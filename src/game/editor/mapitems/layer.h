@@ -55,7 +55,7 @@ public:
 	virtual bool IsEntitiesLayer() const { return false; }
 
 	virtual void Render(bool Tileset = false) {}
-	virtual CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) { return CUI::POPUP_KEEP_OPEN; }
+	virtual CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) { return CUi::POPUP_KEEP_OPEN; }
 
 	virtual void ModifyImageIndex(FIndexModifyFunction pfnFunc) {}
 	virtual void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) {}

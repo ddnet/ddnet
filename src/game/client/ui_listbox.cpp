@@ -39,7 +39,7 @@ void CListBox::DoHeader(const CUIRect *pRect, const char *pTitle, float HeaderHe
 
 	// draw header
 	View.HSplitTop(HeaderHeight, &Header, &View);
-	UI()->DoLabel(&Header, pTitle, Header.h * CUI::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
+	Ui()->DoLabel(&Header, pTitle, Header.h * CUi::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
 
 	View.HSplitTop(Spacing, &Header, &View);
 
@@ -80,7 +80,7 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 		CUIRect Footer;
 		View.HSplitBottom(m_FooterHeight, &View, &Footer);
 		Footer.VSplitLeft(10.0f, 0, &Footer);
-		UI()->DoLabel(&Footer, m_pBottomText, Footer.h * CUI::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
+		Ui()->DoLabel(&Footer, m_pBottomText, Footer.h * CUi::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
 	}
 
 	// setup the variables
@@ -100,17 +100,17 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	// handle input
 	if(m_Active && !Input()->ModifierIsPressed() && !Input()->ShiftIsPressed() && !Input()->AltIsPressed())
 	{
-		if(UI()->ConsumeHotkey(CUI::HOTKEY_DOWN))
+		if(Ui()->ConsumeHotkey(CUi::HOTKEY_DOWN))
 			m_ListBoxNewSelOffset += 1;
-		else if(UI()->ConsumeHotkey(CUI::HOTKEY_UP))
+		else if(Ui()->ConsumeHotkey(CUi::HOTKEY_UP))
 			m_ListBoxNewSelOffset -= 1;
-		else if(UI()->ConsumeHotkey(CUI::HOTKEY_PAGE_UP))
+		else if(Ui()->ConsumeHotkey(CUi::HOTKEY_PAGE_UP))
 			m_ListBoxNewSelOffset = -ItemsPerRow * RowsPerScroll * 4;
-		else if(UI()->ConsumeHotkey(CUI::HOTKEY_PAGE_DOWN))
+		else if(Ui()->ConsumeHotkey(CUi::HOTKEY_PAGE_DOWN))
 			m_ListBoxNewSelOffset = ItemsPerRow * RowsPerScroll * 4;
-		else if(UI()->ConsumeHotkey(CUI::HOTKEY_HOME))
+		else if(Ui()->ConsumeHotkey(CUi::HOTKEY_HOME))
 			m_ListBoxNewSelOffset = 1 - m_ListBoxNumItems;
-		else if(UI()->ConsumeHotkey(CUI::HOTKEY_END))
+		else if(Ui()->ConsumeHotkey(CUi::HOTKEY_END))
 			m_ListBoxNewSelOffset = m_ListBoxNumItems - 1;
 	}
 
@@ -164,7 +164,7 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected)
 	CListboxItem Item = DoNextRow();
 	bool ItemClicked = false;
 
-	if(Item.m_Visible && UI()->DoButtonLogic(pId, 0, &Item.m_Rect))
+	if(Item.m_Visible && Ui()->DoButtonLogic(pId, 0, &Item.m_Rect))
 	{
 		ItemClicked = true;
 		m_ListBoxNewSelected = ThisItemIndex;
@@ -181,16 +181,16 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected)
 		{
 			m_ListBoxDoneEvents = true;
 
-			if(UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (ItemClicked && Input()->MouseDoubleClick()))
+			if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || (ItemClicked && Input()->MouseDoubleClick()))
 			{
 				m_ListBoxItemActivated = true;
-				UI()->SetActiveItem(nullptr);
+				Ui()->SetActiveItem(nullptr);
 			}
 		}
 
 		Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, m_Active ? 0.5f : 0.33f), IGraphics::CORNER_ALL, 5.0f);
 	}
-	if(UI()->HotItem() == pId && !m_ScrollRegion.Animating())
+	if(Ui()->HotItem() == pId && !m_ScrollRegion.Animating())
 	{
 		Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.33f), IGraphics::CORNER_ALL, 5.0f);
 	}

@@ -402,7 +402,7 @@ bool CConsole::LineIsValid(const char *pStr)
 	return true;
 }
 
-void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bool InterpretSemicolons)
+void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bool InterpretSemicolons)
 {
 	const char *pWithoutPrefix = str_startswith(pStr, "mc;");
 	if(pWithoutPrefix)
@@ -413,7 +413,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 	while(pStr && *pStr)
 	{
 		CResult Result;
-		Result.m_ClientID = ClientID;
+		Result.m_ClientId = ClientId;
 		const char *pEnd = pStr;
 		const char *pNextPart = 0;
 		int InString = 0;
@@ -448,14 +448,14 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 			return;
 
 		CCommand *pCommand;
-		if(ClientID == IConsole::CLIENT_ID_GAME)
+		if(ClientId == IConsole::CLIENT_ID_GAME)
 			pCommand = FindCommand(Result.m_pCommand, m_FlagMask | CFGFLAG_GAME);
 		else
 			pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 
 		if(pCommand)
 		{
-			if(ClientID == IConsole::CLIENT_ID_GAME && !(pCommand->m_Flags & CFGFLAG_GAME))
+			if(ClientId == IConsole::CLIENT_ID_GAME && !(pCommand->m_Flags & CFGFLAG_GAME))
 			{
 				if(Stroke)
 				{
@@ -464,7 +464,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 				}
 			}
-			else if(ClientID == IConsole::CLIENT_ID_NO_GAME && pCommand->m_Flags & CFGFLAG_GAME)
+			else if(ClientId == IConsole::CLIENT_ID_NO_GAME && pCommand->m_Flags & CFGFLAG_GAME)
 			{
 				if(Stroke)
 				{
@@ -509,11 +509,11 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 
 						if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags & CFGFLAG_NONTEEHISTORIC))
 						{
-							m_pfnTeeHistorianCommandCallback(ClientID, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
+							m_pfnTeeHistorianCommandCallback(ClientId, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
 						}
 
 						if(Result.GetVictim() == CResult::VICTIM_ME)
-							Result.SetVictim(ClientID);
+							Result.SetVictim(ClientId);
 
 						if(Result.HasVictim() && Result.GetVictim() == CResult::VICTIM_ALL)
 						{
@@ -590,21 +590,21 @@ CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 	return 0x0;
 }
 
-void CConsole::ExecuteLine(const char *pStr, int ClientID, bool InterpretSemicolons)
+void CConsole::ExecuteLine(const char *pStr, int ClientId, bool InterpretSemicolons)
 {
-	CConsole::ExecuteLineStroked(1, pStr, ClientID, InterpretSemicolons); // press it
-	CConsole::ExecuteLineStroked(0, pStr, ClientID, InterpretSemicolons); // then release it
+	CConsole::ExecuteLineStroked(1, pStr, ClientId, InterpretSemicolons); // press it
+	CConsole::ExecuteLineStroked(0, pStr, ClientId, InterpretSemicolons); // then release it
 }
 
-void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID, bool InterpretSemicolons)
+void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientId, bool InterpretSemicolons)
 {
 	int Temp = m_FlagMask;
 	m_FlagMask = FlagMask;
-	ExecuteLine(pStr, ClientID, InterpretSemicolons);
+	ExecuteLine(pStr, ClientId, InterpretSemicolons);
 	m_FlagMask = Temp;
 }
 
-bool CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure, int StorageType)
+bool CConsole::ExecuteFile(const char *pFilename, int ClientId, bool LogFailure, int StorageType)
 {
 	// make sure that this isn't being executed already
 	for(CExecFile *pCur = m_pFirstExec; pCur; pCur = pCur->m_pPrev)
@@ -636,7 +636,7 @@ bool CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure,
 
 		char *pLine;
 		while((pLine = Reader.Get()))
-			ExecuteLine(pLine, ClientID);
+			ExecuteLine(pLine, ClientId);
 
 		io_close(File);
 		Success = true;

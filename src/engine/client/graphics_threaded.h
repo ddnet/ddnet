@@ -604,7 +604,7 @@ public:
 		SCommand_WindowCreateNtf() :
 			SCommand(CMD_WINDOW_CREATE_NTF) {}
 
-		uint32_t m_WindowID;
+		uint32_t m_WindowId;
 	};
 
 	struct SCommand_WindowDestroyNtf : public CCommandBuffer::SCommand
@@ -612,7 +612,7 @@ public:
 		SCommand_WindowDestroyNtf() :
 			SCommand(CMD_WINDOW_DESTROY_NTF) {}
 
-		uint32_t m_WindowID;
+		uint32_t m_WindowId;
 	};
 
 	//
@@ -709,7 +709,7 @@ public:
 	virtual uint64_t StreamedMemoryUsage() const = 0;
 	virtual uint64_t StagingMemoryUsage() const = 0;
 
-	virtual const TTWGraphicsGPUList &GetGPUs() const = 0;
+	virtual const TTwGraphicsGpuList &GetGpus() const = 0;
 
 	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
 	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
@@ -731,8 +731,8 @@ public:
 	virtual void GetViewportSize(int &w, int &h) = 0;
 	virtual void NotifyWindow() = 0;
 
-	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;
-	virtual void WindowCreateNtf(uint32_t WindowID) = 0;
+	virtual void WindowDestroyNtf(uint32_t WindowId) = 0;
+	virtual void WindowCreateNtf(uint32_t WindowId) = 0;
 
 	virtual void RunBuffer(CCommandBuffer *pBuffer) = 0;
 	virtual void RunBufferSingleThreadedUnsafe(CCommandBuffer *pBuffer) = 0;
@@ -953,7 +953,7 @@ public:
 	uint64_t StreamedMemoryUsage() const override;
 	uint64_t StagingMemoryUsage() const override;
 
-	const TTWGraphicsGPUList &GetGPUs() const override;
+	const TTwGraphicsGpuList &GetGpus() const override;
 
 	void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) override;
 	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) override;
@@ -967,12 +967,12 @@ public:
 	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override;
 	IGraphics::CTextureHandle LoadTextureRaw(size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData, int Flags, const char *pTexName = nullptr) override;
 	IGraphics::CTextureHandle LoadTextureRawMove(size_t Width, size_t Height, CImageInfo::EImageFormat Format, void *pData, int Flags, const char *pTexName = nullptr) override;
-	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData) override;
+	int LoadTextureRawSub(IGraphics::CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData) override;
 	IGraphics::CTextureHandle NullTexture() const override;
 
 	bool LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) override;
 	bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) override;
-	bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, const void *pData) override;
+	bool UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, const void *pData) override;
 
 	CTextureHandle LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, size_t w, size_t h);
 	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) override;
@@ -991,7 +991,7 @@ public:
 	void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t PixelSize, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) override;
 	void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, uint8_t *pSourceBuffer, size_t SrcWidth, size_t SrcHeight, size_t PixelSize, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) override;
 
-	void TextureSet(CTextureHandle TextureID) override;
+	void TextureSet(CTextureHandle TextureId) override;
 
 	void Clear(float r, float g, float b, bool ForceClearNow = false) override;
 
@@ -1245,8 +1245,8 @@ public:
 	void AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc) override;
 	int GetWindowScreen() override;
 
-	void WindowDestroyNtf(uint32_t WindowID) override;
-	void WindowCreateNtf(uint32_t WindowID) override;
+	void WindowDestroyNtf(uint32_t WindowId) override;
+	void WindowCreateNtf(uint32_t WindowId) override;
 
 	int WindowActive() override;
 	int WindowOpen() override;

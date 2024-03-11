@@ -40,11 +40,11 @@ TEST(Datafile, ExtendedType)
 		ASSERT_GE(Index, 0);
 		ASSERT_EQ(Reader.GetItemSize(Index), (int)sizeof(ItemTest));
 
-		int Type, ID;
-		const CMapItemTest *pTest = (const CMapItemTest *)Reader.GetItem(Index, &Type, &ID);
+		int Type, Id;
+		const CMapItemTest *pTest = (const CMapItemTest *)Reader.GetItem(Index, &Type, &Id);
 		EXPECT_EQ(pTest, Reader.FindItem(MAPITEMTYPE_TEST, 0x8000));
 		EXPECT_EQ(Type, MAPITEMTYPE_TEST);
-		EXPECT_EQ(ID, 0x8000);
+		EXPECT_EQ(Id, 0x8000);
 
 		EXPECT_EQ(pTest->m_Version, ItemTest.m_Version);
 		EXPECT_EQ(pTest->m_aFields[0], ItemTest.m_aFields[0]);

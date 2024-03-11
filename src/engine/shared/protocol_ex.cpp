@@ -15,52 +15,52 @@ void RegisterUuids(CUuidManager *pManager)
 #undef UUID
 }
 
-int UnpackMessageID(int *pID, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker)
+int UnpackMessageId(int *pId, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker)
 {
-	*pID = 0;
+	*pId = 0;
 	*pSys = false;
 	mem_zero(pUuid, sizeof(*pUuid));
 
-	int MsgID = pUnpacker->GetInt();
+	int MsgId = pUnpacker->GetInt();
 
 	if(pUnpacker->Error())
 	{
 		return UNPACKMESSAGE_ERROR;
 	}
 
-	*pID = MsgID >> 1;
-	*pSys = MsgID & 1;
+	*pId = MsgId >> 1;
+	*pSys = MsgId & 1;
 
-	if(*pID < 0 || *pID >= OFFSET_UUID)
+	if(*pId < 0 || *pId >= OFFSET_UUID)
 	{
 		return UNPACKMESSAGE_ERROR;
 	}
 
-	if(*pID != 0) // NETMSG_EX, NETMSGTYPE_EX
+	if(*pId != 0) // NETMSG_EX, NETMSGTYPE_EX
 	{
 		return UNPACKMESSAGE_OK;
 	}
 
-	*pID = g_UuidManager.UnpackUuid(pUnpacker, pUuid);
+	*pId = g_UuidManager.UnpackUuid(pUnpacker, pUuid);
 
-	if(*pID == UUID_INVALID || *pID == UUID_UNKNOWN)
+	if(*pId == UUID_INVALID || *pId == UUID_UNKNOWN)
 	{
 		return UNPACKMESSAGE_ERROR;
 	}
 
 	if(*pSys)
 	{
-		switch(*pID)
+		switch(*pId)
 		{
 		case NETMSG_WHATIS:
 		{
 			CUuid Uuid2;
-			int ID2 = g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
-			if(ID2 == UUID_INVALID)
+			int Id2 = g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
+			if(Id2 == UUID_INVALID)
 			{
 				break;
 			}
-			if(ID2 == UUID_UNKNOWN)
+			if(Id2 == UUID_UNKNOWN)
 			{
 				new(pPacker) CMsgPacker(NETMSG_IDONTKNOW, true);
 				pPacker->AddRaw(&Uuid2, sizeof(Uuid2));
@@ -69,7 +69,7 @@ int UnpackMessageID(int *pID, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CM
 			{
 				new(pPacker) CMsgPacker(NETMSG_ITIS, true);
 				pPacker->AddRaw(&Uuid2, sizeof(Uuid2));
-				pPacker->AddString(g_UuidManager.GetName(ID2), 0);
+				pPacker->AddString(g_UuidManager.GetName(Id2), 0);
 			}
 			return UNPACKMESSAGE_ANSWER;
 		}

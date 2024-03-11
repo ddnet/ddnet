@@ -41,7 +41,7 @@ public:
 	void SwapClients(int Client1, int Client2) override;
 
 	bool CanSnapCharacter(int SnappingClient);
-	bool IsSnappingCharacterInView(int SnappingClientID);
+	bool IsSnappingCharacterInView(int SnappingClientId);
 
 	bool IsGrounded();
 
@@ -157,7 +157,7 @@ private:
 
 	// DDRace
 
-	void SnapCharacter(int SnappingClient, int ID);
+	void SnapCharacter(int SnappingClient, int Id);
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void SetTimeCheckpoint(int TimeCheckpoint);
 	void HandleTiles(int Index);
@@ -190,8 +190,8 @@ public:
 	void ResetPickups();
 	int m_DDRaceState;
 	int Team();
-	bool CanCollide(int ClientID);
-	bool SameTeam(int ClientID);
+	bool CanCollide(int ClientId);
+	bool SameTeam(int ClientId);
 	bool m_NinjaJetpack;
 	int m_TeamBeforeSuper;
 	int m_FreezeTime;
@@ -221,7 +221,7 @@ public:
 	vec2 m_TeleGunPos;
 	bool m_TeleGunTeleport;
 	bool m_IsBlueTeleGunTeleport;
-	int m_StrongWeakID;
+	int m_StrongWeakId;
 
 	int m_SpawnTick;
 	int m_WeaponChangeTick;

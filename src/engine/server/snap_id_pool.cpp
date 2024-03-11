@@ -5,20 +5,20 @@
 
 #include <base/system.h>
 
-CSnapIDPool::CSnapIDPool()
+CSnapIdPool::CSnapIdPool()
 {
 	Reset();
 }
 
-void CSnapIDPool::Reset()
+void CSnapIdPool::Reset()
 {
 	for(int i = 0; i < MAX_IDS; i++)
 	{
-		m_aIDs[i].m_Next = i + 1;
-		m_aIDs[i].m_State = ID_FREE;
+		m_aIds[i].m_Next = i + 1;
+		m_aIds[i].m_State = ID_FREE;
 	}
 
-	m_aIDs[MAX_IDS - 1].m_Next = -1;
+	m_aIds[MAX_IDS - 1].m_Next = -1;
 	m_FirstFree = 0;
 	m_FirstTimed = -1;
 	m_LastTimed = -1;
@@ -26,13 +26,13 @@ void CSnapIDPool::Reset()
 	m_InUsage = 0;
 }
 
-void CSnapIDPool::RemoveFirstTimeout()
+void CSnapIdPool::RemoveFirstTimeout()
 {
-	int NextTimed = m_aIDs[m_FirstTimed].m_Next;
+	int NextTimed = m_aIds[m_FirstTimed].m_Next;
 
 	// add it to the free list
-	m_aIDs[m_FirstTimed].m_Next = m_FirstFree;
-	m_aIDs[m_FirstTimed].m_State = ID_FREE;
+	m_aIds[m_FirstTimed].m_Next = m_FirstFree;
+	m_aIds[m_FirstTimed].m_State = ID_FREE;
 	m_FirstFree = m_FirstTimed;
 
 	// remove it from the timed list
@@ -43,54 +43,54 @@ void CSnapIDPool::RemoveFirstTimeout()
 	m_Usage--;
 }
 
-int CSnapIDPool::NewID()
+int CSnapIdPool::NewId()
 {
 	int64_t Now = time_get();
 
 	// process timed ids
-	while(m_FirstTimed != -1 && m_aIDs[m_FirstTimed].m_Timeout < Now)
+	while(m_FirstTimed != -1 && m_aIds[m_FirstTimed].m_Timeout < Now)
 		RemoveFirstTimeout();
 
-	int ID = m_FirstFree;
-	if(ID == -1)
+	int Id = m_FirstFree;
+	if(Id == -1)
 	{
 		dbg_msg("server", "invalid id");
-		return ID;
+		return Id;
 	}
-	m_FirstFree = m_aIDs[m_FirstFree].m_Next;
-	m_aIDs[ID].m_State = ID_ALLOCATED;
+	m_FirstFree = m_aIds[m_FirstFree].m_Next;
+	m_aIds[Id].m_State = ID_ALLOCATED;
 	m_Usage++;
 	m_InUsage++;
-	return ID;
+	return Id;
 }
 
-void CSnapIDPool::TimeoutIDs()
+void CSnapIdPool::TimeoutIds()
 {
 	// process timed ids
 	while(m_FirstTimed != -1)
 		RemoveFirstTimeout();
 }
 
-void CSnapIDPool::FreeID(int ID)
+void CSnapIdPool::FreeId(int Id)
 {
-	if(ID < 0)
+	if(Id < 0)
 		return;
-	dbg_assert((size_t)ID < std::size(m_aIDs), "id is out of range");
-	dbg_assert(m_aIDs[ID].m_State == ID_ALLOCATED, "id is not allocated");
+	dbg_assert((size_t)Id < std::size(m_aIds), "id is out of range");
+	dbg_assert(m_aIds[Id].m_State == ID_ALLOCATED, "id is not allocated");
 
 	m_InUsage--;
-	m_aIDs[ID].m_State = ID_TIMED;
-	m_aIDs[ID].m_Timeout = time_get() + time_freq() * 5;
-	m_aIDs[ID].m_Next = -1;
+	m_aIds[Id].m_State = ID_TIMED;
+	m_aIds[Id].m_Timeout = time_get() + time_freq() * 5;
+	m_aIds[Id].m_Next = -1;
 
 	if(m_LastTimed != -1)
 	{
-		m_aIDs[m_LastTimed].m_Next = ID;
-		m_LastTimed = ID;
+		m_aIds[m_LastTimed].m_Next = Id;
+		m_LastTimed = Id;
 	}
 	else
 	{
-		m_FirstTimed = ID;
-		m_LastTimed = ID;
+		m_FirstTimed = Id;
+		m_LastTimed = Id;
 	}
 }

@@ -25,10 +25,10 @@ public:
 	int NumData() const override;
 
 	int GetItemSize(int Index) override;
-	void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr) override;
+	void *GetItem(int Index, int *pType = nullptr, int *pId = nullptr) override;
 	void GetType(int Type, int *pStart, int *pNum) override;
-	int FindItemIndex(int Type, int ID) override;
-	void *FindItem(int Type, int ID) override;
+	int FindItemIndex(int Type, int Id) override;
+	void *FindItem(int Type, int Id) override;
 	int NumItems() const override;
 
 	bool Load(const char *pMapName) override;

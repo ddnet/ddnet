@@ -28,7 +28,7 @@ public:
 	// unused
 	struct CSampleHandle
 	{
-		int m_SampleID;
+		int m_SampleId;
 	};
 
 	struct CVoiceShapeCircle
@@ -67,13 +67,13 @@ public:
 	virtual int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
 	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
 	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
-	virtual void UnloadSample(int SampleID) = 0;
+	virtual void UnloadSample(int SampleId) = 0;
 
-	virtual float GetSampleTotalTime(int SampleID) = 0; // in s
-	virtual float GetSampleCurrentTime(int SampleID) = 0; // in s
-	virtual void SetSampleCurrentTime(int SampleID, float Time) = 0;
+	virtual float GetSampleTotalTime(int SampleId) = 0; // in s
+	virtual float GetSampleCurrentTime(int SampleId) = 0; // in s
+	virtual void SetSampleCurrentTime(int SampleId, float Time) = 0;
 
-	virtual void SetChannel(int ChannelID, float Volume, float Panning) = 0;
+	virtual void SetChannel(int ChannelId, float Volume, float Panning) = 0;
 	virtual void SetListenerPos(float x, float y) = 0;
 
 	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume) = 0;
@@ -84,13 +84,13 @@ public:
 	virtual void SetVoiceCircle(CVoiceHandle Voice, float Radius) = 0;
 	virtual void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) = 0;
 
-	virtual CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y) = 0;
-	virtual CVoiceHandle Play(int ChannelID, int SampleID, int Flags) = 0;
-	virtual void Pause(int SampleID) = 0;
-	virtual void Stop(int SampleID) = 0;
+	virtual CVoiceHandle PlayAt(int ChannelId, int SampleId, int Flags, float x, float y) = 0;
+	virtual CVoiceHandle Play(int ChannelId, int SampleId, int Flags) = 0;
+	virtual void Pause(int SampleId) = 0;
+	virtual void Stop(int SampleId) = 0;
 	virtual void StopAll() = 0;
 	virtual void StopVoice(CVoiceHandle Voice) = 0;
-	virtual bool IsPlaying(int SampleID) = 0;
+	virtual bool IsPlaying(int SampleId) = 0;
 
 	virtual void Mix(short *pFinalOut, unsigned Frames) = 0;
 	// useful for thread synchronization

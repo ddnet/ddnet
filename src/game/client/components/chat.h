@@ -30,7 +30,7 @@ class CChat : public CComponent
 	{
 		int64_t m_Time;
 		float m_aYOffset[2];
-		int m_ClientID;
+		int m_ClientId;
 		int m_TeamNumber;
 		bool m_Team;
 		bool m_Whisper;
@@ -88,7 +88,7 @@ class CChat : public CComponent
 	static char ms_aDisplayText[MAX_LINE_LENGTH];
 	struct CRateablePlayer
 	{
-		int ClientID;
+		int ClientId;
 		int Score;
 	};
 	CRateablePlayer m_aPlayerCompletionList[MAX_CLIENTS];
@@ -152,7 +152,7 @@ public:
 	static constexpr float MESSAGE_TEE_PADDING_RIGHT = 0.5f;
 
 	bool IsActive() const { return m_Mode != MODE_NONE; }
-	void AddLine(int ClientID, int Team, const char *pLine);
+	void AddLine(int ClientId, int Team, const char *pLine);
 	void EnableMode(int Team);
 	void DisableMode();
 	void Say(int Team, const char *pLine);

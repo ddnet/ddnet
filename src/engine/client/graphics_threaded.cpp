@@ -208,9 +208,9 @@ uint64_t CGraphics_Threaded::StagingMemoryUsage() const
 	return m_pBackend->StagingMemoryUsage();
 }
 
-const TTWGraphicsGPUList &CGraphics_Threaded::GetGPUs() const
+const TTwGraphicsGpuList &CGraphics_Threaded::GetGpus() const
 {
-	return m_pBackend->GetGPUs();
+	return m_pBackend->GetGpus();
 }
 
 void CGraphics_Threaded::MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY)
@@ -337,12 +337,12 @@ static bool ConvertToRGBA(uint8_t *pDest, const uint8_t *pSrc, size_t SrcWidth, 
 	}
 }
 
-int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData)
+int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData)
 {
-	dbg_assert(TextureID.IsValid(), "Invalid texture handle used with LoadTextureRawSub.");
+	dbg_assert(TextureId.IsValid(), "Invalid texture handle used with LoadTextureRawSub.");
 
 	CCommandBuffer::SCommand_Texture_Update Cmd;
-	Cmd.m_Slot = TextureID.Id();
+	Cmd.m_Slot = TextureId.Id();
 	Cmd.m_X = x;
 	Cmd.m_Y = y;
 	Cmd.m_Width = Width;
@@ -505,12 +505,12 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 	CImageInfo Img;
 	if(LoadPNG(&Img, pFilename, StorageType))
 	{
-		CTextureHandle ID = LoadTextureRawMove(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, Flags, pFilename);
-		if(ID.IsValid())
+		CTextureHandle Id = LoadTextureRawMove(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, Flags, pFilename);
+		if(Id.IsValid())
 		{
 			if(g_Config.m_Debug)
 				dbg_msg("graphics/texture", "loaded %s", pFilename);
-			return ID;
+			return Id;
 		}
 	}
 
@@ -556,10 +556,10 @@ bool CGraphics_Threaded::UnloadTextTextures(CTextureHandle &TextTexture, CTextur
 	return true;
 }
 
-bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, const void *pData)
+bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, const void *pData)
 {
 	CCommandBuffer::SCommand_TextTexture_Update Cmd;
-	Cmd.m_Slot = TextureID.Id();
+	Cmd.m_Slot = TextureId.Id();
 	Cmd.m_X = x;
 	Cmd.m_Y = y;
 	Cmd.m_Width = Width;
@@ -839,11 +839,11 @@ void CGraphics_Threaded::ScreenshotDirect(bool *pSwapped)
 	}
 }
 
-void CGraphics_Threaded::TextureSet(CTextureHandle TextureID)
+void CGraphics_Threaded::TextureSet(CTextureHandle TextureId)
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->TextureSet within begin");
-	dbg_assert(!TextureID.IsValid() || m_vTextureIndices[TextureID.Id()] == -1, "Texture handle was not invalid, but also did not correlate to an existing texture.");
-	m_State.m_Texture = TextureID.Id();
+	dbg_assert(!TextureId.IsValid() || m_vTextureIndices[TextureId.Id()] == -1, "Texture handle was not invalid, but also did not correlate to an existing texture.");
+	m_State.m_Texture = TextureId.Id();
 }
 
 void CGraphics_Threaded::Clear(float r, float g, float b, bool ForceClearNow)
@@ -2741,12 +2741,12 @@ int CGraphics_Threaded::GetWindowScreen()
 	return m_pBackend->GetWindowScreen();
 }
 
-void CGraphics_Threaded::WindowDestroyNtf(uint32_t WindowID)
+void CGraphics_Threaded::WindowDestroyNtf(uint32_t WindowId)
 {
-	m_pBackend->WindowDestroyNtf(WindowID);
+	m_pBackend->WindowDestroyNtf(WindowId);
 
 	CCommandBuffer::SCommand_WindowDestroyNtf Cmd;
-	Cmd.m_WindowID = WindowID;
+	Cmd.m_WindowId = WindowId;
 	AddCmd(Cmd);
 
 	// wait
@@ -2754,12 +2754,12 @@ void CGraphics_Threaded::WindowDestroyNtf(uint32_t WindowID)
 	WaitForIdle();
 }
 
-void CGraphics_Threaded::WindowCreateNtf(uint32_t WindowID)
+void CGraphics_Threaded::WindowCreateNtf(uint32_t WindowId)
 {
-	m_pBackend->WindowCreateNtf(WindowID);
+	m_pBackend->WindowCreateNtf(WindowId);
 
 	CCommandBuffer::SCommand_WindowCreateNtf Cmd;
-	Cmd.m_WindowID = WindowID;
+	Cmd.m_WindowId = WindowId;
 	AddCmd(Cmd);
 
 	// wait

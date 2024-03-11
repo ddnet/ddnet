@@ -36,7 +36,7 @@ class CPlayer
 #include <game/server/gamemodes/instagib/player.h>
 
 public:
-	CPlayer(CGameContext *pGameServer, uint32_t UniqueClientID, int ClientID, int Team);
+	CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientId, int Team);
 	~CPlayer();
 
 	void Reset();
@@ -46,8 +46,8 @@ public:
 	CCharacter *ForceSpawn(vec2 Pos); // required for loading savegames
 	void SetTeam(int Team, bool DoChatMsg = true);
 	int GetTeam() const { return m_Team; }
-	int GetCID() const { return m_ClientID; }
-	uint32_t GetUniqueCID() const { return m_UniqueClientID; }
+	int GetCid() const { return m_ClientId; }
+	uint32_t GetUniqueCid() const { return m_UniqueClientId; }
 	int GetClientVersion() const;
 	bool SetTimerType(int TimerType);
 
@@ -85,7 +85,7 @@ public:
 	int m_SentSnaps = 0;
 
 	// used for spectator mode
-	int m_SpectatorID;
+	int m_SpectatorId;
 
 	bool m_IsReady;
 
@@ -131,7 +131,7 @@ public:
 	} m_Latency;
 
 private:
-	const uint32_t m_UniqueClientID;
+	const uint32_t m_UniqueClientId;
 	CCharacter *m_pCharacter;
 	int m_NumInputs;
 	CGameContext *m_pGameServer;
@@ -142,7 +142,7 @@ private:
 	//
 	bool m_Spawning;
 	bool m_WeakHookSpawn;
-	int m_ClientID;
+	int m_ClientId;
 	int m_Team;
 
 	int m_Paused;
@@ -217,7 +217,7 @@ public:
 	bool CanOverrideDefaultEmote() const;
 
 	bool m_FirstPacket;
-	int64_t m_LastSQLQuery;
+	int64_t m_LastSqlQuery;
 	void ProcessScoreResult(CScorePlayerResult &Result);
 	std::shared_ptr<CScorePlayerResult> m_ScoreQueryResult;
 	std::shared_ptr<CScorePlayerResult> m_ScoreFinishResult;

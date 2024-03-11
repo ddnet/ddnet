@@ -112,11 +112,11 @@ void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 	if(pEnt->m_ObjType == ENTTYPE_CHARACTER)
 	{
 		auto *pChar = (CCharacter *)pEnt;
-		int ID = pChar->GetCID();
-		if(ID >= 0 && ID < MAX_CLIENTS)
+		int Id = pChar->GetCid();
+		if(Id >= 0 && Id < MAX_CLIENTS)
 		{
-			m_apCharacters[ID] = pChar;
-			m_Core.m_apCharacters[ID] = &pChar->m_Core;
+			m_apCharacters[Id] = pChar;
+			m_Core.m_apCharacters[Id] = &pChar->m_Core;
 		}
 		pChar->SetCoreWorld(this);
 	}
@@ -159,11 +159,11 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 
 void CGameWorld::RemoveCharacter(CCharacter *pChar)
 {
-	int ID = pChar->GetCID();
-	if(ID >= 0 && ID < MAX_CLIENTS)
+	int Id = pChar->GetCid();
+	if(Id >= 0 && Id < MAX_CLIENTS)
 	{
-		m_apCharacters[ID] = 0;
-		m_Core.m_apCharacters[ID] = 0;
+		m_apCharacters[Id] = 0;
+		m_Core.m_apCharacters[Id] = 0;
 	}
 }
 
@@ -304,12 +304,12 @@ std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1
 	return vpCharacters;
 }
 
-void CGameWorld::ReleaseHooked(int ClientID)
+void CGameWorld::ReleaseHooked(int ClientId)
 {
 	CCharacter *pChr = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
-		if(pChr->Core()->HookedPlayer() == ClientID && !pChr->IsSuper())
+		if(pChr->Core()->HookedPlayer() == ClientId && !pChr->IsSuper())
 		{
 			pChr->ReleaseHook();
 		}
@@ -321,10 +321,10 @@ CTuningParams *CGameWorld::Tuning()
 	return &m_Core.m_aTuning[g_Config.m_ClDummy];
 }
 
-CEntity *CGameWorld::GetEntity(int ID, int EntityType)
+CEntity *CGameWorld::GetEntity(int Id, int EntityType)
 {
 	for(CEntity *pEnt = m_apFirstEntityTypes[EntityType]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
-		if(pEnt->m_ID == ID)
+		if(pEnt->m_Id == Id)
 			return pEnt;
 	return 0;
 }
@@ -349,35 +349,35 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 			ForceDir = normalize(Diff);
 		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
 		float Strength;
-		if(Owner == -1 || !GetCharacterByID(Owner))
+		if(Owner == -1 || !GetCharacterById(Owner))
 			Strength = Tuning()->m_ExplosionStrength;
 		else
-			Strength = GetCharacterByID(Owner)->Tuning()->m_ExplosionStrength;
+			Strength = GetCharacterById(Owner)->Tuning()->m_ExplosionStrength;
 
 		float Dmg = Strength * l;
 		if((int)Dmg)
-			if((GetCharacterByID(Owner) ? !GetCharacterByID(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit || NoDamage) || Owner == pChar->GetCID())
+			if((GetCharacterById(Owner) ? !GetCharacterById(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit || NoDamage) || Owner == pChar->GetCid())
 			{
 				if(Owner != -1 && !pChar->CanCollide(Owner))
 					continue;
 				if(Owner == -1 && ActivatedTeam != -1 && pChar->Team() != ActivatedTeam)
 					continue;
 				pChar->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
-				if(GetCharacterByID(Owner) ? GetCharacterByID(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit || NoDamage)
+				if(GetCharacterById(Owner) ? GetCharacterById(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit || NoDamage)
 					break;
 			}
 	}
 }
 
-bool CGameWorld::IsLocalTeam(int OwnerID) const
+bool CGameWorld::IsLocalTeam(int OwnerId) const
 {
-	return OwnerID < 0 || m_Teams.CanCollide(m_LocalClientID, OwnerID);
+	return OwnerId < 0 || m_Teams.CanCollide(m_LocalClientId, OwnerId);
 }
 
-void CGameWorld::NetObjBegin(CTeamsCore Teams, int LocalClientID)
+void CGameWorld::NetObjBegin(CTeamsCore Teams, int LocalClientId)
 {
 	m_Teams = Teams;
-	m_LocalClientID = LocalClientID;
+	m_LocalClientId = LocalClientId;
 
 	for(int i = 0; i < NUM_ENTTYPES; i++)
 		for(CEntity *pEnt = FindFirst(i); pEnt; pEnt = pEnt->TypeNext())
@@ -389,19 +389,19 @@ void CGameWorld::NetObjBegin(CTeamsCore Teams, int LocalClientID)
 	OnModified();
 }
 
-void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
+void CGameWorld::NetCharAdd(int ObjId, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
 {
-	if(IsLocalTeam(ObjID))
+	if(IsLocalTeam(ObjId))
 	{
 		CCharacter *pChar;
-		if((pChar = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER)))
+		if((pChar = (CCharacter *)GetEntity(ObjId, ENTTYPE_CHARACTER)))
 		{
 			pChar->Read(pCharObj, pExtended, IsLocal);
 			pChar->Keep();
 		}
 		else
 		{
-			pChar = new CCharacter(this, ObjID, pCharObj, pExtended);
+			pChar = new CCharacter(this, ObjId, pCharObj, pExtended);
 			InsertEntity(pChar);
 		}
 
@@ -410,7 +410,7 @@ void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNe
 	}
 }
 
-void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx)
+void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx)
 {
 	if((ObjType == NETOBJTYPE_PROJECTILE || ObjType == NETOBJTYPE_DDRACEPROJECTILE || ObjType == NETOBJTYPE_DDNETPROJECTILE) && m_WorldConfig.m_PredictWeapons)
 	{
@@ -418,12 +418,12 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 		if(!IsLocalTeam(Data.m_Owner))
 			return;
 
-		CProjectile NetProj = CProjectile(this, ObjID, &Data);
+		CProjectile NetProj = CProjectile(this, ObjId, &Data);
 
 		if(NetProj.m_Type != WEAPON_SHOTGUN && absolute(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
 			return;
 
-		if(CProjectile *pProj = (CProjectile *)GetEntity(ObjID, ENTTYPE_PROJECTILE))
+		if(CProjectile *pProj = (CProjectile *)GetEntity(ObjId, ENTTYPE_PROJECTILE))
 		{
 			if(NetProj.Match(pProj))
 			{
@@ -438,9 +438,9 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 			// try to match the newly received (unrecognized) projectile with a locally fired one
 			for(CProjectile *pProj = (CProjectile *)FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = (CProjectile *)pProj->TypeNext())
 			{
-				if(pProj->m_ID == -1 && NetProj.Match(pProj))
+				if(pProj->m_Id == -1 && NetProj.Match(pProj))
 				{
-					pProj->m_ID = ObjID;
+					pProj->m_Id = ObjId;
 					pProj->Keep();
 					return;
 				}
@@ -464,7 +464,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 						Second = Dist;
 				}
 				if(pClosest && maximum(First, 2.f) * 1.2f < Second)
-					NetProj.m_Owner = pClosest->m_ID;
+					NetProj.m_Owner = pClosest->m_Id;
 			}
 		}
 		CProjectile *pProj = new CProjectile(NetProj);
@@ -473,8 +473,8 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	else if((ObjType == NETOBJTYPE_PICKUP || ObjType == NETOBJTYPE_DDNETPICKUP) && m_WorldConfig.m_PredictWeapons)
 	{
 		CPickupData Data = ExtractPickupInfo(ObjType, pObjData, pDataEx);
-		CPickup NetPickup = CPickup(this, ObjID, &Data);
-		if(CPickup *pPickup = (CPickup *)GetEntity(ObjID, ENTTYPE_PICKUP))
+		CPickup NetPickup = CPickup(this, ObjId, &Data);
+		if(CPickup *pPickup = (CPickup *)GetEntity(ObjId, ENTTYPE_PICKUP))
 		{
 			if(NetPickup.Match(pPickup))
 			{
@@ -496,9 +496,9 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 
 		if(Data.m_Type == LASERTYPE_RIFLE || Data.m_Type == LASERTYPE_SHOTGUN || Data.m_Type < 0)
 		{
-			CLaser NetLaser = CLaser(this, ObjID, &Data);
+			CLaser NetLaser = CLaser(this, ObjId, &Data);
 			CLaser *pMatching = 0;
-			if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjID, ENTTYPE_LASER)))
+			if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjId, ENTTYPE_LASER)))
 				if(NetLaser.Match(pLaser))
 					pMatching = pLaser;
 			if(!pMatching)
@@ -506,10 +506,10 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 				for(CEntity *pEnt = FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->TypeNext())
 				{
 					auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
-					if(pLaser && pLaser->m_ID == -1 && NetLaser.Match(pLaser))
+					if(pLaser && pLaser->m_Id == -1 && NetLaser.Match(pLaser))
 					{
 						pMatching = pLaser;
-						pMatching->m_ID = ObjID;
+						pMatching->m_Id = ObjId;
 						break;
 					}
 				}
@@ -527,10 +527,10 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 		}
 		else if(Data.m_Type == LASERTYPE_DRAGGER)
 		{
-			CDragger NetDragger = CDragger(this, ObjID, &Data);
+			CDragger NetDragger = CDragger(this, ObjId, &Data);
 			if(NetDragger.GetStrength() > 0)
 			{
-				auto *pDragger = dynamic_cast<CDragger *>(GetEntity(ObjID, ENTTYPE_DRAGGER));
+				auto *pDragger = dynamic_cast<CDragger *>(GetEntity(ObjId, ENTTYPE_DRAGGER));
 				if(pDragger && NetDragger.Match(pDragger))
 				{
 					pDragger->Keep();
@@ -548,9 +548,9 @@ void CGameWorld::NetObjEnd()
 {
 	// keep predicting hooked characters, based on hook position
 	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(CCharacter *pChar = GetCharacterByID(i))
+		if(CCharacter *pChar = GetCharacterById(i))
 			if(!pChar->m_MarkedForDestroy)
-				if(CCharacter *pHookedChar = GetCharacterByID(pChar->m_Core.HookedPlayer()))
+				if(CCharacter *pHookedChar = GetCharacterById(pChar->m_Core.HookedPlayer()))
 					if(pHookedChar->m_MarkedForDestroy)
 					{
 						pHookedChar->m_Pos = pHookedChar->m_Core.m_Pos = pChar->m_Core.m_HookPos;
@@ -570,11 +570,11 @@ void CGameWorld::NetObjEnd()
 	}
 	for(CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
 	{
-		int ID = pChar->GetCID();
-		if(ID >= 0 && ID < MAX_CLIENTS)
+		int Id = pChar->GetCid();
+		if(Id >= 0 && Id < MAX_CLIENTS)
 		{
-			m_apCharacters[ID] = pChar;
-			m_Core.m_apCharacters[ID] = &pChar->m_Core;
+			m_apCharacters[Id] = pChar;
+			m_Core.m_apCharacters[Id] = &pChar->m_Core;
 		}
 	}
 }
@@ -633,14 +633,14 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_IsValidCopy = true;
 }
 
-CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
+CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 {
 	switch(ObjType)
 	{
 	case NETOBJTYPE_CHARACTER:
 	{
-		CCharacter *pEnt = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER);
-		if(pEnt && CCharacter(this, ObjID, (CNetObj_Character *)pObjData).Match((CCharacter *)pEnt))
+		CCharacter *pEnt = (CCharacter *)GetEntity(ObjId, ENTTYPE_CHARACTER);
+		if(pEnt && CCharacter(this, ObjId, (CNetObj_Character *)pObjData).Match((CCharacter *)pEnt))
 		{
 			return pEnt;
 		}
@@ -651,8 +651,8 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 	case NETOBJTYPE_DDNETPROJECTILE:
 	{
 		CProjectileData Data = ExtractProjectileInfo(ObjType, pObjData, this, nullptr);
-		CProjectile *pEnt = (CProjectile *)GetEntity(ObjID, ENTTYPE_PROJECTILE);
-		if(pEnt && CProjectile(this, ObjID, &Data).Match(pEnt))
+		CProjectile *pEnt = (CProjectile *)GetEntity(ObjId, ENTTYPE_PROJECTILE);
+		if(pEnt && CProjectile(this, ObjId, &Data).Match(pEnt))
 		{
 			return pEnt;
 		}
@@ -664,16 +664,16 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 		CLaserData Data = ExtractLaserInfo(ObjType, pObjData, this, nullptr);
 		if(Data.m_Type == LASERTYPE_RIFLE || Data.m_Type == LASERTYPE_SHOTGUN)
 		{
-			CLaser *pEnt = (CLaser *)GetEntity(ObjID, ENTTYPE_LASER);
-			if(pEnt && CLaser(this, ObjID, &Data).Match(pEnt))
+			CLaser *pEnt = (CLaser *)GetEntity(ObjId, ENTTYPE_LASER);
+			if(pEnt && CLaser(this, ObjId, &Data).Match(pEnt))
 			{
 				return pEnt;
 			}
 		}
 		else if(Data.m_Type == LASERTYPE_DRAGGER)
 		{
-			CDragger *pEnt = (CDragger *)GetEntity(ObjID, ENTTYPE_DRAGGER);
-			if(pEnt && CDragger(this, ObjID, &Data).Match(pEnt))
+			CDragger *pEnt = (CDragger *)GetEntity(ObjId, ENTTYPE_DRAGGER);
+			if(pEnt && CDragger(this, ObjId, &Data).Match(pEnt))
 			{
 				return pEnt;
 			}
@@ -684,8 +684,8 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 	case NETOBJTYPE_DDNETPICKUP:
 	{
 		CPickupData Data = ExtractPickupInfo(ObjType, pObjData, nullptr);
-		CPickup *pEnt = (CPickup *)GetEntity(ObjID, ENTTYPE_PICKUP);
-		if(pEnt && CPickup(this, ObjID, &Data).Match(pEnt))
+		CPickup *pEnt = (CPickup *)GetEntity(ObjId, ENTTYPE_PICKUP);
+		if(pEnt && CPickup(this, ObjId, &Data).Match(pEnt))
 		{
 			return pEnt;
 		}

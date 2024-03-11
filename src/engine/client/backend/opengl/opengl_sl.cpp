@@ -126,7 +126,7 @@ bool CGLSL::LoadShader(CGLSLCompiler *pCompiler, IStorage *pStorage, const char 
 		m_Type = Type;
 		m_IsLoaded = true;
 
-		m_ShaderID = shader;
+		m_ShaderId = shader;
 
 		return true;
 	}
@@ -139,7 +139,7 @@ void CGLSL::DeleteShader()
 	if(!IsLoaded())
 		return;
 	m_IsLoaded = false;
-	glDeleteShader(m_ShaderID);
+	glDeleteShader(m_ShaderId);
 }
 
 bool CGLSL::IsLoaded() const
@@ -147,9 +147,9 @@ bool CGLSL::IsLoaded() const
 	return m_IsLoaded;
 }
 
-TWGLuint CGLSL::GetShaderID() const
+TWGLuint CGLSL::GetShaderId() const
 {
-	return m_ShaderID;
+	return m_ShaderId;
 }
 
 CGLSL::CGLSL()

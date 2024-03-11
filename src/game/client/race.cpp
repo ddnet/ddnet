@@ -71,7 +71,7 @@ bool CRaceHelper::IsStart(CGameClient *pClient, vec2 Prev, vec2 Pos)
 	CCollision *pCollision = pClient->Collision();
 	if(pClient->m_GameInfo.m_FlagStartsRace)
 	{
-		int EnemyTeam = pClient->m_aClients[pClient->m_Snap.m_LocalClientID].m_Team ^ 1;
+		int EnemyTeam = pClient->m_aClients[pClient->m_Snap.m_LocalClientId].m_Team ^ 1;
 		return ms_aFlagIndex[EnemyTeam] != -1 && distance(Pos, pCollision->GetPos(ms_aFlagIndex[EnemyTeam])) < 32;
 	}
 	else

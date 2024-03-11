@@ -123,7 +123,7 @@ public:
 		char *m_pVersionString;
 		char *m_pRendererString;
 
-		TTWGraphicsGPUList *m_pGPUList;
+		TTwGraphicsGpuList *m_pGpuList;
 	};
 
 	struct SCommand_Init : public CCommandBuffer::SCommand
@@ -141,7 +141,7 @@ public:
 		std::atomic<uint64_t> *m_pStreamMemoryUsage;
 		std::atomic<uint64_t> *m_pStagingMemoryUsage;
 
-		TTWGraphicsGPUList *m_pGPUList;
+		TTwGraphicsGpuList *m_pGpuList;
 
 		TGLBackendReadPresentedImageData *m_pReadPresentedImageDataFunc;
 

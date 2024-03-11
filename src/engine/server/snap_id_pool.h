@@ -4,7 +4,7 @@
 #ifndef ENGINE_SERVER_SNAP_ID_POOL_H
 #define ENGINE_SERVER_SNAP_ID_POOL_H
 
-class CSnapIDPool
+class CSnapIdPool
 {
 	enum
 	{
@@ -27,7 +27,7 @@ class CSnapIDPool
 		int m_Timeout;
 	};
 
-	CID m_aIDs[MAX_IDS];
+	CID m_aIds[MAX_IDS];
 
 	int m_FirstFree;
 	int m_FirstTimed;
@@ -36,13 +36,13 @@ class CSnapIDPool
 	int m_InUsage;
 
 public:
-	CSnapIDPool();
+	CSnapIdPool();
 
 	void Reset();
 	void RemoveFirstTimeout();
-	int NewID();
-	void TimeoutIDs();
-	void FreeID(int ID);
+	int NewId();
+	void TimeoutIds();
+	void FreeId(int Id);
 };
 
 #endif

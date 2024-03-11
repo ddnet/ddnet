@@ -36,44 +36,44 @@ void CVoting::Callvote(const char *pType, const char *pValue, const char *pReaso
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
-void CVoting::CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote)
+void CVoting::CallvoteSpectate(int ClientId, const char *pReason, bool ForceVote)
 {
 	if(ForceVote)
 	{
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "set_team %d -1", ClientID);
+		str_format(aBuf, sizeof(aBuf), "set_team %d -1", ClientId);
 		Client()->Rcon(aBuf);
 	}
 	else
 	{
 		char aBuf[32];
-		str_from_int(ClientID, aBuf);
+		str_from_int(ClientId, aBuf);
 		Callvote("spectate", aBuf, pReason);
 	}
 }
 
-void CVoting::CallvoteKick(int ClientID, const char *pReason, bool ForceVote)
+void CVoting::CallvoteKick(int ClientId, const char *pReason, bool ForceVote)
 {
 	if(ForceVote)
 	{
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "force_vote kick %d %s", ClientID, pReason);
+		str_format(aBuf, sizeof(aBuf), "force_vote kick %d %s", ClientId, pReason);
 		Client()->Rcon(aBuf);
 	}
 	else
 	{
 		char aBuf[32];
-		str_from_int(ClientID, aBuf);
+		str_from_int(ClientId, aBuf);
 		Callvote("kick", aBuf, pReason);
 	}
 }
 
-void CVoting::CallvoteOption(int OptionID, const char *pReason, bool ForceVote)
+void CVoting::CallvoteOption(int OptionId, const char *pReason, bool ForceVote)
 {
 	CVoteOptionClient *pOption = m_pFirst;
-	while(pOption && OptionID >= 0)
+	while(pOption && OptionId >= 0)
 	{
-		if(OptionID == 0)
+		if(OptionId == 0)
 		{
 			if(ForceVote)
 			{
@@ -92,17 +92,17 @@ void CVoting::CallvoteOption(int OptionID, const char *pReason, bool ForceVote)
 			break;
 		}
 
-		OptionID--;
+		OptionId--;
 		pOption = pOption->m_pNext;
 	}
 }
 
-void CVoting::RemovevoteOption(int OptionID)
+void CVoting::RemovevoteOption(int OptionId)
 {
 	CVoteOptionClient *pOption = m_pFirst;
-	while(pOption && OptionID >= 0)
+	while(pOption && OptionId >= 0)
 	{
-		if(OptionID == 0)
+		if(OptionId == 0)
 		{
 			char aBuf[128];
 			str_copy(aBuf, "remove_vote \"");
@@ -113,7 +113,7 @@ void CVoting::RemovevoteOption(int OptionID)
 			break;
 		}
 
-		OptionID--;
+		OptionId--;
 		pOption = pOption->m_pNext;
 	}
 }
@@ -349,18 +349,18 @@ void CVoting::Render()
 
 	SProgressSpinnerProperties ProgressProps;
 	ProgressProps.m_Progress = clamp((time() - m_Opentime) / (float)(m_Closetime - m_Opentime), 0.0f, 1.0f);
-	UI()->RenderProgressSpinner(ProgressSpinner.Center(), ProgressSpinner.h / 2.0f, ProgressProps);
+	Ui()->RenderProgressSpinner(ProgressSpinner.Center(), ProgressSpinner.h / 2.0f, ProgressProps);
 
-	UI()->DoLabel(&RightColumn, aBuf, 6.0f, TEXTALIGN_MR);
+	Ui()->DoLabel(&RightColumn, aBuf, 6.0f, TEXTALIGN_MR);
 
 	Props.m_MaxWidth = LeftColumn.w;
-	UI()->DoLabel(&LeftColumn, VoteDescription(), 6.0f, TEXTALIGN_ML, Props);
+	Ui()->DoLabel(&LeftColumn, VoteDescription(), 6.0f, TEXTALIGN_ML, Props);
 
 	View.HSplitTop(3.0f, nullptr, &View);
 	View.HSplitTop(6.0f, &Row, &View);
 	str_format(aBuf, sizeof(aBuf), "%s %s", Localize("Reason:"), VoteReason());
 	Props.m_MaxWidth = Row.w;
-	UI()->DoLabel(&Row, aBuf, 6.0f, TEXTALIGN_ML, Props);
+	Ui()->DoLabel(&Row, aBuf, 6.0f, TEXTALIGN_ML, Props);
 
 	View.HSplitTop(3.0f, nullptr, &View);
 	View.HSplitTop(4.0f, &Row, &View);
@@ -374,12 +374,12 @@ void CVoting::Render()
 	m_pClient->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
 	TextRender()->TextColor(TakenChoice() == 1 ? ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f) : TextRender()->DefaultTextColor());
-	UI()->DoLabel(&LeftColumn, aBuf, 6.0f, TEXTALIGN_ML);
+	Ui()->DoLabel(&LeftColumn, aBuf, 6.0f, TEXTALIGN_ML);
 
 	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
 	TextRender()->TextColor(TakenChoice() == -1 ? ColorRGBA(0.95f, 0.25f, 0.25f, 0.85f) : TextRender()->DefaultTextColor());
-	UI()->DoLabel(&RightColumn, aBuf, 6.0f, TEXTALIGN_MR);
+	Ui()->DoLabel(&RightColumn, aBuf, 6.0f, TEXTALIGN_MR);
 
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }

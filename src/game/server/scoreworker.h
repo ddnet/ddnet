@@ -100,13 +100,13 @@ struct CSqlPlayerRequest : ISqlData
 
 struct CScoreRandomMapResult : ISqlResult
 {
-	CScoreRandomMapResult(int ClientID) :
-		m_ClientID(ClientID)
+	CScoreRandomMapResult(int ClientId) :
+		m_ClientId(ClientId)
 	{
 		m_aMap[0] = '\0';
 		m_aMessage[0] = '\0';
 	}
-	int m_ClientID;
+	int m_ClientId;
 	char m_aMap[MAX_MAP_LENGTH];
 	char m_aMessage[512];
 };
@@ -137,7 +137,7 @@ struct CSqlScoreData : ISqlData
 	char m_aGameUuid[UUID_MAXSTRSIZE];
 	char m_aName[MAX_MAP_LENGTH];
 
-	int m_ClientID;
+	int m_ClientId;
 	float m_Time;
 	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
 	float m_aCurrentTimeCp[NUM_CHECKPOINTS];
@@ -148,9 +148,9 @@ struct CSqlScoreData : ISqlData
 
 struct CScoreSaveResult : ISqlResult
 {
-	CScoreSaveResult(int PlayerID) :
+	CScoreSaveResult(int PlayerId) :
 		m_Status(SAVE_FAILED),
-		m_RequestingPlayer(PlayerID)
+		m_RequestingPlayer(PlayerId)
 	{
 		m_aMessage[0] = '\0';
 		m_aBroadcast[0] = '\0';
@@ -167,7 +167,7 @@ struct CScoreSaveResult : ISqlResult
 	char m_aBroadcast[512];
 	CSaveTeam m_SavedTeam;
 	int m_RequestingPlayer;
-	CUuid m_SaveID;
+	CUuid m_SaveId;
 };
 
 struct CSqlTeamScoreData : ISqlData
@@ -212,10 +212,10 @@ struct CSqlTeamLoad : ISqlData
 	char m_aCode[128];
 	char m_aMap[MAX_MAP_LENGTH];
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
-	int m_ClientID;
+	int m_ClientId;
 	// struct holding all player names in the team or an empty string
 	char m_aClientNames[MAX_CLIENTS][MAX_NAME_LENGTH];
-	int m_aClientID[MAX_CLIENTS];
+	int m_aClientId[MAX_CLIENTS];
 	int m_NumPlayer;
 };
 
@@ -253,16 +253,16 @@ public:
 
 struct CTeamrank
 {
-	CUuid m_TeamID;
+	CUuid m_TeamId;
 	char m_aaNames[MAX_CLIENTS][MAX_NAME_LENGTH];
 	unsigned int m_NumNames;
 	CTeamrank();
 
 	// Assumes that a database query equivalent to
 	//
-	//     SELECT TeamID, Name [, ...] -- the order is important
+	//     SELECT TeamId, Name [, ...] -- the order is important
 	//     FROM record_teamrace
-	//     ORDER BY TeamID, Name
+	//     ORDER BY TeamId, Name
 	//
 	// was executed and that the result line of the first team member is already selected.
 	// Afterwards the team member of the next team is selected.

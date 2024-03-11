@@ -287,7 +287,7 @@ void CGhost::OnNewSnapshot()
 			CheckStart();
 
 		if(m_Recording)
-			AddInfos(m_pClient->m_Snap.m_pLocalCharacter, (m_pClient->m_Snap.m_LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData) ? &m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_ExtendedData : nullptr);
+			AddInfos(m_pClient->m_Snap.m_pLocalCharacter, (m_pClient->m_Snap.m_LocalClientId != -1 && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientId].m_HasExtendedData) ? &m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientId].m_ExtendedData : nullptr);
 	}
 
 	// Record m_LastRaceTick for g_Config.m_ClConfirmDisconnect/QuitTime anyway
@@ -415,7 +415,7 @@ void CGhost::StartRecord(int Tick)
 	m_CurGhost.Reset();
 	m_CurGhost.m_StartTick = Tick;
 
-	const CGameClient::CClientData *pData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID];
+	const CGameClient::CClientData *pData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId];
 	str_copy(m_CurGhost.m_aPlayer, Client()->PlayerName());
 	GetGhostSkin(&m_CurGhost.m_Skin, pData->m_aSkinName, pData->m_UseCustomColor, pData->m_ColorBody, pData->m_ColorFeet);
 	InitRenderInfos(&m_CurGhost);
@@ -620,7 +620,7 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_KILLMSG)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
-		if(pMsg->m_Victim == m_pClient->m_Snap.m_LocalClientID)
+		if(pMsg->m_Victim == m_pClient->m_Snap.m_LocalClientId)
 		{
 			if(m_Recording)
 				StopRecord();
@@ -633,7 +633,7 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_KillMsgTeam *pMsg = (CNetMsg_Sv_KillMsgTeam *)pRawMsg;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(m_pClient->m_Teams.Team(i) == pMsg->m_Team && i == m_pClient->m_Snap.m_LocalClientID)
+			if(m_pClient->m_Teams.Team(i) == pMsg->m_Team && i == m_pClient->m_Snap.m_LocalClientId)
 			{
 				if(m_Recording)
 					StopRecord();
@@ -645,11 +645,11 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 	else if(MsgType == NETMSGTYPE_SV_CHAT)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
-		if(pMsg->m_ClientID == -1 && m_Recording)
+		if(pMsg->m_ClientId == -1 && m_Recording)
 		{
 			char aName[MAX_NAME_LENGTH];
 			int Time = CRaceHelper::TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
-			if(Time > 0 && m_pClient->m_Snap.m_LocalClientID >= 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_aName) == 0)
+			if(Time > 0 && m_pClient->m_Snap.m_LocalClientId >= 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_aName) == 0)
 			{
 				StopRecord(Time);
 				StopRender();

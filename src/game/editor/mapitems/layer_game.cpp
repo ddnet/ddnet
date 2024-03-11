@@ -61,9 +61,9 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 	}
 }
 
-CUI::EPopupMenuFunctionResult CLayerGame::RenderProperties(CUIRect *pToolbox)
+CUi::EPopupMenuFunctionResult CLayerGame::RenderProperties(CUIRect *pToolbox)
 {
-	const CUI::EPopupMenuFunctionResult Result = CLayerTiles::RenderProperties(pToolbox);
+	const CUi::EPopupMenuFunctionResult Result = CLayerTiles::RenderProperties(pToolbox);
 	m_Image = -1;
 	return Result;
 }

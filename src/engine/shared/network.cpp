@@ -13,11 +13,11 @@ void CNetRecvUnpacker::Clear()
 	m_Valid = false;
 }
 
-void CNetRecvUnpacker::Start(const NETADDR *pAddr, CNetConnection *pConnection, int ClientID)
+void CNetRecvUnpacker::Start(const NETADDR *pAddr, CNetConnection *pConnection, int ClientId)
 {
 	m_Addr = *pAddr;
 	m_pConnection = pConnection;
-	m_ClientID = ClientID;
+	m_ClientId = ClientId;
 	m_CurrentChunk = 0;
 	m_Valid = true;
 }
@@ -82,7 +82,7 @@ int CNetRecvUnpacker::FetchChunk(CNetChunk *pChunk)
 		}
 
 		// fill in the info
-		pChunk->m_ClientID = m_ClientID;
+		pChunk->m_ClientId = m_ClientId;
 		pChunk->m_Address = m_Addr;
 		pChunk->m_Flags = Header.m_Flags;
 		pChunk->m_DataSize = Header.m_Size;

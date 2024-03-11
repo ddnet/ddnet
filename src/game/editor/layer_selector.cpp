@@ -12,9 +12,9 @@ void CLayerSelector::Init(CEditor *pEditor)
 bool CLayerSelector::SelectByTile()
 {
 	// ctrl+rightclick a map index to select the layer that has a tile there
-	if(UI()->HotItem() != &Editor()->m_MapEditorId)
+	if(Ui()->HotItem() != &Editor()->m_MapEditorId)
 		return false;
-	if(!Input()->ModifierIsPressed() || !UI()->MouseButtonClicked(1))
+	if(!Input()->ModifierIsPressed() || !Ui()->MouseButtonClicked(1))
 		return false;
 
 	int MatchedGroup = -1;

@@ -27,14 +27,14 @@ void CCharacter::SetWeapon(int W)
 void CCharacter::SetSolo(bool Solo)
 {
 	m_Core.m_Solo = Solo;
-	TeamsCore()->SetSolo(GetCID(), Solo);
+	TeamsCore()->SetSolo(GetCid(), Solo);
 }
 
 void CCharacter::SetSuper(bool Super)
 {
 	m_Core.m_Super = Super;
 	if(m_Core.m_Super)
-		TeamsCore()->Team(GetCID(), TeamsCore()->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER);
+		TeamsCore()->Team(GetCid(), TeamsCore()->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER);
 }
 
 bool CCharacter::IsGrounded()
@@ -87,7 +87,7 @@ void CCharacter::HandleJetpack()
 			float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
 			if(!m_TuneZone)
 				Strength = m_LastJetpackStrength;
-			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCID(), m_Core.m_ActiveWeapon);
+			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCid(), m_Core.m_ActiveWeapon);
 		}
 	}
 	}
@@ -142,7 +142,7 @@ void CCharacter::HandleNinja()
 			int Num = GameWorld()->FindEntities(OldPos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 			// check that we're not in solo part
-			if(TeamsCore()->GetSolo(GetCID()))
+			if(TeamsCore()->GetSolo(GetCid()))
 				return;
 
 			for(int i = 0; i < Num; ++i)
@@ -156,14 +156,14 @@ void CCharacter::HandleNinja()
 					continue;
 
 				// Don't hit players in solo parts
-				if(TeamsCore()->GetSolo(pChr->GetCID()))
+				if(TeamsCore()->GetSolo(pChr->GetCid()))
 					return;
 
 				// make sure we haven't Hit this object before
 				bool bAlreadyHit = false;
 				for(int j = 0; j < m_NumObjectsHit; j++)
 				{
-					if(m_aHitObjects[j] == pChr->GetCID())
+					if(m_aHitObjects[j] == pChr->GetCid())
 						bAlreadyHit = true;
 				}
 				if(bAlreadyHit)
@@ -176,11 +176,11 @@ void CCharacter::HandleNinja()
 				// Hit a player, give them damage and stuffs...
 				// set his velocity to fast upward (for now)
 				if(m_NumObjectsHit < 10)
-					m_aHitObjects[m_NumObjectsHit++] = pChr->GetCID();
+					m_aHitObjects[m_NumObjectsHit++] = pChr->GetCid();
 
-				CCharacter *pChar = GameWorld()->GetCharacterByID(pChr->GetCID());
+				CCharacter *pChar = GameWorld()->GetCharacterById(pChr->GetCid());
 				if(pChar)
-					pChar->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, GetCID(), WEAPON_NINJA);
+					pChar->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, GetCid(), WEAPON_NINJA);
 			}
 		}
 
@@ -312,7 +312,7 @@ void CCharacter::FireWeapon()
 		{
 			auto *pTarget = static_cast<CCharacter *>(apEnts[i]);
 
-			if((pTarget == this || !CanCollide(pTarget->GetCID())))
+			if((pTarget == this || !CanCollide(pTarget->GetCid())))
 				continue;
 
 			// set his velocity to fast upward (for now)
@@ -348,7 +348,7 @@ void CCharacter::FireWeapon()
 				Force *= Strength;
 
 			pTarget->TakeDamage(Force, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
-				GetCID(), m_Core.m_ActiveWeapon);
+				GetCid(), m_Core.m_ActiveWeapon);
 			pTarget->UnFreeze();
 
 			Hits++;
@@ -372,7 +372,7 @@ void CCharacter::FireWeapon()
 			new CProjectile(
 				GameWorld(),
 				WEAPON_GUN, //Type
-				GetCID(), //Owner
+				GetCid(), //Owner
 				ProjStartPos, //Pos
 				Direction, //Dir
 				Lifetime, //Span
@@ -400,7 +400,7 @@ void CCharacter::FireWeapon()
 				new CProjectile(
 					GameWorld(),
 					WEAPON_SHOTGUN, //Type
-					GetCID(), //Owner
+					GetCid(), //Owner
 					ProjStartPos, //Pos
 					direction(a) * Speed, //Dir
 					(int)(GameWorld()->GameTickSpeed() * Tuning()->m_ShotgunLifetime), //Span
@@ -414,7 +414,7 @@ void CCharacter::FireWeapon()
 		{
 			float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
-			new CLaser(GameWorld(), m_Pos, Direction, LaserReach, GetCID(), WEAPON_SHOTGUN);
+			new CLaser(GameWorld(), m_Pos, Direction, LaserReach, GetCid(), WEAPON_SHOTGUN);
 		}
 	}
 	break;
@@ -426,7 +426,7 @@ void CCharacter::FireWeapon()
 		new CProjectile(
 			GameWorld(),
 			WEAPON_GRENADE, //Type
-			GetCID(), //Owner
+			GetCid(), //Owner
 			ProjStartPos, //Pos
 			Direction, //Dir
 			Lifetime, //Span
@@ -441,7 +441,7 @@ void CCharacter::FireWeapon()
 	{
 		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
-		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, GetCID(), WEAPON_LASER);
+		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, GetCid(), WEAPON_LASER);
 	}
 	break;
 
@@ -618,19 +618,19 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 // DDRace
 
-bool CCharacter::CanCollide(int ClientID)
+bool CCharacter::CanCollide(int ClientId)
 {
-	return TeamsCore()->CanCollide(GetCID(), ClientID);
+	return TeamsCore()->CanCollide(GetCid(), ClientId);
 }
 
-bool CCharacter::SameTeam(int ClientID)
+bool CCharacter::SameTeam(int ClientId)
 {
-	return TeamsCore()->SameTeam(GetCID(), ClientID);
+	return TeamsCore()->SameTeam(GetCid(), ClientId);
 }
 
 int CCharacter::Team()
 {
-	return TeamsCore()->Team(GetCID());
+	return TeamsCore()->Team(GetCid());
 }
 
 void CCharacter::HandleSkippableTiles(int Index)
@@ -924,11 +924,11 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	// solo part
-	if(((m_TileIndex == TILE_SOLO_ENABLE) || (m_TileFIndex == TILE_SOLO_ENABLE)) && !TeamsCore()->GetSolo(GetCID()))
+	if(((m_TileIndex == TILE_SOLO_ENABLE) || (m_TileFIndex == TILE_SOLO_ENABLE)) && !TeamsCore()->GetSolo(GetCid()))
 	{
 		SetSolo(true);
 	}
-	else if(((m_TileIndex == TILE_SOLO_DISABLE) || (m_TileFIndex == TILE_SOLO_DISABLE)) && TeamsCore()->GetSolo(GetCID()))
+	else if(((m_TileIndex == TILE_SOLO_DISABLE) || (m_TileFIndex == TILE_SOLO_DISABLE)) && TeamsCore()->GetSolo(GetCid()))
 	{
 		SetSolo(false);
 	}
@@ -1150,10 +1150,10 @@ CTeamsCore *CCharacter::TeamsCore()
 	return GameWorld()->Teams();
 }
 
-CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended) :
+CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_CHARACTER, vec2(0, 0), CCharacterCore::PhysicalSize())
 {
-	m_ID = ID;
+	m_Id = Id;
 	m_IsLocal = false;
 
 	m_LastWeapon = WEAPON_HAMMER;
@@ -1162,7 +1162,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_PrevPrevPos = m_PrevPos = m_Pos = vec2(pChar->m_X, pChar->m_Y);
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
-	m_Core.m_Id = ID;
+	m_Core.m_Id = Id;
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
@@ -1171,7 +1171,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_LastJetpackStrength = 400.0f;
 	m_CanMoveInFreeze = false;
 	m_TeleCheckpoint = 0;
-	m_StrongWeakID = 0;
+	m_StrongWeakId = 0;
 
 	mem_zero(&m_Input, sizeof(m_Input));
 	// never initialize both to zero
@@ -1231,7 +1231,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		SetSuper(pExtended->m_Flags & CHARACTERFLAG_SUPER);
 
 		m_TeleCheckpoint = pExtended->m_TeleCheckpoint;
-		m_StrongWeakID = pExtended->m_StrongWeakID;
+		m_StrongWeakId = pExtended->m_StrongWeakId;
 
 		const bool Ninja = (pExtended->m_Flags & CHARACTERFLAG_WEAPON_NINJA) != 0;
 		if(Ninja && m_Core.m_ActiveWeapon != WEAPON_NINJA)

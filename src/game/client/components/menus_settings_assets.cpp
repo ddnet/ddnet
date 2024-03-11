@@ -547,7 +547,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		CUIRect TextureRect;
 		ItemRect.HSplitTop(15, &ItemRect, &TextureRect);
 		TextureRect.HSplitTop(10, NULL, &TextureRect);
-		UI()->DoLabel(&ItemRect, pItem->m_aName, ItemRect.h - 2, TEXTALIGN_MC);
+		Ui()->DoLabel(&ItemRect, pItem->m_aName, ItemRect.h - 2, TEXTALIGN_MC);
 		if(pItem->m_RenderTexture.IsValid())
 		{
 			Graphics()->WrapClamp();
@@ -607,7 +607,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
-		UI()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
+		Ui()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
 		float wSearch = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
@@ -616,11 +616,11 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		QuickSearch.VSplitLeft(QuickSearch.w - 10.0f, &QuickSearch, &QuickSearchClearButton);
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
-			UI()->SetActiveItem(&s_aFilterInputs[s_CurCustomTab]);
+			Ui()->SetActiveItem(&s_aFilterInputs[s_CurCustomTab]);
 			s_aFilterInputs[s_CurCustomTab].SelectAll();
 		}
 		s_aFilterInputs[s_CurCustomTab].SetEmptyText(Localize("Search"));
-		if(UI()->DoClearableEditBox(&s_aFilterInputs[s_CurCustomTab], &QuickSearch, 14.0f))
+		if(Ui()->DoClearableEditBox(&s_aFilterInputs[s_CurCustomTab], &QuickSearch, 14.0f))
 			gs_aInitCustomList[s_CurCustomTab] = true;
 	}
 
@@ -628,8 +628,8 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	DirectoryButton.VSplitRight(175.0f, 0, &DirectoryButton);
 	DirectoryButton.VSplitRight(25.0f, &DirectoryButton, &ReloadButton);
 	DirectoryButton.VSplitRight(10.0f, &DirectoryButton, 0);
-	static CButtonContainer s_AssetsDirID;
-	if(DoButton_Menu(&s_AssetsDirID, Localize("Assets directory"), 0, &DirectoryButton))
+	static CButtonContainer s_AssetsDirId;
+	if(DoButton_Menu(&s_AssetsDirId, Localize("Assets directory"), 0, &DirectoryButton))
 	{
 		char aBuf[IO_MAX_PATH_LENGTH];
 		char aBufFull[IO_MAX_PATH_LENGTH + 7];
@@ -653,12 +653,12 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 			dbg_msg("menus", "couldn't open file '%s'", aBuf);
 		}
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_AssetsDirID, &DirectoryButton, Localize("Open the directory to add custom assets"));
+	GameClient()->m_Tooltips.DoToolTip(&s_AssetsDirId, &DirectoryButton, Localize("Open the directory to add custom assets"));
 
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-	static CButtonContainer s_AssetsReloadBtnID;
-	if(DoButton_Menu(&s_AssetsReloadBtnID, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &ReloadButton) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
+	static CButtonContainer s_AssetsReloadBtnId;
+	if(DoButton_Menu(&s_AssetsReloadBtnId, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &ReloadButton) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 	{
 		ClearCustomItems(s_CurCustomTab);
 	}

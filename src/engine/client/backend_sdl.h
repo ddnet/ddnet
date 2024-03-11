@@ -198,7 +198,7 @@ public:
 	void HandleWarning();
 };
 
-static constexpr size_t gs_GPUInfoStringSize = 256;
+static constexpr size_t gs_GpuInfoStringSize = 256;
 
 // graphics backend implemented with SDL and the graphics library @see EBackendType
 class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
@@ -211,7 +211,7 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 	std::atomic<uint64_t> m_StreamMemoryUsage{0};
 	std::atomic<uint64_t> m_StagingMemoryUsage{0};
 
-	TTWGraphicsGPUList m_GPUList;
+	TTwGraphicsGpuList m_GpuList;
 
 	TGLBackendReadPresentedImageData m_ReadPresentedImageDataFunc;
 
@@ -219,9 +219,9 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 
 	SBackendCapabilites m_Capabilites;
 
-	char m_aVendorString[gs_GPUInfoStringSize] = {};
-	char m_aVersionString[gs_GPUInfoStringSize] = {};
-	char m_aRendererString[gs_GPUInfoStringSize] = {};
+	char m_aVendorString[gs_GpuInfoStringSize] = {};
+	char m_aVersionString[gs_GpuInfoStringSize] = {};
+	char m_aRendererString[gs_GpuInfoStringSize] = {};
 
 	EBackendType m_BackendType = BACKEND_TYPE_AUTO;
 
@@ -240,13 +240,13 @@ public:
 	uint64_t StreamedMemoryUsage() const override;
 	uint64_t StagingMemoryUsage() const override;
 
-	const TTWGraphicsGPUList &GetGPUs() const override;
+	const TTwGraphicsGpuList &GetGpus() const override;
 
 	int GetNumScreens() const override { return m_NumScreens; }
 	const char *GetScreenName(int Screen) const override;
 
-	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID) override;
-	void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID) override;
+	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
+	void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
 
 	void Minimize() override;
 	void Maximize() override;
@@ -261,8 +261,8 @@ public:
 	void GetViewportSize(int &w, int &h) override;
 	void NotifyWindow() override;
 
-	void WindowDestroyNtf(uint32_t WindowID) override;
-	void WindowCreateNtf(uint32_t WindowID) override;
+	void WindowDestroyNtf(uint32_t WindowId) override;
+	void WindowCreateNtf(uint32_t WindowId) override;
 
 	bool GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType) override;
 	bool IsConfigModernAPI() override { return IsModernAPI(m_BackendType); }

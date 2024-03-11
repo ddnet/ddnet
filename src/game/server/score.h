@@ -26,51 +26,51 @@ class CScore
 	void GeneratePassphrase(char *pBuf, int BufSize);
 
 	// returns new SqlResult bound to the player, if no current Thread is active for this player
-	std::shared_ptr<CScorePlayerResult> NewSqlPlayerResult(int ClientID);
+	std::shared_ptr<CScorePlayerResult> NewSqlPlayerResult(int ClientId);
 	// Creates for player database requests
 	void ExecPlayerThread(
 		bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
 		const char *pThreadName,
-		int ClientID,
+		int ClientId,
 		const char *pName,
 		int Offset);
 
 	// returns true if the player should be rate limited
-	bool RateLimitPlayer(int ClientID);
+	bool RateLimitPlayer(int ClientId);
 
 public:
 	CScore(CGameContext *pGameServer, CDbConnectionPool *pPool);
 	~CScore() {}
 
-	CPlayerData *PlayerData(int ID) { return &m_aPlayerData[ID]; }
+	CPlayerData *PlayerData(int Id) { return &m_aPlayerData[Id]; }
 
 	void LoadBestTime();
-	void MapInfo(int ClientID, const char *pMapName);
-	void MapVote(int ClientID, const char *pMapName);
-	void LoadPlayerData(int ClientID, const char *pName = "");
-	void SaveScore(int ClientID, float Time, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible);
+	void MapInfo(int ClientId, const char *pMapName);
+	void MapVote(int ClientId, const char *pMapName);
+	void LoadPlayerData(int ClientId, const char *pName = "");
+	void SaveScore(int ClientId, float Time, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible);
 
-	void SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp);
+	void SaveTeamScore(int *pClientIds, unsigned int Size, float Time, const char *pTimestamp);
 
-	void ShowTop(int ClientID, int Offset = 1);
-	void ShowRank(int ClientID, const char *pName);
+	void ShowTop(int ClientId, int Offset = 1);
+	void ShowRank(int ClientId, const char *pName);
 
-	void ShowTeamTop5(int ClientID, int Offset = 1);
-	void ShowPlayerTeamTop5(int ClientID, const char *pName, int Offset = 1);
-	void ShowTeamRank(int ClientID, const char *pName);
+	void ShowTeamTop5(int ClientId, int Offset = 1);
+	void ShowPlayerTeamTop5(int ClientId, const char *pName, int Offset = 1);
+	void ShowTeamRank(int ClientId, const char *pName);
 
-	void ShowTopPoints(int ClientID, int Offset = 1);
-	void ShowPoints(int ClientID, const char *pName);
+	void ShowTopPoints(int ClientId, int Offset = 1);
+	void ShowPoints(int ClientId, const char *pName);
 
-	void ShowTimes(int ClientID, const char *pName, int Offset = 1);
-	void ShowTimes(int ClientID, int Offset = 1);
+	void ShowTimes(int ClientId, const char *pName, int Offset = 1);
+	void ShowTimes(int ClientId, int Offset = 1);
 
-	void RandomMap(int ClientID, int Stars);
-	void RandomUnfinishedMap(int ClientID, int Stars);
+	void RandomMap(int ClientId, int Stars);
+	void RandomUnfinishedMap(int ClientId, int Stars);
 
-	void SaveTeam(int ClientID, const char *pCode, const char *pServer);
-	void LoadTeam(const char *pCode, int ClientID);
-	void GetSaves(int ClientID);
+	void SaveTeam(int ClientId, const char *pCode, const char *pServer);
+	void LoadTeam(const char *pCode, int ClientId);
+	void GetSaves(int ClientId);
 };
 
 #endif // GAME_SERVER_SCORE_H

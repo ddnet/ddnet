@@ -18,7 +18,7 @@
 
 using namespace FontIcons;
 
-void CUIElement::Init(CUI *pUI, int RequestedRectCount)
+void CUIElement::Init(CUi *pUI, int RequestedRectCount)
 {
 	m_pUI = pUI;
 	pUI->AddUIElement(this);
@@ -28,7 +28,7 @@ void CUIElement::Init(CUI *pUI, int RequestedRectCount)
 
 void CUIElement::InitRects(int RequestedRectCount)
 {
-	dbg_assert(m_vUIRects.empty(), "UI rects can only be initialized once, create another ui element instead.");
+	dbg_assert(m_vUIRects.empty(), "Ui rects can only be initialized once, create another ui element instead.");
 	m_vUIRects.resize(RequestedRectCount);
 	for(auto &Rect : m_vUIRects)
 		Rect.m_pParent = this;
@@ -59,7 +59,7 @@ void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int
 	bool NeedsRecreate = false;
 	if(m_UIRectQuadContainer == -1 || m_Width != pRect->w || m_Height != pRect->h || mem_comp(&m_QuadColor, &Color, sizeof(Color)) != 0)
 	{
-		m_pParent->UI()->Graphics()->DeleteQuadContainer(m_UIRectQuadContainer);
+		m_pParent->Ui()->Graphics()->DeleteQuadContainer(m_UIRectQuadContainer);
 		NeedsRecreate = true;
 	}
 	m_X = pRect->x;
@@ -70,13 +70,13 @@ void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int
 		m_Height = pRect->h;
 		m_QuadColor = Color;
 
-		m_pParent->UI()->Graphics()->SetColor(Color);
-		m_UIRectQuadContainer = m_pParent->UI()->Graphics()->CreateRectQuadContainer(0, 0, pRect->w, pRect->h, Rounding, Corners);
-		m_pParent->UI()->Graphics()->SetColor(1, 1, 1, 1);
+		m_pParent->Ui()->Graphics()->SetColor(Color);
+		m_UIRectQuadContainer = m_pParent->Ui()->Graphics()->CreateRectQuadContainer(0, 0, pRect->w, pRect->h, Rounding, Corners);
+		m_pParent->Ui()->Graphics()->SetColor(1, 1, 1, 1);
 	}
 
-	m_pParent->UI()->Graphics()->TextureClear();
-	m_pParent->UI()->Graphics()->RenderQuadContainerEx(m_UIRectQuadContainer,
+	m_pParent->Ui()->Graphics()->TextureClear();
+	m_pParent->Ui()->Graphics()->RenderQuadContainerEx(m_UIRectQuadContainer,
 		0, -1, m_X, m_Y, 1, 1);
 }
 
@@ -84,21 +84,21 @@ void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int
  UI
 *********************************************************/
 
-const CLinearScrollbarScale CUI::ms_LinearScrollbarScale;
-const CLogarithmicScrollbarScale CUI::ms_LogarithmicScrollbarScale(25);
-const CDarkButtonColorFunction CUI::ms_DarkButtonColorFunction;
-const CLightButtonColorFunction CUI::ms_LightButtonColorFunction;
-const CScrollBarColorFunction CUI::ms_ScrollBarColorFunction;
-const float CUI::ms_FontmodHeight = 0.8f;
+const CLinearScrollbarScale CUi::ms_LinearScrollbarScale;
+const CLogarithmicScrollbarScale CUi::ms_LogarithmicScrollbarScale(25);
+const CDarkButtonColorFunction CUi::ms_DarkButtonColorFunction;
+const CLightButtonColorFunction CUi::ms_LightButtonColorFunction;
+const CScrollBarColorFunction CUi::ms_ScrollBarColorFunction;
+const float CUi::ms_FontmodHeight = 0.8f;
 
-CUI *CUIElementBase::s_pUI = nullptr;
+CUi *CUIElementBase::s_pUI = nullptr;
 
 IClient *CUIElementBase::Client() const { return s_pUI->Client(); }
 IGraphics *CUIElementBase::Graphics() const { return s_pUI->Graphics(); }
 IInput *CUIElementBase::Input() const { return s_pUI->Input(); }
 ITextRender *CUIElementBase::TextRender() const { return s_pUI->TextRender(); }
 
-void CUI::Init(IKernel *pKernel)
+void CUi::Init(IKernel *pKernel)
 {
 	m_pClient = pKernel->RequestInterface<IClient>();
 	m_pGraphics = pKernel->RequestInterface<IGraphics>();
@@ -109,7 +109,7 @@ void CUI::Init(IKernel *pKernel)
 	CUIElementBase::Init(this);
 }
 
-CUI::CUI()
+CUi::CUi()
 {
 	m_Enabled = true;
 
@@ -129,7 +129,7 @@ CUI::CUI()
 	m_Screen.y = 0.0f;
 }
 
-CUI::~CUI()
+CUi::~CUi()
 {
 	for(CUIElement *&pEl : m_vpOwnUIElements)
 	{
@@ -138,7 +138,7 @@ CUI::~CUI()
 	m_vpOwnUIElements.clear();
 }
 
-CUIElement *CUI::GetNewUIElement(int RequestedRectCount)
+CUIElement *CUi::GetNewUIElement(int RequestedRectCount)
 {
 	CUIElement *pNewEl = new CUIElement(this, RequestedRectCount);
 
@@ -147,12 +147,12 @@ CUIElement *CUI::GetNewUIElement(int RequestedRectCount)
 	return pNewEl;
 }
 
-void CUI::AddUIElement(CUIElement *pElement)
+void CUi::AddUIElement(CUIElement *pElement)
 {
 	m_vpUIElements.push_back(pElement);
 }
 
-void CUI::ResetUIElement(CUIElement &UIElement) const
+void CUi::ResetUIElement(CUIElement &UIElement) const
 {
 	for(CUIElement::SUIElementRect &Rect : UIElement.m_vUIRects)
 	{
@@ -162,7 +162,7 @@ void CUI::ResetUIElement(CUIElement &UIElement) const
 	}
 }
 
-void CUI::OnElementsReset()
+void CUi::OnElementsReset()
 {
 	for(CUIElement *pEl : m_vpUIElements)
 	{
@@ -170,12 +170,12 @@ void CUI::OnElementsReset()
 	}
 }
 
-void CUI::OnWindowResize()
+void CUi::OnWindowResize()
 {
 	OnElementsReset();
 }
 
-void CUI::OnCursorMove(float X, float Y)
+void CUi::OnCursorMove(float X, float Y)
 {
 	if(!CheckMouseLock())
 	{
@@ -186,7 +186,7 @@ void CUI::OnCursorMove(float X, float Y)
 	m_UpdatedMouseDelta += vec2(X, Y);
 }
 
-void CUI::Update()
+void CUi::Update()
 {
 	const CUIRect *pScreen = Screen();
 	const float MouseX = (m_UpdatedMousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
@@ -195,7 +195,7 @@ void CUI::Update()
 	m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
 }
 
-void CUI::Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDeltaY, float MouseWorldX, float MouseWorldY)
+void CUi::Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDeltaY, float MouseWorldX, float MouseWorldY)
 {
 	unsigned MouseButtons = 0;
 	if(Enabled())
@@ -234,7 +234,7 @@ void CUI::Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDelta
 	}
 }
 
-void CUI::DebugRender()
+void CUi::DebugRender()
 {
 	MapScreen();
 
@@ -243,12 +243,12 @@ void CUI::DebugRender()
 	TextRender()->Text(2.0f, Screen()->h - 12.0f, 10.0f, aBuf);
 }
 
-bool CUI::MouseInside(const CUIRect *pRect) const
+bool CUi::MouseInside(const CUIRect *pRect) const
 {
 	return pRect->Inside(m_MouseX, m_MouseY);
 }
 
-void CUI::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const
+void CUi::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const
 {
 	float Factor = 1.0f;
 	switch(CursorType)
@@ -260,7 +260,7 @@ void CUI::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType)
 		Factor = g_Config.m_UiControllerSens / 100.0f;
 		break;
 	default:
-		dbg_msg("assert", "CUI::ConvertMouseMove CursorType %d", (int)CursorType);
+		dbg_msg("assert", "CUi::ConvertMouseMove CursorType %d", (int)CursorType);
 		dbg_break();
 		break;
 	}
@@ -272,14 +272,14 @@ void CUI::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType)
 	*pY *= Factor;
 }
 
-bool CUI::ConsumeHotkey(EHotkey Hotkey)
+bool CUi::ConsumeHotkey(EHotkey Hotkey)
 {
 	const bool Pressed = m_HotkeysPressed & Hotkey;
 	m_HotkeysPressed &= ~Hotkey;
 	return Pressed;
 }
 
-bool CUI::OnInput(const IInput::CEvent &Event)
+bool CUi::OnInput(const IInput::CEvent &Event)
 {
 	if(!Enabled())
 		return false;
@@ -320,34 +320,34 @@ bool CUI::OnInput(const IInput::CEvent &Event)
 	return false;
 }
 
-float CUI::ButtonColorMul(const void *pID)
+float CUi::ButtonColorMul(const void *pId)
 {
-	if(CheckActiveItem(pID))
+	if(CheckActiveItem(pId))
 		return ButtonColorMulActive();
-	else if(HotItem() == pID)
+	else if(HotItem() == pId)
 		return ButtonColorMulHot();
 	return ButtonColorMulDefault();
 }
 
-const CUIRect *CUI::Screen()
+const CUIRect *CUi::Screen()
 {
 	m_Screen.h = 600.0f;
 	m_Screen.w = Graphics()->ScreenAspect() * m_Screen.h;
 	return &m_Screen;
 }
 
-void CUI::MapScreen()
+void CUi::MapScreen()
 {
 	const CUIRect *pScreen = Screen();
 	Graphics()->MapScreen(pScreen->x, pScreen->y, pScreen->w, pScreen->h);
 }
 
-float CUI::PixelSize()
+float CUi::PixelSize()
 {
 	return Screen()->w / Graphics()->ScreenWidth();
 }
 
-void CUI::ClipEnable(const CUIRect *pRect)
+void CUi::ClipEnable(const CUIRect *pRect)
 {
 	if(IsClipped())
 	{
@@ -366,20 +366,20 @@ void CUI::ClipEnable(const CUIRect *pRect)
 	UpdateClipping();
 }
 
-void CUI::ClipDisable()
+void CUi::ClipDisable()
 {
 	dbg_assert(IsClipped(), "no clip region");
 	m_vClips.pop_back();
 	UpdateClipping();
 }
 
-const CUIRect *CUI::ClipArea() const
+const CUIRect *CUi::ClipArea() const
 {
 	dbg_assert(IsClipped(), "no clip region");
 	return &m_vClips.back();
 }
 
-void CUI::UpdateClipping()
+void CUi::UpdateClipping()
 {
 	if(IsClipped())
 	{
@@ -394,14 +394,14 @@ void CUI::UpdateClipping()
 	}
 }
 
-int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
+int CUi::DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect)
 {
 	// logic
 	int ReturnValue = 0;
 	const bool Inside = MouseHovered(pRect);
 	static int s_ButtonUsed = -1;
 
-	if(CheckActiveItem(pID))
+	if(CheckActiveItem(pId))
 	{
 		if(s_ButtonUsed >= 0 && !MouseButton(s_ButtonUsed))
 		{
@@ -411,25 +411,25 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 			s_ButtonUsed = -1;
 		}
 	}
-	else if(HotItem() == pID)
+	else if(HotItem() == pId)
 	{
 		for(int i = 0; i < 3; ++i)
 		{
 			if(MouseButton(i))
 			{
-				SetActiveItem(pID);
+				SetActiveItem(pId);
 				s_ButtonUsed = i;
 			}
 		}
 	}
 
 	if(Inside && !MouseButton(0) && !MouseButton(1) && !MouseButton(2))
-		SetHotItem(pID);
+		SetHotItem(pId);
 
 	return ReturnValue;
 }
 
-int CUI::DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted)
+int CUi::DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted)
 {
 	// logic
 	int ReturnValue = 0;
@@ -441,7 +441,7 @@ int CUI::DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRe
 	if(pAbrupted != nullptr)
 		*pAbrupted = false;
 
-	if(CheckActiveItem(pID))
+	if(CheckActiveItem(pId))
 	{
 		if(s_ButtonUsed == 0)
 		{
@@ -472,54 +472,54 @@ int CUI::DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRe
 			s_ButtonUsed = -1;
 		}
 	}
-	else if(HotItem() == pID)
+	else if(HotItem() == pId)
 	{
 		for(int i = 0; i < 3; ++i)
 		{
 			if(MouseButton(i))
 			{
-				SetActiveItem(pID);
+				SetActiveItem(pId);
 				s_ButtonUsed = i;
 			}
 		}
 	}
 
 	if(Inside && !MouseButton(0) && !MouseButton(1) && !MouseButton(2))
-		SetHotItem(pID);
+		SetHotItem(pId);
 
 	return ReturnValue;
 }
 
-EEditState CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY)
+EEditState CUi::DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, float *pY)
 {
 	static const void *s_pEditing = nullptr;
 
 	if(MouseHovered(pRect))
-		SetHotItem(pID);
+		SetHotItem(pId);
 
 	EEditState Res = EEditState::EDITING;
 
-	if(HotItem() == pID && MouseButtonClicked(0))
+	if(HotItem() == pId && MouseButtonClicked(0))
 	{
-		SetActiveItem(pID);
+		SetActiveItem(pId);
 		if(!s_pEditing)
 		{
-			s_pEditing = pID;
+			s_pEditing = pId;
 			Res = EEditState::START;
 		}
 	}
 
-	if(CheckActiveItem(pID) && !MouseButton(0))
+	if(CheckActiveItem(pId) && !MouseButton(0))
 	{
 		SetActiveItem(nullptr);
-		if(s_pEditing == pID)
+		if(s_pEditing == pId)
 		{
 			s_pEditing = nullptr;
 			Res = EEditState::END;
 		}
 	}
 
-	if(!CheckActiveItem(pID) && Res == EEditState::EDITING)
+	if(!CheckActiveItem(pId) && Res == EEditState::EDITING)
 		return EEditState::NONE;
 
 	if(Input()->ShiftIsPressed())
@@ -533,7 +533,7 @@ EEditState CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, 
 	return Res;
 }
 
-void CUI::DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp, float ScrollSpeed) const
+void CUi::DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp, float ScrollSpeed) const
 {
 	// reset scrolling if it's not necessary anymore
 	if(TotalSize < ViewPortSize)
@@ -639,7 +639,7 @@ static int GetFlagsForLabelProperties(const SLabelProperties &LabelProps, const 
 	return Flags;
 }
 
-vec2 CUI::CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, const float *pBiggestCharHeight)
+vec2 CUi::CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, const float *pBiggestCharHeight)
 {
 	vec2 Cursor(pRect->x, pRect->y);
 
@@ -666,7 +666,7 @@ vec2 CUI::CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, c
 	return Cursor;
 }
 
-void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps) const
+void CUi::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps) const
 {
 	const int Flags = GetFlagsForLabelProperties(LabelProps, nullptr);
 	const SCursorAndBoundingBox TextBounds = CalcFontSizeCursorHeightAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
@@ -679,7 +679,7 @@ void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align
 	TextRender()->TextEx(&Cursor, pText, -1);
 }
 
-void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor) const
+void CUi::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor) const
 {
 	const int Flags = GetFlagsForLabelProperties(LabelProps, pReadCursor);
 	const SCursorAndBoundingBox TextBounds = CalcFontSizeCursorHeightAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
@@ -706,7 +706,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	RectEl.m_Cursor = Cursor;
 }
 
-void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor) const
+void CUi::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor) const
 {
 	const int ReadCursorGlyphCount = pReadCursor == nullptr ? -1 : pReadCursor->m_GlyphCount;
 	bool NeedsRecreate = false;
@@ -762,7 +762,7 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 	}
 }
 
-bool CUI::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const std::vector<STextColorSplit> &vColorSplits)
+bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const std::vector<STextColorSplit> &vColorSplits)
 {
 	const bool Inside = MouseHovered(pRect);
 	const bool Active = m_pLastActiveItem == pLineInput;
@@ -804,7 +804,7 @@ bool CUI::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 		SetHotItem(pLineInput);
 
 	if(Enabled() && Active && !JustGotActive)
-		pLineInput->Activate(EInputPriority::UI);
+		pLineInput->Activate(EInputPriority::Ui);
 	else
 		pLineInput->Deactivate();
 
@@ -865,7 +865,7 @@ bool CUI::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 	return Changed;
 }
 
-bool CUI::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const std::vector<STextColorSplit> &vColorSplits)
+bool CUi::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const std::vector<STextColorSplit> &vColorSplits)
 {
 	CUIRect EditBox, ClearButton;
 	pRect->VSplitRight(pRect->h, &EditBox, &ClearButton);
@@ -874,7 +874,7 @@ bool CUI::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float
 
 	ClearButton.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.33f * ButtonColorMul(pLineInput->GetClearButtonId())), Corners & ~IGraphics::CORNER_L, 3.0f);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-	DoLabel(&ClearButton, "×", ClearButton.h * CUI::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
+	DoLabel(&ClearButton, "×", ClearButton.h * CUi::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
 	TextRender()->SetRenderFlags(0);
 	if(DoButtonLogic(pLineInput->GetClearButtonId(), 0, &ClearButton))
 	{
@@ -886,7 +886,7 @@ bool CUI::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float
 	return ReturnValue;
 }
 
-int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props)
+int CUi::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pId, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props)
 {
 	CUIRect Text = *pRect, DropDownIcon;
 	Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
@@ -957,7 +957,7 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 					NewRect.m_Text = pText;
 					if(Props.m_UseIconFont)
 						TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-					DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, TEXTALIGN_MC);
+					DoLabel(NewRect, &Text, pText, Text.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
 					if(Props.m_UseIconFont)
 						TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 				}
@@ -967,9 +967,9 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 	}
 	// render
 	size_t Index = 2;
-	if(CheckActiveItem(pID))
+	if(CheckActiveItem(pId))
 		Index = 0;
-	else if(HotItem() == pID)
+	else if(HotItem() == pId)
 		Index = 1;
 	Graphics()->TextureClear();
 	Graphics()->RenderQuadContainer(UIElement.Rect(Index)->m_UIRectQuadContainer, -1);
@@ -977,7 +977,7 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 	{
 		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		DoLabel(&DropDownIcon, FONT_ICON_CIRCLE_CHEVRON_DOWN, DropDownIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_MR);
+		DoLabel(&DropDownIcon, FONT_ICON_CIRCLE_CHEVRON_DOWN, DropDownIcon.h * CUi::ms_FontmodHeight, TEXTALIGN_MR);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 	}
@@ -985,10 +985,10 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 	ColorRGBA ColorTextOutline(TextRender()->DefaultTextOutlineColor());
 	if(UIElement.Rect(0)->m_UITextContainer.Valid())
 		TextRender()->RenderTextContainer(UIElement.Rect(0)->m_UITextContainer, ColorText, ColorTextOutline);
-	return DoButtonLogic(pID, Props.m_Checked, pRect);
+	return DoButtonLogic(pId, Props.m_Checked, pRect);
 }
 
-int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding, bool TransparentInactive, bool Enabled)
+int CUi::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding, bool TransparentInactive, bool Enabled)
 {
 	if(!TransparentInactive || CheckActiveItem(pButtonContainer) || HotItem() == pButtonContainer)
 		pRect->Draw(Enabled ? ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * ButtonColorMul(pButtonContainer)) : ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_ALL, 3.0f);
@@ -1000,35 +1000,35 @@ int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pTex
 	return Enabled ? DoButtonLogic(pButtonContainer, 0, pRect) : 0;
 }
 
-int64_t CUI::DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
+int64_t CUi::DoValueSelector(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
 {
-	return DoValueSelectorWithState(pID, pRect, pLabel, Current, Min, Max, Props).m_Value;
+	return DoValueSelectorWithState(pId, pRect, pLabel, Current, Min, Max, Props).m_Value;
 }
 
-SEditResult<int64_t> CUI::DoValueSelectorWithState(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
+SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
 {
 	// logic
 	static float s_Value;
 	static CLineInputNumber s_NumberInput;
-	static const void *s_pLastTextID = pID;
+	static const void *s_pLastTextId = pId;
 	const bool Inside = MouseInside(pRect);
 	static const void *s_pEditing = nullptr;
 	EEditState State = EEditState::NONE;
 
 	if(Inside)
-		SetHotItem(pID);
+		SetHotItem(pId);
 
 	const int Base = Props.m_IsHex ? 16 : 10;
 
-	if(MouseButtonReleased(1) && HotItem() == pID)
+	if(MouseButtonReleased(1) && HotItem() == pId)
 	{
-		s_pLastTextID = pID;
+		s_pLastTextId = pId;
 		m_ValueSelectorTextMode = true;
 		s_NumberInput.SetInteger64(Current, Base, Props.m_HexPrefix);
 		s_NumberInput.SelectAll();
 	}
 
-	if(CheckActiveItem(pID))
+	if(CheckActiveItem(pId))
 	{
 		if(!MouseButton(0))
 		{
@@ -1038,7 +1038,7 @@ SEditResult<int64_t> CUI::DoValueSelectorWithState(const void *pID, const CUIRec
 		}
 	}
 
-	if(m_ValueSelectorTextMode && s_pLastTextID == pID)
+	if(m_ValueSelectorTextMode && s_pLastTextId == pId)
 	{
 		DoEditBox(&s_NumberInput, pRect, 10.0f);
 		SetActiveItem(&s_NumberInput);
@@ -1060,7 +1060,7 @@ SEditResult<int64_t> CUI::DoValueSelectorWithState(const void *pID, const CUIRec
 	}
 	else
 	{
-		if(CheckActiveItem(pID))
+		if(CheckActiveItem(pId))
 		{
 			if(Props.m_UseScroll)
 			{
@@ -1084,14 +1084,14 @@ SEditResult<int64_t> CUI::DoValueSelectorWithState(const void *pID, const CUIRec
 				}
 			}
 		}
-		else if(HotItem() == pID)
+		else if(HotItem() == pId)
 		{
 			if(MouseButtonClicked(0))
 			{
 				s_Value = 0;
-				SetActiveItem(pID);
+				SetActiveItem(pId);
 				if(Props.m_UseScroll)
-					EnableMouseLock(pID);
+					EnableMouseLock(pId);
 			}
 		}
 
@@ -1118,17 +1118,17 @@ SEditResult<int64_t> CUI::DoValueSelectorWithState(const void *pID, const CUIRec
 	if(!m_ValueSelectorTextMode)
 		s_NumberInput.Clear();
 
-	if(s_pEditing == pID)
+	if(s_pEditing == pId)
 		State = EEditState::EDITING;
 
 	bool MouseLocked = CheckMouseLock();
 	if((MouseLocked || m_ValueSelectorTextMode) && !s_pEditing)
 	{
 		State = EEditState::START;
-		s_pEditing = pID;
+		s_pEditing = pId;
 	}
 
-	if(!CheckMouseLock() && !m_ValueSelectorTextMode && s_pEditing == pID)
+	if(!CheckMouseLock() && !m_ValueSelectorTextMode && s_pEditing == pId)
 	{
 		State = EEditState::END;
 		s_pEditing = nullptr;
@@ -1137,7 +1137,7 @@ SEditResult<int64_t> CUI::DoValueSelectorWithState(const void *pID, const CUIRec
 	return SEditResult<int64_t>{State, Current};
 }
 
-float CUI::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
+float CUi::DoScrollbarV(const void *pId, const CUIRect *pRect, float Current)
 {
 	Current = clamp(Current, 0.0f, 1.0f);
 
@@ -1155,7 +1155,7 @@ float CUI::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 	const bool InsideHandle = MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
 
-	if(CheckActiveItem(pID))
+	if(CheckActiveItem(pId))
 	{
 		if(MouseButton(0))
 		{
@@ -1168,25 +1168,25 @@ float CUI::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 			SetActiveItem(nullptr);
 		}
 	}
-	else if(HotItem() == pID)
+	else if(HotItem() == pId)
 	{
 		if(MouseButton(0))
 		{
-			SetActiveItem(pID);
+			SetActiveItem(pId);
 			s_OffsetY = MouseY() - Handle.y;
 			Grabbed = true;
 		}
 	}
 	else if(MouseButtonClicked(0) && !InsideHandle && InsideRail)
 	{
-		SetActiveItem(pID);
+		SetActiveItem(pId);
 		s_OffsetY = Handle.h / 2.0f;
 		Grabbed = true;
 	}
 
 	if(InsideHandle)
 	{
-		SetHotItem(pID);
+		SetHotItem(pId);
 	}
 
 	float ReturnValue = Current;
@@ -1200,12 +1200,12 @@ float CUI::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 
 	// render
 	Rail.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, Rail.w / 2.0f);
-	Handle.Draw(ms_ScrollBarColorFunction.GetColor(CheckActiveItem(pID), HotItem() == pID), IGraphics::CORNER_ALL, Handle.w / 2.0f);
+	Handle.Draw(ms_ScrollBarColorFunction.GetColor(CheckActiveItem(pId), HotItem() == pId), IGraphics::CORNER_ALL, Handle.w / 2.0f);
 
 	return ReturnValue;
 }
 
-float CUI::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner)
+float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner)
 {
 	Current = clamp(Current, 0.0f, 1.0f);
 
@@ -1226,7 +1226,7 @@ float CUI::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, co
 	const bool InsideHandle = MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
 
-	if(CheckActiveItem(pID))
+	if(CheckActiveItem(pId))
 	{
 		if(MouseButton(0))
 		{
@@ -1239,25 +1239,25 @@ float CUI::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, co
 			SetActiveItem(nullptr);
 		}
 	}
-	else if(HotItem() == pID)
+	else if(HotItem() == pId)
 	{
 		if(MouseButton(0))
 		{
-			SetActiveItem(pID);
+			SetActiveItem(pId);
 			s_OffsetX = MouseX() - Handle.x;
 			Grabbed = true;
 		}
 	}
 	else if(MouseButtonClicked(0) && !InsideHandle && InsideRail)
 	{
-		SetActiveItem(pID);
+		SetActiveItem(pId);
 		s_OffsetX = Handle.w / 2.0f;
 		Grabbed = true;
 	}
 
 	if(InsideHandle)
 	{
-		SetHotItem(pID);
+		SetHotItem(pId);
 	}
 
 	float ReturnValue = Current;
@@ -1282,17 +1282,17 @@ float CUI::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, co
 	else
 	{
 		Rail.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, Rail.h / 2.0f);
-		Handle.Draw(ms_ScrollBarColorFunction.GetColor(CheckActiveItem(pID), HotItem() == pID), IGraphics::CORNER_ALL, Handle.h / 2.0f);
+		Handle.Draw(ms_ScrollBarColorFunction.GetColor(CheckActiveItem(pId), HotItem() == pId), IGraphics::CORNER_ALL, Handle.h / 2.0f);
 	}
 
 	return ReturnValue;
 }
 
-void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, unsigned Flags, const char *pSuffix)
+void CUi::DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, unsigned Flags, const char *pSuffix)
 {
-	const bool Infinite = Flags & CUI::SCROLLBAR_OPTION_INFINITE;
-	const bool NoClampValue = Flags & CUI::SCROLLBAR_OPTION_NOCLAMPVALUE;
-	const bool MultiLine = Flags & CUI::SCROLLBAR_OPTION_MULTILINE;
+	const bool Infinite = Flags & CUi::SCROLLBAR_OPTION_INFINITE;
+	const bool NoClampValue = Flags & CUi::SCROLLBAR_OPTION_NOCLAMPVALUE;
+	const bool MultiLine = Flags & CUi::SCROLLBAR_OPTION_MULTILINE;
 
 	int Value = *pOption;
 	if(Infinite)
@@ -1320,10 +1320,10 @@ void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect,
 	else
 		pRect->VSplitMid(&Label, &ScrollBar, minimum(10.0f, pRect->w * 0.05f));
 
-	const float FontSize = Label.h * CUI::ms_FontmodHeight * 0.8f;
+	const float FontSize = Label.h * CUi::ms_FontmodHeight * 0.8f;
 	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_ML);
 
-	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, Min, Max)), Min, Max);
+	Value = pScale->ToAbsolute(DoScrollbarH(pId, &ScrollBar, pScale->ToRelative(Value, Min, Max)), Min, Max);
 	if(NoClampValue && ((Value == Min && *pOption < Min) || (Value == Max && *pOption > Max)))
 	{
 		Value = *pOption; // use previous out of range value instead if the scrollbar is at the edge
@@ -1337,7 +1337,7 @@ void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect,
 	*pOption = Value;
 }
 
-void CUI::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props) const
+void CUi::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props) const
 {
 	static float s_SpinnerOffset = 0.0f;
 	static float s_LastRender = Client()->LocalTime();
@@ -1386,7 +1386,7 @@ void CUI::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressS
 	s_LastRender = Client()->LocalTime();
 }
 
-void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props)
+void CUi::DoPopupMenu(const SPopupMenuId *pId, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props)
 {
 	constexpr float Margin = SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN;
 	if(X + Width > Screen()->w - Margin)
@@ -1396,7 +1396,7 @@ void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Heig
 
 	m_vPopupMenus.emplace_back();
 	SPopupMenu *pNewMenu = &m_vPopupMenus.back();
-	pNewMenu->m_pID = pID;
+	pNewMenu->m_pId = pId;
 	pNewMenu->m_Props = Props;
 	pNewMenu->m_Rect.x = X;
 	pNewMenu->m_Rect.y = Y;
@@ -1406,35 +1406,35 @@ void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Heig
 	pNewMenu->m_pfnFunc = pfnFunc;
 }
 
-void CUI::RenderPopupMenus()
+void CUi::RenderPopupMenus()
 {
 	for(size_t i = 0; i < m_vPopupMenus.size(); ++i)
 	{
 		const SPopupMenu &PopupMenu = m_vPopupMenus[i];
-		const SPopupMenuId *pID = PopupMenu.m_pID;
+		const SPopupMenuId *pId = PopupMenu.m_pId;
 		const bool Inside = MouseInside(&PopupMenu.m_Rect);
 		const bool Active = i == m_vPopupMenus.size() - 1;
 
 		if(Active)
-			SetHotItem(pID);
+			SetHotItem(pId);
 
-		if(CheckActiveItem(pID))
+		if(CheckActiveItem(pId))
 		{
 			if(!MouseButton(0))
 			{
 				if(!Inside)
 				{
-					ClosePopupMenu(pID);
+					ClosePopupMenu(pId);
 					--i;
 					continue;
 				}
 				SetActiveItem(nullptr);
 			}
 		}
-		else if(HotItem() == pID)
+		else if(HotItem() == pId)
 		{
 			if(MouseButton(0))
-				SetActiveItem(pID);
+				SetActiveItem(pId);
 		}
 
 		CUIRect PopupRect = PopupMenu.m_Rect;
@@ -1444,16 +1444,16 @@ void CUI::RenderPopupMenus()
 		PopupRect.Margin(SPopupMenu::POPUP_MARGIN, &PopupRect);
 
 		// The popup render function can open/close popups, which may resize the vector and thus
-		// invalidate the variable PopupMenu. We therefore store pID in a separate variable.
+		// invalidate the variable PopupMenu. We therefore store pId in a separate variable.
 		EPopupMenuFunctionResult Result = PopupMenu.m_pfnFunc(PopupMenu.m_pContext, PopupRect, Active);
 		if(Result != POPUP_KEEP_OPEN || (Active && ConsumeHotkey(HOTKEY_ESCAPE)))
-			ClosePopupMenu(pID, Result == POPUP_CLOSE_CURRENT_AND_DESCENDANTS);
+			ClosePopupMenu(pId, Result == POPUP_CLOSE_CURRENT_AND_DESCENDANTS);
 	}
 }
 
-void CUI::ClosePopupMenu(const SPopupMenuId *pID, bool IncludeDescendants)
+void CUi::ClosePopupMenu(const SPopupMenuId *pId, bool IncludeDescendants)
 {
-	auto PopupMenuToClose = std::find_if(m_vPopupMenus.begin(), m_vPopupMenus.end(), [pID](const SPopupMenu PopupMenu) { return PopupMenu.m_pID == pID; });
+	auto PopupMenuToClose = std::find_if(m_vPopupMenus.begin(), m_vPopupMenus.end(), [pId](const SPopupMenu PopupMenu) { return PopupMenu.m_pId == pId; });
 	if(PopupMenuToClose != m_vPopupMenus.end())
 	{
 		if(IncludeDescendants)
@@ -1466,7 +1466,7 @@ void CUI::ClosePopupMenu(const SPopupMenuId *pID, bool IncludeDescendants)
 	}
 }
 
-void CUI::ClosePopupMenus()
+void CUi::ClosePopupMenus()
 {
 	if(m_vPopupMenus.empty())
 		return;
@@ -1477,49 +1477,49 @@ void CUI::ClosePopupMenus()
 		m_pfnPopupMenuClosedCallback();
 }
 
-bool CUI::IsPopupOpen() const
+bool CUi::IsPopupOpen() const
 {
 	return !m_vPopupMenus.empty();
 }
 
-bool CUI::IsPopupOpen(const SPopupMenuId *pID) const
+bool CUi::IsPopupOpen(const SPopupMenuId *pId) const
 {
-	return std::any_of(m_vPopupMenus.begin(), m_vPopupMenus.end(), [pID](const SPopupMenu PopupMenu) { return PopupMenu.m_pID == pID; });
+	return std::any_of(m_vPopupMenus.begin(), m_vPopupMenus.end(), [pId](const SPopupMenu PopupMenu) { return PopupMenu.m_pId == pId; });
 }
 
-bool CUI::IsPopupHovered() const
+bool CUi::IsPopupHovered() const
 {
 	return std::any_of(m_vPopupMenus.begin(), m_vPopupMenus.end(), [this](const SPopupMenu PopupMenu) { return MouseHovered(&PopupMenu.m_Rect); });
 }
 
-void CUI::SetPopupMenuClosedCallback(FPopupMenuClosedCallback pfnCallback)
+void CUi::SetPopupMenuClosedCallback(FPopupMenuClosedCallback pfnCallback)
 {
 	m_pfnPopupMenuClosedCallback = std::move(pfnCallback);
 }
 
-void CUI::SMessagePopupContext::DefaultColor(ITextRender *pTextRender)
+void CUi::SMessagePopupContext::DefaultColor(ITextRender *pTextRender)
 {
 	m_TextColor = pTextRender->DefaultTextColor();
 }
 
-void CUI::SMessagePopupContext::ErrorColor()
+void CUi::SMessagePopupContext::ErrorColor()
 {
 	m_TextColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
-CUI::EPopupMenuFunctionResult CUI::PopupMessage(void *pContext, CUIRect View, bool Active)
+CUi::EPopupMenuFunctionResult CUi::PopupMessage(void *pContext, CUIRect View, bool Active)
 {
 	SMessagePopupContext *pMessagePopup = static_cast<SMessagePopupContext *>(pContext);
-	CUI *pUI = pMessagePopup->m_pUI;
+	CUi *pUI = pMessagePopup->m_pUI;
 
 	pUI->TextRender()->TextColor(pMessagePopup->m_TextColor);
 	pUI->TextRender()->Text(View.x, View.y, SMessagePopupContext::POPUP_FONT_SIZE, pMessagePopup->m_aMessage, View.w);
 	pUI->TextRender()->TextColor(pUI->TextRender()->DefaultTextColor());
 
-	return (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)) ? CUI::POPUP_CLOSE_CURRENT : CUI::POPUP_KEEP_OPEN;
+	return (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)) ? CUi::POPUP_CLOSE_CURRENT : CUi::POPUP_KEEP_OPEN;
 }
 
-void CUI::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
+void CUi::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
 {
 	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SMessagePopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
@@ -1530,23 +1530,23 @@ void CUI::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
 	DoPopupMenu(pContext, X, Y, TextWidth + 10.0f, TextHeight + 10.0f, pContext, PopupMessage);
 }
 
-CUI::SConfirmPopupContext::SConfirmPopupContext()
+CUi::SConfirmPopupContext::SConfirmPopupContext()
 {
 	Reset();
 }
 
-void CUI::SConfirmPopupContext::Reset()
+void CUi::SConfirmPopupContext::Reset()
 {
 	m_Result = SConfirmPopupContext::UNSET;
 }
 
-void CUI::SConfirmPopupContext::YesNoButtons()
+void CUi::SConfirmPopupContext::YesNoButtons()
 {
 	str_copy(m_aPositiveButtonLabel, Localize("Yes"));
 	str_copy(m_aNegativeButtonLabel, Localize("No"));
 }
 
-void CUI::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
+void CUi::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
 {
 	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SConfirmPopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
@@ -1559,10 +1559,10 @@ void CUI::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
 	DoPopupMenu(pContext, X, Y, TextWidth + 10.0f, PopupHeight, pContext, PopupConfirm);
 }
 
-CUI::EPopupMenuFunctionResult CUI::PopupConfirm(void *pContext, CUIRect View, bool Active)
+CUi::EPopupMenuFunctionResult CUi::PopupConfirm(void *pContext, CUIRect View, bool Active)
 {
 	SConfirmPopupContext *pConfirmPopup = static_cast<SConfirmPopupContext *>(pContext);
-	CUI *pUI = pConfirmPopup->m_pUI;
+	CUi *pUI = pConfirmPopup->m_pUI;
 
 	CUIRect Label, ButtonBar, CancelButton, ConfirmButton;
 	View.HSplitBottom(SConfirmPopupContext::POPUP_BUTTON_HEIGHT, &Label, &ButtonBar);
@@ -1573,24 +1573,24 @@ CUI::EPopupMenuFunctionResult CUI::PopupConfirm(void *pContext, CUIRect View, bo
 	if(pUI->DoButton_PopupMenu(&pConfirmPopup->m_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTALIGN_MC))
 	{
 		pConfirmPopup->m_Result = SConfirmPopupContext::CANCELED;
-		return CUI::POPUP_CLOSE_CURRENT;
+		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
 	if(pUI->DoButton_PopupMenu(&pConfirmPopup->m_ConfirmButton, pConfirmPopup->m_aPositiveButtonLabel, &ConfirmButton, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTALIGN_MC) || (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)))
 	{
 		pConfirmPopup->m_Result = SConfirmPopupContext::CONFIRMED;
-		return CUI::POPUP_CLOSE_CURRENT;
+		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
-	return CUI::POPUP_KEEP_OPEN;
+	return CUi::POPUP_KEEP_OPEN;
 }
 
-CUI::SSelectionPopupContext::SSelectionPopupContext()
+CUi::SSelectionPopupContext::SSelectionPopupContext()
 {
 	Reset();
 }
 
-void CUI::SSelectionPopupContext::Reset()
+void CUi::SSelectionPopupContext::Reset()
 {
 	m_Props = SPopupMenuProperties();
 	m_aMessage[0] = '\0';
@@ -1607,10 +1607,10 @@ void CUI::SSelectionPopupContext::Reset()
 	m_TransparentButtons = false;
 }
 
-CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, bool Active)
+CUi::EPopupMenuFunctionResult CUi::PopupSelection(void *pContext, CUIRect View, bool Active)
 {
 	SSelectionPopupContext *pSelectionPopup = static_cast<SSelectionPopupContext *>(pContext);
-	CUI *pUI = pSelectionPopup->m_pUI;
+	CUi *pUI = pSelectionPopup->m_pUI;
 	CScrollRegion *pScrollRegion = pSelectionPopup->m_pScrollRegion;
 
 	vec2 ScrollOffset(0.0f, 0.0f);
@@ -1654,10 +1654,10 @@ CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, 
 
 	pScrollRegion->End();
 
-	return pSelectionPopup->m_pSelection == nullptr ? CUI::POPUP_KEEP_OPEN : CUI::POPUP_CLOSE_CURRENT;
+	return pSelectionPopup->m_pSelection == nullptr ? CUi::POPUP_KEEP_OPEN : CUi::POPUP_CLOSE_CURRENT;
 }
 
-void CUI::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
+void CUi::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
 {
 	const STextBoundingBox TextBoundingBox = TextRender()->TextBoundingBox(pContext->m_FontSize, pContext->m_aMessage, -1, pContext->m_Width);
 	const float PopupHeight = minimum((pContext->m_aMessage[0] == '\0' ? -pContext->m_EntrySpacing : TextBoundingBox.m_H) + pContext->m_vEntries.size() * (pContext->m_EntryHeight + pContext->m_EntrySpacing) + (SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN) * 2 + CScrollRegion::HEIGHT_MAGIC_FIX, Screen()->h * 0.4f);
@@ -1686,7 +1686,7 @@ void CUI::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
 	DoPopupMenu(pContext, X, Y, pContext->m_Width, PopupHeight, pContext, PopupSelection, pContext->m_Props);
 }
 
-int CUI::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Num, SDropDownState &State)
+int CUi::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Num, SDropDownState &State)
 {
 	if(!State.m_Init)
 	{
@@ -1713,7 +1713,7 @@ int CUI::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Nu
 			State.m_SelectionPopupContext.m_vEntries.emplace_back(pStrs[i]);
 		State.m_SelectionPopupContext.m_EntryHeight = pRect->h;
 		State.m_SelectionPopupContext.m_EntryPadding = pRect->h >= 20.0f ? 2.0f : 1.0f;
-		State.m_SelectionPopupContext.m_FontSize = (State.m_SelectionPopupContext.m_EntryHeight - 2 * State.m_SelectionPopupContext.m_EntryPadding) * CUI::ms_FontmodHeight;
+		State.m_SelectionPopupContext.m_FontSize = (State.m_SelectionPopupContext.m_EntryHeight - 2 * State.m_SelectionPopupContext.m_EntryPadding) * CUi::ms_FontmodHeight;
 		State.m_SelectionPopupContext.m_Width = pRect->w;
 		State.m_SelectionPopupContext.m_AlignmentHeight = pRect->h;
 		State.m_SelectionPopupContext.m_TransparentButtons = true;
@@ -1730,10 +1730,10 @@ int CUI::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Nu
 	return CurSelection;
 }
 
-CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View, bool Active)
+CUi::EPopupMenuFunctionResult CUi::PopupColorPicker(void *pContext, CUIRect View, bool Active)
 {
 	SColorPickerPopupContext *pColorPicker = static_cast<SColorPickerPopupContext *>(pContext);
-	CUI *pUI = pColorPicker->m_pUI;
+	CUi *pUI = pColorPicker->m_pUI;
 	pColorPicker->m_State = EEditState::NONE;
 
 	CUIRect ColorsArea, HueArea, BottomArea, ModeButtonArea, HueRect, SatRect, ValueRect, HexRect, AlphaRect;
@@ -2001,10 +2001,10 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 		}
 	}
 
-	return CUI::POPUP_KEEP_OPEN;
+	return CUi::POPUP_KEEP_OPEN;
 }
 
-void CUI::ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pContext)
+void CUi::ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pContext)
 {
 	pContext->m_pUI = this;
 	if(pContext->m_ColorMode == SColorPickerPopupContext::MODE_UNSET)

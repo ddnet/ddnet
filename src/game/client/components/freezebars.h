@@ -4,9 +4,9 @@
 
 class CFreezeBars : public CComponent
 {
-	void RenderFreezeBar(const int ClientID);
+	void RenderFreezeBar(const int ClientId);
 	void RenderFreezeBarPos(float x, const float y, const float width, const float height, float Progress, float Alpha = 1.0f);
-	bool IsPlayerInfoAvailable(int ClientID) const;
+	bool IsPlayerInfoAvailable(int ClientId) const;
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }

@@ -53,7 +53,7 @@ bool CEmoticon::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	if(!m_Active)
 		return false;
 
-	UI()->ConvertMouseMove(&x, &y, CursorType);
+	Ui()->ConvertMouseMove(&x, &y, CursorType);
 	m_SelectorMouse += vec2(x, y);
 	return true;
 }
@@ -93,9 +93,9 @@ void CEmoticon::OnRender()
 	else if(length(m_SelectorMouse) > 40.0f)
 		m_SelectedEyeEmote = (int)(SelectedAngle / (2 * pi) * NUM_EMOTES);
 
-	CUIRect Screen = *UI()->Screen();
+	CUIRect Screen = *Ui()->Screen();
 
-	UI()->MapScreen();
+	Ui()->MapScreen();
 
 	Graphics()->BlendNormal();
 
@@ -135,7 +135,7 @@ void CEmoticon::OnRender()
 		Graphics()->DrawCircle(Screen.w / 2, Screen.h / 2, 100.0f, 64);
 		Graphics()->QuadsEnd();
 
-		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[m_pClient->m_aLocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
+		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[m_pClient->m_aLocalIds[g_Config.m_ClDummy]].m_RenderInfo;
 
 		for(int i = 0; i < NUM_EMOTES; i++)
 		{

@@ -29,7 +29,7 @@ private:
 	CGameWorld *m_pGameWorld;
 	CCollision *m_pCCollision;
 
-	int m_ID;
+	int m_Id;
 	int m_ObjType;
 
 	/*
@@ -50,7 +50,7 @@ public: // TODO: Maybe make protected
 	vec2 m_Pos;
 
 	/* Getters */
-	int GetID() const { return m_ID; }
+	int GetId() const { return m_Id; }
 
 	/* Constructor */
 	CEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos = vec2(0, 0), int ProximityRadius = 0);
@@ -133,14 +133,14 @@ public: // TODO: Maybe make protected
 	virtual void SwapClients(int Client1, int Client2) {}
 
 	/*
-		Function GetOwnerID
+		Function GetOwnerId
 		Returns:
-			ClientID of the initiator from this entity. -1 created by map.
+			ClientId of the initiator from this entity. -1 created by map.
 			This is used by save/load to remove related entities to the tee.
 			CCharacter should not return the PlayerId, because they get
 			handled separately in save/load code.
 	*/
-	virtual int GetOwnerID() const { return -1; }
+	virtual int GetOwnerId() const { return -1; }
 
 	/*
 		Function: NetworkClipped

@@ -21,13 +21,13 @@ public:
 	void DeleteShader();
 
 	bool IsLoaded() const;
-	TWGLuint GetShaderID() const;
+	TWGLuint GetShaderId() const;
 
 	CGLSL();
 	virtual ~CGLSL();
 
 private:
-	TWGLuint m_ShaderID;
+	TWGLuint m_ShaderId;
 	int m_Type;
 	bool m_IsLoaded;
 };

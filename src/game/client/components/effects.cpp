@@ -190,11 +190,11 @@ void CEffects::PlayerSpawn(vec2 Pos, float Alpha)
 		m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SPAWN, 1.0f, Pos);
 }
 
-void CEffects::PlayerDeath(vec2 Pos, int ClientID, float Alpha)
+void CEffects::PlayerDeath(vec2 Pos, int ClientId, float Alpha)
 {
 	ColorRGBA BloodColor(1.0f, 1.0f, 1.0f);
 
-	if(ClientID >= 0)
+	if(ClientId >= 0)
 	{
 		// Use m_RenderInfo.m_CustomColoredSkin instead of m_UseCustomColor
 		// m_UseCustomColor says if the player's skin has a custom color (value sent from the client side)
@@ -202,11 +202,11 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID, float Alpha)
 		// m_RenderInfo.m_CustomColoredSkin Defines if in the context of the game the color is being customized,
 		// Using this value if the game is teams (red and blue), this value will be true even if the skin is with the normal color.
 		// And will use the team body color to create player death effect instead of tee color
-		if(m_pClient->m_aClients[ClientID].m_RenderInfo.m_CustomColoredSkin)
-			BloodColor = m_pClient->m_aClients[ClientID].m_RenderInfo.m_ColorBody;
+		if(m_pClient->m_aClients[ClientId].m_RenderInfo.m_CustomColoredSkin)
+			BloodColor = m_pClient->m_aClients[ClientId].m_RenderInfo.m_ColorBody;
 		else
 		{
-			BloodColor = m_pClient->m_aClients[ClientID].m_RenderInfo.m_BloodColor;
+			BloodColor = m_pClient->m_aClients[ClientId].m_RenderInfo.m_BloodColor;
 		}
 	}
 

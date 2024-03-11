@@ -211,17 +211,17 @@ protected:
 		}
 		m_TH.Finish();
 	}
-	void DeadPlayer(int ClientID)
+	void DeadPlayer(int ClientId)
 	{
-		m_TH.RecordDeadPlayer(ClientID);
+		m_TH.RecordDeadPlayer(ClientId);
 	}
-	void Player(int ClientID, int x, int y)
+	void Player(int ClientId, int x, int y)
 	{
 		CNetObj_CharacterCore Char;
 		mem_zero(&Char, sizeof(Char));
 		Char.m_X = x;
 		Char.m_Y = y;
-		m_TH.RecordPlayer(ClientID, &Char);
+		m_TH.RecordPlayer(ClientId, &Char);
 	}
 };
 
@@ -264,7 +264,7 @@ TEST_F(TeeHistorian, TickImplicitTwoTicks)
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
 
-TEST_F(TeeHistorian, TickImplicitDescendingClientID)
+TEST_F(TeeHistorian, TickImplicitDescendingClientId)
 {
 	const unsigned char EXPECTED[] = {
 		0x42, 0x01, 0x02, 0x03, // PLAYER_NEW cid=1 x=2 y=3
@@ -281,7 +281,7 @@ TEST_F(TeeHistorian, TickImplicitDescendingClientID)
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
 
-TEST_F(TeeHistorian, TickExplicitAscendingClientID)
+TEST_F(TeeHistorian, TickExplicitAscendingClientId)
 {
 	const unsigned char EXPECTED[] = {
 		0x42, 0x00, 0x04, 0x05, // PLAYER_NEW cid=0 x=4 y=5
@@ -388,10 +388,10 @@ TEST_F(TeeHistorian, DDNetVersion)
 		0x01, 0x92, 0xcb, 0x01,
 		0x40, // FINISH
 	};
-	CUuid ConnectionID = {
+	CUuid ConnectionId = {
 		0xfb, 0x13, 0xa5, 0x76, 0xd3, 0x5f, 0x48, 0x93,
 		0xb8, 0x15, 0xee, 0xdc, 0x6d, 0x98, 0x01, 0x5b};
-	m_TH.RecordDDNetVersion(0, ConnectionID, 13010, "DDNet 13.1 (3623f5e4cd184556)");
+	m_TH.RecordDDNetVersion(0, ConnectionId, 13010, "DDNet 13.1 (3623f5e4cd184556)");
 	m_TH.RecordDDNetVersionOld(1, 13010);
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
@@ -482,16 +482,16 @@ TEST_F(TeeHistorian, Input)
 		0x41, 0x00,
 		// new player -> InputNew
 		0x45,
-		0x00, // ClientID 0
+		0x00, // ClientId 0
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
 		// same unique id, same input -> nothing
 		// same unique id, different input -> InputDiff
 		0x44,
-		0x00, // ClientID 0
+		0x00, // ClientId 0
 		0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		// different unique id, same input -> InputNew
 		0x45,
-		0x00, // ClientID 0
+		0x00, // ClientId 0
 		0x00, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
 		// FINISH
 		0x40};
@@ -533,11 +533,11 @@ TEST_F(TeeHistorian, SaveSuccess)
 		// FINISH
 		0x40};
 
-	CUuid SaveID = {
+	CUuid SaveId = {
 		0xfb, 0x13, 0xa5, 0x76, 0xd3, 0x5f, 0x48, 0x93,
 		0xb8, 0x15, 0xee, 0xdc, 0x6d, 0x98, 0x01, 0x5b};
 	const char *pTeamSave = "2\tH.\nll0";
-	m_TH.RecordTeamSaveSuccess(21, SaveID, pTeamSave);
+	m_TH.RecordTeamSaveSuccess(21, SaveId, pTeamSave);
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
@@ -577,11 +577,11 @@ TEST_F(TeeHistorian, LoadSuccess)
 		// FINISH
 		0x40};
 
-	CUuid SaveID = {
+	CUuid SaveId = {
 		0xfb, 0x13, 0xa5, 0x76, 0xd3, 0x5f, 0x48, 0x93,
 		0xb8, 0x15, 0xee, 0xdc, 0x6d, 0x98, 0x01, 0x5b};
 	const char *pTeamSave = "2\tH.\nll0";
-	m_TH.RecordTeamLoadSuccess(21, SaveID, pTeamSave);
+	m_TH.RecordTeamLoadSuccess(21, SaveId, pTeamSave);
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
 }

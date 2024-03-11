@@ -56,7 +56,7 @@ void SIntConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUser
 		}
 
 		*pData->m_pVariable = Value;
-		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
+		if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
 			pData->m_OldValue = Value;
 	}
 	else
@@ -121,7 +121,7 @@ void SColorConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUs
 		const unsigned Value = Color.Pack(pData->m_Light ? 0.5f : 0.0f, pData->m_Alpha);
 
 		*pData->m_pVariable = Value;
-		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
+		if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
 			pData->m_OldValue = Value;
 	}
 	else
@@ -230,7 +230,7 @@ void SStringConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pU
 		else
 			str_copy(pData->m_pStr, pString, pData->m_MaxSize);
 
-		if(pResult->m_ClientID != IConsole::CLIENT_ID_GAME)
+		if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
 			str_copy(pData->m_pOldValue, pData->m_pStr, pData->m_MaxSize);
 	}
 	else

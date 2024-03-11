@@ -81,7 +81,7 @@ void CEventHandler::EventToSixup(int *pType, int *pSize, const char **ppData)
 		pEvent7->m_X = pEvent->m_X;
 		pEvent7->m_Y = pEvent->m_Y;
 
-		pEvent7->m_ClientID = 0;
+		pEvent7->m_ClientId = 0;
 		pEvent7->m_Angle = 0;
 
 		// This will need some work, perhaps an event wrapper for damageind,
@@ -102,7 +102,7 @@ void CEventHandler::EventToSixup(int *pType, int *pSize, const char **ppData)
 		*pType = -protocol7::NETEVENTTYPE_SOUNDWORLD;
 		*pSize = sizeof(*pEvent7);
 
-		pEvent7->m_SoundID = pEvent->m_SoundID;
+		pEvent7->m_SoundId = pEvent->m_SoundId;
 		pEvent7->m_X = pEvent->m_X;
 		pEvent7->m_Y = pEvent->m_Y;
 

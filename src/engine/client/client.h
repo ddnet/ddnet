@@ -91,7 +91,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	char m_aConnectAddressStr[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE] = "";
 
-	CUuid m_ConnectionID = UUID_ZEROED;
+	CUuid m_ConnectionId = UUID_ZEROED;
 
 	bool m_HaveGlobalTcpAddr = false;
 	NETADDR m_GlobalTcpAddr = NETADDR_ZEROED;
@@ -323,10 +323,10 @@ public:
 	// ---
 
 	int GetPredictionTime() override;
-	void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const override;
-	int SnapItemSize(int SnapID, int Index) const override;
-	const void *SnapFindItem(int SnapID, int Type, int ID) const override;
-	int SnapNumItems(int SnapID) const override;
+	void *SnapGetItem(int SnapId, int Index, CSnapItem *pItem) const override;
+	int SnapItemSize(int SnapId, int Index) const override;
+	const void *SnapFindItem(int SnapId, int Type, int Id) const override;
+	int SnapNumItems(int SnapId) const override;
 	void SnapSetStaticsize(int ItemType, int Size) override;
 
 	void Render();
@@ -506,7 +506,7 @@ public:
 #endif
 
 	void ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type = MESSAGE_BOX_TYPE_ERROR) override;
-	void GetGPUInfoString(char (&aGPUInfo)[256]) override;
+	void GetGpuInfoString(char (&aGpuInfo)[256]) override;
 	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 };
 

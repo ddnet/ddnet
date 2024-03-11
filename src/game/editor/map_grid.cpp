@@ -26,7 +26,7 @@ void CMapGrid::OnRender(CUIRect View)
 		float aGroupPoints[4];
 		pGroup->Mapping(aGroupPoints);
 
-		const CUIRect *pScreen = UI()->Screen();
+		const CUIRect *pScreen = Ui()->Screen();
 
 		int LineDistance = GridLineDistance();
 
@@ -110,10 +110,10 @@ void CMapGrid::SetFactor(int Factor)
 
 void CMapGrid::DoSettingsPopup(vec2 Position)
 {
-	UI()->DoPopupMenu(&m_PopupGridSettingsId, Position.x, Position.y, 120.0f, 37.0f, this, PopupGridSettings);
+	Ui()->DoPopupMenu(&m_PopupGridSettingsId, Position.x, Position.y, 120.0f, 37.0f, this, PopupGridSettings);
 }
 
-CUI::EPopupMenuFunctionResult CMapGrid::PopupGridSettings(void *pContext, CUIRect View, bool Active)
+CUi::EPopupMenuFunctionResult CMapGrid::PopupGridSettings(void *pContext, CUIRect View, bool Active)
 {
 	CMapGrid *pMapGrid = static_cast<CMapGrid *>(pContext);
 
@@ -145,5 +145,5 @@ CUI::EPopupMenuFunctionResult CMapGrid::PopupGridSettings(void *pContext, CUIRec
 		pMapGrid->SetFactor(1);
 	}
 
-	return CUI::POPUP_KEEP_OPEN;
+	return CUi::POPUP_KEEP_OPEN;
 }

@@ -25,7 +25,7 @@ int CSaveTeam::FromString(const char *)
 	return 1;
 }
 
-bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen) const
+bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientId, int NumPlayer, char *pMessage, int MessageLen) const
 {
 	// Dummy implementation for testing
 	return false;
@@ -98,7 +98,7 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		str_copy(ScoreData.m_aMap, "Kobra 3", sizeof(ScoreData.m_aMap));
 		str_copy(ScoreData.m_aGameUuid, "8d300ecf-5873-4297-bee5-95668fdff320", sizeof(ScoreData.m_aGameUuid));
 		str_copy(ScoreData.m_aName, "nameless tee", sizeof(ScoreData.m_aName));
-		ScoreData.m_ClientID = 0;
+		ScoreData.m_ClientId = 0;
 		ScoreData.m_Time = Time;
 		str_copy(ScoreData.m_aTimestamp, "2021-11-24 19:24:08", sizeof(ScoreData.m_aTimestamp));
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
@@ -542,7 +542,7 @@ TEST_P(RandomMap, NoStars)
 {
 	m_RandomMapRequest.m_Stars = -1;
 	ASSERT_FALSE(CScoreWorker::RandomMap(m_pConn, &m_RandomMapRequest, m_aError, sizeof(m_aError))) << m_aError;
-	EXPECT_EQ(m_pRandomMapResult->m_ClientID, 0);
+	EXPECT_EQ(m_pRandomMapResult->m_ClientId, 0);
 	EXPECT_STREQ(m_pRandomMapResult->m_aMap, "Kobra 3");
 	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "");
 }
@@ -551,7 +551,7 @@ TEST_P(RandomMap, StarsExists)
 {
 	m_RandomMapRequest.m_Stars = 5;
 	ASSERT_FALSE(CScoreWorker::RandomMap(m_pConn, &m_RandomMapRequest, m_aError, sizeof(m_aError))) << m_aError;
-	EXPECT_EQ(m_pRandomMapResult->m_ClientID, 0);
+	EXPECT_EQ(m_pRandomMapResult->m_ClientId, 0);
 	EXPECT_STREQ(m_pRandomMapResult->m_aMap, "Kobra 3");
 	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "");
 }
@@ -560,7 +560,7 @@ TEST_P(RandomMap, StarsDoesntExist)
 {
 	m_RandomMapRequest.m_Stars = 3;
 	ASSERT_FALSE(CScoreWorker::RandomMap(m_pConn, &m_RandomMapRequest, m_aError, sizeof(m_aError))) << m_aError;
-	EXPECT_EQ(m_pRandomMapResult->m_ClientID, 0);
+	EXPECT_EQ(m_pRandomMapResult->m_ClientId, 0);
 	EXPECT_STREQ(m_pRandomMapResult->m_aMap, "");
 	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "No maps found on this server!");
 }
@@ -569,7 +569,7 @@ TEST_P(RandomMap, UnfinishedExists)
 {
 	m_RandomMapRequest.m_Stars = -1;
 	ASSERT_FALSE(CScoreWorker::RandomUnfinishedMap(m_pConn, &m_RandomMapRequest, m_aError, sizeof(m_aError))) << m_aError;
-	EXPECT_EQ(m_pRandomMapResult->m_ClientID, 0);
+	EXPECT_EQ(m_pRandomMapResult->m_ClientId, 0);
 	EXPECT_STREQ(m_pRandomMapResult->m_aMap, "Kobra 3");
 	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "");
 }
@@ -578,7 +578,7 @@ TEST_P(RandomMap, UnfinishedDoesntExist)
 {
 	InsertRank();
 	ASSERT_FALSE(CScoreWorker::RandomUnfinishedMap(m_pConn, &m_RandomMapRequest, m_aError, sizeof(m_aError))) << m_aError;
-	EXPECT_EQ(m_pRandomMapResult->m_ClientID, 0);
+	EXPECT_EQ(m_pRandomMapResult->m_ClientId, 0);
 	EXPECT_STREQ(m_pRandomMapResult->m_aMap, "");
 	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "You have no more unfinished maps on this server!");
 }
