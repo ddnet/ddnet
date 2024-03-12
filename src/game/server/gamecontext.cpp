@@ -32,6 +32,8 @@
 #include "gamemodes/DDRace.h"
 #include "gamemodes/gctf.h"
 #include "gamemodes/ictf.h"
+#include "gamemodes/gdm.h"
+#include "gamemodes/idm.h"
 #include "gamemodes/mod.h"
 #include "gamemodes/solofng.h"
 #include "gamemodes/zcatch.h"
@@ -3821,6 +3823,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerSoloFng(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "zcatch"))
 		m_pController = new CGameControllerZcatch(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "gdm"))
+		m_pController = new CGameControllerGDM(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "idm"))
+		m_pController = new CGameControllerIDM(this);
 	else
 	{
 		if(str_comp_nocase(Config()->m_SvGametype, "ddnet"))

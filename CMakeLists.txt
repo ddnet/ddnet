@@ -2577,6 +2577,12 @@ if(SERVER)
     gamemodes/gctf.h
     gamemodes/ictf.cpp
     gamemodes/ictf.h
+    gamemodes/dm.cpp
+    gamemodes/dm.h
+    gamemodes/gdm.cpp
+    gamemodes/gdm.h
+    gamemodes/idm.cpp
+    gamemodes/idm.h
     gamemodes/instagib/bangcommands.cpp
     gamemodes/instagib/character.cpp
     gamemodes/instagib/character.h
