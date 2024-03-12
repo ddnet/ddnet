@@ -2581,6 +2581,12 @@ if(SERVER)
     gamemodes/dm.h
     gamemodes/gdm.cpp
     gamemodes/gdm.h
+    gamemodes/tdm.cpp
+    gamemodes/tdm.h
+    gamemodes/gtdm.cpp
+    gamemodes/gtdm.h
+    gamemodes/itdm.cpp
+    gamemodes/itdm.h
     gamemodes/idm.cpp
     gamemodes/idm.h
     gamemodes/instagib/bangcommands.cpp

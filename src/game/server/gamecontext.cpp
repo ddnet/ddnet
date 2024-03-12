@@ -34,6 +34,8 @@
 #include "gamemodes/ictf.h"
 #include "gamemodes/gdm.h"
 #include "gamemodes/idm.h"
+#include "gamemodes/gtdm.h"
+#include "gamemodes/itdm.h"
 #include "gamemodes/mod.h"
 #include "gamemodes/solofng.h"
 #include "gamemodes/zcatch.h"
@@ -3827,6 +3829,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerGDM(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "idm"))
 		m_pController = new CGameControllerIDM(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "gtdm"))
+		m_pController = new CGameControllerGTDM(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "itdm"))
+		m_pController = new CGameControllerITDM(this);
 	else
 	{
 		if(str_comp_nocase(Config()->m_SvGametype, "ddnet"))
