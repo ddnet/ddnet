@@ -804,7 +804,7 @@ bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 		SetHotItem(pLineInput);
 
 	if(Enabled() && Active && !JustGotActive)
-		pLineInput->Activate(EInputPriority::Ui);
+		pLineInput->Activate(EInputPriority::UI);
 	else
 		pLineInput->Deactivate();
 
