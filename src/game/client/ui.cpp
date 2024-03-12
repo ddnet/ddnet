@@ -113,11 +113,6 @@ CUi::CUi()
 {
 	m_Enabled = true;
 
-	m_pHotItem = nullptr;
-	m_pActiveItem = nullptr;
-	m_pLastActiveItem = nullptr;
-	m_pBecomingHotItem = nullptr;
-
 	m_MouseX = 0;
 	m_MouseY = 0;
 	m_MouseWorldX = 0;
@@ -220,6 +215,8 @@ void CUi::Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDelta
 	if(m_pActiveItem)
 		m_pHotItem = m_pActiveItem;
 	m_pBecomingHotItem = nullptr;
+	m_pHotScrollRegion = m_pBecomingHotScrollRegion;
+	m_pBecomingHotScrollRegion = nullptr;
 
 	if(Enabled())
 	{
@@ -231,6 +228,7 @@ void CUi::Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDelta
 	{
 		m_pHotItem = nullptr;
 		m_pActiveItem = nullptr;
+		m_pHotScrollRegion = nullptr;
 	}
 }
 
@@ -1416,7 +1414,10 @@ void CUi::RenderPopupMenus()
 		const bool Active = i == m_vPopupMenus.size() - 1;
 
 		if(Active)
+		{
+			// Prevent UI elements below the popup menu from being activated.
 			SetHotItem(pId);
+		}
 
 		if(CheckActiveItem(pId))
 		{
@@ -1435,6 +1436,12 @@ void CUi::RenderPopupMenus()
 		{
 			if(MouseButton(0))
 				SetActiveItem(pId);
+		}
+
+		if(Inside)
+		{
+			// Prevent scroll regions directly behind popup menus from using the mouse scroll events.
+			SetHotScrollRegion(nullptr);
 		}
 
 		CUIRect PopupRect = PopupMenu.m_Rect;

@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+class CScrollRegion;
 class IClient;
 class IGraphics;
 class IKernel;
@@ -322,10 +323,12 @@ public:
 private:
 	bool m_Enabled;
 
-	const void *m_pHotItem;
-	const void *m_pActiveItem;
-	const void *m_pLastActiveItem; // only used internally to track active CLineInput
-	const void *m_pBecomingHotItem;
+	const void *m_pHotItem = nullptr;
+	const void *m_pActiveItem = nullptr;
+	const void *m_pLastActiveItem = nullptr; // only used internally to track active CLineInput
+	const void *m_pBecomingHotItem = nullptr;
+	const CScrollRegion *m_pHotScrollRegion = nullptr;
+	const CScrollRegion *m_pBecomingHotScrollRegion = nullptr;
 	bool m_ActiveItemValid = false;
 
 	vec2 m_UpdatedMousePos = vec2(0.0f, 0.0f);
@@ -464,9 +467,11 @@ public:
 		}
 		return false;
 	}
+	void SetHotScrollRegion(const CScrollRegion *pId) { m_pBecomingHotScrollRegion = pId; }
 	const void *HotItem() const { return m_pHotItem; }
 	const void *NextHotItem() const { return m_pBecomingHotItem; }
 	const void *ActiveItem() const { return m_pActiveItem; }
+	const CScrollRegion *HotScrollRegion() const { return m_pHotScrollRegion; }
 
 	void StartCheck() { m_ActiveItemValid = false; }
 	void FinishCheck()
@@ -629,7 +634,7 @@ public:
 	struct SSelectionPopupContext : public SPopupMenuId
 	{
 		CUi *m_pUI; // set by CUi when popup is shown
-		class CScrollRegion *m_pScrollRegion;
+		CScrollRegion *m_pScrollRegion;
 		SPopupMenuProperties m_Props;
 		char m_aMessage[256];
 		std::vector<std::string> m_vEntries;
