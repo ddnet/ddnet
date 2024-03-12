@@ -15,7 +15,7 @@
 enum class EInputPriority
 {
 	NONE = 0,
-	Ui,
+	UI,
 	CHAT,
 	CONSOLE,
 };

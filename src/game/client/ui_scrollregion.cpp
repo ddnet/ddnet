@@ -79,7 +79,7 @@ void CScrollRegion::End()
 	CUIRect RegionRect = m_ClipRect;
 	RegionRect.w += m_Params.m_ScrollbarWidth;
 
-	if(m_ScrollDirection != SCROLLRELATIVE_NONE || (Ui()->Enabled() && m_Params.m_Active && Ui()->MouseHovered(&RegionRect)))
+	if(m_ScrollDirection != SCROLLRELATIVE_NONE || Ui()->HotScrollRegion() == this)
 	{
 		bool ProgrammaticScroll = false;
 		if(Ui()->ConsumeHotkey(CUi::HOTKEY_SCROLL_UP))
@@ -104,6 +104,11 @@ void CScrollRegion::End()
 			m_ScrollDirection = SCROLLRELATIVE_NONE;
 			m_ScrollSpeedMultiplier = 1.0f;
 		}
+	}
+
+	if(Ui()->Enabled() && Ui()->MouseHovered(&RegionRect))
+	{
+		Ui()->SetHotScrollRegion(this);
 	}
 
 	const float SliderHeight = maximum(m_Params.m_SliderMinHeight, m_ClipRect.h / m_ContentH * m_RailRect.h);
@@ -163,7 +168,6 @@ void CScrollRegion::End()
 			m_SliderGrabPos = Ui()->MouseY() - Slider.y;
 			m_AnimTargetScrollY = m_ScrollY;
 			m_AnimTime = 0.0f;
-			m_Params.m_Active = true;
 		}
 	}
 	else if(InsideRail && Ui()->MouseButtonClicked(0))
@@ -174,7 +178,6 @@ void CScrollRegion::End()
 		m_SliderGrabPos = Slider.h / 2.0f;
 		m_AnimTargetScrollY = m_ScrollY;
 		m_AnimTime = 0.0f;
-		m_Params.m_Active = true;
 	}
 	else if(Ui()->CheckActiveItem(pId) && !Ui()->MouseButton(0))
 	{
@@ -258,4 +261,9 @@ bool CScrollRegion::ScrollbarShown() const
 bool CScrollRegion::Animating() const
 {
 	return m_AnimTime > 0.0f;
+}
+
+bool CScrollRegion::Active() const
+{
+	return Ui()->ActiveItem() == &m_ScrollY;
 }
