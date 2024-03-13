@@ -1,15 +1,14 @@
 use arrayvec::ArrayString;
 use arrayvec::ArrayVec;
 use crate::CallbackData;
-use crate::ConnectionEvent;
+use crate::ConnectionEvent as Event;
 use crate::Context as _;
 use crate::Error;
-use crate::Event;
 use crate::PeerIndex;
 use crate::PrivateIdentity;
-use crate::Tw06Addr as Addr;
+use crate::ProtocolEvent;
 use crate::Result;
-use crate::Something;
+use crate::Tw06Addr as Addr;
 use getrandom::getrandom;
 use mio::net::UdpSocket;
 use std::collections::VecDeque;
@@ -36,8 +35,9 @@ impl Protocol {
         cb: &CallbackData,
         packet_buf: &mut [u8; 65536],
         packet_len: usize,
+        buf: &mut [u8],
         from: &SocketAddr,
-    ) -> Result<Option<Something<Connection>>> {
+    ) -> Result<Option<ProtocolEvent>> {
         let (packet_buf, decomp_buf) = {
             let len = packet_buf.len();
             packet_buf.split_at_mut(len - 2048)
@@ -92,6 +92,10 @@ impl Protocol {
                 }
                 _ => return Ok(None),
             }
+            Ok(Packet::Connless(payload)) => {
+                buf[..payload.len()].copy_from_slice(payload);
+                return Ok(Some(ProtocolEvent::ConnlessChunk(Addr(*from).into(), payload.len())));
+            }
             _ => return Ok(None),
         };
 
@@ -99,7 +103,7 @@ impl Protocol {
         let libtw2_cb = &mut Callback { socket: &cb.socket, addr: from, epoch };
         let conn = libtw2_net::Connection::new_accept_token(libtw2_cb, token);
         let conn = Connection::new(conn, epoch, false, *from);
-        Ok(Some(Something::NewConnection(cb.next_peer_index, conn)))
+        Ok(Some(ProtocolEvent::NewConnection(cb.next_peer_index, conn.into())))
     }
     pub fn connect(
         &mut self,
@@ -114,6 +118,20 @@ impl Protocol {
         let cb = &mut Callback { socket: &cb.socket, addr: &addr, epoch };
         conn.connect(cb).context("libtw2_net::Conn::connect")?;
         Ok(Connection::new(conn, epoch, true, addr))
+    }
+    pub fn send_connless_chunk(
+        &mut self,
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
+        addr: Addr,
+        payload: &[u8],
+    ) -> Result<()> {
+        use libtw2_net::protocol::Packet;
+
+        let Addr(addr) = addr;
+        let written = Packet::Connless(payload).write(&mut packet_buf[..]).unwrap();
+        cb.socket.send_to(written, addr).context("UdpSocket::send_to")?;
+        Ok(())
     }
 }
 
@@ -133,6 +151,7 @@ pub struct Connection {
 
 #[derive(Debug)]
 enum BufferedEvent {
+    ConnlessChunk(ArrayVec<[u8; 2048]>),
     Connect,
     /// `Chunk(data, unreliable)`
     Chunk(ArrayVec<[u8; 2048]>, bool),
@@ -173,7 +192,7 @@ impl Connection {
         use self::BufferedEvent::*;
         for event in events {
             let event = match event {
-                ReceiveChunk::Connless(_) => continue,
+                ReceiveChunk::Connless(chunk) => ConnlessChunk(chunk.iter().copied().collect()),
                 ReceiveChunk::Connected(chunk, reliable) => Chunk(chunk.iter().copied().collect(), !reliable),
                 ReceiveChunk::Ready => Connect,
                 ReceiveChunk::Disconnect(reason) => {
@@ -200,19 +219,23 @@ impl Connection {
         _cb: &CallbackData,
         _packet_buf: &mut [u8; 65536],
         buf: &mut [u8],
-    ) -> Result<Option<ConnectionEvent>> {
+    ) -> Result<Option<Event>> {
         use self::BufferedEvent::*;
         Ok(self.buffered_events.pop_front().map(|ev| match ev {
-            Connect => Event::Connect(None).into(),
+            Connect => Event::Connect(Addr(self.addr).into()).into(),
             Chunk(chunk, unreliable) => {
                 buf[..chunk.len()].copy_from_slice(&chunk);
                 Event::Chunk(chunk.len(), unreliable).into()
+            }
+            ConnlessChunk(chunk) => {
+                buf[..chunk.len()].copy_from_slice(&chunk);
+                Event::ConnlessChunk(Addr(self.addr).into(), chunk.len()).into()
             }
             Disconnect(reason, remote) => {
                 buf[..reason.len()].copy_from_slice(reason.as_bytes());
                 Event::Disconnect(reason.len(), remote).into()
             }
-            Delete => ConnectionEvent::Delete,
+            Delete => Event::Delete,
         }))
     }
     pub fn send_chunk(

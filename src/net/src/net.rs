@@ -118,29 +118,35 @@ impl Peer {
 
 #[derive(Clone, Copy)]
 pub enum Event {
-    Connect(Option<Identity>),
-    /// `Chunk(size, unreliable)`
-    Chunk(usize, bool),
+    /// `Connect(pid, peer_addr)`
+    Connect(PeerIndex, Addr),
+    /// `Chunk(pid, size, unreliable)`
+    Chunk(PeerIndex, usize, bool),
     // TODO: distinguish disconnect from error?
-    /// `Disconnect(reason_size, remote)`
-    Disconnect(usize, bool),
+    /// `Disconnect(pid, reason_size, remote)`
+    Disconnect(PeerIndex, usize, bool),
+    /// `ConnlessChunk(from, size)`
+    ConnlessChunk(Addr, usize),
 }
 
 #[derive(Clone, Copy)]
 pub enum ConnectionEvent {
-    Normal(Event),
+    Connect(Addr),
+    /// `Chunk(size, unreliable)`
+    Chunk(usize, bool),
+    /// `ConnlessChunk(from, size)`
+    ConnlessChunk(Addr, usize),
+    // TODO: distinguish disconnect from error?
+    /// `Disconnect(reason_size, remote)`
+    Disconnect(usize, bool),
     /// Asks for the connection object to be destroyed.
     ///
-    /// This event can only be sent after a `Normal(Event::Disconnect)` event.
+    /// This event can only be sent after a `Disconnect` event.
     Delete,
 }
 
-impl From<Event> for ConnectionEvent {
-    fn from(event: Event) -> ConnectionEvent {
-        ConnectionEvent::Normal(event)
-    }
-}
-
+// TODO: make inner content opaque
+#[derive(Clone, Copy)]
 pub enum Addr {
     Quic(QuicAddr),
     Tw06(Tw06Addr),
@@ -154,9 +160,30 @@ impl Addr {
             Tw06(Tw06Addr(socket_addr)) => socket_addr,
         }
     }
+    pub fn identity(&self) -> Option<&Identity> {
+        use self::Addr::*;
+        match self {
+            Quic(QuicAddr(_, identity)) => Some(identity),
+            Tw06(Tw06Addr(_)) => None,
+        }
+    }
 }
 
+impl From<QuicAddr> for Addr {
+    fn from(addr: QuicAddr) -> Addr {
+        Addr::Quic(addr)
+    }
+}
+
+impl From<Tw06Addr> for Addr {
+    fn from(addr: Tw06Addr) -> Addr {
+        Addr::Tw06(addr)
+    }
+}
+
+#[derive(Clone, Copy)]
 pub struct Tw06Addr(pub SocketAddr);
+#[derive(Clone, Copy)]
 pub struct QuicAddr(pub SocketAddr, pub Identity);
 
 fn socket_addr_from_url(url: &Url) -> Result<SocketAddr> {
@@ -249,19 +276,16 @@ impl io::Write for ArcFile {
     // TODO(rust-lang/rust#69941): implement `is_write_vectored`
 }
 
-pub enum Something<C> {
-    NewConnection(PeerIndex, C),
+pub enum ProtocolEvent {
+    NewConnection(PeerIndex, Connection),
     ExistingConnection(PeerIndex),
+    ConnlessChunk(Addr, usize),
 }
 
-impl<C> Something<C> {
-    pub fn into<T: From<C>>(self) -> Something<T> {
-        use self::Something::*;
-        match self {
-            NewConnection(idx, conn) => NewConnection(idx, conn.into()),
-            ExistingConnection(idx) => ExistingConnection(idx),
-        }
-    }
+enum SocketReadEvent {
+    None,
+    ReadablePeer(PeerIndex),
+    ConnlessChunk(Addr, usize),
 }
 
 impl ReadablePeers {
@@ -317,7 +341,7 @@ impl NetBuilder {
                         error!(
                             "error opening SSLKEYLOGFILE {}: {}",
                             Path::new(&sslkeylogfile).display(),
-                            err
+                            err,
                         )
                     })
                     .ok()
@@ -394,7 +418,7 @@ impl Net {
         // TODO: efficiency
         self.peer_addrs.retain(|_, &mut i| i != idx);
     }
-    fn socket_read(&mut self) -> Result<Option<PeerIndex>> {
+    fn socket_read(&mut self, buf: &mut [u8]) -> Result<SocketReadEvent> {
         loop {
             let Some((read, from)) = self.cb.socket.recv_from(&mut self.packet_buf[..16384]).no_block().context("UdpSocket::recv_from")? else { break; };
             let from = normalize(from);
@@ -416,8 +440,16 @@ impl Net {
                 // 11111111:          teeworlds 0.6 connless
 
                 let packet = &self.packet_buf[..read];
-                let something = match (packet.get(0).copied(), packet.get(1).copied()) {
-                    (Some(0b00010000), _) => self.proto_tw06.on_recv(&self.cb, &mut self.packet_buf, read, &from).map(|something| something.map(Something::into))?,
+                let event = match (packet.get(0).copied(), packet.get(1).copied()) {
+                    (Some(0b00010000 | 0b11111111), _) => {
+                        self.proto_tw06.on_recv(
+                            &self.cb,
+                            &mut self.packet_buf,
+                            read,
+                            buf,
+                            &from,
+                        )?
+                    }
                     (Some(p0), Some(p1))
                         if p0 & 0b11000000 == 0b01000000
                             && p1 != 0b01100101 =>
@@ -427,9 +459,9 @@ impl Net {
                                 &self.cb,
                                 &mut self.packet_buf,
                                 read,
+                                buf,
                                 &from,
-                            )
-                            .map(|something| something.map(Something::into))?
+                            )?
                     }
                     (Some(p0), _) if p0 & 0b11110000 == 0b11000000 => {
                         self.proto_quic
@@ -437,25 +469,28 @@ impl Net {
                                 &self.cb,
                                 &mut self.packet_buf,
                                 read,
+                                buf,
                                 &from,
-                            )
-                            .map(|something| something.map(Something::into))?
+                            )?
                     }
                     _ => {
                         error!("unknown packet");
                         continue;
                     }
                 };
-                match something {
-                    Some(Something::NewConnection(idx, conn)) => {
+                match event {
+                    Some(ProtocolEvent::NewConnection(idx, conn)) => {
                         assert!(idx == self.cb.next_peer_index.get_and_increment());
                         assert!(self.peers.insert(idx, Peer::new(conn)).is_none());
                         assert!(self.peer_addrs.insert(from, idx).is_none());
                         idx
                     }
-                    Some(Something::ExistingConnection(idx)) => {
+                    Some(ProtocolEvent::ExistingConnection(idx)) => {
                         assert!(self.peer_addrs.insert(from, idx).is_none());
                         idx
+                    }
+                    Some(ProtocolEvent::ConnlessChunk(addr, size)) => {
+                        return Ok(SocketReadEvent::ConnlessChunk(addr, size));
                     }
                     None => continue,
                 }
@@ -467,9 +502,9 @@ impl Net {
                 read,
                 &from,
             );
-            return Ok(Some(idx));
+            return Ok(SocketReadEvent::ReadablePeer(idx));
         }
-        Ok(None)
+        Ok(SocketReadEvent::None)
     }
     fn wait_impl(&mut self, timeout: Option<Instant>) {
         if !self.connect_errors.is_empty()
@@ -540,17 +575,16 @@ impl Net {
     pub fn recv(
         &mut self,
         buf: &mut [u8],
-    ) -> Result<Option<(PeerIndex, Event)>> {
+    ) -> Result<Option<Event>> {
         assert!(buf.len() >= MAX_FRAME_SIZE as usize);
 
         if let Some((idx, error)) = self.connect_errors.pop_front() {
             let mut remaining = &mut buf[..];
             let _ = write!(remaining, "{}", error);
             let remaining_len = remaining.len();
-            return Ok(Some((
-                idx,
-                Event::Disconnect(buf.len() - remaining_len, true),
-            )));
+            return Ok(Some(
+                Event::Disconnect(idx, buf.len() - remaining_len, true)
+            ));
         }
         let mut did_nothing = true;
         loop {
@@ -562,7 +596,10 @@ impl Net {
                     peer.conn.recv(&self.cb, &mut self.packet_buf, buf).unwrap()
                 {
                     match ev {
-                        ConnectionEvent::Normal(ev) => return Ok(Some((idx, ev))),
+                        ConnectionEvent::Connect(peer_addr) => return Ok(Some(Event::Connect(idx, peer_addr))),
+                        ConnectionEvent::Chunk(size, unreliable) => return Ok(Some(Event::Chunk(idx, size, unreliable))),
+                        ConnectionEvent::ConnlessChunk(peer_addr, size) => return Ok(Some(Event::ConnlessChunk(peer_addr, size))),
+                        ConnectionEvent::Disconnect(reason_size, remote) => return Ok(Some(Event::Disconnect(idx, reason_size, remote))),
                         ConnectionEvent::Delete => {
                             self.remove_peer(idx);
                             assert!(self.readable_peers.pop_front() == Some(idx));
@@ -573,11 +610,15 @@ impl Net {
                 assert!(self.readable_peers.pop_front() == Some(idx));
             }
             if self.socket_readable {
-                if let Some(readable_peer) = self.socket_read()? {
-                    self.readable_peers.push_back(readable_peer);
-                    continue;
-                } else {
-                    self.socket_readable = false;
+                match self.socket_read(buf)? {
+                    SocketReadEvent::ReadablePeer(readable_peer) => {
+                        self.readable_peers.push_back(readable_peer);
+                        continue;
+                    }
+                    SocketReadEvent::ConnlessChunk(peer_addr, size) => {
+                        return Ok(Some(Event::ConnlessChunk(peer_addr, size)));
+                    }
+                    SocketReadEvent::None => self.socket_readable = false,
                 }
                 did_nothing = false;
             }
@@ -647,9 +688,20 @@ impl Net {
         self.readable_peers.push_back(idx);
         Ok(())
     }
+    pub fn send_connless_chunk(&mut self, addr: &str, payload: &[u8]) -> Result<()> {
+        let addr: Addr = match addr.parse() {
+            Err(_) => return Ok(()),
+            Ok(addr) => addr,
+        };
+        use self::Addr::*;
+        match addr {
+            Quic(addr) => self.proto_quic.send_connless_chunk(&self.cb, &mut self.packet_buf, addr, payload),
+            Tw06(addr) => self.proto_tw06.send_connless_chunk(&self.cb, &mut self.packet_buf, addr, payload),
+        }
+    }
 }
 
-enum Connection {
+pub enum Connection {
     Quic(quic::Connection),
     Tw06(tw06::Connection),
 }

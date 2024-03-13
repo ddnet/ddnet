@@ -1,18 +1,17 @@
+use crate::CallbackData;
+use crate::Challenger;
+use crate::ConnectionEvent as Event;
+use crate::Context as _;
+use crate::Identity;
+use crate::MAX_FRAME_SIZE;
+use crate::PeerIndex;
+use crate::PrivateIdentity;
+use crate::ProtocolEvent;
+use crate::QuicAddr as Addr;
+use crate::Result;
 use crate::peek_quic_varint;
 use crate::secure_random;
 use crate::write_quic_varint;
-use crate::CallbackData;
-use crate::Challenger;
-use crate::ConnectionEvent;
-use crate::Context as _;
-use crate::Event;
-use crate::Identity;
-use crate::PeerIndex;
-use crate::PrivateIdentity;
-use crate::QuicAddr as Addr;
-use crate::Result;
-use crate::Something;
-use crate::MAX_FRAME_SIZE;
 use arrayvec::ArrayVec;
 use std::cmp;
 use std::collections::hash_map;
@@ -218,9 +217,9 @@ fn config(
             .is_some()
         },
     );
-    let mut config = quiche::Config::with_boring_ssl_ctx(
+    let mut config = quiche::Config::with_boring_ssl_ctx_builder(
         quiche::PROTOCOL_VERSION,
-        context.build(),
+        context,
     )
     .context("quiche::Config::new")?;
     config.log_keys();
@@ -293,8 +292,9 @@ impl Protocol {
         cb: &CallbackData,
         packet_buf: &mut [u8; 65536],
         packet_len: usize,
+        _buf: &mut [u8],
         from: &SocketAddr,
-    ) -> Result<Option<Something<Connection>>> {
+    ) -> Result<Option<ProtocolEvent>> {
         if let Ok(header) = quiche::Header::from_slice(
             &mut packet_buf[..packet_len],
             ConnectionId::LEN,
@@ -306,7 +306,7 @@ impl Protocol {
                 cb.accept_connections,
             ) {
                 (Some(hash_map::Entry::Occupied(o)), _) => {
-                    return Ok(Some(Something::ExistingConnection(*o.get())))
+                    return Ok(Some(ProtocolEvent::ExistingConnection(*o.get())))
                 }
                 // TODO: test version negotiation
                 // token is always present in Initial packets.
@@ -376,11 +376,12 @@ impl Protocol {
                         conn,
                         cpi,
                         false,
+                        *from,
                         PeerIdentity::AcceptAny,
                     );
                     let idx = cb.next_peer_index;
                     v.insert(idx);
-                    return Ok(Some(Something::NewConnection(idx, conn)));
+                    return Ok(Some(ProtocolEvent::NewConnection(idx, conn.into())));
                 }
                 _ => {}
             };
@@ -413,11 +414,22 @@ impl Protocol {
             conn,
             self.callback_peer_identity.clone(),
             true,
+            sock_addr,
             PeerIdentity::Wanted(peer_identity),
         );
         conn.flush(cb, packet_buf)?;
         assert!(self.connection_ids.insert(cid, idx).is_none());
         Ok(conn)
+    }
+    pub fn send_connless_chunk(
+        &mut self,
+        _cb: &CallbackData,
+        _packet_buf: &mut [u8; 65536],
+        _addr: Addr,
+        _payload: &[u8],
+    ) -> Result<()> {
+        // Quic doesn't support connectionless data.
+        Ok(())
     }
 }
 
@@ -432,6 +444,7 @@ pub struct Connection {
     inner: quiche::Connection,
     callback_peer_identity: Arc<Mutex<Option<PeerIdentity>>>,
     client: bool,
+    peer_addr: SocketAddr,
     peer_identity: PeerIdentity,
     state: State,
     buffer: [u8; 2048],
@@ -443,12 +456,14 @@ impl Connection {
         inner: quiche::Connection,
         callback_peer_identity: Arc<Mutex<Option<PeerIdentity>>>,
         client: bool,
+        peer_addr: SocketAddr,
         peer_identity: PeerIdentity,
     ) -> Connection {
         Connection {
             inner,
             callback_peer_identity,
             client,
+            peer_addr,
             peer_identity,
             state: State::Connecting,
             buffer: [0; 2048],
@@ -533,7 +548,7 @@ impl Connection {
         cb: &CallbackData,
         packet_buf: &mut [u8; 65536],
         buf: &mut [u8],
-    ) -> Result<Option<ConnectionEvent>> {
+    ) -> Result<Option<Event>> {
         assert!(buf.len() >= MAX_FRAME_SIZE as usize);
 
         use self::State::*;
@@ -558,9 +573,10 @@ impl Connection {
                 }
                 if self.state == Online {
                     self.check_connection_params()?;
-                    return Ok(Some(Event::Connect(Some(
+                    return Ok(Some(Event::Connect(Addr(
+                        self.peer_addr,
                         *self.peer_identity.assert_known(),
-                    )).into()));
+                    ).into()).into()));
                 }
             }
             Online => {}
@@ -568,7 +584,7 @@ impl Connection {
                 return Ok(if !self.inner.is_closed() {
                     None
                 } else {
-                    Some(ConnectionEvent::Delete)
+                    Some(Event::Delete)
                 });
             },
         }

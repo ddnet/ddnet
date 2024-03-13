@@ -499,7 +499,7 @@ void CServer::Kick(int ClientID, const char *pReason)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "invalid client id to kick");
 		return;
 	}
-	else if(m_RconClientID == ClientID)
+	else if(m_RconClientID == ClientID && false)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "you can't kick yourself");
 		return;
@@ -1413,6 +1413,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		SendMsg(&Packer, MSGFLAG_VITAL, ClientID);
 	}
 
+	//dbg_msg("server", "sys=%d msgid=%d len=%d", (int)Sys, Msg, pPacket->m_DataSize);
 	if(Sys)
 	{
 		// system message

@@ -1,7 +1,9 @@
 use self::NetInner::*;
+use crate::Addr;
 use crate::Context;
 use crate::Error;
 use crate::Event as EventImpl;
+use crate::Identity;
 use crate::Net as NetImpl;
 use crate::NetBuilder as NetBuilderImpl;
 use crate::PeerIndex;
@@ -44,6 +46,9 @@ pub const DDNET_NET_EV_NONE: u64 = 0;
 pub const DDNET_NET_EV_CONNECT: u64 = 1;
 pub const DDNET_NET_EV_CHUNK: u64 = 2;
 pub const DDNET_NET_EV_DISCONNECT: u64 = 3;
+pub const DDNET_NET_EV_CONNLESS_CHUNK: u64 = 4;
+
+pub type DdnetNetAddr = Addr;
 
 impl DdnetNet {
     /// Calls the provided function if `NetInner` is `init`, and adjusts the
@@ -154,16 +159,36 @@ pub extern "C" fn ddnet_net_ev_kind(ev: &DdnetNetEvent) -> u64 {
         Some(Connect(..)) => DDNET_NET_EV_CONNECT,
         Some(Chunk(..)) => DDNET_NET_EV_CHUNK,
         Some(Disconnect(..)) => DDNET_NET_EV_DISCONNECT,
+        Some(ConnlessChunk(..)) => DDNET_NET_EV_CONNLESS_CHUNK,
     }
 }
-/// Can return `nullptr`.
 #[no_mangle]
-pub extern "C" fn ddnet_net_ev_connect_identity(
+pub extern "C" fn ddnet_net_ev_connect_peer_index(
     ev: &DdnetNetEvent,
-) -> Option<&[u8; 32]> {
+) -> u64 {
     use self::EventImpl::*;
     match unsafe { &ev.inner } {
-        Some(Connect(id)) => id.as_ref().map(|id| id.as_bytes()),
+        Some(Connect(idx, _)) => idx.0,
+        _ => unreachable!(),
+    }
+}
+#[no_mangle]
+pub extern "C" fn ddnet_net_ev_connect_addr(
+    ev: &DdnetNetEvent,
+) -> &DdnetNetAddr {
+    use self::EventImpl::*;
+    match unsafe { &ev.inner } {
+        Some(Connect(_, addr)) => addr,
+        _ => unreachable!(),
+    }
+}
+#[no_mangle]
+pub extern "C" fn ddnet_net_ev_chunk_peer_index(
+    ev: &DdnetNetEvent,
+) -> u64 {
+    use self::EventImpl::*;
+    match unsafe { &ev.inner } {
+        Some(Chunk(idx, _, _)) => idx.0,
         _ => unreachable!(),
     }
 }
@@ -171,7 +196,7 @@ pub extern "C" fn ddnet_net_ev_connect_identity(
 pub extern "C" fn ddnet_net_ev_chunk_len(ev: &DdnetNetEvent) -> usize {
     use self::EventImpl::*;
     match unsafe { ev.inner } {
-        Some(Chunk(len, _)) => len,
+        Some(Chunk(_, len, _)) => len,
         _ => unreachable!(),
     }
 }
@@ -179,7 +204,17 @@ pub extern "C" fn ddnet_net_ev_chunk_len(ev: &DdnetNetEvent) -> usize {
 pub extern "C" fn ddnet_net_ev_chunk_is_unreliable(ev: &DdnetNetEvent) -> bool {
     use self::EventImpl::*;
     match unsafe { ev.inner } {
-        Some(Chunk(_, unreliable)) => unreliable,
+        Some(Chunk(_, _, unreliable)) => unreliable,
+        _ => unreachable!(),
+    }
+}
+#[no_mangle]
+pub extern "C" fn ddnet_net_ev_disconnect_peer_index(
+    ev: &DdnetNetEvent,
+) -> u64 {
+    use self::EventImpl::*;
+    match unsafe { &ev.inner } {
+        Some(Disconnect(idx, _, _)) => idx.0,
         _ => unreachable!(),
     }
 }
@@ -189,7 +224,7 @@ pub extern "C" fn ddnet_net_ev_disconnect_reason_len(
 ) -> usize {
     use self::EventImpl::*;
     match unsafe { ev.inner } {
-        Some(Disconnect(reason_len, _)) => reason_len,
+        Some(Disconnect(_, reason_len, _)) => reason_len,
         _ => unreachable!(),
     }
 }
@@ -199,9 +234,17 @@ pub extern "C" fn ddnet_net_ev_disconnect_is_remote(
 ) -> bool {
     use self::EventImpl::*;
     match unsafe { ev.inner } {
-        Some(Disconnect(_, remote)) => remote,
+        Some(Disconnect(_, _, remote)) => remote,
         _ => unreachable!(),
     }
+}
+
+/// Can return `nullptr`.
+#[no_mangle]
+pub extern "C" fn ddnet_net_addr_identity(
+    addr: &DdnetNetAddr,
+) -> Option<&[u8; 32]> {
+    addr.identity().map(Identity::as_bytes)
 }
 
 #[no_mangle]
@@ -329,16 +372,11 @@ pub extern "C" fn ddnet_net_recv(
     net: &mut DdnetNet,
     buf: *mut u8,
     buf_cap: usize,
-    peer_index: &mut u64,
     event: &mut DdnetNetEvent,
 ) -> bool {
     net.good(|impl_| {
         let buf = unsafe { slice::from_raw_parts_mut(buf, buf_cap) };
-        let result = impl_.recv(buf)?;
-        if let Some((cid, _)) = result {
-            *peer_index = cid.0;
-        }
-        event.inner = result.map(|(_, ev)| ev);
+        event.inner = impl_.recv(buf)?;
         Ok(())
     })
 }
@@ -392,6 +430,23 @@ pub extern "C" fn ddnet_net_close(
             None
         };
         impl_.close(PeerIndex(peer_index), reason)
+    })
+}
+#[no_mangle]
+pub extern "C" fn ddnet_net_send_connless_chunk(
+    net: &mut DdnetNet,
+    addr: *const c_char,
+    addr_len: usize,
+    chunk: *const u8,
+    chunk_len: usize,
+) -> bool {
+    net.good(|impl_| {
+        let addr =
+            unsafe { slice::from_raw_parts(addr as *const u8, addr_len) };
+        let addr = str::from_utf8(addr).unwrap();
+        let chunk = unsafe { slice::from_raw_parts(chunk, chunk_len) };
+        impl_.send_connless_chunk(addr, chunk)?;
+        Ok(())
     })
 }
 #[no_mangle]

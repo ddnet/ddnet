@@ -11,17 +11,17 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 arrayvec = "0.5.2"
 bstr = "1.0.1"
-boring = "2.1.0"
-boring-sys = "2.1.0"
+boring = "4"
+boring-sys = "4"
 env_logger = "0.10.0"
 foreign-types-shared = "0.3.1"
 getrandom = { version = "0.2.8", features = ["std"] }
-libtw2_net = { package = "net", git = "https://github.com/heinrich5991/libtw2" }
+libtw2-net = { path = "../../../libtw2/net" }
 log = "0.4.17"
 mio = { version = "0.8.4", features = ["net", "os-poll"] }
 octets = "0.2.0"
 openssl-probe = "0.1.5"
-quiche = { version = "0.16.0", features = ["boringssl-boring-crate"] }
+quiche = { version = "0.20.0", features = ["boringssl-boring-crate"] }
 ring = "0.16.20"
 url = "2.3.1"
 uuid = "1.2.2"

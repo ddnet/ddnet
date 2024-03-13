@@ -117,19 +117,20 @@ int CNetClient::Recv(CNetChunk *pChunk)
 {
 	while(true)
 	{
-		uint64_t PeerID;
 		DdnetNetEvent Event;
 		// Keep space for null termination.
-                if(ddnet_net_recv(m_pNet, m_aBuffer, sizeof(m_aBuffer) - 1, &PeerID, &Event))
+                if(ddnet_net_recv(m_pNet, m_aBuffer, sizeof(m_aBuffer) - 1, &Event))
 		{
 			log_error("net", "recv failed: %s", ddnet_net_error(m_pNet));
                         exit(1);
 		}
+		uint64_t PeerID;
 		switch(ddnet_net_ev_kind(&Event))
                 {
                 case DDNET_NET_EV_NONE:
                         return 0;
                 case DDNET_NET_EV_CONNECT:
+			PeerID = ddnet_net_ev_connect_peer_index(&Event);
 			if((int)PeerID != m_PeerID)
 			{
 				continue;
@@ -137,15 +138,18 @@ int CNetClient::Recv(CNetChunk *pChunk)
 			m_State = NETSTATE_ONLINE;
                         break;
                 case DDNET_NET_EV_DISCONNECT:
+			PeerID = ddnet_net_ev_disconnect_peer_index(&Event);
 			if((int)PeerID != m_PeerID)
 			{
 				continue;
 			}
 			m_PeerID = -1;
 			m_State = NETSTATE_OFFLINE;
+			log_debug("net", "reason len: %d", (int)ddnet_net_ev_disconnect_reason_len(&Event));
 			m_aBuffer[ddnet_net_ev_disconnect_reason_len(&Event)] = 0;
                         break;
                 case DDNET_NET_EV_CHUNK:
+			PeerID = ddnet_net_ev_chunk_peer_index(&Event);
 			if((int)PeerID != m_PeerID)
 			{
 				continue;

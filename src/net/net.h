@@ -15,6 +15,8 @@
 
 #define DDNET_NET_EV_DISCONNECT 3
 
+#define DDNET_NET_EV_CONNLESS_CHUNK 4
+
 typedef struct DdnetNet DdnetNet;
 
 
@@ -28,14 +30,17 @@ extern "C" {
 
 uint64_t ddnet_net_ev_kind(const union DdnetNetEvent *ev);
 
-/**
- * Can return `nullptr`.
- */
-const uint8_t (*ddnet_net_ev_connect_identity(const union DdnetNetEvent *ev))[32];
+uint64_t ddnet_net_ev_connect_peer_index(const union DdnetNetEvent *ev);
+
+const uint8_t (*ddnet_net_ev_connect_addr(const union DdnetNetEvent *ev))[32];
+
+uint64_t ddnet_net_ev_chunk_peer_index(const union DdnetNetEvent *ev);
 
 size_t ddnet_net_ev_chunk_len(const union DdnetNetEvent *ev);
 
 bool ddnet_net_ev_chunk_is_unreliable(const union DdnetNetEvent *ev);
+
+uint64_t ddnet_net_ev_disconnect_peer_index(const union DdnetNetEvent *ev);
 
 size_t ddnet_net_ev_disconnect_reason_len(const union DdnetNetEvent *ev);
 
@@ -65,11 +70,7 @@ bool ddnet_net_wait(struct DdnetNet *net);
 
 bool ddnet_net_wait_timeout(struct DdnetNet *net, uint64_t ns);
 
-bool ddnet_net_recv(struct DdnetNet *net,
-                    uint8_t *buf,
-                    size_t buf_cap,
-                    uint64_t *peer_index,
-                    union DdnetNetEvent *event);
+bool ddnet_net_recv(struct DdnetNet *net, uint8_t *buf, size_t buf_cap, union DdnetNetEvent *event);
 
 bool ddnet_net_send_chunk(struct DdnetNet *net,
                           uint64_t peer_index,
@@ -88,6 +89,12 @@ bool ddnet_net_close(struct DdnetNet *net,
                      uint64_t peer_index,
                      const char *reason,
                      size_t reason_len);
+
+bool ddnet_net_send_connless_chunk(struct DdnetNet *net,
+                                   const char *addr,
+                                   size_t addr_len,
+                                   const uint8_t *chunk,
+                                   size_t chunk_len);
 
 bool ddnet_net_set_logger(void (*log)(int32_t level,
                                       const char *system,

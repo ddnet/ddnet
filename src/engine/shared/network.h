@@ -186,6 +186,8 @@ class CNetServer
 	CNet *m_pNet = nullptr;
 	unsigned char m_aBuffer[2048];
 
+	CNetBan *m_pNetBan;
+
 	NETFUNC_NEWCLIENT m_pfnNewClient = nullptr;
 	NETFUNC_DELCLIENT m_pfnDelClient = nullptr;
 	void *m_pUser = nullptr;
@@ -193,9 +195,27 @@ class CNetServer
 	// Next client ID to try.
 	int m_NextClientID = 0;
 
-	// Stores a mapping from client IDs to peer IDs of the network library.
-	// The opposite mapping is stored in the userdata of the library.
-	uint64_t m_aPeerMapping[NET_MAX_CLIENTS];
+	struct CPeer
+	{
+		enum
+		{
+			STATE_NONE,
+			STATE_CONNECTED,
+			STATE_TIMEOUT,
+			STATE_TIMEOUT_CLEARED,
+		};
+
+		int m_State;
+		// Stores a mapping from client IDs to peer IDs of the network library.
+		// The opposite mapping is stored in the userdata of the library.
+		uint64_t m_ID;
+		bool m_TimeoutProtected;
+		NETADDR m_Address;
+
+		void Reset();
+	};
+
+	CPeer m_aPeers[NET_MAX_CLIENTS];
 
 public:
 	~CNetServer();
@@ -229,10 +249,15 @@ public:
 
 	//
 	void SetMaxClientsPerIP(int Max);
+	// Change the client ID of the client with `OrigID` to `ClientID`,
+	// replacing a timed out client.
 	bool SetTimedOut(int ClientID, int OrigID);
+	// Pretend the client remains online after a network timeout.
 	void SetTimeoutProtected(int ClientID);
 
+	// Reset timeout indication.
 	int ResetErrorString(int ClientID);
+	// Check if a timeout happened, return non-empty string on timeout.
 	const char *ErrorString(int ClientID);
 
 	// anti spoof
