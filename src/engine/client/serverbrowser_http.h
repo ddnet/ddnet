@@ -3,7 +3,6 @@
 #include <base/types.h>
 
 class CServerInfo;
-class IConsole;
 class IEngine;
 class IStorage;
 class IHttp;
@@ -26,5 +25,5 @@ public:
 	virtual const NETADDR &LegacyServer(int Index) const = 0;
 };
 
-IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, IStorage *pStorage, IHttp *pHttp, const char *pPreviousBestUrl);
+IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IStorage *pStorage, IHttp *pHttp, const char *pPreviousBestUrl);
 #endif // ENGINE_CLIENT_SERVERBROWSER_HTTP_H

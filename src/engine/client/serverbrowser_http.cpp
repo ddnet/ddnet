@@ -11,6 +11,7 @@
 #include <engine/storage.h>
 
 #include <base/lock.h>
+#include <base/log.h>
 #include <base/system.h>
 
 #include <memory>
@@ -200,7 +201,7 @@ void CChooseMaster::CJob::Run()
 		pHead->Wait();
 		if(pHead->State() == EHttpState::ABORTED || State() == IJob::STATE_ABORTED)
 		{
-			dbg_msg("serverbrowse_http", "master chooser aborted");
+			log_debug("serverbrowse_http", "master chooser aborted");
 			return;
 		}
 		if(pHead->State() != EHttpState::DONE)
@@ -223,7 +224,7 @@ void CChooseMaster::CJob::Run()
 		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
 		if(pGet->State() == EHttpState::ABORTED || State() == IJob::STATE_ABORTED)
 		{
-			dbg_msg("serverbrowse_http", "master chooser aborted");
+			log_debug("serverbrowse_http", "master chooser aborted");
 			return;
 		}
 		if(pGet->State() != EHttpState::DONE)
@@ -242,7 +243,7 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		dbg_msg("serverbrowse_http", "found master, url='%s' time=%dms", pUrl, (int)Time.count());
+		log_info("serverbrowse_http", "found master, url='%s' time=%dms", pUrl, (int)Time.count());
 		aTimeMs[i] = Time.count();
 	}
 
@@ -263,18 +264,18 @@ void CChooseMaster::CJob::Run()
 	}
 	if(BestIndex == -1)
 	{
-		dbg_msg("serverbrowse_http", "WARNING: no usable masters found");
+		log_error("serverbrowse_http", "WARNING: no usable masters found");
 		return;
 	}
 
-	dbg_msg("serverbrowse_http", "determined best master, url='%s' time=%dms", m_pData->m_aaUrls[BestIndex], BestTime);
+	log_info("serverbrowse_http", "determined best master, url='%s' time=%dms", m_pData->m_aaUrls[BestIndex], BestTime);
 	m_pData->m_BestIndex.store(BestIndex);
 }
 
 class CServerBrowserHttp : public IServerBrowserHttp
 {
 public:
-	CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, IHttp *pHttp, const char **ppUrls, int NumUrls, int PreviousBestIndex);
+	CServerBrowserHttp(IEngine *pEngine, IHttp *pHttp, const char **ppUrls, int NumUrls, int PreviousBestIndex);
 	~CServerBrowserHttp() override;
 	void Update() override;
 	bool IsRefreshing() override { return m_State != STATE_DONE; }
@@ -310,7 +311,6 @@ private:
 	static bool Validate(json_value *pJson);
 	static bool Parse(json_value *pJson, std::vector<CServerInfo> *pvServers, std::vector<NETADDR> *pvLegacyServers);
 
-	IConsole *m_pConsole;
 	IHttp *m_pHttp;
 
 	int m_State = STATE_DONE;
@@ -321,8 +321,7 @@ private:
 	std::vector<NETADDR> m_vLegacyServers;
 };
 
-CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, IHttp *pHttp, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
-	m_pConsole(pConsole),
+CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IHttp *pHttp, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
 	m_pHttp(pHttp),
 	m_pChooseMaster(new CChooseMaster(pEngine, pHttp, Validate, ppUrls, NumUrls, PreviousBestIndex))
 {
@@ -346,7 +345,7 @@ void CServerBrowserHttp::Update()
 		{
 			if(!m_pChooseMaster->IsRefreshing())
 			{
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse_http", "no working serverlist URL found");
+				log_error("serverbrowse_http", "no working serverlist URL found");
 				m_State = STATE_NO_MASTER;
 			}
 			return;
@@ -374,7 +373,7 @@ void CServerBrowserHttp::Update()
 		json_value_free(pJson);
 		if(!Success)
 		{
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowse_http", "failed getting serverlist, trying to find best URL");
+			log_error("serverbrowse_http", "failed getting serverlist, trying to find best URL");
 			m_pChooseMaster->Reset();
 			m_pChooseMaster->Refresh();
 		}
@@ -435,7 +434,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 		}
 		if(CServerInfo2::FromJson(&ParsedInfo, &Info))
 		{
-			//dbg_msg("dbg/serverbrowser", "skipped due to info, i=%d", i);
+			log_debug("serverbrowser_http", "skipped due to info, i=%d", i);
 			// Only skip the current server on parsing
 			// failure; the server info is "user input" by
 			// the game server and can be set to arbitrary
@@ -455,7 +454,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 			NETADDR ParsedAddr;
 			if(ServerbrowserParseUrl(&ParsedAddr, Addresses[a]))
 			{
-				//dbg_msg("dbg/serverbrowser", "unknown address, i=%d a=%d", i, a);
+				log_debug("dbg/serverbrowser", "unknown address, i=%d a=%d", i, a);
 				// Skip unknown addresses.
 				continue;
 			}
@@ -495,7 +494,7 @@ static const char *DEFAULT_SERVERLIST_URLS[] = {
 	"https://master4.ddnet.org/ddnet/15/servers.json",
 };
 
-IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, IStorage *pStorage, IHttp *pHttp, const char *pPreviousBestUrl)
+IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IStorage *pStorage, IHttp *pHttp, const char *pPreviousBestUrl)
 {
 	char aaUrls[CChooseMaster::MAX_URLS][256];
 	const char *apUrls[CChooseMaster::MAX_URLS] = {0};
@@ -532,5 +531,5 @@ IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IConsole *pConsole
 			break;
 		}
 	}
-	return new CServerBrowserHttp(pEngine, pConsole, pHttp, ppUrls, NumUrls, PreviousBestIndex);
+	return new CServerBrowserHttp(pEngine, pHttp, ppUrls, NumUrls, PreviousBestIndex);
 }
