@@ -2573,20 +2573,16 @@ if(SERVER)
     gamemodes/base_instagib.h
     gamemodes/ctf.cpp
     gamemodes/ctf.h
-    gamemodes/gctf.cpp
-    gamemodes/gctf.h
-    gamemodes/ictf.cpp
-    gamemodes/ictf.h
     gamemodes/dm.cpp
     gamemodes/dm.h
+    gamemodes/gctf.cpp
+    gamemodes/gctf.h
     gamemodes/gdm.cpp
     gamemodes/gdm.h
-    gamemodes/tdm.cpp
-    gamemodes/tdm.h
     gamemodes/gtdm.cpp
     gamemodes/gtdm.h
-    gamemodes/itdm.cpp
-    gamemodes/itdm.h
+    gamemodes/ictf.cpp
+    gamemodes/ictf.h
     gamemodes/idm.cpp
     gamemodes/idm.h
     gamemodes/instagib/bangcommands.cpp
@@ -2597,10 +2593,14 @@ if(SERVER)
     gamemodes/instagib/player.h
     gamemodes/instagib/rcon_commands.cpp
     gamemodes/instagib/rcon_commands.h
+    gamemodes/itdm.cpp
+    gamemodes/itdm.h
     gamemodes/mod.cpp
     gamemodes/mod.h
     gamemodes/solofng.cpp
     gamemodes/solofng.h
+    gamemodes/tdm.cpp
+    gamemodes/tdm.h
     gamemodes/team_fng.cpp
     gamemodes/team_fng.h
     gamemodes/zcatch.cpp
