@@ -1522,7 +1522,7 @@ void CCharacter::SetTimeCheckpoint(int TimeCheckpoint)
 		if(m_pPlayer->GetClientVersion() >= VERSION_DDRACE)
 		{
 			CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCid());
-			if(pData->m_BestTime && pData->m_aBestTimeCp[m_LastTimeCp] != 0.0f)
+			if(pData->m_aBestTimeCp[m_LastTimeCp] != 0.0f)
 			{
 				CNetMsg_Sv_DDRaceTime Msg;
 				Msg.m_Time = (int)(m_Time * 100.0f);

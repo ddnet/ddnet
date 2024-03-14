@@ -445,6 +445,8 @@ void CServerBrowser::Filter()
 			Filtered = true;
 		else if(g_Config.m_BrFilterUnfinishedMap && Info.m_HasRank == CServerInfo::RANK_RANKED)
 			Filtered = true;
+		else if(g_Config.m_BrFilterLogin && Info.m_RequiresLogin)
+			Filtered = true;
 		else
 		{
 			if(!Communities().empty())
@@ -597,6 +599,7 @@ int CServerBrowser::SortHash() const
 	i |= g_Config.m_BrFilterUnfinishedMap << 13;
 	i |= g_Config.m_BrFilterCountry << 14;
 	i |= g_Config.m_BrFilterConnectingPlayers << 15;
+	i |= g_Config.m_BrFilterLogin << 16;
 	return i;
 }
 

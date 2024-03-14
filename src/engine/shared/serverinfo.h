@@ -38,6 +38,7 @@ public:
 	char m_aName[64];
 	char m_aMapName[MAX_MAP_LENGTH];
 	char m_aVersion[32];
+	bool m_RequiresLogin;
 
 	bool operator==(const CServerInfo2 &Other) const;
 	bool operator!=(const CServerInfo2 &Other) const { return !(*this == Other); }

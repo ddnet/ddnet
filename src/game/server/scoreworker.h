@@ -39,6 +39,7 @@ struct CScorePlayerResult : ISqlResult
 		BROADCAST,
 		MAP_VOTE,
 		PLAYER_INFO,
+		PLAYER_TIMECP,
 	} m_MessageKind;
 	union
 	{
@@ -49,6 +50,7 @@ struct CScorePlayerResult : ISqlResult
 			std::optional<float> m_Time;
 			float m_aTimeCp[NUM_CHECKPOINTS];
 			int m_Birthday; // 0 indicates no birthday
+			char m_aRequestedPlayer[MAX_NAME_LENGTH];
 		} m_Info = {};
 		struct
 		{
@@ -244,6 +246,12 @@ public:
 			m_aBestTimeCp[i] = aTimeCp[i];
 	}
 
+	void SetBestTimeCp(const float aTimeCp[NUM_CHECKPOINTS])
+	{
+		for(int i = 0; i < NUM_CHECKPOINTS; i++)
+			m_aBestTimeCp[i] = aTimeCp[i];
+	}
+
 	float m_BestTime;
 	float m_aBestTimeCp[NUM_CHECKPOINTS];
 
@@ -284,6 +292,7 @@ struct CScoreWorker
 	static bool MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 
 	static bool LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool LoadPlayerTimeCp(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);

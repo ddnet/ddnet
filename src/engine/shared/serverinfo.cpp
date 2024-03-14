@@ -71,6 +71,8 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	const json_value &MapName = ServerInfo["map"]["name"];
 	const json_value &Version = ServerInfo["version"];
 	const json_value &Clients = ServerInfo["clients"];
+	const json_value &RequiresLogin = ServerInfo["requires_login"];
+
 	Error = false;
 	Error = Error || MaxClients.type != json_integer;
 	Error = Error || MaxPlayers.type != json_integer;
@@ -95,6 +97,11 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	else if(ClientScoreKind.type == json_string && str_startswith(ClientScoreKind, "time"))
 	{
 		pOut->m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_TIME;
+	}
+	pOut->m_RequiresLogin = false;
+	if(RequiresLogin.type == json_boolean)
+	{
+		pOut->m_RequiresLogin = RequiresLogin;
 	}
 	pOut->m_Passworded = Passworded;
 	str_copy(pOut->m_aGameType, GameType);
@@ -196,6 +203,7 @@ bool CServerInfo2::operator==(const CServerInfo2 &Other) const
 	Unequal = Unequal || str_comp(m_aName, Other.m_aName) != 0;
 	Unequal = Unequal || str_comp(m_aMapName, Other.m_aMapName) != 0;
 	Unequal = Unequal || str_comp(m_aVersion, Other.m_aVersion) != 0;
+	Unequal = Unequal || m_RequiresLogin != Other.m_RequiresLogin;
 	if(Unequal)
 	{
 		return false;
@@ -225,6 +233,7 @@ CServerInfo2::operator CServerInfo() const
 	Result.m_MaxPlayers = m_MaxPlayers;
 	Result.m_NumPlayers = m_NumPlayers;
 	Result.m_ClientScoreKind = m_ClientScoreKind;
+	Result.m_RequiresLogin = m_RequiresLogin;
 	Result.m_Flags = m_Passworded ? SERVER_FLAG_PASSWORD : 0;
 	str_copy(Result.m_aGameType, m_aGameType);
 	str_copy(Result.m_aName, m_aName);

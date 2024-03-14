@@ -7,7 +7,6 @@
 
 struct CScrollRegionParams
 {
-	bool m_Active;
 	float m_ScrollbarWidth;
 	float m_ScrollbarMargin;
 	bool m_ScrollbarNoMarginRight;
@@ -28,7 +27,6 @@ struct CScrollRegionParams
 
 	CScrollRegionParams()
 	{
-		m_Active = true;
 		m_ScrollbarWidth = 20.0f;
 		m_ScrollbarMargin = 5.0f;
 		m_ScrollbarNoMarginRight = false;
@@ -140,6 +138,7 @@ public:
 	bool RectClipped(const CUIRect &Rect) const;
 	bool ScrollbarShown() const;
 	bool Animating() const;
+	bool Active() const;
 	const CScrollRegionParams &Params() const { return m_Params; }
 };
 
