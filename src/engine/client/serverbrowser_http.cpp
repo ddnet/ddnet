@@ -21,6 +21,28 @@
 
 using namespace std::chrono_literals;
 
+static int SanitizeAge(std::optional<int64_t> Age)
+{
+	// A year is of course pi*10**7 seconds.
+	if(!(Age && 0 <= *Age && *Age < 31415927))
+	{
+		return 31415927;
+	}
+	return *Age;
+}
+
+// Classify HTTP responses into buckets, treat 15 seconds as fresh, 1 minute as
+// less fresh, etc. This ensures that differences in the order of seconds do
+// not affect master choice.
+static int ClassifyAge(int AgeSeconds)
+{
+	return 0 //
+	       + (AgeSeconds >= 15) // 15 seconds
+	       + (AgeSeconds >= 60) // 1 minute
+	       + (AgeSeconds >= 300) // 5 minutes
+	       + (AgeSeconds / 3600); // 1 hour
+}
+
 class CChooseMaster
 {
 public:
@@ -185,9 +207,11 @@ void CChooseMaster::CJob::Run()
 	// fail.
 	CTimeout Timeout{10000, 0, 8000, 10};
 	int aTimeMs[MAX_URLS];
+	int aAgeS[MAX_URLS];
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
 		aTimeMs[i] = -1;
+		aAgeS[i] = SanitizeAge({});
 		const char *pUrl = m_pData->m_aaUrls[aRandomized[i]];
 		std::shared_ptr<CHttpRequest> pHead = HttpHead(pUrl);
 		pHead->Timeout(Timeout);
@@ -243,22 +267,27 @@ void CChooseMaster::CJob::Run()
 		{
 			continue;
 		}
-		log_info("serverbrowse_http", "found master, url='%s' time=%dms", pUrl, (int)Time.count());
+		int AgeS = SanitizeAge(pGet->ResultAgeSeconds());
+		log_info("serverbrowse_http", "found master, url='%s' time=%dms age=%ds", pUrl, (int)Time.count(), AgeS);
+
 		aTimeMs[i] = Time.count();
+		aAgeS[i] = AgeS;
 	}
 
 	// Determine index of the minimum time.
 	int BestIndex = -1;
 	int BestTime = 0;
+	int BestAge = 0;
 	for(int i = 0; i < m_pData->m_NumUrls; i++)
 	{
 		if(aTimeMs[i] < 0)
 		{
 			continue;
 		}
-		if(BestIndex == -1 || aTimeMs[i] < BestTime)
+		if(BestIndex == -1 || std::tuple(ClassifyAge(aAgeS[i]), aTimeMs[i]) < std::tuple(ClassifyAge(BestAge), BestTime))
 		{
 			BestTime = aTimeMs[i];
+			BestAge = aAgeS[i];
 			BestIndex = aRandomized[i];
 		}
 	}
@@ -268,7 +297,7 @@ void CChooseMaster::CJob::Run()
 		return;
 	}
 
-	log_info("serverbrowse_http", "determined best master, url='%s' time=%dms", m_pData->m_aaUrls[BestIndex], BestTime);
+	log_info("serverbrowse_http", "determined best master, url='%s' time=%dms age=%ds", m_pData->m_aaUrls[BestIndex], BestTime, BestAge);
 	m_pData->m_BestIndex.store(BestIndex);
 }
 
@@ -371,10 +400,18 @@ void CServerBrowserHttp::Update()
 		Success = Success && pJson;
 		Success = Success && !Parse(pJson, &m_vServers, &m_vLegacyServers);
 		json_value_free(pJson);
+		int Age = SanitizeAge(pGetServers->ResultAgeSeconds());
 		if(!Success)
 		{
 			log_error("serverbrowse_http", "failed getting serverlist, trying to find best URL");
 			m_pChooseMaster->Reset();
+			m_pChooseMaster->Refresh();
+		}
+		// Try to find new master if the current one returns results
+		// that are 5 minutes old.
+		else if(Age > 300)
+		{
+			log_info("serverbrowse_http", "got stale serverlist, age=%ds, trying to find best URL", Age);
 			m_pChooseMaster->Refresh();
 		}
 	}
