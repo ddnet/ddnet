@@ -300,9 +300,9 @@ void CGameContext::InstagibUnstackChatMessage(char *pUnstacked, const char *pMes
 
 int CGameContext::GetDDNetInstaWeapon()
 {
-	if(str_comp_nocase(g_Config.m_SvGametype, "gctf") == 0)
+	if(g_Config.m_SvGametype[0] == 'g')
 		return WEAPON_GRENADE;
-	if(str_comp_nocase(g_Config.m_SvGametype, "ictf") == 0)
+	if(g_Config.m_SvGametype[0] == 'i')
 		return WEAPON_LASER;
 	return WEAPON_GRENADE;
 }
