@@ -20,16 +20,14 @@ int CGameControllerTDM::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 {
 	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
 
-
 	if(pKiller && WeaponId != WEAPON_GAME)
 	{
 		// do team scoring
 		if(pKiller == pVictim->GetPlayer() || pKiller->GetTeam() == pVictim->GetPlayer()->GetTeam())
-			m_aTeamscore[pKiller->GetTeam()&1]--;
+			m_aTeamscore[pKiller->GetTeam() & 1]--;
 		else
-			m_aTeamscore[pKiller->GetTeam()&1]++;
+			m_aTeamscore[pKiller->GetTeam() & 1]++;
 	}
-
 
 	// check score win condition
 	if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)) ||

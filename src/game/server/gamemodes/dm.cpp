@@ -14,7 +14,6 @@ CGameControllerDM::~CGameControllerDM() = default;
 void CGameControllerDM::Tick()
 {
 	CGameControllerInstagib::Tick();
-	
 }
 
 void CGameControllerDM::OnCharacterSpawn(class CCharacter *pChr)
@@ -30,8 +29,8 @@ int CGameControllerDM::OnCharacterDeath(class CCharacter *pVictim, class CPlayer
 	if((m_GameInfo.m_ScoreLimit > 0 && pKiller->m_Score.value_or(0) >= m_GameInfo.m_ScoreLimit) ||
 		(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick() - m_GameStartTick) >= m_GameInfo.m_TimeLimit * Server()->TickSpeed() * 60))
 	{
-				EndMatch();
-				return true;
+		EndMatch();
+		return true;
 	}
 	return false;
 }
