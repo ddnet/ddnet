@@ -118,6 +118,9 @@ class CHttpRequest : public IHttpRequest
 	std::atomic<bool> m_Abort{false};
 
 	int m_StatusCode = 0;
+	bool m_HeadersEnded = false;
+	std::optional<int64_t> m_ResultDate = {};
+	std::optional<int64_t> m_ResultLastModified = {};
 
 	// Abort the request with an error if `BeforeInit()` returns false.
 	bool BeforeInit();
@@ -125,11 +128,15 @@ class CHttpRequest : public IHttpRequest
 	// `pHandle` can be nullptr if no handle was ever created for this request.
 	void OnCompletionInternal(void *pHandle, unsigned int Result); // void * == CURL *, unsigned int == CURLcode
 
+	// Abort the request if `OnHeader()` returns something other than
+	// `DataSize`. `pHeader` is NOT null-terminated.
+	size_t OnHeader(char *pHeader, size_t HeaderSize);
 	// Abort the request if `OnData()` returns something other than
 	// `DataSize`.
 	size_t OnData(char *pData, size_t DataSize);
 
 	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
+	static size_t HeaderCallback(char *pData, size_t Size, size_t Number, void *pUser);
 	static size_t WriteCallback(char *pData, size_t Size, size_t Number, void *pUser);
 
 protected:
@@ -207,6 +214,8 @@ public:
 	const SHA256_DIGEST &ResultSha256() const;
 
 	int StatusCode() const;
+	std::optional<int64_t> ResultAgeSeconds() const;
+	std::optional<int64_t> ResultLastModified() const;
 };
 
 inline std::unique_ptr<CHttpRequest> HttpHead(const char *pUrl)

@@ -148,6 +148,8 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 	curl_easy_setopt(pH, CURLOPT_USERAGENT, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
 	curl_easy_setopt(pH, CURLOPT_ACCEPT_ENCODING, ""); // Use any compression algorithm supported by libcurl.
 
+	curl_easy_setopt(pH, CURLOPT_HEADERDATA, this);
+	curl_easy_setopt(pH, CURLOPT_HEADERFUNCTION, HeaderCallback);
 	curl_easy_setopt(pH, CURLOPT_WRITEDATA, this);
 	curl_easy_setopt(pH, CURLOPT_WRITEFUNCTION, WriteCallback);
 	curl_easy_setopt(pH, CURLOPT_NOPROGRESS, 0L);
@@ -206,6 +208,52 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 	return true;
 }
 
+size_t CHttpRequest::OnHeader(char *pHeader, size_t HeaderSize)
+{
+	// `pHeader` is NOT null-terminated.
+	// `pHeader` has a trailing newline.
+
+	if(HeaderSize <= 1)
+	{
+		m_HeadersEnded = true;
+		return HeaderSize;
+	}
+	if(m_HeadersEnded)
+	{
+		// redirect, clear old headers
+		m_HeadersEnded = false;
+		m_ResultDate = {};
+		m_ResultLastModified = {};
+	}
+
+	static const char DATE[] = "Date: ";
+	static const char LAST_MODIFIED[] = "Last-Modified: ";
+
+	// Trailing newline and null termination evens out.
+	if(HeaderSize - 1 >= sizeof(DATE) - 1 && str_startswith_nocase(pHeader, DATE))
+	{
+		char aValue[128];
+		str_truncate(aValue, sizeof(aValue), pHeader + (sizeof(DATE) - 1), HeaderSize - (sizeof(DATE) - 1) - 1);
+		int64_t Value = curl_getdate(aValue, nullptr);
+		if(Value != -1)
+		{
+			m_ResultDate = Value;
+		}
+	}
+	if(HeaderSize - 1 >= sizeof(LAST_MODIFIED) - 1 && str_startswith_nocase(pHeader, LAST_MODIFIED))
+	{
+		char aValue[128];
+		str_truncate(aValue, sizeof(aValue), pHeader + (sizeof(LAST_MODIFIED) - 1), HeaderSize - (sizeof(LAST_MODIFIED) - 1) - 1);
+		int64_t Value = curl_getdate(aValue, nullptr);
+		if(Value != -1)
+		{
+			m_ResultLastModified = Value;
+		}
+	}
+
+	return HeaderSize;
+}
+
 size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 {
 	// Need to check for the maximum response size here as curl can only
@@ -242,6 +290,12 @@ size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 		m_ResponseLength += DataSize;
 		return io_write(m_File, pData, DataSize);
 	}
+}
+
+size_t CHttpRequest::HeaderCallback(char *pData, size_t Size, size_t Number, void *pUser)
+{
+	dbg_assert(Size == 1, "invalid size parameter passed to header callback");
+	return ((CHttpRequest *)pUser)->OnHeader(pData, Number);
 }
 
 size_t CHttpRequest::WriteCallback(char *pData, size_t Size, size_t Number, void *pUser)
@@ -388,6 +442,22 @@ int CHttpRequest::StatusCode() const
 {
 	dbg_assert(State() == EHttpState::DONE, "Request not done");
 	return m_StatusCode;
+}
+
+std::optional<int64_t> CHttpRequest::ResultAgeSeconds() const
+{
+	dbg_assert(State() == EHttpState::DONE, "Request not done");
+	if(!m_ResultDate || !m_ResultLastModified)
+	{
+		return {};
+	}
+	return *m_ResultDate - *m_ResultLastModified;
+}
+
+std::optional<int64_t> CHttpRequest::ResultLastModified() const
+{
+	dbg_assert(State() == EHttpState::DONE, "Request not done");
+	return m_ResultLastModified;
 }
 
 bool CHttp::Init(std::chrono::milliseconds ShutdownDelay)
