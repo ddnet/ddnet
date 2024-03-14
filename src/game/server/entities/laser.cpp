@@ -164,10 +164,10 @@ void CLaser::DoBounce()
 			}
 			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
 
-			if(Res == TILE_TELEINWEAPON && !GameServer()->m_pController->m_TeleOuts[z - 1].empty())
+			if(Res == TILE_TELEINWEAPON && !GameServer()->Collision()->TeleOuts(z - 1).empty())
 			{
-				int TeleOut = GameServer()->m_World.m_Core.RandomOr0(GameServer()->m_pController->m_TeleOuts[z - 1].size());
-				m_TelePos = GameServer()->m_pController->m_TeleOuts[z - 1][TeleOut];
+				int TeleOut = GameServer()->m_World.m_Core.RandomOr0(GameServer()->Collision()->TeleOuts(z - 1).size());
+				m_TelePos = GameServer()->Collision()->TeleOuts(z - 1)[TeleOut];
 				m_WasTele = true;
 			}
 			else

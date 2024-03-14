@@ -8,9 +8,6 @@
 #include <engine/shared/protocol.h>
 #include <game/server/teams.h>
 
-#include <map>
-#include <vector>
-
 struct CScoreLoadBestTimeResult;
 
 /*
@@ -148,15 +145,12 @@ public:
 	virtual bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize);
 	int ClampTeam(int Team);
 
-	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptId = -1);
-	virtual void InitTeleporter();
+	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 
 	bool IsTeamPlay() { return m_GameFlags & GAMEFLAG_TEAMS; }
 	// DDRace
 
 	float m_CurrentRecord;
-	std::map<int, std::vector<vec2>> m_TeleOuts;
-	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
 	CGameTeams &Teams() { return m_Teams; }
 	std::shared_ptr<CScoreLoadBestTimeResult> m_pLoadBestTimeResult;
 };
