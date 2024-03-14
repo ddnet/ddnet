@@ -102,7 +102,7 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 
 void CServerBrowser::OnInit()
 {
-	m_pHttp = CreateServerBrowserHttp(m_pEngine, m_pConsole, m_pStorage, m_pHttpClient, g_Config.m_BrCachedBestServerinfoUrl);
+	m_pHttp = CreateServerBrowserHttp(m_pEngine, m_pStorage, m_pHttpClient, g_Config.m_BrCachedBestServerinfoUrl);
 }
 
 void CServerBrowser::RegisterCommands()
