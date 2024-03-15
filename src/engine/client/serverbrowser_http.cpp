@@ -491,7 +491,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 			NETADDR ParsedAddr;
 			if(ServerbrowserParseUrl(&ParsedAddr, Addresses[a]))
 			{
-				log_debug("serverbrowser_http", "unknown address, i=%d a=%d", i, a);
+				// log_debug("serverbrowser_http", "unknown address, i=%d a=%d", i, a);
 				// Skip unknown addresses.
 				continue;
 			}
