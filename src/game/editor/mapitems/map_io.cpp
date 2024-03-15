@@ -245,6 +245,7 @@ bool CEditorMap::Save(const char *pFileName)
 				// save layer name
 				StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerTiles->m_aName);
 
+				// save item
 				Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 
 				// save auto mapper of each tile layer (not physics layer)
@@ -263,61 +264,75 @@ bool CEditorMap::Save(const char *pFileName)
 					Writer.AddItem(MAPITEMTYPE_AUTOMAPPER_CONFIG, AutomapperCount, sizeof(ItemAutomapper), &ItemAutomapper);
 					AutomapperCount++;
 				}
-
-				GItem.m_NumLayers++;
-				LayerCount++;
 			}
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving quads layer");
 				std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
+				CMapItemLayerQuads Item;
+				Item.m_Version = 2;
+				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
+				Item.m_Layer.m_Flags = pLayerQuads->m_Flags;
+				Item.m_Layer.m_Type = pLayerQuads->m_Type;
+				Item.m_Image = pLayerQuads->m_Image;
+
+				Item.m_NumQuads = 0;
+				Item.m_Data = -1;
 				if(!pLayerQuads->m_vQuads.empty())
 				{
-					CMapItemLayerQuads Item;
-					Item.m_Version = 2;
-					Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
-					Item.m_Layer.m_Flags = pLayerQuads->m_Flags;
-					Item.m_Layer.m_Type = pLayerQuads->m_Type;
-					Item.m_Image = pLayerQuads->m_Image;
-
 					// add the data
 					Item.m_NumQuads = pLayerQuads->m_vQuads.size();
 					Item.m_Data = Writer.AddDataSwapped(pLayerQuads->m_vQuads.size() * sizeof(CQuad), pLayerQuads->m_vQuads.data());
-
-					// save layer name
-					StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerQuads->m_aName);
-
-					Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
-
-					GItem.m_NumLayers++;
-					LayerCount++;
 				}
+				else
+				{
+					// add dummy data for backwards compatibility
+					// this allows the layer to be loaded with an empty array since m_NumQuads is 0 while saving
+					CQuad Dummy{};
+					Item.m_Data = Writer.AddDataSwapped(sizeof(CQuad), &Dummy);
+				}
+
+				// save layer name
+				StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerQuads->m_aName);
+
+				// save item
+				Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 			}
 			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
 				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving sounds layer");
 				std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
+				CMapItemLayerSounds Item;
+				Item.m_Version = CMapItemLayerSounds::CURRENT_VERSION;
+				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
+				Item.m_Layer.m_Flags = pLayerSounds->m_Flags;
+				Item.m_Layer.m_Type = pLayerSounds->m_Type;
+				Item.m_Sound = pLayerSounds->m_Sound;
+
+				Item.m_NumSources = 0;
 				if(!pLayerSounds->m_vSources.empty())
 				{
-					CMapItemLayerSounds Item;
-					Item.m_Version = CMapItemLayerSounds::CURRENT_VERSION;
-					Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
-					Item.m_Layer.m_Flags = pLayerSounds->m_Flags;
-					Item.m_Layer.m_Type = pLayerSounds->m_Type;
-					Item.m_Sound = pLayerSounds->m_Sound;
-
 					// add the data
 					Item.m_NumSources = pLayerSounds->m_vSources.size();
 					Item.m_Data = Writer.AddDataSwapped(pLayerSounds->m_vSources.size() * sizeof(CSoundSource), pLayerSounds->m_vSources.data());
-
-					// save layer name
-					StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerSounds->m_aName);
-
-					Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
-					GItem.m_NumLayers++;
-					LayerCount++;
 				}
+				else
+				{
+					// add dummy data for backwards compatibility
+					// this allows the layer to be loaded with an empty array since m_NumSources is 0 while saving
+					CSoundSource Dummy{};
+					Item.m_Data = Writer.AddDataSwapped(sizeof(CSoundSource), &Dummy);
+				}
+
+				// save layer name
+				StrToInts(Item.m_aName, std::size(Item.m_aName), pLayerSounds->m_aName);
+
+				// save item
+				Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 			}
+
+			GItem.m_NumLayers++;
+			LayerCount++;
 		}
 
 		Writer.AddItem(MAPITEMTYPE_GROUP, GroupCount, sizeof(GItem), &GItem);
@@ -828,11 +843,15 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					if(pQuadsItem->m_Version >= 2)
 						IntsToStr(pQuadsItem->m_aName, std::size(pQuadsItem->m_aName), pQuads->m_aName, std::size(pQuads->m_aName));
 
-					void *pData = DataFile.GetDataSwapped(pQuadsItem->m_Data);
+					if(pQuadsItem->m_NumQuads > 0)
+					{
+						void *pData = DataFile.GetDataSwapped(pQuadsItem->m_Data);
+						pQuads->m_vQuads.resize(pQuadsItem->m_NumQuads);
+						mem_copy(pQuads->m_vQuads.data(), pData, sizeof(CQuad) * pQuadsItem->m_NumQuads);
+						DataFile.UnloadData(pQuadsItem->m_Data);
+					}
+
 					pGroup->AddLayer(pQuads);
-					pQuads->m_vQuads.resize(pQuadsItem->m_NumQuads);
-					mem_copy(pQuads->m_vQuads.data(), pData, sizeof(CQuad) * pQuadsItem->m_NumQuads);
-					DataFile.UnloadData(pQuadsItem->m_Data);
 				}
 				else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS)
 				{
@@ -852,11 +871,15 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					IntsToStr(pSoundsItem->m_aName, std::size(pSoundsItem->m_aName), pSounds->m_aName, std::size(pSounds->m_aName));
 
 					// load data
-					void *pData = DataFile.GetDataSwapped(pSoundsItem->m_Data);
+					if(pSoundsItem->m_NumSources > 0)
+					{
+						void *pData = DataFile.GetDataSwapped(pSoundsItem->m_Data);
+						pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
+						mem_copy(pSounds->m_vSources.data(), pData, sizeof(CSoundSource) * pSoundsItem->m_NumSources);
+						DataFile.UnloadData(pSoundsItem->m_Data);
+					}
+
 					pGroup->AddLayer(pSounds);
-					pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
-					mem_copy(pSounds->m_vSources.data(), pData, sizeof(CSoundSource) * pSoundsItem->m_NumSources);
-					DataFile.UnloadData(pSoundsItem->m_Data);
 				}
 				else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS_DEPRECATED)
 				{
