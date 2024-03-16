@@ -214,9 +214,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		{
 			const size_t PixelSize = ImgInfo.PixelSize();
 			const size_t BuildImageSize = (size_t)ImgInfo.m_Width * ImgInfo.m_Height * PixelSize;
-
-			uint8_t *pTmpImgData = ImgInfo.m_pData;
-			uint8_t *pBuildImgData = (uint8_t *)malloc(BuildImageSize);
+			uint8_t *pBuildImgData = static_cast<uint8_t *>(malloc(BuildImageSize));
 
 			// build game layer
 			for(int LayerType = 0; LayerType < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++LayerType)
@@ -260,17 +258,18 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 						}
 					}
 
-					if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && TileIndex == TILE_SWITCHTIMEDOPEN)
-						TileIndex = 8;
-
-					int X = TileIndex % 16;
-					int Y = TileIndex / 16;
-
-					int CopyWidth = ImgInfo.m_Width / 16;
-					int CopyHeight = ImgInfo.m_Height / 16;
 					if(ValidTile)
 					{
-						Graphics()->CopyTextureBufferSub(pBuildImgData, pTmpImgData, ImgInfo.m_Width, ImgInfo.m_Height, PixelSize, (size_t)X * CopyWidth, (size_t)Y * CopyHeight, CopyWidth, CopyHeight);
+						if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && TileIndex == TILE_SWITCHTIMEDOPEN)
+						{
+							TileIndex = 8;
+						}
+
+						const size_t CopyWidth = ImgInfo.m_Width / 16;
+						const size_t CopyHeight = ImgInfo.m_Height / 16;
+						const size_t OffsetX = (size_t)(TileIndex % 16) * CopyWidth;
+						const size_t OffsetY = (size_t)(TileIndex / 16) * CopyHeight;
+						Graphics()->CopyTextureBufferSub(pBuildImgData, ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height, PixelSize, OffsetX, OffsetY, CopyWidth, CopyHeight);
 					}
 				}
 
@@ -291,10 +290,8 @@ IGraphics::CTextureHandle CMapImages::GetSpeedupArrow()
 	{
 		int TextureLoadFlag = (Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
 		m_SpeedupArrowTexture = Graphics()->LoadTexture("editor/speed_arrow_array.png", IStorage::TYPE_ALL, TextureLoadFlag);
-
 		m_SpeedupArrowIsLoaded = true;
 	}
-
 	return m_SpeedupArrowTexture;
 }
 
