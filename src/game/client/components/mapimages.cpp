@@ -187,43 +187,30 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 	{
 		m_aEntitiesIsLoaded[(EntitiesModType * 2) + (int)EntitiesAreMasked] = true;
 
-		char aPath[64];
-		str_format(aPath, sizeof(aPath), "%s/%s.png", m_aEntitiesPath, gs_apModEntitiesNames[EntitiesModType]);
-
 		int TextureLoadFlag = 0;
 		if(Graphics()->HasTextureArraysSupport())
 			TextureLoadFlag = (Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
 
 		CImageInfo ImgInfo;
-		bool ImagePNGLoaded = false;
-		if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
-			ImagePNGLoaded = true;
-		else
-		{
-			bool TryDefault = true;
-			// try as single ddnet replacement
-			if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET)
-			{
-				str_format(aPath, sizeof(aPath), "%s.png", m_aEntitiesPath);
-				if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
-				{
-					ImagePNGLoaded = true;
-					TryDefault = false;
-				}
-			}
+		char aPath[IO_MAX_PATH_LENGTH];
+		str_format(aPath, sizeof(aPath), "%s/%s.png", m_aEntitiesPath, gs_apModEntitiesNames[EntitiesModType]);
+		Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
 
-			if(!ImagePNGLoaded && TryDefault)
-			{
-				// try default
-				str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", gs_apModEntitiesNames[EntitiesModType]);
-				if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
-				{
-					ImagePNGLoaded = true;
-				}
-			}
+		// try as single ddnet replacement
+		if(ImgInfo.m_pData == nullptr && EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET)
+		{
+			str_format(aPath, sizeof(aPath), "%s.png", m_aEntitiesPath);
+			Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
 		}
 
-		if(ImagePNGLoaded && ImgInfo.m_Width > 0 && ImgInfo.m_Height > 0)
+		// try default
+		if(ImgInfo.m_pData == nullptr)
+		{
+			str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", gs_apModEntitiesNames[EntitiesModType]);
+			Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+		}
+
+		if(ImgInfo.m_pData != nullptr)
 		{
 			const size_t PixelSize = ImgInfo.PixelSize();
 			const size_t BuildImageSize = (size_t)ImgInfo.m_Width * ImgInfo.m_Height * PixelSize;
