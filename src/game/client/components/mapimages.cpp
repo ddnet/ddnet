@@ -178,6 +178,48 @@ static EMapImageModType GetEntitiesModType(const CGameInfo &GameInfo)
 		return MAP_IMAGE_MOD_TYPE_DDNET;
 }
 
+static bool IsValidTile(int LayerType, bool EntitiesAreMasked, EMapImageModType EntitiesModType, int TileIndex)
+{
+	if(TileIndex == TILE_AIR)
+		return false;
+	if(!EntitiesAreMasked)
+		return true;
+
+	if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || EntitiesModType == MAP_IMAGE_MOD_TYPE_DDRACE)
+	{
+		if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_BOOST)
+		{
+			if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH &&
+				!IsValidGameTile(TileIndex) &&
+				!IsValidFrontTile(TileIndex) &&
+				!IsValidSpeedupTile(TileIndex) &&
+				!IsValidTeleTile(TileIndex) &&
+				!IsValidTuneTile(TileIndex))
+			{
+				return false;
+			}
+			else if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH &&
+				!IsValidSwitchTile(TileIndex))
+			{
+				return false;
+			}
+		}
+	}
+	else if(EntitiesModType == MAP_IMAGE_MOD_TYPE_RACE && IsCreditsTile(TileIndex))
+	{
+		return false;
+	}
+	else if(EntitiesModType == MAP_IMAGE_MOD_TYPE_FNG && IsCreditsTile(TileIndex))
+	{
+		return false;
+	}
+	else if(EntitiesModType == MAP_IMAGE_MOD_TYPE_VANILLA && IsCreditsTile(TileIndex))
+	{
+		return false;
+	}
+	return true;
+}
+
 IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType EntityLayerType)
 {
 	const bool EntitiesAreMasked = !GameClient()->m_GameInfo.m_DontMaskEntities;
@@ -226,39 +268,8 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 
 				for(int i = 0; i < 256; ++i)
 				{
-					bool ValidTile = i != 0;
 					int TileIndex = i;
-					if(EntitiesAreMasked)
-					{
-						if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || EntitiesModType == MAP_IMAGE_MOD_TYPE_DDRACE)
-						{
-							if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_BOOST)
-							{
-								if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH && !IsValidGameTile((int)TileIndex) && !IsValidFrontTile((int)TileIndex) && !IsValidSpeedupTile((int)TileIndex) &&
-									!IsValidTeleTile((int)TileIndex) && !IsValidTuneTile((int)TileIndex))
-									ValidTile = false;
-								else if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH)
-								{
-									if(!IsValidSwitchTile((int)TileIndex))
-										ValidTile = false;
-								}
-							}
-						}
-						else if((EntitiesModType == MAP_IMAGE_MOD_TYPE_RACE) && IsCreditsTile((int)TileIndex))
-						{
-							ValidTile = false;
-						}
-						else if((EntitiesModType == MAP_IMAGE_MOD_TYPE_FNG) && IsCreditsTile((int)TileIndex))
-						{
-							ValidTile = false;
-						}
-						else if((EntitiesModType == MAP_IMAGE_MOD_TYPE_VANILLA) && IsCreditsTile((int)TileIndex))
-						{
-							ValidTile = false;
-						}
-					}
-
-					if(ValidTile)
+					if(IsValidTile(LayerType, EntitiesAreMasked, EntitiesModType, TileIndex))
 					{
 						if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && TileIndex == TILE_SWITCHTIMEDOPEN)
 						{
