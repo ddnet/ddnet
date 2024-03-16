@@ -2249,7 +2249,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 	}
 	if(Info.m_Format != CImageInfo::FORMAT_RGBA)
 	{
-		pSelf->Graphics()->FreePNG(&Info);
+		Info.Free();
 		char aError[IO_MAX_PATH_LENGTH + 64];
 		str_format(aError, sizeof(aError), "Failed to load menu image from '%s': must be an RGBA image", aPath);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus", aError);

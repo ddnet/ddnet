@@ -97,6 +97,15 @@ public:
 	 */
 	uint8_t *m_pData = nullptr;
 
+	void Free()
+	{
+		m_Width = 0;
+		m_Height = 0;
+		m_Format = FORMAT_ERROR;
+		free(m_pData);
+		m_pData = nullptr;
+	}
+
 	static size_t PixelSize(EImageFormat Format)
 	{
 		dbg_assert(Format != FORMAT_ERROR, "Format invalid");
@@ -322,7 +331,6 @@ public:
 	virtual const TTwGraphicsGpuList &GetGpus() const = 0;
 
 	virtual bool LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
-	virtual void FreePNG(CImageInfo *pImg) = 0;
 
 	virtual bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) = 0;
 	virtual bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) = 0;

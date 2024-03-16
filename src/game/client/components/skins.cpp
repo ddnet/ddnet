@@ -293,7 +293,7 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	for(int i = 0; i < 6; ++i)
 		Skin.m_ColorableSkin.m_aEyes[i] = Graphics()->LoadSpriteTexture(Info, &g_pData->m_aSprites[SPRITE_TEE_EYE_NORMAL + i]);
 
-	Graphics()->FreePNG(&Info);
+	Info.Free();
 
 	if(g_Config.m_Debug)
 	{

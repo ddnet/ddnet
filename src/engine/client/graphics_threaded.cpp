@@ -657,12 +657,6 @@ bool CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int St
 	return true;
 }
 
-void CGraphics_Threaded::FreePNG(CImageInfo *pImg)
-{
-	free(pImg->m_pData);
-	pImg->m_pData = NULL;
-}
-
 bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize)
 {
 	dbg_assert(DivX != 0 && DivY != 0, "Passing 0 to this function is not allowed.");

@@ -212,8 +212,7 @@ void CEditor::AddTileart(bool IgnoreHistory)
 		m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileArt>(this, ImageCount, m_aTileartFilename, IndexMap));
 	}
 
-	free(m_TileartImageInfo.m_pData);
-	m_TileartImageInfo.m_pData = nullptr;
+	m_TileartImageInfo.Free();
 	m_Map.OnModify();
 	m_Dialog = DIALOG_NONE;
 }
@@ -226,8 +225,7 @@ void CEditor::TileartCheckColors()
 	{
 		m_PopupEventType = CEditor::POPEVENT_PIXELART_TOO_MANY_COLORS;
 		m_PopupEventActivated = true;
-		free(m_TileartImageInfo.m_pData);
-		m_TileartImageInfo.m_pData = nullptr;
+		m_TileartImageInfo.Free();
 	}
 	else if(NumColorGroups > 1)
 	{
