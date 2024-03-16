@@ -1944,8 +1944,7 @@ CMenus::CCommunityIconLoadJob::CCommunityIconLoadJob(CMenus *pMenus, const char 
 
 CMenus::CCommunityIconLoadJob::~CCommunityIconLoadJob()
 {
-	free(m_ImageInfo.m_pData);
-	m_ImageInfo.m_pData = nullptr;
+	m_ImageInfo.Free();
 }
 
 int CMenus::CommunityIconScan(const char *pName, int IsDir, int DirType, void *pUser)
@@ -1983,14 +1982,14 @@ bool CMenus::LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &I
 	}
 	if(Info.m_Format != CImageInfo::FORMAT_RGBA)
 	{
-		Graphics()->FreePNG(&Info);
+		Info.Free();
 		str_format(aError, sizeof(aError), "Failed to load community icon from '%s': must be an RGBA image", pPath);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus/browser", aError);
 		return false;
 	}
 	if(!Storage()->CalculateHashes(pPath, DirType, &Sha256))
 	{
-		Graphics()->FreePNG(&Info);
+		Info.Free();
 		str_format(aError, sizeof(aError), "Failed to load community icon from '%s': could not calculate hash", pPath);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus/browser", aError);
 		return false;

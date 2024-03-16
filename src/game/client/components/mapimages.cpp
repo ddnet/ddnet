@@ -286,8 +286,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			}
 
 			free(pBuildImgData);
-
-			Graphics()->FreePNG(&ImgInfo);
+			ImgInfo.Free();
 		}
 	}
 
