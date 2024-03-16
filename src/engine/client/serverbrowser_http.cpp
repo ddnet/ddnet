@@ -400,19 +400,22 @@ void CServerBrowserHttp::Update()
 		Success = Success && pJson;
 		Success = Success && !Parse(pJson, &m_vServers, &m_vLegacyServers);
 		json_value_free(pJson);
-		int Age = SanitizeAge(pGetServers->ResultAgeSeconds());
 		if(!Success)
 		{
 			log_error("serverbrowse_http", "failed getting serverlist, trying to find best URL");
 			m_pChooseMaster->Reset();
 			m_pChooseMaster->Refresh();
 		}
-		// Try to find new master if the current one returns results
-		// that are 5 minutes old.
-		else if(Age > 300)
+		else
 		{
-			log_info("serverbrowse_http", "got stale serverlist, age=%ds, trying to find best URL", Age);
-			m_pChooseMaster->Refresh();
+			// Try to find new master if the current one returns
+			// results that are 5 minutes old.
+			int Age = SanitizeAge(pGetServers->ResultAgeSeconds());
+			if(Age > 300)
+			{
+				log_info("serverbrowse_http", "got stale serverlist, age=%ds, trying to find best URL", Age);
+				m_pChooseMaster->Refresh();
+			}
 		}
 	}
 }
