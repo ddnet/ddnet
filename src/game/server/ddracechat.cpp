@@ -1217,7 +1217,7 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 			"chatresp",
 			(pPlayer->m_EyeEmoteEnabled) ?
 				"You can now use the preset eye emotes." :
-				"You don't have any eye emotes, remember to bind some. (until you die)");
+				"You don't have any eye emotes, remember to bind some.");
 		return;
 	}
 	else if(str_comp_nocase(pResult->GetString(0), "on") == 0)
@@ -1231,7 +1231,7 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 		"chatresp",
 		(pPlayer->m_EyeEmoteEnabled) ?
 			"You can now use the preset eye emotes." :
-			"You don't have any eye emotes, remember to bind some. (until you die)");
+			"You don't have any eye emotes, remember to bind some.");
 }
 
 void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
