@@ -1,12 +1,14 @@
 name: Check ASan & UBSan
 
-on:
-  push:
-    branches-ignore:
-      - gh-readonly-queue/**
-      - master
-  pull_request:
-  merge_group:
+# TODO(def-) Reenable when we figure out #8104
+on: workflow_dispatch
+#on:
+#  push:
+#    branches-ignore:
+#      - gh-readonly-queue/**
+#      - master
+#  pull_request:
+#  merge_group:
 
 jobs:
   check-clang-san:
