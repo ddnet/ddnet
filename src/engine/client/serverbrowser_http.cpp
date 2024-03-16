@@ -225,7 +225,7 @@ void CChooseMaster::CJob::Run()
 		pHead->Wait();
 		if(pHead->State() == EHttpState::ABORTED || State() == IJob::STATE_ABORTED)
 		{
-			log_debug("serverbrowse_http", "master chooser aborted");
+			log_debug("serverbrowser_http", "master chooser aborted");
 			return;
 		}
 		if(pHead->State() != EHttpState::DONE)
@@ -248,7 +248,7 @@ void CChooseMaster::CJob::Run()
 		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
 		if(pGet->State() == EHttpState::ABORTED || State() == IJob::STATE_ABORTED)
 		{
-			log_debug("serverbrowse_http", "master chooser aborted");
+			log_debug("serverbrowser_http", "master chooser aborted");
 			return;
 		}
 		if(pGet->State() != EHttpState::DONE)
@@ -268,7 +268,7 @@ void CChooseMaster::CJob::Run()
 			continue;
 		}
 		int AgeS = SanitizeAge(pGet->ResultAgeSeconds());
-		log_info("serverbrowse_http", "found master, url='%s' time=%dms age=%ds", pUrl, (int)Time.count(), AgeS);
+		log_info("serverbrowser_http", "found master, url='%s' time=%dms age=%ds", pUrl, (int)Time.count(), AgeS);
 
 		aTimeMs[i] = Time.count();
 		aAgeS[i] = AgeS;
@@ -293,11 +293,11 @@ void CChooseMaster::CJob::Run()
 	}
 	if(BestIndex == -1)
 	{
-		log_error("serverbrowse_http", "WARNING: no usable masters found");
+		log_error("serverbrowser_http", "WARNING: no usable masters found");
 		return;
 	}
 
-	log_info("serverbrowse_http", "determined best master, url='%s' time=%dms age=%ds", m_pData->m_aaUrls[BestIndex], BestTime, BestAge);
+	log_info("serverbrowser_http", "determined best master, url='%s' time=%dms age=%ds", m_pData->m_aaUrls[BestIndex], BestTime, BestAge);
 	m_pData->m_BestIndex.store(BestIndex);
 }
 
@@ -374,7 +374,7 @@ void CServerBrowserHttp::Update()
 		{
 			if(!m_pChooseMaster->IsRefreshing())
 			{
-				log_error("serverbrowse_http", "no working serverlist URL found");
+				log_error("serverbrowser_http", "no working serverlist URL found");
 				m_State = STATE_NO_MASTER;
 			}
 			return;
@@ -403,7 +403,7 @@ void CServerBrowserHttp::Update()
 		int Age = SanitizeAge(pGetServers->ResultAgeSeconds());
 		if(!Success)
 		{
-			log_error("serverbrowse_http", "failed getting serverlist, trying to find best URL");
+			log_error("serverbrowser_http", "failed getting serverlist, trying to find best URL");
 			m_pChooseMaster->Reset();
 			m_pChooseMaster->Refresh();
 		}
@@ -411,7 +411,7 @@ void CServerBrowserHttp::Update()
 		// that are 5 minutes old.
 		else if(Age > 300)
 		{
-			log_info("serverbrowse_http", "got stale serverlist, age=%ds, trying to find best URL", Age);
+			log_info("serverbrowser_http", "got stale serverlist, age=%ds, trying to find best URL", Age);
 			m_pChooseMaster->Refresh();
 		}
 	}
@@ -491,7 +491,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 			NETADDR ParsedAddr;
 			if(ServerbrowserParseUrl(&ParsedAddr, Addresses[a]))
 			{
-				log_debug("dbg/serverbrowser", "unknown address, i=%d a=%d", i, a);
+				// log_debug("serverbrowser_http", "unknown address, i=%d a=%d", i, a);
 				// Skip unknown addresses.
 				continue;
 			}
