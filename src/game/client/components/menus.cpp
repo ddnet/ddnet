@@ -380,27 +380,27 @@ ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetId, const float Lin
 	pMainRect->HSplitTop(LineSize, &Section, pMainRect);
 	pMainRect->HSplitTop(BottomMargin, nullptr, pMainRect);
 
-	if(CheckBoxSpacing || pCheckBoxValue != nullptr)
-	{
-		CUIRect CheckBox;
-		Section.VSplitLeft(Section.h, &CheckBox, &Section);
-		if(pCheckBoxValue != nullptr)
-		{
-			CheckBox.Margin(2.0f, &CheckBox);
-			if(DoButton_CheckBox(pCheckBoxValue, "", *pCheckBoxValue, &CheckBox))
-				*pCheckBoxValue ^= 1;
-		}
-		Section.VSplitLeft(5.0f, nullptr, &Section);
-	}
-
-	Section.VSplitRight(88.0f, &Label, &Section);
 	Section.VSplitRight(60.0f, &Section, &ResetButton);
 	Section.VSplitRight(8.0f, &Section, nullptr);
 	Section.VSplitRight(Section.h, &Section, &ColorPickerButton);
+	Section.VSplitRight(8.0f, &Label, nullptr);
 
-	Ui()->DoLabel(&Label, pText, LabelSize, TEXTALIGN_ML);
+	if(pCheckBoxValue != nullptr)
+	{
+		Label.Margin(2.0f, &Label);
+		if(DoButton_CheckBox(pCheckBoxValue, pText, *pCheckBoxValue, &Label))
+			*pCheckBoxValue ^= 1;
+	}
+	else if(CheckBoxSpacing)
+	{
+		Label.VSplitLeft(Label.h + 5.0f, nullptr, &Label);
+	}
+	if(pCheckBoxValue == nullptr)
+	{
+		Ui()->DoLabel(&Label, pText, LabelSize, TEXTALIGN_ML);
+	}
 
-	ColorHSLA PickedColor = DoButton_ColorPicker(&ColorPickerButton, pColorValue, Alpha);
+	const ColorHSLA PickedColor = DoButton_ColorPicker(&ColorPickerButton, pColorValue, Alpha);
 
 	ResetButton.HMargin(2.0f, &ResetButton);
 	if(DoButton_Menu(pResetId, Localize("Reset"), 0, &ResetButton, nullptr, IGraphics::CORNER_ALL, 4.0f, 0.1f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f)))
