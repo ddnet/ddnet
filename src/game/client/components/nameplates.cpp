@@ -220,11 +220,11 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 	if((g_Config.m_Debug || g_Config.m_ClNameplatesStrong) && g_Config.m_ClNameplates)
 	{
-		if(m_pClient->m_Snap.m_LocalClientId != -1 && m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId].m_HasExtendedData && m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientId].m_HasExtendedData)
+		if(m_pClient->m_Snap.m_LocalClientId != -1)
 		{
-			CCharacter *pLocalChar = m_pClient->m_GameWorld.GetCharacterById(m_pClient->m_Snap.m_LocalClientId);
-			CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterById(pPlayerInfo->m_ClientId);
-			if(pCharacter && pLocalChar)
+			const CGameClient::CSnapState::CCharacterInfo &Local = m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientId];
+			const CGameClient::CSnapState::CCharacterInfo &Other = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId];
+			if(Local.m_HasExtendedData && Other.m_HasExtendedData)
 			{
 				if(pPlayerInfo->m_Local)
 					TextRender()->TextColor(rgb);
@@ -237,7 +237,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 					Graphics()->QuadsBegin();
 					ColorRGBA StrongWeakStatusColor;
 					int StrongWeakSpriteId;
-					if(pLocalChar->GetStrongWeakId() > pCharacter->GetStrongWeakId())
+					if(Local.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId)
 					{
 						StrongWeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
 						StrongWeakSpriteId = SPRITE_HOOK_STRONG;
@@ -271,7 +271,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				{
 					YOffset -= FontSize;
 					char aBuf[12];
-					str_from_int(pCharacter->GetStrongWeakId(), aBuf);
+					str_from_int(Other.m_ExtendedData.m_StrongWeakId, aBuf);
 					float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
 					TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 				}
