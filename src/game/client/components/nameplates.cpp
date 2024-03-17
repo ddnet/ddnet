@@ -220,13 +220,15 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 	if((g_Config.m_Debug || g_Config.m_ClNameplatesStrong) && g_Config.m_ClNameplates)
 	{
-		if(m_pClient->m_Snap.m_LocalClientId != -1)
+		bool Following = (m_pClient->m_Snap.m_SpecInfo.m_Active && !GameClient()->m_MultiViewActivated && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW);
+		if(m_pClient->m_Snap.m_LocalClientId != -1 || Following)
 		{
-			const CGameClient::CSnapState::CCharacterInfo &Local = m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientId];
-			const CGameClient::CSnapState::CCharacterInfo &Other = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId];
-			if(Local.m_HasExtendedData && Other.m_HasExtendedData)
+			int SelectedId = Following ? m_pClient->m_Snap.m_SpecInfo.m_SpectatorId : m_pClient->m_Snap.m_LocalClientId;
+			const CGameClient::CSnapState::CCharacterInfo &Selected = m_pClient->m_Snap.m_aCharacters[SelectedId];
+			const CGameClient::CSnapState::CCharacterInfo &Other = m_pClient->m_Snap.m_aCharacters[ClientId];
+			if(Selected.m_HasExtendedData && Other.m_HasExtendedData)
 			{
-				if(pPlayerInfo->m_Local)
+				if(SelectedId == ClientId)
 					TextRender()->TextColor(rgb);
 				else
 				{
@@ -237,7 +239,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 					Graphics()->QuadsBegin();
 					ColorRGBA StrongWeakStatusColor;
 					int StrongWeakSpriteId;
-					if(Local.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId)
+					if(Selected.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId)
 					{
 						StrongWeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
 						StrongWeakSpriteId = SPRITE_HOOK_STRONG;
