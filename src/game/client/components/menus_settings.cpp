@@ -1164,7 +1164,7 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 
 			View.HSplitTop(Spacing, nullptr, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
-			Ui()->DoScrollbarOption(&g_Config.m_UiControllerSens, &g_Config.m_UiControllerSens, &Button, Localize("Ui controller sens."), 1, 500, &CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE);
+			Ui()->DoScrollbarOption(&g_Config.m_UiControllerSens, &g_Config.m_UiControllerSens, &Button, Localize("UI controller sens."), 1, 500, &CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE);
 
 			View.HSplitTop(Spacing, nullptr, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
@@ -1331,7 +1331,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MouseSettings.HSplitTop(2.0f, nullptr, &MouseSettings);
 
 			MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
-			Ui()->DoScrollbarOption(&g_Config.m_UiMousesens, &g_Config.m_UiMousesens, &Button, Localize("Ui mouse sens."), 1, 500, &CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE);
+			Ui()->DoScrollbarOption(&g_Config.m_UiMousesens, &g_Config.m_UiMousesens, &Button, Localize("UI mouse sens."), 1, 500, &CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE);
 		}
 	}
 
@@ -1689,7 +1689,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(2.0f, nullptr, &MainView);
 	static CButtonContainer s_UiColorResetId;
-	DoLine_ColorPicker(&s_UiColorResetId, 25.0f, 13.0f, 2.0f, &MainView, Localize("Ui Color"), &g_Config.m_UiColor, color_cast<ColorRGBA>(ColorHSLA(0xE4A046AFU, true)), false, nullptr, true);
+	DoLine_ColorPicker(&s_UiColorResetId, 25.0f, 13.0f, 2.0f, &MainView, Localize("UI Color"), &g_Config.m_UiColor, color_cast<ColorRGBA>(ColorHSLA(0xE4A046AFU, true)), false, nullptr, true);
 
 	// Backend list
 	struct SMenuBackendInfo
