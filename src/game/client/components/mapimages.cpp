@@ -158,131 +158,133 @@ void CMapImages::LoadBackground(class CLayers *pLayers, class IMap *pMap)
 	OnMapLoadImpl(pLayers, pMap);
 }
 
+static EMapImageModType GetEntitiesModType(const CGameInfo &GameInfo)
+{
+	if(GameInfo.m_EntitiesFDDrace)
+		return MAP_IMAGE_MOD_TYPE_FDDRACE;
+	else if(GameInfo.m_EntitiesDDNet)
+		return MAP_IMAGE_MOD_TYPE_DDNET;
+	else if(GameInfo.m_EntitiesDDRace)
+		return MAP_IMAGE_MOD_TYPE_DDRACE;
+	else if(GameInfo.m_EntitiesRace)
+		return MAP_IMAGE_MOD_TYPE_RACE;
+	else if(GameInfo.m_EntitiesBW)
+		return MAP_IMAGE_MOD_TYPE_BLOCKWORLDS;
+	else if(GameInfo.m_EntitiesFNG)
+		return MAP_IMAGE_MOD_TYPE_FNG;
+	else if(GameInfo.m_EntitiesVanilla)
+		return MAP_IMAGE_MOD_TYPE_VANILLA;
+	else
+		return MAP_IMAGE_MOD_TYPE_DDNET;
+}
+
+static bool IsValidTile(int LayerType, bool EntitiesAreMasked, EMapImageModType EntitiesModType, int TileIndex)
+{
+	if(TileIndex == TILE_AIR)
+		return false;
+	if(!EntitiesAreMasked)
+		return true;
+
+	if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || EntitiesModType == MAP_IMAGE_MOD_TYPE_DDRACE)
+	{
+		if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_BOOST)
+		{
+			if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH &&
+				!IsValidGameTile(TileIndex) &&
+				!IsValidFrontTile(TileIndex) &&
+				!IsValidSpeedupTile(TileIndex) &&
+				!IsValidTeleTile(TileIndex) &&
+				!IsValidTuneTile(TileIndex))
+			{
+				return false;
+			}
+			else if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH &&
+				!IsValidSwitchTile(TileIndex))
+			{
+				return false;
+			}
+		}
+	}
+	else if(EntitiesModType == MAP_IMAGE_MOD_TYPE_RACE && IsCreditsTile(TileIndex))
+	{
+		return false;
+	}
+	else if(EntitiesModType == MAP_IMAGE_MOD_TYPE_FNG && IsCreditsTile(TileIndex))
+	{
+		return false;
+	}
+	else if(EntitiesModType == MAP_IMAGE_MOD_TYPE_VANILLA && IsCreditsTile(TileIndex))
+	{
+		return false;
+	}
+	return true;
+}
+
 IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType EntityLayerType)
 {
-	EMapImageModType EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
-	bool EntitiesAreMasked = !GameClient()->m_GameInfo.m_DontMaskEntities;
-
-	if(GameClient()->m_GameInfo.m_EntitiesFDDrace)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_FDDRACE;
-	else if(GameClient()->m_GameInfo.m_EntitiesDDNet)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
-	else if(GameClient()->m_GameInfo.m_EntitiesDDRace)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDRACE;
-	else if(GameClient()->m_GameInfo.m_EntitiesRace)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_RACE;
-	else if(GameClient()->m_GameInfo.m_EntitiesBW)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_BLOCKWORLDS;
-	else if(GameClient()->m_GameInfo.m_EntitiesFNG)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_FNG;
-	else if(GameClient()->m_GameInfo.m_EntitiesVanilla)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_VANILLA;
+	const bool EntitiesAreMasked = !GameClient()->m_GameInfo.m_DontMaskEntities;
+	const EMapImageModType EntitiesModType = GetEntitiesModType(GameClient()->m_GameInfo);
 
 	if(!m_aEntitiesIsLoaded[(EntitiesModType * 2) + (int)EntitiesAreMasked])
 	{
 		m_aEntitiesIsLoaded[(EntitiesModType * 2) + (int)EntitiesAreMasked] = true;
-
-		char aPath[64];
-		str_format(aPath, sizeof(aPath), "%s/%s.png", m_aEntitiesPath, gs_apModEntitiesNames[EntitiesModType]);
 
 		int TextureLoadFlag = 0;
 		if(Graphics()->HasTextureArraysSupport())
 			TextureLoadFlag = (Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
 
 		CImageInfo ImgInfo;
-		bool ImagePNGLoaded = false;
-		if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
-			ImagePNGLoaded = true;
-		else
-		{
-			bool TryDefault = true;
-			// try as single ddnet replacement
-			if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET)
-			{
-				str_format(aPath, sizeof(aPath), "%s.png", m_aEntitiesPath);
-				if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
-				{
-					ImagePNGLoaded = true;
-					TryDefault = false;
-				}
-			}
+		char aPath[IO_MAX_PATH_LENGTH];
+		str_format(aPath, sizeof(aPath), "%s/%s.png", m_aEntitiesPath, gs_apModEntitiesNames[EntitiesModType]);
+		Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
 
-			if(!ImagePNGLoaded && TryDefault)
-			{
-				// try default
-				str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", gs_apModEntitiesNames[EntitiesModType]);
-				if(Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL))
-				{
-					ImagePNGLoaded = true;
-				}
-			}
+		// try as single ddnet replacement
+		if(ImgInfo.m_pData == nullptr && EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET)
+		{
+			str_format(aPath, sizeof(aPath), "%s.png", m_aEntitiesPath);
+			Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
 		}
 
-		if(ImagePNGLoaded && ImgInfo.m_Width > 0 && ImgInfo.m_Height > 0)
+		// try default
+		if(ImgInfo.m_pData == nullptr)
+		{
+			str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", gs_apModEntitiesNames[EntitiesModType]);
+			Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+		}
+
+		if(ImgInfo.m_pData != nullptr)
 		{
 			const size_t PixelSize = ImgInfo.PixelSize();
 			const size_t BuildImageSize = (size_t)ImgInfo.m_Width * ImgInfo.m_Height * PixelSize;
-
-			uint8_t *pTmpImgData = ImgInfo.m_pData;
-			uint8_t *pBuildImgData = (uint8_t *)malloc(BuildImageSize);
+			uint8_t *pBuildImgData = static_cast<uint8_t *>(malloc(BuildImageSize));
 
 			// build game layer
-			for(int n = 0; n < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++n)
+			for(int LayerType = 0; LayerType < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++LayerType)
 			{
-				dbg_assert(!m_aaEntitiesTextures[(EntitiesModType * 2) + (int)EntitiesAreMasked][n].IsValid(), "entities texture already loaded when it should not be");
+				dbg_assert(!m_aaEntitiesTextures[(EntitiesModType * 2) + (int)EntitiesAreMasked][LayerType].IsValid(), "entities texture already loaded when it should not be");
 
 				// set everything transparent
 				mem_zero(pBuildImgData, BuildImageSize);
 
 				for(int i = 0; i < 256; ++i)
 				{
-					bool ValidTile = i != 0;
 					int TileIndex = i;
-					if(EntitiesAreMasked)
+					if(IsValidTile(LayerType, EntitiesAreMasked, EntitiesModType, TileIndex))
 					{
-						if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || EntitiesModType == MAP_IMAGE_MOD_TYPE_DDRACE)
+						if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && TileIndex == TILE_SWITCHTIMEDOPEN)
 						{
-							if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_BOOST)
-							{
-								if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH && !IsValidGameTile((int)TileIndex) && !IsValidFrontTile((int)TileIndex) && !IsValidSpeedupTile((int)TileIndex) &&
-									!IsValidTeleTile((int)TileIndex) && !IsValidTuneTile((int)TileIndex))
-									ValidTile = false;
-								else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH)
-								{
-									if(!IsValidSwitchTile((int)TileIndex))
-										ValidTile = false;
-								}
-							}
+							TileIndex = 8;
 						}
-						else if((EntitiesModType == MAP_IMAGE_MOD_TYPE_RACE) && IsCreditsTile((int)TileIndex))
-						{
-							ValidTile = false;
-						}
-						else if((EntitiesModType == MAP_IMAGE_MOD_TYPE_FNG) && IsCreditsTile((int)TileIndex))
-						{
-							ValidTile = false;
-						}
-						else if((EntitiesModType == MAP_IMAGE_MOD_TYPE_VANILLA) && IsCreditsTile((int)TileIndex))
-						{
-							ValidTile = false;
-						}
-					}
 
-					if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && TileIndex == TILE_SWITCHTIMEDOPEN)
-						TileIndex = 8;
-
-					int X = TileIndex % 16;
-					int Y = TileIndex / 16;
-
-					int CopyWidth = ImgInfo.m_Width / 16;
-					int CopyHeight = ImgInfo.m_Height / 16;
-					if(ValidTile)
-					{
-						Graphics()->CopyTextureBufferSub(pBuildImgData, pTmpImgData, ImgInfo.m_Width, ImgInfo.m_Height, PixelSize, (size_t)X * CopyWidth, (size_t)Y * CopyHeight, CopyWidth, CopyHeight);
+						const size_t CopyWidth = ImgInfo.m_Width / 16;
+						const size_t CopyHeight = ImgInfo.m_Height / 16;
+						const size_t OffsetX = (size_t)(TileIndex % 16) * CopyWidth;
+						const size_t OffsetY = (size_t)(TileIndex / 16) * CopyHeight;
+						Graphics()->CopyTextureBufferSub(pBuildImgData, ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height, PixelSize, OffsetX, OffsetY, CopyWidth, CopyHeight);
 					}
 				}
 
-				m_aaEntitiesTextures[(EntitiesModType * 2) + (int)EntitiesAreMasked][n] = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, pBuildImgData, TextureLoadFlag, aPath);
+				m_aaEntitiesTextures[(EntitiesModType * 2) + (int)EntitiesAreMasked][LayerType] = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, pBuildImgData, TextureLoadFlag, aPath);
 			}
 
 			free(pBuildImgData);
@@ -299,10 +301,8 @@ IGraphics::CTextureHandle CMapImages::GetSpeedupArrow()
 	{
 		int TextureLoadFlag = (Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
 		m_SpeedupArrowTexture = Graphics()->LoadTexture("editor/speed_arrow_array.png", IStorage::TYPE_ALL, TextureLoadFlag);
-
 		m_SpeedupArrowIsLoaded = true;
 	}
-
 	return m_SpeedupArrowTexture;
 }
 
@@ -330,20 +330,20 @@ void CMapImages::ChangeEntitiesPath(const char *pPath)
 		str_format(m_aEntitiesPath, sizeof(m_aEntitiesPath), "assets/entities/%s", pPath);
 	}
 
-	for(int i = 0; i < MAP_IMAGE_MOD_TYPE_COUNT * 2; ++i)
+	for(int ModType = 0; ModType < MAP_IMAGE_MOD_TYPE_COUNT * 2; ++ModType)
 	{
-		if(m_aEntitiesIsLoaded[i])
+		if(m_aEntitiesIsLoaded[ModType])
 		{
-			for(int n = 0; n < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++n)
+			for(int LayerType = 0; LayerType < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++LayerType)
 			{
-				if(m_aaEntitiesTextures[i][n].IsValid())
+				if(m_aaEntitiesTextures[ModType][LayerType].IsValid())
 				{
-					Graphics()->UnloadTexture(&(m_aaEntitiesTextures[i][n]));
+					Graphics()->UnloadTexture(&(m_aaEntitiesTextures[ModType][LayerType]));
 				}
-				m_aaEntitiesTextures[i][n] = IGraphics::CTextureHandle();
+				m_aaEntitiesTextures[ModType][LayerType] = IGraphics::CTextureHandle();
 			}
 
-			m_aEntitiesIsLoaded[i] = false;
+			m_aEntitiesIsLoaded[ModType] = false;
 		}
 	}
 }
