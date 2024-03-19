@@ -1786,7 +1786,7 @@ Continue anyway?
 == Все равно продолжить?
 
 Communities
-== Соообщества
+== Сообщества
 
 Info Messages
 == Инф. Сообщения
