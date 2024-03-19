@@ -21,6 +21,7 @@
 #	timakro			2014-06-30 18:26:59
 #	deen			2020-06-26 18:32:00
 #	bluesky			2022-07-05 21:00:00
+# BlaiZephyr 2024-03-19 20:05:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -656,7 +657,7 @@ Updating...
 == Aktualisieren...
 
 Overlay entities
-== Overlay-Entities
+== Overlay-Entitäten
 
 Messages
 == Nachrichten
@@ -851,7 +852,7 @@ Length
 == Länge
 
 Show text entities
-== Entities-Text
+== Entitäten-Text
 
 Hook collisions
 == Hakenkollisionen
@@ -893,7 +894,7 @@ Downloading %s:
 == Herunterladen %s:
 
 Show entities
-== Entities anzeigen
+== Entitäten anzeigen
 
 Zoom in
 == Hineinzoomen
@@ -1065,7 +1066,7 @@ Assets
 == Assets
 
 Entities
-== Entities
+== Entitäten
 
 Emoticons
 == Emoticons
@@ -1257,7 +1258,7 @@ Team %d
 == Team %d
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== Deckkraft von Entities die zu einem anderen Team gehören, z.B. Tees und Namensschilder
+== Deckkraft von Entitäten die zu einem anderen Team gehören, z.B. Tees und Namensschilder
 
 Position:
 == Position:
@@ -1510,7 +1511,7 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Kein VRAM mehr verfügbar. Versuch eigene Assets (Skins, Entities, usw.) zu löschen, insbesondere solche mit hoher Auflösung.
+== Kein VRAM mehr verfügbar. Versuch eigene Assets (Skins, Entitäten, usw.) zu löschen, insbesondere solche mit hoher Auflösung.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1743,7 +1744,7 @@ Regular background color
 == Normale Hintergrundfarbe
 
 Entities background color
-== Entities-Hintergrundfarbe
+== Entitäten-Hintergrundfarbe
 
 Saving settings to '%s' failed
 == Einstellungen als '%s' speichern fehlgeschlagen
