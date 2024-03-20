@@ -2613,10 +2613,22 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("Chat"), HeadlineFontSize, TEXTALIGN_ML);
 
 		// General chat settings
-		LeftView.HSplitTop(SectionTotalMargin + 8 * LineSize, &Section, &LeftView);
+		LeftView.HSplitTop(SectionTotalMargin + 9 * LineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
 
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowChat, Localize("Show chat"), &g_Config.m_ClShowChat, &Section, LineSize);
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClShowChat, Localize("Show chat"), g_Config.m_ClShowChat, &Button))
+		{
+			g_Config.m_ClShowChat = g_Config.m_ClShowChat ? 0 : 1;
+		}
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(g_Config.m_ClShowChat)
+		{
+			static int s_ShowChat = 0;
+			if(DoButton_CheckBox(&s_ShowChat, Localize("Always show chat"), g_Config.m_ClShowChat == 2, &Button))
+				g_Config.m_ClShowChat = g_Config.m_ClShowChat != 2 ? 2 : 1;
+		}
+
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), &g_Config.m_ClChatTeamColors, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowChatFriends, Localize("Show only chat messages from friends"), &g_Config.m_ClShowChatFriends, &Section, LineSize);
 
@@ -2968,7 +2980,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("Name Plate"), HeadlineFontSize, TEXTALIGN_ML);
 
 		// General name plate settings
-		LeftView.HSplitTop(SectionTotalMargin + 10 * LineSize + 2 * ColorPickerLineSize, &Section, &LeftView);
+		LeftView.HSplitTop(SectionTotalMargin + 12 * LineSize + 2 * ColorPickerLineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplates, Localize("Show name plates"), &g_Config.m_ClNameplates, &Section, LineSize);
@@ -2983,7 +2995,20 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		}
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplatesTeamcolors, Localize("Use team colors for name plates"), &g_Config.m_ClNameplatesTeamcolors, &Section, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplatesStrong, Localize("Show hook strength indicator"), &g_Config.m_ClNameplatesStrong, &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplatesFriendMark, Localize("Show friend mark (♥) in name plates"), &g_Config.m_ClNameplatesFriendMark, &Section, LineSize);
+
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClNameplatesStrong, Localize("Show hook strength icon indicator"), g_Config.m_ClNameplatesStrong, &Button))
+		{
+			g_Config.m_ClNameplatesStrong = g_Config.m_ClNameplatesStrong ? 0 : 1;
+		}
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(g_Config.m_ClNameplatesStrong)
+		{
+			static int s_NameplatesStrong = 0;
+			if(DoButton_CheckBox(&s_NameplatesStrong, Localize("Show hook strength number indicator"), g_Config.m_ClNameplatesStrong == 2, &Button))
+				g_Config.m_ClNameplatesStrong = g_Config.m_ClNameplatesStrong != 2 ? 2 : 1;
+		}
 
 		Section.HSplitTop(LineSize, &Button, &Section);
 		if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection >= 1 && g_Config.m_ClShowDirection != 3, &Button))
@@ -3012,13 +3037,33 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("Hook collision line"), HeadlineFontSize, TEXTALIGN_ML);
 
 		// General hookline settings
-		LeftView.HSplitTop(SectionTotalMargin + 6 * LineSize + 3 * ColorPickerLineSize, &Section, &LeftView);
+		LeftView.HSplitTop(SectionTotalMargin + 9 * LineSize + 3 * ColorPickerLineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
+
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClShowHookCollOwn, Localize("Show own player's hook collision line"), g_Config.m_ClShowHookCollOwn, &Button))
+		{
+			g_Config.m_ClShowHookCollOwn = g_Config.m_ClShowHookCollOwn ? 0 : 1;
+		}
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(g_Config.m_ClShowHookCollOwn)
+		{
+			static int s_ShowHookCollOwn = 0;
+			if(DoButton_CheckBox(&s_ShowHookCollOwn, Localize("Always show own player's hook collision line"), g_Config.m_ClShowHookCollOwn == 2, &Button))
+				g_Config.m_ClShowHookCollOwn = g_Config.m_ClShowHookCollOwn != 2 ? 2 : 1;
+		}
 
 		Section.HSplitTop(LineSize, &Button, &Section);
 		if(DoButton_CheckBox(&g_Config.m_ClShowHookCollOther, Localize("Show other players' hook collision lines"), g_Config.m_ClShowHookCollOther, &Button))
 		{
 			g_Config.m_ClShowHookCollOther = g_Config.m_ClShowHookCollOther >= 1 ? 0 : 1;
+		}
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(g_Config.m_ClShowHookCollOther)
+		{
+			static int s_ShowHookCollOther = 0;
+			if(DoButton_CheckBox(&s_ShowHookCollOther, Localize("Always show other players' hook collision lines"), g_Config.m_ClShowHookCollOther == 2, &Button))
+				g_Config.m_ClShowHookCollOther = g_Config.m_ClShowHookCollOther != 2 ? 2 : 1;
 		}
 
 		Section.HSplitTop(2 * LineSize, &Button, &Section);
