@@ -1456,7 +1456,14 @@ void CServerBrowser::LoadDDNetServers()
 		const json_value &Name = Community["name"];
 		const json_value HasFinishes = Community["has_finishes"];
 		const json_value *pFinishes = &Icon["finishes"];
-		const json_value *pServers = &Icon["servers"];
+		const json_value *pServers = &Community["servers"];
+		// We accidentally set servers to be part of icon, so support that as a
+		// fallback for now. Can be removed in a few versions when the
+		// communities.json has been updated.
+		if(pServers->type == json_none)
+		{
+			pServers = &Icon["servers"];
+		}
 		if(pFinishes->type == json_none)
 		{
 			if(str_comp(Id, COMMUNITY_DDNET) == 0)
