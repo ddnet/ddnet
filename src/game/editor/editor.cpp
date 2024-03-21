@@ -7047,6 +7047,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 											ShowPopupEnvPoint();
 										}
 										Ui()->SetActiveItem(nullptr);
+										s_Operation = EEnvelopeEditorOp::OP_NONE;
 									}
 								}
 								else if(!Ui()->MouseButton(0))
@@ -7179,6 +7180,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 											ShowPopupEnvPoint();
 										}
 										Ui()->SetActiveItem(nullptr);
+										s_Operation = EEnvelopeEditorOp::OP_NONE;
 									}
 								}
 								else if(!Ui()->MouseButton(0))
