@@ -151,6 +151,7 @@ MACRO_CONFIG_INT(UiCloseWindowAfterChangingSetting, ui_close_window_after_changi
 MACRO_CONFIG_INT(UiUnreadNews, ui_unread_news, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Whether there is unread news")
 
 MACRO_CONFIG_INT(GfxNoclip, gfx_noclip, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Disable clipping")
+MACRO_CONFIG_INT(GfxIngameAspectRatio, gfx_ingame_aspect_ratio, 0, 0, 10000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Ingame aspect ratio (normalized float by 1000)")
 
 // dummy
 MACRO_CONFIG_STR(ClDummyName, dummy_name, 16, "", CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Name of the dummy")
