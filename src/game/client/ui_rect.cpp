@@ -29,6 +29,38 @@ void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom, float Spacing) const
 	}
 }
 
+void CUIRect::HSpaceAround(CUIRect *pTop, CUIRect *pMiddle, CUIRect *pBottom, float Spacing) const
+{
+	CUIRect r = *this;
+	const float Cut = r.h / 3;
+	const float HalfSpacing = Spacing / 2;
+	const float Height = Cut - Spacing;
+
+	if(pTop)
+	{
+		pTop->x = r.x;
+		pTop->y = r.y + HalfSpacing;
+		pTop->w = r.w;
+		pTop->h = Height;
+	}
+
+	if(pMiddle)
+	{
+		pMiddle->x = r.x;
+		pMiddle->y = r.y + Cut + HalfSpacing;
+		pMiddle->w = r.w;
+		pMiddle->h = Height;
+	}
+
+	if(pBottom)
+	{
+		pBottom->x = r.x;
+		pBottom->y = r.y + Cut * 2 + HalfSpacing;
+		pBottom->w = r.w;
+		pBottom->h = Height;
+	}
+}
+
 void CUIRect::HSplitTop(float Cut, CUIRect *pTop, CUIRect *pBottom) const
 {
 	CUIRect r = *this;
@@ -90,6 +122,38 @@ void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight, float Spacing) const
 		pRight->x = r.x + Cut + HalfSpacing;
 		pRight->y = r.y;
 		pRight->w = r.w - Cut - HalfSpacing;
+		pRight->h = r.h;
+	}
+}
+
+void CUIRect::VSpaceAround(CUIRect *pLeft, CUIRect *pMiddle, CUIRect *pRight, float Spacing) const
+{
+	CUIRect r = *this;
+	const float Cut = r.w / 3;
+	const float HalfSpacing = Spacing / 2;
+	const float Width = Cut - Spacing;
+
+	if(pLeft)
+	{
+		pLeft->x = r.x + HalfSpacing;
+		pLeft->y = r.y;
+		pLeft->w = Width;
+		pLeft->h = r.h;
+	}
+
+	if(pMiddle)
+	{
+		pMiddle->x = r.x + Cut + HalfSpacing;
+		pMiddle->y = r.y;
+		pMiddle->w = Width;
+		pMiddle->h = r.h;
+	}
+
+	if(pRight)
+	{
+		pRight->x = r.x + Cut * 2 + HalfSpacing;
+		pRight->y = r.y;
+		pRight->w = Width;
 		pRight->h = r.h;
 	}
 }

@@ -18,12 +18,53 @@ public:
 
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect horizontally. You can pass null pointers.
+	 * The spacing will be applied between the pTop and pBottom while both stay attached to *this*
+	 *
+	 * @verbatim
+	 * +---------------+
+	 * |+-------------+|
+	 * ||    pTop     ||
+	 * |+-------------+|
+	 * |    *this*     |
+	 * |+-------------+|
+	 * ||   pBottom   ||
+	 * |+-------------+|
+	 * +---------------+
+	 * @endverbatim
 	 *
 	 * @param pTop This rect will end up taking the top half of this CUIRect.
 	 * @param pBottom This rect will end up taking the bottom half of this CUIRect.
 	 * @param Spacing Total size of margin between split rects.
 	 */
 	void HSplitMid(CUIRect *pTop, CUIRect *pBottom, float Spacing = 0.0f) const;
+	/**
+	 * Splits 3 CUIRect inside *this* CUIRect horizontally. You can pass null pointers.
+	 * The spacing will be applied between the pTop, pMiddle, pBottom and also the *this*
+	 *
+	 * @verbatim
+	 * +---------------+
+	 * |    *this*     |
+	 * |+-------------+|
+	 * ||    pTop     ||
+	 * |+-------------+|
+	 * |               |
+	 * |+-------------+|
+	 * ||   pMiddle   ||
+	 * |+-------------+|
+	 * |               |
+	 * |+-------------+|
+	 * ||   pBottom   ||
+	 * |+-------------+|
+	 * |               |
+	 * +---------------+
+	 * @endverbatim
+	 *
+	 * @param pTop This rect will end up taking the top third of this CUIRect.
+	 * @param pMiddle This rect will end up taking the middle third of this CUIRect.
+	 * @param pBottom This rect will end up taking the bottom third of this CUIRect.
+	 * @param Spacing Total size of margin between split rects.
+	 */
+	void HSpaceAround(CUIRect *pTop, CUIRect *pMiddle, CUIRect *pBottom, float Spacing = 0.0f) const;
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect.
 	 *
@@ -50,12 +91,39 @@ public:
 	void HSplitBottom(float Cut, CUIRect *pTop, CUIRect *pBottom) const;
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect vertically. You can pass null pointers.
+	 * The spacing will be applied between the pLeft and pRight while both stay attached to *this*
+	 *
+	 * @verbatim
+	 * +--------------------------+
+	 * |+-------+        +-------+|
+	 * || pLeft | *this* | pRight||
+	 * |+-------+        +-------+|
+	 * +--------------------------+
+	 * @endverbatim
 	 *
 	 * @param pLeft This rect will take up the left half of *this* CUIRect.
 	 * @param pRight This rect will take up the right half of *this* CUIRect.
 	 * @param Spacing Total size of margin between split rects.
 	 */
 	void VSplitMid(CUIRect *pLeft, CUIRect *pRight, float Spacing = 0.0f) const;
+	/**
+	 * Splits 3 CUIRect inside *this* CUIRect vertically. You can pass null pointers.
+	 * The spacing will be applied between the pLeft, pMiddle, pRight and also the *this*
+	 *
+	 * @verbatim
+	 * +--------------------------------------------------------------+
+	 * |        +--------+        +--------+        +--------+        |
+	 * | *this* | pLeft  |        | pMiddle|        | pRight |        |
+	 * |        +--------+        +--------+        +--------+        |
+	 * +--------------------------------------------------------------+
+	 * @endverbatim
+	 *
+	 * @param pLeft This rect will take up the left third of *this* CUIRect.
+	 * @param pMiddle This rect will take up the middle third of *this* CUIRect.
+	 * @param pRight This rect will take up the right third of *this* CUIRect.
+	 * @param Spacing Total size of margin between split rects.
+	 */
+	void VSpaceAround(CUIRect *pLeft, CUIRect *pMiddle, CUIRect *pRight, float Spacing = 0.0f) const;
 	/**
 	 * Splits 2 CUIRect inside *this* CUIRect.
 	 *
