@@ -22,6 +22,8 @@ public:
 	// `pInfo` must be an encoded JSON object.
 	virtual void OnNewInfo(const char *pInfo) = 0;
 	virtual void OnShutdown() = 0;
+
+	virtual void RegisterChains() = 0;
 };
 
 IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);

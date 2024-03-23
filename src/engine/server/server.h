@@ -428,6 +428,7 @@ public:
 #endif
 
 	void RegisterCommands();
+	void RegisterChains();
 
 	int SnapNewId() override;
 	void SnapFreeId(int Id) override;
