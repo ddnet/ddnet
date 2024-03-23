@@ -2223,13 +2223,7 @@ void CGameClient::CClientData::Reset()
 	m_Afk = false;
 	m_Paused = false;
 	m_Spec = false;
-	m_SkinInfo.m_BloodColor = ColorRGBA(1, 1, 1);
-	m_SkinInfo.m_ColorableRenderSkin.Reset();
-	m_SkinInfo.m_OriginalRenderSkin.Reset();
-	m_SkinInfo.m_CustomColoredSkin = false;
-	m_SkinInfo.m_ColorBody = ColorRGBA(1, 1, 1);
-	m_SkinInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
-	m_SkinInfo.m_SkinMetrics.Reset();
+	m_SkinInfo.Reset();
 
 	m_Solo = false;
 	m_Jetpack = false;
