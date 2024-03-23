@@ -21,7 +21,7 @@
 #	timakro			2014-06-30 18:26:59
 #	deen			2020-06-26 18:32:00
 #	bluesky			2022-07-05 21:00:00
-# BlaiZephyr 2024-03-19 20:05:00
+# BlaiZephyr 2024-03-23 20:55:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -690,7 +690,7 @@ Normal message
 == Normale Nachricht
 
 AntiPing: predict grenade paths
-== AntiPing: Granatenflugkurve vorberechnen
+== Anti-Ping: Granatenflugkurve vorberechnen
 
 Search
 == Suche
@@ -708,7 +708,7 @@ Enable highlighted chat sound
 == Ton für Nachrichten an dich aktivieren
 
 AntiPing: predict weapons
-== AntiPing: Waffen vorberechnen
+== Anti-Ping: Waffen vorberechnen
 
 Highlighted message
 == Hervorgehobene Nachricht
