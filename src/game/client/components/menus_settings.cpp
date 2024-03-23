@@ -1809,8 +1809,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	// GPU list
-	const auto &GPUList = Graphics()->GetGpus();
-	if(GPUList.m_vGpus.size() > 1)
+	const auto &GpuList = Graphics()->GetGpus();
+	if(GpuList.m_vGpus.size() > 1)
 	{
 		CUIRect Text, GpuDropDown;
 		MainView.HSplitTop(10.0f, nullptr, &MainView);
@@ -1819,20 +1819,20 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		MainView.HSplitTop(20.0f, &GpuDropDown, &MainView);
 		Ui()->DoLabel(&Text, Localize("Graphics card"), 16.0f, TEXTALIGN_MC);
 
-		static std::vector<const char *> s_vpGpuIDNames;
+		static std::vector<const char *> s_vpGpuIdNames;
 
-		size_t GPUCount = GPUList.m_vGpus.size() + 1;
-		s_vpGpuIDNames.resize(GPUCount);
+		size_t GpuCount = GpuList.m_vGpus.size() + 1;
+		s_vpGpuIdNames.resize(GpuCount);
 
 		char aCurDeviceName[256 + 4];
 
 		int OldSelectedGpu = -1;
-		for(size_t i = 0; i < GPUCount; ++i)
+		for(size_t i = 0; i < GpuCount; ++i)
 		{
 			if(i == 0)
 			{
-				str_format(aCurDeviceName, sizeof(aCurDeviceName), "%s (%s)", Localize("auto"), GPUList.m_AutoGpu.m_aName);
-				s_vpGpuIDNames[i] = aCurDeviceName;
+				str_format(aCurDeviceName, sizeof(aCurDeviceName), "%s (%s)", Localize("auto"), GpuList.m_AutoGpu.m_aName);
+				s_vpGpuIdNames[i] = aCurDeviceName;
 				if(str_comp("auto", g_Config.m_GfxGpuName) == 0)
 				{
 					OldSelectedGpu = 0;
@@ -1840,8 +1840,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			}
 			else
 			{
-				s_vpGpuIDNames[i] = GPUList.m_vGpus[i - 1].m_aName;
-				if(str_comp(GPUList.m_vGpus[i - 1].m_aName, g_Config.m_GfxGpuName) == 0)
+				s_vpGpuIdNames[i] = GpuList.m_vGpus[i - 1].m_aName;
+				if(str_comp(GpuList.m_vGpus[i - 1].m_aName, g_Config.m_GfxGpuName) == 0)
 				{
 					OldSelectedGpu = i;
 				}
@@ -1855,13 +1855,13 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		static CUi::SDropDownState s_GpuDropDownState;
 		static CScrollRegion s_GpuDropDownScrollRegion;
 		s_GpuDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_GpuDropDownScrollRegion;
-		const int NewGpu = Ui()->DoDropDown(&GpuDropDown, OldSelectedGpu, s_vpGpuIDNames.data(), GPUCount, s_GpuDropDownState);
+		const int NewGpu = Ui()->DoDropDown(&GpuDropDown, OldSelectedGpu, s_vpGpuIdNames.data(), GpuCount, s_GpuDropDownState);
 		if(OldSelectedGpu != NewGpu)
 		{
 			if(NewGpu == 0)
 				str_copy(g_Config.m_GfxGpuName, "auto");
 			else
-				str_copy(g_Config.m_GfxGpuName, GPUList.m_vGpus[NewGpu - 1].m_aName);
+				str_copy(g_Config.m_GfxGpuName, GpuList.m_vGpus[NewGpu - 1].m_aName);
 			CheckSettings = true;
 			s_GfxGpuChanged = NewGpu != s_OldSelectedGpu;
 		}
