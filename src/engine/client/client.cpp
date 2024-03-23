@@ -598,12 +598,12 @@ void CClient::Disconnect()
 	}
 }
 
-bool CClient::DummyConnected()
+bool CClient::DummyConnected() const
 {
 	return m_DummyConnected;
 }
 
-bool CClient::DummyConnecting()
+bool CClient::DummyConnecting() const
 {
 	return !m_DummyConnected && m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy);
 }
@@ -653,7 +653,7 @@ void CClient::DummyDisconnect(const char *pReason)
 	GameClient()->OnDummyDisconnect();
 }
 
-bool CClient::DummyAllowed()
+bool CClient::DummyAllowed() const
 {
 	return m_ServerCapabilities.m_AllowDummy;
 }

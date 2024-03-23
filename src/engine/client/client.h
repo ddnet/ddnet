@@ -312,9 +312,9 @@ public:
 
 	void DummyDisconnect(const char *pReason) override;
 	void DummyConnect() override;
-	bool DummyConnected() override;
-	bool DummyConnecting() override;
-	bool DummyAllowed() override;
+	bool DummyConnected() const override;
+	bool DummyConnecting() const override;
+	bool DummyAllowed() const override;
 
 	void GetServerInfo(CServerInfo *pServerInfo) const override;
 	void ServerInfoRequest();

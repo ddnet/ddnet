@@ -160,9 +160,9 @@ public:
 	// dummy
 	virtual void DummyDisconnect(const char *pReason) = 0;
 	virtual void DummyConnect() = 0;
-	virtual bool DummyConnected() = 0;
-	virtual bool DummyConnecting() = 0;
-	virtual bool DummyAllowed() = 0;
+	virtual bool DummyConnected() const = 0;
+	virtual bool DummyConnecting() const = 0;
+	virtual bool DummyAllowed() const = 0;
 
 	virtual void Restart() = 0;
 	virtual void Quit() = 0;
