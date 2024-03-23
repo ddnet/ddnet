@@ -1300,6 +1300,12 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 
 void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 {
+	// only allow packets from the server we actually want
+	if(net_addr_comp(&pPacket->m_Address, &ServerAddress()))
+	{
+		return;
+	}
+
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
@@ -1662,12 +1668,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
 		{
-			// only allow packets from the server we actually want
-			if(net_addr_comp(&pPacket->m_Address, &ServerAddress()))
-			{
-				return;
-			}
-
 			// we are not allowed to process snapshot yet
 			if(State() < IClient::STATE_LOADING)
 			{
