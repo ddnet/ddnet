@@ -131,10 +131,14 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		}
 		else if(Format == CImageInfo::FORMAT_RGBA)
 		{
-			const uint8_t *pData = static_cast<uint8_t *>(pMap->GetData(pImg->m_ImageData));
+			CImageInfo ImageInfo;
+			ImageInfo.m_Width = pImg->m_Width;
+			ImageInfo.m_Height = pImg->m_Height;
+			ImageInfo.m_Format = Format;
+			ImageInfo.m_pData = static_cast<uint8_t *>(pMap->GetData(pImg->m_ImageData));
 			char aTexName[IO_MAX_PATH_LENGTH];
 			str_format(aTexName, sizeof(aTexName), "embedded: %s", pName);
-			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, Format, pData, LoadFlag, aTexName);
+			m_aTextures[i] = Graphics()->LoadTextureRaw(ImageInfo, LoadFlag, aTexName);
 			pMap->UnloadData(pImg->m_ImageData);
 		}
 		pMap->UnloadData(pImg->m_ImageName);
@@ -254,9 +258,11 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 
 		if(ImgInfo.m_pData != nullptr)
 		{
-			const size_t PixelSize = ImgInfo.PixelSize();
-			const size_t BuildImageSize = (size_t)ImgInfo.m_Width * ImgInfo.m_Height * PixelSize;
-			uint8_t *pBuildImgData = static_cast<uint8_t *>(malloc(BuildImageSize));
+			CImageInfo BuildImageInfo;
+			BuildImageInfo.m_Width = ImgInfo.m_Width;
+			BuildImageInfo.m_Height = ImgInfo.m_Height;
+			BuildImageInfo.m_Format = ImgInfo.m_Format;
+			BuildImageInfo.m_pData = static_cast<uint8_t *>(malloc(BuildImageInfo.DataSize()));
 
 			// build game layer
 			for(int LayerType = 0; LayerType < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++LayerType)
@@ -264,7 +270,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 				dbg_assert(!m_aaEntitiesTextures[(EntitiesModType * 2) + (int)EntitiesAreMasked][LayerType].IsValid(), "entities texture already loaded when it should not be");
 
 				// set everything transparent
-				mem_zero(pBuildImgData, BuildImageSize);
+				mem_zero(BuildImageInfo.m_pData, BuildImageInfo.DataSize());
 
 				for(int i = 0; i < 256; ++i)
 				{
@@ -280,14 +286,14 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 						const size_t CopyHeight = ImgInfo.m_Height / 16;
 						const size_t OffsetX = (size_t)(TileIndex % 16) * CopyWidth;
 						const size_t OffsetY = (size_t)(TileIndex / 16) * CopyHeight;
-						Graphics()->CopyTextureBufferSub(pBuildImgData, ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height, PixelSize, OffsetX, OffsetY, CopyWidth, CopyHeight);
+						Graphics()->CopyTextureBufferSub(BuildImageInfo.m_pData, ImgInfo, OffsetX, OffsetY, CopyWidth, CopyHeight);
 					}
 				}
 
-				m_aaEntitiesTextures[(EntitiesModType * 2) + (int)EntitiesAreMasked][LayerType] = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, pBuildImgData, TextureLoadFlag, aPath);
+				m_aaEntitiesTextures[(EntitiesModType * 2) + (int)EntitiesAreMasked][LayerType] = Graphics()->LoadTextureRaw(BuildImageInfo, TextureLoadFlag, aPath);
 			}
 
-			free(pBuildImgData);
+			BuildImageInfo.Free();
 			ImgInfo.Free();
 		}
 	}
@@ -377,21 +383,21 @@ int CMapImages::GetTextureScale() const
 
 IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int MaxWidth, int YOffset)
 {
-	const size_t Width = 1024;
-	const size_t Height = 1024;
-	const size_t PixelSize = CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA);
+	CImageInfo TextImage;
+	TextImage.m_Width = 1024;
+	TextImage.m_Height = 1024;
+	TextImage.m_Format = CImageInfo::FORMAT_RGBA;
+	TextImage.m_pData = static_cast<uint8_t *>(calloc(TextImage.DataSize(), sizeof(uint8_t)));
 
-	uint8_t *pMem = static_cast<uint8_t *>(calloc(Width * Height * PixelSize, 1));
-
-	UpdateEntityLayerText(pMem, PixelSize, Width, Height, TextureSize, MaxWidth, YOffset, 0);
-	UpdateEntityLayerText(pMem, PixelSize, Width, Height, TextureSize, MaxWidth, YOffset, 1);
-	UpdateEntityLayerText(pMem, PixelSize, Width, Height, TextureSize, MaxWidth, YOffset, 2, 255);
+	UpdateEntityLayerText(TextImage, TextureSize, MaxWidth, YOffset, 0);
+	UpdateEntityLayerText(TextImage, TextureSize, MaxWidth, YOffset, 1);
+	UpdateEntityLayerText(TextImage, TextureSize, MaxWidth, YOffset, 2, 255);
 
 	const int TextureLoadFlag = (Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
-	return Graphics()->LoadTextureRawMove(Width, Height, CImageInfo::FORMAT_RGBA, pMem, TextureLoadFlag);
+	return Graphics()->LoadTextureRawMove(TextImage, TextureLoadFlag);
 }
 
-void CMapImages::UpdateEntityLayerText(uint8_t *pTexBuffer, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber)
+void CMapImages::UpdateEntityLayerText(CImageInfo &TextImage, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber)
 {
 	char aBuf[4];
 	int DigitsCount = NumbersPower + 1;
@@ -418,7 +424,7 @@ void CMapImages::UpdateEntityLayerText(uint8_t *pTexBuffer, size_t PixelSize, si
 		int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
 		int XOffSet = (MaxWidth - clamp(ApproximateTextWidth, 0, MaxWidth)) / 2;
 
-		TextRender()->UploadEntityLayerText(pTexBuffer, PixelSize, TexWidth, TexHeight, (TexWidth / 16) - XOffSet, (TexHeight / 16) - YOffset, aBuf, DigitsCount, x + XOffSet, y + YOffset, UniversalSuitableFontSize);
+		TextRender()->UploadEntityLayerText(TextImage, (TextImage.m_Width / 16) - XOffSet, (TextImage.m_Height / 16) - YOffset, aBuf, DigitsCount, x + XOffSet, y + YOffset, UniversalSuitableFontSize);
 	}
 }
 
