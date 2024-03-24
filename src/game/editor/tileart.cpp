@@ -121,9 +121,7 @@ static CImageInfo ColorGroupToImage(const std::array<ColorRGBA, NumTiles> &aColo
 	Image.m_Width = NumTilesRow * TileSize;
 	Image.m_Height = NumTilesColumn * TileSize;
 	Image.m_Format = CImageInfo::FORMAT_RGBA;
-
-	uint8_t *pData = static_cast<uint8_t *>(malloc(static_cast<size_t>(Image.m_Width) * Image.m_Height * 4 * sizeof(uint8_t)));
-	Image.m_pData = pData;
+	Image.m_pData = static_cast<uint8_t *>(malloc(Image.DataSize()));
 
 	for(int y = 0; y < NumTilesColumn; y++)
 	{

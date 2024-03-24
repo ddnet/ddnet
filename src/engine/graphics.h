@@ -118,6 +118,11 @@ public:
 		return PixelSize(m_Format);
 	}
 
+	size_t DataSize() const
+	{
+		return (size_t)m_Width * m_Height * PixelSize(m_Format);
+	}
+
 	static EImageFormat ImageFormatFromInt(int Format)
 	{
 		if(Format < (int)FORMAT_RGB || Format > (int)FORMAT_SINGLE_COMPONENT)
