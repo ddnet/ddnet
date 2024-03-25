@@ -38,8 +38,8 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 		}
 		CTile nohook = {TILE_NOHOOK};
 		CLayerTiles::SetTile(x, y, nohook);
-		CTile through_cut = {TILE_THROUGH_CUT};
-		m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, through_cut); // NOLINT(bugprone-parent-virtual-call)
+		CTile ThroughCut = {TILE_THROUGH_CUT};
+		m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, ThroughCut); // NOLINT(bugprone-parent-virtual-call)
 	}
 	else
 	{
