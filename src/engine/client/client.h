@@ -21,6 +21,7 @@
 #include <engine/shared/fifo.h>
 #include <engine/shared/http.h>
 #include <engine/shared/network.h>
+#include <engine/textrender.h>
 #include <engine/warning.h>
 
 #include "graph.h"

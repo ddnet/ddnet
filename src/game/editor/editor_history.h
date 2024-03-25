@@ -3,7 +3,9 @@
 
 #include "editor_action.h"
 
-#include <queue>
+#include <deque>
+#include <memory>
+#include <vector>
 
 class CEditorHistory
 {
