@@ -2105,6 +2105,10 @@ void CMenus::RenderSettings(CUIRect MainView)
 		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_ASSETS);
 		RenderSettingsCustom(MainView);
 	}
+	else
+	{
+		dbg_assert(false, "ui_settings_page invalid");
+	}
 
 	if(m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartUpdate)
 	{

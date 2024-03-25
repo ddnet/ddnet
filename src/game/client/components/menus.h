@@ -164,7 +164,6 @@ protected:
 	int m_MenuPage;
 	int m_GamePage;
 	int m_Popup;
-	int m_ActivePage;
 	bool m_ShowStart;
 	bool m_MenuActive;
 
@@ -421,10 +420,12 @@ protected:
 	// found in menus.cpp
 	void Render();
 	void RenderPopupFullscreen(CUIRect Screen);
+	void RenderPopupConnecting(CUIRect Screen);
+	void RenderPopupLoading(CUIRect Screen);
 #if defined(CONF_VIDEORECORDER)
 	void PopupConfirmDemoReplaceVideo();
 #endif
-	void RenderMenubar(CUIRect Box);
+	void RenderMenubar(CUIRect Box, IClient::EClientState ClientState);
 	void RenderNews(CUIRect MainView);
 	static void ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	void UpdateMusicState();
@@ -748,7 +749,6 @@ public:
 		POPUP_CONFIRM, // generic confirmation popup (two buttons)
 		POPUP_FIRST_LAUNCH,
 		POPUP_POINTS,
-		POPUP_CONNECTING,
 		POPUP_DISCONNECTED,
 		POPUP_LANGUAGE,
 		POPUP_RENAME_DEMO,
