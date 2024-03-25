@@ -5,6 +5,7 @@
 
 #include <SDL_events.h>
 #include <SDL_joystick.h>
+#include <engine/console.h>
 
 #include <engine/input.h>
 #include <engine/keys.h>

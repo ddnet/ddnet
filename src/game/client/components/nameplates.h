@@ -5,6 +5,7 @@
 #include <base/vmath.h>
 
 #include <engine/shared/protocol.h>
+#include <engine/textrender.h>
 
 #include <game/client/component.h>
 
