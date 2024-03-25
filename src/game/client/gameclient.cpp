@@ -2469,9 +2469,9 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 		if(i == ownId)
 			continue;
 
-		const CClientData &cData = m_aClients[i];
+		const CClientData &Data = m_aClients[i];
 
-		if(!cData.m_Active)
+		if(!Data.m_Active)
 			continue;
 
 		CNetObj_Character Prev = m_Snap.m_aCharacters[i].m_Prev;
@@ -2479,8 +2479,8 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 
 		vec2 Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
 
-		bool IsOneSuper = cData.m_Super || OwnClientData.m_Super;
-		bool IsOneSolo = cData.m_Solo || OwnClientData.m_Solo;
+		bool IsOneSuper = Data.m_Super || OwnClientData.m_Super;
+		bool IsOneSolo = Data.m_Solo || OwnClientData.m_Solo;
 
 		if(!IsOneSuper && (!m_Teams.SameTeam(i, ownId) || IsOneSolo || OwnClientData.m_HookHitDisabled))
 			continue;

@@ -160,13 +160,13 @@ void CCharacter::HandleNinja()
 					return;
 
 				// make sure we haven't Hit this object before
-				bool bAlreadyHit = false;
+				bool AlreadyHit = false;
 				for(int j = 0; j < m_NumObjectsHit; j++)
 				{
 					if(m_aHitObjects[j] == pChr->GetCid())
-						bAlreadyHit = true;
+						AlreadyHit = true;
 				}
-				if(bAlreadyHit)
+				if(AlreadyHit)
 					continue;
 
 				// check so we are sufficiently close

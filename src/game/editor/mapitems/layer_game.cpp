@@ -17,8 +17,8 @@ CTile CLayerGame::GetTile(int x, int y)
 {
 	if(m_pEditor->m_Map.m_pFrontLayer && m_pEditor->m_Map.m_pFrontLayer->GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 	{
-		CTile through_cut = {TILE_THROUGH_CUT};
-		return through_cut;
+		CTile ThroughCut = {TILE_THROUGH_CUT};
+		return ThroughCut;
 	}
 	else
 	{
@@ -38,8 +38,8 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 		}
 		CTile nohook = {TILE_NOHOOK};
 		CLayerTiles::SetTile(x, y, nohook);
-		CTile through_cut = {TILE_THROUGH_CUT};
-		m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, through_cut); // NOLINT(bugprone-parent-virtual-call)
+		CTile ThroughCut = {TILE_THROUGH_CUT};
+		m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, ThroughCut); // NOLINT(bugprone-parent-virtual-call)
 	}
 	else
 	{
