@@ -1,0 +1,21 @@
+# Only used to enforce camel case naming convention for variables
+
+WarningsAsErrors:
+  readability-identifier-naming,
+
+Checks: >
+  -*,
+  readability-identifier-naming,
+
+CheckOptions:
+  - key:             readability-identifier-naming.LocalVariableCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.StaticConstantCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.StaticVariableCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.LocalConstantCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.LocalVariableIgnoredRegexp
+    value:           '^(p|a|s_|FT_|TB_|s_|ul_|v|[xy]i$|[zijklxyhmrgbacwestnduvqf]$|[dmpwsitcf][xy]$|(ch|skel)[0-2]?$|it$|tw$|dt$|th$|ls$|func$|res$|shader$|len$|maxLength$|length$|offset$|offpos$|result$|bg$|sp$|url$|Tickdelta_legacy$|index$|ctxt$|key$|null$|logger$|LAST_MODIFIED$|GfxFsaaSamples_MouseButton$|teleNr$|target$|id$|hit$|hsl[0-2]?$|rgb[0-2]?$|dir$|tmp$|cData$|sub$|ret$|rendered$|(lower|upper)(16|26|24|32)|size$|wSearch$|bAlreadyHit$|isWeaponCollide$|zerochar$|dist$|sound$|match$|best_skin$|matches$|nohook$|through_cut$|btn$|savedLayers$|l[hw]$|evilz$|sec$|min$|to2$|delay$|m_TileF?Index$|mode$|maxModes$|numModes$|iLogLength$|[xy]Fract$|[xy]Int$|imgg[xy]$|skip$|localPlayer$|fdratio$|[rgbat][0-2]$|[xy][0-3]$|x[rl]$).*'
+
