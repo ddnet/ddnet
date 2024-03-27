@@ -2284,20 +2284,19 @@ void CClient::PumpNetwork()
 
 	// process packets
 	CNetChunk Packet;
-	for(int i = 0; i < NUM_CONNS; i++)
+	for(int Conn = 0; Conn < NUM_CONNS; Conn++)
 	{
-		while(m_aNetClient[i].Recv(&Packet))
+		while(m_aNetClient[Conn].Recv(&Packet))
 		{
 			if(Packet.m_ClientId == -1)
 			{
 				ProcessConnlessPacket(&Packet);
 				continue;
 			}
-			if(i > 1)
+			if(Conn == CONN_MAIN || Conn == CONN_DUMMY)
 			{
-				continue;
+				ProcessServerPacket(&Packet, Conn, g_Config.m_ClDummy ^ Conn);
 			}
-			ProcessServerPacket(&Packet, i, g_Config.m_ClDummy ^ i);
 		}
 	}
 }
