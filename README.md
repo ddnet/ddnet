@@ -329,6 +329,12 @@ FreeBSD
 $ pkg install DDNet
 ```
 
+Windows (Scoop)
+```
+scoop bucket add games
+scoop install games/ddnet
+```
+
 Benchmarking
 ------------
 
