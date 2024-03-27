@@ -2862,8 +2862,8 @@ void CClient::Run()
 			m_aCmdEditMap[0] = 0;
 		}
 
-		// progress on dummy connect if security token handshake skipped/passed
-		if(m_DummySendConnInfo && !m_aNetClient[CONN_DUMMY].SecurityTokenUnknown())
+		// progress on dummy connect when the connection is online
+		if(m_DummySendConnInfo && m_aNetClient[CONN_DUMMY].State() == NETSTATE_ONLINE)
 		{
 			m_DummySendConnInfo = false;
 			SendInfo(CONN_DUMMY);
