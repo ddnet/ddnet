@@ -4,6 +4,7 @@
 #define ENGINE_SHARED_PROTOCOL_H
 
 #include <bitset>
+#include <engine/shared/protocol7.h>
 
 /*
 	Connection diagram - How the initialization works.
@@ -95,6 +96,7 @@ enum
 
 	MAX_NAME_LENGTH = 16,
 	MAX_CLAN_LENGTH = 12,
+	MAX_SKIN_LENGTH = 24, // 0.7 skins system
 
 	// message packing
 	MSGFLAG_VITAL = 1,

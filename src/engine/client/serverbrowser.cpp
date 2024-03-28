@@ -695,7 +695,7 @@ void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs
 		{
 			return;
 		}
-		net_addr_str(&pAddrs[i], pBuffer, BufferSize, true);
+		net_addr_url_str(&pAddrs[i], pBuffer, BufferSize, true);
 		int Length = str_length(pBuffer);
 		pBuffer += Length;
 		BufferSize -= Length;

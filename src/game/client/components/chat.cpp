@@ -1329,6 +1329,16 @@ void CChat::Say(int Team, const char *pLine)
 
 	m_LastChatSend = time();
 
+	if(m_pClient->Client()->IsSixup())
+	{
+		protocol7::CNetMsg_Cl_Say Msg7;
+		Msg7.m_Mode = Team == 1 ? protocol7::CHAT_TEAM : protocol7::CHAT_ALL;
+		Msg7.m_Target = -1;
+		Msg7.m_pMessage = pLine;
+		Client()->SendPackMsgActive(&Msg7, MSGFLAG_VITAL, true);
+		return;
+	}
+
 	// send chat message
 	CNetMsg_Cl_Say Msg;
 	Msg.m_Team = Team;

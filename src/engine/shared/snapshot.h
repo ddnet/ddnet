@@ -6,6 +6,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <game/generated/protocol7.h>
+
 // CSnapshot
 
 class CSnapshotItem
@@ -21,6 +23,7 @@ public:
 	int Type() const { return m_TypeAndId >> 16; }
 	int Id() const { return m_TypeAndId & 0xffff; }
 	int Key() const { return m_TypeAndId; }
+	void Invalidate() { m_TypeAndId = -1; }
 };
 
 class CSnapshot
@@ -52,12 +55,21 @@ public:
 	const CSnapshotItem *GetItem(int Index) const;
 	int GetItemSize(int Index) const;
 	int GetItemIndex(int Key) const;
+	void InvalidateItem(int Index);
 	int GetItemType(int Index) const;
 	int GetExternalItemType(int InternalType) const;
 	const void *FindItem(int Type, int Id) const;
 
 	unsigned Crc() const;
 	void DebugDump() const;
+	int TranslateSevenToSix(
+		CSnapshot *pSixSnapDest,
+		class CTranslationContext &TranslationContext,
+		float LocalTime,
+		int GameTick,
+		int Conn,
+		bool Dummy,
+		protocol7::CNetObjHandler *pNetObjHandler);
 	bool IsValid(size_t ActualSize) const;
 
 	static const CSnapshot *EmptySnapshot() { return &ms_EmptySnapshot; }
@@ -83,6 +95,7 @@ private:
 		MAX_NETOBJSIZES = 64
 	};
 	short m_aItemSizes[MAX_NETOBJSIZES];
+	short m_aItemSizes7[MAX_NETOBJSIZES];
 	int m_aSnapshotDataRate[CSnapshot::MAX_TYPE + 1];
 	int m_aSnapshotDataUpdates[CSnapshot::MAX_TYPE + 1];
 	CData m_Empty;
@@ -96,9 +109,10 @@ public:
 	int GetDataRate(int Index) const { return m_aSnapshotDataRate[Index]; }
 	int GetDataUpdates(int Index) const { return m_aSnapshotDataUpdates[Index]; }
 	void SetStaticsize(int ItemType, size_t Size);
+	void SetStaticsize7(int ItemType, size_t Size);
 	const CData *EmptyDelta() const;
 	int CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, void *pDstData);
-	int UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize);
+	int UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize, bool Sixup);
 };
 
 // CSnapshotStorage
@@ -117,6 +131,7 @@ public:
 
 		int m_SnapSize;
 		int m_AltSnapSize;
+		int m_TransSnapSize;
 
 		CSnapshot *m_pSnap;
 		CSnapshot *m_pAltSnap;

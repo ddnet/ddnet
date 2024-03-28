@@ -23,9 +23,12 @@
 
 #include <game/client/component.h>
 #include <game/client/components/mapimages.h>
+#include <game/client/lineinput.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
 #include <game/voting.h>
+
+#include <game/client/components/skins7.h>
 
 struct CServerProcess
 {
@@ -235,6 +238,12 @@ protected:
 	bool m_NeedSendinfo;
 	bool m_NeedSendDummyinfo;
 	int m_SettingPlayerPage;
+
+	// 0.7 skins
+	int m_TeePartSelected = protocol7::SKINPART_BODY;
+	const CSkins7::CSkin *m_pSelectedSkin = nullptr;
+	bool m_SkinModified = false;
+	CLineInputBuffered<protocol7::MAX_SKIN_ARRAY_SIZE, protocol7::MAX_SKIN_LENGTH> m_SkinNameInput;
 
 	// for map download popup
 	int64_t m_DownloadLastCheckTime;
@@ -585,6 +594,11 @@ protected:
 	void RenderSettingsPlayer(CUIRect MainView);
 	void RenderSettingsDummyPlayer(CUIRect MainView);
 	void RenderSettingsTee(CUIRect MainView);
+	void RenderSettingsTee7(CUIRect MainView);
+	void RenderSettingsTeeCustom7(CUIRect MainView);
+	void RenderSettingsTeeBasic7(CUIRect MainView);
+	void RenderSkinSelection7(CUIRect MainView);
+	void RenderSkinPartSelection7(CUIRect MainView);
 	void RenderSettingsControls(CUIRect MainView);
 	void ResetSettingsControls();
 	void RenderSettingsGraphics(CUIRect MainView);

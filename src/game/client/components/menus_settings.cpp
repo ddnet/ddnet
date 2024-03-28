@@ -7,6 +7,7 @@
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 #include <engine/shared/localization.h>
+#include <engine/shared/protocol7.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 #include <engine/updater.h>
@@ -2035,7 +2036,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Language"),
 		Localize("General"),
 		Localize("Player"),
-		"Tee",
+		Client()->IsSixup() ? "Tee 0.7" : "Tee",
 		Localize("Appearance"),
 		Localize("Controls"),
 		Localize("Graphics"),
@@ -2073,7 +2074,10 @@ void CMenus::RenderSettings(CUIRect MainView)
 	else if(g_Config.m_UiSettingsPage == SETTINGS_TEE)
 	{
 		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_TEE);
-		RenderSettingsTee(MainView);
+		if(Client()->IsSixup())
+			RenderSettingsTee7(MainView);
+		else
+			RenderSettingsTee(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_APPEARANCE)
 	{

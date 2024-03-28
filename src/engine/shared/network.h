@@ -65,10 +65,11 @@ enum
 	NET_SEQUENCE_MASK = NET_MAX_SEQUENCE - 1,
 
 	NET_CONNSTATE_OFFLINE = 0,
-	NET_CONNSTATE_CONNECT = 1,
-	NET_CONNSTATE_PENDING = 2,
-	NET_CONNSTATE_ONLINE = 3,
-	NET_CONNSTATE_ERROR = 4,
+	NET_CONNSTATE_TOKEN = 1,
+	NET_CONNSTATE_CONNECT = 2,
+	NET_CONNSTATE_PENDING = 3,
+	NET_CONNSTATE_ONLINE = 4,
+	NET_CONNSTATE_ERROR = 5,
 
 	NET_PACKETFLAG_UNUSED = 1 << 0,
 	NET_PACKETFLAG_TOKEN = 1 << 1,
@@ -87,6 +88,7 @@ enum
 	NET_CTRLMSG_CONNECTACCEPT = 2,
 	NET_CTRLMSG_ACCEPT = 3,
 	NET_CTRLMSG_CLOSE = 4,
+	NET_CTRLMSG_TOKEN = 5,
 
 	NET_CONN_BUFFERSIZE = 1024 * 32,
 
@@ -94,8 +96,17 @@ enum
 
 	NET_ENUM_TERMINATOR
 };
+enum
+{
+	NET_TOKEN_MAX = 0xffffffff,
+	NET_TOKEN_NONE = NET_TOKEN_MAX,
+	NET_TOKEN_MASK = NET_TOKEN_MAX,
+
+	NET_TOKENREQUEST_DATASIZE = 512,
+};
 
 typedef int SECURITY_TOKEN;
+typedef unsigned int TOKEN;
 
 SECURITY_TOKEN ToSecurityToken(unsigned char *pData);
 
@@ -216,7 +227,10 @@ private:
 	unsigned short m_PeerAck;
 	unsigned m_State;
 
+public:
 	SECURITY_TOKEN m_SecurityToken;
+
+private:
 	int m_RemoteClosed;
 	bool m_BlockCloseMsg;
 	bool m_UnknownSeq;
@@ -237,6 +251,11 @@ private:
 	NETSOCKET m_Socket;
 	NETSTATS m_Stats;
 
+	// client 0.7
+	static TOKEN GenerateToken7(const NETADDR *pPeerAddr);
+	class CNetBase *m_pNetBase;
+	bool IsSixup() { return m_Sixup; }
+
 	//
 	void ResetStats();
 	void SetError(const char *pString);
@@ -245,6 +264,7 @@ private:
 	int QueueChunkEx(int Flags, int DataSize, const void *pData, int Sequence);
 	void SendConnect();
 	void SendControl(int ControlMsg, const void *pExtra, int ExtraSize);
+	void SendControlWithToken7(int ControlMsg, SECURITY_TOKEN ResponseToken);
 	void ResendChunk(CNetChunkResend *pResend);
 	void Resend();
 
@@ -252,15 +272,18 @@ public:
 	bool m_TimeoutProtected;
 	bool m_TimeoutSituation;
 
+	void SetToken7(TOKEN Token);
+
 	void Reset(bool Rejoin = false);
 	void Init(NETSOCKET Socket, bool BlockCloseMsg);
 	int Connect(const NETADDR *pAddr, int NumAddrs);
+	int Connect7(const NETADDR *pAddr, int NumAddrs);
 	void Disconnect(const char *pReason);
 
 	int Update();
 	int Flush();
 
-	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED);
+	int Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_TOKEN SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED, SECURITY_TOKEN ResponseToken = NET_SECURITY_TOKEN_UNSUPPORTED);
 	int QueueChunk(int Flags, int DataSize, const void *pData);
 
 	const char *ErrorString();
@@ -496,9 +519,10 @@ public:
 	// connection state
 	int Disconnect(const char *pReason);
 	int Connect(const NETADDR *pAddr, int NumAddrs);
+	int Connect7(const NETADDR *pAddr, int NumAddrs);
 
 	// communication
-	int Recv(CNetChunk *pChunk);
+	int Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Sixup);
 	int Send(CNetChunk *pChunk);
 
 	// pumping
@@ -538,6 +562,7 @@ public:
 	static int Decompress(const void *pData, int DataSize, void *pOutput, int OutputSize);
 
 	static void SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken, bool Sixup = false);
+	static void SendControlMsgWithToken7(NETSOCKET Socket, NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, TOKEN MyToken, bool Extended);
 	static void SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, bool Extended, unsigned char aExtra[4]);
 	static void SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup = false, bool NoCompress = false);
 

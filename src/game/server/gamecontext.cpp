@@ -18,6 +18,7 @@
 #include <engine/shared/json.h>
 #include <engine/shared/linereader.h>
 #include <engine/shared/memheap.h>
+#include <engine/shared/protocolglue.h>
 #include <engine/storage.h>
 
 #include <game/collision.h>
@@ -479,13 +480,7 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapId, const vec
 
 		pPickup->m_X = (int)Pos.x;
 		pPickup->m_Y = (int)Pos.y;
-
-		if(Type == POWERUP_WEAPON)
-			pPickup->m_Type = SubType == WEAPON_SHOTGUN ? protocol7::PICKUP_SHOTGUN : SubType == WEAPON_GRENADE ? protocol7::PICKUP_GRENADE : protocol7::PICKUP_LASER;
-		else if(Type == POWERUP_NINJA)
-			pPickup->m_Type = protocol7::PICKUP_NINJA;
-		else if(Type == POWERUP_ARMOR)
-			pPickup->m_Type = protocol7::PICKUP_ARMOR;
+		pPickup->m_Type = PickupType_SixToSeven(Type, SubType);
 	}
 	else if(Context.GetClientVersion() >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
@@ -1271,18 +1266,6 @@ void CGameContext::OnTick()
 		m_TeeHistorian.BeginInputs();
 	}
 	// Warning: do not put code in this function directly above or below this comment
-}
-
-static int PlayerFlags_SevenToSix(int Flags)
-{
-	int Six = 0;
-	if(Flags & protocol7::PLAYERFLAG_CHATTING)
-		Six |= PLAYERFLAG_CHATTING;
-	if(Flags & protocol7::PLAYERFLAG_SCOREBOARD)
-		Six |= PLAYERFLAG_SCOREBOARD;
-	if(Flags & protocol7::PLAYERFLAG_AIM)
-		Six |= PLAYERFLAG_AIM;
-	return Six;
 }
 
 // Server hooks

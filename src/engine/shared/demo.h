@@ -140,6 +140,7 @@ private:
 	bool ScanFile();
 
 	int64_t Time();
+	bool m_Sixup;
 
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo);
@@ -171,6 +172,8 @@ public:
 	const char *ErrorMessage() { return m_aErrorMessage; }
 
 	int Update(bool RealTime = true);
+	bool IsSixup() const { return m_Sixup; }
+	void SetSixup(bool Sixup) { m_Sixup = Sixup; }
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
 	bool IsPlaying() const override { return m_File != nullptr; }
