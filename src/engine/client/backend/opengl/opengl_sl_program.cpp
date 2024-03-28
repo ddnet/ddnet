@@ -58,8 +58,8 @@ void CGLSLProgram::LinkProgram()
 	{
 		char aInfoLog[1024];
 		char aFinalMessage[1536];
-		int iLogLength;
-		glGetProgramInfoLog(m_ProgramId, 1024, &iLogLength, aInfoLog);
+		int LogLength;
+		glGetProgramInfoLog(m_ProgramId, 1024, &LogLength, aInfoLog);
 		str_format(aFinalMessage, sizeof(aFinalMessage), "Error! Shader program wasn't linked! The linker returned:\n\n%s", aInfoLog);
 		dbg_msg("glslprogram", "%s", aFinalMessage);
 	}

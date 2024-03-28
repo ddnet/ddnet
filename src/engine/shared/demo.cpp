@@ -493,15 +493,15 @@ CDemoPlayer::EReadChunkHeaderResult CDemoPlayer::ReadChunkHeader(int *pType, int
 	if(Chunk & CHUNKTYPEFLAG_TICKMARKER)
 	{
 		// decode tick marker
-		int Tickdelta_legacy = Chunk & CHUNKMASK_TICK_LEGACY; // compatibility
+		int TickdeltaLegacy = Chunk & CHUNKMASK_TICK_LEGACY; // compatibility
 		*pType = Chunk & (CHUNKTYPEFLAG_TICKMARKER | CHUNKTICKFLAG_KEYFRAME);
 
 		int NewTick;
-		if(m_Info.m_Header.m_Version < gs_VersionTickCompression && Tickdelta_legacy != 0)
+		if(m_Info.m_Header.m_Version < gs_VersionTickCompression && TickdeltaLegacy != 0)
 		{
 			if(*pTick < 0) // initial tick not initialized before a tick delta
 				return CHUNKHEADER_ERROR;
-			NewTick = *pTick + Tickdelta_legacy;
+			NewTick = *pTick + TickdeltaLegacy;
 		}
 		else if(Chunk & CHUNKTICKFLAG_TICK_COMPRESSED)
 		{
