@@ -121,9 +121,7 @@ static CImageInfo ColorGroupToImage(const std::array<ColorRGBA, NumTiles> &aColo
 	Image.m_Width = NumTilesRow * TileSize;
 	Image.m_Height = NumTilesColumn * TileSize;
 	Image.m_Format = CImageInfo::FORMAT_RGBA;
-
-	uint8_t *pData = static_cast<uint8_t *>(malloc(static_cast<size_t>(Image.m_Width) * Image.m_Height * 4 * sizeof(uint8_t)));
-	Image.m_pData = pData;
+	Image.m_pData = static_cast<uint8_t *>(malloc(Image.DataSize()));
 
 	for(int y = 0; y < NumTilesColumn; y++)
 	{
@@ -156,7 +154,7 @@ static std::shared_ptr<CEditorImage> ImageInfoToEditorImage(CEditor *pEditor, co
 	pEditorImage->m_pData = Image.m_pData;
 
 	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-	pEditorImage->m_Texture = pEditor->Graphics()->LoadTextureRaw(Image.m_Width, Image.m_Height, Image.m_Format, Image.m_pData, TextureLoadFlag, pName);
+	pEditorImage->m_Texture = pEditor->Graphics()->LoadTextureRaw(Image, TextureLoadFlag, pName);
 	pEditorImage->m_External = 0;
 	str_copy(pEditorImage->m_aName, pName);
 
