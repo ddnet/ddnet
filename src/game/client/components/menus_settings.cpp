@@ -2020,16 +2020,20 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 void CMenus::RenderSettings(CUIRect MainView)
 {
 	// render background
-	CUIRect Button, TabBar, RestartBar, RestartWarning, RestartButton;
+	CUIRect Button, TabBar, RestartBar;
 	MainView.VSplitRight(120.0f, &MainView, &TabBar);
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
-	MainView.Margin(10.0f, &MainView);
-	MainView.HSplitBottom(15.0f, &MainView, &RestartBar);
-	RestartBar.VSplitRight(125.0f, &RestartWarning, &RestartButton);
+	MainView.Margin(20.0f, &MainView);
+
+	const bool NeedRestart = m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartUpdate;
+	if(NeedRestart)
+	{
+		MainView.HSplitBottom(20.0f, &MainView, &RestartBar);
+		MainView.HSplitBottom(10.0f, &MainView, nullptr);
+	}
+
 	TabBar.HSplitTop(50.0f, &Button, &TabBar);
 	Button.Draw(ms_ColorTabbarActive, IGraphics::CORNER_BR, 10.0f);
-
-	MainView.HSplitTop(10.0f, nullptr, &MainView);
 
 	const char *apTabs[SETTINGS_LENGTH] = {
 		Localize("Language"),
@@ -2051,9 +2055,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 		if(DoButton_MenuTab(&s_aTabButtons[i], apTabs[i], g_Config.m_UiSettingsPage == i, &Button, IGraphics::CORNER_R, &m_aAnimatorsSettingsTab[i]))
 			g_Config.m_UiSettingsPage = i;
 	}
-
-	MainView.Margin(10.0f, &MainView);
-	RestartBar.VMargin(10.0f, &RestartBar);
 
 	if(g_Config.m_UiSettingsPage == SETTINGS_LANGUAGE)
 	{
@@ -2110,8 +2111,11 @@ void CMenus::RenderSettings(CUIRect MainView)
 		dbg_assert(false, "ui_settings_page invalid");
 	}
 
-	if(m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartUpdate)
+	if(NeedRestart)
 	{
+		CUIRect RestartWarning, RestartButton;
+		RestartBar.VSplitRight(125.0f, &RestartWarning, &RestartButton);
+		RestartWarning.VSplitRight(10.0f, &RestartWarning, nullptr);
 		if(m_NeedRestartUpdate)
 		{
 			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
