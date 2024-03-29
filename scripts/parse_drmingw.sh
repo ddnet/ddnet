@@ -30,7 +30,7 @@ if [ "$TMP_OFFSET" != "0" ]; then
 	echo "Module offset: 0x$TMP_OFFSET"
 fi
 
-ADDR_BASE=$(winedump -f "$1" | grep -E -o "image base[ ]*0x[0-9A-Fa-f]*" | grep -E -o "0x[0-9A-Fa-f]+" | tail -1)
+ADDR_BASE=0x$(objdump -x "$1" | grep -E -o "^ImageBase\s+[0-9A-Fa-f]+$" | grep -E -o "[0-9A-Fa-f]+$")
 echo "Image base: $ADDR_BASE"
 
 ADDR_PC_REGEX='[0-9A-Fa-f]+ [0-9A-Fa-f]+ [0-9A-Fa-f]+ [0-9A-Fa-f]+'
