@@ -185,6 +185,7 @@ public:
 	bool UnFreeze();
 	void GiveAllWeapons();
 	void ResetPickups();
+	void ResetJumps();
 	int m_DDRaceState;
 	int Team();
 	bool CanCollide(int ClientId);

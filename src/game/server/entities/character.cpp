@@ -2197,6 +2197,12 @@ bool CCharacter::UnFreeze()
 	return false;
 }
 
+void CCharacter::ResetJumps()
+{
+	m_Core.m_JumpedTotal = 0;
+	m_Core.m_Jumped = 0;
+}
+
 void CCharacter::GiveWeapon(int Weapon, bool Remove)
 {
 	if(Weapon == WEAPON_NINJA)

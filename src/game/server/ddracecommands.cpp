@@ -413,6 +413,7 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 			Pos += vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
 		}
 		pSelf->Teleport(pChr, Pos);
+		pChr->ResetJumps();
 		pChr->UnFreeze();
 		pChr->SetVelocity(vec2(0, 0));
 	}
