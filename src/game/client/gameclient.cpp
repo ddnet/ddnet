@@ -2445,6 +2445,33 @@ void CGameClient::SendSkinChange7(bool Dummy)
 
 bool CGameClient::GotWantedSkin7(bool Dummy)
 {
+	// validate the wanted skinparts before comparison
+	// because the skin parts we compare against are also validated
+	// otherwise it tries to resend the skin info when the eyes are set to "negative"
+	// in team based modes
+	char aSkinParts[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_ARRAY_SIZE];
+	char *apSkinPartsPtr[protocol7::NUM_SKINPARTS];
+	int aUCCVars[protocol7::NUM_SKINPARTS];
+	int aColorVars[protocol7::NUM_SKINPARTS];
+	for(int SkinPart = 0; SkinPart < protocol7::NUM_SKINPARTS; SkinPart++)
+	{
+		str_copy(aSkinParts[SkinPart], CSkins7::ms_apSkinVariables[(int)Dummy][SkinPart], protocol7::MAX_SKIN_ARRAY_SIZE);
+		apSkinPartsPtr[SkinPart] = aSkinParts[SkinPart];
+		aUCCVars[SkinPart] = *CSkins7::ms_apUCCVariables[(int)Dummy][SkinPart];
+		aColorVars[SkinPart] = *CSkins7::ms_apColorVariables[(int)Dummy][SkinPart];
+	}
+	m_Skins7.ValidateSkinParts(apSkinPartsPtr, aUCCVars, aColorVars, m_pClient->m_TranslationContext.m_GameFlags);
+
+	for(int SkinPart = 0; SkinPart < protocol7::NUM_SKINPARTS; SkinPart++)
+	{
+		if(str_comp(m_aClients[m_aLocalIds[(int)Dummy]].m_aaSkinPartNames[SkinPart], apSkinPartsPtr[SkinPart]))
+			return false;
+		if(m_aClients[m_aLocalIds[(int)Dummy]].m_aUseCustomColors[SkinPart] != aUCCVars[SkinPart])
+			return false;
+		if(m_aClients[m_aLocalIds[(int)Dummy]].m_aSkinPartColors[SkinPart] != aColorVars[SkinPart])
+			return false;
+	}
+
 	// TODO: add name change ddnet extension to 0.7 protocol
 	// if(str_comp(m_aClients[m_aLocalIds[(int)Dummy]].m_aName, Dummy ? Client()->DummyName() : Client()->PlayerName()))
 	// 	return false;
