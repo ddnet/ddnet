@@ -882,8 +882,8 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_FavoritesButton, &Button, Localize("Favorites"));
 
 	size_t FavoriteCommunityIndex = 0;
-	static CButtonContainer s_aFavoriteCommunityButtons[3];
-	static_assert(std::size(s_aFavoriteCommunityButtons) == (size_t)PAGE_FAVORITE_COMMUNITY_3 - PAGE_FAVORITE_COMMUNITY_1 + 1);
+	static CButtonContainer s_aFavoriteCommunityButtons[5];
+	static_assert(std::size(s_aFavoriteCommunityButtons) == (size_t)PAGE_FAVORITE_COMMUNITY_5 - PAGE_FAVORITE_COMMUNITY_1 + 1);
 	for(const CCommunity *pCommunity : ServerBrowser()->FavoriteCommunities())
 	{
 		TabBar.VSplitLeft(75.0f, &Button, &TabBar);
