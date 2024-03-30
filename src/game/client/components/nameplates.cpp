@@ -347,11 +347,6 @@ void CNamePlates::OnRender()
 	}
 }
 
-void CNamePlates::SetPlayers(CPlayers *pPlayers)
-{
-	m_pPlayers = pPlayers;
-}
-
 void CNamePlates::ResetNamePlates()
 {
 	for(auto &NamePlate : m_aNamePlates)

@@ -49,7 +49,6 @@ class CNamePlates : public CComponent
 	void RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha = false);
 
 	SPlayerNamePlate m_aNamePlates[MAX_CLIENTS];
-	class CPlayers *m_pPlayers;
 
 	void ResetNamePlates();
 
@@ -60,8 +59,6 @@ public:
 	virtual void OnWindowResize() override;
 	virtual void OnInit() override;
 	virtual void OnRender() override;
-
-	void SetPlayers(class CPlayers *pPlayers);
 };
 
 #endif

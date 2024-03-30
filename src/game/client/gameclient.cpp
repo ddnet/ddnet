@@ -102,10 +102,6 @@ void CGameClient::OnConsoleInit()
 #endif
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
 
-	m_Menus.SetMenuBackground(&m_MenuBackground);
-
-	m_NamePlates.SetPlayers(&m_Players);
-
 	// make a list of all the systems, make sure to add them in the correct render order
 	m_vpAll.insert(m_vpAll.end(), {&m_Skins,
 					      &m_CountryFlags,
