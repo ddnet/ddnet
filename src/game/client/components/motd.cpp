@@ -43,6 +43,9 @@ void CMotd::OnWindowResize()
 
 void CMotd::OnRender()
 {
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		return;
+
 	if(!IsActive())
 		return;
 
