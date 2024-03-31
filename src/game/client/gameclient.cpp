@@ -538,6 +538,8 @@ void CGameClient::OnReset()
 
 	m_aReceivedTuning[0] = false;
 	m_aReceivedTuning[1] = false;
+	m_aTuning[0] = CTuningParams();
+	m_aTuning[1] = CTuningParams();
 
 	InvalidateSnapshot();
 
@@ -553,7 +555,6 @@ void CGameClient::OnReset()
 	m_LastRoundStartTick = -1;
 	m_LastFlagCarrierRed = -4;
 	m_LastFlagCarrierBlue = -4;
-	m_aTuning[g_Config.m_ClDummy] = CTuningParams();
 
 	m_NextChangeInfo = 0;
 
