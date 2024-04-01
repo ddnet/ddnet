@@ -910,9 +910,8 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 
 	SetState(IClient::STATE_LOADING);
 	SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_LOADING_MAP);
-
-	if((bool)m_MapLoadingCBFunc)
-		m_MapLoadingCBFunc();
+	if((bool)m_LoadingCallback)
+		m_LoadingCallback(IClient::LOADING_CALLBACK_DETAIL_MAP);
 
 	if(!m_pMap->Load(pFilename))
 	{
@@ -995,8 +994,6 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	}
 	str_format(aBuf, sizeof(aBuf), "loading map, map=%s wanted %scrc=%08x", pMapName, aWanted, WantedCrc);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
-	SetState(IClient::STATE_LOADING);
-	SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_LOADING_MAP);
 
 	// try the normal maps folder
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
@@ -3553,10 +3550,18 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	Disconnect();
 	m_aNetClient[CONN_MAIN].ResetErrorString();
 
+	SetState(IClient::STATE_LOADING);
+	SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_LOADING_DEMO);
+	if((bool)m_LoadingCallback)
+		m_LoadingCallback(IClient::LOADING_CALLBACK_DETAIL_DEMO);
+
 	// try to start playback
 	m_DemoPlayer.SetListener(this);
 	if(m_DemoPlayer.Load(Storage(), m_pConsole, pFilename, StorageType))
+	{
+		DisconnectWithReason(m_DemoPlayer.ErrorMessage());
 		return m_DemoPlayer.ErrorMessage();
+	}
 
 	// load map
 	const CMapInfo *pMapInfo = m_DemoPlayer.GetMapInfo();

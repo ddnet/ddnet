@@ -210,8 +210,31 @@ void CGameClient::OnConsoleInit()
 
 void CGameClient::OnInit()
 {
-	Client()->SetMapLoadingCBFunc([this]() {
-		m_Menus.RenderLoading(DemoPlayer()->IsPlaying() ? Localize("Preparing demo playback") : Localize("Connected"), Localize("Loading map file from storage"), 0, false);
+	Client()->SetLoadingCallback([this](IClient::ELoadingCallbackDetail Detail) {
+		const char *pTitle;
+		if(Detail == IClient::LOADING_CALLBACK_DETAIL_DEMO || DemoPlayer()->IsPlaying())
+		{
+			pTitle = Localize("Preparing demo playback");
+		}
+		else
+		{
+			pTitle = Localize("Connected");
+		}
+
+		const char *pMessage;
+		switch(Detail)
+		{
+		case IClient::LOADING_CALLBACK_DETAIL_MAP:
+			pMessage = Localize("Loading map file from storage");
+			break;
+		case IClient::LOADING_CALLBACK_DETAIL_DEMO:
+			pMessage = Localize("Loading demo file from storage");
+			break;
+		default:
+			dbg_assert(false, "Invalid callback loading detail");
+			dbg_break();
+		}
+		m_Menus.RenderLoading(pTitle, pMessage, 0, false);
 	});
 
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();

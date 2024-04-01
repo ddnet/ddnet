@@ -1891,6 +1891,9 @@ void CMenus::RenderPopupLoading(CUIRect Screen)
 		case IClient::LOADING_STATE_DETAIL_LOADING_MAP:
 			str_copy(aLabel1, Localize("Loading map file from storage"));
 			break;
+		case IClient::LOADING_STATE_DETAIL_LOADING_DEMO:
+			str_copy(aLabel1, Localize("Loading demo file from storage"));
+			break;
 		case IClient::LOADING_STATE_DETAIL_SENDING_READY:
 			str_copy(aLabel1, Localize("Requesting to join the game"));
 			break;
