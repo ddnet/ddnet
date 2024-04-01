@@ -2310,8 +2310,8 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 {
 	// update ticks, they could have changed
 	const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
-	m_aCurGameTick[g_Config.m_ClDummy] = pInfo->m_Info.m_CurrentTick;
-	m_aPrevGameTick[g_Config.m_ClDummy] = pInfo->m_PreviousTick;
+	m_aCurGameTick[0] = pInfo->m_Info.m_CurrentTick;
+	m_aPrevGameTick[0] = pInfo->m_PreviousTick;
 
 	// create a verified and unpacked snapshot
 	unsigned char aAltSnapBuffer[CSnapshot::MAX_SIZE];
@@ -2324,9 +2324,9 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 	}
 
 	// handle snapshots after validation
-	std::swap(m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV], m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]);
-	mem_copy(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pSnap, pData, Size);
-	mem_copy(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pAltSnap, pAltSnapBuffer, AltSnapSize);
+	std::swap(m_aapSnapshots[0][SNAP_PREV], m_aapSnapshots[0][SNAP_CURRENT]);
+	mem_copy(m_aapSnapshots[0][SNAP_CURRENT]->m_pSnap, pData, Size);
+	mem_copy(m_aapSnapshots[0][SNAP_CURRENT]->m_pAltSnap, pAltSnapBuffer, AltSnapSize);
 
 	GameClient()->OnNewSnapshot();
 }
@@ -2356,11 +2356,11 @@ void CClient::UpdateDemoIntraTimers()
 {
 	// update timers
 	const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
-	m_aCurGameTick[g_Config.m_ClDummy] = pInfo->m_Info.m_CurrentTick;
-	m_aPrevGameTick[g_Config.m_ClDummy] = pInfo->m_PreviousTick;
-	m_aGameIntraTick[g_Config.m_ClDummy] = pInfo->m_IntraTick;
-	m_aGameTickTime[g_Config.m_ClDummy] = pInfo->m_TickTime;
-	m_aGameIntraTickSincePrev[g_Config.m_ClDummy] = pInfo->m_IntraTickSincePrev;
+	m_aCurGameTick[0] = pInfo->m_Info.m_CurrentTick;
+	m_aPrevGameTick[0] = pInfo->m_PreviousTick;
+	m_aGameIntraTick[0] = pInfo->m_IntraTick;
+	m_aGameTickTime[0] = pInfo->m_TickTime;
+	m_aGameIntraTickSincePrev[0] = pInfo->m_IntraTickSincePrev;
 };
 
 void CClient::Update()
@@ -2385,10 +2385,10 @@ void CClient::Update()
 
 			// update timers
 			const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
-			m_aCurGameTick[g_Config.m_ClDummy] = pInfo->m_Info.m_CurrentTick;
-			m_aPrevGameTick[g_Config.m_ClDummy] = pInfo->m_PreviousTick;
-			m_aGameIntraTick[g_Config.m_ClDummy] = pInfo->m_IntraTick;
-			m_aGameTickTime[g_Config.m_ClDummy] = pInfo->m_TickTime;
+			m_aCurGameTick[0] = pInfo->m_Info.m_CurrentTick;
+			m_aPrevGameTick[0] = pInfo->m_PreviousTick;
+			m_aGameIntraTick[0] = pInfo->m_IntraTick;
+			m_aGameTickTime[0] = pInfo->m_TickTime;
 		}
 		else
 		{
@@ -3601,12 +3601,12 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 
 	for(int SnapshotType = 0; SnapshotType < NUM_SNAPSHOT_TYPES; SnapshotType++)
 	{
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType] = &m_aDemorecSnapshotHolders[SnapshotType];
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_pSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][0];
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_pAltSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][1];
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_SnapSize = 0;
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_AltSnapSize = 0;
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_Tick = -1;
+		m_aapSnapshots[0][SnapshotType] = &m_aDemorecSnapshotHolders[SnapshotType];
+		m_aapSnapshots[0][SnapshotType]->m_pSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][0];
+		m_aapSnapshots[0][SnapshotType]->m_pAltSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][1];
+		m_aapSnapshots[0][SnapshotType]->m_SnapSize = 0;
+		m_aapSnapshots[0][SnapshotType]->m_AltSnapSize = 0;
+		m_aapSnapshots[0][SnapshotType]->m_Tick = -1;
 	}
 
 	// enter demo playback state
