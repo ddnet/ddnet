@@ -194,6 +194,9 @@ void CSpectator::OnRelease()
 
 void CSpectator::OnRender()
 {
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		return;
+
 	if(!GameClient()->m_MultiViewActivated && m_MultiViewActivateDelay != 0.0f)
 	{
 		if(m_MultiViewActivateDelay <= Client()->LocalTime())

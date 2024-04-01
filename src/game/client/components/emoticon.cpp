@@ -60,6 +60,9 @@ bool CEmoticon::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 
 void CEmoticon::OnRender()
 {
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		return;
+
 	if(!m_Active)
 	{
 		if(m_WasActive && m_SelectedEmote != -1)

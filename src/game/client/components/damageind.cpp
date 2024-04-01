@@ -49,6 +49,9 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir, float Alpha)
 
 void CDamageInd::OnRender()
 {
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		return;
+
 	Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteStars[0]);
 	static float s_LastLocalTime = LocalTime();
 	for(int i = 0; i < m_NumItems;)
