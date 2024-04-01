@@ -1718,6 +1718,8 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 	case PAGE_FAVORITE_COMMUNITY_1:
 	case PAGE_FAVORITE_COMMUNITY_2:
 	case PAGE_FAVORITE_COMMUNITY_3:
+	case PAGE_FAVORITE_COMMUNITY_4:
+	case PAGE_FAVORITE_COMMUNITY_5:
 		m_pBackground->ChangePosition(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1 + CMenuBackground::POS_BROWSER_CUSTOM0);
 		break;
 	default:
@@ -1837,7 +1839,7 @@ void CMenus::ConchainCommunitiesUpdate(IConsole::IResult *pResult, void *pUserDa
 {
 	pfnCallback(pResult, pCallbackUserData);
 	CMenus *pThis = static_cast<CMenus *>(pUserData);
-	if(pResult->NumArguments() >= 1 && (g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES || (g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_3)))
+	if(pResult->NumArguments() >= 1 && (g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES || (g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_5)))
 	{
 		pThis->UpdateCommunityCache(true);
 		pThis->Client()->ServerBrowserUpdate();
@@ -1851,7 +1853,7 @@ void CMenus::ConchainUiPageUpdate(IConsole::IResult *pResult, void *pUserData, I
 	CMenus *pThis = static_cast<CMenus *>(pUserData);
 	if(pResult->NumArguments() >= 1)
 	{
-		if(g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_3 &&
+		if(g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_5 &&
 			(size_t)(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1) >= pThis->ServerBrowser()->FavoriteCommunities().size())
 		{
 			// Reset page to internet when there is no favorite community for this page.
@@ -1869,7 +1871,7 @@ void CMenus::ConchainUiPageUpdate(IConsole::IResult *pResult, void *pUserData, I
 
 void CMenus::UpdateCommunityCache(bool Force)
 {
-	if(g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_3 &&
+	if(g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_5 &&
 		(size_t)(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1) >= ServerBrowser()->FavoriteCommunities().size())
 	{
 		// Reset page to internet when there is no favorite community for this page,
@@ -1881,7 +1883,7 @@ void CMenus::UpdateCommunityCache(bool Force)
 	const unsigned CommunitiesHash = ServerBrowser()->CurrentCommunitiesHash();
 	const bool PageChanged = m_CommunityCache.m_LastPage != 0 && m_CommunityCache.m_LastPage != g_Config.m_UiPage;
 	const bool CurrentCommunitiesChanged = m_CommunityCache.m_LastPage != 0 && m_CommunityCache.m_LastPage == g_Config.m_UiPage && m_CommunityCache.m_SelectedCommunitiesHash != CommunitiesHash;
-	if(CurrentCommunitiesChanged && g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_3)
+	if(CurrentCommunitiesChanged && g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_5)
 	{
 		// Favorite community was changed while its page is active,
 		// refresh to get correct serverlist for updated community.

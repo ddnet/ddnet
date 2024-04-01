@@ -456,7 +456,7 @@ void CServerBrowser::Filter()
 					Filtered = CommunitiesFilter().Filtered(Info.m_aCommunityId);
 				}
 				if(m_ServerlistType == IServerBrowser::TYPE_INTERNET || m_ServerlistType == IServerBrowser::TYPE_FAVORITES ||
-					(m_ServerlistType >= IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 && m_ServerlistType <= IServerBrowser::TYPE_FAVORITE_COMMUNITY_3))
+					(m_ServerlistType >= IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 && m_ServerlistType <= IServerBrowser::TYPE_FAVORITE_COMMUNITY_5))
 				{
 					Filtered = Filtered || CountriesFilter().Filtered(Info.m_aCommunityCountry);
 					Filtered = Filtered || TypesFilter().Filtered(Info.m_aCommunityType);
@@ -1079,7 +1079,7 @@ void CServerBrowser::UpdateFromHttp()
 			return m_pFavorites->IsFavorite(pAddrs, NumAddrs) != TRISTATE::NONE;
 		};
 	}
-	else if(m_ServerlistType >= IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 && m_ServerlistType <= IServerBrowser::TYPE_FAVORITE_COMMUNITY_3)
+	else if(m_ServerlistType >= IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 && m_ServerlistType <= IServerBrowser::TYPE_FAVORITE_COMMUNITY_5)
 	{
 		const size_t CommunityIndex = m_ServerlistType - IServerBrowser::TYPE_FAVORITE_COMMUNITY_1;
 		std::vector<const CCommunity *> vpFavoriteCommunities = FavoriteCommunities();
@@ -1704,7 +1704,7 @@ std::vector<const CCommunity *> CServerBrowser::CurrentCommunities() const
 	{
 		return SelectedCommunities();
 	}
-	else if(m_ServerlistType >= IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 && m_ServerlistType <= IServerBrowser::TYPE_FAVORITE_COMMUNITY_3)
+	else if(m_ServerlistType >= IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 && m_ServerlistType <= IServerBrowser::TYPE_FAVORITE_COMMUNITY_5)
 	{
 		const size_t CommunityIndex = m_ServerlistType - IServerBrowser::TYPE_FAVORITE_COMMUNITY_1;
 		std::vector<const CCommunity *> vpFavoriteCommunities = FavoriteCommunities();
@@ -1737,7 +1737,7 @@ void CFavoriteCommunityFilterList::Add(const char *pCommunityId)
 	// Ensure maximum number of favorite communities, by removing the least-recently
 	// added community from the beginning, when the maximum number of favorite
 	// communities has been reached.
-	constexpr size_t MaxFavoriteCommunities = 3;
+	constexpr size_t MaxFavoriteCommunities = IServerBrowser::TYPE_FAVORITE_COMMUNITY_5 - IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 + 1;
 	if(m_vEntries.size() >= MaxFavoriteCommunities)
 	{
 		dbg_assert(m_vEntries.size() == MaxFavoriteCommunities, "Maximum number of communities can never be exceeded");
