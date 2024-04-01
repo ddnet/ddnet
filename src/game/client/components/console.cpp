@@ -1498,7 +1498,7 @@ void CGameConsole::OnInit()
 
 void CGameConsole::OnStateChange(int NewState, int OldState)
 {
-	if(OldState == IClient::STATE_ONLINE && NewState < IClient::STATE_LOADING)
+	if(OldState <= IClient::STATE_ONLINE && NewState == IClient::STATE_OFFLINE)
 	{
 		m_RemoteConsole.m_UserGot = false;
 		m_RemoteConsole.m_aUser[0] = '\0';
