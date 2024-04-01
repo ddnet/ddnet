@@ -61,11 +61,17 @@ public:
 	{
 		LOADING_STATE_DETAIL_INITIAL,
 		LOADING_STATE_DETAIL_LOADING_MAP,
+		LOADING_STATE_DETAIL_LOADING_DEMO,
 		LOADING_STATE_DETAIL_SENDING_READY,
 		LOADING_STATE_DETAIL_GETTING_READY,
 	};
 
-	typedef std::function<void()> TMapLoadingCallbackFunc;
+	enum ELoadingCallbackDetail
+	{
+		LOADING_CALLBACK_DETAIL_MAP,
+		LOADING_CALLBACK_DETAIL_DEMO,
+	};
+	typedef std::function<void(ELoadingCallbackDetail Detail)> TLoadingCallback;
 
 protected:
 	// quick access to state of the client
@@ -88,7 +94,7 @@ protected:
 	float m_RenderFrameTime = 0.0001f;
 	float m_FrameTimeAvg = 0.0001f;
 
-	TMapLoadingCallbackFunc m_MapLoadingCBFunc = nullptr;
+	TLoadingCallback m_LoadingCallback = nullptr;
 
 	char m_aNews[3000] = "";
 	int m_Points = -1;
@@ -128,7 +134,7 @@ public:
 	inline int64_t StateStartTime() const { return m_StateStartTime; }
 	void SetLoadingStateDetail(ELoadingStateDetail LoadingStateDetail) { m_LoadingStateDetail = LoadingStateDetail; }
 
-	void SetMapLoadingCBFunc(TMapLoadingCallbackFunc &&Func) { m_MapLoadingCBFunc = std::move(Func); }
+	void SetLoadingCallback(TLoadingCallback &&Func) { m_LoadingCallback = std::move(Func); }
 
 	// tick time access
 	inline int PrevGameTick(int Conn) const { return m_aPrevGameTick[Conn]; }
