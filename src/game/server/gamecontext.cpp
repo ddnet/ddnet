@@ -2028,6 +2028,9 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 		case NETMSGTYPE_CL_SETSPECTATORMODE:
 			OnSetSpectatorModeNetMessage(static_cast<CNetMsg_Cl_SetSpectatorMode *>(pRawMsg), ClientId);
 			break;
+		case NETMSGTYPE_CL_NAMECHANGE:
+			OnNameChangeNetMessage(static_cast<CNetMsg_Cl_NameChange *>(pRawMsg), ClientId);
+			break;
 		case NETMSGTYPE_CL_CHANGEINFO:
 			OnChangeInfoNetMessage(static_cast<CNetMsg_Cl_ChangeInfo *>(pRawMsg), ClientId);
 			break;
@@ -2543,6 +2546,20 @@ void CGameContext::OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMod
 		pPlayer->m_SpectatorId = SpectatorId;
 }
 
+void CGameContext::OnNameChangeNetMessage(const CNetMsg_Cl_NameChange *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+	CNetMsg_Cl_ChangeInfo ChangeInfoMsg;
+	ChangeInfoMsg.m_pName = pMsg->m_pName;
+	ChangeInfoMsg.m_pClan = pMsg->m_pClan;
+	ChangeInfoMsg.m_Country = pMsg->m_Country;
+	ChangeInfoMsg.m_pSkin = pPlayer->m_TeeInfos.m_aSkinName;
+	ChangeInfoMsg.m_UseCustomColor = pPlayer->m_TeeInfos.m_UseCustomColor;
+	ChangeInfoMsg.m_ColorBody = pPlayer->m_TeeInfos.m_ColorBody;
+	ChangeInfoMsg.m_ColorFeet = pPlayer->m_TeeInfos.m_ColorFeet;
+	OnChangeInfoNetMessage(&ChangeInfoMsg, ClientId);
+}
+
 void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientId];
@@ -2645,6 +2662,13 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
 	}
+
+	CNetMsg_Sv_NameChange NameChangeMsg;
+	NameChangeMsg.m_ClientId = ClientId;
+	NameChangeMsg.m_pName = pMsg->m_pName;
+	NameChangeMsg.m_pClan = pMsg->m_pClan;
+	NameChangeMsg.m_Country = pMsg->m_Country;
+	Server()->SendPackMsg(&NameChangeMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
 
 	Server()->ExpireServerInfo();
 }

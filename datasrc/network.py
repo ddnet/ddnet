@@ -582,4 +582,17 @@ Messages = [
 	NetMessageEx("Sv_ChangeInfoCooldown", "change-info-cooldown@netmsg.ddnet.org", [
 		NetTick("m_WaitUntil")
 	]),
+
+	NetMessageEx("Cl_NameChange", "cl-name-change@netmsg.ddnet.org", [
+		NetStringStrict("m_pName"),
+		NetStringStrict("m_pClan"),
+		NetIntAny("m_Country"),
+	]),
+
+	NetMessageEx("Sv_NameChange", "sv-name-change@netmsg.ddnet.org", [
+		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
+		NetStringStrict("m_pName"),
+		NetStringStrict("m_pClan"),
+		NetIntAny("m_Country"),
+	]),
 ]
