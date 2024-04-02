@@ -291,6 +291,12 @@ if(NOT MSVC AND NOT HAIKU)
     add_cxx_compiler_flag_if_supported(OUR_FLAGS -ffloat-store)
   endif()
 
+  # This is needed to get the server to correctly display special characters
+  # on ARM systems.
+  if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm" OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64")
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS -fsigned-char)
+  endif()
+
   # Don't insert timestamps into PEs to keep the build reproducible.
   if(TARGET_OS STREQUAL "windows")
     add_cxx_compiler_flag_if_supported(OUR_FLAGS_LINK -Wl,--no-insert-timestamp)
