@@ -1989,15 +1989,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						unsigned char aTmpTransSnapBuffer[CSnapshot::MAX_SIZE];
 						CSnapshot *pTmpTransSnapBuffer = (CSnapshot *)aTmpTransSnapBuffer;
 						mem_copy(pTmpTransSnapBuffer, pTmpBuffer3, CSnapshot::MAX_SIZE);
-						AltSnapSize = pTmpTransSnapBuffer->TranslateSevenToSix(
-							pAltSnapBuffer,
-							m_TranslationContext,
-							LocalTime(),
-							CClient::GameTick(g_Config.m_ClDummy),
-							Conn,
-							Dummy,
-							GameClient()->GetNetObjHandler7(),
-							GameClient()->GetNetObjHandler());
+						AltSnapSize = GameClient()->TranslateSnap(pAltSnapBuffer, pTmpTransSnapBuffer, Conn, Dummy);
 					}
 					else
 					{
@@ -2018,13 +2010,26 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
 						SnapshotRemoveExtraProjectileInfo(pTmpBuffer3);
 
+						unsigned char aSnapSeven[CSnapshot::MAX_SIZE];
+						CSnapshot *pSnapSeven = (CSnapshot *)aSnapSeven;
+						int DemoSnapSize = SnapSize;
+						if(IsSixup())
+						{
+							DemoSnapSize = GameClient()->OnDemoRecSnap7(pTmpBuffer3, pSnapSeven, Conn);
+							if(DemoSnapSize < 0)
+							{
+								dbg_msg("sixup", "demo snapshot failed. error=%d", DemoSnapSize);
+								return;
+							}
+						}
+
 						// add snapshot to demo
 						for(auto &DemoRecorder : m_aDemoRecorder)
 						{
 							if(DemoRecorder.IsRecording())
 							{
 								// write snapshot
-								DemoRecorder.RecordSnapshot(GameTick, pTmpBuffer3, SnapSize);
+								DemoRecorder.RecordSnapshot(GameTick, IsSixup() ? pSnapSeven : pTmpBuffer3, DemoSnapSize);
 							}
 						}
 					}
@@ -2525,25 +2530,24 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 	// create a verified and unpacked snapshot
 	unsigned char aAltSnapBuffer[CSnapshot::MAX_SIZE];
 	CSnapshot *pAltSnapBuffer = (CSnapshot *)aAltSnapBuffer;
-	const int AltSnapSize = UnpackAndValidateSnapshot((CSnapshot *)pData, pAltSnapBuffer);
-	if(AltSnapSize < 0)
-	{
-		dbg_msg("client", "unpack snapshot and validate failed. error=%d", AltSnapSize);
-		return;
-	}
+	int AltSnapSize;
 
-	unsigned char aTmpTranslateBuffer[CSnapshot::MAX_SIZE];
-	CSnapshot *pTmpTranslateBuffer = nullptr;
-	int TranslatedSize = 0;
 	if(IsSixup())
 	{
-		pTmpTranslateBuffer = (CSnapshot *)aTmpTranslateBuffer;
-		TranslatedSize = ((CSnapshot *)pData)->TranslateSevenToSix(pTmpTranslateBuffer, m_TranslationContext, LocalTime(), GameTick(g_Config.m_ClDummy), CONN_MAIN, false, GameClient()->GetNetObjHandler7(), GameClient()->GetNetObjHandler());
-		if(TranslatedSize < 0)
+		AltSnapSize = GameClient()->TranslateSnap(pAltSnapBuffer, (CSnapshot *)pData, CONN_MAIN, false);
+		if(AltSnapSize < 0)
 		{
-			dbg_msg("sixup", "failed to translate snapshot. error=%d", TranslatedSize);
-			pTmpTranslateBuffer = nullptr;
-			TranslatedSize = 0;
+			dbg_msg("sixup", "failed to translate snapshot. error=%d", AltSnapSize);
+			return;
+		}
+	}
+	else
+	{
+		AltSnapSize = UnpackAndValidateSnapshot((CSnapshot *)pData, pAltSnapBuffer);
+		if(AltSnapSize < 0)
+		{
+			dbg_msg("client", "unpack snapshot and validate failed. error=%d", AltSnapSize);
+			return;
 		}
 	}
 
@@ -2551,9 +2555,6 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 	std::swap(m_aapSnapshots[0][SNAP_PREV], m_aapSnapshots[0][SNAP_CURRENT]);
 	mem_copy(m_aapSnapshots[0][SNAP_CURRENT]->m_pSnap, pData, Size);
 	mem_copy(m_aapSnapshots[0][SNAP_CURRENT]->m_pAltSnap, pAltSnapBuffer, AltSnapSize);
-
-	if(pTmpTranslateBuffer && TranslatedSize > 0)
-		mem_copy(m_aapSnapshots[0][SNAP_CURRENT]->m_pAltSnap, pTmpTranslateBuffer, TranslatedSize);
 
 	GameClient()->OnNewSnapshot();
 }
@@ -3917,7 +3918,20 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 			str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pFilename);
 		}
 
-		m_aDemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Sha256(), m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
+		m_aDemoRecorder[Recorder].Start(
+			Storage(),
+			m_pConsole,
+			aFilename,
+			IsSixup() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
+			m_aCurrentMap,
+			m_pMap->Sha256(),
+			m_pMap->Crc(),
+			"client",
+			m_pMap->MapSize(),
+			0,
+			m_pMap->File(),
+			nullptr,
+			nullptr);
 	}
 }
 
@@ -4881,7 +4895,20 @@ void CClient::RaceRecord_Start(const char *pFilename)
 	if(State() != IClient::STATE_ONLINE)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
 	else
-		m_aDemoRecorder[RECORDER_RACE].Start(Storage(), m_pConsole, pFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Sha256(), m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
+		m_aDemoRecorder[RECORDER_RACE].Start(
+			Storage(),
+			m_pConsole,
+			pFilename,
+			IsSixup() ? GameClient()->NetVersion7() : GameClient()->NetVersion(),
+			m_aCurrentMap,
+			m_pMap->Sha256(),
+			m_pMap->Crc(),
+			"client",
+			m_pMap->MapSize(),
+			0,
+			m_pMap->File(),
+			nullptr,
+			nullptr);
 }
 
 void CClient::RaceRecord_Stop()

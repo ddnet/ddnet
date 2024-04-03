@@ -81,6 +81,7 @@ using namespace std::chrono_literals;
 
 const char *CGameClient::Version() const { return GAME_VERSION; }
 const char *CGameClient::NetVersion() const { return GAME_NETVERSION; }
+const char *CGameClient::NetVersion7() const { return GAME_NETVERSION7; }
 int CGameClient::DDNetVersion() const { return DDNET_VERSION_NUMBER; }
 const char *CGameClient::DDNetVersionStr() const { return m_aDDNetVersionStr; }
 int CGameClient::ClientVersion7() const { return CLIENT_VERSION7; }
@@ -2336,9 +2337,9 @@ void CGameClient::CClientData::Reset()
 	m_SkinColor = 0;
 	for(int i = 0; i < protocol7::NUM_SKINPARTS; ++i)
 	{
-		m_aaSkinPartNames[i][0] = '\0';
-		m_aUseCustomColors[i] = 0;
-		m_aSkinPartColors[i] = 0;
+		m_Sixup.m_aaSkinPartNames[i][0] = '\0';
+		m_Sixup.m_aUseCustomColors[i] = 0;
+		m_Sixup.m_aSkinPartColors[i] = 0;
 	}
 	m_Team = 0;
 	m_Emoticon = 0;
@@ -2464,11 +2465,11 @@ bool CGameClient::GotWantedSkin7(bool Dummy)
 
 	for(int SkinPart = 0; SkinPart < protocol7::NUM_SKINPARTS; SkinPart++)
 	{
-		if(str_comp(m_aClients[m_aLocalIds[(int)Dummy]].m_aaSkinPartNames[SkinPart], apSkinPartsPtr[SkinPart]))
+		if(str_comp(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup.m_aaSkinPartNames[SkinPart], apSkinPartsPtr[SkinPart]))
 			return false;
-		if(m_aClients[m_aLocalIds[(int)Dummy]].m_aUseCustomColors[SkinPart] != aUCCVars[SkinPart])
+		if(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup.m_aUseCustomColors[SkinPart] != aUCCVars[SkinPart])
 			return false;
-		if(m_aClients[m_aLocalIds[(int)Dummy]].m_aSkinPartColors[SkinPart] != aColorVars[SkinPart])
+		if(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup.m_aSkinPartColors[SkinPart] != aColorVars[SkinPart])
 			return false;
 	}
 
