@@ -1821,9 +1821,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					if(!Dummy)
 					{
 						// for antiping: if the projectile netobjects from the server contains extra data, this is removed and the original content restored before recording demo
-						unsigned char aExtraInfoRemoved[CSnapshot::MAX_SIZE];
-						mem_copy(aExtraInfoRemoved, pTmpBuffer3, SnapSize);
-						SnapshotRemoveExtraProjectileInfo(aExtraInfoRemoved);
+						SnapshotRemoveExtraProjectileInfo(pTmpBuffer3);
 
 						// add snapshot to demo
 						for(auto &DemoRecorder : m_aDemoRecorder)
@@ -1831,7 +1829,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							if(DemoRecorder.IsRecording())
 							{
 								// write snapshot
-								DemoRecorder.RecordSnapshot(GameTick, aExtraInfoRemoved, SnapSize);
+								DemoRecorder.RecordSnapshot(GameTick, pTmpBuffer3, SnapSize);
 							}
 						}
 					}
