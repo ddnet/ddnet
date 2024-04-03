@@ -2427,6 +2427,7 @@ if(CLIENT)
     render.h
     render_map.cpp
     sixup_translate_game.cpp
+    sixup_translate_snapshot.cpp
     skin.h
     ui.cpp
     ui.h

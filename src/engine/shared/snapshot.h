@@ -63,15 +63,6 @@ public:
 
 	unsigned Crc() const;
 	void DebugDump() const;
-	int TranslateSevenToSix(
-		CSnapshot *pSixSnapDest,
-		class CTranslationContext &TranslationContext,
-		float LocalTime,
-		int GameTick,
-		int Conn,
-		bool Dummy,
-		protocol7::CNetObjHandler *pNetObjHandler,
-		CNetObjHandler *pNetObjHandler6);
 	bool IsValid(size_t ActualSize) const;
 
 	static const CSnapshot *EmptySnapshot() { return &ms_EmptySnapshot; }
@@ -171,12 +162,13 @@ class CSnapshotBuilder
 	int GetExtendedItemTypeIndex(int TypeId);
 	int GetTypeFromIndex(int Index) const;
 
-	bool m_Sixup;
+	bool m_Sixup = false;
 
 public:
 	CSnapshotBuilder();
 
 	void Init(bool Sixup = false);
+	void Init7(const CSnapshot *pSnapshot);
 
 	void *NewItem(int Type, int Id, int Size);
 
