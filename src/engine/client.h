@@ -11,6 +11,7 @@
 #include <game/generated/protocol.h>
 
 #include <engine/friends.h>
+#include <engine/shared/snapshot.h>
 #include <functional>
 
 struct SWarning;
@@ -346,7 +347,7 @@ public:
 	virtual CNetObjHandler *GetNetObjHandler() = 0;
 };
 
-void SnapshotRemoveExtraProjectileInfo(unsigned char *pData);
+void SnapshotRemoveExtraProjectileInfo(CSnapshot *pSnap);
 
 extern IGameClient *CreateGameClient();
 #endif
