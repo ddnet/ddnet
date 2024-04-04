@@ -2685,10 +2685,6 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		float Y = PreviewView.y;
 		float LineWidth = g_Config.m_ClChatWidth * 2 - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
 
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, X, Y, RealFontSize, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = LineWidth;
-
 		str_copy(aBuf, Client()->PlayerName());
 
 		const CAnimState *pIdleState = CAnimState::GetIdle();
@@ -2949,7 +2945,6 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		}
 		// Client
 		RenderPreview(PREVIEW_CLIENT, X, Y);
-		TextRender()->SetCursorPosition(&Cursor, X, Y);
 
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
