@@ -2620,18 +2620,14 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			GameClient()->m_Chat.RebuildChat();
 
 		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
-		int PrevFontSize = g_Config.m_ClChatFontSize;
-		Ui()->DoScrollbarOption(&g_Config.m_ClChatFontSize, &g_Config.m_ClChatFontSize, &Button, Localize("Chat font size"), 10, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
-		if(PrevFontSize != g_Config.m_ClChatFontSize)
+		if(Ui()->DoScrollbarOption(&g_Config.m_ClChatFontSize, &g_Config.m_ClChatFontSize, &Button, Localize("Chat font size"), 10, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE))
 		{
 			Chat.EnsureCoherentWidth();
 			Chat.RebuildChat();
 		}
 
 		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
-		int PrevWidth = g_Config.m_ClChatWidth;
-		Ui()->DoScrollbarOption(&g_Config.m_ClChatWidth, &g_Config.m_ClChatWidth, &Button, Localize("Chat width"), 120, 400, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
-		if(PrevWidth != g_Config.m_ClChatWidth)
+		if(Ui()->DoScrollbarOption(&g_Config.m_ClChatWidth, &g_Config.m_ClChatWidth, &Button, Localize("Chat width"), 120, 400, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE))
 		{
 			Chat.EnsureCoherentFontSize();
 			Chat.RebuildChat();
@@ -3258,10 +3254,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	if(g_Config.m_ClTextEntities)
 	{
-		int PreviousSize = g_Config.m_ClTextEntitiesSize;
-		Ui()->DoScrollbarOption(&g_Config.m_ClTextEntitiesSize, &g_Config.m_ClTextEntitiesSize, &Button, Localize("Size"), 0, 100);
-
-		if(PreviousSize != g_Config.m_ClTextEntitiesSize)
+		if(Ui()->DoScrollbarOption(&g_Config.m_ClTextEntitiesSize, &g_Config.m_ClTextEntitiesSize, &Button, Localize("Size"), 0, 100))
 			m_pClient->m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
 	}
 
@@ -3290,9 +3283,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowQuads, &Button, Localize("Quads are used for background decoration"));
 
 	Right.HSplitTop(20.0f, &Button, &Right);
-	int PreviousZoom = g_Config.m_ClDefaultZoom;
-	Ui()->DoScrollbarOption(&g_Config.m_ClDefaultZoom, &g_Config.m_ClDefaultZoom, &Button, Localize("Default zoom"), 0, 20);
-	if(PreviousZoom != g_Config.m_ClDefaultZoom)
+	if(Ui()->DoScrollbarOption(&g_Config.m_ClDefaultZoom, &g_Config.m_ClDefaultZoom, &Button, Localize("Default zoom"), 0, 20))
 		m_pClient->m_Camera.SetZoom(std::pow(CCamera::ZOOM_STEP, g_Config.m_ClDefaultZoom - 10), g_Config.m_ClSmoothZoomTime);
 
 	Right.HSplitTop(20.0f, &Button, &Right);
