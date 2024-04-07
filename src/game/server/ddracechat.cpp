@@ -1050,7 +1050,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 				SendChatTarget(pPlayer->GetCid(), "Practice mode enabled for your team, happy practicing!");
 
 			if(m_pController->Teams().TeamFlock(Team))
-				SendChatTarget(pPlayer->GetCid(), "Team 0 mode enabled for your team, happy team 0-ing!");
+				SendChatTarget(pPlayer->GetCid(), "Team 0 mode enabled for your team. This will make your team behave like team 0.");
 		}
 	}
 }
@@ -1119,7 +1119,7 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Can't invite players to this team");
 }
 
-void CGameContext::ConFlock(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	auto *pController = pSelf->m_pController;
@@ -1178,7 +1178,7 @@ void CGameContext::ConFlock(IConsole::IResult *pResult, void *pUserData)
 	{
 		pController->Teams().SetTeamFlock(Team, true);
 
-		str_format(aBuf, sizeof(aBuf), "'%s' enabled team 0 mode.", pSelf->Server()->ClientName(pResult->m_ClientId));
+		str_format(aBuf, sizeof(aBuf), "'%s' enabled team 0 mode. This will make your team behave like team 0.", pSelf->Server()->ClientName(pResult->m_ClientId));
 		pSelf->SendChatTeam(Team, aBuf);
 	}
 }
