@@ -345,6 +345,11 @@ void CScore::LoadTeam(const char *pCode, int ClientId)
 		GameServer()->SendChatTarget(ClientId, "Team can't be loaded while racing");
 		return;
 	}
+	if(pController->Teams().TeamFlock(Team))
+	{
+		GameServer()->SendChatTarget(ClientId, "Team can't be loaded while in team 0 mode");
+		return;
+	}
 	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientId);
 	SaveResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 	pController->Teams().SetSaving(Team, SaveResult);
