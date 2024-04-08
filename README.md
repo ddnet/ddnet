@@ -196,12 +196,21 @@ Check the SAN.\* files afterwards. This finds more problems than memcheck, runs 
 For valgrind's memcheck compile a normal Debug build and run with: `valgrind --tool=memcheck ./DDNet`
 Expect a large slow down.
 
-Building on Windows with Visual Studio
+Building on Windows with Microsoft Visual C++
 --------------------------------------
 
-Download and install some version of [Microsoft Visual Studio](https://www.visualstudio.com/) (as of writing, MSVS Community 2017) with **C++ support**, install [Python 3](https://www.python.org/downloads/) **for all users** and install [CMake](https://cmake.org/download/#latest). You also need to install [Rust](https://rustup.rs/).
+First off you will need to install the MSVC [Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), [Python 3](https://www.python.org/downloads/) as well as [Rust](https://www.rust-lang.org/tools/install).
 
-Start CMake and select the source code folder (where DDNet resides, the directory with `CMakeLists.txt`). Additionally select a build folder, e.g. create a build subdirectory in the source code directory. Click "Configure" and select the Visual Studio generator (it should be pre-selected, so pressing "Finish" will suffice). After configuration finishes and the "Generate" reactivates, click it. When that finishes, click "Open Project". Visual Studio should open. You can compile the DDNet client by right-clicking the "game-client" project and select "Set as Startup project". Now you should be able to compile DDNet by clicking the green, triangular "Run" button.
+To compile and build DDNet on Windows, use your IDE of choice either with a CMake integration (e.g Visual Studio Code), or by ~~**deprecated**~~ using the CMake GUI.
+
+Configure CMake to use the MSVC Build Tools appropriate to your System by your IDE's instructions.
+
+If you're using Visual Studio Code, you can use the [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools) extension to configure and build the project.
+
+You can then open the project folder in VSC and press `Ctrl+Shift+P` to open the command palette, then search for `CMake: Configure`
+
+This will open up a prompt for you to select a kit, select your `Visual Studio` version and save it. You can now use the GUI (bottom left) to compile and build your project.
+
 
 Cross-compiling on Linux to Windows x86/x86\_64
 -----------------------------------------------
