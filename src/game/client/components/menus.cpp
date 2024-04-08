@@ -903,6 +903,7 @@ void CMenus::OnInit()
 
 	Console()->Chain("snd_enable", ConchainUpdateMusicState, this);
 	Console()->Chain("snd_enable_music", ConchainUpdateMusicState, this);
+	Console()->Chain("cl_background_entities", ConchainBackgroundEntities, this);
 
 	Console()->Chain("cl_assets_entities", ConchainAssetsEntities, this);
 	Console()->Chain("cl_asset_game", ConchainAssetGame, this);
@@ -936,6 +937,22 @@ void CMenus::OnConsoleInit()
 	ConfigManager()->RegisterCallback(CMenus::ConfigSaveCallback, this);
 	Console()->Register("add_favorite_skin", "s[skin_name]", CFGFLAG_CLIENT, Con_AddFavoriteSkin, this, "Add a skin as a favorite");
 	Console()->Register("remove_favorite_skin", "s[skin_name]", CFGFLAG_CLIENT, Con_RemFavoriteSkin, this, "Remove a skin from the favorites");
+}
+
+void CMenus::ConchainBackgroundEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		CMenus *pSelf = (CMenus *)pUserData;
+		pSelf->UpdateBackgroundEntities();
+	}
+}
+
+void CMenus::UpdateBackgroundEntities()
+{
+	if(str_comp(g_Config.m_ClBackgroundEntities, m_pClient->m_Background.MapName()) != 0)
+		m_pClient->m_Background.LoadBackground();
 }
 
 void CMenus::ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
