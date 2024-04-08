@@ -3641,7 +3641,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("unlock", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConUnlock, this, "Unlock a team");
 	Console()->Register("invite", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConInvite, this, "Invite a person to a locked team");
 	Console()->Register("join", "r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConJoin, this, "Join the team of the specified player");
-	Console()->Register("team0mode", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTeam0Mode, this, "Toggle team between team 0 and team mode. This mode will make your team will behave like team 0.");
+	Console()->Register("team0mode", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTeam0Mode, this, "Toggle team between team 0 and team mode. This mode will make your team behave like team 0.");
 
 	Console()->Register("showothers", "?i['0'|'1'|'2']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConShowOthers, this, "Whether to show players from other teams or not (off by default), optional i = 0 for off, i = 1 for on, i = 2 for own team only");
 	Console()->Register("showall", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConShowAll, this, "Whether to show players at any distance (off by default), optional i = 0 for off else for on");
