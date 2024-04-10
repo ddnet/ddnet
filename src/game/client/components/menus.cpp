@@ -663,12 +663,6 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 		static CButtonContainer s_InternetButton;
 		if(DoButton_MenuTab(&s_InternetButton, FONT_ICON_EARTH_AMERICAS, ActivePage == PAGE_INTERNET, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_INTERNET]))
 		{
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
-			{
-				if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
-					Client()->RequestDDNetInfo();
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-			}
 			NewPage = PAGE_INTERNET;
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_InternetButton, &Button, Localize("Internet"));
@@ -677,8 +671,6 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 		static CButtonContainer s_LanButton;
 		if(DoButton_MenuTab(&s_LanButton, FONT_ICON_NETWORK_WIRED, ActivePage == PAGE_LAN, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_LAN]))
 		{
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 			NewPage = PAGE_LAN;
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_LanButton, &Button, Localize("LAN"));
@@ -687,12 +679,6 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 		static CButtonContainer s_FavoritesButton;
 		if(DoButton_MenuTab(&s_FavoritesButton, FONT_ICON_STAR, ActivePage == PAGE_FAVORITES, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_FAVORITES]))
 		{
-			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
-			{
-				if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
-					Client()->RequestDDNetInfo();
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-			}
 			NewPage = PAGE_FAVORITES;
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_FavoritesButton, &Button, Localize("Favorites"));
@@ -710,13 +696,6 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 			const int Page = PAGE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
 			if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, ActivePage == Page, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIT_TAB_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex], nullptr, nullptr, nullptr, 10.0f, FindCommunityIcon(pCommunity->Id())))
 			{
-				const int BrowserType = IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
-				if(ServerBrowser()->GetCurrentType() != BrowserType)
-				{
-					if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
-						Client()->RequestDDNetInfo();
-					ServerBrowser()->Refresh(BrowserType);
-				}
 				NewPage = Page;
 			}
 			GameClient()->m_Tooltips.DoToolTip(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], &Button, pCommunity->Name());
@@ -1036,7 +1015,7 @@ void CMenus::Render()
 	static int s_Frame = 0;
 	if(s_Frame == 0)
 	{
-		RefreshBrowserTab(g_Config.m_UiPage);
+		RefreshBrowserTab(true);
 		s_Frame++;
 	}
 	else if(s_Frame == 1)
@@ -1851,7 +1830,7 @@ void CMenus::RenderPopupConnecting(CUIRect Screen)
 	{
 		Client()->Disconnect();
 		Ui()->SetActiveItem(nullptr);
-		RefreshBrowserTab(g_Config.m_UiPage);
+		RefreshBrowserTab(true);
 	}
 }
 
@@ -1970,7 +1949,7 @@ void CMenus::RenderPopupLoading(CUIRect Screen)
 	{
 		Client()->Disconnect();
 		Ui()->SetActiveItem(nullptr);
-		RefreshBrowserTab(g_Config.m_UiPage);
+		RefreshBrowserTab(true);
 	}
 }
 
@@ -2383,30 +2362,63 @@ const CMenus::CMenuImage *CMenus::FindMenuImage(const char *pName)
 
 void CMenus::SetMenuPage(int NewPage)
 {
+	const int OldPage = m_MenuPage;
 	m_MenuPage = NewPage;
 	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_FAVORITE_COMMUNITY_5)
+	{
 		g_Config.m_UiPage = NewPage;
+		if(!m_ShowStart && OldPage != NewPage)
+		{
+			RefreshBrowserTab(false);
+		}
+	}
 }
 
-void CMenus::RefreshBrowserTab(int UiPage)
+void CMenus::RefreshBrowserTab(bool Force)
 {
-	if(UiPage == PAGE_INTERNET)
+	if(g_Config.m_UiPage == PAGE_INTERNET)
 	{
-		Client()->RequestDDNetInfo();
-		ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+		if(Force || ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
+		{
+			if(Force || ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
+			{
+				Client()->RequestDDNetInfo();
+			}
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+			UpdateCommunityCache(true);
+		}
 	}
-	else if(UiPage == PAGE_LAN)
+	else if(g_Config.m_UiPage == PAGE_LAN)
 	{
-		ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+		if(Force || ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
+		{
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+			UpdateCommunityCache(true);
+		}
 	}
-	else if(UiPage == PAGE_FAVORITES)
+	else if(g_Config.m_UiPage == PAGE_FAVORITES)
 	{
-		Client()->RequestDDNetInfo();
-		ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+		if(Force || ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
+		{
+			if(Force || ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
+			{
+				Client()->RequestDDNetInfo();
+			}
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+			UpdateCommunityCache(true);
+		}
 	}
-	else if(UiPage >= PAGE_FAVORITE_COMMUNITY_1 && UiPage <= PAGE_FAVORITE_COMMUNITY_5)
+	else if(g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_5)
 	{
-		Client()->RequestDDNetInfo();
-		ServerBrowser()->Refresh(UiPage - PAGE_FAVORITE_COMMUNITY_1 + IServerBrowser::TYPE_FAVORITE_COMMUNITY_1);
+		const int BrowserType = g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1 + IServerBrowser::TYPE_FAVORITE_COMMUNITY_1;
+		if(Force || ServerBrowser()->GetCurrentType() != BrowserType)
+		{
+			if(Force || ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
+			{
+				Client()->RequestDDNetInfo();
+			}
+			ServerBrowser()->Refresh(BrowserType);
+			UpdateCommunityCache(true);
+		}
 	}
 }

@@ -248,6 +248,18 @@ public:
 	virtual bool Filtered(const char *pElement) const = 0;
 };
 
+class ICommunityCache
+{
+public:
+	virtual void Update(bool Force) = 0;
+	virtual const std::vector<const CCommunity *> &SelectedCommunities() const = 0;
+	virtual const std::vector<const CCommunityCountry *> &SelectableCountries() const = 0;
+	virtual const std::vector<const CCommunityType *> &SelectableTypes() const = 0;
+	virtual bool AnyRanksAvailable() const = 0;
+	virtual bool CountriesTypesFilterAvailable() const = 0;
+	virtual const char *CountryTypeFilterKey() const = 0;
+};
+
 class IServerBrowser : public IInterface
 {
 	MACRO_INTERFACE("serverbrowser")
@@ -286,6 +298,11 @@ public:
 
 	static constexpr const char *COMMUNITY_DDNET = "ddnet";
 	static constexpr const char *COMMUNITY_NONE = "none";
+	/**
+	 * Special community value for country/type filters that
+	 * affect all communities.
+	 */
+	static constexpr const char *COMMUNITY_ALL = "all";
 
 	static constexpr const char *SEARCH_EXCLUDE_TOKEN = ";";
 
@@ -313,6 +330,8 @@ public:
 	virtual bool DDNetInfoAvailable() const = 0;
 	virtual SHA256_DIGEST DDNetInfoSha256() const = 0;
 
+	virtual ICommunityCache &CommunityCache() = 0;
+	virtual const ICommunityCache &CommunityCache() const = 0;
 	virtual IFilterList &FavoriteCommunitiesFilter() = 0;
 	virtual IFilterList &CommunitiesFilter() = 0;
 	virtual IFilterList &CountriesFilter() = 0;
