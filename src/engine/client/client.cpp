@@ -588,6 +588,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_aapSnapshots[0][SNAP_CURRENT] = 0;
 	m_aapSnapshots[0][SNAP_PREV] = 0;
 	m_aReceivedSnapshots[0] = 0;
+	m_LastDummy = false;
 }
 
 void CClient::Disconnect()
