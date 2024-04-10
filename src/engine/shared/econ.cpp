@@ -3,6 +3,7 @@
 
 #include "econ.h"
 #include "netban.h"
+#include <base/log.h>
 
 CEcon::CEcon() :
 	m_Ready(false)
@@ -93,7 +94,7 @@ void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
 		Console()->Register("logout", "", CFGFLAG_ECON, ConLogout, this, "Logout of econ");
 	}
 	else
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "econ", "couldn't open socket. port %d might already be in use", BindAddr.port);
+		log_error("econ", "couldn't open socket. port %d might already be in use", BindAddr.port);
 }
 
 void CEcon::Update()
