@@ -2148,7 +2148,7 @@ bool CServerBrowser::IsRegistered(const NETADDR &Addr)
 	const int NumServers = m_pHttp->NumServers();
 	for(int i = 0; i < NumServers; i++)
 	{
-		const CServerInfo Info = m_pHttp->Server(i);
+		const CServerInfo &Info = m_pHttp->Server(i);
 		for(int j = 0; j < Info.m_NumAddresses; j++)
 		{
 			if(net_addr_comp(&Info.m_aAddresses[j], &Addr) == 0)
