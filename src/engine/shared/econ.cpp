@@ -93,7 +93,7 @@ void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
 		Console()->Register("logout", "", CFGFLAG_ECON, ConLogout, this, "Logout of econ");
 	}
 	else
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "econ", "couldn't open socket. port might already be in use");
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "econ", "couldn't open socket. port %d might already be in use", BindAddr.port);
 }
 
 void CEcon::Update()
