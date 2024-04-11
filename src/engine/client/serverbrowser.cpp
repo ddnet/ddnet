@@ -53,8 +53,9 @@ bool matchesExactly(const char *a, const char *b)
 }
 
 CServerBrowser::CServerBrowser() :
-	m_CountriesFilter([this]() { return CurrentCommunities(); }),
-	m_TypesFilter([this]() { return CurrentCommunities(); })
+	m_CommunityCache(this),
+	m_CountriesFilter(&m_CommunityCache),
+	m_TypesFilter(&m_CommunityCache)
 {
 	m_ppServerlist = nullptr;
 	m_pSortedServerlist = nullptr;
@@ -1728,6 +1729,78 @@ unsigned CServerBrowser::CurrentCommunitiesHash() const
 	return Hash;
 }
 
+void CCommunityCache::Update(bool Force)
+{
+	const unsigned CommunitiesHash = m_pServerBrowser->CurrentCommunitiesHash();
+	const bool TypeChanged = m_LastType != m_pServerBrowser->GetCurrentType();
+	const bool CurrentCommunitiesChanged = m_LastType == m_pServerBrowser->GetCurrentType() && m_SelectedCommunitiesHash != CommunitiesHash;
+	if(CurrentCommunitiesChanged && m_pServerBrowser->GetCurrentType() >= IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 && m_pServerBrowser->GetCurrentType() <= IServerBrowser::TYPE_FAVORITE_COMMUNITY_5)
+	{
+		// Favorite community was changed while its type is active,
+		// refresh to get correct serverlist for updated community.
+		m_pServerBrowser->Refresh(m_pServerBrowser->GetCurrentType(), true);
+	}
+
+	if(!Force && m_InfoSha256 == m_pServerBrowser->DDNetInfoSha256() &&
+		!CurrentCommunitiesChanged && !TypeChanged)
+	{
+		return;
+	}
+
+	m_InfoSha256 = m_pServerBrowser->DDNetInfoSha256();
+	m_LastType = m_pServerBrowser->GetCurrentType();
+	m_SelectedCommunitiesHash = CommunitiesHash;
+	m_vpSelectedCommunities = m_pServerBrowser->CurrentCommunities();
+
+	m_vpSelectableCountries.clear();
+	m_vpSelectableTypes.clear();
+	for(const CCommunity *pCommunity : m_vpSelectedCommunities)
+	{
+		for(const auto &Country : pCommunity->Countries())
+		{
+			const auto ExistingCountry = std::find_if(m_vpSelectableCountries.begin(), m_vpSelectableCountries.end(), [&](const CCommunityCountry *pOther) {
+				return str_comp(Country.Name(), pOther->Name()) == 0 && Country.FlagId() == pOther->FlagId();
+			});
+			if(ExistingCountry == m_vpSelectableCountries.end())
+			{
+				m_vpSelectableCountries.push_back(&Country);
+			}
+		}
+		for(const auto &Type : pCommunity->Types())
+		{
+			const auto ExistingType = std::find_if(m_vpSelectableTypes.begin(), m_vpSelectableTypes.end(), [&](const CCommunityType *pOther) {
+				return str_comp(Type.Name(), pOther->Name()) == 0;
+			});
+			if(ExistingType == m_vpSelectableTypes.end())
+			{
+				m_vpSelectableTypes.push_back(&Type);
+			}
+		}
+	}
+
+	m_AnyRanksAvailable = std::any_of(m_vpSelectedCommunities.begin(), m_vpSelectedCommunities.end(), [](const CCommunity *pCommunity) {
+		return pCommunity->HasRanks();
+	});
+
+	// Country/type filters not shown if there are no countries and types, or if only the none-community is selected
+	m_CountryTypesFilterAvailable = (!m_vpSelectableCountries.empty() || !m_vpSelectableTypes.empty()) &&
+					(m_vpSelectedCommunities.size() != 1 || str_comp(m_vpSelectedCommunities[0]->Id(), IServerBrowser::COMMUNITY_NONE) != 0);
+
+	if(m_pServerBrowser->GetCurrentType() >= IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 && m_pServerBrowser->GetCurrentType() <= IServerBrowser::TYPE_FAVORITE_COMMUNITY_5)
+	{
+		const size_t CommunityIndex = m_pServerBrowser->GetCurrentType() - IServerBrowser::TYPE_FAVORITE_COMMUNITY_1;
+		std::vector<const CCommunity *> vpFavoriteCommunities = m_pServerBrowser->FavoriteCommunities();
+		dbg_assert(CommunityIndex < vpFavoriteCommunities.size(), "Invalid favorite community serverbrowser type");
+		m_pCountryTypeFilterKey = vpFavoriteCommunities[CommunityIndex]->Id();
+	}
+	else
+	{
+		m_pCountryTypeFilterKey = IServerBrowser::COMMUNITY_ALL;
+	}
+
+	m_pServerBrowser->CleanFilters();
+}
+
 void CFavoriteCommunityFilterList::Add(const char *pCommunityId)
 {
 	// Remove community if it's already a favorite, so it will be added again at
@@ -1797,6 +1870,14 @@ const std::vector<CCommunityId> &CFavoriteCommunityFilterList::Entries() const
 	return m_vEntries;
 }
 
+template<typename TNamedElement, typename TElementName>
+static bool IsSubsetEquals(const std::vector<const TNamedElement *> &vpLeft, const std::unordered_set<TElementName> &Right)
+{
+	return vpLeft.size() <= Right.size() && std::all_of(vpLeft.begin(), vpLeft.end(), [&](const TNamedElement *pElem) {
+		return Right.count(TElementName(pElem->Name())) > 0;
+	});
+}
+
 void CExcludedCommunityFilterList::Add(const char *pCommunityId)
 {
 	m_Entries.emplace(pCommunityId);
@@ -1859,13 +1940,18 @@ void CExcludedCommunityFilterList::Save(IConfigManager *pConfigManager) const
 
 void CExcludedCommunityCountryFilterList::Add(const char *pCountryName)
 {
-	for(const CCommunity *pCommunity : m_CurrentCommunitiesGetter())
+	// Handle special case that all selectable entries are currently filtered,
+	// where adding more entries to the exclusion list would have no effect.
+	auto CommunityEntry = m_Entries.find(m_pCommunityCache->CountryTypeFilterKey());
+	if(CommunityEntry != m_Entries.end() && IsSubsetEquals(m_pCommunityCache->SelectableCountries(), CommunityEntry->second))
 	{
-		if(pCommunity->HasCountry(pCountryName))
+		for(const CCommunityCountry *pSelectableCountry : m_pCommunityCache->SelectableCountries())
 		{
-			Add(pCommunity->Id(), pCountryName);
+			CommunityEntry->second.erase(pSelectableCountry->Name());
 		}
 	}
+
+	Add(m_pCommunityCache->CountryTypeFilterKey(), pCountryName);
 }
 
 void CExcludedCommunityCountryFilterList::Add(const char *pCommunityId, const char *pCountryName)
@@ -1880,10 +1966,7 @@ void CExcludedCommunityCountryFilterList::Add(const char *pCommunityId, const ch
 
 void CExcludedCommunityCountryFilterList::Remove(const char *pCountryName)
 {
-	for(const CCommunity *pCommunity : m_CurrentCommunitiesGetter())
-	{
-		Remove(pCommunity->Id(), pCountryName);
-	}
+	Remove(m_pCommunityCache->CountryTypeFilterKey(), pCountryName);
 }
 
 void CExcludedCommunityCountryFilterList::Remove(const char *pCommunityId, const char *pCountryName)
@@ -1897,50 +1980,38 @@ void CExcludedCommunityCountryFilterList::Remove(const char *pCommunityId, const
 
 void CExcludedCommunityCountryFilterList::Clear()
 {
-	for(const CCommunity *pCommunity : m_CurrentCommunitiesGetter())
+	auto CommunityEntry = m_Entries.find(m_pCommunityCache->CountryTypeFilterKey());
+	if(CommunityEntry != m_Entries.end())
 	{
-		auto CommunityEntry = m_Entries.find(pCommunity->Id());
-		if(CommunityEntry != m_Entries.end())
-		{
-			CommunityEntry->second.clear();
-		}
+		CommunityEntry->second.clear();
 	}
 }
 
 bool CExcludedCommunityCountryFilterList::Filtered(const char *pCountryName) const
 {
-	const auto Communities = m_CurrentCommunitiesGetter();
-	return std::none_of(Communities.begin(), Communities.end(), [&](const CCommunity *pCommunity) {
-		if(!pCommunity->HasCountry(pCountryName))
-			return false;
-
-		auto CommunityEntry = m_Entries.find(CCommunityId(pCommunity->Id()));
-		if(CommunityEntry == m_Entries.end())
-			return true;
-
-		const auto &CountryEntries = CommunityEntry->second;
-		if(CountryEntries.find(CCommunityCountryName(pCountryName)) == CountryEntries.end())
-			return true;
-
+	auto CommunityEntry = m_Entries.find(CCommunityId(m_pCommunityCache->CountryTypeFilterKey()));
+	if(CommunityEntry == m_Entries.end())
 		return false;
-	});
+
+	const auto &CountryEntries = CommunityEntry->second;
+	return !IsSubsetEquals(m_pCommunityCache->SelectableCountries(), CountryEntries) &&
+	       CountryEntries.find(CCommunityCountryName(pCountryName)) != CountryEntries.end();
 }
 
 bool CExcludedCommunityCountryFilterList::Empty() const
 {
-	for(const CCommunity *pCommunity : m_CurrentCommunitiesGetter())
-	{
-		auto CommunityEntry = m_Entries.find(CCommunityId(pCommunity->Id()));
-		return CommunityEntry == m_Entries.end() || CommunityEntry->second.empty();
-	}
-	return false;
+	auto CommunityEntry = m_Entries.find(CCommunityId(m_pCommunityCache->CountryTypeFilterKey()));
+	return CommunityEntry == m_Entries.end() ||
+	       CommunityEntry->second.empty() ||
+	       IsSubsetEquals(m_pCommunityCache->SelectableCountries(), CommunityEntry->second);
 }
 
 void CExcludedCommunityCountryFilterList::Clean(const std::vector<CCommunity> &vAllowedCommunities)
 {
 	for(auto It = m_Entries.begin(); It != m_Entries.end();)
 	{
-		const bool Found = std::find_if(vAllowedCommunities.begin(), vAllowedCommunities.end(), [&](const CCommunity &AllowedCommunity) {
+		const bool AllEntry = str_comp(It->first.Id(), IServerBrowser::COMMUNITY_ALL) == 0;
+		const bool Found = AllEntry || std::find_if(vAllowedCommunities.begin(), vAllowedCommunities.end(), [&](const CCommunity &AllowedCommunity) {
 			return str_comp(It->first.Id(), AllowedCommunity.Id()) == 0;
 		}) != vAllowedCommunities.end();
 		if(Found)
@@ -1977,6 +2048,36 @@ void CExcludedCommunityCountryFilterList::Clean(const std::vector<CCommunity> &v
 			}
 		}
 	}
+
+	auto AllCommunityEntry = m_Entries.find(CCommunityId(IServerBrowser::COMMUNITY_ALL));
+	if(AllCommunityEntry != m_Entries.end())
+	{
+		auto &CountryEntries = AllCommunityEntry->second;
+		for(auto It = CountryEntries.begin(); It != CountryEntries.end();)
+		{
+			if(std::any_of(vAllowedCommunities.begin(), vAllowedCommunities.end(), [&](const auto &Community) { return Community.HasCountry(It->Name()); }))
+			{
+				++It;
+			}
+			else
+			{
+				It = CountryEntries.erase(It);
+			}
+		}
+		// Prevent filter that would exclude all allowed countries
+		std::unordered_set<CCommunityCountryName> UniqueCountries;
+		for(const CCommunity &AllowedCommunity : vAllowedCommunities)
+		{
+			for(const CCommunityCountry &Country : AllowedCommunity.Countries())
+			{
+				UniqueCountries.emplace(Country.Name());
+			}
+		}
+		if(CountryEntries.size() == UniqueCountries.size())
+		{
+			CountryEntries.clear();
+		}
+	}
 }
 
 void CExcludedCommunityCountryFilterList::Save(IConfigManager *pConfigManager) const
@@ -1998,13 +2099,18 @@ void CExcludedCommunityCountryFilterList::Save(IConfigManager *pConfigManager) c
 
 void CExcludedCommunityTypeFilterList::Add(const char *pTypeName)
 {
-	for(const CCommunity *pCommunity : m_CurrentCommunitiesGetter())
+	// Handle special case that all selectable entries are currently filtered,
+	// where adding more entries to the exclusion list would have no effect.
+	auto CommunityEntry = m_Entries.find(m_pCommunityCache->CountryTypeFilterKey());
+	if(CommunityEntry != m_Entries.end() && IsSubsetEquals(m_pCommunityCache->SelectableTypes(), CommunityEntry->second))
 	{
-		if(pCommunity->HasType(pTypeName))
+		for(const CCommunityType *pSelectableType : m_pCommunityCache->SelectableTypes())
 		{
-			Add(pCommunity->Id(), pTypeName);
+			CommunityEntry->second.erase(pSelectableType->Name());
 		}
 	}
+
+	Add(m_pCommunityCache->CountryTypeFilterKey(), pTypeName);
 }
 
 void CExcludedCommunityTypeFilterList::Add(const char *pCommunityId, const char *pTypeName)
@@ -2019,10 +2125,7 @@ void CExcludedCommunityTypeFilterList::Add(const char *pCommunityId, const char 
 
 void CExcludedCommunityTypeFilterList::Remove(const char *pTypeName)
 {
-	for(const CCommunity *pCommunity : m_CurrentCommunitiesGetter())
-	{
-		Remove(pCommunity->Id(), pTypeName);
-	}
+	Remove(m_pCommunityCache->CountryTypeFilterKey(), pTypeName);
 }
 
 void CExcludedCommunityTypeFilterList::Remove(const char *pCommunityId, const char *pTypeName)
@@ -2036,47 +2139,38 @@ void CExcludedCommunityTypeFilterList::Remove(const char *pCommunityId, const ch
 
 void CExcludedCommunityTypeFilterList::Clear()
 {
-	for(const CCommunity *pCommunity : m_CurrentCommunitiesGetter())
+	auto CommunityEntry = m_Entries.find(m_pCommunityCache->CountryTypeFilterKey());
+	if(CommunityEntry != m_Entries.end())
 	{
-		auto CommunityEntry = m_Entries.find(pCommunity->Id());
-		if(CommunityEntry != m_Entries.end())
-		{
-			CommunityEntry->second.clear();
-		}
+		CommunityEntry->second.clear();
 	}
 }
 
 bool CExcludedCommunityTypeFilterList::Filtered(const char *pTypeName) const
 {
-	const auto Communities = m_CurrentCommunitiesGetter();
-	return std::none_of(Communities.begin(), Communities.end(), [&](const CCommunity *pCommunity) {
-		if(!pCommunity->HasType(pTypeName))
-			return false;
+	auto CommunityEntry = m_Entries.find(CCommunityId(m_pCommunityCache->CountryTypeFilterKey()));
+	if(CommunityEntry == m_Entries.end())
+		return false;
 
-		auto CommunityEntry = m_Entries.find(CCommunityId(pCommunity->Id()));
-		if(CommunityEntry == m_Entries.end())
-			return true;
-
-		const auto &TypeEntries = CommunityEntry->second;
-		return TypeEntries.find(CCommunityTypeName(pTypeName)) == TypeEntries.end();
-	});
+	const auto &TypeEntries = CommunityEntry->second;
+	return !IsSubsetEquals(m_pCommunityCache->SelectableTypes(), TypeEntries) &&
+	       TypeEntries.find(CCommunityTypeName(pTypeName)) != TypeEntries.end();
 }
 
 bool CExcludedCommunityTypeFilterList::Empty() const
 {
-	for(const CCommunity *pCommunity : m_CurrentCommunitiesGetter())
-	{
-		auto CommunityEntry = m_Entries.find(CCommunityId(pCommunity->Id()));
-		return CommunityEntry == m_Entries.end() || CommunityEntry->second.empty();
-	}
-	return false;
+	auto CommunityEntry = m_Entries.find(CCommunityId(m_pCommunityCache->CountryTypeFilterKey()));
+	return CommunityEntry == m_Entries.end() ||
+	       CommunityEntry->second.empty() ||
+	       IsSubsetEquals(m_pCommunityCache->SelectableTypes(), CommunityEntry->second);
 }
 
 void CExcludedCommunityTypeFilterList::Clean(const std::vector<CCommunity> &vAllowedCommunities)
 {
 	for(auto It = m_Entries.begin(); It != m_Entries.end();)
 	{
-		const bool Found = std::find_if(vAllowedCommunities.begin(), vAllowedCommunities.end(), [&](const CCommunity &AllowedCommunity) {
+		const bool AllEntry = str_comp(It->first.Id(), IServerBrowser::COMMUNITY_ALL) == 0;
+		const bool Found = AllEntry || std::find_if(vAllowedCommunities.begin(), vAllowedCommunities.end(), [&](const CCommunity &AllowedCommunity) {
 			return str_comp(It->first.Id(), AllowedCommunity.Id()) == 0;
 		}) != vAllowedCommunities.end();
 		if(Found)
@@ -2106,11 +2200,41 @@ void CExcludedCommunityTypeFilterList::Clean(const std::vector<CCommunity> &vAll
 					It = TypeEntries.erase(It);
 				}
 			}
-			// Prevent filter that would exclude all allowed countries
+			// Prevent filter that would exclude all allowed types
 			if(TypeEntries.size() == AllowedCommunity.Types().size())
 			{
 				TypeEntries.clear();
 			}
+		}
+	}
+
+	auto AllCommunityEntry = m_Entries.find(CCommunityId(IServerBrowser::COMMUNITY_ALL));
+	if(AllCommunityEntry != m_Entries.end())
+	{
+		auto &TypeEntries = AllCommunityEntry->second;
+		for(auto It = TypeEntries.begin(); It != TypeEntries.end();)
+		{
+			if(std::any_of(vAllowedCommunities.begin(), vAllowedCommunities.end(), [&](const auto &Community) { return Community.HasType(It->Name()); }))
+			{
+				++It;
+			}
+			else
+			{
+				It = TypeEntries.erase(It);
+			}
+		}
+		// Prevent filter that would exclude all allowed types
+		std::unordered_set<CCommunityCountryName> UniqueTypes;
+		for(const CCommunity &AllowedCommunity : vAllowedCommunities)
+		{
+			for(const CCommunityType &Type : AllowedCommunity.Types())
+			{
+				UniqueTypes.emplace(Type.Name());
+			}
+		}
+		if(TypeEntries.size() == UniqueTypes.size())
+		{
+			TypeEntries.clear();
 		}
 	}
 }
@@ -2148,7 +2272,7 @@ bool CServerBrowser::IsRegistered(const NETADDR &Addr)
 	const int NumServers = m_pHttp->NumServers();
 	for(int i = 0; i < NumServers; i++)
 	{
-		const CServerInfo Info = m_pHttp->Server(i);
+		const CServerInfo &Info = m_pHttp->Server(i);
 		for(int j = 0; j < Info.m_NumAddresses; j++)
 		{
 			if(net_addr_comp(&Info.m_aAddresses[j], &Addr) == 0)

@@ -72,7 +72,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		// Activate internet tab before joining tutorial to make sure the server info
 		// for the tutorial servers is available.
 		SetMenuPage(PAGE_INTERNET);
-		RefreshBrowserTab(IServerBrowser::TYPE_INTERNET);
+		RefreshBrowserTab(true);
 		const char *pAddr = ServerBrowser()->GetTutorialServer();
 		if(pAddr)
 		{
