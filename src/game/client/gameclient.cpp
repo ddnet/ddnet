@@ -203,9 +203,6 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("cl_text_entities_size", ConchainClTextEntitiesSize, this);
 
 	Console()->Chain("cl_menu_map", ConchainMenuMap, this);
-
-	//
-	m_SuppressEvents = false;
 }
 
 void CGameClient::OnInit()
@@ -294,8 +291,6 @@ void CGameClient::OnInit()
 		++CompCounter;
 	}
 
-	char aBuf[256];
-
 	m_GameSkinLoaded = false;
 	m_ParticlesSkinLoaded = false;
 	m_EmoticonsSkinLoaded = false;
@@ -321,21 +316,9 @@ void CGameClient::OnInit()
 		m_Menus.RenderLoading(pLoadingDDNetCaption, Localize("Initializing assets"), 1);
 	}
 
-	for(auto &pComponent : m_vpAll)
-		pComponent->OnReset();
-
-	m_ServerMode = SERVERMODE_PURE;
-
-	m_aDDRaceMsgSent[0] = false;
-	m_aDDRaceMsgSent[1] = false;
-	m_aShowOthers[0] = SHOW_OTHERS_NOT_SET;
-	m_aShowOthers[1] = SHOW_OTHERS_NOT_SET;
-	m_aSwitchStateTeam[0] = -1;
-	m_aSwitchStateTeam[1] = -1;
-
-	m_LastZoom = .0;
-	m_LastScreenAspect = .0;
-	m_LastDummyConnected = false;
+	m_GameWorld.m_pCollision = Collision();
+	m_GameWorld.m_pTuningList = m_aTuningList;
+	OnReset();
 
 	// Set free binds to DDRace binds if it's active
 	m_Binds.SetDDRaceBinds(true);
@@ -363,11 +346,9 @@ void CGameClient::OnInit()
 	}
 
 	int64_t End = time_get();
+	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End - Start) * 1000) / (float)time_freq());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "gameclient", aBuf);
-
-	m_GameWorld.m_pCollision = Collision();
-	m_GameWorld.m_pTuningList = m_aTuningList;
 
 	m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
 
@@ -528,8 +509,6 @@ void CGameClient::OnConnected()
 	Client()->SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_GETTING_READY);
 	m_Menus.RenderLoading(pConnectCaption, Localize("Sending initial client info"), 0, false);
 
-	m_ServerMode = SERVERMODE_PURE;
-
 	// send the initial info
 	SendInfo(true);
 	// we should keep this in for now, because otherwise you can't spectate
@@ -537,10 +516,6 @@ void CGameClient::OnConnected()
 	// snap
 	Client()->Rcon("crashmeplx");
 
-	m_GameWorld.Clear();
-	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
-	mem_zero(&m_GameInfo, sizeof(m_GameInfo));
-	m_PredictedDummyId = -1;
 	ConfigManager()->ResetGameSettings();
 	LoadMapSettings();
 
@@ -550,48 +525,94 @@ void CGameClient::OnConnected()
 
 void CGameClient::OnReset()
 {
-	m_aLastNewPredictedTick[0] = -1;
-	m_aLastNewPredictedTick[1] = -1;
-
-	m_aLocalTuneZone[0] = 0;
-	m_aLocalTuneZone[1] = 0;
-
-	m_aExpectingTuningForZone[0] = -1;
-	m_aExpectingTuningForZone[1] = -1;
-
-	m_aReceivedTuning[0] = false;
-	m_aReceivedTuning[1] = false;
-	m_aTuning[0] = CTuningParams();
-	m_aTuning[1] = CTuningParams();
-
 	InvalidateSnapshot();
 
-	for(auto &Client : m_aClients)
-		Client.Reset();
+	m_EditorMovementDelay = 5;
 
-	for(auto &pComponent : m_vpAll)
-		pComponent->OnReset();
+	m_PredictedTick = -1;
+	std::fill(std::begin(m_aLastNewPredictedTick), std::end(m_aLastNewPredictedTick), -1);
 
-	m_DemoSpecId = SPEC_FOLLOW;
-	m_aFlagDropTick[TEAM_RED] = 0;
-	m_aFlagDropTick[TEAM_BLUE] = 0;
 	m_LastRoundStartTick = -1;
 	m_LastFlagCarrierRed = -4;
 	m_LastFlagCarrierBlue = -4;
 
+	std::fill(std::begin(m_aCheckInfo), std::end(m_aCheckInfo), -1);
+
+	// m_aDDNetVersionStr is initialized once in OnInit
+
+	std::fill(std::begin(m_aLastPos), std::end(m_aLastPos), vec2(0.0f, 0.0f));
+	std::fill(std::begin(m_aLastActive), std::end(m_aLastActive), false);
+
+	m_GameOver = false;
+	m_GamePaused = false;
+	m_PrevLocalId = -1;
+
+	m_SuppressEvents = false;
+	m_NewTick = false;
+	m_NewPredictedTick = false;
+
+	m_aFlagDropTick[TEAM_RED] = 0;
+	m_aFlagDropTick[TEAM_BLUE] = 0;
+
+	m_ServerMode = SERVERMODE_PURE;
+	mem_zero(&m_GameInfo, sizeof(m_GameInfo));
+
+	m_DemoSpecId = SPEC_FOLLOW;
+	m_LocalCharacterPos = vec2(0.0f, 0.0f);
+
+	m_PredictedPrevChar.Reset();
+	m_PredictedChar.Reset();
+
+	// m_Snap was cleared in InvalidateSnapshot
+
+	std::fill(std::begin(m_aLocalTuneZone), std::end(m_aLocalTuneZone), 0);
+	std::fill(std::begin(m_aReceivedTuning), std::end(m_aReceivedTuning), false);
+	std::fill(std::begin(m_aExpectingTuningForZone), std::end(m_aExpectingTuningForZone), -1);
+	std::fill(std::begin(m_aExpectingTuningSince), std::end(m_aExpectingTuningSince), 0);
+	std::fill(std::begin(m_aTuning), std::end(m_aTuning), CTuningParams());
+
+	for(auto &Client : m_aClients)
+		Client.Reset();
+
+	for(auto &Stats : m_aStats)
+		Stats.Reset();
+
 	m_NextChangeInfo = 0;
+	std::fill(std::begin(m_aLocalIds), std::end(m_aLocalIds), -1);
+	m_DummyInput = {};
+	m_HammerInput = {};
+	m_DummyFire = 0;
+	m_ReceivedDDNetPlayer = false;
 
 	m_Teams.Reset();
-	m_aDDRaceMsgSent[0] = false;
-	m_aDDRaceMsgSent[1] = false;
-	m_aShowOthers[0] = SHOW_OTHERS_NOT_SET;
-	m_aShowOthers[1] = SHOW_OTHERS_NOT_SET;
+	m_GameWorld.Clear();
+	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
+	m_PredictedWorld.CopyWorld(&m_GameWorld);
+	m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
 
-	m_LastZoom = .0;
-	m_LastScreenAspect = .0;
+	m_vSnapEntities.clear();
+
+	std::fill(std::begin(m_aDDRaceMsgSent), std::end(m_aDDRaceMsgSent), false);
+	std::fill(std::begin(m_aShowOthers), std::end(m_aShowOthers), SHOW_OTHERS_NOT_SET);
+	std::fill(std::begin(m_aLastUpdateTick), std::end(m_aLastUpdateTick), 0);
+
+	m_PredictedDummyId = -1;
+	m_IsDummySwapping = false;
+	m_CharOrder.Reset();
+	std::fill(std::begin(m_aSwitchStateTeam), std::end(m_aSwitchStateTeam), -1);
+
+	// m_aTuningList is reset in LoadMapSettings
+
+	m_LastZoom = 0.0f;
+	m_LastScreenAspect = 0.0f;
 	m_LastDummyConnected = false;
 
-	m_ReceivedDDNetPlayer = false;
+	m_MultiViewPersonalZoom = 0;
+	m_MultiViewActivated = false;
+	m_MultiView.m_IsInit = false;
+
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnReset();
 
 	Editor()->ResetMentions();
 	Editor()->ResetIngameMoved();
@@ -2081,7 +2102,7 @@ void CGameClient::OnPredict()
 	}
 
 	// detect mispredictions of other players and make corrections smoother when possible
-	if(g_Config.m_ClAntiPingSmooth && Predict() && AntiPingPlayers() && m_NewTick && absolute(m_PredictedTick - Client()->PredGameTick(g_Config.m_ClDummy)) <= 1 && absolute(Client()->GameTick(g_Config.m_ClDummy) - Client()->PrevGameTick(g_Config.m_ClDummy)) <= 2)
+	if(g_Config.m_ClAntiPingSmooth && Predict() && AntiPingPlayers() && m_NewTick && m_PredictedTick >= MIN_TICK && absolute(m_PredictedTick - Client()->PredGameTick(g_Config.m_ClDummy)) <= 1 && absolute(Client()->GameTick(g_Config.m_ClDummy) - Client()->PrevGameTick(g_Config.m_ClDummy)) <= 2)
 	{
 		int PredTime = clamp(Client()->GetPredictionTime(), 0, 800);
 		float SmoothPace = 4 - 1.5f * PredTime / 800.f; // smoothing pace (a lower value will make the smoothing quicker)
@@ -2190,16 +2211,15 @@ void CGameClient::CClientStats::Reset()
 	m_JoinTick = 0;
 	m_IngameTicks = 0;
 	m_Active = false;
+
+	std::fill(std::begin(m_aFragsWith), std::end(m_aFragsWith), 0);
+	std::fill(std::begin(m_aDeathsFrom), std::end(m_aDeathsFrom), 0);
 	m_Frags = 0;
 	m_Deaths = 0;
 	m_Suicides = 0;
 	m_BestSpree = 0;
 	m_CurrentSpree = 0;
-	for(int j = 0; j < NUM_WEAPONS; j++)
-	{
-		m_aFragsWith[j] = 0;
-		m_aDeathsFrom[j] = 0;
-	}
+
 	m_FlagGrabs = 0;
 	m_FlagCaptures = 0;
 }
@@ -2228,26 +2248,19 @@ void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay)
 
 void CGameClient::CClientData::Reset()
 {
-	m_aName[0] = 0;
-	m_aClan[0] = 0;
+	m_UseCustomColor = 0;
+	m_ColorBody = 0;
+	m_ColorFeet = 0;
+
+	m_aName[0] = '\0';
+	m_aClan[0] = '\0';
 	m_Country = -1;
 	m_aSkinName[0] = '\0';
 	m_SkinColor = 0;
 	m_Team = 0;
-	m_Angle = 0;
 	m_Emoticon = 0;
-	m_EmoticonStartTick = -1;
 	m_EmoticonStartFraction = 0;
-	m_Active = false;
-	m_ChatIgnore = false;
-	m_EmoticonIgnore = false;
-	m_Friend = false;
-	m_Foe = false;
-	m_AuthLevel = AUTHED_NO;
-	m_Afk = false;
-	m_Paused = false;
-	m_Spec = false;
-	m_SkinInfo.Reset();
+	m_EmoticonStartTick = -1;
 
 	m_Solo = false;
 	m_Jetpack = false;
@@ -2267,14 +2280,40 @@ void CGameClient::CClientData::Reset()
 	m_DeepFrozen = false;
 	m_LiveFrozen = false;
 
+	m_Predicted.Reset();
+	m_PrevPredicted.Reset();
+
+	m_SkinInfo.Reset();
+	m_RenderInfo.Reset();
+
+	m_Angle = 0.0f;
+	m_Active = false;
+	m_ChatIgnore = false;
+	m_EmoticonIgnore = false;
+	m_Friend = false;
+	m_Foe = false;
+
+	m_AuthLevel = AUTHED_NO;
+	m_Afk = false;
+	m_Paused = false;
+	m_Spec = false;
+
+	std::fill(std::begin(m_aSwitchStates), std::end(m_aSwitchStates), 0);
+
+	m_Snapped.m_Tick = -1;
 	m_Evolved.m_Tick = -1;
 
-	m_SpecChar = vec2(0, 0);
+	m_RenderCur.m_Tick = -1;
+	m_RenderPrev.m_Tick = -1;
+	m_RenderPos = vec2(0.0f, 0.0f);
+	m_IsPredicted = false;
+	m_IsPredictedLocal = false;
+	std::fill(std::begin(m_aSmoothStart), std::end(m_aSmoothStart), 0);
+	std::fill(std::begin(m_aSmoothLen), std::end(m_aSmoothLen), 0);
+	std::fill(std::begin(m_aPredPos), std::end(m_aPredPos), vec2(0.0f, 0.0f));
+	std::fill(std::begin(m_aPredTick), std::end(m_aPredTick), 0);
 	m_SpecCharPresent = false;
-
-	mem_zero(m_aSwitchStates, sizeof(m_aSwitchStates));
-
-	UpdateRenderInfo(false);
+	m_SpecChar = vec2(0.0f, 0.0f);
 }
 
 void CGameClient::SendSwitchTeam(int Team)
