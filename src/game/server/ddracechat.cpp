@@ -1134,6 +1134,15 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	if(!g_Config.m_SvTeam0Mode)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Team mode change is disabled on this server.");
+		return;
+	}
+
 	int Team = pController->Teams().m_Core.Team(pResult->m_ClientId);
 	bool Mode = pController->Teams().TeamFlock(Team);
 
