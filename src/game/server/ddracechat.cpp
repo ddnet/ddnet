@@ -1185,10 +1185,17 @@ void CGameContext::ConTeam0Mode(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		pController->Teams().SetTeamFlock(Team, true);
+		if(pController->Teams().IsPractice(Team))
+		{
+			pSelf->SendChatTarget(pResult->m_ClientId, "Can't enable team 0 mode with practice mode on.");
+		}
+		else
+		{
+			pController->Teams().SetTeamFlock(Team, true);
 
-		str_format(aBuf, sizeof(aBuf), "'%s' enabled team 0 mode. This will make your team behave like team 0.", pSelf->Server()->ClientName(pResult->m_ClientId));
-		pSelf->SendChatTeam(Team, aBuf);
+			str_format(aBuf, sizeof(aBuf), "'%s' enabled team 0 mode. This will make your team behave like team 0.", pSelf->Server()->ClientName(pResult->m_ClientId));
+			pSelf->SendChatTeam(Team, aBuf);
+		}
 	}
 }
 
