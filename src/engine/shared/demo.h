@@ -167,8 +167,8 @@ public:
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, size_t BufferSize) const override;
 	bool GetDemoInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const override;
-	const char *Filename() { return m_aFilename; }
-	const char *ErrorMessage() { return m_aErrorMessage; }
+	const char *Filename() const { return m_aFilename; }
+	const char *ErrorMessage() const override { return m_aErrorMessage; }
 
 	int Update(bool RealTime = true);
 

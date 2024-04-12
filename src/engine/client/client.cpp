@@ -3303,7 +3303,12 @@ void CClient::StartVideo(const char *pFilename, bool WithTimestamp)
 	Sound()->PauseAudioDevice();
 	new CVideo(Graphics(), Sound(), Storage(), Graphics()->ScreenWidth(), Graphics()->ScreenHeight(), aFilename);
 	Sound()->UnpauseAudioDevice();
-	IVideo::Current()->Start();
+	if(!IVideo::Current()->Start())
+	{
+		log_error("videorecorder", "Failed to start recording to '%s'", aFilename);
+		m_DemoPlayer.Stop("Failed to start video recording. See local console for details.");
+		return;
+	}
 	if(m_DemoPlayer.Info()->m_Info.m_Paused)
 	{
 		IVideo::Current()->Pause(true);

@@ -47,7 +47,7 @@ public:
 	CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName);
 	~CVideo();
 
-	void Start() override REQUIRES(!g_WriteLock);
+	bool Start() override REQUIRES(!g_WriteLock);
 	void Stop() override;
 	void Pause(bool Pause) override;
 	bool IsRecording() override { return m_Recording; }
@@ -60,7 +60,7 @@ public:
 
 	static IVideo *Current() { return IVideo::ms_pCurrentVideo; }
 
-	static void Init() { av_log_set_level(AV_LOG_DEBUG); }
+	static void Init();
 
 private:
 	void RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex) REQUIRES(!g_WriteLock);

@@ -2,6 +2,8 @@
 
 #include "video.h"
 
+#include <base/log.h>
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/sound.h>
@@ -33,6 +35,46 @@ using namespace std::chrono_literals;
 
 const size_t FORMAT_GL_NCHANNELS = 4;
 CLock g_WriteLock;
+
+static LEVEL AvLevelToLogLevel(int Level)
+{
+	switch(Level)
+	{
+	case AV_LOG_PANIC:
+	case AV_LOG_FATAL:
+	case AV_LOG_ERROR:
+		return LEVEL_ERROR;
+	case AV_LOG_WARNING:
+		return LEVEL_WARN;
+	case AV_LOG_INFO:
+		return LEVEL_INFO;
+	case AV_LOG_VERBOSE:
+	case AV_LOG_DEBUG:
+		return LEVEL_DEBUG;
+	case AV_LOG_TRACE:
+		return LEVEL_TRACE;
+	default:
+		dbg_assert(false, "invalid log level");
+		dbg_break();
+	}
+}
+
+void AvLogCallback(void *pUser, int Level, const char *pFormat, va_list VarArgs)
+	GNUC_ATTRIBUTE((format(printf, 3, 0)));
+
+void AvLogCallback(void *pUser, int Level, const char *pFormat, va_list VarArgs)
+{
+	const LEVEL LogLevel = AvLevelToLogLevel(Level);
+	if(LogLevel <= LEVEL_INFO)
+	{
+		log_log_v(LogLevel, "videorecorder/libav", pFormat, VarArgs);
+	}
+}
+
+void CVideo::Init()
+{
+	av_log_set_callback(AvLogCallback);
+}
 
 CVideo::CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName) :
 	m_pGraphics(pGraphics),
@@ -70,7 +112,7 @@ CVideo::~CVideo()
 	ms_pCurrentVideo = nullptr;
 }
 
-void CVideo::Start()
+bool CVideo::Start()
 {
 	// wait for the graphic thread to idle
 	m_pGraphics->WaitForIdle();
@@ -78,24 +120,25 @@ void CVideo::Start()
 	m_AudioStream = {};
 	m_VideoStream = {};
 
-	char aWholePath[1024];
+	char aWholePath[IO_MAX_PATH_LENGTH];
 	IOHANDLE File = m_pStorage->OpenFile(m_aName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
-
 	if(File)
 	{
 		io_close(File);
 	}
 	else
 	{
-		dbg_msg("video_recorder", "Failed to open file for recoding video.");
-		return;
+		log_error("videorecorder", "Could not open file '%s'", aWholePath);
+		return false;
 	}
-	avformat_alloc_output_context2(&m_pFormatContext, 0, "mp4", aWholePath);
 
-	if(!m_pFormatContext)
+	const int FormatAllocResult = avformat_alloc_output_context2(&m_pFormatContext, nullptr, "mp4", aWholePath);
+	if(FormatAllocResult < 0 || !m_pFormatContext)
 	{
-		dbg_msg("video_recorder", "Failed to create formatcontext for recoding video.");
-		return;
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(FormatAllocResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not create format context: %s", aError);
+		return false;
 	}
 
 	m_pFormat = m_pFormatContext->oformat;
@@ -127,21 +170,26 @@ void CVideo::Start()
 	if(m_pFormat->video_codec != AV_CODEC_ID_NONE)
 	{
 		if(!AddStream(&m_VideoStream, m_pFormatContext, &m_pVideoCodec, m_pFormat->video_codec))
-			return;
+			return false;
 	}
 	else
 	{
-		dbg_msg("video_recorder", "Failed to add VideoStream for recoding video.");
+		log_error("videorecorder", "Could not determine default video stream codec");
+		return false;
 	}
 
-	if(m_HasAudio && m_pFormat->audio_codec != AV_CODEC_ID_NONE)
+	if(m_HasAudio)
 	{
-		if(!AddStream(&m_AudioStream, m_pFormatContext, &m_pAudioCodec, m_pFormat->audio_codec))
-			return;
-	}
-	else
-	{
-		dbg_msg("video_recorder", "No audio.");
+		if(m_pFormat->audio_codec != AV_CODEC_ID_NONE)
+		{
+			if(!AddStream(&m_AudioStream, m_pFormatContext, &m_pAudioCodec, m_pFormat->audio_codec))
+				return false;
+		}
+		else
+		{
+			log_error("videorecorder", "Could not determine default audio stream codec");
+			return false;
+		}
 	}
 
 	m_vVideoThreads.resize(m_VideoThreads);
@@ -171,25 +219,21 @@ void CVideo::Start()
 	/* Now that all the parameters are set, we can open the audio and
 	 * video codecs and allocate the necessary encode buffers. */
 	if(!OpenVideo())
-		return;
+		return false;
 
-	if(m_HasAudio)
-		if(!OpenAudio())
-			return;
-
-	// TODO: remove/comment:
-	av_dump_format(m_pFormatContext, 0, aWholePath, 1);
+	if(m_HasAudio && !OpenAudio())
+		return false;
 
 	/* open the output file, if needed */
 	if(!(m_pFormat->flags & AVFMT_NOFILE))
 	{
-		int Ret = avio_open(&m_pFormatContext->pb, aWholePath, AVIO_FLAG_WRITE);
-		if(Ret < 0)
+		const int OpenResult = avio_open(&m_pFormatContext->pb, aWholePath, AVIO_FLAG_WRITE);
+		if(OpenResult < 0)
 		{
 			char aError[AV_ERROR_MAX_STRING_SIZE];
-			av_strerror(Ret, aError, sizeof(aError));
-			dbg_msg("video_recorder", "Could not open '%s': %s", aWholePath, aError);
-			return;
+			av_strerror(OpenResult, aError, sizeof(aError));
+			log_error("videorecorder", "Could not open file '%s': %s", aWholePath, aError);
+			return false;
 		}
 	}
 
@@ -211,18 +255,20 @@ void CVideo::Start()
 	}
 
 	/* Write the stream header, if any. */
-	int Ret = avformat_write_header(m_pFormatContext, &m_pOptDict);
-	if(Ret < 0)
+	const int WriteHeaderResult = avformat_write_header(m_pFormatContext, &m_pOptDict);
+	if(WriteHeaderResult < 0)
 	{
 		char aError[AV_ERROR_MAX_STRING_SIZE];
-		av_strerror(Ret, aError, sizeof(aError));
-		dbg_msg("video_recorder", "Error occurred when opening output file: %s", aError);
-		return;
+		av_strerror(WriteHeaderResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not write header: %s", aError);
+		return false;
 	}
+
 	m_Recording = true;
 	m_Started = true;
 	ms_Time = time_get();
 	m_Vframe = 0;
+	return true;
 }
 
 void CVideo::Pause(bool Pause)
@@ -303,7 +349,6 @@ void CVideo::NextVideoFrameThread()
 				NextVideoThreadIndex = 0;
 
 			// always wait for the next video thread too, to prevent a dead lock
-
 			{
 				auto *pVideoThread = m_vVideoThreads[NextVideoThreadIndex].get();
 				std::unique_lock<std::mutex> Lock(pVideoThread->m_Mutex);
@@ -471,7 +516,7 @@ void CVideo::RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex)
 
 void CVideo::FillAudioFrame(size_t ThreadIndex)
 {
-	av_samples_fill_arrays(
+	const int FillArrayResult = av_samples_fill_arrays(
 		(uint8_t **)m_AudioStream.m_vpTmpFrames[ThreadIndex]->data,
 		nullptr, // pointer to linesize (int*)
 		(const uint8_t *)m_vBuffer[ThreadIndex].m_aBuffer,
@@ -480,25 +525,35 @@ void CVideo::FillAudioFrame(size_t ThreadIndex)
 		AV_SAMPLE_FMT_S16,
 		0 // align
 	);
-
-	int Ret = av_frame_make_writable(m_AudioStream.m_vpFrames[ThreadIndex]);
-	if(Ret < 0)
+	if(FillArrayResult < 0)
 	{
-		dbg_msg("video_recorder", "Error making frame writable");
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(FillArrayResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not fill audio frame: %s", aError);
+		return;
+	}
+
+	const int MakeWriteableResult = av_frame_make_writable(m_AudioStream.m_vpFrames[ThreadIndex]);
+	if(MakeWriteableResult < 0)
+	{
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(MakeWriteableResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not make audio frame writeable: %s", aError);
 		return;
 	}
 
 	/* convert to destination format */
-	Ret = swr_convert(
+	const int ConvertResult = swr_convert(
 		m_AudioStream.m_vpSwrCtxs[ThreadIndex],
 		m_AudioStream.m_vpFrames[ThreadIndex]->data,
 		m_AudioStream.m_vpFrames[ThreadIndex]->nb_samples,
 		(const uint8_t **)m_AudioStream.m_vpTmpFrames[ThreadIndex]->data,
 		m_AudioStream.m_vpTmpFrames[ThreadIndex]->nb_samples);
-
-	if(Ret < 0)
+	if(ConvertResult < 0)
 	{
-		dbg_msg("video_recorder", "Error while converting");
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(ConvertResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not convert audio frame: %s", aError);
 		return;
 	}
 }
@@ -565,22 +620,24 @@ void CVideo::ReadRGBFromGL(size_t ThreadIndex)
 
 AVFrame *CVideo::AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height)
 {
-	AVFrame *pPicture;
-	int Ret;
-
-	pPicture = av_frame_alloc();
+	AVFrame *pPicture = av_frame_alloc();
 	if(!pPicture)
+	{
+		log_error("videorecorder", "Could not allocate video frame");
 		return nullptr;
+	}
 
 	pPicture->format = PixFmt;
 	pPicture->width = Width;
 	pPicture->height = Height;
 
 	/* allocate the buffers for the frame data */
-	Ret = av_frame_get_buffer(pPicture, 32);
-	if(Ret < 0)
+	const int FrameBufferAllocResult = av_frame_get_buffer(pPicture, 32);
+	if(FrameBufferAllocResult < 0)
 	{
-		dbg_msg("video_recorder", "Could not allocate frame data.");
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(FrameBufferAllocResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not allocate video frame buffer: %s", aError);
 		return nullptr;
 	}
 
@@ -590,11 +647,9 @@ AVFrame *CVideo::AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height)
 AVFrame *CVideo::AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t ChannelLayout, int SampleRate, int NbSamples)
 {
 	AVFrame *pFrame = av_frame_alloc();
-	int Ret;
-
 	if(!pFrame)
 	{
-		dbg_msg("video_recorder", "Error allocating an audio frame");
+		log_error("videorecorder", "Could not allocate audio frame");
 		return nullptr;
 	}
 
@@ -609,10 +664,12 @@ AVFrame *CVideo::AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t Channel
 
 	if(NbSamples)
 	{
-		Ret = av_frame_get_buffer(pFrame, 0);
-		if(Ret < 0)
+		const int FrameBufferAllocResult = av_frame_get_buffer(pFrame, 0);
+		if(FrameBufferAllocResult < 0)
 		{
-			dbg_msg("video_recorder", "Error allocating an audio buffer");
+			char aError[AV_ERROR_MAX_STRING_SIZE];
+			av_strerror(FrameBufferAllocResult, aError, sizeof(aError));
+			log_error("videorecorder", "Could not allocate audio frame buffer: %s", aError);
 			return nullptr;
 		}
 	}
@@ -622,19 +679,18 @@ AVFrame *CVideo::AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t Channel
 
 bool CVideo::OpenVideo()
 {
-	int Ret;
 	AVCodecContext *pContext = m_VideoStream.pEnc;
 	AVDictionary *pOptions = nullptr;
 	av_dict_copy(&pOptions, m_pOptDict, 0);
 
 	/* open the codec */
-	Ret = avcodec_open2(pContext, m_pVideoCodec, &pOptions);
+	const int VideoOpenResult = avcodec_open2(pContext, m_pVideoCodec, &pOptions);
 	av_dict_free(&pOptions);
-	if(Ret < 0)
+	if(VideoOpenResult < 0)
 	{
-		char aBuf[AV_ERROR_MAX_STRING_SIZE];
-		av_strerror(Ret, aBuf, sizeof(aBuf));
-		dbg_msg("video_recorder", "Could not open video codec: %s", aBuf);
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(VideoOpenResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not open video codec: %s", aError);
 		return false;
 	}
 
@@ -648,7 +704,6 @@ bool CVideo::OpenVideo()
 		m_VideoStream.m_vpFrames[i] = AllocPicture(pContext->pix_fmt, pContext->width, pContext->height);
 		if(!m_VideoStream.m_vpFrames[i])
 		{
-			dbg_msg("video_recorder", "Could not allocate video frame");
 			return false;
 		}
 	}
@@ -668,17 +723,18 @@ bool CVideo::OpenVideo()
 			m_VideoStream.m_vpTmpFrames[i] = AllocPicture(AV_PIX_FMT_YUV420P, pContext->width, pContext->height);
 			if(!m_VideoStream.m_vpTmpFrames[i])
 			{
-				dbg_msg("video_recorder", "Could not allocate temporary video frame");
 				return false;
 			}
 		}
 	}
 
 	/* copy the stream parameters to the muxer */
-	Ret = avcodec_parameters_from_context(m_VideoStream.pSt->codecpar, pContext);
-	if(Ret < 0)
+	const int AudioStreamCopyResult = avcodec_parameters_from_context(m_VideoStream.pSt->codecpar, pContext);
+	if(AudioStreamCopyResult < 0)
 	{
-		dbg_msg("video_recorder", "Could not copy the stream parameters");
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(AudioStreamCopyResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not copy video stream parameters: %s", aError);
 		return false;
 	}
 	m_VSeq = 0;
@@ -687,25 +743,22 @@ bool CVideo::OpenVideo()
 
 bool CVideo::OpenAudio()
 {
-	AVCodecContext *pContext;
-	int NbSamples;
-	int Ret;
+	AVCodecContext *pContext = m_AudioStream.pEnc;
 	AVDictionary *pOptions = nullptr;
-
-	pContext = m_AudioStream.pEnc;
+	av_dict_copy(&pOptions, m_pOptDict, 0);
 
 	/* open it */
-	av_dict_copy(&pOptions, m_pOptDict, 0);
-	Ret = avcodec_open2(pContext, m_pAudioCodec, &pOptions);
+	const int AudioOpenResult = avcodec_open2(pContext, m_pAudioCodec, &pOptions);
 	av_dict_free(&pOptions);
-	if(Ret < 0)
+	if(AudioOpenResult < 0)
 	{
-		char aBuf[AV_ERROR_MAX_STRING_SIZE];
-		av_strerror(Ret, aBuf, sizeof(aBuf));
-		dbg_msg("video_recorder", "Could not open audio codec: %s", aBuf);
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(AudioOpenResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not open audio codec: %s", aError);
 		return false;
 	}
 
+	int NbSamples;
 	if(pContext->codec->capabilities & AV_CODEC_CAP_VARIABLE_FRAME_SIZE)
 		NbSamples = 10000;
 	else
@@ -728,7 +781,6 @@ bool CVideo::OpenAudio()
 #endif
 		if(!m_AudioStream.m_vpFrames[i])
 		{
-			dbg_msg("video_recorder", "Could not allocate audio frame");
 			return false;
 		}
 
@@ -736,20 +788,21 @@ bool CVideo::OpenAudio()
 		m_AudioStream.m_vpTmpFrames[i] = AllocAudioFrame(AV_SAMPLE_FMT_S16, AV_CH_LAYOUT_STEREO, g_Config.m_SndRate, NbSamples);
 		if(!m_AudioStream.m_vpTmpFrames[i])
 		{
-			dbg_msg("video_recorder", "Could not allocate audio frame");
 			return false;
 		}
 	}
 
 	/* copy the stream parameters to the muxer */
-	Ret = avcodec_parameters_from_context(m_AudioStream.pSt->codecpar, pContext);
-	if(Ret < 0)
+	const int AudioStreamCopyResult = avcodec_parameters_from_context(m_AudioStream.pSt->codecpar, pContext);
+	if(AudioStreamCopyResult < 0)
 	{
-		dbg_msg("video_recorder", "Could not copy the stream parameters");
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(AudioStreamCopyResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not copy audio stream parameters: %s", aError);
 		return false;
 	}
 
-	/* create resampler context */
+	/* create resampling context */
 	m_AudioStream.m_vpSwrCtxs.clear();
 	m_AudioStream.m_vpSwrCtxs.resize(m_AudioThreads);
 	for(size_t i = 0; i < m_AudioThreads; ++i)
@@ -757,26 +810,33 @@ bool CVideo::OpenAudio()
 		m_AudioStream.m_vpSwrCtxs[i] = swr_alloc();
 		if(!m_AudioStream.m_vpSwrCtxs[i])
 		{
-			dbg_msg("video_recorder", "Could not allocate resampler context");
+			log_error("videorecorder", "Could not allocate resampling context");
 			return false;
 		}
 
 		/* set options */
-		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_channel_count", 2, 0);
-		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_sample_rate", g_Config.m_SndRate, 0);
-		av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "in_sample_fmt", AV_SAMPLE_FMT_S16, 0);
+		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_channel_count", 2, 0) == 0, "invalid option");
+		if(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_sample_rate", g_Config.m_SndRate, 0) != 0)
+		{
+			log_error("videorecorder", "Could not set audio sample rate to %d", g_Config.m_SndRate);
+			return false;
+		}
+		dbg_assert(av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "in_sample_fmt", AV_SAMPLE_FMT_S16, 0) == 0, "invalid option");
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100)
-		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_channel_count", pContext->ch_layout.nb_channels, 0);
+		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_channel_count", pContext->ch_layout.nb_channels, 0) == 0, "invalid option");
 #else
-		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_channel_count", pContext->channels, 0);
+		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_channel_count", pContext->channels, 0) == 0, "invalid option");
 #endif
-		av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_sample_rate", pContext->sample_rate, 0);
-		av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "out_sample_fmt", pContext->sample_fmt, 0);
+		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_sample_rate", pContext->sample_rate, 0) == 0, "invalid option");
+		dbg_assert(av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "out_sample_fmt", pContext->sample_fmt, 0) == 0, "invalid option");
 
 		/* initialize the resampling context */
-		if(swr_init(m_AudioStream.m_vpSwrCtxs[i]) < 0)
+		const int ResamplingContextInitResult = swr_init(m_AudioStream.m_vpSwrCtxs[i]);
+		if(ResamplingContextInitResult < 0)
 		{
-			dbg_msg("video_recorder", "Failed to initialize the resampling context");
+			char aError[AV_ERROR_MAX_STRING_SIZE];
+			av_strerror(ResamplingContextInitResult, aError, sizeof(aError));
+			log_error("videorecorder", "Could not initialize resampling context: %s", aError);
 			return false;
 		}
 	}
@@ -788,28 +848,25 @@ bool CVideo::OpenAudio()
 /* Add an output stream. */
 bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId) const
 {
-	AVCodecContext *pContext;
-
 	/* find the encoder */
 	*ppCodec = avcodec_find_encoder(CodecId);
 	if(!(*ppCodec))
 	{
-		dbg_msg("video_recorder", "Could not find encoder for '%s'",
-			avcodec_get_name(CodecId));
+		log_error("videorecorder", "Could not find encoder for codec '%s'", avcodec_get_name(CodecId));
 		return false;
 	}
 
-	pStream->pSt = avformat_new_stream(pOC, NULL);
+	pStream->pSt = avformat_new_stream(pOC, nullptr);
 	if(!pStream->pSt)
 	{
-		dbg_msg("video_recorder", "Could not allocate stream");
+		log_error("videorecorder", "Could not allocate stream");
 		return false;
 	}
 	pStream->pSt->id = pOC->nb_streams - 1;
-	pContext = avcodec_alloc_context3(*ppCodec);
+	AVCodecContext *pContext = avcodec_alloc_context3(*ppCodec);
 	if(!pContext)
 	{
-		dbg_msg("video_recorder", "Could not alloc an encoding context");
+		log_error("videorecorder", "Could not allocate encoding context");
 		return false;
 	}
 	pStream->pEnc = pContext;
@@ -880,8 +937,9 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 		if(CodecId == AV_CODEC_ID_H264)
 		{
 			static const char *s_apPresets[10] = {"ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow", "placebo"};
-			av_opt_set(pContext->priv_data, "preset", s_apPresets[g_Config.m_ClVideoX264Preset], 0);
-			av_opt_set_int(pContext->priv_data, "crf", g_Config.m_ClVideoX264Crf, 0);
+			dbg_assert(g_Config.m_ClVideoX264Preset < (int)std::size(s_apPresets), "preset index invalid");
+			dbg_assert(av_opt_set(pContext->priv_data, "preset", s_apPresets[g_Config.m_ClVideoX264Preset], 0) == 0, "invalid option");
+			dbg_assert(av_opt_set_int(pContext->priv_data, "crf", g_Config.m_ClVideoX264Crf, 0) == 0, "invalid option");
 		}
 		break;
 
@@ -898,12 +956,10 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 
 void CVideo::WriteFrame(OutputStream *pStream, size_t ThreadIndex)
 {
-	int RetRecv = 0;
-
 	AVPacket *pPacket = av_packet_alloc();
 	if(pPacket == nullptr)
 	{
-		dbg_msg("video_recorder", "Failed allocating packet");
+		log_error("videorecorder", "Could not allocate packet");
 		return;
 	}
 
@@ -911,29 +967,33 @@ void CVideo::WriteFrame(OutputStream *pStream, size_t ThreadIndex)
 	pPacket->size = 0;
 
 	avcodec_send_frame(pStream->pEnc, pStream->m_vpFrames[ThreadIndex]);
+	int RecvResult = 0;
 	do
 	{
-		RetRecv = avcodec_receive_packet(pStream->pEnc, pPacket);
-		if(!RetRecv)
+		RecvResult = avcodec_receive_packet(pStream->pEnc, pPacket);
+		if(!RecvResult)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
 			av_packet_rescale_ts(pPacket, pStream->pEnc->time_base, pStream->pSt->time_base);
 			pPacket->stream_index = pStream->pSt->index;
 
-			if(int Ret = av_interleaved_write_frame(m_pFormatContext, pPacket))
+			const int WriteFrameResult = av_interleaved_write_frame(m_pFormatContext, pPacket);
+			if(WriteFrameResult < 0)
 			{
-				char aBuf[AV_ERROR_MAX_STRING_SIZE];
-				av_strerror(Ret, aBuf, sizeof(aBuf));
-				dbg_msg("video_recorder", "Error while writing video frame: %s", aBuf);
+				char aError[AV_ERROR_MAX_STRING_SIZE];
+				av_strerror(WriteFrameResult, aError, sizeof(aError));
+				log_error("videorecorder", "Could not write video frame: %s", aError);
 			}
 		}
 		else
 			break;
 	} while(true);
 
-	if(RetRecv && RetRecv != AVERROR(EAGAIN))
+	if(RecvResult && RecvResult != AVERROR(EAGAIN))
 	{
-		dbg_msg("video_recorder", "Error encoding frame, error: %d", RetRecv);
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(RecvResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not encode video frame: %s", aError);
 	}
 
 	av_packet_free(&pPacket);
@@ -941,13 +1001,10 @@ void CVideo::WriteFrame(OutputStream *pStream, size_t ThreadIndex)
 
 void CVideo::FinishFrames(OutputStream *pStream)
 {
-	dbg_msg("video_recorder", "------------");
-	int RetRecv = 0;
-
 	AVPacket *pPacket = av_packet_alloc();
 	if(pPacket == nullptr)
 	{
-		dbg_msg("video_recorder", "Failed allocating packet");
+		log_error("videorecorder", "Could not allocate packet");
 		return;
 	}
 
@@ -955,29 +1012,33 @@ void CVideo::FinishFrames(OutputStream *pStream)
 	pPacket->size = 0;
 
 	avcodec_send_frame(pStream->pEnc, 0);
+	int RecvResult = 0;
 	do
 	{
-		RetRecv = avcodec_receive_packet(pStream->pEnc, pPacket);
-		if(!RetRecv)
+		RecvResult = avcodec_receive_packet(pStream->pEnc, pPacket);
+		if(!RecvResult)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
 			av_packet_rescale_ts(pPacket, pStream->pEnc->time_base, pStream->pSt->time_base);
 			pPacket->stream_index = pStream->pSt->index;
 
-			if(int Ret = av_interleaved_write_frame(m_pFormatContext, pPacket))
+			const int WriteFrameResult = av_interleaved_write_frame(m_pFormatContext, pPacket);
+			if(WriteFrameResult < 0)
 			{
-				char aBuf[AV_ERROR_MAX_STRING_SIZE];
-				av_strerror(Ret, aBuf, sizeof(aBuf));
-				dbg_msg("video_recorder", "Error while writing video frame: %s", aBuf);
+				char aError[AV_ERROR_MAX_STRING_SIZE];
+				av_strerror(WriteFrameResult, aError, sizeof(aError));
+				log_error("videorecorder", "Could not write video frame: %s", aError);
 			}
 		}
 		else
 			break;
 	} while(true);
 
-	if(RetRecv && RetRecv != AVERROR_EOF)
+	if(RecvResult && RecvResult != AVERROR_EOF)
 	{
-		dbg_msg("video_recorder", "failed to finish recoding, error: %d", RetRecv);
+		char aError[AV_ERROR_MAX_STRING_SIZE];
+		av_strerror(RecvResult, aError, sizeof(aError));
+		log_error("videorecorder", "Could not finish recording: %s", aError);
 	}
 
 	av_packet_free(&pPacket);
