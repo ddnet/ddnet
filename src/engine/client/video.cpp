@@ -856,9 +856,9 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 		pContext->width = m_Width;
 		pContext->height = m_Height % 2 == 0 ? m_Height : m_Height - 1;
 		/* timebase: This is the fundamental unit of time (in seconds) in terms
-			 * of which frame timestamps are represented. For fixed-fps content,
-			 * timebase should be 1/framerate and timestamp increments should be
-			 * identical to 1. */
+		 * of which frame timestamps are represented. For fixed-fps content,
+		 * timebase should be 1/framerate and timestamp increments should be
+		 * identical to 1. */
 		pStream->pSt->time_base.num = 1;
 		pStream->pSt->time_base.den = m_FPS;
 		pContext->time_base = pStream->pSt->time_base;
@@ -873,8 +873,8 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 		if(pContext->codec_id == AV_CODEC_ID_MPEG1VIDEO)
 		{
 			/* Needed to avoid using macroblocks in which some coeffs overflow.
-				 * This does not happen with normal video, it just happens here as
-				 * the motion of the chroma plane does not match the luma plane. */
+			 * This does not happen with normal video, it just happens here as
+			 * the motion of the chroma plane does not match the luma plane. */
 			pContext->mb_decision = 2;
 		}
 		if(CodecId == AV_CODEC_ID_H264)
