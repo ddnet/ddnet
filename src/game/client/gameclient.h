@@ -216,8 +216,8 @@ private:
 	static void ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	// only used in OnPredict
-	vec2 m_aLastPos[MAX_CLIENTS] = {{0, 0}};
-	bool m_aLastActive[MAX_CLIENTS] = {false};
+	vec2 m_aLastPos[MAX_CLIENTS];
+	bool m_aLastActive[MAX_CLIENTS];
 
 	// only used in OnNewSnapshot
 	bool m_GameOver = false;
@@ -268,9 +268,6 @@ public:
 	bool m_NewTick;
 	bool m_NewPredictedTick;
 	int m_aFlagDropTick[2];
-
-	// TODO: move this
-	CTuningParams m_aTuning[NUM_DUMMIES];
 
 	enum
 	{
@@ -347,6 +344,7 @@ public:
 	bool m_aReceivedTuning[NUM_DUMMIES];
 	int m_aExpectingTuningForZone[NUM_DUMMIES];
 	int m_aExpectingTuningSince[NUM_DUMMIES];
+	CTuningParams m_aTuning[NUM_DUMMIES];
 
 	// client data
 	struct CClientData
@@ -364,6 +362,7 @@ public:
 		int m_Emoticon;
 		float m_EmoticonStartFraction;
 		int m_EmoticonStartTick;
+
 		bool m_Solo;
 		bool m_Jetpack;
 		bool m_CollisionDisabled;
@@ -406,9 +405,6 @@ public:
 		CNetObj_Character m_Snapped;
 		CNetObj_Character m_Evolved;
 
-		void UpdateRenderInfo(bool IsTeamPlay);
-		void Reset();
-
 		// rendered characters
 		CNetObj_Character m_RenderCur;
 		CNetObj_Character m_RenderPrev;
@@ -421,6 +417,9 @@ public:
 		int m_aPredTick[200];
 		bool m_SpecCharPresent;
 		vec2 m_SpecChar;
+
+		void UpdateRenderInfo(bool IsTeamPlay);
+		void Reset();
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
@@ -652,7 +651,7 @@ public:
 	};
 
 	SClientGameSkin m_GameSkin;
-	bool m_GameSkinLoaded;
+	bool m_GameSkinLoaded = false;
 
 	struct SClientParticlesSkin
 	{
@@ -668,7 +667,7 @@ public:
 	};
 
 	SClientParticlesSkin m_ParticlesSkin;
-	bool m_ParticlesSkinLoaded;
+	bool m_ParticlesSkinLoaded = false;
 
 	struct SClientEmoticonsSkin
 	{
@@ -676,7 +675,7 @@ public:
 	};
 
 	SClientEmoticonsSkin m_EmoticonsSkin;
-	bool m_EmoticonsSkinLoaded;
+	bool m_EmoticonsSkinLoaded = false;
 
 	struct SClientHudSkin
 	{
@@ -713,7 +712,7 @@ public:
 	};
 
 	SClientHudSkin m_HudSkin;
-	bool m_HudSkinLoaded;
+	bool m_HudSkinLoaded = false;
 
 	struct SClientExtrasSkin
 	{
@@ -722,7 +721,7 @@ public:
 	};
 
 	SClientExtrasSkin m_ExtrasSkin;
-	bool m_ExtrasSkinLoaded;
+	bool m_ExtrasSkinLoaded = false;
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 

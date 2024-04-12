@@ -118,6 +118,11 @@ public:
 	std::list<int> m_Ids; // reverse of the order in the gameworld, since entities will be inserted in reverse
 	CCharOrder()
 	{
+		Reset();
+	}
+	void Reset()
+	{
+		m_Ids.clear();
 		for(int i = 0; i < MAX_CLIENTS; i++)
 			m_Ids.push_back(i);
 	}
