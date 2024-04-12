@@ -39,12 +39,12 @@ CVideo::CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Wid
 	m_pStorage(pStorage),
 	m_pSound(pSound)
 {
-	m_pFormatContext = 0;
-	m_pFormat = 0;
-	m_pOptDict = 0;
+	m_pFormatContext = nullptr;
+	m_pFormat = nullptr;
+	m_pOptDict = nullptr;
 
-	m_pVideoCodec = 0;
-	m_pAudioCodec = 0;
+	m_pVideoCodec = nullptr;
+	m_pAudioCodec = nullptr;
 
 	m_Width = Width;
 	m_Height = Height;
@@ -59,7 +59,7 @@ CVideo::CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Wid
 
 	m_HasAudio = g_Config.m_ClVideoSndEnable;
 
-	dbg_assert(ms_pCurrentVideo == 0, "ms_pCurrentVideo is NOT set to NULL while creating a new Video.");
+	dbg_assert(ms_pCurrentVideo == nullptr, "ms_pCurrentVideo is NOT set to nullptr while creating a new Video.");
 
 	ms_TickTime = time_freq() / m_FPS;
 	ms_pCurrentVideo = this;
@@ -67,7 +67,7 @@ CVideo::CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Wid
 
 CVideo::~CVideo()
 {
-	ms_pCurrentVideo = 0;
+	ms_pCurrentVideo = nullptr;
 }
 
 void CVideo::Start()
@@ -473,7 +473,7 @@ void CVideo::FillAudioFrame(size_t ThreadIndex)
 {
 	av_samples_fill_arrays(
 		(uint8_t **)m_AudioStream.m_vpTmpFrames[ThreadIndex]->data,
-		0, // pointer to linesize (int*)
+		nullptr, // pointer to linesize (int*)
 		(const uint8_t *)m_vBuffer[ThreadIndex].m_aBuffer,
 		2, // channels
 		m_AudioStream.m_vpTmpFrames[ThreadIndex]->nb_samples,
@@ -570,7 +570,7 @@ AVFrame *CVideo::AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height)
 
 	pPicture = av_frame_alloc();
 	if(!pPicture)
-		return NULL;
+		return nullptr;
 
 	pPicture->format = PixFmt;
 	pPicture->width = Width;
@@ -624,8 +624,7 @@ bool CVideo::OpenVideo()
 {
 	int Ret;
 	AVCodecContext *pContext = m_VideoStream.pEnc;
-	AVDictionary *pOptions = 0;
-
+	AVDictionary *pOptions = nullptr;
 	av_dict_copy(&pOptions, m_pOptDict, 0);
 
 	/* open the codec */
@@ -691,7 +690,7 @@ bool CVideo::OpenAudio()
 	AVCodecContext *pContext;
 	int NbSamples;
 	int Ret;
-	AVDictionary *pOptions = NULL;
+	AVDictionary *pOptions = nullptr;
 
 	pContext = m_AudioStream.pEnc;
 
