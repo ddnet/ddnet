@@ -17,7 +17,7 @@ extern "C" {
 #include <vector>
 #define ALEN 2048
 
-class CGraphics_Threaded;
+class IGraphics;
 class ISound;
 class IStorage;
 
@@ -44,7 +44,7 @@ struct OutputStream
 class CVideo : public IVideo
 {
 public:
-	CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName);
+	CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName);
 	~CVideo();
 
 	void Start() override REQUIRES(!g_WriteLock);
@@ -81,7 +81,7 @@ private:
 
 	bool AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId) const;
 
-	CGraphics_Threaded *m_pGraphics;
+	IGraphics *m_pGraphics;
 	IStorage *m_pStorage;
 	ISound *m_pSound;
 

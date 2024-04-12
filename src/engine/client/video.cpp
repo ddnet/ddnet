@@ -2,7 +2,7 @@
 
 #include "video.h"
 
-#include <engine/client/graphics_threaded.h>
+#include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
@@ -34,7 +34,7 @@ using namespace std::chrono_literals;
 const size_t FORMAT_GL_NCHANNELS = 4;
 CLock g_WriteLock;
 
-CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName) :
+CVideo::CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName) :
 	m_pGraphics(pGraphics),
 	m_pStorage(pStorage),
 	m_pSound(pSound)
