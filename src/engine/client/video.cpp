@@ -275,7 +275,6 @@ void CVideo::Stop()
 
 	if(m_HasAudio)
 		CloseStream(&m_AudioStream);
-	//fclose(m_dbgfile);
 
 	if(!(m_pFormat->flags & AVFMT_NOFILE))
 		avio_closep(&m_pFormatContext->pb);
@@ -294,9 +293,6 @@ void CVideo::NextVideoFrameThread()
 {
 	if(m_Recording)
 	{
-		// #ifdef CONF_PLATFORM_MACOS
-		// 	CAutoreleasePool AutoreleasePool;
-		// #endif
 		m_VSeq += 1;
 		if(m_VSeq >= 2)
 		{
@@ -317,8 +313,6 @@ void CVideo::NextVideoFrameThread()
 					pVideoThread->m_Cond.wait(Lock, [&pVideoThread]() -> bool { return !pVideoThread->m_HasVideoFrame; });
 				}
 			}
-
-			//dbg_msg("video_recorder", "vframe: %d", m_VideoStream.pEnc->FRAME_NUM);
 
 			// after reading the graphic libraries' frame buffer, go threaded
 			{
@@ -344,9 +338,6 @@ void CVideo::NextVideoFrameThread()
 			if(m_CurVideoThreadIndex == m_VideoThreads)
 				m_CurVideoThreadIndex = 0;
 		}
-
-		// sync_barrier();
-		// m_Semaphore.signal();
 	}
 }
 
@@ -364,7 +355,6 @@ void CVideo::NextAudioFrameTimeline(ISoundMixFunc Mix)
 {
 	if(m_Recording && m_HasAudio)
 	{
-		//if(m_VideoStream.pEnc->FRAME_NUM * (double)m_AudioStream.pEnc->sample_rate / m_FPS >= (double)m_AudioStream.pEnc->FRAME_NUM * m_AudioStream.pEnc->frame_size)
 		double SamplesPerFrame = (double)m_AudioStream.pEnc->sample_rate / m_FPS;
 		while(m_AudioStream.m_SamplesFrameCount >= m_AudioStream.m_SamplesCount)
 		{
@@ -490,9 +480,6 @@ void CVideo::FillAudioFrame(size_t ThreadIndex)
 		AV_SAMPLE_FMT_S16,
 		0 // align
 	);
-
-	// dbg_msg("video_recorder", "DstNbSamples: %d", DstNbSamples);
-	// fwrite(m_aBuffer, sizeof(short), 2048, m_dbgfile);
 
 	int Ret = av_frame_make_writable(m_AudioStream.m_vpFrames[ThreadIndex]);
 	if(Ret < 0)
@@ -709,7 +696,6 @@ bool CVideo::OpenAudio()
 	pContext = m_AudioStream.pEnc;
 
 	/* open it */
-	//m_dbgfile = fopen("/tmp/pcm_dbg", "wb");
 	av_dict_copy(&pOptions, m_pOptDict, 0);
 	Ret = avcodec_open2(pContext, m_pAudioCodec, &pOptions);
 	av_dict_free(&pOptions);
