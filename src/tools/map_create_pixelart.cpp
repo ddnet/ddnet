@@ -17,14 +17,14 @@ void SaveOutputMap(CDataFileReader &, CDataFileWriter &, CMapItemLayerQuads *, i
 CMapItemLayerQuads *GetQuadLayer(CDataFileReader &, const int[2], int *);
 CQuad CreateNewQuad(float, float, int, int, const uint8_t[4], const int[2]);
 
-bool GetPixelClamped(const CImageInfo &, int, int, uint8_t[4]);
+bool GetPixelClamped(const CImageInfo &, size_t, size_t, uint8_t[4]);
 bool ComparePixel(const uint8_t[4], const uint8_t[4]);
-bool IsPixelOptimizable(const CImageInfo &, int, int, const uint8_t[4], const bool[]);
-void SetVisitedPixels(const CImageInfo &, int, int, int, int, bool[]);
+bool IsPixelOptimizable(const CImageInfo &, size_t, size_t, const uint8_t[4], const bool[]);
+void SetVisitedPixels(const CImageInfo &, size_t, size_t, size_t, size_t, bool[]);
 
-int GetImagePixelSize(const CImageInfo &);
-int FindSuperPixelSize(const CImageInfo &, const uint8_t[4], int, int, int, bool[]);
-void GetOptimizedQuadSize(const CImageInfo &, int, const uint8_t[4], int, int, int &, int &, bool[]);
+size_t GetImagePixelSize(const CImageInfo &);
+size_t FindSuperPixelSize(const CImageInfo &, const uint8_t[4], size_t, size_t, size_t, bool[]);
+void GetOptimizedQuadSize(const CImageInfo &, size_t, const uint8_t[4], size_t, size_t, size_t &, size_t &, bool[]);
 
 int main(int argc, const char **argv)
 {
@@ -83,7 +83,7 @@ bool CreatePixelArt(const char aFilenames[3][64], const int aLayerId[2], const i
 	if(!pQuadLayer)
 		return false;
 
-	int MaxNewQuads = std::ceil((Img.m_Width * Img.m_Height) / aPixelSizes[0]);
+	size_t MaxNewQuads = std::ceil((Img.m_Width * Img.m_Height) / aPixelSizes[0]);
 	CQuad *pQuads = new CQuad[pQuadLayer->m_NumQuads + MaxNewQuads];
 
 	InsertCurrentQuads(InputMap, pQuadLayer, pQuads);
@@ -104,19 +104,19 @@ void InsertCurrentQuads(CDataFileReader &InputMap, CMapItemLayerQuads *pQuadLaye
 
 int InsertPixelArtQuads(CQuad *pQuads, int &NumQuads, const CImageInfo &Img, const int aStartingPos[2], const int aPixelSizes[2], const bool aArtOptions[2])
 {
-	int ImgPixelSize = aPixelSizes[0], QuadPixelSize = aPixelSizes[1], OriginalNumQuads = NumQuads;
+	size_t ImgPixelSize = aPixelSizes[0], QuadPixelSize = aPixelSizes[1], OriginalNumQuads = NumQuads;
 	int aForcedPivot[2] = {std::numeric_limits<int>::max(), std::numeric_limits<int>::max()};
 	bool *aVisitedPixels = new bool[Img.m_Height * Img.m_Width];
 	mem_zero(aVisitedPixels, sizeof(bool) * Img.m_Height * Img.m_Width);
 
-	for(int y = 0; y < Img.m_Height; y += ImgPixelSize)
-		for(int x = 0; x < Img.m_Width; x += ImgPixelSize)
+	for(size_t y = 0; y < Img.m_Height; y += ImgPixelSize)
+		for(size_t x = 0; x < Img.m_Width; x += ImgPixelSize)
 		{
 			uint8_t aPixel[4];
 			if(aVisitedPixels[x + y * Img.m_Width] || !GetPixelClamped(Img, x, y, aPixel))
 				continue;
 
-			int Width = 1, Height = 1;
+			size_t Width = 1, Height = 1;
 			if(aArtOptions[0])
 				GetOptimizedQuadSize(Img, ImgPixelSize, aPixel, x, y, Width, Height, aVisitedPixels);
 
@@ -136,9 +136,9 @@ int InsertPixelArtQuads(CQuad *pQuads, int &NumQuads, const CImageInfo &Img, con
 	return NumQuads - OriginalNumQuads;
 }
 
-void GetOptimizedQuadSize(const CImageInfo &Img, const int ImgPixelSize, const uint8_t aPixel[4], const int PosX, const int PosY, int &Width, int &Height, bool aVisitedPixels[])
+void GetOptimizedQuadSize(const CImageInfo &Img, const size_t ImgPixelSize, const uint8_t aPixel[4], const size_t PosX, const size_t PosY, size_t &Width, size_t &Height, bool aVisitedPixels[])
 {
-	int w = 0, h = 0, OptimizedWidth = 0, OptimizedHeight = 0;
+	size_t w = 0, h = 0, OptimizedWidth = 0, OptimizedHeight = 0;
 
 	while(IsPixelOptimizable(Img, PosX + w, PosY + h, aPixel, aVisitedPixels))
 	{
@@ -158,31 +158,31 @@ void GetOptimizedQuadSize(const CImageInfo &Img, const int ImgPixelSize, const u
 	Height = OptimizedHeight / ImgPixelSize;
 }
 
-int GetImagePixelSize(const CImageInfo &Img)
+size_t GetImagePixelSize(const CImageInfo &Img)
 {
-	int ImgPixelSize = std::numeric_limits<int>::max();
+	size_t ImgPixelSize = std::numeric_limits<size_t>::max();
 	bool *aVisitedPixels = new bool[Img.m_Height * Img.m_Width];
 	mem_zero(aVisitedPixels, sizeof(bool) * Img.m_Height * Img.m_Width);
 
-	for(int y = 0; y < Img.m_Height && ImgPixelSize > 1; y++)
-		for(int x = 0; x < Img.m_Width && ImgPixelSize > 1; x++)
+	for(size_t y = 0; y < Img.m_Height && ImgPixelSize > 1; y++)
+		for(size_t x = 0; x < Img.m_Width && ImgPixelSize > 1; x++)
 		{
 			uint8_t aPixel[4];
 			if(aVisitedPixels[x + y * Img.m_Width])
 				continue;
 
 			GetPixelClamped(Img, x, y, aPixel);
-			int SuperPixelSize = FindSuperPixelSize(Img, aPixel, x, y, 1, aVisitedPixels);
+			size_t SuperPixelSize = FindSuperPixelSize(Img, aPixel, x, y, 1, aVisitedPixels);
 			if(SuperPixelSize < ImgPixelSize)
 				ImgPixelSize = SuperPixelSize;
 		}
 	delete[] aVisitedPixels;
 
-	dbg_msg("map_create_pixelart", "INFO: automatically detected img_pixelsize of %dpx", ImgPixelSize);
+	dbg_msg("map_create_pixelart", "INFO: automatically detected img_pixelsize of %" PRIzu "px", ImgPixelSize);
 	return ImgPixelSize;
 }
 
-int FindSuperPixelSize(const CImageInfo &Img, const uint8_t aPixel[4], const int PosX, const int PosY, const int CurrentSize, bool aVisitedPixels[])
+size_t FindSuperPixelSize(const CImageInfo &Img, const uint8_t aPixel[4], const size_t PosX, const size_t PosY, const size_t CurrentSize, bool aVisitedPixels[])
 {
 	if(PosX + CurrentSize >= Img.m_Width || PosY + CurrentSize >= Img.m_Height)
 	{
@@ -192,10 +192,10 @@ int FindSuperPixelSize(const CImageInfo &Img, const uint8_t aPixel[4], const int
 
 	for(int i = 0; i < 2; i++)
 	{
-		for(int j = 0; j < CurrentSize + 1; j++)
+		for(size_t j = 0; j < CurrentSize + 1; j++)
 		{
 			uint8_t aCheckPixel[4];
-			int x = PosX, y = PosY;
+			size_t x = PosX, y = PosY;
 			x += i == 0 ? j : CurrentSize;
 			y += i == 0 ? CurrentSize : j;
 
@@ -211,10 +211,10 @@ int FindSuperPixelSize(const CImageInfo &Img, const uint8_t aPixel[4], const int
 	return FindSuperPixelSize(Img, aPixel, PosX, PosY, CurrentSize + 1, aVisitedPixels);
 }
 
-bool GetPixelClamped(const CImageInfo &Img, int x, int y, uint8_t aPixel[4])
+bool GetPixelClamped(const CImageInfo &Img, size_t x, size_t y, uint8_t aPixel[4])
 {
-	x = clamp<int>(x, 0, (int)Img.m_Width - 1);
-	y = clamp<int>(y, 0, (int)Img.m_Height - 1);
+	x = clamp<size_t>(x, 0, Img.m_Width - 1);
+	y = clamp<size_t>(y, 0, Img.m_Height - 1);
 	aPixel[0] = 255;
 	aPixel[1] = 255;
 	aPixel[2] = 255;
@@ -235,16 +235,16 @@ bool ComparePixel(const uint8_t aPixel1[4], const uint8_t aPixel2[4])
 	return true;
 }
 
-bool IsPixelOptimizable(const CImageInfo &Img, const int PosX, const int PosY, const uint8_t aPixel[4], const bool aVisitedPixels[])
+bool IsPixelOptimizable(const CImageInfo &Img, const size_t PosX, const size_t PosY, const uint8_t aPixel[4], const bool aVisitedPixels[])
 {
 	uint8_t aCheckPixel[4];
 	return PosX < Img.m_Width && PosY < Img.m_Height && !aVisitedPixels[PosX + PosY * Img.m_Width] && GetPixelClamped(Img, PosX, PosY, aCheckPixel) && ComparePixel(aPixel, aCheckPixel);
 }
 
-void SetVisitedPixels(const CImageInfo &Img, int PosX, int PosY, int Width, int Height, bool aVisitedPixels[])
+void SetVisitedPixels(const CImageInfo &Img, size_t PosX, size_t PosY, size_t Width, size_t Height, bool aVisitedPixels[])
 {
-	for(int y = PosY; y < PosY + Height; y++)
-		for(int x = PosX; x < PosX + Width; x++)
+	for(size_t y = PosY; y < PosY + Height; y++)
+		for(size_t x = PosX; x < PosX + Width; x++)
 			aVisitedPixels[x + y * Img.m_Width] = true;
 }
 

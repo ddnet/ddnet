@@ -1978,7 +1978,7 @@ void CMenus::LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info,
 	// create gray scale version
 	unsigned char *pData = static_cast<unsigned char *>(Info.m_pData);
 	const size_t Step = Info.PixelSize();
-	for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
+	for(size_t i = 0; i < Info.m_Width * Info.m_Height; i++)
 	{
 		int v = (pData[i * Step] + pData[i * Step + 1] + pData[i * Step + 2]) / 3;
 		pData[i * Step] = v;
