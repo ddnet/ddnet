@@ -4361,7 +4361,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	}
 
 	CEditorImage ImgInfo(this);
-	if(!Graphics()->LoadPng(&ImgInfo, pFileName, StorageType))
+	if(!Graphics()->LoadPng(ImgInfo, pFileName, StorageType))
 	{
 		ShowFileDialogError("Failed to load image from file '%s'.", pFileName);
 		return false;
@@ -4424,7 +4424,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	CEditorImage ImgInfo(pEditor);
-	if(!pEditor->Graphics()->LoadPng(&ImgInfo, pFileName, StorageType))
+	if(!pEditor->Graphics()->LoadPng(ImgInfo, pFileName, StorageType))
 	{
 		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFileName);
 		return false;
@@ -5139,7 +5139,7 @@ void CEditor::RenderFileDialog()
 			{
 				char aBuffer[IO_MAX_PATH_LENGTH];
 				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
-				if(Graphics()->LoadPng(&m_FilePreviewImageInfo, aBuffer, m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType))
+				if(Graphics()->LoadPng(m_FilePreviewImageInfo, aBuffer, m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType))
 				{
 					Graphics()->UnloadTexture(&m_FilePreviewImage);
 					m_FilePreviewImage = Graphics()->LoadTextureRawMove(m_FilePreviewImageInfo, 0, aBuffer);

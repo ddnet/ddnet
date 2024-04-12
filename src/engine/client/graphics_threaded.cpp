@@ -499,10 +499,10 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 {
 	dbg_assert(pFilename[0] != '\0', "Cannot load texture from file with empty filename"); // would cause Valgrind to crash otherwise
 
-	CImageInfo Img;
-	if(LoadPng(&Img, pFilename, StorageType))
+	CImageInfo Image;
+	if(LoadPng(Image, pFilename, StorageType))
 	{
-		CTextureHandle Id = LoadTextureRawMove(Img, Flags, pFilename);
+		CTextureHandle Id = LoadTextureRawMove(Image, Flags, pFilename);
 		if(Id.IsValid())
 		{
 			if(g_Config.m_Debug)
@@ -571,7 +571,7 @@ bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureId, int x, int 
 	return true;
 }
 
-bool CGraphics_Threaded::LoadPng(CImageInfo *pImg, const char *pFilename, int StorageType)
+bool CGraphics_Threaded::LoadPng(CImageInfo &Image, const char *pFilename, int StorageType)
 {
 	char aCompleteFilename[IO_MAX_PATH_LENGTH];
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType, aCompleteFilename, sizeof(aCompleteFilename));
@@ -598,19 +598,19 @@ bool CGraphics_Threaded::LoadPng(CImageInfo *pImg, const char *pFilename, int St
 		uint8_t *pImgBuffer = NULL;
 		EImageFormat ImageFormat;
 		int PngliteIncompatible;
-		if(::LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
+		if(::LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, Image.m_Width, Image.m_Height, pImgBuffer, ImageFormat))
 		{
 			if(ImageFormat == IMAGE_FORMAT_RGB)
-				pImg->m_Format = CImageInfo::FORMAT_RGB;
+				Image.m_Format = CImageInfo::FORMAT_RGB;
 			else if(ImageFormat == IMAGE_FORMAT_RGBA)
-				pImg->m_Format = CImageInfo::FORMAT_RGBA;
+				Image.m_Format = CImageInfo::FORMAT_RGBA;
 			else
 			{
 				free(pImgBuffer);
 				log_error("game/png", "image had unsupported image format. filename='%s' format='%d'", pFilename, (int)ImageFormat);
 				return false;
 			}
-			pImg->m_pData = pImgBuffer;
+			Image.m_pData = pImgBuffer;
 
 			if(m_WarnPngliteIncompatibleImages && PngliteIncompatible != 0)
 			{

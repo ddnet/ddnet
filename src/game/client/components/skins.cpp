@@ -141,7 +141,7 @@ const CSkin *CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 
 bool CSkins::LoadSkinPng(CImageInfo &Info, const char *pName, const char *pPath, int DirType)
 {
-	if(!Graphics()->LoadPng(&Info, pPath, DirType))
+	if(!Graphics()->LoadPng(Info, pPath, DirType))
 	{
 		log_error("skins", "Failed to load skin PNG: %s", pName);
 		return false;
