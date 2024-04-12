@@ -10,7 +10,7 @@ bool CreatePixelArt(const char[3][64], const int[2], const int[2], int[2], const
 void InsertCurrentQuads(CDataFileReader &, CMapItemLayerQuads *, CQuad *);
 int InsertPixelArtQuads(CQuad *, int &, const CImageInfo &, const int[2], const int[2], const bool[2]);
 
-bool LoadPNG(CImageInfo *, const char *);
+bool LoadPng(CImageInfo *, const char *);
 bool OpenMaps(const char[2][64], CDataFileReader &, CDataFileWriter &);
 void SaveOutputMap(CDataFileReader &, CDataFileWriter &, CMapItemLayerQuads *, int, CQuad *, int);
 
@@ -67,7 +67,7 @@ int main(int argc, const char **argv)
 bool CreatePixelArt(const char aFilenames[3][64], const int aLayerId[2], const int aStartingPos[2], int aPixelSizes[2], const bool aArtOptions[2])
 {
 	CImageInfo Img;
-	if(!LoadPNG(&Img, aFilenames[2]))
+	if(!LoadPng(&Img, aFilenames[2]))
 		return false;
 
 	aPixelSizes[0] = aPixelSizes[0] ? aPixelSizes[0] : GetImagePixelSize(Img);
@@ -309,7 +309,7 @@ CQuad CreateNewQuad(const float PosX, const float PosY, const int Width, const i
 	return Quad;
 }
 
-bool LoadPNG(CImageInfo *pImg, const char *pFilename)
+bool LoadPng(CImageInfo *pImg, const char *pFilename)
 {
 	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
 	if(!File)
@@ -338,7 +338,7 @@ bool LoadPNG(CImageInfo *pImg, const char *pFilename)
 	EImageFormat ImageFormat;
 	int PngliteIncompatible;
 
-	if(!LoadPNG(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
+	if(!LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
 	{
 		dbg_msg("map_create_pixelart", "ERROR: Unable to load a valid PNG from file %s", pFilename);
 		return false;

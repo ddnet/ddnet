@@ -124,7 +124,7 @@ static int PngliteIncompatibility(png_structp pPNGStruct, png_infop pPNGInfo)
 	return Result;
 }
 
-bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat)
+bool LoadPng(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat)
 {
 	SLibPNGWarningItem UserErrorStruct = {&ByteLoader, pFileName, {}};
 
@@ -295,7 +295,7 @@ static int ImageLoaderHelperFormatToColorChannel(EImageFormat Format)
 	}
 }
 
-bool SavePNG(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, int Width, int Height)
+bool SavePng(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, int Width, int Height)
 {
 	png_structp pPNGStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 

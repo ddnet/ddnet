@@ -335,7 +335,7 @@ public:
 
 	virtual const TTwGraphicsGpuList &GetGpus() const = 0;
 
-	virtual bool LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
+	virtual bool LoadPng(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
 
 	virtual bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) = 0;
 	virtual bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) = 0;

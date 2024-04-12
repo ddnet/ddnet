@@ -238,7 +238,7 @@ bool CEditor::CallbackAddTileart(const char *pFilepath, int StorageType, void *p
 {
 	CEditor *pEditor = (CEditor *)pUser;
 
-	if(!pEditor->Graphics()->LoadPNG(&pEditor->m_TileartImageInfo, pFilepath, StorageType))
+	if(!pEditor->Graphics()->LoadPng(&pEditor->m_TileartImageInfo, pFilepath, StorageType))
 	{
 		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFilepath);
 		return false;

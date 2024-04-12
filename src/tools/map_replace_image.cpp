@@ -23,7 +23,7 @@ int g_NewDataId = -1;
 int g_NewDataSize = 0;
 void *g_pNewData = nullptr;
 
-bool LoadPNG(CImageInfo *pImg, const char *pFilename)
+bool LoadPng(CImageInfo *pImg, const char *pFilename)
 {
 	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
 	if(File)
@@ -47,7 +47,7 @@ bool LoadPNG(CImageInfo *pImg, const char *pFilename)
 		uint8_t *pImgBuffer = NULL;
 		EImageFormat ImageFormat;
 		int PngliteIncompatible;
-		if(LoadPNG(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
+		if(LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
 		{
 			if((ImageFormat == IMAGE_FORMAT_RGBA || ImageFormat == IMAGE_FORMAT_RGB) && pImg->m_Width <= (2 << 13) && pImg->m_Height <= (2 << 13))
 			{
@@ -87,7 +87,7 @@ void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pImgName,
 	dbg_msg("map_replace_image", "found image '%s'", pImgName);
 
 	CImageInfo ImgInfo;
-	if(!LoadPNG(&ImgInfo, pImgFile))
+	if(!LoadPng(&ImgInfo, pImgFile))
 		return 0;
 
 	if(ImgInfo.m_Format != CImageInfo::FORMAT_RGBA)

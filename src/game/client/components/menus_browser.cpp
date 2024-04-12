@@ -1946,7 +1946,7 @@ const SCommunityIcon *CMenus::FindCommunityIcon(const char *pCommunityId)
 bool CMenus::LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, SHA256_DIGEST &Sha256)
 {
 	char aError[IO_MAX_PATH_LENGTH + 128];
-	if(!Graphics()->LoadPNG(&Info, pPath, DirType))
+	if(!Graphics()->LoadPng(&Info, pPath, DirType))
 	{
 		str_format(aError, sizeof(aError), "Failed to load community icon from '%s'", pPath);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus/browser", aError);

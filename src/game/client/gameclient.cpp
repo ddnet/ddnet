@@ -3030,7 +3030,7 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 	}
 
 	CImageInfo ImgInfo;
-	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+	bool PngLoaded = Graphics()->LoadPng(&ImgInfo, aPath, IStorage::TYPE_ALL);
 	if(!PngLoaded && !IsDefault)
 	{
 		if(AsDir)
@@ -3191,7 +3191,7 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 	}
 
 	CImageInfo ImgInfo;
-	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+	bool PngLoaded = Graphics()->LoadPng(&ImgInfo, aPath, IStorage::TYPE_ALL);
 	if(!PngLoaded && !IsDefault)
 	{
 		if(AsDir)
@@ -3245,7 +3245,7 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 	}
 
 	CImageInfo ImgInfo;
-	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+	bool PngLoaded = Graphics()->LoadPng(&ImgInfo, aPath, IStorage::TYPE_ALL);
 	if(!PngLoaded && !IsDefault)
 	{
 		if(AsDir)
@@ -3333,7 +3333,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 	}
 
 	CImageInfo ImgInfo;
-	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+	bool PngLoaded = Graphics()->LoadPng(&ImgInfo, aPath, IStorage::TYPE_ALL);
 	if(!PngLoaded && !IsDefault)
 	{
 		if(AsDir)
@@ -3407,7 +3407,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 	}
 
 	CImageInfo ImgInfo;
-	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+	bool PngLoaded = Graphics()->LoadPng(&ImgInfo, aPath, IStorage::TYPE_ALL);
 	if(!PngLoaded && !IsDefault)
 	{
 		if(AsDir)

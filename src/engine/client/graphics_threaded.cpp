@@ -500,7 +500,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 	dbg_assert(pFilename[0] != '\0', "Cannot load texture from file with empty filename"); // would cause Valgrind to crash otherwise
 
 	CImageInfo Img;
-	if(LoadPNG(&Img, pFilename, StorageType))
+	if(LoadPng(&Img, pFilename, StorageType))
 	{
 		CTextureHandle Id = LoadTextureRawMove(Img, Flags, pFilename);
 		if(Id.IsValid())
@@ -571,7 +571,7 @@ bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureId, int x, int 
 	return true;
 }
 
-bool CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType)
+bool CGraphics_Threaded::LoadPng(CImageInfo *pImg, const char *pFilename, int StorageType)
 {
 	char aCompleteFilename[IO_MAX_PATH_LENGTH];
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType, aCompleteFilename, sizeof(aCompleteFilename));
@@ -598,7 +598,7 @@ bool CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int St
 		uint8_t *pImgBuffer = NULL;
 		EImageFormat ImageFormat;
 		int PngliteIncompatible;
-		if(::LoadPNG(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
+		if(::LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
 		{
 			if(ImageFormat == IMAGE_FORMAT_RGB)
 				pImg->m_Format = CImageInfo::FORMAT_RGB;
@@ -775,7 +775,7 @@ class CScreenshotSaveJob : public IJob
 			TImageByteBuffer ByteBuffer;
 			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
 
-			if(SavePNG(IMAGE_FORMAT_RGBA, m_pData, ImageByteBuffer, m_Width, m_Height))
+			if(SavePng(IMAGE_FORMAT_RGBA, m_pData, ImageByteBuffer, m_Width, m_Height))
 				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
 			io_close(File);
 

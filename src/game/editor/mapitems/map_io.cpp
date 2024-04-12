@@ -516,7 +516,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 				// load external
 				CImageInfo ImgInfo;
-				if(m_pEditor->Graphics()->LoadPNG(&ImgInfo, aBuf, IStorage::TYPE_ALL))
+				if(m_pEditor->Graphics()->LoadPng(&ImgInfo, aBuf, IStorage::TYPE_ALL))
 				{
 					pImg->m_Width = ImgInfo.m_Width;
 					pImg->m_Height = ImgInfo.m_Height;
