@@ -2509,8 +2509,7 @@ void CClient::Update()
 			}
 
 			// fetch server info if we don't have it
-			if(State() >= IClient::STATE_LOADING &&
-				m_CurrentServerInfoRequestTime >= 0 &&
+			if(m_CurrentServerInfoRequestTime >= 0 &&
 				time_get() > m_CurrentServerInfoRequestTime)
 			{
 				m_ServerBrowser.RequestCurrentServer(ServerAddress());
@@ -2518,8 +2517,7 @@ void CClient::Update()
 			}
 
 			// periodically ping server
-			if(State() == IClient::STATE_ONLINE &&
-				m_CurrentServerNextPingTime >= 0 &&
+			if(m_CurrentServerNextPingTime >= 0 &&
 				time_get() > m_CurrentServerNextPingTime)
 			{
 				int64_t NowPing = time_get();
