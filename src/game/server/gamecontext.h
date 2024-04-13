@@ -227,6 +227,7 @@ public:
 		VOTE_ENFORCE_NO_ADMIN,
 		VOTE_ENFORCE_YES_ADMIN,
 		VOTE_ENFORCE_ABORT,
+		VOTE_ENFORCE_CANCEL,
 	};
 	CHeap *m_pVoteOptionHeap;
 	CVoteOptionServer *m_pVoteOptionFirst;
