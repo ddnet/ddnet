@@ -949,7 +949,6 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "loaded map '%s'", pFilename);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
-	m_aReceivedSnapshots[g_Config.m_ClDummy] = 0;
 
 	str_copy(m_aCurrentMap, pName);
 	str_copy(m_aCurrentMapPath, pFilename);
