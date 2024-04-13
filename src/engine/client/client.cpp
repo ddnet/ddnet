@@ -949,7 +949,6 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "loaded map '%s'", pFilename);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", aBuf);
-	m_aReceivedSnapshots[g_Config.m_ClDummy] = 0;
 
 	str_copy(m_aCurrentMap, pName);
 	str_copy(m_aCurrentMapPath, pFilename);
@@ -2404,26 +2403,18 @@ void CClient::Update()
 			int64_t Now = m_aGameTime[!g_Config.m_ClDummy].Get(time_get());
 			while(true)
 			{
-				CSnapshotStorage::CHolder *pCur = m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT];
-				int64_t TickStart = (pCur->m_Tick) * time_freq() / GameTickSpeed();
-
-				if(TickStart < Now)
-				{
-					CSnapshotStorage::CHolder *pNext = m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT]->m_pNext;
-					if(pNext)
-					{
-						m_aapSnapshots[!g_Config.m_ClDummy][SNAP_PREV] = m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT];
-						m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT] = pNext;
-
-						// set ticks
-						m_aCurGameTick[!g_Config.m_ClDummy] = m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick;
-						m_aPrevGameTick[!g_Config.m_ClDummy] = m_aapSnapshots[!g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
-					}
-					else
-						break;
-				}
-				else
+				if(!m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT]->m_pNext)
 					break;
+				int64_t TickStart = m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick * time_freq() / GameTickSpeed();
+				if(TickStart >= Now)
+					break;
+
+				m_aapSnapshots[!g_Config.m_ClDummy][SNAP_PREV] = m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT];
+				m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT] = m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT]->m_pNext;
+
+				// set ticks
+				m_aCurGameTick[!g_Config.m_ClDummy] = m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick;
+				m_aPrevGameTick[!g_Config.m_ClDummy] = m_aapSnapshots[!g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
 			}
 		}
 
@@ -2443,32 +2434,24 @@ void CClient::Update()
 
 			while(true)
 			{
-				CSnapshotStorage::CHolder *pCur = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
-				int64_t TickStart = (pCur->m_Tick) * time_freq() / GameTickSpeed();
-
-				if(TickStart < Now)
-				{
-					CSnapshotStorage::CHolder *pNext = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pNext;
-					if(pNext)
-					{
-						m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV] = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
-						m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = pNext;
-
-						// set ticks
-						m_aCurGameTick[g_Config.m_ClDummy] = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick;
-						m_aPrevGameTick[g_Config.m_ClDummy] = m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
-
-						if(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV])
-						{
-							GameClient()->OnNewSnapshot();
-							Repredict = true;
-						}
-					}
-					else
-						break;
-				}
-				else
+				if(!m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pNext)
 					break;
+				int64_t TickStart = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick * time_freq() / GameTickSpeed();
+				if(TickStart >= Now)
+					break;
+
+				m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV] = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT];
+				m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pNext;
+
+				// set ticks
+				m_aCurGameTick[g_Config.m_ClDummy] = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick;
+				m_aPrevGameTick[g_Config.m_ClDummy] = m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
+
+				if(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV])
+				{
+					GameClient()->OnNewSnapshot();
+					Repredict = true;
+				}
 			}
 
 			if(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV])
@@ -2510,8 +2493,7 @@ void CClient::Update()
 			}
 
 			// fetch server info if we don't have it
-			if(State() >= IClient::STATE_LOADING &&
-				m_CurrentServerInfoRequestTime >= 0 &&
+			if(m_CurrentServerInfoRequestTime >= 0 &&
 				time_get() > m_CurrentServerInfoRequestTime)
 			{
 				m_ServerBrowser.RequestCurrentServer(ServerAddress());
@@ -2519,8 +2501,7 @@ void CClient::Update()
 			}
 
 			// periodically ping server
-			if(State() == IClient::STATE_ONLINE &&
-				m_CurrentServerNextPingTime >= 0 &&
+			if(m_CurrentServerNextPingTime >= 0 &&
 				time_get() > m_CurrentServerNextPingTime)
 			{
 				int64_t NowPing = time_get();
@@ -2553,24 +2534,24 @@ void CClient::Update()
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 	{
-		static int64_t ActionTaken = 0;
+		static int64_t s_ActionTaken = 0;
 		int64_t Now = time_get();
 		if(State() == IClient::STATE_OFFLINE)
 		{
-			if(Now > ActionTaken + time_freq() * 2)
+			if(Now > s_ActionTaken + time_freq() * 2)
 			{
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "stress", "reconnecting!");
 				Connect(g_Config.m_DbgStressServer);
-				ActionTaken = Now;
+				s_ActionTaken = Now;
 			}
 		}
 		else
 		{
-			if(Now > ActionTaken + time_freq() * (10 + g_Config.m_DbgStress))
+			if(Now > s_ActionTaken + time_freq() * (10 + g_Config.m_DbgStress))
 			{
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "stress", "disconnecting!");
 				Disconnect();
-				ActionTaken = Now;
+				s_ActionTaken = Now;
 			}
 		}
 	}
