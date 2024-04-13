@@ -2550,24 +2550,24 @@ void CClient::Update()
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgStress)
 	{
-		static int64_t ActionTaken = 0;
+		static int64_t s_ActionTaken = 0;
 		int64_t Now = time_get();
 		if(State() == IClient::STATE_OFFLINE)
 		{
-			if(Now > ActionTaken + time_freq() * 2)
+			if(Now > s_ActionTaken + time_freq() * 2)
 			{
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "stress", "reconnecting!");
 				Connect(g_Config.m_DbgStressServer);
-				ActionTaken = Now;
+				s_ActionTaken = Now;
 			}
 		}
 		else
 		{
-			if(Now > ActionTaken + time_freq() * (10 + g_Config.m_DbgStress))
+			if(Now > s_ActionTaken + time_freq() * (10 + g_Config.m_DbgStress))
 			{
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "stress", "disconnecting!");
 				Disconnect();
-				ActionTaken = Now;
+				s_ActionTaken = Now;
 			}
 		}
 	}
