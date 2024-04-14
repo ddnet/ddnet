@@ -1479,12 +1479,11 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				Rect.HSplitTop(11.0f + 10.0f, &Rect, nullptr);
 
 				// tee
+				CUIRect Skin;
+				Rect.VSplitLeft(Rect.h, &Skin, &Rect);
+				Rect.VSplitLeft(2.0f, nullptr, &Rect);
 				if(Friend.Skin()[0] != '\0')
 				{
-					CUIRect Skin;
-					Rect.VSplitLeft(Rect.h, &Skin, &Rect);
-					Rect.VSplitLeft(2.0f, nullptr, &Rect);
-
 					const CTeeRenderInfo TeeInfo = GetTeeRenderInfo(vec2(Skin.w, Skin.h), Friend.Skin(), Friend.CustomSkinColors(), Friend.CustomSkinColorBody(), Friend.CustomSkinColorFeet());
 					const CAnimState *pIdleState = CAnimState::GetIdle();
 					vec2 OffsetToMid;
