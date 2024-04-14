@@ -2176,10 +2176,15 @@ void CMenus::OnRender()
 	if(!IsActive())
 	{
 		if(Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+		{
 			SetActive(true);
-		Ui()->FinishCheck();
-		Ui()->ClearHotkeys();
-		return;
+		}
+		else if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		{
+			Ui()->FinishCheck();
+			Ui()->ClearHotkeys();
+			return;
+		}
 	}
 
 	UpdateColors();
@@ -2187,7 +2192,11 @@ void CMenus::OnRender()
 	Ui()->Update();
 
 	Render();
-	RenderTools()->RenderCursor(Ui()->MousePos(), 24.0f);
+
+	if(IsActive())
+	{
+		RenderTools()->RenderCursor(Ui()->MousePos(), 24.0f);
+	}
 
 	// render debug information
 	if(g_Config.m_Debug)
