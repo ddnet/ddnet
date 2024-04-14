@@ -708,8 +708,8 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		static int s_GameTilesButton = 0;
 		if(m_pEditor->DoButton_Editor(&s_GameTilesButton, "Game tiles", 0, &Button, 0, "Constructs game tiles from this layer"))
 			m_pEditor->PopupSelectGametileOpInvoke(m_pEditor->Ui()->MouseX(), m_pEditor->Ui()->MouseY());
-		int Selected = m_pEditor->PopupSelectGameTileOpResult();
-		int Result = -1;
+		const int Selected = m_pEditor->PopupSelectGameTileOpResult();
+		int Result = Selected;
 		switch(Selected)
 		{
 		case 4:
