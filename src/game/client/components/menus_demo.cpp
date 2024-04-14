@@ -750,8 +750,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		RenderDemoPlayerSliceSavePopup(MainView);
 	}
-
-	Ui()->RenderPopupMenus();
 }
 
 void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
