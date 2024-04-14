@@ -803,7 +803,7 @@ void CGameContext::SendVoteSet(int ClientId)
 			Type = protocol7::VOTE_END_FAIL;
 		else if(m_VoteEnforce == VOTE_ENFORCE_YES || m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
 			Type = protocol7::VOTE_END_PASS;
-		else if(m_VoteEnforce == VOTE_ENFORCE_ABORT)
+		else if(m_VoteEnforce == VOTE_ENFORCE_ABORT || m_VoteEnforce == VOTE_ENFORCE_CANCEL)
 			Type = protocol7::VOTE_END_ABORT;
 
 		if(m_VoteEnforce == VOTE_ENFORCE_NO_ADMIN || m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
@@ -1034,6 +1034,13 @@ void CGameContext::OnTick()
 		if(m_VoteEnforce == VOTE_ENFORCE_ABORT)
 		{
 			SendChat(-1, CGameContext::CHAT_ALL, "Vote aborted");
+			EndVote();
+		}
+		else if(m_VoteEnforce == VOTE_ENFORCE_CANCEL)
+		{
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "'%s' canceled their vote", Server()->ClientName(m_VoteCreator));
+			SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 			EndVote();
 		}
 		else
@@ -2425,6 +2432,13 @@ void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 
 	if(!pMsg->m_Vote)
 		return;
+
+	// Allow the vote creator to cancel the vote
+	if(pPlayer->GetCid() == m_VoteCreator && pMsg->m_Vote == -1)
+	{
+		m_VoteEnforce = VOTE_ENFORCE_CANCEL;
+		return;
+	}
 
 	pPlayer->m_Vote = pMsg->m_Vote;
 	pPlayer->m_VotePos = ++m_VotePos;
