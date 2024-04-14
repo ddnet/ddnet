@@ -47,8 +47,8 @@ class CGameTeams
 	*/
 	void KillTeam(int Team, int NewStrongId, int ExceptId = -1);
 	bool TeamFinished(int Team);
-	void OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, const char *pTimestamp);
-	void OnFinish(CPlayer *Player, float Time, const char *pTimestamp);
+	void OnTeamFinish(int Team, CPlayer **Players, unsigned int Size, int TimeTicks, const char *pTimestamp);
+	void OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp);
 
 public:
 	enum

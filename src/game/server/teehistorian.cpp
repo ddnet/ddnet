@@ -811,6 +811,34 @@ void CTeeHistorian::RecordAntibot(const void *pData, int DataSize)
 	WriteExtra(UUID_TEEHISTORIAN_ANTIBOT, pData, DataSize);
 }
 
+void CTeeHistorian::RecordPlayerFinish(int ClientId, int TimeTicks)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientId);
+	Buffer.AddInt(TimeTicks);
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "player_finish cid=%d Time=%d", ClientId, TimeTicks);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_PLAYER_FINISH, Buffer.Data(), Buffer.Size());
+}
+
+void CTeeHistorian::RecordTeamFinish(int TeamId, int TimeTicks)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(TeamId);
+	Buffer.AddInt(TimeTicks);
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "player_finish cid=%d Time=%d", TeamId, TimeTicks);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_TEAM_FINISH, Buffer.Data(), Buffer.Size());
+}
+
 void CTeeHistorian::Finish()
 {
 	dbg_assert(m_State == STATE_START || m_State == STATE_INPUTS || m_State == STATE_BEFORE_ENDTICK || m_State == STATE_BEFORE_TICK, "invalid teehistorian state");
