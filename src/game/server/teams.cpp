@@ -193,13 +193,13 @@ void CGameTeams::OnCharacterFinish(int ClientId)
 		CPlayer *pPlayer = GetPlayer(ClientId);
 		if(pPlayer && pPlayer->IsPlaying())
 		{
-			float Time = (float)(Server()->Tick() - GetStartTime(pPlayer)) / ((float)Server()->TickSpeed());
-			if(Time < 0.000001f)
+			int TimeTicks = Server()->Tick() - GetStartTime(pPlayer);
+			if(TimeTicks <= 0)
 				return;
 			char aTimestamp[TIMESTAMP_STR_LENGTH];
 			str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
 
-			OnFinish(pPlayer, Time, aTimestamp);
+			OnFinish(pPlayer, TimeTicks, aTimestamp);
 		}
 	}
 	else
@@ -335,8 +335,9 @@ void CGameTeams::CheckTeamFinished(int Team)
 
 		if(PlayersCount > 0)
 		{
-			float Time = (float)(Server()->Tick() - GetStartTime(apTeamPlayers[0])) / ((float)Server()->TickSpeed());
-			if(Time < 0.000001f)
+			int TimeTicks = Server()->Tick() - GetStartTime(apTeamPlayers[0]);
+			float Time = (float)TimeTicks / (float)Server()->TickSpeed();
+			if(TimeTicks <= 0)
 			{
 				return;
 			}
@@ -348,7 +349,7 @@ void CGameTeams::CheckTeamFinished(int Team)
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf),
 					"Your team would've finished in: %d minute(s) %5.2f second(s). Since you had practice mode enabled your rank doesn't count.",
-					(int)Time / 60, Time - ((int)Time / 60 * 60));
+					(int)Time / 50 / 60, Time - ((int)Time / 60 * 60));
 				GameServer()->SendChatTeam(Team, aBuf);
 
 				for(unsigned int i = 0; i < PlayersCount; ++i)
@@ -363,9 +364,9 @@ void CGameTeams::CheckTeamFinished(int Team)
 			str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
 
 			for(unsigned int i = 0; i < PlayersCount; ++i)
-				OnFinish(apTeamPlayers[i], Time, aTimestamp);
+				OnFinish(apTeamPlayers[i], TimeTicks, aTimestamp);
 			ChangeTeamState(Team, TEAMSTATE_FINISHED); // TODO: Make it better
-			OnTeamFinish(apTeamPlayers, PlayersCount, Time, aTimestamp);
+			OnTeamFinish(Team, apTeamPlayers, PlayersCount, TimeTicks, aTimestamp);
 		}
 	}
 }
@@ -666,7 +667,7 @@ float *CGameTeams::GetCurrentTimeCp(CPlayer *Player)
 	return NULL;
 }
 
-void CGameTeams::OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, const char *pTimestamp)
+void CGameTeams::OnTeamFinish(int Team, CPlayer **Players, unsigned int Size, int TimeTicks, const char *pTimestamp)
 {
 	int aPlayerCids[MAX_CLIENTS];
 
@@ -685,13 +686,16 @@ void CGameTeams::OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, 
 	}
 
 	if(Size >= (unsigned int)g_Config.m_SvMinTeamSize)
-		GameServer()->Score()->SaveTeamScore(aPlayerCids, Size, Time, pTimestamp);
+		GameServer()->Score()->SaveTeamScore(Team, aPlayerCids, Size, TimeTicks, pTimestamp);
 }
 
-void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
+void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp)
 {
 	if(!Player || !Player->IsPlaying())
 		return;
+
+	float Time = TimeTicks / (float)Server()->TickSpeed();
+
 	// TODO:DDRace:btd: this ugly
 	const int ClientId = Player->GetCid();
 	CPlayerData *pData = GameServer()->Score()->PlayerData(ClientId);
@@ -804,7 +808,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 
 	if(CallSaveScore)
 		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientId), "nameless tee"))
-			GameServer()->Score()->SaveScore(ClientId, Time, pTimestamp,
+			GameServer()->Score()->SaveScore(ClientId, TimeTicks, pTimestamp,
 				GetCurrentTimeCp(Player), Player->m_NotEligibleForFinish);
 
 	bool NeedToSendNewServerRecord = false;
