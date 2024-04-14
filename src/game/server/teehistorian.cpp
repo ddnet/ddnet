@@ -573,6 +573,23 @@ void CTeeHistorian::RecordPlayerDrop(int ClientId, const char *pReason)
 	Write(Buffer.Data(), Buffer.Size());
 }
 
+void CTeeHistorian::RecordPlayerName(int ClientId, const char *pName)
+{
+	EnsureTickWritten();
+
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientId);
+	Buffer.AddString(pName, 0);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "player_name cid=%d name='%s'", ClientId, pName);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_PLAYER_NAME, Buffer.Data(), Buffer.Size());
+}
+
 void CTeeHistorian::RecordConsoleCommand(int ClientId, int FlagMask, const char *pCmd, IConsole::IResult *pResult)
 {
 	EnsureTickWritten();
