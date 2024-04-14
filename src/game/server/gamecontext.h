@@ -328,6 +328,7 @@ public:
 	void TeehistorianRecordPlayerJoin(int ClientId, bool Sixup) override;
 	void TeehistorianRecordPlayerDrop(int ClientId, const char *pReason) override;
 	void TeehistorianRecordPlayerRejoin(int ClientId) override;
+	void TeehistorianRecordPlayerName(int ClientId, const char *pName) override;
 
 	bool IsClientReady(int ClientId) const override;
 	bool IsClientPlayer(int ClientId) const override;

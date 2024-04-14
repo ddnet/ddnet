@@ -1767,6 +1767,14 @@ void CGameContext::TeehistorianRecordPlayerRejoin(int ClientId)
 	}
 }
 
+void CGameContext::TeehistorianRecordPlayerName(int ClientId, const char *pName)
+{
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordPlayerName(ClientId, pName);
+	}
+}
+
 bool CGameContext::OnClientDDNetVersionKnown(int ClientId)
 {
 	IServer::CClientInfo Info;
