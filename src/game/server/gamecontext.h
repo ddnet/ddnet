@@ -447,7 +447,6 @@ private:
 	static void ConUnlock(IConsole::IResult *pResult, void *pUserData);
 	static void ConInvite(IConsole::IResult *pResult, void *pUserData);
 	static void ConJoin(IConsole::IResult *pResult, void *pUserData);
-	static void ConMode(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeam0Mode(IConsole::IResult *pResult, void *pUserData);
 	static void ConMe(IConsole::IResult *pResult, void *pUserData);
 	static void ConWhisper(IConsole::IResult *pResult, void *pUserData);
