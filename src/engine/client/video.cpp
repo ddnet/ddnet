@@ -157,13 +157,13 @@ bool CVideo::Start()
 	m_CurAudioThreadIndex = 0;
 
 	size_t GLNVals = FORMAT_GL_NCHANNELS * m_Width * m_Height;
-	m_vPixelHelper.resize(m_VideoThreads);
+	m_vVideoBuffers.resize(m_VideoThreads);
 	for(size_t i = 0; i < m_VideoThreads; ++i)
 	{
-		m_vPixelHelper[i].resize(GLNVals * sizeof(uint8_t));
+		m_vVideoBuffers[i].m_vBuffer.resize(GLNVals * sizeof(uint8_t));
 	}
 
-	m_vBuffer.resize(m_AudioThreads);
+	m_vAudioBuffers.resize(m_AudioThreads);
 
 	/* Add the audio and video streams using the default format codecs
 	 * and initialize the codecs. */
@@ -192,28 +192,28 @@ bool CVideo::Start()
 		}
 	}
 
-	m_vVideoThreads.resize(m_VideoThreads);
+	m_vpVideoThreads.resize(m_VideoThreads);
 	for(size_t i = 0; i < m_VideoThreads; ++i)
 	{
-		m_vVideoThreads[i] = std::make_unique<SVideoRecorderThread>();
+		m_vpVideoThreads[i] = std::make_unique<CVideoRecorderThread>();
 	}
 	for(size_t i = 0; i < m_VideoThreads; ++i)
 	{
-		std::unique_lock<std::mutex> Lock(m_vVideoThreads[i]->m_Mutex);
-		m_vVideoThreads[i]->m_Thread = std::thread([this, i]() REQUIRES(!g_WriteLock) { RunVideoThread(i == 0 ? (m_VideoThreads - 1) : (i - 1), i); });
-		m_vVideoThreads[i]->m_Cond.wait(Lock, [this, i]() -> bool { return m_vVideoThreads[i]->m_Started; });
+		std::unique_lock<std::mutex> Lock(m_vpVideoThreads[i]->m_Mutex);
+		m_vpVideoThreads[i]->m_Thread = std::thread([this, i]() REQUIRES(!g_WriteLock) { RunVideoThread(i == 0 ? (m_VideoThreads - 1) : (i - 1), i); });
+		m_vpVideoThreads[i]->m_Cond.wait(Lock, [this, i]() -> bool { return m_vpVideoThreads[i]->m_Started; });
 	}
 
-	m_vAudioThreads.resize(m_AudioThreads);
+	m_vpAudioThreads.resize(m_AudioThreads);
 	for(size_t i = 0; i < m_AudioThreads; ++i)
 	{
-		m_vAudioThreads[i] = std::make_unique<SAudioRecorderThread>();
+		m_vpAudioThreads[i] = std::make_unique<CAudioRecorderThread>();
 	}
 	for(size_t i = 0; i < m_AudioThreads; ++i)
 	{
-		std::unique_lock<std::mutex> Lock(m_vAudioThreads[i]->m_Mutex);
-		m_vAudioThreads[i]->m_Thread = std::thread([this, i]() REQUIRES(!g_WriteLock) { RunAudioThread(i == 0 ? (m_AudioThreads - 1) : (i - 1), i); });
-		m_vAudioThreads[i]->m_Cond.wait(Lock, [this, i]() -> bool { return m_vAudioThreads[i]->m_Started; });
+		std::unique_lock<std::mutex> Lock(m_vpAudioThreads[i]->m_Mutex);
+		m_vpAudioThreads[i]->m_Thread = std::thread([this, i]() REQUIRES(!g_WriteLock) { RunAudioThread(i == 0 ? (m_AudioThreads - 1) : (i - 1), i); });
+		m_vpAudioThreads[i]->m_Cond.wait(Lock, [this, i]() -> bool { return m_vpAudioThreads[i]->m_Started; });
 	}
 
 	/* Now that all the parameters are set, we can open the audio and
@@ -237,19 +237,19 @@ bool CVideo::Start()
 		}
 	}
 
-	m_VideoStream.m_vpSwsCtxs.reserve(m_VideoThreads);
+	m_VideoStream.m_vpSwsContexts.reserve(m_VideoThreads);
 
 	for(size_t i = 0; i < m_VideoThreads; ++i)
 	{
-		if(m_VideoStream.m_vpSwsCtxs.size() <= i)
-			m_VideoStream.m_vpSwsCtxs.emplace_back(nullptr);
+		if(m_VideoStream.m_vpSwsContexts.size() <= i)
+			m_VideoStream.m_vpSwsContexts.emplace_back(nullptr);
 
-		if(!m_VideoStream.m_vpSwsCtxs[i])
+		if(!m_VideoStream.m_vpSwsContexts[i])
 		{
-			m_VideoStream.m_vpSwsCtxs[i] = sws_getCachedContext(
-				m_VideoStream.m_vpSwsCtxs[i],
-				m_VideoStream.pEnc->width, m_VideoStream.pEnc->height, AV_PIX_FMT_RGBA,
-				m_VideoStream.pEnc->width, m_VideoStream.pEnc->height, AV_PIX_FMT_YUV420P,
+			m_VideoStream.m_vpSwsContexts[i] = sws_getCachedContext(
+				m_VideoStream.m_vpSwsContexts[i],
+				m_VideoStream.m_pCodecContext->width, m_VideoStream.m_pCodecContext->height, AV_PIX_FMT_RGBA,
+				m_VideoStream.m_pCodecContext->width, m_VideoStream.m_pCodecContext->height, AV_PIX_FMT_YUV420P,
 				0, 0, 0, 0);
 		}
 	}
@@ -267,7 +267,6 @@ bool CVideo::Start()
 	m_Recording = true;
 	m_Started = true;
 	ms_Time = time_get();
-	m_Vframe = 0;
 	return true;
 }
 
@@ -284,26 +283,26 @@ void CVideo::Stop()
 	for(size_t i = 0; i < m_VideoThreads; ++i)
 	{
 		{
-			std::unique_lock<std::mutex> Lock(m_vVideoThreads[i]->m_Mutex);
-			m_vVideoThreads[i]->m_Finished = true;
-			m_vVideoThreads[i]->m_Cond.notify_all();
+			std::unique_lock<std::mutex> Lock(m_vpVideoThreads[i]->m_Mutex);
+			m_vpVideoThreads[i]->m_Finished = true;
+			m_vpVideoThreads[i]->m_Cond.notify_all();
 		}
 
-		m_vVideoThreads[i]->m_Thread.join();
+		m_vpVideoThreads[i]->m_Thread.join();
 	}
-	m_vVideoThreads.clear();
+	m_vpVideoThreads.clear();
 
 	for(size_t i = 0; i < m_AudioThreads; ++i)
 	{
 		{
-			std::unique_lock<std::mutex> Lock(m_vAudioThreads[i]->m_Mutex);
-			m_vAudioThreads[i]->m_Finished = true;
-			m_vAudioThreads[i]->m_Cond.notify_all();
+			std::unique_lock<std::mutex> Lock(m_vpAudioThreads[i]->m_Mutex);
+			m_vpAudioThreads[i]->m_Finished = true;
+			m_vpAudioThreads[i]->m_Cond.notify_all();
 		}
 
-		m_vAudioThreads[i]->m_Thread.join();
+		m_vpAudioThreads[i]->m_Thread.join();
 	}
-	m_vAudioThreads.clear();
+	m_vpAudioThreads.clear();
 
 	while(m_ProcessingVideoFrame > 0 || m_ProcessingAudioFrame > 0)
 		std::this_thread::sleep_for(10us);
@@ -339,8 +338,8 @@ void CVideo::NextVideoFrameThread()
 {
 	if(m_Recording)
 	{
-		m_VSeq += 1;
-		if(m_VSeq >= 2)
+		m_VideoFrameIndex += 1;
+		if(m_VideoFrameIndex >= 2)
 		{
 			m_ProcessingVideoFrame.fetch_add(1);
 
@@ -350,7 +349,7 @@ void CVideo::NextVideoFrameThread()
 
 			// always wait for the next video thread too, to prevent a dead lock
 			{
-				auto *pVideoThread = m_vVideoThreads[NextVideoThreadIndex].get();
+				auto *pVideoThread = m_vpVideoThreads[NextVideoThreadIndex].get();
 				std::unique_lock<std::mutex> Lock(pVideoThread->m_Mutex);
 
 				if(pVideoThread->m_HasVideoFrame)
@@ -361,7 +360,7 @@ void CVideo::NextVideoFrameThread()
 
 			// after reading the graphic libraries' frame buffer, go threaded
 			{
-				auto *pVideoThread = m_vVideoThreads[m_CurVideoThreadIndex].get();
+				auto *pVideoThread = m_vpVideoThreads[m_CurVideoThreadIndex].get();
 				std::unique_lock<std::mutex> Lock(pVideoThread->m_Mutex);
 
 				if(pVideoThread->m_HasVideoFrame)
@@ -369,12 +368,12 @@ void CVideo::NextVideoFrameThread()
 					pVideoThread->m_Cond.wait(Lock, [&pVideoThread]() -> bool { return !pVideoThread->m_HasVideoFrame; });
 				}
 
-				ReadRGBFromGL(m_CurVideoThreadIndex);
+				UpdateVideoBufferFromGraphics(m_CurVideoThreadIndex);
 
 				pVideoThread->m_HasVideoFrame = true;
 				{
 					std::unique_lock<std::mutex> LockParent(pVideoThread->m_VideoFillMutex);
-					pVideoThread->m_VideoFrameToFill = m_VSeq;
+					pVideoThread->m_VideoFrameToFill = m_VideoFrameIndex;
 				}
 				pVideoThread->m_Cond.notify_all();
 			}
@@ -392,7 +391,6 @@ void CVideo::NextVideoFrame()
 	{
 		ms_Time += ms_TickTime;
 		ms_LocalTime = (ms_Time - ms_LocalStartTime) / (float)time_freq();
-		m_Vframe += 1;
 	}
 }
 
@@ -400,7 +398,7 @@ void CVideo::NextAudioFrameTimeline(ISoundMixFunc Mix)
 {
 	if(m_Recording && m_HasAudio)
 	{
-		double SamplesPerFrame = (double)m_AudioStream.pEnc->sample_rate / m_FPS;
+		double SamplesPerFrame = (double)m_AudioStream.m_pCodecContext->sample_rate / m_FPS;
 		while(m_AudioStream.m_SamplesFrameCount >= m_AudioStream.m_SamplesCount)
 		{
 			NextAudioFrame(Mix);
@@ -413,7 +411,7 @@ void CVideo::NextAudioFrame(ISoundMixFunc Mix)
 {
 	if(m_Recording && m_HasAudio)
 	{
-		m_ASeq += 1;
+		m_AudioFrameIndex += 1;
 
 		m_ProcessingAudioFrame.fetch_add(1);
 
@@ -424,7 +422,7 @@ void CVideo::NextAudioFrame(ISoundMixFunc Mix)
 		// always wait for the next Audio thread too, to prevent a dead lock
 
 		{
-			auto *pAudioThread = m_vAudioThreads[NextAudioThreadIndex].get();
+			auto *pAudioThread = m_vpAudioThreads[NextAudioThreadIndex].get();
 			std::unique_lock<std::mutex> Lock(pAudioThread->m_Mutex);
 
 			if(pAudioThread->m_HasAudioFrame)
@@ -435,7 +433,7 @@ void CVideo::NextAudioFrame(ISoundMixFunc Mix)
 
 		// after reading the graphic libraries' frame buffer, go threaded
 		{
-			auto *pAudioThread = m_vAudioThreads[m_CurAudioThreadIndex].get();
+			auto *pAudioThread = m_vpAudioThreads[m_CurAudioThreadIndex].get();
 
 			std::unique_lock<std::mutex> Lock(pAudioThread->m_Mutex);
 
@@ -444,13 +442,13 @@ void CVideo::NextAudioFrame(ISoundMixFunc Mix)
 				pAudioThread->m_Cond.wait(Lock, [&pAudioThread]() -> bool { return !pAudioThread->m_HasAudioFrame; });
 			}
 
-			Mix(m_vBuffer[m_CurAudioThreadIndex].m_aBuffer, ALEN / 2); // two channels
+			Mix(m_vAudioBuffers[m_CurAudioThreadIndex].m_aBuffer, std::size(m_vAudioBuffers[m_CurAudioThreadIndex].m_aBuffer) / 2 / 2); // two channels
 
 			int64_t DstNbSamples = av_rescale_rnd(
-				swr_get_delay(m_AudioStream.m_vpSwrCtxs[m_CurAudioThreadIndex], m_AudioStream.pEnc->sample_rate) +
+				swr_get_delay(m_AudioStream.m_vpSwrContexts[m_CurAudioThreadIndex], m_AudioStream.m_pCodecContext->sample_rate) +
 					m_AudioStream.m_vpFrames[m_CurAudioThreadIndex]->nb_samples,
-				m_AudioStream.pEnc->sample_rate,
-				m_AudioStream.pEnc->sample_rate, AV_ROUND_UP);
+				m_AudioStream.m_pCodecContext->sample_rate,
+				m_AudioStream.m_pCodecContext->sample_rate, AV_ROUND_UP);
 
 			pAudioThread->m_SampleCountStart = m_AudioStream.m_SamplesCount;
 			m_AudioStream.m_SamplesCount += DstNbSamples;
@@ -458,7 +456,7 @@ void CVideo::NextAudioFrame(ISoundMixFunc Mix)
 			pAudioThread->m_HasAudioFrame = true;
 			{
 				std::unique_lock<std::mutex> LockParent(pAudioThread->m_AudioFillMutex);
-				pAudioThread->m_AudioFrameToFill = m_ASeq;
+				pAudioThread->m_AudioFrameToFill = m_AudioFrameIndex;
 			}
 			pAudioThread->m_Cond.notify_all();
 		}
@@ -471,8 +469,8 @@ void CVideo::NextAudioFrame(ISoundMixFunc Mix)
 
 void CVideo::RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex)
 {
-	auto *pThreadData = m_vAudioThreads[ThreadIndex].get();
-	auto *pParentThreadData = m_vAudioThreads[ParentThreadIndex].get();
+	auto *pThreadData = m_vpAudioThreads[ThreadIndex].get();
+	auto *pParentThreadData = m_vpAudioThreads[ParentThreadIndex].get();
 	std::unique_lock<std::mutex> Lock(pThreadData->m_Mutex);
 	pThreadData->m_Started = true;
 	pThreadData->m_Cond.notify_all();
@@ -499,7 +497,7 @@ void CVideo::RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex)
 
 				{
 					CLockScope ls(g_WriteLock);
-					m_AudioStream.m_vpFrames[ThreadIndex]->pts = av_rescale_q(pThreadData->m_SampleCountStart, AVRational{1, m_AudioStream.pEnc->sample_rate}, m_AudioStream.pEnc->time_base);
+					m_AudioStream.m_vpFrames[ThreadIndex]->pts = av_rescale_q(pThreadData->m_SampleCountStart, AVRational{1, m_AudioStream.m_pCodecContext->sample_rate}, m_AudioStream.m_pCodecContext->time_base);
 					WriteFrame(&m_AudioStream, ThreadIndex);
 				}
 
@@ -519,7 +517,7 @@ void CVideo::FillAudioFrame(size_t ThreadIndex)
 	const int FillArrayResult = av_samples_fill_arrays(
 		(uint8_t **)m_AudioStream.m_vpTmpFrames[ThreadIndex]->data,
 		nullptr, // pointer to linesize (int*)
-		(const uint8_t *)m_vBuffer[ThreadIndex].m_aBuffer,
+		(const uint8_t *)m_vAudioBuffers[ThreadIndex].m_aBuffer,
 		2, // channels
 		m_AudioStream.m_vpTmpFrames[ThreadIndex]->nb_samples,
 		AV_SAMPLE_FMT_S16,
@@ -544,7 +542,7 @@ void CVideo::FillAudioFrame(size_t ThreadIndex)
 
 	/* convert to destination format */
 	const int ConvertResult = swr_convert(
-		m_AudioStream.m_vpSwrCtxs[ThreadIndex],
+		m_AudioStream.m_vpSwrContexts[ThreadIndex],
 		m_AudioStream.m_vpFrames[ThreadIndex]->data,
 		m_AudioStream.m_vpFrames[ThreadIndex]->nb_samples,
 		(const uint8_t **)m_AudioStream.m_vpTmpFrames[ThreadIndex]->data,
@@ -560,8 +558,8 @@ void CVideo::FillAudioFrame(size_t ThreadIndex)
 
 void CVideo::RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex)
 {
-	auto *pThreadData = m_vVideoThreads[ThreadIndex].get();
-	auto *pParentThreadData = m_vVideoThreads[ParentThreadIndex].get();
+	auto *pThreadData = m_vpVideoThreads[ThreadIndex].get();
+	auto *pParentThreadData = m_vpVideoThreads[ParentThreadIndex].get();
 	std::unique_lock<std::mutex> Lock(pThreadData->m_Mutex);
 	pThreadData->m_Started = true;
 	pThreadData->m_Cond.notify_all();
@@ -587,7 +585,7 @@ void CVideo::RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex)
 				std::unique_lock<std::mutex> LockVideo(pThreadData->m_VideoFillMutex);
 				{
 					CLockScope ls(g_WriteLock);
-					m_VideoStream.m_vpFrames[ThreadIndex]->pts = (int64_t)m_VideoStream.pEnc->FRAME_NUM;
+					m_VideoStream.m_vpFrames[ThreadIndex]->pts = (int64_t)m_VideoStream.m_pCodecContext->FRAME_NUM;
 					WriteFrame(&m_VideoStream, ThreadIndex);
 				}
 
@@ -604,18 +602,18 @@ void CVideo::RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex)
 
 void CVideo::FillVideoFrame(size_t ThreadIndex)
 {
-	const int InLineSize = 4 * m_VideoStream.pEnc->width;
-	auto *pRGBAData = m_vPixelHelper[ThreadIndex].data();
-	sws_scale(m_VideoStream.m_vpSwsCtxs[ThreadIndex], (const uint8_t *const *)&pRGBAData, &InLineSize, 0,
-		m_VideoStream.pEnc->height, m_VideoStream.m_vpFrames[ThreadIndex]->data, m_VideoStream.m_vpFrames[ThreadIndex]->linesize);
+	const int InLineSize = 4 * m_VideoStream.m_pCodecContext->width;
+	auto *pRGBAData = m_vVideoBuffers[ThreadIndex].m_vBuffer.data();
+	sws_scale(m_VideoStream.m_vpSwsContexts[ThreadIndex], (const uint8_t *const *)&pRGBAData, &InLineSize, 0,
+		m_VideoStream.m_pCodecContext->height, m_VideoStream.m_vpFrames[ThreadIndex]->data, m_VideoStream.m_vpFrames[ThreadIndex]->linesize);
 }
 
-void CVideo::ReadRGBFromGL(size_t ThreadIndex)
+void CVideo::UpdateVideoBufferFromGraphics(size_t ThreadIndex)
 {
 	uint32_t Width;
 	uint32_t Height;
 	CImageInfo::EImageFormat Format;
-	m_pGraphics->GetReadPresentedImageDataFuncUnsafe()(Width, Height, Format, m_vPixelHelper[ThreadIndex]);
+	m_pGraphics->GetReadPresentedImageDataFuncUnsafe()(Width, Height, Format, m_vVideoBuffers[ThreadIndex].m_vBuffer);
 }
 
 AVFrame *CVideo::AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height)
@@ -679,7 +677,7 @@ AVFrame *CVideo::AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t Channel
 
 bool CVideo::OpenVideo()
 {
-	AVCodecContext *pContext = m_VideoStream.pEnc;
+	AVCodecContext *pContext = m_VideoStream.m_pCodecContext;
 	AVDictionary *pOptions = nullptr;
 	av_dict_copy(&pOptions, m_pOptDict, 0);
 
@@ -729,7 +727,7 @@ bool CVideo::OpenVideo()
 	}
 
 	/* copy the stream parameters to the muxer */
-	const int AudioStreamCopyResult = avcodec_parameters_from_context(m_VideoStream.pSt->codecpar, pContext);
+	const int AudioStreamCopyResult = avcodec_parameters_from_context(m_VideoStream.m_pStream->codecpar, pContext);
 	if(AudioStreamCopyResult < 0)
 	{
 		char aError[AV_ERROR_MAX_STRING_SIZE];
@@ -737,13 +735,13 @@ bool CVideo::OpenVideo()
 		log_error("videorecorder", "Could not copy video stream parameters: %s", aError);
 		return false;
 	}
-	m_VSeq = 0;
+	m_VideoFrameIndex = 0;
 	return true;
 }
 
 bool CVideo::OpenAudio()
 {
-	AVCodecContext *pContext = m_AudioStream.pEnc;
+	AVCodecContext *pContext = m_AudioStream.m_pCodecContext;
 	AVDictionary *pOptions = nullptr;
 	av_dict_copy(&pOptions, m_pOptDict, 0);
 
@@ -793,7 +791,7 @@ bool CVideo::OpenAudio()
 	}
 
 	/* copy the stream parameters to the muxer */
-	const int AudioStreamCopyResult = avcodec_parameters_from_context(m_AudioStream.pSt->codecpar, pContext);
+	const int AudioStreamCopyResult = avcodec_parameters_from_context(m_AudioStream.m_pStream->codecpar, pContext);
 	if(AudioStreamCopyResult < 0)
 	{
 		char aError[AV_ERROR_MAX_STRING_SIZE];
@@ -803,35 +801,35 @@ bool CVideo::OpenAudio()
 	}
 
 	/* create resampling context */
-	m_AudioStream.m_vpSwrCtxs.clear();
-	m_AudioStream.m_vpSwrCtxs.resize(m_AudioThreads);
+	m_AudioStream.m_vpSwrContexts.clear();
+	m_AudioStream.m_vpSwrContexts.resize(m_AudioThreads);
 	for(size_t i = 0; i < m_AudioThreads; ++i)
 	{
-		m_AudioStream.m_vpSwrCtxs[i] = swr_alloc();
-		if(!m_AudioStream.m_vpSwrCtxs[i])
+		m_AudioStream.m_vpSwrContexts[i] = swr_alloc();
+		if(!m_AudioStream.m_vpSwrContexts[i])
 		{
 			log_error("videorecorder", "Could not allocate resampling context");
 			return false;
 		}
 
 		/* set options */
-		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_channel_count", 2, 0) == 0, "invalid option");
-		if(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_sample_rate", m_pSound->MixingRate(), 0) != 0)
+		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrContexts[i], "in_channel_count", 2, 0) == 0, "invalid option");
+		if(av_opt_set_int(m_AudioStream.m_vpSwrContexts[i], "in_sample_rate", m_pSound->MixingRate(), 0) != 0)
 		{
 			log_error("videorecorder", "Could not set audio sample rate to %d", m_pSound->MixingRate());
 			return false;
 		}
-		dbg_assert(av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "in_sample_fmt", AV_SAMPLE_FMT_S16, 0) == 0, "invalid option");
+		dbg_assert(av_opt_set_sample_fmt(m_AudioStream.m_vpSwrContexts[i], "in_sample_fmt", AV_SAMPLE_FMT_S16, 0) == 0, "invalid option");
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100)
-		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_channel_count", pContext->ch_layout.nb_channels, 0) == 0, "invalid option");
+		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrContexts[i], "out_channel_count", pContext->ch_layout.nb_channels, 0) == 0, "invalid option");
 #else
-		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_channel_count", pContext->channels, 0) == 0, "invalid option");
+		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrContexts[i], "out_channel_count", pContext->channels, 0) == 0, "invalid option");
 #endif
-		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "out_sample_rate", pContext->sample_rate, 0) == 0, "invalid option");
-		dbg_assert(av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "out_sample_fmt", pContext->sample_fmt, 0) == 0, "invalid option");
+		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrContexts[i], "out_sample_rate", pContext->sample_rate, 0) == 0, "invalid option");
+		dbg_assert(av_opt_set_sample_fmt(m_AudioStream.m_vpSwrContexts[i], "out_sample_fmt", pContext->sample_fmt, 0) == 0, "invalid option");
 
 		/* initialize the resampling context */
-		const int ResamplingContextInitResult = swr_init(m_AudioStream.m_vpSwrCtxs[i]);
+		const int ResamplingContextInitResult = swr_init(m_AudioStream.m_vpSwrContexts[i]);
 		if(ResamplingContextInitResult < 0)
 		{
 			char aError[AV_ERROR_MAX_STRING_SIZE];
@@ -841,12 +839,12 @@ bool CVideo::OpenAudio()
 		}
 	}
 
-	m_ASeq = 0;
+	m_AudioFrameIndex = 0;
 	return true;
 }
 
 /* Add an output stream. */
-bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId) const
+bool CVideo::AddStream(COutputStream *pStream, AVFormatContext *pFormatContext, const AVCodec **ppCodec, enum AVCodecID CodecId) const
 {
 	/* find the encoder */
 	*ppCodec = avcodec_find_encoder(CodecId);
@@ -856,20 +854,20 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 		return false;
 	}
 
-	pStream->pSt = avformat_new_stream(pOC, nullptr);
-	if(!pStream->pSt)
+	pStream->m_pStream = avformat_new_stream(pFormatContext, nullptr);
+	if(!pStream->m_pStream)
 	{
 		log_error("videorecorder", "Could not allocate stream");
 		return false;
 	}
-	pStream->pSt->id = pOC->nb_streams - 1;
+	pStream->m_pStream->id = pFormatContext->nb_streams - 1;
 	AVCodecContext *pContext = avcodec_alloc_context3(*ppCodec);
 	if(!pContext)
 	{
 		log_error("videorecorder", "Could not allocate encoding context");
 		return false;
 	}
-	pStream->pEnc = pContext;
+	pStream->m_pCodecContext = pContext;
 
 #if defined(CONF_ARCH_IA32) || defined(CONF_ARCH_ARM)
 	// use only 1 ffmpeg thread on 32-bit to save memory
@@ -904,8 +902,8 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 		pContext->channel_layout = AV_CH_LAYOUT_STEREO;
 #endif
 
-		pStream->pSt->time_base.num = 1;
-		pStream->pSt->time_base.den = pContext->sample_rate;
+		pStream->m_pStream->time_base.num = 1;
+		pStream->m_pStream->time_base.den = pContext->sample_rate;
 		break;
 
 	case AVMEDIA_TYPE_VIDEO:
@@ -919,9 +917,9 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 		 * of which frame timestamps are represented. For fixed-fps content,
 		 * timebase should be 1/framerate and timestamp increments should be
 		 * identical to 1. */
-		pStream->pSt->time_base.num = 1;
-		pStream->pSt->time_base.den = m_FPS;
-		pContext->time_base = pStream->pSt->time_base;
+		pStream->m_pStream->time_base.num = 1;
+		pStream->m_pStream->time_base.den = m_FPS;
+		pContext->time_base = pStream->m_pStream->time_base;
 
 		pContext->gop_size = 12; /* emit one intra frame every twelve frames at most */
 		pContext->pix_fmt = STREAM_PIX_FMT;
@@ -951,13 +949,13 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 	}
 
 	/* Some formats want stream headers to be separate. */
-	if(pOC->oformat->flags & AVFMT_GLOBALHEADER)
+	if(pFormatContext->oformat->flags & AVFMT_GLOBALHEADER)
 		pContext->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
 	return true;
 }
 
-void CVideo::WriteFrame(OutputStream *pStream, size_t ThreadIndex)
+void CVideo::WriteFrame(COutputStream *pStream, size_t ThreadIndex)
 {
 	AVPacket *pPacket = av_packet_alloc();
 	if(pPacket == nullptr)
@@ -969,16 +967,16 @@ void CVideo::WriteFrame(OutputStream *pStream, size_t ThreadIndex)
 	pPacket->data = 0;
 	pPacket->size = 0;
 
-	avcodec_send_frame(pStream->pEnc, pStream->m_vpFrames[ThreadIndex]);
+	avcodec_send_frame(pStream->m_pCodecContext, pStream->m_vpFrames[ThreadIndex]);
 	int RecvResult = 0;
 	do
 	{
-		RecvResult = avcodec_receive_packet(pStream->pEnc, pPacket);
+		RecvResult = avcodec_receive_packet(pStream->m_pCodecContext, pPacket);
 		if(!RecvResult)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
-			av_packet_rescale_ts(pPacket, pStream->pEnc->time_base, pStream->pSt->time_base);
-			pPacket->stream_index = pStream->pSt->index;
+			av_packet_rescale_ts(pPacket, pStream->m_pCodecContext->time_base, pStream->m_pStream->time_base);
+			pPacket->stream_index = pStream->m_pStream->index;
 
 			const int WriteFrameResult = av_interleaved_write_frame(m_pFormatContext, pPacket);
 			if(WriteFrameResult < 0)
@@ -1002,7 +1000,7 @@ void CVideo::WriteFrame(OutputStream *pStream, size_t ThreadIndex)
 	av_packet_free(&pPacket);
 }
 
-void CVideo::FinishFrames(OutputStream *pStream)
+void CVideo::FinishFrames(COutputStream *pStream)
 {
 	AVPacket *pPacket = av_packet_alloc();
 	if(pPacket == nullptr)
@@ -1014,16 +1012,16 @@ void CVideo::FinishFrames(OutputStream *pStream)
 	pPacket->data = 0;
 	pPacket->size = 0;
 
-	avcodec_send_frame(pStream->pEnc, 0);
+	avcodec_send_frame(pStream->m_pCodecContext, 0);
 	int RecvResult = 0;
 	do
 	{
-		RecvResult = avcodec_receive_packet(pStream->pEnc, pPacket);
+		RecvResult = avcodec_receive_packet(pStream->m_pCodecContext, pPacket);
 		if(!RecvResult)
 		{
 			/* rescale output packet timestamp values from codec to stream timebase */
-			av_packet_rescale_ts(pPacket, pStream->pEnc->time_base, pStream->pSt->time_base);
-			pPacket->stream_index = pStream->pSt->index;
+			av_packet_rescale_ts(pPacket, pStream->m_pCodecContext->time_base, pStream->m_pStream->time_base);
+			pPacket->stream_index = pStream->m_pStream->index;
 
 			const int WriteFrameResult = av_interleaved_write_frame(m_pFormatContext, pPacket);
 			if(WriteFrameResult < 0)
@@ -1047,9 +1045,9 @@ void CVideo::FinishFrames(OutputStream *pStream)
 	av_packet_free(&pPacket);
 }
 
-void CVideo::CloseStream(OutputStream *pStream)
+void CVideo::CloseStream(COutputStream *pStream)
 {
-	avcodec_free_context(&pStream->pEnc);
+	avcodec_free_context(&pStream->m_pCodecContext);
 	for(auto *pFrame : pStream->m_vpFrames)
 		av_frame_free(&pFrame);
 	pStream->m_vpFrames.clear();
@@ -1058,13 +1056,13 @@ void CVideo::CloseStream(OutputStream *pStream)
 		av_frame_free(&pFrame);
 	pStream->m_vpTmpFrames.clear();
 
-	for(auto *pSwsContext : pStream->m_vpSwsCtxs)
+	for(auto *pSwsContext : pStream->m_vpSwsContexts)
 		sws_freeContext(pSwsContext);
-	pStream->m_vpSwsCtxs.clear();
+	pStream->m_vpSwsContexts.clear();
 
-	for(auto *pSwrContext : pStream->m_vpSwrCtxs)
+	for(auto *pSwrContext : pStream->m_vpSwrContexts)
 		swr_free(&pSwrContext);
-	pStream->m_vpSwrCtxs.clear();
+	pStream->m_vpSwrContexts.clear();
 }
 
 #endif
