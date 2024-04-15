@@ -316,8 +316,6 @@ class ITextRender : public IInterface
 	MACRO_INTERFACE("textrender")
 public:
 	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) const = 0;
-	virtual void MoveCursor(CTextCursor *pCursor, float x, float y) const = 0;
-	virtual void SetCursorPosition(CTextCursor *pCursor, float x, float y) const = 0;
 
 	virtual bool LoadFonts() = 0;
 	virtual void SetFontPreset(EFontPreset FontPreset) = 0;

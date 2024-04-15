@@ -1365,18 +1365,6 @@ public:
 		pCursor->m_vColorSplits = {};
 	}
 
-	void MoveCursor(CTextCursor *pCursor, float x, float y) const override
-	{
-		pCursor->m_X += x;
-		pCursor->m_Y += y;
-	}
-
-	void SetCursorPosition(CTextCursor *pCursor, float x, float y) const override
-	{
-		pCursor->m_X = x;
-		pCursor->m_Y = y;
-	}
-
 	void Text(float x, float y, float Size, const char *pText, float LineWidth = -1.0f) override
 	{
 		CTextCursor Cursor;
