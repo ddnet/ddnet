@@ -1700,6 +1700,7 @@ void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)
 
 	// Teleport tee
 	pSelf->Teleport(pCallingCharacter, Pos);
+	pCallingCharacter->ResetJumps();
 	pCallingCharacter->UnFreeze();
 	pCallingCharacter->ResetVelocity();
 	pCallingPlayer->m_LastTeleTee.Save(pCallingCharacter);
@@ -1777,6 +1778,7 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 
 	// Teleport tee
 	pSelf->Teleport(pCallingCharacter, Pos);
+	pCallingCharacter->ResetJumps();
 	pCallingCharacter->UnFreeze();
 	pCallingCharacter->ResetVelocity();
 	pCallingPlayer->m_LastTeleTee.Save(pCallingCharacter);
@@ -1829,6 +1831,7 @@ void CGameContext::ConTeleCursor(IConsole::IResult *pResult, void *pUserData)
 		Pos = pChrTo->m_Pos;
 	}
 	pSelf->Teleport(pChr, Pos);
+	pChr->ResetJumps();
 	pChr->UnFreeze();
 	pChr->ResetVelocity();
 	pPlayer->m_LastTeleTee.Save(pChr);
