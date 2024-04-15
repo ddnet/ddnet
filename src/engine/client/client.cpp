@@ -658,9 +658,6 @@ int CClient::GetCurrentRaceTime()
 void CClient::GetServerInfo(CServerInfo *pServerInfo) const
 {
 	mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
-
-	if(m_DemoPlayer.IsPlaying() && g_Config.m_ClDemoAssumeRace)
-		str_copy(pServerInfo->m_aGameType, "DDraceNetwork");
 }
 
 void CClient::ServerInfoRequest()
@@ -3564,10 +3561,15 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		}
 	}
 
-	// setup current info
+	// setup current server info
+	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
 	str_copy(m_CurrentServerInfo.m_aMap, pMapInfo->m_aName);
 	m_CurrentServerInfo.m_MapCrc = pMapInfo->m_Crc;
 	m_CurrentServerInfo.m_MapSize = pMapInfo->m_Size;
+	if(g_Config.m_ClDemoAssumeRace)
+	{
+		str_copy(m_CurrentServerInfo.m_aGameType, "DDraceNetwork");
+	}
 
 	GameClient()->OnConnected();
 
