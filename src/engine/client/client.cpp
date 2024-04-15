@@ -3261,57 +3261,68 @@ void CClient::Con_Screenshot(IConsole::IResult *pResult, void *pUserData)
 
 void CClient::Con_StartVideo(IConsole::IResult *pResult, void *pUserData)
 {
-	CClient *pSelf = (CClient *)pUserData;
+	CClient *pSelf = static_cast<CClient *>(pUserData);
 
-	if(pSelf->State() != IClient::STATE_DEMOPLAYBACK)
+	if(pResult->NumArguments())
 	{
-		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Can not start videorecorder outside of demoplayer.");
+		pSelf->StartVideo(pResult->GetString(0), false);
+	}
+	else
+	{
+		pSelf->StartVideo("video", true);
+	}
+}
+
+void CClient::StartVideo(const char *pFilename, bool WithTimestamp)
+{
+	if(State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		log_error("videorecorder", "Video can only be recorded in demo player.");
 		return;
 	}
 
-	if(!IVideo::Current())
+	if(IVideo::Current())
 	{
-		// wait for idle, so there is no data race
-		pSelf->Graphics()->WaitForIdle();
-		// pause the sound device while creating the video instance
-		pSelf->Sound()->PauseAudioDevice();
-		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Sound(), pSelf->Storage(), pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), "");
-		pSelf->Sound()->UnpauseAudioDevice();
-		IVideo::Current()->Start();
-		bool paused = pSelf->m_DemoPlayer.Info()->m_Info.m_Paused;
-		if(paused)
-			IVideo::Current()->Pause(true);
+		log_error("videorecorder", "Already recording.");
+		return;
+	}
+
+	char aFilename[IO_MAX_PATH_LENGTH];
+	if(WithTimestamp)
+	{
+		char aTimestamp[20];
+		str_timestamp(aTimestamp, sizeof(aTimestamp));
+		str_format(aFilename, sizeof(aFilename), "videos/%s_%s.mp4", pFilename, aTimestamp);
 	}
 	else
-		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Videorecorder already running.");
-}
-
-void CClient::StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideoName)
-{
-	CClient *pSelf = (CClient *)pUserData;
-
-	if(pSelf->State() != IClient::STATE_DEMOPLAYBACK)
-		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Can not start videorecorder outside of demoplayer.");
-
-	pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_render", pVideoName);
-	if(!IVideo::Current())
 	{
-		// wait for idle, so there is no data race
-		pSelf->Graphics()->WaitForIdle();
-		// pause the sound device while creating the video instance
-		pSelf->Sound()->PauseAudioDevice();
-		new CVideo((CGraphics_Threaded *)pSelf->m_pGraphics, pSelf->Sound(), pSelf->Storage(), pSelf->Graphics()->ScreenWidth(), pSelf->Graphics()->ScreenHeight(), pVideoName);
-		pSelf->Sound()->UnpauseAudioDevice();
-		IVideo::Current()->Start();
+		str_format(aFilename, sizeof(aFilename), "videos/%s.mp4", pFilename);
 	}
-	else
-		pSelf->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "videorecorder", "Videorecorder already running.");
+
+	// wait for idle, so there is no data race
+	Graphics()->WaitForIdle();
+	// pause the sound device while creating the video instance
+	Sound()->PauseAudioDevice();
+	new CVideo((CGraphics_Threaded *)m_pGraphics, Sound(), Storage(), Graphics()->ScreenWidth(), Graphics()->ScreenHeight(), aFilename);
+	Sound()->UnpauseAudioDevice();
+	IVideo::Current()->Start();
+	if(m_DemoPlayer.Info()->m_Info.m_Paused)
+	{
+		IVideo::Current()->Pause(true);
+	}
+	log_info("videorecorder", "Recording to '%s'", aFilename);
 }
 
 void CClient::Con_StopVideo(IConsole::IResult *pResult, void *pUserData)
 {
-	if(IVideo::Current())
-		IVideo::Current()->Stop();
+	if(!IVideo::Current())
+	{
+		log_error("videorecorder", "Not recording.");
+		return;
+	}
+
+	IVideo::Current()->Stop();
+	log_info("videorecorder", "Stopped recording.");
 }
 
 #endif
@@ -3610,8 +3621,7 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 	if(pError)
 		return pError;
 
-	this->CClient::StartVideo(NULL, this, pVideoName);
-	m_DemoPlayer.Play();
+	StartVideo(pVideoName, false);
 	m_DemoPlayer.SetSpeedIndex(SpeedIndex);
 	if(StartPaused)
 	{
@@ -4085,7 +4095,7 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("screenshot", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Screenshot, this, "Take a screenshot");
 
 #if defined(CONF_VIDEORECORDER)
-	m_pConsole->Register("start_video", "", CFGFLAG_CLIENT, Con_StartVideo, this, "Start recording a video");
+	m_pConsole->Register("start_video", "?r[file]", CFGFLAG_CLIENT, Con_StartVideo, this, "Start recording a video");
 	m_pConsole->Register("stop_video", "", CFGFLAG_CLIENT, Con_StopVideo, this, "Stop recording a video");
 #endif
 

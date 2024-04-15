@@ -78,16 +78,8 @@ void CVideo::Start()
 	m_AudioStream = {};
 	m_VideoStream = {};
 
-	char aDate[20];
-	str_timestamp(aDate, sizeof(aDate));
-	char aBuf[256];
-	if(str_length(m_aName) != 0)
-		str_format(aBuf, sizeof(aBuf), "videos/%s", m_aName);
-	else
-		str_format(aBuf, sizeof(aBuf), "videos/%s.mp4", aDate);
-
 	char aWholePath[1024];
-	IOHANDLE File = m_pStorage->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
+	IOHANDLE File = m_pStorage->OpenFile(m_aName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
 
 	if(File)
 	{
