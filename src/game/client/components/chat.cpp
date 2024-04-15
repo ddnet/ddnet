@@ -932,7 +932,6 @@ void CChat::OnPrepareLines(float y)
 	float HeightLimit = IsScoreBoardOpen ? 180.0f : (m_PrevShowChat ? 50.0f : 200.0f);
 	float Begin = x;
 	float TextBegin = Begin + RealMsgPaddingX / 2.0f;
-	CTextCursor Cursor;
 	int OffsetType = IsScoreBoardOpen ? 1 : 0;
 
 	for(int i = 0; i < MAX_LINES; i++)
@@ -980,35 +979,38 @@ void CChat::OnPrepareLines(float y)
 		// get the y offset (calculate it if we haven't done that yet)
 		if(Line.m_aYOffset[OffsetType] < 0.0f)
 		{
-			TextRender()->SetCursor(&Cursor, TextBegin, 0.0f, FontSize, 0);
-			Cursor.m_LineWidth = LineWidth;
+			CTextCursor MeasureCursor;
+			MeasureCursor.SetPosition(vec2(TextBegin, 0.0f));
+			MeasureCursor.m_FontSize = FontSize;
+			MeasureCursor.m_Flags = 0;
+			MeasureCursor.m_LineWidth = LineWidth;
 
 			if(Line.m_ClientId >= 0 && Line.m_aName[0] != '\0')
 			{
-				Cursor.m_X += RealMsgPaddingTee;
+				MeasureCursor.m_X += RealMsgPaddingTee;
 
 				if(Line.m_Friend && g_Config.m_ClMessageFriend)
 				{
-					TextRender()->TextEx(&Cursor, "♥ ");
+					TextRender()->TextEx(&MeasureCursor, "♥ ");
 				}
 			}
 
-			TextRender()->TextEx(&Cursor, aClientId);
-			TextRender()->TextEx(&Cursor, Line.m_aName);
+			TextRender()->TextEx(&MeasureCursor, aClientId);
+			TextRender()->TextEx(&MeasureCursor, Line.m_aName);
 			if(Line.m_TimesRepeated > 0)
-				TextRender()->TextEx(&Cursor, aCount);
+				TextRender()->TextEx(&MeasureCursor, aCount);
 
 			if(Line.m_ClientId >= 0 && Line.m_aName[0] != '\0')
 			{
-				TextRender()->TextEx(&Cursor, ": ");
+				TextRender()->TextEx(&MeasureCursor, ": ");
 			}
 
-			CTextCursor AppendCursor = Cursor;
+			CTextCursor AppendCursor = MeasureCursor;
 			AppendCursor.m_LongestLineWidth = 0.0f;
 			if(!IsScoreBoardOpen && !g_Config.m_ClChatOld)
 			{
-				AppendCursor.m_StartX = Cursor.m_X;
-				AppendCursor.m_LineWidth -= Cursor.m_LongestLineWidth;
+				AppendCursor.m_StartX = MeasureCursor.m_X;
+				AppendCursor.m_LineWidth -= MeasureCursor.m_LongestLineWidth;
 			}
 
 			TextRender()->TextEx(&AppendCursor, pText);
@@ -1029,18 +1031,20 @@ void CChat::OnPrepareLines(float y)
 		TextRender()->SetRenderFlags(CurRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD);
 
 		// reset the cursor
-		TextRender()->SetCursor(&Cursor, TextBegin, Line.m_TextYOffset, FontSize, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = LineWidth;
+		CTextCursor LineCursor;
+		LineCursor.SetPosition(vec2(TextBegin, Line.m_TextYOffset));
+		LineCursor.m_FontSize = FontSize;
+		LineCursor.m_LineWidth = LineWidth;
 
 		// Message is from valid player
 		if(Line.m_ClientId >= 0 && Line.m_aName[0] != '\0')
 		{
-			Cursor.m_X += RealMsgPaddingTee;
+			LineCursor.m_X += RealMsgPaddingTee;
 
 			if(Line.m_Friend && g_Config.m_ClMessageFriend)
 			{
 				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor)).WithAlpha(1.0f));
-				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, "♥ ");
+				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &LineCursor, "♥ ");
 			}
 		}
 
@@ -1066,19 +1070,19 @@ void CChat::OnPrepareLines(float y)
 			NameColor = ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
 
 		TextRender()->TextColor(NameColor);
-		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, aClientId);
-		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, Line.m_aName);
+		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &LineCursor, aClientId);
+		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &LineCursor, Line.m_aName);
 
 		if(Line.m_TimesRepeated > 0)
 		{
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
-			TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, aCount);
+			TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &LineCursor, aCount);
 		}
 
 		if(Line.m_ClientId >= 0 && Line.m_aName[0] != '\0')
 		{
 			TextRender()->TextColor(NameColor);
-			TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, ": ");
+			TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &LineCursor, ": ");
 		}
 
 		ColorRGBA Color;
@@ -1096,12 +1100,12 @@ void CChat::OnPrepareLines(float y)
 			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
 		TextRender()->TextColor(Color);
 
-		CTextCursor AppendCursor = Cursor;
+		CTextCursor AppendCursor = LineCursor;
 		AppendCursor.m_LongestLineWidth = 0.0f;
 		if(!IsScoreBoardOpen && !g_Config.m_ClChatOld)
 		{
-			AppendCursor.m_StartX = Cursor.m_X;
-			AppendCursor.m_LineWidth -= Cursor.m_LongestLineWidth;
+			AppendCursor.m_StartX = LineCursor.m_X;
+			AppendCursor.m_LineWidth -= LineCursor.m_LongestLineWidth;
 		}
 
 		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &AppendCursor, pText);
@@ -1111,11 +1115,11 @@ void CChat::OnPrepareLines(float y)
 			float FullWidth = RealMsgPaddingX * 1.5f;
 			if(!IsScoreBoardOpen && !g_Config.m_ClChatOld)
 			{
-				FullWidth += Cursor.m_LongestLineWidth + AppendCursor.m_LongestLineWidth;
+				FullWidth += LineCursor.m_LongestLineWidth + AppendCursor.m_LongestLineWidth;
 			}
 			else
 			{
-				FullWidth += maximum(Cursor.m_LongestLineWidth, AppendCursor.m_LongestLineWidth);
+				FullWidth += maximum(LineCursor.m_LongestLineWidth, AppendCursor.m_LongestLineWidth);
 			}
 			Graphics()->SetColor(1, 1, 1, 1);
 			Line.m_QuadContainerIndex = Graphics()->CreateRectQuadContainer(Begin, y, FullWidth, Line.m_aYOffset[OffsetType], MessageRounding(), IGraphics::CORNER_ALL);
@@ -1159,21 +1163,22 @@ void CChat::OnRender()
 	if(m_Mode != MODE_NONE)
 	{
 		// render chat input
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x, y, ScaledFontSize, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = Width - 190.0f;
+		CTextCursor InputCursor;
+		InputCursor.SetPosition(vec2(x, y));
+		InputCursor.m_FontSize = ScaledFontSize;
+		InputCursor.m_LineWidth = Width - 190.0f;
 
 		if(m_Mode == MODE_ALL)
-			TextRender()->TextEx(&Cursor, Localize("All"));
+			TextRender()->TextEx(&InputCursor, Localize("All"));
 		else if(m_Mode == MODE_TEAM)
-			TextRender()->TextEx(&Cursor, Localize("Team"));
+			TextRender()->TextEx(&InputCursor, Localize("Team"));
 		else
-			TextRender()->TextEx(&Cursor, Localize("Chat"));
+			TextRender()->TextEx(&InputCursor, Localize("Chat"));
 
-		TextRender()->TextEx(&Cursor, ": ");
+		TextRender()->TextEx(&InputCursor, ": ");
 
-		const float MessageMaxWidth = Cursor.m_LineWidth - (Cursor.m_X - Cursor.m_StartX);
-		const CUIRect ClippingRect = {Cursor.m_X, Cursor.m_Y, MessageMaxWidth, 2.25f * Cursor.m_FontSize};
+		const float MessageMaxWidth = InputCursor.m_LineWidth - (InputCursor.m_X - InputCursor.m_StartX);
+		const CUIRect ClippingRect = {InputCursor.m_X, InputCursor.m_Y, MessageMaxWidth, 2.25f * InputCursor.m_FontSize};
 		const float XScale = Graphics()->ScreenWidth() / Width;
 		const float YScale = Graphics()->ScreenHeight() / Height;
 		Graphics()->ClipEnable((int)(ClippingRect.x * XScale), (int)(ClippingRect.y * YScale), (int)(ClippingRect.w * XScale), (int)(ClippingRect.h * YScale));
@@ -1182,11 +1187,11 @@ void CChat::OnRender()
 		float ScrollOffsetChange = m_Input.GetScrollOffsetChange();
 
 		m_Input.Activate(EInputPriority::CHAT); // Ensure that the input is active
-		const CUIRect InputCursorRect = {Cursor.m_X, Cursor.m_Y - ScrollOffset, 0.0f, 0.0f};
+		const CUIRect InputCursorRect = {InputCursor.m_X, InputCursor.m_Y - ScrollOffset, 0.0f, 0.0f};
 		const bool WasChanged = m_Input.WasChanged();
 		const bool WasCursorChanged = m_Input.WasCursorChanged();
 		const bool Changed = WasChanged || WasCursorChanged;
-		const STextBoundingBox BoundingBox = m_Input.Render(&InputCursorRect, Cursor.m_FontSize, TEXTALIGN_TL, Changed, MessageMaxWidth, 0.0f);
+		const STextBoundingBox BoundingBox = m_Input.Render(&InputCursorRect, InputCursor.m_FontSize, TEXTALIGN_TL, Changed, MessageMaxWidth, 0.0f);
 
 		Graphics()->ClipDisable();
 
@@ -1194,8 +1199,8 @@ void CChat::OnRender()
 		const float CaretPositionY = m_Input.GetCaretPosition().y - ScrollOffsetChange;
 		if(CaretPositionY < ClippingRect.y)
 			ScrollOffsetChange -= ClippingRect.y - CaretPositionY;
-		else if(CaretPositionY + Cursor.m_FontSize > ClippingRect.y + ClippingRect.h)
-			ScrollOffsetChange += CaretPositionY + Cursor.m_FontSize - (ClippingRect.y + ClippingRect.h);
+		else if(CaretPositionY + InputCursor.m_FontSize > ClippingRect.y + ClippingRect.h)
+			ScrollOffsetChange += CaretPositionY + InputCursor.m_FontSize - (ClippingRect.y + ClippingRect.h);
 
 		Ui()->DoSmoothScrollLogic(&ScrollOffset, &ScrollOffsetChange, ClippingRect.h, BoundingBox.m_H);
 
@@ -1209,10 +1214,10 @@ void CChat::OnRender()
 			{
 				if(str_startswith_nocase(Command.m_aName, m_Input.GetString() + 1))
 				{
-					Cursor.m_X = Cursor.m_X + TextRender()->TextWidth(Cursor.m_FontSize, m_Input.GetString(), -1, Cursor.m_LineWidth);
-					Cursor.m_Y = m_Input.GetCaretPosition().y;
+					InputCursor.m_X = InputCursor.m_X + TextRender()->TextWidth(InputCursor.m_FontSize, m_Input.GetString(), -1, InputCursor.m_LineWidth);
+					InputCursor.m_Y = m_Input.GetCaretPosition().y;
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.5f);
-					TextRender()->TextEx(&Cursor, Command.m_aName + str_length(m_Input.GetString() + 1));
+					TextRender()->TextEx(&InputCursor, Command.m_aName + str_length(m_Input.GetString() + 1));
 					TextRender()->TextColor(TextRender()->DefaultTextColor());
 					break;
 				}

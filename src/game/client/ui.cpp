@@ -47,7 +47,7 @@ void CUIElement::SUIElementRect::Reset()
 	m_Rounding = -1.0f;
 	m_Corners = -1;
 	m_Text.clear();
-	m_Cursor.Reset();
+	m_Cursor = CTextCursor();
 	m_TextColor = ColorRGBA(-1, -1, -1, -1);
 	m_TextOutlineColor = ColorRGBA(-1, -1, -1, -1);
 	m_QuadColor = ColorRGBA(-1, -1, -1, -1);
@@ -797,7 +797,9 @@ void CUi::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align
 	const vec2 CursorPos = CalcAlignedCursorPos(pRect, TextBounds.m_TextSize, Align, TextBounds.m_LineCount == 1 ? &TextBounds.m_BiggestCharacterHeight : nullptr);
 
 	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, Size, TEXTFLAG_RENDER | Flags);
+	Cursor.SetPosition(CursorPos);
+	Cursor.m_FontSize = Size;
+	Cursor.m_Flags |= Flags;
 	Cursor.m_vColorSplits = LabelProps.m_vColorSplits;
 	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
 	TextRender()->TextEx(&Cursor, pText, -1);
@@ -815,8 +817,9 @@ void CUi::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	}
 	else
 	{
-		const vec2 CursorPos = CalcAlignedCursorPos(pRect, TextBounds.m_TextSize, Align);
-		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, Size, TEXTFLAG_RENDER | Flags);
+		Cursor.SetPosition(CalcAlignedCursorPos(pRect, TextBounds.m_TextSize, Align));
+		Cursor.m_FontSize = Size;
+		Cursor.m_Flags |= Flags;
 	}
 	Cursor.m_LineWidth = LabelProps.m_MaxWidth;
 

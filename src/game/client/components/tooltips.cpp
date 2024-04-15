@@ -124,7 +124,8 @@ void CTooltips::OnRender()
 		Rect.Margin(Padding, &Rect);
 
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, Rect.x, Rect.y, FontSize, TEXTFLAG_RENDER);
+		Cursor.SetPosition(Rect.TopLeft());
+		Cursor.m_FontSize = FontSize;
 		Cursor.m_LineWidth = Tooltip.m_WidthHint;
 
 		STextContainerIndex TextContainerIndex;

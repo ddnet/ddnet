@@ -729,7 +729,8 @@ void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
 void CGameConsole::CInstance::UpdateEntryTextAttributes(CBacklogEntry *pEntry) const
 {
 	CTextCursor Cursor;
-	m_pGameConsole->TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FONT_SIZE, 0);
+	Cursor.m_FontSize = FONT_SIZE;
+	Cursor.m_Flags = 0;
 	Cursor.m_LineWidth = m_pGameConsole->Ui()->Screen()->w - 10;
 	Cursor.m_MaxLines = 10;
 	Cursor.m_LineSpacing = LINE_SPACING;
@@ -1122,12 +1123,13 @@ void CGameConsole::OnRender()
 		const float InitialY = y;
 
 		// render prompt
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x, y + FONT_SIZE / 2.0f, FONT_SIZE, TEXTFLAG_RENDER);
+		CTextCursor PromptCursor;
+		PromptCursor.SetPosition(vec2(x, y + FONT_SIZE / 2.0f));
+		PromptCursor.m_FontSize = FONT_SIZE;
 
 		char aPrompt[32];
 		Prompt(aPrompt);
-		TextRender()->TextEx(&Cursor, aPrompt);
+		TextRender()->TextEx(&PromptCursor, aPrompt);
 
 		// check if mouse is pressed
 		const vec2 WindowSize = vec2(Graphics()->WindowWidth(), Graphics()->WindowHeight());
@@ -1174,7 +1176,7 @@ void CGameConsole::OnRender()
 			pConsole->m_HasSelection = false;
 		}
 
-		x = Cursor.m_X;
+		x = PromptCursor.m_X;
 
 		if(m_ConsoleState == CONSOLE_OPEN)
 		{
@@ -1212,9 +1214,6 @@ void CGameConsole::OnRender()
 			pConsole->m_HasSelection = false; // Clear console selection if we have a line input selection
 
 		y -= pConsole->m_BoundingBox.m_H - FONT_SIZE;
-		TextRender()->SetCursor(&Cursor, x, y, FONT_SIZE, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = Screen.w - 10.0f - x;
-		Cursor.m_LineSpacing = LINE_SPACING;
 
 		if(pConsole->m_LastInputHeight != pConsole->m_BoundingBox.m_H)
 		{
@@ -1237,7 +1236,9 @@ void CGameConsole::OnRender()
 			pConsole->GetCommand(pConsole->m_aCompletionBuffer, aCmd);
 			Info.m_pCurrentCmd = aCmd;
 
-			TextRender()->SetCursor(&Info.m_Cursor, InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f, FONT_SIZE, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+			Info.m_Cursor.SetPosition(vec2(InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f));
+			Info.m_Cursor.m_FontSize = FONT_SIZE;
+			Info.m_Cursor.m_Flags |= TEXTFLAG_STOP_AT_END;
 			Info.m_Cursor.m_LineWidth = std::numeric_limits<float>::max();
 			const int NumCommands = m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
 			pConsole->m_CompletionRenderOffset = Info.m_Offset;
@@ -1278,7 +1279,8 @@ void CGameConsole::OnRender()
 		else if(pConsole->m_Searching && !pConsole->m_Input.IsEmpty())
 		{ // Render current match and match count
 			CTextCursor MatchInfoCursor;
-			TextRender()->SetCursor(&MatchInfoCursor, InitialX, InitialY + RowHeight + 2.0f, FONT_SIZE, TEXTFLAG_RENDER);
+			MatchInfoCursor.SetPosition(vec2(InitialX, InitialY + RowHeight + 2.0f));
+			MatchInfoCursor.m_FontSize = FONT_SIZE;
 			TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.0f);
 			if(!pConsole->m_vSearchMatches.empty())
 			{
@@ -1367,13 +1369,15 @@ void CGameConsole::OnRender()
 			const int LinesNotRendered = pEntry->m_LineCount - minimum((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
 			pConsole->m_LinesRendered -= LinesNotRendered;
 
-			TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FONT_SIZE, TEXTFLAG_RENDER);
-			Cursor.m_LineWidth = Screen.w - 10.0f;
-			Cursor.m_MaxLines = pEntry->m_LineCount;
-			Cursor.m_LineSpacing = LINE_SPACING;
-			Cursor.m_CalculateSelectionMode = (m_ConsoleState == CONSOLE_OPEN && pConsole->m_MousePress.y < pConsole->m_BoundingBox.m_Y && (pConsole->m_MouseIsPress || (pConsole->m_CurSelStart != pConsole->m_CurSelEnd) || pConsole->m_HasSelection)) ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : TEXT_CURSOR_SELECTION_MODE_NONE;
-			Cursor.m_PressMouse = pConsole->m_MousePress;
-			Cursor.m_ReleaseMouse = pConsole->m_MouseRelease;
+			CTextCursor EntryCursor;
+			EntryCursor.SetPosition(vec2(0.0f, y - OffsetY));
+			EntryCursor.m_FontSize = FONT_SIZE;
+			EntryCursor.m_LineWidth = Screen.w - 10.0f;
+			EntryCursor.m_MaxLines = pEntry->m_LineCount;
+			EntryCursor.m_LineSpacing = LINE_SPACING;
+			EntryCursor.m_CalculateSelectionMode = (m_ConsoleState == CONSOLE_OPEN && pConsole->m_MousePress.y < pConsole->m_BoundingBox.m_Y && (pConsole->m_MouseIsPress || (pConsole->m_CurSelStart != pConsole->m_CurSelEnd) || pConsole->m_HasSelection)) ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : TEXT_CURSOR_SELECTION_MODE_NONE;
+			EntryCursor.m_PressMouse = pConsole->m_MousePress;
+			EntryCursor.m_ReleaseMouse = pConsole->m_MouseRelease;
 
 			if(pConsole->m_Searching && pConsole->m_CurrentMatchIndex != -1)
 			{
@@ -1382,24 +1386,24 @@ void CGameConsole::OnRender()
 
 				auto CurrentSelectedOccurrence = pConsole->m_vSearchMatches[pConsole->m_CurrentMatchIndex];
 
-				Cursor.m_vColorSplits.reserve(vMatches.size());
+				EntryCursor.m_vColorSplits.reserve(vMatches.size());
 				for(const auto &Match : vMatches)
 				{
 					bool IsSelected = CurrentSelectedOccurrence.m_EntryLine == Match.m_EntryLine && CurrentSelectedOccurrence.m_Pos == Match.m_Pos;
-					Cursor.m_vColorSplits.emplace_back(
+					EntryCursor.m_vColorSplits.emplace_back(
 						Match.m_Pos,
 						pConsole->m_Input.GetLength(),
 						IsSelected ? ms_SearchSelectedColor : ms_SearchHighlightColor);
 				}
 			}
 
-			TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
-			Cursor.m_vColorSplits = {};
+			TextRender()->TextEx(&EntryCursor, pEntry->m_aText, -1);
+			EntryCursor.m_vColorSplits = {};
 
-			if(Cursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
+			if(EntryCursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 			{
-				pConsole->m_CurSelStart = minimum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
-				pConsole->m_CurSelEnd = maximum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+				pConsole->m_CurSelStart = minimum(EntryCursor.m_SelectionStart, EntryCursor.m_SelectionEnd);
+				pConsole->m_CurSelEnd = maximum(EntryCursor.m_SelectionStart, EntryCursor.m_SelectionEnd);
 			}
 			pConsole->m_LinesRendered += First ? pEntry->m_LineCount - (pConsole->m_BacklogLastActiveLine - SkippedLines) : pEntry->m_LineCount;
 

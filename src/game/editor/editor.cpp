@@ -7566,7 +7566,8 @@ void CEditor::RenderPressedKeys(CUIRect View)
 
 	Ui()->MapScreen();
 	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, View.x + 10, View.y + View.h - 24 - 10, 24.0f, TEXTFLAG_RENDER);
+	Cursor.SetPosition(vec2(View.x + 10, View.y + View.h - 24 - 10));
+	Cursor.m_FontSize = 24.0f;
 
 	int NKeys = 0;
 	for(int i = 0; i < KEY_LAST; i++)

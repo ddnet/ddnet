@@ -1863,7 +1863,7 @@ void CMenus::RenderLanguageSettings(CUIRect MainView)
 	CreditsScroll.y += ScrollOffset.y;
 
 	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, CreditsFontSize, TEXTFLAG_RENDER);
+	Cursor.m_FontSize = CreditsFontSize;
 	Cursor.m_LineWidth = CreditsScroll.w - 2.0f * CreditsMargin;
 
 	const unsigned OldRenderFlags = TextRender()->GetRenderFlags();
@@ -2592,7 +2592,9 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			if(LineIndex >= (int)s_vLines.size())
 				return vec2(0, 0);
 			CTextCursor LocalCursor;
-			TextRender()->SetCursor(&LocalCursor, x, y, RealFontSize, Render ? TEXTFLAG_RENDER : 0);
+			LocalCursor.SetPosition(vec2(x, y));
+			LocalCursor.m_FontSize = RealFontSize;
+			LocalCursor.m_Flags = Render ? TEXTFLAG_RENDER : 0;
 			LocalCursor.m_LineWidth = LineWidth;
 			const auto &Line = s_vLines[LineIndex];
 

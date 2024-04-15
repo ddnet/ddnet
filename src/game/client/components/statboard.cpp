@@ -302,7 +302,9 @@ void CStatboard::RenderGlobalStats()
 
 		char aBuf[128];
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x + 64, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+		Cursor.SetPosition(vec2(x + 64, y + (LineHeight * 0.95f - FontSize) / 2.f));
+		Cursor.m_FontSize = FontSize;
+		Cursor.m_Flags |= TEXTFLAG_STOP_AT_END;
 		Cursor.m_LineWidth = 220;
 		TextRender()->TextEx(&Cursor, GameClient()->m_aClients[pInfo->m_ClientId].m_aName, -1);
 
