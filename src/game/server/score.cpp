@@ -290,6 +290,8 @@ void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 	int Team = pController->Teams().m_Core.Team(ClientId);
 	if(pController->Teams().GetSaving(Team))
 		return;
+	if(pController->Teams().IsPractice(Team))
+		return;
 
 	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientId);
 	SaveResult->m_SaveId = RandomUuid();
