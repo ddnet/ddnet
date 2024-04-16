@@ -91,9 +91,6 @@ public:
 
 	void RecordAntibot(const void *pData, int DataSize);
 
-	void RecordPlayerFinish(int ClientId, int TimeTicks);
-	void RecordTeamFinish(int TeamId, int TimeTicks);
-
 	int m_Debug; // Possible values: 0, 1, 2.
 
 private:

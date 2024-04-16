@@ -357,8 +357,6 @@ public:
 	virtual void TeehistorianRecordPlayerDrop(int ClientId, const char *pReason) = 0;
 	virtual void TeehistorianRecordPlayerRejoin(int ClientId) = 0;
 	virtual void TeehistorianRecordPlayerName(int ClientId, const char *pName) = 0;
-	virtual void TeehistorianRecordPlayerFinish(int ClientId, int TimeTicks) = 0;
-	virtual void TeehistorianRecordTeamFinish(int TeamId, int TimeTicks) = 0;
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
 

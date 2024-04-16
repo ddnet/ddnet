@@ -1775,22 +1775,6 @@ void CGameContext::TeehistorianRecordPlayerName(int ClientId, const char *pName)
 	}
 }
 
-void CGameContext::TeehistorianRecordPlayerFinish(int ClientId, int TimeTicks)
-{
-	if(m_TeeHistorianActive)
-	{
-		m_TeeHistorian.RecordPlayerFinish(ClientId, TimeTicks);
-	}
-}
-
-void CGameContext::TeehistorianRecordTeamFinish(int TeamId, int TimeTicks)
-{
-	if(m_TeeHistorianActive)
-	{
-		m_TeeHistorian.RecordTeamFinish(TeamId, TimeTicks);
-	}
-}
-
 bool CGameContext::OnClientDDNetVersionKnown(int ClientId)
 {
 	IServer::CClientInfo Info;

@@ -145,13 +145,11 @@ void CScore::MapInfo(int ClientId, const char *pMapName)
 	ExecPlayerThread(CScoreWorker::MapInfo, "map info", ClientId, pMapName, 0);
 }
 
-void CScore::SaveScore(int ClientId, int TimeTicks, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible)
+void CScore::SaveScore(int ClientId, float Time, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible)
 {
 	CConsole *pCon = (CConsole *)GameServer()->Console();
 	if(pCon->Cheated() || NotEligible)
 		return;
-
-	GameServer()->TeehistorianRecordPlayerFinish(ClientId, TimeTicks);
 
 	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientId];
 	if(pCurPlayer->m_ScoreFinishResult != nullptr)
@@ -162,7 +160,7 @@ void CScore::SaveScore(int ClientId, int TimeTicks, const char *pTimestamp, cons
 	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
 	Tmp->m_ClientId = ClientId;
 	str_copy(Tmp->m_aName, Server()->ClientName(ClientId), sizeof(Tmp->m_aName));
-	Tmp->m_Time = (float)(TimeTicks) / (float)Server()->TickSpeed();
+	Tmp->m_Time = Time;
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 		Tmp->m_aCurrentTimeCp[i] = aTimeCp[i];
@@ -170,7 +168,7 @@ void CScore::SaveScore(int ClientId, int TimeTicks, const char *pTimestamp, cons
 	m_pPool->ExecuteWrite(CScoreWorker::SaveScore, std::move(Tmp), "save score");
 }
 
-void CScore::SaveTeamScore(int Team, int *pClientIds, unsigned int Size, int TimeTicks, const char *pTimestamp)
+void CScore::SaveTeamScore(int *pClientIds, unsigned int Size, float Time, const char *pTimestamp)
 {
 	CConsole *pCon = (CConsole *)GameServer()->Console();
 	if(pCon->Cheated())
@@ -180,14 +178,11 @@ void CScore::SaveTeamScore(int Team, int *pClientIds, unsigned int Size, int Tim
 		if(GameServer()->m_apPlayers[pClientIds[i]]->m_NotEligibleForFinish)
 			return;
 	}
-
-	GameServer()->TeehistorianRecordTeamFinish(Team, TimeTicks);
-
 	auto Tmp = std::make_unique<CSqlTeamScoreData>();
 	for(unsigned int i = 0; i < Size; i++)
 		str_copy(Tmp->m_aaNames[i], Server()->ClientName(pClientIds[i]), sizeof(Tmp->m_aaNames[i]));
 	Tmp->m_Size = Size;
-	Tmp->m_Time = (float)TimeTicks / (float)Server()->TickSpeed();
+	Tmp->m_Time = Time;
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
 	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
 	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));

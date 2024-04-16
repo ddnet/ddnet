@@ -329,8 +329,6 @@ public:
 	void TeehistorianRecordPlayerDrop(int ClientId, const char *pReason) override;
 	void TeehistorianRecordPlayerRejoin(int ClientId) override;
 	void TeehistorianRecordPlayerName(int ClientId, const char *pName) override;
-	void TeehistorianRecordPlayerFinish(int ClientId, int TimeTicks) override;
-	void TeehistorianRecordTeamFinish(int TeamId, int TimeTicks) override;
 
 	bool IsClientReady(int ClientId) const override;
 	bool IsClientPlayer(int ClientId) const override;

@@ -335,9 +335,8 @@ void CGameTeams::CheckTeamFinished(int Team)
 
 		if(PlayersCount > 0)
 		{
-			int TimeTicks = Server()->Tick() - GetStartTime(apTeamPlayers[0]);
-			float Time = (float)TimeTicks / (float)Server()->TickSpeed();
-			if(TimeTicks <= 0)
+			float Time = (float)(Server()->Tick() - GetStartTime(apTeamPlayers[0])) / ((float)Server()->TickSpeed());
+			if(Time < 0.000001f)
 			{
 				return;
 			}
@@ -349,7 +348,7 @@ void CGameTeams::CheckTeamFinished(int Team)
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf),
 					"Your team would've finished in: %d minute(s) %5.2f second(s). Since you had practice mode enabled your rank doesn't count.",
-					(int)Time / 50 / 60, Time - ((int)Time / 60 * 60));
+					(int)Time / 60, Time - ((int)Time / 60 * 60));
 				GameServer()->SendChatTeam(Team, aBuf);
 
 				for(unsigned int i = 0; i < PlayersCount; ++i)
@@ -366,7 +365,7 @@ void CGameTeams::CheckTeamFinished(int Team)
 			for(unsigned int i = 0; i < PlayersCount; ++i)
 				OnFinish(apTeamPlayers[i], Time, aTimestamp);
 			ChangeTeamState(Team, TEAMSTATE_FINISHED); // TODO: Make it better
-			OnTeamFinish(Team, apTeamPlayers, PlayersCount, TimeTicks, aTimestamp);
+			OnTeamFinish(apTeamPlayers, PlayersCount, Time, aTimestamp);
 		}
 	}
 }
@@ -667,7 +666,7 @@ float *CGameTeams::GetCurrentTimeCp(CPlayer *Player)
 	return NULL;
 }
 
-void CGameTeams::OnTeamFinish(int Team, CPlayer **Players, unsigned int Size, int TimeTicks, const char *pTimestamp)
+void CGameTeams::OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, const char *pTimestamp)
 {
 	int aPlayerCids[MAX_CLIENTS];
 
@@ -686,16 +685,13 @@ void CGameTeams::OnTeamFinish(int Team, CPlayer **Players, unsigned int Size, in
 	}
 
 	if(Size >= (unsigned int)g_Config.m_SvMinTeamSize)
-		GameServer()->Score()->SaveTeamScore(Team, aPlayerCids, Size, TimeTicks, pTimestamp);
+		GameServer()->Score()->SaveTeamScore(aPlayerCids, Size, Time, pTimestamp);
 }
 
-void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp)
+void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 {
 	if(!Player || !Player->IsPlaying())
 		return;
-
-	float Time = TimeTicks / (float)Server()->TickSpeed();
-
 	// TODO:DDRace:btd: this ugly
 	const int ClientId = Player->GetCid();
 	CPlayerData *pData = GameServer()->Score()->PlayerData(ClientId);
@@ -808,7 +804,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 
 	if(CallSaveScore)
 		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientId), "nameless tee"))
-			GameServer()->Score()->SaveScore(ClientId, TimeTicks, pTimestamp,
+			GameServer()->Score()->SaveScore(ClientId, Time, pTimestamp,
 				GetCurrentTimeCp(Player), Player->m_NotEligibleForFinish);
 
 	bool NeedToSendNewServerRecord = false;
