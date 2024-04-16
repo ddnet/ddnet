@@ -308,11 +308,16 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	}
 	else if(m_HookState == HOOK_FLYING)
 	{
+		vec2 HookBase = m_Pos;
+		if(m_NewHook)
+		{
+			HookBase = m_HookTeleBase;
+		}
 		vec2 NewPos = m_HookPos + m_HookDir * m_Tuning.m_HookFireSpeed;
-		if((!m_NewHook && distance(m_Pos, NewPos) > m_Tuning.m_HookLength) || (m_NewHook && distance(m_HookTeleBase, NewPos) > m_Tuning.m_HookLength))
+		if(distance(HookBase, NewPos) > m_Tuning.m_HookLength)
 		{
 			m_HookState = HOOK_RETRACT_START;
-			NewPos = m_Pos + normalize(NewPos - m_Pos) * m_Tuning.m_HookLength;
+			NewPos = HookBase + normalize(NewPos - HookBase) * m_Tuning.m_HookLength;
 			m_Reset = true;
 		}
 
@@ -337,7 +342,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		}
 
 		// Check against other players first
-		if(!this->m_HookHitDisabled && m_pWorld && m_Tuning.m_PlayerHooking)
+		if(!this->m_HookHitDisabled && m_pWorld && m_Tuning.m_PlayerHooking && (m_HookState == HOOK_FLYING || !m_NewHook))
 		{
 			float Distance = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
