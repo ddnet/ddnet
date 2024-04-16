@@ -573,6 +573,23 @@ void CTeeHistorian::RecordPlayerDrop(int ClientId, const char *pReason)
 	Write(Buffer.Data(), Buffer.Size());
 }
 
+void CTeeHistorian::RecordPlayerName(int ClientId, const char *pName)
+{
+	EnsureTickWritten();
+
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientId);
+	Buffer.AddString(pName, 0);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "drop cid=%d reason='%s'", ClientId, pName);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_PLAYER_NAME, Buffer.Data(), Buffer.Size());
+}
+
 void CTeeHistorian::RecordConsoleCommand(int ClientId, int FlagMask, const char *pCmd, IConsole::IResult *pResult)
 {
 	EnsureTickWritten();
@@ -792,6 +809,34 @@ void CTeeHistorian::RecordAntibot(const void *pData, int DataSize)
 	}
 
 	WriteExtra(UUID_TEEHISTORIAN_ANTIBOT, pData, DataSize);
+}
+
+void CTeeHistorian::RecordPlayerFinish(int ClientId, int TimeTicks)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientId);
+	Buffer.AddInt(TimeTicks);
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "player_finish cid=%d Time=%d", ClientId, TimeTicks);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_PLAYER_FINISH, Buffer.Data(), Buffer.Size());
+}
+
+void CTeeHistorian::RecordTeamFinish(int TeamId, int TimeTicks)
+{
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(TeamId);
+	Buffer.AddInt(TimeTicks);
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "player_finish cid=%d Time=%d", TeamId, TimeTicks);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_TEAM_FINISH, Buffer.Data(), Buffer.Size());
 }
 
 void CTeeHistorian::Finish()
