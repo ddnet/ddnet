@@ -838,24 +838,6 @@ TEST_F(TeeHistorian, AntibotEmptyMessage)
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
 
-TEST_F(TeeHistorian, PlayerName)
-{
-	const unsigned char EXPECTED[] = {
-		// EX uuid=d016f9b9-4151-3b87-87e5-3a6087eb5f26 datalen=4
-		0x4a,
-		0xd0, 0x16, 0xf9, 0xb9, 0x41, 0x51, 0x3b, 0x87,
-		0x87, 0xe5, 0x3a, 0x60, 0x87, 0xeb, 0x5f, 0x26,
-		0x0e,
-		// (PLAYER_NAME) id=21 name="nameless tee"
-		0x15,
-		0x6e, 0x61, 0x6d, 0x65, 0x6c, 0x65, 0x73, 0x73,
- 	    0x20, 0x74, 0x65, 0x65
-	};
-
-	m_TH.RecordPlayerName(21, "nameless tee");
-	Expect(EXPECTED, sizeof(EXPECTED));
-}
-
 TEST_F(TeeHistorian, PrevGameUuid)
 {
 	m_GameInfo.m_HavePrevGameUuid = true;

@@ -354,11 +354,10 @@ bool CServer::SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set
 
 	bool Changed = str_comp(m_aClients[ClientId].m_aName, aNameTry) != 0;
 
-	if(Set && Changed)
+	if(Set)
 	{
 		// set the client name
 		str_copy(m_aClients[ClientId].m_aName, aNameTry);
-		GameServer()->TeehistorianRecordPlayerName(ClientId, m_aClients[ClientId].m_aName);
 	}
 
 	return Changed;

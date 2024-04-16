@@ -70,7 +70,6 @@ public:
 	void RecordPlayerRejoin(int ClientId);
 	void RecordPlayerReady(int ClientId);
 	void RecordPlayerDrop(int ClientId, const char *pReason);
-	void RecordPlayerName(int ClientId, const char *pName);
 	void RecordConsoleCommand(int ClientId, int FlagMask, const char *pCmd, IConsole::IResult *pResult);
 	void RecordTestExtra();
 	void RecordPlayerSwap(int ClientId1, int ClientId2);
