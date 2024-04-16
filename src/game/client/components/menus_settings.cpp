@@ -2058,52 +2058,52 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 	if(g_Config.m_UiSettingsPage == SETTINGS_LANGUAGE)
 	{
-		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_LANGUAGE);
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_LANGUAGE);
 		RenderLanguageSelection(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_GENERAL)
 	{
-		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_GENERAL);
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_GENERAL);
 		RenderSettingsGeneral(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_PLAYER)
 	{
-		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_PLAYER);
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_PLAYER);
 		RenderSettingsPlayer(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_TEE)
 	{
-		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_TEE);
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_TEE);
 		RenderSettingsTee(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_APPEARANCE)
 	{
-		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_APPEARANCE);
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_APPEARANCE);
 		RenderSettingsAppearance(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_CONTROLS)
 	{
-		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_CONTROLS);
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_CONTROLS);
 		RenderSettingsControls(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_GRAPHICS)
 	{
-		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_GRAPHICS);
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_GRAPHICS);
 		RenderSettingsGraphics(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_SOUND)
 	{
-		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_SOUND);
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_SOUND);
 		RenderSettingsSound(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_DDNET)
 	{
-		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_DDNET);
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_DDNET);
 		RenderSettingsDDNet(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_ASSETS)
 	{
-		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_ASSETS);
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_ASSETS);
 		RenderSettingsCustom(MainView);
 	}
 	else

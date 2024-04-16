@@ -1058,7 +1058,7 @@ void CMenus::FetchAllHeaders()
 
 void CMenus::RenderDemoBrowser(CUIRect MainView)
 {
-	m_pBackground->ChangePosition(CMenuBackground::POS_DEMOS);
+	GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_DEMOS);
 
 	CUIRect ListView, DetailsView, ButtonsView;
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);

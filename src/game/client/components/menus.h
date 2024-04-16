@@ -591,12 +591,8 @@ protected:
 
 	bool CheckHotKey(int Key) const;
 
-	class CMenuBackground *m_pBackground;
-
 public:
 	void RenderBackground();
-
-	void SetMenuBackground(class CMenuBackground *pBackground) { m_pBackground = pBackground; }
 
 	static CMenusKeyBinder m_Binder;
 

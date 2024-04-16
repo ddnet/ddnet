@@ -779,7 +779,7 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 
 	Ui()->MapScreen();
 
-	if(!RenderMenuBackgroundMap || !m_pBackground->Render())
+	if(!RenderMenuBackgroundMap || !GameClient()->m_MenuBackground.Render())
 	{
 		RenderBackground();
 	}
@@ -811,7 +811,7 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 
 void CMenus::RenderNews(CUIRect MainView)
 {
-	m_pBackground->ChangePosition(CMenuBackground::POS_NEWS);
+	GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_NEWS);
 
 	g_Config.m_UiUnreadNews = false;
 
@@ -1069,7 +1069,7 @@ void CMenus::Render()
 	}
 	else
 	{
-		if(!m_pBackground->Render())
+		if(!GameClient()->m_MenuBackground.Render())
 		{
 			RenderBackground();
 		}
@@ -1977,7 +1977,7 @@ void CMenus::PopupConfirmDemoReplaceVideo()
 
 void CMenus::RenderThemeSelection(CUIRect MainView)
 {
-	const std::vector<CTheme> &vThemes = m_pBackground->GetThemes();
+	const std::vector<CTheme> &vThemes = GameClient()->m_MenuBackground.GetThemes();
 
 	int SelectedTheme = -1;
 	for(int i = 0; i < (int)vThemes.size(); i++)
@@ -2043,7 +2043,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView)
 	{
 		const CTheme &Theme = vThemes[SelectedTheme];
 		str_copy(g_Config.m_ClMenuMap, Theme.m_Name.c_str());
-		m_pBackground->LoadMenuBackground(Theme.m_HasDay, Theme.m_HasNight);
+		GameClient()->m_MenuBackground.LoadMenuBackground(Theme.m_HasDay, Theme.m_HasNight);
 	}
 }
 
