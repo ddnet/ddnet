@@ -2167,7 +2167,7 @@ bool CCharacter::Freeze(int Seconds)
 {
 	if(Seconds <= 0 || m_Core.m_Super || m_FreezeTime > Seconds * Server()->TickSpeed())
 		return false;
-	if(m_Core.m_FreezeStart < Server()->Tick() - Server()->TickSpeed())
+	if(m_FreezeTime == 0 || m_Core.m_FreezeStart < Server()->Tick() - Server()->TickSpeed())
 	{
 		m_Armor = 0;
 		m_FreezeTime = Seconds * Server()->TickSpeed();
