@@ -410,7 +410,13 @@ std::unique_ptr<ILogger> log_logger_stdout()
 	if(OutputType == FILE_TYPE_CHAR)
 	{
 		DWORD OldConsoleMode = 0;
-		dbg_assert(GetConsoleMode(pOutput, &OldConsoleMode), "GetConsoleMode failure");
+		if(!GetConsoleMode(pOutput, &OldConsoleMode))
+		{
+			// GetConsoleMode can fail with ERROR_INVALID_HANDLE when redirecting output to "nul",
+			// which is considered a character file but cannot be used as a console.
+			dbg_assert(GetLastError() == ERROR_INVALID_HANDLE, "GetConsoleMode failure");
+			return nullptr;
+		}
 
 		const bool Colors = _wgetenv(L"NO_COLOR") == nullptr;
 
@@ -421,7 +427,7 @@ std::unique_ptr<ILogger> log_logger_stdout()
 			// Try to downgrade mode gracefully when failing to set both.
 			if(!SetConsoleMode(pOutput, OldConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING))
 			{
-				// Fallback to old, slower Windows logging API, when failung to enable virtual terminal processing.
+				// Fallback to old, slower Windows logging API, when failing to enable virtual terminal processing.
 				return std::make_unique<CWindowsConsoleLogger>(pOutput, Colors);
 			}
 		}
@@ -440,7 +446,7 @@ std::unique_ptr<ILogger> log_logger_stdout()
 		// We can use the async logger to write to files and pipes
 		// by converting the HANDLE to an IOHANDLE.
 		// For pipes there does not seem to be any way to determine
-		// whether the console support ANSI escape codes.
+		// whether the console supports ANSI escape codes.
 		return std::make_unique<CLoggerAsync>(ConvertWindowsHandle(pOutput, _O_APPEND), false, false);
 	}
 	else
