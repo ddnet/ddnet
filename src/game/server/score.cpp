@@ -288,10 +288,17 @@ void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 		return;
 	auto *pController = GameServer()->m_pController;
 	int Team = pController->Teams().m_Core.Team(ClientId);
+	char aBuf[512];
 	if(pController->Teams().GetSaving(Team))
+	{
+		GameServer()->SendChatTarget(ClientId, "Team save already in progress");
 		return;
+	}
 	if(pController->Teams().IsPractice(Team))
+	{
+		GameServer()->SendChatTarget(ClientId, "Team save disabled for teams in practice mode");
 		return;
+	}
 
 	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientId);
 	SaveResult->m_SaveId = RandomUuid();
@@ -308,7 +315,6 @@ void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 	Tmp->m_aGeneratedCode[0] = '\0';
 	GeneratePassphrase(Tmp->m_aGeneratedCode, sizeof(Tmp->m_aGeneratedCode));
 
-	char aBuf[512];
 	if(Tmp->m_aCode[0] == '\0')
 	{
 		str_format(aBuf,
