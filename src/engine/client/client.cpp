@@ -295,7 +295,7 @@ int *CClient::GetInput(int Tick, int IsDummy) const
 	const int d = IsDummy ^ g_Config.m_ClDummy;
 	for(int i = 0; i < 200; i++)
 	{
-		if(m_aInputs[d][i].m_Tick <= Tick && (Best == -1 || m_aInputs[d][Best].m_Tick < m_aInputs[d][i].m_Tick))
+		if(m_aInputs[d][i].m_Tick != -1 && m_aInputs[d][i].m_Tick <= Tick && (Best == -1 || m_aInputs[d][Best].m_Tick < m_aInputs[d][i].m_Tick))
 			Best = i;
 	}
 
@@ -357,20 +357,30 @@ void CClient::OnEnterGame(bool Dummy)
 	m_aCurrentInput[Dummy] = 0;
 
 	// reset snapshots
-	m_aapSnapshots[Dummy][SNAP_CURRENT] = 0;
-	m_aapSnapshots[Dummy][SNAP_PREV] = 0;
+	m_aapSnapshots[Dummy][SNAP_CURRENT] = nullptr;
+	m_aapSnapshots[Dummy][SNAP_PREV] = nullptr;
 	m_aSnapshotStorage[Dummy].PurgeAll();
-	// Also make gameclient aware that snapshots have been purged
-	GameClient()->InvalidateSnapshot();
 	m_aReceivedSnapshots[Dummy] = 0;
 	m_aSnapshotParts[Dummy] = 0;
-	m_aPredTick[Dummy] = 0;
+	m_aSnapshotIncomingDataSize[Dummy] = 0;
+	m_SnapCrcErrors = 0;
+	// Also make gameclient aware that snapshots have been purged
+	GameClient()->InvalidateSnapshot();
+
+	// reset times
 	m_aAckGameTick[Dummy] = -1;
 	m_aCurrentRecvTick[Dummy] = 0;
-	m_aCurGameTick[Dummy] = 0;
 	m_aPrevGameTick[Dummy] = 0;
+	m_aCurGameTick[Dummy] = 0;
+	m_aGameIntraTick[Dummy] = 0.0f;
+	m_aGameTickTime[Dummy] = 0.0f;
+	m_aGameIntraTickSincePrev[Dummy] = 0.0f;
+	m_aPredTick[Dummy] = 0;
+	m_aPredIntraTick[Dummy] = 0.0f;
+	m_aGameTime[Dummy].Init(0);
+	m_PredictedTime.Init(0);
 
-	if(Dummy == 0)
+	if(!Dummy)
 	{
 		m_LastDummyConnectTime = 0;
 	}
@@ -1846,6 +1856,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						m_aGameTime[Conn].Init((GameTick - 1) * time_freq() / GameTickSpeed());
 						m_aapSnapshots[Conn][SNAP_PREV] = m_aSnapshotStorage[Conn].m_pFirst;
 						m_aapSnapshots[Conn][SNAP_CURRENT] = m_aSnapshotStorage[Conn].m_pLast;
+						m_aPrevGameTick[Conn] = m_aapSnapshots[Conn][SNAP_PREV]->m_Tick;
+						m_aCurGameTick[Conn] = m_aapSnapshots[Conn][SNAP_CURRENT]->m_Tick;
 						if(!Dummy)
 						{
 							m_LocalStartTime = time_get();
@@ -2349,6 +2361,8 @@ void CClient::UpdateDemoIntraTimers()
 
 void CClient::Update()
 {
+	PumpNetwork();
+
 	if(State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		if(m_DemoPlayer.IsPlaying())
@@ -2394,7 +2408,7 @@ void CClient::Update()
 			GameClient()->OnDummySwap();
 		}
 
-		if(m_aReceivedSnapshots[!g_Config.m_ClDummy] >= 3)
+		if(m_aapSnapshots[!g_Config.m_ClDummy][SNAP_CURRENT])
 		{
 			// switch dummy snapshot
 			int64_t Now = m_aGameTime[!g_Config.m_ClDummy].Get(time_get());
@@ -2415,14 +2429,14 @@ void CClient::Update()
 			}
 		}
 
-		if(m_aReceivedSnapshots[g_Config.m_ClDummy] >= 3)
+		if(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT])
 		{
 			// switch snapshot
 			bool Repredict = false;
 			int64_t Now = m_aGameTime[g_Config.m_ClDummy].Get(time_get());
 			int64_t PredNow = m_PredictedTime.Get(time_get());
 
-			if(m_LastDummy != (bool)g_Config.m_ClDummy && m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV])
+			if(m_LastDummy != (bool)g_Config.m_ClDummy && m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV])
 			{
 				// Load snapshot for m_ClDummy
 				GameClient()->OnNewSnapshot();
@@ -2444,14 +2458,11 @@ void CClient::Update()
 				m_aCurGameTick[g_Config.m_ClDummy] = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick;
 				m_aPrevGameTick[g_Config.m_ClDummy] = m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick;
 
-				if(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV])
-				{
-					GameClient()->OnNewSnapshot();
-					Repredict = true;
-				}
+				GameClient()->OnNewSnapshot();
+				Repredict = true;
 			}
 
-			if(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] && m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV])
+			if(m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV])
 			{
 				int64_t CurTickStart = m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_Tick * time_freq() / GameTickSpeed();
 				int64_t PrevTickStart = m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick * time_freq() / GameTickSpeed();
@@ -2553,9 +2564,6 @@ void CClient::Update()
 		}
 	}
 #endif
-
-	// pump the network
-	PumpNetwork();
 
 	if(m_pMapdownloadTask)
 	{
