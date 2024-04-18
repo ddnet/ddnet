@@ -644,6 +644,15 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	if(Teams.GetSaving(Team))
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Practice mode can't be enabled while team save or load is in progress");
+		return;
+	}
+
 	if(Teams.IsPractice(Team))
 	{
 		pSelf->Console()->Print(
