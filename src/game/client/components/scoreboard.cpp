@@ -112,7 +112,8 @@ void CScoreboard::RenderSpectators(float x, float y, float w, float h)
 
 		if(m_pClient->m_aClients[pInfo->m_ClientId].m_AuthLevel)
 		{
-			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
+			//TODO: Add 0.7 Correct Conditions after ChillerDragon's pr is merged
+			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_aClients[pInfo->m_ClientId].m_AuthLevel == AUTHED_ADMIN ? g_Config.m_ClAdminColor : m_pClient->m_aClients[pInfo->m_ClientId].m_AuthLevel == AUTHED_MOD ? g_Config.m_ClModeratorColor : g_Config.m_ClHelperColor));
 			TextRender()->TextColor(Color);
 		}
 
@@ -443,7 +444,8 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		TextRender()->SetCursor(&Cursor, NameOffset, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
 		if(m_pClient->m_aClients[pInfo->m_ClientId].m_AuthLevel)
 		{
-			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
+			//TODO: Add 0.7 Correct Conditions after ChillerDragon's pr is merged
+			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_aClients[pInfo->m_ClientId].m_AuthLevel == AUTHED_ADMIN ? g_Config.m_ClAdminColor : m_pClient->m_aClients[pInfo->m_ClientId].m_AuthLevel == AUTHED_MOD ? g_Config.m_ClModeratorColor : g_Config.m_ClHelperColor));
 			TextRender()->TextColor(Color);
 		}
 

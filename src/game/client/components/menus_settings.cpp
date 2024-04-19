@@ -2994,10 +2994,16 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			g_Config.m_ClShowDirection = g_Config.m_ClShowDirection ^ 3;
 		}
 
+		LeftView.HSplitTop(LineSize, &Button, &LeftView);
 		ColorRGBA GreenDefault(0.78f, 1.0f, 0.8f, 1.0f);
-		static CButtonContainer s_AuthedColor, s_SameClanColor;
-		DoLine_ColorPicker(&s_AuthedColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Authed name color in scoreboard"), &g_Config.m_ClAuthedPlayerColor, GreenDefault, false);
-		DoLine_ColorPicker(&s_SameClanColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Same clan color in scoreboard"), &g_Config.m_ClSameClanColor, GreenDefault, false);
+		ColorRGBA AdminDefault(0.98f, 0.2f, 0.3f, 1.0f);
+		ColorRGBA ModeratorDefault(0.31f, 0.72f, 0.46f, 1.0f);
+		ColorRGBA HelperDefault(0.98f, 0.58f, 0.16f, 1.0f);
+		static CButtonContainer s_AdminColor, s_ModeratorColor, s_HelperColor, s_SameClanColor;
+		DoLine_ColorPicker(&s_AdminColor, 25.0f, 13.0f, 5.0f, &Button, Localize("Admin name color in scoreboard"), &g_Config.m_ClAdminColor, AdminDefault, false);
+		DoLine_ColorPicker(&s_ModeratorColor, 25.0f, 13.0f, 5.0f, &Button, Localize("Mod name color in scoreboard"), &g_Config.m_ClModeratorColor, ModeratorDefault, false);
+		DoLine_ColorPicker(&s_HelperColor, 25.0f, 13.0f, 5.0f, &Button, Localize("Helper name color in scoreboard"), &g_Config.m_ClHelperColor, HelperDefault, false);
+		DoLine_ColorPicker(&s_SameClanColor, 25.0f, 13.0f, 5.0f, &Button, Localize("Same clan color in scoreboard"), &g_Config.m_ClSameClanColor, GreenDefault, false);
 	}
 	else if(s_CurTab == APPEARANCE_TAB_HOOK_COLLISION)
 	{
