@@ -1359,9 +1359,6 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == Láthatósága a töltő csíknak, mikor levan fagyaztva a Tee
 
-Show hook strength indicator
-== Horog erősségi indikátor mutatása
-
 Hook collision line
 == Horog érintkező vonal indikátora
 
@@ -1572,6 +1569,9 @@ Saving settings to '%s' failed
 Error saving settings
 == 
 
+Loading demo file from storage
+== 
+
 Quitting. Please wait…
 == 
 
@@ -1657,6 +1657,9 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+No login required
 == 
 
 Communities
@@ -1777,6 +1780,9 @@ Activate all
 Deactivate all
 == 
 
+Player info change cooldown
+== 
+
 Axis
 == 
 
@@ -1789,16 +1795,37 @@ Info Messages
 Show local time always
 == 
 
+Always show chat
+== 
+
 Chat font size
 == 
 
 Chat width
 == 
 
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
 Authed name color in scoreboard
 == 
 
 Same clan color in scoreboard
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
 == 
 
 Show finish messages

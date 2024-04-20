@@ -1549,9 +1549,6 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == Opacitet av freeze bars i freeze
 
-Show hook strength indicator
-== Visa hook styrka indikator
-
 Hook collision line
 == Hook kollisions linje
 
@@ -1821,3 +1818,33 @@ Friends
 
 Loading…
 == Laddar…
+
+Loading demo file from storage
+== 
+
+No login required
+== 
+
+Player info change cooldown
+== 
+
+Always show chat
+== 
+
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
+== 

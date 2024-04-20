@@ -601,6 +601,9 @@ The format of texture %s is not RGBA which will cause visual bugs.
 Preparing demo playback
 == 
 
+Loading demo file from storage
+== 
+
 Why are you slowmo replaying to read this?
 == 
 
@@ -697,28 +700,10 @@ Reset
 Press a key…
 == 
 
-Main menu
-== 
-
 Demos
 == 
 
-Trying to determine UDP connectivity...
-== 
-
-UDP seems to be filtered.
-== 
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
-
-No answer from server yet.
-== 
-
-Getting game info
-== 
-
-Requesting to join the game
+Main menu
 == 
 
 Rename folder
@@ -793,6 +778,24 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.org
 == 
 
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
 Error loading demo
 == 
 
@@ -809,6 +812,9 @@ Has people playing
 == 
 
 Server not full
+== 
+
+No login required
 == 
 
 Strict gametype filter
@@ -1140,6 +1146,9 @@ Automatically create statboard csv
 == 
 
 Max CSVs
+== 
+
+Player info change cooldown
 == 
 
 Download skins
@@ -1486,6 +1495,9 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Always show chat
+== 
+
 Show names in chat in team colors
 == 
 
@@ -1528,7 +1540,13 @@ Clan plates size
 Use team colors for name plates
 == 
 
-Show hook strength indicator
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
 == 
 
 Show other players' key presses
@@ -1546,7 +1564,16 @@ Same clan color in scoreboard
 Hook collision line
 == 
 
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
 Show other players' hook collision lines
+== 
+
+Always show other players' hook collision lines
 == 
 
 Hook collision line width

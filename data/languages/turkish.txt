@@ -1498,9 +1498,6 @@ Use old chat style
 Preview
 == Önizleme
 
-Show hook strength indicator
-== Kanca gücü göstergesini göster
-
 Show local player's key presses
 == Yerel oyuncunun tuş basışlarını göster
 
@@ -1774,10 +1771,6 @@ No demo selected
 Created
 == Oluşturuldu
 
-Netversion
-== 
-
-[Demo details]
 map not included
 == Harita dahil değil
 
@@ -1825,3 +1818,36 @@ Regular background color
 
 Entities background color
 == Yapı arka plan rengi
+
+Loading demo file from storage
+== 
+
+No login required
+== 
+
+Netversion
+== 
+
+Player info change cooldown
+== 
+
+Always show chat
+== 
+
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
+== 

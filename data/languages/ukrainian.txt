@@ -1474,9 +1474,6 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == Непрозорість індикатора фрізу всередині фріза
 
-Show hook strength indicator
-== Показати індикатор міцності гака
-
 Hook collision line
 == Лінія колізій гаків
 
@@ -1738,6 +1735,9 @@ Saving settings to '%s' failed
 Error saving settings
 == 
 
+Loading demo file from storage
+== 
+
 Searching
 == 
 
@@ -1783,6 +1783,9 @@ There's an unsaved map in the editor, you might want to save it.
 Continue anyway?
 == 
 
+No login required
+== 
+
 Communities
 == 
 
@@ -1798,10 +1801,16 @@ Please use a different filename
 Loading…
 == 
 
+Player info change cooldown
+== 
+
 Info Messages
 == 
 
 Show local time always
+== 
+
+Always show chat
 == 
 
 Chat font size
@@ -1810,10 +1819,28 @@ Chat font size
 Chat width
 == 
 
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
 Authed name color in scoreboard
 == 
 
 Same clan color in scoreboard
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
 == 
 
 Show finish messages

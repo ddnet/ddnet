@@ -1376,9 +1376,6 @@ Show DDRace HUD
 Show jumps indicator
 == Показывать индикатор прыжка
 
-Show hook strength indicator
-== Показывать тип крюка
-
 Hook collision line
 == Линия коллизии крюка
 
@@ -1832,3 +1829,33 @@ Friends
 
 Loading…
 == Загрузка…
+
+Loading demo file from storage
+== 
+
+No login required
+== 
+
+Player info change cooldown
+== 
+
+Always show chat
+== 
+
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
+== 

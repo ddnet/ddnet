@@ -1390,9 +1390,6 @@ Show DDRace HUD
 Show jumps indicator
 == 顯示跳躍次數
 
-Show hook strength indicator
-== 顯示對其他玩家的鈎索强度
-
 Hook collision line
 == 瞄準輔助綫
 
@@ -1846,3 +1843,33 @@ Friends
 
 Loading…
 == 正在載入...
+
+Loading demo file from storage
+== 
+
+No login required
+== 
+
+Player info change cooldown
+== 
+
+Always show chat
+== 
+
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
+== 
