@@ -1388,9 +1388,6 @@ Show DDRace HUD
 Show jumps indicator
 == Mostrar indicador de pulos
 
-Show hook strength indicator
-== Mostrar indicador de força do gancho
-
 Hook collision line
 == Linha de colisão do gancho
 
@@ -1844,3 +1841,33 @@ Friends
 
 Loading…
 == Carregando…
+
+Loading demo file from storage
+== 
+
+No login required
+== 
+
+Player info change cooldown
+== 
+
+Always show chat
+== 
+
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
+== 

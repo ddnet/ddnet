@@ -1168,6 +1168,9 @@ Connected
 Loading map file from storage
 == 
 
+Loading demo file from storage
+== 
+
 Why are you slowmo replaying to read this?
 == 
 
@@ -1255,24 +1258,6 @@ Press a key…
 Main menu
 == 
 
-Trying to determine UDP connectivity...
-== 
-
-UDP seems to be filtered.
-== 
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
-
-No answer from server yet.
-== 
-
-Getting game info
-== 
-
-Requesting to join the game
-== 
-
 Rename folder
 == 
 
@@ -1315,6 +1300,24 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
 Loading menu images
 == 
 
@@ -1340,6 +1343,9 @@ CHN
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+No login required
 == 
 
 Communities
@@ -1538,6 +1544,9 @@ Open the directory that contains the configuration and user files
 Open the directory to add custom themes
 == 
 
+Player info change cooldown
+== 
+
 Download community skins
 == 
 
@@ -1675,13 +1684,22 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Always show chat
+== 
+
 Chat font size
 == 
 
 Chat width
 == 
 
-Show hook strength indicator
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
 == 
 
 Show local player's key presses
@@ -1694,6 +1712,15 @@ Same clan color in scoreboard
 == 
 
 Hook collision line
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
 == 
 
 Hook collision line width

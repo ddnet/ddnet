@@ -1285,9 +1285,6 @@ Clan plates size
 Use team colors for name plates
 ==  ﻡﺎﻧ کﻼﭘ ﯼﺍﺮﺑ ﯽﻤﯿﺗ ﯼﺎﻫ ﮓﻧﺭ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
 
-Show hook strength indicator
-== ﺏﻼﻗ ﺕﺭﺪﻗ ﺮﮕﻧﺎﺸﻧ ﺶﯾﺎﻤﻧ
-
 Show other players' key presses
 == ﺮﮕﯾﺩ ﻥﺎﻨﮑﯾﺯﺎﺑ ﺪﯿﻠﮐ ﺭﺎﺸﻓ ﺶﯾﺎﻤﻧ
 
@@ -1548,6 +1545,9 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Loading demo file from storage
+== 
+
 Initializing map logic
 == 
 
@@ -1636,6 +1636,9 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+No login required
 == 
 
 Communities
@@ -1759,6 +1762,9 @@ Activate all
 Deactivate all
 == 
 
+Player info change cooldown
+== 
+
 Create a random skin
 == 
 
@@ -1774,16 +1780,37 @@ Info Messages
 Show local time always
 == 
 
+Always show chat
+== 
+
 Chat font size
 == 
 
 Chat width
 == 
 
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
 Authed name color in scoreboard
 == 
 
 Same clan color in scoreboard
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
 == 
 
 Show finish messages

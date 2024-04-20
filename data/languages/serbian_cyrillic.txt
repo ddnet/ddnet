@@ -1302,9 +1302,6 @@ Use old chat style
 Preview
 == Преглед
 
-Show hook strength indicator
-== Прикажи јачину куке индикатор
-
 Show local player's key presses
 == Прикажи своје акције
 
@@ -1446,6 +1443,9 @@ Saving settings to '%s' failed
 Error saving settings
 == 
 
+Loading demo file from storage
+== 
+
 Initializing components
 == 
 
@@ -1537,6 +1537,9 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+No login required
 == 
 
 Communities
@@ -1723,6 +1726,9 @@ Open the directory that contains the configuration and user files
 Open the directory to add custom themes
 == 
 
+Player info change cooldown
+== 
+
 Create a random skin
 == 
 
@@ -1753,16 +1759,37 @@ Info Messages
 Show local time always
 == 
 
+Always show chat
+== 
+
 Chat font size
 == 
 
 Chat width
 == 
 
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
 Authed name color in scoreboard
 == 
 
 Same clan color in scoreboard
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
 == 
 
 Show finish messages

@@ -585,6 +585,9 @@ Connected
 Loading map file from storage
 == 
 
+Loading demo file from storage
+== 
+
 Loading DDNet Client
 == 
 
@@ -690,6 +693,12 @@ Reset
 Press a key…
 == 
 
+Settings
+== 
+
+Editor
+== 
+
 Main menu
 == 
 
@@ -697,30 +706,6 @@ Browser
 == 
 
 Ghost
-== 
-
-Settings
-== 
-
-Editor
-== 
-
-Trying to determine UDP connectivity...
-== 
-
-UDP seems to be filtered.
-== 
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
-
-No answer from server yet.
-== 
-
-Getting game info
-== 
-
-Requesting to join the game
 == 
 
 Reconnect in %d sec
@@ -813,6 +798,24 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.org
 == 
 
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
 Theme
 == 
 
@@ -862,6 +865,9 @@ Exclude
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+No login required
 == 
 
 Filter connecting players
@@ -1171,6 +1177,9 @@ Max CSVs
 Dummy
 == 
 
+Player info change cooldown
+== 
+
 Download skins
 == 
 
@@ -1452,6 +1461,9 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Always show chat
+== 
+
 Show names in chat in team colors
 == 
 
@@ -1497,7 +1509,13 @@ Show clan above name plates
 Clan plates size
 == 
 
-Show hook strength indicator
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
 == 
 
 Show other players' key presses
@@ -1515,7 +1533,16 @@ Same clan color in scoreboard
 Hook collision line
 == 
 
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
 Show other players' hook collision lines
+== 
+
+Always show other players' hook collision lines
 == 
 
 Hook collision line width

@@ -1498,9 +1498,6 @@ Show clan above name plates
 Clan plates size
 == Veľkosť menoviek klanu
 
-Show hook strength indicator
-== Zobraziť indikátor sily háku
-
 Show other players' key presses
 == Zobraziť stlačenie klávesov ostatných hráčov
 
@@ -1819,3 +1816,33 @@ Grabs
 
 Moved ingame
 == Presunutý v hre
+
+Loading demo file from storage
+== 
+
+No login required
+== 
+
+Player info change cooldown
+== 
+
+Always show chat
+== 
+
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
+== 

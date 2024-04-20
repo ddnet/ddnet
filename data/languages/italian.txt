@@ -1309,9 +1309,6 @@ Opacity of freeze bars inside freeze
 Preview
 == Anteprima
 
-Show hook strength indicator
-== Mostra l'indicatore della forza del gancio
-
 Show local player's key presses
 == Mostra le pressioni dei tasti del giocatore locale
 
@@ -1441,6 +1438,9 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Loading demo file from storage
+== 
+
 Why are you slowmo replaying to read this?
 == 
 
@@ -1532,6 +1532,9 @@ SA
 == 
 
 CHN
+== 
+
+No login required
 == 
 
 Communities
@@ -1712,6 +1715,9 @@ Open the directory to add custom themes
 Dummy
 == 
 
+Player info change cooldown
+== 
+
 Converse
 == 
 
@@ -1770,16 +1776,37 @@ Show local time always
 DDRace HUD
 == 
 
+Always show chat
+== 
+
 Chat font size
 == 
 
 Chat width
 == 
 
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
 Authed name color in scoreboard
 == 
 
 Same clan color in scoreboard
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
 == 
 
 A Tee
