@@ -47,7 +47,7 @@ void CSkins::CGetPngFile::OnCompletion(EHttpState State)
 	// Maybe this should start another thread to load the png in instead of stalling the curl thread
 	if(State == EHttpState::DONE)
 	{
-		m_pSkins->LoadSkinPNG(m_Info, Dest(), Dest(), IStorage::TYPE_SAVE);
+		m_pSkins->LoadSkinPng(m_Info, Dest(), Dest(), IStorage::TYPE_SAVE);
 	}
 }
 
@@ -134,14 +134,14 @@ static void CheckMetrics(CSkin::SSkinMetricVariable &Metrics, const uint8_t *pIm
 const CSkin *CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 {
 	CImageInfo Info;
-	if(!LoadSkinPNG(Info, pName, pPath, DirType))
+	if(!LoadSkinPng(Info, pName, pPath, DirType))
 		return nullptr;
 	return LoadSkin(pName, Info);
 }
 
-bool CSkins::LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType)
+bool CSkins::LoadSkinPng(CImageInfo &Info, const char *pName, const char *pPath, int DirType)
 {
-	if(!Graphics()->LoadPNG(&Info, pPath, DirType))
+	if(!Graphics()->LoadPng(Info, pPath, DirType))
 	{
 		log_error("skins", "Failed to load skin PNG: %s", pName);
 		return false;

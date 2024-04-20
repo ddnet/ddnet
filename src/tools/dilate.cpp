@@ -31,7 +31,7 @@ int DilateFile(const char *pFilename)
 		CImageInfo Img;
 		EImageFormat ImageFormat;
 		int PngliteIncompatible;
-		if(LoadPNG(ImageByteBuffer, pFilename, PngliteIncompatible, Img.m_Width, Img.m_Height, Img.m_pData, ImageFormat))
+		if(LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, Img.m_Width, Img.m_Height, Img.m_pData, ImageFormat))
 		{
 			if(ImageFormat != IMAGE_FORMAT_RGBA)
 			{
@@ -49,7 +49,7 @@ int DilateFile(const char *pFilename)
 				TImageByteBuffer ByteBuffer2;
 				SImageByteBuffer ImageByteBuffer2(&ByteBuffer2);
 
-				if(SavePNG(IMAGE_FORMAT_RGBA, Img.m_pData, ImageByteBuffer2, Img.m_Width, Img.m_Height))
+				if(SavePng(IMAGE_FORMAT_RGBA, Img.m_pData, ImageByteBuffer2, Img.m_Width, Img.m_Height))
 					io_write(SaveFile, &ByteBuffer2.front(), ByteBuffer2.size());
 				io_close(SaveFile);
 

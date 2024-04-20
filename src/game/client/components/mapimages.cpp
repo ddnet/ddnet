@@ -240,20 +240,20 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 		CImageInfo ImgInfo;
 		char aPath[IO_MAX_PATH_LENGTH];
 		str_format(aPath, sizeof(aPath), "%s/%s.png", m_aEntitiesPath, gs_apModEntitiesNames[EntitiesModType]);
-		Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+		Graphics()->LoadPng(ImgInfo, aPath, IStorage::TYPE_ALL);
 
 		// try as single ddnet replacement
 		if(ImgInfo.m_pData == nullptr && EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET)
 		{
 			str_format(aPath, sizeof(aPath), "%s.png", m_aEntitiesPath);
-			Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+			Graphics()->LoadPng(ImgInfo, aPath, IStorage::TYPE_ALL);
 		}
 
 		// try default
 		if(ImgInfo.m_pData == nullptr)
 		{
 			str_format(aPath, sizeof(aPath), "editor/entities_clear/%s.png", gs_apModEntitiesNames[EntitiesModType]);
-			Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
+			Graphics()->LoadPng(ImgInfo, aPath, IStorage::TYPE_ALL);
 		}
 
 		if(ImgInfo.m_pData != nullptr)

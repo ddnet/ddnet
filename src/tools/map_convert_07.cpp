@@ -25,7 +25,7 @@ int g_NextDataItemId = -1;
 
 int g_aImageIds[MAX_MAPIMAGES];
 
-int LoadPNG(CImageInfo *pImg, const char *pFilename)
+int LoadPng(CImageInfo *pImg, const char *pFilename)
 {
 	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
 	if(File)
@@ -50,7 +50,7 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 		uint8_t *pImgBuffer = NULL;
 		EImageFormat ImageFormat;
 		int PngliteIncompatible;
-		if(LoadPNG(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
+		if(LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
 		{
 			pImg->m_pData = pImgBuffer;
 
@@ -120,7 +120,7 @@ void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, CMapItemImage *pNewIm
 	CImageInfo ImgInfo;
 	char aStr[IO_MAX_PATH_LENGTH];
 	str_format(aStr, sizeof(aStr), "data/mapres/%s.png", pName);
-	if(!LoadPNG(&ImgInfo, aStr))
+	if(!LoadPng(&ImgInfo, aStr))
 		return pImgItem; // keep as external if we don't have a mapres to replace
 
 	if(ImgInfo.m_Format != CImageInfo::FORMAT_RGBA)

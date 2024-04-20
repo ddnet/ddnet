@@ -2323,7 +2323,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 	str_format(aPath, sizeof(aPath), "menuimages/%s", pName);
 
 	CImageInfo Info;
-	if(!pSelf->Graphics()->LoadPNG(&Info, aPath, DirType))
+	if(!pSelf->Graphics()->LoadPng(Info, aPath, DirType))
 	{
 		char aError[IO_MAX_PATH_LENGTH + 64];
 		str_format(aError, sizeof(aError), "Failed to load menu image from '%s'", aPath);

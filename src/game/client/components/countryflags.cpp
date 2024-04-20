@@ -63,7 +63,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		char aBuf[128];
 		CImageInfo Info;
 		str_format(aBuf, sizeof(aBuf), "countryflags/%s.png", aOrigin);
-		if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
+		if(!Graphics()->LoadPng(Info, aBuf, IStorage::TYPE_ALL))
 		{
 			char aMsg[128];
 			str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
