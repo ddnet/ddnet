@@ -99,6 +99,7 @@ public:
 	const CData *EmptyDelta() const;
 	int CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, void *pDstData);
 	int UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize);
+	int DebugDumpDelta(const void *pSrcData, int DataSize);
 };
 
 // CSnapshotStorage
