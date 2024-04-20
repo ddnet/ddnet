@@ -5,12 +5,13 @@
 #   Cammodude 2024-09-03 22:19:06
 #   Cammodude 2024-10-03 18:04:16
 #   Cammodude 2024-12-04 17:35:38
+#   Cammodude 2024-20-04 15:17:26
 ##### /authors #####
 
 ##### translated strings #####
 
 %ds left
-== %ds lahkus
+== %ds jäänud
 
 %i minute left
 == %i minut jäänud
@@ -1814,34 +1815,34 @@ Moved ingame
 == Mängusisene liikumine
 
 Loading demo file from storage
-== 
+== Demofaili laadimine mälust
 
 No login required
-== 
+== Sisse pole vaja logida
 
 Player info change cooldown
-== 
+== Mängija info muutmise viivitus
 
 Always show chat
-== 
+== Alati näita vestlust
 
 Show friend mark (♥) in name plates
-== 
+== Näita sõbra märki (♥) nimesiltides
 
 Show hook strength icon indicator
-== 
+== Näita konksu jõu ikooni indikaatorit
 
 Show hook strength number indicator
-== 
+== Näita konksu jõu numbri indikaatorit
 
 Show own player's hook collision line
-== 
+== Näita enda konksu kokkupõrkejoont
 
 Always show own player's hook collision line
-== 
+== Alati näita enda konksu kokkupõrkejoont
 
 Always show other players' hook collision lines
-== 
+== Alati näita teiste konksu kokkupõrkejoont
 
 Net
-== 
+== Võrk
