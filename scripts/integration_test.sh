@@ -167,7 +167,7 @@ function wait_for_fifo() {
 			print_results
 			exit 1
 		fi
-		sleep 1
+		sleep 0.1
 	done
 }
 
@@ -175,10 +175,10 @@ function wait_for_launch() {
 	local fifo="$1"
 	local baseDuration="$2"
 	if [ "$arg_valgrind_memcheck" == "1" ]; then
-		wait_for_fifo "$fifo" $((40 * baseDuration))
+		wait_for_fifo "$fifo" $((400 * baseDuration))
 		sleep $((8 * baseDuration))
 	else
-		wait_for_fifo "$fifo" $((10 * baseDuration))
+		wait_for_fifo "$fifo" $((100 * baseDuration))
 		sleep "$baseDuration"
 	fi
 }
@@ -203,12 +203,11 @@ $tool ../DDNet \
 	$client_args
 	connect localhost:$port" > stdout_client1.txt 2> stderr_client1.txt || fail client1 "$?" &
 
-wait_for_launch client1.fifo 5
+wait_for_launch client1.fifo 3
 
 echo "[*] Start demo recording"
 echo "record server" > server.fifo
 echo "record client1" > client1.fifo
-sleep 1
 
 echo "[*] Launch client 2"
 $tool ../DDNet \
@@ -219,6 +218,9 @@ $tool ../DDNet \
 	connect localhost:$port" > stdout_client2.txt 2> stderr_client2.txt || fail client2 "$?" &
 
 wait_for_launch client2.fifo 5
+
+# wait for tees to finish
+sleep 15
 
 echo "[*] Test chat and chat commands"
 echo "say hello world" > client1.fifo
@@ -313,20 +315,25 @@ then
 fi
 
 ranks="$(sqlite3 ddnet-server.sqlite < <(echo "select * from record_race;"))"
-num_ranks="$(echo "$ranks" | wc -l | xargs)"
+rank_time="$(echo "$ranks" | awk -F '|' '{ print "player:", $2, "time:", $4, "cps:", $6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28 }')"
+expected_times="\
+player: client2 time: 1020.98 cps: 0.02 0.1 0.2 0.26 0.32 600.36 600.42 600.46 600.5 1020.54 1020.58 1020.6 1020.64 1020.66 1020.7 1020.72 1020.76 1020.78 1020.8 1020.84 1020.86 1020.88 1020.9
+player: client2 time: 1020.38 cps: 1021.34 0.02 0.04 0.04 0.06 600.08 600.1 600.12 600.12 1020.14 1020.16 1020.18 1020.2 1020.2 1020.22 1020.24 1020.26 1020.26 1020.28 1020.3 1020.3 1020.32 1020.34
+player: client1 time: 6248.56 cps: 0.42 0.5 0.0 0.66 0.92 0.02 300.18 300.46 300.76 300.88 300.98 301.02 301.04 301.06 301.08 301.18 301.38 301.66 307.34 308.08 308.1 308.14 308.44
+player: client1 time: 168300.5 cps: 0.02 0.06 0.12 15300.14 15300.18 30600.2 30600.22 45900.24 45900.26 61200.28 61200.3 76500.32 76500.34 91800.36 91800.36 107100.38 107100.4 122400.42 122400.42 137700.44 137700.45 137700.45 153000.48
+player: client2 time: 302.02 cps: 0.42 0.5 0.0 0.66 0.92 0.02 300.18 300.46 300.76 300.88 300.98 301.16 301.24 301.28 301.3 301.86 301.96 0.0 0.0 0.0 0.0 0.0 0.0"
+
+# require at least one rank in all cases. Exact finishes only with valgrind disabled
 if [ "$ranks" == "" ]
 then
 	touch fail_ranks.txt
 	echo "[-] Error: no ranks found in database"
-elif [ "$num_ranks" != "1" ]
+elif [ "$arg_valgrind_memcheck" != "1" ] && [ "$rank_time" != "$expected_times" ]
 then
 	touch fail_ranks.txt
-	echo "[-] Error: expected 1 rank got $num_ranks"
-elif ! echo "$ranks" | grep -q client1
-then
-	touch fail_ranks.txt
-	echo "[-] Error: expected a rank from client1 instead got:"
-	echo "  $ranks"
+	echo "[-] Error: unexpected finish time"
+	echo "  expected: $expected_times"
+	echo "  got: $rank_time"
 fi
 
 for logfile in client1.log client2.log server.log
