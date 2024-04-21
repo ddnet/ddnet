@@ -208,6 +208,13 @@ CGameConsole::CInstance::CInstance(int Type)
 
 	m_IsCommand = false;
 
+	m_Backlog.SetPopCallback([this](CBacklogEntry *pEntry) {
+		if(pEntry->m_LineCount != -1)
+		{
+			m_NewLineCounter -= pEntry->m_LineCount;
+		}
+	});
+
 	m_Input.SetClipboardLineCallback([this](const char *pStr) { ExecuteLine(pStr); });
 
 	m_CurrentMatchIndex = -1;
@@ -1135,7 +1142,7 @@ void CGameConsole::OnRender()
 		}
 
 		pConsole->PumpBacklogPending();
-		if(pConsole->m_NewLineCounter > 0)
+		if(pConsole->m_NewLineCounter != 0)
 		{
 			pConsole->UpdateSearch();
 
@@ -1145,6 +1152,8 @@ void CGameConsole::OnRender()
 				pConsole->m_BacklogCurLine += pConsole->m_NewLineCounter;
 				pConsole->m_BacklogLastActiveLine += pConsole->m_NewLineCounter;
 			}
+			if(pConsole->m_NewLineCounter < 0)
+				pConsole->m_NewLineCounter = 0;
 		}
 
 		// render console log (current entry, status, wrap lines)
