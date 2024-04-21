@@ -5,6 +5,8 @@
 
 #include <base/system.h>
 
+#include <functional>
+
 class CRingBufferBase
 {
 	class CItem
@@ -25,6 +27,8 @@ class CRingBufferBase
 	int m_Size;
 	int m_Flags;
 
+	std::function<void(void *pCurrent)> m_PopCallback = nullptr;
+
 	CItem *NextBlock(CItem *pItem);
 	CItem *PrevBlock(CItem *pItem);
 	CItem *MergeBack(CItem *pItem);
@@ -39,6 +43,7 @@ protected:
 
 	void Init(void *pMemory, int Size, int Flags);
 	int PopFirst();
+	void SetPopCallback(const std::function<void(void *pCurrent)> PopCallback);
 
 public:
 	enum
@@ -55,6 +60,12 @@ class CTypedRingBuffer : public CRingBufferBase
 public:
 	T *Allocate(int Size) { return (T *)CRingBufferBase::Allocate(Size); }
 	int PopFirst() { return CRingBufferBase::PopFirst(); }
+	void SetPopCallback(std::function<void(T *pCurrent)> PopCallback)
+	{
+		CRingBufferBase::SetPopCallback([PopCallback](void *pCurrent) {
+			PopCallback((T *)pCurrent);
+		});
+	}
 
 	T *Prev(T *pCurrent) { return (T *)CRingBufferBase::Prev(pCurrent); }
 	T *Next(T *pCurrent) { return (T *)CRingBufferBase::Next(pCurrent); }

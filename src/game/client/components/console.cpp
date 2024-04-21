@@ -208,6 +208,13 @@ CGameConsole::CInstance::CInstance(int Type)
 
 	m_IsCommand = false;
 
+	m_Backlog.SetPopCallback([this](CBacklogEntry *pEntry) {
+		if(pEntry->m_LineCount != -1)
+		{
+			m_NewLineCounter -= pEntry->m_LineCount;
+		}
+	});
+
 	m_Input.SetClipboardLineCallback([this](const char *pStr) { ExecuteLine(pStr); });
 
 	m_CurrentMatchIndex = -1;
@@ -236,7 +243,7 @@ void CGameConsole::CInstance::ClearBacklog()
 void CGameConsole::CInstance::UpdateBacklogTextAttributes()
 {
 	// Pending backlog entries are not handled because they don't have text attributes yet.
-	for(CInstance::CBacklogEntry *pEntry = m_Backlog.First(); pEntry; pEntry = m_Backlog.Next(pEntry))
+	for(CBacklogEntry *pEntry = m_Backlog.First(); pEntry; pEntry = m_Backlog.Next(pEntry))
 	{
 		UpdateEntryTextAttributes(pEntry);
 	}
@@ -244,27 +251,29 @@ void CGameConsole::CInstance::UpdateBacklogTextAttributes()
 
 void CGameConsole::CInstance::PumpBacklogPending()
 {
-	std::vector<CInstance::CBacklogEntry *> vpEntries;
 	{
 		// We must ensure that no log messages are printed while owning
 		// m_BacklogPendingLock or this will result in a dead lock.
 		const CLockScope LockScopePending(m_BacklogPendingLock);
-		for(CInstance::CBacklogEntry *pPendingEntry = m_BacklogPending.First(); pPendingEntry; pPendingEntry = m_BacklogPending.Next(pPendingEntry))
+		for(CBacklogEntry *pPendingEntry = m_BacklogPending.First(); pPendingEntry; pPendingEntry = m_BacklogPending.Next(pPendingEntry))
 		{
 			const size_t EntrySize = sizeof(CBacklogEntry) + pPendingEntry->m_Length;
 			CBacklogEntry *pEntry = m_Backlog.Allocate(EntrySize);
 			mem_copy(pEntry, pPendingEntry, EntrySize);
-			vpEntries.push_back(pEntry);
 		}
 
 		m_BacklogPending.Init();
 	}
 
+	// Update text attributes and count number of added lines
 	m_pGameConsole->Ui()->MapScreen();
-	for(CInstance::CBacklogEntry *pEntry : vpEntries)
+	for(CBacklogEntry *pEntry = m_Backlog.First(); pEntry; pEntry = m_Backlog.Next(pEntry))
 	{
-		UpdateEntryTextAttributes(pEntry);
-		m_NewLineCounter += pEntry->m_LineCount;
+		if(pEntry->m_LineCount == -1)
+		{
+			UpdateEntryTextAttributes(pEntry);
+			m_NewLineCounter += pEntry->m_LineCount;
+		}
 	}
 }
 
@@ -1133,7 +1142,7 @@ void CGameConsole::OnRender()
 		}
 
 		pConsole->PumpBacklogPending();
-		if(pConsole->m_NewLineCounter > 0)
+		if(pConsole->m_NewLineCounter != 0)
 		{
 			pConsole->UpdateSearch();
 
@@ -1143,6 +1152,8 @@ void CGameConsole::OnRender()
 				pConsole->m_BacklogCurLine += pConsole->m_NewLineCounter;
 				pConsole->m_BacklogLastActiveLine += pConsole->m_NewLineCounter;
 			}
+			if(pConsole->m_NewLineCounter < 0)
+				pConsole->m_NewLineCounter = 0;
 		}
 
 		// render console log (current entry, status, wrap lines)

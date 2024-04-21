@@ -123,10 +123,20 @@ void *CRingBufferBase::Allocate(int Size)
 	return (void *)(pBlock + 1);
 }
 
+void CRingBufferBase::SetPopCallback(std::function<void(void *pCurrent)> PopCallback)
+{
+	m_PopCallback = std::move(PopCallback);
+}
+
 int CRingBufferBase::PopFirst()
 {
 	if(m_pConsume->m_Free)
 		return 0;
+
+	if(m_PopCallback)
+	{
+		m_PopCallback(m_pConsume + 1);
+	}
 
 	// set the free flag
 	m_pConsume->m_Free = 1;
