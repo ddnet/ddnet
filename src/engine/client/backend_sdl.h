@@ -1,6 +1,7 @@
 #ifndef ENGINE_CLIENT_BACKEND_SDL_H
 #define ENGINE_CLIENT_BACKEND_SDL_H
 
+#include <SDL.h>
 #include <SDL_video.h>
 
 #include <base/detect.h>
@@ -273,6 +274,8 @@ public:
 	bool HasQuadContainerBuffering() override { return m_Capabilites.m_QuadContainerBuffering; }
 	bool Uses2DTextureArrays() override { return m_Capabilites.m_2DArrayTextures; }
 	bool HasTextureArraysSupport() override { return m_Capabilites.m_2DArrayTextures || m_Capabilites.m_3DTextures; }
+
+	int ScreenSwitchCallback(void *userdata, SDL_Event *event);
 
 	const char *GetErrorString() override
 	{

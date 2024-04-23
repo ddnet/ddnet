@@ -768,11 +768,6 @@ void CGameClient::OnRender()
 				m_aCheckInfo[1]--;
 		}
 	}
-
-#if !defined(CONF_HEADLESS_CLIENT)
-	if(Graphics()->GetWindowScreen() != g_Config.m_GfxScreen)
-		Client()->SwitchWindowScreen(Graphics()->GetWindowScreen());
-#endif
 }
 
 void CGameClient::OnDummyDisconnect()
