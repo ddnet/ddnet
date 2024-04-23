@@ -47,7 +47,7 @@ Automatically record demos
 == Demoları avtomatik olaraq qeyd edin
 
 Automatically take game over screenshot
-==
+== 
 
 Blue team
 == Mavi qrup
@@ -404,7 +404,7 @@ Try again
 == Yenidən cəhd elə
 
 Type
-= Növü
+== Növü
 
 Unable to rename the demo
 == Demonun adını dəyişdirmək olmaz
