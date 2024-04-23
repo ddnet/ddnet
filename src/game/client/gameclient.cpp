@@ -769,8 +769,10 @@ void CGameClient::OnRender()
 		}
 	}
 
+#if !defined(CONF_HEADLESS_CLIENT)
 	if(Graphics()->GetWindowScreen() != g_Config.m_GfxScreen)
 		Client()->SwitchWindowScreen(Graphics()->GetWindowScreen());
+#endif
 }
 
 void CGameClient::OnDummyDisconnect()
