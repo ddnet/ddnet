@@ -240,7 +240,7 @@ Mute when not active
 == Aktif değilken sessizleştir
 
 Name
-== Takma ad
+== Sunucu ismi
 
 Next weapon
 == Sonraki silah
@@ -576,7 +576,7 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 == DDRaceNetwork bitiş çizgisine en kısa sürede ulaşmayı amaçlayan oyunculardan oluşan, çevrimiçi bir takım oyunudur. Çaylak olarak ilk önce kolay haritalardan yani Novice sunuculardan oynamaya başlamanı öneririz. Herhangi bir sunucu seçmeden önce sana yakın olan sunucuyu seçmek için ping'i dikkate al.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== İntihar etmek (yeniden başlamak) için k tuşu, oyunu durdurup diğer oyuncuları izlemek için q tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
+== Ölmek (yeniden başlamak) için "k" tuşu, oyunu durdurup diğer oyuncuları izlemek için "q" tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Sunuculara bağlanmadan önce ayarları kontrol edip kendine göre düzenlemeni öneriyoruz.
@@ -717,7 +717,7 @@ Pause
 == Durdur
 
 Kill
-== İntihar et
+== Öl
 
 Zoom in
 == Yakınlaştır
@@ -1626,7 +1626,7 @@ Can't find a Tutorial server
 == Öğretici sunucu bulunamıyor
 
 Website
-== İnternet sitesi
+== Web sitesi
 
 Settings
 == Ayarlar
