@@ -185,6 +185,11 @@ turkish
 == 792
 == tr
 
+azerbaijanese
+== Azərbaycan
+== 31
+== az
+
 ukrainian
 == Українська
 == 804
