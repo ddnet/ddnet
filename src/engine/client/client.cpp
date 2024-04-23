@@ -588,6 +588,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_aapSnapshots[0][SNAP_CURRENT] = 0;
 	m_aapSnapshots[0][SNAP_PREV] = 0;
 	m_aReceivedSnapshots[0] = 0;
+	m_LastDummy = false;
 }
 
 void CClient::Disconnect()
@@ -598,12 +599,12 @@ void CClient::Disconnect()
 	}
 }
 
-bool CClient::DummyConnected()
+bool CClient::DummyConnected() const
 {
 	return m_DummyConnected;
 }
 
-bool CClient::DummyConnecting()
+bool CClient::DummyConnecting() const
 {
 	return !m_DummyConnected && m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy);
 }
@@ -653,7 +654,7 @@ void CClient::DummyDisconnect(const char *pReason)
 	GameClient()->OnDummyDisconnect();
 }
 
-bool CClient::DummyAllowed()
+bool CClient::DummyAllowed() const
 {
 	return m_ServerCapabilities.m_AllowDummy;
 }
@@ -1300,6 +1301,12 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 
 void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 {
+	// only allow packets from the server we actually want
+	if(net_addr_comp(&pPacket->m_Address, &ServerAddress()))
+	{
+		return;
+	}
+
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
@@ -1462,12 +1469,17 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Conn == CONN_MAIN && Msg == NETMSG_MAP_DATA)
 		{
+			if(!m_MapdownloadFileTemp)
+			{
+				return;
+			}
+
 			int Last = Unpacker.GetInt();
 			int MapCRC = Unpacker.GetInt();
 			int Chunk = Unpacker.GetInt();
 			int Size = Unpacker.GetInt();
 			const unsigned char *pData = Unpacker.GetRaw(Size);
-			if(Unpacker.Error() || Size <= 0 || MapCRC != m_MapdownloadCrc || Chunk != m_MapdownloadChunk || !m_MapdownloadFileTemp)
+			if(Unpacker.Error() || Size <= 0 || MapCRC != m_MapdownloadCrc || Chunk != m_MapdownloadChunk)
 			{
 				return;
 			}
@@ -1662,12 +1674,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
 		{
-			// only allow packets from the server we actually want
-			if(net_addr_comp(&pPacket->m_Address, &ServerAddress()))
-			{
-				return;
-			}
-
 			// we are not allowed to process snapshot yet
 			if(State() < IClient::STATE_LOADING)
 			{
@@ -2204,7 +2210,7 @@ void CClient::LoadDDNetInfo()
 		NETADDR Addr;
 		if(!net_addr_from_str(&Addr, StunServersIpv6[0]))
 		{
-			m_aNetClient->FeedStunServer(Addr);
+			m_aNetClient[CONN_MAIN].FeedStunServer(Addr);
 		}
 	}
 	const json_value &StunServersIpv4 = DDNetInfo["stun-servers-ipv4"];
@@ -2213,7 +2219,7 @@ void CClient::LoadDDNetInfo()
 		NETADDR Addr;
 		if(!net_addr_from_str(&Addr, StunServersIpv4[0]))
 		{
-			m_aNetClient->FeedStunServer(Addr);
+			m_aNetClient[CONN_MAIN].FeedStunServer(Addr);
 		}
 	}
 	const json_value &ConnectingIp = DDNetInfo["connecting-ip"];
@@ -2284,20 +2290,19 @@ void CClient::PumpNetwork()
 
 	// process packets
 	CNetChunk Packet;
-	for(int i = 0; i < NUM_CONNS; i++)
+	for(int Conn = 0; Conn < NUM_CONNS; Conn++)
 	{
-		while(m_aNetClient[i].Recv(&Packet))
+		while(m_aNetClient[Conn].Recv(&Packet))
 		{
 			if(Packet.m_ClientId == -1)
 			{
 				ProcessConnlessPacket(&Packet);
 				continue;
 			}
-			if(i > 1)
+			if(Conn == CONN_MAIN || Conn == CONN_DUMMY)
 			{
-				continue;
+				ProcessServerPacket(&Packet, Conn, g_Config.m_ClDummy ^ Conn);
 			}
-			ProcessServerPacket(&Packet, i, g_Config.m_ClDummy ^ i);
 		}
 	}
 }
@@ -2306,8 +2311,8 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 {
 	// update ticks, they could have changed
 	const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
-	m_aCurGameTick[g_Config.m_ClDummy] = pInfo->m_Info.m_CurrentTick;
-	m_aPrevGameTick[g_Config.m_ClDummy] = pInfo->m_PreviousTick;
+	m_aCurGameTick[0] = pInfo->m_Info.m_CurrentTick;
+	m_aPrevGameTick[0] = pInfo->m_PreviousTick;
 
 	// create a verified and unpacked snapshot
 	unsigned char aAltSnapBuffer[CSnapshot::MAX_SIZE];
@@ -2320,9 +2325,9 @@ void CClient::OnDemoPlayerSnapshot(void *pData, int Size)
 	}
 
 	// handle snapshots after validation
-	std::swap(m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV], m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]);
-	mem_copy(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pSnap, pData, Size);
-	mem_copy(m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT]->m_pAltSnap, pAltSnapBuffer, AltSnapSize);
+	std::swap(m_aapSnapshots[0][SNAP_PREV], m_aapSnapshots[0][SNAP_CURRENT]);
+	mem_copy(m_aapSnapshots[0][SNAP_CURRENT]->m_pSnap, pData, Size);
+	mem_copy(m_aapSnapshots[0][SNAP_CURRENT]->m_pAltSnap, pAltSnapBuffer, AltSnapSize);
 
 	GameClient()->OnNewSnapshot();
 }
@@ -2352,11 +2357,11 @@ void CClient::UpdateDemoIntraTimers()
 {
 	// update timers
 	const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
-	m_aCurGameTick[g_Config.m_ClDummy] = pInfo->m_Info.m_CurrentTick;
-	m_aPrevGameTick[g_Config.m_ClDummy] = pInfo->m_PreviousTick;
-	m_aGameIntraTick[g_Config.m_ClDummy] = pInfo->m_IntraTick;
-	m_aGameTickTime[g_Config.m_ClDummy] = pInfo->m_TickTime;
-	m_aGameIntraTickSincePrev[g_Config.m_ClDummy] = pInfo->m_IntraTickSincePrev;
+	m_aCurGameTick[0] = pInfo->m_Info.m_CurrentTick;
+	m_aPrevGameTick[0] = pInfo->m_PreviousTick;
+	m_aGameIntraTick[0] = pInfo->m_IntraTick;
+	m_aGameTickTime[0] = pInfo->m_TickTime;
+	m_aGameIntraTickSincePrev[0] = pInfo->m_IntraTickSincePrev;
 };
 
 void CClient::Update()
@@ -2381,10 +2386,10 @@ void CClient::Update()
 
 			// update timers
 			const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
-			m_aCurGameTick[g_Config.m_ClDummy] = pInfo->m_Info.m_CurrentTick;
-			m_aPrevGameTick[g_Config.m_ClDummy] = pInfo->m_PreviousTick;
-			m_aGameIntraTick[g_Config.m_ClDummy] = pInfo->m_IntraTick;
-			m_aGameTickTime[g_Config.m_ClDummy] = pInfo->m_TickTime;
+			m_aCurGameTick[0] = pInfo->m_Info.m_CurrentTick;
+			m_aPrevGameTick[0] = pInfo->m_PreviousTick;
+			m_aGameIntraTick[0] = pInfo->m_IntraTick;
+			m_aGameTickTime[0] = pInfo->m_TickTime;
 		}
 		else
 		{
@@ -2858,8 +2863,8 @@ void CClient::Run()
 			m_aCmdEditMap[0] = 0;
 		}
 
-		// progress on dummy connect if security token handshake skipped/passed
-		if(m_DummySendConnInfo && !m_aNetClient[CONN_DUMMY].SecurityTokenUnknown())
+		// progress on dummy connect when the connection is online
+		if(m_DummySendConnInfo && m_aNetClient[CONN_DUMMY].State() == NETSTATE_ONLINE)
 		{
 			m_DummySendConnInfo = false;
 			SendInfo(CONN_DUMMY);
@@ -3597,12 +3602,12 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 
 	for(int SnapshotType = 0; SnapshotType < NUM_SNAPSHOT_TYPES; SnapshotType++)
 	{
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType] = &m_aDemorecSnapshotHolders[SnapshotType];
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_pSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][0];
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_pAltSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][1];
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_SnapSize = 0;
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_AltSnapSize = 0;
-		m_aapSnapshots[g_Config.m_ClDummy][SnapshotType]->m_Tick = -1;
+		m_aapSnapshots[0][SnapshotType] = &m_aDemorecSnapshotHolders[SnapshotType];
+		m_aapSnapshots[0][SnapshotType]->m_pSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][0];
+		m_aapSnapshots[0][SnapshotType]->m_pAltSnap = (CSnapshot *)&m_aaaDemorecSnapshotData[SnapshotType][1];
+		m_aapSnapshots[0][SnapshotType]->m_SnapSize = 0;
+		m_aapSnapshots[0][SnapshotType]->m_AltSnapSize = 0;
+		m_aapSnapshots[0][SnapshotType]->m_Tick = -1;
 	}
 
 	// enter demo playback state
