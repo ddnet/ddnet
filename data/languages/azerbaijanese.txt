@@ -1,8 +1,8 @@
 ##### authors #####
 #originally created by:
-#	Gokturk
+#	    Gokturk and seishiroon 
 #modified by:
-
+#     
 ##### /authors #####
 
 ##### translated strings #####
@@ -23,7 +23,7 @@
 == %i saniyə qaldı
 
 %s wins!
-== %s qalib!
+== %s qalibdir!
 
 Abort
 == Ləğv edin
@@ -47,7 +47,7 @@ Automatically record demos
 == Demoları avtomatik olaraq qeyd edin
 
 Automatically take game over screenshot
-== 
+== Avtomatik olaraq oyun sonu ekran görüntüsü al
 
 Blue team
 == Mavi qrup
@@ -56,7 +56,7 @@ Blue team wins!
 == Mavi qrup qazandı!
 
 Body
-== bədən
+== Bədən
 
 Call vote
 == Səsvermə
@@ -65,19 +65,19 @@ Change settings
 == Parametrləri dəyişdirin
 
 Chat
-== Söhbat
+== Söhbət
 
 Clan
 == Klan
 
 Client
-== Client
+== Klient
 
 Connecting to
 == Bağlanmaq
 
 Connection Problems...
-== Bağlanmaq Problems...
+== Bağlantı Xətası...
 
 Console
 == Konsol
@@ -101,7 +101,7 @@ Delete demo
 == Demo sil
 
 Demofile: %s
-== Demo dosya: %s
+== Demo faylı: %s
 
 Demos
 == Demolar
@@ -116,25 +116,25 @@ Downloading map
 == Xəritə yüklənir
 
 Draw!
-== Çəkmək!
+== Bərabərə!
 
 Dynamic Camera
 == Dinamik Kamera
 
 Emoticon
-== Yüz ifadə
+== Emosiya 
 
 Error
-== Error
+== Xəta
 
 Error loading demo
-== Demo yüklenirken hata oluştu
+== Demo yüklənərkən xəta baş verdi
 
 Favorite
 == Favori
 
 Favorites
-== Favoriler
+== Favorilər
 
 Feet
 == Ayaq
@@ -158,7 +158,7 @@ Game
 == Oyun
 
 Game info
-== Oyun məlumat
+== Oyun haqqında
 
 Game over
 == Oyun bitdi
@@ -170,19 +170,19 @@ Game types:
 == Oyun növləri:
 
 General
-== General
+== Ümumi
 
 Graphics
-== Qrafik
+== Qrafikalar
 
 Grenade
-== Qranat
+== Qumbara
 
 Hammer
 == Çəkic
 
 Has people playing
-== Oyunçuları ehtiva edir
+== Var olan oyunçu
 
 High Detail
 == Yüksək Detal
@@ -203,7 +203,7 @@ Jump
 == Tullanma
 
 Kick player
-== Oyuncuyu At
+== Oyunçu At
 
 Language
 == Dil
@@ -281,7 +281,7 @@ Players
 == Oyunçular
 
 Please balance teams!
-== qrupları balanslaşdırın!
+== Qrupları balanslaşdırın!
 
 Prev. weapon
 == Əvvəlki silah
@@ -356,16 +356,16 @@ Sound error
 == Səs xətası
 
 Spectate
-== Bax
+== Tamaşa
 
 Spectate next
-== Sıradakini izle
+== Sonra ki tamaşa
 
 Spectate previous
-== Öncekini izle
+== Avvəlki tamaşa
 
 Spectator mode
-== İzleyici modu
+== Tamaşaçı rejimi
 
 Spectators
 == İzleyiciler
@@ -422,7 +422,7 @@ Version
 == Versiya
 
 Vote command:
-== Əmr:
+== Səs Əmr:
 
 Vote description:
 == Şərh:
@@ -431,7 +431,7 @@ Vote no
 == Yox
 
 Vote yes
-== Bəli
+== Hə
 
 Voting
 == Səsvermə
@@ -455,23 +455,22 @@ Sat.
 == Doygunluk
 
 Miscellaneous
-== Çeşitli
+== Müxtəlif
 
 Internet
-== İnternet
+== Internet
 
 Max demos
 == Maksimum Demo sayı
 
 News
-== xəbərlər
+== Xəbərlər
 
 Join game
-== Oyuna qoşulun
+== Oyuna daxil ol
 
 FSAA samples
 == FSAA nümunələri
-
 
 Sound volume
 == Ses seviyesi
@@ -483,151 +482,151 @@ Laser
 == Lazer
 
 Hue
-== Renk
+== Rəng
 
 Record demo
-== Demo kaydet
+== Demo qeyd
 
 Your skin
-== Sizin görünüşünüz
+== Şəxsi görünüş
 
 Reset to defaults
-== Varsayılanlara getir
+== Defoltlara sıfırlayın
 
 Round
-== Raunt
+== Round
 
 Lht.
-== Parlaklık
+== Parlaqlıq
 
 UI Color
-== Menü rengi
+== Menu rəngi
 
 Alpha
-== Şeffaflık
+== Şəffaflıq
 
 LAN
 == LAN
 
 Name plates size
-== Boyut
+== Ölçü
 
 Successfully saved the replay!
-== Başarıyla kaydedildi!
+== Uğurla yadda saxlandı!
 
 Replay feature is disabled!
-== Yeniden oynatma özelliği devre dışı!
+== Təkrar oxutma funksiyası deaktiv edildi!
 
 Game paused
-== Oyun durduruldu
+== Oyun dayandı
 
 Server best:
-== Sunucu en iyi:
+== Ən yaxşı server:
 
 Personal best:
-== Bireysel en iyi:
+== Ən yaxşı şəxsi:
 
 Learn
-== Öğren
+== Öyrən
 
 Browser
-== Sunucular
+== Serverlər
 
 Ghost
-== Hayalet
+== Ruh
 
 Loading DDNet Client
-== DDNet Client yükleniyor
+== DDNet Klient Yüklənir
 
 Reconnect in %d sec
-== %d saniye içinde yeniden bağlanılacak
+== %d saniyə ərzində yenidən qoşulacaq
 
 Render demo
 == Render demo
 
 Replace video
-== Video üzerine yaz
+== Video üzərinə yaz
 
 File already exists, do you want to overwrite it?
-== Dosya halihazırda mevcut, üzerine yazılsın mı?
+== Fayl hal-hazırda mövcuddur, üzərinə qeyd edilsin?
 
 Are you sure that you want to disconnect?
-== Ayrılmak istediğinizden emin misiniz?
+== Çıxmağa razısan?
 
 Disconnect Dummy
 == Dummy Ayrıl
 
 Are you sure that you want to disconnect your dummy?
-== Dummy bağlantısını koparmak istediğinizden emin misiniz?
+== Dummy Bağlantını kəsmək istədiyinizə əminsiniz?
 
 Welcome to DDNet
-== DDNet'e hoşgeldiniz
+== DDNet’ə xoş gəldiniz!
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDRaceNetwork bitiş çizgisine en kısa sürede ulaşmayı amaçlayan oyunculardan oluşan, çevrimiçi bir takım oyunudur. Çaylak olarak ilk önce kolay haritalardan yani Novice sunuculardan oynamaya başlamanı öneririz. Herhangi bir sunucu seçmeden önce sana yakın olan sunucuyu seçmek için ping'i dikkate al.
+== DDraceNetwork korperativ onlayn oyundur, bu xəritədə məqsəd siz və sizin qrupunuzun ən qısa zamanda finiş nöqtəsinə çatmağıdır. Yeni gələn oyunçular üçün asan xəritələrdə yəni  Novice(Təcrübəsiz) serverlərdə oynamağını tövsiyyə edirik. Hər hansı bir server seçmədən əvvəl, sizə yaxın bir server seçmək üçün ping-i nəzərdən keçirin.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== İntihar etmek (yeniden başlamak) için k tuşu, oyunu durdurup diğer oyuncuları izlemek için q tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
+== İntihar etmək (yenidən başlamaq) üçün k düyməsi, oyunu dayandırıb digər oyunçuları izləmək üçün q düyməsini istifadə edə bilərsiniz. Digər düymələrə parametrlərdən baxa bilərsiniz. 
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Sunuculara bağlanmadan önce ayarları kontrol edip kendine göre düzenlemeni öneriyoruz.
+== Serverlərə qoşulmadan əvvəl parametrləri nəzərdən keçirib özünüzə uyğun konfiqurasiya etməyinizi tövsiyyə edirik.
 
 Please enter your nickname below.
-== Lütfen takma adı girin.
+== Xahiş edirik istifadəçi adınızı daxil edin
 
 Video name:
-== Video ismi:
+== Video adı:
 
 Show DDNet map finishes in server browser
-== Tamamlanan DDNet haritalarını sunucu listesinde göster
+== Tamamlanan DDNet xəritələrini server listində göstər
 
 transmits your player name to info.ddnet.org
-== oyuncu adını info.ddnet.org ile paylaşır
+== istifadəçi adını info.ddnet.org ilə paylaş
 
 Search
 == Ara
 
 Exclude
-== Hariç
+== Qəric 
 
 Player country:
-== Oyuncu ülkesi
+== Oyunçu ölkəsi
 
 Filter connecting players
-== Bağlanan oyuncuları sayma
+== Qoşulmuş oyunçuların sayılması
 
 Indicate map finish
-== Tamamlanmış haritaları göster
+== Tamamlanmış xəritələri göstərin
 
 Unfinished map
-== Tamamlanmamış harita
+== Natamam xəritə
 
 Countries
-== Ülkeler
+== Ölkəlar
 
 Types
-== Türler
+== Növləri
 
 DDNet %s is out!
-== DDNet %s yayınlandı!
+== DDNet %s nəşr olundu!
 
 Downloading %s:
-== İndiriliyor %s:
+== Endirilir %s:
 
 Update failed! Check log...
-== Güncelleme sırasında hata oluştu!
+== Yeniləmə zamanı xəta baş verdi!
 
 DDNet Client updated!
-== DDNet Client güncellendi!
+== DDNet Klient yeniləndi!
 
 Update now
-== Güncelle
+== yeniləmə
 
 Restart
-== Yeniden başlat
+== Yenidən başlatmaq 
 
 Remove chat
-== Sohbeti kaldır
+== Söhbəti silin
 
 %.2f MiB
 == %.2f MiB
@@ -642,175 +641,175 @@ Markers
 == İşaretler
 
 Length
-== Uzunluk
+== Uzunluq
 
 Date
-== Tarih
+== Tarix
 
 Fetch Info
-== Bilgileri göster
+== Məlumat haqqında
 
 Connecting dummy
-== Dummy bağlanıyor
+== Dummy bağlanmaq
 
 Connect Dummy
-== Dummy Katıl
+== Dummy daxil ol
 
 Reload
-== Yenile
+== Yenilə
 
 Deactivate
-== Devre dışı bırak
+== Qeyri-aktiv etmək 
 
 Activate
-== Etkinleştir
+== Aktivləşdirmək 
 
 Save
-== Kaydet
+== Saxla
 
 Switch weapon when out of ammo
-== Mermi kalmadığında silahı değiştir
+== Mərmi bitəndə silahı dəyiş
 
 Show only chat messages from friends
-== Sadece arkadaşlardan gelen mesajları göster
+==Sadəcə dostlarından gələn mesajları göstər
 
 Show clan above name plates
-== Oyuncu isimlerinin üstünde klanı göster
+== İstifadəçi adının üzərində klan adını göstər
 
 Clan plates size
-== Boyut
+== Ölçü
 
 Refresh Rate
 == Yenileme Hızı
 
 Automatically take statboard screenshot
-== Otomatik olarak skor tablosunun ekran görüntüsü al
+== Avtomatik olaraq xal lövhəsinin ekran görüntüsünü al
 
 Automatically create statboard csv
-== Otomatik olarak skor tablosunu csv olarak oluştur
+== Avtomatik olaraq xal lövhəsini csv olaraq yarat
 
 Max CSVs
 == Maksimum CSVs
 
 Vanilla skins only
-== Sadece vanilla skinleri
+== Ancaq vanilla skinləri
 
 Fat skins (DDFat)
-== Şişko skinler (DDFat)
+== Şişman skinlər (DDFat)
 
 Skin prefix
-== Skin sıfatı
+== Skin üzü
 
 Hook collisions
-== Kanca çizgisi
+== Qarmaq izi
 
 Pause
-== Durdur
+== Dayandır
 
 Kill
-== İntihar et
+== Ölmək
 
 Zoom in
-== Yakınlaştır
+== Yaxınlaşdır
 
 Zoom out
-== Uzaklaştır
+== Uzaqlaşdır
 
 Default zoom
-== Varsayılan yakınlaştırma
+== Defolt yaxınlaşdırma
 
 Show others
-== Diğerlerini göster
+== Digərlərini göstər
 
 Show all
-== Herkesi göster
+== Hər kəsi göstər
 
 Toggle dyncam
 == Dinamik kamera
 
 Toggle dummy
-== Dummy kullan
+== Dummyden istifadə edin
 
 Toggle ghost
-== Hayaleti göster
+== Ruhu göstər
 
 Dummy copy
-== Dummy kopyala
+== Dummy kopya
 
 Hammerfly dummy
 == Hammerfly dummy
 
 Converse
-== Konuşma
+== Qonuşma
 
 Statboard
 == Skor Tablosu
 
 Lock team
-== Takımı kilitle
+== Qrubu kilidlən
 
 Show entities
-== Yapıları göster
+== Binaları göstər
 
 Show HUD
-== Arayüzü göster
+== İnterfeysi göstər
 
 may cause delay
-== gecikmelere sebep olabilir
+== gecikmələrə səbəb ola bilər
 
 Screen
 == Ekran
 
 Use high DPI
-== Yüksek DPI kullan
+== Yüksək DPI istifadə et 
 
 Enable game sounds
-== Oyun sesini etkinleştir
+== Oyun səsini aktivləşdirin
 
 Enable gun sound
-== Silah sesini etkinleştir
+== Silah səsini aktivləşdirin
 
 Enable long pain sound (used when shooting in freeze)
-== Uzun ağlama sesini etkinleştir (freeze iken ateş edince kullanılır)
+== Uzun qışqırıq səsini aktivləşdirin (freeze zamanı atəş edərkən istifadə olunur)
 
 Enable server message sound
-== Sunucu mesaj sesini etkinleştir
+== Server mesajının səsini aktivləşdirin
 
 Enable regular chat sound
-== Genel mesaj sesini etkinleştir
+== Ümumi mesaj səsini aktivləşdirin
 
 Enable team chat sound
-== Takım mesajı sesini etkinleştir
+== Qrup mesajının səsini aktivləşdirin
 
 Enable highlighted chat sound
-== Vurgulanmış mesaj sesini etkinleştir
+== Vurğulanmış mesaj səsini aktivləşdirin
 
 Map sound volume
-== Harita ses seviyesi
+== Xəritə səs səviyyəsi
 
 HUD
-== Arayüz
+== interfeys 
 
 DDNet
 == DDNet
 
 DDNet Client needs to be restarted to complete update!
-== Güncellemenin tamamlanabilmesi için oyunun yeniden başlatılması lazım!
+== Yeniləmənin tamamlanması üçün oyunu yenidən başlatmaq lazımdır!
 
 Use DDRace Scoreboard
-== DDRace skor tablosunu kulan
+== DDRace xal lövhəsindən istifadə edin
 
 Show score
-== Skoru göster
+== Xal göstər
 
 Show names in chat in team colors
-== Sohbette isimleri takım rengine göre ayır
+== Çatda adları komanda rənglərində göstərin
 
 Show kill messages
-== Ölüm mesajlarını göster
+== Ölüm mesajlarını göstərin
 
 Show votes window after voting
-== Oyladıktan sonra oylama ekranını göstermeye devam et
+== Səsvermədən sonra səslər pəncərəsini göstərin
 
 Messages
 == Mesajlar
@@ -819,97 +818,97 @@ System message
 == Sistem mesajı
 
 Reset
-== Sıfırla
+== Sıfırlayın
 
 Highlighted message
-== Vurgulanmış mesaj
+== Vurğulanan mesaj
 
 Team message
-== Takım mesajı
+== Qrup mesajı
 
 Friend message
-== Arkadaş mesajı
+== Dost mesajı
 
 Normal message
 == Normal mesaj
 
 Client message
-== İstemci mesajı
+== Klient mesajı
 
 Save the best demo of each race
-== Her yarış için en iyi demoyu kaydet
+== Hər yarış üçün ən yaxşı demonu yadda saxlayın
 
 Default length
-== Varsayılan uzunluk
+== Standart uzunluq
 
 Enable replays
-== Tekrar oynatmaları etkinleştir
+== Təkrarları aktivləşdirin
 
 Show ghost
-== Hayaleti göster
+== Ruhu göstər
 
 Save ghost
-== Hayaleti kaydet
+== Ruhu xilas et
 
 Gameplay
-== Oyun içi
+== Oyunda
 
 Overlay entities
-== Üst katman yapıları
+== Üst təbəqə strukturları
 
 Size
-== Boyut
+== Ölçü
 
 Show text entities
-== Yazı yapılarını göster
+== Post strukturlarını göstərin
 
 Show others (own team only)
-== Diğerlerini göster (sadece kendi takımını)
+== Başqalarını göstər (yalnız öz komanda)
 
 Show quads
-== Dörtgen yapıları göster
+== Dördbucaqlı strukturları göstərin
 
 AntiPing
 == AntiPing
 
 AntiPing: predict other players
-== AntiPing: diğer oyuncuları tahmin et
+== AntiPing: predict other players
 
 AntiPing: predict weapons
-== AntiPing: silahları tahmin et
+== AntiPing: predict weapons
 
 AntiPing: predict grenade paths
-== AntiPing: el bombası yolunu tahmin et
+== AntiPing: predict grenade paths
 
 Show other players' hook collision lines
-== Diğer oyuncuların kanca çizgisini göster
+== Show other players' hook collision lines
 
 Show other players' key presses
-== Diğer oyuncuların tuş basışlarını göster
+== Show other players' key presses
 
 Show tiles layers from BG map
-== Yapı katmanlarını göster
+== Show tiles layers from BG map
 
 DDNet %s is available:
-== DDNet %s yayınlandı:
+== DDNet %s Nəşr olundu:
 
 Updating...
-== Güncelleniyor...
+== Yenilənir...
 
 No updates available
-== Güncelleme mevcut değil
+== Güncəlləmə mövcud deyil
 
 Check now
-== Kontrol et
+== Yoxlayın
 
 New random timeout code
-== Yeni rastgele zaman aşımı kodu
+== New random timeout code
 
 Time
-== Süre
+== Müddət
 
 Follow
-== Takip et
+== İzləyin
 
 Frags
 == Frags
@@ -933,19 +932,19 @@ Spree
 == Spree
 
 Best
-== En iyi
+== Ən yaxşı
 
 Grabs
 == Yakalama
 
 1 new mention
-== 1 yeni bildirim
+== 1 yeni bildiriş
 
 %d new mentions
-== %d yeni bildirim
+== %d yeni bildiriş
 
 9+ new mentions
-== 9+ yeni bildirim
+== 9+ yeni bildiriş
 
 Manual
 == Manual
@@ -954,25 +953,25 @@ Race
 == Yarış
 
 Auto
-== Otomatik
+== Avtomatik
 
 Replay
 == Yeniden oynatma
 
 https://wiki.ddnet.org/
-== https://wiki.ddnet.org/wiki/Main_Page/tr
+== https://wiki.ddnet.org/wiki/Main_Page/
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Başlatma başarısız oldu. Konfigürasyon klasöründeki settings_ddnet.cfg dosyasında gfx_backend ayarını OpenGL veya Vulkan olarak değiştirmeyi deneyin.
+== Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== VRAM tükendi. Özellikle yüksek çözünürlüklü olan özel kaynakları (skinler, yapılar, vb.) silmeyi deneyin.
+== Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== Komut kaydı sırasında hata oluştu. GPU sürücülerini güncellemeyi deneyin.
+== An error during command recording occurred. Try to update your GPU drivers.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
@@ -980,140 +979,140 @@ A render command failed. Try to update your GPU drivers.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== Render komutları gönderilemedi. GPU sürücülerini güncellemeyi deneyin.
+== Submitting the render commands failed. Try to update your GPU drivers.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== Arabellek değiştirilemedi. GPU sürücülerini güncellemeyi deneyin.
+== Failed to swap framebuffers. Try to update your GPU drivers.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Bilinmeyen hata. Konfigürasyon klasöründeki settings_ddnet.cfg dosyasında gfx_backend ayarını OpenGL veya Vulkan olarak değiştirmeyi deneyin.
+== Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== Verilen grafik işleyicisi başlatılamadı, varsayılan ayarlara dönülüyor.
+== Could not initialize the given graphics backend, reverting to the default backend now.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== Verilen grafik işleyicisi başlatılamadı, muhtemelen dahili ekran kartının sürücülerini yüklemediğinizden kaynaklanıyor.
+== Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== İndirilen map kaydedilemedi. Bu dosyayı manuel olarak silmeyi deneyin: %s
+== Could not save downloaded map. Try manually deleting this file: %s
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== %s dokusunun genişliği %d'ye veya yüksekliği %d'ye bölünmüyor, bu görsel hatalara neden olabilir.
+== The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== %s dokusunun formatı RGBA değil, bu görsel hatalara neden olacak.
+== The format of texture %s is not RGBA which will cause visual bugs.
 
 Preparing demo playback
-== Demo oynatmaya hazırlanıyor
+== Demo oynamağa hazırlaşır
 
 Connected
-== Bağlanıldı
+== Əlaqədar
 
 Loading map file from storage
-== Harita dosyası yükleniyor
+== Xəritə faylı yüklənir
 
 Why are you slowmo replaying to read this?
-== Neden bunu okumak için ağır çekimde izliyorsunuz?
+== Bunu oxumaq üçün niyə yavaş çəkilişdə baxırsan?
 
 Initializing components
-== Bileşenler başlatılıyor
+== Komponentlər işə salınır
 
 Initializing assets
-== Kaynaklar yükleniyor
+== Resurslar yüklənir
 
 Initializing map logic
-== Harita içeriği yükleniyor
+== Xəritə məzmunu yüklənir
 
 Sending initial client info
-== İstemciye ilk bilgiler gönderiliyor
+== İlkin məlumatlar kliente göndərilir
 
 Warning
-== Uyarı
+== Xəbərdarlıq 
 
 Quitting. Please wait…
-== Çıkılıyor. Lütfen bekleyin...
+== Çıxılır. Zəhmət olmasa, gözləyin...
 
 Restarting. Please wait…
-== Yeniden başlatılıyor. Lütfen bekleyin...
+== Yenidən işə salınır. Zəhmət olmasa, gözləyin...
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== Hata ayıklama modu etkinleştirildi. Devre dışı bırakmak için Ctrl+Shift+D tuşlarına basın.
+== Sazlama rejimi aktivdir. Onu söndürmək üçün Ctrl+Shift+D düymələrini sıxın.
 
 Position:
-== Pozisyon:
+== Vəzifə:
 
 Speed:
-== Hız:
+== Sürət:
 
 Angle:
 == Açı:
 
 Multi-View
-== Çoklu İzleme
+== Coxlu izləmə
 
 Team %d
-== Takım %d
+== Qrup %d
 
 Uploading map data to GPU
-== Harita verisi GPU'ya yükleniyor
+== Uploading map data to GPU
 
 Trying to determine UDP connectivity...
-== UDP bağlantısı belirlenmeye çalışılıyor...
+== Trying to determine UDP connectivity...
 
 UDP seems to be filtered.
-== UDP filtrelenmiş görünüyor.
+== UDP seems to be filtered.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== UDP ve TCP IP adresleri farklı görünüyor. Proxy, VPN veya ağ hızlandırıcılarını devre dışı bırakmayı deneyin.
+== UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
 
 No answer from server yet.
-== Henüz sunucudan cevap alınamadı.
+== Hələlik serverdən heç bir cavab gəlməyib.
 
 Getting game info
-== Oyun bilgisi alınıyor
+== Oyun məlumatlarının alınır
 
 Requesting to join the game
-== Oyuna girmeye çalışıyor
+== Oyuna girməyə çalışır
 
 Rename folder
-== Klasör ismini değiştir
+== Rename folder
 
 Existing Player
-== Var olan oyuncu
+== Mövcud oyunçu
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Takma adınız '%s' başkası tarafından kullanılıyor (%d puan). Yine de kullanmak istiyor musunuz?
+== Sizin '%s' ləqəbiniz başqası tərəfindən istifadə olunur (%d xal). Hələ də istifadə etmək istəyirsən?
 
 Checking for existing player with your name
-== Adınıza sahip diğer oyuncular aranıyor
+== Adınız olan digər oyunçuları axtarırsınız
 
 A demo with this name already exists
-== Bu ada sahip bir demo zaten var
+== A demo with this name already exists
 
 A folder with this name already exists
-== Bu ada sahip bir klasör zaten var
+== A folder with this name already exists
 
 Unable to rename the folder
-== Klasör yeniden adlandırılamıyor
+== Unable to rename the folder
 
 File '%s' already exists, do you want to overwrite it?
-== '%s' dosyası zaten var, üzerine yazmak istiyor musunuz?
+== File '%s' already exists, do you want to overwrite it??
 
 (paused)
-== (duraklatıldı)
+== (fasilə verdi)
 
 Speed
-== Hız
+== Sürət
 
 Join Tutorial Server
-== Öğretici sunucuya gir
+== Dərslik serverinə daxil olun
 
 Skip Tutorial
-== Öğreticiyi atla
+== Dərsliyi keçin
 
 Theme
 == Tema
@@ -1143,212 +1142,212 @@ CHN
 == CHN
 
 Getting server list from master server
-== Ana sunucudan sunucu listesi alınıyor
+== Master serverdən server siyahısı əldə edilir
 
 %d of %d servers
-== %2$d sunucunun %1$d tanesi
+== %2$d serverin %1$d tanesi
 
 %d of %d server
-== %2$d sunucunun %1$d tanesi
+== %2$d serverin %1$d tanesi
 
 %d players
-== %d oyuncu
+== %d oyunçu
 
 %d player
-== %d oyuncu
+== %d oyun.u
 
 Are you sure that you want to disconnect and switch to a different server?
-== Bağlantınızı kesip başka bir sunucuya girmek istediğinizden emin misiniz?
+== Bağlantını kəsib başqa serverə daxil olmaq istədiyinizə əminsiniz?
 
 Copy info
-== Bilgiyi kopyala
+== Məlumatı kopyalayın
 
 Leak IP
-== IP'yi sızdır
+== Leak IP
 
 No server selected
-== Sunucu seçilmedi
+== Heç bir server seçilmədi
 
 Online players (%d)
-== Çevrimiçi oyuncular (%d)
+== Onlayn oyunçular (%d)
 
 Online clanmates (%d)
-== Çevrimiçi klan arkadaşları (%d)
+== Onlayn klandaşlar (%d)
 
 [friends (server browser)]
 Offline (%d)
-== Çevrimdışı (%d)
+== Oflayn (%d)
 
 Click to select server. Double click to join your friend.
-== Sunucu seçmek için tıklayın. Arkadaşınıza katılmak için çift tıklayın.
+== Server seçmək üçün klikləyin. Dostunuza qoşulmaq üçün iki dəfə klikləyin.
 
 Click to remove this player from your friends list.
-== Bu oyuncuyu arkadaş listesinden silmek için tıkla.
+== Bu oyunçunu dostlarınızın siyahısından silmək üçün klikləyin.
 
 Click to remove this clan from your friends list.
-== Bu klanı arkadaş listesinden silmek için tıkla.
+== Bu klanı dostlarınızın siyahısından silmək üçün klikləyin.
 
 None
 == Yok
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== '%s' oyuncusunu arkadaş listenizden silmek istediğinize emin misiniz?
+== '%s' oyunçu dostlarınız siyahısından silmək istədiyinizə əminsiniz?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== '%s' klanını arkadaş listenizden silmek istediğinize emin misiniz?
+== '%s' klanı dostlarınız siyahısından silmək istədiyinizə əminsiniz?
 
 Add Clan
-== Klan ekle
+== klan əlavə edin
 
 Play the current demo
-== Demoyu oynat
+== Play the current demo
 
 Pause the current demo
 == Demoyu duraklat
 
 Stop the current demo
-== Demoyu durdur
+== Stop the current demo
 
 Go back one tick
-== Bir tık geri git
+== Go back one tick
 
 Go forward one tick
-== Bir tık ileri git
+== Go forward one tick
 
 Slow down the demo
-== Demoyu yavaşlat
+== Slow down the demo
 
 Speed up the demo
-== Demoyu hızlandır
+== Speed up the demo
 
 Mark the beginning of a cut (right click to reset)
-== Bir kesitin başlangıcını işaretleyin (sıfırlamak için sağ tıkla)
+== Mark the beginning of a cut (right click to reset)
 
 Mark the end of a cut (right click to reset)
-== Bir kesitin bitişini işaretleyin (sıfırlamak için sağ tıkla)
+== Mark the end of a cut (right click to reset)
 
 Export cut as a separate demo
-== Kesiti ayrı bir demo olarak dışarı aktar
+== Export cut as a separate demo
 
 Go back one marker
-== Bir işaret geri git
+== Go back one marker
 
 Go forward one marker
-== Bir işaret ileri git
+== Go forward one marker
 
 Close the demo player
-== Demo oynatıcısını kapat
+== Close the demo player
 
 Toggle keyboard shortcuts
-== Klavye kısayollarını kullan
+== Toggle keyboard shortcuts
 
 Export demo cut
-== Kesiti dışarı aktar
+== Export demo cut
 
 Cut interval
-== Kesit aralığı
+== Cut interval
 
 Cut length
-== Kesit uzunluğu
+== Cut length
 
 Loading demo files
-== Demo dosyaları yükleniyor
+== Loading demo files
 
 All combined
-== Hepsi birlikte
+== All combined
 
 Folder Link
-== Klasör Linki
+== Folder Link
 
 Demos directory
-== Demo klasörü
+== Demos directory
 
 Open the directory that contains the demo files
-== Demo dosyalarını içeren klasörü aç
+== Open the directory that contains the demo files
 
 Are you sure that you want to delete the folder '%s'?
-== '%s' klasörünü silmek istediğine emin misin?
+== Are you sure that you want to delete the folder '%s'?
 
 Are you sure that you want to delete the demo '%s'?
-== '%s' demosunu silmek istediğine emin misin?
+== Are you sure that you want to delete the demo '%s'?
 
 Delete folder
-== Klasörü sil
+== Qovluğu silin
 
 Unable to delete the demo '%s'
 == '%s' demosu silinemiyor
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== '%s' klasörü silinemiyor. Önce boş olduğundan emin olun.
+== Unable to delete the folder '%s'. Make sure it's empty first.
 
 Loading ghost files
-== Hayalet dosyaları yükleniyor
+== Ruh faylların yüklənməsi
 
 Menu opened. Press Esc key again to close menu.
-== Menü açıldı. Menüyü kapatmak için Esc tuşuna tekrar basın.
+== Menyu açılır. Menyunu bağlamaq üçün yenidən Esc düyməsini basın.
 
 Smooth Dynamic Camera
-== Yumuşak dinamik kamera
+== Smooth Dynamic Camera
 
 Skip the main menu
-== Ana menüyü atla
+== Əsas menyudan keçin
 
 Save power by lowering refresh rate (higher input latency)
-== Tazeleme hızını düşürerek güç tasarrufu yap (daha yüksek girdi gecikmesi)
+== Yeniləmə sürətini azaltmaqla enerjiyə qənaət edin (daha yüksək giriş gecikməsi)
 
 Settings file
-== Ayarlar dosyası
+== Parametrlər faylı
 
 Open the settings file
-== Ayarlar dosyasını aç
+== Parametrlər faylını açın
 
 Config directory
-== Konfigürasyon klasörü
+== Konfiqurasiya qovluğu
 
 Open the directory that contains the configuration and user files
-== Konfigürasyon ve kullanıcı dosyalarını içeren klasörü aç
+== Konfiqurasiya və istifadəçi faylları olan qovluğu açın
 
 Themes directory
-== Tema klasörü
+== Mövzu qovluğu
 
 Open the directory to add custom themes
-== Özel temalar eklemek için klasörü aç
+== Fərdi mövzular əlavə etmək üçün qovluğu açın
 
 Loading skin files
-== Skin dosyaları yükleniyor
+== Skin faylların yüklənməsi
 
 Download skins
-== Skinleri indir
+== Skinleri yükləyin
 
 Download community skins
-== Topluluk skinlerini indir
+== İcma skinlerini yükləyin
 
 Choose default eyes when joining a server
-== Bir sunucuya girerken kullanılacak varsayılan gözleri seçin
+== Serverə daxil olarkən istifadə etmək üçün standart gözləri seçin
 
 Create a random skin
-== Rastgele skin oluştur
+== Təsadüfi skin yaradın
 
 Skin Database
-== Skin Veri Tabanı
+== Skin verilənlər bazası 
 
 Skins directory
-== Skin klasörü
+== Skin qovluq
 
 Open the directory to add custom skins
-== Özel skinler eklemek için klasörü açın
+== Open the directory to add custom skins
 
 Chat command
-== Sohbet komutu
+== Söhbət əmri
 
 Enable controller
-== Kontrolcüyü etkinleştir
+== Enable controller
 
 Controller
-== Kontrolcü
+== Controller
 
 Ingame controller mode
-== Oyun içi kontrolcü modu
+== Ingame controller mode
 
 [Ingame controller mode]
 Relative
@@ -1359,16 +1358,16 @@ Absolute
 == Mutlak
 
 Ingame controller sens.
-== Oyun içi kontrolcü hassasiyeti
+== Ingame controller sens.
 
 UI controller sens.
-== Arayüz kontrolcü hassasiyeti
+== UI controller sens.
 
 Controller jitter tolerance
-== Kontrolcü titreşim toleransı
+== Controller jitter tolerance
 
 No controller found. Plug in a controller.
-== Kontrolcü bulunamadı. Bir Kontrolcü bağlayın.
+== No controller found. Plug in a controller.
 
 Axis
 == Ox
@@ -1395,13 +1394,13 @@ Are you sure that you want to reset the controls to their defaults?
 == Kontrolleri varsayılan değerlerine döndürmek istediğine emin misin?
 
 Cancel
-== İptal et
+== İmtina etm
 
 Dummy
 == Dummy
 
 Windowed
-== Pencereli
+== Pəncərəli
 
 Windowed borderless
 == Kenarsız pencereli
@@ -1416,178 +1415,178 @@ Allows maps to render with more detail
 == Haritaların daha detaylı işlenmesine izin ver
 
 Renderer
-== İşleyici
+== İşləyici
 
 default
-== varsayılan
+== defolt
 
 custom
-== özel
+== xüsusi
 
 Graphics card
-== Ekran kartı
+== Video kart 
 
 auto
-== otomatik
+== avtomatik 
 
 Game sound volume
-== Oyun ses seviyesi
+== Oyun səs səviyyəsi
 
 Chat sound volume
-== Sohbet ses seviyesi
+== Söhbət səs səviyyəsi
 
 Background music volume
-== Arkaplan müziği ses seviyesi
+== Arxa plan musiqi səs səviyyəsi
 
 Appearance
-== Görünüm
+== Görüntü
 
 Assets
-== Kaynaklar
+== Mənbələr
 
 Name Plate
-== İsim Etiketi
+==  İstifadəçi adı
 
 Hook Collisions
-== Kanca kesişmeleri
+== Qarmaq kəsişmələri
 
 Show health, shields and ammo
-== Can, kalkan ve cephaneyi göster
+== Can, qalxan və sursatı göstər
 
 DDRace HUD
-== DDRace arayüzü
+== DDRace interfeysi
 
 Show client IDs in scoreboard
-== Skor tablosunda ki istemci ID'lerini göster
+== Xal lövhəsində klient ID-lərini göstərin
 
 Show DDRace HUD
-== DDRace arayüzünü göster
+== DDRace interfeysi göstər 
 
 Show jumps indicator
-== Kaç zıplama kaldığını göster
+== Neçə tullanma qaldığını göstər
 
 Show dummy actions
-== Dummy aksiyonlarını göster
+== Dummy hərəkətlərini göstər
 
 Show player position
-== Oyuncu pozisyonunu göster
+== Oyunçu pozisyalarını göstər 
 
 Show player speed
-== Oyuncu hızını göster
+== Oyunçu sürətini göstər
 
 Show player target angle
-== Oyuncu hedef açısını göster
+== Oyunçunun hədəf bucağını göstər
 
 Show freeze bars
-== Freeze barını göster
+== Freeze barını göstər
 
 Opacity of freeze bars inside freeze
-== Freeze içerisindeyken freeze barının opaklığı
+== Freeze içindəykən freeze barının qeyri-şəffaflığı
 
 Use old chat style
-== Eski sohbet stilini kullan
+== Köhnə söhbət stilini istifadə et
 
 Preview
-== Ön izleme
+== Önizləmə
 
 Show local player's key presses
-== Yerel oyuncunun tuş basışlarını göster
+== Yerli oyunçunun düymə basmalarını göstərin
 
 Hook collision line
-== Kanca çizgisi
+== Qarmaq izi
 
 Hook collision line width
-== Kanca çizgisi kalınlığı
+== Qarmaq izinin qalınlığı
 
 Hook collision line opacity
 == Kanca çizgisi opaklığı
 
 Colors of the hook collision line, in case of a possible collision with:
-== Olası bir kesişme durumunda kanca çizgisinin renkleri:
+== OMümkün bir kəsişmə nəticəsində qarmaq izinin rəngləri:
 
 Your movements are not taken into account when calculating the line colors
-== Çizgi renkleri hesaplanırken hareketleriniz dikkate alınmaz
+== Rəngləri hesablanarkən hərəkətləriniz diqqətə (qeydə) alınmaz
 
 Nothing hookable
-== Kanca atılamaz
+== Qarmaq atıla bilməz
 
 Something hookable
-== Kanca atılabilir
+== Qarmaq atıla bilər
 
 A Tee
 == Bir tee
 
 Normal Color
-== Normal rengi
+== Normal rəngi
 
 Highlight Color
-== Vurgu rengi
+== Vurğu rəngi
 
 Weapons
 == Silahlar
 
 Rifle Laser Outline Color
-== Tüfek Lazeri Dış Rengi
+== Tüfəng lazerinin çöl rəngi
 
 Rifle Laser Inner Color
-== Tüfek Lazeri İç Rengi
+== Tüfəng lazerinin iç rəngi
 
 Shotgun Laser Outline Color
-== Pompalı Tüfek Lazeri Dış Rengi
+== Ov tüfəngi lazerinin çöl rəngi
 
 Shotgun Laser Inner Color
-== Pompalı Tüfek Lazeri İç Rengi
+== Ov tüfəngi lazerinin çöl rəngi
 
 Entities
-== Yapılar
+== Binalar
 
 Door Laser Outline Color
-== Kapı Lazeri Dış Rengi
+== Qapı lazerinin çöl rəngi
 
 Door Laser Inner Color
-== Kapı Lazeri İç Rengi
+== Qapı lazerinin iç rəngi
 
 Freeze Laser Outline Color
-== Freeze Lazeri Dış Rengi
+== Freeze lazerinin çöl rəngi
 
 Freeze Laser Inner Color
-== Freeze Lazeri İç Rengi
+== Freeze lazerinin iç rəngi
 
 Set all to Rifle
-== Hepsini tüfeğe ayarla
+== Hamısını tüfəngə quraşdır
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== Başlangıç çizgisini geçtiğinizde en iyi zamanınızın hareketlerini kopyalayan bir hayalet tee göster
+== Başlanğıc xəttini keçdiyiniz zaman ən yaxşı vaxtınızın hərəkətlərini kopyalayan bir kabus tee göstər
 
 Opacity
-== Opaklık
+== Şəffaflıq
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== Teeler ve isim etiketleri gibi diğer takımlara ait varlıkların opaklığını ayarlayın
+== Teelər və istifadəçi adları kimi digər qruplara aid varlıqların qeyri-şəffaflığını düzəldin
 
 Quads are used for background decoration
-== Dörtgen yapılar arkaplan dekorasyonu için kullanılır
+== Dördbucaq binalar arxa plan dekorasiyası üçün istifadə edilir
 
 Tries to predict other entities to give a feel of low latency
-== Düşük gecikme hissi vermek için diğer yapıları tahmin etmeye çalışır
+== Kiçik gecikmə hissi vermək üçün digər binaları təxmin etməyə çalışdır 
 
 Background
-== Fon
+== Arxa fon
 
 Use current map as background
 == Cari xəritəni fon kimi istifadə edin
 
 Run on join
-== Katılınca çalıştır
+== Qoşulduqda çalışdır
 
 Chat command (e.g. showall 1)
-== Sohbet komutu (örn. showall 1)
+== Söhbət komandası (məs. showall 1)
 
 Unregister protocol and file extensions
-== Protokol ve dosya uzantılarının kaydını sil
+== Protokol və fayl uzantılarının qeydiyyatını sil
 
 Emoticons
-== İfadələr
+==  Emosiyalar (İfadələr)
 
 Particles
 == Hissəciklər
@@ -1599,10 +1598,10 @@ Loading assets
 == Aktivlər yüklənir
 
 Assets directory
-== Kaynak klasörü
+== Mənbə qovluğu
 
 Open the directory to add custom assets
-== Özel kaynak eklemek için klasörü açın
+== Xüsusi mənbə əlavə etmək üçün qovluq açın
 
 Discord
 == Discord
@@ -1617,7 +1616,7 @@ Can't find a Tutorial server
 == Təlimat server tapmaq mümkün deyil
 
 Website
-== Web sayt
+== Web-sayt
 
 Settings
 == Parametrlər
@@ -1632,55 +1631,55 @@ Server executable not found, can't run server
 == Server icra edilə bilən tapılmadı, serveri işə salmaq mümkün deyil
 
 Editor
-== Editör
+== Redaktor
 
 [Start menu]
 Play
 == Oynamaq
 
 Loading race demo files
-== Yarış demo dosyaları yükleniyor
+== Yarış demo faylları yüklənir
 
 Super
-== Super
+== Əla
 
 Loading sound files
-== Ses dosyaları yükleniyor
+== Səs faylları yükləni
 
 Moved ingame
-== Hareket edildi
+== Hərəkət edildi
 
 Go back the specified duration
-== Belirtilen süre kadar geri git
+== Verilən zaman qədər geri qayıt
 
 [Demo player duration]
 %d min.
-== %d dk.
+== %d dəq.
 
 [Demo player duration]
 %d sec.
-== %d sn.
+== %d san.
 
 Change the skip duration
-== Atlanacak süreyi değiştir
+== Keçiləcək zamanı dəyişdir
 
 Go forward the specified duration
-== Belirtilen süre kadar ileri git
+== Verilən zaman qədər irəli get
 
 Render cut to video
-== Kesiti videoya dönüştür
+== Kəsiyi (hissəni) videoya çevir
 
 Error playing demo
-== Demo oynatırken hata oluştu
+== Demo açılarkən xəta baş verdi
 
 Failed saving the replay!
-== Tekrar kaydedilemedi!
+== Təkrar yaddaşda saxlanılmadı ! (qeydə alınmadı)
 
 Saving settings to '%s' failed
-== Ayarlar '%s' dosyasına kaydedilemedi
+== Parametrlər ‘%s’ qovluğuna qeyd edilmədi
 
 Error saving settings
-== Ayarları kaydederken hata oluştu
+== Parametrləri qeyd edərkən xəta baş verdi
 
 Searching
 == Axtarış
@@ -1710,31 +1709,31 @@ Following
 == İzləyir
 
 Loading commands…
-== Komutlar yükleniyor…
+== Komandalar yüklənir…
 
 Some map images could not be loaded. Check the local console for details.
-== Bazı görseller yüklenemedi. Detaylar için konsolu kontrol edin.
+== Bəzi fotolar yüklənmədi. Detallar üçün konsola nəzət yetirin.
 
 Some map sounds could not be loaded. Check the local console for details.
-== Bazı sesler yüklenemedi. Detaylar için konsolu kontrol edin.
+== Bəzi səslər yüklənmədi. Detallar üçün konsola nəzər yetirin.
 
 Loading menu themes
-== Temalar yükleniyor
+== Temalar yüklənir
 
 Press a key…
-== Bir tuşa basın…
+== Bir düyməni basın…
 
 Main menu
-== Ana menü
+== Əsas menyu
 
 Render complete
-== Video işleme tamamlandı
+== Videonun işlənməsi tamamlandı
 
 Are you sure that you want to restart?
-== Yeniden başlatmak istediğinizden eminmisiniz?
+== Yenidən başlamaq istədiyinizə əminsiniz?
 
 There's an unsaved map in the editor, you might want to save it.
-== Editörde kaydedilmemiş bir harita var, kaydetmek isteyebilirsiniz
+== Redaktorda saxlanmamış xəritə var, onu saxlamaq istəyə bilərsiniz
 
 Continue anyway?
 == Yine de devam et
@@ -1743,34 +1742,34 @@ Videos directory
 == Video dizini
 
 Video was saved to '%s'
-== Video '%s' yoluna kaydedildi
+== Video '%s' yolunda xilas oldu
 
 Communities
-== Topluluklar
+== İcmalar
 
 Server filter
-== Sunucu filtresi
+== Server filtri
 
 Friends
-== Arkadaşlar
+== Dostlar
 
 Please use a different filename
-== Farklı bir dosya adı kullanın
+== Fərqli fayl adı istifadə edin
 
 No demo selected
-== Demo seçilmedi
+== Demo seçilməyib
 
 Created
-== Oluşturuldu
+== Yaradılmışdır
 
 map not included
-== Harita dahil değil
+== Xəritə daxil deyil
 
 Loading…
-== Yükleniyor…
+== Yüklənir…
 
 Ghosts directory
-== Hayalet dizini
+== Ruh kataloqu
 
 Activate all
 == Tümünü etkinleştir
@@ -1779,67 +1778,67 @@ Deactivate all
 == Tümünü devre dışı bırak
 
 Info Messages
-== Bilgi Mesajları
+== Məlumat Mesajları
 
 Show local time always
-== Yerel saati her zaman göster
+== Yerli saat həmişə göstərmək
 
 Chat font size
-== Yazı tipi büyüklüğü
+== Şrift ölçüsü
 
 Chat width
-== Sohbet genişliği
+== Söhbət eni
 
 Authed name color in scoreboard
-== Skor tablosunda yetkili isim rengi
+== Xal lövhəsində səlahiyyətli ad rəngi
 
 Same clan color in scoreboard
-== Skor tablosunda aynı klan rengi
+== Xal lövhəsində eyni qlan rəngi
 
 Show finish messages
-== Bitirme mesajlarını göster
+== Bitirmə mesajlarını göstərin
 
 Enable ghost
-== Hayaleti etkinleştir
+== Ruhu aktivləşdirin
 
 Only save improvements
-== Sadece iyileştirmeleri kaydet
+== Sadəcə təkmilləşdirmələri saxlayın
 
 Regular background color
-== Normal arka plan rengi
+== Normal fon rəngi
 
 Entities background color
-== Yapı arka plan rengi
+== Struktur fon rəngi
 
 Loading demo file from storage
-== Cihazdaki demo dosyası yükleniyor
+== Demo faylı yaddaşdan yüklənir
 
 No login required
-== Giriş yapılmasına gerek yok
+== Giriş tələb olunmur
 
 Netversion
-==  Netversion
+== Netversion
 
 Player info change cooldown
-== Oyuncu bilgisini değiştirmek için bekleme süresi
+== Oyunçu məlumatını dəyişmək üçün gözləmə vaxtı
 
 Always show chat
-== Sohbeti her zaman göster
+== Həmişə söhbəti göstərin
 
 Show friend mark (♥) in name plates
-== İsim etiketlerinde arkadaşlık simgesini (♥) göster
+== İstifadəçi adlarında dostluq simvolunu (♥️) göstər
 
 Show hook strength icon indicator
-== Kancanın güç göstergesini göster
+== Show hook strength icon indicator
 
 Show hook strength number indicator
-== Kancanın güç numarası göstergesini göster
+== Show hook strength number indicator
 
 Show own player's hook collision line
-== Karakterinin kanca çarpışma çizgini göster
+== Show own player's hook collision line
 
 Always show own player's hook collision line
-== Karakterinin her zaman kanca çarpışma çizgini göster
+== Always show own player's hook collision line
 
 Always show other players' hook collision lines
-== Diğerlerinin kanca çarpışma çizgini göster
+== Always show other players' hook collision lines
