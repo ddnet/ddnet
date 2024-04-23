@@ -1153,7 +1153,7 @@ Getting server list from master server
 == %d oyunçu
 
 %d player
-== %d oyun.u
+== %d oyunçu
 
 Are you sure that you want to disconnect and switch to a different server?
 == Bağlantını kəsib başqa serverə daxil olmaq istədiyinizə əminsiniz?
