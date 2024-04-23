@@ -57,7 +57,7 @@ Automatically record demos
 == Demoları otomatik olarak kaydet
 
 Automatically take game over screenshot
-== Otomatik olarak oyun bitişinde ekran görüntüsü al
+== Oyun bittiğinde otomatik olarak ekran görüntüsü al
 
 Blue team
 == Mavi takım
@@ -132,7 +132,7 @@ Dynamic Camera
 == Dinamik Kamera
 
 Emoticon
-== Yüz ifadesi
+== İfade
 
 Error
 == Hata
@@ -279,7 +279,7 @@ Pistol
 == Tabanca
 
 Play background music
-== Arkaplan müziğini oynat
+== Arka plan müziğini oynat
 
 Player
 == Oyuncu
@@ -309,7 +309,7 @@ Red team wins!
 == Kırmızı takım kazandı!
 
 Remote console
-== Uzak Konsol
+== Uzak konsol
 
 Remove
 == Çıkar
@@ -504,7 +504,7 @@ Reset to defaults
 == Varsayılanlara getir
 
 Round
-== Raunt
+== Yuvarlak
 
 Lht.
 == Parlaklık
@@ -552,7 +552,7 @@ Reconnect in %d sec
 == %d saniye içinde yeniden bağlanılacak
 
 Render demo
-== Render demo
+== Demo'yu işle
 
 Replace video
 == Video üzerine yaz
@@ -567,13 +567,13 @@ Disconnect Dummy
 == Dummy Ayrıl
 
 Are you sure that you want to disconnect your dummy?
-== Dummy bağlantısını koparmak istediğinizden emin misiniz?
+== Dummy'nin bağlantısını koparmak istediğinizden emin misiniz?
 
 Welcome to DDNet
-== DDNet'e hoşgeldiniz
+== DDNet'e hoş geldiniz
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDRaceNetwork bitiş çizgisine en kısa sürede ulaşmayı amaçlayan oyunculardan oluşan, çevrimiçi bir takım oyunudur. Çaylak olarak ilk önce kolay haritalardan yani Novice sunuculardan oynamaya başlamanı öneririz. Herhangi bir sunucu seçmeden önce sana yakın olan sunucuyu seçmek için ping'i dikkate al.
+== DDRaceNetwork bitiş çizgisine en kısa sürede ulaşmayı amaçlayan oyunculardan oluşan, çevrim içi bir takım oyunudur. Çaylak olarak ilk önce kolay haritalardan yani Novice sunuculardan oynamaya başlamanı öneririz. Size uygun sunucuyu seçerken pinginizi dikkate alın.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Ölmek (yeniden başlamak) için "k" tuşu, oyunu durdurup diğer oyuncuları izlemek için "q" tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
@@ -582,7 +582,7 @@ It's recommended that you check the settings to adjust them to your liking befor
 == Sunuculara bağlanmadan önce ayarları kontrol edip kendine göre düzenlemeni öneriyoruz.
 
 Please enter your nickname below.
-== Lütfen takma adı girin.
+== Lütfen takma adınızı girin.
 
 Video name:
 == Video ismi:
@@ -600,7 +600,7 @@ Exclude
 == Hariç
 
 Player country:
-== Oyuncu ülkesi
+== Oyuncu ülkesi:
 
 Filter connecting players
 == Bağlanan oyuncuları sayma
@@ -921,7 +921,7 @@ Follow
 == Takip et
 
 Frags
-== Frags
+== Parçalanma
 
 Deaths
 == Ölümler
@@ -1179,14 +1179,14 @@ No server selected
 == Sunucu seçilmedi
 
 Online players (%d)
-== Çevrimiçi oyuncular (%d)
+== Çevrim içi oyuncular (%d)
 
 Online clanmates (%d)
-== Çevrimiçi klan arkadaşları (%d)
+== Çevrim içi klan arkadaşları (%d)
 
 [friends (server browser)]
 Offline (%d)
-== Çevrimdışı (%d)
+== Çevrim dışı (%d)
 
 Click to select server. Double click to join your friend.
 == Sunucu seçmek için tıklayın. Arkadaşınıza katılmak için çift tıklayın.
@@ -1446,7 +1446,7 @@ Chat sound volume
 == Sohbet ses seviyesi
 
 Background music volume
-== Arkaplan müziği ses seviyesi
+== Arka plan müziği ses seviyesi
 
 Appearance
 == Görünüm
@@ -1536,25 +1536,25 @@ Weapons
 == Silahlar
 
 Rifle Laser Outline Color
-== Tüfek Lazeri Dış Rengi
+== Tüfeğin Lazer Dış Rengi
 
 Rifle Laser Inner Color
-== Tüfek Lazeri İç Rengi
+== Tüfeğin Lazer İç Rengi
 
 Shotgun Laser Outline Color
-== Pompalı Tüfek Lazeri Dış Rengi
+== Pompalı Tüfeğin Lazer Dış Rengi
 
 Shotgun Laser Inner Color
-== Pompalı Tüfek Lazeri İç Rengi
+== Pompalı Tüfeğin Lazer İç Rengi
 
 Entities
 == Yapılar
 
 Door Laser Outline Color
-== Kapı Lazeri Dış Rengi
+== Kapının Lazer Dış Rengi
 
 Door Laser Inner Color
-== Kapı Lazeri İç Rengi
+== Kapının Lazer İç Rengi
 
 Freeze Laser Outline Color
 == Freeze Lazeri Dış Rengi
@@ -1563,7 +1563,7 @@ Freeze Laser Inner Color
 == Freeze Lazeri İç Rengi
 
 Set all to Rifle
-== Hepsini tüfeğe ayarla
+== Hepsini tüfeğe göre ayarla
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == Başlangıç çizgisini geçtiğinizde en iyi zamanınızın hareketlerini kopyalayan bir hayalet tee göster
@@ -1575,16 +1575,16 @@ Adjust the opacity of entities belonging to other teams, such as tees and namepl
 == Teeler ve isim etiketleri gibi diğer takımlara ait varlıkların opaklığını ayarlayın
 
 Quads are used for background decoration
-== Dörtgen yapılar arkaplan dekorasyonu için kullanılır
+== Dörtgen yapılar arka plan dekorasyonu için kullanılır
 
 Tries to predict other entities to give a feel of low latency
 == Düşük gecikme hissi vermek için diğer yapıları tahmin etmeye çalışır
 
 Background
-== Arkaplan
+== Arka plan
 
 Use current map as background
-== Mevcut haritayı arkaplan olarak kullan
+== Mevcut haritayı arka plan olarak kullan
 
 Run on join
 == Katılınca çalıştır
@@ -1704,7 +1704,7 @@ NOT CONNECTED
 == BAĞLI DEĞİL
 
 Match %d of %d
-== Match %d of %d
+== %d'den %d'yi eşleştir
 
 No results
 == Sonuç yok
@@ -1852,4 +1852,4 @@ Always show other players' hook collision lines
 
 [Demo details]
 map not included
-== 
+== harita dahil edilmemiş
