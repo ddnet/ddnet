@@ -1772,9 +1772,6 @@ No demo selected
 Created
 == Oluşturuldu
 
-map not included
-== Harita dahil değil
-
 Loading…
 == Yükleniyor…
 
@@ -1852,3 +1849,7 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Diğerlerinin kanca çarpışma çizgini göster
+
+[Demo details]
+map not included
+== 

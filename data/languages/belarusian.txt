@@ -518,10 +518,6 @@ LAN
 Name plates size
 == Памер таблічак з імёнамі
 
-A render command failed. Try to update your GPU drivers.
-== Каманда рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
-
-[Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
 == Адпраўка каманд рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
 
@@ -1728,6 +1724,10 @@ Out of VRAM. Try removing custom assets (skins, entities, etc.), especially thos
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
 == 
 
 Failed saving the replay!
