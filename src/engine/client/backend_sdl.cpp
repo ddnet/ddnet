@@ -40,7 +40,6 @@
 #include "graphics_threaded.h"
 
 #include <engine/graphics.h>
-#include <Windows.h>
 
 class IStorage;
 
