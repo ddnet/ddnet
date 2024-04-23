@@ -6,7 +6,6 @@
 ##### /authors #####
 
 ##### translated strings #####
-
 %ds left
 == %ds qaldı
 
@@ -671,7 +670,7 @@ Switch weapon when out of ammo
 == Mərmi bitəndə silahı dəyiş
 
 Show only chat messages from friends
-==Sadəcə dostlarından gələn mesajları göstər
+== Sadəcə dostlarından gələn mesajları göstər
 
 Show clan above name plates
 == İstifadəçi adının üzərində klan adını göstər
