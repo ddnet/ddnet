@@ -1584,7 +1584,7 @@ void CGameContext::OnClientEnter(int ClientId)
 	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientId);
 	NewClientInfoMsg.m_Silent = false;
 
-	for(int p = 0; p < 6; p++)
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 	{
 		NewClientInfoMsg.m_apSkinPartNames[p] = pNewPlayer->m_TeeInfos.m_apSkinPartNames[p];
 		NewClientInfoMsg.m_aUseCustomColors[p] = pNewPlayer->m_TeeInfos.m_aUseCustomColors[p];
@@ -1614,7 +1614,7 @@ void CGameContext::OnClientEnter(int ClientId)
 			ClientInfoMsg.m_Country = Server()->ClientCountry(i);
 			ClientInfoMsg.m_Silent = 0;
 
-			for(int p = 0; p < 6; p++)
+			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 			{
 				ClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
 				ClientInfoMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
@@ -1882,7 +1882,7 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 
 			protocol7::CNetMsg_Sv_SkinChange Msg;
 			Msg.m_ClientId = ClientId;
-			for(int p = 0; p < 6; p++)
+			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 			{
 				Msg.m_apSkinPartNames[p] = pMsg->m_apSkinPartNames[p];
 				Msg.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
@@ -2630,7 +2630,7 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 		Info.m_Silent = true;
 		Info.m_Team = pPlayer->GetTeam();
 
-		for(int p = 0; p < 6; p++)
+		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 		{
 			Info.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
 			Info.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
@@ -2650,7 +2650,7 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	{
 		protocol7::CNetMsg_Sv_SkinChange Msg;
 		Msg.m_ClientId = ClientId;
-		for(int p = 0; p < 6; p++)
+		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 		{
 			Msg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
 			Msg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
