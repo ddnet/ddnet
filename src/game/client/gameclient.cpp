@@ -769,7 +769,7 @@ void CGameClient::OnRender()
 		}
 	}
 
-	if (Graphics()->GetWindowScreen() != g_Config.m_GfxScreen)
+	if(Graphics()->GetWindowScreen() != g_Config.m_GfxScreen)
 		Client()->SwitchWindowScreen(Graphics()->GetWindowScreen());
 }
 
