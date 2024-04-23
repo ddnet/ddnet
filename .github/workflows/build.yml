@@ -153,8 +153,6 @@ jobs:
       if: contains(matrix.os, 'ubuntu-latest')
       uses: codecov/codecov-action@v4
       with:
-        gcov: true
-        gcov_include: src
         flags: unittests
 
     - name: Test headless client (start & connect)
@@ -170,8 +168,6 @@ jobs:
       if: contains(matrix.os, 'ubuntu-latest')
       uses: codecov/codecov-action@v4
       with:
-        gcov: true
-        gcov_include: src
         flags: startconnect
 
     - name: Build in release mode with debug info and all features on
@@ -206,8 +202,6 @@ jobs:
       if: contains(matrix.os, 'ubuntu-latest')
       uses: codecov/codecov-action@v4
       with:
-        gcov: true
-        gcov_include: src
         flags: integrationtests
 
     - name: Package

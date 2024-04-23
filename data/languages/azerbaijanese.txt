@@ -1,93 +1,83 @@
 ##### authors #####
 #originally created by:
-#	Learath2
+#	Gokturk
 #modified by:
-#	Learath2		2011-06-27 18:54:08
-#	Learath2		2011-08-21 00:12:50
-#	Learath2		2011-09-07 15:59:20
-#	Learath2		2012-01-01 22:54:29
-#	ardadem			2020-08-20 00:00:00
-#	ardadem			2020-08-22 00:00:00
-#   h-kaan          2023-08-23 15:57:36
-#   h-kaan          2023-08-30 01:52:04
-#   h-kaan          2023-09-21 21:04:35
-#   eghwand          2024-03-03 13:24:20
-#   Gokturk          2024-04-23 01:56:10
+
 ##### /authors #####
 
 ##### translated strings #####
 
 %ds left
-== %ds kaldı
+== %ds qaldı
 
 %i minute left
-== %i dakika kaldı
+== %i dəqiqə qalıb
 
 %i minutes left
-== %i dakika kaldı
+== %i dəqiqə qalıb
 
 %i second left
-== %i saniye kaldı
+== %i saniyə qaldı
 
 %i seconds left
-== %i saniye kaldı
+== %i saniyə qaldı
 
 %s wins!
-== %s kazandı!
+== %s qalib!
 
 Abort
-== İptal
+== Ləğv edin
 
 Add
-== Ekle
+== Əlavə etmək
 
 Add Friend
-== Arkadaş Ekle
+== Dost əlavə et
 
 Address
-== Adres
+== Ünvan
 
 All
-== Hepsi
+== Hamısı
 
 Are you sure that you want to quit?
-== Çıkmak istediğinize emin misiniz?
+== Çıxmaq istədiyinizə əminsiniz?
 
 Automatically record demos
-== Demoları otomatik olarak kaydet
+== Demoları avtomatik olaraq qeyd edin
 
 Automatically take game over screenshot
-== Otomatik olarak oyun bitişinde ekran görüntüsü al
+== 
 
 Blue team
-== Mavi takım
+== Mavi qrup
 
 Blue team wins!
-== Mavi takım kazandı!
+== Mavi qrup qazandı!
 
 Body
-== Gövde
+== bədən
 
 Call vote
-== Oylama
+== Səsvermə
 
 Change settings
-== Ayarları değiştir
+== Parametrləri dəyişdirin
 
 Chat
-== Sohbet
+== Söhbat
 
 Clan
 == Klan
 
 Client
-== İstemci
+== Client
 
 Connecting to
-== Bağlanılıyor
+== Bağlanmaq
 
 Connection Problems...
-== Bağlantı Hataları...
+== Bağlanmaq Problems...
 
 Console
 == Konsol
@@ -96,46 +86,46 @@ Controls
 == Kontroller
 
 Count players only
-== Sadece oyuncuları say
+== Sadəcə oyunçuları say
 
 Current
-== Şimdiki
+== İndi
 
 Custom colors
-== Özel renkler
+== Xüsusi rənglər
 
 Delete
 == Sil
 
 Delete demo
-== Demoyu sil
+== Demo sil
 
 Demofile: %s
-== Demo dosyası: %s
+== Demo dosya: %s
 
 Demos
 == Demolar
 
 Disconnect
-== Bağlantıyı kes
+== Bağlantını kəsin
 
 Disconnected
-== Bağlantı kesildi
+== Bağlantı kəsildi
 
 Downloading map
-== Harita yükleniyor
+== Xəritə yüklənir
 
 Draw!
-== Berabere!
+== Çəkmək!
 
 Dynamic Camera
 == Dinamik Kamera
 
 Emoticon
-== Yüz ifadesi
+== Yüz ifadə
 
 Error
-== Hata
+== Error
 
 Error loading demo
 == Demo yüklenirken hata oluştu
@@ -147,19 +137,19 @@ Favorites
 == Favoriler
 
 Feet
-== Ayak
+== Ayaq
 
 Fire
-== Ateş
+== Atəş
 
 Folder
-== Klasör
+== Qovluq
 
 Force vote
-== Oylamayı zorla
+== Məcburi səsvermə
 
 Free-View
-== Serbest Bakış
+== Sərbəst baxış
 
 Fullscreen
 == Tam ekran
@@ -168,49 +158,49 @@ Game
 == Oyun
 
 Game info
-== Oyun bilgisi
+== Oyun məlumat
 
 Game over
-== Oyun bitti
+== Oyun bitdi
 
 Game type
-== Oyun türü
+== Oyun növü
 
 Game types:
-== Oyun türleri:
+== Oyun növləri:
 
 General
-== Genel
+== General
 
 Graphics
-== Grafik
+== Qrafik
 
 Grenade
-== El bombası
+== Qranat
 
 Hammer
-== Çekiç
+== Çəkic
 
 Has people playing
-== Oyuncu bulunduran
+== Oyunçuları ehtiva edir
 
 High Detail
-== Yüksek Detay
+== Yüksək Detal
 
 Hook
-== Kanca
+== Qarmaq
 
 Invalid Demo
-== Geçersiz Demo
+== Etibarsız demo
 
 Join blue
-== Maviye katıl
+== Maviye daxil ol
 
 Join red
-== Kırmızıya katıl
+== Qırmızıya daxil ol
 
 Jump
-== Zıpla
+== Tullanma
 
 Kick player
 == Oyuncuyu At
@@ -222,151 +212,151 @@ MOTD
 == MOTD
 
 Map
-== Harita
+== Xəritə
 
 Move left
-== Sola git
+== Sola get
 
 Move player to spectators
-== Seyircilere katıl
+== Tamaşaçılara qoşulun
 
 Move right
-== Sağa git
+== Sağa get
 
 Movement
-== Hareket
+== Hərəkat
 
 Mute when not active
 == Aktif değilken sessizleştir
 
 Name
-== Sunucu ismi
+== Server adı
 
 Next weapon
-== Sonraki silah
+== Növbəti silah
 
 Nickname
-== Takma ad
+== Ləqəb
 
 No
-== Hayır
+== Yox
 
 No password
-== Şifre yok
+== Parol yox
 
 No servers found
-== Sunucu bulunamadı
+== Server tapılmadı
 
 No servers match your filter criteria
 == Filtre kriterlerinize uygun sunucu bulunamadı
 
 Ok
-== Tamam
+== Yaxşı
 
 Parent Folder
-== Üst dizin
+== Ana Kataloq
 
 Password
-== Şifre
+== Parol
 
 Password incorrect
-== Hatalı şifre
+== Səhv Parol
 
 Ping
 == Ping
 
 Pistol
-== Tabanca
+== Tapança 
 
 Play background music
-== Arkaplan müziğini oynat
+== Fon musiqisini çal
 
 Player
-== Oyuncu
+== Oyunçu
 
 Player options
-== Oyuncu ayarları
+== Oyunçu parametrlər	
 
 Players
-== Oyuncular
+== Oyunçular
 
 Please balance teams!
-== Takımları dengeleyin!
+== qrupları balanslaşdırın!
 
 Prev. weapon
-== Önceki silah
+== Əvvəlki silah
 
 Quit
-== Çıkış
+== Çıxmaq
 
 Reason:
-== Neden:
+== Səbəb:
 
 Red team
-== Kırmızı takım
+== Qırmızı qruq
 
 Red team wins!
-== Kırmızı takım kazandı!
+== Qırmızı qruq qazandı!
 
 Remote console
-== Uzak Konsol
+== Uzaq Konsol
 
 Remove
-== Çıkar
+== Çıxarmaq
 
 Remove friend
-== Arkadaşı sil
+== Dostu çıxarın
 
 Rename demo
-== Demonun adını değiştir
+== Demonun adını dəyişdirin
 
 Reset filter
-== Filtreleri sıfırla
+== Filtrləri sıfırlayın
 
 Score
-== Skor
+== Xal
 
 Score limit
-== Skor limiti
+== Xal limiti
 
 Scoreboard
-== Skor tablosu
+== Xal lövhəsi
 
 Screenshot
 == Ekran görüntüsü
 
 Server address:
-== Sunucu adresi:
+== Server ünvanı:
 
 Server info
-== Sunucu bilgisi
+== Server məlumatı
 
 Server not full
-== Sunucu dolu değil
+== Sunucu dolu deyil
 
 Shotgun
-== Tüfek
+== Tüfəng
 
 Show chat
-== Sohbeti göster
+== Söhbəti göstər
 
 Show friends only
-== Sadece arkadaşları göster
+== Yalnız dostlar göstərin
 
 Show ingame HUD
-== Oyun içi arayüzünü göster
+== Oyundaxili HUD göstərin
 
 Show name plates
-== Oyuncu isimlerini göster
+== Oyunçu adlarını göstərin
 
 Sound
-== Ses
+== Səs
 
 Sound error
-== Ses hatası
+== Səs xətası
 
 Spectate
-== İzle
+== Bax
 
 Spectate next
 == Sıradakini izle
@@ -381,85 +371,85 @@ Spectators
 == İzleyiciler
 
 Stop record
-== Kaydı durdur
+== Qeydi dayandırın
 
 Strict gametype filter
-== Sıkı oyun türü filtresi
+== Ciddi oyun növü filtri
 
 Sudden Death
 == Ani ölüm
 
 Switch weapon on pickup
-== Silah alındığıda yeni silahı kullan
+== Silah alındıqda yeni silahdan istifadə edin
 
 Team
-== Takım
+== Qrup
 
 Team chat
-== Takım sohbeti
+== Qrup söhbəti
 
 The audio device couldn't be initialised.
-== Ses donanımı başlatılamadı.
+== Ses aparatı işə sala bilmədi.
 
 The server is running a non-standard tuning on a pure game type.
-== Bu sunucu standart olmayan bir ayarı saf bir oyun türünde kullanıyor.
+== Bu server təmiz oyun janrında qeyri-standart parametrdən istifadə edir.
 
 Time limit
-== Süre limiti
+== Vaxt məhdudiyyəti
 
 Time limit: %d min
-== Süre limiti: %d dakika
+== Vaxt məhdudiyyəti: %d dəqiqə
 
 Try again
-== Tekrar dene
+== Yenidən cəhd elə
 
 Type
-== Tür
+== Növü
 
 Unable to rename the demo
-== Demonun ismi değiştirilemiyor
+== Demonun adını dəyişdirmək olmaz
 
 Use sounds
-== Sesleri kullan
+== Səslərdən istifadə edin
 
 Use team colors for name plates
-== İsim etiketlerinde takım renklerini kullan
+== Ad etiketlərində komanda rənglərindən istifadə edin
 
 V-Sync
 == V-Sync
 
 Version
-== Sürüm
+== Versiya
 
 Vote command:
-== Komut:
+== Əmr:
 
 Vote description:
-== Açıklama:
+== Şərh:
 
 Vote no
-== Olumsuz
+== Yox
 
 Vote yes
-== Olumlu
+== Bəli
 
 Voting
-== Oylama
+== Səsvermə
 
 Warmup
-== Isınma
+== İstiləşmə
 
 Weapon
 == Silah
 
 Yes
-== Evet
+== Bəli
 
 You must restart the game for all settings to take effect.
-== Bütün ayarların aktif olması için oyunu yeniden başlatmalısınız.
+== Bütün parametrlərin aktiv olması üçün oyunu yenidən başlatmalısınız.
 
 New name:
-== Yeni isim:
+== Yeni ad:
 
 Sat.
 == Doygunluk
@@ -471,16 +461,17 @@ Internet
 == İnternet
 
 Max demos
-== Maksimum Demo Sayısı
+== Maksimum Demo sayı
 
 News
-== Haberler
+== xəbərlər
 
 Join game
-== Oyuna katıl
+== Oyuna qoşulun
 
 FSAA samples
-== FSAA örnekleri
+== FSAA nümunələri
+
 
 Sound volume
 == Ses seviyesi
@@ -576,7 +567,7 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 == DDRaceNetwork bitiş çizgisine en kısa sürede ulaşmayı amaçlayan oyunculardan oluşan, çevrimiçi bir takım oyunudur. Çaylak olarak ilk önce kolay haritalardan yani Novice sunuculardan oynamaya başlamanı öneririz. Herhangi bir sunucu seçmeden önce sana yakın olan sunucuyu seçmek için ping'i dikkate al.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Ölmek (yeniden başlamak) için "k" tuşu, oyunu durdurup diğer oyuncuları izlemek için "q" tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
+== İntihar etmek (yeniden başlamak) için k tuşu, oyunu durdurup diğer oyuncuları izlemek için q tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Sunuculara bağlanmadan önce ayarları kontrol edip kendine göre düzenlemeni öneriyoruz.
@@ -717,7 +708,7 @@ Pause
 == Durdur
 
 Kill
-== Öl
+== İntihar et
 
 Zoom in
 == Yakınlaştır
@@ -1371,7 +1362,7 @@ Ingame controller sens.
 == Oyun içi kontrolcü hassasiyeti
 
 UI controller sens.
-== Arayüz kontrolcü hassasiyeti 
+== Arayüz kontrolcü hassasiyeti
 
 Controller jitter tolerance
 == Kontrolcü titreşim toleransı
@@ -1380,16 +1371,16 @@ No controller found. Plug in a controller.
 == Kontrolcü bulunamadı. Bir Kontrolcü bağlayın.
 
 Axis
-== Eksen
+== Ox
 
 Status
-== Durum
+== Vəziyyət
 
 Aim bind
-== Nişan alma
+== Nişan almaq
 
 Mouse
-== Fare
+== Mouse
 
 Ingame mouse sens.
 == Oyun hassasiyeti
@@ -1461,7 +1452,7 @@ Hook Collisions
 == Kanca kesişmeleri
 
 Show health, shields and ammo
-== Can, kalkan ve cephaneyi göster 
+== Can, kalkan ve cephaneyi göster
 
 DDRace HUD
 == DDRace arayüzü
@@ -1581,10 +1572,10 @@ Tries to predict other entities to give a feel of low latency
 == Düşük gecikme hissi vermek için diğer yapıları tahmin etmeye çalışır
 
 Background
-== Arkaplan
+== Fon
 
 Use current map as background
-== Mevcut haritayı arkaplan olarak kullan
+== Cari xəritəni fon kimi istifadə edin
 
 Run on join
 == Katılınca çalıştır
@@ -1596,16 +1587,16 @@ Unregister protocol and file extensions
 == Protokol ve dosya uzantılarının kaydını sil
 
 Emoticons
-== İfadeler
+== İfadələr
 
 Particles
-== Parçacıklar
+== Hissəciklər
 
 Extras
-== Ekstralar
+== Əlavələr
 
 Loading assets
-== Kaynaklar yükleniyor
+== Aktivlər yüklənir
 
 Assets directory
 == Kaynak klasörü
@@ -1620,38 +1611,38 @@ https://ddnet.org/discord
 == https://ddnet.org/discord
 
 Tutorial
-== Öğretici
+== Təlimat
 
 Can't find a Tutorial server
-== Öğretici sunucu bulunamıyor
+== Təlimat server tapmaq mümkün deyil
 
 Website
-== Web sitesi
+== Web sayt
 
 Settings
-== Ayarlar
+== Parametrlər
 
 Stop server
-== Sunucuyu durdur
+== Serveri dayandırın
 
 Run server
-== Sunucu aç
+== Açıq server
 
 Server executable not found, can't run server
-== Çalıştırılabilir sunucu bulunamadı, sunucu başlatılamıyor
+== Server icra edilə bilən tapılmadı, serveri işə salmaq mümkün deyil
 
 Editor
 == Editör
 
 [Start menu]
 Play
-== Oyna
+== Oynamaq
 
 Loading race demo files
 == Yarış demo dosyaları yükleniyor
 
 Super
-== Süper
+== Super
 
 Loading sound files
 == Ses dosyaları yükleniyor
@@ -1692,31 +1683,31 @@ Error saving settings
 == Ayarları kaydederken hata oluştu
 
 Searching
-== Aranıyor
+== Axtarış
 
 Enter Username
-== Kullanıcı adı girin
+== İstifadəçi adınızı daxil edin
 
 Enter Password
-== Şifre girin
+== Parola daxil edin
 
 NOT CONNECTED
-== BAĞLI DEĞİL
+== BAĞLANTI YOXDUR
 
 Match %d of %d
-== Match %d of %d
+== Uyğunluq %d dən %d
 
 No results
-== Sonuç yok
+== Heç bir nəticə yoxdur
 
 Lines %d - %d (%s)
-== Satır %d - %d (%s)
+== Xətlər %d - %d (%s)
 
 Locked
-== Sabit
+== Kilidli
 
 Following
-== Takipte
+== İzləyir
 
 Loading commands…
 == Komutlar yükleniyor…
@@ -1771,6 +1762,9 @@ No demo selected
 
 Created
 == Oluşturuldu
+
+map not included
+== Harita dahil değil
 
 Loading…
 == Yükleniyor…
@@ -1849,7 +1843,3 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Diğerlerinin kanca çarpışma çizgini göster
-
-[Demo details]
-map not included
-== 
