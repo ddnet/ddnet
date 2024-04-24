@@ -1,6 +1,6 @@
 ##### authors #####
 #originally created by:
-#	    Gokturk and seishiroon 
+#	    Gokturk, seishiroon and Aykhan [EN07Z]
 #modified by:
 #     
 ##### /authors #####
@@ -10,10 +10,10 @@
 == %ds qaldı
 
 %i minute left
-== %i dəqiqə qalıb
+== %i dəqiqə qaldı
 
 %i minutes left
-== %i dəqiqə qalıb
+== %i dəqiqə qaldı
 
 %i second left
 == %i saniyə qaldı
@@ -244,7 +244,7 @@ No password
 == Parol yox
 
 No servers found
-== Server tapılmadı
+== Server  tapıla bilmədi
 
 No servers match your filter criteria
 == Filtre kriterlerinize uygun sunucu bulunamadı
@@ -328,7 +328,7 @@ Server address:
 == Server ünvanı:
 
 Server info
-== Server məlumatı
+== Server haqqında 
 
 Server not full
 == Sunucu dolu deyil
@@ -472,7 +472,7 @@ FSAA samples
 == FSAA nümunələri
 
 Sound volume
-== Ses seviyesi
+== Ses səviyyəsi
 
 Max Screenshots
 == Maksimum Ekran Görüntüsü Sayısı
@@ -493,7 +493,7 @@ Reset to defaults
 == Defoltlara sıfırlayın
 
 Round
-== Round
+== Yuvarlaq
 
 Lht.
 == Parlaqlıq
@@ -1078,7 +1078,7 @@ Requesting to join the game
 == Oyuna girməyə çalışır
 
 Rename folder
-== Rename folder
+== Qovluğun adını dəyişdirin
 
 Existing Player
 == Mövcud oyunçu
@@ -1087,37 +1087,37 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 == Sizin '%s' ləqəbiniz başqası tərəfindən istifadə olunur (%d xal). Hələ də istifadə etmək istəyirsən?
 
 Checking for existing player with your name
-== Adınız olan digər oyunçuları axtarırsınız
+== Eyni adlı mövcud oyunçular yoxlanılır
 
 A demo with this name already exists
-== A demo with this name already exists
+== Eyni adlı demo hal-hazırda mövcuddur
 
 A folder with this name already exists
-== A folder with this name already exists
+== Eyni adlı qovluq hal-hazırda mövcuddur
 
 Unable to rename the folder
-== Unable to rename the folder
+== Qovluğun adı dəyişdirilə bilmədi
 
 File '%s' already exists, do you want to overwrite it?
-== File '%s' already exists, do you want to overwrite it??
+==  '%s' faylı hal-hazırda mövcuddur, əvəz edilsin??
 
 (paused)
-== (fasilə verdi)
+== (fasilədə)
 
 Speed
 == Sürət
 
 Join Tutorial Server
-== Dərslik serverinə daxil olun
+== Öyrədici derverə daxil olun
 
 Skip Tutorial
-== Dərsliyi keçin
+== Dərsi keçin
 
 Theme
 == Tema
 
 Loading menu images
-== Menü resimleri yükleniyor
+== Menyu şəkilləri yüklənir
 
 AFR
 == AFR
@@ -1144,10 +1144,10 @@ Getting server list from master server
 == Master serverdən server siyahısı əldə edilir
 
 %d of %d servers
-== %2$d serverin %1$d tanesi
+== %2$d serverdən %1$d ədədi
 
 %d of %d server
-== %2$d serverin %1$d tanesi
+== %2$d serverdən %1$d ədədi
 
 %d players
 == %d oyunçu
@@ -1162,7 +1162,7 @@ Copy info
 == Məlumatı kopyalayın
 
 Leak IP
-== Leak IP
+== IP-i sızdır
 
 No server selected
 == Heç bir server seçilmədi
@@ -1187,7 +1187,7 @@ Click to remove this clan from your friends list.
 == Bu klanı dostlarınızın siyahısından silmək üçün klikləyin.
 
 None
-== Yok
+== Yox
 
 Are you sure that you want to remove the player '%s' from your friends list?
 == '%s' oyunçu dostlarınız siyahısından silmək istədiyinizə əminsiniz?
@@ -1196,97 +1196,97 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 == '%s' klanı dostlarınız siyahısından silmək istədiyinizə əminsiniz?
 
 Add Clan
-== klan əlavə edin
+== Klan əlavə edin
 
 Play the current demo
-== Play the current demo
+== Cari demoyu oynayın
 
 Pause the current demo
-== Demoyu duraklat
+== Demoya fasilə ver
 
 Stop the current demo
-== Stop the current demo
+== Demoyu dayandır
 
 Go back one tick
-== Go back one tick
+== Bir tik geri qayıt
 
 Go forward one tick
-== Go forward one tick
+== Bir tik irəli get
 
 Slow down the demo
-== Slow down the demo
+== Demoyu yavaşlat
 
 Speed up the demo
-== Speed up the demo
+== Demoyu sürətləndir
 
 Mark the beginning of a cut (right click to reset)
-== Mark the beginning of a cut (right click to reset)
+== Kəsim başlanğıcını işarələ (sağ kliklə sıfırla)
 
 Mark the end of a cut (right click to reset)
-== Mark the end of a cut (right click to reset)
+== Kəsim sonunu işarələ (sol kliklə sıfırla)
 
 Export cut as a separate demo
-== Export cut as a separate demo
+== Kəsimi ayrıca demo kimi ixrac et
 
 Go back one marker
-== Go back one marker
+== Bir işarə geri qayıt
 
 Go forward one marker
-== Go forward one marker
+== Bir işarə irəli get
 
 Close the demo player
-== Close the demo player
+== Demo pleyeri bağla
 
 Toggle keyboard shortcuts
-== Toggle keyboard shortcuts
+== Klaviatura qısayollarına keçid
 
 Export demo cut
-== Export demo cut
+== Demo kəsimini ixrac et
 
 Cut interval
-== Cut interval
+== Kəsim intervalı
 
 Cut length
-== Cut length
+== Kəsim müddəti
 
 Loading demo files
-== Loading demo files
+== Demo fayllarının yüklənməsi
 
 All combined
-== All combined
+== Hamısı bir yerdə
 
 Folder Link
-== Folder Link
+== Qovluğa keçid
 
 Demos directory
-== Demos directory
+== Demolara keçid
 
 Open the directory that contains the demo files
-== Open the directory that contains the demo files
+== Demo faylları olan qovluğu aç
 
 Are you sure that you want to delete the folder '%s'?
-== Are you sure that you want to delete the folder '%s'?
+== '%s' qovluğunu silmək istədiyinizə əminsinizmi?
 
 Are you sure that you want to delete the demo '%s'?
-== Are you sure that you want to delete the demo '%s'?
+== '%s' demosunu silmək istədiyinizə əminsinizmi?
 
 Delete folder
 == Qovluğu silin
 
 Unable to delete the demo '%s'
-== '%s' demosu silinemiyor
+== '%s' demosu silinə bilmədi.
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== Unable to delete the folder '%s'. Make sure it's empty first.
+==  '%s' qovluğu silinə bilmədi. Əvvəlcə boş olduğundan əmin olun.
 
 Loading ghost files
 == Ruh faylların yüklənməsi
 
 Menu opened. Press Esc key again to close menu.
-== Menyu açılır. Menyunu bağlamaq üçün yenidən Esc düyməsini basın.
+== Menyu açıqdır. Menyuyu yenidən bağlamaq üçün Esc klavişini sıxın.
 
 Smooth Dynamic Camera
-== Smooth Dynamic Camera
+== Hamar Dinamik Kamera
 
 Skip the main menu
 == Əsas menyudan keçin
@@ -1334,39 +1334,39 @@ Skins directory
 == Skin qovluq
 
 Open the directory to add custom skins
-== Open the directory to add custom skins
+==  Xüsusi örtük(?) etmək üçün kataloqu açın.
 
 Chat command
 == Söhbət əmri
 
 Enable controller
-== Enable controller
+== Kontrolleri aktivləşdir
 
 Controller
-== Controller
+== Kontroller
 
 Ingame controller mode
-== Ingame controller mode
+== Oyundaxili kontroller rejimi
 
 [Ingame controller mode]
 Relative
-== Bağıl
+== Nisbi
 
 [Ingame controller mode]
 Absolute
-== Mutlak
+== Mütləq
 
 Ingame controller sens.
-== Ingame controller sens.
+== Oyundaxili kontroller həssaslığı.
 
 UI controller sens.
-== UI controller sens.
+== UI kontroller həssaslığı.
 
 Controller jitter tolerance
-== Controller jitter tolerance
+== Kontroller gecikmə əmsalı
 
 No controller found. Plug in a controller.
-== No controller found. Plug in a controller.
+== Kontroller tapılmadı. Kontrolleri qoşun
 
 Axis
 == Ox
@@ -1393,7 +1393,7 @@ Are you sure that you want to reset the controls to their defaults?
 == Kontrolleri varsayılan değerlerine döndürmek istediğine emin misin?
 
 Cancel
-== İmtina etm
+== İmtina etmək 
 
 Dummy
 == Dummy
@@ -1402,13 +1402,13 @@ Windowed
 == Pəncərəli
 
 Windowed borderless
-== Kenarsız pencereli
+== Sərhədsiz pəncərəli
 
 Windowed fullscreen
-== Pencereli tam ekran
+== Pəncərəli tam ekran
 
 Desktop fullscreen
-== Masaüstü tam ekran
+== Tam ekran
 
 Allows maps to render with more detail
 == Haritaların daha detaylı işlenmesine izin ver
@@ -1585,7 +1585,7 @@ Unregister protocol and file extensions
 == Protokol və fayl uzantılarının qeydiyyatını sil
 
 Emoticons
-==  Emosiyalar (İfadələr)
+== Emosiyalar (İfadələr)
 
 Particles
 == Hissəciklər
@@ -1735,10 +1735,10 @@ There's an unsaved map in the editor, you might want to save it.
 == Redaktorda saxlanmamış xəritə var, onu saxlamaq istəyə bilərsiniz
 
 Continue anyway?
-== Yine de devam et
+== Yenə də davam et?
 
 Videos directory
-== Video dizini
+== Video kataloqu
 
 Video was saved to '%s'
 == Video '%s' yolunda xilas oldu
@@ -1828,16 +1828,16 @@ Show friend mark (♥) in name plates
 == İstifadəçi adlarında dostluq simvolunu (♥️) göstər
 
 Show hook strength icon indicator
-== Show hook strength icon indicator
+== Qarmaq gücü işarəsi göstəricisini göstər
 
 Show hook strength number indicator
-== Show hook strength number indicator
+== Qarmaq gücü say göstəricisini göstər
 
 Show own player's hook collision line
-== Show own player's hook collision line
+== Oyunçunun qarmaq toqquşma sərhədini göstər
 
 Always show own player's hook collision line
-== Always show own player's hook collision line
+== Oyunçunun qarmaq toqquşma sərhədini həmişə göstər
 
 Always show other players' hook collision lines
-== Always show other players' hook collision lines
+== Digər oyunçuların qarmaq toqquşma sərhədini həmişə göstər
