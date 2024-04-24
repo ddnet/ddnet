@@ -748,7 +748,7 @@ Dummy copy
 == Dummy kopyala
 
 Hammerfly dummy
-== Hammerfly dummy
+== Çekiç uçuşu dummy
 
 Converse
 == Konuşma
