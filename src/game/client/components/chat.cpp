@@ -764,6 +764,8 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		pCurrentLine->m_Team = Team == 1;
 		pCurrentLine->m_Whisper = Team >= 2;
 		pCurrentLine->m_NameColor = -2;
+		pCurrentLine->m_Friend = false;
+		pCurrentLine->m_HasRenderTee = false;
 
 		TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
 		Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
@@ -800,58 +802,56 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		}
 		else
 		{
-			if(m_pClient->m_aClients[ClientId].m_Team == TEAM_SPECTATORS)
+			auto &LineAuthor = m_pClient->m_aClients[pCurrentLine->m_ClientId];
+
+			if(LineAuthor.m_Team == TEAM_SPECTATORS)
 				pCurrentLine->m_NameColor = TEAM_SPECTATORS;
 
 			if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
 			{
-				if(m_pClient->m_aClients[ClientId].m_Team == TEAM_RED)
+				if(LineAuthor.m_Team == TEAM_RED)
 					pCurrentLine->m_NameColor = TEAM_RED;
-				else if(m_pClient->m_aClients[ClientId].m_Team == TEAM_BLUE)
+				else if(LineAuthor.m_Team == TEAM_BLUE)
 					pCurrentLine->m_NameColor = TEAM_BLUE;
 			}
 
 			if(Team == 2) // whisper send
 			{
-				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "→ %s", m_pClient->m_aClients[ClientId].m_aName);
+				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "→ %s", LineAuthor.m_aName);
 				pCurrentLine->m_NameColor = TEAM_BLUE;
 				pCurrentLine->m_Highlighted = false;
 				Highlighted = false;
 			}
 			else if(Team == 3) // whisper recv
 			{
-				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s", m_pClient->m_aClients[ClientId].m_aName);
+				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s", LineAuthor.m_aName);
 				pCurrentLine->m_NameColor = TEAM_RED;
 				pCurrentLine->m_Highlighted = true;
 				Highlighted = true;
 			}
 			else
-				str_copy(pCurrentLine->m_aName, m_pClient->m_aClients[ClientId].m_aName);
+				str_copy(pCurrentLine->m_aName, LineAuthor.m_aName);
 
 			str_copy(pCurrentLine->m_aText, pLine);
-			pCurrentLine->m_Friend = m_pClient->m_aClients[ClientId].m_Friend;
-		}
+			pCurrentLine->m_Friend = LineAuthor.m_Friend;
 
-		pCurrentLine->m_HasRenderTee = false;
-
-		pCurrentLine->m_Friend = ClientId >= 0 ? m_pClient->m_aClients[ClientId].m_Friend : false;
-
-		if(pCurrentLine->m_ClientId >= 0 && pCurrentLine->m_aName[0] != '\0')
-		{
-			if(!g_Config.m_ClChatOld)
+			if(pCurrentLine->m_aName[0] != '\0')
 			{
-				pCurrentLine->m_CustomColoredSkin = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_CustomColoredSkin;
-				if(pCurrentLine->m_CustomColoredSkin)
-					pCurrentLine->m_RenderSkin = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_ColorableRenderSkin;
-				else
-					pCurrentLine->m_RenderSkin = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_OriginalRenderSkin;
+				if(!g_Config.m_ClChatOld)
+				{
+					pCurrentLine->m_CustomColoredSkin = LineAuthor.m_RenderInfo.m_CustomColoredSkin;
+					if(pCurrentLine->m_CustomColoredSkin)
+						pCurrentLine->m_RenderSkin = LineAuthor.m_RenderInfo.m_ColorableRenderSkin;
+					else
+						pCurrentLine->m_RenderSkin = LineAuthor.m_RenderInfo.m_OriginalRenderSkin;
 
-				str_copy(pCurrentLine->m_aSkinName, m_pClient->m_aClients[pCurrentLine->m_ClientId].m_aSkinName);
-				pCurrentLine->m_ColorBody = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_ColorBody;
-				pCurrentLine->m_ColorFeet = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_ColorFeet;
+					str_copy(pCurrentLine->m_aSkinName, LineAuthor.m_aSkinName);
+					pCurrentLine->m_ColorBody = LineAuthor.m_RenderInfo.m_ColorBody;
+					pCurrentLine->m_ColorFeet = LineAuthor.m_RenderInfo.m_ColorFeet;
 
-				pCurrentLine->m_RenderSkinMetrics = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_SkinMetrics;
-				pCurrentLine->m_HasRenderTee = true;
+					pCurrentLine->m_RenderSkinMetrics = LineAuthor.m_RenderInfo.m_SkinMetrics;
+					pCurrentLine->m_HasRenderTee = true;
+				}
 			}
 		}
 
