@@ -1379,12 +1379,17 @@ void CEditor::DoToolbarSounds(CUIRect ToolBar)
 		if(pSelectedSound->m_SoundId != m_ToolbarPreviewSound && m_ToolbarPreviewSound >= 0 && Sound()->IsPlaying(m_ToolbarPreviewSound))
 			Sound()->Stop(m_ToolbarPreviewSound);
 		m_ToolbarPreviewSound = pSelectedSound->m_SoundId;
+	}
+	else
+	{
+		m_ToolbarPreviewSound = -1;
+	}
 
+	if(m_ToolbarPreviewSound >= 0)
+	{
 		static int s_PlayPauseButton, s_StopButton, s_SeekBar = 0;
 		DoAudioPreview(ToolBarBottom, &s_PlayPauseButton, &s_StopButton, &s_SeekBar, m_ToolbarPreviewSound);
 	}
-	else
-		m_ToolbarPreviewSound = -1;
 }
 
 static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
