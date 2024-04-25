@@ -341,7 +341,8 @@ void CSound::RateConvert(CSample &Sample) const
 
 bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) const
 {
-	OggOpusFile *pOpusFile = op_open_memory((const unsigned char *)pData, DataSize, nullptr);
+	int OpusError = 0;
+	OggOpusFile *pOpusFile = op_open_memory((const unsigned char *)pData, DataSize, &OpusError);
 	if(pOpusFile)
 	{
 		const int NumChannels = op_channel_count(pOpusFile, -1);
@@ -380,7 +381,7 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 	}
 	else
 	{
-		dbg_msg("sound/opus", "failed to decode sample");
+		dbg_msg("sound/opus", "failed to decode sample, error %d", OpusError);
 		return false;
 	}
 
