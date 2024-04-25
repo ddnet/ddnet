@@ -350,6 +350,7 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 
 		if(NumChannels > 2)
 		{
+			op_free(pOpusFile);
 			dbg_msg("sound/opus", "file is not mono or stereo.");
 			return false;
 		}
@@ -363,6 +364,7 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 			if(Read < 0)
 			{
 				free(pSampleData);
+				op_free(pOpusFile);
 				dbg_msg("sound/opus", "op_read error %d at %d", Read, Pos);
 				return false;
 			}
@@ -370,6 +372,8 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 				break;
 			Pos += Read;
 		}
+
+		op_free(pOpusFile);
 
 		Sample.m_pData = pSampleData;
 		Sample.m_NumFrames = Pos;
