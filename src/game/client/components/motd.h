@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_MOTD_H
 
 #include <engine/shared/config.h>
+#include <engine/textrender.h>
 
 #include <game/client/component.h>
 

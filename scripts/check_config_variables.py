@@ -46,7 +46,7 @@ def find_config_variables(config_variables):
 	return variables_not_found
 
 def main():
-	lines = read_all_lines('src/game/variables.h') + read_all_lines('src/engine/shared/config_variables.h')
+	lines = read_all_lines('src/engine/shared/config_variables.h')
 	config_variables = parse_config_variables(lines)
 	config_variables_not_found = find_config_variables(config_variables)
 	for variable_code in config_variables_not_found:

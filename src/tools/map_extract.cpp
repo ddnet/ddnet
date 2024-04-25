@@ -80,7 +80,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 			TImageByteBuffer ByteBuffer;
 			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
 
-			if(SavePNG(OutputFormat, (const uint8_t *)Reader.GetData(pItem->m_ImageData), ImageByteBuffer, pItem->m_Width, pItem->m_Height))
+			if(SavePng(OutputFormat, (const uint8_t *)Reader.GetData(pItem->m_ImageData), ImageByteBuffer, pItem->m_Width, pItem->m_Height))
 				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
 			io_close(File);
 		}
@@ -102,12 +102,13 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 			continue;
 		}
 
+		const int SoundDataSize = Reader.GetDataSize(pItem->m_SoundData);
 		char aBuf[IO_MAX_PATH_LENGTH];
 		str_format(aBuf, sizeof(aBuf), "%s/%s.opus", pPathSave, pName);
-		dbg_msg("map_extract", "writing sound: %s (%d B)", aBuf, pItem->m_SoundDataSize);
+		dbg_msg("map_extract", "writing sound: %s (%d B)", aBuf, SoundDataSize);
 
 		IOHANDLE Opus = io_open(aBuf, IOFLAG_WRITE);
-		io_write(Opus, (unsigned char *)Reader.GetData(pItem->m_SoundData), pItem->m_SoundDataSize);
+		io_write(Opus, Reader.GetData(pItem->m_SoundData), SoundDataSize);
 		io_close(Opus);
 	}
 

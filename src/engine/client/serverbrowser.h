@@ -3,13 +3,16 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_H
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
+#include <base/hash.h>
 #include <base/system.h>
 
 #include <engine/console.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/memheap.h>
 
+#include <functional>
 #include <unordered_map>
+#include <unordered_set>
 
 typedef struct _json_value json_value;
 class CNetClient;
@@ -21,6 +24,88 @@ class IFriends;
 class IServerBrowserHttp;
 class IServerBrowserPingCache;
 class IStorage;
+class IHttp;
+
+class CCommunityId
+{
+	char m_aId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];
+
+public:
+	CCommunityId(const char *pCommunityId)
+	{
+		str_copy(m_aId, pCommunityId);
+	}
+
+	const char *Id() const { return m_aId; }
+
+	bool operator==(const CCommunityId &Other) const
+	{
+		return str_comp(Id(), Other.Id()) == 0;
+	}
+};
+
+template<>
+struct std::hash<CCommunityId>
+{
+	size_t operator()(const CCommunityId &Elem) const noexcept
+	{
+		return str_quickhash(Elem.Id());
+	}
+};
+
+class CCommunityCountryName
+{
+	char m_aName[CServerInfo::MAX_COMMUNITY_COUNTRY_LENGTH];
+
+public:
+	CCommunityCountryName(const char *pCountryName)
+	{
+		str_copy(m_aName, pCountryName);
+	}
+
+	const char *Name() const { return m_aName; }
+
+	bool operator==(const CCommunityCountryName &Other) const
+	{
+		return str_comp(Name(), Other.Name()) == 0;
+	}
+};
+
+template<>
+struct std::hash<CCommunityCountryName>
+{
+	size_t operator()(const CCommunityCountryName &Elem) const noexcept
+	{
+		return str_quickhash(Elem.Name());
+	}
+};
+
+class CCommunityTypeName
+{
+	char m_aName[CServerInfo::MAX_COMMUNITY_TYPE_LENGTH];
+
+public:
+	CCommunityTypeName(const char *pTypeName)
+	{
+		str_copy(m_aName, pTypeName);
+	}
+
+	const char *Name() const { return m_aName; }
+
+	bool operator==(const CCommunityTypeName &Other) const
+	{
+		return str_comp(Name(), Other.Name()) == 0;
+	}
+};
+
+template<>
+struct std::hash<CCommunityTypeName>
+{
+	size_t operator()(const CCommunityTypeName &Elem) const noexcept
+	{
+		return str_quickhash(Elem.Name());
+	}
+};
 
 class CCommunityServer
 {
@@ -41,23 +126,109 @@ public:
 	const char *TypeName() const { return m_aTypeName; }
 };
 
-class CFilterList : public IFilterList
+class CFavoriteCommunityFilterList : public IFilterList
 {
-	char *m_pFilter;
-	size_t m_FilterSize;
-
 public:
-	CFilterList(char *pFilter, size_t FilterSize) :
-		m_pFilter(pFilter), m_FilterSize(FilterSize)
+	void Add(const char *pCommunityId) override;
+	void Remove(const char *pCommunityId) override;
+	void Clear() override;
+	bool Filtered(const char *pCommunityId) const override;
+	bool Empty() const override;
+	void Clean(const std::vector<CCommunity> &vAllowedCommunities);
+	void Save(IConfigManager *pConfigManager) const;
+	const std::vector<CCommunityId> &Entries() const;
+
+private:
+	std::vector<CCommunityId> m_vEntries;
+};
+
+class CExcludedCommunityFilterList : public IFilterList
+{
+public:
+	void Add(const char *pCommunityId) override;
+	void Remove(const char *pCommunityId) override;
+	void Clear() override;
+	bool Filtered(const char *pCommunityId) const override;
+	bool Empty() const override;
+	void Clean(const std::vector<CCommunity> &vAllowedCommunities);
+	void Save(IConfigManager *pConfigManager) const;
+
+private:
+	std::unordered_set<CCommunityId> m_Entries;
+};
+
+class CExcludedCommunityCountryFilterList : public IFilterList
+{
+public:
+	CExcludedCommunityCountryFilterList(const ICommunityCache *pCommunityCache) :
+		m_pCommunityCache(pCommunityCache)
 	{
 	}
 
-	void Add(const char *pElement) override;
-	void Remove(const char *pElement) override;
+	void Add(const char *pCountryName) override;
+	void Add(const char *pCommunityId, const char *pCountryName);
+	void Remove(const char *pCountryName) override;
+	void Remove(const char *pCommunityId, const char *pCountryName);
 	void Clear() override;
-	bool Filtered(const char *pElement) const override;
+	bool Filtered(const char *pCountryName) const override;
 	bool Empty() const override;
-	void Clean(const std::vector<const char *> &vpAllowedElements);
+	void Clean(const std::vector<CCommunity> &vAllowedCommunities);
+	void Save(IConfigManager *pConfigManager) const;
+
+private:
+	const ICommunityCache *m_pCommunityCache;
+	std::unordered_map<CCommunityId, std::unordered_set<CCommunityCountryName>> m_Entries;
+};
+
+class CExcludedCommunityTypeFilterList : public IFilterList
+{
+public:
+	CExcludedCommunityTypeFilterList(const ICommunityCache *pCommunityCache) :
+		m_pCommunityCache(pCommunityCache)
+	{
+	}
+
+	void Add(const char *pTypeName) override;
+	void Add(const char *pCommunityId, const char *pTypeName);
+	void Remove(const char *pTypeName) override;
+	void Remove(const char *pCommunityId, const char *pTypeName);
+	void Clear() override;
+	bool Filtered(const char *pTypeName) const override;
+	bool Empty() const override;
+	void Clean(const std::vector<CCommunity> &vAllowedCommunities);
+	void Save(IConfigManager *pConfigManager) const;
+
+private:
+	const ICommunityCache *m_pCommunityCache;
+	std::unordered_map<CCommunityId, std::unordered_set<CCommunityTypeName>> m_Entries;
+};
+
+class CCommunityCache : public ICommunityCache
+{
+	IServerBrowser *m_pServerBrowser;
+	SHA256_DIGEST m_InfoSha256 = SHA256_ZEROED;
+	int m_LastType = IServerBrowser::NUM_TYPES; // initial value does not appear normally, marking uninitialized cache
+	unsigned m_SelectedCommunitiesHash = 0;
+	std::vector<const CCommunity *> m_vpSelectedCommunities;
+	std::vector<const CCommunityCountry *> m_vpSelectableCountries;
+	std::vector<const CCommunityType *> m_vpSelectableTypes;
+	bool m_AnyRanksAvailable = false;
+	bool m_CountryTypesFilterAvailable = false;
+	const char *m_pCountryTypeFilterKey = IServerBrowser::COMMUNITY_ALL;
+
+public:
+	CCommunityCache(IServerBrowser *pServerBrowser) :
+		m_pServerBrowser(pServerBrowser)
+	{
+	}
+
+	void Update(bool Force) override;
+	const std::vector<const CCommunity *> &SelectedCommunities() const override { return m_vpSelectedCommunities; }
+	const std::vector<const CCommunityCountry *> &SelectableCountries() const override { return m_vpSelectableCountries; }
+	const std::vector<const CCommunityType *> &SelectableTypes() const override { return m_vpSelectableTypes; }
+	bool AnyRanksAvailable() const override { return m_AnyRanksAvailable; }
+	bool CountriesTypesFilterAvailable() const override { return m_CountryTypesFilterAvailable; }
+	const char *CountryTypeFilterKey() const override { return m_pCountryTypeFilterKey; }
 };
 
 class CServerBrowser : public IServerBrowser
@@ -79,7 +250,7 @@ public:
 	virtual ~CServerBrowser();
 
 	// interface functions
-	void Refresh(int Type) override;
+	void Refresh(int Type, bool Force = false) override;
 	bool IsRefreshing() const override;
 	bool IsGettingServerlist() const override;
 	int LoadingProgression() const override;
@@ -105,19 +276,24 @@ public:
 	const std::vector<CCommunity> &Communities() const override;
 	const CCommunity *Community(const char *pCommunityId) const override;
 	std::vector<const CCommunity *> SelectedCommunities() const override;
-	int64_t DDNetInfoUpdateTime() const override { return m_DDNetInfoUpdateTime; }
+	std::vector<const CCommunity *> FavoriteCommunities() const override;
+	std::vector<const CCommunity *> CurrentCommunities() const override;
+	unsigned CurrentCommunitiesHash() const override;
 
-	CFilterList &CommunitiesFilter() override { return m_CommunitiesFilter; }
-	CFilterList &CountriesFilter() override { return m_CountriesFilter; }
-	CFilterList &TypesFilter() override { return m_TypesFilter; }
-	const CFilterList &CommunitiesFilter() const override { return m_CommunitiesFilter; }
-	const CFilterList &CountriesFilter() const override { return m_CountriesFilter; }
-	const CFilterList &TypesFilter() const override { return m_TypesFilter; }
+	bool DDNetInfoAvailable() const override { return m_pDDNetInfo != nullptr; }
+	SHA256_DIGEST DDNetInfoSha256() const override { return m_DDNetInfoSha256; }
+
+	ICommunityCache &CommunityCache() override { return m_CommunityCache; }
+	const ICommunityCache &CommunityCache() const override { return m_CommunityCache; }
+	CFavoriteCommunityFilterList &FavoriteCommunitiesFilter() override { return m_FavoriteCommunitiesFilter; }
+	CExcludedCommunityFilterList &CommunitiesFilter() override { return m_CommunitiesFilter; }
+	CExcludedCommunityCountryFilterList &CountriesFilter() override { return m_CountriesFilter; }
+	CExcludedCommunityTypeFilterList &TypesFilter() override { return m_TypesFilter; }
+	const CFavoriteCommunityFilterList &FavoriteCommunitiesFilter() const override { return m_FavoriteCommunitiesFilter; }
+	const CExcludedCommunityFilterList &CommunitiesFilter() const override { return m_CommunitiesFilter; }
+	const CExcludedCommunityCountryFilterList &CountriesFilter() const override { return m_CountriesFilter; }
+	const CExcludedCommunityTypeFilterList &TypesFilter() const override { return m_TypesFilter; }
 	void CleanFilters() override;
-
-	void CommunitiesFilterClean();
-	void CountriesFilterClean();
-	void TypesFilterClean();
 
 	//
 	void Update();
@@ -143,6 +319,7 @@ private:
 	IFriends *m_pFriends = nullptr;
 	IFavorites *m_pFavorites = nullptr;
 	IStorage *m_pStorage = nullptr;
+	IHttp *m_pHttpClient = nullptr;
 	char m_aNetVersion[128];
 
 	bool m_RefreshingHttp = false;
@@ -160,12 +337,14 @@ private:
 
 	int m_OwnLocation = CServerInfo::LOC_UNKNOWN;
 
-	CFilterList m_CommunitiesFilter;
-	CFilterList m_CountriesFilter;
-	CFilterList m_TypesFilter;
+	CCommunityCache m_CommunityCache;
+	CFavoriteCommunityFilterList m_FavoriteCommunitiesFilter;
+	CExcludedCommunityFilterList m_CommunitiesFilter;
+	CExcludedCommunityCountryFilterList m_CountriesFilter;
+	CExcludedCommunityTypeFilterList m_TypesFilter;
 
-	json_value *m_pDDNetInfo;
-	int64_t m_DDNetInfoUpdateTime;
+	json_value *m_pDDNetInfo = nullptr;
+	SHA256_DIGEST m_DDNetInfoSha256 = SHA256_ZEROED;
 
 	CServerEntry *m_pFirstReqServer; // request list
 	CServerEntry *m_pLastReqServer;
@@ -198,6 +377,7 @@ private:
 	bool SortCompareGametype(int Index1, int Index2) const;
 	bool SortCompareNumPlayers(int Index1, int Index2) const;
 	bool SortCompareNumClients(int Index1, int Index2) const;
+	bool SortCompareNumFriends(int Index1, int Index2) const;
 	bool SortCompareNumPlayersAndPing(int Index1, int Index2) const;
 
 	//
@@ -215,9 +395,22 @@ private:
 	void RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int *pBasicToken, int *pToken, bool RandomToken) const;
 
 	void RegisterCommands();
+	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
+	static void Con_AddFavoriteCommunity(IConsole::IResult *pResult, void *pUserData);
+	static void Con_RemoveFavoriteCommunity(IConsole::IResult *pResult, void *pUserData);
+	static void Con_AddExcludedCommunity(IConsole::IResult *pResult, void *pUserData);
+	static void Con_RemoveExcludedCommunity(IConsole::IResult *pResult, void *pUserData);
+	static void Con_AddExcludedCountry(IConsole::IResult *pResult, void *pUserData);
+	static void Con_RemoveExcludedCountry(IConsole::IResult *pResult, void *pUserData);
+	static void Con_AddExcludedType(IConsole::IResult *pResult, void *pUserData);
+	static void Con_RemoveExcludedType(IConsole::IResult *pResult, void *pUserData);
 	static void Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserData);
 
-	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
+	bool ValidateCommunityId(const char *pCommunityId) const;
+	bool ValidateCountryName(const char *pCountryName) const;
+	bool ValidateTypeName(const char *pTypeName) const;
+
+	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info) const;
 	void SetLatency(NETADDR Addr, int Latency);
 
 	static bool ParseCommunityFinishes(CCommunity *pCommunity, const json_value &Finishes);

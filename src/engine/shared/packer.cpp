@@ -72,12 +72,8 @@ void CPacker::AddRaw(const void *pData, int Size)
 		return;
 	}
 
-	const unsigned char *pSrc = (const unsigned char *)pData;
-	while(Size)
-	{
-		*m_pCurrent++ = *pSrc++;
-		Size--;
-	}
+	mem_copy(m_pCurrent, pData, Size);
+	m_pCurrent += Size;
 }
 
 void CUnpacker::Reset(const void *pData, int Size)
@@ -134,7 +130,8 @@ int CUnpacker::GetUncompressedInt()
 		return 0;
 	}
 
-	int i = *(int *)m_pCurrent;
+	int i;
+	mem_copy(&i, m_pCurrent, sizeof(int));
 	m_pCurrent += sizeof(int);
 	return i;
 }
@@ -174,6 +171,12 @@ const char *CUnpacker::GetString(int SanitizeType)
 		}
 	}
 	m_pCurrent++;
+
+	if(!str_utf8_check(pPtr))
+	{
+		m_Error = true;
+		return "";
+	}
 
 	// sanitize all strings
 	if(SanitizeType & SANITIZE)

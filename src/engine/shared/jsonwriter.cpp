@@ -3,6 +3,8 @@
 
 #include "jsonwriter.h"
 
+#include <base/system.h>
+
 static char EscapeJsonChar(char c)
 {
 	switch(c)

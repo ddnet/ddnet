@@ -81,10 +81,16 @@ void CEventHandler::EventToSixup(int *pType, int *pSize, const char **ppData)
 		pEvent7->m_X = pEvent->m_X;
 		pEvent7->m_Y = pEvent->m_Y;
 
+		pEvent7->m_ClientId = 0;
+		pEvent7->m_Angle = 0;
+
 		// This will need some work, perhaps an event wrapper for damageind,
 		// a scan of the event array to merge multiple damageinds
 		// or a separate array of "damage ind" events that's added in while snapping
 		pEvent7->m_HealthAmount = 1;
+
+		pEvent7->m_ArmorAmount = 0;
+		pEvent7->m_Self = 0;
 
 		*ppData = s_aEventStore;
 	}
@@ -96,7 +102,7 @@ void CEventHandler::EventToSixup(int *pType, int *pSize, const char **ppData)
 		*pType = -protocol7::NETEVENTTYPE_SOUNDWORLD;
 		*pSize = sizeof(*pEvent7);
 
-		pEvent7->m_SoundID = pEvent->m_SoundID;
+		pEvent7->m_SoundId = pEvent->m_SoundId;
 		pEvent7->m_X = pEvent->m_X;
 		pEvent7->m_Y = pEvent->m_Y;
 

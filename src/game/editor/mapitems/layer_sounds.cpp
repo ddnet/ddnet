@@ -1,7 +1,7 @@
 #include "layer_sounds.h"
 
 #include <game/editor/editor.h>
-
+#include <game/editor/editor_actions.h>
 #include <game/generated/client_data.h>
 
 static const float s_SourceVisualSize = 32.0f;
@@ -34,41 +34,31 @@ void CLayerSounds::Render(bool Tileset)
 	Graphics()->SetColor(0.6f, 0.8f, 1.0f, 0.4f);
 	for(const auto &Source : m_vSources)
 	{
-		float OffsetX = 0;
-		float OffsetY = 0;
-
-		if(Source.m_PosEnv >= 0)
-		{
-			ColorRGBA Channels;
-			CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
-			OffsetX = Channels.r;
-			OffsetY = Channels.g;
-		}
+		ColorRGBA Offset = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+		CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Offset, 2, m_pEditor);
+		const vec2 Position = vec2(fx2f(Source.m_Position.x) + Offset.r, fx2f(Source.m_Position.y) + Offset.g);
+		const float Falloff = Source.m_Falloff / 255.0f;
 
 		switch(Source.m_Shape.m_Type)
 		{
 		case CSoundShape::SHAPE_CIRCLE:
 		{
-			m_pEditor->Graphics()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
-				Source.m_Shape.m_Circle.m_Radius, 32);
-
-			float Falloff = ((float)Source.m_Falloff / 255.0f);
+			m_pEditor->Graphics()->DrawCircle(Position.x, Position.y, Source.m_Shape.m_Circle.m_Radius, 32);
 			if(Falloff > 0.0f)
-				m_pEditor->Graphics()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
-					Source.m_Shape.m_Circle.m_Radius * Falloff, 32);
+			{
+				m_pEditor->Graphics()->DrawCircle(Position.x, Position.y, Source.m_Shape.m_Circle.m_Radius * Falloff, 32);
+			}
 			break;
 		}
 		case CSoundShape::SHAPE_RECTANGLE:
 		{
-			float Width = fx2f(Source.m_Shape.m_Rectangle.m_Width);
-			float Height = fx2f(Source.m_Shape.m_Rectangle.m_Height);
-			m_pEditor->Graphics()->DrawRectExt(fx2f(Source.m_Position.x) + OffsetX - Width / 2, fx2f(Source.m_Position.y) + OffsetY - Height / 2,
-				Width, Height, 0.0f, IGraphics::CORNER_NONE);
-
-			float Falloff = ((float)Source.m_Falloff / 255.0f);
+			const float Width = fx2f(Source.m_Shape.m_Rectangle.m_Width);
+			const float Height = fx2f(Source.m_Shape.m_Rectangle.m_Height);
+			m_pEditor->Graphics()->DrawRectExt(Position.x - Width / 2, Position.y - Height / 2, Width, Height, 0.0f, IGraphics::CORNER_NONE);
 			if(Falloff > 0.0f)
-				m_pEditor->Graphics()->DrawRectExt(fx2f(Source.m_Position.x) + OffsetX - Falloff * Width / 2, fx2f(Source.m_Position.y) + OffsetY - Falloff * Height / 2,
-					Width * Falloff, Height * Falloff, 0.0f, IGraphics::CORNER_NONE);
+			{
+				m_pEditor->Graphics()->DrawRectExt(Position.x - Falloff * Width / 2, Position.y - Falloff * Height / 2, Width * Falloff, Height * Falloff, 0.0f, IGraphics::CORNER_NONE);
+			}
 			break;
 		}
 		}
@@ -84,18 +74,10 @@ void CLayerSounds::Render(bool Tileset)
 	m_pEditor->RenderTools()->SelectSprite(SPRITE_AUDIO_SOURCE);
 	for(const auto &Source : m_vSources)
 	{
-		float OffsetX = 0;
-		float OffsetY = 0;
-
-		if(Source.m_PosEnv >= 0)
-		{
-			ColorRGBA Channels;
-			CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
-			OffsetX = Channels.r;
-			OffsetY = Channels.g;
-		}
-
-		m_pEditor->RenderTools()->DrawSprite(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY, m_pEditor->MapView()->ScaleLength(s_SourceVisualSize));
+		ColorRGBA Offset = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+		CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Offset, 2, m_pEditor);
+		const vec2 Position = vec2(fx2f(Source.m_Position.x) + Offset.r, fx2f(Source.m_Position.y) + Offset.g);
+		m_pEditor->RenderTools()->DrawSprite(Position.x, Position.y, m_pEditor->MapView()->ScaleLength(s_SourceVisualSize));
 	}
 
 	Graphics()->QuadsEnd();
@@ -171,6 +153,7 @@ int CLayerSounds::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 void CLayerSounds::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 {
 	std::shared_ptr<CLayerSounds> pSoundLayer = std::static_pointer_cast<CLayerSounds>(pBrush);
+	std::vector<CSoundSource> vAddedSources;
 	for(const auto &Source : pSoundLayer->m_vSources)
 	{
 		CSoundSource n = Source;
@@ -179,32 +162,31 @@ void CLayerSounds::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy
 		n.m_Position.y += f2fx(wy);
 
 		m_vSources.push_back(n);
+		vAddedSources.push_back(n);
 	}
+	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionSoundPlace>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], vAddedSources));
 	m_pEditor->m_Map.OnModify();
 }
 
-CUI::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
+CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 {
-	enum
-	{
-		PROP_SOUND = 0,
-		NUM_PROPS,
-	};
-
 	CProperty aProps[] = {
 		{"Sound", m_Sound, PROPTYPE_SOUND, -1, 0},
 		{nullptr},
 	};
 
-	static int s_aIds[NUM_PROPS] = {0};
+	static int s_aIds[(int)ELayerSoundsProp::NUM_PROPS] = {0};
 	int NewVal = 0;
-	int Prop = m_pEditor->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
-	if(Prop != -1)
+	auto [State, Prop] = m_pEditor->DoPropertiesWithState<ELayerSoundsProp>(pToolBox, aProps, s_aIds, &NewVal);
+	if(Prop != ELayerSoundsProp::PROP_NONE)
 	{
 		m_pEditor->m_Map.OnModify();
 	}
 
-	if(Prop == PROP_SOUND)
+	static CLayerSoundsPropTracker s_Tracker(m_pEditor);
+	s_Tracker.Begin(this, Prop, State);
+
+	if(Prop == ELayerSoundsProp::PROP_SOUND)
 	{
 		if(NewVal >= 0)
 			m_Sound = NewVal % m_pEditor->m_Map.m_vpSounds.size();
@@ -212,7 +194,9 @@ CUI::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 			m_Sound = -1;
 	}
 
-	return CUI::POPUP_KEEP_OPEN;
+	s_Tracker.End(Prop, State);
+
+	return CUi::POPUP_KEEP_OPEN;
 }
 
 void CLayerSounds::ModifySoundIndex(FIndexModifyFunction Func)
@@ -232,4 +216,9 @@ void CLayerSounds::ModifyEnvelopeIndex(FIndexModifyFunction Func)
 std::shared_ptr<CLayer> CLayerSounds::Duplicate() const
 {
 	return std::make_shared<CLayerSounds>(*this);
+}
+
+const char *CLayerSounds::TypeName() const
+{
+	return "sounds";
 }

@@ -81,7 +81,6 @@ Checks: >
   -readability-implicit-bool-conversion,
   -readability-isolate-declaration,
   -readability-magic-numbers,
-  -readability-make-member-function-const,
   -readability-named-parameter,
   -readability-non-const-parameter,
   -readability-simplify-boolean-expr,

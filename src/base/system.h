@@ -9,6 +9,7 @@
 #define BASE_SYSTEM_H
 
 #include "detect.h"
+#include "types.h"
 
 #ifndef __USE_GNU
 #define __USE_GNU
@@ -22,6 +23,7 @@
 #include <ctime>
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <string>
 
 #ifdef __MINGW32__
@@ -72,7 +74,7 @@
  * @see dbg_break
  */
 #define dbg_assert(test, msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
-void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
+void dbg_assert_imp(const char *filename, int line, bool test, const char *msg);
 
 #ifdef __clang_analyzer__
 #include <cassert>
@@ -225,11 +227,7 @@ enum
 	IOSEEK_START = 0,
 	IOSEEK_CUR = 1,
 	IOSEEK_END = 2,
-
-	IO_MAX_PATH_LENGTH = 512,
 };
-
-typedef void *IOHANDLE;
 
 /**
  * Opens a file.
@@ -560,6 +558,7 @@ void aio_free(ASYNCIO *aio);
  * Threading related functions.
  *
  * @see Locks
+ * @see Semaphore
  */
 
 /**
@@ -569,7 +568,9 @@ void aio_free(ASYNCIO *aio);
  *
  * @param threadfunc Entry point for the new thread.
  * @param user Pointer to pass to the thread.
- * @param name name describing the use of the thread
+ * @param name Name describing the use of the thread.
+ *
+ * @return Handle for the new thread.
  */
 void *thread_init(void (*threadfunc)(void *), void *user, const char *name);
 
@@ -583,35 +584,33 @@ void *thread_init(void (*threadfunc)(void *), void *user, const char *name);
 void thread_wait(void *thread);
 
 /**
- * Yield the current threads execution slice.
+ * Yield the current thread's execution slice.
  *
  * @ingroup Threads
  */
 void thread_yield();
 
 /**
- * Puts the thread in the detached thread, guaranteeing that
+ * Puts the thread in the detached state, guaranteeing that
  * resources of the thread will be freed immediately when the
  * thread terminates.
  *
  * @ingroup Threads
  *
- * @param thread Thread to detach
+ * @param thread Thread to detach.
  */
 void thread_detach(void *thread);
 
 /**
- * Creates a new thread and if it succeeded detaches it.
+ * Creates a new thread and detaches it.
  *
  * @ingroup Threads
  *
  * @param threadfunc Entry point for the new thread.
  * @param user Pointer to pass to the thread.
- * @param name Name describing the use of the thread
- *
- * @return true on success, false on failure.
+ * @param name Name describing the use of the thread.
  */
-bool thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
+void thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
 /**
  * @defgroup Semaphore
@@ -740,41 +739,11 @@ ETimeSeason time_season();
  * @defgroup Network-General
  */
 
-/**
- * @ingroup Network-General
- */
-typedef struct NETSOCKET_INTERNAL *NETSOCKET;
+extern const NETADDR NETADDR_ZEROED;
 
 /**
  * @ingroup Network-General
  */
-enum
-{
-	NETADDR_MAXSTRSIZE = 1 + (8 * 4 + 7) + 1 + 1 + 5 + 1, // [XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX]:XXXXX
-
-	NETTYPE_LINK_BROADCAST = 4,
-
-	NETTYPE_INVALID = 0,
-	NETTYPE_IPV4 = 1,
-	NETTYPE_IPV6 = 2,
-	NETTYPE_WEBSOCKET_IPV4 = 8,
-
-	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4,
-	NETTYPE_MASK = NETTYPE_ALL | NETTYPE_LINK_BROADCAST,
-};
-
-/**
- * @ingroup Network-General
- */
-typedef struct NETADDR
-{
-	unsigned int type;
-	unsigned char ip[16];
-	unsigned short port;
-
-	bool operator==(const NETADDR &other) const;
-	bool operator!=(const NETADDR &other) const { return !(*this == other); }
-} NETADDR;
 
 #ifdef CONF_FAMILY_UNIX
 /**
@@ -1743,6 +1712,21 @@ void str_timestamp_format(char *buffer, int buffer_size, const char *format)
 void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format)
 	GNUC_ATTRIBUTE((format(strftime, 4, 0)));
 
+/**
+ * Parses a string into a timestamp following a specified format.
+ *
+ * @ingroup Timestamp
+ *
+ * @param string Pointer to the string to parse
+ * @param format The time format to use (for example FORMAT_NOSPACE below)
+ * @param timestamp Pointer to the timestamp result
+ *
+ * @return true on success, false if the string could not be parsed with the specified format
+ *
+ */
+bool timestamp_from_str(const char *string, const char *format, time_t *timestamp)
+	GNUC_ATTRIBUTE((format(strftime, 2, 0)));
+
 #define FORMAT_TIME "%H:%M:%S"
 #define FORMAT_SPACE "%Y-%m-%d %H:%M:%S"
 #define FORMAT_NOSPACE "%Y-%m-%d_%H-%M-%S"
@@ -1754,6 +1738,7 @@ enum
 	TIME_MINS,
 	TIME_HOURS_CENTISECS,
 	TIME_MINS_CENTISECS,
+	TIME_SECS_CENTISECS,
 };
 
 /*
@@ -1806,15 +1791,7 @@ void str_escape(char **dst, const char *src, const char *end);
  *
  * @remark The strings are treated as zero-terminated strings.
  */
-typedef int (*FS_LISTDIR_CALLBACK)(const char *name, int is_dir, int dir_type, void *user);
 void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
-
-typedef struct
-{
-	const char *m_pName;
-	time_t m_TimeCreated; // seconds since UNIX Epoch
-	time_t m_TimeModified; // seconds since UNIX Epoch
-} CFsFileInfo;
 
 /**
  * Lists the files and folders in a directory and gets additional file information.
@@ -1828,7 +1805,6 @@ typedef struct
  *
  * @remark The strings are treated as zero-terminated strings.
  */
-typedef int (*FS_LISTDIR_CALLBACK_FILEINFO)(const CFsFileInfo *info, int is_dir, int dir_type, void *user);
 void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int type, void *user);
 
 /**
@@ -1863,11 +1839,11 @@ int fs_makedir(const char *path);
 int fs_removedir(const char *path);
 
 /**
- * Recursively create directories for a file.
+ * Recursively creates parent directories for a file or directory.
  *
  * @ingroup Filesystem
  *
- * @param path - File for which to create directories.
+ * @param path File or directory for which to create parent directories.
  *
  * @return 0 on success. Negative value on failure.
  *
@@ -2093,36 +2069,6 @@ int net_would_block();
 
 int net_socket_read_wait(NETSOCKET sock, int time);
 
-/*
-	Function: open_link
-		Opens a link in the browser.
-
-	Parameters:
-		link - The link to open in a browser.
-
-	Returns:
-		Returns 1 on success, 0 on failure.
-
-	Remarks:
-		This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
-*/
-int open_link(const char *link);
-
-/*
-	Function: open_file
-		Opens a file or directory with default program.
-
-	Parameters:
-		path - The path to open.
-
-	Returns:
-		Returns 1 on success, 0 on failure.
-
-	Remarks:
-		This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
-*/
-int open_file(const char *path);
-
 /**
  * Swaps the endianness of data. Each element is swapped individually by reversing its bytes.
  *
@@ -2145,10 +2091,12 @@ typedef struct
 void net_stats(NETSTATS *stats);
 
 int str_toint(const char *str);
+bool str_toint(const char *str, int *out);
 int str_toint_base(const char *str, int base);
 unsigned long str_toulong_base(const char *str, int base);
 int64_t str_toint64_base(const char *str, int base = 10);
 float str_tofloat(const char *str);
+bool str_tofloat(const char *str, float *out);
 
 void str_from_int(int value, char *buffer, size_t buffer_size);
 
@@ -2178,14 +2126,6 @@ int str_isallnum(const char *str);
 int str_isallnum_hex(const char *str);
 
 unsigned str_quickhash(const char *str);
-
-enum
-{
-	/**
-	 * The maximum bytes necessary to encode one Unicode codepoint with UTF-8.
-	 */
-	UTF8_BYTE_LENGTH = 4,
-};
 
 int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 
@@ -2505,162 +2445,246 @@ unsigned bytes_be_to_uint(const unsigned char *bytes);
  */
 void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 
-/*
-	Function: pid
-		Returns the pid of the current process.
+/**
+ * @defgroup Shell
+ * Shell, process management, OS specific functionality.
+ */
 
-	Returns:
-		pid of the current process
-*/
+/**
+ * Returns the ID of the current process.
+ *
+ * @ingroup Shell
+ *
+ * @return PID of the current process.
+ */
 int pid();
 
-/*
-	Function: cmdline_fix
-		Fixes the command line arguments to be encoded in UTF-8 on all
-		systems.
-
-	Parameters:
-		argc - A pointer to the argc parameter that was passed to the main function.
-		argv - A pointer to the argv parameter that was passed to the main function.
-
-	Remarks:
-		- You need to call cmdline_free once you're no longer using the
-		results.
-*/
+/**
+ * Fixes the command line arguments to be encoded in UTF-8 on all systems.
+ *
+ * @ingroup Shell
+ *
+ * @param argc A pointer to the argc parameter that was passed to the main function.
+ * @param argv A pointer to the argv parameter that was passed to the main function.
+ *
+ * @remark You need to call @link cmdline_free @endlink once you're no longer using the results.
+ */
 void cmdline_fix(int *argc, const char ***argv);
 
-/*
-	Function: cmdline_free
-		Frees memory that was allocated by cmdline_fix.
-
-	Parameters:
-		argc - The argc obtained from cmdline_fix.
-		argv - The argv obtained from cmdline_fix.
-
-*/
+/**
+ * Frees memory that was allocated by @link cmdline_fix @endlink.
+ *
+ * @ingroup Shell
+ *
+ * @param argc The argc obtained from `cmdline_fix`.
+ * @param argv The argv obtained from `cmdline_fix`.
+ */
 void cmdline_free(int argc, const char **argv);
 
 #if defined(CONF_FAMILY_WINDOWS)
+/**
+ * A handle for a process.
+ *
+ * @ingroup Shell
+ */
 typedef void *PROCESS;
+/**
+ * A handle that denotes an invalid process.
+ *
+ * @ingroup Shell
+ */
 constexpr PROCESS INVALID_PROCESS = nullptr;
 #else
+/**
+ * A handle for a process.
+ *
+ * @ingroup Shell
+ */
 typedef pid_t PROCESS;
+/**
+ * A handle that denotes an invalid process.
+ *
+ * @ingroup Shell
+ */
 constexpr PROCESS INVALID_PROCESS = 0;
 #endif
 
-/*
-	Function: shell_execute
-		Executes a given file.
+/**
+ * Determines the initial window state when using @link shell_execute @endlink
+ * to execute a process.
+ *
+ * @ingroup Shell
+ *
+ * @remark Currently only supported on Windows.
+ */
+enum class EShellExecuteWindowState
+{
+	/**
+	 * The process window is opened in the foreground and activated.
+	 */
+	FOREGROUND,
 
-	Returns:
-		handle/pid of the new process
-*/
-PROCESS shell_execute(const char *file);
+	/**
+	 * The process window is opened in the background without focus.
+	 */
+	BACKGROUND,
+};
 
-/*
-	Function: kill_process
-		Sends kill signal to a process.
+/**
+ * Executes a given file.
+ *
+ * @ingroup Shell
+ *
+ * @param file The file to execute.
+ * @param window_state The window state how the process window should be shown.
+ *
+ * @return Handle of the new process, or @link INVALID_PROCESS @endlink on error.
+ */
+PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state);
 
-	Parameters:
-		process - handle/pid of the process
-
-	Returns:
-		0 - Error
-		1 - Success
-*/
+/**
+ * Sends kill signal to a process.
+ *
+ * @ingroup Shell
+ *
+ * @param process Handle of the process to kill.
+ *
+ * @return `1` on success, `0` on error.
+ */
 int kill_process(PROCESS process);
 
 /**
  * Checks if a process is alive.
- * 
+ *
+ * @ingroup Shell
+ *
  * @param process Handle/PID of the process.
- * 
- * @return bool Returns true if the process is currently running, false if the process is not running (dead).
+ *
+ * @return `true` if the process is currently running,
+ * `false` if the process is not running (dead).
  */
 bool is_process_alive(PROCESS process);
 
-/*
-	Function: generate_password
-		Generates a null-terminated password of length `2 *
-		random_length`.
+/**
+ * Opens a link in the browser.
+ *
+ * @ingroup Shell
+ *
+ * @param link The link to open in a browser.
+ *
+ * @return `1` on success, `0` on failure.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
+ */
+int open_link(const char *link);
 
-	Parameters:
-		buffer - Pointer to the start of the output buffer.
-		length - Length of the buffer.
-		random - Pointer to a randomly-initialized array of shorts.
-		random_length - Length of the short array.
-*/
+/**
+ * Opens a file or directory with default program.
+ *
+ * @ingroup Shell
+ *
+ * @param path The path to open.
+ *
+ * @return `1` on success, `0` on failure.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
+ */
+int open_file(const char *path);
+
+/**
+ * @defgroup Secure-Random
+ * Secure random number generation.
+ */
+
+/**
+ * Generates a null-terminated password of length `2 * random_length`.
+ *
+ * @ingroup Secure-Random
+ *
+ * @param buffer Pointer to the start of the output buffer.
+ * @param length Length of the buffer.
+ * @param random Pointer to a randomly-initialized array of shorts.
+ * @param random_length Length of the short array.
+ */
 void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length);
 
-/*
-	Function: secure_random_init
-		Initializes the secure random module.
-		You *MUST* check the return value of this function.
-
-	Returns:
-		0 - Initialization succeeded.
-		1 - Initialization failed.
-*/
+/**
+ * Initializes the secure random module.
+ * You *MUST* check the return value of this function.
+ *
+ * @ingroup Secure-Random
+ *
+ * @return `0` on success.
+ */
 int secure_random_init();
 
-/*
-	Function: secure_random_uninit
-		Uninitializes the secure random module.
-
-	Returns:
-		0 - Uninitialization succeeded.
-		1 - Uninitialization failed.
-*/
+/**
+ * Uninitializes the secure random module.
+ *
+ * @ingroup Secure-Random
+ *
+ * @return `0` on success.
+ */
 int secure_random_uninit();
 
-/*
-	Function: secure_random_password
-		Fills the buffer with the specified amount of random password
-		characters.
-
-		The desired password length must be greater or equal to 6, even
-		and smaller or equal to 128.
-
-	Parameters:
-		buffer - Pointer to the start of the buffer.
-		length - Length of the buffer.
-		pw_length - Length of the desired password.
-*/
+/**
+ * Fills the buffer with the specified amount of random password characters.
+ *
+ * @ingroup Secure-Random
+ *
+ * @param buffer Pointer to the start of the buffer.
+ * @param length Length of the buffer.
+ * @param pw_length Length of the desired password.
+ *
+ * @remark The desired password length must be greater or equal to 6,
+ * even and smaller or equal to 128.
+ */
 void secure_random_password(char *buffer, unsigned length, unsigned pw_length);
 
-/*
-	Function: secure_random_fill
-		Fills the buffer with the specified amount of random bytes.
-
-	Parameters:
-		buffer - Pointer to the start of the buffer.
-		length - Length of the buffer.
-*/
+/**
+ * Fills the buffer with the specified amount of random bytes.
+ *
+ * @ingroup Secure-Random
+ *
+ * @param buffer Pointer to the start of the buffer.
+ * @param length Length of the buffer.
+ */
 void secure_random_fill(void *bytes, unsigned length);
 
-/*
-	Function: secure_rand
-		Returns random int (replacement for rand()).
-*/
+/**
+ * Returns random `int`.
+ *
+ * @ingroup Secure-Random
+ *
+ * @return Random int.
+ *
+ * @remark Can be used as a replacement for the `rand` function.
+ */
 int secure_rand();
 
-/*
-	Function: secure_rand_below
-		Returns a random nonnegative integer below the given number,
-		with a uniform distribution.
-
-	Parameters:
-		below - Upper limit (exclusive) of integers to return.
-*/
+/**
+ * Returns a random nonnegative integer below the given number,
+ * with a uniform distribution.
+ *
+ * @ingroup Secure-Random
+ *
+ * @param below Upper limit (exclusive) of integers to return.
+ *
+ * @return Random nonnegative below the given number.
+ */
 int secure_rand_below(int below);
 
 /**
  * Returns a human-readable version string of the operating system.
  *
+ * @ingroup Shell
+ *
  * @param version Buffer to use for the output.
  * @param length Length of the output buffer.
  *
- * @return true on success, false on failure.
+ * @return `true` on success, `false` on failure.
  */
 bool os_version_str(char *version, size_t length);
 
@@ -2671,6 +2695,8 @@ bool os_version_str(char *version, size_t length);
  * If the preferred locale could not be determined this function
  * falls back to the locale `"en-US"`.
  *
+ * @ingroup Shell
+ *
  * @param locale Buffer to use for the output.
  * @param length Length of the output buffer.
  *
@@ -2679,7 +2705,25 @@ bool os_version_str(char *version, size_t length);
 void os_locale_str(char *locale, size_t length);
 
 #if defined(CONF_EXCEPTION_HANDLING)
+/**
+ * @defgroup Exception-Handling
+ * Exception handling (crash logging).
+ */
+
+/**
+ * Initializes the exception handling module.
+ *
+ * @ingroup Exception-Handling
+ */
 void init_exception_handler();
+
+/**
+ * Sets the filename for writing the crash log.
+ *
+ * @ingroup Exception-Handling
+ *
+ * @param log_file_path Absolute path to which crash log file should be written.
+ */
 void set_exception_handler_log_file(const char *log_file_path);
 #endif
 
@@ -2696,7 +2740,9 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
 
 /**
  * Fixes the command line arguments to be encoded in UTF-8 on all systems.
- * This is a RAII wrapper for cmdline_fix and cmdline_free.
+ * This is a RAII wrapper for @link cmdline_fix @endlink and @link cmdline_free @endlink.
+ *
+ * @ingroup Shell
  */
 class CCmdlineFix
 {
@@ -2718,35 +2764,44 @@ public:
 
 #if defined(CONF_FAMILY_WINDOWS)
 /**
- * Converts a utf8 encoded string to a wide character string
+ * Converts a UTF-8 encoded string to a wide character string
  * for use with the Windows API.
  *
- * @param str The utf8 encoded string to convert.
+ * @ingroup Shell
+ *
+ * @param str The UTF-8 encoded string to convert.
  *
  * @return The argument as a wide character string.
  *
  * @remark The argument string must be zero-terminated.
+ * @remark Fails with assertion error if passed UTF-8 is invalid.
  */
 std::wstring windows_utf8_to_wide(const char *str);
 
 /**
  * Converts a wide character string obtained from the Windows API
- * to a utf8 encoded string.
+ * to a UTF-8 encoded string.
+ *
+ * @ingroup Shell
  *
  * @param wide_str The wide character string to convert.
  *
- * @return The argument as a utf8 encoded string.
+ * @return The argument as a UTF-8 encoded string, wrapped in an optional.
+ * The optional is empty, if the wide string contains invalid codepoints.
  *
  * @remark The argument string must be zero-terminated.
  */
-std::string windows_wide_to_utf8(const wchar_t *wide_str);
+std::optional<std::string> windows_wide_to_utf8(const wchar_t *wide_str);
 
 /**
  * This is a RAII wrapper to initialize/uninitialize the Windows COM library,
- * which may be necessary for using the open_file and open_link functions.
+ * which may be necessary for using the @link open_file @endlink and
+ * @link open_link @endlink functions.
  * Must be used on every thread. It's automatically used on threads created
- * with thread_init. Pass true to the constructor on threads that own a
- * window (i.e. pump a message queue).
+ * with @link thread_init @endlink. Pass `true` to the constructor on threads
+ * that own a window (i.e. pump a message queue).
+ *
+ * @ingroup Shell
  */
 class CWindowsComLifecycle
 {
@@ -2762,11 +2817,11 @@ public:
  *
  * @param protocol_name The name of the protocol.
  * @param executable The absolute path of the executable that will be associated with the protocol.
- * @param updated Pointer to a variable that will be set to true, iff the shell needs to be updated.
+ * @param updated Pointer to a variable that will be set to `true`, iff the shell needs to be updated.
  *
- * @return true on success, false on failure.
+ * @return `true` on success, `false` on failure.
  *
- * @remark The caller must later call shell_update, iff the shell needs to be updated.
+ * @remark The caller must later call @link shell_update @endlink, iff the shell needs to be updated.
  */
 bool shell_register_protocol(const char *protocol_name, const char *executable, bool *updated);
 
@@ -2779,11 +2834,11 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
  * @param description A readable description for the file extension.
  * @param executable_name A unique name that will used to describe the application.
  * @param executable The absolute path of the executable that will be associated with the file extension.
- * @param updated Pointer to a variable that will be set to true, iff the shell needs to be updated.
+ * @param updated Pointer to a variable that will be set to `true`, iff the shell needs to be updated.
  *
- * @return true on success, false on failure.
+ * @return `true` on success, `false` on failure.
  *
- * @remark The caller must later call shell_update, iff the shell needs to be updated.
+ * @remark The caller must later call @link shell_update @endlink, iff the shell needs to be updated.
  */
 bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable, bool *updated);
 
@@ -2794,11 +2849,11 @@ bool shell_register_extension(const char *extension, const char *description, co
  *
  * @param name Readable name of the application.
  * @param executable The absolute path of the executable being registered.
- * @param updated Pointer to a variable that will be set to true, iff the shell needs to be updated.
+ * @param updated Pointer to a variable that will be set to `true`, iff the shell needs to be updated.
  *
- * @return true on success, false on failure.
+ * @return `true` on success, `false` on failure.
  *
- * @remark The caller must later call shell_update, iff the shell needs to be updated.
+ * @remark The caller must later call @link shell_update @endlink, iff the shell needs to be updated.
  */
 bool shell_register_application(const char *name, const char *executable, bool *updated);
 
@@ -2810,11 +2865,11 @@ bool shell_register_application(const char *name, const char *executable, bool *
  * @param shell_class The shell class to delete.
  * For protocols this is the name of the protocol.
  * For file extensions this is the program ID associated with the file extension.
- * @param updated Pointer to a variable that will be set to true, iff the shell needs to be updated.
+ * @param updated Pointer to a variable that will be set to `true`, iff the shell needs to be updated.
  *
- * @return true on success, false on failure.
+ * @return `true` on success, `false` on failure.
  *
- * @remark The caller must later call shell_update, iff the shell needs to be updated.
+ * @remark The caller must later call @link shell_update @endlink, iff the shell needs to be updated.
  */
 bool shell_unregister_class(const char *shell_class, bool *updated);
 
@@ -2824,11 +2879,11 @@ bool shell_unregister_class(const char *shell_class, bool *updated);
  * @ingroup Shell
  *
  * @param executable The absolute path of the executable being unregistered.
- * @param updated Pointer to a variable that will be set to true, iff the shell needs to be updated.
+ * @param updated Pointer to a variable that will be set to `true`, iff the shell needs to be updated.
  *
- * @return true on success, false on failure.
+ * @return `true` on success, `false` on failure.
  *
- * @remark The caller must later call shell_update, iff the shell needs to be updated.
+ * @remark The caller must later call @link shell_update @endlink, iff the shell needs to be updated.
  */
 bool shell_unregister_application(const char *executable, bool *updated);
 

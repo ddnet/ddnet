@@ -1,6 +1,7 @@
 #ifndef ENGINE_SHARED_FIFO_H
 #define ENGINE_SHARED_FIFO_H
 
+#include <base/detect.h>
 #include <engine/console.h>
 
 class CFifo
@@ -15,7 +16,7 @@ class CFifo
 #endif
 
 public:
-	void Init(IConsole *pConsole, char *pFifoFile, int Flag);
+	void Init(IConsole *pConsole, const char *pFifoFile, int Flag);
 	void Update();
 	void Shutdown();
 };

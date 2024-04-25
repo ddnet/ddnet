@@ -5,6 +5,7 @@
 
 #include <SDL_events.h>
 #include <SDL_joystick.h>
+#include <engine/console.h>
 
 #include <engine/input.h>
 #include <engine/keys.h>
@@ -25,7 +26,7 @@ public:
 		int m_Index;
 		char m_aName[64];
 		char m_aGUID[34];
-		SDL_JoystickID m_InstanceID;
+		SDL_JoystickID m_InstanceId;
 		int m_NumAxes;
 		int m_NumButtons;
 		int m_NumBalls;
@@ -42,7 +43,7 @@ public:
 		int GetIndex() const override { return m_Index; }
 		const char *GetName() const override { return m_aName; }
 		const char *GetGUID() const { return m_aGUID; }
-		SDL_JoystickID GetInstanceID() const { return m_InstanceID; }
+		SDL_JoystickID GetInstanceId() const { return m_InstanceId; }
 		int GetNumAxes() const override { return m_NumAxes; }
 		int GetNumButtons() const override { return m_NumButtons; }
 		int GetNumBalls() const override { return m_NumBalls; }

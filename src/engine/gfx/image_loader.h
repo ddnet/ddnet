@@ -8,6 +8,7 @@
 enum EImageFormat
 {
 	IMAGE_FORMAT_R = 0,
+	IMAGE_FORMAT_RA,
 	IMAGE_FORMAT_RGB,
 	IMAGE_FORMAT_RGBA,
 };
@@ -31,7 +32,7 @@ enum
 	PNGLITE_FILTER_TYPE = 1 << 4,
 };
 
-bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat);
-bool SavePNG(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, int Width, int Height);
+bool LoadPng(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat);
+bool SavePng(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, int Width, int Height);
 
 #endif // ENGINE_GFX_IMAGE_LOADER_H

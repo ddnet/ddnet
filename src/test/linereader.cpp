@@ -1,6 +1,7 @@
 #include "test.h"
 #include <gtest/gtest.h>
 
+#include <base/system.h>
 #include <engine/shared/linereader.h>
 
 void TestFileLineReader(const char *pWritten, bool SkipBom, std::initializer_list<const char *> pReads)
@@ -34,4 +35,14 @@ TEST(LineReader, NormalNewline)
 TEST(LineReader, CRLFNewline)
 {
 	TestFileLineReader("foo\r\nbar\r\nbaz", true, {"foo", "bar", "baz"});
+}
+
+TEST(LineReader, Invalid)
+{
+	// Lines containing invalid UTF-8 are skipped
+	TestFileLineReader("foo\xff\nbar\xff\nbaz\xff\n", false, {});
+	TestFileLineReader("foo\xff\nbar\nbaz\n", false, {"bar", "baz"});
+	TestFileLineReader("foo\nbar\xff\nbaz\n", false, {"foo", "baz"});
+	TestFileLineReader("foo\nbar\nbaz\xff\n", false, {"foo", "bar"});
+	TestFileLineReader("foo\nbar1\xff\nbar2\xff\nfoobar\nbar3\xff\nbaz\n", false, {"foo", "foobar", "baz"});
 }

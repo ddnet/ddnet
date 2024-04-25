@@ -78,3 +78,26 @@ TEST(Io, SyncWorks)
 	EXPECT_FALSE(io_close(File));
 	EXPECT_FALSE(fs_remove(Info.m_aFilename));
 }
+
+TEST(Io, WriteTruncatesFile)
+{
+	CTestInfo Info;
+
+	IOHANDLE File = io_open(Info.m_aFilename, IOFLAG_WRITE);
+	ASSERT_TRUE(File);
+	EXPECT_EQ(io_write(File, "0123456789", 10), 10);
+	EXPECT_FALSE(io_close(File));
+
+	File = io_open(Info.m_aFilename, IOFLAG_WRITE);
+	EXPECT_EQ(io_write(File, "ABCDE", 5), 5);
+	EXPECT_FALSE(io_close(File));
+
+	char aBuf[16];
+	File = io_open(Info.m_aFilename, IOFLAG_READ);
+	ASSERT_TRUE(File);
+	EXPECT_EQ(io_read(File, aBuf, sizeof(aBuf)), 5);
+	EXPECT_TRUE(mem_comp(aBuf, "ABCDE", 5) == 0);
+	EXPECT_FALSE(io_close(File));
+
+	EXPECT_FALSE(fs_remove(Info.m_aFilename));
+}

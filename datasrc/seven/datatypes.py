@@ -1,10 +1,15 @@
+def only(x):
+	if len(x) != 1:
+		raise ValueError
+	return list(x)[0]
+
 GlobalIdCounter = 0
-def GetID():
+def GetId():
 	global GlobalIdCounter
 	GlobalIdCounter += 1
 	return GlobalIdCounter
 def GetUID():
-	return f"x{int(GetID())}"
+	return f"x{int(GetId())}"
 
 def FixCasing(Str):
 	NewStr = ""
@@ -31,7 +36,7 @@ class BaseType:
 	def __init__(self, type_name):
 		self._type_name = type_name
 		self._target_name = "INVALID"
-		self._id = GetID() # this is used to remember what order the members have in structures etc
+		self._id = GetId() # this is used to remember what order the members have in structures etc
 
 	def Identifier(self):
 		return "x"+str(self._id)
@@ -39,7 +44,7 @@ class BaseType:
 		return self._target_name
 	def TypeName(self):
 		return self._type_name
-	def ID(self):
+	def Id(self):
 		return self._id
 
 	def EmitDeclaration(self, name):
@@ -60,7 +65,7 @@ class Struct(BaseType):
 		BaseType.__init__(self, type_name)
 	def Members(self):
 		def sorter(a):
-			return a.var.ID()
+			return a.var.Id()
 		m = []
 		for name, value in self.__dict__.items():
 			if name[0] == "_":
@@ -210,30 +215,39 @@ class NetObject:
 	def __init__(self, name, variables):
 		l = name.split(":")
 		self.name = l[0]
-		self.base = ""
+		self.base = None
+		self.base_struct_name = None
 		if len(l) > 1:
 			self.base = l[1]
-		self.base_struct_name = f"CNetObj_{self.base}"
+			self.base_struct_name = f"CNetObj_{self.base}"
 		self.struct_name = f"CNetObj_{self.name}"
 		self.enum_name = f"NETOBJTYPE_{self.name.upper()}"
 		self.variables = variables
 	def emit_declaration(self):
-		if self.base:
+		if self.base is not None:
 			lines = [f"struct {self.struct_name} : public {self.base_struct_name}", "{"]
 		else:
 			lines = [f"struct {self.struct_name}", "{"]
 		lines += ["\tusing is_sixup = char;"]
-		lines += [f"\tstatic constexpr int ms_MsgID = {self.enum_name};"]
+		lines += [f"\tstatic constexpr int ms_MsgId = {self.enum_name};"]
 		for v in self.variables:
 			lines += ["\t"+line for line in v.emit_declaration()]
 		lines += ["};"]
 		return lines
-	def emit_validate(self):
+	def emit_validate(self, objects):
 		lines = [f"case {self.enum_name}:"]
 		lines += ["{"]
 		lines += [f"\t{self.struct_name} *pObj = ({self.struct_name} *)pData;"]
 		lines += ["\tif(sizeof(*pObj) != Size) return -1;"]
-		for v in self.variables:
+
+		variables = self.variables
+		next_base_name = self.base
+		while next_base_name is not None:
+			base_item = only([i for i in objects if i.name == next_base_name])
+			variables = base_item.variables + variables
+			next_base_name = base_item.base
+
+		for v in variables:
 			lines += ["\t"+line for line in v.emit_validate()]
 		lines += ["\treturn 0;"]
 		lines += ["}"]
@@ -243,14 +257,16 @@ class NetObject:
 class NetEvent(NetObject):
 	def __init__(self, name, variables):
 		NetObject.__init__(self, name, variables)
-		self.base_struct_name = f"CNetEvent_{self.base}"
+		if self.base is not None:
+			self.base_struct_name = f"CNetEvent_{self.base}"
 		self.struct_name = f"CNetEvent_{self.name}"
 		self.enum_name = f"NETEVENTTYPE_{self.name.upper()}"
 
 class NetMessage(NetObject):
 	def __init__(self, name, variables):
 		NetObject.__init__(self, name, variables)
-		self.base_struct_name = f"CNetMsg_{self.base}"
+		if self.base is not None:
+			self.base_struct_name = f"CNetMsg_{self.base}"
 		self.struct_name = f"CNetMsg_{self.name}"
 		self.enum_name = f"NETMSGTYPE_{self.name.upper()}"
 	def emit_unpack(self):

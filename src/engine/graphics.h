@@ -7,6 +7,7 @@
 #include "warning.h"
 
 #include <base/color.h>
+#include <base/system.h>
 
 #include <cstddef>
 #include <cstdint>
@@ -94,7 +95,16 @@ public:
 	/**
 	 * Pointer to the image data.
 	 */
-	void *m_pData = nullptr;
+	uint8_t *m_pData = nullptr;
+
+	void Free()
+	{
+		m_Width = 0;
+		m_Height = 0;
+		m_Format = FORMAT_ERROR;
+		free(m_pData);
+		m_pData = nullptr;
+	}
 
 	static size_t PixelSize(EImageFormat Format)
 	{
@@ -106,6 +116,11 @@ public:
 	size_t PixelSize() const
 	{
 		return PixelSize(m_Format);
+	}
+
+	size_t DataSize() const
+	{
+		return (size_t)m_Width * m_Height * PixelSize(m_Format);
 	}
 
 	static EImageFormat ImageFormatFromInt(int Format)
@@ -201,9 +216,9 @@ enum EBackendType
 	BACKEND_TYPE_COUNT,
 };
 
-struct STWGraphicGPU
+struct STWGraphicGpu
 {
-	enum ETWGraphicsGPUType
+	enum ETWGraphicsGpuType
 	{
 		GRAPHICS_GPU_TYPE_DISCRETE = 0,
 		GRAPHICS_GPU_TYPE_INTEGRATED,
@@ -214,16 +229,16 @@ struct STWGraphicGPU
 		GRAPHICS_GPU_TYPE_INVALID,
 	};
 
-	struct STWGraphicGPUItem
+	struct STWGraphicGpuItem
 	{
 		char m_aName[256];
-		ETWGraphicsGPUType m_GPUType;
+		ETWGraphicsGpuType m_GpuType;
 	};
-	std::vector<STWGraphicGPUItem> m_vGPUs;
-	STWGraphicGPUItem m_AutoGPU;
+	std::vector<STWGraphicGpuItem> m_vGpus;
+	STWGraphicGpuItem m_AutoGpu;
 };
 
-typedef STWGraphicGPU TTWGraphicsGPUList;
+typedef STWGraphicGpu TTwGraphicsGpuList;
 
 typedef std::function<void()> WINDOW_RESIZE_FUNC;
 typedef std::function<void()> WINDOW_PROPS_CHANGED_FUNC;
@@ -232,7 +247,7 @@ typedef std::function<bool(uint32_t &Width, uint32_t &Height, CImageInfo::EImage
 
 class IGraphics : public IInterface
 {
-	MACRO_INTERFACE("graphics", 0)
+	MACRO_INTERFACE("graphics")
 protected:
 	int m_ScreenWidth;
 	int m_ScreenHeight;
@@ -274,7 +289,7 @@ public:
 	int WindowHeight() const { return m_ScreenHeight / m_ScreenHiDPIScale; }
 
 	virtual void WarnPngliteIncompatibleImages(bool Warn) = 0;
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) = 0;
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual bool SetVSync(bool State) = 0;
 	virtual bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) = 0;
@@ -294,8 +309,8 @@ public:
 	*/
 	virtual void AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc) = 0;
 
-	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;
-	virtual void WindowCreateNtf(uint32_t WindowID) = 0;
+	virtual void WindowDestroyNtf(uint32_t WindowId) = 0;
+	virtual void WindowCreateNtf(uint32_t WindowId) = 0;
 
 	// ForceClearNow forces the backend to trigger a clear, even at performance cost, else it might be delayed by one frame
 	virtual void Clear(float r, float g, float b, bool ForceClearNow = false) = 0;
@@ -318,37 +333,37 @@ public:
 	virtual uint64_t StreamedMemoryUsage() const = 0;
 	virtual uint64_t StagingMemoryUsage() const = 0;
 
-	virtual const TTWGraphicsGPUList &GetGPUs() const = 0;
+	virtual const TTwGraphicsGpuList &GetGpus() const = 0;
 
-	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
-	virtual void FreePNG(CImageInfo *pImg) = 0;
+	virtual bool LoadPng(CImageInfo &Image, const char *pFilename, int StorageType) = 0;
 
 	virtual bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) = 0;
 	virtual bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) = 0;
 
 	// destination and source buffer require to have the same width and height
-	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t PixelSize, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) = 0;
+	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, const CImageInfo &SourceImage, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) = 0;
 
 	// destination width must be equal to the subwidth of the source
-	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, uint8_t *pSourceBuffer, size_t SrcWidth, size_t SrcHeight, size_t PixelSize, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) = 0;
+	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, const CImageInfo &SourceImage, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) = 0;
 
 	virtual int UnloadTexture(CTextureHandle *pIndex) = 0;
-	virtual CTextureHandle LoadTextureRaw(size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData, int Flags, const char *pTexName = nullptr) = 0;
-	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData) = 0;
+	virtual CTextureHandle LoadTextureRaw(const CImageInfo &Image, int Flags, const char *pTexName = nullptr) = 0;
+	virtual CTextureHandle LoadTextureRawMove(CImageInfo &Image, int Flags, const char *pTexName = nullptr) = 0;
+	virtual int LoadTextureRawSub(CTextureHandle TextureId, int x, int y, const CImageInfo &Image) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) = 0;
 	virtual CTextureHandle NullTexture() const = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }
 
 	// pTextData & pTextOutlineData are automatically free'd
-	virtual bool LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) = 0;
+	virtual bool LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, uint8_t *pTextData, uint8_t *pTextOutlineData) = 0;
 	virtual bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) = 0;
-	virtual bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, const void *pData) = 0;
+	virtual bool UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, const uint8_t *pData) = 0;
 
-	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) = 0;
+	virtual CTextureHandle LoadSpriteTexture(const CImageInfo &FromImageInfo, const struct CDataSprite *pSprite) = 0;
 
-	virtual bool IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h) = 0;
-	virtual bool IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) = 0;
+	virtual bool IsImageSubFullyTransparent(const CImageInfo &FromImageInfo, int x, int y, int w, int h) = 0;
+	virtual bool IsSpriteTextureFullyTransparent(const CImageInfo &FromImageInfo, const struct CDataSprite *pSprite) = 0;
 
 	virtual void FlushVertices(bool KeepVertices = false) = 0;
 	virtual void FlushVerticesTex3D() = 0;
@@ -502,18 +517,29 @@ public:
 		CColorVertex() {}
 		CColorVertex(int i, float r, float g, float b, float a) :
 			m_Index(i), m_R(r), m_G(g), m_B(b), m_A(a) {}
+		CColorVertex(int i, ColorRGBA Color) :
+			m_Index(i), m_R(Color.r), m_G(Color.g), m_B(Color.b), m_A(Color.a) {}
 	};
-	virtual void SetColorVertex(const CColorVertex *pArray, int Num) = 0;
+	virtual void SetColorVertex(const CColorVertex *pArray, size_t Num) = 0;
 	virtual void SetColor(float r, float g, float b, float a) = 0;
 	virtual void SetColor(ColorRGBA Color) = 0;
 	virtual void SetColor4(ColorRGBA TopLeft, ColorRGBA TopRight, ColorRGBA BottomLeft, ColorRGBA BottomRight) = 0;
 	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) = 0;
-	virtual void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) = 0;
+	virtual void ChangeColorOfQuadVertices(size_t QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) = 0;
 
+	/**
+	 * Reads the color at the specified position from the backbuffer once,
+	 * after the next swap operation.
+	 *
+	 * @param Position The pixel position to read.
+	 * @param pColor Pointer that will receive the read pixel color.
+	 * The pointer must be valid until the next swap operation.
+	 */
+	virtual void ReadPixel(ivec2 Position, ColorRGBA *pColor) = 0;
 	virtual void TakeScreenshot(const char *pFilename) = 0;
 	virtual void TakeCustomScreenshot(const char *pFilename) = 0;
 	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) = 0;
-
+	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int Screen) = 0;
 	virtual void Swap() = 0;
 	virtual int GetNumScreens() const = 0;
 	virtual const char *GetScreenName(int Screen) const = 0;
@@ -547,7 +573,7 @@ protected:
 
 class IEngineGraphics : public IGraphics
 {
-	MACRO_INTERFACE("enginegraphics", 0)
+	MACRO_INTERFACE("enginegraphics")
 public:
 	virtual int Init() = 0;
 	virtual void Shutdown() override = 0;

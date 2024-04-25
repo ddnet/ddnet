@@ -11,8 +11,9 @@ public:
 
 	CTile GetTile(int x, int y) override;
 	void SetTile(int x, int y, CTile Tile) override;
+	const char *TypeName() const override;
 
-	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
+	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 };
 
 #endif

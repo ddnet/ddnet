@@ -126,6 +126,7 @@ def gen_network_source():
 	print("""\
 #include "protocol.h"
 
+#include <base/system.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/uuid_manager.h>
@@ -262,10 +263,7 @@ void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)
 	"""]
 
 	for item in network.Objects:
-		base_item = None
-		if item.base:
-			base_item = next(i for i in network.Objects if i.name == item.base)
-		for line in item.emit_uncompressed_unpack_and_validate(base_item):
+		for line in item.emit_uncompressed_unpack_and_validate(network.Objects):
 			lines += ["\t" + line]
 		lines += ['\t']
 

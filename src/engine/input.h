@@ -4,13 +4,14 @@
 #define ENGINE_INPUT_H
 
 #include "kernel.h"
+#include <base/system.h>
 
 const int g_MaxKeys = 512;
 extern const char g_aaKeyStrings[g_MaxKeys][20];
 
 class IInput : public IInterface
 {
-	MACRO_INTERFACE("input", 0)
+	MACRO_INTERFACE("input")
 public:
 	enum
 	{
@@ -141,7 +142,7 @@ public:
 
 class IEngineInput : public IInput
 {
-	MACRO_INTERFACE("engineinput", 0)
+	MACRO_INTERFACE("engineinput")
 public:
 	virtual void Init() = 0;
 	virtual void Shutdown() override = 0;

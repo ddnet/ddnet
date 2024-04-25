@@ -27,12 +27,7 @@ void CLayerFront::SetTile(int x, int y, CTile Tile)
 	{
 		CTile air = {TILE_AIR};
 		CLayerTiles::SetTile(x, y, air);
-		if(!m_pEditor->m_PreventUnusedTilesWasWarned)
-		{
-			m_pEditor->m_PopupEventType = CEditor::POPEVENT_PREVENTUNUSEDTILES;
-			m_pEditor->m_PopupEventActivated = true;
-			m_pEditor->m_PreventUnusedTilesWasWarned = true;
-		}
+		ShowPreventUnusedTilesWarning();
 	}
 }
 
@@ -44,4 +39,9 @@ void CLayerFront::Resize(int NewW, int NewH)
 	// resize gamelayer too
 	if(m_pEditor->m_Map.m_pGameLayer->m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_Height != NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
+}
+
+const char *CLayerFront::TypeName() const
+{
+	return "front";
 }

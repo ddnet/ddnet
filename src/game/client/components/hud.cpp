@@ -262,8 +262,8 @@ void CHud::RenderScoreHud()
 					else if(aFlagCarrier[t] >= 0)
 					{
 						// draw name of the flag holder
-						int ID = aFlagCarrier[t] % MAX_CLIENTS;
-						const char *pName = m_pClient->m_aClients[ID].m_aName;
+						int Id = aFlagCarrier[t] % MAX_CLIENTS;
+						const char *pName = m_pClient->m_aClients[Id].m_aName;
 						if(str_comp(pName, m_aScoreInfo[t].m_aPlayerNameText) != 0 || RecreateRect)
 						{
 							mem_copy(m_aScoreInfo[t].m_aPlayerNameText, pName, sizeof(m_aScoreInfo[t].m_aPlayerNameText));
@@ -284,13 +284,13 @@ void CHud::RenderScoreHud()
 						}
 
 						// draw tee of the flag holder
-						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[ID].m_RenderInfo;
+						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[Id].m_RenderInfo;
 						TeeInfo.m_Size = ScoreSingleBoxHeight;
 
 						
 						const CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
-						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+						CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 						vec2 TeeRenderPos(m_Width - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
 
 						RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
@@ -310,7 +310,7 @@ void CHud::RenderScoreHud()
 				if(m_pClient->m_Snap.m_apInfoByScore[i]->m_Team != TEAM_SPECTATORS)
 				{
 					apPlayerInfo[t] = m_pClient->m_Snap.m_apInfoByScore[i];
-					if(apPlayerInfo[t]->m_ClientID == m_pClient->m_Snap.m_LocalClientID)
+					if(apPlayerInfo[t]->m_ClientId == m_pClient->m_Snap.m_LocalClientId)
 						Local = t;
 					++t;
 				}
@@ -322,7 +322,7 @@ void CHud::RenderScoreHud()
 				{
 					if(m_pClient->m_Snap.m_apInfoByScore[i]->m_Team != TEAM_SPECTATORS)
 						++aPos[1];
-					if(m_pClient->m_Snap.m_apInfoByScore[i]->m_ClientID == m_pClient->m_Snap.m_LocalClientID)
+					if(m_pClient->m_Snap.m_apInfoByScore[i]->m_ClientId == m_pClient->m_Snap.m_LocalClientId)
 					{
 						apPlayerInfo[1] = m_pClient->m_Snap.m_apInfoByScore[i];
 						Local = 1;
@@ -349,9 +349,9 @@ void CHud::RenderScoreHud()
 					aScore[t][0] = 0;
 			}
 
-			static int LocalClientID = -1;
-			bool RecreateScores = str_comp(aScore[0], m_aScoreInfo[0].m_aScoreText) != 0 || str_comp(aScore[1], m_aScoreInfo[1].m_aScoreText) != 0 || LocalClientID != m_pClient->m_Snap.m_LocalClientID;
-			LocalClientID = m_pClient->m_Snap.m_LocalClientID;
+			static int LocalClientId = -1;
+			bool RecreateScores = str_comp(aScore[0], m_aScoreInfo[0].m_aScoreText) != 0 || str_comp(aScore[1], m_aScoreInfo[1].m_aScoreText) != 0 || LocalClientId != m_pClient->m_Snap.m_LocalClientId;
+			LocalClientId = m_pClient->m_Snap.m_LocalClientId;
 
 			bool RecreateRect = ForceScoreInfoInit;
 			for(int t = 0; t < 2; t++)
@@ -365,10 +365,10 @@ void CHud::RenderScoreHud()
 
 				if(apPlayerInfo[t])
 				{
-					int ID = apPlayerInfo[t]->m_ClientID;
-					if(ID >= 0 && ID < MAX_CLIENTS)
+					int Id = apPlayerInfo[t]->m_ClientId;
+					if(Id >= 0 && Id < MAX_CLIENTS)
 					{
-						const char *pName = m_pClient->m_aClients[ID].m_aName;
+						const char *pName = m_pClient->m_aClients[Id].m_aName;
 						if(str_comp(pName, m_aScoreInfo[t].m_aPlayerNameText) != 0)
 							RecreateRect = true;
 					}
@@ -425,10 +425,10 @@ void CHud::RenderScoreHud()
 				if(apPlayerInfo[t])
 				{
 					// draw name
-					int ID = apPlayerInfo[t]->m_ClientID;
-					if(ID >= 0 && ID < MAX_CLIENTS)
+					int Id = apPlayerInfo[t]->m_ClientId;
+					if(Id >= 0 && Id < MAX_CLIENTS)
 					{
-						const char *pName = m_pClient->m_aClients[ID].m_aName;
+						const char *pName = m_pClient->m_aClients[Id].m_aName;
 						if(RecreateRect)
 						{
 							mem_copy(m_aScoreInfo[t].m_aPlayerNameText, pName, sizeof(m_aScoreInfo[t].m_aPlayerNameText));
@@ -448,12 +448,12 @@ void CHud::RenderScoreHud()
 						}
 
 						// draw tee
-						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[ID].m_RenderInfo;
+						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[Id].m_RenderInfo;
 						TeeInfo.m_Size = ScoreSingleBoxHeight;
 
 						const CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
-						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+						CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 						vec2 TeeRenderPos(m_Width - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
 
 						RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
@@ -511,7 +511,12 @@ void CHud::RenderWarmupTimer()
 
 void CHud::RenderTextInfo()
 {
-	if(g_Config.m_ClShowfps)
+	int Showfps = g_Config.m_ClShowfps;
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current())
+		Showfps = 0;
+#endif
+	if(Showfps)
 	{
 		// calculate avg. fps
 		m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;
@@ -547,7 +552,7 @@ void CHud::RenderTextInfo()
 	{
 		char aBuf[64];
 		str_from_int(Client()->GetPredictionTime(), aBuf);
-		TextRender()->Text(m_Width - 10 - TextRender()->TextWidth(12, aBuf, -1, -1.0f), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1.0f);
+		TextRender()->Text(m_Width - 10 - TextRender()->TextWidth(12, aBuf, -1, -1.0f), Showfps ? 20 : 5, 12, aBuf, -1.0f);
 	}
 
 	if(g_Config.m_ClMiniDebug)
@@ -766,65 +771,6 @@ void CHud::RenderTeambalanceWarning()
 	}
 }
 
-void CHud::RenderVoting()
-{
-	bool kickvote = str_startswith(m_pClient->m_Voting.VoteDescription(), "Kick ") != 0 ? true : false;
-	bool specvote = str_startswith(m_pClient->m_Voting.VoteDescription(), "Pause ") != 0 ? true : false;
-
-	if(g_Config.m_ClVoteDontShow && (kickvote || specvote))
-	{ // only show votes
-		// check if the is a playervote and if he is in your team.
-	}
-
-	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.Active() && m_pClient->m_Voting.TakenChoice()) || !m_pClient->m_Voting.IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
-		return;
-
-	Graphics()->DrawRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_ALL, 5.0f);
-
-	TextRender()->TextColor(TextRender()->DefaultTextColor());
-
-	CTextCursor Cursor;
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), Localize("%ds left"), m_pClient->m_Voting.SecondsLeft());
-	float tw = TextRender()->TextWidth(6, aBuf, -1, -1.0f);
-	TextRender()->SetCursor(&Cursor, 5.0f + 100.0f - tw, 60.0f, 6.0f, TEXTFLAG_RENDER);
-	TextRender()->TextEx(&Cursor, aBuf, -1);
-
-	TextRender()->SetCursor(&Cursor, 5.0f, 60.0f, 6.0f, TEXTFLAG_RENDER);
-	Cursor.m_LineWidth = 100.0f - tw;
-	Cursor.m_MaxLines = 3;
-	TextRender()->TextEx(&Cursor, m_pClient->m_Voting.VoteDescription(), -1);
-
-	// reason
-	str_format(aBuf, sizeof(aBuf), "%s %s", Localize("Reason:"), m_pClient->m_Voting.VoteReason());
-	TextRender()->SetCursor(&Cursor, 5.0f, 79.0f, 6.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-	Cursor.m_LineWidth = 100.0f;
-	TextRender()->TextEx(&Cursor, aBuf, -1);
-
-	CUIRect Base = {5, 88, 100, 4};
-	m_pClient->m_Voting.RenderBars(Base, false);
-
-	char aKey[64];
-	m_pClient->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
-
-	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
-	Base.y += Base.h;
-	Base.h = 12.0f;
-	if(m_pClient->m_Voting.TakenChoice() == 1)
-		TextRender()->TextColor(ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f));
-	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_ML);
-
-	TextRender()->TextColor(TextRender()->DefaultTextColor());
-
-	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
-	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
-	if(m_pClient->m_Voting.TakenChoice() == -1)
-		TextRender()->TextColor(ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f));
-	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_MR);
-
-	TextRender()->TextColor(TextRender()->DefaultTextColor());
-}
-
 void CHud::RenderCursor()
 {
 	if((!m_pClient->m_Snap.m_pLocalCharacter && !(g_Config.m_ClRenderCursorSpec && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)) || Client()->State() == IClient::STATE_DEMOPLAYBACK)
@@ -1009,22 +955,23 @@ void CHud::PreparePlayerStateQuads()
 	m_DummyHammerOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_DummyCopyOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 
-	// Quad for displaying practice mode
+	// Quads for displaying team modes
 	m_PracticeModeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_LockModeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 }
 
-void CHud::RenderPlayerState(const int ClientID)
+void CHud::RenderPlayerState(const int ClientId)
 {
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
-	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
-	CNetObj_Character *pPlayer = &m_pClient->m_aClients[ClientID].m_RenderCur;
+	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientId].m_Predicted;
+	CNetObj_Character *pPlayer = &m_pClient->m_aClients[ClientId].m_RenderCur;
 	int TotalJumpsToDisplay = 0;
 	if(g_Config.m_ClShowhudJumpsIndicator)
 	{
 		int AvailableJumpsToDisplay;
-		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
+		if(m_pClient->m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo)
 		{
 			bool Grounded = false;
 			if(Collision()->CheckPoint(pPlayer->m_X + CCharacterCore::PhysicalSize() / 2,
@@ -1070,7 +1017,7 @@ void CHud::RenderPlayerState(const int ClientID)
 		}
 		else
 		{
-			TotalJumpsToDisplay = AvailableJumpsToDisplay = absolute(m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Jumps);
+			TotalJumpsToDisplay = AvailableJumpsToDisplay = absolute(m_pClient->m_Snap.m_aCharacters[ClientId].m_ExtendedData.m_Jumps);
 		}
 
 		// render available and used jumps
@@ -1123,7 +1070,7 @@ void CHud::RenderPlayerState(const int ClientID)
 		{
 			const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
 			float NinjaProgress = clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
-			if(NinjaProgress > 0.0f && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
+			if(NinjaProgress > 0.0f && m_pClient->m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo)
 			{
 				RenderNinjaBarPos(x, y - 12, 6.f, 24.f, NinjaProgress);
 			}
@@ -1249,7 +1196,13 @@ void CHud::RenderPlayerState(const int ClientID)
 	{
 		y += 12;
 	}
-	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Flags & CHARACTERFLAG_PRACTICE_MODE)
+	if(m_pClient->m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[ClientId].m_ExtendedData.m_Flags & CHARACTERFLAG_LOCK_MODE)
+	{
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudLockMode);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_LockModeOffset, x, y);
+		x += 12;
+	}
+	if(m_pClient->m_Snap.m_aCharacters[ClientId].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[ClientId].m_ExtendedData.m_Flags & CHARACTERFLAG_PRACTICE_MODE)
 	{
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudPracticeMode);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_PracticeModeOffset, x, y);
@@ -1491,7 +1444,7 @@ inline float CHud::GetMovementInformationBoxHeight()
 	return BoxHeight;
 }
 
-void CHud::RenderMovementInformation(const int ClientID)
+void CHud::RenderMovementInformation(const int ClientId)
 {
 	// Draw the infomations depending on settings: Position, speed and target angle
 	// This display is only to present the available information from the last snapshot, not to interpolate or predict
@@ -1514,8 +1467,8 @@ void CHud::RenderMovementInformation(const int ClientID)
 
 	Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
 
-	const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientID].m_Prev;
-	const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
+	const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
+	const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
 	const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
 
 	// To make the player position relative to blocks we need to divide by the block size
@@ -1542,7 +1495,7 @@ void CHud::RenderMovementInformation(const int ClientID)
 	DisplaySpeedX *= Ramp;
 	float DisplaySpeedY = VelspeedY / 32;
 
-	float Angle = m_pClient->m_Players.GetPlayerTargetAngle(pPrevChar, pCurChar, ClientID, IntraTick);
+	float Angle = m_pClient->m_Players.GetPlayerTargetAngle(pPrevChar, pCurChar, ClientId, IntraTick);
 	if(Angle < 0)
 	{
 		Angle += 2.0f * pi;
@@ -1630,7 +1583,7 @@ void CHud::RenderSpectatorHud()
 
 	// draw the text
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Spectate"), GameClient()->m_MultiViewActivated ? Localize("Multi-View") : m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW ? m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_aName : Localize("Free-View"));
+	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Spectate"), GameClient()->m_MultiViewActivated ? Localize("Multi-View") : m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW ? m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId].m_aName : Localize("Free-View"));
 	TextRender()->Text(m_Width - 174.0f, m_Height - 15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
 }
 
@@ -1650,6 +1603,9 @@ void CHud::RenderLocalTime(float x)
 
 void CHud::OnRender()
 {
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		return;
+
 	if(!m_pClient->m_Snap.m_pGameInfoObj)
 		return;
 
@@ -1669,31 +1625,31 @@ void CHud::OnRender()
 			{
 				RenderAmmoHealthAndArmor(m_pClient->m_Snap.m_pLocalCharacter);
 			}
-			if(m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_HasExtendedData && g_Config.m_ClShowhudDDRace && GameClient()->m_GameInfo.m_HudDDRace)
+			if(m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientId].m_HasExtendedData && g_Config.m_ClShowhudDDRace && GameClient()->m_GameInfo.m_HudDDRace)
 			{
-				RenderPlayerState(m_pClient->m_Snap.m_LocalClientID);
+				RenderPlayerState(m_pClient->m_Snap.m_LocalClientId);
 			}
-			RenderMovementInformation(m_pClient->m_Snap.m_LocalClientID);
+			RenderMovementInformation(m_pClient->m_Snap.m_LocalClientId);
 			RenderDDRaceEffects();
 		}
 		else if(m_pClient->m_Snap.m_SpecInfo.m_Active)
 		{
-			int SpectatorID = m_pClient->m_Snap.m_SpecInfo.m_SpectatorID;
-			if(SpectatorID != SPEC_FREEVIEW && g_Config.m_ClShowhudHealthAmmo)
+			int SpectatorId = m_pClient->m_Snap.m_SpecInfo.m_SpectatorId;
+			if(SpectatorId != SPEC_FREEVIEW && g_Config.m_ClShowhudHealthAmmo)
 			{
-				RenderAmmoHealthAndArmor(&m_pClient->m_Snap.m_aCharacters[SpectatorID].m_Cur);
+				RenderAmmoHealthAndArmor(&m_pClient->m_Snap.m_aCharacters[SpectatorId].m_Cur);
 			}
-			if(SpectatorID != SPEC_FREEVIEW &&
-				m_pClient->m_Snap.m_aCharacters[SpectatorID].m_HasExtendedData &&
+			if(SpectatorId != SPEC_FREEVIEW &&
+				m_pClient->m_Snap.m_aCharacters[SpectatorId].m_HasExtendedData &&
 				g_Config.m_ClShowhudDDRace &&
 				(!GameClient()->m_MultiViewActivated || GameClient()->m_MultiViewShowHud) &&
 				GameClient()->m_GameInfo.m_HudDDRace)
 			{
-				RenderPlayerState(SpectatorID);
+				RenderPlayerState(SpectatorId);
 			}
-			if(SpectatorID != SPEC_FREEVIEW)
+			if(SpectatorId != SPEC_FREEVIEW)
 			{
-				RenderMovementInformation(SpectatorID);
+				RenderMovementInformation(SpectatorId);
 			}
 			RenderSpectatorHud();
 		}
@@ -1713,7 +1669,7 @@ void CHud::OnRender()
 		if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			RenderConnectionWarning();
 		RenderTeambalanceWarning();
-		RenderVoting();
+		m_pClient->m_Voting.Render();
 		if(g_Config.m_ClShowRecord)
 			RenderRecord();
 	}

@@ -16,6 +16,7 @@ CSoundLoading::CSoundLoading(CGameClient *pGameClient, bool Render) :
 	m_pGameClient(pGameClient),
 	m_Render(Render)
 {
+	Abortable(true);
 }
 
 void CSoundLoading::Run()
@@ -27,6 +28,9 @@ void CSoundLoading::Run()
 
 		for(int i = 0; i < g_pData->m_aSounds[s].m_NumSounds; i++)
 		{
+			if(State() == IJob::STATE_ABORTED)
+				return;
+
 			int Id = m_pGameClient->Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
 			g_pData->m_aSounds[s].m_aSounds[i].m_Id = Id;
 			// try to render a frame
@@ -114,7 +118,7 @@ void CSounds::OnRender()
 	// check for sound initialisation
 	if(m_WaitForSoundJob)
 	{
-		if(m_pSoundJob->Status() == IJob::STATE_DONE)
+		if(m_pSoundJob->State() == IJob::STATE_DONE)
 			m_WaitForSoundJob = false;
 		else
 			return;
@@ -190,7 +194,7 @@ void CSounds::Enqueue(int Channel, int SetId)
 void CSounds::PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos)
 {
 	CNetMsg_Sv_SoundGlobal Msg;
-	Msg.m_SoundID = SetId;
+	Msg.m_SoundId = SetId;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_NOSEND | MSGFLAG_RECORD);
 
 	Play(Channel, SetId, Vol);

@@ -1,12 +1,13 @@
 #include "backend_base.h"
+#include <base/system.h>
 #include <engine/gfx/image_manipulation.h>
 
-void *CCommandProcessorFragment_GLBase::Resize(const unsigned char *pData, int Width, int Height, int NewWidth, int NewHeight, int BPP)
+uint8_t *CCommandProcessorFragment_GLBase::Resize(const uint8_t *pData, int Width, int Height, int NewWidth, int NewHeight, int BPP)
 {
-	return ResizeImage((const uint8_t *)pData, Width, Height, NewWidth, NewHeight, BPP);
+	return ResizeImage(pData, Width, Height, NewWidth, NewHeight, BPP);
 }
 
-bool CCommandProcessorFragment_GLBase::Texture2DTo3D(void *pImageBuffer, int ImageWidth, int ImageHeight, size_t PixelSize, int SplitCountWidth, int SplitCountHeight, void *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight)
+bool CCommandProcessorFragment_GLBase::Texture2DTo3D(uint8_t *pImageBuffer, int ImageWidth, int ImageHeight, size_t PixelSize, int SplitCountWidth, int SplitCountHeight, uint8_t *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight)
 {
 	Target3DImageWidth = ImageWidth / SplitCountWidth;
 	Target3DImageHeight = ImageHeight / SplitCountHeight;
@@ -25,7 +26,7 @@ bool CCommandProcessorFragment_GLBase::Texture2DTo3D(void *pImageBuffer, int Ima
 				size_t TargetImageFullSize = (size_t)TargetImageFullWidth * Target3DImageHeight;
 				ptrdiff_t ImageOffset = (ptrdiff_t)(((size_t)Y * FullImageWidth * (size_t)Target3DImageHeight) + ((size_t)Y3D * FullImageWidth) + ((size_t)X * TargetImageFullWidth));
 				ptrdiff_t TargetImageOffset = (ptrdiff_t)(TargetImageFullSize * (size_t)DepthIndex + ((size_t)Y3D * TargetImageFullWidth));
-				mem_copy(((uint8_t *)pTarget3DImageData) + TargetImageOffset, ((uint8_t *)pImageBuffer) + (ptrdiff_t)(ImageOffset), TargetImageFullWidth);
+				mem_copy(pTarget3DImageData + TargetImageOffset, pImageBuffer + (ptrdiff_t)(ImageOffset), TargetImageFullWidth);
 			}
 		}
 	}

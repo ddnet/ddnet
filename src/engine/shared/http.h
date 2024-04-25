@@ -1,20 +1,30 @@
 #ifndef ENGINE_SHARED_HTTP_H
 #define ENGINE_SHARED_HTTP_H
 
+#include <base/hash_ctxt.h>
+
+#include <engine/shared/jobs.h>
+
 #include <algorithm>
 #include <atomic>
-#include <engine/shared/jobs.h>
+#include <condition_variable>
+#include <deque>
+#include <mutex>
+#include <optional>
+#include <unordered_map>
+
+#include <engine/http.h>
 
 typedef struct _json_value json_value;
 class IStorage;
 
-enum
+enum class EHttpState
 {
-	HTTP_ERROR = -1,
-	HTTP_QUEUED,
-	HTTP_RUNNING,
-	HTTP_DONE,
-	HTTP_ABORTED,
+	ERROR = -1,
+	QUEUED,
+	RUNNING,
+	DONE,
+	ABORTED,
 };
 
 enum class HTTPLOG
@@ -39,8 +49,10 @@ struct CTimeout
 	long LowSpeedTime;
 };
 
-class CHttpRequest : public IJob
+class CHttpRequest : public IHttpRequest
 {
+	friend class CHttp;
+
 	enum class REQUEST
 	{
 		GET = 0,
@@ -48,6 +60,24 @@ class CHttpRequest : public IJob
 		POST,
 		POST_JSON,
 	};
+
+	static constexpr const char *GetRequestType(REQUEST Type)
+	{
+		switch(Type)
+		{
+		case REQUEST::GET:
+			return "GET";
+		case REQUEST::HEAD:
+			return "HEAD";
+		case REQUEST::POST:
+		case REQUEST::POST_JSON:
+			return "POST";
+		}
+
+		// Unreachable, maybe assert instead?
+		return "UNKNOWN";
+	}
+
 	char m_aUrl[256] = {0};
 
 	void *m_pHeaders = nullptr;
@@ -57,6 +87,10 @@ class CHttpRequest : public IJob
 	CTimeout m_Timeout = CTimeout{0, 0, 0, 0};
 	int64_t m_MaxResponseSize = -1;
 	REQUEST m_Type = REQUEST::GET;
+
+	SHA256_DIGEST m_ActualSha256 = SHA256_ZEROED;
+	SHA256_CTX m_ActualSha256Ctx;
+	SHA256_DIGEST m_ExpectedSha256 = SHA256_ZEROED;
 
 	bool m_WriteToFile = false;
 
@@ -77,34 +111,50 @@ class CHttpRequest : public IJob
 	HTTPLOG m_LogProgress = HTTPLOG::ALL;
 	IPRESOLVE m_IpResolve = IPRESOLVE::WHATEVER;
 
-	std::atomic<int> m_State{HTTP_QUEUED};
+	bool m_FailOnErrorStatus = true;
+
+	char m_aErr[256]; // 256 == CURL_ERROR_SIZE
+	std::atomic<EHttpState> m_State{EHttpState::QUEUED};
 	std::atomic<bool> m_Abort{false};
 
-	void Run() override;
+	int m_StatusCode = 0;
+	bool m_HeadersEnded = false;
+	std::optional<int64_t> m_ResultDate = {};
+	std::optional<int64_t> m_ResultLastModified = {};
+
 	// Abort the request with an error if `BeforeInit()` returns false.
 	bool BeforeInit();
-	int RunImpl(void *pUser);
+	bool ConfigureHandle(void *pHandle); // void * == CURL *
+	// `pHandle` can be nullptr if no handle was ever created for this request.
+	void OnCompletionInternal(void *pHandle, unsigned int Result); // void * == CURL *, unsigned int == CURLcode
 
+	// Abort the request if `OnHeader()` returns something other than
+	// `DataSize`. `pHeader` is NOT null-terminated.
+	size_t OnHeader(char *pHeader, size_t HeaderSize);
 	// Abort the request if `OnData()` returns something other than
 	// `DataSize`.
 	size_t OnData(char *pData, size_t DataSize);
 
 	static int ProgressCallback(void *pUser, double DlTotal, double DlCurr, double UlTotal, double UlCurr);
+	static size_t HeaderCallback(char *pData, size_t Size, size_t Number, void *pUser);
 	static size_t WriteCallback(char *pData, size_t Size, size_t Number, void *pUser);
 
 protected:
+	// These run on the curl thread now, DO NOT STALL THE THREAD
 	virtual void OnProgress() {}
-	virtual int OnCompletion(int State);
+	virtual void OnCompletion(EHttpState State) {}
 
 public:
 	CHttpRequest(const char *pUrl);
-	~CHttpRequest();
+	virtual ~CHttpRequest();
 
 	void Timeout(CTimeout Timeout) { m_Timeout = Timeout; }
 	void MaxResponseSize(int64_t MaxResponseSize) { m_MaxResponseSize = MaxResponseSize; }
 	void LogProgress(HTTPLOG LogProgress) { m_LogProgress = LogProgress; }
 	void IpResolve(IPRESOLVE IpResolve) { m_IpResolve = IpResolve; }
+	void FailOnErrorStatus(bool FailOnErrorStatus) { m_FailOnErrorStatus = FailOnErrorStatus; }
 	void WriteToFile(IStorage *pStorage, const char *pDest, int StorageType);
+	void ExpectSha256(const SHA256_DIGEST &Sha256) { m_ExpectedSha256 = Sha256; }
 	void Head() { m_Type = REQUEST::HEAD; }
 	void Post(const unsigned char *pData, size_t DataLength)
 	{
@@ -149,11 +199,23 @@ public:
 	double Current() const { return m_Current.load(std::memory_order_relaxed); }
 	double Size() const { return m_Size.load(std::memory_order_relaxed); }
 	int Progress() const { return m_Progress.load(std::memory_order_relaxed); }
-	int State() const { return m_State; }
+	EHttpState State() const { return m_State; }
+	bool Done() const
+	{
+		EHttpState State = m_State;
+		return State != EHttpState::QUEUED && State != EHttpState::RUNNING;
+	}
 	void Abort() { m_Abort = true; }
+
+	void Wait();
 
 	void Result(unsigned char **ppResult, size_t *pResultLength) const;
 	json_value *ResultJson() const;
+	const SHA256_DIGEST &ResultSha256() const;
+
+	int StatusCode() const;
+	std::optional<int64_t> ResultAgeSeconds() const;
+	std::optional<int64_t> ResultLastModified() const;
 };
 
 inline std::unique_ptr<CHttpRequest> HttpHead(const char *pUrl)
@@ -192,7 +254,44 @@ inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *
 	return pResult;
 }
 
-bool HttpInit(IStorage *pStorage);
 void EscapeUrl(char *pBuf, int Size, const char *pStr);
 bool HttpHasIpresolveBug();
+
+// In an ideal world this would be a kernel interface
+class CHttp : public IHttp
+{
+	enum EState
+	{
+		UNINITIALIZED,
+		RUNNING,
+		ERROR,
+	};
+
+	void *m_pThread = nullptr;
+
+	std::mutex m_Lock{};
+	std::condition_variable m_Cv{};
+	std::atomic<EState> m_State = UNINITIALIZED;
+	std::deque<std::shared_ptr<CHttpRequest>> m_PendingRequests{};
+	std::unordered_map<void *, std::shared_ptr<CHttpRequest>> m_RunningRequests{}; // void * == CURL *
+	std::chrono::milliseconds m_ShutdownDelay{};
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_ShutdownTime{};
+	std::atomic<bool> m_Shutdown = false;
+
+	// Only to be used with curl_multi_wakeup
+	void *m_pMultiH = nullptr; // void * == CURLM *
+
+	static void ThreadMain(void *pUser);
+	void RunLoop();
+
+public:
+	// Startup
+	bool Init(std::chrono::milliseconds ShutdownDelay);
+
+	// User
+	virtual void Run(std::shared_ptr<IHttpRequest> pRequest) override;
+	void Shutdown() override;
+	~CHttp();
+};
+
 #endif // ENGINE_SHARED_HTTP_H

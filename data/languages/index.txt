@@ -60,6 +60,11 @@ esperanto
 == -1
 == eo
 
+estonian
+== Eesti
+== 233
+== ee
+
 finnish
 == Suomi
 == 246
@@ -179,6 +184,11 @@ turkish
 == Türkçe
 == 792
 == tr
+
+azerbaijanese
+== Azərbaycan
+== 31
+== az
 
 ukrainian
 == Українська

@@ -1,3 +1,4 @@
+#include <base/system.h>
 #include <engine/discord.h>
 
 // Hack for universal binary builds on macOS: Ignore arm64 until Discord
@@ -54,6 +55,7 @@ public:
 		}
 
 		m_pActivityManager = m_pCore->get_activity_manager(m_pCore);
+		ClearGameInfo();
 		return false;
 	}
 	void Update() override
@@ -62,7 +64,13 @@ public:
 	}
 	void ClearGameInfo() override
 	{
-		m_pActivityManager->clear_activity(m_pActivityManager, 0, 0);
+		DiscordActivity Activity;
+		mem_zero(&Activity, sizeof(DiscordActivity));
+		str_copy(Activity.assets.large_image, "ddnet_logo", sizeof(Activity.assets.large_image));
+		str_copy(Activity.assets.large_text, "DDNet logo", sizeof(Activity.assets.large_text));
+		Activity.timestamps.start = time_timestamp();
+		str_copy(Activity.details, "Offline", sizeof(Activity.details));
+		m_pActivityManager->update_activity(m_pActivityManager, &Activity, 0, 0);
 	}
 	void SetGameInfo(const NETADDR &ServerAddr, const char *pMapName, bool AnnounceAddr) override
 	{
@@ -71,7 +79,8 @@ public:
 		str_copy(Activity.assets.large_image, "ddnet_logo", sizeof(Activity.assets.large_image));
 		str_copy(Activity.assets.large_text, "DDNet logo", sizeof(Activity.assets.large_text));
 		Activity.timestamps.start = time_timestamp();
-		str_copy(Activity.details, pMapName, sizeof(Activity.details));
+		str_copy(Activity.details, "Online", sizeof(Activity.details));
+		str_copy(Activity.state, pMapName, sizeof(Activity.state));
 		m_pActivityManager->update_activity(m_pActivityManager, &Activity, 0, 0);
 	}
 };

@@ -3,6 +3,7 @@
 #include "layer_quads.h"
 
 #include <game/editor/editor.h>
+#include <game/editor/editor_actions.h>
 
 #include "image.h"
 
@@ -140,6 +141,7 @@ int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 void CLayerQuads::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 {
 	std::shared_ptr<CLayerQuads> pQuadLayer = std::static_pointer_cast<CLayerQuads>(pBrush);
+	std::vector<CQuad> vAddedQuads;
 	for(const auto &Quad : pQuadLayer->m_vQuads)
 	{
 		CQuad n = Quad;
@@ -151,7 +153,9 @@ void CLayerQuads::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 		}
 
 		m_vQuads.push_back(n);
+		vAddedQuads.push_back(n);
 	}
+	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionQuadPlace>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], vAddedQuads));
 	m_pEditor->m_Map.OnModify();
 }
 
@@ -217,28 +221,25 @@ void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 	}
 }
 
-CUI::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
+CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 {
-	enum
-	{
-		PROP_IMAGE = 0,
-		NUM_PROPS,
-	};
-
 	CProperty aProps[] = {
 		{"Image", m_Image, PROPTYPE_IMAGE, -1, 0},
 		{nullptr},
 	};
 
-	static int s_aIds[NUM_PROPS] = {0};
+	static int s_aIds[(int)ELayerQuadsProp::NUM_PROPS] = {0};
 	int NewVal = 0;
-	int Prop = m_pEditor->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
-	if(Prop != -1)
+	auto [State, Prop] = m_pEditor->DoPropertiesWithState<ELayerQuadsProp>(pToolBox, aProps, s_aIds, &NewVal);
+	if(Prop != ELayerQuadsProp::PROP_NONE)
 	{
 		m_pEditor->m_Map.OnModify();
 	}
 
-	if(Prop == PROP_IMAGE)
+	static CLayerQuadsPropTracker s_Tracker(m_pEditor);
+	s_Tracker.Begin(this, Prop, State);
+
+	if(Prop == ELayerQuadsProp::PROP_IMAGE)
 	{
 		if(NewVal >= 0)
 			m_Image = NewVal % m_pEditor->m_Map.m_vpImages.size();
@@ -246,7 +247,9 @@ CUI::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 			m_Image = -1;
 	}
 
-	return CUI::POPUP_KEEP_OPEN;
+	s_Tracker.End(Prop, State);
+
+	return CUi::POPUP_KEEP_OPEN;
 }
 
 void CLayerQuads::ModifyImageIndex(FIndexModifyFunction Func)
@@ -279,4 +282,9 @@ int CLayerQuads::SwapQuads(int Index0, int Index1)
 	m_pEditor->m_Map.OnModify();
 	std::swap(m_vQuads[Index0], m_vQuads[Index1]);
 	return Index1;
+}
+
+const char *CLayerQuads::TypeName() const
+{
+	return "quads";
 }

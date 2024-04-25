@@ -195,4 +195,12 @@
 #define CONF_ARCH_STRING "unknown"
 #endif
 
+#if defined(CONF_ARCH_ENDIAN_LITTLE)
+#define CONF_ARCH_ENDIAN_STRING "little endian"
+#elif defined(CONF_ARCH_ENDIAN_BIG)
+#define CONF_ARCH_ENDIAN_STRING "big endian"
+#else
+#error "Unsupported endianness"
+#endif
+
 #endif

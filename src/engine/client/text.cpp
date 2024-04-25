@@ -391,8 +391,8 @@ private:
 	void UploadTextures()
 	{
 		const size_t NewTextureSize = m_TextureDimension * m_TextureDimension;
-		void *pTmpTextFillData = malloc(NewTextureSize);
-		void *pTmpTextOutlineData = malloc(NewTextureSize);
+		uint8_t *pTmpTextFillData = static_cast<uint8_t *>(malloc(NewTextureSize));
+		uint8_t *pTmpTextOutlineData = static_cast<uint8_t *>(malloc(NewTextureSize));
 		mem_copy(pTmpTextFillData, m_apTextureData[FONT_TEXTURE_FILL], NewTextureSize);
 		mem_copy(pTmpTextOutlineData, m_apTextureData[FONT_TEXTURE_OUTLINE], NewTextureSize);
 		Graphics()->LoadTextTextures(m_TextureDimension, m_TextureDimension, m_aTextures[FONT_TEXTURE_FILL], m_aTextures[FONT_TEXTURE_OUTLINE], pTmpTextFillData, pTmpTextOutlineData);
@@ -465,8 +465,8 @@ private:
 						if(GetX >= 0 && GetY >= 0 && GetX < w && GetY < h)
 						{
 							int Index = GetY * w + GetX;
-							if(pIn[Index] > c)
-								c = pIn[Index];
+							float Mask = 1.f - clamp(length(vec2(sx, sy)) - OutlineCount, 0.f, 1.f);
+							c = maximum(c, int(pIn[Index] * Mask));
 						}
 					}
 				}
@@ -729,11 +729,12 @@ public:
 		return vec2(0.0f, 0.0f);
 	}
 
-	void UploadEntityLayerText(void *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
+	void UploadEntityLayerText(const CImageInfo &TextImage, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if(FontSize < 1)
 			return;
 
+		const size_t PixelSize = TextImage.PixelSize();
 		const char *pCurrent = pText;
 		const char *pEnd = pCurrent + Length;
 		int WidthLastChars = 0;
@@ -770,24 +771,23 @@ public:
 				else
 					mem_zero(m_aaGlyphData[FONT_TEXTURE_FILL], GlyphDataSize);
 
-				uint8_t *pImageBuff = (uint8_t *)pTexBuff;
 				for(unsigned OffY = 0; OffY < pBitmap->rows; ++OffY)
 				{
 					for(unsigned OffX = 0; OffX < pBitmap->width; ++OffX)
 					{
 						const int ImgOffX = clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
 						const int ImgOffY = clamp(y + OffY, y, (y + TexSubHeight) - 1);
-						const size_t ImageOffset = ImgOffY * (TexWidth * PixelSize) + ImgOffX * PixelSize;
+						const size_t ImageOffset = ImgOffY * (TextImage.m_Width * PixelSize) + ImgOffX * PixelSize;
 						const size_t GlyphOffset = OffY * pBitmap->width + OffX;
 						for(size_t i = 0; i < PixelSize; ++i)
 						{
 							if(i != PixelSize - 1)
 							{
-								*(pImageBuff + ImageOffset + i) = 255;
+								*(TextImage.m_pData + ImageOffset + i) = 255;
 							}
 							else
 							{
-								*(pImageBuff + ImageOffset + i) = *(m_aaGlyphData[FONT_TEXTURE_FILL] + GlyphOffset);
+								*(TextImage.m_pData + ImageOffset + i) = *(m_aaGlyphData[FONT_TEXTURE_FILL] + GlyphOffset);
 							}
 						}
 					}
@@ -1269,6 +1269,9 @@ public:
 		pCursor->m_CharCount = 0;
 		pCursor->m_MaxLines = 0;
 
+		pCursor->m_LineSpacing = 0;
+		pCursor->m_AlignedLineSpacing = 0;
+
 		pCursor->m_StartX = x;
 		pCursor->m_StartY = y;
 		pCursor->m_LineWidth = -1.0f;
@@ -1291,6 +1294,8 @@ public:
 		pCursor->m_ForceCursorRendering = false;
 		pCursor->m_CursorCharacter = -1;
 		pCursor->m_CursorRenderedPosition = vec2(-1.0f, -1.0f);
+
+		pCursor->m_vColorSplits = {};
 	}
 
 	void MoveCursor(CTextCursor *pCursor, float x, float y) const override
@@ -1330,11 +1335,12 @@ public:
 		return Cursor.m_LongestLineWidth;
 	}
 
-	STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0) override
+	STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, float LineSpacing = 0.0f, int Flags = 0) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
+		Cursor.m_LineSpacing = LineSpacing;
 		TextEx(&Cursor, pText, StrLength);
 		return Cursor.BoundingBox();
 	}
@@ -1477,6 +1483,7 @@ public:
 		const float CursorY = round_to_int(pCursor->m_Y * FakeToScreen.y) / FakeToScreen.y;
 		const int ActualSize = round_truncate(pCursor->m_FontSize * FakeToScreen.y);
 		pCursor->m_AlignedFontSize = ActualSize / FakeToScreen.y;
+		pCursor->m_AlignedLineSpacing = round_truncate(pCursor->m_LineSpacing * FakeToScreen.y) / FakeToScreen.y;
 
 		// string length
 		if(Length < 0)
@@ -1525,6 +1532,7 @@ public:
 		const float CursorOuterInnerDiff = (CursorOuterWidth - CursorInnerWidth) / 2;
 
 		std::vector<IGraphics::CQuadItem> vSelectionQuads;
+		int SelectionQuadLine = -1;
 		bool SelectionStarted = false;
 		bool SelectionUsedPress = false;
 		bool SelectionUsedRelease = false;
@@ -1534,38 +1542,34 @@ public:
 		const auto &&CheckInsideChar = [&](bool CheckOuter, vec2 CursorPos, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
 			return (LastCharX - LastCharWidth / 2 <= CursorPos.x &&
 				       CharX + CharWidth / 2 > CursorPos.x &&
-				       CharY - pCursor->m_AlignedFontSize <= CursorPos.y &&
-				       CharY > CursorPos.y) ||
+				       CursorPos.y >= CharY - pCursor->m_AlignedFontSize &&
+				       CursorPos.y < CharY + pCursor->m_AlignedLineSpacing) ||
 			       (CheckOuter &&
-				       CharY - pCursor->m_AlignedFontSize > CursorPos.y);
+				       CursorPos.y <= CharY - pCursor->m_AlignedFontSize);
 		};
 		const auto &&CheckSelectionStart = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
-			if(!SelectionStarted && !SelectionUsedCase)
+			if(!SelectionStarted && !SelectionUsedCase &&
+				CheckInsideChar(CheckOuter, CursorPos, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
 			{
-				if(CheckInsideChar(CheckOuter, CursorPos, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
-				{
-					SelectionChar = pCursor->m_GlyphCount;
-					SelectionStarted = !SelectionStarted;
-					SelectionUsedCase = true;
-				}
+				SelectionChar = pCursor->m_GlyphCount;
+				SelectionStarted = !SelectionStarted;
+				SelectionUsedCase = true;
 			}
 		};
 		const auto &&CheckOutsideChar = [&](bool CheckOuter, vec2 CursorPos, float CharX, float CharWidth, float CharY) -> bool {
 			return (CharX + CharWidth / 2 > CursorPos.x &&
-				       CharY - pCursor->m_AlignedFontSize <= CursorPos.y &&
-				       CharY > CursorPos.y) ||
+				       CursorPos.y >= CharY - pCursor->m_AlignedFontSize &&
+				       CursorPos.y < CharY + pCursor->m_AlignedLineSpacing) ||
 			       (CheckOuter &&
-				       CharY <= CursorPos.y);
+				       CursorPos.y >= CharY + pCursor->m_AlignedLineSpacing);
 		};
 		const auto &&CheckSelectionEnd = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
-			if(SelectionStarted && !SelectionUsedCase)
+			if(SelectionStarted && !SelectionUsedCase &&
+				CheckOutsideChar(CheckOuter, CursorPos, CharX, CharWidth, CharY))
 			{
-				if(CheckOutsideChar(CheckOuter, CursorPos, CharX, CharWidth, CharY))
-				{
-					SelectionChar = pCursor->m_GlyphCount;
-					SelectionStarted = !SelectionStarted;
-					SelectionUsedCase = true;
-				}
+				SelectionChar = pCursor->m_GlyphCount;
+				SelectionStarted = !SelectionStarted;
+				SelectionUsedCase = true;
 			}
 		};
 
@@ -1580,7 +1584,7 @@ public:
 				return false;
 
 			DrawX = pCursor->m_StartX;
-			DrawY += pCursor->m_AlignedFontSize;
+			DrawY += pCursor->m_AlignedFontSize + pCursor->m_AlignedLineSpacing;
 			if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
 			{
 				DrawX = round_to_int(DrawX * FakeToScreen.x) / FakeToScreen.x; // realign
@@ -1610,6 +1614,8 @@ public:
 		const SGlyph *pLastGlyph = nullptr;
 		bool GotNewLine = false;
 		bool GotNewLineLast = false;
+
+		int ColorOption = 0;
 
 		while(pCurrent < pEnd && pCurrent != pEllipsis)
 		{
@@ -1662,6 +1668,7 @@ public:
 
 			while(pCurrent < pBatchEnd && pCurrent != pEllipsis)
 			{
+				const int PrevCharCount = pCursor->m_GlyphCount;
 				pCursor->m_CharCount += pTmp - pCurrent;
 				pCurrent = pTmp;
 				int Character = NextCharacter;
@@ -1742,8 +1749,27 @@ public:
 					const float CharX = (DrawX + CharKerning) + BearingX;
 					const float CharY = TmpY - BearingY;
 
+					// Check if we have any color split
+					ColorRGBA Color = m_Color;
+					if(ColorOption < (int)pCursor->m_vColorSplits.size())
+					{
+						STextColorSplit &Split = pCursor->m_vColorSplits.at(ColorOption);
+						if(PrevCharCount >= Split.m_CharIndex && (Split.m_Length == -1 || PrevCharCount < Split.m_CharIndex + Split.m_Length))
+							Color = Split.m_Color;
+						if(Split.m_Length != -1 && PrevCharCount >= (Split.m_CharIndex + Split.m_Length - 1))
+						{
+							ColorOption++;
+							if(ColorOption < (int)pCursor->m_vColorSplits.size())
+							{ // Handle splits that are
+								Split = pCursor->m_vColorSplits.at(ColorOption);
+								if(PrevCharCount >= Split.m_CharIndex)
+									Color = Split.m_Color;
+							}
+						}
+					}
+
 					// don't add text that isn't drawn, the color overwrite is used for that
-					if(m_Color.a != 0.f && IsRendered)
+					if(Color.a != 0.f && IsRendered)
 					{
 						TextContainer.m_StringInfo.m_vCharacterQuads.emplace_back();
 						STextCharQuad &TextCharQuad = TextContainer.m_StringInfo.m_vCharacterQuads.back();
@@ -1752,37 +1778,37 @@ public:
 						TextCharQuad.m_aVertices[0].m_Y = CharY;
 						TextCharQuad.m_aVertices[0].m_U = pGlyph->m_aUVs[0];
 						TextCharQuad.m_aVertices[0].m_V = pGlyph->m_aUVs[3];
-						TextCharQuad.m_aVertices[0].m_Color.r = (unsigned char)(m_Color.r * 255.f);
-						TextCharQuad.m_aVertices[0].m_Color.g = (unsigned char)(m_Color.g * 255.f);
-						TextCharQuad.m_aVertices[0].m_Color.b = (unsigned char)(m_Color.b * 255.f);
-						TextCharQuad.m_aVertices[0].m_Color.a = (unsigned char)(m_Color.a * 255.f);
+						TextCharQuad.m_aVertices[0].m_Color.r = (unsigned char)(Color.r * 255.f);
+						TextCharQuad.m_aVertices[0].m_Color.g = (unsigned char)(Color.g * 255.f);
+						TextCharQuad.m_aVertices[0].m_Color.b = (unsigned char)(Color.b * 255.f);
+						TextCharQuad.m_aVertices[0].m_Color.a = (unsigned char)(Color.a * 255.f);
 
 						TextCharQuad.m_aVertices[1].m_X = CharX + CharWidth;
 						TextCharQuad.m_aVertices[1].m_Y = CharY;
 						TextCharQuad.m_aVertices[1].m_U = pGlyph->m_aUVs[2];
 						TextCharQuad.m_aVertices[1].m_V = pGlyph->m_aUVs[3];
-						TextCharQuad.m_aVertices[1].m_Color.r = (unsigned char)(m_Color.r * 255.f);
-						TextCharQuad.m_aVertices[1].m_Color.g = (unsigned char)(m_Color.g * 255.f);
-						TextCharQuad.m_aVertices[1].m_Color.b = (unsigned char)(m_Color.b * 255.f);
-						TextCharQuad.m_aVertices[1].m_Color.a = (unsigned char)(m_Color.a * 255.f);
+						TextCharQuad.m_aVertices[1].m_Color.r = (unsigned char)(Color.r * 255.f);
+						TextCharQuad.m_aVertices[1].m_Color.g = (unsigned char)(Color.g * 255.f);
+						TextCharQuad.m_aVertices[1].m_Color.b = (unsigned char)(Color.b * 255.f);
+						TextCharQuad.m_aVertices[1].m_Color.a = (unsigned char)(Color.a * 255.f);
 
 						TextCharQuad.m_aVertices[2].m_X = CharX + CharWidth;
 						TextCharQuad.m_aVertices[2].m_Y = CharY - CharHeight;
 						TextCharQuad.m_aVertices[2].m_U = pGlyph->m_aUVs[2];
 						TextCharQuad.m_aVertices[2].m_V = pGlyph->m_aUVs[1];
-						TextCharQuad.m_aVertices[2].m_Color.r = (unsigned char)(m_Color.r * 255.f);
-						TextCharQuad.m_aVertices[2].m_Color.g = (unsigned char)(m_Color.g * 255.f);
-						TextCharQuad.m_aVertices[2].m_Color.b = (unsigned char)(m_Color.b * 255.f);
-						TextCharQuad.m_aVertices[2].m_Color.a = (unsigned char)(m_Color.a * 255.f);
+						TextCharQuad.m_aVertices[2].m_Color.r = (unsigned char)(Color.r * 255.f);
+						TextCharQuad.m_aVertices[2].m_Color.g = (unsigned char)(Color.g * 255.f);
+						TextCharQuad.m_aVertices[2].m_Color.b = (unsigned char)(Color.b * 255.f);
+						TextCharQuad.m_aVertices[2].m_Color.a = (unsigned char)(Color.a * 255.f);
 
 						TextCharQuad.m_aVertices[3].m_X = CharX;
 						TextCharQuad.m_aVertices[3].m_Y = CharY - CharHeight;
 						TextCharQuad.m_aVertices[3].m_U = pGlyph->m_aUVs[0];
 						TextCharQuad.m_aVertices[3].m_V = pGlyph->m_aUVs[1];
-						TextCharQuad.m_aVertices[3].m_Color.r = (unsigned char)(m_Color.r * 255.f);
-						TextCharQuad.m_aVertices[3].m_Color.g = (unsigned char)(m_Color.g * 255.f);
-						TextCharQuad.m_aVertices[3].m_Color.b = (unsigned char)(m_Color.b * 255.f);
-						TextCharQuad.m_aVertices[3].m_Color.a = (unsigned char)(m_Color.a * 255.f);
+						TextCharQuad.m_aVertices[3].m_Color.r = (unsigned char)(Color.r * 255.f);
+						TextCharQuad.m_aVertices[3].m_Color.g = (unsigned char)(Color.g * 255.f);
+						TextCharQuad.m_aVertices[3].m_Color.b = (unsigned char)(Color.b * 255.f);
+						TextCharQuad.m_aVertices[3].m_Color.a = (unsigned char)(Color.a * 255.f);
 					}
 
 					// calculate the full width from the last selection point to the end of this selection draw on screen
@@ -1849,7 +1875,18 @@ public:
 
 					if(SelectionStarted && IsRendered)
 					{
-						vSelectionQuads.emplace_back(SelX, DrawY + (1.0f - pCursor->m_SelectionHeightFactor) * pCursor->m_AlignedFontSize, SelWidth, pCursor->m_SelectionHeightFactor * pCursor->m_AlignedFontSize);
+						if(!vSelectionQuads.empty() && SelectionQuadLine == LineCount)
+						{
+							vSelectionQuads.back().m_Width += SelWidth;
+						}
+						else
+						{
+							const float SelectionHeight = pCursor->m_AlignedFontSize + pCursor->m_AlignedLineSpacing;
+							const float SelectionY = DrawY + (1.0f - pCursor->m_SelectionHeightFactor) * SelectionHeight;
+							const float ScaledSelectionHeight = pCursor->m_SelectionHeightFactor * SelectionHeight;
+							vSelectionQuads.emplace_back(SelX, SelectionY, SelWidth, ScaledSelectionHeight);
+							SelectionQuadLine = LineCount;
+						}
 					}
 
 					LastSelX = SelX;
@@ -1938,9 +1975,9 @@ public:
 			if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1)
 				TextContainer.m_StringInfo.m_SelectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 			if(HasCursor)
-				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, aCursorQuads, 2);
+				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, aCursorQuads, std::size(aCursorQuads));
 			if(HasSelection)
-				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, vSelectionQuads.data(), (int)vSelectionQuads.size());
+				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, vSelectionQuads.data(), vSelectionQuads.size());
 			Graphics()->QuadContainerUpload(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
 
 			TextContainer.m_HasCursor = HasCursor;
@@ -2144,9 +2181,9 @@ public:
 		return TextContainer.m_BoundingBox;
 	}
 
-	void UploadEntityLayerText(void *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
+	void UploadEntityLayerText(const CImageInfo &TextImage, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
 	{
-		m_pGlyphMap->UploadEntityLayerText(pTexBuff, PixelSize, TexWidth, TexHeight, TexSubWidth, TexSubHeight, pText, Length, x, y, FontSize);
+		m_pGlyphMap->UploadEntityLayerText(TextImage, TexSubWidth, TexSubHeight, pText, Length, x, y, FontSize);
 	}
 
 	int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) const override

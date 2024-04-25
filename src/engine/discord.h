@@ -2,10 +2,11 @@
 #define ENGINE_DISCORD_H
 
 #include "kernel.h"
+#include <base/types.h>
 
 class IDiscord : public IInterface
 {
-	MACRO_INTERFACE("discord", 0)
+	MACRO_INTERFACE("discord")
 public:
 	virtual void Update() = 0;
 

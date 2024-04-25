@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+#include <base/system.h>
+
 #include <engine/client/serverbrowser_ping_cache.h>
 #include <engine/console.h>
 #include <engine/engine.h>

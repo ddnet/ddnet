@@ -1,0 +1,1848 @@
+##### authors #####
+#originally created by:
+#	Cammodude
+#modified by:
+#   Cammodude 2024-09-03 22:19:06
+#   Cammodude 2024-10-03 18:04:16
+#   Cammodude 2024-12-04 17:35:38
+#   Cammodude 2024-20-04 15:17:26
+##### /authors #####
+
+##### translated strings #####
+
+%ds left
+== %ds jäänud
+
+%i minute left
+== %i minut jäänud
+
+%i minutes left
+== %i minutit jäänud
+
+%i second left
+== %i sekund jäänud
+
+%i seconds left
+== %i sekundit jäänud
+
+%s wins!
+== %s võitis!
+
+Abort
+== Katkesta
+
+Add
+== Lisa
+
+Add Friend
+== Lisa sõber
+
+Address
+== Aadress
+
+All
+== Kõik
+
+Are you sure that you want to quit?
+== Kas olete kindel, et tahate lahkuda?
+
+Automatically record demos
+== Automaatselt lindista demosid
+
+Automatically take game over screenshot
+== Automaatselt tee mängu lõpu ekraanipilt.
+
+Blue team
+== Sinine tiim
+
+Blue team wins!
+== Sinine tiim võitis!
+
+Body
+== Keha
+
+Call vote
+== Alusta hääletus
+
+Change settings
+== Muuda sätteid
+
+Chat
+== Vestlus
+
+Clan
+== Klann
+
+Client
+== Klient
+
+Connecting to
+== Ühenduse loomine
+
+Connection Problems...
+== Ühenduse Probleemid...
+
+Console
+== Konsool
+
+Controls
+== Kontrollid
+
+Count players only
+== Loe ainult mängijaid
+
+Current
+== Praegune
+
+Custom colors
+== Oma värvid
+
+Delete
+== Kustuta
+
+Delete demo
+== Kustuta demo
+
+Demofile: %s
+== Demo fail: %s
+
+Demos
+== Demod
+
+Disconnect
+== Katkesta ühendus
+
+Disconnected
+== Ühendus katkestatud
+
+Downloading map
+== Kaardi laadimine
+
+Draw!
+== Joonista!
+
+Dynamic Camera
+== Dünaamiline Kaamera
+
+Emoticon
+== Emotikon
+
+Error
+== Rike
+
+Error loading demo
+== Rike demo laadimisega
+
+Favorite
+== Lemmik
+
+Favorites
+== Lemmikud
+
+Feet
+== Jalad
+
+Fire
+== Tuli
+
+Folder
+== Kaust
+
+Force vote
+== Sunni hääletus
+
+Free-View
+== Vaba vaade
+
+Fullscreen
+== Täisekraan
+
+Game
+== Mäng
+
+Game info
+== Mängu info
+
+Game over
+== Mäng läbi
+
+Game type
+== Mängu tüüp
+
+Game types:
+== Mängu tüübid:
+
+General
+== Üldine
+
+Graphics
+== Graafika
+
+Grenade
+== Granaat
+
+Hammer
+== Haamer
+
+Has people playing
+== Inimesed mängivad
+
+High Detail
+== Kõrge kvaliteet
+
+Hook
+== Konks
+
+Invalid Demo
+== Kehtetu Demo
+
+Join blue
+== Liitu sinisega
+
+Join red
+== Liitu punasega
+
+Jump
+== Hüppa
+
+Kick player
+== Löö mängija välja
+
+Language
+== Keel
+
+MOTD
+== Serveri sõnum
+
+Map
+== Kaart
+
+Move left
+== Liigu vasakule
+
+Move player to spectators
+== Liiguta mängija pealtvaatajate hulka
+
+Move right
+== Liigu paremale
+
+Movement
+== Liikumine
+
+Mute when not active
+== Vaigista, kui ei ole aktiivne
+
+Name
+== Nimi
+
+Next weapon
+== Järgmine relv
+
+Nickname
+== Hüüdnimi
+
+No
+== Ei
+
+No password
+== Salasõnata
+
+No servers found
+== Serverit ei leitud
+
+No servers match your filter criteria
+== Ükski server ei vasta teie filtrikriteeriumidele
+
+Ok
+== Ok
+
+Parent Folder
+== Ülemkaust
+
+Password
+== Salasõna
+
+Password incorrect
+== Vale salasõna
+
+Ping
+== Ping
+
+Pistol
+== Püstol
+
+Play background music
+== Mängi taustamuusikat
+
+Player
+== Mängija
+
+Player country:
+== Mängija maa:
+
+Player options
+== Mängija sätted
+
+Players
+== Mängijad
+
+Please balance teams!
+== Palun tasakaalusta tiime!
+
+Prev. weapon
+== Eelmine relv
+
+Quit
+== Lõpeta
+
+Reason:
+== Põhjus:
+
+Red team
+== Punane tiim
+
+Red team wins!
+== Punane tiim võitis!
+
+Remote console
+== Kaugkonsool
+
+Remove
+== Eemalda
+
+Remove friend
+== Eemalda sõber
+
+Rename demo
+== Nimeta demo ümber
+
+Reset filter
+== Lähtesta filter
+
+Score
+== Punktid
+
+Score limit
+== Punktilimiit
+
+Scoreboard
+== Punktitabel
+
+Screenshot
+== Ekraanipilt
+
+Server address:
+== Serveri aadress:
+
+Server info
+== Serveri info
+
+Server not full
+== Server pole täis
+
+Shotgun
+== Pumppüss
+
+Show chat
+== Näita vestlust
+
+Show friends only
+== Näita ainult sõpru
+
+Show ingame HUD
+== Näita mängusisest HUD-di
+
+Show name plates
+== Näita nimesilte
+
+Sound
+== Heli
+
+Sound error
+== Helirike
+
+Spectate
+== Vaata pealt
+
+Spectate next
+== Jälgi järgmist
+
+Spectate previous
+== Jälgi eelmist
+
+Spectator mode
+== Pealtvaataja režiim
+
+Spectators
+== Pealtvaatajad
+
+Stop record
+== Lõpeta lindistamine
+
+Strict gametype filter
+== Range mängutüübi filter
+
+Sudden Death
+== Äkksurm
+
+Switch weapon on pickup
+== Vaheta relva selle ülesvõtmisel
+
+Team
+== Tiim
+
+Team chat
+== Tiimi vestlus
+
+The audio device couldn't be initialised.
+== Audio süsteemi ei saanud lähtestada.
+
+The server is running a non-standard tuning on a pure game type.
+== Server jookseb mittestandardsel häälestusel puhtal mängutüübil.
+
+Time limit
+== Ajapiirang
+
+Time limit: %d min
+== Ajapiirang: %d min
+
+Try again
+== Proovi uuesti
+
+Type
+== Tüüp
+
+Unable to rename the demo
+== Demot ei saa ümber nimetada
+
+Use sounds
+== Kasuta heli
+
+Use team colors for name plates
+== Kasuta tiimi värve nimesiltide jaoks
+
+V-Sync
+== V-Sync
+
+Version
+== Versioon
+
+Vote command:
+== Hääletuskäsk:
+
+Vote description:
+== Hääletuse kirjeldus:
+
+Vote no
+== Hääleta ei
+
+Vote yes
+== Hääleta jah
+
+Voting
+== Hääletus
+
+Warmup
+== Soojendus
+
+Weapon
+== Relv
+
+Yes
+== Jah
+
+You must restart the game for all settings to take effect.
+== Te peate mängu taaskäivitama, et kõik seaded jõustuks.
+
+New name:
+== Uus nimi:
+
+Sat.
+== Küllastus
+
+Miscellaneous
+== Muu
+
+Internet
+== Internet
+
+Max demos
+== Demode maksimaalne arv
+
+News
+== Uudised
+
+Join game
+== Liitu mänguga
+
+FSAA samples
+== FSAA samples
+
+Sound volume
+== Helitugevus
+
+Max Screenshots
+== Ekraanipiltide maksimaalne arv
+
+Laser
+== Laser
+
+Hue
+== Värvitoon
+
+Record demo
+== Lindista demo
+
+Your skin
+== Teie välimus
+
+Reset to defaults
+== Lähtesta vaikeseadetele
+
+Round
+== Raund
+
+Lht.
+== Heledus
+
+UI Color
+== UI Värv
+
+Alpha
+== Alfa
+
+LAN
+== LAN
+
+Name plates size
+== Nimesiltide suurus
+
+Successfully saved the replay!
+== Kordus on edukalt salvestatud!
+
+Replay feature is disabled!
+== Korduse funktsioon on keelatud!
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== Tekstuuri %s laius ei jagu %d-ga või kõrgus ei jagu %d-ga, mis võib põhjustada visuaalseid vigu.
+
+Warning
+== Hoiatus
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Silumisrežiim on käivitatud. Vajutage klahvikombinatsiooni Ctrl+Shift+D et silumisrežiimist lahkuda.
+
+Game paused
+== Mäng peatatud
+
+Server best:
+== Serveri parim:
+
+Personal best:
+== Isiklik parim:
+
+Reset
+== Lähtesta
+
+Browser
+== Brauser
+
+Ghost
+== Kummitus
+
+Loading DDNet Client
+== DDNet Kliendi laadimine
+
+Reconnect in %d sec
+== Taasühendamine %d sekundi pärast
+
+Render demo
+== Renderda demo
+
+Replace video
+== Asenda video
+
+File already exists, do you want to overwrite it?
+== Fail on juba olemas, kas te tahate selle üle kirjutada?
+
+Are you sure that you want to disconnect?
+== Kas olete kindel, et tahate ühenduse katkestada?
+
+Disconnect Dummy
+== Katkesta Dummy Ühendus
+
+Are you sure that you want to disconnect your dummy?
+== Kas olete kindel, et tahate oma dummy ühenduse katkestada?
+
+Welcome to DDNet
+== Tere tulemast DDNet-i
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== DDraceNetwork on koostööpõhine interneti mäng, mille eesmärk on, et teie ja teie grupp teesid jõuaksid kaardi finišisse. Uue mängijana peaksite alustama Novice serveritest, kus on kõige lihtsamad kaardid. Leia pingi abil sinule lähim server.
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== Kasutage klahvi k tapmiseks (uuesti proovimiseks), q teiste mängijate pealtvaatamiseks. Vaadake sätteid muude klahvide jaoks.
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Soovitatav on enne serveriga ühendamist sätteid üle vaadata, et neid oma maitse järgi kohandada.
+
+Please enter your nickname below.
+== Palun sisestage oma hüüdnimi all.
+
+Existing Player
+== Olemasolev Mängija
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Teie hüüdnimi '%s' on juba kasutuses (%d punkti). Kas te ikka soovite seda kasutada?
+
+Checking for existing player with your name
+== Samasuguse nimega mängija kontrollimine
+
+Speed
+== Kiirus
+
+Video name:
+== Video nimi:
+
+Show DDNet map finishes in server browser
+== Näita DDNet kaardi lõpetusi serveri brauseris
+
+transmits your player name to info.ddnet.org
+== edastab teie mängija nime veebilehele info.ddnet.org
+
+Theme
+== Teema
+
+AFR
+== AFR
+
+ASI
+== ASI
+
+AUS
+== AUS
+
+EUR
+== EUR
+
+NA
+== NA
+
+SA
+== SA
+
+CHN
+== CHN
+
+Getting server list from master server
+== Serveriloendi hankimine peaserverist
+
+Search
+== Otsi
+
+Exclude
+== Välista
+
+%d of %d servers
+== %d serverit %d -st 
+
+%d of %d server
+== %d server %d -st
+
+%d players
+== %d mängijat
+
+%d player
+== %d mängija
+
+Filter connecting players
+== Filtreri ühendavaid mängijaid
+
+Indicate map finish
+== Näita kaardi lõpetusi
+
+Unfinished map
+== Lõpetamata kaart
+
+Countries
+== Riigid
+
+Types
+== Tüübid
+
+Leak IP
+== Lekki IP
+
+Remove chat
+== Eemalda vestlus
+
+%.2f MiB
+== %.2f MiB
+
+%.2f KiB
+== %.2f KiB
+
+Demo
+== Demo
+
+Markers
+== Markerid
+
+Length
+== Pikkus
+
+Date
+== Kuupäev
+
+Fetch Info
+== Hangi Info
+
+Demos directory
+== Demode asukoht
+
+Connecting dummy
+== Ühendan dummyga
+
+Connect Dummy
+== Ühenda Dummy
+
+Kill
+== Tapa
+
+Pause
+== Paus
+
+Reload
+== Lae uuesti
+
+Deactivate
+== Deaktiveeri
+
+Activate
+== Aktiveeri
+
+Save
+== Salvesta
+
+Smooth Dynamic Camera
+== Sujuv Dünaamiline Kaamera
+
+Switch weapon when out of ammo
+== Vaheta relva kui laskemoon on otsas
+
+Show only chat messages from friends
+== Ainult näita sõnumeid sõpradelt
+
+Show clan above name plates
+== Näita klanni nimesildi peal
+
+Clan plates size
+== Klanni nimesildi suurus
+
+Skip the main menu
+== Jäta peamenüü vahele
+
+Refresh Rate
+== Värskenduse Määr
+
+Themes directory
+== Teemade asukoht
+
+Download skins
+== Laadi alla nahad
+
+Vanilla skins only
+== Ainult vaikenahad
+
+Skin prefix
+== Naha eesliide
+
+Skin Database
+== Naha andmebaas
+
+Skins directory
+== Nahkade asukoht
+
+Hook collisions
+== Konksu kokkupõrked
+
+Zoom in
+== Suumi sisse
+
+Zoom out
+== Suumi välja
+
+Default zoom
+== Vaikimisi suum
+
+Show others
+== Näita teisi
+
+Show all
+== Näita kõiki
+
+Toggle dyncam
+== Lülita dünaamilist kaamerat
+
+Toggle dummy
+== Lülita dummy
+
+Toggle ghost
+== Lülita kummitus
+
+Lock team
+== Lukusta tiim
+
+Show HUD
+== Näita HUDi
+
+Chat command
+== Vestluse käsk
+
+Dummy
+== Dummy
+
+Windowed
+== Aknas
+
+Windowed borderless
+== Aknas raamita
+
+Desktop fullscreen
+== Töölaua täisekraan
+
+may cause delay
+== võib tekitada viivitust
+
+Screen
+== Ekraan
+
+Use high DPI
+== Kasuta kõrget DPId
+
+Enable game sounds
+== Kasuta mängu helisid
+
+Enable gun sound
+== Kasuta püssi heli
+
+Enable server message sound
+== Kasuta serveri sõnumi heli
+
+Enable regular chat sound
+== Kasuta tavalise sõnumi heli
+
+Enable team chat sound
+== Kasuta tiimi sõnumi heli
+
+Enable highlighted chat sound
+== Kasuta esile tõstetud sõnumi heli
+
+Game sound volume
+== Mängu helitugevus
+
+Chat sound volume
+== Vestluse helitugevus
+
+Map sound volume
+== Kaardi helitugevus
+
+Background music volume
+== Tausta muusika helitugevus
+
+HUD
+== HUD
+
+DDNet
+== DDNet
+
+DDNet Client needs to be restarted to complete update!
+== DDNet Klient peab taaskäivitama, et uuendus lõpetada!
+
+Use DDRace Scoreboard
+== Kasuta DDRace punktitabelit
+
+Show score
+== Näita punkte
+
+Show names in chat in team colors
+== Näita vestluses olevaid nimesid tiimi värvidega
+
+Show kill messages
+== Näita tapasõnumeid
+
+Show votes window after voting
+== Näita hääletuse akent pärast hääletamist
+
+Use old chat style
+== Kasuta vana vestluse stiili
+
+Messages
+== Sõnumid
+
+System message
+== Süsteemi sõnum
+
+Highlighted message
+== Esiletõstetud sõnum
+
+Team message
+== Tiimi sõnum
+
+Friend message
+== Sõbra sõnum
+
+Normal message
+== Tavaline sõnum
+
+Client message
+== Kliendi sõnum
+
+Preview
+== Eelvaade
+
+Save the best demo of each race
+== Salvesta iga võistluse parim demo
+
+Default length
+== Vaikepikkus
+
+Enable replays
+== Kasuta kordusi
+
+Show ghost
+== Näita kummitust
+
+Save ghost
+== Salvesta kummitus
+
+Gameplay
+== Mäng
+
+Size
+== Suurus
+
+Show others (own team only)
+== Näita teisi (ainult omas tiimis)
+
+AntiPing
+== AntiPing
+
+AntiPing: predict other players
+== AntiPing: ennusta teisi mängijaid
+
+AntiPing: predict weapons
+== AntiPing: ennusta relvi
+
+AntiPing: predict grenade paths
+== AntiPing: ennusta granaadi teekonda
+
+Show other players' hook collision lines
+== Näita teiste mängijate konksu kokkupõrke jooni
+
+Show other players' key presses
+== Näita teiste mängijate klahvivajutusi
+
+Background
+== Tagataust
+
+Use current map as background
+== Kasuta praegust kaarti tagataustana
+
+DDNet %s is available:
+== DDNet %s on saadaval:
+
+Update now
+== Uuenda nüüd
+
+Updating...
+== Uuendamine...
+
+DDNet Client updated!
+== DDNet Klient on uuendatud!
+
+No updates available
+== Ühtegi uuendust pole saadaval
+
+Check now
+== Kontrolli nüüd
+
+Emoticons
+== Emotikonid
+
+Discord
+== Discord
+
+https://ddnet.org/discord
+== https://ddnet.org/discord
+
+Learn
+== Õppige
+
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
+
+Website
+== Veebileht
+
+Settings
+== Sätted
+
+Stop server
+== Peata server
+
+Run server
+== Käivita server
+
+Editor
+== Kaardiredaktor
+
+[Start menu]
+Play
+== Mängi
+
+DDNet %s is out!
+== DDNet %s on väljas!
+
+Downloading %s:
+== Allalaadimine %s:
+
+Update failed! Check log...
+== Uuendus ebaõnnestus! Vaata logi...
+
+Restart
+== Taaskäivita
+
+Time
+== Aeg
+
+Manual
+== Manuaal
+
+Race
+== Võistlus
+
+Replay
+== Kordus
+
+Follow
+== Järgne
+
+Frags
+== Killustused
+
+Deaths
+== Surma
+
+Suicides
+== Enesetappu
+
+Ratio
+== Suhe
+
+FPM
+== FPM
+
+Best
+== Parim
+
+1 new mention
+== 1 uus mainimine
+
+%d new mentions
+== %d uut mainimist
+
+9+ new mentions
+== 9+ uut mainimist
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Ebaõnnestumine initsialiseerimise ajal. Üritage gfx_backend muuta OpenGL-iks või Vulkan-iks settings_ddnet.cfg failis konfig. asukohas ja proovige uuesti.
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== VRAM on otsas. Üritage eemaldada oma varad (nahad, üksused, jne.), eriti need, millel on kõrge resolutsioon.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== Error esines käsusalvestamise ajal. Üritage uuendada oma GPU draivereid.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Renderdamiskäsk ebaõnnestus. Üritage uuendada oma GPU draivereid.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== Renderdamiskäskude esitamine ebaõnnestus. Üritage uuendada oma GPU draivereid.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== Kaadripuhvrite vahetus ebaõnnestus. Üritage uuendada oma GPU draivereid.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Tundmatu error. Üritage gfx_backend muuta OpenGL-iks või Vulkan-iks settings_ddnet.cfg failis konfig. asukohas ja proovige uuesti.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== Ei suutnud initsialiseerida antud graafika tagaprogrammi, vaiketagaprogrammile naasmine
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== Ei suutnud initsialiseerida antud graafika tagaprogrammi, see on ilmselt sellepärast, et teie ei installinud oma integreeritud graafika kaardi draivereid.
+
+Could not save downloaded map. Try manually deleting this file: %s
+== Ei suutnud salvestada allalaaditud kaarti. Proovi käsitsi kustutada seda faili: %s
+
+Error playing demo
+== Rike demo mängimisel
+
+Failed saving the replay!
+== Ei suutnud salvestada kordust!
+
+Saving settings to '%s' failed
+== Sätete salvestamine '%s'-i ebaõnnestus
+
+Error saving settings
+== Rike sätete salvestamisel
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== Tekstuuri %s vorming ei ole RGBA, mis põhjustab visuaalseid vigu.
+
+Preparing demo playback
+== Demo taasesituse ettevalmistamine
+
+Connected
+== Ühendatud
+
+Loading map file from storage
+== Kaardifaili laadimine mälust
+
+Why are you slowmo replaying to read this?
+== Miks sa kasutad aeglustust, et seda lugeda?
+
+Initializing components
+== Komponentide initsialiseerimine
+
+Initializing assets
+== Varade initsialiseerimine
+
+Initializing map logic
+== Kaardi loogika initsialiseerimine
+
+Sending initial client info
+== Esialgse kliendiinfo saatmine
+
+Quitting. Please wait…
+== Lõpetamine. Palun oota…
+
+Restarting. Please wait…
+== Taaskäivitamine. Palun oota…
+
+Loading skin files
+== Naha failide laadimine
+
+Searching
+== Otsimine
+
+Enter Username
+== Sisesta Hüüdnimi
+
+Enter Password
+== Sisesta Parool
+
+NOT CONNECTED
+== MITTE ÜHENDATUD
+
+Match %d of %d
+== Vaste %d %d -st
+
+No results
+== Tulemusi pole
+
+Lines %d - %d (%s)
+== Read %d - %d (%s)
+
+Locked
+== Lukus
+
+Following
+== Järgneb
+
+Loading commands…
+== Käskude laadimine…
+
+Position:
+== Asukoht:
+
+Speed:
+== Kiirus:
+
+Angle:
+== Nurk:
+
+Multi-View
+== Mitmikvaade
+
+Team %d
+== Tiim %d
+
+Some map images could not be loaded. Check the local console for details.
+== Mõnda kaardi pilti ei suudetud laadida. Vaadake kohalikku konsooli lisateabe saamiseks.
+
+Uploading map data to GPU
+== Kaardi info üleslaadimine GPU-le
+
+Some map sounds could not be loaded. Check the local console for details.
+== Mõnda kaardi heli ei suudetud laadida. Vaadake kohalikku konsooli lisateabe saamiseks.
+
+Loading menu themes
+== Menüü teemade laadimine
+
+Press a key…
+== Vajuta nuppu…
+
+Main menu
+== Peamenüü
+
+Trying to determine UDP connectivity...
+== UDP-ühenduvuse määramine
+
+UDP seems to be filtered.
+== UDP näib olevat filtreeritud.
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== UDP ja TCP IP-aadressid näivad olevat erinevad. Proovige lülitada välja VPN, puhverserver või võrgukiirendi.
+
+No answer from server yet.
+== Serverilt pole veel vastust.
+
+Getting game info
+== Mängu info saamine
+
+Requesting to join the game
+== Taotlus mänguga liitmise jaoks
+
+Rename folder
+== Nimeta kaust ümber
+
+Render complete
+== Renderdamine on valmis
+
+Are you sure that you want to restart?
+== Kas te olete kindel, et tahate taaskäivitada?
+
+There's an unsaved map in the editor, you might want to save it.
+== Kaardiredaktoris on salvestamata kaart, te võibolla tahate seda salvestada.
+
+Continue anyway?
+== Jätka igatahes?
+
+A demo with this name already exists
+== Demo sellise nimega on juba olemas
+
+A folder with this name already exists
+== Kaust sellise nimega on juba olemas 
+
+Unable to rename the folder
+== Ei saa kausta ümber nimetada
+
+File '%s' already exists, do you want to overwrite it?
+== Fail '%s' on juba olemas, kas te soovite selle üle kirjutada?
+
+(paused)
+== (peatatud)
+
+Videos directory
+== Videode asukoht
+
+Video was saved to '%s'
+== Video on salvestatud kohta '%s'
+
+Join Tutorial Server
+== Liitu Õpetuse Serveriga
+
+Skip Tutorial
+== Jäta Õpetus Vahele
+
+Loading menu images
+== Menüü piltide laadimine
+
+Are you sure that you want to disconnect and switch to a different server?
+== Kas te olete kindel, et soovite katkestada ühenduse ja liituda teise serveriga?
+
+Communities
+== Kogukonnad
+
+Copy info
+== Kopeeri info
+
+No server selected
+== Serverit pole valitud
+
+Online players (%d)
+== Võrgus olevaid mängijaid (%d)
+
+Online clanmates (%d)
+== Võrgus olevaid klannikaaslasi (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Võrguühenduseta (%d)
+
+Click to select server. Double click to join your friend.
+== Klõpsake, et valida server. Topelt klõps et liituda sõbraga.
+
+Click to remove this player from your friends list.
+== Klõpsake, et eemaldada see mängija oma sõbranimekirjast.
+
+Click to remove this clan from your friends list.
+== Klõpsake, et eemaldada see klann oma sõbranimekirjast.
+
+None
+== Mitte ühtegi
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== Kas olete kindel, et soovite eemaldada mängija '%s' oma sõbranimekirjast?
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== Kas olete kindel, et soovite eemaldada klanni '%s' oma sõbranimekirjast?
+
+Add Clan
+== Lisa Klann
+
+Server filter
+== Serveri filter
+
+Friends
+== Sõbrad
+
+Play the current demo
+== Mängi praegust demo
+
+Pause the current demo
+== Peata praegune demo
+
+Stop the current demo
+== Katkesta praegune demo
+
+Go back the specified duration
+== Mine tagasi määratud kestus
+
+[Demo player duration]
+%d min.
+== %d min.
+
+[Demo player duration]
+%d sec.
+== %d sek.
+
+Change the skip duration
+== Muuda vahelejätmise kestust
+
+Go forward the specified duration
+== Mine edasi määratud kestus
+
+Go back one tick
+== Mine tagasi üks tiks
+
+Go forward one tick
+== Mine edasi üks tiks
+
+Go back one marker
+== Mine tagasi üks marker
+
+Go forward one marker
+== Mine edasi üks marker
+
+Slow down the demo
+== Aeglusta demo
+
+Speed up the demo
+== Kiirenda demo
+
+Mark the beginning of a cut (right click to reset)
+== Märgi lõike algus (parem klick lähtestamiseks)
+
+Mark the end of a cut (right click to reset)
+== Märgi lõike lõpp (parem klick lähtestamiseks)
+
+Export cut as a separate demo
+== Ekspordi lõik eraldi demona
+
+Close the demo player
+== Sulge demo mängija
+
+Toggle keyboard shortcuts
+== Lülita klaviatuuri otseteed
+
+Export demo cut
+== Ekspordi demo lõik
+
+Cut interval
+== Lõigu ajavahemik
+
+Cut length
+== Lõigu pikkus
+
+Render cut to video
+== Renderda lõik videoks
+
+Please use a different filename
+== Palun kasutage teistsugust faili nime
+
+Loading demo files
+== Demo failide laadimine
+
+All combined
+== Kõik koos
+
+No demo selected
+== Demo pole valitud
+
+Folder Link
+== Kausta Side
+
+Created
+== Loodud
+
+Netversion
+== Netversioon
+
+[Demo details]
+map not included
+== kaart pole kaasas
+
+Open the directory that contains the demo files
+== Ava demo failide asukoht
+
+Are you sure that you want to delete the folder '%s'?
+== Kas olete kindel, et soovite kustutada kausta '%s'?
+
+Are you sure that you want to delete the demo '%s'?
+== Kas olete kindel, et soovite kustutada demo '%s'?
+
+Delete folder
+== Kustuta kaust
+
+Unable to delete the demo '%s'
+== Ei saa kustutada demo '%s'
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== Ei saa kustutada kausta '%s'. Tehke kindlaks et see on tühi.
+
+Loading…
+== Laadimine…
+
+Loading ghost files
+== Kummitus failide laadimine
+
+Ghosts directory
+== Kummituse asukoht
+
+Activate all
+== Aktiveeri kõik
+
+Deactivate all
+== Deaktiveeri kõik
+
+Menu opened. Press Esc key again to close menu.
+== Menüü avatud. Vajutage Esc klahvi, et see sulgeda.
+
+Save power by lowering refresh rate (higher input latency)
+== Säästke voolu värskendamise määru vähendamisel (suurem sisendi latentsus)
+
+Settings file
+== Sättete fail
+
+Open the settings file
+== Avage sättete fail
+
+Config directory
+== Konfig. asukoht
+
+Open the directory that contains the configuration and user files
+== Avage konfiguratsiooni ja kasutaja failide asukoht
+
+Open the directory to add custom themes
+== Avage oma teemade asukoht
+
+Automatically take statboard screenshot
+== Automaatselt tee stat. tabeli ekraanipilt
+
+Automatically create statboard csv
+== Automaatselt loo stat. tabeli csv
+
+Max CSVs
+== CSV-de maksimaalne arv
+
+Download community skins
+== Laadige alla kogukonna nahad
+
+Fat skins (DDFat)
+== Paksud nahad (DDFat)
+
+Create a random skin
+== Loo suvaline nahk
+
+Choose default eyes when joining a server
+== Vali vaikesilmad serveriga ühinedes
+
+Open the directory to add custom skins
+== Avage oma nahkade asukoht
+
+Converse
+== Suhtle
+
+Dummy copy
+== Dummy kopeerimine
+
+Hammerfly dummy
+== Dummy haamrilend
+
+Statboard
+== Stat. tabel
+
+Show entities
+== Näita üksuseid
+
+Enable controller
+== Käivita kontroller
+
+Controller
+== Kontroller
+
+Ingame controller mode
+== Mängusisene kontrolleri režiim
+
+[Ingame controller mode]
+Relative
+== Relatiivne
+
+[Ingame controller mode]
+Absolute
+== Absoluutne
+
+Ingame controller sens.
+== Mängusisese kontrolleri sensitiivsus
+
+UI controller sens.
+== UI kontrolleri sensitiivsus
+
+Controller jitter tolerance
+== Kontrolleri värinataluvus
+
+No controller found. Plug in a controller.
+== Kontrollerit ei leitud. Sisestage kontroller.
+
+Axis
+== Telg
+
+Status
+== Staatus
+
+Aim bind
+== Sihtimisside
+
+Mouse
+== Hiir
+
+Ingame mouse sens.
+== Mängusisene hiire sensitiivsus
+
+UI mouse sens.
+== UI hiire sensitiivsus
+
+Reset controls
+== Lähtesta juhtnupud
+
+Are you sure that you want to reset the controls to their defaults?
+== Kas olete kindel, et soovite lähtestada juhtnupud nende vaikeseadetele?
+
+Cancel
+== Tühista
+
+Windowed fullscreen
+== Aknas täisekraanis
+
+Allows maps to render with more detail
+== Lubab kaartidel renderdada rohkem üksikasjadega
+
+Renderer
+== Renderdaja
+
+default
+== vaikimisi
+
+custom
+== oma
+
+Graphics card
+== Graafika kaart
+
+auto
+== automaatne
+
+Enable long pain sound (used when shooting in freeze)
+== Kasuta pikka valuheli (kasutatakse tulistamisel külmutatuna)
+
+Appearance
+== Välimus
+
+Assets
+== Varad
+
+Name Plate
+== Nimesilt
+
+Hook Collisions
+== Konksu kokkupõrked
+
+Info Messages
+== Info sõnumid
+
+Show health, shields and ammo
+== Näita elu, kilpe ja laskemoona
+
+Show local time always
+== Näita alati kohalikku aega
+
+DDRace HUD
+== DDRace HUD
+
+Show client IDs in scoreboard
+== Näita kliendi ID-eid tulemustabelis
+
+Show DDRace HUD
+== Näita DDRace HUD-i
+
+Show jumps indicator
+== Näita hüpete indikaatorit
+
+Show dummy actions
+== Näita dummy tegevusi
+
+Show player position
+== Näita mängija positsiooni
+
+Show player speed
+== Näita mängija kiirust
+
+Show player target angle
+== Näita mängija sihtnurka
+
+Show freeze bars
+== Näita külmutusriba
+
+Opacity of freeze bars inside freeze
+== Külmutusribade läbipaistvus külmutuses
+
+Chat font size
+== Vestluse fondi suurus
+
+Chat width
+== Vestluse laius
+
+Show local player's key presses
+== Näita kohaliku mängija klahvivajutusi
+
+Authed name color in scoreboard
+== Autentitud nime värv tulemustabelis
+
+Same clan color in scoreboard
+== Sama klanni värv tulemustabelis
+
+Hook collision line
+== Konksu kokkupõrkejoon
+
+Hook collision line width
+== Konksu kokkupõrkejoone laius
+
+Hook collision line opacity
+== Konksu kokkupõrkejoone läbipaistvus
+
+Colors of the hook collision line, in case of a possible collision with:
+== Konksu kokkupõrkejoone värvid, juhul kui on võimalik kokkupõrge:
+
+Your movements are not taken into account when calculating the line colors
+== Teie liigutusi ei võeta arvesse joone värvide arvutamisel
+
+Nothing hookable
+== Mittemillegi haakuvaga
+
+Something hookable
+== Millegi haakuvaga
+
+A Tee
+== Teega
+
+Show finish messages
+== Näita lõpusõnumeid
+
+Normal Color
+== Normaalne Värv
+
+Highlight Color
+== Esile Tõstetud Värv
+
+Weapons
+== Relvad
+
+Rifle Laser Outline Color
+== Laserpüssi Kontuuri Värv
+
+Rifle Laser Inner Color
+== Laserpüssi Sisene Värv
+
+Shotgun Laser Outline Color
+== Pumppüssi Laseri Kontuuri Värv
+
+Shotgun Laser Inner Color
+== Pumppüssi Laseri Sisene Värv
+
+Entities
+== Üksused
+
+Door Laser Outline Color
+== Ukse Laseri Kontuuri Värv
+
+Door Laser Inner Color
+== Ukse Laseri Sisene Värv
+
+Freeze Laser Outline Color
+== Külmutava Laseri Kontuuri Värv
+
+Freeze Laser Inner Color
+== Külmutava Laseri Sisene Värv
+
+Set all to Rifle
+== Seadke Kõik Laserpüssiks
+
+Enable ghost
+== Kasuta kummitust
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== Kui ületate stardijoone, näidake kummitus-teed, mis kordab teie parima aja liigutusi
+
+Opacity
+== Läbipaistvus
+
+Only save improvements
+== Ainult salvesta täiustusi
+
+Overlay entities
+== Üksuste ülekate
+
+Show text entities
+== Näita teksti üksusi
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Seadista teiste tiimide üksuste läbipaistvust, nagu teed ja nimesildid
+
+Show quads
+== Näita nelikuid
+
+Quads are used for background decoration
+== Nelikuid kasutatakse tagatausta kaunistamiseks
+
+Tries to predict other entities to give a feel of low latency
+== Üritab ennustada teisi üksuseid, et anda madala latentsuse tunne
+
+Regular background color
+== Normaalne tagatausta värv
+
+Entities background color
+== Üksuste tagatausta värv
+
+Show tiles layers from BG map
+== Näita plaate tausta kaardist
+
+New random timeout code
+== Uus suvaline timeout kood
+
+Run on join
+== Jooksuta liitumisel
+
+Chat command (e.g. showall 1)
+== Vestluse käskus (nt showall 1)
+
+Unregister protocol and file extensions
+== Tühista protokolli ja faililaiendite registreerimine
+
+Particles
+== Osakesed
+
+Extras
+== Ekstrad
+
+Loading assets
+== Varade laadimine
+
+Assets directory
+== Varade asukoht
+
+Open the directory to add custom assets
+== Ava oma varade lisamise asukoht
+
+Tutorial
+== Õpetus
+
+Can't find a Tutorial server
+== Ei suuda leida Õpetuse serverit
+
+Server executable not found, can't run server
+== Serveri käivitaja faili ei leitud, serverit ei saa käivitada
+
+Loading race demo files
+== Võistluste demofailide laadimine
+
+Super
+== Super
+
+Auto
+== Auto
+
+Loading sound files
+== Helifailide laadimine
+
+Spree
+== Pillerkaar
+
+Grabs
+== Haaramised
+
+Moved ingame
+== Mängusisene liikumine
+
+Loading demo file from storage
+== Demofaili laadimine mälust
+
+No login required
+== Sisse pole vaja logida
+
+Player info change cooldown
+== Mängija info muutmise viivitus
+
+Always show chat
+== Alati näita vestlust
+
+Show friend mark (♥) in name plates
+== Näita sõbra märki (♥) nimesiltides
+
+Show hook strength icon indicator
+== Näita konksu jõu ikooni indikaatorit
+
+Show hook strength number indicator
+== Näita konksu jõu numbri indikaatorit
+
+Show own player's hook collision line
+== Näita enda konksu kokkupõrkejoont
+
+Always show own player's hook collision line
+== Alati näita enda konksu kokkupõrkejoont
+
+Always show other players' hook collision lines
+== Alati näita teiste konksu kokkupõrkejoont
+
+Net
+== Võrk

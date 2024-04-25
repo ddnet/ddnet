@@ -138,15 +138,16 @@ int main(int argc, const char **argv)
 	// add all items
 	for(int Index = 0, i = 0; Index < Reader.NumItems(); Index++)
 	{
-		int Type, ID;
-		void *pPtr = Reader.GetItem(Index, &Type, &ID);
-		int Size = Reader.GetItemSize(Index);
+		int Type, Id;
+		CUuid Uuid;
+		void *pPtr = Reader.GetItem(Index, &Type, &Id, &Uuid);
 
-		// filter ITEMTYPE_EX items, they will be automatically added again
+		// Filter ITEMTYPE_EX items, they will be automatically added again.
 		if(Type == ITEMTYPE_EX)
 		{
 			continue;
 		}
+
 		// for all layers, check if it uses a image and set the corresponding flag
 		if(Type == MAPITEMTYPE_LAYER)
 		{
@@ -203,7 +204,8 @@ int main(int argc, const char **argv)
 			++i;
 		}
 
-		Writer.AddItem(Type, ID, Size, pPtr);
+		int Size = Reader.GetItemSize(Index);
+		Writer.AddItem(Type, Id, Size, pPtr, &Uuid);
 	}
 
 	// add all data
@@ -306,7 +308,7 @@ int main(int argc, const char **argv)
 			}
 		}
 
-		Writer.AddData(Size, pPtr, Z_BEST_COMPRESSION);
+		Writer.AddData(Size, pPtr, CDataFileWriter::COMPRESSION_BEST);
 
 		if(DeletePtr)
 			free(pPtr);

@@ -29,9 +29,6 @@
 %s wins!
 == Wygrał %s!
 
--Page %d-
-== -Strona %d-
-
 Abort
 == Anuluj
 
@@ -404,9 +401,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Ten serwer korzysta z niestandardowych ustawień.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== W edytorze jest niezapisana mapa! Możesz ją zapisać zanim wyjdziesz.
-
 Time limit
 == Limit czasu
 
@@ -523,9 +517,6 @@ Your skin
 Reset to defaults
 == Przywróć domyślne
 
-Quit anyway?
-== Wyjść mimo wszystko?
-
 Round
 == Runda
 
@@ -591,9 +582,6 @@ Overlay entities
 
 Switch weapon when out of ammo
 == Zmień broń, gdy skończy się amunicja
-
-Dummy settings
-== Ustawienia dummy
 
 Show score
 == Pokazuj wyniki
@@ -762,9 +750,6 @@ Show clan above name plates
 
 Loading DDNet Client
 == Ładowanie klienta DDNet
-
-Please use a different filename
-== 
 
 HUD
 == HUD
@@ -973,9 +958,6 @@ Auto
 Replay
 == Powtórka
 
-Saving ddnet-settings.cfg failed
-== Zapisywanie ddnet-settings.cfg nie powiodło się
-
 Warning
 == Ostrzeżenie
 
@@ -1139,9 +1121,6 @@ Settings file
 Config directory
 == Lokalizacja konfiguracji
 
-Toggle to edit your dummy settings
-== Przełącz aby edytować ustawienia kukły
-
 Choose default eyes when joining a server
 == Wybierz domyślne oczy, podczas dołączenia do serwera
 
@@ -1177,9 +1156,6 @@ custom
 
 auto
 == automatyczny
-
-Kill Messages
-== Wiadomości o zabiciu
 
 Preview
 == Podgląd
@@ -1271,6 +1247,15 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
+Failed saving the replay!
+== 
+
+Saving settings to '%s' failed
+== 
+
+Error saving settings
+== 
+
 Preparing demo playback
 == 
 
@@ -1278,6 +1263,9 @@ Connected
 == 
 
 Loading map file from storage
+== 
+
+Loading demo file from storage
 == 
 
 Why are you slowmo replaying to read this?
@@ -1299,6 +1287,39 @@ Quitting. Please wait…
 == 
 
 Restarting. Please wait…
+== 
+
+Loading skin files
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
+Loading commands…
 == 
 
 Position:
@@ -1325,28 +1346,25 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
-Trying to determine UDP connectivity...
+Press a key…
 == 
 
-UDP seems to be filtered.
-== 
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
-
-No answer from server yet.
-== 
-
-Getting game info
-== 
-
-Requesting to join the game
+Main menu
 == 
 
 Rename folder
 == 
 
 Render complete
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -1370,7 +1388,31 @@ Videos directory
 Video was saved to '%s'
 == 
 
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
 Loading menu images
+== 
+
+No login required
+== 
+
+Communities
 == 
 
 Copy info
@@ -1408,6 +1450,12 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Add Clan
+== 
+
+Server filter
+== 
+
+Friends
 == 
 
 Play the current demo
@@ -1481,6 +1529,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 Loading demo files
 == 
 
@@ -1521,6 +1572,9 @@ Unable to delete the demo '%s'
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Loading…
+== 
+
 Loading ghost files
 == 
 
@@ -1548,7 +1602,7 @@ Open the directory that contains the configuration and user files
 Open the directory to add custom themes
 == 
 
-Loading skin files
+Player info change cooldown
 == 
 
 Download community skins
@@ -1628,7 +1682,13 @@ Name Plate
 Hook Collisions
 == 
 
+Info Messages
+== 
+
 Show health, shields and ammo
+== 
+
+Show local time always
 == 
 
 DDRace HUD
@@ -1661,10 +1721,40 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
-Show hook strength indicator
+Always show chat
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
 == 
 
 Hook collision line
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
 == 
 
 Hook collision line width
@@ -1686,6 +1776,9 @@ Something hookable
 == 
 
 A Tee
+== 
+
+Show finish messages
 == 
 
 Normal Color

@@ -77,6 +77,7 @@ private:
 	FDisplayTextCallback m_pfnDisplayTextCallback;
 	FCalculateOffsetCallback m_pfnCalculateOffsetCallback;
 	bool m_WasChanged;
+	bool m_WasCursorChanged;
 	bool m_WasRendered;
 
 	char m_ClearButtonId;
@@ -179,15 +180,21 @@ public:
 		m_WasChanged = false;
 		return Changed;
 	}
+	bool WasCursorChanged()
+	{
+		const bool Changed = m_WasCursorChanged;
+		m_WasCursorChanged = false;
+		return Changed;
+	}
 
-	STextBoundingBox Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth);
+	STextBoundingBox Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth, float LineSpacing, const std::vector<STextColorSplit> &vColorSplits = {});
 	SMouseSelection *GetMouseSelection() { return &m_MouseSelection; }
 
 	const void *GetClearButtonId() const { return &m_ClearButtonId; }
 
 	bool IsActive() const { return GetActiveInput() == this; }
 	void Activate(EInputPriority Priority);
-	void Deactivate();
+	void Deactivate() const;
 };
 
 template<size_t MaxSize, size_t MaxChars = MaxSize>

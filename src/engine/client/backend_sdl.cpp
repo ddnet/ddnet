@@ -108,7 +108,7 @@ void CGraphicsBackend_Threaded::StopProcessor()
 
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 {
-	SGFXErrorContainer Error;
+	SGfxErrorContainer Error;
 #ifdef CONF_WEBASM
 	// run everything single threaded for now, context binding in a thread seems to not work as of now
 	Error = m_pProcessor->GetError();
@@ -153,7 +153,7 @@ void CGraphicsBackend_Threaded::WaitForIdle()
 	m_BufferSwapCond.wait(Lock, [this]() { return m_pBuffer == nullptr; });
 }
 
-void CGraphicsBackend_Threaded::ProcessError(const SGFXErrorContainer &Error)
+void CGraphicsBackend_Threaded::ProcessError(const SGfxErrorContainer &Error)
 {
 	std::string VerboseStr = "Graphics Assertion:";
 	for(const auto &ErrStr : Error.m_vErrors)
@@ -226,7 +226,7 @@ void CCommandProcessorFragment_SDL::Cmd_VSync(const CCommandBuffer::SCommand_VSy
 
 void CCommandProcessorFragment_SDL::Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)
 {
-	m_pWindow = SDL_GetWindowFromID(pCommand->m_WindowID);
+	m_pWindow = SDL_GetWindowFromID(pCommand->m_WindowId);
 	// Android destroys windows when they are not visible, so we get the new one and work with that
 	// The graphic context does not need to be recreated, just unbound see @see SCommand_WindowDestroyNtf
 #ifdef CONF_PLATFORM_ANDROID
@@ -274,31 +274,31 @@ void CCommandProcessor_SDL_GL::HandleError()
 	switch(m_Error.m_ErrorType)
 	{
 	case GFX_ERROR_TYPE_INIT:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_OUT_OF_MEMORY_IMAGE:
 		[[fallthrough]];
 	case GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER:
 		[[fallthrough]];
 	case GFX_ERROR_TYPE_OUT_OF_MEMORY_STAGING:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_RENDER_RECORDING:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("An error during command recording occurred. Try to update your GPU drivers.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("An error during command recording occurred. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_RENDER_CMD_FAILED:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("A render command failed. Try to update your GPU drivers.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("A render command failed. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Submitting the render commands failed. Try to update your GPU drivers.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("Submitting the render commands failed. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_SWAP_FAILED:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Failed to swap framebuffers. Try to update your GPU drivers.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("Failed to swap framebuffers. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_UNKNOWN:
 		[[fallthrough]];
 	default:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.", "Graphics error")});
 		break;
 	}
 }
@@ -416,7 +416,7 @@ CCommandProcessor_SDL_GL::~CCommandProcessor_SDL_GL()
 	delete m_pGLBackend;
 }
 
-const SGFXErrorContainer &CCommandProcessor_SDL_GL::GetError() const
+const SGfxErrorContainer &CCommandProcessor_SDL_GL::GetError() const
 {
 	return m_Error;
 }
@@ -426,7 +426,7 @@ void CCommandProcessor_SDL_GL::ErroneousCleanup()
 	return m_pGLBackend->ErroneousCleanup();
 }
 
-const SGFXWarningContainer &CCommandProcessor_SDL_GL::GetWarning() const
+const SGfxWarningContainer &CCommandProcessor_SDL_GL::GetWarning() const
 {
 	return m_Warning;
 }
@@ -900,10 +900,10 @@ static void DisplayToVideoMode(CVideoMode *pVMode, SDL_DisplayMode *pMode, int H
 	pVMode->m_Format = pMode->format;
 }
 
-void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID)
+void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId)
 {
 	SDL_DisplayMode DesktopMode;
-	int maxModes = SDL_GetNumDisplayModes(ScreenID);
+	int maxModes = SDL_GetNumDisplayModes(ScreenId);
 	int numModes = 0;
 
 	// Only collect fullscreen modes when requested, that makes sure in windowed mode no refresh rates are shown that aren't supported without
@@ -911,7 +911,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 	bool IsFullscreenDestkop = m_pWindow != NULL && (((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP) || g_Config.m_GfxFullscreen == 3);
 	bool CollectFullscreenModes = m_pWindow == NULL || ((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN) != 0 && !IsFullscreenDestkop);
 
-	if(SDL_GetDesktopDisplayMode(ScreenID, &DesktopMode) < 0)
+	if(SDL_GetDesktopDisplayMode(ScreenId, &DesktopMode) < 0)
 	{
 		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 	}
@@ -922,7 +922,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 	for(int i = 0; i < maxModes && NumModes < ModeCount; i++)
 	{
 		SDL_DisplayMode mode;
-		if(SDL_GetDisplayMode(ScreenID, i, &mode) < 0)
+		if(SDL_GetDisplayMode(ScreenId, i, &mode) < 0)
 		{
 			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 			continue;
@@ -964,20 +964,20 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 	*pNumModes = numModes;
 }
 
-void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID)
+void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId)
 {
-	SDL_DisplayMode DPMode;
+	SDL_DisplayMode DpMode;
 	// if "real" fullscreen, obtain the video mode for that
 	if((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN)
 	{
-		if(SDL_GetCurrentDisplayMode(ScreenID, &DPMode))
+		if(SDL_GetCurrentDisplayMode(ScreenId, &DpMode))
 		{
 			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 		}
 	}
 	else
 	{
-		if(SDL_GetDesktopDisplayMode(ScreenID, &DPMode) < 0)
+		if(SDL_GetDesktopDisplayMode(ScreenId, &DpMode) < 0)
 		{
 			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 		}
@@ -986,11 +986,11 @@ void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPI
 			int Width = 0;
 			int Height = 0;
 			SDL_GL_GetDrawableSize(m_pWindow, &Width, &Height);
-			DPMode.w = Width;
-			DPMode.h = Height;
+			DpMode.w = Width;
+			DpMode.h = Height;
 		}
 	}
-	DisplayToVideoMode(&CurMode, &DPMode, HiDPIScale, DPMode.refresh_rate);
+	DisplayToVideoMode(&CurMode, &DpMode, HiDPIScale, DpMode.refresh_rate);
 }
 
 CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc) :
@@ -1275,7 +1275,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	CmdPre.m_pVendorString = m_aVendorString;
 	CmdPre.m_pVersionString = m_aVersionString;
 	CmdPre.m_pRendererString = m_aRendererString;
-	CmdPre.m_pGPUList = &m_GPUList;
+	CmdPre.m_pGpuList = &m_GpuList;
 	CmdBuffer.AddCommandUnsafe(CmdPre);
 	RunBufferSingleThreadedUnsafe(&CmdBuffer);
 	CmdBuffer.Reset();
@@ -1299,7 +1299,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		CmdGL.m_pBufferMemoryUsage = &m_BufferMemoryUsage;
 		CmdGL.m_pStreamMemoryUsage = &m_StreamMemoryUsage;
 		CmdGL.m_pStagingMemoryUsage = &m_StagingMemoryUsage;
-		CmdGL.m_pGPUList = &m_GPUList;
+		CmdGL.m_pGpuList = &m_GpuList;
 		CmdGL.m_pReadPresentedImageDataFunc = &m_ReadPresentedImageDataFunc;
 		CmdGL.m_pStorage = pStorage;
 		CmdGL.m_pCapabilities = &m_Capabilites;
@@ -1444,9 +1444,9 @@ uint64_t CGraphicsBackend_SDL_GL::StagingMemoryUsage() const
 	return m_StagingMemoryUsage;
 }
 
-const TTWGraphicsGPUList &CGraphicsBackend_SDL_GL::GetGPUs() const
+const TTwGraphicsGpuList &CGraphicsBackend_SDL_GL::GetGpus() const
 {
-	return m_GPUList;
+	return m_GpuList;
 }
 
 void CGraphicsBackend_SDL_GL::Minimize()
@@ -1459,7 +1459,7 @@ void CGraphicsBackend_SDL_GL::Maximize()
 	// TODO: SDL
 }
 
-void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing)
+void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderless)
 {
 	if(FullscreenMode > 0)
 	{
@@ -1488,14 +1488,14 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 			SDL_SetWindowFullscreen(m_pWindow, 0);
 			SDL_SetWindowBordered(m_pWindow, SDL_TRUE);
 			SDL_SetWindowResizable(m_pWindow, SDL_FALSE);
-			SDL_DisplayMode DPMode;
-			if(SDL_GetDesktopDisplayMode(g_Config.m_GfxScreen, &DPMode) < 0)
+			SDL_DisplayMode DpMode;
+			if(SDL_GetDesktopDisplayMode(g_Config.m_GfxScreen, &DpMode) < 0)
 			{
 				dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 			}
 			else
 			{
-				ResizeWindow(DPMode.w, DPMode.h, DPMode.refresh_rate);
+				ResizeWindow(DpMode.w, DpMode.h, DpMode.refresh_rate);
 				SDL_SetWindowPosition(m_pWindow, SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen), SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen));
 			}
 		}
@@ -1520,6 +1520,8 @@ bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index)
 	{
 		return false;
 	}
+	// Todo SDL: remove this when fixed (changing screen when in fullscreen is bugged)
+	SDL_SetWindowBordered(m_pWindow, SDL_TRUE); //fixing primary monitor goes black when switch screen (borderless OpenGL)
 
 	SDL_SetWindowPosition(m_pWindow,
 		SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
@@ -1574,7 +1576,7 @@ bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
 	{
 #ifdef CONF_FAMILY_WINDOWS
 		// in windows make the window windowed mode first, this prevents strange window glitches (other games probably do something similar)
-		SetWindowParams(0, true, true);
+		SetWindowParams(0, true);
 #endif
 		SDL_DisplayMode SetMode = {};
 		SDL_DisplayMode ClosestMode = {};
@@ -1586,7 +1588,7 @@ bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
 #ifdef CONF_FAMILY_WINDOWS
 		// now change it back to fullscreen, this will restore the above set state, bcs SDL saves fullscreen modes apart from other video modes (as of SDL 2.0.16)
 		// see implementation of SDL_SetWindowDisplayMode
-		SetWindowParams(1, false, true);
+		SetWindowParams(1, false);
 #endif
 		return true;
 	}
@@ -1618,13 +1620,13 @@ void CGraphicsBackend_SDL_GL::NotifyWindow()
 #endif
 }
 
-void CGraphicsBackend_SDL_GL::WindowDestroyNtf(uint32_t WindowID)
+void CGraphicsBackend_SDL_GL::WindowDestroyNtf(uint32_t WindowId)
 {
 }
 
-void CGraphicsBackend_SDL_GL::WindowCreateNtf(uint32_t WindowID)
+void CGraphicsBackend_SDL_GL::WindowCreateNtf(uint32_t WindowId)
 {
-	m_pWindow = SDL_GetWindowFromID(WindowID);
+	m_pWindow = SDL_GetWindowFromID(WindowId);
 }
 
 TGLBackendReadPresentedImageData &CGraphicsBackend_SDL_GL::GetReadPresentedImageDataFuncUnsafe()

@@ -45,9 +45,9 @@ int CMap::GetItemSize(int Index)
 	return m_DataFile.GetItemSize(Index);
 }
 
-void *CMap::GetItem(int Index, int *pType, int *pID)
+void *CMap::GetItem(int Index, int *pType, int *pId)
 {
-	return m_DataFile.GetItem(Index, pType, pID);
+	return m_DataFile.GetItem(Index, pType, pId);
 }
 
 void CMap::GetType(int Type, int *pStart, int *pNum)
@@ -55,14 +55,14 @@ void CMap::GetType(int Type, int *pStart, int *pNum)
 	m_DataFile.GetType(Type, pStart, pNum);
 }
 
-int CMap::FindItemIndex(int Type, int ID)
+int CMap::FindItemIndex(int Type, int Id)
 {
-	return m_DataFile.FindItemIndex(Type, ID);
+	return m_DataFile.FindItemIndex(Type, Id);
 }
 
-void *CMap::FindItem(int Type, int ID)
+void *CMap::FindItem(int Type, int Id)
 {
-	return m_DataFile.FindItem(Type, ID);
+	return m_DataFile.FindItem(Type, Id);
 }
 
 int CMap::NumItems() const

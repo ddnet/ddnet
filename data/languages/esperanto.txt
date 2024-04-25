@@ -21,9 +21,6 @@ Team
 Chat
 == Diskutejo
 
--Page %d-
-== -Paĝo %d-
-
 Game paused
 == Paŭzata ludo
 
@@ -143,12 +140,6 @@ Checking for existing player with your name
 
 Are you sure that you want to disconnect and switch to a different server?
 == Ĉu vi certas malkonektiĝi kaj movi al alia servilo?
-
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Estas nesavata mapo en la redaktilo, vi eble volas savi ĝin antaŭ eliri la ludon.
-
-Quit anyway?
-== Eliri tamen
 
 No
 == Ne
@@ -279,9 +270,6 @@ Clan
 Add Friend
 == Aldoni amikon
 
-Please use a different filename
-== 
-
 Remove chat
 == Malmontri la diskutejon
 
@@ -362,9 +350,6 @@ Add
 
 Time
 == Tempo
-
-Dummy settings
-== Agordoj de la pupo
 
 Skin Database
 == Datumbazo de haŭtoj
@@ -589,7 +574,19 @@ Error playing demo
 Successfully saved the replay!
 == 
 
-Saving ddnet-settings.cfg failed
+Failed saving the replay!
+== 
+
+Sound error
+== 
+
+The audio device couldn't be initialised.
+== 
+
+Saving settings to '%s' failed
+== 
+
+Error saving settings
 == 
 
 Replay feature is disabled!
@@ -602,6 +599,9 @@ The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
 Preparing demo playback
+== 
+
+Loading demo file from storage
 == 
 
 Why are you slowmo replaying to read this?
@@ -623,6 +623,39 @@ Quitting. Please wait…
 == 
 
 Restarting. Please wait…
+== 
+
+Loading skin files
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
+Loading commands…
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -664,31 +697,13 @@ Loading menu themes
 Reset
 == 
 
+Press a key…
+== 
+
 Demos
 == 
 
-Sound error
-== 
-
-The audio device couldn't be initialised.
-== 
-
-Trying to determine UDP connectivity...
-== 
-
-UDP seems to be filtered.
-== 
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
-
-No answer from server yet.
-== 
-
-Getting game info
-== 
-
-Requesting to join the game
+Main menu
 == 
 
 Rename folder
@@ -706,6 +721,9 @@ Render complete
 Password incorrect
 == 
 
+Are you sure that you want to restart?
+== 
+
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
@@ -713,6 +731,12 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 == 
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -754,6 +778,24 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.org
 == 
 
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
 Error loading demo
 == 
 
@@ -763,10 +805,16 @@ The server is running a non-standard tuning on a pure game type.
 Loading menu images
 == 
 
+Reset filter
+== 
+
 Has people playing
 == 
 
 Server not full
+== 
+
+No login required
 == 
 
 Strict gametype filter
@@ -787,7 +835,7 @@ Unfinished map
 Types
 == 
 
-Reset filter
+Communities
 == 
 
 Copy info
@@ -831,6 +879,12 @@ Remove friend
 == 
 
 Add Clan
+== 
+
+Server filter
+== 
+
+Friends
 == 
 
 Play the current demo
@@ -905,6 +959,9 @@ Cut length
 == 
 
 Render cut to video
+== 
+
+Please use a different filename
 == 
 
 File already exists, do you want to overwrite it?
@@ -998,6 +1055,9 @@ Score limit
 Time limit
 == 
 
+Loading…
+== 
+
 Remove
 == 
 
@@ -1043,18 +1103,6 @@ Client
 Skip the main menu
 == 
 
-Automatically record demos
-== 
-
-Max demos
-== 
-
-Automatically take game over screenshot
-== 
-
-Max Screenshots
-== 
-
 Refresh Rate
 == 
 
@@ -1079,6 +1127,18 @@ Themes directory
 Open the directory to add custom themes
 == 
 
+Automatically record demos
+== 
+
+Max demos
+== 
+
+Automatically take game over screenshot
+== 
+
+Max Screenshots
+== 
+
 Automatically take statboard screenshot
 == 
 
@@ -1088,13 +1148,7 @@ Automatically create statboard csv
 Max CSVs
 == 
 
-Toggle to edit your dummy settings
-== 
-
-Loading skin files
-== 
-
-Your skin
+Player info change cooldown
 == 
 
 Download skins
@@ -1112,13 +1166,16 @@ Fat skins (DDFat)
 Skin prefix
 == 
 
-Choose default eyes when joining a server
+Your skin
 == 
 
 Create a random skin
 == 
 
 Custom colors
+== 
+
+Choose default eyes when joining a server
 == 
 
 Body
@@ -1393,19 +1450,16 @@ Name Plate
 Hook Collisions
 == 
 
-Kill Messages
+Info Messages
 == 
 
 Show health, shields and ammo
 == 
 
-Show name plates
-== 
-
-Show kill messages
-== 
-
 Show score
+== 
+
+Show local time always
 == 
 
 Show votes window after voting
@@ -1441,6 +1495,9 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Always show chat
+== 
+
 Show names in chat in team colors
 == 
 
@@ -1448,6 +1505,12 @@ Show only chat messages from friends
 == 
 
 Use old chat style
+== 
+
+Chat font size
+== 
+
+Chat width
 == 
 
 Messages
@@ -1462,6 +1525,9 @@ Highlighted message
 Client message
 == 
 
+Show name plates
+== 
+
 Name plates size
 == 
 
@@ -1474,7 +1540,13 @@ Clan plates size
 Use team colors for name plates
 == 
 
-Show hook strength indicator
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
 == 
 
 Show other players' key presses
@@ -1483,10 +1555,25 @@ Show other players' key presses
 Show local player's key presses
 == 
 
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
 Hook collision line
 == 
 
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
 Show other players' hook collision lines
+== 
+
+Always show other players' hook collision lines
 == 
 
 Hook collision line width
@@ -1505,6 +1592,12 @@ Nothing hookable
 == 
 
 Something hookable
+== 
+
+Show kill messages
+== 
+
+Show finish messages
 == 
 
 Normal Color

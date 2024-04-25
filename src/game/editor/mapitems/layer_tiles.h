@@ -1,7 +1,20 @@
 #ifndef GAME_EDITOR_MAPITEMS_LAYER_TILES_H
 #define GAME_EDITOR_MAPITEMS_LAYER_TILES_H
 
+#include <game/editor/editor_trackers.h>
+#include <map>
+
 #include "layer.h"
+
+struct STileStateChange
+{
+	bool m_Changed;
+	CTile m_Previous;
+	CTile m_Current;
+};
+
+template<typename T>
+using EditorTileStateChangeHistory = std::map<int, std::map<int, T>>;
 
 enum
 {
@@ -89,18 +102,19 @@ public:
 
 	virtual CTile GetTile(int x, int y);
 	virtual void SetTile(int x, int y, CTile Tile);
+	void SetTileIgnoreHistory(int x, int y, CTile Tile) const;
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
 
-	void MakePalette();
+	void MakePalette() const;
 	void Render(bool Tileset = false) override;
 
 	int ConvertX(float x) const;
 	int ConvertY(float y) const;
-	void Convert(CUIRect Rect, RECTi *pOut);
-	void Snap(CUIRect *pRect);
-	void Clamp(RECTi *pRect);
+	void Convert(CUIRect Rect, RECTi *pOut) const;
+	void Snap(CUIRect *pRect) const;
+	void Clamp(RECTi *pRect) const;
 
 	virtual bool IsEntitiesLayer() const override;
 
@@ -114,9 +128,10 @@ public:
 	void BrushRotate(float Amount) override;
 
 	std::shared_ptr<CLayer> Duplicate() const override;
+	const char *TypeName() const override;
 
 	virtual void ShowInfo();
-	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
+	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
 	struct SCommonPropState
 	{
@@ -130,13 +145,13 @@ public:
 		int m_Height = -1;
 		int m_Color = 0;
 	};
-	static CUI::EPopupMenuFunctionResult RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers);
+	static CUi::EPopupMenuFunctionResult RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers, std::vector<int> &vLayerIndices);
 
 	void ModifyImageIndex(FIndexModifyFunction pfnFunc) override;
 	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
 
 	void PrepareForSave();
-	void ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize);
+	void ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize) const;
 
 	void GetSize(float *pWidth, float *pHeight) override
 	{
@@ -166,6 +181,18 @@ public:
 	int m_Switch;
 	int m_Tune;
 	char m_aFileName[IO_MAX_PATH_LENGTH];
+
+	EditorTileStateChangeHistory<STileStateChange> m_TilesHistory;
+	inline virtual void ClearHistory() { m_TilesHistory.clear(); }
+
+	static bool HasAutomapEffect(ETilesProp Prop);
+
+protected:
+	void RecordStateChange(int x, int y, CTile Previous, CTile Tile);
+
+	void ShowPreventUnusedTilesWarning();
+
+	friend class CAutoMapper;
 };
 
 #endif

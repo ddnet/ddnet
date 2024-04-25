@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include <base/system.h>
-
 enum
 {
 	UUID_MAXSTRSIZE = 37, // 12345678-0123-5678-0123-567890123456
@@ -21,8 +19,10 @@ struct CUuid
 
 	bool operator==(const CUuid &Other) const;
 	bool operator!=(const CUuid &Other) const;
-	bool operator<(const CUuid &Other) const { return mem_comp(m_aData, Other.m_aData, sizeof(m_aData)) < 0; }
+	bool operator<(const CUuid &Other) const;
 };
+
+extern const CUuid UUID_ZEROED;
 
 CUuid RandomUuid();
 CUuid CalculateUuid(const char *pName);
@@ -40,7 +40,7 @@ struct CName
 struct CNameIndexed
 {
 	CUuid m_Uuid;
-	int m_ID;
+	int m_Id;
 
 	bool operator<(const CNameIndexed &Other) const { return m_Uuid < Other.m_Uuid; }
 	bool operator==(const CNameIndexed &Other) const { return m_Uuid == Other.m_Uuid; }
@@ -55,15 +55,15 @@ class CUuidManager
 	std::vector<CNameIndexed> m_vNamesSorted;
 
 public:
-	void RegisterName(int ID, const char *pName);
-	CUuid GetUuid(int ID) const;
-	const char *GetName(int ID) const;
+	void RegisterName(int Id, const char *pName);
+	CUuid GetUuid(int Id) const;
+	const char *GetName(int Id) const;
 	int LookupUuid(CUuid Uuid) const;
 	int NumUuids() const;
 
 	int UnpackUuid(CUnpacker *pUnpacker) const;
 	int UnpackUuid(CUnpacker *pUnpacker, CUuid *pOut) const;
-	void PackUuid(int ID, CPacker *pPacker) const;
+	void PackUuid(int Id, CPacker *pPacker) const;
 
 	void DebugDump() const;
 };

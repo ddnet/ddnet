@@ -12,9 +12,8 @@ void CSmoothTime::Init(int64_t Target)
 	m_Snap = time_get();
 	m_Current = Target;
 	m_Target = Target;
-	m_SnapMargin = m_Snap;
-	m_CurrentMargin = 0;
-	m_TargetMargin = 0;
+	m_Margin = 0;
+	m_SpikeCounter = 0;
 	m_aAdjustSpeed[ADJUSTDIRECTION_DOWN] = 0.3f;
 	m_aAdjustSpeed[ADJUSTDIRECTION_UP] = 0.3f;
 }
@@ -41,15 +40,15 @@ int64_t CSmoothTime::Get(int64_t Now) const
 		a = 1.0f;
 
 	int64_t r = c + (int64_t)((t - c) * a);
-	return r + GetMargin(Now);
+	return r + m_Margin;
 }
 
 void CSmoothTime::UpdateInt(int64_t Target)
 {
 	int64_t Now = time_get();
-	m_Current = Get(Now) - GetMargin(Now);
+	m_Current = Get(Now) - m_Margin;
 	m_Snap = Now;
-	m_Target = Target - GetMargin(Now);
+	m_Target = Target;
 }
 
 void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, EAdjustDirection AdjustDirection)
@@ -97,20 +96,7 @@ void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, EAdjustDi
 		UpdateInt(Target);
 }
 
-int64_t CSmoothTime::GetMargin(int64_t Now) const
+void CSmoothTime::UpdateMargin(int64_t Margin)
 {
-	int64_t TimePassed = Now - m_SnapMargin;
-	int64_t Diff = m_TargetMargin - m_CurrentMargin;
-
-	float a = clamp(TimePassed / (float)time_freq(), -1.f, 1.f);
-	int64_t Lim = maximum((int64_t)(a * absolute(Diff)), 1 + TimePassed / 100);
-	return m_CurrentMargin + (int64_t)clamp(Diff, -Lim, Lim);
-}
-
-void CSmoothTime::UpdateMargin(int64_t TargetMargin)
-{
-	int64_t Now = time_get();
-	m_CurrentMargin = GetMargin(Now);
-	m_SnapMargin = Now;
-	m_TargetMargin = TargetMargin;
+	m_Margin = Margin;
 }

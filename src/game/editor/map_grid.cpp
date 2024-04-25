@@ -4,6 +4,9 @@
 
 #include "editor.h"
 
+static constexpr int MIN_GRID_FACTOR = 1;
+static constexpr int MAX_GRID_FACTOR = 15;
+
 void CMapGrid::OnReset()
 {
 	m_GridActive = false;
@@ -23,7 +26,7 @@ void CMapGrid::OnRender(CUIRect View)
 		float aGroupPoints[4];
 		pGroup->Mapping(aGroupPoints);
 
-		const CUIRect *pScreen = UI()->Screen();
+		const CUIRect *pScreen = Ui()->Screen();
 
 		int LineDistance = GridLineDistance();
 
@@ -60,7 +63,11 @@ void CMapGrid::OnRender(CUIRect View)
 
 int CMapGrid::GridLineDistance() const
 {
-	if(Editor()->MapView()->Zoom()->GetValue() <= 100.0f)
+	if(Editor()->MapView()->Zoom()->GetValue() <= 10.0f)
+		return 4;
+	else if(Editor()->MapView()->Zoom()->GetValue() <= 50.0f)
+		return 8;
+	else if(Editor()->MapView()->Zoom()->GetValue() <= 100.0f)
 		return 16;
 	else if(Editor()->MapView()->Zoom()->GetValue() <= 250.0f)
 		return 32;
@@ -74,7 +81,7 @@ int CMapGrid::GridLineDistance() const
 		return 512;
 }
 
-void CMapGrid::SnapToGrid(float &x, float &y)
+void CMapGrid::SnapToGrid(float &x, float &y) const
 {
 	const int GridDistance = GridLineDistance() * m_GridFactor;
 	x = (int)((x + (x >= 0 ? 1.0f : -1.0f) * GridDistance / 2) / GridDistance) * GridDistance;
@@ -96,19 +103,47 @@ int CMapGrid::Factor() const
 	return m_GridFactor;
 }
 
-void CMapGrid::ResetFactor()
+void CMapGrid::SetFactor(int Factor)
 {
-	m_GridFactor = 1;
+	m_GridFactor = clamp(Factor, MIN_GRID_FACTOR, MAX_GRID_FACTOR);
 }
 
-void CMapGrid::IncreaseFactor()
+void CMapGrid::DoSettingsPopup(vec2 Position)
 {
-	if(m_GridFactor < 15)
-		m_GridFactor++;
+	Ui()->DoPopupMenu(&m_PopupGridSettingsId, Position.x, Position.y, 120.0f, 37.0f, this, PopupGridSettings);
 }
 
-void CMapGrid::DecreaseFactor()
+CUi::EPopupMenuFunctionResult CMapGrid::PopupGridSettings(void *pContext, CUIRect View, bool Active)
 {
-	if(m_GridFactor > 1)
-		m_GridFactor--;
+	CMapGrid *pMapGrid = static_cast<CMapGrid *>(pContext);
+
+	enum
+	{
+		PROP_SIZE = 0,
+		NUM_PROPS,
+	};
+	CProperty aProps[] = {
+		{"Size", pMapGrid->Factor(), PROPTYPE_INT, MIN_GRID_FACTOR, MAX_GRID_FACTOR},
+		{nullptr},
+	};
+
+	static int s_aIds[NUM_PROPS];
+	int NewVal;
+	int Prop = pMapGrid->Editor()->DoProperties(&View, aProps, s_aIds, &NewVal);
+
+	if(Prop == PROP_SIZE)
+	{
+		pMapGrid->SetFactor(NewVal);
+	}
+
+	CUIRect Button;
+	View.HSplitBottom(12.0f, &View, &Button);
+
+	static char s_DefaultButton;
+	if(pMapGrid->Editor()->DoButton_Ex(&s_DefaultButton, "Default", 0, &Button, 0, "Normal grid size", IGraphics::CORNER_ALL))
+	{
+		pMapGrid->SetFactor(1);
+	}
+
+	return CUi::POPUP_KEEP_OPEN;
 }

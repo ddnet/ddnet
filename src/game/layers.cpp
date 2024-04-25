@@ -45,6 +45,7 @@ void CLayers::Init(class IKernel *pKernel)
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
+				bool IsEntities = false;
 
 				if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
 				{
@@ -66,6 +67,7 @@ void CLayers::Init(class IKernel *pKernel)
 						m_pGameGroup->m_ClipH = 0;
 					}
 
+					IsEntities = true;
 					//break;
 				}
 				if(pTilemap->m_Flags & TILESLAYERFLAG_TELE)
@@ -75,6 +77,7 @@ void CLayers::Init(class IKernel *pKernel)
 						pTilemap->m_Tele = *((int *)(pTilemap) + 15);
 					}
 					m_pTeleLayer = pTilemap;
+					IsEntities = true;
 				}
 				if(pTilemap->m_Flags & TILESLAYERFLAG_SPEEDUP)
 				{
@@ -83,6 +86,7 @@ void CLayers::Init(class IKernel *pKernel)
 						pTilemap->m_Speedup = *((int *)(pTilemap) + 16);
 					}
 					m_pSpeedupLayer = pTilemap;
+					IsEntities = true;
 				}
 				if(pTilemap->m_Flags & TILESLAYERFLAG_FRONT)
 				{
@@ -91,6 +95,7 @@ void CLayers::Init(class IKernel *pKernel)
 						pTilemap->m_Front = *((int *)(pTilemap) + 17);
 					}
 					m_pFrontLayer = pTilemap;
+					IsEntities = true;
 				}
 				if(pTilemap->m_Flags & TILESLAYERFLAG_SWITCH)
 				{
@@ -99,6 +104,7 @@ void CLayers::Init(class IKernel *pKernel)
 						pTilemap->m_Switch = *((int *)(pTilemap) + 18);
 					}
 					m_pSwitchLayer = pTilemap;
+					IsEntities = true;
 				}
 				if(pTilemap->m_Flags & TILESLAYERFLAG_TUNE)
 				{
@@ -107,6 +113,12 @@ void CLayers::Init(class IKernel *pKernel)
 						pTilemap->m_Tune = *((int *)(pTilemap) + 19);
 					}
 					m_pTuneLayer = pTilemap;
+					IsEntities = true;
+				}
+
+				if(IsEntities)
+				{ // Ensure default color for entities layers
+					pTilemap->m_Color = CColor(255, 255, 255, 255);
 				}
 			}
 		}

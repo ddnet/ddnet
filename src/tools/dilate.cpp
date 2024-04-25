@@ -12,7 +12,13 @@ int DilateFile(const char *pFilename)
 	if(File)
 	{
 		io_seek(File, 0, IOSEEK_END);
-		unsigned int FileSize = io_tell(File);
+		long int FileSize = io_tell(File);
+		if(FileSize <= 0)
+		{
+			io_close(File);
+			dbg_msg("dilate", "failed to get file size (%ld). filename='%s'", FileSize, pFilename);
+			return false;
+		}
 		io_seek(File, 0, IOSEEK_START);
 		TImageByteBuffer ByteBuffer;
 		SImageByteBuffer ImageByteBuffer(&ByteBuffer);
@@ -23,27 +29,18 @@ int DilateFile(const char *pFilename)
 		io_close(File);
 
 		CImageInfo Img;
-
-		uint8_t *pImgBuffer = NULL;
 		EImageFormat ImageFormat;
 		int PngliteIncompatible;
-		if(LoadPNG(ImageByteBuffer, pFilename, PngliteIncompatible, Img.m_Width, Img.m_Height, pImgBuffer, ImageFormat))
+		if(LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, Img.m_Width, Img.m_Height, Img.m_pData, ImageFormat))
 		{
 			if(ImageFormat != IMAGE_FORMAT_RGBA)
 			{
-				free(pImgBuffer);
+				free(Img.m_pData);
 				dbg_msg("dilate", "%s: not an RGBA image", pFilename);
 				return -1;
 			}
 
-			Img.m_pData = pImgBuffer;
-
-			unsigned char *pBuffer = (unsigned char *)Img.m_pData;
-
-			int w = Img.m_Width;
-			int h = Img.m_Height;
-
-			DilateImage(pBuffer, w, h);
+			DilateImage(Img.m_pData, Img.m_Width, Img.m_Height);
 
 			// save here
 			IOHANDLE SaveFile = io_open(pFilename, IOFLAG_WRITE);
@@ -52,11 +49,11 @@ int DilateFile(const char *pFilename)
 				TImageByteBuffer ByteBuffer2;
 				SImageByteBuffer ImageByteBuffer2(&ByteBuffer2);
 
-				if(SavePNG(IMAGE_FORMAT_RGBA, (const uint8_t *)pBuffer, ImageByteBuffer2, w, h))
+				if(SavePng(IMAGE_FORMAT_RGBA, Img.m_pData, ImageByteBuffer2, Img.m_Width, Img.m_Height))
 					io_write(SaveFile, &ByteBuffer2.front(), ByteBuffer2.size());
 				io_close(SaveFile);
 
-				free(pBuffer);
+				free(Img.m_pData);
 			}
 		}
 		else

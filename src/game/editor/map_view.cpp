@@ -135,7 +135,7 @@ void CMapView::ResetZoom()
 	m_Zoom.SetValue(100.0f);
 }
 
-float CMapView::ScaleLength(float Value)
+float CMapView::ScaleLength(float Value) const
 {
 	return m_WorldZoom * Value;
 }
@@ -152,8 +152,8 @@ void CMapView::ZoomMouseTarget(float ZoomFactor)
 	float WorldWidth = aPoints[2] - aPoints[0];
 	float WorldHeight = aPoints[3] - aPoints[1];
 
-	float Mwx = aPoints[0] + WorldWidth * (UI()->MouseX() / UI()->Screen()->w);
-	float Mwy = aPoints[1] + WorldHeight * (UI()->MouseY() / UI()->Screen()->h);
+	float Mwx = aPoints[0] + WorldWidth * (Ui()->MouseX() / Ui()->Screen()->w);
+	float Mwy = aPoints[1] + WorldHeight * (Ui()->MouseY() / Ui()->Screen()->h);
 
 	// adjust camera
 	OffsetWorld((vec2(Mwx, Mwy) - GetWorldOffset()) * (1.0f - ZoomFactor));

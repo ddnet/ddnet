@@ -35,6 +35,10 @@
 # 2023-05-21 RemakePower
 # 2023-07-20 By
 # 2023-08-11 By
+# 2023-11-25 By
+# 2024-01-15 By
+# 2024-03-03 Bamcane
+# 2024-04-21 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -57,9 +61,6 @@
 %s wins!
 == %s 胜利！
 
--Page %d-
-== -第 %d 页-
-
 Abort
 == 取消
 
@@ -76,7 +77,7 @@ All
 == 全体
 
 Are you sure that you want to quit?
-== 你确定要退出吗？
+== 确定要退出吗？
 
 Automatically record demos
 == 自动录制回放
@@ -471,9 +472,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == 此服务器运行着经过调整的非标准游戏模式。
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 编辑器中的地图尚未保存，建议你在退出游戏之前返回编辑器进行保存。
-
 Time limit
 == 规定时限
 
@@ -493,7 +491,7 @@ Use sounds
 == 开启声音
 
 Use team colors for name plates
-== 用队伍颜色标注昵称
+== 用队伍颜色显示昵称
 
 V-Sync
 == 垂直同步
@@ -570,9 +568,6 @@ Map sound volume
 Max Screenshots
 == 最大截图数
 
-Dummy settings
-== 分身设置
-
 Laser
 == 激光
 
@@ -587,9 +582,6 @@ Your skin
 
 Reset to defaults
 == 恢复默认设置
-
-Quit anyway?
-== 无论如何都要退出吗？
 
 Round
 == 回合
@@ -748,9 +740,6 @@ DDNet
 
 Deaths
 == 死亡数
-
-Please use a different filename
-== 
 
 Restart
 == 重新开始
@@ -1009,7 +998,7 @@ Speed
 == 速度
 
 Skip the main menu
-== 跳过主界面
+== 跳过主菜单
 
 Website
 == 官网
@@ -1044,9 +1033,6 @@ Auto
 
 Replay
 == 回放
-
-Saving ddnet-settings.cfg failed
-== 配置文件 ddnet-settings.cfg 保存失败
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 调试模式已启用。按 Ctrl+Shift+D 禁用调试模式。
@@ -1181,10 +1167,7 @@ Desktop fullscreen
 == 无边框全屏
 
 Are you sure that you want to disconnect and switch to a different server?
-== 你确定要断开此服务器连接并进入其他服务器吗？
-
-Kill Messages
-== 击杀消息
+== 确定要断开此服务器连接并进入其他服务器吗？
 
 Show local player's key presses
 == 显示自己的按键
@@ -1230,9 +1213,6 @@ Tutorial
 
 Can't find a Tutorial server
 == 无法找到教学服务器
-
-Toggle to edit your dummy settings
-== 编辑分身设置
 
 Choose default eyes when joining a server
 == 进入服务器时的默认表情
@@ -1422,11 +1402,8 @@ Show DDRace HUD
 Show jumps indicator
 == 显示可跳跃次数
 
-Show hook strength indicator
-== 显示对其他玩家的钩索强度
-
 Hook collision line
-== 瞄准辅助线
+== 钩索辅助线
 
 Hook collision line width
 == 辅助线宽度
@@ -1519,10 +1496,10 @@ File '%s' already exists, do you want to overwrite it?
 == 文件名 "%s" 已经存在，是否要覆盖该文件？
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 你确定要将好友 "%s" 从你的好友列表中删除？
+== 确定要将好友 "%s" 从你的好友列表中删除？
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 你确定要将战队 "%s" 从你的好友列表中删除？
+== 确定要将战队 "%s" 从你的好友列表中删除？
 
 Go back one tick
 == 上一个 tick
@@ -1537,7 +1514,7 @@ Go forward one marker
 == 跳至下一个标记
 
 Are you sure that you want to delete the demo '%s'?
-== 你确定要删除回放文件 "%s" ？
+== 确定要删除回放文件 "%s" ？
 
 Unable to delete the demo '%s'
 == 无法删除回放文件 "%s"
@@ -1546,7 +1523,7 @@ Reset controls
 == 恢复默认设置
 
 Are you sure that you want to reset the controls to their defaults?
-== 你确定要将当前的控制恢复至默认设置？
+== 确定要将当前的控制恢复至默认设置？
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -1703,7 +1680,7 @@ Folder Link
 == 文件夹链接
 
 Are you sure that you want to delete the folder '%s'?
-== 你确定要删除文件夹 "%s" ？
+== 确定要删除文件夹 "%s" ？
 
 Delete folder
 == 删除文件夹
@@ -1715,76 +1692,196 @@ Moved ingame
 == 游戏内移动
 
 Error playing demo
-== 
+== 回放播放错误
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== 未能加载某些地图图片。检查本地控制台以获取详情。
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== 未能加载某些地图音效。检查本地控制台以获取详情。
 
 Loading menu themes
-== 
+== 正在加载主菜单主题
 
 Render complete
-== 
+== 渲染完毕
 
 Videos directory
-== 
+== 视频目录
 
 Video was saved to '%s'
-== 
+== 视频保存至 "%s"
 
 Go back the specified duration
-== 
+== 快退指定时长
 
 [Demo player duration]
 %d min.
-== 
+== %d 分
 
 [Demo player duration]
 %d sec.
-== 
+== %d 秒
 
 Change the skip duration
-== 
+== 变更指定时长
 
 Go forward the specified duration
-== 
+== 快进指定时长
 
 Render cut to video
-== 
+== 渲染裁剪部分
 
 No demo selected
-== 
+== 未选择回放
 
 Created
-== 
+== 创建日期
 
 Netversion
-== 
+== Netversion
 
 [Demo details]
 map not included
-== 
+== 未包含地图
 
 Ghosts directory
-== 
+== 影子目录
 
 Activate all
-== 
+== 全部启用
 
 Deactivate all
-== 
+== 全部停用
 
 Enable ghost
-== 
+== 启用影子
 
 Only save improvements
-== 
+== 只保存更佳记录
 
 Regular background color
-== 
+== 原图层背景颜色
 
 Entities background color
-== 
+== 实体层背景颜色
+
+Saving settings to '%s' failed
+== 无法保存设置至 "%s"
+
+Searching
+== 正在搜索
+
+Enter Username
+== 输入账号名称
+
+Enter Password
+== 输入密码
+
+NOT CONNECTED
+== 连接未成功
+
+Match %d of %d
+== 结果 %d / 总共 %d 则
+
+No results
+== 无结果
+
+Lines %d - %d (%s)
+== 行 %d - %d (%s)
+
+Locked
+== 锁定
+
+Following
+== 当前
+
+Press a key…
+== 按任意键...
+
+Are you sure that you want to restart?
+== 确定要重新开始？
+
+There's an unsaved map in the editor, you might want to save it.
+== 编辑器中有尚未保存的地图，你或需要保存
+
+Continue anyway?
+== 仍要退出？
+
+Communities
+== 社区
+
+Please use a different filename
+== 请使用不同的文件名
+
+Info Messages
+== 消息
+
+Show local time always
+== 始终显示本地时间
+
+Chat font size
+== 聊天字体大小
+
+Chat width
+== 聊天框宽度
+
+Authed name color in scoreboard
+== 管理权限者名字计分板显示颜色
+
+Same clan color in scoreboard
+== 相同战队计分板显示颜色
+
+Show finish messages
+== 显示完成消息
+
+Failed saving the replay!
+== 保存回放失败！
+
+Error saving settings
+== 保存设置错误
+
+Loading commands…
+== 正在加载指令...
+
+Main menu
+== 主菜单
+
+Server filter
+== 服务器筛选
+
+Friends
+== 好友
+
+Loading…
+== 正在加载...
+
+Loading demo file from storage
+== 正在从硬盘中加载回放文件
+
+No login required
+== 无需登录
+
+Player info change cooldown
+== 玩家信息更改冷却时间
+
+Always show chat
+== 始终显示聊天框
+
+Show friend mark (♥) in name plates
+== 在昵称上显示好友标记 (♥)
+
+Show hook strength icon indicator
+== 显示钩索强度图标
+
+Show hook strength number indicator
+== 显示钩索强度数值
+
+Show own player's hook collision line
+== 显示自己的钩索辅助线
+
+Always show own player's hook collision line
+== 始终显示自己的钩索辅助线
+
+Always show other players' hook collision lines
+== 始终显示其他玩家的钩索辅助线

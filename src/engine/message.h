@@ -9,18 +9,18 @@
 class CMsgPacker : public CPacker
 {
 public:
-	int m_MsgID;
+	int m_MsgId;
 	bool m_System;
 	bool m_NoTranslate;
 	CMsgPacker(int Type, bool System = false, bool NoTranslate = false) :
-		m_MsgID(Type), m_System(System), m_NoTranslate(NoTranslate)
+		m_MsgId(Type), m_System(System), m_NoTranslate(NoTranslate)
 	{
 		Reset();
 	}
 
 	template<typename T>
 	CMsgPacker(const T *, bool System = false, bool NoTranslate = false) :
-		CMsgPacker(T::ms_MsgID, System, NoTranslate)
+		CMsgPacker(T::ms_MsgId, System, NoTranslate)
 	{
 	}
 };

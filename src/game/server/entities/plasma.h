@@ -25,7 +25,7 @@ class CPlasma : public CEntity
 	vec2 m_Core;
 	int m_Freeze;
 	bool m_Explosive;
-	int m_ForClientID;
+	int m_ForClientId;
 	int m_EvalTick;
 	int m_LifeTime;
 

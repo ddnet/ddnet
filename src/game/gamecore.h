@@ -3,7 +3,6 @@
 #ifndef GAME_GAMECORE_H
 #define GAME_GAMECORE_H
 
-#include <base/system.h>
 #include <base/vmath.h>
 
 #include <map>
@@ -45,7 +44,6 @@ class CTuningParams
 public:
 	CTuningParams()
 	{
-		const float TicksPerSecond = 50.0f;
 #define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) m_##Name.Set((int)((Value)*100.0f));
 #include "tuning.h"
 #undef MACRO_TUNING_PARAM
@@ -67,53 +65,9 @@ public:
 	float GetWeaponFireDelay(int Weapon) const;
 };
 
-inline void StrToInts(int *pInts, int Num, const char *pStr)
-{
-	int Index = 0;
-	while(Num)
-	{
-		char aBuf[4] = {0, 0, 0, 0};
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warray-bounds" // false positive
-#endif
-		for(int c = 0; c < 4 && pStr[Index]; c++, Index++)
-			aBuf[c] = pStr[Index];
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-		*pInts = ((aBuf[0] + 128) << 24) | ((aBuf[1] + 128) << 16) | ((aBuf[2] + 128) << 8) | (aBuf[3] + 128);
-		pInts++;
-		Num--;
-	}
-
-	// null terminate
-	pInts[-1] &= 0xffffff00;
-}
-
-inline void IntsToStr(const int *pInts, int Num, char *pStr)
-{
-	while(Num)
-	{
-		pStr[0] = (((*pInts) >> 24) & 0xff) - 128;
-		pStr[1] = (((*pInts) >> 16) & 0xff) - 128;
-		pStr[2] = (((*pInts) >> 8) & 0xff) - 128;
-		pStr[3] = ((*pInts) & 0xff) - 128;
-		pStr += 4;
-		pInts++;
-		Num--;
-	}
-
-#if defined(__GNUC__) && __GNUC__ >= 7
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstringop-overflow" // false positive
-#endif
-	// null terminate
-	pStr[-1] = 0;
-#if defined(__GNUC__) && __GNUC__ >= 7
-#pragma GCC diagnostic pop
-#endif
-}
+// Do not use these function unless for legacy code!
+void StrToInts(int *pInts, size_t NumInts, const char *pStr);
+bool IntsToStr(const int *pInts, size_t NumInts, char *pStr, size_t StrSize);
 
 inline vec2 CalcPos(vec2 Pos, vec2 Velocity, float Curvature, float Speed, float Time)
 {
@@ -192,7 +146,10 @@ class CWorldCore
 public:
 	CWorldCore()
 	{
-		mem_zero(m_apCharacters, sizeof(m_apCharacters));
+		for(auto &pCharacter : m_apCharacters)
+		{
+			pCharacter = nullptr;
+		}
 		m_pPrng = nullptr;
 	}
 
@@ -220,7 +177,6 @@ class CCharacterCore
 {
 	CWorldCore *m_pWorld = nullptr;
 	CCollision *m_pCollision;
-	std::map<int, std::vector<vec2>> *m_pTeleOuts;
 
 public:
 	static constexpr float PhysicalSize() { return 28.0f; };
@@ -268,7 +224,7 @@ public:
 
 	int m_TriggeredEvents;
 
-	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams = nullptr, std::map<int, std::vector<vec2>> *pTeleOuts = nullptr);
+	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams = nullptr);
 	void SetCoreWorld(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams);
 	void Reset();
 	void TickDeferred();
@@ -276,7 +232,7 @@ public:
 	void Move();
 
 	void Read(const CNetObj_CharacterCore *pObjCore);
-	void Write(CNetObj_CharacterCore *pObjCore);
+	void Write(CNetObj_CharacterCore *pObjCore) const;
 	void Quantize();
 
 	// DDRace
@@ -284,13 +240,11 @@ public:
 	bool m_Reset;
 	CCollision *Collision() { return m_pCollision; }
 
-	vec2 m_LastVel;
 	int m_Colliding;
 	bool m_LeftWall;
 
 	// DDNet Character
 	void SetTeamsCore(CTeamsCore *pTeams);
-	void SetTeleOuts(std::map<int, std::vector<vec2>> *pTeleOuts);
 	void ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet);
 	bool m_Solo;
 	bool m_Jetpack;

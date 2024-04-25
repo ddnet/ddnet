@@ -7,7 +7,6 @@
 
 struct CScrollRegionParams
 {
-	bool m_Active;
 	float m_ScrollbarWidth;
 	float m_ScrollbarMargin;
 	bool m_ScrollbarNoMarginRight;
@@ -28,7 +27,6 @@ struct CScrollRegionParams
 
 	CScrollRegionParams()
 	{
-		m_Active = true;
 		m_ScrollbarWidth = 20.0f;
 		m_ScrollbarMargin = 5.0f;
 		m_ScrollbarNoMarginRight = false;
@@ -117,7 +115,7 @@ private:
 	CUIRect m_ClipRect;
 	CUIRect m_RailRect;
 	CUIRect m_LastAddedRect; // saved for ScrollHere()
-	vec2 m_SliderGrabPos; // where did user grab the slider
+	float m_SliderGrabPos; // where did user grab the slider
 	vec2 m_ContentScrollOff;
 	CScrollRegionParams m_Params;
 
@@ -140,6 +138,7 @@ public:
 	bool RectClipped(const CUIRect &Rect) const;
 	bool ScrollbarShown() const;
 	bool Animating() const;
+	bool Active() const;
 	const CScrollRegionParams &Params() const { return m_Params; }
 };
 

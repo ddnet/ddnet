@@ -276,10 +276,10 @@ void CProjectile::Tick()
 		z = GameServer()->Collision()->IsTeleport(x);
 	else
 		z = GameServer()->Collision()->IsTeleportWeapon(x);
-	if(z && !GameServer()->m_pController->m_TeleOuts[z - 1].empty())
+	if(z && !GameServer()->Collision()->TeleOuts(z - 1).empty())
 	{
-		int TeleOut = GameServer()->m_World.m_Core.RandomOr0(GameServer()->m_pController->m_TeleOuts[z - 1].size());
-		m_Pos = GameServer()->m_pController->m_TeleOuts[z - 1][TeleOut];
+		int TeleOut = GameServer()->m_World.m_Core.RandomOr0(GameServer()->Collision()->TeleOuts(z - 1).size());
+		m_Pos = GameServer()->Collision()->TeleOuts(z - 1)[TeleOut];
 		m_StartTick = Server()->Tick();
 	}
 }
@@ -331,7 +331,7 @@ void CProjectile::Snap(int SnappingClient)
 
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		CNetObj_DDNetProjectile *pDDNetProjectile = static_cast<CNetObj_DDNetProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPROJECTILE, GetID(), sizeof(CNetObj_DDNetProjectile)));
+		CNetObj_DDNetProjectile *pDDNetProjectile = static_cast<CNetObj_DDNetProjectile *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPROJECTILE, GetId(), sizeof(CNetObj_DDNetProjectile)));
 		if(!pDDNetProjectile)
 		{
 			return;
@@ -341,7 +341,7 @@ void CProjectile::Snap(int SnappingClient)
 	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfoLegacy(&DDRaceProjectile))
 	{
 		int Type = SnappingClientVersion < VERSION_DDNET_MSG_LEGACY ? (int)NETOBJTYPE_PROJECTILE : NETOBJTYPE_DDRACEPROJECTILE;
-		void *pProj = Server()->SnapNewItem(Type, GetID(), sizeof(DDRaceProjectile));
+		void *pProj = Server()->SnapNewItem(Type, GetId(), sizeof(DDRaceProjectile));
 		if(!pProj)
 		{
 			return;
@@ -350,7 +350,7 @@ void CProjectile::Snap(int SnappingClient)
 	}
 	else
 	{
-		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(GetID());
+		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(GetId());
 		if(!pProj)
 		{
 			return;

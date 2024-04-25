@@ -2,7 +2,11 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_HUD_H
 #define GAME_CLIENT_COMPONENTS_HUD_H
+#include <engine/client.h>
+#include <engine/shared/protocol.h>
+#include <engine/textrender.h>
 #include <game/client/component.h>
+#include <game/generated/protocol.h>
 
 struct SScoreInfo
 {
@@ -57,9 +61,9 @@ class CHud : public CComponent
 	void RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter);
 
 	void PreparePlayerStateQuads();
-	void RenderPlayerState(const int ClientID);
+	void RenderPlayerState(const int ClientId);
 	void RenderDummyActions();
-	void RenderMovementInformation(const int ClientID);
+	void RenderMovementInformation(const int ClientId);
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
@@ -132,6 +136,7 @@ private:
 	int m_DummyHammerOffset;
 	int m_DummyCopyOffset;
 	int m_PracticeModeOffset;
+	int m_LockModeOffset;
 };
 
 #endif

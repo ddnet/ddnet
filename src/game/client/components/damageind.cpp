@@ -40,7 +40,7 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir, float Alpha)
 	{
 		pItem->m_Pos = Pos;
 		pItem->m_StartTime = LocalTime();
-		pItem->m_Dir = Dir * -1;
+		pItem->m_Dir = -Dir;
 		pItem->m_StartAngle = -random_angle();
 		pItem->m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
 		pItem->m_StartAlpha = Alpha;
@@ -49,6 +49,9 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir, float Alpha)
 
 void CDamageInd::OnRender()
 {
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		return;
+
 	Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteStars[0]);
 	static float s_LastLocalTime = LocalTime();
 	for(int i = 0; i < m_NumItems;)

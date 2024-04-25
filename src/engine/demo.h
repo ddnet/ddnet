@@ -8,6 +8,8 @@
 #include <engine/map.h>
 #include <engine/shared/uuid_manager.h>
 
+#include <cstdint>
+
 enum
 {
 	MAX_TIMELINE_MARKERS = 64
@@ -37,15 +39,7 @@ struct CDemoHeader
 	unsigned char m_aLength[sizeof(int32_t)];
 	char m_aTimestamp[20];
 
-	bool Valid() const
-	{
-		// Check marker and ensure that strings are zero-terminated and valid UTF-8.
-		return mem_comp(m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) == 0 &&
-		       mem_has_null(m_aNetversion, sizeof(m_aNetversion)) && str_utf8_check(m_aNetversion) &&
-		       mem_has_null(m_aMapName, sizeof(m_aMapName)) && str_utf8_check(m_aMapName) &&
-		       mem_has_null(m_aType, sizeof(m_aType)) && str_utf8_check(m_aType) &&
-		       mem_has_null(m_aTimestamp, sizeof(m_aTimestamp)) && str_utf8_check(m_aTimestamp);
-	}
+	bool Valid() const;
 };
 
 struct CTimelineMarkers
@@ -64,7 +58,7 @@ struct CMapInfo
 
 class IDemoPlayer : public IInterface
 {
-	MACRO_INTERFACE("demoplayer", 0)
+	MACRO_INTERFACE("demoplayer")
 public:
 	class CInfo
 	{
@@ -105,20 +99,26 @@ public:
 
 class IDemoRecorder : public IInterface
 {
-	MACRO_INTERFACE("demorecorder", 0)
+	MACRO_INTERFACE("demorecorder")
 public:
+	enum class EStopMode
+	{
+		KEEP_FILE,
+		REMOVE_FILE,
+	};
+
 	virtual ~IDemoRecorder() {}
 	virtual bool IsRecording() const = 0;
-	virtual int Stop() = 0;
+	virtual int Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilename = "") = 0;
 	virtual int Length() const = 0;
-	virtual char *GetCurrentFilename() = 0;
+	virtual const char *CurrentFilename() const = 0;
 };
 
 class IDemoEditor : public IInterface
 {
-	MACRO_INTERFACE("demoeditor", 0)
+	MACRO_INTERFACE("demoeditor")
 public:
-	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) = 0;
+	virtual bool Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) = 0;
 };
 
 #endif

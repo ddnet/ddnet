@@ -104,9 +104,8 @@ CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj)
 	return Result;
 }
 
-void SnapshotRemoveExtraProjectileInfo(unsigned char *pData)
+void SnapshotRemoveExtraProjectileInfo(CSnapshot *pSnap)
 {
-	CSnapshot *pSnap = (CSnapshot *)pData;
 	for(int Index = 0; Index < pSnap->NumItems(); Index++)
 	{
 		const CSnapshotItem *pItem = pSnap->GetItem(Index);

@@ -20,14 +20,14 @@ public:
 	bool LoadShader(CGLSLCompiler *pCompiler, class IStorage *pStorage, const char *pFile, int Type);
 	void DeleteShader();
 
-	bool IsLoaded();
-	TWGLuint GetShaderID();
+	bool IsLoaded() const;
+	TWGLuint GetShaderId() const;
 
 	CGLSL();
 	virtual ~CGLSL();
 
 private:
-	TWGLuint m_ShaderID;
+	TWGLuint m_ShaderId;
 	int m_Type;
 	bool m_IsLoaded;
 };

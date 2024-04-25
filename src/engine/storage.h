@@ -4,6 +4,7 @@
 #define ENGINE_STORAGE_H
 
 #include <base/hash.h>
+#include <base/types.h>
 
 #include "kernel.h"
 
@@ -17,7 +18,7 @@ enum
 
 class IStorage : public IInterface
 {
-	MACRO_INTERFACE("storage", 0)
+	MACRO_INTERFACE("storage")
 public:
 	enum
 	{

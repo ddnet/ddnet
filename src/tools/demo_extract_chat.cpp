@@ -1,7 +1,13 @@
 #include <base/logger.h>
 #include <base/system.h>
+
 #include <engine/client.h>
-#include <game/client/gameclient.h>
+#include <engine/shared/demo.h>
+#include <engine/shared/network.h>
+#include <engine/shared/snapshot.h>
+#include <engine/storage.h>
+
+#include <game/gamecore.h>
 
 static const char *TOOL_NAME = "demo_extract_chat";
 
@@ -55,7 +61,7 @@ public:
 				continue;
 
 			const int ItemSize = NetObjHandler.GetUnpackedObjSize(ItemType);
-			void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->ID(), ItemSize);
+			void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->Id(), ItemSize);
 			if(!pObj)
 				return -4;
 
@@ -65,21 +71,21 @@ public:
 		return Builder.Finish(pTo);
 	}
 
-	int SnapNumItems(int SnapID)
+	int SnapNumItems(int SnapId)
 	{
-		dbg_assert(SnapID >= 0 && SnapID < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapID");
-		if(!m_apSnapshots[SnapID])
+		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapId");
+		if(!m_apSnapshots[SnapId])
 			return 0;
-		return m_apSnapshots[SnapID]->m_pAltSnap->NumItems();
+		return m_apSnapshots[SnapId]->m_pAltSnap->NumItems();
 	}
 
-	void *SnapGetItem(int SnapID, int Index, IClient::CSnapItem *pItem)
+	void *SnapGetItem(int SnapId, int Index, IClient::CSnapItem *pItem)
 	{
-		dbg_assert(SnapID >= 0 && SnapID < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapID");
-		const CSnapshotItem *pSnapshotItem = m_apSnapshots[SnapID]->m_pAltSnap->GetItem(Index);
-		pItem->m_DataSize = m_apSnapshots[SnapID]->m_pAltSnap->GetItemSize(Index);
-		pItem->m_Type = m_apSnapshots[SnapID]->m_pAltSnap->GetItemType(Index);
-		pItem->m_ID = pSnapshotItem->ID();
+		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapId");
+		const CSnapshotItem *pSnapshotItem = m_apSnapshots[SnapId]->m_pAltSnap->GetItem(Index);
+		pItem->m_DataSize = m_apSnapshots[SnapId]->m_pAltSnap->GetItemSize(Index);
+		pItem->m_Type = m_apSnapshots[SnapId]->m_pAltSnap->GetItemType(Index);
+		pItem->m_Id = pSnapshotItem->Id();
 		return (void *)pSnapshotItem->Data();
 	}
 
@@ -94,11 +100,11 @@ public:
 			if(Item.m_Type == NETOBJTYPE_CLIENTINFO)
 			{
 				const CNetObj_ClientInfo *pInfo = (const CNetObj_ClientInfo *)pData;
-				int ClientID = Item.m_ID;
-				if(ClientID < MAX_CLIENTS)
+				int ClientId = Item.m_Id;
+				if(ClientId < MAX_CLIENTS)
 				{
-					CClientData *pClient = &m_aClients[ClientID];
-					IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName);
+					CClientData *pClient = &m_aClients[ClientId];
+					IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName, sizeof(pClient->m_aName));
 				}
 			}
 		}
@@ -141,7 +147,7 @@ public:
 		bool Sys;
 		CUuid Uuid;
 
-		int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+		int Result = UnpackMessageId(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
 		if(Result == UNPACKMESSAGE_ERROR)
 			return;
 
@@ -156,23 +162,23 @@ public:
 			{
 				CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 
-				if(pMsg->m_ClientID > -1 && m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientID].m_aName[0] == '\0')
+				if(pMsg->m_ClientId > -1 && m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName[0] == '\0')
 					return;
 
 				const char *Prefix = pMsg->m_Team > 1 ? "whisper" : (pMsg->m_Team ? "teamchat" : "chat");
 
-				if(pMsg->m_ClientID < 0)
+				if(pMsg->m_ClientId < 0)
 				{
 					printf("%s: *** %s\n", Prefix, pMsg->m_pMessage);
 					return;
 				}
 
 				if(pMsg->m_Team == 2) // WHISPER SEND
-					printf("%s: -> %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientID].m_aName, pMsg->m_pMessage);
+					printf("%s: -> %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 				else if(pMsg->m_Team == 3) // WHISPER RECEIVE
-					printf("%s: <- %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientID].m_aName, pMsg->m_pMessage);
+					printf("%s: <- %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 				else
-					printf("%s: %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientID].m_aName, pMsg->m_pMessage);
+					printf("%s: %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 			}
 			else if(Msg == NETMSGTYPE_SV_BROADCAST)
 			{
@@ -190,14 +196,14 @@ public:
 	}
 };
 
-int Process(const char *pDemoFilePath, IStorage *pStorage)
+static int ExtractDemoChat(const char *pDemoFilePath, IStorage *pStorage)
 {
 	CSnapshotDelta DemoSnapshotDelta;
 	CDemoPlayer DemoPlayer(&DemoSnapshotDelta, false);
 
 	if(DemoPlayer.Load(pStorage, nullptr, pDemoFilePath, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 	{
-		dbg_msg(TOOL_NAME, "Demo file '%s' failed to load: %s", pDemoFilePath, DemoPlayer.ErrorMessage());
+		log_error(TOOL_NAME, "Demo file '%s' failed to load: %s", pDemoFilePath, DemoPlayer.ErrorMessage());
 		return -1;
 	}
 
@@ -225,21 +231,23 @@ int Process(const char *pDemoFilePath, IStorage *pStorage)
 
 int main(int argc, const char *argv[])
 {
+	// Create storage before setting logger to avoid log messages from storage creation
 	IStorage *pStorage = CreateLocalStorage();
-	if(!pStorage)
-	{
-		dbg_msg(TOOL_NAME, "Error loading storage");
-		return -1;
-	}
 
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
-	if(argc != 2)
+	if(!pStorage)
 	{
-		dbg_msg(TOOL_NAME, "Usage: %s <demo_filename>", TOOL_NAME);
+		log_error(TOOL_NAME, "Error creating local storage");
 		return -1;
 	}
 
-	return Process(argv[1], pStorage);
+	if(argc != 2)
+	{
+		log_error(TOOL_NAME, "Usage: %s <demo_filename>", TOOL_NAME);
+		return -1;
+	}
+
+	return ExtractDemoChat(argv[1], pStorage);
 }

@@ -7,6 +7,8 @@
 
 #include <game/mapitems.h>
 
+#include <zlib.h>
+
 void CreateEmptyMap(IStorage *pStorage)
 {
 	const char *pMapName = "maps/dummy3.map";
@@ -90,7 +92,7 @@ void CreateEmptyMap(IStorage *pStorage)
 	unsigned char *pDataChar = static_cast<unsigned char *>(pData);
 
 	unsigned Crc = crc32(0, pDataChar, DataSize);
-	SHA256_DIGEST Sha256 = sha256(&pDataChar, DataSize);
+	SHA256_DIGEST Sha256 = sha256(pDataChar, DataSize);
 
 	char aMapSha[SHA256_MAXSTRSIZE];
 	sha256_str(Sha256, aMapSha, sizeof(aMapSha));

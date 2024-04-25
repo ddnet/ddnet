@@ -1,9 +1,8 @@
 #ifndef ENGINE_SHARED_NETBAN_H
 #define ENGINE_SHARED_NETBAN_H
 
-#include <engine/console.h>
-
 #include <base/system.h>
+#include <engine/console.h>
 
 inline int NetComp(const NETADDR *pAddr1, const NETADDR *pAddr2)
 {
@@ -159,7 +158,7 @@ protected:
 	class IStorage *m_pStorage;
 	CBanAddrPool m_BanAddrPool;
 	CBanRangePool m_BanRangePool;
-	NETADDR m_LocalhostIPV4, m_LocalhostIPV6;
+	NETADDR m_LocalhostIpV4, m_LocalhostIpV6;
 
 public:
 	enum

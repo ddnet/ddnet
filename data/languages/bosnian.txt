@@ -28,9 +28,6 @@
 %s wins!
 == %s je pobijedio!
 
--Page %d-
-== -Strana %d-
-
 Abort
 == Prekini
 
@@ -403,9 +400,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Server sadrži nestandardne postavke.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Mapa u editoru nije memorisana, možda je želite memorisati prije nego izađete iz igre.
-
 Time limit
 == Max. vremena
 
@@ -506,9 +500,6 @@ Your skin
 
 Reset to defaults
 == Vrati na početne postavke
-
-Quit anyway?
-== Izlaz?
 
 Round
 == Runda
@@ -639,9 +630,6 @@ Update now
 Restart
 == Restart
 
-Please use a different filename
-== 
-
 Remove chat
 == Ukloni čat
 
@@ -698,9 +686,6 @@ Automatically take statboard screenshot
 
 Automatically create statboard csv
 == Automatski kreiraj csv tablice bodova
-
-Dummy settings
-== Postavke Dummy-a
 
 Vanilla skins only
 == Samo skinovi iz Vanille
@@ -978,7 +963,13 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
-Saving ddnet-settings.cfg failed
+Failed saving the replay!
+== 
+
+Saving settings to '%s' failed
+== 
+
+Error saving settings
 == 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
@@ -994,6 +985,9 @@ Connected
 == 
 
 Loading map file from storage
+== 
+
+Loading demo file from storage
 == 
 
 Why are you slowmo replaying to read this?
@@ -1018,6 +1012,39 @@ Quitting. Please wait…
 == 
 
 Restarting. Please wait…
+== 
+
+Loading skin files
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
+Loading commands…
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -1050,28 +1077,25 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
-Trying to determine UDP connectivity...
+Press a key…
 == 
 
-UDP seems to be filtered.
+Settings
 == 
 
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+Editor
 == 
 
-No answer from server yet.
-== 
-
-Getting game info
-== 
-
-Requesting to join the game
+Main menu
 == 
 
 Rename folder
 == 
 
 Render complete
+== 
+
+Are you sure that you want to restart?
 == 
 
 Existing Player
@@ -1081,6 +1105,12 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 == 
 
 Checking for existing player with your name
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -1111,6 +1141,24 @@ Join Tutorial Server
 == 
 
 Skip Tutorial
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
 == 
 
 Theme
@@ -1158,6 +1206,12 @@ Getting server list from master server
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
+No login required
+== 
+
+Communities
+== 
+
 Copy info
 == 
 
@@ -1196,6 +1250,12 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Add Clan
+== 
+
+Server filter
+== 
+
+Friends
 == 
 
 Play the current demo
@@ -1269,6 +1329,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 Loading demo files
 == 
 
@@ -1318,6 +1381,9 @@ Unable to delete the demo '%s'
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Loading…
+== 
+
 Loading ghost files
 == 
 
@@ -1363,10 +1429,10 @@ Open the directory to add custom themes
 Max CSVs
 == 
 
-Toggle to edit your dummy settings
+Dummy
 == 
 
-Loading skin files
+Player info change cooldown
 == 
 
 Download skins
@@ -1375,10 +1441,10 @@ Download skins
 Download community skins
 == 
 
-Choose default eyes when joining a server
+Create a random skin
 == 
 
-Create a random skin
+Choose default eyes when joining a server
 == 
 
 Skin Database
@@ -1449,9 +1515,6 @@ Are you sure that you want to reset the controls to their defaults?
 Cancel
 == 
 
-Dummy
-== 
-
 Windowed
 == 
 
@@ -1509,10 +1572,13 @@ Name Plate
 Hook Collisions
 == 
 
-Kill Messages
+Info Messages
 == 
 
 Show health, shields and ammo
+== 
+
+Show local time always
 == 
 
 DDRace HUD
@@ -1545,19 +1611,49 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Always show chat
+== 
+
 Use old chat style
+== 
+
+Chat font size
+== 
+
+Chat width
 == 
 
 Preview
 == 
 
-Show hook strength indicator
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
 == 
 
 Show local player's key presses
 == 
 
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
 Hook collision line
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
 == 
 
 Hook collision line width
@@ -1579,6 +1675,9 @@ Something hookable
 == 
 
 A Tee
+== 
+
+Show finish messages
 == 
 
 Normal Color
@@ -1704,9 +1803,6 @@ Can't find a Tutorial server
 Website
 == 
 
-Settings
-== 
-
 Stop server
 == 
 
@@ -1714,9 +1810,6 @@ Run server
 == 
 
 Server executable not found, can't run server
-== 
-
-Editor
 == 
 
 [Start menu]

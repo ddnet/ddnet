@@ -13,14 +13,14 @@
 class CSkins : public CComponent
 {
 public:
-	CSkins() = default;
+	CSkins();
 
 	class CGetPngFile : public CHttpRequest
 	{
 		CSkins *m_pSkins;
 
 	protected:
-		virtual int OnCompletion(int State) override;
+		virtual void OnCompletion(EHttpState State) override;
 
 	public:
 		CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest);
@@ -64,7 +64,7 @@ public:
 	void Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc);
 	int Num();
 	std::unordered_map<std::string_view, std::unique_ptr<CSkin>> &GetSkinsUnsafe() { return m_Skins; }
-	const CSkin *FindOrNullptr(const char *pName);
+	const CSkin *FindOrNullptr(const char *pName, bool IgnorePrefix = false);
 	const CSkin *Find(const char *pName);
 
 	bool IsDownloadingSkins() { return m_DownloadingSkins; }
@@ -79,10 +79,11 @@ public:
 private:
 	std::unordered_map<std::string_view, std::unique_ptr<CSkin>> m_Skins;
 	std::unordered_map<std::string_view, std::unique_ptr<CDownloadSkin>> m_DownloadSkins;
+	CSkin m_PlaceholderSkin;
 	size_t m_DownloadingSkins = 0;
 	char m_aEventSkinPrefix[24];
 
-	bool LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType);
+	bool LoadSkinPng(CImageInfo &Info, const char *pName, const char *pPath, int DirType);
 	const CSkin *LoadSkin(const char *pName, const char *pPath, int DirType);
 	const CSkin *LoadSkin(const char *pName, CImageInfo &Info);
 	const CSkin *FindImpl(const char *pName);

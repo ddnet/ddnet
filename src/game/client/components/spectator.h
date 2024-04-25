@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_SPECTATOR_H
 #define GAME_CLIENT_COMPONENTS_SPECTATOR_H
 #include <base/vmath.h>
+#include <engine/console.h>
 
 #include <game/client/component.h>
 
@@ -18,7 +19,7 @@ class CSpectator : public CComponent
 	bool m_WasActive;
 	bool m_Clicked;
 
-	int m_SelectedSpectatorID;
+	int m_SelectedSpectatorId;
 	vec2 m_SelectorMouse;
 
 	float m_OldMouseX;
@@ -47,7 +48,7 @@ public:
 	virtual void OnReset() override;
 	virtual bool OnInput(const IInput::CEvent &Event) override;
 
-	void Spectate(int SpectatorID);
+	void Spectate(int SpectatorId);
 	void SpectateClosest();
 };
 

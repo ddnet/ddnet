@@ -1,6 +1,7 @@
 #include "uuid_manager.h"
 
 #include <base/hash_ctxt.h>
+#include <base/system.h>
 #include <engine/shared/packer.h>
 
 #include <algorithm>
@@ -9,6 +10,10 @@
 static const CUuid TEEWORLDS_NAMESPACE = {{// "e05ddaaa-c4e6-4cfb-b642-5d48e80c0029"
 	0xe0, 0x5d, 0xda, 0xaa, 0xc4, 0xe6, 0x4c, 0xfb,
 	0xb6, 0x42, 0x5d, 0x48, 0xe8, 0x0c, 0x00, 0x29}};
+
+const CUuid UUID_ZEROED = {{// "00000000-0000-0000-0000-000000000000"
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
 
 CUuid RandomUuid()
 {
@@ -96,19 +101,24 @@ bool CUuid::operator!=(const CUuid &Other) const
 	return !(*this == Other);
 }
 
-static int GetIndex(int ID)
+bool CUuid::operator<(const CUuid &Other) const
 {
-	return ID - OFFSET_UUID;
+	return mem_comp(this, &Other, sizeof(*this)) < 0;
 }
 
-static int GetID(int Index)
+static int GetIndex(int Id)
+{
+	return Id - OFFSET_UUID;
+}
+
+static int GetId(int Index)
 {
 	return Index + OFFSET_UUID;
 }
 
-void CUuidManager::RegisterName(int ID, const char *pName)
+void CUuidManager::RegisterName(int Id, const char *pName)
 {
-	dbg_assert(GetIndex(ID) == (int)m_vNames.size(), "names must be registered with increasing ID");
+	dbg_assert(GetIndex(Id) == (int)m_vNames.size(), "names must be registered with increasing ID");
 	CName Name;
 	Name.m_pName = pName;
 	Name.m_Uuid = CalculateUuid(pName);
@@ -118,29 +128,29 @@ void CUuidManager::RegisterName(int ID, const char *pName)
 
 	CNameIndexed NameIndexed;
 	NameIndexed.m_Uuid = Name.m_Uuid;
-	NameIndexed.m_ID = GetIndex(ID);
+	NameIndexed.m_Id = GetIndex(Id);
 	m_vNamesSorted.insert(std::lower_bound(m_vNamesSorted.begin(), m_vNamesSorted.end(), NameIndexed), NameIndexed);
 }
 
-CUuid CUuidManager::GetUuid(int ID) const
+CUuid CUuidManager::GetUuid(int Id) const
 {
-	return m_vNames[GetIndex(ID)].m_Uuid;
+	return m_vNames[GetIndex(Id)].m_Uuid;
 }
 
-const char *CUuidManager::GetName(int ID) const
+const char *CUuidManager::GetName(int Id) const
 {
-	return m_vNames[GetIndex(ID)].m_pName;
+	return m_vNames[GetIndex(Id)].m_pName;
 }
 
 int CUuidManager::LookupUuid(CUuid Uuid) const
 {
 	CNameIndexed Needle;
 	Needle.m_Uuid = Uuid;
-	Needle.m_ID = 0;
+	Needle.m_Id = 0;
 	auto Range = std::equal_range(m_vNamesSorted.begin(), m_vNamesSorted.end(), Needle);
 	if(std::distance(Range.first, Range.second) == 1)
 	{
-		return GetID(Range.first->m_ID);
+		return GetId(Range.first->m_Id);
 	}
 	return UUID_UNKNOWN;
 }
@@ -167,9 +177,9 @@ int CUuidManager::UnpackUuid(CUnpacker *pUnpacker, CUuid *pOut) const
 	return LookupUuid(*pUuid);
 }
 
-void CUuidManager::PackUuid(int ID, CPacker *pPacker) const
+void CUuidManager::PackUuid(int Id, CPacker *pPacker) const
 {
-	CUuid Uuid = GetUuid(ID);
+	CUuid Uuid = GetUuid(Id);
 	pPacker->AddRaw(&Uuid, sizeof(Uuid));
 }
 

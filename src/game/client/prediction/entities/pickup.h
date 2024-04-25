@@ -14,7 +14,7 @@ public:
 
 	void Tick() override;
 
-	CPickup(CGameWorld *pGameWorld, int ID, const CPickupData *pPickup);
+	CPickup(CGameWorld *pGameWorld, int Id, const CPickupData *pPickup);
 	void FillInfo(CNetObj_Pickup *pPickup);
 	bool Match(CPickup *pPickup);
 	bool InDDNetTile() { return m_IsCoreActive; }

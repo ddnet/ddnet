@@ -1,6 +1,7 @@
 #ifndef ENGINE_CLIENT_GRAPHICS_THREADED_H
 #define ENGINE_CLIENT_GRAPHICS_THREADED_H
 
+#include <base/system.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 
@@ -129,6 +130,7 @@ public:
 		// misc
 		CMD_MULTISAMPLING,
 		CMD_VSYNC,
+		CMD_TRY_SWAP_AND_READ_PIXEL,
 		CMD_TRY_SWAP_AND_SCREENSHOT,
 		CMD_UPDATE_VIEWPORT,
 
@@ -461,12 +463,21 @@ public:
 		void *m_pOffset;
 	};
 
+	struct SCommand_TrySwapAndReadPixel : public SCommand
+	{
+		SCommand_TrySwapAndReadPixel() :
+			SCommand(CMD_TRY_SWAP_AND_READ_PIXEL) {}
+		ivec2 m_Position;
+		SColorf *m_pColor; // processor will fill this out
+		bool *m_pSwapped; // processor may set this to true, must be initialized to false by the caller
+	};
+
 	struct SCommand_TrySwapAndScreenshot : public SCommand
 	{
 		SCommand_TrySwapAndScreenshot() :
 			SCommand(CMD_TRY_SWAP_AND_SCREENSHOT) {}
 		CImageInfo *m_pImage; // processor will fill this out, the one who adds this command must free the data as well
-		bool *m_pSwapped;
+		bool *m_pSwapped; // processor may set this to true, must be initialized to false by the caller
 	};
 
 	struct SCommand_Swap : public SCommand
@@ -519,7 +530,7 @@ public:
 		int m_Format;
 		int m_StoreFormat;
 		int m_Flags;
-		void *m_pData; // will be freed by the command processor
+		uint8_t *m_pData; // will be freed by the command processor
 	};
 
 	struct SCommand_Texture_Update : public SCommand
@@ -535,7 +546,7 @@ public:
 		size_t m_Width;
 		size_t m_Height;
 		int m_Format;
-		void *m_pData; // will be freed by the command processor
+		uint8_t *m_pData; // will be freed by the command processor
 	};
 
 	struct SCommand_Texture_Destroy : public SCommand
@@ -559,8 +570,8 @@ public:
 		size_t m_Width;
 		size_t m_Height;
 
-		void *m_pTextData;
-		void *m_pTextOutlineData;
+		uint8_t *m_pTextData; // will be freed by the command processor
+		uint8_t *m_pTextOutlineData; // will be freed by the command processor
 	};
 
 	struct SCommand_TextTextures_Destroy : public SCommand
@@ -585,7 +596,7 @@ public:
 		int m_Y;
 		size_t m_Width;
 		size_t m_Height;
-		void *m_pData; // will be freed by the command processor
+		uint8_t *m_pData; // will be freed by the command processor
 	};
 
 	struct SCommand_WindowCreateNtf : public CCommandBuffer::SCommand
@@ -593,7 +604,7 @@ public:
 		SCommand_WindowCreateNtf() :
 			SCommand(CMD_WINDOW_CREATE_NTF) {}
 
-		uint32_t m_WindowID;
+		uint32_t m_WindowId;
 	};
 
 	struct SCommand_WindowDestroyNtf : public CCommandBuffer::SCommand
@@ -601,7 +612,7 @@ public:
 		SCommand_WindowDestroyNtf() :
 			SCommand(CMD_WINDOW_DESTROY_NTF) {}
 
-		uint32_t m_WindowID;
+		uint32_t m_WindowId;
 	};
 
 	//
@@ -698,7 +709,7 @@ public:
 	virtual uint64_t StreamedMemoryUsage() const = 0;
 	virtual uint64_t StagingMemoryUsage() const = 0;
 
-	virtual const TTWGraphicsGPUList &GetGPUs() const = 0;
+	virtual const TTwGraphicsGpuList &GetGpus() const = 0;
 
 	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
 	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
@@ -708,7 +719,7 @@ public:
 
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) = 0;
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual bool UpdateDisplayMode(int Index) = 0;
 	virtual int GetWindowScreen() = 0;
@@ -720,8 +731,8 @@ public:
 	virtual void GetViewportSize(int &w, int &h) = 0;
 	virtual void NotifyWindow() = 0;
 
-	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;
-	virtual void WindowCreateNtf(uint32_t WindowID) = 0;
+	virtual void WindowDestroyNtf(uint32_t WindowId) = 0;
+	virtual void WindowCreateNtf(uint32_t WindowId) = 0;
 
 	virtual void RunBuffer(CCommandBuffer *pBuffer) = 0;
 	virtual void RunBufferSingleThreadedUnsafe(CCommandBuffer *pBuffer) = 0;
@@ -916,6 +927,11 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	void AdjustViewport(bool SendViewportChangeToBackend);
 
+	ivec2 m_ReadPixelPosition = ivec2(0, 0);
+	ColorRGBA *m_pReadPixelColor = nullptr;
+	void ReadPixelDirect(bool *pSwapped);
+	void ScreenshotDirect(bool *pSwapped);
+
 	int IssueInit();
 	int InitWindow();
 
@@ -937,7 +953,7 @@ public:
 	uint64_t StreamedMemoryUsage() const override;
 	uint64_t StagingMemoryUsage() const override;
 
-	const TTWGraphicsGPUList &GetGPUs() const override;
+	const TTwGraphicsGpuList &GetGpus() const override;
 
 	void MapScreen(float TopLeftX, float TopLeftY, float BottomRightX, float BottomRightY) override;
 	void GetScreen(float *pTopLeftX, float *pTopLeftY, float *pBottomRightX, float *pBottomRightY) override;
@@ -949,34 +965,32 @@ public:
 	IGraphics::CTextureHandle FindFreeTextureIndex();
 	void FreeTextureIndex(CTextureHandle *pIndex);
 	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override;
-	IGraphics::CTextureHandle LoadTextureRaw(size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData, int Flags, const char *pTexName = nullptr) override;
-	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData) override;
+	IGraphics::CTextureHandle LoadTextureRaw(const CImageInfo &Image, int Flags, const char *pTexName = nullptr) override;
+	IGraphics::CTextureHandle LoadTextureRawMove(CImageInfo &Image, int Flags, const char *pTexName = nullptr) override;
+	int LoadTextureRawSub(IGraphics::CTextureHandle TextureId, int x, int y, const CImageInfo &Image) override;
 	IGraphics::CTextureHandle NullTexture() const override;
 
-	bool LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) override;
+	bool LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, uint8_t *pTextData, uint8_t *pTextOutlineData) override;
 	bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) override;
-	bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, const void *pData) override;
+	bool UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, const uint8_t *pData) override;
 
-	CTextureHandle LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, size_t w, size_t h);
-	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) override;
+	CTextureHandle LoadSpriteTextureImpl(const CImageInfo &FromImageInfo, int x, int y, size_t w, size_t h, const char *pName);
+	CTextureHandle LoadSpriteTexture(const CImageInfo &FromImageInfo, const struct CDataSprite *pSprite) override;
 
-	bool IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h) override;
-	bool IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) override;
+	bool IsImageSubFullyTransparent(const CImageInfo &FromImageInfo, int x, int y, int w, int h) override;
+	bool IsSpriteTextureFullyTransparent(const CImageInfo &FromImageInfo, const struct CDataSprite *pSprite) override;
 
 	// simple uncompressed RGBA loaders
 	IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) override;
-	int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) override;
-	void FreePNG(CImageInfo *pImg) override;
+	bool LoadPng(CImageInfo &Image, const char *pFilename, int StorageType) override;
 
 	bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) override;
 	bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) override;
 
-	void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t PixelSize, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) override;
-	void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, uint8_t *pSourceBuffer, size_t SrcWidth, size_t SrcHeight, size_t PixelSize, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) override;
+	void CopyTextureBufferSub(uint8_t *pDestBuffer, const CImageInfo &SourceImage, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) override;
+	void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, const CImageInfo &SourceImage, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) override;
 
-	bool ScreenshotDirect();
-
-	void TextureSet(CTextureHandle TextureID) override;
+	void TextureSet(CTextureHandle TextureId) override;
 
 	void Clear(float r, float g, float b, bool ForceClearNow = false) override;
 
@@ -997,14 +1011,14 @@ public:
 		pVert->m_Color = m_aColor[ColorIndex];
 	}
 
-	void SetColorVertex(const CColorVertex *pArray, int Num) override;
+	void SetColorVertex(const CColorVertex *pArray, size_t Num) override;
 	void SetColor(float r, float g, float b, float a) override;
 	void SetColor(ColorRGBA Color) override;
 	void SetColor4(ColorRGBA TopLeft, ColorRGBA TopRight, ColorRGBA BottomLeft, ColorRGBA BottomRight) override;
 
 	// go through all vertices and change their color (only works for quads)
 	void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) override;
-	void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) override;
+	void ChangeColorOfQuadVertices(size_t QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) override;
 
 	void QuadsSetSubset(float TlU, float TlV, float BrU, float BrV) override;
 	void QuadsSetSubsetFree(
@@ -1220,7 +1234,7 @@ public:
 	void Minimize() override;
 	void Maximize() override;
 	void WarnPngliteIncompatibleImages(bool Warn) override;
-	void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) override;
+	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
 	void Move(int x, int y) override;
 	void Resize(int w, int h, int RefreshRate) override;
@@ -1230,8 +1244,8 @@ public:
 	void AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc) override;
 	int GetWindowScreen() override;
 
-	void WindowDestroyNtf(uint32_t WindowID) override;
-	void WindowCreateNtf(uint32_t WindowID) override;
+	void WindowDestroyNtf(uint32_t WindowId) override;
+	void WindowCreateNtf(uint32_t WindowId) override;
 
 	int WindowActive() override;
 	int WindowOpen() override;
@@ -1242,6 +1256,7 @@ public:
 	int Init() override;
 	void Shutdown() override;
 
+	void ReadPixel(ivec2 Position, ColorRGBA *pColor) override;
 	void TakeScreenshot(const char *pFilename) override;
 	void TakeCustomScreenshot(const char *pFilename) override;
 	void Swap() override;
@@ -1249,6 +1264,7 @@ public:
 	bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) override;
 
 	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
+	void GetCurrentVideoMode(CVideoMode &CurMode, int Screen) override;
 
 	virtual int GetDesktopScreenWidth() const { return g_Config.m_GfxDesktopWidth; }
 	virtual int GetDesktopScreenHeight() const { return g_Config.m_GfxDesktopHeight; }

@@ -15,7 +15,7 @@ class CMapImages;
 
 class CBackgroundEngineMap : public CMap
 {
-	MACRO_INTERFACE("background_enginemap", 0)
+	MACRO_INTERFACE("background_enginemap")
 };
 
 class CBackground : public CMapLayers

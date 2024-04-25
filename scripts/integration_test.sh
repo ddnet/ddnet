@@ -7,14 +7,14 @@ for arg in "$@"
 do
 	if [ "$arg" == "-h" ] || [ "$arg" == "--help" ]
 	then
-		echo "usage: $(basename "$0") [OPTION..] [build dir]"
+		echo "usage: $(basename "$0") [OPTION..]"
 		echo "description:"
 		echo "  Runs a simple integration test of the client and server"
-		echo "  binaries from the given build dir"
+		echo "  binaries from the current build directory."
 		echo "options:"
-		echo "  --help|-h           show this help"
-		echo "  --verbose|-v        verbose output"
-		echo "  --valgrind-memcheck use valgrind's memcheck to run server and client"
+		echo "  --help|-h             show this help"
+		echo "  --verbose|-v          verbose output"
+		echo "  --valgrind-memcheck   use valgrind's memcheck to run server and client"
 		exit 0
 	elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]
 	then
@@ -23,22 +23,23 @@ do
 	then
 		arg_valgrind_memcheck=1
 	else
-		echo "Error: unknown arg '$arg'"
+		echo "Error: unknown argument '$arg'"
 		exit 1
 	fi
 done
 
 if [ ! -f DDNet ]
 then
-	echo "Error: client binary not found DDNet' not found"
+	echo "[-] Error: client binary 'DDNet' not found"
 	exit 1
 fi
 if [ ! -f DDNet-Server ]
 then
-	echo "Error: server binary not found DDNet-Server' not found"
+	echo "[-] Error: server binary 'DDNet-Server' not found"
 	exit 1
 fi
 
+echo "[*] Setup"
 got_killed=0
 
 function kill_all() {
@@ -51,24 +52,27 @@ function kill_all() {
 
 	if [ "$arg_verbose" == "1" ]
 	then
-		echo "[*] shutting down test clients and server ..."
+		echo "[*] Shutting down test clients and server"
 	fi
-
 	sleep 1
+
 	if [[ ! -f fail_server.txt ]]
 	then
-		echo "[*] shutting down server"
+		echo "[*] Shutting down server"
 		echo "shutdown" > server.fifo
 	fi
+	sleep 1
+
 	local i
 	for ((i=1;i<3;i++))
 	do
 		if [[ ! -f fail_client$i.txt ]]
 		then
-			echo "[*] shutting down client$i"
+			echo "[*] Shutting down client$i"
 			echo "quit" > "client$i.fifo"
 		fi
 	done
+	sleep 1
 }
 
 function cleanup() {
@@ -85,8 +89,8 @@ function fail()
 	echo "[-] $1 exited with code $2"
 }
 
-# TODO: check for open ports instead
-port=17822
+# Get unused port from the system by binding to port 0 and immediately closing the socket again
+port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()');
 
 if [[ $OSTYPE == 'darwin'* ]]; then
 	DETECT_LEAKS=0
@@ -100,13 +104,18 @@ export LSAN_OPTIONS=suppressions=../lsan.supp:print_suppressions=0
 
 function print_results() {
 	if [ "$arg_valgrind_memcheck" == "1" ]; then
-		if grep "ERROR SUMMARY" server.log client1.log client2.log | grep -q -v "ERROR SUMMARY: 0"; then
-			grep "^==" server.log client1.log client2.log
+		# Wait to ensure that the error summary was written to the stderr files because valgrind takes some time
+		# TODO: Instead wait for all started processes to finish
+		sleep 20
+		if grep "== ERROR SUMMARY: " stderr_server.txt stderr_client1.txt stderr_client2.txt | grep -q -v "ERROR SUMMARY: 0"; then
+			echo "[-] Error: Valgrind has detected the following errors:"
+			grep "^==" stderr_server.txt stderr_client1.txt stderr_client2.txt
 			return 1
 		fi
 	else
 		if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
 		then
+			echo "[-] Error: ASAN has detected the following errors:"
 			cat SAN.*
 			return 1
 		fi
@@ -127,39 +136,54 @@ cd integration_test || exit 1
 	echo $'add_path ../data'
 } > storage.cfg
 
+tool=""
+client_args="cl_download_skins 0;
+	gfx_fullscreen 0;
+	snd_enable 0;"
+
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	tool="valgrind --tool=memcheck --gen-suppressions=all --suppressions=../memcheck.supp --track-origins=yes"
-	client_args="cl_menu_map \"\";"
-else
-	tool=""
-	client_args=""
+	client_args="$client_args cl_menu_map \"\";"
 fi
 
 function wait_for_fifo() {
 	local fifo="$1"
 	local tries="$2"
 	local fails=0
-	# give the client time to launch and create the fifo file
-	# but assume after X secs that the client crashed before
+	# give the server/client time to launch and create the fifo file
+	# but assume after X secs that the server/client crashed before
 	# being able to create the file
 	while [[ ! -p "$fifo" ]]
 	do
 		fails="$((fails+1))"
 		if [ "$arg_verbose" == "1" ]
 		then
-			echo "[!] client fifos not found (attempts $fails/$tries)"
+			echo "[!] Note: $fifo not found (attempts $fails/$tries)"
 		fi
 		if [ "$fails" -gt "$tries" ]
 		then
+			echo "[-] Error: $(basename "$fifo" .fifo) possibly crashed on launch"
+			kill_all
 			print_results
-			echo "[-] Error: client possibly crashed on launch"
 			exit 1
 		fi
-		sleep 1
+		sleep 0.1
 	done
 }
 
-echo "[*] launch server"
+function wait_for_launch() {
+	local fifo="$1"
+	local baseDuration="$2"
+	if [ "$arg_valgrind_memcheck" == "1" ]; then
+		wait_for_fifo "$fifo" $((400 * baseDuration))
+		sleep $((8 * baseDuration))
+	else
+		wait_for_fifo "$fifo" $((100 * baseDuration))
+		sleep "$baseDuration"
+	fi
+}
+
+echo "[*] Launch server"
 $tool ../DDNet-Server \
 	"sv_input_fifo server.fifo;
 	sv_rcon_password rcon;
@@ -169,50 +193,36 @@ $tool ../DDNet-Server \
 	sv_register 0;
 	sv_port $port" > stdout_server.txt 2> stderr_server.txt || fail server "$?" &
 
-echo "[*] launch client 1"
+wait_for_launch server.fifo 1
+
+echo "[*] Launch client 1"
 $tool ../DDNet \
 	"cl_input_fifo client1.fifo;
 	player_name client1;
-	cl_download_skins 0;
-	gfx_fullscreen 0;
-	snd_enable 0;
 	logfile client1.log;
 	$client_args
 	connect localhost:$port" > stdout_client1.txt 2> stderr_client1.txt || fail client1 "$?" &
 
-if [ "$arg_valgrind_memcheck" == "1" ]; then
-	wait_for_fifo client1.fifo 180
-	sleep 40
-else
-	wait_for_fifo client1.fifo 50
-	sleep 1
-fi
+wait_for_launch client1.fifo 3
 
-echo "[*] start demo recording"
+echo "[*] Start demo recording"
 echo "record server" > server.fifo
 echo "record client1" > client1.fifo
-sleep 1
 
-echo "[*] launch client 2"
+echo "[*] Launch client 2"
 $tool ../DDNet \
 	"cl_input_fifo client2.fifo;
 	player_name client2;
-	cl_download_skins 0;
-	gfx_fullscreen 0;
-	snd_enable 0;
 	logfile client2.log;
 	$client_args
 	connect localhost:$port" > stdout_client2.txt 2> stderr_client2.txt || fail client2 "$?" &
 
-if [ "$arg_valgrind_memcheck" == "1" ]; then
-	wait_for_fifo client2.fifo 180
-	sleep 40
-else
-	wait_for_fifo client2.fifo 50
-	sleep 2
-fi
+wait_for_launch client2.fifo 5
 
-echo "[*] test chat and chat commands"
+# wait for tees to finish
+sleep 15
+
+echo "[*] Test chat and chat commands"
 echo "say hello world" > client1.fifo
 echo "rcon_auth rcon" > client1.fifo
 sleep 1
@@ -236,7 +246,7 @@ say "/mc
 EOF
 sleep 1
 
-echo "[*] test rcon commands"
+echo "[*] Test rcon commands"
 tr -d '\n' > client1.fifo << EOF
 rcon say hello from admin;
 rcon broadcast test;
@@ -247,12 +257,12 @@ unban_all;
 EOF
 sleep 1
 
-echo "[*] stop demo recording"
+echo "[*] Stop demo recording"
 echo "stoprecord" > server.fifo
 echo "stoprecord" > client1.fifo
 sleep 1
 
-echo "[*] test map change"
+echo "[*] Test map change"
 echo "rcon sv_map Tutorial" > client1.fifo
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	sleep 60
@@ -260,7 +270,7 @@ else
 	sleep 15
 fi
 
-echo "[*] play demos"
+echo "[*] Play demos"
 echo "play demos/server.demo" > client1.fifo
 echo "play demos/client1.demo" > client2.fifo
 if [ "$arg_valgrind_memcheck" == "1" ]; then
@@ -271,8 +281,6 @@ fi
 
 # Kill all processes first so all outputs are fully written
 kill_all
-wait
-sleep 1
 
 if ! grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2} I chat: 0:-2:client1: hello world$' server.log
 then
@@ -307,20 +315,25 @@ then
 fi
 
 ranks="$(sqlite3 ddnet-server.sqlite < <(echo "select * from record_race;"))"
-num_ranks="$(echo "$ranks" | wc -l | xargs)"
+rank_time="$(echo "$ranks" | awk -F '|' '{ print "player:", $2, "time:", $4, "cps:", $6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28 }')"
+expected_times="\
+player: client2 time: 1020.98 cps: 0.02 0.1 0.2 0.26 0.32 600.36 600.42 600.46 600.5 1020.54 1020.58 1020.6 1020.64 1020.66 1020.7 1020.72 1020.76 1020.78 1020.8 1020.84 1020.86 1020.88 1020.9
+player: client2 time: 1020.38 cps: 1021.34 0.02 0.04 0.04 0.06 600.08 600.1 600.12 600.12 1020.14 1020.16 1020.18 1020.2 1020.2 1020.22 1020.24 1020.26 1020.26 1020.28 1020.3 1020.3 1020.32 1020.34
+player: client1 time: 6248.56 cps: 0.42 0.5 0.0 0.66 0.92 0.02 300.18 300.46 300.76 300.88 300.98 301.02 301.04 301.06 301.08 301.18 301.38 301.66 307.34 308.08 308.1 308.14 308.44
+player: client1 time: 168300.5 cps: 0.02 0.06 0.12 15300.14 15300.18 30600.2 30600.22 45900.24 45900.26 61200.28 61200.3 76500.32 76500.34 91800.36 91800.36 107100.38 107100.4 122400.42 122400.42 137700.44 137700.45 137700.45 153000.48
+player: client2 time: 302.02 cps: 0.42 0.5 0.0 0.66 0.92 0.02 300.18 300.46 300.76 300.88 300.98 301.16 301.24 301.28 301.3 301.86 301.96 0.0 0.0 0.0 0.0 0.0 0.0"
+
+# require at least one rank in all cases. Exact finishes only with valgrind disabled
 if [ "$ranks" == "" ]
 then
 	touch fail_ranks.txt
 	echo "[-] Error: no ranks found in database"
-elif [ "$num_ranks" != "1" ]
+elif [ "$arg_valgrind_memcheck" != "1" ] && [ "$rank_time" != "$expected_times" ]
 then
 	touch fail_ranks.txt
-	echo "[-] Error: expected 1 rank got $num_ranks"
-elif ! echo "$ranks" | grep -q client1
-then
-	touch fail_ranks.txt
-	echo "[-] Error: expected a rank from client1 instead got:"
-	echo "  $ranks"
+	echo "[-] Error: unexpected finish time"
+	echo "  expected: $expected_times"
+	echo "  got: $rank_time"
 fi
 
 for logfile in client1.log client2.log server.log
@@ -331,7 +344,7 @@ do
 	fi
 	if [ ! -f "$logfile" ]
 	then
-		echo "[-] Error: logfile '$logfile' not found."
+		echo "[-] Error: logfile '$logfile' not found"
 		touch fail_logs.txt
 		continue
 	fi
@@ -366,10 +379,9 @@ then
 		cat "$fail"
 	done
 	print_results
-	echo "[-] Test failed. See errors above."
+	echo "[-] Test failed. See errors above"
 	exit 1
-else
-	echo "[*] all tests passed"
 fi
 
+echo "[*] All tests passed"
 print_results || exit 1

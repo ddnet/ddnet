@@ -57,7 +57,20 @@ bool IsValidTeleTile(int Index)
 		Index == TILE_TELECHECKINEVIL);
 }
 
-bool IsTeleTileNumberUsed(int Index)
+bool IsTeleTileCheckpoint(int Index)
+{
+	return Index == TILE_TELECHECK || Index == TILE_TELECHECKOUT;
+}
+
+bool IsTeleTileNumberUsed(int Index, bool Checkpoint)
+{
+	if(Checkpoint)
+		return IsTeleTileCheckpoint(Index);
+	return !IsTeleTileCheckpoint(Index) && Index != TILE_TELECHECKIN &&
+	       Index != TILE_TELECHECKINEVIL;
+}
+
+bool IsTeleTileNumberUsedAny(int Index)
 {
 	return Index != TILE_TELECHECKIN &&
 	       Index != TILE_TELECHECKINEVIL;
@@ -149,4 +162,14 @@ bool IsCreditsTile(int TileIndex)
 		(TILE_CREDITS_6 == TileIndex) ||
 		(TILE_CREDITS_7 == TileIndex) ||
 		(TILE_CREDITS_8 == TileIndex));
+}
+
+int PackColor(CColor Color)
+{
+	int Res = 0;
+	Res |= Color.r << 24;
+	Res |= Color.g << 16;
+	Res |= Color.b << 8;
+	Res |= Color.a;
+	return Res;
 }

@@ -4,7 +4,7 @@
 #define ENGINE_SERVERBROWSER_H
 
 #include <base/hash.h>
-#include <base/types.h>
+#include <base/system.h>
 
 #include <engine/map.h>
 #include <engine/shared/protocol.h>
@@ -117,6 +117,7 @@ public:
 	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
 	int m_NumFilteredPlayers;
+	bool m_RequiresLogin;
 
 	static int EstimateLatency(int Loc1, int Loc2);
 	static bool ParseLocation(int *pResult, const char *pString);
@@ -231,6 +232,8 @@ public:
 	const SHA256_DIGEST &IconSha256() const { return m_IconSha256; }
 	const std::vector<CCommunityCountry> &Countries() const { return m_vCountries; }
 	const std::vector<CCommunityType> &Types() const { return m_vTypes; }
+	bool HasCountry(const char *pCountryName) const;
+	bool HasType(const char *pTypeName) const;
 	bool HasRanks() const { return m_HasFinishes; }
 	CServerInfo::ERankState HasRank(const char *pMap) const;
 };
@@ -245,9 +248,21 @@ public:
 	virtual bool Filtered(const char *pElement) const = 0;
 };
 
+class ICommunityCache
+{
+public:
+	virtual void Update(bool Force) = 0;
+	virtual const std::vector<const CCommunity *> &SelectedCommunities() const = 0;
+	virtual const std::vector<const CCommunityCountry *> &SelectableCountries() const = 0;
+	virtual const std::vector<const CCommunityType *> &SelectableTypes() const = 0;
+	virtual bool AnyRanksAvailable() const = 0;
+	virtual bool CountriesTypesFilterAvailable() const = 0;
+	virtual const char *CountryTypeFilterKey() const = 0;
+};
+
 class IServerBrowser : public IInterface
 {
-	MACRO_INTERFACE("serverbrowser", 0)
+	MACRO_INTERFACE("serverbrowser")
 public:
 	/* Constants: Server Browser Sorting
 		SORT_NAME - Sort by name.
@@ -255,6 +270,7 @@ public:
 		SORT_MAP - Sort by map
 		SORT_GAMETYPE - Sort by game type. DM, TDM etc.
 		SORT_NUMPLAYERS - Sort after how many players there are on the server.
+		SORT_NUMFRIENDS - Sort after how many friends there are on the server.
 	*/
 	enum
 	{
@@ -263,6 +279,7 @@ public:
 		SORT_MAP,
 		SORT_GAMETYPE,
 		SORT_NUMPLAYERS,
+		SORT_NUMFRIENDS,
 
 		QUICK_SERVERNAME = 1,
 		QUICK_PLAYER = 2,
@@ -271,15 +288,25 @@ public:
 		TYPE_INTERNET = 0,
 		TYPE_LAN,
 		TYPE_FAVORITES,
+		TYPE_FAVORITE_COMMUNITY_1,
+		TYPE_FAVORITE_COMMUNITY_2,
+		TYPE_FAVORITE_COMMUNITY_3,
+		TYPE_FAVORITE_COMMUNITY_4,
+		TYPE_FAVORITE_COMMUNITY_5,
 		NUM_TYPES,
 	};
 
 	static constexpr const char *COMMUNITY_DDNET = "ddnet";
 	static constexpr const char *COMMUNITY_NONE = "none";
+	/**
+	 * Special community value for country/type filters that
+	 * affect all communities.
+	 */
+	static constexpr const char *COMMUNITY_ALL = "all";
 
 	static constexpr const char *SEARCH_EXCLUDE_TOKEN = ";";
 
-	virtual void Refresh(int Type) = 0;
+	virtual void Refresh(int Type, bool Force = false) = 0;
 	virtual bool IsGettingServerlist() const = 0;
 	virtual bool IsRefreshing() const = 0;
 	virtual int LoadingProgression() const = 0;
@@ -296,11 +323,20 @@ public:
 	virtual const std::vector<CCommunity> &Communities() const = 0;
 	virtual const CCommunity *Community(const char *pCommunityId) const = 0;
 	virtual std::vector<const CCommunity *> SelectedCommunities() const = 0;
-	virtual int64_t DDNetInfoUpdateTime() const = 0;
+	virtual std::vector<const CCommunity *> FavoriteCommunities() const = 0;
+	virtual std::vector<const CCommunity *> CurrentCommunities() const = 0;
+	virtual unsigned CurrentCommunitiesHash() const = 0;
 
+	virtual bool DDNetInfoAvailable() const = 0;
+	virtual SHA256_DIGEST DDNetInfoSha256() const = 0;
+
+	virtual ICommunityCache &CommunityCache() = 0;
+	virtual const ICommunityCache &CommunityCache() const = 0;
+	virtual IFilterList &FavoriteCommunitiesFilter() = 0;
 	virtual IFilterList &CommunitiesFilter() = 0;
 	virtual IFilterList &CountriesFilter() = 0;
 	virtual IFilterList &TypesFilter() = 0;
+	virtual const IFilterList &FavoriteCommunitiesFilter() const = 0;
 	virtual const IFilterList &CommunitiesFilter() const = 0;
 	virtual const IFilterList &CountriesFilter() const = 0;
 	virtual const IFilterList &TypesFilter() const = 0;

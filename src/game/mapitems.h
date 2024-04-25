@@ -520,6 +520,9 @@ struct CMapItemSound
 
 	int m_SoundName;
 	int m_SoundData;
+	// Deprecated. Do not read this value, it could be wrong.
+	// Use GetDataSize instead, which returns the de facto size.
+	// Value must still be written for compatibility.
 	int m_SoundDataSize;
 };
 
@@ -568,7 +571,9 @@ public:
 bool IsValidGameTile(int Index);
 bool IsValidFrontTile(int Index);
 bool IsValidTeleTile(int Index);
-bool IsTeleTileNumberUsed(int Index); // Assumes that Index is a valid tele tile index
+bool IsTeleTileCheckpoint(int Index); // Assumes that Index is a valid tele tile index
+bool IsTeleTileNumberUsed(int Index, bool Checkpoint); // Assumes that Index is a valid tele tile index
+bool IsTeleTileNumberUsedAny(int Index); // Does not check for checkpoint only
 bool IsValidSpeedupTile(int Index);
 bool IsValidSwitchTile(int Index);
 bool IsSwitchTileFlagsUsed(int Index); // Assumes that Index is a valid switch tile index
@@ -578,5 +583,6 @@ bool IsValidTuneTile(int Index);
 bool IsValidEntity(int Index);
 bool IsRotatableTile(int Index);
 bool IsCreditsTile(int TileIndex);
+int PackColor(CColor Color);
 
 #endif

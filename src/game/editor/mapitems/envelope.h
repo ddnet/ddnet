@@ -21,10 +21,11 @@ public:
 	explicit CEnvelope(int NumChannels);
 
 	std::pair<float, float> GetValueRange(int ChannelMask);
-	int Eval(float Time, ColorRGBA &Color);
+	void Eval(float Time, ColorRGBA &Result, size_t Channels);
 	void AddPoint(int Time, int v0, int v1 = 0, int v2 = 0, int v3 = 0);
 	float EndTime() const;
 	int GetChannels() const;
+	EType Type() const { return m_Type; }
 
 private:
 	void Resort();

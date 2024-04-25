@@ -5,21 +5,21 @@
 
 class IAntibot : public IInterface
 {
-	MACRO_INTERFACE("antibot", 0)
+	MACRO_INTERFACE("antibot")
 public:
 	virtual void RoundStart(class IGameServer *pGameServer) = 0;
 	virtual void RoundEnd() = 0;
 
 	// Hooks
-	virtual void OnPlayerInit(int ClientID) = 0;
-	virtual void OnPlayerDestroy(int ClientID) = 0;
-	virtual void OnSpawn(int ClientID) = 0;
-	virtual void OnHammerFireReloading(int ClientID) = 0;
-	virtual void OnHammerFire(int ClientID) = 0;
-	virtual void OnHammerHit(int ClientID, int TargetID) = 0;
-	virtual void OnDirectInput(int ClientID) = 0;
-	virtual void OnCharacterTick(int ClientID) = 0;
-	virtual void OnHookAttach(int ClientID, bool Player) = 0;
+	virtual void OnPlayerInit(int ClientId) = 0;
+	virtual void OnPlayerDestroy(int ClientId) = 0;
+	virtual void OnSpawn(int ClientId) = 0;
+	virtual void OnHammerFireReloading(int ClientId) = 0;
+	virtual void OnHammerFire(int ClientId) = 0;
+	virtual void OnHammerHit(int ClientId, int TargetId) = 0;
+	virtual void OnDirectInput(int ClientId) = 0;
+	virtual void OnCharacterTick(int ClientId) = 0;
+	virtual void OnHookAttach(int ClientId, bool Player) = 0;
 
 	// Commands
 	virtual void ConsoleCommand(const char *pCommand) = 0;
@@ -29,17 +29,17 @@ public:
 
 class IEngineAntibot : public IAntibot
 {
-	MACRO_INTERFACE("engineantibot", 0)
+	MACRO_INTERFACE("engineantibot")
 public:
 	virtual void Init() = 0;
 
 	// Hooks
 	virtual void OnEngineTick() = 0;
-	virtual void OnEngineClientJoin(int ClientID, bool Sixup) = 0;
-	virtual void OnEngineClientDrop(int ClientID, const char *pReason) = 0;
-	virtual bool OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) = 0;
-	virtual bool OnEngineServerMessage(int ClientID, const void *pData, int Size, int Flags) = 0;
-	virtual bool OnEngineSimulateClientMessage(int *pClientID, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags) = 0;
+	virtual void OnEngineClientJoin(int ClientId, bool Sixup) = 0;
+	virtual void OnEngineClientDrop(int ClientId, const char *pReason) = 0;
+	virtual bool OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags) = 0;
+	virtual bool OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags) = 0;
+	virtual bool OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags) = 0;
 
 	virtual ~IEngineAntibot(){};
 };

@@ -86,6 +86,7 @@ void CLineInput::SetRange(const char *pString, size_t Begin, size_t End)
 		m_Len += AddedCharSize - RemovedCharSize;
 		m_NumChars += AddedCharCount - RemovedCharCount;
 		m_WasChanged = true;
+		m_WasCursorChanged = true;
 		m_pStr[m_Len] = '\0';
 		m_SelectionStart = m_SelectionEnd = m_CursorPos;
 	}
@@ -158,7 +159,7 @@ void CLineInput::MoveCursor(EMoveDirection Direction, bool MoveWord, const char 
 void CLineInput::SetCursorOffset(size_t Offset)
 {
 	m_SelectionStart = m_SelectionEnd = m_LastCompositionCursorPos = m_CursorPos = clamp<size_t>(Offset, 0, m_Len);
-	m_WasChanged = true;
+	m_WasCursorChanged = true;
 }
 
 void CLineInput::SetSelection(size_t Start, size_t End)
@@ -168,7 +169,7 @@ void CLineInput::SetSelection(size_t Start, size_t End)
 		std::swap(Start, End);
 	m_SelectionStart = clamp<size_t>(Start, 0, m_Len);
 	m_SelectionEnd = clamp<size_t>(End, 0, m_Len);
-	m_WasChanged = true;
+	m_WasCursorChanged = true;
 }
 
 size_t CLineInput::OffsetFromActualToDisplay(size_t ActualOffset)
@@ -383,12 +384,12 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 		}
 	}
 
-	m_WasChanged |= OldCursorPos != m_CursorPos;
-	m_WasChanged |= SelectionLength != GetSelectionLength();
-	return m_WasChanged || KeyHandled;
+	m_WasCursorChanged |= OldCursorPos != m_CursorPos;
+	m_WasCursorChanged |= SelectionLength != GetSelectionLength();
+	return m_WasChanged || m_WasCursorChanged || KeyHandled;
 }
 
-STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth)
+STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth, float LineSpacing, const std::vector<STextColorSplit> &vColorSplits)
 {
 	// update derived attributes to handle external changes to the buffer
 	UpdateStrData();
@@ -422,14 +423,16 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 			pDisplayStr = DisplayStrBuffer.c_str();
 		}
 
-		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth);
-		const vec2 CursorPos = CUI::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
+		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth, LineSpacing);
+		const vec2 CursorPos = CUi::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
 
 		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 		Cursor.m_ForceCursorRendering = Changed;
+		Cursor.m_LineSpacing = LineSpacing;
 		Cursor.m_PressMouse.x = m_MouseSelection.m_PressMouse.x;
 		Cursor.m_ReleaseMouse.x = m_MouseSelection.m_ReleaseMouse.x;
+		Cursor.m_vColorSplits = vColorSplits;
 		if(LineWidth < 0.0f)
 		{
 			// Using a Y position that's always inside the line input makes it so the selection does not reset when
@@ -497,6 +500,7 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 		CTextCursor CaretCursor;
 		TextRender()->SetCursor(&CaretCursor, CursorPos.x, CursorPos.y, FontSize, 0);
 		CaretCursor.m_LineWidth = LineWidth;
+		CaretCursor.m_LineSpacing = LineSpacing;
 		CaretCursor.m_CursorMode = TEXT_CURSOR_CURSOR_MODE_SET;
 		CaretCursor.m_CursorCharacter = str_utf8_offset_bytes_to_chars(pDisplayStr, DisplayCursorOffset);
 		TextRender()->TextEx(&CaretCursor, pDisplayStr);
@@ -504,10 +508,12 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 	}
 	else
 	{
-		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth);
-		const vec2 CursorPos = CUI::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
+		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth, LineSpacing);
+		const vec2 CursorPos = CUi::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
 		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
+		Cursor.m_LineSpacing = LineSpacing;
+		Cursor.m_vColorSplits = vColorSplits;
 		TextRender()->TextEx(&Cursor, pDisplayStr);
 	}
 
@@ -629,7 +635,7 @@ void CLineInput::Activate(EInputPriority Priority)
 	ms_ActiveInputPriority = Priority;
 }
 
-void CLineInput::Deactivate()
+void CLineInput::Deactivate() const
 {
 	if(!IsActive())
 		return;

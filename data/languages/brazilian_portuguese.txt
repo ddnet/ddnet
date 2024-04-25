@@ -29,6 +29,8 @@
 # Rafael Fontenelle   2023-07-07 12:11:00
 # Rafael Fontenelle   2023-08-14 14:17:00
 # Rafael Fontenelle   2023-09-25 14:23:00
+# Rafael Fontenelle   2023-12-05 17:01:00
+# Rafael Fontenelle   2024-03-02 16:20:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -50,9 +52,6 @@
 
 %s wins!
 == Vitória de %s!
-
--Page %d-
-== -Página %d-
 
 Abort
 == Cancelar
@@ -432,9 +431,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == O servidor está rodando com modificações em um tipo de jogo oficial.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Existe um mapa não salvo no editor, você pode querer salvá-lo antes de sair do jogo.
-
 Time limit
 == Limite de tempo
 
@@ -509,9 +505,6 @@ Ratio
 
 Max demos
 == Máximo de demos
-
-Dummy settings
-== Configs do dummy
 
 AntiPing
 == AntiPing
@@ -591,9 +584,6 @@ Sound volume
 Hue
 == Matiz
 
-Please use a different filename
-== 
-
 Show others
 == Mostrar outros
 
@@ -665,9 +655,6 @@ Automatically take statboard screenshot
 
 System message
 == Mensagem do sistema
-
-Quit anyway?
-== Sair mesmo assim?
 
 DDNet %s is available:
 == DDNet %s está disponível:
@@ -1036,9 +1023,6 @@ Editor
 Play
 == Jogar
 
-Saving ddnet-settings.cfg failed
-== Falha ao salvar ddnet-settings.cfg
-
 Theme
 == Tema
 
@@ -1171,9 +1155,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == Tem certeza que deseja desconectar e trocar para um servidor diferente?
 
-Kill Messages
-== Mensagens de kill
-
 Show local player's key presses
 == Mostrar pressionamento de teclas de jogadores locais
 
@@ -1218,9 +1199,6 @@ Tutorial
 
 Can't find a Tutorial server
 == Não foi possível encontrar o servidor de tutorial
-
-Toggle to edit your dummy settings
-== Alterne para editar as configurações do seu dummy
 
 Choose default eyes when joining a server
 == Escolha os olhos padrões ao entrar em um servidor
@@ -1409,9 +1387,6 @@ Show DDRace HUD
 
 Show jumps indicator
 == Mostrar indicador de pulos
-
-Show hook strength indicator
-== Mostrar indicador de força do gancho
 
 Hook collision line
 == Linha de colisão do gancho
@@ -1723,56 +1698,176 @@ Render cut to video
 == Renderizar corte do vídeo
 
 Error playing demo
-== 
+== Erro ao reproduzir demo
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Algumas imagens de mapa não puderam ser carregadas. Verifique o console local para detalhes.
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Alguns sons de mapa não puderam ser carregadas. Verifique o console local para detalhes.
 
 Loading menu themes
-== 
+== Carregando temas de menu
 
 Render complete
-== 
+== Renderização concluída
 
 Videos directory
-== 
+== Diretório de vídeos
 
 Video was saved to '%s'
-== 
+== O vídeo foi salvo em "%s"
 
 No demo selected
-== 
+== Nenhuma demo selecionada
 
 Created
-== 
+== Criada
 
 Netversion
-== 
+== Netversion
 
 [Demo details]
 map not included
-== 
+== mapa não incluído
 
 Ghosts directory
-== 
+== Diretório de fantasmas
 
 Activate all
-== 
+== Ativar tudo
 
 Deactivate all
-== 
+== Desativar tudo
 
 Enable ghost
-== 
+== Habilitar fantasma
 
 Only save improvements
-== 
+== Salvar somente melhorias
 
 Regular background color
-== 
+== Cor de fundo regular
 
 Entities background color
+== Cor de fundo de entidades
+
+Saving settings to '%s' failed
+== Falha ao salvar as configurações para '%s'
+
+Searching
+== Pesquisando
+
+Enter Username
+== Insira o nome de usuário
+
+Enter Password
+== Insira a senha
+
+NOT CONNECTED
+== NÃO CONECTADO
+
+Match %d of %d
+== Correspondência %d de %d
+
+No results
+== Nenhum resultado
+
+Lines %d - %d (%s)
+== Linhas %d - %d (%s)
+
+Locked
+== Bloqueado
+
+Following
+== Seguindo
+
+Press a key…
+== Pressione uma tecla…
+
+Are you sure that you want to restart?
+== Tem certeza que você deseja reiniciar?
+
+There's an unsaved map in the editor, you might want to save it.
+== Há um mapa não salvo no editor, você pode querer salvá-lo.
+
+Continue anyway?
+== Continuar mesmo assim?
+
+Communities
+== Comunidades
+
+Please use a different filename
+== Por favor, use um nome de arquivo diferente
+
+Info Messages
+== Mensagens de informação
+
+Show local time always
+== Mostrar sempre o tempo local
+
+Chat font size
+== Tamanho da fonte do chat
+
+Chat width
+== Largura do chat
+
+Authed name color in scoreboard
+== Cor do seu nome no placar
+
+Same clan color in scoreboard
+== Cor do mesmo clã no placar
+
+Show finish messages
+== Mostrar mensagens de finalização
+
+Failed saving the replay!
+== Falha ao salvar a reprodução!
+
+Error saving settings
+== Erro ao salvar as configurações
+
+Loading commands…
+== Carregando comandos…
+
+Main menu
+== Menu principal
+
+Server filter
+== Filtro de servidores
+
+Friends
+== Amigos
+
+Loading…
+== Carregando…
+
+Loading demo file from storage
+== 
+
+No login required
+== 
+
+Player info change cooldown
+== 
+
+Always show chat
+== 
+
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
 == 

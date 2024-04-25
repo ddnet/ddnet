@@ -22,10 +22,7 @@ private:
 	int64_t m_Snap;
 	int64_t m_Current;
 	int64_t m_Target;
-
-	int64_t m_SnapMargin;
-	int64_t m_CurrentMargin;
-	int64_t m_TargetMargin;
+	int64_t m_Margin;
 
 	int m_SpikeCounter;
 	float m_aAdjustSpeed[NUM_ADJUSTDIRECTIONS];
@@ -39,8 +36,7 @@ public:
 	void UpdateInt(int64_t Target);
 	void Update(CGraph *pGraph, int64_t Target, int TimeLeft, EAdjustDirection AdjustDirection);
 
-	int64_t GetMargin(int64_t Now) const;
-	void UpdateMargin(int64_t TargetMargin);
+	void UpdateMargin(int64_t Margin);
 };
 
 #endif

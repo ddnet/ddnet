@@ -4,7 +4,7 @@
 
 #define TW_DILATE_ALPHA_THRESHOLD 10
 
-static void Dilate(int w, int h, const unsigned char *pSrc, unsigned char *pDest, unsigned char AlphaThreshold = TW_DILATE_ALPHA_THRESHOLD)
+static void Dilate(int w, int h, const uint8_t *pSrc, uint8_t *pDest, uint8_t AlphaThreshold = TW_DILATE_ALPHA_THRESHOLD)
 {
 	const int BPP = 4; // RGBA assumed
 	int ix, iy;
@@ -44,7 +44,7 @@ static void Dilate(int w, int h, const unsigned char *pSrc, unsigned char *pDest
 				for(int i = 0; i < BPP - 1; ++i)
 				{
 					aSumOfOpaque[i] /= Counter;
-					pDest[m + i] = (unsigned char)aSumOfOpaque[i];
+					pDest[m + i] = (uint8_t)aSumOfOpaque[i];
 				}
 
 				pDest[m + AlphaCompIndex] = 255;
@@ -53,7 +53,7 @@ static void Dilate(int w, int h, const unsigned char *pSrc, unsigned char *pDest
 	}
 }
 
-static void CopyColorValues(int w, int h, int BPP, const unsigned char *pSrc, unsigned char *pDest)
+static void CopyColorValues(int w, int h, int BPP, const uint8_t *pSrc, uint8_t *pDest)
 {
 	int m = 0;
 	for(int y = 0; y < h; y++)
@@ -69,28 +69,26 @@ static void CopyColorValues(int w, int h, int BPP, const unsigned char *pSrc, un
 	}
 }
 
-void DilateImage(unsigned char *pImageBuff, int w, int h)
+void DilateImage(uint8_t *pImageBuff, int w, int h)
 {
 	DilateImageSub(pImageBuff, w, h, 0, 0, w, h);
 }
 
-void DilateImageSub(unsigned char *pImageBuff, int w, int h, int x, int y, int sw, int sh)
+void DilateImageSub(uint8_t *pImageBuff, int w, int h, int x, int y, int sw, int sh)
 {
 	const int BPP = 4; // RGBA assumed
-	unsigned char *apBuffer[2] = {NULL, NULL};
+	uint8_t *apBuffer[2] = {NULL, NULL};
 
-	apBuffer[0] = (unsigned char *)malloc((size_t)sw * sh * sizeof(unsigned char) * BPP);
-	apBuffer[1] = (unsigned char *)malloc((size_t)sw * sh * sizeof(unsigned char) * BPP);
-	unsigned char *pBufferOriginal = (unsigned char *)malloc((size_t)sw * sh * sizeof(unsigned char) * BPP);
-
-	unsigned char *pPixelBuff = (unsigned char *)pImageBuff;
+	apBuffer[0] = (uint8_t *)malloc((size_t)sw * sh * sizeof(uint8_t) * BPP);
+	apBuffer[1] = (uint8_t *)malloc((size_t)sw * sh * sizeof(uint8_t) * BPP);
+	uint8_t *pBufferOriginal = (uint8_t *)malloc((size_t)sw * sh * sizeof(uint8_t) * BPP);
 
 	for(int Y = 0; Y < sh; ++Y)
 	{
 		int SrcImgOffset = ((y + Y) * w * BPP) + (x * BPP);
 		int DstImgOffset = (Y * sw * BPP);
 		int CopySize = sw * BPP;
-		mem_copy(&pBufferOriginal[DstImgOffset], &pPixelBuff[SrcImgOffset], CopySize);
+		mem_copy(&pBufferOriginal[DstImgOffset], &pImageBuff[SrcImgOffset], CopySize);
 	}
 
 	Dilate(sw, sh, pBufferOriginal, apBuffer[0]);
@@ -111,7 +109,7 @@ void DilateImageSub(unsigned char *pImageBuff, int w, int h, int x, int y, int s
 		int SrcImgOffset = ((y + Y) * w * BPP) + (x * BPP);
 		int DstImgOffset = (Y * sw * BPP);
 		int CopySize = sw * BPP;
-		mem_copy(&pPixelBuff[SrcImgOffset], &pBufferOriginal[DstImgOffset], CopySize);
+		mem_copy(&pImageBuff[SrcImgOffset], &pBufferOriginal[DstImgOffset], CopySize);
 	}
 
 	free(pBufferOriginal);

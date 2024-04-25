@@ -10,6 +10,7 @@ public:
 
 	void Resize(int NewW, int NewH) override;
 	void SetTile(int x, int y, CTile Tile) override;
+	const char *TypeName() const override;
 };
 
 #endif

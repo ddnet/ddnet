@@ -32,9 +32,6 @@
 %s wins!
 == %s ha vinto!
 
--Page %d-
-== -Pagina %d-
-
 Abort
 == Annulla
 
@@ -407,9 +404,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Il server presenta impostazioni non standard in un tipo di gioco normale.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== C'è una mappa non salvata nell'editor, probabilmente vuoi salvarla prima di uscire.
-
 Time limit
 == Limite di tempo
 
@@ -508,9 +502,6 @@ Your skin
 Reset to defaults
 == Reimposta predefinito
 
-Quit anyway?
-== Vuoi chiudere comunque?
-
 Round
 == Turno
 
@@ -585,9 +576,6 @@ Are you sure that you want to disconnect your dummy?
 
 Successfully saved the replay!
 == Hai salvato il replay con successo!
-
-Saving ddnet-settings.cfg failed
-== Salvataggio di ddnet-settings.cfg non riuscito
 
 Replay feature is disabled!
 == Il replay è disabilitato!
@@ -700,9 +688,6 @@ Countries
 Types
 == Tipi
 
-Please use a different filename
-== 
-
 Remove chat
 == Rimuovi chat
 
@@ -771,9 +756,6 @@ Automatically create statboard csv
 
 Max CSVs
 == Massimo valore separato da virgole (CSV)
-
-Dummy settings
-== Impostazioni Dummy
 
 Download skins
 == Scarica skin
@@ -1327,9 +1309,6 @@ Opacity of freeze bars inside freeze
 Preview
 == Anteprima
 
-Show hook strength indicator
-== Mostra l'indicatore della forza del gancio
-
 Show local player's key presses
 == Mostra le pressioni dei tasti del giocatore locale
 
@@ -1444,13 +1423,58 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
+Failed saving the replay!
+== 
+
+Saving settings to '%s' failed
+== 
+
+Error saving settings
+== 
+
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
+Loading demo file from storage
+== 
+
 Why are you slowmo replaying to read this?
+== 
+
+Loading skin files
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
+Loading commands…
 == 
 
 Some map images could not be loaded. Check the local console for details.
@@ -1462,7 +1486,22 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
+Press a key…
+== 
+
+Main menu
+== 
+
 Render complete
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 Videos directory
@@ -1495,6 +1534,12 @@ SA
 CHN
 == 
 
+No login required
+== 
+
+Communities
+== 
+
 Copy info
 == 
 
@@ -1506,6 +1551,12 @@ Online players (%d)
 
 [friends (server browser)]
 Offline (%d)
+== 
+
+Server filter
+== 
+
+Friends
 == 
 
 Play the current demo
@@ -1579,6 +1630,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 Loading demo files
 == 
 
@@ -1622,6 +1676,9 @@ Unable to delete the demo '%s'
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Loading…
+== 
+
 Loading ghost files
 == 
 
@@ -1655,10 +1712,10 @@ Open the directory that contains the configuration and user files
 Open the directory to add custom themes
 == 
 
-Toggle to edit your dummy settings
+Dummy
 == 
 
-Loading skin files
+Player info change cooldown
 == 
 
 Converse
@@ -1689,9 +1746,6 @@ Aim bind
 Mouse
 == 
 
-Dummy
-== 
-
 Allows maps to render with more detail
 == 
 
@@ -1713,13 +1767,52 @@ Appearance
 Name Plate
 == 
 
-Kill Messages
+Info Messages
+== 
+
+Show local time always
 == 
 
 DDRace HUD
 == 
 
+Always show chat
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
+== 
+
 A Tee
+== 
+
+Show finish messages
 == 
 
 Normal Color

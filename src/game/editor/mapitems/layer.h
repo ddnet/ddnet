@@ -55,13 +55,14 @@ public:
 	virtual bool IsEntitiesLayer() const { return false; }
 
 	virtual void Render(bool Tileset = false) {}
-	virtual CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) { return CUI::POPUP_KEEP_OPEN; }
+	virtual CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) { return CUi::POPUP_KEEP_OPEN; }
 
 	virtual void ModifyImageIndex(FIndexModifyFunction pfnFunc) {}
 	virtual void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) {}
 	virtual void ModifySoundIndex(FIndexModifyFunction pfnFunc) {}
 
 	virtual std::shared_ptr<CLayer> Duplicate() const = 0;
+	virtual const char *TypeName() const = 0;
 
 	virtual void GetSize(float *pWidth, float *pHeight)
 	{

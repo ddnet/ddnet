@@ -56,19 +56,19 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 		{
 			CTile air = {TILE_AIR};
 			CLayerTiles::SetTile(x, y, air);
-			if(!m_pEditor->m_PreventUnusedTilesWasWarned)
-			{
-				m_pEditor->m_PopupEventType = CEditor::POPEVENT_PREVENTUNUSEDTILES;
-				m_pEditor->m_PopupEventActivated = true;
-				m_pEditor->m_PreventUnusedTilesWasWarned = true;
-			}
+			ShowPreventUnusedTilesWarning();
 		}
 	}
 }
 
-CUI::EPopupMenuFunctionResult CLayerGame::RenderProperties(CUIRect *pToolbox)
+CUi::EPopupMenuFunctionResult CLayerGame::RenderProperties(CUIRect *pToolbox)
 {
-	const CUI::EPopupMenuFunctionResult Result = CLayerTiles::RenderProperties(pToolbox);
+	const CUi::EPopupMenuFunctionResult Result = CLayerTiles::RenderProperties(pToolbox);
 	m_Image = -1;
 	return Result;
+}
+
+const char *CLayerGame::TypeName() const
+{
+	return "game";
 }

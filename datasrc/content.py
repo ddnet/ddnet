@@ -255,6 +255,7 @@ container.images.Add(image_audio_source)
 container.images.Add(image_strongweak)
 container.images.Add(image_hud)
 container.images.Add(image_extras)
+container.images.Add(Image("raceflag", "race_flag.png"))
 
 container.pickups.Add(Pickup("health"))
 container.pickups.Add(Pickup("armor"))
@@ -447,6 +448,7 @@ container.sprites.Add(Sprite("hud_teleport_laser", set_hud, 8,4,2,2))
 container.sprites.Add(Sprite("hud_practice_mode", set_hud, 4,6,2,2))
 container.sprites.Add(Sprite("hud_dummy_hammer", set_hud, 6,6,2,2))
 container.sprites.Add(Sprite("hud_dummy_copy", set_hud, 8,6,2,2))
+container.sprites.Add(Sprite("hud_lock_mode", set_hud, 10,6,2,2))
 
 container.sprites.Add(Sprite("part_snowflake", set_extras, 0,0,2,2))
 

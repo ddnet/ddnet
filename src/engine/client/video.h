@@ -2,7 +2,6 @@
 #define ENGINE_CLIENT_VIDEO_H
 
 #include <base/lock.h>
-#include <base/system.h>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -80,7 +79,7 @@ private:
 	void FinishFrames(OutputStream *pStream);
 	void CloseStream(OutputStream *pStream);
 
-	bool AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId);
+	bool AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId) const;
 
 	CGraphics_Threaded *m_pGraphics;
 	IStorage *m_pStorage;

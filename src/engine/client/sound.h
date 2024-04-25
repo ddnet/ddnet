@@ -13,6 +13,9 @@
 
 struct CSample
 {
+	int m_Index;
+	int m_NextFreeSampleIndex;
+
 	short *m_pData;
 	int m_NumFrames;
 	int m_Rate;
@@ -20,6 +23,11 @@ struct CSample
 	int m_LoopStart;
 	int m_LoopEnd;
 	int m_PausedAt;
+
+	float TotalTime() const
+	{
+		return m_NumFrames / (float)m_Rate;
+	}
 };
 
 struct CChannel
@@ -61,6 +69,8 @@ class CSound : public IEngineSound
 	CLock m_SoundLock;
 
 	CSample m_aSamples[NUM_SAMPLES] = {{0}};
+	int m_FirstFreeSampleIndex = 0;
+
 	CVoice m_aVoices[NUM_VOICES] = {{0}};
 	CChannel m_aChannels[NUM_CHANNELS] = {{255, 0}};
 	int m_NextVoice = 0;
@@ -76,11 +86,11 @@ class CSound : public IEngineSound
 
 	int *m_pMixBuffer = nullptr;
 
-	int AllocID();
-	void RateConvert(CSample &Sample);
+	CSample *AllocSample();
+	void RateConvert(CSample &Sample) const;
 
-	bool DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize);
-	bool DecodeWV(CSample &Sample, const void *pData, unsigned DataSize);
+	bool DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) const;
+	bool DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) const;
 
 	void UpdateVolume();
 
@@ -91,17 +101,17 @@ public:
 
 	bool IsSoundEnabled() override { return m_SoundEnabled; }
 
-	int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override;
-	int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override;
-	int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
-	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
-	void UnloadSample(int SampleID) override REQUIRES(!m_SoundLock);
+	int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override REQUIRES(!m_SoundLock);
+	int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override REQUIRES(!m_SoundLock);
+	int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor) override REQUIRES(!m_SoundLock);
+	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override REQUIRES(!m_SoundLock);
+	void UnloadSample(int SampleId) override REQUIRES(!m_SoundLock);
 
-	float GetSampleTotalTime(int SampleID) override; // in s
-	float GetSampleCurrentTime(int SampleID) override REQUIRES(!m_SoundLock); // in s
-	void SetSampleCurrentTime(int SampleID, float Time) override REQUIRES(!m_SoundLock);
+	float GetSampleTotalTime(int SampleId) override; // in s
+	float GetSampleCurrentTime(int SampleId) override REQUIRES(!m_SoundLock); // in s
+	void SetSampleCurrentTime(int SampleId, float Time) override REQUIRES(!m_SoundLock);
 
-	void SetChannel(int ChannelID, float Vol, float Pan) override;
+	void SetChannel(int ChannelId, float Vol, float Pan) override;
 	void SetListenerPos(float x, float y) override;
 
 	void SetVoiceVolume(CVoiceHandle Voice, float Volume) override REQUIRES(!m_SoundLock);
@@ -112,14 +122,14 @@ public:
 	void SetVoiceCircle(CVoiceHandle Voice, float Radius) override REQUIRES(!m_SoundLock);
 	void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) override REQUIRES(!m_SoundLock);
 
-	CVoiceHandle Play(int ChannelID, int SampleID, int Flags, float x, float y) REQUIRES(!m_SoundLock);
-	CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y) override REQUIRES(!m_SoundLock);
-	CVoiceHandle Play(int ChannelID, int SampleID, int Flags) override REQUIRES(!m_SoundLock);
-	void Pause(int SampleID) override REQUIRES(!m_SoundLock);
-	void Stop(int SampleID) override REQUIRES(!m_SoundLock);
+	CVoiceHandle Play(int ChannelId, int SampleId, int Flags, float x, float y) REQUIRES(!m_SoundLock);
+	CVoiceHandle PlayAt(int ChannelId, int SampleId, int Flags, float x, float y) override REQUIRES(!m_SoundLock);
+	CVoiceHandle Play(int ChannelId, int SampleId, int Flags) override REQUIRES(!m_SoundLock);
+	void Pause(int SampleId) override REQUIRES(!m_SoundLock);
+	void Stop(int SampleId) override REQUIRES(!m_SoundLock);
 	void StopAll() override REQUIRES(!m_SoundLock);
 	void StopVoice(CVoiceHandle Voice) override REQUIRES(!m_SoundLock);
-	bool IsPlaying(int SampleID) override REQUIRES(!m_SoundLock);
+	bool IsPlaying(int SampleId) override REQUIRES(!m_SoundLock);
 
 	void Mix(short *pFinalOut, unsigned Frames) override REQUIRES(!m_SoundLock);
 	void PauseAudioDevice() override;
