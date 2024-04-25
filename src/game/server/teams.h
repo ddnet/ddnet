@@ -25,6 +25,7 @@ class CGameTeams
 
 	int m_aTeamState[NUM_TEAMS];
 	bool m_aTeamLocked[NUM_TEAMS];
+	bool m_aTeamFlock[NUM_TEAMS];
 	CClientMask m_aInvited[NUM_TEAMS];
 	bool m_aPractice[NUM_TEAMS];
 	std::shared_ptr<CScoreSaveResult> m_apSaveTeamResult[NUM_TEAMS];
@@ -109,6 +110,7 @@ public:
 
 	void SendTeamsState(int ClientId);
 	void SetTeamLock(int Team, bool Lock);
+	void SetTeamFlock(int Team, bool Mode);
 	void ResetInvited(int Team);
 	void SetClientInvited(int Team, int ClientId, bool Invited);
 
@@ -147,6 +149,14 @@ public:
 			return false;
 
 		return m_aTeamLocked[Team];
+	}
+
+	bool TeamFlock(int Team)
+	{
+		if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
+			return false;
+
+		return m_aTeamFlock[Team];
 	}
 
 	bool IsInvited(int Team, int ClientId)

@@ -131,6 +131,33 @@ void CCollision::Init(class CLayers *pLayers)
 			}
 		}
 	}
+
+	m_TeleIns.clear();
+	m_TeleOuts.clear();
+	m_TeleCheckOuts.clear();
+	if(m_pTele)
+	{
+		for(int i = 0; i < m_Width * m_Height; i++)
+		{
+			int Number = TeleLayer()[i].m_Number;
+			int Type = TeleLayer()[i].m_Type;
+			if(Number > 0)
+			{
+				if(Type == TILE_TELEIN)
+				{
+					m_TeleIns[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
+				}
+				else if(Type == TILE_TELEOUT)
+				{
+					m_TeleOuts[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
+				}
+				else if(Type == TILE_TELECHECKOUT)
+				{
+					m_TeleCheckOuts[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
+				}
+			}
+		}
+	}
 }
 
 void CCollision::FillAntibot(CAntibotMapData *pMapData)

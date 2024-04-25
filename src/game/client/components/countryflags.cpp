@@ -63,7 +63,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		char aBuf[128];
 		CImageInfo Info;
 		str_format(aBuf, sizeof(aBuf), "countryflags/%s.png", aOrigin);
-		if(!Graphics()->LoadPNG(&Info, aBuf, IStorage::TYPE_ALL))
+		if(!Graphics()->LoadPng(Info, aBuf, IStorage::TYPE_ALL))
 		{
 			char aMsg[128];
 			str_format(aMsg, sizeof(aMsg), "failed to load '%s'", aBuf);
@@ -75,7 +75,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		CCountryFlag CountryFlag;
 		CountryFlag.m_CountryCode = CountryCode;
 		str_copy(CountryFlag.m_aCountryCodeString, aOrigin);
-		CountryFlag.m_Texture = Graphics()->LoadTextureRawMove(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, 0, aOrigin);
+		CountryFlag.m_Texture = Graphics()->LoadTextureRawMove(Info, 0, aBuf);
 
 		if(g_Config.m_Debug)
 		{

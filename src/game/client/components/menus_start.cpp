@@ -19,6 +19,8 @@
 
 void CMenus::RenderStartMenu(CUIRect MainView)
 {
+	GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_START);
+
 	// render logo
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_BANNER].m_Id);
 	Graphics()->QuadsBegin();
@@ -70,7 +72,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		// Activate internet tab before joining tutorial to make sure the server info
 		// for the tutorial servers is available.
 		SetMenuPage(PAGE_INTERNET);
-		RefreshBrowserTab(IServerBrowser::TYPE_INTERNET);
+		RefreshBrowserTab(true);
 		const char *pAddr = ServerBrowser()->GetTutorialServer();
 		if(pAddr)
 		{
@@ -191,7 +193,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	static CButtonContainer s_PlayButton;
 	if(DoButton_Menu(&s_PlayButton, Localize("Play", "Start menu"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "play_game" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)) || Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || CheckHotKey(KEY_P))
 	{
-		NewPage = g_Config.m_UiPage >= PAGE_INTERNET && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_3 ? g_Config.m_UiPage : PAGE_INTERNET;
+		NewPage = g_Config.m_UiPage >= PAGE_INTERNET && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_5 ? g_Config.m_UiPage : PAGE_INTERNET;
 	}
 
 	// render version

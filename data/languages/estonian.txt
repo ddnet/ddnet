@@ -4,12 +4,14 @@
 #modified by:
 #   Cammodude 2024-09-03 22:19:06
 #   Cammodude 2024-10-03 18:04:16
+#   Cammodude 2024-12-04 17:35:38
+#   Cammodude 2024-20-04 15:17:26
 ##### /authors #####
 
 ##### translated strings #####
 
 %ds left
-== %ds lahkus
+== %ds jäänud
 
 %i minute left
 == %i minut jäänud
@@ -42,7 +44,7 @@ All
 == Kõik
 
 Are you sure that you want to quit?
-== Oled kindel, et tahad lahkuda?
+== Kas olete kindel, et tahate lahkuda?
 
 Automatically record demos
 == Automaatselt lindista demosid
@@ -318,7 +320,7 @@ Reset filter
 == Lähtesta filter
 
 Score
-== Skoor
+== Punktid
 
 Score limit
 == Punktilimiit
@@ -450,7 +452,7 @@ Yes
 == Jah
 
 You must restart the game for all settings to take effect.
-== Sa pead mängu taaskäivitama, et kõik seaded jõustuks.
+== Te peate mängu taaskäivitama, et kõik seaded jõustuks.
 
 New name:
 == Uus nimi:
@@ -492,7 +494,7 @@ Record demo
 == Lindista demo
 
 Your skin
-== Sinu välimus
+== Teie välimus
 
 Reset to defaults
 == Lähtesta vaikeseadetele
@@ -561,22 +563,22 @@ Replace video
 == Asenda video
 
 File already exists, do you want to overwrite it?
-== Fail on juba olemas, kas sa tahad selle üle kirjutada?
+== Fail on juba olemas, kas te tahate selle üle kirjutada?
 
 Are you sure that you want to disconnect?
-== Kas sa oled kindel, et tahad ühenduse katkestada?
+== Kas olete kindel, et tahate ühenduse katkestada?
 
 Disconnect Dummy
 == Katkesta Dummy Ühendus
 
 Are you sure that you want to disconnect your dummy?
-== Kas sa oled kindel, et tahad oma dummy ühenduse katkestada?
+== Kas olete kindel, et tahate oma dummy ühenduse katkestada?
 
 Welcome to DDNet
-== Tere tulemast DDNet:i
+== Tere tulemast DDNet-i
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork on koostööpõhine interneti mäng, mille eesmärk on, et sina ja sinu grupp teesid jõuaksid kaardi finišisse. Uue mängijana peaksite alustama Novice serveritest, kus on kõige lihtsamad kaardid. Leia pingi abil sinule lähim server.
+== DDraceNetwork on koostööpõhine interneti mäng, mille eesmärk on, et teie ja teie grupp teesid jõuaksid kaardi finišisse. Uue mängijana peaksite alustama Novice serveritest, kus on kõige lihtsamad kaardid. Leia pingi abil sinule lähim server.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Kasutage klahvi k tapmiseks (uuesti proovimiseks), q teiste mängijate pealtvaatamiseks. Vaadake sätteid muude klahvide jaoks.
@@ -591,7 +593,7 @@ Existing Player
 == Olemasolev Mängija
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Sinu hüüdnimi '%s' on juba kasutuses (%d punkti). Kas sa ikka soovid seda kasutada?
+== Teie hüüdnimi '%s' on juba kasutuses (%d punkti). Kas te ikka soovite seda kasutada?
 
 Checking for existing player with your name
 == Samasuguse nimega mängija kontrollimine
@@ -606,7 +608,7 @@ Show DDNet map finishes in server browser
 == Näita DDNet kaardi lõpetusi serveri brauseris
 
 transmits your player name to info.ddnet.org
-== edastab sinu mängija nime veebilehele info.ddnet.org
+== edastab teie mängija nime veebilehele info.ddnet.org
 
 Theme
 == Teema
@@ -855,13 +857,13 @@ DDNet
 == DDNet
 
 DDNet Client needs to be restarted to complete update!
-== DDNet-klient peab taaskäivitama, et uuendus lõpetada!
+== DDNet Klient peab taaskäivitama, et uuendus lõpetada!
 
 Use DDRace Scoreboard
 == Kasuta DDRace punktitabelit
 
 Show score
-== Näita skoori
+== Näita punkte
 
 Show names in chat in team colors
 == Näita vestluses olevaid nimesid tiimi värvidega
@@ -975,7 +977,7 @@ https://ddnet.org/discord
 == https://ddnet.org/discord
 
 Learn
-== Õpi
+== Õppige
 
 https://wiki.ddnet.org/
 == https://wiki.ddnet.org/
@@ -1027,7 +1029,7 @@ Follow
 == Järgne
 
 Frags
-== 
+== Killustused
 
 Deaths
 == Surma
@@ -1037,9 +1039,6 @@ Suicides
 
 Ratio
 == Suhe
-
-Net
-== 
 
 FPM
 == FPM
@@ -1058,39 +1057,39 @@ Best
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Ebaõnnestumine initsialiseerimise ajal. Üritage gfx_backend muuta OpenGL-iks või Vulkan-iks settings_ddnet.cfg failis konfig. asukohas ja proovige uuesti.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== VRAM on otsas. Üritage eemaldada oma varad (nahad, üksused, jne.), eriti need, millel on kõrge resolutsioon.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Error esines käsusalvestamise ajal. Üritage uuendada oma GPU draivereid.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Renderdamiskäsk ebaõnnestus. Üritage uuendada oma GPU draivereid.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Renderdamiskäskude esitamine ebaõnnestus. Üritage uuendada oma GPU draivereid.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Kaadripuhvrite vahetus ebaõnnestus. Üritage uuendada oma GPU draivereid.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Tundmatu error. Üritage gfx_backend muuta OpenGL-iks või Vulkan-iks settings_ddnet.cfg failis konfig. asukohas ja proovige uuesti.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Ei suutnud initsialiseerida antud graafika tagaprogrammi, vaiketagaprogrammile naasmine
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Ei suutnud initsialiseerida antud graafika tagaprogrammi, see on ilmselt sellepärast, et teie ei installinud oma integreeritud graafika kaardi draivereid.
 
 Could not save downloaded map. Try manually deleting this file: %s
 == Ei suutnud salvestada allalaaditud kaarti. Proovi käsitsi kustutada seda faili: %s
@@ -1231,10 +1230,10 @@ Render complete
 == Renderdamine on valmis
 
 Are you sure that you want to restart?
-== Kas sa oled kindel, et tahad taaskäivitada?
+== Kas te olete kindel, et tahate taaskäivitada?
 
 There's an unsaved map in the editor, you might want to save it.
-== Kaardiredaktoris on salvestamata kaart, sa võibolla tahad seda salvestada.
+== Kaardiredaktoris on salvestamata kaart, te võibolla tahate seda salvestada.
 
 Continue anyway?
 == Jätka igatahes?
@@ -1249,7 +1248,7 @@ Unable to rename the folder
 == Ei saa kausta ümber nimetada
 
 File '%s' already exists, do you want to overwrite it?
-== Fail '%s' on juba olemas, kas sa soovid selle üle kirjutada?
+== Fail '%s' on juba olemas, kas te soovite selle üle kirjutada?
 
 (paused)
 == (peatatud)
@@ -1270,7 +1269,7 @@ Loading menu images
 == Menüü piltide laadimine
 
 Are you sure that you want to disconnect and switch to a different server?
-== Kas sa oled kindel et soovid katkestada ühenduse ja liituda teise serveriga?
+== Kas te olete kindel, et soovite katkestada ühenduse ja liituda teise serveriga?
 
 Communities
 == Kogukonnad
@@ -1304,10 +1303,10 @@ None
 == Mitte ühtegi
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== Oled kindel, et soovite eemaldada mängija '%s' oma sõbranimekirjast?
+== Kas olete kindel, et soovite eemaldada mängija '%s' oma sõbranimekirjast?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== Oled kindel, et soovite eemaldada klanni '%s' oma sõbranimekirjast?
+== Kas olete kindel, et soovite eemaldada klanni '%s' oma sõbranimekirjast?
 
 Add Clan
 == Lisa Klann
@@ -1418,10 +1417,10 @@ Open the directory that contains the demo files
 == Ava demo failide asukoht
 
 Are you sure that you want to delete the folder '%s'?
-== Kas oled kindel, et soovid kustutada kausta '%s'?
+== Kas olete kindel, et soovite kustutada kausta '%s'?
 
 Are you sure that you want to delete the demo '%s'?
-== Kas oled kindel, et soovid kustutada demo '%s'?
+== Kas olete kindel, et soovite kustutada demo '%s'?
 
 Delete folder
 == Kustuta kaust
@@ -1558,7 +1557,7 @@ Reset controls
 == Lähtesta juhtnupud
 
 Are you sure that you want to reset the controls to their defaults?
-== Kas oled kindel, et soovid lähtestada juhtnupud nende vaikeseadetele?
+== Kas olete kindel, et soovite lähtestada juhtnupud nende vaikeseadetele?
 
 Cancel
 == Tühista
@@ -1644,9 +1643,6 @@ Chat font size
 Chat width
 == Vestluse laius
 
-Show hook strength indicator
-== Näita konksu jõu indikaatorit
-
 Show local player's key presses
 == Näita kohaliku mängija klahvivajutusi
 
@@ -1669,7 +1665,7 @@ Colors of the hook collision line, in case of a possible collision with:
 == Konksu kokkupõrkejoone värvid, juhul kui on võimalik kokkupõrge:
 
 Your movements are not taken into account when calculating the line colors
-== Sinu liigutusi ei võeta arvesse joone värvide arvutamisel
+== Teie liigutusi ei võeta arvesse joone värvide arvutamisel
 
 Nothing hookable
 == Mittemillegi haakuvaga
@@ -1810,10 +1806,43 @@ Loading sound files
 == Helifailide laadimine
 
 Spree
-== 
+== Pillerkaar
 
 Grabs
-== 
+== Haaramised
 
 Moved ingame
 == Mängusisene liikumine
+
+Loading demo file from storage
+== Demofaili laadimine mälust
+
+No login required
+== Sisse pole vaja logida
+
+Player info change cooldown
+== Mängija info muutmise viivitus
+
+Always show chat
+== Alati näita vestlust
+
+Show friend mark (♥) in name plates
+== Näita sõbra märki (♥) nimesiltides
+
+Show hook strength icon indicator
+== Näita konksu jõu ikooni indikaatorit
+
+Show hook strength number indicator
+== Näita konksu jõu numbri indikaatorit
+
+Show own player's hook collision line
+== Näita enda konksu kokkupõrkejoont
+
+Always show own player's hook collision line
+== Alati näita enda konksu kokkupõrkejoont
+
+Always show other players' hook collision lines
+== Alati näita teiste konksu kokkupõrkejoont
+
+Net
+== Võrk

@@ -83,7 +83,7 @@ private:
 	size_t m_DownloadingSkins = 0;
 	char m_aEventSkinPrefix[24];
 
-	bool LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType);
+	bool LoadSkinPng(CImageInfo &Info, const char *pName, const char *pPath, int DirType);
 	const CSkin *LoadSkin(const char *pName, const char *pPath, int DirType);
 	const CSkin *LoadSkin(const char *pName, CImageInfo &Info);
 	const CSkin *FindImpl(const char *pName);

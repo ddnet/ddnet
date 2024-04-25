@@ -1839,11 +1839,11 @@ int fs_makedir(const char *path);
 int fs_removedir(const char *path);
 
 /**
- * Recursively create directories for a file.
+ * Recursively creates parent directories for a file or directory.
  *
  * @ingroup Filesystem
  *
- * @param path - File for which to create directories.
+ * @param path File or directory for which to create parent directories.
  *
  * @return 0 on success. Negative value on failure.
  *

@@ -21,6 +21,7 @@
 #	timakro			2014-06-30 18:26:59
 #	deen			2020-06-26 18:32:00
 #	bluesky			2022-07-05 21:00:00
+# BlaiZephyr 2024-03-23 20:55:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -376,9 +377,6 @@ Show friends only
 Show health, shields and ammo
 == Leben, Schilde und Munition anzeigen
 
-Show hook strength indicator
-== Indikator für Hakenstärke anzeigen
-
 Show ingame HUD
 == Spiel-HUD anzeigen
 
@@ -656,7 +654,7 @@ Updating...
 == Aktualisieren...
 
 Overlay entities
-== Overlay-Entities
+== Overlay-Entitäten
 
 Messages
 == Nachrichten
@@ -689,7 +687,7 @@ Normal message
 == Normale Nachricht
 
 AntiPing: predict grenade paths
-== AntiPing: Granatenflugkurve vorberechnen
+== Anti-Ping: Granatenflugkurve vorberechnen
 
 Search
 == Suche
@@ -707,7 +705,7 @@ Enable highlighted chat sound
 == Ton für Nachrichten an dich aktivieren
 
 AntiPing: predict weapons
-== AntiPing: Waffen vorberechnen
+== Anti-Ping: Waffen vorberechnen
 
 Highlighted message
 == Hervorgehobene Nachricht
@@ -851,7 +849,7 @@ Length
 == Länge
 
 Show text entities
-== Entities-Text
+== Entitäten-Text
 
 Hook collisions
 == Hakenkollisionen
@@ -893,7 +891,7 @@ Downloading %s:
 == Herunterladen %s:
 
 Show entities
-== Entities anzeigen
+== Entitäten anzeigen
 
 Zoom in
 == Hineinzoomen
@@ -1065,7 +1063,7 @@ Assets
 == Assets
 
 Entities
-== Entities
+== Entitäten
 
 Emoticons
 == Emoticons
@@ -1257,7 +1255,7 @@ Team %d
 == Team %d
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== Deckkraft von Entities die zu einem anderen Team gehören, z.B. Tees und Namensschilder
+== Deckkraft von Entitäten die zu einem anderen Team gehören, z.B. Tees und Namensschilder
 
 Position:
 == Position:
@@ -1510,7 +1508,7 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Kein VRAM mehr verfügbar. Versuch eigene Assets (Skins, Entities, usw.) zu löschen, insbesondere solche mit hoher Auflösung.
+== Kein VRAM mehr verfügbar. Versuch eigene Assets (Skins, Entitäten, usw.) zu löschen, insbesondere solche mit hoher Auflösung.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1743,7 +1741,7 @@ Regular background color
 == Normale Hintergrundfarbe
 
 Entities background color
-== Entities-Hintergrundfarbe
+== Entitäten-Hintergrundfarbe
 
 Saving settings to '%s' failed
 == Einstellungen als '%s' speichern fehlgeschlagen
@@ -1834,3 +1832,33 @@ Friends
 
 Loading…
 == Laden…
+
+Loading demo file from storage
+== Lade Demo-Datei von Platte
+
+No login required
+== Kein Login erforderlich
+
+Player info change cooldown
+== Abklingzeit Änderung Spieler-Info
+
+Always show chat
+== Immer Chat anzeigen
+
+Show friend mark (♥) in name plates
+== Freund-Zeichen (♥) im Namen anzeigen
+
+Show hook strength icon indicator
+== Hakenstärke Icon anzeigen
+
+Show hook strength number indicator
+== Hakenstärke Zahl anzeigen
+
+Show own player's hook collision line
+== Eigene Hakenkollisionslinie anzeigen
+
+Always show own player's hook collision line
+== Immer eigene Hakenkollisionslinie anzeigen
+
+Always show other players' hook collision lines
+== Immer Hakenkollisionslinie anderer Spieler anzeigen

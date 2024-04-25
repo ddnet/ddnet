@@ -866,7 +866,7 @@ bool CEditor::CallbackSaveImage(const char *pFileName, int StorageType, void *pU
 
 	TImageByteBuffer ByteBuffer;
 	SImageByteBuffer ImageByteBuffer(&ByteBuffer);
-	if(SavePNG(OutputFormat, pImg->m_pData, ImageByteBuffer, pImg->m_Width, pImg->m_Height))
+	if(SavePng(OutputFormat, pImg->m_pData, ImageByteBuffer, pImg->m_Width, pImg->m_Height))
 	{
 		IOHANDLE File = pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType);
 		if(File)
@@ -4231,7 +4231,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		}
 	}
 
-	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && s_Operation == OP_NONE)
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && s_Operation == OP_NONE)
 	{
 		if(Input()->ShiftIsPressed())
 		{
@@ -4263,7 +4263,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		}
 		s_ScrollToSelectionNext = true;
 	}
-	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && s_Operation == OP_NONE)
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen() && CLineInput::GetActiveInput() == nullptr && s_Operation == OP_NONE)
 	{
 		if(Input()->ShiftIsPressed())
 		{
@@ -4361,7 +4361,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	}
 
 	CEditorImage ImgInfo(this);
-	if(!Graphics()->LoadPNG(&ImgInfo, pFileName, StorageType))
+	if(!Graphics()->LoadPng(ImgInfo, pFileName, StorageType))
 	{
 		ShowFileDialogError("Failed to load image from file '%s'.", pFileName);
 		return false;
@@ -4369,8 +4369,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 
 	std::shared_ptr<CEditorImage> pImg = m_Map.m_vpImages[m_SelectedImage];
 	Graphics()->UnloadTexture(&(pImg->m_Texture));
-	free(pImg->m_pData);
-	pImg->m_pData = nullptr;
+	pImg->Free();
 	*pImg = ImgInfo;
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
@@ -4384,7 +4383,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	int TextureLoadFlag = Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 		TextureLoadFlag = 0;
-	pImg->m_Texture = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, pFileName);
+	pImg->m_Texture = Graphics()->LoadTextureRaw(ImgInfo, TextureLoadFlag, pFileName);
 	ImgInfo.m_pData = nullptr;
 	SortImages();
 	for(size_t i = 0; i < m_Map.m_vpImages.size(); ++i)
@@ -4425,7 +4424,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	CEditorImage ImgInfo(pEditor);
-	if(!pEditor->Graphics()->LoadPNG(&ImgInfo, pFileName, StorageType))
+	if(!pEditor->Graphics()->LoadPng(ImgInfo, pFileName, StorageType))
 	{
 		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFileName);
 		return false;
@@ -4443,7 +4442,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 		TextureLoadFlag = 0;
-	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, pFileName);
+	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo, TextureLoadFlag, pFileName);
 	ImgInfo.m_pData = nullptr;
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_AutoMapper.Load(pImg->m_aName);
@@ -5140,10 +5139,10 @@ void CEditor::RenderFileDialog()
 			{
 				char aBuffer[IO_MAX_PATH_LENGTH];
 				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
-				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType))
+				if(Graphics()->LoadPng(m_FilePreviewImageInfo, aBuffer, m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType))
 				{
 					Graphics()->UnloadTexture(&m_FilePreviewImage);
-					m_FilePreviewImage = Graphics()->LoadTextureRawMove(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, 0);
+					m_FilePreviewImage = Graphics()->LoadTextureRawMove(m_FilePreviewImageInfo, 0, aBuffer);
 					m_FilePreviewImageInfo.m_pData = nullptr;
 					m_FilePreviewState = PREVIEW_LOADED;
 				}
@@ -7048,6 +7047,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 											ShowPopupEnvPoint();
 										}
 										Ui()->SetActiveItem(nullptr);
+										s_Operation = EEnvelopeEditorOp::OP_NONE;
 									}
 								}
 								else if(!Ui()->MouseButton(0))
@@ -7180,6 +7180,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 											ShowPopupEnvPoint();
 										}
 										Ui()->SetActiveItem(nullptr);
+										s_Operation = EEnvelopeEditorOp::OP_NONE;
 									}
 								}
 								else if(!Ui()->MouseButton(0))

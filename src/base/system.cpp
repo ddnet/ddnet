@@ -1290,19 +1290,15 @@ static int parse_uint16(unsigned short *out, const char **str)
 
 int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t host_buf_size)
 {
-	char host[128];
-	int length;
-	int start = 0;
-	int end;
-	int failure;
 	const char *str = str_startswith(string, "tw-0.6+udp://");
 	if(!str)
 		return 1;
 
 	mem_zero(addr, sizeof(*addr));
 
-	length = str_length(str);
-	end = length;
+	int length = str_length(str);
+	int start = 0;
+	int end = length;
 	for(int i = 0; i < length; i++)
 	{
 		if(str[i] == '@')
@@ -1320,14 +1316,13 @@ int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t 
 			break;
 		}
 	}
+
+	char host[128];
 	str_truncate(host, sizeof(host), str + start, end - start);
 	if(host_buf)
 		str_copy(host_buf, host, host_buf_size);
 
-	if((failure = net_addr_from_str(addr, host)))
-		return failure;
-
-	return failure;
+	return net_addr_from_str(addr, host);
 }
 
 int net_addr_from_str(NETADDR *addr, const char *string)
@@ -2298,17 +2293,20 @@ int fs_storage_path(const char *appname, char *path, int max)
 
 int fs_makedir_rec_for(const char *path)
 {
-	char buffer[1024 * 2];
-	char *p;
+	char buffer[IO_MAX_PATH_LENGTH];
 	str_copy(buffer, path);
-	for(p = buffer + 1; *p != '\0'; p++)
+	for(int index = 1; buffer[index] != '\0'; ++index)
 	{
-		if(*p == '/' && *(p + 1) != '\0')
+		// Do not try to create folder for drive letters on Windows,
+		// as this is not necessary and may fail for system drives.
+		if((buffer[index] == '/' || buffer[index] == '\\') && buffer[index + 1] != '\0' && buffer[index - 1] != ':')
 		{
-			*p = '\0';
+			buffer[index] = '\0';
 			if(fs_makedir(buffer) < 0)
+			{
 				return -1;
-			*p = '/';
+			}
+			buffer[index] = '/';
 		}
 	}
 	return 0;

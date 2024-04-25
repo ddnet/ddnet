@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_PARTICLES_H
 #define GAME_CLIENT_COMPONENTS_PARTICLES_H
+#include <base/color.h>
 #include <base/vmath.h>
 #include <game/client/component.h>
 

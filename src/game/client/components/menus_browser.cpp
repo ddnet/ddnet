@@ -591,7 +591,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 			static CButtonContainer s_RefreshButton;
 			if(Ui()->DoButton_Menu(m_RefreshButton, &s_RefreshButton, RefreshLabelFunc, &ButtonRefresh, Props) || (!Ui()->IsPopupOpen() && (Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))))
 			{
-				RefreshBrowserTab(g_Config.m_UiPage);
+				RefreshBrowserTab(true);
 			}
 		}
 
@@ -715,7 +715,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterConnectingPlayers ^= 1;
 
 	// map finish filters
-	if(m_CommunityCache.m_AnyRanksAvailable)
+	if(ServerBrowser()->CommunityCache().AnyRanksAvailable())
 	{
 		View.HSplitTop(RowHeight, &Button, &View);
 		if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, Localize("Indicate map finish"), g_Config.m_BrIndicateFinished, &Button))
@@ -737,9 +737,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		}
 	}
 
-	// countries and types filters (not shown if there are no countries and types, or if only the none community is selected)
-	if((!m_CommunityCache.m_vpSelectableCountries.empty() || !m_CommunityCache.m_vpSelectableTypes.empty()) &&
-		(m_CommunityCache.m_vpSelectedCommunities.size() != 1 || str_comp(m_CommunityCache.m_vpSelectedCommunities[0]->Id(), IServerBrowser::COMMUNITY_NONE) != 0))
+	// countries and types filters
+	if(ServerBrowser()->CommunityCache().CountriesTypesFilterAvailable())
 	{
 		const ColorRGBA ColorActive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f);
 		const ColorRGBA ColorInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f);
@@ -806,7 +805,7 @@ void CMenus::ResetServerbrowserFilters()
 
 	if(g_Config.m_UiPage != PAGE_LAN)
 	{
-		if(m_CommunityCache.m_AnyRanksAvailable)
+		if(ServerBrowser()->CommunityCache().AnyRanksAvailable())
 		{
 			g_Config.m_BrFilterUnfinishedMap = 0;
 		}
@@ -891,10 +890,14 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 						break;
 					}
 				}
-				// when last one is removed, reset (re-enable all)
+				// When last one is removed, re-enable all currently selectable items.
+				// Don't use Clear, to avoid enabling also currently unselectable items.
 				if(AllFilteredExceptUs)
 				{
-					Filter.Clear();
+					for(int j = 0; j < MaxItems; ++j)
+					{
+						Filter.Remove(GetItemName(j));
+					}
 				}
 				else if(Active)
 				{
@@ -912,8 +915,11 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 		}
 		else if(Click == 3)
 		{
-			// middle click to reset (re-enable all)
-			Filter.Clear();
+			// middle click to reset (re-enable all currently selectable items)
+			for(int j = 0; j < MaxItems; ++j)
+			{
+				Filter.Remove(GetItemName(j));
+			}
 			Client()->ServerBrowserUpdate();
 			if(UpdateCommunityCacheOnChange)
 				UpdateCommunityCache(true);
@@ -991,7 +997,7 @@ void CMenus::RenderServerbrowserCommunitiesFilter(CUIRect View)
 
 void CMenus::RenderServerbrowserCountriesFilter(CUIRect View)
 {
-	const int MaxEntries = m_CommunityCache.m_vpSelectableCountries.size();
+	const int MaxEntries = ServerBrowser()->CommunityCache().SelectableCountries().size();
 	const int EntriesPerRow = MaxEntries > 8 ? 5 : 4;
 
 	static CScrollRegion s_ScrollRegion;
@@ -1001,14 +1007,14 @@ void CMenus::RenderServerbrowserCountriesFilter(CUIRect View)
 	const float Spacing = 2.0f;
 
 	const auto &&GetItemName = [&](int ItemIndex) {
-		return m_CommunityCache.m_vpSelectableCountries[ItemIndex]->Name();
+		return ServerBrowser()->CommunityCache().SelectableCountries()[ItemIndex]->Name();
 	};
 	const auto &&RenderItem = [&](int ItemIndex, CUIRect Item, const void *pItemId, bool Active) {
 		Item.Margin(Spacing, &Item);
 		const float OldWidth = Item.w;
 		Item.w = Item.h * 2.0f;
 		Item.x += (OldWidth - Item.w) / 2.0f;
-		m_pClient->m_CountryFlags.Render(m_CommunityCache.m_vpSelectableCountries[ItemIndex]->FlagId(), ColorRGBA(1.0f, 1.0f, 1.0f, (Active ? 0.9f : 0.2f) + (Ui()->HotItem() == pItemId ? 0.1f : 0.0f)), Item.x, Item.y, Item.w, Item.h);
+		m_pClient->m_CountryFlags.Render(ServerBrowser()->CommunityCache().SelectableCountries()[ItemIndex]->FlagId(), ColorRGBA(1.0f, 1.0f, 1.0f, (Active ? 0.9f : 0.2f) + (Ui()->HotItem() == pItemId ? 0.1f : 0.0f)), Item.x, Item.y, Item.w, Item.h);
 	};
 
 	RenderServerbrowserDDNetFilter(View, ServerBrowser()->CountriesFilter(), ItemHeight + 2.0f * Spacing, MaxEntries, EntriesPerRow, s_ScrollRegion, s_vItemIds, false, GetItemName, RenderItem);
@@ -1016,7 +1022,7 @@ void CMenus::RenderServerbrowserCountriesFilter(CUIRect View)
 
 void CMenus::RenderServerbrowserTypesFilter(CUIRect View)
 {
-	const int MaxEntries = m_CommunityCache.m_vpSelectableTypes.size();
+	const int MaxEntries = ServerBrowser()->CommunityCache().SelectableTypes().size();
 	const int EntriesPerRow = 3;
 
 	static CScrollRegion s_ScrollRegion;
@@ -1026,7 +1032,7 @@ void CMenus::RenderServerbrowserTypesFilter(CUIRect View)
 	const float Spacing = 2.0f;
 
 	const auto &&GetItemName = [&](int ItemIndex) {
-		return m_CommunityCache.m_vpSelectableTypes[ItemIndex]->Name();
+		return ServerBrowser()->CommunityCache().SelectableTypes()[ItemIndex]->Name();
 	};
 	const auto &&RenderItem = [&](int ItemIndex, CUIRect Item, const void *pItemId, bool Active) {
 		Item.Margin(Spacing, &Item);
@@ -1473,12 +1479,11 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				Rect.HSplitTop(11.0f + 10.0f, &Rect, nullptr);
 
 				// tee
+				CUIRect Skin;
+				Rect.VSplitLeft(Rect.h, &Skin, &Rect);
+				Rect.VSplitLeft(2.0f, nullptr, &Rect);
 				if(Friend.Skin()[0] != '\0')
 				{
-					CUIRect Skin;
-					Rect.VSplitLeft(Rect.h, &Skin, &Rect);
-					Rect.VSplitLeft(2.0f, nullptr, &Rect);
-
 					const CTeeRenderInfo TeeInfo = GetTeeRenderInfo(vec2(Skin.w, Skin.h), Friend.Skin(), Friend.CustomSkinColors(), Friend.CustomSkinColorBody(), Friend.CustomSkinColorFeet());
 					const CAnimState *pIdleState = CAnimState::GetIdle();
 					vec2 OffsetToMid;
@@ -1704,6 +1709,28 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 {
 	UpdateCommunityCache(false);
 
+	switch(g_Config.m_UiPage)
+	{
+	case PAGE_INTERNET:
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_BROWSER_INTERNET);
+		break;
+	case PAGE_LAN:
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_BROWSER_LAN);
+		break;
+	case PAGE_FAVORITES:
+		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_BROWSER_FAVORITES);
+		break;
+	case PAGE_FAVORITE_COMMUNITY_1:
+	case PAGE_FAVORITE_COMMUNITY_2:
+	case PAGE_FAVORITE_COMMUNITY_3:
+	case PAGE_FAVORITE_COMMUNITY_4:
+	case PAGE_FAVORITE_COMMUNITY_5:
+		GameClient()->m_MenuBackground.ChangePosition(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1 + CMenuBackground::POS_BROWSER_CUSTOM0);
+		break;
+	default:
+		dbg_assert(false, "ui_page invalid for RenderServerbrowser");
+	}
+
 	/*
 		+---------------------------+ +---communities---+
 		|							| |					|
@@ -1817,7 +1844,7 @@ void CMenus::ConchainCommunitiesUpdate(IConsole::IResult *pResult, void *pUserDa
 {
 	pfnCallback(pResult, pCallbackUserData);
 	CMenus *pThis = static_cast<CMenus *>(pUserData);
-	if(pResult->NumArguments() >= 1 && (g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES || (g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_3)))
+	if(pResult->NumArguments() >= 1 && (g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES || (g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_5)))
 	{
 		pThis->UpdateCommunityCache(true);
 		pThis->Client()->ServerBrowserUpdate();
@@ -1826,12 +1853,11 @@ void CMenus::ConchainCommunitiesUpdate(IConsole::IResult *pResult, void *pUserDa
 
 void CMenus::ConchainUiPageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
-	const int OldPage = g_Config.m_UiPage;
 	pfnCallback(pResult, pCallbackUserData);
 	CMenus *pThis = static_cast<CMenus *>(pUserData);
 	if(pResult->NumArguments() >= 1)
 	{
-		if(g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_3 &&
+		if(g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_5 &&
 			(size_t)(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1) >= pThis->ServerBrowser()->FavoriteCommunities().size())
 		{
 			// Reset page to internet when there is no favorite community for this page.
@@ -1839,78 +1865,23 @@ void CMenus::ConchainUiPageUpdate(IConsole::IResult *pResult, void *pUserData, I
 		}
 
 		pThis->SetMenuPage(g_Config.m_UiPage);
-
-		if(!pThis->m_ShowStart && g_Config.m_UiPage != OldPage)
-		{
-			pThis->RefreshBrowserTab(g_Config.m_UiPage);
-		}
 	}
 }
 
 void CMenus::UpdateCommunityCache(bool Force)
 {
-	if(g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_3 &&
+	if(g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_5 &&
 		(size_t)(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1) >= ServerBrowser()->FavoriteCommunities().size())
 	{
 		// Reset page to internet when there is no favorite community for this page,
 		// i.e. when favorite community is removed via console while the page is open.
+		// This also updates the community cache because the page is changed.
 		SetMenuPage(PAGE_INTERNET);
-		RefreshBrowserTab(g_Config.m_UiPage);
 	}
-
-	const unsigned CommunitiesHash = ServerBrowser()->CurrentCommunitiesHash();
-	const bool PageChanged = m_CommunityCache.m_LastPage != 0 && m_CommunityCache.m_LastPage != g_Config.m_UiPage;
-	const bool CurrentCommunitiesChanged = m_CommunityCache.m_LastPage != 0 && m_CommunityCache.m_LastPage == g_Config.m_UiPage && m_CommunityCache.m_SelectedCommunitiesHash != CommunitiesHash;
-	if(CurrentCommunitiesChanged && g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_3)
+	else
 	{
-		// Favorite community was changed while its page is active,
-		// refresh to get correct serverlist for updated community.
-		ServerBrowser()->Refresh(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1 + IServerBrowser::TYPE_FAVORITE_COMMUNITY_1, true);
+		ServerBrowser()->CommunityCache().Update(Force);
 	}
-
-	if(!Force && m_CommunityCache.m_InfoSha256 != SHA256_ZEROED &&
-		m_CommunityCache.m_InfoSha256 == ServerBrowser()->DDNetInfoSha256() &&
-		!CurrentCommunitiesChanged && !PageChanged)
-	{
-		return;
-	}
-
-	ServerBrowser()->CleanFilters();
-
-	m_CommunityCache.m_InfoSha256 = ServerBrowser()->DDNetInfoSha256();
-	m_CommunityCache.m_LastPage = g_Config.m_UiPage;
-	m_CommunityCache.m_SelectedCommunitiesHash = CommunitiesHash;
-	m_CommunityCache.m_vpSelectedCommunities = ServerBrowser()->CurrentCommunities();
-
-	m_CommunityCache.m_vpSelectableCountries.clear();
-	m_CommunityCache.m_vpSelectableTypes.clear();
-	for(const CCommunity *pCommunity : m_CommunityCache.m_vpSelectedCommunities)
-	{
-		for(const auto &Country : pCommunity->Countries())
-		{
-			const auto ExistingCountry = std::find_if(m_CommunityCache.m_vpSelectableCountries.begin(), m_CommunityCache.m_vpSelectableCountries.end(), [&](const CCommunityCountry *pOther) {
-				return str_comp(Country.Name(), pOther->Name()) == 0 && Country.FlagId() == pOther->FlagId();
-			});
-			if(ExistingCountry == m_CommunityCache.m_vpSelectableCountries.end())
-			{
-				m_CommunityCache.m_vpSelectableCountries.push_back(&Country);
-			}
-		}
-		for(const auto &Type : pCommunity->Types())
-		{
-			const auto ExistingType = std::find_if(m_CommunityCache.m_vpSelectableTypes.begin(), m_CommunityCache.m_vpSelectableTypes.end(), [&](const CCommunityType *pOther) {
-				return str_comp(Type.Name(), pOther->Name()) == 0;
-			});
-			if(ExistingType == m_CommunityCache.m_vpSelectableTypes.end())
-			{
-				m_CommunityCache.m_vpSelectableTypes.push_back(&Type);
-			}
-		}
-	}
-
-	m_CommunityCache.m_AnyRanksAvailable = std::any_of(m_CommunityCache.m_vpSelectedCommunities.begin(), m_CommunityCache.m_vpSelectedCommunities.end(), [](const CCommunity *pCommunity) {
-		return pCommunity->HasRanks();
-	});
 }
 
 CMenus::CAbstractCommunityIconJob::CAbstractCommunityIconJob(CMenus *pMenus, const char *pCommunityId, int StorageType) :
@@ -1944,8 +1915,7 @@ CMenus::CCommunityIconLoadJob::CCommunityIconLoadJob(CMenus *pMenus, const char 
 
 CMenus::CCommunityIconLoadJob::~CCommunityIconLoadJob()
 {
-	free(m_ImageInfo.m_pData);
-	m_ImageInfo.m_pData = nullptr;
+	m_ImageInfo.Free();
 }
 
 int CMenus::CommunityIconScan(const char *pName, int IsDir, int DirType, void *pUser)
@@ -1975,7 +1945,7 @@ const SCommunityIcon *CMenus::FindCommunityIcon(const char *pCommunityId)
 bool CMenus::LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, SHA256_DIGEST &Sha256)
 {
 	char aError[IO_MAX_PATH_LENGTH + 128];
-	if(!Graphics()->LoadPNG(&Info, pPath, DirType))
+	if(!Graphics()->LoadPng(Info, pPath, DirType))
 	{
 		str_format(aError, sizeof(aError), "Failed to load community icon from '%s'", pPath);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus/browser", aError);
@@ -1983,14 +1953,14 @@ bool CMenus::LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &I
 	}
 	if(Info.m_Format != CImageInfo::FORMAT_RGBA)
 	{
-		Graphics()->FreePNG(&Info);
+		Info.Free();
 		str_format(aError, sizeof(aError), "Failed to load community icon from '%s': must be an RGBA image", pPath);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus/browser", aError);
 		return false;
 	}
 	if(!Storage()->CalculateHashes(pPath, DirType, &Sha256))
 	{
-		Graphics()->FreePNG(&Info);
+		Info.Free();
 		str_format(aError, sizeof(aError), "Failed to load community icon from '%s': could not calculate hash", pPath);
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus/browser", aError);
 		return false;
@@ -2003,7 +1973,7 @@ void CMenus::LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info,
 	SCommunityIcon CommunityIcon;
 	str_copy(CommunityIcon.m_aCommunityId, pCommunityId);
 	CommunityIcon.m_Sha256 = Sha256;
-	CommunityIcon.m_OrgTexture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, 0);
+	CommunityIcon.m_OrgTexture = Graphics()->LoadTextureRaw(Info, 0, pCommunityId);
 
 	// create gray scale version
 	unsigned char *pData = static_cast<unsigned char *>(Info.m_pData);
@@ -2015,7 +1985,7 @@ void CMenus::LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info,
 		pData[i * Step + 1] = v;
 		pData[i * Step + 2] = v;
 	}
-	CommunityIcon.m_GreyTexture = Graphics()->LoadTextureRawMove(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, 0);
+	CommunityIcon.m_GreyTexture = Graphics()->LoadTextureRawMove(Info, 0, pCommunityId);
 	Info.m_pData = nullptr;
 
 	auto ExistingIcon = std::find_if(m_vCommunityIcons.begin(), m_vCommunityIcons.end(), [pCommunityId](const SCommunityIcon &Element) {

@@ -729,11 +729,12 @@ public:
 		return vec2(0.0f, 0.0f);
 	}
 
-	void UploadEntityLayerText(uint8_t *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
+	void UploadEntityLayerText(const CImageInfo &TextImage, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if(FontSize < 1)
 			return;
 
+		const size_t PixelSize = TextImage.PixelSize();
 		const char *pCurrent = pText;
 		const char *pEnd = pCurrent + Length;
 		int WidthLastChars = 0;
@@ -776,17 +777,17 @@ public:
 					{
 						const int ImgOffX = clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
 						const int ImgOffY = clamp(y + OffY, y, (y + TexSubHeight) - 1);
-						const size_t ImageOffset = ImgOffY * (TexWidth * PixelSize) + ImgOffX * PixelSize;
+						const size_t ImageOffset = ImgOffY * (TextImage.m_Width * PixelSize) + ImgOffX * PixelSize;
 						const size_t GlyphOffset = OffY * pBitmap->width + OffX;
 						for(size_t i = 0; i < PixelSize; ++i)
 						{
 							if(i != PixelSize - 1)
 							{
-								*(pTexBuff + ImageOffset + i) = 255;
+								*(TextImage.m_pData + ImageOffset + i) = 255;
 							}
 							else
 							{
-								*(pTexBuff + ImageOffset + i) = *(m_aaGlyphData[FONT_TEXTURE_FILL] + GlyphOffset);
+								*(TextImage.m_pData + ImageOffset + i) = *(m_aaGlyphData[FONT_TEXTURE_FILL] + GlyphOffset);
 							}
 						}
 					}
@@ -2180,9 +2181,9 @@ public:
 		return TextContainer.m_BoundingBox;
 	}
 
-	void UploadEntityLayerText(uint8_t *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
+	void UploadEntityLayerText(const CImageInfo &TextImage, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
 	{
-		m_pGlyphMap->UploadEntityLayerText(pTexBuff, PixelSize, TexWidth, TexHeight, TexSubWidth, TexSubHeight, pText, Length, x, y, FontSize);
+		m_pGlyphMap->UploadEntityLayerText(TextImage, TexSubWidth, TexSubHeight, pText, Length, x, y, FontSize);
 	}
 
 	int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) const override

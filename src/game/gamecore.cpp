@@ -121,11 +121,10 @@ float VelocityRamp(float Value, float Start, float Range, float Curvature)
 	return 1.0f / std::pow(Curvature, (Value - Start) / Range);
 }
 
-void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2>> *pTeleOuts)
+void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams)
 {
 	m_pWorld = pWorld;
 	m_pCollision = pCollision;
-	m_pTeleOuts = pTeleOuts;
 
 	m_pTeams = pTeams;
 	m_Id = -1;
@@ -309,11 +308,16 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	}
 	else if(m_HookState == HOOK_FLYING)
 	{
+		vec2 HookBase = m_Pos;
+		if(m_NewHook)
+		{
+			HookBase = m_HookTeleBase;
+		}
 		vec2 NewPos = m_HookPos + m_HookDir * m_Tuning.m_HookFireSpeed;
-		if((!m_NewHook && distance(m_Pos, NewPos) > m_Tuning.m_HookLength) || (m_NewHook && distance(m_HookTeleBase, NewPos) > m_Tuning.m_HookLength))
+		if(distance(HookBase, NewPos) > m_Tuning.m_HookLength)
 		{
 			m_HookState = HOOK_RETRACT_START;
-			NewPos = m_Pos + normalize(NewPos - m_Pos) * m_Tuning.m_HookLength;
+			NewPos = HookBase + normalize(NewPos - HookBase) * m_Tuning.m_HookLength;
 			m_Reset = true;
 		}
 
@@ -338,7 +342,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		}
 
 		// Check against other players first
-		if(!this->m_HookHitDisabled && m_pWorld && m_Tuning.m_PlayerHooking)
+		if(!this->m_HookHitDisabled && m_pWorld && m_Tuning.m_PlayerHooking && (m_HookState == HOOK_FLYING || !m_NewHook))
 		{
 			float Distance = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -378,14 +382,14 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				m_HookState = HOOK_RETRACT_START;
 			}
 
-			if(GoingThroughTele && m_pWorld && m_pTeleOuts && !m_pTeleOuts->empty() && !(*m_pTeleOuts)[teleNr - 1].empty())
+			if(GoingThroughTele && m_pWorld && !m_pCollision->TeleOuts(teleNr - 1).empty())
 			{
 				m_TriggeredEvents = 0;
 				SetHookedPlayer(-1);
 
 				m_NewHook = true;
-				int RandomOut = m_pWorld->RandomOr0((*m_pTeleOuts)[teleNr - 1].size());
-				m_HookPos = (*m_pTeleOuts)[teleNr - 1][RandomOut] + TargetDirection * PhysicalSize() * 1.5f;
+				int RandomOut = m_pWorld->RandomOr0(m_pCollision->TeleOuts(teleNr - 1).size());
+				m_HookPos = m_pCollision->TeleOuts(teleNr - 1)[RandomOut] + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				m_HookTeleBase = m_HookPos;
 			}
@@ -726,11 +730,6 @@ void CCharacterCore::SetHookedPlayer(int HookedPlayer)
 void CCharacterCore::SetTeamsCore(CTeamsCore *pTeams)
 {
 	m_pTeams = pTeams;
-}
-
-void CCharacterCore::SetTeleOuts(std::map<int, std::vector<vec2>> *pTeleOuts)
-{
-	m_pTeleOuts = pTeleOuts;
 }
 
 bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)

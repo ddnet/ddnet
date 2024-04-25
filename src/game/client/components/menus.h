@@ -164,7 +164,6 @@ protected:
 	int m_MenuPage;
 	int m_GamePage;
 	int m_Popup;
-	int m_ActivePage;
 	bool m_ShowStart;
 	bool m_MenuActive;
 
@@ -421,11 +420,15 @@ protected:
 	// found in menus.cpp
 	void Render();
 	void RenderPopupFullscreen(CUIRect Screen);
+	void RenderPopupConnecting(CUIRect Screen);
+	void RenderPopupLoading(CUIRect Screen);
 #if defined(CONF_VIDEORECORDER)
 	void PopupConfirmDemoReplaceVideo();
 #endif
-	void RenderMenubar(CUIRect Box);
+	void RenderMenubar(CUIRect Box, IClient::EClientState ClientState);
 	void RenderNews(CUIRect MainView);
+	static void ConchainBackgroundEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	void UpdateBackgroundEntities();
 	static void ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	void UpdateMusicState();
 
@@ -505,17 +508,6 @@ protected:
 	static void ConchainFavoritesUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainCommunitiesUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainUiPageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	struct SCommunityCache
-	{
-		SHA256_DIGEST m_InfoSha256 = SHA256_ZEROED;
-		int m_LastPage = 0;
-		unsigned m_SelectedCommunitiesHash;
-		std::vector<const CCommunity *> m_vpSelectedCommunities;
-		std::vector<const CCommunityCountry *> m_vpSelectableCountries;
-		std::vector<const CCommunityType *> m_vpSelectableTypes;
-		bool m_AnyRanksAvailable;
-	};
-	SCommunityCache m_CommunityCache;
 	void UpdateCommunityCache(bool Force);
 
 	// community icons
@@ -599,12 +591,8 @@ protected:
 
 	bool CheckHotKey(int Key) const;
 
-	class CMenuBackground *m_pBackground;
-
 public:
 	void RenderBackground();
-
-	void SetMenuBackground(class CMenuBackground *pBackground) { m_pBackground = pBackground; }
 
 	static CMenusKeyBinder m_Binder;
 
@@ -643,6 +631,8 @@ public:
 		PAGE_FAVORITE_COMMUNITY_1,
 		PAGE_FAVORITE_COMMUNITY_2,
 		PAGE_FAVORITE_COMMUNITY_3,
+		PAGE_FAVORITE_COMMUNITY_4,
+		PAGE_FAVORITE_COMMUNITY_5,
 		PAGE_DEMOS,
 		PAGE_SETTINGS,
 		PAGE_NETWORK,
@@ -670,6 +660,8 @@ public:
 		BIT_TAB_FAVORITE_COMMUNITY_1,
 		BIT_TAB_FAVORITE_COMMUNITY_2,
 		BIT_TAB_FAVORITE_COMMUNITY_3,
+		BIT_TAB_FAVORITE_COMMUNITY_4,
+		BIT_TAB_FAVORITE_COMMUNITY_5,
 		BIG_TAB_DEMOS,
 
 		BIG_TAB_LENGTH,
@@ -748,7 +740,6 @@ public:
 		POPUP_CONFIRM, // generic confirmation popup (two buttons)
 		POPUP_FIRST_LAUNCH,
 		POPUP_POINTS,
-		POPUP_CONNECTING,
 		POPUP_DISCONNECTED,
 		POPUP_LANGUAGE,
 		POPUP_RENAME_DEMO,
@@ -767,7 +758,7 @@ public:
 private:
 	static int GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 	void SetMenuPage(int NewPage);
-	void RefreshBrowserTab(int UiPage);
+	void RefreshBrowserTab(bool Force);
 
 	// found in menus_ingame.cpp
 	void RenderInGameNetwork(CUIRect MainView);

@@ -2107,8 +2107,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 
 			if(pEditor->m_PopupEventType == POPEVENT_PIXELART_BIG_IMAGE || pEditor->m_PopupEventType == POPEVENT_PIXELART_MANY_COLORS)
 			{
-				free(pEditor->m_TileartImageInfo.m_pData);
-				pEditor->m_TileartImageInfo.m_pData = nullptr;
+				pEditor->m_TileartImageInfo.Free();
 			}
 
 			return CUi::POPUP_CLOSE_CURRENT;
@@ -2199,32 +2198,32 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectImage(void *pContext, CUIRect 
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
 
-	static CScrollRegion s_ScrollRegion;
-	vec2 ScrollOffset(0.0f, 0.0f);
-	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollbarWidth = 10.0f;
-	ScrollParams.m_ScrollbarMargin = 3.0f;
-	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
-	s_ScrollRegion.Begin(&ButtonBar, &ScrollOffset, &ScrollParams);
-	ButtonBar.y += ScrollOffset.y;
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(ButtonHeight, pEditor->m_Map.m_vpImages.size() + 1, 1, 4, g_SelectImageCurrent + 1, &ButtonBar, false);
+	s_ListBox.DoAutoSpacing(ButtonMargin);
 
-	for(int i = -1; i < (int)pEditor->m_Map.m_vpImages.size(); i++)
+	for(int i = 0; i <= (int)pEditor->m_Map.m_vpImages.size(); i++)
 	{
-		CUIRect Button;
-		ButtonBar.HSplitTop(ButtonMargin, nullptr, &ButtonBar);
-		ButtonBar.HSplitTop(ButtonHeight, &Button, &ButtonBar);
-		if(s_ScrollRegion.AddRect(Button))
-		{
-			if(pEditor->Ui()->MouseInside(&Button))
-				ShowImage = i;
+		static int s_NoneButton = 0;
+		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpImages[i - 1], (i - 1) == g_SelectImageCurrent, 3.0f);
+		if(!Item.m_Visible)
+			continue;
 
-			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpImages[i], i == -1 ? "None" : pEditor->m_Map.m_vpImages[i]->m_aName, i == g_SelectImageCurrent, &Button))
-				g_SelectImageSelected = i;
-		}
+		if(pEditor->Ui()->MouseInside(&Item.m_Rect))
+			ShowImage = i - 1;
+
+		CUIRect Label;
+		Item.m_Rect.VMargin(5.0f, &Label);
+
+		SLabelProperties Props;
+		Props.m_MaxWidth = Label.w;
+		Props.m_EllipsisAtEnd = true;
+		pEditor->Ui()->DoLabel(&Label, i == 0 ? "None" : pEditor->m_Map.m_vpImages[i - 1]->m_aName, EditorFontSizes::MENU, TEXTALIGN_ML, Props);
 	}
 
-	s_ScrollRegion.End();
+	int NewSelected = s_ListBox.DoEnd() - 1;
+	if(NewSelected != g_SelectImageCurrent)
+		g_SelectImageSelected = NewSelected;
 
 	if(ShowImage >= 0 && (size_t)ShowImage < pEditor->m_Map.m_vpImages.size())
 	{
@@ -2276,29 +2275,29 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectSound(void *pContext, CUIRect 
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
 
-	static CScrollRegion s_ScrollRegion;
-	vec2 ScrollOffset(0.0f, 0.0f);
-	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollbarWidth = 10.0f;
-	ScrollParams.m_ScrollbarMargin = 3.0f;
-	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
-	s_ScrollRegion.Begin(&View, &ScrollOffset, &ScrollParams);
-	View.y += ScrollOffset.y;
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(ButtonHeight, pEditor->m_Map.m_vpSounds.size() + 1, 1, 4, g_SelectSoundCurrent + 1, &View, false);
+	s_ListBox.DoAutoSpacing(ButtonMargin);
 
-	for(int i = -1; i < (int)pEditor->m_Map.m_vpSounds.size(); i++)
+	for(int i = 0; i <= (int)pEditor->m_Map.m_vpSounds.size(); i++)
 	{
-		CUIRect Button;
-		View.HSplitTop(ButtonMargin, nullptr, &View);
-		View.HSplitTop(ButtonHeight, &Button, &View);
-		if(s_ScrollRegion.AddRect(Button))
-		{
-			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpSounds[i], i == -1 ? "None" : pEditor->m_Map.m_vpSounds[i]->m_aName, i == g_SelectSoundCurrent, &Button))
-				g_SelectSoundSelected = i;
-		}
+		static int s_NoneButton = 0;
+		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpSounds[i - 1], (i - 1) == g_SelectSoundCurrent, 3.0f);
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect Label;
+		Item.m_Rect.VMargin(5.0f, &Label);
+
+		SLabelProperties Props;
+		Props.m_MaxWidth = Label.w;
+		Props.m_EllipsisAtEnd = true;
+		pEditor->Ui()->DoLabel(&Label, i == 0 ? "None" : pEditor->m_Map.m_vpSounds[i - 1]->m_aName, EditorFontSizes::MENU, TEXTALIGN_ML, Props);
 	}
 
-	s_ScrollRegion.End();
+	int NewSelected = s_ListBox.DoEnd() - 1;
+	if(NewSelected != g_SelectSoundCurrent)
+		g_SelectSoundSelected = NewSelected;
 
 	return CUi::POPUP_KEEP_OPEN;
 }
@@ -2386,29 +2385,29 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectConfigAutoMap(void *pContext, 
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
 
-	static CScrollRegion s_ScrollRegion;
-	vec2 ScrollOffset(0.0f, 0.0f);
-	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollbarWidth = 10.0f;
-	ScrollParams.m_ScrollbarMargin = 3.0f;
-	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
-	s_ScrollRegion.Begin(&View, &ScrollOffset, &ScrollParams);
-	View.y += ScrollOffset.y;
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(ButtonHeight, pAutoMapper->ConfigNamesNum() + 1, 1, 4, s_AutoMapConfigCurrent + 1, &View, false);
+	s_ListBox.DoAutoSpacing(ButtonMargin);
 
-	for(int i = -1; i < pAutoMapper->ConfigNamesNum(); i++)
+	for(int i = 0; i < pAutoMapper->ConfigNamesNum() + 1; i++)
 	{
-		CUIRect Button;
-		View.HSplitTop(ButtonMargin, nullptr, &View);
-		View.HSplitTop(ButtonHeight, &Button, &View);
-		if(s_ScrollRegion.AddRect(Button))
-		{
-			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : pAutoMapper->GetConfigName(i), i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button))
-				s_AutoMapConfigSelected = i;
-		}
+		static int s_NoneButton = 0;
+		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : pAutoMapper->GetConfigName(i - 1), (i - 1) == s_AutoMapConfigCurrent, 3.0f);
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect Label;
+		Item.m_Rect.VMargin(5.0f, &Label);
+
+		SLabelProperties Props;
+		Props.m_MaxWidth = Label.w;
+		Props.m_EllipsisAtEnd = true;
+		pEditor->Ui()->DoLabel(&Label, i == 0 ? "None" : pAutoMapper->GetConfigName(i - 1), EditorFontSizes::MENU, TEXTALIGN_ML, Props);
 	}
 
-	s_ScrollRegion.End();
+	int NewSelected = s_ListBox.DoEnd() - 1;
+	if(NewSelected != s_AutoMapConfigCurrent)
+		s_AutoMapConfigSelected = NewSelected;
 
 	return CUi::POPUP_KEEP_OPEN;
 }

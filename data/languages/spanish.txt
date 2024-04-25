@@ -1295,7 +1295,7 @@ Show player speed
 == Mostrar la velocidad del jugador
 
 Show player target angle
-== Mostrar el ángulo del objetivo del jugador
+== Mostrar el ángulo de la mira del jugador
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres.
@@ -1404,9 +1404,6 @@ Show DDRace HUD
 
 Show jumps indicator
 == Mostrar indicador de saltos
-
-Show hook strength indicator
-== Mostrar indicador de fuerza del gancho
 
 Hook collision line
 == Línea de colisión del gancho
@@ -1837,3 +1834,33 @@ Friends
 
 Loading…
 == Cargando…
+
+Loading demo file from storage
+== Cargando archivo de demo desde el almacenamiento
+
+No login required
+== No requiere login
+
+Player info change cooldown
+== Tiempo para cambiar la información del jugador
+
+Always show chat
+== Siempre mostrar chat
+
+Show friend mark (♥) in name plates
+== Mostrar marca de amigos (♥) en los nombres
+
+Show hook strength icon indicator
+== Mostrar indicador de fuerza del gancho
+
+Show hook strength number indicator
+== Mostrar número indicador de fuerza del gancho
+
+Show own player's hook collision line
+== Mostrar la línea de colisión del gancho del jugador local
+
+Always show own player's hook collision line
+== Siempre mostrar la línea de colisión del gancho del jugador local
+
+Always show other players' hook collision lines
+== Siempre mostrar la línea de colisión del gancho de otros jugadores

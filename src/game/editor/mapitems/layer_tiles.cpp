@@ -708,8 +708,9 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		static int s_GameTilesButton = 0;
 		if(m_pEditor->DoButton_Editor(&s_GameTilesButton, "Game tiles", 0, &Button, 0, "Constructs game tiles from this layer"))
 			m_pEditor->PopupSelectGametileOpInvoke(m_pEditor->Ui()->MouseX(), m_pEditor->Ui()->MouseY());
-		int Result = m_pEditor->PopupSelectGameTileOpResult();
-		switch(Result)
+		const int Selected = m_pEditor->PopupSelectGameTileOpResult();
+		int Result = Selected;
+		switch(Selected)
 		{
 		case 4:
 			Result = TILE_THROUGH_CUT;
@@ -804,7 +805,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 				vpActions.push_back(std::make_shared<CEditorBrushDrawAction>(m_pEditor, m_pEditor->m_SelectedGroup));
 				char aDisplay[256];
-				str_format(aDisplay, sizeof(aDisplay), "Construct '%s' game tiles (x%d)", s_apGametileOpNames[Result], Changes);
+				str_format(aDisplay, sizeof(aDisplay), "Construct '%s' game tiles (x%d)", s_apGametileOpNames[Selected], Changes);
 				m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(m_pEditor, vpActions, aDisplay, true));
 			}
 			else

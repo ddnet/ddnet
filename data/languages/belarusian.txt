@@ -518,14 +518,6 @@ LAN
 Name plates size
 == Памер таблічак з імёнамі
 
-An error during command recording occurred. Try to update your GPU drivers.
-== Адбылася памылка падчас выканання каманды запісу. Паспрабуйце абнавіць драйверы відэакарты.
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== Каманда рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
-
-[Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
 == Адпраўка каманд рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
 
@@ -1249,9 +1241,6 @@ Show clan above name plates
 Clan plates size
 == Памер таблічак з кланамі
 
-Show hook strength indicator
-== Паказваць індыкатар сілы крука
-
 Show other players' key presses
 == Паказваць націснутыя клавішы іншых гульцоў
 
@@ -1733,6 +1722,14 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
 == 
 
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
 Failed saving the replay!
 == 
 
@@ -1740,6 +1737,9 @@ Saving settings to '%s' failed
 == 
 
 Error saving settings
+== 
+
+Loading demo file from storage
 == 
 
 Searching
@@ -1787,6 +1787,9 @@ There's an unsaved map in the editor, you might want to save it.
 Continue anyway?
 == 
 
+No login required
+== 
+
 Communities
 == 
 
@@ -1799,10 +1802,16 @@ Friends
 Loading…
 == 
 
+Player info change cooldown
+== 
+
 Info Messages
 == 
 
 Show local time always
+== 
+
+Always show chat
 == 
 
 Chat font size
@@ -1811,10 +1820,28 @@ Chat font size
 Chat width
 == 
 
+Show friend mark (♥) in name plates
+== 
+
+Show hook strength icon indicator
+== 
+
+Show hook strength number indicator
+== 
+
 Authed name color in scoreboard
 == 
 
 Same clan color in scoreboard
+== 
+
+Show own player's hook collision line
+== 
+
+Always show own player's hook collision line
+== 
+
+Always show other players' hook collision lines
 == 
 
 Show finish messages

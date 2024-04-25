@@ -397,8 +397,6 @@ void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)
 
 	// default health
 	pChr->IncreaseHealth(10);
-
-	pChr->SetTeleports(&m_TeleOuts, &m_TeleCheckOuts);
 }
 
 void CGameControllerInstagib::AddSpree(class CPlayer *pPlayer)

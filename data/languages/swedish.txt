@@ -7,7 +7,7 @@
 #	3edcxzaq1		2020-06-25 00:00:00
 #	cur.ie			2020-09-28 00:00:00
 #	simpygirl		2022-02-20 00:00:00
-#	furo			2024-03-02 00:00:00
+#	furo			2024-04-20 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1549,9 +1549,6 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == Opacitet av freeze bars i freeze
 
-Show hook strength indicator
-== Visa hook styrka indikator
-
 Hook collision line
 == Hook kollisions linje
 
@@ -1821,3 +1818,33 @@ Friends
 
 Loading…
 == Laddar…
+
+Loading demo file from storage
+== Laddar demo fil från lagring
+
+No login required
+== Ingen inloggning krävs
+
+Player info change cooldown
+== Spelarinfo ändring cooldown
+
+Always show chat
+== Visa alltid chatt
+
+Show friend mark (♥) in name plates
+== Visa kompis markering (♥) i namnskyltar
+
+Show hook strength icon indicator
+== Visa hook styrka med en ikon
+
+Show hook strength number indicator
+== Visa hook styrka med ett nummer 
+
+Show own player's hook collision line
+== Visa din egen hook kollisions linje
+
+Always show own player's hook collision line
+== Visa alltid din egna hook kollisions linje
+
+Always show other players' hook collision lines
+== Visa alltid andra spelares hook kollisions linjer

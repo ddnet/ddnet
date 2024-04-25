@@ -160,8 +160,8 @@ private:
 class CExcludedCommunityCountryFilterList : public IFilterList
 {
 public:
-	CExcludedCommunityCountryFilterList(std::function<std::vector<const CCommunity *>()> CurrentCommunitiesGetter) :
-		m_CurrentCommunitiesGetter(CurrentCommunitiesGetter)
+	CExcludedCommunityCountryFilterList(const ICommunityCache *pCommunityCache) :
+		m_pCommunityCache(pCommunityCache)
 	{
 	}
 
@@ -176,15 +176,15 @@ public:
 	void Save(IConfigManager *pConfigManager) const;
 
 private:
-	std::function<std::vector<const CCommunity *>()> m_CurrentCommunitiesGetter;
+	const ICommunityCache *m_pCommunityCache;
 	std::unordered_map<CCommunityId, std::unordered_set<CCommunityCountryName>> m_Entries;
 };
 
 class CExcludedCommunityTypeFilterList : public IFilterList
 {
 public:
-	CExcludedCommunityTypeFilterList(std::function<std::vector<const CCommunity *>()> CurrentCommunitiesGetter) :
-		m_CurrentCommunitiesGetter(CurrentCommunitiesGetter)
+	CExcludedCommunityTypeFilterList(const ICommunityCache *pCommunityCache) :
+		m_pCommunityCache(pCommunityCache)
 	{
 	}
 
@@ -199,8 +199,36 @@ public:
 	void Save(IConfigManager *pConfigManager) const;
 
 private:
-	std::function<std::vector<const CCommunity *>()> m_CurrentCommunitiesGetter;
+	const ICommunityCache *m_pCommunityCache;
 	std::unordered_map<CCommunityId, std::unordered_set<CCommunityTypeName>> m_Entries;
+};
+
+class CCommunityCache : public ICommunityCache
+{
+	IServerBrowser *m_pServerBrowser;
+	SHA256_DIGEST m_InfoSha256 = SHA256_ZEROED;
+	int m_LastType = IServerBrowser::NUM_TYPES; // initial value does not appear normally, marking uninitialized cache
+	unsigned m_SelectedCommunitiesHash = 0;
+	std::vector<const CCommunity *> m_vpSelectedCommunities;
+	std::vector<const CCommunityCountry *> m_vpSelectableCountries;
+	std::vector<const CCommunityType *> m_vpSelectableTypes;
+	bool m_AnyRanksAvailable = false;
+	bool m_CountryTypesFilterAvailable = false;
+	const char *m_pCountryTypeFilterKey = IServerBrowser::COMMUNITY_ALL;
+
+public:
+	CCommunityCache(IServerBrowser *pServerBrowser) :
+		m_pServerBrowser(pServerBrowser)
+	{
+	}
+
+	void Update(bool Force) override;
+	const std::vector<const CCommunity *> &SelectedCommunities() const override { return m_vpSelectedCommunities; }
+	const std::vector<const CCommunityCountry *> &SelectableCountries() const override { return m_vpSelectableCountries; }
+	const std::vector<const CCommunityType *> &SelectableTypes() const override { return m_vpSelectableTypes; }
+	bool AnyRanksAvailable() const override { return m_AnyRanksAvailable; }
+	bool CountriesTypesFilterAvailable() const override { return m_CountryTypesFilterAvailable; }
+	const char *CountryTypeFilterKey() const override { return m_pCountryTypeFilterKey; }
 };
 
 class CServerBrowser : public IServerBrowser
@@ -255,6 +283,8 @@ public:
 	bool DDNetInfoAvailable() const override { return m_pDDNetInfo != nullptr; }
 	SHA256_DIGEST DDNetInfoSha256() const override { return m_DDNetInfoSha256; }
 
+	ICommunityCache &CommunityCache() override { return m_CommunityCache; }
+	const ICommunityCache &CommunityCache() const override { return m_CommunityCache; }
 	CFavoriteCommunityFilterList &FavoriteCommunitiesFilter() override { return m_FavoriteCommunitiesFilter; }
 	CExcludedCommunityFilterList &CommunitiesFilter() override { return m_CommunitiesFilter; }
 	CExcludedCommunityCountryFilterList &CountriesFilter() override { return m_CountriesFilter; }
@@ -307,6 +337,7 @@ private:
 
 	int m_OwnLocation = CServerInfo::LOC_UNKNOWN;
 
+	CCommunityCache m_CommunityCache;
 	CFavoriteCommunityFilterList m_FavoriteCommunitiesFilter;
 	CExcludedCommunityFilterList m_CommunitiesFilter;
 	CExcludedCommunityCountryFilterList m_CountriesFilter;

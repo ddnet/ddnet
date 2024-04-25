@@ -291,6 +291,12 @@ if(NOT MSVC AND NOT HAIKU)
     add_cxx_compiler_flag_if_supported(OUR_FLAGS -ffloat-store)
   endif()
 
+  # This is needed to get the server to correctly display special characters
+  # on ARM systems.
+  if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm" OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64")
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS -fsigned-char)
+  endif()
+
   # Don't insert timestamps into PEs to keep the build reproducible.
   if(TARGET_OS STREQUAL "windows")
     add_cxx_compiler_flag_if_supported(OUR_FLAGS_LINK -Wl,--no-insert-timestamp)
@@ -758,7 +764,7 @@ endif()
 ########################################################################
 
 if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
-  set(DDNET_GTEST_VERSION v1.13.0)
+  set(DDNET_GTEST_VERSION 3d73dee972d0db344bda9b659836612aba6a3564)
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
@@ -1426,6 +1432,7 @@ set(EXPECTED_DATA
   gui_logo.png
   hud.png
   languages/arabic.txt
+  languages/azerbaijanese.txt
   languages/belarusian.txt
   languages/bosnian.txt
   languages/brazilian_portuguese.txt

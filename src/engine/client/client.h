@@ -21,6 +21,7 @@
 #include <engine/shared/fifo.h>
 #include <engine/shared/http.h>
 #include <engine/shared/network.h>
+#include <engine/textrender.h>
 #include <engine/warning.h>
 
 #include "graph.h"
@@ -311,9 +312,9 @@ public:
 
 	void DummyDisconnect(const char *pReason) override;
 	void DummyConnect() override;
-	bool DummyConnected() override;
-	bool DummyConnecting() override;
-	bool DummyAllowed() override;
+	bool DummyConnected() const override;
+	bool DummyConnecting() const override;
+	bool DummyAllowed() const override;
 
 	void GetServerInfo(CServerInfo *pServerInfo) const override;
 	void ServerInfoRequest();
@@ -394,7 +395,7 @@ public:
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
 
 #if defined(CONF_VIDEORECORDER)
-	static void StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideoName);
+	void StartVideo(const char *pFilename, bool WithTimestamp);
 	static void Con_StartVideo(IConsole::IResult *pResult, void *pUserData);
 	static void Con_StopVideo(IConsole::IResult *pResult, void *pUserData);
 	const char *DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex, bool StartPaused = false) override;

@@ -6,7 +6,7 @@
 #	Petr			2011-04-02 23:02:33
 #	Medik & Petr	2011-07-02 19:37:05
 #	TeeWorlds-org	2011-07-15 00:34:19
-#	dobrykafe		2024-03-04 00:00:00
+#	dobrykafe		2024-04-20 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1676,9 +1676,6 @@ Chat width
 Preview
 == Náhled
 
-Show hook strength indicator
-== Zobrazit indikátor síly háku
-
 Show local player's key presses
 == Zobrazit stisknutí kláves místních hráčů
 
@@ -1822,3 +1819,33 @@ Loading sound files
 
 Moved ingame
 == Přesun ve hře
+
+Loading demo file from storage
+== Načítání souboru záznamu z úložiště
+
+No login required
+== Bez přihlášení
+
+Player info change cooldown
+== Cooldown změny informací o hráči
+
+Always show chat
+== Vždy zobrazit chat
+
+Show friend mark (♥) in name plates
+== Zobrazit značku přítele (♥) ve jmenovkách
+
+Show hook strength icon indicator
+== Zobrazit sílu háku pomocí ikony
+
+Show hook strength number indicator
+== Zobrazit sílu háku pomocí čísla
+
+Show own player's hook collision line
+== Zobrazit čáru kolize háku vlastního hráče
+
+Always show own player's hook collision line
+== Vždy zobrazit čáru kolize háku vlastního hráče
+
+Always show other players' hook collision lines
+== Vždy zobrazit čáru kolize háků ostatních hráčů

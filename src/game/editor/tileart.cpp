@@ -121,9 +121,7 @@ static CImageInfo ColorGroupToImage(const std::array<ColorRGBA, NumTiles> &aColo
 	Image.m_Width = NumTilesRow * TileSize;
 	Image.m_Height = NumTilesColumn * TileSize;
 	Image.m_Format = CImageInfo::FORMAT_RGBA;
-
-	uint8_t *pData = static_cast<uint8_t *>(malloc(static_cast<size_t>(Image.m_Width) * Image.m_Height * 4 * sizeof(uint8_t)));
-	Image.m_pData = pData;
+	Image.m_pData = static_cast<uint8_t *>(malloc(Image.DataSize()));
 
 	for(int y = 0; y < NumTilesColumn; y++)
 	{
@@ -156,7 +154,7 @@ static std::shared_ptr<CEditorImage> ImageInfoToEditorImage(CEditor *pEditor, co
 	pEditorImage->m_pData = Image.m_pData;
 
 	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-	pEditorImage->m_Texture = pEditor->Graphics()->LoadTextureRaw(Image.m_Width, Image.m_Height, Image.m_Format, Image.m_pData, TextureLoadFlag, pName);
+	pEditorImage->m_Texture = pEditor->Graphics()->LoadTextureRaw(Image, TextureLoadFlag, pName);
 	pEditorImage->m_External = 0;
 	str_copy(pEditorImage->m_aName, pName);
 
@@ -212,8 +210,7 @@ void CEditor::AddTileart(bool IgnoreHistory)
 		m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileArt>(this, ImageCount, m_aTileartFilename, IndexMap));
 	}
 
-	free(m_TileartImageInfo.m_pData);
-	m_TileartImageInfo.m_pData = nullptr;
+	m_TileartImageInfo.Free();
 	m_Map.OnModify();
 	m_Dialog = DIALOG_NONE;
 }
@@ -226,8 +223,7 @@ void CEditor::TileartCheckColors()
 	{
 		m_PopupEventType = CEditor::POPEVENT_PIXELART_TOO_MANY_COLORS;
 		m_PopupEventActivated = true;
-		free(m_TileartImageInfo.m_pData);
-		m_TileartImageInfo.m_pData = nullptr;
+		m_TileartImageInfo.Free();
 	}
 	else if(NumColorGroups > 1)
 	{
@@ -242,7 +238,7 @@ bool CEditor::CallbackAddTileart(const char *pFilepath, int StorageType, void *p
 {
 	CEditor *pEditor = (CEditor *)pUser;
 
-	if(!pEditor->Graphics()->LoadPNG(&pEditor->m_TileartImageInfo, pFilepath, StorageType))
+	if(!pEditor->Graphics()->LoadPng(pEditor->m_TileartImageInfo, pFilepath, StorageType))
 	{
 		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFilepath);
 		return false;

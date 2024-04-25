@@ -38,6 +38,7 @@
 # 2023-11-25 By
 # 2024-01-15 By
 # 2024-03-03 Bamcane
+# 2024-04-21 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -490,7 +491,7 @@ Use sounds
 == 开启声音
 
 Use team colors for name plates
-== 用队伍颜色标注昵称
+== 用队伍颜色显示昵称
 
 V-Sync
 == 垂直同步
@@ -997,7 +998,7 @@ Speed
 == 速度
 
 Skip the main menu
-== 跳过主界面
+== 跳过主菜单
 
 Website
 == 官网
@@ -1401,11 +1402,8 @@ Show DDRace HUD
 Show jumps indicator
 == 显示可跳跃次数
 
-Show hook strength indicator
-== 显示对其他玩家的钩索强度
-
 Hook collision line
-== 瞄准辅助线
+== 钩索辅助线
 
 Hook collision line width
 == 辅助线宽度
@@ -1838,13 +1836,13 @@ Show finish messages
 == 显示完成消息
 
 Failed saving the replay!
-== 保存该回放失败！
+== 保存回放失败！
 
 Error saving settings
-== 保存设置时出错
+== 保存设置错误
 
 Loading commands…
-== 正在加载指令…
+== 正在加载指令...
 
 Main menu
 == 主菜单
@@ -1856,4 +1854,34 @@ Friends
 == 好友
 
 Loading…
-== 加载中…
+== 正在加载...
+
+Loading demo file from storage
+== 正在从硬盘中加载回放文件
+
+No login required
+== 无需登录
+
+Player info change cooldown
+== 玩家信息更改冷却时间
+
+Always show chat
+== 始终显示聊天框
+
+Show friend mark (♥) in name plates
+== 在昵称上显示好友标记 (♥)
+
+Show hook strength icon indicator
+== 显示钩索强度图标
+
+Show hook strength number indicator
+== 显示钩索强度数值
+
+Show own player's hook collision line
+== 显示自己的钩索辅助线
+
+Always show own player's hook collision line
+== 始终显示自己的钩索辅助线
+
+Always show other players' hook collision lines
+== 始终显示其他玩家的钩索辅助线

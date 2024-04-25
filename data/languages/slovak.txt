@@ -3,7 +3,7 @@
 #	Limit and Petr
 #modified by:
 #	LimiT		2011-07-02 20:24:44
-#	dobrykafe	2024-03-08 00:00:00
+#	dobrykafe	2024-04-20 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1498,9 +1498,6 @@ Show clan above name plates
 Clan plates size
 == Veľkosť menoviek klanu
 
-Show hook strength indicator
-== Zobraziť indikátor sily háku
-
 Show other players' key presses
 == Zobraziť stlačenie klávesov ostatných hráčov
 
@@ -1819,3 +1816,33 @@ Grabs
 
 Moved ingame
 == Presunutý v hre
+
+Loading demo file from storage
+== Načítanie súboru záznamu z úložiska
+
+No login required
+== Bez prihlásenia
+
+Player info change cooldown
+== Cooldown zmeny informácií o hráči
+
+Always show chat
+== Vždy zobraziť chat
+
+Show friend mark (♥) in name plates
+== Zobraziť značku priateľa (♥) v menovkách
+
+Show hook strength icon indicator
+== Zobraziť silu háku pomocou ikony
+
+Show hook strength number indicator
+== Zobraziť silu háku pomocou čísla
+
+Show own player's hook collision line
+== Zobraziť čiaru kolízie háku vlastného hráča
+
+Always show own player's hook collision line
+== Vždy zobraziť čiaru kolízie háku vlastného hráča
+
+Always show other players' hook collision lines
+== Vždy zobraziť čiaru kolízie hákov ostatných hráčov

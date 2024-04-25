@@ -750,8 +750,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		RenderDemoPlayerSliceSavePopup(MainView);
 	}
-
-	Ui()->RenderPopupMenus();
 }
 
 void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
@@ -1060,6 +1058,8 @@ void CMenus::FetchAllHeaders()
 
 void CMenus::RenderDemoBrowser(CUIRect MainView)
 {
+	GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_DEMOS);
+
 	CUIRect ListView, DetailsView, ButtonsView;
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);

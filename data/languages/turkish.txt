@@ -12,6 +12,8 @@
 #   h-kaan          2023-08-30 01:52:04
 #   h-kaan          2023-09-21 21:04:35
 #   eghwand          2024-03-03 13:24:20
+#   Gokturk          2024-04-23 01:56:10
+#   Gokturk          2024-04-24 03:01:50
 ##### /authors #####
 
 ##### translated strings #####
@@ -56,7 +58,7 @@ Automatically record demos
 == Demoları otomatik olarak kaydet
 
 Automatically take game over screenshot
-== Otomatik olarak oyun bitişinde ekran görüntüsü al
+== Oyun bittiğinde otomatik olarak ekran görüntüsü al
 
 Blue team
 == Mavi takım
@@ -131,7 +133,7 @@ Dynamic Camera
 == Dinamik Kamera
 
 Emoticon
-== Yüz ifadesi
+== İfade
 
 Error
 == Hata
@@ -170,7 +172,7 @@ Game info
 == Oyun bilgisi
 
 Game over
-== Oyun sonu
+== Oyun bitti
 
 Game type
 == Oyun türü
@@ -239,7 +241,7 @@ Mute when not active
 == Aktif değilken sessizleştir
 
 Name
-== Takma ad
+== Sunucu ismi
 
 Next weapon
 == Sonraki silah
@@ -251,7 +253,7 @@ No
 == Hayır
 
 No password
-== Şifresiz
+== Şifre yok
 
 No servers found
 == Sunucu bulunamadı
@@ -278,7 +280,7 @@ Pistol
 == Tabanca
 
 Play background music
-== Arkaplan müziğini çal
+== Arka plan müziğini oynat
 
 Player
 == Oyuncu
@@ -308,7 +310,7 @@ Red team wins!
 == Kırmızı takım kazandı!
 
 Remote console
-== Uzak Konsol
+== Uzak konsol
 
 Remove
 == Çıkar
@@ -329,7 +331,7 @@ Score limit
 == Skor limiti
 
 Scoreboard
-== Skor tahtası
+== Skor tablosu
 
 Screenshot
 == Ekran görüntüsü
@@ -338,7 +340,7 @@ Server address:
 == Sunucu adresi:
 
 Server info
-== Hakkında
+== Sunucu bilgisi
 
 Server not full
 == Sunucu dolu değil
@@ -467,13 +469,13 @@ Miscellaneous
 == Çeşitli
 
 Internet
-== Internet
+== İnternet
 
 Max demos
 == Maksimum Demo Sayısı
 
 News
-== Haber
+== Haberler
 
 Join game
 == Oyuna katıl
@@ -503,7 +505,7 @@ Reset to defaults
 == Varsayılanlara getir
 
 Round
-== Raunt
+== Yuvarlak
 
 Lht.
 == Parlaklık
@@ -551,7 +553,7 @@ Reconnect in %d sec
 == %d saniye içinde yeniden bağlanılacak
 
 Render demo
-== Render demo
+== Demo'yu işle
 
 Replace video
 == Video üzerine yaz
@@ -566,22 +568,22 @@ Disconnect Dummy
 == Dummy Ayrıl
 
 Are you sure that you want to disconnect your dummy?
-== Dummy bağlantısını koparmak istediğinizden emin misiniz?
+== Dummy'nin bağlantısını koparmak istediğinizden emin misiniz?
 
 Welcome to DDNet
-== DDNet e hoşgeldiniz
+== DDNet'e hoş geldiniz
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDRaceNetwork bitiş çizgisine en kısa sürede ulaşmayı amaçlayan oyunculardan oluşan, çevrimiçi bir takım oyunudur. Çaylak olarak ilk önce kolay haritalardan yani Novice sunuculardan oynamaya başlamanı öneririz. Herhangi bir sunucu seçmeden önce sana yakın olan sunucuyu seçmek için ping'i dikkate al.
+== DDRaceNetwork bitiş çizgisine en kısa sürede ulaşmayı amaçlayan oyunculardan oluşan, çevrim içi bir takım oyunudur. Çaylak olarak ilk önce kolay haritalardan yani Novice sunuculardan oynamaya başlamanı öneririz. Size uygun sunucuyu seçerken pinginizi dikkate alın.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== İntihar etmek (yeniden başlamak) için k tuşu, oyunu durdurup diğer oyuncuları izlemek için q tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
+== Ölmek (yeniden başlamak) için "k" tuşu, oyunu durdurup diğer oyuncuları izlemek için "q" tuşunu kullanabilirsin. Diğer kontrollere ayarlardan bakabilirsin.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Sunuculara bağlanmadan önce ayarları kontrol edip kendine göre düzenlemeni öneriyoruz.
 
 Please enter your nickname below.
-== Lütfen takma adı girin.
+== Lütfen takma adınızı girin.
 
 Video name:
 == Video ismi:
@@ -599,7 +601,7 @@ Exclude
 == Hariç
 
 Player country:
-== Oyuncu ülkesi
+== Oyuncu ülkesi:
 
 Filter connecting players
 == Bağlanan oyuncuları sayma
@@ -692,13 +694,13 @@ Refresh Rate
 == Yenileme Hızı
 
 Automatically take statboard screenshot
-== Otomatik olarak stat tahtası ekran görüntüsü al
+== Otomatik olarak skor tablosunun ekran görüntüsü al
 
 Automatically create statboard csv
-== Otomatik olarak stat tahtası csv oluştur
+== Otomatik olarak skor tablosunu csv olarak oluştur
 
 Max CSVs
-== Max CSVs
+== Maksimum CSVs
 
 Vanilla skins only
 == Sadece vanilla skinleri
@@ -716,7 +718,7 @@ Pause
 == Durdur
 
 Kill
-== İntihar et
+== Öl
 
 Zoom in
 == Yakınlaştır
@@ -725,7 +727,7 @@ Zoom out
 == Uzaklaştır
 
 Default zoom
-== Varsayılan zoom
+== Varsayılan yakınlaştırma
 
 Show others
 == Diğerlerini göster
@@ -743,16 +745,16 @@ Toggle ghost
 == Hayaleti göster
 
 Dummy copy
-== Dummy copy
+== Dummy kopyala
 
 Hammerfly dummy
-== Hammerfly dummy
+== Çekiç uçuşu dummy
 
 Converse
 == Konuşma
 
 Statboard
-== Stat tahtası
+== Skor Tablosu
 
 Lock team
 == Takımı kilitle
@@ -803,16 +805,16 @@ DDNet
 == DDNet
 
 DDNet Client needs to be restarted to complete update!
-== Güncellemenin tamamlanabilmesi için istemcinin yeniden başlatılması gerek!
+== Güncellemenin tamamlanabilmesi için oyunun yeniden başlatılması lazım!
 
 Use DDRace Scoreboard
-== DDRace Skor Tahtası kulan
+== DDRace skor tablosunu kulan
 
 Show score
 == Skoru göster
 
 Show names in chat in team colors
-== Sohbetde isimleri takım rengiyle göster
+== Sohbette isimleri takım rengine göre ayır
 
 Show kill messages
 == Ölüm mesajlarını göster
@@ -848,7 +850,7 @@ Save the best demo of each race
 == Her yarış için en iyi demoyu kaydet
 
 Default length
-== Uzunluk
+== Varsayılan uzunluk
 
 Enable replays
 == Tekrar oynatmaları etkinleştir
@@ -872,7 +874,7 @@ Show text entities
 == Yazı yapılarını göster
 
 Show others (own team only)
-== Diğerlerini göster (sadece kendi takımın)
+== Diğerlerini göster (sadece kendi takımını)
 
 Show quads
 == Dörtgen yapıları göster
@@ -920,7 +922,7 @@ Follow
 == Takip et
 
 Frags
-== Frags
+== Parçalanma
 
 Deaths
 == Ölümler
@@ -944,7 +946,7 @@ Best
 == En iyi
 
 Grabs
-== Grabs
+== Yakalama
 
 1 new mention
 == 1 yeni bildirim
@@ -1000,11 +1002,11 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== Verilen grafik renderer başlatılamadı, varsayılan ayarlara dönülüyor.
+== Verilen grafik işleyicisi başlatılamadı, varsayılan ayarlara dönülüyor.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== Verilen grafik renderer başlatılamadı, muhtemelen dahili ekran kartının sürücülerini yüklemediğinizden kaynaklanıyor.
+== Verilen grafik işleyicisi başlatılamadı, muhtemelen dahili ekran kartının sürücülerini yüklemediğinizden kaynaklanıyor.
 
 Could not save downloaded map. Try manually deleting this file: %s
 == İndirilen map kaydedilemedi. Bu dosyayı manuel olarak silmeyi deneyin: %s
@@ -1019,7 +1021,7 @@ Preparing demo playback
 == Demo oynatmaya hazırlanıyor
 
 Connected
-== Bağlandı
+== Bağlanıldı
 
 Loading map file from storage
 == Harita dosyası yükleniyor
@@ -1061,7 +1063,7 @@ Angle:
 == Açı:
 
 Multi-View
-== Çoklu İzle
+== Çoklu İzleme
 
 Team %d
 == Takım %d
@@ -1178,14 +1180,14 @@ No server selected
 == Sunucu seçilmedi
 
 Online players (%d)
-== Çevrimiçi oyuncular (%d)
+== Çevrim içi oyuncular (%d)
 
 Online clanmates (%d)
-== Çevrimiçi klan arkadaşları (%d)
+== Çevrim içi klan arkadaşları (%d)
 
 [friends (server browser)]
 Offline (%d)
-== Çevrimdışı (%d)
+== Çevrim dışı (%d)
 
 Click to select server. Double click to join your friend.
 == Sunucu seçmek için tıklayın. Arkadaşınıza katılmak için çift tıklayın.
@@ -1424,7 +1426,7 @@ Allows maps to render with more detail
 == Haritaların daha detaylı işlenmesine izin ver
 
 Renderer
-== Renderer
+== İşleyici
 
 default
 == varsayılan
@@ -1445,7 +1447,7 @@ Chat sound volume
 == Sohbet ses seviyesi
 
 Background music volume
-== Arkaplan müziği ses seviyesi
+== Arka plan müziği ses seviyesi
 
 Appearance
 == Görünüm
@@ -1463,13 +1465,13 @@ Show health, shields and ammo
 == Can, kalkan ve cephaneyi göster 
 
 DDRace HUD
-== DDRace HUD
+== DDRace arayüzü
 
 Show client IDs in scoreboard
-== Skor tahtasında istemci ID'lerini göster
+== Skor tablosunda ki istemci ID'lerini göster
 
 Show DDRace HUD
-== DDRace HUD göster
+== DDRace arayüzünü göster
 
 Show jumps indicator
 == Kaç zıplama kaldığını göster
@@ -1496,10 +1498,7 @@ Use old chat style
 == Eski sohbet stilini kullan
 
 Preview
-== Önizleme
-
-Show hook strength indicator
-== Kanca gücü göstergesini göster
+== Ön izleme
 
 Show local player's key presses
 == Yerel oyuncunun tuş basışlarını göster
@@ -1538,25 +1537,25 @@ Weapons
 == Silahlar
 
 Rifle Laser Outline Color
-== Tüfek Lazeri Dış Rengi
+== Tüfeğin Lazer Dış Rengi
 
 Rifle Laser Inner Color
-== Tüfek Lazeri İç Rengi
+== Tüfeğin Lazer İç Rengi
 
 Shotgun Laser Outline Color
-== Pompalı Tüfek Lazeri Dış Rengi
+== Pompalı Tüfeğin Lazer Dış Rengi
 
 Shotgun Laser Inner Color
-== Pompalı Tüfek Lazeri İç Rengi
+== Pompalı Tüfeğin Lazer İç Rengi
 
 Entities
 == Yapılar
 
 Door Laser Outline Color
-== Kapı Lazeri Dış Rengi
+== Kapının Lazer Dış Rengi
 
 Door Laser Inner Color
-== Kapı Lazeri İç Rengi
+== Kapının Lazer İç Rengi
 
 Freeze Laser Outline Color
 == Freeze Lazeri Dış Rengi
@@ -1565,7 +1564,7 @@ Freeze Laser Inner Color
 == Freeze Lazeri İç Rengi
 
 Set all to Rifle
-== Hepsini tüfeğe ayarla
+== Hepsini tüfeğe göre ayarla
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == Başlangıç çizgisini geçtiğinizde en iyi zamanınızın hareketlerini kopyalayan bir hayalet tee göster
@@ -1577,16 +1576,16 @@ Adjust the opacity of entities belonging to other teams, such as tees and namepl
 == Teeler ve isim etiketleri gibi diğer takımlara ait varlıkların opaklığını ayarlayın
 
 Quads are used for background decoration
-== Dörtgen yapılar arkaplan dekorasyonu için kullanılır
+== Dörtgen yapılar arka plan dekorasyonu için kullanılır
 
 Tries to predict other entities to give a feel of low latency
 == Düşük gecikme hissi vermek için diğer yapıları tahmin etmeye çalışır
 
 Background
-== Arkaplan
+== Arka plan
 
 Use current map as background
-== Mevcut haritayı arkaplan olarak kullan
+== Mevcut haritayı arka plan olarak kullan
 
 Run on join
 == Katılınca çalıştır
@@ -1628,7 +1627,7 @@ Can't find a Tutorial server
 == Öğretici sunucu bulunamıyor
 
 Website
-== Website
+== Web sitesi
 
 Settings
 == Ayarlar
@@ -1640,7 +1639,7 @@ Run server
 == Sunucu aç
 
 Server executable not found, can't run server
-== Yürütülebilir sunucu bulunamadı, sunucu başlatılamıyor
+== Çalıştırılabilir sunucu bulunamadı, sunucu başlatılamıyor
 
 Editor
 == Editör
@@ -1685,7 +1684,7 @@ Error playing demo
 == Demo oynatırken hata oluştu
 
 Failed saving the replay!
-== Failed saving the replay!
+== Tekrar kaydedilemedi!
 
 Saving settings to '%s' failed
 == Ayarlar '%s' dosyasına kaydedilemedi
@@ -1706,7 +1705,7 @@ NOT CONNECTED
 == BAĞLI DEĞİL
 
 Match %d of %d
-== Match %d of %d
+== %d'den %d'yi eşleştir
 
 No results
 == Sonuç yok
@@ -1774,13 +1773,6 @@ No demo selected
 Created
 == Oluşturuldu
 
-Netversion
-== 
-
-[Demo details]
-map not included
-== Harita dahil değil
-
 Loading…
 == Yükleniyor…
 
@@ -1825,3 +1817,40 @@ Regular background color
 
 Entities background color
 == Yapı arka plan rengi
+
+Loading demo file from storage
+== Cihazdaki demo dosyası yükleniyor
+
+No login required
+== Giriş yapılmasına gerek yok
+
+Netversion
+==  Netversion
+
+Player info change cooldown
+== Oyuncu bilgisini değiştirmek için bekleme süresi
+
+Always show chat
+== Sohbeti her zaman göster
+
+Show friend mark (♥) in name plates
+== İsim etiketlerinde arkadaşlık simgesini (♥) göster
+
+Show hook strength icon indicator
+== Kancanın güç göstergesini göster
+
+Show hook strength number indicator
+== Kancanın güç numarası göstergesini göster
+
+Show own player's hook collision line
+== Karakterinin kanca çarpışma çizgini göster
+
+Always show own player's hook collision line
+== Karakterinin her zaman kanca çarpışma çizgini göster
+
+Always show other players' hook collision lines
+== Diğerlerinin kanca çarpışma çizgini göster
+
+[Demo details]
+map not included
+== harita dahil edilmemiş

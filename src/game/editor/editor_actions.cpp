@@ -1243,7 +1243,7 @@ void CEditorActionTileArt::Undo()
 
 void CEditorActionTileArt::Redo()
 {
-	if(!m_pEditor->Graphics()->LoadPNG(&m_pEditor->m_TileartImageInfo, m_aTileArtFile, IStorage::TYPE_ALL))
+	if(!m_pEditor->Graphics()->LoadPng(m_pEditor->m_TileartImageInfo, m_aTileArtFile, IStorage::TYPE_ALL))
 	{
 		m_pEditor->ShowFileDialogError("Failed to load image from file '%s'.", m_aTileArtFile);
 		return;

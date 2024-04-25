@@ -40,8 +40,6 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 
 	m_CurrentRecord = 0;
 
-	InitTeleporter();
-
 	// ddnet-insta
 	m_Warmup = 0;
 	m_GameState = IGS_GAME_RUNNING;
@@ -567,8 +565,6 @@ void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_HAMMER);
 	pChr->GiveWeapon(WEAPON_GUN);
-
-	pChr->SetTeleports(&m_TeleOuts, &m_TeleCheckOuts);
 }
 
 void IGameController::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
@@ -952,31 +948,6 @@ CClientMask IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptId)
 		return CClientMask().set().reset(ExceptId);
 
 	return Teams().TeamMask(GameServer()->GetDDRaceTeam(Asker), ExceptId, Asker);
-}
-
-void IGameController::InitTeleporter()
-{
-	if(!GameServer()->Collision()->Layers()->TeleLayer())
-		return;
-	int Width = GameServer()->Collision()->Layers()->TeleLayer()->m_Width;
-	int Height = GameServer()->Collision()->Layers()->TeleLayer()->m_Height;
-
-	for(int i = 0; i < Width * Height; i++)
-	{
-		int Number = GameServer()->Collision()->TeleLayer()[i].m_Number;
-		int Type = GameServer()->Collision()->TeleLayer()[i].m_Type;
-		if(Number > 0)
-		{
-			if(Type == TILE_TELEOUT)
-			{
-				m_TeleOuts[Number - 1].emplace_back(i % Width * 32.0f + 16.0f, i / Width * 32.0f + 16.0f);
-			}
-			else if(Type == TILE_TELECHECKOUT)
-			{
-				m_TeleCheckOuts[Number - 1].emplace_back(i % Width * 32.0f + 16.0f, i / Width * 32.0f + 16.0f);
-			}
-		}
-	}
 }
 
 void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)

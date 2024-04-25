@@ -60,8 +60,14 @@ void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
 	m_Ready = false;
 	m_UserClientId = -1;
 
-	if(g_Config.m_EcPort == 0 || g_Config.m_EcPassword[0] == 0)
+	if(g_Config.m_EcPort == 0)
 		return;
+
+	if(g_Config.m_EcPassword[0] == 0)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "econ", "ec_password is required to be set for econ to be enabled.");
+		return;
+	}
 
 	NETADDR BindAddr;
 	if(g_Config.m_EcBindaddr[0] == '\0')
