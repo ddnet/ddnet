@@ -347,9 +347,7 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 		const int NumChannels = op_channel_count(pOpusFile, -1);
 		const int NumSamples = op_pcm_total(pOpusFile, -1); // per channel!
 
-		Sample.m_Channels = NumChannels;
-
-		if(Sample.m_Channels > 2)
+		if(NumChannels > 2)
 		{
 			dbg_msg("sound/opus", "file is not mono or stereo.");
 			return false;
@@ -375,6 +373,7 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 		Sample.m_pData = pSampleData;
 		Sample.m_NumFrames = Pos;
 		Sample.m_Rate = 48000;
+		Sample.m_Channels = NumChannels;
 		Sample.m_LoopStart = -1;
 		Sample.m_LoopEnd = -1;
 		Sample.m_PausedAt = 0;
@@ -460,10 +459,7 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) con
 		const unsigned int SampleRate = WavpackGetSampleRate(pContext);
 		const int NumChannels = WavpackGetNumChannels(pContext);
 
-		Sample.m_Channels = NumChannels;
-		Sample.m_Rate = SampleRate;
-
-		if(Sample.m_Channels > 2)
+		if(NumChannels > 2)
 		{
 			dbg_msg("sound/wv", "file is not mono or stereo.");
 			s_pWVBuffer = nullptr;
@@ -499,6 +495,8 @@ bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) con
 #endif
 
 		Sample.m_NumFrames = NumSamples;
+		Sample.m_Rate = SampleRate;
+		Sample.m_Channels = NumChannels;
 		Sample.m_LoopStart = -1;
 		Sample.m_LoopEnd = -1;
 		Sample.m_PausedAt = 0;
