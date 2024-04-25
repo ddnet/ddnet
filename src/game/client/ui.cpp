@@ -1215,9 +1215,14 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 		pRect->HMargin(5.0f, &Rail);
 
 	CUIRect Handle;
-	Rail.VSplitLeft(pColorInner ? 8.0f : clamp(33.0f, Rail.h, Rail.w / 3.0f), &Handle, 0);
+	Rail.VSplitLeft(pColorInner ? 8.0f : clamp(33.0f, Rail.h, Rail.w / 3.5f), &Handle, 0);
 	Handle.x += (Rail.w - Handle.w) * Current;
 
+	if(!pColorInner)
+	{
+		Handle.h += 4.0f;
+		Handle.y -= 2.0f;
+	}
 	// logic
 	static float s_OffsetX;
 	const bool InsideRail = MouseHovered(&Rail);
