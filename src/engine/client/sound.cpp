@@ -358,7 +358,7 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 		int Pos = 0;
 		while(Pos < NumSamples)
 		{
-			const int Read = op_read(pOpusFile, pSampleData + Pos * NumChannels, NumSamples * NumChannels, nullptr);
+			const int Read = op_read(pOpusFile, pSampleData + Pos * NumChannels, (NumSamples - Pos) * NumChannels, nullptr);
 			if(Read < 0)
 			{
 				free(pSampleData);
