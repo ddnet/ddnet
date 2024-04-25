@@ -355,15 +355,15 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 			return false;
 		}
 
-		Sample.m_pData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
+		short *pSampleData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
 
 		int Pos = 0;
 		while(Pos < NumSamples)
 		{
-			const int Read = op_read(pOpusFile, Sample.m_pData + Pos * NumChannels, NumSamples * NumChannels, nullptr);
+			const int Read = op_read(pOpusFile, pSampleData + Pos * NumChannels, NumSamples * NumChannels, nullptr);
 			if(Read < 0)
 			{
-				free(Sample.m_pData);
+				free(pSampleData);
 				dbg_msg("sound/opus", "op_read error %d at %d", Read, Pos);
 				return false;
 			}
@@ -372,6 +372,7 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 			Pos += Read;
 		}
 
+		Sample.m_pData = pSampleData;
 		Sample.m_NumFrames = Pos;
 		Sample.m_Rate = 48000;
 		Sample.m_LoopStart = -1;
