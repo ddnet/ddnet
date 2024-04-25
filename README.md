@@ -12,7 +12,7 @@ Thanks to tela for the logo png <3
 # Installation:
 
 
-Download the exe from https://github.com/danielkempf/TaterClient-ddnet/releases, or build it using the build instuctions from the main repository. 
+Download the exe from https://github.com/sjrc6/TaterClient-ddnet/releases, or build it using the build instuctions from the main repository. 
 
 # Settings Page: 
 ![image](https://user-images.githubusercontent.com/22122579/182528606-cfb47e19-fb99-47c8-887f-43115ecf1f3e.png)
