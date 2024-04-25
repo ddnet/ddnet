@@ -8710,11 +8710,10 @@ void CEditor::OnClose()
 
 void CEditor::OnDialogClose()
 {
-	if(m_FilePreviewSound >= 0)
-	{
-		Sound()->UnloadSample(m_FilePreviewSound);
-		m_FilePreviewSound = -1;
-	}
+	Graphics()->UnloadTexture(&m_FilePreviewImage);
+	Sound()->UnloadSample(m_FilePreviewSound);
+	m_FilePreviewSound = -1;
+	m_FilePreviewState = PREVIEW_UNLOADED;
 }
 
 void CEditor::LoadCurrentMap()
