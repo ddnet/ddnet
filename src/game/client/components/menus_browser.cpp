@@ -566,7 +566,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 			str_format(aBuf, sizeof(aBuf), Localize("%d of %d servers"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers());
 		else
 			str_format(aBuf, sizeof(aBuf), Localize("%d of %d server"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers());
-		UI()->DoLabel(&ServersOnline, aBuf, 12.0f, TEXTALIGN_MR);
+		Ui()->DoLabel(&ServersOnline, aBuf, 12.0f, TEXTALIGN_MR);
 
 		int NumPlayers = 0;
 		for(int i = 0; i < ServerBrowser()->NumSortedServers(); i++)
@@ -576,7 +576,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 			str_format(aBuf, sizeof(aBuf), Localize("%d players"), NumPlayers);
 		else
 			str_format(aBuf, sizeof(aBuf), Localize("%d player"), NumPlayers);
-		UI()->DoLabel(&PlayersOnline, aBuf, 12.0f, TEXTALIGN_MR);
+		Ui()->DoLabel(&PlayersOnline, aBuf, 12.0f, TEXTALIGN_MR);
 	}
 
 	// address info

@@ -132,7 +132,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	char m_aTimeoutCodes[NUM_DUMMIES][32] = {"", ""};
 	bool m_aCodeRunAfterJoin[NUM_DUMMIES] = {false, false};
-	bool m_CodeRunAfterJoinConsole[NUM_DUMMIES] = {false, false};
+	bool m_aCodeRunAfterJoinConsole[NUM_DUMMIES] = {false, false};
 	bool m_GenerateTimeoutSeed = true;
 
 	char m_aCmdConnect[256] = "";

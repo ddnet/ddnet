@@ -114,8 +114,6 @@ MACRO_CONFIG_INT(ClApplyProfileEmote, tc_profile_emote, 1, 0, 1, CFGFLAG_CLIENT 
 MACRO_CONFIG_INT(ClVoteAuto, tc_vote_auto, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Activate auto vote")
 MACRO_CONFIG_INT(ClVoteDefaultAll, tc_vote_default, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Default vote everybody (0:yes,1:no)")
 MACRO_CONFIG_INT(ClVoteDefaultFriend, tc_vote_default, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Default vote friends (0:yes,1:no,3:Default)")
-MACRO_CONFIG_INT(ClVoteDontShow, tc_vote_show, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show only votes where your vote counts")
-MACRO_CONFIG_INT(ClVoteDontShowFriends, tc_vote_show_friends, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show only votes where your vote counts exclude friends")
 
 // Auto Verify
 MACRO_CONFIG_INT(ClAutoVerify, tc_auto_verify, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Auto verify")

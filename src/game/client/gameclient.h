@@ -739,8 +739,8 @@ public:
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 
-	vec2 GetSmoothPos(int ClientID);
-	vec2 GetFreezePos(int ClientID);
+	vec2 GetSmoothPos(int ClientId);
+	vec2 GetFreezePos(int ClientId);
 	int m_MultiViewTeam;
 	int m_MultiViewPersonalZoom;
 	bool m_MultiViewShowHud;
@@ -763,8 +763,6 @@ private:
 
 	int m_aLastUpdateTick[MAX_CLIENTS] = {0};
 	void DetectStrongHook();
-
-	vec2 GetSmoothPos(int ClientId);
 
 	int m_PredictedDummyId;
 	int m_IsDummySwapping;

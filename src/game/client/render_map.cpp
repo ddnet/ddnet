@@ -667,7 +667,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Scale, int TileType, float Alpha)
+void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Scale, int TileType, float Alpha) const
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -866,7 +866,8 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 	Graphics()->QuadsEnd();
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
-void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, int h, float Scale, float Alpha)
+
+void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, int h, float Scale, float Alpha) const
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -995,7 +996,8 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 	Graphics()->QuadsEnd();
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
-void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha)
+
+void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha) const
 {
 	if(!g_Config.m_ClTextEntities)
 		return;

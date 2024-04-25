@@ -401,8 +401,8 @@ void CClient::EnterGame(int Conn)
 	if(State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	m_CodeRunAfterJoin[Conn] = false;
-	m_CodeRunAfterJoinConsole[Conn] = false;
+	m_aCodeRunAfterJoin[Conn] = false;
+	m_aCodeRunAfterJoinConsole[Conn] = false;
 
 	// now we will wait for two snapshots
 	// to finish the connection
@@ -1896,10 +1896,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						int64_t TimeLeft = (TickStart - Now) * 1000 / time_freq();
 						m_aGameTime[Conn].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / GameTickSpeed(), TimeLeft, CSmoothTime::ADJUSTDIRECTION_DOWN);
 					}
-					if(g_Config.m_ClRunOnJoinConsole && m_aReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay && !m_CodeRunAfterJoinConsole[Conn])
+					if(g_Config.m_ClRunOnJoinConsole && m_aReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay && !m_aCodeRunAfterJoinConsole[Conn])
 					{
 						m_pConsole->ExecuteLine(g_Config.m_ClRunOnJoin);
-						m_CodeRunAfterJoinConsole[Conn] = true;
+						m_aCodeRunAfterJoinConsole[Conn] = true;
 					}
 
 					if(m_aReceivedSnapshots[Conn] > GameTickSpeed() && !m_aCodeRunAfterJoin[Conn])
@@ -1911,7 +1911,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							char aBufTO[256];
 							str_format(aBufTO, sizeof(aBufTO), "/timeout %s", m_aTimeoutCodes[Conn]);
 							TOMsgp.m_pMessage = aBufTO;
-							CMsgPacker PackerTO(TOMsgp.ms_MsgID, false);
+							CMsgPacker PackerTO(TOMsgp.ms_MsgId, false);
 							TOMsgp.Pack(&PackerTO);
 							SendMsg(Conn, &PackerTO, MSGFLAG_VITAL);
 
@@ -1967,7 +1967,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							if(g_Config.m_ClRunOnJoin[0] || g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
 								SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
 						}
-						m_CodeRunAfterJoin[Conn] = true;
+						m_aCodeRunAfterJoin[Conn] = true;
 					}
 
 					// ack snapshot

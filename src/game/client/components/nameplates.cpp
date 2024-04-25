@@ -180,13 +180,13 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			{
 				Graphics()->TextureClear();
 				Graphics()->QuadsBegin();
-				rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(m_pClient->m_Snap.m_apPlayerInfos[ClientID]->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f, 0.8f));
+				rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(m_pClient->m_Snap.m_apPlayerInfos[ClientId]->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f, 0.8f));
 				Graphics()->SetColor(rgb);
 				float CircleSize = 7.0f;
 				Graphics()->DrawCircle(Position.x - tw / 2.0f - CircleSize, YOffset + FontSize / 2.0f + 1.4f, CircleSize, 24);
 				Graphics()->QuadsEnd();
 			}
-			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - tw / 2.0f, YOffset);
+			TextRender()->RenderTextContainer(m_aNamePlates[ClientId].m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - tw / 2.0f, YOffset);
 		}
 
 		if(g_Config.m_ClNameplatesClan)
@@ -200,13 +200,13 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		{
 			YOffset -= FontSizeClan;
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "%s", m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aSkinName);
+			str_format(aBuf, sizeof(aBuf), "%s", m_pClient->m_aClients[pPlayerInfo->m_ClientId].m_aSkinName);
 			float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
 			TextRender()->TextColor(rgb);
 			TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 		}
 
-		if(g_Config.m_ClNameplatesFriendMark && m_pClient->m_aClients[ClientID].m_Friend)
+		if(g_Config.m_ClNameplatesFriendMark && m_pClient->m_aClients[ClientId].m_Friend)
 		{
 			YOffset -= FontSize;
 			char aFriendMark[] = "♥";

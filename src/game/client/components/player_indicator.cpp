@@ -23,14 +23,14 @@ float DistanceBetweenTwoPoints(vec2 src, vec2 dst)
 void CPlayerIndicator::OnRender()
 {
 	// Don't render if we can't find our own tee
-	if(m_pClient->m_Snap.m_LocalClientID == -1 || !m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientID].m_Active)
+	if(m_pClient->m_Snap.m_LocalClientId == -1 || !m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientId].m_Active)
 		return;
 
 	// Don't render if not race gamemode or in demo
 	if(!GameClient()->m_GameInfo.m_Race || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	vec2 Position = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderPos;
+	vec2 Position = m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_RenderPos;
 
     if (g_Config.m_ClPlayerIndicator != 1)
         return;
@@ -39,24 +39,24 @@ void CPlayerIndicator::OnRender()
 
 		Graphics()->TextureClear();
 		ColorRGBA col = ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f);
-		if(!(m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID) == 0 && g_Config.m_ClIndicatorTeamOnly))
+		if(!(m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientId) == 0 && g_Config.m_ClIndicatorTeamOnly))
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
-				if(!m_pClient->m_Snap.m_apPlayerInfos[i] || i == m_pClient->m_Snap.m_LocalClientID)
+				if(!m_pClient->m_Snap.m_apPlayerInfos[i] || i == m_pClient->m_Snap.m_LocalClientId)
 					continue;
 
 				CGameClient::CClientData OtherTee = m_pClient->m_aClients[i];
                 CCharacterCore *pOtherCharacter = &m_pClient->m_aClients[i].m_Predicted;
 				if(
-					OtherTee.m_Team == m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_Team &&
+					OtherTee.m_Team == m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_Team &&
 					!OtherTee.m_Spec &&
 					m_pClient->m_Snap.m_aCharacters[i].m_Active)
 				{
 					if(g_Config.m_ClPlayerIndicatorFreeze && !(OtherTee.m_FreezeEnd > 0 || OtherTee.m_DeepFrozen))
 						continue;
 
-					vec2 norm = NormalizedDirection(m_pClient->m_aClients[i].m_RenderPos, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_RenderPos) * (-1);
+					vec2 norm = NormalizedDirection(m_pClient->m_aClients[i].m_RenderPos, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_RenderPos) * (-1);
 
 					float Offset = g_Config.m_ClIndicatorOffset;
 					if(g_Config.m_ClIndicatorVariableDistance)

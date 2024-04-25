@@ -21,13 +21,15 @@ void CVerify::OnRender()
 		if(verified)
 			return;
 
-		CTimeout Timeout{10000, 0, 8000, 10};
 		auto StartTime = time_get_nanoseconds();
-		CHttpRequest *pGet = HttpGet("https://ger10.ddnet.org/").release();
-		pGet->Timeout(Timeout);
-		IEngine::RunJobBlocking(pGet);
+		std::shared_ptr<CHttpRequest> pGet = HttpGet("https://ger10.ddnet.org/");
+		pGet->Timeout(CTimeout{10000, 0, 500, 10});
+		pGet->IpResolve(IPRESOLVE::V4);
+
+		Http()->Run(pGet);
+
 		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
-		if(pGet->State() != HTTP_DONE)
+		if(pGet->State() != EHttpState::DONE)
 		{
 			dbg_msg("verify", "Failed to verify client");
 			tries++;

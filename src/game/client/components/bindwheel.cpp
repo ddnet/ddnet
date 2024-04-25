@@ -53,6 +53,7 @@ void CBindWheel::ConchainBindwheel(IConsole::IResult *pResult, void *pUserData, 
 		pThis->updateBinds(bindpos, description, command);
 	}
 }
+
 void CBindWheel::OnConsoleInit()
 {
 	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
@@ -96,7 +97,7 @@ bool CBindWheel::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 		return false;
 	}
 
-	UI()->ConvertMouseMove(&x, &y, CursorType);
+	Ui()->ConvertMouseMove(&x, &y, CursorType);
 	m_SelectorMouse += vec2(x, y);
 	return true;
 }
@@ -131,9 +132,9 @@ void CBindWheel::OnRender()
 	if(length(m_SelectorMouse) > 110.0f)
 		m_SelectedBind = (int)(SelectedAngle / (2 * pi) * NUM_BINDWHEEL);
 
-	CUIRect Screen = *UI()->Screen();
+	CUIRect Screen = *Ui()->Screen();
 
-	UI()->MapScreen();
+	Ui()->MapScreen();
 
 	Graphics()->BlendNormal();
 
@@ -219,3 +220,4 @@ void CBindWheel::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserD
 		pConfigManager->WriteLine(aBuf);
 	}
 }
+

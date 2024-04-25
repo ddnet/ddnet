@@ -562,17 +562,17 @@ void CHud::RenderTextInfo()
 		char aBuf[64];
 		float yOff = 3;
 
-		int PlayerId = m_pClient->m_Snap.m_LocalClientID;
+		int PlayerId = m_pClient->m_Snap.m_LocalClientId;
 		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
-			PlayerId = m_pClient->m_Snap.m_SpecInfo.m_SpectatorID;
+			PlayerId = m_pClient->m_Snap.m_SpecInfo.m_SpectatorId;
 
-		if(g_Config.m_ClShowhudDDRace && m_pClient->m_Snap.m_aCharacters[PlayerId].m_HasExtendedData && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		if(g_Config.m_ClShowhudDDRace && m_pClient->m_Snap.m_aCharacters[PlayerId].m_HasExtendedData && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
 			yOff += 50;
-		else if(g_Config.m_ClShowhudHealthAmmo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		else if(g_Config.m_ClShowhudHealthAmmo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
 			yOff += 27;
 
 		vec2 Pos;
-		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW)
 			Pos = vec2(GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, GameClient()->m_Controls.m_aMousePos[g_Config.m_ClDummy].y);
 		else
 			Pos = m_pClient->m_aClients[PlayerId].m_RenderPos;
@@ -583,7 +583,7 @@ void CHud::RenderTextInfo()
 		yOff += TextHeight;
 		str_format(aBuf, sizeof(aBuf), "Y: %.2f", Pos.y / 32.0f);
 		TextRender()->Text(4, yOff, FontSize, aBuf, -1.0f);
-		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
 		{
 			yOff += TextHeight;
 			str_format(aBuf, sizeof(aBuf), "Angle: %d", m_pClient->m_aClients[PlayerId].m_RenderCur.m_Angle);
@@ -605,9 +605,9 @@ void CHud::RenderTextInfo()
 	{
 		int NumInTeam = 0;
 		int NumFrozen = 0;
-		int LocalTeamID = m_pClient->m_Snap.m_SpecInfo.m_Active == 1 && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != -1 ?
-					  m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID) :
-					  m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID);
+		int LocalTeamID = m_pClient->m_Snap.m_SpecInfo.m_Active == 1 && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != -1 ?
+					  m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId) :
+					  m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientId);
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
@@ -643,7 +643,7 @@ void CHud::RenderTextInfo()
 		if(g_Config.m_ClShowFrozenText > 0)
 			TextRender()->Text(m_Width / 2 - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 12, 10, aBuf, -1.0f);
 
-		//str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_PrevPredicted.m_FreezeEnd);
+		//str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_PrevPredicted.m_FreezeEnd);
 		//str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_ClWhatsMyPing);
 		//TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 20, 10, aBuf, -1.0f);
 
@@ -773,14 +773,14 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::RenderCursor()
 {
-	if((!m_pClient->m_Snap.m_pLocalCharacter && !(g_Config.m_ClRenderCursorSpec && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)) || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if((!m_pClient->m_Snap.m_pLocalCharacter && !(g_Config.m_ClRenderCursorSpec && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW)) || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
 	int CurWeapon = 1;
 	RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
 
 	// render cursor
-	if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
+	if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
 		CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
