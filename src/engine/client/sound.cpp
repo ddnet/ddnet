@@ -292,14 +292,15 @@ CSample *CSound::AllocSample()
 		return nullptr;
 
 	CSample *pSample = &m_aSamples[m_FirstFreeSampleIndex];
-	m_FirstFreeSampleIndex = pSample->m_NextFreeSampleIndex;
-	pSample->m_NextFreeSampleIndex = SAMPLE_INDEX_USED;
-	if(pSample->m_pData != nullptr)
+	if(pSample->m_pData != nullptr || pSample->m_NextFreeSampleIndex == SAMPLE_INDEX_USED)
 	{
-		char aError[64];
-		str_format(aError, sizeof(aError), "Sample was not unloaded (index=%d, duration=%f)", pSample->m_Index, pSample->TotalTime());
+		char aError[128];
+		str_format(aError, sizeof(aError), "Sample was not unloaded (index=%d, next=%d, duration=%f, data=%p)",
+			pSample->m_Index, pSample->m_NextFreeSampleIndex, pSample->TotalTime(), pSample->m_pData);
 		dbg_assert(false, aError);
 	}
+	m_FirstFreeSampleIndex = pSample->m_NextFreeSampleIndex;
+	pSample->m_NextFreeSampleIndex = SAMPLE_INDEX_USED;
 	return pSample;
 }
 
