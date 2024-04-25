@@ -346,12 +346,18 @@ bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) c
 	if(pOpusFile)
 	{
 		const int NumChannels = op_channel_count(pOpusFile, -1);
-		const int NumSamples = op_pcm_total(pOpusFile, -1); // per channel!
-
 		if(NumChannels > 2)
 		{
 			op_free(pOpusFile);
 			dbg_msg("sound/opus", "file is not mono or stereo.");
+			return false;
+		}
+
+		const int NumSamples = op_pcm_total(pOpusFile, -1); // per channel!
+		if(NumSamples < 0)
+		{
+			op_free(pOpusFile);
+			dbg_msg("sound/opus", "failed to get number of samples, error %d", NumSamples);
 			return false;
 		}
 
