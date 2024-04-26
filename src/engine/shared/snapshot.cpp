@@ -447,7 +447,7 @@ int CSnapshotDelta::DebugDumpDelta(const void *pSrcData, int DataSize)
 			}
 			if(*pData < 0 || (size_t)*pData > std::numeric_limits<int32_t>::max() / sizeof(int32_t))
 			{
-				dbg_msg("delta_dump", "|  Invalid delta. Item size %d out of range (0 - %lu)", *pData, std::numeric_limits<int32_t>::max() / sizeof(int32_t));
+				dbg_msg("delta_dump", "|  Invalid delta. Item size %d out of range (0 - %" PRIzu ")", *pData, std::numeric_limits<int32_t>::max() / sizeof(int32_t));
 				return -204;
 			}
 			dbg_msg("delta_dump", "|  %3d %12d  %08x updated size=%d", DumpIndex++, *pData, *pData, *pData);
@@ -478,7 +478,7 @@ int CSnapshotDelta::DebugDumpDelta(const void *pSrcData, int DataSize)
 		dbg_assert(pItemEnd == pData, "Incorrect amount of data dumped for this item.");
 	}
 
-	dbg_msg("delta_dump", "|  Finished with expected_data_size=%d parsed_data_size=%lu", DataSize, (pData - (int *)pSrcData) * sizeof(int32_t));
+	dbg_msg("delta_dump", "|  Finished with expected_data_size=%d parsed_data_size=%" PRIzu, DataSize, (pData - (int *)pSrcData) * sizeof(int32_t));
 	dbg_msg("delta_dump", "+--------------------");
 
 	return 0;
