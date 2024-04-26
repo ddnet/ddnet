@@ -66,9 +66,12 @@ CInput::CInput()
 
 	m_pClipboardText = nullptr;
 
+
 	m_CompositionLength = COMP_LENGTH_INACTIVE;
 	m_CompositionCursor = 0;
 	m_CandidateSelectedIndex = -1;
+
+	m_LastSwitchCheck = -1;
 
 	m_aDropFile[0] = '\0';
 }
@@ -704,8 +707,51 @@ int CInput::Update()
 			switch(Event.window.event)
 			{
 			case SDL_WINDOWEVENT_MOVED:
-				Graphics()->Move(Event.window.data1, Event.window.data2);
+			{
+				int64_t currentTime = time_get();
+				int64_t timeDifference = currentTime - m_LastSwitchCheck;
+				int64_t seconds = timeDifference / time_freq();
+				int CurrentScreen = Graphics()->GetWindowScreen();
+				if(seconds)
+				{
+					// fast switch cuz to stay on current screen or goes windowed mode on windowed fullscreen
+					// on fullscreen sometime `m_GfxScreen` update with wrong screen number cuz of fast switches
+					m_LastSwitchCheck = currentTime;
+					int nextScreen = CurrentScreen;
+					Graphics()->Move(Event.window.data1, Event.window.data2);
+					int IsFullscreen = g_Config.m_GfxFullscreen;
+					int IsBorderless = g_Config.m_GfxBorderless;
+					int NumScreens = Graphics()->GetNumScreens();
+
+					// I checked on all modes on Windows 11 64 bit with both OpenGL & Vulkan
+					if(!IsFullscreen && CurrentScreen == g_Config.m_GfxScreen) // prevent spam switching
+						break;
+
+					nextScreen = (CurrentScreen + 1) % NumScreens;
+					if(IsFullscreen && !IsBorderless)
+					{
+						if(CurrentScreen != g_Config.m_GfxScreen)
+						{
+							if(IsFullscreen == 1)
+								g_Config.m_GfxScreen = CurrentScreen;
+							else if(IsFullscreen == 2)				
+								Graphics()->ResizeScreenAfterSwitch(nextScreen);
+							else if(IsFullscreen == 3)
+								Graphics()->ResizeScreenAfterSwitch(CurrentScreen);
+						}
+						else
+						{
+							if(IsFullscreen == 1)
+								g_Config.m_GfxScreen = nextScreen;
+							else
+								Graphics()->ResizeScreenAfterSwitch(nextScreen);
+						}
+					}
+					else
+						Graphics()->ResizeScreenAfterSwitch(CurrentScreen);
+				}
 				break;
+			}
 			// listen to size changes, this includes our manual changes and the ones by the window manager
 			case SDL_WINDOWEVENT_SIZE_CHANGED:
 				Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);

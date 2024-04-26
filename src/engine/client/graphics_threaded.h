@@ -717,6 +717,8 @@ public:
 	virtual int GetNumScreens() const = 0;
 	virtual const char *GetScreenName(int Screen) const = 0;
 
+	virtual void ResizeScreenAfterSwitch(int Index) = 0;
+
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
@@ -1230,6 +1232,8 @@ public:
 
 	int GetNumScreens() const override;
 	const char *GetScreenName(int Screen) const override;
+
+	void ResizeScreenAfterSwitch(int Index) override;
 
 	void Minimize() override;
 	void Maximize() override;
