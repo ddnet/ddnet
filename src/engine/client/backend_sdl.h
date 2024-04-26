@@ -277,8 +277,6 @@ public:
 	bool Uses2DTextureArrays() override { return m_Capabilites.m_2DArrayTextures; }
 	bool HasTextureArraysSupport() override { return m_Capabilites.m_2DArrayTextures || m_Capabilites.m_3DTextures; }
 
-	int ScreenSwitchCallback(void *userdata, SDL_Event *event);
-
 	const char *GetErrorString() override
 	{
 		if(m_aErrorString[0] != '\0')

@@ -1019,66 +1019,6 @@ CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc)
 	mem_zero(m_aErrorString, std::size(m_aErrorString));
 }
 
-int ScreenSwitchCallbackWrapper(void *userdata, SDL_Event *event)
-{
-	CGraphicsBackend_SDL_GL *backend = static_cast<CGraphicsBackend_SDL_GL *>(userdata);
-	return backend->ScreenSwitchCallback(userdata, event);
-}
-
-int CGraphicsBackend_SDL_GL::ScreenSwitchCallback(void *userdata, SDL_Event *event)
-{
-	switch(event->type)
-	{
-	case SDL_WINDOWEVENT:
-		switch(event->window.event)
-		{
-		case SDL_WINDOWEVENT_MOVED:
-			int CurrentScreen = GetWindowScreen();
-
-			int IsFullscreen = g_Config.m_GfxFullscreen;
-			int IsBorderless = g_Config.m_GfxBorderless;
-
-			//Switch on fullscreen modes work fine but g_Config.m_GfxScreen won't update
-			//I checked on all modes on windows 11 64 bit with both OpenGL & Vulcan
-
-			if(IsBorderless && CurrentScreen != g_Config.m_GfxScreen)
-			{
-				float m_ScreenHiDPIScale = g_Config.m_GfxDesktopWidth / (float)g_Config.m_GfxScreenWidth;
-
-				if(SetWindowScreen(CurrentScreen))
-					g_Config.m_GfxScreen = CurrentScreen;
-
-				SetWindowParams(3, false);
-
-				CVideoMode CurMode;
-				GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, CurrentScreen);
-
-				const int Depth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
-
-				g_Config.m_GfxColorDepth = Depth;
-				g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
-				g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
-				g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
-
-				if(ResizeWindow(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate))
-				{
-					CVideoMode CurMode;
-					GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
-				}
-
-				SetWindowParams(IsFullscreen, IsBorderless);
-
-				dbg_msg("Window-Manager", "Window switched!");
-			}
-		}
-		break;
-	default:
-		break;
-	}
-
-	return 0;
-}
-
 int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
 #if defined(CONF_HEADLESS_CLIENT)
@@ -1465,11 +1405,6 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		CmdBuffer.Reset();
 	}
 
-#if !defined(CONF_HEADLESS_CLIENT)
-	// Set up a callback function to handle screen switch events
-	if(m_NumScreens > 1)
-		SDL_AddEventWatch(&ScreenSwitchCallbackWrapper, this);
-#endif
 	// return
 	return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_NONE;
 }

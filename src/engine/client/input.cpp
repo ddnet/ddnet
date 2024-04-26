@@ -711,30 +711,27 @@ int CInput::Update()
 				int64_t currentTime = time_get();
 				int64_t timeDifference = currentTime - m_LastSwitchCheck;
 				int64_t seconds = timeDifference / time_freq();
-				int CurrentScreen = Graphics()->GetWindowScreen();
 				if(seconds)
 				{
 					// fast switch cuz to stay on current screen or goes windowed mode on windowed fullscreen
 					// on fullscreen sometime `m_GfxScreen` update with wrong screen number cuz of fast switches
+					int CurrentScreen = Graphics()->GetWindowScreen();
 					m_LastSwitchCheck = currentTime;
-					int nextScreen = CurrentScreen;
-					Graphics()->Move(Event.window.data1, Event.window.data2);
 					int IsFullscreen = g_Config.m_GfxFullscreen;
 					int IsBorderless = g_Config.m_GfxBorderless;
 					int NumScreens = Graphics()->GetNumScreens();
 
-					// I checked on all modes on Windows 11 64 bit with both OpenGL & Vulkan
 					if(!IsFullscreen && CurrentScreen == g_Config.m_GfxScreen) // prevent spam switching
 						break;
 
-					nextScreen = (CurrentScreen + 1) % NumScreens;
 					if(IsFullscreen && !IsBorderless)
 					{
+						int nextScreen = (CurrentScreen + 1) % NumScreens;
 						if(CurrentScreen != g_Config.m_GfxScreen)
 						{
 							if(IsFullscreen == 1)
 								g_Config.m_GfxScreen = CurrentScreen;
-							else if(IsFullscreen == 2)				
+							else if(IsFullscreen == 2)
 								Graphics()->ResizeScreenAfterSwitch(nextScreen);
 							else if(IsFullscreen == 3)
 								Graphics()->ResizeScreenAfterSwitch(CurrentScreen);
