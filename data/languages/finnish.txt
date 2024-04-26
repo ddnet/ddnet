@@ -1061,48 +1061,39 @@ Best
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== [Grafiikkavirhe]
-Epäonnistui alustuksen aikana. Yritä muuttaa gfx_backend arvoksi OpenGL tai Vulkan asetushakemistossa settings_ddnet.cfg ja yritä uudelleen.
+== Epäonnistui alustuksen aikana. Yritä muuttaa gfx_backend arvoksi OpenGL tai Vulkan asetushakemistossa settings_ddnet.cfg ja yritä uudelleen.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== [Grafiikkavirhe]
-VRAM loppu. Yritä poistaa mukautettuja resursseja (skinit, entiteetit, jne.), erityisesti korkearesoluutioiset.
+== VRAM loppu. Yritä poistaa mukautettuja resursseja (skinit, entiteetit, jne.), erityisesti korkearesoluutioiset.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== [Grafiikkavirhe]
-Komennon tallennuksen aikana tapahtui virhe. Yritä päivittää GPU-ajurit.
+== Komennon tallennuksen aikana tapahtui virhe. Yritä päivittää GPU-ajurit.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== [Grafiikkavirhe]
-Renderöintikomento epäonnistui. Yritä päivittää GPU-ajurit.
+== Renderöintikomento epäonnistui. Yritä päivittää GPU-ajurit.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== [Grafiikkavirhe]
-Renderöintikomentojen lähettäminen epäonnistui. Yritä päivittää GPU-ajurit.
+== Renderöintikomentojen lähettäminen epäonnistui. Yritä päivittää GPU-ajurit.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== [Grafiikkavirhe]
-Framepuskureiden vaihto epäonnistui. Yritä päivittää GPU-ajurit.
+== Framepuskureiden vaihto epäonnistui. Yritä päivittää GPU-ajurit.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== [Grafiikkavirhe]
-Tuntematon virhe. Yritä muuttaa gfx_backend arvoksi OpenGL tai Vulkan asetushakemistossa settings_ddnet.cfg ja yritä uudelleen.
+== Tuntematon virhe. Yritä muuttaa gfx_backend arvoksi OpenGL tai Vulkan asetushakemistossa settings_ddnet.cfg ja yritä uudelleen.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== [Grafiikkavirhe]
-Annettua näytönohjainta ei voitu alustaa. Palataan nyt oletusarvoiseen taustajärjestelmään.
+== Annettua näytönohjainta ei voitu alustaa. Palataan nyt oletusarvoiseen taustajärjestelmään.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== [Grafiikkavirhe]
-Annettua näytönohjainta ei voitu alustaa, tämä johtuu luultavasti siitä, että et asentanut integroidun näytönohjaimen ohjainta.
+== Annettua näytönohjainta ei voitu alustaa, tämä johtuu luultavasti siitä, että et asentanut integroidun näytönohjaimen ohjainta.
 
 Could not save downloaded map. Try manually deleting this file: %s
 == Ei voitu tallentaa ladattua karttaa. Yritä poistaa tämä tiedosto manuaalisesti: %s
@@ -1301,8 +1292,7 @@ Online clanmates (%d)
 
 [friends (server browser)]
 Offline (%d)
-== [ystävät (palvelinselain)]
-Offline (%d)
+== Offline (%d)
 
 Click to select server. Double click to join your friend.
 == Klikkaa valitaksesi palvelimen. Kaksoisklikkaa liittyäksesi ystävään.
@@ -1345,13 +1335,11 @@ Go back the specified duration
 
 [Demo player duration]
 %d min.
-== [Demo-soittimen kesto]
-%d min.
+== %d min.
 
 [Demo player duration]
 %d sec.
-== [Demo-soittimen kesto]
-%d sek.
+== %d sek.
 
 Change the skip duration
 == Vaihda hyppyajan kesto
@@ -1427,8 +1415,7 @@ Netversion
 
 [Demo details]
 map not included
-== [Demon tiedot]
-kartta ei sisälly
+== kartta ei sisälly
 
 Open the directory that contains the demo files
 == Avaa kansio joka sisältää demo-tiedostot
@@ -1534,13 +1521,11 @@ Ingame controller mode
 
 [Ingame controller mode]
 Relative
-== [Pelauksen ohjaintila]
-Suhteellinen
+== Suhteellinen
 
 [Ingame controller mode]
 Absolute
-== [Pelauksen ohjaintila]
-Ehdoton
+== Ehdoton
 
 Ingame controller sens.
 == Pelissä ohjaimen herkkyys
