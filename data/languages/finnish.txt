@@ -36,7 +36,7 @@ Add
 == Lisää
 
 Add Friend
-== Lisää kaveri
+== Lisää ystävä
 
 Address
 == Osoite
@@ -75,13 +75,13 @@ Clan
 == Klaani
 
 Client
-== Clientti
+== Asiakasohjelma
 
 Connecting to
-== Liitytään
+== Yhdistetään
 
 Connection Problems...
-== Netti Vikoja...
+== Yhteysongelmia...
 
 Console
 == Konsoli
@@ -90,7 +90,7 @@ Controls
 == Ohjaus
 
 Count players only
-== Laske vain pelaajia
+== Laske vain pelaajat
 
 Current
 == Nykyinen
