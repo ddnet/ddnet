@@ -1,3 +1,4 @@
+#include <base/system.h>
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
@@ -43,6 +44,12 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 		GameServer()->Console()->ExecuteFile(AUTOEXEC_SERVER_FILE);
 	else // fallback
 		GameServer()->Console()->ExecuteFile(AUTOEXEC_FILE);
+
+	if(!m_HttpInsta.Init(std::chrono::seconds{2}))
+	{
+		dbg_msg("ddnet-insta", "Failed to initialize the HTTP client.");
+		dbg_break();
+	}
 }
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;

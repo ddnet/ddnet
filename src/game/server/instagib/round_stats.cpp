@@ -2,6 +2,8 @@
 #include <engine/shared/http.h>
 #include <engine/shared/json.h>
 
+#include <base/system.h>
+
 #include "../entities/character.h"
 #include "../gamecontext.h"
 #include "../gamecontroller.h"
@@ -105,16 +107,16 @@ void IGameController::PublishRoundEndStatsStrFile(const char *pStr)
 
 void IGameController::PublishRoundEndStatsStrDiscord(const char *pStr)
 {
-	// TODO: do not init here!
-	m_HttpInsta.Init(std::chrono::seconds{2});
-
 	char aPayload[2048];
 	char aStatsStr[2000];
 	str_format(aPayload, sizeof(aPayload), "{\"content\": \"%s\"}", EscapeJson(aStatsStr, sizeof(aStatsStr), pStr));
-	std::shared_ptr<CHttpRequest> pDiscord = HttpPost(g_Config.m_SvRoundStatsDiscordWebhook, (const unsigned char *)aPayload, 0);
+	const int PayloadSize = str_length(aPayload);
+	// TODO: use HttpPostJson()
+	std::shared_ptr<CHttpRequest> pDiscord = HttpPost(g_Config.m_SvRoundStatsDiscordWebhook, (const unsigned char *)aPayload, PayloadSize);
 	pDiscord->LogProgress(HTTPLOG::FAILURE);
 	pDiscord->IpResolve(IPRESOLVE::V4);
-	// pDiscord->Timeout(CTimeout{1000, 1000, 0, 0});
+	pDiscord->Timeout(CTimeout{4000, 15000, 500, 5});
+	pDiscord->HeaderString("Content-Type", "application/json");
 	m_HttpInsta.Run(pDiscord);
 }
 
