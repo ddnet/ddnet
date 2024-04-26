@@ -719,14 +719,19 @@ int CInput::Update()
 					m_LastSwitchCheck = currentTime;
 					int IsFullscreen = g_Config.m_GfxFullscreen;
 					int IsBorderless = g_Config.m_GfxBorderless;
-					int NumScreens = Graphics()->GetNumScreens();
 
 					if(!IsFullscreen && CurrentScreen == g_Config.m_GfxScreen) // prevent spam switching
 						break;
 
-					if(IsFullscreen && !IsBorderless)
+					int NumScreens = Graphics()->GetNumScreens();
+					int nextScreen = (CurrentScreen + 1) % NumScreens;
+					if (!IsFullscreen && !IsBorderless)
 					{
-						int nextScreen = (CurrentScreen + 1) % NumScreens;
+						Graphics()->Move(Event.window.data1, Event.window.data2);
+						Graphics()->ResizeScreenAfterSwitch(CurrentScreen);
+					}
+					else if(IsFullscreen && !IsBorderless)
+					{
 						if(CurrentScreen != g_Config.m_GfxScreen)
 						{
 							if(IsFullscreen == 1)

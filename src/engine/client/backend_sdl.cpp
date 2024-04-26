@@ -889,8 +889,13 @@ const char *CGraphicsBackend_SDL_GL::GetScreenName(int Screen) const
 
 void CGraphicsBackend_SDL_GL::ResizeScreenAfterSwitch(int Index)
 {
+	int IsFullscreen = g_Config.m_GfxFullscreen;
+	int IsBorderless = g_Config.m_GfxBorderless;
 	if(SetWindowScreen(Index))
 		g_Config.m_GfxScreen = Index;
+
+	if(!IsFullscreen && !IsBorderless)
+		return;
 
 	SetWindowParams(3, false);
 
