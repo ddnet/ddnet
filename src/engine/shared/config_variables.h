@@ -678,6 +678,20 @@ MACRO_CONFIG_INT(GfxDriverIsBlocked, gfx_driver_is_blocked, 0, 0, 1, CFGFLAG_SAV
 
 MACRO_CONFIG_INT(ClVideoRecorderFPS, cl_video_recorder_fps, 60, 1, 1000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "At which FPS the videorecorder should record demos.")
 
+
+MACRO_CONFIG_INT(ClDummyCopyDirection, cl_dummy_copy_direction, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your direction (requires cl_dummy_copy_moves 1)")
+MACRO_CONFIG_INT(ClDummyCopyJump, cl_dummy_copy_jump, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your jump (requires cl_dummy_copy_moves 1)")
+MACRO_CONFIG_INT(ClDummyCopyFire, cl_dummy_copy_fire, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your fire (requires cl_dummy_copy_moves 1)")
+MACRO_CONFIG_INT(ClDummyCopyHook, cl_dummy_copy_hook, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your hook (requires cl_dummy_copy_moves 1)")
+MACRO_CONFIG_INT(ClDummyCopyAim, cl_dummy_copy_aim, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your aim (requires cl_dummy_copy_moves 1)")
+MACRO_CONFIG_INT(ClDummyCopyWeapon, cl_dummy_copy_weapon, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether dummy should copy your selected weapon (requires cl_dummy_copy_moves 1)")
+MACRO_CONFIG_INT(ClDummyDirection, cl_dummy_direction, 0, -1, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Set dummy direction -1, 1(requires cl_dummy_extra_control 1)")
+
+MACRO_CONFIG_INT(ClDummyReset, cl_dummy_reset, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether to always reset dummy input")
+MACRO_CONFIG_INT(ClDummyResetHook, cl_dummy_reset_hook, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether to always reset dummy hook input")
+MACRO_CONFIG_INT(ClDummyResetJump, cl_dummy_reset_jump, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether to always reset dummy jump input")
+MACRO_CONFIG_INT(ClDummyResetFire, cl_dummy_reset_fire, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether to always reset dummy fire input")
+MACRO_CONFIG_INT(ClDummyResetDirection, cl_dummy_reset_direction, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Whether to always reset dummy direction input")
 /*
  * Add config variables for mods below this comment to avoid merge conflicts.
  */

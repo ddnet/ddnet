@@ -39,7 +39,7 @@ void CControls::OnReset()
 void CControls::ResetInput(int Dummy)
 {
 	m_aLastData[Dummy].m_Direction = 0;
-	//m_aLastData[Dummy].m_Hook = 0;
+	// m_aLastData[Dummy].m_Hook = 0;
 	// simulate releasing the fire button
 	if((m_aLastData[Dummy].m_Fire & 1) != 0)
 		m_aLastData[Dummy].m_Fire++;
@@ -273,40 +273,92 @@ int CControls::SnapInput(int *pData)
 			m_aInputData[g_Config.m_ClDummy].m_TargetY *= m_pClient->m_Camera.m_Zoom;
 		}
 
-		// dummy copy moves
-		if(g_Config.m_ClDummyCopyMoves)
-		{
-			CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
-			pDummyInput->m_Direction = m_aInputData[g_Config.m_ClDummy].m_Direction;
-			pDummyInput->m_Hook = m_aInputData[g_Config.m_ClDummy].m_Hook;
-			pDummyInput->m_Jump = m_aInputData[g_Config.m_ClDummy].m_Jump;
-			pDummyInput->m_PlayerFlags = m_aInputData[g_Config.m_ClDummy].m_PlayerFlags;
-			pDummyInput->m_TargetX = m_aInputData[g_Config.m_ClDummy].m_TargetX;
-			pDummyInput->m_TargetY = m_aInputData[g_Config.m_ClDummy].m_TargetY;
-			pDummyInput->m_WantedWeapon = m_aInputData[g_Config.m_ClDummy].m_WantedWeapon;
+    // Dummy ResetInput
+    if (g_Config.m_ClDummyReset) {
+      CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
+      pDummyInput->m_Direction = 0;
+      pDummyInput->m_Jump = 0;
+      pDummyInput->m_Hook = 0;
+      pDummyInput->m_Fire = 0;
+      m_aInputData[!g_Config.m_ClDummy] = *pDummyInput;
+      g_Config.m_ClDummyReset = 0;
+    }
+    if (g_Config.m_ClDummyResetJump || g_Config.m_ClDummyResetHook ||
+        g_Config.m_ClDummyResetDirection || g_Config.m_ClDummyResetFire) {
+      CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
+      if (g_Config.m_ClDummyResetJump)
+        pDummyInput->m_Jump = 0;
+      if (g_Config.m_ClDummyResetHook)
+        pDummyInput->m_Hook = 0;
+      if (g_Config.m_ClDummyResetDirection)
+        pDummyInput->m_Direction = 0;
+      if (g_Config.m_ClDummyResetFire)
+        pDummyInput->m_Fire = 0;
+      m_aInputData[!g_Config.m_ClDummy] = *pDummyInput;
+      g_Config.m_ClDummyResetJump = 0;
+      g_Config.m_ClDummyResetHook = 0;
+      g_Config.m_ClDummyResetDirection = 0;
+      g_Config.m_ClDummyResetFire = 0;
+    }
 
-			if(!g_Config.m_ClDummyControl)
-				pDummyInput->m_Fire += m_aInputData[g_Config.m_ClDummy].m_Fire - m_aLastData[g_Config.m_ClDummy].m_Fire;
+    // dummy copy moves
+    if (g_Config.m_ClDummyCopyMoves) {
+      CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
+      if (g_Config.m_ClDummyCopyDirection)
+        pDummyInput->m_Direction = m_aInputData[g_Config.m_ClDummy].m_Direction;
+      if (g_Config.m_ClDummyCopyHook)
+        pDummyInput->m_Hook = m_aInputData[g_Config.m_ClDummy].m_Hook;
+      if (g_Config.m_ClDummyCopyJump)
+        pDummyInput->m_Jump = m_aInputData[g_Config.m_ClDummy].m_Jump;
+      pDummyInput->m_PlayerFlags =
+          m_aInputData[g_Config.m_ClDummy].m_PlayerFlags;
+      if (g_Config.m_ClDummyCopyAim) {
+        pDummyInput->m_TargetX = m_aInputData[g_Config.m_ClDummy].m_TargetX;
+        pDummyInput->m_TargetY = m_aInputData[g_Config.m_ClDummy].m_TargetY;
+      }
 
-			pDummyInput->m_NextWeapon += m_aInputData[g_Config.m_ClDummy].m_NextWeapon - m_aLastData[g_Config.m_ClDummy].m_NextWeapon;
-			pDummyInput->m_PrevWeapon += m_aInputData[g_Config.m_ClDummy].m_PrevWeapon - m_aLastData[g_Config.m_ClDummy].m_PrevWeapon;
+      if (g_Config.m_ClDummyCopyWeapon)
+        pDummyInput->m_WantedWeapon =
+            m_aInputData[g_Config.m_ClDummy].m_WantedWeapon;
 
-			m_aInputData[!g_Config.m_ClDummy] = *pDummyInput;
-		}
+      if (g_Config.m_ClDummyCopyFire)
+        pDummyInput->m_Fire += m_aInputData[g_Config.m_ClDummy].m_Fire -
+                               m_aLastData[g_Config.m_ClDummy].m_Fire;
 
-		if(g_Config.m_ClDummyControl)
-		{
-			CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
-			pDummyInput->m_Jump = g_Config.m_ClDummyJump;
+      pDummyInput->m_NextWeapon +=
+          m_aInputData[g_Config.m_ClDummy].m_NextWeapon -
+          m_aLastData[g_Config.m_ClDummy].m_NextWeapon;
+      pDummyInput->m_PrevWeapon +=
+          m_aInputData[g_Config.m_ClDummy].m_PrevWeapon -
+          m_aLastData[g_Config.m_ClDummy].m_PrevWeapon;
 
-			if(g_Config.m_ClDummyFire)
-				pDummyInput->m_Fire = g_Config.m_ClDummyFire;
-			else if((pDummyInput->m_Fire & 1) != 0)
-				pDummyInput->m_Fire++;
+      m_aInputData[!g_Config.m_ClDummy] = *pDummyInput;
+    }
 
-			pDummyInput->m_Hook = g_Config.m_ClDummyHook;
-		}
+    // dummy control mode
+    if (g_Config.m_ClDummyControl) {
+      CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
+      CNetObj_PlayerInput *pDummyLastInput = &m_aLastData[!g_Config.m_ClDummy];
 
+      if (g_Config.m_ClDummyFire)
+        pDummyInput->m_Fire = g_Config.m_ClDummyFire;
+      else if ((pDummyInput->m_Fire & 1) != 0)
+        if(!pDummyLastInput->m_Fire)pDummyInput->m_Fire++;
+
+      if (!m_aLastData[!g_Config.m_ClDummy].m_Jump)
+        if(!pDummyLastInput->m_Jump)pDummyInput->m_Jump = g_Config.m_ClDummyJump;
+
+      if (!m_aLastData[!g_Config.m_ClDummy].m_Hook)
+        if(!pDummyLastInput->m_Hook)pDummyInput->m_Hook = g_Config.m_ClDummyHook;
+
+      m_aInputData[!g_Config.m_ClDummy] = *pDummyInput;
+    }
+
+    if (g_Config.m_ClDummyDirection) {
+      CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
+      pDummyInput->m_Direction = g_Config.m_ClDummyDirection;
+      m_aInputData[!g_Config.m_ClDummy] = *pDummyInput;
+    }
 		// stress testing
 #ifdef CONF_DEBUG
 		if(g_Config.m_DbgStress)
