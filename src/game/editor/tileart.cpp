@@ -66,9 +66,9 @@ static std::vector<ColorRGBA> GetUniqueColors(const CImageInfo &Image)
 {
 	std::set<ColorRGBA> ColorSet;
 	std::vector<ColorRGBA> vUniqueColors;
-	for(int x = 0; x < Image.m_Width; x++)
+	for(size_t x = 0; x < Image.m_Width; x++)
 	{
-		for(int y = 0; y < Image.m_Height; y++)
+		for(size_t y = 0; y < Image.m_Height; y++)
 		{
 			ColorRGBA Color = GetPixelColor(Image, x, y);
 			if(Color.a > 0 && ColorSet.insert(Color).second)
