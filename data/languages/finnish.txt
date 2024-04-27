@@ -1495,8 +1495,38 @@ Choose default eyes when joining a server
 Open the directory to add custom skins
 == Avaa kansio mukautetuille ihonväreille
 
+Loading demo file from storage
+== Ladataan demo-tiedosto tallennuksesta
+
+No login required
+== Kirjautumista ei vaadita
+
+Player info change cooldown
+== Pelaajan tiedon muutos viive
+
 Converse
 == 
+
+Always show chat
+== Aina näytä chatti
+
+Show friend mark (♥) in name plates
+== Näytä ystävämerkki (♥) nimilaatoissa
+
+Show hook strength icon indicator
+== Näytä koukun voiman ikoniindikaattori
+
+Show hook strength number indicator
+== Näytä koukun voimanumeroindikaattori
+
+Show own player's hook collision line
+== Näytä oman pelaajan törmäysviiva
+
+Always show own player's hook collision line
+== Näytä aina oman pelaajan törmäysviiva
+
+Always show other players' hook collision lines
+== Näytä aina muiden pelaajien törmaysviivat
 
 Dummy copy
 == Nuken kopio
