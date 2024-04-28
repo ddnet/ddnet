@@ -2777,6 +2777,8 @@ bool CGraphics_Threaded::SetVSync(bool State)
 	if(!m_pCommandBuffer)
 		return true;
 
+	const bool OldState = State;
+
 	// add vsync command
 	bool RetOk = false;
 	CCommandBuffer::SCommand_VSync Cmd;
@@ -2787,6 +2789,8 @@ bool CGraphics_Threaded::SetVSync(bool State)
 	// kick the command buffer
 	KickCommandBuffer();
 	WaitForIdle();
+
+	g_Config.m_GfxVsync = RetOk ? State : OldState;
 	return RetOk;
 }
 

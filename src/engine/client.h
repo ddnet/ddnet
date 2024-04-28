@@ -188,7 +188,6 @@ public:
 	virtual void ServerBrowserUpdate() = 0;
 
 	// gfx
-	virtual void ToggleWindowVSync() = 0;
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
 	virtual void OnWindowResize() = 0;
 

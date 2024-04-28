@@ -4283,12 +4283,6 @@ void CClient::ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData
 		pfnCallback(pResult, pCallbackUserData);
 }
 
-void CClient::ToggleWindowVSync()
-{
-	if(Graphics()->SetVSync(g_Config.m_GfxVsync ^ 1))
-		g_Config.m_GfxVsync ^= 1;
-}
-
 void CClient::Notify(const char *pTitle, const char *pMessage)
 {
 	if(m_pGraphics->WindowActive() || !g_Config.m_ClShowNotifications)
@@ -4312,7 +4306,7 @@ void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, I
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(g_Config.m_GfxVsync != pResult->GetInteger(0))
-			pSelf->ToggleWindowVSync();
+			pSelf->Graphics()->SetVSync(pResult->GetInteger(0));
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
