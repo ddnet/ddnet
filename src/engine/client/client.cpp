@@ -1585,11 +1585,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			char aAddr[128];
-			char aIp[64];
+			char aAddr[NETADDR_MAXSTRSIZE];
 			NETADDR ServerAddr = ServerAddress();
-			net_addr_str(&ServerAddr, aIp, sizeof(aIp), 0);
-			str_format(aAddr, sizeof(aAddr), "%s:%d", aIp, RedirectPort);
+			ServerAddr.port = RedirectPort;
+			net_addr_str(&ServerAddr, aAddr, sizeof(aAddr), true);
 			Connect(aAddr);
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
