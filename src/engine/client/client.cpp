@@ -3929,8 +3929,10 @@ void CClient::SwitchWindowScreen(int Index)
 	int IsFullscreen = g_Config.m_GfxFullscreen;
 	int IsBorderless = g_Config.m_GfxBorderless;
 
-	if(Graphics()->SetWindowScreen(Index))
-		g_Config.m_GfxScreen = Index;
+	if(!Graphics()->SetWindowScreen(Index))
+	{
+		return;
+	}
 
 	SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
 
@@ -3943,7 +3945,7 @@ void CClient::SwitchWindowScreen(int Index)
 	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
 	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
 
-	Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+	Graphics()->ResizeToScreen();
 
 	SetWindowParams(IsFullscreen, IsBorderless);
 }
@@ -4032,7 +4034,7 @@ void CClient::ConchainWindowResize(IConsole::IResult *pResult, void *pUserData, 
 	pfnCallback(pResult, pCallbackUserData);
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
-		pSelf->Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+		pSelf->Graphics()->ResizeToScreen();
 	}
 }
 

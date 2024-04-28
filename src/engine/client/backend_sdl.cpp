@@ -1539,6 +1539,7 @@ bool CGraphicsBackend_SDL_GL::UpdateDisplayMode(int Index)
 		return false;
 	}
 
+	g_Config.m_GfxScreen = Index;
 	g_Config.m_GfxDesktopWidth = DisplayMode.w;
 	g_Config.m_GfxDesktopHeight = DisplayMode.h;
 
