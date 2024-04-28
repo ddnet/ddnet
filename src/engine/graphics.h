@@ -295,7 +295,8 @@ public:
 	virtual bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual void Move(int x, int y) = 0;
-	virtual void Resize(int w, int h, int RefreshRate) = 0;
+	virtual bool Resize(int w, int h, int RefreshRate) = 0;
+	virtual void ResizeToScreen() = 0;
 	virtual void GotResized(int w, int h, int RefreshRate) = 0;
 	virtual void UpdateViewport(int X, int Y, int W, int H, bool ByResize) = 0;
 

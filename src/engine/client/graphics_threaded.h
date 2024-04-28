@@ -1237,7 +1237,8 @@ public:
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
 	void Move(int x, int y) override;
-	void Resize(int w, int h, int RefreshRate) override;
+	bool Resize(int w, int h, int RefreshRate) override;
+	void ResizeToScreen() override;
 	void GotResized(int w, int h, int RefreshRate) override;
 	void UpdateViewport(int X, int Y, int W, int H, bool ByResize) override;
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc) override;
