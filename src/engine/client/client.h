@@ -489,7 +489,6 @@ public:
 
 	// gfx
 	void SwitchWindowScreen(int Index) override;
-	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	void ToggleWindowVSync() override;
 	void Notify(const char *pTitle, const char *pMessage) override;
 	void OnWindowResize() override;

@@ -2491,7 +2491,10 @@ void CGraphics_Threaded::WarnPngliteIncompatibleImages(bool Warn)
 
 void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
 {
-	m_pBackend->SetWindowParams(FullscreenMode, IsBorderless);
+	g_Config.m_GfxFullscreen = clamp(FullscreenMode, 0, 3);
+	g_Config.m_GfxBorderless = (int)IsBorderless;
+
+	m_pBackend->SetWindowParams(g_Config.m_GfxFullscreen, g_Config.m_GfxBorderless);
 	CVideoMode CurMode;
 	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
 	GotResized(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate);

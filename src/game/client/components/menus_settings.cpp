@@ -1463,15 +1463,15 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(OldWindowMode != NewWindowMode)
 	{
 		if(NewWindowMode == 0)
-			Client()->SetWindowParams(0, false);
+			Graphics()->SetWindowParams(0, false);
 		else if(NewWindowMode == 1)
-			Client()->SetWindowParams(0, true);
+			Graphics()->SetWindowParams(0, true);
 		else if(NewWindowMode == 2)
-			Client()->SetWindowParams(3, false);
+			Graphics()->SetWindowParams(3, false);
 		else if(NewWindowMode == 3)
-			Client()->SetWindowParams(2, false);
+			Graphics()->SetWindowParams(2, false);
 		else if(NewWindowMode == 4)
-			Client()->SetWindowParams(1, false);
+			Graphics()->SetWindowParams(1, false);
 	}
 
 	if(Graphics()->GetNumScreens() > 1)

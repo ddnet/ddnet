@@ -4258,7 +4258,7 @@ void CClient::SwitchWindowScreen(int Index)
 		return;
 	}
 
-	SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
+	Graphics()->SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
 
 	CVideoMode CurMode;
 	Graphics()->GetCurrentVideoMode(CurMode, Index);
@@ -4271,7 +4271,7 @@ void CClient::SwitchWindowScreen(int Index)
 
 	Graphics()->ResizeToScreen();
 
-	SetWindowParams(IsFullscreen, IsBorderless);
+	Graphics()->SetWindowParams(IsFullscreen, IsBorderless);
 }
 
 void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4286,20 +4286,13 @@ void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, 
 		pfnCallback(pResult, pCallbackUserData);
 }
 
-void CClient::SetWindowParams(int FullscreenMode, bool IsBorderless)
-{
-	g_Config.m_GfxFullscreen = clamp(FullscreenMode, 0, 3);
-	g_Config.m_GfxBorderless = (int)IsBorderless;
-	Graphics()->SetWindowParams(FullscreenMode, IsBorderless);
-}
-
 void CClient::ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(g_Config.m_GfxFullscreen != pResult->GetInteger(0))
-			pSelf->SetWindowParams(pResult->GetInteger(0), g_Config.m_GfxBorderless);
+			pSelf->Graphics()->SetWindowParams(pResult->GetInteger(0), g_Config.m_GfxBorderless);
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
@@ -4311,7 +4304,7 @@ void CClient::ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(!g_Config.m_GfxFullscreen && (g_Config.m_GfxBorderless != pResult->GetInteger(0)))
-			pSelf->SetWindowParams(g_Config.m_GfxFullscreen, !g_Config.m_GfxBorderless);
+			pSelf->Graphics()->SetWindowParams(g_Config.m_GfxFullscreen, !g_Config.m_GfxBorderless);
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
