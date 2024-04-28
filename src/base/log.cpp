@@ -483,6 +483,19 @@ std::unique_ptr<ILogger> log_logger_windows_debugger()
 }
 #endif
 
+class CLoggerNoOp : public ILogger
+{
+public:
+	void Log(const CLogMessage *pMessage) override
+	{
+		// no-op
+	}
+};
+std::unique_ptr<ILogger> log_logger_noop()
+{
+	return std::make_unique<CLoggerNoOp>();
+}
+
 void CFutureLogger::Set(std::shared_ptr<ILogger> pLogger)
 {
 	const CLockScope LockScope(m_PendingLock);

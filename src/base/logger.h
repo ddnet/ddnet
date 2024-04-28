@@ -213,6 +213,13 @@ std::unique_ptr<ILogger> log_logger_windows_debugger();
 /**
  * @ingroup Log
  *
+ * Logger which discards all logs.
+ */
+std::unique_ptr<ILogger> log_logger_noop();
+
+/**
+ * @ingroup Log
+ *
  * Logger that collects log messages in memory until it is replaced by another
  * logger.
  *
