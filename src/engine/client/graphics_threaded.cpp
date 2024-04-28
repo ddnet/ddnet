@@ -2519,6 +2519,34 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 	return true;
 }
 
+bool CGraphics_Threaded::SwitchWindowScreen(int Index)
+{
+	const int IsFullscreen = g_Config.m_GfxFullscreen;
+	const int IsBorderless = g_Config.m_GfxBorderless;
+
+	if(!SetWindowScreen(Index))
+	{
+		return false;
+	}
+
+	// Prevent window from being stretched over multiple monitors by temporarily switching to
+	// windowed fullscreen mode on Windows, which is desktop fullscreen mode on other systems.
+	SetWindowParams(3, false);
+
+	CVideoMode CurMode;
+	GetCurrentVideoMode(CurMode, Index);
+
+	g_Config.m_GfxColorDepth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
+	g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
+	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
+	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
+
+	ResizeToScreen();
+
+	SetWindowParams(IsFullscreen, IsBorderless);
+	return true;
+}
+
 void CGraphics_Threaded::Move(int x, int y)
 {
 #if defined(CONF_VIDEORECORDER)

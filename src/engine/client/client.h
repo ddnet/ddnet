@@ -488,7 +488,6 @@ public:
 	virtual int HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker);
 
 	// gfx
-	void SwitchWindowScreen(int Index) override;
 	void ToggleWindowVSync() override;
 	void Notify(const char *pTitle, const char *pMessage) override;
 	void OnWindowResize() override;
