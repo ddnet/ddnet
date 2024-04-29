@@ -1433,7 +1433,9 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		static CButtonContainer s_ButtonTryAgain;
 		if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) || Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER))
 		{
-			Client()->Connect(g_Config.m_UiServerAddress, g_Config.m_Password);
+			char aAddr[NETADDR_MAXSTRSIZE];
+			net_addr_str(&Client()->ServerAddress(), aAddr, sizeof(aAddr), true);
+			Client()->Connect(aAddr, g_Config.m_Password);
 		}
 
 		Box.HSplitBottom(60.f, &Box, &Part);
