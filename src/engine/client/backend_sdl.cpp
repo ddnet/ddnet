@@ -1554,12 +1554,12 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 #else
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
 #endif
-			SDL_SetWindowResizable(m_pWindow, SDL_TRUE);
+			SDL_SetWindowResizable(m_pWindow, SDL_FALSE);
 		}
 		else if(IsDesktopFullscreen)
 		{
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
-			SDL_SetWindowResizable(m_pWindow, SDL_TRUE);
+			SDL_SetWindowResizable(m_pWindow, SDL_FALSE);
 		}
 		else
 		{
