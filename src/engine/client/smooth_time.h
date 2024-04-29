@@ -23,6 +23,9 @@ private:
 	int64_t m_Current;
 	int64_t m_Target;
 	int64_t m_Margin;
+	int64_t m_SnapMargin;
+	int64_t m_CurrentMargin;
+	int64_t m_TargetMargin;
 
 	int m_SpikeCounter;
 	float m_aAdjustSpeed[NUM_ADJUSTDIRECTIONS];
@@ -37,6 +40,7 @@ public:
 	void Update(CGraph *pGraph, int64_t Target, int TimeLeft, EAdjustDirection AdjustDirection);
 
 	void UpdateMargin(int64_t Margin);
+	int64_t GetMargin(int64_t Now) const;
 };
 
 #endif
