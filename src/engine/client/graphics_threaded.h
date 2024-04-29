@@ -720,7 +720,7 @@ public:
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
-	virtual bool SetWindowScreen(int Index) = 0;
+	virtual bool SetWindowScreen(int Index, bool Center = true) = 0;
 	virtual bool UpdateDisplayMode(int Index) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual int WindowActive() = 0;
@@ -730,6 +730,10 @@ public:
 	virtual bool ResizeWindow(int w, int h, int RefreshRate) = 0;
 	virtual void GetViewportSize(int &w, int &h) = 0;
 	virtual void NotifyWindow() = 0;
+
+	virtual bool GetLastCheckSwitch() = 0;
+	virtual void SetLastCheckSwitch(bool Status) = 0;
+	virtual void ResizeScreenAfterSwitch(int Index, bool Center = true) = 0;
 
 	virtual void WindowDestroyNtf(uint32_t WindowId) = 0;
 	virtual void WindowCreateNtf(uint32_t WindowId) = 0;
@@ -1235,8 +1239,8 @@ public:
 	void Maximize() override;
 	void WarnPngliteIncompatibleImages(bool Warn) override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
-	bool SetWindowScreen(int Index) override;
-	void Move(int x, int y) override;
+	bool SetWindowScreen(int Index, bool Center = true) override;
+	void Move(int x, int y, int NextDisplay = -1) override;
 	bool Resize(int w, int h, int RefreshRate) override;
 	void ResizeToScreen() override;
 	void GotResized(int w, int h, int RefreshRate) override;
@@ -1253,6 +1257,10 @@ public:
 
 	void SetWindowGrab(bool Grab) override;
 	void NotifyWindow() override;
+
+	bool GetLastCheckSwitch() override;
+	void SetLastCheckSwitch(bool Status) override;
+	void ResizeScreenAfterSwitch(int Index, bool Center = true) override;
 
 	int Init() override;
 	void Shutdown() override;

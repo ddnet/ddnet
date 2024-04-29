@@ -2630,9 +2630,9 @@ void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
 		PropChangedListener();
 }
 
-bool CGraphics_Threaded::SetWindowScreen(int Index)
+bool CGraphics_Threaded::SetWindowScreen(int Index, bool Center)
 {
-	if(!m_pBackend->SetWindowScreen(Index))
+	if(!m_pBackend->SetWindowScreen(Index, Center))
 	{
 		return false;
 	}
@@ -2646,7 +2646,7 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 	return true;
 }
 
-void CGraphics_Threaded::Move(int x, int y)
+void CGraphics_Threaded::Move(int x, int y, int NextDisplay)
 {
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && IVideo::Current()->IsRecording())
@@ -2655,13 +2655,16 @@ void CGraphics_Threaded::Move(int x, int y)
 
 	// Only handling CurScreen != m_GfxScreen doesn't work reliably
 	const int CurScreen = m_pBackend->GetWindowScreen();
-	m_pBackend->UpdateDisplayMode(CurScreen);
+	m_pBackend->UpdateDisplayMode((NextDisplay != -1) ? NextDisplay : CurScreen);
 
 	// send a got resized event so that the current canvas size is requested
 	GotResized(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
 
 	for(auto &PropChangedListener : m_vPropChangeListeners)
 		PropChangedListener();
+
+
+	SetLastCheckSwitch(true);
 }
 
 bool CGraphics_Threaded::Resize(int w, int h, int RefreshRate)
@@ -2793,6 +2796,21 @@ void CGraphics_Threaded::SetWindowGrab(bool Grab)
 void CGraphics_Threaded::NotifyWindow()
 {
 	return m_pBackend->NotifyWindow();
+}
+
+bool CGraphics_Threaded::GetLastCheckSwitch()
+{
+	return m_pBackend->GetLastCheckSwitch();
+}
+
+void CGraphics_Threaded::SetLastCheckSwitch(bool Status)
+{
+	return m_pBackend->SetLastCheckSwitch(Status);
+}
+
+void CGraphics_Threaded::ResizeScreenAfterSwitch(int Index, bool Center)
+{
+	return m_pBackend->ResizeScreenAfterSwitch(Index, Center);
 }
 
 void CGraphics_Threaded::ReadPixel(ivec2 Position, ColorRGBA *pColor)

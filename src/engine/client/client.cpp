@@ -3922,13 +3922,13 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 	return 0;
 }
 
-void CClient::SwitchWindowScreen(int Index)
+void CClient::SwitchWindowScreen(int Index, bool Center)
 {
 	//Tested on windows 11 64 bit (gtx 1660 super, intel UHD 630 opengl 1.2.0, 3.3.0 and vulkan 1.1.0)
 	int IsFullscreen = g_Config.m_GfxFullscreen;
 	int IsBorderless = g_Config.m_GfxBorderless;
 
-	if(!Graphics()->SetWindowScreen(Index))
+	if(!Graphics()->SetWindowScreen(Index, Center))
 	{
 		return;
 	}
@@ -3955,7 +3955,7 @@ void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, 
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(g_Config.m_GfxScreen != pResult->GetInteger(0))
-			pSelf->SwitchWindowScreen(pResult->GetInteger(0));
+			pSelf->SwitchWindowScreen(pResult->GetInteger(0), true);
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);

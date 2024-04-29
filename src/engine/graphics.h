@@ -290,15 +290,19 @@ public:
 
 	virtual void WarnPngliteIncompatibleImages(bool Warn) = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
-	virtual bool SetWindowScreen(int Index) = 0;
+	virtual bool SetWindowScreen(int Index, bool Center = true) = 0;
 	virtual bool SetVSync(bool State) = 0;
 	virtual bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) = 0;
 	virtual int GetWindowScreen() = 0;
-	virtual void Move(int x, int y) = 0;
+	virtual void Move(int x, int y, int NextDisplay = -1) = 0;
 	virtual bool Resize(int w, int h, int RefreshRate) = 0;
 	virtual void ResizeToScreen() = 0;
 	virtual void GotResized(int w, int h, int RefreshRate) = 0;
 	virtual void UpdateViewport(int X, int Y, int W, int H, bool ByResize) = 0;
+
+	virtual bool GetLastCheckSwitch() = 0;
+	virtual void SetLastCheckSwitch(bool Status) = 0;
+	virtual void ResizeScreenAfterSwitch(int Index, bool Center = true) = 0;
 
 	/**
 	* Listens to a resize event of the canvas, which is usually caused by a window resize.

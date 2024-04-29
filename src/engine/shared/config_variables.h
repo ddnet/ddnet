@@ -322,6 +322,8 @@ MACRO_CONFIG_INT(GfxScreen, gfx_screen, 0, 0, 15, CFGFLAG_SAVE | CFGFLAG_CLIENT,
 MACRO_CONFIG_INT(GfxScreenWidth, gfx_screen_width, 0, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Screen resolution width")
 MACRO_CONFIG_INT(GfxScreenHeight, gfx_screen_height, 0, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Screen resolution height")
 MACRO_CONFIG_INT(GfxScreenRefreshRate, gfx_screen_refresh_rate, 0, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Screen refresh rate")
+MACRO_CONFIG_INT(GfxNeedRefreshSettings, gfx_need_refresh_settings, 0, 0, 1, CFGFLAG_CLIENT, "Graphics settings need to get refresh")
+MACRO_CONFIG_INT(GfxNewScreen, gfx_new_screen, 0, 0, 15, CFGFLAG_CLIENT, "Screen new index")
 
 MACRO_CONFIG_INT(GfxDesktopWidth, gfx_desktop_width, 0, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Desktop resolution width for detecting display changes (not recommended to change manually)")
 MACRO_CONFIG_INT(GfxDesktopHeight, gfx_desktop_height, 0, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Desktop resolution height for detecting display changes (not recommended to change manually)")

@@ -704,8 +704,76 @@ int CInput::Update()
 			switch(Event.window.event)
 			{
 			case SDL_WINDOWEVENT_MOVED:
-				Graphics()->Move(Event.window.data1, Event.window.data2);
+			{
+				if(Graphics()->GetLastCheckSwitch())
+				{
+					if(!g_Config.m_GfxNeedRefreshSettings)
+					{
+						Graphics()->SetLastCheckSwitch(false);
+						g_Config.m_GfxNeedRefreshSettings = 1;
+					}
+				}
+				int CurrentScreen = Graphics()->GetWindowScreen();
+				int NumScreens = Graphics()->GetNumScreens();
+				int NextScreen = (CurrentScreen + 1) % NumScreens;
+				if(!Graphics()->GetLastCheckSwitch())
+				{
+					Graphics()->SetLastCheckSwitch(true);
+
+					int IsFullscreen = g_Config.m_GfxFullscreen;
+					int IsBorderless = g_Config.m_GfxBorderless;
+
+					if(!IsFullscreen && CurrentScreen == g_Config.m_GfxScreen)
+					{
+						Graphics()->SetLastCheckSwitch(false);
+						break;
+					}
+
+					if(!IsFullscreen && !IsBorderless)
+						Graphics()->ResizeScreenAfterSwitch(CurrentScreen, false);
+
+					if(g_Config.m_GfxNeedRefreshSettings == 2)
+						break;
+					else if(IsFullscreen && !IsBorderless)
+					{
+						Graphics()->SetLastCheckSwitch(true);
+						if(CurrentScreen != g_Config.m_GfxScreen)
+						{		
+							if (IsFullscreen == 1)
+								g_Config.m_GfxNeedRefreshSettings = 1;
+							else if(IsFullscreen == 2)
+							{
+								Graphics()->Move(Event.window.data1, Event.window.data2, CurrentScreen);
+								g_Config.m_GfxNewScreen = CurrentScreen;
+								g_Config.m_GfxNeedRefreshSettings = 1;
+							}
+							else if(IsFullscreen == 3)
+								Graphics()->ResizeScreenAfterSwitch(CurrentScreen);
+						}
+						else
+						{
+							if(IsFullscreen == 1)
+								g_Config.m_GfxNeedRefreshSettings = 1;
+							else if(IsFullscreen == 2)
+							{
+								Graphics()->Move(Event.window.data1, Event.window.data2, NextScreen);
+								g_Config.m_GfxNewScreen = NextScreen;
+								g_Config.m_GfxNeedRefreshSettings = 1;
+							}
+						}
+					}
+					else
+					{
+						if(!IsFullscreen && !IsBorderless)
+						{
+							Graphics()->ResizeScreenAfterSwitch(CurrentScreen, false);
+							break;
+						}
+						Graphics()->ResizeScreenAfterSwitch(CurrentScreen);
+					}
+				}
 				break;
+			}
 			// listen to size changes, this includes our manual changes and the ones by the window manager
 			case SDL_WINDOWEVENT_SIZE_CHANGED:
 				Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);

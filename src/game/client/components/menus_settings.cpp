@@ -1511,11 +1511,32 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		});
 	}
 
-	if(s_ModesReload || g_Config.m_GfxDisplayAllVideoModes != s_InitDisplayAllVideoModes)
+	if(s_ModesReload || g_Config.m_GfxNeedRefreshSettings || g_Config.m_GfxDisplayAllVideoModes != s_InitDisplayAllVideoModes)
 	{
+		int IsFullscreen = g_Config.m_GfxFullscreen;
+		int IsBorderless = g_Config.m_GfxBorderless;
+		int CurrentScreen = Graphics()->GetWindowScreen();
+		int NumScreens = Graphics()->GetNumScreens();
+		int NextScreen = (CurrentScreen + 1) % NumScreens;
+		if(g_Config.m_GfxNeedRefreshSettings == 1)
+		{
+			if(!IsBorderless)
+			{
+				if(IsFullscreen == 1)
+					g_Config.m_GfxScreen = (CurrentScreen != g_Config.m_GfxScreen) ? CurrentScreen : (g_Config.m_GfxScreen ? CurrentScreen : NextScreen);
+			}
+
+			Graphics()->SetLastCheckSwitch(false);
+		}
+		if(IsFullscreen == 2)
+		{
+			if(g_Config.m_GfxScreen != g_Config.m_GfxNewScreen)
+				g_Config.m_GfxScreen = g_Config.m_GfxNewScreen;
+		}
 		s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
 		s_ModesReload = false;
 		s_InitDisplayAllVideoModes = g_Config.m_GfxDisplayAllVideoModes;
+		g_Config.m_GfxNeedRefreshSettings = 0;
 	}
 
 	CUIRect ModeList, ModeLabel;
@@ -1555,8 +1576,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			continue;
 
 		int G = std::gcd(s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight);
-		str_format(aBuf, sizeof(aBuf), " %dx%d @%dhz %d bit (%d:%d)", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, s_aModes[i].m_RefreshRate, Depth, s_aModes[i].m_CanvasWidth / G, s_aModes[i].m_CanvasHeight / G);
-		Ui()->DoLabel(&Item.m_Rect, aBuf, sc_FontSizeResList, TEXTALIGN_ML);
+		if(G > 0)
+		{
+			str_format(aBuf, sizeof(aBuf), " %dx%d @%dhz %d bit (%d:%d)", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, s_aModes[i].m_RefreshRate, Depth, s_aModes[i].m_CanvasWidth / G, s_aModes[i].m_CanvasHeight / G);
+			Ui()->DoLabel(&Item.m_Rect, aBuf, sc_FontSizeResList, TEXTALIGN_ML);
+		}
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
@@ -1621,7 +1645,12 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		s_ScreenDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ScreenDropDownScrollRegion;
 		const int NewScreen = Ui()->DoDropDown(&ScreenDropDown, g_Config.m_GfxScreen, s_vpScreenNames.data(), s_vpScreenNames.size(), s_ScreenDropDownState);
 		if(NewScreen != g_Config.m_GfxScreen)
-			Client()->SwitchWindowScreen(NewScreen);
+		{
+			g_Config.m_GfxNewScreen = NewScreen;
+			Graphics()->SetLastCheckSwitch(true);
+			Client()->SwitchWindowScreen(NewScreen, true);
+			g_Config.m_GfxNeedRefreshSettings = 2;
+		}
 	}
 
 	MainView.HSplitTop(2.0f, nullptr, &MainView);

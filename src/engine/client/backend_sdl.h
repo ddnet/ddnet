@@ -216,6 +216,7 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 	TGLBackendReadPresentedImageData m_ReadPresentedImageDataFunc;
 
 	int m_NumScreens;
+	bool m_LastCheckSwitch;
 
 	SBackendCapabilites m_Capabilites;
 
@@ -251,7 +252,7 @@ public:
 	void Minimize() override;
 	void Maximize() override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
-	bool SetWindowScreen(int Index) override;
+	bool SetWindowScreen(int Index, bool Center = true) override;
 	bool UpdateDisplayMode(int Index) override;
 	int GetWindowScreen() override;
 	int WindowActive() override;
@@ -260,6 +261,10 @@ public:
 	bool ResizeWindow(int w, int h, int RefreshRate) override;
 	void GetViewportSize(int &w, int &h) override;
 	void NotifyWindow() override;
+
+	bool GetLastCheckSwitch() override;
+	void SetLastCheckSwitch(bool Status) override;
+	void ResizeScreenAfterSwitch(int Index, bool Center = true) override;
 
 	void WindowDestroyNtf(uint32_t WindowId) override;
 	void WindowCreateNtf(uint32_t WindowId) override;

@@ -1508,7 +1508,7 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 	}
 }
 
-bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index)
+bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index, bool Center)
 {
 	if(Index < 0 || Index >= m_NumScreens)
 	{
@@ -1523,9 +1523,12 @@ bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index)
 	// Todo SDL: remove this when fixed (changing screen when in fullscreen is bugged)
 	SDL_SetWindowBordered(m_pWindow, SDL_TRUE); //fixing primary monitor goes black when switch screen (borderless OpenGL)
 
-	SDL_SetWindowPosition(m_pWindow,
-		SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
-		SDL_WINDOWPOS_CENTERED_DISPLAY(Index));
+	if(Center)
+	{
+		SDL_SetWindowPosition(m_pWindow,
+			SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
+			SDL_WINDOWPOS_CENTERED_DISPLAY(Index));
+	}
 
 	return UpdateDisplayMode(Index);
 }
@@ -1538,7 +1541,7 @@ bool CGraphicsBackend_SDL_GL::UpdateDisplayMode(int Index)
 		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 		return false;
 	}
-
+	
 	g_Config.m_GfxScreen = Index;
 	g_Config.m_GfxDesktopWidth = DisplayMode.w;
 	g_Config.m_GfxDesktopHeight = DisplayMode.h;
@@ -1619,6 +1622,52 @@ void CGraphicsBackend_SDL_GL::NotifyWindow()
 		return;
 	}
 #endif
+}
+
+bool CGraphicsBackend_SDL_GL::GetLastCheckSwitch()
+{
+	return m_LastCheckSwitch;
+}
+
+void CGraphicsBackend_SDL_GL::SetLastCheckSwitch(bool Status)
+{
+	m_LastCheckSwitch = Status;
+	if(Status)
+		g_Config.m_GfxNeedRefreshSettings = 1;
+}
+
+void CGraphicsBackend_SDL_GL::ResizeScreenAfterSwitch(int Index, bool Center)
+{
+	int IsFullscreen = g_Config.m_GfxFullscreen;
+	int IsBorderless = g_Config.m_GfxBorderless;
+
+	if(!SetWindowScreen(Index, Center))
+		return;
+
+	if(!IsFullscreen && !IsBorderless)
+	{
+		SetLastCheckSwitch(false);
+		return;
+	}
+
+	SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
+
+	float m_ScreenHiDPIScale = g_Config.m_GfxDesktopWidth / (float)g_Config.m_GfxScreenWidth;
+	CVideoMode CurMode;
+	GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Index);
+
+	const int Depth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
+	g_Config.m_GfxColorDepth = Depth;
+	g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
+	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
+	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
+
+	ResizeWindow(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+
+	SetWindowParams(IsFullscreen, IsBorderless);
+	SetLastCheckSwitch(false);
+	if(g_Config.m_GfxNeedRefreshSettings != 2)
+		g_Config.m_GfxNeedRefreshSettings = 1;
 }
 
 void CGraphicsBackend_SDL_GL::WindowDestroyNtf(uint32_t WindowId)
