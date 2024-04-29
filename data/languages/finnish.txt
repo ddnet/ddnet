@@ -1,10 +1,11 @@
 ##### authors #####
 #originally created by:
-#	ziltoide
+#   ziltoide
 #modified by:
 #	ziltoide		2011-04-06 23:56:54
 #	ziltoide		2011-07-05 18:31:04
 #	Misse & Igrekyll	2021-07-07 18:01:51
+#	ƤØŢĀŤ0Co		2024-04-26 21:37:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -43,13 +44,13 @@ All
 == Kaikki
 
 Are you sure that you want to quit?
-== Oletko varma, että haluat lopettaa?
+== Oletko varma, että haluat lopettaa pelin?
 
 Automatically record demos
 == Nauhoita demot automaattisesti
 
 Automatically take game over screenshot
-== Ota pelin jälkeinen kuvankaappaus autom.
+== Ota pelin jälkeinen kuvankaappaus automaattisesti
 
 Blue team
 == Sininen joukkue
@@ -85,7 +86,7 @@ Console
 == Konsoli
 
 Controls
-== Kontrollit
+== Ohjaus
 
 Count players only
 == Laske vain pelaajat
@@ -94,7 +95,7 @@ Current
 == Nykyinen
 
 Custom colors
-== Omat värit
+== Mukautetut värit
 
 Delete
 == Poista
@@ -568,10 +569,10 @@ Are you sure that you want to disconnect?
 == Oletko varma, että haluat katkaista yhteyden?
 
 Disconnect Dummy
-== Katk. dummyn yhteys
+== Katk. nuken yhteys
 
 Are you sure that you want to disconnect your dummy?
-== Oletko varma, että haluat katkaista dummysi yhteyden?
+== Oletko varma, että haluat katkaista nukkeesi yhteyden?
 
 Welcome to DDNet
 == Tervetuloa DDNet:iin
@@ -700,10 +701,10 @@ Demos directory
 == Demohakemisto
 
 Connecting dummy
-== Yhdistetään dummyä
+== Yhdistetään nukkea
 
 Connect Dummy
-== Yhdistä dummy
+== Yhdistä nukke
 
 Kill
 == Tapa
@@ -784,7 +785,7 @@ Toggle dyncam
 == Vaihda dynaaminen kamera
 
 Toggle dummy
-== Vaihda dummy
+== Vaihda nukkeen
 
 Toggle ghost
 == Vaihda haamu
@@ -799,7 +800,7 @@ Chat command
 == Chattikomento
 
 Dummy
-== Dummy
+== Nukke
 
 Windowed
 == Ikkunoitu
@@ -1059,783 +1060,786 @@ Best
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Epäonnistui alustuksen aikana. Yritä muuttaa gfx_backend arvoksi OpenGL tai Vulkan asetushakemistossa settings_ddnet.cfg ja yritä uudelleen.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== VRAM loppu. Yritä poistaa mukautettuja resursseja (skinit, entiteetit, jne.), erityisesti korkearesoluutioiset.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Komennon tallennuksen aikana tapahtui virhe. Yritä päivittää GPU-ajurit.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Renderöintikomento epäonnistui. Yritä päivittää GPU-ajurit.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Renderöintikomentojen lähettäminen epäonnistui. Yritä päivittää GPU-ajurit.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Framepuskureiden vaihto epäonnistui. Yritä päivittää GPU-ajurit.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Tuntematon virhe. Yritä muuttaa gfx_backend arvoksi OpenGL tai Vulkan asetushakemistossa settings_ddnet.cfg ja yritä uudelleen.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Annettua näytönohjainta ei voitu alustaa. Palataan nyt oletusarvoiseen taustajärjestelmään.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Annettua näytönohjainta ei voitu alustaa, tämä johtuu luultavasti siitä, että et asentanut integroidun näytönohjaimen ohjainta.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Ei voitu tallentaa ladattua karttaa. Yritä poistaa tämä tiedosto manuaalisesti: %s
 
 Error playing demo
-== 
+== Virhe demoa toistaessa
 
 Failed saving the replay!
-== 
+== Toiston tallentaminen epäonnistui!
 
 Saving settings to '%s' failed
-== 
+== Asetusten tallentaminen '%s' epäonnistui
 
 Error saving settings
-== 
+== Virhe asetusten tallentamisessa
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Tekstuurin %s muoto ei ole RGBA, mikä aiheuttaa visuaalisia virheitä.
 
 Preparing demo playback
-== 
+== Valmistetaan demon toistoa
 
 Connected
-== 
+== Yhdistetty
 
 Loading map file from storage
-== 
-
-Loading demo file from storage
-== 
+== Ladataan karttatiedostoa tallennustilasta
 
 Why are you slowmo replaying to read this?
-== 
+== Miksi hidastat toistoa lukeaksesi tätä?
 
 Initializing components
-== 
+== Komponenttien alustus
 
 Initializing assets
-== 
+== Resurssien alustaminen
 
 Initializing map logic
-== 
+== Karttalogiikkaa alustetaan
 
 Sending initial client info
-== 
+== Alkuasiakastietojen lähettäminen
 
 Quitting. Please wait…
-== 
+== Lopettaminen. Odota…
 
 Restarting. Please wait…
-== 
+== Käynnistetään uudelleen. Odota…
 
 Loading skin files
-== 
+== Ladataan skinin tiedostoja
 
 Searching
-== 
+== Etsitään
 
 Enter Username
-== 
+== Syötä käyttäjätunnus
 
 Enter Password
-== 
+== Syötä Salasana
 
 NOT CONNECTED
-== 
+== EI YHTEYTTÄ
 
 Match %d of %d
-== 
+== Yhdistä %d'n %d
 
 No results
-== 
+== Ei tuloksia
 
 Lines %d - %d (%s)
-== 
+== Rivit %d - %d (%s)
 
 Locked
-== 
+== Lukittu
 
 Following
-== 
+== Seurataan
 
 Loading commands…
-== 
+== Ladataan komentoja...
 
 Position:
-== 
+== Positio:
 
 Speed:
-== 
+== Vauhti:
 
 Angle:
-== 
+== Kulma:
 
 Multi-View
-== 
+== Moni-Näkymä
 
 Team %d
-== 
+== Joukkue %d
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Joitakin kartan kuvia ei voitu ladata. Tarkasta paikallinen konsoli yksityiskohtia varten.
 
 Uploading map data to GPU
-== 
+== Ladataan karttatietoja GPU:lle
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Joitakin kartan ääniä ei voitu ladata. Tarkasta paikallinen konsoli yksityiskohtia varten.
 
 Loading menu themes
-== 
+== Ladataan valikon teemoja
 
 Press a key…
-== 
+== Paina näppäintä...
 
 Main menu
-== 
-
-Rename folder
-== 
-
-Render complete
-== 
-
-Are you sure that you want to restart?
-== 
-
-There's an unsaved map in the editor, you might want to save it.
-== 
-
-Continue anyway?
-== 
-
-A demo with this name already exists
-== 
-
-A folder with this name already exists
-== 
-
-Unable to rename the folder
-== 
-
-File '%s' already exists, do you want to overwrite it?
-== 
-
-(paused)
-== 
-
-Videos directory
-== 
-
-Video was saved to '%s'
-== 
-
-Join Tutorial Server
-== 
-
-Skip Tutorial
-== 
+== Päävalikko
 
 Trying to determine UDP connectivity...
-== 
+== Yritetään selvittää UDP-yhteyden toimivuutta...
 
 UDP seems to be filtered.
-== 
+== UDP näyttää olevan suodatettu.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== UDP ja TCP IP-osoitteet näyttävät eroavan. Yritä poistaa käytöstä VPN, välityspalvelin tai verkon nopeuttimia.
 
 No answer from server yet.
-== 
+== Ei vielä vastausta palvelimelta.
 
 Getting game info
-== 
+== Saadaan pelitietoja
 
 Requesting to join the game
-== 
+== Pyydetään liittymistä peliin
+
+Rename folder
+== Nimeä uudelleen kansio
+
+Render complete
+== Renderöinti valmis
+
+Are you sure that you want to restart?
+== Oletko varma, että haluat käynnistää uudelleen?
+
+There's an unsaved map in the editor, you might want to save it.
+== Editorissa on tallentamaton kartta, joten haluat ehkä tallentaa sen.
+
+Continue anyway?
+== Jatka silti?
+
+A demo with this name already exists
+== Demo tällä nimellä on jo olemassa
+
+A folder with this name already exists
+== Kansio tällä nimellä on jo olemassa
+
+Unable to rename the folder
+== Ei voitu nimetä kansiota uudelleen
+
+File '%s' already exists, do you want to overwrite it?
+== Tiedosto '%s' on jo olemassa, haluatko korvata sen?
+
+(paused)
+== (keskeytetty)
+
+Videos directory
+== Videoitten kansio
+
+Video was saved to '%s'
+== Video tallennettiin osoitteeseen '%s'
+
+Join Tutorial Server
+== Liity opetuspalvelimeen
+
+Skip Tutorial
+== Ohita Tutoriali
 
 Loading menu images
-== 
+== Ladataan valikon kuvia
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
-
-No login required
-== 
+== Oletko varma, että haluat katkaista yhteyden ja siirtyä toiseen palvelimeen?
 
 Communities
-== 
+== Yhteisöt
 
 Copy info
-== 
+== Kopioi tiedot
 
 No server selected
-== 
+== Palvelinta ei ole valittu
 
 Online players (%d)
-== 
+== Online pelaajat (%d)
 
 Online clanmates (%d)
-== 
+== Online klaanikaverit (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Offline (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Klikkaa valitaksesi palvelimen. Kaksoisklikkaa liittyäksesi ystävään.
 
 Click to remove this player from your friends list.
-== 
+== Klikkaa poistaaksesi tämän pelaajan ystävälistaltasi.
 
 Click to remove this clan from your friends list.
-== 
+== Klikkaa poistaaksesi tämän klaanin ystävälistaltasi.
 
 None
-== 
+== Ei mitään
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Oletko varma että haluat poistaa pelaajan '%s' ystävälistaltasi?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Oletko varma että haluat poistaa klaanin '%s' ystävälistaltasi?
 
 Add Clan
-== 
+== Lisää Klaani
 
 Server filter
-== 
+== Palvelimen 
 
 Friends
-== 
+== Ystävät
 
 Play the current demo
-== 
+== Pyöritä nykyistä demoa
 
 Pause the current demo
-== 
+== Tauota nykyinen demo
 
 Stop the current demo
-== 
+== Pysäytä nykyinen demo
 
 Go back the specified duration
-== 
+== Mene annetun ajan taaksepäin
 
 [Demo player duration]
 %d min.
-== 
+== %d min.
 
 [Demo player duration]
 %d sec.
-== 
+== %d sek.
 
 Change the skip duration
-== 
+== Vaihda hyppyajan kesto
 
 Go forward the specified duration
-== 
+== Mene annetun ajan eteenpäin
 
 Go back one tick
-== 
+== Mene yhden askelen taaksepäin
 
 Go forward one tick
-== 
+== Mene yhden askelen eteenpäin
 
 Go back one marker
-== 
+== Mene yhden merkin taaksepäin
 
 Go forward one marker
-== 
+== Mene yhden merkin eteenpäin
 
 Slow down the demo
-== 
+== Hidasta demoa
 
 Speed up the demo
-== 
+== Nopeuta demoa
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Merkitse leikkauksen alku (oikea klikkaus nollaa)
 
 Mark the end of a cut (right click to reset)
-== 
+== Merkitse leikkauksen loppu (oikea klikkaus nollaa)
 
 Export cut as a separate demo
-== 
+== Vie leikkaus erillisenä demona
 
 Close the demo player
-== 
+== Sulje demo pelaaja
 
 Toggle keyboard shortcuts
-== 
+== Vaihda näppäimistön pikanäppäimet
 
 Export demo cut
-== 
+== Vie demoleikkaus
 
 Cut interval
-== 
+== Leikkauksen väliaika
 
 Cut length
-== 
+== Leikkauksen pituus
 
 Render cut to video
-== 
+== Renderöi leikkaus videoksi
 
 Please use a different filename
-== 
+== Käytä toista tiedostonimeä
 
 Loading demo files
-== 
+== Ladataan demo-tiedostoja
 
 All combined
-== 
+== Kaikki yhdistettynä
 
 No demo selected
-== 
+== Demoa ei valittu
 
 Folder Link
-== 
+== Kansio Linkki
 
 Created
-== 
+== Luotu
 
 Netversion
-== 
+== Netversio
 
 [Demo details]
 map not included
-== 
+== kartta ei sisälly
 
 Open the directory that contains the demo files
-== 
+== Avaa kansio joka sisältää demo-tiedostot
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Oletko varma että haluat poistaa kansion '%s'?
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Oletko varma että haluat poistaa demon '%s'?
 
 Delete folder
-== 
+== Poista kansio
 
 Unable to delete the demo '%s'
-== 
+== Ei voitu poistaa demoa '%s'
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Ei voitu poistaa kansiota '%s'. Varmista että se on tyhjä ensin.
 
 Loading…
-== 
+== Ladataan...
 
 Loading ghost files
-== 
+== Ladataan aave-tiedostoja
 
 Ghosts directory
-== 
+== Aaveitten kansio
 
 Activate all
-== 
+== Aktivoi kaikki
 
 Deactivate all
-== 
+== Deaktivoi kaikki
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Valikko avattu. Paina Esc-näppäintä uudelleen sulkeaksesi valikon.
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Säästä virtaa alentamalla virkistystaajuutta (korkeampi viive syötteessä)
 
 Settings file
-== 
+== asetustiedosto
 
 Open the settings file
-== 
+== Avaa asetustiedosto
 
 Config directory
-== 
+== Konfigurionti kansio
 
 Open the directory that contains the configuration and user files
-== 
+== Avaa kansio jossa ovat asetus- ja käyttäjätiedostot
 
 Open the directory to add custom themes
-== 
+== Avaa kansio mukautetuille teemoille
 
 Automatically take statboard screenshot
-== 
+== Automaattisesti ota tilastotaulun kuva
 
 Automatically create statboard csv
-== 
+== Automaattisesti luo tilastotaulu csv
 
 Max CSVs
-== 
-
-Player info change cooldown
-== 
+== Maksimi CSV:t
 
 Download community skins
-== 
+== Lataa yhteisön skinit
 
 Fat skins (DDFat)
-== 
+== Lihavoidut ihonvärit (DDfat)
 
 Create a random skin
-== 
+== Luo satunnainen skinit
 
 Choose default eyes when joining a server
-== 
+== Valitse oletussilmät palvelimeen liittyessä
 
 Open the directory to add custom skins
-== 
+== Avaa kansio mukautetuille ihonväreille
+
+Loading demo file from storage
+== Ladataan demo-tiedosto tallennuksesta
+
+No login required
+== Kirjautumista ei vaadita
+
+Player info change cooldown
+== Pelaajan tiedon muutos viive
 
 Converse
 == 
 
+Always show chat
+== Aina näytä chatti
+
+Show friend mark (♥) in name plates
+== Näytä ystävämerkki (♥) nimilaatoissa
+
+Show hook strength icon indicator
+== Näytä koukun voiman ikoniindikaattori
+
+Show hook strength number indicator
+== Näytä koukun voimanumeroindikaattori
+
+Show own player's hook collision line
+== Näytä oman pelaajan törmäysviiva
+
+Always show own player's hook collision line
+== Näytä aina oman pelaajan törmäysviiva
+
+Always show other players' hook collision lines
+== Näytä aina muiden pelaajien törmaysviivat
+
 Dummy copy
-== 
+== Nuken kopio
 
 Hammerfly dummy
-== 
+== Vasaralento nukella
 
 Statboard
-== 
+== Tilastotaulu
 
 Show entities
-== 
+== Näytä entiteetit
 
 Enable controller
-== 
+== Salli ohjain
 
 Controller
-== 
+== Ohjain
 
 Ingame controller mode
-== 
+== Pelissä ohjaimen tilatila
 
 [Ingame controller mode]
 Relative
-== 
+== Suhteellinen
 
 [Ingame controller mode]
 Absolute
-== 
+== Ehdoton
 
 Ingame controller sens.
-== 
+== Pelissä ohjaimen herkkyys
 
 UI controller sens.
-== 
+== Käyttöliittymässä 
 
 Controller jitter tolerance
-== 
+== Ohjaimen häiriösieto
 
 No controller found. Plug in a controller.
-== 
+== Ohjainta ei löytynyt. Liitä ohjain.
 
 Axis
-== 
+== Akseli
 
 Status
-== 
+== Status
 
 Aim bind
-== 
+== Tähtäys sidonta
 
 Mouse
-== 
+== Hiiri
 
 Ingame mouse sens.
-== 
+== Pelissä hiiren herkkyys
 
 UI mouse sens.
-== 
+== Käyttöliittymän hiiren herkkyys
 
 Reset controls
-== 
+== Nollaa ohjaukset
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Oletko varma että haluat palauttaa ohjaimet oletusasetuksiin?
 
 Cancel
-== 
+== Peruta
 
 Windowed fullscreen
-== 
+== Ikkuna koko näyttö
 
 Allows maps to render with more detail
-== 
+== Salli karttojen renderöitymisen enemmän yksityiskohtia
 
 Renderer
-== 
+== Renderöijä
 
 default
-== 
+== tavallinen
 
 custom
-== 
+== mukautettu
 
 Graphics card
-== 
+== Näytönohjain
 
 auto
-== 
+== automaattinen
 
 Enable long pain sound (used when shooting in freeze)
-== 
+== Salli pitkä kipuääni (käytetään jäädytyksessä ampumiseen)
 
 Appearance
-== 
+== Ulkomuoto
 
 Assets
-== 
+== Resurssit
 
 Name Plate
-== 
+== Nimi
 
 Hook Collisions
-== 
+== Koukun törmäykset
 
 Info Messages
-== 
+== Info viestit
 
 Show health, shields and ammo
-== 
+== Näytä elämät, kilvet ja ammukset
 
 Show local time always
-== 
+== Näytä paikallinen aika aina
 
 DDRace HUD
-== 
+== DDrace-HUD
 
 Show client IDs in scoreboard
-== 
+== Näytä asiakas-ID:t pistetaulukossa
 
 Show DDRace HUD
-== 
+== Näytä DDRace-HUD
 
 Show jumps indicator
-== 
+== Näytä hyppyjen mittari
 
 Show dummy actions
-== 
+== Näytä dummyn toiminnot
 
 Show player position
-== 
+== Näytä pelaajan sijainti
 
 Show player speed
-== 
+== Näytä pelaajan nopeus
 
 Show player target angle
-== 
+== Näytä pelaajan maalikulma
 
 Show freeze bars
-== 
+== Näytä jäätymispalkit
 
 Opacity of freeze bars inside freeze
-== 
-
-Always show chat
-== 
+== Läpinäkyvyys jäätymisessä olevan pelaajan jäätymispalkkien sisällä
 
 Chat font size
-== 
+== Chatti kirjasinkoko
 
 Chat width
-== 
+== Chatin leveys
 
-Show friend mark (♥) in name plates
-== 
-
-Show hook strength icon indicator
-== 
-
-Show hook strength number indicator
-== 
+Show hook strength indicator
+== Näytä koukun voimakkuus mittari
 
 Show local player's key presses
-== 
+== Näytä paikallisen pelaajan näppäimistönpainallukset
 
 Authed name color in scoreboard
-== 
+== Autentifikoidun käyttäjän nimen väri pistetaulukossa
 
 Same clan color in scoreboard
-== 
+== Saman klaanin väri pistetaulukossa
 
 Hook collision line
-== 
-
-Show own player's hook collision line
-== 
-
-Always show own player's hook collision line
-== 
-
-Always show other players' hook collision lines
-== 
+== Koukku törmäysviiva
 
 Hook collision line width
-== 
+== Koukku törmäysviivan paksuus
 
 Hook collision line opacity
-== 
+== Koukku törmäysviivan läpinäkyvyys
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Koukun törmäysviivan värit mahdollisen törmäyksen tapauksessa:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Sinun liikkeitäsi ei oteta huomioon viivan värien laskennassa
 
 Nothing hookable
-== 
+== Ei mitään koukutettavaa
 
 Something hookable
-== 
+== Jotain koukutettavaa
 
 A Tee
-== 
+== Tee
 
 Show finish messages
-== 
+== Näytä maaliviiva viestit
 
 Normal Color
-== 
+== Tavallinen väri
 
 Highlight Color
-== 
+== Korostus väri
 
 Weapons
-== 
+== Aseet
 
 Rifle Laser Outline Color
-== 
+== Kivärin laserin reunaviivan väri
 
 Rifle Laser Inner Color
-== 
+== Kivärin laserin sisäinen väri
 
 Shotgun Laser Outline Color
-== 
+== Haulikon laserin reunaviivan väri
 
 Shotgun Laser Inner Color
-== 
+== Haulikon laserin sisäinen väri
 
 Entities
-== 
+== Entiteetit
 
 Door Laser Outline Color
-== 
+== Oven laserin reunaviivan väri
 
 Door Laser Inner Color
-== 
+== Oven laserin sisäinen väri
 
 Freeze Laser Outline Color
-== 
+== Jäädytys laserin reunaviivan väri
 
 Freeze Laser Inner Color
-== 
+== Jäädytys laserin sisäinen väri
 
 Set all to Rifle
-== 
+== Aseta kaikki kivääriksi
 
 Enable ghost
-== 
+== Ota käyttöön aave
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Kun ylität maaliviivan, näytä aave-tee, joka toistaa parhaan aikasi liikkeet
 
 Opacity
-== 
+== Peittävyys
 
 Only save improvements
-== 
+== Tallenna vain parannukset
 
 Overlay entities
-== 
+== Päällys entiteetit
 
 Show text entities
-== 
+== Näytä teksti-entiteettejä
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Säädä muiden joukkueiden entiteettien, kuten teen ja nimilaattojen, läpinäkyvyyttä
 
 Show quads
-== 
+== Näytä quadit
 
 Quads are used for background decoration
-== 
+== Quadit ovat taustakoristelua varten
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Yrittää ennustaa muiden entiteettien liikkeitä antamaan tuntuman pienestä viiveestä
 
 Regular background color
-== 
+== Tavallinen taustaväri
 
 Entities background color
-== 
+== Entiteettien taustaväri
 
 Show tiles layers from BG map
-== 
+== Näytä kartan taustakartan kerrokset
 
 New random timeout code
-== 
+== Uusi satunnainen timeout koodi
 
 Run on join
-== 
+== Käynnistä liittyessä palvelimeen
 
 Chat command (e.g. showall 1)
-== 
+== Chatti komento (esim. showall 1)
 
 Unregister protocol and file extensions
-== 
+== Rekisteröimätön protokolla ja tiedostopäätteet
 
 Particles
-== 
+== Partikkelit
 
 Extras
-== 
+== Lisä.
 
 Loading assets
-== 
+== Ladataan resursseja
 
 Assets directory
-== 
+== Resurssien kansio
 
 Open the directory to add custom assets
-== 
+== Avaa kansio johon voi lisätä omia resursseja
 
 Tutorial
-== 
+== Tutoriali
 
 Can't find a Tutorial server
-== 
+== Ei voitu löytää Tutoriali palvelinta
 
 Server executable not found, can't run server
-== 
+== Serverin suoritettavaa tiedostoa ei löytynyt, palvelinta ei voitu käynnistää
 
 Loading race demo files
-== 
+== Ladataan kilpailu demo tiedostoja
 
 Super
-== 
+== Super
 
 Auto
-== 
+== Automaattinen
 
 Loading sound files
-== 
+== Ladataan ääni tiedostoja
 
 Spree
 == 
@@ -1844,4 +1848,4 @@ Grabs
 == 
 
 Moved ingame
-== 
+== Liikui pelissä
