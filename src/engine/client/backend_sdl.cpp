@@ -887,6 +887,31 @@ const char *CGraphicsBackend_SDL_GL::GetScreenName(int Screen) const
 	return pName == nullptr ? "unknown/error" : pName;
 }
 
+void CGraphicsBackend_SDL_GL::ResizeScreenAfterSwitch(int Index)
+{
+	int IsFullscreen = g_Config.m_GfxFullscreen;
+	int IsBorderless = g_Config.m_GfxBorderless;
+	if(SetWindowScreen(Index))
+		g_Config.m_GfxScreen = Index;
+
+	if(!IsFullscreen && !IsBorderless)
+		return;
+
+	SetWindowParams(3, false);
+
+	float m_ScreenHiDPIScale = g_Config.m_GfxDesktopWidth / (float)g_Config.m_GfxScreenWidth;
+	CVideoMode CurMode;
+	GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Index);
+
+	const int Depth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
+
+	g_Config.m_GfxColorDepth = Depth;
+	g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
+	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
+	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
+	SetWindowParams(g_Config.m_GfxFullscreen, g_Config.m_GfxBorderless);
+}
+
 static void DisplayToVideoMode(CVideoMode *pVMode, SDL_DisplayMode *pMode, int HiDPIScale, int RefreshRate)
 {
 	pVMode->m_CanvasWidth = pMode->w * HiDPIScale;

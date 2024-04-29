@@ -66,9 +66,12 @@ CInput::CInput()
 
 	m_pClipboardText = nullptr;
 
+
 	m_CompositionLength = COMP_LENGTH_INACTIVE;
 	m_CompositionCursor = 0;
 	m_CandidateSelectedIndex = -1;
+
+	m_LastSwitchCheck = -1;
 
 	m_aDropFile[0] = '\0';
 }

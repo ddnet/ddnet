@@ -38,6 +38,7 @@ protected:
 	CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
 	int64_t m_LastUpdate;
 	float m_UpdateTime;
+	int64_t m_LastSwitchCheck;
 
 public:
 	enum
@@ -61,6 +62,9 @@ public:
 
 	// events
 	size_t NumEvents() const { return m_NumEvents; }
+
+	void SetLastCheckSwitch(int64_t Timestamp) { m_LastSwitchCheck = Timestamp; }
+
 	virtual bool IsEventValid(const CEvent &Event) const = 0;
 	const CEvent &GetEvent(size_t Index) const
 	{

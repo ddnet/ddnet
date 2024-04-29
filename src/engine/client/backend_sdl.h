@@ -1,6 +1,7 @@
 #ifndef ENGINE_CLIENT_BACKEND_SDL_H
 #define ENGINE_CLIENT_BACKEND_SDL_H
 
+#include <SDL.h>
 #include <SDL_video.h>
 
 #include <base/detect.h>
@@ -245,6 +246,8 @@ public:
 
 	int GetNumScreens() const override { return m_NumScreens; }
 	const char *GetScreenName(int Screen) const override;
+
+	void ResizeScreenAfterSwitch(int Index) override;
 
 	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
 	void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;

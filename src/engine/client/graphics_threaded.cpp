@@ -2597,6 +2597,11 @@ const char *CGraphics_Threaded::GetScreenName(int Screen) const
 	return m_pBackend->GetScreenName(Screen);
 }
 
+void CGraphics_Threaded::ResizeScreenAfterSwitch(int Index)
+{
+	return m_pBackend->ResizeScreenAfterSwitch(Index);
+}
+
 void CGraphics_Threaded::Minimize()
 {
 	m_pBackend->Minimize();

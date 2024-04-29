@@ -549,6 +549,8 @@ public:
 	virtual int GetNumScreens() const = 0;
 	virtual const char *GetScreenName(int Screen) const = 0;
 
+	virtual void ResizeScreenAfterSwitch(int Index) = 0;
+
 	// synchronization
 	virtual void InsertSignal(class CSemaphore *pSemaphore) = 0;
 	virtual bool IsIdle() const = 0;
