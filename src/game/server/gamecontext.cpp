@@ -4235,6 +4235,7 @@ void CGameContext::OnSnap(int ClientId)
 void CGameContext::OnPreSnap() {}
 void CGameContext::OnPostSnap()
 {
+	m_World.PostSnap();
 	m_Events.Clear();
 }
 
