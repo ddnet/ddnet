@@ -291,6 +291,25 @@ public:
 	char m_aaLastChatMessages[MAX_LINES][MAX_LINE_LENGTH];
 	int m_UnstackHackCharacterOffset;
 	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
+	void RegisterInstagibCommands();
+	bool IsInstaControllerActive() const;
+	void SwapTeams();
+	static void ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainResetInstasettingTees(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainSpawnWeapons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainSmartChat(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainTournamentChat(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
+	static void ConHammer(IConsole::IResult *pResult, void *pUserData);
+	static void ConGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnHammer(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConGodmode(IConsole::IResult *pResult, void *pUserData);
+	static void ConForceReady(IConsole::IResult *pResult, void *pUserData);
+	static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData);
+	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData);
+	static void ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData);
 
 	//
 	void CheckPureTuning();

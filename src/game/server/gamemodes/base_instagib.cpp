@@ -13,38 +13,6 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 
 	m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
 
-	GameServer()->Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this);
-	GameServer()->Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this);
-	GameServer()->Console()->Chain("sv_grenade_ammo_regen", ConchainResetInstasettingTees, this);
-	GameServer()->Console()->Chain("sv_spawn_weapons", ConchainSpawnWeapons, this);
-	GameServer()->Console()->Chain("sv_tournament_chat_smart", ConchainSmartChat, this);
-	GameServer()->Console()->Chain("sv_tournament_chat", ConchainTournamentChat, this);
-
-#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) GameServer()->Console()->Register(name, params, flags, callback, userdata, help);
-#include "instagib/rcon_commands.h"
-#undef CONSOLE_COMMAND
-
-	// generate callbacks to trigger insta settings update for all instagib configs
-	// when one of the insta configs is changed
-	// we update the checkboxes [x] in the vote menu
-#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
-	GameServer()->Console()->Chain(#ScriptName, ConchainInstaSettingsUpdate, this);
-#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) // only int checkboxes for now
-#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) // only int checkboxes for now
-#include <engine/shared/variables_insta.h>
-#undef MACRO_CONFIG_INT
-#undef MACRO_CONFIG_COL
-#undef MACRO_CONFIG_STR
-
-	// ugly hack to fix https://github.com/ZillyInsta/ddnet-insta/issues/88
-	// we load the autoexec again after the insta controller registered its commands
-	// loading the autoexec twice might cause some weird bugs so this hack is far from ideal
-	// a clean fix requires refactoring ddnet code upstream
-	if(GameServer()->Storage()->FileExists(AUTOEXEC_SERVER_FILE, IStorage::TYPE_ALL))
-		GameServer()->Console()->ExecuteFile(AUTOEXEC_SERVER_FILE);
-	else // fallback
-		GameServer()->Console()->ExecuteFile(AUTOEXEC_FILE);
-
 	if(!m_HttpInsta.Init(std::chrono::seconds{2}))
 	{
 		dbg_msg("ddnet-insta", "Failed to initialize the HTTP client.");
@@ -64,41 +32,18 @@ void CGameControllerInstagib::SendChat(int ClientId, int Team, const char *pText
 	GameServer()->SendChat(ClientId, Team, pText, SpamProtectionClientId, Flags);
 }
 
-void CGameControllerInstagib::ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CGameControllerInstagib::UpdateSpawnWeapons()
 {
-	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments())
+	const char *pWeapons = Config()->m_SvSpawnWeapons;
+	if(!str_comp_nocase(pWeapons, "grenade"))
+		m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
+	else if(!str_comp_nocase(pWeapons, "laser") || !str_comp_nocase(pWeapons, "rifle"))
+		m_SpawnWeapons = SPAWN_WEAPON_LASER;
+	else
 	{
-		CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
-		if(pSelf->GameServer()->m_pController)
-			pSelf->GameServer()->m_pController->CheckGameInfo();
+		dbg_msg("ddnet-insta", "warning invalid spawn weapon falling back to grenade");
+		m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
 	}
-}
-
-void CGameControllerInstagib::ConchainResetInstasettingTees(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
-	if(pResult->NumArguments())
-	{
-		for(auto *pPlayer : pSelf->GameServer()->m_apPlayers)
-		{
-			if(!pPlayer)
-				continue;
-			CCharacter *pChr = pPlayer->GetCharacter();
-			if(!pChr)
-				continue;
-			pChr->ResetInstaSettings();
-		}
-	}
-}
-
-void CGameControllerInstagib::ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
-	pSelf->GameServer()->UpdateVoteCheckboxes();
-	pSelf->GameServer()->RefreshVotes();
 }
 
 void CGameControllerInstagib::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
@@ -128,56 +73,6 @@ void CGameControllerInstagib::ModifyWeapons(IConsole::IResult *pResult, void *pU
 	}
 
 	pChr->m_DDRaceState = DDRACE_CHEAT;
-}
-
-void CGameControllerInstagib::ConchainSpawnWeapons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments())
-	{
-		CGameControllerInstagib *pThis = static_cast<CGameControllerInstagib *>(pUserData);
-		const char *pWeapons = pThis->Config()->m_SvSpawnWeapons;
-		if(!str_comp_nocase(pWeapons, "grenade"))
-			pThis->m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
-		else if(!str_comp_nocase(pWeapons, "laser") || !str_comp_nocase(pWeapons, "rifle"))
-			pThis->m_SpawnWeapons = SPAWN_WEAPON_LASER;
-		else
-		{
-			dbg_msg("ddnet-insta", "warning invalid spawn weapon falling back to grenade");
-			pThis->m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
-		}
-	}
-}
-
-void CGameControllerInstagib::ConchainSmartChat(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-
-	if(!pResult->NumArguments())
-		return;
-
-	CGameControllerInstagib *pSelf = static_cast<CGameControllerInstagib *>(pUserData);
-	char aBuf[512];
-	str_format(
-		aBuf,
-		sizeof(aBuf),
-		"Warning: sv_tournament_chat is currently set to %d you might want to update that too.",
-		pSelf->Config()->m_SvTournamentChat);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
-}
-
-void CGameControllerInstagib::ConchainTournamentChat(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-
-	CGameControllerInstagib *pSelf = static_cast<CGameControllerInstagib *>(pUserData);
-	if(!pSelf->Config()->m_SvTournamentChatSmart)
-		return;
-
-	pSelf->Console()->Print(
-		IConsole::OUTPUT_LEVEL_STANDARD,
-		"ddnet-insta",
-		"Warning: this variable will be set automatically on round end because sv_tournament_chat_smart is active.");
 }
 
 int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)

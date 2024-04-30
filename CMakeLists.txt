@@ -2600,6 +2600,7 @@ if(SERVER)
     gamemodes/instagib/player.h
     gamemodes/instagib/rcon_commands.cpp
     gamemodes/instagib/rcon_commands.h
+    gamemodes/instagib/rcon_configs.cpp
     gamemodes/itdm.cpp
     gamemodes/itdm.h
     gamemodes/mod.cpp

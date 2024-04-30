@@ -1,63 +1,62 @@
+#include "game/server/gamecontroller.h"
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
 
-#include "../base_instagib.h"
-
-void CGameControllerInstagib::ConHammer(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConHammer(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_HAMMER, false);
 }
 
-void CGameControllerInstagib::ConGun(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConGun(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_GUN, false);
 }
 
-void CGameControllerInstagib::ConUnHammer(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConUnHammer(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_HAMMER, true);
 }
 
-void CGameControllerInstagib::ConUnGun(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConUnGun(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_GUN, true);
 }
 
-void CGameControllerInstagib::ConGodmode(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConGodmode(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 
-	CCharacter *pChr = pSelf->GameServer()->GetPlayerChar(Victim);
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
 
 	if(!pChr)
 		return;
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "'%s' got godmode!",
-		pSelf->GameServer()->Server()->ClientName(Victim));
-	pSelf->GameServer()->SendChat(-1, pSelf->GameServer()->CHAT_ALL, aBuf);
+		pSelf->Server()->ClientName(Victim));
+	pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
 	pChr->m_IsGodmode = true;
 }
 
-void CGameControllerInstagib::ConForceReady(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConForceReady(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 	if(Victim < 0 || Victim >= MAX_CLIENTS)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "victim has to be in 0-64 range");
 		return;
 	}
-	CPlayer *pPlayer = pSelf->GameServer()->m_apPlayers[Victim];
+	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
 	if(!pPlayer)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "victim with that id not found");
@@ -66,18 +65,18 @@ void CGameControllerInstagib::ConForceReady(IConsole::IResult *pResult, void *pU
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "'%s' was forced ready by an admin!",
-		pSelf->GameServer()->Server()->ClientName(Victim));
-	pSelf->GameServer()->SendChat(-1, pSelf->GameServer()->CHAT_ALL, aBuf);
+		pSelf->Server()->ClientName(Victim));
+	pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
 	pPlayer->m_IsReadyToPlay = true;
-	pSelf->GameServer()->PlayerReadyStateBroadcast();
-	pSelf->CheckReadyStates();
+	pSelf->PlayerReadyStateBroadcast();
+	pSelf->m_pController->CheckReadyStates();
 }
 
-void CGameControllerInstagib::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
-	if(!pSelf->GameServer()->m_pController->IsTeamplay())
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!pSelf->m_pController->IsTeamplay())
 		return;
 
 	int rnd = 0;
@@ -85,10 +84,10 @@ void CGameControllerInstagib::ConShuffleTeams(IConsole::IResult *pResult, void *
 	int aPlayer[MAX_CLIENTS];
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(pSelf->GameServer()->m_apPlayers[i] && pSelf->GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+		if(pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 			aPlayer[PlayerTeam++] = i;
 
-	// pSelf->GameServer()->SendGameMsg(GAMEMSG_TEAM_SHUFFLE, -1);
+	// pSelf->SendGameMsg(GAMEMSG_TEAM_SHUFFLE, -1);
 
 	//creating random permutation
 	for(int i = PlayerTeam; i > 1; i--)
@@ -102,36 +101,36 @@ void CGameControllerInstagib::ConShuffleTeams(IConsole::IResult *pResult, void *
 	rnd = PlayerTeam % 2 ? rand() % 2 : 0;
 
 	for(int i = 0; i < PlayerTeam; i++)
-		pSelf->GameServer()->m_pController->DoTeamChange(pSelf->GameServer()->m_apPlayers[aPlayer[i]], i < (PlayerTeam + rnd) / 2 ? TEAM_RED : TEAM_BLUE, false);
+		pSelf->m_pController->DoTeamChange(pSelf->m_apPlayers[aPlayer[i]], i < (PlayerTeam + rnd) / 2 ? TEAM_RED : TEAM_BLUE, false);
 }
 
-void CGameControllerInstagib::ConSwapTeams(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConSwapTeams(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->SwapTeams();
 }
 
-void CGameControllerInstagib::ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData)
 {
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(rand() % 2)
 		pSelf->SwapTeams();
 	else
 		dbg_msg("swap", "did not swap due to random chance");
 }
 
-void CGameControllerInstagib::SwapTeams()
+void CGameContext::SwapTeams()
 {
-	if(!GameServer()->m_pController->IsTeamplay())
+	if(!m_pController->IsTeamplay())
 		return;
 
-	GameServer()->SendGameMsg(protocol7::GAMEMSG_TEAM_SWAP, -1);
+	SendGameMsg(protocol7::GAMEMSG_TEAM_SWAP, -1);
 
-	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	for(CPlayer *pPlayer : m_apPlayers)
 	{
 		if(pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
-			GameServer()->m_pController->DoTeamChange(pPlayer, pPlayer->GetTeam() ^ 1, false);
+			m_pController->DoTeamChange(pPlayer, pPlayer->GetTeam() ^ 1, false);
 	}
 
-	GameServer()->m_pController->SwapTeamscore();
+	m_pController->SwapTeamscore();
 }

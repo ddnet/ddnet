@@ -7,7 +7,7 @@ class CGameControllerInstagib : public CGameControllerDDRace
 {
 public:
 	CGameControllerInstagib(class CGameContext *pGameServer);
-	~CGameControllerInstagib();
+	~CGameControllerInstagib() override;
 
 	// convience accessors to copy code from gamecontext to the instagib controller
 	class IServer *Server() const { return GameServer()->Server(); }
@@ -28,21 +28,6 @@ public:
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
 
-	static void ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainResetInstasettingTees(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-
-	static void ConHammer(IConsole::IResult *pResult, void *pUserData);
-	static void ConGun(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnHammer(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnGun(IConsole::IResult *pResult, void *pUserData);
-	static void ConGodmode(IConsole::IResult *pResult, void *pUserData);
-	static void ConForceReady(IConsole::IResult *pResult, void *pUserData);
-	static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData);
-	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData);
-	static void ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData);
-
-	void SwapTeams();
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 
 	void BangCommandVote(int ClientId, const char *pCommand, const char *pDesc);
@@ -56,6 +41,12 @@ public:
 	void AddSpree(CPlayer *pPlayer);
 	void EndSpree(CPlayer *pPlayer, CPlayer *pKiller);
 	void CheckForceUnpauseGame();
+
+	/* UpdateSpawnWeapons
+	 *
+	 * called when sv_spawn_weapons is updated
+	 */
+	void UpdateSpawnWeapons();
 	enum ESpawnWeapons
 	{
 		SPAWN_WEAPON_LASER,
@@ -63,12 +54,8 @@ public:
 		NUM_SPAWN_WEAPONS
 	};
 	ESpawnWeapons m_SpawnWeapons;
-	ESpawnWeapons GetSpawnWeapons(int ClientId) { return m_SpawnWeapons; }
+	ESpawnWeapons GetSpawnWeapons(int ClientId) const { return m_SpawnWeapons; }
 	void SetSpawnWeapons(class CCharacter *pChr);
-
-	static void ConchainSpawnWeapons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainSmartChat(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainTournamentChat(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	// ddnet-insta only
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;

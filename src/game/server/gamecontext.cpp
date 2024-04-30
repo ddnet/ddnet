@@ -3583,6 +3583,7 @@ void CGameContext::OnConsoleInit()
 
 	RegisterDDRaceCommands();
 	RegisterChatCommands();
+	RegisterInstagibCommands();
 }
 
 void CGameContext::RegisterDDRaceCommands()
