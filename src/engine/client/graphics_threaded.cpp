@@ -312,9 +312,9 @@ static bool ConvertToRGBA(uint8_t *pDest, const CImageInfo &SrcImage)
 	{
 		const size_t SrcChannelCount = CImageInfo::PixelSize(SrcImage.m_Format);
 		const size_t DstChannelCount = CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA);
-		for(size_t Y = 0; Y < (size_t)SrcImage.m_Height; ++Y)
+		for(size_t Y = 0; Y < SrcImage.m_Height; ++Y)
 		{
-			for(size_t X = 0; X < (size_t)SrcImage.m_Width; ++X)
+			for(size_t X = 0; X < SrcImage.m_Width; ++X)
 			{
 				size_t ImgOffsetSrc = (Y * SrcImage.m_Width * SrcChannelCount) + (X * SrcChannelCount);
 				size_t ImgOffsetDest = (Y * SrcImage.m_Width * DstChannelCount) + (X * DstChannelCount);
@@ -349,7 +349,7 @@ int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureId, int x, int y
 	Cmd.m_Height = Image.m_Height;
 	Cmd.m_Format = CCommandBuffer::TEXFORMAT_RGBA;
 
-	uint8_t *pTmpData = static_cast<uint8_t *>(malloc((size_t)Image.m_Width * Image.m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
+	uint8_t *pTmpData = static_cast<uint8_t *>(malloc(Image.m_Width * Image.m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
 	ConvertToRGBA(pTmpData, Image);
 	Cmd.m_pData = pTmpData;
 	AddCmd(Cmd);
@@ -460,7 +460,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(const CImageInfo &I
 	CCommandBuffer::SCommand_Texture_Create Cmd = LoadTextureCreateCommand(TextureHandle.Id(), Image.m_Width, Image.m_Height, Flags);
 
 	// Copy texture data and convert if necessary
-	uint8_t *pTmpData = static_cast<uint8_t *>(malloc((size_t)Image.m_Width * Image.m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
+	uint8_t *pTmpData = static_cast<uint8_t *>(malloc(Image.m_Width * Image.m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
 	if(!ConvertToRGBA(pTmpData, Image))
 	{
 		dbg_msg("graphics", "converted image '%s' to RGBA, consider making its file format RGBA", pTexName ? pTexName : "(no name)");
@@ -2664,15 +2664,15 @@ void CGraphics_Threaded::Move(int x, int y)
 		PropChangedListener();
 }
 
-void CGraphics_Threaded::Resize(int w, int h, int RefreshRate)
+bool CGraphics_Threaded::Resize(int w, int h, int RefreshRate)
 {
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current() && IVideo::Current()->IsRecording())
-		return;
+		return false;
 #endif
 
 	if(WindowWidth() == w && WindowHeight() == h && RefreshRate == m_ScreenRefreshRate)
-		return;
+		return false;
 
 	// if the size is changed manually, only set the window resize, a window size changed event is triggered anyway
 	if(m_pBackend->ResizeWindow(w, h, RefreshRate))
@@ -2680,7 +2680,20 @@ void CGraphics_Threaded::Resize(int w, int h, int RefreshRate)
 		CVideoMode CurMode;
 		m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
 		GotResized(w, h, RefreshRate);
+		return true;
 	}
+	return false;
+}
+
+void CGraphics_Threaded::ResizeToScreen()
+{
+	if(Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate))
+		return;
+
+	// Revert config variables if the change was not accepted
+	g_Config.m_GfxScreenWidth = ScreenWidth();
+	g_Config.m_GfxScreenHeight = ScreenHeight();
+	g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
 }
 
 void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)

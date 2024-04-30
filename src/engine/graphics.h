@@ -78,12 +78,12 @@ public:
 	/**
 	 * Contains the width of the image
 	 */
-	int m_Width = 0;
+	size_t m_Width = 0;
 
 	/**
 	 * Contains the height of the image
 	 */
-	int m_Height = 0;
+	size_t m_Height = 0;
 
 	/**
 	 * Contains the format of the image.
@@ -120,7 +120,7 @@ public:
 
 	size_t DataSize() const
 	{
-		return (size_t)m_Width * m_Height * PixelSize(m_Format);
+		return m_Width * m_Height * PixelSize(m_Format);
 	}
 
 	static EImageFormat ImageFormatFromInt(int Format)
@@ -295,7 +295,8 @@ public:
 	virtual bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual void Move(int x, int y) = 0;
-	virtual void Resize(int w, int h, int RefreshRate) = 0;
+	virtual bool Resize(int w, int h, int RefreshRate) = 0;
+	virtual void ResizeToScreen() = 0;
 	virtual void GotResized(int w, int h, int RefreshRate) = 0;
 	virtual void UpdateViewport(int X, int Y, int W, int H, bool ByResize) = 0;
 

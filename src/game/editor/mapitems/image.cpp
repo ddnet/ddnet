@@ -27,22 +27,20 @@ void CEditorImage::AnalyseTileFlags()
 {
 	mem_zero(m_aTileFlags, sizeof(m_aTileFlags));
 
-	int tw = m_Width / 16; // tilesizes
-	int th = m_Height / 16;
+	size_t tw = m_Width / 16; // tilesizes
+	size_t th = m_Height / 16;
 	if(tw == th && m_Format == CImageInfo::FORMAT_RGBA)
 	{
-		unsigned char *pPixelData = (unsigned char *)m_pData;
-
 		int TileId = 0;
-		for(int ty = 0; ty < 16; ty++)
-			for(int tx = 0; tx < 16; tx++, TileId++)
+		for(size_t ty = 0; ty < 16; ty++)
+			for(size_t tx = 0; tx < 16; tx++, TileId++)
 			{
 				bool Opaque = true;
-				for(int x = 0; x < tw; x++)
-					for(int y = 0; y < th; y++)
+				for(size_t x = 0; x < tw; x++)
+					for(size_t y = 0; y < th; y++)
 					{
-						int p = (ty * tw + y) * m_Width + tx * tw + x;
-						if(pPixelData[p * 4 + 3] < 250)
+						size_t p = (ty * tw + y) * m_Width + tx * tw + x;
+						if(m_pData[p * 4 + 3] < 250)
 						{
 							Opaque = false;
 							break;
@@ -68,9 +66,9 @@ bool CEditorImage::DataEquals(const CEditorImage &Other) const
 	};
 
 	// Look through every pixel and check if there are any difference
-	for(int y = 0; y < m_Height; y += ImgPixelSize)
+	for(size_t y = 0; y < m_Height; y += ImgPixelSize)
 	{
-		for(int x = 0; x < m_Width; x += ImgPixelSize)
+		for(size_t x = 0; x < m_Width; x += ImgPixelSize)
 		{
 			for(size_t p = 0; p < ImgPixelSize; p++)
 				if(GetPixel(m_pData, x, y, p) != GetPixel(Other.m_pData, x, y, p))

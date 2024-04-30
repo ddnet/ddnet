@@ -1585,11 +1585,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			char aAddr[128];
-			char aIp[64];
+			char aAddr[NETADDR_MAXSTRSIZE];
 			NETADDR ServerAddr = ServerAddress();
-			net_addr_str(&ServerAddr, aIp, sizeof(aIp), 0);
-			str_format(aAddr, sizeof(aAddr), "%s:%d", aIp, RedirectPort);
+			ServerAddr.port = RedirectPort;
+			net_addr_str(&ServerAddr, aAddr, sizeof(aAddr), true);
 			Connect(aAddr);
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
@@ -3929,8 +3928,10 @@ void CClient::SwitchWindowScreen(int Index)
 	int IsFullscreen = g_Config.m_GfxFullscreen;
 	int IsBorderless = g_Config.m_GfxBorderless;
 
-	if(Graphics()->SetWindowScreen(Index))
-		g_Config.m_GfxScreen = Index;
+	if(!Graphics()->SetWindowScreen(Index))
+	{
+		return;
+	}
 
 	SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
 
@@ -3943,7 +3944,7 @@ void CClient::SwitchWindowScreen(int Index)
 	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
 	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
 
-	Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+	Graphics()->ResizeToScreen();
 
 	SetWindowParams(IsFullscreen, IsBorderless);
 }
@@ -4032,7 +4033,7 @@ void CClient::ConchainWindowResize(IConsole::IResult *pResult, void *pUserData, 
 	pfnCallback(pResult, pCallbackUserData);
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
-		pSelf->Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+		pSelf->Graphics()->ResizeToScreen();
 	}
 }
 
@@ -4499,9 +4500,9 @@ int main(int argc, const char **argv)
 		pSteam->ClearConnectAddress();
 	}
 
-	const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 	if(g_Config.m_Logfile[0])
 	{
+		const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 		IOHANDLE Logfile = pStorage->OpenFile(g_Config.m_Logfile, Mode, IStorage::TYPE_SAVE_OR_ABSOLUTE);
 		if(Logfile)
 		{
@@ -4510,7 +4511,12 @@ int main(int argc, const char **argv)
 		else
 		{
 			log_error("client", "failed to open '%s' for logging", g_Config.m_Logfile);
+			pFutureFileLogger->Set(log_logger_noop());
 		}
+	}
+	else
+	{
+		pFutureFileLogger->Set(log_logger_noop());
 	}
 
 	// Register protocol and file extensions

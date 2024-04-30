@@ -1433,7 +1433,9 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		static CButtonContainer s_ButtonTryAgain;
 		if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) || Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER))
 		{
-			Client()->Connect(g_Config.m_UiServerAddress, g_Config.m_Password);
+			char aAddr[NETADDR_MAXSTRSIZE];
+			net_addr_str(&Client()->ServerAddress(), aAddr, sizeof(aAddr), true);
+			Client()->Connect(aAddr, g_Config.m_Password);
 		}
 
 		Box.HSplitBottom(60.f, &Box, &Part);
@@ -2344,7 +2346,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 	// create gray scale version
 	unsigned char *pData = static_cast<unsigned char *>(Info.m_pData);
 	const size_t Step = Info.PixelSize();
-	for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
+	for(size_t i = 0; i < Info.m_Width * Info.m_Height; i++)
 	{
 		int v = (pData[i * Step] + pData[i * Step + 1] + pData[i * Step + 2]) / 3;
 		pData[i * Step] = v;
