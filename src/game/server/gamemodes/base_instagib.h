@@ -55,7 +55,7 @@ public:
 	};
 	ESpawnWeapons m_SpawnWeapons;
 	ESpawnWeapons GetSpawnWeapons(int ClientId) const { return m_SpawnWeapons; }
-	void SetSpawnWeapons(class CCharacter *pChr);
+	void SetSpawnWeapons(class CCharacter *pChr) const;
 
 	// ddnet-insta only
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;

@@ -268,7 +268,7 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 	return false;
 }
 
-void CGameControllerInstagib::SetSpawnWeapons(class CCharacter *pChr)
+void CGameControllerInstagib::SetSpawnWeapons(class CCharacter *pChr) const
 {
 	switch(CGameControllerInstagib::GetSpawnWeapons(pChr->GetPlayer()->GetCid()))
 	{
