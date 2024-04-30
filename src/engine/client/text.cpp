@@ -1612,7 +1612,6 @@ public:
 		bool HasCursor = false;
 
 		const SGlyph *pLastGlyph = nullptr;
-		bool GotNewLine = false;
 		bool GotNewLineLast = false;
 
 		int ColorOption = 0;
@@ -1902,7 +1901,6 @@ public:
 			{
 				if(!StartNewLine())
 					break;
-				GotNewLine = true;
 				GotNewLineLast = true;
 			}
 			else
@@ -1998,10 +1996,8 @@ public:
 
 		// even if no text is drawn the cursor position will be adjusted
 		pCursor->m_X = DrawX;
+		pCursor->m_Y = DrawY;
 		pCursor->m_LineCount = LineCount;
-
-		if(GotNewLine)
-			pCursor->m_Y = DrawY;
 
 		TextContainer.m_BoundingBox = pCursor->BoundingBox();
 	}
