@@ -12,6 +12,7 @@
 #include <game/mapbugs.h>
 #include <game/voting.h>
 
+#include "engine/http.h"
 #include "eventhandler.h"
 #include "gameworld.h"
 #include "teehistorian.h"
@@ -294,6 +295,8 @@ public:
 	void RegisterInstagibCommands();
 	bool IsInstaControllerActive() const;
 	void SwapTeams();
+	IHttp *m_pHttp;
+	void OnInitInstagib();
 	static void ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainResetInstasettingTees(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

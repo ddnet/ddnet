@@ -1,7 +1,7 @@
-#include "base/system.h"
-#include "game/server/gamemodes/base_instagib.h"
+#include <base/system.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/gamemodes/base_instagib.h>
 #include <game/server/player.h>
 
 #include <game/server/gamecontext.h>

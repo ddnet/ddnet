@@ -12,12 +12,6 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 
 	m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
-
-	if(!m_HttpInsta.Init(std::chrono::seconds{2}))
-	{
-		dbg_msg("ddnet-insta", "Failed to initialize the HTTP client.");
-		dbg_break();
-	}
 }
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;

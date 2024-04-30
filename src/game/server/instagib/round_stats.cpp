@@ -117,7 +117,7 @@ void IGameController::PublishRoundEndStatsStrDiscord(const char *pStr)
 	pDiscord->IpResolve(IPRESOLVE::V4);
 	pDiscord->Timeout(CTimeout{4000, 15000, 500, 5});
 	pDiscord->HeaderString("Content-Type", "application/json");
-	m_HttpInsta.Run(pDiscord);
+	GameServer()->m_pHttp->Run(pDiscord);
 }
 
 void IGameController::PublishRoundEndStatsStr(const char *pStr)

@@ -3959,9 +3959,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_pAntibot->RoundStart(this);
 
-	UpdateVoteCheckboxes(); // ddnet-insta
-	AlertOnSpecialInstagibConfigs(); // ddnet-insta
-	ShowCurrentInstagibConfigsMotd(); // ddnet-insta
+	OnInitInstagib(); // ddnet-insta
 }
 
 void CGameContext::CreateAllEntities(bool Initial)

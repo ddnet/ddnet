@@ -10,6 +10,19 @@
 
 #include "strhelpers.h"
 
+// TODO: this is not game logic
+//       do some cleanup of the file structuring
+//       rcon_commands.cpp rcon_configs.cpp and gamelogic.cpp
+//       all implement CGameContext mehtods
+void CGameContext::OnInitInstagib()
+{
+	UpdateVoteCheckboxes(); // ddnet-insta
+	AlertOnSpecialInstagibConfigs(); // ddnet-insta
+	ShowCurrentInstagibConfigsMotd(); // ddnet-insta
+
+	m_pHttp = Kernel()->RequestInterface<IHttp>();
+}
+
 void CGameContext::AlertOnSpecialInstagibConfigs(int ClientId) const
 {
 	if(g_Config.m_SvTournament)

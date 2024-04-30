@@ -305,7 +305,6 @@ protected:
 	void PublishRoundEndStatsStrFile(const char *pStr);
 	void PublishRoundEndStatsStrDiscord(const char *pStr);
 	void PublishRoundEndStatsStr(const char *pStr);
-	CHttp m_HttpInsta;
 	class CInstaPlayerStats
 	{
 	public:
