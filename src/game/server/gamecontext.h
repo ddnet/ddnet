@@ -4,6 +4,7 @@
 #define GAME_SERVER_GAMECONTEXT_H
 
 #include <engine/console.h>
+#include <engine/http.h> // ddnet-insta m_pHttp
 #include <engine/server.h>
 
 #include <game/collision.h>
@@ -12,7 +13,6 @@
 #include <game/mapbugs.h>
 #include <game/voting.h>
 
-#include "engine/http.h"
 #include "eventhandler.h"
 #include "gameworld.h"
 #include "teehistorian.h"
