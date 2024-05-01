@@ -54,7 +54,7 @@ Global variable
 
 Static variable
 
-`_p`
+`p`
 
 Pointer
 
