@@ -129,6 +129,19 @@ void CGameWorld::Snap(int SnappingClient)
 	}
 }
 
+void CGameWorld::PostSnap()
+{
+	for(auto *pEnt : m_apFirstEntityTypes)
+	{
+		for(; pEnt;)
+		{
+			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+			pEnt->PostSnap();
+			pEnt = m_pNextTraverseEntity;
+		}
+	}
+}
+
 void CGameWorld::Reset()
 {
 	// reset all entities
