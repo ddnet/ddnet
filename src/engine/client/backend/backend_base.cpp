@@ -1,11 +1,5 @@
 #include "backend_base.h"
 #include <base/system.h>
-#include <engine/gfx/image_manipulation.h>
-
-uint8_t *CCommandProcessorFragment_GLBase::Resize(const uint8_t *pData, int Width, int Height, int NewWidth, int NewHeight, int BPP)
-{
-	return ResizeImage(pData, Width, Height, NewWidth, NewHeight, BPP);
-}
 
 bool CCommandProcessorFragment_GLBase::Texture2DTo3D(uint8_t *pImageBuffer, int ImageWidth, int ImageHeight, size_t PixelSize, int SplitCountWidth, int SplitCountHeight, uint8_t *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight)
 {
