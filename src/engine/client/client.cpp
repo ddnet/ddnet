@@ -1301,12 +1301,6 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 
 void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 {
-	// only allow packets from the server we actually want
-	if(net_addr_comp(&pPacket->m_Address, &ServerAddress()))
-	{
-		return;
-	}
-
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
