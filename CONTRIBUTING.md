@@ -58,7 +58,7 @@ Static variable
 
 Pointer
 
-`_a`
+`a`
 
 Fixed array
 
