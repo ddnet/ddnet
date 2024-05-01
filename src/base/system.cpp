@@ -1237,7 +1237,7 @@ static int parse_int(int *out, const char **str)
 {
 	int i = 0;
 	*out = 0;
-	if(**str < '0' || **str > '9')
+	if(!str_isnum(**str))
 		return -1;
 
 	i = **str - '0';
@@ -1245,7 +1245,7 @@ static int parse_int(int *out, const char **str)
 
 	while(true)
 	{
-		if(**str < '0' || **str > '9')
+		if(!str_isnum(**str))
 		{
 			*out = i;
 			return 0;
@@ -2950,7 +2950,7 @@ int str_comp_filenames(const char *a, const char *b)
 
 	for(; *a && *b; ++a, ++b)
 	{
-		if(*a >= '0' && *a <= '9' && *b >= '0' && *b <= '9')
+		if(str_isnum(*a) && str_isnum(*b))
 		{
 			result = 0;
 			do
@@ -2959,11 +2959,11 @@ int str_comp_filenames(const char *a, const char *b)
 					result = *a - *b;
 				++a;
 				++b;
-			} while(*a >= '0' && *a <= '9' && *b >= '0' && *b <= '9');
+			} while(str_isnum(*a) && str_isnum(*b));
 
-			if(*a >= '0' && *a <= '9')
+			if(str_isnum(*a))
 				return 1;
-			else if(*b >= '0' && *b <= '9')
+			else if(str_isnum(*b))
 				return -1;
 			else if(result || *a == '\0' || *b == '\0')
 				return result;
@@ -3563,11 +3563,16 @@ char str_uppercase(char c)
 	return c;
 }
 
+bool str_isnum(char c)
+{
+	return c >= '0' && c <= '9';
+}
+
 int str_isallnum(const char *str)
 {
 	while(*str)
 	{
-		if(!(*str >= '0' && *str <= '9'))
+		if(!str_isnum(*str))
 			return 0;
 		str++;
 	}
@@ -3578,7 +3583,7 @@ int str_isallnum_hex(const char *str)
 {
 	while(*str)
 	{
-		if(!(*str >= '0' && *str <= '9') && !(*str >= 'a' && *str <= 'f') && !(*str >= 'A' && *str <= 'F'))
+		if(!str_isnum(*str) && !(*str >= 'a' && *str <= 'f') && !(*str >= 'A' && *str <= 'F'))
 			return 0;
 		str++;
 	}
@@ -4546,7 +4551,7 @@ void os_locale_str(char *locale, size_t length)
 		{
 			locale[i] = '-';
 		}
-		else if(locale[i] != '-' && !(locale[i] >= 'a' && locale[i] <= 'z') && !(locale[i] >= 'A' && locale[i] <= 'Z') && !(locale[i] >= '0' && locale[i] <= '9'))
+		else if(locale[i] != '-' && !(locale[i] >= 'a' && locale[i] <= 'z') && !(locale[i] >= 'A' && locale[i] <= 'Z') && !(str_isnum(locale[i])))
 		{
 			locale[i] = '\0';
 			break;

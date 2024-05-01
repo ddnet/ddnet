@@ -5,6 +5,7 @@
 #include <engine/client/backend_sdl.h>
 
 #include <base/detect.h>
+#include <base/system.h>
 
 #if defined(BACKEND_AS_OPENGL_ES) || !defined(CONF_BACKEND_OPENGL_ES)
 
@@ -194,7 +195,7 @@ static void ParseVersionString(EBackendType BackendType, const char *pStr, int &
 		bool LastWasNumber = false;
 		while(*pStr && TotalNumbersPassed < 3)
 		{
-			if(*pStr >= '0' && *pStr <= '9')
+			if(str_isnum(*pStr))
 			{
 				aCurNumberStr[CurNumberStrLen++] = (char)*pStr;
 				LastWasNumber = true;
