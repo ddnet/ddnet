@@ -95,7 +95,7 @@ class CFoo
 
 Do not use the `goto` keyword.
 
-### Assignements in if statements should be avoided
+### Assignments in if statements should be avoided
 
 Do not set variables in if statements.
 
