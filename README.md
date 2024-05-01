@@ -196,7 +196,20 @@ Check the SAN.\* files afterwards. This finds more problems than memcheck, runs 
 For valgrind's memcheck compile a normal Debug build and run with: `valgrind --tool=memcheck ./DDNet`
 Expect a large slow down.
 
-Building on Windows with Microsoft Visual C++
+Building on Windows with the Visual Studio IDE
+--------------------------------------
+
+Download and install some version of [Microsoft Visual Studio](https://www.visualstudio.com/) (At the time of writing, MSVS Community 2022) with **C++ support**.
+
+You'll have to install both [Python 3](https://www.python.org/downloads/) and [Rust](https://rustup.rs/) as well.
+
+Make sure the MSVC build tools, C++ CMake-Tools and the latest Windows SDK version appropriate to your windows version are selected in the installer.
+
+Now open up your Project folder, Visual Studio should automatically detect and configure your project using CMake.
+
+On your tools hotbar next to the triangular "Run" Button, you can now select what you want to start (e.g game-client or game-server) and build it.
+
+Building on Windows with standalone MSVC build tools 
 --------------------------------------
 
 First off you will need to install the MSVC [Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), [Python 3](https://www.python.org/downloads/) as well as [Rust](https://www.rust-lang.org/tools/install).
