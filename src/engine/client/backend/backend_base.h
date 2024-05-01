@@ -84,8 +84,6 @@ protected:
 	SGfxErrorContainer m_Error;
 	SGfxWarningContainer m_Warning;
 
-	static uint8_t *Resize(const uint8_t *pData, int Width, int Height, int NewWidth, int NewHeight, int BPP);
-
 	static bool Texture2DTo3D(uint8_t *pImageBuffer, int ImageWidth, int ImageHeight, size_t PixelSize, int SplitCountWidth, int SplitCountHeight, uint8_t *pTarget3DImageData, int &Target3DImageWidth, int &Target3DImageHeight);
 
 	virtual bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) = 0;

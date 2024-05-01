@@ -2548,7 +2548,7 @@ protected:
 				YOff /= 2;
 			}
 
-			uint8_t *pTmpData = Resize(pData, Width, Height, Width, Height, VulkanFormatToPixelSize(Format));
+			uint8_t *pTmpData = ResizeImage(pData, Width, Height, Width, Height, VulkanFormatToPixelSize(Format));
 			free(pData);
 			pData = pTmpData;
 		}
@@ -2602,7 +2602,7 @@ protected:
 				++RescaleCount;
 			} while((size_t)Width > m_MaxTextureSize || (size_t)Height > m_MaxTextureSize);
 
-			uint8_t *pTmpData = Resize(pData, Width, Height, Width, Height, PixelSize);
+			uint8_t *pTmpData = ResizeImage(pData, Width, Height, Width, Height, PixelSize);
 			free(pData);
 			pData = pTmpData;
 		}
@@ -2657,7 +2657,7 @@ protected:
 				dbg_msg("vulkan", "3D/2D array texture was resized");
 				int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
 				int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
-				uint8_t *pNewTexData = Resize(pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
+				uint8_t *pNewTexData = ResizeImage(pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
 
 				ConvertWidth = NewWidth;
 				ConvertHeight = NewHeight;
