@@ -117,7 +117,11 @@ Unless the alternative code is more complex and harder to read.
 
 ### Methods with default arguments should be avoided
 
+Default arguments tend to break soon, if you have multiple you have to specify each even if you only want to change the last one.
+
 ### Method overloading should be avoided
+
+Try finding descriptive names instead.
 
 ### Class member variables should be initialized where they are declared
 
