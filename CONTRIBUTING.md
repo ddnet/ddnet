@@ -3,7 +3,7 @@
 ## General
 
 Please open issues first discussing the idea before starting to write code.
-It would be unfortune if you spend time working on a contribution that does not align with the ideals of the ddnet project.
+It would be unfortunate if you spend time working on a contribution that does not align with the ideals of the ddnet project.
 
 A non exhaustive list of things that usually get rejected would be:
 - Extending the dummy with new gameplay affecting features.
