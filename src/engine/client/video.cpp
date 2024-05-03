@@ -96,6 +96,7 @@ CVideo::CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Wid
 
 	m_Recording = false;
 	m_Started = false;
+	m_Stopped = false;
 	m_ProcessingVideoFrame = 0;
 	m_ProcessingAudioFrame = 0;
 
@@ -114,6 +115,8 @@ CVideo::~CVideo()
 
 bool CVideo::Start()
 {
+	dbg_assert(!m_Started, "Already started");
+
 	// wait for the graphic thread to idle
 	m_pGraphics->WaitForIdle();
 
@@ -266,6 +269,7 @@ bool CVideo::Start()
 
 	m_Recording = true;
 	m_Started = true;
+	m_Stopped = false;
 	ms_Time = time_get();
 	return true;
 }
@@ -278,29 +282,31 @@ void CVideo::Pause(bool Pause)
 
 void CVideo::Stop()
 {
+	dbg_assert(!m_Stopped, "Already stopped");
+
 	m_pGraphics->WaitForIdle();
 
-	for(size_t i = 0; i < m_VideoThreads; ++i)
+	for(auto &pVideoThread : m_vpVideoThreads)
 	{
 		{
-			std::unique_lock<std::mutex> Lock(m_vpVideoThreads[i]->m_Mutex);
-			m_vpVideoThreads[i]->m_Finished = true;
-			m_vpVideoThreads[i]->m_Cond.notify_all();
+			std::unique_lock<std::mutex> Lock(pVideoThread->m_Mutex);
+			pVideoThread->m_Finished = true;
+			pVideoThread->m_Cond.notify_all();
 		}
 
-		m_vpVideoThreads[i]->m_Thread.join();
+		pVideoThread->m_Thread.join();
 	}
 	m_vpVideoThreads.clear();
 
-	for(size_t i = 0; i < m_AudioThreads; ++i)
+	for(auto &pAudioThread : m_vpAudioThreads)
 	{
 		{
-			std::unique_lock<std::mutex> Lock(m_vpAudioThreads[i]->m_Mutex);
-			m_vpAudioThreads[i]->m_Finished = true;
-			m_vpAudioThreads[i]->m_Cond.notify_all();
+			std::unique_lock<std::mutex> Lock(pAudioThread->m_Mutex);
+			pAudioThread->m_Finished = true;
+			pAudioThread->m_Cond.notify_all();
 		}
 
-		m_vpAudioThreads[i]->m_Thread.join();
+		pAudioThread->m_Thread.join();
 	}
 	m_vpAudioThreads.clear();
 
@@ -314,24 +320,29 @@ void CVideo::Stop()
 	if(m_HasAudio)
 		FinishFrames(&m_AudioStream);
 
-	av_write_trailer(m_pFormatContext);
+	if(m_pFormatContext && m_Started)
+		av_write_trailer(m_pFormatContext);
 
 	CloseStream(&m_VideoStream);
 
 	if(m_HasAudio)
 		CloseStream(&m_AudioStream);
 
-	if(!(m_pFormat->flags & AVFMT_NOFILE))
-		avio_closep(&m_pFormatContext->pb);
-
 	if(m_pFormatContext)
+	{
+		if(!(m_pFormat->flags & AVFMT_NOFILE))
+			avio_closep(&m_pFormatContext->pb);
+
 		avformat_free_context(m_pFormatContext);
+	}
 
 	ISound *volatile pSound = m_pSound;
 
 	pSound->PauseAudioDevice();
 	delete ms_pCurrentVideo;
 	pSound->UnpauseAudioDevice();
+
+	m_Stopped = true;
 }
 
 void CVideo::NextVideoFrameThread()
@@ -1004,6 +1015,9 @@ void CVideo::WriteFrame(COutputStream *pStream, size_t ThreadIndex)
 
 void CVideo::FinishFrames(COutputStream *pStream)
 {
+	if(!pStream->m_pCodecContext || !avcodec_is_open(pStream->m_pCodecContext))
+		return;
+
 	AVPacket *pPacket = av_packet_alloc();
 	if(pPacket == nullptr)
 	{
@@ -1050,6 +1064,7 @@ void CVideo::FinishFrames(COutputStream *pStream)
 void CVideo::CloseStream(COutputStream *pStream)
 {
 	avcodec_free_context(&pStream->m_pCodecContext);
+
 	for(auto *pFrame : pStream->m_vpFrames)
 		av_frame_free(&pFrame);
 	pStream->m_vpFrames.clear();

@@ -93,6 +93,7 @@ private:
 	int m_FPS;
 
 	bool m_Started;
+	bool m_Stopped;
 	bool m_Recording;
 
 	size_t m_VideoThreads = 2;
