@@ -99,7 +99,7 @@ CVideo::CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Wid
 	m_ProcessingVideoFrame = 0;
 	m_ProcessingAudioFrame = 0;
 
-	m_HasAudio = g_Config.m_ClVideoSndEnable;
+	m_HasAudio = m_pSound->IsSoundEnabled() && g_Config.m_ClVideoSndEnable;
 
 	dbg_assert(ms_pCurrentVideo == nullptr, "ms_pCurrentVideo is NOT set to nullptr while creating a new Video.");
 
@@ -785,7 +785,7 @@ bool CVideo::OpenAudio()
 		}
 
 		m_AudioStream.m_vpTmpFrames.emplace_back(nullptr);
-		m_AudioStream.m_vpTmpFrames[i] = AllocAudioFrame(AV_SAMPLE_FMT_S16, AV_CH_LAYOUT_STEREO, g_Config.m_SndRate, NbSamples);
+		m_AudioStream.m_vpTmpFrames[i] = AllocAudioFrame(AV_SAMPLE_FMT_S16, AV_CH_LAYOUT_STEREO, m_pSound->MixingRate(), NbSamples);
 		if(!m_AudioStream.m_vpTmpFrames[i])
 		{
 			return false;
@@ -816,9 +816,9 @@ bool CVideo::OpenAudio()
 
 		/* set options */
 		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_channel_count", 2, 0) == 0, "invalid option");
-		if(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_sample_rate", g_Config.m_SndRate, 0) != 0)
+		if(av_opt_set_int(m_AudioStream.m_vpSwrCtxs[i], "in_sample_rate", m_pSound->MixingRate(), 0) != 0)
 		{
-			log_error("videorecorder", "Could not set audio sample rate to %d", g_Config.m_SndRate);
+			log_error("videorecorder", "Could not set audio sample rate to %d", m_pSound->MixingRate());
 			return false;
 		}
 		dbg_assert(av_opt_set_sample_fmt(m_AudioStream.m_vpSwrCtxs[i], "in_sample_fmt", AV_SAMPLE_FMT_S16, 0) == 0, "invalid option");
@@ -880,20 +880,23 @@ bool CVideo::AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCode
 	{
 	case AVMEDIA_TYPE_AUDIO:
 		pContext->sample_fmt = (*ppCodec)->sample_fmts ? (*ppCodec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
-		pContext->bit_rate = g_Config.m_SndRate * 2 * 16;
-		pContext->sample_rate = g_Config.m_SndRate;
 		if((*ppCodec)->supported_samplerates)
 		{
 			pContext->sample_rate = (*ppCodec)->supported_samplerates[0];
 			for(int i = 0; (*ppCodec)->supported_samplerates[i]; i++)
 			{
-				if((*ppCodec)->supported_samplerates[i] == g_Config.m_SndRate)
+				if((*ppCodec)->supported_samplerates[i] == m_pSound->MixingRate())
 				{
-					pContext->sample_rate = g_Config.m_SndRate;
+					pContext->sample_rate = m_pSound->MixingRate();
 					break;
 				}
 			}
 		}
+		else
+		{
+			pContext->sample_rate = m_pSound->MixingRate();
+		}
+		pContext->bit_rate = pContext->sample_rate * 2 * 16;
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100)
 		dbg_assert(av_channel_layout_from_mask(&pContext->ch_layout, AV_CH_LAYOUT_STEREO) == 0, "Failed to set channel layout");
 #else
