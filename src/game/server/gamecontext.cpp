@@ -3277,7 +3277,7 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
 
 		// copy option
 		int Len = str_length(pSrc->m_aCommand);
-		CVoteOptionServer *pDst = (CVoteOptionServer *)pVoteOptionHeap->Allocate(sizeof(CVoteOptionServer) + Len);
+		CVoteOptionServer *pDst = (CVoteOptionServer *)pVoteOptionHeap->Allocate(sizeof(CVoteOptionServer) + Len, alignof(CVoteOptionServer));
 		pDst->m_pNext = 0;
 		pDst->m_pPrev = pVoteOptionLast;
 		if(pDst->m_pPrev)
