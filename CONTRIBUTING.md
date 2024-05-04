@@ -38,6 +38,40 @@ For multiple words:
 - `int maxLength = 0;` :x:
 - `int MaxLength = 0;` :white_check_mark:
 
+### Variable names should be descriptive
+
+:x: Avoid:
+
+```C++
+for(int i = 0; i < MAX_CLIENTS; i++)
+{
+    for(int k = 0; k < NUM_DUMMIES; k++)
+    {
+        if(k == 0)
+            continue;
+
+        m_aClients[i].Foo();
+    }
+}
+```
+
+:white_check_mark: Instead do:
+
+```C++
+for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+{
+    for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+    {
+        if(Dummy == 0)
+            continue;
+
+        m_aClients[ClientId].Foo();
+    }
+}
+```
+
+More examples can be found [here](https://github.com/ddnet/ddnet/pull/8288#issuecomment-2094097306)
+
 ### Teeworlds interpretation of the hungarian notation
 
 DDNet inherited the hungarian notation like prefixes from [teeworlds](https://www.teeworlds.com/?page=docs&wiki=nomenclature)
