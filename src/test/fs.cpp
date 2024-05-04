@@ -43,8 +43,20 @@ TEST(Filesystem, SplitFileExtension)
 	EXPECT_STREQ(aName, "no_dot");
 	EXPECT_STREQ(aExt, "");
 
+	fs_split_file_extension("no_dot", aName, sizeof(aName)); // extension parameter is optional
+	EXPECT_STREQ(aName, "no_dot");
+
+	fs_split_file_extension("no_dot", nullptr, 0, aExt, sizeof(aExt)); // name parameter is optional
+	EXPECT_STREQ(aExt, "");
+
 	fs_split_file_extension(".dot_first", aName, sizeof(aName), aExt, sizeof(aExt));
 	EXPECT_STREQ(aName, ".dot_first");
+	EXPECT_STREQ(aExt, "");
+
+	fs_split_file_extension(".dot_first", aName, sizeof(aName)); // extension parameter is optional
+	EXPECT_STREQ(aName, ".dot_first");
+
+	fs_split_file_extension(".dot_first", nullptr, 0, aExt, sizeof(aExt)); // name parameter is optional
 	EXPECT_STREQ(aExt, "");
 }
 
