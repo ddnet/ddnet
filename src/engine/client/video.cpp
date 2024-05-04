@@ -614,6 +614,8 @@ void CVideo::UpdateVideoBufferFromGraphics(size_t ThreadIndex)
 	uint32_t Height;
 	CImageInfo::EImageFormat Format;
 	m_pGraphics->GetReadPresentedImageDataFuncUnsafe()(Width, Height, Format, m_vVideoBuffers[ThreadIndex].m_vBuffer);
+	dbg_assert((int)Width == m_Width && (int)Height == m_Height, "Size mismatch between video and graphics");
+	dbg_assert(Format == CImageInfo::FORMAT_RGBA, "Unexpected image format");
 }
 
 AVFrame *CVideo::AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height)
