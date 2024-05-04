@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -480,9 +481,8 @@ void CMenus::Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
 	const char *pStr = pResult->GetString(0);
 	if(!CSkin::IsValidName(pStr))
 	{
-		char aError[IConsole::CMDLINE_LENGTH + 64];
-		str_format(aError, sizeof(aError), "Favorite skin name '%s' is not valid", pStr);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "menus/settings", aError);
+		log_error("menus/settings", "Favorite skin name '%s' is not valid", pStr);
+		log_error("menus/settings", "%s", CSkin::m_aSkinNameRestrictions);
 		return;
 	}
 	pSelf->m_SkinFavorites.emplace(pStr);
