@@ -83,6 +83,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	if(!CSkin::IsValidName(aSkinName))
 	{
 		log_error("skins", "Skin name is not valid: %s", aSkinName);
+		log_error("skins", "%s", CSkin::m_aSkinNameRestrictions);
 		return 0;
 	}
 
