@@ -3014,6 +3014,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     test.cpp
     test.h
     thread.cpp
+    time.cpp
     timestamp.cpp
     unix.cpp
     uuid.cpp
