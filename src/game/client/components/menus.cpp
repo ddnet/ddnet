@@ -1962,8 +1962,6 @@ void CMenus::PopupConfirmDemoReplaceVideo()
 	str_format(aBuf, sizeof(aBuf), "%s/%s.demo", m_aCurrentDemoFolder, m_aCurrentDemoSelectionName);
 	char aVideoName[IO_MAX_PATH_LENGTH];
 	str_copy(aVideoName, m_DemoRenderInput.GetString());
-	if(!str_endswith(aVideoName, ".mp4"))
-		str_append(aVideoName, ".mp4");
 	const char *pError = Client()->DemoPlayer_Render(aBuf, m_DemolistStorageType, aVideoName, m_Speed, m_StartPaused);
 	m_Speed = 4;
 	m_StartPaused = false;

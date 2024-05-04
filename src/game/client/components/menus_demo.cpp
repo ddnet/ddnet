@@ -1085,7 +1085,14 @@ void CMenus::RenderDemoBrowserList(CUIRect ListView, bool &WasListboxItemActivat
 #if defined(CONF_VIDEORECORDER)
 	if(!m_DemoRenderInput.IsEmpty())
 	{
-		m_Popup = POPUP_RENDER_DONE;
+		if(DemoPlayer()->ErrorMessage()[0] == '\0')
+		{
+			m_Popup = POPUP_RENDER_DONE;
+		}
+		else
+		{
+			m_DemoRenderInput.Clear();
+		}
 	}
 #endif
 

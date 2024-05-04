@@ -91,6 +91,7 @@ public:
 	virtual int SetPos(int WantedTick) = 0;
 	virtual void Pause() = 0;
 	virtual void Unpause() = 0;
+	virtual const char *ErrorMessage() const = 0;
 	virtual bool IsPlaying() const = 0;
 	virtual const CInfo *BaseInfo() const = 0;
 	virtual void GetDemoName(char *pBuffer, size_t BufferSize) const = 0;

@@ -12,7 +12,7 @@ class IVideo
 public:
 	virtual ~IVideo(){};
 
-	virtual void Start() = 0;
+	virtual bool Start() = 0;
 	virtual void Stop() = 0;
 	virtual void Pause(bool Pause) = 0;
 	virtual bool IsRecording() = 0;
