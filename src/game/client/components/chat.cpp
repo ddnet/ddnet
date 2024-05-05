@@ -815,14 +815,14 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 					pCurrentLine->m_NameColor = TEAM_BLUE;
 			}
 
-			if(Team == 2) // whisper send
+			if(Team == TEAM_WHISPER_SEND)
 			{
 				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "→ %s", LineAuthor.m_aName);
 				pCurrentLine->m_NameColor = TEAM_BLUE;
 				pCurrentLine->m_Highlighted = false;
 				Highlighted = false;
 			}
-			else if(Team == 3) // whisper recv
+			else if(Team == TEAM_WHISPER_RECV)
 			{
 				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s", LineAuthor.m_aName);
 				pCurrentLine->m_NameColor = TEAM_RED;
@@ -894,7 +894,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			}
 		}
 	}
-	else if(Team != 2)
+	else if(Team != TEAM_WHISPER_SEND)
 	{
 		if(Now - m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq() * 3 / 10)
 		{

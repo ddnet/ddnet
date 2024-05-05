@@ -196,9 +196,10 @@ class Object:
 	pass
 
 class Enum:
-	def __init__(self, name, values):
+	def __init__(self, name, values, start = 0):
 		self.name = name
 		self.values = values
+		self.start = start
 
 class Flags:
 	def __init__(self, name, values):

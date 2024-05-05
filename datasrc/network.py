@@ -49,6 +49,7 @@ Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY",
 Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA", "ARMOR_SHOTGUN", "ARMOR_GRENADE", "ARMOR_NINJA", "ARMOR_LASER"]
 Authed = ["NO", "HELPER", "MOD", "ADMIN"]
 EntityClasses = ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"]
+Teams = ["ALL", "SPECTATORS", "RED", "BLUE", "WHISPER_SEND", "WHISPER_RECV"]
 
 RawHeader = '''
 #include <engine/shared/teehistorian_ex.h>
@@ -60,10 +61,6 @@ enum
 
 enum
 {
-	TEAM_SPECTATORS=-1,
-	TEAM_RED,
-	TEAM_BLUE,
-
 	FLAG_MISSING=-3,
 	FLAG_ATSTAND,
 	FLAG_TAKEN,
@@ -87,6 +84,7 @@ Enums = [
 	Enum("LASERTYPE", LaserTypes),
 	Enum("LASERDRAGGERTYPE", DraggerTypes),
 	Enum("LASERGUNTYPE", GunTypes),
+	Enum("TEAM", Teams, -2),
 ]
 
 Flags = [

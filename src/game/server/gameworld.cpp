@@ -212,7 +212,7 @@ void CGameWorld::Tick()
 	if(!m_Paused)
 	{
 		if(GameServer()->m_pController->IsForceBalanced())
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Teams have been balanced");
+			GameServer()->SendChat(-1, TEAM_ALL, "Teams have been balanced");
 
 		// update all objects
 		for(int i = 0; i < NUM_ENTTYPES; i++)
