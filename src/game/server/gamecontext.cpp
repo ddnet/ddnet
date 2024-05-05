@@ -4187,7 +4187,8 @@ void CGameContext::OnShutdown(void *pPersistentData)
 
 	DeleteTempfile();
 	ConfigManager()->ResetGameSettings();
-	Collision()->Dest();
+	Collision()->Unload();
+	Layers()->Unload();
 	delete m_pController;
 	m_pController = 0;
 	Clear();

@@ -612,6 +612,9 @@ void CGameClient::OnReset()
 
 	Editor()->ResetMentions();
 	Editor()->ResetIngameMoved();
+
+	Collision()->Unload();
+	Layers()->Unload();
 }
 
 void CGameClient::UpdatePositions()
