@@ -118,8 +118,13 @@ private:
 	CPlaybackInfo m_Info;
 	unsigned char m_aCompressedSnapshotData[CSnapshot::MAX_SIZE];
 	unsigned char m_aDecompressedSnapshotData[CSnapshot::MAX_SIZE];
-	unsigned char m_aCurrentSnapshotData[CSnapshot::MAX_SIZE];
-	unsigned char m_aDeltaSnapshotData[CSnapshot::MAX_SIZE];
+
+	// Depending on the chunk header
+	// this is either a full CSnapshot or a CSnapshotDelta.
+	unsigned char m_aChunkData[CSnapshot::MAX_SIZE];
+	// Storage for the full snapshot
+	// where the delta gets unpacked into.
+	unsigned char m_aSnapshot[CSnapshot::MAX_SIZE];
 	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
 	int m_LastSnapshotDataSize;
 	class CSnapshotDelta *m_pSnapshotDelta;
