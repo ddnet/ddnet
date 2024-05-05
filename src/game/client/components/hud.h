@@ -135,6 +135,7 @@ private:
 	int m_DummyHammerOffset;
 	int m_DummyCopyOffset;
 	int m_PracticeModeOffset;
+	int m_Team0ModeOffset;
 	int m_LockModeOffset;
 };
 
