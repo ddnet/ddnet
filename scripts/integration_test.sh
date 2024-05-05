@@ -244,7 +244,7 @@ say "/mc
 ;cmdlist
 ;saytime"
 EOF
-sleep 1
+sleep 10
 
 echo "[*] Test rcon commands"
 tr -d '\n' > client1.fifo << EOF
@@ -255,7 +255,7 @@ rcon echo test;
 muteid 1 900 spam;
 unban_all;
 EOF
-sleep 1
+sleep 5
 
 echo "[*] Stop demo recording"
 echo "stoprecord" > server.fifo
