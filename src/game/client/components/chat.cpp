@@ -570,7 +570,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	}
 }
 
-bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
+bool CChat::LineContainsName(const char *pLine, const char *pName)
 {
 	const char *pHL = str_utf8_find_nocase(pLine, pName);
 
@@ -582,6 +582,35 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 			return true;
 	}
 
+	return false;
+}
+
+bool CChat::LineShouldHighlight(const char *pLine, int LineAuthorId, int Team)
+{
+	if(Team == 2) // whisper send
+		return false;
+	if(Team == 3) // whisper recv
+		return true;
+
+	// check for highlighted name
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		if(LineAuthorId >= 0 && LineAuthorId != m_pClient->m_aLocalIds[0] && (!m_pClient->Client()->DummyConnected() || LineAuthorId != m_pClient->m_aLocalIds[1]))
+		{
+			// main character
+			if(LineContainsName(pLine, m_pClient->m_aClients[m_pClient->m_aLocalIds[0]].m_aName))
+				return true;
+			// dummy
+			if(m_pClient->Client()->DummyConnected() && LineContainsName(pLine, m_pClient->m_aClients[m_pClient->m_aLocalIds[1]].m_aName))
+				return true;
+		}
+	}
+	else
+	{
+		// on demo playback use local id from snap directly,
+		// since m_aLocalIds isn't valid there
+		return m_pClient->m_Snap.m_LocalClientId >= 0 && LineContainsName(pLine, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_aName);
+	}
 	return false;
 }
 
@@ -646,13 +675,23 @@ void CChat::StoreSave(const char *pText)
 
 void CChat::AddLine(int ClientId, int Team, const char *pLine)
 {
-	if(*pLine == 0 ||
-		(ClientId == SERVER_MSG && !g_Config.m_ClShowChatSystem) ||
-		(ClientId >= 0 && (m_pClient->m_aClients[ClientId].m_aName[0] == '\0' || // unknown client
-					  m_pClient->m_aClients[ClientId].m_ChatIgnore ||
-					  (m_pClient->m_Snap.m_LocalClientId != ClientId && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientId].m_Friend) ||
-					  (m_pClient->m_Snap.m_LocalClientId != ClientId && m_pClient->m_aClients[ClientId].m_Foe))))
+	if(*pLine == 0)
 		return;
+	if(ClientId == SERVER_MSG && !g_Config.m_ClShowChatSystem)
+		return;
+	if(ClientId >= 0)
+	{
+		if(m_pClient->m_aClients[ClientId].m_aName[0] == '\0') // unknown client
+			return;
+		if(m_pClient->m_aClients[ClientId].m_ChatIgnore)
+			return;
+		if(m_pClient->m_Snap.m_LocalClientId != ClientId && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientId].m_Friend)
+			return;
+		if(m_pClient->m_Snap.m_LocalClientId != ClientId && m_pClient->m_aClients[ClientId].m_Foe)
+			return;
+		if(m_pClient->m_Snap.m_LocalClientId != ClientId && g_Config.m_ClShowChatMention && !(LineShouldHighlight(pLine, ClientId, Team) || Team == 2))
+			return;
+	}
 
 	// trim right and set maximum length to 256 utf8-characters
 	int Length = 0;
@@ -721,7 +760,6 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 
 	while(*p)
 	{
-		Highlighted = false;
 		pLine = p;
 		// find line separator and strip multiline
 		while(*p)
@@ -734,6 +772,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		}
 
 		CLine *pCurrentLine = &m_aLines[m_CurrentLine];
+		Highlighted = LineShouldHighlight(pLine, ClientId, Team);
 
 		// Team Number:
 		// 0 = global; 1 = team; 2 = sending whisper; 3 = receiving whisper
@@ -766,29 +805,10 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		pCurrentLine->m_NameColor = -2;
 		pCurrentLine->m_Friend = false;
 		pCurrentLine->m_HasRenderTee = false;
+		pCurrentLine->m_Highlighted = Highlighted;
 
 		TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
 		Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
-
-		// check for highlighted name
-		if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
-		{
-			if(ClientId >= 0 && ClientId != m_pClient->m_aLocalIds[0] && (!m_pClient->Client()->DummyConnected() || ClientId != m_pClient->m_aLocalIds[1]))
-			{
-				// main character
-				Highlighted |= LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->m_aLocalIds[0]].m_aName);
-				// dummy
-				Highlighted |= m_pClient->Client()->DummyConnected() && LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->m_aLocalIds[1]].m_aName);
-			}
-		}
-		else
-		{
-			// on demo playback use local id from snap directly,
-			// since m_aLocalIds isn't valid there
-			Highlighted |= m_pClient->m_Snap.m_LocalClientId >= 0 && LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_aName);
-		}
-
-		pCurrentLine->m_Highlighted = Highlighted;
 
 		if(pCurrentLine->m_ClientId == SERVER_MSG)
 		{
@@ -819,15 +839,11 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			{
 				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "→ %s", LineAuthor.m_aName);
 				pCurrentLine->m_NameColor = TEAM_BLUE;
-				pCurrentLine->m_Highlighted = false;
-				Highlighted = false;
 			}
 			else if(Team == 3) // whisper recv
 			{
 				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s", LineAuthor.m_aName);
 				pCurrentLine->m_NameColor = TEAM_RED;
-				pCurrentLine->m_Highlighted = true;
-				Highlighted = true;
 			}
 			else
 				str_copy(pCurrentLine->m_aName, LineAuthor.m_aName);
