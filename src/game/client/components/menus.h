@@ -700,11 +700,11 @@ public:
 		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aPlayer[MAX_NAME_LENGTH];
 
-		bool m_Failed;
-		int m_Time;
-		int m_Slot;
-		bool m_Own;
-		time_t m_Date;
+		bool m_Failed = true;
+		int m_Time = 0;
+		int m_Slot = -1;
+		bool m_Own = false;
+		time_t m_Date = 0;
 
 		CGhostItem() :
 			m_Slot(-1), m_Own(false) { m_aFilename[0] = 0; }
