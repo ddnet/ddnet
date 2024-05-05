@@ -28,7 +28,7 @@ void CGameTeams::Reset()
 		SendTeamsState(i);
 	}
 
-	for(int i = 0; i < NUM_TEAMS; ++i)
+	for(int i = 0; i < NUM_DDRACE_TEAMS; ++i)
 	{
 		m_aTeamState[i] = TEAMSTATE_EMPTY;
 		m_aTeamLocked[i] = false;
@@ -681,7 +681,7 @@ void CGameTeams::OnTeamFinish(int Team, CPlayer **Players, unsigned int Size, in
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "'%s' joined team 0",
 				GameServer()->Server()->ClientName(Players[i]->GetCid()));
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		}
 	}
 
@@ -710,7 +710,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
 		GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::CHAT_SIX);
 	else
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1., CGameContext::CHAT_SIX);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1., CGameContext::CHAT_SIX);
 
 	float Diff = absolute(Time - pData->m_BestTime);
 
@@ -729,7 +729,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 		if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
 			GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::CHAT_SIX);
 		else
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 	}
 	else if(pData->m_BestTime != 0) // tee has already finished?
 	{
@@ -969,7 +969,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPla
 
 void CGameTeams::ProcessSaveTeam()
 {
-	for(int Team = 0; Team < NUM_TEAMS; Team++)
+	for(int Team = 0; Team < NUM_DDRACE_TEAMS; Team++)
 	{
 		if(m_apSaveTeamResult[Team] == nullptr || !m_apSaveTeamResult[Team]->m_Completed)
 			continue;

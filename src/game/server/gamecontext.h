@@ -248,13 +248,6 @@ public:
 
 	enum
 	{
-		CHAT_ALL = -2,
-		CHAT_SPEC = -1,
-		CHAT_RED = 0,
-		CHAT_BLUE = 1,
-		CHAT_WHISPER_SEND = 2,
-		CHAT_WHISPER_RECV = 3,
-
 		CHAT_SIX = 1 << 0,
 		CHAT_SIXUP = 1 << 1,
 	};

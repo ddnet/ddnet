@@ -95,7 +95,7 @@ void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData)
 		str_format(aBuf, sizeof(aBuf), "%s was killed by %s",
 			pSelf->Server()->ClientName(Victim),
 			pSelf->Server()->ClientName(pResult->m_ClientId));
-		pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		pSelf->SendChat(-1, TEAM_ALL, aBuf);
 	}
 }
 
@@ -489,7 +489,7 @@ void CGameContext::VoteMute(const NETADDR *pAddr, int Secs, const char *pReason,
 	else
 		str_format(aBuf, sizeof(aBuf), "'%s' banned '%s' for %d seconds from voting",
 			Server()->ClientName(AuthedId), pDisplayName, Secs);
-	SendChat(-1, CHAT_ALL, aBuf);
+	SendChat(-1, TEAM_ALL, aBuf);
 }
 
 bool CGameContext::VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedId)
@@ -562,7 +562,7 @@ void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName
 		str_format(aBuf, sizeof(aBuf), "'%s' has been muted for %d seconds (%s)", pDisplayName, Secs, pReason);
 	else
 		str_format(aBuf, sizeof(aBuf), "'%s' has been muted for %d seconds", pDisplayName, Secs);
-	SendChat(-1, CHAT_ALL, aBuf);
+	SendChat(-1, TEAM_ALL, aBuf);
 }
 
 void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
@@ -764,10 +764,10 @@ void CGameContext::ConModerate(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->m_Moderating = !pPlayer->m_Moderating;
 
 	if(!HadModerator && pPlayer->m_Moderating)
-		pSelf->SendChat(-1, CHAT_ALL, "Server kick/spec votes will now be actively moderated.", 0);
+		pSelf->SendChat(-1, TEAM_ALL, "Server kick/spec votes will now be actively moderated.", 0);
 
 	if(!pSelf->PlayerModerating())
-		pSelf->SendChat(-1, CHAT_ALL, "Server kick/spec votes are no longer actively moderated.", 0);
+		pSelf->SendChat(-1, TEAM_ALL, "Server kick/spec votes are no longer actively moderated.", 0);
 
 	if(pPlayer->m_Moderating)
 		pSelf->SendChatTarget(pResult->m_ClientId, "Active moderator mode enabled for you.");
@@ -822,7 +822,7 @@ void CGameContext::ConFreezeHammer(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "'%s' got freeze hammer!",
 		pSelf->Server()->ClientName(Victim));
-	pSelf->SendChat(-1, CHAT_ALL, aBuf);
+	pSelf->SendChat(-1, TEAM_ALL, aBuf);
 
 	pChr->m_FreezeHammer = true;
 }
@@ -840,7 +840,7 @@ void CGameContext::ConUnFreezeHammer(IConsole::IResult *pResult, void *pUserData
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "'%s' lost freeze hammer!",
 		pSelf->Server()->ClientName(Victim));
-	pSelf->SendChat(-1, CHAT_ALL, aBuf);
+	pSelf->SendChat(-1, TEAM_ALL, aBuf);
 
 	pChr->m_FreezeHammer = false;
 }
