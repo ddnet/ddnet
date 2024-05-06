@@ -2784,12 +2784,12 @@ int CGraphics_Threaded::WindowOpen()
 
 void CGraphics_Threaded::SetWindowGrab(bool Grab)
 {
-	return m_pBackend->SetWindowGrab(Grab);
+	m_pBackend->SetWindowGrab(Grab);
 }
 
 void CGraphics_Threaded::NotifyWindow()
 {
-	return m_pBackend->NotifyWindow();
+	m_pBackend->NotifyWindow();
 }
 
 void CGraphics_Threaded::ReadPixel(ivec2 Position, ColorRGBA *pColor)
