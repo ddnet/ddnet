@@ -155,7 +155,7 @@ public:
 	void AddLine(int ClientId, int Team, const char *pLine);
 	void EnableMode(int Team);
 	void DisableMode();
-	void Say(int Team, const char *pLine);
+	void SendChat(int Team, const char *pLine);
 	void SayChat(const char *pLine);
 	void RegisterCommand(const char *pName, const char *pParams, const char *pHelpText);
 	void UnregisterCommand(const char *pName);

@@ -150,12 +150,12 @@ void CChat::OnStateChange(int NewState, int OldState)
 
 void CChat::ConSay(IConsole::IResult *pResult, void *pUserData)
 {
-	((CChat *)pUserData)->Say(0, pResult->GetString(0));
+	((CChat *)pUserData)->SendChat(0, pResult->GetString(0));
 }
 
 void CChat::ConSayTeam(IConsole::IResult *pResult, void *pUserData)
 {
-	((CChat *)pUserData)->Say(1, pResult->GetString(0));
+	((CChat *)pUserData)->SendChat(1, pResult->GetString(0));
 }
 
 void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
@@ -255,7 +255,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 
 			if(m_LastChatSend + time_freq() < time())
 			{
-				Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
+				SendChat(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
 				AddEntry = true;
 			}
 			else if(m_PendingChatCounter < 3)
@@ -1177,7 +1177,7 @@ void CChat::OnRender()
 		{
 			if(i == 0)
 			{
-				Say(pEntry->m_Team, pEntry->m_aText);
+				SendChat(pEntry->m_Team, pEntry->m_aText);
 				break;
 			}
 		}
@@ -1324,7 +1324,7 @@ void CChat::OnRender()
 	}
 }
 
-void CChat::Say(int Team, const char *pLine)
+void CChat::SendChat(int Team, const char *pLine)
 {
 	// don't send empty messages
 	if(*str_utf8_skip_whitespaces(pLine) == '\0')
@@ -1348,7 +1348,7 @@ void CChat::SayChat(const char *pLine)
 
 	if(m_LastChatSend + time_freq() < time())
 	{
-		Say(m_Mode == MODE_ALL ? 0 : 1, pLine);
+		SendChat(m_Mode == MODE_ALL ? 0 : 1, pLine);
 		AddEntry = true;
 	}
 	else if(m_PendingChatCounter < 3)
