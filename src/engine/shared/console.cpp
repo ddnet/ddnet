@@ -736,7 +736,7 @@ void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 	str_from_int((int)IConsole::ACCESS_LEVEL_USER, aBuf);
 	Result.AddArgument(aBuf);
 
-	pConsole->ConCommandStatus(&Result, pConsole);
+	CConsole::ConCommandStatus(&Result, pConsole);
 }
 
 void CConsole::TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData)
