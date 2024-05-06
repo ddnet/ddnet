@@ -190,10 +190,9 @@ class CDemoEditor : public IDemoEditor
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	class CSnapshotDelta *m_pSnapshotDelta;
-	const char *m_pNetVersion;
 
 public:
-	virtual void Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);
+	virtual void Init(class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);
 	bool Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) override;
 };
 
