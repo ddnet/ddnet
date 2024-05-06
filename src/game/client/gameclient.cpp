@@ -1373,10 +1373,7 @@ void CGameClient::OnNewSnapshot()
 				aMessage[i] = (char)('a' + (rand() % ('z' - 'a')));
 			aMessage[MsgLen] = 0;
 
-			CNetMsg_Cl_Say Msg;
-			Msg.m_Team = rand() & 1;
-			Msg.m_pMessage = aMessage;
-			Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+			m_Chat.SendChat(rand() & 1, aMessage);
 		}
 	}
 #endif
