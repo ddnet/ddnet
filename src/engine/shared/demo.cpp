@@ -1219,9 +1219,8 @@ public:
 	}
 };
 
-void CDemoEditor::Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage)
+void CDemoEditor::Init(class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage)
 {
-	m_pNetVersion = pNetVersion;
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
