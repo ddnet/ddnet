@@ -4,11 +4,6 @@
 #include "network.h"
 #include <base/system.h>
 
-SECURITY_TOKEN ToSecurityToken(unsigned char *pData)
-{
-	return (int)pData[0] | (pData[1] << 8) | (pData[2] << 16) | (pData[3] << 24);
-}
-
 void CNetConnection::ResetStats()
 {
 	mem_zero(&m_Stats, sizeof(m_Stats));
