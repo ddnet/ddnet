@@ -1876,7 +1876,7 @@ void CGameContext::ConLastTele(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->Pause(CPlayer::PAUSE_NONE, true);
 }
 
-inline std::optional<CCharacter *> CGameContext::GetPracticeCharacter(IConsole::IResult *pResult, void *pUserData)
+std::optional<CCharacter *> CGameContext::GetPracticeCharacter(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientId(pResult->m_ClientId))

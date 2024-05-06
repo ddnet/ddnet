@@ -462,7 +462,7 @@ private:
 	static void ConTeleCursor(IConsole::IResult *pResult, void *pUserData);
 	static void ConLastTele(IConsole::IResult *pResult, void *pUserData);
 
-	// Practice commands
+	// Chat commands for practice mode
 	static void ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData);
