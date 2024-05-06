@@ -32,7 +32,7 @@ CChat::CChat()
 
 	m_Mode = MODE_NONE;
 
-	m_Input.SetClipboardLineCallback([this](const char *pStr) { SayChat(pStr); });
+	m_Input.SetClipboardLineCallback([this](const char *pStr) { SendChatQueued(pStr); });
 	m_Input.SetCalculateOffsetCallback([this]() { return m_IsInputCensored; });
 	m_Input.SetDisplayTextCallback([this](char *pStr, size_t NumChars) {
 		m_IsInputCensored = false;
@@ -249,28 +249,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 			m_CommandsNeedSorting = false;
 		}
 
-		if(m_Input.GetString()[0])
-		{
-			bool AddEntry = false;
-
-			if(m_LastChatSend + time_freq() < time())
-			{
-				SendChat(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
-				AddEntry = true;
-			}
-			else if(m_PendingChatCounter < 3)
-			{
-				++m_PendingChatCounter;
-				AddEntry = true;
-			}
-
-			if(AddEntry)
-			{
-				CHistoryEntry *pEntry = m_History.Allocate(sizeof(CHistoryEntry) + m_Input.GetLength());
-				pEntry->m_Team = m_Mode == MODE_ALL ? 0 : 1;
-				mem_copy(pEntry->m_aText, m_Input.GetString(), m_Input.GetLength() + 1);
-			}
-		}
+		SendChatQueued(m_Input.GetString());
 		m_pHistoryEntry = nullptr;
 		DisableMode();
 		m_pClient->OnRelease();
@@ -1324,6 +1303,28 @@ void CChat::OnRender()
 	}
 }
 
+void CChat::EnsureCoherentFontSize() const
+{
+	// Adjust font size based on width
+	if(g_Config.m_ClChatWidth / (float)g_Config.m_ClChatFontSize >= CHAT_FONTSIZE_WIDTH_RATIO)
+		return;
+
+	// We want to keep a ration between font size and font width so that we don't have a weird rendering
+	g_Config.m_ClChatFontSize = g_Config.m_ClChatWidth / CHAT_FONTSIZE_WIDTH_RATIO;
+}
+
+void CChat::EnsureCoherentWidth() const
+{
+	// Adjust width based on font size
+	if(g_Config.m_ClChatWidth / (float)g_Config.m_ClChatFontSize >= CHAT_FONTSIZE_WIDTH_RATIO)
+		return;
+
+	// We want to keep a ration between font size and font width so that we don't have a weird rendering
+	g_Config.m_ClChatWidth = CHAT_FONTSIZE_WIDTH_RATIO * g_Config.m_ClChatFontSize;
+}
+
+// ----- send functions -----
+
 void CChat::SendChat(int Team, const char *pLine)
 {
 	// don't send empty messages
@@ -1339,7 +1340,7 @@ void CChat::SendChat(int Team, const char *pLine)
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
-void CChat::SayChat(const char *pLine)
+void CChat::SendChatQueued(const char *pLine)
 {
 	if(!pLine || str_length(pLine) < 1)
 		return;
@@ -1363,24 +1364,4 @@ void CChat::SayChat(const char *pLine)
 		pEntry->m_Team = m_Mode == MODE_ALL ? 0 : 1;
 		mem_copy(pEntry->m_aText, pLine, str_length(pLine));
 	}
-}
-
-void CChat::EnsureCoherentFontSize() const
-{
-	// Adjust font size based on width
-	if(g_Config.m_ClChatWidth / (float)g_Config.m_ClChatFontSize >= CHAT_FONTSIZE_WIDTH_RATIO)
-		return;
-
-	// We want to keep a ration between font size and font width so that we don't have a weird rendering
-	g_Config.m_ClChatFontSize = g_Config.m_ClChatWidth / CHAT_FONTSIZE_WIDTH_RATIO;
-}
-
-void CChat::EnsureCoherentWidth() const
-{
-	// Adjust width based on font size
-	if(g_Config.m_ClChatWidth / (float)g_Config.m_ClChatFontSize >= CHAT_FONTSIZE_WIDTH_RATIO)
-		return;
-
-	// We want to keep a ration between font size and font width so that we don't have a weird rendering
-	g_Config.m_ClChatWidth = CHAT_FONTSIZE_WIDTH_RATIO * g_Config.m_ClChatFontSize;
 }
