@@ -502,7 +502,7 @@ private:
 	static void ConFreezeHammer(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnFreezeHammer(IConsole::IResult *pResult, void *pUserData);
 
-	static std::optional<CCharacter *> GetPracticeCharacter(IConsole::IResult *pResult, void *pUserData);
+	CCharacter *GetPracticeCharacter(IConsole::IResult *pResult);
 
 	enum
 	{

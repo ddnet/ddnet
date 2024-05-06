@@ -1876,22 +1876,43 @@ void CGameContext::ConLastTele(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->Pause(CPlayer::PAUSE_NONE, true);
 }
 
-std::optional<CCharacter *> CGameContext::GetPracticeCharacter(IConsole::IResult *pResult, void *pUserData)
+CCharacter *CGameContext::GetPracticeCharacter(IConsole::IResult *pResult)
+{
+	if(!CheckClientId(pResult->m_ClientId))
+		return nullptr;
+	CPlayer *pPlayer = m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return nullptr;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return nullptr;
+
+	CGameTeams &Teams = m_pController->Teams();
+	int Team = GetDDRaceTeam(pResult->m_ClientId);
+	if(!Teams.IsPractice(Team))
+	{
+		SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return nullptr;
+	}
+	return pChr;
+}
+
+void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientId(pResult->m_ClientId))
-		return std::nullopt;
+		return;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
 	if(!pPlayer)
-		return std::nullopt;
+		return;
 	CCharacter *pChr = pPlayer->GetCharacter();
 	if(!pChr)
-		return std::nullopt;
+		return;
 
 	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
 		pSelf->SendChatTarget(pPlayer->GetCid(), "Command is not available on solo servers");
-		return std::nullopt;
+		return;
 	}
 
 	CGameTeams &Teams = pSelf->m_pController->Teams();
@@ -1899,122 +1920,154 @@ std::optional<CCharacter *> CGameContext::GetPracticeCharacter(IConsole::IResult
 	if(!Teams.IsPractice(Team))
 	{
 		pSelf->SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
-		return std::nullopt;
+		return;
 	}
-	return pChr;
-}
-
-void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData)
-{
-	auto pChr = GetPracticeCharacter(pResult, pUserData);
-	if(pChr.has_value())
-		pChr.value()->SetSolo(false);
+	pChr->SetSolo(false);
 }
 
 void CGameContext::ConPracticeSolo(IConsole::IResult *pResult, void *pUserData)
 {
-	auto pChr = GetPracticeCharacter(pResult, pUserData);
-	if(pChr.has_value())
-		pChr.value()->SetSolo(true);
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+	{
+		pSelf->SendChatTarget(pPlayer->GetCid(), "Command is not available on solo servers");
+		return;
+	}
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+	pChr->SetSolo(true);
 }
 
 void CGameContext::ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData)
 {
-	auto pChr = GetPracticeCharacter(pResult, pUserData);
-	if(pChr.has_value())
-	{
-		pChr.value()->SetDeepFrozen(false);
-		pChr.value()->UnFreeze();
-	}
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	pChr->SetDeepFrozen(false);
+	pChr->UnFreeze();
 }
 
 void CGameContext::ConPracticeDeep(IConsole::IResult *pResult, void *pUserData)
 {
-	auto pChr = GetPracticeCharacter(pResult, pUserData);
-	if(pChr.has_value())
-		pChr.value()->SetDeepFrozen(true);
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
+	if(!pChr)
+		return;
+
+	pChr->SetDeepFrozen(true);
 }
 
 void CGameContext::ConPracticeShotgun(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConShotgun(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeGrenade(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConGrenade(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeLaser(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConLaser(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeJetpack(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConJetpack(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeWeapons(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConWeapons(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeUnShotgun(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConUnShotgun(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeUnGrenade(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConUnGrenade(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeUnLaser(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConUnLaser(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeUnJetpack(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConUnJetpack(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeUnWeapons(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConUnWeapons(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeNinja(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConNinja(pResult, pUserData);
 }
 void CGameContext::ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConUnNinja(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConAddWeapon(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData)
 {
-	if(GetPracticeCharacter(pResult, pUserData))
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
 		ConRemoveWeapon(pResult, pUserData);
 }
 
