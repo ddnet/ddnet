@@ -155,8 +155,6 @@ public:
 	void AddLine(int ClientId, int Team, const char *pLine);
 	void EnableMode(int Team);
 	void DisableMode();
-	void Say(int Team, const char *pLine);
-	void SayChat(const char *pLine);
 	void RegisterCommand(const char *pName, const char *pParams, const char *pHelpText);
 	void UnregisterCommand(const char *pName);
 	void Echo(const char *pString);
@@ -183,5 +181,22 @@ public:
 	float MessagePaddingY() const { return FontSize() * (1 / 6.f); }
 	float MessageTeeSize() const { return FontSize() * (7 / 6.f); }
 	float MessageRounding() const { return FontSize() * (1 / 2.f); }
+
+	// ----- send functions -----
+
+	// Sends a chat message to the server.
+	//
+	// @param Team MODE_ALL=0 MODE_TEAM=1
+	// @param pLine the chat message
+	void SendChat(int Team, const char *pLine);
+
+	// Sends a chat message to the server.
+	//
+	// It uses a queue with a maximum of 3 entries
+	// that ensures there is a minimum delay of one second
+	// between sent messages.
+	//
+	// It uses team or public chat depending on m_Mode.
+	void SendChatQueued(const char *pLine);
 };
 #endif
