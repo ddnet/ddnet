@@ -8475,8 +8475,8 @@ void CEditor::OnMouseMove(float MouseX, float MouseY)
 				continue;
 			CTile Tile = pTiles->GetTile(x, y);
 			if(Tile.m_Index)
-				m_vHoverTiles.emplace_back(CHoverTile(
-					g, l, x, y, Tile));
+				m_vHoverTiles.emplace_back(
+					g, l, x, y, Tile);
 		}
 	}
 	Ui()->MapScreen();
