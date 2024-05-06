@@ -986,7 +986,7 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const
 			}
 			else
 			{
-				const float AmountSeek = clamp((Ui()->MouseX() - SeekBar.x - Rounding) / (float)(SeekBar.w - 2 * Rounding), 0.0f, 1.0f);
+				const float AmountSeek = clamp((Ui()->MouseX() - SeekBar.x - Rounding) / (SeekBar.w - 2 * Rounding), 0.0f, 1.0f);
 				Sound()->SetSampleCurrentTime(SampleId, AmountSeek);
 			}
 		}
@@ -6491,7 +6491,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				if(Value / m_ZoomEnvelopeY.GetValue() * View.h < 40.0f)
 					UnitsPerLineY = Value;
 			}
-			int NumLinesY = m_ZoomEnvelopeY.GetValue() / static_cast<float>(UnitsPerLineY) + 1;
+			int NumLinesY = m_ZoomEnvelopeY.GetValue() / UnitsPerLineY + 1;
 
 			Ui()->ClipEnable(&View);
 			Graphics()->TextureClear();
@@ -6536,7 +6536,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				if(Value.AsSeconds() / m_ZoomEnvelopeX.GetValue() * View.w < 160.0f)
 					UnitsPerLineX = Value;
 			}
-			int NumLinesX = m_ZoomEnvelopeX.GetValue() / static_cast<float>(UnitsPerLineX.AsSeconds()) + 1;
+			int NumLinesX = m_ZoomEnvelopeX.GetValue() / UnitsPerLineX.AsSeconds() + 1;
 
 			Ui()->ClipEnable(&View);
 			Graphics()->TextureClear();
@@ -8390,8 +8390,8 @@ void CEditor::HandleCursorMovement()
 	}
 
 	// update positions for ui, but only update ui when rendering
-	m_MouseX = Ui()->Screen()->w * ((float)s_MouseX / Graphics()->WindowWidth());
-	m_MouseY = Ui()->Screen()->h * ((float)s_MouseY / Graphics()->WindowHeight());
+	m_MouseX = Ui()->Screen()->w * (s_MouseX / Graphics()->WindowWidth());
+	m_MouseY = Ui()->Screen()->h * (s_MouseY / Graphics()->WindowHeight());
 
 	// fix correct world x and y
 	std::shared_ptr<CLayerGroup> pGroup = GetSelectedGroup();
