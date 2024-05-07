@@ -1,18 +1,22 @@
 #!/bin/bash
 
-export ANDROID_HOME=~/Android/Sdk
-export MAKEFLAGS=-j32
+# $HOME must be used instead of ~ else cargo-ndk cannot find the folder
+export ANDROID_HOME=$HOME/Android/Sdk
+MAKEFLAGS=-j$(nproc)
+export MAKEFLAGS
 
 ANDROID_NDK_VERSION="$(cd "$ANDROID_HOME/ndk" && find . -maxdepth 1 | sort -n | tail -1)"
 ANDROID_NDK_VERSION="${ANDROID_NDK_VERSION:2}"
+# ANDROID_NDK_VERSION must be exported for build.sh step
 export ANDROID_NDK_VERSION
-ANDROID_NDK="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
+# ANDROID_NDK_HOME must be exported for cargo-ndk
+export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
 
 _DEFAULT_ANDROID_BUILD=x86
 _DEFAULT_GAME_NAME=DDNet
 _DEFAULT_BUILD_TYPE=Debug
 _DEFAULT_BUILD_FOLDER=build-android
-_ANDROID_API_LEVEL=android-24
+_ANDROID_API_LEVEL=34
 
 _ANDROID_SUB_BUILD_DIR=build_arch
 
@@ -102,12 +106,19 @@ function build_for_type() {
 		-G "Ninja" \
 		-DPREFER_BUNDLED_LIBS=ON \
 		-DCMAKE_BUILD_TYPE="${_DEFAULT_BUILD_TYPE}" \
-		-DANDROID_NATIVE_API_LEVEL="$_ANDROID_API_LEVEL" \
-		-DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
-		-DANDROID_NDK="$ANDROID_NDK" \
+		-DANDROID_PLATFORM="android-${_ANDROID_API_LEVEL}" \
+		-DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
+		-DANDROID_NDK="$ANDROID_NDK_HOME" \
 		-DANDROID_ABI="${2}" \
 		-DANDROID_ARM_NEON=TRUE \
-		-B${_DEFAULT_BUILD_FOLDER}/"$_ANDROID_SUB_BUILD_DIR/$1" \
+		-DCMAKE_ANDROID_NDK="$ANDROID_NDK_HOME" \
+		-DCMAKE_SYSTEM_NAME=Android \
+		-DCMAKE_SYSTEM_VERSION="$_ANDROID_API_LEVEL" \
+		-DCMAKE_ANDROID_ARCH_ABI="${2}" \
+		-DCARGO_NDK_TARGET="${3}" \
+		-DCARGO_NDK_API="$_ANDROID_API_LEVEL" \
+		-DDDNET_TEST_NO_LINK=ON \
+		-B"${_DEFAULT_BUILD_FOLDER}/$_ANDROID_SUB_BUILD_DIR/$1" \
 		-DSERVER=OFF \
 		-DTOOLS=OFF \
 		-DDEV=TRUE \
@@ -120,29 +131,29 @@ function build_for_type() {
 	)
 }
 
-mkdir ${_DEFAULT_BUILD_FOLDER}
+mkdir "${_DEFAULT_BUILD_FOLDER}"
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "arm" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	build_for_type arm armeabi-v7a &
+	build_for_type arm armeabi-v7a armv7-linux-androideabi &
 fi
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "arm64" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	build_for_type arm64 arm64-v8a &
+	build_for_type arm64 arm64-v8a aarch64-linux-android &
 fi
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "x86" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	build_for_type x86 x86 &
+	build_for_type x86 x86 i686-linux-android &
 fi
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "x86_64" || "${_DEFAULT_ANDROID_BUILD}" == "x64" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	build_for_type x86_64 x86_64 &
+	build_for_type x86_64 x86_64 x86_64-linux-android &
 fi
 
 wait
 
 printf "\e[36mPreparing gradle build\n"
 
-cd ${_DEFAULT_BUILD_FOLDER} || exit 1
+cd "${_DEFAULT_BUILD_FOLDER}" || exit 1
 
 mkdir -p src/main
 mkdir -p src/main/res/mipmap

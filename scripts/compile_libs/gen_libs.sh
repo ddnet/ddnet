@@ -53,6 +53,8 @@ fi
 mkdir -p "$1"
 cd "$1" || exit 1
 
+_ANDROID_ABI_LEVEL=34
+
 function build_cmake_lib() {
 	if [ ! -d "${1}" ]; then
 		if [ -z ${3+x} ]; then
@@ -67,8 +69,6 @@ function build_cmake_lib() {
 		./cmake_lib_compile.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 	)
 }
-
-_ANDROID_ABI_LEVEL=24
 
 mkdir -p compile_libs
 cd compile_libs || exit 1
