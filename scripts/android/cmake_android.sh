@@ -11,6 +11,7 @@ ANDROID_NDK="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
 _DEFAULT_ANDROID_BUILD=x86
 _DEFAULT_GAME_NAME=DDNet
 _DEFAULT_BUILD_TYPE=Debug
+_DEFAULT_BUILD_FOLDER=build-android
 _ANDROID_API_LEVEL=android-24
 
 _ANDROID_SUB_BUILD_DIR=build_arch
@@ -36,6 +37,13 @@ if [ -z ${3+x} ]; then
 	_SHOW_USAGE_INFO=1
 else
 	_DEFAULT_BUILD_TYPE=$3
+fi
+
+if [ -z ${4+x} ]; then
+    printf "\e[31m%s\e[30m\n" "Did not pass build folder, using default: ${_DEFAULT_BUILD_FOLDER}"
+	_SHOW_USAGE_INFO=1
+else
+	_DEFAULT_BUILD_FOLDER=$4
 fi
 
 _ANDROID_JAR_KEY_NAME=~/.android/debug.keystore
@@ -99,7 +107,7 @@ function build_for_type() {
 		-DANDROID_NDK="$ANDROID_NDK" \
 		-DANDROID_ABI="${2}" \
 		-DANDROID_ARM_NEON=TRUE \
-		-Bbuild_android/"$_ANDROID_SUB_BUILD_DIR/$1" \
+		-B${_DEFAULT_BUILD_FOLDER}/"$_ANDROID_SUB_BUILD_DIR/$1" \
 		-DSERVER=OFF \
 		-DTOOLS=OFF \
 		-DDEV=TRUE \
@@ -107,12 +115,12 @@ function build_for_type() {
 		-DVULKAN=ON \
 		-DVIDEORECORDER=OFF
 	(
-		cd "build_android/$_ANDROID_SUB_BUILD_DIR/$1" || exit 1
+		cd "${_DEFAULT_BUILD_FOLDER}/$_ANDROID_SUB_BUILD_DIR/$1" || exit 1
 		cmake --build . --target DDNet
 	)
 }
 
-mkdir build_android
+mkdir ${_DEFAULT_BUILD_FOLDER}
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "arm" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
 	build_for_type arm armeabi-v7a arm eabi &
@@ -134,7 +142,7 @@ wait
 
 printf "\e[36mPreparing gradle build\n"
 
-cd build_android || exit 1
+cd ${_DEFAULT_BUILD_FOLDER} || exit 1
 
 mkdir -p src/main
 mkdir -p src/main/res/mipmap
