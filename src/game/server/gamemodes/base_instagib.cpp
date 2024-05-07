@@ -138,12 +138,12 @@ void CGameControllerInstagib::CheckForceUnpauseGame()
 		str_copy(aBuf, "Game will be force unpaused in 10 seconds.");
 	if(aBuf[0])
 	{
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 	}
 
 	if(MinutesPaused >= Config()->m_SvForceReadyAll)
 	{
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Force unpaused the game because the maximum pause time was reached.");
+		GameServer()->SendChat(-1, TEAM_ALL, "Force unpaused the game because the maximum pause time was reached.");
 		SetPlayersReadyState(true);
 		CheckReadyStates();
 	}
@@ -307,7 +307,7 @@ void CGameControllerInstagib::AddSpree(class CPlayer *pPlayer)
 		int No = pPlayer->m_Spree / g_Config.m_SvKillingspreeKills;
 
 		str_format(aBuf, sizeof(aBuf), "'%s' %s with %d kills!", Server()->ClientName(pPlayer->GetCid()), aaSpreeMsg[(No > NumMsg - 1) ? NumMsg - 1 : No], pPlayer->m_Spree);
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 	}
 }
 
@@ -331,7 +331,7 @@ void CGameControllerInstagib::EndSpree(class CPlayer *pPlayer, class CPlayer *pK
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "'%s' %d-kills killing spree was ended by %s",
 				Server()->ClientName(pPlayer->GetCid()), pPlayer->m_Spree, Server()->ClientName(pKiller->GetCid()));
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		}
 	}
 	// pPlayer->m_GotAward = false;
@@ -357,7 +357,7 @@ void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 		else if(g_Config.m_SvTournamentJoinMsgs == 2)
 			SendChatSpectators(aBuf, CGameContext::CHAT_SIX);
 
@@ -384,7 +384,7 @@ void CGameControllerInstagib::SendChatSpectators(const char *pMessage, int Flags
 		if(!Send)
 			continue;
 
-		GameServer()->SendChat(pPlayer->GetCid(), CGameContext::CHAT_ALL, pMessage, -1, Flags);
+		GameServer()->SendChat(pPlayer->GetCid(), TEAM_ALL, pMessage, -1, Flags);
 	}
 }
 
@@ -400,7 +400,7 @@ void CGameControllerInstagib::OnPlayerDisconnect(class CPlayer *pPlayer, const c
 		else
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientId));
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 		else if(g_Config.m_SvTournamentJoinMsgs == 2)
 			SendChatSpectators(aBuf, CGameContext::CHAT_SIX);
 
@@ -429,7 +429,7 @@ void CGameControllerInstagib::DoTeamChange(CPlayer *pPlayer, int Team, bool DoCh
 	if(DoChatMsg)
 	{
 		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(ClientId), GameServer()->m_pController->GetTeamName(Team));
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, CGameContext::CHAT_SIX);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf, CGameContext::CHAT_SIX);
 	}
 
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", ClientId, Server()->ClientName(ClientId), Team);

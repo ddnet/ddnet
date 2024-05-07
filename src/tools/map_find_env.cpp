@@ -50,7 +50,7 @@ int FxToTilePos(const int FxPos)
 
 bool GetEnvelopedQuads(const CQuad *pQuads, const int NumQuads, const int EnvId, const int GroupId, const int LayerId, int &QuadsCounter, EnvelopedQuad pEnvQuads[1024])
 {
-	bool bFound = false;
+	bool Found = false;
 	for(int i = 0; i < NumQuads; i++)
 	{
 		if(pQuads[i].m_PosEnv != EnvId && pQuads[i].m_ColorEnv != EnvId)
@@ -62,10 +62,10 @@ bool GetEnvelopedQuads(const CQuad *pQuads, const int NumQuads, const int EnvId,
 		pEnvQuads[QuadsCounter].m_TilePosY = FxToTilePos(pQuads[i].m_aPoints[4].y);
 
 		QuadsCounter++;
-		bFound = true;
+		Found = true;
 	}
 
-	return bFound;
+	return Found;
 }
 
 void PrintEnvelopedQuads(const EnvelopedQuad pEnvQuads[1024], const int EnvId, const int QuadsCounter)

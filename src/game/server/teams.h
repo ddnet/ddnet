@@ -23,19 +23,19 @@ class CGameTeams
 	bool m_aTeeFinished[MAX_CLIENTS];
 	int m_aLastChat[MAX_CLIENTS];
 
-	int m_aTeamState[NUM_TEAMS];
-	bool m_aTeamLocked[NUM_TEAMS];
-	bool m_aTeamFlock[NUM_TEAMS];
-	CClientMask m_aInvited[NUM_TEAMS];
-	bool m_aPractice[NUM_TEAMS];
-	std::shared_ptr<CScoreSaveResult> m_apSaveTeamResult[NUM_TEAMS];
+	int m_aTeamState[NUM_DDRACE_TEAMS];
+	bool m_aTeamLocked[NUM_DDRACE_TEAMS];
+	bool m_aTeamFlock[NUM_DDRACE_TEAMS];
+	CClientMask m_aInvited[NUM_DDRACE_TEAMS];
+	bool m_aPractice[NUM_DDRACE_TEAMS];
+	std::shared_ptr<CScoreSaveResult> m_apSaveTeamResult[NUM_DDRACE_TEAMS];
 	uint64_t m_aLastSwap[MAX_CLIENTS]; // index is id of player who initiated swap
-	bool m_aTeamSentStartWarning[NUM_TEAMS];
+	bool m_aTeamSentStartWarning[NUM_DDRACE_TEAMS];
 	// `m_aTeamUnfinishableKillTick` is -1 by default and gets set when a
 	// team becomes unfinishable. If the team hasn't entered practice mode
 	// by that time, it'll get killed to prevent people not understanding
 	// the message from playing for a long time in an unfinishable team.
-	int m_aTeamUnfinishableKillTick[NUM_TEAMS];
+	int m_aTeamUnfinishableKillTick[NUM_DDRACE_TEAMS];
 
 	class CGameContext *m_pGameContext;
 
@@ -47,8 +47,8 @@ class CGameTeams
 	*/
 	void KillTeam(int Team, int NewStrongId, int ExceptId = -1);
 	bool TeamFinished(int Team);
-	void OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, const char *pTimestamp);
-	void OnFinish(CPlayer *Player, float Time, const char *pTimestamp);
+	void OnTeamFinish(int Team, CPlayer **Players, unsigned int Size, int TimeTicks, const char *pTimestamp);
+	void OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp);
 
 public:
 	enum

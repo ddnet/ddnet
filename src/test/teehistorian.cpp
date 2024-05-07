@@ -105,7 +105,7 @@ protected:
 	void Expect(const unsigned char *pOutput, size_t OutputSize)
 	{
 		static CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
-		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"7\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
+		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"8\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
 		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\",\"map_crc\":\"eceaf25c\",\"prng_description\":\"test-prng:02468ace\",\"config\":{},\"tuning\":{},\"uuids\":[";
 		static const char PREFIX3[] = "]}";
 
@@ -835,6 +835,53 @@ TEST_F(TeeHistorian, AntibotEmptyMessage)
 		0x96};
 
 	m_TH.RecordAntibot("🤖", 4);
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, PlayerName)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=d016f9b9-4151-3b87-87e5-3a6087eb5f26 datalen=14
+		0x4a,
+		0xd0, 0x16, 0xf9, 0xb9, 0x41, 0x51, 0x3b, 0x87,
+		0x87, 0xe5, 0x3a, 0x60, 0x87, 0xeb, 0x5f, 0x26,
+		0x0e,
+		// (PLAYER_NAME) id=21 name="nameless tee"
+		0x15,
+		0x6e, 0x61, 0x6d, 0x65, 0x6c, 0x65, 0x73, 0x73,
+		0x20, 0x74, 0x65, 0x65, 0x00};
+
+	m_TH.RecordPlayerName(21, "nameless tee");
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, PlayerFinish)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=68943c01-2348-3e01-9490-3f27f8269d94 datalen=4
+		0x4a,
+		0x68, 0x94, 0x3c, 0x01, 0x23, 0x48, 0x3e, 0x01,
+		0x94, 0x90, 0x3f, 0x27, 0xf8, 0x26, 0x9d, 0x94,
+		0x04,
+		// (PLAYER_FINISH) id=1 time=1000000
+		0x01, 0x80, 0x89, 0x7a};
+
+	m_TH.RecordPlayerFinish(1, 1000000);
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, TeamFinish)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=9588b9af-3fdc-3760-8043-82deeee317a5 datalen=3
+		0x4a,
+		0x95, 0x88, 0xb9, 0xaf, 0x3f, 0xdc, 0x37, 0x60,
+		0x80, 0x43, 0x82, 0xde, 0xee, 0xe3, 0x17, 0xa5,
+		0x03,
+		// (TEAM_FINISH) team=63 Time=1000
+		0x3f, 0xa8, 0x0f};
+
+	m_TH.RecordTeamFinish(63, 1000);
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
 

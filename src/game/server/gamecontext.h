@@ -249,13 +249,6 @@ public:
 
 	enum
 	{
-		CHAT_ALL = -2,
-		CHAT_SPEC = -1,
-		CHAT_RED = 0,
-		CHAT_BLUE = 1,
-		CHAT_WHISPER_SEND = 2,
-		CHAT_WHISPER_RECV = 3,
-
 		CHAT_SIX = 1 << 0,
 		CHAT_SIXUP = 1 << 1,
 	};
@@ -369,6 +362,9 @@ public:
 	void TeehistorianRecordPlayerJoin(int ClientId, bool Sixup) override;
 	void TeehistorianRecordPlayerDrop(int ClientId, const char *pReason) override;
 	void TeehistorianRecordPlayerRejoin(int ClientId) override;
+	void TeehistorianRecordPlayerName(int ClientId, const char *pName) override;
+	void TeehistorianRecordPlayerFinish(int ClientId, int TimeTicks) override;
+	void TeehistorianRecordTeamFinish(int TeamId, int TimeTicks) override;
 
 	bool IsClientReady(int ClientId) const override;
 	bool IsClientPlayer(int ClientId) const override;

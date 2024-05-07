@@ -118,8 +118,13 @@ private:
 	CPlaybackInfo m_Info;
 	unsigned char m_aCompressedSnapshotData[CSnapshot::MAX_SIZE];
 	unsigned char m_aDecompressedSnapshotData[CSnapshot::MAX_SIZE];
-	unsigned char m_aCurrentSnapshotData[CSnapshot::MAX_SIZE];
-	unsigned char m_aDeltaSnapshotData[CSnapshot::MAX_SIZE];
+
+	// Depending on the chunk header
+	// this is either a full CSnapshot or a CSnapshotDelta.
+	unsigned char m_aChunkData[CSnapshot::MAX_SIZE];
+	// Storage for the full snapshot
+	// where the delta gets unpacked into.
+	unsigned char m_aSnapshot[CSnapshot::MAX_SIZE];
 	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
 	int m_LastSnapshotDataSize;
 	class CSnapshotDelta *m_pSnapshotDelta;
@@ -167,8 +172,8 @@ public:
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, size_t BufferSize) const override;
 	bool GetDemoInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const override;
-	const char *Filename() { return m_aFilename; }
-	const char *ErrorMessage() { return m_aErrorMessage; }
+	const char *Filename() const { return m_aFilename; }
+	const char *ErrorMessage() const override { return m_aErrorMessage; }
 
 	int Update(bool RealTime = true);
 

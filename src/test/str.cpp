@@ -4,6 +4,34 @@
 
 #include <game/gamecore.h>
 
+TEST(Str, StrIsNum)
+{
+	EXPECT_EQ(str_isnum('/'), false);
+	EXPECT_EQ(str_isnum('0'), true);
+	EXPECT_EQ(str_isnum('1'), true);
+	EXPECT_EQ(str_isnum('2'), true);
+	EXPECT_EQ(str_isnum('8'), true);
+	EXPECT_EQ(str_isnum('9'), true);
+	EXPECT_EQ(str_isnum(':'), false);
+	EXPECT_EQ(str_isnum(' '), false);
+}
+
+TEST(Str, StrIsAllNum)
+{
+	EXPECT_EQ(str_isallnum("/"), 0);
+	EXPECT_EQ(str_isallnum("0"), 1);
+	EXPECT_EQ(str_isallnum("1"), 1);
+	EXPECT_EQ(str_isallnum("2"), 1);
+	EXPECT_EQ(str_isallnum("8"), 1);
+	EXPECT_EQ(str_isallnum("9"), 1);
+	EXPECT_EQ(str_isallnum(":"), 0);
+	EXPECT_EQ(str_isallnum(" "), 0);
+
+	EXPECT_EQ(str_isallnum("123"), 1);
+	EXPECT_EQ(str_isallnum("123/"), 0);
+	EXPECT_EQ(str_isallnum("123:"), 0);
+}
+
 TEST(Str, Dist)
 {
 	EXPECT_EQ(str_utf8_dist("aaa", "aaa"), 0);

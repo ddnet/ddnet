@@ -49,9 +49,9 @@ public:
 	void MapVote(int ClientId, const char *pMapName);
 	void LoadPlayerData(int ClientId, const char *pName = "");
 	void LoadPlayerTimeCp(int ClientId, const char *pName = "");
-	void SaveScore(int ClientId, float Time, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible);
+	void SaveScore(int ClientId, int TimeTicks, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible);
 
-	void SaveTeamScore(int *pClientIds, unsigned int Size, float Time, const char *pTimestamp);
+	void SaveTeamScore(int Team, int *pClientIds, unsigned int Size, int TimeTicks, const char *pTimestamp);
 
 	void ShowTop(int ClientId, int Offset = 1);
 	void ShowRank(int ClientId, const char *pName);

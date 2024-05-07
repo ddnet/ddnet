@@ -43,7 +43,7 @@ void CGameContext::ConGodmode(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "'%s' got godmode!",
 		pSelf->Server()->ClientName(Victim));
-	pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+	pSelf->SendChat(-1, TEAM_ALL, aBuf);
 
 	pChr->m_IsGodmode = true;
 }
@@ -67,7 +67,7 @@ void CGameContext::ConForceReady(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "'%s' was forced ready by an admin!",
 		pSelf->Server()->ClientName(Victim));
-	pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+	pSelf->SendChat(-1, TEAM_ALL, aBuf);
 
 	pPlayer->m_IsReadyToPlay = true;
 	pSelf->PlayerReadyStateBroadcast();

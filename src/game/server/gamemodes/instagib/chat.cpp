@@ -213,12 +213,12 @@ bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Leng
 	int ClientId = pPlayer->GetCid();
 
 	if(pMsg->m_Team || !AllowPublicChat(pPlayer))
-		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CGameContext::CHAT_SPEC : pPlayer->GetTeam()); // ddnet-insta
+		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? TEAM_SPECTATORS : pPlayer->GetTeam()); // ddnet-insta
 	else
-		Team = CGameContext::CHAT_ALL;
+		Team = TEAM_ALL;
 
 	// ddnet-insta warn on ping if cant respond
-	if(Team == CGameContext::CHAT_ALL && pPlayer->GetTeam() != TEAM_SPECTATORS)
+	if(Team == TEAM_ALL && pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
 		for(const CPlayer *pSpecPlayer : GameServer()->m_apPlayers)
 		{
@@ -233,8 +233,8 @@ bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Leng
 
 			char aChatText[256];
 			str_format(aChatText, sizeof(aChatText), "Warning: '%s' got pinged in chat but can not respond", Server()->ClientName(pSpecPlayer->GetCid()));
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aChatText);
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "turn off tournament chat or make sure there are enough in game slots");
+			GameServer()->SendChat(-1, TEAM_ALL, aChatText);
+			GameServer()->SendChat(-1, TEAM_ALL, "turn off tournament chat or make sure there are enough in game slots");
 			break;
 		}
 	}
@@ -249,7 +249,7 @@ bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Leng
 				dbg_msg("ratelimit", "m_SvChatRatelimitSpectators %s", pMsg->m_pMessage);
 			RateLimit = true;
 		}
-		if(g_Config.m_SvChatRatelimitPublicChat && Team == CGameContext::CHAT_ALL)
+		if(g_Config.m_SvChatRatelimitPublicChat && Team == TEAM_ALL)
 		{
 			if(g_Config.m_SvChatRatelimitDebug)
 				dbg_msg("ratelimit", "m_SvChatRatelimitPublicChat %s", pMsg->m_pMessage);

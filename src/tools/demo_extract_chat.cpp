@@ -173,9 +173,9 @@ public:
 					return;
 				}
 
-				if(pMsg->m_Team == 2) // WHISPER SEND
+				if(pMsg->m_Team == TEAM_WHISPER_SEND)
 					printf("%s: -> %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
-				else if(pMsg->m_Team == 3) // WHISPER RECEIVE
+				else if(pMsg->m_Team == TEAM_WHISPER_RECV)
 					printf("%s: <- %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 				else
 					printf("%s: %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);

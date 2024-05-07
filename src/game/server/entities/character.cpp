@@ -28,6 +28,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 {
 	m_Health = 0;
 	m_Armor = 0;
+	m_TriggeredEvents7 = 0;
 	m_StrongWeakId = 0;
 
 	m_Input = LastInput;
@@ -925,6 +926,17 @@ void CCharacter::TickDeferred()
 
 		if(Events & COREEVENT_HOOK_HIT_NOHOOK)
 			GameServer()->CreateSound(m_Pos, SOUND_HOOK_NOATTACH, TeamMaskExceptSelf);
+
+		if(Events & COREEVENT_GROUND_JUMP)
+			m_TriggeredEvents7 |= protocol7::COREEVENTFLAG_GROUND_JUMP;
+		if(Events & COREEVENT_AIR_JUMP)
+			m_TriggeredEvents7 |= protocol7::COREEVENTFLAG_AIR_JUMP;
+		if(Events & COREEVENT_HOOK_ATTACH_PLAYER)
+			m_TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_ATTACH_PLAYER;
+		if(Events & COREEVENT_HOOK_ATTACH_GROUND)
+			m_TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_ATTACH_GROUND;
+		if(Events & COREEVENT_HOOK_HIT_NOHOOK)
+			m_TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_HIT_NOHOOK;
 	}
 
 	if(m_pPlayer->GetTeam() == TEAM_SPECTATORS)
@@ -1199,18 +1211,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 		pCharacter->m_Health = Health;
 		pCharacter->m_Armor = Armor;
-		int TriggeredEvents7 = 0;
-		if(m_Core.m_TriggeredEvents & COREEVENT_GROUND_JUMP)
-			TriggeredEvents7 |= protocol7::COREEVENTFLAG_GROUND_JUMP;
-		if(m_Core.m_TriggeredEvents & COREEVENT_AIR_JUMP)
-			TriggeredEvents7 |= protocol7::COREEVENTFLAG_AIR_JUMP;
-		if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER)
-			TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_ATTACH_PLAYER;
-		if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_GROUND)
-			TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_ATTACH_GROUND;
-		if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_HIT_NOHOOK)
-			TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_HIT_NOHOOK;
-		pCharacter->m_TriggeredEvents = TriggeredEvents7;
+		pCharacter->m_TriggeredEvents = m_TriggeredEvents7;
 	}
 }
 
@@ -1350,8 +1351,17 @@ void CCharacter::Snap(int SnappingClient)
 	{
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_LOCK_MODE;
 	}
+	if(Teams()->TeamFlock(Team()))
+	{
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TEAM0_MODE;
+	}
 	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
 	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
+}
+
+void CCharacter::PostSnap()
+{
+	m_TriggeredEvents7 = 0;
 }
 
 // DDRace

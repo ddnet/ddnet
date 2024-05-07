@@ -2121,6 +2121,8 @@ int str_isspace(char c);
 
 char str_uppercase(char c);
 
+bool str_isnum(char c);
+
 int str_isallnum(const char *str);
 
 int str_isallnum_hex(const char *str);

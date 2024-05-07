@@ -765,8 +765,9 @@ int CSnapshotBuilder::GetExtendedItemTypeIndex(int TypeId)
 	}
 	dbg_assert(m_NumExtendedItemTypes < MAX_EXTENDED_ITEM_TYPES, "too many extended item types");
 	int Index = m_NumExtendedItemTypes;
-	m_aExtendedItemTypes[Index] = TypeId;
 	m_NumExtendedItemTypes++;
+	m_aExtendedItemTypes[Index] = TypeId;
+	AddExtendedItemType(Index);
 	return Index;
 }
 
