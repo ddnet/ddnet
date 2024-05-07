@@ -4262,16 +4262,6 @@ int main(int argc, const char **argv)
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
 
-	bool Silent = false;
-
-	for(int i = 1; i < argc; i++)
-	{
-		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0)
-		{
-			Silent = true;
-		}
-	}
-
 #if defined(CONF_PLATFORM_ANDROID)
 	InitAndroid();
 #endif
@@ -4285,6 +4275,14 @@ int main(int argc, const char **argv)
 #if defined(CONF_PLATFORM_ANDROID)
 	pStdoutLogger = std::shared_ptr<ILogger>(log_logger_android());
 #else
+	bool Silent = false;
+	for(int i = 1; i < argc; i++)
+	{
+		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0)
+		{
+			Silent = true;
+		}
+	}
 	if(!Silent)
 	{
 		pStdoutLogger = std::shared_ptr<ILogger>(log_logger_stdout());
