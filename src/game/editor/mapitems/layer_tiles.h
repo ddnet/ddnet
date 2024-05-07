@@ -187,6 +187,7 @@ public:
 	bool m_HasSwitch;
 	bool m_HasTune;
 	char m_aFileName[IO_MAX_PATH_LENGTH];
+	bool m_KnownTextModeLayer = false;
 
 	EditorTileStateChangeHistory<STileStateChange> m_TilesHistory;
 	inline virtual void ClearHistory() { m_TilesHistory.clear(); }
