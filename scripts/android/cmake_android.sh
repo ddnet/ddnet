@@ -123,19 +123,19 @@ function build_for_type() {
 mkdir ${_DEFAULT_BUILD_FOLDER}
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "arm" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	build_for_type arm armeabi-v7a arm eabi &
+	build_for_type arm armeabi-v7a &
 fi
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "arm64" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	build_for_type arm64 arm64-v8a aarch64 &
+	build_for_type arm64 arm64-v8a &
 fi
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "x86" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	build_for_type x86 x86 i686 &
+	build_for_type x86 x86 &
 fi
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "x86_64" || "${_DEFAULT_ANDROID_BUILD}" == "x64" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	build_for_type x86_64 x86_64 x86_64 &
+	build_for_type x86_64 x86_64 &
 fi
 
 wait
@@ -177,19 +177,19 @@ function copy_libs() {
 }
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "arm" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	copy_libs arm armeabi-v7a arm eabi
+	copy_libs arm armeabi-v7a
 fi
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "arm64" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	copy_libs arm64 arm64-v8a aarch64
+	copy_libs arm64 arm64-v8a
 fi
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "x86" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	copy_libs x86 x86 i686
+	copy_libs x86 x86
 fi
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "x86_64" || "${_DEFAULT_ANDROID_BUILD}" == "x64" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
-	copy_libs x86_64 x86_64 x86_64
+	copy_libs x86_64 x86_64
 fi
 
 _DEFAULT_ANDROID_BUILD_DUMMY=$_DEFAULT_ANDROID_BUILD
