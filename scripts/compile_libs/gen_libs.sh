@@ -55,7 +55,11 @@ cd "$1" || exit 1
 
 function build_cmake_lib() {
 	if [ ! -d "${1}" ]; then
-		git clone "${2}" "${1}"
+		if [ -z ${3+x} ]; then
+			git clone "${2}" "${1}"
+		else
+			git clone --single-branch --branch "${3}" "${2}" "${1}"
+		fi
 	fi
 	(
 		cd "${1}" || exit 1
@@ -90,7 +94,7 @@ build_cmake_lib zlib https://github.com/madler/zlib
 build_cmake_lib png https://github.com/glennrp/libpng
 build_cmake_lib curl https://github.com/curl/curl
 build_cmake_lib freetype2 https://gitlab.freedesktop.org/freetype/freetype
-build_cmake_lib sdl https://github.com/libsdl-org/SDL
+build_cmake_lib sdl https://github.com/libsdl-org/SDL SDL2
 build_cmake_lib ogg https://github.com/xiph/ogg
 build_cmake_lib opus https://github.com/xiph/opus
 
