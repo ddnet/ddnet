@@ -116,7 +116,7 @@ function build_for_type() {
 		-DVIDEORECORDER=OFF
 	(
 		cd "${_DEFAULT_BUILD_FOLDER}/$_ANDROID_SUB_BUILD_DIR/$1" || exit 1
-		cmake --build . --target DDNet
+		cmake --build . --target game-client
 	)
 }
 
