@@ -93,6 +93,7 @@ void InitAndroid()
 				sha256_from_str(&ShaAll, pLine);
 				GotSHA = true;
 			}
+			io_close(IntegritySaveFileRead);
 		}
 	}
 
