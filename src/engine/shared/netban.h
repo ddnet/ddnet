@@ -79,7 +79,7 @@ protected:
 			EXPIRES_NEVER = -1,
 			REASON_LENGTH = 64,
 		};
-		int m_Expires;
+		int64_t m_Expires;
 		char m_aReason[REASON_LENGTH];
 	};
 
