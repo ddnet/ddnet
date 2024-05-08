@@ -61,15 +61,9 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		str_format(aBuf, sizeof(aBuf), "%s/%s.png", pPathSave, pName);
 		dbg_msg("map_extract", "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
 
-		const int Format = pItem->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : pItem->m_Format;
-		EImageFormat OutputFormat;
-		if(Format == CImageInfo::FORMAT_RGBA)
-			OutputFormat = IMAGE_FORMAT_RGBA;
-		else if(Format == CImageInfo::FORMAT_RGB)
-			OutputFormat = IMAGE_FORMAT_RGB;
-		else
+		if(pItem->m_Version >= 2 && pItem->m_MustBe1 != 1)
 		{
-			dbg_msg("map_extract", "ignoring image '%s' with unknown format %d", aBuf, Format);
+			log_error("map_extract", "ignoring image '%s' with unknown format %d", aBuf, pItem->m_MustBe1);
 			continue;
 		}
 
@@ -80,7 +74,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 			TImageByteBuffer ByteBuffer;
 			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
 
-			if(SavePng(OutputFormat, (const uint8_t *)Reader.GetData(pItem->m_ImageData), ImageByteBuffer, pItem->m_Width, pItem->m_Height))
+			if(SavePng(IMAGE_FORMAT_RGBA, (const uint8_t *)Reader.GetData(pItem->m_ImageData), ImageByteBuffer, pItem->m_Width, pItem->m_Height))
 				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
 			io_close(File);
 		}

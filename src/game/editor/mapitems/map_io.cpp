@@ -508,8 +508,14 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 			else
 				str_copy(pImg->m_aName, pName);
 
-			const CImageInfo::EImageFormat Format = pItem->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : CImageInfo::ImageFormatFromInt(pItem->m_Format);
-			if(pImg->m_External || (Format != CImageInfo::FORMAT_RGB && Format != CImageInfo::FORMAT_RGBA))
+			if(pItem->m_Version > 1 && pItem->m_MustBe1 != 1)
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "Error: Unsupported image type of image %d '%s'.", i, pImg->m_aName);
+				ErrorHandler(aBuf);
+			}
+
+			if(pImg->m_External || (pItem->m_Version > 1 && pItem->m_MustBe1 != 1))
 			{
 				char aBuf[IO_MAX_PATH_LENGTH];
 				str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pImg->m_aName);
@@ -534,7 +540,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 			{
 				pImg->m_Width = pItem->m_Width;
 				pImg->m_Height = pItem->m_Height;
-				pImg->m_Format = Format;
+				pImg->m_Format = CImageInfo::FORMAT_RGBA;
 
 				// copy image data
 				void *pData = DataFile.GetData(pItem->m_ImageData);
