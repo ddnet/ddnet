@@ -124,9 +124,9 @@ void CGameControllerCTF::FlagTick()
 	if(GameServer()->m_World.m_ResetRequested || GameServer()->m_World.m_Paused)
 		return;
 
-	for(int fi = 0; fi < 2; fi++)
+	for(int Fi = 0; Fi < 2; Fi++)
 	{
-		CFlag *F = m_apFlags[fi];
+		CFlag *F = m_apFlags[Fi];
 
 		if(!F)
 			continue;
@@ -134,12 +134,12 @@ void CGameControllerCTF::FlagTick()
 		//
 		if(F->GetCarrier())
 		{
-			if(m_apFlags[fi ^ 1] && m_apFlags[fi ^ 1]->IsAtStand())
+			if(m_apFlags[Fi ^ 1] && m_apFlags[Fi ^ 1]->IsAtStand())
 			{
-				if(distance(F->GetPos(), m_apFlags[fi ^ 1]->GetPos()) < CFlag::ms_PhysSize + CCharacterCore::PhysicalSize())
+				if(distance(F->GetPos(), m_apFlags[Fi ^ 1]->GetPos()) < CFlag::ms_PhysSize + CCharacterCore::PhysicalSize())
 				{
 					// CAPTURE! \o/
-					m_aTeamscore[fi ^ 1] += 100;
+					m_aTeamscore[Fi ^ 1] += 100;
 					F->GetCarrier()->GetPlayer()->AddScore(5);
 					float Diff = Server()->Tick() - F->GetGrabTick();
 
@@ -155,13 +155,13 @@ void CGameControllerCTF::FlagTick()
 					if(CaptureTime <= 60)
 						str_format(aBuf,
 							sizeof(aBuf),
-							"The %s flag was captured by '%s' (%d.%s%d seconds)", fi ? "blue" : "red",
+							"The %s flag was captured by '%s' (%d.%s%d seconds)", Fi ? "blue" : "red",
 							Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCid()), (int)CaptureTime % 60, ((int)(CaptureTime * 100) % 100) < 10 ? "0" : "", (int)(CaptureTime * 100) % 100);
 					else
 						str_format(
 							aBuf,
 							sizeof(aBuf),
-							"The %s flag was captured by '%s'", fi ? "blue" : "red",
+							"The %s flag was captured by '%s'", Fi ? "blue" : "red",
 							Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCid()));
 					for(auto &pPlayer : GameServer()->m_apPlayers)
 					{
@@ -173,7 +173,7 @@ void CGameControllerCTF::FlagTick()
 						GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
 					}
 					GameServer()->m_pController->OnFlagCapture(F, Diff);
-					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, fi, F->GetCarrier()->GetPlayer()->GetCid(), Diff, -1);
+					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, Fi, F->GetCarrier()->GetPlayer()->GetCid(), Diff, -1);
 					GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 					for(int i = 0; i < 2; i++)
 						for(auto &pFlag : m_apFlags)
@@ -216,7 +216,7 @@ void CGameControllerCTF::FlagTick()
 				{
 					// take the flag
 					if(F->IsAtStand())
-						m_aTeamscore[fi ^ 1]++;
+						m_aTeamscore[Fi ^ 1]++;
 
 					F->Grab(apCloseCCharacters[i]);
 
@@ -228,7 +228,7 @@ void CGameControllerCTF::FlagTick()
 						Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCid()),
 						F->GetCarrier()->GetPlayer()->GetTeam());
 					GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_GRAB, fi, -1);
+					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_GRAB, Fi, -1);
 					break;
 				}
 			}

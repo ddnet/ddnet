@@ -80,7 +80,7 @@ void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_pController->IsTeamplay())
 		return;
 
-	int rnd = 0;
+	int Rnd = 0;
 	int PlayerTeam = 0;
 	int aPlayer[MAX_CLIENTS];
 
@@ -93,16 +93,16 @@ void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
 	//creating random permutation
 	for(int i = PlayerTeam; i > 1; i--)
 	{
-		rnd = rand() % i;
-		int tmp = aPlayer[rnd];
-		aPlayer[rnd] = aPlayer[i - 1];
+		Rnd = rand() % i;
+		int tmp = aPlayer[Rnd];
+		aPlayer[Rnd] = aPlayer[i - 1];
 		aPlayer[i - 1] = tmp;
 	}
 	//uneven Number of Players?
-	rnd = PlayerTeam % 2 ? rand() % 2 : 0;
+	Rnd = PlayerTeam % 2 ? rand() % 2 : 0;
 
 	for(int i = 0; i < PlayerTeam; i++)
-		pSelf->m_pController->DoTeamChange(pSelf->m_apPlayers[aPlayer[i]], i < (PlayerTeam + rnd) / 2 ? TEAM_RED : TEAM_BLUE, false);
+		pSelf->m_pController->DoTeamChange(pSelf->m_apPlayers[aPlayer[i]], i < (PlayerTeam + Rnd) / 2 ? TEAM_RED : TEAM_BLUE, false);
 }
 
 void CGameContext::ConSwapTeams(IConsole::IResult *pResult, void *pUserData)

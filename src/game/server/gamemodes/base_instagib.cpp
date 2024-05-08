@@ -315,17 +315,17 @@ void CGameControllerInstagib::EndSpree(class CPlayer *pPlayer, class CPlayer *pK
 {
 	if(pPlayer->m_Spree >= g_Config.m_SvKillingspreeKills)
 	{
-		CCharacter *charac = pPlayer->GetCharacter();
+		CCharacter *pChr = pPlayer->GetCharacter();
 
-		if(charac)
+		if(pChr)
 		{
-			GameServer()->CreateSound(charac->m_Pos, SOUND_GRENADE_EXPLODE);
-			// GameServer()->CreateExplosion(charac->m_Pos,  pPlayer->GetCid(), WEAPON_GRENADE, true, -1, -1);
+			GameServer()->CreateSound(pChr->m_Pos, SOUND_GRENADE_EXPLODE);
+			// GameServer()->CreateExplosion(pChr->m_Pos,  pPlayer->GetCid(), WEAPON_GRENADE, true, -1, -1);
 			CNetEvent_Explosion *pEvent = GameServer()->m_Events.Create<CNetEvent_Explosion>(CClientMask());
 			if(pEvent)
 			{
-				pEvent->m_X = (int)charac->m_Pos.x;
-				pEvent->m_Y = (int)charac->m_Pos.y;
+				pEvent->m_X = (int)pChr->m_Pos.x;
+				pEvent->m_Y = (int)pChr->m_Pos.y;
 			}
 
 			char aBuf[128];

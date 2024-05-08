@@ -4,14 +4,14 @@ const char *str_find_digit(const char *haystack)
 {
 	char aaDigits[][2] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
 
-	const char *first = NULL;
+	const char *pFirst= NULL;
 	for(const char *aDigit : aaDigits)
 	{
 		const char *s = str_find(haystack, aDigit);
-		if(s && (!first || first > s))
-			first = s;
+		if(s && (!pFirst || pFirst > s))
+			pFirst = s;
 	}
-	return first;
+	return pFirst;
 }
 
 bool str_contains_ip(const char *pStr)
@@ -20,7 +20,7 @@ bool str_contains_ip(const char *pStr)
 	if(!s)
 		return false;
 	// dbg_msg("str_contains_ip", "s=%s", s);
-	for(int byte = 0; byte < 4; byte++)
+	for(int Byte = 0; Byte < 4; Byte++)
 	{
 		int i;
 		for(i = 0; i < 3; i++)
@@ -48,7 +48,7 @@ bool str_contains_ip(const char *pStr)
 			}
 			s++;
 		}
-		if(byte == 3 && i > 1)
+		if(Byte == 3 && i > 1)
 		{
 			// dbg_msg("str_contains_ip", "we got ip with 3 digits in the end");
 			return true;
