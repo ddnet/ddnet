@@ -10,19 +10,25 @@ buildscript {
 	}
 	
 	dependencies {
-		classpath 'com.android.tools.build:gradle:7.2.1'
+		classpath 'com.android.tools.build:gradle:8.3.0'
 		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 	}
 }
 
+java {
+	toolchain {
+		languageVersion.set(JavaLanguageVersion.of(21))
+	}
+}
+
 android {
-	compileSdkVersion 30
-	buildToolsVersion "30.0.3"
+	compileSdkVersion 34
 	ndkVersion "TW_NDK_VERSION"
 	defaultConfig {
 		applicationId "tw.DDNet"
+		namespace("tw.DDNet")
 		minSdkVersion 24
-		targetSdkVersion 30
+		targetSdkVersion 34
 		versionCode TW_VERSION_CODE
 		versionName "TW_VERSION_NAME"
 	}
@@ -46,7 +52,11 @@ android {
 			shrinkResources false
 		}
 	}
-	
+	packagingOptions {
+		jniLibs {
+			useLegacyPackaging = true
+		}
+	}
 	sourceSets {
 		main {
 			assets.srcDirs = ['assets']
