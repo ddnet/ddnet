@@ -36,9 +36,6 @@ sed -i "s/DDNet/${2}/g" src/main/res/values/strings.xml
 sed -i "s/\"DDNet\"/\"${2}\"/g" src/main/AndroidManifest.xml
 sed -i "s/tw.DDNet/${_REPLACE_PACKAGE_NAME_STR}/g" src/main/AndroidManifest.xml
 
-__TW_HOME_DIR=$(echo "$HOME"|sed 's/\//\\\//g')
-
-sed -i "s/TW_HOME_DIR/${__TW_HOME_DIR}/g" local.properties
 sed -i "s/TW_NDK_VERSION/${ANDROID_NDK_VERSION}/g" build.gradle
 sed -i "s/TW_VERSION_CODE/${TW_VERSION_CODE}/g" build.gradle
 sed -i "s/TW_VERSION_NAME/${TW_VERSION_NAME}/g" build.gradle

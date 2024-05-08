@@ -154,7 +154,6 @@ copy_dummy_files scripts/android/files/gradle-wrapper.jar gradle-wrapper.jar
 copy_dummy_files scripts/android/files/build.gradle build.gradle
 copy_dummy_files scripts/android/files/gradle-wrapper.properties gradle-wrapper.properties
 copy_dummy_files scripts/android/files/gradle.properties gradle.properties
-copy_dummy_files scripts/android/files/local.properties local.properties
 copy_dummy_files scripts/android/files/proguard-rules.pro proguard-rules.pro
 copy_dummy_files scripts/android/files/settings.gradle settings.gradle
 copy_dummy_files scripts/android/files/AndroidManifest.xml src/main/AndroidManifest.xml
