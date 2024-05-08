@@ -277,7 +277,7 @@ struct CMapItemImage_v2 : public CMapItemImage_v1
 		CURRENT_VERSION = 2,
 	};
 
-	int m_Format; // Default before this version is CImageInfo::FORMAT_RGBA
+	int m_MustBe1;
 };
 
 typedef CMapItemImage_v1 CMapItemImage;
