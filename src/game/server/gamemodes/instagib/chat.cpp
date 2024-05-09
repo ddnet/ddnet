@@ -20,7 +20,7 @@ bool CGameControllerInstagib::AllowPublicChat(const CPlayer *pPlayer)
 
 bool CGameControllerInstagib::ParseChatCmd(char Prefix, int ClientId, const char *pCmdWithArgs)
 {
-	const int MAX_ARG_LEN = 256;
+	#define MAX_ARG_LEN 256
 	char aCmd[MAX_ARG_LEN];
 	int i;
 	for(i = 0; pCmdWithArgs[i] && i < MAX_ARG_LEN; i++)
@@ -34,7 +34,7 @@ bool CGameControllerInstagib::ParseChatCmd(char Prefix, int ClientId, const char
 	int ROffset = -1; // TODO: add params with typed args: s,r,i
 
 	// max 8 args of 128 len each
-	const int MAX_ARGS = 16;
+	#define MAX_ARGS 16
 	char **ppArgs = new char *[MAX_ARGS];
 	for(int x = 0; x < MAX_ARGS; ++x)
 	{
