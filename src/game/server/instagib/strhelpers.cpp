@@ -1,13 +1,13 @@
 #include "strhelpers.h"
 
-const char *str_find_digit(const char *haystack)
+const char *str_find_digit(const char *Haystack)
 {
 	char aaDigits[][2] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
 
 	const char *pFirst = NULL;
 	for(const char *aDigit : aaDigits)
 	{
-		const char *s = str_find(haystack, aDigit);
+		const char *s = str_find(Haystack, aDigit);
 		if(s && (!pFirst || pFirst > s))
 			pFirst = s;
 	}
