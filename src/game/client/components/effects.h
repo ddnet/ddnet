@@ -29,7 +29,7 @@ public:
 	void PlayerSpawn(vec2 Pos, float Alpha = 1.0f);
 	void PlayerDeath(vec2 Pos, int ClientId, float Alpha = 1.0f);
 	void PowerupShine(vec2 Pos, vec2 Size, float Alpha = 1.0f);
-	void FreezingFlakes(vec2 Pos, vec2 Size, float Alpha = 1.0f);
+	void FreezingFlakes(vec2 Pos, vec2 Size, float Alpha = 1.0f, bool Force = false);
 	void SparkleTrail(vec2 Pos, float Alpha = 1.0f);
 	void Confetti(vec2 Pos, float Alpha = 1.0f);
 

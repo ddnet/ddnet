@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_PLAYERS_H
 #include <game/client/component.h>
 
+#include <engine/shared/protocol.h>
 #include <game/client/render.h>
 #include <game/generated/protocol.h>
 
@@ -36,6 +37,7 @@ class CPlayers : public CComponent
 
 	int m_WeaponEmoteQuadContainerIndex;
 	int m_aWeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
+	int m_aLastRenderFreezeSeconds[MAX_CLIENTS] = {-1};
 
 	int64_t m_SkidSoundTime = 0;
 
