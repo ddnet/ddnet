@@ -72,6 +72,7 @@ private:
 	int m_GotoTeleOffset;
 	ivec2 m_GotoSwitchLastPos;
 	ivec2 m_GotoTeleLastPos;
+	int m_GotoTeleLastNumber = -1;
 };
 
 #endif

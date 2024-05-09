@@ -113,6 +113,54 @@ public:
 	class CLayers *Layers() { return m_pLayers; }
 	int m_HighestSwitchNumber;
 
+	// Index all teleporter types (in, out and checkpoints)
+	// as one consecutive list
+	//
+	// @param Number is the teleporter number (one less than what is shown in game)
+	// @param Offset picks the n'th occurence of that teleporter in the map
+	//
+	// @return The coordinates of the teleporter in the map
+	//         or (-1, -1) if not found
+	vec2 TeleAllGet(int Number, size_t Offset)
+	{
+		if(m_TeleIns.count(Number) > 0)
+		{
+			if(m_TeleIns[Number].size() > Offset)
+				return m_TeleIns[Number][Offset];
+			else
+				Offset -= m_TeleIns[Number].size();
+		}
+		if(m_TeleOuts.count(Number) > 0)
+		{
+			if(m_TeleOuts[Number].size() > Offset)
+				return m_TeleOuts[Number][Offset];
+			else
+				Offset -= m_TeleOuts[Number].size();
+		}
+		if(m_TeleCheckOuts.count(Number) > 0)
+		{
+			if(m_TeleCheckOuts[Number].size() > Offset)
+				return m_TeleCheckOuts[Number][Offset];
+			else
+				Offset -= m_TeleCheckOuts[Number].size();
+		}
+		return vec2(-1, -1);
+	}
+
+	// @param Number is the teleporter number (one less than what is shown in game)
+	// @return The amount of occurences of that teleporter across all types (in, out, checkpoint)
+	size_t TeleAllSize(int Number)
+	{
+		size_t Total = 0;
+		if(m_TeleIns.count(Number) > 0)
+			Total += m_TeleIns[Number].size();
+		if(m_TeleOuts.count(Number) > 0)
+			Total += m_TeleOuts[Number].size();
+		if(m_TeleCheckOuts.count(Number) > 0)
+			Total += m_TeleCheckOuts[Number].size();
+		return Total;
+	}
+
 	const std::vector<vec2> &TeleIns(int Number) { return m_TeleIns[Number]; }
 	const std::vector<vec2> &TeleOuts(int Number) { return m_TeleOuts[Number]; }
 	const std::vector<vec2> &TeleCheckOuts(int Number) { return m_TeleCheckOuts[Number]; }
