@@ -84,7 +84,11 @@ export TW_KEY_ALIAS=$_ANDROID_JAR_KEY_ALIAS
 
 _ANDROID_VERSION_CODE=1
 if [ -z ${TW_VERSION_CODE+x} ]; then
-    printf "\e[31m%s\e[30m\n" "Did not pass a version code, using default: ${_ANDROID_VERSION_CODE}"
+	_ANDROID_VERSION_CODE=$(grep '#define DDNET_VERSION_NUMBER' src/game/version.h | awk '{print $3}')
+	if [ -z ${_ANDROID_VERSION_CODE+x} ]; then
+		_ANDROID_VERSION_CODE=1
+	fi
+	printf "\e[31m%s\e[30m\n" "Did not pass a version code, using default: ${_ANDROID_VERSION_CODE}"
 else
 	_ANDROID_VERSION_CODE=$TW_VERSION_CODE
 fi
@@ -93,7 +97,11 @@ export TW_VERSION_CODE=$_ANDROID_VERSION_CODE
 
 _ANDROID_VERSION_NAME="1.0"
 if [ -z ${TW_VERSION_NAME+x} ]; then
-    printf "\e[31m%s\e[30m\n" "Did not pass a version name, using default: ${_ANDROID_VERSION_NAME}"
+	_ANDROID_VERSION_NAME="$(grep '#define GAME_RELEASE_VERSION' src/game/version.h | awk '{print $3}' | tr -d '"')"
+	if [ -z ${_ANDROID_VERSION_NAME+x} ]; then
+		_ANDROID_VERSION_NAME="1.0"
+	fi
+	printf "\e[31m%s\e[30m\n" "Did not pass a version name, using default: ${_ANDROID_VERSION_NAME}"
 else
 	_ANDROID_VERSION_NAME=$TW_VERSION_NAME
 fi
