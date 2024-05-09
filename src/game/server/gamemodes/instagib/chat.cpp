@@ -30,8 +30,8 @@ bool CGameControllerInstagib::ParseChatCmd(char Prefix, int ClientId, const char
 		aCmd[i] = pCmdWithArgs[i];
 	}
 	aCmd[i] = '\0';
-	// int ROffset = m_pClient->m_ChatHelper.ChatCommandGetROffset(aCmd);
-	int ROffset = -1; // TODO: add params with typed args: s,r,i
+	// int RestOffset = m_pClient->m_ChatHelper.ChatCommandGetROffset(aCmd);
+	int RestOffset = -1; // TODO: add params with typed args: s,r,i
 
 	// max 8 args of 128 len each
 	#define MAX_ARGS 16
@@ -59,7 +59,7 @@ bool CGameControllerInstagib::ParseChatCmd(char Prefix, int ClientId, const char
 		{
 			// do not delimit on space
 			// if we reached the r parameter
-			if(NumArgs == ROffset)
+			if(NumArgs == RestOffset)
 			{
 				// strip spaces from the beggining
 				// add spaces in the middle and end
