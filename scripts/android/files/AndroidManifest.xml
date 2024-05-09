@@ -26,7 +26,7 @@
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
 		<activity
-			android:name=".NativeMain"
+			android:name="org.ddnet.client.NativeMain"
 			android:exported="true"
 			android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
 			android:screenOrientation="landscape">

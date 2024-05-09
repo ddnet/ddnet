@@ -1,4 +1,5 @@
-package tw.DDNet;
+package org.ddnet.client;
+
 import android.app.NativeActivity;
 import org.libsdl.app.SDLActivity;
 import android.os.Bundle;
@@ -12,7 +13,7 @@ public class NativeMain extends SDLActivity {
 	@Override
 	protected String[] getLibraries() {
 		return new String[] {
-			// disable hid API for now 
+			// disable hid API for now
 			// "hidapi",
 			// "SDL2",
 			"DDNet",

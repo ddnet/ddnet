@@ -14,6 +14,7 @@ export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
 
 _DEFAULT_ANDROID_BUILD=x86
 _DEFAULT_GAME_NAME=DDNet
+_DEFAULT_PACKAGE_NAME=org.ddnet.client
 _DEFAULT_BUILD_TYPE=Debug
 _DEFAULT_BUILD_FOLDER=build-android
 _ANDROID_API_LEVEL=34
@@ -37,17 +38,24 @@ else
 fi
 
 if [ -z ${3+x} ]; then
-    printf "\e[31m%s\e[30m\n" "Did not pass build type, using default: ${_DEFAULT_BUILD_TYPE}"
+    printf "\e[31m%s\e[30m\n" "Did not pass package name, using default: ${_DEFAULT_PACKAGE_NAME}"
 	_SHOW_USAGE_INFO=1
 else
-	_DEFAULT_BUILD_TYPE=$3
+	_DEFAULT_PACKAGE_NAME=$3
 fi
 
 if [ -z ${4+x} ]; then
+    printf "\e[31m%s\e[30m\n" "Did not pass build type, using default: ${_DEFAULT_BUILD_TYPE}"
+	_SHOW_USAGE_INFO=1
+else
+	_DEFAULT_BUILD_TYPE=$4
+fi
+
+if [ -z ${5+x} ]; then
     printf "\e[31m%s\e[30m\n" "Did not pass build folder, using default: ${_DEFAULT_BUILD_FOLDER}"
 	_SHOW_USAGE_INFO=1
 else
-	_DEFAULT_BUILD_FOLDER=$4
+	_DEFAULT_BUILD_FOLDER=$5
 fi
 
 _ANDROID_JAR_KEY_NAME=~/.android/debug.keystore
@@ -92,10 +100,10 @@ fi
 
 export TW_VERSION_NAME=$_ANDROID_VERSION_NAME
 
-printf "\e[31m%s\e[1m\n" "Building with setting, for arch: ${_DEFAULT_ANDROID_BUILD}, with build type: ${_DEFAULT_BUILD_TYPE}, with name: ${_DEFAULT_GAME_NAME}"
+printf "\e[31m%s\e[1m\n" "Building with setting, for arch: ${_DEFAULT_ANDROID_BUILD}, with build type: ${_DEFAULT_BUILD_TYPE}, with name: ${_DEFAULT_GAME_NAME} (${_DEFAULT_PACKAGE_NAME})"
 
 if [ $_SHOW_USAGE_INFO == 1 ]; then	
-    printf "\e[31m%s\e[1m\n" "Usage: ./cmake_android.sh <x86/x86_64/arm/arm64/all> <Game name> <Debug/Release>"
+    printf "\e[31m%s\e[1m\n" "Usage: ./cmake_android.sh <x86/x86_64/arm/arm64/all> <Game name> <Package name> <Debug/Release> <Build folder>"
 fi
 
 printf "\e[33mBuilding cmake\e[0m\n"
@@ -238,15 +246,12 @@ printf "\e[0m"
 
 echo "Building..."
 
-rm -R src/main/java/tw
-mkdir -p src/main/java/tw/DDNet
-cp ../scripts/android/files/java/tw/DDNet/NativeMain.java src/main/java/tw/DDNet/NativeMain.java
-
 rm -R src/main/java/org
+mkdir -p src/main/java
 cp -R ../scripts/android/files/java/org src/main/java/
 cp -R ../ddnet-libs/sdl/java/org src/main/java/
 
 # shellcheck disable=SC1091
-source ./build.sh "$ANDROID_HOME" "$_DEFAULT_GAME_NAME" "$_DEFAULT_BUILD_TYPE"
+source ./build.sh "$_DEFAULT_GAME_NAME" "$_DEFAULT_PACKAGE_NAME" "$_DEFAULT_BUILD_TYPE"
 
 cd ..
