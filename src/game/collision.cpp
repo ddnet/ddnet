@@ -139,6 +139,10 @@ void CCollision::Init(class CLayers *pLayers)
 				{
 					m_TeleCheckOuts[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
 				}
+				else if(Type)
+				{
+					m_TeleOthers[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
+				}
 			}
 		}
 	}
@@ -156,6 +160,7 @@ void CCollision::Unload()
 	m_TeleIns.clear();
 	m_TeleOuts.clear();
 	m_TeleCheckOuts.clear();
+	m_TeleOthers.clear();
 
 	m_pTele = nullptr;
 	m_pSpeedup = nullptr;
@@ -1259,4 +1264,49 @@ int CCollision::IsFTimeCheckpoint(int Index) const
 	if(z >= TILE_TIME_CHECKPOINT_FIRST && z <= TILE_TIME_CHECKPOINT_LAST)
 		return z - TILE_TIME_CHECKPOINT_FIRST;
 	return -1;
+}
+
+vec2 CCollision::TeleAllGet(int Number, size_t Offset)
+{
+	if(m_TeleIns.count(Number) > 0)
+	{
+		if(m_TeleIns[Number].size() > Offset)
+			return m_TeleIns[Number][Offset];
+		else
+			Offset -= m_TeleIns[Number].size();
+	}
+	if(m_TeleOuts.count(Number) > 0)
+	{
+		if(m_TeleOuts[Number].size() > Offset)
+			return m_TeleOuts[Number][Offset];
+		else
+			Offset -= m_TeleOuts[Number].size();
+	}
+	if(m_TeleCheckOuts.count(Number) > 0)
+	{
+		if(m_TeleCheckOuts[Number].size() > Offset)
+			return m_TeleCheckOuts[Number][Offset];
+		else
+			Offset -= m_TeleCheckOuts[Number].size();
+	}
+	if(m_TeleOthers.count(Number) > 0)
+	{
+		if(m_TeleOthers[Number].size() > Offset)
+			return m_TeleOthers[Number][Offset];
+	}
+	return vec2(-1, -1);
+}
+
+size_t CCollision::TeleAllSize(int Number)
+{
+	size_t Total = 0;
+	if(m_TeleIns.count(Number) > 0)
+		Total += m_TeleIns[Number].size();
+	if(m_TeleOuts.count(Number) > 0)
+		Total += m_TeleOuts[Number].size();
+	if(m_TeleCheckOuts.count(Number) > 0)
+		Total += m_TeleCheckOuts[Number].size();
+	if(m_TeleOthers.count(Number) > 0)
+		Total += m_TeleOthers[Number].size();
+	return Total;
 }

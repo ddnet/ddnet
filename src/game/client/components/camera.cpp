@@ -323,7 +323,8 @@ void CCamera::GotoTele(int Number, int Offset)
 	{
 		if((size_t)Offset >= NumTeles || Offset < 0)
 			Offset = 0;
-		MatchPos = ivec2(Collision()->TeleAllGet(Number, Offset).x / 32, Collision()->TeleAllGet(Number, Offset).y / 32);
+		vec2 Tele = Collision()->TeleAllGet(Number, Offset);
+		MatchPos = ivec2(Tele.x / 32, Tele.y / 32);
 		m_GotoTeleOffset = Offset;
 	}
 	else
@@ -331,7 +332,8 @@ void CCamera::GotoTele(int Number, int Offset)
 		bool FullRound = false;
 		do
 		{
-			MatchPos = ivec2(Collision()->TeleAllGet(Number, m_GotoTeleOffset).x / 32, Collision()->TeleAllGet(Number, m_GotoTeleOffset).y / 32);
+			vec2 Tele = Collision()->TeleAllGet(Number, m_GotoTeleOffset);
+			MatchPos = ivec2(Tele.x / 32, Tele.y / 32);
 			m_GotoTeleOffset++;
 			if((size_t)m_GotoTeleOffset >= NumTeles)
 			{
