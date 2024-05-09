@@ -2563,17 +2563,26 @@ int CServer::LoadMap(const char *pMapName)
 		void *pData;
 		if(!Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pData, &m_aCurrentMapSize[MAP_TYPE_SIXUP]))
 		{
-			Config()->m_SvSixup = 0;
-			if(m_pRegister)
+			if(Config()->m_SvSixup == 2)
 			{
-				m_pRegister->OnConfigChange();
+				Config()->m_SvSixup = 1; // enabled, ignoring sixup connections
+				if(m_pRegister)
+					m_pRegister->OnConfigChange();
 			}
+
 			str_format(aBufMsg, sizeof(aBufMsg), "couldn't load map %s", aBuf);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", "disabling 0.7 compatibility");
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", "ignoring 0.7 connections");
 		}
 		else
 		{
+			if(Config()->m_SvSixup == 1)
+			{
+				Config()->m_SvSixup = 2; // enabled
+				if(m_pRegister)
+					m_pRegister->OnConfigChange();
+			}
+
 			free(m_apCurrentMapData[MAP_TYPE_SIXUP]);
 			m_apCurrentMapData[MAP_TYPE_SIXUP] = (unsigned char *)pData;
 
@@ -2584,7 +2593,7 @@ int CServer::LoadMap(const char *pMapName)
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
 		}
 	}
-	if(!Config()->m_SvSixup)
+	if(Config()->m_SvSixup != 2)
 	{
 		free(m_apCurrentMapData[MAP_TYPE_SIXUP]);
 		m_apCurrentMapData[MAP_TYPE_SIXUP] = 0;
