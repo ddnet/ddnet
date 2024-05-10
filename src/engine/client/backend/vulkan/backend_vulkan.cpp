@@ -5374,6 +5374,8 @@ public:
 
 		m_vFrameFences.clear();
 		m_vImagesFences.clear();
+
+		m_CurFrameSyncObject = 0;
 	}
 
 	void DestroyBufferOfFrame(size_t ImageIndex, SFrameBuffers &Buffer)
@@ -5427,7 +5429,7 @@ public:
 	}
 
 	template<bool IsLastCleanup>
-	void CleanupVulkan()
+	void CleanupVulkan(size_t SwapchainCount)
 	{
 		if(IsLastCleanup)
 		{
@@ -5465,7 +5467,7 @@ public:
 		m_vStreamedVertexBuffers.clear();
 		m_vStreamedUniformBuffers.clear();
 
-		for(size_t i = 0; i < m_SwapChainImageCount; ++i)
+		for(size_t i = 0; i < SwapchainCount; ++i)
 		{
 			ClearFrameData(i);
 		}
@@ -5474,11 +5476,11 @@ public:
 		m_vvFrameDelayedTextureCleanup.clear();
 		m_vvFrameDelayedTextTexturesCleanup.clear();
 
-		m_StagingBufferCache.DestroyFrameData(m_SwapChainImageCount);
-		m_StagingBufferCacheImage.DestroyFrameData(m_SwapChainImageCount);
-		m_VertexBufferCache.DestroyFrameData(m_SwapChainImageCount);
+		m_StagingBufferCache.DestroyFrameData(SwapchainCount);
+		m_StagingBufferCacheImage.DestroyFrameData(SwapchainCount);
+		m_VertexBufferCache.DestroyFrameData(SwapchainCount);
 		for(auto &ImageBufferCache : m_ImageBufferCaches)
-			ImageBufferCache.second.DestroyFrameData(m_SwapChainImageCount);
+			ImageBufferCache.second.DestroyFrameData(SwapchainCount);
 
 		if(IsLastCleanup)
 		{
@@ -5556,7 +5558,7 @@ public:
 
 		if(OldSwapChainImageCount != m_SwapChainImageCount)
 		{
-			CleanupVulkan<false>();
+			CleanupVulkan<false>(OldSwapChainImageCount);
 			InitVulkan<false>();
 		}
 
@@ -6620,7 +6622,7 @@ public:
 		DestroyIndexBuffer(m_IndexBuffer, m_IndexBufferMemory);
 		DestroyIndexBuffer(m_RenderIndexBuffer, m_RenderIndexBufferMemory);
 
-		CleanupVulkan<true>();
+		CleanupVulkan<true>(m_SwapChainImageCount);
 
 		return true;
 	}
