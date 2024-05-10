@@ -1360,8 +1360,9 @@ void CChat::SendChatQueued(const char *pLine)
 
 	if(AddEntry)
 	{
-		CHistoryEntry *pEntry = m_History.Allocate(sizeof(CHistoryEntry) + str_length(pLine) - 1);
+		const int Length = str_length(pLine);
+		CHistoryEntry *pEntry = m_History.Allocate(sizeof(CHistoryEntry) + Length);
 		pEntry->m_Team = m_Mode == MODE_ALL ? 0 : 1;
-		mem_copy(pEntry->m_aText, pLine, str_length(pLine));
+		str_copy(pEntry->m_aText, pLine, Length + 1);
 	}
 }
