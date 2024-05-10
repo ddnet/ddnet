@@ -50,6 +50,12 @@ int main(int argc, const char **argv)
 	str_copy(aFilenames[1], argv[9]); //output_map
 	str_copy(aFilenames[2], argv[1]); //image_file
 
+	if(str_comp_filenames(aFilenames[0], aFilenames[1]) == 0)
+	{
+		dbg_msg("map_create_pixelart", "Invalid usage: you can not use the same map as input and output");
+		return -1;
+	}
+
 	int aLayerId[2] = {str_toint(argv[4]), str_toint(argv[5])}; //layergroup_id, layer_id
 	int aStartingPos[2] = {str_toint(argv[6]) * 32, str_toint(argv[7]) * 32}; //pos_x, pos_y
 	int aPixelSizes[2] = {str_toint(argv[2]), str_toint(argv[8])}; //quad_pixelsize, img_pixelsize
