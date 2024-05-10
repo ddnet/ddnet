@@ -87,6 +87,7 @@ public:
 	bool m_EntitiesFDDrace;
 
 	bool m_Race;
+	bool m_Pvp;
 
 	bool m_DontMaskEntities;
 	bool m_AllowXSkins;
