@@ -59,7 +59,7 @@ int main(int argc, const char **argv)
 	aArtOptions[1] = argc >= 11 ? str_toint(argv[11]) : false; //centralize
 
 	dbg_msg("map_create_pixelart", "image_file='%s'; image_pixelsize='%dpx'; input_map='%s'; layergroup_id='#%d'; layer_id='#%d'; pos_x='#%dpx'; pos_y='%dpx'; quad_pixelsize='%dpx'; output_map='%s'; optimize='%d'; centralize='%d'",
-		aFilenames[2], aPixelSizes[0], aFilenames[1], aLayerId[0], aLayerId[1], aStartingPos[0], aStartingPos[1], aPixelSizes[1], aFilenames[2], aArtOptions[0], aArtOptions[1]);
+		aFilenames[2], aPixelSizes[0], aFilenames[0], aLayerId[0], aLayerId[1], aStartingPos[0], aStartingPos[1], aPixelSizes[1], aFilenames[1], aArtOptions[0], aArtOptions[1]);
 
 	return !CreatePixelArt(aFilenames, aLayerId, aStartingPos, aPixelSizes, aArtOptions);
 }
