@@ -31,7 +31,7 @@ int main(int argc, const char **argv)
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
-	if(argc < 9 || argc > 12)
+	if(argc < 10 || argc > 12)
 	{
 		dbg_msg("map_create_pixelart", "Invalid arguments");
 		dbg_msg("map_create_pixelart", "Usage: %s <image.png> <img_pixelsize> <input_map> <layergroup_id> <layer_id> <pos_x> <pos_y> <quad_pixelsize> <output_map> [optimize=0|1] [centralize=0|1]", argv[0]);
@@ -61,8 +61,8 @@ int main(int argc, const char **argv)
 	int aPixelSizes[2] = {str_toint(argv[2]), str_toint(argv[8])}; //quad_pixelsize, img_pixelsize
 
 	bool aArtOptions[3];
-	aArtOptions[0] = argc >= 10 ? str_toint(argv[10]) : true; //optimize
-	aArtOptions[1] = argc >= 11 ? str_toint(argv[11]) : false; //centralize
+	aArtOptions[0] = argc > 10 ? str_toint(argv[10]) : true; //optimize
+	aArtOptions[1] = argc > 11 ? str_toint(argv[11]) : false; //centralize
 
 	dbg_msg("map_create_pixelart", "image_file='%s'; image_pixelsize='%dpx'; input_map='%s'; layergroup_id='#%d'; layer_id='#%d'; pos_x='#%dpx'; pos_y='%dpx'; quad_pixelsize='%dpx'; output_map='%s'; optimize='%d'; centralize='%d'",
 		aFilenames[2], aPixelSizes[0], aFilenames[0], aLayerId[0], aLayerId[1], aStartingPos[0], aStartingPos[1], aPixelSizes[1], aFilenames[1], aArtOptions[0], aArtOptions[1]);
