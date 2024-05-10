@@ -6,12 +6,12 @@
 #include <engine/storage.h>
 #include <game/mapitems.h>
 
-bool CreatePixelArt(const char[3][64], const int[2], const int[2], int[2], const bool[2]);
+bool CreatePixelArt(const char[3][IO_MAX_PATH_LENGTH], const int[2], const int[2], int[2], const bool[2]);
 void InsertCurrentQuads(CDataFileReader &, CMapItemLayerQuads *, CQuad *);
 int InsertPixelArtQuads(CQuad *, int &, const CImageInfo &, const int[2], const int[2], const bool[2]);
 
 bool LoadPng(CImageInfo *, const char *);
-bool OpenMaps(const char[2][64], CDataFileReader &, CDataFileWriter &);
+bool OpenMaps(const char[2][IO_MAX_PATH_LENGTH], CDataFileReader &, CDataFileWriter &);
 void SaveOutputMap(CDataFileReader &, CDataFileWriter &, CMapItemLayerQuads *, int, CQuad *, int);
 
 CMapItemLayerQuads *GetQuadLayer(CDataFileReader &, const int[2], int *);
@@ -45,7 +45,7 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	char aFilenames[3][64];
+	char aFilenames[3][IO_MAX_PATH_LENGTH];
 	str_copy(aFilenames[0], argv[3]); //input_map
 	str_copy(aFilenames[1], argv[9]); //output_map
 	str_copy(aFilenames[2], argv[1]); //image_file
@@ -64,7 +64,7 @@ int main(int argc, const char **argv)
 	return !CreatePixelArt(aFilenames, aLayerId, aStartingPos, aPixelSizes, aArtOptions);
 }
 
-bool CreatePixelArt(const char aFilenames[3][64], const int aLayerId[2], const int aStartingPos[2], int aPixelSizes[2], const bool aArtOptions[2])
+bool CreatePixelArt(const char aFilenames[3][IO_MAX_PATH_LENGTH], const int aLayerId[2], const int aStartingPos[2], int aPixelSizes[2], const bool aArtOptions[2])
 {
 	CImageInfo Img;
 	if(!LoadPng(&Img, aFilenames[2]))
@@ -357,7 +357,7 @@ bool LoadPng(CImageInfo *pImg, const char *pFilename)
 	return true;
 }
 
-bool OpenMaps(const char pMapNames[2][64], CDataFileReader &InputMap, CDataFileWriter &OutputMap)
+bool OpenMaps(const char pMapNames[2][IO_MAX_PATH_LENGTH], CDataFileReader &InputMap, CDataFileWriter &OutputMap)
 {
 	IStorage *pStorage = CreateLocalStorage();
 
