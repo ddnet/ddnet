@@ -6112,20 +6112,20 @@ public:
 	template<bool IsFirstInitialization>
 	int InitVulkan()
 	{
-		if(!CreateDescriptorSetLayouts())
-			return -1;
-
-		if(!CreateTextDescriptorSetLayout())
-			return -1;
-
-		if(!CreateSpriteMultiUniformDescriptorSetLayout())
-			return -1;
-
-		if(!CreateQuadUniformDescriptorSetLayout())
-			return -1;
-
 		if(IsFirstInitialization)
 		{
+			if(!CreateDescriptorSetLayouts())
+				return -1;
+
+			if(!CreateTextDescriptorSetLayout())
+				return -1;
+
+			if(!CreateSpriteMultiUniformDescriptorSetLayout())
+				return -1;
+
+			if(!CreateQuadUniformDescriptorSetLayout())
+				return -1;
+
 			VkSwapchainKHR OldSwapChain = VK_NULL_HANDLE;
 			if(InitVulkanSwapChain(OldSwapChain) != 0)
 				return -1;
