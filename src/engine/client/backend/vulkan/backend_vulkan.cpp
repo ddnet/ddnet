@@ -986,8 +986,6 @@ private:
 	std::vector<VkSemaphore> m_vWaitSemaphores;
 	std::vector<VkSemaphore> m_vSigSemaphores;
 
-	std::vector<VkSemaphore> m_vMemorySemaphores;
-
 	std::vector<VkFence> m_vFrameFences;
 	std::vector<VkFence> m_vImagesFences;
 
@@ -1053,7 +1051,7 @@ private:
 	std::vector<SStreamMemory<SFrameBuffers>> m_vStreamedVertexBuffers;
 	std::vector<SStreamMemory<SFrameUniformBuffers>> m_vStreamedUniformBuffers;
 
-	uint32_t m_CurFrames = 0;
+	uint32_t m_CurFrameSyncObject = 0;
 	uint32_t m_CurImageIndex = 0;
 
 	uint32_t m_CanvasWidth;
@@ -2275,7 +2273,7 @@ protected:
 			return false;
 		}
 
-		VkSemaphore WaitSemaphore = m_vWaitSemaphores[m_CurFrames];
+		VkSemaphore WaitSemaphore = m_vWaitSemaphores[m_CurFrameSyncObject];
 
 		VkSubmitInfo SubmitInfo{};
 		SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -2304,13 +2302,13 @@ protected:
 		SubmitInfo.pWaitSemaphores = aWaitSemaphores.data();
 		SubmitInfo.pWaitDstStageMask = aWaitStages.data();
 
-		std::array<VkSemaphore, 1> aSignalSemaphores = {m_vSigSemaphores[m_CurFrames]};
+		std::array<VkSemaphore, 1> aSignalSemaphores = {m_vSigSemaphores[m_CurFrameSyncObject]};
 		SubmitInfo.signalSemaphoreCount = aSignalSemaphores.size();
 		SubmitInfo.pSignalSemaphores = aSignalSemaphores.data();
 
-		vkResetFences(m_VKDevice, 1, &m_vFrameFences[m_CurFrames]);
+		vkResetFences(m_VKDevice, 1, &m_vFrameFences[m_CurFrameSyncObject]);
 
-		VkResult QueueSubmitRes = vkQueueSubmit(m_VKGraphicsQueue, 1, &SubmitInfo, m_vFrameFences[m_CurFrames]);
+		VkResult QueueSubmitRes = vkQueueSubmit(m_VKGraphicsQueue, 1, &SubmitInfo, m_vFrameFences[m_CurFrameSyncObject]);
 		if(QueueSubmitRes != VK_SUCCESS)
 		{
 			const char *pCritErrorMsg = CheckVulkanCriticalError(QueueSubmitRes);
@@ -2321,7 +2319,7 @@ protected:
 			}
 		}
 
-		std::swap(m_vWaitSemaphores[m_CurFrames], m_vSigSemaphores[m_CurFrames]);
+		std::swap(m_vWaitSemaphores[m_CurFrameSyncObject], m_vSigSemaphores[m_CurFrameSyncObject]);
 
 		VkPresentInfoKHR PresentInfo{};
 		PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -2348,7 +2346,7 @@ protected:
 			}
 		}
 
-		m_CurFrames = (m_CurFrames + 1) % m_SwapChainImageCount;
+		m_CurFrameSyncObject = (m_CurFrameSyncObject + 1) % m_vWaitSemaphores.size();
 		return true;
 	}
 
@@ -2364,7 +2362,7 @@ protected:
 			RecreateSwapChain();
 		}
 
-		auto AcqResult = vkAcquireNextImageKHR(m_VKDevice, m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_vSigSemaphores[m_CurFrames], VK_NULL_HANDLE, &m_CurImageIndex);
+		auto AcqResult = vkAcquireNextImageKHR(m_VKDevice, m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_vSigSemaphores[m_CurFrameSyncObject], VK_NULL_HANDLE, &m_CurImageIndex);
 		if(AcqResult != VK_SUCCESS)
 		{
 			if(AcqResult == VK_ERROR_OUT_OF_DATE_KHR || m_RecreateSwapChain)
@@ -2395,13 +2393,13 @@ protected:
 				}
 			}
 		}
-		std::swap(m_vWaitSemaphores[m_CurFrames], m_vSigSemaphores[m_CurFrames]);
+		std::swap(m_vWaitSemaphores[m_CurFrameSyncObject], m_vSigSemaphores[m_CurFrameSyncObject]);
 
 		if(m_vImagesFences[m_CurImageIndex] != VK_NULL_HANDLE)
 		{
 			vkWaitForFences(m_VKDevice, 1, &m_vImagesFences[m_CurImageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
 		}
-		m_vImagesFences[m_CurImageIndex] = m_vFrameFences[m_CurFrames];
+		m_vImagesFences[m_CurImageIndex] = m_vFrameFences[m_CurFrameSyncObject];
 
 		// next frame
 		m_CurFrame++;
@@ -5333,12 +5331,12 @@ public:
 
 	[[nodiscard]] bool CreateSyncObjects()
 	{
-		m_vWaitSemaphores.resize(m_SwapChainImageCount);
-		m_vSigSemaphores.resize(m_SwapChainImageCount);
+		// Create one more sync object than there are frames in flight
+		auto SyncObjectCount = m_SwapChainImageCount + 1;
+		m_vWaitSemaphores.resize(SyncObjectCount);
+		m_vSigSemaphores.resize(SyncObjectCount);
 
-		m_vMemorySemaphores.resize(m_SwapChainImageCount);
-
-		m_vFrameFences.resize(m_SwapChainImageCount);
+		m_vFrameFences.resize(SyncObjectCount);
 		m_vImagesFences.resize(m_SwapChainImageCount, VK_NULL_HANDLE);
 
 		VkSemaphoreCreateInfo CreateSemaphoreInfo{};
@@ -5348,11 +5346,10 @@ public:
 		FenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		FenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		for(size_t i = 0; i < m_SwapChainImageCount; i++)
+		for(size_t i = 0; i < SyncObjectCount; i++)
 		{
 			if(vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_vWaitSemaphores[i]) != VK_SUCCESS ||
 				vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_vSigSemaphores[i]) != VK_SUCCESS ||
-				vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_vMemorySemaphores[i]) != VK_SUCCESS ||
 				vkCreateFence(m_VKDevice, &FenceInfo, nullptr, &m_vFrameFences[i]) != VK_SUCCESS)
 			{
 				SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Creating swap chain sync objects(fences, semaphores) failed.");
@@ -5365,18 +5362,15 @@ public:
 
 	void DestroySyncObjects()
 	{
-		for(size_t i = 0; i < m_SwapChainImageCount; i++)
+		for(size_t i = 0; i < m_vWaitSemaphores.size(); i++)
 		{
 			vkDestroySemaphore(m_VKDevice, m_vWaitSemaphores[i], nullptr);
 			vkDestroySemaphore(m_VKDevice, m_vSigSemaphores[i], nullptr);
-			vkDestroySemaphore(m_VKDevice, m_vMemorySemaphores[i], nullptr);
 			vkDestroyFence(m_VKDevice, m_vFrameFences[i], nullptr);
 		}
 
 		m_vWaitSemaphores.clear();
 		m_vSigSemaphores.clear();
-
-		m_vMemorySemaphores.clear();
 
 		m_vFrameFences.clear();
 		m_vImagesFences.clear();
