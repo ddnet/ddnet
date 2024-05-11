@@ -69,6 +69,7 @@ class CGameConsole : public CComponent
 		float m_CompletionRenderOffset;
 		float m_CompletionRenderOffsetChange;
 		int m_CompletionArgumentPosition;
+		int m_CompletionCommandStart = 0;
 
 		char m_aUser[32];
 		bool m_UserGot;

@@ -321,7 +321,13 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const 
 {
 	CGameConsole::CInstance *pInstance = (CGameConsole::CInstance *)pUser;
 	if(pInstance->m_CompletionChosen == Index)
-		pInstance->m_Input.Set(pStr);
+	{
+		char aCurrent[512];
+		str_truncate(aCurrent, sizeof(aCurrent), pInstance->m_aCompletionBuffer, pInstance->m_CompletionCommandStart);
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "%s%s", aCurrent, pStr);
+		pInstance->m_Input.Set(aBuf);
+	}
 }
 
 const char *CGameConsole::CInstance::GetCommand(const char *pInput) const
@@ -452,9 +458,12 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 			if(!m_Searching)
 			{
+				const char *pSearch = GetCommand(m_aCompletionBuffer);
+				m_CompletionCommandStart = pSearch - m_aCompletionBuffer;
+
 				// command completion
 				const bool UseTempCommands = m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands();
-				int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, UseTempCommands);
+				int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(pSearch, m_CompletionFlagmask, UseTempCommands);
 				if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 				{
 					if(CompletionEnumerationCount)
@@ -463,7 +472,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 							m_CompletionChosen = 0;
 						m_CompletionChosen = (m_CompletionChosen + Direction + CompletionEnumerationCount) % CompletionEnumerationCount;
 						m_CompletionArgumentPosition = 0;
-						m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, UseTempCommands, PossibleCommandsCompleteCallback, this);
+						m_pGameConsole->m_pConsole->PossibleCommands(pSearch, m_CompletionFlagmask, UseTempCommands, PossibleCommandsCompleteCallback, this);
 					}
 					else if(m_CompletionChosen != -1)
 					{
