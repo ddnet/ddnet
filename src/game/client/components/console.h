@@ -113,6 +113,7 @@ class CGameConsole : public CComponent
 		void Dump() REQUIRES(!m_BacklogPendingLock);
 
 		const char *GetString() const { return m_Input.GetString(); }
+		void GetCommand(char *pBuf, size_t Size) const;
 		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);
 		static void PossibleArgumentsCompleteCallback(int Index, const char *pStr, void *pUser);
 

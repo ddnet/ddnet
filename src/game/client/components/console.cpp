@@ -324,6 +324,14 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const 
 		pInstance->m_Input.Set(pStr);
 }
 
+void CGameConsole::CInstance::GetCommand(char *pBuf, size_t Size) const
+{
+	const char *pInput = GetString();
+	while(str_find(pInput, ";"))
+		pInput = str_find(pInput, ";") + 1;
+	StrCopyUntilSpace(pBuf, Size, pInput);
+}
+
 static void StrCopyUntilSpace(char *pDest, size_t DestSize, const char *pSrc)
 {
 	const char *pSpace = str_find(pSrc, " ");
@@ -582,7 +590,8 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		// find the current command
 		{
 			char aBuf[IConsole::CMDLINE_LENGTH];
-			StrCopyUntilSpace(aBuf, sizeof(aBuf), GetString());
+			GetCommand(aBuf, sizeof(aBuf));
+
 			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
 			if(pCommand)
