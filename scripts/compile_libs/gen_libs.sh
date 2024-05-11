@@ -7,7 +7,7 @@ if [ -z ${1+x} ]; then
 fi
 
 if [ -z ${2+x} ]; then
-	echo "Specify the target system"
+	echo "Specify the target system: android, linux, window, webasm"
 	exit 1
 fi
 
@@ -38,6 +38,9 @@ elif [[ "${OS_NAME}" == "windows" ]]; then
 	COMP_HAS_x64=1
 elif [[ "${OS_NAME}" == "webasm" ]]; then
 	COMP_HAS_WEBASM=1
+else
+	echo "Specify the target system: android, linux, window, webasm"
+	exit 1
 fi
 
 mkdir -p "$1"
