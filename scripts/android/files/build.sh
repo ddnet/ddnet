@@ -19,6 +19,15 @@ _APK_BASENAME="$1"
 _APK_PACKAGE_NAME="$2"
 _APK_BUILD_TYPE="$3"
 
+if [[ "${_APK_BUILD_TYPE}" == "Debug" ]]; then
+	_RELEASE_TYPE_NAME=debug
+elif [[ "${_APK_BUILD_TYPE}" == "Release" ]]; then
+	_RELEASE_TYPE_NAME=release
+else
+	printf '\e[31mDid not pass build type to build script: Debug, Release\e[30m\n'
+	exit 1
+fi
+
 _APK_PACKAGE_FOLDER=$(echo "$_APK_PACKAGE_NAME" | sed 's/\./\//g')
 
 sed -i "s/DDNet/${_APK_BASENAME}/g" settings.gradle
@@ -52,15 +61,6 @@ sed -i "s/mHIDDeviceManager = HIDDeviceManager.acquire(this);/mHIDDeviceManager=
 
 if [[ "${_APK_BUILD_TYPE}" == "Debug" ]]; then
 	sed -i "s/android.enableR8.fullMode=true/android.enableR8.fullMode=false/g" gradle.properties
-fi
-
-_RELEASE_TYPE_NAME=debug
-if [[ "${_APK_BUILD_TYPE}" == "Debug" ]]; then
-	_RELEASE_TYPE_NAME=debug
-fi
-
-if [[ "${_APK_BUILD_TYPE}" == "Release" ]]; then
-	_RELEASE_TYPE_NAME=release
 fi
 
 function build_gradle() {
