@@ -75,16 +75,11 @@ cd compile_libs || exit 1
 
 # start with openssl
 (
-	_WAS_THERE_SSLFILE=1
 	if [ ! -d "openssl" ]; then
 		git clone https://github.com/openssl/openssl openssl
-		_WAS_THERE_SSLFILE=0
 	fi
 	(
 		cd openssl || exit 1
-		if [[ "$_WAS_THERE_SSLFILE" == 0 ]]; then
-			./autogen.sh
-		fi
 		cp "${CURDIR}"/scripts/compile_libs/make_lib_openssl.sh make_lib_openssl.sh
 		./make_lib_openssl.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 	)
