@@ -324,12 +324,11 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const 
 		pInstance->m_Input.Set(pStr);
 }
 
-void CGameConsole::CInstance::GetCommand(char *pBuf, size_t Size) const
+const char *CGameConsole::CInstance::GetCommand(const char *pInput) const
 {
-	const char *pInput = GetString();
 	while(str_find(pInput, ";"))
 		pInput = str_find(pInput, ";") + 1;
-	StrCopyUntilSpace(pBuf, Size, pInput);
+	return pInput;
 }
 
 static void StrCopyUntilSpace(char *pDest, size_t DestSize, const char *pSrc)
@@ -590,7 +589,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		// find the current command
 		{
 			char aBuf[IConsole::CMDLINE_LENGTH];
-			GetCommand(aBuf, sizeof(aBuf));
+			StrCopyUntilSpace(aBuf, sizeof(aBuf), GetCommand(GetString()));
 
 			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
@@ -1120,7 +1119,8 @@ void CGameConsole::OnRender()
 			Info.m_pOffsetChange = &pConsole->m_CompletionRenderOffsetChange;
 			Info.m_Width = Screen.w;
 			Info.m_TotalWidth = 0.0f;
-			Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
+			Info.m_pCurrentCmd = pConsole->GetCommand(pConsole->m_aCompletionBuffer);
+
 			TextRender()->SetCursor(&Info.m_Cursor, InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f, FONT_SIZE, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 			Info.m_Cursor.m_LineWidth = std::numeric_limits<float>::max();
 			const int NumCommands = m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
