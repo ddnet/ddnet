@@ -153,9 +153,7 @@ function _copy_sdl() {
 	mkdir -p ddnet-libs/sdl/"$OS_NAME"/lib"$2"
 	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2.a ddnet-libs/sdl/"$OS_NAME"/lib"$2"/libSDL2.a
 	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2main.a ddnet-libs/sdl/"$OS_NAME"/lib"$2"/libSDL2main.a
-	if [ ! -d "ddnet-libs/sdl/include/$OS_NAME" ]; then
-		mkdir -p ddnet-libs/sdl/include/"$OS_NAME"
-	fi
+	mkdir -p ddnet-libs/sdl/include/"$OS_NAME"
 	cp -R compile_libs/sdl/include/* ddnet-libs/sdl/include/"$OS_NAME"
 }
 
