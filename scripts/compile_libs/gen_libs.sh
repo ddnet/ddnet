@@ -113,6 +113,7 @@ fi
 )
 
 cd ..
+mkdir -p ddnet-libs
 
 function copy_arches_for_lib() {
 	if [[ "$COMP_HAS_ARM32" == "1" ]]; then
@@ -132,23 +133,18 @@ function copy_arches_for_lib() {
 	fi
 }
 
-mkdir ddnet-libs
 function _copy_curl() {
 	mkdir -p ddnet-libs/curl/"$OS_NAME"/lib"$2"
 	cp compile_libs/curl/build_"$OS_NAME"_"$1"/lib/libcurl.a ddnet-libs/curl/"$OS_NAME"/lib"$2"/libcurl.a
 }
-
 copy_arches_for_lib _copy_curl
 
-mkdir ddnet-libs
 function _copy_freetype2() {
 	mkdir -p ddnet-libs/freetype/"$OS_NAME"/lib"$2"
 	cp compile_libs/freetype2/build_"$OS_NAME"_"$1"/libfreetype.a ddnet-libs/freetype/"$OS_NAME"/lib"$2"/libfreetype.a
 }
-
 copy_arches_for_lib _copy_freetype2
 
-mkdir ddnet-libs
 function _copy_sdl() {
 	mkdir -p ddnet-libs/sdl/"$OS_NAME"/lib"$2"
 	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2.a ddnet-libs/sdl/"$OS_NAME"/lib"$2"/libSDL2.a
@@ -156,7 +152,6 @@ function _copy_sdl() {
 	mkdir -p ddnet-libs/sdl/include/"$OS_NAME"
 	cp -R compile_libs/sdl/include/* ddnet-libs/sdl/include/"$OS_NAME"
 }
-
 copy_arches_for_lib _copy_sdl
 
 # copy java code from SDL2
@@ -166,39 +161,30 @@ if [[ "$OS_NAME" == "android" ]]; then
 	cp -R compile_libs/sdl/android-project/app/src/main/java/org ddnet-libs/sdl/java/
 fi
 
-mkdir ddnet-libs
 function _copy_ogg() {
 	mkdir -p ddnet-libs/opus/"$OS_NAME"/lib"$2"
 	cp compile_libs/ogg/build_"$OS_NAME"_"$1"/libogg.a ddnet-libs/opus/"$OS_NAME"/lib"$2"/libogg.a
 }
-
 copy_arches_for_lib _copy_ogg
 
-mkdir ddnet-libs
 function _copy_opus() {
 	mkdir -p ddnet-libs/opus/"$OS_NAME"/lib"$2"
 	cp compile_libs/opus/build_"$OS_NAME"_"$1"/libopus.a ddnet-libs/opus/"$OS_NAME"/lib"$2"/libopus.a
 }
-
 copy_arches_for_lib _copy_opus
 
-mkdir ddnet-libs
 function _copy_opusfile() {
 	mkdir -p ddnet-libs/opus/"$OS_NAME"/lib"$2"
 	cp compile_libs/opusfile/build_"$OS_NAME"_"$1"/libopusfile.a ddnet-libs/opus/"$OS_NAME"/lib"$2"/libopusfile.a
 }
-
 copy_arches_for_lib _copy_opusfile
 
-mkdir ddnet-libs
 function _copy_sqlite3() {
 	mkdir -p ddnet-libs/sqlite3/"$OS_NAME"/lib"$2"
 	cp compile_libs/sqlite3/build_"$OS_NAME"_"$1"/sqlite3.a ddnet-libs/sqlite3/"$OS_NAME"/lib"$2"/libsqlite3.a
 }
-
 copy_arches_for_lib _copy_sqlite3
 
-mkdir ddnet-libs
 function _copy_openssl() {
 	mkdir -p ddnet-libs/openssl/"$OS_NAME"/lib"$2"
 	mkdir -p ddnet-libs/openssl/include
@@ -208,10 +194,8 @@ function _copy_openssl() {
 	cp -R compile_libs/openssl/build_"$OS_NAME"_"$1"/include/* ddnet-libs/openssl/include/"$OS_NAME"
 	cp -R compile_libs/openssl/include/* ddnet-libs/openssl/include
 }
-
 copy_arches_for_lib _copy_openssl
 
-mkdir ddnet-libs
 function _copy_zlib() {
 	# copy headers
 	(
@@ -231,13 +215,10 @@ function _copy_zlib() {
 	mkdir -p ddnet-libs/zlib/"$OS_NAME"/lib"$2"
 	cp compile_libs/zlib/build_"$OS_NAME"_"$1"/libz.a ddnet-libs/zlib/"$OS_NAME"/lib"$2"/libz.a
 }
-
 copy_arches_for_lib _copy_zlib
 
-mkdir ddnet-libs
 function _copy_png() {
 	mkdir -p ddnet-libs/png/"$OS_NAME"/lib"$2"
 	cp compile_libs/png/build_"$OS_NAME"_"$1"/libpng16.a ddnet-libs/png/"$OS_NAME"/lib"$2"/libpng16.a
 }
-
 copy_arches_for_lib _copy_png
