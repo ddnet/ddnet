@@ -489,7 +489,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			}
 		}
 
-		if(Inside)
+		if(Inside && !Ui()->MouseButton(0))
 			Ui()->SetHotItem(pId);
 
 		if(Ui()->HotItem() == pId)
