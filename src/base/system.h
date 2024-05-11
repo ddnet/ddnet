@@ -1605,6 +1605,21 @@ const char *str_find_nocase(const char *haystack, const char *needle);
 */
 const char *str_find(const char *haystack, const char *needle);
 
+/*
+	Function: str_delimiters_around_offset
+	Parameters:
+		haystack - String to search in
+		needle - String to search for
+
+	Returns:
+		true if both delimiters were found
+		false if a delimiter is missing (it uses haystart start and end as fallback)
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
+bool str_delimiters_around_offset(const char *haystay, const char *delim, int offset, int *start, int *end);
+
 /**
  * Finds the last occurrence of a character
  *

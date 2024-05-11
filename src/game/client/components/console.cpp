@@ -322,19 +322,19 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const 
 	CGameConsole::CInstance *pInstance = (CGameConsole::CInstance *)pUser;
 	if(pInstance->m_CompletionChosen == Index)
 	{
-		char aCurrent[512];
-		str_truncate(aCurrent, sizeof(aCurrent), pInstance->m_aCompletionBuffer, pInstance->m_CompletionCommandStart);
+		char aBefore[512];
+		str_truncate(aBefore, sizeof(aBefore), pInstance->m_aCompletionBuffer, pInstance->m_CompletionCommandStart);
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "%s%s", aCurrent, pStr);
+		str_format(aBuf, sizeof(aBuf), "%s%s%s", aBefore, pStr, pInstance->m_aCompletionBuffer + pInstance->m_CompletionCommandEnd);
 		pInstance->m_Input.Set(aBuf);
+		pInstance->m_Input.SetCursorOffset(str_length(pStr) + pInstance->m_CompletionCommandStart);
 	}
 }
 
-const char *CGameConsole::CInstance::GetCommand(const char *pInput) const
+void CGameConsole::CInstance::GetCommand(const char *pInput, char *pCmd, size_t CmdSize)
 {
-	while(str_find(pInput, ";"))
-		pInput = str_find(pInput, ";") + 1;
-	return pInput;
+	str_delimiters_around_offset(pInput, ";", m_Input.GetCursorOffset(), &m_CompletionCommandStart, &m_CompletionCommandEnd);
+	str_truncate(pCmd, CmdSize, pInput + m_CompletionCommandStart, m_CompletionCommandEnd - m_CompletionCommandStart);
 }
 
 static void StrCopyUntilSpace(char *pDest, size_t DestSize, const char *pSrc)
@@ -458,12 +458,12 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 			if(!m_Searching)
 			{
-				const char *pSearch = GetCommand(m_aCompletionBuffer);
-				m_CompletionCommandStart = pSearch - m_aCompletionBuffer;
+				char aSearch[128];
+				GetCommand(m_aCompletionBuffer, aSearch, sizeof(aSearch));
 
 				// command completion
 				const bool UseTempCommands = m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands();
-				int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(pSearch, m_CompletionFlagmask, UseTempCommands);
+				int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(aSearch, m_CompletionFlagmask, UseTempCommands);
 				if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 				{
 					if(CompletionEnumerationCount)
@@ -472,7 +472,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 							m_CompletionChosen = 0;
 						m_CompletionChosen = (m_CompletionChosen + Direction + CompletionEnumerationCount) % CompletionEnumerationCount;
 						m_CompletionArgumentPosition = 0;
-						m_pGameConsole->m_pConsole->PossibleCommands(pSearch, m_CompletionFlagmask, UseTempCommands, PossibleCommandsCompleteCallback, this);
+						m_pGameConsole->m_pConsole->PossibleCommands(aSearch, m_CompletionFlagmask, UseTempCommands, PossibleCommandsCompleteCallback, this);
 					}
 					else if(m_CompletionChosen != -1)
 					{
@@ -597,8 +597,10 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 		// find the current command
 		{
+			char aCmd[128];
+			GetCommand(GetString(), aCmd, sizeof(aCmd));
 			char aBuf[IConsole::CMDLINE_LENGTH];
-			StrCopyUntilSpace(aBuf, sizeof(aBuf), GetCommand(GetString()));
+			StrCopyUntilSpace(aBuf, sizeof(aBuf), aCmd);
 
 			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
@@ -1128,7 +1130,9 @@ void CGameConsole::OnRender()
 			Info.m_pOffsetChange = &pConsole->m_CompletionRenderOffsetChange;
 			Info.m_Width = Screen.w;
 			Info.m_TotalWidth = 0.0f;
-			Info.m_pCurrentCmd = pConsole->GetCommand(pConsole->m_aCompletionBuffer);
+			char aCmd[128];
+			pConsole->GetCommand(pConsole->m_aCompletionBuffer, aCmd, sizeof(aCmd));
+			Info.m_pCurrentCmd = aCmd;
 
 			TextRender()->SetCursor(&Info.m_Cursor, InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f, FONT_SIZE, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 			Info.m_Cursor.m_LineWidth = std::numeric_limits<float>::max();

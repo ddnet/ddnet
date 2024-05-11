@@ -70,6 +70,7 @@ class CGameConsole : public CComponent
 		float m_CompletionRenderOffsetChange;
 		int m_CompletionArgumentPosition;
 		int m_CompletionCommandStart = 0;
+		int m_CompletionCommandEnd = 0;
 
 		char m_aUser[32];
 		bool m_UserGot;
@@ -114,7 +115,20 @@ class CGameConsole : public CComponent
 		void Dump() REQUIRES(!m_BacklogPendingLock);
 
 		const char *GetString() const { return m_Input.GetString(); }
-		void GetCommand(char *pBuf, size_t Size) const;
+		/**
+		 * Gets the command at the current cursor including surrounding spaces.
+		 * Commands are split by semicolons.
+		 *
+		 * So if the current console input is for example "hello; world ;foo"
+		 *                                                        ^
+		 *                   and the cursor is here  -------------/
+		 * The result would be " world "
+		 *
+		 * @param pInput the console input line
+		 * @param pCmd the command the cursor is at
+		 * @param CmdSize size of the pCmd buffer
+		 */
+		void GetCommand(const char *pInput, char *pCmd, size_t CmdSize);
 		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);
 		static void PossibleArgumentsCompleteCallback(int Index, const char *pStr, void *pUser);
 

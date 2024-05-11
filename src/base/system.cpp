@@ -3155,6 +3155,38 @@ const char *str_find(const char *haystack, const char *needle)
 	return 0;
 }
 
+bool str_delimiters_around_offset(const char *haystack, const char *delim, int offset, int *start, int *end)
+{
+	bool found = true;
+	const char *search = haystack;
+	const int delim_len = str_length(delim);
+	*start = 0;
+	while(str_find(search, delim))
+	{
+		const char *test = str_find(search, delim) + delim_len;
+		int distance = test - haystack;
+		if(distance > offset)
+			break;
+
+		*start = distance;
+		search = test;
+	}
+	if(search == haystack)
+		found = false;
+
+	if(str_find(search, delim))
+	{
+		*end = str_find(search, delim) - haystack;
+	}
+	else
+	{
+		*end = str_length(haystack);
+		found = false;
+	}
+
+	return found;
+}
+
 const char *str_rchr(const char *haystack, char needle)
 {
 	return strrchr(haystack, needle);
