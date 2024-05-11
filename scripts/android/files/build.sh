@@ -54,33 +54,30 @@ if [[ "${_APK_BUILD_TYPE}" == "Debug" ]]; then
 	sed -i "s/android.enableR8.fullMode=true/android.enableR8.fullMode=false/g" gradle.properties
 fi
 
-if [[ -z ${GE_NO_APK_BUILD} || "${GE_NO_APK_BUILD}" != "1" ]]; then
+_RELEASE_TYPE_NAME=debug
+_RELEASE_TYPE_APK_NAME=
+if [[ "${_APK_BUILD_TYPE}" == "Debug" ]]; then
 	_RELEASE_TYPE_NAME=debug
+fi
+
+if [[ "${_APK_BUILD_TYPE}" == "Release" ]]; then
+	_RELEASE_TYPE_NAME=release
 	_RELEASE_TYPE_APK_NAME=
-	if [[ "${_APK_BUILD_TYPE}" == "Debug" ]]; then
-		_RELEASE_TYPE_NAME=debug
-	fi
+fi
 
-	if [[ "${_APK_BUILD_TYPE}" == "Release" ]]; then
-		_RELEASE_TYPE_NAME=release
-		_RELEASE_TYPE_APK_NAME=
-	fi
+APP_BASE_NAME=Gradle
+CLASSPATH=gradle-wrapper.jar
+java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all
+if [[ "${_APK_BUILD_TYPE}" == "Debug" ]]; then
+	java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all builddebug
+	java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all assembleDebug
+else
+	java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all buildrelease
+	java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all assembleRelease
+fi
+cp build/outputs/apk/"$_RELEASE_TYPE_NAME"/"$_APK_BASENAME"-"$_RELEASE_TYPE_NAME""$_RELEASE_TYPE_APK_NAME".apk "$_APK_BASENAME".apk
 
-	APP_BASE_NAME=Gradle
-	CLASSPATH=gradle-wrapper.jar
-	java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all
-	if [[ "${_APK_BUILD_TYPE}" == "Debug" ]]; then
-		java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all builddebug
-		java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all assembleDebug
-	else
-		java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all buildrelease
-		java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all assembleRelease
-	fi
-	cp build/outputs/apk/"$_RELEASE_TYPE_NAME"/"$_APK_BASENAME"-"$_RELEASE_TYPE_NAME""$_RELEASE_TYPE_APK_NAME".apk "$_APK_BASENAME".apk
-
-	if [[ "${_APK_BUILD_TYPE}" == "Release" ]]; then
-		java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all bundleRelease
-
-		cp build/outputs/bundle/"$_RELEASE_TYPE_NAME"/"$_APK_BASENAME"-"$_RELEASE_TYPE_NAME""$_RELEASE_TYPE_APK_NAME".aab "$_APK_BASENAME".aab
-	fi
+if [[ "${_APK_BUILD_TYPE}" == "Release" ]]; then
+	java "-Dorg.gradle.appname=${APP_BASE_NAME}" -classpath "${CLASSPATH}" org.gradle.wrapper.GradleWrapperMain --warning-mode all bundleRelease
+	cp build/outputs/bundle/"$_RELEASE_TYPE_NAME"/"$_APK_BASENAME"-"$_RELEASE_TYPE_NAME""$_RELEASE_TYPE_APK_NAME".aab "$_APK_BASENAME".aab
 fi
