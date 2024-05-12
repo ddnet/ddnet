@@ -41,7 +41,6 @@ bool CPrompt::OnInput(const IInput::CEvent &Event)
 	if(Input()->KeyIsPressed(KEY_P))
 	{
 		m_Active = true;
-		Editor()->m_Dialog = -1;
 	}
 	return false;
 }
@@ -54,7 +53,6 @@ void CPrompt::OnRender(CUIRect View)
 	if(Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 	{
 		m_Active = false;
-		Editor()->m_Dialog = DIALOG_NONE;
 	}
 
 	static CListBox s_ListBox;
