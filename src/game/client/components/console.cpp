@@ -333,14 +333,22 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const 
 
 void CGameConsole::CInstance::GetCommand(const char *pInput, char *pCmd, size_t CmdSize)
 {
-	str_delimiters_around_offset(pInput, ";", m_Input.GetCursorOffset(), &m_CompletionCommandStart, &m_CompletionCommandEnd);
-	char aCmd[IConsole::CMDLINE_LENGTH];
-	str_truncate(aCmd, sizeof(aCmd), pInput + m_CompletionCommandStart, m_CompletionCommandEnd - m_CompletionCommandStart);
+	char aInput[IConsole::CMDLINE_LENGTH];
+	str_copy(aInput, pInput);
 	int Start, End;
-	str_delimiters_around_offset(aCmd, "\"", m_Input.GetCursorOffset() - m_CompletionCommandStart, &Start, &End);
-	m_CompletionCommandStart += Start;
-	m_CompletionCommandEnd = m_CompletionCommandStart + (End - Start);
-	str_truncate(pCmd, CmdSize, pInput + m_CompletionCommandStart, m_CompletionCommandEnd - m_CompletionCommandStart);
+	m_CompletionCommandStart = 0;
+	m_CompletionCommandEnd = 0;
+
+	char aaSeperators[][2] = {";", "\"", " "};
+	for(auto *pSeperator : aaSeperators)
+	{
+		str_delimiters_around_offset(aInput + m_CompletionCommandStart, pSeperator, m_Input.GetCursorOffset() - m_CompletionCommandStart, &Start, &End);
+		m_CompletionCommandStart += Start;
+		m_CompletionCommandEnd = m_CompletionCommandStart + (End - Start);
+		aInput[m_CompletionCommandEnd] = '\0';
+	}
+
+	str_copy(pCmd, aInput + m_CompletionCommandStart, CmdSize);
 }
 
 static void StrCopyUntilSpace(char *pDest, size_t DestSize, const char *pSrc)
