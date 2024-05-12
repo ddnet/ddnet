@@ -2362,6 +2362,8 @@ if(CLIENT)
     mapitems/sound.cpp
     mapitems/sound.h
     popups.cpp
+    prompt.cpp
+    prompt.h
     proof_mode.cpp
     proof_mode.h
     smooth_value.cpp

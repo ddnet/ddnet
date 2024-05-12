@@ -4325,10 +4325,6 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		if(DoButton_Editor(&s_AddGroupButton, pBtn.m_pText, 0, &AddGroupButton, IGraphics::CORNER_R, "Adds a new group"))
 		{
 			pBtn.Call();
-
-			m_Map.NewGroup();
-			m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
-			m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(this, m_SelectedGroup, false));
 		}
 	}
 
@@ -8046,7 +8042,6 @@ void CEditor::Render()
 
 	for(CEditorComponent &Component : m_vComponents)
 		Component.OnRender(View);
-	RenderPrompt(View);
 
 	MapView()->UpdateZoom();
 
@@ -8072,15 +8067,6 @@ void CEditor::Render()
 		RenderTooltip(TooltipRect);
 
 	RenderMousePointer();
-}
-
-#include "../../ddnet_hotui/loader.h"
-
-void CEditor::RenderPrompt(CUIRect View)
-{
-	static CListBox s_ListBox;
-	CUIRect Prompt, PromptBox;
-	HotEditorListCuiRects(this, s_ListBox, View, Prompt, PromptBox);
 }
 
 void CEditor::RenderPressedKeys(CUIRect View)
@@ -8362,6 +8348,7 @@ void CEditor::Init()
 	m_vComponents.emplace_back(m_MapView);
 	m_vComponents.emplace_back(m_MapSettingsBackend);
 	m_vComponents.emplace_back(m_LayerSelector);
+	m_vComponents.emplace_back(m_Prompt);
 	for(CEditorComponent &Component : m_vComponents)
 		Component.Init(this);
 
