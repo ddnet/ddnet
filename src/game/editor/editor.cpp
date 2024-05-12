@@ -5,6 +5,7 @@
 
 #include <base/color.h>
 #include <base/system.h>
+#include <cstdlib>
 
 #if defined(CONF_FAMILY_UNIX)
 #include <pthread.h>
@@ -4301,10 +4302,30 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	LayersBox.HSplitTop(RowHeight + 1.0f, &AddGroupButton, &LayersBox);
 	if(s_ScrollRegion.AddRect(AddGroupButton))
 	{
+		// editor.h
+		// int NumButtons = 0;
+		// #define REGISTER_BUTTON(index, text, callback, editor) int index;
+		// #include <game/editor/buttons.h>
+		// CEditorButton *m_pButtons;
+		// #undef REGISTER_BUTTON
+
+		// editor.cpp init
+		// int NumButtons = 0;
+		// #define REGISTER_BUTTON(index, text, callback, editor) index = NumButtons++;
+		// #include <game/editor/buttons.h>
+		// #undef REGISTER_BUTTON
+		// m_pButtons = (CEditorButton *)malloc(NumButtons * sizeof(CEditorButton));
+		// #define REGISTER_BUTTON(index, text, callback, editor) m_aButtons[index] = CEditorButton("Add group", nullptr);
+		// #include <game/editor/buttons.h>
+		// #undef REGISTER_BUTTON
+
 		AddGroupButton.HSplitTop(RowHeight, &AddGroupButton, 0);
 		static int s_AddGroupButton = 0;
-		if(DoButton_Editor(&s_AddGroupButton, "Add group", 0, &AddGroupButton, IGraphics::CORNER_R, "Adds a new group"))
+		CEditorButton pBtn = m_pButtons[BTN_ADD_GROUP];
+		if(DoButton_Editor(&s_AddGroupButton, pBtn.m_pText, 0, &AddGroupButton, IGraphics::CORNER_R, "Adds a new group"))
 		{
+			pBtn.Call();
+
 			m_Map.NewGroup();
 			m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
 			m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(this, m_SelectedGroup, false));

@@ -2305,6 +2305,8 @@ if(CLIENT)
   set_src(GAME_EDITOR GLOB_RECURSE src/game/editor
     auto_map.cpp
     auto_map.h
+    buttons.cpp
+    buttons.h
     component.cpp
     component.h
     editor.cpp
