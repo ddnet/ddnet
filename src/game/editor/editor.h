@@ -323,6 +323,8 @@ public:
 	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
 
 	static void ButtonAddGroup(void *pEditor);
+	static void ButtonRefocus(void *pEditor);
+	static void ButtonProof(void *pEditor);
 	#define REGISTER_BUTTON(index, text, callback, editor) int index;
 	#include <game/editor/buttons.h>
 	#undef REGISTER_BUTTON
@@ -335,11 +337,11 @@ public:
 		m_MapSettingsCommandContext(m_MapSettingsBackend.NewContext(&m_SettingsCommandInput))
 	{
 		int NumButtons = 0;
-		#define REGISTER_BUTTON(index, text, callback, editor) index = NumButtons++;
+		#define REGISTER_BUTTON(index, text, callback, editor) index = NumButtons++;dbg_msg("editor", "%s = %d", #index, NumButtons);
 		#include <game/editor/buttons.h>
 		#undef REGISTER_BUTTON
 		m_pButtons = (CEditorButton *)malloc(NumButtons * sizeof(CEditorButton));
-		#define REGISTER_BUTTON(index, text, callback, editor) m_pButtons[index] = CEditorButton("Add group", callback, editor);
+		#define REGISTER_BUTTON(index, text, callback, editor) m_pButtons[index] = CEditorButton(text, callback, editor);
 		#include <game/editor/buttons.h>
 		#undef REGISTER_BUTTON
 		m_NumButtons = NumButtons;
