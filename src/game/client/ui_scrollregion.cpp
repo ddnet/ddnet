@@ -179,7 +179,8 @@ void CScrollRegion::End()
 		m_AnimTargetScrollY = m_ScrollY;
 		m_AnimTime = 0.0f;
 	}
-	else if(Ui()->CheckActiveItem(pId) && !Ui()->MouseButton(0))
+
+	if(Ui()->CheckActiveItem(pId) && !Ui()->MouseButton(0))
 	{
 		Ui()->SetActiveItem(nullptr);
 	}
