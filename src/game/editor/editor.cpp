@@ -4302,23 +4302,6 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	LayersBox.HSplitTop(RowHeight + 1.0f, &AddGroupButton, &LayersBox);
 	if(s_ScrollRegion.AddRect(AddGroupButton))
 	{
-		// editor.h
-		// int NumButtons = 0;
-		// #define REGISTER_BUTTON(index, text, callback, editor) int index;
-		// #include <game/editor/buttons.h>
-		// CEditorButton *m_pButtons;
-		// #undef REGISTER_BUTTON
-
-		// editor.cpp init
-		// int NumButtons = 0;
-		// #define REGISTER_BUTTON(index, text, callback, editor) index = NumButtons++;
-		// #include <game/editor/buttons.h>
-		// #undef REGISTER_BUTTON
-		// m_pButtons = (CEditorButton *)malloc(NumButtons * sizeof(CEditorButton));
-		// #define REGISTER_BUTTON(index, text, callback, editor) m_aButtons[index] = CEditorButton("Add group", nullptr);
-		// #include <game/editor/buttons.h>
-		// #undef REGISTER_BUTTON
-
 		AddGroupButton.HSplitTop(RowHeight, &AddGroupButton, 0);
 		static int s_AddGroupButton = 0;
 		CEditorButton pBtn = m_pButtons[BTN_ADD_GROUP];
