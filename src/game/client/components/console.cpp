@@ -322,9 +322,9 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const 
 	CGameConsole::CInstance *pInstance = (CGameConsole::CInstance *)pUser;
 	if(pInstance->m_CompletionChosen == Index)
 	{
-		char aBefore[512];
+		char aBefore[IConsole::CMDLINE_LENGTH];
 		str_truncate(aBefore, sizeof(aBefore), pInstance->m_aCompletionBuffer, pInstance->m_CompletionCommandStart);
-		char aBuf[512];
+		char aBuf[IConsole::CMDLINE_LENGTH];
 		str_format(aBuf, sizeof(aBuf), "%s%s%s", aBefore, pStr, pInstance->m_aCompletionBuffer + pInstance->m_CompletionCommandEnd);
 		pInstance->m_Input.Set(aBuf);
 		pInstance->m_Input.SetCursorOffset(str_length(pStr) + pInstance->m_CompletionCommandStart);
@@ -334,6 +334,12 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const 
 void CGameConsole::CInstance::GetCommand(const char *pInput, char *pCmd, size_t CmdSize)
 {
 	str_delimiters_around_offset(pInput, ";", m_Input.GetCursorOffset(), &m_CompletionCommandStart, &m_CompletionCommandEnd);
+	char aCmd[IConsole::CMDLINE_LENGTH];
+	str_truncate(aCmd, sizeof(aCmd), pInput + m_CompletionCommandStart, m_CompletionCommandEnd - m_CompletionCommandStart);
+	int Start, End;
+	str_delimiters_around_offset(aCmd, "\"", m_Input.GetCursorOffset() - m_CompletionCommandStart, &Start, &End);
+	m_CompletionCommandStart += Start;
+	m_CompletionCommandEnd = m_CompletionCommandStart + (End - Start);
 	str_truncate(pCmd, CmdSize, pInput + m_CompletionCommandStart, m_CompletionCommandEnd - m_CompletionCommandStart);
 }
 
@@ -597,7 +603,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 		// find the current command
 		{
-			char aCmd[128];
+			char aCmd[IConsole::CMDLINE_LENGTH];
 			GetCommand(GetString(), aCmd, sizeof(aCmd));
 			char aBuf[IConsole::CMDLINE_LENGTH];
 			StrCopyUntilSpace(aBuf, sizeof(aBuf), aCmd);
