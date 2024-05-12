@@ -122,13 +122,6 @@ public:
 	{
 		return m_Width * m_Height * PixelSize(m_Format);
 	}
-
-	static EImageFormat ImageFormatFromInt(int Format)
-	{
-		if(Format < (int)FORMAT_RGB || Format > (int)FORMAT_SINGLE_COMPONENT)
-			return FORMAT_ERROR;
-		return (EImageFormat)Format;
-	}
 };
 
 /*
