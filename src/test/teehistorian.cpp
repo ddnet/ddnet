@@ -7,9 +7,23 @@
 #include <game/gamecore.h>
 #include <game/server/teehistorian.h>
 
+#include <cstdarg>
+#include <cstdio>
 #include <vector>
 
 void RegisterGameUuids(CUuidManager *pManager);
+
+void Print(const char *pFormat, ...)
+{
+	const char *pBrief = getenv("GTEST_BRIEF");
+	if(pBrief && pBrief[0] == '1')
+		return;
+
+	va_list Args;
+	va_start(Args, pFormat);
+	vprintf(pFormat, Args);
+	va_end(Args);
+}
 
 class TeeHistorian : public ::testing::Test
 {
@@ -156,7 +170,7 @@ protected:
 			io_close(File);
 		}
 
-		printf("pOutput = {");
+		Print("pOutput = {");
 		size_t Start = 0; // skip over header;
 		for(size_t i = 0; i < m_vBuffer.size(); i++)
 		{
@@ -167,12 +181,12 @@ protected:
 				continue;
 			}
 			if((i - Start) % 10 == 0)
-				printf("\n\t");
+				Print("\n\t");
 			else
-				printf(", ");
-			printf("0x%.2x", m_vBuffer[i]);
+				Print(", ");
+			Print("0x%.2x", m_vBuffer[i]);
 		}
-		printf("\n}\n");
+		Print("\n}\n");
 		ASSERT_EQ(m_vBuffer.size(), OutputSize);
 		ASSERT_TRUE(mem_comp(m_vBuffer.data(), pOutput, OutputSize) == 0);
 	}
