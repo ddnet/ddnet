@@ -11,7 +11,6 @@ class CPrompt : public CEditorComponent
 {
 	int m_PromptSelectedIndex = -1;
 
-	std::vector<char *> m_vpCompletePromptList;
 	std::vector<const CEditorButton*> m_vpFilteredPromptList;
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_PromptInput;
 	bool m_Active = false;
