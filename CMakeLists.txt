@@ -2314,6 +2314,7 @@ if(CLIENT)
     editor_action.h
     editor_actions.cpp
     editor_actions.h
+    editor_button.h
     editor_history.cpp
     editor_history.h
     editor_object.cpp

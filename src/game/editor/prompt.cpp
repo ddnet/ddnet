@@ -2,6 +2,7 @@
 
 #include "editor.h"
 #include "engine/keys.h"
+#include "game/editor/editor_button.h"
 
 #include "prompt.h"
 
@@ -90,11 +91,13 @@ void CPrompt::OnRender(CUIRect View)
 	{
 		m_PromptSelectedIndex = 0;
 		m_vpFilteredPromptList.clear();
-		for(const char *Item : m_vpCompletePromptList)
+		for(int Button = 0; Button < Editor()->m_NumButtons; Button++)
 		{
-			if(m_PromptInput.IsEmpty() || FuzzyMatch(Item, m_PromptInput.GetString()))
+			CEditorButton *pBtn = &Editor()->m_pButtons[Button];
+			const char *pTitle = pBtn->m_pText;
+			if(m_PromptInput.IsEmpty() || FuzzyMatch(pTitle, m_PromptInput.GetString()))
 			{
-				m_vpFilteredPromptList.push_back(Item);
+				m_vpFilteredPromptList.push_back(pBtn);
 			}
 		}
 	}
@@ -118,7 +121,7 @@ void CPrompt::OnRender(CUIRect View)
 		SLabelProperties Props;
 		Props.m_MaxWidth = Button.w;
 		Props.m_EllipsisAtEnd = true;
-		Ui()->DoLabel(&Button, m_vpFilteredPromptList[i], 10.0f, TEXTALIGN_ML, Props);
+		Ui()->DoLabel(&Button, m_vpFilteredPromptList[i]->m_pText, 10.0f, TEXTALIGN_ML, Props);
 
 	}
 
@@ -130,11 +133,13 @@ void CPrompt::OnRender(CUIRect View)
 
 	if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || Input()->KeyIsPressed(KEY_RETURN))
 	{
-		dbg_msg("editor", "enter");
-		if(m_PromptSelectedIndex > 0)
+		dbg_msg("editor", "enter index=%d", m_PromptSelectedIndex);
+		if(m_PromptSelectedIndex >= 0)
 		{
-			const char *pName = m_vpFilteredPromptList[m_PromptSelectedIndex];
-			dbg_msg("editor", "selected %s", pName);
+			const CEditorButton *pBtn = m_vpFilteredPromptList[m_PromptSelectedIndex];
+			dbg_msg("editor", "selected %s", pBtn->m_pText);
+			pBtn->Call();
+			m_PromptInput.Clear();
 		}
 	}
 }

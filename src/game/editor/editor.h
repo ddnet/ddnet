@@ -39,6 +39,7 @@
 #include "layer_selector.h"
 #include "map_view.h"
 #include "smooth_value.h"
+#include "editor_button.h"
 
 #include <deque>
 #include <functional>
@@ -321,28 +322,12 @@ public:
 	const CMapView *MapView() const { return &m_MapView; }
 	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
 
-	typedef void (*FButtonCallback)(void *pEditor);
 	static void ButtonAddGroup(void *pEditor);
-	class CEditorButton
-	{
-		public:
-		const char *m_pText;
-		FButtonCallback m_pfnCallback;
-		void *m_pEditor;
-
-		CEditorButton(const char *pText, FButtonCallback pfnCallback, void *pEditor) : m_pText(pText), m_pfnCallback(pfnCallback), m_pEditor(pEditor)
-		{
-		}
-
-		void Call() const
-		{
-			m_pfnCallback(m_pEditor);
-		}
-	};
 	#define REGISTER_BUTTON(index, text, callback, editor) int index;
 	#include <game/editor/buttons.h>
 	#undef REGISTER_BUTTON
 	CEditorButton *m_pButtons;
+	int m_NumButtons;
 
 	CEditor() :
 		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
@@ -357,6 +342,7 @@ public:
 		#define REGISTER_BUTTON(index, text, callback, editor) m_pButtons[index] = CEditorButton("Add group", callback, editor);
 		#include <game/editor/buttons.h>
 		#undef REGISTER_BUTTON
+		m_NumButtons = NumButtons;
 
 
 		m_EntitiesTexture.Invalidate();
