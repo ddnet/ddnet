@@ -160,7 +160,8 @@ void CScrollRegion::End()
 	}
 	else if(InsideSlider)
 	{
-		Ui()->SetHotItem(pId);
+		if(!Ui()->MouseButton(0))
+			Ui()->SetHotItem(pId);
 
 		if(!Ui()->CheckActiveItem(pId) && Ui()->MouseButtonClicked(0))
 		{
