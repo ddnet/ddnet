@@ -1066,12 +1066,9 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 	int NumOptions = 1; // expandable header
 	if(JoystickEnabled)
 	{
-		if(NumJoysticks == 0)
-			NumOptions++; // message
-		else
+		NumOptions++; // message or joystick name/selection
+		if(NumJoysticks > 0)
 		{
-			if(NumJoysticks > 1)
-				NumOptions++; // joystick selection
 			NumOptions += 3; // mode, ui sens, tolerance
 			if(!g_Config.m_InpControllerAbsolute)
 				NumOptions++; // ingame sens
