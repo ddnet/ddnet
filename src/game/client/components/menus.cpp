@@ -468,72 +468,44 @@ int CMenus::DoButton_CheckBox_Number(const void *pId, const char *pText, int Che
 
 int CMenus::DoKeyReader(const void *pId, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
 {
-	// process
-	static const void *s_pGrabbedId = nullptr;
-	static bool s_MouseReleased = true;
-	static int s_ButtonUsed = 0;
-	const bool Inside = Ui()->MouseHovered(pRect);
 	int NewKey = Key;
 	*pNewModifierCombination = ModifierCombination;
 
-	if(!Ui()->MouseButton(0) && !Ui()->MouseButton(1) && s_pGrabbedId == pId)
-		s_MouseReleased = true;
-
-	if(Ui()->CheckActiveItem(pId))
+	const int ButtonResult = Ui()->DoButtonLogic(pId, 0, pRect);
+	if(ButtonResult == 1)
 	{
-		if(m_Binder.m_GotKey)
-		{
-			// abort with escape key
-			if(m_Binder.m_Key.m_Key != KEY_ESCAPE)
-			{
-				NewKey = m_Binder.m_Key.m_Key;
-				*pNewModifierCombination = m_Binder.m_ModifierCombination;
-			}
-			m_Binder.m_GotKey = false;
-			Ui()->SetActiveItem(nullptr);
-			s_MouseReleased = false;
-			s_pGrabbedId = pId;
-		}
-
-		if(s_ButtonUsed == 1 && !Ui()->MouseButton(1))
-		{
-			if(Inside)
-				NewKey = 0;
-			Ui()->SetActiveItem(nullptr);
-		}
+		m_Binder.m_pKeyReaderId = pId;
+		m_Binder.m_TakeKey = true;
+		m_Binder.m_GotKey = false;
 	}
-	else if(Ui()->HotItem() == pId)
+	else if(ButtonResult == 2)
 	{
-		if(s_MouseReleased)
-		{
-			if(Ui()->MouseButton(0))
-			{
-				m_Binder.m_TakeKey = true;
-				m_Binder.m_GotKey = false;
-				Ui()->SetActiveItem(pId);
-				s_ButtonUsed = 0;
-			}
-
-			if(Ui()->MouseButton(1))
-			{
-				Ui()->SetActiveItem(pId);
-				s_ButtonUsed = 1;
-			}
-		}
+		NewKey = 0;
+		*pNewModifierCombination = CBinds::MODIFIER_NONE;
 	}
 
-	if(Inside)
-		Ui()->SetHotItem(pId);
+	if(m_Binder.m_pKeyReaderId == pId && m_Binder.m_GotKey)
+	{
+		// abort with escape key
+		if(m_Binder.m_Key.m_Key != KEY_ESCAPE)
+		{
+			NewKey = m_Binder.m_Key.m_Key;
+			*pNewModifierCombination = m_Binder.m_ModifierCombination;
+		}
+		m_Binder.m_pKeyReaderId = nullptr;
+		m_Binder.m_GotKey = false;
+		Ui()->SetActiveItem(nullptr);
+	}
 
 	char aBuf[64];
-	if(Ui()->CheckActiveItem(pId) && s_ButtonUsed == 0)
+	if(m_Binder.m_pKeyReaderId == pId && m_Binder.m_TakeKey)
 		str_copy(aBuf, Localize("Press a key…"));
 	else if(NewKey == 0)
 		aBuf[0] = '\0';
 	else
 		str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*pNewModifierCombination), Input()->KeyName(NewKey));
 
-	const ColorRGBA Color = Ui()->CheckActiveItem(pId) && m_Binder.m_TakeKey ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.4f) : ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * Ui()->ButtonColorMul(pId));
+	const ColorRGBA Color = m_Binder.m_pKeyReaderId == pId && m_Binder.m_TakeKey ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.4f) : ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * Ui()->ButtonColorMul(pId));
 	pRect->Draw(Color, IGraphics::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(1.0f, &Temp);

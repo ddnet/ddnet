@@ -36,6 +36,7 @@ struct CServerProcess
 class CMenusKeyBinder : public CComponent
 {
 public:
+	const void *m_pKeyReaderId;
 	bool m_TakeKey;
 	bool m_GotKey;
 	IInput::CEvent m_Key;
