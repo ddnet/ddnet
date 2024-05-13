@@ -1343,19 +1343,20 @@ void CServer::SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int Cli
 
 void CServer::UpdateClientRconCommands()
 {
-	int ClientId = Tick() % MAX_CLIENTS;
-
-	if(m_aClients[ClientId].m_State != CClient::STATE_EMPTY && m_aClients[ClientId].m_Authed)
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		int ConsoleAccessLevel = m_aClients[ClientId].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientId].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
-		for(int i = 0; i < MAX_RCONCMD_SEND && m_aClients[ClientId].m_pRconCmdToSend; ++i)
+		if(m_aClients[ClientId].m_State != CClient::STATE_EMPTY && m_aClients[ClientId].m_Authed)
 		{
-			SendRconCmdAdd(m_aClients[ClientId].m_pRconCmdToSend, ClientId);
-			m_aClients[ClientId].m_pRconCmdToSend = m_aClients[ClientId].m_pRconCmdToSend->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
-			if(m_aClients[ClientId].m_pRconCmdToSend == nullptr)
+			int ConsoleAccessLevel = m_aClients[ClientId].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientId].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
+			for(int i = 0; i < MAX_RCONCMD_SEND && m_aClients[ClientId].m_pRconCmdToSend; ++i)
 			{
-				CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
-				SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+				SendRconCmdAdd(m_aClients[ClientId].m_pRconCmdToSend, ClientId);
+				m_aClients[ClientId].m_pRconCmdToSend = m_aClients[ClientId].m_pRconCmdToSend->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
+				if(m_aClients[ClientId].m_pRconCmdToSend == nullptr)
+				{
+					CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
+					SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+				}
 			}
 		}
 	}
