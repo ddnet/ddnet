@@ -94,7 +94,7 @@ bool CreatePixelArt(const char aFilenames[3][IO_MAX_PATH_LENGTH], const int aLay
 
 	InsertCurrentQuads(InputMap, pQuadLayer, pQuads);
 	int QuadsCounter = InsertPixelArtQuads(pQuads, pQuadLayer->m_NumQuads, Img, aStartingPos, aPixelSizes, aArtOptions);
-	SaveOutputMap(InputMap, OutputMap, pQuadLayer, ItemNumber, pQuads, ((int)sizeof(CQuad)) * (pQuadLayer->m_NumQuads + 1));
+	SaveOutputMap(InputMap, OutputMap, pQuadLayer, ItemNumber, pQuads, (int)sizeof(CQuad) * pQuadLayer->m_NumQuads);
 	delete[] pQuads;
 
 	dbg_msg("map_create_pixelart", "INFO: successfully added %d new pixelart quads.", QuadsCounter);
