@@ -213,8 +213,6 @@ public:
 	{
 		SCommand_Clear() :
 			SCommand(CMD_CLEAR) {}
-		SColorf m_Color;
-		bool m_ForceClear;
 	};
 
 	struct SCommand_Signal : public SCommand
@@ -991,7 +989,7 @@ public:
 
 	void TextureSet(CTextureHandle TextureId) override;
 
-	void Clear(float r, float g, float b, bool ForceClearNow = false) override;
+	void Clear() override;
 
 	void QuadsBegin() override;
 	void QuadsEnd() override;
