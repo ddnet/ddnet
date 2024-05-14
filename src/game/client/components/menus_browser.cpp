@@ -30,7 +30,7 @@ static void FormatServerbrowserPing(char (&aBuffer)[N], const CServerInfo *pInfo
 {
 	if(!pInfo->m_LatencyIsEstimated)
 	{
-		str_from_int(pInfo->m_Latency, aBuffer);
+		str_format(aBuffer, sizeof(aBuffer), "%d", pInfo->m_Latency);
 		return;
 	}
 	static const char *LOCATION_NAMES[CServerInfo::NUM_LOCS] = {
@@ -393,7 +393,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 
 					if(pItem->m_FriendNum > 1)
 					{
-						str_from_int(pItem->m_FriendNum, aTemp);
+						str_format(aTemp, sizeof(aTemp), "%d", pItem->m_FriendNum);
 						TextRender()->TextColor(0.94f, 0.8f, 0.8f, 1.0f);
 						Ui()->DoLabel(&Button, aTemp, 9.0f, TEXTALIGN_MC);
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
@@ -1250,7 +1250,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 		}
 		else if(pSelectedServer->m_ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_POINTS)
 		{
-			str_from_int(CurrentClient.m_Score, aTemp);
+			str_format(aTemp, sizeof(aTemp), "%d", CurrentClient.m_Score);
 		}
 		else
 		{

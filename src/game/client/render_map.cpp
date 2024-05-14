@@ -708,7 +708,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 			unsigned char Index = pTele[c].m_Number;
 			if(Index && IsTeleTileNumberUsedAny(pTele[c].m_Type))
 			{
-				str_from_int(Index, aBuf);
+				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				// Auto-resize text to fit inside the tile
 				float ScaledWidth = TextRender()->TextWidth(Size * Scale, aBuf, -1);
 				float Factor = clamp(Scale / ScaledWidth, 0.0f, 1.0f);
@@ -774,11 +774,11 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 				// draw force and max speed
 				if(g_Config.m_ClTextEntities)
 				{
-					str_from_int(Force, aBuf);
+					str_format(aBuf, sizeof(aBuf), "%d", Force);
 					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
 					if(MaxSpeed)
 					{
-						str_from_int(MaxSpeed, aBuf);
+						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
 						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
 					}
 				}
@@ -831,14 +831,14 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 			unsigned char Index = pSwitch[c].m_Number;
 			if(Index && IsSwitchTileNumberUsed(pSwitch[c].m_Type))
 			{
-				str_from_int(Index, aBuf);
+				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
 			}
 
 			unsigned char Delay = pSwitch[c].m_Delay;
 			if(Delay && IsSwitchTileDelayUsed(pSwitch[c].m_Type))
 			{
-				str_from_int(Delay, aBuf);
+				str_format(aBuf, sizeof(aBuf), "%d", Delay);
 				TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
 			}
 		}
@@ -888,7 +888,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 			unsigned char Index = pTune[c].m_Number;
 			if(Index)
 			{
-				str_from_int(Index, aBuf);
+				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				TextRender()->Text(mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf); // numbers shouldn't be too big and in the center of the tile
 			}
 		}

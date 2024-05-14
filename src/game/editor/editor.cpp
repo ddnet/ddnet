@@ -404,7 +404,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 		else if(IsHex)
 			str_format(aBuf, sizeof(aBuf), "#%06X", Current);
 		else
-			str_from_int(Current, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", Current);
 		pRect->Draw(pColor ? *pColor : GetButtonColor(pId, 0), Corners, 3.0f);
 		Ui()->DoLabel(pRect, aBuf, 10, TEXTALIGN_MC);
 	}
@@ -6515,7 +6515,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				char aValueBuffer[16];
 				if(UnitsPerLineY >= 1.0f)
 				{
-					str_from_int(static_cast<int>(Value), aValueBuffer);
+					str_format(aValueBuffer, sizeof(aValueBuffer), "%d", static_cast<int>(Value));
 				}
 				else
 				{

@@ -1944,7 +1944,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 #define ADD_INT(p, x) \
 	do \
 	{ \
-		str_from_int(x, aBuf); \
+		str_format(aBuf, sizeof(aBuf), "%d", x); \
 		(p).AddString(aBuf, 0); \
 	} while(0)
 
@@ -2205,7 +2205,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 #define ADD_INT(p, x) \
 	do \
 	{ \
-		str_from_int(x, aBuf); \
+		str_format(aBuf, sizeof(aBuf), "%d", x); \
 		(p).AddString(aBuf, 0); \
 	} while(0)
 

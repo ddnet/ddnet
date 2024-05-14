@@ -4667,7 +4667,7 @@ void CGameContext::Converse(int ClientId, char *pStr)
 bool CGameContext::IsVersionBanned(int Version)
 {
 	char aVersion[16];
-	str_from_int(Version, aVersion);
+	str_format(aVersion, sizeof(aVersion), "%d", Version);
 
 	return str_in_list(g_Config.m_SvBannedVersions, ",", aVersion);
 }
