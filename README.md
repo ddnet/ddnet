@@ -69,12 +69,8 @@ Building on Linux and macOS
 
 To compile DDNet yourself, execute the following commands in the source root:
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j$(nproc)
-
-Pass the number of threads for compilation to `make -j`. `$(nproc)` in this case returns the number of processing units.
+    cmake -Bbuild
+    cmake --build build
 
 DDNet requires additional libraries, some of which are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86\_64) for convenience and the official builds. The bundled libraries for official builds are now in the ddnet-libs submodule. Note that when you build and develop locally, you should ideally use your system's package manager to install the dependencies, instead of relying on ddnet-libs submodule, which does not contain all dependencies anyway (e.g. openssl, vulkan). See the previous section for how to get the dependencies. Alternatively see the following build arguments for how to disable some features and their dependencies (`-DVULKAN=OFF` won't require Vulkan for example).
 
@@ -159,7 +155,7 @@ This library isn't compiled, so you have to do it:
 sudo apt install libgtest-dev
 cd /usr/src/gtest
 sudo cmake CMakeLists.txt
-sudo make -j$(nproc)
+sudo make
 
 # copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
 sudo cp lib/*.a /usr/lib
@@ -312,11 +308,9 @@ sv_use_sql 1
 add_sqlserver r teeworlds record teeworlds "PW2" "localhost" "3306"
 add_sqlserver w teeworlds record teeworlds "PW2" "localhost" "3306"
 
-$ mkdir build
-$ cd build
-$ cmake -DMYSQL=ON ..
-$ make -j$(nproc)
-$ ./DDNet-Server -f mine.cfg
+$ cmake -Bbuild -DMYSQL=ON
+$ cmake --build build --target DDNet-Server
+$ build/DDNet-Server -f mine.cfg
 ```
 
 <a href="https://repology.org/metapackage/ddnet/versions">
