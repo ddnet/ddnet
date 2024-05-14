@@ -804,6 +804,8 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			}
 			else if(Team == TEAM_WHISPER_RECV)
 			{
+				if(g_Config.m_ClDisableWhisper)
+					return;
 				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s", LineAuthor.m_aName);
 				pCurrentLine->m_NameColor = TEAM_RED;
 				pCurrentLine->m_Highlighted = true;
