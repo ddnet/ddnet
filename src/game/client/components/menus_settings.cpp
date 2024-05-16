@@ -45,9 +45,10 @@ CMenusKeyBinder CMenus::m_Binder;
 
 CMenusKeyBinder::CMenusKeyBinder()
 {
+	m_pKeyReaderId = nullptr;
 	m_TakeKey = false;
 	m_GotKey = false;
-	m_ModifierCombination = 0;
+	m_ModifierCombination = CBinds::MODIFIER_NONE;
 }
 
 bool CMenusKeyBinder::OnInput(const IInput::CEvent &Event)
@@ -64,7 +65,7 @@ bool CMenusKeyBinder::OnInput(const IInput::CEvent &Event)
 			m_ModifierCombination = CBinds::GetModifierMask(Input());
 			if(m_ModifierCombination == CBinds::GetModifierMaskOfKey(Event.m_Key))
 			{
-				m_ModifierCombination = 0;
+				m_ModifierCombination = CBinds::MODIFIER_NONE;
 			}
 		}
 		return true;
