@@ -933,6 +933,9 @@ void CServer::DoSnapshot()
 					if(!GameServer()->IsClientPlayer(j))
 						continue;
 					
+					if(!GameServer()->GetPlayerChar(j))
+						continue;
+					
 					if(!GameServer()->GetPlayerChar(j)->CanSnapCharacter(i))
 						continue;
 					
