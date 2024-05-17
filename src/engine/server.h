@@ -337,6 +337,8 @@ public:
 	virtual bool IsClientReady(int ClientId) const = 0;
 	virtual bool IsClientPlayer(int ClientId) const = 0;
 
+	virtual class CCharacter *GetPlayerChar(int ClientId) = 0;
+
 	virtual int PersistentDataSize() const = 0;
 	virtual int PersistentClientDataSize() const = 0;
 

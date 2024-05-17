@@ -40,6 +40,7 @@
 #include <engine/shared/linereader.h>
 #include <vector>
 #include <zlib.h>
+#include <game/server/entities/character.h>
 
 #include "databases/connection.h"
 #include "databases/connection_pool.h"
@@ -918,7 +919,7 @@ void CServer::DoSnapshot()
 
 			GameServer()->OnSnap(i);
 
-			if(Config()->m_SvPreInputs && m_aClients[i].m_DDNetVersion > VERSION_DDNET_PREINPUT)
+			if(Config()->m_SvPreInputs && m_aClients[i].m_DDNetVersion >= VERSION_DDNET_PREINPUT)
 			{
 				for(int j = 0; j < MaxClients(); j++)
 				{
@@ -932,9 +933,27 @@ void CServer::DoSnapshot()
 					if(!GameServer()->IsClientPlayer(j))
 						continue;
 					
+					if(!GameServer()->GetPlayerChar(j)->CanSnapCharacter(i))
+						continue;
+					
+					if(!GameServer()->GetPlayerChar(j)->IsSnappingCharacterInView(i))
+						continue;
+					
 					//get latest tick
-					CClient::CInput * latestInput = &m_aClients[j].m_LatestInput;
-					int latestTick = latestInput->m_GameTick;
+					CClient::CInput * latestInput = 0;
+					int latestTick = 0;
+
+					for(auto &Input : m_aClients[j].m_aInputs)
+					{
+						if(Input.m_GameTick > Tick() && Input.m_GameTick > latestTick)
+						{
+							latestTick = Input.m_GameTick;
+							latestInput = &Input;
+						}
+					}
+
+					if(!latestInput || !latestTick)
+						continue;
 
 					if(m_CurrentGameTick >= latestTick)
 						continue;
