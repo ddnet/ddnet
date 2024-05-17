@@ -6,16 +6,10 @@ import android.os.Bundle;
 import android.content.pm.ActivityInfo;
 
 public class NativeMain extends SDLActivity {
-	static {
-		System.loadLibrary("DDNet");
-	}
 
 	@Override
 	protected String[] getLibraries() {
 		return new String[] {
-			// disable hid API for now
-			// "hidapi",
-			// "SDL2",
 			"DDNet",
 		};
 	}
