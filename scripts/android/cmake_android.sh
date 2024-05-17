@@ -172,16 +172,12 @@ printf "\e[36mPreparing gradle build\n"
 cd "${_DEFAULT_BUILD_FOLDER}" || exit 1
 
 mkdir -p src/main
+mkdir -p src/main/res/values
 mkdir -p src/main/res/mipmap
 
 function copy_dummy_files() {
 	rm ./"$2"
 	cp ../"$1" "$2"
-}
-
-function copy_dummy_files_rec() {
-	rm -R ./"$2"/"$1"
-	cp -R ../"$1" "$2"
 }
 
 copy_dummy_files scripts/android/files/build.sh build.sh
@@ -192,7 +188,7 @@ copy_dummy_files scripts/android/files/gradle.properties gradle.properties
 copy_dummy_files scripts/android/files/proguard-rules.pro proguard-rules.pro
 copy_dummy_files scripts/android/files/settings.gradle settings.gradle
 copy_dummy_files scripts/android/files/AndroidManifest.xml src/main/AndroidManifest.xml
-copy_dummy_files_rec scripts/android/files/res src/main
+copy_dummy_files scripts/android/files/res/values/strings.xml src/main/res/values/strings.xml
 copy_dummy_files other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher.png
 copy_dummy_files other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher_round.png
 
