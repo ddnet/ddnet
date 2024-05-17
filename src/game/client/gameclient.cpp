@@ -1705,7 +1705,6 @@ void CGameClient::OnNewSnapshot()
 				{
 					m_aClients[Item.m_Id].m_CurrentInput = (m_aClients[Item.m_Id].m_CurrentInput + 1) % 200;
 					m_aClients[Item.m_Id].m_Inputs[m_aClients[Item.m_Id].m_CurrentInput] = *((const CNetObj_PreInput *)pData);
-					printf("arrived!!! %i\n", ((const CNetObj_PreInput *)pData)->m_IntendedTick);
 				}
 			}
 		}

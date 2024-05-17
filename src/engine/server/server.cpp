@@ -918,47 +918,41 @@ void CServer::DoSnapshot()
 
 			GameServer()->OnSnap(i);
 
-			for(int j = 0; j < MaxClients(); j++)
+			if(Config()->m_SvPreInputs && m_aClients[i].m_DDNetVersion > VERSION_DDNET_PREINPUT)
 			{
-				if(i==j)
-					continue;
-				
-				if(!GameServer()->IsClientReady(j))
-					continue;
-				
-				//client in game
-				if(!GameServer()->IsClientPlayer(j))
-					continue;
-				
-				//get latest tick
-				CClient::CInput * latestInput = 0;
-				int latestTick = 0;
-
-				for(auto &Input : m_aClients[j].m_aInputs)
+				for(int j = 0; j < MaxClients(); j++)
 				{
-					if(Input.m_GameTick > Tick() && Input.m_GameTick > latestTick)
-					{
-						latestTick = Input.m_GameTick;
-						latestInput = &Input;
-					}
-				}
+					if(i==j)
+						continue;
+					
+					if(!GameServer()->IsClientReady(j))
+						continue;
+					
+					//client in game
+					if(!GameServer()->IsClientPlayer(j))
+						continue;
+					
+					//get latest tick
+					CClient::CInput * latestInput = &m_aClients[j].m_LatestInput;
+					int latestTick = latestInput->m_GameTick;
 
-				if(!latestInput || !latestTick)
-					continue;
-				
-				CNetObj_PreInput * preInputs = IServer::SnapNewItem<CNetObj_PreInput>(j);
-				CNetObj_PlayerInput * input = (CNetObj_PlayerInput *)latestInput->m_aData;
-				preInputs->m_Direction = input->m_Direction;
-				preInputs->m_TargetX = input->m_TargetX;
-				preInputs->m_TargetY = input->m_TargetY;
-				preInputs->m_Jump = input->m_Jump;
-				preInputs->m_Fire = input->m_Fire;
-				preInputs->m_Hook = input->m_Hook;
-				preInputs->m_PlayerFlags = input->m_PlayerFlags;
-				preInputs->m_WantedWeapon = input->m_WantedWeapon;
-				preInputs->m_NextWeapon = input->m_NextWeapon;
-				preInputs->m_PrevWeapon = input->m_PrevWeapon;
-				preInputs->m_IntendedTick = latestTick;
+					if(m_CurrentGameTick >= latestTick)
+						continue;
+					
+					CNetObj_PreInput * preInputs = IServer::SnapNewItem<CNetObj_PreInput>(j);
+					CNetObj_PlayerInput * input = (CNetObj_PlayerInput *)latestInput->m_aData;
+					preInputs->m_Direction = input->m_Direction;
+					preInputs->m_TargetX = input->m_TargetX;
+					preInputs->m_TargetY = input->m_TargetY;
+					preInputs->m_Jump = input->m_Jump;
+					preInputs->m_Fire = input->m_Fire;
+					preInputs->m_Hook = input->m_Hook;
+					preInputs->m_PlayerFlags = input->m_PlayerFlags;
+					preInputs->m_WantedWeapon = input->m_WantedWeapon;
+					preInputs->m_NextWeapon = input->m_NextWeapon;
+					preInputs->m_PrevWeapon = input->m_PrevWeapon;
+					preInputs->m_IntendedTick = latestTick;
+				}
 			}
 
 			// finish snapshot
