@@ -798,7 +798,7 @@ bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 		}
 	}
 
-	if(Inside)
+	if(Inside && !MouseButton(0))
 		SetHotItem(pLineInput);
 
 	if(Enabled() && Active && !JustGotActive)
@@ -1013,9 +1013,6 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 	static const void *s_pEditing = nullptr;
 	EEditState State = EEditState::NONE;
 
-	if(Inside)
-		SetHotItem(pId);
-
 	const int Base = Props.m_IsHex ? 16 : 10;
 
 	if(MouseButtonReleased(1) && HotItem() == pId)
@@ -1113,6 +1110,9 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 		DoLabel(pRect, aBuf, 10.0f, TEXTALIGN_MC);
 	}
 
+	if(Inside && !MouseButton(0))
+		SetHotItem(pId);
+
 	if(!m_ValueSelectorTextMode)
 		s_NumberInput.Clear();
 
@@ -1182,7 +1182,7 @@ float CUi::DoScrollbarV(const void *pId, const CUIRect *pRect, float Current)
 		Grabbed = true;
 	}
 
-	if(InsideHandle)
+	if(InsideHandle && !MouseButton(0))
 	{
 		SetHotItem(pId);
 	}
@@ -1253,7 +1253,7 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 		Grabbed = true;
 	}
 
-	if(InsideHandle)
+	if(InsideHandle && !MouseButton(0))
 	{
 		SetHotItem(pId);
 	}

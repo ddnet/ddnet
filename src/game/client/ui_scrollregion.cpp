@@ -160,7 +160,8 @@ void CScrollRegion::End()
 	}
 	else if(InsideSlider)
 	{
-		Ui()->SetHotItem(pId);
+		if(!Ui()->MouseButton(0))
+			Ui()->SetHotItem(pId);
 
 		if(!Ui()->CheckActiveItem(pId) && Ui()->MouseButtonClicked(0))
 		{
@@ -179,7 +180,8 @@ void CScrollRegion::End()
 		m_AnimTargetScrollY = m_ScrollY;
 		m_AnimTime = 0.0f;
 	}
-	else if(Ui()->CheckActiveItem(pId) && !Ui()->MouseButton(0))
+
+	if(Ui()->CheckActiveItem(pId) && !Ui()->MouseButton(0))
 	{
 		Ui()->SetActiveItem(nullptr);
 	}
