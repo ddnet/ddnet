@@ -21,6 +21,9 @@ void IGameController::OnEndMatchInsta()
 	dbg_msg("ddnet-insta", "building stats ...");
 	GetRoundEndStatsStr(aStats, sizeof(aStats));
 	PublishRoundEndStatsStr(aStats);
+
+	for(CInstaPlayerStats &Stats : m_aInstaPlayerStats)
+		Stats.Reset();
 }
 
 static float CalcKillDeathRatio(int Kills, int Deaths)
