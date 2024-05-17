@@ -217,7 +217,7 @@ int CNetBan::Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, c
 		return -1;
 	}
 
-	int Stamp = Seconds > 0 ? time_timestamp() + Seconds : CBanInfo::EXPIRES_NEVER;
+	int64_t Stamp = Seconds > 0 ? time_timestamp() + Seconds : static_cast<int64_t>(CBanInfo::EXPIRES_NEVER);
 
 	// set up info
 	CBanInfo Info = {0};
@@ -290,7 +290,7 @@ void CNetBan::Init(IConsole *pConsole, IStorage *pStorage)
 
 void CNetBan::Update()
 {
-	int Now = time_timestamp();
+	int64_t Now = time_timestamp();
 
 	// remove expired bans
 	char aBuf[256], aNetStr[256];
@@ -522,7 +522,7 @@ void CNetBan::ConBansSave(IConsole::IResult *pResult, void *pUser)
 		return;
 	}
 
-	int Now = time_timestamp();
+	int64_t Now = time_timestamp();
 	char aAddrStr1[NETADDR_MAXSTRSIZE], aAddrStr2[NETADDR_MAXSTRSIZE];
 	for(CBanAddr *pBan = pThis->m_BanAddrPool.First(); pBan; pBan = pBan->m_pNext)
 	{

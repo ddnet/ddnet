@@ -2613,7 +2613,7 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	return 0;
 }
 
-int time_timestamp()
+int64_t time_timestamp()
 {
 	return time(0);
 }

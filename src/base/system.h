@@ -698,7 +698,7 @@ int64_t time_freq();
  *
  * @return The time as a UNIX timestamp
  */
-int time_timestamp();
+int64_t time_timestamp();
 
 /**
  * Retrieves the hours since midnight (0..23)

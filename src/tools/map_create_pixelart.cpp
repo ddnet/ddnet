@@ -6,12 +6,12 @@
 #include <engine/storage.h>
 #include <game/mapitems.h>
 
-bool CreatePixelArt(const char[3][64], const int[2], const int[2], int[2], const bool[2]);
+bool CreatePixelArt(const char[3][IO_MAX_PATH_LENGTH], const int[2], const int[2], int[2], const bool[2]);
 void InsertCurrentQuads(CDataFileReader &, CMapItemLayerQuads *, CQuad *);
 int InsertPixelArtQuads(CQuad *, int &, const CImageInfo &, const int[2], const int[2], const bool[2]);
 
 bool LoadPng(CImageInfo *, const char *);
-bool OpenMaps(const char[2][64], CDataFileReader &, CDataFileWriter &);
+bool OpenMaps(const char[2][IO_MAX_PATH_LENGTH], CDataFileReader &, CDataFileWriter &);
 void SaveOutputMap(CDataFileReader &, CDataFileWriter &, CMapItemLayerQuads *, int, CQuad *, int);
 
 CMapItemLayerQuads *GetQuadLayer(CDataFileReader &, const int[2], int *);
@@ -31,7 +31,7 @@ int main(int argc, const char **argv)
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
-	if(argc < 9 || argc > 12)
+	if(argc < 10 || argc > 12)
 	{
 		dbg_msg("map_create_pixelart", "Invalid arguments");
 		dbg_msg("map_create_pixelart", "Usage: %s <image.png> <img_pixelsize> <input_map> <layergroup_id> <layer_id> <pos_x> <pos_y> <quad_pixelsize> <output_map> [optimize=0|1] [centralize=0|1]", argv[0]);
@@ -45,26 +45,32 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	char aFilenames[3][64];
+	char aFilenames[3][IO_MAX_PATH_LENGTH];
 	str_copy(aFilenames[0], argv[3]); //input_map
 	str_copy(aFilenames[1], argv[9]); //output_map
 	str_copy(aFilenames[2], argv[1]); //image_file
+
+	if(str_comp_filenames(aFilenames[0], aFilenames[1]) == 0)
+	{
+		dbg_msg("map_create_pixelart", "Invalid usage: you can not use the same map as input and output");
+		return -1;
+	}
 
 	int aLayerId[2] = {str_toint(argv[4]), str_toint(argv[5])}; //layergroup_id, layer_id
 	int aStartingPos[2] = {str_toint(argv[6]) * 32, str_toint(argv[7]) * 32}; //pos_x, pos_y
 	int aPixelSizes[2] = {str_toint(argv[2]), str_toint(argv[8])}; //quad_pixelsize, img_pixelsize
 
 	bool aArtOptions[3];
-	aArtOptions[0] = argc >= 10 ? str_toint(argv[10]) : true; //optimize
-	aArtOptions[1] = argc >= 11 ? str_toint(argv[11]) : false; //centralize
+	aArtOptions[0] = argc > 10 ? str_toint(argv[10]) : true; //optimize
+	aArtOptions[1] = argc > 11 ? str_toint(argv[11]) : false; //centralize
 
 	dbg_msg("map_create_pixelart", "image_file='%s'; image_pixelsize='%dpx'; input_map='%s'; layergroup_id='#%d'; layer_id='#%d'; pos_x='#%dpx'; pos_y='%dpx'; quad_pixelsize='%dpx'; output_map='%s'; optimize='%d'; centralize='%d'",
-		aFilenames[2], aPixelSizes[0], aFilenames[1], aLayerId[0], aLayerId[1], aStartingPos[0], aStartingPos[1], aPixelSizes[1], aFilenames[2], aArtOptions[0], aArtOptions[1]);
+		aFilenames[2], aPixelSizes[0], aFilenames[0], aLayerId[0], aLayerId[1], aStartingPos[0], aStartingPos[1], aPixelSizes[1], aFilenames[1], aArtOptions[0], aArtOptions[1]);
 
 	return !CreatePixelArt(aFilenames, aLayerId, aStartingPos, aPixelSizes, aArtOptions);
 }
 
-bool CreatePixelArt(const char aFilenames[3][64], const int aLayerId[2], const int aStartingPos[2], int aPixelSizes[2], const bool aArtOptions[2])
+bool CreatePixelArt(const char aFilenames[3][IO_MAX_PATH_LENGTH], const int aLayerId[2], const int aStartingPos[2], int aPixelSizes[2], const bool aArtOptions[2])
 {
 	CImageInfo Img;
 	if(!LoadPng(&Img, aFilenames[2]))
@@ -88,7 +94,7 @@ bool CreatePixelArt(const char aFilenames[3][64], const int aLayerId[2], const i
 
 	InsertCurrentQuads(InputMap, pQuadLayer, pQuads);
 	int QuadsCounter = InsertPixelArtQuads(pQuads, pQuadLayer->m_NumQuads, Img, aStartingPos, aPixelSizes, aArtOptions);
-	SaveOutputMap(InputMap, OutputMap, pQuadLayer, ItemNumber, pQuads, ((int)sizeof(CQuad)) * (pQuadLayer->m_NumQuads + 1));
+	SaveOutputMap(InputMap, OutputMap, pQuadLayer, ItemNumber, pQuads, (int)sizeof(CQuad) * pQuadLayer->m_NumQuads);
 	delete[] pQuads;
 
 	dbg_msg("map_create_pixelart", "INFO: successfully added %d new pixelart quads.", QuadsCounter);
@@ -357,7 +363,7 @@ bool LoadPng(CImageInfo *pImg, const char *pFilename)
 	return true;
 }
 
-bool OpenMaps(const char pMapNames[2][64], CDataFileReader &InputMap, CDataFileWriter &OutputMap)
+bool OpenMaps(const char pMapNames[2][IO_MAX_PATH_LENGTH], CDataFileReader &InputMap, CDataFileWriter &OutputMap)
 {
 	IStorage *pStorage = CreateLocalStorage();
 

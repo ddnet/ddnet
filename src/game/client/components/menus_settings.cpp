@@ -45,9 +45,10 @@ CMenusKeyBinder CMenus::m_Binder;
 
 CMenusKeyBinder::CMenusKeyBinder()
 {
+	m_pKeyReaderId = nullptr;
 	m_TakeKey = false;
 	m_GotKey = false;
-	m_ModifierCombination = 0;
+	m_ModifierCombination = CBinds::MODIFIER_NONE;
 }
 
 bool CMenusKeyBinder::OnInput(const IInput::CEvent &Event)
@@ -64,7 +65,7 @@ bool CMenusKeyBinder::OnInput(const IInput::CEvent &Event)
 			m_ModifierCombination = CBinds::GetModifierMask(Input());
 			if(m_ModifierCombination == CBinds::GetModifierMaskOfKey(Event.m_Key))
 			{
-				m_ModifierCombination = 0;
+				m_ModifierCombination = CBinds::MODIFIER_NONE;
 			}
 		}
 		return true;
@@ -1066,12 +1067,9 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 	int NumOptions = 1; // expandable header
 	if(JoystickEnabled)
 	{
-		if(NumJoysticks == 0)
-			NumOptions++; // message
-		else
+		NumOptions++; // message or joystick name/selection
+		if(NumJoysticks > 0)
 		{
-			if(NumJoysticks > 1)
-				NumOptions++; // joystick selection
 			NumOptions += 3; // mode, ui sens, tolerance
 			if(!g_Config.m_InpControllerAbsolute)
 				NumOptions++; // ingame sens
@@ -2615,6 +2613,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), &g_Config.m_ClChatTeamColors, &LeftView, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowChatFriends, Localize("Show only chat messages from friends"), &g_Config.m_ClShowChatFriends, &LeftView, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowChatTeamMembersOnly, Localize("Show only chat messages from team members"), &g_Config.m_ClShowChatTeamMembersOnly, &LeftView, LineSize);
 
 		if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &LeftView, LineSize))
 			GameClient()->m_Chat.RebuildChat();
@@ -2892,13 +2891,15 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 			if(!g_Config.m_ClShowChatFriends)
 			{
-				TempY += RenderMessageBackground(PREVIEW_HIGHLIGHT);
+				if(!g_Config.m_ClShowChatTeamMembersOnly)
+					TempY += RenderMessageBackground(PREVIEW_HIGHLIGHT);
 				TempY += RenderMessageBackground(PREVIEW_TEAM);
 			}
 
-			TempY += RenderMessageBackground(PREVIEW_FRIEND);
+			if(!g_Config.m_ClShowChatTeamMembersOnly)
+				TempY += RenderMessageBackground(PREVIEW_FRIEND);
 
-			if(!g_Config.m_ClShowChatFriends)
+			if(!g_Config.m_ClShowChatFriends && !g_Config.m_ClShowChatTeamMembersOnly)
 			{
 				TempY += RenderMessageBackground(PREVIEW_SPAMMER);
 			}
@@ -2917,9 +2918,10 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		if(!g_Config.m_ClShowChatFriends)
 		{
 			// Highlighted
-			if(!g_Config.m_ClChatOld)
+			if(!g_Config.m_ClChatOld && !g_Config.m_ClShowChatTeamMembersOnly)
 				RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_HIGHLIGHT].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-			Y += RenderPreview(PREVIEW_HIGHLIGHT, X, Y).y;
+			if(!g_Config.m_ClShowChatTeamMembersOnly)
+				Y += RenderPreview(PREVIEW_HIGHLIGHT, X, Y).y;
 
 			// Team
 			if(!g_Config.m_ClChatOld)
@@ -2928,12 +2930,13 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		}
 
 		// Friend
-		if(!g_Config.m_ClChatOld)
+		if(!g_Config.m_ClChatOld && !g_Config.m_ClShowChatTeamMembersOnly)
 			RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_FRIEND].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-		Y += RenderPreview(PREVIEW_FRIEND, X, Y).y;
+		if(!g_Config.m_ClShowChatTeamMembersOnly)
+			Y += RenderPreview(PREVIEW_FRIEND, X, Y).y;
 
 		// Normal
-		if(!g_Config.m_ClShowChatFriends)
+		if(!g_Config.m_ClShowChatFriends && !g_Config.m_ClShowChatTeamMembersOnly)
 		{
 			if(!g_Config.m_ClChatOld)
 				RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_SPAMMER].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));

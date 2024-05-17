@@ -487,17 +487,18 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			{
 				Ui()->SetActiveItem(pId);
 			}
-			else
-			{
-				const int HoveredTick = (int)(clamp((Ui()->MouseX() - SeekBar.x - Rounding) / (float)(SeekBar.w - 2 * Rounding), 0.0f, 1.0f) * TotalTicks);
-				static char s_aHoveredTime[32];
-				str_time((int64_t)HoveredTick / Client()->GameTickSpeed() * 100, TIME_HOURS, s_aHoveredTime, sizeof(s_aHoveredTime));
-				GameClient()->m_Tooltips.DoToolTip(pId, &SeekBar, s_aHoveredTime);
-			}
 		}
 
-		if(Inside)
+		if(Inside && !Ui()->MouseButton(0))
 			Ui()->SetHotItem(pId);
+
+		if(Ui()->HotItem() == pId)
+		{
+			const int HoveredTick = (int)(clamp((Ui()->MouseX() - SeekBar.x - Rounding) / (float)(SeekBar.w - 2 * Rounding), 0.0f, 1.0f) * TotalTicks);
+			static char s_aHoveredTime[32];
+			str_time((int64_t)HoveredTick / Client()->GameTickSpeed() * 100, TIME_HOURS, s_aHoveredTime, sizeof(s_aHoveredTime));
+			GameClient()->m_Tooltips.DoToolTip(pId, &SeekBar, s_aHoveredTime);
+		}
 	}
 
 	bool IncreaseDemoSpeed = false, DecreaseDemoSpeed = false;
