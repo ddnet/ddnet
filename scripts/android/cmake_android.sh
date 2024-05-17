@@ -198,9 +198,7 @@ copy_dummy_files other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launche
 
 function copy_libs() {
 	mkdir -p "lib/$2"
-	cp "$_ANDROID_SUB_BUILD_DIR/$1/libDDNet.so" "lib/$2"
-	cp "$_ANDROID_SUB_BUILD_DIR/$1/libs/libSDL2.so" "lib/$2"
-	cp "$_ANDROID_SUB_BUILD_DIR/$1/libs/libhidapi.so" "lib/$2"
+	cp "$_ANDROID_SUB_BUILD_DIR/$1/libDDNet.so" "lib/$2" || exit 1
 }
 
 if [[ "${_DEFAULT_ANDROID_BUILD}" == "arm" || "${_DEFAULT_ANDROID_BUILD}" == "all" ]]; then
