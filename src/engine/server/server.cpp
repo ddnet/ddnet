@@ -953,8 +953,15 @@ void CServer::DoSnapshot()
 					if(!latestInput || !latestTick)
 						continue;
 					
-					CNetObj_PreInput * preInputs = IServer::SnapNewItem<CNetObj_PreInput>(j);
+
 					CNetObj_PlayerInput * input = (CNetObj_PlayerInput *)latestInput->m_aData;
+					
+					if(mem_comp(input, &m_aClients[i].m_aPreInputs[j], sizeof(CNetObj_PlayerInput)) == 0)
+						continue; //same as last send
+
+					m_aClients[i].m_aPreInputs[j] = *input;
+					
+					CNetObj_PreInput * preInputs = IServer::SnapNewItem<CNetObj_PreInput>(j);
 					preInputs->m_Direction = input->m_Direction;
 					preInputs->m_TargetX = input->m_TargetX;
 					preInputs->m_TargetY = input->m_TargetY;
