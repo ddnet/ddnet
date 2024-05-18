@@ -2117,6 +2117,11 @@ void CGameClient::OnPredict()
 				if(Events & COREEVENT_AIR_JUMP)
 					m_Effects.AirJump(Pos, 1.0f);
 		}
+
+		if(Tick == predictTick)
+		{
+			m_PartialPredictedWorld.CopyWorld(&m_PredictedWorld);
+		}
 	}
 
 	// detect mispredictions of other players and make corrections smoother when possible
