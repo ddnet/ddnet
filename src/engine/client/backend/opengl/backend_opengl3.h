@@ -71,7 +71,6 @@ protected:
 
 	void InitPrimExProgram(CGLSLPrimitiveExProgram *pProgram, class CGLSLCompiler *pCompiler, class IStorage *pStorage, bool Textured, bool Rotationless);
 
-	static int TexFormatToNewOpenGLFormat(int TexFormat);
 	bool IsNewApi() override { return true; }
 
 	void UseProgram(CGLSLTWProgram *pProgram);

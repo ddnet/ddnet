@@ -82,7 +82,6 @@ protected:
 
 	bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) override;
 
-	static int TexFormatToOpenGLFormat(int TexFormat);
 	static size_t GLFormatToPixelSize(int GLFormat);
 
 	void TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, uint8_t *pTexData);

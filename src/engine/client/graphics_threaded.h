@@ -527,9 +527,8 @@ public:
 
 		size_t m_Width;
 		size_t m_Height;
-		int m_Format;
-		int m_StoreFormat;
 		int m_Flags;
+		// data must be in RGBA format
 		uint8_t *m_pData; // will be freed by the command processor
 	};
 
@@ -545,7 +544,7 @@ public:
 		int m_Y;
 		size_t m_Width;
 		size_t m_Height;
-		int m_Format;
+		// data must be in RGBA format
 		uint8_t *m_pData; // will be freed by the command processor
 	};
 

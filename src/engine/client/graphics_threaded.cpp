@@ -347,7 +347,6 @@ int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureId, int x, int y
 	Cmd.m_Y = y;
 	Cmd.m_Width = Image.m_Width;
 	Cmd.m_Height = Image.m_Height;
-	Cmd.m_Format = CCommandBuffer::TEXFORMAT_RGBA;
 
 	uint8_t *pTmpData = static_cast<uint8_t *>(malloc(Image.m_Width * Image.m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
 	ConvertToRGBA(pTmpData, Image);
@@ -433,8 +432,6 @@ static CCommandBuffer::SCommand_Texture_Create LoadTextureCreateCommand(int Text
 	Cmd.m_Slot = TextureId;
 	Cmd.m_Width = Width;
 	Cmd.m_Height = Height;
-	Cmd.m_Format = CCommandBuffer::TEXFORMAT_RGBA;
-	Cmd.m_StoreFormat = CCommandBuffer::TEXFORMAT_RGBA;
 
 	Cmd.m_Flags = 0;
 	if(Flags & IGraphics::TEXLOAD_NOMIPMAPS)
