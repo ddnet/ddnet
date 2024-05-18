@@ -220,6 +220,7 @@ public:
 	virtual bool ServerCapAnyPlayerFlag() const = 0;
 
 	virtual int GetPredictionTime() = 0;
+	virtual int GetPredictionTick() = 0;
 
 	// snapshot interface
 
