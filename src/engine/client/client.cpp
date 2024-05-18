@@ -4535,6 +4535,12 @@ int main(int argc, const char **argv)
 	SDL_SetHint("SDL_IME_SHOW_UI", "1");
 #endif
 
+#if defined(CONF_PLATFORM_ANDROID)
+	// Trap the Android back button so it can be handled in our code reliably
+	// instead of letting the system handle it.
+	SDL_SetHint("SDL_ANDROID_TRAP_BACK_BUTTON", "1");
+#endif
+
 	// init SDL
 	if(SDL_Init(0) < 0)
 	{
