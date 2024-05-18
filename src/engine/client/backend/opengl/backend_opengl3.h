@@ -67,8 +67,6 @@ protected:
 
 	std::vector<TWGLuint> m_vBufferObjectIndices;
 
-	CCommandBuffer::SColorf m_ClearColor;
-
 	void InitPrimExProgram(CGLSLPrimitiveExProgram *pProgram, class CGLSLCompiler *pCompiler, class IStorage *pStorage, bool Textured, bool Rotationless);
 
 	bool IsNewApi() override { return true; }

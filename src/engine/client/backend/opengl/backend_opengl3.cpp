@@ -414,8 +414,6 @@ bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand
 
 	m_vTextures.resize(CCommandBuffer::MAX_TEXTURES);
 
-	m_ClearColor.r = m_ClearColor.g = m_ClearColor.b = -1.f;
-
 	// fix the alignment to allow even 1byte changes, e.g. for alpha components
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
@@ -687,11 +685,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Clear(const CCommandBuffer::SComma
 	{
 		glDisable(GL_SCISSOR_TEST);
 	}
-	if(pCommand->m_Color.r != m_ClearColor.r || pCommand->m_Color.g != m_ClearColor.g || pCommand->m_Color.b != m_ClearColor.b)
-	{
-		glClearColor(pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, 0.0f);
-		m_ClearColor = pCommand->m_Color;
-	}
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	if(ClipWasEnabled)
 	{

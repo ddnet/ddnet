@@ -1059,8 +1059,6 @@ private:
 
 	SDL_Window *m_pWindow;
 
-	std::array<float, 4> m_aClearColor = {0, 0, 0, 0};
-
 	struct SRenderCommandExecuteBuffer
 	{
 		CCommandBuffer::ECommandBufferCMD m_Command;
@@ -1076,8 +1074,6 @@ private:
 		std::array<SDeviceDescriptorSet, 2> m_aDescriptors;
 
 		VkBuffer m_IndexBuffer;
-
-		bool m_ClearColorInRenderThread = false;
 
 		bool m_HasDynamicState = false;
 		VkViewport m_Viewport;
@@ -2445,7 +2441,7 @@ protected:
 		RenderPassInfo.renderArea.offset = {0, 0};
 		RenderPassInfo.renderArea.extent = m_VKSwapImgAndViewportExtent.m_SwapImageViewport;
 
-		VkClearValue ClearColorVal = {{{m_aClearColor[0], m_aClearColor[1], m_aClearColor[2], m_aClearColor[3]}}};
+		VkClearValue ClearColorVal = {{{0.0f, 0.0f, 0.0f, 0.0f}}};
 		RenderPassInfo.clearValueCount = 1;
 		RenderPassInfo.pClearValues = &ClearColorVal;
 
@@ -6715,37 +6711,19 @@ public:
 
 	void Cmd_Clear_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_Clear *pCommand)
 	{
-		if(!pCommand->m_ForceClear)
-		{
-			bool ColorChanged = m_aClearColor[0] != pCommand->m_Color.r || m_aClearColor[1] != pCommand->m_Color.g ||
-					    m_aClearColor[2] != pCommand->m_Color.b || m_aClearColor[3] != pCommand->m_Color.a;
-			m_aClearColor[0] = pCommand->m_Color.r;
-			m_aClearColor[1] = pCommand->m_Color.g;
-			m_aClearColor[2] = pCommand->m_Color.b;
-			m_aClearColor[3] = pCommand->m_Color.a;
-			if(ColorChanged)
-				ExecBuffer.m_ClearColorInRenderThread = true;
-		}
-		else
-		{
-			ExecBuffer.m_ClearColorInRenderThread = true;
-		}
 		ExecBuffer.m_EstimatedRenderCallCount = 0;
 	}
 
 	[[nodiscard]] bool Cmd_Clear(const SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_Clear *pCommand)
 	{
-		if(ExecBuffer.m_ClearColorInRenderThread)
-		{
-			std::array<VkClearAttachment, 1> aAttachments = {VkClearAttachment{VK_IMAGE_ASPECT_COLOR_BIT, 0, VkClearValue{VkClearColorValue{{pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, pCommand->m_Color.a}}}}};
-			std::array<VkClearRect, 1> aClearRects = {VkClearRect{{{0, 0}, m_VKSwapImgAndViewportExtent.m_SwapImageViewport}, 0, 1}};
+		std::array<VkClearAttachment, 1> aAttachments = {VkClearAttachment{VK_IMAGE_ASPECT_COLOR_BIT, 0, VkClearValue{VkClearColorValue{{0.0f, 0.0f, 0.0f, 0.0f}}}}};
+		std::array<VkClearRect, 1> aClearRects = {VkClearRect{{{0, 0}, m_VKSwapImgAndViewportExtent.m_SwapImageViewport}, 0, 1}};
 
-			VkCommandBuffer *pCommandBuffer;
-			if(!GetGraphicCommandBuffer(pCommandBuffer, ExecBuffer.m_ThreadIndex))
-				return false;
-			auto &CommandBuffer = *pCommandBuffer;
-			vkCmdClearAttachments(CommandBuffer, aAttachments.size(), aAttachments.data(), aClearRects.size(), aClearRects.data());
-		}
+		VkCommandBuffer *pCommandBuffer;
+		if(!GetGraphicCommandBuffer(pCommandBuffer, ExecBuffer.m_ThreadIndex))
+			return false;
+		auto &CommandBuffer = *pCommandBuffer;
+		vkCmdClearAttachments(CommandBuffer, aAttachments.size(), aAttachments.data(), aClearRects.size(), aClearRects.data());
 
 		return true;
 	}

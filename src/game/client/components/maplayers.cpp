@@ -1412,6 +1412,23 @@ void CMapLayers::OnRender()
 	CUIRect Screen;
 	Graphics()->GetScreen(&Screen.x, &Screen.y, &Screen.w, &Screen.h);
 
+	if(m_Type == TYPE_BACKGROUND || m_Type == TYPE_BACKGROUND_FORCE)
+	{
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		if(g_Config.m_ClOverlayEntities)
+		{
+			Graphics()->SetColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundEntitiesColor)));
+		}
+		else
+		{
+			Graphics()->SetColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundColor)));
+		}
+		IGraphics::CQuadItem QuadItem(Screen.x, Screen.y, Screen.w, Screen.h);
+		Graphics()->QuadsDrawTL(&QuadItem, 1);
+		Graphics()->QuadsEnd();
+	}
+
 	vec2 Center = GetCurCamera()->m_Center;
 
 	bool PassedGameLayer = false;
