@@ -919,27 +919,22 @@ void CServer::DoSnapshot()
 
 			GameServer()->OnSnap(i);
 
-			if(Config()->m_SvPreInputs && m_aClients[i].m_DDNetVersion >= VERSION_DDNET_PREINPUT)
+			if(Config()->m_SvPreInputs && m_aClients[i].m_DDNetVersion >= VERSION_DDNET_PREINPUT
+				&& GameServer()->IsClientPlayer(i))
 			{
 				for(int j = 0; j < MaxClients(); j++)
 				{
 					if(i==j)
 						continue;
 					
-					if(!GameServer()->IsClientReady(j))
+					//skip if player not in game and in view
+					if(!GameServer()->IsClientReady(j) || !GameServer()->IsClientPlayer(j)
+						|| !GameServer()->GetPlayerChar(j) || !GameServer()->GetPlayerChar(j)->CanSnapCharacter(i)
+						|| !GameServer()->GetPlayerChar(j)->IsSnappingCharacterInView(i))
 						continue;
-					
-					//client in game
-					if(!GameServer()->IsClientPlayer(j))
-						continue;
-					
-					if(!GameServer()->GetPlayerChar(j))
-						continue;
-					
-					if(!GameServer()->GetPlayerChar(j)->CanSnapCharacter(i))
-						continue;
-					
-					if(!GameServer()->GetPlayerChar(j)->IsSnappingCharacterInView(i))
+
+					//skip if on different teams
+					if(!GameServer()->GetPlayerChar(j)->SameTeam(i))
 						continue;
 					
 					//get latest tick
@@ -956,9 +951,6 @@ void CServer::DoSnapshot()
 					}
 
 					if(!latestInput || !latestTick)
-						continue;
-
-					if(m_CurrentGameTick >= latestTick)
 						continue;
 					
 					CNetObj_PreInput * preInputs = IServer::SnapNewItem<CNetObj_PreInput>(j);
