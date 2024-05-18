@@ -2013,11 +2013,10 @@ void CGameClient::OnPredict()
 	if(PredictDummy())
 		pDummyChar = m_PredictedWorld.GetCharacterById(m_PredictedDummyId);
 
-	float predictPercentage = 1 - g_Config.m_ClAntiPingPercent / 100.0;
-	int predictTick = Client()->GetPredictionTime() * Client()->GameTickSpeed() / 1000.0;
+	float predictPercentage = 1 - g_Config.m_ClAntiPingPercent / 100.0f;
+	int predictTick = Client()->GetPredictionTime() * Client()->GameTickSpeed() / 1000.0f;
 	predictTick = Client()->PredGameTick(g_Config.m_ClDummy) - floor(predictTick * predictPercentage);
 
-	
 	// predict
 	for(int Tick = Client()->GameTick(g_Config.m_ClDummy) + 1; Tick <= Client()->PredGameTick(g_Config.m_ClDummy); Tick++)
 	{
@@ -2034,7 +2033,7 @@ void CGameClient::OnPredict()
 			m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
 			m_PredictedPrevChar = pLocalChar->GetCore();
 			m_aClients[m_Snap.m_LocalClientId].m_PrevPredicted = pLocalChar->GetCore();
-			
+
 			if(pDummyChar)
 				m_aClients[m_PredictedDummyId].m_PrevPredicted = pDummyChar->GetCore();
 		}
@@ -2062,7 +2061,6 @@ void CGameClient::OnPredict()
 		m_PredictedWorld.Tick();
 
 		// fetch the current characters
-		// if(Tick == Client()->PredGameTick(g_Config.m_ClDummy) || 
 		if(Tick == predictTick)
 		{
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -2074,7 +2072,7 @@ void CGameClient::OnPredict()
 		{
 			m_PredictedChar = pLocalChar->GetCore();
 			m_aClients[m_Snap.m_LocalClientId].m_Predicted = pLocalChar->GetCore();
-			
+
 			if(pDummyChar)
 				m_aClients[m_PredictedDummyId].m_Predicted = pDummyChar->GetCore();
 		}
