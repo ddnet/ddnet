@@ -35,7 +35,7 @@ public:
 
 	void Play(int SoundId);
 	void PlayAt(int SoundId, vec2 Pos);
-	
+
 	virtual void OnMapLoad() override;
 	virtual void OnRender() override;
 	virtual void OnStateChange(int NewState, int OldState) override;
