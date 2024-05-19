@@ -1,7 +1,7 @@
 # pylint: skip-file
 # See https://github.com/ddnet/ddnet/issues/3507
 
-from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
+from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
@@ -369,6 +369,10 @@ Objects = [
 		NetIntAny("m_Layer"),
 		NetIntAny("m_EntityClass"),
 	]),
+
+	NetEventEx("MapSoundWorld:Common", "map-sound-world@netobj.ddnet.org", [
+		NetIntAny("m_SoundId", 0),
+	]),
 ]
 
 Messages = [
@@ -579,5 +583,9 @@ Messages = [
 
 	NetMessageEx("Sv_ChangeInfoCooldown", "change-info-cooldown@netmsg.ddnet.org", [
 		NetTick("m_WaitUntil")
+	]),
+
+	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
+		NetIntAny("m_SoundId", 0),
 	]),
 ]

@@ -996,6 +996,17 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		CNetMsg_Sv_ChangeInfoCooldown *pMsg = (CNetMsg_Sv_ChangeInfoCooldown *)pRawMsg;
 		m_NextChangeInfo = pMsg->m_WaitUntil;
 	}
+	else if(MsgId == NETMSGTYPE_SV_MAPSOUNDGLOBAL)
+	{
+		if(m_SuppressEvents)
+			return;
+
+		if(!g_Config.m_SndGame)
+			return;
+
+		CNetMsg_Sv_MapSoundGlobal *pMsg = (CNetMsg_Sv_MapSoundGlobal *)pRawMsg;
+		m_MapSounds.Play(pMsg->m_SoundId);
+	}
 }
 
 void CGameClient::OnStateChange(int NewState, int OldState)
@@ -1160,6 +1171,14 @@ void CGameClient::ProcessEvents()
 				continue;
 
 			m_Sounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, 1.0f, vec2(pEvent->m_X, pEvent->m_Y));
+		}
+		else if(Item.m_Type == NETEVENTTYPE_MAPSOUNDWORLD)
+		{
+			CNetEvent_MapSoundWorld *pEvent = (CNetEvent_MapSoundWorld *)pData;
+			if(!Config()->m_SndGame)
+				continue;
+
+			m_MapSounds.PlayAt(pEvent->m_SoundId, vec2(pEvent->m_X, pEvent->m_Y));
 		}
 	}
 }
