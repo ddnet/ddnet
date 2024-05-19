@@ -306,7 +306,8 @@ public:
 	virtual void WindowDestroyNtf(uint32_t WindowId) = 0;
 	virtual void WindowCreateNtf(uint32_t WindowId) = 0;
 
-	virtual void Clear() = 0;
+	// ForceClearNow forces the backend to trigger a clear, even at performance cost, else it might be delayed by one frame
+	virtual void Clear(float r, float g, float b, bool ForceClearNow = false) = 0;
 
 	virtual void ClipEnable(int x, int y, int w, int h) = 0;
 	virtual void ClipDisable() = 0;

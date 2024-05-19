@@ -891,7 +891,17 @@ const char *CClient::ErrorString() const
 
 void CClient::Render()
 {
-	Graphics()->Clear();
+	if(g_Config.m_ClOverlayEntities)
+	{
+		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundEntitiesColor));
+		Graphics()->Clear(bg.r, bg.g, bg.b);
+	}
+	else
+	{
+		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundColor));
+		Graphics()->Clear(bg.r, bg.g, bg.b);
+	}
+
 	GameClient()->OnRender();
 	DebugRender();
 
@@ -2718,7 +2728,7 @@ void CClient::Run()
 	}
 
 	// make sure the first frame just clears everything to prevent undesired colors when waiting for io
-	Graphics()->Clear();
+	Graphics()->Clear(0, 0, 0);
 	Graphics()->Swap();
 
 	// init sound, allowed to fail
@@ -3773,7 +3783,7 @@ void CClient::UpdateAndSwap()
 {
 	Input()->Update();
 	Graphics()->Swap();
-	Graphics()->Clear();
+	Graphics()->Clear(0, 0, 0);
 }
 
 void CClient::ServerBrowserUpdate()

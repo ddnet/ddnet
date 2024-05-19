@@ -1092,12 +1092,12 @@ void CGameClient::RenderShutdownMessage()
 		dbg_assert(false, "Invalid client state for quitting message");
 
 	// This function only gets called after the render loop has already terminated, so we have to call Swap manually.
-	Graphics()->Clear();
+	Graphics()->Clear(0.0f, 0.0f, 0.0f);
 	Ui()->MapScreen();
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	Ui()->DoLabel(Ui()->Screen(), pMessage, 16.0f, TEXTALIGN_MC);
 	Graphics()->Swap();
-	Graphics()->Clear();
+	Graphics()->Clear(0.0f, 0.0f, 0.0f);
 }
 
 void CGameClient::OnRconType(bool UsernameReq)

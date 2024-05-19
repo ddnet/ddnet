@@ -7718,7 +7718,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 void CEditor::Render()
 {
 	// basic start
-	Graphics()->Clear();
+	Graphics()->Clear(0.0f, 0.0f, 0.0f);
 	CUIRect View = *Ui()->Screen();
 	Ui()->MapScreen();
 	m_CursorType = CURSOR_NORMAL;
