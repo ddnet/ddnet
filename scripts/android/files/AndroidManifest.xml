@@ -3,6 +3,8 @@
 	package="tw.DDNet">
 	<uses-feature
 		android:glEsVersion="0x00030000" />
+	<uses-feature
+		android:name="android.hardware.screen.landscape" />
 
 	<!-- Teeworlds does broadcasts over local networks -->
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
@@ -24,10 +26,11 @@
 		android:isGame="true"
 		android:icon="@mipmap/ic_launcher"
 		android:roundIcon="@mipmap/ic_launcher_round"
-		>
+		android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
 		<activity
 			android:name=".NativeMain"
-			android:configChanges="orientation|screenSize|screenLayout|keyboardHidden">
+			android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+			android:screenOrientation="landscape">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 
