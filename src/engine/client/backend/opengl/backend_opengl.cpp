@@ -937,7 +937,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_
 	{
 		glDisable(GL_SCISSOR_TEST);
 	}
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if(ClipWasEnabled)
 	{

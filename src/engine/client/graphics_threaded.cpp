@@ -833,9 +833,14 @@ void CGraphics_Threaded::TextureSet(CTextureHandle TextureId)
 	m_State.m_Texture = TextureId.Id();
 }
 
-void CGraphics_Threaded::Clear()
+void CGraphics_Threaded::Clear(float r, float g, float b, bool ForceClearNow)
 {
 	CCommandBuffer::SCommand_Clear Cmd;
+	Cmd.m_Color.r = r;
+	Cmd.m_Color.g = g;
+	Cmd.m_Color.b = b;
+	Cmd.m_Color.a = 0;
+	Cmd.m_ForceClear = ForceClearNow;
 	AddCmd(Cmd);
 }
 
