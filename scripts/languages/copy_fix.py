@@ -8,7 +8,10 @@ def copy_fix(infile, delete_unused, append_missing, delete_empty):
 	with open(infile, encoding="utf-8") as f:
 		content = f.readlines()
 	trans = twlang.translations(infile)
-	local = twlang.localizes()
+	if delete_unused or append_missing:
+		local = twlang.localizes()
+	else:
+		local = []
 	supported = []
 	for tran, (start, expr, end) in trans.items():
 		if delete_unused and tran not in local:
