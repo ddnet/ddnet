@@ -220,7 +220,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 	}
 
-	if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
+	if(m_pClient->m_GameInfo.m_TimeScore)
 	{
 		if(m_ServerRecord > 0)
 			str_time_float(m_ServerRecord, TIME_HOURS, aBuf, sizeof(aBuf));
@@ -289,7 +289,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	x += 10.0f;
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
-	const char *pScore = (m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard) ? Localize("Time") : Localize("Score");
+	const char *pScore = m_pClient->m_GameInfo.m_TimeScore ? Localize("Time") : Localize("Score");
 	tw = TextRender()->TextWidth(HeadlineFontsize, pScore, -1, -1.0f);
 	TextRender()->Text(ScoreOffset + ScoreLength - tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, pScore, -1.0f);
 
@@ -397,7 +397,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 
 		// score
-		if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
+		if(m_pClient->m_GameInfo.m_TimeScore)
 		{
 			if(pInfo->m_Score == -9999)
 				aBuf[0] = 0;
