@@ -919,7 +919,7 @@ void CServer::DoSnapshot()
 
 			GameServer()->OnSnap(i);
 
-			if(Config()->m_SvPreInputs // && m_aClients[i].m_DDNetVersion >= VERSION_DDNET_PREINPUT
+			if(Config()->m_SvPreInputs && m_aClients[i].m_DDNetVersion >= VERSION_DDNET_PREINPUT
 				&& GameServer()->IsClientPlayer(i))
 			{
 				for(int j = 0; j < MaxClients(); j++)
