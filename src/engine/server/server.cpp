@@ -919,7 +919,7 @@ void CServer::DoSnapshot()
 
 			GameServer()->OnSnap(i);
 
-			if(Config()->m_SvPreInputs && m_aClients[i].m_DDNetVersion >= VERSION_DDNET_PREINPUT
+			if(Config()->m_SvPreInputs // && m_aClients[i].m_DDNetVersion >= VERSION_DDNET_PREINPUT
 				&& GameServer()->IsClientPlayer(i))
 			{
 				for(int j = 0; j < MaxClients(); j++)
@@ -954,24 +954,30 @@ void CServer::DoSnapshot()
 						continue;
 					
 
-					CNetObj_PlayerInput * input = (CNetObj_PlayerInput *)latestInput->m_aData;
-					
-					if(mem_comp(input, &m_aClients[i].m_aPreInputs[j], sizeof(CNetObj_PlayerInput)) == 0)
+					CNetObj_PlayerInput input = *(CNetObj_PlayerInput *)latestInput->m_aData;
+
+					//ignore m_TargetX / m_TargetY
+					input.m_TargetX = 0;
+					input.m_TargetY = 0;
+
+					if(mem_comp(&input, &m_aClients[i].m_aPreInputs[j], sizeof(CNetObj_PlayerInput)) == 0)
 						continue; //same as last send
 
-					m_aClients[i].m_aPreInputs[j] = *input;
+					m_aClients[i].m_aPreInputs[j] = input;
+
+					input = *(CNetObj_PlayerInput *)latestInput->m_aData;
 					
 					CNetObj_PreInput * preInputs = IServer::SnapNewItem<CNetObj_PreInput>(j);
-					preInputs->m_Direction = input->m_Direction;
-					preInputs->m_TargetX = input->m_TargetX;
-					preInputs->m_TargetY = input->m_TargetY;
-					preInputs->m_Jump = input->m_Jump;
-					preInputs->m_Fire = input->m_Fire;
-					preInputs->m_Hook = input->m_Hook;
-					preInputs->m_PlayerFlags = input->m_PlayerFlags;
-					preInputs->m_WantedWeapon = input->m_WantedWeapon;
-					preInputs->m_NextWeapon = input->m_NextWeapon;
-					preInputs->m_PrevWeapon = input->m_PrevWeapon;
+					preInputs->m_Direction = input.m_Direction;
+					preInputs->m_TargetX = input.m_TargetX;
+					preInputs->m_TargetY = input.m_TargetY;
+					preInputs->m_Jump = input.m_Jump;
+					preInputs->m_Fire = input.m_Fire;
+					preInputs->m_Hook = input.m_Hook;
+					preInputs->m_PlayerFlags = input.m_PlayerFlags;
+					preInputs->m_WantedWeapon = input.m_WantedWeapon;
+					preInputs->m_NextWeapon = input.m_NextWeapon;
+					preInputs->m_PrevWeapon = input.m_PrevWeapon;
 					preInputs->m_IntendedTick = latestTick;
 				}
 			}
