@@ -7,6 +7,7 @@
 #	Shymwo			2011-07-15 01:27:45
 #	Shymwo			2011-07-21 18:54:53
 #	CROACH			2022-05-15 21:41:32
+#	Delciak (PKP) & Shkyyl	2024-05-19 17:52:30
 ##### /authors #####
 
 ##### translated strings #####
@@ -641,7 +642,7 @@ Enable highlighted chat sound
 == Włącz dźwięk wyróżnionej wiadomości
 
 Map sound volume
-== Glośność dźwięków z map
+== Głośność dźwięków z map
 
 No updates available
 == Brak dostępnych aktualizacji
@@ -1207,11 +1208,11 @@ Team %d
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Wystąpił błąd podczas inicjalizacji. Spróbuj zmienić gfx_backend na OpenGL lub Vulkan w settings_ddnet.cfg w folderze konfiguracyjnym i spróbuj ponownie.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Brak pamięci VRAM. Spróbuj usunąć niestandardowe zasoby (skiny, entities, itd.), szczególnie te z dużą rozdzielczością.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1231,435 +1232,435 @@ Failed to swap framebuffers. Try to update your GPU drivers.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Wystąpił nieznany błąd. Spróbuj zmienić gfx_backend na OpenGL lub Vulkan w settings_ddnet.cfg w folderze konfiguracyjnym i spróbuj ponownie.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Nie można zainicjować podanego backendu graficznego, domyślny backend został przywrócony.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Nie można zainicjować podanego backendu graficznego, ponieważ prawdopodobnie nie zainstalowałeś sterowników do zintegrowanej karty graficznej.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Nie udało się zapisać pobranej mapy. Spróbuj ręcznie usunąć plik: %s
 
 Error playing demo
-== 
+== Wystąpił błąd podczas odtwarzania demo
 
 Failed saving the replay!
-== 
+== Wystąpił błąd podczas zapisywania powtórki!
 
 Saving settings to '%s' failed
-== 
+== Zapisywanie ustawień do '%s' nie powiodło się
 
 Error saving settings
-== 
+== Wystąpił błąd podczas zapisywania ustawień
 
 Preparing demo playback
-== 
+== Przygotowywanie do odtworzenia demo
 
 Connected
-== 
+== Połączono
 
 Loading map file from storage
-== 
+== Ładowanie pliku mapy z pamięci
 
 Loading demo file from storage
-== 
+== Ładowanie pliku demo z pamięci
 
 Why are you slowmo replaying to read this?
-== 
+== Dlaczego odtwarzasz w zwolnionym tempie, żeby to przeczytać?
 
 Initializing components
-== 
+== Inicjowanie komponentów
 
 Initializing assets
-== 
+== Inicjowanie zasobów
 
 Initializing map logic
-== 
+== Inicjowanie logiki mapy
 
 Sending initial client info
-== 
+== Wysyłanie wstępnych informacji o kliencie
 
 Quitting. Please wait…
-== 
+== Opuszczanie. Prosimy czekać…
 
 Restarting. Please wait…
-== 
+== Restartowanie. Prosimy czekać…
 
 Loading skin files
-== 
+== Ładowanie skinów
 
 Searching
-== 
+== Szukanie
 
 Enter Username
-== 
+== Wpisz nazwę użytkownika
 
 Enter Password
-== 
+== Wpisz hasło
 
 NOT CONNECTED
-== 
+== NIE POŁĄCZONO
 
 Match %d of %d
 == 
 
 No results
-== 
+== Brak wyników
 
 Lines %d - %d (%s)
-== 
+== Linie %d - %d (%s)
 
 Locked
-== 
+== Zablokowane
 
 Following
 == 
 
 Loading commands…
-== 
+== Ładowanie komend…
 
 Position:
-== 
+== Pozycja:
 
 Speed:
-== 
+== Prędkość:
 
 Angle:
-== 
+== Kąt:
 
-Multi-View
-== 
+Multi-view
+== Multi kamera
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Nie można załadować niektórych obrazów mapy. Sprawdź konsolę, aby poznać szczegóły.
 
 Uploading map data to GPU
-== 
+== Wysyłanie danych mapy do GPU
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Nie można załadować niektórych dźwięków mapy. Sprawdź konsolę, aby poznać szczegóły.
 
 Loading menu themes
-== 
+== Ładowanie motywów menu
 
 Press a key…
-== 
+== Naciśnij klawisz…
 
 Main menu
-== 
+== Menu główne
 
 Rename folder
-== 
+== Zmień nazwę katalogu
 
 Render complete
-== 
+== Zakończono renderowanie
 
 Are you sure that you want to restart?
-== 
+== Jesteś pewny, że chcesz uruchomić ponownie?
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== Posiadasz niezapisane mapy w edytorze, warto je zapisać.
 
 Continue anyway?
-== 
+== Kontynuować mimo to?
 
 A demo with this name already exists
-== 
+== Demo z tą nazwą już istnieje
 
 A folder with this name already exists
-== 
+== Katalog z tą nazwą już istnieje
 
 Unable to rename the folder
-== 
+== Nie można zmienić nazwy katalogu
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== Plik '%s' już istnieje, chcesz go zamienić?
 
 (paused)
-== 
+== (zatrzymano)
 
 Videos directory
-== 
+== Katalog filmów
 
 Video was saved to '%s'
-== 
+== Film został zapisany do '%s'
 
 Trying to determine UDP connectivity...
-== 
+== Próba określenia łączności UDP...
 
 UDP seems to be filtered.
-== 
+== Protokół UDP wydaje się być filtrowany.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== Adresy IP TDP oraz UDP są różne. Spróbuj wyłączyć usługę VPN, proxy lub akcelerację sieci.
 
 No answer from server yet.
-== 
+== Brak odpowiedzi z serwera.
 
 Getting game info
-== 
+== Pobieranie informacji o grze
 
 Requesting to join the game
-== 
+== Wysyłanie prośby o dołączenie do gry
 
 Loading menu images
-== 
+== Ładowanie obrazów menu
 
 No login required
-== 
+== Nie wymaga logowania
 
 Communities
-== 
+== Społeczności
 
 Copy info
-== 
+== Kopiuj info
 
 No server selected
-== 
+== Nie wybrano serwera
 
 Online players (%d)
-== 
+== Dostępni gracze (%d)
 
 Online clanmates (%d)
-== 
+== Dostępni członkowie klanu (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Niedostępni (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Kliknij, aby wybrać serwer. Kliknij dwukrotnie, aby dołączyć do znajomego.
 
 Click to remove this player from your friends list.
-== 
+== Kliknij, aby usunąć tego gracza z listy znajomych.
 
 Click to remove this clan from your friends list.
-== 
+== Kliknij, aby usunąć ten klan z listy znajomych.
 
 None
-== 
+== Nikt
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Jesteś pewny, że chcesz usunąć gracza '%s' z listy znajomych?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Jesteś pewny, że chcesz usunąć klan '%s' z listy znajomych?
 
 Add Clan
-== 
+== Dodaj klan
 
 Server filter
-== 
+== Filtr serwera
 
 Friends
-== 
+== Znajomi
 
 Play the current demo
-== 
+== Odtwórz bieżące demo
 
 Pause the current demo
-== 
+== Spauzuj bieżące demo
 
 Stop the current demo
-== 
+== Zatrzymaj bieżące demo
 
 Go back the specified duration
-== 
+== Cofnij o określony czas
 
 [Demo player duration]
 %d min.
-== 
+== %d min.
 
 [Demo player duration]
 %d sec.
-== 
+== %d sek.
 
 Change the skip duration
-== 
+== Zmień długość pominięcia
 
 Go forward the specified duration
-== 
+== Przewiń o określony czas
 
 Go back one tick
-== 
+== Cofnij o jeden tick
 
 Go forward one tick
-== 
+== Przewiń o jeden tick
 
 Go back one marker
-== 
+== Cofnij o jeden znacznik
 
 Go forward one marker
-== 
+== Przewiń o jeden znacznik
 
 Slow down the demo
-== 
+== Spowolnij demo
 
 Speed up the demo
-== 
+== Przyśpiesz demo
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Zaznacz początek cięcia (kliknij prawy aby zresetować)
 
 Mark the end of a cut (right click to reset)
-== 
+== Zaznacz koniec cięcia (kliknij prawy aby zresetować)
 
 Export cut as a separate demo
-== 
+== Wyeksportuj cięcie jako osobne demo
 
 Close the demo player
-== 
+== Zamknij odtwarzacz demo
 
 Toggle keyboard shortcuts
-== 
+== Przełącz skróty klawiszowe
 
 Export demo cut
-== 
+== Wyeksportuj demo cięcia
 
 Cut interval
-== 
+== Przedział cięcia
 
-Cut length
-== 
+Cut lenght
+== Długość cięcia
 
 Render cut to video
-== 
+== Wyeksportuj cięcie do pliku wideo
 
 Please use a different filename
-== 
+== Użyj innej nazwy pliku
 
 Loading demo files
-== 
+== Ładowanie plików demo
 
 All combined
 == 
 
 No demo selected
-== 
+== Nie wybrano demo
 
 Folder Link
 == 
 
 Created
-== 
+== Utworzono
 
 Netversion
-== 
+== Wersja
 
 [Demo details]
 map not included
 == 
 
 Open the directory that contains the demo files
-== 
+== Otwórz katalog zawierający pliki demo
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Jesteś pewny, że chcesz usunąć katalog '%s'?
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Jesteś pewny, że chcesz usunąć demo '%s'?
 
 Delete folder
-== 
+== Usuń katalog
 
 Unable to delete the demo '%s'
-== 
+== Nie można usunąć demo '%s'
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Nie można usunąć katalogu '%s'. Upewnij się że jest pusty.
 
 Loading…
-== 
+== Ładowanie…
 
 Loading ghost files
-== 
+== Ładowanie plików duszków
 
 Ghosts directory
-== 
+== Katalog duszków
 
 Activate all
-== 
+== Aktywuj wszystko
 
 Deactivate all
-== 
+== Dezaktywuj wszystko
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Menu otwarte. Naciśnij przycisk Esc, aby zamknąć menu.
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Oszczędzaj energię przez obniżenie częstotliwości próbkowania (większe opóźnienie)
 
 Open the settings file
-== 
+== Otwórz plik ustawień
 
 Open the directory that contains the configuration and user files
-== 
+== Otwórz katalog który zawiera konfiguracje i pliki użytkownika
 
 Open the directory to add custom themes
-== 
+== Otwórz katalog własnych motywów
 
 Player info change cooldown
-== 
+== Czas do zmiany informacji o graczu
 
 Download community skins
-== 
+== Pobieraj skiny społeczności
 
 Create a random skin
-== 
+== Wygeneruj losowy skin
 
 Open the directory to add custom skins
-== 
+== Otwórz katalog, aby dodać własne skiny
 
 Enable controller
-== 
+== Włącz kontroler
 
 Controller
-== 
+== Kontroler
 
 Ingame controller mode
-== 
+== Tryb kontrolera w grze
 
 [Ingame controller mode]
 Relative
-== 
+== Relatywny
 
 [Ingame controller mode]
 Absolute
-== 
+== Absolutny
 
 Ingame controller sens.
-== 
+== Czułość kontrolera w grze
 
 UI controller sens.
-== 
+== Czułość kontrolera w menu
 
 Controller jitter tolerance
-== 
+== Tolerancja drgania kontrolera
 
 No controller found. Plug in a controller.
-== 
+== Nie znaleziono kontrolera. Podłącz go.
 
 Axis
-== 
+== Oś
 
 Status
-== 
+== Status
 
 Aim bind
 == 
 
 Mouse
-== 
+== Mysz
 
 Ingame mouse sens.
-== 
+== Czułość myszy w grze
 
 UI mouse sens.
-== 
+== Czułość myszy w menu
 
 Reset controls
 == 
@@ -1668,184 +1669,184 @@ Are you sure that you want to reset the controls to their defaults?
 == 
 
 Cancel
-== 
+== Anuluj
 
 Graphics card
-== 
+== Karta graficzna
 
 Appearance
-== 
+== Wygląd
 
 Name Plate
-== 
+== Plakietki
 
 Hook Collisions
-== 
+== Kolizje haka
 
 Info Messages
-== 
+== Komunikaty
 
 Show health, shields and ammo
-== 
+== Pokazuj zdrowie, tarcze i amunicję
 
 Show local time always
-== 
+== Pokazuj czas lokalny
 
 DDRace HUD
 == 
 
 Show client IDs in scoreboard
-== 
+== Pokazuj ID klienta w tabeli wyników
 
 Show DDRace HUD
-== 
+== Pokazuj HUD DDRace
 
 Show jumps indicator
-== 
+== Pokazuj wskaźnik skoków
 
 Show dummy actions
-== 
+== Pokazuj akcje kukły
 
 Show player position
-== 
+== Pokazuj pozycję gracza
 
 Show player speed
-== 
+== Pokazuj prędkość gracza
 
 Show player target angle
-== 
+== Pokazuj kąt celownika gracza
 
 Show freeze bars
-== 
+== Pokazuj pasek freeze
 
 Opacity of freeze bars inside freeze
-== 
+== Przezroczystość paska freeze
 
 Always show chat
-== 
+== Zawsze pokazuj czat
 
 Chat font size
-== 
+== Rozmiar czcionki czatu
 
 Chat width
-== 
+== Szerokość czatu
 
 Show friend mark (♥) in name plates
-== 
+== Pokazuj ikonę znajomego (♥) w plakietce nazwy
 
 Show hook strength icon indicator
-== 
+== Pokazuj ikonę siły haka
 
 Show hook strength number indicator
-== 
+== Pokazuj numer siły haka
 
 Authed name color in scoreboard
-== 
+== Kolor zweryfikowanego w tabeli wyników
 
 Same clan color in scoreboard
-== 
+== Kolor tego samego klanu w tabeli wyników
 
 Hook collision line
-== 
+== Linia kolizji haka
 
 Show own player's hook collision line
-== 
+== Pokazuj swoją linię kolizyjną haka
 
 Always show own player's hook collision line
-== 
+== Zawsze pokazuj swoją linię kolizyjną haka
 
 Always show other players' hook collision lines
-== 
+== Zawsze pokazuj linię kolizyjną haka innych
 
 Hook collision line width
-== 
+== Szerokość linii kolizji haka
 
 Hook collision line opacity
-== 
+== Przezroczystość linii kolizji haka
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Kolor linii kolizji haka, w przypadku kolizji z:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Twoje ruchy nie są brane pod uwagę podczas obliczania kolorów linii
 
 Nothing hookable
-== 
+== Niczym możliwym do złapania
 
 Something hookable
-== 
+== Czymś możliwym do złapania
 
 A Tee
-== 
+== Graczem 
 
 Show finish messages
-== 
+== Pokazuj wiadomości o ukończeniu
 
 Normal Color
-== 
+== Kolor normalny
 
 Highlight Color
-== 
+== Kolor podkreślenia
 
 Weapons
-== 
+== Bronie
 
 Rifle Laser Outline Color
-== 
+== Kolor zewnętrzny lasera
 
 Rifle Laser Inner Color
-== 
+== Kolor wewnętrzny lasera
 
 Shotgun Laser Outline Color
-== 
+== Kolor zewnętrzny shotguna
 
 Shotgun Laser Inner Color
-== 
+== Kolor wewnętrzny shotguna
 
 Door Laser Outline Color
-== 
+== Kolor zewnętrzny bramki
 
 Door Laser Inner Color
-== 
+== Kolor wewnętrzny bramki
 
 Freeze Laser Outline Color
-== 
+== Kolor zewnętrzny freeze
 
 Freeze Laser Inner Color
-== 
+== Kolor wewnętrzny freeze
 
 Set all to Rifle
-== 
+== Ustaw wszystkie jako laser
 
 Enable ghost
-== 
+== Włącz duszka
 
 Only save improvements
-== 
+== Podmieniaj duszka z lepszym czasem
 
 Regular background color
-== 
+== Kolor tła regularny
 
 Entities background color
-== 
+== Kolor tła entities
 
 Unregister protocol and file extensions
-== 
+== Wyrejestruj protokoły i rozszerzenia plików
 
 Extras
-== 
+== Dodatki
 
 Loading assets
-== 
+== Ładowanie zasobów
 
 Open the directory to add custom assets
-== 
+== Otwórz katalog, aby dodać własne zasoby
 
 Loading race demo files
-== 
+== Ładowanie plików demo
 
 Loading sound files
-== 
+== Ładowanie dźwięków
 
 Moved ingame
 == 
