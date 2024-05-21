@@ -176,24 +176,63 @@ void CUi::OnCursorMove(float X, float Y)
 
 void CUi::Update(vec2 MouseWorldPos)
 {
-	unsigned MouseButtons = 0;
+	const vec2 WindowSize = vec2(Graphics()->WindowWidth(), Graphics()->WindowHeight());
+	const CUIRect *pScreen = Screen();
+
+	unsigned UpdatedMouseButtonsNext = 0;
 	if(Enabled())
 	{
-		if(Input()->KeyIsPressed(KEY_MOUSE_1))
-			MouseButtons |= 1;
-		if(Input()->KeyIsPressed(KEY_MOUSE_2))
-			MouseButtons |= 2;
-		if(Input()->KeyIsPressed(KEY_MOUSE_3))
-			MouseButtons |= 4;
+		// Update mouse buttons based on mouse keys
+		for(int MouseKey = KEY_MOUSE_1; MouseKey <= KEY_MOUSE_3; ++MouseKey)
+		{
+			if(Input()->KeyIsPressed(MouseKey))
+			{
+				m_UpdatedMouseButtons |= 1 << (MouseKey - KEY_MOUSE_1);
+			}
+		}
+
+		// Update mouse position and buttons based on touch finger state
+		UpdateTouchState(m_TouchState);
+		if(m_TouchState.m_AnyPressed)
+		{
+			if(!CheckMouseLock())
+			{
+				m_UpdatedMousePos = m_TouchState.m_PrimaryPosition * WindowSize;
+				m_UpdatedMousePos.x = clamp(m_UpdatedMousePos.x, 0.0f, WindowSize.x - 1.0f);
+				m_UpdatedMousePos.y = clamp(m_UpdatedMousePos.y, 0.0f, WindowSize.y - 1.0f);
+			}
+			m_UpdatedMouseDelta += m_TouchState.m_PrimaryDelta * WindowSize;
+
+			// Scroll currently hovered scroll region with touch scroll gesture.
+			if(m_TouchState.m_ScrollAmount != vec2(0.0f, 0.0f))
+			{
+				if(m_pHotScrollRegion != nullptr)
+				{
+					m_pHotScrollRegion->ScrollRelativeDirect(-m_TouchState.m_ScrollAmount.y * pScreen->h);
+				}
+				m_TouchState.m_ScrollAmount = vec2(0.0f, 0.0f);
+			}
+
+			// We need to delay the click until the next update or it's not possible to use UI
+			// elements because click and hover would happen at the same time for touch events.
+			if(m_TouchState.m_PrimaryPressed)
+			{
+				UpdatedMouseButtonsNext |= 1;
+			}
+			if(m_TouchState.m_SecondaryPressed)
+			{
+				UpdatedMouseButtonsNext |= 2;
+			}
+		}
 	}
 
-	const CUIRect *pScreen = Screen();
-	m_MousePos = m_UpdatedMousePos * vec2(pScreen->w / Graphics()->WindowWidth(), pScreen->h / Graphics()->WindowHeight());
+	m_MousePos = m_UpdatedMousePos * vec2(pScreen->w, pScreen->h) / WindowSize;
 	m_MouseDelta = m_UpdatedMouseDelta;
 	m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
 	m_MouseWorldPos = MouseWorldPos;
 	m_LastMouseButtons = m_MouseButtons;
-	m_MouseButtons = MouseButtons;
+	m_MouseButtons = m_UpdatedMouseButtons;
+	m_UpdatedMouseButtons = UpdatedMouseButtonsNext;
 
 	m_pHotItem = m_pBecomingHotItem;
 	if(m_pActiveItem)
@@ -255,6 +294,87 @@ void CUi::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType)
 
 	*pX *= Factor;
 	*pY *= Factor;
+}
+
+void CUi::UpdateTouchState(CTouchState &State) const
+{
+	const std::vector<IInput::CTouchFingerState> &vTouchFingerStates = Input()->TouchFingerStates();
+
+	// Updated touch position as long as any finger is beinged pressed.
+	const bool WasAnyPressed = State.m_AnyPressed;
+	State.m_AnyPressed = !vTouchFingerStates.empty();
+	if(State.m_AnyPressed)
+	{
+		// We always use the position of first finger being pressed down. Multi-touch UI is
+		// not possible and always choosing the last finger would cause the cursor to briefly
+		// warp without having any effect if multiple fingers are used.
+		const IInput::CTouchFingerState &PrimaryTouchFingerState = vTouchFingerStates.front();
+		State.m_PrimaryPosition = PrimaryTouchFingerState.m_Position;
+		State.m_PrimaryDelta = PrimaryTouchFingerState.m_Delta;
+	}
+
+	// Update primary (left click) and secondary (right click) action.
+	if(State.m_SecondaryPressedNext)
+	{
+		// The secondary action is delayed by one frame until the primary has been released,
+		// otherwise most UI elements cannot be activated by the secondary action because they
+		// never become the hot-item unless all mouse buttons are released for one frame.
+		State.m_SecondaryPressedNext = false;
+		State.m_SecondaryPressed = true;
+	}
+	else if(vTouchFingerStates.size() != 1)
+	{
+		// Consider primary and secondary to be pressed only when exactly one finger is pressed,
+		// to avoid UI elements and console text selection being activated while scrolling.
+		State.m_PrimaryPressed = false;
+		State.m_SecondaryPressed = false;
+	}
+	else if(!WasAnyPressed)
+	{
+		State.m_PrimaryPressed = true;
+		State.m_SecondaryActivationTime = Client()->GlobalTime();
+		State.m_SecondaryActivationDelta = vec2(0.0f, 0.0f);
+	}
+	else if(State.m_PrimaryPressed)
+	{
+		// Activate secondary by pressing and holding roughly on the same position for some time.
+		const float SecondaryActivationDelay = 0.5f;
+		const float SecondaryActivationMaxDistance = 0.001f;
+		State.m_SecondaryActivationDelta += State.m_PrimaryDelta;
+		if(Client()->GlobalTime() - State.m_SecondaryActivationTime >= SecondaryActivationDelay &&
+			length(State.m_SecondaryActivationDelta) <= SecondaryActivationMaxDistance)
+		{
+			State.m_PrimaryPressed = false;
+			State.m_SecondaryPressedNext = true;
+		}
+	}
+
+	// Handle two fingers being moved roughly in same direction as a scrolling gesture.
+	if(vTouchFingerStates.size() == 2)
+	{
+		const vec2 Delta0 = vTouchFingerStates[0].m_Delta;
+		const vec2 Delta1 = vTouchFingerStates[1].m_Delta;
+		const float Similarity = dot(normalize(Delta0), normalize(Delta1));
+		const float SimilarityThreshold = 0.8f; // How parallel the deltas have to be (1.0f being completely parallel)
+		if(Similarity > SimilarityThreshold)
+		{
+			const float DirectionThreshold = 3.0f; // How much longer the delta of one axis has to be compared to other axis
+
+			// Vertical scrolling (y-delta must be larger than x-delta)
+			if(absolute(Delta0.y) > DirectionThreshold * absolute(Delta0.x) &&
+				absolute(Delta1.y) > DirectionThreshold * absolute(Delta1.x) &&
+				Delta0.y * Delta1.y > 0.0f) // Same y direction required
+			{
+				// Accumulate average delta of the two fingers
+				State.m_ScrollAmount.y += (Delta0.y + Delta1.y) / 2.0f;
+			}
+		}
+	}
+	else
+	{
+		// Scrolling gesture should start from zero again if released.
+		State.m_ScrollAmount = vec2(0.0f, 0.0f);
+	}
 }
 
 bool CUi::ConsumeHotkey(EHotkey Hotkey)

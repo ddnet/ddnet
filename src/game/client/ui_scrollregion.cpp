@@ -234,6 +234,11 @@ void CScrollRegion::ScrollRelative(EScrollRelative Direction, float SpeedMultipl
 	m_ScrollSpeedMultiplier = SpeedMultiplier;
 }
 
+void CScrollRegion::ScrollRelativeDirect(float ScrollAmount)
+{
+	m_RequestScrollY = clamp(m_ScrollY + ScrollAmount, 0.0f, m_ContentH - m_ClipRect.h);
+}
+
 void CScrollRegion::DoEdgeScrolling()
 {
 	if(!ScrollbarShown())
