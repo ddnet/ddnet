@@ -116,7 +116,7 @@ CheckOptions:
   - key:             readability-identifier-naming.StructIgnoredRegexp
     value:           '^([CS]|MapObject$|EnvelopedQuad$).*'
   - key:             readability-identifier-naming.ClassIgnoredRegexp
-    value:           '^(CCommandProcessorFragment_Vulkan$).*'
+    value:           '^(I|CCommandProcessorFragment_Vulkan$).*'
   - key:             readability-identifier-naming.ParameterCase
     value:           CamelCase
   - key:             readability-identifier-naming.ParameterIgnoredRegexp
