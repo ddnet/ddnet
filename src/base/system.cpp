@@ -1846,7 +1846,7 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
 	NETADDR tmpbindaddr = bindaddr;
-	int socket = -1;
+	int socket4 = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
@@ -1855,14 +1855,15 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV4;
 		netaddr_to_sockaddr_in(&tmpbindaddr, &addr);
-		socket = priv_net_create_socket(AF_INET, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
-		if(socket >= 0)
+		socket4 = priv_net_create_socket(AF_INET, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
+		if(socket4 >= 0)
 		{
 			sock->type |= NETTYPE_IPV4;
-			sock->ipv4sock = socket;
+			sock->ipv4sock = socket4;
 		}
 	}
 
+	int socket6 = -1;
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
@@ -1870,15 +1871,15 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		/* bind, we should check for error */
 		tmpbindaddr.type = NETTYPE_IPV6;
 		netaddr_to_sockaddr_in6(&tmpbindaddr, &addr);
-		socket = priv_net_create_socket(AF_INET6, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
-		if(socket >= 0)
+		socket6 = priv_net_create_socket(AF_INET6, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
+		if(socket6 >= 0)
 		{
 			sock->type |= NETTYPE_IPV6;
-			sock->ipv6sock = socket;
+			sock->ipv6sock = socket6;
 		}
 	}
 
-	if(socket < 0)
+	if(socket4 < 0 && socket6 < 0)
 	{
 		free(sock);
 		sock = nullptr;
