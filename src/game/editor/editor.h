@@ -465,7 +465,6 @@ public:
 
 	void HandleCursorMovement();
 	void OnMouseMove(float MouseX, float MouseY);
-	void DispatchInputEvents();
 	void HandleAutosave();
 	bool PerformAutosave();
 	void HandleWriterFinishJobs();

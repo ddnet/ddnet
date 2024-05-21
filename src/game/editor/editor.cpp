@@ -8482,17 +8482,6 @@ void CEditor::OnMouseMove(float MouseX, float MouseY)
 	Ui()->MapScreen();
 }
 
-void CEditor::DispatchInputEvents()
-{
-	for(size_t i = 0; i < Input()->NumEvents(); i++)
-	{
-		const IInput::CEvent &Event = Input()->GetEvent(i);
-		if(!Input()->IsEventValid(Event))
-			continue;
-		Ui()->OnInput(Event);
-	}
-}
-
 void CEditor::HandleAutosave()
 {
 	const float Time = Client()->GlobalTime();
@@ -8624,21 +8613,16 @@ void CEditor::OnUpdate()
 	m_pContainerPannedLast = m_pContainerPanned;
 
 	// handle key presses
-	for(size_t i = 0; i < Input()->NumEvents(); i++)
-	{
-		const IInput::CEvent &Event = Input()->GetEvent(i);
-		if(!Input()->IsEventValid(Event))
-			continue;
-
+	Input()->ConsumeEvents([&](const IInput::CEvent &Event) {
 		for(CEditorComponent &Component : m_vComponents)
 		{
 			if(Component.OnInput(Event))
-				break;
+				return;
 		}
-	}
+		Ui()->OnInput(Event);
+	});
 
 	HandleCursorMovement();
-	DispatchInputEvents();
 	HandleAutosave();
 	HandleWriterFinishJobs();
 

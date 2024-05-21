@@ -6,6 +6,9 @@
 #include "kernel.h"
 #include <base/system.h>
 
+#include <cstdint>
+#include <functional>
+
 const int g_MaxKeys = 512;
 extern const char g_aaKeyStrings[g_MaxKeys][20];
 
@@ -23,23 +26,10 @@ public:
 	public:
 		int m_Flags;
 		int m_Key;
+		uint32_t m_InputCount;
 		char m_aText[INPUT_TEXT_SIZE];
-		int m_InputCount;
 	};
 
-protected:
-	enum
-	{
-		INPUT_BUFFER_SIZE = 32
-	};
-
-	// quick access to events
-	size_t m_NumEvents;
-	CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
-	int64_t m_LastUpdate;
-	float m_UpdateTime;
-
-public:
 	enum
 	{
 		FLAG_PRESS = 1 << 0,
@@ -60,19 +50,14 @@ public:
 	};
 
 	// events
-	size_t NumEvents() const { return m_NumEvents; }
-	virtual bool IsEventValid(const CEvent &Event) const = 0;
-	const CEvent &GetEvent(size_t Index) const
-	{
-		dbg_assert(Index < m_NumEvents, "Index invalid");
-		return m_aInputEvents[Index];
-	}
+	virtual void ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const = 0;
+	virtual void Clear() = 0;
 
 	/**
 	 * @return Rolling average of the time in seconds between
 	 * calls of the Update function.
 	 */
-	float GetUpdateTime() const { return m_UpdateTime; }
+	virtual float GetUpdateTime() const = 0;
 
 	// keys
 	virtual bool ModifierIsPressed() const = 0;
@@ -81,7 +66,6 @@ public:
 	virtual bool KeyIsPressed(int Key) const = 0;
 	virtual bool KeyPress(int Key, bool CheckCounter = false) const = 0;
 	const char *KeyName(int Key) const { return (Key >= 0 && Key < g_MaxKeys) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
-	virtual void Clear() = 0;
 
 	// joystick
 	class IJoystick
