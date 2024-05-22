@@ -2390,17 +2390,12 @@ int fs_is_relative_path(const char *path)
 
 int fs_chdir(const char *path)
 {
-	if(fs_is_dir(path))
-	{
 #if defined(CONF_FAMILY_WINDOWS)
-		const std::wstring wide_path = windows_utf8_to_wide(path);
-		return SetCurrentDirectoryW(wide_path.c_str()) != 0 ? 0 : 1;
+	const std::wstring wide_path = windows_utf8_to_wide(path);
+	return SetCurrentDirectoryW(wide_path.c_str()) != 0 ? 0 : 1;
 #else
-		return chdir(path) ? 1 : 0;
+	return chdir(path) ? 1 : 0;
 #endif
-	}
-	else
-		return 1;
 }
 
 char *fs_getcwd(char *buffer, int buffer_size)
@@ -2408,15 +2403,7 @@ char *fs_getcwd(char *buffer, int buffer_size)
 #if defined(CONF_FAMILY_WINDOWS)
 	const DWORD size_needed = GetCurrentDirectoryW(0, nullptr);
 	std::wstring wide_current_dir(size_needed, L'0');
-	DWORD result = GetCurrentDirectoryW(size_needed, wide_current_dir.data());
-	if(result == 0)
-	{
-		const DWORD LastError = GetLastError();
-		const std::string ErrorMsg = windows_format_system_message(LastError);
-		dbg_msg("filesystem", "GetCurrentDirectoryW failed: %ld %s", LastError, ErrorMsg.c_str());
-		buffer[0] = '\0';
-		return nullptr;
-	}
+	dbg_assert(GetCurrentDirectoryW(size_needed, wide_current_dir.data()) == size_needed - 1, "GetCurrentDirectoryW failure");
 	const std::optional<std::string> current_dir = windows_wide_to_utf8(wide_current_dir.c_str());
 	if(!current_dir.has_value())
 	{
