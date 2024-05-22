@@ -117,7 +117,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aRconUsername[32] = "";
 	char m_aRconPassword[sizeof(g_Config.m_SvRconPassword)] = "";
 	int m_UseTempRconCommands = 0;
-	bool m_ReceivingRconCommands = false;
+	int m_ExpectedRconCommands = -1;
+	int m_GotRconCommands = 0;
 	char m_aPassword[sizeof(g_Config.m_Password)] = "";
 	bool m_SendPassword = false;
 
@@ -285,7 +286,8 @@ public:
 	bool UseTempRconCommands() const override { return m_UseTempRconCommands != 0; }
 	void RconAuth(const char *pName, const char *pPassword) override;
 	void Rcon(const char *pCmd) override;
-	bool ReceivingRconCommands() const override { return m_ReceivingRconCommands; }
+	bool ReceivingRconCommands() const override { return m_ExpectedRconCommands > 0; }
+	float GotRconCommandsPercentage() const override;
 
 	bool ConnectionProblems() const override;
 

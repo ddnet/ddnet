@@ -217,6 +217,16 @@ void CClient::Rcon(const char *pCmd)
 	SendMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
+float CClient::GotRconCommandsPercentage() const
+{
+	if(m_ExpectedRconCommands < 1)
+		return -1.0f;
+	if(m_GotRconCommands > m_ExpectedRconCommands)
+		return -1.0f;
+
+	return (float)m_GotRconCommands / (float)m_ExpectedRconCommands;
+}
+
 bool CClient::ConnectionProblems() const
 {
 	return m_aNetClient[g_Config.m_ClDummy].GotProblems(MaxLatencyTicks() * time_freq() / GameTickSpeed()) != 0;
@@ -552,7 +562,8 @@ void CClient::DisconnectWithReason(const char *pReason)
 	mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
-	m_ReceivingRconCommands = false;
+	m_ExpectedRconCommands = -1;
+	m_GotRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
 	m_aNetClient[CONN_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
@@ -1594,6 +1605,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				m_pConsole->RegisterTemp(pName, pParams, CFGFLAG_SERVER, pHelp);
 			}
+			m_GotRconCommands++;
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_REM)
 		{
@@ -1621,7 +1633,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				if(Old != 0 && m_UseTempRconCommands == 0)
 				{
 					m_pConsole->DeregisterTempAll();
-					m_ReceivingRconCommands = false;
+					m_ExpectedRconCommands = -1;
 				}
 			}
 		}
@@ -1953,11 +1965,16 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_GROUP_START)
 		{
-			m_ReceivingRconCommands = true;
+			int ExpectedRconCommands = Unpacker.GetInt();
+			if(Unpacker.Error())
+				return;
+
+			m_ExpectedRconCommands = ExpectedRconCommands;
+			m_GotRconCommands = 0;
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_GROUP_END)
 		{
-			m_ReceivingRconCommands = false;
+			m_ExpectedRconCommands = -1;
 		}
 	}
 	else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)
