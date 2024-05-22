@@ -54,23 +54,23 @@ void InitAndroid()
 
 		dbg_msg("integrity", "copying integrity.txt with size: %ld", length);
 
-		IOHANDLE pIO = io_open("integrity.txt", IOFLAG_WRITE);
-		io_write(pIO, pAl, length);
-		io_close(pIO);
+		IOHANDLE IntegrityFileWrite = io_open("integrity.txt", IOFLAG_WRITE);
+		io_write(IntegrityFileWrite, pAl, length);
+		io_close(IntegrityFileWrite);
 
 		free(pAl);
 	}
 
-	IOHANDLE pIO = io_open("integrity.txt", IOFLAG_READ);
-	CLineReader LineReader;
-	LineReader.Init(pIO);
+	IOHANDLE IntegrityFileRead = io_open("integrity.txt", IOFLAG_READ);
+	CLineReader IntegrityFileLineReader;
+	IntegrityFileLineReader.Init(IntegrityFileRead);
 	const char *pReadLine = NULL;
 	std::vector<std::string> vLines;
-	while((pReadLine = LineReader.Get()))
+	while((pReadLine = IntegrityFileLineReader.Get()))
 	{
 		vLines.push_back(pReadLine);
 	}
-	io_close(pIO);
+	io_close(IntegrityFileRead);
 
 	// first line is the whole hash
 	std::string AllAsOne;
@@ -82,17 +82,18 @@ void InitAndroid()
 	SHA256_DIGEST ShaAll;
 	bool GotSHA = false;
 	{
-		IOHANDLE pIOR = io_open("integrity_save.txt", IOFLAG_READ);
-		if(pIOR != NULL)
+		IOHANDLE IntegritySaveFileRead = io_open("integrity_save.txt", IOFLAG_READ);
+		if(IntegritySaveFileRead != NULL)
 		{
-			CLineReader LineReader;
-			LineReader.Init(pIOR);
-			const char *pLine = LineReader.Get();
+			CLineReader IntegritySaveLineReader;
+			IntegritySaveLineReader.Init(IntegritySaveFileRead);
+			const char *pLine = IntegritySaveLineReader.Get();
 			if(pLine != NULL)
 			{
 				sha256_from_str(&ShaAll, pLine);
 				GotSHA = true;
 			}
+			io_close(IntegritySaveFileRead);
 		}
 	}
 
@@ -138,20 +139,20 @@ void InitAndroid()
 
 			SDL_RWclose(pF);
 
-			IOHANDLE pIO = io_open(FileName.c_str(), IOFLAG_WRITE);
-			io_write(pIO, pAl, length);
-			io_close(pIO);
+			IOHANDLE AssetFileWrite = io_open(FileName.c_str(), IOFLAG_WRITE);
+			io_write(AssetFileWrite, pAl, length);
+			io_close(AssetFileWrite);
 
 			free(pAl);
 		}
 
-		IOHANDLE pIOR = io_open("integrity_save.txt", IOFLAG_WRITE);
-		if(pIOR != NULL)
+		IOHANDLE IntegritySaveFileWrite = io_open("integrity_save.txt", IOFLAG_WRITE);
+		if(IntegritySaveFileWrite != NULL)
 		{
 			char aFileSHA[SHA256_MAXSTRSIZE];
 			sha256_str(ShaAllFile, aFileSHA, sizeof(aFileSHA));
-			io_write(pIOR, aFileSHA, str_length(aFileSHA));
-			io_close(pIOR);
+			io_write(IntegritySaveFileWrite, aFileSHA, str_length(aFileSHA));
+			io_close(IntegritySaveFileWrite);
 		}
 	}
 }

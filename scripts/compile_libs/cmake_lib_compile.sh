@@ -1,10 +1,11 @@
 #!/bin/bash
 
 ANDROID_HOME=~/Android/Sdk
-ANDROID_NDK="$(find "$ANDROID_HOME/ndk" -maxdepth 1 | sort -n | tail -1)"
-echo "$ANDROID_NDK"
+ANDROID_NDK_HOME="$(find "$ANDROID_HOME/ndk" -maxdepth 1 | sort -n | tail -1)"
+export ANDROID_NDK_HOME
 
-export MAKEFLAGS=-j32
+MAKEFLAGS=-j$(nproc)
+export MAKEFLAGS
 
 if [[ "${2}" == "webasm" ]]; then
 	COMPILEFLAGS="-pthread -O3 -g -s USE_PTHREADS=1"
@@ -20,10 +21,15 @@ function compile_source() {
 			-H. \
 			-G "Unix Makefiles" \
 			-DCMAKE_BUILD_TYPE=Release \
-			-DANDROID_NATIVE_API_LEVEL="android-$1" \
-			-DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
+			-DANDROID_PLATFORM="android-$1" \
+			-DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
+			-DANDROID_NDK="$ANDROID_NDK_HOME" \
 			-DANDROID_ABI="${3}" \
 			-DANDROID_ARM_NEON=TRUE \
+			-DCMAKE_ANDROID_NDK="$ANDROID_NDK_HOME" \
+			-DCMAKE_SYSTEM_NAME=Android \
+			-DCMAKE_SYSTEM_VERSION="$1" \
+			-DCMAKE_ANDROID_ARCH_ABI="${3}" \
 			-B"$2" \
 			-DBUILD_SHARED_LIBS=OFF \
 			-DHIDAPI_SKIP_LIBUSB=TRUE \
