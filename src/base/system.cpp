@@ -2785,6 +2785,15 @@ int str_format_v(char *buffer, int buffer_size, const char *format, va_list args
 	return str_utf8_fix_truncation(buffer);
 }
 
+int str_format_int(char *buffer, size_t buffer_size, int value)
+{
+	buffer[0] = '\0'; // Fix false positive clang-analyzer-core.UndefinedBinaryOperatorResult when using result
+	auto result = std::to_chars(buffer, buffer + buffer_size - 1, value);
+	result.ptr[0] = '\0';
+	return result.ptr - buffer;
+}
+
+#undef str_format
 int str_format(char *buffer, int buffer_size, const char *format, ...)
 {
 	va_list args;
@@ -2793,6 +2802,9 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
 	va_end(args);
 	return length;
 }
+#if !defined(CONF_DEBUG)
+#define str_format str_format_opt
+#endif
 
 const char *str_trim_words(const char *str, int words)
 {
@@ -3638,13 +3650,6 @@ bool str_tofloat(const char *str, float *out)
 	if(out != nullptr)
 		*out = value;
 	return true;
-}
-
-void str_from_int(int value, char *buffer, size_t buffer_size)
-{
-	buffer[0] = '\0'; // Fix false positive clang-analyzer-core.UndefinedBinaryOperatorResult when using result
-	auto result = std::to_chars(buffer, buffer + buffer_size - 1, value);
-	result.ptr[0] = '\0';
 }
 
 int str_utf8_comp_nocase(const char *a, const char *b)

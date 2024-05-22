@@ -413,7 +413,7 @@ void CMapImages::UpdateEntityLayerText(CImageInfo &TextImage, int TextureSize, i
 	if(MaxNumber == -1)
 		MaxNumber = CurrentNumber * 10 - 1;
 
-	str_from_int(CurrentNumber, aBuf);
+	str_format(aBuf, sizeof(aBuf), "%d", CurrentNumber);
 
 	int CurrentNumberSuitableFontSize = TextRender()->AdjustFontSize(aBuf, DigitsCount, TextureSize, MaxWidth);
 	int UniversalSuitableFontSize = CurrentNumberSuitableFontSize * 0.92f; // should be smoothed enough to fit any digits combination
@@ -422,7 +422,7 @@ void CMapImages::UpdateEntityLayerText(CImageInfo &TextImage, int TextureSize, i
 
 	for(; CurrentNumber <= MaxNumber; ++CurrentNumber)
 	{
-		str_from_int(CurrentNumber, aBuf);
+		str_format(aBuf, sizeof(aBuf), "%d", CurrentNumber);
 
 		float x = (CurrentNumber % 16) * 64;
 		float y = (CurrentNumber / 16) * 64;

@@ -676,7 +676,7 @@ void CLayerTiles::ShowInfo()
 				}
 				else
 				{
-					str_from_int(m_pTiles[c].m_Index, aBuf);
+					str_format(aBuf, sizeof(aBuf), "%d", m_pTiles[c].m_Index);
 				}
 				m_pEditor->Graphics()->QuadsText(x * 32, y * 32, 16.0f, aBuf);
 

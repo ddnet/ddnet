@@ -32,7 +32,7 @@ void CUPnP::Open(NETADDR Address)
 		{
 			m_Enabled = true;
 			dbg_msg("upnp", "found valid IGD: %s", m_pUPnPUrls->controlURL);
-			str_from_int(m_Addr.port, aPort);
+			str_format(aPort, sizeof(aPort), "%d", m_Addr.port);
 			Error = UPNP_AddPortMapping(m_pUPnPUrls->controlURL, m_pUPnPData->first.servicetype,
 				aPort, aPort, aLanAddr,
 				"DDNet Server " GAME_RELEASE_VERSION,
@@ -55,7 +55,7 @@ void CUPnP::Shutdown()
 		if(m_Enabled)
 		{
 			char aPort[6];
-			str_from_int(m_Addr.port, aPort);
+			str_format(aPort, sizeof(aPort), "%d", m_Addr.port);
 			int Error = UPNP_DeletePortMapping(m_pUPnPUrls->controlURL, m_pUPnPData->first.servicetype, aPort, "UDP", NULL);
 
 			if(Error != 0)
