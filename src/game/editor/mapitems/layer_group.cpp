@@ -1,6 +1,7 @@
 #include "layer_group.h"
 
 #include <base/math.h>
+#include <engine/shared/config.h>
 #include <game/editor/editor.h>
 
 CLayerGroup::CLayerGroup()
@@ -8,7 +9,7 @@ CLayerGroup::CLayerGroup()
 	m_vpLayers.clear();
 	m_aName[0] = 0;
 	m_Visible = true;
-	m_Collapse = true;
+	m_Collapse = g_Config.m_EdGroupsCollapsed;
 	m_GameGroup = false;
 	m_OffsetX = 0;
 	m_OffsetY = 0;
