@@ -1,17 +1,12 @@
 apply plugin: 'com.android.application'
 
-apply plugin: 'kotlin-android'
-
 buildscript {
-	ext.kotlin_version = '+'
 	repositories {
 		google()
 		mavenCentral()
 	}
-	
 	dependencies {
 		classpath 'com.android.tools.build:gradle:8.3.0'
-		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 	}
 }
 
@@ -27,7 +22,7 @@ android {
 	defaultConfig {
 		applicationId "org.ddnet.client"
 		namespace("org.ddnet.client")
-		minSdkVersion 24
+		minSdkVersion 19
 		targetSdkVersion 34
 		versionCode TW_VERSION_CODE
 		versionName "TW_VERSION_NAME"
@@ -61,10 +56,8 @@ android {
 		main {
 			assets.srcDirs = ['assets']
 			jniLibs.srcDirs = ['lib']
-			//TW_ENABLE_RESOURCESresources.srcDirs = ['resources']
 		}
 	}
-
 	lintOptions {
 		abortOnError false
 	}
@@ -80,11 +73,4 @@ allprojects {
 			options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 		}
 	}
-}
-
-dependencies {
-	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-	implementation 'androidx.appcompat:appcompat:1.1.0'
-	implementation 'androidx.core:core-ktx:1.3.0'
-	implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 }
