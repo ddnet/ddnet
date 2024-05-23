@@ -24,35 +24,35 @@ _ANDROID_SUB_BUILD_DIR=build_arch
 _SHOW_USAGE_INFO=0
 
 if [ -z ${1+x} ]; then
-    printf "\e[31m%s\e[30m\n" "Did not pass android build type, using default: ${_DEFAULT_ANDROID_BUILD}"
+	printf "\e[31m%s\e[30m\n" "Did not pass android build type, using default: ${_DEFAULT_ANDROID_BUILD}"
 	_SHOW_USAGE_INFO=1
 else
 	_DEFAULT_ANDROID_BUILD=$1
 fi
 
 if [ -z ${2+x} ]; then
-    printf "\e[31m%s\e[30m\n" "Did not pass game name, using default: ${_DEFAULT_GAME_NAME}"
+	printf "\e[31m%s\e[30m\n" "Did not pass game name, using default: ${_DEFAULT_GAME_NAME}"
 	_SHOW_USAGE_INFO=1
 else
 	_DEFAULT_GAME_NAME=$2
 fi
 
 if [ -z ${3+x} ]; then
-    printf "\e[31m%s\e[30m\n" "Did not pass package name, using default: ${_DEFAULT_PACKAGE_NAME}"
+	printf "\e[31m%s\e[30m\n" "Did not pass package name, using default: ${_DEFAULT_PACKAGE_NAME}"
 	_SHOW_USAGE_INFO=1
 else
 	_DEFAULT_PACKAGE_NAME=$3
 fi
 
 if [ -z ${4+x} ]; then
-    printf "\e[31m%s\e[30m\n" "Did not pass build type, using default: ${_DEFAULT_BUILD_TYPE}"
+	printf "\e[31m%s\e[30m\n" "Did not pass build type, using default: ${_DEFAULT_BUILD_TYPE}"
 	_SHOW_USAGE_INFO=1
 else
 	_DEFAULT_BUILD_TYPE=$4
 fi
 
 if [ -z ${5+x} ]; then
-    printf "\e[31m%s\e[30m\n" "Did not pass build folder, using default: ${_DEFAULT_BUILD_FOLDER}"
+	printf "\e[31m%s\e[30m\n" "Did not pass build folder, using default: ${_DEFAULT_BUILD_FOLDER}"
 	_SHOW_USAGE_INFO=1
 else
 	_DEFAULT_BUILD_FOLDER=$5
@@ -63,17 +63,17 @@ _ANDROID_JAR_KEY_PW=android
 _ANDROID_JAR_KEY_ALIAS=androiddebugkey
 
 if [ -z ${TW_KEY_NAME+x} ]; then
-    printf "\e[31m%s\e[30m\n" "Did not pass a key for the jar signer, using default: ${_ANDROID_JAR_KEY_NAME}"
+	printf "\e[31m%s\e[30m\n" "Did not pass a key for the jar signer, using default: ${_ANDROID_JAR_KEY_NAME}"
 else
 	_ANDROID_JAR_KEY_NAME=$TW_KEY_NAME
 fi
 if [ -z ${TW_KEY_PW+x} ]; then
-    printf "\e[31m%s\e[30m\n" "Did not pass a key pw for the jar signer, using default: ${_ANDROID_JAR_KEY_PW}"
+	printf "\e[31m%s\e[30m\n" "Did not pass a key pw for the jar signer, using default: ${_ANDROID_JAR_KEY_PW}"
 else
 	_ANDROID_JAR_KEY_PW=$TW_KEY_PW
 fi
 if [ -z ${TW_KEY_ALIAS+x} ]; then
-    printf "\e[31m%s\e[30m\n" "Did not pass a key alias for the jar signer, using default: ${_ANDROID_JAR_KEY_ALIAS}"
+	printf "\e[31m%s\e[30m\n" "Did not pass a key alias for the jar signer, using default: ${_ANDROID_JAR_KEY_ALIAS}"
 else
 	_ANDROID_JAR_KEY_ALIAS=$TW_KEY_ALIAS
 fi
@@ -110,8 +110,8 @@ export TW_VERSION_NAME=$_ANDROID_VERSION_NAME
 
 printf "\e[31m%s\e[1m\n" "Building with setting, for arch: ${_DEFAULT_ANDROID_BUILD}, with build type: ${_DEFAULT_BUILD_TYPE}, with name: ${_DEFAULT_GAME_NAME} (${_DEFAULT_PACKAGE_NAME})"
 
-if [ $_SHOW_USAGE_INFO == 1 ]; then	
-    printf "\e[31m%s\e[1m\n" "Usage: ./cmake_android.sh <x86/x86_64/arm/arm64/all> <Game name> <Package name> <Debug/Release> <Build folder>"
+if [ $_SHOW_USAGE_INFO == 1 ]; then
+	printf "\e[31m%s\e[1m\n" "Usage: ./cmake_android.sh <x86/x86_64/arm/arm64/all> <Game name> <Package name> <Debug/Release> <Build folder>"
 fi
 
 printf "\e[33mBuilding cmake\e[0m\n"

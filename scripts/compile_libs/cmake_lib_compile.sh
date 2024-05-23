@@ -11,7 +11,7 @@ if [[ "${2}" == "webasm" ]]; then
 	COMPILEFLAGS="-pthread -O3 -g -s USE_PTHREADS=1"
 	LINKFLAGS="-pthread -O3 -g -s USE_PTHREADS=1 -s ASYNCIFY=1"
 fi
- 
+
 COMPILEFLAGS=$3
 LINKFLAGS=$4
 

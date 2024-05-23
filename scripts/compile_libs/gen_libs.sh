@@ -1,18 +1,18 @@
 #!/bin/bash
 
 CURDIR="$PWD"
-if [ -z ${1+x} ]; then 
+if [ -z ${1+x} ]; then
 	echo "Give a destination path where to run this script, please choose a path other than in the source directory"
 	exit 1
 fi
 
-if [ -z ${2+x} ]; then 
+if [ -z ${2+x} ]; then
 	echo "Specify the target system"
 	exit 1
 fi
 
 OS_NAME=$2
- 
+
 COMPILEFLAGS="-fPIC"
 LINKFLAGS="-fPIC"
 if [[ "${OS_NAME}" == "webasm" ]]; then
