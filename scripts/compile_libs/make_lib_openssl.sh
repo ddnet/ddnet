@@ -25,7 +25,7 @@ function buid_openssl() {
 		if [[ "$_EXISTS_PROJECT" == "0" ]]; then
 			if [[ "${4}" == "webasm" ]]; then
 				emconfigure ../Configure "$2" -no-tests -no-asm -static -no-afalgeng -DOPENSSL_SYS_NETWARE -DSIG_DFL=0 -DSIG_IGN=0 -DHAVE_FORK=0 -DOPENSSL_NO_AFALGENG=1 --with-rand-seed=getrandom
-				
+
 				sed -i 's|^CROSS_COMPILE.*$|CROSS_COMPILE=|g' Makefile
 			else
 				../Configure "$2" no-asm no-shared

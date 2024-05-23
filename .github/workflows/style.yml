@@ -23,6 +23,8 @@ jobs:
         sudo apt-get install clang-format imagemagick ddnet-tools shellcheck pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools -y
         rustup default stable
         pip3 install pylint
+        wget -O ~/.local/bin/shfmt https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64
+        chmod +x ~/.local/bin/shfmt
         git clone https://gitlab.com/Patiga/twmap.git/
         cd twmap/twmap-tools
         cargo install --locked --path=.
@@ -60,6 +62,8 @@ jobs:
     #    fi
     - name: Shellcheck
       run: find . -type f -name '*.sh' -print0 | xargs -0 shellcheck
+    - name: Shell format (shfmt)
+      run: find . -type f -name '*.sh' -print0 | xargs -0 shfmt -d
     - name: Check log error case
       run: |
         if grep -Eqr '(msg|Print).*\(.*"[Ee]rror:' src/;

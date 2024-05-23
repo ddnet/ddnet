@@ -46,13 +46,12 @@ function prine_line_for_address() {
 }
 
 ADDR_PC_REGEX='[0-9A-Fa-f]+ [0-9A-Fa-f]+ [0-9A-Fa-f]+ [0-9A-Fa-f]+'
-while read -r line
-do
+while read -r line; do
 	if [[ $line =~ $ADDR_PC_REGEX ]]; then
 		# Check for main executable file with address information
 		EXE_FILE_RELATIVE_ADDR=$(echo "$line" | grep -E -o -m 1 "\s${EXE_FILE_FILENAME_REGEX}!.*0x[0-9A-Fa-f]+" | grep -E -o "0x[0-9A-Fa-f]+" | head -1)
 		if [ -n "$EXE_FILE_RELATIVE_ADDR" ]; then
-			prine_line_for_address "$(printf '0x%X\n' "$((EXE_FILE_RELATIVE_ADDR+ADDR_BASE))")"
+			prine_line_for_address "$(printf '0x%X\n' "$((EXE_FILE_RELATIVE_ADDR + ADDR_BASE))")"
 			continue
 		fi
 
@@ -65,6 +64,6 @@ do
 
 		# Compatibilty with old crash logs: use the raw address and assume it belongs to the main executable
 		RAW_ADDR=$(echo "$line" | grep -E -o -m 1 "[0-9A-Fa-f]+ " | head -1)
-		prine_line_for_address "$(printf '0x%X\n' "$(((0x$RAW_ADDR-0x$MODULE_OFFSET)+ADDR_BASE))")"
+		prine_line_for_address "$(printf '0x%X\n' "$(((0x$RAW_ADDR - 0x$MODULE_OFFSET) + ADDR_BASE))")"
 	fi
 done < "$CRASH_LOG_FILE"
