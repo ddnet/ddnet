@@ -79,8 +79,6 @@ void CSounds::OnInit()
 	Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 0.0f);
 	Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
 
-	Sound()->SetListenerPos(0.0f, 0.0f);
-
 	ClearQueue();
 
 	// load sounds
