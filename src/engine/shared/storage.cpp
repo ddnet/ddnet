@@ -39,8 +39,13 @@ public:
 
 	int Init(int StorageType, int NumArgs, const char **ppArguments)
 	{
-#if !defined(CONF_PLATFORM_ANDROID)
-		// get userdir, just use data directory on android
+#if defined(CONF_PLATFORM_ANDROID)
+		// See InitAndroid in android_main.cpp for details about Android storage handling.
+		// The current working directory is set to the app specific external storage location
+		// on Android. The user data is stored within a folder "user" in the external storage.
+		str_copy(m_aUserdir, "user");
+#else
+		// get userdir
 		char aFallbackUserdir[IO_MAX_PATH_LENGTH];
 		if(fs_storage_path("DDNet", m_aUserdir, sizeof(m_aUserdir)))
 		{

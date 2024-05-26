@@ -55,6 +55,10 @@
 #include "video.h"
 #endif
 
+#if defined(CONF_PLATFORM_ANDROID)
+#include <android/android_main.h>
+#endif
+
 #include "SDL.h"
 #ifdef main
 #undef main
@@ -4262,9 +4266,8 @@ static void ShowMessageBox(const char *pTitle, const char *pMessage, IClient::EM
 #if defined(CONF_PLATFORM_MACOS)
 extern "C" int TWMain(int argc, const char **argv)
 #elif defined(CONF_PLATFORM_ANDROID)
+static int gs_AndroidStarted = false;
 extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char *argv[]);
-extern "C" void InitAndroid();
-
 int SDL_main(int argc, char *argv2[])
 #else
 int main(int argc, const char **argv)
@@ -4274,14 +4277,18 @@ int main(int argc, const char **argv)
 
 #if defined(CONF_PLATFORM_ANDROID)
 	const char **argv = const_cast<const char **>(argv2);
+	// Android might not unload the library from memory, causing globals like gs_AndroidStarted
+	// not to be initialized correctly when starting the app again.
+	if(gs_AndroidStarted)
+	{
+		::ShowMessageBox("Android Error", "The app was started, but not closed properly, this causes bugs. Please restart or manually close this task.");
+		std::exit(0);
+	}
+	gs_AndroidStarted = true;
 #elif defined(CONF_FAMILY_WINDOWS)
 	CWindowsComLifecycle WindowsComLifecycle(true);
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
-
-#if defined(CONF_PLATFORM_ANDROID)
-	InitAndroid();
-#endif
 
 #if defined(CONF_EXCEPTION_HANDLING)
 	init_exception_handler();
@@ -4317,6 +4324,17 @@ int main(int argc, const char **argv)
 	vpLoggers.push_back(pFutureAssertionLogger);
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
+#if defined(CONF_PLATFORM_ANDROID)
+	// Initialize Android after logger is available
+	const char *pAndroidInitError = InitAndroid();
+	if(pAndroidInitError != nullptr)
+	{
+		log_error("android", "%s", pAndroidInitError);
+		::ShowMessageBox("Android Error", pAndroidInitError);
+		std::exit(0);
+	}
+#endif
+
 	std::stack<std::function<void()>> CleanerFunctions;
 	std::function<void()> PerformCleanup = [&CleanerFunctions]() mutable {
 		while(!CleanerFunctions.empty())
@@ -4327,7 +4345,17 @@ int main(int argc, const char **argv)
 	};
 	std::function<void()> PerformFinalCleanup = []() {
 #ifdef CONF_PLATFORM_ANDROID
-		// properly close this native thread, so globals are destructed
+		// Forcefully terminate the entire process, to ensure that static variables
+		// will be initialized correctly when the app is started again after quitting.
+		// Returning from the main function is not enough, as this only results in the
+		// native thread terminating, but the Java thread will continue. Java does not
+		// support unloading libraries once they have been loaded, so all static
+		// variables will not have their expected initial values anymore when the app
+		// is started again after quitting. The variable gs_AndroidStarted above is
+		// used to check that static variables have been initialized properly.
+		// TODO: This is not the correct way to close an activity on Android, as it
+		//       ignores the activity lifecycle entirely, which may cause issues if
+		//       we ever used any global resources like the camera.
 		std::exit(0);
 #endif
 	};
