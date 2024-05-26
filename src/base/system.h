@@ -2637,7 +2637,7 @@ void generate_password(char *buffer, unsigned length, const unsigned short *rand
  *
  * @return `0` on success.
  */
-int secure_random_init();
+[[nodiscard]] int secure_random_init();
 
 /**
  * Uninitializes the secure random module.
