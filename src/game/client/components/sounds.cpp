@@ -143,9 +143,7 @@ void CSounds::OnRender()
 			return;
 	}
 
-	// set listener pos
-	Sound()->SetListenerPos(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
-
+	Sound()->SetListenerPosition(m_pClient->m_Camera.m_Center);
 	UpdateChannels();
 
 	// play sound from queue
@@ -224,7 +222,7 @@ void CSounds::PlayAt(int Channel, int SetId, float Vol, vec2 Pos)
 	if(Channel == CHN_MUSIC)
 		Flags = ISound::FLAG_LOOP;
 
-	Sound()->PlayAt(Channel, SampleId, Flags, Pos.x, Pos.y);
+	Sound()->PlayAt(Channel, SampleId, Flags, Pos);
 }
 
 void CSounds::Stop(int SetId)
@@ -269,5 +267,5 @@ ISound::CVoiceHandle CSounds::PlaySampleAt(int Channel, int SampleId, float Vol,
 	if(Channel == CHN_MUSIC)
 		Flags |= ISound::FLAG_LOOP;
 
-	return Sound()->PlayAt(Channel, SampleId, Flags, Pos.x, Pos.y);
+	return Sound()->PlayAt(Channel, SampleId, Flags, Pos);
 }

@@ -239,7 +239,7 @@ void CMapSounds::OnRender()
 						x -= pGroup->m_OffsetX;
 						y -= pGroup->m_OffsetY;
 
-						Sound()->SetVoiceLocation(Voice.m_Voice, x, y);
+						Sound()->SetVoicePosition(Voice.m_Voice, vec2(x, y));
 
 						ColorRGBA Volume = ColorRGBA(1.0f, 0.0f, 0.0f, 0.0f);
 						CMapLayers::EnvelopeEval(Voice.m_pSource->m_SoundEnvOffset, Voice.m_pSource->m_SoundEnv, Volume, 1, &m_pClient->m_MapLayersBackground);
