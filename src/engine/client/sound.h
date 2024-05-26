@@ -124,9 +124,9 @@ public:
 	void SetVoiceCircle(CVoiceHandle Voice, float Radius) override REQUIRES(!m_SoundLock);
 	void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) override REQUIRES(!m_SoundLock);
 
-	CVoiceHandle Play(int ChannelId, int SampleId, int Flags, vec2 Position) REQUIRES(!m_SoundLock);
-	CVoiceHandle PlayAt(int ChannelId, int SampleId, int Flags, vec2 Position) override REQUIRES(!m_SoundLock);
-	CVoiceHandle Play(int ChannelId, int SampleId, int Flags) override REQUIRES(!m_SoundLock);
+	CVoiceHandle Play(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position) REQUIRES(!m_SoundLock);
+	CVoiceHandle PlayAt(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position) override REQUIRES(!m_SoundLock);
+	CVoiceHandle Play(int ChannelId, int SampleId, int Flags, float Volume) override REQUIRES(!m_SoundLock);
 	void Pause(int SampleId) override REQUIRES(!m_SoundLock);
 	void Stop(int SampleId) override REQUIRES(!m_SoundLock);
 	void StopAll() override REQUIRES(!m_SoundLock);

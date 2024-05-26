@@ -180,49 +180,26 @@ void CSounds::Enqueue(int Channel, int SetId)
 	m_aQueue[m_QueuePos++].m_SetId = SetId;
 }
 
-void CSounds::PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos)
+void CSounds::PlayAndRecord(int Channel, int SetId, float Volume, vec2 Position)
 {
+	// TODO: Volume and position are currently not recorded for sounds played with this function
+	// TODO: This also causes desync sounds during demo playback of demos recorded on high ping servers:
+	//       https://github.com/ddnet/ddnet/issues/1282
 	CNetMsg_Sv_SoundGlobal Msg;
 	Msg.m_SoundId = SetId;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_NOSEND | MSGFLAG_RECORD);
 
-	Play(Channel, SetId, Vol);
+	PlayAt(Channel, SetId, Volume, Position);
 }
 
-void CSounds::Play(int Channel, int SetId, float Vol)
+void CSounds::Play(int Channel, int SetId, float Volume)
 {
-	if(m_pClient->m_SuppressEvents)
-		return;
-	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
-		return;
-
-	int SampleId = GetSampleId(SetId);
-	if(SampleId == -1)
-		return;
-
-	int Flags = 0;
-	if(Channel == CHN_MUSIC)
-		Flags = ISound::FLAG_LOOP;
-
-	Sound()->Play(Channel, SampleId, Flags);
+	PlaySample(Channel, GetSampleId(SetId), 0, Volume);
 }
 
-void CSounds::PlayAt(int Channel, int SetId, float Vol, vec2 Pos)
+void CSounds::PlayAt(int Channel, int SetId, float Volume, vec2 Position)
 {
-	if(m_pClient->m_SuppressEvents)
-		return;
-	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
-		return;
-
-	int SampleId = GetSampleId(SetId);
-	if(SampleId == -1)
-		return;
-
-	int Flags = 0;
-	if(Channel == CHN_MUSIC)
-		Flags = ISound::FLAG_LOOP;
-
-	Sound()->PlayAt(Channel, SampleId, Flags, Pos);
+	PlaySampleAt(Channel, GetSampleId(SetId), 0, Volume, Position);
 }
 
 void CSounds::Stop(int SetId)
@@ -248,24 +225,24 @@ bool CSounds::IsPlaying(int SetId)
 	return false;
 }
 
-ISound::CVoiceHandle CSounds::PlaySample(int Channel, int SampleId, float Vol, int Flags)
+ISound::CVoiceHandle CSounds::PlaySample(int Channel, int SampleId, int Flags, float Volume)
 {
-	if((Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if(m_pClient->m_SuppressEvents || (Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
 	if(Channel == CHN_MUSIC)
 		Flags |= ISound::FLAG_LOOP;
 
-	return Sound()->Play(Channel, SampleId, Flags);
+	return Sound()->Play(Channel, SampleId, Flags, Volume);
 }
 
-ISound::CVoiceHandle CSounds::PlaySampleAt(int Channel, int SampleId, float Vol, vec2 Pos, int Flags)
+ISound::CVoiceHandle CSounds::PlaySampleAt(int Channel, int SampleId, int Flags, float Volume, vec2 Position)
 {
-	if((Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if(m_pClient->m_SuppressEvents || (Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
 	if(Channel == CHN_MUSIC)
 		Flags |= ISound::FLAG_LOOP;
 
-	return Sound()->PlayAt(Channel, SampleId, Flags, Pos);
+	return Sound()->PlayAt(Channel, SampleId, Flags, Volume, Position);
 }

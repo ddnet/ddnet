@@ -86,8 +86,8 @@ public:
 	virtual void SetVoiceCircle(CVoiceHandle Voice, float Radius) = 0;
 	virtual void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) = 0;
 
-	virtual CVoiceHandle PlayAt(int ChannelId, int SampleId, int Flags, vec2 Position) = 0;
-	virtual CVoiceHandle Play(int ChannelId, int SampleId, int Flags) = 0;
+	virtual CVoiceHandle PlayAt(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position) = 0;
+	virtual CVoiceHandle Play(int ChannelId, int SampleId, int Flags, float Volume) = 0;
 	virtual void Pause(int SampleId) = 0;
 	virtual void Stop(int SampleId) = 0;
 	virtual void StopAll() = 0;

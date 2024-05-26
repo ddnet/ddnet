@@ -820,7 +820,7 @@ void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
 	m_aVoices[VoiceId].m_Rectangle.m_Height = maximum(0.0f, Height);
 }
 
-ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, vec2 Position)
+ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position)
 {
 	const CLockScope LockScope(m_SoundLock);
 
@@ -856,7 +856,7 @@ ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, vec2 P
 		{
 			m_aVoices[VoiceId].m_Tick = 0;
 		}
-		m_aVoices[VoiceId].m_Vol = 255;
+		m_aVoices[VoiceId].m_Vol = (int)(clamp(Volume, 0.0f, 1.0f) * 255.0f);
 		m_aVoices[VoiceId].m_Flags = Flags;
 		m_aVoices[VoiceId].m_Position = Position;
 		m_aVoices[VoiceId].m_Falloff = 0.0f;
@@ -868,14 +868,14 @@ ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, vec2 P
 	return CreateVoiceHandle(VoiceId, Age);
 }
 
-ISound::CVoiceHandle CSound::PlayAt(int ChannelId, int SampleId, int Flags, vec2 Position)
+ISound::CVoiceHandle CSound::PlayAt(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position)
 {
-	return Play(ChannelId, SampleId, Flags | ISound::FLAG_POS, Position);
+	return Play(ChannelId, SampleId, Flags | ISound::FLAG_POS, Volume, Position);
 }
 
-ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags)
+ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float Volume)
 {
-	return Play(ChannelId, SampleId, Flags, vec2(0.0f, 0.0f));
+	return Play(ChannelId, SampleId, Flags, Volume, vec2(0.0f, 0.0f));
 }
 
 void CSound::Pause(int SampleId)

@@ -61,14 +61,14 @@ public:
 
 	void ClearQueue();
 	void Enqueue(int Channel, int SetId);
-	void Play(int Channel, int SetId, float Vol);
-	void PlayAt(int Channel, int SetId, float Vol, vec2 Pos);
-	void PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos);
+	void Play(int Channel, int SetId, float Volume);
+	void PlayAt(int Channel, int SetId, float Volume, vec2 Position);
+	void PlayAndRecord(int Channel, int SetId, float Volume, vec2 Position);
 	void Stop(int SetId);
 	bool IsPlaying(int SetId);
 
-	ISound::CVoiceHandle PlaySample(int Channel, int SampleId, float Vol, int Flags = 0);
-	ISound::CVoiceHandle PlaySampleAt(int Channel, int SampleId, float Vol, vec2 Pos, int Flags = 0);
+	ISound::CVoiceHandle PlaySample(int Channel, int SampleId, int Flags, float Volume);
+	ISound::CVoiceHandle PlaySampleAt(int Channel, int SampleId, int Flags, float Volume, vec2 Position);
 };
 
 #endif
