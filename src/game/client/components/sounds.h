@@ -34,12 +34,13 @@ class CSounds : public CComponent
 	std::shared_ptr<CSoundLoading> m_pSoundJob;
 	bool m_WaitForSoundJob;
 
+	void UpdateChannels();
 	int GetSampleId(int SetId);
 
-	float m_GuiSoundVolume;
-	float m_GameSoundVolume;
-	float m_MapSoundVolume;
-	float m_BackgroundMusicVolume;
+	float m_GuiSoundVolume = -1.0f;
+	float m_GameSoundVolume = -1.0f;
+	float m_MapSoundVolume = -1.0f;
+	float m_BackgroundMusicVolume = -1.0f;
 
 public:
 	// sound channels

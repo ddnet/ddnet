@@ -43,6 +43,38 @@ void CSoundLoading::Run()
 	}
 }
 
+void CSounds::UpdateChannels()
+{
+	const float NewGuiSoundVolume = g_Config.m_SndChatSoundVolume / 100.0f;
+	if(NewGuiSoundVolume != m_GuiSoundVolume)
+	{
+		m_GuiSoundVolume = NewGuiSoundVolume;
+		Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 0.0f);
+	}
+
+	const float NewGameSoundVolume = g_Config.m_SndGameSoundVolume / 100.0f;
+	if(NewGameSoundVolume != m_GameSoundVolume)
+	{
+		m_GameSoundVolume = NewGameSoundVolume;
+		Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f * m_GameSoundVolume, 1.0f);
+		Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 0.0f);
+	}
+
+	const float NewMapSoundVolume = g_Config.m_SndMapSoundVolume / 100.0f;
+	if(NewMapSoundVolume != m_MapSoundVolume)
+	{
+		m_MapSoundVolume = NewMapSoundVolume;
+		Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
+	}
+
+	const float NewBackgroundMusicVolume = g_Config.m_SndBackgroundMusicVolume / 100.0f;
+	if(NewBackgroundMusicVolume != m_BackgroundMusicVolume)
+	{
+		m_BackgroundMusicVolume = NewBackgroundMusicVolume;
+		Sound()->SetChannel(CSounds::CHN_MUSIC, m_BackgroundMusicVolume, 1.0f);
+	}
+}
+
 int CSounds::GetSampleId(int SetId)
 {
 	if(!g_Config.m_SndEnable || !Sound()->IsSoundEnabled() || m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
@@ -67,18 +99,7 @@ int CSounds::GetSampleId(int SetId)
 
 void CSounds::OnInit()
 {
-	// setup sound channels
-	m_GuiSoundVolume = g_Config.m_SndChatSoundVolume / 100.0f;
-	m_GameSoundVolume = g_Config.m_SndGameSoundVolume / 100.0f;
-	m_MapSoundVolume = g_Config.m_SndMapSoundVolume / 100.0f;
-	m_BackgroundMusicVolume = g_Config.m_SndBackgroundMusicVolume / 100.0f;
-
-	Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 0.0f);
-	Sound()->SetChannel(CSounds::CHN_MUSIC, m_BackgroundMusicVolume, 1.0f);
-	Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f * m_GameSoundVolume, 1.0f);
-	Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 0.0f);
-	Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
-
+	UpdateChannels();
 	ClearQueue();
 
 	// load sounds
@@ -125,35 +146,7 @@ void CSounds::OnRender()
 	// set listener pos
 	Sound()->SetListenerPos(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
 
-	// update volume
-	float NewGuiSoundVol = g_Config.m_SndChatSoundVolume / 100.0f;
-	if(NewGuiSoundVol != m_GuiSoundVolume)
-	{
-		m_GuiSoundVolume = NewGuiSoundVol;
-		Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 1.0f);
-	}
-
-	float NewGameSoundVol = g_Config.m_SndGameSoundVolume / 100.0f;
-	if(NewGameSoundVol != m_GameSoundVolume)
-	{
-		m_GameSoundVolume = NewGameSoundVol;
-		Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f * m_GameSoundVolume, 1.0f);
-		Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 1.0f);
-	}
-
-	float NewMapSoundVol = g_Config.m_SndMapSoundVolume / 100.0f;
-	if(NewMapSoundVol != m_MapSoundVolume)
-	{
-		m_MapSoundVolume = NewMapSoundVol;
-		Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
-	}
-
-	float NewBackgroundMusicVol = g_Config.m_SndBackgroundMusicVolume / 100.0f;
-	if(NewBackgroundMusicVol != m_BackgroundMusicVolume)
-	{
-		m_BackgroundMusicVolume = NewBackgroundMusicVol;
-		Sound()->SetChannel(CSounds::CHN_MUSIC, m_BackgroundMusicVolume, 1.0f);
-	}
+	UpdateChannels();
 
 	// play sound from queue
 	if(m_QueuePos > 0)
