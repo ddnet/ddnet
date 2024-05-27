@@ -5,6 +5,8 @@
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
 
+#include <game/server/player.h>
+
 #include "flag.h"
 CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_FLAG)
@@ -34,7 +36,22 @@ void CFlag::Grab(CCharacter *pChar)
 	if(m_AtStand)
 		m_GrabTick = Server()->Tick();
 	m_AtStand = false;
-	GameServer()->CreateSoundGlobal(m_Team == TEAM_RED ? SOUND_CTF_GRAB_EN : SOUND_CTF_GRAB_PL);
+
+	for(int c = 0; c < MAX_CLIENTS; c++)
+	{
+		CPlayer *pPlayer = GameServer()->m_apPlayers[c];
+		if(!pPlayer)
+			continue;
+
+		if(pPlayer->GetTeam() == TEAM_SPECTATORS && pPlayer->m_SpectatorId != SPEC_FREEVIEW && GameServer()->m_apPlayers[pPlayer->m_SpectatorId]
+			&& GameServer()->m_apPlayers[pPlayer->m_SpectatorId]->GetTeam() == m_Team)
+			GameServer()->CreateSoundGlobal(SOUND_CTF_GRAB_EN, c);
+		else if(pPlayer->GetTeam() == m_Team)
+			GameServer()->CreateSoundGlobal(SOUND_CTF_GRAB_EN, c);
+		else
+			GameServer()->CreateSoundGlobal(SOUND_CTF_GRAB_PL, c);
+	}
+	// GameServer()->CreateSoundGlobal(m_Team == TEAM_RED ? SOUND_CTF_GRAB_EN : SOUND_CTF_GRAB_PL);
 }
 
 void CFlag::Drop()
