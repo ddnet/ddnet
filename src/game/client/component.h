@@ -104,25 +104,12 @@ protected:
 	class IUpdater *Updater() const;
 #endif
 
-#if defined(CONF_VIDEORECORDER)
 	/**
 	 * Gets the current time.
 	 * @see time_get()
 	 */
-	int64_t time() const
-	{
-		return IVideo::Current() ? IVideo::Time() : time_get();
-	}
-#else
-	/**
-	 * Gets the current time.
-	 * @see time_get()
-	 */
-	int64_t time() const
-	{
-		return time_get();
-	}
-#endif
+	int64_t time() const;
+
 	/**
 	 * Gets the local time.
 	 */

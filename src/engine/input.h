@@ -4,7 +4,8 @@
 #define ENGINE_INPUT_H
 
 #include "kernel.h"
-#include <base/system.h>
+
+#include <base/types.h>
 
 #include <cstdint>
 #include <functional>
