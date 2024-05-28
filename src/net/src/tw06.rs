@@ -136,7 +136,8 @@ impl Protocol {
 }
 
 enum State {
-    NeedConnectEvent,
+    SimulateConnectEvent,
+    ExpectConnectEvent,
     Normal,
     Disconnected,
 }
@@ -165,7 +166,7 @@ impl Connection {
         Connection {
             inner,
             epoch,
-            state: if !client { State::NeedConnectEvent } else { State::Normal },
+            state: if !client { State::SimulateConnectEvent } else { State::ExpectConnectEvent },
             addr,
             buffered_events: VecDeque::with_capacity(4),
         }
@@ -200,9 +201,18 @@ impl Connection {
                     Disconnect(ArrayString::from(reason).unwrap(), true)
                 }
             };
-            if let State::NeedConnectEvent = self.state {
-                self.state = State::Normal;
-                self.buffered_events.push_back(Connect);
+            match (&event, &self.state) {
+                (ConnlessChunk(_), _) => {}
+                (Connect, State::ExpectConnectEvent) => self.state = State::Normal,
+                (Connect, _) => unreachable!(),
+                (_, State::SimulateConnectEvent) => {
+                    self.state = State::Normal;
+                    self.buffered_events.push_back(Connect);
+                }
+                (Disconnect(..), State::Normal) => {}
+                (Disconnect(..), _) => unreachable!(), // TODO: check that this is actually unreachable
+                (_, State::Disconnected) => unreachable!(), // TODO: check that this is actually unreachable
+                (_, _) => {}
             }
             let is_disconnect = matches!(event, Disconnect(..));
             self.buffered_events.push_back(event);
