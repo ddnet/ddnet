@@ -1172,6 +1172,12 @@ void CMenus::Render()
 
 	Ui()->RenderPopupMenus();
 
+	// Prevent UI elements from being hovered while a key reader is active
+	if(m_Binder.m_TakeKey)
+	{
+		Ui()->SetHotItem(nullptr);
+	}
+
 	// Handle this escape hotkey after popup menus
 	if(!m_ShowStart && ClientState == IClient::STATE_OFFLINE && Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 	{
