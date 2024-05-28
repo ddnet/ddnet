@@ -2,6 +2,7 @@
 
 #include "netban.h"
 #include <base/log.h>
+#include <engine/shared/config.h>
 #include <net/net.h>
 
 #include <curl/curl.h>
@@ -155,121 +156,135 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 	{
 		// Keep space for null termination.
 		EE(ddnet_net_recv, m_pNet, m_aBuffer, sizeof(m_aBuffer) - 1, m_pNetEvent);
-		uint64_t PeerID;
-		int ClientID;
-		void *pUserdata;
-		const char *pAddr;
-		size_t AddrLen;
-		NETADDR Addr;
-		char aBanReason[256];
 		switch(ddnet_net_ev_kind(m_pNetEvent))
 		{
 		case DDNET_NET_EV_NONE:
 			return 0;
 		case DDNET_NET_EV_CONNECT:
-			PeerID = ddnet_net_ev_connect_peer_index(m_pNetEvent);
-			for(int i = 0; i < NET_MAX_CLIENTS; i++)
 			{
-				if(m_aPeers[m_NextClientID].m_ID == (uint64_t)-1)
+				uint64_t PeerID = ddnet_net_ev_connect_peer_index(m_pNetEvent);
+				for(int i = 0; i < NET_MAX_CLIENTS; i++)
 				{
-					break;
+					if(m_aPeers[m_NextClientID].m_ID == (uint64_t)-1)
+					{
+						break;
+					}
+					m_NextClientID = (m_NextClientID + 1) % NET_MAX_CLIENTS;
 				}
+				int ClientID = m_NextClientID;
 				m_NextClientID = (m_NextClientID + 1) % NET_MAX_CLIENTS;
-			}
-			ClientID = m_NextClientID;
-			m_NextClientID = (m_NextClientID + 1) % NET_MAX_CLIENTS;
-			if(m_aPeers[ClientID].m_ID != (uint64_t)-1)
-			{
-				static const char FULL[] = "This server is full";
-				EE(ddnet_net_close, m_pNet, PeerID, FULL, sizeof(FULL) - 1);
-			}
-			ddnet_net_ev_connect_addr(m_pNetEvent, &pAddr, &AddrLen);
-			if(!AddrFromUrl(pAddr, &Addr))
-			{
-				static const char UNRECOGNIZED_ADDR[] = "Unrecognized address";
-				EE(ddnet_net_close, m_pNet, PeerID, UNRECOGNIZED_ADDR, sizeof(UNRECOGNIZED_ADDR) - 1);
-			}
+				if(m_aPeers[ClientID].m_ID != (uint64_t)-1)
+				{
+					static const char FULL[] = "This server is full";
+					EE(ddnet_net_close, m_pNet, PeerID, FULL, sizeof(FULL) - 1);
+				}
+				const char *pAddr;
+				size_t AddrLen;
+				ddnet_net_ev_connect_addr(m_pNetEvent, &pAddr, &AddrLen);
+				NETADDR Addr;
+				if(!AddrFromUrl(pAddr, &Addr))
+				{
+					static const char UNRECOGNIZED_ADDR[] = "Unrecognized address";
+					EE(ddnet_net_close, m_pNet, PeerID, UNRECOGNIZED_ADDR, sizeof(UNRECOGNIZED_ADDR) - 1);
+				}
 
-			if(m_pNetBan->IsBanned(&Addr, aBanReason, sizeof(aBanReason)))
-			{
-				EE(ddnet_net_close, m_pNet, PeerID, aBanReason, str_length(aBanReason));
-			}
+				char aBanReason[256];
+				if(m_pNetBan->IsBanned(&Addr, aBanReason, sizeof(aBanReason)))
+				{
+					EE(ddnet_net_close, m_pNet, PeerID, aBanReason, str_length(aBanReason));
+				}
 
-			m_aPeers[ClientID].m_State = CPeer::STATE_CONNECTED;
-			m_aPeers[ClientID].m_ID = PeerID;
-			m_aPeers[ClientID].m_Address = Addr;
-			EE(ddnet_net_set_userdata, m_pNet, PeerID, (void *)(uintptr_t)ClientID);
-			if(m_pfnNewClient)
-			{
-				m_pfnNewClient(ClientID, m_pUser, false);
+				uint32_t NumConnected;
+				EE(ddnet_net_num_peers_in_bucket, m_pNet, pAddr, AddrLen, &NumConnected);
+				if((int)NumConnected > g_Config.m_SvMaxClientsPerIP)
+				{
+					char aBuf[64];
+					str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", g_Config.m_SvMaxClientsPerIP);
+					EE(ddnet_net_close, m_pNet, PeerID, aBuf, str_length(aBuf));
+				}
+
+				m_aPeers[ClientID].m_State = CPeer::STATE_CONNECTED;
+				m_aPeers[ClientID].m_ID = PeerID;
+				m_aPeers[ClientID].m_Address = Addr;
+				EE(ddnet_net_set_userdata, m_pNet, PeerID, (void *)(uintptr_t)ClientID);
+				if(m_pfnNewClient)
+				{
+					m_pfnNewClient(ClientID, m_pUser, false);
+				}
 			}
 			break;
 		case DDNET_NET_EV_DISCONNECT:
-			PeerID = ddnet_net_ev_disconnect_peer_index(m_pNetEvent);
-			// TODO: can a disconnect happen before a connect?
-			EE(ddnet_net_userdata, m_pNet, PeerID, &pUserdata);
-			if((uintptr_t)pUserdata == (uintptr_t)-1)
 			{
-				continue;
-			}
-			ClientID = (uintptr_t)pUserdata;
-			// TODO: should we disallow sending packets in the
-			// `m_pfnDelClient` callback? currently some are sent
-			// #1  0x00005555555ee6a7 in dbg_assert_imp (
-			//     filename=0x5555557c3300 "src/engine/shared/network_server.cpp", line=219,
-			//     test=0, msg=0x5555557c32e8 "invalid client id") at src/base/system.cpp:188
-			// #2  0x00005555555d398f in CNetServer::Send (this=0x7ffff5c18490, pChunk=0x7fffffffadc0)
-			//     at src/engine/shared/network_server.cpp:219
-			// #3  0x0000555555629934 in CServer::SendMsg (this=0x7ffff552d010, pMsg=0x7fffffffbe80, Flags=1,
-			//     ClientID=0) at src/engine/server/server.cpp:859
-			// #4  0x000055555565b406 in IServer::SendPackMsgOne<CNetMsg_Sv_KillMsg> (this=0x7ffff552d010,
-			//     pMsg=0x7fffffffc6e0, Flags=1, ClientID=0) at src/engine/server.h:167
-			// #5  0x000055555565a4a8 in IServer::SendPackMsgTranslate (this=0x7ffff552d010,
-			//     pMsg=0x7fffffffc770, Flags=1, ClientID=0) at src/engine/server.h:156
-			// #6  0x000055555565b613 in IServer::SendPackMsg<CNetMsg_Sv_KillMsg, 0> (this=0x7ffff552d010,
-			//     pMsg=0x7fffffffc770, Flags=1, ClientID=-1) at src/engine/server.h:84
-			// #7  0x000055555565114c in CCharacter::Die (this=0x555555932e40 <gs_PoolDataCCharacter>, Killer=0,
-			//     Weapon=-3) at src/game/server/entities/character.cpp:928
-			// #8  0x0000555555699632 in CPlayer::KillCharacter (this=0x555555980d20 <gs_PoolDataCPlayer>,
-			//     Weapon=-3) at src/game/server/player.cpp:566
-			// #9  0x0000555555699116 in CPlayer::OnDisconnect (this=0x555555980d20 <gs_PoolDataCPlayer>)
-			//     at src/game/server/player.cpp:489
-			// #10 0x000055555568b4a0 in IGameController::OnPlayerDisconnect (this=0x555555a0ed70,
-			//     pPlayer=0x555555980d20 <gs_PoolDataCPlayer>, pReason=0x5555557c33e2 "")
-			//     at src/game/server/gamecontroller.cpp:407
-			// #11 0x0000555555691669 in CGameControllerDDRace::OnPlayerDisconnect (this=0x555555a0ed70,
-			//     pPlayer=0x555555980d20 <gs_PoolDataCPlayer>, pReason=0x5555557c33e2 "")
-			//     at src/game/server/gamemodes/DDRace.cpp:153
-			// #12 0x000055555566fb1b in CGameContext::OnClientDrop (this=0x7ffff44ea010, ClientID=0,
-			//     pReason=0x5555557c33e2 "") at src/game/server/gamecontext.cpp:1619
-			// #13 0x000055555562af69 in CServer::DelClientCallback (ClientID=0, pReason=0x5555557c33e2 "",
-			//     pUser=0x7ffff552d010) at src/engine/server/server.cpp:1151
+				uint64_t PeerID = ddnet_net_ev_disconnect_peer_index(m_pNetEvent);
+				// TODO: can a disconnect happen before a connect?
+				void *pUserdata;
+				EE(ddnet_net_userdata, m_pNet, PeerID, &pUserdata);
+				if((uintptr_t)pUserdata == (uintptr_t)-1)
+				{
+					continue;
+				}
+				int ClientID = (uintptr_t)pUserdata;
+				// TODO: should we disallow sending packets in the
+				// `m_pfnDelClient` callback? currently some are sent
+				// #1  0x00005555555ee6a7 in dbg_assert_imp (
+				//     filename=0x5555557c3300 "src/engine/shared/network_server.cpp", line=219,
+				//     test=0, msg=0x5555557c32e8 "invalid client id") at src/base/system.cpp:188
+				// #2  0x00005555555d398f in CNetServer::Send (this=0x7ffff5c18490, pChunk=0x7fffffffadc0)
+				//     at src/engine/shared/network_server.cpp:219
+				// #3  0x0000555555629934 in CServer::SendMsg (this=0x7ffff552d010, pMsg=0x7fffffffbe80, Flags=1,
+				//     ClientID=0) at src/engine/server/server.cpp:859
+				// #4  0x000055555565b406 in IServer::SendPackMsgOne<CNetMsg_Sv_KillMsg> (this=0x7ffff552d010,
+				//     pMsg=0x7fffffffc6e0, Flags=1, ClientID=0) at src/engine/server.h:167
+				// #5  0x000055555565a4a8 in IServer::SendPackMsgTranslate (this=0x7ffff552d010,
+				//     pMsg=0x7fffffffc770, Flags=1, ClientID=0) at src/engine/server.h:156
+				// #6  0x000055555565b613 in IServer::SendPackMsg<CNetMsg_Sv_KillMsg, 0> (this=0x7ffff552d010,
+				//     pMsg=0x7fffffffc770, Flags=1, ClientID=-1) at src/engine/server.h:84
+				// #7  0x000055555565114c in CCharacter::Die (this=0x555555932e40 <gs_PoolDataCCharacter>, Killer=0,
+				//     Weapon=-3) at src/game/server/entities/character.cpp:928
+				// #8  0x0000555555699632 in CPlayer::KillCharacter (this=0x555555980d20 <gs_PoolDataCPlayer>,
+				//     Weapon=-3) at src/game/server/player.cpp:566
+				// #9  0x0000555555699116 in CPlayer::OnDisconnect (this=0x555555980d20 <gs_PoolDataCPlayer>)
+				//     at src/game/server/player.cpp:489
+				// #10 0x000055555568b4a0 in IGameController::OnPlayerDisconnect (this=0x555555a0ed70,
+				//     pPlayer=0x555555980d20 <gs_PoolDataCPlayer>, pReason=0x5555557c33e2 "")
+				//     at src/game/server/gamecontroller.cpp:407
+				// #11 0x0000555555691669 in CGameControllerDDRace::OnPlayerDisconnect (this=0x555555a0ed70,
+				//     pPlayer=0x555555980d20 <gs_PoolDataCPlayer>, pReason=0x5555557c33e2 "")
+				//     at src/game/server/gamemodes/DDRace.cpp:153
+				// #12 0x000055555566fb1b in CGameContext::OnClientDrop (this=0x7ffff44ea010, ClientID=0,
+				//     pReason=0x5555557c33e2 "") at src/game/server/gamecontext.cpp:1619
+				// #13 0x000055555562af69 in CServer::DelClientCallback (ClientID=0, pReason=0x5555557c33e2 "",
+				//     pUser=0x7ffff552d010) at src/engine/server/server.cpp:1151
 
-			if(m_pfnDelClient)
-			{
-				m_aBuffer[ddnet_net_ev_disconnect_reason_len(m_pNetEvent)] = 0;
-				const char *pReason = ddnet_net_ev_disconnect_is_remote(m_pNetEvent) ? "" : (char *)m_aBuffer;
-				m_pfnDelClient(ClientID, pReason, m_pUser);
+				if(m_pfnDelClient)
+				{
+					m_aBuffer[ddnet_net_ev_disconnect_reason_len(m_pNetEvent)] = 0;
+					const char *pReason = ddnet_net_ev_disconnect_is_remote(m_pNetEvent) ? "" : (char *)m_aBuffer;
+					m_pfnDelClient(ClientID, pReason, m_pUser);
+				}
+				dbg_assert(m_aPeers[ClientID].m_ID == PeerID, "invalid peer mapping");
+				m_aPeers[ClientID].m_ID = -1;
+				m_aPeers[ClientID].m_State = CPeer::STATE_NONE;
 			}
-			dbg_assert(m_aPeers[ClientID].m_ID == PeerID, "invalid peer mapping");
-			m_aPeers[ClientID].m_ID = -1;
-			m_aPeers[ClientID].m_State = CPeer::STATE_NONE;
 			break;
 		case DDNET_NET_EV_CHUNK:
-			PeerID = ddnet_net_ev_chunk_peer_index(m_pNetEvent);
-			EE(ddnet_net_userdata, m_pNet, PeerID, &pUserdata);
-			ClientID = (uintptr_t)pUserdata;
-			dbg_assert(m_aPeers[ClientID].m_ID == PeerID, "invalid peer mapping");
-			log_debug("net", "chunk len=%d", (int)ddnet_net_ev_chunk_len(m_pNetEvent));
-			mem_zero(pChunk, sizeof(*pChunk));
-			pChunk->m_ClientID = ClientID;
-			pChunk->m_Flags = 0;
-			if(!ddnet_net_ev_chunk_is_unreliable(m_pNetEvent))
 			{
-				pChunk->m_Flags |= NET_CHUNKFLAG_VITAL;
+				uint64_t PeerID = ddnet_net_ev_chunk_peer_index(m_pNetEvent);
+				void *pUserdata;
+				EE(ddnet_net_userdata, m_pNet, PeerID, &pUserdata);
+				int ClientID = (uintptr_t)pUserdata;
+				dbg_assert(m_aPeers[ClientID].m_ID == PeerID, "invalid peer mapping");
+				log_debug("net", "chunk len=%d", (int)ddnet_net_ev_chunk_len(m_pNetEvent));
+				mem_zero(pChunk, sizeof(*pChunk));
+				pChunk->m_ClientID = ClientID;
+				pChunk->m_Flags = 0;
+				if(!ddnet_net_ev_chunk_is_unreliable(m_pNetEvent))
+				{
+					pChunk->m_Flags |= NET_CHUNKFLAG_VITAL;
+				}
+				pChunk->m_DataSize = ddnet_net_ev_chunk_len(m_pNetEvent);
+				pChunk->m_pData = m_aBuffer;
 			}
-			pChunk->m_DataSize = ddnet_net_ev_chunk_len(m_pNetEvent);
-			pChunk->m_pData = m_aBuffer;
 			return 1;
 		case DDNET_NET_EV_CONNLESS_CHUNK:
 			continue;

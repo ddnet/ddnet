@@ -100,6 +100,11 @@ bool ddnet_net_send_connless_chunk(struct DdnetNet *net,
                                    const uint8_t *chunk,
                                    size_t chunk_len);
 
+bool ddnet_net_num_peers_in_bucket(struct DdnetNet *net,
+                                   const char *addr,
+                                   size_t addr_len,
+                                   uint32_t *result);
+
 bool ddnet_net_set_logger(void (*log)(int32_t level,
                                       const char *system,
                                       size_t system_len,

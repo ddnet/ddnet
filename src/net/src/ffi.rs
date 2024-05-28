@@ -2,7 +2,6 @@ use self::NetInner::*;
 use crate::Context;
 use crate::Error;
 use crate::Event as EventImpl;
-use crate::Identity;
 use crate::Net as NetImpl;
 use crate::NetBuilder as NetBuilderImpl;
 use crate::PeerIndex;
@@ -27,6 +26,7 @@ pub struct DdnetNet(NetInner);
 ///
 /// `Temporary` is only used to abide by ownership rules when moving from
 /// `Good` to `LaterError`.
+#[allow(dead_code)] // TODO
 enum NetInner {
     Init(NetBuilderImpl),
     Good(NetImpl),
@@ -54,6 +54,8 @@ pub const DDNET_NET_EV_CONNECT: u64 = 1;
 pub const DDNET_NET_EV_CHUNK: u64 = 2;
 pub const DDNET_NET_EV_DISCONNECT: u64 = 3;
 pub const DDNET_NET_EV_CONNLESS_CHUNK: u64 = 4;
+
+// TODO: Maybe expose `Addr` struct to C (in an opaque way).
 
 impl DdnetNet {
     /// Calls the provided function if `NetInner` is `init`, and adjusts the
@@ -466,6 +468,21 @@ pub extern "C" fn ddnet_net_send_connless_chunk(
         let addr = str::from_utf8(addr).unwrap();
         let chunk = unsafe { slice::from_raw_parts(chunk, chunk_len) };
         impl_.send_connless_chunk(addr, chunk)?;
+        Ok(())
+    })
+}
+#[no_mangle]
+pub extern "C" fn ddnet_net_num_peers_in_bucket(
+    net: &mut DdnetNet,
+    addr: *const c_char,
+    addr_len: usize,
+    result: &mut u32,
+) -> bool {
+    net.good(|impl_| {
+        let addr =
+            unsafe { slice::from_raw_parts(addr as *const u8, addr_len) };
+        let addr = str::from_utf8(addr).unwrap();
+        *result = impl_.num_peers_in_bucket(addr);
         Ok(())
     })
 }

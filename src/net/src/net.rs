@@ -12,6 +12,7 @@ use arrayvec::ArrayString;
 use mio::net::UdpSocket;
 use mio::Events;
 use mio::Poll;
+use std::collections::hash_map;
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
@@ -22,6 +23,8 @@ use std::fs;
 use std::fs::File;
 use std::io;
 use std::io::Write as _;
+use std::net::IpAddr;
+use std::net::Ipv4Addr;
 use std::net::Ipv6Addr;
 use std::net::SocketAddr;
 use std::path::Path;
@@ -56,7 +59,42 @@ struct ReadablePeers {
 
 struct Peer {
     conn: Connection,
+    // TODO: limit number of addresses
+    addrs: Vec<SocketAddr>,
+    /// Is the outer protocol aware of this connection?
+    high_level: bool,
     userdata: Option<*mut ()>,
+}
+
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+enum Bucket {
+    Ipv4(Ipv4Addr),
+    Ipv6([u16; 4]),
+}
+
+impl From<SocketAddr> for Bucket {
+    fn from(addr: SocketAddr) -> Bucket {
+        match addr.ip() {
+            IpAddr::V4(ipv4) => Bucket::Ipv4(ipv4),
+            IpAddr::V6(ipv6) => Bucket::Ipv6(ipv6.segments()[..4].try_into().unwrap()),
+        }
+    }
+}
+
+#[derive(Default, Eq, PartialEq)]
+struct BucketCount {
+    /// Number of peers we keep state about.
+    low_level: u32,
+    /// Connections reported to the surrounding protocol.
+    ///
+    /// From the `Connect` until the `Disconnect` event.
+    high_level: u32,
+}
+
+impl BucketCount {
+    fn is_empty(&self) -> bool {
+        *self == Default::default()
+    }
 }
 
 pub struct Net {
@@ -71,6 +109,7 @@ pub struct Net {
 
     peer_addrs: HashMap<SocketAddr, PeerIndex>,
     peers: HashMap<PeerIndex, Peer>,
+    peer_buckets: HashMap<Bucket, BucketCount>,
     connect_errors: VecDeque<(PeerIndex, Error)>,
 
     socket_readable: bool,
@@ -108,9 +147,11 @@ impl PeerIndex {
 }
 
 impl Peer {
-    fn new(conn: Connection) -> Peer {
+    fn new(conn: Connection, addr: SocketAddr) -> Peer {
         Peer {
             conn,
+            addrs: vec![addr],
+            high_level: false,
             userdata: None,
         }
     }
@@ -133,11 +174,15 @@ pub enum Event {
 pub enum ConnectionEvent {
     Connect(Addr),
     /// `Chunk(size, unreliable)`
+    ///
+    /// Must only be sent once a [`Connect`] has been sent.
     Chunk(usize, bool),
     /// `ConnlessChunk(from, size)`
     ConnlessChunk(Addr, usize),
     // TODO: distinguish disconnect from error?
     /// `Disconnect(reason_size, remote)`
+    ///
+    /// Must only be sent once a [`Connect`] has been sent.
     Disconnect(usize, bool),
     /// Asks for the connection object to be destroyed.
     ///
@@ -192,10 +237,10 @@ fn socket_addr_from_url(url: &Url) -> Result<SocketAddr> {
         &mut ip_port,
         "{}:{}",
         url.host_str().ok_or_else(|| Error::from_string(
-            "connect: URL missing host".to_owned()
+            "addr: URL missing host".to_owned()
         ))?,
         url.port().ok_or_else(|| Error::from_string(
-            "connect: URL missing port".to_owned()
+            "addr: URL missing port".to_owned()
         ))?,
     )
     .unwrap();
@@ -205,7 +250,7 @@ fn socket_addr_from_url(url: &Url) -> Result<SocketAddr> {
 impl FromStr for Addr {
     type Err = Error;
     fn from_str(addr: &str) -> Result<Addr> {
-        let addr = Url::parse(addr).context("connect: URL")?;
+        let addr = Url::parse(addr).context("addr: URL")?;
         let sock_addr = socket_addr_from_url(&addr)?;
         Ok(match addr.scheme() {
             "ddnet-15+quic" => {
@@ -217,7 +262,7 @@ impl FromStr for Addr {
                     .map(|(idx, _)| idx)
                     .unwrap_or(fragment.len());
                 let identity: Identity =
-                    fragment[..end].parse().context("connect: identity")?;
+                    fragment[..end].parse().context("addr: identity")?;
                 Addr::Quic(QuicAddr(sock_addr, identity))
             }
             "tw-0.6+udp" => Addr::Tw06(Tw06Addr(sock_addr)),
@@ -387,6 +432,7 @@ impl NetBuilder {
 
             peer_addrs: HashMap::new(),
             peers: HashMap::new(),
+            peer_buckets: HashMap::new(),
             connect_errors: VecDeque::with_capacity(1),
 
             socket_readable: false,
@@ -411,12 +457,24 @@ impl Net {
     }
     fn remove_peer(&mut self, idx: PeerIndex) {
         use self::Connection::*;
-        match self.peers.remove(&idx).unwrap().conn {
+        let Peer { conn, addrs, high_level, userdata: _ } = self.peers.remove(&idx).unwrap();
+        assert!(!high_level);
+        match conn {
             Quic(inner) => self.proto_quic.remove_peer(idx, inner),
             Tw06(inner) => self.proto_tw06.remove_peer(idx, inner),
         }
-        // TODO: efficiency
-        self.peer_addrs.retain(|_, &mut i| i != idx);
+        for addr in addrs {
+            assert_eq!(self.peer_addrs.remove(&addr), Some(idx));
+            match self.peer_buckets.entry(Bucket::from(addr)) {
+                hash_map::Entry::Vacant(_) => unreachable!(),
+                hash_map::Entry::Occupied(mut o) => {
+                    o.get_mut().low_level -= 1;
+                    if o.get().is_empty() {
+                        o.remove();
+                    }
+                }
+            }
+        }
     }
     fn socket_read(&mut self, buf: &mut [u8]) -> Result<SocketReadEvent> {
         loop {
@@ -481,12 +539,20 @@ impl Net {
                 match event {
                     Some(ProtocolEvent::NewConnection(idx, conn)) => {
                         assert!(idx == self.cb.next_peer_index.get_and_increment());
-                        assert!(self.peers.insert(idx, Peer::new(conn)).is_none());
+                        assert!(self.peers.insert(idx, Peer::new(conn, from)).is_none());
                         assert!(self.peer_addrs.insert(from, idx).is_none());
+                        self.peer_buckets.entry(Bucket::from(from)).or_default().low_level += 1;
                         idx
                     }
                     Some(ProtocolEvent::ExistingConnection(idx)) => {
+                        let peer = self.peers.get_mut(&idx).unwrap();
+                        peer.addrs.push(from);
                         assert!(self.peer_addrs.insert(from, idx).is_none());
+                        let bucket = self.peer_buckets.entry(Bucket::from(from)).or_default();
+                        bucket.low_level += 1;
+                        if peer.high_level {
+                            bucket.high_level += 1;
+                        }
                         idx
                     }
                     Some(ProtocolEvent::ConnlessChunk(addr, size)) => {
@@ -596,10 +662,27 @@ impl Net {
                     peer.conn.recv(&self.cb, &mut self.packet_buf, buf).unwrap()
                 {
                     match ev {
-                        ConnectionEvent::Connect(peer_addr) => return Ok(Some(Event::Connect(idx, peer_addr))),
-                        ConnectionEvent::Chunk(size, unreliable) => return Ok(Some(Event::Chunk(idx, size, unreliable))),
+                        ConnectionEvent::Connect(peer_addr) => {
+                            assert!(!peer.high_level);
+                            peer.high_level = true;
+                            for &addr in &peer.addrs {
+                                self.peer_buckets.get_mut(&Bucket::from(addr)).unwrap().high_level += 1;
+                            }
+                            return Ok(Some(Event::Connect(idx, peer_addr)));
+                        }
+                        ConnectionEvent::Chunk(size, unreliable) => {
+                            assert!(peer.high_level);
+                            return Ok(Some(Event::Chunk(idx, size, unreliable)))
+                        }
                         ConnectionEvent::ConnlessChunk(peer_addr, size) => return Ok(Some(Event::ConnlessChunk(peer_addr, size))),
-                        ConnectionEvent::Disconnect(reason_size, remote) => return Ok(Some(Event::Disconnect(idx, reason_size, remote))),
+                        ConnectionEvent::Disconnect(reason_size, remote) => {
+                            assert!(peer.high_level); // TODO: check that `Disconnect` cannot be emitted before `Connect`
+                            peer.high_level = false;
+                            for &addr in &peer.addrs {
+                                self.peer_buckets.get_mut(&Bucket::from(addr)).unwrap().high_level -= 1;
+                            }
+                            return Ok(Some(Event::Disconnect(idx, reason_size, remote)))
+                        }
                         ConnectionEvent::Delete => {
                             self.remove_peer(idx);
                             assert!(self.readable_peers.pop_front() == Some(idx));
@@ -674,8 +757,9 @@ impl Net {
             Quic(addr) => self.proto_quic.connect(&self.cb, &mut self.packet_buf, addr, idx)?.into(),
             Tw06(addr) => self.proto_tw06.connect(&self.cb, &mut self.packet_buf, addr, idx)?.into(),
         };
-        assert!(self.peers.insert(idx, Peer::new(conn)).is_none());
+        assert!(self.peers.insert(idx, Peer::new(conn, socket_addr)).is_none());
         assert!(self.peer_addrs.insert(socket_addr, idx).is_none());
+        self.peer_buckets.entry(Bucket::from(socket_addr)).or_default().low_level += 1;
         Ok(idx)
     }
     pub fn close(
@@ -698,6 +782,14 @@ impl Net {
             Quic(addr) => self.proto_quic.send_connless_chunk(&self.cb, &mut self.packet_buf, addr, payload),
             Tw06(addr) => self.proto_tw06.send_connless_chunk(&self.cb, &mut self.packet_buf, addr, payload),
         }
+    }
+    // TODO: second function including all non-connected, or already-disconnected peers
+    pub fn num_peers_in_bucket(&self, addr: &str) -> u32 {
+        let addr: Addr = match addr.parse() {
+            Err(_) => todo!(),
+            Ok(addr) => addr,
+        };
+        self.peer_buckets.get(&Bucket::from(*addr.socket_addr())).map(|b| b.high_level).unwrap_or(0)
     }
 }
 
