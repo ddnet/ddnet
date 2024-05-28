@@ -349,8 +349,6 @@ private:
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
 
-	bool m_ValueSelectorTextMode = false;
-
 	struct SPopupMenu
 	{
 		static constexpr float POPUP_BORDER = 1.0f;
@@ -565,8 +563,6 @@ public:
 	// value selector
 	SEditResult<int64_t> DoValueSelectorWithState(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
 	int64_t DoValueSelector(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
-	bool IsValueSelectorTextMode() const { return m_ValueSelectorTextMode; }
-	void SetValueSelectorTextMode(bool TextMode) { m_ValueSelectorTextMode = TextMode; }
 
 	// scrollbars
 	enum
