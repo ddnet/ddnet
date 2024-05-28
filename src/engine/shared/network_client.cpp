@@ -4,6 +4,21 @@
 #include <base/system.h>
 #include <net/net.h>
 
+#define EE(function, net, ...) \
+	do \
+	{ \
+		if(function(net, __VA_ARGS__)) \
+		{ \
+			ExitWithError(net, #function); \
+		} \
+	} while(0)
+
+static void ExitWithError(CNet *pNet, const char *pFunction)
+{
+	log_error("net", "%s: %s", pFunction, ddnet_net_error(pNet));
+	exit(1);
+}
+
 CNetClient::~CNetClient()
 {
 	Close();
@@ -62,11 +77,7 @@ int CNetClient::Disconnect(const char *pReason)
 		{
 			pReason = "";
 		}
-		if(ddnet_net_close(m_pNet, m_PeerID, pReason, str_length(pReason)))
-		{
-			log_error("net", "couldn't disconnect: %s", ddnet_net_error(m_pNet));
-			exit(1);
-		}
+		EE(ddnet_net_close, m_pNet, m_PeerID, pReason, str_length(pReason));
 		str_copy((char *)m_aBuffer, pReason, sizeof(m_aBuffer));
 		m_PeerID = -1;
 		m_State = NETSTATE_OFFLINE;
@@ -82,11 +93,7 @@ int CNetClient::Update()
 
 void CNetClient::Wait(uint64_t Microseconds)
 {
-	if(ddnet_net_wait_timeout(m_pNet, Microseconds * 1000))
-	{
-		log_error("net", "wait failed: %s", ddnet_net_error(m_pNet));
-		exit(1);
-	}
+	EE(ddnet_net_wait_timeout, m_pNet, Microseconds * 1000);
 }
 
 int CNetClient::Connect(const NETADDR *pAddr, int NumAddrs)
@@ -99,11 +106,7 @@ int CNetClient::Connect(const NETADDR *pAddr, int NumAddrs)
 	//str_format(aUrl, sizeof(aUrl), "ddnet-15+quic://%s#0026a0d653cd5f38d1002bf166167933f2f7910f26d6dd619b2b3fe769e057ee", aAddr);
 	str_format(aUrl, sizeof(aUrl), "tw-0.6+udp://%s", aAddr);
 	uint64_t PeerID;
-	if(ddnet_net_connect(m_pNet, aUrl, str_length(aUrl), &PeerID))
-	{
-		log_error("net", "couldn't connect: %s", ddnet_net_error(m_pNet));
-		exit(1);
-	}
+	EE(ddnet_net_connect, m_pNet, aUrl, str_length(aUrl), &PeerID);
 	m_PeerID = PeerID;
 	m_State = NETSTATE_CONNECTING;
 	return 0;
@@ -124,11 +127,7 @@ int CNetClient::Recv(CNetChunk *pChunk)
 	while(true)
 	{
 		// Keep space for null termination.
-                if(ddnet_net_recv(m_pNet, m_aBuffer, sizeof(m_aBuffer) - 1, m_pNetEvent))
-		{
-			log_error("net", "recv failed: %s", ddnet_net_error(m_pNet));
-                        exit(1);
-		}
+                EE(ddnet_net_recv, m_pNet, m_aBuffer, sizeof(m_aBuffer) - 1, m_pNetEvent);
 		uint64_t PeerID;
 		switch(ddnet_net_ev_kind(m_pNetEvent))
                 {
@@ -193,18 +192,10 @@ int CNetClient::Send(CNetChunk *pChunk)
 			return -1;
 		}
 		dbg_assert(pChunk->m_ClientID == 0, "erroneous client id");
-		if(ddnet_net_send_chunk(m_pNet, m_PeerID, (unsigned char *)pChunk->m_pData, pChunk->m_DataSize, (pChunk->m_Flags & NETSENDFLAG_VITAL) == 0))
-		{
-			log_error("net", "send failed: %s", ddnet_net_error(m_pNet));
-			exit(1);
-		}
+		EE(ddnet_net_send_chunk, m_pNet, m_PeerID, (unsigned char *)pChunk->m_pData, pChunk->m_DataSize, (pChunk->m_Flags & NETSENDFLAG_VITAL) == 0);
 		if((pChunk->m_Flags & NETSENDFLAG_FLUSH) != 0)
 		{
-			if(ddnet_net_flush(m_pNet, m_PeerID))
-			{
-				log_error("net", "flush failed: %s", ddnet_net_error(m_pNet));
-				exit(1);
-			}
+			EE(ddnet_net_flush, m_pNet, m_PeerID);
 		}
 	}
 	return 0;

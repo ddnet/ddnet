@@ -6,6 +6,21 @@
 
 #include <curl/curl.h>
 
+#define EE(function, net, ...) \
+	do \
+	{ \
+		if(function(net, __VA_ARGS__)) \
+		{ \
+			ExitWithError(net, #function); \
+		} \
+	} while(0)
+
+static void ExitWithError(CNet *pNet, const char *pFunction)
+{
+	log_error("net", "%s: %s", pFunction, ddnet_net_error(pNet));
+	exit(1);
+}
+
 static unsigned char IDENTITY[] = {
 	0x5c, 0xf2, 0xa4, 0xf0, 0xed, 0x3d, 0xc8, 0x5b, 0x3f, 0x4b, 0xfa, 0x5c,
 	0xa9, 0x7b, 0x8a, 0xde, 0xaf, 0x0d, 0x5e, 0xc1, 0x65, 0x17, 0x9a, 0xf8,
@@ -116,18 +131,10 @@ int CNetServer::Drop(int ClientID, const char *pReason)
 
 	// Reset peer mapping.
 	m_aPeers[ClientID].m_ID = -1;
-	if(ddnet_net_set_userdata(m_pNet, PeerID, (void *)(uintptr_t)-1))
-	{
-		log_error("net", "couldn't set userdata: %s", ddnet_net_error(m_pNet));
-		exit(1);
-	}
+	EE(ddnet_net_set_userdata, m_pNet, PeerID, (void *)(uintptr_t)-1);
 
 	// Close the connection.
-	if(ddnet_net_close(m_pNet, ClientID, pReason, str_length(pReason)))
-	{
-		log_error("net", "drop failed: %s", ddnet_net_error(m_pNet));
-		exit(1);
-	}
+	EE(ddnet_net_close, m_pNet, ClientID, pReason, str_length(pReason));
 	return 0;
 }
 
@@ -139,11 +146,7 @@ int CNetServer::Update()
 
 void CNetServer::Wait(uint64_t Microseconds)
 {
-	if(ddnet_net_wait_timeout(m_pNet, Microseconds * 1000))
-	{
-		log_error("net", "wait failed: %s", ddnet_net_error(m_pNet));
-		exit(1);
-	}
+	EE(ddnet_net_wait_timeout, m_pNet, Microseconds * 1000);
 }
 
 int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
@@ -151,11 +154,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 	while(true)
 	{
 		// Keep space for null termination.
-		if(ddnet_net_recv(m_pNet, m_aBuffer, sizeof(m_aBuffer) - 1, m_pNetEvent))
-		{
-			log_error("net", "recv failed: %s", ddnet_net_error(m_pNet));
-			exit(1);
-		}
+		EE(ddnet_net_recv, m_pNet, m_aBuffer, sizeof(m_aBuffer) - 1, m_pNetEvent);
 		uint64_t PeerID;
 		int ClientID;
 		void *pUserdata;
@@ -182,40 +181,24 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 			if(m_aPeers[ClientID].m_ID != (uint64_t)-1)
 			{
 				static const char FULL[] = "This server is full";
-				if(ddnet_net_close(m_pNet, PeerID, FULL, sizeof(FULL) - 1))
-				{
-					log_error("net", "drop failed: %s", ddnet_net_error(m_pNet));
-					exit(1);
-				}
+				EE(ddnet_net_close, m_pNet, PeerID, FULL, sizeof(FULL) - 1);
 			}
 			ddnet_net_ev_connect_addr(m_pNetEvent, &pAddr, &AddrLen);
 			if(!AddrFromUrl(pAddr, &Addr))
 			{
 				static const char UNRECOGNIZED_ADDR[] = "Unrecognized address";
-				if(ddnet_net_close(m_pNet, PeerID, UNRECOGNIZED_ADDR, sizeof(UNRECOGNIZED_ADDR) - 1))
-				{
-					log_error("net", "drop failed: %s", ddnet_net_error(m_pNet));
-					exit(1);
-				}
+				EE(ddnet_net_close, m_pNet, PeerID, UNRECOGNIZED_ADDR, sizeof(UNRECOGNIZED_ADDR) - 1);
 			}
 
 			if(m_pNetBan->IsBanned(&Addr, aBanReason, sizeof(aBanReason)))
 			{
-				if(ddnet_net_close(m_pNet, PeerID, aBanReason, str_length(aBanReason)))
-				{
-					log_error("net", "drop failed: %s", ddnet_net_error(m_pNet));
-					exit(1);
-				}
+				EE(ddnet_net_close, m_pNet, PeerID, aBanReason, str_length(aBanReason));
 			}
 
 			m_aPeers[ClientID].m_State = CPeer::STATE_CONNECTED;
 			m_aPeers[ClientID].m_ID = PeerID;
 			m_aPeers[ClientID].m_Address = Addr;
-			if(ddnet_net_set_userdata(m_pNet, PeerID, (void *)(uintptr_t)ClientID))
-			{
-				log_error("net", "couldn't set userdata: %s", ddnet_net_error(m_pNet));
-				exit(1);
-			}
+			EE(ddnet_net_set_userdata, m_pNet, PeerID, (void *)(uintptr_t)ClientID);
 			if(m_pfnNewClient)
 			{
 				m_pfnNewClient(ClientID, m_pUser, false);
@@ -224,11 +207,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 		case DDNET_NET_EV_DISCONNECT:
 			PeerID = ddnet_net_ev_disconnect_peer_index(m_pNetEvent);
 			// TODO: can a disconnect happen before a connect?
-			if(ddnet_net_userdata(m_pNet, PeerID, &pUserdata))
-			{
-				log_error("net", "couldn't get userdata: %s", ddnet_net_error(m_pNet));
-				exit(1);
-			}
+			EE(ddnet_net_userdata, m_pNet, PeerID, &pUserdata);
 			if((uintptr_t)pUserdata == (uintptr_t)-1)
 			{
 				continue;
@@ -268,7 +247,6 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 
 			if(m_pfnDelClient)
 			{
-				log_debug("net", "reason len: %d", (int)ddnet_net_ev_disconnect_reason_len(m_pNetEvent));
 				m_aBuffer[ddnet_net_ev_disconnect_reason_len(m_pNetEvent)] = 0;
 				const char *pReason = ddnet_net_ev_disconnect_is_remote(m_pNetEvent) ? "" : (char *)m_aBuffer;
 				m_pfnDelClient(ClientID, pReason, m_pUser);
@@ -279,11 +257,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 			break;
 		case DDNET_NET_EV_CHUNK:
 			PeerID = ddnet_net_ev_chunk_peer_index(m_pNetEvent);
-			if(ddnet_net_userdata(m_pNet, PeerID, &pUserdata))
-			{
-				log_error("net", "couldn't get userdata: %s", ddnet_net_error(m_pNet));
-				exit(1);
-			}
+			EE(ddnet_net_userdata, m_pNet, PeerID, &pUserdata);
 			ClientID = (uintptr_t)pUserdata;
 			dbg_assert(m_aPeers[ClientID].m_ID == PeerID, "invalid peer mapping");
 			log_debug("net", "chunk len=%d", (int)ddnet_net_ev_chunk_len(m_pNetEvent));
@@ -317,11 +291,7 @@ int CNetServer::Send(CNetChunk *pChunk)
 		net_addr_str(&pChunk->m_Address, aAddr, sizeof(aAddr), true);
 		char aUrl[128];
 		str_format(aUrl, sizeof(aUrl), "tw-0.6+udp://%s", aAddr);
-		if(ddnet_net_send_connless_chunk(m_pNet, aAddr, str_length(aAddr), (const unsigned char *)pChunk->m_pData, pChunk->m_DataSize))
-		{
-			log_error("net", "send_connless_chunk failed: %s", ddnet_net_error(m_pNet));
-			exit(1);
-		}
+		EE(ddnet_net_send_connless_chunk, m_pNet, aAddr, str_length(aAddr), (const unsigned char *)pChunk->m_pData, pChunk->m_DataSize);
 		return 0;
 	}
 	else
@@ -330,18 +300,10 @@ int CNetServer::Send(CNetChunk *pChunk)
 		dbg_assert(pChunk->m_ClientID < MaxClients(), "erroneous client id");
 		uint64_t PeerID = m_aPeers[pChunk->m_ClientID].m_ID;
 		dbg_assert(m_aPeers[pChunk->m_ClientID].m_ID != (uint64_t)-1, "invalid client id");
-		if(ddnet_net_send_chunk(m_pNet, PeerID, (const unsigned char *)pChunk->m_pData, pChunk->m_DataSize, (pChunk->m_Flags & NETSENDFLAG_VITAL) == 0))
-		{
-			log_error("net", "send failed: %s", ddnet_net_error(m_pNet));
-			exit(1);
-		}
+		EE(ddnet_net_send_chunk, m_pNet, PeerID, (const unsigned char *)pChunk->m_pData, pChunk->m_DataSize, (pChunk->m_Flags & NETSENDFLAG_VITAL) == 0);
 		if((pChunk->m_Flags & NETSENDFLAG_FLUSH) != 0)
 		{
-			if(ddnet_net_flush(m_pNet, PeerID))
-			{
-				log_error("net", "flush failed: %s", ddnet_net_error(m_pNet));
-				exit(1);
-			}
+			EE(ddnet_net_flush, m_pNet, PeerID);
 		}
 	}
 	return 0;
@@ -368,11 +330,7 @@ bool CNetServer::SetTimedOut(int ClientID, int OrigID)
 	dbg_assert(m_aPeers[ClientID].m_ID == (uint64_t)-1, "invalid peer id");
 	m_aPeers[ClientID] = m_aPeers[OrigID];
 	m_aPeers[OrigID].Reset();
-	if(ddnet_net_set_userdata(m_pNet, m_aPeers[ClientID].m_ID, (void *)(uintptr_t)ClientID))
-	{
-		log_error("net", "couldn't set userdata: %s", ddnet_net_error(m_pNet));
-		exit(1);
-	}
+	EE(ddnet_net_set_userdata, m_pNet, m_aPeers[ClientID].m_ID, (void *)(uintptr_t)ClientID);
 	return true;
 }
 
