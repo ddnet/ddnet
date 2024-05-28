@@ -210,7 +210,6 @@ pub extern "C" fn ddnet_net_ev_connect_addr(
     let addr = ev.addr.insert(addr);
     *addr_ptr = addr.as_ptr();
     *addr_len = addr.as_bytes().len();
-
 }
 #[no_mangle]
 pub extern "C" fn ddnet_net_ev_chunk_peer_index(
@@ -267,6 +266,36 @@ pub extern "C" fn ddnet_net_ev_disconnect_is_remote(
         Some(Disconnect(_, _, remote)) => remote,
         _ => unreachable!(),
     }
+}
+#[no_mangle]
+pub extern "C" fn ddnet_net_ev_connless_chunk_len(
+    ev: &mut DdnetNetEvent,
+) -> usize {
+    use self::EventImpl::*;
+    match ev.inner {
+        Some(ConnlessChunk(_, len)) => len,
+        _ => unreachable!(),
+    }
+}
+#[no_mangle]
+pub extern "C" fn ddnet_net_ev_connless_chunk_addr(
+    ev: &mut DdnetNetEvent,
+    addr_ptr: &mut *const c_char,
+    addr_len: &mut usize,
+) {
+    use self::EventImpl::*;
+    if let Some(addr) = &ev.addr {
+        *addr_ptr = addr.as_ptr();
+        *addr_len = addr.as_bytes().len();
+        return;
+    }
+    let addr = match &ev.inner {
+        Some(ConnlessChunk(addr, _)) => CString::new(addr.to_string()).unwrap(),
+        _ => unreachable!(),
+    };
+    let addr = ev.addr.insert(addr);
+    *addr_ptr = addr.as_ptr();
+    *addr_len = addr.as_bytes().len();
 }
 
 #[no_mangle]

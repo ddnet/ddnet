@@ -47,6 +47,12 @@ size_t ddnet_net_ev_disconnect_reason_len(const struct DdnetNetEvent *ev);
 
 bool ddnet_net_ev_disconnect_is_remote(const struct DdnetNetEvent *ev);
 
+size_t ddnet_net_ev_connless_chunk_len(struct DdnetNetEvent *ev);
+
+void ddnet_net_ev_connless_chunk_addr(struct DdnetNetEvent *ev,
+                                      const char **addr_ptr,
+                                      size_t *addr_len);
+
 bool ddnet_net_new(struct DdnetNet **net);
 
 void ddnet_net_free(struct DdnetNet *net);

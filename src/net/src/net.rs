@@ -9,6 +9,7 @@ use crate::NoBlock as _;
 use crate::PrivateIdentity;
 use crate::Result;
 use arrayvec::ArrayString;
+use hexdump::hexdump_iter;
 use mio::net::UdpSocket;
 use mio::Events;
 use mio::Poll;
@@ -508,6 +509,15 @@ impl Net {
                             &from,
                         )?
                     }
+                    (Some(0b01111000), Some(0b01100101)) => {
+                        self.proto_tw06.on_recv(
+                            &self.cb,
+                            &mut self.packet_buf,
+                            read,
+                            buf,
+                            &from,
+                        )?
+                    }
                     (Some(p0), Some(p1))
                         if p0 & 0b11000000 == 0b01000000
                             && p1 != 0b01100101 =>
@@ -533,6 +543,9 @@ impl Net {
                     }
                     _ => {
                         error!("unknown packet");
+                        for line in hexdump_iter(packet) {
+                            error!("{}", line);
+                        }
                         continue;
                     }
                 };
@@ -774,7 +787,10 @@ impl Net {
     }
     pub fn send_connless_chunk(&mut self, addr: &str, payload: &[u8]) -> Result<()> {
         let addr: Addr = match addr.parse() {
-            Err(_) => return Ok(()),
+            Err(e) => {
+                error!("invalid addr {:?}: {}", addr, e);
+                return Ok(());
+            }
             Ok(addr) => addr,
         };
         use self::Addr::*;

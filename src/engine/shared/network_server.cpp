@@ -32,19 +32,50 @@ static bool AddrFromUrl(const char *pUrl, NETADDR *pAddr)
 {
 	// TODO: maybe parse URL by ourselves
 	CURLU *pHandle = curl_url();
-	if(curl_url_set(pHandle, CURLUPART_URL, pUrl, CURLU_NON_SUPPORT_SCHEME))
-	{
-		curl_url_cleanup(pHandle);
-		return false;
-	}
 	char *pHostname;
-	if(curl_url_get(pHandle, CURLUPART_HOST, &pHostname, 0))
+	char *pPort;
+	bool Error = false
+		|| curl_url_set(pHandle, CURLUPART_URL, pUrl, CURLU_NON_SUPPORT_SCHEME)
+		|| curl_url_get(pHandle, CURLUPART_HOST, &pHostname, 0)
+		|| curl_url_get(pHandle, CURLUPART_PORT, &pPort, 0);
+	curl_url_cleanup(pHandle);
+	if(Error)
 	{
-		curl_url_cleanup(pHandle);
 		return false;
 	}
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "%s:%s", pHostname, pPort);
+	if(net_addr_from_str(pAddr, aBuf))
+	{
+		return false;
+	}
+	return true;
+}
+
+static bool Tw06AddrFromUrl(const char *pUrl, NETADDR *pAddr)
+{
+	// TODO: maybe parse URL by ourselves
+	CURLU *pHandle = curl_url();
+	char *pScheme;
+	char *pHostname;
+	char *pPort;
+	bool Error = false
+		|| curl_url_set(pHandle, CURLUPART_URL, pUrl, CURLU_NON_SUPPORT_SCHEME)
+		|| curl_url_get(pHandle, CURLUPART_SCHEME, &pScheme, 0)
+		|| curl_url_get(pHandle, CURLUPART_HOST, &pHostname, 0)
+		|| curl_url_get(pHandle, CURLUPART_PORT, &pPort, 0);
 	curl_url_cleanup(pHandle);
-	if(net_addr_from_str(pAddr, pHostname))
+	if(Error)
+	{
+		return false;
+	}
+	if(str_comp(pScheme, "tw-0.6+udp") != 0)
+	{
+		return false;
+	}
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "%s:%s", pHostname, pPort);
+	if(net_addr_from_str(pAddr, aBuf))
 	{
 		return false;
 	}
@@ -152,6 +183,7 @@ void CNetServer::Wait(uint64_t Microseconds)
 
 int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 {
+	*pResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
 	while(true)
 	{
 		// Keep space for null termination.
@@ -287,7 +319,23 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 			}
 			return 1;
 		case DDNET_NET_EV_CONNLESS_CHUNK:
-			continue;
+			{
+				const char *pAddr;
+				size_t AddrLen;
+				ddnet_net_ev_connless_chunk_addr(m_pNetEvent, &pAddr, &AddrLen);
+				NETADDR Addr;
+				if(!Tw06AddrFromUrl(pAddr, &Addr))
+				{
+					continue;
+				}
+				mem_zero(pChunk, sizeof(*pChunk));
+				pChunk->m_ClientID = -1;
+				pChunk->m_Address = Addr;
+				pChunk->m_Flags = 0;
+				pChunk->m_DataSize = ddnet_net_ev_connless_chunk_len(m_pNetEvent);
+				pChunk->m_pData = m_aBuffer;
+			}
+			return 1;
 		}
 	}
 }
@@ -306,7 +354,7 @@ int CNetServer::Send(CNetChunk *pChunk)
 		net_addr_str(&pChunk->m_Address, aAddr, sizeof(aAddr), true);
 		char aUrl[128];
 		str_format(aUrl, sizeof(aUrl), "tw-0.6+udp://%s", aAddr);
-		EE(ddnet_net_send_connless_chunk, m_pNet, aAddr, str_length(aAddr), (const unsigned char *)pChunk->m_pData, pChunk->m_DataSize);
+		EE(ddnet_net_send_connless_chunk, m_pNet, aUrl, str_length(aUrl), (const unsigned char *)pChunk->m_pData, pChunk->m_DataSize);
 		return 0;
 	}
 	else

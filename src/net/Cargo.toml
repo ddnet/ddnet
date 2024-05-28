@@ -16,6 +16,7 @@ boring-sys = "4"
 env_logger = "0.10.0"
 foreign-types-shared = "0.3.1"
 getrandom = { version = "0.2.8", features = ["std"] }
+hexdump = "0.1.2"
 libtw2-net = { path = "../../../libtw2/net" }
 log = "0.4.17"
 mio = { version = "0.8.4", features = ["net", "os-poll"] }

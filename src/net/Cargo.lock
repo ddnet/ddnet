@@ -271,6 +271,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "856b5cb0902c2b6d65d5fd97dfa30f9b70c7538e770b98eab5ed52d8db923e01"
 
 [[package]]
+name = "hexdump"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf31ab66ed8145a1c7427bd8e9b42a6131bd74ccf444f69b9e620c2e73ded832"
+dependencies = [
+ "arrayvec",
+]
+
+[[package]]
 name = "humantime"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -480,6 +489,7 @@ dependencies = [
  "env_logger",
  "foreign-types-shared",
  "getrandom",
+ "hexdump",
  "libtw2-net",
  "log 0.4.17",
  "mio",
