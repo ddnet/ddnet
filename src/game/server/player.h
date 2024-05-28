@@ -228,7 +228,8 @@ public:
 
 	bool m_BirthdayAnnounced;
 
-	vec2 LastTelePos;
+	int m_RescueMode;
+
 	CSaveTee m_LastTeleTee;
 };
 

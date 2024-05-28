@@ -202,7 +202,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(m_pClient->m_Snap.m_pGameDataObj)
 		{
 			int Score = Team == TEAM_RED ? m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed : m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue;
-			str_from_int(Score, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", Score);
 		}
 	}
 	else
@@ -211,16 +211,16 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId])
 		{
 			int Score = m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId]->m_Score;
-			str_from_int(Score, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", Score);
 		}
 		else if(m_pClient->m_Snap.m_pLocalInfo)
 		{
 			int Score = m_pClient->m_Snap.m_pLocalInfo->m_Score;
-			str_from_int(Score, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", Score);
 		}
 	}
 
-	if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
+	if(m_pClient->m_GameInfo.m_TimeScore)
 	{
 		if(m_ServerRecord > 0)
 			str_time_float(m_ServerRecord, TIME_HOURS, aBuf, sizeof(aBuf));
@@ -289,7 +289,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	x += 10.0f;
 	y += 50.0f;
 	float HeadlineFontsize = 22.0f;
-	const char *pScore = (m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard) ? Localize("Time") : Localize("Score");
+	const char *pScore = m_pClient->m_GameInfo.m_TimeScore ? Localize("Time") : Localize("Score");
 	tw = TextRender()->TextWidth(HeadlineFontsize, pScore, -1, -1.0f);
 	TextRender()->Text(ScoreOffset + ScoreLength - tw, y + (HeadlineFontsize * 2.f - HeadlineFontsize) / 2.f, HeadlineFontsize, pScore, -1.0f);
 
@@ -370,7 +370,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 					if(DDTeam == TEAM_SUPER)
 						str_copy(aBuf, Localize("Super"));
 					else
-						str_from_int(DDTeam, aBuf);
+						str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
 					TextRender()->SetCursor(&Cursor, x - 10.0f, y + Spacing + FontSize - (FontSize / 1.5f), FontSize / 1.5f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 					Cursor.m_LineWidth = NameLength + 3;
 				}
@@ -397,7 +397,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 
 		// score
-		if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
+		if(m_pClient->m_GameInfo.m_TimeScore)
 		{
 			if(pInfo->m_Score == -9999)
 				aBuf[0] = 0;
@@ -405,7 +405,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				str_time((int64_t)absolute(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 		}
 		else
-			str_from_int(clamp(pInfo->m_Score, -999, 99999), aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 99999));
 		tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 		TextRender()->SetCursor(&Cursor, ScoreOffset + ScoreLength - tw, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER);
 		TextRender()->TextEx(&Cursor, aBuf, -1);
@@ -494,7 +494,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
 			TextRender()->TextColor(rgb);
 		}
-		str_from_int(clamp(pInfo->m_Latency, 0, 999), aBuf);
+		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 999));
 		tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 		TextRender()->SetCursor(&Cursor, PingOffset + PingLength - tw, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = PingLength;

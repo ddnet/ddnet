@@ -147,6 +147,7 @@ void CPlayer::Reset()
 	m_VotedForPractice = false;
 	m_SwapTargetsClientId = -1;
 	m_BirthdayAnnounced = false;
+	m_RescueMode = RESCUEMODE_AUTO;
 
 	// ddnet-insta
 	m_IsReadyToPlay = !GameServer()->m_pController->IsPlayerReadyMode();

@@ -1672,8 +1672,76 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	pChr->Rescue();
-	pChr->UnFreeze();
+	bool GoRescue = true;
+
+	if(pPlayer->m_RescueMode == RESCUEMODE_MANUAL)
+	{
+		// if character can't set his rescue state then we should rescue him instead
+		GoRescue = !pChr->TrySetRescue(RESCUEMODE_MANUAL);
+	}
+
+	if(GoRescue)
+	{
+		pChr->Rescue();
+		pChr->UnFreeze();
+	}
+}
+
+void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
+	if(!g_Config.m_SvRescue && !Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCid(), "Rescue is not enabled on this server and you're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	if(str_comp_nocase(pResult->GetString(0), "auto") == 0)
+	{
+		if(pPlayer->m_RescueMode != RESCUEMODE_AUTO)
+		{
+			pPlayer->m_RescueMode = RESCUEMODE_AUTO;
+
+			pSelf->SendChatTarget(pPlayer->GetCid(), "Rescue mode changed to auto.");
+		}
+
+		return;
+	}
+
+	if(str_comp_nocase(pResult->GetString(0), "manual") == 0)
+	{
+		if(pPlayer->m_RescueMode != RESCUEMODE_MANUAL)
+		{
+			pPlayer->m_RescueMode = RESCUEMODE_MANUAL;
+
+			pSelf->SendChatTarget(pPlayer->GetCid(), "Rescue mode changed to manual.");
+		}
+
+		return;
+	}
+
+	if(str_comp_nocase(pResult->GetString(0), "list") == 0)
+	{
+		pSelf->SendChatTarget(pPlayer->GetCid(), "Available rescue modes: auto, manual");
+	}
+	else if(str_comp_nocase(pResult->GetString(0), "") == 0)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "Current rescue mode: %s.", pPlayer->m_RescueMode == RESCUEMODE_MANUAL ? "manual" : "auto");
+		pSelf->SendChatTarget(pPlayer->GetCid(), aBuf);
+	}
+	else
+	{
+		pSelf->SendChatTarget(pPlayer->GetCid(), "Unknown argument. Check '/rescuemode list'");
+	}
 }
 
 void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)

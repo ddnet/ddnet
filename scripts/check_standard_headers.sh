@@ -5,7 +5,7 @@ c_headers=(assert complex ctype errno fenv float inttypes iso646 limits locale m
 c_headers_map=(cassert complex cctype cerrno cfenv cfloat cinttypes ciso646 climits clocale cmath csetjmp csignal cstdarg cstdbool cstddef cstdint cstdio cstdlib cstring ctgmath ctime cwchar cwctype)
 
 # Create regex dynamically from the array to match any C header
-c_headers_regex=$(IFS="|"; echo "${c_headers[*]}")
+c_headers_regex=$(printf "%s" "${c_headers[*]}" | tr ' ' '|')
 
 # Find all C++ source and header files
 files=$(find ./src -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.h' \) ! -path "./src/engine/external/*")
@@ -15,10 +15,10 @@ error_found=0
 # Check each source file for C headers
 for file in $files; do
 	# First check if the file includes any C headers for more efficiency when no C header is used
-	if grep -E "#include\s+<($c_headers_regex)\.h>" "$file" >/dev/null; then
+	if grep -E "#include\s+<($c_headers_regex)\.h>" "$file" > /dev/null; then
 		# Check each C header individually to print an error message with the appropriate replacement C++ header
-		for (( i=0; i < ${#c_headers[@]}; i++ )); do
-			if grep -E "#include\s+<${c_headers[i]}\.h>" "$file" >/dev/null; then
+		for ((i = 0; i < ${#c_headers[@]}; i++)); do
+			if grep -E "#include\s+<${c_headers[i]}\.h>" "$file" > /dev/null; then
 				echo "Error: '$file' includes C header '${c_headers[i]}.h'. Include the C++ header '${c_headers_map[i]}' instead."
 			fi
 		done

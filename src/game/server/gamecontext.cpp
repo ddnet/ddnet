@@ -3731,9 +3731,9 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("saytimeall", "", CFGFLAG_CHAT | CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConSayTimeAll, this, "Publicly messages everyone your current time in this current running race");
 	Console()->Register("time", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTime, this, "Privately shows you your current time in this current running race in the broadcast message");
 	Console()->Register("timer", "?s['gametimer'|'broadcast'|'both'|'none'|'cycle']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSetTimerType, this, "Personal Setting of showing time in either broadcast or game/round timer, timer s, where s = broadcast for broadcast, gametimer for game/round timer, cycle for cycle, both for both, none for no timer and nothing to show current status");
-
-	Console()->Register("r", "", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConRescue, this, "Teleport yourself out of freeze (use sv_rescue 1 to enable this feature)");
-	Console()->Register("rescue", "", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConRescue, this, "Teleport yourself out of freeze (use sv_rescue 1 to enable this feature)");
+	Console()->Register("r", "", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConRescue, this, "Teleport yourself out of freeze if auto rescue mode is enabled, otherwise it will set position for rescuing if grounded and teleport you out of freeze if not (use sv_rescue 1 to enable this feature)");
+	Console()->Register("rescue", "", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConRescue, this, "Teleport yourself out of freeze if auto rescue mode is enabled, otherwise it will set position for rescuing if grounded and teleport you out of freeze if not (use sv_rescue 1 to enable this feature)");
+	Console()->Register("rescuemode", "?r['auto'|'manual']", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConRescueMode, this, "Sets one of the two rescue modes (auto or manual). Prints current mode if no arguments provided");
 	Console()->Register("tp", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConTeleTo, this, "Depending on the number of supplied arguments, teleport yourself to; (0.) where you are spectating or aiming; (1.) the specified player name");
 	Console()->Register("teleport", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConTeleTo, this, "Depending on the number of supplied arguments, teleport yourself to; (0.) where you are spectating or aiming; (1.) the specified player name");
 	Console()->Register("tpxy", "f[x] f[y]", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConTeleXY, this, "Teleport yourself to the specified coordinates. A tilde (~) can be used to denote your current position, e.g. '/tpxy ~1 ~' to teleport one tile to the right");
@@ -3760,7 +3760,6 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("unweapons", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnWeapons, this, "Removes all weapons from you");
 	Console()->Register("ninja", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeNinja, this, "Makes you a ninja");
 	Console()->Register("unninja", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnNinja, this, "Removes ninja from you");
-
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
 }
 
@@ -4731,7 +4730,7 @@ void CGameContext::Converse(int ClientId, char *pStr)
 bool CGameContext::IsVersionBanned(int Version)
 {
 	char aVersion[16];
-	str_from_int(Version, aVersion);
+	str_format(aVersion, sizeof(aVersion), "%d", Version);
 
 	return str_in_list(g_Config.m_SvBannedVersions, ",", aVersion);
 }

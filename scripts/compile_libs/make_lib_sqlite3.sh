@@ -32,21 +32,21 @@ function make_sqlite3() {
 		LDFLAGS="${LINKER_FLAGS} -L./" \
 			LD_LIBRARY_PATH="$_LD_LIBRARY_PATH" \
 			${TMP_COMPILER} \
-				-c \
-				-fPIC \
-				-DSQLITE_ENABLE_ATOMIC_WRITE=1 \
-				-DSQLITE_ENABLE_BATCH_ATOMIC_WRITE=1 \
-				-DSQLITE_ENABLE_MULTITHREADED_CHECKS=1 \
-				-DSQLITE_THREADSAFE=1 \
-				../sqlite3.c \
-				-o sqlite3.o
+			-c \
+			-fPIC \
+			-DSQLITE_ENABLE_ATOMIC_WRITE=1 \
+			-DSQLITE_ENABLE_BATCH_ATOMIC_WRITE=1 \
+			-DSQLITE_ENABLE_MULTITHREADED_CHECKS=1 \
+			-DSQLITE_THREADSAFE=1 \
+			../sqlite3.c \
+			-o sqlite3.o
 
 		LDFLAGS="${LINKER_FLAGS} -L./" \
 			LD_LIBRARY_PATH="$_LD_LIBRARY_PATH" \
 			${TMP_AR} \
-				rvs \
-				sqlite3.a \
-				sqlite3.o
+			rvs \
+			sqlite3.a \
+			sqlite3.o
 	)
 }
 
@@ -62,4 +62,3 @@ function compile_all_sqlite3() {
 }
 
 compile_all_sqlite3 "$1" "$2"
-

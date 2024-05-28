@@ -39,7 +39,7 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
-			str_from_int(pProps[i].m_Value, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", pProps[i].m_Value);
 			auto NewValueRes = UiDoValueSelector((char *)&pIds[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0, pColor);
 			int NewValue = NewValueRes.m_Value;
 			if(NewValue != pProps[i].m_Value || NewValueRes.m_State != EEditState::EDITING)

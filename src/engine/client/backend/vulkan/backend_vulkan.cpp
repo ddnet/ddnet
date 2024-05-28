@@ -2702,13 +2702,6 @@ protected:
 		return true;
 	}
 
-	VkFormat TextureFormatToVulkanFormat(int TexFormat)
-	{
-		if(TexFormat == CCommandBuffer::TEXFORMAT_RGBA)
-			return VK_FORMAT_R8G8B8A8_UNORM;
-		return VK_FORMAT_R8G8B8A8_UNORM;
-	}
-
 	[[nodiscard]] bool BuildMipmaps(VkImage Image, VkFormat ImageFormat, size_t Width, size_t Height, size_t Depth, size_t MipMapLevelCount)
 	{
 		VkCommandBuffer *pMemCommandBuffer;
@@ -6657,12 +6650,10 @@ public:
 		int Slot = pCommand->m_Slot;
 		int Width = pCommand->m_Width;
 		int Height = pCommand->m_Height;
-		int Format = pCommand->m_Format;
-		int StoreFormat = pCommand->m_StoreFormat;
 		int Flags = pCommand->m_Flags;
 		uint8_t *pData = pCommand->m_pData;
 
-		if(!CreateTextureCMD(Slot, Width, Height, TextureFormatToVulkanFormat(Format), TextureFormatToVulkanFormat(StoreFormat), Flags, pData))
+		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, Flags, pData))
 			return false;
 
 		free(pData);
