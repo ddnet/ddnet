@@ -2054,7 +2054,6 @@ void CGameClient::OnPredict()
 			pLocalChar->OnPredictedInput(pInputData);
 		if(pDummyInputData)
 			pDummyChar->OnPredictedInput(pDummyInputData);
-		
 
 		if(g_Config.m_ClAntiPingPreInputs)
 		{
@@ -2067,13 +2066,13 @@ void CGameClient::OnPredict()
 						continue;
 					if(pLocalChar == pChar)
 						continue;
-					
-					CNetObj_PreInput * preInput = nullptr;
+
+					CNetObj_PreInput *preInput = nullptr;
 					for(int input = 0; input < 200; input++)
 					{
 						if(m_aClients[i].m_Inputs[input].m_IntendedTick != Tick)
 							continue;
-						
+
 						preInput = &m_aClients[i].m_Inputs[input];
 						break;
 					}
@@ -2081,10 +2080,10 @@ void CGameClient::OnPredict()
 					//no inputs found for this tick
 					if(!preInput)
 						continue;
-					
+
 					//convert preinput to input
-					
-					pChar->OnPredictedInput((CNetObj_PlayerInput*)preInput);
+
+					pChar->OnPredictedInput((CNetObj_PlayerInput *)preInput);
 				}
 			}
 		}

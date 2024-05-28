@@ -38,9 +38,9 @@
 
 // DDRace
 #include <engine/shared/linereader.h>
+#include <game/server/entities/character.h>
 #include <vector>
 #include <zlib.h>
-#include <game/server/entities/character.h>
 
 #include "databases/connection.h"
 #include "databases/connection_pool.h"
@@ -919,26 +919,23 @@ void CServer::DoSnapshot()
 
 			GameServer()->OnSnap(i);
 
-			if(Config()->m_SvPreInputs && m_aClients[i].m_DDNetVersion >= VERSION_DDNET_PREINPUT
-				&& GameServer()->IsClientPlayer(i))
+			if(Config()->m_SvPreInputs && m_aClients[i].m_DDNetVersion >= VERSION_DDNET_PREINPUT && GameServer()->IsClientPlayer(i))
 			{
 				for(int j = 0; j < MaxClients(); j++)
 				{
-					if(i==j)
+					if(i == j)
 						continue;
-					
+
 					//skip if player not in game and in view
-					if(!GameServer()->IsClientReady(j) || !GameServer()->IsClientPlayer(j)
-						|| !GameServer()->GetPlayerChar(j) || !GameServer()->GetPlayerChar(j)->CanSnapCharacter(i)
-						|| !GameServer()->GetPlayerChar(j)->IsSnappingCharacterInView(i))
+					if(!GameServer()->IsClientReady(j) || !GameServer()->IsClientPlayer(j) || !GameServer()->GetPlayerChar(j) || !GameServer()->GetPlayerChar(j)->CanSnapCharacter(i) || !GameServer()->GetPlayerChar(j)->IsSnappingCharacterInView(i))
 						continue;
 
 					//skip if on different teams
 					if(!GameServer()->GetPlayerChar(j)->SameTeam(i))
 						continue;
-					
+
 					//get latest tick
-					CClient::CInput * latestInput = 0;
+					CClient::CInput *latestInput = 0;
 					int latestTick = 0;
 
 					for(auto &Input : m_aClients[j].m_aInputs)
@@ -952,7 +949,6 @@ void CServer::DoSnapshot()
 
 					if(!latestInput || !latestTick)
 						continue;
-					
 
 					CNetObj_PlayerInput input = *(CNetObj_PlayerInput *)latestInput->m_aData;
 
@@ -966,8 +962,8 @@ void CServer::DoSnapshot()
 					m_aClients[i].m_aPreInputs[j] = input;
 
 					input = *(CNetObj_PlayerInput *)latestInput->m_aData;
-					
-					CNetObj_PreInput * preInputs = IServer::SnapNewItem<CNetObj_PreInput>(j);
+
+					CNetObj_PreInput *preInputs = IServer::SnapNewItem<CNetObj_PreInput>(j);
 					preInputs->m_Direction = input.m_Direction;
 					preInputs->m_TargetX = input.m_TargetX;
 					preInputs->m_TargetY = input.m_TargetY;
