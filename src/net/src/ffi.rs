@@ -1,5 +1,4 @@
 use self::NetInner::*;
-use crate::Addr;
 use crate::Context;
 use crate::Error;
 use crate::Event as EventImpl;
@@ -36,10 +35,18 @@ enum NetInner {
     Temporary,
 }
 
-#[repr(C)]
-pub union DdnetNetEvent {
+pub struct DdnetNetEvent {
     inner: Option<EventImpl>,
-    _padding_alignment: [u64; 8],
+    addr: Option<CString>,
+}
+
+impl DdnetNetEvent {
+    fn new(ev: Option<EventImpl>) -> DdnetNetEvent {
+        DdnetNetEvent {
+            inner: ev,
+            addr: None,
+        }
+    }
 }
 
 pub const DDNET_NET_EV_NONE: u64 = 0;
@@ -47,8 +54,6 @@ pub const DDNET_NET_EV_CONNECT: u64 = 1;
 pub const DDNET_NET_EV_CHUNK: u64 = 2;
 pub const DDNET_NET_EV_DISCONNECT: u64 = 3;
 pub const DDNET_NET_EV_CONNLESS_CHUNK: u64 = 4;
-
-pub type DdnetNetAddr = Addr;
 
 impl DdnetNet {
     /// Calls the provided function if `NetInner` is `init`, and adjusts the
@@ -152,9 +157,21 @@ fn catch_unwind<T, F: FnOnce() -> Result<T> + panic::UnwindSafe>(
 }
 
 #[no_mangle]
+pub extern "C" fn ddnet_net_ev_new(ev: *mut *mut DdnetNetEvent) {
+    unsafe {
+        ptr::write(ev, Box::leak(Box::new(DdnetNetEvent::new(None))));
+    }
+}
+#[no_mangle]
+pub extern "C" fn ddnet_net_ev_free(ev: *mut DdnetNetEvent) {
+    unsafe {
+        mem::drop(Box::from_raw(ev));
+    }
+}
+#[no_mangle]
 pub extern "C" fn ddnet_net_ev_kind(ev: &DdnetNetEvent) -> u64 {
     use self::EventImpl::*;
-    match unsafe { ev.inner } {
+    match ev.inner {
         None => DDNET_NET_EV_NONE,
         Some(Connect(..)) => DDNET_NET_EV_CONNECT,
         Some(Chunk(..)) => DDNET_NET_EV_CHUNK,
@@ -167,27 +184,38 @@ pub extern "C" fn ddnet_net_ev_connect_peer_index(
     ev: &DdnetNetEvent,
 ) -> u64 {
     use self::EventImpl::*;
-    match unsafe { &ev.inner } {
+    match &ev.inner {
         Some(Connect(idx, _)) => idx.0,
         _ => unreachable!(),
     }
 }
 #[no_mangle]
 pub extern "C" fn ddnet_net_ev_connect_addr(
-    ev: &DdnetNetEvent,
-) -> &DdnetNetAddr {
+    ev: &mut DdnetNetEvent,
+    addr_ptr: &mut *const c_char,
+    addr_len: &mut usize,
+) {
     use self::EventImpl::*;
-    match unsafe { &ev.inner } {
-        Some(Connect(_, addr)) => addr,
-        _ => unreachable!(),
+    if let Some(addr) = &ev.addr {
+        *addr_ptr = addr.as_ptr();
+        *addr_len = addr.as_bytes().len();
+        return;
     }
+    let addr = match &ev.inner {
+        Some(Connect(_, addr)) => CString::new(addr.to_string()).unwrap(),
+        _ => unreachable!(),
+    };
+    let addr = ev.addr.insert(addr);
+    *addr_ptr = addr.as_ptr();
+    *addr_len = addr.as_bytes().len();
+
 }
 #[no_mangle]
 pub extern "C" fn ddnet_net_ev_chunk_peer_index(
     ev: &DdnetNetEvent,
 ) -> u64 {
     use self::EventImpl::*;
-    match unsafe { &ev.inner } {
+    match &ev.inner {
         Some(Chunk(idx, _, _)) => idx.0,
         _ => unreachable!(),
     }
@@ -195,7 +223,7 @@ pub extern "C" fn ddnet_net_ev_chunk_peer_index(
 #[no_mangle]
 pub extern "C" fn ddnet_net_ev_chunk_len(ev: &DdnetNetEvent) -> usize {
     use self::EventImpl::*;
-    match unsafe { ev.inner } {
+    match ev.inner {
         Some(Chunk(_, len, _)) => len,
         _ => unreachable!(),
     }
@@ -203,7 +231,7 @@ pub extern "C" fn ddnet_net_ev_chunk_len(ev: &DdnetNetEvent) -> usize {
 #[no_mangle]
 pub extern "C" fn ddnet_net_ev_chunk_is_unreliable(ev: &DdnetNetEvent) -> bool {
     use self::EventImpl::*;
-    match unsafe { ev.inner } {
+    match ev.inner {
         Some(Chunk(_, _, unreliable)) => unreliable,
         _ => unreachable!(),
     }
@@ -213,7 +241,7 @@ pub extern "C" fn ddnet_net_ev_disconnect_peer_index(
     ev: &DdnetNetEvent,
 ) -> u64 {
     use self::EventImpl::*;
-    match unsafe { &ev.inner } {
+    match &ev.inner {
         Some(Disconnect(idx, _, _)) => idx.0,
         _ => unreachable!(),
     }
@@ -223,7 +251,7 @@ pub extern "C" fn ddnet_net_ev_disconnect_reason_len(
     ev: &DdnetNetEvent,
 ) -> usize {
     use self::EventImpl::*;
-    match unsafe { ev.inner } {
+    match ev.inner {
         Some(Disconnect(_, reason_len, _)) => reason_len,
         _ => unreachable!(),
     }
@@ -233,18 +261,10 @@ pub extern "C" fn ddnet_net_ev_disconnect_is_remote(
     ev: &DdnetNetEvent,
 ) -> bool {
     use self::EventImpl::*;
-    match unsafe { ev.inner } {
+    match ev.inner {
         Some(Disconnect(_, _, remote)) => remote,
         _ => unreachable!(),
     }
-}
-
-/// Can return `nullptr`.
-#[no_mangle]
-pub extern "C" fn ddnet_net_addr_identity(
-    addr: &DdnetNetAddr,
-) -> Option<&[u8; 32]> {
-    addr.identity().map(Identity::as_bytes)
 }
 
 #[no_mangle]
@@ -256,6 +276,12 @@ pub extern "C" fn ddnet_net_new(net: *mut *mut DdnetNet) -> bool {
     unsafe {
         ptr::write(net, Box::leak(Box::new(DdnetNet(result))));
         (**net).init(|_| Ok(()))
+    }
+}
+#[no_mangle]
+pub extern "C" fn ddnet_net_free(net: *mut DdnetNet) {
+    unsafe {
+        mem::drop(Box::from_raw(net));
     }
 }
 #[no_mangle]
@@ -317,12 +343,6 @@ pub extern "C" fn ddnet_net_open(net: &mut DdnetNet) -> bool {
     };
     net.good(|_| Ok(()))
 }
-#[no_mangle]
-pub extern "C" fn ddnet_net_free(net: *mut DdnetNet) {
-    unsafe {
-        mem::drop(Box::from_raw(net));
-    }
-}
 static NO_ERROR: &str = "no error\0";
 #[no_mangle]
 pub extern "C" fn ddnet_net_error(net: &DdnetNet) -> *const c_char {
@@ -376,7 +396,7 @@ pub extern "C" fn ddnet_net_recv(
 ) -> bool {
     net.good(|impl_| {
         let buf = unsafe { slice::from_raw_parts_mut(buf, buf_cap) };
-        event.inner = impl_.recv(buf)?;
+        *event = DdnetNetEvent::new(impl_.recv(buf)?);
         Ok(())
     })
 }
@@ -496,25 +516,4 @@ pub extern "C" fn ddnet_net_set_logger(
         Ok(())
     })
     .is_err()
-}
-
-#[cfg(test)]
-mod test {
-    use super::DdnetNetEvent;
-    use std::mem;
-
-    #[test]
-    fn event_padding_works() {
-        let ev = DdnetNetEvent { inner: None };
-        unsafe {
-            assert!(
-                mem::size_of_val(&ev.inner)
-                    <= mem::size_of_val(&ev._padding_alignment)
-            );
-            assert!(
-                mem::align_of_val(&ev.inner)
-                    <= mem::align_of_val(&ev._padding_alignment)
-            );
-        }
-    }
 }

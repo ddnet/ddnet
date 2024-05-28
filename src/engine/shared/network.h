@@ -12,6 +12,7 @@
 class CHuffman;
 class CNetBan;
 typedef struct DdnetNet CNet;
+typedef struct DdnetNetEvent CNetEvent;
 
 enum
 {
@@ -184,6 +185,7 @@ public:
 class CNetServer
 {
 	CNet *m_pNet = nullptr;
+	CNetEvent *m_pNetEvent = nullptr;
 	unsigned char m_aBuffer[2048];
 
 	CNetBan *m_pNetBan;
@@ -304,6 +306,7 @@ public:
 class CNetClient
 {
 	CNet *m_pNet = nullptr;
+	CNetEvent *m_pNetEvent = nullptr;
 	unsigned char m_aBuffer[2048] = {0};
 	int m_State = NETSTATE_OFFLINE;
 	int m_PeerID = -1;

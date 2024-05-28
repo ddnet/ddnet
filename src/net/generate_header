@@ -1,2 +1,2 @@
 #!/bin/sh
-cbindgen -c cbindgen.toml src/ffi.rs | grep -v Option > net.h
+cbindgen -c cbindgen.toml src/ffi.rs | sed 's/typedef [A-Za-z0-9]* DdnetNetAddr;/typedef struct DdnetNetAddr DdnetNetAddr;/g' > net.h

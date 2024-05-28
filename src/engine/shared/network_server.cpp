@@ -1,13 +1,39 @@
 #include "network.h"
 
+#include "netban.h"
 #include <base/log.h>
 #include <net/net.h>
 
+#include <curl/curl.h>
+
 static unsigned char IDENTITY[] = {
-        0x5c, 0xf2, 0xa4, 0xf0, 0xed, 0x3d, 0xc8, 0x5b, 0x3f, 0x4b, 0xfa, 0x5c,
-        0xa9, 0x7b, 0x8a, 0xde, 0xaf, 0x0d, 0x5e, 0xc1, 0x65, 0x17, 0x9a, 0xf8,
-        0x05, 0xa3, 0xf7, 0x75, 0x1d, 0xd8, 0xac, 0x47
+	0x5c, 0xf2, 0xa4, 0xf0, 0xed, 0x3d, 0xc8, 0x5b, 0x3f, 0x4b, 0xfa, 0x5c,
+	0xa9, 0x7b, 0x8a, 0xde, 0xaf, 0x0d, 0x5e, 0xc1, 0x65, 0x17, 0x9a, 0xf8,
+	0x05, 0xa3, 0xf7, 0x75, 0x1d, 0xd8, 0xac, 0x47
 };
+
+static bool AddrFromUrl(const char *pUrl, NETADDR *pAddr)
+{
+	// TODO: maybe parse URL by ourselves
+	CURLU *pHandle = curl_url();
+	if(curl_url_set(pHandle, CURLUPART_URL, pUrl, CURLU_NON_SUPPORT_SCHEME))
+	{
+		curl_url_cleanup(pHandle);
+		return false;
+	}
+	char *pHostname;
+	if(curl_url_get(pHandle, CURLUPART_HOST, &pHostname, 0))
+	{
+		curl_url_cleanup(pHandle);
+		return false;
+	}
+	curl_url_cleanup(pHandle);
+	if(net_addr_from_str(pAddr, pHostname))
+	{
+		return false;
+	}
+	return true;
+}
 
 void CNetServer::CPeer::Reset()
 {
@@ -35,6 +61,7 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 	char aBindAddr[NETADDR_MAXSTRSIZE];
 	str_format(aBindAddr, sizeof(aBindAddr), "0.0.0.0:%d", BindAddr.port);
 
+	ddnet_net_ev_new(&m_pNetEvent);
 	if(false
 		|| ddnet_net_new(&m_pNet)
 		|| ddnet_net_set_bindaddr(m_pNet, aBindAddr, str_length(aBindAddr))
@@ -68,6 +95,11 @@ int CNetServer::Close()
 	if(m_pNet)
 	{
 		ddnet_net_free(m_pNet);
+		m_pNet = nullptr;
+	}
+	if(m_pNetEvent)
+	{
+		ddnet_net_ev_free(m_pNetEvent);
 		m_pNet = nullptr;
 	}
 	return 0;
@@ -118,9 +150,8 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 {
 	while(true)
 	{
-		DdnetNetEvent Event;
 		// Keep space for null termination.
-		if(ddnet_net_recv(m_pNet, m_aBuffer, sizeof(m_aBuffer) - 1, &Event))
+		if(ddnet_net_recv(m_pNet, m_aBuffer, sizeof(m_aBuffer) - 1, m_pNetEvent))
 		{
 			log_error("net", "recv failed: %s", ddnet_net_error(m_pNet));
 			exit(1);
@@ -128,12 +159,16 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 		uint64_t PeerID;
 		int ClientID;
 		void *pUserdata;
-		switch(ddnet_net_ev_kind(&Event))
+		const char *pAddr;
+		size_t AddrLen;
+		NETADDR Addr;
+		char aBanReason[256];
+		switch(ddnet_net_ev_kind(m_pNetEvent))
 		{
 		case DDNET_NET_EV_NONE:
 			return 0;
 		case DDNET_NET_EV_CONNECT:
-			PeerID = ddnet_net_ev_connect_peer_index(&Event);
+			PeerID = ddnet_net_ev_connect_peer_index(m_pNetEvent);
 			for(int i = 0; i < NET_MAX_CLIENTS; i++)
 			{
 				if(m_aPeers[m_NextClientID].m_ID == (uint64_t)-1)
@@ -153,7 +188,29 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 					exit(1);
 				}
 			}
+			ddnet_net_ev_connect_addr(m_pNetEvent, &pAddr, &AddrLen);
+			if(!AddrFromUrl(pAddr, &Addr))
+			{
+				static const char UNRECOGNIZED_ADDR[] = "Unrecognized address";
+				if(ddnet_net_close(m_pNet, PeerID, UNRECOGNIZED_ADDR, sizeof(UNRECOGNIZED_ADDR) - 1))
+				{
+					log_error("net", "drop failed: %s", ddnet_net_error(m_pNet));
+					exit(1);
+				}
+			}
+
+			if(m_pNetBan->IsBanned(&Addr, aBanReason, sizeof(aBanReason)))
+			{
+				if(ddnet_net_close(m_pNet, PeerID, aBanReason, str_length(aBanReason)))
+				{
+					log_error("net", "drop failed: %s", ddnet_net_error(m_pNet));
+					exit(1);
+				}
+			}
+
+			m_aPeers[ClientID].m_State = CPeer::STATE_CONNECTED;
 			m_aPeers[ClientID].m_ID = PeerID;
+			m_aPeers[ClientID].m_Address = Addr;
 			if(ddnet_net_set_userdata(m_pNet, PeerID, (void *)(uintptr_t)ClientID))
 			{
 				log_error("net", "couldn't set userdata: %s", ddnet_net_error(m_pNet));
@@ -165,7 +222,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 			}
 			break;
 		case DDNET_NET_EV_DISCONNECT:
-			PeerID = ddnet_net_ev_disconnect_peer_index(&Event);
+			PeerID = ddnet_net_ev_disconnect_peer_index(m_pNetEvent);
 			// TODO: can a disconnect happen before a connect?
 			if(ddnet_net_userdata(m_pNet, PeerID, &pUserdata))
 			{
@@ -211,16 +268,17 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 
 			if(m_pfnDelClient)
 			{
-				log_debug("net", "reason len: %d", (int)ddnet_net_ev_disconnect_reason_len(&Event));
-				m_aBuffer[ddnet_net_ev_disconnect_reason_len(&Event)] = 0;
-				const char *pReason = ddnet_net_ev_disconnect_is_remote(&Event) ? "" : (char *)m_aBuffer;
+				log_debug("net", "reason len: %d", (int)ddnet_net_ev_disconnect_reason_len(m_pNetEvent));
+				m_aBuffer[ddnet_net_ev_disconnect_reason_len(m_pNetEvent)] = 0;
+				const char *pReason = ddnet_net_ev_disconnect_is_remote(m_pNetEvent) ? "" : (char *)m_aBuffer;
 				m_pfnDelClient(ClientID, pReason, m_pUser);
 			}
 			dbg_assert(m_aPeers[ClientID].m_ID == PeerID, "invalid peer mapping");
 			m_aPeers[ClientID].m_ID = -1;
+			m_aPeers[ClientID].m_State = CPeer::STATE_NONE;
 			break;
 		case DDNET_NET_EV_CHUNK:
-			PeerID = ddnet_net_ev_chunk_peer_index(&Event);
+			PeerID = ddnet_net_ev_chunk_peer_index(m_pNetEvent);
 			if(ddnet_net_userdata(m_pNet, PeerID, &pUserdata))
 			{
 				log_error("net", "couldn't get userdata: %s", ddnet_net_error(m_pNet));
@@ -228,15 +286,15 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 			}
 			ClientID = (uintptr_t)pUserdata;
 			dbg_assert(m_aPeers[ClientID].m_ID == PeerID, "invalid peer mapping");
-			log_debug("net", "chunk len=%d", (int)ddnet_net_ev_chunk_len(&Event));
+			log_debug("net", "chunk len=%d", (int)ddnet_net_ev_chunk_len(m_pNetEvent));
 			mem_zero(pChunk, sizeof(*pChunk));
 			pChunk->m_ClientID = ClientID;
 			pChunk->m_Flags = 0;
-			if(!ddnet_net_ev_chunk_is_unreliable(&Event))
+			if(!ddnet_net_ev_chunk_is_unreliable(m_pNetEvent))
 			{
 				pChunk->m_Flags |= NET_CHUNKFLAG_VITAL;
 			}
-			pChunk->m_DataSize = ddnet_net_ev_chunk_len(&Event);
+			pChunk->m_DataSize = ddnet_net_ev_chunk_len(m_pNetEvent);
 			pChunk->m_pData = m_aBuffer;
 			return 1;
 		case DDNET_NET_EV_CONNLESS_CHUNK:
