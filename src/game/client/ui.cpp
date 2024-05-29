@@ -807,7 +807,7 @@ bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 	if(pMouseSelection->m_Selecting)
 	{
 		pMouseSelection->m_ReleaseMouse = MousePos();
-		if(MouseButtonReleased(0))
+		if(!MouseButton(0))
 		{
 			pMouseSelection->m_Selecting = false;
 		}
