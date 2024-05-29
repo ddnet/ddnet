@@ -2013,8 +2013,8 @@ void CGameClient::OnPredict()
 	if(PredictDummy())
 		pDummyChar = m_PredictedWorld.GetCharacterById(m_PredictedDummyId);
 
-	float predictPercentage = 1 - g_Config.m_ClAntiPingPercent / 100.0f;
 	int predictTick = Client()->GetPredictionTime() * Client()->GameTickSpeed() / 1000.0f;
+	float predictPercentage = 1 - g_Config.m_ClAntiPingMax / 100.0f;
 	predictTick = Client()->PredGameTick(g_Config.m_ClDummy) - floor(predictTick * predictPercentage);
 
 	if(predictTick < Client()->GameTick(g_Config.m_ClDummy) + 1)

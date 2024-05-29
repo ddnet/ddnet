@@ -58,7 +58,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 
 	bool IsOtherTeam = (pCurrent->m_ExtraInfo && pCurrent->m_Owner >= 0 && m_pClient->IsOtherTeam(pCurrent->m_Owner));
 
-	float predictPercentage = 1 - g_Config.m_ClAntiPingPercent / 100.0f;
+	float predictPercentage = 1 - g_Config.m_ClAntiPingMax / 100.0f;
 	int predictTick = Client()->GetPredictionTime() * Client()->GameTickSpeed() / 1000.0f;
 	predictTick = Client()->PredGameTick(g_Config.m_ClDummy) - floor(predictTick * predictPercentage);
 
@@ -308,7 +308,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	{
 		Dir = normalize_pre_length(Pos - From, Len);
 
-		float predictPercentage = 1 - g_Config.m_ClAntiPingPercent / 100.0f;
+		float predictPercentage = 1 - g_Config.m_ClAntiPingMax / 100.0f;
 		int predictTick = Client()->GetPredictionTime() * Client()->GameTickSpeed() / 1000.0f;
 		predictTick = Client()->PredGameTick(g_Config.m_ClDummy) - floor(predictTick * predictPercentage);
 
@@ -611,7 +611,7 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 	if(!m_pClient->AntiPingGunfire() || !LocalPlayerInGame)
 		return;
 
-	float predictPercentage = 1 - g_Config.m_ClAntiPingPercent / 100.0f;
+	float predictPercentage = 1 - g_Config.m_ClAntiPingMax / 100.0f;
 	int predictTick = Client()->GetPredictionTime() * Client()->GameTickSpeed() / 1000.0f;
 	predictTick = Client()->PredGameTick(g_Config.m_ClDummy) - floor(predictTick * predictPercentage);
 
