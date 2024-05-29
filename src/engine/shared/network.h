@@ -190,6 +190,7 @@ class CNetServer
 
 	CNetBan *m_pNetBan;
 
+	int m_Port = 0;
 	NETFUNC_NEWCLIENT m_pfnNewClient = nullptr;
 	NETFUNC_DELCLIENT m_pfnDelClient = nullptr;
 	void *m_pUser = nullptr;
@@ -310,6 +311,7 @@ class CNetClient
 	unsigned char m_aBuffer[2048] = {0};
 	int m_State = NETSTATE_OFFLINE;
 	int m_PeerID = -1;
+	NETADDR m_ServerAddress = {0};
 
 	CStun *m_pStun = nullptr;
 

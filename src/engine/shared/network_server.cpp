@@ -107,6 +107,7 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 	// TODO: use the actual bind address, not just the port
 	char aBindAddr[NETADDR_MAXSTRSIZE];
 	str_format(aBindAddr, sizeof(aBindAddr), "0.0.0.0:%d", BindAddr.port);
+	m_Port = BindAddr.port;
 
 	ddnet_net_ev_new(&m_pNetEvent);
 	if(false
@@ -147,7 +148,7 @@ int CNetServer::Close()
 	if(m_pNetEvent)
 	{
 		ddnet_net_ev_free(m_pNetEvent);
-		m_pNet = nullptr;
+		m_pNetEvent = nullptr;
 	}
 	return 0;
 }
@@ -218,12 +219,14 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 				{
 					static const char UNRECOGNIZED_ADDR[] = "Unrecognized address";
 					EE(ddnet_net_close, m_pNet, PeerID, UNRECOGNIZED_ADDR, sizeof(UNRECOGNIZED_ADDR) - 1);
+					continue;
 				}
 
 				char aBanReason[256];
 				if(m_pNetBan->IsBanned(&Addr, aBanReason, sizeof(aBanReason)))
 				{
 					EE(ddnet_net_close, m_pNet, PeerID, aBanReason, str_length(aBanReason));
+					continue;
 				}
 
 				uint32_t NumConnected;
@@ -233,6 +236,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 					char aBuf[64];
 					str_format(aBuf, sizeof(aBuf), "Only %d players with the same IP are allowed", g_Config.m_SvMaxClientsPerIP);
 					EE(ddnet_net_close, m_pNet, PeerID, aBuf, str_length(aBuf));
+					continue;
 				}
 
 				m_aPeers[ClientID].m_State = CPeer::STATE_CONNECTED;
@@ -331,7 +335,7 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 				mem_zero(pChunk, sizeof(*pChunk));
 				pChunk->m_ClientID = -1;
 				pChunk->m_Address = Addr;
-				pChunk->m_Flags = 0;
+				pChunk->m_Flags = NETSENDFLAG_CONNLESS;
 				pChunk->m_DataSize = ddnet_net_ev_connless_chunk_len(m_pNetEvent);
 				pChunk->m_pData = m_aBuffer;
 			}
@@ -436,9 +440,9 @@ CNetBan *CNetServer::NetBan() const
 }
 NETADDR CNetServer::Address() const
 {
-	// unimplemented
-	NETADDR Null = {0};
-	return Null;
+	NETADDR Addr = {0};
+	Addr.port = m_Port;
+	return Addr;
 }
 int CNetServer::MaxClients() const
 {

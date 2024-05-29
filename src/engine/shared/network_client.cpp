@@ -4,6 +4,8 @@
 #include <base/system.h>
 #include <net/net.h>
 
+#include <curl/curl.h>
+
 #define EE(function, net, ...) \
 	do \
 	{ \
@@ -17,6 +19,60 @@ static void ExitWithError(CNet *pNet, const char *pFunction)
 {
 	log_error("net", "%s: %s", pFunction, ddnet_net_error(pNet));
 	exit(1);
+}
+
+static bool AddrFromUrl(const char *pUrl, NETADDR *pAddr)
+{
+	// TODO: maybe parse URL by ourselves
+	CURLU *pHandle = curl_url();
+	char *pHostname;
+	char *pPort;
+	bool Error = false
+		|| curl_url_set(pHandle, CURLUPART_URL, pUrl, CURLU_NON_SUPPORT_SCHEME)
+		|| curl_url_get(pHandle, CURLUPART_HOST, &pHostname, 0)
+		|| curl_url_get(pHandle, CURLUPART_PORT, &pPort, 0);
+	curl_url_cleanup(pHandle);
+	if(Error)
+	{
+		return false;
+	}
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "%s:%s", pHostname, pPort);
+	if(net_addr_from_str(pAddr, aBuf))
+	{
+		return false;
+	}
+	return true;
+}
+
+static bool Tw06AddrFromUrl(const char *pUrl, NETADDR *pAddr)
+{
+	// TODO: maybe parse URL by ourselves
+	CURLU *pHandle = curl_url();
+	char *pScheme;
+	char *pHostname;
+	char *pPort;
+	bool Error = false
+		|| curl_url_set(pHandle, CURLUPART_URL, pUrl, CURLU_NON_SUPPORT_SCHEME)
+		|| curl_url_get(pHandle, CURLUPART_SCHEME, &pScheme, 0)
+		|| curl_url_get(pHandle, CURLUPART_HOST, &pHostname, 0)
+		|| curl_url_get(pHandle, CURLUPART_PORT, &pPort, 0);
+	curl_url_cleanup(pHandle);
+	if(Error)
+	{
+		return false;
+	}
+	if(str_comp(pScheme, "tw-0.6+udp") != 0)
+	{
+		return false;
+	}
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "%s:%s", pHostname, pPort);
+	if(net_addr_from_str(pAddr, aBuf))
+	{
+		return false;
+	}
+	return true;
 }
 
 CNetClient::~CNetClient()
@@ -128,46 +184,80 @@ int CNetClient::Recv(CNetChunk *pChunk)
 	{
 		// Keep space for null termination.
                 EE(ddnet_net_recv, m_pNet, m_aBuffer, sizeof(m_aBuffer) - 1, m_pNetEvent);
-		uint64_t PeerID;
 		switch(ddnet_net_ev_kind(m_pNetEvent))
                 {
                 case DDNET_NET_EV_NONE:
                         return 0;
                 case DDNET_NET_EV_CONNECT:
-			PeerID = ddnet_net_ev_connect_peer_index(m_pNetEvent);
-			if((int)PeerID != m_PeerID)
 			{
-				continue;
+				uint64_t PeerID = ddnet_net_ev_connect_peer_index(m_pNetEvent);
+				if((int)PeerID != m_PeerID)
+				{
+					continue;
+				}
+				const char *pAddr;
+				size_t AddrLen;
+				ddnet_net_ev_connect_addr(m_pNetEvent, &pAddr, &AddrLen);
+				NETADDR Addr;
+				if(!AddrFromUrl(pAddr, &Addr))
+				{
+					static const char UNRECOGNIZED_ADDR[] = "Unrecognized address";
+					EE(ddnet_net_close, m_pNet, PeerID, UNRECOGNIZED_ADDR, sizeof(UNRECOGNIZED_ADDR) - 1);
+					continue;
+				}
+				m_ServerAddress = Addr;
+				m_State = NETSTATE_ONLINE;
 			}
-			m_State = NETSTATE_ONLINE;
                         break;
                 case DDNET_NET_EV_DISCONNECT:
-			PeerID = ddnet_net_ev_disconnect_peer_index(m_pNetEvent);
-			if((int)PeerID != m_PeerID)
 			{
-				continue;
+				uint64_t PeerID = ddnet_net_ev_disconnect_peer_index(m_pNetEvent);
+				if((int)PeerID != m_PeerID)
+				{
+					continue;
+				}
+				m_PeerID = -1;
+				m_State = NETSTATE_OFFLINE;
+				log_debug("net", "reason len: %d", (int)ddnet_net_ev_disconnect_reason_len(m_pNetEvent));
+				m_aBuffer[ddnet_net_ev_disconnect_reason_len(m_pNetEvent)] = 0;
 			}
-			m_PeerID = -1;
-			m_State = NETSTATE_OFFLINE;
-			log_debug("net", "reason len: %d", (int)ddnet_net_ev_disconnect_reason_len(m_pNetEvent));
-			m_aBuffer[ddnet_net_ev_disconnect_reason_len(m_pNetEvent)] = 0;
                         break;
                 case DDNET_NET_EV_CHUNK:
-			PeerID = ddnet_net_ev_chunk_peer_index(m_pNetEvent);
-			if((int)PeerID != m_PeerID)
 			{
-				continue;
+				uint64_t PeerID = ddnet_net_ev_chunk_peer_index(m_pNetEvent);
+				if((int)PeerID != m_PeerID)
+				{
+					continue;
+				}
+				mem_zero(pChunk, sizeof(*pChunk));
+				pChunk->m_ClientID = 0;
+				pChunk->m_Flags = 0;
+				if(!ddnet_net_ev_chunk_is_unreliable(m_pNetEvent))
+				{
+					pChunk->m_Flags |= NET_CHUNKFLAG_VITAL;
+				}
+				pChunk->m_DataSize = ddnet_net_ev_chunk_len(m_pNetEvent);
+				pChunk->m_pData = m_aBuffer;
 			}
-                        mem_zero(pChunk, sizeof(*pChunk));
-                        pChunk->m_ClientID = 0;
-                        pChunk->m_Flags = 0;
-                        if(!ddnet_net_ev_chunk_is_unreliable(m_pNetEvent))
-                        {
-                                pChunk->m_Flags |= NET_CHUNKFLAG_VITAL;
-                        }
-                        pChunk->m_DataSize = ddnet_net_ev_chunk_len(m_pNetEvent);
-                        pChunk->m_pData = m_aBuffer;
                         return 1;
+		case DDNET_NET_EV_CONNLESS_CHUNK:
+			{
+				const char *pAddr;
+				size_t AddrLen;
+				ddnet_net_ev_connless_chunk_addr(m_pNetEvent, &pAddr, &AddrLen);
+				NETADDR Addr;
+				if(!Tw06AddrFromUrl(pAddr, &Addr))
+				{
+					continue;
+				}
+				mem_zero(pChunk, sizeof(*pChunk));
+				pChunk->m_ClientID = -1;
+				pChunk->m_Address = Addr;
+				pChunk->m_Flags = NETSENDFLAG_CONNLESS;
+				pChunk->m_DataSize = ddnet_net_ev_connless_chunk_len(m_pNetEvent);
+				pChunk->m_pData = m_aBuffer;
+			}
+			return 1;
                 }
 	}
 }
@@ -182,7 +272,11 @@ int CNetClient::Send(CNetChunk *pChunk)
 
 	if(pChunk->m_Flags & NETSENDFLAG_CONNLESS)
 	{
-		// unimplemented
+		char aAddr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&pChunk->m_Address, aAddr, sizeof(aAddr), true);
+		char aUrl[128];
+		str_format(aUrl, sizeof(aUrl), "tw-0.6+udp://%s", aAddr);
+		EE(ddnet_net_send_connless_chunk, m_pNet, aUrl, str_length(aUrl), (const unsigned char *)pChunk->m_pData, pChunk->m_DataSize);
 	}
 	else
 	{
@@ -247,8 +341,12 @@ int CNetClient::NetType() const
 }
 const NETADDR *CNetClient::ServerAddress() const
 {
-	static const NETADDR Null = {0};
-	return &Null;
+	if(m_State != NETSTATE_ONLINE)
+	{
+		static const NETADDR Null = {0};
+		return &Null;
+	}
+	return &m_ServerAddress;
 }
 void CNetClient::ConnectAddresses(const NETADDR **ppAddrs, int *pNumAddrs) const
 {

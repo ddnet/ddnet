@@ -1922,10 +1922,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			int GameTick = Unpacker.GetInt();
 			int DeltaTick = GameTick - Unpacker.GetInt();
 
-			// only allow packets from the server we actually want
-			if(net_addr_comp(&pPacket->m_Address, &ServerAddress()))
-				return;
-
 			// we are not allowed to process snapshot yet
 			if(State() < IClient::STATE_LOADING)
 				return;
