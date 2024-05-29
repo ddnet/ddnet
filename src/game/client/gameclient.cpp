@@ -2017,6 +2017,10 @@ void CGameClient::OnPredict()
 	int predictTick = Client()->GetPredictionTime() * Client()->GameTickSpeed() / 1000.0f;
 	predictTick = Client()->PredGameTick(g_Config.m_ClDummy) - floor(predictTick * predictPercentage);
 
+	if(predictTick < Client()->GameTick(g_Config.m_ClDummy) + 1)
+	{
+		predictTick = Client()->GameTick(g_Config.m_ClDummy) + 1;
+	}
 	// predict
 	for(int Tick = Client()->GameTick(g_Config.m_ClDummy) + 1; Tick <= Client()->PredGameTick(g_Config.m_ClDummy); Tick++)
 	{
@@ -2030,12 +2034,16 @@ void CGameClient::OnPredict()
 
 		if(Tick == Client()->PredGameTick(g_Config.m_ClDummy))
 		{
-			m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
 			m_PredictedPrevChar = pLocalChar->GetCore();
 			m_aClients[m_Snap.m_LocalClientId].m_PrevPredicted = pLocalChar->GetCore();
 
 			if(pDummyChar)
 				m_aClients[m_PredictedDummyId].m_PrevPredicted = pDummyChar->GetCore();
+		}
+
+		if(Tick == predictTick)
+		{
+			m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
 		}
 
 		// optionally allow some movement in freeze by not predicting freeze the last one to two ticks
@@ -2114,11 +2122,6 @@ void CGameClient::OnPredict()
 			if(g_Config.m_ClPredict && !m_SuppressEvents)
 				if(Events & COREEVENT_AIR_JUMP)
 					m_Effects.AirJump(Pos, 1.0f);
-		}
-
-		if(Tick == predictTick)
-		{
-			m_PartialPredictedWorld.CopyWorld(&m_PredictedWorld);
 		}
 	}
 
