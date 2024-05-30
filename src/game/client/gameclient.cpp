@@ -2015,7 +2015,7 @@ void CGameClient::OnPredict()
 
 	int predictTick = Client()->GetPredictionTime() * Client()->GameTickSpeed() / 1000.0f;
 	float predictPercentage = 1 - g_Config.m_ClAntiPingMax / 100.0f;
-	predictTick = Client()->PredGameTick(g_Config.m_ClDummy) - floor(predictTick * predictPercentage);
+	predictTick = Client()->PredGameTick(g_Config.m_ClDummy) - std::floor(predictTick * predictPercentage);
 
 	if(predictTick < Client()->GameTick(g_Config.m_ClDummy) + 1)
 	{
