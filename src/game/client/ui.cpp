@@ -113,13 +113,6 @@ CUi::CUi()
 {
 	m_Enabled = true;
 
-	m_MouseX = 0;
-	m_MouseY = 0;
-	m_MouseWorldX = 0;
-	m_MouseWorldY = 0;
-	m_MouseButtons = 0;
-	m_LastMouseButtons = 0;
-
 	m_Screen.x = 0.0f;
 	m_Screen.y = 0.0f;
 }
@@ -181,16 +174,7 @@ void CUi::OnCursorMove(float X, float Y)
 	m_UpdatedMouseDelta += vec2(X, Y);
 }
 
-void CUi::Update()
-{
-	const CUIRect *pScreen = Screen();
-	const float MouseX = (m_UpdatedMousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
-	const float MouseY = (m_UpdatedMousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
-	Update(MouseX, MouseY, m_UpdatedMouseDelta.x, m_UpdatedMouseDelta.y, MouseX * 3.0f, MouseY * 3.0f);
-	m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
-}
-
-void CUi::Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDeltaY, float MouseWorldX, float MouseWorldY)
+void CUi::Update(vec2 MouseWorldPos)
 {
 	unsigned MouseButtons = 0;
 	if(Enabled())
@@ -203,14 +187,14 @@ void CUi::Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDelta
 			MouseButtons |= 4;
 	}
 
-	m_MouseDeltaX = MouseDeltaX;
-	m_MouseDeltaY = MouseDeltaY;
-	m_MouseX = MouseX;
-	m_MouseY = MouseY;
-	m_MouseWorldX = MouseWorldX;
-	m_MouseWorldY = MouseWorldY;
+	const CUIRect *pScreen = Screen();
+	m_MousePos = m_UpdatedMousePos * vec2(pScreen->w / Graphics()->WindowWidth(), pScreen->h / Graphics()->WindowHeight());
+	m_MouseDelta = m_UpdatedMouseDelta;
+	m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
+	m_MouseWorldPos = MouseWorldPos;
 	m_LastMouseButtons = m_MouseButtons;
 	m_MouseButtons = MouseButtons;
+
 	m_pHotItem = m_pBecomingHotItem;
 	if(m_pActiveItem)
 		m_pHotItem = m_pActiveItem;
@@ -243,7 +227,7 @@ void CUi::DebugRender()
 
 bool CUi::MouseInside(const CUIRect *pRect) const
 {
-	return pRect->Inside(m_MouseX, m_MouseY);
+	return pRect->Inside(MousePos());
 }
 
 void CUi::ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const
@@ -524,9 +508,9 @@ EEditState CUi::DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, 
 		m_MouseSlow = true;
 
 	if(pX)
-		*pX = clamp(m_MouseX - pRect->x, 0.0f, pRect->w);
+		*pX = clamp(MouseX() - pRect->x, 0.0f, pRect->w);
 	if(pY)
-		*pY = clamp(m_MouseY - pRect->y, 0.0f, pRect->h);
+		*pY = clamp(MouseY() - pRect->y, 0.0f, pRect->h);
 
 	return Res;
 }
