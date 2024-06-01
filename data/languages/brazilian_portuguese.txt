@@ -1687,7 +1687,7 @@ Go back the specified duration
 
 [Demo player duration]
 %d sec.
-== $d seg.
+== %d seg.
 
 Change the skip duration
 == Alterar a duração de pulo
