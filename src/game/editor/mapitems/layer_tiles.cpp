@@ -64,7 +64,7 @@ CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
 	m_Switch = Other.m_Switch;
 	m_Tune = Other.m_Tune;
 
-	mem_copy(m_aFileName, Other.m_aFileName, IO_MAX_PATH_LENGTH);
+	str_copy(m_aFileName, Other.m_aFileName);
 }
 
 CLayerTiles::~CLayerTiles()

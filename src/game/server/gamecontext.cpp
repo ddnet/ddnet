@@ -3250,7 +3250,7 @@ void CGameContext::AddVote(const char *pDescription, const char *pCommand)
 		m_pVoteOptionFirst = pOption;
 
 	str_copy(pOption->m_aDescription, pDescription, sizeof(pOption->m_aDescription));
-	mem_copy(pOption->m_aCommand, pCommand, Len + 1);
+	str_copy(pOption->m_aCommand, pCommand, Len + 1);
 }
 
 void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
@@ -3311,7 +3311,7 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
 			pVoteOptionFirst = pDst;
 
 		str_copy(pDst->m_aDescription, pSrc->m_aDescription, sizeof(pDst->m_aDescription));
-		mem_copy(pDst->m_aCommand, pSrc->m_aCommand, Len + 1);
+		str_copy(pDst->m_aCommand, pSrc->m_aCommand, Len + 1);
 	}
 
 	// clean up
@@ -4068,7 +4068,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	{
 		int Length = str_length(pLine) + 1;
 		char *pCopy = (char *)malloc(Length);
-		mem_copy(pCopy, pLine, Length);
+		str_copy(pCopy, pLine, Length);
 		vLines.push_back(pCopy);
 		TotalLength += Length;
 	}

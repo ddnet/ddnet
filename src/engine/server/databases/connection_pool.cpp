@@ -96,7 +96,7 @@ CSqlExecData::CSqlExecData(
 	m_pName("add sqlite server")
 {
 	m_Ptr.m_Sqlite.m_Mode = m;
-	mem_copy(m_Ptr.m_Sqlite.m_FileName, aFileName, sizeof(m_Ptr.m_Sqlite.m_FileName));
+	str_copy(m_Ptr.m_Sqlite.m_FileName, aFileName);
 }
 CSqlExecData::CSqlExecData(CDbConnectionPool::Mode m,
 	const CMysqlConfig *pMysqlConfig) :
