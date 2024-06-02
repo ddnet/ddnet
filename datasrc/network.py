@@ -370,7 +370,7 @@ Objects = [
 		NetIntAny("m_EntityClass"),
 	]),
 
-	NetEventEx("MapSoundWorld:Common", "map-sound-world@netobj.ddnet.org", [
+	NetEventEx("MapSoundWorld:Common", "map-sound-world@netevent.ddnet.org", [
 		NetIntAny("m_SoundId", 0),
 	]),
 ]
