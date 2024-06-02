@@ -183,7 +183,7 @@ void CUpdater::Update()
 
 void CUpdater::AddFileJob(const char *pFile, bool Job)
 {
-	m_FileJobs.emplace_front(std::make_pair(pFile, Job));
+	m_FileJobs.emplace_front(pFile, Job);
 }
 
 bool CUpdater::ReplaceClient()

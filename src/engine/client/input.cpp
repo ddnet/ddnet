@@ -216,7 +216,7 @@ void CInput::CJoystick::GetJoystickHatKeys(int Hat, int HatValue, int (&HatKeys)
 
 void CInput::CJoystick::GetHatValue(int Hat, int (&HatKeys)[2])
 {
-	return GetJoystickHatKeys(Hat, SDL_JoystickGetHat(m_pDelegate, Hat), HatKeys);
+	GetJoystickHatKeys(Hat, SDL_JoystickGetHat(m_pDelegate, Hat), HatKeys);
 }
 
 bool CInput::CJoystick::Relative(float *pX, float *pY)
