@@ -71,8 +71,8 @@ Client
 Connecting to
 == ﻰﻟﺍ ﻝﺎﺼﺗﺍ
 
-Connection Problems...
-== ﻝﺎﺼﺗﻻﺍ ﻲﻓ ﻞﻛﺎﺸﻣ...
+Connection Problems…
+== ﻝﺎﺼﺗﻻﺍ ﻲﻓ ﻞﻛﺎﺸﻣ…
 
 Console
 == ﻞﺴﻧﻮﻜﻟﺍ
@@ -608,8 +608,8 @@ Show other players' key presses
 System message
 == ﻡﺎﻈﻨﻟﺍ ﻞﺋﺎﺳﺭ
 
-Updating...
-== ...ﺚﻳﺪﺤﺘﻟﺍ ﺭﺎﺟ
+Updating…
+== …ﺚﻳﺪﺤﺘﻟﺍ ﺭﺎﺟ
 
 Overlay entities
 == ﻥﺍﺭﺪﺠﻟﺍ-ﺐﻛﺍﺮﺗ
@@ -845,8 +845,8 @@ Zoom in
 Disconnect Dummy
 == ﺔﻴﻣﺪﻟﺍ ﺝﺍﺮﺧﺍ
 
-Update failed! Check log...
-== ...ﺕﺎﻗﻮﻠﻟﺍ ﻦﻣ ﺪﻛﺎﺗ !ﻞﺸﻓ ﺚﻳﺪﺤﺘﻟﺍ
+Update failed! Check log…
+== …ﺕﺎﻗﻮﻠﻟﺍ ﻦﻣ ﺪﻛﺎﺗ !ﻞﺸﻓ ﺚﻳﺪﺤﺘﻟﺍ
 
 Markers
 == ﺕﺎﻣﻼﻌﻟﺍ
@@ -1260,7 +1260,7 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.

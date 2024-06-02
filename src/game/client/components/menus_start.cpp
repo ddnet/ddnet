@@ -225,7 +225,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 	else if(State == IUpdater::FAIL)
 	{
-		str_format(aBuf, sizeof(aBuf), Localize("Update failed! Check log..."));
+		str_format(aBuf, sizeof(aBuf), Localize("Update failed! Check log…"));
 		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 	}
 	else if(State == IUpdater::NEED_RESTART)

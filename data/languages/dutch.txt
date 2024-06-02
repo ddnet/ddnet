@@ -89,8 +89,8 @@ Client
 Connecting to
 == Verbinden met
 
-Connection Problems...
-== Verbindingsproblemen...
+Connection Problems…
+== Verbindingsproblemen…
 
 Console
 == Console
@@ -625,8 +625,8 @@ DDNet %s is out!
 Downloading %s:
 == Downloaden %s:
 
-Update failed! Check log...
-== Update fout! Check log...
+Update failed! Check log…
+== Update fout! Check log…
 
 DDNet Client updated!
 == DDNet Client is geüpdate
@@ -900,7 +900,7 @@ Show tiles layers from BG map
 DDNet %s is available:
 == DDNet %s is beschikbaar
 
-Updating...
+Updating…
 == Aan het updaten
 
 No updates available
@@ -1396,7 +1396,7 @@ Videos directory
 Video was saved to '%s'
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.

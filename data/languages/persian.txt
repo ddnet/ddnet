@@ -76,8 +76,8 @@ Client
 Connecting to
 == ﻪﺑ ﻥﺪﺷ ﻞﺻﻭ
 
-Connection Problems...
-== ...ﺪﺷ ﻪﺟﺍﻮﻣ ﻞﻜﺸﻣ ﺎﺑ ﻁﺎﺒﺗﺭﺍ
+Connection Problems…
+== …ﺪﺷ ﻪﺟﺍﻮﻣ ﻞﻜﺸﻣ ﺎﺑ ﻁﺎﺒﺗﺭﺍ
 
 Console
 == ﻝﻮﺴﻨﻛ
@@ -738,7 +738,7 @@ Background
 Update now
 == ﻦﮐ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﻥﻻﺍ ﻦﯿﻤﻫ
 
-Updating...
+Updating…
 == ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﻝﺎﺣﺭﺩ
 
 No updates available
@@ -775,8 +775,8 @@ Play
 Downloading %s:
 == %s :ﺩﻮﻠﻧﺍﺩ ﻝﺎﺣﺭﺩ
 
-Update failed! Check log...
-== ... ﺪﯿﻨﮐ ﮏﭼ ﺍﺭ گﻻ!ﻖﻓﻮﻣﺎﻧ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ
+Update failed! Check log…
+== … ﺪﯿﻨﮐ ﮏﭼ ﺍﺭ گﻻ!ﻖﻓﻮﻣﺎﻧ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ
 
 Restart
 == ﺩﺪﺠﻣ ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ
@@ -869,8 +869,8 @@ Uploading map data to GPU
 The audio device couldn't be initialised.
 == .ﺩﻮﺷ ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ ﺪﻧﺍﻮﺗ ﯽﻤﻧ ﯽﺗﻮﺻ ﻩﺎﮕﺘﺳﺩ
 
-Trying to determine UDP connectivity...
-== UDP... ﻝﺎﺼﺗﺍ ﻦﯿﯿﻌﺗ ﯼﺍﺮﺑ ﺵﻼﺗ
+Trying to determine UDP connectivity…
+== UDP… ﻝﺎﺼﺗﺍ ﻦﯿﯿﻌﺗ ﯼﺍﺮﺑ ﺵﻼﺗ
 
 UDP seems to be filtered.
 == .ﺖﺳﺍ ﻩﺪﺷ ﺮﺘﻠﯿﻓ UDP ﺪﺳﺭ ﯽﻣ ﺮﻈﻧ ﻪﺑ
