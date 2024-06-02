@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 
+#include <engine/client.h>
 #include <engine/shared/config.h>
 
 #include <game/client/components/camera.h>
@@ -65,8 +66,7 @@ void CControls::OnPlayerDeath()
 struct CInputState
 {
 	CControls *m_pControls;
-	int *m_pVariable1;
-	int *m_pVariable2;
+	int *m_apVariables[NUM_DUMMIES];
 };
 
 static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
@@ -76,10 +76,7 @@ static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
 	if(pState->m_pControls->GameClient()->m_GameInfo.m_BugDDRaceInput && pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
 		return;
 
-	if(g_Config.m_ClDummy)
-		*pState->m_pVariable2 = pResult->GetInteger(0);
-	else
-		*pState->m_pVariable1 = pResult->GetInteger(0);
+	*pState->m_apVariables[g_Config.m_ClDummy] = pResult->GetInteger(0);
 }
 
 static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData)
@@ -89,22 +86,16 @@ static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData)
 	if(pState->m_pControls->GameClient()->m_GameInfo.m_BugDDRaceInput && pState->m_pControls->GameClient()->m_Snap.m_SpecInfo.m_Active)
 		return;
 
-	int *v;
-	if(g_Config.m_ClDummy)
-		v = pState->m_pVariable2;
-	else
-		v = pState->m_pVariable1;
-
-	if(((*v) & 1) != pResult->GetInteger(0))
-		(*v)++;
-	*v &= INPUT_STATE_MASK;
+	int *pVariable = pState->m_apVariables[g_Config.m_ClDummy];
+	if(((*pVariable) & 1) != pResult->GetInteger(0))
+		(*pVariable)++;
+	*pVariable &= INPUT_STATE_MASK;
 }
 
 struct CInputSet
 {
 	CControls *m_pControls;
-	int *m_pVariable1;
-	int *m_pVariable2;
+	int *m_apVariables[NUM_DUMMIES];
 	int m_Value;
 };
 
@@ -113,10 +104,7 @@ static void ConKeyInputSet(IConsole::IResult *pResult, void *pUserData)
 	CInputSet *pSet = (CInputSet *)pUserData;
 	if(pResult->GetInteger(0))
 	{
-		if(g_Config.m_ClDummy)
-			*pSet->m_pVariable2 = pSet->m_Value;
-		else
-			*pSet->m_pVariable1 = pSet->m_Value;
+		*pSet->m_apVariables[g_Config.m_ClDummy] = pSet->m_Value;
 	}
 }
 
@@ -131,58 +119,58 @@ void CControls::OnConsoleInit()
 {
 	// game commands
 	{
-		static CInputState s_State = {this, &m_aInputDirectionLeft[0], &m_aInputDirectionLeft[1]};
-		Console()->Register("+left", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Move left");
+		static CInputState s_State = {this, {&m_aInputDirectionLeft[0], &m_aInputDirectionLeft[1]}};
+		Console()->Register("+left", "", CFGFLAG_CLIENT, ConKeyInputState, &s_State, "Move left");
 	}
 	{
-		static CInputState s_State = {this, &m_aInputDirectionRight[0], &m_aInputDirectionRight[1]};
-		Console()->Register("+right", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Move right");
+		static CInputState s_State = {this, {&m_aInputDirectionRight[0], &m_aInputDirectionRight[1]}};
+		Console()->Register("+right", "", CFGFLAG_CLIENT, ConKeyInputState, &s_State, "Move right");
 	}
 	{
-		static CInputState s_State = {this, &m_aInputData[0].m_Jump, &m_aInputData[1].m_Jump};
-		Console()->Register("+jump", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Jump");
+		static CInputState s_State = {this, {&m_aInputData[0].m_Jump, &m_aInputData[1].m_Jump}};
+		Console()->Register("+jump", "", CFGFLAG_CLIENT, ConKeyInputState, &s_State, "Jump");
 	}
 	{
-		static CInputState s_State = {this, &m_aInputData[0].m_Hook, &m_aInputData[1].m_Hook};
-		Console()->Register("+hook", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Hook");
+		static CInputState s_State = {this, {&m_aInputData[0].m_Hook, &m_aInputData[1].m_Hook}};
+		Console()->Register("+hook", "", CFGFLAG_CLIENT, ConKeyInputState, &s_State, "Hook");
 	}
 	{
-		static CInputState s_State = {this, &m_aInputData[0].m_Fire, &m_aInputData[1].m_Fire};
-		Console()->Register("+fire", "", CFGFLAG_CLIENT, ConKeyInputCounter, (void *)&s_State, "Fire");
+		static CInputState s_State = {this, {&m_aInputData[0].m_Fire, &m_aInputData[1].m_Fire}};
+		Console()->Register("+fire", "", CFGFLAG_CLIENT, ConKeyInputCounter, &s_State, "Fire");
 	}
 	{
-		static CInputState s_State = {this, &m_aShowHookColl[0], &m_aShowHookColl[1]};
-		Console()->Register("+showhookcoll", "", CFGFLAG_CLIENT, ConKeyInputState, (void *)&s_State, "Show Hook Collision");
-	}
-
-	{
-		static CInputSet s_Set = {this, &m_aInputData[0].m_WantedWeapon, &m_aInputData[1].m_WantedWeapon, 1};
-		Console()->Register("+weapon1", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to hammer");
-	}
-	{
-		static CInputSet s_Set = {this, &m_aInputData[0].m_WantedWeapon, &m_aInputData[1].m_WantedWeapon, 2};
-		Console()->Register("+weapon2", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to gun");
-	}
-	{
-		static CInputSet s_Set = {this, &m_aInputData[0].m_WantedWeapon, &m_aInputData[1].m_WantedWeapon, 3};
-		Console()->Register("+weapon3", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to shotgun");
-	}
-	{
-		static CInputSet s_Set = {this, &m_aInputData[0].m_WantedWeapon, &m_aInputData[1].m_WantedWeapon, 4};
-		Console()->Register("+weapon4", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to grenade");
-	}
-	{
-		static CInputSet s_Set = {this, &m_aInputData[0].m_WantedWeapon, &m_aInputData[1].m_WantedWeapon, 5};
-		Console()->Register("+weapon5", "", CFGFLAG_CLIENT, ConKeyInputSet, (void *)&s_Set, "Switch to laser");
+		static CInputState s_State = {this, {&m_aShowHookColl[0], &m_aShowHookColl[1]}};
+		Console()->Register("+showhookcoll", "", CFGFLAG_CLIENT, ConKeyInputState, &s_State, "Show Hook Collision");
 	}
 
 	{
-		static CInputSet s_Set = {this, &m_aInputData[0].m_NextWeapon, &m_aInputData[1].m_NextWeapon, 0};
-		Console()->Register("+nextweapon", "", CFGFLAG_CLIENT, ConKeyInputNextPrevWeapon, (void *)&s_Set, "Switch to next weapon");
+		static CInputSet s_Set = {this, {&m_aInputData[0].m_WantedWeapon, &m_aInputData[1].m_WantedWeapon}, 1};
+		Console()->Register("+weapon1", "", CFGFLAG_CLIENT, ConKeyInputSet, &s_Set, "Switch to hammer");
 	}
 	{
-		static CInputSet s_Set = {this, &m_aInputData[0].m_PrevWeapon, &m_aInputData[1].m_PrevWeapon, 0};
-		Console()->Register("+prevweapon", "", CFGFLAG_CLIENT, ConKeyInputNextPrevWeapon, (void *)&s_Set, "Switch to previous weapon");
+		static CInputSet s_Set = {this, {&m_aInputData[0].m_WantedWeapon, &m_aInputData[1].m_WantedWeapon}, 2};
+		Console()->Register("+weapon2", "", CFGFLAG_CLIENT, ConKeyInputSet, &s_Set, "Switch to gun");
+	}
+	{
+		static CInputSet s_Set = {this, {&m_aInputData[0].m_WantedWeapon, &m_aInputData[1].m_WantedWeapon}, 3};
+		Console()->Register("+weapon3", "", CFGFLAG_CLIENT, ConKeyInputSet, &s_Set, "Switch to shotgun");
+	}
+	{
+		static CInputSet s_Set = {this, {&m_aInputData[0].m_WantedWeapon, &m_aInputData[1].m_WantedWeapon}, 4};
+		Console()->Register("+weapon4", "", CFGFLAG_CLIENT, ConKeyInputSet, &s_Set, "Switch to grenade");
+	}
+	{
+		static CInputSet s_Set = {this, {&m_aInputData[0].m_WantedWeapon, &m_aInputData[1].m_WantedWeapon}, 5};
+		Console()->Register("+weapon5", "", CFGFLAG_CLIENT, ConKeyInputSet, &s_Set, "Switch to laser");
+	}
+
+	{
+		static CInputSet s_Set = {this, {&m_aInputData[0].m_NextWeapon, &m_aInputData[1].m_NextWeapon}, 0};
+		Console()->Register("+nextweapon", "", CFGFLAG_CLIENT, ConKeyInputNextPrevWeapon, &s_Set, "Switch to next weapon");
+	}
+	{
+		static CInputSet s_Set = {this, {&m_aInputData[0].m_PrevWeapon, &m_aInputData[1].m_PrevWeapon}, 0};
+		Console()->Register("+prevweapon", "", CFGFLAG_CLIENT, ConKeyInputNextPrevWeapon, &s_Set, "Switch to previous weapon");
 	}
 }
 
