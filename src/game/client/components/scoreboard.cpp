@@ -523,47 +523,42 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 void CScoreboard::RenderRecordingNotification(float x)
 {
-	char aBuf[64] = "\0";
-	char aBuf2[64];
-	char aTime[32];
+	char aBuf[512] = "";
 
-	if(m_pClient->DemoRecorder(RECORDER_MANUAL)->IsRecording())
-	{
-		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_MANUAL)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
-		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Manual"), aTime);
-		str_append(aBuf, aBuf2);
-	}
-	if(m_pClient->DemoRecorder(RECORDER_RACE)->IsRecording())
-	{
-		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_RACE)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
-		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Race"), aTime);
-		str_append(aBuf, aBuf2);
-	}
-	if(m_pClient->DemoRecorder(RECORDER_AUTO)->IsRecording())
-	{
-		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_AUTO)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
-		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Auto"), aTime);
-		str_append(aBuf, aBuf2);
-	}
-	if(m_pClient->DemoRecorder(RECORDER_REPLAYS)->IsRecording())
-	{
-		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_REPLAYS)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
-		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Replay"), aTime);
-		str_append(aBuf, aBuf2);
-	}
+	const auto &&AppendRecorderInfo = [&](int Recorder, const char *pName) {
+		if(GameClient()->DemoRecorder(Recorder)->IsRecording())
+		{
+			char aTime[32];
+			str_time((int64_t)GameClient()->DemoRecorder(Recorder)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
+			str_append(aBuf, pName);
+			str_append(aBuf, " ");
+			str_append(aBuf, aTime);
+			str_append(aBuf, "  ");
+		}
+	};
 
-	if(!aBuf[0])
+	AppendRecorderInfo(RECORDER_MANUAL, Localize("Manual"));
+	AppendRecorderInfo(RECORDER_RACE, Localize("Race"));
+	AppendRecorderInfo(RECORDER_AUTO, Localize("Auto"));
+	AppendRecorderInfo(RECORDER_REPLAYS, Localize("Replay"));
+
+	if(aBuf[0] == '\0')
 		return;
 
-	float w = TextRender()->TextWidth(20.0f, aBuf, -1, -1.0f);
+	const float FontSize = 20.0f;
 
-	// draw the box
-	Graphics()->DrawRect(x, 0.0f, w + 60.0f, 50.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_B, 15.0f);
+	CUIRect Rect = {x, 0.0f, TextRender()->TextWidth(FontSize, aBuf) + 60.0f, 50.0f};
+	Rect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_B, 15.0f);
+	Rect.VSplitLeft(20.0f, nullptr, &Rect);
+	Rect.VSplitRight(10.0f, &Rect, nullptr);
 
-	// draw the red dot
-	Graphics()->DrawRect(x + 20, 15.0f, 20.0f, 20.0f, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), IGraphics::CORNER_ALL, 10.0f);
+	CUIRect Circle;
+	Rect.VSplitLeft(20.0f, &Circle, &Rect);
+	Circle.HMargin((Circle.h - Circle.w) / 2.0f, &Circle);
+	Circle.Draw(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), IGraphics::CORNER_ALL, Circle.h / 2.0f);
 
-	TextRender()->Text(x + 50.0f, (50.f - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
+	Rect.VSplitLeft(10.0f, nullptr, &Rect);
+	Ui()->DoLabel(&Rect, aBuf, FontSize, TEXTALIGN_ML);
 }
 
 void CScoreboard::OnRender()
