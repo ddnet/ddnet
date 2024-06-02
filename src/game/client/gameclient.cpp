@@ -1140,6 +1140,11 @@ void CGameClient::ProcessEvents()
 			CNetEvent_HammerHit *pEvent = (CNetEvent_HammerHit *)pData;
 			m_Effects.HammerHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
 		}
+		else if(Item.m_Type == NETEVENTTYPE_FINISH)
+		{
+			CNetEvent_Finish *pEvent = (CNetEvent_Finish *)pData;
+			m_Effects.FinishConfetti(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
+		}
 		else if(Item.m_Type == NETEVENTTYPE_SPAWN)
 		{
 			CNetEvent_Spawn *pEvent = (CNetEvent_Spawn *)pData;
