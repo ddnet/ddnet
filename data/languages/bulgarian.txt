@@ -76,8 +76,8 @@ Client
 Connecting to
 == Свързвам се с
 
-Connection Problems...
-== Проблеми с Връзката...
+Connection Problems…
+== Проблеми с Връзката…
 
 Console
 == Конзола
@@ -798,7 +798,7 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.org
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.
@@ -1710,7 +1710,7 @@ DDNet %s is available:
 Update now
 == 
 
-Updating...
+Updating…
 == 
 
 DDNet Client updated!
@@ -1780,7 +1780,7 @@ DDNet %s is out!
 Downloading %s:
 == 
 
-Update failed! Check log...
+Update failed! Check log…
 == 
 
 Loading race demo files

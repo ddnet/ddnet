@@ -1776,7 +1776,7 @@ void CMenus::RenderPopupConnecting(CUIRect Screen)
 		case IClient::CONNECTIVITY_UNKNOWN:
 			break;
 		case IClient::CONNECTIVITY_CHECKING:
-			pConnectivityLabel = Localize("Trying to determine UDP connectivity...");
+			pConnectivityLabel = Localize("Trying to determine UDP connectivity…");
 			break;
 		case IClient::CONNECTIVITY_UNREACHABLE:
 			pConnectivityLabel = Localize("UDP seems to be filtered.");

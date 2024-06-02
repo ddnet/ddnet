@@ -76,7 +76,7 @@ Client
 Connecting to
 == 接続先
 
-Connection Problems...
+Connection Problems…
 == 接続中に問題が発生
 
 Console
@@ -981,7 +981,7 @@ DDNet %s is available:
 Update now
 == 今すぐ更新
 
-Updating...
+Updating…
 == 更新中…
 
 DDNet Client updated!
@@ -1045,7 +1045,7 @@ DDNet %s is out!
 Downloading %s:
 == %s をダウンロード中:
 
-Update failed! Check log...
+Update failed! Check log…
 == 更新に失敗しました！ログを確認してください。
 
 Restart
@@ -1300,7 +1300,7 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.

@@ -76,7 +76,7 @@ Client
 Connecting to
 == Повезујем се на
 
-Connection Problems...
+Connection Problems…
 == Проблеми са интернетом
 
 Console
@@ -924,8 +924,8 @@ DDNet %s is available:
 Update now
 == Унапреди сада
 
-Updating...
-== Унапређујем...
+Updating…
+== Унапређујем…
 
 DDNet Client updated!
 == DDNet клијент је унапређен!
@@ -979,8 +979,8 @@ DDNet %s is out!
 Downloading %s:
 == Преузимање %s:
 
-Update failed! Check log...
-== Ажурирање није успело! Сачекајте log...
+Update failed! Check log…
+== Ажурирање није успело! Сачекајте log…
 
 Restart
 == Поново покрени
@@ -1081,7 +1081,7 @@ Angle:
 Uploading map data to GPU
 == Слање података мапе Г.Ј.О.~у (GPU)
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == Покушавам да одредим К.Д.П.(UDP) повезаност
 
 UDP seems to be filtered.

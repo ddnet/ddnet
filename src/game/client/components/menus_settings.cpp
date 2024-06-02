@@ -3418,7 +3418,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			}
 		}
 		else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
-			str_format(aBuf, sizeof(aBuf), Localize("Updating..."));
+			str_format(aBuf, sizeof(aBuf), Localize("Updating…"));
 		else if(State == IUpdater::NEED_RESTART)
 		{
 			str_format(aBuf, sizeof(aBuf), Localize("DDNet Client updated!"));

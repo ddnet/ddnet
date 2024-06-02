@@ -541,7 +541,7 @@ void CHud::RenderConnectionWarning()
 {
 	if(Client()->ConnectionProblems())
 	{
-		const char *pText = Localize("Connection Problems...");
+		const char *pText = Localize("Connection Problems…");
 		float w = TextRender()->TextWidth(24, pText, -1, -1.0f);
 		TextRender()->Text(150 * Graphics()->ScreenAspect() - w / 2, 50, 24, pText, -1.0f);
 	}
