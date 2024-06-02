@@ -3,7 +3,9 @@
 
 #include <engine/shared/config.h>
 
+#include <base/log.h>
 #include <base/math.h>
+#include <base/vmath.h>
 #include <game/client/gameclient.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
@@ -319,54 +321,56 @@ void CCamera::GotoTele(int Number, int Offset)
 {
 	if(Collision()->TeleLayer() == nullptr)
 		return;
+	Number--;
 
-	int Match = -1;
+	if(m_GotoTeleLastNumber != Number)
+		m_GotoTeleLastPos = ivec2(-1, -1);
+
 	ivec2 MatchPos = ivec2(-1, -1);
+	const size_t NumTeles = Collision()->TeleAllSize(Number);
+	if(!NumTeles)
+	{
+		log_error("camera", "No teleporter with number %d found.", Number + 1);
+		return;
+	}
 
-	auto FindTile = [this, &Match, &MatchPos, &Number, &Offset]() {
-		for(int x = 0; x < Collision()->GetWidth(); x++)
+	if(Offset != -1 || m_GotoTeleLastPos == ivec2(-1, -1))
+	{
+		if((size_t)Offset >= NumTeles || Offset < 0)
+			Offset = 0;
+		vec2 Tele = Collision()->TeleAllGet(Number, Offset);
+		MatchPos = ivec2(Tele.x / 32, Tele.y / 32);
+		m_GotoTeleOffset = Offset;
+	}
+	else
+	{
+		bool FullRound = false;
+		do
 		{
-			for(int y = 0; y < Collision()->GetHeight(); y++)
+			vec2 Tele = Collision()->TeleAllGet(Number, m_GotoTeleOffset);
+			MatchPos = ivec2(Tele.x / 32, Tele.y / 32);
+			m_GotoTeleOffset++;
+			if((size_t)m_GotoTeleOffset >= NumTeles)
 			{
-				int i = y * Collision()->GetWidth() + x;
-				int Tele = Collision()->TeleLayer()[i].m_Number;
-				if(Number == Tele)
+				m_GotoTeleOffset = 0;
+				if(FullRound)
 				{
-					Match++;
-					if(Offset != -1)
-					{
-						if(Match == Offset)
-						{
-							MatchPos = ivec2(x, y);
-							m_GotoTeleOffset = Match;
-							return;
-						}
-						continue;
-					}
-					MatchPos = ivec2(x, y);
-					if(m_GotoTeleLastPos != ivec2(-1, -1))
-					{
-						if(distance(m_GotoTeleLastPos, MatchPos) < 10.0f)
-						{
-							m_GotoTeleOffset++;
-							continue;
-						}
-					}
-					m_GotoTeleLastPos = MatchPos;
-					if(Match == m_GotoTeleOffset)
-						return;
+					MatchPos = m_GotoTeleLastPos;
+					break;
+				}
+				else
+				{
+					FullRound = true;
 				}
 			}
-		}
-	};
-	FindTile();
+		} while(distance(m_GotoTeleLastPos, MatchPos) < 10.0f);
+	}
 
 	if(MatchPos == ivec2(-1, -1))
 		return;
-	if(Match < m_GotoTeleOffset)
-		m_GotoTeleOffset = -1;
+	m_GotoTeleLastPos = MatchPos;
+	m_GotoTeleLastNumber = Number;
 	SetView(MatchPos);
-	m_GotoTeleOffset++;
 }
 
 void CCamera::SetZoom(float Target, int Smoothness)
