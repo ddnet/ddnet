@@ -336,16 +336,16 @@ void CControls::OnRender()
 			m_pClient->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_HAMMER &&
 			m_pClient->m_Snap.m_pLocalCharacter->m_Weapon != WEAPON_NINJA)
 		{
-			int w;
-			for(w = WEAPON_LASER; w > WEAPON_GUN; w--)
+			int Weapon;
+			for(Weapon = WEAPON_LASER; Weapon > WEAPON_GUN; Weapon--)
 			{
-				if(w == m_pClient->m_Snap.m_pLocalCharacter->m_Weapon)
+				if(Weapon == m_pClient->m_Snap.m_pLocalCharacter->m_Weapon)
 					continue;
-				if(m_aAmmoCount[w] > 0)
+				if(m_aAmmoCount[Weapon] > 0)
 					break;
 			}
-			if(w != m_pClient->m_Snap.m_pLocalCharacter->m_Weapon)
-				m_aInputData[g_Config.m_ClDummy].m_WantedWeapon = w + 1;
+			if(Weapon != m_pClient->m_Snap.m_pLocalCharacter->m_Weapon)
+				m_aInputData[g_Config.m_ClDummy].m_WantedWeapon = Weapon + 1;
 		}
 	}
 
