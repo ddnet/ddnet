@@ -12,6 +12,7 @@
 
 class CControls : public CComponent
 {
+	float GetMinMouseDistance() const;
 	float GetMaxMouseDistance() const;
 
 public:

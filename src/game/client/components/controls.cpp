@@ -410,9 +410,8 @@ void CControls::ClampMousePos()
 	}
 	else
 	{
-		float MouseMax = GetMaxMouseDistance();
-		float MinDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMinDistance : g_Config.m_ClMouseMinDistance;
-		float MouseMin = MinDistance;
+		const float MouseMin = GetMinMouseDistance();
+		const float MouseMax = GetMaxMouseDistance();
 
 		float MouseDistance = length(m_aMousePos[g_Config.m_ClDummy]);
 		if(MouseDistance < 0.001f)
@@ -427,6 +426,11 @@ void CControls::ClampMousePos()
 		if(MouseDistance > MouseMax)
 			m_aMousePos[g_Config.m_ClDummy] = normalize_pre_length(m_aMousePos[g_Config.m_ClDummy], MouseDistance) * MouseMax;
 	}
+}
+
+float CControls::GetMinMouseDistance() const
+{
+	return g_Config.m_ClDyncam ? g_Config.m_ClDyncamMinDistance : g_Config.m_ClMouseMinDistance;
 }
 
 float CControls::GetMaxMouseDistance() const
