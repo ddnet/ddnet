@@ -414,18 +414,18 @@ void CControls::ClampMousePos()
 		float MinDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMinDistance : g_Config.m_ClMouseMinDistance;
 		float MouseMin = MinDistance;
 
-		float MDistance = length(m_aMousePos[g_Config.m_ClDummy]);
-		if(MDistance < 0.001f)
+		float MouseDistance = length(m_aMousePos[g_Config.m_ClDummy]);
+		if(MouseDistance < 0.001f)
 		{
 			m_aMousePos[g_Config.m_ClDummy].x = 0.001f;
 			m_aMousePos[g_Config.m_ClDummy].y = 0;
-			MDistance = 0.001f;
+			MouseDistance = 0.001f;
 		}
-		if(MDistance < MouseMin)
-			m_aMousePos[g_Config.m_ClDummy] = normalize_pre_length(m_aMousePos[g_Config.m_ClDummy], MDistance) * MouseMin;
-		MDistance = length(m_aMousePos[g_Config.m_ClDummy]);
-		if(MDistance > MouseMax)
-			m_aMousePos[g_Config.m_ClDummy] = normalize_pre_length(m_aMousePos[g_Config.m_ClDummy], MDistance) * MouseMax;
+		if(MouseDistance < MouseMin)
+			m_aMousePos[g_Config.m_ClDummy] = normalize_pre_length(m_aMousePos[g_Config.m_ClDummy], MouseDistance) * MouseMin;
+		MouseDistance = length(m_aMousePos[g_Config.m_ClDummy]);
+		if(MouseDistance > MouseMax)
+			m_aMousePos[g_Config.m_ClDummy] = normalize_pre_length(m_aMousePos[g_Config.m_ClDummy], MouseDistance) * MouseMax;
 	}
 }
 
