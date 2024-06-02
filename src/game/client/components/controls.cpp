@@ -35,6 +35,8 @@ void CControls::OnReset()
 	for(int &AmmoCount : m_aAmmoCount)
 		AmmoCount = 0;
 	m_OldMouseX = m_OldMouseY = 0.0f;
+
+	m_LastSendTime = 0;
 }
 
 void CControls::ResetInput(int Dummy)
@@ -188,7 +190,6 @@ void CControls::OnMessage(int Msg, void *pRawMsg)
 
 int CControls::SnapInput(int *pData)
 {
-	static int64_t LastSendTime = 0;
 	bool Send = false;
 
 	// update player state
@@ -224,7 +225,7 @@ int CControls::SnapInput(int *pData)
 		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
 
 		// send once a second just to be sure
-		if(time_get() > LastSendTime + time_freq())
+		if(time_get() > m_LastSendTime + time_freq())
 			Send = true;
 	}
 	else
@@ -328,7 +329,7 @@ int CControls::SnapInput(int *pData)
 			Send = true;
 
 		// send at at least 10hz
-		if(time_get() > LastSendTime + time_freq() / 25)
+		if(time_get() > m_LastSendTime + time_freq() / 25)
 			Send = true;
 
 		if(m_pClient->m_Snap.m_pLocalCharacter && m_pClient->m_Snap.m_pLocalCharacter->m_Weapon == WEAPON_NINJA && (m_aInputData[g_Config.m_ClDummy].m_Direction || m_aInputData[g_Config.m_ClDummy].m_Jump || m_aInputData[g_Config.m_ClDummy].m_Hook))
@@ -341,7 +342,7 @@ int CControls::SnapInput(int *pData)
 	if(!Send)
 		return 0;
 
-	LastSendTime = time_get();
+	m_LastSendTime = time_get();
 	mem_copy(pData, &m_aInputData[g_Config.m_ClDummy], sizeof(m_aInputData[0]));
 	return sizeof(m_aInputData[0]);
 }
