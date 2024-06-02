@@ -219,13 +219,11 @@ int CControls::SnapInput(int *pData)
 		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePos[g_Config.m_ClDummy].x;
 		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
 
-		if(g_Config.m_ClSubTickAiming && m_aMousePosOnAction[g_Config.m_ClDummy].x != 0 && m_aMousePosOnAction[g_Config.m_ClDummy].y != 0)
+		if(g_Config.m_ClSubTickAiming && m_aMousePosOnAction[g_Config.m_ClDummy] != vec2(0.0f, 0.0f))
 		{
 			m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePosOnAction[g_Config.m_ClDummy].x;
 			m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePosOnAction[g_Config.m_ClDummy].y;
-
-			m_aMousePosOnAction[g_Config.m_ClDummy].x = 0;
-			m_aMousePosOnAction[g_Config.m_ClDummy].y = 0;
+			m_aMousePosOnAction[g_Config.m_ClDummy] = vec2(0.0f, 0.0f);
 		}
 
 		if(!m_aInputData[g_Config.m_ClDummy].m_TargetX && !m_aInputData[g_Config.m_ClDummy].m_TargetY)
@@ -365,9 +363,9 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 
 	if(CursorType == IInput::CURSOR_JOYSTICK && g_Config.m_InpControllerAbsolute && m_pClient->m_Snap.m_pGameInfoObj && !m_pClient->m_Snap.m_SpecInfo.m_Active)
 	{
-		float AbsX = 0.0f, AbsY = 0.0f;
-		if(Input()->GetActiveJoystick()->Absolute(&AbsX, &AbsY))
-			m_aMousePos[g_Config.m_ClDummy] = vec2(AbsX, AbsY) * GetMaxMouseDistance();
+		vec2 AbsoluteDirection;
+		if(Input()->GetActiveJoystick()->Absolute(&AbsoluteDirection.x, &AbsoluteDirection.y))
+			m_aMousePos[g_Config.m_ClDummy] = AbsoluteDirection * GetMaxMouseDistance();
 		return true;
 	}
 
