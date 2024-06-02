@@ -19,9 +19,6 @@
 CControls::CControls()
 {
 	mem_zero(&m_aLastData, sizeof(m_aLastData));
-	m_LastDummy = 0;
-	m_OtherFire = 0;
-
 	mem_zero(m_aMousePos, sizeof(m_aMousePos));
 	mem_zero(m_aMousePosOnAction, sizeof(m_aMousePosOnAction));
 	mem_zero(m_aTargetPos, sizeof(m_aTargetPos));
@@ -34,7 +31,6 @@ void CControls::OnReset()
 
 	for(int &AmmoCount : m_aAmmoCount)
 		AmmoCount = 0;
-	m_OldMouseX = m_OldMouseY = 0.0f;
 
 	m_LastSendTime = 0;
 }
@@ -42,7 +38,6 @@ void CControls::OnReset()
 void CControls::ResetInput(int Dummy)
 {
 	m_aLastData[Dummy].m_Direction = 0;
-	//m_aLastData[Dummy].m_Hook = 0;
 	// simulate releasing the fire button
 	if((m_aLastData[Dummy].m_Fire & 1) != 0)
 		m_aLastData[Dummy].m_Fire++;
@@ -52,11 +47,6 @@ void CControls::ResetInput(int Dummy)
 
 	m_aInputDirectionLeft[Dummy] = 0;
 	m_aInputDirectionRight[Dummy] = 0;
-}
-
-void CControls::OnRelease()
-{
-	//OnReset();
 }
 
 void CControls::OnPlayerDeath()
