@@ -201,6 +201,8 @@ void CControls::OnMessage(int Msg, void *pRawMsg)
 int CControls::SnapInput(int *pData)
 {
 	static int64_t LastSendTime = 0;
+	static int HotSendCount = 0;
+
 	bool Send = false;
 
 	// update player state
@@ -339,8 +341,17 @@ int CControls::SnapInput(int *pData)
 		else if(m_aInputData[g_Config.m_ClDummy].m_PrevWeapon != m_aLastData[g_Config.m_ClDummy].m_PrevWeapon)
 			Send = true;
 
+		HotSendCount = std::max(0, HotSendCount - 1);
+
+		if(Send)
+			HotSendCount = 5;
+
 		// send at at least 10hz
 		if(time_get() > LastSendTime + time_freq() / 25)
+			Send = true;
+
+		// always send for 5 ticks in a row when a new input happens
+		if(HotSendCount > 0)
 			Send = true;
 
 		if(m_pClient->m_Snap.m_pLocalCharacter && m_pClient->m_Snap.m_pLocalCharacter->m_Weapon == WEAPON_NINJA && (m_aInputData[g_Config.m_ClDummy].m_Direction || m_aInputData[g_Config.m_ClDummy].m_Jump || m_aInputData[g_Config.m_ClDummy].m_Hook))

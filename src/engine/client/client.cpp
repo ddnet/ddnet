@@ -275,6 +275,13 @@ void CClient::SendInput()
 			Msg.AddInt(m_aPredTick[g_Config.m_ClDummy]);
 			Msg.AddInt(Size);
 
+			// copy to sent inputs
+			int SendIndex = m_aPredTick[g_Config.m_ClDummy] % 200;
+			m_aSentInputs[i][SendIndex].m_AckGameTick = m_aAckGameTick[i];
+			m_aSentInputs[i][SendIndex].m_PredTick = m_aPredTick[g_Config.m_ClDummy];
+			m_aSentInputs[i][SendIndex].Size = Size;
+			mem_copy(m_aSentInputs[i][SendIndex].m_aData, m_aInputs[i][m_aCurrentInput[i]].m_aData, sizeof(m_aSentInputs[i][SendIndex].m_aData));
+
 			m_aInputs[i][m_aCurrentInput[i]].m_Tick = m_aPredTick[g_Config.m_ClDummy];
 			m_aInputs[i][m_aCurrentInput[i]].m_PredictedTime = m_PredictedTime.Get(Now);
 			m_aInputs[i][m_aCurrentInput[i]].m_PredictionMargin = PredictionMargin() * time_freq() / 1000;
@@ -293,6 +300,53 @@ void CClient::SendInput()
 			// impossible to use grenade with frozen dummy that gets hammered...
 			if(g_Config.m_ClDummyCopyMoves || m_aCurrentInput[i] % 2)
 				Force = true;
+		}
+	}
+	if(g_Config.m_ClResendInputs && m_ServerCapabilities.m_SortInputs)
+	{
+		// for each 20ms of prediction margin (1 tick duration) we can usefully send 1 extra input to the server
+		// incase the previous attempt was dropped
+		int ResendTicks = PredictionMargin() / (1000 / GameTickSpeed());
+		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+		{
+			if(!m_DummyConnected && Dummy != 0)
+			{
+				break;
+			}
+			int i = g_Config.m_ClDummy ^ Dummy;
+
+			int FlushTick = 0;
+
+			// figure out which tick will be the last one so we can flush the network
+			for(int Tick = 0; Tick < ResendTicks; Tick++)
+			{
+				int TargetTick = m_aPredTick[g_Config.m_ClDummy] - Tick;
+				int SendIndex = TargetTick % 200;
+				if(m_aSentInputs[i][SendIndex].m_PredTick == TargetTick)
+					FlushTick = Tick;
+			}
+
+			for(int Tick = 0; Tick < ResendTicks; Tick++)
+			{
+				int TargetTick = m_aPredTick[g_Config.m_ClDummy] - Tick;
+				int SendIndex = TargetTick % 200;
+
+				// we only want to send inputs that we already sent the server normally
+				if(m_aSentInputs[i][SendIndex].m_PredTick == TargetTick)
+				{
+					CMsgPacker Msg(NETMSG_INPUT, true);
+					Msg.AddInt(m_aSentInputs[i][SendIndex].m_AckGameTick);
+					Msg.AddInt(m_aSentInputs[i][SendIndex].m_PredTick);
+					Msg.AddInt(m_aSentInputs[i][SendIndex].Size);
+					for(int k = 0; k < m_aSentInputs[i][SendIndex].Size / 4; k++)
+						Msg.AddInt(m_aSentInputs[i][SendIndex].m_aData[k]);
+
+					if(Tick == FlushTick || Tick == ResendTicks - 1)
+						SendMsg(i, &Msg, MSGFLAG_FLUSH);
+					else
+						SendMsg(i, &Msg, 0);
+				}
+			}
 		}
 	}
 }
@@ -1310,6 +1364,10 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 	if(Version >= 5)
 	{
 		Result.m_SyncWeaponInput = Flags & SERVERCAPFLAG_SYNCWEAPONINPUT;
+	}
+	if(Version >= 6)
+	{
+		Result.m_SortInputs = Flags & SERVERCAPFLAG_SORTINPUTS;
 	}
 	return Result;
 }
