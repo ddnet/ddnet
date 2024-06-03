@@ -16,8 +16,8 @@
 void CCountryFlags::LoadCountryflagsIndexfile()
 {
 	const char *pFilename = "countryflags/index.txt";
-	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
-	if(!File)
+	CLineReader LineReader;
+	if(!LineReader.OpenFile(Storage()->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "couldn't open index file '%s'", pFilename);
@@ -26,16 +26,13 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 	}
 
 	char aOrigin[128];
-	CLineReader LineReader;
-	LineReader.Init(File);
-	char *pLine;
-	while((pLine = LineReader.Get()))
+	while(const char *pLine = LineReader.Get())
 	{
 		if(!str_length(pLine) || pLine[0] == '#') // skip empty lines and comments
 			continue;
 
 		str_copy(aOrigin, pLine);
-		char *pReplacement = LineReader.Get();
+		const char *pReplacement = LineReader.Get();
 		if(!pReplacement)
 		{
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", "unexpected end of index file");
@@ -84,7 +81,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		}
 		m_vCountryFlags.push_back(CountryFlag);
 	}
-	io_close(File);
+
 	std::sort(m_vCountryFlags.begin(), m_vCountryFlags.end());
 
 	// find index of default item

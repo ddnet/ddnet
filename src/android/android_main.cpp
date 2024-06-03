@@ -120,17 +120,14 @@ public:
 
 static std::vector<CIntegrityFileLine> ReadIntegrityFile(const char *pFilename)
 {
-	IOHANDLE IntegrityFile = io_open(pFilename, IOFLAG_READ);
-	if(!IntegrityFile)
+	CLineReader LineReader;
+	if(!LineReader.OpenFile(io_open(pFilename, IOFLAG_READ)))
 	{
 		return {};
 	}
 
-	CLineReader LineReader;
-	LineReader.Init(IntegrityFile);
-	const char *pReadLine;
 	std::vector<CIntegrityFileLine> vLines;
-	while((pReadLine = LineReader.Get()))
+	while(const char *pReadLine = LineReader.Get())
 	{
 		const char *pSpaceInLine = str_rchr(pReadLine, ' ');
 		CIntegrityFileLine Line;
@@ -159,7 +156,6 @@ static std::vector<CIntegrityFileLine> ReadIntegrityFile(const char *pFilename)
 		vLines.emplace_back(std::move(Line));
 	}
 
-	io_close(IntegrityFile);
 	return vLines;
 }
 

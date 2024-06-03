@@ -540,15 +540,12 @@ IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IStorage *pStorage
 	const char *apUrls[CChooseMaster::MAX_URLS] = {0};
 	const char **ppUrls = apUrls;
 	int NumUrls = 0;
-	IOHANDLE File = pStorage->OpenFile("ddnet-serverlist-urls.cfg", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
-	if(File)
+	CLineReader LineReader;
+	if(LineReader.OpenFile(pStorage->OpenFile("ddnet-serverlist-urls.cfg", IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
-		CLineReader Lines;
-		Lines.Init(File);
-		while(NumUrls < CChooseMaster::MAX_URLS)
+		while(const char *pLine = LineReader.Get())
 		{
-			const char *pLine = Lines.Get();
-			if(!pLine)
+			if(NumUrls == CChooseMaster::MAX_URLS)
 			{
 				break;
 			}

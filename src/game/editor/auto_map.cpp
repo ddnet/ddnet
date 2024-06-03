@@ -49,8 +49,8 @@ void CAutoMapper::Load(const char *pTileName)
 {
 	char aPath[IO_MAX_PATH_LENGTH];
 	str_format(aPath, sizeof(aPath), "editor/automap/%s.rules", pTileName);
-	IOHANDLE RulesFile = Storage()->OpenFile(aPath, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
-	if(!RulesFile)
+	CLineReader LineReader;
+	if(!LineReader.OpenFile(Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
 		char aBuf[IO_MAX_PATH_LENGTH + 32];
 		str_format(aBuf, sizeof(aBuf), "failed to load %s", aPath);
@@ -58,15 +58,12 @@ void CAutoMapper::Load(const char *pTileName)
 		return;
 	}
 
-	CLineReader LineReader;
-	LineReader.Init(RulesFile);
-
 	CConfiguration *pCurrentConf = nullptr;
 	CRun *pCurrentRun = nullptr;
 	CIndexRule *pCurrentIndex = nullptr;
 
 	// read each line
-	while(char *pLine = LineReader.Get())
+	while(const char *pLine = LineReader.Get())
 	{
 		// skip blank/empty lines as well as comments
 		if(str_length(pLine) > 0 && pLine[0] != '#' && pLine[0] != '\n' && pLine[0] != '\r' && pLine[0] != '\t' && pLine[0] != '\v' && pLine[0] != ' ')
@@ -364,8 +361,6 @@ void CAutoMapper::Load(const char *pTileName)
 			}
 		}
 	}
-
-	io_close(RulesFile);
 
 	char aBuf[IO_MAX_PATH_LENGTH + 16];
 	str_format(aBuf, sizeof(aBuf), "loaded %s", aPath);
