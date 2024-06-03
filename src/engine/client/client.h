@@ -55,6 +55,7 @@ public:
 	bool m_PingEx = false;
 	bool m_AllowDummy = false;
 	bool m_SyncWeaponInput = false;
+	bool m_SortInputs = false;
 };
 
 class CClient : public IClient, public CDemoPlayer::IListener
@@ -174,6 +175,15 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		int64_t m_PredictionMargin; // prediction margin when we sent this input
 		int64_t m_Time;
 	} m_aInputs[NUM_DUMMIES][200];
+
+	struct CSentInput
+	{
+		int m_AckGameTick;
+		int m_PredTick;
+		int Size;
+		int m_aData[MAX_INPUT_SIZE];
+	};
+	CSentInput m_aSentInputs[NUM_DUMMIES][200];
 
 	int m_aCurrentInput[NUM_DUMMIES] = {0, 0};
 	bool m_LastDummy = false;
