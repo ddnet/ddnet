@@ -528,26 +528,35 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 				// Use Tab / Shift-Tab to cycle through search matches
 				SelectNextSearchMatch(Direction);
 			}
+			Handled = true;
 		}
 		else if(Event.m_Key == KEY_PAGEUP)
 		{
 			m_BacklogCurLine += GetLinesToScroll(-1, m_LinesRendered);
+			Handled = true;
 		}
 		else if(Event.m_Key == KEY_PAGEDOWN)
 		{
 			m_BacklogCurLine -= GetLinesToScroll(1, m_LinesRendered);
 			if(m_BacklogCurLine < 0)
+			{
 				m_BacklogCurLine = 0;
+			}
+			Handled = true;
 		}
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_UP)
 		{
 			m_BacklogCurLine += GetLinesToScroll(-1, 1);
+			Handled = true;
 		}
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
 		{
 			--m_BacklogCurLine;
 			if(m_BacklogCurLine < 0)
+			{
 				m_BacklogCurLine = 0;
+			}
+			Handled = true;
 		}
 		// in order not to conflict with CLineInput's handling of Home/End only
 		// react to it when the input is empty
@@ -555,16 +564,17 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		{
 			m_BacklogCurLine += GetLinesToScroll(-1, -1);
 			m_BacklogLastActiveLine = m_BacklogCurLine;
+			Handled = true;
 		}
 		else if(Event.m_Key == KEY_END && m_Input.IsEmpty())
 		{
 			m_BacklogCurLine = 0;
+			Handled = true;
 		}
-		else if(Event.m_Key == KEY_F && m_pGameConsole->Input()->ModifierIsPressed() && Event.m_Flags & IInput::FLAG_PRESS)
+		else if(Event.m_Key == KEY_F && m_pGameConsole->Input()->ModifierIsPressed())
 		{
 			m_Searching = !m_Searching;
 			ClearSearch();
-
 			Handled = true;
 		}
 	}
