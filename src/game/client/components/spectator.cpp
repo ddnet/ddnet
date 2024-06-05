@@ -164,7 +164,6 @@ CSpectator::CSpectator()
 {
 	m_SelectorMouse = vec2(0.0f, 0.0f);
 	OnReset();
-	m_OldMouseX = m_OldMouseY = 0.0f;
 }
 
 void CSpectator::OnConsoleInit()

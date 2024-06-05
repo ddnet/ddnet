@@ -22,9 +22,6 @@ class CSpectator : public CComponent
 	int m_SelectedSpectatorId;
 	vec2 m_SelectorMouse;
 
-	float m_OldMouseX;
-	float m_OldMouseY;
-
 	float m_MultiViewActivateDelay;
 
 	bool CanChangeSpectator();
