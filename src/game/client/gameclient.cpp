@@ -703,7 +703,7 @@ void CGameClient::OnRender()
 	{
 		if(pWarning != nullptr && m_Menus.CanDisplayWarning())
 		{
-			m_Menus.PopupWarning(pWarning->m_aWarningTitle[0] == '\0' ? Localize("Warning") : pWarning->m_aWarningTitle, pWarning->m_aWarningMsg, "Ok", pWarning->m_AutoHide ? 10s : 0s);
+			m_Menus.PopupWarning(pWarning->m_aWarningTitle[0] == '\0' ? Localize("Warning") : pWarning->m_aWarningTitle, pWarning->m_aWarningMsg, Localize("Ok"), pWarning->m_AutoHide ? 10s : 0s);
 			pWarning->m_WasShown = true;
 		}
 	}
