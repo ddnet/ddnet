@@ -830,13 +830,15 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	static CButtonContainer s_ButtonOk;
 	if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &OkButton) || (!Ui()->IsPopupOpen() && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
+		if(str_endswith(m_DemoSliceInput.GetString(), ".demo"))
+		{
+			char aNameWithoutExt[IO_MAX_PATH_LENGTH];
+			fs_split_file_extension(m_DemoSliceInput.GetString(), aNameWithoutExt, sizeof(aNameWithoutExt));
+			m_DemoSliceInput.Set(aNameWithoutExt);
+		}
+
 		char aDemoName[IO_MAX_PATH_LENGTH];
-		char aNameWithoutExt[IO_MAX_PATH_LENGTH];
 		DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
-
-		fs_split_file_extension(m_DemoSliceInput.GetString(), aNameWithoutExt, sizeof(aNameWithoutExt));
-		m_DemoSliceInput.Set(aNameWithoutExt);
-
 		if(str_comp(aDemoName, m_DemoSliceInput.GetString()) == 0)
 		{
 			static CUi::SMessagePopupContext s_MessagePopupContext;
