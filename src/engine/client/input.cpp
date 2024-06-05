@@ -33,19 +33,25 @@
 // for platform specific features that aren't available or are broken in SDL
 #include <SDL_syswm.h>
 
-void CInput::AddEvent(char *pText, int Key, int Flags)
+void CInput::AddKeyEvent(int Key, int Flags)
 {
-	if(m_NumEvents != INPUT_BUFFER_SIZE)
-	{
-		m_aInputEvents[m_NumEvents].m_Key = Key;
-		m_aInputEvents[m_NumEvents].m_Flags = Flags;
-		if(pText == nullptr)
-			m_aInputEvents[m_NumEvents].m_aText[0] = '\0';
-		else
-			str_copy(m_aInputEvents[m_NumEvents].m_aText, pText);
-		m_aInputEvents[m_NumEvents].m_InputCount = m_InputCounter;
-		m_NumEvents++;
-	}
+	dbg_assert((Flags & (FLAG_PRESS | FLAG_RELEASE)) != 0 && (Flags & ~(FLAG_PRESS | FLAG_RELEASE)) == 0, "Flags invalid");
+	CEvent Event;
+	Event.m_Key = Key;
+	Event.m_Flags = Flags;
+	Event.m_aText[0] = '\0';
+	Event.m_InputCount = m_InputCounter;
+	m_vInputEvents.emplace_back(Event);
+}
+
+void CInput::AddTextEvent(const char *pText)
+{
+	CEvent Event;
+	Event.m_Key = KEY_UNKNOWN;
+	Event.m_Flags = FLAG_TEXT;
+	str_copy(Event.m_aText, pText);
+	Event.m_InputCount = m_InputCounter;
+	m_vInputEvents.emplace_back(Event);
 }
 
 CInput::CInput()
@@ -53,6 +59,7 @@ CInput::CInput()
 	mem_zero(m_aInputCount, sizeof(m_aInputCount));
 	mem_zero(m_aInputState, sizeof(m_aInputState));
 
+	m_vInputEvents.reserve(32);
 	m_LastUpdate = 0;
 	m_UpdateTime = 0.0f;
 
@@ -60,8 +67,6 @@ CInput::CInput()
 	m_InputGrabbed = false;
 
 	m_MouseDoubleClick = false;
-
-	m_NumEvents = 0;
 	m_MouseFocus = true;
 
 	m_pClipboardText = nullptr;
@@ -342,11 +347,29 @@ void CInput::StopTextInput()
 	m_vCandidates.clear();
 }
 
+void CInput::ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const
+{
+	for(const CEvent &Event : m_vInputEvents)
+	{
+		// Only propagate valid input events
+		if(Event.m_InputCount == m_InputCounter)
+		{
+			Consumer(Event);
+		}
+	}
+}
+
 void CInput::Clear()
 {
 	mem_zero(m_aInputState, sizeof(m_aInputState));
 	mem_zero(m_aInputCount, sizeof(m_aInputCount));
-	m_NumEvents = 0;
+	m_vInputEvents.clear();
+	m_MouseDoubleClick = false;
+}
+
+float CInput::GetUpdateTime() const
+{
+	return m_UpdateTime;
 }
 
 bool CInput::KeyState(int Key) const
@@ -424,24 +447,24 @@ void CInput::HandleJoystickAxisMotionEvent(const SDL_JoyAxisEvent &Event)
 	{
 		m_aInputState[LeftKey] = true;
 		m_aInputCount[LeftKey] = m_InputCounter;
-		AddEvent(nullptr, LeftKey, IInput::FLAG_PRESS);
+		AddKeyEvent(LeftKey, IInput::FLAG_PRESS);
 	}
 	else if(Event.value > SDL_JOYSTICK_AXIS_MIN * DeadZone && m_aInputState[LeftKey])
 	{
 		m_aInputState[LeftKey] = false;
-		AddEvent(nullptr, LeftKey, IInput::FLAG_RELEASE);
+		AddKeyEvent(LeftKey, IInput::FLAG_RELEASE);
 	}
 
 	if(Event.value >= SDL_JOYSTICK_AXIS_MAX * DeadZone && !m_aInputState[RightKey])
 	{
 		m_aInputState[RightKey] = true;
 		m_aInputCount[RightKey] = m_InputCounter;
-		AddEvent(nullptr, RightKey, IInput::FLAG_PRESS);
+		AddKeyEvent(RightKey, IInput::FLAG_PRESS);
 	}
 	else if(Event.value < SDL_JOYSTICK_AXIS_MAX * DeadZone && m_aInputState[RightKey])
 	{
 		m_aInputState[RightKey] = false;
-		AddEvent(nullptr, RightKey, IInput::FLAG_RELEASE);
+		AddKeyEvent(RightKey, IInput::FLAG_RELEASE);
 	}
 }
 
@@ -461,12 +484,12 @@ void CInput::HandleJoystickButtonEvent(const SDL_JoyButtonEvent &Event)
 	{
 		m_aInputState[Key] = true;
 		m_aInputCount[Key] = m_InputCounter;
-		AddEvent(nullptr, Key, IInput::FLAG_PRESS);
+		AddKeyEvent(Key, IInput::FLAG_PRESS);
 	}
 	else if(Event.type == SDL_JOYBUTTONUP)
 	{
 		m_aInputState[Key] = false;
-		AddEvent(nullptr, Key, IInput::FLAG_RELEASE);
+		AddKeyEvent(Key, IInput::FLAG_RELEASE);
 	}
 }
 
@@ -488,7 +511,7 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 		if(Key != HatKeys[0] && Key != HatKeys[1] && m_aInputState[Key])
 		{
 			m_aInputState[Key] = false;
-			AddEvent(nullptr, Key, IInput::FLAG_RELEASE);
+			AddKeyEvent(Key, IInput::FLAG_RELEASE);
 		}
 	}
 
@@ -498,7 +521,7 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 		{
 			m_aInputState[CurrentKey] = true;
 			m_aInputCount[CurrentKey] = m_InputCounter;
-			AddEvent(nullptr, CurrentKey, IInput::FLAG_PRESS);
+			AddKeyEvent(CurrentKey, IInput::FLAG_PRESS);
 		}
 	}
 }
@@ -582,8 +605,8 @@ int CInput::Update()
 	}
 	m_LastUpdate = Now;
 
-	// keep the counter between 1..0xFFFF, 0 means not pressed
-	m_InputCounter = (m_InputCounter % 0xFFFF) + 1;
+	// keep the counter between 1..0xFFFFFFFF, 0 means not pressed
+	m_InputCounter = (m_InputCounter % std::numeric_limits<decltype(m_InputCounter)>::max()) + 1;
 
 	// Ensure that we have the latest keyboard, mouse and joystick state
 	SDL_PumpEvents();
@@ -621,7 +644,7 @@ int CInput::Update()
 				for(int i = 0; i < Event.edit.start; i++)
 					m_CompositionCursor = str_utf8_forward(m_aComposition, m_CompositionCursor);
 				// Event.edit.length is currently unused on Windows and will always be 0, so we don't support selecting composition text
-				AddEvent(nullptr, KEY_UNKNOWN, IInput::FLAG_TEXT);
+				AddTextEvent("");
 			}
 			else
 			{
@@ -636,7 +659,7 @@ int CInput::Update()
 			m_aComposition[0] = '\0';
 			m_CompositionLength = COMP_LENGTH_INACTIVE;
 			m_CompositionCursor = 0;
-			AddEvent(Event.text.text, KEY_UNKNOWN, IInput::FLAG_TEXT);
+			AddTextEvent(Event.text.text);
 			break;
 
 		// handle keys
@@ -806,7 +829,7 @@ int CInput::Update()
 				m_aInputState[Scancode] = 1;
 				m_aInputCount[Scancode] = m_InputCounter;
 			}
-			AddEvent(nullptr, Scancode, Action);
+			AddKeyEvent(Scancode, Action);
 		}
 	}
 

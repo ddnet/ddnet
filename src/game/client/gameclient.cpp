@@ -385,18 +385,13 @@ void CGameClient::OnUpdate()
 	}
 
 	// handle key presses
-	for(size_t i = 0; i < Input()->NumEvents(); i++)
-	{
-		const IInput::CEvent &Event = Input()->GetEvent(i);
-		if(!Input()->IsEventValid(Event))
-			continue;
-
+	Input()->ConsumeEvents([&](const IInput::CEvent &Event) {
 		for(auto &pComponent : m_vpInput)
 		{
 			if(pComponent->OnInput(Event))
 				break;
 		}
-	}
+	});
 
 	if(g_Config.m_ClSubTickAiming && m_Binds.m_MouseOnAction)
 	{
