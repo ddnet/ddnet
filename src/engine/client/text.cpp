@@ -1667,7 +1667,7 @@ public:
 
 			while(pCurrent < pBatchEnd && pCurrent != pEllipsis)
 			{
-				const int PrevCharCount = pCursor->m_GlyphCount;
+				const int PrevCharCount = pCursor->m_CharCount;
 				pCursor->m_CharCount += pTmp - pCurrent;
 				pCurrent = pTmp;
 				int Character = NextCharacter;
