@@ -353,10 +353,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 		{
 			if(Ui()->MouseButton(0))
 			{
-				if(Input()->ShiftIsPressed())
-					s_Value += m_MouseDeltaX * 0.05f;
-				else
-					s_Value += m_MouseDeltaX;
+				s_Value += Ui()->MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
 
 				if(absolute(s_Value) >= Scale)
 				{
@@ -1412,8 +1409,8 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 	float CenterX = fx2f(pSource->m_Position.x);
 	float CenterY = fx2f(pSource->m_Position.y);
 
-	float dx = (CenterX - wx) / m_MouseWScale;
-	float dy = (CenterY - wy) / m_MouseWScale;
+	float dx = (CenterX - wx) / m_MouseWorldScale;
+	float dy = (CenterY - wy) / m_MouseWorldScale;
 	if(dx * dx + dy * dy < 50)
 		Ui()->SetHotItem(pId);
 
@@ -1433,7 +1430,7 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 			s_Tracker.Begin(pSource, s_Operation, LayerIndex);
 		}
 
-		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
+		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
 		{
 			if(s_Operation == ESoundSourceOp::OP_MOVE)
 			{
@@ -1499,7 +1496,7 @@ void CEditor::DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index)
 		Graphics()->SetColor(0, 1, 0, 1);
 	}
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -1533,17 +1530,17 @@ void CEditor::DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point) const
 	Graphics()->SetColor(1, 0, 0.1f, 1);
 	if(Axis == EAxis::AXIS_X)
 	{
-		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x + Point.x) / 2.0f, fx2f(OriginalPoint.y), fx2f(Point.x - OriginalPoint.x), 1.0f * m_MouseWScale);
+		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x + Point.x) / 2.0f, fx2f(OriginalPoint.y), fx2f(Point.x - OriginalPoint.x), 1.0f * m_MouseWorldScale);
 		Graphics()->QuadsDraw(&Line, 1);
 	}
 	else if(Axis == EAxis::AXIS_Y)
 	{
-		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y + Point.y) / 2.0f, 1.0f * m_MouseWScale, fx2f(Point.y - OriginalPoint.y));
+		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y + Point.y) / 2.0f, 1.0f * m_MouseWorldScale, fx2f(Point.y - OriginalPoint.y));
 		Graphics()->QuadsDraw(&Line, 1);
 	}
 
 	// Draw ghost of original point
-	IGraphics::CQuadItem QuadItem(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y), 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
+	IGraphics::CQuadItem QuadItem(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y), 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -1557,7 +1554,7 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 	bool GridEnabled = MapView()->MapGrid()->IsEnabled() && !Input()->AltIsPressed();
 
 	// Perform computation from the original position of this point
-	int Threshold = f2fx(maximum(5.0f, 10.0f * m_MouseWScale));
+	int Threshold = f2fx(maximum(5.0f, 10.0f * m_MouseWorldScale));
 	CPoint OrigPoint = m_QuadDragOriginalPoints.at(QuadIndex)[PointIndex];
 	// Get the "current" point by applying the offset
 	CPoint Point = OrigPoint + ivec2(OffsetX, OffsetY);
@@ -1742,7 +1739,7 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 	// This method is a bit different than the point alignment in the way where instead of trying to aling 1 point to all quads,
 	// we try to align 5 points to all quads, these 5 points being 5 points of an AABB.
 	// Otherwise, the concept is the same, we use the original position of the AABB to make the computations.
-	int Threshold = f2fx(maximum(5.0f, 10.0f * m_MouseWScale));
+	int Threshold = f2fx(maximum(5.0f, 10.0f * m_MouseWorldScale));
 	int SmallestDiffX = Threshold + 1, SmallestDiffY = Threshold + 1;
 	std::vector<SAlignmentInfo> vAlignmentsX, vAlignmentsY;
 
@@ -1858,12 +1855,12 @@ void CEditor::DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments
 		// We don't use IGraphics::CLineItem to draw because we don't want to stop QuadsBegin(), quads work just fine.
 		if(Alignment.m_Axis == EAxis::AXIS_X)
 		{ // Alignment on X axis is same Y values but different X values
-			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), fx2f(Alignment.m_X + OffsetX - Alignment.m_AlignedPoint.x), 1.0f * m_MouseWScale);
+			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), fx2f(Alignment.m_X + OffsetX - Alignment.m_AlignedPoint.x), 1.0f * m_MouseWorldScale);
 			Graphics()->QuadsDrawTL(&Line, 1);
 		}
 		else if(Alignment.m_Axis == EAxis::AXIS_Y)
 		{ // Alignment on Y axis is same X values but different Y values
-			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), 1.0f * m_MouseWScale, fx2f(Alignment.m_Y + OffsetY - Alignment.m_AlignedPoint.y));
+			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), 1.0f * m_MouseWorldScale, fx2f(Alignment.m_Y + OffsetY - Alignment.m_AlignedPoint.y));
 			Graphics()->QuadsDrawTL(&Line, 1);
 		}
 	}
@@ -1881,15 +1878,15 @@ void CEditor::DrawAABB(const SAxisAlignedBoundingBox &AABB, int OffsetX, int Off
 
 	// We don't use IGraphics::CLineItem to draw because we don't want to stop QuadsBegin(), quads work just fine.
 	IGraphics::CQuadItem Lines[4] = {
-		{TL.x, TL.y, TR.x - TL.x, 1.0f * m_MouseWScale},
-		{TL.x, TL.y, 1.0f * m_MouseWScale, BL.y - TL.y},
-		{TR.x, TR.y, 1.0f * m_MouseWScale, BR.y - TR.y},
-		{BL.x, BL.y, BR.x - BL.x, 1.0f * m_MouseWScale},
+		{TL.x, TL.y, TR.x - TL.x, 1.0f * m_MouseWorldScale},
+		{TL.x, TL.y, 1.0f * m_MouseWorldScale, BL.y - TL.y},
+		{TR.x, TR.y, 1.0f * m_MouseWorldScale, BR.y - TR.y},
+		{BL.x, BL.y, BR.x - BL.x, 1.0f * m_MouseWorldScale},
 	};
 	Graphics()->SetColor(1, 0, 1, 1);
 	Graphics()->QuadsDrawTL(Lines, 4);
 
-	IGraphics::CQuadItem CenterQuad(Center.x, Center.y, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
+	IGraphics::CQuadItem CenterQuad(Center.x, Center.y, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
 	Graphics()->QuadsDraw(&CenterQuad, 1);
 }
 
@@ -2018,13 +2015,13 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	if(IsQuadSelected(Index))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * m_MouseWScale, 7.0f * m_MouseWScale);
+		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * m_MouseWorldScale, 7.0f * m_MouseWorldScale);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
 	if(Ui()->CheckActiveItem(pId))
 	{
-		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
+		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
 		{
 			if(s_Operation == OP_SELECT)
 			{
@@ -2116,10 +2113,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 					}
 				}
 
-				if(Input()->ShiftIsPressed())
-					s_RotateAngle += (m_MouseDeltaX)*0.0001f;
-				else
-					s_RotateAngle += (m_MouseDeltaX)*0.002f;
+				s_RotateAngle += Ui()->MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.0001f : 0.002f);
 			}
 		}
 
@@ -2287,7 +2281,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 	else
 		Graphics()->SetColor(0, 1, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -2305,7 +2299,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	if(IsQuadPointSelected(QuadIndex, V))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(px, py, 7.0f * m_MouseWScale, 7.0f * m_MouseWScale);
+		IGraphics::CQuadItem QuadItem(px, py, 7.0f * m_MouseWorldScale, 7.0f * m_MouseWorldScale);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 	}
 
@@ -2341,7 +2335,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 
 	if(Ui()->CheckActiveItem(pId))
 	{
-		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
+		if(m_MouseDeltaWorld != vec2(0.0f, 0.0f))
 		{
 			if(s_Operation == OP_SELECT)
 			{
@@ -2412,11 +2406,11 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 							// 0,2;1,3 - line x
 							// 0,1;2,3 - line y
 
-							pSelectedQuad->m_aTexcoords[m].x += f2fx(m_MouseDeltaWx * 0.001f);
-							pSelectedQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(m_MouseDeltaWx * 0.001f);
+							pSelectedQuad->m_aTexcoords[m].x += f2fx(m_MouseDeltaWorld.x * 0.001f);
+							pSelectedQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(m_MouseDeltaWorld.x * 0.001f);
 
-							pSelectedQuad->m_aTexcoords[m].y += f2fx(m_MouseDeltaWy * 0.001f);
-							pSelectedQuad->m_aTexcoords[m ^ 1].y += f2fx(m_MouseDeltaWy * 0.001f);
+							pSelectedQuad->m_aTexcoords[m].y += f2fx(m_MouseDeltaWorld.y * 0.001f);
+							pSelectedQuad->m_aTexcoords[m ^ 1].y += f2fx(m_MouseDeltaWorld.y * 0.001f);
 						}
 					}
 				}
@@ -2513,7 +2507,7 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 	else
 		Graphics()->SetColor(1, 0, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(px, py, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
+	IGraphics::CQuadItem QuadItem(px, py, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -2549,7 +2543,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	CQuad *pQuad = &pLayer->m_vQuads[QuadIndex];
 
 	const bool IgnoreGrid = Input()->AltIsPressed();
-	float SnapRadius = 4.f * m_MouseWScale;
+	float SnapRadius = 4.f * m_MouseWorldScale;
 
 	vec2 Mouse = vec2(Ui()->MouseWorldX(), Ui()->MouseWorldY());
 	vec2 Point = Mouse;
@@ -2752,14 +2746,14 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	IGraphics::CQuadItem aMarkers[4];
 
 	for(int i = 0; i < m_QuadKnifeCount; i++)
-		aMarkers[i] = IGraphics::CQuadItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, 5.f * m_MouseWScale, 5.f * m_MouseWScale);
+		aMarkers[i] = IGraphics::CQuadItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, 5.f * m_MouseWorldScale, 5.f * m_MouseWorldScale);
 
 	Graphics()->SetColor(0.f, 0.f, 1.f, 1.f);
 	Graphics()->QuadsDraw(aMarkers, m_QuadKnifeCount);
 
 	if(ValidPosition)
 	{
-		IGraphics::CQuadItem MarkerCurrent(Point.x, Point.y, 5.f * m_MouseWScale, 5.f * m_MouseWScale);
+		IGraphics::CQuadItem MarkerCurrent(Point.x, Point.y, 5.f * m_MouseWorldScale, 5.f * m_MouseWorldScale);
 		Graphics()->QuadsDraw(&MarkerCurrent, 1);
 	}
 
@@ -2936,7 +2930,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 			}
 		}
 		else if(s_Operation == OP_ROTATE)
-			pEnvelope->m_vPoints[PIndex].m_aValues[2] += 10 * m_MouseDeltaX;
+			pEnvelope->m_vPoints[PIndex].m_aValues[2] += 10 * Ui()->MouseDeltaX();
 
 		s_LastWx = wx;
 		s_LastWy = wy;
@@ -2990,7 +2984,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 	else
 		Graphics()->SetColor(0.0f, 1.0f, 0.0f, 1.0f);
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
+	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWorldScale, 5.0f * m_MouseWorldScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -3146,9 +3140,9 @@ void CEditor::DoMapEditor(CUIRect View)
 			s_Operation = OP_NONE;
 
 		if(s_Operation == OP_PAN_WORLD)
-			MapView()->OffsetWorld(-vec2(m_MouseDeltaX, m_MouseDeltaY) * m_MouseWScale);
+			MapView()->OffsetWorld(-Ui()->MouseDelta() * m_MouseWorldScale);
 		else if(s_Operation == OP_PAN_EDITOR)
-			MapView()->OffsetEditor(-vec2(m_MouseDeltaX, m_MouseDeltaY) * m_MouseWScale);
+			MapView()->OffsetEditor(-Ui()->MouseDelta() * m_MouseWorldScale);
 
 		if(s_Operation == OP_NONE)
 			m_pContainerPanned = nullptr;
@@ -3274,10 +3268,8 @@ void CEditor::DoMapEditor(CUIRect View)
 							for(size_t i = 0; i < pQuadLayer->m_vQuads.size(); i++)
 							{
 								const CQuad &Quad = pQuadLayer->m_vQuads[i];
-								float px = fx2f(Quad.m_aPoints[4].x);
-								float py = fx2f(Quad.m_aPoints[4].y);
-
-								if(r.Inside(px, py) && !IsQuadSelected(i))
+								vec2 Position = vec2(fx2f(Quad.m_aPoints[4].x), fx2f(Quad.m_aPoints[4].y));
+								if(r.Inside(Position) && !IsQuadSelected(i))
 									ToggleSelectQuad(i);
 							}
 						}
@@ -3467,8 +3459,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				Pos += MapView()->GetWorldOffset() - MapView()->ProofMode()->m_vMenuBackgroundPositions[MapView()->ProofMode()->m_CurrentMenuProofIndex];
 				Pos.y -= 3.0f;
 
-				vec2 MousePos(m_MouseWorldNoParaX, m_MouseWorldNoParaY);
-				if(distance(Pos, MousePos) <= 20.0f)
+				if(distance(Pos, m_MouseWorldNoParaPos) <= 20.0f)
 				{
 					Ui()->SetHotItem(&MapView()->ProofMode()->m_vMenuBackgroundPositions[i]);
 
@@ -3505,8 +3496,7 @@ void CEditor::DoMapEditor(CUIRect View)
 							Pos += MapView()->GetWorldOffset() - MapView()->ProofMode()->m_vMenuBackgroundPositions[MapView()->ProofMode()->m_CurrentMenuProofIndex];
 							Pos.y -= 3.0f;
 
-							MousePos = vec2(m_MouseWorldNoParaX, m_MouseWorldNoParaY);
-							if(distance(Pos, MousePos) > 20.0f)
+							if(distance(Pos, m_MouseWorldNoParaPos) > 20.0f)
 								continue;
 
 							if(i < (TILE_TIME_CHECKPOINT_LAST - TILE_TIME_CHECKPOINT_FIRST))
@@ -3550,13 +3540,13 @@ void CEditor::DoMapEditor(CUIRect View)
 		{
 			float PanSpeed = Input()->ShiftIsPressed() ? 200.0f : 64.0f;
 			if(Input()->KeyPress(KEY_A))
-				MapView()->OffsetWorld({-PanSpeed * m_MouseWScale, 0});
+				MapView()->OffsetWorld({-PanSpeed * m_MouseWorldScale, 0});
 			else if(Input()->KeyPress(KEY_D))
-				MapView()->OffsetWorld({PanSpeed * m_MouseWScale, 0});
+				MapView()->OffsetWorld({PanSpeed * m_MouseWorldScale, 0});
 			if(Input()->KeyPress(KEY_W))
-				MapView()->OffsetWorld({0, -PanSpeed * m_MouseWScale});
+				MapView()->OffsetWorld({0, -PanSpeed * m_MouseWorldScale});
 			else if(Input()->KeyPress(KEY_S))
-				MapView()->OffsetWorld({0, PanSpeed * m_MouseWScale});
+				MapView()->OffsetWorld({0, PanSpeed * m_MouseWorldScale});
 		}
 	}
 	else if(Ui()->CheckActiveItem(&m_MapEditorId))
@@ -3621,8 +3611,8 @@ void CEditor::SetHotQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer)
 	void *pMinPoint = nullptr;
 
 	auto UpdateMinimum = [&](float px, float py, void *pId) {
-		float dx = (px - wx) / m_MouseWScale;
-		float dy = (py - wy) / m_MouseWScale;
+		float dx = (px - wx) / m_MouseWorldScale;
+		float dy = (py - wy) / m_MouseWorldScale;
 
 		float CurrDist = dx * dx + dy * dy;
 		if(CurrDist < MinDist)
@@ -8222,10 +8212,6 @@ void CEditor::Reset(bool CreateDefault)
 	m_SelectedSound = 0;
 	m_SelectedSource = -1;
 
-	m_MouseDeltaX = 0;
-	m_MouseDeltaY = 0;
-	m_MouseDeltaWx = 0;
-	m_MouseDeltaWy = 0;
 	m_pContainerPanned = nullptr;
 	m_pContainerPannedLast = nullptr;
 
@@ -8372,29 +8358,11 @@ void CEditor::PlaceBorderTiles()
 
 void CEditor::HandleCursorMovement()
 {
-	static float s_MouseX = 0.0f;
-	static float s_MouseY = 0.0f;
-
-	float MouseRelX = 0.0f, MouseRelY = 0.0f;
-	IInput::ECursorType CursorType = Input()->CursorRelative(&MouseRelX, &MouseRelY);
-	if(CursorType != IInput::CURSOR_NONE)
-		Ui()->ConvertMouseMove(&MouseRelX, &MouseRelY, CursorType);
-
-	m_MouseDeltaX += MouseRelX;
-	m_MouseDeltaY += MouseRelY;
-
-	if(!Ui()->CheckMouseLock())
-	{
-		s_MouseX = clamp(s_MouseX + MouseRelX, 0.0f, Graphics()->WindowWidth() - 1.0f);
-		s_MouseY = clamp(s_MouseY + MouseRelY, 0.0f, Graphics()->WindowHeight() - 1.0f);
-	}
-
-	// update positions for ui, but only update ui when rendering
-	m_MouseX = Ui()->Screen()->w * (s_MouseX / Graphics()->WindowWidth());
-	m_MouseY = Ui()->Screen()->h * (s_MouseY / Graphics()->WindowHeight());
+	const vec2 UpdatedMousePos = Ui()->UpdatedMousePos();
+	const vec2 UpdatedMouseDelta = Ui()->UpdatedMouseDelta();
 
 	// fix correct world x and y
-	std::shared_ptr<CLayerGroup> pGroup = GetSelectedGroup();
+	const std::shared_ptr<CLayerGroup> pGroup = GetSelectedGroup();
 	if(pGroup)
 	{
 		float aPoints[4];
@@ -8403,19 +8371,20 @@ void CEditor::HandleCursorMovement()
 		float WorldWidth = aPoints[2] - aPoints[0];
 		float WorldHeight = aPoints[3] - aPoints[1];
 
-		m_MouseWScale = WorldWidth / Graphics()->WindowWidth();
+		m_MouseWorldScale = WorldWidth / Graphics()->WindowWidth();
 
-		m_MouseWorldX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
-		m_MouseWorldY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());
-		m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / Graphics()->WindowWidth());
-		m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / Graphics()->WindowHeight());
+		m_MouseWorldPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
+		m_MouseWorldPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
+		m_MouseDeltaWorld.x = UpdatedMouseDelta.x * (WorldWidth / Graphics()->WindowWidth());
+		m_MouseDeltaWorld.y = UpdatedMouseDelta.y * (WorldHeight / Graphics()->WindowHeight());
 	}
 	else
 	{
-		m_MouseWorldX = 0.0f;
-		m_MouseWorldY = 0.0f;
+		m_MouseWorldPos = vec2(-1.0f, -1.0f);
+		m_MouseDeltaWorld = vec2(0.0f, 0.0f);
 	}
 
+	m_MouseWorldNoParaPos = vec2(-1.0f, -1.0f);
 	for(const std::shared_ptr<CLayerGroup> &pGameGroup : m_Map.m_vpGroups)
 	{
 		if(!pGameGroup->m_GameGroup)
@@ -8427,14 +8396,14 @@ void CEditor::HandleCursorMovement()
 		float WorldWidth = aPoints[2] - aPoints[0];
 		float WorldHeight = aPoints[3] - aPoints[1];
 
-		m_MouseWorldNoParaX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
-		m_MouseWorldNoParaY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());
+		m_MouseWorldNoParaPos.x = aPoints[0] + WorldWidth * (UpdatedMousePos.x / Graphics()->WindowWidth());
+		m_MouseWorldNoParaPos.y = aPoints[1] + WorldHeight * (UpdatedMousePos.y / Graphics()->WindowHeight());
 	}
 
-	OnMouseMove(s_MouseX, s_MouseY);
+	OnMouseMove(UpdatedMousePos);
 }
 
-void CEditor::OnMouseMove(float MouseX, float MouseY)
+void CEditor::OnMouseMove(vec2 MousePos)
 {
 	m_vHoverTiles.clear();
 	for(size_t g = 0; g < m_Map.m_vpGroups.size(); g++)
@@ -8459,8 +8428,8 @@ void CEditor::OnMouseMove(float MouseX, float MouseY)
 			float WorldWidth = aPoints[2] - aPoints[0];
 			float WorldHeight = aPoints[3] - aPoints[1];
 			CUIRect Rect;
-			Rect.x = aPoints[0] + WorldWidth * (MouseX / Graphics()->WindowWidth());
-			Rect.y = aPoints[1] + WorldHeight * (MouseY / Graphics()->WindowHeight());
+			Rect.x = aPoints[0] + WorldWidth * (MousePos.x / Graphics()->WindowWidth());
+			Rect.y = aPoints[1] + WorldHeight * (MousePos.y / Graphics()->WindowHeight());
 			Rect.w = 0;
 			Rect.h = 0;
 			RECTi r;
@@ -8612,6 +8581,15 @@ void CEditor::OnUpdate()
 
 	m_pContainerPannedLast = m_pContainerPanned;
 
+	// handle mouse movement
+	vec2 CursorRel = vec2(0.0f, 0.0f);
+	IInput::ECursorType CursorType = Input()->CursorRelative(&CursorRel.x, &CursorRel.y);
+	if(CursorType != IInput::CURSOR_NONE)
+	{
+		Ui()->ConvertMouseMove(&CursorRel.x, &CursorRel.y, CursorType);
+		Ui()->OnCursorMove(CursorRel.x, CursorRel.y);
+	}
+
 	// handle key presses
 	Input()->ConsumeEvents([&](const IInput::CEvent &Event) {
 		for(CEditorComponent &Component : m_vComponents)
@@ -8649,14 +8627,11 @@ void CEditor::OnRender()
 	ms_pUiGotContext = nullptr;
 	Ui()->StartCheck();
 
-	Ui()->Update(m_MouseX, m_MouseY, m_MouseDeltaX, m_MouseDeltaY, m_MouseWorldX, m_MouseWorldY);
+	Ui()->Update(m_MouseWorldPos);
 
 	Render();
 
-	m_MouseDeltaX = 0.0f;
-	m_MouseDeltaY = 0.0f;
-	m_MouseDeltaWx = 0.0f;
-	m_MouseDeltaWy = 0.0f;
+	m_MouseDeltaWorld = vec2(0.0f, 0.0f);
 
 	if(Input()->KeyPress(KEY_F10))
 	{

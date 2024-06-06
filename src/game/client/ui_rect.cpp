@@ -161,9 +161,9 @@ void CUIRect::HMargin(float Cut, CUIRect *pOtherRect) const
 	Margin(vec2(0.0f, Cut), pOtherRect);
 }
 
-bool CUIRect::Inside(float PointX, float PointY) const
+bool CUIRect::Inside(vec2 Point) const
 {
-	return PointX >= x && PointX < x + w && PointY >= y && PointY < y + h;
+	return Point.x >= x && Point.x < x + w && Point.y >= y && Point.y < y + h;
 }
 
 void CUIRect::Draw(ColorRGBA Color, int Corners, float Rounding) const
