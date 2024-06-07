@@ -715,20 +715,32 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	{
 		Teams.SetPractice(Team, true);
 		pSelf->SendChatTeam(Team, "Practice mode enabled for your team, happy practicing!");
-
-		char aPracticeCommands[256];
-		mem_zero(aPracticeCommands, sizeof(aPracticeCommands));
-		str_append(aPracticeCommands, "Available practice commands: ");
-		for(const IConsole::CCommandInfo *pCmd = pSelf->Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CMDFLAG_PRACTICE);
-			pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CMDFLAG_PRACTICE))
-		{
-			char aCommand[64];
-
-			str_format(aCommand, sizeof(aCommand), "/%s%s", pCmd->m_pName, pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CMDFLAG_PRACTICE) ? ", " : "");
-			str_append(aPracticeCommands, aCommand);
-		}
-		pSelf->SendChatTeam(Team, aPracticeCommands);
+		pSelf->SendChatTeam(Team, "See /practicecmdlist for a list of all avaliable practice commands. Most commonly used ones are /telecursor, /lasttp and /rescue");
 	}
+}
+
+void CGameContext::ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	char aPracticeCommands[256];
+	mem_zero(aPracticeCommands, sizeof(aPracticeCommands));
+	str_append(aPracticeCommands, "Available practice commands: ");
+	for(const IConsole::CCommandInfo *pCmd = pSelf->Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CMDFLAG_PRACTICE);
+		pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CMDFLAG_PRACTICE))
+	{
+		char aCommand[64];
+
+		str_format(aCommand, sizeof(aCommand), "/%s%s", pCmd->m_pName, pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CMDFLAG_PRACTICE) ? ", " : "");
+
+		if(str_length(aCommand) + str_length(aPracticeCommands) > 255)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientId, aPracticeCommands);
+			mem_zero(aPracticeCommands, sizeof(aPracticeCommands));
+		}
+		str_append(aPracticeCommands, aCommand);
+	}
+	pSelf->SendChatTarget(pResult->m_ClientId, aPracticeCommands);
 }
 
 void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)

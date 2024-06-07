@@ -48,22 +48,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 
 void CCharacter::Reset()
 {
-	// this will conflict with ddnet when
-	// https://github.com/ddnet/ddnet/pull/7588
-	// is merged
-	// just accept incoming changes
-	if(Server()->IsRecording(m_pPlayer->GetCid()))
-	{
-		CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCid());
-
-		if(pData->m_RecordStopTick - Server()->Tick() <= Server()->TickSpeed() && pData->m_RecordStopTick != -1)
-			Server()->SaveDemo(m_pPlayer->GetCid(), pData->m_RecordFinishTime);
-		else
-			Server()->StopRecord(m_pPlayer->GetCid());
-
-		pData->m_RecordStopTick = -1;
-	}
-
+	StopRecording();
 	Destroy();
 }
 
@@ -307,13 +292,13 @@ void CCharacter::HandleNinja()
 					return;
 
 				// make sure we haven't Hit this object before
-				bool bAlreadyHit = false;
+				bool AlreadyHit = false;
 				for(int j = 0; j < m_NumObjectsHit; j++)
 				{
 					if(m_apHitObjects[j] == pChr)
-						bAlreadyHit = true;
+						AlreadyHit = true;
 				}
-				if(bAlreadyHit)
+				if(AlreadyHit)
 					continue;
 
 				// check so we are sufficiently close
@@ -996,7 +981,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 	return true;
 }
 
-void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
+void CCharacter::StopRecording()
 {
 	if(Server()->IsRecording(m_pPlayer->GetCid()))
 	{
@@ -1009,7 +994,11 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 
 		pData->m_RecordStopTick = -1;
 	}
+}
 
+void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
+{
+	StopRecording();
 	m_pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, (Killer < 0) ? nullptr : GameServer()->m_apPlayers[Killer], Weapon);
 

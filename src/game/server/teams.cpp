@@ -848,6 +848,10 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	{
 		Player->m_Score = TTime;
 	}
+
+	// Confetti
+	CCharacter *pChar = Player->GetCharacter();
+	m_pGameContext->CreateFinishConfetti(pChar->m_Pos, pChar->TeamMask());
 }
 
 void CGameTeams::RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int Team)

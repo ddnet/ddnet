@@ -1172,6 +1172,12 @@ void CMenus::Render()
 
 	Ui()->RenderPopupMenus();
 
+	// Prevent UI elements from being hovered while a key reader is active
+	if(m_Binder.m_TakeKey)
+	{
+		Ui()->SetHotItem(nullptr);
+	}
+
 	// Handle this escape hotkey after popup menus
 	if(!m_ShowStart && ClientState == IClient::STATE_OFFLINE && Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 	{
@@ -1770,7 +1776,7 @@ void CMenus::RenderPopupConnecting(CUIRect Screen)
 		case IClient::CONNECTIVITY_UNKNOWN:
 			break;
 		case IClient::CONNECTIVITY_CHECKING:
-			pConnectivityLabel = Localize("Trying to determine UDP connectivity...");
+			pConnectivityLabel = Localize("Trying to determine UDP connectivity…");
 			break;
 		case IClient::CONNECTIVITY_UNREACHABLE:
 			pConnectivityLabel = Localize("UDP seems to be filtered.");
@@ -1837,7 +1843,7 @@ void CMenus::RenderPopupLoading(CUIRect Screen)
 
 		str_format(aTitle, sizeof(aTitle), "%s: %s", Localize("Downloading map"), Client()->MapDownloadName());
 
-		str_format(aLabel1, sizeof(aLabel1), "%d/%d KiB (%.1f KiB/s)", Client()->MapDownloadAmount() / 1024, Client()->MapDownloadTotalsize() / 1024, m_DownloadSpeed / 1024.0f);
+		str_format(aLabel1, sizeof(aLabel1), Localize("%d/%d KiB (%.1f KiB/s)"), Client()->MapDownloadAmount() / 1024, Client()->MapDownloadTotalsize() / 1024, m_DownloadSpeed / 1024.0f);
 
 		const int SecondsLeft = maximum(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize() - Client()->MapDownloadAmount()) / m_DownloadSpeed) : 1);
 		const int MinutesLeft = SecondsLeft / 60;

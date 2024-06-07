@@ -640,7 +640,7 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 	case NETOBJTYPE_CHARACTER:
 	{
 		CCharacter *pEnt = (CCharacter *)GetEntity(ObjId, ENTTYPE_CHARACTER);
-		if(pEnt && CCharacter(this, ObjId, (CNetObj_Character *)pObjData).Match((CCharacter *)pEnt))
+		if(pEnt && CCharacter(this, ObjId, (CNetObj_Character *)pObjData).Match(pEnt))
 		{
 			return pEnt;
 		}

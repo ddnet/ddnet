@@ -80,7 +80,7 @@ Client
 Connecting to
 == A ligar ao endereço
 
-Connection Problems...
+Connection Problems…
 == Problemas na ligação!
 
 Console
@@ -120,7 +120,7 @@ Disconnected
 == Desconectado
 
 Downloading map
-== A sacar o mapa...
+== A sacar o mapa…
 
 Draw!
 == Empate!
@@ -632,8 +632,8 @@ System message
 DDNet %s is available:
 == DDNet %s está disponível:
 
-Updating...
-== A atualizar...
+Updating…
+== A atualizar…
 
 Messages
 == Mensagens
@@ -1088,7 +1088,7 @@ Skip Tutorial
 Show DDNet map finishes in server browser
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.
@@ -1794,7 +1794,7 @@ DDNet %s is out!
 Downloading %s:
 == 
 
-Update failed! Check log...
+Update failed! Check log…
 == 
 
 Loading race demo files

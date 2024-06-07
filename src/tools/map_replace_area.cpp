@@ -634,7 +634,7 @@ bool GetLineIntersection(const float aLine1[2], const float aLine2[2], float aIn
 		std::min(aLine1[1], aLine2[1])};
 
 	if(aIntersection)
-		SetInexistent((float *)aIntersection, 2);
+		SetInexistent(aIntersection, 2);
 
 	if(aBorders[0] - aBorders[1] > 0.01f)
 		return false;

@@ -105,7 +105,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientId].m_aName;
 		if(str_comp(pName, m_aNamePlates[ClientId].m_aName) != 0 || FontSize != m_aNamePlates[ClientId].m_NameTextFontSize)
 		{
-			mem_copy(m_aNamePlates[ClientId].m_aName, pName, sizeof(m_aNamePlates[ClientId].m_aName));
+			str_copy(m_aNamePlates[ClientId].m_aName, pName);
 			m_aNamePlates[ClientId].m_NameTextFontSize = FontSize;
 
 			CTextCursor Cursor;
@@ -128,7 +128,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			const char *pClan = m_pClient->m_aClients[ClientId].m_aClan;
 			if(str_comp(pClan, m_aNamePlates[ClientId].m_aClanName) != 0 || FontSizeClan != m_aNamePlates[ClientId].m_ClanNameTextFontSize)
 			{
-				mem_copy(m_aNamePlates[ClientId].m_aClanName, pClan, sizeof(m_aNamePlates[ClientId].m_aClanName));
+				str_copy(m_aNamePlates[ClientId].m_aClanName, pClan);
 				m_aNamePlates[ClientId].m_ClanNameTextFontSize = FontSizeClan;
 
 				CTextCursor Cursor;

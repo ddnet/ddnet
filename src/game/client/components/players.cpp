@@ -832,13 +832,13 @@ void CPlayers::OnRender()
 	}
 
 	// render spectating players
-	for(auto &m_aClient : m_pClient->m_aClients)
+	for(auto &Client : m_pClient->m_aClients)
 	{
-		if(!m_aClient.m_SpecCharPresent)
+		if(!Client.m_SpecCharPresent)
 		{
 			continue;
 		}
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), m_aClient.m_SpecChar);
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Client.m_SpecChar);
 	}
 
 	// render everyone else's tee, then either our own or the tee we are spectating.

@@ -113,9 +113,28 @@ public:
 	class CLayers *Layers() { return m_pLayers; }
 	int m_HighestSwitchNumber;
 
+	/**
+	 * Index all teleporter types (in, out and checkpoints)
+	 * as one consecutive list.
+	 *
+	 * @param Number is the teleporter number (one less than what is shown in game)
+	 * @param Offset picks the n'th occurence of that teleporter in the map
+	 *
+	 * @return The coordinates of the teleporter in the map
+	 *         or (-1, -1) if not found
+	 */
+	vec2 TeleAllGet(int Number, size_t Offset);
+
+	/**
+	 * @param Number is the teleporter number (one less than what is shown in game)
+	 * @return The amount of occurences of that teleporter across all types (in, out, checkpoint)
+	 */
+	size_t TeleAllSize(int Number);
+
 	const std::vector<vec2> &TeleIns(int Number) { return m_TeleIns[Number]; }
 	const std::vector<vec2> &TeleOuts(int Number) { return m_TeleOuts[Number]; }
 	const std::vector<vec2> &TeleCheckOuts(int Number) { return m_TeleCheckOuts[Number]; }
+	const std::vector<vec2> &TeleOthers(int Number) { return m_TeleOthers[Number]; }
 
 private:
 	class CTile *m_pTiles;
@@ -123,9 +142,14 @@ private:
 	int m_Height;
 	class CLayers *m_pLayers;
 
+	// TILE_TELEIN
 	std::map<int, std::vector<vec2>> m_TeleIns;
+	// TILE_TELEOUT
 	std::map<int, std::vector<vec2>> m_TeleOuts;
+	// TILE_TELECHECKOUT
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
+	// TILE_TELEINEVIL, TILE_TELECHECK, TILE_TELECHECKIN, TILE_TELECHECKINEVIL
+	std::map<int, std::vector<vec2>> m_TeleOthers;
 
 	class CTeleTile *m_pTele;
 	class CSpeedupTile *m_pSpeedup;

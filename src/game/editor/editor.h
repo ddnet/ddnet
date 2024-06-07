@@ -370,10 +370,6 @@ public:
 		m_OffsetEnvelopeY = 0.5f;
 
 		m_ShowMousePointer = true;
-		m_MouseDeltaX = 0;
-		m_MouseDeltaY = 0;
-		m_MouseDeltaWx = 0;
-		m_MouseDeltaWy = 0;
 
 		m_GuiActive = true;
 		m_PreviewZoom = false;
@@ -464,8 +460,7 @@ public:
 	void ResetIngameMoved() override { m_IngameMoved = false; }
 
 	void HandleCursorMovement();
-	void OnMouseMove(float MouseX, float MouseY);
-	void DispatchInputEvents();
+	void OnMouseMove(vec2 MousePos);
 	void HandleAutosave();
 	bool PerformAutosave();
 	void HandleWriterFinishJobs();
@@ -706,17 +701,10 @@ public:
 
 	char m_aMenuBackgroundTooltip[256];
 	bool m_PreviewZoom;
-	float m_MouseWScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
-	float m_MouseX = 0.0f;
-	float m_MouseY = 0.0f;
-	float m_MouseWorldX = 0.0f;
-	float m_MouseWorldY = 0.0f;
-	float m_MouseWorldNoParaX = 0.0f;
-	float m_MouseWorldNoParaY = 0.0f;
-	float m_MouseDeltaX;
-	float m_MouseDeltaY;
-	float m_MouseDeltaWx;
-	float m_MouseDeltaWy;
+	float m_MouseWorldScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
+	vec2 m_MouseWorldPos = vec2(0.0f, 0.0f);
+	vec2 m_MouseWorldNoParaPos = vec2(0.0f, 0.0f);
+	vec2 m_MouseDeltaWorld = vec2(0.0f, 0.0f);
 	const void *m_pContainerPanned;
 	const void *m_pContainerPannedLast;
 	char m_MapEditorId; // UI element ID for the main map editor
