@@ -15,19 +15,27 @@ class CPlayer
 #endif // IN_CLASS_PLAYER
 
 public:
-	// zcatch
-	int m_KillerId;
+	/*******************************************************************
+	 * zCatch                                                          *
+	 *******************************************************************/
+
+	// Will be -1 when the player is alive
+	int m_KillerId = -1;
 	void SetTeamRaw(int Team) { m_Team = Team; }
 	bool m_IsDead;
 
-	// gctf
+	/*******************************************************************
+	 * gCTF                                                            *
+	 *******************************************************************/
 	bool m_GameStateBroadcast;
 	int m_RespawnTick;
 	bool m_IsReadyToEnter; // 0.7 ready change
 	bool m_IsReadyToPlay; // 0.7 ready change
 	bool m_DeadSpecMode; // 0.7 dead players
 
-	// ictf
+	/*******************************************************************
+	 * iCTF                                                            *
+	 *******************************************************************/
 	int m_Spree;
 
 	/*
