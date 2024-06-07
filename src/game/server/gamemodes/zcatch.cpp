@@ -68,12 +68,10 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 		if(pPlayer->m_KillerId != pVictim->GetPlayer()->GetCid())
 			continue;
 
-		// victim
+		// victim's victims
 		str_format(aBuf, sizeof(aBuf), "You respawned because '%s' died", Server()->ClientName(pVictim->GetPlayer()->GetCid()));
 		GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
-		pVictim->GetPlayer()->m_KillerId = -1;
-
-		// killer
+		pPlayer->m_KillerId = -1;
 		pPlayer->m_IsDead = false;
 		pPlayer->SetTeamRaw(TEAM_RED);
 	}
