@@ -28,7 +28,6 @@ void CGameControllerZcatch::Tick()
 		if(!pPlayer)
 			continue;
 
-
 		// this is wasting a bit of clock cycles setting it every tick
 		// it should be set on kill and then not be overwritten by info changes
 		// but there is no git conflict free way of doing that
