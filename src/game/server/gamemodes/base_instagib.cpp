@@ -102,7 +102,7 @@ int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class C
 	// but selfkill is a death
 	m_aInstaPlayerStats[pVictim->GetPlayer()->GetCid()].m_Deaths++;
 
-	if(g_Config.m_SvKillingspreeKills > 0 && pKiller && pVictim)
+	if(pKiller && pVictim)
 	{
 		if(pKiller->GetCharacter() && pKiller != pVictim->GetPlayer())
 			AddSpree(pKiller);
@@ -301,7 +301,7 @@ void CGameControllerInstagib::AddSpree(class CPlayer *pPlayer)
 	const int NumMsg = 5;
 	char aBuf[128];
 
-	if(pPlayer->m_Spree % g_Config.m_SvKillingspreeKills == 0)
+	if(g_Config.m_SvKillingspreeKills > 0 && pPlayer->m_Spree % g_Config.m_SvKillingspreeKills == 0)
 	{
 		static const char aaSpreeMsg[NumMsg][32] = {"is on a killing spree", "is on a rampage", "is dominating", "is unstoppable", "is godlike"};
 		int No = pPlayer->m_Spree / g_Config.m_SvKillingspreeKills;
@@ -313,7 +313,7 @@ void CGameControllerInstagib::AddSpree(class CPlayer *pPlayer)
 
 void CGameControllerInstagib::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller)
 {
-	if(pPlayer->m_Spree >= g_Config.m_SvKillingspreeKills)
+	if(g_Config.m_SvKillingspreeKills > 0 && pPlayer->m_Spree >= g_Config.m_SvKillingspreeKills)
 	{
 		CCharacter *pChr = pPlayer->GetCharacter();
 

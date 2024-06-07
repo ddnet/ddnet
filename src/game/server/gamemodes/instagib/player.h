@@ -34,8 +34,9 @@ public:
 	bool m_DeadSpecMode; // 0.7 dead players
 
 	/*******************************************************************
-	 * iCTF                                                            *
+	 * shared                                                          *
 	 *******************************************************************/
+	// Will also be set if spree chat messages are turned off
 	int m_Spree;
 
 	/*
