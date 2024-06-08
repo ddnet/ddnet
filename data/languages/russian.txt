@@ -1828,7 +1828,7 @@ Loading…
 == Загрузка…
 
 Loading demo file from storage
-== Загрузка демо-файла из хранилища
+== Загрузка демо из файлового хранилища
 
 %d/%d KiB (%.1f KiB/s)
 == %d/%d КиБ (%.1f КиБ/s)
@@ -1865,3 +1865,5 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Всегда показывать линию коллизии крюка других игроков
+
+#### need translate ####
