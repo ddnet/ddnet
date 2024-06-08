@@ -500,9 +500,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Звуки выделенных сообщений
 
-Use DDRace Scoreboard
-== Использовать DDRace табло счета
-
 Show kill messages
 == Показывать сообщения о смерти
 
@@ -1833,13 +1830,22 @@ Loading…
 Loading demo file from storage
 == 
 
+%d/%d KiB (%.1f KiB/s)
+== 
+
 No login required
 == 
 
 Player info change cooldown
 == 
 
+Tee
+== 
+
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Show friend mark (♥) in name plates

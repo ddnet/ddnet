@@ -859,9 +859,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == DDNet Klient peab taaskäivitama, et uuendus lõpetada!
 
-Use DDRace Scoreboard
-== Kasuta DDRace punktitabelit
-
 Show score
 == Näita punkte
 
@@ -1846,3 +1843,12 @@ Always show other players' hook collision lines
 
 Net
 == Võrk
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Tee
+== 
+
+Show only chat messages from team members
+== 

@@ -822,6 +822,9 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 No answer from server yet.
 == 
 
+%d/%d KiB (%.1f KiB/s)
+== 
+
 Getting game info
 == 
 
@@ -1401,6 +1404,9 @@ Map sound volume
 Background music volume
 == 
 
+Tee
+== 
+
 Appearance
 == 
 
@@ -1440,9 +1446,6 @@ Show votes window after voting
 DDRace HUD
 == 
 
-Use DDRace Scoreboard
-== 
-
 Show client IDs in scoreboard
 == 
 
@@ -1474,6 +1477,9 @@ Always show chat
 == 
 
 Show names in chat in team colors
+== 
+
+Show only chat messages from team members
 == 
 
 Use old chat style

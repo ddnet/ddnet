@@ -807,9 +807,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == Güncellemenin tamamlanabilmesi için oyunun yeniden başlatılması lazım!
 
-Use DDRace Scoreboard
-== DDRace skor tablosunu kulan
-
 Show score
 == Skoru göster
 
@@ -1854,3 +1851,12 @@ Always show other players' hook collision lines
 [Demo details]
 map not included
 == harita dahil edilmemiş
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Tee
+== 
+
+Show only chat messages from team members
+== 

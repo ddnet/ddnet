@@ -604,9 +604,6 @@ LAN
 Name plates size
 == 昵称大小
 
-Use DDRace Scoreboard
-== 使用 DDRace 计分板
-
 Show score
 == 显示分数
 
@@ -1885,3 +1882,12 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == 始终显示其他玩家的钩索辅助线
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Tee
+== 
+
+Show only chat messages from team members
+== 
