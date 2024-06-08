@@ -7,7 +7,7 @@
 #	3edcxzaq1		2020-06-25 00:00:00
 #	cur.ie			2020-09-28 00:00:00
 #	simpygirl		2022-02-20 00:00:00
-#	furo			2024-04-20 00:00:00
+#	furo			2024-06-08 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1847,10 +1847,10 @@ Always show other players' hook collision lines
 == Visa alltid andra spelares hook kollisions linjer
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 Tee
-== 
+== Tee
 
 Show only chat messages from team members
-== 
+== Visa bara chattmeddelanden från lagkamrater
