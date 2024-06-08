@@ -1861,10 +1861,10 @@ Always show other players' hook collision lines
 == Immer Hakenkollisionslinie anderer Spieler anzeigen
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 Tee
-== 
+== Tee
 
 Show only chat messages from team members
-== 
+== Nur Nachrichten von Teammitgliedern anzeigen
