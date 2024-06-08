@@ -83,8 +83,8 @@ Client
 Connecting to
 == Connessione a
 
-Connection Problems...
-== Problemi di connessione...
+Connection Problems…
+== Problemi di connessione…
 
 Console
 == Console
@@ -556,8 +556,8 @@ Length
 Downloading %s:
 == Scaricando %s:
 
-Update failed! Check log...
-== Aggiornamento non riuscito! Controlla registro...
+Update failed! Check log…
+== Aggiornamento non riuscito! Controlla registro…
 
 Filter connecting players
 == Filtra i giocatori in conness.
@@ -877,9 +877,6 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == Il Client DDNet deve essere riavviato per completare l'aggiornamento!
 
-Use DDRace Scoreboard
-== Usa il tabellone segnapunti DDRace
-
 Show score
 == Mostra punteggio/tempo
 
@@ -979,8 +976,8 @@ DDNet %s is available:
 Update now
 == Aggiorna ora
 
-Updating...
-== Aggiornamento in corso...
+Updating…
+== Aggiornamento in corso…
 
 DDNet Client updated!
 == Client DDNet aggiornato!
@@ -1111,10 +1108,10 @@ Sending initial client info
 == Inviando le informazioni del client
 
 Quitting. Please wait…
-== Uscendo. Perfavore aspetta...
+== Uscendo. Perfavore aspetta…
 
 Restarting. Please wait…
-== Riavviando. Perfavore aspetta...
+== Riavviando. Perfavore aspetta…
 
 Position:
 == Posizione:
@@ -1134,8 +1131,8 @@ Team %d
 Uploading map data to GPU
 == Caricando dati mappa alla GPU
 
-Trying to determine UDP connectivity...
-== Provando a determinare l'UDP connectivity...
+Trying to determine UDP connectivity…
+== Provando a determinare l'UDP connectivity…
 
 UDP seems to be filtered.
 == UDP sembra essere filtrato.
@@ -1510,6 +1507,9 @@ Videos directory
 Video was saved to '%s'
 == 
 
+%d/%d KiB (%.1f KiB/s)
+== 
+
 Loading menu images
 == 
 
@@ -1761,6 +1761,9 @@ custom
 auto
 == 
 
+Tee
+== 
+
 Appearance
 == 
 
@@ -1777,6 +1780,9 @@ DDRace HUD
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size

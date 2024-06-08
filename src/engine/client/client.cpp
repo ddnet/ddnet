@@ -4419,7 +4419,7 @@ int main(int argc, const char **argv)
 		delete pEngine;
 	});
 
-	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv);
+	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_CLIENT, argc, argv);
 	pKernel->RegisterInterface(pStorage);
 
 	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
@@ -4529,7 +4529,7 @@ int main(int argc, const char **argv)
 
 	// parse the command line arguments
 	pConsole->SetUnknownCommandCallback(UnknownArgumentCallback, pClient);
-	pConsole->ParseArguments(argc - 1, (const char **)&argv[1]);
+	pConsole->ParseArguments(argc - 1, &argv[1]);
 	pConsole->SetUnknownCommandCallback(IConsole::EmptyUnknownCommandCallback, nullptr);
 
 	if(pSteam->GetConnectAddress())

@@ -92,8 +92,8 @@ Client
 Connecting to
 == Подключение к
 
-Connection Problems...
-== Проблемы со связью...
+Connection Problems…
+== Проблемы со связью…
 
 Console
 == Консоль
@@ -500,9 +500,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Звуки выделенных сообщений
 
-Use DDRace Scoreboard
-== Использовать DDRace табло счета
-
 Show kill messages
 == Показывать сообщения о смерти
 
@@ -626,8 +623,8 @@ Remove chat
 System message
 == Системное с.
 
-Updating...
-== Обновление...
+Updating…
+== Обновление…
 
 Messages
 == Сообщения
@@ -720,10 +717,10 @@ Filter connecting players
 == Только подключившиеся
 
 Indicate map finish
-== Выделять финишированные карты
+== Показ. пройденные карты
 
 Unfinished map
-== Непройденная карта
+== Только непройденные карты
 
 DDNet %s is out!
 == Вышел DDNet %s!
@@ -731,8 +728,8 @@ DDNet %s is out!
 Downloading %s:
 == Скачивание %s:
 
-Update failed! Check log...
-== Провал. Проверьте логи...
+Update failed! Check log…
+== Ошибка. Проверьте логи…
 
 Restart
 == Рестарт
@@ -1072,10 +1069,10 @@ Assets directory
 == Расп. текстур
 
 Manual
-== Ручное
+== Вруч.
 
 Race
-== Гонка
+== Забег
 
 Auto
 == Авто
@@ -1200,8 +1197,8 @@ Speed:
 Angle:
 == Угол
 
-Trying to determine UDP connectivity...
-== Попытка определить UDP соединение...
+Trying to determine UDP connectivity…
+== Попытка определить UDP соединение…
 
 UDP seems to be filtered.
 == Похоже, что UDP фильтруется.
@@ -1833,13 +1830,22 @@ Loading…
 Loading demo file from storage
 == 
 
+%d/%d KiB (%.1f KiB/s)
+== 
+
 No login required
 == 
 
 Player info change cooldown
 == 
 
+Tee
+== 
+
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Show friend mark (♥) in name plates

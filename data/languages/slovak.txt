@@ -77,8 +77,8 @@ Client
 Connecting to
 == Pripojujem sa k
 
-Connection Problems...
-== Problémy s pripojením...
+Connection Problems…
+== Problémy s pripojením…
 
 Console
 == Konzola
@@ -611,10 +611,10 @@ Warning
 == Varovanie
 
 Quitting. Please wait…
-== Ukončovanie. Prosím, čakajte...
+== Ukončovanie. Prosím, čakajte…
 
 Restarting. Please wait…
-== Reštartovanie. Prosím, čakajte...
+== Reštartovanie. Prosím, čakajte…
 
 Loading skin files
 == Načítanie skin súborov
@@ -709,8 +709,8 @@ Settings
 Editor
 == Editor
 
-Trying to determine UDP connectivity...
-== Pokus o zistenie pripojenia UDP...
+Trying to determine UDP connectivity…
+== Pokus o zistenie pripojenia UDP…
 
 UDP seems to be filtered.
 == Zdá sa, že UDP je filtrovaný.
@@ -1423,9 +1423,6 @@ Show votes window after voting
 DDRace HUD
 == DDRace HUD
 
-Use DDRace Scoreboard
-== Použiť DDRace tabuľku výsledkov
-
 Show client IDs in scoreboard
 == Zobraziť ID klientov vo výsledkovej tabuľke
 
@@ -1681,8 +1678,8 @@ DDNet %s is available:
 Update now
 == Aktualizovať teraz
 
-Updating...
-== Aktualizácia...
+Updating…
+== Aktualizácia…
 
 DDNet Client updated!
 == DDNet Klient aktualizovaný!
@@ -1751,8 +1748,8 @@ DDNet %s is out!
 Downloading %s:
 == Sťahovanie %s:
 
-Update failed! Check log...
-== Aktualizácia zlyhala! Skontrolujte log...
+Update failed! Check log…
+== Aktualizácia zlyhala! Skontrolujte log…
 
 Loading race demo files
 == Načítanie záznamov závodov
@@ -1846,3 +1843,12 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Vždy zobraziť čiaru kolízie hákov ostatných hráčov
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Tee
+== 
+
+Show only chat messages from team members
+== 

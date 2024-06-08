@@ -76,8 +76,8 @@ Client
 Connecting to
 == Свързвам се с
 
-Connection Problems...
-== Проблеми с Връзката...
+Connection Problems…
+== Проблеми с Връзката…
 
 Console
 == Конзола
@@ -798,7 +798,7 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.org
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.
@@ -808,6 +808,9 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+%d/%d KiB (%.1f KiB/s)
 == 
 
 Getting game info
@@ -1392,6 +1395,9 @@ Map sound volume
 Background music volume
 == 
 
+Tee
+== 
+
 Appearance
 == 
 
@@ -1431,9 +1437,6 @@ Show votes window after voting
 DDRace HUD
 == 
 
-Use DDRace Scoreboard
-== 
-
 Show client IDs in scoreboard
 == 
 
@@ -1468,6 +1471,9 @@ Show names in chat in team colors
 == 
 
 Show only chat messages from friends
+== 
+
+Show only chat messages from team members
 == 
 
 Use old chat style
@@ -1710,7 +1716,7 @@ DDNet %s is available:
 Update now
 == 
 
-Updating...
+Updating…
 == 
 
 DDNet Client updated!
@@ -1780,7 +1786,7 @@ DDNet %s is out!
 Downloading %s:
 == 
 
-Update failed! Check log...
+Update failed! Check log…
 == 
 
 Loading race demo files

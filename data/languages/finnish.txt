@@ -79,8 +79,8 @@ Client
 Connecting to
 == Yhdistetään
 
-Connection Problems...
-== Yhteysongelmia...
+Connection Problems…
+== Yhteysongelmia…
 
 Console
 == Konsoli
@@ -859,9 +859,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == DDNet-asiakas täytyy käynnistää uudelleen latauksen viimeistelemiseksi
 
-Use DDRace Scoreboard
-== Käytä DDRacen tuloslistaa
-
 Show score
 == Näytä pistemäärä
 
@@ -955,8 +952,8 @@ DDNet %s is available:
 Update now
 == Päivitä nyt
 
-Updating...
-== Päivitetään...
+Updating…
+== Päivitetään…
 
 DDNet Client updated!
 == DDNet-asiakas on päivitetty!
@@ -1007,8 +1004,8 @@ DDNet %s is out!
 Downloading %s:
 == Päivitetään %s:
 
-Update failed! Check log...
-== Päivitys epäonnistui! Katso loki...
+Update failed! Check log…
+== Päivitys epäonnistui! Katso loki…
 
 Restart
 == Uudelleenaloitus
@@ -1173,7 +1170,7 @@ Following
 == Seurataan
 
 Loading commands…
-== Ladataan komentoja...
+== Ladataan komentoja…
 
 Position:
 == Positio:
@@ -1203,13 +1200,13 @@ Loading menu themes
 == Ladataan valikon teemoja
 
 Press a key…
-== Paina näppäintä...
+== Paina näppäintä…
 
 Main menu
 == Päävalikko
 
-Trying to determine UDP connectivity...
-== Yritetään selvittää UDP-yhteyden toimivuutta...
+Trying to determine UDP connectivity…
+== Yritetään selvittää UDP-yhteyden toimivuutta…
 
 UDP seems to be filtered.
 == UDP näyttää olevan suodatettu.
@@ -1435,7 +1432,7 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 == Ei voitu poistaa kansiota '%s'. Varmista että se on tyhjä ensin.
 
 Loading…
-== Ladataan...
+== Ladataan…
 
 Loading ghost files
 == Ladataan aave-tiedostoja
@@ -1502,9 +1499,6 @@ No login required
 
 Player info change cooldown
 == Pelaajan tiedon muutos viive
-
-Converse
-== 
 
 Always show chat
 == Aina näytä chatti
@@ -1676,9 +1670,6 @@ Chat font size
 Chat width
 == Chatin leveys
 
-Show hook strength indicator
-== Näytä koukun voimakkuus mittari
-
 Show local player's key presses
 == Näytä paikallisen pelaajan näppäimistönpainallukset
 
@@ -1841,11 +1832,23 @@ Auto
 Loading sound files
 == Ladataan ääni tiedostoja
 
+Moved ingame
+== Liikui pelissä
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Converse
+== 
+
+Tee
+== 
+
+Show only chat messages from team members
+== 
+
 Spree
 == 
 
 Grabs
 == 
-
-Moved ingame
-== Liikui pelissä

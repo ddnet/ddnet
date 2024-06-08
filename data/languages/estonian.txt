@@ -79,8 +79,8 @@ Client
 Connecting to
 == Ühenduse loomine
 
-Connection Problems...
-== Ühenduse Probleemid...
+Connection Problems…
+== Ühenduse Probleemid…
 
 Console
 == Konsool
@@ -859,9 +859,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == DDNet Klient peab taaskäivitama, et uuendus lõpetada!
 
-Use DDRace Scoreboard
-== Kasuta DDRace punktitabelit
-
 Show score
 == Näita punkte
 
@@ -955,8 +952,8 @@ DDNet %s is available:
 Update now
 == Uuenda nüüd
 
-Updating...
-== Uuendamine...
+Updating…
+== Uuendamine…
 
 DDNet Client updated!
 == DDNet Klient on uuendatud!
@@ -1007,8 +1004,8 @@ DDNet %s is out!
 Downloading %s:
 == Allalaadimine %s:
 
-Update failed! Check log...
-== Uuendus ebaõnnestus! Vaata logi...
+Update failed! Check log…
+== Uuendus ebaõnnestus! Vaata logi…
 
 Restart
 == Taaskäivita
@@ -1205,7 +1202,7 @@ Press a key…
 Main menu
 == Peamenüü
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == UDP-ühenduvuse määramine
 
 UDP seems to be filtered.
@@ -1846,3 +1843,12 @@ Always show other players' hook collision lines
 
 Net
 == Võrk
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Tee
+== 
+
+Show only chat messages from team members
+== 

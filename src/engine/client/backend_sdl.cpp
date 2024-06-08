@@ -423,7 +423,7 @@ const SGfxErrorContainer &CCommandProcessor_SDL_GL::GetError() const
 
 void CCommandProcessor_SDL_GL::ErroneousCleanup()
 {
-	return m_pGLBackend->ErroneousCleanup();
+	m_pGLBackend->ErroneousCleanup();
 }
 
 const SGfxWarningContainer &CCommandProcessor_SDL_GL::GetWarning() const

@@ -105,8 +105,8 @@ Client
 Connecting to
 == Conectando a
 
-Connection Problems...
-== Problemas de conexão...
+Connection Problems…
+== Problemas de conexão…
 
 Console
 == Console
@@ -663,8 +663,8 @@ DDNet %s is available:
 News
 == Novidades
 
-Updating...
-== Atualizando...
+Updating…
+== Atualizando…
 
 Overlay entities
 == Sobrepor entidades
@@ -686,9 +686,6 @@ New random timeout code
 
 Suicides
 == Suicídios
-
-Use DDRace Scoreboard
-== Usar o placar do DDRace
 
 Record demo
 == Gravar demo
@@ -828,8 +825,8 @@ Reload
 Time
 == Tempo
 
-Update failed! Check log...
-== Atualização falhou! Verifique o log...
+Update failed! Check log…
+== Atualização falhou! Verifique o log…
 
 1 new mention
 == 1 nova menção
@@ -1237,8 +1234,8 @@ Speed:
 Angle:
 == Ângulo:
 
-Trying to determine UDP connectivity...
-== Tentando determinar conectividade UDP...
+Trying to determine UDP connectivity…
+== Tentando determinar conectividade UDP…
 
 UDP seems to be filtered.
 == UDP parece estar filtrado.
@@ -1687,7 +1684,7 @@ Go back the specified duration
 
 [Demo player duration]
 %d sec.
-== $d seg.
+== %d seg.
 
 Change the skip duration
 == Alterar a duração de pulo
@@ -1872,3 +1869,12 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Sempre mostrar linhas de colisão do gancho dos outros jogadores
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Tee
+== 
+
+Show only chat messages from team members
+== 

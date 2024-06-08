@@ -78,8 +78,8 @@ Client
 Connecting to
 == Kobler til
 
-Connection Problems...
-== Tilkoblingsproblemer...
+Connection Problems…
+== Tilkoblingsproblemer…
 
 Console
 == Konsoll
@@ -614,8 +614,8 @@ DDNet %s is out!
 Downloading %s:
 == Laster ned %s:
 
-Update failed! Check log...
-== Oppdatering mislyktes! Sjekk logg...
+Update failed! Check log…
+== Oppdatering mislyktes! Sjekk logg…
 
 DDNet Client updated!
 == DDNet-klient oppdatert!
@@ -797,9 +797,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == DDNet-klienten må restartes for å fullføre oppdatering!
 
-Use DDRace Scoreboard
-== Bruk DDRace-poengliste
-
 Show score
 == Vis poeng
 
@@ -890,8 +887,8 @@ Show tiles layers from BG map
 DDNet %s is available:
 == DDNet %s er tilgjengelig:
 
-Updating...
-== Oppdaterer...
+Updating…
+== Oppdaterer…
 
 No updates available
 == Ingen oppdateringer tilgjengelig
@@ -1269,7 +1266,7 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.
@@ -1279,6 +1276,9 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+%d/%d KiB (%.1f KiB/s)
 == 
 
 Getting game info
@@ -1626,6 +1626,9 @@ Graphics card
 auto
 == 
 
+Tee
+== 
+
 Appearance
 == 
 
@@ -1675,6 +1678,9 @@ Opacity of freeze bars inside freeze
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size

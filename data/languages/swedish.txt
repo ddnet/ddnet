@@ -81,8 +81,8 @@ Client
 Connecting to
 == Ansluter till
 
-Connection Problems...
-== Anslutningsproblem...
+Connection Problems…
+== Anslutningsproblem…
 
 Console
 == Konsol
@@ -687,8 +687,8 @@ Max CSVs
 Zoom in
 == Zooma in
 
-Update failed! Check log...
-== Updatering misslyckades! Kolla logg...
+Update failed! Check log…
+== Updatering misslyckades! Kolla logg…
 
 %d new mentions
 == %d nya nämningar
@@ -846,8 +846,8 @@ AntiPing: predict grenade paths
 Best
 == Bäst
 
-Updating...
-== Uppdaterar...
+Updating…
+== Uppdaterar…
 
 Clan plates size
 == Klanskylt storlek
@@ -866,9 +866,6 @@ DDNet %s is out!
 
 Highlighted message
 == Betona meddelande
-
-Use DDRace Scoreboard
-== Använd DDRace poänglista
 
 AntiPing: predict weapons
 == AntiPing: predicera vapen
@@ -1240,8 +1237,8 @@ Team %d
 Uploading map data to GPU
 == Laddar upp bana data till grafikkortet
 
-Trying to determine UDP connectivity...
-== Försöker att bestämma UDP anslutning...
+Trying to determine UDP connectivity…
+== Försöker att bestämma UDP anslutning…
 
 UDP seems to be filtered.
 == UDP verkar vara filtrerad.
@@ -1848,3 +1845,12 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Visa alltid andra spelares hook kollisions linjer
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Tee
+== 
+
+Show only chat messages from team members
+== 

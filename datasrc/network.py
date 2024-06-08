@@ -1,7 +1,7 @@
 # pylint: skip-file
 # See https://github.com/ddnet/ddnet/issues/3507
 
-from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
+from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
@@ -328,6 +328,7 @@ Objects = [
 	NetEvent("Spawn:Common", []),
 	NetEvent("HammerHit:Common", []),
 
+
 	NetEvent("Death:Common", [
 		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
 	]),
@@ -343,6 +344,8 @@ Objects = [
 	NetEvent("DamageInd:Common", [
 		NetIntAny("m_Angle"),
 	]),
+
+	NetEventEx("Finish:Common", "finish@netevent.ddnet.org", []),
 
 	NetObjectEx("MyOwnEvent", "my-own-event@heinrich5991.de", [
 		NetIntAny("m_Test"),

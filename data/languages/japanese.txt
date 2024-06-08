@@ -76,7 +76,7 @@ Client
 Connecting to
 == 接続先
 
-Connection Problems...
+Connection Problems…
 == 接続中に問題が発生
 
 Console
@@ -870,9 +870,6 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == アップデートを完了するには、DDNet クライアントの再起動が必要です。
 
-Use DDRace Scoreboard
-== DDRace スゴアボードを使用
-
 Show score
 == スコアを表示
 
@@ -981,7 +978,7 @@ DDNet %s is available:
 Update now
 == 今すぐ更新
 
-Updating...
+Updating…
 == 更新中…
 
 DDNet Client updated!
@@ -1045,7 +1042,7 @@ DDNet %s is out!
 Downloading %s:
 == %s をダウンロード中:
 
-Update failed! Check log...
+Update failed! Check log…
 == 更新に失敗しました！ログを確認してください。
 
 Restart
@@ -1300,7 +1297,7 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.
@@ -1310,6 +1307,9 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+%d/%d KiB (%.1f KiB/s)
 == 
 
 Getting game info
@@ -1636,6 +1636,9 @@ Graphics card
 auto
 == 
 
+Tee
+== 
+
 Appearance
 == 
 
@@ -1685,6 +1688,9 @@ Opacity of freeze bars inside freeze
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size

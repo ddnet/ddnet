@@ -186,7 +186,7 @@ void CHud::RenderScoreHud()
 				if(aRecreateTeamScore[t])
 				{
 					m_aScoreInfo[t].m_ScoreTextWidth = TextRender()->TextWidth(14.0f, aScoreTeam[t == 0 ? TEAM_RED : TEAM_BLUE], -1, -1.0f);
-					mem_copy(m_aScoreInfo[t].m_aScoreText, aScoreTeam[t == 0 ? TEAM_RED : TEAM_BLUE], sizeof(m_aScoreInfo[t].m_aScoreText));
+					str_copy(m_aScoreInfo[t].m_aScoreText, aScoreTeam[t == 0 ? TEAM_RED : TEAM_BLUE]);
 					RecreateRect = true;
 				}
 			}
@@ -248,7 +248,7 @@ void CHud::RenderScoreHud()
 						const char *pName = m_pClient->m_aClients[Id].m_aName;
 						if(str_comp(pName, m_aScoreInfo[t].m_aPlayerNameText) != 0 || RecreateRect)
 						{
-							mem_copy(m_aScoreInfo[t].m_aPlayerNameText, pName, sizeof(m_aScoreInfo[t].m_aPlayerNameText));
+							str_copy(m_aScoreInfo[t].m_aPlayerNameText, pName);
 
 							float w = TextRender()->TextWidth(8.0f, pName, -1, -1.0f);
 
@@ -340,7 +340,7 @@ void CHud::RenderScoreHud()
 				if(RecreateScores)
 				{
 					m_aScoreInfo[t].m_ScoreTextWidth = TextRender()->TextWidth(14.0f, aScore[t], -1, -1.0f);
-					mem_copy(m_aScoreInfo[t].m_aScoreText, aScore[t], sizeof(m_aScoreInfo[t].m_aScoreText));
+					str_copy(m_aScoreInfo[t].m_aScoreText, aScore[t]);
 					RecreateRect = true;
 				}
 
@@ -412,7 +412,7 @@ void CHud::RenderScoreHud()
 						const char *pName = m_pClient->m_aClients[Id].m_aName;
 						if(RecreateRect)
 						{
-							mem_copy(m_aScoreInfo[t].m_aPlayerNameText, pName, sizeof(m_aScoreInfo[t].m_aPlayerNameText));
+							str_copy(m_aScoreInfo[t].m_aPlayerNameText, pName);
 
 							CTextCursor Cursor;
 							float w = TextRender()->TextWidth(8.0f, pName, -1, -1.0f);
@@ -450,7 +450,7 @@ void CHud::RenderScoreHud()
 				str_format(aBuf, sizeof(aBuf), "%d.", aPos[t]);
 				if(RecreateRect)
 				{
-					mem_copy(m_aScoreInfo[t].m_aRankText, aBuf, sizeof(m_aScoreInfo[t].m_aRankText));
+					str_copy(m_aScoreInfo[t].m_aRankText, aBuf);
 
 					CTextCursor Cursor;
 					TextRender()->SetCursor(&Cursor, m_Width - ScoreWidthMax - ImageSize - Split - PosSize, StartY + t * 20 + (18.f - 10.f) / 2.f, 10.0f, TEXTFLAG_RENDER);
@@ -541,7 +541,7 @@ void CHud::RenderConnectionWarning()
 {
 	if(Client()->ConnectionProblems())
 	{
-		const char *pText = Localize("Connection Problems...");
+		const char *pText = Localize("Connection Problems…");
 		float w = TextRender()->TextWidth(24, pText, -1, -1.0f);
 		TextRender()->Text(150 * Graphics()->ScreenAspect() - w / 2, 50, 24, pText, -1.0f);
 	}
@@ -1571,7 +1571,7 @@ void CHud::RenderDDRaceEffects()
 			}
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
-		else if(!m_ShowFinishTime && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
+		else if(g_Config.m_ClShowhudTimeCpDiff && !m_ShowFinishTime && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 		{
 			if(m_TimeCpDiff < 0)
 			{

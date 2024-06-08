@@ -2,6 +2,8 @@
 
 #include "gameclient.h"
 
+#include <base/system.h>
+
 class IKernel *CComponent::Kernel() const { return m_pClient->Kernel(); }
 class IEngine *CComponent::Engine() const { return m_pClient->Engine(); }
 class IGraphics *CComponent::Graphics() const { return m_pClient->Graphics(); }
@@ -26,6 +28,15 @@ class IUpdater *CComponent::Updater() const
 	return m_pClient->Updater();
 }
 #endif
+
+int64_t CComponent::time() const
+{
+#if defined(CONF_VIDEORECORDER)
+	return IVideo::Current() ? IVideo::Time() : time_get();
+#else
+	return time_get();
+#endif
+}
 
 float CComponent::LocalTime() const
 {

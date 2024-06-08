@@ -80,7 +80,7 @@ Client
 Connecting to
 == A ligar ao endereço
 
-Connection Problems...
+Connection Problems…
 == Problemas na ligação!
 
 Console
@@ -120,7 +120,7 @@ Disconnected
 == Desconectado
 
 Downloading map
-== A sacar o mapa...
+== A sacar o mapa…
 
 Draw!
 == Empate!
@@ -632,8 +632,8 @@ System message
 DDNet %s is available:
 == DDNet %s está disponível:
 
-Updating...
-== A atualizar...
+Updating…
+== A atualizar…
 
 Messages
 == Mensagens
@@ -658,9 +658,6 @@ Show score
 
 Max CSVs
 == CSVs máximos
-
-Use DDRace Scoreboard
-== Usa a tabela de pontuações de DDRace
 
 Best
 == Melhor
@@ -1088,7 +1085,7 @@ Skip Tutorial
 Show DDNet map finishes in server browser
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.
@@ -1098,6 +1095,9 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+%d/%d KiB (%.1f KiB/s)
 == 
 
 Getting game info
@@ -1532,6 +1532,9 @@ auto
 Enable long pain sound (used when shooting in freeze)
 == 
 
+Tee
+== 
+
 Appearance
 == 
 
@@ -1584,6 +1587,9 @@ Opacity of freeze bars inside freeze
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size
@@ -1794,7 +1800,7 @@ DDNet %s is out!
 Downloading %s:
 == 
 
-Update failed! Check log...
+Update failed! Check log…
 == 
 
 Loading race demo files

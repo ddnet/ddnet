@@ -2022,7 +2022,7 @@ void *CGraphics_Threaded::AllocCommandBufferData(size_t AllocSize)
 		if(pData == nullptr)
 		{
 			char aError[256];
-			str_format(aError, sizeof(aError), "graphics: failed to allocate data (size %" PRIzu ") for command buffer", (size_t)AllocSize);
+			str_format(aError, sizeof(aError), "graphics: failed to allocate data (size %" PRIzu ") for command buffer", AllocSize);
 			dbg_assert(false, aError);
 		}
 	}
@@ -2784,12 +2784,12 @@ int CGraphics_Threaded::WindowOpen()
 
 void CGraphics_Threaded::SetWindowGrab(bool Grab)
 {
-	return m_pBackend->SetWindowGrab(Grab);
+	m_pBackend->SetWindowGrab(Grab);
 }
 
 void CGraphics_Threaded::NotifyWindow()
 {
-	return m_pBackend->NotifyWindow();
+	m_pBackend->NotifyWindow();
 }
 
 void CGraphics_Threaded::ReadPixel(ivec2 Position, ColorRGBA *pColor)

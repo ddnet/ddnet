@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "voting.h"
 
+#include <base/system.h>
+
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
@@ -137,6 +139,11 @@ void CVoting::Vote(int v)
 		m_Voted = v;
 	CNetMsg_Cl_Vote Msg = {v};
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+}
+
+int CVoting::SecondsLeft() const
+{
+	return (m_Closetime - time()) / time_freq();
 }
 
 CVoting::CVoting()

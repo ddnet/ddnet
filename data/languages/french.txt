@@ -100,8 +100,8 @@ Client
 Connecting to
 == Connexion à
 
-Connection Problems...
-== Problèmes de connexion...
+Connection Problems…
+== Problèmes de connexion…
 
 Console
 == Console
@@ -576,9 +576,6 @@ Show other players' hook collision lines
 Filter connecting players
 == Filtre les Tees se connectant
 
-Use DDRace Scoreboard
-== Utiliser le tableau des scores de DDRace
-
 AntiPing: predict grenade paths
 == AntiPing: prédit la trajectoire du lance-grenade
 
@@ -681,8 +678,8 @@ Show entities
 Replay feature is disabled!
 == L'option de replay est désactivée
 
-Updating...
-== Mise à jour en cours...
+Updating…
+== Mise à jour en cours…
 
 Use high DPI
 == Utiliser un DPI élevé
@@ -699,8 +696,8 @@ Are you sure that you want to disconnect?
 Deactivate
 == Désactiver
 
-Update failed! Check log...
-== La mise à jour a échoué ! Vérifier les logs...
+Update failed! Check log…
+== La mise à jour a échoué ! Vérifier les logs…
 
 %.2f KiB
 == %.2f Kio
@@ -1234,8 +1231,8 @@ Speed:
 Angle:
 == Angle:
 
-Trying to determine UDP connectivity...
-== Tentative de connection UDP...
+Trying to determine UDP connectivity…
+== Tentative de connection UDP…
 
 UDP seems to be filtered.
 == UDP semble filtré.
@@ -1708,6 +1705,9 @@ Videos directory
 Video was saved to '%s'
 == 
 
+%d/%d KiB (%.1f KiB/s)
+== 
+
 No login required
 == 
 
@@ -1813,6 +1813,9 @@ Axis
 Graphics card
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1820,6 +1823,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size

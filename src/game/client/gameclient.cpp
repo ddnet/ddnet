@@ -385,18 +385,13 @@ void CGameClient::OnUpdate()
 	}
 
 	// handle key presses
-	for(size_t i = 0; i < Input()->NumEvents(); i++)
-	{
-		const IInput::CEvent &Event = Input()->GetEvent(i);
-		if(!Input()->IsEventValid(Event))
-			continue;
-
+	Input()->ConsumeEvents([&](const IInput::CEvent &Event) {
 		for(auto &pComponent : m_vpInput)
 		{
 			if(pComponent->OnInput(Event))
 				break;
 		}
-	}
+	});
 
 	if(g_Config.m_ClSubTickAiming && m_Binds.m_MouseOnAction)
 	{
@@ -708,7 +703,7 @@ void CGameClient::OnRender()
 	{
 		if(pWarning != nullptr && m_Menus.CanDisplayWarning())
 		{
-			m_Menus.PopupWarning(pWarning->m_aWarningTitle[0] == '\0' ? Localize("Warning") : pWarning->m_aWarningTitle, pWarning->m_aWarningMsg, "Ok", pWarning->m_AutoHide ? 10s : 0s);
+			m_Menus.PopupWarning(pWarning->m_aWarningTitle[0] == '\0' ? Localize("Warning") : pWarning->m_aWarningTitle, pWarning->m_aWarningMsg, Localize("Ok"), pWarning->m_AutoHide ? 10s : 0s);
 			pWarning->m_WasShown = true;
 		}
 	}
@@ -944,7 +939,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		}
 
 		// if we are spectating a static id set (team 0) and somebody killed, and its not a guy in solo, we remove him from the list
-		if(IsMultiViewIdSet() && m_MultiViewTeam == 0 && m_aMultiViewId[pMsg->m_Victim] && !m_aClients[pMsg->m_Victim].m_Spec && !m_MultiView.m_Solo)
+		// never remove players from the list if it is a pvp server
+		if(IsMultiViewIdSet() && m_MultiViewTeam == 0 && m_aMultiViewId[pMsg->m_Victim] && !m_aClients[pMsg->m_Victim].m_Spec && !m_MultiView.m_Solo && !m_GameInfo.m_Pvp)
 		{
 			m_aMultiViewId[pMsg->m_Victim] = false;
 
@@ -1140,6 +1136,11 @@ void CGameClient::ProcessEvents()
 			CNetEvent_HammerHit *pEvent = (CNetEvent_HammerHit *)pData;
 			m_Effects.HammerHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
 		}
+		else if(Item.m_Type == NETEVENTTYPE_FINISH)
+		{
+			CNetEvent_Finish *pEvent = (CNetEvent_Finish *)pData;
+			m_Effects.FinishConfetti(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
+		}
 		else if(Item.m_Type == NETEVENTTYPE_SPAWN)
 		{
 			CNetEvent_Spawn *pEvent = (CNetEvent_Spawn *)pData;
@@ -1256,6 +1257,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_EntitiesVanilla = Vanilla;
 	Info.m_EntitiesBW = BlockWorlds;
 	Info.m_Race = Race;
+	Info.m_Pvp = !Race;
 	Info.m_DontMaskEntities = !DDNet;
 	Info.m_AllowXSkins = false;
 	Info.m_EntitiesFDDrace = FDDrace;
@@ -2414,9 +2416,13 @@ void CGameClient::ConKill(IConsole::IResult *pResult, void *pUserData)
 
 void CGameClient::ConchainLanguageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
+	CGameClient *pThis = static_cast<CGameClient *>(pUserData);
+	const bool Changed = pThis->Client()->GlobalTime() && pResult->NumArguments() && str_comp(pResult->GetString(0), g_Config.m_ClLanguagefile) != 0;
 	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments())
-		((CGameClient *)pUserData)->OnLanguageChange();
+	if(Changed)
+	{
+		pThis->OnLanguageChange();
+	}
 }
 
 void CGameClient::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -2469,9 +2475,9 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 		if(i == ownId)
 			continue;
 
-		const CClientData &cData = m_aClients[i];
+		const CClientData &Data = m_aClients[i];
 
-		if(!cData.m_Active)
+		if(!Data.m_Active)
 			continue;
 
 		CNetObj_Character Prev = m_Snap.m_aCharacters[i].m_Prev;
@@ -2479,8 +2485,8 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 
 		vec2 Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
 
-		bool IsOneSuper = cData.m_Super || OwnClientData.m_Super;
-		bool IsOneSolo = cData.m_Solo || OwnClientData.m_Solo;
+		bool IsOneSuper = Data.m_Super || OwnClientData.m_Super;
+		bool IsOneSolo = Data.m_Solo || OwnClientData.m_Solo;
 
 		if(!IsOneSuper && (!m_Teams.SameTeam(i, ownId) || IsOneSolo || OwnClientData.m_HookHitDisabled))
 			continue;

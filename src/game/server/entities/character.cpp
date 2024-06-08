@@ -48,6 +48,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 
 void CCharacter::Reset()
 {
+	StopRecording();
 	Destroy();
 }
 
@@ -291,13 +292,13 @@ void CCharacter::HandleNinja()
 					return;
 
 				// make sure we haven't Hit this object before
-				bool bAlreadyHit = false;
+				bool AlreadyHit = false;
 				for(int j = 0; j < m_NumObjectsHit; j++)
 				{
 					if(m_apHitObjects[j] == pChr)
-						bAlreadyHit = true;
+						AlreadyHit = true;
 				}
-				if(bAlreadyHit)
+				if(AlreadyHit)
 					continue;
 
 				// check so we are sufficiently close
@@ -932,7 +933,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 	return true;
 }
 
-void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
+void CCharacter::StopRecording()
 {
 	if(Server()->IsRecording(m_pPlayer->GetCid()))
 	{
@@ -945,7 +946,11 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 
 		pData->m_RecordStopTick = -1;
 	}
+}
 
+void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
+{
+	StopRecording();
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
 	char aBuf[256];

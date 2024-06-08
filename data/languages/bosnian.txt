@@ -79,8 +79,8 @@ Client
 Connecting to
 == Konektovanje na
 
-Connection Problems...
-== Problemi sa konekcijom...
+Connection Problems…
+== Problemi sa konekcijom…
 
 Console
 == Konzola
@@ -618,8 +618,8 @@ DDNet %s is out!
 Downloading %s:
 == Preuzimanje %s:
 
-Update failed! Check log...
-== Ažuriranje neuspješno! Provjeri log...
+Update failed! Check log…
+== Ažuriranje neuspješno! Provjeri log…
 
 DDNet Client updated!
 == DDNet Klijent ažuriran!
@@ -786,9 +786,6 @@ Map sound volume
 DDNet Client needs to be restarted to complete update!
 == DDNet Klijent mora da se restartuje da bi završio ažuriranje!
 
-Use DDRace Scoreboard
-== Koristi DDRace tablicu bodova
-
 Show score
 == Prikaži bodove
 
@@ -876,8 +873,8 @@ Show tiles layers from BG map
 DDNet %s is available:
 == DDNet %s je dostupan:
 
-Updating...
-== Ažuriranje...
+Updating…
+== Ažuriranje…
 
 No updates available
 == Nema dostupnih ažuriranja
@@ -1143,7 +1140,7 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.
@@ -1153,6 +1150,9 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+%d/%d KiB (%.1f KiB/s)
 == 
 
 Getting game info
@@ -1554,6 +1554,9 @@ Chat sound volume
 Background music volume
 == 
 
+Tee
+== 
+
 Appearance
 == 
 
@@ -1612,6 +1615,9 @@ Opacity of freeze bars inside freeze
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Use old chat style

@@ -71,8 +71,8 @@ Client
 Connecting to
 == ﻰﻟﺍ ﻝﺎﺼﺗﺍ
 
-Connection Problems...
-== ﻝﺎﺼﺗﻻﺍ ﻲﻓ ﻞﻛﺎﺸﻣ...
+Connection Problems…
+== ﻝﺎﺼﺗﻻﺍ ﻲﻓ ﻞﻛﺎﺸﻣ…
 
 Console
 == ﻞﺴﻧﻮﻜﻟﺍ
@@ -608,8 +608,8 @@ Show other players' key presses
 System message
 == ﻡﺎﻈﻨﻟﺍ ﻞﺋﺎﺳﺭ
 
-Updating...
-== ...ﺚﻳﺪﺤﺘﻟﺍ ﺭﺎﺟ
+Updating…
+== …ﺚﻳﺪﺤﺘﻟﺍ ﺭﺎﺟ
 
 Overlay entities
 == ﻥﺍﺭﺪﺠﻟﺍ-ﺐﻛﺍﺮﺗ
@@ -619,9 +619,6 @@ Messages
 
 %.2f MiB
 == %.2f MiB
-
-Use DDRace Scoreboard
-== ﻝﺎﻤﻌﺘﺳﺃ DDRace ﺩﺭﻮﺑ ﺭﻮﻜﺳ
 
 Loading DDNet Client
 == ﻞﻴﻤﺤﺘﻟﺍ ﺭﺎﺟ DDNet Client
@@ -845,8 +842,8 @@ Zoom in
 Disconnect Dummy
 == ﺔﻴﻣﺪﻟﺍ ﺝﺍﺮﺧﺍ
 
-Update failed! Check log...
-== ...ﺕﺎﻗﻮﻠﻟﺍ ﻦﻣ ﺪﻛﺎﺗ !ﻞﺸﻓ ﺚﻳﺪﺤﺘﻟﺍ
+Update failed! Check log…
+== …ﺕﺎﻗﻮﻠﻟﺍ ﻦﻣ ﺪﻛﺎﺗ !ﻞﺸﻓ ﺚﻳﺪﺤﺘﻟﺍ
 
 Markers
 == ﺕﺎﻣﻼﻌﻟﺍ
@@ -1260,7 +1257,7 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.
@@ -1270,6 +1267,9 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+%d/%d KiB (%.1f KiB/s)
 == 
 
 Getting game info
@@ -1617,6 +1617,9 @@ Graphics card
 auto
 == 
 
+Tee
+== 
+
 Appearance
 == 
 
@@ -1666,6 +1669,9 @@ Opacity of freeze bars inside freeze
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size

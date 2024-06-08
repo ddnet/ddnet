@@ -76,7 +76,7 @@ Client
 Connecting to
 == Повезујем се на
 
-Connection Problems...
+Connection Problems…
 == Проблеми са интернетом
 
 Console
@@ -831,9 +831,6 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == Потребно је поново покренути DDNet клијент да бисте довршили ажурирање!
 
-Use DDRace Scoreboard
-== Користи DDRace табелу резултата
-
 Show score
 == Прикажи бодове
 
@@ -924,8 +921,8 @@ DDNet %s is available:
 Update now
 == Унапреди сада
 
-Updating...
-== Унапређујем...
+Updating…
+== Унапређујем…
 
 DDNet Client updated!
 == DDNet клијент је унапређен!
@@ -979,8 +976,8 @@ DDNet %s is out!
 Downloading %s:
 == Преузимање %s:
 
-Update failed! Check log...
-== Ажурирање није успело! Сачекајте log...
+Update failed! Check log…
+== Ажурирање није успело! Сачекајте log…
 
 Restart
 == Поново покрени
@@ -1081,7 +1078,7 @@ Angle:
 Uploading map data to GPU
 == Слање података мапе Г.Ј.О.~у (GPU)
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == Покушавам да одредим К.Д.П.(UDP) повезаност
 
 UDP seems to be filtered.
@@ -1539,6 +1536,9 @@ Videos directory
 Video was saved to '%s'
 == 
 
+%d/%d KiB (%.1f KiB/s)
+== 
+
 No login required
 == 
 
@@ -1753,6 +1753,9 @@ Cancel
 Graphics card
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1760,6 +1763,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size
