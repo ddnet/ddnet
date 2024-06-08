@@ -795,9 +795,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == Yeniləmənin tamamlanması üçün oyunu yenidən başlatmaq lazımdır!
 
-Use DDRace Scoreboard
-== DDRace xal lövhəsindən istifadə edin
-
 Show score
 == Xal göstər
 
@@ -1761,9 +1758,6 @@ No demo selected
 Created
 == Yaradılmışdır
 
-map not included
-== Xəritə daxil deyil
-
 Loading…
 == Yüklənir…
 
@@ -1841,3 +1835,16 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Digər oyunçuların qarmaq toqquşma sərhədini həmişə göstər
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+[Demo details]
+map not included
+== 
+
+Tee
+== 
+
+Show only chat messages from team members
+== 

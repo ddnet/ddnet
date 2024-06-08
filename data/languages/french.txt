@@ -576,9 +576,6 @@ Show other players' hook collision lines
 Filter connecting players
 == Filtre les Tees se connectant
 
-Use DDRace Scoreboard
-== Utiliser le tableau des scores de DDRace
-
 AntiPing: predict grenade paths
 == AntiPing: prédit la trajectoire du lance-grenade
 
@@ -1708,6 +1705,9 @@ Videos directory
 Video was saved to '%s'
 == 
 
+%d/%d KiB (%.1f KiB/s)
+== 
+
 No login required
 == 
 
@@ -1813,6 +1813,9 @@ Axis
 Graphics card
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1820,6 +1823,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size

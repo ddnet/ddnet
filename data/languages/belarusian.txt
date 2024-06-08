@@ -518,10 +518,6 @@ LAN
 Name plates size
 == Памер таблічак з імёнамі
 
-Submitting the render commands failed. Try to update your GPU drivers.
-== Адпраўка каманд рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
-
-[Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
 == Не атрымалася выканаць падпампоўку кадравых буфераў. Паспрабуйце абнавіць драйверы відэакарты.
 
@@ -1172,9 +1168,6 @@ Show votes window after voting
 DDRace HUD
 == DDRace HUD
 
-Use DDRace Scoreboard
-== Выкарыстоўваць табло ачкоў DDRace
-
 Show client IDs in scoreboard
 == Паказваць ID кліента ў табло ачкоў
 
@@ -1730,6 +1723,10 @@ An error during command recording occurred. Try to update your GPU drivers.
 A render command failed. Try to update your GPU drivers.
 == 
 
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
 Failed saving the replay!
 == 
 
@@ -1787,6 +1784,9 @@ There's an unsaved map in the editor, you might want to save it.
 Continue anyway?
 == 
 
+%d/%d KiB (%.1f KiB/s)
+== 
+
 No login required
 == 
 
@@ -1805,6 +1805,9 @@ Loading…
 Player info change cooldown
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1812,6 +1815,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size

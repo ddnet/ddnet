@@ -790,9 +790,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == K dokončení aktualizace je nutné restartovat klienta DDNet!
 
-Use DDRace Scoreboard
-== Použít DDRace tabulku výsledků
-
 Show score
 == Zobrazit skóre
 
@@ -1849,3 +1846,12 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Vždy zobrazit čáru kolize háků ostatních hráčů
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Tee
+== 
+
+Show only chat messages from team members
+== 

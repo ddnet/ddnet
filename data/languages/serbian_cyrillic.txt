@@ -831,9 +831,6 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == Потребно је поново покренути DDNet клијент да бисте довршили ажурирање!
 
-Use DDRace Scoreboard
-== Користи DDRace табелу резултата
-
 Show score
 == Прикажи бодове
 
@@ -1539,6 +1536,9 @@ Videos directory
 Video was saved to '%s'
 == 
 
+%d/%d KiB (%.1f KiB/s)
+== 
+
 No login required
 == 
 
@@ -1753,6 +1753,9 @@ Cancel
 Graphics card
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1760,6 +1763,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size

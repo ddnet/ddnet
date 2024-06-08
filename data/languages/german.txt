@@ -662,9 +662,6 @@ Messages
 %.2f MiB
 == %.2f MiB
 
-Use DDRace Scoreboard
-== DDRace-Punktetafel benutzen
-
 Loading DDNet Client
 == DDNet-Client laden
 
@@ -1862,3 +1859,12 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Immer Hakenkollisionslinie anderer Spieler anzeigen
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== Nur Nachrichten von Teammitgliedern anzeigen
