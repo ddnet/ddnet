@@ -1831,7 +1831,7 @@ Loading demo file from storage
 == Загрузка демо из файлового хранилища
 
 %d/%d KiB (%.1f KiB/s)
-== %d/%d КиБ (%.1f КиБ/s)
+== %d/%d КиБ (%.1f КиБ/с)
 
 No login required
 == аутентификация не требуется
