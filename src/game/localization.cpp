@@ -210,7 +210,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 				log_error("localization", "malformed context '%s' on line %d", pLine, Line);
 				continue;
 			}
-			str_truncate(aContext, sizeof(aContext), pLine + 1, Len - 1);
+			str_truncate(aContext, sizeof(aContext), pLine + 1, Len - 2);
 			pLine = LineReader.Get();
 			if(!pLine)
 			{
