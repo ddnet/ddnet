@@ -403,7 +403,7 @@ protected:
 
 		bool operator<(const CFriendItem &Other) const
 		{
-			const int Result = str_comp(m_aName, Other.m_aName);
+			const int Result = str_comp_nocase(m_aName, Other.m_aName);
 			return Result < 0 || (Result == 0 && str_comp(m_aClan, Other.m_aClan) < 0);
 		}
 	};
