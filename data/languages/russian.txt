@@ -1828,40 +1828,40 @@ Loading…
 == Загрузка…
 
 Loading demo file from storage
-== 
+== Загрузка демо-файла из хранилища
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d КиБ (%.1f КиБ/s)
 
 No login required
-== 
+== аутентификация не требуется
 
 Player info change cooldown
-== 
+== Кулдаун смены информации об игроке
 
 Tee
-== 
+== Ти
 
 Always show chat
-== 
+== Всегда показывать чат
 
 Show only chat messages from team members
-== 
+== Показывать сообщения только от членов команды
 
 Show friend mark (♥) in name plates
-== 
+== Показывать знак дружбы (♥) в имени друга
 
 Show hook strength icon indicator
-== 
+== Показывать индикатор вида крюка
 
 Show hook strength number indicator
-== 
+== Показывать индикатор номера вида крюка
 
 Show own player's hook collision line
-== 
+== Показывать собственную линию коллизии крюка
 
 Always show own player's hook collision line
-== 
+== Всегда показывать собственную линию коллизии крюка
 
 Always show other players' hook collision lines
-== 
+== Всегда показывать линию коллизии крюка других игроков
