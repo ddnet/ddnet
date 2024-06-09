@@ -214,6 +214,9 @@ void CUi::Update(vec2 MouseWorldPos)
 		m_pActiveItem = nullptr;
 		m_pHotScrollRegion = nullptr;
 	}
+
+	m_ProgressSpinnerOffset += Client()->RenderFrameTime() * 1.5f;
+	m_ProgressSpinnerOffset = std::fmod(m_ProgressSpinnerOffset, 1.0f);
 }
 
 void CUi::DebugRender()
@@ -381,16 +384,16 @@ int CUi::DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect)
 	// logic
 	int ReturnValue = 0;
 	const bool Inside = MouseHovered(pRect);
-	static int s_ButtonUsed = -1;
 
 	if(CheckActiveItem(pId))
 	{
-		if(s_ButtonUsed >= 0 && !MouseButton(s_ButtonUsed))
+		dbg_assert(m_ActiveButtonLogicButton >= 0, "m_ActiveButtonLogicButton invalid");
+		if(!MouseButton(m_ActiveButtonLogicButton))
 		{
 			if(Inside && Checked >= 0)
-				ReturnValue = 1 + s_ButtonUsed;
+				ReturnValue = 1 + m_ActiveButtonLogicButton;
 			SetActiveItem(nullptr);
-			s_ButtonUsed = -1;
+			m_ActiveButtonLogicButton = -1;
 		}
 	}
 	else if(HotItem() == pId)
@@ -400,7 +403,7 @@ int CUi::DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect)
 			if(MouseButton(i))
 			{
 				SetActiveItem(pId);
-				s_ButtonUsed = i;
+				m_ActiveButtonLogicButton = i;
 			}
 		}
 	}
@@ -416,7 +419,6 @@ int CUi::DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRe
 	// logic
 	int ReturnValue = 0;
 	const bool Inside = MouseHovered(pRect);
-	static int s_ButtonUsed = -1;
 
 	if(pClicked != nullptr)
 		*pClicked = false;
@@ -425,33 +427,34 @@ int CUi::DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRe
 
 	if(CheckActiveItem(pId))
 	{
-		if(s_ButtonUsed == 0)
+		dbg_assert(m_ActiveDraggableButtonLogicButton >= 0, "m_ActiveDraggableButtonLogicButton invalid");
+		if(m_ActiveDraggableButtonLogicButton == 0)
 		{
 			if(Checked >= 0)
-				ReturnValue = 1 + s_ButtonUsed;
-			if(!MouseButton(s_ButtonUsed))
+				ReturnValue = 1 + m_ActiveDraggableButtonLogicButton;
+			if(!MouseButton(m_ActiveDraggableButtonLogicButton))
 			{
 				if(pClicked != nullptr)
 					*pClicked = true;
 				SetActiveItem(nullptr);
-				s_ButtonUsed = -1;
+				m_ActiveDraggableButtonLogicButton = -1;
 			}
 			if(MouseButton(1))
 			{
 				if(pAbrupted != nullptr)
 					*pAbrupted = true;
 				SetActiveItem(nullptr);
-				s_ButtonUsed = -1;
+				m_ActiveDraggableButtonLogicButton = -1;
 			}
 		}
-		else if(s_ButtonUsed > 0 && !MouseButton(s_ButtonUsed))
+		else if(!MouseButton(m_ActiveDraggableButtonLogicButton))
 		{
 			if(Inside && Checked >= 0)
-				ReturnValue = 1 + s_ButtonUsed;
+				ReturnValue = 1 + m_ActiveDraggableButtonLogicButton;
 			if(pClicked != nullptr)
 				*pClicked = true;
 			SetActiveItem(nullptr);
-			s_ButtonUsed = -1;
+			m_ActiveDraggableButtonLogicButton = -1;
 		}
 	}
 	else if(HotItem() == pId)
@@ -461,7 +464,7 @@ int CUi::DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRe
 			if(MouseButton(i))
 			{
 				SetActiveItem(pId);
-				s_ButtonUsed = i;
+				m_ActiveDraggableButtonLogicButton = i;
 			}
 		}
 	}
@@ -474,8 +477,6 @@ int CUi::DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRe
 
 EEditState CUi::DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, float *pY)
 {
-	static const void *s_pEditing = nullptr;
-
 	if(MouseHovered(pRect))
 		SetHotItem(pId);
 
@@ -484,9 +485,9 @@ EEditState CUi::DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, 
 	if(HotItem() == pId && MouseButtonClicked(0))
 	{
 		SetActiveItem(pId);
-		if(!s_pEditing)
+		if(!m_pLastEditingItem)
 		{
-			s_pEditing = pId;
+			m_pLastEditingItem = pId;
 			Res = EEditState::START;
 		}
 	}
@@ -494,9 +495,9 @@ EEditState CUi::DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, 
 	if(CheckActiveItem(pId) && !MouseButton(0))
 	{
 		SetActiveItem(nullptr);
-		if(s_pEditing == pId)
+		if(m_pLastEditingItem == pId)
 		{
-			s_pEditing = nullptr;
+			m_pLastEditingItem = nullptr;
 			Res = EEditState::END;
 		}
 	}
@@ -990,66 +991,61 @@ int64_t CUi::DoValueSelector(const void *pId, const CUIRect *pRect, const char *
 SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
 {
 	// logic
-	static bool s_DidScroll = false;
-	static float s_ScrollValue = 0.0f;
-	static CLineInputNumber s_NumberInput;
-	static int s_ButtonUsed = -1;
-	static const void *s_pLastTextId = nullptr;
-
 	const bool Inside = MouseInside(pRect);
 	const int Base = Props.m_IsHex ? 16 : 10;
 
-	if(HotItem() == pId && s_ButtonUsed >= 0 && !MouseButton(s_ButtonUsed))
+	if(HotItem() == pId && m_ActiveValueSelectorState.m_Button >= 0 && !MouseButton(m_ActiveValueSelectorState.m_Button))
 	{
 		DisableMouseLock();
 		if(CheckActiveItem(pId))
 		{
 			SetActiveItem(nullptr);
 		}
-		if(Inside && ((s_ButtonUsed == 0 && !s_DidScroll && Input()->MouseDoubleClick()) || s_ButtonUsed == 1))
+		if(Inside && ((m_ActiveValueSelectorState.m_Button == 0 && !m_ActiveValueSelectorState.m_DidScroll && Input()->MouseDoubleClick()) || m_ActiveValueSelectorState.m_Button == 1))
 		{
-			s_pLastTextId = pId;
-			s_NumberInput.SetInteger64(Current, Base, Props.m_HexPrefix);
-			s_NumberInput.SelectAll();
+			m_ActiveValueSelectorState.m_pLastTextId = pId;
+			m_ActiveValueSelectorState.m_NumberInput.SetInteger64(Current, Base, Props.m_HexPrefix);
+			m_ActiveValueSelectorState.m_NumberInput.SelectAll();
 		}
-		s_ButtonUsed = -1;
+		m_ActiveValueSelectorState.m_Button = -1;
 	}
 
-	if(s_pLastTextId == pId)
+	if(m_ActiveValueSelectorState.m_pLastTextId == pId)
 	{
-		SetActiveItem(&s_NumberInput);
-		DoEditBox(&s_NumberInput, pRect, 10.0f);
+		SetActiveItem(&m_ActiveValueSelectorState.m_NumberInput);
+		DoEditBox(&m_ActiveValueSelectorState.m_NumberInput, pRect, 10.0f);
 
 		if(ConsumeHotkey(HOTKEY_ENTER) || ((MouseButtonClicked(1) || MouseButtonClicked(0)) && !Inside))
 		{
-			Current = clamp(s_NumberInput.GetInteger64(Base), Min, Max);
+			Current = clamp(m_ActiveValueSelectorState.m_NumberInput.GetInteger64(Base), Min, Max);
 			DisableMouseLock();
 			SetActiveItem(nullptr);
-			s_pLastTextId = nullptr;
+			m_ActiveValueSelectorState.m_pLastTextId = nullptr;
 		}
 
 		if(ConsumeHotkey(HOTKEY_ESCAPE))
 		{
 			DisableMouseLock();
 			SetActiveItem(nullptr);
-			s_pLastTextId = nullptr;
+			m_ActiveValueSelectorState.m_pLastTextId = nullptr;
 		}
 	}
 	else
 	{
 		if(CheckActiveItem(pId))
 		{
-			if(Props.m_UseScroll && s_ButtonUsed == 0 && MouseButton(0))
+			dbg_assert(m_ActiveValueSelectorState.m_Button >= 0, "m_ActiveValueSelectorState.m_Button invalid");
+			if(Props.m_UseScroll && m_ActiveValueSelectorState.m_Button == 0 && MouseButton(0))
 			{
-				s_ScrollValue += MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
+				m_ActiveValueSelectorState.m_ScrollValue += MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
 
-				if(absolute(s_ScrollValue) > Props.m_Scale)
+				if(absolute(m_ActiveValueSelectorState.m_ScrollValue) > Props.m_Scale)
 				{
-					const int64_t Count = (int64_t)(s_ScrollValue / Props.m_Scale);
-					s_ScrollValue = std::fmod(s_ScrollValue, Props.m_Scale);
+					const int64_t Count = (int64_t)(m_ActiveValueSelectorState.m_ScrollValue / Props.m_Scale);
+					m_ActiveValueSelectorState.m_ScrollValue = std::fmod(m_ActiveValueSelectorState.m_ScrollValue, Props.m_Scale);
 					Current += Props.m_Step * Count;
 					Current = clamp(Current, Min, Max);
-					s_DidScroll = true;
+					m_ActiveValueSelectorState.m_DidScroll = true;
 
 					// Constrain to discrete steps
 					if(Count > 0)
@@ -1063,16 +1059,16 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 		{
 			if(MouseButton(0))
 			{
-				s_ButtonUsed = 0;
-				s_DidScroll = false;
-				s_ScrollValue = 0.0f;
+				m_ActiveValueSelectorState.m_Button = 0;
+				m_ActiveValueSelectorState.m_DidScroll = false;
+				m_ActiveValueSelectorState.m_ScrollValue = 0.0f;
 				SetActiveItem(pId);
 				if(Props.m_UseScroll)
 					EnableMouseLock(pId);
 			}
 			else if(MouseButton(1))
 			{
-				s_ButtonUsed = 1;
+				m_ActiveValueSelectorState.m_Button = 1;
 				SetActiveItem(pId);
 			}
 		}
@@ -1100,21 +1096,20 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 	if(Inside && !MouseButton(0) && !MouseButton(1))
 		SetHotItem(pId);
 
-	static const void *s_pEditing = nullptr;
 	EEditState State = EEditState::NONE;
-	if(s_pEditing == pId)
+	if(m_pLastEditingItem == pId)
 	{
 		State = EEditState::EDITING;
 	}
-	if(((CheckActiveItem(pId) && CheckMouseLock()) || s_pLastTextId == pId) && s_pEditing != pId)
+	if(((CheckActiveItem(pId) && CheckMouseLock()) || m_ActiveValueSelectorState.m_pLastTextId == pId) && m_pLastEditingItem != pId)
 	{
 		State = EEditState::START;
-		s_pEditing = pId;
+		m_pLastEditingItem = pId;
 	}
-	if(!CheckMouseLock() && s_pLastTextId != pId && s_pEditing == pId)
+	if(!CheckMouseLock() && m_ActiveValueSelectorState.m_pLastTextId != pId && m_pLastEditingItem == pId)
 	{
 		State = EEditState::END;
-		s_pEditing = nullptr;
+		m_pLastEditingItem = nullptr;
 	}
 
 	return SEditResult<int64_t>{State, Current};
@@ -1133,7 +1128,6 @@ float CUi::DoScrollbarV(const void *pId, const CUIRect *pRect, float Current)
 	Handle.y = Rail.y + (Rail.h - Handle.h) * Current;
 
 	// logic
-	static float s_OffsetY;
 	const bool InsideRail = MouseHovered(&Rail);
 	const bool InsideHandle = MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
@@ -1156,14 +1150,14 @@ float CUi::DoScrollbarV(const void *pId, const CUIRect *pRect, float Current)
 		if(MouseButton(0))
 		{
 			SetActiveItem(pId);
-			s_OffsetY = MouseY() - Handle.y;
+			m_ActiveScrollbarOffset = MouseY() - Handle.y;
 			Grabbed = true;
 		}
 	}
 	else if(MouseButtonClicked(0) && !InsideHandle && InsideRail)
 	{
 		SetActiveItem(pId);
-		s_OffsetY = Handle.h / 2.0f;
+		m_ActiveScrollbarOffset = Handle.h / 2.0f;
 		Grabbed = true;
 	}
 
@@ -1177,7 +1171,7 @@ float CUi::DoScrollbarV(const void *pId, const CUIRect *pRect, float Current)
 	{
 		const float Min = Rail.y;
 		const float Max = Rail.h - Handle.h;
-		const float Cur = MouseY() - s_OffsetY;
+		const float Cur = MouseY() - m_ActiveScrollbarOffset;
 		ReturnValue = clamp((Cur - Min) / Max, 0.0f, 1.0f);
 	}
 
@@ -1204,7 +1198,6 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 	Handle.x += (Rail.w - Handle.w) * Current;
 
 	// logic
-	static float s_OffsetX;
 	const bool InsideRail = MouseHovered(&Rail);
 	const bool InsideHandle = MouseHovered(&Handle);
 	bool Grabbed = false; // whether to apply the offset
@@ -1227,14 +1220,14 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 		if(MouseButton(0))
 		{
 			SetActiveItem(pId);
-			s_OffsetX = MouseX() - Handle.x;
+			m_ActiveScrollbarOffset = MouseX() - Handle.x;
 			Grabbed = true;
 		}
 	}
 	else if(MouseButtonClicked(0) && !InsideHandle && InsideRail)
 	{
 		SetActiveItem(pId);
-		s_OffsetX = Handle.w / 2.0f;
+		m_ActiveScrollbarOffset = Handle.w / 2.0f;
 		Grabbed = true;
 	}
 
@@ -1248,7 +1241,7 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 	{
 		const float Min = Rail.x;
 		const float Max = Rail.w - Handle.w;
-		const float Cur = MouseX() - s_OffsetX;
+		const float Cur = MouseX() - m_ActiveScrollbarOffset;
 		ReturnValue = clamp((Cur - Min) / Max, 0.0f, 1.0f);
 	}
 
@@ -1327,11 +1320,6 @@ bool CUi::DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect,
 
 void CUi::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props) const
 {
-	static float s_SpinnerOffset = 0.0f;
-	static float s_LastRender = Client()->LocalTime();
-	s_SpinnerOffset += (Client()->LocalTime() - s_LastRender) * 1.5f;
-	s_SpinnerOffset = std::fmod(s_SpinnerOffset, 1.0f);
-
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 
@@ -1354,7 +1342,7 @@ void CUi::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressS
 	}
 
 	const float FilledRatio = Props.m_Progress < 0.0f ? 0.333f : Props.m_Progress;
-	const int FilledSegmentOffset = Props.m_Progress < 0.0f ? round_to_int(s_SpinnerOffset * Props.m_Segments) : 0;
+	const int FilledSegmentOffset = Props.m_Progress < 0.0f ? round_to_int(m_ProgressSpinnerOffset * Props.m_Segments) : 0;
 	const int FilledNumSegments = minimum<int>(Props.m_Segments * FilledRatio + (Props.m_Progress < 0.0f ? 0 : 1), Props.m_Segments);
 	Graphics()->SetColor(Props.m_Color);
 	for(int i = 0; i < FilledNumSegments; ++i)
@@ -1370,8 +1358,6 @@ void CUi::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressS
 	}
 
 	Graphics()->QuadsEnd();
-
-	s_LastRender = Client()->LocalTime();
 }
 
 void CUi::DoPopupMenu(const SPopupMenuId *pId, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props)

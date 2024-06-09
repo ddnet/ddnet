@@ -331,6 +331,22 @@ private:
 	const CScrollRegion *m_pBecomingHotScrollRegion = nullptr;
 	bool m_ActiveItemValid = false;
 
+	int m_ActiveButtonLogicButton = -1;
+	int m_ActiveDraggableButtonLogicButton = -1;
+	const void *m_pLastEditingItem = nullptr;
+	float m_ActiveScrollbarOffset = 0.0f;
+	float m_ProgressSpinnerOffset = 0.0f;
+	class CValueSelectorState
+	{
+	public:
+		int m_Button = -1;
+		bool m_DidScroll = false;
+		float m_ScrollValue = 0.0f;
+		CLineInputNumber m_NumberInput;
+		const void *m_pLastTextId = nullptr;
+	};
+	CValueSelectorState m_ActiveValueSelectorState;
+
 	vec2 m_UpdatedMousePos = vec2(0.0f, 0.0f); // in window screen space
 	vec2 m_UpdatedMouseDelta = vec2(0.0f, 0.0f); // in window screen space
 	vec2 m_MousePos = vec2(0.0f, 0.0f); // in gui space
