@@ -1310,7 +1310,7 @@ void CGameConsole::OnRender()
 			float Percentage = Client()->GotRconCommandsPercentage();
 			SProgressSpinnerProperties ProgressProps;
 			ProgressProps.m_Progress = Percentage;
-			Ui()->RenderProgressSpinner(vec2(Screen.w / 4.0f + FONT_SIZE / 2.f, FONT_SIZE), FONT_SIZE / 2.f);
+			Ui()->RenderProgressSpinner(vec2(Screen.w / 4.0f + FONT_SIZE / 2.f, FONT_SIZE), FONT_SIZE / 2.f, ProgressProps);
 
 			char aLoading[128];
 			str_copy(aLoading, Localize("Loading commands…"));
