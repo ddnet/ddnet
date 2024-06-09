@@ -1837,14 +1837,14 @@ Always show other players' hook collision lines
 == Digər oyunçuların qarmaq toqquşma sərhədini həmişə göstər
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 [Demo details]
 map not included
-== 
+== xəritə daxil deyil
 
 Tee
-== 
+== Tee
 
 Show only chat messages from team members
-== 
+== Yalnız komanda üzvlərinin mesajlarını göstərin
