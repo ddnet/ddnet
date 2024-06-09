@@ -1070,7 +1070,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	s_Tracker.End(Prop, State);
 
 	// Check if modified property could have an effect on automapper
-	if(HasAutomapEffect(Prop))
+	if((State == EEditState::END || State == EEditState::ONE_GO) && HasAutomapEffect(Prop))
 	{
 		FlagModified(0, 0, m_Width, m_Height);
 
@@ -1251,13 +1251,16 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 
 	s_Tracker.End(Prop, PropState);
 
-	if(Prop == ETilesCommonProp::PROP_WIDTH || Prop == ETilesCommonProp::PROP_HEIGHT)
+	if(PropState == EEditState::END || PropState == EEditState::ONE_GO)
 	{
-		State.m_Modified |= SCommonPropState::MODIFIED_SIZE;
-	}
-	else if(Prop == ETilesCommonProp::PROP_COLOR)
-	{
-		State.m_Modified |= SCommonPropState::MODIFIED_COLOR;
+		if(Prop == ETilesCommonProp::PROP_WIDTH || Prop == ETilesCommonProp::PROP_HEIGHT)
+		{
+			State.m_Modified |= SCommonPropState::MODIFIED_SIZE;
+		}
+		else if(Prop == ETilesCommonProp::PROP_COLOR)
+		{
+			State.m_Modified |= SCommonPropState::MODIFIED_COLOR;
+		}
 	}
 
 	return CUi::POPUP_KEEP_OPEN;

@@ -349,8 +349,6 @@ private:
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
 
-	bool m_ValueSelectorTextMode = false;
-
 	struct SPopupMenu
 	{
 		static constexpr float POPUP_BORDER = 1.0f;
@@ -439,7 +437,6 @@ public:
 	vec2 UpdatedMouseDelta() const { return m_UpdatedMouseDelta; }
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
 	int MouseButtonClicked(int Index) const { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
-	int MouseButtonReleased(int Index) const { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
 	bool CheckMouseLock()
 	{
 		if(m_MouseLock && ActiveItem() != m_pMouseLockId)
@@ -565,8 +562,6 @@ public:
 	// value selector
 	SEditResult<int64_t> DoValueSelectorWithState(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
 	int64_t DoValueSelector(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
-	bool IsValueSelectorTextMode() const { return m_ValueSelectorTextMode; }
-	void SetValueSelectorTextMode(bool TextMode) { m_ValueSelectorTextMode = TextMode; }
 
 	// scrollbars
 	enum

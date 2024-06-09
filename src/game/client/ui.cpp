@@ -807,7 +807,7 @@ bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 	if(pMouseSelection->m_Selecting)
 	{
 		pMouseSelection->m_ReleaseMouse = MousePos();
-		if(MouseButtonReleased(0))
+		if(!MouseButton(0))
 		{
 			pMouseSelection->m_Selecting = false;
 		}
@@ -990,87 +990,90 @@ int64_t CUi::DoValueSelector(const void *pId, const CUIRect *pRect, const char *
 SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
 {
 	// logic
-	static float s_Value;
+	static bool s_DidScroll = false;
+	static float s_ScrollValue = 0.0f;
 	static CLineInputNumber s_NumberInput;
-	static const void *s_pLastTextId = pId;
-	const bool Inside = MouseInside(pRect);
-	static const void *s_pEditing = nullptr;
-	EEditState State = EEditState::NONE;
+	static int s_ButtonUsed = -1;
+	static const void *s_pLastTextId = nullptr;
 
+	const bool Inside = MouseInside(pRect);
 	const int Base = Props.m_IsHex ? 16 : 10;
 
-	if(MouseButtonReleased(1) && HotItem() == pId)
+	if(HotItem() == pId && s_ButtonUsed >= 0 && !MouseButton(s_ButtonUsed))
 	{
-		s_pLastTextId = pId;
-		m_ValueSelectorTextMode = true;
-		s_NumberInput.SetInteger64(Current, Base, Props.m_HexPrefix);
-		s_NumberInput.SelectAll();
-	}
-
-	if(CheckActiveItem(pId))
-	{
-		if(!MouseButton(0))
+		DisableMouseLock();
+		if(CheckActiveItem(pId))
 		{
-			DisableMouseLock();
 			SetActiveItem(nullptr);
-			m_ValueSelectorTextMode = false;
 		}
+		if(Inside && ((s_ButtonUsed == 0 && !s_DidScroll && Input()->MouseDoubleClick()) || s_ButtonUsed == 1))
+		{
+			s_pLastTextId = pId;
+			s_NumberInput.SetInteger64(Current, Base, Props.m_HexPrefix);
+			s_NumberInput.SelectAll();
+		}
+		s_ButtonUsed = -1;
 	}
 
-	if(m_ValueSelectorTextMode && s_pLastTextId == pId)
+	if(s_pLastTextId == pId)
 	{
-		DoEditBox(&s_NumberInput, pRect, 10.0f);
 		SetActiveItem(&s_NumberInput);
+		DoEditBox(&s_NumberInput, pRect, 10.0f);
 
 		if(ConsumeHotkey(HOTKEY_ENTER) || ((MouseButtonClicked(1) || MouseButtonClicked(0)) && !Inside))
 		{
 			Current = clamp(s_NumberInput.GetInteger64(Base), Min, Max);
 			DisableMouseLock();
 			SetActiveItem(nullptr);
-			m_ValueSelectorTextMode = false;
+			s_pLastTextId = nullptr;
 		}
 
 		if(ConsumeHotkey(HOTKEY_ESCAPE))
 		{
 			DisableMouseLock();
 			SetActiveItem(nullptr);
-			m_ValueSelectorTextMode = false;
+			s_pLastTextId = nullptr;
 		}
 	}
 	else
 	{
 		if(CheckActiveItem(pId))
 		{
-			if(Props.m_UseScroll)
+			if(Props.m_UseScroll && s_ButtonUsed == 0 && MouseButton(0))
 			{
-				if(MouseButton(0))
+				s_ScrollValue += MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
+
+				if(absolute(s_ScrollValue) > Props.m_Scale)
 				{
-					s_Value += MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
+					const int64_t Count = (int64_t)(s_ScrollValue / Props.m_Scale);
+					s_ScrollValue = std::fmod(s_ScrollValue, Props.m_Scale);
+					Current += Props.m_Step * Count;
+					Current = clamp(Current, Min, Max);
+					s_DidScroll = true;
 
-					if(absolute(s_Value) > Props.m_Scale)
-					{
-						const int64_t Count = (int64_t)(s_Value / Props.m_Scale);
-						s_Value = std::fmod(s_Value, Props.m_Scale);
-						Current += Props.m_Step * Count;
-						Current = clamp(Current, Min, Max);
-
-						// Constrain to discrete steps
-						if(Count > 0)
-							Current = Current / Props.m_Step * Props.m_Step;
-						else
-							Current = std::ceil(Current / (float)Props.m_Step) * Props.m_Step;
-					}
+					// Constrain to discrete steps
+					if(Count > 0)
+						Current = Current / Props.m_Step * Props.m_Step;
+					else
+						Current = std::ceil(Current / (float)Props.m_Step) * Props.m_Step;
 				}
 			}
 		}
 		else if(HotItem() == pId)
 		{
-			if(MouseButtonClicked(0))
+			if(MouseButton(0))
 			{
-				s_Value = 0;
+				s_ButtonUsed = 0;
+				s_DidScroll = false;
+				s_ScrollValue = 0.0f;
 				SetActiveItem(pId);
 				if(Props.m_UseScroll)
 					EnableMouseLock(pId);
+			}
+			else if(MouseButton(1))
+			{
+				s_ButtonUsed = 1;
+				SetActiveItem(pId);
 			}
 		}
 
@@ -1094,23 +1097,21 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 		DoLabel(pRect, aBuf, 10.0f, TEXTALIGN_MC);
 	}
 
-	if(Inside && !MouseButton(0))
+	if(Inside && !MouseButton(0) && !MouseButton(1))
 		SetHotItem(pId);
 
-	if(!m_ValueSelectorTextMode)
-		s_NumberInput.Clear();
-
+	static const void *s_pEditing = nullptr;
+	EEditState State = EEditState::NONE;
 	if(s_pEditing == pId)
+	{
 		State = EEditState::EDITING;
-
-	bool MouseLocked = CheckMouseLock();
-	if((MouseLocked || m_ValueSelectorTextMode) && !s_pEditing)
+	}
+	if(((CheckActiveItem(pId) && CheckMouseLock()) || s_pLastTextId == pId) && s_pEditing != pId)
 	{
 		State = EEditState::START;
 		s_pEditing = pId;
 	}
-
-	if(!CheckMouseLock() && !m_ValueSelectorTextMode && s_pEditing == pId)
+	if(!CheckMouseLock() && s_pLastTextId != pId && s_pEditing == pId)
 	{
 		State = EEditState::END;
 		s_pEditing = nullptr;
