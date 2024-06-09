@@ -1839,10 +1839,10 @@ Show friend mark (♥) in name plates
 == Montrez l'icone d'ami (♥) dans les pseudonymes
 
 Show hook strength icon indicator
-== Afficher l'indicateur de force du grappin
+== Montrer l'icone de force du grappin
 
 Show hook strength number indicator
-== Afficher le nombre de force du grappin
+== Montrer la valeur de la force du grappin
 
 Authed name color in scoreboard
 == Couleur des noms authentifiés dans le tableau des scores
