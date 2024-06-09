@@ -6,7 +6,7 @@
 #	Petr			2011-04-02 23:02:33
 #	Medik & Petr	2011-07-02 19:37:05
 #	TeeWorlds-org	2011-07-15 00:34:19
-#	dobrykafe		2024-04-20 00:00:00
+#	dobrykafe		2024-06-09 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1848,10 +1848,10 @@ Always show other players' hook collision lines
 == Vždy zobrazit čáru kolize háků ostatních hráčů
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 Tee
-== 
+== Tee
 
 Show only chat messages from team members
-== 
+== Zobrazit pouze zprávy od členů týmu
