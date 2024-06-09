@@ -241,7 +241,7 @@ Mute when not active
 == Aktif değilken sessizleştir
 
 Name
-== Sunucu ismi
+== İsim
 
 Next weapon
 == Sonraki silah
@@ -1853,10 +1853,10 @@ map not included
 == harita dahil edilmemiş
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 Tee
-== 
+== Tee
 
 Show only chat messages from team members
-== 
+== Sadece takım üyelerinin mesajlarını göster
