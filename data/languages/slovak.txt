@@ -3,7 +3,7 @@
 #	Limit and Petr
 #modified by:
 #	LimiT		2011-07-02 20:24:44
-#	dobrykafe	2024-04-20 00:00:00
+#	dobrykafe	2024-06-09 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1845,10 +1845,10 @@ Always show other players' hook collision lines
 == Vždy zobraziť čiaru kolízie hákov ostatných hráčov
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 Tee
-== 
+== Tee
 
 Show only chat messages from team members
-== 
+== Zobraziť iba správy od členov tímu
