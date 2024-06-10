@@ -1686,7 +1686,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	static CUi::SSelectionPopupContext s_SelectionPopupContext;
 	static CScrollRegion s_SelectionPopupScrollRegion;
 	s_SelectionPopupContext.m_pScrollRegion = &s_SelectionPopupScrollRegion;
-	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the image from the mapres folder"))
+	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Reload", 0, &Slot, 0, "Reloads the image from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.png", pImg->m_aName);
@@ -1785,7 +1785,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	View.HSplitTop(5.0f, nullptr, &View);
 	View.HSplitTop(RowHeight, &Slot, &View);
 
-	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from the mapres folder"))
+	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Reload", 0, &Slot, 0, "Reloads the sound from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.opus", pSound->m_aName);
