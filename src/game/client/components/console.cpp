@@ -783,6 +783,30 @@ void CGameConsole::CInstance::UpdateSearch()
 	}
 }
 
+void CGameConsole::CInstance::Dump()
+{
+	char aTimestamp[20];
+	str_timestamp(aTimestamp, sizeof(aTimestamp));
+	char aFilename[IO_MAX_PATH_LENGTH];
+	str_format(aFilename, sizeof(aFilename), "dumps/%s_dump_%s.txt", m_pName, aTimestamp);
+	IOHANDLE File = m_pGameConsole->Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(File)
+	{
+		PumpBacklogPending();
+		for(CInstance::CBacklogEntry *pEntry = m_Backlog.First(); pEntry; pEntry = m_Backlog.Next(pEntry))
+		{
+			io_write(File, pEntry->m_aText, pEntry->m_Length);
+			io_write_newline(File);
+		}
+		io_close(File);
+		log_info("console", "%s contents were written to '%s'", m_pName, aFilename);
+	}
+	else
+	{
+		log_error("console", "Failed to open '%s'", aFilename);
+	}
+}
+
 CGameConsole::CGameConsole() :
 	m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE)
 {
@@ -1388,32 +1412,6 @@ void CGameConsole::Toggle(int Type)
 	m_ConsoleType = Type;
 }
 
-void CGameConsole::Dump(int Type)
-{
-	CInstance *pConsole = Type == CONSOLETYPE_REMOTE ? &m_RemoteConsole : &m_LocalConsole;
-	char aBuf[IO_MAX_PATH_LENGTH + 64];
-	char aFilename[IO_MAX_PATH_LENGTH];
-	str_timestamp(aBuf, sizeof(aBuf));
-	str_format(aFilename, sizeof(aFilename), "dumps/%s_dump_%s.txt", pConsole->m_pName, aBuf);
-	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-	if(File)
-	{
-		pConsole->PumpBacklogPending();
-		for(CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.First(); pEntry; pEntry = pConsole->m_Backlog.Next(pEntry))
-		{
-			io_write(File, pEntry->m_aText, pEntry->m_Length);
-			io_write_newline(File);
-		}
-		io_close(File);
-		str_format(aBuf, sizeof(aBuf), "%s contents were written to '%s'", pConsole->m_pName, aFilename);
-	}
-	else
-	{
-		str_format(aBuf, sizeof(aBuf), "Failed to open '%s'", aFilename);
-	}
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-}
-
 void CGameConsole::ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameConsole *)pUserData)->Toggle(CONSOLETYPE_LOCAL);
@@ -1436,12 +1434,12 @@ void CGameConsole::ConClearRemoteConsole(IConsole::IResult *pResult, void *pUser
 
 void CGameConsole::ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserData)
 {
-	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_LOCAL);
+	((CGameConsole *)pUserData)->m_LocalConsole.Dump();
 }
 
 void CGameConsole::ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData)
 {
-	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_REMOTE);
+	((CGameConsole *)pUserData)->m_RemoteConsole.Dump();
 }
 
 void CGameConsole::ConConsolePageUp(IConsole::IResult *pResult, void *pUserData)

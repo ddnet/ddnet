@@ -110,6 +110,7 @@ class CGameConsole : public CComponent
 		int GetLinesToScroll(int Direction, int LinesToScroll);
 		void ScrollToCenter(int StartLine, int EndLine);
 		void ClearSearch();
+		void Dump() REQUIRES(!m_BacklogPendingLock);
 
 		const char *GetString() const { return m_Input.GetString(); }
 		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);
@@ -142,7 +143,6 @@ class CGameConsole : public CComponent
 	static const ColorRGBA ms_SearchSelectedColor;
 
 	void Toggle(int Type);
-	void Dump(int Type);
 
 	static void PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
