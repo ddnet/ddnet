@@ -77,7 +77,6 @@ private:
 	char *m_pClipboardText;
 
 	bool m_MouseFocus;
-	bool m_MouseDoubleClick;
 #if defined(CONF_PLATFORM_ANDROID)
 	ivec2 m_LastMousePos = ivec2(0, 0); // No relative mouse on Android
 	int m_NumBackPresses = 0;
@@ -145,7 +144,6 @@ public:
 	void MouseModeRelative() override;
 	void NativeMousePos(int *pX, int *pY) const override;
 	bool NativeMousePressed(int Index) override;
-	bool MouseDoubleClick() override;
 
 	const char *GetClipboardText() override;
 	void SetClipboardText(const char *pText) override;

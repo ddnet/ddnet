@@ -312,7 +312,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 		{
 			Ui()->SetActiveItem(nullptr);
 		}
-		if(Inside && ((s_ButtonUsed == 0 && !s_DidScroll && Input()->MouseDoubleClick()) || s_ButtonUsed == 1))
+		if(Inside && ((s_ButtonUsed == 0 && !s_DidScroll && Ui()->DoDoubleClickLogic(pId)) || s_ButtonUsed == 1))
 		{
 			s_pLastTextId = pId;
 			s_NumberInput.SetInteger(Current, Base);
@@ -3907,7 +3907,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 						Ui()->DoPopupMenu(&s_PopupGroupId, Ui()->MouseX(), Ui()->MouseY(), 145, 256, this, PopupGroup);
 					}
 
-					if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Input()->MouseDoubleClick())
+					if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Ui()->DoDoubleClickLogic(m_Map.m_vpGroups[g].get()))
 						m_Map.m_vpGroups[g]->m_Collapse ^= 1;
 
 					SetOperation(OP_NONE);
@@ -6449,7 +6449,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			else if(s_EnvelopeEditorButtonUsed == 0)
 			{
-				if(Input()->MouseDoubleClick())
+				if(Ui()->DoDoubleClickLogic(&s_EnvelopeEditorId))
 				{
 					// add point
 					float Time = ScreenToEnvelopeX(View, Ui()->MouseX());
