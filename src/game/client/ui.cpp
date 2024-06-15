@@ -475,6 +475,21 @@ int CUi::DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRe
 	return ReturnValue;
 }
 
+bool CUi::DoDoubleClickLogic(const void *pId)
+{
+	if(m_DoubleClickState.m_pLastClickedId == pId &&
+		Client()->GlobalTime() - m_DoubleClickState.m_LastClickTime < 0.5f &&
+		distance(m_DoubleClickState.m_LastClickPos, MousePos()) <= 32.0f * Screen()->h / Graphics()->ScreenHeight())
+	{
+		m_DoubleClickState.m_pLastClickedId = nullptr;
+		return true;
+	}
+	m_DoubleClickState.m_pLastClickedId = pId;
+	m_DoubleClickState.m_LastClickTime = Client()->GlobalTime();
+	m_DoubleClickState.m_LastClickPos = MousePos();
+	return false;
+}
+
 EEditState CUi::DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, float *pY)
 {
 	if(MouseHovered(pRect))
@@ -1001,7 +1016,7 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 		{
 			SetActiveItem(nullptr);
 		}
-		if(Inside && ((m_ActiveValueSelectorState.m_Button == 0 && !m_ActiveValueSelectorState.m_DidScroll && Input()->MouseDoubleClick()) || m_ActiveValueSelectorState.m_Button == 1))
+		if(Inside && ((m_ActiveValueSelectorState.m_Button == 0 && !m_ActiveValueSelectorState.m_DidScroll && DoDoubleClickLogic(pId)) || m_ActiveValueSelectorState.m_Button == 1))
 		{
 			m_ActiveValueSelectorState.m_pLastTextId = pId;
 			m_ActiveValueSelectorState.m_NumberInput.SetInteger64(Current, Base, Props.m_HexPrefix);

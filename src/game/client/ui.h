@@ -333,6 +333,14 @@ private:
 
 	int m_ActiveButtonLogicButton = -1;
 	int m_ActiveDraggableButtonLogicButton = -1;
+	class CDoubleClickState
+	{
+	public:
+		const void *m_pLastClickedId = nullptr;
+		float m_LastClickTime = -1.0f;
+		vec2 m_LastClickPos = vec2(-1.0f, -1.0f);
+	};
+	CDoubleClickState m_DoubleClickState;
 	const void *m_pLastEditingItem = nullptr;
 	float m_ActiveScrollbarOffset = 0.0f;
 	float m_ProgressSpinnerOffset = 0.0f;
@@ -526,6 +534,7 @@ public:
 
 	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect);
 	int DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
+	bool DoDoubleClickLogic(const void *pId);
 	EEditState DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, float *pY);
 	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp = false, float ScrollSpeed = 10.0f) const;
 	static vec2 CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, const float *pBiggestCharHeight = nullptr);

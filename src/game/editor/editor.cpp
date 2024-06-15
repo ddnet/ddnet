@@ -312,7 +312,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 		{
 			Ui()->SetActiveItem(nullptr);
 		}
-		if(Inside && ((s_ButtonUsed == 0 && !s_DidScroll && Input()->MouseDoubleClick()) || s_ButtonUsed == 1))
+		if(Inside && ((s_ButtonUsed == 0 && !s_DidScroll && Ui()->DoDoubleClickLogic(pId)) || s_ButtonUsed == 1))
 		{
 			s_pLastTextId = pId;
 			s_NumberInput.SetInteger(Current, Base);
@@ -3907,7 +3907,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 						Ui()->DoPopupMenu(&s_PopupGroupId, Ui()->MouseX(), Ui()->MouseY(), 145, 256, this, PopupGroup);
 					}
 
-					if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Input()->MouseDoubleClick())
+					if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Ui()->DoDoubleClickLogic(m_Map.m_vpGroups[g].get()))
 						m_Map.m_vpGroups[g]->m_Collapse ^= 1;
 
 					SetOperation(OP_NONE);
@@ -6334,8 +6334,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			ResetZoomEnvelope(pEnvelope, s_ActiveChannels);
 		}
 
-		static int s_EnvelopeEditorId = 0;
-
 		ColorRGBA aColors[] = {ColorRGBA(1, 0.2f, 0.2f), ColorRGBA(0.2f, 1, 0.2f), ColorRGBA(0.2f, 0.2f, 1), ColorRGBA(1, 1, 0.2f)};
 
 		CUIRect Button;
@@ -6389,6 +6387,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			m_Map.OnModify();
 		}
 
+		static int s_EnvelopeEditorId = 0;
+		static int s_EnvelopeEditorButtonUsed = -1;
 		const bool ShouldPan = s_Operation == EEnvelopeEditorOp::OP_NONE && (Ui()->MouseButton(2) || (Ui()->MouseButton(0) && Input()->ModifierIsPressed()));
 		if(m_pContainerPanned == &s_EnvelopeEditorId)
 		{
@@ -6439,7 +6439,17 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			// do stuff
 			if(Ui()->MouseButton(0))
 			{
-				if(Input()->MouseDoubleClick())
+				s_EnvelopeEditorButtonUsed = 0;
+				if(s_Operation != EEnvelopeEditorOp::OP_BOX_SELECT && !Input()->ModifierIsPressed())
+				{
+					s_Operation = EEnvelopeEditorOp::OP_BOX_SELECT;
+					s_MouseXStart = Ui()->MouseX();
+					s_MouseYStart = Ui()->MouseY();
+				}
+			}
+			else if(s_EnvelopeEditorButtonUsed == 0)
+			{
+				if(Ui()->DoDoubleClickLogic(&s_EnvelopeEditorId))
 				{
 					// add point
 					float Time = ScreenToEnvelopeX(View, Ui()->MouseX());
@@ -6462,14 +6472,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						RemoveTimeOffsetEnvelope(pEnvelope);
 					m_Map.OnModify();
 				}
-				else if(s_Operation != EEnvelopeEditorOp::OP_BOX_SELECT && !Input()->ModifierIsPressed())
-				{
-					static int s_BoxSelectId = 0;
-					Ui()->SetActiveItem(&s_BoxSelectId);
-					s_Operation = EEnvelopeEditorOp::OP_BOX_SELECT;
-					s_MouseXStart = Ui()->MouseX();
-					s_MouseYStart = Ui()->MouseY();
-				}
+				s_EnvelopeEditorButtonUsed = -1;
 			}
 
 			m_ShowEnvelopePreview = SHOWENV_SELECTED;

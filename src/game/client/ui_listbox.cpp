@@ -93,7 +93,6 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	m_ListBoxRowHeight = RowHeight;
 	m_ListBoxNumItems = NumItems;
 	m_ListBoxItemsPerRow = ItemsPerRow;
-	m_ListBoxDoneEvents = false;
 	m_ListBoxItemActivated = false;
 	m_ListBoxItemSelected = false;
 
@@ -174,13 +173,11 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, float CornerRa
 		ItemClicked = false;
 
 	// process input, regard selected index
-	if(m_ListBoxSelectedIndex == ThisItemIndex)
+	if(m_ListBoxNewSelected == ThisItemIndex)
 	{
-		if(m_Active && !m_ListBoxDoneEvents)
+		if(m_Active)
 		{
-			m_ListBoxDoneEvents = true;
-
-			if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || (ItemClicked && Input()->MouseDoubleClick()))
+			if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || (ItemClicked && Ui()->DoDoubleClickLogic(pId)))
 			{
 				m_ListBoxItemActivated = true;
 				Ui()->SetActiveItem(nullptr);
