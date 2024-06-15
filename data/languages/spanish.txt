@@ -1863,10 +1863,10 @@ Always show other players' hook collision lines
 == Siempre mostrar la línea de colisión del gancho de otros jugadores
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 Tee
-== 
+== Tee
 
 Show only chat messages from team members
-== 
+== Mostrar solo los mensajes de miembros del equipo
