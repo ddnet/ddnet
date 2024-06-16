@@ -273,9 +273,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 		FontSize = 16.0f;
 	}
 
-	const float ScoreOffset = Scoreboard.x + 10.0f + 10.0f;
+	const float ScoreOffset = Scoreboard.x + 40.0f;
 	const float ScoreLength = TextRender()->TextWidth(FontSize, TimeScore ? "00:00:00" : "99999");
-	const float TeeOffset = ScoreOffset + ScoreLength + 15.0f;
+	const float TeeOffset = ScoreOffset + ScoreLength + 20.0f;
 	const float TeeLength = 60.0f * TeeSizeMod;
 	const float NameOffset = TeeOffset + TeeLength;
 	const float NameLength = 300.0f - TeeLength;
@@ -302,8 +302,12 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	// render player entries
 	int CountRendered = 0;
 	int PrevDDTeam = -1;
+	int CurrentDDTeamSize = 0;
 
 	char aBuf[64];
+	int MaxTeamSize = m_pClient->Config()->m_SvMaxTeamSize;
+	float TeamStartY = 0;
+
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// make sure that we render the correct team
@@ -350,30 +354,42 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			const ColorRGBA Color = GameClient()->GetDDTeamColor(DDTeam).WithAlpha(0.5f);
 			int TeamRectCorners = 0;
 			if(PrevDDTeam != DDTeam)
+			{
 				TeamRectCorners |= IGraphics::CORNER_T;
+				TeamStartY = Row.y;
+			}
 			if(NextDDTeam != DDTeam)
 				TeamRectCorners |= IGraphics::CORNER_B;
 			RowAndSpacing.Draw(Color, TeamRectCorners, RoundRadius);
 
+			CurrentDDTeamSize++;
+
 			if(NextDDTeam != DDTeam)
 			{
 				const float TeamFontSize = FontSize / 1.5f;
+
 				if(NumPlayers > 8)
 				{
 					if(DDTeam == TEAM_SUPER)
 						str_copy(aBuf, Localize("Super"));
-					else
+					else if(CurrentDDTeamSize <= 1)
 						str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
-					TextRender()->Text(Row.x, Row.y + Row.h / 2.0f - TeamFontSize / 2.0f, TeamFontSize, aBuf);
+					else
+						str_format(aBuf, sizeof(aBuf), Localize("%d\n(%d/%d)", "Team and size"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
+					TextRender()->Text(Row.x, TeamStartY + Row.h / 2.0f - TeamFontSize / 2.0f, TeamFontSize, aBuf);
 				}
 				else
 				{
 					if(DDTeam == TEAM_SUPER)
 						str_copy(aBuf, Localize("Super"));
+					else if(CurrentDDTeamSize > 1)
+						str_format(aBuf, sizeof(aBuf), Localize("Team %d (%d/%d)"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
 					else
 						str_format(aBuf, sizeof(aBuf), Localize("Team %d"), DDTeam);
 					TextRender()->Text(Row.x + Row.w / 2.0f - TextRender()->TextWidth(TeamFontSize, aBuf) / 2.0f + 10.0f, Row.y + Row.h, TeamFontSize, aBuf);
 				}
+
+				CurrentDDTeamSize = 0;
 			}
 		}
 		PrevDDTeam = DDTeam;
@@ -383,9 +399,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			(GameClient()->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW && pInfo->m_Local) ||
 			(GameClient()->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientId == GameClient()->m_Snap.m_SpecInfo.m_SpectatorId))
 		{
-			CUIRect Highlight;
-			Row.VMargin(10.0f, &Highlight);
-			Highlight.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, RoundRadius);
+			Row.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, RoundRadius);
 		}
 
 		// score
