@@ -23,6 +23,9 @@ void CMapSounds::OnMapLoad()
 
 	Clear();
 
+	if(!Sound()->IsSoundEnabled())
+		return;
+
 	// load samples
 	int Start;
 	pMap->GetType(MAPITEMTYPE_SOUND, &Start, &m_Count);
@@ -64,7 +67,6 @@ void CMapSounds::OnMapLoad()
 	}
 
 	// enqueue sound sources
-	m_vSourceQueue.clear();
 	for(int g = 0; g < Layers()->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = Layers()->GetGroup(g);
@@ -239,6 +241,7 @@ void CMapSounds::OnRender()
 void CMapSounds::Clear()
 {
 	// unload all samples
+	m_vSourceQueue.clear();
 	for(int i = 0; i < m_Count; i++)
 	{
 		Sound()->UnloadSample(m_aSounds[i]);
