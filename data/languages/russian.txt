@@ -1840,7 +1840,7 @@ Player info change cooldown
 == Кулдаун смены информации об игроке
 
 Tee
-== Ти
+== Tee
 
 Always show chat
 == Всегда показывать чат
