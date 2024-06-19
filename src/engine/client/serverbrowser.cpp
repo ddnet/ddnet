@@ -484,22 +484,26 @@ void CServerBrowser::Filter()
 
 				const char *pStr = g_Config.m_BrFilterString;
 				char aFilterStr[sizeof(g_Config.m_BrFilterString)];
+				char aFilterStrTrimmed[sizeof(g_Config.m_BrFilterString)];
 				while((pStr = str_next_token(pStr, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aFilterStr, sizeof(aFilterStr))))
 				{
-					if(aFilterStr[0] == '\0')
+					str_copy(aFilterStrTrimmed, str_utf8_skip_whitespaces(aFilterStr));
+					str_utf8_trim_right(aFilterStrTrimmed);
+
+					if(aFilterStrTrimmed[0] == '\0')
 					{
 						continue;
 					}
 					auto MatchesFn = matchesPart;
-					const int FilterLen = str_length(aFilterStr);
-					if(aFilterStr[0] == '"' && aFilterStr[FilterLen - 1] == '"')
+					const int FilterLen = str_length(aFilterStrTrimmed);
+					if(aFilterStrTrimmed[0] == '"' && aFilterStrTrimmed[FilterLen - 1] == '"')
 					{
-						aFilterStr[FilterLen - 1] = '\0';
+						aFilterStrTrimmed[FilterLen - 1] = '\0';
 						MatchesFn = matchesExactly;
 					}
 
 					// match against server name
-					if(MatchesFn(Info.m_aName, aFilterStr))
+					if(MatchesFn(Info.m_aName, aFilterStrTrimmed))
 					{
 						Info.m_QuickSearchHit |= IServerBrowser::QUICK_SERVERNAME;
 					}
@@ -507,8 +511,8 @@ void CServerBrowser::Filter()
 					// match against players
 					for(int p = 0; p < minimum(Info.m_NumClients, (int)MAX_CLIENTS); p++)
 					{
-						if(MatchesFn(Info.m_aClients[p].m_aName, aFilterStr) ||
-							MatchesFn(Info.m_aClients[p].m_aClan, aFilterStr))
+						if(MatchesFn(Info.m_aClients[p].m_aName, aFilterStrTrimmed) ||
+							MatchesFn(Info.m_aClients[p].m_aClan, aFilterStrTrimmed))
 						{
 							if(g_Config.m_BrFilterConnectingPlayers &&
 								str_comp(Info.m_aClients[p].m_aName, "(connecting)") == 0 &&
@@ -522,7 +526,7 @@ void CServerBrowser::Filter()
 					}
 
 					// match against map
-					if(MatchesFn(Info.m_aMap, aFilterStr))
+					if(MatchesFn(Info.m_aMap, aFilterStrTrimmed))
 					{
 						Info.m_QuickSearchHit |= IServerBrowser::QUICK_MAPNAME;
 					}
@@ -536,36 +540,40 @@ void CServerBrowser::Filter()
 			{
 				const char *pStr = g_Config.m_BrExcludeString;
 				char aExcludeStr[sizeof(g_Config.m_BrExcludeString)];
+				char aExcludeStrTrimmed[sizeof(g_Config.m_BrExcludeString)];
 				while((pStr = str_next_token(pStr, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aExcludeStr, sizeof(aExcludeStr))))
 				{
-					if(aExcludeStr[0] == '\0')
+					str_copy(aExcludeStrTrimmed, str_utf8_skip_whitespaces(aExcludeStr));
+					str_utf8_trim_right(aExcludeStrTrimmed);
+
+					if(aExcludeStrTrimmed[0] == '\0')
 					{
 						continue;
 					}
 					auto MatchesFn = matchesPart;
-					const int FilterLen = str_length(aExcludeStr);
-					if(aExcludeStr[0] == '"' && aExcludeStr[FilterLen - 1] == '"')
+					const int FilterLen = str_length(aExcludeStrTrimmed);
+					if(aExcludeStrTrimmed[0] == '"' && aExcludeStrTrimmed[FilterLen - 1] == '"')
 					{
-						aExcludeStr[FilterLen - 1] = '\0';
+						aExcludeStrTrimmed[FilterLen - 1] = '\0';
 						MatchesFn = matchesExactly;
 					}
 
 					// match against server name
-					if(MatchesFn(Info.m_aName, aExcludeStr))
+					if(MatchesFn(Info.m_aName, aExcludeStrTrimmed))
 					{
 						Filtered = true;
 						break;
 					}
 
 					// match against map
-					if(MatchesFn(Info.m_aMap, aExcludeStr))
+					if(MatchesFn(Info.m_aMap, aExcludeStrTrimmed))
 					{
 						Filtered = true;
 						break;
 					}
 
 					// match against gametype
-					if(MatchesFn(Info.m_aGameType, aExcludeStr))
+					if(MatchesFn(Info.m_aGameType, aExcludeStrTrimmed))
 					{
 						Filtered = true;
 						break;
