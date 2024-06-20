@@ -2037,7 +2037,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Language"),
 		Localize("General"),
 		Localize("Player"),
-		Localize("Tee"),
+		Localize("Skin"),
 		Localize("Appearance"),
 		Localize("Controls"),
 		Localize("Graphics"),
