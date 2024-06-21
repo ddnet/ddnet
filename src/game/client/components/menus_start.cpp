@@ -263,13 +263,11 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 	else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
 	{
-		CUIRect ProgressBar, Percent;
-		Part.VSplitLeft(100.0f, &ProgressBar, &Percent);
+		CUIRect ProgressBar;
+		Part.VSplitLeft(100.0f, &ProgressBar, nullptr);
 		ProgressBar.y += 2.0f;
 		ProgressBar.HMargin(1.0f, &ProgressBar);
-		ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
-		ProgressBar.w = clamp((float)Updater()->GetCurrentPercent(), 10.0f, 100.0f);
-		ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+		Ui()->RenderProgressBar(ProgressBar, Updater()->GetCurrentPercent() / 100.0f);
 	}
 #elif defined(CONF_INFORM_UPDATE)
 	if(str_comp(Client()->LatestVersion(), "0") != 0)

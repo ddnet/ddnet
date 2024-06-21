@@ -1915,9 +1915,7 @@ void CMenus::RenderPopupLoading(CUIRect Screen)
 		Box.HSplitTop(20.0f, nullptr, &Box);
 		Box.HSplitTop(24.0f, &ProgressBar, &Box);
 		ProgressBar.VMargin(20.0f, &ProgressBar);
-		ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
-		ProgressBar.w = maximum(10.0f, (ProgressBar.w * Client()->MapDownloadAmount()) / Client()->MapDownloadTotalsize());
-		ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+		Ui()->RenderProgressBar(ProgressBar, Client()->MapDownloadAmount() / (float)Client()->MapDownloadTotalsize());
 	}
 
 	CUIRect Button;
