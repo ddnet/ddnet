@@ -20,5 +20,5 @@ void CGameControllerITDM::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerTDM::OnCharacterSpawn(pChr);
 
 	// give default weapons
-	pChr->GiveWeapon(WEAPON_LASER, false, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);
+	pChr->GiveWeapon(WEAPON_LASER, false, -1);
 }

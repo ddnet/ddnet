@@ -3,6 +3,7 @@
 #include <engine/shared/config.h>
 #include <game/collision.h>
 #include <game/generated/client_data.h>
+#include <game/generated/protocol.h>
 #include <game/mapitems.h>
 
 #include "character.h"
@@ -1209,7 +1210,8 @@ void CCharacter::ResetPrediction()
 	for(int w = 0; w < NUM_WEAPONS; w++)
 	{
 		SetWeaponGot(w, false);
-		SetWeaponAmmo(w, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);
+		if(w == WEAPON_GRENADE)
+			SetWeaponAmmo(w, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);
 	}
 	if(m_Core.HookedPlayer() >= 0)
 	{
