@@ -1551,7 +1551,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				{
 					str_copy(g_Config.m_UiServerAddress, Friend.ServerInfo()->m_aAddress);
 					m_ServerBrowserShouldRevealSelection = true;
-					if(Input()->MouseDoubleClick())
+					if(Ui()->DoDoubleClickLogic(Friend.ListItemId()))
 					{
 						Connect(g_Config.m_UiServerAddress);
 					}

@@ -241,7 +241,7 @@ Mute when not active
 == Aktif değilken sessizleştir
 
 Name
-== Sunucu ismi
+== İsim
 
 Next weapon
 == Sonraki silah
@@ -806,9 +806,6 @@ DDNet
 
 DDNet Client needs to be restarted to complete update!
 == Güncellemenin tamamlanabilmesi için oyunun yeniden başlatılması lazım!
-
-Use DDRace Scoreboard
-== DDRace skor tablosunu kulan
 
 Show score
 == Skoru göster
@@ -1854,3 +1851,12 @@ Always show other players' hook collision lines
 [Demo details]
 map not included
 == harita dahil edilmemiş
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== Sadece takım üyelerinin mesajlarını göster

@@ -1465,6 +1465,9 @@ Show names in chat in team colors
 Show only chat messages from friends
 == Показувати лише повідомлення від друзів
 
+Show only chat messages from team members
+== Показувати лише повідомлення від членів команди
+
 Show other players' hook collision lines
 == Показувати лінії зіткнення гака інших гравців
 
@@ -1745,9 +1748,6 @@ Uploading map data to GPU
 
 Use current map as background
 == Використовувати поточну мапу як фон
-
-Use DDRace Scoreboard
-== Використовувати табло DDRace
 
 Use high DPI
 == Високий DPI

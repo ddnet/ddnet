@@ -66,7 +66,6 @@ CInput::CInput()
 	m_InputCounter = 1;
 	m_InputGrabbed = false;
 
-	m_MouseDoubleClick = false;
 	m_MouseFocus = true;
 
 	m_pClipboardText = nullptr;
@@ -307,16 +306,6 @@ bool CInput::NativeMousePressed(int Index)
 	return (i & SDL_BUTTON(Index)) != 0;
 }
 
-bool CInput::MouseDoubleClick()
-{
-	if(m_MouseDoubleClick)
-	{
-		m_MouseDoubleClick = false;
-		return true;
-	}
-	return false;
-}
-
 const char *CInput::GetClipboardText()
 {
 	SDL_free(m_pClipboardText);
@@ -364,7 +353,6 @@ void CInput::Clear()
 	mem_zero(m_aInputState, sizeof(m_aInputState));
 	mem_zero(m_aInputCount, sizeof(m_aInputCount));
 	m_vInputEvents.clear();
-	m_MouseDoubleClick = false;
 }
 
 float CInput::GetUpdateTime() const
@@ -743,13 +731,6 @@ int CInput::Update()
 				Scancode = KEY_MOUSE_8;
 			if(Event.button.button == 9)
 				Scancode = KEY_MOUSE_9;
-			if(Event.button.button == SDL_BUTTON_LEFT)
-			{
-				if(Event.button.clicks % 2 == 0)
-					m_MouseDoubleClick = true;
-				if(Event.button.clicks == 1)
-					m_MouseDoubleClick = false;
-			}
 			break;
 
 		case SDL_MOUSEWHEEL:

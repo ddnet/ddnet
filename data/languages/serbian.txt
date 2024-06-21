@@ -832,9 +832,6 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == Potrebno je ponovo pokrenuti DDNet klijent da biste dovršili ažuriranje!
 
-Use DDRace Scoreboard
-== Koristi DDRace tabelu rezultata
-
 Show score
 == Prikaži bodove
 
@@ -1733,6 +1730,9 @@ Videos directory
 Video was saved to '%s'
 == 
 
+%d/%d KiB (%.1f KiB/s)
+== 
+
 No login required
 == 
 
@@ -1796,6 +1796,9 @@ Deactivate all
 Player info change cooldown
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1803,6 +1806,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size

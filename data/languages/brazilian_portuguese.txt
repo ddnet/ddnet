@@ -32,6 +32,7 @@
 # Rafael Fontenelle   2023-12-05 17:01:00
 # Rafael Fontenelle   2024-03-02 16:20:00
 # Rafael Fontenelle   2024-04-30 14:52:00
+# Rafael Fontenelle   2024-06-11 22:43:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -686,9 +687,6 @@ New random timeout code
 
 Suicides
 == Suicídios
-
-Use DDRace Scoreboard
-== Usar o placar do DDRace
 
 Record demo
 == Gravar demo
@@ -1872,3 +1870,12 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Sempre mostrar linhas de colisão do gancho dos outros jogadores
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== Mostrar apenas mensagens de chat de membros do time

@@ -605,9 +605,6 @@ Team message
 Normal message
 == Wiadomość standardowa
 
-Use DDRace Scoreboard
-== Użyj tabeli wyników z DDRace
-
 Show kill messages
 == Pokazuj wiadomości śmierci
 
@@ -1214,23 +1211,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
 == Brak pamięci VRAM. Spróbuj usunąć niestandardowe zasoby (skiny, entities, itd.), szczególnie te z dużą rozdzielczością.
 
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== 
-
-[Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Wystąpił nieznany błąd. Spróbuj zmienić gfx_backend na OpenGL lub Vulkan w settings_ddnet.cfg w folderze konfiguracyjnym i spróbuj ponownie.
 
@@ -1305,9 +1285,6 @@ Enter Password
 NOT CONNECTED
 == NIE POŁĄCZONO
 
-Match %d of %d
-== 
-
 No results
 == Brak wyników
 
@@ -1316,9 +1293,6 @@ Lines %d - %d (%s)
 
 Locked
 == Zablokowane
-
-Following
-== 
 
 Loading commands…
 == Ładowanie komend…
@@ -1331,9 +1305,6 @@ Speed:
 
 Angle:
 == Kąt:
-
-Multi-view
-== Multi kamera
 
 Some map images could not be loaded. Check the local console for details.
 == Nie można załadować niektórych obrazów mapy. Sprawdź konsolę, aby poznać szczegóły.
@@ -1524,9 +1495,6 @@ Export demo cut
 Cut interval
 == Przedział cięcia
 
-Cut lenght
-== Długość cięcia
-
 Render cut to video
 == Wyeksportuj cięcie do pliku wideo
 
@@ -1536,24 +1504,14 @@ Please use a different filename
 Loading demo files
 == Ładowanie plików demo
 
-All combined
-== 
-
 No demo selected
 == Nie wybrano demo
-
-Folder Link
-== 
 
 Created
 == Utworzono
 
 Netversion
 == Wersja
-
-[Demo details]
-map not included
-== 
 
 Open the directory that contains the demo files
 == Otwórz katalog zawierający pliki demo
@@ -1650,9 +1608,6 @@ Axis
 Status
 == Status
 
-Aim bind
-== 
-
 Mouse
 == Mysz
 
@@ -1661,12 +1616,6 @@ Ingame mouse sens.
 
 UI mouse sens.
 == Czułość myszy w menu
-
-Reset controls
-== 
-
-Are you sure that you want to reset the controls to their defaults?
-== 
 
 Cancel
 == Anuluj
@@ -1691,9 +1640,6 @@ Show health, shields and ammo
 
 Show local time always
 == Pokazuj czas lokalny
-
-DDRace HUD
-== 
 
 Show client IDs in scoreboard
 == Pokazuj ID klienta w tabeli wyników
@@ -1847,6 +1793,65 @@ Loading race demo files
 
 Loading sound files
 == Ładowanie dźwięków
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+Match %d of %d
+== 
+
+Following
+== 
+
+Multi-View
+== 
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Cut length
+== 
+
+All combined
+== 
+
+Folder Link
+== 
+
+[Demo details]
+map not included
+== 
+
+Aim bind
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 
+
+Tee
+== 
+
+DDRace HUD
+== 
+
+Show only chat messages from team members
+== 
 
 Moved ingame
 == 

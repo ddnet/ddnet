@@ -296,71 +296,67 @@ void CEditor::RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, 
 SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree, bool IsHex, int Corners, const ColorRGBA *pColor, bool ShowValue)
 {
 	// logic
-	static float s_Value;
+	static bool s_DidScroll = false;
+	static float s_ScrollValue = 0.0f;
 	static CLineInputNumber s_NumberInput;
-	static bool s_TextMode = false;
-	static void *s_pLastTextId = pId;
+	static int s_ButtonUsed = -1;
+	static void *s_pLastTextId = nullptr;
+
 	const bool Inside = Ui()->MouseInside(pRect);
 	const int Base = IsHex ? 16 : 10;
-	static bool s_Editing = false;
-	EEditState State = EEditState::EDITING;
 
-	if(Ui()->MouseButton(1) && Ui()->HotItem() == pId)
+	if(Ui()->HotItem() == pId && s_ButtonUsed >= 0 && !Ui()->MouseButton(s_ButtonUsed))
 	{
-		s_pLastTextId = pId;
-		s_TextMode = true;
 		Ui()->DisableMouseLock();
-		s_NumberInput.SetInteger(Current, Base);
-	}
-
-	if(Ui()->CheckActiveItem(pId))
-	{
-		if(!Ui()->MouseButton(0))
+		if(Ui()->CheckActiveItem(pId))
 		{
-			Ui()->DisableMouseLock();
 			Ui()->SetActiveItem(nullptr);
-			s_TextMode = false;
 		}
+		if(Inside && ((s_ButtonUsed == 0 && !s_DidScroll && Ui()->DoDoubleClickLogic(pId)) || s_ButtonUsed == 1))
+		{
+			s_pLastTextId = pId;
+			s_NumberInput.SetInteger(Current, Base);
+			s_NumberInput.SelectAll();
+		}
+		s_ButtonUsed = -1;
 	}
 
-	if(s_TextMode && s_pLastTextId == pId)
+	if(s_pLastTextId == pId)
 	{
 		str_copy(m_aTooltip, "Type your number");
-
+		Ui()->SetActiveItem(&s_NumberInput);
 		DoEditBox(&s_NumberInput, pRect, 10.0f, Corners);
 
-		Ui()->SetActiveItem(&s_NumberInput);
-
-		if(Input()->KeyIsPressed(KEY_RETURN) || Input()->KeyIsPressed(KEY_KP_ENTER) ||
-			((Ui()->MouseButton(1) || Ui()->MouseButton(0)) && !Inside))
+		if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || ((Ui()->MouseButtonClicked(1) || Ui()->MouseButtonClicked(0)) && !Inside))
 		{
 			Current = clamp(s_NumberInput.GetInteger(Base), Min, Max);
 			Ui()->DisableMouseLock();
 			Ui()->SetActiveItem(nullptr);
-			s_TextMode = false;
+			s_pLastTextId = nullptr;
 		}
 
 		if(Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 		{
 			Ui()->DisableMouseLock();
 			Ui()->SetActiveItem(nullptr);
-			s_TextMode = false;
+			s_pLastTextId = nullptr;
 		}
 	}
 	else
 	{
 		if(Ui()->CheckActiveItem(pId))
 		{
-			if(Ui()->MouseButton(0))
+			if(s_ButtonUsed == 0 && Ui()->MouseButton(0))
 			{
-				s_Value += Ui()->MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
+				s_ScrollValue += Ui()->MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
 
-				if(absolute(s_Value) >= Scale)
+				if(absolute(s_ScrollValue) >= Scale)
 				{
-					int Count = (int)(s_Value / Scale);
-					s_Value = std::fmod(s_Value, Scale);
+					int Count = (int)(s_ScrollValue / Scale);
+					s_ScrollValue = std::fmod(s_ScrollValue, Scale);
 					Current += Step * Count;
 					Current = clamp(Current, Min, Max);
+					s_DidScroll = true;
 
 					// Constrain to discrete steps
 					if(Count > 0)
@@ -369,23 +365,29 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 						Current = std::ceil(Current / (float)Step) * Step;
 				}
 			}
-			if(pToolTip && !s_TextMode)
+
+			if(pToolTip && s_pLastTextId != pId)
 				str_copy(m_aTooltip, pToolTip);
 		}
 		else if(Ui()->HotItem() == pId)
 		{
 			if(Ui()->MouseButton(0))
 			{
+				s_ButtonUsed = 0;
+				s_DidScroll = false;
+				s_ScrollValue = 0.0f;
 				Ui()->SetActiveItem(pId);
 				Ui()->EnableMouseLock(pId);
-				s_Value = 0;
 			}
-			if(pToolTip && !s_TextMode)
+			else if(Ui()->MouseButton(1))
+			{
+				s_ButtonUsed = 1;
+				Ui()->SetActiveItem(pId);
+			}
+
+			if(pToolTip && s_pLastTextId != pId)
 				str_copy(m_aTooltip, pToolTip);
 		}
-
-		if(Inside && !Ui()->MouseButton(0))
-			Ui()->SetHotItem(pId);
 
 		// render
 		char aBuf[128];
@@ -406,20 +408,24 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 		Ui()->DoLabel(pRect, aBuf, 10, TEXTALIGN_MC);
 	}
 
-	if(!s_TextMode)
-		s_NumberInput.Clear();
+	if(Inside && !Ui()->MouseButton(0) && !Ui()->MouseButton(1))
+		Ui()->SetHotItem(pId);
 
-	bool MouseLocked = Ui()->CheckMouseLock();
-	if((MouseLocked || s_TextMode) && !s_Editing)
+	static const void *s_pEditing = nullptr;
+	EEditState State = EEditState::NONE;
+	if(s_pEditing == pId)
+	{
+		State = EEditState::EDITING;
+	}
+	if(((Ui()->CheckActiveItem(pId) && Ui()->CheckMouseLock()) || s_pLastTextId == pId) && s_pEditing != pId)
 	{
 		State = EEditState::START;
-		s_Editing = true;
+		s_pEditing = pId;
 	}
-
-	if(!MouseLocked && !s_TextMode && s_Editing)
+	if(!Ui()->CheckMouseLock() && s_pLastTextId != pId && s_pEditing == pId)
 	{
 		State = EEditState::END;
-		s_Editing = false;
+		s_pEditing = nullptr;
 	}
 
 	return SEditResult<int>{State, Current};
@@ -3901,7 +3907,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 						Ui()->DoPopupMenu(&s_PopupGroupId, Ui()->MouseX(), Ui()->MouseY(), 145, 256, this, PopupGroup);
 					}
 
-					if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Input()->MouseDoubleClick())
+					if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Ui()->DoDoubleClickLogic(m_Map.m_vpGroups[g].get()))
 						m_Map.m_vpGroups[g]->m_Collapse ^= 1;
 
 					SetOperation(OP_NONE);
@@ -6328,8 +6334,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			ResetZoomEnvelope(pEnvelope, s_ActiveChannels);
 		}
 
-		static int s_EnvelopeEditorId = 0;
-
 		ColorRGBA aColors[] = {ColorRGBA(1, 0.2f, 0.2f), ColorRGBA(0.2f, 1, 0.2f), ColorRGBA(0.2f, 0.2f, 1), ColorRGBA(1, 1, 0.2f)};
 
 		CUIRect Button;
@@ -6383,6 +6387,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			m_Map.OnModify();
 		}
 
+		static int s_EnvelopeEditorId = 0;
+		static int s_EnvelopeEditorButtonUsed = -1;
 		const bool ShouldPan = s_Operation == EEnvelopeEditorOp::OP_NONE && (Ui()->MouseButton(2) || (Ui()->MouseButton(0) && Input()->ModifierIsPressed()));
 		if(m_pContainerPanned == &s_EnvelopeEditorId)
 		{
@@ -6433,7 +6439,17 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			// do stuff
 			if(Ui()->MouseButton(0))
 			{
-				if(Input()->MouseDoubleClick())
+				s_EnvelopeEditorButtonUsed = 0;
+				if(s_Operation != EEnvelopeEditorOp::OP_BOX_SELECT && !Input()->ModifierIsPressed())
+				{
+					s_Operation = EEnvelopeEditorOp::OP_BOX_SELECT;
+					s_MouseXStart = Ui()->MouseX();
+					s_MouseYStart = Ui()->MouseY();
+				}
+			}
+			else if(s_EnvelopeEditorButtonUsed == 0)
+			{
+				if(Ui()->DoDoubleClickLogic(&s_EnvelopeEditorId))
 				{
 					// add point
 					float Time = ScreenToEnvelopeX(View, Ui()->MouseX());
@@ -6456,14 +6472,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						RemoveTimeOffsetEnvelope(pEnvelope);
 					m_Map.OnModify();
 				}
-				else if(s_Operation != EEnvelopeEditorOp::OP_BOX_SELECT && !Input()->ModifierIsPressed())
-				{
-					static int s_BoxSelectId = 0;
-					Ui()->SetActiveItem(&s_BoxSelectId);
-					s_Operation = EEnvelopeEditorOp::OP_BOX_SELECT;
-					s_MouseXStart = Ui()->MouseX();
-					s_MouseYStart = Ui()->MouseY();
-				}
+				s_EnvelopeEditorButtonUsed = -1;
 			}
 
 			m_ShowEnvelopePreview = SHOWENV_SELECTED;

@@ -891,9 +891,6 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == 업데이트 완료를 위해 DDNet 클라이언트 재시작이 필요합니다!
 
-Use DDRace Scoreboard
-== DDRace 점수판 사용
-
 Show score
 == 점수 표시
 
@@ -1671,6 +1668,9 @@ Videos directory
 Video was saved to '%s'
 == 
 
+%d/%d KiB (%.1f KiB/s)
+== 
+
 No login required
 == 
 
@@ -1801,6 +1801,9 @@ Axis
 Graphics card
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1808,6 +1811,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size

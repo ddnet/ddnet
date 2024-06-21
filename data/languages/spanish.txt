@@ -814,9 +814,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == ¡El Cliente DDNet debe reiniciarse para completar la actualización!
 
-Use DDRace Scoreboard
-== Utilizar el marcador DDRace
-
 Show score
 == Mostrar puntaje
 
@@ -1864,3 +1861,12 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Siempre mostrar la línea de colisión del gancho de otros jugadores
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== Mostrar solo los mensajes de miembros del equipo

@@ -178,7 +178,7 @@ CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	static int s_aIds[(int)ELayerSoundsProp::NUM_PROPS] = {0};
 	int NewVal = 0;
 	auto [State, Prop] = m_pEditor->DoPropertiesWithState<ELayerSoundsProp>(pToolBox, aProps, s_aIds, &NewVal);
-	if(Prop != ELayerSoundsProp::PROP_NONE)
+	if(Prop != ELayerSoundsProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
 		m_pEditor->m_Map.OnModify();
 	}

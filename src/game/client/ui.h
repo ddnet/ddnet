@@ -331,6 +331,30 @@ private:
 	const CScrollRegion *m_pBecomingHotScrollRegion = nullptr;
 	bool m_ActiveItemValid = false;
 
+	int m_ActiveButtonLogicButton = -1;
+	int m_ActiveDraggableButtonLogicButton = -1;
+	class CDoubleClickState
+	{
+	public:
+		const void *m_pLastClickedId = nullptr;
+		float m_LastClickTime = -1.0f;
+		vec2 m_LastClickPos = vec2(-1.0f, -1.0f);
+	};
+	CDoubleClickState m_DoubleClickState;
+	const void *m_pLastEditingItem = nullptr;
+	float m_ActiveScrollbarOffset = 0.0f;
+	float m_ProgressSpinnerOffset = 0.0f;
+	class CValueSelectorState
+	{
+	public:
+		int m_Button = -1;
+		bool m_DidScroll = false;
+		float m_ScrollValue = 0.0f;
+		CLineInputNumber m_NumberInput;
+		const void *m_pLastTextId = nullptr;
+	};
+	CValueSelectorState m_ActiveValueSelectorState;
+
 	vec2 m_UpdatedMousePos = vec2(0.0f, 0.0f); // in window screen space
 	vec2 m_UpdatedMouseDelta = vec2(0.0f, 0.0f); // in window screen space
 	vec2 m_MousePos = vec2(0.0f, 0.0f); // in gui space
@@ -348,8 +372,6 @@ private:
 
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
-
-	bool m_ValueSelectorTextMode = false;
 
 	struct SPopupMenu
 	{
@@ -439,7 +461,6 @@ public:
 	vec2 UpdatedMouseDelta() const { return m_UpdatedMouseDelta; }
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
 	int MouseButtonClicked(int Index) const { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
-	int MouseButtonReleased(int Index) const { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
 	bool CheckMouseLock()
 	{
 		if(m_MouseLock && ActiveItem() != m_pMouseLockId)
@@ -513,6 +534,7 @@ public:
 
 	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect);
 	int DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
+	bool DoDoubleClickLogic(const void *pId);
 	EEditState DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, float *pY);
 	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp = false, float ScrollSpeed = 10.0f) const;
 	static vec2 CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, const float *pBiggestCharHeight = nullptr);
@@ -565,8 +587,6 @@ public:
 	// value selector
 	SEditResult<int64_t> DoValueSelectorWithState(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
 	int64_t DoValueSelector(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
-	bool IsValueSelectorTextMode() const { return m_ValueSelectorTextMode; }
-	void SetValueSelectorTextMode(bool TextMode) { m_ValueSelectorTextMode = TextMode; }
 
 	// scrollbars
 	enum

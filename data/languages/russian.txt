@@ -14,11 +14,12 @@
 #	Vy0x2		2021-06-08 15:48:25
 #	Anime.pdf	2021-06-13 13:08:50
 #	banan		2022-06-12 11:36:50
-#	ban			2023-01-5 10:22:50
+#	ban			2023-01-05 10:22:50
 #	unban		2023-03-10 21:50:50
 #	eblan		2023-08-07 14:27:00
-#	kaban		2023-9-21 19:00:00
+#	kaban		2023-09-21 19:00:00
 #	ByFox		2023-11-14 11:24:00
+#	Sedonya		2024-06-20 03:18:10
 ##### /authors #####
 
 ##### translated strings #####
@@ -499,9 +500,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Звуки выделенных сообщений
-
-Use DDRace Scoreboard
-== Использовать DDRace табло счета
 
 Show kill messages
 == Показывать сообщения о смерти
@@ -1747,7 +1745,7 @@ Saving settings to '%s' failed
 == Не получилось сохранить настройки в '%s'
 
 Searching
-== В поиске
+== Поиск
 
 Enter Username
 == Введите имя
@@ -1777,7 +1775,7 @@ Are you sure that you want to restart?
 == Вы уверены, что хотите начать заново?
 
 There's an unsaved map in the editor, you might want to save it.
-== Вы не сохранили последнюю отредактированную карту, возможно, вы хотите ее сохранить.
+== В редакторе есть несохраненная карта, возможно, вы хотите её сохранить.
 
 Continue anyway?
 == Все равно продолжить?
@@ -1831,31 +1829,42 @@ Loading…
 == Загрузка…
 
 Loading demo file from storage
-== 
+== Загрузка демо из файлового хранилища
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d КиБ (%.1f КиБ/с)
 
 No login required
-== 
+== Без логина
 
 Player info change cooldown
-== 
+== Задержка смены информации об игроке
+
+Tee
+== Ти
 
 Always show chat
-== 
+== Всегда показывать чат
+
+Show only chat messages from team members
+== Показывать сообщения только от членов команды
 
 Show friend mark (♥) in name plates
-== 
+== Показывать знак дружбы (♥) в имени друга
 
 Show hook strength icon indicator
-== 
+== Показывать индикатор вида крюка
 
 Show hook strength number indicator
-== 
+== Показывать индикатор номера вида крюка
 
 Show own player's hook collision line
-== 
+== Показывать собственную линию коллизии крюка
 
 Always show own player's hook collision line
-== 
+== Всегда показывать собственную линию коллизии крюка
 
 Always show other players' hook collision lines
-== 
+== Всегда показывать линию коллизии крюка других игроков
+
+#### need translate ####

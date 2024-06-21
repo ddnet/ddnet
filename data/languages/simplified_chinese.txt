@@ -39,6 +39,7 @@
 # 2024-01-15 By
 # 2024-03-03 Bamcane
 # 2024-04-21 By
+# 2024-06-10 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -416,7 +417,7 @@ Show name plates
 == 显示昵称
 
 Show only chat messages from friends
-== 只显示好友消息
+== 只显示好友聊天消息
 
 Sound
 == 声音
@@ -603,9 +604,6 @@ LAN
 
 Name plates size
 == 昵称大小
-
-Use DDRace Scoreboard
-== 使用 DDRace 计分板
 
 Show score
 == 显示分数
@@ -1885,3 +1883,12 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == 始终显示其他玩家的钩索辅助线
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== 只显示队伍聊天消息

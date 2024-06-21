@@ -9,6 +9,8 @@
 #include <base/system.h>
 #include <engine/shared/config.h>
 
+#include <limits>
+
 const char *CTuningParams::ms_apNames[] =
 	{
 #define MACRO_TUNING_PARAM(Name, ScriptName, Value, Description) #ScriptName,
@@ -62,6 +64,8 @@ float CTuningParams::GetWeaponFireDelay(int Weapon) const
 	default: dbg_assert(false, "invalid weapon"); return 0.0f; // this value should not be reached
 	}
 }
+
+static_assert(std::numeric_limits<char>::is_signed, "char must be signed for StrToInts to work correctly");
 
 void StrToInts(int *pInts, size_t NumInts, const char *pStr)
 {
