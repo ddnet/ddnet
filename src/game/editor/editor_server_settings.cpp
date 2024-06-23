@@ -84,7 +84,10 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			s_CommandSelectedIndex = m_Map.m_vSettings.size() - 1;
 		if(s_CommandSelectedIndex >= 0)
 			m_SettingsCommandInput.Set(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand);
+		else
+			m_SettingsCommandInput.Clear();
 		m_Map.OnModify();
+		m_MapSettingsCommandContext.Update();
 		s_ListBox.ScrollToSelected();
 	}
 
