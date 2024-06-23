@@ -1631,7 +1631,7 @@ void CHud::RenderRecord()
 	if(m_ServerRecord > 0.0f)
 	{
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), Localize("Server best:"));
+		str_format(aBuf, sizeof(aBuf), Localize("Server best:"), "");
 		TextRender()->Text(5, 75, 6, aBuf, -1.0f);
 		char aTime[32];
 		str_time_float(m_ServerRecord, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
@@ -1643,7 +1643,7 @@ void CHud::RenderRecord()
 	if(PlayerRecord > 0.0f)
 	{
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), Localize("Personal best:"));
+		str_format(aBuf, sizeof(aBuf), Localize("Personal best:"), "");
 		TextRender()->Text(5, 82, 6, aBuf, -1.0f);
 		char aTime[32];
 		str_time_float(PlayerRecord, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
