@@ -206,7 +206,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 #if defined(CONF_AUTOUPDATE)
 	char aBuf[64];
 	CUIRect Part;
-	int State = Updater()->GetCurrentState();
+	IUpdater::EUpdaterState State = Updater()->GetCurrentState();
 	bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
 	if(State == IUpdater::CLEAN && NeedUpdate)
 	{

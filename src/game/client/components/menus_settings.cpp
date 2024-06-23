@@ -3402,7 +3402,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 #if defined(CONF_AUTOUPDATE)
 	{
 		bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
-		int State = Updater()->GetCurrentState();
+		IUpdater::EUpdaterState State = Updater()->GetCurrentState();
 
 		// Update Button
 		char aBuf[256];
