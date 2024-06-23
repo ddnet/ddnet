@@ -308,7 +308,7 @@ int CHttpRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, d
 	CHttpRequest *pTask = (CHttpRequest *)pUser;
 	pTask->m_Current.store(DlCurr, std::memory_order_relaxed);
 	pTask->m_Size.store(DlTotal, std::memory_order_relaxed);
-	pTask->m_Progress.store((100 * DlCurr) / (DlTotal ? DlTotal : 1), std::memory_order_relaxed);
+	pTask->m_Progress.store(DlTotal == 0.0 ? 0 : (100 * DlCurr) / DlTotal, std::memory_order_relaxed);
 	pTask->OnProgress();
 	return pTask->m_Abort ? -1 : 0;
 }
