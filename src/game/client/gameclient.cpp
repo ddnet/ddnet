@@ -265,20 +265,23 @@ void CGameClient::OnInit()
 	Client()->UpdateAndSwap();
 
 	const char *pLoadingDDNetCaption = Localize("Loading DDNet Client");
+	const char *pLoadingMessageComponents = Localize("Initializing components");
+	const char *pLoadingMessageComponentsSpecial = Localize("Why are you slowmo replaying to read this?");
+	char aLoadingMessage[256];
 
 	// init all components
-	int SkippedComps = 0;
-	int CompCounter = 0;
-	for(int i = m_vpAll.size() - 1; i >= 0; --i)
+	int SkippedComps = 1;
+	int CompCounter = 1;
+	const int NumComponents = ComponentCount();
+	for(int i = NumComponents - 1; i >= 0; --i)
 	{
 		m_vpAll[i]->OnInit();
 		// try to render a frame after each component, also flushes GPU uploads
 		if(m_Menus.IsInit())
 		{
-			char aBuff[256];
-			str_format(aBuff, std::size(aBuff), "%s [%d/%d]", CompCounter == 40 ? Localize("Why are you slowmo replaying to read this?") : Localize("Initializing components"), (CompCounter + 1), (int)ComponentCount());
-			m_Menus.RenderLoading(pLoadingDDNetCaption, aBuff, 1 + SkippedComps);
-			SkippedComps = 0;
+			str_format(aLoadingMessage, std::size(aLoadingMessage), "%s [%d/%d]", CompCounter == NumComponents ? pLoadingMessageComponentsSpecial : pLoadingMessageComponents, CompCounter, NumComponents);
+			m_Menus.RenderLoading(pLoadingDDNetCaption, aLoadingMessage, SkippedComps);
+			SkippedComps = 1;
 		}
 		else
 		{
@@ -293,6 +296,7 @@ void CGameClient::OnInit()
 	m_HudSkinLoaded = false;
 
 	// setup load amount, load textures
+	const char *pLoadingMessageAssets = Localize("Initializing assets");
 	for(int i = 0; i < g_pData->m_NumImages; i++)
 	{
 		if(i == IMAGE_GAME)
@@ -309,7 +313,7 @@ void CGameClient::OnInit()
 			g_pData->m_aImages[i].m_Id = IGraphics::CTextureHandle();
 		else
 			g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL);
-		m_Menus.RenderLoading(pLoadingDDNetCaption, Localize("Initializing assets"), 1);
+		m_Menus.RenderLoading(pLoadingDDNetCaption, pLoadingMessageAssets, 1);
 	}
 
 	m_GameWorld.m_pCollision = Collision();
