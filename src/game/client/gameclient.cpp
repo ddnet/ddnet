@@ -23,6 +23,7 @@
 #include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
 
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 #include <base/vmath.h>
@@ -203,6 +204,8 @@ void CGameClient::OnConsoleInit()
 
 void CGameClient::OnInit()
 {
+	const int64_t OnInitStart = time_get();
+
 	Client()->SetLoadingCallback([this](IClient::ELoadingCallbackDetail Detail) {
 		const char *pTitle;
 		if(Detail == IClient::LOADING_CALLBACK_DETAIL_DEMO || DemoPlayer()->IsPlaying())
@@ -235,8 +238,6 @@ void CGameClient::OnInit()
 	// propagate pointers
 	m_UI.Init(Kernel());
 	m_RenderTools.Init(Graphics(), TextRender());
-
-	int64_t Start = time_get();
 
 	if(GIT_SHORTREV_HASH)
 	{
@@ -345,11 +346,6 @@ void CGameClient::OnInit()
 		}
 	}
 
-	int64_t End = time_get();
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End - Start) * 1000) / (float)time_freq());
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "gameclient", aBuf);
-
 	m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
 
 	// Aggressively try to grab window again since some Windows users report
@@ -368,6 +364,8 @@ void CGameClient::OnInit()
 		int Size = m_vpAll[i]->Sizeof();
 		pChecksum->m_aComponentsChecksum[i] = Size;
 	}
+
+	log_trace("gameclient", "initialization finished after %.2fms", (time_get() - OnInitStart) * 1000.0f / (float)time_freq());
 }
 
 void CGameClient::OnUpdate()
