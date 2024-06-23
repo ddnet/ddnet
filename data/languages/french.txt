@@ -1876,3 +1876,7 @@ Entities background color
 
 Moved ingame
 == Déplacé en jeu
+
+[Spectating]
+Following %s
+== 

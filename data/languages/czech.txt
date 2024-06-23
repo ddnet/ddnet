@@ -1855,3 +1855,7 @@ Tee
 
 Show only chat messages from team members
 == Zobrazit pouze zprávy od členů týmu
+
+[Spectating]
+Following %s
+== 

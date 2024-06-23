@@ -1868,3 +1868,7 @@ Tee
 
 Show only chat messages from team members
 == Nur Nachrichten von Teammitgliedern anzeigen
+
+[Spectating]
+Following %s
+== 

@@ -1881,3 +1881,7 @@ Tee
 
 Show only chat messages from team members
 == 只顯示隊伍聊天訊息
+
+[Spectating]
+Following %s
+== 

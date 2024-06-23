@@ -1854,3 +1854,7 @@ Tee
 
 Show only chat messages from team members
 == Visa bara chattmeddelanden från lagkamrater
+
+[Spectating]
+Following %s
+== 

@@ -1848,3 +1848,7 @@ Tee
 
 Show only chat messages from team members
 == Yalnız komanda üzvlərinin mesajlarını göstərin
+
+[Spectating]
+Following %s
+== 

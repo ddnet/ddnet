@@ -1835,6 +1835,10 @@ Loading sound files
 Moved ingame
 == Liikui pelissä
 
+[Spectating]
+Following %s
+== 
+
 %d/%d KiB (%.1f KiB/s)
 == 
 

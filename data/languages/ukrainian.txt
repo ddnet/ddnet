@@ -1852,3 +1852,7 @@ Zoom out
 == Віддалити
 
 ##### needs translation #####
+
+[Spectating]
+Following %s
+== 

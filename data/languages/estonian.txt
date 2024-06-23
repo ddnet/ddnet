@@ -1844,6 +1844,10 @@ Always show other players' hook collision lines
 Net
 == Võrk
 
+[Spectating]
+Following %s
+== 
+
 %d/%d KiB (%.1f KiB/s)
 == 
 

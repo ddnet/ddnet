@@ -1867,3 +1867,7 @@ Always show other players' hook collision lines
 == Всегда показывать линию коллизии крюка других игроков
 
 #### need translate ####
+
+[Spectating]
+Following %s
+== 

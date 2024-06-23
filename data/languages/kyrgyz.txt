@@ -663,6 +663,10 @@ Angle:
 Multi-View
 == 
 
+[Spectating]
+Following %s
+== 
+
 Server best:
 == 
 

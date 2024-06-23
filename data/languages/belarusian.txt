@@ -518,6 +518,7 @@ LAN
 Name plates size
 == Памер таблічак з імёнамі
 
+[Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
 == Не атрымалася выканаць падпампоўку кадравых буфераў. Паспрабуйце абнавіць драйверы відэакарты.
 
@@ -1767,6 +1768,10 @@ Following
 == 
 
 Loading commands…
+== 
+
+[Spectating]
+Following %s
 == 
 
 Press a key…
