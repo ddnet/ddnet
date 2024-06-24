@@ -170,6 +170,7 @@ protected:
 
 	bool m_JoinTutorial = false;
 	bool m_CreateDefaultFavoriteCommunities = false;
+	bool m_ForceRefreshLanPage = false;
 
 	char m_aNextServer[256];
 

@@ -155,6 +155,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			if(str_find(aBuf, "/") == 0 || fs_is_file(aBuf))
 			{
 				m_ServerProcess.m_Process = shell_execute(aBuf, EShellExecuteWindowState::BACKGROUND);
+				m_ForceRefreshLanPage = true;
 			}
 			else
 			{
@@ -285,8 +286,8 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 
 	if(NewPage != -1)
 	{
-		m_MenuPage = NewPage;
 		m_ShowStart = false;
+		SetMenuPage(NewPage);
 	}
 }
 
@@ -297,6 +298,7 @@ void CMenus::KillServer()
 		if(kill_process(m_ServerProcess.m_Process))
 		{
 			m_ServerProcess.m_Process = INVALID_PROCESS;
+			m_ForceRefreshLanPage = true;
 		}
 	}
 }
