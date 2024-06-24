@@ -2354,9 +2354,15 @@ void CMenus::SetMenuPage(int NewPage)
 	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_FAVORITE_COMMUNITY_5)
 	{
 		g_Config.m_UiPage = NewPage;
-		if(OldPage != NewPage)
+		bool ForceRefresh = false;
+		if(m_ForceRefreshLanPage)
 		{
-			RefreshBrowserTab(false);
+			ForceRefresh = NewPage == PAGE_LAN;
+			m_ForceRefreshLanPage = false;
+		}
+		if(OldPage != NewPage || ForceRefresh)
+		{
+			RefreshBrowserTab(ForceRefresh);
 		}
 	}
 }
