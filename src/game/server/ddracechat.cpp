@@ -1050,7 +1050,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 					"This team is locked using /lock. Only members of the team can unlock it using /lock." :
 					"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
 		}
-		else if(Team > 0 && Team < MAX_CLIENTS && m_pController->Teams().Count(Team) >= g_Config.m_SvMaxTeamSize && !m_pController->Teams().TeamFlock(Team))
+		else if(Team > 0 && Team < MAX_CLIENTS && m_pController->Teams().Count(Team) >= g_Config.m_SvMaxTeamSize && !m_pController->Teams().TeamFlock(Team) && !m_pController->Teams().IsPractice(Team))
 		{
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvMaxTeamSize);

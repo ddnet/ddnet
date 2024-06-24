@@ -1106,6 +1106,15 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 
 			if(Count(Team) > 1)
 			{
+				// Disband team if the team has more players than allowed.
+				if(Count(Team) > g_Config.m_SvMaxTeamSize)
+				{
+					GameServer()->SendChatTeam(Team, "This team was disbanded because there are more players than allowed in the team.");
+					SetTeamLock(Team, false);
+					KillTeam(Team, Weapon == WEAPON_SELF ? ClientId : -1, ClientId);
+					return;
+				}
+
 				KillTeam(Team, Weapon == WEAPON_SELF ? ClientId : -1, ClientId);
 
 				char aBuf[512];
