@@ -285,8 +285,8 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 
 	if(NewPage != -1)
 	{
-		m_MenuPage = NewPage;
 		m_ShowStart = false;
+		SetMenuPage(NewPage);
 	}
 }
 
