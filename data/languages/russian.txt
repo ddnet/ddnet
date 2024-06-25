@@ -1297,7 +1297,7 @@ Quads are used for background decoration
 == Квады используются для украшения фона
 
 Tries to predict other entities to give a feel of low latency
-== Пытыается предсказать другие объекты, чтобы придать ощущение низкой задержки
+== Пытается предсказать другие объекты, чтобы придать ощущение низкой задержки
 
 Extras
 == Доп.
