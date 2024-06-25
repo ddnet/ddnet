@@ -199,16 +199,42 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 
 	// render version
 	CUIRect VersionUpdate, CurVersion;
-	MainView.HSplitBottom(20.0f, 0, &VersionUpdate);
-
-	VersionUpdate.VSplitRight(50.0f, &CurVersion, 0);
+	MainView.HSplitBottom(20.0f, nullptr, &VersionUpdate);
+	VersionUpdate.VSplitRight(50.0f, &CurVersion, nullptr);
 	VersionUpdate.VMargin(VMargin, &VersionUpdate);
 
+	Ui()->DoLabel(&CurVersion, GAME_RELEASE_VERSION, 14.0f, TEXTALIGN_MR);
+
 #if defined(CONF_AUTOUPDATE)
-	char aBuf[64];
-	CUIRect Part;
-	IUpdater::EUpdaterState State = Updater()->GetCurrentState();
-	bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
+	CUIRect UpdateButton;
+	VersionUpdate.VSplitRight(100.0f, &VersionUpdate, &UpdateButton);
+	VersionUpdate.VSplitRight(10.0f, &VersionUpdate, nullptr);
+
+	char aBuf[128];
+	const IUpdater::EUpdaterState State = Updater()->GetCurrentState();
+	const bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
+
+	if(State == IUpdater::CLEAN && NeedUpdate)
+	{
+		static CButtonContainer s_VersionUpdate;
+		if(DoButton_Menu(&s_VersionUpdate, Localize("Update now"), 0, &UpdateButton, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		{
+			Updater()->InitiateUpdate();
+		}
+	}
+	else if(State == IUpdater::NEED_RESTART)
+	{
+		static CButtonContainer s_VersionUpdate;
+		if(DoButton_Menu(&s_VersionUpdate, Localize("Restart"), 0, &UpdateButton, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		{
+			Client()->Restart();
+		}
+	}
+	else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
+	{
+		Ui()->RenderProgressBar(UpdateButton, Updater()->GetCurrentPercent() / 100.0f);
+	}
+
 	if(State == IUpdater::CLEAN && NeedUpdate)
 	{
 		str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out!"), Client()->LatestVersion());
@@ -235,54 +261,16 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 	}
 	Ui()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_ML);
-	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-	VersionUpdate.VSplitLeft(TextRender()->TextWidth(14.0f, aBuf, -1, -1.0f) + 10.0f, 0, &Part);
-
-	if(State == IUpdater::CLEAN && NeedUpdate)
-	{
-		CUIRect Update;
-		Part.VSplitLeft(100.0f, &Update, NULL);
-
-		static CButtonContainer s_VersionUpdate;
-		if(DoButton_Menu(&s_VersionUpdate, Localize("Update now"), 0, &Update, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-		{
-			Updater()->InitiateUpdate();
-		}
-	}
-	else if(State == IUpdater::NEED_RESTART)
-	{
-		CUIRect Restart;
-		Part.VSplitLeft(50.0f, &Restart, &Part);
-
-		static CButtonContainer s_VersionUpdate;
-		if(DoButton_Menu(&s_VersionUpdate, Localize("Restart"), 0, &Restart, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-		{
-			Client()->Restart();
-		}
-	}
-	else if(State >= IUpdater::GETTING_MANIFEST && State < IUpdater::NEED_RESTART)
-	{
-		CUIRect ProgressBar, Percent;
-		Part.VSplitLeft(100.0f, &ProgressBar, &Percent);
-		ProgressBar.y += 2.0f;
-		ProgressBar.HMargin(1.0f, &ProgressBar);
-		ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
-		ProgressBar.w = clamp((float)Updater()->GetCurrentPercent(), 10.0f, 100.0f);
-		ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
-	}
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 #elif defined(CONF_INFORM_UPDATE)
 	if(str_comp(Client()->LatestVersion(), "0") != 0)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out!"), Client()->LatestVersion());
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
 		Ui()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_MC);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 #endif
-
-	Ui()->DoLabel(&CurVersion, GAME_RELEASE_VERSION, 14.0f, TEXTALIGN_MR);
 
 	if(NewPage != -1)
 	{
