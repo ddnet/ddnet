@@ -2804,6 +2804,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     secure_random.cpp
     serverbrowser.cpp
     serverinfo.cpp
+    snapshot.cpp
     str.cpp
     strip_path_and_extension.cpp
     swap_endian.cpp
