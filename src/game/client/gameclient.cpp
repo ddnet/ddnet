@@ -209,9 +209,9 @@ static void GenerateTimeoutCode(char *pTimeoutCode)
 		for(unsigned int i = 0; i < 16; i++)
 		{
 			if(rand() % 2)
-				pTimeoutCode[i] = (char)((rand() % 26) + 97);
+				pTimeoutCode[i] = (char)((rand() % ('z' - 'a' + 1)) + 'a');
 			else
-				pTimeoutCode[i] = (char)((rand() % 26) + 65);
+				pTimeoutCode[i] = (char)((rand() % ('Z' - 'A' + 1)) + 'A');
 		}
 	}
 }
