@@ -14,23 +14,7 @@
 #include "controls.h"
 #include "nameplates.h"
 
-void CNamePlates::RenderNameplate(
-	const CNetObj_Character *pPrevChar,
-	const CNetObj_Character *pPlayerChar,
-	const CNetObj_PlayerInfo *pPlayerInfo)
-{
-	int ClientId = pPlayerInfo->m_ClientId;
-
-	vec2 Position;
-	if(ClientId >= 0 && ClientId < MAX_CLIENTS)
-		Position = m_pClient->m_aClients[ClientId].m_RenderPos;
-	else
-		Position = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pPlayerChar->m_X, pPlayerChar->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
-
-	RenderNameplatePos(Position, pPlayerInfo, 1.0f);
-}
-
-void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha)
+void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha)
 {
 	int ClientId = pPlayerInfo->m_ClientId;
 
@@ -328,7 +312,7 @@ void CNamePlates::OnRender()
 			// don't render offscreen
 			if(!(pRenderPos->x < ScreenX0) && !(pRenderPos->x > ScreenX1) && !(pRenderPos->y < ScreenY0) && !(pRenderPos->y > ScreenY1))
 			{
-				RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
+				RenderNameplate(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
 			}
 		}
 		if(m_pClient->m_Snap.m_aCharacters[i].m_Active)
@@ -338,10 +322,7 @@ void CNamePlates::OnRender()
 			// don't render offscreen
 			if(!(pRenderPos->x < ScreenX0) && !(pRenderPos->x > ScreenX1) && !(pRenderPos->y < ScreenY0) && !(pRenderPos->y > ScreenY1))
 			{
-				RenderNameplate(
-					&m_pClient->m_Snap.m_aCharacters[i].m_Prev,
-					&m_pClient->m_Snap.m_aCharacters[i].m_Cur,
-					pInfo);
+				RenderNameplate(m_pClient->m_aClients[i].m_RenderPos, pInfo, 1.0f, false);
 			}
 		}
 	}

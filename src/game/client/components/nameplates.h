@@ -42,11 +42,7 @@ struct SPlayerNamePlate
 
 class CNamePlates : public CComponent
 {
-	void RenderNameplate(
-		const CNetObj_Character *pPrevChar,
-		const CNetObj_Character *pPlayerChar,
-		const CNetObj_PlayerInfo *pPlayerInfo);
-	void RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha = false);
+	void RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha);
 
 	SPlayerNamePlate m_aNamePlates[MAX_CLIENTS];
 
