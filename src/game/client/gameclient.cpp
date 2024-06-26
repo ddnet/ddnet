@@ -202,6 +202,20 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("cl_menu_map", ConchainMenuMap, this);
 }
 
+static void GenerateTimeoutCode(char *pTimeoutCode)
+{
+	if(pTimeoutCode[0] == '\0' || str_comp(pTimeoutCode, "hGuEYnfxicsXGwFq") == 0)
+	{
+		for(unsigned int i = 0; i < 16; i++)
+		{
+			if(rand() % 2)
+				pTimeoutCode[i] = (char)((rand() % ('z' - 'a' + 1)) + 'a');
+			else
+				pTimeoutCode[i] = (char)((rand() % ('Z' - 'A' + 1)) + 'A');
+		}
+	}
+}
+
 void CGameClient::OnInit()
 {
 	const int64_t OnInitStart = time_get();
@@ -324,27 +338,8 @@ void CGameClient::OnInit()
 	// Set free binds to DDRace binds if it's active
 	m_Binds.SetDDRaceBinds(true);
 
-	if(g_Config.m_ClTimeoutCode[0] == '\0' || str_comp(g_Config.m_ClTimeoutCode, "hGuEYnfxicsXGwFq") == 0)
-	{
-		for(unsigned int i = 0; i < 16; i++)
-		{
-			if(rand() % 2)
-				g_Config.m_ClTimeoutCode[i] = (char)((rand() % 26) + 97);
-			else
-				g_Config.m_ClTimeoutCode[i] = (char)((rand() % 26) + 65);
-		}
-	}
-
-	if(g_Config.m_ClDummyTimeoutCode[0] == '\0' || str_comp(g_Config.m_ClDummyTimeoutCode, "hGuEYnfxicsXGwFq") == 0)
-	{
-		for(unsigned int i = 0; i < 16; i++)
-		{
-			if(rand() % 2)
-				g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 97);
-			else
-				g_Config.m_ClDummyTimeoutCode[i] = (char)((rand() % 26) + 65);
-		}
-	}
+	GenerateTimeoutCode(g_Config.m_ClTimeoutCode);
+	GenerateTimeoutCode(g_Config.m_ClDummyTimeoutCode);
 
 	m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
 
