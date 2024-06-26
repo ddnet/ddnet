@@ -23,19 +23,16 @@ struct SPlayerNamePlate
 	{
 		m_NameTextContainerIndex.Reset();
 		m_ClanNameTextContainerIndex.Reset();
-		m_aName[0] = 0;
-		m_aClanName[0] = 0;
-		m_NameTextWidth = m_ClanNameTextWidth = 0.f;
+		m_aName[0] = '\0';
+		m_aClanName[0] = '\0';
 		m_NameTextFontSize = m_ClanNameTextFontSize = 0;
 	}
 
 	char m_aName[MAX_NAME_LENGTH];
-	float m_NameTextWidth;
 	STextContainerIndex m_NameTextContainerIndex;
 	float m_NameTextFontSize;
 
 	char m_aClanName[MAX_CLAN_LENGTH];
-	float m_ClanNameTextWidth;
 	STextContainerIndex m_ClanNameTextContainerIndex;
 	float m_ClanNameTextFontSize;
 };

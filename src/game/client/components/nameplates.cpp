@@ -96,15 +96,11 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 
 			CTextCursor Cursor;
 			TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
-			Cursor.m_LineWidth = -1;
 
 			// create nameplates at standard zoom
 			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 			Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 			RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
-
-			NamePlate.m_NameTextWidth = TextRender()->TextWidth(FontSize, ClientData.m_aName, -1, -1.0f);
-
 			TextRender()->RecreateTextContainer(NamePlate.m_NameTextContainerIndex, &Cursor, ClientData.m_aName);
 			Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 		}
@@ -118,21 +114,16 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 
 				CTextCursor Cursor;
 				TextRender()->SetCursor(&Cursor, 0, 0, FontSizeClan, TEXTFLAG_RENDER);
-				Cursor.m_LineWidth = -1;
 
 				// create nameplates at standard zoom
 				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 				RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
-
-				NamePlate.m_ClanNameTextWidth = TextRender()->TextWidth(FontSizeClan, ClientData.m_aClan, -1, -1.0f);
-
 				TextRender()->RecreateTextContainer(NamePlate.m_ClanNameTextContainerIndex, &Cursor, ClientData.m_aClan);
 				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 			}
 		}
 
-		float tw = NamePlate.m_NameTextWidth;
 		if(g_Config.m_ClNameplatesTeamcolors)
 		{
 			const int Team = m_pClient->m_Teams.Team(pPlayerInfo->m_ClientId);
@@ -169,14 +160,14 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		if(NamePlate.m_NameTextContainerIndex.Valid())
 		{
 			YOffset -= FontSize;
-			TextRender()->RenderTextContainer(NamePlate.m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - tw / 2.0f, YOffset);
+			TextRender()->RenderTextContainer(NamePlate.m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f, YOffset);
 		}
 
 		if(g_Config.m_ClNameplatesClan)
 		{
 			YOffset -= FontSizeClan;
 			if(NamePlate.m_ClanNameTextContainerIndex.Valid())
-				TextRender()->RenderTextContainer(NamePlate.m_ClanNameTextContainerIndex, TColor, TOutlineColor, Position.x - NamePlate.m_ClanNameTextWidth / 2.0f, YOffset);
+				TextRender()->RenderTextContainer(NamePlate.m_ClanNameTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_ClanNameTextContainerIndex).m_W / 2.0f, YOffset);
 		}
 
 		if(g_Config.m_ClNameplatesFriendMark && ClientData.m_Friend)
