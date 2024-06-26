@@ -18,10 +18,10 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 {
 	SPlayerNamePlate &NamePlate = m_aNamePlates[pPlayerInfo->m_ClientId];
 	const auto &ClientData = m_pClient->m_aClients[pPlayerInfo->m_ClientId];
-	bool OtherTeam = m_pClient->IsOtherTeam(pPlayerInfo->m_ClientId);
+	const bool OtherTeam = m_pClient->IsOtherTeam(pPlayerInfo->m_ClientId);
 
-	float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
-	float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
+	const float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
+	const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
 
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 	float YOffset = Position.y - 38;
@@ -35,25 +35,9 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 #endif
 	if((ShowDirection && ShowDirection != 3 && !pPlayerInfo->m_Local) || (ShowDirection >= 2 && pPlayerInfo->m_Local) || (ShowDirection == 3 && Client()->DummyConnected() && Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_ClientId == m_pClient->m_aLocalIds[!g_Config.m_ClDummy]))
 	{
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		Graphics()->QuadsSetRotation(0);
-
-		const float ShowDirectionImgSize = 22.0f;
-		YOffset -= ShowDirectionImgSize;
-		vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
-
-		const auto &Character = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId];
-		bool DirLeft = Character.m_Cur.m_Direction == -1;
-		bool DirRight = Character.m_Cur.m_Direction == 1;
-		bool Jump = Character.m_Cur.m_Jumped & 1;
-
-		if(pPlayerInfo->m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-		{
-			const auto &InputData = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy];
-			DirLeft = InputData.m_Direction == -1;
-			DirRight = InputData.m_Direction == 1;
-			Jump = InputData.m_Jump == 1;
-		}
+		bool DirLeft;
+		bool DirRight;
+		bool Jump;
 		if(Client()->DummyConnected() && Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_ClientId == m_pClient->m_aLocalIds[!g_Config.m_ClDummy])
 		{
 			const auto &InputData = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy];
@@ -61,6 +45,26 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 			DirRight = InputData.m_Direction == 1;
 			Jump = InputData.m_Jump == 1;
 		}
+		else if(pPlayerInfo->m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		{
+			const auto &InputData = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy];
+			DirLeft = InputData.m_Direction == -1;
+			DirRight = InputData.m_Direction == 1;
+			Jump = InputData.m_Jump == 1;
+		}
+		else
+		{
+			const auto &Character = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId];
+			DirLeft = Character.m_Cur.m_Direction == -1;
+			DirRight = Character.m_Cur.m_Direction == 1;
+			Jump = Character.m_Cur.m_Jumped & 1;
+		}
+
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+		const float ShowDirectionImgSize = 22.0f;
+		YOffset -= ShowDirectionImgSize;
+		const vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
 		if(DirLeft)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
@@ -70,6 +74,7 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		else if(DirRight)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsSetRotation(0);
 			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x + 30.f, ShowDirectionPos.y);
 		}
 		if(Jump)
@@ -85,9 +90,11 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 	// render name plate
 	if((!pPlayerInfo->m_Local || g_Config.m_ClNameplatesOwn) && g_Config.m_ClNameplates)
 	{
-		float a = 1;
+		float a;
 		if(g_Config.m_ClNameplatesAlways == 0)
 			a = clamp(1 - std::pow(distance(m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
+		else
+			a = 1.0f;
 
 		if(str_comp(ClientData.m_aName, NamePlate.m_aName) != 0 || FontSize != NamePlate.m_NameTextFontSize)
 		{
@@ -139,12 +146,12 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		if(OtherTeam && !ForceAlpha)
 		{
 			TOutlineColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.2f * g_Config.m_ClShowOthersAlpha / 100.0f);
-			TColor = ColorRGBA(rgb.r, rgb.g, rgb.b, g_Config.m_ClShowOthersAlpha / 100.0f);
+			TColor = rgb.WithAlpha(g_Config.m_ClShowOthersAlpha / 100.0f);
 		}
 		else
 		{
 			TOutlineColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f * a);
-			TColor = ColorRGBA(rgb.r, rgb.g, rgb.b, a);
+			TColor = rgb.WithAlpha(a);
 		}
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
 		{
@@ -173,50 +180,43 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		if(g_Config.m_ClNameplatesFriendMark && ClientData.m_Friend)
 		{
 			YOffset -= FontSize;
-			char aFriendMark[] = "♥";
-
-			ColorRGBA Color;
-
+			ColorRGBA Color = ColorRGBA(1.0f, 0.0f, 0.0f, Alpha);
 			if(OtherTeam && !ForceAlpha)
-				Color = ColorRGBA(1.0f, 0.0f, 0.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
+				Color.a *= g_Config.m_ClShowOthersAlpha / 100.0f;
 			else
-				Color = ColorRGBA(1.0f, 0.0f, 0.0f, a);
+				Color.a *= a;
 
-			Color.a *= Alpha;
-
+			const char *pFriendMark = "♥";
 			TextRender()->TextColor(Color);
-			float XOffSet = TextRender()->TextWidth(FontSize, aFriendMark, -1, -1.0f) / 2.0f;
-			TextRender()->Text(Position.x - XOffSet, YOffset, FontSize, aFriendMark, -1.0f);
+			TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, pFriendMark) / 2.0f, YOffset, FontSize, pFriendMark);
 		}
 
 		if(g_Config.m_Debug || g_Config.m_ClNameplatesIds) // render client id when in debug as well
 		{
 			YOffset -= FontSize;
-			char aBuf[128];
+			char aBuf[12];
 			str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
-			float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
 			TextRender()->TextColor(rgb);
-			TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
+			TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
 		}
 	}
 
 	if((g_Config.m_Debug || g_Config.m_ClNameplatesStrong) && g_Config.m_ClNameplates)
 	{
-		bool Following = (m_pClient->m_Snap.m_SpecInfo.m_Active && !GameClient()->m_MultiViewActivated && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW);
+		const bool Following = (m_pClient->m_Snap.m_SpecInfo.m_Active && !GameClient()->m_MultiViewActivated && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW);
 		if(m_pClient->m_Snap.m_LocalClientId != -1 || Following)
 		{
-			int SelectedId = Following ? m_pClient->m_Snap.m_SpecInfo.m_SpectatorId : m_pClient->m_Snap.m_LocalClientId;
+			const int SelectedId = Following ? m_pClient->m_Snap.m_SpecInfo.m_SpectatorId : m_pClient->m_Snap.m_LocalClientId;
 			const CGameClient::CSnapState::CCharacterInfo &Selected = m_pClient->m_Snap.m_aCharacters[SelectedId];
 			const CGameClient::CSnapState::CCharacterInfo &Other = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId];
 			if(Selected.m_HasExtendedData && Other.m_HasExtendedData)
 			{
 				if(SelectedId == pPlayerInfo->m_ClientId)
+				{
 					TextRender()->TextColor(rgb);
+				}
 				else
 				{
-					float ScaleX, ScaleY;
-					const float StrongWeakImgSize = 40.0f;
-					Graphics()->TextureClear();
 					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_STRONGWEAK].m_Id);
 					Graphics()->QuadsBegin();
 					ColorRGBA StrongWeakStatusColor;
@@ -232,21 +232,21 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 						StrongWeakSpriteId = SPRITE_HOOK_WEAK;
 					}
 
-					float ClampedAlpha = 1;
-					if(g_Config.m_ClNameplatesAlways == 0)
-						ClampedAlpha = clamp(1 - std::pow(distance(m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
-
 					if(OtherTeam && !ForceAlpha)
 						StrongWeakStatusColor.a = g_Config.m_ClShowOthersAlpha / 100.0f;
+					else if(g_Config.m_ClNameplatesAlways == 0)
+						StrongWeakStatusColor.a = clamp(1 - std::pow(distance(m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
 					else
-						StrongWeakStatusColor.a = ClampedAlpha;
+						StrongWeakStatusColor.a = 1.0f;
 
 					StrongWeakStatusColor.a *= Alpha;
 					Graphics()->SetColor(StrongWeakStatusColor);
+					float ScaleX, ScaleY;
 					RenderTools()->SelectSprite(StrongWeakSpriteId);
 					RenderTools()->GetSpriteScale(StrongWeakSpriteId, ScaleX, ScaleY);
 					TextRender()->TextColor(StrongWeakStatusColor);
 
+					const float StrongWeakImgSize = 40.0f;
 					YOffset -= StrongWeakImgSize * ScaleY;
 					RenderTools()->DrawSprite(Position.x, YOffset + (StrongWeakImgSize / 2.0f) * ScaleY, StrongWeakImgSize);
 					Graphics()->QuadsEnd();
@@ -256,8 +256,7 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 					YOffset -= FontSize;
 					char aBuf[12];
 					str_format(aBuf, sizeof(aBuf), "%d", Other.m_ExtendedData.m_StrongWeakId);
-					float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
-					TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
+					TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
 				}
 			}
 		}
