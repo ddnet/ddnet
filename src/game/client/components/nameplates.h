@@ -22,19 +22,19 @@ struct SPlayerNamePlate
 	void Reset()
 	{
 		m_NameTextContainerIndex.Reset();
-		m_ClanNameTextContainerIndex.Reset();
+		m_ClanTextContainerIndex.Reset();
 		m_aName[0] = '\0';
-		m_aClanName[0] = '\0';
-		m_NameTextFontSize = m_ClanNameTextFontSize = 0;
+		m_aClan[0] = '\0';
+		m_NameTextFontSize = m_ClanTextFontSize = 0.0f;
 	}
 
 	char m_aName[MAX_NAME_LENGTH];
 	STextContainerIndex m_NameTextContainerIndex;
 	float m_NameTextFontSize;
 
-	char m_aClanName[MAX_CLAN_LENGTH];
-	STextContainerIndex m_ClanNameTextContainerIndex;
-	float m_ClanNameTextFontSize;
+	char m_aClan[MAX_CLAN_LENGTH];
+	STextContainerIndex m_ClanTextContainerIndex;
+	float m_ClanTextFontSize;
 };
 
 class CNamePlates : public CComponent

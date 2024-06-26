@@ -107,10 +107,10 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 
 		if(g_Config.m_ClNameplatesClan)
 		{
-			if(str_comp(ClientData.m_aClan, NamePlate.m_aClanName) != 0 || FontSizeClan != NamePlate.m_ClanNameTextFontSize)
+			if(str_comp(ClientData.m_aClan, NamePlate.m_aClan) != 0 || FontSizeClan != NamePlate.m_ClanTextFontSize)
 			{
-				str_copy(NamePlate.m_aClanName, ClientData.m_aClan);
-				NamePlate.m_ClanNameTextFontSize = FontSizeClan;
+				str_copy(NamePlate.m_aClan, ClientData.m_aClan);
+				NamePlate.m_ClanTextFontSize = FontSizeClan;
 
 				CTextCursor Cursor;
 				TextRender()->SetCursor(&Cursor, 0, 0, FontSizeClan, TEXTFLAG_RENDER);
@@ -119,7 +119,7 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 				RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
-				TextRender()->RecreateTextContainer(NamePlate.m_ClanNameTextContainerIndex, &Cursor, ClientData.m_aClan);
+				TextRender()->RecreateTextContainer(NamePlate.m_ClanTextContainerIndex, &Cursor, ClientData.m_aClan);
 				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 			}
 		}
@@ -166,8 +166,8 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		if(g_Config.m_ClNameplatesClan)
 		{
 			YOffset -= FontSizeClan;
-			if(NamePlate.m_ClanNameTextContainerIndex.Valid())
-				TextRender()->RenderTextContainer(NamePlate.m_ClanNameTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_ClanNameTextContainerIndex).m_W / 2.0f, YOffset);
+			if(NamePlate.m_ClanTextContainerIndex.Valid())
+				TextRender()->RenderTextContainer(NamePlate.m_ClanTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_ClanTextContainerIndex).m_W / 2.0f, YOffset);
 		}
 
 		if(g_Config.m_ClNameplatesFriendMark && ClientData.m_Friend)
@@ -330,7 +330,7 @@ void CNamePlates::ResetNamePlates()
 	for(auto &NamePlate : m_aNamePlates)
 	{
 		TextRender()->DeleteTextContainer(NamePlate.m_NameTextContainerIndex);
-		TextRender()->DeleteTextContainer(NamePlate.m_ClanNameTextContainerIndex);
+		TextRender()->DeleteTextContainer(NamePlate.m_ClanTextContainerIndex);
 
 		NamePlate.Reset();
 	}
