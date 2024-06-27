@@ -2888,9 +2888,10 @@ int CServer::Run()
 						}
 					}
 
-					if(m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED &&
-						Config()->m_SvDnsblBan)
-						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientId), 60 * 10, "VPN detected, try connecting without. Contact admin if mistaken");
+					if(m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED && Config()->m_SvDnsblBan)
+					{
+						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientId), 60 * 10, Config()->m_SvDnsblBanReason);
+					}
 				}
 			}
 
