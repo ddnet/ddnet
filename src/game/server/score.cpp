@@ -79,20 +79,16 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	secure_random_fill(aSeed, sizeof(aSeed));
 	m_Prng.Seed(aSeed);
 
-	IOHANDLE File = GameServer()->Storage()->OpenFile("wordlist.txt", IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
-	if(File)
+	CLineReader LineReader;
+	if(LineReader.OpenFile(GameServer()->Storage()->OpenFile("wordlist.txt", IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
-		CLineReader LineReader;
-		LineReader.Init(File);
-		char *pLine;
-		while((pLine = LineReader.Get()))
+		while(const char *pLine = LineReader.Get())
 		{
 			char aWord[32] = {0};
 			sscanf(pLine, "%*s %31s", aWord);
 			aWord[31] = 0;
 			m_vWordlist.emplace_back(aWord);
 		}
-		io_close(File);
 	}
 	else
 	{

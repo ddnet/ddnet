@@ -3846,21 +3846,17 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerDDRace(this);
 
 	const char *pCensorFilename = "censorlist.txt";
-	IOHANDLE File = Storage()->OpenFile(pCensorFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
-	if(!File)
+	CLineReader LineReader;
+	if(LineReader.OpenFile(Storage()->OpenFile(pCensorFilename, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
-		dbg_msg("censorlist", "failed to open '%s'", pCensorFilename);
-	}
-	else
-	{
-		CLineReader LineReader;
-		LineReader.Init(File);
-		char *pLine;
-		while((pLine = LineReader.Get()))
+		while(const char *pLine = LineReader.Get())
 		{
 			m_vCensorlist.emplace_back(pLine);
 		}
-		io_close(File);
+	}
+	else
+	{
+		dbg_msg("censorlist", "failed to open '%s'", pCensorFilename);
 	}
 
 	m_TeeHistorianActive = g_Config.m_SvTeeHistorian;
@@ -4064,36 +4060,28 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	char aConfig[IO_MAX_PATH_LENGTH];
 	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", g_Config.m_SvMap);
 
-	IOHANDLE File = Storage()->OpenFile(aConfig, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
-	if(!File)
+	CLineReader LineReader;
+	if(!LineReader.OpenFile(Storage()->OpenFile(aConfig, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
 		// No map-specific config, just return.
 		return;
 	}
-	CLineReader LineReader;
-	LineReader.Init(File);
 
-	std::vector<char *> vLines;
-	char *pLine;
+	std::vector<const char *> vpLines;
 	int TotalLength = 0;
-	while((pLine = LineReader.Get()))
+	while(const char *pLine = LineReader.Get())
 	{
-		int Length = str_length(pLine) + 1;
-		char *pCopy = (char *)malloc(Length);
-		str_copy(pCopy, pLine, Length);
-		vLines.push_back(pCopy);
-		TotalLength += Length;
+		vpLines.push_back(pLine);
+		TotalLength += str_length(pLine) + 1;
 	}
-	io_close(File);
 
 	char *pSettings = (char *)malloc(maximum(1, TotalLength));
 	int Offset = 0;
-	for(auto &Line : vLines)
+	for(const char *pLine : vpLines)
 	{
-		int Length = str_length(Line) + 1;
-		mem_copy(pSettings + Offset, Line, Length);
+		int Length = str_length(pLine) + 1;
+		mem_copy(pSettings + Offset, pLine, Length);
 		Offset += Length;
-		free(Line);
 	}
 
 	CDataFileReader Reader;

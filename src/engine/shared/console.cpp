@@ -622,23 +622,19 @@ bool CConsole::ExecuteFile(const char *pFilename, int ClientId, bool LogFailure,
 	m_pFirstExec = &ThisFile;
 
 	// exec the file
-	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, StorageType);
-
+	CLineReader LineReader;
 	bool Success = false;
 	char aBuf[32 + IO_MAX_PATH_LENGTH];
-	if(File)
+	if(LineReader.OpenFile(m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType)))
 	{
 		str_format(aBuf, sizeof(aBuf), "executing '%s'", pFilename);
 		Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 
-		CLineReader Reader;
-		Reader.Init(File);
-
-		char *pLine;
-		while((pLine = Reader.Get()))
+		while(const char *pLine = LineReader.Get())
+		{
 			ExecuteLine(pLine, ClientId);
+		}
 
-		io_close(File);
 		Success = true;
 	}
 	else if(LogFailure)

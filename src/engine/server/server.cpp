@@ -3860,18 +3860,18 @@ const char *CServer::GetAnnouncementLine(const char *pFileName)
 		str_copy(m_aAnnouncementFile, pFileName);
 		m_vAnnouncements.clear();
 
-		IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
-		if(!File)
+		CLineReader LineReader;
+		if(!LineReader.OpenFile(m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL)))
+		{
 			return 0;
-
-		char *pLine;
-		CLineReader Reader;
-		Reader.Init(File);
-		while((pLine = Reader.Get()))
+		}
+		while(const char *pLine = LineReader.Get())
+		{
 			if(str_length(pLine) && pLine[0] != '#')
+			{
 				m_vAnnouncements.emplace_back(pLine);
-
-		io_close(File);
+			}
+		}
 	}
 
 	if(m_vAnnouncements.empty())
