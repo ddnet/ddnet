@@ -4175,6 +4175,7 @@ bool is_process_alive(PROCESS process)
 #endif
 }
 
+#if !defined(CONF_PLATFORM_ANDROID)
 int open_link(const char *link)
 {
 #if defined(CONF_FAMILY_WINDOWS)
@@ -4236,6 +4237,7 @@ int open_file(const char *path)
 	return open_link(buf);
 #endif
 }
+#endif // !defined(CONF_PLATFORM_ANDROID)
 
 struct SECURE_RANDOM_DATA
 {

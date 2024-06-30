@@ -43,11 +43,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	static CButtonContainer s_DiscordButton;
 	if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
-		const char *pLink = Localize("https://ddnet.org/discord");
-		if(!open_link(pLink))
-		{
-			dbg_msg("menus", "couldn't open link '%s'", pLink);
-		}
+		Client()->ViewLink(Localize("https://ddnet.org/discord"));
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -55,11 +51,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	static CButtonContainer s_LearnButton;
 	if(DoButton_Menu(&s_LearnButton, Localize("Learn"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
-		const char *pLink = Localize("https://wiki.ddnet.org/");
-		if(!open_link(pLink))
-		{
-			dbg_msg("menus", "couldn't open link '%s'", pLink);
-		}
+		Client()->ViewLink(Localize("https://wiki.ddnet.org/"));
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -96,11 +88,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	static CButtonContainer s_WebsiteButton;
 	if(DoButton_Menu(&s_WebsiteButton, Localize("Website"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
-		const char *pLink = "https://ddnet.org/";
-		if(!open_link(pLink))
-		{
-			dbg_msg("menus", "couldn't open link '%s'", pLink);
-		}
+		Client()->ViewLink("https://ddnet.org/");
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space

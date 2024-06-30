@@ -2583,6 +2583,7 @@ int kill_process(PROCESS process);
  */
 bool is_process_alive(PROCESS process);
 
+#if !defined(CONF_PLATFORM_ANDROID)
 /**
  * Opens a link in the browser.
  *
@@ -2598,11 +2599,11 @@ bool is_process_alive(PROCESS process);
 int open_link(const char *link);
 
 /**
- * Opens a file or directory with default program.
+ * Opens a file or directory with the default program.
  *
  * @ingroup Shell
  *
- * @param path The path to open.
+ * @param path The file or folder to open with the default program.
  *
  * @return `1` on success, `0` on failure.
  *
@@ -2610,6 +2611,7 @@ int open_link(const char *link);
  * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
  */
 int open_file(const char *path);
+#endif // !defined(CONF_PLATFORM_ANDROID)
 
 /**
  * @defgroup Secure-Random
