@@ -7674,11 +7674,13 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 92.0f, this, PopupMenuSettings, PopupProperties);
 	}
 
-	CUIRect ChangedIndicator, Info, Close;
+	CUIRect ChangedIndicator, Info, Help, Close;
 	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
 	MenuBar.VSplitLeft(MenuBar.h, &ChangedIndicator, &MenuBar);
-	MenuBar.VSplitRight(20.0f, &MenuBar, &Close);
-	Close.VSplitLeft(5.0f, nullptr, &Close);
+	MenuBar.VSplitRight(15.0f, &MenuBar, &Close);
+	MenuBar.VSplitRight(5.0f, &MenuBar, nullptr);
+	MenuBar.VSplitRight(15.0f, &MenuBar, &Help);
+	MenuBar.VSplitRight(5.0f, &MenuBar, nullptr);
 	MenuBar.VSplitLeft(MenuBar.w * 0.6f, &MenuBar, &Info);
 	MenuBar.VSplitRight(5.0f, &MenuBar, nullptr);
 
@@ -7705,6 +7707,16 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 
 	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", Ui()->MouseWorldX() / 32.0f, Ui()->MouseWorldY() / 32.0f, MapView()->Zoom()->GetValue(), m_AnimateSpeed, MapView()->MapGrid()->Factor(), aTimeStr);
 	Ui()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_MR);
+
+	static int s_HelpButton = 0;
+	if(DoButton_Editor(&s_HelpButton, "?", 0, &Help, 0, "[F1] Open the DDNet Wiki page for the Map Editor in a web browser") || (Input()->KeyPress(KEY_F1) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
+	{
+		const char *pLink = Localize("https://wiki.ddnet.org/wiki/Mapping");
+		if(!open_link(pLink))
+		{
+			ShowFileDialogError("Failed to open the link '%s' in the default web browser.", pLink);
+		}
+	}
 
 	static int s_CloseButton = 0;
 	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, 0, "Exits from the editor"))
