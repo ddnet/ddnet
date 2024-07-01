@@ -2990,6 +2990,8 @@ if(SERVER)
     mutes.cpp
     player.cpp
     player.h
+    playermapping.cpp
+    playermapping.h
     save.cpp
     save.h
     score.cpp
