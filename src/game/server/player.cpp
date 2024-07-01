@@ -52,13 +52,6 @@ void CPlayer::Reset()
 	m_LastInvited = 0;
 	m_WeakHookSpawn = false;
 
-	int *pIdMap = Server()->GetIdMap(m_ClientId);
-	for(int i = 1; i < VANILLA_MAX_CLIENTS; i++)
-	{
-		pIdMap[i] = -1;
-	}
-	pIdMap[0] = m_ClientId;
-
 	// DDRace
 
 	m_LastCommandPos = 0;
@@ -390,13 +383,19 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
 	{
+		int SpectatorId = m_SpectatorId;
+		if(SpectatorId >= 0 && !Server()->Translate(SpectatorId, m_ClientId))
+		{
+			SpectatorId = id;
+		}
+
 		if(!Server()->IsSixup(SnappingClient))
 		{
 			CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<CNetObj_SpectatorInfo>(m_ClientId);
 			if(!pSpectatorInfo)
 				return;
 
-			pSpectatorInfo->m_SpectatorId = m_SpectatorId;
+			pSpectatorInfo->m_SpectatorId = SpectatorId;
 			pSpectatorInfo->m_X = m_ViewPos.x;
 			pSpectatorInfo->m_Y = m_ViewPos.y;
 		}
@@ -407,7 +406,7 @@ void CPlayer::Snap(int SnappingClient)
 				return;
 
 			pSpectatorInfo->m_SpecMode = m_SpectatorId == SPEC_FREEVIEW ? protocol7::SPEC_FREEVIEW : protocol7::SPEC_PLAYER;
-			pSpectatorInfo->m_SpectatorId = m_SpectatorId;
+			pSpectatorInfo->m_SpectatorId = SpectatorId;
 			pSpectatorInfo->m_X = m_ViewPos.x;
 			pSpectatorInfo->m_Y = m_ViewPos.y;
 		}
@@ -480,43 +479,103 @@ void CPlayer::Snap(int SnappingClient)
 void CPlayer::FakeSnap()
 {
 	m_SentSnaps++;
-	if(GetClientVersion() >= VERSION_DDNET_OLD)
+	if(GetClientVersion() >= VERSION_DDNET_128 || Server()->MaxClients() <= LEGACY_MAX_CLIENTS)
 		return;
+
+	// see others in spec
+	int SeeOthersId = GameServer()->m_PlayerMapping.GetSeeOthersId(m_ClientId);
 
 	if(Server()->IsSixup(m_ClientId))
+	{
+		if(GameServer()->m_PlayerMapping.GetTotalOverhang(m_ClientId))
+		{
+			protocol7::CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<protocol7::CNetObj_PlayerInfo>(SeeOthersId);
+			if(!pPlayerInfo)
+				return;
+
+			pPlayerInfo->m_PlayerFlags = 0;
+			pPlayerInfo->m_Score = -9999;
+			pPlayerInfo->m_Latency = 0;
+		}
+
+		// nothing more to process in fake snap for 0.7
 		return;
+	}
 
-	int FakeId = VANILLA_MAX_CLIENTS - 1;
+	// see others
+	if(GameServer()->m_PlayerMapping.GetTotalOverhang(m_ClientId))
+	{
+		CNetObj_ClientInfo *pClientInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(SeeOthersId);
+		if(!pClientInfo)
+			return;
 
+		char aName[MAX_NAME_LENGTH];
+		StrToInts(&pClientInfo->m_Name0, 4, GameServer()->m_PlayerMapping.GetSeeOthersName(m_ClientId, aName));
+		StrToInts(&pClientInfo->m_Clan0, 3, "");
+		StrToInts(&pClientInfo->m_Skin0, 6, "default");
+		pClientInfo->m_UseCustomColor = 1;
+		pClientInfo->m_ColorBody = pClientInfo->m_ColorFeet = 6618880;
+
+		CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<CNetObj_PlayerInfo>(SeeOthersId);
+		if(!pPlayerInfo)
+			return;
+
+		pPlayerInfo->m_Local = 0;
+		pPlayerInfo->m_ClientId = SeeOthersId;
+		pPlayerInfo->m_Team = TEAM_BLUE;
+		pPlayerInfo->m_Score = -9999;
+		pPlayerInfo->m_Latency = 0;
+	}
+
+	int FakeId = LEGACY_MAX_CLIENTS - 1;
 	CNetObj_ClientInfo *pClientInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(FakeId);
-
 	if(!pClientInfo)
 		return;
 
 	StrToInts(&pClientInfo->m_Name0, 4, " ");
 	StrToInts(&pClientInfo->m_Clan0, 3, "");
 	StrToInts(&pClientInfo->m_Skin0, 6, "default");
+}
 
-	if(m_Paused != PAUSE_PAUSED)
+void CPlayer::SendConnect(int FakeId, int ClientId)
+{
+	if(!Server()->IsSixup(m_ClientId))
 		return;
 
-	CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<CNetObj_PlayerInfo>(FakeId);
-	if(!pPlayerInfo)
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
 		return;
 
-	pPlayerInfo->m_Latency = m_Latency.m_Min;
-	pPlayerInfo->m_Local = 1;
-	pPlayerInfo->m_ClientId = FakeId;
-	pPlayerInfo->m_Score = -9999;
-	pPlayerInfo->m_Team = TEAM_SPECTATORS;
+	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
+	NewClientInfoMsg.m_ClientId = FakeId;
+	NewClientInfoMsg.m_Local = ClientId == m_ClientId;
+	NewClientInfoMsg.m_Team = pPlayer->GetTeam();
+	NewClientInfoMsg.m_pName = Server()->ClientName(ClientId);
+	NewClientInfoMsg.m_pClan = Server()->ClientClan(ClientId);
+	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientId);
+	NewClientInfoMsg.m_Silent = 1;
 
-	CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<CNetObj_SpectatorInfo>(FakeId);
-	if(!pSpectatorInfo)
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	{
+		NewClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+		NewClientInfoMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+		NewClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+	}
+
+	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
+}
+
+void CPlayer::SendDisconnect(int FakeId)
+{
+	if(!Server()->IsSixup(m_ClientId))
 		return;
 
-	pSpectatorInfo->m_SpectatorId = m_SpectatorId;
-	pSpectatorInfo->m_X = m_ViewPos.x;
-	pSpectatorInfo->m_Y = m_ViewPos.y;
+	protocol7::CNetMsg_Sv_ClientDrop ClientDropMsg;
+	ClientDropMsg.m_ClientId = FakeId;
+	ClientDropMsg.m_pReason = "";
+	ClientDropMsg.m_Silent = 1;
+
+	Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
 }
 
 void CPlayer::OnDisconnect()
@@ -635,7 +694,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	m_Team = Team;
 	m_LastSetTeam = Server()->Tick();
 	m_LastActionTick = Server()->Tick();
-	m_SpectatorId = SPEC_FREEVIEW;
+	SetSpectatorId(SPEC_FREEVIEW);
 
 	protocol7::CNetMsg_Sv_Team Msg;
 	Msg.m_ClientId = m_ClientId;
@@ -650,7 +709,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 		for(auto &pPlayer : GameServer()->m_apPlayers)
 		{
 			if(pPlayer && pPlayer->m_SpectatorId == m_ClientId)
-				pPlayer->m_SpectatorId = SPEC_FREEVIEW;
+				pPlayer->SetSpectatorId(SPEC_FREEVIEW);
 		}
 	}
 
@@ -847,6 +906,11 @@ int CPlayer::Pause(int State, bool Force)
 		Msg.m_Team = m_Paused ? protocol7::TEAM_SPECTATORS : m_Team;
 
 		GameServer()->Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, m_ClientId);
+
+		if(m_Paused == PAUSE_NONE)
+		{
+			GameServer()->m_PlayerMapping.ResetSeeOthers(m_ClientId);
+		}
 	}
 
 	return m_Paused;
@@ -885,10 +949,16 @@ void CPlayer::SpectatePlayerName(const char *pName)
 	{
 		if(i != m_ClientId && Server()->ClientIngame(i) && !str_comp(pName, Server()->ClientName(i)))
 		{
-			m_SpectatorId = i;
+			SetSpectatorId(i);
 			return;
 		}
 	}
+}
+
+void CPlayer::SetSpectatorId(int Id)
+{
+	m_SpectatorId = Id;
+	GameServer()->m_PlayerMapping.ResetSeeOthers(m_ClientId);
 }
 
 void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
