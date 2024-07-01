@@ -88,7 +88,8 @@ enum
 	SERVERINFO_MAX_CLIENTS = 128,
 	MAX_CLIENTS = 128,
 	VANILLA_MAX_CLIENTS = 16,
-	SERVER_MAX_CLIENTS = 64,
+	SERVER_MAX_CLIENTS = 128,
+	LEGACY_MAX_CLIENTS = 64,
 	MAX_CHECKPOINTS = 25,
 	MIN_TICK = 0,
 	MAX_TICK = 0x6FFFFFFF,
@@ -121,6 +122,11 @@ enum
 	 * Don't send the message to client/server. Useful combined with @link MSGFLAG_RECORD @endlink to record a message without sending it.
 	 */
 	MSGFLAG_NOSEND = 1 << 4,
+
+	/**
+	 * for 0.7 player mapping fake disconnect/connects
+	 */
+	MSGFLAG_NOTRANSLATE = 1 << 5,
 };
 
 enum
@@ -148,6 +154,7 @@ enum
 	VERSION_DDNET_SAVE_CODE = 19060,
 	VERSION_DDNET_IMPORTANT_ALERT = 19060,
 	VERSION_DDNET_MAP_BESTTIME = 19070,
+	VERSION_DDNET_128_TEAMS = 20000,
 };
 
 namespace TuneZone

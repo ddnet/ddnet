@@ -291,16 +291,20 @@ bool CProjectile::NetIsInfoLegacyCompatible() const
 	return true;
 }
 
-CNetObj_DDRaceProjectile CProjectile::NetInfoLegacy() const
+CNetObj_DDRaceProjectile CProjectile::NetInfoLegacy(int SnappingClient)
 {
 	dbg_assert(NetIsInfoLegacyCompatible(), "can't send incompatible projectile");
 
 	//Send additional/modified info, by modifying the fields of the netobj
 	float Angle = -std::atan2(m_Direction.x, m_Direction.y);
 
+	int Owner = m_Owner;
+	if(!Server()->Translate(Owner, SnappingClient))
+		Owner = -1;
+
 	int Data = 0;
-	Data |= (absolute(m_Owner) & 255) << 0;
-	if(m_Owner < 0)
+	Data |= (absolute(Owner) & 255) << 0;
+	if(Owner < 0)
 		Data |= LEGACYPROJECTILEFLAG_NO_OWNER;
 	//This bit tells the client to use the extra info
 	Data |= LEGACYPROJECTILEFLAG_IS_DDNET;
@@ -321,7 +325,7 @@ CNetObj_DDRaceProjectile CProjectile::NetInfoLegacy() const
 	return Result;
 }
 
-CNetObj_DDNetProjectile CProjectile::NetInfo() const
+CNetObj_DDNetProjectile CProjectile::NetInfo(int SnappingClient)
 {
 	CNetObj_DDNetProjectile Result = {};
 
@@ -343,7 +347,11 @@ CNetObj_DDNetProjectile CProjectile::NetInfo() const
 		Flags |= PROJECTILEFLAG_FREEZE;
 	}
 
-	if(m_Owner < 0)
+	int Owner = m_Owner;
+	if(!Server()->Translate(Owner, SnappingClient))
+		Owner = -1;
+
+	if(Owner < 0)
 	{
 		Result.m_VelX = round_to_int(m_Direction.x * 1e6f);
 		Result.m_VelY = round_to_int(m_Direction.y * 1e6f);
@@ -359,7 +367,7 @@ CNetObj_DDNetProjectile CProjectile::NetInfo() const
 	Result.m_Y = round_to_int(m_Pos.y * 100.0f);
 	Result.m_Type = m_Type;
 	Result.m_StartTick = m_StartTick;
-	Result.m_Owner = m_Owner;
+	Result.m_Owner = Owner;
 	Result.m_Flags = Flags;
 	Result.m_SwitchNumber = m_Number;
 	Result.m_TuneZone = m_TuneZone;
@@ -396,17 +404,17 @@ void CProjectile::Snap(int SnappingClient)
 
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		Server()->SnapNewItem(GetId(), NetInfo());
+		Server()->SnapNewItem(GetId(), NetInfo(SnappingClient));
 	}
 	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && NetIsInfoLegacyCompatible())
 	{
 		if(SnappingClientVersion >= VERSION_DDNET_MSG_LEGACY)
 		{
-			Server()->SnapNewItem(GetId(), NetInfoLegacy());
+			Server()->SnapNewItem(GetId(), NetInfoLegacy(SnappingClient));
 		}
 		else
 		{
-			CNetObj_DDRaceProjectile DDRaceProjectile = NetInfoLegacy();
+			CNetObj_DDRaceProjectile DDRaceProjectile = NetInfoLegacy(SnappingClient);
 			CNetObj_Projectile Projectile = {};
 			static_assert(sizeof(DDRaceProjectile) == sizeof(Projectile));
 			mem_copy(&Projectile, &DDRaceProjectile, sizeof(Projectile));
