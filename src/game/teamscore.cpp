@@ -20,7 +20,7 @@ int CTeamsCore::Team(int ClientId) const
 
 void CTeamsCore::Team(int ClientId, int Team)
 {
-	dbg_assert(Team >= TEAM_FLOCK && Team <= TEAM_SUPER, "invalid team");
+	dbg_assert(Team >= TEAM_FLOCK && Team < MAX_CLIENTS, "invalid team");
 	m_aTeam[ClientId] = Team;
 }
 
