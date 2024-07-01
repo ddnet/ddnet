@@ -219,9 +219,9 @@ void CServer::CClient::Reset()
 	m_Flags = 0;
 	m_RedirectDropTime = 0;
 
-	for (int i = 0; i < LEGACY_MAX_CLIENTS; i++)
+	for(int i = 0; i < LEGACY_MAX_CLIENTS; i++)
 		m_aIdMap[i] = -1;
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_aReverseIdMap[i] = -1;
 }
 
@@ -3940,7 +3940,7 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 	{
 		LogoutClient(ClientId, "Timeout Protection");
 	}
-	
+
 	m_aClients[ClientId].m_Authed = AUTHED_NO;
 	m_aClients[ClientId].m_Flags = m_aClients[OrigId].m_Flags;
 	m_aClients[ClientId].m_DDNetVersion = m_aClients[OrigId].m_DDNetVersion;

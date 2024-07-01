@@ -380,7 +380,7 @@ void CPlayer::Snap(int SnappingClient)
 	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
 	{
 		int SpectatorId = m_SpectatorId;
-		if (SpectatorId >= 0 && !Server()->Translate(SpectatorId, m_ClientId))
+		if(SpectatorId >= 0 && !Server()->Translate(SpectatorId, m_ClientId))
 		{
 			SpectatorId = id;
 		}
@@ -456,9 +456,9 @@ void CPlayer::FakeSnap()
 	// see others in spec
 	int SeeOthersID = GameServer()->m_PlayerMapping.GetSeeOthersID(m_ClientId);
 
-	if (Server()->IsSixup(m_ClientId))
+	if(Server()->IsSixup(m_ClientId))
 	{
-		if (GameServer()->m_PlayerMapping.GetTotalOverhang(m_ClientId))
+		if(GameServer()->m_PlayerMapping.GetTotalOverhang(m_ClientId))
 		{
 			protocol7::CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<protocol7::CNetObj_PlayerInfo>(SeeOthersID);
 			if(!pPlayerInfo)
@@ -474,7 +474,7 @@ void CPlayer::FakeSnap()
 	}
 
 	// see others
-	if (GameServer()->m_PlayerMapping.GetTotalOverhang(m_ClientId))
+	if(GameServer()->m_PlayerMapping.GetTotalOverhang(m_ClientId))
 	{
 		CNetObj_ClientInfo *pClientInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(SeeOthersID);
 		if(!pClientInfo)
@@ -509,11 +509,11 @@ void CPlayer::FakeSnap()
 
 void CPlayer::SendConnect(int FakeID, int ClientID)
 {
-	if (!Server()->IsSixup(m_ClientId))
+	if(!Server()->IsSixup(m_ClientId))
 		return;
 
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
-	if (!pPlayer)
+	if(!pPlayer)
 		return;
 
 	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
@@ -525,19 +525,19 @@ void CPlayer::SendConnect(int FakeID, int ClientID)
 	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
 	NewClientInfoMsg.m_Silent = 1;
 
-	for (int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 	{
 		NewClientInfoMsg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
 		NewClientInfoMsg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
 		NewClientInfoMsg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
 	}
 
-	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NOTRANSLATE, m_ClientId);
+	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
 }
 
 void CPlayer::SendDisconnect(int FakeID)
 {
-	if (!Server()->IsSixup(m_ClientId))
+	if(!Server()->IsSixup(m_ClientId))
 		return;
 
 	protocol7::CNetMsg_Sv_ClientDrop ClientDropMsg;
@@ -545,7 +545,7 @@ void CPlayer::SendDisconnect(int FakeID)
 	ClientDropMsg.m_pReason = "";
 	ClientDropMsg.m_Silent = 1;
 
-	Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL|MSGFLAG_NORECORD|MSGFLAG_NOTRANSLATE, m_ClientId);
+	Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
 }
 
 void CPlayer::OnDisconnect()
@@ -879,7 +879,7 @@ int CPlayer::Pause(int State, bool Force)
 
 		GameServer()->Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, m_ClientId);
 
-		if (m_Paused == PAUSE_NONE)
+		if(m_Paused == PAUSE_NONE)
 		{
 			GameServer()->m_PlayerMapping.ResetSeeOthers(m_ClientId);
 		}
