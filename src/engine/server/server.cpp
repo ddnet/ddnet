@@ -1526,8 +1526,17 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					return;
 				}
 
+				int NumConnectedClients = 0;
+				for(int i = 0; i < MaxClients(); ++i)
+				{
+					if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+					{
+						NumConnectedClients++;
+					}
+				}
+
 				// reserved slot
-				if(ClientId >= Config()->m_SvMaxClients - Config()->m_SvReservedSlots && !CheckReservedSlotAuth(ClientId, pPassword))
+				if(NumConnectedClients >= Config()->m_SvMaxClients - Config()->m_SvReservedSlots && !CheckReservedSlotAuth(ClientId, pPassword))
 				{
 					m_NetServer.Drop(ClientId, "This server is full");
 					return;
