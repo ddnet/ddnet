@@ -33,6 +33,7 @@ class CCharacter : public CEntity
 
 public:
 	CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput);
+	~CCharacter() override;
 
 	void Reset() override;
 	void Destroy() override;
@@ -168,7 +169,7 @@ private:
 
 	// DDRace
 
-	void SnapCharacter(int SnappingClient, int Id);
+	void SnapCharacter(int SnappingClient, int MapId);
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void SetTimeCheckpoint(int TimeCheckpoint);
 	void HandleTiles(int Index);
@@ -186,6 +187,14 @@ private:
 
 	bool m_SetSavePos[NUM_RESCUEMODES];
 	CSaveTee m_RescueTee[NUM_RESCUEMODES];
+
+	enum EUntranslatedMap
+	{
+		ID_HOOK,
+		ID_WEAPON,
+		NUM_IDS
+	};
+	int m_aUntranslatedId[EUntranslatedMap::NUM_IDS];
 
 public:
 	CGameTeams *Teams() { return m_pTeams; }
@@ -258,6 +267,7 @@ public:
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Core.m_Ninja.m_CurrentMoveTime = CurrentMoveTime; }
 
 	int GetLastAction() const { return m_LastAction; }
+	bool IsIdle() const { return !m_SavedInput.m_Direction && !m_SavedInput.m_Hook && !m_SavedInput.m_Jump && !(m_SavedInput.m_Fire & 1); }
 
 	bool HasTelegunGun() const { return m_Core.m_HasTelegunGun; }
 	bool HasTelegunGrenade() const { return m_Core.m_HasTelegunGrenade; }
