@@ -180,6 +180,14 @@ private:
 	bool m_SetSavePos[NUM_RESCUEMODES];
 	CSaveTee m_RescueTee[NUM_RESCUEMODES];
 
+	enum EUntranslatedMap
+	{
+		ID_HOOK,
+		ID_WEAPON,
+		NUM_IDS
+	};
+	int m_aUntranslatedID[EUntranslatedMap::NUM_IDS];
+
 public:
 	CGameTeams *Teams() { return m_pTeams; }
 	void SetTeams(CGameTeams *pTeams);

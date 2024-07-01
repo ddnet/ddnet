@@ -76,7 +76,7 @@ void PickupType_SevenToSix(int Type7, int &Type6, int &SubType6)
 int PickupType_SixToSeven(int Type6, int SubType6)
 {
 	if(Type6 == POWERUP_WEAPON)
-		return SubType6 == WEAPON_SHOTGUN ? protocol7::PICKUP_SHOTGUN : SubType6 == WEAPON_GRENADE ? protocol7::PICKUP_GRENADE : protocol7::PICKUP_LASER;
+		return SubType6 == WEAPON_SHOTGUN ? protocol7::PICKUP_SHOTGUN : SubType6 == WEAPON_GRENADE ? protocol7::PICKUP_GRENADE : SubType6 == WEAPON_LASER ? protocol7::PICKUP_LASER : SubType6 == WEAPON_GUN ? protocol7::PICKUP_GUN : protocol7::PICKUP_HAMMER;
 	else if(Type6 == POWERUP_NINJA)
 		return protocol7::PICKUP_NINJA;
 	else if(Type6 == POWERUP_ARMOR)
