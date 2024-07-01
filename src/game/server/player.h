@@ -56,6 +56,9 @@ public:
 	void PostPostTick();
 	void Snap(int SnappingClient);
 	void FakeSnap();
+	void SendConnect(int FakeID, int ClientID);
+	void SendDisconnect(int FakeID);
+	int m_aStrongWeakID[LEGACY_MAX_CLIENTS];
 
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
@@ -84,6 +87,7 @@ public:
 
 	// used for spectator mode
 	int m_SpectatorId;
+	void SetSpectatorId(int Id);
 
 	bool m_IsReady;
 

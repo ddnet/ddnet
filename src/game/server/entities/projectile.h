@@ -51,8 +51,8 @@ private:
 
 public:
 	void SetBouncing(int Value);
-	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj);
-	void FillExtraInfo(CNetObj_DDNetProjectile *pProj);
+	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int SnappingClient);
+	void FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClient);
 
 	virtual int GetOwnerId() const override { return m_Owner; }
 };
