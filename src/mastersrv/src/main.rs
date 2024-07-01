@@ -898,7 +898,7 @@ async fn main() {
         .arg(Arg::with_name("locations")
             .long("locations")
             .value_name("LOCATIONS")
-            .help("IP to continent locations database filename (CSV file with network,continent_code header).")
+            .help("IP to continent locations database filename (libloc format, can be obtained from https://location.ipfire.org/databases/1/location.db.xz).")
         )
         .arg(Arg::with_name("write-addresses")
             .long("write-addresses")

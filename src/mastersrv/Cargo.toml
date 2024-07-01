@@ -16,11 +16,10 @@ clap = { version = "2.34.0", default-features = false, features = [
   "suggestions",
   "wrap_help",
 ] }
-csv = "1.1.6"
 env_logger = "0.8.3"
 headers = "0.3.7"
 hex = "0.4.3"
-ipnet = { version = "2.5.0", features = ["serde"] }
+libloc = "0.1.0"
 log = "0.4.17"
 mime = "0.3.16"
 rand = "0.8.4"
