@@ -309,10 +309,16 @@ mod ffi {
         /// # result = result_param;
         /// assert_eq!(result.GetVictim(), 63);
         /// # }
+        /// // …
+        /// # 130 => {
+        /// let result: &IConsole_IResult /* = `command all` last invocation */;
+        /// # result = result_param;
+        /// assert_eq!(result.GetVictim(), 127);
+        /// # }
         /// # _ => {}
         /// # }
         /// # }
-        /// # assert!(executed == 67);
+        /// # assert!(executed == 131);
         /// ```
         pub fn GetVictim(self: &IConsole_IResult) -> i32;
 
