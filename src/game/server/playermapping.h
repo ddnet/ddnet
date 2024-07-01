@@ -17,7 +17,8 @@ class CPlayerMapping
 
 	struct PlayerMap
 	{
-		enum SSeeOthers {
+		enum SSeeOthers
+		{
 			STATE_NONE = -1,
 			STATE_PAGE_FIRST,
 			STATE_PAGE_SECOND,

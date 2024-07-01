@@ -140,7 +140,7 @@ void CCharacter::Destroy()
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = 0;
 	m_Alive = false;
 	SetSolo(false);
-	for (int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
+	for(int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
 		Server()->SnapFreeId(m_aUntranslatedID[i]);
 }
 
@@ -1228,7 +1228,7 @@ void CCharacter::Snap(int SnappingClient)
 
 	// translate id, if we are not in the map of the other person display us as weapon and our hook as a laser
 	int Id = m_pPlayer->GetCid();
-	if (SnappingClient > -1 && !Server()->Translate(Id, SnappingClient))
+	if(SnappingClient > -1 && !Server()->Translate(Id, SnappingClient))
 	{
 		int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 		bool Sixup = Server()->IsSixup(SnappingClient);
@@ -1236,10 +1236,10 @@ void CCharacter::Snap(int SnappingClient)
 		int Type = Subtype == WEAPON_NINJA ? POWERUP_NINJA : POWERUP_WEAPON;
 		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_aUntranslatedID[EUntranslatedMap::ID_WEAPON], m_Pos, Type, Subtype, 0);
 
-		if (m_Core.m_HookState != HOOK_IDLE && m_Core.m_HookState != HOOK_RETRACTED)
+		if(m_Core.m_HookState != HOOK_IDLE && m_Core.m_HookState != HOOK_RETRACTED)
 		{
 			CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aUntranslatedID[EUntranslatedMap::ID_HOOK], sizeof(CNetObj_Laser)));
-			if (!pLaser)
+			if(!pLaser)
 				return;
 
 			pLaser->m_X = round_to_int(m_Core.m_HookPos.x);
@@ -2430,7 +2430,7 @@ void CCharacter::DDRaceInit()
 		GameServer()->SendStartWarning(GetPlayer()->GetCid(), "Please join a team before you start");
 	}
 
-	for (int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
+	for(int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
 		m_aUntranslatedID[i] = Server()->SnapNewId();
 }
 

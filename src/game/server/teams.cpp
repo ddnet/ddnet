@@ -602,15 +602,15 @@ void CGameTeams::SendTeamsState(int ClientId)
 	{
 		// see others selector
 		int Indicator = GameServer()->m_PlayerMapping.GetSeeOthersInd(ClientId, i);
-		if (Indicator != -1)
+		if(Indicator != -1)
 		{
 			int Team = -1;
-			if (Indicator == CPlayerMapping::SEE_OTHERS_IND_BUTTON)
+			if(Indicator == CPlayerMapping::SEE_OTHERS_IND_BUTTON)
 				Team = LegacyTeams ? 49 : 25;
-			else if (Indicator == CPlayerMapping::SEE_OTHERS_IND_PLAYER)
+			else if(Indicator == CPlayerMapping::SEE_OTHERS_IND_PLAYER)
 				Team = LegacyTeams ? 28 : 24;
 
-			if (Team != -1)
+			if(Team != -1)
 			{
 				Msg.AddInt(Team);
 				continue;
@@ -619,12 +619,12 @@ void CGameTeams::SendTeamsState(int ClientId)
 
 		int Team = 0;
 		int ID = i;
-		if (Server()->ReverseTranslate(ID, ClientId))
+		if(Server()->ReverseTranslate(ID, ClientId))
 		{
 			Team = m_Core.Team(ID);
-			if (Team == TEAM_SUPER)
+			if(Team == TEAM_SUPER)
 				Team = LEGACY_MAX_CLIENTS;
-			else if (Team > LEGACY_MAX_CLIENTS)
+			else if(Team > LEGACY_MAX_CLIENTS)
 				Team = 0;
 		}
 		Msg.AddInt(Team);

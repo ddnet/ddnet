@@ -58,7 +58,7 @@ void CEventHandler::Snap(int SnappingClient)
 				int Size = m_aSizes[i];
 				const char *pData = &m_aData[m_aOffsets[i]];
 
-				if (Type == NETEVENTTYPE_DEATH)
+				if(Type == NETEVENTTYPE_DEATH)
 				{
 					CNetEvent_Death *pDeath = (CNetEvent_Death *)pData;
 					// save real id
@@ -66,7 +66,7 @@ void CEventHandler::Snap(int SnappingClient)
 
 					// translate id
 					int ID = pDeath->m_ClientId;
-					if (!GameServer()->Server()->Translate(ID, SnappingClient))
+					if(!GameServer()->Server()->Translate(ID, SnappingClient))
 						continue;
 					pDeath->m_ClientId = ID;
 

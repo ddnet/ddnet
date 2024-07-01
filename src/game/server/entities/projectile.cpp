@@ -385,7 +385,7 @@ bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int Snapp
 	float Angle = -std::atan2(m_Direction.x, m_Direction.y);
 
 	int Owner = m_Owner;
-	if (!Server()->Translate(Owner, SnappingClient))
+	if(!Server()->Translate(Owner, SnappingClient))
 		Owner = -1;
 
 	int Data = 0;
@@ -431,7 +431,7 @@ void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClie
 	}
 
 	int Owner = m_Owner;
-	if (!Server()->Translate(Owner, SnappingClient))
+	if(!Server()->Translate(Owner, SnappingClient))
 		Owner = -1;
 
 	if(Owner < 0)

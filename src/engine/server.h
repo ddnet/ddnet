@@ -155,26 +155,26 @@ public:
 
 		// 128 player translation
 		int *pID = MsgCopy.m_Mode == WhisperSend ? &MsgCopy.m_TargetId : &MsgCopy.m_ClientId;
-		if (*pID >= 0 && ((Flags&MSGFLAG_NONAME) || (MsgCopy.m_Mode == protocol7::CHAT_TEAM && *pID != ClientID) || MsgCopy.m_Mode == WhisperRecv || !Translate(*pID, ClientID)))
+		if(*pID >= 0 && ((Flags & MSGFLAG_NONAME) || (MsgCopy.m_Mode == protocol7::CHAT_TEAM && *pID != ClientID) || MsgCopy.m_Mode == WhisperRecv || !Translate(*pID, ClientID)))
 		{
 			str_format(aBuf, sizeof(aBuf), "%s: %s", ClientName(*pID), MsgCopy.m_pMessage);
 			MsgCopy.m_pMessage = aBuf;
 
 			// with noname and sending a whisper to ourselves show our own client id as targetid because otherwise it would be two times id 63 with same text which gets shown twice the same msg
-			if (MsgCopy.m_Mode == WhisperSend && *pID == ClientID)
+			if(MsgCopy.m_Mode == WhisperSend && *pID == ClientID)
 				Translate(*pID, ClientID);
 			else
 				*pID = LEGACY_MAX_CLIENTS - 1;
 		}
 
-		if (IsSixup(ClientID))
+		if(IsSixup(ClientID))
 		{
-			if (MsgCopy.m_Mode == WhisperSend)
+			if(MsgCopy.m_Mode == WhisperSend)
 			{
 				Translate(MsgCopy.m_ClientId, ClientID);
 				MsgCopy.m_Mode = protocol7::CHAT_WHISPER;
 			}
-			else if (MsgCopy.m_Mode == WhisperRecv)
+			else if(MsgCopy.m_Mode == WhisperRecv)
 			{
 				Translate(MsgCopy.m_TargetId, ClientID);
 				MsgCopy.m_Mode = protocol7::CHAT_WHISPER;
@@ -196,8 +196,10 @@ public:
 	{
 		CNetMsg_Sv_KillMsg MsgCopy;
 		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
-		if (!Translate(MsgCopy.m_Victim, ClientID)) return 0;
-		if (!Translate(MsgCopy.m_Killer, ClientID)) MsgCopy.m_Killer = MsgCopy.m_Victim;
+		if(!Translate(MsgCopy.m_Victim, ClientID))
+			return 0;
+		if(!Translate(MsgCopy.m_Killer, ClientID))
+			MsgCopy.m_Killer = MsgCopy.m_Victim;
 		return SendPackMsgOne(&MsgCopy, Flags, ClientID);
 	}
 
@@ -226,21 +228,22 @@ public:
 	{
 		protocol7::CNetMsg_Sv_ClientInfo MsgCopy;
 		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
-		return (Flags&MSGFLAG_NOTRANSLATE || Translate(MsgCopy.m_ClientId, ClientID)) && SendPackMsgOne(&MsgCopy, Flags, ClientID);
+		return (Flags & MSGFLAG_NOTRANSLATE || Translate(MsgCopy.m_ClientId, ClientID)) && SendPackMsgOne(&MsgCopy, Flags, ClientID);
 	}
 
 	int SendPackMsgTranslate(const protocol7::CNetMsg_Sv_ClientDrop *pMsg, int Flags, int ClientID)
 	{
 		protocol7::CNetMsg_Sv_ClientDrop MsgCopy;
 		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
-		return (Flags&MSGFLAG_NOTRANSLATE || Translate(MsgCopy.m_ClientId, ClientID)) && SendPackMsgOne(&MsgCopy, Flags, ClientID);
+		return (Flags & MSGFLAG_NOTRANSLATE || Translate(MsgCopy.m_ClientId, ClientID)) && SendPackMsgOne(&MsgCopy, Flags, ClientID);
 	}
 
 	int SendPackMsgTranslate(const CNetMsg_Sv_VoteSet *pMsg, int Flags, int ClientID)
 	{
 		protocol7::CNetMsg_Sv_VoteSet MsgCopy;
 		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
-		return (Flags&MSGFLAG_NOTRANSLATE || Translate(MsgCopy.m_ClientId, ClientID)) && SendPackMsgOne(&MsgCopy, Flags, ClientID);	}
+		return (Flags & MSGFLAG_NOTRANSLATE || Translate(MsgCopy.m_ClientId, ClientID)) && SendPackMsgOne(&MsgCopy, Flags, ClientID);
+	}
 
 	int SendPackMsgTranslate(const CNetMsg_Sv_RaceFinish *pMsg, int Flags, int ClientID)
 	{
@@ -271,23 +274,23 @@ public:
 		return SendMsg(&Packer, Flags, ClientId);
 	}
 
-	bool Translate(int& Target, int Client)
+	bool Translate(int &Target, int Client)
 	{
-		if (Target < 0 || Target >= MAX_CLIENTS)
+		if(Target < 0 || Target >= MAX_CLIENTS)
 			return false;
 		int *pMap = GetReverseIdMap(Client);
-		if (pMap[Target] == -1)
+		if(pMap[Target] == -1)
 			return false;
 		Target = pMap[Target];
 		return true;
 	}
 
-	bool ReverseTranslate(int& Target, int Client)
+	bool ReverseTranslate(int &Target, int Client)
 	{
-		if (Target < 0 || Target >= LEGACY_MAX_CLIENTS)
+		if(Target < 0 || Target >= LEGACY_MAX_CLIENTS)
 			return false;
 		int *pMap = GetIdMap(Client);
-		if (pMap[Target] == -1)
+		if(pMap[Target] == -1)
 			return false;
 		Target = pMap[Target];
 		return true;

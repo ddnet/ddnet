@@ -501,7 +501,7 @@ bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, cons
 		pObj->m_Subtype = Subtype;
 		pObj->m_SwitchNumber = SwitchNumber;
 		pObj->m_Flags = 0;
-		if (!Server()->Translate(pObj->m_Owner, Context.GetCid()))
+		if(!Server()->Translate(pObj->m_Owner, Context.GetCid()))
 			pObj->m_Owner = -1;
 	}
 	else
@@ -2591,7 +2591,7 @@ void CGameContext::OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMod
 
 	int SpectatorId = clamp(pMsg->m_SpectatorId, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
 
-	if (SpectatorId == m_PlayerMapping.GetSeeOthersID(ClientId))
+	if(SpectatorId == m_PlayerMapping.GetSeeOthersID(ClientId))
 	{
 		m_PlayerMapping.DoSeeOthers(ClientId);
 		return;
@@ -3444,7 +3444,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 	else if(str_comp_nocase(pType, "spectate") == 0)
 	{
 		int SpectateId = str_toint(pValue);
-		if (!pSelf->Server()->ReverseTranslate(SpectateId, pResult->m_ClientId))
+		if(!pSelf->Server()->ReverseTranslate(SpectateId, pResult->m_ClientId))
 			return;
 		if(SpectateId < 0 || SpectateId >= MAX_CLIENTS || !pSelf->m_apPlayers[SpectateId] || pSelf->m_apPlayers[SpectateId]->GetTeam() == TEAM_SPECTATORS)
 		{
@@ -4970,5 +4970,5 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 
 bool CGameContext::FlagsUsed()
 {
-	return (m_pController->GetGameFlags()&GAMEFLAG_FLAGS);
+	return (m_pController->GetGameFlags() & GAMEFLAG_FLAGS);
 }
