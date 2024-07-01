@@ -408,7 +408,7 @@ impl Servers {
                 });
             }
             hash_map::Entry::Occupied(mut o) => {
-                let mut server = &mut o.get_mut();
+                let server = &mut o.get_mut();
                 if insert_addr {
                     server.addresses.push(addr);
                     server.addresses.sort_unstable();
