@@ -2082,6 +2082,13 @@ void CGameContext::ConPracticeJetpack(IConsole::IResult *pResult, void *pUserDat
 		ConJetpack(pResult, pUserData);
 }
 
+void CGameContext::ConPracticeSetJumps(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConSetJumps(pResult, pUserData);
+}
+
 void CGameContext::ConPracticeWeapons(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2130,6 +2137,7 @@ void CGameContext::ConPracticeNinja(IConsole::IResult *pResult, void *pUserData)
 	if(pSelf->GetPracticeCharacter(pResult))
 		ConNinja(pResult, pUserData);
 }
+
 void CGameContext::ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

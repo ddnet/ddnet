@@ -3592,6 +3592,7 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("laser", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConLaser, this, "Gives a laser to you");
 	Console()->Register("rifle", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConLaser, this, "Gives a laser to you");
 	Console()->Register("jetpack", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConJetpack, this, "Gives jetpack to you");
+	Console()->Register("setjumps", "i[jumps]", CFGFLAG_SERVER | CMDFLAG_TEST, ConSetJumps, this, "Gives you as many jumps as you specify");
 	Console()->Register("weapons", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConWeapons, this, "Gives all weapons to you");
 	Console()->Register("unshotgun", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnShotgun, this, "Removes the shotgun from you");
 	Console()->Register("ungrenade", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnGrenade, this, "Removes the grenade launcher from you");
@@ -3721,6 +3722,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("laser", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeLaser, this, "Gives a laser to you");
 	Console()->Register("rifle", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeLaser, this, "Gives a laser to you");
 	Console()->Register("jetpack", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeJetpack, this, "Gives jetpack to you");
+	Console()->Register("setjumps", "i[jumps]", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeSetJumps, this, "Gives you as many jumps as you specify");
 	Console()->Register("weapons", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeWeapons, this, "Gives all weapons to you");
 	Console()->Register("unshotgun", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnShotgun, this, "Removes the shotgun from you");
 	Console()->Register("ungrenade", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnGrenade, this, "Removes the grenade launcher from you");

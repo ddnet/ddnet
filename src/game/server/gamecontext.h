@@ -388,6 +388,7 @@ private:
 	static void ConGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConLaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConJetpack(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetJumps(IConsole::IResult *pResult, void *pUserData);
 	static void ConWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnGrenade(IConsole::IResult *pResult, void *pUserData);
@@ -474,6 +475,7 @@ private:
 	static void ConPracticeGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeLaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeJetpack(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeSetJumps(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnGrenade(IConsole::IResult *pResult, void *pUserData);
