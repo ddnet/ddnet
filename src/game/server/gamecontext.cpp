@@ -838,10 +838,12 @@ void CGameContext::SendVoteSet(int ClientId)
 				// 0.7 clients need the client id in order to show the vote and the name of the caller, so its important that we get him in
 				m_PlayerMapping.ForceInsertPlayer(m_VoteCreator, i);
 				int id = m_VoteCreator;
-				Server()->Translate(id, i);
-				Msg7.m_ClientId = id;
-				Server()->SendPackMsg(&Msg7, MSGFLAG_VITAL, i);
-				Msg7.m_ClientId = m_VoteCreator;
+				if(Server()->Translate(id, i))
+				{
+					Msg7.m_ClientId = id;
+					Server()->SendPackMsg(&Msg7, MSGFLAG_VITAL, i);
+					Msg7.m_ClientId = m_VoteCreator;
+				}
 			}
 		}
 	}
@@ -857,10 +859,12 @@ void CGameContext::SendVoteSet(int ClientId)
 			// 0.7 clients need the client id in order to show the vote and the name of the caller, so its important that we get him in
 			m_PlayerMapping.ForceInsertPlayer(m_VoteCreator, Msg7.m_ClientId = m_VoteCreator);
 			int id = m_VoteCreator;
-			Server()->Translate(id, ClientId);
-			Msg7.m_ClientId = id;
-			Server()->SendPackMsg(&Msg7, MSGFLAG_VITAL, ClientId);
-			Msg7.m_ClientId = m_VoteCreator;
+			if(Server()->Translate(id, ClientId))
+			{
+				Msg7.m_ClientId = id;
+				Server()->SendPackMsg(&Msg7, MSGFLAG_VITAL, ClientId);
+				Msg7.m_ClientId = m_VoteCreator;
+			}
 		}
 	}
 }
