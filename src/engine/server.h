@@ -238,7 +238,7 @@ public:
 		return (Flags & MSGFLAG_NOTRANSLATE || Translate(MsgCopy.m_ClientId, ClientID)) && SendPackMsgOne(&MsgCopy, Flags, ClientID);
 	}
 
-	int SendPackMsgTranslate(const CNetMsg_Sv_VoteSet *pMsg, int Flags, int ClientID)
+	int SendPackMsgTranslate(const protocol7::CNetMsg_Sv_VoteSet *pMsg, int Flags, int ClientID)
 	{
 		protocol7::CNetMsg_Sv_VoteSet MsgCopy;
 		mem_copy(&MsgCopy, pMsg, sizeof(MsgCopy));
