@@ -1527,6 +1527,7 @@ set(EXPECTED_DATA
   mapres/water.png
   mapres/winter_doodads.png
   mapres/winter_main.png
+  mapres/winter_main_0.7.png
   mapres/winter_mountains.png
   mapres/winter_mountains2.png
   mapres/winter_mountains3.png
