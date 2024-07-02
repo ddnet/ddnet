@@ -286,7 +286,17 @@ void CSpectator::OnRender()
 		++TotalPlayers;
 	}
 
-	if(TotalPlayers > 32)
+	if(TotalPlayers > 64)
+	{
+		FontSize = 12.0f;
+		LineHeight = 15.0f;
+		TeeSizeMod = 0.3f;
+		PerLine = 32;
+		RoundRadius = 5.0f;
+		BoxMove = 3.0f;
+		BoxOffset = 6.0f;
+	}
+	else if(TotalPlayers > 32)
 	{
 		FontSize = 18.0f;
 		LineHeight = 30.0f;

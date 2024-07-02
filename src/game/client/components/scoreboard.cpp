@@ -225,6 +225,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	const CNetObj_GameData *pGameDataObj = GameClient()->m_Snap.m_pGameDataObj;
 	const bool TimeScore = GameClient()->m_GameInfo.m_TimeScore;
 	const int NumPlayers = CountEnd - CountStart;
+	const bool LowScoreboardWidth = Scoreboard.w < 700.0f;
 
 	// calculate measurements
 	float LineHeight;
@@ -264,7 +265,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 		RoundRadius = 5.0f;
 		FontSize = 20.0f;
 	}
-	else
+	else if(NumPlayers <= 32)
 	{
 		LineHeight = 20.0f;
 		TeeSizeMod = 0.4f;
@@ -272,19 +273,35 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 		RoundRadius = 5.0f;
 		FontSize = 16.0f;
 	}
+	else if(LowScoreboardWidth)
+	{
+		LineHeight = 15.0f;
+		TeeSizeMod = 0.25f;
+		Spacing = 0.0f;
+		RoundRadius = 2.0f;
+		FontSize = 14.0f;
+	}
+	else
+	{
+		LineHeight = 10.0f;
+		TeeSizeMod = 0.2f;
+		Spacing = 0.0f;
+		RoundRadius = 2.0f;
+		FontSize = 10.0f;
+	}
 
-	const float ScoreOffset = Scoreboard.x + 40.0f;
+	const float ScoreOffset = Scoreboard.x + 20.0f;
 	const float ScoreLength = TextRender()->TextWidth(FontSize, TimeScore ? "00:00:00" : "99999");
 	const float TeeOffset = ScoreOffset + ScoreLength + 20.0f;
 	const float TeeLength = 60.0f * TeeSizeMod;
 	const float NameOffset = TeeOffset + TeeLength;
-	const float NameLength = 300.0f - TeeLength;
+	const float NameLength = (LowScoreboardWidth ? 180.0f : 300.0f) - TeeLength;
 	const float CountryLength = (LineHeight - Spacing - TeeSizeMod * 5.0f) * 2.0f;
-	const float PingLength = 65.0f;
-	const float PingOffset = Scoreboard.x + Scoreboard.w - PingLength - 10.0f - 10.0f;
+	const float PingLength = 55.0f;
+	const float PingOffset = Scoreboard.x + Scoreboard.w - PingLength - 20.0f;
 	const float CountryOffset = PingOffset - CountryLength;
-	const float ClanLength = Scoreboard.w - ((NameOffset - Scoreboard.x) + NameLength) - (Scoreboard.w - (CountryOffset - Scoreboard.x));
-	const float ClanOffset = CountryOffset - ClanLength;
+	const float ClanOffset = NameOffset + NameLength + 5.0f;
+	const float ClanLength = CountryOffset - ClanOffset - 5.0f;
 
 	// render headlines
 	const float HeadlineFontsize = 22.0f;
@@ -639,7 +656,7 @@ void CScoreboard::OnRender()
 		{
 			RenderScoreboard(Scoreboard, TEAM_RED, 0, NumPlayers);
 		}
-		else
+		else if(NumPlayers <= 64)
 		{
 			int PlayersPerSide;
 			if(NumPlayers <= 24)
@@ -655,6 +672,18 @@ void CScoreboard::OnRender()
 			Scoreboard.VSplitMid(&LeftScoreboard, &RightScoreboard);
 			RenderScoreboard(LeftScoreboard, TEAM_RED, 0, PlayersPerSide);
 			RenderScoreboard(RightScoreboard, TEAM_RED, PlayersPerSide, 2 * PlayersPerSide);
+		}
+		else
+		{
+			const int NumColumns = 3;
+			const int PlayersPerColumn = std::ceil(128.0f / NumColumns);
+			CUIRect RemainingScoreboard = Scoreboard;
+			for(int i = 0; i < NumColumns; ++i)
+			{
+				CUIRect Column;
+				RemainingScoreboard.VSplitLeft(Scoreboard.w / NumColumns, &Column, &RemainingScoreboard);
+				RenderScoreboard(Column, TEAM_RED, i * PlayersPerColumn, (i + 1) * PlayersPerColumn);
+			}
 		}
 	}
 
