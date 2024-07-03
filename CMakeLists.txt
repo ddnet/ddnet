@@ -911,6 +911,7 @@ else()
   endif()
 endif()
 list(APPEND CARGO_BUILD $<$<NOT:$<CONFIG:Debug>>:--release>)
+list(APPEND CARGO_BUILD --manifest-path "${PROJECT_SOURCE_DIR}/Cargo.toml")
 
 if(CMAKE_OSX_ARCHITECTURES)
   set(RUST_OSX_ARCHITECTURES)
@@ -949,7 +950,7 @@ if(NOT CMAKE_OSX_ARCHITECTURES)
   add_custom_command(
     OUTPUT ${RUST_OUTPUTS}
     COMMAND ${CARGO_BUILD}
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     USES_TERMINAL
     DEPENDS ${RUST_SRC}
   )
@@ -982,7 +983,7 @@ else()
     add_custom_command(
       OUTPUT ${RUST_OUTPUTS}
       COMMAND ${CARGO_BUILD} --target=${arch}
-      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
       USES_TERMINAL
       DEPENDS ${RUST_SRC}
     )
