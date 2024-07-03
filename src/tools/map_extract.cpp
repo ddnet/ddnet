@@ -102,8 +102,11 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		dbg_msg("map_extract", "writing sound: %s (%d B)", aBuf, SoundDataSize);
 
 		IOHANDLE Opus = io_open(aBuf, IOFLAG_WRITE);
-		io_write(Opus, Reader.GetData(pItem->m_SoundData), SoundDataSize);
-		io_close(Opus);
+		if(Opus)
+		{
+			io_write(Opus, Reader.GetData(pItem->m_SoundData), SoundDataSize);
+			io_close(Opus);
+		}
 	}
 
 	return Reader.Close();
