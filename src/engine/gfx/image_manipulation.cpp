@@ -121,18 +121,15 @@ static float CubicHermite(float A, float B, float C, float D, float t)
 	return (a * t * t * t) + (b * t * t) + (c * t) + d;
 }
 
-static void GetPixelClamped(const uint8_t *pSourceImage, int x, int y, uint32_t W, uint32_t H, size_t BPP, uint8_t aTmp[])
+static void GetPixelClamped(const uint8_t *pSourceImage, int x, int y, uint32_t W, uint32_t H, size_t BPP, uint8_t aSample[4])
 {
 	x = clamp<int>(x, 0, (int)W - 1);
 	y = clamp<int>(y, 0, (int)H - 1);
 
-	for(size_t i = 0; i < BPP; i++)
-	{
-		aTmp[i] = pSourceImage[x * BPP + (W * BPP * y) + i];
-	}
+	mem_copy(aSample, &pSourceImage[x * BPP + (W * BPP * y)], BPP);
 }
 
-static void SampleBicubic(const uint8_t *pSourceImage, float u, float v, uint32_t W, uint32_t H, size_t BPP, uint8_t aSample[])
+static void SampleBicubic(const uint8_t *pSourceImage, float u, float v, uint32_t W, uint32_t H, size_t BPP, uint8_t aSample[4])
 {
 	float X = (u * W) - 0.5f;
 	int xInt = (int)X;
@@ -142,79 +139,37 @@ static void SampleBicubic(const uint8_t *pSourceImage, float u, float v, uint32_
 	int yInt = (int)Y;
 	float yFract = Y - std::floor(Y);
 
-	uint8_t aPX00[4];
-	uint8_t aPX10[4];
-	uint8_t aPX20[4];
-	uint8_t aPX30[4];
-
-	uint8_t aPX01[4];
-	uint8_t aPX11[4];
-	uint8_t aPX21[4];
-	uint8_t aPX31[4];
-
-	uint8_t aPX02[4];
-	uint8_t aPX12[4];
-	uint8_t aPX22[4];
-	uint8_t aPX32[4];
-
-	uint8_t aPX03[4];
-	uint8_t aPX13[4];
-	uint8_t aPX23[4];
-	uint8_t aPX33[4];
-
-	GetPixelClamped(pSourceImage, xInt - 1, yInt - 1, W, H, BPP, aPX00);
-	GetPixelClamped(pSourceImage, xInt + 0, yInt - 1, W, H, BPP, aPX10);
-	GetPixelClamped(pSourceImage, xInt + 1, yInt - 1, W, H, BPP, aPX20);
-	GetPixelClamped(pSourceImage, xInt + 2, yInt - 1, W, H, BPP, aPX30);
-
-	GetPixelClamped(pSourceImage, xInt - 1, yInt + 0, W, H, BPP, aPX01);
-	GetPixelClamped(pSourceImage, xInt + 0, yInt + 0, W, H, BPP, aPX11);
-	GetPixelClamped(pSourceImage, xInt + 1, yInt + 0, W, H, BPP, aPX21);
-	GetPixelClamped(pSourceImage, xInt + 2, yInt + 0, W, H, BPP, aPX31);
-
-	GetPixelClamped(pSourceImage, xInt - 1, yInt + 1, W, H, BPP, aPX02);
-	GetPixelClamped(pSourceImage, xInt + 0, yInt + 1, W, H, BPP, aPX12);
-	GetPixelClamped(pSourceImage, xInt + 1, yInt + 1, W, H, BPP, aPX22);
-	GetPixelClamped(pSourceImage, xInt + 2, yInt + 1, W, H, BPP, aPX32);
-
-	GetPixelClamped(pSourceImage, xInt - 1, yInt + 2, W, H, BPP, aPX03);
-	GetPixelClamped(pSourceImage, xInt + 0, yInt + 2, W, H, BPP, aPX13);
-	GetPixelClamped(pSourceImage, xInt + 1, yInt + 2, W, H, BPP, aPX23);
-	GetPixelClamped(pSourceImage, xInt + 2, yInt + 2, W, H, BPP, aPX33);
+	uint8_t aaaSamples[4][4][4];
+	for(int y = 0; y < 4; ++y)
+	{
+		for(int x = 0; x < 4; ++x)
+		{
+			GetPixelClamped(pSourceImage, xInt + x - 1, yInt + y - 1, W, H, BPP, aaaSamples[x][y]);
+		}
+	}
 
 	for(size_t i = 0; i < BPP; i++)
 	{
-		float Clmn0 = CubicHermite(aPX00[i], aPX10[i], aPX20[i], aPX30[i], xFract);
-		float Clmn1 = CubicHermite(aPX01[i], aPX11[i], aPX21[i], aPX31[i], xFract);
-		float Clmn2 = CubicHermite(aPX02[i], aPX12[i], aPX22[i], aPX32[i], xFract);
-		float Clmn3 = CubicHermite(aPX03[i], aPX13[i], aPX23[i], aPX33[i], xFract);
-
-		float Valuef = CubicHermite(Clmn0, Clmn1, Clmn2, Clmn3, yFract);
-
-		Valuef = clamp<float>(Valuef, 0.0f, 255.0f);
-
-		aSample[i] = (uint8_t)Valuef;
+		float aRows[4];
+		for(int y = 0; y < 4; ++y)
+		{
+			aRows[y] = CubicHermite(aaaSamples[0][y][i], aaaSamples[1][y][i], aaaSamples[2][y][i], aaaSamples[3][y][i], xFract);
+		}
+		aSample[i] = (uint8_t)clamp<float>(CubicHermite(aRows[0], aRows[1], aRows[2], aRows[3], yFract), 0.0f, 255.0f);
 	}
 }
 
 static void ResizeImage(const uint8_t *pSourceImage, uint32_t SW, uint32_t SH, uint8_t *pDestinationImage, uint32_t W, uint32_t H, size_t BPP)
 {
-	uint8_t aSample[4];
-	int y, x;
-
-	for(y = 0; y < (int)H; ++y)
+	for(int y = 0; y < (int)H; ++y)
 	{
 		float v = (float)y / (float)(H - 1);
-
-		for(x = 0; x < (int)W; ++x)
+		for(int x = 0; x < (int)W; ++x)
 		{
 			float u = (float)x / (float)(W - 1);
+			uint8_t aSample[4];
 			SampleBicubic(pSourceImage, u, v, SW, SH, BPP, aSample);
-
-			for(size_t i = 0; i < BPP; ++i)
-			{
-				pDestinationImage[x * BPP + ((W * BPP) * y) + i] = aSample[i];
-			}
+			mem_copy(&pDestinationImage[x * BPP + ((W * BPP) * y)], aSample, BPP);
 		}
 	}
 }
