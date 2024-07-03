@@ -2002,21 +2002,24 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 		(p).AddString(aBuf, 0); \
 	} while(0)
 
+	char aDemoName[256];
+	str_format(aDemoName, sizeof(aDemoName), "%s [128 player BETA]", Config()->m_SvName);
+
 	p.AddString(GameServer()->Version(), 32);
 	if(Type != SERVERINFO_VANILLA)
 	{
-		p.AddString(Config()->m_SvName, 256);
+		p.AddString(aDemoName, 256);
 	}
 	else
 	{
 		if(m_NetServer.MaxClients() <= VANILLA_MAX_CLIENTS)
 		{
-			p.AddString(Config()->m_SvName, 64);
+			p.AddString(aDemoName, 64);
 		}
 		else
 		{
 			const int MaxClients = maximum(ClientCount, m_NetServer.MaxClients() - Config()->m_SvReservedSlots);
-			str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", Config()->m_SvName, ClientCount, MaxClients);
+			str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", aDemoName, ClientCount, MaxClients);
 			p.AddString(aBuf, 64);
 		}
 	}
@@ -2206,10 +2209,13 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 		}
 	}
 
+	char aDemoName[256];
+	str_format(aDemoName, sizeof(aDemoName), "%s [128 player BETA]", Config()->m_SvName);
+
 	char aVersion[32];
 	str_format(aVersion, sizeof(aVersion), "0.7↔%s", GameServer()->Version());
 	Packer.AddString(aVersion, 32);
-	Packer.AddString(Config()->m_SvName, 64);
+	Packer.AddString(aDemoName, 64);
 	Packer.AddString(Config()->m_SvHostname, 128);
 	Packer.AddString(GetMapName(), 32);
 
