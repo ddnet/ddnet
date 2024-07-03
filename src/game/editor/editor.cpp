@@ -850,41 +850,14 @@ bool CEditor::CallbackSaveImage(const char *pFileName, int StorageType, void *pU
 
 	std::shared_ptr<CEditorImage> pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
 
-	EImageFormat OutputFormat;
-	switch(pImg->m_Format)
+	if(CImageLoader::SavePng(pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType), pFileName, *pImg))
 	{
-	case CImageInfo::FORMAT_RGB:
-		OutputFormat = IMAGE_FORMAT_RGB;
-		break;
-	case CImageInfo::FORMAT_RGBA:
-		OutputFormat = IMAGE_FORMAT_RGBA;
-		break;
-	case CImageInfo::FORMAT_SINGLE_COMPONENT:
-		OutputFormat = IMAGE_FORMAT_R;
-		break;
-	default:
-		dbg_assert(false, "Image has invalid format.");
-		return false;
-	};
-
-	TImageByteBuffer ByteBuffer;
-	SImageByteBuffer ImageByteBuffer(&ByteBuffer);
-	if(SavePng(OutputFormat, pImg->m_pData, ImageByteBuffer, pImg->m_Width, pImg->m_Height))
-	{
-		IOHANDLE File = pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType);
-		if(File)
-		{
-			io_write(File, &ByteBuffer.front(), ByteBuffer.size());
-			io_close(File);
-			pEditor->m_Dialog = DIALOG_NONE;
-			return true;
-		}
-		pEditor->ShowFileDialogError("Failed to open file '%s'.", pFileName);
-		return false;
+		pEditor->m_Dialog = DIALOG_NONE;
+		return true;
 	}
 	else
 	{
-		pEditor->ShowFileDialogError("Failed to write image to file.");
+		pEditor->ShowFileDialogError("Failed to write image to file '%s'.", pFileName);
 		return false;
 	}
 }
@@ -4401,18 +4374,13 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
 
-	if(!pImg->m_External && pImg->m_Format != CImageInfo::FORMAT_RGBA)
+	if(!pImg->m_External)
 	{
-		uint8_t *pRgbaData = static_cast<uint8_t *>(malloc((size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
-		ConvertToRGBA(pRgbaData, *pImg);
-		free(pImg->m_pData);
-		pImg->m_pData = pRgbaData;
-		pImg->m_Format = CImageInfo::FORMAT_RGBA;
-	}
-
-	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
-	{
-		DilateImage(pImg->m_pData, pImg->m_Width, pImg->m_Height);
+		ConvertToRgba(*pImg);
+		if(g_Config.m_ClEditorDilate == 1)
+		{
+			DilateImage(*pImg);
+		}
 	}
 
 	pImg->m_AutoMapper.Load(pImg->m_aName);
@@ -4473,18 +4441,13 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	pImg->m_pData = ImgInfo.m_pData;
 	pImg->m_External = IsVanillaImage(aBuf);
 
-	if(pImg->m_Format != CImageInfo::FORMAT_RGBA)
+	if(!pImg->m_External)
 	{
-		uint8_t *pRgbaData = static_cast<uint8_t *>(malloc((size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
-		ConvertToRGBA(pRgbaData, *pImg);
-		free(pImg->m_pData);
-		pImg->m_pData = pRgbaData;
-		pImg->m_Format = CImageInfo::FORMAT_RGBA;
-	}
-
-	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
-	{
-		DilateImage(pImg->m_pData, pImg->m_Width, pImg->m_Height);
+		ConvertToRgba(*pImg);
+		if(g_Config.m_ClEditorDilate == 1)
+		{
+			DilateImage(*pImg);
+		}
 	}
 
 	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;

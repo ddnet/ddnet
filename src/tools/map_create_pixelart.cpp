@@ -1,16 +1,16 @@
 #include <base/logger.h>
 #include <base/system.h>
+
 #include <engine/gfx/image_loader.h>
-#include <engine/graphics.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
+
 #include <game/mapitems.h>
 
 bool CreatePixelArt(const char[3][IO_MAX_PATH_LENGTH], const int[2], const int[2], int[2], const bool[2]);
 void InsertCurrentQuads(CDataFileReader &, CMapItemLayerQuads *, CQuad *);
 int InsertPixelArtQuads(CQuad *, int &, const CImageInfo &, const int[2], const int[2], const bool[2]);
 
-bool LoadPng(CImageInfo *, const char *);
 bool OpenMaps(const char[2][IO_MAX_PATH_LENGTH], CDataFileReader &, CDataFileWriter &);
 void SaveOutputMap(CDataFileReader &, CDataFileWriter &, CMapItemLayerQuads *, int, CQuad *, int);
 
@@ -73,7 +73,8 @@ int main(int argc, const char **argv)
 bool CreatePixelArt(const char aFilenames[3][IO_MAX_PATH_LENGTH], const int aLayerId[2], const int aStartingPos[2], int aPixelSizes[2], const bool aArtOptions[2])
 {
 	CImageInfo Img;
-	if(!LoadPng(&Img, aFilenames[2]))
+	int PngliteIncompatible;
+	if(!CImageLoader::LoadPng(io_open(aFilenames[2], IOFLAG_READ), aFilenames[2], Img, PngliteIncompatible))
 		return false;
 
 	aPixelSizes[0] = aPixelSizes[0] ? aPixelSizes[0] : GetImagePixelSize(Img);
@@ -227,7 +228,7 @@ bool GetPixelClamped(const CImageInfo &Img, size_t x, size_t y, uint8_t aPixel[4
 	aPixel[3] = 255;
 
 	const size_t PixelSize = Img.PixelSize();
-	for(size_t i = 0; i < PixelSize; i++)
+	for(size_t i = 0; i < minimum<size_t>(4, PixelSize); i++) // minimum is used here to avoid false positive stringop-overflow warning
 		aPixel[i] = Img.m_pData[x * PixelSize + (Img.m_Width * PixelSize * y) + i];
 
 	return aPixel[3] > 0;
@@ -313,54 +314,6 @@ CQuad CreateNewQuad(const float PosX, const float PosY, const int Width, const i
 	Quad.m_aPoints[4].y = aForcedPivot ? f2fx(aForcedPivot[1]) : y;
 
 	return Quad;
-}
-
-bool LoadPng(CImageInfo *pImg, const char *pFilename)
-{
-	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
-	if(!File)
-	{
-		dbg_msg("map_create_pixelart", "ERROR: Unable to open file %s", pFilename);
-		return false;
-	}
-
-	io_seek(File, 0, IOSEEK_END);
-	long int FileSize = io_tell(File);
-	if(FileSize <= 0)
-	{
-		io_close(File);
-		dbg_msg("map_create_pixelart", "ERROR: Failed to get file size (%ld). filename='%s'", FileSize, pFilename);
-		return false;
-	}
-	io_seek(File, 0, IOSEEK_START);
-	TImageByteBuffer ByteBuffer;
-	SImageByteBuffer ImageByteBuffer(&ByteBuffer);
-
-	ByteBuffer.resize(FileSize);
-	io_read(File, &ByteBuffer.front(), FileSize);
-	io_close(File);
-
-	uint8_t *pImgBuffer = NULL;
-	EImageFormat ImageFormat;
-	int PngliteIncompatible;
-
-	if(!LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
-	{
-		dbg_msg("map_create_pixelart", "ERROR: Unable to load a valid PNG from file %s", pFilename);
-		return false;
-	}
-
-	if(ImageFormat != IMAGE_FORMAT_RGBA && ImageFormat != IMAGE_FORMAT_RGB)
-	{
-		dbg_msg("map_create_pixelart", "ERROR: only RGB and RGBA PNG images are supported");
-		free(pImgBuffer);
-		return false;
-	}
-
-	pImg->m_pData = pImgBuffer;
-	pImg->m_Format = ImageFormat == IMAGE_FORMAT_RGB ? CImageInfo::FORMAT_RGB : CImageInfo::FORMAT_RGBA;
-
-	return true;
 }
 
 bool OpenMaps(const char pMapNames[2][IO_MAX_PATH_LENGTH], CDataFileReader &InputMap, CDataFileWriter &OutputMap)

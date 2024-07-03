@@ -52,29 +52,3 @@ void CEditorImage::AnalyseTileFlags()
 			}
 	}
 }
-
-bool CEditorImage::DataEquals(const CEditorImage &Other) const
-{
-	// If height, width or pixel size don't match, then data cannot be equal
-	const size_t ImgPixelSize = PixelSize();
-
-	if(Other.m_Height != m_Height || Other.m_Width != m_Width || Other.PixelSize() != ImgPixelSize)
-		return false;
-
-	const auto &&GetPixel = [&](uint8_t *pData, int x, int y, size_t p) -> uint8_t {
-		return pData[x * ImgPixelSize + (m_Width * ImgPixelSize * y) + p];
-	};
-
-	// Look through every pixel and check if there are any difference
-	for(size_t y = 0; y < m_Height; y += ImgPixelSize)
-	{
-		for(size_t x = 0; x < m_Width; x += ImgPixelSize)
-		{
-			for(size_t p = 0; p < ImgPixelSize; p++)
-				if(GetPixel(m_pData, x, y, p) != GetPixel(Other.m_pData, x, y, p))
-					return false;
-		}
-	}
-
-	return true;
-}

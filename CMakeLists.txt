@@ -2033,6 +2033,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   ghost.h
   graphics.h
   http.h
+  image.h
   input.h
   kernel.h
   keys.h
@@ -2139,6 +2140,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   websockets.h
 )
 set_src(ENGINE_GFX GLOB src/engine/gfx
+  image.cpp
   image_loader.cpp
   image_loader.h
   image_manipulation.cpp

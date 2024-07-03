@@ -3,12 +3,14 @@
 
 #include <base/logger.h>
 #include <base/system.h>
+
 #include <engine/gfx/image_loader.h>
-#include <engine/graphics.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
+
 #include <game/gamecore.h>
 #include <game/mapitems.h>
+
 /*
 	Usage: map_convert_07 <source map filepath> <dest map filepath>
 */
@@ -24,53 +26,6 @@ int g_Index = 0;
 int g_NextDataItemId = -1;
 
 int g_aImageIds[MAX_MAPIMAGES];
-
-int LoadPng(CImageInfo *pImg, const char *pFilename)
-{
-	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
-	if(File)
-	{
-		io_seek(File, 0, IOSEEK_END);
-		long int FileSize = io_tell(File);
-		if(FileSize <= 0)
-		{
-			io_close(File);
-			dbg_msg("map_convert_07", "failed to get file size (%ld). filename='%s'", FileSize, pFilename);
-			return false;
-		}
-		io_seek(File, 0, IOSEEK_START);
-		TImageByteBuffer ByteBuffer;
-		SImageByteBuffer ImageByteBuffer(&ByteBuffer);
-
-		ByteBuffer.resize(FileSize);
-		io_read(File, &ByteBuffer.front(), FileSize);
-
-		io_close(File);
-
-		uint8_t *pImgBuffer = NULL;
-		EImageFormat ImageFormat;
-		int PngliteIncompatible;
-		if(LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
-		{
-			pImg->m_pData = pImgBuffer;
-
-			if(ImageFormat == IMAGE_FORMAT_RGBA && pImg->m_Width <= (2 << 13) && pImg->m_Height <= (2 << 13))
-			{
-				pImg->m_Format = CImageInfo::FORMAT_RGBA;
-			}
-			else
-			{
-				dbg_msg("map_convert_07", "invalid image format. filename='%s'", pFilename);
-				return 0;
-			}
-		}
-		else
-			return 0;
-	}
-	else
-		return 0;
-	return 1;
-}
 
 bool CheckImageDimensions(void *pLayerItem, int LayerType, const char *pFilename)
 {
@@ -117,15 +72,19 @@ void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, CMapItemImage *pNewIm
 
 	dbg_msg("map_convert_07", "embedding image '%s'", pName);
 
-	CImageInfo ImgInfo;
 	char aStr[IO_MAX_PATH_LENGTH];
 	str_format(aStr, sizeof(aStr), "data/mapres/%s.png", pName);
-	if(!LoadPng(&ImgInfo, aStr))
+
+	CImageInfo ImgInfo;
+	int PngliteIncompatible;
+	if(!CImageLoader::LoadPng(io_open(aStr, IOFLAG_READ), aStr, ImgInfo, PngliteIncompatible))
 		return pImgItem; // keep as external if we don't have a mapres to replace
 
-	if(ImgInfo.m_Format != CImageInfo::FORMAT_RGBA)
+	const size_t MaxImageDimension = 1 << 13;
+	if(ImgInfo.m_Format != CImageInfo::FORMAT_RGBA || ImgInfo.m_Width > MaxImageDimension || ImgInfo.m_Height > MaxImageDimension)
 	{
-		dbg_msg("map_convert_07", "image '%s' is not in RGBA format", aStr);
+		dbg_msg("map_convert_07", "ERROR: only RGBA PNG images with maximum width/height %" PRIzu " are supported", MaxImageDimension);
+		ImgInfo.Free();
 		return pImgItem;
 	}
 
