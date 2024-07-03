@@ -419,7 +419,15 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		if(DoButton_Menu(&s_CopyButton, Localize("Copy info"), 0, &Button))
 		{
 			char aInfo[256];
-			CurrentServerInfo.InfoToString(aInfo, sizeof(aInfo));
+			str_format(
+				aInfo,
+				sizeof(aInfo),
+				"%s\n"
+				"Address: ddnet://%s\n"
+				"My IGN: %s\n",
+				CurrentServerInfo.m_aName,
+				CurrentServerInfo.m_aAddress,
+				Client()->PlayerName());
 			Input()->SetClipboardText(aInfo);
 		}
 	}

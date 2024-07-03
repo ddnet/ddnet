@@ -2344,16 +2344,3 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 	}
 	return true;
 }
-
-void CServerInfo::InfoToString(char *pBuffer, int BufferSize) const
-{
-	str_format(
-		pBuffer,
-		BufferSize,
-		"%s\n"
-		"Address: ddnet://%s\n"
-		"My IGN: %s\n",
-		m_aName,
-		m_aAddress,
-		g_Config.m_PlayerName);
-}

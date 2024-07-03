@@ -1121,7 +1121,13 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 			if(DoButton_Menu(&s_CopyButton, Localize("Copy info"), 0, &Button))
 			{
 				char aInfo[256];
-				pSelectedServer->InfoToString(aInfo, sizeof(aInfo));
+				str_format(
+					aInfo,
+					sizeof(aInfo),
+					"%s\n"
+					"Address: ddnet://%s\n",
+					pSelectedServer->m_aName,
+					pSelectedServer->m_aAddress);
 				Input()->SetClipboardText(aInfo);
 			}
 		}
