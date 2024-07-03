@@ -694,19 +694,15 @@ bool CGraphics_Threaded::CheckImageDivisibility(const char *pContextName, CImage
 	return ImageIsValid;
 }
 
-bool CGraphics_Threaded::IsImageFormatRGBA(const char *pFileName, CImageInfo &Img)
+bool CGraphics_Threaded::IsImageFormatRgba(const char *pContextName, const CImageInfo &Image)
 {
-	if(Img.m_Format != CImageInfo::FORMAT_RGBA)
+	if(Image.m_Format != CImageInfo::FORMAT_RGBA)
 	{
 		SWarning NewWarning;
-		char aText[128];
-		aText[0] = '\0';
-		if(pFileName)
-		{
-			str_format(aText, sizeof(aText), "\"%s\"", pFileName);
-		}
+		char aContextNameQuoted[128];
+		str_format(aContextNameQuoted, sizeof(aContextNameQuoted), "\"%s\"", pContextName);
 		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg),
-			Localize("The format of texture %s is not RGBA which will cause visual bugs."), aText);
+			Localize("The format of texture %s is not RGBA which will cause visual bugs."), aContextNameQuoted);
 		m_vWarnings.emplace_back(NewWarning);
 		return false;
 	}
