@@ -2,38 +2,35 @@
 #include <base/math.h>
 #include <base/system.h>
 
-#define TW_DILATE_ALPHA_THRESHOLD 10
+static constexpr int DILATE_BPP = 4; // RGBA assumed
+static constexpr uint8_t DILATE_ALPHA_THRESHOLD = 10;
 
-static void Dilate(int w, int h, const uint8_t *pSrc, uint8_t *pDest, uint8_t AlphaThreshold = TW_DILATE_ALPHA_THRESHOLD)
+static void Dilate(int w, int h, const uint8_t *pSrc, uint8_t *pDest)
 {
-	const int BPP = 4; // RGBA assumed
-	int ix, iy;
 	const int aDirX[] = {0, -1, 1, 0};
 	const int aDirY[] = {-1, 0, 0, 1};
-
-	int AlphaCompIndex = BPP - 1;
 
 	int m = 0;
 	for(int y = 0; y < h; y++)
 	{
-		for(int x = 0; x < w; x++, m += BPP)
+		for(int x = 0; x < w; x++, m += DILATE_BPP)
 		{
-			for(int i = 0; i < BPP; ++i)
+			for(int i = 0; i < DILATE_BPP; ++i)
 				pDest[m + i] = pSrc[m + i];
-			if(pSrc[m + AlphaCompIndex] > AlphaThreshold)
+			if(pSrc[m + DILATE_BPP - 1] > DILATE_ALPHA_THRESHOLD)
 				continue;
 
 			int aSumOfOpaque[] = {0, 0, 0};
 			int Counter = 0;
 			for(int c = 0; c < 4; c++)
 			{
-				ix = clamp(x + aDirX[c], 0, w - 1);
-				iy = clamp(y + aDirY[c], 0, h - 1);
-				int k = iy * w * BPP + ix * BPP;
-				if(pSrc[k + AlphaCompIndex] > AlphaThreshold)
+				const int ClampedX = clamp(x + aDirX[c], 0, w - 1);
+				const int ClampedY = clamp(y + aDirY[c], 0, h - 1);
+				const int SrcIndex = ClampedY * w * DILATE_BPP + ClampedX * DILATE_BPP;
+				if(pSrc[SrcIndex + DILATE_BPP - 1] > DILATE_ALPHA_THRESHOLD)
 				{
-					for(int p = 0; p < BPP - 1; ++p)
-						aSumOfOpaque[p] += pSrc[k + p];
+					for(int p = 0; p < DILATE_BPP - 1; ++p)
+						aSumOfOpaque[p] += pSrc[SrcIndex + p];
 					++Counter;
 					break;
 				}
@@ -41,29 +38,28 @@ static void Dilate(int w, int h, const uint8_t *pSrc, uint8_t *pDest, uint8_t Al
 
 			if(Counter > 0)
 			{
-				for(int i = 0; i < BPP - 1; ++i)
+				for(int i = 0; i < DILATE_BPP - 1; ++i)
 				{
 					aSumOfOpaque[i] /= Counter;
 					pDest[m + i] = (uint8_t)aSumOfOpaque[i];
 				}
 
-				pDest[m + AlphaCompIndex] = 255;
+				pDest[m + DILATE_BPP - 1] = 255;
 			}
 		}
 	}
 }
 
-static void CopyColorValues(int w, int h, int BPP, const uint8_t *pSrc, uint8_t *pDest)
+static void CopyColorValues(int w, int h, const uint8_t *pSrc, uint8_t *pDest)
 {
 	int m = 0;
 	for(int y = 0; y < h; y++)
 	{
-		for(int x = 0; x < w; x++, m += BPP)
+		for(int x = 0; x < w; x++, m += DILATE_BPP)
 		{
-			for(int i = 0; i < BPP - 1; ++i)
+			if(pDest[m + DILATE_BPP - 1] == 0)
 			{
-				if(pDest[m + 3] == 0)
-					pDest[m + i] = pSrc[m + i];
+				mem_copy(&pDest[m], &pSrc[m], DILATE_BPP - 1);
 			}
 		}
 	}
@@ -76,18 +72,18 @@ void DilateImage(uint8_t *pImageBuff, int w, int h)
 
 void DilateImageSub(uint8_t *pImageBuff, int w, int h, int x, int y, int sw, int sh)
 {
-	const int BPP = 4; // RGBA assumed
-	uint8_t *apBuffer[2] = {NULL, NULL};
+	uint8_t *apBuffer[2] = {nullptr, nullptr};
 
-	apBuffer[0] = (uint8_t *)malloc((size_t)sw * sh * sizeof(uint8_t) * BPP);
-	apBuffer[1] = (uint8_t *)malloc((size_t)sw * sh * sizeof(uint8_t) * BPP);
-	uint8_t *pBufferOriginal = (uint8_t *)malloc((size_t)sw * sh * sizeof(uint8_t) * BPP);
+	const size_t ImageSize = (size_t)sw * sh * sizeof(uint8_t) * DILATE_BPP;
+	apBuffer[0] = (uint8_t *)malloc(ImageSize);
+	apBuffer[1] = (uint8_t *)malloc(ImageSize);
+	uint8_t *pBufferOriginal = (uint8_t *)malloc(ImageSize);
 
 	for(int Y = 0; Y < sh; ++Y)
 	{
-		int SrcImgOffset = ((y + Y) * w * BPP) + (x * BPP);
-		int DstImgOffset = (Y * sw * BPP);
-		int CopySize = sw * BPP;
+		int SrcImgOffset = ((y + Y) * w * DILATE_BPP) + (x * DILATE_BPP);
+		int DstImgOffset = (Y * sw * DILATE_BPP);
+		int CopySize = sw * DILATE_BPP;
 		mem_copy(&pBufferOriginal[DstImgOffset], &pImageBuff[SrcImgOffset], CopySize);
 	}
 
@@ -99,16 +95,16 @@ void DilateImageSub(uint8_t *pImageBuff, int w, int h, int x, int y, int sw, int
 		Dilate(sw, sh, apBuffer[1], apBuffer[0]);
 	}
 
-	CopyColorValues(sw, sh, BPP, apBuffer[0], pBufferOriginal);
+	CopyColorValues(sw, sh, apBuffer[0], pBufferOriginal);
 
 	free(apBuffer[0]);
 	free(apBuffer[1]);
 
 	for(int Y = 0; Y < sh; ++Y)
 	{
-		int SrcImgOffset = ((y + Y) * w * BPP) + (x * BPP);
-		int DstImgOffset = (Y * sw * BPP);
-		int CopySize = sw * BPP;
+		int SrcImgOffset = ((y + Y) * w * DILATE_BPP) + (x * DILATE_BPP);
+		int DstImgOffset = (Y * sw * DILATE_BPP);
+		int CopySize = sw * DILATE_BPP;
 		mem_copy(&pImageBuff[SrcImgOffset], &pBufferOriginal[DstImgOffset], CopySize);
 	}
 
