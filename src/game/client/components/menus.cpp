@@ -1262,7 +1262,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		pTitle = Localize("Existing Player");
 		if(Client()->Points() > 50)
 		{
-			str_format(aBuf, sizeof(aBuf), Localize("Your nickname '%s' is already used (%d points). Do you still want to use it?"), Client()->PlayerName(), Client()->Points());
+			str_format(aBuf, sizeof(aBuf), Localize("Your nickname '%s' is already used (%d points). Do you still want to use it?"), PlayerName(), Client()->Points());
 			pExtraText = aBuf;
 			TopAlign = true;
 		}
@@ -1695,7 +1695,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		TextBox.VSplitRight(60.0f, &TextBox, 0);
 		Ui()->DoLabel(&Label, Localize("Nickname"), 16.0f, TEXTALIGN_ML);
 		static CLineInput s_PlayerNameInput(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName));
-		s_PlayerNameInput.SetEmptyText(Client()->PlayerName());
+		s_PlayerNameInput.SetEmptyText(PlayerName());
 		Ui()->DoEditBox(&s_PlayerNameInput, &TextBox, 12.0f);
 	}
 	else if(m_Popup == POPUP_POINTS)

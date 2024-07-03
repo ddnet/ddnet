@@ -13,6 +13,7 @@
 #include <base/log.h>
 #include <base/system.h>
 
+#include <engine/client/client.h>
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
@@ -2355,5 +2356,5 @@ void CServerInfo::InfoToString(char *pBuffer, int BufferSize) const
 		"My IGN: %s\n",
 		m_aName,
 		m_aAddress,
-		g_Config.m_PlayerName);
+		PlayerName());
 }

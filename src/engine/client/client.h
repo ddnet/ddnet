@@ -47,6 +47,9 @@ class IUpdater;
 #define CONNECTLINK_DOUBLE_SLASH "ddnet://"
 #define CONNECTLINK_NO_SLASH "ddnet:"
 
+const char *PlayerName();
+const char *DummyName();
+
 class CServerCapabilities
 {
 public:
@@ -338,8 +341,6 @@ public:
 	void Restart() override;
 	void Quit() override;
 
-	const char *PlayerName() const override;
-	const char *DummyName() const override;
 	const char *ErrorString() const override;
 
 	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);

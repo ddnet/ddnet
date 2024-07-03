@@ -245,8 +245,6 @@ public:
 	}
 
 	//
-	virtual const char *PlayerName() const = 0;
-	virtual const char *DummyName() const = 0;
 	virtual const char *ErrorString() const = 0;
 	virtual const char *LatestVersion() const = 0;
 	virtual bool ConnectionProblems() const = 0;

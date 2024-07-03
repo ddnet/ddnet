@@ -299,14 +299,14 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	{
 		pCountry = &g_Config.m_PlayerCountry;
 		s_NameInput.SetBuffer(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName));
-		s_NameInput.SetEmptyText(Client()->PlayerName());
+		s_NameInput.SetEmptyText(PlayerName());
 		s_ClanInput.SetBuffer(g_Config.m_PlayerClan, sizeof(g_Config.m_PlayerClan));
 	}
 	else
 	{
 		pCountry = &g_Config.m_ClDummyCountry;
 		s_NameInput.SetBuffer(g_Config.m_ClDummyName, sizeof(g_Config.m_ClDummyName));
-		s_NameInput.SetEmptyText(Client()->DummyName());
+		s_NameInput.SetEmptyText(DummyName());
 		s_ClanInput.SetBuffer(g_Config.m_ClDummyClan, sizeof(g_Config.m_ClDummyClan));
 	}
 
@@ -2679,7 +2679,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		float Y = PreviewView.y;
 		float LineWidth = g_Config.m_ClChatWidth * 2 - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
 
-		str_copy(aBuf, Client()->PlayerName());
+		str_copy(aBuf, PlayerName());
 
 		const CAnimState *pIdleState = CAnimState::GetIdle();
 		const float RealTeeSize = Chat.MessageTeeSize() * 2;

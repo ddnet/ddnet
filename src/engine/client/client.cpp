@@ -76,6 +76,43 @@ using namespace std::chrono_literals;
 static const ColorRGBA gs_ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
 static const ColorRGBA gs_ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
 
+const char *PlayerName()
+{
+	if(g_Config.m_PlayerName[0])
+	{
+		return g_Config.m_PlayerName;
+	}
+	if(g_Config.m_SteamName[0])
+	{
+		return g_Config.m_SteamName;
+	}
+	return "nameless tee";
+}
+
+const char *DummyName()
+{
+	if(g_Config.m_ClDummyName[0])
+	{
+		return g_Config.m_ClDummyName;
+	}
+	const char *pBase = 0;
+	if(g_Config.m_PlayerName[0])
+	{
+		pBase = g_Config.m_PlayerName;
+	}
+	else if(g_Config.m_SteamName[0])
+	{
+		pBase = g_Config.m_SteamName;
+	}
+	if(pBase)
+	{
+		static char aDummyNameBuf[16];
+		str_format(aDummyNameBuf, sizeof(aDummyNameBuf), "[D] %s", pBase);
+		return aDummyNameBuf;
+	}
+	return "brainless tee";
+}
+
 CClient::CClient() :
 	m_DemoPlayer(&m_SnapshotDelta, true, [&]() { UpdateDemoIntraTimers(); }),
 	m_InputtimeMarginGraph(128),
@@ -860,43 +897,6 @@ void CClient::Restart()
 void CClient::Quit()
 {
 	SetState(IClient::STATE_QUITTING);
-}
-
-const char *CClient::PlayerName() const
-{
-	if(g_Config.m_PlayerName[0])
-	{
-		return g_Config.m_PlayerName;
-	}
-	if(g_Config.m_SteamName[0])
-	{
-		return g_Config.m_SteamName;
-	}
-	return "nameless tee";
-}
-
-const char *CClient::DummyName() const
-{
-	if(g_Config.m_ClDummyName[0])
-	{
-		return g_Config.m_ClDummyName;
-	}
-	const char *pBase = 0;
-	if(g_Config.m_PlayerName[0])
-	{
-		pBase = g_Config.m_PlayerName;
-	}
-	else if(g_Config.m_SteamName[0])
-	{
-		pBase = g_Config.m_SteamName;
-	}
-	if(pBase)
-	{
-		static char aDummyNameBuf[16];
-		str_format(aDummyNameBuf, sizeof(aDummyNameBuf), "[D] %s", pBase);
-		return aDummyNameBuf;
-	}
-	return "brainless tee";
 }
 
 const char *CClient::ErrorString() const

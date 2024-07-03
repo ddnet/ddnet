@@ -939,7 +939,7 @@ void CMenus::GhostlistPopulate()
 	for(auto &Ghost : m_vGhosts)
 	{
 		Ghost.m_Failed = false;
-		if(str_comp(Ghost.m_aPlayer, Client()->PlayerName()) == 0 && (!pOwnGhost || Ghost < *pOwnGhost))
+		if(str_comp(Ghost.m_aPlayer, PlayerName()) == 0 && (!pOwnGhost || Ghost < *pOwnGhost))
 			pOwnGhost = &Ghost;
 	}
 
