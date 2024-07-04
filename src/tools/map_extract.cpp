@@ -7,26 +7,9 @@
 #include <engine/storage.h>
 #include <game/mapitems.h>
 
-bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
+static void PrintMapInfo(CDataFileReader &Reader)
 {
-	CDataFileReader Reader;
-	if(!Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
-	{
-		log_error("map_extract", "error opening map '%s'", pMapName);
-		return false;
-	}
-
-	const CMapItemVersion *pVersion = static_cast<CMapItemVersion *>(Reader.FindItem(MAPITEMTYPE_VERSION, 0));
-	if(pVersion == nullptr || pVersion->m_Version != CMapItemVersion::CURRENT_VERSION)
-	{
-		log_error("map_extract", "unsupported map version '%s'", pMapName);
-		return false;
-	}
-
-	log_info("map_extract", "Make sure you have the permission to use these images and sounds in your own maps");
-
 	CMapItemInfo *pInfo = (CMapItemInfo *)Reader.FindItem(MAPITEMTYPE_INFO, 0);
-
 	if(pInfo)
 	{
 		const char *pAuthor = Reader.GetDataString(pInfo->m_Author);
@@ -38,12 +21,12 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		const char *pLicense = Reader.GetDataString(pInfo->m_License);
 		log_info("map_extract", "license: %s", pLicense == nullptr ? "(error)" : pLicense);
 	}
+}
 
+static void ExtractMapImages(CDataFileReader &Reader, const char *pPathSave)
+{
 	int Start, Num;
-
-	// load images
 	Reader.GetType(MAPITEMTYPE_IMAGE, &Start, &Num);
-
 	for(int i = 0; i < Num; i++)
 	{
 		CMapItemImage_v2 *pItem = (CMapItemImage_v2 *)Reader.GetItem(Start + i);
@@ -67,7 +50,6 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 			continue;
 		}
 
-		// copy image data
 		IOHANDLE File = io_open(aBuf, IOFLAG_WRITE);
 		if(File)
 		{
@@ -85,10 +67,12 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 			log_error("map_extract", "failed to open image file for writing. filename='%s'", aBuf);
 		}
 	}
+}
 
-	// load sounds
+static void ExtractMapSounds(CDataFileReader &Reader, const char *pPathSave)
+{
+	int Start, Num;
 	Reader.GetType(MAPITEMTYPE_SOUND, &Start, &Num);
-
 	for(int i = 0; i < Num; i++)
 	{
 		CMapItemSound *pItem = (CMapItemSound *)Reader.GetItem(Start + i);
@@ -120,6 +104,29 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 			log_error("map_extract", "failed to open sound file for writing. filename='%s'", aBuf);
 		}
 	}
+}
+
+static bool ExtractMap(IStorage *pStorage, const char *pMapName, const char *pPathSave)
+{
+	CDataFileReader Reader;
+	if(!Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
+	{
+		log_error("map_extract", "error opening map '%s'", pMapName);
+		return false;
+	}
+
+	const CMapItemVersion *pVersion = static_cast<CMapItemVersion *>(Reader.FindItem(MAPITEMTYPE_VERSION, 0));
+	if(pVersion == nullptr || pVersion->m_Version != CMapItemVersion::CURRENT_VERSION)
+	{
+		log_error("map_extract", "unsupported map version '%s'", pMapName);
+		return false;
+	}
+
+	log_info("map_extract", "Make sure you have the permission to use these images and sounds in your own maps");
+
+	PrintMapInfo(Reader);
+	ExtractMapImages(Reader, pPathSave);
+	ExtractMapSounds(Reader, pPathSave);
 
 	return Reader.Close();
 }
@@ -154,6 +161,6 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	int Result = Process(pStorage, argv[1], pDir) ? 0 : 1;
+	int Result = ExtractMap(pStorage, argv[1], pDir) ? 0 : 1;
 	return Result;
 }
