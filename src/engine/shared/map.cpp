@@ -106,8 +106,17 @@ bool CMap::Load(const char *pMapName)
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
 				if(pTilemap->m_Version >= CMapItemLayerTilemap::TILE_SKIP_MIN_VERSION)
 				{
-					const size_t TilemapSize = (size_t)pTilemap->m_Width * pTilemap->m_Height * sizeof(CTile);
+					const size_t TilemapCount = (size_t)pTilemap->m_Width * pTilemap->m_Height;
+					const size_t TilemapSize = TilemapCount * sizeof(CTile);
+
+					if(((int)TilemapCount / pTilemap->m_Width != pTilemap->m_Height) || (TilemapSize / sizeof(CTile) != TilemapCount))
+					{
+						log_error("map/load", "map layer too big (%d * %d * %d causes an integer overflow)", pTilemap->m_Width, pTilemap->m_Height, sizeof(CTile));
+						return false;
+					}
 					CTile *pTiles = static_cast<CTile *>(malloc(TilemapSize));
+					if(!pTiles)
+						return false;
 					ExtractTiles(pTiles, (size_t)pTilemap->m_Width * pTilemap->m_Height, static_cast<CTile *>(NewDataFile.GetData(pTilemap->m_Data)), NewDataFile.GetDataSize(pTilemap->m_Data) / sizeof(CTile));
 					NewDataFile.ReplaceData(pTilemap->m_Data, reinterpret_cast<char *>(pTiles), TilemapSize);
 				}
