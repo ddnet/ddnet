@@ -9,7 +9,7 @@
 
 static void PrintMapInfo(CDataFileReader &Reader)
 {
-	CMapItemInfo *pInfo = (CMapItemInfo *)Reader.FindItem(MAPITEMTYPE_INFO, 0);
+	const CMapItemInfo *pInfo = static_cast<CMapItemInfo *>(Reader.FindItem(MAPITEMTYPE_INFO, 0));
 	if(pInfo)
 	{
 		const char *pAuthor = Reader.GetDataString(pInfo->m_Author);
@@ -29,7 +29,7 @@ static void ExtractMapImages(CDataFileReader &Reader, const char *pPathSave)
 	Reader.GetType(MAPITEMTYPE_IMAGE, &Start, &Num);
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemImage_v2 *pItem = (CMapItemImage_v2 *)Reader.GetItem(Start + i);
+		const CMapItemImage_v2 *pItem = static_cast<CMapItemImage_v2 *>(Reader.GetItem(Start + i));
 		if(pItem->m_External)
 			continue;
 
@@ -75,7 +75,7 @@ static void ExtractMapSounds(CDataFileReader &Reader, const char *pPathSave)
 	Reader.GetType(MAPITEMTYPE_SOUND, &Start, &Num);
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemSound *pItem = (CMapItemSound *)Reader.GetItem(Start + i);
+		const CMapItemSound *pItem = static_cast<CMapItemSound *>(Reader.GetItem(Start + i));
 		if(pItem->m_External)
 			continue;
 
