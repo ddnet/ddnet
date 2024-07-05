@@ -4781,6 +4781,51 @@ int CClient::UdpConnectivity(int NetType)
 	return Connectivity;
 }
 
+bool CClient::ViewLink(const char *pLink)
+{
+#if defined(CONF_PLATFORM_ANDROID)
+	if(SDL_OpenURL(pLink) == 0)
+	{
+		return true;
+	}
+	log_error("client", "Failed to open link '%s' (%s)", pLink, SDL_GetError());
+	return false;
+#else
+	if(open_link(pLink))
+	{
+		return true;
+	}
+	log_error("client", "Failed to open link '%s'", pLink);
+	return false;
+#endif
+}
+
+bool CClient::ViewFile(const char *pFilename)
+{
+#if defined(CONF_PLATFORM_MACOS)
+	return ViewLink(pFilename);
+#else
+	// Create a file link so the path can contain forward and
+	// backward slashes. But the file link must be absolute.
+	char aWorkingDir[IO_MAX_PATH_LENGTH];
+	if(fs_is_relative_path(pFilename))
+	{
+		if(!fs_getcwd(aWorkingDir, sizeof(aWorkingDir)))
+		{
+			log_error("client", "Failed to open file '%s' (failed to get working directory)", pFilename);
+			return false;
+		}
+		str_append(aWorkingDir, "/");
+	}
+	else
+		aWorkingDir[0] = '\0';
+
+	char aFileLink[IO_MAX_PATH_LENGTH];
+	str_format(aFileLink, sizeof(aFileLink), "file://%s%s", aWorkingDir, pFilename);
+	return ViewLink(aFileLink);
+#endif
+}
+
 #if defined(CONF_FAMILY_WINDOWS)
 void CClient::ShellRegister()
 {

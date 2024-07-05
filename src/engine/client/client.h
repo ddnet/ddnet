@@ -503,6 +503,9 @@ public:
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	int UdpConnectivity(int NetType) override;
 
+	bool ViewLink(const char *pLink) override;
+	bool ViewFile(const char *pFilename) override;
+
 #if defined(CONF_FAMILY_WINDOWS)
 	void ShellRegister() override;
 	void ShellUnregister() override;

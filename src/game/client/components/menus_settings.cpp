@@ -77,8 +77,8 @@ bool CMenusKeyBinder::OnInput(const IInput::CEvent &Event)
 void CMenus::RenderSettingsGeneral(CUIRect MainView)
 {
 	char aBuf[128 + IO_MAX_PATH_LENGTH];
-	CUIRect Label, Button, Left, Right, Game, Client;
-	MainView.HSplitTop(150.0f, &Game, &Client);
+	CUIRect Label, Button, Left, Right, Game, ClientSettings;
+	MainView.HSplitTop(150.0f, &Game, &ClientSettings);
 
 	// game
 	{
@@ -139,10 +139,10 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	// client
 	{
 		// headline
-		Client.HSplitTop(30.0f, &Label, &Client);
+		ClientSettings.HSplitTop(30.0f, &Label, &ClientSettings);
 		Ui()->DoLabel(&Label, Localize("Client"), 20.0f, TEXTALIGN_ML);
-		Client.HSplitTop(5.0f, nullptr, &Client);
-		Client.VSplitMid(&Left, &Right, 20.0f);
+		ClientSettings.HSplitTop(5.0f, nullptr, &ClientSettings);
+		ClientSettings.VSplitMid(&Left, &Right, 20.0f);
 
 		// skip main menu
 		Left.HSplitTop(20.0f, &Button, &Left);
@@ -165,10 +165,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_Menu(&s_SettingsButtonId, Localize("Settings file"), 0, &SettingsButton))
 		{
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, CONFIG_FILE, aBuf, sizeof(aBuf));
-			if(!open_file(aBuf))
-			{
-				dbg_msg("menus", "couldn't open file '%s'", aBuf);
-			}
+			Client()->ViewFile(aBuf);
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_SettingsButtonId, &SettingsButton, Localize("Open the settings file"));
 
@@ -179,10 +176,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		if(DoButton_Menu(&s_ConfigButtonId, Localize("Config directory"), 0, &ConfigButton))
 		{
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "", aBuf, sizeof(aBuf));
-			if(!open_file(aBuf))
-			{
-				dbg_msg("menus", "couldn't open file '%s'", aBuf);
-			}
+			Client()->ViewFile(aBuf);
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_ConfigButtonId, &ConfigButton, Localize("Open the directory that contains the configuration and user files"));
 
@@ -194,10 +188,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		{
 			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "themes", aBuf, sizeof(aBuf));
 			Storage()->CreateFolder("themes", IStorage::TYPE_SAVE);
-			if(!open_file(aBuf))
-			{
-				dbg_msg("menus", "couldn't open file '%s'", aBuf);
-			}
+			Client()->ViewFile(aBuf);
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_ThemesButtonId, &DirectoryButton, Localize("Open the directory to add custom themes"));
 
@@ -938,11 +929,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static CButtonContainer s_SkinDatabaseButton;
 	if(DoButton_Menu(&s_SkinDatabaseButton, Localize("Skin Database"), 0, &DatabaseButton))
 	{
-		const char *pLink = "https://ddnet.org/skins/";
-		if(!open_link(pLink))
-		{
-			dbg_msg("menus", "couldn't open link '%s'", pLink);
-		}
+		Client()->ViewLink("https://ddnet.org/skins/");
 	}
 
 	static CButtonContainer s_DirectoryButton;
@@ -950,10 +937,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "skins", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("skins", IStorage::TYPE_SAVE);
-		if(!open_file(aBuf))
-		{
-			dbg_msg("menus", "couldn't open file '%s'", aBuf);
-		}
+		Client()->ViewFile(aBuf);
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButton, &DirectoryButton, Localize("Open the directory to add custom skins"));
 

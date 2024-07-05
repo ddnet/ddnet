@@ -1625,10 +1625,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		static CButtonContainer s_ButtonOpenFolder;
 		if(DoButton_Menu(&s_ButtonOpenFolder, Localize("Videos directory"), 0, &OpenFolder))
 		{
-			if(!open_file(aSaveFolder))
-			{
-				dbg_msg("menus", "couldn't open file '%s'", aSaveFolder);
-			}
+			Client()->ViewFile(aSaveFolder);
 		}
 
 		static CButtonContainer s_ButtonOk;
