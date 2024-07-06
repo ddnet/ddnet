@@ -31,7 +31,6 @@
 #include <engine/shared/datafile.h>
 #include <engine/shared/jobs.h>
 
-#include "auto_map.h"
 #include "editor_history.h"
 #include "editor_server_settings.h"
 #include "editor_trackers.h"
@@ -402,8 +401,8 @@ public:
 
 		m_CheckerTexture.Invalidate();
 		m_BackgroundTexture.Invalidate();
-		for(int i = 0; i < NUM_CURSORS; i++)
-			m_aCursorTextures[i].Invalidate();
+		for(auto &CursorTexture : m_aCursorTextures)
+			CursorTexture.Invalidate();
 
 		m_CursorType = CURSOR_NORMAL;
 
@@ -833,7 +832,7 @@ public:
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness) const;
 
-	SEditResult<int> UiDoValueSelector(void *pId, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, const ColorRGBA *pColor = nullptr, bool ShowValue = true);
+	SEditResult<int> UiDoValueSelector(void *pId, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int Corners = IGraphics::CORNER_ALL, const ColorRGBA *pColor = nullptr, bool ShowValue = true);
 
 	static CUi::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);
@@ -1003,7 +1002,7 @@ public:
 	void SelectGameLayer();
 	std::vector<int> SortImages();
 
-	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, const int SampleId);
+	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, int SampleId);
 
 	// Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum
@@ -1127,7 +1126,6 @@ public:
 	int FindNextFreeSwitchNumber();
 	int FindNextFreeTeleNumber(bool IsCheckpoint = false);
 
-public:
 	// Undo/Redo
 	CEditorHistory m_EditorHistory;
 	CEditorHistory m_ServerSettingsHistory;
@@ -1139,7 +1137,6 @@ private:
 	void UndoLastAction();
 	void RedoLastAction();
 
-private:
 	std::map<int, CPoint[5]> m_QuadDragOriginalPoints;
 };
 

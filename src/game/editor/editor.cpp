@@ -917,7 +917,7 @@ bool CEditor::CallbackSaveSound(const char *pFileName, int StorageType, void *pU
 	return false;
 }
 
-void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, const int SampleId)
+void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, int SampleId)
 {
 	CUIRect Button, SeekBar;
 	// play/pause button
