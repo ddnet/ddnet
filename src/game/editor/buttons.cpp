@@ -4,7 +4,7 @@
 
 void CEditor::ButtonAddGroup(void *pEditor)
 {
-	CEditor *pSelf = (CEditor*)pEditor;
+	CEditor *pSelf = (CEditor *)pEditor;
 
 	pSelf->m_Map.NewGroup();
 	pSelf->m_SelectedGroup = pSelf->m_Map.m_vpGroups.size() - 1;
@@ -13,12 +13,12 @@ void CEditor::ButtonAddGroup(void *pEditor)
 
 void CEditor::ButtonRefocus(void *pEditor)
 {
-	CEditor *pSelf = (CEditor*)pEditor;
+	CEditor *pSelf = (CEditor *)pEditor;
 	pSelf->MapView()->Focus();
 }
 
 void CEditor::ButtonProof(void *pEditor)
 {
-	CEditor *pSelf = (CEditor*)pEditor;
+	CEditor *pSelf = (CEditor *)pEditor;
 	pSelf->MapView()->ProofMode()->Toggle();
 }

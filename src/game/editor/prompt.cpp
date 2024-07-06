@@ -124,7 +124,6 @@ void CPrompt::OnRender(CUIRect View)
 		Props.m_MaxWidth = Button.w;
 		Props.m_EllipsisAtEnd = true;
 		Ui()->DoLabel(&Button, m_vpFilteredPromptList[i]->m_pText, 10.0f, TEXTALIGN_ML, Props);
-
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
@@ -146,4 +145,3 @@ void CPrompt::OnRender(CUIRect View)
 		}
 	}
 }
-

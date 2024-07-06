@@ -39,7 +39,6 @@
 #include "layer_selector.h"
 #include "map_view.h"
 #include "smooth_value.h"
-#include "editor_button.h"
 
 #include <deque>
 #include <functional>
@@ -325,9 +324,9 @@ public:
 	static void ButtonAddGroup(void *pEditor);
 	static void ButtonRefocus(void *pEditor);
 	static void ButtonProof(void *pEditor);
-	#define REGISTER_BUTTON(index, text, callback, editor) int index;
-	#include <game/editor/buttons.h>
-	#undef REGISTER_BUTTON
+#define REGISTER_BUTTON(index, text, callback, editor) int index;
+#include <game/editor/buttons.h>
+#undef REGISTER_BUTTON
 	CEditorButton *m_pButtons;
 	int m_NumButtons;
 
@@ -337,15 +336,16 @@ public:
 		m_MapSettingsCommandContext(m_MapSettingsBackend.NewContext(&m_SettingsCommandInput))
 	{
 		int NumButtons = 0;
-		#define REGISTER_BUTTON(index, text, callback, editor) index = NumButtons++;dbg_msg("editor", "%s = %d", #index, NumButtons);
-		#include <game/editor/buttons.h>
-		#undef REGISTER_BUTTON
+#define REGISTER_BUTTON(index, text, callback, editor) \
+	index = NumButtons++; \
+	dbg_msg("editor", "%s = %d", #index, NumButtons);
+#include <game/editor/buttons.h>
+#undef REGISTER_BUTTON
 		m_pButtons = (CEditorButton *)malloc(NumButtons * sizeof(CEditorButton));
-		#define REGISTER_BUTTON(index, text, callback, editor) m_pButtons[index] = CEditorButton(text, callback, editor);
-		#include <game/editor/buttons.h>
-		#undef REGISTER_BUTTON
+#define REGISTER_BUTTON(index, text, callback, editor) m_pButtons[index] = CEditorButton(text, callback, editor);
+#include <game/editor/buttons.h>
+#undef REGISTER_BUTTON
 		m_NumButtons = NumButtons;
-
 
 		m_EntitiesTexture.Invalidate();
 		m_FrontTexture.Invalidate();
