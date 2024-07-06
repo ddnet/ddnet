@@ -293,10 +293,18 @@ void CAutoMapper::Load(const char *pTileName)
 					{
 						for(const auto &Index : vNewIndexList)
 						{
-							if(Value == CPosRule::INDEX && Index.m_Id == 0)
+							if(Index.m_Id == 0 && Value == CPosRule::INDEX)
+							{
+								// Skip full tiles if we have a rule "POS 0 0 INDEX 0"
+								// because that forces the tile to be empty
 								pCurrentIndex->m_SkipFull = true;
-							else
+							}
+							else if((Index.m_Id > 0 && Value == CPosRule::INDEX) || (Index.m_Id == 0 && Value == CPosRule::NOTINDEX))
+							{
+								// Skip empty tiles if we have a rule "POS 0 0 INDEX i" where i > 0
+								// or if we have a rule "POS 0 0 NOTINDEX 0"
 								pCurrentIndex->m_SkipEmpty = true;
+							}
 						}
 					}
 				}
@@ -334,14 +342,25 @@ void CAutoMapper::Load(const char *pTileName)
 			for(auto &IndexRule : Run.m_vIndexRules)
 			{
 				bool Found = false;
+
+				// Search for the exact rule "POS 0 0 INDEX 0" which corresponds to the default rule
 				for(const auto &Rule : IndexRule.m_vRules)
 				{
-					if(Rule.m_X == 0 && Rule.m_Y == 0)
+					if(Rule.m_X == 0 && Rule.m_Y == 0 && Rule.m_Value == CPosRule::INDEX)
 					{
-						Found = true;
+						for(const auto &Index : Rule.m_vIndexList)
+						{
+							if(Index.m_Id == 0)
+								Found = true;
+						}
 						break;
 					}
+
+					if(Found)
+						break;
 				}
+
+				// If the default rule was not found, and we require it, then add it
 				if(!Found && IndexRule.m_DefaultRule)
 				{
 					std::vector<CIndexInfo> vNewIndexList;
@@ -353,6 +372,7 @@ void CAutoMapper::Load(const char *pTileName)
 					IndexRule.m_SkipEmpty = true;
 					IndexRule.m_SkipFull = false;
 				}
+
 				if(IndexRule.m_SkipEmpty && IndexRule.m_SkipFull)
 				{
 					IndexRule.m_SkipEmpty = false;
@@ -475,14 +495,15 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigId, int Seed, int SeedO
 			for(int x = 0; x < pLayer->m_Width; x++)
 			{
 				CTile *pTile = &(pLayer->m_pTiles[y * pLayer->m_Width + x]);
+				const CTile *pReadTile = &(pReadLayer->m_pTiles[y * pLayer->m_Width + x]);
 				Editor()->m_Map.OnModify();
 
 				for(size_t i = 0; i < pRun->m_vIndexRules.size(); ++i)
 				{
 					CIndexRule *pIndexRule = &pRun->m_vIndexRules[i];
-					if(pIndexRule->m_SkipEmpty && pTile->m_Index == 0) // skip empty tiles
+					if(pIndexRule->m_SkipEmpty && pReadTile->m_Index == 0) // skip empty tiles
 						continue;
-					if(pIndexRule->m_SkipFull && pTile->m_Index != 0) // skip full tiles
+					if(pIndexRule->m_SkipFull && pReadTile->m_Index != 0) // skip full tiles
 						continue;
 
 					bool RespectRules = true;
