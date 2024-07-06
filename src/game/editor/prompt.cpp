@@ -130,6 +130,9 @@ void CPrompt::OnRender(CUIRect View)
 		Props.m_MaxWidth = Button.w;
 		Props.m_EllipsisAtEnd = true;
 		Ui()->DoLabel(&Button, m_vpFilteredPromptList[i]->Label(), 10.0f, TEXTALIGN_ML, Props);
+		TextRender()->TextColor(Item.m_Selected ? ColorRGBA(0, 0, 0, 1) : TextRender()->DefaultTextSelectionColor());
+		Ui()->DoLabel(&Button, m_vpFilteredPromptList[i]->Description(), 10.0f, TEXTALIGN_MR, Props);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
