@@ -58,11 +58,13 @@ void CPrompt::OnRender(CUIRect View)
 	static CListBox s_ListBox;
 	CUIRect Prompt, PromptBox;
 
-
-	static auto s_AllQuickActions = {
-	    &Editor()->m_QuickActionAddGroup,
-	    &Editor()->m_QuickActionRefocus,
-	    &Editor()->m_QuickActionProof};
+	static std::initializer_list<CQuickAction *> s_AllQuickActionsNullptr = {
+		nullptr // unholy hack to make the macro work with trailing commas
+#define REGISTER_QUICK_ACTION(name, text, callback, editor) , &Editor()->m_QuickAction##name
+#include <game/editor/quick_actions.h>
+#undef REGISTER_QUICK_ACTION
+	};
+	static  std::vector<CQuickAction *>   s_AllQuickActions =  {s_AllQuickActionsNullptr.begin() + 1, s_AllQuickActionsNullptr.end()} ;
 
 	// m_vpCompletePromptList.clear();
 	// m_vpCompletePromptList.emplace_back((char *)"Add Quad");
