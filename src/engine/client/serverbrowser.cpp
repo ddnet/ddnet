@@ -739,11 +739,11 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 
 	class CPlayerScoreNameLess
 	{
-		const int ScoreKind;
+		const int m_ScoreKind;
 
 	public:
 		CPlayerScoreNameLess(int ClientScoreKind) :
-			ScoreKind(ClientScoreKind)
+			m_ScoreKind(ClientScoreKind)
 		{
 		}
 
@@ -758,7 +758,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 			int Score0 = p0.m_Score;
 			int Score1 = p1.m_Score;
 
-			if(ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME || ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
+			if(m_ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME || m_ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
 			{
 				// Sort unfinished (-9999) and still connecting players (-1) after others
 				if(Score0 < 0 && Score1 >= 0)
@@ -770,7 +770,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 			if(Score0 != Score1)
 			{
 				// Handle the sign change introduced with CLIENT_SCORE_KIND_TIME
-				if(ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME)
+				if(m_ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME)
 					return Score0 < Score1;
 				else
 					return Score0 > Score1;
