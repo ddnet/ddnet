@@ -6,14 +6,23 @@
 
 typedef std::function<void()> FButtonClickCallback;
 typedef std::function<bool()> FButtonEnabledCallback;
+typedef std::function<bool()> FButtonActiveCallback;
 
 class CQuickAction
 {
 public:
 	const char *m_pLabel;
 	const char *m_pDescription;
+
+	// code to run when the action is triggered
 	FButtonClickCallback m_pfnCallback;
-	FButtonClickCallback m_pfnEnabledCallback;
+
+	// bool that indicates if the action can be performed not or not
+	FButtonEnabledCallback m_pfnEnabledCallback;
+
+	// bool that indicates if the action is currently running
+	// only applies to actions that can be turned on or off like proof borders
+	FButtonActiveCallback m_pfnActiveCallback;
 
 	CQuickAction(
 		const char *pLabel,
@@ -24,6 +33,7 @@ public:
 		m_pfnCallback(std::move(pfnCallback))
 	{
 		m_pfnEnabledCallback = []() { return true; };
+		m_pfnActiveCallback = []() { return true; };
 	}
 
 	void Call() const

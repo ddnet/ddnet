@@ -1075,8 +1075,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		// proof button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-		static int s_ProofButton = 0;
-		if(DoButton_Ex(&s_ProofButton, m_QuickActionProof.Label(), MapView()->ProofMode()->IsEnabled(), &Button, 0, m_QuickActionProof.Description(), IGraphics::CORNER_L) ||
+		if(DoButton_Ex(&m_QuickActionProof, m_QuickActionProof.Label(), MapView()->ProofMode()->IsEnabled(), &Button, 0, m_QuickActionProof.Description(), IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_P) && ModPressed))
 		{
 			m_QuickActionProof.Call();
@@ -1255,9 +1254,8 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// refocus button
 		{
 			TB_Bottom.VSplitLeft(50.0f, &Button, &TB_Bottom);
-			static int s_RefocusButton = 0;
 			int FocusButtonChecked = MapView()->IsFocused() ? -1 : 1;
-			if(DoButton_Editor(&s_RefocusButton, m_QuickActionRefocus.Label(), FocusButtonChecked, &Button, 0, m_QuickActionRefocus.Description()) || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_HOME)))
+			if(DoButton_Editor(&m_QuickActionRefocus, m_QuickActionRefocus.Label(), FocusButtonChecked, &Button, 0, m_QuickActionRefocus.Description()) || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_HOME)))
 				m_QuickActionRefocus.Call();
 			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
 		}
@@ -4303,8 +4301,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	if(s_ScrollRegion.AddRect(AddGroupButton))
 	{
 		AddGroupButton.HSplitTop(RowHeight, &AddGroupButton, 0);
-		static int s_AddGroupButton = 0;
-		if(DoButton_Editor(&s_AddGroupButton, m_QuickActionAddGroup.Label(), 0, &AddGroupButton, IGraphics::CORNER_R, m_QuickActionAddGroup.Description()))
+		if(DoButton_Editor(&m_QuickActionAddGroup, m_QuickActionAddGroup.Label(), 0, &AddGroupButton, IGraphics::CORNER_R, m_QuickActionAddGroup.Description()))
 		{
 			m_QuickActionAddGroup.Call();
 		}

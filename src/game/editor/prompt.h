@@ -12,7 +12,7 @@ class CPrompt : public CEditorComponent
 	int m_PromptSelectedIndex = -1;
 
 	std::vector<const CQuickAction *> m_vpFilteredPromptList;
-	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_PromptInput;
+	CLineInputBuffered<512> m_PromptInput;
 	bool m_Active = false;
 
 public:

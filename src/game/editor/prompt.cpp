@@ -138,7 +138,7 @@ void CPrompt::OnRender(CUIRect View)
 		m_PromptSelectedIndex = NewSelected;
 	}
 
-	if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || Input()->KeyIsPressed(KEY_RETURN))
+	if(s_ListBox.WasItemActivated())
 	{
 		dbg_msg("editor", "enter index=%d", m_PromptSelectedIndex);
 		if(m_PromptSelectedIndex >= 0)
