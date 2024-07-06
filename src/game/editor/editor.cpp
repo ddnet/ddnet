@@ -1076,11 +1076,10 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// proof button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_ProofButton = 0;
-		CEditorButton Btn = m_pButtons[BTN_PROOF];
-		if(DoButton_Ex(&s_ProofButton, Btn.m_pText, MapView()->ProofMode()->IsEnabled(), &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.", IGraphics::CORNER_L) ||
+		if(DoButton_Ex(&s_ProofButton, m_QuickActionProof.Label(), MapView()->ProofMode()->IsEnabled(), &Button, 0, m_QuickActionProof.Description(), IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_P) && ModPressed))
 		{
-			Btn.Call();
+			m_QuickActionProof.Call();
 		}
 
 		TB_Top.VSplitLeft(14.0f, &Button, &TB_Top);
@@ -1258,9 +1257,8 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			TB_Bottom.VSplitLeft(50.0f, &Button, &TB_Bottom);
 			static int s_RefocusButton = 0;
 			int FocusButtonChecked = MapView()->IsFocused() ? -1 : 1;
-			CEditorButton Btn = m_pButtons[BTN_REFOCUS];
-			if(DoButton_Editor(&s_RefocusButton, Btn.m_pText, FocusButtonChecked, &Button, 0, "[HOME] Restore map focus") || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_HOME)))
-				Btn.Call();
+			if(DoButton_Editor(&s_RefocusButton, m_QuickActionRefocus.Label(), FocusButtonChecked, &Button, 0, m_QuickActionRefocus.Description()) || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_HOME)))
+				m_QuickActionRefocus.Call();
 			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
 		}
 
@@ -4306,10 +4304,9 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	{
 		AddGroupButton.HSplitTop(RowHeight, &AddGroupButton, 0);
 		static int s_AddGroupButton = 0;
-		CEditorButton Btn = m_pButtons[BTN_ADD_GROUP];
-		if(DoButton_Editor(&s_AddGroupButton, Btn.m_pText, 0, &AddGroupButton, IGraphics::CORNER_R, "Adds a new group"))
+		if(DoButton_Editor(&s_AddGroupButton, m_QuickActionAddGroup.Label(), 0, &AddGroupButton, IGraphics::CORNER_R, m_QuickActionAddGroup.Description()))
 		{
-			Btn.Call();
+			m_QuickActionAddGroup.Call();
 		}
 	}
 

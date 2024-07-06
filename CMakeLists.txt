@@ -2305,8 +2305,6 @@ if(CLIENT)
   set_src(GAME_EDITOR GLOB_RECURSE src/game/editor
     auto_map.cpp
     auto_map.h
-    buttons.cpp
-    buttons.h
     component.cpp
     component.h
     editor.cpp
@@ -2314,7 +2312,6 @@ if(CLIENT)
     editor_action.h
     editor_actions.cpp
     editor_actions.h
-    editor_button.h
     editor_history.cpp
     editor_history.h
     editor_object.cpp
@@ -2367,6 +2364,9 @@ if(CLIENT)
     prompt.h
     proof_mode.cpp
     proof_mode.h
+    quick_action.h
+    quick_actions.cpp
+    quick_actions.h
     smooth_value.cpp
     smooth_value.h
     tileart.cpp

@@ -2,7 +2,7 @@
 
 #include "editor.h"
 #include "engine/keys.h"
-#include "game/editor/editor_button.h"
+#include "game/editor/quick_action.h"
 
 #include "prompt.h"
 
@@ -58,6 +58,12 @@ void CPrompt::OnRender(CUIRect View)
 	static CListBox s_ListBox;
 	CUIRect Prompt, PromptBox;
 
+
+	static auto s_AllQuickActions = {
+	    &Editor()->m_QuickActionAddGroup,
+	    &Editor()->m_QuickActionRefocus,
+	    &Editor()->m_QuickActionProof};
+
 	// m_vpCompletePromptList.clear();
 	// m_vpCompletePromptList.emplace_back((char *)"Add Quad");
 	// m_vpCompletePromptList.emplace_back((char *)"Add Sound");
@@ -93,13 +99,11 @@ void CPrompt::OnRender(CUIRect View)
 	{
 		m_PromptSelectedIndex = 0;
 		m_vpFilteredPromptList.clear();
-		for(int Button = 0; Button < Editor()->m_NumButtons; Button++)
+		for(auto *pQuickAction : s_AllQuickActions)
 		{
-			CEditorButton *pBtn = &Editor()->m_pButtons[Button];
-			const char *pTitle = pBtn->m_pText;
-			if(m_PromptInput.IsEmpty() || FuzzyMatch(pTitle, m_PromptInput.GetString()))
+			if(m_PromptInput.IsEmpty() || FuzzyMatch(pQuickAction->Label(), m_PromptInput.GetString()))
 			{
-				m_vpFilteredPromptList.push_back(pBtn);
+				m_vpFilteredPromptList.push_back(pQuickAction);
 			}
 		}
 	}
@@ -123,7 +127,7 @@ void CPrompt::OnRender(CUIRect View)
 		SLabelProperties Props;
 		Props.m_MaxWidth = Button.w;
 		Props.m_EllipsisAtEnd = true;
-		Ui()->DoLabel(&Button, m_vpFilteredPromptList[i]->m_pText, 10.0f, TEXTALIGN_ML, Props);
+		Ui()->DoLabel(&Button, m_vpFilteredPromptList[i]->Label(), 10.0f, TEXTALIGN_ML, Props);
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
@@ -137,8 +141,8 @@ void CPrompt::OnRender(CUIRect View)
 		dbg_msg("editor", "enter index=%d", m_PromptSelectedIndex);
 		if(m_PromptSelectedIndex >= 0)
 		{
-			const CEditorButton *pBtn = m_vpFilteredPromptList[m_PromptSelectedIndex];
-			dbg_msg("editor", "selected %s", pBtn->m_pText);
+			const CQuickAction *pBtn = m_vpFilteredPromptList[m_PromptSelectedIndex];
+			dbg_msg("editor", "selected %s", pBtn->Label());
 			pBtn->Call();
 			m_PromptInput.Clear();
 			m_Active = false;

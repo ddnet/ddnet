@@ -35,7 +35,8 @@
 #include "editor_server_settings.h"
 #include "editor_trackers.h"
 #include "editor_ui.h"
-#include "game/editor/prompt.h"
+#include <game/editor/prompt.h>
+#include <game/editor/quick_action.h>
 #include "layer_selector.h"
 #include "map_view.h"
 #include "smooth_value.h"
@@ -321,32 +322,21 @@ public:
 	const CMapView *MapView() const { return &m_MapView; }
 	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
 
-	static void ButtonAddGroup(void *pEditor);
-	static void ButtonRefocus(void *pEditor);
-	static void ButtonProof(void *pEditor);
-#define REGISTER_BUTTON(index, text, callback, editor) int index;
-#include <game/editor/buttons.h>
-#undef REGISTER_BUTTON
-	CEditorButton *m_pButtons;
-	int m_NumButtons;
+	void QuickActionAddGroup();
+	void QuickActionRefocus();
+	void QuickActionProof();
+#define REGISTER_QUICK_ACTION(name, text, callback, editor) CQuickAction m_QuickAction##name;
+#include <game/editor/quick_actions.h>
+#undef REGISTER_QUICK_ACTION
 
 	CEditor() :
+		#define REGISTER_QUICK_ACTION(name, text, callback, description) m_QuickAction##name(text, description, callback),
+		#include <game/editor/quick_actions.h>
+		#undef REGISTER_QUICK_ACTION
 		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
 		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f),
 		m_MapSettingsCommandContext(m_MapSettingsBackend.NewContext(&m_SettingsCommandInput))
 	{
-		int NumButtons = 0;
-#define REGISTER_BUTTON(index, text, callback, editor) \
-	index = NumButtons++; \
-	dbg_msg("editor", "%s = %d", #index, NumButtons);
-#include <game/editor/buttons.h>
-#undef REGISTER_BUTTON
-		m_pButtons = (CEditorButton *)malloc(NumButtons * sizeof(CEditorButton));
-#define REGISTER_BUTTON(index, text, callback, editor) m_pButtons[index] = CEditorButton(text, callback, editor);
-#include <game/editor/buttons.h>
-#undef REGISTER_BUTTON
-		m_NumButtons = NumButtons;
-
 		m_EntitiesTexture.Invalidate();
 		m_FrontTexture.Invalidate();
 		m_TeleTexture.Invalidate();
