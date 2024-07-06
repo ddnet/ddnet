@@ -331,24 +331,24 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const 
 	}
 }
 
-void CGameConsole::CInstance::GetCommand(const char *pInput, char *pCmd, size_t CmdSize)
+void CGameConsole::CInstance::GetCommand(const char *pInput, char (&aCmd)[IConsole::CMDLINE_LENGTH])
 {
 	char aInput[IConsole::CMDLINE_LENGTH];
 	str_copy(aInput, pInput);
-	int Start, End;
 	m_CompletionCommandStart = 0;
 	m_CompletionCommandEnd = 0;
 
-	char aaSeperators[][2] = {";", "\"", " "};
-	for(auto *pSeperator : aaSeperators)
+	char aaSeparators[][2] = {";", "\""};
+	for(auto *pSeparator : aaSeparators)
 	{
-		str_delimiters_around_offset(aInput + m_CompletionCommandStart, pSeperator, m_Input.GetCursorOffset() - m_CompletionCommandStart, &Start, &End);
+		int Start, End;
+		str_delimiters_around_offset(aInput + m_CompletionCommandStart, pSeparator, m_Input.GetCursorOffset() - m_CompletionCommandStart, &Start, &End);
 		m_CompletionCommandStart += Start;
 		m_CompletionCommandEnd = m_CompletionCommandStart + (End - Start);
 		aInput[m_CompletionCommandEnd] = '\0';
 	}
 
-	str_copy(pCmd, aInput + m_CompletionCommandStart, CmdSize);
+	str_copy(aCmd, aInput + m_CompletionCommandStart, sizeof(aCmd));
 }
 
 static void StrCopyUntilSpace(char *pDest, size_t DestSize, const char *pSrc)
@@ -472,8 +472,8 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 			if(!m_Searching)
 			{
-				char aSearch[128];
-				GetCommand(m_aCompletionBuffer, aSearch, sizeof(aSearch));
+				char aSearch[IConsole::CMDLINE_LENGTH];
+				GetCommand(m_aCompletionBuffer, aSearch);
 
 				// command completion
 				const bool UseTempCommands = m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands();
@@ -612,7 +612,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		// find the current command
 		{
 			char aCmd[IConsole::CMDLINE_LENGTH];
-			GetCommand(GetString(), aCmd, sizeof(aCmd));
+			GetCommand(GetString(), aCmd);
 			char aBuf[IConsole::CMDLINE_LENGTH];
 			StrCopyUntilSpace(aBuf, sizeof(aBuf), aCmd);
 
@@ -1144,8 +1144,8 @@ void CGameConsole::OnRender()
 			Info.m_pOffsetChange = &pConsole->m_CompletionRenderOffsetChange;
 			Info.m_Width = Screen.w;
 			Info.m_TotalWidth = 0.0f;
-			char aCmd[128];
-			pConsole->GetCommand(pConsole->m_aCompletionBuffer, aCmd, sizeof(aCmd));
+			char aCmd[IConsole::CMDLINE_LENGTH];
+			pConsole->GetCommand(pConsole->m_aCompletionBuffer, aCmd);
 			Info.m_pCurrentCmd = aCmd;
 
 			TextRender()->SetCursor(&Info.m_Cursor, InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f, FONT_SIZE, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);

@@ -125,10 +125,9 @@ class CGameConsole : public CComponent
 		 * The result would be " world "
 		 *
 		 * @param pInput the console input line
-		 * @param pCmd the command the cursor is at
-		 * @param CmdSize size of the pCmd buffer
+		 * @param aCmd the command the cursor is at
 		 */
-		void GetCommand(const char *pInput, char *pCmd, size_t CmdSize);
+		void GetCommand(const char *pInput, char (&aCmd)[IConsole::CMDLINE_LENGTH]);
 		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);
 		static void PossibleArgumentsCompleteCallback(int Index, const char *pStr, void *pUser);
 

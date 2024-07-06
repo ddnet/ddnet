@@ -1605,19 +1605,20 @@ const char *str_find_nocase(const char *haystack, const char *needle);
 */
 const char *str_find(const char *haystack, const char *needle);
 
-/*
-	Function: str_delimiters_around_offset
-	Parameters:
-		haystack - String to search in
-		needle - String to search for
-
-	Returns:
-		true if both delimiters were found
-		false if a delimiter is missing (it uses haystart start and end as fallback)
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
+/**
+ * @ingroup Strings
+ *
+ * @param haystack String to search in
+ * @param delim String to search for
+ * @param offset Number of characters into the haystack
+ * @param start Will be set to the first delimiter on the left side of the offset (or haystack start)
+ * @param end Will be set to the furst delimiter on the right side  of the offset (or haystack end)
+ *
+ * @return `true` if both delimiters were found
+ * @return 'false' if a delimiter is missing (it uses haystack start and end as fallback)
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
 bool str_delimiters_around_offset(const char *haystay, const char *delim, int offset, int *start, int *end);
 
 /**
