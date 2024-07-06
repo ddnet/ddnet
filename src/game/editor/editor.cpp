@@ -1075,7 +1075,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		// proof button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-		if(DoButton_Ex(&m_QuickActionProof, m_QuickActionProof.Label(), MapView()->ProofMode()->IsEnabled(), &Button, 0, m_QuickActionProof.Description(), IGraphics::CORNER_L) ||
+		if(DoButton_Ex(&m_QuickActionProof, m_QuickActionProof.Label(), m_QuickActionProof.Active(), &Button, 0, m_QuickActionProof.Description(), IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_P) && ModPressed))
 		{
 			m_QuickActionProof.Call();

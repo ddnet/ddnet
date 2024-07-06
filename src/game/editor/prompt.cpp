@@ -60,11 +60,11 @@ void CPrompt::OnRender(CUIRect View)
 
 	static std::initializer_list<CQuickAction *> s_AllQuickActionsNullptr = {
 		nullptr // unholy hack to make the macro work with trailing commas
-#define REGISTER_QUICK_ACTION(name, text, callback, editor) , &Editor()->m_QuickAction##name
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, description) , &Editor()->m_QuickAction##name
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
 	};
-	static  std::vector<CQuickAction *>   s_AllQuickActions =  {s_AllQuickActionsNullptr.begin() + 1, s_AllQuickActionsNullptr.end()} ;
+	static std::vector<CQuickAction *> s_AllQuickActions = {s_AllQuickActionsNullptr.begin() + 1, s_AllQuickActionsNullptr.end()};
 
 	// m_vpCompletePromptList.clear();
 	// m_vpCompletePromptList.emplace_back((char *)"Add Quad");

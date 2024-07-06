@@ -5,41 +5,43 @@
 #include <utility>
 
 typedef std::function<void()> FButtonClickCallback;
-typedef std::function<bool()> FButtonEnabledCallback;
+typedef std::function<bool()> FButtonDisabledCallback;
 typedef std::function<bool()> FButtonActiveCallback;
 
 class CQuickAction
 {
-public:
+private:
 	const char *m_pLabel;
 	const char *m_pDescription;
 
-	// code to run when the action is triggered
 	FButtonClickCallback m_pfnCallback;
-
-	// bool that indicates if the action can be performed not or not
-	FButtonEnabledCallback m_pfnEnabledCallback;
-
-	// bool that indicates if the action is currently running
-	// only applies to actions that can be turned on or off like proof borders
+	FButtonDisabledCallback m_pfnDisabledCallback;
 	FButtonActiveCallback m_pfnActiveCallback;
 
+public:
 	CQuickAction(
 		const char *pLabel,
 		const char *pDescription,
-		FButtonClickCallback pfnCallback) :
+		FButtonClickCallback pfnCallback,
+		FButtonDisabledCallback pfnDisabledCallback,
+		FButtonActiveCallback pfnActiveCallback) :
 		m_pLabel(pLabel),
 		m_pDescription(pDescription),
-		m_pfnCallback(std::move(pfnCallback))
+		m_pfnCallback(std::move(pfnCallback)),
+		m_pfnDisabledCallback(std::move(pfnDisabledCallback)),
+		m_pfnActiveCallback(std::move(pfnActiveCallback))
 	{
-		m_pfnEnabledCallback = []() { return true; };
-		m_pfnActiveCallback = []() { return true; };
 	}
 
-	void Call() const
-	{
-		m_pfnCallback();
-	}
+	// code to run when the action is triggered
+	void Call() const { m_pfnCallback(); }
+
+	// bool that indicates if the action can be performed not or not
+	bool Disabled() { return m_pfnDisabledCallback(); }
+
+	// bool that indicates if the action is currently running
+	// only applies to actions that can be turned on or off like proof borders
+	bool Active() { return m_pfnActiveCallback(); }
 
 	const char *Label() const { return m_pLabel; }
 	const char *Description() const { return m_pDescription; }

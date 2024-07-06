@@ -1,8 +1,17 @@
-#ifndef REGISTER_QUICK_ACTION 
-#define REGISTER_QUICK_ACTION(name, text, callback, description)
+#ifndef REGISTER_QUICK_ACTION
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, description)
 #endif
 
-REGISTER_QUICK_ACTION(AddGroup, "Add group", [&]() { AddGroup(); }, "Adds a new group")
-REGISTER_QUICK_ACTION(Refocus, "Refocus", [&]() { MapView()->Focus(); }, "[HOME] Restore map focus")
-REGISTER_QUICK_ACTION(Proof, "Proof", [&]() { MapView()->ProofMode()->Toggle(); }, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.")
+#define ALWAYS_FALSE []() -> bool { return false; }
 
+REGISTER_QUICK_ACTION(
+	AddGroup, "Add group", [&]() { AddGroup(); }, ALWAYS_FALSE, ALWAYS_FALSE, "Adds a new group")
+REGISTER_QUICK_ACTION(
+	Refocus, "Refocus", [&]() { MapView()->Focus(); }, ALWAYS_FALSE, ALWAYS_FALSE, "[HOME] Restore map focus")
+REGISTER_QUICK_ACTION(
+	Proof,
+	"Proof",
+	[&]() { MapView()->ProofMode()->Toggle(); },
+	ALWAYS_FALSE,
+	[&]() -> bool { return MapView()->ProofMode()->IsEnabled(); },
+	"[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.")

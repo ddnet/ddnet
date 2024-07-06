@@ -35,11 +35,11 @@
 #include "editor_server_settings.h"
 #include "editor_trackers.h"
 #include "editor_ui.h"
-#include <game/editor/prompt.h>
-#include <game/editor/quick_action.h>
 #include "layer_selector.h"
 #include "map_view.h"
 #include "smooth_value.h"
+#include <game/editor/prompt.h>
+#include <game/editor/quick_action.h>
 
 #include <deque>
 #include <functional>
@@ -323,14 +323,14 @@ public:
 	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
 
 	void AddGroup();
-#define REGISTER_QUICK_ACTION(name, text, callback, editor) CQuickAction m_QuickAction##name;
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, description) CQuickAction m_QuickAction##name;
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
 
 	CEditor() :
-		#define REGISTER_QUICK_ACTION(name, text, callback, description) m_QuickAction##name(text, description, callback),
-		#include <game/editor/quick_actions.h>
-		#undef REGISTER_QUICK_ACTION
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, description) m_QuickAction##name(text, description, callback, disabled, active),
+#include <game/editor/quick_actions.h>
+#undef REGISTER_QUICK_ACTION
 		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
 		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f),
 		m_MapSettingsCommandContext(m_MapSettingsBackend.NewContext(&m_SettingsCommandInput))
