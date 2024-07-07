@@ -132,6 +132,11 @@ void CCharacter::SetJetpack(bool Active)
 	m_Core.m_Jetpack = Active;
 }
 
+void CCharacter::SetJumps(int Jumps)
+{
+	m_Core.m_Jumps = Jumps;
+}
+
 void CCharacter::SetSolo(bool Solo)
 {
 	m_Core.m_Solo = Solo;
