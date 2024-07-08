@@ -167,7 +167,7 @@ TEST_P(SingleScore, RankRegional)
 {
 	g_Config.m_SvRegionalRankings = true;
 	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - GER unranked"}, true);
+	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - GER rank 1"}, true);
 }
 
 TEST_P(SingleScore, Rank)
