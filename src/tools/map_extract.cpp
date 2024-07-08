@@ -7,59 +7,42 @@
 #include <engine/storage.h>
 #include <game/mapitems.h>
 
-bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
+static void PrintMapInfo(CDataFileReader &Reader)
 {
-	CDataFileReader Reader;
-	if(!Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
-	{
-		dbg_msg("map_extract", "error opening map '%s'", pMapName);
-		return false;
-	}
-
-	const CMapItemVersion *pVersion = static_cast<CMapItemVersion *>(Reader.FindItem(MAPITEMTYPE_VERSION, 0));
-	if(pVersion == nullptr || pVersion->m_Version != CMapItemVersion::CURRENT_VERSION)
-	{
-		dbg_msg("map_extract", "unsupported map version '%s'", pMapName);
-		return false;
-	}
-
-	dbg_msg("map_extract", "Make sure you have the permission to use these images and sounds in your own maps");
-
-	CMapItemInfo *pInfo = (CMapItemInfo *)Reader.FindItem(MAPITEMTYPE_INFO, 0);
-
+	const CMapItemInfo *pInfo = static_cast<CMapItemInfo *>(Reader.FindItem(MAPITEMTYPE_INFO, 0));
 	if(pInfo)
 	{
 		const char *pAuthor = Reader.GetDataString(pInfo->m_Author);
-		dbg_msg("map_extract", "author:  %s", pAuthor == nullptr ? "(error)" : pAuthor);
+		log_info("map_extract", "author:  %s", pAuthor == nullptr ? "(error)" : pAuthor);
 		const char *pMapVersion = Reader.GetDataString(pInfo->m_MapVersion);
-		dbg_msg("map_extract", "version: %s", pMapVersion == nullptr ? "(error)" : pMapVersion);
+		log_info("map_extract", "version: %s", pMapVersion == nullptr ? "(error)" : pMapVersion);
 		const char *pCredits = Reader.GetDataString(pInfo->m_Credits);
-		dbg_msg("map_extract", "credits: %s", pCredits == nullptr ? "(error)" : pCredits);
+		log_info("map_extract", "credits: %s", pCredits == nullptr ? "(error)" : pCredits);
 		const char *pLicense = Reader.GetDataString(pInfo->m_License);
-		dbg_msg("map_extract", "license: %s", pLicense == nullptr ? "(error)" : pLicense);
+		log_info("map_extract", "license: %s", pLicense == nullptr ? "(error)" : pLicense);
 	}
+}
 
+static void ExtractMapImages(CDataFileReader &Reader, const char *pPathSave)
+{
 	int Start, Num;
-
-	// load images
 	Reader.GetType(MAPITEMTYPE_IMAGE, &Start, &Num);
-
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemImage_v2 *pItem = (CMapItemImage_v2 *)Reader.GetItem(Start + i);
+		const CMapItemImage_v2 *pItem = static_cast<CMapItemImage_v2 *>(Reader.GetItem(Start + i));
 		if(pItem->m_External)
 			continue;
 
 		const char *pName = Reader.GetDataString(pItem->m_ImageName);
 		if(pName == nullptr || pName[0] == '\0')
 		{
-			dbg_msg("map_extract", "failed to load name of image %d", i);
+			log_error("map_extract", "failed to load name of image %d", i);
 			continue;
 		}
 
 		char aBuf[IO_MAX_PATH_LENGTH];
 		str_format(aBuf, sizeof(aBuf), "%s/%s.png", pPathSave, pName);
-		dbg_msg("map_extract", "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
+		Reader.UnloadData(pItem->m_ImageName);
 
 		if(pItem->m_Version >= 2 && pItem->m_MustBe1 != 1)
 		{
@@ -67,44 +50,83 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 			continue;
 		}
 
-		// copy image data
 		IOHANDLE File = io_open(aBuf, IOFLAG_WRITE);
 		if(File)
 		{
+			log_info("map_extract", "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
 			TImageByteBuffer ByteBuffer;
 			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
 
 			if(SavePng(IMAGE_FORMAT_RGBA, (const uint8_t *)Reader.GetData(pItem->m_ImageData), ImageByteBuffer, pItem->m_Width, pItem->m_Height))
 				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
 			io_close(File);
+			Reader.UnloadData(pItem->m_ImageData);
+		}
+		else
+		{
+			log_error("map_extract", "failed to open image file for writing. filename='%s'", aBuf);
 		}
 	}
+}
 
-	// load sounds
+static void ExtractMapSounds(CDataFileReader &Reader, const char *pPathSave)
+{
+	int Start, Num;
 	Reader.GetType(MAPITEMTYPE_SOUND, &Start, &Num);
-
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemSound *pItem = (CMapItemSound *)Reader.GetItem(Start + i);
+		const CMapItemSound *pItem = static_cast<CMapItemSound *>(Reader.GetItem(Start + i));
 		if(pItem->m_External)
 			continue;
 
 		const char *pName = Reader.GetDataString(pItem->m_SoundName);
 		if(pName == nullptr || pName[0] == '\0')
 		{
-			dbg_msg("map_extract", "failed to load name of sound %d", i);
+			log_error("map_extract", "failed to load name of sound %d", i);
 			continue;
 		}
 
 		const int SoundDataSize = Reader.GetDataSize(pItem->m_SoundData);
 		char aBuf[IO_MAX_PATH_LENGTH];
 		str_format(aBuf, sizeof(aBuf), "%s/%s.opus", pPathSave, pName);
-		dbg_msg("map_extract", "writing sound: %s (%d B)", aBuf, SoundDataSize);
+		Reader.UnloadData(pItem->m_SoundName);
 
 		IOHANDLE Opus = io_open(aBuf, IOFLAG_WRITE);
-		io_write(Opus, Reader.GetData(pItem->m_SoundData), SoundDataSize);
-		io_close(Opus);
+		if(Opus)
+		{
+			log_info("map_extract", "writing sound: %s (%d B)", aBuf, SoundDataSize);
+			io_write(Opus, Reader.GetData(pItem->m_SoundData), SoundDataSize);
+			io_close(Opus);
+			Reader.UnloadData(pItem->m_SoundData);
+		}
+		else
+		{
+			log_error("map_extract", "failed to open sound file for writing. filename='%s'", aBuf);
+		}
 	}
+}
+
+static bool ExtractMap(IStorage *pStorage, const char *pMapName, const char *pPathSave)
+{
+	CDataFileReader Reader;
+	if(!Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
+	{
+		log_error("map_extract", "error opening map '%s'", pMapName);
+		return false;
+	}
+
+	const CMapItemVersion *pVersion = static_cast<CMapItemVersion *>(Reader.FindItem(MAPITEMTYPE_VERSION, 0));
+	if(pVersion == nullptr || pVersion->m_Version != CMapItemVersion::CURRENT_VERSION)
+	{
+		log_error("map_extract", "unsupported map version '%s'", pMapName);
+		return false;
+	}
+
+	log_info("map_extract", "Make sure you have the permission to use these images and sounds in your own maps");
+
+	PrintMapInfo(Reader);
+	ExtractMapImages(Reader, pPathSave);
+	ExtractMapSounds(Reader, pPathSave);
 
 	return Reader.Close();
 }
@@ -129,16 +151,16 @@ int main(int argc, const char *argv[])
 	}
 	else
 	{
-		dbg_msg("usage", "%s map [directory]", argv[0]);
+		log_error("map_extract", "usage: %s <map> [directory]", argv[0]);
 		return -1;
 	}
 
 	if(!fs_is_dir(pDir))
 	{
-		dbg_msg("usage", "directory '%s' does not exist", pDir);
+		log_error("map_extract", "directory '%s' does not exist", pDir);
 		return -1;
 	}
 
-	int Result = Process(pStorage, argv[1], pDir) ? 0 : 1;
+	int Result = ExtractMap(pStorage, argv[1], pDir) ? 0 : 1;
 	return Result;
 }
