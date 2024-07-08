@@ -316,7 +316,7 @@ public:
 	virtual void MoveCursor(CTextCursor *pCursor, float x, float y) const = 0;
 	virtual void SetCursorPosition(CTextCursor *pCursor, float x, float y) const = 0;
 
-	virtual void LoadFonts() = 0;
+	virtual bool LoadFonts() = 0;
 	virtual void SetFontPreset(EFontPreset FontPreset) = 0;
 	virtual void SetFontLanguageVariant(const char *pLanguageFile) = 0;
 
