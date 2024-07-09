@@ -2971,14 +2971,21 @@ int CServer::Run()
 			if(!NonActive)
 				PumpNetwork(PacketWaiting);
 
-			NonActive = true;
-
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
 				if(m_aClients[i].m_State == CClient::STATE_REDIRECTED)
+				{
 					if(time_get() > m_aClients[i].m_RedirectDropTime)
+					{
 						m_NetServer.Drop(i, "redirected");
-				if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+					}
+				}
+			}
+
+			NonActive = true;
+			for(const auto &Client : m_aClients)
+			{
+				if(Client.m_State != CClient::STATE_EMPTY)
 				{
 					NonActive = false;
 					break;
