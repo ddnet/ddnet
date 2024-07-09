@@ -437,7 +437,8 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			vec2 NewVel = m_Vel + HookVel;
 
 			// check if we are under the legal limit for the hook
-			if(length(NewVel) < m_Tuning.m_HookDragSpeed || length(NewVel) < length(m_Vel))
+			const float NewVelLength = length(NewVel);
+			if(NewVelLength < m_Tuning.m_HookDragSpeed || NewVelLength < length(m_Vel))
 				m_Vel = NewVel; // no problem. apply
 		}
 
