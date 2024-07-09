@@ -1410,6 +1410,7 @@ set(EXPECTED_DATA
   editor/cursor.png
   editor/cursor_resize.png
   editor/entities/DDNet.png
+  editor/entities/F-DDrace.png
   editor/entities/FNG.png
   editor/entities/Race.png
   editor/entities/Vanilla.png
