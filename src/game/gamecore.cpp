@@ -479,7 +479,7 @@ void CCharacterCore::TickDeferred()
 
 				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_CollisionDisabled && !pCharCore->m_CollisionDisabled && m_Tuning.m_PlayerCollision);
 
-				if(CanCollide && Distance < PhysicalSize() * 1.25f && Distance > 0.0f)
+				if(CanCollide && Distance < PhysicalSize() * 1.25f)
 				{
 					float a = (PhysicalSize() * 1.45f - Distance);
 					float Velocity = 0.5f;
@@ -580,7 +580,7 @@ void CCharacterCore::Move()
 					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
 						continue;
 					float D = distance(Pos, pCharCore->m_Pos);
-					if(D < PhysicalSize() && D >= 0.0f)
+					if(D < PhysicalSize())
 					{
 						if(a > 0.0f)
 							m_Pos = LastPos;
