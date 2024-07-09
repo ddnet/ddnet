@@ -2285,7 +2285,7 @@ void CServer::FillAntibot(CAntibotRoundData *pData)
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CAntibotPlayerData *pPlayer = &pData->m_aPlayers[i];
-		net_addr_str(m_NetServer.ClientAddr(i), pPlayer->m_aAddress, sizeof(pPlayer->m_aAddress), true);
+		str_copy(pPlayer->m_aAddress, m_NetServer.ClientAddrString(i));
 	}
 }
 

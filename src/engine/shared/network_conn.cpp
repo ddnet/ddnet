@@ -41,6 +41,7 @@ void CNetConnection::Reset(bool Rejoin)
 	m_Buffer.Init();
 
 	mem_zero(&m_Construct, sizeof(m_Construct));
+	m_aPeerAddrStr[0] = '\0';
 }
 
 const char *CNetConnection::ErrorString()
@@ -240,6 +241,7 @@ void CNetConnection::DirectInit(const NETADDR &Addr, SECURITY_TOKEN SecurityToke
 	m_State = NET_CONNSTATE_ONLINE;
 
 	m_PeerAddr = Addr;
+	net_addr_str(&Addr, m_aPeerAddrStr, sizeof(m_aPeerAddrStr), true);
 	mem_zero(m_aErrorString, sizeof(m_aErrorString));
 
 	int64_t Now = time_get();
@@ -353,6 +355,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 					Reset();
 					m_State = NET_CONNSTATE_PENDING;
 					m_PeerAddr = *pAddr;
+					net_addr_str(pAddr, m_aPeerAddrStr, sizeof(m_aPeerAddrStr), true);
 					mem_zero(m_aErrorString, sizeof(m_aErrorString));
 					m_LastSendTime = Now;
 					m_LastRecvTime = Now;
@@ -380,6 +383,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 				if(CtrlMsg == NET_CTRLMSG_CONNECTACCEPT)
 				{
 					m_PeerAddr = *pAddr;
+					net_addr_str(pAddr, m_aPeerAddrStr, sizeof(m_aPeerAddrStr), true);
 					if(m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN && pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)) && !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
 					{
 						m_SecurityToken = ToSecurityToken(&pPacket->m_aChunkData[1 + sizeof(SECURITY_TOKEN_MAGIC)]);
