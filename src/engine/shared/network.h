@@ -270,7 +270,7 @@ public:
 	void SignalResend();
 	int State() const { return m_State; }
 	const NETADDR *PeerAddress() const { return &m_PeerAddr; }
-	const char *PeerAddressString() const { return m_aPeerAddrStr; }
+	const char (*PeerAddressString() const)[NETADDR_MAXSTRSIZE] { return &m_aPeerAddrStr; }
 	void ConnectAddresses(const NETADDR **ppAddrs, int *pNumAddrs) const
 	{
 		*ppAddrs = m_aConnectAddrs;
@@ -420,7 +420,7 @@ public:
 
 	// status requests
 	const NETADDR *ClientAddr(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
-	const char *ClientAddrString(int ClientID) const { return m_aSlots[ClientID].m_Connection.PeerAddressString(); }
+	const char (*ClientAddrString(int ClientID) const)[NETADDR_MAXSTRSIZE] { return m_aSlots[ClientID].m_Connection.PeerAddressString(); }
 	bool HasSecurityToken(int ClientId) const { return m_aSlots[ClientId].m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
 	NETADDR Address() const { return m_Address; }
 	NETSOCKET Socket() const { return m_Socket; }
