@@ -321,7 +321,34 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const 
 {
 	CGameConsole::CInstance *pInstance = (CGameConsole::CInstance *)pUser;
 	if(pInstance->m_CompletionChosen == Index)
-		pInstance->m_Input.Set(pStr);
+	{
+		char aBefore[IConsole::CMDLINE_LENGTH];
+		str_truncate(aBefore, sizeof(aBefore), pInstance->m_aCompletionBuffer, pInstance->m_CompletionCommandStart);
+		char aBuf[IConsole::CMDLINE_LENGTH];
+		str_format(aBuf, sizeof(aBuf), "%s%s%s", aBefore, pStr, pInstance->m_aCompletionBuffer + pInstance->m_CompletionCommandEnd);
+		pInstance->m_Input.Set(aBuf);
+		pInstance->m_Input.SetCursorOffset(str_length(pStr) + pInstance->m_CompletionCommandStart);
+	}
+}
+
+void CGameConsole::CInstance::GetCommand(const char *pInput, char (&aCmd)[IConsole::CMDLINE_LENGTH])
+{
+	char aInput[IConsole::CMDLINE_LENGTH];
+	str_copy(aInput, pInput);
+	m_CompletionCommandStart = 0;
+	m_CompletionCommandEnd = 0;
+
+	char aaSeparators[][2] = {";", "\""};
+	for(auto *pSeparator : aaSeparators)
+	{
+		int Start, End;
+		str_delimiters_around_offset(aInput + m_CompletionCommandStart, pSeparator, m_Input.GetCursorOffset() - m_CompletionCommandStart, &Start, &End);
+		m_CompletionCommandStart += Start;
+		m_CompletionCommandEnd = m_CompletionCommandStart + (End - Start);
+		aInput[m_CompletionCommandEnd] = '\0';
+	}
+
+	str_copy(aCmd, aInput + m_CompletionCommandStart, sizeof(aCmd));
 }
 
 static void StrCopyUntilSpace(char *pDest, size_t DestSize, const char *pSrc)
@@ -445,9 +472,12 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 			if(!m_Searching)
 			{
+				char aSearch[IConsole::CMDLINE_LENGTH];
+				GetCommand(m_aCompletionBuffer, aSearch);
+
 				// command completion
 				const bool UseTempCommands = m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands();
-				int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, UseTempCommands);
+				int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(aSearch, m_CompletionFlagmask, UseTempCommands);
 				if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 				{
 					if(CompletionEnumerationCount)
@@ -456,7 +486,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 							m_CompletionChosen = 0;
 						m_CompletionChosen = (m_CompletionChosen + Direction + CompletionEnumerationCount) % CompletionEnumerationCount;
 						m_CompletionArgumentPosition = 0;
-						m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, UseTempCommands, PossibleCommandsCompleteCallback, this);
+						m_pGameConsole->m_pConsole->PossibleCommands(aSearch, m_CompletionFlagmask, UseTempCommands, PossibleCommandsCompleteCallback, this);
 					}
 					else if(m_CompletionChosen != -1)
 					{
@@ -581,8 +611,11 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 		// find the current command
 		{
+			char aCmd[IConsole::CMDLINE_LENGTH];
+			GetCommand(GetString(), aCmd);
 			char aBuf[IConsole::CMDLINE_LENGTH];
-			StrCopyUntilSpace(aBuf, sizeof(aBuf), GetString());
+			StrCopyUntilSpace(aBuf, sizeof(aBuf), aCmd);
+
 			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
 			if(pCommand)
@@ -1111,7 +1144,10 @@ void CGameConsole::OnRender()
 			Info.m_pOffsetChange = &pConsole->m_CompletionRenderOffsetChange;
 			Info.m_Width = Screen.w;
 			Info.m_TotalWidth = 0.0f;
-			Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
+			char aCmd[IConsole::CMDLINE_LENGTH];
+			pConsole->GetCommand(pConsole->m_aCompletionBuffer, aCmd);
+			Info.m_pCurrentCmd = aCmd;
+
 			TextRender()->SetCursor(&Info.m_Cursor, InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f, FONT_SIZE, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 			Info.m_Cursor.m_LineWidth = std::numeric_limits<float>::max();
 			const int NumCommands = m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
