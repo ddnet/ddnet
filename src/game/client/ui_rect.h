@@ -136,7 +136,9 @@ public:
 	void Draw(ColorRGBA Color, int Corners, float Rounding) const;
 	void Draw4(ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) const;
 
-	vec2 Center() const { return vec2(x + w / 2.0f, y + h / 2.0f); }
+	vec2 TopLeft() const { return vec2(x, y); }
+	vec2 Size() const { return vec2(w, h); }
+	vec2 Center() const { return TopLeft() + Size() / 2.0f; }
 };
 
 #endif

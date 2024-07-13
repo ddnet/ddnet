@@ -42,19 +42,15 @@ void CMenus::RenderGame(CUIRect MainView)
 {
 	CUIRect Button, ButtonBar, ButtonBar2;
 	bool ShowDDRaceButtons = MainView.w > 855.0f;
-	MainView.HSplitTop(45.0f, &ButtonBar, &MainView);
+	MainView.HSplitTop(45.0f + (g_Config.m_ClTouchControls ? 35.0f : 0.0f), &ButtonBar, &MainView);
 	ButtonBar.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
-
-	// button bar
-	ButtonBar.HSplitTop(10.0f, 0, &ButtonBar);
-	ButtonBar.HSplitTop(25.0f, &ButtonBar, 0);
-	ButtonBar.VMargin(10.0f, &ButtonBar);
-
-	ButtonBar.HSplitTop(30.0f, 0, &ButtonBar2);
-	ButtonBar2.HSplitTop(25.0f, &ButtonBar2, 0);
+	ButtonBar.Margin(10.0f, &ButtonBar);
+	if(g_Config.m_ClTouchControls)
+	{
+		ButtonBar.HSplitMid(&ButtonBar, &ButtonBar2, 10.0f);
+	}
 
 	ButtonBar.VSplitRight(120.0f, &ButtonBar, &Button);
-
 	static CButtonContainer s_DisconnectButton;
 	if(DoButton_Menu(&s_DisconnectButton, Localize("Disconnect"), 0, &Button))
 	{
@@ -69,7 +65,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 	}
 
-	ButtonBar.VSplitRight(5.0f, &ButtonBar, 0);
+	ButtonBar.VSplitRight(5.0f, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(170.0f, &ButtonBar, &Button);
 
 	static CButtonContainer s_DummyButton;
@@ -107,9 +103,8 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 	}
 
-	ButtonBar.VSplitRight(5.0f, &ButtonBar, 0);
+	ButtonBar.VSplitRight(5.0f, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(140.0f, &ButtonBar, &Button);
-
 	static CButtonContainer s_DemoButton;
 	const bool Recording = DemoRecorder(RECORDER_MANUAL)->IsRecording();
 	if(DoButton_Menu(&s_DemoButton, Recording ? Localize("Stop record") : Localize("Record demo"), 0, &Button))
@@ -134,7 +129,6 @@ void CMenus::RenderGame(CUIRect MainView)
 
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
 		{
-			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 			ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 			if(!Client()->DummyConnecting() && DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
 			{
@@ -150,7 +144,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_RED)
 			{
-				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				static CButtonContainer s_JoinRedButton;
 				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinRedButton, Localize("Join red"), 0, &Button))
@@ -162,7 +156,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_BLUE)
 			{
-				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				static CButtonContainer s_JoinBlueButton;
 				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinBlueButton, Localize("Join blue"), 0, &Button))
@@ -176,7 +170,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != 0)
 			{
-				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				if(!Client()->DummyConnecting() && DoButton_Menu(&s_SpectateButton, Localize("Join game"), 0, &Button))
 				{
@@ -188,7 +182,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS && ShowDDRaceButtons)
 		{
-			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+			ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 			ButtonBar.VSplitLeft(65.0f, &Button, &ButtonBar);
 
 			static CButtonContainer s_KillButton;
@@ -204,16 +198,57 @@ void CMenus::RenderGame(CUIRect MainView)
 	{
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS || Paused || Spec)
 		{
-			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
+			ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 			ButtonBar.VSplitLeft((!Paused && !Spec) ? 65.0f : 120.0f, &Button, &ButtonBar);
 
 			static CButtonContainer s_PauseButton;
 			if(DoButton_Menu(&s_PauseButton, (!Paused && !Spec) ? Localize("Pause") : Localize("Join game"), 0, &Button))
 			{
-				m_pClient->Console()->ExecuteLine("say /pause");
+				Console()->ExecuteLine("say /pause");
 				SetActive(false);
 			}
 		}
+	}
+
+	if(!g_Config.m_ClTouchControls)
+		return;
+
+	ButtonBar2.VSplitLeft(170.0f, &Button, &ButtonBar2);
+	static char s_VirtualJoystickCheckbox;
+	if(DoButton_CheckBox(&s_VirtualJoystickCheckbox, Localize("Virtual joystick"), g_Config.m_ClTouchControlsJoystick, &Button))
+	{
+		g_Config.m_ClTouchControlsJoystick = !g_Config.m_ClTouchControlsJoystick;
+	}
+
+	ButtonBar2.VSplitLeft(5.0f, nullptr, &ButtonBar2);
+	ButtonBar2.VSplitLeft(170.0f, &Button, &ButtonBar2);
+	static char s_ShowEntitiesCheckbox;
+	if(DoButton_CheckBox(&s_ShowEntitiesCheckbox, Localize("Show entities"), g_Config.m_ClOverlayEntities, &Button))
+	{
+		Console()->ExecuteLine("toggle cl_overlay_entities 0 100");
+	}
+
+	ButtonBar2.VSplitRight(80.0f, &ButtonBar2, &Button);
+	static CButtonContainer s_CloseButton;
+	if(DoButton_Menu(&s_CloseButton, Localize("Close"), 0, &Button))
+	{
+		SetActive(false);
+	}
+
+	ButtonBar2.VSplitRight(5.0f, &ButtonBar2, nullptr);
+	ButtonBar2.VSplitRight(160.0f, &ButtonBar2, &Button);
+	static CButtonContainer s_RemoveConsoleButton;
+	if(DoButton_Menu(&s_RemoveConsoleButton, Localize("Remote console"), 0, &Button))
+	{
+		Console()->ExecuteLine("toggle_remote_console");
+	}
+
+	ButtonBar2.VSplitRight(5.0f, &ButtonBar2, nullptr);
+	ButtonBar2.VSplitRight(160.0f, &ButtonBar2, &Button);
+	static CButtonContainer s_LocalConsoleButton;
+	if(DoButton_Menu(&s_LocalConsoleButton, Localize("Local console"), 0, &Button))
+	{
+		Console()->ExecuteLine("toggle_local_console");
 	}
 }
 

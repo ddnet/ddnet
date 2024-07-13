@@ -592,7 +592,6 @@ protected:
 	void RenderSettingsCustom(CUIRect MainView);
 
 	void SetNeedSendInfo();
-	void SetActive(bool Active);
 	void UpdateColors();
 
 	IGraphics::CTextureHandle m_TextureBlob;
@@ -612,6 +611,8 @@ public:
 	bool IsInit() { return m_IsInit; }
 
 	bool IsActive() const { return m_MenuActive; }
+	void SetActive(bool Active);
+
 	void KillServer();
 
 	virtual void OnInit() override;
