@@ -146,6 +146,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Chat,
 					      &m_Broadcast,
 					      &m_DebugHud,
+					      &m_TouchControls,
 					      &m_Scoreboard,
 					      &m_Statboard,
 					      &m_Motd,
@@ -165,6 +166,7 @@ void CGameClient::OnConsoleInit()
 						  &m_Emoticon,
 						  &m_Menus,
 						  &m_Controls,
+						  &m_TouchControls,
 						  &m_Binds});
 
 	// add basic console commands
