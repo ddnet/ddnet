@@ -8,6 +8,7 @@ void CNetConnection::ResetStats()
 {
 	mem_zero(&m_Stats, sizeof(m_Stats));
 	mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
+	m_aPeerAddrStr[0] = '\0';
 	m_LastUpdateTime = 0;
 }
 
@@ -41,7 +42,6 @@ void CNetConnection::Reset(bool Rejoin)
 	m_Buffer.Init();
 
 	mem_zero(&m_Construct, sizeof(m_Construct));
-	m_aPeerAddrStr[0] = '\0';
 }
 
 const char *CNetConnection::ErrorString()
@@ -197,6 +197,8 @@ int CNetConnection::Connect(const NETADDR *pAddr, int NumAddrs)
 	// init connection
 	Reset();
 	mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
+	m_aPeerAddrStr[0] = '\0';
+
 	for(int i = 0; i < NumAddrs; i++)
 	{
 		m_aConnectAddrs[i] = pAddr[i];
@@ -509,6 +511,7 @@ void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SE
 
 	m_State = NET_CONNSTATE_ONLINE;
 	m_PeerAddr = *pAddr;
+	net_addr_str(pAddr, m_aPeerAddrStr, sizeof(m_aPeerAddrStr), true);
 	mem_zero(m_aErrorString, sizeof(m_aErrorString));
 	m_LastSendTime = Now;
 	m_LastRecvTime = Now;
