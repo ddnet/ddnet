@@ -1616,7 +1616,7 @@ void CGameClient::OnNewSnapshot()
 				FoundGameInfoEx = true;
 				CServerInfo ServerInfo;
 				Client()->GetServerInfo(&ServerInfo);
-				m_GameInfo = GetGameInfo((const CNetObj_GameInfoEx *)Item.m_pData, Client()->SnapItemSize(IClient::SNAP_CURRENT, i), &ServerInfo);
+				m_GameInfo = GetGameInfo((const CNetObj_GameInfoEx *)Item.m_pData, Item.m_DataSize, &ServerInfo);
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
 			{

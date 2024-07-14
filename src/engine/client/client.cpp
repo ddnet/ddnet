@@ -712,12 +712,6 @@ IClient::CSnapItem CClient::SnapGetItem(int SnapId, int Index) const
 	return Item;
 }
 
-int CClient::SnapItemSize(int SnapId, int Index) const
-{
-	dbg_assert(SnapId >= 0 && SnapId < NUM_SNAPSHOT_TYPES, "invalid SnapId");
-	return m_aapSnapshots[g_Config.m_ClDummy][SnapId]->m_pAltSnap->GetItemSize(Index);
-}
-
 const void *CClient::SnapFindItem(int SnapId, int Type, int Id) const
 {
 	if(!m_aapSnapshots[g_Config.m_ClDummy][SnapId])
