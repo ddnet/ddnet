@@ -71,14 +71,17 @@ public:
 		return m_apAltSnapshots[SnapId]->NumItems();
 	}
 
-	void *SnapGetItem(int SnapId, int Index, IClient::CSnapItem *pItem)
+	IClient::CSnapItem SnapGetItem(int SnapId, int Index)
 	{
 		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapId");
+		const CSnapshot *pSnapshot = m_apAltSnapshots[SnapId];
 		const CSnapshotItem *pSnapshotItem = m_apAltSnapshots[SnapId]->GetItem(Index);
-		pItem->m_DataSize = m_apAltSnapshots[SnapId]->GetItemSize(Index);
-		pItem->m_Type = m_apAltSnapshots[SnapId]->GetItemType(Index);
-		pItem->m_Id = pSnapshotItem->Id();
-		return (void *)pSnapshotItem->Data();
+		IClient::CSnapItem Item;
+		Item.m_Type = pSnapshot->GetItemType(Index);
+		Item.m_Id = pSnapshotItem->Id();
+		Item.m_pData = pSnapshotItem->Data();
+		Item.m_DataSize = pSnapshot->GetItemSize(Index);
+		return Item;
 	}
 
 	void OnNewSnapshot()
@@ -86,12 +89,11 @@ public:
 		int Num = SnapNumItems(IClient::SNAP_CURRENT);
 		for(int i = 0; i < Num; i++)
 		{
-			IClient::CSnapItem Item;
-			const void *pData = SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
+			const IClient::CSnapItem Item = SnapGetItem(IClient::SNAP_CURRENT, i);
 
 			if(Item.m_Type == NETOBJTYPE_CLIENTINFO)
 			{
-				const CNetObj_ClientInfo *pInfo = (const CNetObj_ClientInfo *)pData;
+				const CNetObj_ClientInfo *pInfo = (const CNetObj_ClientInfo *)Item.m_pData;
 				int ClientId = Item.m_Id;
 				if(ClientId < MAX_CLIENTS)
 				{

@@ -699,15 +699,17 @@ void CClient::LoadDebugFont()
 
 // ---
 
-void *CClient::SnapGetItem(int SnapId, int Index, CSnapItem *pItem) const
+IClient::CSnapItem CClient::SnapGetItem(int SnapId, int Index) const
 {
 	dbg_assert(SnapId >= 0 && SnapId < NUM_SNAPSHOT_TYPES, "invalid SnapId");
 	const CSnapshot *pSnapshot = m_aapSnapshots[g_Config.m_ClDummy][SnapId]->m_pAltSnap;
 	const CSnapshotItem *pSnapshotItem = pSnapshot->GetItem(Index);
-	pItem->m_DataSize = pSnapshot->GetItemSize(Index);
-	pItem->m_Type = pSnapshot->GetItemType(Index);
-	pItem->m_Id = pSnapshotItem->Id();
-	return (void *)pSnapshotItem->Data();
+	CSnapItem Item;
+	Item.m_Type = pSnapshot->GetItemType(Index);
+	Item.m_Id = pSnapshotItem->Id();
+	Item.m_pData = pSnapshotItem->Data();
+	Item.m_DataSize = pSnapshot->GetItemSize(Index);
+	return Item;
 }
 
 int CClient::SnapItemSize(int SnapId, int Index) const

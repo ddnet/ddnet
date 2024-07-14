@@ -104,7 +104,6 @@ class CSnapEntities
 {
 public:
 	IClient::CSnapItem m_Item;
-	const void *m_pData;
 	const CNetObj_EntityEx *m_pDataEx;
 };
 

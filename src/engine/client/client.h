@@ -326,7 +326,7 @@ public:
 	// ---
 
 	int GetPredictionTime() override;
-	void *SnapGetItem(int SnapId, int Index, CSnapItem *pItem) const override;
+	CSnapItem SnapGetItem(int SnapId, int Index) const override;
 	int SnapItemSize(int SnapId, int Index) const override;
 	const void *SnapFindItem(int SnapId, int Type, int Id) const override;
 	int SnapNumItems(int SnapId) const override;
