@@ -13,12 +13,13 @@ class CPrompt : public CEditorComponent
 
 	std::vector<const CQuickAction *> m_vpFilteredPromptList;
 	CLineInputBuffered<512> m_PromptInput;
-	bool m_Active = false;
 
 public:
 	bool OnInput(const IInput::CEvent &Event) override;
 	void OnRender(CUIRect View) override;
-	bool IsActive() const { return m_Active; }
+	bool IsActive();
+	void SetActive();
+	void SetInactive();
 };
 
 #endif

@@ -23,24 +23,39 @@ bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
 	if(!pNeedle || !pNeedle[0])
 		return false;
 	const char *pHit = str_find_nocase_char(pHaystack, pNeedle[0]);
-	printf("'== pHit=%s'\n", pHit);
 	for(int i = 0; i < str_length(pNeedle); i++)
 	{
 		if(!pHit)
 			return false;
 		char Search = pNeedle[i];
 		pHit = str_find_nocase_char(pHit, Search);
-		printf("'%c' hit=%s\n", Search, pHit);
 	}
-	printf("'-------------------'\n");
 	return pHit;
+}
+
+bool CPrompt::IsActive()
+{
+	return CEditorComponent::IsActive() || Editor()->m_Dialog == DIALOG_QUICK_PROMPT;
+}
+
+void CPrompt::SetActive()
+{
+	Editor()->m_Dialog = DIALOG_QUICK_PROMPT;
+	CEditorComponent::SetActive();
+}
+
+void CPrompt::SetInactive()
+{
+	if(Editor()->m_Dialog == DIALOG_QUICK_PROMPT)
+		Editor()->m_Dialog = DIALOG_NONE;
+	CEditorComponent::SetInactive();
 }
 
 bool CPrompt::OnInput(const IInput::CEvent &Event)
 {
-	if(Input()->KeyIsPressed(KEY_P))
+	if(Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_P))
 	{
-		m_Active = true;
+		SetActive();
 	}
 	return false;
 }
@@ -52,7 +67,7 @@ void CPrompt::OnRender(CUIRect View)
 
 	if(Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 	{
-		m_Active = false;
+		SetInactive();
 	}
 
 	static CListBox s_ListBox;
@@ -111,7 +126,7 @@ void CPrompt::OnRender(CUIRect View)
 	}
 	Ui()->SetActiveItem(&m_PromptInput);
 
-	s_ListBox.SetActive(Editor()->m_Dialog == DIALOG_NONE && !Ui()->IsPopupOpen());
+	s_ListBox.SetActive(!Ui()->IsPopupOpen());
 	s_ListBox.DoStart(15.0f, m_vpFilteredPromptList.size(), 1, 5, m_PromptSelectedIndex, &Suggestions, false);
 
 	for(size_t i = 0; i < m_vpFilteredPromptList.size(); i++)
@@ -143,14 +158,12 @@ void CPrompt::OnRender(CUIRect View)
 
 	if(s_ListBox.WasItemActivated())
 	{
-		dbg_msg("editor", "enter index=%d", m_PromptSelectedIndex);
 		if(m_PromptSelectedIndex >= 0)
 		{
 			const CQuickAction *pBtn = m_vpFilteredPromptList[m_PromptSelectedIndex];
-			dbg_msg("editor", "selected %s", pBtn->Label());
 			pBtn->Call();
 			m_PromptInput.Clear();
-			m_Active = false;
+			SetInactive();
 		}
 	}
 }
