@@ -1,3 +1,5 @@
+// This file can be included several times.
+
 #ifndef REGISTER_QUICK_ACTION
 #define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, description)
 #endif

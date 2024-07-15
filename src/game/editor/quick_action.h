@@ -1,5 +1,5 @@
-#ifndef GAME_EDITOR_EDITOR_QUICK_ACTION_H
-#define GAME_EDITOR_EDITOR_QUICK_ACTION_H
+#ifndef GAME_EDITOR_QUICK_ACTION_H
+#define GAME_EDITOR_QUICK_ACTION_H
 
 #include <functional>
 #include <utility>
