@@ -14,4 +14,4 @@ REGISTER_QUICK_ACTION(
 	[&]() { MapView()->ProofMode()->Toggle(); },
 	ALWAYS_FALSE,
 	[&]() -> bool { return MapView()->ProofMode()->IsEnabled(); },
-	"[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.")
+	"Toggles proof borders. These borders represent what a player maximum can see.")
