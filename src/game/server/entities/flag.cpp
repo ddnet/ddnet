@@ -109,7 +109,7 @@ void CFlag::Snap(int SnappingClient)
 	// it is also done in TickDeferred and vanilla does not
 	// keep this in here
 	// but thats the only fix i found for
-	// https://github.com/ZillyInsta/ddnet-insta/issues/6
+	// https://github.com/ddnet-insta/ddnet-insta/issues/6
 	// in 0.7 the flag laggs behind otherwise unless cl_predict_players is set to 1
 	// which is not needed on vanilla servers
 	if(m_pCarrier)

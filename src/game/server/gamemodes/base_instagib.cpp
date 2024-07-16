@@ -361,7 +361,7 @@ void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 		else if(g_Config.m_SvTournamentJoinMsgs == 2)
 			SendChatSpectators(aBuf, CGameContext::CHAT_SIX);
 
-		GameServer()->SendChatTarget(ClientId, "DDNet-insta https://github.com/ZillyInsta/ddnet-insta/");
+		GameServer()->SendChatTarget(ClientId, "DDNet-insta https://github.com/ddnet-insta/ddnet-insta/");
 		GameServer()->SendChatTarget(ClientId, "DDraceNetwork Mod. Version: " GAME_VERSION);
 
 		GameServer()->AlertOnSpecialInstagibConfigs(ClientId);

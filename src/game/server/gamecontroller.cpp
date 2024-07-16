@@ -1348,7 +1348,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			// meaning that if countdown and timelimit is set the
 			// timerstops at 00:00 and waits the additional countdown time
 			// before actually ending the game
-			// https://github.com/ZillyInsta/ddnet-insta/issues/41
+			// https://github.com/ddnet-insta/ddnet-insta/issues/41
 			if(m_GameState == IGS_START_COUNTDOWN_ROUND_START)
 			{
 				m_GameStartTick = Server()->Tick();

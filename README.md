@@ -1,4 +1,4 @@
-[![DDraceNetwork](other/ddnet-insta.png)](https://ddnet.tw) [![](https://github.com/ZillyInsta/ddnet-insta/workflows/Build/badge.svg)](https://github.com/ZillyInsta/ddnet-insta/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
+[![DDraceNetwork](other/ddnet-insta.png)](https://ddnet.tw) [![](https://github.com/ddnet-insta/ddnet-insta/workflows/Build/badge.svg)](https://github.com/ddnet-insta/ddnet-insta/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
 
 DDNet-insta based on DDRaceNetwork, a Teeworlds mod. See the [website](https://ddnet.tw) for more information.
 
@@ -15,13 +15,13 @@ It is only applied for ddnet-insta settings not for all ddnet configs.
 It is recommended to set ``sv_vote_checkboxes 0`` at the start of your autoexec and ``sv_vote_checkboxes 1``
 at the end so it does not update all votes for every setting it loads.
 
-![checkbox votes](https://raw.githubusercontent.com/ZillyInsta/images/c6c3e871a844fa06b460b8be61ba0ff01d0a82f6/checkbox_votes.png)
+![checkbox votes](https://raw.githubusercontent.com/ddnet-insta/images/c6c3e871a844fa06b460b8be61ba0ff01d0a82f6/checkbox_votes.png)
 
 ## unstack chat for ddnet clients
 
 Newer DDNet clients do not show duplicated messages multiple times. This is not always wanted when using call binds for team communication during pvp games. So there is ``sv_unstack_chat`` to revert that ddnet feature and ensure every message is sent properly in chat.
 
-![unstack_chat](https://raw.githubusercontent.com/ZillyInsta/images/3c437acdea599788fb245518e9c25de7c0e63795/unstack_chat.png)
+![unstack_chat](https://raw.githubusercontent.com/ddnet-insta/images/3c437acdea599788fb245518e9c25de7c0e63795/unstack_chat.png)
 
 ## 0.6 and 0.7 support including ready change
 
@@ -30,7 +30,7 @@ ddnet-insta uses the 0.6/0.7 server side version bridge from ddnet. So all gamet
 In 0.7 there was a ready change added which allows users to pause the game. It only continues when everyone presses the ready bind.
 This feature is now also possible for 0.6 clients using the /pause chat command. This feature should be turned off on public servers ``sv_player_ready_mode 0`` because it will be used by trolls.
 
-![pause game](https://raw.githubusercontent.com/ZillyInsta/images/1a2d10c893605d704aeea8320cf0e65f8e0c2aa3/ready_change.png)
+![pause game](https://raw.githubusercontent.com/ddnet-insta/images/1a2d10c893605d704aeea8320cf0e65f8e0c2aa3/ready_change.png)
 
 ## gametype support
 
