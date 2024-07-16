@@ -101,7 +101,7 @@ void CCamera::OnRender()
 		m_Zoom = clamp(m_Zoom, MinZoomLevel(), MaxZoomLevel());
 	}
 
-	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || GameClient()->m_GameInfo.m_AllowZoom || Client()->State() == IClient::STATE_DEMOPLAYBACK))
+	if(!ZoomAllowed())
 	{
 		m_ZoomSet = false;
 		m_Zoom = 1.0f;
@@ -210,28 +210,31 @@ void CCamera::OnReset()
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		pSelf->ScaleZoom(CCamera::ZOOM_STEP);
+	if(!pSelf->ZoomAllowed())
+		return;
 
-		if(pSelf->GameClient()->m_MultiViewActivated)
-			pSelf->GameClient()->m_MultiViewPersonalZoom++;
-	}
+	pSelf->ScaleZoom(CCamera::ZOOM_STEP);
+
+	if(pSelf->GameClient()->m_MultiViewActivated)
+		pSelf->GameClient()->m_MultiViewPersonalZoom++;
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		pSelf->ScaleZoom(1 / CCamera::ZOOM_STEP);
+	if(!pSelf->ZoomAllowed())
+		return;
 
-		if(pSelf->GameClient()->m_MultiViewActivated)
-			pSelf->GameClient()->m_MultiViewPersonalZoom--;
-	}
+	pSelf->ScaleZoom(1 / CCamera::ZOOM_STEP);
+
+	if(pSelf->GameClient()->m_MultiViewActivated)
+		pSelf->GameClient()->m_MultiViewPersonalZoom--;
 }
 void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
+	if(!pSelf->ZoomAllowed())
+		return;
+
 	float TargetLevel = pResult->NumArguments() ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
 	pSelf->ChangeZoom(std::pow(CCamera::ZOOM_STEP, TargetLevel - 10), pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime);
 
@@ -376,4 +379,11 @@ void CCamera::GotoTele(int Number, int Offset)
 void CCamera::SetZoom(float Target, int Smoothness)
 {
 	ChangeZoom(Target, Smoothness);
+}
+
+bool CCamera::ZoomAllowed() const
+{
+	return GameClient()->m_Snap.m_SpecInfo.m_Active ||
+	       GameClient()->m_GameInfo.m_AllowZoom ||
+	       Client()->State() == IClient::STATE_DEMOPLAYBACK;
 }
