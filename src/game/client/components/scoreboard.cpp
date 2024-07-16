@@ -583,12 +583,26 @@ void CScoreboard::OnRender()
 			if(pGameDataObj->m_TeamscoreRed > pGameDataObj->m_TeamscoreBlue)
 			{
 				TextRender()->TextColor(ColorRGBA(0.975f, 0.17f, 0.17f, 1.0f));
-				str_format(aTitle, sizeof(aTitle), Localize("%s wins!"), pRedTeamName);
+				if(pRedTeamName == nullptr)
+				{
+					str_copy(aTitle, Localize("Red team wins!"));
+				}
+				else
+				{
+					str_format(aTitle, sizeof(aTitle), Localize("%s wins!"), pRedTeamName);
+				}
 			}
 			else if(pGameDataObj->m_TeamscoreBlue > pGameDataObj->m_TeamscoreRed)
 			{
 				TextRender()->TextColor(ColorRGBA(0.17f, 0.46f, 0.975f, 1.0f));
-				str_format(aTitle, sizeof(aTitle), Localize("%s wins!"), pBlueTeamName);
+				if(pBlueTeamName == nullptr)
+				{
+					str_copy(aTitle, Localize("Blue team wins!"));
+				}
+				else
+				{
+					str_format(aTitle, sizeof(aTitle), Localize("%s wins!"), pBlueTeamName);
+				}
 			}
 			else
 			{
@@ -612,8 +626,8 @@ void CScoreboard::OnRender()
 		RedScoreboard.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_B, 15.0f);
 		BlueScoreboard.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_B, 15.0f);
 
-		RenderTitle(RedTitle, TEAM_RED, pRedTeamName);
-		RenderTitle(BlueTitle, TEAM_BLUE, pBlueTeamName);
+		RenderTitle(RedTitle, TEAM_RED, pRedTeamName == nullptr ? Localize("Red team") : pRedTeamName);
+		RenderTitle(BlueTitle, TEAM_BLUE, pBlueTeamName == nullptr ? Localize("Blue team") : pBlueTeamName);
 		RenderScoreboard(RedScoreboard, TEAM_RED, 0, NumPlayers);
 		RenderScoreboard(BlueScoreboard, TEAM_BLUE, 0, NumPlayers);
 	}
@@ -701,7 +715,6 @@ const char *CScoreboard::GetTeamName(int Team) const
 
 	int ClanPlayers = 0;
 	const char *pClanName = nullptr;
-	const char *pDefaultTeamName = Team == TEAM_RED ? Localize("Red team") : Localize("Blue team");
 	for(const CNetObj_PlayerInfo *pInfo : GameClient()->m_Snap.m_apInfoByScore)
 	{
 		if(!pInfo || pInfo->m_Team != Team)
@@ -717,12 +730,12 @@ const char *CScoreboard::GetTeamName(int Team) const
 			if(str_comp(GameClient()->m_aClients[pInfo->m_ClientId].m_aClan, pClanName) == 0)
 				ClanPlayers++;
 			else
-				return pDefaultTeamName;
+				return nullptr;
 		}
 	}
 
 	if(ClanPlayers > 1 && pClanName[0] != '\0')
 		return pClanName;
 	else
-		return pDefaultTeamName;
+		return nullptr;
 }
