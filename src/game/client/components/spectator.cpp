@@ -232,24 +232,6 @@ void CSpectator::OnRender()
 		return;
 	}
 
-	if(m_SelectedSpectatorId != NO_SELECTION)
-	{
-		// clicking a component
-		if(m_Clicked)
-		{
-			if(!GameClient()->m_MultiViewActivated)
-				Spectate(m_SelectedSpectatorId);
-
-			if(m_SelectedSpectatorId == MULTI_VIEW)
-				GameClient()->m_MultiViewActivated = true;
-			else if(m_SelectedSpectatorId == SPEC_FREEVIEW || m_SelectedSpectatorId == SPEC_FOLLOW)
-				GameClient()->m_MultiViewActivated = false;
-
-			if(!GameClient()->m_MultiViewActivated && m_SelectedSpectatorId >= 0 && m_SelectedSpectatorId < MAX_CLIENTS)
-				m_Clicked = false;
-		}
-	}
-
 	if(!m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		m_Active = false;
@@ -275,6 +257,8 @@ void CSpectator::OnRender()
 	int PerLine = 8;
 	float BoxMove = -10.0f;
 	float BoxOffset = 0.0f;
+
+	const bool MousePressed = Input()->KeyPress(KEY_MOUSE_1);
 
 	for(const auto &pInfo : m_pClient->m_Snap.m_apInfoByDDTeamName)
 	{
@@ -330,6 +314,11 @@ void CSpectator::OnRender()
 	{
 		m_SelectedSpectatorId = SPEC_FREEVIEW;
 		FreeViewSelected = true;
+		if(MousePressed)
+		{
+			GameClient()->m_MultiViewActivated = false;
+			Spectate(m_SelectedSpectatorId);
+		}
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, FreeViewSelected ? 1.0f : 0.5f);
 	TextRender()->Text(Width / 2.0f - (ObjWidth - 40.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1.0f);
@@ -339,6 +328,10 @@ void CSpectator::OnRender()
 	{
 		m_SelectedSpectatorId = MULTI_VIEW;
 		MultiViewSelected = true;
+		if(MousePressed)
+		{
+			GameClient()->m_MultiViewActivated = true;
+		}
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, MultiViewSelected ? 1.0f : 0.5f);
 	TextRender()->Text(Width / 2.0f - (ObjWidth - 40.0f) + (ObjWidth * 2.0f / 3.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Multi-View"), -1.0f);
@@ -351,6 +344,11 @@ void CSpectator::OnRender()
 		{
 			m_SelectedSpectatorId = SPEC_FOLLOW;
 			FollowSelected = true;
+			if(MousePressed)
+			{
+				GameClient()->m_MultiViewActivated = false;
+				Spectate(m_SelectedSpectatorId);
+			}
 		}
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, FollowSelected ? 1.0f : 0.5f);
 		TextRender()->Text(Width / 2.0f - (ObjWidth - 40.0f) + (ObjWidth * 2.0f * 2.0f / 3.0f), Height / 2.0f - 280.0f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Follow"), -1.0f);
@@ -426,29 +424,35 @@ void CSpectator::OnRender()
 		{
 			m_SelectedSpectatorId = m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId;
 			PlayerSelected = true;
-			if(GameClient()->m_MultiViewActivated && m_Clicked)
+			if(MousePressed)
 			{
-				if(GameClient()->m_MultiViewTeam == DDTeam)
+				if(GameClient()->m_MultiViewActivated)
 				{
-					GameClient()->m_aMultiViewId[m_SelectedSpectatorId] = !GameClient()->m_aMultiViewId[m_SelectedSpectatorId];
-					if(!GameClient()->m_aMultiViewId[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId])
+					if(GameClient()->m_MultiViewTeam == DDTeam)
 					{
-						int NewClientId = GameClient()->FindFirstMultiViewId();
-						if(NewClientId < MAX_CLIENTS && NewClientId >= 0)
+						GameClient()->m_aMultiViewId[m_SelectedSpectatorId] = !GameClient()->m_aMultiViewId[m_SelectedSpectatorId];
+						if(!GameClient()->m_aMultiViewId[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId])
 						{
-							GameClient()->CleanMultiViewId(NewClientId);
-							GameClient()->m_aMultiViewId[NewClientId] = true;
-							Spectate(NewClientId);
+							int NewClientId = GameClient()->FindFirstMultiViewId();
+							if(NewClientId < MAX_CLIENTS && NewClientId >= 0)
+							{
+								GameClient()->CleanMultiViewId(NewClientId);
+								GameClient()->m_aMultiViewId[NewClientId] = true;
+								Spectate(NewClientId);
+							}
 						}
+					}
+					else
+					{
+						GameClient()->ResetMultiView();
+						Spectate(m_SelectedSpectatorId);
+						m_MultiViewActivateDelay = Client()->LocalTime() + 0.3f;
 					}
 				}
 				else
 				{
-					GameClient()->ResetMultiView();
 					Spectate(m_SelectedSpectatorId);
-					m_MultiViewActivateDelay = Client()->LocalTime() + 0.3f;
 				}
-				m_Clicked = false;
 			}
 		}
 		float TeeAlpha;
@@ -552,19 +556,4 @@ void CSpectator::Spectate(int SpectatorId)
 void CSpectator::SpectateClosest()
 {
 	ConSpectateClosest(NULL, this);
-}
-
-bool CSpectator::OnInput(const IInput::CEvent &Event)
-{
-	if(m_Active && Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_1)
-	{
-		m_Clicked = true;
-		return true;
-	}
-	else if(Event.m_Flags & IInput::FLAG_RELEASE && Event.m_Key == KEY_MOUSE_1)
-	{
-		m_Clicked = false;
-		return false;
-	}
-	return false;
 }
