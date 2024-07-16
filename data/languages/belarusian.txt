@@ -500,9 +500,6 @@ Your skin
 Reset to defaults
 == Скінуць налады
 
-Round
-== Раўнд
-
 Lht.
 == Светлата
 
@@ -1708,6 +1705,13 @@ Regular background color
 Entities background color
 == Колер фону энтыты
 
+An error during command recording occurred. Try to update your GPU drivers.
+== Адбылася памылка падчас выканання каманды запісу. Паспрабуйце абнавіць драйверы відэакарты.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Каманда рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
+
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
@@ -1715,14 +1719,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
 == 
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== Адбылася памылка падчас выканання каманды запісу. Паспрабуйце абнавіць драйверы відэакарты.
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== Каманда рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
@@ -1770,6 +1766,10 @@ Following
 Loading commands…
 == 
 
+[Spectating]
+Following %s
+== 
+
 Press a key…
 == 
 
@@ -1786,6 +1786,9 @@ Continue anyway?
 == 
 
 %d/%d KiB (%.1f KiB/s)
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1852,4 +1855,21 @@ Always show other players' hook collision lines
 == 
 
 Show finish messages
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

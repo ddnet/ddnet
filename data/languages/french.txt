@@ -523,9 +523,6 @@ Your skin
 Reset to defaults
 == Réinitialiser
 
-Round
-== Round
-
 Lht.
 == Luminosité
 
@@ -1876,3 +1873,27 @@ Entities background color
 
 Moved ingame
 == Déplacé en jeu
+
+[Spectating]
+Following %s
+== 
+
+Example of usage
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
+== 

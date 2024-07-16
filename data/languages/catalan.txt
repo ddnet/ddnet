@@ -506,9 +506,6 @@ Your skin
 Reset to defaults
 == Restaurar als valors predeterminats
 
-Round
-== Ronda
-
 Lht.
 == Lluminositat
 
@@ -1227,10 +1224,10 @@ Loading map file from storage
 Loading demo file from storage
 == 
 
-Why are you slowmo replaying to read this?
+Initializing components
 == 
 
-Initializing components
+Why are you slowmo replaying to read this?
 == 
 
 Initializing assets
@@ -1291,6 +1288,10 @@ Angle:
 == 
 
 Multi-View
+== 
+
+[Spectating]
+Following %s
 == 
 
 Team %d
@@ -1372,6 +1373,9 @@ Requesting to join the game
 == 
 
 Loading menu images
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1836,11 +1840,28 @@ Open the directory to add custom assets
 Loading race demo files
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
 Super
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
 == 
 
 Loading sound files
 == 
 
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

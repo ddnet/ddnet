@@ -500,9 +500,6 @@ Your skin
 Reset to defaults
 == Tilbakestill standardinstillinger
 
-Round
-== Runde
-
 Lht.
 == Lyshet
 
@@ -1137,10 +1134,10 @@ Loading map file from storage
 Loading demo file from storage
 == 
 
-Why are you slowmo replaying to read this?
+Initializing components
 == 
 
-Initializing components
+Why are you slowmo replaying to read this?
 == 
 
 Initializing assets
@@ -1201,6 +1198,10 @@ Angle:
 == 
 
 Multi-View
+== 
+
+[Spectating]
+Following %s
 == 
 
 Team %d
@@ -1312,6 +1313,9 @@ CHN
 == 
 
 Getting server list from master server
+== 
+
+Example of usage
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
@@ -1845,11 +1849,28 @@ Can't find a Tutorial server
 Loading race demo files
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
 Super
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
 == 
 
 Loading sound files
 == 
 
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

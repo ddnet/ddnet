@@ -530,9 +530,6 @@ Your skin
 Reset to defaults
 == Standardeinstellung
 
-Round
-== Runde
-
 Lht.
 == Hell.
 
@@ -1868,3 +1865,27 @@ Tee
 
 Show only chat messages from team members
 == Nur Nachrichten von Teammitgliedern anzeigen
+
+[Spectating]
+Following %s
+== %s folgen
+
+Example of usage
+== Beispielnutzung
+
+Round %d/%d
+== Runde %d/%d
+
+[Spectators]
+%d others…
+== %d andere…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Team %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== 

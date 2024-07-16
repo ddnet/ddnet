@@ -501,9 +501,6 @@ Your skin
 Reset to defaults
 == Nollställ till standard
 
-Round
-== Runda
-
 Lht.
 == Ljusstyrka
 
@@ -1854,3 +1851,27 @@ Tee
 
 Show only chat messages from team members
 == Visa bara chattmeddelanden från lagkamrater
+
+[Spectating]
+Following %s
+== 
+
+Example of usage
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
+== 

@@ -1297,9 +1297,6 @@ Rifle Laser Inner Color
 Rifle Laser Outline Color
 == Колір контуру лазера гвинтівки
 
-Round
-== Раунд
-
 Run on join
 == Запускати при приєднанні
 
@@ -1852,3 +1849,27 @@ Zoom out
 == Віддалити
 
 ##### needs translation #####
+
+[Spectating]
+Following %s
+== 
+
+Example of usage
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
+== 
