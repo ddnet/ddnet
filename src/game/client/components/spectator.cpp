@@ -270,7 +270,6 @@ void CSpectator::OnRender()
 	float LineHeight = 60.0f;
 	float TeeSizeMod = 1.0f;
 	float RoundRadius = 30.0f;
-	bool Selected = false;
 	bool MultiViewSelected = false;
 	int TotalPlayers = 0;
 	int PerLine = 8;
@@ -325,13 +324,14 @@ void CSpectator::OnRender()
 		Graphics()->DrawRect(Width / 2.0f - (ObjWidth - 20.0f) + (ObjWidth * 2.0f * 2.0f / 3.0f), Height / 2.0f - 280.0f, ((ObjWidth * 2.0f) / 3.0f) - 40.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 20.0f);
 	}
 
+	bool FreeViewSelected = false;
 	if(m_SelectorMouse.x >= -(ObjWidth - 20.0f) && m_SelectorMouse.x <= -(ObjWidth - 20.0f) + ((ObjWidth * 2.0f) / 3.0f) - 40.0f &&
 		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 	{
 		m_SelectedSpectatorId = SPEC_FREEVIEW;
-		Selected = true;
+		FreeViewSelected = true;
 	}
-	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, FreeViewSelected ? 1.0f : 0.5f);
 	TextRender()->Text(Width / 2.0f - (ObjWidth - 40.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1.0f);
 
 	if(m_SelectorMouse.x >= -(ObjWidth - 20.0f) + (ObjWidth * 2.0f / 3.0f) && m_SelectorMouse.x <= -(ObjWidth - 20.0f) + (ObjWidth * 2.0f / 3.0f) + ((ObjWidth * 2.0f) / 3.0f) - 40.0f &&
@@ -345,14 +345,14 @@ void CSpectator::OnRender()
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_LocalClientId >= 0)
 	{
-		Selected = false;
+		bool FollowSelected = false;
 		if(m_SelectorMouse.x >= -(ObjWidth - 20.0f) + (ObjWidth * 2.0f * 2.0f / 3.0f) && m_SelectorMouse.x <= -(ObjWidth - 20.0f) + (ObjWidth * 2.0f * 2.0f / 3.0f) + ((ObjWidth * 2.0f) / 3.0f) - 40.0f &&
 			m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
 		{
 			m_SelectedSpectatorId = SPEC_FOLLOW;
-			Selected = true;
+			FollowSelected = true;
 		}
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, FollowSelected ? 1.0f : 0.5f);
 		TextRender()->Text(Width / 2.0f - (ObjWidth - 40.0f) + (ObjWidth * 2.0f * 2.0f / 3.0f), Height / 2.0f - 280.0f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Follow"), -1.0f);
 	}
 
@@ -420,12 +420,12 @@ void CSpectator::OnRender()
 			Graphics()->DrawRect(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, RoundRadius);
 		}
 
-		Selected = false;
+		bool PlayerSelected = false;
 		if(m_SelectorMouse.x >= x - 10.0f && m_SelectorMouse.x < x + 260.0f &&
 			m_SelectorMouse.y >= y - (LineHeight / 6.0f) && m_SelectorMouse.y < y + (LineHeight * 5.0f / 6.0f))
 		{
 			m_SelectedSpectatorId = m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId;
-			Selected = true;
+			PlayerSelected = true;
 			if(GameClient()->m_MultiViewActivated && m_Clicked)
 			{
 				if(GameClient()->m_MultiViewTeam == DDTeam)
@@ -460,7 +460,7 @@ void CSpectator::OnRender()
 		}
 		else
 		{
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, PlayerSelected ? 1.0f : 0.5f);
 			TeeAlpha = 1.0f;
 		}
 		TextRender()->Text(Width / 2.0f + x + 50.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_aName, 220.0f);
@@ -469,12 +469,12 @@ void CSpectator::OnRender()
 		{
 			if(GameClient()->m_aMultiViewId[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId])
 			{
-				TextRender()->TextColor(0.1f, 1.0f, 0.1f, Selected ? 1.0f : 0.5f);
+				TextRender()->TextColor(0.1f, 1.0f, 0.1f, PlayerSelected ? 1.0f : 0.5f);
 				TextRender()->Text(Width / 2.0f + x + 50.0f + 180.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize - 3, "⬤", 220.0f);
 			}
 			else if(GameClient()->m_MultiViewTeam == DDTeam)
 			{
-				TextRender()->TextColor(1.0f, 0.1f, 0.1f, Selected ? 1.0f : 0.5f);
+				TextRender()->TextColor(1.0f, 0.1f, 0.1f, PlayerSelected ? 1.0f : 0.5f);
 				TextRender()->Text(Width / 2.0f + x + 50.0f + 180.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize - 3, "◯", 220.0f);
 			}
 		}
