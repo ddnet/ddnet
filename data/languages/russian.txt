@@ -570,9 +570,6 @@ Your skin
 Reset to defaults
 == Сбросить настройки
 
-Round
-== Раунд
-
 Lht.
 == Ярк.
 
@@ -1868,3 +1865,27 @@ Always show other players' hook collision lines
 == Всегда показывать линию коллизии крюка других игроков
 
 #### need translate ####
+
+[Spectating]
+Following %s
+== 
+
+Example of usage
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
+== 

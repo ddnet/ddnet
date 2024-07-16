@@ -492,9 +492,6 @@ Your skin
 Reset to defaults
 == Defoltlara sıfırlayın
 
-Round
-== Yuvarlaq
-
 Lht.
 == Parlaqlıq
 
@@ -1848,3 +1845,27 @@ Tee
 
 Show only chat messages from team members
 == Yalnız komanda üzvlərinin mesajlarını göstərin
+
+[Spectating]
+Following %s
+== 
+
+Example of usage
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
+== 

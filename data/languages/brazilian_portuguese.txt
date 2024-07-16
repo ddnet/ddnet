@@ -595,9 +595,6 @@ Gameplay
 Restart
 == Reiniciar
 
-Round
-== Turno
-
 Browser
 == Navegar
 
@@ -1879,3 +1876,27 @@ Tee
 
 Show only chat messages from team members
 == Mostrar apenas mensagens de chat de membros do time
+
+[Spectating]
+Following %s
+== 
+
+Example of usage
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
+== 

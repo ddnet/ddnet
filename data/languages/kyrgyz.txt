@@ -357,9 +357,6 @@ Reset to defaults
 Laser
 == Бластер
 
-Round
-== Раунду
-
 Sat.
 == Канык.
 
@@ -591,10 +588,10 @@ Loading demo file from storage
 Loading DDNet Client
 == 
 
-Why are you slowmo replaying to read this?
+Initializing components
 == 
 
-Initializing components
+Why are you slowmo replaying to read this?
 == 
 
 Initializing assets
@@ -661,6 +658,10 @@ Angle:
 == 
 
 Multi-View
+== 
+
+[Spectating]
+Following %s
 == 
 
 Server best:
@@ -847,6 +848,9 @@ Getting server list from master server
 == 
 
 Search
+== 
+
+Example of usage
 == 
 
 Exclude
@@ -1783,7 +1787,21 @@ Update failed! Check log…
 Loading race demo files
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
 Super
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
 == 
 
 Manual
@@ -1841,4 +1859,7 @@ Grabs
 == 
 
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

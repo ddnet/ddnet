@@ -515,9 +515,6 @@ Your skin
 Reset to defaults
 == Restaurar predefinições
 
-Round
-== Ronda
-
 UI Color
 == Cor do menu
 
@@ -932,10 +929,10 @@ Loading map file from storage
 Loading demo file from storage
 == 
 
-Why are you slowmo replaying to read this?
+Initializing components
 == 
 
-Initializing components
+Why are you slowmo replaying to read this?
 == 
 
 Initializing assets
@@ -999,6 +996,10 @@ Angle:
 == 
 
 Multi-View
+== 
+
+[Spectating]
+Following %s
 == 
 
 Server best:
@@ -1131,6 +1132,9 @@ CHN
 == 
 
 Getting server list from master server
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1806,7 +1810,21 @@ Update failed! Check log…
 Loading race demo files
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
 Super
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
 == 
 
 Manual
@@ -1852,4 +1870,7 @@ Grabs
 == 
 
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

@@ -532,9 +532,6 @@ Your skin
 Reset to defaults
 == Resetuj
 
-Round
-== Runda
-
 Lht.
 == Svetl.
 
@@ -1697,6 +1694,10 @@ Following
 Loading commands…
 == 
 
+[Spectating]
+Following %s
+== 
+
 Some map images could not be loaded. Check the local console for details.
 == 
 
@@ -1731,6 +1732,9 @@ Video was saved to '%s'
 == 
 
 %d/%d KiB (%.1f KiB/s)
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1854,4 +1858,21 @@ Regular background color
 == 
 
 Entities background color
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 
