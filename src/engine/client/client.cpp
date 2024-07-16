@@ -4594,11 +4594,13 @@ int main(int argc, const char **argv)
 	pClient->Run();
 
 	const bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
+#if !defined(CONF_PLATFORM_ANDROID)
 	char aRestartBinaryPath[IO_MAX_PATH_LENGTH];
 	if(Restarting)
 	{
 		pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aRestartBinaryPath, sizeof(aRestartBinaryPath));
 	}
+#endif
 
 	std::vector<SWarning> vQuittingWarnings = pClient->QuittingWarnings();
 
@@ -4611,7 +4613,11 @@ int main(int argc, const char **argv)
 
 	if(Restarting)
 	{
+#if defined(CONF_PLATFORM_ANDROID)
+		RestartAndroidApp();
+#else
 		shell_execute(aRestartBinaryPath, EShellExecuteWindowState::FOREGROUND);
+#endif
 	}
 
 	PerformFinalCleanup();

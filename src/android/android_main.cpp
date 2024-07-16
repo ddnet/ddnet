@@ -225,3 +225,12 @@ const char *InitAndroid()
 
 	return nullptr;
 }
+
+// See NativeMain.java
+constexpr uint32_t COMMAND_USER = 0x8000;
+constexpr uint32_t COMMAND_RESTART_APP = COMMAND_USER + 1;
+
+void RestartAndroidApp()
+{
+	SDL_AndroidSendMessage(COMMAND_RESTART_APP, 0);
+}
