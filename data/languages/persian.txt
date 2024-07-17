@@ -1465,9 +1465,6 @@ Loading race demo files
 Time limit: %d min
 == ﻪﻘﯿﻗﺩ %d :ﯽﻧﺎﻣﺯ ﺖﯾﺩﻭﺪﺤﻣ
 
-Round
-== ﺪﻧﺍﺭ
-
 Super
 == ﺮﭘﻮﺳ
 
@@ -1587,6 +1584,10 @@ Loading commands…
 Multi-View
 == 
 
+[Spectating]
+Following %s
+== 
+
 Some map images could not be loaded. Check the local console for details.
 == 
 
@@ -1636,6 +1637,9 @@ Video was saved to '%s'
 == 
 
 %d/%d KiB (%.1f KiB/s)
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1837,6 +1841,20 @@ Entities background color
 Unregister protocol and file extensions
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
 FPM
 == 
 
@@ -1847,4 +1865,7 @@ Grabs
 == 
 
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

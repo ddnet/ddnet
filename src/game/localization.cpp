@@ -23,18 +23,14 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 	m_vLanguages.emplace_back("English", "", 826, vEnglishLanguageCodes);
 
 	const char *pFilename = "languages/index.txt";
-	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
-	if(!File)
+	CLineReader LineReader;
+	if(!LineReader.OpenFile(pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
 		log_error("localization", "Couldn't open index file '%s'", pFilename);
 		return;
 	}
 
-	CLineReader LineReader;
-	LineReader.Init(File);
-
-	const char *pLine;
-	while((pLine = LineReader.Get()))
+	while(const char *pLine = LineReader.Get())
 	{
 		if(!str_length(pLine) || pLine[0] == '#') // skip empty lines and comments
 			continue;
@@ -104,8 +100,6 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 		str_format(aFileName, sizeof(aFileName), "languages/%s.txt", aEnglishName);
 		m_vLanguages.emplace_back(aNativeName, aFileName, str_toint(aCountryCode), vLanguageCodes);
 	}
-
-	io_close(File);
 
 	std::sort(m_vLanguages.begin(), m_vLanguages.end());
 }
@@ -179,8 +173,8 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 		return true;
 	}
 
-	IOHANDLE IoHandle = pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
-	if(!IoHandle)
+	CLineReader LineReader;
+	if(!LineReader.OpenFile(pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_ALL)))
 		return false;
 
 	log_info("localization", "loaded '%s'", pFilename);
@@ -189,11 +183,8 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 
 	char aContext[512];
 	char aOrigin[512];
-	CLineReader LineReader;
-	LineReader.Init(IoHandle);
-	char *pLine;
 	int Line = 0;
-	while((pLine = LineReader.Get()))
+	while(const char *pLine = LineReader.Get())
 	{
 		Line++;
 		if(!str_length(pLine))
@@ -225,7 +216,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 		}
 
 		str_copy(aOrigin, pLine);
-		char *pReplacement = LineReader.Get();
+		const char *pReplacement = LineReader.Get();
 		if(!pReplacement)
 		{
 			log_error("localization", "unexpected end of file after original '%s' on line %d", aOrigin, Line);
@@ -242,7 +233,6 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 		pReplacement += 3;
 		AddString(aOrigin, pReplacement, aContext);
 	}
-	io_close(IoHandle);
 	std::sort(m_vStrings.begin(), m_vStrings.end());
 	return true;
 }

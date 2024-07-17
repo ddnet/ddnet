@@ -207,6 +207,18 @@ int CSound::Init()
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
+	// Initialize sample indices. We always need them to load sounds in
+	// the editor even if sound is disabled or failed to be enabled.
+	m_FirstFreeSampleIndex = 0;
+	for(size_t i = 0; i < std::size(m_aSamples) - 1; ++i)
+	{
+		m_aSamples[i].m_Index = i;
+		m_aSamples[i].m_NextFreeSampleIndex = i + 1;
+		m_aSamples[i].m_pData = nullptr;
+	}
+	m_aSamples[std::size(m_aSamples) - 1].m_Index = std::size(m_aSamples) - 1;
+	m_aSamples[std::size(m_aSamples) - 1].m_NextFreeSampleIndex = SAMPLE_INDEX_FULL;
+
 	if(!g_Config.m_SndEnable)
 		return 0;
 
@@ -228,7 +240,6 @@ int CSound::Init()
 
 	// Open the audio device and start playing sound!
 	m_Device = SDL_OpenAudioDevice(nullptr, 0, &Format, &FormatOut, 0);
-
 	if(m_Device == 0)
 	{
 		dbg_msg("sound", "unable to open audio: %s", SDL_GetError());
@@ -242,15 +253,6 @@ int CSound::Init()
 	m_MaxFrames = maximum<uint32_t>(m_MaxFrames, 1024 * 2); // make the buffer bigger just in case
 #endif
 	m_pMixBuffer = (int *)calloc(m_MaxFrames * 2, sizeof(int));
-
-	m_FirstFreeSampleIndex = 0;
-	for(size_t i = 0; i < std::size(m_aSamples) - 1; ++i)
-	{
-		m_aSamples[i].m_Index = i;
-		m_aSamples[i].m_NextFreeSampleIndex = i + 1;
-	}
-	m_aSamples[std::size(m_aSamples) - 1].m_Index = std::size(m_aSamples) - 1;
-	m_aSamples[std::size(m_aSamples) - 1].m_NextFreeSampleIndex = SAMPLE_INDEX_FULL;
 
 	SDL_PauseAudioDevice(m_Device, 0);
 

@@ -406,7 +406,7 @@ Switch weapon when out of ammo
 == Переключать оружие без патронов
 
 Show only chat messages from friends
-== Показывать только дружеские с.
+== Показывать только сообщения от друзей
 
 Show clan above name plates
 == Показывать клан
@@ -570,9 +570,6 @@ Your skin
 Reset to defaults
 == Сбросить настройки
 
-Round
-== Раунд
-
 Lht.
 == Ярк.
 
@@ -610,7 +607,7 @@ Game paused
 == Пауза
 
 Team message
-== Командное с.
+== Командное
 
 Automatically create statboard csv
 == Записывать результаты в CSV
@@ -622,7 +619,7 @@ Remove chat
 == Удалить чат
 
 System message
-== Системное с.
+== Системное
 
 Updating…
 == Обновление…
@@ -1273,10 +1270,10 @@ Show player target angle
 == Показывать угол прицела игрока
 
 Show freeze bars
-== Показывать полоску фриза
+== Показывать индикатор фриза
 
 Opacity of freeze bars inside freeze
-== Прозрачность полоски фриза внутри фриза
+== Прозрачность индикатора фриза
 
 Normal Color
 == Обычный цвет
@@ -1297,7 +1294,7 @@ Quads are used for background decoration
 == Квады используются для украшения фона
 
 Tries to predict other entities to give a feel of low latency
-== Пытыается предсказать другие объекты, чтобы придать ощущение низкой задержки
+== Пытается предсказать другие объекты, чтобы придать ощущение низкой задержки
 
 Extras
 == Доп.
@@ -1384,19 +1381,19 @@ Hook collision line opacity
 == Прозрачность линии
 
 Colors of the hook collision line, in case of a possible collision with:
-== Цвет линии коллизии крюка при:
+== Цвет линии коллизии крюка если
 
 Your movements are not taken into account when calculating the line colors
-== Ваше перемещение не учитываются при расчете цвета линии коллизии
+== Ваше перемещение не учитывается при расчете цвета линии коллизии
 
 Nothing hookable
-== Невозможности зацепиться
+== Невозможно зацепиться
 
 Something hookable
-== Возможности зацепиться
+== Можно зацепиться
 
 A Tee
-== Пересечении игрока
+== Задевает игрока
 
 Loading assets
 == Загрузка ресурсов
@@ -1480,13 +1477,13 @@ Go back one tick
 == Отмотать назад на один тик
 
 Go forward one tick
-== Отмотать вперед на один тик
+== Промотать вперед на один тик
 
 Go back one marker
-== Отмотать назад на один маркер
+== Вернуться назад на один маркер
 
 Go forward one marker
-== Отмотать вперед на один маркер
+== Пройти вперед на один маркер
 
 Are you sure that you want to delete the demo '%s'?
 == Вы уверены, что хотите удалить демо '%s'?
@@ -1498,7 +1495,7 @@ Reset controls
 == Сброс настроек
 
 Are you sure that you want to reset the controls to their defaults?
-== Вы уверены, что хотите сбросить настройки по умолчанию?
+== Вы уверены, что хотите сбросить игру до настроек по умолчанию?
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -1586,10 +1583,10 @@ Click to select server. Double click to join your friend.
 == Нажмите, чтобы выбрать сервер. Нажмите дважды, чтобы присоединиться.
 
 Click to remove this player from your friends list.
-== Нажмите, чтобы убрать игрока из списка друзей.
+== Нажмите, чтобы удалить игрока из списка друзей.
 
 Click to remove this clan from your friends list.
-== Нажмите, чтобы Исключить клан из списка.
+== Нажмите, чтобы исключить клан из списка.
 
 None
 == Пусто
@@ -1678,10 +1675,10 @@ Go back the specified duration
 == %d сек.
 
 Change the skip duration
-== Изменение времени перехода
+== Изменить продолжительность шага
 
 Go forward the specified duration
-== Отмотать вперед на заданное время
+== Промотать вперед на заданное время
 
 Render cut to video
 == Рендеринг отрезка в видео
@@ -1799,7 +1796,7 @@ Authed name color in scoreboard
 == Цвет администратора в табло
 
 Same clan color in scoreboard
-== Цвет клан в табло
+== Цвет клана в табло
 
 Show finish messages
 == Показывать сообщения о финишах
@@ -1808,7 +1805,7 @@ Failed saving the replay!
 == Не удалось сохранить запись!
 
 Error saving settings
-== Ошибка сохранения настроек
+== Ошибка при сохранении настроек
 
 Following
 == Текущие
@@ -1847,24 +1844,46 @@ Always show chat
 == Всегда показывать чат
 
 Show only chat messages from team members
-== Показывать сообщения только от членов команды
+== Показывать сообщения только от команды
 
 Show friend mark (♥) in name plates
 == Показывать знак дружбы (♥) в имени друга
 
 Show hook strength icon indicator
-== Показывать индикатор вида крюка
+== Показывать иконку индикатора силы крюка
 
 Show hook strength number indicator
-== Показывать индикатор номера вида крюка
+== Показывать номер индикатора силы крюка
 
 Show own player's hook collision line
-== Показывать собственную линию коллизии крюка
+== Показывать линию крюка
 
 Always show own player's hook collision line
-== Всегда показывать собственную линию коллизии крюка
+== Всегда показывать линию крюка
 
 Always show other players' hook collision lines
-== Всегда показывать линию коллизии крюка других игроков
+== Всегда показывать линию крюка других игроков
 
-#### need translate ####
+[Spectating]
+Following %s
+== Наблюдение за %s
+
+Example of usage
+== Пример использования
+
+Round %d/%d
+== Раунд %d/%d
+
+[Spectators]
+%d others…
+== %d остальных…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Команда %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping/ru

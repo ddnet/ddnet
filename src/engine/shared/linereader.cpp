@@ -4,97 +4,92 @@
 
 #include <base/system.h>
 
-void CLineReader::Init(IOHANDLE File)
+CLineReader::CLineReader()
 {
-	m_BufferMaxSize = sizeof(m_aBuffer) - 1;
-	m_BufferSize = 0;
-	m_BufferPos = 0;
-	m_File = File;
+	m_pBuffer = nullptr;
 }
 
-char *CLineReader::Get()
+CLineReader::~CLineReader()
 {
-	unsigned LineStart = m_BufferPos;
-	bool CRLFBreak = false;
+	free(m_pBuffer);
+}
 
+bool CLineReader::OpenFile(IOHANDLE File)
+{
+	if(!File)
+	{
+		return false;
+	}
+	char *pBuffer = io_read_all_str(File);
+	io_close(File);
+	if(pBuffer == nullptr)
+	{
+		return false;
+	}
+	OpenBuffer(pBuffer);
+	return true;
+}
+
+void CLineReader::OpenBuffer(char *pBuffer)
+{
+	dbg_assert(pBuffer != nullptr, "Line reader initialized without valid buffer");
+
+	m_pBuffer = pBuffer;
+	m_BufferPos = 0;
+	m_ReadLastLine = false;
+
+	// Skip UTF-8 BOM
+	if(m_pBuffer[0] == '\xEF' && m_pBuffer[1] == '\xBB' && m_pBuffer[2] == '\xBF')
+	{
+		m_BufferPos += 3;
+	}
+}
+
+const char *CLineReader::Get()
+{
+	dbg_assert(m_pBuffer != nullptr, "Line reader not initialized");
+	if(m_ReadLastLine)
+	{
+		return nullptr;
+	}
+
+	unsigned LineStart = m_BufferPos;
 	while(true)
 	{
-		if(m_BufferPos >= m_BufferSize)
+		if(m_pBuffer[m_BufferPos] == '\0' || m_pBuffer[m_BufferPos] == '\n' || (m_pBuffer[m_BufferPos] == '\r' && m_pBuffer[m_BufferPos + 1] == '\n'))
 		{
-			// fetch more
-
-			// move the remaining part to the front
-			unsigned Left = m_BufferSize - LineStart;
-
-			if(LineStart > m_BufferSize)
-				Left = 0;
-			if(Left)
-				mem_move(m_aBuffer, &m_aBuffer[LineStart], Left);
-			m_BufferPos = Left;
-
-			// fill the buffer
-			unsigned Read = io_read(m_File, &m_aBuffer[m_BufferPos], m_BufferMaxSize - m_BufferPos);
-			m_BufferSize = Left + Read;
-			LineStart = 0;
-
-			if(!Read)
+			if(m_pBuffer[m_BufferPos] == '\0')
 			{
-				if(Left)
-				{
-					m_aBuffer[Left] = '\0'; // return the last line
-					m_BufferPos = Left;
-					m_BufferSize = Left;
-					if(!str_utf8_check(m_aBuffer))
-					{
-						LineStart = m_BufferPos;
-						CRLFBreak = false;
-						continue; // skip lines containing invalid UTF-8
-					}
-					return m_aBuffer;
-				}
-				return nullptr; // we are done!
-			}
-		}
-		else
-		{
-			if(m_aBuffer[m_BufferPos] == '\n' || m_aBuffer[m_BufferPos] == '\r')
-			{
-				// line found
-				if(m_aBuffer[m_BufferPos] == '\r')
-				{
-					if(m_BufferPos + 1 >= m_BufferSize)
-					{
-						// read more to get the connected '\n'
-						CRLFBreak = true;
-						++m_BufferPos;
-						continue;
-					}
-					else if(m_aBuffer[m_BufferPos + 1] == '\n')
-						m_aBuffer[m_BufferPos++] = '\0';
-				}
-				m_aBuffer[m_BufferPos++] = '\0';
-				if(!str_utf8_check(&m_aBuffer[LineStart]))
-				{
-					LineStart = m_BufferPos;
-					CRLFBreak = false;
-					continue; // skip lines containing invalid UTF-8
-				}
-				return &m_aBuffer[LineStart];
-			}
-			else if(CRLFBreak)
-			{
-				if(m_aBuffer[m_BufferPos] == '\n')
-					m_aBuffer[m_BufferPos++] = '\0';
-				if(!str_utf8_check(&m_aBuffer[LineStart]))
-				{
-					LineStart = m_BufferPos;
-					CRLFBreak = false;
-					continue; // skip lines containing invalid UTF-8
-				}
-				return &m_aBuffer[LineStart];
+				m_ReadLastLine = true;
 			}
 			else
-				m_BufferPos++;
+			{
+				if(m_pBuffer[m_BufferPos] == '\r')
+				{
+					m_pBuffer[m_BufferPos] = '\0';
+					++m_BufferPos;
+				}
+				m_pBuffer[m_BufferPos] = '\0';
+				++m_BufferPos;
+			}
+
+			if(!str_utf8_check(&m_pBuffer[LineStart]))
+			{
+				// Skip lines containing invalid UTF-8
+				if(m_ReadLastLine)
+				{
+					return nullptr;
+				}
+				LineStart = m_BufferPos;
+				continue;
+			}
+			// Skip trailing empty line
+			if(m_ReadLastLine && m_pBuffer[LineStart] == '\0')
+			{
+				return nullptr;
+			}
+			return &m_pBuffer[LineStart];
 		}
+		++m_BufferPos;
 	}
 }

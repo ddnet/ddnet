@@ -7,7 +7,7 @@
 #	3edcxzaq1		2020-06-25 00:00:00
 #	cur.ie			2020-09-28 00:00:00
 #	simpygirl		2022-02-20 00:00:00
-#	furo			2024-06-08 00:00:00
+#	furo			2024-07-17 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -500,9 +500,6 @@ Your skin
 
 Reset to defaults
 == Nollställ till standard
-
-Round
-== Runda
 
 Lht.
 == Ljusstyrka
@@ -1854,3 +1851,27 @@ Tee
 
 Show only chat messages from team members
 == Visa bara chattmeddelanden från lagkamrater
+
+[Spectating]
+Following %s
+== Följer %s
+
+Example of usage
+== Exempel på användning
+
+Round %d/%d
+== Runda %d/%d
+
+[Spectators]
+%d others…
+== %d andra…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Lag %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping

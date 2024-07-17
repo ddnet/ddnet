@@ -502,9 +502,6 @@ Your skin
 Reset to defaults
 == Reimposta predefinito
 
-Round
-== Turno
-
 Lht.
 == Luminosità
 
@@ -1474,6 +1471,10 @@ Following
 Loading commands…
 == 
 
+[Spectating]
+Following %s
+== 
+
 Some map images could not be loaded. Check the local console for details.
 == 
 
@@ -1532,6 +1533,9 @@ SA
 == 
 
 CHN
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1881,8 +1885,25 @@ https://ddnet.org/discord
 Tutorial
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
 Super
 == 
 
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
 FPM
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

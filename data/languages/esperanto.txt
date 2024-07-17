@@ -604,10 +604,10 @@ Preparing demo playback
 Loading demo file from storage
 == 
 
-Why are you slowmo replaying to read this?
+Initializing components
 == 
 
-Initializing components
+Why are you slowmo replaying to read this?
 == 
 
 Initializing assets
@@ -671,6 +671,10 @@ Angle:
 == 
 
 Multi-View
+== 
+
+[Spectating]
+Following %s
 == 
 
 Server best:
@@ -809,6 +813,9 @@ Loading menu images
 == 
 
 Reset filter
+== 
+
+Example of usage
 == 
 
 Has people playing
@@ -1777,16 +1784,24 @@ Loading race demo files
 Time limit: %d min
 == 
 
-Round
+Round %d/%d
 == 
 
-Game over
+[Spectators]
+%d others…
 == 
 
 Score
 == 
 
 Super
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
 == 
 
 Manual
@@ -1801,16 +1816,19 @@ Auto
 Replay
 == 
 
-Draw!
+Red team wins!
 == 
 
 %s wins!
 == 
 
-Red team wins!
+Blue team wins!
 == 
 
-Blue team wins!
+Draw!
+== 
+
+Game over
 == 
 
 Loading sound files
@@ -1841,4 +1859,7 @@ Grabs
 == 
 
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

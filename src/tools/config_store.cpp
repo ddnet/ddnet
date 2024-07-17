@@ -8,37 +8,28 @@
 
 void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 {
-	IOHANDLE File = pStorage->OpenFile(pConfigName, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ABSOLUTE);
-	if(!File)
+	CLineReader LineReader;
+	if(!LineReader.OpenFile(pStorage->OpenFile(pConfigName, IOFLAG_READ, IStorage::TYPE_ABSOLUTE)))
 	{
 		dbg_msg("config_store", "config '%s' not found", pConfigName);
 		return;
 	}
 
-	CLineReader LineReader;
-	LineReader.Init(File);
-
-	char *pLine;
+	std::vector<const char *> vpLines;
 	int TotalLength = 0;
-	std::vector<char *> vLines;
-	while((pLine = LineReader.Get()))
+	while(const char *pLine = LineReader.Get())
 	{
-		int Length = str_length(pLine) + 1;
-		char *pCopy = (char *)malloc(Length);
-		mem_copy(pCopy, pLine, Length);
-		vLines.push_back(pCopy);
-		TotalLength += Length;
+		vpLines.push_back(pLine);
+		TotalLength += str_length(pLine) + 1;
 	}
-	io_close(File);
 
 	char *pSettings = (char *)malloc(maximum(1, TotalLength));
 	int Offset = 0;
-	for(auto &Line : vLines)
+	for(const char *pLine : vpLines)
 	{
-		int Length = str_length(Line) + 1;
-		mem_copy(pSettings + Offset, Line, Length);
+		int Length = str_length(pLine) + 1;
+		mem_copy(pSettings + Offset, pLine, Length);
 		Offset += Length;
-		free(Line);
 	}
 
 	CDataFileReader Reader;

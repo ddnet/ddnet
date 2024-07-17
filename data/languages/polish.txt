@@ -518,9 +518,6 @@ Your skin
 Reset to defaults
 == Przywróć domyślne
 
-Round
-== Runda
-
 Lht.
 == Jasność
 
@@ -1211,6 +1208,7 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
 == Brak pamięci VRAM. Spróbuj usunąć niestandardowe zasoby (skiny, entities, itd.), szczególnie te z dużą rozdzielczością.
 
+[Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Wystąpił nieznany błąd. Spróbuj zmienić gfx_backend na OpenGL lub Vulkan w settings_ddnet.cfg w folderze konfiguracyjnym i spróbuj ponownie.
 
@@ -1819,7 +1817,14 @@ Following
 Multi-View
 == 
 
+[Spectating]
+Following %s
+== 
+
 %d/%d KiB (%.1f KiB/s)
+== 
+
+Example of usage
 == 
 
 Cut length
@@ -1853,5 +1858,22 @@ DDRace HUD
 Show only chat messages from team members
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

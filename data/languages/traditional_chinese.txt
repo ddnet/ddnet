@@ -573,9 +573,6 @@ Your skin
 Reset to defaults
 == 恢復預設設定
 
-Round
-== 回合
-
 Lht.
 == 亮度
 
@@ -1881,3 +1878,27 @@ Tee
 
 Show only chat messages from team members
 == 只顯示隊伍聊天訊息
+
+[Spectating]
+Following %s
+== 
+
+Example of usage
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
+== 

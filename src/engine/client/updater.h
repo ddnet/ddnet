@@ -52,7 +52,7 @@ class CUpdater : public IUpdater
 
 	CLock m_Lock;
 
-	int m_State GUARDED_BY(m_Lock);
+	EUpdaterState m_State GUARDED_BY(m_Lock);
 	char m_aStatus[256] GUARDED_BY(m_Lock);
 	int m_Percent GUARDED_BY(m_Lock);
 	char m_aClientExecTmp[64];
@@ -80,12 +80,12 @@ class CUpdater : public IUpdater
 	bool ReplaceClient();
 	bool ReplaceServer();
 
-	void SetCurrentState(int NewState) REQUIRES(!m_Lock);
+	void SetCurrentState(EUpdaterState NewState) REQUIRES(!m_Lock);
 
 public:
 	CUpdater();
 
-	int GetCurrentState() override REQUIRES(!m_Lock);
+	EUpdaterState GetCurrentState() override REQUIRES(!m_Lock);
 	void GetCurrentFile(char *pBuf, int BufSize) override REQUIRES(!m_Lock);
 	int GetCurrentPercent() override REQUIRES(!m_Lock);
 

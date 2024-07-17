@@ -33,6 +33,7 @@
 # Rafael Fontenelle   2024-03-02 16:20:00
 # Rafael Fontenelle   2024-04-30 14:52:00
 # Rafael Fontenelle   2024-06-11 22:43:00
+# Rafael Fontenelle   2024-07-17 12:04:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -594,9 +595,6 @@ Gameplay
 
 Restart
 == Reiniciar
-
-Round
-== Turno
 
 Browser
 == Navegar
@@ -1879,3 +1877,27 @@ Tee
 
 Show only chat messages from team members
 == Mostrar apenas mensagens de chat de membros do time
+
+[Spectating]
+Following %s
+== Seguindo %s
+
+Example of usage
+== Exemplo de uso
+
+Round %d/%d
+== Rodada %d/%d
+
+[Spectators]
+%d others…
+== %d outros…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Time %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping

@@ -477,9 +477,6 @@ Your skin
 Reset to defaults
 == Visszaállítás alapértelmezettre
 
-Round
-== Menet
-
 Lht.
 == Fényerősség
 
@@ -1608,6 +1605,10 @@ Loading commands…
 Multi-View
 == 
 
+[Spectating]
+Following %s
+== 
+
 Some map images could not be loaded. Check the local console for details.
 == 
 
@@ -1657,6 +1658,9 @@ Video was saved to '%s'
 == 
 
 %d/%d KiB (%.1f KiB/s)
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1849,5 +1853,22 @@ Regular background color
 Entities background color
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

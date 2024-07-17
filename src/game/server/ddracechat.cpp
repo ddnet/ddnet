@@ -1070,7 +1070,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 					"This team is locked using /lock. Only members of the team can unlock it using /lock." :
 					"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
 		}
-		else if(Team > 0 && Team < MAX_CLIENTS && m_pController->Teams().Count(Team) >= g_Config.m_SvMaxTeamSize && !m_pController->Teams().TeamFlock(Team))
+		else if(Team > 0 && Team < MAX_CLIENTS && m_pController->Teams().Count(Team) >= g_Config.m_SvMaxTeamSize && !m_pController->Teams().TeamFlock(Team) && !m_pController->Teams().IsPractice(Team))
 		{
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvMaxTeamSize);
@@ -1261,18 +1261,25 @@ void CGameContext::ConTeam(IConsole::IResult *pResult, void *pUserData)
 		char aBuf[512];
 		if(!pPlayer->IsPlaying())
 		{
-			pSelf->Console()->Print(
-				IConsole::OUTPUT_LEVEL_STANDARD,
-				"chatresp",
-				"You can't check your team while you are dead/a spectator.");
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You can't check your team while you are dead/a spectator.");
 		}
 		else
 		{
-			str_format(
-				aBuf,
-				sizeof(aBuf),
-				"You are in team %d",
-				pSelf->GetDDRaceTeam(pResult->m_ClientId));
+			int TeamSize = 0;
+			const int PlayerTeam = pSelf->GetDDRaceTeam(pResult->m_ClientId);
+
+			// Count players in team
+			for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+			{
+				const CPlayer *pOtherPlayer = pSelf->m_apPlayers[ClientId];
+				if(!pOtherPlayer || !pOtherPlayer->IsPlaying())
+					continue;
+
+				if(pSelf->GetDDRaceTeam(ClientId) == PlayerTeam)
+					TeamSize++;
+			}
+
+			str_format(aBuf, sizeof(aBuf), "You are in team %d having %d %s", PlayerTeam, TeamSize, TeamSize > 1 ? "players" : "player");
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 		}
 	}
@@ -2102,6 +2109,13 @@ void CGameContext::ConPracticeJetpack(IConsole::IResult *pResult, void *pUserDat
 		ConJetpack(pResult, pUserData);
 }
 
+void CGameContext::ConPracticeSetJumps(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConSetJumps(pResult, pUserData);
+}
+
 void CGameContext::ConPracticeWeapons(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2150,6 +2164,7 @@ void CGameContext::ConPracticeNinja(IConsole::IResult *pResult, void *pUserData)
 	if(pSelf->GetPracticeCharacter(pResult))
 		ConNinja(pResult, pUserData);
 }
+
 void CGameContext::ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

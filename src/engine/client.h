@@ -107,6 +107,7 @@ public:
 	public:
 		int m_Type;
 		int m_Id;
+		const void *m_pData;
 		int m_DataSize;
 	};
 
@@ -227,8 +228,7 @@ public:
 	// TODO: Refactor: should redo this a bit i think, too many virtual calls
 	virtual int SnapNumItems(int SnapId) const = 0;
 	virtual const void *SnapFindItem(int SnapId, int Type, int Id) const = 0;
-	virtual void *SnapGetItem(int SnapId, int Index, CSnapItem *pItem) const = 0;
-	virtual int SnapItemSize(int SnapId, int Index) const = 0;
+	virtual CSnapItem SnapGetItem(int SnapId, int Index) const = 0;
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
@@ -288,6 +288,27 @@ public:
 
 	virtual CChecksumData *ChecksumData() = 0;
 	virtual int UdpConnectivity(int NetType) = 0;
+
+	/**
+	 * Opens a link in the browser.
+	 *
+	 * @param pLink The link to open in a browser.
+	 *
+	 * @return `true` on success, `false` on failure.
+	 *
+	 * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
+	 */
+	virtual bool ViewLink(const char *pLink) = 0;
+	/**
+	 * Opens a file or directory with the default program.
+	 *
+	 * @param pFilename The file or folder to open with the default program.
+	 *
+	 * @return `true` on success, `false` on failure.
+	 *
+	 * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
+	 */
+	virtual bool ViewFile(const char *pFilename) = 0;
 
 #if defined(CONF_FAMILY_WINDOWS)
 	virtual void ShellRegister() = 0;

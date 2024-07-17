@@ -501,9 +501,6 @@ Your skin
 Reset to defaults
 == Vrati na početne postavke
 
-Round
-== Runda
-
 Lht.
 == Svjetl.
 
@@ -987,10 +984,10 @@ Loading map file from storage
 Loading demo file from storage
 == 
 
-Why are you slowmo replaying to read this?
+Initializing components
 == 
 
-Initializing components
+Why are you slowmo replaying to read this?
 == 
 
 Initializing assets
@@ -1057,6 +1054,10 @@ Angle:
 == 
 
 Multi-View
+== 
+
+[Spectating]
+Following %s
 == 
 
 Team %d
@@ -1189,6 +1190,9 @@ CHN
 == 
 
 Getting server list from master server
+== 
+
+Example of usage
 == 
 
 %d of %d servers
@@ -1825,7 +1829,21 @@ Play
 Loading race demo files
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
 Super
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
 == 
 
 Manual
@@ -1853,4 +1871,7 @@ Grabs
 == 
 
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

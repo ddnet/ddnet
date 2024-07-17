@@ -1333,6 +1333,14 @@ bool CUi::DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect,
 	return false;
 }
 
+void CUi::RenderProgressBar(CUIRect ProgressBar, float Progress)
+{
+	const float Rounding = minimum(5.0f, ProgressBar.h / 2.0f);
+	ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, Rounding);
+	ProgressBar.w = maximum(ProgressBar.w * Progress, 2 * Rounding);
+	ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, Rounding);
+}
+
 void CUi::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props) const
 {
 	Graphics()->TextureClear();

@@ -29,7 +29,7 @@ struct CDemoListParam
 {
 	const CRaceDemo *m_pThis;
 	std::vector<CDemoItem> *m_pvDemos;
-	const char *pMap;
+	const char *m_pMap;
 };
 
 CRaceDemo::CRaceDemo() :
@@ -203,8 +203,8 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 {
 	auto *pRealUser = (SRaceDemoFetchUser *)pUser;
 	auto *pParam = pRealUser->m_pParam;
-	int MapLen = str_length(pParam->pMap);
-	if(IsDir || !str_endswith(pInfo->m_pName, ".demo") || !str_startswith(pInfo->m_pName, pParam->pMap) || pInfo->m_pName[MapLen] != '_')
+	int MapLen = str_length(pParam->m_pMap);
+	if(IsDir || !str_endswith(pInfo->m_pName, ".demo") || !str_startswith(pInfo->m_pName, pParam->m_pMap) || pInfo->m_pName[MapLen] != '_')
 		return 0;
 
 	CDemoItem Item;

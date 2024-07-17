@@ -499,9 +499,6 @@ Your skin
 Reset to defaults
 == Palaa oletusasetuksiin
 
-Round
-== Kierros
-
 Lht.
 == Valoisuus
 
@@ -1835,7 +1832,14 @@ Loading sound files
 Moved ingame
 == Liikui pelissä
 
+[Spectating]
+Following %s
+== 
+
 %d/%d KiB (%.1f KiB/s)
+== 
+
+Example of usage
 == 
 
 Converse
@@ -1847,8 +1851,25 @@ Tee
 Show only chat messages from team members
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
 Spree
 == 
 
 Grabs
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

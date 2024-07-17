@@ -6,36 +6,32 @@
 #include <engine/console.h>
 
 #include <game/client/component.h>
+#include <game/client/ui_rect.h>
 
 class CScoreboard : public CComponent
 {
-	void RenderGoals(float x, float y, float w);
-	void RenderSpectators(float x, float y, float w, float h);
-	void RenderScoreboard(float x, float y, float w, int Team, const char *pTitle, int NumPlayers = -1);
+	void RenderTitle(CUIRect TitleBar, int Team, const char *pTitle);
+	void RenderGoals(CUIRect Goals);
+	void RenderSpectators(CUIRect Spectators);
+	void RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd);
 	void RenderRecordingNotification(float x);
 
 	static void ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData);
-
-	const char *GetClanName(int Team);
+	const char *GetTeamName(int Team) const;
 
 	bool m_Active;
+	float m_ServerRecord;
 
 public:
 	CScoreboard();
 	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnReset() override;
 	virtual void OnConsoleInit() override;
+	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual void OnRelease() override;
-
-	bool Active();
-
-	// DDRace
-
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 
-private:
-	float m_ServerRecord;
+	bool Active() const;
 };
 
 #endif

@@ -14,6 +14,8 @@
 #   eghwand          2024-03-03 13:24:20
 #   Gokturk          2024-04-23 01:56:10
 #   Gokturk          2024-04-24 03:01:50
+#   Gokturk          2024-06-09 12:00:50
+#   Gokturk          2024-07-17 02:24:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -503,9 +505,6 @@ Your skin
 
 Reset to defaults
 == Varsayılanlara getir
-
-Round
-== Yuvarlak
 
 Lht.
 == Parlaklık
@@ -1860,3 +1859,27 @@ Tee
 
 Show only chat messages from team members
 == Sadece takım üyelerinin mesajlarını göster
+
+[Spectating]
+Following %s
+== İzleniyor %s
+
+Example of usage
+== Kullanım örneği
+
+Round %d/%d
+== Yuvarlak %d/%d
+
+[Spectators]
+%d others…
+== %d diğerleri…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Takım %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping/tr

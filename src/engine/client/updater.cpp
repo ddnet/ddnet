@@ -98,13 +98,13 @@ void CUpdater::Init(CHttp *pHttp)
 	m_pHttp = pHttp;
 }
 
-void CUpdater::SetCurrentState(int NewState)
+void CUpdater::SetCurrentState(EUpdaterState NewState)
 {
 	CLockScope ls(m_Lock);
 	m_State = NewState;
 }
 
-int CUpdater::GetCurrentState()
+IUpdater::EUpdaterState CUpdater::GetCurrentState()
 {
 	CLockScope ls(m_Lock);
 	return m_State;
@@ -164,8 +164,7 @@ bool CUpdater::MoveFile(const char *pFile)
 
 void CUpdater::Update()
 {
-	auto State = GetCurrentState();
-	switch(State)
+	switch(GetCurrentState())
 	{
 	case IUpdater::GOT_MANIFEST:
 		PerformUpdate();

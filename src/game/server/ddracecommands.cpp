@@ -269,6 +269,14 @@ void CGameContext::ConJetpack(IConsole::IResult *pResult, void *pUserData)
 		pChr->SetJetpack(true);
 }
 
+void CGameContext::ConSetJumps(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	if(pChr)
+		pChr->SetJumps(pResult->GetInteger(0));
+}
+
 void CGameContext::ConWeapons(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

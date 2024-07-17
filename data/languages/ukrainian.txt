@@ -27,6 +27,10 @@
 %d of %d servers
 == Сервери: %d з %d
 
+[Spectators]
+%d others…
+== ще %d…
+
 %d player
 == Гравців: %d
 
@@ -39,6 +43,10 @@
 
 %d/%d KiB (%.1f KiB/s)
 == %d/%d КіБ (%.1f КіБ/с)
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d з %d)
 
 %ds left
 == залишилося %dс
@@ -573,6 +581,9 @@ Error saving settings
 EUR
 == ЄВР
 
+Example of usage
+== Наприклад
+
 Exclude
 == Виключити
 
@@ -637,6 +648,10 @@ Follow
 
 Following
 == Слідування
+
+[Spectating]
+Following %s
+== Слідуємо за %s
 
 Force vote
 == Форсувати
@@ -778,6 +793,9 @@ https://ddnet.org/discord
 
 https://wiki.ddnet.org/
 == https://wiki.ddnet.org/
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping
 
 HUD
 == HUD
@@ -1294,11 +1312,11 @@ Restarting. Please wait…
 Rifle Laser Inner Color
 == Колір лазера гвинтівки
 
+Round %d/%d
+== Раунд %d з %d
+
 Rifle Laser Outline Color
 == Колір контуру лазера гвинтівки
-
-Round
-== Раунд
 
 Run on join
 == Запускати при приєднанні
@@ -1623,7 +1641,10 @@ Team
 == Команда
 
 Team %d
-== Команда
+== Команда %d
+
+Team %d (%d/%d)
+== Команда %d (%d з %d)
 
 Team chat
 == Чат команди
@@ -1850,5 +1871,3 @@ Zoom in
 
 Zoom out
 == Віддалити
-
-##### needs translation #####

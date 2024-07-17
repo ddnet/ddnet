@@ -170,6 +170,7 @@ protected:
 
 	bool m_JoinTutorial = false;
 	bool m_CreateDefaultFavoriteCommunities = false;
+	bool m_ForceRefreshLanPage = false;
 
 	char m_aNextServer[256];
 
@@ -185,8 +186,14 @@ protected:
 	const CMenuImage *FindMenuImage(const char *pName);
 
 	// loading
-	int m_LoadCurrent;
-	int m_LoadTotal;
+	class CLoadingState
+	{
+	public:
+		std::chrono::nanoseconds m_LastRender{0};
+		int m_Current;
+		int m_Total;
+	};
+	CLoadingState m_LoadingState;
 
 	//
 	char m_aMessageTopic[512];

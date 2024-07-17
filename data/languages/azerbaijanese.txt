@@ -2,7 +2,8 @@
 #originally created by:
 #	    Gokturk, seishiroon and Aykhan [EN07Z]
 #modified by:
-#     
+#     Gokturk          2024-06-09 12:00:50
+#     Gokturk          2024-07-17 02:24:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -491,9 +492,6 @@ Your skin
 
 Reset to defaults
 == Defoltlara sıfırlayın
-
-Round
-== Yuvarlaq
 
 Lht.
 == Parlaqlıq
@@ -1848,3 +1846,27 @@ Tee
 
 Show only chat messages from team members
 == Yalnız komanda üzvlərinin mesajlarını göstərin
+
+[Spectating]
+Following %s
+== izlənilməkdədir %s
+
+Example of usage
+== İstifadə nümunəsi
+
+Round %d/%d
+== Yumru %d/%d
+
+[Spectators]
+%d others…
+== %d başqaları
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Komanda %d (%d/%d
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping

@@ -699,21 +699,17 @@ void CClient::LoadDebugFont()
 
 // ---
 
-void *CClient::SnapGetItem(int SnapId, int Index, CSnapItem *pItem) const
+IClient::CSnapItem CClient::SnapGetItem(int SnapId, int Index) const
 {
 	dbg_assert(SnapId >= 0 && SnapId < NUM_SNAPSHOT_TYPES, "invalid SnapId");
 	const CSnapshot *pSnapshot = m_aapSnapshots[g_Config.m_ClDummy][SnapId]->m_pAltSnap;
 	const CSnapshotItem *pSnapshotItem = pSnapshot->GetItem(Index);
-	pItem->m_DataSize = pSnapshot->GetItemSize(Index);
-	pItem->m_Type = pSnapshot->GetItemType(Index);
-	pItem->m_Id = pSnapshotItem->Id();
-	return (void *)pSnapshotItem->Data();
-}
-
-int CClient::SnapItemSize(int SnapId, int Index) const
-{
-	dbg_assert(SnapId >= 0 && SnapId < NUM_SNAPSHOT_TYPES, "invalid SnapId");
-	return m_aapSnapshots[g_Config.m_ClDummy][SnapId]->m_pAltSnap->GetItemSize(Index);
+	CSnapItem Item;
+	Item.m_Type = pSnapshot->GetItemType(Index);
+	Item.m_Id = pSnapshotItem->Id();
+	Item.m_pData = pSnapshotItem->Data();
+	Item.m_DataSize = pSnapshot->GetItemSize(Index);
+	return Item;
 }
 
 const void *CClient::SnapFindItem(int SnapId, int Type, int Id) const
@@ -4598,11 +4594,13 @@ int main(int argc, const char **argv)
 	pClient->Run();
 
 	const bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
+#if !defined(CONF_PLATFORM_ANDROID)
 	char aRestartBinaryPath[IO_MAX_PATH_LENGTH];
 	if(Restarting)
 	{
 		pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aRestartBinaryPath, sizeof(aRestartBinaryPath));
 	}
+#endif
 
 	std::vector<SWarning> vQuittingWarnings = pClient->QuittingWarnings();
 
@@ -4615,7 +4613,11 @@ int main(int argc, const char **argv)
 
 	if(Restarting)
 	{
+#if defined(CONF_PLATFORM_ANDROID)
+		RestartAndroidApp();
+#else
 		shell_execute(aRestartBinaryPath, EShellExecuteWindowState::FOREGROUND);
+#endif
 	}
 
 	PerformFinalCleanup();
@@ -4779,6 +4781,51 @@ int CClient::UdpConnectivity(int NetType)
 		Connectivity = std::max(Connectivity, NewConnectivity);
 	}
 	return Connectivity;
+}
+
+bool CClient::ViewLink(const char *pLink)
+{
+#if defined(CONF_PLATFORM_ANDROID)
+	if(SDL_OpenURL(pLink) == 0)
+	{
+		return true;
+	}
+	log_error("client", "Failed to open link '%s' (%s)", pLink, SDL_GetError());
+	return false;
+#else
+	if(open_link(pLink))
+	{
+		return true;
+	}
+	log_error("client", "Failed to open link '%s'", pLink);
+	return false;
+#endif
+}
+
+bool CClient::ViewFile(const char *pFilename)
+{
+#if defined(CONF_PLATFORM_MACOS)
+	return ViewLink(pFilename);
+#else
+	// Create a file link so the path can contain forward and
+	// backward slashes. But the file link must be absolute.
+	char aWorkingDir[IO_MAX_PATH_LENGTH];
+	if(fs_is_relative_path(pFilename))
+	{
+		if(!fs_getcwd(aWorkingDir, sizeof(aWorkingDir)))
+		{
+			log_error("client", "Failed to open file '%s' (failed to get working directory)", pFilename);
+			return false;
+		}
+		str_append(aWorkingDir, "/");
+	}
+	else
+		aWorkingDir[0] = '\0';
+
+	char aFileLink[IO_MAX_PATH_LENGTH];
+	str_format(aFileLink, sizeof(aFileLink), "file://%s%s", aWorkingDir, pFilename);
+	return ViewLink(aFileLink);
+#endif
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
