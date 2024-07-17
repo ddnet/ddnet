@@ -122,6 +122,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	if(DoButton_Menu(&s_SettingsButton, Localize("Settings"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "settings" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)) || CheckHotKey(KEY_S))
 		NewPage = PAGE_SETTINGS;
 
+#if !defined(CONF_PLATFORM_ANDROID)
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static CButtonContainer s_LocalServerButton;
@@ -151,6 +152,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			}
 		}
 	}
+#endif
 
 	static bool EditorHotkeyWasPressed = true;
 	static float EditorHotKeyChecktime = 0.0f;
@@ -269,6 +271,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 
 void CMenus::KillServer()
 {
+#if !defined(CONF_PLATFORM_ANDROID)
 	if(m_ServerProcess.m_Process)
 	{
 		if(kill_process(m_ServerProcess.m_Process))
@@ -277,4 +280,5 @@ void CMenus::KillServer()
 			m_ForceRefreshLanPage = true;
 		}
 	}
+#endif
 }

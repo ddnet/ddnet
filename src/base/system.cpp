@@ -4125,6 +4125,7 @@ void cmdline_free(int argc, const char **argv)
 #endif
 }
 
+#if !defined(CONF_PLATFORM_ANDROID)
 PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
 {
 #if defined(CONF_FAMILY_WINDOWS)
@@ -4207,7 +4208,6 @@ bool is_process_alive(PROCESS process)
 #endif
 }
 
-#if !defined(CONF_PLATFORM_ANDROID)
 int open_link(const char *link)
 {
 #if defined(CONF_FAMILY_WINDOWS)

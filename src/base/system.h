@@ -2542,7 +2542,7 @@ typedef pid_t PROCESS;
  */
 constexpr PROCESS INVALID_PROCESS = 0;
 #endif
-
+#if !defined(CONF_PLATFORM_ANDROID)
 /**
  * Determines the initial window state when using @link shell_execute @endlink
  * to execute a process.
@@ -2599,7 +2599,6 @@ int kill_process(PROCESS process);
  */
 bool is_process_alive(PROCESS process);
 
-#if !defined(CONF_PLATFORM_ANDROID)
 /**
  * Opens a link in the browser.
  *
