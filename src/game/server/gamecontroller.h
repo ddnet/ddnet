@@ -269,7 +269,8 @@ public:
 	void SetGameState(EGameState GameState, int Timer = 0);
 	void StartMatch(bool RoundEnd);
 
-protected:
+	// protected:
+public:
 	struct CGameInfo
 	{
 		int m_MatchCurrent;
@@ -299,6 +300,7 @@ protected:
 	void OnEndMatchInsta();
 	void GetRoundEndStatsStrCsv(char *pBuf, size_t Size);
 	void PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Size);
+	void GetRoundEndStatsStrJson(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrPsv(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrAsciiTable(char *pBuf, size_t Size);
 	void GetRoundEndStatsStr(char *pBuf, size_t Size);

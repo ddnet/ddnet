@@ -7,11 +7,9 @@
 #include "../entities/character.h"
 #include "../gamecontext.h"
 #include "../gamecontroller.h"
-#include "../gamemodes/DDRace.h"
-#include "../gamemodes/gctf.h"
-#include "../gamemodes/ictf.h"
-#include "../gamemodes/mod.h"
 #include "../player.h"
+#include "engine/shared/jsonwriter.h"
+#include "game/generated/protocol.h"
 
 void IGameController::OnEndMatchInsta()
 {
@@ -50,6 +48,68 @@ void IGameController::PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Si
 		pStats->m_Deaths,
 		CalcKillDeathRatio(pStats->m_Kills, pStats->m_Deaths));
 	str_append(pBuf, aBuf, Size);
+}
+
+void IGameController::GetRoundEndStatsStrJson(char *pBuf, size_t Size)
+{
+	pBuf[0] = '\0';
+
+	int ScoreRed = m_aTeamscore[TEAM_RED];
+	int ScoreBlue = m_aTeamscore[TEAM_BLUE];
+	int GameTimeTotalSeconds = (Server()->Tick() - m_GameStartTick) / Server()->TickSpeed();
+	int ScoreLimit = m_GameInfo.m_ScoreLimit;
+	int TimeLimit = m_GameInfo.m_TimeLimit;
+
+	CJsonStringWriter Writer;
+	Writer.BeginObject();
+	{
+		Writer.WriteAttribute("server");
+		Writer.WriteStrValue(g_Config.m_SvName);
+		Writer.WriteAttribute("map");
+		Writer.WriteStrValue(g_Config.m_SvMap);
+		Writer.WriteAttribute("game_type");
+		Writer.WriteStrValue(g_Config.m_SvGametype);
+		Writer.WriteAttribute("game_duration_seconds");
+		Writer.WriteIntValue(GameTimeTotalSeconds);
+		Writer.WriteAttribute("score_limit");
+		Writer.WriteIntValue(ScoreLimit);
+		Writer.WriteAttribute("time_limit");
+		Writer.WriteIntValue(TimeLimit);
+		Writer.WriteAttribute("score_red");
+		Writer.WriteIntValue(ScoreRed);
+		Writer.WriteAttribute("score_blue");
+		Writer.WriteIntValue(ScoreBlue);
+
+		Writer.WriteAttribute("players");
+		Writer.BeginArray();
+		for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+
+			const CInstaPlayerStats *pStats = &m_aInstaPlayerStats[pPlayer->GetCid()];
+
+			Writer.BeginObject();
+			Writer.WriteAttribute("id");
+			Writer.WriteIntValue(pPlayer->GetCid());
+			Writer.WriteAttribute("team");
+			Writer.WriteStrValue(pPlayer->GetTeam() == TEAM_RED ? "red" : "blue");
+			Writer.WriteAttribute("name");
+			Writer.WriteStrValue(Server()->ClientName(pPlayer->GetCid()));
+			Writer.WriteAttribute("score");
+			Writer.WriteIntValue(pPlayer->m_Score.value_or(0));
+			Writer.WriteAttribute("kills");
+			Writer.WriteIntValue(pStats->m_Kills);
+			Writer.WriteAttribute("deaths");
+			Writer.WriteIntValue(pStats->m_Deaths);
+			Writer.WriteAttribute("ratio");
+			Writer.WriteIntValue(CalcKillDeathRatio(pStats->m_Kills, pStats->m_Deaths));
+			Writer.EndObject();
+		}
+		Writer.EndArray();
+	}
+	Writer.EndObject();
+	str_copy(pBuf, Writer.GetOutputString().c_str(), Size);
 }
 
 void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
@@ -109,6 +169,8 @@ void IGameController::GetRoundEndStatsStr(char *pBuf, size_t Size)
 		GetRoundEndStatsStrCsv(pBuf, Size);
 	if(g_Config.m_SvRoundStatsFormat == 1)
 		GetRoundEndStatsStrPsv(pBuf, Size);
+	else if(g_Config.m_SvRoundStatsFormat == 4)
+		GetRoundEndStatsStrJson(pBuf, Size);
 	else
 		dbg_msg("ddnet-insta", "sv_round_stats_format %d not implemented", g_Config.m_SvRoundStatsFormat);
 }

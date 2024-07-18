@@ -2,13 +2,10 @@
 
 #include "../entities/character.h"
 #include "../gamecontext.h"
-#include "../gamemodes/DDRace.h"
-#include "../gamemodes/gctf.h"
-#include "../gamemodes/ictf.h"
-#include "../gamemodes/mod.h"
 #include "../player.h"
+#include "base/system.h"
 
-#include "strhelpers.h"
+#include <game/server/gamecontroller.h>
 
 // TODO: this is not game logic
 //       do some cleanup of the file structuring
@@ -21,6 +18,10 @@ void CGameContext::OnInitInstagib()
 	ShowCurrentInstagibConfigsMotd(); // ddnet-insta
 
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
+
+	char aStats[2048];
+	m_pController->GetRoundEndStatsStrJson(aStats, sizeof(aStats));
+	dbg_msg("stats", "%s", aStats);
 }
 
 void CGameContext::AlertOnSpecialInstagibConfigs(int ClientId) const
