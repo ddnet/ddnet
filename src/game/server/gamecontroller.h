@@ -306,6 +306,7 @@ public:
 	void GetRoundEndStatsStr(char *pBuf, size_t Size);
 	void PublishRoundEndStatsStrFile(const char *pStr);
 	void PublishRoundEndStatsStrDiscord(const char *pStr);
+	void PublishRoundEndStatsStrHttp(const char *pStr);
 	void PublishRoundEndStatsStr(const char *pStr);
 	class CInstaPlayerStats
 	{

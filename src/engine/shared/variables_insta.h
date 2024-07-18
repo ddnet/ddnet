@@ -69,6 +69,7 @@ MACRO_CONFIG_INT(SvTournamentChat, sv_tournament_chat, 0, 0, 2, CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvTournamentChatSmart, sv_tournament_chat_smart, 0, 0, 2, CFGFLAG_SERVER, "Turns sv_tournament_chat on on restart and off on round end (1=specs,2=all)")
 MACRO_CONFIG_INT(SvTournamentJoinMsgs, sv_tournament_join_msgs, 0, 0, 2, CFGFLAG_SERVER, "Hide join/leave of spectators in chat !0.6 only for now! (0=off,1=hidden,2=shown for specs)")
 MACRO_CONFIG_STR(SvRoundStatsDiscordWebhook, sv_round_stats_discord_webhook, 512, "", CFGFLAG_SERVER, "If set will post score stats there on round end")
+MACRO_CONFIG_STR(SvRoundStatsHttpEndpoint, sv_round_stats_http_endpoint, 512, "", CFGFLAG_SERVER, "If set will post score stats there on round end")
 MACRO_CONFIG_STR(SvRoundStatsOutputFile, sv_round_stats_output_file, 512, "", CFGFLAG_SERVER, "If set will write score stats there on round end")
 MACRO_CONFIG_INT(SvRoundStatsFormat, sv_round_stats_format, 1, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
 

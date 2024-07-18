@@ -194,11 +194,28 @@ void IGameController::PublishRoundEndStatsStrDiscord(const char *pStr)
 	GameServer()->m_pHttp->Run(pDiscord);
 }
 
+void IGameController::PublishRoundEndStatsStrHttp(const char *pStr)
+{
+	const int PayloadSize = str_length(pStr);
+	std::shared_ptr<CHttpRequest> pHttp = HttpPost(g_Config.m_SvRoundStatsHttpEndpoint, (const unsigned char *)pStr, PayloadSize);
+	pHttp->LogProgress(HTTPLOG::FAILURE);
+	pHttp->IpResolve(IPRESOLVE::V4);
+	pHttp->Timeout(CTimeout{4000, 15000, 500, 5});
+	if(g_Config.m_SvRoundStatsFormat == 4)
+		pHttp->HeaderString("Content-Type", "application/json");
+	else
+		pHttp->HeaderString("Content-Type", "text/plain");
+	// TODO: text/csv
+	GameServer()->m_pHttp->Run(pHttp);
+}
+
 void IGameController::PublishRoundEndStatsStr(const char *pStr)
 {
 	dbg_msg("ddnet-insta", "publishing round stats:\n%s", pStr);
 	if(g_Config.m_SvRoundStatsDiscordWebhook[0] != '\0')
 		PublishRoundEndStatsStrDiscord(pStr);
+	if(g_Config.m_SvRoundStatsHttpEndpoint[0] != '\0')
+		PublishRoundEndStatsStrHttp(pStr);
 	if(g_Config.m_SvRoundStatsOutputFile[0] != '\0')
 		PublishRoundEndStatsStrFile(pStr);
 }
