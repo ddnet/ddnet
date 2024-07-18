@@ -826,7 +826,11 @@ bool CVideo::OpenAudio()
 		}
 
 		/* set options */
-		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrContexts[i], "in_channel_count", 2, 0) == 0, "invalid option");
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100)
+		dbg_assert(av_opt_set_chlayout(m_AudioStream.m_vpSwrContexts[i], "in_chlayout", &pContext->ch_layout, 0) == 0, "invalid option");
+#else
+		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrContexts[i], "in_channel_count", pContext->channels, 0) == 0, "invalid option");
+#endif
 		if(av_opt_set_int(m_AudioStream.m_vpSwrContexts[i], "in_sample_rate", m_pSound->MixingRate(), 0) != 0)
 		{
 			log_error("videorecorder", "Could not set audio sample rate to %d", m_pSound->MixingRate());
@@ -834,7 +838,7 @@ bool CVideo::OpenAudio()
 		}
 		dbg_assert(av_opt_set_sample_fmt(m_AudioStream.m_vpSwrContexts[i], "in_sample_fmt", AV_SAMPLE_FMT_S16, 0) == 0, "invalid option");
 #if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(59, 24, 100)
-		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrContexts[i], "out_channel_count", pContext->ch_layout.nb_channels, 0) == 0, "invalid option");
+		dbg_assert(av_opt_set_chlayout(m_AudioStream.m_vpSwrContexts[i], "out_chlayout", &pContext->ch_layout, 0) == 0, "invalid option");
 #else
 		dbg_assert(av_opt_set_int(m_AudioStream.m_vpSwrContexts[i], "out_channel_count", pContext->channels, 0) == 0, "invalid option");
 #endif
