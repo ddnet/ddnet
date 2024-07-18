@@ -6,6 +6,7 @@
 #   Cammodude 2024-10-03 18:04:16
 #   Cammodude 2024-12-04 17:35:38
 #   Cammodude 2024-20-04 15:17:26
+#   Cammodude 2024-18-07 20:00:25
 ##### /authors #####
 
 ##### translated strings #####
@@ -1843,33 +1844,33 @@ Net
 
 [Spectating]
 Following %s
-== 
+== %s jälgimine
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 Example of usage
-== 
+== Kasutamise näide
 
 Tee
-== 
+== Tee
 
 Show only chat messages from team members
-== 
+== Ainult näita sõnumeid tiimi kaaslastelt
 
 Round %d/%d
-== 
+== Raund %d/%d
 
 [Spectators]
 %d others…
-== 
+== %d teisi…
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== Tiim %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == 
