@@ -1,9 +1,9 @@
+#include <base/system.h>
 #include <engine/shared/config.h>
 
 #include "../entities/character.h"
 #include "../gamecontext.h"
 #include "../player.h"
-#include "base/system.h"
 
 #include <game/server/gamecontroller.h>
 
@@ -18,10 +18,6 @@ void CGameContext::OnInitInstagib()
 	ShowCurrentInstagibConfigsMotd(); // ddnet-insta
 
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
-
-	char aStats[2048];
-	m_pController->GetRoundEndStatsStrJson(aStats, sizeof(aStats));
-	dbg_msg("stats", "%s", aStats);
 }
 
 void CGameContext::AlertOnSpecialInstagibConfigs(int ClientId) const
