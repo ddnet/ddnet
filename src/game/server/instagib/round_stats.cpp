@@ -1,6 +1,8 @@
 #include <engine/shared/config.h>
 #include <engine/shared/http.h>
 #include <engine/shared/json.h>
+#include <engine/shared/jsonwriter.h>
+#include <game/generated/protocol.h>
 
 #include <base/system.h>
 
@@ -8,8 +10,6 @@
 #include "../gamecontext.h"
 #include "../gamecontroller.h"
 #include "../player.h"
-#include "engine/shared/jsonwriter.h"
-#include "game/generated/protocol.h"
 
 void IGameController::OnEndMatchInsta()
 {
