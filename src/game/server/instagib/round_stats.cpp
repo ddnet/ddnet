@@ -183,7 +183,11 @@ void IGameController::PublishRoundEndStatsStrDiscord(const char *pStr)
 {
 	char aPayload[2048];
 	char aStatsStr[2000];
-	str_format(aPayload, sizeof(aPayload), "{\"content\": \"%s\"}", EscapeJson(aStatsStr, sizeof(aStatsStr), pStr));
+	str_format(
+		aPayload,
+		sizeof(aPayload),
+		"{\"allowed_mentions\": {\"parse\": []}, \"content\": \"%s\"}",
+		EscapeJson(aStatsStr, sizeof(aStatsStr), pStr));
 	const int PayloadSize = str_length(aPayload);
 	// TODO: use HttpPostJson()
 	std::shared_ptr<CHttpRequest> pDiscord = HttpPost(g_Config.m_SvRoundStatsDiscordWebhook, (const unsigned char *)aPayload, PayloadSize);
