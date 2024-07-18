@@ -1,5 +1,7 @@
+#include <base/system.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/flag.h>
@@ -22,6 +24,7 @@ CGameControllerZcatch::~CGameControllerZcatch() = default;
 void CGameControllerZcatch::Tick()
 {
 	CGameControllerInstagib::Tick();
+	static int s_aBodyColors[MAX_CLIENTS] = {0};
 
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -33,7 +36,38 @@ void CGameControllerZcatch::Tick()
 		// but there is no git conflict free way of doing that
 		pPlayer->m_TeeInfos.m_ColorBody = GetBodyColor(pPlayer->m_Spree);
 		pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+
+		if(s_aBodyColors[pPlayer->GetCid()] != pPlayer->m_TeeInfos.m_ColorBody)
+		{
+			s_aBodyColors[pPlayer->GetCid()] = pPlayer->m_TeeInfos.m_ColorBody;
+			SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
+			dbg_msg("zcatch", "send skin change");
+		}
 	}
+}
+
+void CGameControllerZcatch::SendSkinBodyColor7(int ClientId, int Color)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return;
+
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return;
+
+	pPlayer->m_TeeInfos.m_ColorBody = Color;
+	pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+
+	protocol7::CNetMsg_Sv_SkinChange Msg;
+	Msg.m_ClientId = ClientId;
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	{
+		Msg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+		Msg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+		Msg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+	}
+
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
 }
 
 int CGameControllerZcatch::GetBodyColor(int Kills)

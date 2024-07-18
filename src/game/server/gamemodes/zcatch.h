@@ -21,5 +21,7 @@ public:
 	// gets the tee's body color based on the amount of its kills
 	// the value is the integer that will be sent over the network
 	int GetBodyColor(int Kills);
+
+	void SendSkinBodyColor7(int ClientId, int Color);
 };
 #endif // GAME_SERVER_GAMEMODES_ZCATCH_H
