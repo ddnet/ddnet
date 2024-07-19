@@ -7,6 +7,7 @@
 typedef std::function<void()> FButtonClickCallback;
 typedef std::function<bool()> FButtonDisabledCallback;
 typedef std::function<bool()> FButtonActiveCallback;
+typedef std::function<int()> FButtonColorCallback;
 
 class CQuickAction
 {
@@ -17,6 +18,7 @@ private:
 	FButtonClickCallback m_pfnCallback;
 	FButtonDisabledCallback m_pfnDisabledCallback;
 	FButtonActiveCallback m_pfnActiveCallback;
+	FButtonColorCallback m_pfnColorCallback;
 
 public:
 	CQuickAction(
@@ -24,12 +26,14 @@ public:
 		const char *pDescription,
 		FButtonClickCallback pfnCallback,
 		FButtonDisabledCallback pfnDisabledCallback,
-		FButtonActiveCallback pfnActiveCallback) :
+		FButtonActiveCallback pfnActiveCallback,
+		FButtonColorCallback pfnColorCallback) :
 		m_pLabel(pLabel),
 		m_pDescription(pDescription),
 		m_pfnCallback(std::move(pfnCallback)),
 		m_pfnDisabledCallback(std::move(pfnDisabledCallback)),
-		m_pfnActiveCallback(std::move(pfnActiveCallback))
+		m_pfnActiveCallback(std::move(pfnActiveCallback)),
+		m_pfnColorCallback(std::move(pfnColorCallback))
 	{
 	}
 
@@ -42,6 +46,10 @@ public:
 	// bool that indicates if the action is currently running
 	// only applies to actions that can be turned on or off like proof borders
 	bool Active() { return m_pfnActiveCallback(); }
+
+	// color "enum" that represents the state of the quick actions button
+	// used as Checked argument for DoButton_Editor()
+	int Color() { return m_pfnColorCallback(); }
 
 	const char *Label() const { return m_pLabel; }
 	const char *Description() const { return m_pDescription; }

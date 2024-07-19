@@ -325,12 +325,12 @@ public:
 
 	void AddGroup();
 	void AddTileLayer();
-#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, description) CQuickAction m_QuickAction##name;
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) CQuickAction m_QuickAction##name;
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
 
 	CEditor() :
-#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, description) m_QuickAction##name(text, description, callback, disabled, active),
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) m_QuickAction##name(text, description, callback, disabled, active, button_color),
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
 		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),

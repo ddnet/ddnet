@@ -63,7 +63,7 @@ void CPrompt::OnRender(CUIRect View)
 
 	static std::initializer_list<CQuickAction *> s_AllQuickActionsNullptr = {
 		nullptr // unholy hack to make the macro work with trailing commas
-#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, description) , &Editor()->m_QuickAction##name
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) , &Editor()->m_QuickAction##name
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
 	};
