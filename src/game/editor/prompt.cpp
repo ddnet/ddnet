@@ -1,22 +1,10 @@
+#include <engine/keys.h>
 #include <game/client/ui_listbox.h>
+#include <game/editor/quick_action.h>
 
 #include "editor.h"
-#include "engine/keys.h"
-#include "game/editor/quick_action.h"
 
 #include "prompt.h"
-
-const char *str_find_nocase_char(const char *pHaystack, char Needle)
-{
-	while(*pHaystack)
-	{
-		if(tolower((unsigned char)*pHaystack) == tolower(Needle))
-			return pHaystack;
-		pHaystack++;
-	}
-
-	return 0;
-}
 
 bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
 {

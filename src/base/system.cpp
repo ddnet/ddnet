@@ -3136,6 +3136,18 @@ const char *str_find_nocase(const char *haystack, const char *needle)
 	return 0;
 }
 
+const char *str_find_nocase_char(const char *pHaystack, char Needle)
+{
+	while(*pHaystack)
+	{
+		if(tolower((unsigned char)*pHaystack) == tolower(Needle))
+			return pHaystack;
+		pHaystack++;
+	}
+
+	return 0;
+}
+
 const char *str_find(const char *haystack, const char *needle)
 {
 	while(*haystack) /* native implementation */

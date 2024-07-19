@@ -1589,6 +1589,23 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
 const char *str_find_nocase(const char *haystack, const char *needle);
 
 /*
+	Function: str_find_nocase_char
+		Finds a character inside a string case insensitively.
+
+	Parameters:
+		haystack - String to search in
+		needle - Character to search for
+
+	Returns:
+		A pointer into haystack where the needle was found.
+		Returns NULL if needle could not be found.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+*/
+const char *str_find_nocase_char(const char *pHaystack, char Needle);
+
+/*
 	Function: str_find
 		Finds a string inside another string case sensitive.
 
