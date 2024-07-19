@@ -5714,9 +5714,9 @@ void CEditor::RenderStatusbar(CUIRect View, CUIRect *pTooltipRect)
 	CUIRect Button;
 	View.VSplitRight(100.0f, &View, &Button);
 	static int s_EnvelopeButton = 0;
-	if(DoButton_Editor(&s_EnvelopeButton, "Envelopes", ButtonsDisabled ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES, &Button, 0, "Toggles the envelope editor.") == 1)
+	if(DoButton_Editor(&s_EnvelopeButton, m_QuickActionEnvelopes.Label(), m_QuickActionEnvelopes.Active() ? 1 : -1, &Button, 0, m_QuickActionEnvelopes.Description()) == 1)
 	{
-		m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES ? EXTRAEDITOR_NONE : EXTRAEDITOR_ENVELOPES;
+		m_QuickActionEnvelopes.Call();
 	}
 
 	View.VSplitRight(10.0f, &View, nullptr);

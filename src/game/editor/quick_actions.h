@@ -21,4 +21,11 @@ REGISTER_QUICK_ACTION(
 	AddTileLayer, "Add tile layer", [&]() { AddTileLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, "Creates a new tile layer.")
 REGISTER_QUICK_ACTION(
 	SaveAs, "Save As", [&]() { InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save As", "maps", true, CEditor::CallbackSaveMap, this); }, ALWAYS_FALSE, ALWAYS_FALSE, "Saves the current map under a new name (ctrl+shift+s)")
+REGISTER_QUICK_ACTION(
+	Envelopes,
+	"Envelopes",
+	[&]() {  m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES ? EXTRAEDITOR_NONE : EXTRAEDITOR_ENVELOPES; },
+	ALWAYS_FALSE,
+	[&]() -> bool { return m_ShowPicker ? false : m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES; },
+	"Toggles the envelope editor.")
 
