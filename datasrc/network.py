@@ -222,17 +222,15 @@ Objects = [
 
 	NetObject("ClientInfo", [
 		# 4*4 = 16 characters
-		NetTwIntString("m_Name0"), NetTwIntString("m_Name1"), NetTwIntString("m_Name2"),
-		NetTwIntString("m_Name3"),
+		NetArray(NetTwIntString("m_aName"), 4),
 
 		# 4*3 = 12 characters
-		NetTwIntString("m_Clan0"), NetTwIntString("m_Clan1"), NetTwIntString("m_Clan2"),
+		NetArray(NetTwIntString("m_aClan"), 3),
 
 		NetIntAny("m_Country"),
 
 		# 4*6 = 24 characters
-		NetTwIntString("m_Skin0"), NetTwIntString("m_Skin1"), NetTwIntString("m_Skin2"),
-		NetTwIntString("m_Skin3"), NetTwIntString("m_Skin4"), NetTwIntString("m_Skin5"),
+		NetArray(NetTwIntString("m_aSkin"), 6),
 
 		NetIntRange("m_UseCustomColor", 0, 1),
 
