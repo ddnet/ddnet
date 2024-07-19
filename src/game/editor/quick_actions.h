@@ -24,8 +24,14 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	Envelopes,
 	"Envelopes",
-	[&]() {  m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES ? EXTRAEDITOR_NONE : EXTRAEDITOR_ENVELOPES; },
+	[&]() { m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES ? EXTRAEDITOR_NONE : EXTRAEDITOR_ENVELOPES; },
 	ALWAYS_FALSE,
 	[&]() -> bool { return m_ShowPicker ? false : m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES; },
 	"Toggles the envelope editor.")
-
+REGISTER_QUICK_ACTION(
+	AddImage,
+	"Add Image",
+	[&]() { InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Add Image", "Add", "mapres", false, AddImage, this); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	"Load a new image to use in the map")
