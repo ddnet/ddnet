@@ -324,6 +324,7 @@ public:
 	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
 
 	void AddGroup();
+	void AddTileLayer();
 #define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, description) CQuickAction m_QuickAction##name;
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION

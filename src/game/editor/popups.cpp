@@ -578,16 +578,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	// new tile layer
 	View.HSplitBottom(5.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
-	static int s_NewTileLayerButton = 0;
-	if(pEditor->DoButton_Editor(&s_NewTileLayerButton, "Add tile layer", 0, &Button, 0, "Creates a new tile layer"))
+	if(pEditor->DoButton_Editor(&pEditor->m_QuickActionAddTileLayer, pEditor->m_QuickActionAddTileLayer.Label(), 0, &Button, 0, pEditor->m_QuickActionAddTileLayer.Description()))
 	{
-		std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-		pTileLayer->m_pEditor = pEditor;
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTileLayer);
-		int LayerIndex = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1;
-		pEditor->SelectLayer(LayerIndex);
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
-		pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(pEditor, pEditor->m_SelectedGroup, LayerIndex));
+		pEditor->m_QuickActionAddTileLayer.Call();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 

@@ -17,3 +17,5 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	[&]() -> bool { return MapView()->ProofMode()->IsEnabled(); },
 	"Toggles proof borders. These borders represent what a player maximum can see.")
+REGISTER_QUICK_ACTION(
+	AddTileLayer, "Add tile layer", [&]() { AddTileLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, "Creates a new tile layer.")
