@@ -69,27 +69,6 @@ void CPrompt::OnRender(CUIRect View)
 	};
 	static std::vector<CQuickAction *> s_AllQuickActions = {s_AllQuickActionsNullptr.begin() + 1, s_AllQuickActionsNullptr.end()};
 
-	// m_vpCompletePromptList.clear();
-	// m_vpCompletePromptList.emplace_back((char *)"Add Quad");
-	// m_vpCompletePromptList.emplace_back((char *)"Add Sound");
-	// m_vpCompletePromptList.emplace_back((char *)"Add Group");
-	// m_vpCompletePromptList.emplace_back((char *)"Add tele layer");
-	// m_vpCompletePromptList.emplace_back((char *)"Add speedup layer");
-	// m_vpCompletePromptList.emplace_back((char *)"Add tune layer");
-	// m_vpCompletePromptList.emplace_back((char *)"Add front layer");
-	// m_vpCompletePromptList.emplace_back((char *)"Add switch layer");
-	// m_vpCompletePromptList.emplace_back((char *)"Add quads layer");
-	// m_vpCompletePromptList.emplace_back((char *)"Add tile layer");
-	// m_vpCompletePromptList.emplace_back((char *)"Add sound layer");
-	// m_vpCompletePromptList.emplace_back((char *)"Save As");
-	// m_vpCompletePromptList.emplace_back((char *)"Save Copy");
-	// m_vpCompletePromptList.emplace_back((char *)"Toggle High Detail");
-	// m_vpCompletePromptList.emplace_back((char *)"Refocus");
-	// m_vpCompletePromptList.emplace_back((char *)"Envelopes");
-	// m_vpCompletePromptList.emplace_back((char *)"Server settings");
-	// m_vpCompletePromptList.emplace_back((char *)"History");
-	// m_vpCompletePromptList.emplace_back((char *)"Toggle preview of how layers will be zoomed in-game");
-
 	CUIRect Suggestions;
 
 	View.HSplitMid(&Prompt, nullptr);
