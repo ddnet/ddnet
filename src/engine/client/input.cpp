@@ -263,14 +263,7 @@ bool CInput::MouseRelative(float *pX, float *pY)
 		return false;
 
 	ivec2 Relative;
-#if defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
-	ivec2 CurrentPos;
-	SDL_GetMouseState(&CurrentPos.x, &CurrentPos.y);
-	Relative = CurrentPos - m_LastMousePos;
-	m_LastMousePos = CurrentPos;
-#else
 	SDL_GetRelativeMouseState(&Relative.x, &Relative.y);
-#endif
 
 	*pX = Relative.x;
 	*pY = Relative.y;
@@ -287,23 +280,28 @@ void CInput::MouseModeAbsolute()
 void CInput::MouseModeRelative()
 {
 	m_InputGrabbed = true;
-#if !defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-#endif
 	Graphics()->SetWindowGrab(true);
 	// Clear pending relative mouse motion
 	SDL_GetRelativeMouseState(nullptr, nullptr);
 }
 
-void CInput::NativeMousePos(int *pX, int *pY) const
+vec2 CInput::NativeMousePos() const
 {
-	SDL_GetMouseState(pX, pY);
+	ivec2 Position;
+	SDL_GetMouseState(&Position.x, &Position.y);
+	return vec2(Position.x, Position.y);
 }
 
-bool CInput::NativeMousePressed(int Index)
+bool CInput::NativeMousePressed(int Index) const
 {
 	int i = SDL_GetMouseState(nullptr, nullptr);
 	return (i & SDL_BUTTON(Index)) != 0;
+}
+
+const std::vector<IInput::CTouchFingerState> &CInput::TouchFingerStates() const
+{
+	return m_vTouchFingerStates;
 }
 
 const char *CInput::GetClipboardText()
@@ -353,6 +351,10 @@ void CInput::Clear()
 	mem_zero(m_aInputState, sizeof(m_aInputState));
 	mem_zero(m_aInputCount, sizeof(m_aInputCount));
 	m_vInputEvents.clear();
+	for(CTouchFingerState &TouchFingerState : m_vTouchFingerStates)
+	{
+		TouchFingerState.m_Delta = vec2(0.0f, 0.0f);
+	}
 }
 
 float CInput::GetUpdateTime() const
@@ -536,6 +538,39 @@ void CInput::HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event)
 			++NextJoystick;
 		}
 		UpdateActiveJoystick();
+	}
+}
+
+void CInput::HandleTouchDownEvent(const SDL_TouchFingerEvent &Event)
+{
+	CTouchFingerState TouchFingerState;
+	TouchFingerState.m_Finger.m_DeviceId = Event.touchId;
+	TouchFingerState.m_Finger.m_FingerId = Event.fingerId;
+	TouchFingerState.m_Position = vec2(Event.x, Event.y);
+	TouchFingerState.m_Delta = vec2(Event.dx, Event.dy);
+	m_vTouchFingerStates.emplace_back(TouchFingerState);
+}
+
+void CInput::HandleTouchUpEvent(const SDL_TouchFingerEvent &Event)
+{
+	auto FoundState = std::find_if(m_vTouchFingerStates.begin(), m_vTouchFingerStates.end(), [Event](const CTouchFingerState &State) {
+		return State.m_Finger.m_DeviceId == Event.touchId && State.m_Finger.m_FingerId == Event.fingerId;
+	});
+	if(FoundState != m_vTouchFingerStates.end())
+	{
+		m_vTouchFingerStates.erase(FoundState);
+	}
+}
+
+void CInput::HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event)
+{
+	auto FoundState = std::find_if(m_vTouchFingerStates.begin(), m_vTouchFingerStates.end(), [Event](const CTouchFingerState &State) {
+		return State.m_Finger.m_DeviceId == Event.touchId && State.m_Finger.m_FingerId == Event.fingerId;
+	});
+	if(FoundState != m_vTouchFingerStates.end())
+	{
+		FoundState->m_Position = vec2(Event.x, Event.y);
+		FoundState->m_Delta += vec2(Event.dx, Event.dy);
 	}
 }
 
@@ -743,6 +778,18 @@ int CInput::Update()
 			if(Event.wheel.x < 0)
 				Scancode = KEY_MOUSE_WHEEL_RIGHT;
 			Action |= IInput::FLAG_RELEASE;
+			break;
+
+		case SDL_FINGERDOWN:
+			HandleTouchDownEvent(Event.tfinger);
+			break;
+
+		case SDL_FINGERUP:
+			HandleTouchUpEvent(Event.tfinger);
+			break;
+
+		case SDL_FINGERMOTION:
+			HandleTouchMotionEvent(Event.tfinger);
 			break;
 
 		case SDL_WINDOWEVENT:

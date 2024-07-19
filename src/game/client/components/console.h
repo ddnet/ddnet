@@ -10,6 +10,7 @@
 
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
+#include <game/client/ui.h>
 
 enum
 {
@@ -153,6 +154,7 @@ class CGameConsole : public CComponent
 	float m_StateChangeDuration;
 
 	bool m_WantsSelectionCopy = false;
+	CUi::CTouchState m_TouchState;
 
 	static const ColorRGBA ms_SearchHighlightColor;
 	static const ColorRGBA ms_SearchSelectedColor;
