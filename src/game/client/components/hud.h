@@ -49,6 +49,12 @@ class CHud : public CComponent
 	SScoreInfo m_aScoreInfo[2];
 	STextContainerIndex m_FPSTextContainerIndex;
 	STextContainerIndex m_DDRaceEffectsTextContainerIndex;
+	STextContainerIndex m_PlayerAngleTextContainerIndex;
+	char m_aPlayerAngleText[128];
+	STextContainerIndex m_aPlayerSpeedTextContainers[2];
+	char m_aaPlayerSpeedText[2][128];
+	STextContainerIndex m_aPlayerPositionContainers[2];
+	char m_aaPlayerPositionText[2][128];
 
 	void RenderCursor();
 
@@ -64,6 +70,9 @@ class CHud : public CComponent
 	void RenderPlayerState(const int ClientId);
 	void RenderDummyActions();
 	void RenderMovementInformation(const int ClientId);
+
+	void UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, char *pPrevValue, size_t Size);
+	void RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, float X, float Y);
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
