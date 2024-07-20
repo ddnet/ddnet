@@ -15,10 +15,8 @@ void IGameController::OnEndMatchInsta()
 {
 	dbg_msg("ddnet-insta", "match end");
 
-	char aStats[1024];
-	dbg_msg("ddnet-insta", "building stats ...");
-	GetRoundEndStatsStr(aStats, sizeof(aStats));
-	PublishRoundEndStatsStr(aStats);
+	dbg_msg("ddnet-insta", "publishing stats ...");
+	PublishRoundEndStats();
 
 	for(CInstaPlayerStats &Stats : m_aInstaPlayerStats)
 		Stats.Reset();
@@ -157,7 +155,7 @@ void IGameController::GetRoundEndStatsStrAsciiTable(char *pBuf, size_t Size)
 {
 }
 
-void IGameController::GetRoundEndStatsStr(char *pBuf, size_t Size)
+void IGameController::GetRoundEndStatsStrHttp(char *pBuf, size_t Size)
 {
 	if(!IsTeamPlay())
 	{
@@ -165,14 +163,50 @@ void IGameController::GetRoundEndStatsStr(char *pBuf, size_t Size)
 		return;
 	}
 
-	if(g_Config.m_SvRoundStatsFormat == 0)
+	if(g_Config.m_SvRoundStatsFormatHttp == 0)
 		GetRoundEndStatsStrCsv(pBuf, Size);
-	if(g_Config.m_SvRoundStatsFormat == 1)
+	if(g_Config.m_SvRoundStatsFormatHttp == 1)
 		GetRoundEndStatsStrPsv(pBuf, Size);
-	else if(g_Config.m_SvRoundStatsFormat == 4)
+	else if(g_Config.m_SvRoundStatsFormatHttp == 4)
 		GetRoundEndStatsStrJson(pBuf, Size);
 	else
-		dbg_msg("ddnet-insta", "sv_round_stats_format %d not implemented", g_Config.m_SvRoundStatsFormat);
+		dbg_msg("ddnet-insta", "sv_round_stats_format_http %d not implemented", g_Config.m_SvRoundStatsFormatHttp);
+}
+
+void IGameController::GetRoundEndStatsStrDiscord(char *pBuf, size_t Size)
+{
+	if(!IsTeamPlay())
+	{
+		dbg_msg("ddnet-insta", "failed to build stats (no teams not implemented)");
+		return;
+	}
+
+	if(g_Config.m_SvRoundStatsFormatDiscord == 0)
+		GetRoundEndStatsStrCsv(pBuf, Size);
+	if(g_Config.m_SvRoundStatsFormatDiscord == 1)
+		GetRoundEndStatsStrPsv(pBuf, Size);
+	else if(g_Config.m_SvRoundStatsFormatDiscord == 4)
+		GetRoundEndStatsStrJson(pBuf, Size);
+	else
+		dbg_msg("ddnet-insta", "sv_round_stats_format_discord %d not implemented", g_Config.m_SvRoundStatsFormatDiscord);
+}
+
+void IGameController::GetRoundEndStatsStrFile(char *pBuf, size_t Size)
+{
+	if(!IsTeamPlay())
+	{
+		dbg_msg("ddnet-insta", "failed to build stats (no teams not implemented)");
+		return;
+	}
+
+	if(g_Config.m_SvRoundStatsFormatFile == 0)
+		GetRoundEndStatsStrCsv(pBuf, Size);
+	if(g_Config.m_SvRoundStatsFormatFile == 1)
+		GetRoundEndStatsStrPsv(pBuf, Size);
+	else if(g_Config.m_SvRoundStatsFormatFile == 4)
+		GetRoundEndStatsStrJson(pBuf, Size);
+	else
+		dbg_msg("ddnet-insta", "sv_round_stats_format_file %d not implemented", g_Config.m_SvRoundStatsFormatFile);
 }
 
 void IGameController::PublishRoundEndStatsStrFile(const char *pStr)
@@ -205,7 +239,7 @@ void IGameController::PublishRoundEndStatsStrHttp(const char *pStr)
 	pHttp->LogProgress(HTTPLOG::FAILURE);
 	pHttp->IpResolve(IPRESOLVE::V4);
 	pHttp->Timeout(CTimeout{4000, 15000, 500, 5});
-	if(g_Config.m_SvRoundStatsFormat == 4)
+	if(g_Config.m_SvRoundStatsFormatHttp == 4)
 		pHttp->HeaderString("Content-Type", "application/json");
 	else
 		pHttp->HeaderString("Content-Type", "text/plain");
@@ -213,13 +247,25 @@ void IGameController::PublishRoundEndStatsStrHttp(const char *pStr)
 	GameServer()->m_pHttp->Run(pHttp);
 }
 
-void IGameController::PublishRoundEndStatsStr(const char *pStr)
+void IGameController::PublishRoundEndStats()
 {
-	dbg_msg("ddnet-insta", "publishing round stats:\n%s", pStr);
+	char aStats[1024];
 	if(g_Config.m_SvRoundStatsDiscordWebhook[0] != '\0')
-		PublishRoundEndStatsStrDiscord(pStr);
+	{
+		GetRoundEndStatsStrDiscord(aStats, sizeof(aStats));
+		PublishRoundEndStatsStrDiscord(aStats);
+		dbg_msg("ddnet-insta", "publishing round stats to discord:\n%s", aStats);
+	}
 	if(g_Config.m_SvRoundStatsHttpEndpoint[0] != '\0')
-		PublishRoundEndStatsStrHttp(pStr);
+	{
+		GetRoundEndStatsStrHttp(aStats, sizeof(aStats));
+		PublishRoundEndStatsStrHttp(aStats);
+		dbg_msg("ddnet-insta", "publishing round stats to custom http endpoint:\n%s", aStats);
+	}
 	if(g_Config.m_SvRoundStatsOutputFile[0] != '\0')
-		PublishRoundEndStatsStrFile(pStr);
+	{
+		GetRoundEndStatsStrFile(aStats, sizeof(aStats));
+		PublishRoundEndStatsStrFile(aStats);
+		dbg_msg("ddnet-insta", "publishing round stats to file:\n%s", aStats);
+	}
 }

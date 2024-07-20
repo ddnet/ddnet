@@ -303,11 +303,13 @@ public:
 	void GetRoundEndStatsStrJson(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrPsv(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrAsciiTable(char *pBuf, size_t Size);
-	void GetRoundEndStatsStr(char *pBuf, size_t Size);
+	void GetRoundEndStatsStrHttp(char *pBuf, size_t Size);
+	void GetRoundEndStatsStrDiscord(char *pBuf, size_t Size);
+	void GetRoundEndStatsStrFile(char *pBuf, size_t Size);
 	void PublishRoundEndStatsStrFile(const char *pStr);
 	void PublishRoundEndStatsStrDiscord(const char *pStr);
 	void PublishRoundEndStatsStrHttp(const char *pStr);
-	void PublishRoundEndStatsStr(const char *pStr);
+	void PublishRoundEndStats();
 	class CInstaPlayerStats
 	{
 	public:
