@@ -1589,10 +1589,17 @@ void CGameContext::OnClientEnter(int ClientId)
 	}
 
 	IServer::CClientInfo Info;
-	if(Server()->GetClientInfo(ClientId, &Info) && Info.m_GotDDNetVersion)
+	if(Server()->GetClientInfo(ClientId, &Info))
 	{
-		if(OnClientDDNetVersionKnown(ClientId))
+		if(!Info.m_GotDDNetVersion && !Server()->IsSixup(ClientId))
+		{
+			Server()->Kick(ClientId, "Old Teeworlds 0.6 versions are unsupported. Use DDNet client or Teeworlds 0.7");
+			return;
+		}
+		else if(OnClientDDNetVersionKnown(ClientId))
+		{
 			return; // kicked
+		}
 	}
 
 	if(!Server()->ClientPrevIngame(ClientId))

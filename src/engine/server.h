@@ -278,6 +278,8 @@ public:
 	{
 		if(Target < 0 || Target >= MAX_CLIENTS)
 			return false;
+		if(GetClientVersion(Client) >= VERSION_DDNET_128)
+			return true;
 		int *pMap = GetReverseIdMap(Client);
 		if(pMap[Target] == -1)
 			return false;
