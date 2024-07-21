@@ -47,18 +47,20 @@ void CPlayerMapping::PlayerMap::Init(int ClientID, CPlayerMapping *pPlayerMappin
 	m_pMap = m_pPlayerMapping->Server()->GetIdMap(m_ClientID);
 	m_pReverseMap = m_pPlayerMapping->Server()->GetReverseIdMap(m_ClientID);
 	m_UpdateTeamsState = false;
+	m_NumReserved = 0;
+	m_TotalOverhang = 0;
 	ResetSeeOthers();
 }
 
-CPlayer *CPlayerMapping::PlayerMap::GetPlayer()
+CPlayer *CPlayerMapping::PlayerMap::GetPlayer() const
 {
 	return m_pPlayerMapping->GameServer()->m_apPlayers[m_ClientID];
 }
 
 void CPlayerMapping::PlayerMap::InitPlayer(bool Rejoin)
 {
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_aReserved[i] = false;
+	for(bool &Reserved : m_aReserved)
+		Reserved = false;
 
 	// make sure no rests from before are in the client, so we can freshly start and insert our stuff
 	if(Rejoin)
@@ -80,8 +82,9 @@ void CPlayerMapping::PlayerMap::InitPlayer(bool Rejoin)
 
 	int NextFreeID = 0;
 	NETADDR OwnAddr, Addr;
+	mem_zero(&OwnAddr, sizeof(OwnAddr));
 	m_pPlayerMapping->Server()->GetClientAddr(m_ClientID, &OwnAddr);
-	while(1)
+	while(true)
 	{
 		bool Break = true;
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -89,6 +92,7 @@ void CPlayerMapping::PlayerMap::InitPlayer(bool Rejoin)
 			if(!m_pPlayerMapping->GameServer()->m_apPlayers[i] || m_pPlayerMapping->Server()->IsDebugDummy(i) || i == m_ClientID)
 				continue;
 
+			mem_zero(&Addr, sizeof(OwnAddr));
 			m_pPlayerMapping->Server()->GetClientAddr(i, &Addr);
 			if(net_addr_comp_noport(&OwnAddr, &Addr) == 0)
 			{
@@ -343,23 +347,23 @@ void CPlayerMapping::UpdatePlayerMap(int ClientID)
 	if(ClientID == -1)
 	{
 		bool Update = Server()->Tick() % Config()->m_SvMapUpdateRate == 0;
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(auto &Map : m_aMap)
 		{
 			// Calculate overhang every tick, not only when the map updates
-			int Overhang = maximum(0, Server()->ClientCount() - m_aMap[i].GetMapSize());
-			if(Overhang != m_aMap[i].m_TotalOverhang)
+			int Overhang = maximum(0, Server()->ClientCount() - Map.GetMapSize());
+			if(Overhang != Map.m_TotalOverhang)
 			{
-				m_aMap[i].m_TotalOverhang = Overhang;
-				if(m_aMap[i].m_TotalOverhang <= 0 && m_aMap[i].m_SeeOthersState != PlayerMap::SSeeOthers::STATE_NONE)
-					m_aMap[i].ResetSeeOthers();
+				Map.m_TotalOverhang = Overhang;
+				if(Map.m_TotalOverhang <= 0 && Map.m_SeeOthersState != PlayerMap::SSeeOthers::STATE_NONE)
+					Map.ResetSeeOthers();
 
-				m_aMap[i].UpdateSeeOthers();
-				m_aMap[i].m_UpdateTeamsState = true;
+				Map.UpdateSeeOthers();
+				Map.m_UpdateTeamsState = true;
 			}
 
 			if(Update)
 			{
-				m_aMap[i].Update();
+				Map.Update();
 			}
 		}
 	}
@@ -380,26 +384,26 @@ int CPlayerMapping::GetSeeOthersInd(int ClientID, int MapID)
 
 const char *CPlayerMapping::GetSeeOthersName(int ClientID)
 {
-	static char aName[MAX_NAME_LENGTH];
+	static char s_aName[MAX_NAME_LENGTH];
 	int State = m_aMap[ClientID].m_SeeOthersState;
 	const char *pDot = "\xe2\x8b\x85";
 
 	if(State == PlayerMap::SSeeOthers::STATE_PAGE_FIRST)
 	{
 		if(m_aMap[ClientID].m_TotalOverhang > PlayerMap::SSeeOthers::MAX_NUM_SEE_OTHERS)
-			str_format(aName, sizeof(aName), "%s 1/2", pDot);
+			str_format(s_aName, sizeof(s_aName), "%s 1/2", pDot);
 		else
-			str_format(aName, sizeof(aName), "%s Close", pDot);
+			str_format(s_aName, sizeof(s_aName), "%s Close", pDot);
 	}
 	else if(State == PlayerMap::SSeeOthers::STATE_PAGE_SECOND)
 	{
-		str_format(aName, sizeof(aName), "%s 2/2 | Close", pDot);
+		str_format(s_aName, sizeof(s_aName), "%s 2/2 | Close", pDot);
 	}
 	else
 	{
-		str_format(aName, sizeof(aName), "%s %d others", pDot, m_aMap[ClientID].m_TotalOverhang);
+		str_format(s_aName, sizeof(s_aName), "%s %d others", pDot, m_aMap[ClientID].m_TotalOverhang);
 	}
-	return aName;
+	return s_aName;
 }
 
 void CPlayerMapping::PlayerMap::CycleSeeOthers()
@@ -445,8 +449,8 @@ void CPlayerMapping::PlayerMap::DoSeeOthers()
 	if(m_NumSeeOthers == 0)
 	{
 		// Reset these for the next cycle so we can get the fresh page we had before
-		for(int i = 0; i < MAX_CLIENTS; i++)
-			m_aWasSeeOthers[i] = false;
+		for(bool &WasSeeOthers : m_aWasSeeOthers)
+			WasSeeOthers = false;
 		CycleSeeOthers();
 		ResetSeeOthers();
 	}
@@ -460,13 +464,13 @@ void CPlayerMapping::PlayerMap::ResetSeeOthers()
 {
 	m_SeeOthersState = SSeeOthers::STATE_NONE;
 	m_NumSeeOthers = 0;
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_aWasSeeOthers[i] = false;
+	for(bool &WasSeeOthers : m_aWasSeeOthers)
+		WasSeeOthers = false;
 	m_UpdateTeamsState = true;
 	UpdateSeeOthers();
 }
 
-void CPlayerMapping::PlayerMap::UpdateSeeOthers()
+void CPlayerMapping::PlayerMap::UpdateSeeOthers() const
 {
 	if(!m_pPlayerMapping->Server()->IsSixup(m_ClientID))
 		return;
