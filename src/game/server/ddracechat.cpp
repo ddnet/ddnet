@@ -1055,7 +1055,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 	}
 	else
 	{
-		if(Team < 0 || Team >= MAX_CLIENTS)
+		if(Team < 0 || Team >= LEGACY_MAX_CLIENTS)
 			Team = m_pController->Teams().GetFirstEmptyTeam();
 
 		if(pPlayer->m_Last_Team + (int64_t)Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick())
