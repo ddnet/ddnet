@@ -1161,7 +1161,7 @@ void CGameClient::ProcessEvents()
 	}
 }
 
-static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, CServerInfo *pFallbackServerInfo)
+static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, const CServerInfo *pFallbackServerInfo)
 {
 	int Version = -1;
 	if(InfoExSize >= 12)
@@ -1375,6 +1375,9 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 #endif
+
+	CServerInfo ServerInfo;
+	Client()->GetServerInfo(&ServerInfo);
 
 	bool FoundGameInfoEx = false;
 	bool GotSwitchStateTeam = false;
@@ -1614,8 +1617,6 @@ void CGameClient::OnNewSnapshot()
 					continue;
 				}
 				FoundGameInfoEx = true;
-				CServerInfo ServerInfo;
-				Client()->GetServerInfo(&ServerInfo);
 				m_GameInfo = GetGameInfo((const CNetObj_GameInfoEx *)Item.m_pData, Item.m_DataSize, &ServerInfo);
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEDATA)
@@ -1701,8 +1702,6 @@ void CGameClient::OnNewSnapshot()
 
 	if(!FoundGameInfoEx)
 	{
-		CServerInfo ServerInfo;
-		Client()->GetServerInfo(&ServerInfo);
 		m_GameInfo = GetGameInfo(0, 0, &ServerInfo);
 	}
 
@@ -1807,12 +1806,10 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 
-	CServerInfo CurrentServerInfo;
-	Client()->GetServerInfo(&CurrentServerInfo);
 	CTuningParams StandardTuning;
-	if(CurrentServerInfo.m_aGameType[0] != '0')
+	if(ServerInfo.m_aGameType[0] != '0')
 	{
-		if(str_comp(CurrentServerInfo.m_aGameType, "DM") != 0 && str_comp(CurrentServerInfo.m_aGameType, "TDM") != 0 && str_comp(CurrentServerInfo.m_aGameType, "CTF") != 0)
+		if(str_comp(ServerInfo.m_aGameType, "DM") != 0 && str_comp(ServerInfo.m_aGameType, "TDM") != 0 && str_comp(ServerInfo.m_aGameType, "CTF") != 0)
 			m_ServerMode = SERVERMODE_MOD;
 		else if(mem_comp(&StandardTuning, &m_aTuning[g_Config.m_ClDummy], 33) == 0)
 			m_ServerMode = SERVERMODE_PURE;
