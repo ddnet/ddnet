@@ -1896,7 +1896,7 @@ Round %d/%d
 
 [Team and size]
 %d\n(%d/%d)
-== %d\n (%d/%d)
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
 == 隊伍 %d (%d/%d)
