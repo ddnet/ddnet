@@ -123,6 +123,44 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	int ScoreLimit = m_GameInfo.m_ScoreLimit;
 	int TimeLimit = m_GameInfo.m_TimeLimit;
 
+	std::optional<std::string> RedClan = std::nullopt;
+	std::optional<std::string> BlueClan = std::nullopt;
+
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		if(pPlayer->GetTeam() == TEAM_RED)
+		{
+			if(!RedClan.has_value())
+			{
+				RedClan = Server()->ClientClan(pPlayer->GetCid());
+				continue;
+			}
+
+			if(RedClan.value().empty())
+				break;
+
+			if(RedClan.value() != std::string(Server()->ClientClan(pPlayer->GetCid())))
+				RedClan.value().clear();
+		}
+		else if(pPlayer->GetTeam() == TEAM_BLUE)
+		{
+			if(!BlueClan.has_value())
+			{
+				BlueClan = Server()->ClientClan(pPlayer->GetCid());
+				continue;
+			}
+
+			if(BlueClan.value().empty())
+				break;
+
+			if(BlueClan.value() != std::string(Server()->ClientClan(pPlayer->GetCid())))
+				BlueClan.value().clear();
+		}
+	}
+
 	// headers
 	str_format(aBuf, sizeof(aBuf), "---> Server: %s, Map: %s, Gametype: %s.\n", g_Config.m_SvName, g_Config.m_SvMap, g_Config.m_SvGametype);
 	str_append(pBuf, aBuf, Size);
@@ -130,6 +168,11 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	str_append(pBuf, aBuf, Size);
 
 	str_append(pBuf, "**Red Team:**\n", Size);
+	if(RedClan.has_value() && !RedClan.value().empty())
+	{
+		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", RedClan.value().c_str());
+		str_append(pBuf, aBuf, Size);
+	}
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer || pPlayer->GetTeam() != TEAM_RED)
@@ -137,7 +180,13 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 
 		PsvRowPlayer(pPlayer, pBuf, Size);
 	}
+
 	str_append(pBuf, "**Blue Team:**\n", Size);
+	if(BlueClan.has_value() && !BlueClan.value().empty())
+	{
+		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", BlueClan.value().c_str());
+		str_append(pBuf, aBuf, Size);
+	}
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer || pPlayer->GetTeam() != TEAM_BLUE)
