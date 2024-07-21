@@ -4979,7 +4979,7 @@ void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 	m_PlayerMapping.InitPlayerMap(ClientID, true);
 }
 
-bool CGameContext::FlagsUsed()
+bool CGameContext::FlagsUsed() const
 {
 	return (m_pController->GetGameFlags() & GAMEFLAG_FLAGS);
 }

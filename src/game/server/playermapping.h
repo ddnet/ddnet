@@ -29,7 +29,7 @@ class CPlayerMapping
 		void Init(int ClientID, CPlayerMapping *pPlayerMapping);
 		void InitPlayer(bool Rejoin);
 		CPlayerMapping *m_pPlayerMapping;
-		CPlayer *GetPlayer();
+		CPlayer *GetPlayer() const;
 		int m_ClientID;
 		int m_NumReserved;
 		bool m_UpdateTeamsState;
@@ -49,7 +49,7 @@ class CPlayerMapping
 		bool m_aWasSeeOthers[MAX_CLIENTS];
 		void DoSeeOthers();
 		void CycleSeeOthers();
-		void UpdateSeeOthers();
+		void UpdateSeeOthers() const;
 		void ResetSeeOthers();
 	} m_aMap[MAX_CLIENTS];
 	void UpdatePlayerMap(int ClientID);

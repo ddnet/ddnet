@@ -201,7 +201,7 @@ public:
 	class CCharacter *GetPlayerChar(int ClientId);
 	bool EmulateBug(int Bug);
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
-	bool FlagsUsed();
+	bool FlagsUsed() const;
 
 	// voting
 	void StartVote(const char *pDesc, const char *pCommand, const char *pReason, const char *pSixupDesc);

@@ -140,8 +140,8 @@ void CCharacter::Destroy()
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = 0;
 	m_Alive = false;
 	SetSolo(false);
-	for(int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
-		Server()->SnapFreeId(m_aUntranslatedID[i]);
+	for(int id : m_aUntranslatedID)
+		Server()->SnapFreeId(id);
 }
 
 void CCharacter::SetWeapon(int W)
@@ -2430,8 +2430,8 @@ void CCharacter::DDRaceInit()
 		GameServer()->SendStartWarning(GetPlayer()->GetCid(), "Please join a team before you start");
 	}
 
-	for(int i = 0; i < EUntranslatedMap::NUM_IDS; i++)
-		m_aUntranslatedID[i] = Server()->SnapNewId();
+	for(int &id : m_aUntranslatedID)
+		id = Server()->SnapNewId();
 }
 
 void CCharacter::Rescue()
