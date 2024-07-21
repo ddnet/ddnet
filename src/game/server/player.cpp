@@ -452,6 +452,8 @@ void CPlayer::Snap(int SnappingClient)
 void CPlayer::FakeSnap()
 {
 	m_SentSnaps++;
+	if(GetClientVersion() >= VERSION_DDNET_128)
+		return;
 
 	// see others in spec
 	int SeeOthersID = GameServer()->m_PlayerMapping.GetSeeOthersID(m_ClientId);
@@ -572,7 +574,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 	if(m_NumInputs == 20 && g_Config.m_SvClientSuggestion[0] != '\0' && GetClientVersion() <= VERSION_DDNET_OLD)
 		GameServer()->SendBroadcast(g_Config.m_SvClientSuggestion, m_ClientId);
 	else if(m_NumInputs == 200 && Server()->IsSixup(m_ClientId))
-		GameServer()->SendBroadcast("This server uses an experimental translation from Teeworlds 0.7 to 0.6. Please report bugs on ddnet.org/discord", m_ClientId);
+		GameServer()->SendBroadcast("This server uses a translation from Teeworlds 0.7, use DDNet client for all features. Please report bugs on ddnet.org/discord", m_ClientId);
 }
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *pNewInput)

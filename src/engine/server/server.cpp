@@ -2649,6 +2649,9 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 			m_aClients[ClientId].m_DebugDummy = true;
 			GameServer()->OnClientConnected(ClientId, nullptr);
 			m_aClients[ClientId].m_State = CClient::STATE_INGAME;
+			m_aClients[ClientId].m_DDNetVersion = DDNET_VERSION_NUMBER;
+			m_aClients[ClientId].m_GotDDNetVersionPacket = true;
+			m_aClients[ClientId].m_DDNetVersionSettled = true;
 			str_format(m_aClients[ClientId].m_aName, sizeof(m_aClients[ClientId].m_aName), "Debug dummy %d", DummyIndex + 1);
 			GameServer()->OnClientEnter(ClientId);
 		}
