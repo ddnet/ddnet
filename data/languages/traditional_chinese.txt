@@ -1881,24 +1881,24 @@ Show only chat messages from team members
 
 [Spectating]
 Following %s
-== 
+== 正在旁觀 %s
 
 Example of usage
-== 
+== 用途示例
 
 Round %d/%d
-== 
+== 輪次 %d/%d
 
 [Spectators]
 %d others…
-== 
+== %d 其他
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/index.php?title=Mapping/zh&variant=zh-hant
