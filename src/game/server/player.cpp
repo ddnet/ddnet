@@ -452,7 +452,7 @@ void CPlayer::Snap(int SnappingClient)
 void CPlayer::FakeSnap()
 {
 	m_SentSnaps++;
-	if(GetClientVersion() >= VERSION_DDNET_128)
+	if(GetClientVersion() >= VERSION_DDNET_128 || Server()->MaxClients() <= LEGACY_MAX_CLIENTS)
 		return;
 
 	// see others in spec
