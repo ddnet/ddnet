@@ -600,7 +600,7 @@ void CGameTeams::SendTeamsState(int ClientId)
 
 	for(unsigned i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(GameServer()->GetClientVersion(ClientId) >= VERSION_DDNET_128)
+		if(GameServer()->GetClientVersion(ClientId) >= VERSION_DDNET_128 || Server()->MaxClients() <= LEGACY_MAX_CLIENTS)
 		{
 			Msg.AddInt(m_Core.Team(i));
 			MsgLegacy.AddInt(m_Core.Team(i));
