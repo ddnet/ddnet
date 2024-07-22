@@ -39,6 +39,17 @@ public:
 	// Will also be set if spree chat messages are turned off
 	int m_Spree;
 
+	// kills and deaths are tracked per round
+	int m_Kills;
+	int m_Deaths;
+
+	void ResetStats()
+	{
+		m_Kills = 0;
+		m_Deaths = 0;
+		m_Spree = 0;
+	}
+
 	/*
 		m_HasGhostCharInGame
 

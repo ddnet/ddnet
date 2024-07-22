@@ -18,8 +18,8 @@ void IGameController::OnEndMatchInsta()
 	dbg_msg("ddnet-insta", "publishing stats ...");
 	PublishRoundEndStats();
 
-	for(CInstaPlayerStats &Stats : m_aInstaPlayerStats)
-		Stats.Reset();
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+		pPlayer->ResetStats();
 }
 
 static float CalcKillDeathRatio(int Kills, int Deaths)
@@ -34,7 +34,6 @@ static float CalcKillDeathRatio(int Kills, int Deaths)
 void IGameController::PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Size)
 {
 	char aBuf[512];
-	const CInstaPlayerStats *pStats = &m_aInstaPlayerStats[pPlayer->GetCid()];
 	str_format(
 		aBuf,
 		sizeof(aBuf),
@@ -42,9 +41,9 @@ void IGameController::PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Si
 		pPlayer->GetCid(),
 		Server()->ClientName(pPlayer->GetCid()),
 		pPlayer->m_Score.value_or(0),
-		pStats->m_Kills,
-		pStats->m_Deaths,
-		CalcKillDeathRatio(pStats->m_Kills, pStats->m_Deaths));
+		pPlayer->m_Kills,
+		pPlayer->m_Deaths,
+		CalcKillDeathRatio(pPlayer->m_Kills, pPlayer->m_Deaths));
 	str_append(pBuf, aBuf, Size);
 }
 
@@ -85,8 +84,6 @@ void IGameController::GetRoundEndStatsStrJson(char *pBuf, size_t Size)
 			if(!pPlayer)
 				continue;
 
-			const CInstaPlayerStats *pStats = &m_aInstaPlayerStats[pPlayer->GetCid()];
-
 			Writer.BeginObject();
 			Writer.WriteAttribute("id");
 			Writer.WriteIntValue(pPlayer->GetCid());
@@ -97,11 +94,11 @@ void IGameController::GetRoundEndStatsStrJson(char *pBuf, size_t Size)
 			Writer.WriteAttribute("score");
 			Writer.WriteIntValue(pPlayer->m_Score.value_or(0));
 			Writer.WriteAttribute("kills");
-			Writer.WriteIntValue(pStats->m_Kills);
+			Writer.WriteIntValue(pPlayer->m_Kills);
 			Writer.WriteAttribute("deaths");
-			Writer.WriteIntValue(pStats->m_Deaths);
+			Writer.WriteIntValue(pPlayer->m_Deaths);
 			Writer.WriteAttribute("ratio");
-			Writer.WriteIntValue(CalcKillDeathRatio(pStats->m_Kills, pStats->m_Deaths));
+			Writer.WriteIntValue(CalcKillDeathRatio(pPlayer->m_Kills, pPlayer->m_Deaths));
 			Writer.EndObject();
 		}
 		Writer.EndArray();
