@@ -170,7 +170,7 @@ NOT IMPLEMENTED YET
 
 NOT IMPLEMENTED YET
 
-## json - javascript object notation (fromat 4)
+## json - javascript object notation (format 4)
 
 ```json
 {
