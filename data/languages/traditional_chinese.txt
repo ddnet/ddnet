@@ -29,6 +29,7 @@
 # 2024-03-05 By
 # 2024-04-21 By
 # 2024-06-10 By
+# 2024-07-21 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -1881,24 +1882,24 @@ Show only chat messages from team members
 
 [Spectating]
 Following %s
-== 
+== 正在旁觀 %s
 
 Example of usage
-== 
+== 用途示例
 
 Round %d/%d
-== 
+== 輪次 %d/%d
 
 [Spectators]
 %d others…
-== 
+== %d 其他…
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== 隊伍 %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/index.php?title=Mapping/zh&variant=zh-hant

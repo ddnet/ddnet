@@ -320,6 +320,26 @@ public:
 	 */
 	typedef std::function<void()> FPopupMenuClosedCallback;
 
+	/**
+	 * Represents the aggregated state of current touch events to control a user interface.
+	 */
+	class CTouchState
+	{
+		friend class CUi;
+
+		bool m_SecondaryPressedNext = false;
+		float m_SecondaryActivationTime = 0.0f;
+		vec2 m_SecondaryActivationDelta = vec2(0.0f, 0.0f);
+
+	public:
+		bool m_AnyPressed = false;
+		bool m_PrimaryPressed = false;
+		bool m_SecondaryPressed = false;
+		vec2 m_PrimaryPosition = vec2(-1.0f, -1.0f);
+		vec2 m_PrimaryDelta = vec2(0.0f, 0.0f);
+		vec2 m_ScrollAmount = vec2(0.0f, 0.0f);
+	};
+
 private:
 	bool m_Enabled;
 
@@ -327,8 +347,8 @@ private:
 	const void *m_pActiveItem = nullptr;
 	const void *m_pLastActiveItem = nullptr; // only used internally to track active CLineInput
 	const void *m_pBecomingHotItem = nullptr;
-	const CScrollRegion *m_pHotScrollRegion = nullptr;
-	const CScrollRegion *m_pBecomingHotScrollRegion = nullptr;
+	CScrollRegion *m_pHotScrollRegion = nullptr;
+	CScrollRegion *m_pBecomingHotScrollRegion = nullptr;
 	bool m_ActiveItemValid = false;
 
 	int m_ActiveButtonLogicButton = -1;
@@ -360,8 +380,10 @@ private:
 	vec2 m_MousePos = vec2(0.0f, 0.0f); // in gui space
 	vec2 m_MouseDelta = vec2(0.0f, 0.0f); // in gui space
 	vec2 m_MouseWorldPos = vec2(-1.0f, -1.0f); // in world space
+	unsigned m_UpdatedMouseButtons = 0;
 	unsigned m_MouseButtons = 0;
 	unsigned m_LastMouseButtons = 0;
+	CTouchState m_TouchState;
 	bool m_MouseSlow = false;
 	bool m_MouseLock = false;
 	const void *m_pMouseLockId = nullptr;
@@ -491,7 +513,7 @@ public:
 		}
 		return false;
 	}
-	void SetHotScrollRegion(const CScrollRegion *pId) { m_pBecomingHotScrollRegion = pId; }
+	void SetHotScrollRegion(CScrollRegion *pId) { m_pBecomingHotScrollRegion = pId; }
 	const void *HotItem() const { return m_pHotItem; }
 	const void *NextHotItem() const { return m_pBecomingHotItem; }
 	const void *ActiveItem() const { return m_pActiveItem; }
@@ -512,6 +534,7 @@ public:
 	bool MouseInsideClip() const { return !IsClipped() || MouseInside(ClipArea()); }
 	bool MouseHovered(const CUIRect *pRect) const { return MouseInside(pRect) && MouseInsideClip(); }
 	void ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const;
+	void UpdateTouchState(CTouchState &State) const;
 	void ResetMouseSlow() { m_MouseSlow = false; }
 
 	bool ConsumeHotkey(EHotkey Hotkey);

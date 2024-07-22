@@ -4558,6 +4558,10 @@ int main(int argc, const char **argv)
 	pClient->ShellRegister();
 #endif
 
+	// Do not automatically translate touch events to mouse events and vice versa.
+	SDL_SetHint("SDL_TOUCH_MOUSE_EVENTS", "0");
+	SDL_SetHint("SDL_MOUSE_TOUCH_EVENTS", "0");
+
 #if defined(CONF_PLATFORM_MACOS)
 	// Hints will not be set if there is an existing override hint or environment variable that takes precedence.
 	// So this respects cli environment overrides.

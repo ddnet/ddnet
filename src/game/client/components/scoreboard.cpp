@@ -290,7 +290,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 		FontSize = 10.0f;
 	}
 
-	const float ScoreOffset = Scoreboard.x + 20.0f;
+	const float ScoreOffset = Scoreboard.x + 40.0f;
 	const float ScoreLength = TextRender()->TextWidth(FontSize, TimeScore ? "00:00:00" : "99999");
 	const float TeeOffset = ScoreOffset + ScoreLength + 20.0f;
 	const float TeeLength = 60.0f * TeeSizeMod;
