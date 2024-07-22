@@ -19,7 +19,12 @@ void IGameController::OnEndMatchInsta()
 	PublishRoundEndStats();
 
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
 		pPlayer->ResetStats();
+	}
 }
 
 static float CalcKillDeathRatio(int Kills, int Deaths)
@@ -99,6 +104,10 @@ void IGameController::GetRoundEndStatsStrJson(char *pBuf, size_t Size)
 			Writer.WriteIntValue(pPlayer->m_Deaths);
 			Writer.WriteAttribute("ratio");
 			Writer.WriteIntValue(CalcKillDeathRatio(pPlayer->m_Kills, pPlayer->m_Deaths));
+			Writer.WriteAttribute("flag_grabs");
+			Writer.WriteIntValue(pPlayer->m_FlagGrabs);
+			Writer.WriteAttribute("flag_captures");
+			Writer.WriteIntValue(pPlayer->m_FlagCaptures);
 			Writer.EndObject();
 		}
 		Writer.EndArray();
