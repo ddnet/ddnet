@@ -34,6 +34,7 @@ if(OPUSFILE_FOUND)
         "${EXTRA_OPUSFILE_LIBDIR}/libopusfile-0.dll"
         "${EXTRA_OPUSFILE_LIBDIR}/libopus-0.dll"
         "${EXTRA_OPUSFILE_LIBDIR}/libogg-0.dll"
+        "${EXTRA_OPUSFILE_LIBDIR}/libwinpthread-1.dll"
       )
     else()
       set(OPUSFILE_COPY_FILES
