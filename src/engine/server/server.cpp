@@ -2890,12 +2890,12 @@ int CServer::Run()
 							str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s blacklisted", ClientId, aAddrStr, m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
 
 							Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "dnsbl", aBuf);
-						}
-					}
 
-					if(m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED && Config()->m_SvDnsblBan)
-					{
-						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientId), 60 * 10, Config()->m_SvDnsblBanReason);
+							if(Config()->m_SvDnsblBan)
+							{
+								m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientId), 60 * 10, Config()->m_SvDnsblBanReason);
+							}
+						}
 					}
 				}
 			}
