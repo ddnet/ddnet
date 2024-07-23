@@ -181,9 +181,9 @@ void CGameControllerInstagib::Tick()
 			GameServer()->SendBroadcast(aBuf, pPlayer->GetCid());
 		}
 	}
-    //call anticamper
-    if(g_Config.m_SvAnticamper && !GameServer()->m_World.m_Paused)
-        Anticamper();
+	//call anticamper
+	if(g_Config.m_SvAnticamper && !GameServer()->m_World.m_Paused)
+		Anticamper();
 }
 
 bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
@@ -469,79 +469,78 @@ void CGameControllerInstagib::DoTeamChange(CPlayer *pPlayer, int Team, bool DoCh
 
 void CGameControllerInstagib::Anticamper()
 {
-    for(CPlayer *pPlayer : GameServer()->m_apPlayers)
-    {
-        if(!pPlayer)
-            continue;
-        
-        CCharacter *pChr = pPlayer->GetCharacter();
-        
-        //Dont do anticamper if there is no character
-        if(!pChr)
-        {
-            pPlayer->m_CampTick = -1;
-            pPlayer->m_SentCampMsg = false;
-            continue;
-        }
-        
-        //Dont do anticamper if player is already frozen
-        if(pChr->m_FreezeTime > 0 || pChr->GetCore().m_DeepFrozen)
-        {
-            pPlayer->m_CampTick = -1;
-            pPlayer->m_SentCampMsg = false;
-            continue;
-        }
-        
-        int AnticamperTime = g_Config.m_SvAnticamperTime;
-        int AnticamperRange = g_Config.m_SvAnticamperRange;
-        
-        if(pPlayer->m_CampTick == -1)
-        {
-            pPlayer->m_CampPos = pChr->m_Pos;
-            pPlayer->m_CampTick = Server()->Tick() + Server()->TickSpeed()*AnticamperTime;
-        }
-        
-        // Check if the player is moving
-        if((pPlayer->m_CampPos.x - pChr->m_Pos.x >= (float)AnticamperRange || pPlayer->m_CampPos.x - pChr->m_Pos.x <= -(float)AnticamperRange)
-           || (pPlayer->m_CampPos.y - pChr->m_Pos.y >= (float)AnticamperRange || pPlayer->m_CampPos.y - pChr->m_Pos.y <= -(float)AnticamperRange))
-        {
-            pPlayer->m_CampTick = -1;
-            pPlayer->m_SentCampMsg = false;
-        }
-        
-        // Send warning to the player
-        if(pPlayer->m_CampTick <= Server()->Tick() + Server()->TickSpeed() * 5 && pPlayer->m_CampTick != -1 && !pPlayer->m_SentCampMsg)
-        {
-            GameServer()->SendBroadcast("ANTICAMPER: Move or die", pPlayer->GetCid());
-            pPlayer->m_SentCampMsg = true;
-        }
-        
-        // Kill him
-        if((pPlayer->m_CampTick <= Server()->Tick()) && (pPlayer->m_CampTick > 0))
-        {
-            if(g_Config.m_SvAnticamperFreeze)
-            {
-                //Freeze player
-                pChr->Freeze(g_Config.m_SvAnticamperFreeze);
-                GameServer()->CreateSound(pChr->m_Pos, SOUND_PLAYER_PAIN_LONG);
-                
-                //Reset anticamper
-                pPlayer->m_CampTick = -1;
-                pPlayer->m_SentCampMsg = false;
-                
-                continue;
-            }
-            else
-            {
-                //Kill Player
-                pChr->Die(pPlayer->GetCid(), WEAPON_WORLD);
-                
-                //Reset counter on death
-                pPlayer->m_CampTick = -1;
-                pPlayer->m_SentCampMsg = false;
-                
-                continue;
-            }
-        }
-    }
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		CCharacter *pChr = pPlayer->GetCharacter();
+
+		//Dont do anticamper if there is no character
+		if(!pChr)
+		{
+			pPlayer->m_CampTick = -1;
+			pPlayer->m_SentCampMsg = false;
+			continue;
+		}
+
+		//Dont do anticamper if player is already frozen
+		if(pChr->m_FreezeTime > 0 || pChr->GetCore().m_DeepFrozen)
+		{
+			pPlayer->m_CampTick = -1;
+			pPlayer->m_SentCampMsg = false;
+			continue;
+		}
+
+		int AnticamperTime = g_Config.m_SvAnticamperTime;
+		int AnticamperRange = g_Config.m_SvAnticamperRange;
+
+		if(pPlayer->m_CampTick == -1)
+		{
+			pPlayer->m_CampPos = pChr->m_Pos;
+			pPlayer->m_CampTick = Server()->Tick() + Server()->TickSpeed() * AnticamperTime;
+		}
+
+		// Check if the player is moving
+		if((pPlayer->m_CampPos.x - pChr->m_Pos.x >= (float)AnticamperRange || pPlayer->m_CampPos.x - pChr->m_Pos.x <= -(float)AnticamperRange) || (pPlayer->m_CampPos.y - pChr->m_Pos.y >= (float)AnticamperRange || pPlayer->m_CampPos.y - pChr->m_Pos.y <= -(float)AnticamperRange))
+		{
+			pPlayer->m_CampTick = -1;
+			pPlayer->m_SentCampMsg = false;
+		}
+
+		// Send warning to the player
+		if(pPlayer->m_CampTick <= Server()->Tick() + Server()->TickSpeed() * 5 && pPlayer->m_CampTick != -1 && !pPlayer->m_SentCampMsg)
+		{
+			GameServer()->SendBroadcast("ANTICAMPER: Move or die", pPlayer->GetCid());
+			pPlayer->m_SentCampMsg = true;
+		}
+
+		// Kill him
+		if((pPlayer->m_CampTick <= Server()->Tick()) && (pPlayer->m_CampTick > 0))
+		{
+			if(g_Config.m_SvAnticamperFreeze)
+			{
+				//Freeze player
+				pChr->Freeze(g_Config.m_SvAnticamperFreeze);
+				GameServer()->CreateSound(pChr->m_Pos, SOUND_PLAYER_PAIN_LONG);
+
+				//Reset anticamper
+				pPlayer->m_CampTick = -1;
+				pPlayer->m_SentCampMsg = false;
+
+				continue;
+			}
+			else
+			{
+				//Kill Player
+				pChr->Die(pPlayer->GetCid(), WEAPON_WORLD);
+
+				//Reset counter on death
+				pPlayer->m_CampTick = -1;
+				pPlayer->m_SentCampMsg = false;
+
+				continue;
+			}
+		}
+	}
 }

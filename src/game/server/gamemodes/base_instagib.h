@@ -60,8 +60,8 @@ public:
 	// ddnet-insta only
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) override;
-    
-    //Anticamper
-    void Anticamper();
+
+	//Anticamper
+	void Anticamper();
 };
 #endif // GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H
