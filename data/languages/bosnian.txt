@@ -79,8 +79,8 @@ Client
 Connecting to
 == Konektovanje na
 
-Connection Problems...
-== Problemi sa konekcijom...
+Connection Problems…
+== Problemi sa konekcijom…
 
 Console
 == Konzola
@@ -501,9 +501,6 @@ Your skin
 Reset to defaults
 == Vrati na početne postavke
 
-Round
-== Runda
-
 Lht.
 == Svjetl.
 
@@ -618,8 +615,8 @@ DDNet %s is out!
 Downloading %s:
 == Preuzimanje %s:
 
-Update failed! Check log...
-== Ažuriranje neuspješno! Provjeri log...
+Update failed! Check log…
+== Ažuriranje neuspješno! Provjeri log…
 
 DDNet Client updated!
 == DDNet Klijent ažuriran!
@@ -786,9 +783,6 @@ Map sound volume
 DDNet Client needs to be restarted to complete update!
 == DDNet Klijent mora da se restartuje da bi završio ažuriranje!
 
-Use DDRace Scoreboard
-== Koristi DDRace tablicu bodova
-
 Show score
 == Prikaži bodove
 
@@ -876,8 +870,8 @@ Show tiles layers from BG map
 DDNet %s is available:
 == DDNet %s je dostupan:
 
-Updating...
-== Ažuriranje...
+Updating…
+== Ažuriranje…
 
 No updates available
 == Nema dostupnih ažuriranja
@@ -990,10 +984,10 @@ Loading map file from storage
 Loading demo file from storage
 == 
 
-Why are you slowmo replaying to read this?
+Initializing components
 == 
 
-Initializing components
+Why are you slowmo replaying to read this?
 == 
 
 Initializing assets
@@ -1060,6 +1054,10 @@ Angle:
 == 
 
 Multi-View
+== 
+
+[Spectating]
+Following %s
 == 
 
 Team %d
@@ -1143,7 +1141,7 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.
@@ -1153,6 +1151,9 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+%d/%d KiB (%.1f KiB/s)
 == 
 
 Getting game info
@@ -1189,6 +1190,9 @@ CHN
 == 
 
 Getting server list from master server
+== 
+
+Example of usage
 == 
 
 %d of %d servers
@@ -1554,6 +1558,9 @@ Chat sound volume
 Background music volume
 == 
 
+Tee
+== 
+
 Appearance
 == 
 
@@ -1612,6 +1619,9 @@ Opacity of freeze bars inside freeze
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Use old chat style
@@ -1819,7 +1829,21 @@ Play
 Loading race demo files
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
 Super
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
 == 
 
 Manual
@@ -1847,4 +1871,7 @@ Grabs
 == 
 
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

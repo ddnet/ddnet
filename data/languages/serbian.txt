@@ -80,7 +80,7 @@ Client
 Connecting to
 == Povezujem se na
 
-Connection Problems...
+Connection Problems…
 == Problemi sa internetom
 
 Console
@@ -532,9 +532,6 @@ Your skin
 Reset to defaults
 == Resetuj
 
-Round
-== Runda
-
 Lht.
 == Svetl.
 
@@ -832,9 +829,6 @@ Assets
 DDNet Client needs to be restarted to complete update!
 == Potrebno je ponovo pokrenuti DDNet klijent da biste dovršili ažuriranje!
 
-Use DDRace Scoreboard
-== Koristi DDRace tabelu rezultata
-
 Show score
 == Prikaži bodove
 
@@ -925,8 +919,8 @@ DDNet %s is available:
 Update now
 == Unapredi sada
 
-Updating...
-== Unapređujem...
+Updating…
+== Unapređujem…
 
 DDNet Client updated!
 == DDNet klijent je unapređen!
@@ -980,8 +974,8 @@ DDNet %s is out!
 Downloading %s:
 == Preuzimanje %s:
 
-Update failed! Check log...
-== Ažuriranje nije uspelo! Sačekajte log...
+Update failed! Check log…
+== Ažuriranje nije uspelo! Sačekajte log…
 
 Restart
 == Ponovo pokreni
@@ -1082,7 +1076,7 @@ Angle:
 Uploading map data to GPU
 == Slanje podataka mape G.J.O.~u (GPU)
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == Pokušavam da odredim K.D.P.(UDP) povezanost
 
 UDP seems to be filtered.
@@ -1420,10 +1414,10 @@ Initializing components
 == Иницијализација компоненти
 
 Quitting. Please wait…
-== Излазим. Молим вас да почекате...
+== Излазим. Молим вас да почекате…
 
 Restarting. Please wait…
-== Поновно покрећем се. Молим вас да почекате...
+== Поновно покрећем се. Молим вас да почекате…
 
 Multi-View
 == Мулти-поглед
@@ -1700,6 +1694,10 @@ Following
 Loading commands…
 == 
 
+[Spectating]
+Following %s
+== 
+
 Some map images could not be loaded. Check the local console for details.
 == 
 
@@ -1731,6 +1729,12 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1796,6 +1800,9 @@ Deactivate all
 Player info change cooldown
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1803,6 +1810,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size
@@ -1848,4 +1858,21 @@ Regular background color
 == 
 
 Entities background color
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

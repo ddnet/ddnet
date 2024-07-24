@@ -321,7 +321,34 @@ void CGameConsole::CInstance::PossibleCommandsCompleteCallback(int Index, const 
 {
 	CGameConsole::CInstance *pInstance = (CGameConsole::CInstance *)pUser;
 	if(pInstance->m_CompletionChosen == Index)
-		pInstance->m_Input.Set(pStr);
+	{
+		char aBefore[IConsole::CMDLINE_LENGTH];
+		str_truncate(aBefore, sizeof(aBefore), pInstance->m_aCompletionBuffer, pInstance->m_CompletionCommandStart);
+		char aBuf[IConsole::CMDLINE_LENGTH];
+		str_format(aBuf, sizeof(aBuf), "%s%s%s", aBefore, pStr, pInstance->m_aCompletionBuffer + pInstance->m_CompletionCommandEnd);
+		pInstance->m_Input.Set(aBuf);
+		pInstance->m_Input.SetCursorOffset(str_length(pStr) + pInstance->m_CompletionCommandStart);
+	}
+}
+
+void CGameConsole::CInstance::GetCommand(const char *pInput, char (&aCmd)[IConsole::CMDLINE_LENGTH])
+{
+	char aInput[IConsole::CMDLINE_LENGTH];
+	str_copy(aInput, pInput);
+	m_CompletionCommandStart = 0;
+	m_CompletionCommandEnd = 0;
+
+	char aaSeparators[][2] = {";", "\""};
+	for(auto *pSeparator : aaSeparators)
+	{
+		int Start, End;
+		str_delimiters_around_offset(aInput + m_CompletionCommandStart, pSeparator, m_Input.GetCursorOffset() - m_CompletionCommandStart, &Start, &End);
+		m_CompletionCommandStart += Start;
+		m_CompletionCommandEnd = m_CompletionCommandStart + (End - Start);
+		aInput[m_CompletionCommandEnd] = '\0';
+	}
+
+	str_copy(aCmd, aInput + m_CompletionCommandStart, sizeof(aCmd));
 }
 
 static void StrCopyUntilSpace(char *pDest, size_t DestSize, const char *pSrc)
@@ -445,9 +472,12 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 			if(!m_Searching)
 			{
+				char aSearch[IConsole::CMDLINE_LENGTH];
+				GetCommand(m_aCompletionBuffer, aSearch);
+
 				// command completion
 				const bool UseTempCommands = m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands();
-				int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, UseTempCommands);
+				int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(aSearch, m_CompletionFlagmask, UseTempCommands);
 				if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 				{
 					if(CompletionEnumerationCount)
@@ -456,7 +486,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 							m_CompletionChosen = 0;
 						m_CompletionChosen = (m_CompletionChosen + Direction + CompletionEnumerationCount) % CompletionEnumerationCount;
 						m_CompletionArgumentPosition = 0;
-						m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, UseTempCommands, PossibleCommandsCompleteCallback, this);
+						m_pGameConsole->m_pConsole->PossibleCommands(aSearch, m_CompletionFlagmask, UseTempCommands, PossibleCommandsCompleteCallback, this);
 					}
 					else if(m_CompletionChosen != -1)
 					{
@@ -581,8 +611,11 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 		// find the current command
 		{
+			char aCmd[IConsole::CMDLINE_LENGTH];
+			GetCommand(GetString(), aCmd);
 			char aBuf[IConsole::CMDLINE_LENGTH];
-			StrCopyUntilSpace(aBuf, sizeof(aBuf), GetString());
+			StrCopyUntilSpace(aBuf, sizeof(aBuf), aCmd);
+
 			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
 			if(pCommand)
@@ -783,6 +816,30 @@ void CGameConsole::CInstance::UpdateSearch()
 	}
 }
 
+void CGameConsole::CInstance::Dump()
+{
+	char aTimestamp[20];
+	str_timestamp(aTimestamp, sizeof(aTimestamp));
+	char aFilename[IO_MAX_PATH_LENGTH];
+	str_format(aFilename, sizeof(aFilename), "dumps/%s_dump_%s.txt", m_pName, aTimestamp);
+	IOHANDLE File = m_pGameConsole->Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(File)
+	{
+		PumpBacklogPending();
+		for(CInstance::CBacklogEntry *pEntry = m_Backlog.First(); pEntry; pEntry = m_Backlog.Next(pEntry))
+		{
+			io_write(File, pEntry->m_aText, pEntry->m_Length);
+			io_write_newline(File);
+		}
+		io_close(File);
+		log_info("console", "%s contents were written to '%s'", m_pName, aFilename);
+	}
+	else
+	{
+		log_error("console", "Failed to open '%s'", aFilename);
+	}
+}
+
 CGameConsole::CGameConsole() :
 	m_LocalConsole(CONSOLETYPE_LOCAL), m_RemoteConsole(CONSOLETYPE_REMOTE)
 {
@@ -800,11 +857,16 @@ CGameConsole::~CGameConsole()
 		m_pConsoleLogger->OnConsoleDeletion();
 }
 
-CGameConsole::CInstance *CGameConsole::CurrentConsole()
+CGameConsole::CInstance *CGameConsole::ConsoleForType(int ConsoleType)
 {
-	if(m_ConsoleType == CONSOLETYPE_REMOTE)
+	if(ConsoleType == CONSOLETYPE_REMOTE)
 		return &m_RemoteConsole;
 	return &m_LocalConsole;
+}
+
+CGameConsole::CInstance *CGameConsole::CurrentConsole()
+{
+	return ConsoleForType(m_ConsoleType);
 }
 
 void CGameConsole::OnReset()
@@ -915,7 +977,6 @@ void CGameConsole::OnRender()
 		if(m_ConsoleState == CONSOLE_CLOSING)
 		{
 			m_ConsoleState = CONSOLE_CLOSED;
-			pConsole->m_Input.Deactivate();
 			pConsole->m_BacklogLastActiveLine = -1;
 		}
 		else if(m_ConsoleState == CONSOLE_OPENING)
@@ -1015,24 +1076,48 @@ void CGameConsole::OnRender()
 		TextRender()->TextEx(&Cursor, aPrompt);
 
 		// check if mouse is pressed
-		if(!pConsole->m_MouseIsPress && Input()->NativeMousePressed(1))
+		const vec2 WindowSize = vec2(Graphics()->WindowWidth(), Graphics()->WindowHeight());
+		const vec2 ScreenSize = vec2(Screen.w, Screen.h);
+		Ui()->UpdateTouchState(m_TouchState);
+		const auto &&GetMousePosition = [&]() -> vec2 {
+			if(m_TouchState.m_PrimaryPressed)
+			{
+				return m_TouchState.m_PrimaryPosition * ScreenSize;
+			}
+			else
+			{
+				return Input()->NativeMousePos() / WindowSize * ScreenSize;
+			}
+		};
+		if(!pConsole->m_MouseIsPress && (m_TouchState.m_PrimaryPressed || Input()->NativeMousePressed(1)))
 		{
 			pConsole->m_MouseIsPress = true;
-			ivec2 MousePress;
-			Input()->NativeMousePos(&MousePress.x, &MousePress.y);
-			pConsole->m_MousePress.x = (MousePress.x / (float)Graphics()->WindowWidth()) * Screen.w;
-			pConsole->m_MousePress.y = (MousePress.y / (float)Graphics()->WindowHeight()) * Screen.h;
+			pConsole->m_MousePress = GetMousePosition();
+		}
+		if(pConsole->m_MouseIsPress && !m_TouchState.m_PrimaryPressed && !Input()->NativeMousePressed(1))
+		{
+			pConsole->m_MouseIsPress = false;
 		}
 		if(pConsole->m_MouseIsPress)
 		{
-			ivec2 MouseRelease;
-			Input()->NativeMousePos(&MouseRelease.x, &MouseRelease.y);
-			pConsole->m_MouseRelease.x = (MouseRelease.x / (float)Graphics()->WindowWidth()) * Screen.w;
-			pConsole->m_MouseRelease.y = (MouseRelease.y / (float)Graphics()->WindowHeight()) * Screen.h;
+			pConsole->m_MouseRelease = GetMousePosition();
 		}
-		if(pConsole->m_MouseIsPress && !Input()->NativeMousePressed(1))
+		const float ScaledRowHeight = RowHeight / ScreenSize.y;
+		if(absolute(m_TouchState.m_ScrollAmount.y) >= ScaledRowHeight)
 		{
-			pConsole->m_MouseIsPress = false;
+			if(m_TouchState.m_ScrollAmount.y > 0.0f)
+			{
+				pConsole->m_BacklogCurLine += pConsole->GetLinesToScroll(-1, 1);
+				m_TouchState.m_ScrollAmount.y -= ScaledRowHeight;
+			}
+			else
+			{
+				--pConsole->m_BacklogCurLine;
+				if(pConsole->m_BacklogCurLine < 0)
+					pConsole->m_BacklogCurLine = 0;
+				m_TouchState.m_ScrollAmount.y += ScaledRowHeight;
+			}
+			pConsole->m_HasSelection = false;
 		}
 
 		x = Cursor.m_X;
@@ -1054,7 +1139,10 @@ void CGameConsole::OnRender()
 
 		// render console input (wrap line)
 		pConsole->m_Input.SetHidden(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq));
-		pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
+		if(m_ConsoleState == CONSOLE_OPEN)
+		{
+			pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
+		}
 		const CUIRect InputCursorRect = {x, y + FONT_SIZE, 0.0f, 0.0f};
 		const bool WasChanged = pConsole->m_Input.WasChanged();
 		const bool WasCursorChanged = pConsole->m_Input.WasCursorChanged();
@@ -1087,7 +1175,10 @@ void CGameConsole::OnRender()
 			Info.m_pOffsetChange = &pConsole->m_CompletionRenderOffsetChange;
 			Info.m_Width = Screen.w;
 			Info.m_TotalWidth = 0.0f;
-			Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
+			char aCmd[IConsole::CMDLINE_LENGTH];
+			pConsole->GetCommand(pConsole->m_aCompletionBuffer, aCmd);
+			Info.m_pCurrentCmd = aCmd;
+
 			TextRender()->SetCursor(&Info.m_Cursor, InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f, FONT_SIZE, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 			Info.m_Cursor.m_LineWidth = std::numeric_limits<float>::max();
 			const int NumCommands = m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
@@ -1310,7 +1401,7 @@ void CGameConsole::OnRender()
 			float Percentage = Client()->GotRconCommandsPercentage();
 			SProgressSpinnerProperties ProgressProps;
 			ProgressProps.m_Progress = Percentage;
-			Ui()->RenderProgressSpinner(vec2(Screen.w / 4.0f + FONT_SIZE / 2.f, FONT_SIZE), FONT_SIZE / 2.f);
+			Ui()->RenderProgressSpinner(vec2(Screen.w / 4.0f + FONT_SIZE / 2.f, FONT_SIZE), FONT_SIZE / 2.f, ProgressProps);
 
 			char aLoading[128];
 			str_copy(aLoading, Localize("Loading commands…"));
@@ -1379,6 +1470,7 @@ void CGameConsole::Toggle(int Type)
 		}
 		else
 		{
+			ConsoleForType(Type)->m_Input.Deactivate();
 			Input()->MouseModeRelative();
 			Ui()->SetEnabled(true);
 			m_pClient->OnRelease();
@@ -1386,32 +1478,6 @@ void CGameConsole::Toggle(int Type)
 		}
 	}
 	m_ConsoleType = Type;
-}
-
-void CGameConsole::Dump(int Type)
-{
-	CInstance *pConsole = Type == CONSOLETYPE_REMOTE ? &m_RemoteConsole : &m_LocalConsole;
-	char aBuf[IO_MAX_PATH_LENGTH + 64];
-	char aFilename[IO_MAX_PATH_LENGTH];
-	str_timestamp(aBuf, sizeof(aBuf));
-	str_format(aFilename, sizeof(aFilename), "dumps/%s_dump_%s.txt", pConsole->m_pName, aBuf);
-	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-	if(File)
-	{
-		pConsole->PumpBacklogPending();
-		for(CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.First(); pEntry; pEntry = pConsole->m_Backlog.Next(pEntry))
-		{
-			io_write(File, pEntry->m_aText, pEntry->m_Length);
-			io_write_newline(File);
-		}
-		io_close(File);
-		str_format(aBuf, sizeof(aBuf), "%s contents were written to '%s'", pConsole->m_pName, aFilename);
-	}
-	else
-	{
-		str_format(aBuf, sizeof(aBuf), "Failed to open '%s'", aFilename);
-	}
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
 void CGameConsole::ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData)
@@ -1436,12 +1502,12 @@ void CGameConsole::ConClearRemoteConsole(IConsole::IResult *pResult, void *pUser
 
 void CGameConsole::ConDumpLocalConsole(IConsole::IResult *pResult, void *pUserData)
 {
-	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_LOCAL);
+	((CGameConsole *)pUserData)->m_LocalConsole.Dump();
 }
 
 void CGameConsole::ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData)
 {
-	((CGameConsole *)pUserData)->Dump(CONSOLETYPE_REMOTE);
+	((CGameConsole *)pUserData)->m_RemoteConsole.Dump();
 }
 
 void CGameConsole::ConConsolePageUp(IConsole::IResult *pResult, void *pUserData)

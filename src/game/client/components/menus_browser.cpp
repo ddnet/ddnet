@@ -502,6 +502,9 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 		QuickSearch.VSplitLeft(5.0f, nullptr, &QuickSearch);
 
 		static CLineInput s_FilterInput(g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString));
+		static char s_aTooltipText[64];
+		str_format(s_aTooltipText, sizeof(s_aTooltipText), "%s: \"solo; nameless tee; kobra 2\"", Localize("Example of usage"));
+		GameClient()->m_Tooltips.DoToolTip(&s_FilterInput, &QuickSearch, s_aTooltipText);
 		if(!Ui()->IsPopupOpen() && Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
 			Ui()->SetActiveItem(&s_FilterInput);
@@ -528,6 +531,9 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 		QuickExclude.VSplitLeft(5.0f, nullptr, &QuickExclude);
 
 		static CLineInput s_ExcludeInput(g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString));
+		static char s_aTooltipText[64];
+		str_format(s_aTooltipText, sizeof(s_aTooltipText), "%s: \"CHN; [A]\"", Localize("Example of usage"));
+		GameClient()->m_Tooltips.DoToolTip(&s_ExcludeInput, &QuickSearch, s_aTooltipText);
 		if(!Ui()->IsPopupOpen() && Input()->KeyPress(KEY_X) && Input()->ShiftIsPressed() && Input()->ModifierIsPressed())
 		{
 			Ui()->SetActiveItem(&s_ExcludeInput);
@@ -1138,7 +1144,13 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 			if(DoButton_Menu(&s_CopyButton, Localize("Copy info"), 0, &Button))
 			{
 				char aInfo[256];
-				pSelectedServer->InfoToString(aInfo, sizeof(aInfo));
+				str_format(
+					aInfo,
+					sizeof(aInfo),
+					"%s\n"
+					"Address: ddnet://%s\n",
+					pSelectedServer->m_aName,
+					pSelectedServer->m_aAddress);
 				Input()->SetClipboardText(aInfo);
 			}
 		}
@@ -1574,7 +1586,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				{
 					str_copy(g_Config.m_UiServerAddress, Friend.ServerInfo()->m_aAddress);
 					m_ServerBrowserShouldRevealSelection = true;
-					if(Input()->MouseDoubleClick())
+					if(Ui()->DoDoubleClickLogic(Friend.ListItemId()))
 					{
 						Connect(g_Config.m_UiServerAddress);
 					}

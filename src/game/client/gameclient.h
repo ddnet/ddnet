@@ -95,6 +95,7 @@ public:
 	bool m_EntitiesFDDrace;
 
 	bool m_Race;
+	bool m_Pvp;
 
 	bool m_DontMaskEntities;
 	bool m_AllowXSkins;
@@ -111,7 +112,6 @@ class CSnapEntities
 {
 public:
 	IClient::CSnapItem m_Item;
-	const void *m_pData;
 	const CNetObj_EntityEx *m_pDataEx;
 };
 

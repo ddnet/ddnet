@@ -27,8 +27,8 @@ Game paused
 Warmup
 == Trejnado
 
-Connection Problems...
-== Konekta problemoj...
+Connection Problems…
+== Konekta problemoj…
 
 Please balance teams!
 == Bonvolu ekvilibrigi teamojn!
@@ -456,8 +456,8 @@ DDNet %s is available:
 Update now
 == Ĝisdatigi nun
 
-Updating...
-== Ĝisdatiĝas...
+Updating…
+== Ĝisdatiĝas…
 
 Check now
 == Kontroli nun
@@ -604,10 +604,10 @@ Preparing demo playback
 Loading demo file from storage
 == 
 
-Why are you slowmo replaying to read this?
+Initializing components
 == 
 
-Initializing components
+Why are you slowmo replaying to read this?
 == 
 
 Initializing assets
@@ -671,6 +671,10 @@ Angle:
 == 
 
 Multi-View
+== 
+
+[Spectating]
+Following %s
 == 
 
 Server best:
@@ -778,7 +782,7 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.org
 == 
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == 
 
 UDP seems to be filtered.
@@ -788,6 +792,9 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == 
 
 No answer from server yet.
+== 
+
+%d/%d KiB (%.1f KiB/s)
 == 
 
 Getting game info
@@ -806,6 +813,9 @@ Loading menu images
 == 
 
 Reset filter
+== 
+
+Example of usage
 == 
 
 Has people playing
@@ -1426,6 +1436,9 @@ Map sound volume
 Background music volume
 == 
 
+Tee
+== 
+
 Controls
 == 
 
@@ -1468,9 +1481,6 @@ Show votes window after voting
 DDRace HUD
 == 
 
-Use DDRace Scoreboard
-== 
-
 Show client IDs in scoreboard
 == 
 
@@ -1502,6 +1512,9 @@ Show names in chat in team colors
 == 
 
 Show only chat messages from friends
+== 
+
+Show only chat messages from team members
 == 
 
 Use old chat style
@@ -1762,7 +1775,7 @@ Can't find a Tutorial server
 Server executable not found, can't run server
 == 
 
-Update failed! Check log...
+Update failed! Check log…
 == 
 
 Loading race demo files
@@ -1771,16 +1784,24 @@ Loading race demo files
 Time limit: %d min
 == 
 
-Round
+Round %d/%d
 == 
 
-Game over
+[Spectators]
+%d others…
 == 
 
 Score
 == 
 
 Super
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
 == 
 
 Manual
@@ -1795,16 +1816,19 @@ Auto
 Replay
 == 
 
-Draw!
+Red team wins!
 == 
 
 %s wins!
 == 
 
-Red team wins!
+Blue team wins!
 == 
 
-Blue team wins!
+Draw!
+== 
+
+Game over
 == 
 
 Loading sound files
@@ -1835,4 +1859,7 @@ Grabs
 == 
 
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

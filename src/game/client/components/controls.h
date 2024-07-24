@@ -12,30 +12,27 @@
 
 class CControls : public CComponent
 {
+	float GetMinMouseDistance() const;
 	float GetMaxMouseDistance() const;
 
 public:
 	vec2 m_aMousePos[NUM_DUMMIES];
 	vec2 m_aMousePosOnAction[NUM_DUMMIES];
 	vec2 m_aTargetPos[NUM_DUMMIES];
-	float m_OldMouseX;
-	float m_OldMouseY;
 
 	int m_aAmmoCount[NUM_WEAPONS];
 
+	int64_t m_LastSendTime;
 	CNetObj_PlayerInput m_aInputData[NUM_DUMMIES];
 	CNetObj_PlayerInput m_aLastData[NUM_DUMMIES];
 	int m_aInputDirectionLeft[NUM_DUMMIES];
 	int m_aInputDirectionRight[NUM_DUMMIES];
 	int m_aShowHookColl[NUM_DUMMIES];
-	int m_LastDummy;
-	int m_OtherFire;
 
 	CControls();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
 	virtual void OnReset() override;
-	virtual void OnRelease() override;
 	virtual void OnRender() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;

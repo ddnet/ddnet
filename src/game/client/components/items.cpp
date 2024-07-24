@@ -414,7 +414,7 @@ void CItems::OnRender()
 	for(const CSnapEntities &Ent : m_pClient->SnapEntities())
 	{
 		const IClient::CSnapItem Item = Ent.m_Item;
-		const void *pData = Ent.m_pData;
+		const void *pData = Item.m_pData;
 		const CNetObj_EntityEx *pEntEx = Ent.m_pDataEx;
 
 		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
@@ -523,8 +523,7 @@ void CItems::OnRender()
 	// render flag
 	for(int i = 0; i < Num; i++)
 	{
-		IClient::CSnapItem Item;
-		const void *pData = Client()->SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
+		const IClient::CSnapItem Item = Client()->SnapGetItem(IClient::SNAP_CURRENT, i);
 
 		if(Item.m_Type == NETOBJTYPE_FLAG)
 		{
@@ -532,7 +531,7 @@ void CItems::OnRender()
 			if(pPrev)
 			{
 				const void *pPrevGameData = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_GAMEDATA, m_pClient->m_Snap.m_GameDataSnapId);
-				RenderFlag(static_cast<const CNetObj_Flag *>(pPrev), static_cast<const CNetObj_Flag *>(pData),
+				RenderFlag(static_cast<const CNetObj_Flag *>(pPrev), static_cast<const CNetObj_Flag *>(Item.m_pData),
 					static_cast<const CNetObj_GameData *>(pPrevGameData), m_pClient->m_Snap.m_pGameDataObj);
 			}
 		}

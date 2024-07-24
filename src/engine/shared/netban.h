@@ -77,7 +77,7 @@ protected:
 		enum
 		{
 			EXPIRES_NEVER = -1,
-			REASON_LENGTH = 64,
+			REASON_LENGTH = 128,
 		};
 		int64_t m_Expires;
 		char m_aReason[REASON_LENGTH];

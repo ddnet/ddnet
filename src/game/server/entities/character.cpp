@@ -48,6 +48,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 
 void CCharacter::Reset()
 {
+	StopRecording();
 	Destroy();
 }
 
@@ -129,6 +130,11 @@ void CCharacter::SetWeapon(int W)
 void CCharacter::SetJetpack(bool Active)
 {
 	m_Core.m_Jetpack = Active;
+}
+
+void CCharacter::SetJumps(int Jumps)
+{
+	m_Core.m_Jumps = Jumps;
 }
 
 void CCharacter::SetSolo(bool Solo)
@@ -291,13 +297,13 @@ void CCharacter::HandleNinja()
 					return;
 
 				// make sure we haven't Hit this object before
-				bool bAlreadyHit = false;
+				bool AlreadyHit = false;
 				for(int j = 0; j < m_NumObjectsHit; j++)
 				{
 					if(m_apHitObjects[j] == pChr)
-						bAlreadyHit = true;
+						AlreadyHit = true;
 				}
-				if(bAlreadyHit)
+				if(AlreadyHit)
 					continue;
 
 				// check so we are sufficiently close
@@ -932,7 +938,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 	return true;
 }
 
-void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
+void CCharacter::StopRecording()
 {
 	if(Server()->IsRecording(m_pPlayer->GetCid()))
 	{
@@ -945,7 +951,11 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 
 		pData->m_RecordStopTick = -1;
 	}
+}
 
+void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
+{
+	StopRecording();
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
 	char aBuf[256];
@@ -1483,6 +1493,8 @@ void CCharacter::HandleTiles(int Index)
 		m_TeleCheckpoint = TeleCheckpoint;
 
 	GameServer()->m_pController->HandleCharacterTiles(this, Index);
+	if(!m_Alive)
+		return;
 
 	// freeze
 	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Core.m_Super && !m_Core.m_DeepFrozen)

@@ -251,9 +251,9 @@ bool mem_has_null(const void *block, size_t size)
 	return false;
 }
 
-IOHANDLE io_open_impl(const char *filename, int flags)
+IOHANDLE io_open(const char *filename, int flags)
 {
-	dbg_assert(flags == (IOFLAG_READ | IOFLAG_SKIP_BOM) || flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, read+skipbom, write or append");
+	dbg_assert(flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, write or append");
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_filename = windows_utf8_to_wide(filename);
 	DWORD desired_access;
@@ -311,21 +311,6 @@ IOHANDLE io_open_impl(const char *filename, int flags)
 	}
 	return fopen(filename, open_mode);
 #endif
-}
-
-IOHANDLE io_open(const char *filename, int flags)
-{
-	IOHANDLE result = io_open_impl(filename, flags);
-	unsigned char buf[3];
-	if((flags & IOFLAG_SKIP_BOM) == 0 || !result)
-	{
-		return result;
-	}
-	if(io_read(result, buf, sizeof(buf)) != 3 || buf[0] != 0xef || buf[1] != 0xbb || buf[2] != 0xbf)
-	{
-		io_seek(result, 0, IOSEEK_START);
-	}
-	return result;
 }
 
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
@@ -1987,6 +1972,8 @@ int net_tcp_connect(NETSOCKET sock, const NETADDR *a)
 	{
 		struct sockaddr_in addr;
 		netaddr_to_sockaddr_in(a, &addr);
+		if(sock->ipv4sock < 0)
+			return -2;
 		return connect(sock->ipv4sock, (struct sockaddr *)&addr, sizeof(addr));
 	}
 
@@ -1994,6 +1981,8 @@ int net_tcp_connect(NETSOCKET sock, const NETADDR *a)
 	{
 		struct sockaddr_in6 addr;
 		netaddr_to_sockaddr_in6(a, &addr);
+		if(sock->ipv6sock < 0)
+			return -2;
 		return connect(sock->ipv6sock, (struct sockaddr *)&addr, sizeof(addr));
 	}
 
@@ -3166,6 +3155,38 @@ const char *str_find(const char *haystack, const char *needle)
 	return 0;
 }
 
+bool str_delimiters_around_offset(const char *haystack, const char *delim, int offset, int *start, int *end)
+{
+	bool found = true;
+	const char *search = haystack;
+	const int delim_len = str_length(delim);
+	*start = 0;
+	while(str_find(search, delim))
+	{
+		const char *test = str_find(search, delim) + delim_len;
+		int distance = test - haystack;
+		if(distance > offset)
+			break;
+
+		*start = distance;
+		search = test;
+	}
+	if(search == haystack)
+		found = false;
+
+	if(str_find(search, delim))
+	{
+		*end = str_find(search, delim) - haystack;
+	}
+	else
+	{
+		*end = str_length(haystack);
+		found = false;
+	}
+
+	return found;
+}
+
 const char *str_rchr(const char *haystack, char needle)
 {
 	return strrchr(haystack, needle);
@@ -4104,6 +4125,7 @@ void cmdline_free(int argc, const char **argv)
 #endif
 }
 
+#if !defined(CONF_PLATFORM_ANDROID)
 PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
 {
 #if defined(CONF_FAMILY_WINDOWS)
@@ -4247,6 +4269,7 @@ int open_file(const char *path)
 	return open_link(buf);
 #endif
 }
+#endif // !defined(CONF_PLATFORM_ANDROID)
 
 struct SECURE_RANDOM_DATA
 {

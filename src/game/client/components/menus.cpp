@@ -734,17 +734,16 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 {
 	// TODO: not supported right now due to separate render thread
 
-	static std::chrono::nanoseconds s_LastLoadRender{0};
-	const int CurLoadRenderCount = m_LoadCurrent;
-	m_LoadCurrent += IncreaseCounter;
-	const float Percent = CurLoadRenderCount / (float)m_LoadTotal;
+	const int CurLoadRenderCount = m_LoadingState.m_Current;
+	m_LoadingState.m_Current += IncreaseCounter;
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	if(time_get_nanoseconds() - s_LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
+	const std::chrono::nanoseconds Now = time_get_nanoseconds();
+	if(Now - m_LoadingState.m_LastRender < std::chrono::nanoseconds(1s) / 60l)
 		return;
 
-	s_LastLoadRender = time_get_nanoseconds();
+	m_LoadingState.m_LastRender = Now;
 
 	// need up date this here to get correct
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
@@ -756,27 +755,30 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 		RenderBackground();
 	}
 
-	CUIRect Box = *Ui()->Screen();
-	Box.Margin(160.0f, &Box);
+	CUIRect Box;
+	Ui()->Screen()->Margin(160.0f, &Box);
 
 	Graphics()->BlendNormal();
-
 	Graphics()->TextureClear();
-	Box.Draw(ColorRGBA{0, 0, 0, 0.50f}, IGraphics::CORNER_ALL, 15.0f);
+	Box.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 15.0f);
+	Box.Margin(20.0f, &Box);
 
-	CUIRect Part;
-	Box.HSplitTop(20.f, nullptr, &Box);
-	Box.HSplitTop(24.f, &Part, &Box);
-	Part.VMargin(20.f, &Part);
-	Ui()->DoLabel(&Part, pCaption, 24.f, TEXTALIGN_MC);
+	CUIRect Label;
+	Box.HSplitTop(24.0f, &Label, &Box);
+	Ui()->DoLabel(&Label, pCaption, 24.0f, TEXTALIGN_MC);
 
-	Box.HSplitTop(20.f, nullptr, &Box);
-	Box.HSplitTop(24.f, &Part, &Box);
-	Part.VMargin(20.f, &Part);
-	Ui()->DoLabel(&Part, pContent, 20.0f, TEXTALIGN_MC);
+	Box.HSplitTop(20.0f, nullptr, &Box);
+	Box.HSplitTop(24.0f, &Label, &Box);
+	Ui()->DoLabel(&Label, pContent, 20.0f, TEXTALIGN_MC);
 
 	if(RenderLoadingBar)
-		Graphics()->DrawRect(Box.x + 40, Box.y + Box.h - 75, (Box.w - 80) * Percent, 25, ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f), IGraphics::CORNER_ALL, 5.0f);
+	{
+		CUIRect ProgressBar;
+		Box.HSplitBottom(30.0f, &Box, nullptr);
+		Box.HSplitBottom(25.0f, &Box, &ProgressBar);
+		ProgressBar.VMargin(20.0f, &ProgressBar);
+		Ui()->RenderProgressBar(ProgressBar, CurLoadRenderCount / (float)m_LoadingState.m_Total);
+	}
 
 	Client()->UpdateAndSwap();
 }
@@ -867,10 +869,10 @@ void CMenus::OnInit()
 
 	// setup load amount
 	const int NumMenuImages = 5;
-	m_LoadCurrent = 0;
-	m_LoadTotal = g_pData->m_NumImages + NumMenuImages + GameClient()->ComponentCount();
+	m_LoadingState.m_Current = 0;
+	m_LoadingState.m_Total = g_pData->m_NumImages + NumMenuImages + GameClient()->ComponentCount();
 	if(!g_Config.m_ClThreadsoundloading)
-		m_LoadTotal += g_pData->m_NumSounds;
+		m_LoadingState.m_Total += g_pData->m_NumSounds;
 
 	m_IsInit = true;
 
@@ -1623,10 +1625,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		static CButtonContainer s_ButtonOpenFolder;
 		if(DoButton_Menu(&s_ButtonOpenFolder, Localize("Videos directory"), 0, &OpenFolder))
 		{
-			if(!open_file(aSaveFolder))
-			{
-				dbg_msg("menus", "couldn't open file '%s'", aSaveFolder);
-			}
+			Client()->ViewFile(aSaveFolder);
 		}
 
 		static CButtonContainer s_ButtonOk;
@@ -1776,7 +1775,7 @@ void CMenus::RenderPopupConnecting(CUIRect Screen)
 		case IClient::CONNECTIVITY_UNKNOWN:
 			break;
 		case IClient::CONNECTIVITY_CHECKING:
-			pConnectivityLabel = Localize("Trying to determine UDP connectivity...");
+			pConnectivityLabel = Localize("Trying to determine UDP connectivity…");
 			break;
 		case IClient::CONNECTIVITY_UNREACHABLE:
 			pConnectivityLabel = Localize("UDP seems to be filtered.");
@@ -1915,9 +1914,7 @@ void CMenus::RenderPopupLoading(CUIRect Screen)
 		Box.HSplitTop(20.0f, nullptr, &Box);
 		Box.HSplitTop(24.0f, &ProgressBar, &Box);
 		ProgressBar.VMargin(20.0f, &ProgressBar);
-		ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
-		ProgressBar.w = maximum(10.0f, (ProgressBar.w * Client()->MapDownloadAmount()) / Client()->MapDownloadTotalsize());
-		ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+		Ui()->RenderProgressBar(ProgressBar, Client()->MapDownloadAmount() / (float)Client()->MapDownloadTotalsize());
 	}
 
 	CUIRect Button;
@@ -2354,9 +2351,15 @@ void CMenus::SetMenuPage(int NewPage)
 	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_FAVORITE_COMMUNITY_5)
 	{
 		g_Config.m_UiPage = NewPage;
-		if(!m_ShowStart && OldPage != NewPage)
+		bool ForceRefresh = false;
+		if(m_ForceRefreshLanPage)
 		{
-			RefreshBrowserTab(false);
+			ForceRefresh = NewPage == PAGE_LAN;
+			m_ForceRefreshLanPage = false;
+		}
+		if(OldPage != NewPage || ForceRefresh)
+		{
+			RefreshBrowserTab(ForceRefresh);
 		}
 	}
 }

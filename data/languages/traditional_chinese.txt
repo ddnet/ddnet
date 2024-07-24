@@ -28,6 +28,8 @@
 # 2024-01-15 By
 # 2024-03-05 By
 # 2024-04-21 By
+# 2024-06-10 By
+# 2024-07-21 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -101,8 +103,8 @@ Client
 Connecting to
 == 正在連線到
 
-Connection Problems...
-== 連線中斷...
+Connection Problems…
+== 連線中斷…
 
 Console
 == 控制檯
@@ -405,7 +407,7 @@ Show name plates
 == 顯示暱稱
 
 Show only chat messages from friends
-== 只顯示好友訊息
+== 只顯示好友聊天訊息
 
 Sound
 == 聲音
@@ -572,9 +574,6 @@ Your skin
 Reset to defaults
 == 恢復預設設定
 
-Round
-== 回合
-
 Lht.
 == 亮度
 
@@ -592,9 +591,6 @@ LAN
 
 Name plates size
 == 暱稱大小
-
-Use DDRace Scoreboard
-== 使用 DDRace 計分板
 
 Show score
 == 顯示比分
@@ -677,8 +673,8 @@ DDNet %s is available:
 Update now
 == 現在更新
 
-Updating...
-== 更新中...
+Updating…
+== 更新中…
 
 DDNet Client updated!
 == DDNet 客戶端更新成功！
@@ -872,8 +868,8 @@ Zoom in
 1 new mention
 == 1 條新提及
 
-Update failed! Check log...
-== 更新失敗！請檢查日誌...
+Update failed! Check log…
+== 更新失敗！請檢查日誌…
 
 Pause
 == 暫停
@@ -1239,8 +1235,8 @@ Speed:
 Angle:
 == 角度
 
-Trying to determine UDP connectivity...
-== 正在嘗試檢測 UDP 連接...
+Trying to determine UDP connectivity…
+== 正在嘗試檢測 UDP 連接…
 
 UDP seems to be filtered.
 == UDP 疑似被過濾
@@ -1786,7 +1782,7 @@ Following
 == 當前
 
 Press a key…
-== 按任意鍵...
+== 按任意鍵…
 
 Are you sure that you want to restart?
 == 確定要重新開始？
@@ -1831,7 +1827,7 @@ Error saving settings
 == 儲存設定錯誤
 
 Loading commands…
-== 正在載入指令...
+== 正在載入指令…
 
 Main menu
 == 主選單
@@ -1843,7 +1839,7 @@ Friends
 == 好友
 
 Loading…
-== 正在載入...
+== 正在載入…
 
 Loading demo file from storage
 == 正在從硬盤中載入回放檔案
@@ -1874,3 +1870,36 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == 始終顯示其他玩家的鉤索輔助線
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== 只顯示隊伍聊天訊息
+
+[Spectating]
+Following %s
+== 正在旁觀 %s
+
+Example of usage
+== 用途示例
+
+Round %d/%d
+== 輪次 %d/%d
+
+[Spectators]
+%d others…
+== %d 其他…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== 隊伍 %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/index.php?title=Mapping/zh&variant=zh-hant

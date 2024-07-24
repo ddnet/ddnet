@@ -4,7 +4,13 @@
 #define ENGINE_INPUT_H
 
 #include "kernel.h"
-#include <base/system.h>
+
+#include <base/types.h>
+#include <base/vmath.h>
+
+#include <cstdint>
+#include <functional>
+#include <vector>
 
 const int g_MaxKeys = 512;
 extern const char g_aaKeyStrings[g_MaxKeys][20];
@@ -23,23 +29,10 @@ public:
 	public:
 		int m_Flags;
 		int m_Key;
+		uint32_t m_InputCount;
 		char m_aText[INPUT_TEXT_SIZE];
-		int m_InputCount;
 	};
 
-protected:
-	enum
-	{
-		INPUT_BUFFER_SIZE = 32
-	};
-
-	// quick access to events
-	size_t m_NumEvents;
-	CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
-	int64_t m_LastUpdate;
-	float m_UpdateTime;
-
-public:
 	enum
 	{
 		FLAG_PRESS = 1 << 0,
@@ -60,19 +53,14 @@ public:
 	};
 
 	// events
-	size_t NumEvents() const { return m_NumEvents; }
-	virtual bool IsEventValid(const CEvent &Event) const = 0;
-	const CEvent &GetEvent(size_t Index) const
-	{
-		dbg_assert(Index < m_NumEvents, "Index invalid");
-		return m_aInputEvents[Index];
-	}
+	virtual void ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const = 0;
+	virtual void Clear() = 0;
 
 	/**
 	 * @return Rolling average of the time in seconds between
 	 * calls of the Update function.
 	 */
-	float GetUpdateTime() const { return m_UpdateTime; }
+	virtual float GetUpdateTime() const = 0;
 
 	// keys
 	virtual bool ModifierIsPressed() const = 0;
@@ -81,7 +69,6 @@ public:
 	virtual bool KeyIsPressed(int Key) const = 0;
 	virtual bool KeyPress(int Key, bool CheckCounter = false) const = 0;
 	const char *KeyName(int Key) const { return (Key >= 0 && Key < g_MaxKeys) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
-	virtual void Clear() = 0;
 
 	// joystick
 	class IJoystick
@@ -104,12 +91,61 @@ public:
 	virtual void SetActiveJoystick(size_t Index) = 0;
 
 	// mouse
-	virtual void NativeMousePos(int *pX, int *pY) const = 0;
-	virtual bool NativeMousePressed(int Index) = 0;
+	virtual vec2 NativeMousePos() const = 0;
+	virtual bool NativeMousePressed(int Index) const = 0;
 	virtual void MouseModeRelative() = 0;
 	virtual void MouseModeAbsolute() = 0;
-	virtual bool MouseDoubleClick() = 0;
 	virtual bool MouseRelative(float *pX, float *pY) = 0;
+
+	// touch
+	/**
+	 * Represents a unique finger for a current touch event. If there are multiple touch input devices, they
+	 * are handled transparently like different fingers. The concrete values of the member variables of this
+	 * class are arbitrary based on the touch device driver and should only be used to uniquely identify touch
+	 * fingers. Note that once a finger has been released, the same finger value may also be reused again.
+	 */
+	class CTouchFinger
+	{
+		friend class CInput;
+
+		int64_t m_DeviceId;
+		int64_t m_FingerId;
+
+	public:
+		bool operator==(const CTouchFinger &Other) const { return m_DeviceId == Other.m_DeviceId && m_FingerId == Other.m_FingerId; }
+		bool operator!=(const CTouchFinger &Other) const { return !(*this == Other); }
+	};
+	/**
+	 * Represents the state of a particular touch finger currently being pressed down on a touch device.
+	 */
+	class CTouchFingerState
+	{
+	public:
+		/**
+		 * The unique finger which this state is associated with.
+		 */
+		CTouchFinger m_Finger;
+		/**
+		 * The current position of the finger. The x- and y-components of the position are normalized to the
+		 * range `0.0f`-`1.0f` representing the absolute position of the finger on the current touch device.
+		 */
+		vec2 m_Position;
+		/**
+		 * The current delta of the finger. The x- and y-components of the delta are normalized to the
+		 * range `0.0f`-`1.0f` representing the absolute delta of the finger on the current touch device.
+		 *
+		 * @remark This is reset to zero at the end of each frame.
+		 */
+		vec2 m_Delta;
+	};
+	/**
+	 * Returns a vector of the states of all touch fingers currently being pressed down on touch devices.
+	 * Note that this only contains fingers which are pressed down, i.e. released fingers are never stored.
+	 * The order of the fingers in this vector is based on the order in which the fingers where pressed.
+	 *
+	 * @return vector of all touch finger states
+	 */
+	virtual const std::vector<CTouchFingerState> &TouchFingerStates() const = 0;
 
 	// clipboard
 	virtual const char *GetClipboardText() = 0;

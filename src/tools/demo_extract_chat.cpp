@@ -20,23 +20,17 @@ public:
 	};
 	CClientData m_aClients[MAX_CLIENTS];
 
-	CSnapshotStorage::CHolder m_aDemoSnapshotHolders[IClient::NUM_SNAPSHOT_TYPES];
-	char m_aaaDemoSnapshotData[IClient::NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
-	CSnapshotStorage::CHolder *m_apSnapshots[IClient::NUM_SNAPSHOT_TYPES];
+	char m_aaDemoSnapshotData[IClient::NUM_SNAPSHOT_TYPES][CSnapshot::MAX_SIZE];
+	CSnapshot *m_apAltSnapshots[IClient::NUM_SNAPSHOT_TYPES];
 
 	CClientSnapshotHandler() :
-		m_aClients(), m_aDemoSnapshotHolders()
+		m_aClients()
 	{
-		mem_zero(m_aaaDemoSnapshotData, sizeof(m_aaaDemoSnapshotData));
+		mem_zero(m_aaDemoSnapshotData, sizeof(m_aaDemoSnapshotData));
 
 		for(int SnapshotType = 0; SnapshotType < IClient::NUM_SNAPSHOT_TYPES; SnapshotType++)
 		{
-			m_apSnapshots[SnapshotType] = &m_aDemoSnapshotHolders[SnapshotType];
-			m_apSnapshots[SnapshotType]->m_pSnap = (CSnapshot *)&m_aaaDemoSnapshotData[SnapshotType][0];
-			m_apSnapshots[SnapshotType]->m_pAltSnap = (CSnapshot *)&m_aaaDemoSnapshotData[SnapshotType][1];
-			m_apSnapshots[SnapshotType]->m_SnapSize = 0;
-			m_apSnapshots[SnapshotType]->m_AltSnapSize = 0;
-			m_apSnapshots[SnapshotType]->m_Tick = -1;
+			m_apAltSnapshots[SnapshotType] = (CSnapshot *)&m_aaDemoSnapshotData[SnapshotType];
 		}
 	}
 
@@ -74,19 +68,20 @@ public:
 	int SnapNumItems(int SnapId)
 	{
 		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapId");
-		if(!m_apSnapshots[SnapId])
-			return 0;
-		return m_apSnapshots[SnapId]->m_pAltSnap->NumItems();
+		return m_apAltSnapshots[SnapId]->NumItems();
 	}
 
-	void *SnapGetItem(int SnapId, int Index, IClient::CSnapItem *pItem)
+	IClient::CSnapItem SnapGetItem(int SnapId, int Index)
 	{
 		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapId");
-		const CSnapshotItem *pSnapshotItem = m_apSnapshots[SnapId]->m_pAltSnap->GetItem(Index);
-		pItem->m_DataSize = m_apSnapshots[SnapId]->m_pAltSnap->GetItemSize(Index);
-		pItem->m_Type = m_apSnapshots[SnapId]->m_pAltSnap->GetItemType(Index);
-		pItem->m_Id = pSnapshotItem->Id();
-		return (void *)pSnapshotItem->Data();
+		const CSnapshot *pSnapshot = m_apAltSnapshots[SnapId];
+		const CSnapshotItem *pSnapshotItem = m_apAltSnapshots[SnapId]->GetItem(Index);
+		IClient::CSnapItem Item;
+		Item.m_Type = pSnapshot->GetItemType(Index);
+		Item.m_Id = pSnapshotItem->Id();
+		Item.m_pData = pSnapshotItem->Data();
+		Item.m_DataSize = pSnapshot->GetItemSize(Index);
+		return Item;
 	}
 
 	void OnNewSnapshot()
@@ -94,12 +89,11 @@ public:
 		int Num = SnapNumItems(IClient::SNAP_CURRENT);
 		for(int i = 0; i < Num; i++)
 		{
-			IClient::CSnapItem Item;
-			const void *pData = SnapGetItem(IClient::SNAP_CURRENT, i, &Item);
+			const IClient::CSnapItem Item = SnapGetItem(IClient::SNAP_CURRENT, i);
 
 			if(Item.m_Type == NETOBJTYPE_CLIENTINFO)
 			{
-				const CNetObj_ClientInfo *pInfo = (const CNetObj_ClientInfo *)pData;
+				const CNetObj_ClientInfo *pInfo = (const CNetObj_ClientInfo *)Item.m_pData;
 				int ClientId = Item.m_Id;
 				if(ClientId < MAX_CLIENTS)
 				{
@@ -118,9 +112,8 @@ public:
 		if(AltSnapSize < 0)
 			return;
 
-		std::swap(m_apSnapshots[IClient::SNAP_PREV], m_apSnapshots[IClient::SNAP_CURRENT]);
-		mem_copy(m_apSnapshots[IClient::SNAP_CURRENT]->m_pSnap, pData, Size);
-		mem_copy(m_apSnapshots[IClient::SNAP_CURRENT]->m_pAltSnap, pAltSnapBuffer, AltSnapSize);
+		std::swap(m_apAltSnapshots[IClient::SNAP_PREV], m_apAltSnapshots[IClient::SNAP_CURRENT]);
+		mem_copy(m_apAltSnapshots[IClient::SNAP_CURRENT], pAltSnapBuffer, AltSnapSize);
 
 		OnNewSnapshot();
 	}

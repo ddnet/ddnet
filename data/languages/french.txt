@@ -26,6 +26,7 @@
 #	archimede67		2022-08-15 13:02:00
 #	Nouaa			2022-10-25 18:00:00
 #	Sukya			2023-05-20 19:38:00
+#	Emilcha			2024-06-09 11:31:00
 
 ##### /authors #####
 
@@ -100,8 +101,8 @@ Client
 Connecting to
 == Connexion à
 
-Connection Problems...
-== Problèmes de connexion...
+Connection Problems…
+== Problèmes de connexion…
 
 Console
 == Console
@@ -522,9 +523,6 @@ Your skin
 Reset to defaults
 == Réinitialiser
 
-Round
-== Round
-
 Lht.
 == Luminosité
 
@@ -575,9 +573,6 @@ Show other players' hook collision lines
 
 Filter connecting players
 == Filtre les Tees se connectant
-
-Use DDRace Scoreboard
-== Utiliser le tableau des scores de DDRace
 
 AntiPing: predict grenade paths
 == AntiPing: prédit la trajectoire du lance-grenade
@@ -681,8 +676,8 @@ Show entities
 Replay feature is disabled!
 == L'option de replay est désactivée
 
-Updating...
-== Mise à jour en cours...
+Updating…
+== Mise à jour en cours…
 
 Use high DPI
 == Utiliser un DPI élevé
@@ -699,8 +694,8 @@ Are you sure that you want to disconnect?
 Deactivate
 == Désactiver
 
-Update failed! Check log...
-== La mise à jour a échoué ! Vérifier les logs...
+Update failed! Check log…
+== La mise à jour a échoué ! Vérifier les logs…
 
 %.2f KiB
 == %.2f Kio
@@ -1234,8 +1229,8 @@ Speed:
 Angle:
 == Angle:
 
-Trying to determine UDP connectivity...
-== Tentative de connection UDP...
+Trying to determine UDP connectivity…
+== Tentative de connection UDP…
 
 UDP seems to be filtered.
 == UDP semble filtré.
@@ -1607,265 +1602,298 @@ Create a random skin
 == Créer un skin aléatoire
 
 Error playing demo
-== 
+== Erreur durant la lecture de la demo
 
 Failed saving the replay!
-== 
+== Erreur durant la sauvegarde du replay !
 
 Saving settings to '%s' failed
-== 
+== La sauvegarde des paramètres vers '%s' à échoué
 
 Error saving settings
-== 
+== Erreur de sauvegarde des paramètres
 
 Loading demo file from storage
-== 
+== Chargement du fichier de la demo à partir du stockage
 
 Quitting. Please wait…
-== 
+== En train de quitter. Veuillez patienter…
 
 Restarting. Please wait…
-== 
+== Redémarrage. Veuillez patienter…
 
 Searching
-== 
+== Recherche
 
 Enter Username
-== 
+== Saisir le nom d'utilisateur
 
 Enter Password
-== 
+== Saisir le mot de passe
 
 NOT CONNECTED
-== 
+== NON CONNECTÉ
 
 Match %d of %d
-== 
+== Correspondance %d sur %d
 
 No results
-== 
+== Aucun résultat
 
 Lines %d - %d (%s)
-== 
+== Lignes %d - %d (%s)
 
 Locked
-== 
+== Verrouillé
 
 Following
-== 
+== Suivi
 
 Loading commands…
-== 
+== Chargement des commandes
 
 Multi-View
-== 
+== Multi-vues
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Certaines images de la carte n'ont pas pu être chargées. Consultez la console locale pour plus de détails.
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Certains sons de la carte n'ont pas pu être chargés. Consultez la console locale pour plus de détails.
 
 Loading menu themes
-== 
+== Chargement des thèmes du menu
 
 Press a key…
-== 
+== Appuyez sur une touche…
 
 Main menu
-== 
+== Menu principal
 
 Rename folder
-== 
+== Renommer le dossier
 
 Render complete
-== 
+== Rendu terminé
 
 Are you sure that you want to restart?
-== 
+== Êtes-vous sûr de vouloir recommencer ?
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== Il y a une carte non enregistrée dans l'éditeur, vous voulez peut-être l'enregistrer.
 
 Continue anyway?
-== 
+== Continuer quand même ?
 
 A demo with this name already exists
-== 
+== Une demo avec ce nom existe déjà
 
 A folder with this name already exists
-== 
+== Un dossier avec ce nom existe déjà
 
 Unable to rename the folder
-== 
+== Impossible de renommer le dossier
 
 (paused)
-== 
+== (en pause)
 
 Videos directory
-== 
+== Dossier des vidéos
 
 Video was saved to '%s'
-== 
+== La vidéo a été enregistrée dans '%s'
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d Kio (%.1f Kio/s)
 
 No login required
-== 
+== Pas d'authentification requise
 
 Communities
-== 
+== Communautés
 
 No server selected
-== 
+== Aucun serveur sélectionné
 
 Server filter
-== 
+== Filtre de serveur
 
 Friends
-== 
+== Amis
 
 Go back the specified duration
-== 
+== Saut arrière de la durée spécifiée
 
 [Demo player duration]
 %d min.
-== 
+== %d min.
 
 [Demo player duration]
 %d sec.
-== 
+== %d sec.
 
 Change the skip duration
-== 
+== Modifier la durée du saut
 
 Go forward the specified duration
-== 
+== Saut avant de la durée spécifiée
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Marquer le début d'une coupe (clic droit pour réinitialiser)
 
 Mark the end of a cut (right click to reset)
-== 
+== Marquer la fin d'une coupe (clic droit pour réinitialiser)
 
 Close the demo player
-== 
+== Fermer le lecteur de demo
 
 Export demo cut
-== 
+== Exporter le découpage de la demo
 
 Cut interval
-== 
+== Intervale du découpage
 
 Cut length
-== 
+== Longeur du découpage
 
 Render cut to video
-== 
+== Rendu du découpage vers une vidéo
 
 Please use a different filename
-== 
+== Veuillez utiliser un nom de fichier différent
 
 All combined
-== 
+== Tout combiné
 
 No demo selected
-== 
+== Aucune demo sélectionnée
 
 Folder Link
-== 
+== Dossier Lien
 
 Created
-== 
+== Créé
 
 Netversion
-== 
+== Netversion
 
 [Demo details]
 map not included
-== 
+== carte non incluse
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Êtes-vous sûr de vouloir supprimer le dossier '%s'?
 
 Delete folder
-== 
+== Supprimer le dossier
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Impossible de supprimer le dossier '%s'. Assurez-vous d'abord qu'il est vide.
 
 Loading…
-== 
+== Chargement…
 
 Ghosts directory
-== 
+== Dossier des fantômes
 
 Activate all
-== 
+== Tous activer
 
 Deactivate all
-== 
+== Tous désactiver
 
 Player info change cooldown
-== 
+== Délai de changement des informations du joueur
 
 Axis
-== 
+== Axe
 
 Graphics card
-== 
+== Carte graphique
+
+Tee
+== Tee
 
 Info Messages
-== 
+== Messages d'information
 
 Show local time always
-== 
+== Toujours afficher l'heure locale
 
 Always show chat
-== 
+== Toujours afficher le chat
+
+Show only chat messages from team members
+== Afficher uniquement les messages des membres de l'équipe
 
 Chat font size
-== 
+== Taille de police du chat
 
 Chat width
-== 
+== Largeur du chat
 
 Show friend mark (♥) in name plates
-== 
+== Montrez l'icone d'ami (♥) dans les pseudonymes
 
 Show hook strength icon indicator
-== 
+== Afficher l'indicateur de force du grappin
 
 Show hook strength number indicator
-== 
+== Afficher le nombre de force du grappin
 
 Authed name color in scoreboard
-== 
+== Couleur des noms authentifiés dans le tableau des scores
 
 Same clan color in scoreboard
-== 
+== Couleur des membres du clan dans le tableau des scores
 
 Show own player's hook collision line
-== 
+== Afficher la ligne de collision de son propre grappin
 
 Always show own player's hook collision line
-== 
+== Toujours afficher la ligne de collision de son propre grappin
 
 Always show other players' hook collision lines
-== 
+== Toujours afficher la ligne de collision du grappin des autres joueurs
 
 Show finish messages
-== 
+== Afficher les messages de fin de course
 
 Enable ghost
-== 
+== Activer le fantôme
 
 Only save improvements
-== 
+== Enregistrer uniquement les améliorations
 
 Regular background color
-== 
+== Couleur de fond
 
 Entities background color
-== 
+== Couleur de fond des entités
 
 Moved ingame
+== Déplacé en jeu
+
+[Spectating]
+Following %s
+== 
+
+Example of usage
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

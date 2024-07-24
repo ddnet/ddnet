@@ -239,6 +239,7 @@ public:
 	void CreateHammerHit(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreatePlayerSpawn(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreateDeath(vec2 Pos, int ClientId, CClientMask Mask = CClientMask().set());
+	void CreateFinishConfetti(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreateSound(vec2 Pos, int Sound, CClientMask Mask = CClientMask().set());
 	void CreateSoundGlobal(int Sound, int Target = -1) const;
 
@@ -387,6 +388,7 @@ private:
 	static void ConGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConLaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConJetpack(IConsole::IResult *pResult, void *pUserData);
+	static void ConSetJumps(IConsole::IResult *pResult, void *pUserData);
 	static void ConWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnGrenade(IConsole::IResult *pResult, void *pUserData);
@@ -431,6 +433,7 @@ private:
 	static void ConMapInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeout(IConsole::IResult *pResult, void *pUserData);
 	static void ConPractice(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwap(IConsole::IResult *pResult, void *pUserData);
 	static void ConSave(IConsole::IResult *pResult, void *pUserData);
 	static void ConLoad(IConsole::IResult *pResult, void *pUserData);
@@ -472,6 +475,7 @@ private:
 	static void ConPracticeGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeLaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeJetpack(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeSetJumps(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnGrenade(IConsole::IResult *pResult, void *pUserData);

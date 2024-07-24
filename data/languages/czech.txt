@@ -6,7 +6,7 @@
 #	Petr			2011-04-02 23:02:33
 #	Medik & Petr	2011-07-02 19:37:05
 #	TeeWorlds-org	2011-07-15 00:34:19
-#	dobrykafe		2024-04-20 00:00:00
+#	dobrykafe		2024-06-09 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -80,8 +80,8 @@ Client
 Connecting to
 == Připojuji na
 
-Connection Problems...
-== Problémy s připojením...
+Connection Problems…
+== Problémy s připojením…
 
 Console
 == Konzole
@@ -502,9 +502,6 @@ Your skin
 Reset to defaults
 == Obnovit výchozí
 
-Round
-== Kolo
-
 Lht.
 == Jas
 
@@ -790,9 +787,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == K dokončení aktualizace je nutné restartovat klienta DDNet!
 
-Use DDRace Scoreboard
-== Použít DDRace tabulku výsledků
-
 Show score
 == Zobrazit skóre
 
@@ -883,8 +877,8 @@ Show tiles layers from BG map
 DDNet %s is available:
 == DDNet %s je k dispozici:
 
-Updating...
-== Aktualizace...
+Updating…
+== Aktualizace…
 
 No updates available
 == Nejsou k dispozici žádné aktualizace
@@ -1070,8 +1064,8 @@ Editor
 Play
 == Hrát
 
-Update failed! Check log...
-== Aktualizace selhala! Zkontrolujte log...
+Update failed! Check log…
+== Aktualizace selhala! Zkontrolujte log…
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -1226,8 +1220,8 @@ Press a key…
 Main menu
 == Hlavní menu
 
-Trying to determine UDP connectivity...
-== Pokus o zjištění připojení UDP...
+Trying to determine UDP connectivity…
+== Pokus o zjištění připojení UDP…
 
 UDP seems to be filtered.
 == Zdá se, že UDP je filtrován.
@@ -1849,3 +1843,36 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Vždy zobrazit čáru kolize háků ostatních hráčů
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== Zobrazit pouze zprávy od členů týmu
+
+[Spectating]
+Following %s
+== 
+
+Example of usage
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
+== 

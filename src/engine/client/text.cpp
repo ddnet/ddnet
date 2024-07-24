@@ -1667,7 +1667,7 @@ public:
 
 			while(pCurrent < pBatchEnd && pCurrent != pEllipsis)
 			{
-				const int PrevCharCount = pCursor->m_GlyphCount;
+				const int PrevCharCount = pCursor->m_CharCount;
 				pCursor->m_CharCount += pTmp - pCurrent;
 				pCurrent = pTmp;
 				int Character = NextCharacter;
@@ -1838,13 +1838,13 @@ public:
 					}
 					if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_SET)
 					{
-						if((int)pCursor->m_GlyphCount == pCursor->m_SelectionStart)
+						if(pCursor->m_GlyphCount == pCursor->m_SelectionStart)
 						{
 							SelectionStarted = !SelectionStarted;
 							SelectionStartChar = pCursor->m_GlyphCount;
 							SelectionUsedPress = true;
 						}
-						if((int)pCursor->m_GlyphCount == pCursor->m_SelectionEnd)
+						if(pCursor->m_GlyphCount == pCursor->m_SelectionEnd)
 						{
 							SelectionStarted = !SelectionStarted;
 							SelectionEndChar = pCursor->m_GlyphCount;
@@ -1854,7 +1854,7 @@ public:
 
 					if(pCursor->m_CursorMode != TEXT_CURSOR_CURSOR_MODE_NONE)
 					{
-						if((int)pCursor->m_GlyphCount == pCursor->m_CursorCharacter)
+						if(pCursor->m_GlyphCount == pCursor->m_CursorCharacter)
 						{
 							HasCursor = true;
 							aCursorQuads[0] = IGraphics::CQuadItem(SelX - CursorOuterInnerDiff, DrawY, CursorOuterWidth, pCursor->m_AlignedFontSize);
@@ -1936,13 +1936,13 @@ public:
 		}
 		else if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_SET)
 		{
-			if((int)pCursor->m_GlyphCount == pCursor->m_SelectionStart)
+			if(pCursor->m_GlyphCount == pCursor->m_SelectionStart)
 			{
 				SelectionStarted = !SelectionStarted;
 				SelectionStartChar = pCursor->m_GlyphCount;
 				SelectionUsedPress = true;
 			}
-			if((int)pCursor->m_GlyphCount == pCursor->m_SelectionEnd)
+			if(pCursor->m_GlyphCount == pCursor->m_SelectionEnd)
 			{
 				SelectionStarted = !SelectionStarted;
 				SelectionEndChar = pCursor->m_GlyphCount;
@@ -1957,7 +1957,7 @@ public:
 				pCursor->m_CursorCharacter = pCursor->m_GlyphCount;
 			}
 
-			if((int)pCursor->m_GlyphCount == pCursor->m_CursorCharacter)
+			if(pCursor->m_GlyphCount == pCursor->m_CursorCharacter)
 			{
 				HasCursor = true;
 				aCursorQuads[0] = IGraphics::CQuadItem((LastSelX + LastSelWidth) - CursorOuterInnerDiff, DrawY, CursorOuterWidth, pCursor->m_AlignedFontSize);

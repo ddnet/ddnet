@@ -119,8 +119,8 @@ void CTeeInfo::FromSixup()
 	}
 
 	// find closest match
-	int best_skin = 0;
-	int best_matches = -1;
+	int BestSkin = 0;
+	int BestMatches = -1;
 	for(int s = 0; s < 16; s++)
 	{
 		int matches = 0;
@@ -128,14 +128,14 @@ void CTeeInfo::FromSixup()
 			if(str_comp(m_apSkinPartNames[p], g_aStdSkins[s].m_apSkinPartNames[p]) == 0)
 				matches++;
 
-		if(matches > best_matches)
+		if(matches > BestMatches)
 		{
-			best_matches = matches;
-			best_skin = s;
+			BestMatches = matches;
+			BestSkin = s;
 		}
 	}
 
-	str_copy(m_aSkinName, g_aStdSkins[best_skin].m_aSkinName, sizeof(m_aSkinName));
+	str_copy(m_aSkinName, g_aStdSkins[BestSkin].m_aSkinName, sizeof(m_aSkinName));
 	m_UseCustomColor = true;
 	m_ColorBody = ColorHSLA(m_aUseCustomColors[0] ? m_aSkinPartColors[0] : 255).UnclampLighting(ms_DarkestLGT7).Pack(ColorHSLA::DARKEST_LGT);
 	m_ColorFeet = ColorHSLA(m_aUseCustomColors[4] ? m_aSkinPartColors[4] : 255).UnclampLighting(ms_DarkestLGT7).Pack(ColorHSLA::DARKEST_LGT);

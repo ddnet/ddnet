@@ -80,8 +80,8 @@ Client
 Connecting to
 == Падлучэнне да
 
-Connection Problems...
-== Праблемы з падлучэннем...
+Connection Problems…
+== Праблемы з падлучэннем…
 
 Console
 == Кансоль
@@ -500,9 +500,6 @@ Your skin
 Reset to defaults
 == Скінуць налады
 
-Round
-== Раўнд
-
 Lht.
 == Светлата
 
@@ -517,9 +514,6 @@ LAN
 
 Name plates size
 == Памер таблічак з імёнамі
-
-Submitting the render commands failed. Try to update your GPU drivers.
-== Адпраўка каманд рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
@@ -615,8 +609,8 @@ Browser
 Ghost
 == Прывід
 
-Trying to determine UDP connectivity...
-== Спроба вызначыць UDP падлучэнне...
+Trying to determine UDP connectivity…
+== Спроба вызначыць UDP падлучэнне…
 
 UDP seems to be filtered.
 == Здаецца, UDP фільтруецца.
@@ -1172,9 +1166,6 @@ Show votes window after voting
 DDRace HUD
 == DDRace HUD
 
-Use DDRace Scoreboard
-== Выкарыстоўваць табло ачкоў DDRace
-
 Show client IDs in scoreboard
 == Паказваць ID кліента ў табло ачкоў
 
@@ -1400,8 +1391,8 @@ DDNet %s is available:
 Update now
 == Абнавіць зараз
 
-Updating...
-== Абнаўленне...
+Updating…
+== Абнаўленне…
 
 DDNet Client updated!
 == Кліент DDNet абнаўлён!
@@ -1476,8 +1467,8 @@ DDNet %s is out!
 Downloading %s:
 == Спампоўка %s:
 
-Update failed! Check log...
-== Абнаўленне не атрымалася. Праверце логі...
+Update failed! Check log…
+== Абнаўленне не атрымалася. Праверце логі…
 
 Restart
 == Перазапуск
@@ -1714,6 +1705,13 @@ Regular background color
 Entities background color
 == Колер фону энтыты
 
+An error during command recording occurred. Try to update your GPU drivers.
+== Адбылася памылка падчас выканання каманды запісу. Паспрабуйце абнавіць драйверы відэакарты.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Каманда рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
+
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
@@ -1723,11 +1721,7 @@ Out of VRAM. Try removing custom assets (skins, entities, etc.), especially thos
 == 
 
 [Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
+Submitting the render commands failed. Try to update your GPU drivers.
 == 
 
 Failed saving the replay!
@@ -1772,6 +1766,10 @@ Following
 Loading commands…
 == 
 
+[Spectating]
+Following %s
+== 
+
 Press a key…
 == 
 
@@ -1785,6 +1783,12 @@ There's an unsaved map in the editor, you might want to save it.
 == 
 
 Continue anyway?
+== 
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1805,6 +1809,9 @@ Loading…
 Player info change cooldown
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1812,6 +1819,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size
@@ -1845,4 +1855,21 @@ Always show other players' hook collision lines
 == 
 
 Show finish messages
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

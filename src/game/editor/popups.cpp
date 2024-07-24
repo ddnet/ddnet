@@ -640,7 +640,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	static int s_aIds[(int)EGroupProp::NUM_PROPS] = {0};
 	int NewVal = 0;
 	auto [State, Prop] = pEditor->DoPropertiesWithState<EGroupProp>(&View, aProps, s_aIds, &NewVal);
-	if(Prop != EGroupProp::PROP_NONE)
+	if(Prop != EGroupProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
 		pEditor->m_Map.OnModify();
 	}
@@ -790,7 +790,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 	static int s_aIds[(int)ELayerProp::NUM_PROPS] = {0};
 	int NewVal = 0;
 	auto [State, Prop] = pEditor->DoPropertiesWithState<ELayerProp>(&View, aProps, s_aIds, &NewVal);
-	if(Prop != ELayerProp::PROP_NONE)
+	if(Prop != ELayerProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
 		pEditor->m_Map.OnModify();
 	}
@@ -979,15 +979,10 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 
 	static int s_aIds[(int)EQuadProp::NUM_PROPS] = {0};
 	int NewVal = 0;
-	auto PropRes = pEditor->DoPropertiesWithState<EQuadProp>(&View, aProps, s_aIds, &NewVal);
-	EQuadProp Prop = PropRes.m_Value;
-	if(Prop != EQuadProp::PROP_NONE)
+	auto [State, Prop] = pEditor->DoPropertiesWithState<EQuadProp>(&View, aProps, s_aIds, &NewVal);
+	if(Prop != EQuadProp::PROP_NONE && (State == EEditState::START || State == EEditState::ONE_GO))
 	{
-		pEditor->m_Map.OnModify();
-		if(PropRes.m_State == EEditState::START || PropRes.m_State == EEditState::ONE_GO)
-		{
-			pEditor->m_QuadTracker.BeginQuadPropTrack(pLayer, pEditor->m_vSelectedQuads, Prop);
-		}
+		pEditor->m_QuadTracker.BeginQuadPropTrack(pLayer, pEditor->m_vSelectedQuads, Prop);
 	}
 
 	const float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
@@ -1053,12 +1048,10 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 		}
 	}
 
-	if(Prop != EQuadProp::PROP_NONE)
+	if(Prop != EQuadProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
-		if(PropRes.m_State == EEditState::END || PropRes.m_State == EEditState::ONE_GO)
-		{
-			pEditor->m_QuadTracker.EndQuadPropTrack(Prop);
-		}
+		pEditor->m_QuadTracker.EndQuadPropTrack(Prop);
+		pEditor->m_Map.OnModify();
 	}
 
 	return CUi::POPUP_KEEP_OPEN;
@@ -1120,7 +1113,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 	static int s_aIds[(int)ESoundProp::NUM_PROPS] = {0};
 	int NewVal = 0;
 	auto [State, Prop] = pEditor->DoPropertiesWithState<ESoundProp>(&View, aProps, s_aIds, &NewVal);
-	if(Prop != ESoundProp::PROP_NONE)
+	if(Prop != ESoundProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
 		pEditor->m_Map.OnModify();
 	}
@@ -1202,7 +1195,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		static int s_aCircleIds[(int)ECircleShapeProp::NUM_CIRCLE_PROPS] = {0};
 		NewVal = 0;
 		auto [LocalState, LocalProp] = pEditor->DoPropertiesWithState<ECircleShapeProp>(&View, aCircleProps, s_aCircleIds, &NewVal);
-		if(LocalProp != ECircleShapeProp::PROP_NONE)
+		if(LocalProp != ECircleShapeProp::PROP_NONE && (LocalState == EEditState::END || LocalState == EEditState::ONE_GO))
 		{
 			pEditor->m_Map.OnModify();
 		}
@@ -1230,7 +1223,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		static int s_aRectangleIds[(int)ERectangleShapeProp::NUM_RECTANGLE_PROPS] = {0};
 		NewVal = 0;
 		auto [LocalState, LocalProp] = pEditor->DoPropertiesWithState<ERectangleShapeProp>(&View, aRectangleProps, s_aRectangleIds, &NewVal);
-		if(LocalProp != ERectangleShapeProp::PROP_NONE)
+		if(LocalProp != ERectangleShapeProp::PROP_NONE && (LocalState == EEditState::END || LocalState == EEditState::ONE_GO))
 		{
 			pEditor->m_Map.OnModify();
 		}
@@ -1282,16 +1275,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 
 	static int s_aIds[(int)EQuadPointProp::NUM_PROPS] = {0};
 	int NewVal = 0;
-	auto PropRes = pEditor->DoPropertiesWithState<EQuadPointProp>(&View, aProps, s_aIds, &NewVal);
-	EQuadPointProp Prop = PropRes.m_Value;
-	if(Prop != EQuadPointProp::PROP_NONE)
+	auto [State, Prop] = pEditor->DoPropertiesWithState<EQuadPointProp>(&View, aProps, s_aIds, &NewVal);
+	if(Prop != EQuadPointProp::PROP_NONE && (State == EEditState::START || State == EEditState::ONE_GO))
 	{
-		pEditor->m_Map.OnModify();
-		if(PropRes.m_State == EEditState::START || PropRes.m_State == EEditState::ONE_GO)
-		{
-			pEditor->m_QuadTracker.BeginQuadPointPropTrack(pLayer, pEditor->m_vSelectedQuads, pEditor->m_SelectedQuadPoints);
-			pEditor->m_QuadTracker.AddQuadPointPropTrack(Prop);
-		}
+		pEditor->m_QuadTracker.BeginQuadPointPropTrack(pLayer, pEditor->m_vSelectedQuads, pEditor->m_SelectedQuadPoints);
+		pEditor->m_QuadTracker.AddQuadPointPropTrack(Prop);
 	}
 
 	for(CQuad *pQuad : vpQuads)
@@ -1335,13 +1323,10 @@ CUi::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 		}
 	}
 
-	if(Prop != EQuadPointProp::PROP_NONE)
+	if(Prop != EQuadPointProp::PROP_NONE && (State == EEditState::END || State == EEditState::ONE_GO))
 	{
+		pEditor->m_QuadTracker.EndQuadPointPropTrack(Prop);
 		pEditor->m_Map.OnModify();
-		if(PropRes.m_State == EEditState::END || PropRes.m_State == EEditState::ONE_GO)
-		{
-			pEditor->m_QuadTracker.EndQuadPointPropTrack(Prop);
-		}
 	}
 
 	return CUi::POPUP_KEEP_OPEN;
@@ -1647,7 +1632,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
 	static int s_ExternalButton = 0;
-	static int s_ReaddButton = 0;
+	static int s_ReimportButton = 0;
 	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
 	static int s_ExportButton = 0;
@@ -1701,7 +1686,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	static CUi::SSelectionPopupContext s_SelectionPopupContext;
 	static CScrollRegion s_SelectionPopupScrollRegion;
 	s_SelectionPopupContext.m_pScrollRegion = &s_SelectionPopupScrollRegion;
-	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the image from the mapres folder"))
+	if(pEditor->DoButton_MenuItem(&s_ReimportButton, "Re-import", 0, &Slot, 0, "Re-imports the image from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.png", pImg->m_aName);
@@ -1769,7 +1754,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
-	static int s_ReaddButton = 0;
+	static int s_ReimportButton = 0;
 	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
 	static int s_ExportButton = 0;
@@ -1800,7 +1785,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	View.HSplitTop(5.0f, nullptr, &View);
 	View.HSplitTop(RowHeight, &Slot, &View);
 
-	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from the mapres folder"))
+	if(pEditor->DoButton_MenuItem(&s_ReimportButton, "Re-import", 0, &Slot, 0, "Re-imports the sound from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.opus", pSound->m_aName);

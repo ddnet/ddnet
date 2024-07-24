@@ -14,11 +14,12 @@
 #	Vy0x2		2021-06-08 15:48:25
 #	Anime.pdf	2021-06-13 13:08:50
 #	banan		2022-06-12 11:36:50
-#	ban			2023-01-5 10:22:50
+#	ban			2023-01-05 10:22:50
 #	unban		2023-03-10 21:50:50
 #	eblan		2023-08-07 14:27:00
-#	kaban		2023-9-21 19:00:00
+#	kaban		2023-09-21 19:00:00
 #	ByFox		2023-11-14 11:24:00
+#	Sedonya		2024-06-20 03:18:10
 ##### /authors #####
 
 ##### translated strings #####
@@ -92,8 +93,8 @@ Client
 Connecting to
 == Подключение к
 
-Connection Problems...
-== Проблемы со связью...
+Connection Problems…
+== Проблемы со связью…
 
 Console
 == Консоль
@@ -405,7 +406,7 @@ Switch weapon when out of ammo
 == Переключать оружие без патронов
 
 Show only chat messages from friends
-== Показывать только дружеские с.
+== Показывать только сообщения от друзей
 
 Show clan above name plates
 == Показывать клан
@@ -500,9 +501,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Звуки выделенных сообщений
 
-Use DDRace Scoreboard
-== Использовать DDRace табло счета
-
 Show kill messages
 == Показывать сообщения о смерти
 
@@ -572,9 +570,6 @@ Your skin
 Reset to defaults
 == Сбросить настройки
 
-Round
-== Раунд
-
 Lht.
 == Ярк.
 
@@ -612,7 +607,7 @@ Game paused
 == Пауза
 
 Team message
-== Командное с.
+== Командное
 
 Automatically create statboard csv
 == Записывать результаты в CSV
@@ -624,10 +619,10 @@ Remove chat
 == Удалить чат
 
 System message
-== Системное с.
+== Системное
 
-Updating...
-== Обновление...
+Updating…
+== Обновление…
 
 Messages
 == Сообщения
@@ -731,8 +726,8 @@ DDNet %s is out!
 Downloading %s:
 == Скачивание %s:
 
-Update failed! Check log...
-== Ошибка. Проверьте логи...
+Update failed! Check log…
+== Ошибка. Проверьте логи…
 
 Restart
 == Рестарт
@@ -1200,8 +1195,8 @@ Speed:
 Angle:
 == Угол
 
-Trying to determine UDP connectivity...
-== Попытка определить UDP соединение...
+Trying to determine UDP connectivity…
+== Попытка определить UDP соединение…
 
 UDP seems to be filtered.
 == Похоже, что UDP фильтруется.
@@ -1275,10 +1270,10 @@ Show player target angle
 == Показывать угол прицела игрока
 
 Show freeze bars
-== Показывать полоску фриза
+== Показывать индикатор фриза
 
 Opacity of freeze bars inside freeze
-== Прозрачность полоски фриза внутри фриза
+== Прозрачность индикатора фриза
 
 Normal Color
 == Обычный цвет
@@ -1299,7 +1294,7 @@ Quads are used for background decoration
 == Квады используются для украшения фона
 
 Tries to predict other entities to give a feel of low latency
-== Пытыается предсказать другие объекты, чтобы придать ощущение низкой задержки
+== Пытается предсказать другие объекты, чтобы придать ощущение низкой задержки
 
 Extras
 == Доп.
@@ -1386,19 +1381,19 @@ Hook collision line opacity
 == Прозрачность линии
 
 Colors of the hook collision line, in case of a possible collision with:
-== Цвет линии коллизии крюка при:
+== Цвет линии коллизии крюка если
 
 Your movements are not taken into account when calculating the line colors
-== Ваше перемещение не учитываются при расчете цвета линии коллизии
+== Ваше перемещение не учитывается при расчете цвета линии коллизии
 
 Nothing hookable
-== Невозможности зацепиться
+== Невозможно зацепиться
 
 Something hookable
-== Возможности зацепиться
+== Можно зацепиться
 
 A Tee
-== Пересечении игрока
+== Задевает игрока
 
 Loading assets
 == Загрузка ресурсов
@@ -1482,13 +1477,13 @@ Go back one tick
 == Отмотать назад на один тик
 
 Go forward one tick
-== Отмотать вперед на один тик
+== Промотать вперед на один тик
 
 Go back one marker
-== Отмотать назад на один маркер
+== Вернуться назад на один маркер
 
 Go forward one marker
-== Отмотать вперед на один маркер
+== Пройти вперед на один маркер
 
 Are you sure that you want to delete the demo '%s'?
 == Вы уверены, что хотите удалить демо '%s'?
@@ -1500,7 +1495,7 @@ Reset controls
 == Сброс настроек
 
 Are you sure that you want to reset the controls to their defaults?
-== Вы уверены, что хотите сбросить настройки по умолчанию?
+== Вы уверены, что хотите сбросить игру до настроек по умолчанию?
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -1588,10 +1583,10 @@ Click to select server. Double click to join your friend.
 == Нажмите, чтобы выбрать сервер. Нажмите дважды, чтобы присоединиться.
 
 Click to remove this player from your friends list.
-== Нажмите, чтобы убрать игрока из списка друзей.
+== Нажмите, чтобы удалить игрока из списка друзей.
 
 Click to remove this clan from your friends list.
-== Нажмите, чтобы Исключить клан из списка.
+== Нажмите, чтобы исключить клан из списка.
 
 None
 == Пусто
@@ -1680,10 +1675,10 @@ Go back the specified duration
 == %d сек.
 
 Change the skip duration
-== Изменение времени перехода
+== Изменить продолжительность шага
 
 Go forward the specified duration
-== Отмотать вперед на заданное время
+== Промотать вперед на заданное время
 
 Render cut to video
 == Рендеринг отрезка в видео
@@ -1747,7 +1742,7 @@ Saving settings to '%s' failed
 == Не получилось сохранить настройки в '%s'
 
 Searching
-== В поиске
+== Поиск
 
 Enter Username
 == Введите имя
@@ -1777,7 +1772,7 @@ Are you sure that you want to restart?
 == Вы уверены, что хотите начать заново?
 
 There's an unsaved map in the editor, you might want to save it.
-== Вы не сохранили последнюю отредактированную карту, возможно, вы хотите ее сохранить.
+== В редакторе есть несохраненная карта, возможно, вы хотите её сохранить.
 
 Continue anyway?
 == Все равно продолжить?
@@ -1801,7 +1796,7 @@ Authed name color in scoreboard
 == Цвет администратора в табло
 
 Same clan color in scoreboard
-== Цвет клан в табло
+== Цвет клана в табло
 
 Show finish messages
 == Показывать сообщения о финишах
@@ -1810,7 +1805,7 @@ Failed saving the replay!
 == Не удалось сохранить запись!
 
 Error saving settings
-== Ошибка сохранения настроек
+== Ошибка при сохранении настроек
 
 Following
 == Текущие
@@ -1831,31 +1826,64 @@ Loading…
 == Загрузка…
 
 Loading demo file from storage
-== 
+== Загрузка демо из файлового хранилища
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d КиБ (%.1f КиБ/с)
 
 No login required
-== 
+== Без логина
 
 Player info change cooldown
-== 
+== Задержка смены информации об игроке
+
+Tee
+== Ти
 
 Always show chat
-== 
+== Всегда показывать чат
+
+Show only chat messages from team members
+== Показывать сообщения только от команды
 
 Show friend mark (♥) in name plates
-== 
+== Показывать знак дружбы (♥) в имени друга
 
 Show hook strength icon indicator
-== 
+== Показывать иконку индикатора силы крюка
 
 Show hook strength number indicator
-== 
+== Показывать номер индикатора силы крюка
 
 Show own player's hook collision line
-== 
+== Показывать линию крюка
 
 Always show own player's hook collision line
-== 
+== Всегда показывать линию крюка
 
 Always show other players' hook collision lines
-== 
+== Всегда показывать линию крюка других игроков
+
+[Spectating]
+Following %s
+== Наблюдение за %s
+
+Example of usage
+== Пример использования
+
+Round %d/%d
+== Раунд %d/%d
+
+[Spectators]
+%d others…
+== %d остальных…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Команда %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping/ru

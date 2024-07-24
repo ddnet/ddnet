@@ -31,7 +31,6 @@
 #include <engine/shared/datafile.h>
 #include <engine/shared/jobs.h>
 
-#include "auto_map.h"
 #include "editor_history.h"
 #include "editor_server_settings.h"
 #include "editor_trackers.h"
@@ -370,10 +369,6 @@ public:
 		m_OffsetEnvelopeY = 0.5f;
 
 		m_ShowMousePointer = true;
-		m_MouseDeltaX = 0;
-		m_MouseDeltaY = 0;
-		m_MouseDeltaWx = 0;
-		m_MouseDeltaWy = 0;
 
 		m_GuiActive = true;
 		m_PreviewZoom = false;
@@ -406,8 +401,8 @@ public:
 
 		m_CheckerTexture.Invalidate();
 		m_BackgroundTexture.Invalidate();
-		for(int i = 0; i < NUM_CURSORS; i++)
-			m_aCursorTextures[i].Invalidate();
+		for(auto &CursorTexture : m_aCursorTextures)
+			CursorTexture.Invalidate();
 
 		m_CursorType = CURSOR_NORMAL;
 
@@ -464,8 +459,7 @@ public:
 	void ResetIngameMoved() override { m_IngameMoved = false; }
 
 	void HandleCursorMovement();
-	void OnMouseMove(float MouseX, float MouseY);
-	void DispatchInputEvents();
+	void OnMouseMove(vec2 MousePos);
 	void HandleAutosave();
 	bool PerformAutosave();
 	void HandleWriterFinishJobs();
@@ -706,17 +700,10 @@ public:
 
 	char m_aMenuBackgroundTooltip[256];
 	bool m_PreviewZoom;
-	float m_MouseWScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
-	float m_MouseX = 0.0f;
-	float m_MouseY = 0.0f;
-	float m_MouseWorldX = 0.0f;
-	float m_MouseWorldY = 0.0f;
-	float m_MouseWorldNoParaX = 0.0f;
-	float m_MouseWorldNoParaY = 0.0f;
-	float m_MouseDeltaX;
-	float m_MouseDeltaY;
-	float m_MouseDeltaWx;
-	float m_MouseDeltaWy;
+	float m_MouseWorldScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
+	vec2 m_MouseWorldPos = vec2(0.0f, 0.0f);
+	vec2 m_MouseWorldNoParaPos = vec2(0.0f, 0.0f);
+	vec2 m_MouseDeltaWorld = vec2(0.0f, 0.0f);
 	const void *m_pContainerPanned;
 	const void *m_pContainerPannedLast;
 	char m_MapEditorId; // UI element ID for the main map editor
@@ -845,7 +832,7 @@ public:
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness) const;
 
-	SEditResult<int> UiDoValueSelector(void *pId, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, const ColorRGBA *pColor = nullptr, bool ShowValue = true);
+	SEditResult<int> UiDoValueSelector(void *pId, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int Corners = IGraphics::CORNER_ALL, const ColorRGBA *pColor = nullptr, bool ShowValue = true);
 
 	static CUi::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);
@@ -1015,7 +1002,7 @@ public:
 	void SelectGameLayer();
 	std::vector<int> SortImages();
 
-	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, const int SampleId);
+	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, int SampleId);
 
 	// Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum
@@ -1139,7 +1126,6 @@ public:
 	int FindNextFreeSwitchNumber();
 	int FindNextFreeTeleNumber(bool IsCheckpoint = false);
 
-public:
 	// Undo/Redo
 	CEditorHistory m_EditorHistory;
 	CEditorHistory m_ServerSettingsHistory;
@@ -1151,7 +1137,6 @@ private:
 	void UndoLastAction();
 	void RedoLastAction();
 
-private:
 	std::map<int, CPoint[5]> m_QuadDragOriginalPoints;
 };
 

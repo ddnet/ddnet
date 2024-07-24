@@ -39,6 +39,8 @@
 # 2024-01-15 By
 # 2024-03-03 Bamcane
 # 2024-04-21 By
+# 2024-06-10 By
+# 2024-07-21 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -112,8 +114,8 @@ Client
 Connecting to
 == 正在连接到
 
-Connection Problems...
-== 连接中断...
+Connection Problems…
+== 连接中断…
 
 Console
 == 控制台
@@ -416,7 +418,7 @@ Show name plates
 == 显示昵称
 
 Show only chat messages from friends
-== 只显示好友消息
+== 只显示好友聊天消息
 
 Sound
 == 声音
@@ -583,9 +585,6 @@ Your skin
 Reset to defaults
 == 恢复默认设置
 
-Round
-== 回合
-
 Lht.
 == 亮度
 
@@ -603,9 +602,6 @@ LAN
 
 Name plates size
 == 昵称大小
-
-Use DDRace Scoreboard
-== 使用 DDRace 计分板
 
 Show score
 == 显示分数
@@ -688,8 +684,8 @@ DDNet %s is available:
 Update now
 == 现在更新
 
-Updating...
-== 更新中...
+Updating…
+== 更新中…
 
 DDNet Client updated!
 == DDNet 客户端更新成功！
@@ -701,7 +697,7 @@ Check now
 == 检查更新
 
 Loading DDNet Client
-== 加载 DDNet 客户端中...
+== 加载 DDNet 客户端中…
 
 Browser
 == 浏览
@@ -883,8 +879,8 @@ Zoom in
 1 new mention
 == 1 条新被提及消息
 
-Update failed! Check log...
-== 更新失败！请检查日志...
+Update failed! Check log…
+== 更新失败！请检查日志…
 
 Pause
 == 暂停
@@ -1250,8 +1246,8 @@ Speed:
 Angle:
 == 角度
 
-Trying to determine UDP connectivity...
-== 正在尝试检测 UDP 连接...
+Trying to determine UDP connectivity…
+== 正在尝试检测 UDP 连接…
 
 UDP seems to be filtered.
 == UDP 疑似被过滤
@@ -1797,7 +1793,7 @@ Following
 == 当前
 
 Press a key…
-== 按任意键...
+== 按任意键…
 
 Are you sure that you want to restart?
 == 确定要重新开始？
@@ -1842,7 +1838,7 @@ Error saving settings
 == 保存设置错误
 
 Loading commands…
-== 正在加载指令...
+== 正在加载指令…
 
 Main menu
 == 主菜单
@@ -1854,7 +1850,7 @@ Friends
 == 好友
 
 Loading…
-== 正在加载...
+== 正在加载…
 
 Loading demo file from storage
 == 正在从硬盘中加载回放文件
@@ -1885,3 +1881,36 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == 始终显示其他玩家的钩索辅助线
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== 只显示队伍聊天消息
+
+[Spectating]
+Following %s
+== 正在旁观 %s
+
+Example of usage
+== 用途示例
+
+Round %d/%d
+== 轮次 %d/%d
+
+[Spectators]
+%d others…
+== %d 其他…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== 队伍 %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/index.php?title=Mapping/zh&variant=zh-hans

@@ -1527,7 +1527,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 
 				// reserved slot
-				if(ClientId >= Config()->m_SvMaxClients - Config()->m_SvReservedSlots && !CheckReservedSlotAuth(ClientId, pPassword))
+				if(ClientId >= MaxClients() - Config()->m_SvReservedSlots && !CheckReservedSlotAuth(ClientId, pPassword))
 				{
 					m_NetServer.Drop(ClientId, "This server is full");
 					return;
@@ -2285,7 +2285,11 @@ void CServer::FillAntibot(CAntibotRoundData *pData)
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		CAntibotPlayerData *pPlayer = &pData->m_aPlayers[i];
-		net_addr_str(m_NetServer.ClientAddr(i), pPlayer->m_aAddress, sizeof(pPlayer->m_aAddress), true);
+		// No need for expensive str_copy since we don't truncate and the string is
+		// ASCII anyway
+		static_assert(std::size((CAntibotPlayerData{}).m_aAddress) >= NETADDR_MAXSTRSIZE);
+		static_assert(sizeof(*(CNetServer{}).ClientAddrString(i)) == NETADDR_MAXSTRSIZE);
+		mem_copy(pPlayer->m_aAddress, m_NetServer.ClientAddrString(i), NETADDR_MAXSTRSIZE);
 	}
 }
 
@@ -2620,10 +2624,11 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 	if(m_PreviousDebugDummies == g_Config.m_DbgDummies && !ForceDisconnect)
 		return;
 
+	g_Config.m_DbgDummies = clamp(g_Config.m_DbgDummies, 0, MaxClients());
 	for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousDebugDummies, g_Config.m_DbgDummies); ++DummyIndex)
 	{
 		const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_DbgDummies;
-		const int ClientId = MAX_CLIENTS - DummyIndex - 1;
+		const int ClientId = MaxClients() - DummyIndex - 1;
 		if(AddDummy && m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
 		{
 			NewClientCallback(ClientId, this, false);
@@ -2888,9 +2893,10 @@ int CServer::Run()
 						}
 					}
 
-					if(m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED &&
-						Config()->m_SvDnsblBan)
-						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientId), 60 * 10, "VPN detected, try connecting without. Contact admin if mistaken");
+					if(m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED && Config()->m_SvDnsblBan)
+					{
+						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientId), 60 * 10, Config()->m_SvDnsblBanReason);
+					}
 				}
 			}
 
@@ -2970,14 +2976,21 @@ int CServer::Run()
 			if(!NonActive)
 				PumpNetwork(PacketWaiting);
 
-			NonActive = true;
-
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
 				if(m_aClients[i].m_State == CClient::STATE_REDIRECTED)
+				{
 					if(time_get() > m_aClients[i].m_RedirectDropTime)
+					{
 						m_NetServer.Drop(i, "redirected");
-				if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+					}
+				}
+			}
+
+			NonActive = true;
+			for(const auto &Client : m_aClients)
+			{
+				if(Client.m_State != CClient::STATE_EMPTY)
 				{
 					NonActive = false;
 					break;
@@ -3859,18 +3872,18 @@ const char *CServer::GetAnnouncementLine(const char *pFileName)
 		str_copy(m_aAnnouncementFile, pFileName);
 		m_vAnnouncements.clear();
 
-		IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
-		if(!File)
+		CLineReader LineReader;
+		if(!LineReader.OpenFile(m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL)))
+		{
 			return 0;
-
-		char *pLine;
-		CLineReader Reader;
-		Reader.Init(File);
-		while((pLine = Reader.Get()))
+		}
+		while(const char *pLine = LineReader.Get())
+		{
 			if(str_length(pLine) && pLine[0] != '#')
+			{
 				m_vAnnouncements.emplace_back(pLine);
-
-		io_close(File);
+			}
+		}
 	}
 
 	if(m_vAnnouncements.empty())

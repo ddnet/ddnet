@@ -6,6 +6,7 @@
 #   Cammodude 2024-10-03 18:04:16
 #   Cammodude 2024-12-04 17:35:38
 #   Cammodude 2024-20-04 15:17:26
+#   Cammodude 2024-18-07 20:00:25
 ##### /authors #####
 
 ##### translated strings #####
@@ -79,8 +80,8 @@ Client
 Connecting to
 == Ühenduse loomine
 
-Connection Problems...
-== Ühenduse Probleemid...
+Connection Problems…
+== Ühenduse Probleemid…
 
 Console
 == Konsool
@@ -499,9 +500,6 @@ Your skin
 Reset to defaults
 == Lähtesta vaikeseadetele
 
-Round
-== Raund
-
 Lht.
 == Heledus
 
@@ -859,9 +857,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == DDNet Klient peab taaskäivitama, et uuendus lõpetada!
 
-Use DDRace Scoreboard
-== Kasuta DDRace punktitabelit
-
 Show score
 == Näita punkte
 
@@ -955,8 +950,8 @@ DDNet %s is available:
 Update now
 == Uuenda nüüd
 
-Updating...
-== Uuendamine...
+Updating…
+== Uuendamine…
 
 DDNet Client updated!
 == DDNet Klient on uuendatud!
@@ -1007,8 +1002,8 @@ DDNet %s is out!
 Downloading %s:
 == Allalaadimine %s:
 
-Update failed! Check log...
-== Uuendus ebaõnnestus! Vaata logi...
+Update failed! Check log…
+== Uuendus ebaõnnestus! Vaata logi…
 
 Restart
 == Taaskäivita
@@ -1205,7 +1200,7 @@ Press a key…
 Main menu
 == Peamenüü
 
-Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
 == UDP-ühenduvuse määramine
 
 UDP seems to be filtered.
@@ -1846,3 +1841,36 @@ Always show other players' hook collision lines
 
 Net
 == Võrk
+
+[Spectating]
+Following %s
+== %s jälgimine
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+Example of usage
+== Kasutamise näide
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== Ainult näita sõnumeid tiimi kaaslastelt
+
+Round %d/%d
+== Raund %d/%d
+
+[Spectators]
+%d others…
+== %d teisi…
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Tiim %d (%d/%d)
+
+https://wiki.ddnet.org/wiki/Mapping
+== 

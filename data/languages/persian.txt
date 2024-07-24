@@ -76,8 +76,8 @@ Client
 Connecting to
 == ﻪﺑ ﻥﺪﺷ ﻞﺻﻭ
 
-Connection Problems...
-== ...ﺪﺷ ﻪﺟﺍﻮﻣ ﻞﻜﺸﻣ ﺎﺑ ﻁﺎﺒﺗﺭﺍ
+Connection Problems…
+== …ﺪﺷ ﻪﺟﺍﻮﻣ ﻞﻜﺸﻣ ﺎﺑ ﻁﺎﺒﺗﺭﺍ
 
 Console
 == ﻝﻮﺴﻨﻛ
@@ -702,9 +702,6 @@ Background music volume
 Sound
 == ﺍﺪﺻ
 
-Use DDRace Scoreboard
-== DDRace ﺕﺍﺯﺎﯿﺘﻣﺍ ﯼﻮﻠﺑﺎﺗ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
-
 Show score
 == ﺯﺎﯿﺘﻣﺍ ﺶﯾﺎﻤﻧ
 
@@ -738,7 +735,7 @@ Background
 Update now
 == ﻦﮐ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﻥﻻﺍ ﻦﯿﻤﻫ
 
-Updating...
+Updating…
 == ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﻝﺎﺣﺭﺩ
 
 No updates available
@@ -775,8 +772,8 @@ Play
 Downloading %s:
 == %s :ﺩﻮﻠﻧﺍﺩ ﻝﺎﺣﺭﺩ
 
-Update failed! Check log...
-== ... ﺪﯿﻨﮐ ﮏﭼ ﺍﺭ گﻻ!ﻖﻓﻮﻣﺎﻧ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ
+Update failed! Check log…
+== … ﺪﯿﻨﮐ ﮏﭼ ﺍﺭ گﻻ!ﻖﻓﻮﻣﺎﻧ ﯽﻧﺎﺳﺭﺯﻭﺮﺑ
 
 Restart
 == ﺩﺪﺠﻣ ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ
@@ -869,8 +866,8 @@ Uploading map data to GPU
 The audio device couldn't be initialised.
 == .ﺩﻮﺷ ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ ﺪﻧﺍﻮﺗ ﯽﻤﻧ ﯽﺗﻮﺻ ﻩﺎﮕﺘﺳﺩ
 
-Trying to determine UDP connectivity...
-== UDP... ﻝﺎﺼﺗﺍ ﻦﯿﯿﻌﺗ ﯼﺍﺮﺑ ﺵﻼﺗ
+Trying to determine UDP connectivity…
+== UDP… ﻝﺎﺼﺗﺍ ﻦﯿﯿﻌﺗ ﯼﺍﺮﺑ ﺵﻼﺗ
 
 UDP seems to be filtered.
 == .ﺖﺳﺍ ﻩﺪﺷ ﺮﺘﻠﯿﻓ UDP ﺪﺳﺭ ﯽﻣ ﺮﻈﻧ ﻪﺑ
@@ -1468,9 +1465,6 @@ Loading race demo files
 Time limit: %d min
 == ﻪﻘﯿﻗﺩ %d :ﯽﻧﺎﻣﺯ ﺖﯾﺩﻭﺪﺤﻣ
 
-Round
-== ﺪﻧﺍﺭ
-
 Super
 == ﺮﭘﻮﺳ
 
@@ -1590,6 +1584,10 @@ Loading commands…
 Multi-View
 == 
 
+[Spectating]
+Following %s
+== 
+
 Some map images could not be loaded. Check the local console for details.
 == 
 
@@ -1636,6 +1634,12 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1774,6 +1778,9 @@ Axis
 Graphics card
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1781,6 +1788,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size
@@ -1831,6 +1841,20 @@ Entities background color
 Unregister protocol and file extensions
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
 FPM
 == 
 
@@ -1841,4 +1865,7 @@ Grabs
 == 
 
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

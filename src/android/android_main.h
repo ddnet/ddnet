@@ -20,4 +20,12 @@
  */
 const char *InitAndroid();
 
+/**
+ * Sends an intent to the Android system to restart the app.
+ *
+ * This will restart the main activity in a new task. The current process
+ * must immediately terminate after this function is called.
+ */
+void RestartAndroidApp();
+
 #endif // ANDROID_ANDROID_MAIN_H

@@ -320,6 +320,26 @@ public:
 	 */
 	typedef std::function<void()> FPopupMenuClosedCallback;
 
+	/**
+	 * Represents the aggregated state of current touch events to control a user interface.
+	 */
+	class CTouchState
+	{
+		friend class CUi;
+
+		bool m_SecondaryPressedNext = false;
+		float m_SecondaryActivationTime = 0.0f;
+		vec2 m_SecondaryActivationDelta = vec2(0.0f, 0.0f);
+
+	public:
+		bool m_AnyPressed = false;
+		bool m_PrimaryPressed = false;
+		bool m_SecondaryPressed = false;
+		vec2 m_PrimaryPosition = vec2(-1.0f, -1.0f);
+		vec2 m_PrimaryDelta = vec2(0.0f, 0.0f);
+		vec2 m_ScrollAmount = vec2(0.0f, 0.0f);
+	};
+
 private:
 	bool m_Enabled;
 
@@ -327,17 +347,43 @@ private:
 	const void *m_pActiveItem = nullptr;
 	const void *m_pLastActiveItem = nullptr; // only used internally to track active CLineInput
 	const void *m_pBecomingHotItem = nullptr;
-	const CScrollRegion *m_pHotScrollRegion = nullptr;
-	const CScrollRegion *m_pBecomingHotScrollRegion = nullptr;
+	CScrollRegion *m_pHotScrollRegion = nullptr;
+	CScrollRegion *m_pBecomingHotScrollRegion = nullptr;
 	bool m_ActiveItemValid = false;
 
-	vec2 m_UpdatedMousePos = vec2(0.0f, 0.0f);
-	vec2 m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
-	float m_MouseX, m_MouseY; // in gui space
-	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
-	float m_MouseWorldX, m_MouseWorldY; // in world space
-	unsigned m_MouseButtons;
-	unsigned m_LastMouseButtons;
+	int m_ActiveButtonLogicButton = -1;
+	int m_ActiveDraggableButtonLogicButton = -1;
+	class CDoubleClickState
+	{
+	public:
+		const void *m_pLastClickedId = nullptr;
+		float m_LastClickTime = -1.0f;
+		vec2 m_LastClickPos = vec2(-1.0f, -1.0f);
+	};
+	CDoubleClickState m_DoubleClickState;
+	const void *m_pLastEditingItem = nullptr;
+	float m_ActiveScrollbarOffset = 0.0f;
+	float m_ProgressSpinnerOffset = 0.0f;
+	class CValueSelectorState
+	{
+	public:
+		int m_Button = -1;
+		bool m_DidScroll = false;
+		float m_ScrollValue = 0.0f;
+		CLineInputNumber m_NumberInput;
+		const void *m_pLastTextId = nullptr;
+	};
+	CValueSelectorState m_ActiveValueSelectorState;
+
+	vec2 m_UpdatedMousePos = vec2(0.0f, 0.0f); // in window screen space
+	vec2 m_UpdatedMouseDelta = vec2(0.0f, 0.0f); // in window screen space
+	vec2 m_MousePos = vec2(0.0f, 0.0f); // in gui space
+	vec2 m_MouseDelta = vec2(0.0f, 0.0f); // in gui space
+	vec2 m_MouseWorldPos = vec2(-1.0f, -1.0f); // in world space
+	unsigned m_UpdatedMouseButtons = 0;
+	unsigned m_MouseButtons = 0;
+	unsigned m_LastMouseButtons = 0;
+	CTouchState m_TouchState;
 	bool m_MouseSlow = false;
 	bool m_MouseLock = false;
 	const void *m_pMouseLockId = nullptr;
@@ -348,8 +394,6 @@ private:
 
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
-
-	bool m_ValueSelectorTextMode = false;
 
 	struct SPopupMenu
 	{
@@ -423,20 +467,22 @@ public:
 
 	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
 	bool Enabled() const { return m_Enabled; }
-	void Update();
-	void Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDeltaY, float MouseWorldX, float MouseWorldY);
+	void Update(vec2 MouseWorldPos = vec2(-1.0f, -1.0f));
 	void DebugRender();
 
-	float MouseDeltaX() const { return m_MouseDeltaX; }
-	float MouseDeltaY() const { return m_MouseDeltaY; }
-	float MouseX() const { return m_MouseX; }
-	float MouseY() const { return m_MouseY; }
-	vec2 MousePos() const { return vec2(m_MouseX, m_MouseY); }
-	float MouseWorldX() const { return m_MouseWorldX; }
-	float MouseWorldY() const { return m_MouseWorldY; }
+	vec2 MousePos() const { return m_MousePos; }
+	float MouseX() const { return m_MousePos.x; }
+	float MouseY() const { return m_MousePos.y; }
+	vec2 MouseDelta() const { return m_MouseDelta; }
+	float MouseDeltaX() const { return m_MouseDelta.x; }
+	float MouseDeltaY() const { return m_MouseDelta.y; }
+	vec2 MouseWorldPos() const { return m_MouseWorldPos; }
+	float MouseWorldX() const { return m_MouseWorldPos.x; }
+	float MouseWorldY() const { return m_MouseWorldPos.y; }
+	vec2 UpdatedMousePos() const { return m_UpdatedMousePos; }
+	vec2 UpdatedMouseDelta() const { return m_UpdatedMouseDelta; }
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
 	int MouseButtonClicked(int Index) const { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
-	int MouseButtonReleased(int Index) const { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
 	bool CheckMouseLock()
 	{
 		if(m_MouseLock && ActiveItem() != m_pMouseLockId)
@@ -467,7 +513,7 @@ public:
 		}
 		return false;
 	}
-	void SetHotScrollRegion(const CScrollRegion *pId) { m_pBecomingHotScrollRegion = pId; }
+	void SetHotScrollRegion(CScrollRegion *pId) { m_pBecomingHotScrollRegion = pId; }
 	const void *HotItem() const { return m_pHotItem; }
 	const void *NextHotItem() const { return m_pBecomingHotItem; }
 	const void *ActiveItem() const { return m_pActiveItem; }
@@ -488,6 +534,7 @@ public:
 	bool MouseInsideClip() const { return !IsClipped() || MouseInside(ClipArea()); }
 	bool MouseHovered(const CUIRect *pRect) const { return MouseInside(pRect) && MouseInsideClip(); }
 	void ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const;
+	void UpdateTouchState(CTouchState &State) const;
 	void ResetMouseSlow() { m_MouseSlow = false; }
 
 	bool ConsumeHotkey(EHotkey Hotkey);
@@ -510,6 +557,7 @@ public:
 
 	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect);
 	int DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
+	bool DoDoubleClickLogic(const void *pId);
 	EEditState DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, float *pY);
 	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp = false, float ScrollSpeed = 10.0f) const;
 	static vec2 CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, const float *pBiggestCharHeight = nullptr);
@@ -562,8 +610,6 @@ public:
 	// value selector
 	SEditResult<int64_t> DoValueSelectorWithState(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
 	int64_t DoValueSelector(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
-	bool IsValueSelectorTextMode() const { return m_ValueSelectorTextMode; }
-	void SetValueSelectorTextMode(bool TextMode) { m_ValueSelectorTextMode = TextMode; }
 
 	// scrollbars
 	enum
@@ -575,6 +621,9 @@ public:
 	float DoScrollbarV(const void *pId, const CUIRect *pRect, float Current);
 	float DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
 	bool DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u, const char *pSuffix = "");
+
+	// progress bar
+	void RenderProgressBar(CUIRect ProgressBar, float Progress);
 
 	// progress spinner
 	void RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props = {}) const;

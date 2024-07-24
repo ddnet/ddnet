@@ -328,8 +328,7 @@ public:
 	// ---
 
 	int GetPredictionTime() override;
-	void *SnapGetItem(int SnapId, int Index, CSnapItem *pItem) const override;
-	int SnapItemSize(int SnapId, int Index) const override;
+	CSnapItem SnapGetItem(int SnapId, int Index) const override;
 	const void *SnapFindItem(int SnapId, int Type, int Id) const override;
 	int SnapNumItems(int SnapId) const override;
 	void SnapSetStaticsize(int ItemType, int Size) override;
@@ -505,6 +504,9 @@ public:
 
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	int UdpConnectivity(int NetType) override;
+
+	bool ViewLink(const char *pLink) override;
+	bool ViewFile(const char *pFilename) override;
 
 #if defined(CONF_FAMILY_WINDOWS)
 	void ShellRegister() override;

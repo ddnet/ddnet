@@ -48,6 +48,7 @@ public:
 
 	void SetWeapon(int W);
 	void SetJetpack(bool Active);
+	void SetJumps(int Jumps);
 	void SetSolo(bool Solo);
 	void SetSuper(bool Super);
 	void SetLiveFrozen(bool Active);
@@ -194,6 +195,7 @@ public:
 	int Team();
 	bool CanCollide(int ClientId);
 	bool SameTeam(int ClientId);
+	void StopRecording();
 	bool m_NinjaJetpack;
 	int m_TeamBeforeSuper;
 	int m_FreezeTime;

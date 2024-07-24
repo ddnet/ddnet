@@ -60,8 +60,8 @@ private:
 	IEngineGraphics *m_pGraphics;
 	IConsole *m_pConsole;
 
-	IEngineGraphics *Graphics() { return m_pGraphics; }
-	IConsole *Console() { return m_pConsole; }
+	IEngineGraphics *Graphics() const { return m_pGraphics; }
+	IConsole *Console() const { return m_pConsole; }
 
 	// joystick
 	std::vector<CJoystick> m_vJoysticks;
@@ -77,9 +77,7 @@ private:
 	char *m_pClipboardText;
 
 	bool m_MouseFocus;
-	bool m_MouseDoubleClick;
 #if defined(CONF_PLATFORM_ANDROID)
-	ivec2 m_LastMousePos = ivec2(0, 0); // No relative mouse on Android
 	int m_NumBackPresses = 0;
 	bool m_BackButtonReleased = true;
 	int64_t m_LastBackPress = -1;
@@ -92,14 +90,18 @@ private:
 	std::vector<std::string> m_vCandidates;
 	int m_CandidateSelectedIndex;
 
-	void AddEvent(char *pText, int Key, int Flags);
-	void Clear() override;
-	bool IsEventValid(const CEvent &Event) const override { return Event.m_InputCount == m_InputCounter; }
+	// events
+	std::vector<CEvent> m_vInputEvents;
+	int64_t m_LastUpdate;
+	float m_UpdateTime;
+	void AddKeyEvent(int Key, int Flags);
+	void AddTextEvent(const char *pText);
 
 	// quick access to input
-	unsigned short m_aInputCount[g_MaxKeys]; // tw-KEY
-	unsigned char m_aInputState[g_MaxKeys]; // SDL_SCANCODE
-	int m_InputCounter;
+	uint32_t m_aInputCount[g_MaxKeys];
+	unsigned char m_aInputState[g_MaxKeys];
+	uint32_t m_InputCounter;
+	std::vector<CTouchFingerState> m_vTouchFingerStates;
 
 	void UpdateMouseState();
 	void UpdateJoystickState();
@@ -108,6 +110,9 @@ private:
 	void HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event);
 	void HandleJoystickAddedEvent(const SDL_JoyDeviceEvent &Event);
 	void HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event);
+	void HandleTouchDownEvent(const SDL_TouchFingerEvent &Event);
+	void HandleTouchUpEvent(const SDL_TouchFingerEvent &Event);
+	void HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event);
 
 	char m_aDropFile[IO_MAX_PATH_LENGTH];
 
@@ -121,6 +126,10 @@ public:
 	void Init() override;
 	int Update() override;
 	void Shutdown() override;
+
+	void ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const override;
+	void Clear() override;
+	float GetUpdateTime() const override;
 
 	bool ModifierIsPressed() const override { return KeyState(KEY_LCTRL) || KeyState(KEY_RCTRL) || KeyState(KEY_LGUI) || KeyState(KEY_RGUI); }
 	bool ShiftIsPressed() const override { return KeyState(KEY_LSHIFT) || KeyState(KEY_RSHIFT); }
@@ -136,9 +145,10 @@ public:
 	bool MouseRelative(float *pX, float *pY) override;
 	void MouseModeAbsolute() override;
 	void MouseModeRelative() override;
-	void NativeMousePos(int *pX, int *pY) const override;
-	bool NativeMousePressed(int Index) override;
-	bool MouseDoubleClick() override;
+	vec2 NativeMousePos() const override;
+	bool NativeMousePressed(int Index) const override;
+
+	const std::vector<CTouchFingerState> &TouchFingerStates() const override;
 
 	const char *GetClipboardText() override;
 	void SetClipboardText(const char *pText) override;

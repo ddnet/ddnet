@@ -222,7 +222,6 @@ enum
 	IOFLAG_READ = 1,
 	IOFLAG_WRITE = 2,
 	IOFLAG_APPEND = 4,
-	IOFLAG_SKIP_BOM = 8,
 
 	IOSEEK_START = 0,
 	IOSEEK_CUR = 1,
@@ -237,7 +236,7 @@ enum
  * @param File to open.
  * @param flags A set of IOFLAG flags.
  *
- * @sa IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND, IOFLAG_SKIP_BOM.
+ * @sa IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND.
  *
  * @return A handle to the file on success and 0 on failure.
  *
@@ -1607,6 +1606,22 @@ const char *str_find_nocase(const char *haystack, const char *needle);
 const char *str_find(const char *haystack, const char *needle);
 
 /**
+ * @ingroup Strings
+ *
+ * @param haystack String to search in
+ * @param delim String to search for
+ * @param offset Number of characters into the haystack
+ * @param start Will be set to the first delimiter on the left side of the offset (or haystack start)
+ * @param end Will be set to the furst delimiter on the right side  of the offset (or haystack end)
+ *
+ * @return `true` if both delimiters were found
+ * @return 'false' if a delimiter is missing (it uses haystack start and end as fallback)
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
+bool str_delimiters_around_offset(const char *haystay, const char *delim, int offset, int *start, int *end);
+
+/**
  * Finds the last occurrence of a character
  *
  * @ingroup Strings
@@ -2527,7 +2542,7 @@ typedef pid_t PROCESS;
  */
 constexpr PROCESS INVALID_PROCESS = 0;
 #endif
-
+#if !defined(CONF_PLATFORM_ANDROID)
 /**
  * Determines the initial window state when using @link shell_execute @endlink
  * to execute a process.
@@ -2599,11 +2614,11 @@ bool is_process_alive(PROCESS process);
 int open_link(const char *link);
 
 /**
- * Opens a file or directory with default program.
+ * Opens a file or directory with the default program.
  *
  * @ingroup Shell
  *
- * @param path The path to open.
+ * @param path The file or folder to open with the default program.
  *
  * @return `1` on success, `0` on failure.
  *
@@ -2611,6 +2626,7 @@ int open_link(const char *link);
  * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
  */
 int open_file(const char *path);
+#endif // !defined(CONF_PLATFORM_ANDROID)
 
 /**
  * @defgroup Secure-Random

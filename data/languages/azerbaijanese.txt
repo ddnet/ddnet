@@ -2,7 +2,8 @@
 #originally created by:
 #	    Gokturk, seishiroon and Aykhan [EN07Z]
 #modified by:
-#     
+#     Gokturk          2024-06-09 12:00:50
+#     Gokturk          2024-07-17 02:24:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -75,8 +76,8 @@ Client
 Connecting to
 == Bağlanmaq
 
-Connection Problems...
-== Bağlantı Xətası...
+Connection Problems…
+== Bağlantı Xətası…
 
 Console
 == Konsol
@@ -492,9 +493,6 @@ Your skin
 Reset to defaults
 == Defoltlara sıfırlayın
 
-Round
-== Yuvarlaq
-
 Lht.
 == Parlaqlıq
 
@@ -612,7 +610,7 @@ DDNet %s is out!
 Downloading %s:
 == Endirilir %s:
 
-Update failed! Check log...
+Update failed! Check log…
 == Yeniləmə zamanı xəta baş verdi!
 
 DDNet Client updated!
@@ -795,9 +793,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == Yeniləmənin tamamlanması üçün oyunu yenidən başlatmaq lazımdır!
 
-Use DDRace Scoreboard
-== DDRace xal lövhəsindən istifadə edin
-
 Show score
 == Xal göstər
 
@@ -891,8 +886,8 @@ Show tiles layers from BG map
 DDNet %s is available:
 == DDNet %s Nəşr olundu:
 
-Updating...
-== Yenilənir...
+Updating…
+== Yenilənir…
 
 No updates available
 == Güncəlləmə mövcud deyil
@@ -1033,10 +1028,10 @@ Warning
 == Xəbərdarlıq 
 
 Quitting. Please wait…
-== Çıxılır. Zəhmət olmasa, gözləyin...
+== Çıxılır. Zəhmət olmasa, gözləyin…
 
 Restarting. Please wait…
-== Yenidən işə salınır. Zəhmət olmasa, gözləyin...
+== Yenidən işə salınır. Zəhmət olmasa, gözləyin…
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Sazlama rejimi aktivdir. Onu söndürmək üçün Ctrl+Shift+D düymələrini sıxın.
@@ -1059,8 +1054,8 @@ Team %d
 Uploading map data to GPU
 == Uploading map data to GPU
 
-Trying to determine UDP connectivity...
-== Trying to determine UDP connectivity...
+Trying to determine UDP connectivity…
+== Trying to determine UDP connectivity…
 
 UDP seems to be filtered.
 == UDP seems to be filtered.
@@ -1761,9 +1756,6 @@ No demo selected
 Created
 == Yaradılmışdır
 
-map not included
-== Xəritə daxil deyil
-
 Loading…
 == Yüklənir…
 
@@ -1841,3 +1833,40 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Digər oyunçuların qarmaq toqquşma sərhədini həmişə göstər
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+[Demo details]
+map not included
+== xəritə daxil deyil
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== Yalnız komanda üzvlərinin mesajlarını göstərin
+
+[Spectating]
+Following %s
+== izlənilməkdədir %s
+
+Example of usage
+== İstifadə nümunəsi
+
+Round %d/%d
+== Yumru %d/%d
+
+[Spectators]
+%d others…
+== %d başqaları
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== Komanda %d (%d/%d
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping

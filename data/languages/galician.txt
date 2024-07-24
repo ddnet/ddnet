@@ -76,8 +76,8 @@ Client
 Connecting to
 == Conectando con
 
-Connection Problems...
-== Problemas de conexión...
+Connection Problems…
+== Problemas de conexión…
 
 Console
 == Consola
@@ -502,9 +502,6 @@ Your skin
 Reset to defaults
 == Restablecer por defecto
 
-Round
-== Rolda
-
 Lht.
 == Lum.
 
@@ -613,8 +610,8 @@ DDNet %s is out!
 Downloading %s:
 == Descargando %s:
 
-Update failed! Check log...
-== Actualización errada! Comproba o rexistro...
+Update failed! Check log…
+== Actualización errada! Comproba o rexistro…
 
 DDNet Client updated!
 == Cliente DDNet actualizado!
@@ -793,9 +790,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == Utilizar o marcador DDRace
 
-Use DDRace Scoreboard
-== Utilizar o marcador DDRace
-
 Show score
 == Mostrar puntaje
 
@@ -883,8 +877,8 @@ Show tiles layers from BG map
 DDNet %s is available:
 == DDNet %s está dispoñible:
 
-Updating...
-== Actualizando...
+Updating…
+== Actualizando…
 
 No updates available
 == Non hai actualizacións dispoñibles
@@ -1202,8 +1196,8 @@ Speed:
 Angle:
 == Ángulo:
 
-Trying to determine UDP connectivity...
-== Tratando de determinar a conexión UDP...
+Trying to determine UDP connectivity…
+== Tratando de determinar a conexión UDP…
 
 UDP seems to be filtered.
 == UDP parece estar filtrado.
@@ -1631,6 +1625,10 @@ Loading commands…
 Multi-View
 == 
 
+[Spectating]
+Following %s
+== 
+
 Some map images could not be loaded. Check the local console for details.
 == 
 
@@ -1677,6 +1675,12 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1784,6 +1788,9 @@ Axis
 Graphics card
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1791,6 +1798,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size
@@ -1841,5 +1851,22 @@ Regular background color
 Entities background color
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 

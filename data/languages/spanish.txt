@@ -95,8 +95,8 @@ Client
 Connecting to
 == Conectando con
 
-Connection Problems...
-== Problemas de conexión...
+Connection Problems…
+== Problemas de conexión…
 
 Console
 == Consola
@@ -523,9 +523,6 @@ Your skin
 Reset to defaults
 == Resetear por defecto
 
-Round
-== Ronda
-
 Lht.
 == Lum.
 
@@ -634,8 +631,8 @@ DDNet %s is out!
 Downloading %s:
 == Descargando %s:
 
-Update failed! Check log...
-== ¡Actualización fallida! Comprueba el registro...
+Update failed! Check log…
+== ¡Actualización fallida! Comprueba el registro…
 
 DDNet Client updated!
 == ¡Cliente DDNet actualizado!
@@ -814,9 +811,6 @@ DDNet
 DDNet Client needs to be restarted to complete update!
 == ¡El Cliente DDNet debe reiniciarse para completar la actualización!
 
-Use DDRace Scoreboard
-== Utilizar el marcador DDRace
-
 Show score
 == Mostrar puntaje
 
@@ -907,8 +901,8 @@ Show tiles layers from BG map
 DDNet %s is available:
 == DDNet %s está disponible:
 
-Updating...
-== Actualizando...
+Updating…
+== Actualizando…
 
 No updates available
 == No hay actualizaciones disponibles
@@ -1226,8 +1220,8 @@ Speed:
 Angle:
 == Ángulo:
 
-Trying to determine UDP connectivity...
-== Tratando de determinar la conexión UDP...
+Trying to determine UDP connectivity…
+== Tratando de determinar la conexión UDP…
 
 UDP seems to be filtered.
 == UDP parece estar filtrado.
@@ -1864,3 +1858,36 @@ Always show own player's hook collision line
 
 Always show other players' hook collision lines
 == Siempre mostrar la línea de colisión del gancho de otros jugadores
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+Tee
+== Tee
+
+Show only chat messages from team members
+== Mostrar solo los mensajes de miembros del equipo
+
+[Spectating]
+Following %s
+== 
+
+Example of usage
+== 
+
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
+== 

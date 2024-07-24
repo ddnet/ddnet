@@ -3,7 +3,9 @@
 
 #include <engine/shared/config.h>
 
+#include <base/log.h>
 #include <base/math.h>
+#include <base/vmath.h>
 #include <game/client/gameclient.h>
 #include <game/collision.h>
 #include <game/mapitems.h>
@@ -99,7 +101,7 @@ void CCamera::OnRender()
 		m_Zoom = clamp(m_Zoom, MinZoomLevel(), MaxZoomLevel());
 	}
 
-	if(!(m_pClient->m_Snap.m_SpecInfo.m_Active || GameClient()->m_GameInfo.m_AllowZoom || Client()->State() == IClient::STATE_DEMOPLAYBACK))
+	if(!ZoomAllowed())
 	{
 		m_ZoomSet = false;
 		m_Zoom = 1.0f;
@@ -208,28 +210,31 @@ void CCamera::OnReset()
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		pSelf->ScaleZoom(CCamera::ZOOM_STEP);
+	if(!pSelf->ZoomAllowed())
+		return;
 
-		if(pSelf->GameClient()->m_MultiViewActivated)
-			pSelf->GameClient()->m_MultiViewPersonalZoom++;
-	}
+	pSelf->ScaleZoom(CCamera::ZOOM_STEP);
+
+	if(pSelf->GameClient()->m_MultiViewActivated)
+		pSelf->GameClient()->m_MultiViewPersonalZoom++;
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		pSelf->ScaleZoom(1 / CCamera::ZOOM_STEP);
+	if(!pSelf->ZoomAllowed())
+		return;
 
-		if(pSelf->GameClient()->m_MultiViewActivated)
-			pSelf->GameClient()->m_MultiViewPersonalZoom--;
-	}
+	pSelf->ScaleZoom(1 / CCamera::ZOOM_STEP);
+
+	if(pSelf->GameClient()->m_MultiViewActivated)
+		pSelf->GameClient()->m_MultiViewPersonalZoom--;
 }
 void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
+	if(!pSelf->ZoomAllowed())
+		return;
+
 	float TargetLevel = pResult->NumArguments() ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
 	pSelf->ChangeZoom(std::pow(CCamera::ZOOM_STEP, TargetLevel - 10), pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime);
 
@@ -319,57 +324,66 @@ void CCamera::GotoTele(int Number, int Offset)
 {
 	if(Collision()->TeleLayer() == nullptr)
 		return;
+	Number--;
 
-	int Match = -1;
+	if(m_GotoTeleLastNumber != Number)
+		m_GotoTeleLastPos = ivec2(-1, -1);
+
 	ivec2 MatchPos = ivec2(-1, -1);
+	const size_t NumTeles = Collision()->TeleAllSize(Number);
+	if(!NumTeles)
+	{
+		log_error("camera", "No teleporter with number %d found.", Number + 1);
+		return;
+	}
 
-	auto FindTile = [this, &Match, &MatchPos, &Number, &Offset]() {
-		for(int x = 0; x < Collision()->GetWidth(); x++)
+	if(Offset != -1 || m_GotoTeleLastPos == ivec2(-1, -1))
+	{
+		if((size_t)Offset >= NumTeles || Offset < 0)
+			Offset = 0;
+		vec2 Tele = Collision()->TeleAllGet(Number, Offset);
+		MatchPos = ivec2(Tele.x / 32, Tele.y / 32);
+		m_GotoTeleOffset = Offset;
+	}
+	else
+	{
+		bool FullRound = false;
+		do
 		{
-			for(int y = 0; y < Collision()->GetHeight(); y++)
+			vec2 Tele = Collision()->TeleAllGet(Number, m_GotoTeleOffset);
+			MatchPos = ivec2(Tele.x / 32, Tele.y / 32);
+			m_GotoTeleOffset++;
+			if((size_t)m_GotoTeleOffset >= NumTeles)
 			{
-				int i = y * Collision()->GetWidth() + x;
-				int Tele = Collision()->TeleLayer()[i].m_Number;
-				if(Number == Tele)
+				m_GotoTeleOffset = 0;
+				if(FullRound)
 				{
-					Match++;
-					if(Offset != -1)
-					{
-						if(Match == Offset)
-						{
-							MatchPos = ivec2(x, y);
-							m_GotoTeleOffset = Match;
-							return;
-						}
-						continue;
-					}
-					MatchPos = ivec2(x, y);
-					if(m_GotoTeleLastPos != ivec2(-1, -1))
-					{
-						if(distance(m_GotoTeleLastPos, MatchPos) < 10.0f)
-						{
-							m_GotoTeleOffset++;
-							continue;
-						}
-					}
-					m_GotoTeleLastPos = MatchPos;
-					if(Match == m_GotoTeleOffset)
-						return;
+					MatchPos = m_GotoTeleLastPos;
+					break;
+				}
+				else
+				{
+					FullRound = true;
 				}
 			}
-		}
-	};
-	FindTile();
+		} while(distance(m_GotoTeleLastPos, MatchPos) < 10.0f);
+	}
 
 	if(MatchPos == ivec2(-1, -1))
 		return;
-	if(Match < m_GotoTeleOffset)
-		m_GotoTeleOffset = -1;
+	m_GotoTeleLastPos = MatchPos;
+	m_GotoTeleLastNumber = Number;
 	SetView(MatchPos);
-	m_GotoTeleOffset++;
 }
 
 void CCamera::SetZoom(float Target, int Smoothness)
 {
 	ChangeZoom(Target, Smoothness);
+}
+
+bool CCamera::ZoomAllowed() const
+{
+	return GameClient()->m_Snap.m_SpecInfo.m_Active ||
+	       GameClient()->m_GameInfo.m_AllowZoom ||
+	       Client()->State() == IClient::STATE_DEMOPLAYBACK;
 }

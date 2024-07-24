@@ -76,10 +76,10 @@ Client
 == Kliens
 
 Connecting to
-== Csatlakozás...
+== Csatlakozás…
 
-Connection Problems...
-== Csatlakozási problémák...
+Connection Problems…
+== Csatlakozási problémák…
 
 Console
 == Konzol
@@ -112,7 +112,7 @@ Disconnected
 == Lekapcsolódott
 
 Downloading map
-== Pálya letöltése...
+== Pálya letöltése…
 
 Draw!
 == Döntetlen!
@@ -477,9 +477,6 @@ Your skin
 Reset to defaults
 == Visszaállítás alapértelmezettre
 
-Round
-== Menet
-
 Lht.
 == Fényerősség
 
@@ -639,8 +636,8 @@ Enable long pain sound (used when shooting in freeze)
 DDNet %s is available:
 == DDNet %s verzió elérhető
 
-Updating...
-== Frissítés...
+Updating…
+== Frissítés…
 
 Overlay entities
 == Entitás láthatósága
@@ -693,9 +690,6 @@ Max CSVs
 Strict gametype filter
 == Szigorú játékmód szűrő
 
-Use DDRace Scoreboard
-== DDRace pontszámtábla használata
-
 Best
 == Legjobb
 
@@ -712,7 +706,7 @@ Search
 == Keresés
 
 Connecting dummy
-== Másolat válasza...
+== Másolat válasza…
 
 Clan plates size
 == Klán felirat mérete
@@ -876,8 +870,8 @@ Converse
 Use high DPI
 == Magas DPI használata
 
-Update failed! Check log...
-== Frissítés sikertelen! nézd meg a log-ot...
+Update failed! Check log…
+== Frissítés sikertelen! nézd meg a log-ot…
 
 Toggle dyncam
 == Dinamikus kamera
@@ -1210,8 +1204,8 @@ Speed:
 Angle:
 == Szög:
 
-Trying to determine UDP connectivity...
-== Próbáljuk meghatározni az UDP kapcsoltatot...
+Trying to determine UDP connectivity…
+== Próbáljuk meghatározni az UDP kapcsoltatot…
 
 UDP seems to be filtered.
 == Az UDP szűrve van.
@@ -1611,6 +1605,10 @@ Loading commands…
 Multi-View
 == 
 
+[Spectating]
+Following %s
+== 
+
 Some map images could not be loaded. Check the local console for details.
 == 
 
@@ -1657,6 +1655,12 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+%d/%d KiB (%.1f KiB/s)
+== 
+
+Example of usage
 == 
 
 No login required
@@ -1789,6 +1793,9 @@ Axis
 Graphics card
 == 
 
+Tee
+== 
+
 Info Messages
 == 
 
@@ -1796,6 +1803,9 @@ Show local time always
 == 
 
 Always show chat
+== 
+
+Show only chat messages from team members
 == 
 
 Chat font size
@@ -1843,5 +1853,22 @@ Regular background color
 Entities background color
 == 
 
+Round %d/%d
+== 
+
+[Spectators]
+%d others…
+== 
+
+[Team and size]
+%d\n(%d/%d)
+== 
+
+Team %d (%d/%d)
+== 
+
 Moved ingame
+== 
+
+https://wiki.ddnet.org/wiki/Mapping
 == 
