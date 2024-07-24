@@ -59,7 +59,7 @@ class CAutoMapper : public CEditorComponent
 public:
 	explicit CAutoMapper(CEditor *pEditor);
 
-	void Load(const char *pTileName);
+	void Load(const char *pTileName, bool Include = false);
 	void ProceedLocalized(class CLayerTiles *pLayer, int ConfigId, int Seed = 0, int X = 0, int Y = 0, int Width = -1, int Height = -1);
 	void Proceed(class CLayerTiles *pLayer, int ConfigId, int Seed = 0, int SeedOffsetX = 0, int SeedOffsetY = 0);
 
