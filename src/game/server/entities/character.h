@@ -38,6 +38,7 @@ public:
 	void TickDeferred() override;
 	void TickPaused() override;
 	void Snap(int SnappingClient) override;
+	void PostSnap() override;
 	void SwapClients(int Client1, int Client2) override;
 
 	bool CanSnapCharacter(int SnappingClient);
@@ -83,7 +84,7 @@ public:
 
 	void Rescue();
 
-	int NeededFaketuning() { return m_NeededFaketuning; }
+	int NeededFaketuning() const { return m_NeededFaketuning; }
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
@@ -144,6 +145,8 @@ private:
 	int m_Health;
 	int m_Armor;
 
+	int m_TriggeredEvents7;
+
 	// the player core for the physics
 	CCharacterCore m_Core;
 	CGameTeams *m_pTeams = nullptr;
@@ -163,7 +166,7 @@ private:
 	int m_LastBroadcast;
 	void DDRaceInit();
 	void HandleSkippableTiles(int Index);
-	void SetRescue();
+	void ForceSetRescue(int RescueMode);
 	void DDRaceTick();
 	void DDRacePostCoreTick();
 	void HandleBroadcast();
@@ -171,12 +174,13 @@ private:
 	void SendZoneMsgs();
 	IAntibot *Antibot();
 
-	bool m_SetSavePos;
-	CSaveTee m_RescueTee;
+	bool m_SetSavePos[NUM_RESCUEMODES];
+	CSaveTee m_RescueTee[NUM_RESCUEMODES];
 
 public:
 	CGameTeams *Teams() { return m_pTeams; }
 	void SetTeams(CGameTeams *pTeams);
+	bool TrySetRescue(int RescueMode);
 
 	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
@@ -225,12 +229,12 @@ public:
 	int m_WeaponChangeTick;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
-	int GetLastWeapon() { return m_LastWeapon; }
+	int GetLastWeapon() const { return m_LastWeapon; }
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }
-	int GetActiveWeapon() { return m_Core.m_ActiveWeapon; }
+	int GetActiveWeapon() const { return m_Core.m_ActiveWeapon; }
 	void SetActiveWeapon(int ActiveWeap) { m_Core.m_ActiveWeapon = ActiveWeap; }
 	void SetLastAction(int LastAction) { m_LastAction = LastAction; }
-	int GetArmor() { return m_Armor; }
+	int GetArmor() const { return m_Armor; }
 	void SetArmor(int Armor) { m_Armor = Armor; }
 	CCharacterCore GetCore() { return m_Core; }
 	void SetCore(CCharacterCore Core) { m_Core = Core; }
@@ -245,18 +249,18 @@ public:
 
 	int GetLastAction() const { return m_LastAction; }
 
-	bool HasTelegunGun() { return m_Core.m_HasTelegunGun; }
-	bool HasTelegunGrenade() { return m_Core.m_HasTelegunGrenade; }
-	bool HasTelegunLaser() { return m_Core.m_HasTelegunLaser; }
+	bool HasTelegunGun() const { return m_Core.m_HasTelegunGun; }
+	bool HasTelegunGrenade() const { return m_Core.m_HasTelegunGrenade; }
+	bool HasTelegunLaser() const { return m_Core.m_HasTelegunLaser; }
 
-	bool HammerHitDisabled() { return m_Core.m_HammerHitDisabled; }
-	bool ShotgunHitDisabled() { return m_Core.m_ShotgunHitDisabled; }
-	bool LaserHitDisabled() { return m_Core.m_LaserHitDisabled; }
-	bool GrenadeHitDisabled() { return m_Core.m_GrenadeHitDisabled; }
+	bool HammerHitDisabled() const { return m_Core.m_HammerHitDisabled; }
+	bool ShotgunHitDisabled() const { return m_Core.m_ShotgunHitDisabled; }
+	bool LaserHitDisabled() const { return m_Core.m_LaserHitDisabled; }
+	bool GrenadeHitDisabled() const { return m_Core.m_GrenadeHitDisabled; }
 
-	bool IsSuper() { return m_Core.m_Super; }
+	bool IsSuper() const { return m_Core.m_Super; }
 
-	CSaveTee &GetRescueTeeRef() { return m_RescueTee; }
+	CSaveTee &GetLastRescueTeeRef(int Mode = RESCUEMODE_AUTO) { return m_RescueTee[Mode]; }
 };
 
 enum

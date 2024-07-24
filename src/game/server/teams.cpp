@@ -28,7 +28,7 @@ void CGameTeams::Reset()
 		SendTeamsState(i);
 	}
 
-	for(int i = 0; i < NUM_TEAMS; ++i)
+	for(int i = 0; i < NUM_DDRACE_TEAMS; ++i)
 	{
 		m_aTeamState[i] = TEAMSTATE_EMPTY;
 		m_aTeamLocked[i] = false;
@@ -193,13 +193,13 @@ void CGameTeams::OnCharacterFinish(int ClientId)
 		CPlayer *pPlayer = GetPlayer(ClientId);
 		if(pPlayer && pPlayer->IsPlaying())
 		{
-			float Time = (float)(Server()->Tick() - GetStartTime(pPlayer)) / ((float)Server()->TickSpeed());
-			if(Time < 0.000001f)
+			int TimeTicks = Server()->Tick() - GetStartTime(pPlayer);
+			if(TimeTicks <= 0)
 				return;
 			char aTimestamp[TIMESTAMP_STR_LENGTH];
 			str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
 
-			OnFinish(pPlayer, Time, aTimestamp);
+			OnFinish(pPlayer, TimeTicks, aTimestamp);
 		}
 	}
 	else
@@ -335,8 +335,9 @@ void CGameTeams::CheckTeamFinished(int Team)
 
 		if(PlayersCount > 0)
 		{
-			float Time = (float)(Server()->Tick() - GetStartTime(apTeamPlayers[0])) / ((float)Server()->TickSpeed());
-			if(Time < 0.000001f)
+			int TimeTicks = Server()->Tick() - GetStartTime(apTeamPlayers[0]);
+			float Time = (float)TimeTicks / (float)Server()->TickSpeed();
+			if(TimeTicks <= 0)
 			{
 				return;
 			}
@@ -348,7 +349,7 @@ void CGameTeams::CheckTeamFinished(int Team)
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf),
 					"Your team would've finished in: %d minute(s) %5.2f second(s). Since you had practice mode enabled your rank doesn't count.",
-					(int)Time / 60, Time - ((int)Time / 60 * 60));
+					(int)Time / 50 / 60, Time - ((int)Time / 60 * 60));
 				GameServer()->SendChatTeam(Team, aBuf);
 
 				for(unsigned int i = 0; i < PlayersCount; ++i)
@@ -363,9 +364,9 @@ void CGameTeams::CheckTeamFinished(int Team)
 			str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
 
 			for(unsigned int i = 0; i < PlayersCount; ++i)
-				OnFinish(apTeamPlayers[i], Time, aTimestamp);
+				OnFinish(apTeamPlayers[i], TimeTicks, aTimestamp);
 			ChangeTeamState(Team, TEAMSTATE_FINISHED); // TODO: Make it better
-			OnTeamFinish(apTeamPlayers, PlayersCount, Time, aTimestamp);
+			OnTeamFinish(Team, apTeamPlayers, PlayersCount, TimeTicks, aTimestamp);
 		}
 	}
 }
@@ -666,7 +667,7 @@ float *CGameTeams::GetCurrentTimeCp(CPlayer *Player)
 	return NULL;
 }
 
-void CGameTeams::OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, const char *pTimestamp)
+void CGameTeams::OnTeamFinish(int Team, CPlayer **Players, unsigned int Size, int TimeTicks, const char *pTimestamp)
 {
 	int aPlayerCids[MAX_CLIENTS];
 
@@ -680,18 +681,21 @@ void CGameTeams::OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, 
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "'%s' joined team 0",
 				GameServer()->Server()->ClientName(Players[i]->GetCid()));
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		}
 	}
 
 	if(Size >= (unsigned int)g_Config.m_SvMinTeamSize)
-		GameServer()->Score()->SaveTeamScore(aPlayerCids, Size, Time, pTimestamp);
+		GameServer()->Score()->SaveTeamScore(Team, aPlayerCids, Size, TimeTicks, pTimestamp);
 }
 
-void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
+void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp)
 {
 	if(!Player || !Player->IsPlaying())
 		return;
+
+	float Time = TimeTicks / (float)Server()->TickSpeed();
+
 	// TODO:DDRace:btd: this ugly
 	const int ClientId = Player->GetCid();
 	CPlayerData *pData = GameServer()->Score()->PlayerData(ClientId);
@@ -706,7 +710,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
 		GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::CHAT_SIX);
 	else
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1., CGameContext::CHAT_SIX);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1., CGameContext::CHAT_SIX);
 
 	float Diff = absolute(Time - pData->m_BestTime);
 
@@ -725,7 +729,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		if(g_Config.m_SvHideScore || !g_Config.m_SvSaveWorseScores)
 			GameServer()->SendChatTarget(ClientId, aBuf, CGameContext::CHAT_SIX);
 		else
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 	}
 	else if(pData->m_BestTime != 0) // tee has already finished?
 	{
@@ -804,7 +808,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 
 	if(CallSaveScore)
 		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientId), "nameless tee"))
-			GameServer()->Score()->SaveScore(ClientId, Time, pTimestamp,
+			GameServer()->Score()->SaveScore(ClientId, TimeTicks, pTimestamp,
 				GetCurrentTimeCp(Player), Player->m_NotEligibleForFinish);
 
 	bool NeedToSendNewServerRecord = false;
@@ -947,7 +951,8 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPla
 	}
 	std::swap(m_aTeeStarted[pPrimaryPlayer->GetCid()], m_aTeeStarted[pTargetPlayer->GetCid()]);
 	std::swap(m_aTeeFinished[pPrimaryPlayer->GetCid()], m_aTeeFinished[pTargetPlayer->GetCid()]);
-	std::swap(pPrimaryPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
+	std::swap(pPrimaryPlayer->GetCharacter()->GetLastRescueTeeRef(RESCUEMODE_AUTO), pTargetPlayer->GetCharacter()->GetLastRescueTeeRef(RESCUEMODE_AUTO));
+	std::swap(pPrimaryPlayer->GetCharacter()->GetLastRescueTeeRef(RESCUEMODE_MANUAL), pTargetPlayer->GetCharacter()->GetLastRescueTeeRef(RESCUEMODE_MANUAL));
 
 	GameServer()->m_World.SwapClients(pPrimaryPlayer->GetCid(), pTargetPlayer->GetCid());
 
@@ -965,7 +970,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPla
 
 void CGameTeams::ProcessSaveTeam()
 {
-	for(int Team = 0; Team < NUM_TEAMS; Team++)
+	for(int Team = 0; Team < NUM_DDRACE_TEAMS; Team++)
 	{
 		if(m_apSaveTeamResult[Team] == nullptr || !m_apSaveTeamResult[Team]->m_Completed)
 			continue;

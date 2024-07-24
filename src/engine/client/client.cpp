@@ -55,6 +55,10 @@
 #include "video.h"
 #endif
 
+#if defined(CONF_PLATFORM_ANDROID)
+#include <android/android_main.h>
+#endif
+
 #include "SDL.h"
 #ifdef main
 #undef main
@@ -224,6 +228,16 @@ void CClient::Rcon(const char *pCmd)
 	CMsgPacker Msg(NETMSG_RCON_CMD, true);
 	Msg.AddString(pCmd);
 	SendMsgActive(&Msg, MSGFLAG_VITAL);
+}
+
+float CClient::GotRconCommandsPercentage() const
+{
+	if(m_ExpectedRconCommands < 1)
+		return -1.0f;
+	if(m_GotRconCommands > m_ExpectedRconCommands)
+		return -1.0f;
+
+	return (float)m_GotRconCommands / (float)m_ExpectedRconCommands;
 }
 
 bool CClient::ConnectionProblems() const
@@ -563,7 +577,8 @@ void CClient::DisconnectWithReason(const char *pReason)
 	mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
-	m_ReceivingRconCommands = false;
+	m_ExpectedRconCommands = -1;
+	m_GotRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
 	m_aNetClient[CONN_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
@@ -1312,12 +1327,6 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 
 void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 {
-	// only allow packets from the server we actually want
-	if(net_addr_comp(&pPacket->m_Address, &ServerAddress()))
-	{
-		return;
-	}
-
 	CUnpacker Unpacker;
 	Unpacker.Reset(pPacket->m_pData, pPacket->m_DataSize);
 	CMsgPacker Packer(NETMSG_EX, true);
@@ -1596,11 +1605,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			char aAddr[128];
-			char aIp[64];
+			char aAddr[NETADDR_MAXSTRSIZE];
 			NETADDR ServerAddr = ServerAddress();
-			net_addr_str(&ServerAddr, aIp, sizeof(aIp), 0);
-			str_format(aAddr, sizeof(aAddr), "%s:%d", aIp, RedirectPort);
+			ServerAddr.port = RedirectPort;
+			net_addr_str(&ServerAddr, aAddr, sizeof(aAddr), true);
 			Connect(aAddr);
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
@@ -1612,6 +1620,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				m_pConsole->RegisterTemp(pName, pParams, CFGFLAG_SERVER, pHelp);
 			}
+			m_GotRconCommands++;
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_REM)
 		{
@@ -1639,7 +1648,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				if(Old != 0 && m_UseTempRconCommands == 0)
 				{
 					m_pConsole->DeregisterTempAll();
-					m_ReceivingRconCommands = false;
+					m_ExpectedRconCommands = -1;
 				}
 			}
 		}
@@ -1990,11 +1999,16 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_GROUP_START)
 		{
-			m_ReceivingRconCommands = true;
+			int ExpectedRconCommands = Unpacker.GetInt();
+			if(Unpacker.Error())
+				return;
+
+			m_ExpectedRconCommands = ExpectedRconCommands;
+			m_GotRconCommands = 0;
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_GROUP_END)
 		{
-			m_ReceivingRconCommands = false;
+			m_ExpectedRconCommands = -1;
 		}
 	}
 	else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)
@@ -3343,9 +3357,14 @@ void CClient::StartVideo(const char *pFilename, bool WithTimestamp)
 	Graphics()->WaitForIdle();
 	// pause the sound device while creating the video instance
 	Sound()->PauseAudioDevice();
-	new CVideo((CGraphics_Threaded *)m_pGraphics, Sound(), Storage(), Graphics()->ScreenWidth(), Graphics()->ScreenHeight(), aFilename);
+	new CVideo(Graphics(), Sound(), Storage(), Graphics()->ScreenWidth(), Graphics()->ScreenHeight(), aFilename);
 	Sound()->UnpauseAudioDevice();
-	IVideo::Current()->Start();
+	if(!IVideo::Current()->Start())
+	{
+		log_error("videorecorder", "Failed to start recording to '%s'", aFilename);
+		m_DemoPlayer.Stop("Failed to start video recording. See local console for details.");
+		return;
+	}
 	if(m_DemoPlayer.Info()->m_Info.m_Paused)
 	{
 		IVideo::Current()->Pause(true);
@@ -3625,10 +3644,6 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	str_copy(m_CurrentServerInfo.m_aMap, pMapInfo->m_aName);
 	m_CurrentServerInfo.m_MapCrc = pMapInfo->m_Crc;
 	m_CurrentServerInfo.m_MapSize = pMapInfo->m_Size;
-	if(g_Config.m_ClDemoAssumeRace)
-	{
-		str_copy(m_CurrentServerInfo.m_aGameType, "DDraceNetwork");
-	}
 
 	GameClient()->OnConnected();
 
@@ -3964,8 +3979,10 @@ void CClient::SwitchWindowScreen(int Index)
 	int IsFullscreen = g_Config.m_GfxFullscreen;
 	int IsBorderless = g_Config.m_GfxBorderless;
 
-	if(Graphics()->SetWindowScreen(Index))
-		g_Config.m_GfxScreen = Index;
+	if(!Graphics()->SetWindowScreen(Index))
+	{
+		return;
+	}
 
 	SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
 
@@ -3978,7 +3995,7 @@ void CClient::SwitchWindowScreen(int Index)
 	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
 	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
 
-	Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+	Graphics()->ResizeToScreen();
 
 	SetWindowParams(IsFullscreen, IsBorderless);
 }
@@ -4067,7 +4084,7 @@ void CClient::ConchainWindowResize(IConsole::IResult *pResult, void *pUserData, 
 	pfnCallback(pResult, pCallbackUserData);
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
-		pSelf->Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+		pSelf->Graphics()->ResizeToScreen();
 	}
 }
 
@@ -4284,9 +4301,8 @@ static void ShowMessageBox(const char *pTitle, const char *pMessage, IClient::EM
 #if defined(CONF_PLATFORM_MACOS)
 extern "C" int TWMain(int argc, const char **argv)
 #elif defined(CONF_PLATFORM_ANDROID)
+static int gs_AndroidStarted = false;
 extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char *argv[]);
-extern "C" void InitAndroid();
-
 int SDL_main(int argc, char *argv2[])
 #else
 int main(int argc, const char **argv)
@@ -4296,24 +4312,18 @@ int main(int argc, const char **argv)
 
 #if defined(CONF_PLATFORM_ANDROID)
 	const char **argv = const_cast<const char **>(argv2);
+	// Android might not unload the library from memory, causing globals like gs_AndroidStarted
+	// not to be initialized correctly when starting the app again.
+	if(gs_AndroidStarted)
+	{
+		::ShowMessageBox("Android Error", "The app was started, but not closed properly, this causes bugs. Please restart or manually close this task.");
+		std::exit(0);
+	}
+	gs_AndroidStarted = true;
 #elif defined(CONF_FAMILY_WINDOWS)
 	CWindowsComLifecycle WindowsComLifecycle(true);
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
-
-	bool Silent = false;
-
-	for(int i = 1; i < argc; i++)
-	{
-		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0)
-		{
-			Silent = true;
-		}
-	}
-
-#if defined(CONF_PLATFORM_ANDROID)
-	InitAndroid();
-#endif
 
 #if defined(CONF_EXCEPTION_HANDLING)
 	init_exception_handler();
@@ -4324,6 +4334,14 @@ int main(int argc, const char **argv)
 #if defined(CONF_PLATFORM_ANDROID)
 	pStdoutLogger = std::shared_ptr<ILogger>(log_logger_android());
 #else
+	bool Silent = false;
+	for(int i = 1; i < argc; i++)
+	{
+		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0)
+		{
+			Silent = true;
+		}
+	}
 	if(!Silent)
 	{
 		pStdoutLogger = std::shared_ptr<ILogger>(log_logger_stdout());
@@ -4341,6 +4359,17 @@ int main(int argc, const char **argv)
 	vpLoggers.push_back(pFutureAssertionLogger);
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
+#if defined(CONF_PLATFORM_ANDROID)
+	// Initialize Android after logger is available
+	const char *pAndroidInitError = InitAndroid();
+	if(pAndroidInitError != nullptr)
+	{
+		log_error("android", "%s", pAndroidInitError);
+		::ShowMessageBox("Android Error", pAndroidInitError);
+		std::exit(0);
+	}
+#endif
+
 	std::stack<std::function<void()>> CleanerFunctions;
 	std::function<void()> PerformCleanup = [&CleanerFunctions]() mutable {
 		while(!CleanerFunctions.empty())
@@ -4351,7 +4380,17 @@ int main(int argc, const char **argv)
 	};
 	std::function<void()> PerformFinalCleanup = []() {
 #ifdef CONF_PLATFORM_ANDROID
-		// properly close this native thread, so globals are destructed
+		// Forcefully terminate the entire process, to ensure that static variables
+		// will be initialized correctly when the app is started again after quitting.
+		// Returning from the main function is not enough, as this only results in the
+		// native thread terminating, but the Java thread will continue. Java does not
+		// support unloading libraries once they have been loaded, so all static
+		// variables will not have their expected initial values anymore when the app
+		// is started again after quitting. The variable gs_AndroidStarted above is
+		// used to check that static variables have been initialized properly.
+		// TODO: This is not the correct way to close an activity on Android, as it
+		//       ignores the activity lifecycle entirely, which may cause issues if
+		//       we ever used any global resources like the camera.
 		std::exit(0);
 #endif
 	};
@@ -4542,9 +4581,9 @@ int main(int argc, const char **argv)
 		pSteam->ClearConnectAddress();
 	}
 
-	const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 	if(g_Config.m_Logfile[0])
 	{
+		const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 		IOHANDLE Logfile = pStorage->OpenFile(g_Config.m_Logfile, Mode, IStorage::TYPE_SAVE_OR_ABSOLUTE);
 		if(Logfile)
 		{
@@ -4553,7 +4592,12 @@ int main(int argc, const char **argv)
 		else
 		{
 			log_error("client", "failed to open '%s' for logging", g_Config.m_Logfile);
+			pFutureFileLogger->Set(log_logger_noop());
 		}
+	}
+	else
+	{
+		pFutureFileLogger->Set(log_logger_noop());
 	}
 
 	// Register protocol and file extensions
@@ -4571,6 +4615,14 @@ int main(int argc, const char **argv)
 	SDL_SetHint("SDL_IME_SHOW_UI", g_Config.m_InpImeNativeUi ? "1" : "0");
 #else
 	SDL_SetHint("SDL_IME_SHOW_UI", "1");
+#endif
+
+#if defined(CONF_PLATFORM_ANDROID)
+	// Trap the Android back button so it can be handled in our code reliably
+	// instead of letting the system handle it.
+	SDL_SetHint("SDL_ANDROID_TRAP_BACK_BUTTON", "1");
+	// Force landscape screen orientation.
+	SDL_SetHint("SDL_IOS_ORIENTATIONS", "LandscapeLeft LandscapeRight");
 #endif
 
 	// init SDL

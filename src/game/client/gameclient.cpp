@@ -624,6 +624,9 @@ void CGameClient::OnReset()
 
 	Editor()->ResetMentions();
 	Editor()->ResetIngameMoved();
+
+	Collision()->Unload();
+	Layers()->Unload();
 }
 
 void CGameClient::UpdatePositions()
@@ -1382,10 +1385,7 @@ void CGameClient::OnNewSnapshot()
 				aMessage[i] = (char)('a' + (rand() % ('z' - 'a')));
 			aMessage[MsgLen] = 0;
 
-			CNetMsg_Cl_Say Msg;
-			Msg.m_Team = rand() & 1;
-			Msg.m_pMessage = aMessage;
-			Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+			m_Chat.SendChat(rand() & 1, aMessage);
 		}
 	}
 #endif
@@ -3383,6 +3383,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudTeleportLaser);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudPracticeMode);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudLockMode);
+		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudTeam0Mode);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudDummyHammer);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudDummyCopy);
 		m_HudSkinLoaded = false;
@@ -3442,6 +3443,7 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		m_HudSkin.m_SpriteHudTeleportLaser = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_TELEPORT_LASER]);
 		m_HudSkin.m_SpriteHudPracticeMode = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_PRACTICE_MODE]);
 		m_HudSkin.m_SpriteHudLockMode = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_LOCK_MODE]);
+		m_HudSkin.m_SpriteHudTeam0Mode = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_TEAM0_MODE]);
 		m_HudSkin.m_SpriteHudDummyHammer = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_HAMMER]);
 		m_HudSkin.m_SpriteHudDummyCopy = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_COPY]);
 

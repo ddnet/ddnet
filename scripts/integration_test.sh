@@ -3,10 +3,8 @@
 arg_verbose=0
 arg_valgrind_memcheck=0
 
-for arg in "$@"
-do
-	if [ "$arg" == "-h" ] || [ "$arg" == "--help" ]
-	then
+for arg in "$@"; do
+	if [ "$arg" == "-h" ] || [ "$arg" == "--help" ]; then
 		echo "usage: $(basename "$0") [OPTION..]"
 		echo "description:"
 		echo "  Runs a simple integration test of the client and server"
@@ -16,11 +14,9 @@ do
 		echo "  --verbose|-v          verbose output"
 		echo "  --valgrind-memcheck   use valgrind's memcheck to run server and client"
 		exit 0
-	elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]
-	then
+	elif [ "$arg" == "-v" ] || [ "$arg" == "--verbose" ]; then
 		arg_verbose=1
-	elif [ "$arg" == "--valgrind-memcheck" ]
-	then
+	elif [ "$arg" == "--valgrind-memcheck" ]; then
 		arg_valgrind_memcheck=1
 	else
 		echo "Error: unknown argument '$arg'"
@@ -28,13 +24,11 @@ do
 	fi
 done
 
-if [ ! -f DDNet ]
-then
+if [ ! -f DDNet ]; then
 	echo "[-] Error: client binary 'DDNet' not found"
 	exit 1
 fi
-if [ ! -f DDNet-Server ]
-then
+if [ ! -f DDNet-Server ]; then
 	echo "[-] Error: server binary 'DDNet-Server' not found"
 	exit 1
 fi
@@ -44,30 +38,25 @@ got_killed=0
 
 function kill_all() {
 	# needed to fix hang fifo with additional ctrl+c
-	if [ "$got_killed" == "1" ]
-	then
+	if [ "$got_killed" == "1" ]; then
 		exit
 	fi
 	got_killed=1
 
-	if [ "$arg_verbose" == "1" ]
-	then
+	if [ "$arg_verbose" == "1" ]; then
 		echo "[*] Shutting down test clients and server"
 	fi
 	sleep 1
 
-	if [[ ! -f fail_server.txt ]]
-	then
+	if [[ ! -f fail_server.txt ]]; then
 		echo "[*] Shutting down server"
 		echo "shutdown" > server.fifo
 	fi
 	sleep 1
 
 	local i
-	for ((i=1;i<3;i++))
-	do
-		if [[ ! -f fail_client$i.txt ]]
-		then
+	for ((i = 1; i < 3; i++)); do
+		if [[ ! -f fail_client$i.txt ]]; then
 			echo "[*] Shutting down client$i"
 			echo "quit" > "client$i.fifo"
 		fi
@@ -81,8 +70,7 @@ function cleanup() {
 
 trap cleanup EXIT
 
-function fail()
-{
+function fail() {
 	sleep 1
 	tail -n2 "$1".log > fail_"$1".txt
 	echo "$1 exited with code $2" >> fail_"$1".txt
@@ -90,7 +78,7 @@ function fail()
 }
 
 # Get unused port from the system by binding to port 0 and immediately closing the socket again
-port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()');
+port=$(python3 -c 'import socket; s=socket.socket(); s.bind(("", 0)); print(s.getsockname()[1]); s.close()')
 
 if [[ $OSTYPE == 'darwin'* ]]; then
 	DETECT_LEAKS=0
@@ -113,8 +101,7 @@ function print_results() {
 			return 1
 		fi
 	else
-		if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
-		then
+		if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"; then
 			echo "[-] Error: ASAN has detected the following errors:"
 			cat SAN.*
 			return 1
@@ -153,15 +140,12 @@ function wait_for_fifo() {
 	# give the server/client time to launch and create the fifo file
 	# but assume after X secs that the server/client crashed before
 	# being able to create the file
-	while [[ ! -p "$fifo" ]]
-	do
-		fails="$((fails+1))"
-		if [ "$arg_verbose" == "1" ]
-		then
+	while [[ ! -p "$fifo" ]]; do
+		fails="$((fails + 1))"
+		if [ "$arg_verbose" == "1" ]; then
 			echo "[!] Note: $fifo not found (attempts $fails/$tries)"
 		fi
-		if [ "$fails" -gt "$tries" ]
-		then
+		if [ "$fails" -gt "$tries" ]; then
 			echo "[-] Error: $(basename "$fifo" .fifo) possibly crashed on launch"
 			kill_all
 			print_results
@@ -244,7 +228,7 @@ say "/mc
 ;cmdlist
 ;saytime"
 EOF
-sleep 1
+sleep 10
 
 echo "[*] Test rcon commands"
 tr -d '\n' > client1.fifo << EOF
@@ -255,7 +239,7 @@ rcon echo test;
 muteid 1 900 spam;
 unban_all;
 EOF
-sleep 1
+sleep 5
 
 echo "[*] Stop demo recording"
 echo "stoprecord" > server.fifo
@@ -282,39 +266,34 @@ fi
 # Kill all processes first so all outputs are fully written
 kill_all
 
-if ! grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2} I chat: 0:-2:client1: hello world$' server.log
-then
+if ! grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2} I chat: 0:-2:client1: hello world$' server.log; then
 	touch fail_chat.txt
 	echo "[-] Error: chat message not found in server log"
 fi
 
-if ! grep -q 'cmdlist' client1.log || \
-	! grep -q 'pause' client1.log || \
-	! grep -q 'rank' client1.log || \
-	! grep -q 'points' client1.log
-then
+if ! grep -q 'cmdlist' client1.log ||
+	! grep -q 'pause' client1.log ||
+	! grep -q 'rank' client1.log ||
+	! grep -q 'points' client1.log; then
 	touch fail_chatcommand.txt
 	echo "[-] Error: did not find output of /cmdlist command"
 fi
 
-if ! grep -q "hello from admin" server.log
-then
+if ! grep -q "hello from admin" server.log; then
 	touch fail_rcon.txt
 	echo "[-] Error: admin message not found in server log"
 fi
 
-if ! grep -q "demo_player: Stopped playback" client1.log
-then
+if ! grep -q "demo_player: Stopped playback" client1.log; then
 	touch fail_demo_server.txt
 	echo "[-] Error: demo playback of server demo in client 1 was not started/finished"
 fi
-if ! grep -q "demo_player: Stopped playback" client2.log
-then
+if ! grep -q "demo_player: Stopped playback" client2.log; then
 	touch fail_demo_client.txt
 	echo "[-] Error: demo playback of client demo in client 2 was not started/finished"
 fi
 
-ranks="$(sqlite3 ddnet-server.sqlite < <(echo "select * from record_race;"))"
+ranks="$(sqlite3 -cmd '.timeout 10000' ddnet-server.sqlite < <(echo "select * from record_race;"))"
 rank_time="$(echo "$ranks" | awk -F '|' '{ print "player:", $2, "time:", $4, "cps:", $6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28 }')"
 expected_times="\
 player: client2 time: 1020.98 cps: 0.02 0.1 0.2 0.26 0.32 600.36 600.42 600.46 600.5 1020.54 1020.58 1020.6 1020.64 1020.66 1020.7 1020.72 1020.76 1020.78 1020.8 1020.84 1020.86 1020.88 1020.9
@@ -324,33 +303,27 @@ player: client1 time: 168300.5 cps: 0.02 0.06 0.12 15300.14 15300.18 30600.2 306
 player: client2 time: 302.02 cps: 0.42 0.5 0.0 0.66 0.92 0.02 300.18 300.46 300.76 300.88 300.98 301.16 301.24 301.28 301.3 301.86 301.96 0.0 0.0 0.0 0.0 0.0 0.0"
 
 # require at least one rank in all cases. Exact finishes only with valgrind disabled
-if [ "$ranks" == "" ]
-then
+if [ "$ranks" == "" ]; then
 	touch fail_ranks.txt
 	echo "[-] Error: no ranks found in database"
-elif [ "$arg_valgrind_memcheck" != "1" ] && [ "$rank_time" != "$expected_times" ]
-then
+elif [ "$arg_valgrind_memcheck" != "1" ] && [ "$rank_time" != "$expected_times" ]; then
 	touch fail_ranks.txt
 	echo "[-] Error: unexpected finish time"
 	echo "  expected: $expected_times"
 	echo "  got: $rank_time"
 fi
 
-for logfile in client1.log client2.log server.log
-do
-	if [ "$arg_valgrind_memcheck" == "1" ]
-	then
+for logfile in client1.log client2.log server.log; do
+	if [ "$arg_valgrind_memcheck" == "1" ]; then
 		break
 	fi
-	if [ ! -f "$logfile" ]
-	then
+	if [ ! -f "$logfile" ]; then
 		echo "[-] Error: logfile '$logfile' not found"
 		touch fail_logs.txt
 		continue
 	fi
 	logdiff="$(diff -u <(grep -v "console: .* access for .* is now .*abled" "$logfile" | sort) <(sort "stdout_$(basename "$logfile" .log).txt"))"
-	if [ "$logdiff" != "" ]
-	then
+	if [ "$logdiff" != "" ]; then
 		echo "[-] Error: logfile '$logfile' differs from stdout"
 		echo "$logdiff"
 		echo "[-] Error: logfile '$logfile' differs from stdout" >> fail_logs.txt
@@ -358,24 +331,19 @@ do
 	fi
 done
 
-for stderr in ./stderr_*.txt
-do
-	if [ ! -f "$stderr" ]
-	then
+for stderr in ./stderr_*.txt; do
+	if [ ! -f "$stderr" ]; then
 		continue
 	fi
-	if [ "$(cat "$stderr")" == "" ]
-	then
+	if [ "$(cat "$stderr")" == "" ]; then
 		continue
 	fi
 	echo "[!] Warning: $stderr"
 	cat "$stderr"
 done
 
-if test -n "$(find . -maxdepth 1 -name 'fail_*' -print -quit)"
-then
-	for fail in fail_*
-	do
+if test -n "$(find . -maxdepth 1 -name 'fail_*' -print -quit)"; then
+	for fail in fail_*; do
 		cat "$fail"
 	done
 	print_results

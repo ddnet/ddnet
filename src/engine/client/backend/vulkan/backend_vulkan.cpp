@@ -986,8 +986,6 @@ private:
 	std::vector<VkSemaphore> m_vWaitSemaphores;
 	std::vector<VkSemaphore> m_vSigSemaphores;
 
-	std::vector<VkSemaphore> m_vMemorySemaphores;
-
 	std::vector<VkFence> m_vFrameFences;
 	std::vector<VkFence> m_vImagesFences;
 
@@ -1053,7 +1051,7 @@ private:
 	std::vector<SStreamMemory<SFrameBuffers>> m_vStreamedVertexBuffers;
 	std::vector<SStreamMemory<SFrameUniformBuffers>> m_vStreamedUniformBuffers;
 
-	uint32_t m_CurFrames = 0;
+	uint32_t m_CurFrameSyncObject = 0;
 	uint32_t m_CurImageIndex = 0;
 
 	uint32_t m_CanvasWidth;
@@ -2275,7 +2273,7 @@ protected:
 			return false;
 		}
 
-		VkSemaphore WaitSemaphore = m_vWaitSemaphores[m_CurFrames];
+		VkSemaphore WaitSemaphore = m_vWaitSemaphores[m_CurFrameSyncObject];
 
 		VkSubmitInfo SubmitInfo{};
 		SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -2304,13 +2302,13 @@ protected:
 		SubmitInfo.pWaitSemaphores = aWaitSemaphores.data();
 		SubmitInfo.pWaitDstStageMask = aWaitStages.data();
 
-		std::array<VkSemaphore, 1> aSignalSemaphores = {m_vSigSemaphores[m_CurFrames]};
+		std::array<VkSemaphore, 1> aSignalSemaphores = {m_vSigSemaphores[m_CurFrameSyncObject]};
 		SubmitInfo.signalSemaphoreCount = aSignalSemaphores.size();
 		SubmitInfo.pSignalSemaphores = aSignalSemaphores.data();
 
-		vkResetFences(m_VKDevice, 1, &m_vFrameFences[m_CurFrames]);
+		vkResetFences(m_VKDevice, 1, &m_vFrameFences[m_CurFrameSyncObject]);
 
-		VkResult QueueSubmitRes = vkQueueSubmit(m_VKGraphicsQueue, 1, &SubmitInfo, m_vFrameFences[m_CurFrames]);
+		VkResult QueueSubmitRes = vkQueueSubmit(m_VKGraphicsQueue, 1, &SubmitInfo, m_vFrameFences[m_CurFrameSyncObject]);
 		if(QueueSubmitRes != VK_SUCCESS)
 		{
 			const char *pCritErrorMsg = CheckVulkanCriticalError(QueueSubmitRes);
@@ -2321,7 +2319,7 @@ protected:
 			}
 		}
 
-		std::swap(m_vWaitSemaphores[m_CurFrames], m_vSigSemaphores[m_CurFrames]);
+		std::swap(m_vWaitSemaphores[m_CurFrameSyncObject], m_vSigSemaphores[m_CurFrameSyncObject]);
 
 		VkPresentInfoKHR PresentInfo{};
 		PresentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -2348,7 +2346,7 @@ protected:
 			}
 		}
 
-		m_CurFrames = (m_CurFrames + 1) % m_SwapChainImageCount;
+		m_CurFrameSyncObject = (m_CurFrameSyncObject + 1) % m_vWaitSemaphores.size();
 		return true;
 	}
 
@@ -2364,7 +2362,7 @@ protected:
 			RecreateSwapChain();
 		}
 
-		auto AcqResult = vkAcquireNextImageKHR(m_VKDevice, m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_vSigSemaphores[m_CurFrames], VK_NULL_HANDLE, &m_CurImageIndex);
+		auto AcqResult = vkAcquireNextImageKHR(m_VKDevice, m_VKSwapChain, std::numeric_limits<uint64_t>::max(), m_vSigSemaphores[m_CurFrameSyncObject], VK_NULL_HANDLE, &m_CurImageIndex);
 		if(AcqResult != VK_SUCCESS)
 		{
 			if(AcqResult == VK_ERROR_OUT_OF_DATE_KHR || m_RecreateSwapChain)
@@ -2395,13 +2393,13 @@ protected:
 				}
 			}
 		}
-		std::swap(m_vWaitSemaphores[m_CurFrames], m_vSigSemaphores[m_CurFrames]);
+		std::swap(m_vWaitSemaphores[m_CurFrameSyncObject], m_vSigSemaphores[m_CurFrameSyncObject]);
 
 		if(m_vImagesFences[m_CurImageIndex] != VK_NULL_HANDLE)
 		{
 			vkWaitForFences(m_VKDevice, 1, &m_vImagesFences[m_CurImageIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
 		}
-		m_vImagesFences[m_CurImageIndex] = m_vFrameFences[m_CurFrames];
+		m_vImagesFences[m_CurImageIndex] = m_vFrameFences[m_CurFrameSyncObject];
 
 		// next frame
 		m_CurFrame++;
@@ -2548,7 +2546,7 @@ protected:
 				YOff /= 2;
 			}
 
-			uint8_t *pTmpData = Resize(pData, Width, Height, Width, Height, VulkanFormatToPixelSize(Format));
+			uint8_t *pTmpData = ResizeImage(pData, Width, Height, Width, Height, VulkanFormatToPixelSize(Format));
 			free(pData);
 			pData = pTmpData;
 		}
@@ -2602,7 +2600,7 @@ protected:
 				++RescaleCount;
 			} while((size_t)Width > m_MaxTextureSize || (size_t)Height > m_MaxTextureSize);
 
-			uint8_t *pTmpData = Resize(pData, Width, Height, Width, Height, PixelSize);
+			uint8_t *pTmpData = ResizeImage(pData, Width, Height, Width, Height, PixelSize);
 			free(pData);
 			pData = pTmpData;
 		}
@@ -2657,7 +2655,7 @@ protected:
 				dbg_msg("vulkan", "3D/2D array texture was resized");
 				int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
 				int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
-				uint8_t *pNewTexData = Resize(pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
+				uint8_t *pNewTexData = ResizeImage(pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
 
 				ConvertWidth = NewWidth;
 				ConvertHeight = NewHeight;
@@ -2702,13 +2700,6 @@ protected:
 			}
 		}
 		return true;
-	}
-
-	VkFormat TextureFormatToVulkanFormat(int TexFormat)
-	{
-		if(TexFormat == CCommandBuffer::TEXFORMAT_RGBA)
-			return VK_FORMAT_R8G8B8A8_UNORM;
-		return VK_FORMAT_R8G8B8A8_UNORM;
 	}
 
 	[[nodiscard]] bool BuildMipmaps(VkImage Image, VkFormat ImageFormat, size_t Width, size_t Height, size_t Depth, size_t MipMapLevelCount)
@@ -5333,12 +5324,12 @@ public:
 
 	[[nodiscard]] bool CreateSyncObjects()
 	{
-		m_vWaitSemaphores.resize(m_SwapChainImageCount);
-		m_vSigSemaphores.resize(m_SwapChainImageCount);
+		// Create one more sync object than there are frames in flight
+		auto SyncObjectCount = m_SwapChainImageCount + 1;
+		m_vWaitSemaphores.resize(SyncObjectCount);
+		m_vSigSemaphores.resize(SyncObjectCount);
 
-		m_vMemorySemaphores.resize(m_SwapChainImageCount);
-
-		m_vFrameFences.resize(m_SwapChainImageCount);
+		m_vFrameFences.resize(SyncObjectCount);
 		m_vImagesFences.resize(m_SwapChainImageCount, VK_NULL_HANDLE);
 
 		VkSemaphoreCreateInfo CreateSemaphoreInfo{};
@@ -5348,11 +5339,10 @@ public:
 		FenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		FenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		for(size_t i = 0; i < m_SwapChainImageCount; i++)
+		for(size_t i = 0; i < SyncObjectCount; i++)
 		{
 			if(vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_vWaitSemaphores[i]) != VK_SUCCESS ||
 				vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_vSigSemaphores[i]) != VK_SUCCESS ||
-				vkCreateSemaphore(m_VKDevice, &CreateSemaphoreInfo, nullptr, &m_vMemorySemaphores[i]) != VK_SUCCESS ||
 				vkCreateFence(m_VKDevice, &FenceInfo, nullptr, &m_vFrameFences[i]) != VK_SUCCESS)
 			{
 				SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Creating swap chain sync objects(fences, semaphores) failed.");
@@ -5365,21 +5355,20 @@ public:
 
 	void DestroySyncObjects()
 	{
-		for(size_t i = 0; i < m_SwapChainImageCount; i++)
+		for(size_t i = 0; i < m_vWaitSemaphores.size(); i++)
 		{
 			vkDestroySemaphore(m_VKDevice, m_vWaitSemaphores[i], nullptr);
 			vkDestroySemaphore(m_VKDevice, m_vSigSemaphores[i], nullptr);
-			vkDestroySemaphore(m_VKDevice, m_vMemorySemaphores[i], nullptr);
 			vkDestroyFence(m_VKDevice, m_vFrameFences[i], nullptr);
 		}
 
 		m_vWaitSemaphores.clear();
 		m_vSigSemaphores.clear();
 
-		m_vMemorySemaphores.clear();
-
 		m_vFrameFences.clear();
 		m_vImagesFences.clear();
+
+		m_CurFrameSyncObject = 0;
 	}
 
 	void DestroyBufferOfFrame(size_t ImageIndex, SFrameBuffers &Buffer)
@@ -5433,7 +5422,7 @@ public:
 	}
 
 	template<bool IsLastCleanup>
-	void CleanupVulkan()
+	void CleanupVulkan(size_t SwapchainCount)
 	{
 		if(IsLastCleanup)
 		{
@@ -5471,7 +5460,7 @@ public:
 		m_vStreamedVertexBuffers.clear();
 		m_vStreamedUniformBuffers.clear();
 
-		for(size_t i = 0; i < m_SwapChainImageCount; ++i)
+		for(size_t i = 0; i < SwapchainCount; ++i)
 		{
 			ClearFrameData(i);
 		}
@@ -5480,11 +5469,11 @@ public:
 		m_vvFrameDelayedTextureCleanup.clear();
 		m_vvFrameDelayedTextTexturesCleanup.clear();
 
-		m_StagingBufferCache.DestroyFrameData(m_SwapChainImageCount);
-		m_StagingBufferCacheImage.DestroyFrameData(m_SwapChainImageCount);
-		m_VertexBufferCache.DestroyFrameData(m_SwapChainImageCount);
+		m_StagingBufferCache.DestroyFrameData(SwapchainCount);
+		m_StagingBufferCacheImage.DestroyFrameData(SwapchainCount);
+		m_VertexBufferCache.DestroyFrameData(SwapchainCount);
 		for(auto &ImageBufferCache : m_ImageBufferCaches)
-			ImageBufferCache.second.DestroyFrameData(m_SwapChainImageCount);
+			ImageBufferCache.second.DestroyFrameData(SwapchainCount);
 
 		if(IsLastCleanup)
 		{
@@ -5562,7 +5551,7 @@ public:
 
 		if(OldSwapChainImageCount != m_SwapChainImageCount)
 		{
-			CleanupVulkan<false>();
+			CleanupVulkan<false>(OldSwapChainImageCount);
 			InitVulkan<false>();
 		}
 
@@ -6116,20 +6105,20 @@ public:
 	template<bool IsFirstInitialization>
 	int InitVulkan()
 	{
-		if(!CreateDescriptorSetLayouts())
-			return -1;
-
-		if(!CreateTextDescriptorSetLayout())
-			return -1;
-
-		if(!CreateSpriteMultiUniformDescriptorSetLayout())
-			return -1;
-
-		if(!CreateQuadUniformDescriptorSetLayout())
-			return -1;
-
 		if(IsFirstInitialization)
 		{
+			if(!CreateDescriptorSetLayouts())
+				return -1;
+
+			if(!CreateTextDescriptorSetLayout())
+				return -1;
+
+			if(!CreateSpriteMultiUniformDescriptorSetLayout())
+				return -1;
+
+			if(!CreateQuadUniformDescriptorSetLayout())
+				return -1;
+
 			VkSwapchainKHR OldSwapChain = VK_NULL_HANDLE;
 			if(InitVulkanSwapChain(OldSwapChain) != 0)
 				return -1;
@@ -6626,7 +6615,7 @@ public:
 		DestroyIndexBuffer(m_IndexBuffer, m_IndexBufferMemory);
 		DestroyIndexBuffer(m_RenderIndexBuffer, m_RenderIndexBufferMemory);
 
-		CleanupVulkan<true>();
+		CleanupVulkan<true>(m_SwapChainImageCount);
 
 		return true;
 	}
@@ -6661,12 +6650,10 @@ public:
 		int Slot = pCommand->m_Slot;
 		int Width = pCommand->m_Width;
 		int Height = pCommand->m_Height;
-		int Format = pCommand->m_Format;
-		int StoreFormat = pCommand->m_StoreFormat;
 		int Flags = pCommand->m_Flags;
 		uint8_t *pData = pCommand->m_pData;
 
-		if(!CreateTextureCMD(Slot, Width, Height, TextureFormatToVulkanFormat(Format), TextureFormatToVulkanFormat(StoreFormat), Flags, pData))
+		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, Flags, pData))
 			return false;
 
 		free(pData);

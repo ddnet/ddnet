@@ -32,7 +32,7 @@ enum
 	PNGLITE_FILTER_TYPE = 1 << 4,
 };
 
-bool LoadPng(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat);
-bool SavePng(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, int Width, int Height);
+bool LoadPng(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, size_t &Width, size_t &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat);
+bool SavePng(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, size_t Width, size_t Height);
 
 #endif // ENGINE_GFX_IMAGE_LOADER_H

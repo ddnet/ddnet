@@ -257,6 +257,28 @@ void CEffects::Explosion(vec2 Pos, float Alpha)
 	p.m_StartAlpha = Alpha;
 	m_pClient->m_Particles.Add(CParticles::GROUP_EXPLOSIONS, &p);
 
+	// Nudge position slightly to edge of closest tile so the
+	// smoke doesn't get stuck inside the tile.
+	if(Collision()->CheckPoint(Pos))
+	{
+		const vec2 DistanceToTopLeft = Pos - vec2(round_truncate(Pos.x / 32), round_truncate(Pos.y / 32)) * 32;
+
+		vec2 CheckOffset;
+		CheckOffset.x = (DistanceToTopLeft.x > 16 ? 32 : -1);
+		CheckOffset.y = (DistanceToTopLeft.y > 16 ? 32 : -1);
+		CheckOffset -= DistanceToTopLeft;
+
+		for(vec2 Mask : {vec2(1.0f, 0.0f), vec2(0.0f, 1.0f), vec2(1.0f, 1.0f)})
+		{
+			const vec2 NewPos = Pos + CheckOffset * Mask;
+			if(!Collision()->CheckPoint(NewPos))
+			{
+				Pos = NewPos;
+				break;
+			}
+		}
+	}
+
 	// add the smoke
 	for(int i = 0; i < 24; i++)
 	{

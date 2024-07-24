@@ -1307,8 +1307,20 @@ void CGameConsole::OnRender()
 
 		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->ReceivingRconCommands())
 		{
+			float Percentage = Client()->GotRconCommandsPercentage();
+			SProgressSpinnerProperties ProgressProps;
+			ProgressProps.m_Progress = Percentage;
 			Ui()->RenderProgressSpinner(vec2(Screen.w / 4.0f + FONT_SIZE / 2.f, FONT_SIZE), FONT_SIZE / 2.f);
-			TextRender()->Text(Screen.w / 4.0f + FONT_SIZE + 2.0f, FONT_SIZE / 2.f, FONT_SIZE, Localize("Loading commands…"));
+
+			char aLoading[128];
+			str_copy(aLoading, Localize("Loading commands…"));
+			if(Percentage > 0)
+			{
+				char aPercentage[8];
+				str_format(aPercentage, sizeof(aPercentage), " %d%%", (int)(Percentage * 100));
+				str_append(aLoading, aPercentage);
+			}
+			TextRender()->Text(Screen.w / 4.0f + FONT_SIZE + 2.0f, FONT_SIZE / 2.f, FONT_SIZE, aLoading);
 		}
 
 		// render version

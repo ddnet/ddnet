@@ -10,7 +10,7 @@ public:
 	explicit CEditorSound(CEditor *pEditor);
 	~CEditorSound();
 
-	int m_SoundId = 0;
+	int m_SoundId = -1;
 	char m_aName[IO_MAX_PATH_LENGTH] = "";
 
 	void *m_pData = nullptr;

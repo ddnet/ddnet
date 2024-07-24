@@ -1,159 +1,231 @@
-#include <base/detect.h>
-
-#ifdef CONF_PLATFORM_ANDROID
-#include <sys/stat.h>
-#include <unistd.h>
+#include "android_main.h"
 
 #include <SDL.h>
 
 #include <base/hash.h>
+#include <base/log.h>
 #include <base/system.h>
+
 #include <engine/shared/linereader.h>
+
 #include <string>
 #include <vector>
 
-extern "C" __attribute__((visibility("default"))) void InitAndroid();
-
-static int gs_AndroidStarted = false;
-
-void InitAndroid()
+static bool UnpackAsset(const char *pFilename)
 {
-	if(gs_AndroidStarted)
+	char aAssetFilename[IO_MAX_PATH_LENGTH];
+	str_copy(aAssetFilename, "asset_integrity_files/");
+	str_append(aAssetFilename, pFilename);
+
+	// This uses SDL_RWFromFile because it can read Android assets,
+	// which are files stored in the app's APK file. All data files
+	// are stored as assets and unpacked to the external storage.
+	SDL_RWops *pAssetFile = SDL_RWFromFile(aAssetFilename, "rb");
+	if(!pAssetFile)
 	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "DDNet", "The app was started, but not closed properly, this causes bugs. Please restart or manually delete this task.", SDL_GL_GetCurrentWindow());
-		std::exit(0);
+		log_error("android", "Failed to open asset '%s' for reading", pFilename);
+		return false;
 	}
 
-	gs_AndroidStarted = true;
-
-	// change current path to a writable directory
-	const char *pPath = SDL_AndroidGetExternalStoragePath();
-	chdir(pPath);
-	dbg_msg("client", "changed path to %s", pPath);
-
-	// copy integrity files
+	const long int FileLength = SDL_RWsize(pAssetFile);
+	if(FileLength < 0)
 	{
-		SDL_RWops *pF = SDL_RWFromFile("asset_integrity_files/integrity.txt", "rb");
-		if(!pF)
-		{
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "DDNet", "integrity.txt not found, consider reinstalling", SDL_GL_GetCurrentWindow());
-			std::exit(0);
-		}
-
-		long int length;
-		SDL_RWseek(pF, 0, RW_SEEK_END);
-		length = SDL_RWtell(pF);
-		SDL_RWseek(pF, 0, RW_SEEK_SET);
-
-		char *pAl = (char *)malloc(length);
-		SDL_RWread(pF, pAl, 1, length);
-
-		SDL_RWclose(pF);
-
-		mkdir("data", 0755);
-
-		dbg_msg("integrity", "copying integrity.txt with size: %ld", length);
-
-		IOHANDLE pIO = io_open("integrity.txt", IOFLAG_WRITE);
-		io_write(pIO, pAl, length);
-		io_close(pIO);
-
-		free(pAl);
+		SDL_RWclose(pAssetFile);
+		log_error("android", "Failed to determine length of asset '%s'", pFilename);
+		return false;
 	}
 
-	IOHANDLE pIO = io_open("integrity.txt", IOFLAG_READ);
-	CLineReader LineReader;
-	LineReader.Init(pIO);
-	const char *pReadLine = NULL;
-	std::vector<std::string> vLines;
-	while((pReadLine = LineReader.Get()))
-	{
-		vLines.push_back(pReadLine);
-	}
-	io_close(pIO);
+	char *pData = static_cast<char *>(malloc(FileLength));
+	const size_t ReadLength = SDL_RWread(pAssetFile, pData, 1, FileLength);
+	SDL_RWclose(pAssetFile);
 
-	// first line is the whole hash
-	std::string AllAsOne;
-	for(size_t i = 1; i < vLines.size(); ++i)
+	if(ReadLength != (size_t)FileLength)
 	{
-		AllAsOne.append(vLines[i]);
-		AllAsOne.append("\n");
-	}
-	SHA256_DIGEST ShaAll;
-	bool GotSHA = false;
-	{
-		IOHANDLE pIOR = io_open("integrity_save.txt", IOFLAG_READ);
-		if(pIOR != NULL)
-		{
-			CLineReader LineReader;
-			LineReader.Init(pIOR);
-			const char *pLine = LineReader.Get();
-			if(pLine != NULL)
-			{
-				sha256_from_str(&ShaAll, pLine);
-				GotSHA = true;
-			}
-		}
+		free(pData);
+		log_error("android", "Failed to read asset '%s' (read %" PRIzu ", wanted %ld)", pFilename, ReadLength, FileLength);
+		return false;
 	}
 
-	SHA256_DIGEST ShaAllFile;
-	sha256_from_str(&ShaAllFile, vLines[0].c_str());
-
-	// TODO: check files individually
-	if(!GotSHA || ShaAllFile != ShaAll)
+	IOHANDLE TargetFile = io_open(pFilename, IOFLAG_WRITE);
+	if(!TargetFile)
 	{
-		// then the files
-		for(size_t i = 1; i < vLines.size(); ++i)
-		{
-			std::string FileName, Hash;
-			std::string::size_type n = 0;
-			std::string::size_type c = 0;
-			while((c = vLines[i].find(' ', n)) != std::string::npos)
-				n = c + 1;
-			FileName = vLines[i].substr(0, n - 1);
-			Hash = vLines[i].substr(n + 1);
-
-			std::string AssetFileName = std::string("asset_integrity_files/") + FileName;
-			SDL_RWops *pF = SDL_RWFromFile(AssetFileName.c_str(), "rb");
-
-			dbg_msg("Integrity", "Copying from assets: %s", FileName.c_str());
-
-			std::string FileNamePath = FileName;
-			std::string FileNamePathSub;
-			c = 0;
-			while((c = FileNamePath.find('/', c)) != std::string::npos)
-			{
-				FileNamePathSub = FileNamePath.substr(0, c);
-				fs_makedir(FileNamePathSub.c_str());
-				++c;
-			}
-
-			long int length;
-			SDL_RWseek(pF, 0, RW_SEEK_END);
-			length = SDL_RWtell(pF);
-			SDL_RWseek(pF, 0, RW_SEEK_SET);
-
-			char *pAl = (char *)malloc(length);
-			SDL_RWread(pF, pAl, 1, length);
-
-			SDL_RWclose(pF);
-
-			IOHANDLE pIO = io_open(FileName.c_str(), IOFLAG_WRITE);
-			io_write(pIO, pAl, length);
-			io_close(pIO);
-
-			free(pAl);
-		}
-
-		IOHANDLE pIOR = io_open("integrity_save.txt", IOFLAG_WRITE);
-		if(pIOR != NULL)
-		{
-			char aFileSHA[SHA256_MAXSTRSIZE];
-			sha256_str(ShaAllFile, aFileSHA, sizeof(aFileSHA));
-			io_write(pIOR, aFileSHA, str_length(aFileSHA));
-			io_close(pIOR);
-		}
+		free(pData);
+		log_error("android", "Failed to open '%s' for writing", pFilename);
+		return false;
 	}
+
+	const size_t WriteLength = io_write(TargetFile, pData, FileLength);
+	io_close(TargetFile);
+	free(pData);
+
+	if(WriteLength != (size_t)FileLength)
+	{
+		log_error("android", "Failed to write data to '%s' (wrote %" PRIzu ", wanted %ld)", pFilename, WriteLength, FileLength);
+		return false;
+	}
+
+	return true;
 }
 
-#endif
+constexpr const char *INTEGRITY_INDEX = "integrity.txt";
+constexpr const char *INTEGRITY_INDEX_SAVE = "integrity_save.txt";
+
+// The first line of each integrity file contains the combined hash for all files,
+// if the hashes match then we assume that the unpacked data folder is up-to-date.
+static bool EqualIntegrityFiles(const char *pAssetFilename, const char *pStorageFilename)
+{
+	IOHANDLE StorageFile = io_open(pStorageFilename, IOFLAG_READ);
+	if(!StorageFile)
+	{
+		return false;
+	}
+
+	char aStorageMainSha256[SHA256_MAXSTRSIZE];
+	const size_t StorageReadLength = io_read(StorageFile, aStorageMainSha256, sizeof(aStorageMainSha256) - 1);
+	io_close(StorageFile);
+	if(StorageReadLength != sizeof(aStorageMainSha256) - 1)
+	{
+		return false;
+	}
+	aStorageMainSha256[sizeof(aStorageMainSha256) - 1] = '\0';
+
+	char aAssetFilename[IO_MAX_PATH_LENGTH];
+	str_copy(aAssetFilename, "asset_integrity_files/");
+	str_append(aAssetFilename, pAssetFilename);
+
+	SDL_RWops *pAssetFile = SDL_RWFromFile(aAssetFilename, "rb");
+	if(!pAssetFile)
+	{
+		return false;
+	}
+
+	char aAssetMainSha256[SHA256_MAXSTRSIZE];
+	const size_t AssetReadLength = SDL_RWread(pAssetFile, aAssetMainSha256, 1, sizeof(aAssetMainSha256) - 1);
+	SDL_RWclose(pAssetFile);
+	if(AssetReadLength != sizeof(aAssetMainSha256) - 1)
+	{
+		return false;
+	}
+	aAssetMainSha256[sizeof(aAssetMainSha256) - 1] = '\0';
+
+	return str_comp(aStorageMainSha256, aAssetMainSha256) == 0;
+}
+
+class CIntegrityFileLine
+{
+public:
+	char m_aFilename[IO_MAX_PATH_LENGTH];
+	SHA256_DIGEST m_Sha256;
+};
+
+static std::vector<CIntegrityFileLine> ReadIntegrityFile(const char *pFilename)
+{
+	IOHANDLE IntegrityFile = io_open(pFilename, IOFLAG_READ);
+	if(!IntegrityFile)
+	{
+		return {};
+	}
+
+	CLineReader LineReader;
+	LineReader.Init(IntegrityFile);
+	const char *pReadLine;
+	std::vector<CIntegrityFileLine> vLines;
+	while((pReadLine = LineReader.Get()))
+	{
+		const char *pSpaceInLine = str_rchr(pReadLine, ' ');
+		CIntegrityFileLine Line;
+		char aSha256[SHA256_MAXSTRSIZE];
+		if(pSpaceInLine == nullptr)
+		{
+			if(!vLines.empty())
+			{
+				// Only the first line is allowed to not contain a filename
+				log_error("android", "Failed to parse line %" PRIzu " of '%s': line does not contain space", vLines.size() + 1, pFilename);
+				return {};
+			}
+			Line.m_aFilename[0] = '\0';
+			str_copy(aSha256, pReadLine);
+		}
+		else
+		{
+			str_truncate(Line.m_aFilename, sizeof(Line.m_aFilename), pReadLine, pSpaceInLine - pReadLine);
+			str_copy(aSha256, pSpaceInLine + 1);
+		}
+		if(sha256_from_str(&Line.m_Sha256, aSha256) != 0)
+		{
+			log_error("android", "Failed to parse line %" PRIzu " of '%s': invalid SHA256 string", vLines.size() + 1, pFilename);
+			return {};
+		}
+		vLines.emplace_back(std::move(Line));
+	}
+
+	io_close(IntegrityFile);
+	return vLines;
+}
+
+const char *InitAndroid()
+{
+	// Change current working directory to our external storage location
+	const char *pPath = SDL_AndroidGetExternalStoragePath();
+	if(pPath == nullptr)
+	{
+		return "The external storage is not available.";
+	}
+	if(fs_chdir(pPath) != 0)
+	{
+		return "Failed to change current directory to external storage.";
+	}
+	log_info("android", "Changed current directory to '%s'", pPath);
+
+	if(fs_makedir("data") != 0 || fs_makedir("user") != 0)
+	{
+		return "Failed to create 'data' and 'user' directories in external storage.";
+	}
+
+	if(EqualIntegrityFiles(INTEGRITY_INDEX, INTEGRITY_INDEX_SAVE))
+	{
+		return nullptr;
+	}
+
+	if(!UnpackAsset(INTEGRITY_INDEX))
+	{
+		return "Failed to unpack the integrity index file. Consider reinstalling the app.";
+	}
+
+	std::vector<CIntegrityFileLine> vIntegrityLines = ReadIntegrityFile(INTEGRITY_INDEX);
+	if(vIntegrityLines.empty())
+	{
+		return "Failed to load the integrity index file. Consider reinstalling the app.";
+	}
+
+	std::vector<CIntegrityFileLine> vIntegritySaveLines = ReadIntegrityFile(INTEGRITY_INDEX_SAVE);
+
+	// The remaining lines of each integrity file list all assets and their hashes
+	for(size_t i = 1; i < vIntegrityLines.size(); ++i)
+	{
+		const CIntegrityFileLine &IntegrityLine = vIntegrityLines[i];
+
+		// Check if the asset is unchanged from the last unpacking
+		const auto IntegritySaveLine = std::find_if(vIntegritySaveLines.begin(), vIntegritySaveLines.end(), [&](const CIntegrityFileLine &Line) {
+			return str_comp(Line.m_aFilename, IntegrityLine.m_aFilename) == 0;
+		});
+		if(IntegritySaveLine != vIntegritySaveLines.end() && IntegritySaveLine->m_Sha256 == IntegrityLine.m_Sha256)
+		{
+			continue;
+		}
+
+		if(fs_makedir_rec_for(IntegrityLine.m_aFilename) != 0 || !UnpackAsset(IntegrityLine.m_aFilename))
+		{
+			return "Failed to unpack game assets, consider reinstalling the app.";
+		}
+	}
+
+	// The integrity file will be unpacked every time when launching,
+	// so we can simply rename it to update the saved integrity file.
+	if((fs_is_file(INTEGRITY_INDEX_SAVE) && fs_remove(INTEGRITY_INDEX_SAVE) != 0) || fs_rename(INTEGRITY_INDEX, INTEGRITY_INDEX_SAVE) != 0)
+	{
+		return "Failed to update the saved integrity index file.";
+	}
+
+	return nullptr;
+}

@@ -236,7 +236,8 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	{
 		// Always create a rescue tee at the exact location we loaded from so that
 		// the old one gets overwritten.
-		pChr->SetRescue();
+		pChr->ForceSetRescue(RESCUEMODE_AUTO);
+		pChr->ForceSetRescue(RESCUEMODE_MANUAL);
 	}
 }
 

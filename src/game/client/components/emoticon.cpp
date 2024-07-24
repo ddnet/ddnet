@@ -203,5 +203,5 @@ void CEmoticon::EyeEmote(int Emote)
 		str_format(aBuf, sizeof(aBuf), "/emote blink %d", g_Config.m_ClEyeDuration);
 		break;
 	}
-	GameClient()->m_Chat.Say(0, aBuf);
+	GameClient()->m_Chat.SendChat(0, aBuf);
 }

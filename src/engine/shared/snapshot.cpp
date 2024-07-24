@@ -352,6 +352,138 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, vo
 	return (int)((char *)pData - (char *)pDstData);
 }
 
+int CSnapshotDelta::DebugDumpDelta(const void *pSrcData, int DataSize)
+{
+	CData *pDelta = (CData *)pSrcData;
+	int *pData = (int *)pDelta->m_aData;
+	int *pEnd = (int *)(((char *)pSrcData + DataSize));
+
+	dbg_msg("delta_dump", "+-----------------------------------------------");
+	if(DataSize < 3 * (int)sizeof(int32_t))
+	{
+		dbg_msg("delta_dump", "|  delta size %d too small. Should at least fit the empty delta header.", DataSize);
+		return -505;
+	}
+
+	dbg_msg("delta_dump", "|  data_size=%d", DataSize);
+
+	int DumpIndex = 0;
+
+	// dump header
+	{
+		int *pDumpHeader = (int *)pSrcData;
+		dbg_msg("delta_dump", "|  %3d %12d  %08x m_NumDeletedItems=%d", DumpIndex++, *pDumpHeader, *pDumpHeader, *pDumpHeader);
+		pDumpHeader++;
+		dbg_msg("delta_dump", "|  %3d %12d  %08x m_NumUpdatedItems=%d", DumpIndex++, *pDumpHeader, *pDumpHeader, *pDumpHeader);
+		pDumpHeader++;
+		dbg_msg("delta_dump", "|  %3d %12d  %08x _zero=%d", DumpIndex++, *pDumpHeader, *pDumpHeader, *pDumpHeader);
+		pDumpHeader++;
+
+		dbg_assert(pDumpHeader == pData, "invalid header size");
+	}
+
+	// unpack deleted stuff
+	int *pDeleted = pData;
+	if(pDelta->m_NumDeletedItems < 0)
+	{
+		dbg_msg("delta_dump", "|  Invalid delta. Number of deleted items %d is negative.", pDelta->m_NumDeletedItems);
+		return -201;
+	}
+	pData += pDelta->m_NumDeletedItems;
+	if(pData > pEnd)
+	{
+		dbg_msg("delta_dump", "|  Invalid delta. Read past the end.");
+		return -101;
+	}
+
+	// list deleted items
+	// (all other items should be copied from the last full snap)
+	for(int d = 0; d < pDelta->m_NumDeletedItems; d++)
+	{
+		int Type = pDeleted[d] >> 16;
+		int Id = pDeleted[d] & 0xffff;
+		dbg_msg("delta_dump", "  %3d %12d %08x deleted Type=%d Id=%d", DumpIndex++, pDeleted[d], pDeleted[d], Type, Id);
+	}
+
+	// unpack updated stuff
+	for(int i = 0; i < pDelta->m_NumUpdateItems; i++)
+	{
+		if(pData + 2 > pEnd)
+		{
+			dbg_msg("delta_dump", "|  Invalid delta. NumUpdateItems=%d can't be fit into DataSize=%d", pDelta->m_NumUpdateItems, DataSize);
+			return -102;
+		}
+
+		dbg_msg("delta_dump", "|  --------------------------------");
+		dbg_msg("delta_dump", "|  %3d %12d  %08x updated Type=%d", DumpIndex++, *pData, *pData, *pData);
+		const int Type = *pData++;
+		if(Type < 0 || Type > CSnapshot::MAX_TYPE)
+		{
+			dbg_msg("delta_dump", "|  Invalid delta. Type=%d out of range (0 - %d)", Type, CSnapshot::MAX_TYPE);
+			return -202;
+		}
+
+		dbg_msg("delta_dump", "|  %3d %12d  %08x updated Id=%d", DumpIndex++, *pData, *pData, *pData);
+		const int Id = *pData++;
+		if(Id < 0 || Id > CSnapshot::MAX_ID)
+		{
+			dbg_msg("delta_dump", "|  Invalid delta. Id=%d out of range (0 - %d)", Id, CSnapshot::MAX_ID);
+			return -203;
+		}
+
+		// size of the item in bytes
+		int ItemSize;
+		if(Type < MAX_NETOBJSIZES && m_aItemSizes[Type])
+		{
+			ItemSize = m_aItemSizes[Type];
+			dbg_msg("delta_dump", "|                             updated size=%d (known)", ItemSize);
+		}
+		else
+		{
+			if(pData + 1 > pEnd)
+			{
+				dbg_msg("delta_dump", "|  Invalid delta. Expected item size but got end of data.");
+				return -103;
+			}
+			if(*pData < 0 || (size_t)*pData > std::numeric_limits<int32_t>::max() / sizeof(int32_t))
+			{
+				dbg_msg("delta_dump", "|  Invalid delta. Item size %d out of range (0 - %" PRIzu ")", *pData, std::numeric_limits<int32_t>::max() / sizeof(int32_t));
+				return -204;
+			}
+			dbg_msg("delta_dump", "|  %3d %12d  %08x updated size=%d", DumpIndex++, *pData, *pData, *pData);
+			ItemSize = (*pData++) * sizeof(int32_t);
+		}
+
+		if(ItemSize < 0)
+		{
+			dbg_msg("delta_dump", "|  Invalid delta. Item size %d is negative.", ItemSize);
+			return -205;
+		}
+		if((const char *)pEnd - (const char *)pData < ItemSize)
+		{
+			dbg_msg("delta_dump", "|  Invalid delta. Item with type=%d id=%d size=%d does not fit into the delta.", Type, Id, ItemSize);
+			return -205;
+		}
+
+		// divide item size in bytes by size of integers
+		// to get the number of integers we want to increment the pointer
+		const int *pItemEnd = pData + (ItemSize / sizeof(int32_t));
+
+		for(size_t b = 0; b < ItemSize / sizeof(int32_t); b++)
+		{
+			dbg_msg("delta_dump", "|  %3d %12d  %08x item data", DumpIndex++, *pData, *pData);
+			pData++;
+		}
+
+		dbg_assert(pItemEnd == pData, "Incorrect amount of data dumped for this item.");
+	}
+
+	dbg_msg("delta_dump", "|  Finished with expected_data_size=%d parsed_data_size=%" PRIzu, DataSize, (pData - (int *)pSrcData) * sizeof(int32_t));
+	dbg_msg("delta_dump", "+--------------------");
+
+	return 0;
+}
+
 int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize)
 {
 	CData *pDelta = (CData *)pSrcData;
@@ -633,8 +765,9 @@ int CSnapshotBuilder::GetExtendedItemTypeIndex(int TypeId)
 	}
 	dbg_assert(m_NumExtendedItemTypes < MAX_EXTENDED_ITEM_TYPES, "too many extended item types");
 	int Index = m_NumExtendedItemTypes;
-	m_aExtendedItemTypes[Index] = TypeId;
 	m_NumExtendedItemTypes++;
+	m_aExtendedItemTypes[Index] = TypeId;
+	AddExtendedItemType(Index);
 	return Index;
 }
 

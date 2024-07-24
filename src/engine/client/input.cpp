@@ -538,6 +538,40 @@ void CInput::SetCompositionWindowPosition(float X, float Y, float H)
 	SDL_SetTextInputRect(&Rect);
 }
 
+static int TranslateScancode(const SDL_KeyboardEvent &KeyEvent)
+{
+	// See SDL_Keymod for possible modifiers:
+	// NONE   =     0
+	// LSHIFT =     1
+	// RSHIFT =     2
+	// LCTRL  =    64
+	// RCTRL  =   128
+	// LALT   =   256
+	// RALT   =   512
+	// LGUI   =  1024
+	// RGUI   =  2048
+	// NUM    =  4096
+	// CAPS   =  8192
+	// MODE   = 16384
+	// Sum if you want to ignore multiple modifiers.
+	if(KeyEvent.keysym.mod & g_Config.m_InpIgnoredModifiers)
+	{
+		return 0;
+	}
+
+	int Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(KeyEvent.keysym.sym) : KeyEvent.keysym.scancode;
+
+#if defined(CONF_PLATFORM_ANDROID)
+	// Translate the Android back-button to the escape-key so it can be used to open/close the menu, close popups etc.
+	if(Scancode == KEY_AC_BACK)
+	{
+		Scancode = KEY_ESCAPE;
+	}
+#endif
+
+	return Scancode;
+}
+
 int CInput::Update()
 {
 	const int64_t Now = time_get();
@@ -607,28 +641,37 @@ int CInput::Update()
 
 		// handle keys
 		case SDL_KEYDOWN:
-			// See SDL_Keymod for possible modifiers:
-			// NONE   =     0
-			// LSHIFT =     1
-			// RSHIFT =     2
-			// LCTRL  =    64
-			// RCTRL  =   128
-			// LALT   =   256
-			// RALT   =   512
-			// LGUI   =  1024
-			// RGUI   =  2048
-			// NUM    =  4096
-			// CAPS   =  8192
-			// MODE   = 16384
-			// Sum if you want to ignore multiple modifiers.
-			if(!(Event.key.keysym.mod & g_Config.m_InpIgnoredModifiers))
+#if defined(CONF_PLATFORM_ANDROID)
+			if(Event.key.keysym.scancode == KEY_AC_BACK && m_BackButtonReleased)
 			{
-				Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
+				if(m_LastBackPress == -1 || (Now - m_LastBackPress) / (float)time_freq() > 1.0f)
+				{
+					m_NumBackPresses = 1;
+					m_LastBackPress = Now;
+				}
+				else
+				{
+					m_NumBackPresses++;
+					if(m_NumBackPresses >= 3)
+					{
+						// Quit if the Android back-button was pressed 3 times within 1 second
+						return 1;
+					}
+				}
+				m_BackButtonReleased = false;
 			}
+#endif
+			Scancode = TranslateScancode(Event.key);
 			break;
 		case SDL_KEYUP:
+#if defined(CONF_PLATFORM_ANDROID)
+			if(Event.key.keysym.scancode == KEY_AC_BACK && !m_BackButtonReleased)
+			{
+				m_BackButtonReleased = true;
+			}
+#endif
 			Action = IInput::FLAG_RELEASE;
-			Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
+			Scancode = TranslateScancode(Event.key);
 			break;
 
 		// handle the joystick events

@@ -331,6 +331,8 @@ public:
 
 	void SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int ClientId);
 	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientId);
+	int GetConsoleAccessLevel(int ClientId);
+	int NumRconCommands(int ClientId);
 	void UpdateClientRconCommands();
 
 	bool CheckReservedSlotAuth(int ClientId, const char *pPassword);

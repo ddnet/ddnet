@@ -103,7 +103,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		const char *pName = m_pClient->m_aClients[pPlayerInfo->m_ClientId].m_aName;
 		if(str_comp(pName, m_aNamePlates[ClientId].m_aName) != 0 || FontSize != m_aNamePlates[ClientId].m_NameTextFontSize)
 		{
-			mem_copy(m_aNamePlates[ClientId].m_aName, pName, sizeof(m_aNamePlates[ClientId].m_aName));
+			str_copy(m_aNamePlates[ClientId].m_aName, pName);
 			m_aNamePlates[ClientId].m_NameTextFontSize = FontSize;
 
 			CTextCursor Cursor;
@@ -126,7 +126,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			const char *pClan = m_pClient->m_aClients[ClientId].m_aClan;
 			if(str_comp(pClan, m_aNamePlates[ClientId].m_aClanName) != 0 || FontSizeClan != m_aNamePlates[ClientId].m_ClanNameTextFontSize)
 			{
-				mem_copy(m_aNamePlates[ClientId].m_aClanName, pClan, sizeof(m_aNamePlates[ClientId].m_aClanName));
+				str_copy(m_aNamePlates[ClientId].m_aClanName, pClan);
 				m_aNamePlates[ClientId].m_ClanNameTextFontSize = FontSizeClan;
 
 				CTextCursor Cursor;
@@ -229,7 +229,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		{
 			YOffset -= FontSize;
 			char aBuf[128];
-			str_from_int(pPlayerInfo->m_ClientId, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
 			float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
 			TextRender()->TextColor(rgb);
 			TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
@@ -291,7 +291,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				{
 					YOffset -= FontSize;
 					char aBuf[12];
-					str_from_int(Other.m_ExtendedData.m_StrongWeakId, aBuf);
+					str_format(aBuf, sizeof(aBuf), "%d", Other.m_ExtendedData.m_StrongWeakId);
 					float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
 					TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 				}

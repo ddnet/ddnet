@@ -354,10 +354,11 @@ bool CServer::SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set
 
 	bool Changed = str_comp(m_aClients[ClientId].m_aName, aNameTry) != 0;
 
-	if(Set)
+	if(Set && Changed)
 	{
 		// set the client name
 		str_copy(m_aClients[ClientId].m_aName, aNameTry);
+		GameServer()->TeehistorianRecordPlayerName(ClientId, m_aClients[ClientId].m_aName);
 	}
 
 	return Changed;
@@ -1340,13 +1341,30 @@ void CServer::SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int Cli
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
 
+int CServer::GetConsoleAccessLevel(int ClientId)
+{
+	return m_aClients[ClientId].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientId].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
+}
+
+int CServer::NumRconCommands(int ClientId)
+{
+	int Num = 0;
+	int ConsoleAccessLevel = GetConsoleAccessLevel(ClientId);
+	for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
+		pCmd; pCmd = pCmd->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER))
+	{
+		Num++;
+	}
+	return Num;
+}
+
 void CServer::UpdateClientRconCommands()
 {
 	int ClientId = Tick() % MAX_CLIENTS;
 
 	if(m_aClients[ClientId].m_State != CClient::STATE_EMPTY && m_aClients[ClientId].m_Authed)
 	{
-		int ConsoleAccessLevel = m_aClients[ClientId].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientId].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
+		int ConsoleAccessLevel = GetConsoleAccessLevel(ClientId);
 		for(int i = 0; i < MAX_RCONCMD_SEND && m_aClients[ClientId].m_pRconCmdToSend; ++i)
 		{
 			SendRconCmdAdd(m_aClients[ClientId].m_pRconCmdToSend, ClientId);
@@ -1758,6 +1776,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						// AUTHED_ADMIN - AuthLevel gets the proper IConsole::ACCESS_LEVEL_<x>
 						m_aClients[ClientId].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
 						CMsgPacker MsgStart(NETMSG_RCON_CMD_GROUP_START, true);
+						MsgStart.AddInt(NumRconCommands(ClientId));
 						SendMsg(&MsgStart, MSGFLAG_VITAL, ClientId);
 						if(m_aClients[ClientId].m_pRconCmdToSend == nullptr)
 						{
@@ -1943,7 +1962,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 #define ADD_INT(p, x) \
 	do \
 	{ \
-		str_from_int(x, aBuf); \
+		str_format(aBuf, sizeof(aBuf), "%d", x); \
 		(p).AddString(aBuf, 0); \
 	} while(0)
 
@@ -2204,7 +2223,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 #define ADD_INT(p, x) \
 	do \
 	{ \
-		str_from_int(x, aBuf); \
+		str_format(aBuf, sizeof(aBuf), "%d", x); \
 		(p).AddString(aBuf, 0); \
 	} while(0)
 

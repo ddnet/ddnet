@@ -77,7 +77,6 @@ Checks: >
   -readability-function-cognitive-complexity,
   -readability-function-size,
   -readability-identifier-length,
-  -readability-identifier-naming,
   -readability-implicit-bool-conversion,
   -readability-isolate-declaration,
   -readability-magic-numbers,
@@ -89,3 +88,45 @@ Checks: >
   performance-*,
   -performance-no-int-to-ptr,
   portability-*,
+
+WarningsAsErrors:
+  readability-identifier-naming,
+
+CheckOptions:
+  - key:             readability-identifier-naming.LocalVariableCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.StaticConstantCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.StaticVariableCase
+    value:           aNy_CasE
+  - key:             readability-identifier-naming.LocalConstantCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.ClassMemberCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.ClassMemberPrefix
+    value:           m_
+  - key:             readability-identifier-naming.ClassMethodCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.ClassCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.ClassPrefix
+    value:           C
+  - key:             readability-identifier-naming.StructPrefix
+    value:           S
+  - key:             readability-identifier-naming.StructIgnoredRegexp
+    value:           '^([CS]|MapObject$|EnvelopedQuad$).*'
+  - key:             readability-identifier-naming.ClassIgnoredRegexp
+    value:           '^(I|CCommandProcessorFragment_Vulkan$).*'
+  - key:             readability-identifier-naming.ParameterCase
+    value:           CamelCase
+  - key:             readability-identifier-naming.ParameterIgnoredRegexp
+    value:           '^(p|a|v|[a-z]$|s[hw]$|warning_msg$|error_msg$|string$|integer$|boolean$|object$|index$|rhs$|lhs$|[xy]off$|id$|mode$|rgb$|[xy][0123]$|width$|height$|[sdw][xy]$|ownId$|fnMatchCallback$).*'
+  - key:             readability-identifier-naming.ClassMethodIgnoredRegexp
+    value:           '^(Con_).*'
+  - key:             readability-identifier-naming.ClassMemberIgnoredRegexp
+    value:           '^(ms_aStandardScreen$|s_1024x1024ImgSize$|s_ImageBufferCacheId$|s_VertexBufferCacheId$|s_StagingBufferImageCacheId$|REPLACEMENT_CHARACTER$|(MAX|MIN)_FONT_SIZE$|MAXIMUM_ATLAS_DIMENSION$|INITIAL_ATLAS_DIMENSION$|MAX_SECTION_DIMENSION_MAPPED$|MIN_SECTION_DIMENSION$|s_StagingBufferCacheId$|ms_MainThreadIndex$).*'
+  - key:             readability-identifier-naming.LocalConstantIgnoredRegexp
+    value:           '^(p|a|v|s_|MAX_ANIM_SPEED$|DATA_OFFSET$|HEADER_LEN$|MIN_ANIM_SPEED$|[hwdcbqstf]$|[xt][0123]$|result$|sub$|it$|len$|d[xy]$).*'
+  - key:             readability-identifier-naming.LocalVariableIgnoredRegexp
+    value:           '^(p|a|s_|FT_|TB_|s_|ul_|v|[xy]i$|[zijklxyhmrgbacwestnduvqf]$|[dmpwsitcf][xy]$|(ch|skel)[0-2]?$|it$|tw$|dt$|th$|ls$|func$|res$|shader$|len$|maxLength$|length$|offset$|offpos$|result$|bg$|sp$|url$|Tickdelta_legacy$|index$|ctxt$|key$|null$|logger$|LAST_MODIFIED$|GfxFsaaSamples_MouseButton$|teleNr$|target$|id$|hit$|hsl[0-2]?$|rgb[0-2]?$|dir$|tmp$|cData$|sub$|ret$|rendered$|(lower|upper)(16|26|24|32)|size$|wSearch$|bAlreadyHit$|isWeaponCollide$|zerochar$|dist$|sound$|match$|best_skin$|best_matches$|m_aClient$|matches$|nohook$|through_cut$|btn$|savedLayers$|l[hw]$|evilz$|sec$|min$|to2$|delay$|m_TileF?Index$|mode$|maxModes$|numModes$|iLogLength$|[xy]Fract$|[xy]Int$|imgg[xy]$|skip$|localPlayer$|fdratio$|[rgbat][0-2]$|[xy][0-3]$|x[rl]$).*'
+

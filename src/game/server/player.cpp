@@ -143,6 +143,7 @@ void CPlayer::Reset()
 	m_VotedForPractice = false;
 	m_SwapTargetsClientId = -1;
 	m_BirthdayAnnounced = false;
+	m_RescueMode = RESCUEMODE_AUTO;
 }
 
 static int PlayerFlags_SixToSeven(int Flags)
@@ -183,7 +184,7 @@ void CPlayer::Tick()
 		GameServer()->SendChatTarget(m_ClientId, "Active moderator mode disabled because you are afk.");
 
 		if(!GameServer()->PlayerModerating())
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Server kick/spec votes are no longer actively moderated.");
+			GameServer()->SendChat(-1, TEAM_ALL, "Server kick/spec votes are no longer actively moderated.");
 	}
 
 	// do latency stuff
@@ -213,7 +214,7 @@ void CPlayer::Tick()
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' would have timed out, but can use timeout protection now", Server()->ClientName(m_ClientId));
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		Server()->ResetNetErrorString(m_ClientId);
 	}
 
@@ -799,7 +800,7 @@ int CPlayer::Pause(int State, bool Force)
 			if(g_Config.m_SvPauseMessages)
 			{
 				str_format(aBuf, sizeof(aBuf), (State > PAUSE_NONE) ? "'%s' speced" : "'%s' resumed", Server()->ClientName(m_ClientId));
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+				GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 			}
 			break;
 		}
@@ -829,7 +830,7 @@ int CPlayer::ForcePause(int Time)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "'%s' was force-paused for %ds", Server()->ClientName(m_ClientId), Time);
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 	}
 
 	return Pause(PAUSE_SPEC, true);
@@ -885,7 +886,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 				if(GameServer()->ProcessSpamProtection(m_ClientId) && PrimaryMessage)
 					break;
 
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aMessage, -1);
+				GameServer()->SendChat(-1, TEAM_ALL, aMessage, -1);
 				PrimaryMessage = false;
 			}
 			break;
@@ -924,7 +925,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 				str_format(aBuf, sizeof(aBuf),
 					"Happy DDNet birthday to %s for finishing their first map %d year%s ago!",
 					Server()->ClientName(m_ClientId), Birthday, Birthday > 1 ? "s" : "");
-				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, m_ClientId);
+				GameServer()->SendChat(-1, TEAM_ALL, aBuf, m_ClientId);
 				str_format(aBuf, sizeof(aBuf),
 					"Happy DDNet birthday, %s!\nYou have finished your first map exactly %d year%s ago!",
 					Server()->ClientName(m_ClientId), Birthday, Birthday > 1 ? "s" : "");

@@ -720,10 +720,10 @@ Filter connecting players
 == Только подключившиеся
 
 Indicate map finish
-== Выделять финишированные карты
+== Показ. пройденные карты
 
 Unfinished map
-== Непройденная карта
+== Только непройденные карты
 
 DDNet %s is out!
 == Вышел DDNet %s!
@@ -732,7 +732,7 @@ Downloading %s:
 == Скачивание %s:
 
 Update failed! Check log...
-== Провал. Проверьте логи...
+== Ошибка. Проверьте логи...
 
 Restart
 == Рестарт
@@ -1072,10 +1072,10 @@ Assets directory
 == Расп. текстур
 
 Manual
-== Ручное
+== Вруч.
 
 Race
-== Гонка
+== Забег
 
 Auto
 == Авто

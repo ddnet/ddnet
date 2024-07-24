@@ -11,6 +11,8 @@
 #include "player.h"
 #include "score.h"
 
+#include <optional>
+
 bool CheckClientId(int ClientId);
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
@@ -1052,7 +1054,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 			str_format(aBuf, sizeof(aBuf), "'%s' joined team %d",
 				Server()->ClientName(pPlayer->GetCid()),
 				Team);
-			SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+			SendChat(-1, TEAM_ALL, aBuf);
 			pPlayer->m_Last_Team = Server()->Tick();
 
 			if(m_pController->Teams().IsPractice(Team))
@@ -1286,7 +1288,7 @@ void CGameContext::ConMe(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Server()->ClientName(pResult->m_ClientId),
 		pResult->GetString(0));
 	if(g_Config.m_SvSlashMe)
-		pSelf->SendChat(-2, CGameContext::CHAT_ALL, aBuf, pResult->m_ClientId);
+		pSelf->SendChat(-2, TEAM_ALL, aBuf, pResult->m_ClientId);
 	else
 		pSelf->Console()->Print(
 			IConsole::OUTPUT_LEVEL_STANDARD,
@@ -1552,7 +1554,7 @@ void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
 	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientId);
 	str_time(Time, TIME_HOURS, aBufTime, sizeof(aBufTime));
 	str_format(aBuf, sizeof(aBuf), "%s\'s current race time is %s", pName, aBufTime);
-	pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf, pResult->m_ClientId);
+	pSelf->SendChat(-1, TEAM_ALL, aBuf, pResult->m_ClientId);
 }
 
 void CGameContext::ConTime(IConsole::IResult *pResult, void *pUserData)
@@ -1650,8 +1652,76 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	pChr->Rescue();
-	pChr->UnFreeze();
+	bool GoRescue = true;
+
+	if(pPlayer->m_RescueMode == RESCUEMODE_MANUAL)
+	{
+		// if character can't set his rescue state then we should rescue him instead
+		GoRescue = !pChr->TrySetRescue(RESCUEMODE_MANUAL);
+	}
+
+	if(GoRescue)
+	{
+		pChr->Rescue();
+		pChr->UnFreeze();
+	}
+}
+
+void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
+	if(!g_Config.m_SvRescue && !Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCid(), "Rescue is not enabled on this server and you're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	if(str_comp_nocase(pResult->GetString(0), "auto") == 0)
+	{
+		if(pPlayer->m_RescueMode != RESCUEMODE_AUTO)
+		{
+			pPlayer->m_RescueMode = RESCUEMODE_AUTO;
+
+			pSelf->SendChatTarget(pPlayer->GetCid(), "Rescue mode changed to auto.");
+		}
+
+		return;
+	}
+
+	if(str_comp_nocase(pResult->GetString(0), "manual") == 0)
+	{
+		if(pPlayer->m_RescueMode != RESCUEMODE_MANUAL)
+		{
+			pPlayer->m_RescueMode = RESCUEMODE_MANUAL;
+
+			pSelf->SendChatTarget(pPlayer->GetCid(), "Rescue mode changed to manual.");
+		}
+
+		return;
+	}
+
+	if(str_comp_nocase(pResult->GetString(0), "list") == 0)
+	{
+		pSelf->SendChatTarget(pPlayer->GetCid(), "Available rescue modes: auto, manual");
+	}
+	else if(str_comp_nocase(pResult->GetString(0), "") == 0)
+	{
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "Current rescue mode: %s.", pPlayer->m_RescueMode == RESCUEMODE_MANUAL ? "manual" : "auto");
+		pSelf->SendChatTarget(pPlayer->GetCid(), aBuf);
+	}
+	else
+	{
+		pSelf->SendChatTarget(pPlayer->GetCid(), "Unknown argument. Check '/rescuemode list'");
+	}
 }
 
 void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)
@@ -1874,6 +1944,27 @@ void CGameContext::ConLastTele(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->Pause(CPlayer::PAUSE_NONE, true);
 }
 
+CCharacter *CGameContext::GetPracticeCharacter(IConsole::IResult *pResult)
+{
+	if(!CheckClientId(pResult->m_ClientId))
+		return nullptr;
+	CPlayer *pPlayer = m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return nullptr;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return nullptr;
+
+	CGameTeams &Teams = m_pController->Teams();
+	int Team = GetDDRaceTeam(pResult->m_ClientId);
+	if(!Teams.IsPractice(Team))
+	{
+		SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return nullptr;
+	}
+	return pChr;
+}
+
 void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1899,7 +1990,6 @@ void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData
 		pSelf->SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
 		return;
 	}
-
 	pChr->SetSolo(false);
 }
 
@@ -1928,29 +2018,15 @@ void CGameContext::ConPracticeSolo(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
 		return;
 	}
-
 	pChr->SetSolo(true);
 }
 
 void CGameContext::ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
-	if(!pPlayer)
-		return;
-	CCharacter *pChr = pPlayer->GetCharacter();
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
 	if(!pChr)
 		return;
-
-	CGameTeams &Teams = pSelf->m_pController->Teams();
-	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
-	if(!Teams.IsPractice(Team))
-	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
-		return;
-	}
 
 	pChr->SetDeepFrozen(false);
 	pChr->UnFreeze();
@@ -1959,24 +2035,108 @@ void CGameContext::ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData
 void CGameContext::ConPracticeDeep(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
-	if(!pPlayer)
-		return;
-	CCharacter *pChr = pPlayer->GetCharacter();
+	auto *pChr = pSelf->GetPracticeCharacter(pResult);
 	if(!pChr)
 		return;
 
-	CGameTeams &Teams = pSelf->m_pController->Teams();
-	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
-	if(!Teams.IsPractice(Team))
-	{
-		pSelf->SendChatTarget(pPlayer->GetCid(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
-		return;
-	}
-
 	pChr->SetDeepFrozen(true);
+}
+
+void CGameContext::ConPracticeShotgun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConShotgun(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeGrenade(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConGrenade(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeLaser(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConLaser(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeJetpack(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConJetpack(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeWeapons(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConWeapons(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeUnShotgun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConUnShotgun(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeUnGrenade(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConUnGrenade(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeUnLaser(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConUnLaser(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeUnJetpack(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConUnJetpack(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeUnWeapons(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConUnWeapons(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeNinja(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConNinja(pResult, pUserData);
+}
+void CGameContext::ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConUnNinja(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConAddWeapon(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConRemoveWeapon(pResult, pUserData);
 }
 
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)

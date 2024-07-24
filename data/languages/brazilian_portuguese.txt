@@ -31,6 +31,7 @@
 # Rafael Fontenelle   2023-09-25 14:23:00
 # Rafael Fontenelle   2023-12-05 17:01:00
 # Rafael Fontenelle   2024-03-02 16:20:00
+# Rafael Fontenelle   2024-04-30 14:52:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1686,7 +1687,7 @@ Go back the specified duration
 
 [Demo player duration]
 %d sec.
-== $d seg.
+== %d seg.
 
 Change the skip duration
 == Alterar a duração de pulo
@@ -1843,31 +1844,31 @@ Loading…
 == Carregando…
 
 Loading demo file from storage
-== 
+== Carregando arquivo de demo do armazenamento
 
 No login required
-== 
+== Nenhum login exigido
 
 Player info change cooldown
-== 
+== Tempo de resfriamento para alterações de informações de jogador
 
 Always show chat
-== 
+== Sempre mostrar o chat
 
 Show friend mark (♥) in name plates
-== 
+== Mostrar marca de amigo (♥) em apelidos
 
 Show hook strength icon indicator
-== 
+== Mostrar indicador de ícone de força do gancho
 
 Show hook strength number indicator
-== 
+== Mostrar indicador de número da força do gancho
 
 Show own player's hook collision line
-== 
+== Mostrar a linha de colisão do gancho do próprio jogador
 
 Always show own player's hook collision line
-== 
+== Sempre mostrar a linha de colisão do gancho do próprio jogador
 
 Always show other players' hook collision lines
-== 
+== Sempre mostrar linhas de colisão do gancho dos outros jogadores

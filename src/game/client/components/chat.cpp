@@ -32,7 +32,7 @@ CChat::CChat()
 
 	m_Mode = MODE_NONE;
 
-	m_Input.SetClipboardLineCallback([this](const char *pStr) { SayChat(pStr); });
+	m_Input.SetClipboardLineCallback([this](const char *pStr) { SendChatQueued(pStr); });
 	m_Input.SetCalculateOffsetCallback([this]() { return m_IsInputCensored; });
 	m_Input.SetDisplayTextCallback([this](char *pStr, size_t NumChars) {
 		m_IsInputCensored = false;
@@ -150,12 +150,12 @@ void CChat::OnStateChange(int NewState, int OldState)
 
 void CChat::ConSay(IConsole::IResult *pResult, void *pUserData)
 {
-	((CChat *)pUserData)->Say(0, pResult->GetString(0));
+	((CChat *)pUserData)->SendChat(0, pResult->GetString(0));
 }
 
 void CChat::ConSayTeam(IConsole::IResult *pResult, void *pUserData)
 {
-	((CChat *)pUserData)->Say(1, pResult->GetString(0));
+	((CChat *)pUserData)->SendChat(1, pResult->GetString(0));
 }
 
 void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
@@ -249,28 +249,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 			m_CommandsNeedSorting = false;
 		}
 
-		if(m_Input.GetString()[0])
-		{
-			bool AddEntry = false;
-
-			if(m_LastChatSend + time_freq() < time())
-			{
-				Say(m_Mode == MODE_ALL ? 0 : 1, m_Input.GetString());
-				AddEntry = true;
-			}
-			else if(m_PendingChatCounter < 3)
-			{
-				++m_PendingChatCounter;
-				AddEntry = true;
-			}
-
-			if(AddEntry)
-			{
-				CHistoryEntry *pEntry = m_History.Allocate(sizeof(CHistoryEntry) + m_Input.GetLength());
-				pEntry->m_Team = m_Mode == MODE_ALL ? 0 : 1;
-				mem_copy(pEntry->m_aText, m_Input.GetString(), m_Input.GetLength() + 1);
-			}
-		}
+		SendChatQueued(m_Input.GetString());
 		m_pHistoryEntry = nullptr;
 		DisableMode();
 		m_pClient->OnRelease();
@@ -651,6 +630,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		(ClientId >= 0 && (m_pClient->m_aClients[ClientId].m_aName[0] == '\0' || // unknown client
 					  m_pClient->m_aClients[ClientId].m_ChatIgnore ||
 					  (m_pClient->m_Snap.m_LocalClientId != ClientId && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientId].m_Friend) ||
+					  (m_pClient->m_Snap.m_LocalClientId != ClientId && g_Config.m_ClShowChatTeamMembersOnly && m_pClient->IsOtherTeam(ClientId) && m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientId) != TEAM_FLOCK) ||
 					  (m_pClient->m_Snap.m_LocalClientId != ClientId && m_pClient->m_aClients[ClientId].m_Foe))))
 		return;
 
@@ -764,6 +744,8 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		pCurrentLine->m_Team = Team == 1;
 		pCurrentLine->m_Whisper = Team >= 2;
 		pCurrentLine->m_NameColor = -2;
+		pCurrentLine->m_Friend = false;
+		pCurrentLine->m_HasRenderTee = false;
 
 		TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
 		Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
@@ -800,58 +782,56 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		}
 		else
 		{
-			if(m_pClient->m_aClients[ClientId].m_Team == TEAM_SPECTATORS)
+			auto &LineAuthor = m_pClient->m_aClients[pCurrentLine->m_ClientId];
+
+			if(LineAuthor.m_Team == TEAM_SPECTATORS)
 				pCurrentLine->m_NameColor = TEAM_SPECTATORS;
 
 			if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
 			{
-				if(m_pClient->m_aClients[ClientId].m_Team == TEAM_RED)
+				if(LineAuthor.m_Team == TEAM_RED)
 					pCurrentLine->m_NameColor = TEAM_RED;
-				else if(m_pClient->m_aClients[ClientId].m_Team == TEAM_BLUE)
+				else if(LineAuthor.m_Team == TEAM_BLUE)
 					pCurrentLine->m_NameColor = TEAM_BLUE;
 			}
 
-			if(Team == 2) // whisper send
+			if(Team == TEAM_WHISPER_SEND)
 			{
-				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "→ %s", m_pClient->m_aClients[ClientId].m_aName);
+				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "→ %s", LineAuthor.m_aName);
 				pCurrentLine->m_NameColor = TEAM_BLUE;
 				pCurrentLine->m_Highlighted = false;
 				Highlighted = false;
 			}
-			else if(Team == 3) // whisper recv
+			else if(Team == TEAM_WHISPER_RECV)
 			{
-				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s", m_pClient->m_aClients[ClientId].m_aName);
+				str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s", LineAuthor.m_aName);
 				pCurrentLine->m_NameColor = TEAM_RED;
 				pCurrentLine->m_Highlighted = true;
 				Highlighted = true;
 			}
 			else
-				str_copy(pCurrentLine->m_aName, m_pClient->m_aClients[ClientId].m_aName);
+				str_copy(pCurrentLine->m_aName, LineAuthor.m_aName);
 
 			str_copy(pCurrentLine->m_aText, pLine);
-			pCurrentLine->m_Friend = m_pClient->m_aClients[ClientId].m_Friend;
-		}
+			pCurrentLine->m_Friend = LineAuthor.m_Friend;
 
-		pCurrentLine->m_HasRenderTee = false;
-
-		pCurrentLine->m_Friend = ClientId >= 0 ? m_pClient->m_aClients[ClientId].m_Friend : false;
-
-		if(pCurrentLine->m_ClientId >= 0 && pCurrentLine->m_aName[0] != '\0')
-		{
-			if(!g_Config.m_ClChatOld)
+			if(pCurrentLine->m_aName[0] != '\0')
 			{
-				pCurrentLine->m_CustomColoredSkin = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_CustomColoredSkin;
-				if(pCurrentLine->m_CustomColoredSkin)
-					pCurrentLine->m_RenderSkin = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_ColorableRenderSkin;
-				else
-					pCurrentLine->m_RenderSkin = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_OriginalRenderSkin;
+				if(!g_Config.m_ClChatOld)
+				{
+					pCurrentLine->m_CustomColoredSkin = LineAuthor.m_RenderInfo.m_CustomColoredSkin;
+					if(pCurrentLine->m_CustomColoredSkin)
+						pCurrentLine->m_RenderSkin = LineAuthor.m_RenderInfo.m_ColorableRenderSkin;
+					else
+						pCurrentLine->m_RenderSkin = LineAuthor.m_RenderInfo.m_OriginalRenderSkin;
 
-				str_copy(pCurrentLine->m_aSkinName, m_pClient->m_aClients[pCurrentLine->m_ClientId].m_aSkinName);
-				pCurrentLine->m_ColorBody = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_ColorBody;
-				pCurrentLine->m_ColorFeet = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_ColorFeet;
+					str_copy(pCurrentLine->m_aSkinName, LineAuthor.m_aSkinName);
+					pCurrentLine->m_ColorBody = LineAuthor.m_RenderInfo.m_ColorBody;
+					pCurrentLine->m_ColorFeet = LineAuthor.m_RenderInfo.m_ColorFeet;
 
-				pCurrentLine->m_RenderSkinMetrics = m_pClient->m_aClients[pCurrentLine->m_ClientId].m_RenderInfo.m_SkinMetrics;
-				pCurrentLine->m_HasRenderTee = true;
+					pCurrentLine->m_RenderSkinMetrics = LineAuthor.m_RenderInfo.m_SkinMetrics;
+					pCurrentLine->m_HasRenderTee = true;
+				}
 			}
 		}
 
@@ -894,7 +874,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			}
 		}
 	}
-	else if(Team != 2)
+	else if(Team != TEAM_WHISPER_SEND)
 	{
 		if(Now - m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq() * 3 / 10)
 		{
@@ -1177,7 +1157,7 @@ void CChat::OnRender()
 		{
 			if(i == 0)
 			{
-				Say(pEntry->m_Team, pEntry->m_aText);
+				SendChat(pEntry->m_Team, pEntry->m_aText);
 				break;
 			}
 		}
@@ -1324,47 +1304,6 @@ void CChat::OnRender()
 	}
 }
 
-void CChat::Say(int Team, const char *pLine)
-{
-	// don't send empty messages
-	if(*str_utf8_skip_whitespaces(pLine) == '\0')
-		return;
-
-	m_LastChatSend = time();
-
-	// send chat message
-	CNetMsg_Cl_Say Msg;
-	Msg.m_Team = Team;
-	Msg.m_pMessage = pLine;
-	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
-}
-
-void CChat::SayChat(const char *pLine)
-{
-	if(!pLine || str_length(pLine) < 1)
-		return;
-
-	bool AddEntry = false;
-
-	if(m_LastChatSend + time_freq() < time())
-	{
-		Say(m_Mode == MODE_ALL ? 0 : 1, pLine);
-		AddEntry = true;
-	}
-	else if(m_PendingChatCounter < 3)
-	{
-		++m_PendingChatCounter;
-		AddEntry = true;
-	}
-
-	if(AddEntry)
-	{
-		CHistoryEntry *pEntry = m_History.Allocate(sizeof(CHistoryEntry) + str_length(pLine) - 1);
-		pEntry->m_Team = m_Mode == MODE_ALL ? 0 : 1;
-		mem_copy(pEntry->m_aText, pLine, str_length(pLine));
-	}
-}
-
 void CChat::EnsureCoherentFontSize() const
 {
 	// Adjust font size based on width
@@ -1383,4 +1322,48 @@ void CChat::EnsureCoherentWidth() const
 
 	// We want to keep a ration between font size and font width so that we don't have a weird rendering
 	g_Config.m_ClChatWidth = CHAT_FONTSIZE_WIDTH_RATIO * g_Config.m_ClChatFontSize;
+}
+
+// ----- send functions -----
+
+void CChat::SendChat(int Team, const char *pLine)
+{
+	// don't send empty messages
+	if(*str_utf8_skip_whitespaces(pLine) == '\0')
+		return;
+
+	m_LastChatSend = time();
+
+	// send chat message
+	CNetMsg_Cl_Say Msg;
+	Msg.m_Team = Team;
+	Msg.m_pMessage = pLine;
+	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+}
+
+void CChat::SendChatQueued(const char *pLine)
+{
+	if(!pLine || str_length(pLine) < 1)
+		return;
+
+	bool AddEntry = false;
+
+	if(m_LastChatSend + time_freq() < time())
+	{
+		SendChat(m_Mode == MODE_ALL ? 0 : 1, pLine);
+		AddEntry = true;
+	}
+	else if(m_PendingChatCounter < 3)
+	{
+		++m_PendingChatCounter;
+		AddEntry = true;
+	}
+
+	if(AddEntry)
+	{
+		const int Length = str_length(pLine);
+		CHistoryEntry *pEntry = m_History.Allocate(sizeof(CHistoryEntry) + Length);
+		pEntry->m_Team = m_Mode == MODE_ALL ? 0 : 1;
+		str_copy(pEntry->m_aText, pLine, Length + 1);
+	}
 }

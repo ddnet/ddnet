@@ -387,7 +387,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 				str_copy(m_aTooltip, pToolTip);
 		}
 
-		if(Inside)
+		if(Inside && !Ui()->MouseButton(0))
 			Ui()->SetHotItem(pId);
 
 		// render
@@ -404,7 +404,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 		else if(IsHex)
 			str_format(aBuf, sizeof(aBuf), "#%06X", Current);
 		else
-			str_from_int(Current, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", Current);
 		pRect->Draw(pColor ? *pColor : GetButtonColor(pId, 0), Corners, 3.0f);
 		Ui()->DoLabel(pRect, aBuf, 10, TEXTALIGN_MC);
 	}
@@ -996,7 +996,7 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const
 				Ui()->SetActiveItem(pSeekBarId);
 		}
 
-		if(Inside)
+		if(Inside && !Ui()->MouseButton(0))
 			Ui()->SetHotItem(pSeekBarId);
 	}
 }
@@ -1379,12 +1379,17 @@ void CEditor::DoToolbarSounds(CUIRect ToolBar)
 		if(pSelectedSound->m_SoundId != m_ToolbarPreviewSound && m_ToolbarPreviewSound >= 0 && Sound()->IsPlaying(m_ToolbarPreviewSound))
 			Sound()->Stop(m_ToolbarPreviewSound);
 		m_ToolbarPreviewSound = pSelectedSound->m_SoundId;
+	}
+	else
+	{
+		m_ToolbarPreviewSound = -1;
+	}
 
+	if(m_ToolbarPreviewSound >= 0)
+	{
 		static int s_PlayPauseButton, s_StopButton, s_SeekBar = 0;
 		DoAudioPreview(ToolBarBottom, &s_PlayPauseButton, &s_StopButton, &s_SeekBar, m_ToolbarPreviewSound);
 	}
-	else
-		m_ToolbarPreviewSound = -1;
 }
 
 static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
@@ -6510,7 +6515,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				char aValueBuffer[16];
 				if(UnitsPerLineY >= 1.0f)
 				{
-					str_from_int(static_cast<int>(Value), aValueBuffer);
+					str_format(aValueBuffer, sizeof(aValueBuffer), "%d", static_cast<int>(Value));
 				}
 				else
 				{
@@ -8705,11 +8710,10 @@ void CEditor::OnClose()
 
 void CEditor::OnDialogClose()
 {
-	if(m_FilePreviewSound >= 0)
-	{
-		Sound()->UnloadSample(m_FilePreviewSound);
-		m_FilePreviewSound = -1;
-	}
+	Graphics()->UnloadTexture(&m_FilePreviewImage);
+	Sound()->UnloadSample(m_FilePreviewSound);
+	m_FilePreviewSound = -1;
+	m_FilePreviewState = PREVIEW_UNLOADED;
 }
 
 void CEditor::LoadCurrentMap()

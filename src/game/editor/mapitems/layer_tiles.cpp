@@ -64,7 +64,7 @@ CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
 	m_Switch = Other.m_Switch;
 	m_Tune = Other.m_Tune;
 
-	mem_copy(m_aFileName, Other.m_aFileName, IO_MAX_PATH_LENGTH);
+	str_copy(m_aFileName, Other.m_aFileName);
 }
 
 CLayerTiles::~CLayerTiles()
@@ -676,7 +676,7 @@ void CLayerTiles::ShowInfo()
 				}
 				else
 				{
-					str_from_int(m_pTiles[c].m_Index, aBuf);
+					str_format(aBuf, sizeof(aBuf), "%d", m_pTiles[c].m_Index);
 				}
 				m_pEditor->Graphics()->QuadsText(x * 32, y * 32, 16.0f, aBuf);
 

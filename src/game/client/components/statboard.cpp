@@ -310,14 +310,14 @@ void CStatboard::RenderGlobalStats()
 
 		// FRAGS
 		{
-			str_from_int(pStats->m_Frags, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_Frags);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
 		}
 		// DEATHS
 		{
-			str_from_int(pStats->m_Deaths, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_Deaths);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
@@ -325,7 +325,7 @@ void CStatboard::RenderGlobalStats()
 		// SUICIDES
 		{
 			px += 10;
-			str_from_int(pStats->m_Suicides, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_Suicides);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
@@ -357,14 +357,14 @@ void CStatboard::RenderGlobalStats()
 		}
 		// SPREE
 		{
-			str_from_int(pStats->m_CurrentSpree, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_CurrentSpree);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
 		}
 		// BEST SPREE
 		{
-			str_from_int(pStats->m_BestSpree, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_BestSpree);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
@@ -372,7 +372,7 @@ void CStatboard::RenderGlobalStats()
 		// GRABS
 		if(GameWithFlags)
 		{
-			str_from_int(pStats->m_FlagGrabs, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_FlagGrabs);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
@@ -392,7 +392,7 @@ void CStatboard::RenderGlobalStats()
 		// FLAGS
 		if(GameWithFlags)
 		{
-			str_from_int(pStats->m_FlagCaptures, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_FlagCaptures);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 		}

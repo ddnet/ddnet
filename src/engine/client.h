@@ -208,6 +208,7 @@ public:
 	virtual bool UseTempRconCommands() const = 0;
 	virtual void Rcon(const char *pLine) = 0;
 	virtual bool ReceivingRconCommands() const = 0;
+	virtual float GotRconCommandsPercentage() const = 0;
 
 	// server info
 	virtual void GetServerInfo(class CServerInfo *pServerInfo) const = 0;

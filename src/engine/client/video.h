@@ -15,39 +15,38 @@ extern "C" {
 #include <mutex>
 #include <thread>
 #include <vector>
-#define ALEN 2048
 
-class CGraphics_Threaded;
+class IGraphics;
 class ISound;
 class IStorage;
 
 extern CLock g_WriteLock;
 
 // a wrapper around a single output AVStream
-struct OutputStream
+class COutputStream
 {
-	AVStream *pSt = nullptr;
-	AVCodecContext *pEnc = nullptr;
+public:
+	AVStream *m_pStream = nullptr;
+	AVCodecContext *m_pCodecContext = nullptr;
 
 	/* pts of the next frame that will be generated */
-	int64_t NextPts = 0;
 	int64_t m_SamplesCount = 0;
 	int64_t m_SamplesFrameCount = 0;
 
 	std::vector<AVFrame *> m_vpFrames;
 	std::vector<AVFrame *> m_vpTmpFrames;
 
-	std::vector<struct SwsContext *> m_vpSwsCtxs;
-	std::vector<struct SwrContext *> m_vpSwrCtxs;
+	std::vector<struct SwsContext *> m_vpSwsContexts;
+	std::vector<struct SwrContext *> m_vpSwrContexts;
 };
 
 class CVideo : public IVideo
 {
 public:
-	CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName);
+	CVideo(IGraphics *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName);
 	~CVideo();
 
-	void Start() override REQUIRES(!g_WriteLock);
+	bool Start() override REQUIRES(!g_WriteLock);
 	void Stop() override;
 	void Pause(bool Pause) override;
 	bool IsRecording() override { return m_Recording; }
@@ -60,12 +59,12 @@ public:
 
 	static IVideo *Current() { return IVideo::ms_pCurrentVideo; }
 
-	static void Init() { av_log_set_level(AV_LOG_DEBUG); }
+	static void Init();
 
 private:
 	void RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex) REQUIRES(!g_WriteLock);
 	void FillVideoFrame(size_t ThreadIndex) REQUIRES(!g_WriteLock);
-	void ReadRGBFromGL(size_t ThreadIndex);
+	void UpdateVideoBufferFromGraphics(size_t ThreadIndex);
 
 	void RunAudioThread(size_t ParentThreadIndex, size_t ThreadIndex) REQUIRES(!g_WriteLock);
 	void FillAudioFrame(size_t ThreadIndex);
@@ -75,27 +74,26 @@ private:
 	AVFrame *AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height);
 	AVFrame *AllocAudioFrame(enum AVSampleFormat SampleFmt, uint64_t ChannelLayout, int SampleRate, int NbSamples);
 
-	void WriteFrame(OutputStream *pStream, size_t ThreadIndex) REQUIRES(g_WriteLock);
-	void FinishFrames(OutputStream *pStream);
-	void CloseStream(OutputStream *pStream);
+	void WriteFrame(COutputStream *pStream, size_t ThreadIndex) REQUIRES(g_WriteLock);
+	void FinishFrames(COutputStream *pStream);
+	void CloseStream(COutputStream *pStream);
 
-	bool AddStream(OutputStream *pStream, AVFormatContext *pOC, const AVCodec **ppCodec, enum AVCodecID CodecId) const;
+	bool AddStream(COutputStream *pStream, AVFormatContext *pFormatContext, const AVCodec **ppCodec, enum AVCodecID CodecId) const;
 
-	CGraphics_Threaded *m_pGraphics;
+	IGraphics *m_pGraphics;
 	IStorage *m_pStorage;
 	ISound *m_pSound;
 
 	int m_Width;
 	int m_Height;
 	char m_aName[256];
-	//FILE *m_dbgfile;
-	uint64_t m_VSeq = 0;
-	uint64_t m_ASeq = 0;
-	uint64_t m_Vframe;
+	uint64_t m_VideoFrameIndex = 0;
+	uint64_t m_AudioFrameIndex = 0;
 
 	int m_FPS;
 
 	bool m_Started;
+	bool m_Stopped;
 	bool m_Recording;
 
 	size_t m_VideoThreads = 2;
@@ -103,8 +101,9 @@ private:
 	size_t m_AudioThreads = 2;
 	size_t m_CurAudioThreadIndex = 0;
 
-	struct SVideoRecorderThread
+	class CVideoRecorderThread
 	{
+	public:
 		std::thread m_Thread;
 		std::mutex m_Mutex;
 		std::condition_variable m_Cond;
@@ -118,10 +117,11 @@ private:
 		uint64_t m_VideoFrameToFill = 0;
 	};
 
-	std::vector<std::unique_ptr<SVideoRecorderThread>> m_vVideoThreads;
+	std::vector<std::unique_ptr<CVideoRecorderThread>> m_vpVideoThreads;
 
-	struct SAudioRecorderThread
+	class CAudioRecorderThread
 	{
+	public:
 		std::thread m_Thread;
 		std::mutex m_Mutex;
 		std::condition_variable m_Cond;
@@ -136,22 +136,28 @@ private:
 		int64_t m_SampleCountStart = 0;
 	};
 
-	std::vector<std::unique_ptr<SAudioRecorderThread>> m_vAudioThreads;
+	std::vector<std::unique_ptr<CAudioRecorderThread>> m_vpAudioThreads;
 
 	std::atomic<int32_t> m_ProcessingVideoFrame;
 	std::atomic<int32_t> m_ProcessingAudioFrame;
 
 	bool m_HasAudio;
 
-	struct SVideoSoundBuffer
+	class CVideoBuffer
 	{
-		int16_t m_aBuffer[ALEN * 2];
+	public:
+		std::vector<uint8_t> m_vBuffer;
 	};
-	std::vector<SVideoSoundBuffer> m_vBuffer;
-	std::vector<std::vector<uint8_t>> m_vPixelHelper;
+	std::vector<CVideoBuffer> m_vVideoBuffers;
+	class CAudioBuffer
+	{
+	public:
+		int16_t m_aBuffer[4096];
+	};
+	std::vector<CAudioBuffer> m_vAudioBuffers;
 
-	OutputStream m_VideoStream;
-	OutputStream m_AudioStream;
+	COutputStream m_VideoStream;
+	COutputStream m_AudioStream;
 
 	const AVCodec *m_pVideoCodec;
 	const AVCodec *m_pAudioCodec;

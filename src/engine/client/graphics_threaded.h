@@ -527,9 +527,8 @@ public:
 
 		size_t m_Width;
 		size_t m_Height;
-		int m_Format;
-		int m_StoreFormat;
 		int m_Flags;
+		// data must be in RGBA format
 		uint8_t *m_pData; // will be freed by the command processor
 	};
 
@@ -545,7 +544,7 @@ public:
 		int m_Y;
 		size_t m_Width;
 		size_t m_Height;
-		int m_Format;
+		// data must be in RGBA format
 		uint8_t *m_pData; // will be freed by the command processor
 	};
 
@@ -1237,7 +1236,8 @@ public:
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
 	void Move(int x, int y) override;
-	void Resize(int w, int h, int RefreshRate) override;
+	bool Resize(int w, int h, int RefreshRate) override;
+	void ResizeToScreen() override;
 	void GotResized(int w, int h, int RefreshRate) override;
 	void UpdateViewport(int X, int Y, int W, int H, bool ByResize) override;
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc) override;

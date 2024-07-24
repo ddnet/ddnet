@@ -47,7 +47,7 @@ void CVoting::CallvoteSpectate(int ClientId, const char *pReason, bool ForceVote
 	else
 	{
 		char aBuf[32];
-		str_from_int(ClientId, aBuf);
+		str_format(aBuf, sizeof(aBuf), "%d", ClientId);
 		Callvote("spectate", aBuf, pReason);
 	}
 }
@@ -63,7 +63,7 @@ void CVoting::CallvoteKick(int ClientId, const char *pReason, bool ForceVote)
 	else
 	{
 		char aBuf[32];
-		str_from_int(ClientId, aBuf);
+		str_format(aBuf, sizeof(aBuf), "%d", ClientId);
 		Callvote("kick", aBuf, pReason);
 	}
 }

@@ -225,6 +225,8 @@ public:
 	int m_SwapTargetsClientId; //Client ID of the swap target for the given player
 	bool m_BirthdayAnnounced;
 
+	int m_RescueMode;
+
 	CSaveTee m_LastTeleTee;
 };
 

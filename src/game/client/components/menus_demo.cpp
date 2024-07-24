@@ -487,17 +487,18 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			{
 				Ui()->SetActiveItem(pId);
 			}
-			else
-			{
-				const int HoveredTick = (int)(clamp((Ui()->MouseX() - SeekBar.x - Rounding) / (float)(SeekBar.w - 2 * Rounding), 0.0f, 1.0f) * TotalTicks);
-				static char s_aHoveredTime[32];
-				str_time((int64_t)HoveredTick / Client()->GameTickSpeed() * 100, TIME_HOURS, s_aHoveredTime, sizeof(s_aHoveredTime));
-				GameClient()->m_Tooltips.DoToolTip(pId, &SeekBar, s_aHoveredTime);
-			}
 		}
 
-		if(Inside)
+		if(Inside && !Ui()->MouseButton(0))
 			Ui()->SetHotItem(pId);
+
+		if(Ui()->HotItem() == pId)
+		{
+			const int HoveredTick = (int)(clamp((Ui()->MouseX() - SeekBar.x - Rounding) / (float)(SeekBar.w - 2 * Rounding), 0.0f, 1.0f) * TotalTicks);
+			static char s_aHoveredTime[32];
+			str_time((int64_t)HoveredTick / Client()->GameTickSpeed() * 100, TIME_HOURS, s_aHoveredTime, sizeof(s_aHoveredTime));
+			GameClient()->m_Tooltips.DoToolTip(pId, &SeekBar, s_aHoveredTime);
+		}
 	}
 
 	bool IncreaseDemoSpeed = false, DecreaseDemoSpeed = false;
@@ -1085,7 +1086,14 @@ void CMenus::RenderDemoBrowserList(CUIRect ListView, bool &WasListboxItemActivat
 #if defined(CONF_VIDEORECORDER)
 	if(!m_DemoRenderInput.IsEmpty())
 	{
-		m_Popup = POPUP_RENDER_DONE;
+		if(DemoPlayer()->ErrorMessage()[0] == '\0')
+		{
+			m_Popup = POPUP_RENDER_DONE;
+		}
+		else
+		{
+			m_DemoRenderInput.Clear();
+		}
 	}
 #endif
 
@@ -1301,7 +1309,7 @@ void CMenus::RenderDemoBrowserDetails(CUIRect DetailsView)
 	Contents.HSplitTop(18.0f, &Left, &Contents);
 	Left.VSplitMid(&Left, &Right, 4.0f);
 	Ui()->DoLabel(&Left, pItem->m_Info.m_aType, FontSize - 1.0f, TEXTALIGN_ML);
-	str_from_int(pItem->m_Info.m_Version, aBuf);
+	str_format(aBuf, sizeof(aBuf), "%d", pItem->m_Info.m_Version);
 	Ui()->DoLabel(&Right, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
 	Contents.HSplitTop(4.0f, nullptr, &Contents);
 
@@ -1313,7 +1321,7 @@ void CMenus::RenderDemoBrowserDetails(CUIRect DetailsView)
 	Left.VSplitMid(&Left, &Right, 4.0f);
 	str_time((int64_t)pItem->Length() * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 	Ui()->DoLabel(&Left, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
-	str_from_int(pItem->NumMarkers(), aBuf);
+	str_format(aBuf, sizeof(aBuf), "%d", pItem->NumMarkers());
 	Ui()->DoLabel(&Right, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
 	Contents.HSplitTop(4.0f, nullptr, &Contents);
 

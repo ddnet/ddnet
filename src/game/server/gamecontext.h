@@ -248,13 +248,6 @@ public:
 
 	enum
 	{
-		CHAT_ALL = -2,
-		CHAT_SPEC = -1,
-		CHAT_RED = 0,
-		CHAT_BLUE = 1,
-		CHAT_WHISPER_SEND = 2,
-		CHAT_WHISPER_RECV = 3,
-
 		CHAT_SIX = 1 << 0,
 		CHAT_SIXUP = 1 << 1,
 	};
@@ -328,6 +321,9 @@ public:
 	void TeehistorianRecordPlayerJoin(int ClientId, bool Sixup) override;
 	void TeehistorianRecordPlayerDrop(int ClientId, const char *pReason) override;
 	void TeehistorianRecordPlayerRejoin(int ClientId) override;
+	void TeehistorianRecordPlayerName(int ClientId, const char *pName) override;
+	void TeehistorianRecordPlayerFinish(int ClientId, int TimeTicks) override;
+	void TeehistorianRecordTeamFinish(int TeamId, int TimeTicks) override;
 
 	bool IsClientReady(int ClientId) const override;
 	bool IsClientPlayer(int ClientId) const override;
@@ -399,7 +395,6 @@ private:
 	static void ConUnWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
-
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 	void MoveCharacter(int ClientId, int X, int Y, bool Raw = false);
 	static void ConGoLeft(IConsole::IResult *pResult, void *pUserData);
@@ -462,14 +457,33 @@ private:
 	static void ConTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
+	static void ConRescueMode(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleTo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleXY(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleCursor(IConsole::IResult *pResult, void *pUserData);
 	static void ConLastTele(IConsole::IResult *pResult, void *pUserData);
+
+	// Chat commands for practice mode
 	static void ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeDeep(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeShotgun(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeGrenade(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeLaser(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeJetpack(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeWeapons(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnShotgun(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnGrenade(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnLaser(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnJetpack(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnWeapons(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeNinja(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
+
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
@@ -488,6 +502,8 @@ private:
 	static void ConUninvite(IConsole::IResult *pResult, void *pUserData);
 	static void ConFreezeHammer(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnFreezeHammer(IConsole::IResult *pResult, void *pUserData);
+
+	CCharacter *GetPracticeCharacter(IConsole::IResult *pResult);
 
 	enum
 	{

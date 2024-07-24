@@ -14,9 +14,9 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
--keepclassmembers, allowoptimization public class tw.DDNet.NativeMain {
+-keepclassmembers, allowoptimization public class org.ddnet.client.NativeMain {
 	*;
 }
 

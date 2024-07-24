@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-command -v a2x >/dev/null 2>&1 || {
-echo >&2 "You need asciidoc installed";
-echo >&2 "Debian/Ubuntu: sudo apt install asciidoc";
-echo >&2 "http://asciidoc.org/";
-exit 1;
+command -v a2x > /dev/null 2>&1 || {
+	echo >&2 "You need asciidoc installed"
+	echo >&2 "Debian/Ubuntu: sudo apt install asciidoc"
+	echo >&2 "http://asciidoc.org/"
+	exit 1
 }
 
 set -ex
@@ -20,4 +20,3 @@ EOF
 
 a2x --doctype manpage --format manpage DDNet.adoc
 a2x --doctype manpage --format manpage DDNetServer.adoc
-

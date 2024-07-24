@@ -19,7 +19,7 @@ CCamera::CCamera()
 	m_ZoomSet = false;
 	m_Zoom = 1.0f;
 	m_Zooming = false;
-	m_ForceFreeviewPos = vec2(-1, -1);
+	m_ForceFreeview = false;
 	m_GotoSwitchOffset = 0;
 	m_GotoTeleOffset = 0;
 	m_GotoSwitchLastPos = ivec2(-1, -1);
@@ -177,11 +177,14 @@ void CCamera::OnRender()
 			m_Center = m_pClient->m_LocalCharacterPos + s_aCurrentCameraOffset[g_Config.m_ClDummy];
 	}
 
-	if(m_ForceFreeviewPos != vec2(-1, -1) && m_CamType == CAMTYPE_SPEC)
+	if(m_ForceFreeview && m_CamType == CAMTYPE_SPEC)
 	{
 		m_Center = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] = m_ForceFreeviewPos;
-		m_ForceFreeviewPos = vec2(-1, -1);
+		m_ForceFreeview = false;
 	}
+	else
+		m_ForceFreeviewPos = m_Center;
+
 	m_PrevCenter = m_Center;
 }
 
@@ -191,6 +194,7 @@ void CCamera::OnConsoleInit()
 	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease");
 	Console()->Register("zoom", "?i", CFGFLAG_CLIENT, ConZoom, this, "Change zoom");
 	Console()->Register("set_view", "i[x]i[y]", CFGFLAG_CLIENT, ConSetView, this, "Set camera position to x and y in the map");
+	Console()->Register("set_view_relative", "i[x]i[y]", CFGFLAG_CLIENT, ConSetViewRelative, this, "Set camera position relative to current view in the map");
 	Console()->Register("goto_switch", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoSwitch, this, "View switch found (at offset) with given number");
 	Console()->Register("goto_tele", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoTele, this, "View tele found (at offset) with given number");
 }
@@ -238,6 +242,12 @@ void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)
 	// wait until free view camera type to update the position
 	pSelf->SetView(ivec2(pResult->GetInteger(0), pResult->GetInteger(1)));
 }
+void CCamera::ConSetViewRelative(IConsole::IResult *pResult, void *pUserData)
+{
+	CCamera *pSelf = (CCamera *)pUserData;
+	// wait until free view camera type to update the position
+	pSelf->SetView(ivec2(pResult->GetInteger(0), pResult->GetInteger(1)), true);
+}
 void CCamera::ConGotoSwitch(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
@@ -249,11 +259,16 @@ void CCamera::ConGotoTele(IConsole::IResult *pResult, void *pUserData)
 	pSelf->GotoTele(pResult->GetInteger(0), pResult->NumArguments() > 1 ? pResult->GetInteger(1) : -1);
 }
 
-void CCamera::SetView(ivec2 Pos)
+void CCamera::SetView(ivec2 Pos, bool Relative)
 {
+	vec2 RealPos = vec2(Pos.x * 32.0, Pos.y * 32.0);
+	vec2 UntestedViewPos = Relative ? m_ForceFreeviewPos + RealPos : RealPos;
+
+	m_ForceFreeview = true;
+
 	m_ForceFreeviewPos = vec2(
-		clamp(Pos.x * 32.0f, 200.0f, Collision()->GetWidth() * 32 - 200.0f),
-		clamp(Pos.y * 32.0f, 200.0f, Collision()->GetWidth() * 32 - 200.0f));
+		clamp(UntestedViewPos.x, 200.0f, Collision()->GetWidth() * 32 - 200.0f),
+		clamp(UntestedViewPos.y, 200.0f, Collision()->GetWidth() * 32 - 200.0f));
 }
 
 void CCamera::GotoSwitch(int Number, int Offset)

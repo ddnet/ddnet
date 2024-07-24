@@ -721,6 +721,7 @@ public:
 		IGraphics::CTextureHandle m_SpriteHudTeleportLaser;
 		IGraphics::CTextureHandle m_SpriteHudPracticeMode;
 		IGraphics::CTextureHandle m_SpriteHudLockMode;
+		IGraphics::CTextureHandle m_SpriteHudTeam0Mode;
 		IGraphics::CTextureHandle m_SpriteHudDummyHammer;
 		IGraphics::CTextureHandle m_SpriteHudDummyCopy;
 	};

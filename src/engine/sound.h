@@ -92,7 +92,9 @@ public:
 	virtual void StopVoice(CVoiceHandle Voice) = 0;
 	virtual bool IsPlaying(int SampleId) = 0;
 
+	virtual int MixingRate() const = 0;
 	virtual void Mix(short *pFinalOut, unsigned Frames) = 0;
+
 	// useful for thread synchronization
 	virtual void PauseAudioDevice() = 0;
 	virtual void UnpauseAudioDevice() = 0;

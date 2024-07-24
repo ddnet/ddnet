@@ -170,9 +170,9 @@ int main(int argc, const char **argv)
 	pConfigManager->SetReadOnly("sv_test_cmds", true);
 	pConfigManager->SetReadOnly("sv_rescue", true);
 
-	const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 	if(g_Config.m_Logfile[0])
 	{
+		const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 		IOHANDLE Logfile = pStorage->OpenFile(g_Config.m_Logfile, Mode, IStorage::TYPE_SAVE_OR_ABSOLUTE);
 		if(Logfile)
 		{
@@ -181,8 +181,14 @@ int main(int argc, const char **argv)
 		else
 		{
 			log_error("server", "failed to open '%s' for logging", g_Config.m_Logfile);
+			pFutureFileLogger->Set(log_logger_noop());
 		}
 	}
+	else
+	{
+		pFutureFileLogger->Set(log_logger_noop());
+	}
+
 	auto pServerLogger = std::make_shared<CServerLogger>(pServer);
 	pEngine->SetAdditionalLogger(pServerLogger);
 

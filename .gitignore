@@ -43,6 +43,9 @@ testrunner\[1\]_include.cmake
 
 /SDL2.framework
 
+# Android
+local.properties
+
 # Ignore all the generated executables without extensions (for non-Windows
 # systems).
 DDNet

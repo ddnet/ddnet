@@ -1,33 +1,23 @@
 #!/bin/bash
 
 CURDIR="$PWD"
-if [ -z ${1+x} ]; then 
+if [ -z ${1+x} ]; then
 	echo "Give a destination path where to run this script, please choose a path other than in the source directory"
 	exit 1
 fi
 
-if [ -z ${2+x} ]; then 
-	echo "Specify the target system"
+if [ -z ${2+x} ]; then
+	echo "Specify the target system: android, linux, window, webasm"
 	exit 1
 fi
 
 OS_NAME=$2
- 
+
 COMPILEFLAGS="-fPIC"
 LINKFLAGS="-fPIC"
 if [[ "${OS_NAME}" == "webasm" ]]; then
 	COMPILEFLAGS="-pthread -O3 -g -s USE_PTHREADS=1"
 	LINKFLAGS="-pthread -O3 -g -s USE_PTHREADS=1 -s ASYNCIFY=1 -s WASM=1"
-fi
-
-if [[ "${OS_NAME}" == "android" ]]; then
-	OS_NAME_PATH="android"
-elif [[ "${OS_NAME}" == "windows" ]]; then
-	OS_NAME_PATH="windows"
-elif [[ "${OS_NAME}" == "linux" ]]; then
-	OS_NAME_PATH="linux"
-elif [[ "${OS_NAME}" == "webasm" ]]; then
-	OS_NAME_PATH="webasm"
 fi
 
 COMP_HAS_ARM32=0
@@ -48,14 +38,23 @@ elif [[ "${OS_NAME}" == "windows" ]]; then
 	COMP_HAS_x64=1
 elif [[ "${OS_NAME}" == "webasm" ]]; then
 	COMP_HAS_WEBASM=1
+else
+	echo "Specify the target system: android, linux, window, webasm"
+	exit 1
 fi
 
 mkdir -p "$1"
 cd "$1" || exit 1
 
+_ANDROID_ABI_LEVEL=34
+
 function build_cmake_lib() {
 	if [ ! -d "${1}" ]; then
-		git clone "${2}" "${1}"
+		if [ -z ${3+x} ]; then
+			git clone "${2}" "${1}"
+		else
+			git clone --single-branch --branch "${3}" "${2}" "${1}"
+		fi
 	fi
 	(
 		cd "${1}" || exit 1
@@ -64,23 +63,16 @@ function build_cmake_lib() {
 	)
 }
 
-_ANDROID_ABI_LEVEL=24
-
 mkdir -p compile_libs
 cd compile_libs || exit 1
 
 # start with openssl
 (
-	_WAS_THERE_SSLFILE=1
 	if [ ! -d "openssl" ]; then
 		git clone https://github.com/openssl/openssl openssl
-		_WAS_THERE_SSLFILE=0
 	fi
 	(
 		cd openssl || exit 1
-		if [[ "$_WAS_THERE_SSLFILE" == 0 ]]; then
-			./autogen.sh
-		fi
 		cp "${CURDIR}"/scripts/compile_libs/make_lib_openssl.sh make_lib_openssl.sh
 		./make_lib_openssl.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 	)
@@ -90,7 +82,7 @@ build_cmake_lib zlib https://github.com/madler/zlib
 build_cmake_lib png https://github.com/glennrp/libpng
 build_cmake_lib curl https://github.com/curl/curl
 build_cmake_lib freetype2 https://gitlab.freedesktop.org/freetype/freetype
-build_cmake_lib sdl https://github.com/libsdl-org/SDL
+build_cmake_lib sdl https://github.com/libsdl-org/SDL SDL2
 build_cmake_lib ogg https://github.com/xiph/ogg
 build_cmake_lib opus https://github.com/xiph/opus
 
@@ -121,6 +113,7 @@ fi
 )
 
 cd ..
+mkdir -p ddnet-libs
 
 function copy_arches_for_lib() {
 	if [[ "$COMP_HAS_ARM32" == "1" ]]; then
@@ -140,33 +133,25 @@ function copy_arches_for_lib() {
 	fi
 }
 
-mkdir ddnet-libs
 function _copy_curl() {
-	mkdir -p ddnet-libs/curl/"$OS_NAME_PATH"/lib"$2"
-	cp compile_libs/curl/build_"$OS_NAME"_"$1"/lib/libcurl.a ddnet-libs/curl/"$OS_NAME_PATH"/lib"$2"/libcurl.a
+	mkdir -p ddnet-libs/curl/"$OS_NAME"/lib"$2"
+	cp compile_libs/curl/build_"$OS_NAME"_"$1"/lib/libcurl.a ddnet-libs/curl/"$OS_NAME"/lib"$2"/libcurl.a
 }
-
 copy_arches_for_lib _copy_curl
 
-mkdir ddnet-libs
 function _copy_freetype2() {
-	mkdir -p ddnet-libs/freetype/"$OS_NAME_PATH"/lib"$2"
-	cp compile_libs/freetype2/build_"$OS_NAME"_"$1"/libfreetype.a ddnet-libs/freetype/"$OS_NAME_PATH"/lib"$2"/libfreetype.a
+	mkdir -p ddnet-libs/freetype/"$OS_NAME"/lib"$2"
+	cp compile_libs/freetype2/build_"$OS_NAME"_"$1"/libfreetype.a ddnet-libs/freetype/"$OS_NAME"/lib"$2"/libfreetype.a
 }
-
 copy_arches_for_lib _copy_freetype2
 
-mkdir ddnet-libs
 function _copy_sdl() {
-	mkdir -p ddnet-libs/sdl/"$OS_NAME_PATH"/lib"$2"
-	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2.a ddnet-libs/sdl/"$OS_NAME_PATH"/lib"$2"/libSDL2.a
-	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2main.a ddnet-libs/sdl/"$OS_NAME_PATH"/lib"$2"/libSDL2main.a
-	if [ ! -d "ddnet-libs/sdl/include/$OS_NAME_PATH" ]; then
-		mkdir -p ddnet-libs/sdl/include/"$OS_NAME_PATH"
-	fi
-	cp -R compile_libs/sdl/include/* ddnet-libs/sdl/include/"$OS_NAME_PATH"
+	mkdir -p ddnet-libs/sdl/"$OS_NAME"/lib"$2"
+	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2.a ddnet-libs/sdl/"$OS_NAME"/lib"$2"/libSDL2.a
+	cp compile_libs/sdl/build_"$OS_NAME"_"$1"/libSDL2main.a ddnet-libs/sdl/"$OS_NAME"/lib"$2"/libSDL2main.a
+	mkdir -p ddnet-libs/sdl/include/"$OS_NAME"
+	cp -R compile_libs/sdl/include/* ddnet-libs/sdl/include/"$OS_NAME"
 }
-
 copy_arches_for_lib _copy_sdl
 
 # copy java code from SDL2
@@ -176,52 +161,41 @@ if [[ "$OS_NAME" == "android" ]]; then
 	cp -R compile_libs/sdl/android-project/app/src/main/java/org ddnet-libs/sdl/java/
 fi
 
-mkdir ddnet-libs
 function _copy_ogg() {
-	mkdir -p ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"
-	cp compile_libs/ogg/build_"$OS_NAME"_"$1"/libogg.a ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"/libogg.a
+	mkdir -p ddnet-libs/opus/"$OS_NAME"/lib"$2"
+	cp compile_libs/ogg/build_"$OS_NAME"_"$1"/libogg.a ddnet-libs/opus/"$OS_NAME"/lib"$2"/libogg.a
 }
-
 copy_arches_for_lib _copy_ogg
 
-mkdir ddnet-libs
 function _copy_opus() {
-	mkdir -p ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"
-	cp compile_libs/opus/build_"$OS_NAME"_"$1"/libopus.a ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"/libopus.a
+	mkdir -p ddnet-libs/opus/"$OS_NAME"/lib"$2"
+	cp compile_libs/opus/build_"$OS_NAME"_"$1"/libopus.a ddnet-libs/opus/"$OS_NAME"/lib"$2"/libopus.a
 }
-
 copy_arches_for_lib _copy_opus
 
-mkdir ddnet-libs
 function _copy_opusfile() {
-	mkdir -p ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"
-	cp compile_libs/opusfile/build_"$OS_NAME"_"$1"/libopusfile.a ddnet-libs/opus/"$OS_NAME_PATH"/lib"$2"/libopusfile.a
+	mkdir -p ddnet-libs/opus/"$OS_NAME"/lib"$2"
+	cp compile_libs/opusfile/build_"$OS_NAME"_"$1"/libopusfile.a ddnet-libs/opus/"$OS_NAME"/lib"$2"/libopusfile.a
 }
-
 copy_arches_for_lib _copy_opusfile
 
-mkdir ddnet-libs
 function _copy_sqlite3() {
-	mkdir -p ddnet-libs/sqlite3/"$OS_NAME_PATH"/lib"$2"
-	cp compile_libs/sqlite3/build_"$OS_NAME"_"$1"/sqlite3.a ddnet-libs/sqlite3/"$OS_NAME_PATH"/lib"$2"/libsqlite3.a
+	mkdir -p ddnet-libs/sqlite3/"$OS_NAME"/lib"$2"
+	cp compile_libs/sqlite3/build_"$OS_NAME"_"$1"/sqlite3.a ddnet-libs/sqlite3/"$OS_NAME"/lib"$2"/libsqlite3.a
 }
-
 copy_arches_for_lib _copy_sqlite3
 
-mkdir ddnet-libs
 function _copy_openssl() {
-	mkdir -p ddnet-libs/openssl/"$OS_NAME_PATH"/lib"$2"
+	mkdir -p ddnet-libs/openssl/"$OS_NAME"/lib"$2"
 	mkdir -p ddnet-libs/openssl/include
-	mkdir -p ddnet-libs/openssl/include/"$OS_NAME_PATH"
-	cp compile_libs/openssl/build_"$OS_NAME"_"$1"/libcrypto.a ddnet-libs/openssl/"$OS_NAME_PATH"/lib"$2"/libcrypto.a
-	cp compile_libs/openssl/build_"$OS_NAME"_"$1"/libssl.a ddnet-libs/openssl/"$OS_NAME_PATH"/lib"$2"/libssl.a
-	cp -R compile_libs/openssl/build_"$OS_NAME"_"$1"/include/* ddnet-libs/openssl/include/"$OS_NAME_PATH"
+	mkdir -p ddnet-libs/openssl/include/"$OS_NAME"
+	cp compile_libs/openssl/build_"$OS_NAME"_"$1"/libcrypto.a ddnet-libs/openssl/"$OS_NAME"/lib"$2"/libcrypto.a
+	cp compile_libs/openssl/build_"$OS_NAME"_"$1"/libssl.a ddnet-libs/openssl/"$OS_NAME"/lib"$2"/libssl.a
+	cp -R compile_libs/openssl/build_"$OS_NAME"_"$1"/include/* ddnet-libs/openssl/include/"$OS_NAME"
 	cp -R compile_libs/openssl/include/* ddnet-libs/openssl/include
 }
-
 copy_arches_for_lib _copy_openssl
 
-mkdir ddnet-libs
 function _copy_zlib() {
 	# copy headers
 	(
@@ -233,21 +207,18 @@ function _copy_zlib() {
 
 		cd build_"$OS_NAME"_"$1" || exit 1
 		find . -maxdepth 1 -iname '*.h' -print0 | while IFS= read -r -d $'\0' file; do
-			mkdir -p ../../../ddnet-libs/zlib/include/"$OS_NAME_PATH"/"$(dirname "$file")"
-			cp "$file" ../../../ddnet-libs/zlib/include/"$OS_NAME_PATH"/"$(dirname "$file")"
+			mkdir -p ../../../ddnet-libs/zlib/include/"$OS_NAME"/"$(dirname "$file")"
+			cp "$file" ../../../ddnet-libs/zlib/include/"$OS_NAME"/"$(dirname "$file")"
 		done
 	)
 
-	mkdir -p ddnet-libs/zlib/"$OS_NAME_PATH"/lib"$2"
-	cp compile_libs/zlib/build_"$OS_NAME"_"$1"/libz.a ddnet-libs/zlib/"$OS_NAME_PATH"/lib"$2"/libz.a
+	mkdir -p ddnet-libs/zlib/"$OS_NAME"/lib"$2"
+	cp compile_libs/zlib/build_"$OS_NAME"_"$1"/libz.a ddnet-libs/zlib/"$OS_NAME"/lib"$2"/libz.a
 }
-
 copy_arches_for_lib _copy_zlib
 
-mkdir ddnet-libs
 function _copy_png() {
-	mkdir -p ddnet-libs/png/"$OS_NAME_PATH"/lib"$2"
-	cp compile_libs/png/build_"$OS_NAME"_"$1"/libpng16.a ddnet-libs/png/"$OS_NAME_PATH"/lib"$2"/libpng16.a
+	mkdir -p ddnet-libs/png/"$OS_NAME"/lib"$2"
+	cp compile_libs/png/build_"$OS_NAME"_"$1"/libpng16.a ddnet-libs/png/"$OS_NAME"/lib"$2"/libpng16.a
 }
-
 copy_arches_for_lib _copy_png

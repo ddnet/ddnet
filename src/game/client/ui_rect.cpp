@@ -25,7 +25,7 @@ void CUIRect::HSplitMid(CUIRect *pTop, CUIRect *pBottom, float Spacing) const
 		pBottom->x = r.x;
 		pBottom->y = r.y + Cut + HalfSpacing;
 		pBottom->w = r.w;
-		pBottom->h = r.h - Cut - HalfSpacing;
+		pBottom->h = Cut - HalfSpacing;
 	}
 }
 
@@ -89,7 +89,7 @@ void CUIRect::VSplitMid(CUIRect *pLeft, CUIRect *pRight, float Spacing) const
 	{
 		pRight->x = r.x + Cut + HalfSpacing;
 		pRight->y = r.y;
-		pRight->w = r.w - Cut - HalfSpacing;
+		pRight->w = Cut - HalfSpacing;
 		pRight->h = r.h;
 	}
 }
