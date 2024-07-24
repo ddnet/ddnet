@@ -123,8 +123,8 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	int ScoreLimit = m_GameInfo.m_ScoreLimit;
 	int TimeLimit = m_GameInfo.m_TimeLimit;
 
-	char* RedClan = nullptr;
-	char* BlueClan = nullptr;
+	char *RedClan = nullptr;
+	char *BlueClan = nullptr;
 
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -143,12 +143,12 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 			if(!RedClan)
 			{
 				const char *NewClan = Server()->ClientClan(pPlayer->GetCid());
-				RedClan = (char*)calloc(strlen(NewClan) + 1, sizeof(char));
+				RedClan = (char *)calloc(strlen(NewClan) + 1, sizeof(char));
 				str_copy(RedClan, Server()->ClientClan(pPlayer->GetCid()), MAX_CLAN_LENGTH);
 				continue;
 			}
 
-			if(str_comp(RedClan,Server()->ClientClan(pPlayer->GetCid())) != 0)
+			if(str_comp(RedClan, Server()->ClientClan(pPlayer->GetCid())) != 0)
 			{
 				free(RedClan);
 				RedClan = nullptr;
