@@ -123,8 +123,8 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	int ScoreLimit = m_GameInfo.m_ScoreLimit;
 	int TimeLimit = m_GameInfo.m_TimeLimit;
 
-	char *RedClan = nullptr;
-	char *BlueClan = nullptr;
+	const char *RedClan = nullptr;
+	const char *BlueClan = nullptr;
 
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -135,22 +135,18 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 		{
 			if(strlen(Server()->ClientClan(pPlayer->GetCid())) == 0)
 			{
-				free(RedClan);
 				RedClan = nullptr;
 				break;
 			}
 
 			if(!RedClan)
 			{
-				const char *NewClan = Server()->ClientClan(pPlayer->GetCid());
-				RedClan = (char *)calloc(strlen(NewClan) + 1, sizeof(char));
-				str_copy(RedClan, Server()->ClientClan(pPlayer->GetCid()), MAX_CLAN_LENGTH);
+				RedClan = Server()->ClientClan(pPlayer->GetCid());
 				continue;
 			}
 
 			if(str_comp(RedClan, Server()->ClientClan(pPlayer->GetCid())) != 0)
 			{
-				free(RedClan);
 				RedClan = nullptr;
 				break;
 			}
@@ -159,22 +155,18 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 		{
 			if(strlen(Server()->ClientClan(pPlayer->GetCid())) == 0)
 			{
-				free(BlueClan);
 				BlueClan = nullptr;
 				break;
 			}
 
 			if(!BlueClan)
 			{
-				const char *NewClan = Server()->ClientClan(pPlayer->GetCid());
-				BlueClan = (char *)calloc(strlen(NewClan) + 1, sizeof(char));
-				str_copy(BlueClan, Server()->ClientClan(pPlayer->GetCid()), MAX_CLAN_LENGTH);
+				BlueClan = Server()->ClientClan(pPlayer->GetCid());
 				continue;
 			}
 
 			if(str_comp(BlueClan, Server()->ClientClan(pPlayer->GetCid())) != 0)
 			{
-				free(BlueClan);
 				BlueClan = nullptr;
 				break;
 			}
@@ -192,7 +184,6 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	{
 		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", RedClan);
 		str_append(pBuf, aBuf, Size);
-		free(RedClan);
 	}
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -207,7 +198,6 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	{
 		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", BlueClan);
 		str_append(pBuf, aBuf, Size);
-		free(BlueClan);
 	}
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
