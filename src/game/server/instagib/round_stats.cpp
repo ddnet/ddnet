@@ -123,41 +123,61 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	int ScoreLimit = m_GameInfo.m_ScoreLimit;
 	int TimeLimit = m_GameInfo.m_TimeLimit;
 
-	std::optional<std::string> RedClan = std::nullopt;
-	std::optional<std::string> BlueClan = std::nullopt;
+	char* RedClan = nullptr;
+	char* BlueClan = nullptr;
 
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer)
 			continue;
 
-		if(pPlayer->GetTeam() == TEAM_RED)
+		if(pPlayer->GetTeam() == TEAM_RED) // gof of c++, please forgive me for my sins
 		{
-			if(!RedClan.has_value())
+			if(strlen(Server()->ClientClan(pPlayer->GetCid())) == 0)
 			{
-				RedClan = Server()->ClientClan(pPlayer->GetCid());
+				free(RedClan);
+				RedClan = nullptr;
+				break;
+			}
+
+			if(!RedClan)
+			{
+				const char *NewClan = Server()->ClientClan(pPlayer->GetCid());
+				RedClan = (char*)calloc(strlen(NewClan) + 1, sizeof(char));
+				str_copy(RedClan, Server()->ClientClan(pPlayer->GetCid()), MAX_CLAN_LENGTH);
 				continue;
 			}
 
-			if(RedClan.value().empty())
+			if(str_comp(RedClan,Server()->ClientClan(pPlayer->GetCid())) != 0)
+			{
+				free(RedClan);
+				RedClan = nullptr;
 				break;
-
-			if(RedClan.value() != std::string(Server()->ClientClan(pPlayer->GetCid())))
-				RedClan.value().clear();
+			}
 		}
 		else if(pPlayer->GetTeam() == TEAM_BLUE)
 		{
-			if(!BlueClan.has_value())
+			if(strlen(Server()->ClientClan(pPlayer->GetCid())) == 0)
 			{
-				BlueClan = Server()->ClientClan(pPlayer->GetCid());
+				free(BlueClan);
+				BlueClan = nullptr;
+				break;
+			}
+
+			if(!BlueClan)
+			{
+				const char *NewClan = Server()->ClientClan(pPlayer->GetCid());
+				BlueClan = (char *)calloc(strlen(NewClan) + 1, sizeof(char));
+				str_copy(BlueClan, Server()->ClientClan(pPlayer->GetCid()), MAX_CLAN_LENGTH);
 				continue;
 			}
 
-			if(BlueClan.value().empty())
+			if(str_comp(BlueClan, Server()->ClientClan(pPlayer->GetCid())) != 0)
+			{
+				free(BlueClan);
+				BlueClan = nullptr;
 				break;
-
-			if(BlueClan.value() != std::string(Server()->ClientClan(pPlayer->GetCid())))
-				BlueClan.value().clear();
+			}
 		}
 	}
 
@@ -168,10 +188,11 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	str_append(pBuf, aBuf, Size);
 
 	str_append(pBuf, "**Red Team:**\n", Size);
-	if(RedClan.has_value() && !RedClan.value().empty())
+	if(RedClan)
 	{
-		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", RedClan.value().c_str());
+		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", RedClan);
 		str_append(pBuf, aBuf, Size);
+		free(RedClan);
 	}
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -182,10 +203,11 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	}
 
 	str_append(pBuf, "**Blue Team:**\n", Size);
-	if(BlueClan.has_value() && !BlueClan.value().empty())
+	if(BlueClan)
 	{
-		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", BlueClan.value().c_str());
+		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", BlueClan);
 		str_append(pBuf, aBuf, Size);
+		free(BlueClan);
 	}
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
