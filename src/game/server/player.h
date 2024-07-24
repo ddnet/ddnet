@@ -179,6 +179,7 @@ public:
 	int Pause(int State, bool Force);
 	int ForcePause(int Time);
 	int IsPaused() const;
+	bool CanSpec() const;
 
 	bool IsPlaying() const;
 	int64_t m_Last_KickVote;
