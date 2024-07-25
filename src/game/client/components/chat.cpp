@@ -604,6 +604,7 @@ void CChat::StoreSave(const char *pText)
 	}
 	*/
 
+	const bool SavesFileExists = Storage()->FileExists(SAVES_FILE, IStorage::TYPE_SAVE);
 	IOHANDLE File = Storage()->OpenFile(SAVES_FILE, IOFLAG_APPEND, IStorage::TYPE_SAVE);
 	if(!File)
 		return;
@@ -615,7 +616,7 @@ void CChat::StoreSave(const char *pText)
 		aSaveCode,
 	};
 
-	if(io_tell(File) == 0)
+	if(!SavesFileExists)
 	{
 		CsvWrite(File, 4, SAVES_HEADER);
 	}
