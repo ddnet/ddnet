@@ -857,11 +857,16 @@ CGameConsole::~CGameConsole()
 		m_pConsoleLogger->OnConsoleDeletion();
 }
 
-CGameConsole::CInstance *CGameConsole::CurrentConsole()
+CGameConsole::CInstance *CGameConsole::ConsoleForType(int ConsoleType)
 {
-	if(m_ConsoleType == CONSOLETYPE_REMOTE)
+	if(ConsoleType == CONSOLETYPE_REMOTE)
 		return &m_RemoteConsole;
 	return &m_LocalConsole;
+}
+
+CGameConsole::CInstance *CGameConsole::CurrentConsole()
+{
+	return ConsoleForType(m_ConsoleType);
 }
 
 void CGameConsole::OnReset()
@@ -972,7 +977,6 @@ void CGameConsole::OnRender()
 		if(m_ConsoleState == CONSOLE_CLOSING)
 		{
 			m_ConsoleState = CONSOLE_CLOSED;
-			pConsole->m_Input.Deactivate();
 			pConsole->m_BacklogLastActiveLine = -1;
 		}
 		else if(m_ConsoleState == CONSOLE_OPENING)
@@ -1135,7 +1139,10 @@ void CGameConsole::OnRender()
 
 		// render console input (wrap line)
 		pConsole->m_Input.SetHidden(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq));
-		pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
+		if(m_ConsoleState == CONSOLE_OPEN)
+		{
+			pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
+		}
 		const CUIRect InputCursorRect = {x, y + FONT_SIZE, 0.0f, 0.0f};
 		const bool WasChanged = pConsole->m_Input.WasChanged();
 		const bool WasCursorChanged = pConsole->m_Input.WasCursorChanged();
@@ -1463,6 +1470,7 @@ void CGameConsole::Toggle(int Type)
 		}
 		else
 		{
+			ConsoleForType(Type)->m_Input.Deactivate();
 			Input()->MouseModeRelative();
 			Ui()->SetEnabled(true);
 			m_pClient->OnRelease();

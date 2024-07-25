@@ -216,9 +216,9 @@ void CHud::RenderScoreHud()
 					Graphics()->DeleteQuadContainer(m_aScoreInfo[t].m_RoundRectQuadContainerIndex);
 
 					if(t == 0)
-						Graphics()->SetColor(1.0f, 0.0f, 0.0f, 0.25f);
+						Graphics()->SetColor(0.975f, 0.17f, 0.17f, 0.3f);
 					else
-						Graphics()->SetColor(0.0f, 0.0f, 1.0f, 0.25f);
+						Graphics()->SetColor(0.17f, 0.46f, 0.975f, 0.3f);
 					m_aScoreInfo[t].m_RoundRectQuadContainerIndex = Graphics()->CreateRectQuadContainer(m_Width - ScoreWidthMax - ImageSize - 2 * Split, StartY + t * 20, ScoreWidthMax + ImageSize + 2 * Split, ScoreSingleBoxHeight, 5.0f, IGraphics::CORNER_L);
 				}
 				Graphics()->TextureClear();

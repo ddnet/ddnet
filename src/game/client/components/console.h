@@ -146,6 +146,7 @@ class CGameConsole : public CComponent
 	CInstance m_LocalConsole;
 	CInstance m_RemoteConsole;
 
+	CInstance *ConsoleForType(int ConsoleType);
 	CInstance *CurrentConsole();
 
 	int m_ConsoleType;
