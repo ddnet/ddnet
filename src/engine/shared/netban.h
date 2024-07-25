@@ -81,6 +81,7 @@ protected:
 		};
 		int64_t m_Expires;
 		char m_aReason[REASON_LENGTH];
+		bool m_DisplayTime;
 	};
 
 	template<class T>
@@ -150,7 +151,7 @@ protected:
 	template<class T>
 	void MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, int Type) const;
 	template<class T>
-	int Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason);
+	int Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason, bool DisplayTime);
 	template<class T>
 	int Unban(T *pBanPool, const typename T::CDataType *pData);
 
@@ -176,7 +177,7 @@ public:
 	void Init(class IConsole *pConsole, class IStorage *pStorage);
 	void Update();
 
-	virtual int BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason);
+	virtual int BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool DisplayTime);
 	virtual int BanRange(const CNetRange *pRange, int Seconds, const char *pReason);
 	int UnbanByAddr(const NETADDR *pAddr);
 	int UnbanByRange(const CNetRange *pRange);
@@ -227,7 +228,7 @@ void CNetBan::MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, in
 	}
 
 	// add info part
-	if(pBan->m_Info.m_Expires != CBanInfo::EXPIRES_NEVER)
+	if(pBan->m_Info.m_DisplayTime && pBan->m_Info.m_Expires != CBanInfo::EXPIRES_NEVER)
 	{
 		int Mins = ((pBan->m_Info.m_Expires - time_timestamp()) + 59) / 60;
 		if(Mins <= 1)
