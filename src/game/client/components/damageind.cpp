@@ -12,7 +12,6 @@
 
 CDamageInd::CDamageInd()
 {
-	m_Lastupdate = 0;
 	m_NumItems = 0;
 }
 
