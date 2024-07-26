@@ -22,8 +22,8 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir, float Alpha)
 
 	CItem *pItem = &m_aItems[m_NumItems];
 	pItem->m_Pos = Pos;
-	pItem->m_StartTime = LocalTime();
 	pItem->m_Dir = -Dir;
+	pItem->m_RemainingLife = 0.75f;
 	pItem->m_StartAngle = -random_angle();
 	pItem->m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
 	++m_NumItems;
@@ -34,41 +34,45 @@ void CDamageInd::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteStars[0]);
 	static float s_LastLocalTime = LocalTime();
+	float LifeAdjustment;
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	{
+		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+		if(pInfo->m_Paused)
+			LifeAdjustment = 0.0f;
+		else
+			LifeAdjustment = (LocalTime() - s_LastLocalTime) * pInfo->m_Speed;
+	}
+	else
+	{
+		const auto &pGameInfoObj = GameClient()->m_Snap.m_pGameInfoObj;
+		if(pGameInfoObj && pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
+			LifeAdjustment = 0.0f;
+		else
+			LifeAdjustment = LocalTime() - s_LastLocalTime;
+	}
+	s_LastLocalTime = LocalTime();
+
+	Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteStars[0]);
 	for(int i = 0; i < m_NumItems;)
 	{
-		if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
-		{
-			const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
-			if(pInfo->m_Paused)
-				m_aItems[i].m_StartTime += LocalTime() - s_LastLocalTime;
-			else
-				m_aItems[i].m_StartTime += (LocalTime() - s_LastLocalTime) * (1.0f - pInfo->m_Speed);
-		}
-		else
-		{
-			if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED)
-				m_aItems[i].m_StartTime += LocalTime() - s_LastLocalTime;
-		}
-
-		float Life = 0.75f - (LocalTime() - m_aItems[i].m_StartTime);
-		if(Life < 0.0f)
+		m_aItems[i].m_RemainingLife -= LifeAdjustment;
+		if(m_aItems[i].m_RemainingLife < 0.0f)
 		{
 			--m_NumItems;
 			m_aItems[i] = m_aItems[m_NumItems];
 		}
 		else
 		{
-			vec2 Pos = mix(m_aItems[i].m_Pos + m_aItems[i].m_Dir * 75.0f, m_aItems[i].m_Pos, clamp((Life - 0.60f) / 0.15f, 0.0f, 1.0f));
-			const float LifeAlpha = Life / 0.1f;
+			vec2 Pos = mix(m_aItems[i].m_Pos + m_aItems[i].m_Dir * 75.0f, m_aItems[i].m_Pos, clamp((m_aItems[i].m_RemainingLife - 0.60f) / 0.15f, 0.0f, 1.0f));
+			const float LifeAlpha = m_aItems[i].m_RemainingLife / 0.1f;
 			Graphics()->SetColor(m_aItems[i].m_Color.WithMultipliedAlpha(LifeAlpha));
-			Graphics()->QuadsSetRotation(m_aItems[i].m_StartAngle + Life * 2.0f);
+			Graphics()->QuadsSetRotation(m_aItems[i].m_StartAngle + m_aItems[i].m_RemainingLife * 2.0f);
 			Graphics()->RenderQuadContainerAsSprite(m_DmgIndQuadContainerIndex, 0, Pos.x, Pos.y);
 			i++;
 		}
 	}
-	s_LastLocalTime = LocalTime();
 
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
