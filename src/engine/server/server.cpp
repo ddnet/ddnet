@@ -2893,7 +2893,7 @@ int CServer::Run()
 
 							if(Config()->m_SvDnsblBan)
 							{
-								m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientId), 60 * 10, Config()->m_SvDnsblBanReason);
+								m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason);
 							}
 						}
 					}
