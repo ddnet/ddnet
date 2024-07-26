@@ -29,6 +29,9 @@ if(CURL_FOUND)
   if (CURL_BUNDLED AND TARGET_OS STREQUAL "windows" AND TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
     set(CURL_COPY_FILES
       "${EXTRA_CURL_LIBDIR}/libcurl-4.dll"
+      "${EXTRA_CURL_LIBDIR}/libbrotlicommon.dll"
+      "${EXTRA_CURL_LIBDIR}/libbrotlidec.dll"
+      "${EXTRA_CURL_LIBDIR}/libbrotlienc.dll"
     )
   elseif(CURL_BUNDLED AND TARGET_OS STREQUAL "windows")
     set(CURL_COPY_FILES
