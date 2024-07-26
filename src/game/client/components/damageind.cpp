@@ -102,8 +102,5 @@ void CDamageInd::OnInit()
 
 void CDamageInd::OnReset()
 {
-	for(int i = 0; i < m_NumItems;)
-	{
-		DestroyI(&m_aItems[i]);
-	}
+	m_NumItems = 0;
 }
