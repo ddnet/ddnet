@@ -105,7 +105,7 @@ void CDamageInd::OnInit()
 	Graphics()->QuadContainerUpload(m_DmgIndQuadContainerIndex);
 }
 
-void CDamageInd::Reset()
+void CDamageInd::OnReset()
 {
 	for(int i = 0; i < m_NumItems;)
 	{

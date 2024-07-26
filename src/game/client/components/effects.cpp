@@ -53,11 +53,6 @@ void CEffects::DamageIndicator(vec2 Pos, vec2 Dir, float Alpha)
 	m_pClient->m_DamageInd.Create(Pos, Dir, Alpha);
 }
 
-void CEffects::ResetDamageIndicator()
-{
-	m_pClient->m_DamageInd.Reset();
-}
-
 void CEffects::PowerupShine(vec2 Pos, vec2 Size, float Alpha)
 {
 	if(!m_Add50hz)

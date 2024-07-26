@@ -1010,7 +1010,6 @@ void CGameClient::OnShutdown()
 
 void CGameClient::OnEnterGame()
 {
-	m_Effects.ResetDamageIndicator();
 }
 
 void CGameClient::OnGameOver()

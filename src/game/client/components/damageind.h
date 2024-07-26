@@ -37,7 +37,7 @@ public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 
 	void Create(vec2 Pos, vec2 Dir, float Alpha);
-	void Reset();
+	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual void OnInit() override;
 };
