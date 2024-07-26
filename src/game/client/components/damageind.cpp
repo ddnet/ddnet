@@ -15,34 +15,18 @@ CDamageInd::CDamageInd()
 	m_NumItems = 0;
 }
 
-CDamageInd::CItem *CDamageInd::CreateI()
-{
-	if(m_NumItems < MAX_ITEMS)
-	{
-		CItem *p = &m_aItems[m_NumItems];
-		m_NumItems++;
-		return p;
-	}
-	return 0;
-}
-
-void CDamageInd::DestroyI(CDamageInd::CItem *pItem)
-{
-	m_NumItems--;
-	*pItem = m_aItems[m_NumItems];
-}
-
 void CDamageInd::Create(vec2 Pos, vec2 Dir, float Alpha)
 {
-	CItem *pItem = CreateI();
-	if(pItem)
-	{
-		pItem->m_Pos = Pos;
-		pItem->m_StartTime = LocalTime();
-		pItem->m_Dir = -Dir;
-		pItem->m_StartAngle = -random_angle();
-		pItem->m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
-	}
+	if(m_NumItems >= MAX_ITEMS)
+		return;
+
+	CItem *pItem = &m_aItems[m_NumItems];
+	pItem->m_Pos = Pos;
+	pItem->m_StartTime = LocalTime();
+	pItem->m_Dir = -Dir;
+	pItem->m_StartAngle = -random_angle();
+	pItem->m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
+	++m_NumItems;
 }
 
 void CDamageInd::OnRender()
@@ -70,7 +54,10 @@ void CDamageInd::OnRender()
 
 		float Life = 0.75f - (LocalTime() - m_aItems[i].m_StartTime);
 		if(Life < 0.0f)
-			DestroyI(&m_aItems[i]);
+		{
+			--m_NumItems;
+			m_aItems[i] = m_aItems[m_NumItems];
+		}
 		else
 		{
 			vec2 Pos = mix(m_aItems[i].m_Pos + m_aItems[i].m_Dir * 75.0f, m_aItems[i].m_Pos, clamp((Life - 0.60f) / 0.15f, 0.0f, 1.0f));
