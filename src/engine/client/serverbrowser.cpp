@@ -1080,7 +1080,6 @@ void CServerBrowser::UpdateFromHttp()
 	}
 
 	int NumServers = m_pHttp->NumServers();
-	int NumLegacyServers = m_pHttp->NumLegacyServers();
 	std::function<bool(const NETADDR *, int)> Want = [](const NETADDR *pAddrs, int NumAddrs) { return true; };
 	if(m_ServerlistType == IServerBrowser::TYPE_FAVORITES)
 	{
@@ -1137,16 +1136,6 @@ void CServerBrowser::UpdateFromHttp()
 		CServerEntry *pEntry = Add(Info.m_aAddresses, Info.m_NumAddresses);
 		SetInfo(pEntry, Info);
 		pEntry->m_RequestIgnoreInfo = true;
-	}
-
-	for(int i = 0; i < NumLegacyServers; i++)
-	{
-		NETADDR Addr = m_pHttp->LegacyServer(i);
-		if(!Want(&Addr, 1))
-		{
-			continue;
-		}
-		QueueRequest(Add(&Addr, 1));
 	}
 
 	if(m_ServerlistType == IServerBrowser::TYPE_FAVORITES)
@@ -2289,16 +2278,6 @@ bool CServerBrowser::IsRegistered(const NETADDR &Addr)
 			}
 		}
 	}
-
-	const int NumLegacyServers = m_pHttp->NumLegacyServers();
-	for(int i = 0; i < NumLegacyServers; i++)
-	{
-		if(net_addr_comp(&m_pHttp->LegacyServer(i), &Addr) == 0)
-		{
-			return true;
-		}
-	}
-
 	return false;
 }
 

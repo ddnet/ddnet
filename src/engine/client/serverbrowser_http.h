@@ -21,8 +21,6 @@ public:
 
 	virtual int NumServers() const = 0;
 	virtual const CServerInfo &Server(int Index) const = 0;
-	virtual int NumLegacyServers() const = 0;
-	virtual const NETADDR &LegacyServer(int Index) const = 0;
 };
 
 IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IStorage *pStorage, IHttp *pHttp, const char *pPreviousBestUrl);

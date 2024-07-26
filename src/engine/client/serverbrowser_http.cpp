@@ -319,14 +319,6 @@ public:
 	{
 		return m_vServers[Index];
 	}
-	int NumLegacyServers() const override
-	{
-		return m_vLegacyServers.size();
-	}
-	const NETADDR &LegacyServer(int Index) const override
-	{
-		return m_vLegacyServers[Index];
-	}
 
 private:
 	enum
@@ -338,7 +330,7 @@ private:
 	};
 
 	static bool Validate(json_value *pJson);
-	static bool Parse(json_value *pJson, std::vector<CServerInfo> *pvServers, std::vector<NETADDR> *pvLegacyServers);
+	static bool Parse(json_value *pJson, std::vector<CServerInfo> *pvServers);
 
 	IHttp *m_pHttp;
 
@@ -347,7 +339,6 @@ private:
 	std::unique_ptr<CChooseMaster> m_pChooseMaster;
 
 	std::vector<CServerInfo> m_vServers;
-	std::vector<NETADDR> m_vLegacyServers;
 };
 
 CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IHttp *pHttp, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
@@ -398,7 +389,7 @@ void CServerBrowserHttp::Update()
 		bool Success = true;
 		json_value *pJson = pGetServers->State() == EHttpState::DONE ? pGetServers->ResultJson() : nullptr;
 		Success = Success && pJson;
-		Success = Success && !Parse(pJson, &m_vServers, &m_vLegacyServers);
+		Success = Success && !Parse(pJson, &m_vServers);
 		json_value_free(pJson);
 		if(!Success)
 		{
@@ -438,18 +429,15 @@ bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 bool CServerBrowserHttp::Validate(json_value *pJson)
 {
 	std::vector<CServerInfo> vServers;
-	std::vector<NETADDR> vLegacyServers;
-	return Parse(pJson, &vServers, &vLegacyServers);
+	return Parse(pJson, &vServers);
 }
-bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvServers, std::vector<NETADDR> *pvLegacyServers)
+bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvServers)
 {
 	std::vector<CServerInfo> vServers;
-	std::vector<NETADDR> vLegacyServers;
 
 	const json_value &Json = *pJson;
 	const json_value &Servers = Json["servers"];
-	const json_value &LegacyServers = Json["servers_legacy"];
-	if(Servers.type != json_array || (LegacyServers.type != json_array && LegacyServers.type != json_none))
+	if(Servers.type != json_array)
 	{
 		return true;
 	}
@@ -509,21 +497,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 			vServers.push_back(SetInfo);
 		}
 	}
-	if(LegacyServers.type == json_array)
-	{
-		for(unsigned int i = 0; i < LegacyServers.u.array.length; i++)
-		{
-			const json_value &Address = LegacyServers[i];
-			NETADDR ParsedAddr;
-			if(Address.type != json_string || net_addr_from_str(&ParsedAddr, Address))
-			{
-				return true;
-			}
-			vLegacyServers.push_back(ParsedAddr);
-		}
-	}
 	*pvServers = vServers;
-	*pvLegacyServers = vLegacyServers;
 	return false;
 }
 

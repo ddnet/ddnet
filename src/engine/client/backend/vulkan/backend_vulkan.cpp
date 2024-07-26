@@ -3730,12 +3730,12 @@ public:
 		m_pGpuList->m_vGpus.reserve(vDeviceList.size());
 
 		size_t FoundDeviceIndex = 0;
-		size_t FoundGpuType = STWGraphicGpu::ETWGraphicsGpuType::GRAPHICS_GPU_TYPE_INVALID;
 
 		STWGraphicGpu::ETWGraphicsGpuType AutoGpuType = STWGraphicGpu::ETWGraphicsGpuType::GRAPHICS_GPU_TYPE_INVALID;
 
 		bool IsAutoGpu = str_comp(g_Config.m_GfxGpuName, "auto") == 0;
 
+		bool UserSelectedGpuChosen = false;
 		for(auto &CurDevice : vDeviceList)
 		{
 			vkGetPhysicalDeviceProperties(CurDevice, &(vDevicePropList[Index]));
@@ -3754,18 +3754,24 @@ public:
 				NewGpu.m_GpuType = GPUType;
 				m_pGpuList->m_vGpus.push_back(NewGpu);
 
-				if(GPUType < AutoGpuType)
+				// We always decide what the 'auto' GPU would be, even if user is forcing a GPU by name in config
+				// Reminder: A worse GPU enumeration has a higher value than a better GPU enumeration, thus the '>'
+				if(AutoGpuType > STWGraphicGpu::ETWGraphicsGpuType::GRAPHICS_GPU_TYPE_INTEGRATED)
 				{
 					str_copy(m_pGpuList->m_AutoGpu.m_aName, DeviceProp.deviceName);
 					m_pGpuList->m_AutoGpu.m_GpuType = GPUType;
 
 					AutoGpuType = GPUType;
-				}
 
-				if(((IsAutoGpu && (FoundGpuType > STWGraphicGpu::ETWGraphicsGpuType::GRAPHICS_GPU_TYPE_INTEGRATED && GPUType < FoundGpuType)) || str_comp(DeviceProp.deviceName, g_Config.m_GfxGpuName) == 0) && (DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor)))
+					if(IsAutoGpu)
+						FoundDeviceIndex = Index;
+				}
+				// We only select the first GPU that matches, because it comes first in the enumeration array, it's preferred by the system
+				// Reminder: We can't break the cycle here if the name matches because we need to choose the best GPU for 'auto' mode
+				if(!IsAutoGpu && !UserSelectedGpuChosen && str_comp(DeviceProp.deviceName, g_Config.m_GfxGpuName) == 0)
 				{
 					FoundDeviceIndex = Index;
-					FoundGpuType = GPUType;
+					UserSelectedGpuChosen = true;
 				}
 			}
 			Index++;
