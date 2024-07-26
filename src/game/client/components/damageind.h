@@ -15,7 +15,6 @@ class CDamageInd : public CComponent
 		float m_StartTime;
 		float m_StartAngle;
 		ColorRGBA m_Color;
-		float m_StartAlpha;
 	};
 
 	enum

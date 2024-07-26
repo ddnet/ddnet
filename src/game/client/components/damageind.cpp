@@ -42,7 +42,6 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir, float Alpha)
 		pItem->m_Dir = -Dir;
 		pItem->m_StartAngle = -random_angle();
 		pItem->m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
-		pItem->m_StartAlpha = Alpha;
 	}
 }
 
@@ -75,11 +74,8 @@ void CDamageInd::OnRender()
 		else
 		{
 			vec2 Pos = mix(m_aItems[i].m_Pos + m_aItems[i].m_Dir * 75.0f, m_aItems[i].m_Pos, clamp((Life - 0.60f) / 0.15f, 0.0f, 1.0f));
-			ColorRGBA Color = m_aItems[i].m_Color;
-
-			float LifeAlpha = Life / 0.1f;
-			Color.a = m_aItems[i].m_StartAlpha * LifeAlpha;
-			Graphics()->SetColor(Color);
+			const float LifeAlpha = Life / 0.1f;
+			Graphics()->SetColor(m_aItems[i].m_Color.WithMultipliedAlpha(LifeAlpha));
 			Graphics()->QuadsSetRotation(m_aItems[i].m_StartAngle + Life * 2.0f);
 			Graphics()->RenderQuadContainerAsSprite(m_DmgIndQuadContainerIndex, 0, Pos.x, Pos.y);
 			i++;
