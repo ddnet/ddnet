@@ -19,18 +19,13 @@ class IInput : public IInterface
 {
 	MACRO_INTERFACE("input")
 public:
-	enum
-	{
-		INPUT_TEXT_SIZE = 32 * UTF8_BYTE_LENGTH + 1,
-	};
-
 	class CEvent
 	{
 	public:
 		int m_Flags;
 		int m_Key;
 		uint32_t m_InputCount;
-		char m_aText[INPUT_TEXT_SIZE];
+		char m_aText[32]; // SDL_TEXTINPUTEVENT_TEXT_SIZE
 	};
 
 	enum
@@ -44,12 +39,6 @@ public:
 		CURSOR_NONE,
 		CURSOR_MOUSE,
 		CURSOR_JOYSTICK,
-	};
-	enum
-	{
-		MAX_COMPOSITION_ARRAY_SIZE = 32, // SDL2 limitation
-
-		COMP_LENGTH_INACTIVE = -1,
 	};
 
 	// events

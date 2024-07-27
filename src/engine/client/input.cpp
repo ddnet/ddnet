@@ -70,7 +70,6 @@ CInput::CInput()
 
 	m_pClipboardText = nullptr;
 
-	m_CompositionLength = COMP_LENGTH_INACTIVE;
 	m_CompositionCursor = 0;
 	m_CandidateSelectedIndex = -1;
 
@@ -328,9 +327,8 @@ void CInput::StopTextInput()
 	SDL_StopTextInput();
 	// disable system messages for performance
 	SDL_EventState(SDL_SYSWMEVENT, SDL_DISABLE);
-	m_CompositionLength = COMP_LENGTH_INACTIVE;
+	m_CompositionString = "";
 	m_CompositionCursor = 0;
-	m_aComposition[0] = '\0';
 	m_vCandidates.clear();
 }
 
@@ -574,6 +572,26 @@ void CInput::HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event)
 	}
 }
 
+void CInput::HandleTextEditingEvent(const char *pText, int Start, int Length)
+{
+	if(pText[0] != '\0')
+	{
+		m_CompositionString = pText;
+		m_CompositionCursor = 0;
+		for(int i = 0; i < Start; i++)
+		{
+			m_CompositionCursor = str_utf8_forward(m_CompositionString.c_str(), m_CompositionCursor);
+		}
+		// Length is currently unused on Windows and will always be 0, so we don't support selecting composition text
+		AddTextEvent("");
+	}
+	else
+	{
+		m_CompositionString = "";
+		m_CompositionCursor = 0;
+	}
+}
+
 void CInput::SetCompositionWindowPosition(float X, float Y, float H)
 {
 	SDL_Rect Rect;
@@ -658,29 +676,18 @@ int CInput::Update()
 			break;
 
 		case SDL_TEXTEDITING:
-		{
-			m_CompositionLength = str_length(Event.edit.text);
-			if(m_CompositionLength)
-			{
-				str_copy(m_aComposition, Event.edit.text);
-				m_CompositionCursor = 0;
-				for(int i = 0; i < Event.edit.start; i++)
-					m_CompositionCursor = str_utf8_forward(m_aComposition, m_CompositionCursor);
-				// Event.edit.length is currently unused on Windows and will always be 0, so we don't support selecting composition text
-				AddTextEvent("");
-			}
-			else
-			{
-				m_aComposition[0] = '\0';
-				m_CompositionLength = 0;
-				m_CompositionCursor = 0;
-			}
+			HandleTextEditingEvent(Event.edit.text, Event.edit.start, Event.edit.length);
 			break;
-		}
+
+#if SDL_VERSION_ATLEAST(2, 0, 22)
+		case SDL_TEXTEDITING_EXT:
+			HandleTextEditingEvent(Event.editExt.text, Event.editExt.start, Event.editExt.length);
+			SDL_free(Event.editExt.text);
+			break;
+#endif
 
 		case SDL_TEXTINPUT:
-			m_aComposition[0] = '\0';
-			m_CompositionLength = COMP_LENGTH_INACTIVE;
+			m_CompositionString = "";
 			m_CompositionCursor = 0;
 			AddTextEvent(Event.text.text);
 			break;
@@ -860,9 +867,6 @@ int CInput::Update()
 			AddKeyEvent(Scancode, Action);
 		}
 	}
-
-	if(m_CompositionLength == 0)
-		m_CompositionLength = COMP_LENGTH_INACTIVE;
 
 	return 0;
 }
