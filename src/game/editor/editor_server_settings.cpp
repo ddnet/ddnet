@@ -1049,9 +1049,9 @@ void CEditor::MapSettingsDropdownRenderCallback(const SPossibleValueMatch &Match
 
 CMapSettingsBackend::CContext *CMapSettingsBackend::ms_pActiveContext = nullptr;
 
-void CMapSettingsBackend::Init(CEditor *pEditor)
+void CMapSettingsBackend::OnInit(CEditor *pEditor)
 {
-	CEditorComponent::Init(pEditor);
+	CEditorComponent::OnInit(pEditor);
 
 	// Register values loader
 	InitValueLoaders();
