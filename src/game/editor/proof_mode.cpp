@@ -4,9 +4,9 @@
 
 #include "editor.h"
 
-void CProofMode::Init(CEditor *pEditor)
+void CProofMode::OnInit(CEditor *pEditor)
 {
-	CEditorComponent::Init(pEditor);
+	CEditorComponent::OnInit(pEditor);
 	SetMenuBackgroundPositionNames();
 	OnReset();
 	OnMapLoad();

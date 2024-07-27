@@ -8,7 +8,7 @@ class CLayerSelector : public CEditorComponent
 	int m_SelectionOffset;
 
 public:
-	void Init(CEditor *pEditor) override;
+	void OnInit(CEditor *pEditor) override;
 	bool SelectByTile();
 };
 

@@ -8324,15 +8324,15 @@ void CEditor::Init()
 		m_PopupEventWasActivated = false;
 	});
 	m_RenderTools.Init(m_pGraphics, m_pTextRender);
-	m_ZoomEnvelopeX.Init(this);
-	m_ZoomEnvelopeY.Init(this);
+	m_ZoomEnvelopeX.OnInit(this);
+	m_ZoomEnvelopeY.OnInit(this);
 	m_Map.m_pEditor = this;
 
 	m_vComponents.emplace_back(m_MapView);
 	m_vComponents.emplace_back(m_MapSettingsBackend);
 	m_vComponents.emplace_back(m_LayerSelector);
 	for(CEditorComponent &Component : m_vComponents)
-		Component.Init(this);
+		Component.OnInit(this);
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL);
 	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL);

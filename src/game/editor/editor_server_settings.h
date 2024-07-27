@@ -198,7 +198,7 @@ class CMapSettingsBackend : public CEditorComponent
 public: // General methods
 	CMapSettingsBackend() = default;
 
-	void Init(CEditor *pEditor) override;
+	void OnInit(CEditor *pEditor) override;
 	bool OnInput(const IInput::CEvent &Event) override;
 	void OnUpdate() override;
 	void OnMapLoad() override;
