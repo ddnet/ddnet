@@ -4562,6 +4562,11 @@ int main(int argc, const char **argv)
 	SDL_SetHint("SDL_TOUCH_MOUSE_EVENTS", "0");
 	SDL_SetHint("SDL_MOUSE_TOUCH_EVENTS", "0");
 
+	// Support longer IME composition strings (enables SDL_TEXTEDITING_EXT).
+#if SDL_VERSION_ATLEAST(2, 0, 22)
+	SDL_SetHint(SDL_HINT_IME_SUPPORT_EXTENDED_TEXT, "1");
+#endif
+
 #if defined(CONF_PLATFORM_MACOS)
 	// Hints will not be set if there is an existing override hint or environment variable that takes precedence.
 	// So this respects cli environment overrides.

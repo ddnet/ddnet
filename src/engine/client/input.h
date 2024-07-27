@@ -84,9 +84,8 @@ private:
 #endif
 
 	// IME support
-	char m_aComposition[MAX_COMPOSITION_ARRAY_SIZE];
+	std::string m_CompositionString;
 	int m_CompositionCursor;
-	int m_CompositionLength;
 	std::vector<std::string> m_vCandidates;
 	int m_CandidateSelectedIndex;
 
@@ -113,6 +112,7 @@ private:
 	void HandleTouchDownEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTouchUpEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event);
+	void HandleTextEditingEvent(const char *pText, int Start, int Length);
 
 	char m_aDropFile[IO_MAX_PATH_LENGTH];
 
@@ -155,10 +155,10 @@ public:
 
 	void StartTextInput() override;
 	void StopTextInput() override;
-	const char *GetComposition() const override { return m_aComposition; }
-	bool HasComposition() const override { return m_CompositionLength != COMP_LENGTH_INACTIVE; }
+	const char *GetComposition() const override { return m_CompositionString.c_str(); }
+	bool HasComposition() const override { return !m_CompositionString.empty(); }
 	int GetCompositionCursor() const override { return m_CompositionCursor; }
-	int GetCompositionLength() const override { return m_CompositionLength; }
+	int GetCompositionLength() const override { return m_CompositionString.length(); }
 	const char *GetCandidate(int Index) const override { return m_vCandidates[Index].c_str(); }
 	int GetCandidateCount() const override { return m_vCandidates.size(); }
 	int GetCandidateSelectedIndex() const override { return m_CandidateSelectedIndex; }
