@@ -163,6 +163,7 @@ public:
 	virtual void DummyConnect() = 0;
 	virtual bool DummyConnected() const = 0;
 	virtual bool DummyConnecting() const = 0;
+	virtual bool DummyConnectingDelayed() const = 0;
 	virtual bool DummyAllowed() const = 0;
 
 	virtual void Restart() = 0;

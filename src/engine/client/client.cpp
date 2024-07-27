@@ -260,7 +260,7 @@ void CClient::SendInput()
 	// fetch input
 	for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 	{
-		if(!m_DummyConnected && Dummy != 0)
+		if(!DummyConnected() && Dummy != 0)
 		{
 			break;
 		}
@@ -396,7 +396,7 @@ void CClient::OnEnterGame(bool Dummy)
 
 	if(!Dummy)
 	{
-		m_LastDummyConnectTime = 0;
+		m_LastDummyConnectTime = 0.0f;
 	}
 
 	GameClient()->OnEnterGame();
@@ -621,38 +621,51 @@ bool CClient::DummyConnected() const
 
 bool CClient::DummyConnecting() const
 {
-	return !m_DummyConnected && m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy);
+	return m_DummyConnecting;
+}
+
+bool CClient::DummyConnectingDelayed() const
+{
+	return !DummyConnected() && !DummyConnecting() && m_LastDummyConnectTime > 0.0f && m_LastDummyConnectTime + 5.0f > GlobalTime();
 }
 
 void CClient::DummyConnect()
 {
-	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy))
-		return;
-
 	if(m_aNetClient[CONN_MAIN].State() != NETSTATE_ONLINE)
+	{
+		log_info("client", "Not online.");
 		return;
+	}
 
-	if(m_DummyConnected || !DummyAllowed())
+	if(!DummyAllowed())
+	{
+		log_info("client", "Dummy is not allowed on this server.");
 		return;
+	}
+	if(DummyConnected() || DummyConnecting())
+	{
+		log_info("client", "Dummy is already connected/connecting.");
+		return;
+	}
+	if(DummyConnectingDelayed())
+	{
+		log_info("client", "Wait before connecting dummy again.");
+		return;
+	}
 
-	m_LastDummyConnectTime = GameTick(g_Config.m_ClDummy);
-
+	m_LastDummyConnectTime = GlobalTime();
 	m_aRconAuthed[1] = 0;
-
 	m_DummySendConnInfo = true;
 
 	g_Config.m_ClDummyCopyMoves = 0;
 	g_Config.m_ClDummyHammer = 0;
 
-	// connect to the server
+	m_DummyConnecting = true;
 	m_aNetClient[CONN_DUMMY].Connect(m_aNetClient[CONN_MAIN].ServerAddress(), 1);
 }
 
 void CClient::DummyDisconnect(const char *pReason)
 {
-	if(!m_DummyConnected)
-		return;
-
 	m_aNetClient[CONN_DUMMY].Disconnect(pReason);
 	g_Config.m_ClDummy = 0;
 
@@ -666,6 +679,7 @@ void CClient::DummyDisconnect(const char *pReason)
 	m_aapSnapshots[1][SNAP_PREV] = 0;
 	m_aReceivedSnapshots[1] = 0;
 	m_DummyConnected = false;
+	m_DummyConnecting = false;
 	GameClient()->OnDummyDisconnect();
 }
 
@@ -1526,6 +1540,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		else if(Conn == CONN_DUMMY && Msg == NETMSG_CON_READY)
 		{
 			m_DummyConnected = true;
+			m_DummyConnecting = false;
 			g_Config.m_ClDummy = 1;
 			Rcon("crashmeplx");
 			if(m_aRconAuthed[0])
@@ -2269,25 +2284,33 @@ void CClient::PumpNetwork()
 
 	if(State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		// check for errors
-		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITTING && m_aNetClient[CONN_MAIN].State() == NETSTATE_OFFLINE)
+		// check for errors of main and dummy
+		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITTING)
 		{
-			Disconnect();
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_aNetClient[CONN_MAIN].ErrorString());
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkErrPrintColor);
+			if(m_aNetClient[CONN_MAIN].State() == NETSTATE_OFFLINE)
+			{
+				// This will also disconnect the dummy, so the branch below is an `else if`
+				Disconnect();
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_aNetClient[CONN_MAIN].ErrorString());
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkErrPrintColor);
+			}
+			else if((DummyConnecting() || DummyConnected()) && m_aNetClient[CONN_DUMMY].State() == NETSTATE_OFFLINE)
+			{
+				const bool WasConnecting = DummyConnecting();
+				DummyDisconnect(nullptr);
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "offline dummy error='%s'", m_aNetClient[CONN_DUMMY].ErrorString());
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkErrPrintColor);
+				if(WasConnecting)
+				{
+					str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Could not connect dummy"), m_aNetClient[CONN_DUMMY].ErrorString());
+					GameClient()->Echo(aBuf);
+				}
+			}
 		}
 
-		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITTING && m_DummyConnected &&
-			m_aNetClient[CONN_DUMMY].State() == NETSTATE_OFFLINE)
-		{
-			DummyDisconnect(0);
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "offline dummy error='%s'", m_aNetClient[CONN_DUMMY].ErrorString());
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkErrPrintColor);
-		}
-
-		//
+		// check if main was connected
 		if(State() == IClient::STATE_CONNECTING && m_aNetClient[CONN_MAIN].State() == NETSTATE_ONLINE)
 		{
 			// we switched to online
@@ -3164,7 +3187,7 @@ void CClient::Con_DummyConnect(IConsole::IResult *pResult, void *pUserData)
 void CClient::Con_DummyDisconnect(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->DummyDisconnect(0);
+	pSelf->DummyDisconnect(nullptr);
 }
 
 void CClient::Con_DummyResetInput(IConsole::IResult *pResult, void *pUserData)
