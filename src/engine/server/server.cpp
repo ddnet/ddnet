@@ -3370,7 +3370,20 @@ void CServer::DemoRecorder_HandleAutoStart()
 		str_timestamp(aTimestamp, sizeof(aTimestamp));
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "demos/auto/server/%s_%s.demo", m_aCurrentMap, aTimestamp);
-		m_aDemoRecorder[RECORDER_AUTO].Start(Storage(), m_pConsole, aFilename, GameServer()->NetVersion(), m_aCurrentMap, m_aCurrentMapSha256[MAP_TYPE_SIX], m_aCurrentMapCrc[MAP_TYPE_SIX], "server", m_aCurrentMapSize[MAP_TYPE_SIX], m_apCurrentMapData[MAP_TYPE_SIX]);
+		m_aDemoRecorder[RECORDER_AUTO].Start(
+			Storage(),
+			m_pConsole,
+			aFilename,
+			GameServer()->NetVersion(),
+			m_aCurrentMap,
+			m_aCurrentMapSha256[MAP_TYPE_SIX],
+			m_aCurrentMapCrc[MAP_TYPE_SIX],
+			"server",
+			m_aCurrentMapSize[MAP_TYPE_SIX],
+			m_apCurrentMapData[MAP_TYPE_SIX],
+			nullptr,
+			nullptr,
+			nullptr);
 
 		if(Config()->m_SvAutoDemoMax)
 		{
@@ -3397,7 +3410,20 @@ void CServer::StartRecord(int ClientId)
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientId);
-		m_aDemoRecorder[ClientId].Start(Storage(), Console(), aFilename, GameServer()->NetVersion(), m_aCurrentMap, m_aCurrentMapSha256[MAP_TYPE_SIX], m_aCurrentMapCrc[MAP_TYPE_SIX], "server", m_aCurrentMapSize[MAP_TYPE_SIX], m_apCurrentMapData[MAP_TYPE_SIX]);
+		m_aDemoRecorder[ClientId].Start(
+			Storage(),
+			Console(),
+			aFilename,
+			GameServer()->NetVersion(),
+			m_aCurrentMap,
+			m_aCurrentMapSha256[MAP_TYPE_SIX],
+			m_aCurrentMapCrc[MAP_TYPE_SIX],
+			"server",
+			m_aCurrentMapSize[MAP_TYPE_SIX],
+			m_apCurrentMapData[MAP_TYPE_SIX],
+			nullptr,
+			nullptr,
+			nullptr);
 	}
 }
 
@@ -3446,7 +3472,20 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 		str_timestamp(aTimestamp, sizeof(aTimestamp));
 		str_format(aFilename, sizeof(aFilename), "demos/demo_%s.demo", aTimestamp);
 	}
-	pServer->m_aDemoRecorder[RECORDER_MANUAL].Start(pServer->Storage(), pServer->Console(), aFilename, pServer->GameServer()->NetVersion(), pServer->m_aCurrentMap, pServer->m_aCurrentMapSha256[MAP_TYPE_SIX], pServer->m_aCurrentMapCrc[MAP_TYPE_SIX], "server", pServer->m_aCurrentMapSize[MAP_TYPE_SIX], pServer->m_apCurrentMapData[MAP_TYPE_SIX]);
+	pServer->m_aDemoRecorder[RECORDER_MANUAL].Start(
+		pServer->Storage(),
+		pServer->Console(),
+		aFilename,
+		pServer->GameServer()->NetVersion(),
+		pServer->m_aCurrentMap,
+		pServer->m_aCurrentMapSha256[MAP_TYPE_SIX],
+		pServer->m_aCurrentMapCrc[MAP_TYPE_SIX],
+		"server",
+		pServer->m_aCurrentMapSize[MAP_TYPE_SIX],
+		pServer->m_apCurrentMapData[MAP_TYPE_SIX],
+		nullptr,
+		nullptr,
+		nullptr);
 }
 
 void CServer::ConStopRecord(IConsole::IResult *pResult, void *pUser)

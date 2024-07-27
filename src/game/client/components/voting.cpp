@@ -31,6 +31,16 @@ void CVoting::ConVote(IConsole::IResult *pResult, void *pUserData)
 
 void CVoting::Callvote(const char *pType, const char *pValue, const char *pReason)
 {
+	if(Client()->IsSixup())
+	{
+		protocol7::CNetMsg_Cl_CallVote Msg;
+		Msg.m_pType = pType;
+		Msg.m_pValue = pValue;
+		Msg.m_pReason = pReason;
+		Msg.m_Force = false;
+		Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL, true);
+		return;
+	}
 	CNetMsg_Cl_CallVote Msg = {0};
 	Msg.m_pType = pType;
 	Msg.m_pValue = pValue;

@@ -12,6 +12,7 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 #include <game/client/skin.h>
+#include <game/generated/protocol7.h>
 
 class CChat : public CComponent
 {
@@ -54,6 +55,20 @@ class CChat : public CComponent
 		float m_TextYOffset;
 
 		int m_TimesRepeated;
+
+		class CSixup
+		{
+		public:
+			IGraphics::CTextureHandle m_aTextures[protocol7::NUM_SKINPARTS];
+			IGraphics::CTextureHandle m_HatTexture;
+			IGraphics::CTextureHandle m_BotTexture;
+			int m_HatSpriteIndex;
+			ColorRGBA m_BotColor;
+			ColorRGBA m_aColors[protocol7::NUM_SKINPARTS];
+		};
+
+		// 0.7 Skin
+		CSixup m_Sixup;
 	};
 
 	bool m_PrevScoreBoardShowed;

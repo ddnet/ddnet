@@ -16,6 +16,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/generated/client_data7.h>
 #include <game/localization.h>
 
 CScoreboard::CScoreboard()
@@ -227,6 +228,8 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	const int NumPlayers = CountEnd - CountStart;
 	const bool LowScoreboardWidth = Scoreboard.w < 700.0f;
 
+	bool Race7 = Client()->IsSixup() && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
+
 	// calculate measurements
 	float LineHeight;
 	float TeeSizeMod;
@@ -338,6 +341,11 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 		int DDTeam = GameClient()->m_Teams.Team(pInfo->m_ClientId);
 		int NextDDTeam = 0;
+		bool RenderDead = Client()->m_TranslationContext.m_aClients[pInfo->m_ClientId].m_PlayerFlags7 & protocol7::PLAYERFLAG_DEAD;
+
+		ColorRGBA TextColor = TextRender()->DefaultTextColor();
+		TextColor.a = RenderDead ? 0.5f : 1.0f;
+		TextRender()->TextColor(TextColor);
 
 		for(int j = i + 1; j < MAX_CLIENTS; j++)
 		{
@@ -422,7 +430,21 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 		}
 
 		// score
-		if(TimeScore)
+		if(Race7)
+		{
+			if(pInfo->m_Score == -1)
+			{
+				aBuf[0] = '\0';
+			}
+			else
+			{
+				// 0.7 uses milliseconds and ddnets str_time wants centiseconds
+				// 0.7 servers can also send the amount of precision the client should use
+				// we ignore that and always show 3 digit precision
+				str_time((int64_t)absolute(pInfo->m_Score / 10), TIME_MINS_CENTISECS, aBuf, sizeof(aBuf));
+			}
+		}
+		else if(TimeScore)
 		{
 			if(pInfo->m_Score == -9999)
 			{
@@ -455,6 +477,23 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 		const CGameClient::CClientData &ClientData = GameClient()->m_aClients[pInfo->m_ClientId];
 
 		// skin
+		if(RenderDead)
+		{
+			Graphics()->BlendNormal();
+			Graphics()->TextureSet(client_data7::g_pData->m_aImages[client_data7::IMAGE_DEADTEE].m_Id);
+			Graphics()->QuadsBegin();
+			if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+			{
+				ColorRGBA Color = m_pClient->m_Skins7.GetTeamColor(true, 0, m_pClient->m_aClients[pInfo->m_ClientId].m_Team, protocol7::SKINPART_BODY);
+				Graphics()->SetColor(Color.r, Color.g, Color.b, Color.a);
+			}
+			CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientId].m_RenderInfo;
+			TeeInfo.m_Size *= TeeSizeMod;
+			IGraphics::CQuadItem QuadItem(TeeOffset, Row.y, TeeInfo.m_Size, TeeInfo.m_Size);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+		else
 		{
 			CTeeRenderInfo TeeInfo = ClientData.m_RenderInfo;
 			TeeInfo.m_Size *= TeeSizeMod;
@@ -482,6 +521,13 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			{
 				TextRender()->TextEx(&Cursor, ClientData.m_aName);
 			}
+
+			// ready / watching
+			if(Client()->IsSixup() && Client()->m_TranslationContext.m_aClients[pInfo->m_ClientId].m_PlayerFlags7 & protocol7::PLAYERFLAG_READY)
+			{
+				TextRender()->TextColor(0.1f, 1.0f, 0.1f, TextColor.a);
+				TextRender()->TextEx(&Cursor, "✓");
+			}
 		}
 
 		// clan
@@ -492,7 +538,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			}
 			else
 			{
-				TextRender()->TextColor(TextRender()->DefaultTextColor());
+				TextRender()->TextColor(TextColor);
 			}
 			CTextCursor Cursor;
 			TextRender()->SetCursor(&Cursor, ClanOffset + (ClanLength - minimum(TextRender()->TextWidth(FontSize, ClientData.m_aClan), ClanLength)) / 2.0f, Row.y + (Row.h - FontSize) / 2.0f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);

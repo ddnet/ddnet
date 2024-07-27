@@ -25,6 +25,8 @@ public:
 	virtual void OnWindowResize() override;
 	virtual void OnRender() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+
+	void DoBroadcast(const char *pText);
 };
 
 #endif

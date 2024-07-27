@@ -14,7 +14,7 @@ CDemoEdit::CDemoEdit(const char *pNetVersion, class CSnapshotDelta *pSnapshotDel
 	m_EndTick = EndTick;
 
 	// Init the demoeditor
-	m_DemoEditor.Init(pNetVersion, &m_SnapshotDelta, NULL, pStorage);
+	m_DemoEditor.Init(&m_SnapshotDelta, NULL, pStorage);
 }
 
 void CDemoEdit::Run()
