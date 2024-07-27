@@ -178,8 +178,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aCurrentInput[NUM_DUMMIES] = {0, 0};
 	bool m_LastDummy = false;
 	bool m_DummySendConnInfo = false;
+	bool m_DummyConnecting = false;
 	bool m_DummyConnected = false;
-	int m_LastDummyConnectTime = 0;
+	float m_LastDummyConnectTime = 0.0f;
 
 	// graphs
 	CGraph m_InputtimeMarginGraph;
@@ -316,6 +317,7 @@ public:
 	void DummyConnect() override;
 	bool DummyConnected() const override;
 	bool DummyConnecting() const override;
+	bool DummyConnectingDelayed() const override;
 	bool DummyAllowed() const override;
 
 	void GetServerInfo(CServerInfo *pServerInfo) const override;
