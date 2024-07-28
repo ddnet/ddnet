@@ -2234,11 +2234,13 @@ void CMenus::RenderBackground()
 	const float OffsetTime = std::fmod(Client()->GlobalTime() * 0.15f, 2.0f);
 	IGraphics::CQuadItem aCheckerItems[64];
 	size_t NumCheckerItems = 0;
-	for(int y = -2; y < (int)(ScreenWidth / Size); y++)
+	const int NumItemsWidth = std::ceil(ScreenWidth / Size);
+	const int NumItemsHeight = std::ceil(ScreenHeight / Size);
+	for(int y = -2; y < NumItemsHeight; y++)
 	{
-		for(int x = -2; x < (int)(ScreenHeight / Size); x++)
+		for(int x = 0; x < NumItemsWidth + 4; x += 2)
 		{
-			aCheckerItems[NumCheckerItems] = IGraphics::CQuadItem((x - OffsetTime) * Size * 2 + (y & 1) * Size, (y + OffsetTime) * Size, Size, Size);
+			aCheckerItems[NumCheckerItems] = IGraphics::CQuadItem((x - 2 * OffsetTime + (y & 1)) * Size, (y + OffsetTime) * Size, Size, Size);
 			NumCheckerItems++;
 			if(NumCheckerItems == std::size(aCheckerItems))
 			{
