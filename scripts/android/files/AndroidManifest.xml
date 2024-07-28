@@ -3,10 +3,12 @@
 	<!-- Vulkan 1.1.0 is used if supported -->
 	<uses-feature
 		android:name="android.hardware.vulkan.version"
+		android:required="false"
 		android:version="0x00401000" />
 	<!-- android:glEsVersion is not specified as OpenGL ES 1.0 is supported as fallback -->
 	<uses-feature
-		android:name="android.hardware.screen.landscape" />
+		android:name="android.hardware.screen.landscape"
+		android:required="true" />
 
 	<!-- Teeworlds does broadcasts over local networks -->
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
