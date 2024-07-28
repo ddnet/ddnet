@@ -1870,24 +1870,24 @@ Show only chat messages from team members
 
 [Spectating]
 Following %s
-== 
+== Viendo a %s
 
 Example of usage
-== 
+== Ejemplo de uso
 
 Round %d/%d
-== 
+== Ronda %d/%d
 
 [Spectators]
 %d others…
-== 
+== otros %d
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== Equipo %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/wiki/Mapping/es
