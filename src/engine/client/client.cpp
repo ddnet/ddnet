@@ -3820,6 +3820,7 @@ void CClient::UpdateAndSwap()
 	Input()->Update();
 	Graphics()->Swap();
 	Graphics()->Clear(0, 0, 0);
+	m_GlobalTime = (time_get() - m_GlobalStartTime) / (float)time_freq();
 }
 
 void CClient::ServerBrowserUpdate()

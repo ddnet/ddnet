@@ -2231,7 +2231,7 @@ void CMenus::RenderBackground()
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.045f);
 	const float Size = 15.0f;
-	const float OffsetTime = std::fmod(LocalTime() * 0.15f, 2.0f);
+	const float OffsetTime = std::fmod(Client()->GlobalTime() * 0.15f, 2.0f);
 	IGraphics::CQuadItem aCheckerItems[64];
 	size_t NumCheckerItems = 0;
 	for(int y = -2; y < (int)(ScreenWidth / Size); y++)
