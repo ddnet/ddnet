@@ -236,19 +236,6 @@ bool CClient::ConnectionProblems() const
 	return m_aNetClient[g_Config.m_ClDummy].GotProblems(MaxLatencyTicks() * time_freq() / GameTickSpeed()) != 0;
 }
 
-void CClient::DirectInput(int *pInput, int Size)
-{
-	CMsgPacker Msg(NETMSG_INPUT, true);
-	Msg.AddInt(m_aAckGameTick[g_Config.m_ClDummy]);
-	Msg.AddInt(m_aPredTick[g_Config.m_ClDummy]);
-	Msg.AddInt(Size);
-
-	for(int i = 0; i < Size / 4; i++)
-		Msg.AddInt(pInput[i]);
-
-	SendMsgActive(&Msg, 0);
-}
-
 void CClient::SendInput()
 {
 	int64_t Now = time_get();
