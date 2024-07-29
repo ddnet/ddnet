@@ -6,7 +6,7 @@
 CGameControllerDM::CGameControllerDM(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
-	m_GameFlags = GAMEFLAG_FLAGS;
+	m_GameFlags = 0;
 }
 
 CGameControllerDM::~CGameControllerDM() = default;
