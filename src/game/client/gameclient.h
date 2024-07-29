@@ -384,6 +384,9 @@ public:
 		CCharacterCore m_Predicted;
 		CCharacterCore m_PrevPredicted;
 
+		CNetObj_PreInput m_Inputs[200];
+		int m_CurrentInput;
+
 		CTeeRenderInfo m_SkinInfo; // this is what the server reports
 		CTeeRenderInfo m_RenderInfo; // this is what we use
 

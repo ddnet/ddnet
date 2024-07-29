@@ -1697,6 +1697,14 @@ void CGameClient::OnNewSnapshot()
 					m_aSwitchStateTeam[g_Config.m_ClDummy] = -1;
 				GotSwitchStateTeam = true;
 			}
+			else if(Item.m_Type == NETOBJTYPE_PREINPUT)
+			{
+				if(Item.m_Id < MAX_CLIENTS)
+				{
+					m_aClients[Item.m_Id].m_CurrentInput = (m_aClients[Item.m_Id].m_CurrentInput + 1) % 200;
+					m_aClients[Item.m_Id].m_Inputs[m_aClients[Item.m_Id].m_CurrentInput] = *((const CNetObj_PreInput *)pData);
+				}
+			}
 		}
 	}
 
@@ -2040,6 +2048,40 @@ void CGameClient::OnPredict()
 			pLocalChar->OnPredictedInput(pInputData);
 		if(pDummyInputData)
 			pDummyChar->OnPredictedInput(pDummyInputData);
+
+		if(g_Config.m_ClAntiPingPreInputs)
+		{
+			// apply inputs and to other players if possible
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
+				{
+					if(pDummyChar == pChar)
+						continue;
+					if(pLocalChar == pChar)
+						continue;
+
+					CNetObj_PreInput *preInput = nullptr;
+					for(int input = 0; input < 200; input++)
+					{
+						if(m_aClients[i].m_Inputs[input].m_IntendedTick != Tick)
+							continue;
+
+						preInput = &m_aClients[i].m_Inputs[input];
+						break;
+					}
+
+					//no inputs found for this tick
+					if(!preInput)
+						continue;
+
+					//convert preinput to input
+
+					pChar->OnPredictedInput((CNetObj_PlayerInput *)preInput);
+				}
+			}
+		}
+
 		m_PredictedWorld.Tick();
 
 		// fetch the current characters

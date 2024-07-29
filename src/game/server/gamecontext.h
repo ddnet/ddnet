@@ -189,7 +189,7 @@ public:
 	CGameWorld m_World;
 
 	// helper functions
-	class CCharacter *GetPlayerChar(int ClientId);
+	class CCharacter *GetPlayerChar(int ClientId) override;
 	bool EmulateBug(int Bug);
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
 

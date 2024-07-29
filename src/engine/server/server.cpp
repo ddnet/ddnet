@@ -38,6 +38,7 @@
 
 // DDRace
 #include <engine/shared/linereader.h>
+#include <game/server/entities/character.h>
 #include <vector>
 #include <zlib.h>
 
@@ -917,6 +918,65 @@ void CServer::DoSnapshot()
 			m_SnapshotBuilder.Init(m_aClients[i].m_Sixup);
 
 			GameServer()->OnSnap(i);
+
+			if(Config()->m_SvPreInputs && m_aClients[i].m_DDNetVersion >= VERSION_DDNET_PREINPUT && GameServer()->IsClientPlayer(i))
+			{
+				for(int j = 0; j < MaxClients(); j++)
+				{
+					if(i == j)
+						continue;
+
+					//skip if player not in game and in view
+					if(!GameServer()->IsClientReady(j) || !GameServer()->IsClientPlayer(j) || !GameServer()->GetPlayerChar(j) || !GameServer()->GetPlayerChar(j)->CanSnapCharacter(i) || !GameServer()->GetPlayerChar(j)->IsSnappingCharacterInView(i))
+						continue;
+
+					//skip if on different teams
+					if(!GameServer()->GetPlayerChar(j)->SameTeam(i))
+						continue;
+
+					//get latest tick
+					CClient::CInput *latestInput = 0;
+					int latestTick = 0;
+
+					for(auto &Input : m_aClients[j].m_aInputs)
+					{
+						if(Input.m_GameTick > Tick() && Input.m_GameTick > latestTick)
+						{
+							latestTick = Input.m_GameTick;
+							latestInput = &Input;
+						}
+					}
+
+					if(!latestInput || !latestTick)
+						continue;
+
+					CNetObj_PlayerInput input = *(CNetObj_PlayerInput *)latestInput->m_aData;
+
+					//ignore m_TargetX / m_TargetY
+					input.m_TargetX = 0;
+					input.m_TargetY = 0;
+
+					if(mem_comp(&input, &m_aClients[i].m_aPreInputs[j], sizeof(CNetObj_PlayerInput)) == 0)
+						continue; //same as last send
+
+					m_aClients[i].m_aPreInputs[j] = input;
+
+					input = *(CNetObj_PlayerInput *)latestInput->m_aData;
+
+					CNetObj_PreInput *preInputs = IServer::SnapNewItem<CNetObj_PreInput>(j);
+					preInputs->m_Direction = input.m_Direction;
+					preInputs->m_TargetX = input.m_TargetX;
+					preInputs->m_TargetY = input.m_TargetY;
+					preInputs->m_Jump = input.m_Jump;
+					preInputs->m_Fire = input.m_Fire;
+					preInputs->m_Hook = input.m_Hook;
+					preInputs->m_PlayerFlags = input.m_PlayerFlags;
+					preInputs->m_WantedWeapon = input.m_WantedWeapon;
+					preInputs->m_NextWeapon = input.m_NextWeapon;
+					preInputs->m_PrevWeapon = input.m_PrevWeapon;
+					preInputs->m_IntendedTick = latestTick;
+				}
+			}
 
 			// finish snapshot
 			char aData[CSnapshot::MAX_SIZE];
