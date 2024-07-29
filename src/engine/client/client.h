@@ -294,7 +294,6 @@ public:
 
 	IGraphics::CTextureHandle GetDebugFont() const override { return m_DebugFont; }
 
-	void DirectInput(int *pInput, int Size);
 	void SendInput();
 
 	// TODO: OPT: do this a lot smarter!
