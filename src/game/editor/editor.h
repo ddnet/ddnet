@@ -610,7 +610,8 @@ public:
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	int m_FilePreviewSound;
 	EPreviewState m_FilePreviewState;
-	CImageInfo m_FilePreviewImageInfo;
+	int m_FilePreviewImageWidth;
+	int m_FilePreviewImageHeight;
 	bool m_FileDialogOpening;
 
 	int m_ToolbarPreviewSound;

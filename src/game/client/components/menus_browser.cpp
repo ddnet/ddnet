@@ -2001,7 +2001,6 @@ void CMenus::LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info,
 		pData[i * Step + 2] = v;
 	}
 	CommunityIcon.m_GreyTexture = Graphics()->LoadTextureRawMove(Info, 0, pCommunityId);
-	Info.m_pData = nullptr;
 
 	auto ExistingIcon = std::find_if(m_vCommunityIcons.begin(), m_vCommunityIcons.end(), [pCommunityId](const SCommunityIcon &Element) {
 		return str_comp(Element.m_aCommunityId, pCommunityId) == 0;

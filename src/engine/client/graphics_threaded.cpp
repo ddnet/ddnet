@@ -474,7 +474,9 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRawMove(CImageInfo &Ima
 	if(Image.m_Format != CImageInfo::FORMAT_RGBA)
 	{
 		// Moving not possible, texture needs to be converted
-		return LoadTextureRaw(Image, Flags, pTexName);
+		IGraphics::CTextureHandle TextureHandle = LoadTextureRaw(Image, Flags, pTexName);
+		Image.Free();
+		return TextureHandle;
 	}
 
 	LoadTextureAddWarning(Image.m_Width, Image.m_Height, Flags, pTexName, m_vWarnings);
@@ -486,6 +488,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRawMove(CImageInfo &Ima
 	CCommandBuffer::SCommand_Texture_Create Cmd = LoadTextureCreateCommand(TextureHandle.Id(), Image.m_Width, Image.m_Height, Flags);
 	Cmd.m_pData = Image.m_pData;
 	Image.m_pData = nullptr;
+	Image.Free();
 	AddCmd(Cmd);
 
 	return TextureHandle;

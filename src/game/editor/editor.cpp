@@ -5140,11 +5140,13 @@ void CEditor::RenderFileDialog()
 			{
 				char aBuffer[IO_MAX_PATH_LENGTH];
 				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
-				if(Graphics()->LoadPng(m_FilePreviewImageInfo, aBuffer, m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType))
+				CImageInfo PreviewImageInfo;
+				if(Graphics()->LoadPng(PreviewImageInfo, aBuffer, m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType))
 				{
 					Graphics()->UnloadTexture(&m_FilePreviewImage);
-					m_FilePreviewImage = Graphics()->LoadTextureRawMove(m_FilePreviewImageInfo, 0, aBuffer);
-					m_FilePreviewImageInfo.m_pData = nullptr;
+					m_FilePreviewImageWidth = PreviewImageInfo.m_Width;
+					m_FilePreviewImageHeight = PreviewImageInfo.m_Height;
+					m_FilePreviewImage = Graphics()->LoadTextureRawMove(PreviewImageInfo, 0, aBuffer);
 					m_FilePreviewState = PREVIEW_LOADED;
 				}
 				else
@@ -5167,11 +5169,11 @@ void CEditor::RenderFileDialog()
 			Preview.Margin(10.0f, &Preview);
 			if(m_FilePreviewState == PREVIEW_LOADED)
 			{
-				int w = m_FilePreviewImageInfo.m_Width;
-				int h = m_FilePreviewImageInfo.m_Height;
-				if(m_FilePreviewImageInfo.m_Width > Preview.w)
+				int w = m_FilePreviewImageWidth;
+				int h = m_FilePreviewImageHeight;
+				if(m_FilePreviewImageWidth > Preview.w)
 				{
-					h = m_FilePreviewImageInfo.m_Height * Preview.w / m_FilePreviewImageInfo.m_Width;
+					h = m_FilePreviewImageHeight * Preview.w / m_FilePreviewImageWidth;
 					w = Preview.w;
 				}
 				if(h > Preview.h)
@@ -8324,15 +8326,15 @@ void CEditor::Init()
 		m_PopupEventWasActivated = false;
 	});
 	m_RenderTools.Init(m_pGraphics, m_pTextRender);
-	m_ZoomEnvelopeX.Init(this);
-	m_ZoomEnvelopeY.Init(this);
+	m_ZoomEnvelopeX.OnInit(this);
+	m_ZoomEnvelopeY.OnInit(this);
 	m_Map.m_pEditor = this;
 
 	m_vComponents.emplace_back(m_MapView);
 	m_vComponents.emplace_back(m_MapSettingsBackend);
 	m_vComponents.emplace_back(m_LayerSelector);
 	for(CEditorComponent &Component : m_vComponents)
-		Component.Init(this);
+		Component.OnInit(this);
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL);
 	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL);

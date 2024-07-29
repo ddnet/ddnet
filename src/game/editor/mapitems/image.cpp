@@ -5,7 +5,7 @@
 CEditorImage::CEditorImage(CEditor *pEditor) :
 	m_AutoMapper(pEditor)
 {
-	Init(pEditor);
+	OnInit(pEditor);
 	m_Texture.Invalidate();
 }
 
@@ -16,9 +16,9 @@ CEditorImage::~CEditorImage()
 	m_pData = nullptr;
 }
 
-void CEditorImage::Init(CEditor *pEditor)
+void CEditorImage::OnInit(CEditor *pEditor)
 {
-	CEditorComponent::Init(pEditor);
+	CEditorComponent::OnInit(pEditor);
 	RegisterSubComponent(m_AutoMapper);
 	InitSubComponents();
 }
