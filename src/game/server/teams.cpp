@@ -1026,11 +1026,20 @@ void CGameTeams::ProcessSaveTeam()
 					m_apSaveTeamResult[Team]->m_SaveId,
 					m_apSaveTeamResult[Team]->m_SavedTeam.GetString());
 			}
+
+			bool TeamValid = false;
 			if(Count(Team) > 0)
 			{
 				// keep current weak/strong order as on some maps there is no other way of switching
-				m_apSaveTeamResult[Team]->m_SavedTeam.Load(GameServer(), Team, true);
+				TeamValid = m_apSaveTeamResult[Team]->m_SavedTeam.Load(GameServer(), Team, true);
 			}
+
+			if(!TeamValid)
+			{
+				GameServer()->SendChatTeam(Team, "Your team has been killed because it contains an invalid tee state");
+				KillTeam(Team, -1, -1);
+			}
+
 			char aSaveId[UUID_MAXSTRSIZE];
 			FormatUuid(m_apSaveTeamResult[Team]->m_SaveId, aSaveId, UUID_MAXSTRSIZE);
 			dbg_msg("save", "Load successful: %s", aSaveId);

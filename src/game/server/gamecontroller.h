@@ -310,22 +310,6 @@ public:
 	void PublishRoundEndStatsStrDiscord(const char *pStr);
 	void PublishRoundEndStatsStrHttp(const char *pStr);
 	void PublishRoundEndStats();
-	class CInstaPlayerStats
-	{
-	public:
-		int m_Kills;
-		int m_Deaths;
-		void Reset()
-		{
-			m_Kills = 0;
-			m_Deaths = 0;
-		}
-		CInstaPlayerStats()
-		{
-			Reset();
-		}
-	};
-	CInstaPlayerStats m_aInstaPlayerStats[MAX_CLIENTS];
 
 public:
 	enum

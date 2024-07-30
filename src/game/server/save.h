@@ -25,7 +25,7 @@ public:
 	CSaveTee();
 	~CSaveTee() = default;
 	void Save(CCharacter *pchr);
-	void Load(CCharacter *pchr, int Team, bool IsSwap = false);
+	bool Load(CCharacter *pchr, int Team, bool IsSwap = false);
 	char *GetString(const CSaveTeam *pTeam);
 	int FromString(const char *pString);
 	void LoadHookedPlayer(const CSaveTeam *pTeam);
@@ -149,7 +149,7 @@ public:
 	// returns true if a team can load, otherwise writes a nice error Message in pMessage
 	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientId, int NumPlayer, char *pMessage, int MessageLen) const;
 	int Save(CGameContext *pGameServer, int Team, bool Dry = false);
-	void Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakStrong);
+	bool Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakStrong);
 
 	CSaveTee *m_pSavedTees = nullptr;
 

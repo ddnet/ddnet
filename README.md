@@ -70,6 +70,10 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 + `sv_killingspree_kills` How many kills are needed to be on a killing-spree (0=off)
 + `sv_damage_needed_for_kill` Damage needed to kill
 + `sv_allow_zoom` allow ddnet clients to use the client side zoom feature
++ `sv_anticamper` Toggle to enable/disable Anticamper
++ `sv_anticamper_freeze` If a player should freeze on camping (and how long) or die
++ `sv_anticamper_time` How long to wait till the player dies/freezes
++ `sv_anticamper_range` Distance how far away the player must move to escape anticamper
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
 + `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)
@@ -85,10 +89,13 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 + `sv_tournament_chat` 0=off, 1=Spectators can not public chat, 2=Nobody can public chat
 + `sv_tournament_chat_smart` Turns sv_tournament_chat on on restart and off on round end (1=specs,2=all)
 + `sv_tournament_join_msgs` Hide join/leave of spectators in chat !0.6 only for now! (0=off,1=hidden,2=shown for specs)
-+ `sv_round_stats_format` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
++ `sv_round_stats_format_discord` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
++ `sv_round_stats_format_http` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
++ `sv_round_stats_format_file` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_spawn_weapons` possible values: grenade, laser
 + `sv_tournament_welcome_chat` Chat message shown in chat on join when sv_tournament is 1
 + `sv_round_stats_discord_webhook` If set will post score stats there on round end
++ `sv_round_stats_http_endpoint` If set will post score stats there on round end
 + `sv_round_stats_output_file` If set will write score stats there on round end
 
 # Rcon commmands
@@ -117,3 +124,91 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `!settings` show current game settings in the message of the day. It will show if spray protection is on or off and similar game relevant settings.
 + `!1v1` `!2v2` `!v1` `!v2` `!1on1` ... call vote to change in game slots
 + `!restart ?(seconds)` call vote to restart game with optional parameter of warmup seconds (default: 10)
+
+# Publish round stats
+
+At the end of every round the stats about every players score can be published to discord (and other destinations).
+
+The following configs determine which format the stats will be represented in.
+
++ `sv_round_stats_format_discord` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
++ `sv_round_stats_format_http` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
++ `sv_round_stats_format_file` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
+
+And these configs determin where the stats will be sent to.
+
++ `sv_round_stats_discord_webhook` Will do a discord webhook POST request to that url. The url has to look like this: `https://discord.com/api/webhooks/1232962289217568799/8i_a89XXXXXXXXXXXXXXXXXXXXXXX`
+  If you don't know how to setup a discord webhook, don't worry its quite simple. You need to have admin access to a discord server and then you can follow this [1 minute youtube tutorial](https://www.youtube.com/watch?v=fKksxz2Gdnc).
++ `sv_round_stats_http_endpoint` It will do a http POST request to that url with the round stats as payload. You can set this to your custom api endpoint that collect stats. Example: `https://api.zillyhuhn.com/insta/round_stats`
++ `sv_round_stats_output_file` **NOT IMPLEMENTED YET** It will write the round stats to a file located at that path. You could then read that file with another tool or expose it with an http server. Example value: `stats.json`
+
+## csv - comma separated values (format 0)
+
+NOT IMPLEMENTED YET
+
+## psv - pipe separated values (format 1)
+
+```
+---> Server: unnamed server, Map: tmp/maps-07/ctf5_spikes, Gametype: gctf.
+(Length: 0 min 17 sec, Scorelimit: 1, Timelimit: 0)
+
+**Red Team:**                                       
+Clan: **|*KoG*|**                                   
+Id: 0 | Name: ChillerDragon | Score: 2 | Kills: 1 | Deaths: 0 | Ratio: 1.00
+**Blue Team:**                                      
+Clan: **|*KoG*|**                                   
+Id: 1 | Name: ChillerDragon.* | Score: 0 | Kills: 0 | Deaths: 1 | Ratio: 0.00
+---------------------                               
+**Red: 1 | Blue 0**  
+```
+
+Here is how it would display when posted on discord:
+
+![psv on discord](https://raw.githubusercontent.com/ddnet-insta/images/5fafe03ed60153096facf4cc5d56c5df9ff20a5c/psv_discord.png)
+
+## ascii table (format 2)
+
+NOT IMPLEMENTED YET
+
+## markdown (format 3)
+
+NOT IMPLEMENTED YET
+
+## json - javascript object notation (format 4)
+
+```json
+{
+        "server": "unnamed server",
+        "map": "tmp/maps-07/ctf5_spikes",
+        "game_type": "gctf",
+        "game_duration_seconds": 67,
+        "score_limit": 200,
+        "time_limit": 0,
+        "score_red": 203,
+        "score_blue": 0,
+        "players": [
+                {
+                        "id": 0,
+                        "team": "red",
+                        "name": "ChillerDragon",
+                        "score": 15,
+                        "kills": 3,
+                        "deaths": 1,
+                        "ratio": 3,
+                        "flag_grabs": 3,
+                        "flag_captures": 2
+                },
+                {
+                        "id": 1,
+                        "team": "blue",
+                        "name": "ChillerDragon.*",
+                        "score": 0,
+                        "kills": 0,
+                        "deaths": 3,
+                        "ratio": 0,
+                        "flag_grabs": 0,
+                        "flag_captures": 0
+                }
+        ]
+}
+```

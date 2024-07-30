@@ -857,11 +857,16 @@ CGameConsole::~CGameConsole()
 		m_pConsoleLogger->OnConsoleDeletion();
 }
 
-CGameConsole::CInstance *CGameConsole::CurrentConsole()
+CGameConsole::CInstance *CGameConsole::ConsoleForType(int ConsoleType)
 {
-	if(m_ConsoleType == CONSOLETYPE_REMOTE)
+	if(ConsoleType == CONSOLETYPE_REMOTE)
 		return &m_RemoteConsole;
 	return &m_LocalConsole;
+}
+
+CGameConsole::CInstance *CGameConsole::CurrentConsole()
+{
+	return ConsoleForType(m_ConsoleType);
 }
 
 void CGameConsole::OnReset()
@@ -972,7 +977,6 @@ void CGameConsole::OnRender()
 		if(m_ConsoleState == CONSOLE_CLOSING)
 		{
 			m_ConsoleState = CONSOLE_CLOSED;
-			pConsole->m_Input.Deactivate();
 			pConsole->m_BacklogLastActiveLine = -1;
 		}
 		else if(m_ConsoleState == CONSOLE_OPENING)
@@ -1072,24 +1076,48 @@ void CGameConsole::OnRender()
 		TextRender()->TextEx(&Cursor, aPrompt);
 
 		// check if mouse is pressed
-		if(!pConsole->m_MouseIsPress && Input()->NativeMousePressed(1))
+		const vec2 WindowSize = vec2(Graphics()->WindowWidth(), Graphics()->WindowHeight());
+		const vec2 ScreenSize = vec2(Screen.w, Screen.h);
+		Ui()->UpdateTouchState(m_TouchState);
+		const auto &&GetMousePosition = [&]() -> vec2 {
+			if(m_TouchState.m_PrimaryPressed)
+			{
+				return m_TouchState.m_PrimaryPosition * ScreenSize;
+			}
+			else
+			{
+				return Input()->NativeMousePos() / WindowSize * ScreenSize;
+			}
+		};
+		if(!pConsole->m_MouseIsPress && (m_TouchState.m_PrimaryPressed || Input()->NativeMousePressed(1)))
 		{
 			pConsole->m_MouseIsPress = true;
-			ivec2 MousePress;
-			Input()->NativeMousePos(&MousePress.x, &MousePress.y);
-			pConsole->m_MousePress.x = (MousePress.x / (float)Graphics()->WindowWidth()) * Screen.w;
-			pConsole->m_MousePress.y = (MousePress.y / (float)Graphics()->WindowHeight()) * Screen.h;
+			pConsole->m_MousePress = GetMousePosition();
+		}
+		if(pConsole->m_MouseIsPress && !m_TouchState.m_PrimaryPressed && !Input()->NativeMousePressed(1))
+		{
+			pConsole->m_MouseIsPress = false;
 		}
 		if(pConsole->m_MouseIsPress)
 		{
-			ivec2 MouseRelease;
-			Input()->NativeMousePos(&MouseRelease.x, &MouseRelease.y);
-			pConsole->m_MouseRelease.x = (MouseRelease.x / (float)Graphics()->WindowWidth()) * Screen.w;
-			pConsole->m_MouseRelease.y = (MouseRelease.y / (float)Graphics()->WindowHeight()) * Screen.h;
+			pConsole->m_MouseRelease = GetMousePosition();
 		}
-		if(pConsole->m_MouseIsPress && !Input()->NativeMousePressed(1))
+		const float ScaledRowHeight = RowHeight / ScreenSize.y;
+		if(absolute(m_TouchState.m_ScrollAmount.y) >= ScaledRowHeight)
 		{
-			pConsole->m_MouseIsPress = false;
+			if(m_TouchState.m_ScrollAmount.y > 0.0f)
+			{
+				pConsole->m_BacklogCurLine += pConsole->GetLinesToScroll(-1, 1);
+				m_TouchState.m_ScrollAmount.y -= ScaledRowHeight;
+			}
+			else
+			{
+				--pConsole->m_BacklogCurLine;
+				if(pConsole->m_BacklogCurLine < 0)
+					pConsole->m_BacklogCurLine = 0;
+				m_TouchState.m_ScrollAmount.y += ScaledRowHeight;
+			}
+			pConsole->m_HasSelection = false;
 		}
 
 		x = Cursor.m_X;
@@ -1111,7 +1139,10 @@ void CGameConsole::OnRender()
 
 		// render console input (wrap line)
 		pConsole->m_Input.SetHidden(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq));
-		pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
+		if(m_ConsoleState == CONSOLE_OPEN)
+		{
+			pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
+		}
 		const CUIRect InputCursorRect = {x, y + FONT_SIZE, 0.0f, 0.0f};
 		const bool WasChanged = pConsole->m_Input.WasChanged();
 		const bool WasCursorChanged = pConsole->m_Input.WasCursorChanged();
@@ -1439,6 +1470,7 @@ void CGameConsole::Toggle(int Type)
 		}
 		else
 		{
+			ConsoleForType(Type)->m_Input.Deactivate();
 			Input()->MouseModeRelative();
 			Ui()->SetEnabled(true);
 			m_pClient->OnRelease();

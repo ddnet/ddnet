@@ -290,7 +290,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 		FontSize = 10.0f;
 	}
 
-	const float ScoreOffset = Scoreboard.x + 20.0f;
+	const float ScoreOffset = Scoreboard.x + 40.0f;
 	const float ScoreLength = TextRender()->TextWidth(FontSize, TimeScore ? "00:00:00" : "99999");
 	const float TeeOffset = ScoreOffset + ScoreLength + 20.0f;
 	const float TeeLength = 60.0f * TeeSizeMod;
@@ -323,7 +323,8 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 	char aBuf[64];
 	int MaxTeamSize = m_pClient->Config()->m_SvMaxTeamSize;
-	float TeamStartY = 0;
+	static float s_TeamStartY = 0;
+	static float s_TeamStartX = 0;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -373,7 +374,8 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			if(PrevDDTeam != DDTeam)
 			{
 				TeamRectCorners |= IGraphics::CORNER_T;
-				TeamStartY = Row.y;
+				s_TeamStartY = Row.y;
+				s_TeamStartX = Row.x;
 			}
 			if(NextDDTeam != DDTeam)
 				TeamRectCorners |= IGraphics::CORNER_B;
@@ -393,7 +395,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 						str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
 					else
 						str_format(aBuf, sizeof(aBuf), Localize("%d\n(%d/%d)", "Team and size"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
-					TextRender()->Text(Row.x, TeamStartY + Row.h / 2.0f - TeamFontSize / 2.0f, TeamFontSize, aBuf);
+					TextRender()->Text(s_TeamStartX, maximum(s_TeamStartY + Row.h / 2.0f - TeamFontSize, s_TeamStartY + 3.0f /* padding top */), TeamFontSize, aBuf);
 				}
 				else
 				{

@@ -18,8 +18,13 @@ void IGameController::OnEndMatchInsta()
 	dbg_msg("ddnet-insta", "publishing stats ...");
 	PublishRoundEndStats();
 
-	for(CInstaPlayerStats &Stats : m_aInstaPlayerStats)
-		Stats.Reset();
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		pPlayer->ResetStats();
+	}
 }
 
 static float CalcKillDeathRatio(int Kills, int Deaths)
@@ -34,7 +39,6 @@ static float CalcKillDeathRatio(int Kills, int Deaths)
 void IGameController::PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Size)
 {
 	char aBuf[512];
-	const CInstaPlayerStats *pStats = &m_aInstaPlayerStats[pPlayer->GetCid()];
 	str_format(
 		aBuf,
 		sizeof(aBuf),
@@ -42,9 +46,9 @@ void IGameController::PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Si
 		pPlayer->GetCid(),
 		Server()->ClientName(pPlayer->GetCid()),
 		pPlayer->m_Score.value_or(0),
-		pStats->m_Kills,
-		pStats->m_Deaths,
-		CalcKillDeathRatio(pStats->m_Kills, pStats->m_Deaths));
+		pPlayer->m_Kills,
+		pPlayer->m_Deaths,
+		CalcKillDeathRatio(pPlayer->m_Kills, pPlayer->m_Deaths));
 	str_append(pBuf, aBuf, Size);
 }
 
@@ -85,8 +89,6 @@ void IGameController::GetRoundEndStatsStrJson(char *pBuf, size_t Size)
 			if(!pPlayer)
 				continue;
 
-			const CInstaPlayerStats *pStats = &m_aInstaPlayerStats[pPlayer->GetCid()];
-
 			Writer.BeginObject();
 			Writer.WriteAttribute("id");
 			Writer.WriteIntValue(pPlayer->GetCid());
@@ -97,11 +99,15 @@ void IGameController::GetRoundEndStatsStrJson(char *pBuf, size_t Size)
 			Writer.WriteAttribute("score");
 			Writer.WriteIntValue(pPlayer->m_Score.value_or(0));
 			Writer.WriteAttribute("kills");
-			Writer.WriteIntValue(pStats->m_Kills);
+			Writer.WriteIntValue(pPlayer->m_Kills);
 			Writer.WriteAttribute("deaths");
-			Writer.WriteIntValue(pStats->m_Deaths);
+			Writer.WriteIntValue(pPlayer->m_Deaths);
 			Writer.WriteAttribute("ratio");
-			Writer.WriteIntValue(CalcKillDeathRatio(pStats->m_Kills, pStats->m_Deaths));
+			Writer.WriteIntValue(CalcKillDeathRatio(pPlayer->m_Kills, pPlayer->m_Deaths));
+			Writer.WriteAttribute("flag_grabs");
+			Writer.WriteIntValue(pPlayer->m_FlagGrabs);
+			Writer.WriteAttribute("flag_captures");
+			Writer.WriteIntValue(pPlayer->m_FlagCaptures);
 			Writer.EndObject();
 		}
 		Writer.EndArray();
@@ -123,6 +129,56 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	int ScoreLimit = m_GameInfo.m_ScoreLimit;
 	int TimeLimit = m_GameInfo.m_TimeLimit;
 
+	const char *pRedClan = nullptr;
+	const char *pBlueClan = nullptr;
+
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		if(pPlayer->GetTeam() == TEAM_RED)
+		{
+			if(str_length(Server()->ClientClan(pPlayer->GetCid())) == 0)
+			{
+				pRedClan = nullptr;
+				break;
+			}
+
+			if(!pRedClan)
+			{
+				pRedClan = Server()->ClientClan(pPlayer->GetCid());
+				continue;
+			}
+
+			if(str_comp(pRedClan, Server()->ClientClan(pPlayer->GetCid())) != 0)
+			{
+				pRedClan = nullptr;
+				break;
+			}
+		}
+		else if(pPlayer->GetTeam() == TEAM_BLUE)
+		{
+			if(str_length(Server()->ClientClan(pPlayer->GetCid())) == 0)
+			{
+				pBlueClan = nullptr;
+				break;
+			}
+
+			if(!pBlueClan)
+			{
+				pBlueClan = Server()->ClientClan(pPlayer->GetCid());
+				continue;
+			}
+
+			if(str_comp(pBlueClan, Server()->ClientClan(pPlayer->GetCid())) != 0)
+			{
+				pBlueClan = nullptr;
+				break;
+			}
+		}
+	}
+
 	// headers
 	str_format(aBuf, sizeof(aBuf), "---> Server: %s, Map: %s, Gametype: %s.\n", g_Config.m_SvName, g_Config.m_SvMap, g_Config.m_SvGametype);
 	str_append(pBuf, aBuf, Size);
@@ -130,6 +186,11 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	str_append(pBuf, aBuf, Size);
 
 	str_append(pBuf, "**Red Team:**\n", Size);
+	if(pRedClan)
+	{
+		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", pRedClan);
+		str_append(pBuf, aBuf, Size);
+	}
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer || pPlayer->GetTeam() != TEAM_RED)
@@ -137,7 +198,13 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 
 		PsvRowPlayer(pPlayer, pBuf, Size);
 	}
+
 	str_append(pBuf, "**Blue Team:**\n", Size);
+	if(pBlueClan)
+	{
+		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", pBlueClan);
+		str_append(pBuf, aBuf, Size);
+	}
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer || pPlayer->GetTeam() != TEAM_BLUE)
