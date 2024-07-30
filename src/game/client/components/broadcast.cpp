@@ -116,6 +116,14 @@ void CBroadcast::OnBroadcastMessage(const CNetMsg_Sv_Broadcast *pMsg)
 	for(int i = 0; i < MsgLength && ServerMsgLen < MAX_BROADCAST_MSG_SIZE - 1; i++)
 	{
 		const char *c = pMsg->m_pMessage + i;
+
+		if(*c == '\\' && c[1] == '^')
+		{
+			m_aBroadcastText[ServerMsgLen++] = c[1];
+			i++; // skip '^'
+			continue;
+		}
+
 		if(*c == '^' && i + 3 < MsgLength && str_isnum(c[1]) && str_isnum(c[2]) && str_isnum(c[3]))
 		{
 			m_aSegments[NumSegments].m_Color = ColorRGBA((c[1] - '0') / 9.0f, (c[2] - '0') / 9.0f, (c[3] - '0') / 9.0f, 1.0f);
