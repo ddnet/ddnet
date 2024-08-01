@@ -343,7 +343,6 @@ public:
 	virtual int UnloadTexture(CTextureHandle *pIndex) = 0;
 	virtual CTextureHandle LoadTextureRaw(const CImageInfo &Image, int Flags, const char *pTexName = nullptr) = 0;
 	virtual CTextureHandle LoadTextureRawMove(CImageInfo &Image, int Flags, const char *pTexName = nullptr) = 0;
-	virtual int LoadTextureRawSub(CTextureHandle TextureId, int x, int y, const CImageInfo &Image) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }

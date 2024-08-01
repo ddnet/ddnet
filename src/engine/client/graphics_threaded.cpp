@@ -337,25 +337,6 @@ static bool ConvertToRGBA(uint8_t *pDest, const CImageInfo &SrcImage)
 	}
 }
 
-int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureId, int x, int y, const CImageInfo &Image)
-{
-	dbg_assert(TextureId.IsValid(), "Invalid texture handle used with LoadTextureRawSub.");
-
-	CCommandBuffer::SCommand_Texture_Update Cmd;
-	Cmd.m_Slot = TextureId.Id();
-	Cmd.m_X = x;
-	Cmd.m_Y = y;
-	Cmd.m_Width = Image.m_Width;
-	Cmd.m_Height = Image.m_Height;
-
-	uint8_t *pTmpData = static_cast<uint8_t *>(malloc(Image.m_Width * Image.m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
-	ConvertToRGBA(pTmpData, Image);
-	Cmd.m_pData = pTmpData;
-	AddCmd(Cmd);
-
-	return 0;
-}
-
 IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(const CImageInfo &FromImageInfo, int x, int y, size_t w, size_t h, const char *pName)
 {
 	m_vSpriteHelper.resize(w * h * FromImageInfo.PixelSize());
