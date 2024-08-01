@@ -514,11 +514,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 	return m_NullTexture;
 }
 
-IGraphics::CTextureHandle CGraphics_Threaded::NullTexture() const
-{
-	return m_NullTexture;
-}
-
 bool CGraphics_Threaded::LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, uint8_t *pTextData, uint8_t *pTextOutlineData)
 {
 	if(Width == 0 || Height == 0)
