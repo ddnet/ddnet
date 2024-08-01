@@ -340,7 +340,7 @@ public:
 	// destination width must be equal to the subwidth of the source
 	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, const CImageInfo &SourceImage, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) = 0;
 
-	virtual int UnloadTexture(CTextureHandle *pIndex) = 0;
+	virtual void UnloadTexture(CTextureHandle *pIndex) = 0;
 	virtual CTextureHandle LoadTextureRaw(const CImageInfo &Image, int Flags, const char *pTexName = nullptr) = 0;
 	virtual CTextureHandle LoadTextureRawMove(CImageInfo &Image, int Flags, const char *pTexName = nullptr) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) = 0;

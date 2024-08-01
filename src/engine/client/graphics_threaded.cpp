@@ -288,17 +288,16 @@ void CGraphics_Threaded::FreeTextureIndex(CTextureHandle *pIndex)
 	pIndex->Invalidate();
 }
 
-int CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
+void CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 {
 	if(pIndex->IsNullTexture() || !pIndex->IsValid())
-		return 0;
+		return;
 
 	CCommandBuffer::SCommand_Texture_Destroy Cmd;
 	Cmd.m_Slot = pIndex->Id();
 	AddCmd(Cmd);
 
 	FreeTextureIndex(pIndex);
-	return 0;
 }
 
 static bool ConvertToRGBA(uint8_t *pDest, const CImageInfo &SrcImage)

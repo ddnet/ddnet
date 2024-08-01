@@ -946,7 +946,7 @@ public:
 
 	IGraphics::CTextureHandle FindFreeTextureIndex();
 	void FreeTextureIndex(CTextureHandle *pIndex);
-	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override;
+	void UnloadTexture(IGraphics::CTextureHandle *pIndex) override;
 	IGraphics::CTextureHandle LoadTextureRaw(const CImageInfo &Image, int Flags, const char *pTexName = nullptr) override;
 	IGraphics::CTextureHandle LoadTextureRawMove(CImageInfo &Image, int Flags, const char *pTexName = nullptr) override;
 
