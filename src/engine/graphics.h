@@ -250,11 +250,9 @@ protected:
 public:
 	enum
 	{
-		TEXLOAD_NOMIPMAPS = 1 << 1,
-		TEXLOAD_NO_COMPRESSION = 1 << 2,
-		TEXLOAD_TO_3D_TEXTURE = (1 << 3),
-		TEXLOAD_TO_2D_ARRAY_TEXTURE = (1 << 4),
-		TEXLOAD_NO_2D_TEXTURE = (1 << 5),
+		TEXLOAD_TO_3D_TEXTURE = 1 << 0,
+		TEXLOAD_TO_2D_ARRAY_TEXTURE = 1 << 1,
+		TEXLOAD_NO_2D_TEXTURE = 1 << 2,
 	};
 
 	class CTextureHandle
