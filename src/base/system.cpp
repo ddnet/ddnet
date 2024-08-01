@@ -5,12 +5,12 @@
 #include <charconv>
 #include <chrono>
 #include <cinttypes>
-#include <cmath>
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
 #include <iomanip> // std::get_time
 #include <iterator> // std::size
+#include <math.h>
 #include <sstream> // std::istringstream
 #include <string_view>
 
