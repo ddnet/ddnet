@@ -744,6 +744,15 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Swap is not available on forced solo servers.");
+		return;
+	}
+
 	CGameTeams &Teams = pSelf->m_pController->Teams();
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientId);
@@ -804,7 +813,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
-	if((Team == TEAM_FLOCK || Teams.TeamFlock(Team)) && g_Config.m_SvTeam != 3)
+	if(Team == TEAM_FLOCK || Teams.TeamFlock(Team))
 	{
 		CCharacter *pChr = pPlayer->GetCharacter();
 		CCharacter *pSwapChr = pSwapPlayer->GetCharacter();
