@@ -288,17 +288,16 @@ void CGraphics_Threaded::FreeTextureIndex(CTextureHandle *pIndex)
 	pIndex->Invalidate();
 }
 
-int CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
+void CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 {
 	if(pIndex->IsNullTexture() || !pIndex->IsValid())
-		return 0;
+		return;
 
 	CCommandBuffer::SCommand_Texture_Destroy Cmd;
 	Cmd.m_Slot = pIndex->Id();
 	AddCmd(Cmd);
 
 	FreeTextureIndex(pIndex);
-	return 0;
 }
 
 static bool ConvertToRGBA(uint8_t *pDest, const CImageInfo &SrcImage)
@@ -335,25 +334,6 @@ static bool ConvertToRGBA(uint8_t *pDest, const CImageInfo &SrcImage)
 		}
 		return false;
 	}
-}
-
-int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureId, int x, int y, const CImageInfo &Image)
-{
-	dbg_assert(TextureId.IsValid(), "Invalid texture handle used with LoadTextureRawSub.");
-
-	CCommandBuffer::SCommand_Texture_Update Cmd;
-	Cmd.m_Slot = TextureId.Id();
-	Cmd.m_X = x;
-	Cmd.m_Y = y;
-	Cmd.m_Width = Image.m_Width;
-	Cmd.m_Height = Image.m_Height;
-
-	uint8_t *pTmpData = static_cast<uint8_t *>(malloc(Image.m_Width * Image.m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
-	ConvertToRGBA(pTmpData, Image);
-	Cmd.m_pData = pTmpData;
-	AddCmd(Cmd);
-
-	return 0;
 }
 
 IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(const CImageInfo &FromImageInfo, int x, int y, size_t w, size_t h, const char *pName)
@@ -434,8 +414,6 @@ static CCommandBuffer::SCommand_Texture_Create LoadTextureCreateCommand(int Text
 	Cmd.m_Height = Height;
 
 	Cmd.m_Flags = 0;
-	if(Flags & IGraphics::TEXLOAD_NOMIPMAPS)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NOMIPMAPS;
 	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
 	if((Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
@@ -511,11 +489,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 		}
 	}
 
-	return m_NullTexture;
-}
-
-IGraphics::CTextureHandle CGraphics_Threaded::NullTexture() const
-{
 	return m_NullTexture;
 }
 
