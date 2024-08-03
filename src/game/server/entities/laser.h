@@ -8,7 +8,13 @@
 class CLaser : public CEntity
 {
 public:
-	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type);
+	CLaser(
+		CGameWorld *pGameWorld,
+		vec2 Pos,
+		vec2 Direction,
+		float StartEnergy,
+		int Owner,
+		int Type);
 
 	virtual void Reset() override;
 	virtual void Tick() override;
@@ -20,7 +26,7 @@ public:
 
 protected:
 	bool HitCharacter(vec2 From, vec2 To);
-	void DoBounce();
+	void DoBounce(bool EarlyTick = false);
 
 private:
 	vec2 m_From;
@@ -42,6 +48,9 @@ private:
 	bool m_TeleportCancelled;
 	bool m_IsBlueTeleport;
 	bool m_BelongsToPracticeTeam;
+
+public:
+	void SetEvalTick(int Tick);
 };
 
 #endif

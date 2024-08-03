@@ -381,7 +381,7 @@ void CCharacter::HandleWeaponSwitch()
 	DoWeaponSwitch();
 }
 
-void CCharacter::FireWeapon()
+void CCharacter::FireWeapon(bool EarlyFire)
 {
 	if(m_ReloadTimer != 0)
 	{
@@ -520,7 +520,7 @@ void CCharacter::FireWeapon()
 			else
 				Lifetime = (int)(Server()->TickSpeed() * TuningList()[m_TuneZone].m_GunLifetime);
 
-			new CProjectile(
+			CProjectile *Projectile = new CProjectile(
 				GameWorld(),
 				WEAPON_GUN, //Type
 				m_pPlayer->GetCid(), //Owner
@@ -532,6 +532,8 @@ void CCharacter::FireWeapon()
 				-1, //SoundImpact
 				MouseTarget //InitDir
 			);
+			if(EarlyFire)
+				Projectile->SetStartTick(Server()->Tick() - 1);
 
 			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 		}
@@ -546,7 +548,10 @@ void CCharacter::FireWeapon()
 		else
 			LaserReach = TuningList()[m_TuneZone].m_LaserReach;
 
-		new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
+		CLaser *Laser = new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
+		if(EarlyFire)
+			Laser->SetEvalTick(Server()->Tick() - 1);
+
 		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
@@ -559,7 +564,7 @@ void CCharacter::FireWeapon()
 		else
 			Lifetime = (int)(Server()->TickSpeed() * TuningList()[m_TuneZone].m_GrenadeLifetime);
 
-		new CProjectile(
+		CProjectile *Projectile = new CProjectile(
 			GameWorld(),
 			WEAPON_GRENADE, //Type
 			m_pPlayer->GetCid(), //Owner
@@ -571,6 +576,8 @@ void CCharacter::FireWeapon()
 			SOUND_GRENADE_EXPLODE, //SoundImpact
 			MouseTarget // MouseTarget
 		);
+		if(EarlyFire)
+			Projectile->SetStartTick(Server()->Tick() - 1);
 
 		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
 	}
@@ -584,7 +591,10 @@ void CCharacter::FireWeapon()
 		else
 			LaserReach = TuningList()[m_TuneZone].m_LaserReach;
 
-		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_LASER);
+		CLaser *Laser = new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_LASER);
+		if(EarlyFire)
+			Laser->SetEvalTick(Server()->Tick() - 1);
+
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
@@ -604,6 +614,8 @@ void CCharacter::FireWeapon()
 	}
 
 	m_AttackTick = Server()->Tick();
+	if(EarlyFire)
+		m_AttackTick--;
 
 	if(!m_ReloadTimer)
 	{
@@ -676,34 +688,13 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 
 	// copy new input
 	mem_copy(&m_Input, pNewInput, sizeof(m_Input));
+	m_NumInputs++;
 
 	// it is not allowed to aim in the center
 	if(m_Input.m_TargetX == 0 && m_Input.m_TargetY == 0)
 		m_Input.m_TargetY = -1;
 
 	mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
-}
-
-void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
-{
-	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
-	mem_copy(&m_LatestInput, pNewInput, sizeof(m_LatestInput));
-	m_NumInputs++;
-
-	// it is not allowed to aim in the center
-	if(m_LatestInput.m_TargetX == 0 && m_LatestInput.m_TargetY == 0)
-		m_LatestInput.m_TargetY = -1;
-
-	Antibot()->OnDirectInput(m_pPlayer->GetCid());
-
-	if(m_NumInputs > 1 && m_pPlayer->GetTeam() != TEAM_SPECTATORS)
-	{
-		HandleWeaponSwitch();
-		FireWeapon();
-	}
-
-	mem_copy(&m_LatestPrevPrevInput, &m_LatestPrevInput, sizeof(m_LatestInput));
-	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 }
 
 void CCharacter::ReleaseHook()
@@ -728,6 +719,27 @@ void CCharacter::ResetInput()
 	m_Input.m_Fire &= INPUT_STATE_MASK;
 	m_Input.m_Jump = 0;
 	m_LatestPrevInput = m_LatestInput = m_Input;
+}
+
+void CCharacter::WeaponTick()
+{
+	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
+	mem_copy(&m_LatestInput, &m_Input, sizeof(m_LatestInput));
+
+	// it is not allowed to aim in the center
+	if(m_LatestInput.m_TargetX == 0 && m_LatestInput.m_TargetY == 0)
+		m_LatestInput.m_TargetY = -1;
+
+	Antibot()->OnDirectInput(m_pPlayer->GetCid());
+
+	if(m_NumInputs > 1 && m_pPlayer->GetTeam() != TEAM_SPECTATORS)
+	{
+		HandleWeaponSwitch();
+		FireWeapon(true);
+	}
+
+	mem_copy(&m_LatestPrevPrevInput, &m_LatestPrevInput, sizeof(m_LatestInput));
+	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 }
 
 void CCharacter::PreTick()

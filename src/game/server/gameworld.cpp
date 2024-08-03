@@ -6,6 +6,7 @@
 #include "entity.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
+#include "player.h"
 
 #include <engine/shared/config.h>
 
@@ -213,6 +214,17 @@ void CGameWorld::Tick()
 	{
 		if(GameServer()->m_pController->IsForceBalanced())
 			GameServer()->SendChat(-1, TEAM_ALL, "Teams have been balanced");
+
+		// This is placed here so that certain weapon physics can happen before the regular Charecter Tick() to preserve physics accuracy.
+		// It is done in client order to preserve previous behavior.
+		for(auto &pPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+			CCharacter *pChar = pPlayer->GetCharacter();
+			if(pChar)
+				pChar->WeaponTick();
+		}
 
 		// update all objects
 		for(int i = 0; i < NUM_ENTTYPES; i++)
