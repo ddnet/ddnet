@@ -35,6 +35,7 @@
 #include "editor_server_settings.h"
 #include "editor_trackers.h"
 #include "editor_ui.h"
+#include "font_typer.h"
 #include "layer_selector.h"
 #include "map_view.h"
 #include "smooth_value.h"
@@ -60,7 +61,12 @@ enum
 
 	DIALOG_NONE = 0,
 	DIALOG_FILE,
-	DIALOG_MAPSETTINGS_ERROR
+	DIALOG_MAPSETTINGS_ERROR,
+
+	// The font typer component sets m_Dialog
+	// while it is active to make sure no other component
+	// interprets the key presses
+	DIALOG_PSEUDO_FONT_TYPER = -1
 };
 
 class CEditorImage;
@@ -278,6 +284,7 @@ class CEditor : public IEditor
 	std::vector<std::reference_wrapper<CEditorComponent>> m_vComponents;
 	CMapView m_MapView;
 	CLayerSelector m_LayerSelector;
+	CFontTyper m_FontTyper;
 
 	bool m_EditorWasUsedBefore = false;
 
