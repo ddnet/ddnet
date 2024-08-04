@@ -1,5 +1,5 @@
 #include <cctype>
-#include <list>
+#include <vector>
 
 #include <game/client/gameclient.h>
 #include <game/mapitems.h>
@@ -77,19 +77,15 @@ bool CRaceHelper::IsStart(CGameClient *pClient, vec2 Prev, vec2 Pos)
 	else
 	{
 		std::vector<int> vIndices = pCollision->GetMapIndices(Prev, Pos);
-		if(!vIndices.empty())
-			for(int &Indice : vIndices)
-			{
-				if(pCollision->GetTileIndex(Indice) == TILE_START)
-					return true;
-				if(pCollision->GetFTileIndex(Indice) == TILE_START)
-					return true;
-			}
-		else
+		if(vIndices.empty())
 		{
-			if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_START)
+			vIndices.push_back(pCollision->GetPureMapIndex(Pos));
+		}
+		for(const int Index : vIndices)
+		{
+			if(pCollision->GetTileIndex(Index) == TILE_START)
 				return true;
-			if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos)) == TILE_START)
+			if(pCollision->GetFTileIndex(Index) == TILE_START)
 				return true;
 		}
 	}
