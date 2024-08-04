@@ -40,6 +40,12 @@ if(SQLite3_FOUND)
   is_bundled(SQLite3_BUNDLED "${SQLite3_LIBRARY}")
   set(SQLite3_COPY_FILES)
   if(SQLite3_BUNDLED AND TARGET_OS STREQUAL "windows")
-    set(SQLite3_COPY_FILES "${EXTRA_SQLite3_LIBDIR}/sqlite3.dll")
+    if (TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
+      set(SQLite3_COPY_FILES
+        "${EXTRA_SQLite3_LIBDIR}/libsqlite3-0.dll"
+      )
+    else()
+      set(SQLite3_COPY_FILES "${EXTRA_SQLite3_LIBDIR}/sqlite3.dll")
+    endif()
   endif()
 endif()
