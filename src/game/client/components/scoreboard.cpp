@@ -217,7 +217,7 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 	}
 }
 
-void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd)
+void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State)
 {
 	dbg_assert(Team == TEAM_RED || Team == TEAM_BLUE, "Team invalid");
 
@@ -319,12 +319,10 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	// render player entries
 	int CountRendered = 0;
 	int PrevDDTeam = -1;
-	int CurrentDDTeamSize = 0;
+	int &CurrentDDTeamSize = State.m_CurrentDDTeamSize;
 
 	char aBuf[64];
 	int MaxTeamSize = m_pClient->Config()->m_SvMaxTeamSize;
-	static float s_TeamStartY = 0;
-	static float s_TeamStartX = 0;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -374,8 +372,8 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			if(PrevDDTeam != DDTeam)
 			{
 				TeamRectCorners |= IGraphics::CORNER_T;
-				s_TeamStartY = Row.y;
-				s_TeamStartX = Row.x;
+				State.m_TeamStartX = Row.x;
+				State.m_TeamStartY = Row.y;
 			}
 			if(NextDDTeam != DDTeam)
 				TeamRectCorners |= IGraphics::CORNER_B;
@@ -395,7 +393,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 						str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
 					else
 						str_format(aBuf, sizeof(aBuf), Localize("%d\n(%d/%d)", "Team and size"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
-					TextRender()->Text(s_TeamStartX, maximum(s_TeamStartY + Row.h / 2.0f - TeamFontSize, s_TeamStartY + 3.0f /* padding top */), TeamFontSize, aBuf);
+					TextRender()->Text(State.m_TeamStartX, maximum(State.m_TeamStartY + Row.h / 2.0f - TeamFontSize, State.m_TeamStartY + 3.0f /* padding top */), TeamFontSize, aBuf);
 				}
 				else
 				{
@@ -588,6 +586,7 @@ void CScoreboard::OnRender()
 	const float TitleHeight = 60.0f;
 
 	CUIRect Scoreboard = {(Width - ScoreboardWidth) / 2.0f, 150.0f, ScoreboardWidth, 710.0f + TitleHeight};
+	CScoreboardRenderState RenderState{};
 
 	if(Teams)
 	{
@@ -647,8 +646,8 @@ void CScoreboard::OnRender()
 
 		RenderTitle(RedTitle, TEAM_RED, pRedTeamName == nullptr ? Localize("Red team") : pRedTeamName);
 		RenderTitle(BlueTitle, TEAM_BLUE, pBlueTeamName == nullptr ? Localize("Blue team") : pBlueTeamName);
-		RenderScoreboard(RedScoreboard, TEAM_RED, 0, NumPlayers);
-		RenderScoreboard(BlueScoreboard, TEAM_BLUE, 0, NumPlayers);
+		RenderScoreboard(RedScoreboard, TEAM_RED, 0, NumPlayers, RenderState);
+		RenderScoreboard(BlueScoreboard, TEAM_BLUE, 0, NumPlayers, RenderState);
 	}
 	else
 	{
@@ -670,7 +669,7 @@ void CScoreboard::OnRender()
 
 		if(NumPlayers <= 16)
 		{
-			RenderScoreboard(Scoreboard, TEAM_RED, 0, NumPlayers);
+			RenderScoreboard(Scoreboard, TEAM_RED, 0, NumPlayers, RenderState);
 		}
 		else if(NumPlayers <= 64)
 		{
@@ -686,8 +685,8 @@ void CScoreboard::OnRender()
 
 			CUIRect LeftScoreboard, RightScoreboard;
 			Scoreboard.VSplitMid(&LeftScoreboard, &RightScoreboard);
-			RenderScoreboard(LeftScoreboard, TEAM_RED, 0, PlayersPerSide);
-			RenderScoreboard(RightScoreboard, TEAM_RED, PlayersPerSide, 2 * PlayersPerSide);
+			RenderScoreboard(LeftScoreboard, TEAM_RED, 0, PlayersPerSide, RenderState);
+			RenderScoreboard(RightScoreboard, TEAM_RED, PlayersPerSide, 2 * PlayersPerSide, RenderState);
 		}
 		else
 		{
@@ -698,7 +697,7 @@ void CScoreboard::OnRender()
 			{
 				CUIRect Column;
 				RemainingScoreboard.VSplitLeft(Scoreboard.w / NumColumns, &Column, &RemainingScoreboard);
-				RenderScoreboard(Column, TEAM_RED, i * PlayersPerColumn, (i + 1) * PlayersPerColumn);
+				RenderScoreboard(Column, TEAM_RED, i * PlayersPerColumn, (i + 1) * PlayersPerColumn, RenderState);
 			}
 		}
 	}
