@@ -20,6 +20,20 @@ class CBinds : public CComponent
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 
+	class CBindSlot
+	{
+	public:
+		int m_Key;
+		int m_ModifierMask;
+
+		CBindSlot(int Key, int ModifierMask) :
+			m_Key(Key),
+			m_ModifierMask(ModifierMask)
+		{
+		}
+	};
+	CBindSlot GetBindSlot(const char *pBindString) const;
+
 public:
 	CBinds();
 	~CBinds();
@@ -53,7 +67,6 @@ public:
 	void UnbindAll();
 	const char *Get(int KeyId, int ModifierCombination);
 	void GetKey(const char *pBindStr, char *pBuf, size_t BufSize);
-	int GetBindSlot(const char *pBindString, int *pModifierCombination);
 	static int GetModifierMask(IInput *pInput);
 	static int GetModifierMaskOfKey(int Key);
 	static const char *GetModifierName(int Modifier);

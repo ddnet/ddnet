@@ -282,10 +282,9 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 {
 	CBinds *pBinds = (CBinds *)pUserData;
 	const char *pBindStr = pResult->GetString(0);
-	int Modifier;
-	int KeyId = pBinds->GetBindSlot(pBindStr, &Modifier);
+	const CBindSlot BindSlot = pBinds->GetBindSlot(pBindStr);
 
-	if(!KeyId)
+	if(!BindSlot.m_Key)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pBindStr);
@@ -298,16 +297,16 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 		char aBuf[256];
 		const char *pKeyName = pResult->GetString(0);
 
-		if(!pBinds->m_aapKeyBindings[Modifier][KeyId])
-			str_format(aBuf, sizeof(aBuf), "%s (%d) is not bound", pKeyName, KeyId);
+		if(!pBinds->m_aapKeyBindings[BindSlot.m_ModifierMask][BindSlot.m_Key])
+			str_format(aBuf, sizeof(aBuf), "%s (%d) is not bound", pKeyName, BindSlot.m_Key);
 		else
-			str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, KeyId, pBinds->m_aapKeyBindings[Modifier][KeyId]);
+			str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, BindSlot.m_Key, pBinds->m_aapKeyBindings[BindSlot.m_ModifierMask][BindSlot.m_Key]);
 
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		return;
 	}
 
-	pBinds->Bind(KeyId, pResult->GetString(1), false, Modifier);
+	pBinds->Bind(BindSlot.m_Key, pResult->GetString(1), false, BindSlot.m_ModifierMask);
 }
 
 void CBinds::ConBinds(IConsole::IResult *pResult, void *pUserData)
@@ -317,20 +316,18 @@ void CBinds::ConBinds(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[256];
 		const char *pKeyName = pResult->GetString(0);
-
-		int Modifier;
-		int KeyId = pBinds->GetBindSlot(pKeyName, &Modifier);
-		if(!KeyId)
+		const CBindSlot BindSlot = pBinds->GetBindSlot(pKeyName);
+		if(!BindSlot.m_Key)
 		{
 			str_format(aBuf, sizeof(aBuf), "key '%s' not found", pKeyName);
 			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		}
 		else
 		{
-			if(!pBinds->m_aapKeyBindings[Modifier][KeyId])
-				str_format(aBuf, sizeof(aBuf), "%s (%d) is not bound", pKeyName, KeyId);
+			if(!pBinds->m_aapKeyBindings[BindSlot.m_ModifierMask][BindSlot.m_Key])
+				str_format(aBuf, sizeof(aBuf), "%s (%d) is not bound", pKeyName, BindSlot.m_Key);
 			else
-				str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, KeyId, pBinds->m_aapKeyBindings[Modifier][KeyId]);
+				str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, BindSlot.m_Key, pBinds->m_aapKeyBindings[BindSlot.m_ModifierMask][BindSlot.m_Key]);
 
 			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		}
@@ -356,10 +353,9 @@ void CBinds::ConUnbind(IConsole::IResult *pResult, void *pUserData)
 {
 	CBinds *pBinds = (CBinds *)pUserData;
 	const char *pKeyName = pResult->GetString(0);
-	int Modifier;
-	int KeyId = pBinds->GetBindSlot(pKeyName, &Modifier);
+	const CBindSlot BindSlot = pBinds->GetBindSlot(pKeyName);
 
-	if(!KeyId)
+	if(!BindSlot.m_Key)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pKeyName);
@@ -367,7 +363,7 @@ void CBinds::ConUnbind(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	pBinds->Bind(KeyId, "", false, Modifier);
+	pBinds->Bind(BindSlot.m_Key, "", false, BindSlot.m_ModifierMask);
 }
 
 void CBinds::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)
@@ -376,31 +372,31 @@ void CBinds::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)
 	pBinds->UnbindAll();
 }
 
-int CBinds::GetBindSlot(const char *pBindString, int *pModifierCombination)
+CBinds::CBindSlot CBinds::GetBindSlot(const char *pBindString) const
 {
-	*pModifierCombination = MODIFIER_NONE;
+	int ModifierMask = MODIFIER_NONE;
 	char aMod[32];
 	aMod[0] = '\0';
 	const char *pKey = str_next_token(pBindString, "+", aMod, sizeof(aMod));
 	while(aMod[0] && *(pKey))
 	{
 		if(!str_comp_nocase(aMod, "shift"))
-			*pModifierCombination |= (1 << MODIFIER_SHIFT);
+			ModifierMask |= (1 << MODIFIER_SHIFT);
 		else if(!str_comp_nocase(aMod, "ctrl"))
-			*pModifierCombination |= (1 << MODIFIER_CTRL);
+			ModifierMask |= (1 << MODIFIER_CTRL);
 		else if(!str_comp_nocase(aMod, "alt"))
-			*pModifierCombination |= (1 << MODIFIER_ALT);
+			ModifierMask |= (1 << MODIFIER_ALT);
 		else if(!str_comp_nocase(aMod, "gui"))
-			*pModifierCombination |= (1 << MODIFIER_GUI);
+			ModifierMask |= (1 << MODIFIER_GUI);
 		else
-			return 0;
+			return {KEY_UNKNOWN, MODIFIER_NONE};
 
 		if(str_find(pKey + 1, "+"))
 			pKey = str_next_token(pKey + 1, "+", aMod, sizeof(aMod));
 		else
 			break;
 	}
-	return Input()->FindKeyByName(*pModifierCombination == MODIFIER_NONE ? aMod : pKey + 1);
+	return {Input()->FindKeyByName(ModifierMask == MODIFIER_NONE ? aMod : pKey + 1), ModifierMask};
 }
 
 const char *CBinds::GetModifierName(int Modifier)
