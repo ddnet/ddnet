@@ -11,26 +11,15 @@ static const ColorRGBA gs_BindPrintColor{1.0f, 1.0f, 0.8f, 1.0f};
 
 bool CBinds::CBindsSpecial::OnInput(const IInput::CEvent &Event)
 {
+	if((Event.m_Flags & (IInput::FLAG_PRESS | IInput::FLAG_RELEASE)) == 0)
+		return false;
+
 	// only handle F and composed F binds
-	if(((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24)) && (Event.m_Key != KEY_F5 || !m_pClient->m_Menus.IsActive()))
+	// do not handle F5 bind while menu is active
+	if(((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24)) &&
+		(Event.m_Key != KEY_F5 || !m_pClient->m_Menus.IsActive()))
 	{
-		int Mask = CBinds::GetModifierMask(Input());
-
-		// Look for a composed bind
-		bool ret = false;
-		if(m_pBinds->m_aapKeyBindings[Mask][Event.m_Key])
-		{
-			m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags & IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[Mask][Event.m_Key]);
-			ret = true;
-		}
-		// Look for a non composed bind
-		if(!ret && m_pBinds->m_aapKeyBindings[0][Event.m_Key])
-		{
-			m_pBinds->GetConsole()->ExecuteLineStroked(Event.m_Flags & IInput::FLAG_PRESS, m_pBinds->m_aapKeyBindings[0][Event.m_Key]);
-			ret = true;
-		}
-
-		return ret;
+		return m_pBinds->OnInput(Event);
 	}
 
 	return false;
