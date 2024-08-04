@@ -216,7 +216,7 @@ void CGhost::CheckStartLocal(bool Predicted)
 
 		vec2 PrevPos = m_pClient->m_PredictedPrevChar.m_Pos;
 		vec2 Pos = m_pClient->m_PredictedChar.m_Pos;
-		if(((!m_Rendering && RenderTick == -1) || m_AllowRestart) && CRaceHelper::IsStart(m_pClient, PrevPos, Pos))
+		if(((!m_Rendering && RenderTick == -1) || m_AllowRestart) && GameClient()->RaceHelper()->IsStart(PrevPos, Pos))
 		{
 			if(m_Rendering && !m_RenderingStartedByServer) // race restarted: stop rendering
 				StopRender();
@@ -240,7 +240,7 @@ void CGhost::CheckStartLocal(bool Predicted)
 			int TickDiff = CurTick - PrevTick;
 			for(int i = 0; i < TickDiff; i++)
 			{
-				if(CRaceHelper::IsStart(m_pClient, mix(PrevPos, Pos, (float)i / TickDiff), mix(PrevPos, Pos, (float)(i + 1) / TickDiff)))
+				if(GameClient()->RaceHelper()->IsStart(mix(PrevPos, Pos, (float)i / TickDiff), mix(PrevPos, Pos, (float)(i + 1) / TickDiff)))
 				{
 					RecordTick = PrevTick + i + 1;
 					if(!m_AllowRestart)
@@ -651,7 +651,7 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 		if(pMsg->m_ClientId == -1 && m_Recording)
 		{
 			char aName[MAX_NAME_LENGTH];
-			int Time = CRaceHelper::TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
+			int Time = GameClient()->RaceHelper()->TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
 			if(Time > 0 && m_pClient->m_Snap.m_LocalClientId >= 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_aName) == 0)
 			{
 				StopRecord(Time);

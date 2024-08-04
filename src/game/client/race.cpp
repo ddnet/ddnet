@@ -2,13 +2,40 @@
 #include <vector>
 
 #include <game/client/gameclient.h>
+#include <game/collision.h>
 #include <game/mapitems.h>
 
 #include "race.h"
 
-int CRaceHelper::ms_aFlagIndex[2] = {-1, -1};
+void CRaceHelper::Init(const CGameClient *pGameClient)
+{
+	m_pGameClient = pGameClient;
 
-int CRaceHelper::TimeFromSecondsStr(const char *pStr)
+	m_aFlagIndex[TEAM_RED] = -1;
+	m_aFlagIndex[TEAM_BLUE] = -1;
+
+	const CTile *pGameTiles = m_pGameClient->Collision()->GameLayer();
+	const int MapSize = m_pGameClient->Collision()->GetWidth() * m_pGameClient->Collision()->GetHeight();
+	for(int Index = 0; Index < MapSize; Index++)
+	{
+		const int EntityIndex = pGameTiles[Index].m_Index - ENTITY_OFFSET;
+		if(EntityIndex == ENTITY_FLAGSTAND_RED)
+		{
+			m_aFlagIndex[TEAM_RED] = Index;
+			if(m_aFlagIndex[TEAM_BLUE] != -1)
+				break; // Found both flags
+		}
+		else if(EntityIndex == ENTITY_FLAGSTAND_BLUE)
+		{
+			m_aFlagIndex[TEAM_BLUE] = Index;
+			if(m_aFlagIndex[TEAM_RED] != -1)
+				break; // Found both flags
+		}
+		Index += pGameTiles[Index].m_Skip;
+	}
+}
+
+int CRaceHelper::TimeFromSecondsStr(const char *pStr) const
 {
 	while(*pStr == ' ') // skip leading spaces
 		pStr++;
@@ -27,7 +54,7 @@ int CRaceHelper::TimeFromSecondsStr(const char *pStr)
 	return Time;
 }
 
-int CRaceHelper::TimeFromStr(const char *pStr)
+int CRaceHelper::TimeFromStr(const char *pStr) const
 {
 	static const char *const s_pMinutesStr = " minute(s) ";
 	static const char *const s_pSecondsStr = " second(s)";
@@ -50,7 +77,7 @@ int CRaceHelper::TimeFromStr(const char *pStr)
 		return TimeFromSecondsStr(pStr);
 }
 
-int CRaceHelper::TimeFromFinishMessage(const char *pStr, char *pNameBuf, int NameBufSize)
+int CRaceHelper::TimeFromFinishMessage(const char *pStr, char *pNameBuf, int NameBufSize) const
 {
 	static const char *const s_pFinishedStr = " finished in: ";
 	const char *pFinished = str_find(pStr, s_pFinishedStr);
@@ -66,26 +93,25 @@ int CRaceHelper::TimeFromFinishMessage(const char *pStr, char *pNameBuf, int Nam
 	return TimeFromStr(pFinished + str_length(s_pFinishedStr));
 }
 
-bool CRaceHelper::IsStart(CGameClient *pClient, vec2 Prev, vec2 Pos)
+bool CRaceHelper::IsStart(vec2 Prev, vec2 Pos) const
 {
-	CCollision *pCollision = pClient->Collision();
-	if(pClient->m_GameInfo.m_FlagStartsRace)
+	if(m_pGameClient->m_GameInfo.m_FlagStartsRace)
 	{
-		int EnemyTeam = pClient->m_aClients[pClient->m_Snap.m_LocalClientId].m_Team ^ 1;
-		return ms_aFlagIndex[EnemyTeam] != -1 && distance(Pos, pCollision->GetPos(ms_aFlagIndex[EnemyTeam])) < 32;
+		int EnemyTeam = m_pGameClient->m_aClients[m_pGameClient->m_Snap.m_LocalClientId].m_Team ^ 1;
+		return m_aFlagIndex[EnemyTeam] != -1 && distance(Pos, m_pGameClient->Collision()->GetPos(m_aFlagIndex[EnemyTeam])) < 32;
 	}
 	else
 	{
-		std::vector<int> vIndices = pCollision->GetMapIndices(Prev, Pos);
+		std::vector<int> vIndices = m_pGameClient->Collision()->GetMapIndices(Prev, Pos);
 		if(vIndices.empty())
 		{
-			vIndices.push_back(pCollision->GetPureMapIndex(Pos));
+			vIndices.push_back(m_pGameClient->Collision()->GetPureMapIndex(Pos));
 		}
 		for(const int Index : vIndices)
 		{
-			if(pCollision->GetTileIndex(Index) == TILE_START)
+			if(m_pGameClient->Collision()->GetTileIndex(Index) == TILE_START)
 				return true;
-			if(pCollision->GetFTileIndex(Index) == TILE_START)
+			if(m_pGameClient->Collision()->GetFTileIndex(Index) == TILE_START)
 				return true;
 		}
 	}

@@ -79,7 +79,7 @@ void CRaceDemo::OnNewSnapshot()
 		vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
 		vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
 
-		if(ForceStart || (!ServerControl && CRaceHelper::IsStart(m_pClient, PrevPos, Pos)))
+		if(ForceStart || (!ServerControl && GameClient()->RaceHelper()->IsStart(PrevPos, Pos)))
 		{
 			if(m_RaceState == RACE_STARTED)
 				Client()->RaceRecord_Stop();
@@ -150,7 +150,7 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 		if(pMsg->m_ClientId == -1 && m_RaceState == RACE_STARTED)
 		{
 			char aName[MAX_NAME_LENGTH];
-			int Time = CRaceHelper::TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
+			int Time = GameClient()->RaceHelper()->TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
 			if(Time > 0 && m_pClient->m_Snap.m_LocalClientId >= 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_aName) == 0)
 			{
 				m_RaceState = RACE_FINISHED;
@@ -227,7 +227,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 	else if(pTEnd[0])
 		return 0;
 
-	Item.m_Time = CRaceHelper::TimeFromSecondsStr(pTime);
+	Item.m_Time = pRealUser->m_pThis->GameClient()->RaceHelper()->TimeFromSecondsStr(pTime);
 	if(Item.m_Time > 0)
 		pParam->m_pvDemos->push_back(Item);
 
