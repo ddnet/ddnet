@@ -44,9 +44,7 @@ CBinds::CBinds()
 
 CBinds::~CBinds()
 {
-	for(int i = 0; i < KEY_LAST; i++)
-		for(auto &apKeyBinding : m_aapKeyBindings)
-			free(apKeyBinding[i]);
+	UnbindAll();
 }
 
 void CBinds::Bind(int KeyId, const char *pStr, bool FreeOnly, int ModifierCombination)
@@ -58,7 +56,7 @@ void CBinds::Bind(int KeyId, const char *pStr, bool FreeOnly, int ModifierCombin
 		return;
 
 	free(m_aapKeyBindings[ModifierCombination][KeyId]);
-	m_aapKeyBindings[ModifierCombination][KeyId] = 0;
+	m_aapKeyBindings[ModifierCombination][KeyId] = nullptr;
 
 	// skip modifiers for +xxx binds
 	if(pStr[0] == '+')
@@ -120,7 +118,7 @@ int CBinds::GetModifierMaskOfKey(int Key)
 	case KEY_RGUI:
 		return 1 << CBinds::MODIFIER_GUI;
 	default:
-		return 0;
+		return CBinds::MODIFIER_NONE;
 	}
 }
 
@@ -182,7 +180,7 @@ void CBinds::UnbindAll()
 		for(auto &pKeyBinding : apKeyBinding)
 		{
 			free(pKeyBinding);
-			pKeyBinding = 0;
+			pKeyBinding = nullptr;
 		}
 	}
 }
@@ -216,8 +214,8 @@ void CBinds::GetKey(const char *pBindStr, char *pBuf, size_t BufSize)
 
 void CBinds::SetDefaults()
 {
-	// set default key bindings
 	UnbindAll();
+
 	Bind(KEY_F1, "toggle_local_console");
 	Bind(KEY_F2, "toggle_remote_console");
 	Bind(KEY_TAB, "+scoreboard");
@@ -257,7 +255,6 @@ void CBinds::SetDefaults()
 	Bind(KEY_Q, "say /pause");
 	Bind(KEY_P, "say /pause");
 
-	// DDRace
 	g_Config.m_ClDDRaceBindsSet = 0;
 	SetDDRaceBinds(false);
 }
@@ -271,7 +268,6 @@ void CBinds::OnConsoleInit()
 	Console()->Register("unbind", "s[key]", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key");
 	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys");
 
-	// default bindings
 	SetDefaults();
 }
 
@@ -329,17 +325,17 @@ void CBinds::ConBinds(IConsole::IResult *pResult, void *pUserData)
 			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		}
 	}
-	else if(pResult->NumArguments() == 0)
+	else
 	{
 		char aBuf[1024];
-		for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
+		for(int Modifier = MODIFIER_NONE; Modifier < MODIFIER_COMBINATION_COUNT; Modifier++)
 		{
-			for(int j = 0; j < KEY_LAST; j++)
+			for(int Key = KEY_FIRST; Key < KEY_LAST; Key++)
 			{
-				if(!pBinds->m_aapKeyBindings[i][j])
+				if(!pBinds->m_aapKeyBindings[Modifier][Key])
 					continue;
 
-				str_format(aBuf, sizeof(aBuf), "%s%s (%d) = %s", GetKeyBindModifiersName(i), pBinds->Input()->KeyName(j), j, pBinds->m_aapKeyBindings[i][j]);
+				str_format(aBuf, sizeof(aBuf), "%s%s (%d) = %s", GetKeyBindModifiersName(Modifier), pBinds->Input()->KeyName(Key), Key, pBinds->m_aapKeyBindings[Modifier][Key]);
 				pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 			}
 		}
@@ -434,22 +430,22 @@ void CBinds::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 	CBinds *pSelf = (CBinds *)pUserData;
 
 	pConfigManager->WriteLine("unbindall");
-	for(int i = 0; i < MODIFIER_COMBINATION_COUNT; i++)
+	for(int Modifier = MODIFIER_NONE; Modifier < MODIFIER_COMBINATION_COUNT; Modifier++)
 	{
-		for(int j = 0; j < KEY_LAST; j++)
+		for(int Key = KEY_FIRST; Key < KEY_LAST; Key++)
 		{
-			if(!pSelf->m_aapKeyBindings[i][j])
+			if(!pSelf->m_aapKeyBindings[Modifier][Key])
 				continue;
 
 			// worst case the str_escape can double the string length
-			int Size = str_length(pSelf->m_aapKeyBindings[i][j]) * 2 + 30;
+			int Size = str_length(pSelf->m_aapKeyBindings[Modifier][Key]) * 2 + 30;
 			char *pBuffer = (char *)malloc(Size);
 			char *pEnd = pBuffer + Size;
 
-			str_format(pBuffer, Size, "bind %s%s \"", GetKeyBindModifiersName(i), pSelf->Input()->KeyName(j));
+			str_format(pBuffer, Size, "bind %s%s \"", GetKeyBindModifiersName(Modifier), pSelf->Input()->KeyName(Key));
 			// process the string. we need to escape some characters
 			char *pDst = pBuffer + str_length(pBuffer);
-			str_escape(&pDst, pSelf->m_aapKeyBindings[i][j], pEnd);
+			str_escape(&pDst, pSelf->m_aapKeyBindings[Modifier][Key], pEnd);
 			str_append(pBuffer, "\"", Size);
 
 			pConfigManager->WriteLine(pBuffer);
