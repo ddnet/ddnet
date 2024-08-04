@@ -8,6 +8,8 @@
 
 #include <game/client/component.h>
 
+#include <vector>
+
 class IConfigManager;
 
 class CBinds : public CComponent
@@ -81,5 +83,6 @@ public:
 
 private:
 	char *m_aapKeyBindings[MODIFIER_COMBINATION_COUNT][KEY_LAST];
+	std::vector<CBindSlot> m_vActiveBinds;
 };
 #endif

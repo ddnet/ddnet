@@ -47,10 +47,6 @@ void CBinds::Bind(int KeyId, const char *pStr, bool FreeOnly, int ModifierCombin
 	free(m_aapKeyBindings[ModifierCombination][KeyId]);
 	m_aapKeyBindings[ModifierCombination][KeyId] = nullptr;
 
-	// skip modifiers for +xxx binds
-	if(pStr[0] == '+')
-		ModifierCombination = 0;
-
 	char aBuf[256];
 	if(!pStr[0])
 	{
@@ -113,53 +109,88 @@ int CBinds::GetModifierMaskOfKey(int Key)
 
 bool CBinds::OnInput(const IInput::CEvent &Event)
 {
-	// don't handle invalid events
-	if(Event.m_Key <= KEY_FIRST || Event.m_Key >= KEY_LAST)
+	if((Event.m_Flags & (IInput::FLAG_PRESS | IInput::FLAG_RELEASE)) == 0)
 		return false;
 
-	int Mask = GetModifierMask(Input());
-	int KeyModifierMask = GetModifierMaskOfKey(Event.m_Key);
-	Mask &= ~KeyModifierMask;
+	const int KeyModifierMask = GetModifierMaskOfKey(Event.m_Key);
+	const int ModifierMask = GetModifierMask(Input()) & ~KeyModifierMask;
 
-	bool ret = false;
-	const char *pKey = nullptr;
+	bool Handled = false;
 
-	if(m_aapKeyBindings[Mask][Event.m_Key])
+	if(Event.m_Flags & IInput::FLAG_PRESS)
 	{
-		if(Event.m_Flags & IInput::FLAG_PRESS)
+		auto ActiveBind = std::find_if(m_vActiveBinds.begin(), m_vActiveBinds.end(), [&](const CBindSlot &Bind) {
+			return Event.m_Key == Bind.m_Key;
+		});
+		if(ActiveBind == m_vActiveBinds.end())
 		{
-			Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][Event.m_Key]);
-			pKey = m_aapKeyBindings[Mask][Event.m_Key];
-		}
-		// Have to check for nullptr again because the previous execute can unbind itself
-		if(Event.m_Flags & IInput::FLAG_RELEASE && m_aapKeyBindings[Mask][Event.m_Key])
-			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mask][Event.m_Key]);
-		ret = true;
-	}
+			const auto &&OnPress = [&](int Mask) {
+				const char *pBind = m_aapKeyBindings[Mask][Event.m_Key];
+				if(g_Config.m_ClSubTickAiming)
+				{
+					if(str_comp("+fire", pBind) == 0 || str_comp("+hook", pBind) == 0)
+					{
+						m_MouseOnAction = true;
+					}
+				}
+				Console()->ExecuteLineStroked(1, pBind);
+				m_vActiveBinds.emplace_back(Event.m_Key, Mask);
+			};
 
-	if(m_aapKeyBindings[0][Event.m_Key] && !ret)
-	{
-		// When ctrl+shift are pressed (ctrl+shift binds and also the hard-coded ctrl+shift+d, ctrl+shift+g, ctrl+shift+e), ignore other +xxx binds
-		if(Event.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
-		{
-			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][Event.m_Key]);
-			pKey = m_aapKeyBindings[Mask][Event.m_Key];
-		}
-		// Have to check for nullptr again because the previous execute can unbind itself
-		if(Event.m_Flags & IInput::FLAG_RELEASE && m_aapKeyBindings[0][Event.m_Key])
-			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][Event.m_Key]);
-		ret = true;
-	}
-
-	if(g_Config.m_ClSubTickAiming && pKey)
-	{
-		if(str_comp("+fire", pKey) == 0 || str_comp("+hook", pKey) == 0)
-		{
-			m_MouseOnAction = true;
+			if(m_aapKeyBindings[ModifierMask][Event.m_Key])
+			{
+				OnPress(ModifierMask);
+				Handled = true;
+			}
+			else if(m_aapKeyBindings[MODIFIER_NONE][Event.m_Key] &&
+				ModifierMask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) &&
+				ModifierMask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
+			{
+				OnPress(MODIFIER_NONE);
+				Handled = true;
+			}
 		}
 	}
 
-	return ret;
+	if(Event.m_Flags & IInput::FLAG_RELEASE)
+	{
+		// Release active bind that uses this primary key
+		auto ActiveBind = std::find_if(m_vActiveBinds.begin(), m_vActiveBinds.end(), [&](const CBindSlot &Bind) {
+			return Event.m_Key == Bind.m_Key;
+		});
+		if(ActiveBind != m_vActiveBinds.end())
+		{
+			// Have to check for nullptr again because the previous execute can unbind itself
+			if(m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key])
+			{
+				Console()->ExecuteLineStroked(0, m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key]);
+			}
+			m_vActiveBinds.erase(ActiveBind);
+			Handled = true;
+		}
+
+		// Release all active binds that use this modifier key
+		if(KeyModifierMask != MODIFIER_NONE)
+		{
+			while(true)
+			{
+				auto ActiveModifierBind = std::find_if(m_vActiveBinds.begin(), m_vActiveBinds.end(), [&](const CBindSlot &Bind) {
+					return (Bind.m_ModifierMask & KeyModifierMask) != 0;
+				});
+				if(ActiveModifierBind == m_vActiveBinds.end())
+					break;
+				// Have to check for nullptr again because the previous execute can unbind itself
+				if(m_aapKeyBindings[ActiveModifierBind->m_ModifierMask][ActiveModifierBind->m_Key])
+				{
+					Console()->ExecuteLineStroked(0, m_aapKeyBindings[ActiveModifierBind->m_ModifierMask][ActiveModifierBind->m_Key]);
+				}
+				m_vActiveBinds.erase(ActiveModifierBind);
+				Handled = true;
+			}
+		}
+	}
+
+	return Handled;
 }
 
 void CBinds::UnbindAll()
