@@ -108,6 +108,9 @@ public:
 		return Result;
 	}
 
+	/**
+	 * SendPackMsg, but send to both 0.6 and 0.7 players, not just one of them
+	 */
 	template<class T>
 	inline int SendPackMsgForce(const T *pMsg, int Flags, int ClientId)
 	{
