@@ -136,6 +136,7 @@ public:
 	bool AltIsPressed() const override { return KeyState(KEY_LALT) || KeyState(KEY_RALT); }
 	bool KeyIsPressed(int Key) const override { return KeyState(Key); }
 	bool KeyPress(int Key, bool CheckCounter) const override { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
+	int FindKeyByName(const char *pKeyName) const override;
 
 	size_t NumJoysticks() const override { return m_vJoysticks.size(); }
 	CJoystick *GetJoystick(size_t Index) override { return &m_vJoysticks[Index]; }
