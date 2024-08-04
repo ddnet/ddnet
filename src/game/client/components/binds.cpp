@@ -196,21 +196,18 @@ const char *CBinds::Get(int KeyId, int ModifierCombination)
 
 void CBinds::GetKey(const char *pBindStr, char *pBuf, size_t BufSize)
 {
-	pBuf[0] = 0;
-	for(int Mod = 0; Mod < MODIFIER_COMBINATION_COUNT; Mod++)
+	pBuf[0] = '\0';
+	for(int Modifier = MODIFIER_NONE; Modifier < MODIFIER_COMBINATION_COUNT; Modifier++)
 	{
-		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+		for(int KeyId = KEY_FIRST; KeyId < KEY_LAST; KeyId++)
 		{
-			const char *pBind = Get(KeyId, Mod);
+			const char *pBind = Get(KeyId, Modifier);
 			if(!pBind[0])
 				continue;
 
 			if(str_comp(pBind, pBindStr) == 0)
 			{
-				if(Mod)
-					str_format(pBuf, BufSize, "%s+%s", GetModifierName(Mod), Input()->KeyName(KeyId));
-				else
-					str_copy(pBuf, Input()->KeyName(KeyId), BufSize);
+				str_format(pBuf, BufSize, "%s%s", GetKeyBindModifiersName(Modifier), Input()->KeyName(KeyId));
 				return;
 			}
 		}
