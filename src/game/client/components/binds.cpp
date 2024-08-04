@@ -376,26 +376,6 @@ void CBinds::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)
 	pBinds->UnbindAll();
 }
 
-int CBinds::GetKeyId(const char *pKeyName)
-{
-	// check for numeric
-	if(pKeyName[0] == '&')
-	{
-		int i = str_toint(pKeyName + 1);
-		if(i > 0 && i < KEY_LAST)
-			return i; // numeric
-	}
-
-	// search for key
-	for(int i = 0; i < KEY_LAST; i++)
-	{
-		if(str_comp_nocase(pKeyName, Input()->KeyName(i)) == 0)
-			return i;
-	}
-
-	return 0;
-}
-
 int CBinds::GetBindSlot(const char *pBindString, int *pModifierCombination)
 {
 	*pModifierCombination = MODIFIER_NONE;
@@ -420,7 +400,7 @@ int CBinds::GetBindSlot(const char *pBindString, int *pModifierCombination)
 		else
 			break;
 	}
-	return GetKeyId(*pModifierCombination == MODIFIER_NONE ? aMod : pKey + 1);
+	return Input()->FindKeyByName(*pModifierCombination == MODIFIER_NONE ? aMod : pKey + 1);
 }
 
 const char *CBinds::GetModifierName(int Modifier)

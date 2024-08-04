@@ -367,6 +367,26 @@ bool CInput::KeyState(int Key) const
 	return m_aInputState[Key];
 }
 
+int CInput::FindKeyByName(const char *pKeyName) const
+{
+	// check for numeric
+	if(pKeyName[0] == '&')
+	{
+		int Key = str_toint(pKeyName + 1);
+		if(Key > KEY_FIRST && Key < KEY_LAST)
+			return Key; // numeric
+	}
+
+	// search for key
+	for(int Key = KEY_FIRST; Key < KEY_LAST; Key++)
+	{
+		if(str_comp_nocase(pKeyName, KeyName(Key)) == 0)
+			return Key;
+	}
+
+	return KEY_UNKNOWN;
+}
+
 void CInput::UpdateMouseState()
 {
 	const int MouseState = SDL_GetMouseState(nullptr, nullptr);

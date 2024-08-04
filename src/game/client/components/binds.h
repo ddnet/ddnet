@@ -12,8 +12,6 @@ class IConfigManager;
 
 class CBinds : public CComponent
 {
-	int GetKeyId(const char *pKeyName);
-
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);
 	static void ConBinds(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnbind(IConsole::IResult *pResult, void *pUserData);
