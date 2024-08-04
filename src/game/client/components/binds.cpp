@@ -51,8 +51,8 @@ CBinds::~CBinds()
 
 void CBinds::Bind(int KeyId, const char *pStr, bool FreeOnly, int ModifierCombination)
 {
-	if(KeyId < 0 || KeyId >= KEY_LAST)
-		return;
+	dbg_assert(KeyId >= KEY_FIRST && KeyId < KEY_LAST, "KeyId invalid");
+	dbg_assert(ModifierCombination >= MODIFIER_NONE && ModifierCombination < MODIFIER_COMBINATION_COUNT, "ModifierCombination invalid");
 
 	if(FreeOnly && Get(KeyId, ModifierCombination)[0])
 		return;
@@ -189,9 +189,9 @@ void CBinds::UnbindAll()
 
 const char *CBinds::Get(int KeyId, int ModifierCombination)
 {
-	if(KeyId > 0 && KeyId < KEY_LAST && m_aapKeyBindings[ModifierCombination][KeyId])
-		return m_aapKeyBindings[ModifierCombination][KeyId];
-	return "";
+	dbg_assert(KeyId >= KEY_FIRST && KeyId < KEY_LAST, "KeyId invalid");
+	dbg_assert(ModifierCombination >= MODIFIER_NONE && ModifierCombination < MODIFIER_COMBINATION_COUNT, "ModifierCombination invalid");
+	return m_aapKeyBindings[ModifierCombination][KeyId] ? m_aapKeyBindings[ModifierCombination][KeyId] : "";
 }
 
 void CBinds::GetKey(const char *pBindStr, char *pBuf, size_t BufSize)
