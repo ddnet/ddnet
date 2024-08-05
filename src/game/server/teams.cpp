@@ -346,10 +346,13 @@ void CGameTeams::CheckTeamFinished(int Team)
 			{
 				ChangeTeamState(Team, TEAMSTATE_FINISHED);
 
+				int min = (int)Time / 60;
+				float sec = Time - (min * 60.0f);
+
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf),
 					"Your team would've finished in: %d minute(s) %5.2f second(s). Since you had practice mode enabled your rank doesn't count.",
-					(int)Time / 50 / 60, Time - ((int)Time / 60 * 60));
+					min, sec);
 				GameServer()->SendChatTeam(Team, aBuf);
 
 				for(unsigned int i = 0; i < PlayersCount; ++i)
