@@ -107,6 +107,9 @@ void CPrompt::OnRender(CUIRect _)
 		}
 		for(auto *pQuickAction : m_vQuickActions)
 		{
+			if(pQuickAction->Disabled())
+				continue;
+
 			if(m_PromptInput.IsEmpty() || FuzzyMatch(pQuickAction->Label(), m_PromptInput.GetString()))
 			{
 				bool Skip = false;
@@ -158,9 +161,9 @@ void CPrompt::OnRender(CUIRect _)
 		if(m_PromptSelectedIndex >= 0)
 		{
 			const CQuickAction *pBtn = m_vpFilteredPromptList[m_PromptSelectedIndex];
+			SetInactive();
 			pBtn->Call();
 			m_pLastAction = pBtn;
-			SetInactive();
 		}
 	}
 }

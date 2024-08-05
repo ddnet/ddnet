@@ -45,6 +45,14 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
 	"Load a new image to use in the map")
+REGISTER_QUICK_ACTION(
+	LayerPropAddImage,
+	"Layer: Add Image",
+	[&]() { LayerSelectImage(); },
+	[&]() -> bool { return !IsNonGameTileLayerSelected(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Pick mapres image for currently selected layer")
 
 #undef ALWAYS_FALSE
 #undef DEFAULT_BTN

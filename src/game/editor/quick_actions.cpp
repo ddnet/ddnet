@@ -1,3 +1,5 @@
+#include <game/mapitems.h>
+
 #include "editor.h"
 
 #include "editor_actions.h"
@@ -17,4 +19,37 @@ void CEditor::AddTileLayer()
 	SelectLayer(LayerIndex);
 	m_Map.m_vpGroups[m_SelectedGroup]->m_Collapse = false;
 	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+}
+
+bool CEditor::IsNonGameTileLayerSelected() const
+{
+	std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
+	if(!pLayer)
+		return false;
+	if(pLayer->m_Type != LAYERTYPE_TILES)
+		return false;
+	if(
+		pLayer == m_Map.m_pGameLayer ||
+		pLayer == m_Map.m_pFrontLayer ||
+		pLayer == m_Map.m_pSwitchLayer ||
+		pLayer == m_Map.m_pTeleLayer ||
+		pLayer == m_Map.m_pSpeedupLayer ||
+		pLayer == m_Map.m_pTuneLayer)
+		return false;
+
+	return true;
+}
+
+void CEditor::LayerSelectImage()
+{
+	if(!IsNonGameTileLayerSelected())
+		return;
+
+	std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
+	std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
+
+	static SLayerPopupContext s_LayerPopupContext = {};
+	s_LayerPopupContext.m_pEditor = this;
+	Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 120, 270, &s_LayerPopupContext, PopupLayer);
+	PopupSelectImageInvoke(pTiles->m_Image, Ui()->MouseX(), Ui()->MouseY());
 }
