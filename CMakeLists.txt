@@ -2261,6 +2261,8 @@ if(CLIENT)
     components/statboard.h
     components/tooltips.cpp
     components/tooltips.h
+    components/touch_controls.cpp
+    components/touch_controls.h
     components/voting.cpp
     components/voting.h
     gameclient.cpp

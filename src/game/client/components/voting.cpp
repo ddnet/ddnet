@@ -146,6 +146,12 @@ int CVoting::SecondsLeft() const
 	return (m_Closetime - time()) / time_freq();
 }
 
+bool CVoting::IsActive() const
+{
+	return IsVoting() && Client()->State() != IClient::STATE_DEMOPLAYBACK &&
+	       (g_Config.m_ClShowVotesAfterVoting || m_pClient->m_Scoreboard.Active() || !TakenChoice());
+}
+
 CVoting::CVoting()
 {
 	ClearOptions();
@@ -328,8 +334,9 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 
 void CVoting::Render()
 {
-	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.Active() && TakenChoice()) || !IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(!IsActive())
 		return;
+
 	const int Seconds = SecondsLeft();
 	if(Seconds < 0)
 	{

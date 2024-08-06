@@ -136,6 +136,12 @@ public:
 	 * @return vector of all touch finger states
 	 */
 	virtual const std::vector<CTouchFingerState> &TouchFingerStates() const = 0;
+	/**
+	 * Must be called after the touch finger states have been used during the client update to ensure that
+	 * touch deltas are only accumulated until the next update. If the touch states are only using during
+	 * rendering, i.e. for user interfaces, then this is called automatically by calling @link Clear @endlink.
+	 */
+	virtual void ClearTouchDeltas() = 0;
 
 	// clipboard
 	virtual const char *GetClipboardText() = 0;

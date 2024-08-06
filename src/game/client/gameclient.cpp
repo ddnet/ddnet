@@ -137,6 +137,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Chat,
 					      &m_Broadcast,
 					      &m_DebugHud,
+					      &m_TouchControls,
 					      &m_Scoreboard,
 					      &m_Statboard,
 					      &m_Motd,
@@ -152,10 +153,11 @@ void CGameClient::OnConsoleInit()
 						  &m_GameConsole,
 						  &m_Chat, // chat has higher prio, due to that you can quit it by pressing esc
 						  &m_Motd, // for pressing esc to remove it
-						  &m_Menus,
 						  &m_Spectator,
 						  &m_Emoticon,
+						  &m_Menus,
 						  &m_Controls,
+						  &m_TouchControls,
 						  &m_Binds});
 
 	// add basic console commands
@@ -379,6 +381,18 @@ void CGameClient::OnUpdate()
 			if(pComponent->OnCursorMove(x, y, CursorType))
 				break;
 		}
+	}
+
+	// handle touch events
+	std::vector<IInput::CTouchFingerState> vTouchFingerStates = Input()->TouchFingerStates();
+	bool TouchHandled = false;
+	for(auto &pComponent : m_vpInput)
+	{
+		TouchHandled |= pComponent->OnTouchState(vTouchFingerStates);
+	}
+	if(TouchHandled)
+	{
+		Input()->ClearTouchDeltas();
 	}
 
 	// handle key presses
