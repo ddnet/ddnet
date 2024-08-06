@@ -186,7 +186,7 @@ private:
 		ID_WEAPON,
 		NUM_IDS
 	};
-	int m_aUntranslatedID[EUntranslatedMap::NUM_IDS];
+	int m_aUntranslatedId[EUntranslatedMap::NUM_IDS];
 
 public:
 	CGameTeams *Teams() { return m_pTeams; }

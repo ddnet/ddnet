@@ -224,10 +224,8 @@ void CServer::CClient::Reset()
 	m_Flags = 0;
 	m_RedirectDropTime = 0;
 
-	for(int &id : m_aIdMap)
-		id = -1;
-	for(int &id : m_aReverseIdMap)
-		id = -1;
+	std::fill(std::begin(m_aIdMap), std::end(m_aIdMap), -1);
+	std::fill(std::begin(m_aReverseIdMap), std::end(m_aReverseIdMap), -1);
 }
 
 CServer::CServer()

@@ -49,7 +49,7 @@ public:
 	void FakeSnap();
 	void SendConnect(int FakeID, int ClientID);
 	void SendDisconnect(int FakeID);
-	int m_aStrongWeakID[LEGACY_MAX_CLIENTS];
+	int m_aStrongWeakId[LEGACY_MAX_CLIENTS];
 
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);

@@ -63,14 +63,14 @@ struct CScoreRandomMapResult;
 
 struct CSnapContext
 {
-	CSnapContext(int Version, bool Sixup = false, int ClientId = -1) :
+	CSnapContext(int Version, bool Sixup, int ClientId) :
 		m_ClientVersion(Version), m_Sixup(Sixup), m_ClientId(ClientId)
 	{
 	}
 
 	int GetClientVersion() const { return m_ClientVersion; }
 	bool IsSixup() const { return m_Sixup; }
-	int GetCid() const { return m_ClientId; }
+	int GetClientId() const { return m_ClientId; }
 
 private:
 	int m_ClientVersion;
@@ -201,7 +201,6 @@ public:
 	class CCharacter *GetPlayerChar(int ClientId);
 	bool EmulateBug(int Bug);
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
-	bool FlagsUsed() const;
 
 	// voting
 	void StartVote(const char *pDesc, const char *pCommand, const char *pReason, const char *pSixupDesc);

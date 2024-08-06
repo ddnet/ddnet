@@ -140,8 +140,8 @@ void CCharacter::Destroy()
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = 0;
 	m_Alive = false;
 	SetSolo(false);
-	for(int id : m_aUntranslatedID)
-		Server()->SnapFreeId(id);
+	for(int Id : m_aUntranslatedId)
+		Server()->SnapFreeId(Id);
 }
 
 void CCharacter::SetWeapon(int W)
@@ -1234,11 +1234,11 @@ void CCharacter::Snap(int SnappingClient)
 		bool Sixup = Server()->IsSixup(SnappingClient);
 		int Subtype = GetActiveWeapon();
 		int Type = Subtype == WEAPON_NINJA ? POWERUP_NINJA : POWERUP_WEAPON;
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_aUntranslatedID[EUntranslatedMap::ID_WEAPON], m_Pos, Type, Subtype, 0);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup, -1), m_aUntranslatedId[EUntranslatedMap::ID_WEAPON], m_Pos, Type, Subtype, 0);
 
 		if(m_Core.m_HookState != HOOK_IDLE && m_Core.m_HookState != HOOK_RETRACTED)
 		{
-			CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aUntranslatedID[EUntranslatedMap::ID_HOOK], sizeof(CNetObj_Laser)));
+			CNetObj_Laser *pLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, m_aUntranslatedId[EUntranslatedMap::ID_HOOK], sizeof(CNetObj_Laser)));
 			if(!pLaser)
 				return;
 
@@ -1308,7 +1308,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
 	CPlayer *pSnap = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;
-	pDDNetCharacter->m_StrongWeakId = pSnap ? pSnap->m_aStrongWeakID[Id] : m_StrongWeakId;
+	pDDNetCharacter->m_StrongWeakId = pSnap ? pSnap->m_aStrongWeakId[Id] : m_StrongWeakId;
 
 	// Display Information
 	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;
@@ -2430,8 +2430,8 @@ void CCharacter::DDRaceInit()
 		GameServer()->SendStartWarning(GetPlayer()->GetCid(), "Please join a team before you start");
 	}
 
-	for(int &id : m_aUntranslatedID)
-		id = Server()->SnapNewId();
+	for(int &Id : m_aUntranslatedId)
+		Id = Server()->SnapNewId();
 }
 
 void CCharacter::Rescue()
