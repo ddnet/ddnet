@@ -1,5 +1,3 @@
-// made by fokkonaut
-
 #include "entities/character.h"
 #include "gamecontroller.h"
 #include "gamemodes/DDRace.h"
@@ -21,43 +19,43 @@ void CPlayerMapping::Tick()
 {
 	UpdatePlayerMap(-1);
 
-	// Translate StrongWeakID to clamp it to 64 players
+	// Translate StrongWeakId to clamp it to 64 players
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(!GameServer()->m_apPlayers[i] || GameServer()->Server()->IsDebugDummy(i))
 			continue;
 
-		int StrongWeakID = 0;
+		int StrongWeakId = 0;
 		for(CCharacter *pChar = (CCharacter *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
 		{
-			int ID = pChar->GetPlayer()->GetCid();
-			if(Server()->Translate(ID, i))
+			int Id = pChar->GetPlayer()->GetCid();
+			if(Server()->Translate(Id, i))
 			{
-				GameServer()->m_apPlayers[i]->m_aStrongWeakID[ID] = StrongWeakID;
-				StrongWeakID++;
+				GameServer()->m_apPlayers[i]->m_aStrongWeakId[Id] = StrongWeakId;
+				StrongWeakId++;
 			}
 		}
 	}
 }
 
-void CPlayerMapping::PlayerMap::Init(int ClientID, CPlayerMapping *pPlayerMapping)
+void CPlayerMapping::CPlayerMap::Init(int ClientId, CPlayerMapping *pPlayerMapping)
 {
-	m_ClientID = ClientID;
+	m_ClientId = ClientId;
 	m_pPlayerMapping = pPlayerMapping;
-	m_pMap = m_pPlayerMapping->Server()->GetIdMap(m_ClientID);
-	m_pReverseMap = m_pPlayerMapping->Server()->GetReverseIdMap(m_ClientID);
+	m_pMap = m_pPlayerMapping->Server()->GetIdMap(m_ClientId);
+	m_pReverseMap = m_pPlayerMapping->Server()->GetReverseIdMap(m_ClientId);
 	m_UpdateTeamsState = false;
 	m_NumReserved = 0;
 	m_TotalOverhang = 0;
 	ResetSeeOthers();
 }
 
-CPlayer *CPlayerMapping::PlayerMap::GetPlayer() const
+CPlayer *CPlayerMapping::CPlayerMap::GetPlayer() const
 {
-	return m_pPlayerMapping->GameServer()->m_apPlayers[m_ClientID];
+	return m_pPlayerMapping->GameServer()->m_apPlayers[m_ClientId];
 }
 
-void CPlayerMapping::PlayerMap::InitPlayer(bool Rejoin)
+void CPlayerMapping::CPlayerMap::InitPlayer(bool Rejoin)
 {
 	for(bool &Reserved : m_aReserved)
 		Reserved = false;
@@ -77,35 +75,32 @@ void CPlayerMapping::PlayerMap::InitPlayer(bool Rejoin)
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		m_pReverseMap[i] = -1;
 
-	if(m_pPlayerMapping->Server()->IsDebugDummy(m_ClientID))
+	if(m_pPlayerMapping->Server()->IsDebugDummy(m_ClientId))
 		return; // just need to initialize the arrays
 
-	int NextFreeID = 0;
+	int NextFreeId = 0;
 	NETADDR OwnAddr, Addr;
 	mem_zero(&OwnAddr, sizeof(OwnAddr));
-	m_pPlayerMapping->Server()->GetClientAddr(m_ClientID, &OwnAddr);
-	while(true)
+	m_pPlayerMapping->Server()->GetClientAddr(m_ClientId, &OwnAddr);
+	for(bool Finished = false; !Finished;)
 	{
-		bool Break = true;
+		Finished = true;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(!m_pPlayerMapping->GameServer()->m_apPlayers[i] || m_pPlayerMapping->Server()->IsDebugDummy(i) || i == m_ClientID)
+			if(!m_pPlayerMapping->GameServer()->m_apPlayers[i] || m_pPlayerMapping->Server()->IsDebugDummy(i) || i == m_ClientId)
 				continue;
 
-			mem_zero(&Addr, sizeof(OwnAddr));
+			mem_zero(&Addr, sizeof(Addr));
 			m_pPlayerMapping->Server()->GetClientAddr(i, &Addr);
 			if(net_addr_comp_noport(&OwnAddr, &Addr) == 0)
 			{
-				if(m_pPlayerMapping->m_aMap[i].m_pReverseMap[i] == NextFreeID)
+				if(m_pPlayerMapping->m_aMap[i].m_pReverseMap[i] == NextFreeId)
 				{
-					NextFreeID++;
-					Break = false;
+					NextFreeId++;
+					Finished = false;
 				}
 			}
 		}
-
-		if(Break)
-			break;
 	}
 
 	m_NumReserved = 1;
@@ -113,10 +108,10 @@ void CPlayerMapping::PlayerMap::InitPlayer(bool Rejoin)
 
 	// see others in spec menu
 	m_NumReserved++;
-	m_pMap[m_pPlayerMapping->GetSeeOthersID(m_ClientID)] = -1;
+	m_pMap[m_pPlayerMapping->GetSeeOthersId(m_ClientId)] = -1;
 	m_TotalOverhang = 0;
 
-	if(m_pPlayerMapping->Server()->IsSixup(m_ClientID))
+	if(m_pPlayerMapping->Server()->IsSixup(m_ClientId))
 	{
 		protocol7::CNetMsg_Sv_ClientInfo FakeInfo;
 		FakeInfo.m_ClientId = LEGACY_MAX_CLIENTS - 1;
@@ -132,29 +127,20 @@ void CPlayerMapping::PlayerMap::InitPlayer(bool Rejoin)
 			FakeInfo.m_aUseCustomColors[p] = 0;
 			FakeInfo.m_aSkinPartColors[p] = 0;
 		}
-		m_pPlayerMapping->Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientID);
+		m_pPlayerMapping->Server()->SendPackMsg(&FakeInfo, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
 		// see others
 		UpdateSeeOthers();
 	}
-	else
-	{
-		if(m_pPlayerMapping->GameServer()->FlagsUsed())
-		{
-			m_NumReserved += 2;
-			m_pMap[SPEC_SELECT_FLAG_RED] = -1;
-			m_pMap[SPEC_SELECT_FLAG_BLUE] = -1;
-		}
-	}
 
-	if(NextFreeID < GetMapSize())
+	if(NextFreeId < GetMapSize())
 	{
-		m_aReserved[m_ClientID] = true;
-		Add(NextFreeID, m_ClientID);
+		m_aReserved[m_ClientId] = true;
+		Add(NextFreeId, m_ClientId);
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(!m_pPlayerMapping->GameServer()->m_apPlayers[i] || m_pPlayerMapping->Server()->IsDebugDummy(i) || i == m_ClientID)
+		if(!m_pPlayerMapping->GameServer()->m_apPlayers[i] || m_pPlayerMapping->Server()->IsDebugDummy(i) || i == m_ClientId)
 			continue;
 
 		m_pPlayerMapping->Server()->GetClientAddr(i, &Addr);
@@ -169,57 +155,57 @@ void CPlayerMapping::PlayerMap::InitPlayer(bool Rejoin)
 		}
 
 		// update other same ip players with our info
-		if(NextFreeID < m_pPlayerMapping->m_aMap[i].GetMapSize())
+		if(NextFreeId < m_pPlayerMapping->m_aMap[i].GetMapSize())
 		{
-			m_pPlayerMapping->m_aMap[i].m_aReserved[m_ClientID] = true;
-			m_pPlayerMapping->m_aMap[i].Add(NextFreeID, m_ClientID);
+			m_pPlayerMapping->m_aMap[i].m_aReserved[m_ClientId] = true;
+			m_pPlayerMapping->m_aMap[i].Add(NextFreeId, m_ClientId);
 		}
 	}
 }
 
-void CPlayerMapping::PlayerMap::Add(int MapID, int ClientID)
+void CPlayerMapping::CPlayerMap::Add(int MapId, int ClientId)
 {
-	if(MapID == -1 || ClientID == -1 || m_pReverseMap[ClientID] == MapID)
+	if(MapId == -1 || ClientId == -1 || m_pReverseMap[ClientId] == MapId)
 		return;
 
-	Remove(m_pReverseMap[ClientID]);
+	Remove(m_pReverseMap[ClientId]);
 
-	int OldClientID = Remove(MapID);
-	if((OldClientID == -1 && m_pPlayerMapping->GameServer()->GetDDRaceTeam(ClientID) > 0) || (OldClientID != -1 && m_pPlayerMapping->GameServer()->GetDDRaceTeam(OldClientID) != m_pPlayerMapping->GameServer()->GetDDRaceTeam(ClientID)))
+	int OldClientId = Remove(MapId);
+	if((OldClientId == -1 && m_pPlayerMapping->GameServer()->GetDDRaceTeam(ClientId) > 0) || (OldClientId != -1 && m_pPlayerMapping->GameServer()->GetDDRaceTeam(OldClientId) != m_pPlayerMapping->GameServer()->GetDDRaceTeam(ClientId)))
 		m_UpdateTeamsState = true;
 
-	if(m_aReserved[ClientID])
+	if(m_aReserved[ClientId])
 		m_ResortReserved = true;
 
-	m_pMap[MapID] = ClientID;
-	m_pReverseMap[ClientID] = MapID;
-	GetPlayer()->SendConnect(MapID, ClientID);
+	m_pMap[MapId] = ClientId;
+	m_pReverseMap[ClientId] = MapId;
+	GetPlayer()->SendConnect(MapId, ClientId);
 }
 
-int CPlayerMapping::PlayerMap::Remove(int MapID)
+int CPlayerMapping::CPlayerMap::Remove(int MapId)
 {
-	if(MapID == -1)
+	if(MapId == -1)
 		return -1;
 
-	int ClientID = m_pMap[MapID];
-	if(ClientID != -1)
+	int ClientId = m_pMap[MapId];
+	if(ClientId != -1)
 	{
-		if(m_pPlayerMapping->GameServer()->GetDDRaceTeam(ClientID) > 0)
+		if(m_pPlayerMapping->GameServer()->GetDDRaceTeam(ClientId) > 0)
 			m_UpdateTeamsState = true;
 
-		if(m_aReserved[ClientID])
+		if(m_aReserved[ClientId])
 			m_ResortReserved = true;
 
-		GetPlayer()->SendDisconnect(MapID);
-		m_pReverseMap[ClientID] = -1;
-		m_pMap[MapID] = -1;
+		GetPlayer()->SendDisconnect(MapId);
+		m_pReverseMap[ClientId] = -1;
+		m_pMap[MapId] = -1;
 	}
-	return ClientID;
+	return ClientId;
 }
 
-void CPlayerMapping::PlayerMap::Update()
+void CPlayerMapping::CPlayerMap::Update()
 {
-	if(!m_pPlayerMapping->Server()->ClientIngame(m_ClientID) || !GetPlayer() || m_pPlayerMapping->Server()->IsDebugDummy(m_ClientID))
+	if(!m_pPlayerMapping->Server()->ClientIngame(m_ClientId) || !GetPlayer() || m_pPlayerMapping->Server()->IsDebugDummy(m_ClientId))
 		return;
 
 	bool ResortReserved = m_ResortReserved;
@@ -227,7 +213,7 @@ void CPlayerMapping::PlayerMap::Update()
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(i == m_ClientID)
+		if(i == m_ClientId)
 			continue;
 
 		CPlayer *pPlayer = m_pPlayerMapping->GameServer()->m_apPlayers[i];
@@ -242,7 +228,7 @@ void CPlayerMapping::PlayerMap::Update()
 		if(m_aReserved[i])
 		{
 			NETADDR OwnAddr, Addr;
-			m_pPlayerMapping->Server()->GetClientAddr(m_ClientID, &OwnAddr);
+			m_pPlayerMapping->Server()->GetClientAddr(m_ClientId, &OwnAddr);
 			m_pPlayerMapping->Server()->GetClientAddr(i, &Addr);
 			if(net_addr_comp_noport(&OwnAddr, &Addr) != 0)
 			{
@@ -259,8 +245,8 @@ void CPlayerMapping::PlayerMap::Update()
 		{
 			for(int j = 0; j < GetMapSize() - m_NumSeeOthers; j++)
 			{
-				int CID = m_pMap[j];
-				if(CID == -1 || !m_aReserved[CID])
+				int CId = m_pMap[j];
+				if(CId == -1 || !m_aReserved[CId])
 				{
 					Insert = j;
 					m_aReserved[i] = true;
@@ -286,7 +272,7 @@ void CPlayerMapping::PlayerMap::Update()
 		{
 			Add(Insert, i);
 		}
-		else if(pPlayer->GetCharacter() && !pPlayer->GetCharacter()->NetworkClipped(m_ClientID))
+		else if(pPlayer->GetCharacter() && !pPlayer->GetCharacter()->NetworkClipped(m_ClientId))
 		{
 			InsertNextEmpty(i);
 		}
@@ -294,57 +280,53 @@ void CPlayerMapping::PlayerMap::Update()
 
 	if(m_UpdateTeamsState)
 	{
-		((CGameControllerDDRace *)m_pPlayerMapping->GameServer()->m_pController)->Teams().SendTeamsState(m_ClientID);
+		((CGameControllerDDRace *)m_pPlayerMapping->GameServer()->m_pController)->Teams().SendTeamsState(m_ClientId);
 		m_UpdateTeamsState = false;
 	}
 }
 
-void CPlayerMapping::PlayerMap::InsertNextEmpty(int ClientID)
+void CPlayerMapping::CPlayerMap::InsertNextEmpty(int ClientId)
 {
-	if(ClientID == -1 || m_pReverseMap[ClientID] != -1)
+	if(ClientId == -1 || m_pReverseMap[ClientId] != -1)
 		return;
 
 	for(int i = 0; i < GetMapSize() - m_NumSeeOthers; i++)
 	{
-		int CID = m_pMap[i];
-		if(CID != -1 && m_aReserved[CID])
+		int CId = m_pMap[i];
+		if(CId != -1 && m_aReserved[CId])
 			continue;
 
-		if(CID == -1 || (!m_pPlayerMapping->GameServer()->GetPlayerChar(CID) || m_pPlayerMapping->GameServer()->GetPlayerChar(CID)->NetworkClipped(m_ClientID)))
+		if(CId == -1 || (!m_pPlayerMapping->GameServer()->GetPlayerChar(CId) || m_pPlayerMapping->GameServer()->GetPlayerChar(CId)->NetworkClipped(m_ClientId)))
 		{
-			Add(i, ClientID);
+			Add(i, ClientId);
 			break;
 		}
 	}
 }
 
-int CPlayerMapping::GetSeeOthersID(int ClientID)
+int CPlayerMapping::GetSeeOthersId(int ClientId)
 {
-	// 0.7 or if no flags been used on the map
-	if(Server()->IsSixup(ClientID) || !GameServer()->FlagsUsed())
-		return LEGACY_MAX_CLIENTS - 2;
-	// 0.6 AND flags
-	return SPEC_SELECT_FLAG_BLUE - 1;
+	return LEGACY_MAX_CLIENTS - 2;
 }
 
-void CPlayerMapping::DoSeeOthers(int ClientID)
+void CPlayerMapping::DoSeeOthers(int ClientId)
 {
-	m_aMap[ClientID].DoSeeOthers();
+	m_aMap[ClientId].DoSeeOthers();
 }
 
-void CPlayerMapping::ResetSeeOthers(int ClientID)
+void CPlayerMapping::ResetSeeOthers(int ClientId)
 {
-	m_aMap[ClientID].ResetSeeOthers();
+	m_aMap[ClientId].ResetSeeOthers();
 }
 
-int CPlayerMapping::GetTotalOverhang(int ClientID)
+int CPlayerMapping::GetTotalOverhang(int ClientId)
 {
-	return m_aMap[ClientID].m_TotalOverhang;
+	return m_aMap[ClientId].m_TotalOverhang;
 }
 
-void CPlayerMapping::UpdatePlayerMap(int ClientID)
+void CPlayerMapping::UpdatePlayerMap(int ClientId)
 {
-	if(ClientID == -1)
+	if(ClientId == -1)
 	{
 		bool Update = Server()->Tick() % Config()->m_SvMapUpdateRate == 0;
 		for(auto &Map : m_aMap)
@@ -354,7 +336,7 @@ void CPlayerMapping::UpdatePlayerMap(int ClientID)
 			if(Overhang != Map.m_TotalOverhang)
 			{
 				Map.m_TotalOverhang = Overhang;
-				if(Map.m_TotalOverhang <= 0 && Map.m_SeeOthersState != PlayerMap::SSeeOthers::STATE_NONE)
+				if(Map.m_TotalOverhang <= 0 && Map.m_SeeOthersState != (int)CPlayerMap::ESeeOthers::STATE_NONE)
 					Map.ResetSeeOthers();
 
 				Map.UpdateSeeOthers();
@@ -369,44 +351,44 @@ void CPlayerMapping::UpdatePlayerMap(int ClientID)
 	}
 	else
 	{
-		m_aMap[ClientID].Update();
+		m_aMap[ClientId].Update();
 	}
 }
 
-int CPlayerMapping::GetSeeOthersInd(int ClientID, int MapID)
+int CPlayerMapping::GetSeeOthersInd(int ClientId, int MapId)
 {
-	if(m_aMap[ClientID].m_TotalOverhang && MapID == GetSeeOthersID(ClientID))
+	if(m_aMap[ClientId].m_TotalOverhang && MapId == GetSeeOthersId(ClientId))
 		return SEE_OTHERS_IND_BUTTON;
-	if(m_aMap[ClientID].m_NumSeeOthers && MapID >= m_aMap[ClientID].GetMapSize() - m_aMap[ClientID].m_NumSeeOthers)
+	if(m_aMap[ClientId].m_NumSeeOthers && MapId >= m_aMap[ClientId].GetMapSize() - m_aMap[ClientId].m_NumSeeOthers)
 		return SEE_OTHERS_IND_PLAYER;
 	return -1;
 }
 
-const char *CPlayerMapping::GetSeeOthersName(int ClientID)
+const char *CPlayerMapping::GetSeeOthersName(int ClientId)
 {
 	static char s_aName[MAX_NAME_LENGTH];
-	int State = m_aMap[ClientID].m_SeeOthersState;
+	CPlayerMap::ESeeOthers State = static_cast<CPlayerMap::ESeeOthers>(m_aMap[ClientId].m_SeeOthersState);
 	const char *pDot = "\xe2\x8b\x85";
 
-	if(State == PlayerMap::SSeeOthers::STATE_PAGE_FIRST)
+	if(State == CPlayerMap::ESeeOthers::STATE_PAGE_FIRST)
 	{
-		if(m_aMap[ClientID].m_TotalOverhang > PlayerMap::SSeeOthers::MAX_NUM_SEE_OTHERS)
+		if(m_aMap[ClientId].m_TotalOverhang > (int)CPlayerMap::ESeeOthers::MAX_NUM_SEE_OTHERS)
 			str_format(s_aName, sizeof(s_aName), "%s 1/2", pDot);
 		else
 			str_format(s_aName, sizeof(s_aName), "%s Close", pDot);
 	}
-	else if(State == PlayerMap::SSeeOthers::STATE_PAGE_SECOND)
+	else if(State == CPlayerMap::ESeeOthers::STATE_PAGE_SECOND)
 	{
 		str_format(s_aName, sizeof(s_aName), "%s 2/2 | Close", pDot);
 	}
 	else
 	{
-		str_format(s_aName, sizeof(s_aName), "%s %d others", pDot, m_aMap[ClientID].m_TotalOverhang);
+		str_format(s_aName, sizeof(s_aName), "%s %d others", pDot, m_aMap[ClientId].m_TotalOverhang);
 	}
 	return s_aName;
 }
 
-void CPlayerMapping::PlayerMap::CycleSeeOthers()
+void CPlayerMapping::CPlayerMap::CycleSeeOthers()
 {
 	if(m_TotalOverhang <= 0)
 		return;
@@ -415,18 +397,18 @@ void CPlayerMapping::PlayerMap::CycleSeeOthers()
 		if(m_pMap[i] != -1)
 			m_aWasSeeOthers[m_pMap[i]] = true;
 
-	int Size = minimum(m_TotalOverhang, (int)PlayerMap::SSeeOthers::MAX_NUM_SEE_OTHERS);
+	int Size = minimum(m_TotalOverhang, (int)CPlayerMap::ESeeOthers::MAX_NUM_SEE_OTHERS);
 	int Added = 0;
-	int MapID = GetMapSize() - 1;
+	int MapId = GetMapSize() - 1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(!m_pPlayerMapping->GameServer()->m_apPlayers[i] || m_aWasSeeOthers[i])
 			continue;
 
-		Add(MapID, i);
+		Add(MapId, i);
 		m_aWasSeeOthers[i] = true;
 		Added++;
-		MapID--;
+		MapId--;
 
 		if(Added >= Size)
 			break;
@@ -435,7 +417,7 @@ void CPlayerMapping::PlayerMap::CycleSeeOthers()
 	m_NumSeeOthers = Added;
 }
 
-void CPlayerMapping::PlayerMap::DoSeeOthers()
+void CPlayerMapping::CPlayerMap::DoSeeOthers()
 {
 	if(m_TotalOverhang <= 0)
 		return;
@@ -460,9 +442,9 @@ void CPlayerMapping::PlayerMap::DoSeeOthers()
 	Update();
 }
 
-void CPlayerMapping::PlayerMap::ResetSeeOthers()
+void CPlayerMapping::CPlayerMap::ResetSeeOthers()
 {
-	m_SeeOthersState = SSeeOthers::STATE_NONE;
+	m_SeeOthersState = (int)ESeeOthers::STATE_NONE;
 	m_NumSeeOthers = 0;
 	for(bool &WasSeeOthers : m_aWasSeeOthers)
 		WasSeeOthers = false;
@@ -470,22 +452,22 @@ void CPlayerMapping::PlayerMap::ResetSeeOthers()
 	UpdateSeeOthers();
 }
 
-void CPlayerMapping::PlayerMap::UpdateSeeOthers() const
+void CPlayerMapping::CPlayerMap::UpdateSeeOthers() const
 {
-	if(!m_pPlayerMapping->Server()->IsSixup(m_ClientID))
+	if(!m_pPlayerMapping->Server()->IsSixup(m_ClientId))
 		return;
 
-	int SeeOthersID = m_pPlayerMapping->GetSeeOthersID(m_ClientID);
+	int SeeOthersId = m_pPlayerMapping->GetSeeOthersId(m_ClientId);
 	protocol7::CNetMsg_Sv_ClientDrop ClientDropMsg;
-	ClientDropMsg.m_ClientId = SeeOthersID;
+	ClientDropMsg.m_ClientId = SeeOthersId;
 	ClientDropMsg.m_pReason = "";
 	ClientDropMsg.m_Silent = 1;
 
 	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
-	NewClientInfoMsg.m_ClientId = SeeOthersID;
+	NewClientInfoMsg.m_ClientId = SeeOthersId;
 	NewClientInfoMsg.m_Local = 0;
 	NewClientInfoMsg.m_Team = TEAM_BLUE;
-	NewClientInfoMsg.m_pName = m_pPlayerMapping->GetSeeOthersName(m_ClientID);
+	NewClientInfoMsg.m_pName = m_pPlayerMapping->GetSeeOthersName(m_ClientId);
 	NewClientInfoMsg.m_pClan = "";
 	NewClientInfoMsg.m_Country = -1;
 	NewClientInfoMsg.m_Silent = 1;
@@ -497,6 +479,6 @@ void CPlayerMapping::PlayerMap::UpdateSeeOthers() const
 		NewClientInfoMsg.m_aSkinPartColors[p] = Colored ? 5963600 : 0;
 	}
 
-	m_pPlayerMapping->Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientID);
-	m_pPlayerMapping->Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientID);
+	m_pPlayerMapping->Server()->SendPackMsg(&ClientDropMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
+	m_pPlayerMapping->Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
 }

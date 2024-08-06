@@ -463,7 +463,7 @@ bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, cons
 		pObj->m_Subtype = Subtype;
 		pObj->m_SwitchNumber = SwitchNumber;
 		pObj->m_Flags = 0;
-		if(!Server()->Translate(pObj->m_Owner, Context.GetCid()))
+		if(!Server()->Translate(pObj->m_Owner, Context.GetClientId()))
 			pObj->m_Owner = -1;
 	}
 	else
@@ -2567,7 +2567,7 @@ void CGameContext::OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMod
 
 	int SpectatorId = clamp(pMsg->m_SpectatorId, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
 
-	if(SpectatorId == m_PlayerMapping.GetSeeOthersID(ClientId))
+	if(SpectatorId == m_PlayerMapping.GetSeeOthersId(ClientId))
 	{
 		m_PlayerMapping.DoSeeOthers(ClientId);
 		return;
@@ -4856,9 +4856,4 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int Id)
 void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
 {
 	m_PlayerMapping.InitPlayerMap(ClientID, true);
-}
-
-bool CGameContext::FlagsUsed() const
-{
-	return (m_pController->GetGameFlags() & GAMEFLAG_FLAGS);
 }

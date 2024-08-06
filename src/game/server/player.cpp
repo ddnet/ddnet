@@ -456,13 +456,13 @@ void CPlayer::FakeSnap()
 		return;
 
 	// see others in spec
-	int SeeOthersID = GameServer()->m_PlayerMapping.GetSeeOthersID(m_ClientId);
+	int SeeOthersId = GameServer()->m_PlayerMapping.GetSeeOthersId(m_ClientId);
 
 	if(Server()->IsSixup(m_ClientId))
 	{
 		if(GameServer()->m_PlayerMapping.GetTotalOverhang(m_ClientId))
 		{
-			protocol7::CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<protocol7::CNetObj_PlayerInfo>(SeeOthersID);
+			protocol7::CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<protocol7::CNetObj_PlayerInfo>(SeeOthersId);
 			if(!pPlayerInfo)
 				return;
 
@@ -478,7 +478,7 @@ void CPlayer::FakeSnap()
 	// see others
 	if(GameServer()->m_PlayerMapping.GetTotalOverhang(m_ClientId))
 	{
-		CNetObj_ClientInfo *pClientInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(SeeOthersID);
+		CNetObj_ClientInfo *pClientInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(SeeOthersId);
 		if(!pClientInfo)
 			return;
 
@@ -488,12 +488,12 @@ void CPlayer::FakeSnap()
 		pClientInfo->m_UseCustomColor = 1;
 		pClientInfo->m_ColorBody = pClientInfo->m_ColorFeet = 6618880;
 
-		CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<CNetObj_PlayerInfo>(SeeOthersID);
+		CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<CNetObj_PlayerInfo>(SeeOthersId);
 		if(!pPlayerInfo)
 			return;
 
 		pPlayerInfo->m_Local = 0;
-		pPlayerInfo->m_ClientId = SeeOthersID;
+		pPlayerInfo->m_ClientId = SeeOthersId;
 		pPlayerInfo->m_Team = TEAM_BLUE;
 		pPlayerInfo->m_Score = -9999;
 		pPlayerInfo->m_Latency = 0;

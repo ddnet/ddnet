@@ -15,9 +15,9 @@ class CPlayerMapping
 	class CConfig *m_pConfig;
 	class IServer *m_pServer;
 
-	struct PlayerMap
+	struct CPlayerMap
 	{
-		enum SSeeOthers
+		enum class ESeeOthers
 		{
 			STATE_NONE = -1,
 			STATE_PAGE_FIRST,
@@ -26,11 +26,11 @@ class CPlayerMapping
 			MAX_NUM_SEE_OTHERS = 34,
 		};
 
-		void Init(int ClientID, CPlayerMapping *pPlayerMapping);
+		void Init(int ClientId, CPlayerMapping *pPlayerMapping);
 		void InitPlayer(bool Rejoin);
 		CPlayerMapping *m_pPlayerMapping;
 		CPlayer *GetPlayer() const;
-		int m_ClientID;
+		int m_ClientId;
 		int m_NumReserved;
 		bool m_UpdateTeamsState;
 		bool m_aReserved[MAX_CLIENTS];
@@ -38,9 +38,9 @@ class CPlayerMapping
 		int *m_pMap;
 		int *m_pReverseMap;
 		void Update();
-		void Add(int MapID, int ClientID);
-		int Remove(int MapID);
-		void InsertNextEmpty(int ClientID);
+		void Add(int MapId, int ClientId);
+		int Remove(int MapId);
+		void InsertNextEmpty(int ClientId);
 		int GetMapSize() { return LEGACY_MAX_CLIENTS - m_NumReserved; }
 		// See others
 		int m_SeeOthersState;
@@ -52,7 +52,7 @@ class CPlayerMapping
 		void UpdateSeeOthers() const;
 		void ResetSeeOthers();
 	} m_aMap[MAX_CLIENTS];
-	void UpdatePlayerMap(int ClientID);
+	void UpdatePlayerMap(int ClientId);
 
 public:
 	class CGameContext *GameServer() { return m_pGameServer; }
@@ -62,9 +62,9 @@ public:
 	void Init(CGameContext *pGameServer);
 	void Tick();
 
-	void InitPlayerMap(int ClientID, bool Rejoin = false) { m_aMap[ClientID].InitPlayer(Rejoin); }
-	void UpdateTeamsState(int ClientID) { m_aMap[ClientID].m_UpdateTeamsState = true; }
-	void ForceInsertPlayer(int Insert, int ClientID) { m_aMap[ClientID].InsertNextEmpty(Insert); }
+	void InitPlayerMap(int ClientId, bool Rejoin = false) { m_aMap[ClientId].InitPlayer(Rejoin); }
+	void UpdateTeamsState(int ClientId) { m_aMap[ClientId].m_UpdateTeamsState = true; }
+	void ForceInsertPlayer(int Insert, int ClientId) { m_aMap[ClientId].InsertNextEmpty(Insert); }
 
 	enum
 	{
@@ -75,12 +75,12 @@ public:
 		SPEC_SELECT_FLAG_RED = LEGACY_MAX_CLIENTS - protocol7::SPEC_FLAGRED,
 		SPEC_SELECT_FLAG_BLUE = LEGACY_MAX_CLIENTS - protocol7::SPEC_FLAGBLUE,
 	};
-	int GetSeeOthersID(int ClientID);
-	void DoSeeOthers(int ClientID);
-	void ResetSeeOthers(int ClientID);
-	int GetTotalOverhang(int ClientID);
-	int GetSeeOthersInd(int ClientID, int MapID);
-	const char *GetSeeOthersName(int ClientID);
+	int GetSeeOthersId(int ClientId);
+	void DoSeeOthers(int ClientId);
+	void ResetSeeOthers(int ClientId);
+	int GetTotalOverhang(int ClientId);
+	int GetSeeOthersInd(int ClientId, int MapId);
+	const char *GetSeeOthersName(int ClientId);
 };
 
 #endif
