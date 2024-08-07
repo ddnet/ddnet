@@ -160,24 +160,20 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, float CornerRa
 	}
 
 	CListboxItem Item = DoNextRow();
-	bool ItemClicked = false;
-
-	if(Item.m_Visible && Ui()->DoButtonLogic(pId, 0, &Item.m_Rect))
+	const int ItemClicked = Item.m_Visible ? Ui()->DoButtonLogic(pId, 0, &Item.m_Rect) : 0;
+	if(ItemClicked)
 	{
-		ItemClicked = true;
 		m_ListBoxNewSelected = ThisItemIndex;
 		m_ListBoxItemSelected = true;
 		m_Active = true;
 	}
-	else
-		ItemClicked = false;
 
 	// process input, regard selected index
 	if(m_ListBoxNewSelected == ThisItemIndex)
 	{
 		if(m_Active)
 		{
-			if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || (ItemClicked && Ui()->DoDoubleClickLogic(pId)))
+			if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || (ItemClicked == 1 && Ui()->DoDoubleClickLogic(pId)))
 			{
 				m_ListBoxItemActivated = true;
 				Ui()->SetActiveItem(nullptr);
