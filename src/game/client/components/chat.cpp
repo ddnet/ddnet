@@ -944,17 +944,11 @@ void CChat::OnPrepareLines(float y)
 		TextRender()->DeleteTextContainer(Line.m_TextContainerIndex);
 		Graphics()->DeleteQuadContainer(Line.m_QuadContainerIndex);
 
-		char aName[64 + 12] = "";
-
+		char aClientId[16] = "";
 		if(g_Config.m_ClShowIds && Line.m_ClientId >= 0 && Line.m_aName[0] != '\0')
 		{
-			if(Line.m_ClientId < 10)
-				str_format(aName, sizeof(aName), " %d: ", Line.m_ClientId);
-			else
-				str_format(aName, sizeof(aName), "%d: ", Line.m_ClientId);
+			GameClient()->FormatClientId(Line.m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
 		}
-
-		str_append(aName, Line.m_aName);
 
 		char aCount[12];
 		if(Line.m_ClientId < 0)
@@ -996,7 +990,8 @@ void CChat::OnPrepareLines(float y)
 				}
 			}
 
-			TextRender()->TextEx(&Cursor, aName);
+			TextRender()->TextEx(&Cursor, aClientId);
+			TextRender()->TextEx(&Cursor, Line.m_aName);
 			if(Line.m_TimesRepeated > 0)
 				TextRender()->TextEx(&Cursor, aCount);
 
@@ -1066,7 +1061,8 @@ void CChat::OnPrepareLines(float y)
 			NameColor = ColorRGBA(0.8f, 0.8f, 0.8f, 1.f);
 
 		TextRender()->TextColor(NameColor);
-		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, aName);
+		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, aClientId);
+		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, Line.m_aName);
 
 		if(Line.m_TimesRepeated > 0)
 		{
