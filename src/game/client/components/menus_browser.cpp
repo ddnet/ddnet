@@ -576,9 +576,9 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 
 	// buttons
 	{
-		CUIRect ButtonRefresh, ButtonConnect;
+		CUIRect ButtonRefresh, ButtonConnect, Button;
 		ConnectButtons.VSplitMid(&ButtonRefresh, &ButtonConnect, 5.0f);
-
+		
 		// refresh button
 		{
 			char aLabelBuf[32] = {0};
