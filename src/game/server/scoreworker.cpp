@@ -850,7 +850,7 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 		return true;
 	}
 
-	if(!End && !pSqlServer->IsNull(2))
+	if(!End)
 	{
 		int Rank = pSqlServer->GetInt(1);
 		float Time = pSqlServer->GetFloat(2);
