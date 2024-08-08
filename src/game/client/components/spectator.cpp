@@ -477,7 +477,16 @@ void CSpectator::OnRender()
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, PlayerSelected ? 1.0f : 0.5f);
 			TeeAlpha = 1.0f;
 		}
-		TextRender()->Text(Width / 2.0f + x + 50.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_aName, 220.0f);
+		CTextCursor NameCursor;
+		TextRender()->SetCursor(&NameCursor, Width / 2.0f + x + 50.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
+		NameCursor.m_LineWidth = 180.0f;
+		if(g_Config.m_ClShowIds)
+		{
+			char aClientId[16];
+			GameClient()->FormatClientId(m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
+			TextRender()->TextEx(&NameCursor, aClientId);
+		}
+		TextRender()->TextEx(&NameCursor, m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_aName);
 
 		if(GameClient()->m_MultiViewActivated)
 		{

@@ -111,6 +111,13 @@ public:
 	const CNetObj_EntityEx *m_pDataEx;
 };
 
+enum class EClientIdFormat
+{
+	NO_INDENT,
+	INDENT_AUTO,
+	INDENT_FORCE, // for rendering settings preview
+};
+
 class CGameClient : public IGameClient
 {
 public:
@@ -315,6 +322,7 @@ public:
 		int m_LocalClientId;
 		int m_NumPlayers;
 		int m_aTeamSize[2];
+		int m_HighestClientId;
 
 		// spectate data
 		struct CSpectateInfo
@@ -575,6 +583,7 @@ public:
 	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientId >= 0 && m_PredictedDummyId >= 0 && !m_aClients[m_PredictedDummyId].m_Paused; }
 	const CTuningParams *GetTuning(int i) { return &m_aTuningList[i]; }
 	ColorRGBA GetDDTeamColor(int DDTeam, float Lightness = 0.5f) const;
+	void FormatClientId(int ClientId, char (&aClientId)[16], EClientIdFormat Format) const;
 
 	CGameWorld m_GameWorld;
 	CGameWorld m_PredictedWorld;
