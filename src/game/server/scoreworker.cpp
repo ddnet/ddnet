@@ -786,17 +786,25 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	// check sort method
 	char aBuf[600];
 	str_format(aBuf, sizeof(aBuf),
-		"SELECT Ranking, Time, PercentRank "
-		"FROM ("
-		"  SELECT RANK() OVER w AS Ranking, PERCENT_RANK() OVER w as PercentRank, MIN(Time) AS Time, Name "
+		"SELECT COUNT(DISTINCT Name) + 1 AS Ranking, (SELECT MIN(Time) "
 		"  FROM %s_race "
 		"  WHERE Map = ? "
 		"  AND Server LIKE ? "
+		"  AND Name = ? "
 		"  GROUP BY Name "
-		"  WINDOW w AS (ORDER BY MIN(Time))"
-		") as a "
-		"WHERE Name = ?",
-		pSqlServer->GetPrefix());
+		"  LIMIT 1) as minTime "
+		"FROM %s_race "
+		"WHERE Map = ? "
+		"AND Server LIKE ? "
+		"AND Time < (SELECT MIN(Time) "
+		"  FROM %s_race "
+		"  WHERE Map = ? "
+		"  AND Server LIKE ? "
+		"  AND Name = ? "
+		"  GROUP BY Name "
+		"  LIMIT 1 "
+		") ",
+		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
 
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
@@ -805,6 +813,11 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	pSqlServer->BindString(1, pData->m_aMap);
 	pSqlServer->BindString(2, aServerLike);
 	pSqlServer->BindString(3, pData->m_aName);
+	pSqlServer->BindString(4, pData->m_aMap);
+	pSqlServer->BindString(5, aServerLike);
+	pSqlServer->BindString(6, pData->m_aMap);
+	pSqlServer->BindString(7, aServerLike);
+	pSqlServer->BindString(8, pData->m_aName);
 
 	bool End;
 	if(pSqlServer->Step(&End, pError, ErrorSize))
@@ -841,13 +854,11 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 	{
 		int Rank = pSqlServer->GetInt(1);
 		float Time = pSqlServer->GetFloat(2);
-		// CEIL and FLOOR are not supported in SQLite
-		int BetterThanPercent = std::floor(100.0f - 100.0f * pSqlServer->GetFloat(3));
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 		if(g_Config.m_SvHideScore)
 		{
 			str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-				"Your time: %s, better than %d%%", aBuf, BetterThanPercent);
+				"Your time: %s", aBuf);
 		}
 		else
 		{
@@ -856,14 +867,14 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 			if(str_comp_nocase(pData->m_aRequestingPlayer, pData->m_aName) == 0)
 			{
 				str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-					"%s - %s - better than %d%%",
-					pData->m_aName, aBuf, BetterThanPercent);
+					"%s - %s",
+					pData->m_aName, aBuf);
 			}
 			else
 			{
 				str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
-					"%s - %s - better than %d%% - requested by %s",
-					pData->m_aName, aBuf, BetterThanPercent, pData->m_aRequestingPlayer);
+					"%s - %s - requested by %s",
+					pData->m_aName, aBuf, pData->m_aRequestingPlayer);
 			}
 
 			if(g_Config.m_SvRegionalRankings)

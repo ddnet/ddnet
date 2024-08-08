@@ -167,14 +167,14 @@ TEST_P(SingleScore, RankRegional)
 {
 	g_Config.m_SvRegionalRankings = true;
 	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - GER unranked"}, true);
+	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - requested by brainless tee", "Global rank 1 - GER rank 1"}, true);
 }
 
 TEST_P(SingleScore, Rank)
 {
 	g_Config.m_SvRegionalRankings = false;
 	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1"}, true);
+	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - requested by brainless tee", "Global rank 1"}, true);
 }
 
 TEST_P(SingleScore, TopServerRegional)
@@ -205,7 +205,7 @@ TEST_P(SingleScore, RankServerRegional)
 	g_Config.m_SvRegionalRankings = true;
 	str_copy(m_PlayerRequest.m_aServer, "USA", sizeof(m_PlayerRequest.m_aServer));
 	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - USA rank 1"}, true);
+	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - requested by brainless tee", "Global rank 1 - USA rank 1"}, true);
 }
 
 TEST_P(SingleScore, RankServer)
@@ -213,7 +213,7 @@ TEST_P(SingleScore, RankServer)
 	g_Config.m_SvRegionalRankings = false;
 	str_copy(m_PlayerRequest.m_aServer, "USA", sizeof(m_PlayerRequest.m_aServer));
 	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
-	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1"}, true);
+	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - requested by brainless tee", "Global rank 1"}, true);
 }
 
 TEST_P(SingleScore, LoadPlayerData)
