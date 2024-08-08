@@ -150,6 +150,16 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 				Handled = true;
 			}
 		}
+		else
+		{
+			// Repeat active bind while key is held down
+			// Have to check for nullptr again because the previous execute can unbind itself
+			if(m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key])
+			{
+				Console()->ExecuteLineStroked(1, m_aapKeyBindings[ActiveBind->m_ModifierMask][ActiveBind->m_Key]);
+			}
+			Handled = true;
+		}
 	}
 
 	if(Event.m_Flags & IInput::FLAG_RELEASE)
