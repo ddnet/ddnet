@@ -577,20 +577,8 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 	// buttons
 	{
 		CUIRect ButtonRefresh, ButtonConnect, Button;
-		ConnectButtons.VSplitMid(&Button,&ConnectButtons,5.0f);
 		ConnectButtons.VSplitMid(&ButtonRefresh, &ButtonConnect, 5.0f);
-
-		// verify button
-		{
-			static CButtonContainer s_VerifyButton;
-			if(DoButton_Menu(&s_VerifyButton, Localize("Verify"), 0, &Button))
-			{
-				Verify();
-			}
-		}
-
 		
-
 		// refresh button
 		{
 			char aLabelBuf[32] = {0};
@@ -629,42 +617,6 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 		}
 	}
 }
-	static bool m_Verified = false;
-	static unsigned int m_VerifyTries = 0;
-void CMenus::Verify()
-{
-	if(m_Verified)
-			return;
-
-		auto StartTime = time_get_nanoseconds();
-		std::shared_ptr<CHttpRequest> pGet = HttpGet("https://ger10.ddnet.org/");
-		pGet->Timeout(CTimeout{10000, 0, 500, 10});
-		pGet->IpResolve(IPRESOLVE::V4);
-
-		Http()->Run(pGet);
-
-		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
-		if(pGet->State() != EHttpState::DONE)
-		{
-			dbg_msg("verify", "Failed to verify client");
-			m_VerifyTries++;
-			if(m_VerifyTries >= 3)
-			{
-				dbg_msg("verify", "Failed to verify client 3 times, disabling auto verify");
-				m_Verified = true;
-			}
-		}
-		else
-		{
-			unsigned char *cChar[128];
-			size_t cSize[128];
-			pGet->Result(cChar, cSize);
-			dbg_msg("verify", "Verified client! Took %d ms", (int)Time.count());
-			m_Verified = true;
-		}
-		return;
-	}
-
 
 void CMenus::Connect(const char *pAddress)
 {
