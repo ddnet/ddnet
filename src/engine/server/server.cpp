@@ -218,6 +218,9 @@ void CServer::CClient::Reset()
 	m_NextMapChunk = 0;
 	m_Flags = 0;
 	m_RedirectDropTime = 0;
+
+	std::fill(std::begin(m_aIdMap), std::end(m_aIdMap), -1);
+	std::fill(std::begin(m_aReverseIdMap), std::end(m_aReverseIdMap), -1);
 }
 
 CServer::CServer()
@@ -2323,7 +2326,7 @@ void CServer::UpdateRegisterServerInfo()
 
 	sha256_str(m_aCurrentMapSha256[MAP_TYPE_SIX], aMapSha256, sizeof(aMapSha256));
 
-	char aInfo[16384];
+	char aInfo[32768];
 	str_format(aInfo, sizeof(aInfo),
 		"{"
 		"\"max_clients\":%d,"
@@ -2635,6 +2638,9 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 			m_aClients[ClientId].m_DebugDummy = true;
 			GameServer()->OnClientConnected(ClientId, nullptr);
 			m_aClients[ClientId].m_State = CClient::STATE_INGAME;
+			m_aClients[ClientId].m_DDNetVersion = DDNET_VERSION_NUMBER;
+			m_aClients[ClientId].m_GotDDNetVersionPacket = true;
+			m_aClients[ClientId].m_DDNetVersionSettled = true;
 			str_format(m_aClients[ClientId].m_aName, sizeof(m_aClients[ClientId].m_aName), "Debug dummy %d", DummyIndex + 1);
 			GameServer()->OnClientEnter(ClientId);
 		}
@@ -3918,9 +3924,14 @@ const char *CServer::GetAnnouncementLine(const char *pFileName)
 	return m_vAnnouncements[m_AnnouncementLastLine].c_str();
 }
 
-int *CServer::GetIdMap(int ClientId)
+int *CServer::GetIdMap(int ClientID)
 {
-	return m_aIdMap + VANILLA_MAX_CLIENTS * ClientId;
+	return m_aClients[ClientID].m_aIdMap;
+}
+
+int *CServer::GetReverseIdMap(int ClientID)
+{
+	return m_aClients[ClientID].m_aReverseIdMap;
 }
 
 bool CServer::SetTimedOut(int ClientId, int OrigId)
@@ -3935,12 +3946,17 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 	{
 		LogoutClient(ClientId, "Timeout Protection");
 	}
-	DelClientCallback(OrigId, "Timeout Protection used", this);
+
 	m_aClients[ClientId].m_Authed = AUTHED_NO;
 	m_aClients[ClientId].m_Flags = m_aClients[OrigId].m_Flags;
 	m_aClients[ClientId].m_DDNetVersion = m_aClients[OrigId].m_DDNetVersion;
 	m_aClients[ClientId].m_GotDDNetVersionPacket = m_aClients[OrigId].m_GotDDNetVersionPacket;
 	m_aClients[ClientId].m_DDNetVersionSettled = m_aClients[OrigId].m_DDNetVersionSettled;
+
+	// important ot call OnSetTimedOut before we remove the original client but after we swapped already
+	GameServer()->OnSetTimedOut(ClientId, OrigId);
+
+	DelClientCallback(OrigId, "Timeout Protection used", this);
 	return true;
 }
 
