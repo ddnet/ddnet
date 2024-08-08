@@ -96,10 +96,6 @@ class CMenus : public CComponent
 
 	// menus_settings_assets.cpp
 public:
-	//verify
-	static bool m_Verified = false;
-	static unsigned int m_VerifyTries = 0;
-
 	void Verify();
 
 	struct SCustomItem
