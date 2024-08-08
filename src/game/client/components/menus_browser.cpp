@@ -576,7 +576,8 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 
 	// buttons
 	{
-		CUIRect ButtonRefresh, ButtonConnect;
+		CUIRect ButtonRefresh, ButtonConnect, Button;
+		ConnectButtons.VSplitMid(&Button,&ConnectButtons,5.0f);
 		ConnectButtons.VSplitMid(&ButtonRefresh, &ButtonConnect, 5.0f);
 
 		// verify button
@@ -587,6 +588,8 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 				Verify();
 			}
 		}
+
+		
 
 		// refresh button
 		{
@@ -626,6 +629,8 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 		}
 	}
 }
+	static bool m_Verified = false;
+	static unsigned int m_VerifyTries = 0;
 void CMenus::Verify()
 {
 	if(m_Verified)
