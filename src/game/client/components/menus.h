@@ -96,8 +96,6 @@ class CMenus : public CComponent
 
 	// menus_settings_assets.cpp
 public:
-	void Verify();
-
 	struct SCustomItem
 	{
 		IGraphics::CTextureHandle m_RenderTexture;
