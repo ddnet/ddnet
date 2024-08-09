@@ -456,15 +456,12 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	Disconnect();
 	dbg_assert(m_State == IClient::STATE_OFFLINE, "Disconnect must ensure that client is offline");
 
-	m_ConnectionId = RandomUuid();
 	if(pAddress != m_aConnectAddressStr)
 		str_copy(m_aConnectAddressStr, pAddress);
 
 	char aMsg[512];
 	str_format(aMsg, sizeof(aMsg), "connecting to '%s'", m_aConnectAddressStr);
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aMsg, gs_ClientNetworkPrintColor);
-
-	ServerInfoRequest();
 
 	int NumConnectAddrs = 0;
 	NETADDR aConnectAddrs[MAX_SERVER_ADDRESSES];
@@ -502,10 +499,17 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 
 	if(NumConnectAddrs == 0)
 	{
-		log_error("client", "could not find any connect address, defaulting to localhost for whatever reason...");
-		net_host_lookup("localhost", &aConnectAddrs[0], m_aNetClient[CONN_MAIN].NetType());
-		NumConnectAddrs = 1;
+		log_error("client", "could not find any connect address");
+		char aWarning[256];
+		str_format(aWarning, sizeof(aWarning), Localize("Could not resolve connect address '%s'. See local console for details."), m_aConnectAddressStr);
+		SWarning Warning(Localize("Connect address error"), aWarning);
+		Warning.m_AutoHide = false;
+		AddWarning(Warning);
+		return;
 	}
+
+	m_ConnectionId = RandomUuid();
+	ServerInfoRequest();
 
 	if(m_SendPassword)
 	{
