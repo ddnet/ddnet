@@ -2845,9 +2845,9 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 			Graphics()->SetColorVertex(aArray, 4);
 
 			// Rotation
+			CPoint aRotated[4];
 			if(Rot != 0)
 			{
-				static CPoint aRotated[4];
 				aRotated[0] = vQuads[j].m_aPoints[0];
 				aRotated[1] = vQuads[j].m_aPoints[1];
 				aRotated[2] = vQuads[j].m_aPoints[2];

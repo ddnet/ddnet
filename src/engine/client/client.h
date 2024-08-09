@@ -255,6 +255,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::shared_ptr<ILogger> m_pFileLogger = nullptr;
 	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
 
+	// For DummyName function
+	char m_aAutomaticDummyName[MAX_NAME_LENGTH];
+
 public:
 	IConfigManager *ConfigManager() { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
@@ -339,7 +342,7 @@ public:
 	void Quit() override;
 
 	const char *PlayerName() const override;
-	const char *DummyName() const override;
+	const char *DummyName() override;
 	const char *ErrorString() const override;
 
 	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);

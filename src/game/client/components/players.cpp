@@ -460,12 +460,11 @@ void CPlayers::RenderPlayer(
 	// do skidding
 	if(!InAir && WantOtherDir && length(Vel * 50) > 500.0f)
 	{
-		static int64_t SkidSoundTime = 0;
-		if(time() - SkidSoundTime > time_freq() / 10)
+		if(time() - m_SkidSoundTime > time_freq() / 10)
 		{
 			if(g_Config.m_SndGame)
 				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 0.25f, Position);
-			SkidSoundTime = time();
+			m_SkidSoundTime = time();
 		}
 
 		m_pClient->m_Effects.SkidTrail(

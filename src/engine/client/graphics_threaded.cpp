@@ -590,7 +590,7 @@ bool CGraphics_Threaded::LoadPng(CImageInfo &Image, const char *pFilename, int S
 				SWarning Warning;
 				str_format(Warning.m_aWarningMsg, sizeof(Warning.m_aWarningMsg), Localize("\"%s\" is not compatible with pnglite and cannot be loaded by old DDNet versions: "), pFilename);
 				static const int FLAGS[] = {PNGLITE_COLOR_TYPE, PNGLITE_BIT_DEPTH, PNGLITE_INTERLACE_TYPE, PNGLITE_COMPRESSION_TYPE, PNGLITE_FILTER_TYPE};
-				static const char *EXPLANATION[] = {"color type", "bit depth", "interlace type", "compression type", "filter type"};
+				static const char *const EXPLANATION[] = {"color type", "bit depth", "interlace type", "compression type", "filter type"};
 
 				bool First = true;
 				for(size_t i = 0; i < std::size(FLAGS); ++i)
