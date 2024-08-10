@@ -57,16 +57,17 @@ int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser
 		log_error("skins7", "Failed to load skin part '%s'", pName);
 		return 0;
 	}
-	if(Info.m_Format != CImageInfo::FORMAT_RGBA)
+	if(!pSelf->Graphics()->IsImageFormatRgba(aFilename, Info))
 	{
 		log_error("skins7", "Failed to load skin part '%s': must be RGBA format", pName);
+		Info.Free();
 		return 0;
 	}
 
 	Part.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info, 0, aFilename);
 	Part.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f);
 
-	int Step = Info.m_Format == CImageInfo::FORMAT_RGBA ? 4 : 3;
+	const int Step = 4;
 	unsigned char *pData = (unsigned char *)Info.m_pData;
 
 	// dig out blood color
@@ -78,7 +79,7 @@ int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser
 		int PartWidth = Info.m_Width / 2;
 		int PartHeight = Info.m_Height / 2;
 
-		int aColors[3] = {0};
+		int64_t aColors[3] = {0};
 		for(int y = PartY; y < PartY + PartHeight; y++)
 			for(int x = PartX; x < PartX + PartWidth; x++)
 				if(pData[y * Pitch + x * Step + 3] > 128)
@@ -105,7 +106,11 @@ int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser
 		Part.m_Flags |= SKINFLAG_SPECIAL;
 	if(DirType != IStorage::TYPE_SAVE)
 		Part.m_Flags |= SKINFLAG_STANDARD;
-	log_debug("skins7", "load skin part %s", Part.m_aName);
+
+	if(pSelf->Config()->m_Debug)
+	{
+		log_trace("skins7", "Loaded skin part '%s'", Part.m_aName);
+	}
 	pSelf->m_avSkinParts[pSelf->m_ScanningPart].emplace_back(Part);
 
 	return 0;
@@ -206,9 +211,10 @@ int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	Skin.m_Flags = SpecialSkin ? SKINFLAG_SPECIAL : 0;
 	if(DirType != IStorage::TYPE_SAVE)
 		Skin.m_Flags |= SKINFLAG_STANDARD;
+
 	if(pSelf->Config()->m_Debug)
 	{
-		log_debug("skins7", "load skin %s", Skin.m_aName);
+		log_trace("skins7", "Loaded skin '%s'", Skin.m_aName);
 	}
 	pSelf->m_vSkins.insert(std::lower_bound(pSelf->m_vSkins.begin(), pSelf->m_vSkins.end(), Skin), Skin);
 
@@ -322,45 +328,51 @@ void CSkins7::OnInit()
 	if(m_vSkins.empty())
 		m_vSkins.emplace_back(m_DummySkin);
 
-	{
-		// add xmas hat
-		const char *pFileName = SKINS_DIR "/xmas_hat.png";
-		CImageInfo Info;
-		if(!Graphics()->LoadPng(Info, pFileName, IStorage::TYPE_ALL) || Info.m_Width != 128 || Info.m_Height != 512)
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "failed to load xmas hat '%s'", pFileName);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "skins7", aBuf);
-		}
-		else
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "loaded xmas hat '%s'", pFileName);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "skins7", aBuf);
-			m_XmasHatTexture = Graphics()->LoadTextureRawMove(Info, 0, pFileName);
-		}
-	}
+	LoadXmasHat();
+	LoadBotDecoration();
 	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+}
 
+void CSkins7::LoadXmasHat()
+{
+	const char *pFilename = SKINS_DIR "/xmas_hat.png";
+	CImageInfo Info;
+	if(!Graphics()->LoadPng(Info, pFilename, IStorage::TYPE_ALL) ||
+		!Graphics()->IsImageFormatRgba(pFilename, Info) ||
+		!Graphics()->CheckImageDivisibility(pFilename, Info, 1, 4, false))
 	{
-		// add bot decoration
-		const char *pFileName = SKINS_DIR "/bot.png";
-		CImageInfo Info;
-		if(!Graphics()->LoadPng(Info, pFileName, IStorage::TYPE_ALL) || Info.m_Width != 384 || Info.m_Height != 160)
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "failed to load bot '%s'", pFileName);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "skins7", aBuf);
-		}
-		else
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "loaded bot '%s'", pFileName);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "skins7", aBuf);
-			m_BotTexture = Graphics()->LoadTextureRawMove(Info, 0, pFileName);
-		}
+		log_error("skins7", "Failed to xmas hat '%s'", pFilename);
+		Info.Free();
 	}
-	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+	else
+	{
+		if(Config()->m_Debug)
+		{
+			log_trace("skins7", "Loaded xmas hat '%s'", pFilename);
+		}
+		m_XmasHatTexture = Graphics()->LoadTextureRawMove(Info, 0, pFilename);
+	}
+}
+
+void CSkins7::LoadBotDecoration()
+{
+	const char *pFilename = SKINS_DIR "/bot.png";
+	CImageInfo Info;
+	if(!Graphics()->LoadPng(Info, pFilename, IStorage::TYPE_ALL) ||
+		!Graphics()->IsImageFormatRgba(pFilename, Info) ||
+		!Graphics()->CheckImageDivisibility(pFilename, Info, 12, 5, false))
+	{
+		log_error("skins7", "Failed to load bot '%s'", pFilename);
+		Info.Free();
+	}
+	else
+	{
+		if(Config()->m_Debug)
+		{
+			log_trace("skins7", "Loaded bot '%s'", pFilename);
+		}
+		m_BotTexture = Graphics()->LoadTextureRawMove(Info, 0, pFilename);
+	}
 }
 
 void CSkins7::AddSkin(const char *pSkinName, int Dummy)
