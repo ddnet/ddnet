@@ -45,9 +45,14 @@ enum
 	NETTYPE_IPV4 = 1,
 	NETTYPE_IPV6 = 2,
 	NETTYPE_WEBSOCKET_IPV4 = 8,
+	/**
+	 * 0.7 address. This is a flag in NETADDR to avoid introducing a parameter to every networking function
+	 * to differenciate between 0.6 and 0.7 connections.
+	 */
+	NETTYPE_TW7 = 16,
 
 	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4,
-	NETTYPE_MASK = NETTYPE_ALL | NETTYPE_LINK_BROADCAST,
+	NETTYPE_MASK = NETTYPE_ALL | NETTYPE_LINK_BROADCAST | NETTYPE_TW7,
 };
 
 /**
