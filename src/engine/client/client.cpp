@@ -876,7 +876,7 @@ const char *CClient::PlayerName() const
 	return "nameless tee";
 }
 
-const char *CClient::DummyName() const
+const char *CClient::DummyName()
 {
 	if(g_Config.m_ClDummyName[0])
 	{
@@ -893,9 +893,8 @@ const char *CClient::DummyName() const
 	}
 	if(pBase)
 	{
-		static char aDummyNameBuf[16];
-		str_format(aDummyNameBuf, sizeof(aDummyNameBuf), "[D] %s", pBase);
-		return aDummyNameBuf;
+		str_format(m_aAutomaticDummyName, sizeof(m_aAutomaticDummyName), "[D] %s", pBase);
+		return m_aAutomaticDummyName;
 	}
 	return "brainless tee";
 }

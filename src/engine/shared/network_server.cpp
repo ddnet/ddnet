@@ -122,8 +122,8 @@ int CNetServer::Update()
 
 SECURITY_TOKEN CNetServer::GetGlobalToken()
 {
-	static NETADDR NullAddr = {0};
-	return GetToken(NullAddr);
+	static const NETADDR NULL_ADDR = {0};
+	return GetToken(NULL_ADDR);
 }
 SECURITY_TOKEN CNetServer::GetToken(const NETADDR &Addr)
 {

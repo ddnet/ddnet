@@ -33,7 +33,7 @@ static void FormatServerbrowserPing(char (&aBuffer)[N], const CServerInfo *pInfo
 		str_format(aBuffer, sizeof(aBuffer), "%d", pInfo->m_Latency);
 		return;
 	}
-	static const char *LOCATION_NAMES[CServerInfo::NUM_LOCS] = {
+	static const char *const LOCATION_NAMES[CServerInfo::NUM_LOCS] = {
 		"", // LOC_UNKNOWN
 		Localizable("AFR"), // LOC_AFRICA
 		Localizable("ASI"), // LOC_ASIA

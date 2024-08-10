@@ -85,6 +85,7 @@ public:
 	vec2 m_RotationCenter;
 	std::array<vec2, NUM_POS> m_aPositions;
 	int m_CurrentPosition;
+	vec2 m_CurrentDirection = vec2(1.0f, 0.0f);
 	vec2 m_AnimationStartPos;
 	bool m_ChangedPosition;
 	float m_MoveTime;
