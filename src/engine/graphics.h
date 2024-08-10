@@ -250,11 +250,9 @@ protected:
 public:
 	enum
 	{
-		TEXLOAD_NOMIPMAPS = 1 << 1,
-		TEXLOAD_NO_COMPRESSION = 1 << 2,
-		TEXLOAD_TO_3D_TEXTURE = (1 << 3),
-		TEXLOAD_TO_2D_ARRAY_TEXTURE = (1 << 4),
-		TEXLOAD_NO_2D_TEXTURE = (1 << 5),
+		TEXLOAD_TO_3D_TEXTURE = 1 << 0,
+		TEXLOAD_TO_2D_ARRAY_TEXTURE = 1 << 1,
+		TEXLOAD_NO_2D_TEXTURE = 1 << 2,
 	};
 
 	class CTextureHandle
@@ -331,8 +329,8 @@ public:
 
 	virtual bool LoadPng(CImageInfo &Image, const char *pFilename, int StorageType) = 0;
 
-	virtual bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) = 0;
-	virtual bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) = 0;
+	virtual bool CheckImageDivisibility(const char *pContextName, CImageInfo &Image, int DivX, int DivY, bool AllowResize) = 0;
+	virtual bool IsImageFormatRgba(const char *pContextName, const CImageInfo &Image) = 0;
 
 	// destination and source buffer require to have the same width and height
 	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, const CImageInfo &SourceImage, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) = 0;
@@ -340,12 +338,10 @@ public:
 	// destination width must be equal to the subwidth of the source
 	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, const CImageInfo &SourceImage, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) = 0;
 
-	virtual int UnloadTexture(CTextureHandle *pIndex) = 0;
+	virtual void UnloadTexture(CTextureHandle *pIndex) = 0;
 	virtual CTextureHandle LoadTextureRaw(const CImageInfo &Image, int Flags, const char *pTexName = nullptr) = 0;
 	virtual CTextureHandle LoadTextureRawMove(CImageInfo &Image, int Flags, const char *pTexName = nullptr) = 0;
-	virtual int LoadTextureRawSub(CTextureHandle TextureId, int x, int y, const CImageInfo &Image) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) = 0;
-	virtual CTextureHandle NullTexture() const = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }
 

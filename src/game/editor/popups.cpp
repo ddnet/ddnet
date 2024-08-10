@@ -2508,7 +2508,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 
 		static int s_aIds[NUM_PROPS] = {0};
 
-		static int NewVal = 0;
+		int NewVal = 0;
 		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_vColors);
 		if(Prop == PROP_TELE)
 			pEditor->m_TeleNumber = (NewVal - 1 + 255) % 255 + 1;

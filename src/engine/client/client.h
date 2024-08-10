@@ -93,6 +93,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aConnectAddressStr[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE] = "";
 
 	CUuid m_ConnectionId = UUID_ZEROED;
+	bool m_Sixup;
 
 	bool m_HaveGlobalTcpAddr = false;
 	NETADDR m_GlobalTcpAddr = NETADDR_ZEROED;
@@ -255,6 +256,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::shared_ptr<ILogger> m_pFileLogger = nullptr;
 	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
 
+	// For DummyName function
+	char m_aAutomaticDummyName[MAX_NAME_LENGTH];
+
 public:
 	IConfigManager *ConfigManager() { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
@@ -294,7 +298,6 @@ public:
 
 	IGraphics::CTextureHandle GetDebugFont() const override { return m_DebugFont; }
 
-	void DirectInput(int *pInput, int Size);
 	void SendInput();
 
 	// TODO: OPT: do this a lot smarter!
@@ -332,6 +335,7 @@ public:
 	const void *SnapFindItem(int SnapId, int Type, int Id) const override;
 	int SnapNumItems(int SnapId) const override;
 	void SnapSetStaticsize(int ItemType, int Size) override;
+	void SnapSetStaticsize7(int ItemType, int Size) override;
 
 	void Render();
 	void DebugRender();
@@ -340,11 +344,13 @@ public:
 	void Quit() override;
 
 	const char *PlayerName() const override;
-	const char *DummyName() const override;
+	const char *DummyName() override;
 	const char *ErrorString() const override;
 
 	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);
 	const char *LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedSha256, int WantedCrc);
+
+	int TranslateSysMsg(int *pMsgId, bool System, CUnpacker *pUnpacker, CPacker *pPacker, CNetChunk *pPacket, bool *pIsExMsg);
 
 	void ProcessConnlessPacket(CNetChunk *pPacket);
 	void ProcessServerInfo(int Type, NETADDR *pFrom, const void *pData, int DataSize);
@@ -359,6 +365,8 @@ public:
 	void ResetDDNetInfoTask();
 	void FinishDDNetInfo();
 	void LoadDDNetInfo();
+
+	bool IsSixup() const override { return m_Sixup; }
 
 	const NETADDR &ServerAddress() const override { return *m_aNetClient[CONN_MAIN].ServerAddress(); }
 	int ConnectNetTypes() const override;

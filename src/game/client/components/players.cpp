@@ -6,6 +6,7 @@
 #include <engine/shared/config.h>
 #include <game/gamecore.h>
 #include <game/generated/client_data.h>
+#include <game/generated/client_data7.h>
 #include <game/generated/protocol.h>
 
 #include <game/mapitems.h>
@@ -26,6 +27,54 @@
 #include <base/math.h>
 
 void CPlayers::RenderHand(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
+{
+	if(pInfo->m_Sixup.m_aTextures[protocol7::SKINPART_BODY].IsValid())
+		RenderHand7(pInfo, CenterPos, Dir, AngleOffset, PostRotOffset, Alpha);
+	else
+		RenderHand6(pInfo, CenterPos, Dir, AngleOffset, PostRotOffset, Alpha);
+}
+
+void CPlayers::RenderHand7(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
+{
+	// in-game hand size is 15 when tee size is 64
+	float BaseSize = 15.0f * (pInfo->m_Size / 64.0f);
+
+	vec2 HandPos = CenterPos + Dir;
+	float Angle = angle(Dir);
+	if(Dir.x < 0)
+		Angle -= AngleOffset;
+	else
+		Angle += AngleOffset;
+
+	vec2 DirX = Dir;
+	vec2 DirY(-Dir.y, Dir.x);
+
+	if(Dir.x < 0)
+		DirY = -DirY;
+
+	HandPos += DirX * PostRotOffset.x;
+	HandPos += DirY * PostRotOffset.y;
+
+	ColorRGBA Color = pInfo->m_Sixup.m_aColors[protocol7::SKINPART_HANDS];
+	Color.a = Alpha;
+	IGraphics::CQuadItem QuadOutline(HandPos.x, HandPos.y, 2 * BaseSize, 2 * BaseSize);
+	IGraphics::CQuadItem QuadHand = QuadOutline;
+
+	Graphics()->TextureSet(pInfo->m_Sixup.m_aTextures[protocol7::SKINPART_HANDS]);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(Color);
+	Graphics()->QuadsSetRotation(Angle);
+
+	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND_OUTLINE, 0, 0, 0);
+	Graphics()->QuadsDraw(&QuadOutline, 1);
+	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND, 0, 0, 0);
+	Graphics()->QuadsDraw(&QuadHand, 1);
+
+	Graphics()->QuadsSetRotation(0);
+	Graphics()->QuadsEnd();
+}
+
+void CPlayers::RenderHand6(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
 {
 	vec2 HandPos = CenterPos + Dir;
 	float Angle = angle(Dir);
@@ -460,12 +509,11 @@ void CPlayers::RenderPlayer(
 	// do skidding
 	if(!InAir && WantOtherDir && length(Vel * 50) > 500.0f)
 	{
-		static int64_t SkidSoundTime = 0;
-		if(time() - SkidSoundTime > time_freq() / 10)
+		if(time() - m_SkidSoundTime > time_freq() / 10)
 		{
 			if(g_Config.m_SndGame)
 				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 0.25f, Position);
-			SkidSoundTime = time();
+			m_SkidSoundTime = time();
 		}
 
 		m_pClient->m_Effects.SkidTrail(
@@ -780,6 +828,8 @@ void CPlayers::OnRender()
 			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");
 			if(pSkin != nullptr)
 			{
+				aRenderInfo[i].m_Sixup.Reset();
+
 				aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 				aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 				aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;

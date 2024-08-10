@@ -812,9 +812,28 @@ int net_addr_comp_noport(const NETADDR *a, const NETADDR *b);
  * @param max_length Maximum size of the string.
  * @param add_port add port to string or not
  *
+ * @return true on success
+ *
  * @remark The string will always be zero terminated
  */
-void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port);
+bool net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port);
+
+/**
+ * Turns a network address into a url string.
+ * Examples:
+ *   tw-0.6+udp://127.0.0.1:8303
+ *   tw-0.7+udp://127.0.0.1
+ *
+ * @ingroup Network-General
+ *
+ * @param addr Address to turn into a string.
+ * @param string Buffer to fill with the url string.
+ * @param max_length Maximum size of the url string.
+ * @param add_port add port to url string or not
+ *
+ * @remark The string will always be zero terminated
+ */
+void net_addr_url_str(const NETADDR *addr, char *string, int max_length, int add_port);
 
 /**
  * Turns url string into a network address struct.
@@ -1612,7 +1631,7 @@ const char *str_find(const char *haystack, const char *needle);
  * @param delim String to search for
  * @param offset Number of characters into the haystack
  * @param start Will be set to the first delimiter on the left side of the offset (or haystack start)
- * @param end Will be set to the furst delimiter on the right side  of the offset (or haystack end)
+ * @param end Will be set to the first delimiter on the right side of the offset (or haystack end)
  *
  * @return `true` if both delimiters were found
  * @return 'false' if a delimiter is missing (it uses haystack start and end as fallback)
@@ -2375,6 +2394,22 @@ int str_utf8_encode(char *ptr, int chr);
 		- The string is treated as zero-terminated utf8 string.
 */
 int str_utf8_check(const char *str);
+
+/*
+	Function: str_utf8_copy_num
+		Copies a number of utf8 characters from one string to another.
+
+	Parameters:
+		dst - Pointer to a buffer that shall receive the string.
+		src - String to be copied.
+		dst_size - Size of the buffer dst.
+		num - maximum number of utf8 characters to be copied.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+		- Garantees that dst string will contain zero-termination.
+*/
+void str_utf8_copy_num(char *dst, const char *src, int dst_size, int num);
 
 /*
 	Function: str_utf8_stats

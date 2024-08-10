@@ -46,14 +46,14 @@ class CServerBan : public CNetBan
 	class CServer *m_pServer;
 
 	template<class T>
-	int BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason);
+	int BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason, bool DisplayTime);
 
 public:
 	class CServer *Server() const { return m_pServer; }
 
 	void InitServerBan(class IConsole *pConsole, class IStorage *pStorage, class CServer *pServer);
 
-	int BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason) override;
+	int BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool DisplayTime) override;
 	int BanRange(const CNetRange *pRange, int Seconds, const char *pReason) override;
 
 	static void ConBanExt(class IConsole::IResult *pResult, void *pUser);
@@ -279,7 +279,7 @@ public:
 	void SetClientFlags(int ClientId, int Flags) override;
 
 	void Kick(int ClientId, const char *pReason) override;
-	void Ban(int ClientId, int Seconds, const char *pReason) override;
+	void Ban(int ClientId, int Seconds, const char *pReason, bool DisplayTime) override;
 	void RedirectClient(int ClientId, int Port, bool Verbose = false) override;
 
 	void DemoRecorder_HandleAutoStart() override;

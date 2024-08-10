@@ -10,10 +10,20 @@
 
 class CScoreboard : public CComponent
 {
+	struct CScoreboardRenderState
+	{
+		float m_TeamStartX;
+		float m_TeamStartY;
+		int m_CurrentDDTeamSize;
+
+		CScoreboardRenderState() :
+			m_TeamStartX(0), m_TeamStartY(0), m_CurrentDDTeamSize(0) {}
+	};
+
 	void RenderTitle(CUIRect TitleBar, int Team, const char *pTitle);
 	void RenderGoals(CUIRect Goals);
 	void RenderSpectators(CUIRect Spectators);
-	void RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd);
+	void RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State);
 	void RenderRecordingNotification(float x);
 
 	static void ConKeyScoreboard(IConsole::IResult *pResult, void *pUserData);

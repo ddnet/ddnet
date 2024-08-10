@@ -172,7 +172,7 @@ void CGameTeams::OnCharacterStart(int ClientId)
 			}
 		}
 
-		if(g_Config.m_SvTeam < SV_TEAM_FORCED_SOLO && g_Config.m_SvMaxTeamSize != 2 && g_Config.m_SvPauseable)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && g_Config.m_SvMaxTeamSize != 2 && g_Config.m_SvPauseable)
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
@@ -346,10 +346,13 @@ void CGameTeams::CheckTeamFinished(int Team)
 			{
 				ChangeTeamState(Team, TEAMSTATE_FINISHED);
 
+				int min = (int)Time / 60;
+				float sec = Time - (min * 60.0f);
+
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf),
 					"Your team would've finished in: %d minute(s) %5.2f second(s). Since you had practice mode enabled your rank doesn't count.",
-					(int)Time / 50 / 60, Time - ((int)Time / 60 * 60));
+					min, sec);
 				GameServer()->SendChatTeam(Team, aBuf);
 
 				for(unsigned int i = 0; i < PlayersCount; ++i)

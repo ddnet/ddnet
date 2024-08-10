@@ -1009,11 +1009,8 @@ async fn main() {
             addr.unwrap().ip()
         };
         if let IpAddr::V6(v6) = addr {
-            if let Some(v4) = v6.to_ipv4() {
-                // TODO: switch to `to_ipv4_mapped` in the future.
-                if !v6.is_loopback() {
-                    addr = IpAddr::from(v4);
-                }
+            if let Some(v4) = v6.to_ipv4_mapped() {
+                addr = IpAddr::from(v4);
             }
         }
         Ok(addr)

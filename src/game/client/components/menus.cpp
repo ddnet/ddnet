@@ -503,7 +503,11 @@ int CMenus::DoKeyReader(const void *pId, const CUIRect *pRect, int Key, int Modi
 	else if(NewKey == 0)
 		aBuf[0] = '\0';
 	else
-		str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*pNewModifierCombination), Input()->KeyName(NewKey));
+	{
+		char aModifiers[128];
+		CBinds::GetKeyBindModifiersName(*pNewModifierCombination, aModifiers, sizeof(aModifiers));
+		str_format(aBuf, sizeof(aBuf), "%s%s", aModifiers, Input()->KeyName(NewKey));
+	}
 
 	const ColorRGBA Color = m_Binder.m_pKeyReaderId == pId && m_Binder.m_TakeKey ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.4f) : ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * Ui()->ButtonColorMul(pId));
 	pRect->Draw(Color, IGraphics::CORNER_ALL, 5.0f);
