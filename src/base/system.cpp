@@ -1548,24 +1548,21 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 {
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
-	NETADDR tmpbindaddr = bindaddr;
-	int broadcast = 1;
-	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV4;
 		netaddr_to_sockaddr_in(&tmpbindaddr, &addr);
-		socket = priv_net_create_socket(AF_INET, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket = priv_net_create_socket(AF_INET, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket >= 0)
 		{
 			sock->type |= NETTYPE_IPV4;
 			sock->ipv4sock = socket;
 
 			/* set broadcast */
+			int broadcast = 1;
 			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
 			{
 				dbg_msg("socket", "Setting BROADCAST on ipv4 failed: %d", net_errno());
@@ -1581,17 +1578,15 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			}
 		}
 	}
+
 #if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type & NETTYPE_WEBSOCKET_IPV4)
 	{
 		char addr_str[NETADDR_MAXSTRSIZE];
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_WEBSOCKET_IPV4;
-
 		net_addr_str(&tmpbindaddr, addr_str, sizeof(addr_str), 0);
-		socket = websocket_create(addr_str, tmpbindaddr.port);
-
+		int socket = websocket_create(addr_str, tmpbindaddr.port);
 		if(socket >= 0)
 		{
 			sock->type |= NETTYPE_WEBSOCKET_IPV4;
@@ -1603,17 +1598,17 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV6;
 		netaddr_to_sockaddr_in6(&tmpbindaddr, &addr);
-		socket = priv_net_create_socket(AF_INET6, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket = priv_net_create_socket(AF_INET6, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket >= 0)
 		{
 			sock->type |= NETTYPE_IPV6;
 			sock->ipv6sock = socket;
 
 			/* set broadcast */
+			int broadcast = 1;
 			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
 			{
 				dbg_msg("socket", "Setting BROADCAST on ipv6 failed: %d", net_errno());
@@ -1633,20 +1628,17 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-	if(socket < 0)
+	if(sock->type == NETTYPE_INVALID)
 	{
 		free(sock);
 		sock = nullptr;
 	}
 	else
 	{
-		/* set non-blocking */
 		net_set_non_blocking(sock);
-
 		net_buffer_init(&sock->buffer);
 	}
 
-	/* return */
 	return sock;
 }
 
@@ -1862,17 +1854,14 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 {
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
-	NETADDR tmpbindaddr = bindaddr;
-	int socket4 = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV4;
 		netaddr_to_sockaddr_in(&tmpbindaddr, &addr);
-		socket4 = priv_net_create_socket(AF_INET, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket4 = priv_net_create_socket(AF_INET, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket4 >= 0)
 		{
 			sock->type |= NETTYPE_IPV4;
@@ -1880,15 +1869,13 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		}
 	}
 
-	int socket6 = -1;
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV6;
 		netaddr_to_sockaddr_in6(&tmpbindaddr, &addr);
-		socket6 = priv_net_create_socket(AF_INET6, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket6 = priv_net_create_socket(AF_INET6, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket6 >= 0)
 		{
 			sock->type |= NETTYPE_IPV6;
@@ -1896,13 +1883,12 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		}
 	}
 
-	if(socket4 < 0 && socket6 < 0)
+	if(sock->type == NETTYPE_INVALID)
 	{
 		free(sock);
 		sock = nullptr;
 	}
 
-	/* return */
 	return sock;
 }
 
