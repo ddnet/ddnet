@@ -92,6 +92,9 @@ private:
 
 	static int SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
+
+	void LoadXmasHat();
+	void LoadBotDecoration();
 };
 
 #endif
