@@ -33,7 +33,7 @@ static void FormatServerbrowserPing(char (&aBuffer)[N], const CServerInfo *pInfo
 		str_format(aBuffer, sizeof(aBuffer), "%d", pInfo->m_Latency);
 		return;
 	}
-	static const char *LOCATION_NAMES[CServerInfo::NUM_LOCS] = {
+	static const char *const LOCATION_NAMES[CServerInfo::NUM_LOCS] = {
 		"", // LOC_UNKNOWN
 		Localizable("AFR"), // LOC_AFRICA
 		Localizable("ASI"), // LOC_ASIA
@@ -1471,7 +1471,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 					continue;
 
 				const bool Inside = Ui()->HotItem() == Friend.ListItemId() || Ui()->HotItem() == Friend.RemoveButtonId() || Ui()->HotItem() == Friend.CommunityTooltipId();
-				bool ButtonResult = Ui()->DoButtonLogic(Friend.ListItemId(), 0, &Rect);
+				int ButtonResult = Ui()->DoButtonLogic(Friend.ListItemId(), 0, &Rect);
 				if(Friend.ServerInfo())
 				{
 					GameClient()->m_Tooltips.DoToolTip(Friend.ListItemId(), &Rect, Localize("Click to select server. Double click to join your friend."));
@@ -1553,7 +1553,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 					if(Ui()->DoButtonLogic(Friend.RemoveButtonId(), 0, &RemoveButton))
 					{
 						m_pRemoveFriend = &Friend;
-						ButtonResult = false;
+						ButtonResult = 0;
 					}
 					GameClient()->m_Tooltips.DoToolTip(Friend.RemoveButtonId(), &RemoveButton, Friend.FriendState() == IFriends::FRIEND_PLAYER ? Localize("Click to remove this player from your friends list.") : Localize("Click to remove this clan from your friends list."));
 				}
@@ -1563,7 +1563,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				{
 					str_copy(g_Config.m_UiServerAddress, Friend.ServerInfo()->m_aAddress);
 					m_ServerBrowserShouldRevealSelection = true;
-					if(Ui()->DoDoubleClickLogic(Friend.ListItemId()))
+					if(ButtonResult == 1 && Ui()->DoDoubleClickLogic(Friend.ListItemId()))
 					{
 						Connect(g_Config.m_UiServerAddress);
 					}
@@ -2001,7 +2001,6 @@ void CMenus::LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info,
 		pData[i * Step + 2] = v;
 	}
 	CommunityIcon.m_GreyTexture = Graphics()->LoadTextureRawMove(Info, 0, pCommunityId);
-	Info.m_pData = nullptr;
 
 	auto ExistingIcon = std::find_if(m_vCommunityIcons.begin(), m_vCommunityIcons.end(), [pCommunityId](const SCommunityIcon &Element) {
 		return str_comp(Element.m_aCommunityId, pCommunityId) == 0;

@@ -8,12 +8,12 @@
 
 #include <game/client/component.h>
 
+#include <vector>
+
 class IConfigManager;
 
 class CBinds : public CComponent
 {
-	int GetKeyId(const char *pKeyName);
-
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);
 	static void ConBinds(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnbind(IConsole::IResult *pResult, void *pUserData);
@@ -21,6 +21,20 @@ class CBinds : public CComponent
 	class IConsole *GetConsole() const { return Console(); }
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
+
+	class CBindSlot
+	{
+	public:
+		int m_Key;
+		int m_ModifierMask;
+
+		CBindSlot(int Key, int ModifierMask) :
+			m_Key(Key),
+			m_ModifierMask(ModifierMask)
+		{
+		}
+	};
+	CBindSlot GetBindSlot(const char *pBindString) const;
 
 public:
 	CBinds();
@@ -55,11 +69,10 @@ public:
 	void UnbindAll();
 	const char *Get(int KeyId, int ModifierCombination);
 	void GetKey(const char *pBindStr, char *pBuf, size_t BufSize);
-	int GetBindSlot(const char *pBindString, int *pModifierCombination);
 	static int GetModifierMask(IInput *pInput);
 	static int GetModifierMaskOfKey(int Key);
 	static const char *GetModifierName(int Modifier);
-	static const char *GetKeyBindModifiersName(int ModifierCombination);
+	static void GetKeyBindModifiersName(int ModifierCombination, char *pBuf, size_t BufSize);
 
 	virtual void OnConsoleInit() override;
 	virtual bool OnInput(const IInput::CEvent &Event) override;
@@ -70,5 +83,6 @@ public:
 
 private:
 	char *m_aapKeyBindings[MODIFIER_COMBINATION_COUNT][KEY_LAST];
+	std::vector<CBindSlot> m_vActiveBinds;
 };
 #endif

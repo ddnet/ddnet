@@ -72,13 +72,18 @@ void CMenus::RenderGame(CUIRect MainView)
 	ButtonBar.VSplitRight(5.0f, &ButtonBar, 0);
 	ButtonBar.VSplitRight(170.0f, &ButtonBar, &Button);
 
-	bool DummyConnecting = Client()->DummyConnecting();
 	static CButtonContainer s_DummyButton;
 	if(!Client()->DummyAllowed())
 	{
 		DoButton_Menu(&s_DummyButton, Localize("Connect Dummy"), 1, &Button);
+		GameClient()->m_Tooltips.DoToolTip(&s_DummyButton, &Button, Localize("Dummy is not allowed on this server."));
 	}
-	else if(DummyConnecting)
+	else if(Client()->DummyConnectingDelayed())
+	{
+		DoButton_Menu(&s_DummyButton, Localize("Connect Dummy"), 1, &Button);
+		GameClient()->m_Tooltips.DoToolTip(&s_DummyButton, &Button, Localize("Please wait…"));
+	}
+	else if(Client()->DummyConnecting())
 	{
 		DoButton_Menu(&s_DummyButton, Localize("Connecting dummy"), 1, &Button);
 	}
@@ -131,7 +136,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 			ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
-			if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
+			if(!Client()->DummyConnecting() && DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
 			{
 				if(g_Config.m_ClDummy == 0 || Client()->DummyConnected())
 				{
@@ -148,7 +153,7 @@ void CMenus::RenderGame(CUIRect MainView)
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				static CButtonContainer s_JoinRedButton;
-				if(!DummyConnecting && DoButton_Menu(&s_JoinRedButton, Localize("Join red"), 0, &Button))
+				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinRedButton, Localize("Join red"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(TEAM_RED);
 					SetActive(false);
@@ -160,7 +165,7 @@ void CMenus::RenderGame(CUIRect MainView)
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
 				static CButtonContainer s_JoinBlueButton;
-				if(!DummyConnecting && DoButton_Menu(&s_JoinBlueButton, Localize("Join blue"), 0, &Button))
+				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinBlueButton, Localize("Join blue"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(TEAM_BLUE);
 					SetActive(false);
@@ -173,7 +178,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
-				if(!DummyConnecting && DoButton_Menu(&s_SpectateButton, Localize("Join game"), 0, &Button))
+				if(!Client()->DummyConnecting() && DoButton_Menu(&s_SpectateButton, Localize("Join game"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(0);
 					SetActive(false);

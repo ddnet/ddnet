@@ -329,7 +329,9 @@ void CHud::RenderScoreHud()
 			{
 				if(apPlayerInfo[t])
 				{
-					if(m_pClient->m_GameInfo.m_TimeScore)
+					if(Client()->IsSixup() && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE)
+						str_time((int64_t)absolute(apPlayerInfo[t]->m_Score) / 10, TIME_MINS_CENTISECS, aScore[t], sizeof(aScore[t]));
+					else if(m_pClient->m_GameInfo.m_TimeScore)
 					{
 						if(apPlayerInfo[t]->m_Score != -9999)
 							str_time((int64_t)absolute(apPlayerInfo[t]->m_Score) * 100, TIME_HOURS, aScore[t], sizeof(aScore[t]));
@@ -343,9 +345,8 @@ void CHud::RenderScoreHud()
 					aScore[t][0] = 0;
 			}
 
-			static int LocalClientId = -1;
-			bool RecreateScores = str_comp(aScore[0], m_aScoreInfo[0].m_aScoreText) != 0 || str_comp(aScore[1], m_aScoreInfo[1].m_aScoreText) != 0 || LocalClientId != m_pClient->m_Snap.m_LocalClientId;
-			LocalClientId = m_pClient->m_Snap.m_LocalClientId;
+			bool RecreateScores = str_comp(aScore[0], m_aScoreInfo[0].m_aScoreText) != 0 || str_comp(aScore[1], m_aScoreInfo[1].m_aScoreText) != 0 || m_LastLocalClientId != m_pClient->m_Snap.m_LocalClientId;
+			m_LastLocalClientId = m_pClient->m_Snap.m_LocalClientId;
 
 			bool RecreateRect = ForceScoreInfoInit;
 			for(int t = 0; t < 2; t++)

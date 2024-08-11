@@ -505,11 +505,6 @@ void CCommandProcessorFragment_OpenGL3_3::TextureUpdate(int Slot, int X, int Y, 
 	free(pTexData);
 }
 
-void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand)
-{
-	TextureUpdate(pCommand->m_Slot, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height, GL_RGBA, pCommand->m_pData);
-}
-
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand)
 {
 	int Slot = 0;

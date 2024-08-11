@@ -132,7 +132,16 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		if(pImg->m_External)
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
-			str_format(aPath, sizeof(aPath), "mapres/%s.png", pName);
+			bool Translated = false;
+			if(Client()->IsSixup())
+			{
+				Translated =
+					!str_comp(pName, "grass_doodads") ||
+					!str_comp(pName, "grass_main") ||
+					!str_comp(pName, "winter_main") ||
+					!str_comp(pName, "generic_unhookable");
+			}
+			str_format(aPath, sizeof(aPath), "mapres/%s%s.png", pName, Translated ? "_0.7" : "");
 			m_aTextures[i] = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, LoadFlag);
 		}
 		else

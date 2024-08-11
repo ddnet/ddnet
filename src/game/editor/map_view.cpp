@@ -8,9 +8,9 @@
 
 #include "editor.h"
 
-void CMapView::Init(CEditor *pEditor)
+void CMapView::OnInit(CEditor *pEditor)
 {
-	CEditorComponent::Init(pEditor);
+	CEditorComponent::OnInit(pEditor);
 	RegisterSubComponent(m_MapGrid);
 	RegisterSubComponent(m_ProofMode);
 	InitSubComponents();
@@ -19,7 +19,7 @@ void CMapView::Init(CEditor *pEditor)
 void CMapView::OnReset()
 {
 	m_Zoom = CSmoothValue(200.0f, 10.0f, 2000.0f);
-	m_Zoom.Init(Editor());
+	m_Zoom.OnInit(Editor());
 	m_WorldZoom = 1.0f;
 
 	SetWorldOffset({0, 0});

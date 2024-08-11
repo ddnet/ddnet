@@ -121,8 +121,6 @@ CheckOptions:
     value:           ms_
   - key:             readability-identifier-naming.StaticVariablePrefix
     value:           s_
-  - key:             readability-identifier-naming.StaticVariableIgnoredRegexp
-    value:           '^(NullAddr$|aDummyNameBuf$|aModifier$|EXPLANATION$|LocalClientId$|Dir$|LOCATION_NAMES$|EditorHotkeyWasPressed$|EditorHotKeyChecktime$|FrictionFraction$|LastTime$|SkidSoundTime$|NewVal$|aRotated$).*'
   - key:             readability-identifier-naming.ClassMethodCase
     value:           CamelCase
   - key:             readability-identifier-naming.ClassCase

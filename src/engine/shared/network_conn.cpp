@@ -210,6 +210,51 @@ int CNetConnection::Connect(const NETADDR *pAddr, int NumAddrs)
 	return 0;
 }
 
+void CNetConnection::SendControlWithToken7(int ControlMsg, SECURITY_TOKEN ResponseToken)
+{
+	m_LastSendTime = time_get();
+
+	CNetBase::SendControlMsgWithToken7(m_Socket, &m_PeerAddr, ResponseToken, 0, ControlMsg, m_Token, true);
+}
+
+int CNetConnection::Connect7(const NETADDR *pAddr, int NumAddrs)
+{
+	if(State() != NET_CONNSTATE_OFFLINE)
+		return -1;
+
+	// init connection
+	Reset();
+	mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
+	for(int i = 0; i < NumAddrs; i++)
+	{
+		m_aConnectAddrs[i] = pAddr[i];
+	}
+	m_LastRecvTime = time_get();
+	m_NumConnectAddrs = NumAddrs;
+	m_PeerAddr = *pAddr;
+	SetToken7(GenerateToken7(pAddr));
+	mem_zero(m_aErrorString, sizeof(m_aErrorString));
+	m_State = NET_CONNSTATE_TOKEN;
+	SendControlWithToken7(NET_CTRLMSG_TOKEN, NET_TOKEN_NONE);
+	m_Sixup = true;
+	return 0;
+}
+
+void CNetConnection::SetToken7(TOKEN Token)
+{
+	if(State() != NET_CONNSTATE_OFFLINE)
+		return;
+
+	m_Token = Token;
+}
+
+TOKEN CNetConnection::GenerateToken7(const NETADDR *pPeerAddr)
+{
+	TOKEN Token;
+	secure_random_fill(&Token, sizeof(Token));
+	return Token;
+}
+
 void CNetConnection::Disconnect(const char *pReason)
 {
 	if(State() == NET_CONNSTATE_OFFLINE)
@@ -256,7 +301,7 @@ void CNetConnection::DirectInit(const NETADDR &Addr, SECURITY_TOKEN SecurityToke
 	m_Sixup = Sixup;
 }
 
-int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_TOKEN SecurityToken)
+int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_TOKEN SecurityToken, SECURITY_TOKEN ResponseToken)
 {
 	// Disregard packets from the wrong address, unless we don't know our peer yet.
 	if(State() != NET_CONNSTATE_OFFLINE && State() != NET_CONNSTATE_CONNECT && *pAddr != m_PeerAddr)
@@ -346,63 +391,80 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 		}
 		else
 		{
-			if(State() == NET_CONNSTATE_OFFLINE)
+			if(CtrlMsg == NET_CTRLMSG_TOKEN)
 			{
-				if(CtrlMsg == NET_CTRLMSG_CONNECT)
+				if(State() == NET_CONNSTATE_TOKEN)
 				{
-					if(net_addr_comp_noport(&m_PeerAddr, pAddr) == 0 && time_get() - m_LastUpdateTime < time_freq() * 3)
-						return 0;
-
-					// send response and init connection
-					Reset();
-					m_State = NET_CONNSTATE_PENDING;
-					m_PeerAddr = *pAddr;
-					net_addr_str(pAddr, m_aPeerAddrStr, sizeof(m_aPeerAddrStr), true);
-					mem_zero(m_aErrorString, sizeof(m_aErrorString));
-					m_LastSendTime = Now;
 					m_LastRecvTime = Now;
-					m_LastUpdateTime = Now;
-					if(m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN && pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)) && !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
-					{
-						m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
-						if(g_Config.m_Debug)
-							dbg_msg("security", "generated token %d", m_SecurityToken);
-					}
-					else
-					{
-						if(g_Config.m_Debug)
-							dbg_msg("security", "token not supported by client (packet size %d)", pPacket->m_DataSize);
-						m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
-					}
-					SendControl(NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
-					if(g_Config.m_Debug)
-						dbg_msg("connection", "got connection, sending connect+accept");
+					m_State = NET_CONNSTATE_CONNECT;
+					m_SecurityToken = ResponseToken;
+					SendControlWithToken7(NET_CTRLMSG_CONNECT, m_SecurityToken);
+					dbg_msg("connection", "got token, replying, token=%x mytoken=%x", m_SecurityToken, m_Token);
 				}
+				else if(g_Config.m_Debug)
+					dbg_msg("connection", "got token, token=%x", ResponseToken);
 			}
-			else if(State() == NET_CONNSTATE_CONNECT)
+			else
 			{
-				// connection made
-				if(CtrlMsg == NET_CTRLMSG_CONNECTACCEPT)
+				if(State() == NET_CONNSTATE_OFFLINE)
 				{
-					m_PeerAddr = *pAddr;
-					net_addr_str(pAddr, m_aPeerAddrStr, sizeof(m_aPeerAddrStr), true);
-					if(m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN && pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)) && !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
+					if(CtrlMsg == NET_CTRLMSG_CONNECT)
 					{
-						m_SecurityToken = ToSecurityToken(&pPacket->m_aChunkData[1 + sizeof(SECURITY_TOKEN_MAGIC)]);
+						if(net_addr_comp_noport(&m_PeerAddr, pAddr) == 0 && time_get() - m_LastUpdateTime < time_freq() * 3)
+							return 0;
+
+						// send response and init connection
+						Reset();
+						m_State = NET_CONNSTATE_PENDING;
+						m_PeerAddr = *pAddr;
+						net_addr_str(pAddr, m_aPeerAddrStr, sizeof(m_aPeerAddrStr), true);
+						mem_zero(m_aErrorString, sizeof(m_aErrorString));
+						m_LastSendTime = Now;
+						m_LastRecvTime = Now;
+						m_LastUpdateTime = Now;
+						if(m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN && pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)) && !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
+						{
+							m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
+							if(g_Config.m_Debug)
+								dbg_msg("security", "generated token %d", m_SecurityToken);
+						}
+						else
+						{
+							if(g_Config.m_Debug)
+								dbg_msg("security", "token not supported by client (packet size %d)", pPacket->m_DataSize);
+							m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
+						}
+						SendControl(NET_CTRLMSG_CONNECTACCEPT, SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC));
 						if(g_Config.m_Debug)
-							dbg_msg("security", "got token %d", m_SecurityToken);
+							dbg_msg("connection", "got connection, sending connect+accept");
 					}
-					else
+				}
+				else if(State() == NET_CONNSTATE_CONNECT)
+				{
+					// connection made
+					if(CtrlMsg == NET_CTRLMSG_CONNECTACCEPT)
 					{
-						m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
+						m_PeerAddr = *pAddr;
+						net_addr_str(pAddr, m_aPeerAddrStr, sizeof(m_aPeerAddrStr), true);
+						if(m_SecurityToken == NET_SECURITY_TOKEN_UNKNOWN && pPacket->m_DataSize >= (int)(1 + sizeof(SECURITY_TOKEN_MAGIC) + sizeof(m_SecurityToken)) && !mem_comp(&pPacket->m_aChunkData[1], SECURITY_TOKEN_MAGIC, sizeof(SECURITY_TOKEN_MAGIC)))
+						{
+							m_SecurityToken = ToSecurityToken(&pPacket->m_aChunkData[1 + sizeof(SECURITY_TOKEN_MAGIC)]);
+							if(g_Config.m_Debug)
+								dbg_msg("security", "got token %d", m_SecurityToken);
+						}
+						else if(!IsSixup())
+						{
+							m_SecurityToken = NET_SECURITY_TOKEN_UNSUPPORTED;
+							if(g_Config.m_Debug)
+								dbg_msg("security", "token not supported by server");
+						}
+						if(!IsSixup())
+							SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
+						m_LastRecvTime = Now;
+						m_State = NET_CONNSTATE_ONLINE;
 						if(g_Config.m_Debug)
-							dbg_msg("security", "token not supported by server");
+							dbg_msg("connection", "got connect+accept, sending accept. connection online");
 					}
-					m_LastRecvTime = Now;
-					SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
-					m_State = NET_CONNSTATE_ONLINE;
-					if(g_Config.m_Debug)
-						dbg_msg("connection", "got connect+accept, sending accept. connection online");
 				}
 			}
 		}

@@ -84,9 +84,8 @@ private:
 #endif
 
 	// IME support
-	char m_aComposition[MAX_COMPOSITION_ARRAY_SIZE];
+	std::string m_CompositionString;
 	int m_CompositionCursor;
-	int m_CompositionLength;
 	std::vector<std::string> m_vCandidates;
 	int m_CandidateSelectedIndex;
 
@@ -113,6 +112,7 @@ private:
 	void HandleTouchDownEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTouchUpEvent(const SDL_TouchFingerEvent &Event);
 	void HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event);
+	void HandleTextEditingEvent(const char *pText, int Start, int Length);
 
 	char m_aDropFile[IO_MAX_PATH_LENGTH];
 
@@ -136,6 +136,7 @@ public:
 	bool AltIsPressed() const override { return KeyState(KEY_LALT) || KeyState(KEY_RALT); }
 	bool KeyIsPressed(int Key) const override { return KeyState(Key); }
 	bool KeyPress(int Key, bool CheckCounter) const override { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
+	int FindKeyByName(const char *pKeyName) const override;
 
 	size_t NumJoysticks() const override { return m_vJoysticks.size(); }
 	CJoystick *GetJoystick(size_t Index) override { return &m_vJoysticks[Index]; }
@@ -155,10 +156,10 @@ public:
 
 	void StartTextInput() override;
 	void StopTextInput() override;
-	const char *GetComposition() const override { return m_aComposition; }
-	bool HasComposition() const override { return m_CompositionLength != COMP_LENGTH_INACTIVE; }
+	const char *GetComposition() const override { return m_CompositionString.c_str(); }
+	bool HasComposition() const override { return !m_CompositionString.empty(); }
 	int GetCompositionCursor() const override { return m_CompositionCursor; }
-	int GetCompositionLength() const override { return m_CompositionLength; }
+	int GetCompositionLength() const override { return m_CompositionString.length(); }
 	const char *GetCandidate(int Index) const override { return m_vCandidates[Index].c_str(); }
 	int GetCandidateCount() const override { return m_vCandidates.size(); }
 	int GetCandidateSelectedIndex() const override { return m_CandidateSelectedIndex; }

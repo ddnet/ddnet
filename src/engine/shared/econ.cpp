@@ -130,7 +130,7 @@ void CEcon::Update()
 					if(!g_Config.m_EcBantime)
 						m_NetConsole.Drop(ClientId, "Too many authentication tries");
 					else
-						m_NetConsole.NetBan()->BanAddr(m_NetConsole.ClientAddr(ClientId), g_Config.m_EcBantime * 60, "Too many authentication tries");
+						m_NetConsole.NetBan()->BanAddr(m_NetConsole.ClientAddr(ClientId), g_Config.m_EcBantime * 60, "Too many authentication tries", true);
 				}
 			}
 		}

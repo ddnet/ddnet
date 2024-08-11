@@ -42,7 +42,7 @@ static int HashLocation(uint32_t Seed, uint32_t Run, uint32_t Rule, uint32_t X, 
 
 CAutoMapper::CAutoMapper(CEditor *pEditor)
 {
-	Init(pEditor);
+	OnInit(pEditor);
 }
 
 void CAutoMapper::Load(const char *pTileName)
