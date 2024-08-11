@@ -210,6 +210,12 @@ int CClient::SendMsgActive(CMsgPacker *pMsg, int Flags)
 
 void CClient::SendInfo(int Conn)
 {
+	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
+	MsgVer.AddRaw(&m_ConnectionId, sizeof(m_ConnectionId));
+	MsgVer.AddInt(GameClient()->DDNetVersion());
+	MsgVer.AddString(GameClient()->DDNetVersionStr());
+	SendMsg(Conn, &MsgVer, MSGFLAG_VITAL);
+
 	if(IsSixup())
 	{
 		CMsgPacker Msg(NETMSG_INFO, true);
@@ -219,11 +225,6 @@ void CClient::SendInfo(int Conn)
 		SendMsg(Conn, &Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
 		return;
 	}
-	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
-	MsgVer.AddRaw(&m_ConnectionId, sizeof(m_ConnectionId));
-	MsgVer.AddInt(GameClient()->DDNetVersion());
-	MsgVer.AddString(GameClient()->DDNetVersionStr());
-	SendMsg(Conn, &MsgVer, MSGFLAG_VITAL);
 
 	CMsgPacker Msg(NETMSG_INFO, true);
 	Msg.AddString(GameClient()->NetVersion());
