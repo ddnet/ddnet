@@ -21,14 +21,14 @@ int CClient::TranslateSysMsg(int *pMsgId, bool System, CUnpacker *pUnpacker, CPa
 		const char *pMapName = pUnpacker->GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
 		int MapCrc = pUnpacker->GetInt();
 		int Size = pUnpacker->GetInt();
-		m_TranslationContext.m_MapDownloadChunksPerRequest = pUnpacker->GetInt();
+		m_aTranslationContext[g_Config.m_ClDummy].m_MapDownloadChunksPerRequest = pUnpacker->GetInt();
 		int ChunkSize = pUnpacker->GetInt();
 		// void *pSha256 = pUnpacker->GetRaw(); // probably safe to ignore
 		pPacker->AddString(pMapName, 0);
 		pPacker->AddInt(MapCrc);
 		pPacker->AddInt(Size);
-		m_TranslationContext.m_MapdownloadTotalsize = Size;
-		m_TranslationContext.m_MapDownloadChunkSize = ChunkSize;
+		m_aTranslationContext[g_Config.m_ClDummy].m_MapdownloadTotalsize = Size;
+		m_aTranslationContext[g_Config.m_ClDummy].m_MapDownloadChunkSize = ChunkSize;
 		return 0;
 	}
 	else if(*pMsgId == protocol7::NETMSG_SERVERINFO)

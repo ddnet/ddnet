@@ -68,7 +68,7 @@ static CGameMsg7 gs_GameMsgList7[protocol7::NUM_GAMEMSGS] = {
 void CGameClient::DoTeamChangeMessage7(const char *pName, int ClientId, int Team, const char *pPrefix)
 {
 	char aBuf[128];
-	switch(GetStrTeam7(Team, m_pClient->m_TranslationContext.m_GameFlags & protocol7::GAMEFLAG_TEAMS))
+	switch(GetStrTeam7(Team, m_pClient->m_aTranslationContext[g_Config.m_ClDummy].m_GameFlags & protocol7::GAMEFLAG_TEAMS))
 	{
 	case STR_TEAM_GAME: str_format(aBuf, sizeof(aBuf), Localize("'%s' %sjoined the game"), pName, pPrefix); break;
 	case STR_TEAM_RED: str_format(aBuf, sizeof(aBuf), Localize("'%s' %sjoined the red team"), pName, pPrefix); break;
@@ -90,7 +90,7 @@ void CGameClient::ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId)
 		pClient->m_Sixup.m_aUseCustomColors[Part] = pMsg->m_aUseCustomColors[Part];
 		pClient->m_Sixup.m_aSkinPartColors[Part] = pMsg->m_aSkinPartColors[Part];
 	}
-	m_Skins7.ValidateSkinParts(apSkinPartsPtr, pClient->m_Sixup.m_aUseCustomColors, pClient->m_Sixup.m_aSkinPartColors, m_pClient->m_TranslationContext.m_GameFlags);
+	m_Skins7.ValidateSkinParts(apSkinPartsPtr, pClient->m_Sixup.m_aUseCustomColors, pClient->m_Sixup.m_aSkinPartColors, m_pClient->m_aTranslationContext[g_Config.m_ClDummy].m_GameFlags);
 
 	if(time_season() == SEASON_XMAS)
 	{
@@ -194,9 +194,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 
 		if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
-			m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
-			m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
-			m_aClients[pMsg7->m_ClientId].UpdateRenderInfo(IsTeamPlay());
+			m_pClient->m_aTranslationContext[Conn].m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
 
 			// if(pMsg7->m_ClientId == m_LocalClientId)
 			// {
@@ -207,6 +205,9 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 
 		if(Conn != g_Config.m_ClDummy)
 			return nullptr;
+
+		m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
+		m_aClients[pMsg7->m_ClientId].UpdateRenderInfo(IsTeamPlay());
 
 		if(pMsg7->m_Silent == 0)
 		{
@@ -232,17 +233,20 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		// 0.7 only message for ui enrichment like locked teams
 		protocol7::CNetMsg_Sv_ServerSettings *pMsg = (protocol7::CNetMsg_Sv_ServerSettings *)pRawMsg;
 
-		if(!m_pClient->m_TranslationContext.m_ServerSettings.m_TeamLock && pMsg->m_TeamLock)
-			m_Chat.AddLine(-1, 0, Localize("Teams were locked"));
-		else if(m_pClient->m_TranslationContext.m_ServerSettings.m_TeamLock && !pMsg->m_TeamLock)
-			m_Chat.AddLine(-1, 0, Localize("Teams were unlocked"));
+		if(Conn == g_Config.m_ClDummy)
+		{
+			if(!m_pClient->m_aTranslationContext[Conn].m_ServerSettings.m_TeamLock && pMsg->m_TeamLock)
+				m_Chat.AddLine(-1, 0, Localize("Teams were locked"));
+			else if(m_pClient->m_aTranslationContext[Conn].m_ServerSettings.m_TeamLock && !pMsg->m_TeamLock)
+				m_Chat.AddLine(-1, 0, Localize("Teams were unlocked"));
+		}
 
-		m_pClient->m_TranslationContext.m_ServerSettings.m_KickVote = pMsg->m_KickVote;
-		m_pClient->m_TranslationContext.m_ServerSettings.m_KickMin = pMsg->m_KickMin;
-		m_pClient->m_TranslationContext.m_ServerSettings.m_SpecVote = pMsg->m_SpecVote;
-		m_pClient->m_TranslationContext.m_ServerSettings.m_TeamLock = pMsg->m_TeamLock;
-		m_pClient->m_TranslationContext.m_ServerSettings.m_TeamBalance = pMsg->m_TeamBalance;
-		m_pClient->m_TranslationContext.m_ServerSettings.m_PlayerSlots = pMsg->m_PlayerSlots;
+		m_pClient->m_aTranslationContext[Conn].m_ServerSettings.m_KickVote = pMsg->m_KickVote;
+		m_pClient->m_aTranslationContext[Conn].m_ServerSettings.m_KickMin = pMsg->m_KickMin;
+		m_pClient->m_aTranslationContext[Conn].m_ServerSettings.m_SpecVote = pMsg->m_SpecVote;
+		m_pClient->m_aTranslationContext[Conn].m_ServerSettings.m_TeamLock = pMsg->m_TeamLock;
+		m_pClient->m_aTranslationContext[Conn].m_ServerSettings.m_TeamBalance = pMsg->m_TeamBalance;
+		m_pClient->m_aTranslationContext[Conn].m_ServerSettings.m_PlayerSlots = pMsg->m_PlayerSlots;
 		return nullptr; // There is no 0.6 equivalent
 	}
 	else if(*pMsgId == protocol7::NETMSGTYPE_SV_RACEFINISH)
@@ -291,9 +295,12 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 			return nullptr;
 		}
 
-		CTranslationContext::CClientData &Client = m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId];
+		CTranslationContext::CClientData &Client = m_pClient->m_aTranslationContext[Conn].m_aClients[pMsg7->m_ClientId];
 		Client.m_Active = true;
-		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId);
+		if(Conn == g_Config.m_ClDummy)
+		{
+			ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId);
+		}
 		// skin will be moved to the 0.6 snap by the translation context
 		// and we drop the game message
 		return nullptr;
@@ -325,13 +332,16 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		int NumOptions = pUnpacker->GetInt();
 		if(NumOptions > 14)
 		{
-			for(int i = 0; i < NumOptions; i++)
+			if(Conn == g_Config.m_ClDummy)
 			{
-				const char *pDescription = pUnpacker->GetString(CUnpacker::SANITIZE_CC);
-				if(pUnpacker->Error())
-					continue;
+				for(int i = 0; i < NumOptions; i++)
+				{
+					const char *pDescription = pUnpacker->GetString(CUnpacker::SANITIZE_CC);
+					if(pUnpacker->Error())
+						continue;
 
-				m_Voting.AddOption(pDescription);
+					m_Voting.AddOption(pDescription);
+				}
 			}
 			// 0.7 can send more vote options than
 			// the 0.6 protocol fit
@@ -370,6 +380,9 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 	}
 	else if(*pMsgId == protocol7::NETMSGTYPE_SV_VOTESET)
 	{
+		if(Conn != g_Config.m_ClDummy)
+			return nullptr;
+
 		*pMsgId = NETMSGTYPE_SV_VOTESET;
 		protocol7::CNetMsg_Sv_VoteSet *pMsg7 = (protocol7::CNetMsg_Sv_VoteSet *)pRawMsg;
 		::CNetMsg_Sv_VoteSet *pMsg = (::CNetMsg_Sv_VoteSet *)s_aRawMsg;
@@ -458,7 +471,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 			dbg_msg("sixup", "Sv_ClientDrop got invalid ClientId: %d", pMsg7->m_ClientId);
 			return nullptr;
 		}
-		CTranslationContext::CClientData &Client = m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId];
+		CTranslationContext::CClientData &Client = m_pClient->m_aTranslationContext[Conn].m_aClients[pMsg7->m_ClientId];
 		Client.Reset();
 
 		if(pMsg7->m_Silent)
@@ -487,21 +500,23 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 
 		if(pMsg7->m_Local)
 		{
-			m_pClient->m_TranslationContext.m_aLocalClientId[Conn] = pMsg7->m_ClientId;
+			m_pClient->m_aTranslationContext[Conn].m_LocalClientId = pMsg7->m_ClientId;
 		}
-		CTranslationContext::CClientData &Client = m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId];
+		CTranslationContext::CClientData &Client = m_pClient->m_aTranslationContext[Conn].m_aClients[pMsg7->m_ClientId];
 		Client.m_Active = true;
 		Client.m_Team = pMsg7->m_Team;
 		str_copy(Client.m_aName, pMsg7->m_pName);
 		str_copy(Client.m_aClan, pMsg7->m_pClan);
 		Client.m_Country = pMsg7->m_Country;
-		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId);
-		if(m_pClient->m_TranslationContext.m_aLocalClientId[Conn] == -1)
-			return nullptr;
-		if(pMsg7->m_Silent || pMsg7->m_Local)
+		if(m_pClient->m_aTranslationContext[Conn].m_LocalClientId == -1)
 			return nullptr;
 
 		if(Conn != g_Config.m_ClDummy)
+			return nullptr;
+
+		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId);
+
+		if(pMsg7->m_Silent || pMsg7->m_Local)
 			return nullptr;
 
 		DoTeamChangeMessage7(
@@ -515,12 +530,12 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 	else if(*pMsgId == protocol7::NETMSGTYPE_SV_GAMEINFO)
 	{
 		protocol7::CNetMsg_Sv_GameInfo *pMsg7 = (protocol7::CNetMsg_Sv_GameInfo *)pRawMsg;
-		m_pClient->m_TranslationContext.m_GameFlags = pMsg7->m_GameFlags;
-		m_pClient->m_TranslationContext.m_ScoreLimit = pMsg7->m_ScoreLimit;
-		m_pClient->m_TranslationContext.m_TimeLimit = pMsg7->m_TimeLimit;
-		m_pClient->m_TranslationContext.m_MatchNum = pMsg7->m_MatchNum;
-		m_pClient->m_TranslationContext.m_MatchCurrent = pMsg7->m_MatchCurrent;
-		m_pClient->m_TranslationContext.m_ShouldSendGameInfo = true;
+		m_pClient->m_aTranslationContext[Conn].m_GameFlags = pMsg7->m_GameFlags;
+		m_pClient->m_aTranslationContext[Conn].m_ScoreLimit = pMsg7->m_ScoreLimit;
+		m_pClient->m_aTranslationContext[Conn].m_TimeLimit = pMsg7->m_TimeLimit;
+		m_pClient->m_aTranslationContext[Conn].m_MatchNum = pMsg7->m_MatchNum;
+		m_pClient->m_aTranslationContext[Conn].m_MatchCurrent = pMsg7->m_MatchCurrent;
+		m_pClient->m_aTranslationContext[Conn].m_ShouldSendGameInfo = true;
 		return nullptr; // Added to snap by translation context
 	}
 	else if(*pMsgId == protocol7::NETMSGTYPE_SV_EMOTICON)
@@ -557,7 +572,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 
 		if(pMsg7->m_Mode == protocol7::CHAT_WHISPER)
 		{
-			bool Receive = pMsg7->m_TargetId == m_pClient->m_TranslationContext.m_aLocalClientId[Conn];
+			bool Receive = pMsg7->m_TargetId == m_pClient->m_aTranslationContext[Conn].m_LocalClientId;
 
 			pMsg->m_Team = Receive ? 3 : 2;
 			pMsg->m_ClientId = Receive ? pMsg7->m_ClientId : pMsg7->m_TargetId;
@@ -574,18 +589,12 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 	}
 	else if(*pMsgId == protocol7::NETMSGTYPE_SV_GAMEMSG)
 	{
+		if(Conn != g_Config.m_ClDummy)
+			return nullptr;
+
 		int GameMsgId = pUnpacker->GetInt();
 
-		/**
-		 * Prints chat message only once
-		 * even if it is being sent to main tee and dummy
-		 */
 		auto SendChat = [Conn, GameMsgId, this](const char *pText) -> void {
-			if(GameMsgId != protocol7::GAMEMSG_TEAM_BALANCE_VICTIM && GameMsgId != protocol7::GAMEMSG_SPEC_INVALIDID)
-			{
-				if(Conn != g_Config.m_ClDummy)
-					return;
-			}
 			m_Chat.AddLine(-1, 0, pText);
 		};
 
@@ -614,7 +623,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 
 		// handle special messages
 		char aBuf[256];
-		bool TeamPlay = m_pClient->m_TranslationContext.m_GameFlags & protocol7::GAMEFLAG_TEAMS;
+		bool TeamPlay = m_pClient->m_aTranslationContext[Conn].m_GameFlags & protocol7::GAMEFLAG_TEAMS;
 		if(gs_GameMsgList7[GameMsgId].m_Action == DO_SPECIAL)
 		{
 			switch(GameMsgId)

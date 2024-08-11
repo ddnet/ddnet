@@ -75,7 +75,7 @@ public:
 		LOADING_CALLBACK_DETAIL_DEMO,
 	};
 	typedef std::function<void(ELoadingCallbackDetail Detail)> TLoadingCallback;
-	CTranslationContext m_TranslationContext;
+	CTranslationContext m_aTranslationContext[NUM_DUMMIES];
 
 protected:
 	// quick access to state of the client

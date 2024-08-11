@@ -17,8 +17,7 @@ public:
 
 	void Reset()
 	{
-		for(int &LocalClientId : m_aLocalClientId)
-			LocalClientId = -1;
+		m_LocalClientId = -1;
 		m_ShouldSendGameInfo = false;
 		m_GameFlags = 0;
 		m_ScoreLimit = 0;
@@ -95,7 +94,7 @@ public:
 	int m_aDamageTaken[MAX_CLIENTS];
 	float m_aDamageTakenTick[MAX_CLIENTS];
 
-	int m_aLocalClientId[NUM_DUMMIES];
+	int m_LocalClientId;
 
 	bool m_ShouldSendGameInfo;
 	int m_GameStateFlags7;

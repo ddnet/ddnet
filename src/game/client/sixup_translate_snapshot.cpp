@@ -11,7 +11,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 
 	float LocalTime = Client()->LocalTime();
 	int GameTick = Client()->GameTick(g_Config.m_ClDummy);
-	CTranslationContext &TranslationContext = Client()->m_TranslationContext;
+	CTranslationContext &TranslationContext = Client()->m_aTranslationContext[Conn];
 
 	for(auto &PlayerInfosRace : TranslationContext.m_apPlayerInfosRace)
 		PlayerInfosRace = nullptr;
@@ -117,7 +117,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			Info6.m_WarmupTimer = TranslationContext.m_GameStateEndTick7 - GameTick;
 
 		// hack to port 0.7 race timer to ddnet warmup gametimer hack
-		int TimerClientId = clamp(TranslationContext.m_aLocalClientId[Conn], 0, (int)MAX_CLIENTS);
+		int TimerClientId = clamp(TranslationContext.m_LocalClientId, 0, (int)MAX_CLIENTS);
 		if(SpectatorId >= 0)
 			TimerClientId = SpectatorId;
 		const protocol7::CNetObj_PlayerInfoRace *pRaceInfo = TranslationContext.m_apPlayerInfosRace[TimerClientId];
@@ -256,7 +256,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 				mem_copy(pEvent, &Sound, sizeof(CNetEvent_SoundWorld));
 			}
 
-			if(TranslationContext.m_aLocalClientId[Conn] != pItem7->Id())
+			if(TranslationContext.m_LocalClientId != pItem7->Id())
 			{
 				if(pChar7->m_TriggeredEvents & protocol7::COREEVENTFLAG_GROUND_JUMP)
 				{
@@ -306,7 +306,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 
 			const protocol7::CNetObj_PlayerInfo *pInfo7 = (const protocol7::CNetObj_PlayerInfo *)pItem7->Data();
 			CNetObj_PlayerInfo Info6 = {};
-			Info6.m_Local = TranslationContext.m_aLocalClientId[Conn] == pItem7->Id();
+			Info6.m_Local = TranslationContext.m_LocalClientId == pItem7->Id();
 			Info6.m_ClientId = pItem7->Id();
 			Info6.m_Team = 0;
 			if(pItem7->Id() >= 0 && pItem7->Id() < MAX_CLIENTS)
@@ -457,7 +457,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 
 			if(pInfo->m_Local)
 			{
-				TranslationContext.m_aLocalClientId[Conn] = ClientId;
+				TranslationContext.m_LocalClientId = ClientId;
 			}
 			CTranslationContext::CClientData &Client = TranslationContext.m_aClients[ClientId];
 			Client.m_Active = true;
@@ -466,7 +466,10 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			IntsToStr(pInfo->m_aClan, 3, Client.m_aClan, std::size(Client.m_aClan));
 			Client.m_Country = pInfo->m_Country;
 
-			ApplySkin7InfoFromSnapObj(pInfo, ClientId);
+			if(Conn == g_Config.m_ClDummy)
+			{
+				ApplySkin7InfoFromSnapObj(pInfo, ClientId);
+			}
 		}
 		else if(pItem7->Type() == protocol7::NETOBJTYPE_DE_GAMEINFO)
 		{
@@ -513,10 +516,10 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshot *pTo, int Conn)
 		if(!pItem)
 			return -1;
 
-		CTranslationContext::CClientData &ClientData = Client()->m_TranslationContext.m_aClients[i];
+		CTranslationContext::CClientData &ClientData = Client()->m_aTranslationContext[Conn].m_aClients[i];
 
 		protocol7::CNetObj_De_ClientInfo ClientInfoObj;
-		ClientInfoObj.m_Local = i == Client()->m_TranslationContext.m_aLocalClientId[Conn];
+		ClientInfoObj.m_Local = i == Client()->m_aTranslationContext[Conn].m_LocalClientId;
 		ClientInfoObj.m_Team = ClientData.m_Team;
 		StrToInts(ClientInfoObj.m_aName, 4, m_aClients[i].m_aName);
 		StrToInts(ClientInfoObj.m_aClan, 3, m_aClients[i].m_aClan);
@@ -552,11 +555,11 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshot *pTo, int Conn)
 
 	protocol7::CNetObj_De_GameInfo GameInfo;
 
-	GameInfo.m_GameFlags = Client()->m_TranslationContext.m_GameFlags;
-	GameInfo.m_ScoreLimit = Client()->m_TranslationContext.m_ScoreLimit;
-	GameInfo.m_TimeLimit = Client()->m_TranslationContext.m_TimeLimit;
-	GameInfo.m_MatchNum = Client()->m_TranslationContext.m_MatchNum;
-	GameInfo.m_MatchCurrent = Client()->m_TranslationContext.m_MatchCurrent;
+	GameInfo.m_GameFlags = Client()->m_aTranslationContext[Conn].m_GameFlags;
+	GameInfo.m_ScoreLimit = Client()->m_aTranslationContext[Conn].m_ScoreLimit;
+	GameInfo.m_TimeLimit = Client()->m_aTranslationContext[Conn].m_TimeLimit;
+	GameInfo.m_MatchNum = Client()->m_aTranslationContext[Conn].m_MatchNum;
+	GameInfo.m_MatchCurrent = Client()->m_aTranslationContext[Conn].m_MatchCurrent;
 
 	mem_copy(pItem, &GameInfo, sizeof(protocol7::CNetObj_De_GameInfo));
 
