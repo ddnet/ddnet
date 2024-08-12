@@ -157,7 +157,7 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 		log_error("skins", "Skin failed image divisibility: %s", pName);
 		return nullptr;
 	}
-	if(!Graphics()->IsImageFormatRGBA(pName, Info))
+	if(!Graphics()->IsImageFormatRgba(pName, Info))
 	{
 		log_error("skins", "Skin format is not RGBA: %s", pName);
 		return nullptr;
@@ -298,7 +298,7 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 
 	if(g_Config.m_Debug)
 	{
-		log_trace("skins", "Loaded skin %s", Skin.GetName());
+		log_trace("skins", "Loaded skin '%s'", Skin.GetName());
 	}
 
 	auto &&pSkin = std::make_unique<CSkin>(std::move(Skin));

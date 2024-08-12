@@ -14,7 +14,7 @@ void CEditorComponent::InitSubComponents()
 {
 	for(CEditorComponent &Component : m_vSubComponents)
 	{
-		Component.Init(Editor());
+		Component.OnInit(Editor());
 	}
 }
 

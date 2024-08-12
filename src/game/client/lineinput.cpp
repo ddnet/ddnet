@@ -199,6 +199,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 	if((Event.m_Flags & IInput::FLAG_TEXT) && !(KEY_LCTRL <= Event.m_Key && Event.m_Key <= KEY_RGUI))
 	{
 		SetRange(Event.m_aText, m_SelectionStart, m_SelectionEnd);
+		KeyHandled = true;
 	}
 
 	if(Event.m_Flags & IInput::FLAG_PRESS)
@@ -231,6 +232,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 				}
 				m_SelectionStart = m_SelectionEnd = m_CursorPos;
 			}
+			KeyHandled = true;
 		}
 		else if(Event.m_Key == KEY_DELETE)
 		{
@@ -251,6 +253,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 				}
 				m_SelectionStart = m_SelectionEnd = m_CursorPos;
 			}
+			KeyHandled = true;
 		}
 		else if(Event.m_Key == KEY_LEFT)
 		{
@@ -271,7 +274,10 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 			}
 
 			if(!Selecting)
+			{
 				m_SelectionStart = m_SelectionEnd = m_CursorPos;
+			}
+			KeyHandled = true;
 		}
 		else if(Event.m_Key == KEY_RIGHT)
 		{
@@ -292,7 +298,10 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 			}
 
 			if(!Selecting)
+			{
 				m_SelectionStart = m_SelectionEnd = m_CursorPos;
+			}
+			KeyHandled = true;
 		}
 		else if(Event.m_Key == KEY_HOME)
 		{
@@ -305,6 +314,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 				m_SelectionEnd = 0;
 			m_CursorPos = 0;
 			m_SelectionStart = 0;
+			KeyHandled = true;
 		}
 		else if(Event.m_Key == KEY_END)
 		{
@@ -317,6 +327,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 				m_SelectionStart = m_Len;
 			m_CursorPos = m_Len;
 			m_SelectionEnd = m_Len;
+			KeyHandled = true;
 		}
 		else if(ModPressed && !AltPressed && Event.m_Key == KEY_V)
 		{
@@ -381,12 +392,13 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 		{
 			m_SelectionStart = 0;
 			m_SelectionEnd = m_CursorPos = m_Len;
+			KeyHandled = true;
 		}
 	}
 
 	m_WasCursorChanged |= OldCursorPos != m_CursorPos;
 	m_WasCursorChanged |= SelectionLength != GetSelectionLength();
-	return m_WasChanged || m_WasCursorChanged || KeyHandled;
+	return KeyHandled;
 }
 
 STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth, float LineSpacing, const std::vector<STextColorSplit> &vColorSplits)

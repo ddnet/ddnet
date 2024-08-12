@@ -78,6 +78,7 @@ void CMenus::HandleDemoSeeking(float PositionToSeek, float TimeToSeek)
 	if((PositionToSeek >= 0.0f && PositionToSeek <= 1.0f) || TimeToSeek != 0.0f)
 	{
 		m_pClient->m_Chat.Reset();
+		m_pClient->m_DamageInd.OnReset();
 		m_pClient->m_InfoMessages.OnReset();
 		m_pClient->m_Particles.OnReset();
 		m_pClient->m_Sounds.OnReset();

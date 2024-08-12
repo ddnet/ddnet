@@ -958,7 +958,7 @@ const NETADDR NETADDR_ZEROED = {NETTYPE_INVALID, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 static void netaddr_to_sockaddr_in(const NETADDR *src, struct sockaddr_in *dest)
 {
 	mem_zero(dest, sizeof(struct sockaddr_in));
-	if(src->type != NETTYPE_IPV4 && src->type != NETTYPE_WEBSOCKET_IPV4)
+	if(!(src->type & NETTYPE_IPV4) && !(src->type & NETTYPE_WEBSOCKET_IPV4))
 	{
 		dbg_msg("system", "couldn't convert NETADDR of type %d to ipv4", src->type);
 		return;
@@ -972,9 +972,9 @@ static void netaddr_to_sockaddr_in(const NETADDR *src, struct sockaddr_in *dest)
 static void netaddr_to_sockaddr_in6(const NETADDR *src, struct sockaddr_in6 *dest)
 {
 	mem_zero(dest, sizeof(struct sockaddr_in6));
-	if(src->type != NETTYPE_IPV6)
+	if(!(src->type & NETTYPE_IPV6))
 	{
-		dbg_msg("system", "couldn't not convert NETADDR of type %d to ipv6", src->type);
+		dbg_msg("system", "couldn't convert NETADDR of type %d to ipv6", src->type);
 		return;
 	}
 
@@ -1098,16 +1098,16 @@ void net_addr_str_v6(const unsigned short ip[8], int port, char *buffer, int buf
 	}
 }
 
-void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port)
+bool net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port)
 {
-	if(addr->type == NETTYPE_IPV4 || addr->type == NETTYPE_WEBSOCKET_IPV4)
+	if(addr->type & NETTYPE_IPV4 || addr->type & NETTYPE_WEBSOCKET_IPV4)
 	{
 		if(add_port != 0)
 			str_format(string, max_length, "%d.%d.%d.%d:%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3], addr->port);
 		else
 			str_format(string, max_length, "%d.%d.%d.%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3]);
 	}
-	else if(addr->type == NETTYPE_IPV6)
+	else if(addr->type & NETTYPE_IPV6)
 	{
 		int port = -1;
 		unsigned short ip[8];
@@ -1123,7 +1123,27 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 		net_addr_str_v6(ip, port, string, max_length);
 	}
 	else
+	{
 		str_format(string, max_length, "unknown type %d", addr->type);
+		return false;
+	}
+	return true;
+}
+
+void net_addr_url_str(const NETADDR *addr, char *string, int max_length, int add_port)
+{
+	char ipaddr[512];
+	if(!net_addr_str(addr, ipaddr, sizeof(ipaddr), add_port))
+	{
+		str_copy(string, ipaddr, max_length);
+		return;
+	}
+	str_format(
+		string,
+		max_length,
+		"tw-%s+udp://%s",
+		addr->type & NETTYPE_TW7 ? "0.7" : "0.6",
+		ipaddr);
 }
 
 static int priv_net_extract(const char *hostname, char *host, int max_host, int *port)
@@ -1275,11 +1295,16 @@ static int parse_uint16(unsigned short *out, const char **str)
 
 int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t host_buf_size)
 {
+	bool sixup = false;
+	mem_zero(addr, sizeof(*addr));
 	const char *str = str_startswith(string, "tw-0.6+udp://");
+	if(!str && (str = str_startswith(string, "tw-0.7+udp://")))
+	{
+		addr->type |= NETTYPE_TW7;
+		sixup = true;
+	}
 	if(!str)
 		return 1;
-
-	mem_zero(addr, sizeof(*addr));
 
 	int length = str_length(str);
 	int start = 0;
@@ -1307,7 +1332,14 @@ int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t 
 	if(host_buf)
 		str_copy(host_buf, host, host_buf_size);
 
-	return net_addr_from_str(addr, host);
+	int failure = net_addr_from_str(addr, host);
+	if(failure)
+		return failure;
+
+	if(sixup)
+		addr->type |= NETTYPE_TW7;
+
+	return failure;
 }
 
 int net_addr_from_str(NETADDR *addr, const char *string)
@@ -1516,24 +1548,21 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 {
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
-	NETADDR tmpbindaddr = bindaddr;
-	int broadcast = 1;
-	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV4;
 		netaddr_to_sockaddr_in(&tmpbindaddr, &addr);
-		socket = priv_net_create_socket(AF_INET, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket = priv_net_create_socket(AF_INET, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket >= 0)
 		{
 			sock->type |= NETTYPE_IPV4;
 			sock->ipv4sock = socket;
 
 			/* set broadcast */
+			int broadcast = 1;
 			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
 			{
 				dbg_msg("socket", "Setting BROADCAST on ipv4 failed: %d", net_errno());
@@ -1549,17 +1578,15 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			}
 		}
 	}
+
 #if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type & NETTYPE_WEBSOCKET_IPV4)
 	{
 		char addr_str[NETADDR_MAXSTRSIZE];
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_WEBSOCKET_IPV4;
-
 		net_addr_str(&tmpbindaddr, addr_str, sizeof(addr_str), 0);
-		socket = websocket_create(addr_str, tmpbindaddr.port);
-
+		int socket = websocket_create(addr_str, tmpbindaddr.port);
 		if(socket >= 0)
 		{
 			sock->type |= NETTYPE_WEBSOCKET_IPV4;
@@ -1571,17 +1598,17 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV6;
 		netaddr_to_sockaddr_in6(&tmpbindaddr, &addr);
-		socket = priv_net_create_socket(AF_INET6, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket = priv_net_create_socket(AF_INET6, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket >= 0)
 		{
 			sock->type |= NETTYPE_IPV6;
 			sock->ipv6sock = socket;
 
 			/* set broadcast */
+			int broadcast = 1;
 			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
 			{
 				dbg_msg("socket", "Setting BROADCAST on ipv6 failed: %d", net_errno());
@@ -1601,20 +1628,17 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-	if(socket < 0)
+	if(sock->type == NETTYPE_INVALID)
 	{
 		free(sock);
 		sock = nullptr;
 	}
 	else
 	{
-		/* set non-blocking */
 		net_set_non_blocking(sock);
-
 		net_buffer_init(&sock->buffer);
 	}
 
-	/* return */
 	return sock;
 }
 
@@ -1830,17 +1854,14 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 {
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
-	NETADDR tmpbindaddr = bindaddr;
-	int socket4 = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV4;
 		netaddr_to_sockaddr_in(&tmpbindaddr, &addr);
-		socket4 = priv_net_create_socket(AF_INET, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket4 = priv_net_create_socket(AF_INET, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket4 >= 0)
 		{
 			sock->type |= NETTYPE_IPV4;
@@ -1848,15 +1869,13 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		}
 	}
 
-	int socket6 = -1;
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV6;
 		netaddr_to_sockaddr_in6(&tmpbindaddr, &addr);
-		socket6 = priv_net_create_socket(AF_INET6, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket6 = priv_net_create_socket(AF_INET6, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket6 >= 0)
 		{
 			sock->type |= NETTYPE_IPV6;
@@ -1864,13 +1883,12 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		}
 	}
 
-	if(socket4 < 0 && socket6 < 0)
+	if(sock->type == NETTYPE_INVALID)
 	{
 		free(sock);
 		sock = nullptr;
 	}
 
-	/* return */
 	return sock;
 }
 
@@ -3951,6 +3969,24 @@ int str_utf8_check(const char *str)
 		}
 	}
 	return 1;
+}
+
+void str_utf8_copy_num(char *dst, const char *src, int dst_size, int num)
+{
+	int new_cursor;
+	int cursor = 0;
+
+	while(src[cursor] && num > 0)
+	{
+		new_cursor = str_utf8_forward(src, cursor);
+		if(new_cursor >= dst_size) // reserve 1 byte for the null termination
+			break;
+		else
+			cursor = new_cursor;
+		--num;
+	}
+
+	str_copy(dst, src, cursor < dst_size ? cursor + 1 : dst_size);
 }
 
 void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *size, size_t *count)

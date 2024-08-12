@@ -45,7 +45,7 @@ public:
 	CDemoRecorder() {}
 	~CDemoRecorder() override;
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile = nullptr, DEMOFUNC_FILTER pfnFilter = nullptr, void *pUser = nullptr);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser);
 	int Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilename = "") override;
 
 	void AddDemoMarker();
@@ -145,6 +145,7 @@ private:
 	bool ScanFile();
 
 	int64_t Time();
+	bool m_Sixup;
 
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo);
@@ -176,6 +177,8 @@ public:
 	const char *ErrorMessage() const override { return m_aErrorMessage; }
 
 	int Update(bool RealTime = true);
+	bool IsSixup() const { return m_Sixup; }
+	void SetSixup(bool Sixup) { m_Sixup = Sixup; }
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
 	bool IsPlaying() const override { return m_File != nullptr; }
@@ -187,10 +190,9 @@ class CDemoEditor : public IDemoEditor
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	class CSnapshotDelta *m_pSnapshotDelta;
-	const char *m_pNetVersion;
 
 public:
-	virtual void Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);
+	virtual void Init(class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);
 	bool Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) override;
 };
 

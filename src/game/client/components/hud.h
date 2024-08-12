@@ -78,7 +78,10 @@ class CHud : public CComponent
 	void RenderPauseNotification();
 	void RenderSuddenDeath();
 	void RenderCenterLines();
+
 	void RenderScoreHud();
+	int m_LastLocalClientId = -1;
+
 	void RenderSpectatorHud();
 	void RenderWarmupTimer();
 	void RenderLocalTime(float x);

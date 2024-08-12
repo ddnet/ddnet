@@ -17,7 +17,14 @@ void CSaveTee::Save(CCharacter *pChr)
 	str_copy(m_aName, pChr->Server()->ClientName(m_ClientId), sizeof(m_aName));
 
 	m_Alive = pChr->m_Alive;
+
+	// This is extremely suspect code, probably interacts badly with force pause
 	m_Paused = absolute(pChr->m_pPlayer->IsPaused());
+	if(m_Paused == CPlayer::PAUSE_SPEC && !pChr->m_Paused)
+	{
+		m_Paused = CPlayer::PAUSE_NONE;
+	}
+
 	m_NeededFaketuning = pChr->m_NeededFaketuning;
 
 	m_TeeStarted = pChr->Teams()->TeeStarted(m_ClientId);
@@ -121,8 +128,10 @@ void CSaveTee::Save(CCharacter *pChr)
 	FormatUuid(pChr->GameServer()->GameUuid(), m_aGameUuid, sizeof(m_aGameUuid));
 }
 
-void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
+bool CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 {
+	bool Valid = true;
+
 	pChr->m_pPlayer->Pause(m_Paused, true);
 
 	pChr->m_Alive = m_Alive;
@@ -239,6 +248,13 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 		pChr->ForceSetRescue(RESCUEMODE_AUTO);
 		pChr->ForceSetRescue(RESCUEMODE_MANUAL);
 	}
+
+	if(pChr->m_pPlayer->IsPaused() == -1 * CPlayer::PAUSE_SPEC && !pChr->m_pPlayer->CanSpec())
+	{
+		Valid = false;
+	}
+
+	return Valid;
 }
 
 char *CSaveTee::GetString(const CSaveTeam *pTeam)
@@ -570,7 +586,7 @@ bool CSaveTeam::HandleSaveError(int Result, int ClientId, CGameContext *pGameCon
 	return true;
 }
 
-void CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakStrong)
+bool CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakStrong)
 {
 	IGameController *pController = pGameServer->m_pController;
 	CGameTeams *pTeams = &pController->Teams();
@@ -579,6 +595,7 @@ void CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakSt
 	pTeams->SetTeamLock(Team, m_TeamLocked);
 	pTeams->SetPractice(Team, m_Practice);
 
+	bool ContainsInvalidPlayer = false;
 	int aPlayerCids[MAX_CLIENTS];
 	for(int i = m_MembersCount; i-- > 0;)
 	{
@@ -587,7 +604,7 @@ void CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakSt
 		if(pGameServer->m_apPlayers[ClientId] && pTeams->m_Core.Team(ClientId) == Team)
 		{
 			CCharacter *pChr = MatchCharacter(pGameServer, m_pSavedTees[i].GetClientId(), i, KeepCurrentWeakStrong);
-			m_pSavedTees[i].Load(pChr, Team);
+			ContainsInvalidPlayer |= !m_pSavedTees[i].Load(pChr, Team);
 		}
 	}
 
@@ -603,6 +620,8 @@ void CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakSt
 	}
 	// remove projectiles and laser
 	pGameServer->m_World.RemoveEntitiesFromPlayers(aPlayerCids, m_MembersCount);
+
+	return !ContainsInvalidPlayer;
 }
 
 CCharacter *CSaveTeam::MatchCharacter(CGameContext *pGameServer, int ClientId, int SaveId, bool KeepCurrentCharacter) const

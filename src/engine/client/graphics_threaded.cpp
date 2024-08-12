@@ -288,17 +288,16 @@ void CGraphics_Threaded::FreeTextureIndex(CTextureHandle *pIndex)
 	pIndex->Invalidate();
 }
 
-int CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
+void CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 {
 	if(pIndex->IsNullTexture() || !pIndex->IsValid())
-		return 0;
+		return;
 
 	CCommandBuffer::SCommand_Texture_Destroy Cmd;
 	Cmd.m_Slot = pIndex->Id();
 	AddCmd(Cmd);
 
 	FreeTextureIndex(pIndex);
-	return 0;
 }
 
 static bool ConvertToRGBA(uint8_t *pDest, const CImageInfo &SrcImage)
@@ -335,25 +334,6 @@ static bool ConvertToRGBA(uint8_t *pDest, const CImageInfo &SrcImage)
 		}
 		return false;
 	}
-}
-
-int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureId, int x, int y, const CImageInfo &Image)
-{
-	dbg_assert(TextureId.IsValid(), "Invalid texture handle used with LoadTextureRawSub.");
-
-	CCommandBuffer::SCommand_Texture_Update Cmd;
-	Cmd.m_Slot = TextureId.Id();
-	Cmd.m_X = x;
-	Cmd.m_Y = y;
-	Cmd.m_Width = Image.m_Width;
-	Cmd.m_Height = Image.m_Height;
-
-	uint8_t *pTmpData = static_cast<uint8_t *>(malloc(Image.m_Width * Image.m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
-	ConvertToRGBA(pTmpData, Image);
-	Cmd.m_pData = pTmpData;
-	AddCmd(Cmd);
-
-	return 0;
 }
 
 IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(const CImageInfo &FromImageInfo, int x, int y, size_t w, size_t h, const char *pName)
@@ -434,8 +414,6 @@ static CCommandBuffer::SCommand_Texture_Create LoadTextureCreateCommand(int Text
 	Cmd.m_Height = Height;
 
 	Cmd.m_Flags = 0;
-	if(Flags & IGraphics::TEXLOAD_NOMIPMAPS)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NOMIPMAPS;
 	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
 	if((Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
@@ -474,7 +452,9 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRawMove(CImageInfo &Ima
 	if(Image.m_Format != CImageInfo::FORMAT_RGBA)
 	{
 		// Moving not possible, texture needs to be converted
-		return LoadTextureRaw(Image, Flags, pTexName);
+		IGraphics::CTextureHandle TextureHandle = LoadTextureRaw(Image, Flags, pTexName);
+		Image.Free();
+		return TextureHandle;
 	}
 
 	LoadTextureAddWarning(Image.m_Width, Image.m_Height, Flags, pTexName, m_vWarnings);
@@ -486,6 +466,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRawMove(CImageInfo &Ima
 	CCommandBuffer::SCommand_Texture_Create Cmd = LoadTextureCreateCommand(TextureHandle.Id(), Image.m_Width, Image.m_Height, Flags);
 	Cmd.m_pData = Image.m_pData;
 	Image.m_pData = nullptr;
+	Image.Free();
 	AddCmd(Cmd);
 
 	return TextureHandle;
@@ -508,11 +489,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 		}
 	}
 
-	return m_NullTexture;
-}
-
-IGraphics::CTextureHandle CGraphics_Threaded::NullTexture() const
-{
 	return m_NullTexture;
 }
 
@@ -614,7 +590,7 @@ bool CGraphics_Threaded::LoadPng(CImageInfo &Image, const char *pFilename, int S
 				SWarning Warning;
 				str_format(Warning.m_aWarningMsg, sizeof(Warning.m_aWarningMsg), Localize("\"%s\" is not compatible with pnglite and cannot be loaded by old DDNet versions: "), pFilename);
 				static const int FLAGS[] = {PNGLITE_COLOR_TYPE, PNGLITE_BIT_DEPTH, PNGLITE_INTERLACE_TYPE, PNGLITE_COMPRESSION_TYPE, PNGLITE_FILTER_TYPE};
-				static const char *EXPLANATION[] = {"color type", "bit depth", "interlace type", "compression type", "filter type"};
+				static const char *const EXPLANATION[] = {"color type", "bit depth", "interlace type", "compression type", "filter type"};
 
 				bool First = true;
 				for(size_t i = 0; i < std::size(FLAGS); ++i)
@@ -648,61 +624,58 @@ bool CGraphics_Threaded::LoadPng(CImageInfo &Image, const char *pFilename, int S
 	return true;
 }
 
-bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize)
+bool CGraphics_Threaded::CheckImageDivisibility(const char *pContextName, CImageInfo &Image, int DivX, int DivY, bool AllowResize)
 {
 	dbg_assert(DivX != 0 && DivY != 0, "Passing 0 to this function is not allowed.");
 	bool ImageIsValid = true;
-	bool WidthBroken = Img.m_Width == 0 || (Img.m_Width % DivX) != 0;
-	bool HeightBroken = Img.m_Height == 0 || (Img.m_Height % DivY) != 0;
+	bool WidthBroken = Image.m_Width == 0 || (Image.m_Width % DivX) != 0;
+	bool HeightBroken = Image.m_Height == 0 || (Image.m_Height % DivY) != 0;
 	if(WidthBroken || HeightBroken)
 	{
 		SWarning NewWarning;
-		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), pFileName, DivX, DivY);
-
+		char aContextNameQuoted[128];
+		str_format(aContextNameQuoted, sizeof(aContextNameQuoted), "\"%s\"", pContextName);
+		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg),
+			Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), aContextNameQuoted, DivX, DivY);
 		m_vWarnings.emplace_back(NewWarning);
-
 		ImageIsValid = false;
 	}
 
-	if(AllowResize && !ImageIsValid && Img.m_Width > 0 && Img.m_Height > 0)
+	if(AllowResize && !ImageIsValid && Image.m_Width > 0 && Image.m_Height > 0)
 	{
 		int NewWidth = DivX;
 		int NewHeight = DivY;
 		if(WidthBroken)
 		{
-			NewWidth = maximum<int>(HighestBit(Img.m_Width), DivX);
+			NewWidth = maximum<int>(HighestBit(Image.m_Width), DivX);
 			NewHeight = (NewWidth / DivX) * DivY;
 		}
 		else
 		{
-			NewHeight = maximum<int>(HighestBit(Img.m_Height), DivY);
+			NewHeight = maximum<int>(HighestBit(Image.m_Height), DivY);
 			NewWidth = (NewHeight / DivY) * DivX;
 		}
 
-		uint8_t *pNewImg = ResizeImage(Img.m_pData, Img.m_Width, Img.m_Height, NewWidth, NewHeight, Img.PixelSize());
-		free(Img.m_pData);
-		Img.m_pData = pNewImg;
-		Img.m_Width = NewWidth;
-		Img.m_Height = NewHeight;
+		uint8_t *pNewImage = ResizeImage(Image.m_pData, Image.m_Width, Image.m_Height, NewWidth, NewHeight, Image.PixelSize());
+		free(Image.m_pData);
+		Image.m_pData = pNewImage;
+		Image.m_Width = NewWidth;
+		Image.m_Height = NewHeight;
 		ImageIsValid = true;
 	}
 
 	return ImageIsValid;
 }
 
-bool CGraphics_Threaded::IsImageFormatRGBA(const char *pFileName, CImageInfo &Img)
+bool CGraphics_Threaded::IsImageFormatRgba(const char *pContextName, const CImageInfo &Image)
 {
-	if(Img.m_Format != CImageInfo::FORMAT_RGBA)
+	if(Image.m_Format != CImageInfo::FORMAT_RGBA)
 	{
 		SWarning NewWarning;
-		char aText[128];
-		aText[0] = '\0';
-		if(pFileName)
-		{
-			str_format(aText, sizeof(aText), "\"%s\"", pFileName);
-		}
+		char aContextNameQuoted[128];
+		str_format(aContextNameQuoted, sizeof(aContextNameQuoted), "\"%s\"", pContextName);
 		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg),
-			Localize("The format of texture %s is not RGBA which will cause visual bugs."), aText);
+			Localize("The format of texture %s is not RGBA which will cause visual bugs."), aContextNameQuoted);
 		m_vWarnings.emplace_back(NewWarning);
 		return false;
 	}

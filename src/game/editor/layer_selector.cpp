@@ -2,9 +2,9 @@
 
 #include "layer_selector.h"
 
-void CLayerSelector::Init(CEditor *pEditor)
+void CLayerSelector::OnInit(CEditor *pEditor)
 {
-	CEditorComponent::Init(pEditor);
+	CEditorComponent::OnInit(pEditor);
 
 	m_SelectionOffset = 0;
 }

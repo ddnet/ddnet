@@ -96,6 +96,9 @@ private:
 	int m_FirstFree;
 	int m_aFirstPart[NUM_GROUPS];
 
+	float m_FrictionFraction = 0.0f;
+	int64_t m_LastRenderTime = 0;
+
 	void RenderGroup(int Group);
 	void Update(float TimePassed);
 
