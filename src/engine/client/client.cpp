@@ -2108,8 +2108,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							TOMsgp.Pack(&PackerTO);
 							SendMsg(Conn, &PackerTO, MSGFLAG_VITAL);
 
-							CNetMsg_Cl_Say MsgP;
-							MsgP.m_Team = 0;
 							char aBuf[128];
 							char aBufMsg[256];
 							//if(!g_Config.m_ClRunOnJoin[0] && !g_Config.m_ClDummyDefaultEyes && !g_Config.m_ClPlayerDefaultEyes)
