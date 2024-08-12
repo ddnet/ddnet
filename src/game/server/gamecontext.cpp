@@ -2208,10 +2208,10 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 	{
 		str_copy(aReason, pMsg->m_pReason, sizeof(aReason));
 	}
+	int Authed = Server()->GetAuthedState(ClientId);
 
 	if(str_comp_nocase(pMsg->m_pType, "option") == 0)
 	{
-		int Authed = Server()->GetAuthedState(ClientId);
 		CVoteOptionServer *pOption = m_pVoteOptionFirst;
 		while(pOption)
 		{
@@ -2268,8 +2268,6 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 	}
 	else if(str_comp_nocase(pMsg->m_pType, "kick") == 0)
 	{
-		int Authed = Server()->GetAuthedState(ClientId);
-
 		if(!g_Config.m_SvVoteKick && !Authed) // allow admins to call kick votes even if they are forbidden
 		{
 			SendChatTarget(ClientId, "Server does not allow voting to kick players");
@@ -2393,12 +2391,21 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 
 		if(SpectateId < 0 || SpectateId >= MAX_CLIENTS || !m_apPlayers[SpectateId] || m_apPlayers[SpectateId]->GetTeam() == TEAM_SPECTATORS)
 		{
-			SendChatTarget(ClientId, "Invalid client id to move");
+			SendChatTarget(ClientId, "Invalid client id to move to spectators");
 			return;
 		}
 		if(SpectateId == ClientId)
 		{
-			SendChatTarget(ClientId, "You can't move yourself");
+			SendChatTarget(ClientId, "You can't move yourself to spectators");
+			return;
+		}
+		int SpectateAuthed = Server()->GetAuthedState(SpectateId);
+		if(SpectateAuthed > Authed)
+		{
+			SendChatTarget(ClientId, "You can't move authorized players to spectators");
+			char aBufSpectate[128];
+			str_format(aBufSpectate, sizeof(aBufSpectate), "'%s' called for vote to move you to spectators", Server()->ClientName(ClientId));
+			SendChatTarget(SpectateId, aBufSpectate);
 			return;
 		}
 		if(!Server()->ReverseTranslate(SpectateId, ClientId))
