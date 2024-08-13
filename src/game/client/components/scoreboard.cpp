@@ -199,17 +199,39 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 			break;
 		}
 
-		if(GameClient()->m_aClients[pInfo->m_ClientId].m_AuthLevel)
-		{
-			TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor)));
-		}
-
 		if(g_Config.m_ClShowIds)
 		{
 			char aClientId[16];
 			GameClient()->FormatClientId(pInfo->m_ClientId, aClientId, EClientIdFormat::NO_INDENT);
 			TextRender()->TextEx(&Cursor, aClientId);
 		}
+
+		{
+			const char *pClanName = GameClient()->m_aClients[pInfo->m_ClientId].m_aClan;
+
+			if(pClanName[0] != '\0')
+			{
+				if(str_comp(pClanName, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0)
+				{
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor)));
+				}
+				else
+				{
+					TextRender()->TextColor(ColorRGBA(0.7f, 0.7f, 0.7f));
+				}
+
+				TextRender()->TextEx(&Cursor, pClanName);
+				TextRender()->TextEx(&Cursor, " ");
+
+				TextRender()->TextColor(TextRender()->DefaultTextColor());
+			}
+		}
+
+		if(GameClient()->m_aClients[pInfo->m_ClientId].m_AuthLevel)
+		{
+			TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor)));
+		}
+
 		TextRender()->TextEx(&Cursor, GameClient()->m_aClients[pInfo->m_ClientId].m_aName);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 
