@@ -1130,22 +1130,6 @@ bool net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 	return true;
 }
 
-void net_addr_url_str(const NETADDR *addr, char *string, int max_length, int add_port)
-{
-	char ipaddr[512];
-	if(!net_addr_str(addr, ipaddr, sizeof(ipaddr), add_port))
-	{
-		str_copy(string, ipaddr, max_length);
-		return;
-	}
-	str_format(
-		string,
-		max_length,
-		"tw-%s+udp://%s",
-		addr->type & NETTYPE_TW7 ? "0.7" : "0.6",
-		ipaddr);
-}
-
 static int priv_net_extract(const char *hostname, char *host, int max_host, int *port)
 {
 	int i;
