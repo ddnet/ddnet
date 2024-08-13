@@ -937,7 +937,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 				GameServer()->SendBroadcast(aBuf, m_ClientId);
 				m_BirthdayAnnounced = true;
 
-				GameServer()->CreateFinishConfetti(GetCharacter()->m_Pos, GetCharacter()->TeamMask());
+				GameServer()->CreateBirthdayEffect(GetCharacter()->m_Pos, GetCharacter()->TeamMask());
 			}
 			GameServer()->SendRecord(m_ClientId);
 			break;

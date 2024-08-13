@@ -1183,10 +1183,15 @@ void CGameClient::ProcessEvents()
 			const CNetEvent_HammerHit *pEvent = (const CNetEvent_HammerHit *)Item.m_pData;
 			m_Effects.HammerHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
 		}
+		else if(Item.m_Type == NETEVENTTYPE_BIRTHDAY)
+		{
+			const CNetEvent_Birthday *pEvent = (const CNetEvent_Birthday *)Item.m_pData;
+			m_Effects.Confetti(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
+		}
 		else if(Item.m_Type == NETEVENTTYPE_FINISH)
 		{
 			const CNetEvent_Finish *pEvent = (const CNetEvent_Finish *)Item.m_pData;
-			m_Effects.FinishConfetti(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
+			m_Effects.Confetti(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_SPAWN)
 		{

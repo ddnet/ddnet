@@ -345,7 +345,17 @@ void CGameContext::CreateDeath(vec2 Pos, int ClientId, CClientMask Mask)
 	}
 }
 
-void CGameContext::CreateFinishConfetti(vec2 Pos, CClientMask Mask)
+void CGameContext::CreateBirthdayEffect(vec2 Pos, CClientMask Mask)
+{
+	CNetEvent_Birthday *pEvent = m_Events.Create<CNetEvent_Birthday>(Mask);
+	if(pEvent)
+	{
+		pEvent->m_X = (int)Pos.x;
+		pEvent->m_Y = (int)Pos.y;
+	}
+}
+
+void CGameContext::CreateFinishEffect(vec2 Pos, CClientMask Mask)
 {
 	CNetEvent_Finish *pEvent = m_Events.Create<CNetEvent_Finish>(Mask);
 	if(pEvent)
