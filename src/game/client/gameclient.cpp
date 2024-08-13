@@ -846,6 +846,32 @@ ColorRGBA CGameClient::GetDDTeamColor(int DDTeam, float Lightness) const
 	return color_cast<ColorRGBA>(ColorHSLA(Hue, 1.0f, Lightness));
 }
 
+void CGameClient::FormatClientId(int ClientId, char (&aClientId)[16], EClientIdFormat Format) const
+{
+	if(Format == EClientIdFormat::NO_INDENT)
+	{
+		str_format(aClientId, sizeof(aClientId), "%d", ClientId);
+	}
+	else
+	{
+		const int HighestClientId = Format == EClientIdFormat::INDENT_AUTO ? m_Snap.m_HighestClientId : 64;
+		const char *pFigureSpace = " ";
+		char aNumber[8];
+		str_format(aNumber, sizeof(aNumber), "%d", ClientId);
+		aClientId[0] = '\0';
+		if(ClientId < 100 && HighestClientId >= 100)
+		{
+			str_append(aClientId, pFigureSpace);
+		}
+		if(ClientId < 10 && HighestClientId >= 10)
+		{
+			str_append(aClientId, pFigureSpace);
+		}
+		str_append(aClientId, aNumber);
+	}
+	str_append(aClientId, ": ");
+}
+
 void CGameClient::OnRelease()
 {
 	// release all systems
@@ -1519,6 +1545,8 @@ void CGameClient::OnNewSnapshot()
 							m_Snap.m_SpecInfo.m_Active = true;
 						}
 					}
+
+					m_Snap.m_HighestClientId = maximum(m_Snap.m_HighestClientId, pInfo->m_ClientId);
 
 					// calculate team-balance
 					if(pInfo->m_Team != TEAM_SPECTATORS)

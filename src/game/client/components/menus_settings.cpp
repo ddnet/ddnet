@@ -2544,7 +2544,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		RightView.HSplitTop(MarginSmall, nullptr, &RightView);
 
 		// Switches of various DDRace HUD elements
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIds, Localize("Show client IDs in scoreboard"), &g_Config.m_ClShowIds, &RightView, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIds, Localize("Show client IDs (scoreboard, chat, spectator)"), &g_Config.m_ClShowIds, &RightView, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDDRace, Localize("Show DDRace HUD"), &g_Config.m_ClShowhudDDRace, &RightView, LineSize);
 		if(g_Config.m_ClShowhudDDRace)
 		{
@@ -2750,17 +2750,11 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			LocalCursor.m_LineWidth = LineWidth;
 			const auto &Line = s_vLines[LineIndex];
 
-			char aName[64 + 12] = "";
-
+			char aClientId[16] = "";
 			if(g_Config.m_ClShowIds && Line.m_ClientId >= 0 && Line.m_aName[0] != '\0')
 			{
-				if(Line.m_ClientId < 10)
-					str_format(aName, sizeof(aName), " %d: ", Line.m_ClientId);
-				else
-					str_format(aName, sizeof(aName), "%d: ", Line.m_ClientId);
+				GameClient()->FormatClientId(Line.m_ClientId, aClientId, EClientIdFormat::INDENT_FORCE);
 			}
-
-			str_append(aName, Line.m_aName);
 
 			char aCount[12];
 			if(Line.m_ClientId < 0)
@@ -2793,7 +2787,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			if(Render)
 				TextRender()->TextColor(NameColor);
 
-			TextRender()->TextEx(&LocalCursor, aName, -1);
+			TextRender()->TextEx(&LocalCursor, aClientId);
+			TextRender()->TextEx(&LocalCursor, Line.m_aName);
 
 			if(Line.m_TimesRepeated > 0)
 			{
