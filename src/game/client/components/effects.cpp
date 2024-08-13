@@ -226,7 +226,7 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientId, float Alpha)
 	}
 }
 
-void CEffects::FinishConfetti(vec2 Pos, float Alpha)
+void CEffects::Confetti(vec2 Pos, float Alpha)
 {
 	ColorRGBA Red(1.0f, 0.4f, 0.4f);
 	ColorRGBA Green(0.4f, 1.0f, 0.4f);
