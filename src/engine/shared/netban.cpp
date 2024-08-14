@@ -285,7 +285,7 @@ void CNetBan::Init(IConsole *pConsole, IStorage *pStorage)
 	Console()->Register("unban", "s[ip|entry]", CFGFLAG_SERVER | CFGFLAG_MASTER | CFGFLAG_STORE, ConUnban, this, "Unban ip/banlist entry");
 	Console()->Register("unban_range", "s[first ip] s[last ip]", CFGFLAG_SERVER | CFGFLAG_MASTER | CFGFLAG_STORE, ConUnbanRange, this, "Unban ip range");
 	Console()->Register("unban_all", "", CFGFLAG_SERVER | CFGFLAG_MASTER | CFGFLAG_STORE, ConUnbanAll, this, "Unban all entries");
-	Console()->Register("bans", "?i[page]", CFGFLAG_SERVER | CFGFLAG_MASTER, ConBans, this, "Show banlist (page 0 by default, 20 entries per page)");
+	Console()->Register("bans", "?i[page]", CFGFLAG_SERVER | CFGFLAG_MASTER, ConBans, this, "Show banlist (page 1 by default, 20 entries per page)");
 	Console()->Register("bans_save", "s[file]", CFGFLAG_SERVER | CFGFLAG_MASTER | CFGFLAG_STORE, ConBansSave, this, "Save banlist in a file");
 }
 
@@ -479,13 +479,32 @@ void CNetBan::ConBans(IConsole::IResult *pResult, void *pUser)
 {
 	CNetBan *pThis = static_cast<CNetBan *>(pUser);
 
-	int Page = pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 0;
+	int Page = pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 1;
 	static const int s_EntriesPerPage = 20;
-	const int Start = Page * s_EntriesPerPage;
-	const int End = (Page + 1) * s_EntriesPerPage;
+	const int Start = (Page - 1) * s_EntriesPerPage;
+	const int End = Page * s_EntriesPerPage;
+	const int NumBans = pThis->m_BanAddrPool.Num() + pThis->m_BanRangePool.Num();
+	const int NumPages = NumBans / s_EntriesPerPage + 1;
+
+	char aBuf[256], aMsg[256];
+
+	if(NumBans == 0)
+	{
+		str_format(aMsg, sizeof(aMsg), "The ban list is empty.");
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
+
+		return;
+	}
+
+	if(Page <= 0 || Page > NumPages)
+	{
+		str_format(aMsg, sizeof(aMsg), "Invalid page number. There %s %d %s available.", NumPages == 1 ? "is" : "are", NumPages, NumPages == 1 ? "page" : "pages");
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
+
+		return;
+	}
 
 	int Count = 0;
-	char aBuf[256], aMsg[256];
 	for(CBanAddr *pBan = pThis->m_BanAddrPool.First(); pBan; pBan = pBan->m_pNext, Count++)
 	{
 		if(Count < Start || Count >= End)
@@ -506,7 +525,7 @@ void CNetBan::ConBans(IConsole::IResult *pResult, void *pUser)
 		str_format(aMsg, sizeof(aMsg), "#%i %s", Count, aBuf);
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
 	}
-	str_format(aMsg, sizeof(aMsg), "%d %s, showing entries %d - %d", Count, Count == 1 ? "ban" : "bans", Start, End - 1);
+	str_format(aMsg, sizeof(aMsg), "%d %s, showing entries %d - %d (page %d/%d)", Count, Count == 1 ? "ban" : "bans", Start, End > Count ? Count - 1 : End - 1, Page, NumPages);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
 }
 
