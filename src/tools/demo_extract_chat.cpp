@@ -151,6 +151,10 @@ public:
 			if(!pRawMsg)
 				return;
 
+			const IDemoPlayer::CInfo &Info = m_pDemoPlayer->Info()->m_Info;
+			char aTime[20];
+			str_time((int64_t)(Info.m_CurrentTick - Info.m_FirstTick) / SERVER_TICK_SPEED * 100, TIME_HOURS, aTime, sizeof(aTime));
+
 			if(Msg == NETMSGTYPE_SV_CHAT)
 			{
 				CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
@@ -162,16 +166,16 @@ public:
 
 				if(pMsg->m_ClientId < 0)
 				{
-					printf("%s: *** %s\n", Prefix, pMsg->m_pMessage);
+					printf("[%s] %s: *** %s\n", aTime, Prefix, pMsg->m_pMessage);
 					return;
 				}
 
 				if(pMsg->m_Team == TEAM_WHISPER_SEND)
-					printf("%s: -> %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
+					printf("[%s] %s: -> %s: %s\n", aTime, Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 				else if(pMsg->m_Team == TEAM_WHISPER_RECV)
-					printf("%s: <- %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
+					printf("[%s] %s: <- %s: %s\n", aTime, Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 				else
-					printf("%s: %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
+					printf("[%s] %s: %s: %s\n", aTime, Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 			}
 			else if(Msg == NETMSGTYPE_SV_BROADCAST)
 			{
@@ -181,7 +185,7 @@ public:
 				{
 					if(aBroadcast[0] != '\0')
 					{
-						printf("broadcast: %s\n", aBroadcast);
+						printf("[%s] broadcast: %s\n", aTime, aBroadcast);
 					}
 				}
 			}
