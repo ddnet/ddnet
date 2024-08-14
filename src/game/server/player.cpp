@@ -116,6 +116,7 @@ void CPlayer::Reset()
 
 	m_Paused = PAUSE_NONE;
 	m_DND = false;
+	m_Whispers = true;
 
 	m_LastPause = 0;
 	m_Score.reset();
