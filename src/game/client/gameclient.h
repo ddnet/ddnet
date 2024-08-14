@@ -16,6 +16,7 @@
 #include <game/teamscore.h>
 
 #include <game/client/prediction/gameworld.h>
+#include <game/client/race.h>
 
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
@@ -195,6 +196,7 @@ private:
 	CLayers m_Layers;
 	CCollision m_Collision;
 	CUi m_UI;
+	CRaceHelper m_RaceHelper;
 
 	void ProcessEvents();
 	void UpdatePositions();
@@ -258,6 +260,8 @@ public:
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
 	class CLayers *Layers() { return &m_Layers; }
 	CCollision *Collision() { return &m_Collision; }
+	const CCollision *Collision() const { return &m_Collision; }
+	const CRaceHelper *RaceHelper() const { return &m_RaceHelper; }
 	class IEditor *Editor() { return m_pEditor; }
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }

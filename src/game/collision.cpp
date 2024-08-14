@@ -123,8 +123,8 @@ void CCollision::Init(class CLayers *pLayers)
 	{
 		for(int i = 0; i < m_Width * m_Height; i++)
 		{
-			int Number = TeleLayer()[i].m_Number;
-			int Type = TeleLayer()[i].m_Type;
+			int Number = m_pTele[i].m_Number;
+			int Type = m_pTele[i].m_Type;
 			if(Number > 0)
 			{
 				if(Type == TILE_TELEIN)
@@ -171,7 +171,7 @@ void CCollision::Unload()
 	m_pDoor = nullptr;
 }
 
-void CCollision::FillAntibot(CAntibotMapData *pMapData)
+void CCollision::FillAntibot(CAntibotMapData *pMapData) const
 {
 	pMapData->m_Width = m_Width;
 	pMapData->m_Height = m_Height;
