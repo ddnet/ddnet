@@ -879,7 +879,7 @@ void CClient::DebugRender()
 		total = 42
 	*/
 	s_FrameTimeAvg = s_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
-	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k) fps: %3d",
+	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB) fps: %3d",
 		m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy],
 		(Graphics()->TextureMemoryUsage() / 1024),
 		(Graphics()->BufferMemoryUsage() / 1024),
@@ -900,7 +900,7 @@ void CClient::DebugRender()
 			SendPackets++;
 		if(!RecvPackets)
 			RecvPackets++;
-		str_format(aBuffer, sizeof(aBuffer), "send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " kbps) avg: %5" PRIu64 "\nrecv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " kbps) avg: %5" PRIu64,
+		str_format(aBuffer, sizeof(aBuffer), "send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64 "\nrecv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64,
 			SendPackets, SendBytes, SendPackets * 42, SendTotal, (SendTotal * 8) / 1024, SendBytes / SendPackets,
 			RecvPackets, RecvBytes, RecvPackets * 42, RecvTotal, (RecvTotal * 8) / 1024, RecvBytes / RecvPackets);
 		Graphics()->QuadsText(2, 14, 16, aBuffer);
