@@ -3397,8 +3397,8 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		}
 
 		m_GameSkinLoaded = true;
-		ImgInfo.Free();
 	}
+	ImgInfo.Free();
 }
 
 void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
@@ -3441,8 +3441,8 @@ void CGameClient::LoadEmoticonsSkin(const char *pPath, bool AsDir)
 			m_EmoticonsSkin.m_aSpriteEmoticons[i] = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_OOP + i]);
 
 		m_EmoticonsSkinLoaded = true;
-		ImgInfo.Free();
 	}
+	ImgInfo.Free();
 }
 
 void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
@@ -3512,8 +3512,8 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 		m_ParticlesSkin.m_aSpriteParticles[9] = m_ParticlesSkin.m_SpriteParticleHit;
 
 		m_ParticlesSkinLoaded = true;
-		ImgInfo.Free();
 	}
+	ImgInfo.Free();
 }
 
 void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
@@ -3613,8 +3613,8 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		m_HudSkin.m_SpriteHudDummyCopy = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_COPY]);
 
 		m_HudSkinLoaded = true;
-		ImgInfo.Free();
 	}
+	ImgInfo.Free();
 }
 
 void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
@@ -3658,8 +3658,8 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 		m_ExtrasSkin.m_SpriteParticleSnowflake = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE]);
 		m_ExtrasSkin.m_aSpriteParticles[0] = m_ExtrasSkin.m_SpriteParticleSnowflake;
 		m_ExtrasSkinLoaded = true;
-		ImgInfo.Free();
 	}
+	ImgInfo.Free();
 }
 
 void CGameClient::RefreshSkins()
