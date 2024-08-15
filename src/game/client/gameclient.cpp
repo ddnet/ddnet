@@ -1527,7 +1527,7 @@ void CGameClient::OnNewSnapshot()
 						pClient->m_SkinInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
 					}
 
-					pClient->UpdateRenderInfo(IsTeamPlay());
+					pClient->UpdateRenderInfo(IsTeamPlay(), g_Config.m_ClDummy);
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_PLAYERINFO)
@@ -2324,7 +2324,7 @@ void CGameClient::CClientStats::Reset()
 	m_FlagCaptures = 0;
 }
 
-void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay)
+void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay, int Conn)
 {
 	m_RenderInfo = m_SkinInfo;
 
@@ -2346,18 +2346,18 @@ void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay)
 				const ColorRGBA aMarkingColorsSixup[2] = {
 					ColorRGBA(0.824f, 0.345f, 0.345f, 1.0f),
 					ColorRGBA(0.345f, 0.514f, 0.824f, 1.0f)};
-				float MarkingAlpha = m_RenderInfo.m_Sixup.m_aColors[protocol7::SKINPART_MARKING].a;
-				for(auto &Color : m_RenderInfo.m_Sixup.m_aColors)
+				float MarkingAlpha = m_RenderInfo.m_Sixup[Conn].m_aColors[protocol7::SKINPART_MARKING].a;
+				for(auto &Color : m_RenderInfo.m_Sixup[Conn].m_aColors)
 					Color = aTeamColorsSixup[m_Team];
 				if(MarkingAlpha > 0.1f)
-					m_RenderInfo.m_Sixup.m_aColors[protocol7::SKINPART_MARKING] = aMarkingColorsSixup[m_Team];
+					m_RenderInfo.m_Sixup[Conn].m_aColors[protocol7::SKINPART_MARKING] = aMarkingColorsSixup[m_Team];
 			}
 		}
 		else
 		{
 			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(12829350));
 			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(12829350));
-			for(auto &Color : m_RenderInfo.m_Sixup.m_aColors)
+			for(auto &Color : m_RenderInfo.m_Sixup[Conn].m_aColors)
 				Color = color_cast<ColorRGBA>(ColorHSLA(12829350));
 		}
 	}
@@ -3692,7 +3692,8 @@ void CGameClient::RefreshSkins()
 			Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
 			Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
 		}
-		Client.UpdateRenderInfo(IsTeamPlay());
+		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+			Client.UpdateRenderInfo(IsTeamPlay(), Dummy);
 	}
 
 	for(auto &pComponent : m_vpAll)

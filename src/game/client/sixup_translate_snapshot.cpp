@@ -466,7 +466,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			IntsToStr(pInfo->m_aClan, 3, Client.m_aClan, std::size(Client.m_aClan));
 			Client.m_Country = pInfo->m_Country;
 
-			ApplySkin7InfoFromSnapObj(pInfo, ClientId, Conn);
+			ApplySkin7InfoFromSnapObj(pInfo, ClientId);
 		}
 		else if(pItem7->Type() == protocol7::NETOBJTYPE_DE_GAMEINFO)
 		{
