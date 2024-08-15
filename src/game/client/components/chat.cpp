@@ -823,14 +823,14 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 				{
 					for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 					{
-						const char *pPartName = LineAuthor.m_Sixup.m_aaSkinPartNames[Part];
+						const char *pPartName = LineAuthor.m_Sixup[g_Config.m_ClDummy].m_aaSkinPartNames[Part];
 						int Id = m_pClient->m_Skins7.FindSkinPart(Part, pPartName, false);
 						const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, Id);
-						if(LineAuthor.m_Sixup.m_aUseCustomColors[Part])
+						if(LineAuthor.m_Sixup[g_Config.m_ClDummy].m_aUseCustomColors[Part])
 						{
 							pCurrentLine->m_Sixup.m_aTextures[Part] = pSkinPart->m_ColorTexture;
 							pCurrentLine->m_Sixup.m_aColors[Part] = m_pClient->m_Skins7.GetColor(
-								LineAuthor.m_Sixup.m_aSkinPartColors[Part],
+								LineAuthor.m_Sixup[g_Config.m_ClDummy].m_aSkinPartColors[Part],
 								Part == protocol7::SKINPART_MARKING);
 						}
 						else

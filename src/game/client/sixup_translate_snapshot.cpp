@@ -466,7 +466,7 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			IntsToStr(pInfo->m_aClan, 3, Client.m_aClan, std::size(Client.m_aClan));
 			Client.m_Country = pInfo->m_Country;
 
-			ApplySkin7InfoFromSnapObj(pInfo, ClientId);
+			ApplySkin7InfoFromSnapObj(pInfo, ClientId, Conn);
 		}
 		else if(pItem7->Type() == protocol7::NETOBJTYPE_DE_GAMEINFO)
 		{
@@ -524,9 +524,9 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshot *pTo, int Conn)
 
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			StrToInts(ClientInfoObj.m_aaSkinPartNames[Part], 6, m_aClients[i].m_Sixup.m_aaSkinPartNames[Part]);
-			ClientInfoObj.m_aUseCustomColors[Part] = m_aClients[i].m_Sixup.m_aUseCustomColors[Part];
-			ClientInfoObj.m_aSkinPartColors[Part] = m_aClients[i].m_Sixup.m_aSkinPartColors[Part];
+			StrToInts(ClientInfoObj.m_aaSkinPartNames[Part], 6, m_aClients[i].m_Sixup[Conn].m_aaSkinPartNames[Part]);
+			ClientInfoObj.m_aUseCustomColors[Part] = m_aClients[i].m_Sixup[Conn].m_aUseCustomColors[Part];
+			ClientInfoObj.m_aSkinPartColors[Part] = m_aClients[i].m_Sixup[Conn].m_aSkinPartColors[Part];
 		}
 
 		mem_copy(pItem, &ClientInfoObj, sizeof(protocol7::CNetObj_De_ClientInfo));

@@ -5,6 +5,7 @@
 #include <limits>
 
 #include <engine/client/checksum.h>
+#include <engine/client/enums.h>
 #include <engine/demo.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
@@ -2373,11 +2374,14 @@ void CGameClient::CClientData::Reset()
 	m_Country = -1;
 	m_aSkinName[0] = '\0';
 	m_SkinColor = 0;
-	for(int i = 0; i < protocol7::NUM_SKINPARTS; ++i)
+	for(auto &Info : m_Sixup)
 	{
-		m_Sixup.m_aaSkinPartNames[i][0] = '\0';
-		m_Sixup.m_aUseCustomColors[i] = 0;
-		m_Sixup.m_aSkinPartColors[i] = 0;
+		for(int i = 0; i < protocol7::NUM_SKINPARTS; ++i)
+		{
+			Info.m_aaSkinPartNames[i][0] = '\0';
+			Info.m_aUseCustomColors[i] = 0;
+			Info.m_aSkinPartColors[i] = 0;
+		}
 	}
 	m_Team = 0;
 	m_Emoticon = 0;
@@ -2503,11 +2507,11 @@ bool CGameClient::GotWantedSkin7(bool Dummy)
 
 	for(int SkinPart = 0; SkinPart < protocol7::NUM_SKINPARTS; SkinPart++)
 	{
-		if(str_comp(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup.m_aaSkinPartNames[SkinPart], apSkinPartsPtr[SkinPart]))
+		if(str_comp(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup[g_Config.m_ClDummy].m_aaSkinPartNames[SkinPart], apSkinPartsPtr[SkinPart]))
 			return false;
-		if(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup.m_aUseCustomColors[SkinPart] != aUCCVars[SkinPart])
+		if(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup[g_Config.m_ClDummy].m_aUseCustomColors[SkinPart] != aUCCVars[SkinPart])
 			return false;
-		if(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup.m_aSkinPartColors[SkinPart] != aColorVars[SkinPart])
+		if(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup[g_Config.m_ClDummy].m_aSkinPartColors[SkinPart] != aColorVars[SkinPart])
 			return false;
 	}
 
