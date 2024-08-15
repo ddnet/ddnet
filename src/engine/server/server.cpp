@@ -2591,9 +2591,8 @@ int CServer::LoadMap(const char *pMapName)
 			{
 				m_pRegister->OnConfigChange();
 			}
-			str_format(aBufMsg, sizeof(aBufMsg), "couldn't load map %s", aBuf);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", "disabling 0.7 compatibility");
+			log_error("sixup", "couldn't load map %s", aBuf);
+			log_info("sixup", "disabling 0.7 compatibility");
 		}
 		else
 		{
