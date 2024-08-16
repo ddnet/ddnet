@@ -61,38 +61,30 @@ class CConsole : public IConsole
 	static void ConCommandAccess(IResult *pResult, void *pUser);
 	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
 
-	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) override;
-
-	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback;
-	void *m_pTeeHistorianCommandUserdata;
-
-	FUnknownCommandCallback m_pfnUnknownCommandCallback = EmptyUnknownCommandCallback;
-	void *m_pUnknownCommandUserdata = nullptr;
-
 	enum
 	{
 		CONSOLE_MAX_STR_LENGTH = 8192,
 		MAX_PARTS = (CONSOLE_MAX_STR_LENGTH + 1) / 2
 	};
-
+	
 	class CResult : public IResult
 	{
 	public:
 		char m_aStringStorage[CONSOLE_MAX_STR_LENGTH + 1];
 		char *m_pArgsStart;
-
+		
 		const char *m_pCommand;
 		const char *m_apArgs[MAX_PARTS];
-
+		
 		CResult()
-
+		
 		{
 			mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
 			m_pArgsStart = 0;
 			m_pCommand = 0;
 			mem_zero(m_apArgs, sizeof(m_apArgs));
 		}
-
+		
 		CResult &operator=(const CResult &Other)
 		{
 			if(this != &Other)
@@ -106,35 +98,35 @@ class CConsole : public IConsole
 			}
 			return *this;
 		}
-
+		
 		void AddArgument(const char *pArg)
 		{
 			m_apArgs[m_NumArgs++] = pArg;
 		}
-
+		
 		const char *GetString(unsigned Index) const override;
 		int GetInteger(unsigned Index) const override;
 		float GetFloat(unsigned Index) const override;
 		ColorHSLA GetColor(unsigned Index, bool Light) const override;
-
+		
 		void RemoveArgument(unsigned Index) override
 		{
 			dbg_assert(Index < m_NumArgs, "invalid argument index");
 			for(unsigned i = Index; i < m_NumArgs - 1; i++)
 				m_apArgs[i] = m_apArgs[i + 1];
-
+			
 			m_apArgs[m_NumArgs--] = 0;
 		}
-
+		
 		// DDRace
-
+		
 		enum
 		{
 			VICTIM_NONE = -3,
 			VICTIM_ME = -2,
 			VICTIM_ALL = -1,
 		};
-
+		
 		int m_Victim;
 		void ResetVictim();
 		bool HasVictim() const;
@@ -142,8 +134,19 @@ class CConsole : public IConsole
 		void SetVictim(const char *pVictim);
 		int GetVictim() const override;
 	};
+	
+	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) override;
+	void ExecuteCommand(CResult Result, const char *pStr, const char *pEnd, int Stroke);
 
-	int ParseStart(CResult *pResult, const char *pString, int Length);
+	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback;
+	void *m_pTeeHistorianCommandUserdata;
+
+	FUnknownCommandCallback m_pfnUnknownCommandCallback = EmptyUnknownCommandCallback;
+	void *m_pUnknownCommandUserdata = nullptr;
+
+	void ConvertParentheses(char *apResult, const char *pStr);
+	
+	int ParseStart(CResult *pResult, const char *pString, const char *pEnd);
 	int ParseArgs(CResult *pResult, const char *pFormat);
 
 	/*
