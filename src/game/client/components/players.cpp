@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <engine/client/enums.h>
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
@@ -203,8 +204,21 @@ void CPlayers::RenderHookCollLine(
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
 	// draw hook collision line
 	{
+		bool Aim = (Player.m_PlayerFlags & PLAYERFLAG_AIM);
+		if(!Client()->ServerCapAnyPlayerFlag())
+		{
+			for(int i = 0; i < NUM_DUMMIES; i++)
+			{
+				if(ClientId == m_pClient->m_aLocalIds[i])
+				{
+					Aim = GameClient()->m_Controls.m_aShowHookColl[i];
+					break;
+				}
+			}
+		}
+
 		bool AlwaysRenderHookColl = GameClient()->m_GameInfo.m_AllowHookColl && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) == 2;
-		bool RenderHookCollPlayer = ClientId >= 0 && Player.m_PlayerFlags & PLAYERFLAG_AIM && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
+		bool RenderHookCollPlayer = ClientId >= 0 && Aim && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
 		if(Local && GameClient()->m_GameInfo.m_AllowHookColl && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			RenderHookCollPlayer = GameClient()->m_Controls.m_aShowHookColl[g_Config.m_ClDummy] && g_Config.m_ClShowHookCollOwn > 0;
 
