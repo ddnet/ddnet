@@ -45,7 +45,7 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light) const
 {
 	if(Index >= m_NumArgs)
 		return ColorHSLA(0, 0, 0);
-
+	
 	const char *pStr = m_apArgs[Index];
 	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr + 1))) // Teeworlds Color (Packed HSL)
 	{
@@ -76,7 +76,7 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light) const
 		return ColorHSLA(0, 0, .5f);
 	else if(!str_comp_nocase(pStr, "black"))
 		return ColorHSLA(0, 0, 0);
-
+	
 	return ColorHSLA(0, 0, 0);
 }
 
@@ -99,7 +99,7 @@ const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int Fl
 		if(pCommand->m_Flags & FlagMask && pCommand->GetAccessLevel() >= AccessLevel)
 			return pCommand;
 	}
-
+	
 	return 0;
 }
 
@@ -112,21 +112,21 @@ int CConsole::ParseStart(CResult *pResult, const char *pString, const char *pEnd
 	int Len = sizeof(pResult->m_aStringStorage);
 	if(Length < Len)
 		Len = Length;
-
+	
 	str_copy(pResult->m_aStringStorage, pString, Len);
 	pStr = pResult->m_aStringStorage;
-
+	
 	// get command
 	pStr = str_skip_whitespaces(pStr);
 	pResult->m_pCommand = pStr;
 	pStr = str_skip_to_whitespace(pStr);
-
+	
 	if(*pStr)
 	{
 		pStr[0] = 0;
 		pStr++;
 	}
-
+	
 	pResult->m_pArgsStart = pStr;
 	return 0;
 }
@@ -137,22 +137,22 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 	char *pStr;
 	int Optional = 0;
 	int Error = 0;
-
+	
 	pResult->ResetVictim();
-
+	
 	pStr = pResult->m_pArgsStart;
-
+	
 	while(true)
 	{
 		if(!Command)
 			break;
-
+		
 		if(Command == '?')
 			Optional = 1;
 		else
 		{
 			pStr = str_skip_whitespaces(pStr);
-
+			
 			if(!(*pStr)) // error, non optional command needs value
 			{
 				if(!Optional)
@@ -160,7 +160,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					Error = 1;
 					break;
 				}
-
+				
 				while(Command)
 				{
 					if(Command == 'v')
@@ -172,14 +172,14 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 				}
 				break;
 			}
-
+			
 			// add token
 			if(*pStr == '"')
 			{
 				char *pDst;
 				pStr++;
 				pResult->AddArgument(pStr);
-
+				
 				pDst = pStr; // we might have to process escape data
 				while(true)
 				{
@@ -194,27 +194,27 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					}
 					else if(pStr[0] == 0)
 						return 1; // return error
-
+					
 					*pDst = *pStr;
 					pDst++;
 					pStr++;
 				}
-
+				
 				// write null termination
 				*pDst = 0;
-
+				
 				pStr++;
 			}
 			else
 			{
 				char *pVictim = 0;
-
+				
 				pResult->AddArgument(pStr);
 				if(Command == 'v')
 				{
 					pVictim = pStr;
 				}
-
+				
 				if(Command == 'r') // rest of the string
 					break;
 				else if(Command == 'v') // validate victim
@@ -225,13 +225,13 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 					pStr = str_skip_to_whitespace(pStr);
 				else if(Command == 's') // validate string
 					pStr = str_skip_to_whitespace(pStr);
-
+				
 				if(pStr[0] != 0) // check for end of string
 				{
 					pStr[0] = 0;
 					pStr++;
 				}
-
+				
 				if(pVictim)
 				{
 					pResult->SetVictim(pVictim);
@@ -241,7 +241,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 		// fetch next command
 		Command = NextParam(pFormat);
 	}
-
+	
 	return Error;
 }
 
@@ -250,7 +250,7 @@ char CConsole::NextParam(const char *&pFormat)
 	if(*pFormat)
 	{
 		pFormat++;
-
+		
 		if(*pFormat == '[')
 		{
 			// skip bracket contents
@@ -259,10 +259,10 @@ char CConsole::NextParam(const char *&pFormat)
 				if(!*pFormat)
 					return *pFormat;
 			}
-
+			
 			// skip ']'
 			pFormat++;
-
+			
 			// skip space if there is one
 			if(*pFormat == ' ')
 				pFormat++;
@@ -275,7 +275,7 @@ char *CConsole::Format(char *pBuf, int Size, const char *pFrom, const char *pStr
 {
 	char aTimeBuf[80];
 	str_timestamp_format(aTimeBuf, sizeof(aTimeBuf), FORMAT_TIME);
-
+	
 	str_format(pBuf, Size, "[%s][%s]: %s", aTimeBuf, pFrom, pStr);
 	return pBuf;
 }
@@ -366,14 +366,14 @@ bool CConsole::LineIsValid(const char *pStr)
 	ConvertParentheses(apResult, pStr);
 	
 	pStr = apResult;
-
+	
 	do
 	{
 		CResult Result;
 		const char *pEnd = pStr;
 		const char *pNextPart = 0;
 		int InString = 0;
-
+		
 		while(*pEnd)
 		{
 			if(*pEnd == '"')
@@ -393,20 +393,20 @@ bool CConsole::LineIsValid(const char *pStr)
 				else if(*pEnd == '#') // comment, no need to do anything more
 					break;
 			}
-
+			
 			pEnd++;
 		}
-
+		
 		if(ParseStart(&Result, pStr, pEnd) != 0)
 			return false;
-
+		
 		CCommand *pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 		if(!pCommand || ParseArgs(&Result, pCommand->m_pParams))
 			return false;
-
+		
 		pStr = pNextPart;
 	} while(pStr && *pStr);
-
+	
 	return true;
 }
 
@@ -588,10 +588,13 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 	}
 	
 	/*
-		Let's me express here.
-		We solve Parentheses first,
-		and we solve the Semicolons if we have.
+	Let's me express here.
+	We solve Parentheses first,
+	and we solve the Semicolons if we have.
 	*/
+	
+	if (Str [0] == '#')
+		return ;
 	
 	int Len = Str. size ();
 	int Level = 0;
@@ -670,7 +673,7 @@ CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 				return pCommand;
 		}
 	}
-
+	
 	return 0x0;
 }
 
@@ -694,17 +697,17 @@ bool CConsole::ExecuteFile(const char *pFilename, int ClientId, bool LogFailure,
 	for(CExecFile *pCur = m_pFirstExec; pCur; pCur = pCur->m_pPrev)
 		if(str_comp(pFilename, pCur->m_pFilename) == 0)
 			return false;
-
+	
 	if(!m_pStorage)
 		return false;
-
+	
 	// push this one to the stack
 	CExecFile ThisFile;
 	CExecFile *pPrev = m_pFirstExec;
 	ThisFile.m_pFilename = pFilename;
 	ThisFile.m_pPrev = m_pFirstExec;
 	m_pFirstExec = &ThisFile;
-
+	
 	// exec the file
 	CLineReader LineReader;
 	bool Success = false;
@@ -713,12 +716,12 @@ bool CConsole::ExecuteFile(const char *pFilename, int ClientId, bool LogFailure,
 	{
 		str_format(aBuf, sizeof(aBuf), "executing '%s'", pFilename);
 		Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-
+		
 		while(const char *pLine = LineReader.Get())
 		{
 			ExecuteLine(pLine, ClientId);
 		}
-
+		
 		Success = true;
 	}
 	else if(LogFailure)
@@ -726,7 +729,7 @@ bool CConsole::ExecuteFile(const char *pFilename, int ClientId, bool LogFailure,
 		str_format(aBuf, sizeof(aBuf), "failed to open '%s'", pFilename);
 		Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
 	}
-
+	
 	m_pFirstExec = pPrev;
 	return Success;
 }
@@ -768,7 +771,7 @@ void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
 	}
 	else
 		str_format(aBuf, sizeof(aBuf), "No such command: '%s'.", pResult->GetString(0));
-
+	
 	pConsole->Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 }
 
@@ -778,7 +781,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 	char aBuf[240];
 	mem_zero(aBuf, sizeof(aBuf));
 	int Used = 0;
-
+	
 	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
 		if(pCommand->m_Flags & pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->GetInteger(0), (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER))
@@ -815,7 +818,7 @@ void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 	char aBuf[4];
 	str_format(aBuf, sizeof(aBuf), "%d", (int)IConsole::ACCESS_LEVEL_USER);
 	Result.AddArgument(aBuf);
-
+	
 	CConsole::ConCommandStatus(&Result, pConsole);
 }
 
@@ -843,19 +846,19 @@ CConsole::CConsole(int FlagMask)
 	m_pFirstExec = 0;
 	m_pfnTeeHistorianCommandCallback = 0;
 	m_pTeeHistorianCommandUserdata = 0;
-
+	
 	m_pStorage = 0;
-
+	
 	// register some basic commands
 	Register("echo", "r[text]", CFGFLAG_SERVER, Con_Echo, this, "Echo the text");
 	Register("exec", "r[file]", CFGFLAG_SERVER | CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file");
-
+	
 	Register("access_level", "s[command] ?i[accesslevel]", CFGFLAG_SERVER, ConCommandAccess, this, "Specify command accessibility (admin = 0, moderator = 1, helper = 2, all = 3)");
 	Register("access_status", "i[accesslevel]", CFGFLAG_SERVER, ConCommandStatus, this, "List all commands which are accessible for admin = 0, moderator = 1, helper = 2, all = 3");
 	Register("cmdlist", "", CFGFLAG_SERVER | CFGFLAG_CHAT, ConUserCommandStatus, this, "List all commands which are accessible for users");
-
+	
 	// DDRace
-
+	
 	m_Cheated = false;
 }
 
@@ -949,17 +952,17 @@ void CConsole::Register(const char *pName, const char *pParams,
 	}
 	pCommand->m_pfnCallback = pfnFunc;
 	pCommand->m_pUserData = pUser;
-
+	
 	pCommand->m_pName = pName;
 	pCommand->m_pHelp = pHelp;
 	pCommand->m_pParams = pParams;
-
+	
 	pCommand->m_Flags = Flags;
 	pCommand->m_Temp = false;
-
+	
 	if(DoAdd)
 		AddCommandSorted(pCommand);
-
+	
 	if(pCommand->m_Flags & CFGFLAG_CHAT)
 		pCommand->SetAccessLevel(ACCESS_LEVEL_USER);
 }
@@ -973,7 +976,7 @@ void CConsole::RegisterTemp(const char *pName, const char *pParams, int Flags, c
 		str_copy(const_cast<char *>(pCommand->m_pName), pName, TEMPCMD_NAME_LENGTH);
 		str_copy(const_cast<char *>(pCommand->m_pHelp), pHelp, TEMPCMD_HELP_LENGTH);
 		str_copy(const_cast<char *>(pCommand->m_pParams), pParams, TEMPCMD_PARAMS_LENGTH);
-
+		
 		m_pRecycleList = m_pRecycleList->m_pNext;
 	}
 	else
@@ -989,12 +992,12 @@ void CConsole::RegisterTemp(const char *pName, const char *pParams, int Flags, c
 		str_copy(pMem, pParams, TEMPCMD_PARAMS_LENGTH);
 		pCommand->m_pParams = pMem;
 	}
-
+	
 	pCommand->m_pfnCallback = 0;
 	pCommand->m_pUserData = 0;
 	pCommand->m_Flags = Flags;
 	pCommand->m_Temp = true;
-
+	
 	AddCommandSorted(pCommand);
 }
 
@@ -1002,9 +1005,9 @@ void CConsole::DeregisterTemp(const char *pName)
 {
 	if(!m_pFirstCommand)
 		return;
-
+	
 	CCommand *pRemoved = 0;
-
+	
 	// remove temp entry from command list
 	if(m_pFirstCommand->m_Temp && str_comp(m_pFirstCommand->m_pName, pName) == 0)
 	{
@@ -1021,7 +1024,7 @@ void CConsole::DeregisterTemp(const char *pName)
 				break;
 			}
 	}
-
+	
 	// add to recycle list
 	if(pRemoved)
 	{
@@ -1035,7 +1038,7 @@ void CConsole::DeregisterTempAll()
 	// set non temp as first one
 	for(; m_pFirstCommand && m_pFirstCommand->m_Temp; m_pFirstCommand = m_pFirstCommand->m_pNext)
 		;
-
+	
 	// remove temp entries from command list
 	for(CCommand *pCommand = m_pFirstCommand; pCommand && pCommand->m_pNext; pCommand = pCommand->m_pNext)
 	{
@@ -1047,7 +1050,7 @@ void CConsole::DeregisterTempAll()
 			pCommand->m_pNext = pNext;
 		}
 	}
-
+	
 	m_TempCommands.Reset();
 	m_pRecycleList = 0;
 }
@@ -1061,7 +1064,7 @@ void CConsole::Con_Chain(IResult *pResult, void *pUserData)
 void CConsole::Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser)
 {
 	CCommand *pCommand = FindCommand(pName, m_FlagMask);
-
+	
 	if(!pCommand)
 	{
 		char aBuf[256];
@@ -1069,15 +1072,15 @@ void CConsole::Chain(const char *pName, FChainCommandCallback pfnChainFunc, void
 		Print(IConsole::OUTPUT_LEVEL_DEBUG, "console", aBuf);
 		return;
 	}
-
+	
 	CChain *pChainInfo = new CChain();
-
+	
 	// store info
 	pChainInfo->m_pfnChainCallback = pfnChainFunc;
 	pChainInfo->m_pUserData = pUser;
 	pChainInfo->m_pfnCallback = pCommand->m_pfnCallback;
 	pChainInfo->m_pCallbackUserData = pCommand->m_pUserData;
-
+	
 	// chain
 	pCommand->m_pfnCallback = Con_Chain;
 	pCommand->m_pUserData = pChainInfo;
@@ -1104,7 +1107,7 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 				return pCommand;
 		}
 	}
-
+	
 	return 0;
 }
 
