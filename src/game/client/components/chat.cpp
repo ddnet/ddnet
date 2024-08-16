@@ -1299,12 +1299,15 @@ void CChat::OnRender()
 				RenderInfo.m_ColorFeet = Line.m_ColorFeet;
 				RenderInfo.m_Size = TeeSize;
 
-				for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+				if(Client()->IsSixup())
 				{
-					RenderInfo.m_Sixup.m_aColors[Part] = Line.m_Sixup.m_aColors[Part];
-					RenderInfo.m_Sixup.m_aTextures[Part] = Line.m_Sixup.m_aTextures[Part];
-					RenderInfo.m_Sixup.m_HatSpriteIndex = Line.m_Sixup.m_HatSpriteIndex;
-					RenderInfo.m_Sixup.m_HatTexture = Line.m_Sixup.m_HatTexture;
+					for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+					{
+						RenderInfo.m_Sixup.m_aColors[Part] = Line.m_Sixup.m_aColors[Part];
+						RenderInfo.m_Sixup.m_aTextures[Part] = Line.m_Sixup.m_aTextures[Part];
+						RenderInfo.m_Sixup.m_HatSpriteIndex = Line.m_Sixup.m_HatSpriteIndex;
+						RenderInfo.m_Sixup.m_HatTexture = Line.m_Sixup.m_HatTexture;
+					}
 				}
 
 				float RowHeight = FontSize() + RealMsgPaddingY;
