@@ -16,6 +16,7 @@
 
 #include <iterator> // std::size
 #include <new>
+#include <stack>
 
 // todo: rework this
 
@@ -104,8 +105,9 @@ const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int Fl
 
 // the maximum number of tokens occurs in a string of length CONSOLE_MAX_STR_LENGTH with tokens size 1 separated by single spaces
 
-int CConsole::ParseStart(CResult *pResult, const char *pString, int Length)
+int CConsole::ParseStart(CResult *pResult, const char *pString, const char *pEnd)
 {
+	int Length = pEnd - pString + 1;
 	char *pStr;
 	int Len = sizeof(pResult->m_aStringStorage);
 	if(Length < Len)
@@ -358,6 +360,12 @@ bool CConsole::LineIsValid(const char *pStr)
 {
 	if(!pStr || *pStr == 0)
 		return false;
+	
+	char apResult [1024] = "";
+	
+	ConvertParentheses(apResult, pStr);
+	
+	pStr = apResult;
 
 	do
 	{
@@ -389,7 +397,7 @@ bool CConsole::LineIsValid(const char *pStr)
 			pEnd++;
 		}
 
-		if(ParseStart(&Result, pStr, (pEnd - pStr) + 1) != 0)
+		if(ParseStart(&Result, pStr, pEnd) != 0)
 			return false;
 
 		CCommand *pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
@@ -402,15 +410,167 @@ bool CConsole::LineIsValid(const char *pStr)
 	return true;
 }
 
+void CConsole::ExecuteCommand(CResult Result, const char *pStr, const char *pEnd, int Stroke)
+{
+	if(ParseStart(&Result, pStr, pEnd) != 0)
+		return;
+	
+	if(!*Result.m_pCommand)
+		return;
+	
+	CCommand *pCommand;
+	if(Result.m_ClientId == IConsole::CLIENT_ID_GAME)
+		pCommand = FindCommand(Result.m_pCommand, m_FlagMask | CFGFLAG_GAME);
+	else
+		pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
+	
+	if(pCommand)
+	{
+		if(Result.m_ClientId == IConsole::CLIENT_ID_GAME && !(pCommand->m_Flags & CFGFLAG_GAME))
+		{
+			if(Stroke)
+			{
+				char aBuf[CMDLINE_LENGTH + 64];
+				str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a map.", Result.m_pCommand);
+				Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			}
+		}
+		else if(Result.m_ClientId == IConsole::CLIENT_ID_NO_GAME && pCommand->m_Flags & CFGFLAG_GAME)
+		{
+			if(Stroke)
+			{
+				char aBuf[CMDLINE_LENGTH + 64];
+				str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a non-map config file.", Result.m_pCommand);
+				Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+				str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.cfg' instead of '%s.map.cfg' ", g_Config.m_SvMap, g_Config.m_SvMap);
+				Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+			}
+		}
+		else if(pCommand->GetAccessLevel() >= m_AccessLevel)
+		{
+			int IsStrokeCommand = 0;
+			if(Result.m_pCommand[0] == '+')
+			{
+				// insert the stroke direction token
+				Result.AddArgument(m_apStrokeStr[Stroke]);
+				IsStrokeCommand = 1;
+			}
+			
+			if(Stroke || IsStrokeCommand)
+			{
+				if(ParseArgs(&Result, pCommand->m_pParams))
+				{
+					char aBuf[TEMPCMD_NAME_LENGTH + TEMPCMD_PARAMS_LENGTH + 32];
+					str_format(aBuf, sizeof(aBuf), "Invalid arguments. Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
+					Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+				}
+				else if(m_StoreCommands && pCommand->m_Flags & CFGFLAG_STORE)
+				{
+					m_ExecutionQueue.AddEntry();
+					m_ExecutionQueue.m_pLast->m_pCommand = pCommand;
+					m_ExecutionQueue.m_pLast->m_Result = Result;
+				}
+				else
+				{
+					if(pCommand->m_Flags & CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
+					{
+						Print(OUTPUT_LEVEL_STANDARD, "console", "Test commands aren't allowed, enable them with 'sv_test_cmds 1' in your initial config.");
+						return;
+					}
+					
+					if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags & CFGFLAG_NONTEEHISTORIC))
+					{
+						m_pfnTeeHistorianCommandCallback(Result.m_ClientId , m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
+					}
+					
+					if(Result.GetVictim() == CResult::VICTIM_ME)
+						Result.SetVictim(Result.m_ClientId);
+					
+					if(Result.HasVictim() && Result.GetVictim() == CResult::VICTIM_ALL)
+					{
+						for(int i = 0; i < MAX_CLIENTS; i++)
+						{
+							Result.SetVictim(i);
+							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+						}
+					}
+					else
+					{
+						pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+					}
+					
+					if(pCommand->m_Flags & CMDFLAG_TEST)
+						m_Cheated = true;
+				}
+			}
+		}
+		else if(Stroke)
+		{
+			char aBuf[CMDLINE_LENGTH + 32];
+			str_format(aBuf, sizeof(aBuf), "Access for command %s denied.", Result.m_pCommand);
+			Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
+		}
+	}
+	else if(Stroke)
+	{
+		// Pass the original string to the unknown command callback instead of the parsed command, as the latter
+		// ends at the first whitespace, which breaks for unknown commands (filenames) containing spaces.
+		if(!m_pfnUnknownCommandCallback(pStr, m_pUnknownCommandUserdata))
+		{
+			char aBuf[CMDLINE_LENGTH + 32];
+			if(m_FlagMask & CFGFLAG_CHAT)
+				str_format(aBuf, sizeof(aBuf), "No such command: %s. Use /cmdlist for a list of all commands.", Result.m_pCommand);
+			else
+				str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
+			Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+		}
+	}
+}
+
+void CConsole::ConvertParentheses(char *apResult, const char *pStr) {
+	int Level = 0, Num = 0;
+	
+	for (const char *p = pStr ; *p ; p ++) {
+		if (*p == '(') {
+			for (int i = 0 ; i < Level ; i ++) {
+				apResult [Num ++] = '\\';
+			}
+			
+			apResult [Num ++] = '"';
+			
+			Level = Level * 2 + 1;
+		} else if (*p == ')') {
+			Level = (Level - 1) / 2;
+			
+			for (int i = 0 ; i < Level ; i ++) {
+				apResult [Num ++] = '\\';
+			}
+			
+			apResult [Num ++] = '"';
+		} else {
+			apResult [Num ++] = *p;
+		}
+	}
+	
+	if (Level != 0)
+		apResult = nullptr;
+}
+
 void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bool InterpretSemicolons)
 {
+	char apResult [1024] = "";
+	
+	ConvertParentheses(apResult, pStr);
+	
+	pStr = apResult;
+	
 	const char *pWithoutPrefix = str_startswith(pStr, "mc;");
 	if(pWithoutPrefix)
 	{
 		InterpretSemicolons = true;
 		pStr = pWithoutPrefix;
 	}
-	while(pStr && *pStr)
+	while(pStr && *pStr) // it's null or content null
 	{
 		CResult Result;
 		Result.m_ClientId = ClientId;
@@ -418,143 +578,32 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 		const char *pNextPart = 0;
 		int InString = 0;
 
-		while(*pEnd)
+		while(pEnd[0] != '\0')
 		{
-			if(*pEnd == '"')
-				InString ^= 1;
-			else if(*pEnd == '\\') // escape sequences
+			if(pEnd[0] == '"')
+			{
+				InString = !InString;
+			}
+			else if(pEnd[0] == '\\') // escape sequences
 			{
 				if(pEnd[1] == '"')
 					pEnd++;
 			}
 			else if(!InString && InterpretSemicolons)
 			{
-				if(*pEnd == ';') // command separator
+				if(pEnd[0] == ';') // command separator
 				{
-					pNextPart = pEnd + 1;
+					pNextPart = pEnd + 1; // execute now
 					break;
 				}
-				else if(*pEnd == '#') // comment, no need to do anything more
+				else if(pEnd[0] == '#') // comment, no need to do anything more
 					break;
 			}
 
 			pEnd++;
 		}
-
-		if(ParseStart(&Result, pStr, (pEnd - pStr) + 1) != 0)
-			return;
-
-		if(!*Result.m_pCommand)
-			return;
-
-		CCommand *pCommand;
-		if(ClientId == IConsole::CLIENT_ID_GAME)
-			pCommand = FindCommand(Result.m_pCommand, m_FlagMask | CFGFLAG_GAME);
-		else
-			pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
-
-		if(pCommand)
-		{
-			if(ClientId == IConsole::CLIENT_ID_GAME && !(pCommand->m_Flags & CFGFLAG_GAME))
-			{
-				if(Stroke)
-				{
-					char aBuf[CMDLINE_LENGTH + 64];
-					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a map.", Result.m_pCommand);
-					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-				}
-			}
-			else if(ClientId == IConsole::CLIENT_ID_NO_GAME && pCommand->m_Flags & CFGFLAG_GAME)
-			{
-				if(Stroke)
-				{
-					char aBuf[CMDLINE_LENGTH + 64];
-					str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a non-map config file.", Result.m_pCommand);
-					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-					str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.cfg' instead of '%s.map.cfg' ", g_Config.m_SvMap, g_Config.m_SvMap);
-					Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-				}
-			}
-			else if(pCommand->GetAccessLevel() >= m_AccessLevel)
-			{
-				int IsStrokeCommand = 0;
-				if(Result.m_pCommand[0] == '+')
-				{
-					// insert the stroke direction token
-					Result.AddArgument(m_apStrokeStr[Stroke]);
-					IsStrokeCommand = 1;
-				}
-
-				if(Stroke || IsStrokeCommand)
-				{
-					if(ParseArgs(&Result, pCommand->m_pParams))
-					{
-						char aBuf[TEMPCMD_NAME_LENGTH + TEMPCMD_PARAMS_LENGTH + 32];
-						str_format(aBuf, sizeof(aBuf), "Invalid arguments. Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
-						Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
-					}
-					else if(m_StoreCommands && pCommand->m_Flags & CFGFLAG_STORE)
-					{
-						m_ExecutionQueue.AddEntry();
-						m_ExecutionQueue.m_pLast->m_pCommand = pCommand;
-						m_ExecutionQueue.m_pLast->m_Result = Result;
-					}
-					else
-					{
-						if(pCommand->m_Flags & CMDFLAG_TEST && !g_Config.m_SvTestingCommands)
-						{
-							Print(OUTPUT_LEVEL_STANDARD, "console", "Test commands aren't allowed, enable them with 'sv_test_cmds 1' in your initial config.");
-							return;
-						}
-
-						if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags & CFGFLAG_NONTEEHISTORIC))
-						{
-							m_pfnTeeHistorianCommandCallback(ClientId, m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
-						}
-
-						if(Result.GetVictim() == CResult::VICTIM_ME)
-							Result.SetVictim(ClientId);
-
-						if(Result.HasVictim() && Result.GetVictim() == CResult::VICTIM_ALL)
-						{
-							for(int i = 0; i < MAX_CLIENTS; i++)
-							{
-								Result.SetVictim(i);
-								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
-							}
-						}
-						else
-						{
-							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
-						}
-
-						if(pCommand->m_Flags & CMDFLAG_TEST)
-							m_Cheated = true;
-					}
-				}
-			}
-			else if(Stroke)
-			{
-				char aBuf[CMDLINE_LENGTH + 32];
-				str_format(aBuf, sizeof(aBuf), "Access for command %s denied.", Result.m_pCommand);
-				Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
-			}
-		}
-		else if(Stroke)
-		{
-			// Pass the original string to the unknown command callback instead of the parsed command, as the latter
-			// ends at the first whitespace, which breaks for unknown commands (filenames) containing spaces.
-			if(!m_pfnUnknownCommandCallback(pStr, m_pUnknownCommandUserdata))
-			{
-				char aBuf[CMDLINE_LENGTH + 32];
-				if(m_FlagMask & CFGFLAG_CHAT)
-					str_format(aBuf, sizeof(aBuf), "No such command: %s. Use /cmdlist for a list of all commands.", Result.m_pCommand);
-				else
-					str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
-				Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
-			}
-		}
-
+		
+		ExecuteCommand(Result, pStr, pEnd, Stroke);
 		pStr = pNextPart;
 	}
 }
