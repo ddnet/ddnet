@@ -46,7 +46,6 @@ public:
 
 	// DDRace
 	void SetCollisionAt(float x, float y, int id);
-	void SetDTile(float x, float y, bool State);
 	void SetDCollisionAt(float x, float y, int Type, int Flags, int Number);
 	int GetDTileIndex(int Index) const;
 	int GetDTileFlags(int Index) const;
