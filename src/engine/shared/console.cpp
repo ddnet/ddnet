@@ -17,6 +17,7 @@
 #include <iterator> // std::size
 #include <new>
 #include <stack>
+#include <string>
 
 // todo: rework this
 
@@ -410,8 +411,10 @@ bool CConsole::LineIsValid(const char *pStr)
 	return true;
 }
 
-void CConsole::ExecuteCommand(CResult Result, const char *pStr, const char *pEnd, int Stroke)
+void CConsole::ExecuteCommand(CResult Result, const char *pStr, int Stroke)
 {
+	const char *pEnd = pStr + strlen (pStr);
+	
 	if(ParseStart(&Result, pStr, pEnd) != 0)
 		return;
 	
@@ -527,42 +530,37 @@ void CConsole::ExecuteCommand(CResult Result, const char *pStr, const char *pEnd
 	}
 }
 
-void CConsole::ConvertParentheses(char *apResult, const char *pStr) {
-	int Level = 0, Num = 0;
+void CConsole::ConvertParentheses(char *aResult, const char *pStr) 
+{
+	int Level = 0, Num = 0, Len = strlen (pStr), Now = 0;
 	
-	for (const char *p = pStr ; *p ; p ++) {
-		if (*p == '(') {
-			for (int i = 0 ; i < Level ; i ++) {
-				apResult [Num ++] = '\\';
+	for (int i = 0 ; i < Len ; i ++) {
+		if (pStr [i] == '\\') {
+			Now ++;
+		} else if (pStr [i] == '"') {
+			if (Now < Level) {
+				aResult [Num ++] = ')';
+				
+				Level = (Level - 1) / 2;
+			} else {
+				aResult [Num ++] = '(';
+				
+				Level = Level * 2 + 1;
 			}
-			
-			apResult [Num ++] = '"';
-			
-			Level = Level * 2 + 1;
-		} else if (*p == ')') {
-			Level = (Level - 1) / 2;
-			
-			for (int i = 0 ; i < Level ; i ++) {
-				apResult [Num ++] = '\\';
-			}
-			
-			apResult [Num ++] = '"';
 		} else {
-			apResult [Num ++] = *p;
+			aResult [Num ++] = pStr [i];
 		}
 	}
-	
-	if (Level != 0)
-		apResult = nullptr;
 }
 
 void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bool InterpretSemicolons)
 {
-	char apResult [1024] = "";
+	char aResult [CONSOLE_MAX_STR_LENGTH] = "";
 	
-	ConvertParentheses(apResult, pStr);
+	ConvertParentheses(aResult, pStr);
 	
-	pStr = apResult;
+	pStr = aResult;
+	std::string Str = pStr;
 	
 	const char *pWithoutPrefix = str_startswith(pStr, "mc;");
 	if(pWithoutPrefix)
@@ -570,42 +568,56 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 		InterpretSemicolons = true;
 		pStr = pWithoutPrefix;
 	}
-	while(pStr && *pStr) // it's null or content null
-	{
-		CResult Result;
-		Result.m_ClientId = ClientId;
-		const char *pEnd = pStr;
-		const char *pNextPart = 0;
-		int InString = 0;
-
-		while(pEnd[0] != '\0')
-		{
-			if(pEnd[0] == '"')
-			{
-				InString = !InString;
-			}
-			else if(pEnd[0] == '\\') // escape sequences
-			{
-				if(pEnd[1] == '"')
-					pEnd++;
-			}
-			else if(!InString && InterpretSemicolons)
-			{
-				if(pEnd[0] == ';') // command separator
-				{
-					pNextPart = pEnd + 1; // execute now
-					break;
-				}
-				else if(pEnd[0] == '#') // comment, no need to do anything more
-					break;
-			}
-
-			pEnd++;
+	
+	/*
+		Let's me express here.
+		We solve Parentheses first,
+		and we solve the Semicolons if we have.
+	*/
+	
+	int Len = Str. size ();
+	int Level = 0;
+	int SubstrL = 0, SubstrLen = 0;
+	
+	while (Str [0] == '(' && Str [Len - 1] == ')') {
+		std::string NextString = Str;
+		
+		// Cut the first one and the last one
+		NextString = NextString. substr (1);
+		NextString = NextString. substr (0, NextString. size () - 1);
+		
+		Str = NextString. c_str ();
+		
+		Len = Str. size ();
+	}
+	
+	for (int i = 0 ; i < Len ; i ++) {
+		if (Level == 0 && Str [i] == ';' && InterpretSemicolons) {
+			CResult Result;
+			Result.m_ClientId = ClientId;
+			
+			ExecuteCommand (Result, Str. substr (SubstrL, SubstrLen). data (), Stroke);
+			
+			SubstrL = i + 1;
+			SubstrLen = 0;
+			
 		}
 		
-		ExecuteCommand(Result, pStr, pEnd, Stroke);
-		pStr = pNextPart;
+		if (Str [i] == '(') {
+			Level ++;
+		} 
+		
+		if (Str [i] == ')') {
+			Level --;
+		} 
+		
+		SubstrLen ++;
 	}
+	
+	CResult Result;
+	Result.m_ClientId = ClientId;
+	
+	ExecuteCommand (Result, Str. substr (SubstrL, SubstrLen). data (), Stroke);
 }
 
 int CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser)
