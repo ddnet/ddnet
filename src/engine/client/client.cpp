@@ -3,6 +3,7 @@
 
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
+#include <base/log.h>
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
@@ -1947,13 +1948,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					if(Msg != NETMSG_SNAPEMPTY && pTmpBuffer3->Crc() != Crc)
 					{
-						if(g_Config.m_Debug)
-						{
-							char aBuf[256];
-							str_format(aBuf, sizeof(aBuf), "snapshot crc error #%d - tick=%d wantedcrc=%d gotcrc=%d compressed_size=%d delta_tick=%d",
-								m_SnapCrcErrors, GameTick, Crc, pTmpBuffer3->Crc(), m_aSnapshotIncomingDataSize[Conn], DeltaTick);
-							m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", aBuf);
-						}
+						log_error("client", "snapshot crc error #%d - tick=%d wantedcrc=%d gotcrc=%d compressed_size=%d delta_tick=%d",
+							m_SnapCrcErrors, GameTick, Crc, pTmpBuffer3->Crc(), m_aSnapshotIncomingDataSize[Conn], DeltaTick);
 
 						m_SnapCrcErrors++;
 						if(m_SnapCrcErrors > 10)
