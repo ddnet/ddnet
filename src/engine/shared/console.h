@@ -136,7 +136,7 @@ class CConsole : public IConsole
 	};
 	
 	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) override;
-	void ExecuteCommand(CResult Result, const char *pStr, const char *pEnd, int Stroke);
+	void ExecuteCommand(CResult Result, const char *pStr, int Stroke);
 
 	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback;
 	void *m_pTeeHistorianCommandUserdata;
@@ -144,7 +144,7 @@ class CConsole : public IConsole
 	FUnknownCommandCallback m_pfnUnknownCommandCallback = EmptyUnknownCommandCallback;
 	void *m_pUnknownCommandUserdata = nullptr;
 
-	void ConvertParentheses(char *apResult, const char *pStr);
+	void ConvertParentheses(char *aResult, const char *pStr);
 	
 	int ParseStart(CResult *pResult, const char *pString, const char *pEnd);
 	int ParseArgs(CResult *pResult, const char *pFormat);
