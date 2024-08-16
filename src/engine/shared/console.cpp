@@ -413,6 +413,18 @@ bool CConsole::LineIsValid(const char *pStr)
 
 void CConsole::ExecuteCommand(CResult Result, const char *pStr, int Stroke)
 {
+	std::string Tmp = pStr;
+	
+	for (size_t i = 0 ; i < Tmp. size () ; i ++) 
+	{
+		if (Tmp [i] == '(' || Tmp [i] == ')') 
+		{
+			Tmp [i] = '"';
+		}
+	}
+	
+	pStr = Tmp. data ();
+	
 	const char *pEnd = pStr + strlen (pStr);
 	
 	if(ParseStart(&Result, pStr, pEnd) != 0)
@@ -534,20 +546,27 @@ void CConsole::ConvertParentheses(char *aResult, const char *pStr)
 {
 	int Level = 0, Num = 0, Len = strlen (pStr), Now = 0;
 	
-	for (int i = 0 ; i < Len ; i ++) {
-		if (pStr [i] == '\\') {
+	for (int i = 0 ; i < Len ; i ++) 
+	{
+		if (pStr [i] == '\\') 
+		{
 			Now ++;
-		} else if (pStr [i] == '"') {
-			if (Now < Level) {
+		} 
+		else if (pStr [i] == '"') 
+		{
+			if (Now < Level) 
+			{
 				aResult [Num ++] = ')';
 				
 				Level = (Level - 1) / 2;
-			} else {
+			} else 
+			{
 				aResult [Num ++] = '(';
 				
 				Level = Level * 2 + 1;
 			}
-		} else {
+		} else 
+		{
 			aResult [Num ++] = pStr [i];
 		}
 	}
@@ -579,7 +598,8 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 	int Level = 0;
 	int SubstrL = 0, SubstrLen = 0;
 	
-	while (Str [0] == '(' && Str [Len - 1] == ')') {
+	while (Str [0] == '(' && Str [Len - 1] == ')') 
+	{
 		std::string NextString = Str;
 		
 		// Cut the first one and the last one
@@ -591,8 +611,10 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 		Len = Str. size ();
 	}
 	
-	for (int i = 0 ; i < Len ; i ++) {
-		if (Level == 0 && Str [i] == ';' && InterpretSemicolons) {
+	for (int i = 0 ; i < Len ; i ++) 
+	{
+		if (Level == 0 && Str [i] == ';' && InterpretSemicolons) 
+		{
 			CResult Result;
 			Result.m_ClientId = ClientId;
 			
@@ -603,11 +625,13 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 			
 		}
 		
-		if (Str [i] == '(') {
+		if (Str [i] == '(') 
+		{
 			Level ++;
 		} 
 		
-		if (Str [i] == ')') {
+		if (Str [i] == ')') 
+		{
 			Level --;
 		} 
 		
