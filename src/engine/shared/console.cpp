@@ -410,7 +410,7 @@ bool CConsole::LineIsValid(const char *pStr)
 	return true;
 }
 
-void CConsole::ExecuteCommand(CResult Result, const char *pStr, int Stroke)
+void CConsole::ExecuteCommand(CResult *pResult, const char *pStr, int Stroke)
 {
 	std::string Tmp = pStr;
 	
@@ -426,35 +426,35 @@ void CConsole::ExecuteCommand(CResult Result, const char *pStr, int Stroke)
 	
 	const char *pEnd = pStr + strlen (pStr);
 	
-	if(ParseStart(&Result, pStr, pEnd) != 0)
+	if(ParseStart(pResult, pStr, pEnd) != 0)
 		return;
 	
-	if(!*Result.m_pCommand)
+	if(!pResult->m_pCommand)
 		return;
 	
 	CCommand *pCommand;
-	if(Result.m_ClientId == IConsole::CLIENT_ID_GAME)
-		pCommand = FindCommand(Result.m_pCommand, m_FlagMask | CFGFLAG_GAME);
+	if(pResult -> m_ClientId == IConsole::CLIENT_ID_GAME)
+		pCommand = FindCommand(pResult -> m_pCommand, m_FlagMask | CFGFLAG_GAME);
 	else
-		pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
+		pCommand = FindCommand(pResult -> m_pCommand, m_FlagMask);
 	
 	if(pCommand)
 	{
-		if(Result.m_ClientId == IConsole::CLIENT_ID_GAME && !(pCommand->m_Flags & CFGFLAG_GAME))
+		if(pResult -> m_ClientId == IConsole::CLIENT_ID_GAME && !(pCommand->m_Flags & CFGFLAG_GAME))
 		{
 			if(Stroke)
 			{
 				char aBuf[CMDLINE_LENGTH + 64];
-				str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a map.", Result.m_pCommand);
+				str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a map.", pResult -> m_pCommand);
 				Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 			}
 		}
-		else if(Result.m_ClientId == IConsole::CLIENT_ID_NO_GAME && pCommand->m_Flags & CFGFLAG_GAME)
+		else if(pResult -> m_ClientId == IConsole::CLIENT_ID_NO_GAME && pCommand->m_Flags & CFGFLAG_GAME)
 		{
 			if(Stroke)
 			{
 				char aBuf[CMDLINE_LENGTH + 64];
-				str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a non-map config file.", Result.m_pCommand);
+				str_format(aBuf, sizeof(aBuf), "Command '%s' cannot be executed from a non-map config file.", pResult -> m_pCommand);
 				Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 				str_format(aBuf, sizeof(aBuf), "Hint: Put the command in '%s.cfg' instead of '%s.map.cfg' ", g_Config.m_SvMap, g_Config.m_SvMap);
 				Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
@@ -463,16 +463,16 @@ void CConsole::ExecuteCommand(CResult Result, const char *pStr, int Stroke)
 		else if(pCommand->GetAccessLevel() >= m_AccessLevel)
 		{
 			int IsStrokeCommand = 0;
-			if(Result.m_pCommand[0] == '+')
+			if(pResult -> m_pCommand[0] == '+')
 			{
 				// insert the stroke direction token
-				Result.AddArgument(m_apStrokeStr[Stroke]);
+				pResult -> AddArgument(m_apStrokeStr[Stroke]);
 				IsStrokeCommand = 1;
 			}
 			
 			if(Stroke || IsStrokeCommand)
 			{
-				if(ParseArgs(&Result, pCommand->m_pParams))
+				if(ParseArgs(pResult, pCommand->m_pParams))
 				{
 					char aBuf[TEMPCMD_NAME_LENGTH + TEMPCMD_PARAMS_LENGTH + 32];
 					str_format(aBuf, sizeof(aBuf), "Invalid arguments. Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
@@ -482,7 +482,7 @@ void CConsole::ExecuteCommand(CResult Result, const char *pStr, int Stroke)
 				{
 					m_ExecutionQueue.AddEntry();
 					m_ExecutionQueue.m_pLast->m_pCommand = pCommand;
-					m_ExecutionQueue.m_pLast->m_Result = Result;
+					m_ExecutionQueue.m_pLast->m_Result = *pResult;
 				}
 				else
 				{
@@ -494,23 +494,23 @@ void CConsole::ExecuteCommand(CResult Result, const char *pStr, int Stroke)
 					
 					if(m_pfnTeeHistorianCommandCallback && !(pCommand->m_Flags & CFGFLAG_NONTEEHISTORIC))
 					{
-						m_pfnTeeHistorianCommandCallback(Result.m_ClientId , m_FlagMask, pCommand->m_pName, &Result, m_pTeeHistorianCommandUserdata);
+						m_pfnTeeHistorianCommandCallback(pResult -> m_ClientId , m_FlagMask, pCommand->m_pName, pResult, m_pTeeHistorianCommandUserdata);
 					}
 					
-					if(Result.GetVictim() == CResult::VICTIM_ME)
-						Result.SetVictim(Result.m_ClientId);
+					if(pResult -> GetVictim() == CResult::VICTIM_ME)
+						pResult -> SetVictim(pResult -> m_ClientId);
 					
-					if(Result.HasVictim() && Result.GetVictim() == CResult::VICTIM_ALL)
+					if(pResult -> HasVictim() && pResult -> GetVictim() == CResult::VICTIM_ALL)
 					{
 						for(int i = 0; i < MAX_CLIENTS; i++)
 						{
-							Result.SetVictim(i);
-							pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+							pResult -> SetVictim(i);
+							pCommand->m_pfnCallback(pResult, pCommand->m_pUserData);
 						}
 					}
 					else
 					{
-						pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
+						pCommand->m_pfnCallback(pResult, pCommand->m_pUserData);
 					}
 					
 					if(pCommand->m_Flags & CMDFLAG_TEST)
@@ -521,7 +521,7 @@ void CConsole::ExecuteCommand(CResult Result, const char *pStr, int Stroke)
 		else if(Stroke)
 		{
 			char aBuf[CMDLINE_LENGTH + 32];
-			str_format(aBuf, sizeof(aBuf), "Access for command %s denied.", Result.m_pCommand);
+			str_format(aBuf, sizeof(aBuf), "Access for command %s denied.", pResult -> m_pCommand);
 			Print(OUTPUT_LEVEL_STANDARD, "console", aBuf);
 		}
 	}
@@ -533,9 +533,9 @@ void CConsole::ExecuteCommand(CResult Result, const char *pStr, int Stroke)
 		{
 			char aBuf[CMDLINE_LENGTH + 32];
 			if(m_FlagMask & CFGFLAG_CHAT)
-				str_format(aBuf, sizeof(aBuf), "No such command: %s. Use /cmdlist for a list of all commands.", Result.m_pCommand);
+				str_format(aBuf, sizeof(aBuf), "No such command: %s. Use /cmdlist for a list of all commands.", pResult -> m_pCommand);
 			else
-				str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
+				str_format(aBuf, sizeof(aBuf), "No such command: %s.", pResult -> m_pCommand);
 			Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 		}
 	}
@@ -617,8 +617,8 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 	{
 		if (Level == 0 && Str [i] == ';' && InterpretSemicolons) 
 		{
-			CResult Result;
-			Result.m_ClientId = ClientId;
+			CResult *Result = new CResult ();
+			Result -> m_ClientId = ClientId;
 			
 			ExecuteCommand (Result, Str. substr (SubstrL, SubstrLen). data (), Stroke);
 			
@@ -640,8 +640,8 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 		SubstrLen ++;
 	}
 	
-	CResult Result;
-	Result.m_ClientId = ClientId;
+	CResult *Result = new CResult ();
+	Result -> m_ClientId = ClientId;
 	
 	ExecuteCommand (Result, Str. substr (SubstrL, SubstrLen). data (), Stroke);
 }
