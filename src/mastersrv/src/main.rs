@@ -587,7 +587,7 @@ async fn handle_periodic_writeout(
             servers.clone()
         };
         if let Some((filename, filename_temp)) = &dump_filename {
-            let json = json::to_string(&Dump::new(now, &servers)).unwrap();
+            let json = json::to_string(&Dump::new(now, &servers)).unwrap() + "\n";
             overwrite_atomically(filename, filename_temp, json.as_bytes())
                 .await
                 .unwrap();
@@ -614,7 +614,7 @@ async fn handle_periodic_writeout(
                 }
                 non_backcompat_addrs.sort_unstable();
                 non_backcompat_addrs.dedup();
-                let json = json::to_string(&non_backcompat_addrs).unwrap();
+                let json = json::to_string(&non_backcompat_addrs).unwrap() + "\n";
                 overwrite_atomically(filename, filename_temp, json.as_bytes())
                     .await
                     .unwrap();
@@ -637,7 +637,7 @@ async fn handle_periodic_writeout(
                     SerializedServer::new(s, location)
                 }));
                 serialized.servers.sort_by_key(|s| s.addresses);
-                json::to_string(&serialized).unwrap()
+                json::to_string(&serialized).unwrap() + "\n"
             };
             overwrite_atomically(&servers_filename, servers_filename_temp, json.as_bytes())
                 .await
