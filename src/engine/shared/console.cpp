@@ -16,7 +16,6 @@
 
 #include <iterator> // std::size
 #include <new>
-#include <stack>
 #include <string>
 
 // todo: rework this
