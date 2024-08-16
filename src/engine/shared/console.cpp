@@ -361,7 +361,7 @@ bool CConsole::LineIsValid(const char *pStr)
 	if(!pStr || *pStr == 0)
 		return false;
 	
-	char apResult [1024] = "";
+	char apResult [CONSOLE_MAX_STR_LENGTH] = "";
 	
 	ConvertParentheses(apResult, pStr);
 	
