@@ -1391,7 +1391,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 #undef GET_INT
 }
 
-static CServerCapabilities GetServerCapabilities(int Version, int Flags)
+static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Sixup)
 {
 	CServerCapabilities Result;
 	bool DDNet = false;
@@ -1400,7 +1400,7 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 		DDNet = Flags & SERVERCAPFLAG_DDNET;
 	}
 	Result.m_ChatTimeoutCode = DDNet;
-	Result.m_AnyPlayerFlag = DDNet;
+	Result.m_AnyPlayerFlag = !Sixup;
 	Result.m_PingEx = false;
 	Result.m_AllowDummy = true;
 	Result.m_SyncWeaponInput = false;
@@ -1501,7 +1501,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			m_ServerCapabilities = GetServerCapabilities(Version, Flags);
+			m_ServerCapabilities = GetServerCapabilities(Version, Flags, IsSixup());
 			m_CanReceiveServerCapabilities = false;
 			m_ServerSentCapabilities = true;
 		}
@@ -1509,7 +1509,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		{
 			if(m_CanReceiveServerCapabilities)
 			{
-				m_ServerCapabilities = GetServerCapabilities(0, 0);
+				m_ServerCapabilities = GetServerCapabilities(0, 0, IsSixup());
 				m_CanReceiveServerCapabilities = false;
 			}
 			bool MapDetailsWerePresent = m_MapDetailsPresent;
