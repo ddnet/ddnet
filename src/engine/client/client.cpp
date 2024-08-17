@@ -3791,8 +3791,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		return m_DemoPlayer.ErrorMessage();
 	}
 
-	m_Sixup = str_startswith(m_DemoPlayer.Info()->m_Header.m_aNetversion, "0.7");
-	m_DemoPlayer.SetSixup(m_Sixup);
+	m_Sixup = m_DemoPlayer.IsSixup();
 
 	// load map
 	const CMapInfo *pMapInfo = m_DemoPlayer.GetMapInfo();
