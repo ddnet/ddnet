@@ -1,235 +1,232 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#ifndef ENGINE_SHARED_CONSOLE_H
-#define ENGINE_SHARED_CONSOLE_H
+#ifndef ENGINE_SHARED_CONFIG_H
+#define ENGINE_SHARED_CONFIG_H
 
-#include "memheap.h"
-#include <base/math.h>
-#include <base/system.h>
+#include <base/detect.h>
+
+#include <engine/config.h>
 #include <engine/console.h>
-#include <engine/storage.h>
+#include <engine/shared/memheap.h>
 
-class CConsole : public IConsole
+#include <vector>
+
+// include protocol for MAX_CLIENT used in config_variables
+#include <engine/shared/protocol.h>
+
+#define CONFIG_FILE "settings_ddnet.cfg"
+#define AUTOEXEC_FILE "autoexec.cfg"
+#define AUTOEXEC_CLIENT_FILE "autoexec_client.cfg"
+#define AUTOEXEC_SERVER_FILE "autoexec_server.cfg"
+
+class CConfig
 {
-	class CCommand : public CCommandInfo
-	{
-	public:
-		CCommand *m_pNext;
-		int m_Flags;
-		bool m_Temp;
-		FCommandCallback m_pfnCallback;
-		void *m_pUserData;
-
-		const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const override;
-
-		void SetAccessLevel(int AccessLevel) { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
-	};
-
-	class CChain
-	{
-	public:
-		FChainCommandCallback m_pfnChainCallback;
-		FCommandCallback m_pfnCallback;
-		void *m_pCallbackUserData;
-		void *m_pUserData;
-	};
-
-	int m_FlagMask;
-	bool m_StoreCommands;
-	const char *m_apStrokeStr[2];
-	CCommand *m_pFirstCommand;
-
-	class CExecFile
-	{
-	public:
-		const char *m_pFilename;
-		CExecFile *m_pPrev;
-	};
-
-	CExecFile *m_pFirstExec;
-	IStorage *m_pStorage;
-	int m_AccessLevel;
-
-	CCommand *m_pRecycleList;
-	CHeap m_TempCommands;
-
-	static void TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData);
-
-	static void Con_Chain(IResult *pResult, void *pUserData);
-	static void Con_Echo(IResult *pResult, void *pUserData);
-	static void Con_Exec(IResult *pResult, void *pUserData);
-	static void ConCommandAccess(IResult *pResult, void *pUser);
-	static void ConCommandStatus(IConsole::IResult *pResult, void *pUser);
-
-	enum
-	{
-		CONSOLE_MAX_STR_LENGTH = 8192,
-		MAX_PARTS = (CONSOLE_MAX_STR_LENGTH + 1) / 2
-	};
-	
-	class CResult : public IResult
-	{
-	public:
-		char m_aStringStorage[CONSOLE_MAX_STR_LENGTH + 1];
-		char *m_pArgsStart;
-		
-		const char *m_pCommand;
-		const char *m_apArgs[MAX_PARTS];
-		
-		CResult()
-		
-		{
-			mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
-			m_pArgsStart = 0;
-			m_pCommand = 0;
-			mem_zero(m_apArgs, sizeof(m_apArgs));
-		}
-		
-		CResult &operator=(const CResult &Other)
-		{
-			if(this != &Other)
-			{
-				IResult::operator=(Other);
-				mem_copy(m_aStringStorage, Other.m_aStringStorage, sizeof(m_aStringStorage));
-				m_pArgsStart = m_aStringStorage + (Other.m_pArgsStart - Other.m_aStringStorage);
-				m_pCommand = m_aStringStorage + (Other.m_pCommand - Other.m_aStringStorage);
-				for(unsigned i = 0; i < Other.m_NumArgs; ++i)
-					m_apArgs[i] = m_aStringStorage + (Other.m_apArgs[i] - Other.m_aStringStorage);
-			}
-			return *this;
-		}
-		
-		void AddArgument(const char *pArg)
-		{
-			m_apArgs[m_NumArgs++] = pArg;
-		}
-		
-		const char *GetString(unsigned Index) const override;
-		int GetInteger(unsigned Index) const override;
-		float GetFloat(unsigned Index) const override;
-		ColorHSLA GetColor(unsigned Index, bool Light) const override;
-		
-		void RemoveArgument(unsigned Index) override
-		{
-			dbg_assert(Index < m_NumArgs, "invalid argument index");
-			for(unsigned i = Index; i < m_NumArgs - 1; i++)
-				m_apArgs[i] = m_apArgs[i + 1];
-			
-			m_apArgs[m_NumArgs--] = 0;
-		}
-		
-		// DDRace
-		
-		enum
-		{
-			VICTIM_NONE = -3,
-			VICTIM_ME = -2,
-			VICTIM_ALL = -1,
-		};
-		
-		int m_Victim;
-		void ResetVictim();
-		bool HasVictim() const;
-		void SetVictim(int Victim);
-		void SetVictim(const char *pVictim);
-		int GetVictim() const override;
-	};
-	
-	void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) override;
-	void ExecuteCommand(CResult Result, const char *pStr, int Stroke);
-
-	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback;
-	void *m_pTeeHistorianCommandUserdata;
-
-	FUnknownCommandCallback m_pfnUnknownCommandCallback = EmptyUnknownCommandCallback;
-	void *m_pUnknownCommandUserdata = nullptr;
-
-	void ConvertParentheses(char *aResult, const char *pStr);
-	
-	int ParseStart(CResult *pResult, const char *pString, const char *pEnd);
-	int ParseArgs(CResult *pResult, const char *pFormat);
-
-	/*
-	this function will set pFormat to the next parameter (i,s,r,v,?) it contains and
-	return the parameter; descriptions in brackets like [file] will be skipped;
-	returns '\0' if there is no next parameter; expects pFormat to point at a
-	parameter
-	*/
-	char NextParam(const char *&pFormat);
-
-	class CExecutionQueue
-	{
-		CHeap m_Queue;
-
-	public:
-		struct CQueueEntry
-		{
-			CQueueEntry *m_pNext;
-			CCommand *m_pCommand;
-			CResult m_Result;
-		} * m_pFirst, *m_pLast;
-
-		void AddEntry()
-		{
-			CQueueEntry *pEntry = m_Queue.Allocate<CQueueEntry>();
-			pEntry->m_pNext = 0;
-			if(!m_pFirst)
-				m_pFirst = pEntry;
-			if(m_pLast)
-				m_pLast->m_pNext = pEntry;
-			m_pLast = pEntry;
-			(void)new(&(pEntry->m_Result)) CResult;
-		}
-		void Reset()
-		{
-			m_Queue.Reset();
-			m_pFirst = m_pLast = 0;
-		}
-	} m_ExecutionQueue;
-
-	void AddCommandSorted(CCommand *pCommand);
-	CCommand *FindCommand(const char *pName, int FlagMask);
-
-	bool m_Cheated;
-
 public:
-	CConsole(int FlagMask);
-	~CConsole();
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	static constexpr int ms_##Name = Def; \
+	int m_##Name;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
+	static constexpr unsigned ms_##Name = Def; \
+	unsigned m_##Name;
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
+	static constexpr const char *ms_p##Name = Def; \
+	char m_##Name[Len]; // Flawfinder: ignore
+#include "config_variables.h"
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+};
 
-	void Init() override;
-	const CCommandInfo *FirstCommandInfo(int AccessLevel, int FlagMask) const override;
-	const CCommandInfo *GetCommandInfo(const char *pName, int FlagMask, bool Temp) override;
-	int PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossibleCallback pfnCallback, void *pUser) override;
+extern CConfig g_Config;
 
-	void ParseArguments(int NumArgs, const char **ppArguments) override;
-	void Register(const char *pName, const char *pParams, int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp) override;
-	void RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp) override;
-	void DeregisterTemp(const char *pName) override;
-	void DeregisterTempAll() override;
-	void Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser) override;
-	void StoreCommands(bool Store) override;
-
-	bool LineIsValid(const char *pStr) override;
-	void ExecuteLine(const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) override;
-	void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientId = -1, bool InterpretSemicolons = true) override;
-	bool ExecuteFile(const char *pFilename, int ClientId = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) override;
-
-	char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) override;
-	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const override;
-	void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) override;
-	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
-	void InitChecksum(CChecksumData *pData) const override;
-
-	void SetAccessLevel(int AccessLevel) override { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
-
+enum
+{
+	CFGFLAG_SAVE = 1 << 0,
+	CFGFLAG_CLIENT = 1 << 1,
+	CFGFLAG_SERVER = 1 << 2,
+	CFGFLAG_STORE = 1 << 3,
+	CFGFLAG_MASTER = 1 << 4,
+	CFGFLAG_ECON = 1 << 5,
 	// DDRace
 
-	static void ConUserCommandStatus(IConsole::IResult *pResult, void *pUser);
+	CMDFLAG_TEST = 1 << 6,
+	CFGFLAG_CHAT = 1 << 7,
+	CFGFLAG_GAME = 1 << 8,
+	CFGFLAG_NONTEEHISTORIC = 1 << 9,
+	CFGFLAG_COLLIGHT = 1 << 10,
+	CFGFLAG_COLALPHA = 1 << 11,
+	CFGFLAG_INSENSITIVE = 1 << 12,
+	CMDFLAG_PRACTICE = 1 << 13,
+};
 
-	bool Cheated() const override { return m_Cheated; }
+struct SConfigVariable
+{
+	enum EVariableType
+	{
+		VAR_INT,
+		VAR_COLOR,
+		VAR_STRING,
+	};
+	IConsole *m_pConsole;
+	const char *m_pScriptName;
+	EVariableType m_Type;
+	int m_Flags;
+	const char *m_pHelp;
+	// Note that this only applies to the console command and the SetValue function,
+	// but the underlying config variable can still be modified programatically.
+	bool m_ReadOnly = false;
 
-	int FlagMask() const override { return m_FlagMask; }
-	void SetFlagMask(int FlagMask) override { m_FlagMask = FlagMask; }
+	SConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp) :
+		m_pConsole(pConsole),
+		m_pScriptName(pScriptName),
+		m_Type(Type),
+		m_Flags(Flags),
+		m_pHelp(pHelp)
+	{
+	}
+
+	virtual ~SConfigVariable() = default;
+
+	virtual void Register() = 0;
+	virtual bool IsDefault() const = 0;
+	virtual void Serialize(char *pOut, size_t Size) const = 0;
+	virtual void ResetToDefault() = 0;
+	virtual void ResetToOld() = 0;
+
+protected:
+	void ExecuteLine(const char *pLine) const;
+	bool CheckReadOnly() const;
+};
+
+struct SIntConfigVariable : public SConfigVariable
+{
+	int *m_pVariable;
+	int m_Default;
+	int m_Min;
+	int m_Max;
+	int m_OldValue;
+
+	SIntConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, int *pVariable, int Default, int Min, int Max) :
+		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
+		m_pVariable(pVariable),
+		m_Default(Default),
+		m_Min(Min),
+		m_Max(Max),
+		m_OldValue(Default)
+	{
+		*m_pVariable = m_Default;
+	}
+
+	~SIntConfigVariable() override = default;
+
+	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
+	void Register() override;
+	bool IsDefault() const override;
+	void Serialize(char *pOut, size_t Size, int Value) const;
+	void Serialize(char *pOut, size_t Size) const override;
+	void SetValue(int Value);
+	void ResetToDefault() override;
+	void ResetToOld() override;
+};
+
+struct SColorConfigVariable : public SConfigVariable
+{
+	unsigned *m_pVariable;
+	unsigned m_Default;
+	bool m_Light;
+	bool m_Alpha;
+	unsigned m_OldValue;
+
+	SColorConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, unsigned *pVariable, unsigned Default) :
+		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
+		m_pVariable(pVariable),
+		m_Default(Default),
+		m_Light(Flags & CFGFLAG_COLLIGHT),
+		m_Alpha(Flags & CFGFLAG_COLALPHA),
+		m_OldValue(Default)
+	{
+		*m_pVariable = m_Default;
+	}
+
+	~SColorConfigVariable() override = default;
+
+	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
+	void Register() override;
+	bool IsDefault() const override;
+	void Serialize(char *pOut, size_t Size, unsigned Value) const;
+	void Serialize(char *pOut, size_t Size) const override;
+	void SetValue(unsigned Value);
+	void ResetToDefault() override;
+	void ResetToOld() override;
+};
+
+struct SStringConfigVariable : public SConfigVariable
+{
+	char *m_pStr;
+	const char *m_pDefault;
+	size_t m_MaxSize;
+	char *m_pOldValue;
+
+	SStringConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, char *pStr, const char *pDefault, size_t MaxSize, char *pOldValue);
+	~SStringConfigVariable() override = default;
+
+	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
+	void Register() override;
+	bool IsDefault() const override;
+	void Serialize(char *pOut, size_t Size, const char *pValue) const;
+	void Serialize(char *pOut, size_t Size) const override;
+	void SetValue(const char *pValue);
+	void ResetToDefault() override;
+	void ResetToOld() override;
+};
+
+class CConfigManager : public IConfigManager
+{
+	IConsole *m_pConsole;
+	class IStorage *m_pStorage;
+
+	IOHANDLE m_ConfigFile;
+	bool m_Failed;
+
+	struct SCallback
+	{
+		SAVECALLBACKFUNC m_pfnFunc;
+		void *m_pUserData;
+
+		SCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) :
+			m_pfnFunc(pfnFunc),
+			m_pUserData(pUserData)
+		{
+		}
+	};
+	std::vector<SCallback> m_vCallbacks;
+
+	std::vector<SConfigVariable *> m_vpAllVariables;
+	std::vector<SConfigVariable *> m_vpGameVariables;
+	std::vector<const char *> m_vpUnknownCommands;
+	CHeap m_ConfigHeap;
+
+	static void Con_Reset(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Toggle(IConsole::IResult *pResult, void *pUserData);
+	static void Con_ToggleStroke(IConsole::IResult *pResult, void *pUserData);
+
+public:
+	CConfigManager();
+
+	void Init() override;
+	void Reset(const char *pScriptName) override;
+	void ResetGameSettings() override;
+	void SetReadOnly(const char *pScriptName, bool ReadOnly) override;
+	bool Save() override;
+	CConfig *Values() override { return &g_Config; }
+
+	void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) override;
+
+	void WriteLine(const char *pLine) override;
+
+	void StoreUnknownCommand(const char *pCommand) override;
+
+	void PossibleConfigVariables(const char *pStr, int FlagMask, POSSIBLECFGFUNC pfnCallback, void *pUserData) override;
 };
 
 #endif
