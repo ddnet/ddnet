@@ -361,7 +361,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 		int DDTeam = GameClient()->m_Teams.Team(pInfo->m_ClientId);
 		int NextDDTeam = 0;
-		bool RenderDead = Client()->m_TranslationContext.m_aClients[pInfo->m_ClientId].m_PlayerFlags7 & protocol7::PLAYERFLAG_DEAD;
+		bool RenderDead = Client()->IsSixup() && Client()->m_TranslationContext.m_aClients[pInfo->m_ClientId].m_PlayerFlags7 & protocol7::PLAYERFLAG_DEAD;
 
 		ColorRGBA TextColor = TextRender()->DefaultTextColor();
 		TextColor.a = RenderDead ? 0.5f : 1.0f;
