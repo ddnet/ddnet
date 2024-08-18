@@ -824,6 +824,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 					for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 					{
 						const char *pPartName = LineAuthor.m_aSixup[g_Config.m_ClDummy].m_aaSkinPartNames[Part];
+						str_copy(pCurrentLine->m_Sixup.m_aaSkinPartNames[Part], pPartName);
 						int Id = m_pClient->m_Skins7.FindSkinPart(Part, pPartName, false);
 						const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, Id);
 						if(LineAuthor.m_aSixup[g_Config.m_ClDummy].m_aUseCustomColors[Part])
@@ -924,6 +925,20 @@ void CChat::OnRefreshSkins()
 				Line.m_RenderSkin = pSkin->m_OriginalSkin;
 
 			Line.m_RenderSkinMetrics = pSkin->m_Metrics;
+
+			if(Client()->IsSixup())
+			{
+				for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+				{
+					const char *pPartName = Line.m_Sixup.m_aaSkinPartNames[Part];
+					int Id = m_pClient->m_Skins7.FindSkinPart(Part, pPartName, false);
+					const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, Id);
+					if(Line.m_CustomColoredSkin)
+						Line.m_Sixup.m_aTextures[Part] = pSkinPart->m_ColorTexture;
+					else
+						Line.m_Sixup.m_aTextures[Part] = pSkinPart->m_OrgTexture;
+				}
+			}
 		}
 		else
 		{

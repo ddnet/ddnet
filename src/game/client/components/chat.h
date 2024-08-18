@@ -65,6 +65,7 @@ class CChat : public CComponent
 			int m_HatSpriteIndex;
 			ColorRGBA m_BotColor;
 			ColorRGBA m_aColors[protocol7::NUM_SKINPARTS];
+			char m_aaSkinPartNames[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_LENGTH];
 		};
 
 		// 0.7 Skin

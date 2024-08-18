@@ -3682,6 +3682,14 @@ void CGameClient::RefreshSkins()
 		}
 	});
 
+	m_Skins7.Refresh([&](int) {
+		// if skin refreshing takes to long, swap to a loading screen
+		if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
+		{
+			m_Menus.RenderLoading(Localize("Loading skin files"), "", 0, false);
+		}
+	});
+
 	for(auto &Client : m_aClients)
 	{
 		Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
@@ -3697,6 +3705,8 @@ void CGameClient::RefreshSkins()
 			Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
 			Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
 		}
+		RefreshSkin7(&Client);
+
 		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
 			Client.UpdateRenderInfo(IsTeamPlay(), Dummy);
 	}

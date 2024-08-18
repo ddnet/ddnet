@@ -30,11 +30,19 @@ int *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}}
 // TODO: uncomment
 // const float MIN_EYE_BODY_COLOR_DIST = 80.f; // between body and eyes (LAB color space)
 
+struct SSkinScanUser
+{
+	CSkins7 *m_pThis;
+	CSkins7::TSkinLoadedCBFunc m_SkinLoadedFunc;
+};
+
 int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CSkins7 *pSelf = (CSkins7 *)pUser;
 	if(IsDir || !str_endswith(pName, ".png"))
 		return 0;
+
+	auto *pUserReal = static_cast<SSkinScanUser *>(pUser);
+	CSkins7 *pSelf = pUserReal->m_pThis;
 
 	size_t PartNameSize, PartNameCount;
 	str_utf8_stats(pName, str_length(pName) - str_length(".png") + 1, IO_MAX_PATH_LENGTH, &PartNameSize, &PartNameCount);
@@ -112,6 +120,7 @@ int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser
 		log_trace("skins7", "Loaded skin part '%s'", Part.m_aName);
 	}
 	pSelf->m_avSkinParts[pSelf->m_ScanningPart].emplace_back(Part);
+	pUserReal->m_SkinLoadedFunc((int)pSelf->m_avSkinParts[pSelf->m_ScanningPart].size());
 
 	return 0;
 }
@@ -121,7 +130,8 @@ int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	if(IsDir || !str_endswith(pName, ".json"))
 		return 0;
 
-	CSkins7 *pSelf = (CSkins7 *)pUser;
+	auto *pUserReal = static_cast<SSkinScanUser *>(pUser);
+	CSkins7 *pSelf = pUserReal->m_pThis;
 
 	// read file data into buffer
 	char aFilename[IO_MAX_PATH_LENGTH];
@@ -217,6 +227,7 @@ int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 		log_trace("skins7", "Loaded skin '%s'", Skin.m_aName);
 	}
 	pSelf->m_vSkins.insert(std::lower_bound(pSelf->m_vSkins.begin(), pSelf->m_vSkins.end(), Skin), Skin);
+	pUserReal->m_SkinLoadedFunc((int)pSelf->m_vSkins.size());
 
 	return 0;
 }
@@ -268,8 +279,26 @@ void CSkins7::OnInit()
 	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = (int *)&Config()->m_ClDummy7ColorFeet;
 	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = (int *)&Config()->m_ClDummy7ColorEyes;
 
+	Refresh([this](int SkinCounter) {
+		GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+	});
+
+	LoadXmasHat();
+	LoadBotDecoration();
+}
+
+void CSkins7::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
+{
+	SSkinScanUser SkinScanUser;
+	SkinScanUser.m_pThis = this;
+	SkinScanUser.m_SkinLoadedFunc = SkinLoadedFunc;
+
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
+		for(auto &SkinPart : m_avSkinParts[Part])
+		{
+			SkinPart.Unload(Graphics());
+		}
 		m_avSkinParts[Part].clear();
 
 		// add none part
@@ -286,7 +315,7 @@ void CSkins7::OnInit()
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), SKINS_DIR "/%s", ms_apSkinPartNames[Part]);
 		m_ScanningPart = Part;
-		Storage()->ListDirectory(IStorage::TYPE_ALL, aBuf, SkinPartScan, this);
+		Storage()->ListDirectory(IStorage::TYPE_ALL, aBuf, SkinPartScan, &SkinScanUser);
 
 		// add dummy skin part
 		if(m_avSkinParts[Part].empty())
@@ -321,16 +350,11 @@ void CSkins7::OnInit()
 
 	// load skins
 	m_vSkins.clear();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, SKINS_DIR, SkinScan, this);
-	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+	Storage()->ListDirectory(IStorage::TYPE_ALL, SKINS_DIR, SkinScan, &SkinScanUser);
 
 	// add dummy skin
 	if(m_vSkins.empty())
 		m_vSkins.emplace_back(m_DummySkin);
-
-	LoadXmasHat();
-	LoadBotDecoration();
-	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
 }
 
 void CSkins7::LoadXmasHat()

@@ -78,6 +78,26 @@ void CGameClient::DoTeamChangeMessage7(const char *pName, int ClientId, int Team
 	m_Chat.AddLine(-1, 0, aBuf);
 }
 
+void CGameClient::RefreshSkin7(CClientData *pClient)
+{
+	for(int Conn = 0; Conn < NUM_DUMMIES; Conn++)
+	{
+		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+		{
+			const char *pPartName = pClient->m_aSixup[Conn].m_aaSkinPartNames[Part];
+			if(pPartName[0] == '\0')
+				continue;
+
+			int Id = m_Skins7.FindSkinPart(Part, pPartName, false);
+			const CSkins7::CSkinPart *pSkinPart = m_Skins7.GetSkinPart(Part, Id);
+			if(pClient->m_aSixup[Conn].m_aUseCustomColors[Part])
+				pClient->m_SkinInfo.m_aSixup[Conn].m_aTextures[Part] = pSkinPart->m_ColorTexture;
+			else
+				pClient->m_SkinInfo.m_aSixup[Conn].m_aTextures[Part] = pSkinPart->m_OrgTexture;
+		}
+	}
+}
+
 template<typename T>
 void CGameClient::ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId, int Conn)
 {
