@@ -7,6 +7,7 @@
 #include <base/color.h>
 #include <base/vmath.h>
 #include <engine/client.h>
+#include <engine/client/enums.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
 
@@ -437,7 +438,7 @@ public:
 		bool m_SpecCharPresent;
 		vec2 m_SpecChar;
 
-		void UpdateRenderInfo(bool IsTeamPlay);
+		void UpdateRenderInfo(bool IsTeamPlay, int Conn);
 		void Reset();
 
 		class CSixup
@@ -449,7 +450,7 @@ public:
 		};
 
 		// 0.7 Skin
-		CSixup m_Sixup;
+		CSixup m_Sixup[NUM_DUMMIES];
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
@@ -509,7 +510,7 @@ public:
 	void OnConsoleInit() override;
 	void OnStateChange(int NewState, int OldState) override;
 	template<typename T>
-	void ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId);
+	void ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId, int Conn);
 	void ApplySkin7InfoFromSnapObj(const protocol7::CNetObj_De_ClientInfo *pObj, int ClientId) override;
 	int OnDemoRecSnap7(class CSnapshot *pFrom, class CSnapshot *pTo, int Conn) override;
 	void *TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn);

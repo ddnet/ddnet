@@ -79,47 +79,47 @@ void CGameClient::DoTeamChangeMessage7(const char *pName, int ClientId, int Team
 }
 
 template<typename T>
-void CGameClient::ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId)
+void CGameClient::ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId, int Conn)
 {
 	CClientData *pClient = &m_aClients[ClientId];
 	char *apSkinPartsPtr[protocol7::NUM_SKINPARTS];
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		str_utf8_copy_num(pClient->m_Sixup.m_aaSkinPartNames[Part], pMsg->m_apSkinPartNames[Part], sizeof(pClient->m_Sixup.m_aaSkinPartNames[Part]), protocol7::MAX_SKIN_LENGTH);
-		apSkinPartsPtr[Part] = pClient->m_Sixup.m_aaSkinPartNames[Part];
-		pClient->m_Sixup.m_aUseCustomColors[Part] = pMsg->m_aUseCustomColors[Part];
-		pClient->m_Sixup.m_aSkinPartColors[Part] = pMsg->m_aSkinPartColors[Part];
+		str_utf8_copy_num(pClient->m_Sixup[Conn].m_aaSkinPartNames[Part], pMsg->m_apSkinPartNames[Part], sizeof(pClient->m_Sixup[Conn].m_aaSkinPartNames[Part]), protocol7::MAX_SKIN_LENGTH);
+		apSkinPartsPtr[Part] = pClient->m_Sixup[Conn].m_aaSkinPartNames[Part];
+		pClient->m_Sixup[Conn].m_aUseCustomColors[Part] = pMsg->m_aUseCustomColors[Part];
+		pClient->m_Sixup[Conn].m_aSkinPartColors[Part] = pMsg->m_aSkinPartColors[Part];
 	}
-	m_Skins7.ValidateSkinParts(apSkinPartsPtr, pClient->m_Sixup.m_aUseCustomColors, pClient->m_Sixup.m_aSkinPartColors, m_pClient->m_TranslationContext.m_GameFlags);
+	m_Skins7.ValidateSkinParts(apSkinPartsPtr, pClient->m_Sixup[Conn].m_aUseCustomColors, pClient->m_Sixup[Conn].m_aSkinPartColors, m_pClient->m_TranslationContext.m_GameFlags);
 
 	if(time_season() == SEASON_XMAS)
 	{
-		pClient->m_SkinInfo.m_Sixup.m_HatTexture = m_Skins7.m_XmasHatTexture;
-		pClient->m_SkinInfo.m_Sixup.m_HatSpriteIndex = ClientId % CSkins7::HAT_NUM;
+		pClient->m_SkinInfo.m_Sixup[Conn].m_HatTexture = m_Skins7.m_XmasHatTexture;
+		pClient->m_SkinInfo.m_Sixup[Conn].m_HatSpriteIndex = ClientId % CSkins7::HAT_NUM;
 	}
 	else
-		pClient->m_SkinInfo.m_Sixup.m_HatTexture.Invalidate();
+		pClient->m_SkinInfo.m_Sixup[Conn].m_HatTexture.Invalidate();
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		int Id = m_Skins7.FindSkinPart(Part, pClient->m_Sixup.m_aaSkinPartNames[Part], false);
+		int Id = m_Skins7.FindSkinPart(Part, pClient->m_Sixup[Conn].m_aaSkinPartNames[Part], false);
 		const CSkins7::CSkinPart *pSkinPart = m_Skins7.GetSkinPart(Part, Id);
-		if(pClient->m_Sixup.m_aUseCustomColors[Part])
+		if(pClient->m_Sixup[Conn].m_aUseCustomColors[Part])
 		{
-			pClient->m_SkinInfo.m_Sixup.m_aTextures[Part] = pSkinPart->m_ColorTexture;
-			pClient->m_SkinInfo.m_Sixup.m_aColors[Part] = m_Skins7.GetColor(pMsg->m_aSkinPartColors[Part], Part == protocol7::SKINPART_MARKING);
+			pClient->m_SkinInfo.m_Sixup[Conn].m_aTextures[Part] = pSkinPart->m_ColorTexture;
+			pClient->m_SkinInfo.m_Sixup[Conn].m_aColors[Part] = m_Skins7.GetColor(pMsg->m_aSkinPartColors[Part], Part == protocol7::SKINPART_MARKING);
 		}
 		else
 		{
-			pClient->m_SkinInfo.m_Sixup.m_aTextures[Part] = pSkinPart->m_OrgTexture;
-			pClient->m_SkinInfo.m_Sixup.m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+			pClient->m_SkinInfo.m_Sixup[Conn].m_aTextures[Part] = pSkinPart->m_OrgTexture;
+			pClient->m_SkinInfo.m_Sixup[Conn].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 		}
-		if(pClient->m_SkinInfo.m_Sixup.m_HatTexture.IsValid())
+		if(pClient->m_SkinInfo.m_Sixup[Conn].m_HatTexture.IsValid())
 		{
-			if(Part == protocol7::SKINPART_BODY && str_comp(pClient->m_Sixup.m_aaSkinPartNames[Part], "standard"))
-				pClient->m_SkinInfo.m_Sixup.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
-			if(Part == protocol7::SKINPART_DECORATION && !str_comp(pClient->m_Sixup.m_aaSkinPartNames[Part], "twinbopp"))
-				pClient->m_SkinInfo.m_Sixup.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
+			if(Part == protocol7::SKINPART_BODY && str_comp(pClient->m_Sixup[Conn].m_aaSkinPartNames[Part], "standard"))
+				pClient->m_SkinInfo.m_Sixup[Conn].m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
+			if(Part == protocol7::SKINPART_DECORATION && !str_comp(pClient->m_Sixup[Conn].m_aaSkinPartNames[Part], "twinbopp"))
+				pClient->m_SkinInfo.m_Sixup[Conn].m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
 		}
 	}
 }
@@ -136,7 +136,7 @@ void CGameClient::ApplySkin7InfoFromSnapObj(const protocol7::CNetObj_De_ClientIn
 		Msg.m_aUseCustomColors[Part] = pObj->m_aUseCustomColors[Part];
 		Msg.m_aSkinPartColors[Part] = pObj->m_aSkinPartColors[Part];
 	}
-	ApplySkin7InfoFromGameMsg(&Msg, ClientId);
+	ApplySkin7InfoFromGameMsg(&Msg, ClientId, 0);
 }
 
 void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
@@ -196,7 +196,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		{
 			m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
 			m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
-			m_aClients[pMsg7->m_ClientId].UpdateRenderInfo(IsTeamPlay());
+			m_aClients[pMsg7->m_ClientId].UpdateRenderInfo(IsTeamPlay(), Conn);
 
 			// if(pMsg7->m_ClientId == m_LocalClientId)
 			// {
@@ -293,7 +293,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 
 		CTranslationContext::CClientData &Client = m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId];
 		Client.m_Active = true;
-		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId);
+		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId, Conn);
 		// skin will be moved to the 0.6 snap by the translation context
 		// and we drop the game message
 		return nullptr;
@@ -495,7 +495,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		str_copy(Client.m_aName, pMsg7->m_pName);
 		str_copy(Client.m_aClan, pMsg7->m_pClan);
 		Client.m_Country = pMsg7->m_Country;
-		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId);
+		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId, Conn);
 		if(m_pClient->m_TranslationContext.m_aLocalClientId[Conn] == -1)
 			return nullptr;
 		if(pMsg7->m_Silent || pMsg7->m_Local)

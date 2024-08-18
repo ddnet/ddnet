@@ -5,6 +5,7 @@
 #include <limits>
 
 #include <engine/client/checksum.h>
+#include <engine/client/enums.h>
 #include <engine/demo.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
@@ -1526,7 +1527,7 @@ void CGameClient::OnNewSnapshot()
 						pClient->m_SkinInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
 					}
 
-					pClient->UpdateRenderInfo(IsTeamPlay());
+					pClient->UpdateRenderInfo(IsTeamPlay(), g_Config.m_ClDummy);
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_PLAYERINFO)
@@ -2323,7 +2324,7 @@ void CGameClient::CClientStats::Reset()
 	m_FlagCaptures = 0;
 }
 
-void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay)
+void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay, int Conn)
 {
 	m_RenderInfo = m_SkinInfo;
 
@@ -2345,18 +2346,18 @@ void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay)
 				const ColorRGBA aMarkingColorsSixup[2] = {
 					ColorRGBA(0.824f, 0.345f, 0.345f, 1.0f),
 					ColorRGBA(0.345f, 0.514f, 0.824f, 1.0f)};
-				float MarkingAlpha = m_RenderInfo.m_Sixup.m_aColors[protocol7::SKINPART_MARKING].a;
-				for(auto &Color : m_RenderInfo.m_Sixup.m_aColors)
+				float MarkingAlpha = m_RenderInfo.m_Sixup[Conn].m_aColors[protocol7::SKINPART_MARKING].a;
+				for(auto &Color : m_RenderInfo.m_Sixup[Conn].m_aColors)
 					Color = aTeamColorsSixup[m_Team];
 				if(MarkingAlpha > 0.1f)
-					m_RenderInfo.m_Sixup.m_aColors[protocol7::SKINPART_MARKING] = aMarkingColorsSixup[m_Team];
+					m_RenderInfo.m_Sixup[Conn].m_aColors[protocol7::SKINPART_MARKING] = aMarkingColorsSixup[m_Team];
 			}
 		}
 		else
 		{
 			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(12829350));
 			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(12829350));
-			for(auto &Color : m_RenderInfo.m_Sixup.m_aColors)
+			for(auto &Color : m_RenderInfo.m_Sixup[Conn].m_aColors)
 				Color = color_cast<ColorRGBA>(ColorHSLA(12829350));
 		}
 	}
@@ -2373,11 +2374,14 @@ void CGameClient::CClientData::Reset()
 	m_Country = -1;
 	m_aSkinName[0] = '\0';
 	m_SkinColor = 0;
-	for(int i = 0; i < protocol7::NUM_SKINPARTS; ++i)
+	for(auto &Info : m_Sixup)
 	{
-		m_Sixup.m_aaSkinPartNames[i][0] = '\0';
-		m_Sixup.m_aUseCustomColors[i] = 0;
-		m_Sixup.m_aSkinPartColors[i] = 0;
+		for(int i = 0; i < protocol7::NUM_SKINPARTS; ++i)
+		{
+			Info.m_aaSkinPartNames[i][0] = '\0';
+			Info.m_aUseCustomColors[i] = 0;
+			Info.m_aSkinPartColors[i] = 0;
+		}
 	}
 	m_Team = 0;
 	m_Emoticon = 0;
@@ -2503,11 +2507,11 @@ bool CGameClient::GotWantedSkin7(bool Dummy)
 
 	for(int SkinPart = 0; SkinPart < protocol7::NUM_SKINPARTS; SkinPart++)
 	{
-		if(str_comp(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup.m_aaSkinPartNames[SkinPart], apSkinPartsPtr[SkinPart]))
+		if(str_comp(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup[g_Config.m_ClDummy].m_aaSkinPartNames[SkinPart], apSkinPartsPtr[SkinPart]))
 			return false;
-		if(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup.m_aUseCustomColors[SkinPart] != aUCCVars[SkinPart])
+		if(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup[g_Config.m_ClDummy].m_aUseCustomColors[SkinPart] != aUCCVars[SkinPart])
 			return false;
-		if(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup.m_aSkinPartColors[SkinPart] != aColorVars[SkinPart])
+		if(m_aClients[m_aLocalIds[(int)Dummy]].m_Sixup[g_Config.m_ClDummy].m_aSkinPartColors[SkinPart] != aColorVars[SkinPart])
 			return false;
 	}
 
@@ -3688,7 +3692,8 @@ void CGameClient::RefreshSkins()
 			Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
 			Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
 		}
-		Client.UpdateRenderInfo(IsTeamPlay());
+		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+			Client.UpdateRenderInfo(IsTeamPlay(), Dummy);
 	}
 
 	for(auto &pComponent : m_vpAll)
