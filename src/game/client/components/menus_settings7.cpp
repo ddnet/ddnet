@@ -68,7 +68,6 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	const float ButtonHeight = 20.0f;
 	const float SkinHeight = 50.0f;
 	const float BackgroundHeight = (ButtonHeight + SpacingH) + SkinHeight * 2;
-	const vec2 MousePosition = vec2(Ui()->MouseX(), Ui()->MouseY());
 
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(BackgroundHeight, &TopView, &MainView);
@@ -136,14 +135,18 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 
 		{
 			// interactive tee: tee looking towards cursor, and it is happy when you touch it
-			vec2 TeePosition = vec2(Top.x + Top.w / 2.0f, Top.y + Top.h / 2.0f + 6.0f);
-			vec2 DeltaPosition = MousePosition - TeePosition;
-			float Distance = length(DeltaPosition);
-			vec2 TeeDirection = Distance < 20.0f ? normalize(vec2(DeltaPosition.x, maximum(DeltaPosition.y, 0.5f))) : normalize(DeltaPosition);
-			int TeeEmote = Distance < 20.0f ? EMOTE_HAPPY : EMOTE_NORMAL;
+			const vec2 TeePosition = vec2(Top.x + Top.w / 2.0f, Top.y + Top.h / 2.0f + 6.0f);
+			const vec2 DeltaPosition = Ui()->MousePos() - TeePosition;
+			const float Distance = length(DeltaPosition);
+			const float InteractionDistance = 20.0f;
+			const vec2 TeeDirection = Distance < InteractionDistance ? normalize(vec2(DeltaPosition.x, maximum(DeltaPosition.y, 0.5f))) : normalize(DeltaPosition);
+			const int TeeEmote = Distance < InteractionDistance ? EMOTE_HAPPY : EMOTE_NORMAL;
 			RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, TeeEmote, TeeDirection, TeePosition);
-			if(Distance < 20.0f && Ui()->MouseButtonClicked(0))
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_PLAYER_SPAWN, 0);
+			static char s_InteractiveTeeButtonId;
+			if(Distance < InteractionDistance && Ui()->DoButtonLogic(&s_InteractiveTeeButtonId, 0, &Top))
+			{
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_PLAYER_SPAWN, 1.0f);
+			}
 		}
 
 		// handle right (team skins)
