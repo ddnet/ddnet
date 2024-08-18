@@ -312,7 +312,7 @@ void CMenus::RenderSettingsTeeBasic7(CUIRect MainView)
 
 void CMenus::RenderSettingsTeeCustom7(CUIRect MainView)
 {
-	CUIRect Label, Patterns, Button, Left, Right, Picker, Palette;
+	CUIRect Label, Patterns, Button, Left, Right;
 
 	// render skin preview background
 	float SpacingH = 2.0f;
@@ -344,32 +344,30 @@ void CMenus::RenderSettingsTeeCustom7(CUIRect MainView)
 
 	MainView.HSplitTop(SpacingH, 0, &MainView);
 	MainView.VSplitMid(&Left, &Right, SpacingW);
+	Right.Margin(5.0f, &Right);
 
-	// part selection
 	RenderSkinPartSelection7(Left);
 
-	// use custom color checkbox
-	Right.HSplitTop(ButtonHeight, &Button, &Right);
-	Right.HSplitBottom(45.0f, &Picker, &Palette);
-	static CButtonContainer s_ColorPicker;
-	DoLine_ColorPicker(
-		&s_ColorPicker,
-		25.0f, // LineSize
-		13.0f, // LabelSize
-		5.0f, // BottomMargin
-		&Right,
-		Localize("Custom colors"),
-		CSkins7::ms_apColorVariables[(int)m_Dummy][m_TeePartSelected],
-		ColorRGBA(1.0f, 1.0f, 0.5f), // DefaultColor
-		true, // CheckBoxSpacing
-		CSkins7::ms_apUCCVariables[(int)m_Dummy][m_TeePartSelected], // CheckBoxValue
-		m_TeePartSelected == protocol7::SKINPART_MARKING); // use alpha
-	static int s_OldColor = *CSkins7::ms_apColorVariables[(int)m_Dummy][m_TeePartSelected];
-	int NewColor = *CSkins7::ms_apColorVariables[(int)m_Dummy][m_TeePartSelected];
-	if(s_OldColor != NewColor)
+	CUIRect CustomColorsButton;
+	Right.HSplitTop(20.0f, &CustomColorsButton, &Right);
+
+	int *pUseCustomColor = CSkins7::ms_apUCCVariables[(int)m_Dummy][m_TeePartSelected];
+	if(DoButton_CheckBox(pUseCustomColor, Localize("Custom colors"), *pUseCustomColor, &CustomColorsButton))
 	{
-		s_OldColor = NewColor;
+		*pUseCustomColor = !*pUseCustomColor;
 		SetNeedSendInfo();
+	}
+
+	if(*pUseCustomColor)
+	{
+		CUIRect CustomColors;
+		Right.HSplitTop(5.0f, nullptr, &Right);
+		Right.HSplitTop(95.0f, &CustomColors, &Right);
+
+		if(RenderHslaScrollbars(&CustomColors, CSkins7::ms_apColorVariables[(int)m_Dummy][m_TeePartSelected], m_TeePartSelected == protocol7::SKINPART_MARKING, CSkins7::DARKEST_COLOR_LGT))
+		{
+			SetNeedSendInfo();
+		}
 	}
 }
 
