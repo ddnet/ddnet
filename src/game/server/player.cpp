@@ -925,7 +925,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			}
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
-			if(Birthday != 0 && !m_BirthdayAnnounced)
+			if(Birthday != 0 && !m_BirthdayAnnounced && GetCharacter())
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf),
