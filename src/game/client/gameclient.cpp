@@ -3682,6 +3682,14 @@ void CGameClient::RefreshSkins()
 		}
 	});
 
+	m_Skins7.Refresh([&](int) {
+		// if skin refreshing takes to long, swap to a loading screen
+		if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
+		{
+			m_Menus.RenderLoading(Localize("Loading 0.7 skin files"), "", 0, false);
+		}
+	});
+
 	for(auto &Client : m_aClients)
 	{
 		Client.m_SkinInfo.m_OriginalRenderSkin.Reset();

@@ -37,6 +37,12 @@ public:
 		ColorRGBA m_BloodColor;
 
 		bool operator<(const CSkinPart &Other) { return str_comp_nocase(m_aName, Other.m_aName) < 0; }
+
+		void Unload(IGraphics *pGraphics)
+		{
+			pGraphics->UnloadTexture(&m_OrgTexture);
+			pGraphics->UnloadTexture(&m_ColorTexture);
+		}
 	};
 
 	struct CSkin
@@ -83,6 +89,9 @@ public:
 	bool SaveSkinfile(const char *pSaveSkinName, int Dummy);
 
 	virtual int Sizeof() const override { return sizeof(*this); }
+
+	typedef std::function<void(int)> TSkinLoadedCBFunc;
+	void Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc);
 
 private:
 	int m_ScanningPart;

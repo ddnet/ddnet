@@ -31,6 +31,8 @@
 
 #include <vector>
 
+// #include "../../ddnet_hotui/loader.h"
+
 void CMenus::RenderSettingsTee7(CUIRect MainView)
 {
 	static bool s_CustomSkinMenu = false;
@@ -53,14 +55,17 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	BottomView.HSplitTop(20.f, 0, &BottomView);
 
 	CUIRect QuickSearch, Buttons;
-	CUIRect ButtonLeft, ButtonMiddle, ButtonRight;
+	CUIRect ButtonLeft, ButtonMiddle, ButtonRight, ButtonRefresh;
 
 	BottomView.VSplitMid(&QuickSearch, &Buttons);
+	Buttons.VSplitRight(25.0f, &Buttons, &ButtonRefresh);
 
 	const float ButtonSize = Buttons.w / 3;
 	Buttons.VSplitLeft(ButtonSize, &ButtonLeft, &Buttons);
 	Buttons.VSplitLeft(ButtonSize, &ButtonMiddle, &Buttons);
 	Buttons.VSplitLeft(ButtonSize, &ButtonRight, &Buttons);
+
+	// HotCuiRects(ButtonRefresh, BottomView, QuickSearch, ButtonLeft, ButtonMiddle, ButtonRight);
 
 	// render skin preview background
 	const float SpacingH = 2.0f;
@@ -291,6 +296,20 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		if(Ui()->DoClearableEditBox(&s_SkinFilterInput, &QuickSearch, 14.0f))
 			m_SkinListNeedsUpdate = true;
 	}
+
+	// refresh button
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	static CButtonContainer s_SkinRefreshButton;
+	if(DoButton_Menu(&s_SkinRefreshButton, FontIcons::FONT_ICON_ARROW_ROTATE_RIGHT, 0, &ButtonRefresh) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
+	{
+		// reset render flags for possible loading screen
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+		m_pClient->RefreshSkins();
+	}
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 }
 
 void CMenus::PopupConfirmDeleteSkin7()

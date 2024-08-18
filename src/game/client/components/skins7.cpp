@@ -116,12 +116,19 @@ int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser
 	return 0;
 }
 
+struct SSkinScanUser
+{
+	CSkins7 *m_pThis;
+	CSkins7::TSkinLoadedCBFunc m_SkinLoadedFunc;
+};
+
 int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	if(IsDir || !str_endswith(pName, ".json"))
 		return 0;
 
-	CSkins7 *pSelf = (CSkins7 *)pUser;
+	auto *pUserReal = static_cast<SSkinScanUser *>(pUser);
+	CSkins7 *pSelf = pUserReal->m_pThis;
 
 	// read file data into buffer
 	char aFilename[IO_MAX_PATH_LENGTH];
@@ -217,6 +224,7 @@ int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 		log_trace("skins7", "Loaded skin '%s'", Skin.m_aName);
 	}
 	pSelf->m_vSkins.insert(std::lower_bound(pSelf->m_vSkins.begin(), pSelf->m_vSkins.end(), Skin), Skin);
+	pUserReal->m_SkinLoadedFunc((int)pSelf->m_vSkins.size());
 
 	return 0;
 }
@@ -267,6 +275,29 @@ void CSkins7::OnInit()
 	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = (int *)&Config()->m_ClDummy7ColorHands;
 	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = (int *)&Config()->m_ClDummy7ColorFeet;
 	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = (int *)&Config()->m_ClDummy7ColorEyes;
+
+	// load skins;
+	Refresh([this](int SkinCounter) {
+		GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+	});
+
+	LoadXmasHat();
+	LoadBotDecoration();
+	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+}
+
+void CSkins7::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
+{
+	// for(auto & vSkinParts : m_avSkinParts)
+	// {
+	// 	for(auto &SkinPart : vSkinParts)
+	// 	{
+	// 		SkinPart.Unload(Graphics());
+	// 	}
+	// 	vSkinParts.clear();
+	// }
+
+	
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
@@ -321,16 +352,17 @@ void CSkins7::OnInit()
 
 	// load skins
 	m_vSkins.clear();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, SKINS_DIR, SkinScan, this);
-	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+	SSkinScanUser SkinScanUser;
+	SkinScanUser.m_pThis = this;
+	SkinScanUser.m_SkinLoadedFunc = SkinLoadedFunc;
+	Storage()->ListDirectory(IStorage::TYPE_ALL, SKINS_DIR, SkinScan, &SkinScanUser);
 
 	// add dummy skin
 	if(m_vSkins.empty())
 		m_vSkins.emplace_back(m_DummySkin);
 
-	LoadXmasHat();
-	LoadBotDecoration();
-	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+
+	dbg_msg("skins7", "refreshed ...");
 }
 
 void CSkins7::LoadXmasHat()

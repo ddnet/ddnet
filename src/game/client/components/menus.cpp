@@ -57,7 +57,7 @@ CMenus::CMenus()
 {
 	m_Popup = POPUP_NONE;
 	m_MenuPage = 0;
-	m_GamePage = PAGE_GAME;
+	m_GamePage = PAGE_SETTINGS; // TODO: remove
 
 	m_NeedRestartGraphics = false;
 	m_NeedRestartSound = false;
