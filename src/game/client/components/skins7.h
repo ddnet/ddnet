@@ -64,7 +64,7 @@ public:
 	void OnInit() override;
 
 	void AddSkin(const char *pSkinName, int Dummy);
-	void RemoveSkin(const CSkin *pSkin);
+	bool RemoveSkin(const CSkin *pSkin);
 
 	int Num();
 	int NumSkinPart(int Part);
