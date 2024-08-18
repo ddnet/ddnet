@@ -62,8 +62,6 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	Buttons.VSplitLeft(ButtonSize, &ButtonMiddle, &Buttons);
 	Buttons.VSplitLeft(ButtonSize, &ButtonRight, &Buttons);
 
-	// HotCuiRects(MainView, BottomView, QuickSearch, ButtonLeft, ButtonMiddle, ButtonRight);
-
 	// render skin preview background
 	const float SpacingH = 2.0f;
 	const float SpacingW = 3.0f;
