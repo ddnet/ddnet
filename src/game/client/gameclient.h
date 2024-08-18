@@ -444,13 +444,15 @@ public:
 		class CSixup
 		{
 		public:
+			void Reset();
+
 			char m_aaSkinPartNames[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_LENGTH];
 			int m_aUseCustomColors[protocol7::NUM_SKINPARTS];
 			int m_aSkinPartColors[protocol7::NUM_SKINPARTS];
 		};
 
 		// 0.7 Skin
-		CSixup m_Sixup[NUM_DUMMIES];
+		CSixup m_aSixup[NUM_DUMMIES];
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];

@@ -52,7 +52,7 @@ public:
 		m_TeeRenderFlags = 0;
 		m_FeetFlipped = false;
 
-		for(auto &Sixup : m_Sixup)
+		for(auto &Sixup : m_aSixup)
 			Sixup.Reset();
 	}
 
@@ -107,7 +107,7 @@ public:
 		ColorRGBA m_BotColor;
 	};
 
-	CSixup m_Sixup[NUM_DUMMIES];
+	CSixup m_aSixup[NUM_DUMMIES];
 };
 
 // Tee Render Flags

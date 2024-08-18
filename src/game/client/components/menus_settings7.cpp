@@ -117,13 +117,13 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 			const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, SkinPart);
 			if(aUCCVars[Part])
 			{
-				OwnSkinInfo.m_Sixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_ColorTexture;
-				OwnSkinInfo.m_Sixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(aColorVars[Part], Part == protocol7::SKINPART_MARKING);
+				OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_ColorTexture;
+				OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(aColorVars[Part], Part == protocol7::SKINPART_MARKING);
 			}
 			else
 			{
-				OwnSkinInfo.m_Sixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_OrgTexture;
-				OwnSkinInfo.m_Sixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+				OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_OrgTexture;
+				OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
 
@@ -169,13 +169,13 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 			const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, SkinPart);
 			if(aUCCVars[Part])
 			{
-				TeamSkinInfo.m_Sixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_ColorTexture;
-				TeamSkinInfo.m_Sixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(aColorVars[Part], Part == protocol7::SKINPART_MARKING);
+				TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_ColorTexture;
+				TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(aColorVars[Part], Part == protocol7::SKINPART_MARKING);
 			}
 			else
 			{
-				TeamSkinInfo.m_Sixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_OrgTexture;
-				TeamSkinInfo.m_Sixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+				TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_OrgTexture;
+				TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
 
@@ -193,7 +193,7 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
 			ColorRGBA TeamColor = m_pClient->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_RED, Part);
-			TeamSkinInfo.m_Sixup[g_Config.m_ClDummy].m_aColors[Part] = TeamColor;
+			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = TeamColor;
 		}
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(1, 0), vec2(TeeLeft.x + TeeLeft.w / 2.0f, TeeLeft.y + TeeLeft.h / 2.0f + 6.0f));
 
@@ -202,7 +202,7 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
 			ColorRGBA TeamColor = m_pClient->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_BLUE, Part);
-			TeamSkinInfo.m_Sixup[g_Config.m_ClDummy].m_aColors[Part] = TeamColor;
+			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = TeamColor;
 		}
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(-1, 0), vec2(TeeRight.x + TeeRight.w / 2.0f, TeeRight.y + TeeRight.h / 2.0f + 6.0f));
 	}
@@ -421,13 +421,13 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 			{
 				if(s->m_aUseCustomColors[Part])
 				{
-					Info.m_Sixup[g_Config.m_ClDummy].m_aTextures[Part] = s->m_apParts[Part]->m_ColorTexture;
-					Info.m_Sixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(s->m_aPartColors[Part], Part == protocol7::SKINPART_MARKING);
+					Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = s->m_apParts[Part]->m_ColorTexture;
+					Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(s->m_aPartColors[Part], Part == protocol7::SKINPART_MARKING);
 				}
 				else
 				{
-					Info.m_Sixup[g_Config.m_ClDummy].m_aTextures[Part] = s->m_apParts[Part]->m_OrgTexture;
-					Info.m_Sixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+					Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = s->m_apParts[Part]->m_OrgTexture;
+					Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 				}
 			}
 
@@ -510,18 +510,18 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 				if(*CSkins7::ms_apUCCVariables[(int)m_Dummy][j])
 				{
 					if(m_TeePartSelected == j)
-						Info.m_Sixup[g_Config.m_ClDummy].m_aTextures[j] = s->m_ColorTexture;
+						Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = s->m_ColorTexture;
 					else
-						Info.m_Sixup[g_Config.m_ClDummy].m_aTextures[j] = pSkinPart->m_ColorTexture;
-					Info.m_Sixup[g_Config.m_ClDummy].m_aColors[j] = m_pClient->m_Skins7.GetColor(*CSkins7::ms_apColorVariables[(int)m_Dummy][j], j == protocol7::SKINPART_MARKING);
+						Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = pSkinPart->m_ColorTexture;
+					Info.m_aSixup[g_Config.m_ClDummy].m_aColors[j] = m_pClient->m_Skins7.GetColor(*CSkins7::ms_apColorVariables[(int)m_Dummy][j], j == protocol7::SKINPART_MARKING);
 				}
 				else
 				{
 					if(m_TeePartSelected == j)
-						Info.m_Sixup[g_Config.m_ClDummy].m_aTextures[j] = s->m_OrgTexture;
+						Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = s->m_OrgTexture;
 					else
-						Info.m_Sixup[g_Config.m_ClDummy].m_aTextures[j] = pSkinPart->m_OrgTexture;
-					Info.m_Sixup[0].m_aColors[j] = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+						Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = pSkinPart->m_OrgTexture;
+					Info.m_aSixup[0].m_aColors[j] = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 				}
 			}
 			Info.m_Size = 50.0f;

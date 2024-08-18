@@ -29,7 +29,7 @@
 
 void CPlayers::RenderHand(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
 {
-	if(pInfo->m_Sixup[g_Config.m_ClDummy].m_aTextures[protocol7::SKINPART_BODY].IsValid())
+	if(pInfo->m_aSixup[g_Config.m_ClDummy].m_aTextures[protocol7::SKINPART_BODY].IsValid())
 		RenderHand7(pInfo, CenterPos, Dir, AngleOffset, PostRotOffset, Alpha);
 	else
 		RenderHand6(pInfo, CenterPos, Dir, AngleOffset, PostRotOffset, Alpha);
@@ -56,12 +56,12 @@ void CPlayers::RenderHand7(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir
 	HandPos += DirX * PostRotOffset.x;
 	HandPos += DirY * PostRotOffset.y;
 
-	ColorRGBA Color = pInfo->m_Sixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_HANDS];
+	ColorRGBA Color = pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_HANDS];
 	Color.a = Alpha;
 	IGraphics::CQuadItem QuadOutline(HandPos.x, HandPos.y, 2 * BaseSize, 2 * BaseSize);
 	IGraphics::CQuadItem QuadHand = QuadOutline;
 
-	Graphics()->TextureSet(pInfo->m_Sixup[g_Config.m_ClDummy].m_aTextures[protocol7::SKINPART_HANDS]);
+	Graphics()->TextureSet(pInfo->m_aSixup[g_Config.m_ClDummy].m_aTextures[protocol7::SKINPART_HANDS]);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(Color);
 	Graphics()->QuadsSetRotation(Angle);
@@ -842,7 +842,7 @@ void CPlayers::OnRender()
 			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");
 			if(pSkin != nullptr)
 			{
-				aRenderInfo[i].m_Sixup[g_Config.m_ClDummy].Reset();
+				aRenderInfo[i].m_aSixup[g_Config.m_ClDummy].Reset();
 
 				aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 				aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
