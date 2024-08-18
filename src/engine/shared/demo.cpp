@@ -805,6 +805,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		str_copy(m_aFilename, "");
 		return -1;
 	}
+	m_Sixup = str_startswith(m_Info.m_Header.m_aNetversion, "0.7");
 
 	// save byte offset of map for later use
 	m_MapOffset = io_tell(m_File);
