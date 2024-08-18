@@ -68,8 +68,6 @@ CInput::CInput()
 
 	m_MouseFocus = true;
 
-	m_pClipboardText = nullptr;
-
 	m_CompositionCursor = 0;
 	m_CandidateSelectedIndex = -1;
 
@@ -90,7 +88,6 @@ void CInput::Init()
 
 void CInput::Shutdown()
 {
-	SDL_free(m_pClipboardText);
 	CloseJoysticks();
 }
 
@@ -303,11 +300,12 @@ const std::vector<IInput::CTouchFingerState> &CInput::TouchFingerStates() const
 	return m_vTouchFingerStates;
 }
 
-const char *CInput::GetClipboardText()
+std::string CInput::GetClipboardText()
 {
-	SDL_free(m_pClipboardText);
-	m_pClipboardText = SDL_GetClipboardText();
-	return m_pClipboardText;
+	char *pClipboardText = SDL_GetClipboardText();
+	std::string ClipboardText = pClipboardText;
+	SDL_free(pClipboardText);
+	return ClipboardText;
 }
 
 void CInput::SetClipboardText(const char *pText)

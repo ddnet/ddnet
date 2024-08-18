@@ -74,7 +74,6 @@ private:
 	float GetJoystickDeadzone();
 
 	bool m_InputGrabbed;
-	char *m_pClipboardText;
 
 	bool m_MouseFocus;
 #if defined(CONF_PLATFORM_ANDROID)
@@ -151,7 +150,7 @@ public:
 
 	const std::vector<CTouchFingerState> &TouchFingerStates() const override;
 
-	const char *GetClipboardText() override;
+	std::string GetClipboardText() override;
 	void SetClipboardText(const char *pText) override;
 
 	void StartTextInput() override;
