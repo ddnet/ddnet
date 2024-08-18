@@ -395,10 +395,18 @@ void CSkins7::AddSkin(const char *pSkinName, int Dummy)
 		m_vSkins.emplace_back(Skin);
 }
 
-void CSkins7::RemoveSkin(const CSkin *pSkin)
+bool CSkins7::RemoveSkin(const CSkin *pSkin)
 {
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), SKINS_DIR "/%s.json", pSkin->m_aName);
+	if(!Storage()->RemoveFile(aBuf, IStorage::TYPE_SAVE))
+	{
+		return false;
+	}
+
 	auto Position = std::find(m_vSkins.begin(), m_vSkins.end(), *pSkin);
 	m_vSkins.erase(Position);
+	return true;
 }
 
 int CSkins7::Num()

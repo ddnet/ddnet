@@ -249,9 +249,9 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		static CButtonContainer s_CustomSkinDeleteButton;
 		if(DoButton_Menu(&s_CustomSkinDeleteButton, Localize("Delete"), 0, &ButtonMiddle))
 		{
-			// char aBuf[128];
-			// str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete the skin '%s'?"), m_pSelectedSkin->m_aName);
-			// PopupConfirm(Localize("Delete skin"), aBuf, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDeleteSkin);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete the skin '%s'?"), m_pSelectedSkin->m_aName);
+			PopupConfirm(Localize("Delete skin"), aBuf, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDeleteSkin7);
 		}
 	}
 
@@ -290,6 +290,18 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		if(Ui()->DoClearableEditBox(&s_SkinFilterInput, &QuickSearch, 14.0f))
 			m_SkinListNeedsUpdate = true;
 	}
+}
+
+void CMenus::PopupConfirmDeleteSkin7()
+{
+	dbg_assert(m_pSelectedSkin, "no skin selected for deletion");
+
+	if(!m_pClient->m_Skins7.RemoveSkin(m_pSelectedSkin))
+	{
+		PopupMessage(Localize("Error"), Localize("Unable to delete the skin"), Localize("Ok"));
+		return;
+	}
+	m_pSelectedSkin = nullptr;
 }
 
 void CMenus::RenderSettingsTeeBasic7(CUIRect MainView)
