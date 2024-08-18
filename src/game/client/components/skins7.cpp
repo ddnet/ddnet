@@ -242,7 +242,7 @@ void CSkins7::OnInit()
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClPlayer7UseCustomColorFeet;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClPlayer7UseCustomColorEyes;
 	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = (int *)&Config()->m_ClPlayer7ColorBody;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_MARKING] = &Config()->m_ClPlayer7ColorMarking;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_MARKING] = (int *)&Config()->m_ClPlayer7ColorMarking;
 	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = (int *)&Config()->m_ClPlayer7ColorDecoration;
 	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = (int *)&Config()->m_ClPlayer7ColorHands;
 	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = (int *)&Config()->m_ClPlayer7ColorFeet;
