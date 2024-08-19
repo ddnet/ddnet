@@ -331,10 +331,9 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 		}
 		else if(ModPressed && !AltPressed && Event.m_Key == KEY_V)
 		{
-			const char *pClipboardText = Input()->GetClipboardText();
-			if(pClipboardText)
+			std::string ClipboardText = Input()->GetClipboardText();
+			if(!ClipboardText.empty())
 			{
-				std::string ClipboardText = Input()->GetClipboardText();
 				if(m_pfnClipboardLineCallback)
 				{
 					// Split clipboard text into multiple lines. Send all complete lines to callback.

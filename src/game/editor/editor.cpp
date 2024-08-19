@@ -3665,12 +3665,12 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 	{
 		if(ButtonResult == 1)
 		{
-			const char *pClipboard = Input()->GetClipboardText();
-			if(*pClipboard == '#' || *pClipboard == '$') // ignore leading # (web color format) and $ (console color format)
-				++pClipboard;
-			if(str_isallnum_hex(pClipboard))
+			std::string Clipboard = Input()->GetClipboardText();
+			if(Clipboard[0] == '#' || Clipboard[0] == '$') // ignore leading # (web color format) and $ (console color format)
+				Clipboard = Clipboard.substr(1);
+			if(str_isallnum_hex(Clipboard.c_str()))
 			{
-				std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(pClipboard);
+				std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(Clipboard.c_str());
 				if(ParsedColor)
 				{
 					m_ColorPickerPopupContext.m_State = EEditState::ONE_GO;
