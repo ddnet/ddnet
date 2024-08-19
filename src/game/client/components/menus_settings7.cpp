@@ -248,7 +248,7 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	else if(m_pSelectedSkin && (m_pSelectedSkin->m_Flags & CSkins7::SKINFLAG_STANDARD) == 0)
 	{
 		static CButtonContainer s_CustomSkinDeleteButton;
-		if(DoButton_Menu(&s_CustomSkinDeleteButton, Localize("Delete"), 0, &ButtonMiddle))
+		if(DoButton_Menu(&s_CustomSkinDeleteButton, Localize("Delete"), 0, &ButtonMiddle) || Ui()->ConsumeHotkey(CUi::HOTKEY_DELETE))
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete the skin '%s'?"), m_pSelectedSkin->m_aName);
