@@ -208,7 +208,7 @@ typename CNetBan::CBan<T> *CNetBan::CBanPool<T, HashCount>::Get(int Index) const
 }
 
 template<class T>
-int CNetBan::Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason, bool DisplayTime)
+int CNetBan::Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason, bool VerbatimReason)
 {
 	// do not ban localhost
 	if(NetMatch(pData, &m_LocalhostIpV4) || NetMatch(pData, &m_LocalhostIpV6))
@@ -222,7 +222,7 @@ int CNetBan::Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, c
 	// set up info
 	CBanInfo Info = {0};
 	Info.m_Expires = Stamp;
-	Info.m_DisplayTime = DisplayTime;
+	Info.m_VerbatimReason = VerbatimReason;
 	str_copy(Info.m_aReason, pReason);
 
 	// check if it already exists
@@ -309,15 +309,15 @@ void CNetBan::Update()
 	}
 }
 
-int CNetBan::BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool DisplayTime)
+int CNetBan::BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool VerbatimReason)
 {
-	return Ban(&m_BanAddrPool, pAddr, Seconds, pReason, DisplayTime);
+	return Ban(&m_BanAddrPool, pAddr, Seconds, pReason, VerbatimReason);
 }
 
 int CNetBan::BanRange(const CNetRange *pRange, int Seconds, const char *pReason)
 {
 	if(pRange->IsValid())
-		return Ban(&m_BanRangePool, pRange, Seconds, pReason, true);
+		return Ban(&m_BanRangePool, pRange, Seconds, pReason, false);
 
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban failed (invalid range)");
 	return -1;
@@ -415,7 +415,7 @@ void CNetBan::ConBan(IConsole::IResult *pResult, void *pUser)
 
 	NETADDR Addr;
 	if(net_addr_from_str(&Addr, pStr) == 0)
-		pThis->BanAddr(&Addr, Minutes * 60, pReason, true);
+		pThis->BanAddr(&Addr, Minutes * 60, pReason, false);
 	else
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid network address)");
 }
