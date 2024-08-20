@@ -356,7 +356,7 @@ void CMenus::RenderSettingsTeeCustom7(CUIRect MainView)
 		5.0f, // BottomMargin
 		&Right,
 		Localize("Custom colors"),
-		(unsigned int *)CSkins7::ms_apColorVariables[(int)m_Dummy][m_TeePartSelected],
+		CSkins7::ms_apColorVariables[(int)m_Dummy][m_TeePartSelected],
 		ColorRGBA(1.0f, 1.0f, 0.5f), // DefaultColor
 		true, // CheckBoxSpacing
 		CSkins7::ms_apUCCVariables[(int)m_Dummy][m_TeePartSelected], // CheckBoxValue
