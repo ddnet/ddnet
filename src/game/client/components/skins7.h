@@ -56,7 +56,7 @@ public:
 
 	static char *ms_apSkinVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS];
 	static int *ms_apUCCVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS]; // use custom color
-	static int *ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS];
+	static unsigned int *ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS];
 	IGraphics::CTextureHandle m_XmasHatTexture;
 	IGraphics::CTextureHandle m_BotTexture;
 

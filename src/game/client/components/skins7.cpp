@@ -23,7 +23,7 @@ const char *const CSkins7::ms_apColorComponents[NUM_COLOR_COMPONENTS] = {"hue", 
 
 char *CSkins7::ms_apSkinVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
 int *CSkins7::ms_apUCCVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
-int *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
+int unsigned *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
 
 #define SKINS_DIR "skins7"
 
@@ -241,12 +241,12 @@ void CSkins7::OnInit()
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClPlayer7UseCustomColorHands;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClPlayer7UseCustomColorFeet;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClPlayer7UseCustomColorEyes;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = (int *)&Config()->m_ClPlayer7ColorBody;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = &Config()->m_ClPlayer7ColorBody;
 	ms_apColorVariables[Dummy][protocol7::SKINPART_MARKING] = &Config()->m_ClPlayer7ColorMarking;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = (int *)&Config()->m_ClPlayer7ColorDecoration;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = (int *)&Config()->m_ClPlayer7ColorHands;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = (int *)&Config()->m_ClPlayer7ColorFeet;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = (int *)&Config()->m_ClPlayer7ColorEyes;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = &Config()->m_ClPlayer7ColorDecoration;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClPlayer7ColorHands;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClPlayer7ColorFeet;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClPlayer7ColorEyes;
 
 	Dummy = 1;
 	ms_apSkinVariables[Dummy][protocol7::SKINPART_BODY] = Config()->m_ClDummy7SkinBody;
@@ -261,12 +261,12 @@ void CSkins7::OnInit()
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClDummy7UseCustomColorHands;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClDummy7UseCustomColorFeet;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClDummy7UseCustomColorEyes;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = (int *)&Config()->m_ClDummy7ColorBody;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_MARKING] = (int *)&Config()->m_ClDummy7ColorMarking;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = (int *)&Config()->m_ClDummy7ColorDecoration;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = (int *)&Config()->m_ClDummy7ColorHands;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = (int *)&Config()->m_ClDummy7ColorFeet;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = (int *)&Config()->m_ClDummy7ColorEyes;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = &Config()->m_ClDummy7ColorBody;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_MARKING] = &Config()->m_ClDummy7ColorMarking;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = &Config()->m_ClDummy7ColorDecoration;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClDummy7ColorHands;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClDummy7ColorFeet;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClDummy7ColorEyes;
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
