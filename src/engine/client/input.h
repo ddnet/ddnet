@@ -76,11 +76,6 @@ private:
 	bool m_InputGrabbed;
 
 	bool m_MouseFocus;
-#if defined(CONF_PLATFORM_ANDROID)
-	int m_NumBackPresses = 0;
-	bool m_BackButtonReleased = true;
-	int64_t m_LastBackPress = -1;
-#endif
 
 	// IME support
 	std::string m_CompositionString;
