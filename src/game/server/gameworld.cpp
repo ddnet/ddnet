@@ -270,6 +270,21 @@ void CGameWorld::Tick()
 	}
 }
 
+ESaveResult CGameWorld::BlocksSave(int ClientId)
+{
+	// check all objects
+	for(auto *pEnt : m_apFirstEntityTypes)
+		for(; pEnt;)
+		{
+			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+			ESaveResult Result = pEnt->BlocksSave(ClientId);
+			if(Result != ESaveResult::SUCCESS)
+				return Result;
+			pEnt = m_pNextTraverseEntity;
+		}
+	return ESaveResult::SUCCESS;
+}
+
 void CGameWorld::SwapClients(int Client1, int Client2)
 {
 	// update all objects
