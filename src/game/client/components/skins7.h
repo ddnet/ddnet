@@ -20,13 +20,13 @@ public:
 		SKINFLAG_SPECIAL = 1 << 0,
 		SKINFLAG_STANDARD = 1 << 1,
 
-		DARKEST_COLOR_LGT = 61,
-
 		NUM_COLOR_COMPONENTS = 4,
 
 		HAT_NUM = 2,
 		HAT_OFFSET_SIDE = 2,
 	};
+
+	static constexpr float DARKEST_COLOR_LGT = 61.0f / 255.0f;
 
 	struct CSkinPart
 	{
