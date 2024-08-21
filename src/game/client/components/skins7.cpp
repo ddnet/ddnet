@@ -476,11 +476,7 @@ void CSkins7::RandomizeSkin(int Dummy)
 
 ColorRGBA CSkins7::GetColor(int Value, bool UseAlpha) const
 {
-	float Dark = DARKEST_COLOR_LGT / 255.0f;
-	ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(Value).UnclampLighting(Dark));
-	float Alpha = UseAlpha ? ((Value >> 24) & 0xff) / 255.0f : 1.0f;
-	Color.a = Alpha;
-	return Color;
+	return color_cast<ColorRGBA>(ColorHSLA(Value, UseAlpha).UnclampLighting(DARKEST_COLOR_LGT));
 }
 
 ColorRGBA CSkins7::GetTeamColor(int UseCustomColors, int PartColor, int Team, int Part) const
