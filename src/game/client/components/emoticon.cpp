@@ -41,6 +41,7 @@ void CEmoticon::OnReset()
 	m_Active = false;
 	m_SelectedEmote = -1;
 	m_SelectedEyeEmote = -1;
+	m_TouchPressedOutside = false;
 }
 
 void CEmoticon::OnRelease()
@@ -58,6 +59,16 @@ bool CEmoticon::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	return true;
 }
 
+bool CEmoticon::OnInput(const IInput::CEvent &Event)
+{
+	if(IsActive() && Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
+	{
+		OnRelease();
+		return true;
+	}
+	return false;
+}
+
 void CEmoticon::OnRender()
 {
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -65,6 +76,13 @@ void CEmoticon::OnRender()
 
 	if(!m_Active)
 	{
+		if(m_TouchPressedOutside)
+		{
+			m_SelectedEmote = -1;
+			m_SelectedEyeEmote = -1;
+			m_TouchPressedOutside = false;
+		}
+
 		if(m_WasActive && m_SelectedEmote != -1)
 			Emote(m_SelectedEmote);
 		if(m_WasActive && m_SelectedEyeEmote != -1)
@@ -82,6 +100,29 @@ void CEmoticon::OnRender()
 
 	m_WasActive = true;
 
+	const CUIRect Screen = *Ui()->Screen();
+
+	const bool WasTouchPressed = m_TouchState.m_AnyPressed;
+	Ui()->UpdateTouchState(m_TouchState);
+	if(m_TouchState.m_AnyPressed)
+	{
+		const vec2 TouchPos = (m_TouchState.m_PrimaryPosition - vec2(0.5f, 0.5f)) * Screen.Size();
+		const float TouchCenterDistance = length(TouchPos);
+		if(TouchCenterDistance <= 170.0f)
+		{
+			m_SelectorMouse = TouchPos;
+		}
+		else if(TouchCenterDistance > 190.0f)
+		{
+			m_TouchPressedOutside = true;
+		}
+	}
+	else if(WasTouchPressed)
+	{
+		m_Active = false;
+		return;
+	}
+
 	if(length(m_SelectorMouse) > 170.0f)
 		m_SelectorMouse = normalize(m_SelectorMouse) * 170.0f;
 
@@ -95,8 +136,6 @@ void CEmoticon::OnRender()
 		m_SelectedEmote = (int)(SelectedAngle / (2 * pi) * NUM_EMOTICONS);
 	else if(length(m_SelectorMouse) > 40.0f)
 		m_SelectedEyeEmote = (int)(SelectedAngle / (2 * pi) * NUM_EMOTES);
-
-	CUIRect Screen = *Ui()->Screen();
 
 	Ui()->MapScreen();
 
