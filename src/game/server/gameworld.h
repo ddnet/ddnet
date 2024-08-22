@@ -5,6 +5,8 @@
 
 #include <game/gamecore.h>
 
+#include "save.h"
+
 #include <vector>
 
 class CEntity;
@@ -152,6 +154,12 @@ public:
 			command is handled safely.
 	*/
 	void SwapClients(int Client1, int Client2);
+
+	/*
+		Function: BlocksSave
+			Checks if any entity would block /save
+	*/
+	ESaveResult BlocksSave(int ClientId);
 
 	// DDRace
 	void ReleaseHooked(int ClientId);
