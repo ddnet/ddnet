@@ -1327,11 +1327,6 @@ void CHud::RenderMovementInformation(const int ClientId)
 	}
 	// We show the speed in Blocks per Second (Bps) and therefore have to divide by the block size
 	float DisplaySpeedX = VelspeedX / 32;
-	float VelspeedLength = length(vec2(Vel.x, Vel.y) / 256.0f) * Client()->GameTickSpeed();
-	// Todo: Use Velramp tuning of each individual player
-	// Since these tuning parameters are almost never changed, the default values are sufficient in most cases
-	float Ramp = VelocityRamp(VelspeedLength, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
-	DisplaySpeedX *= Ramp;
 	float DisplaySpeedY = VelspeedY / 32;
 
 	float Angle = m_pClient->m_Players.GetPlayerTargetAngle(pPrevChar, pCurChar, ClientId, IntraTick);
