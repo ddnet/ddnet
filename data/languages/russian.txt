@@ -805,7 +805,7 @@ Toggle dyncam
 == Смена дин. камеры
 
 Toggle dummy
-== Смена Tee
+== Переключение дамми
 
 Toggle ghost
 == Переключить тень
@@ -1835,10 +1835,10 @@ No login required
 == Без логина
 
 Player info change cooldown
-== Задержка смены информации об игроке
+== Кулдаун смены данных об игроке
 
 Tee
-== Ти
+== Тии
 
 Always show chat
 == Всегда показывать чат
