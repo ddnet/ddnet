@@ -10,6 +10,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <string>
 #include <vector>
 
 const int g_MaxKeys = 512;
@@ -138,7 +139,7 @@ public:
 	virtual const std::vector<CTouchFingerState> &TouchFingerStates() const = 0;
 
 	// clipboard
-	virtual const char *GetClipboardText() = 0;
+	virtual std::string GetClipboardText() = 0;
 	virtual void SetClipboardText(const char *pText) = 0;
 
 	// text editing

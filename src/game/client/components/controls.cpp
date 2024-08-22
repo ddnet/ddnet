@@ -191,7 +191,7 @@ int CControls::SnapInput(int *pData)
 	if(m_pClient->m_Scoreboard.Active())
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
 
-	if(m_pClient->m_Controls.m_aShowHookColl[g_Config.m_ClDummy])
+	if(m_pClient->m_Controls.m_aShowHookColl[g_Config.m_ClDummy] && Client()->ServerCapAnyPlayerFlag())
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_AIM;
 
 	bool Send = m_aLastData[g_Config.m_ClDummy].m_PlayerFlags != m_aInputData[g_Config.m_ClDummy].m_PlayerFlags;
@@ -210,6 +210,13 @@ int CControls::SnapInput(int *pData)
 		// even if chat or menu are activated
 		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePos[g_Config.m_ClDummy].x;
 		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
+
+		// scale TargetX, TargetY by zoom.
+		if(!m_pClient->m_Snap.m_SpecInfo.m_Active)
+		{
+			m_aInputData[g_Config.m_ClDummy].m_TargetX *= m_pClient->m_Camera.m_Zoom;
+			m_aInputData[g_Config.m_ClDummy].m_TargetY *= m_pClient->m_Camera.m_Zoom;
+		}
 
 		// send once a second just to be sure
 		Send = Send || time_get() > m_LastSendTime + time_freq();

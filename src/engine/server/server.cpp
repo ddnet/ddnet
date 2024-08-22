@@ -60,7 +60,7 @@ void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *
 }
 
 template<class T>
-int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason, bool DisplayTime)
+int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason, bool VerbatimReason)
 {
 	// validate address
 	if(Server()->m_RconClientId >= 0 && Server()->m_RconClientId < MAX_CLIENTS &&
@@ -99,7 +99,7 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 		}
 	}
 
-	int Result = Ban(pBanPool, pData, Seconds, pReason, DisplayTime);
+	int Result = Ban(pBanPool, pData, Seconds, pReason, VerbatimReason);
 	if(Result != 0)
 		return Result;
 
@@ -122,9 +122,9 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 	return Result;
 }
 
-int CServerBan::BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool DisplayTime)
+int CServerBan::BanAddr(const NETADDR *pAddr, int Seconds, const char *pReason, bool VerbatimReason)
 {
-	return BanExt(&m_BanAddrPool, pAddr, Seconds, pReason, DisplayTime);
+	return BanExt(&m_BanAddrPool, pAddr, Seconds, pReason, VerbatimReason);
 }
 
 int CServerBan::BanRange(const CNetRange *pRange, int Seconds, const char *pReason)
@@ -150,7 +150,7 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 		if(ClientId < 0 || ClientId >= MAX_CLIENTS || pThis->Server()->m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid client id)");
 		else
-			pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientId), Minutes * 60, pReason, true);
+			pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientId), Minutes * 60, pReason, false);
 	}
 	else
 		ConBan(pResult, pUser);
@@ -473,11 +473,11 @@ void CServer::Kick(int ClientId, const char *pReason)
 	m_NetServer.Drop(ClientId, pReason);
 }
 
-void CServer::Ban(int ClientId, int Seconds, const char *pReason, bool DisplayTime)
+void CServer::Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason)
 {
 	NETADDR Addr;
 	GetClientAddr(ClientId, &Addr);
-	m_NetServer.NetBan()->BanAddr(&Addr, Seconds, pReason, DisplayTime);
+	m_NetServer.NetBan()->BanAddr(&Addr, Seconds, pReason, VerbatimReason);
 }
 
 void CServer::RedirectClient(int ClientId, int Port, bool Verbose)
@@ -1459,7 +1459,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 		if(m_aClients[ClientId].m_Traffic > Limit)
 		{
-			m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 600, "Stressing network", true);
+			m_NetServer.NetBan()->BanAddr(&pPacket->m_Address, 600, "Stressing network", false);
 			return;
 		}
 		if(Diff > 100)
@@ -1825,7 +1825,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					if(!Config()->m_SvRconBantime)
 						m_NetServer.Drop(ClientId, "Too many remote console authentication tries");
 					else
-						m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientId), Config()->m_SvRconBantime * 60, "Too many remote console authentication tries", true);
+						m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientId), Config()->m_SvRconBantime * 60, "Too many remote console authentication tries", false);
 				}
 			}
 			else
@@ -2433,6 +2433,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 	if(PacketWaiting)
 	{
 		// process packets
+		ResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
 		while(m_NetServer.Recv(&Packet, &ResponseToken))
 		{
 			if(Packet.m_ClientId == -1)
@@ -2590,9 +2591,8 @@ int CServer::LoadMap(const char *pMapName)
 			{
 				m_pRegister->OnConfigChange();
 			}
-			str_format(aBufMsg, sizeof(aBufMsg), "couldn't load map %s", aBuf);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", aBufMsg);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "sixup", "disabling 0.7 compatibility");
+			log_error("sixup", "couldn't load map %s", aBuf);
+			log_info("sixup", "disabling 0.7 compatibility");
 		}
 		else
 		{
@@ -2857,54 +2857,6 @@ int CServer::Run()
 				}
 			}
 
-			// handle dnsbl
-			if(Config()->m_SvDnsbl)
-			{
-				for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
-				{
-					if(m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
-						continue;
-
-					if(m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_NONE)
-					{
-						// initiate dnsbl lookup
-						InitDnsbl(ClientId);
-					}
-					else if(m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_PENDING &&
-						m_aClients[ClientId].m_pDnsblLookup->State() == IJob::STATE_DONE)
-					{
-						if(m_aClients[ClientId].m_pDnsblLookup->Result() != 0)
-						{
-							// entry not found -> whitelisted
-							m_aClients[ClientId].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
-
-							char aAddrStr[NETADDR_MAXSTRSIZE];
-							net_addr_str(m_NetServer.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
-
-							str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s whitelisted", ClientId, aAddrStr, m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
-							Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
-						}
-						else
-						{
-							// entry found -> blacklisted
-							m_aClients[ClientId].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
-
-							// console output
-							char aAddrStr[NETADDR_MAXSTRSIZE];
-							net_addr_str(m_NetServer.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
-
-							str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s blacklisted", ClientId, aAddrStr, m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
-							Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
-
-							if(Config()->m_SvDnsblBan)
-							{
-								m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason, false);
-							}
-						}
-					}
-				}
-			}
-
 			while(t > TickStartTime(m_CurrentGameTick + 1))
 			{
 				GameServer()->OnPreTickTeehistorian();
@@ -2968,29 +2920,76 @@ int CServer::Run()
 				UpdateClientRconCommands();
 
 				m_Fifo.Update();
-			}
 
-			// master server stuff
-			m_pRegister->Update();
+				// master server stuff
+				m_pRegister->Update();
 
-			if(m_ServerInfoNeedsUpdate)
-				UpdateServerInfo();
+				if(m_ServerInfoNeedsUpdate)
+					UpdateServerInfo();
 
-			Antibot()->OnEngineTick();
+				Antibot()->OnEngineTick();
 
-			if(!NonActive)
-				PumpNetwork(PacketWaiting);
-
-			for(int i = 0; i < MAX_CLIENTS; ++i)
-			{
-				if(m_aClients[i].m_State == CClient::STATE_REDIRECTED)
+				// handle dnsbl
+				if(Config()->m_SvDnsbl)
 				{
-					if(time_get() > m_aClients[i].m_RedirectDropTime)
+					for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 					{
-						m_NetServer.Drop(i, "redirected");
+						if(m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
+							continue;
+
+						if(m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_NONE)
+						{
+							// initiate dnsbl lookup
+							InitDnsbl(ClientId);
+						}
+						else if(m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_PENDING &&
+							m_aClients[ClientId].m_pDnsblLookup->State() == IJob::STATE_DONE)
+						{
+							if(m_aClients[ClientId].m_pDnsblLookup->Result() != 0)
+							{
+								// entry not found -> whitelisted
+								m_aClients[ClientId].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
+
+								char aAddrStr[NETADDR_MAXSTRSIZE];
+								net_addr_str(m_NetServer.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
+
+								str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s whitelisted", ClientId, aAddrStr, m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
+								Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
+							}
+							else
+							{
+								// entry found -> blacklisted
+								m_aClients[ClientId].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
+
+								// console output
+								char aAddrStr[NETADDR_MAXSTRSIZE];
+								net_addr_str(m_NetServer.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
+
+								str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s blacklisted", ClientId, aAddrStr, m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
+								Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
+
+								if(Config()->m_SvDnsblBan)
+								{
+									m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason, true);
+								}
+							}
+						}
+					}
+				}
+				for(int i = 0; i < MAX_CLIENTS; ++i)
+				{
+					if(m_aClients[i].m_State == CClient::STATE_REDIRECTED)
+					{
+						if(time_get() > m_aClients[i].m_RedirectDropTime)
+						{
+							m_NetServer.Drop(i, "redirected");
+						}
 					}
 				}
 			}
+
+			if(!NonActive)
+				PumpNetwork(PacketWaiting);
 
 			NonActive = true;
 			for(const auto &Client : m_aClients)

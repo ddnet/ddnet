@@ -823,14 +823,14 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 				{
 					for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 					{
-						const char *pPartName = LineAuthor.m_Sixup.m_aaSkinPartNames[Part];
+						const char *pPartName = LineAuthor.m_aSixup[g_Config.m_ClDummy].m_aaSkinPartNames[Part];
 						int Id = m_pClient->m_Skins7.FindSkinPart(Part, pPartName, false);
 						const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, Id);
-						if(LineAuthor.m_Sixup.m_aUseCustomColors[Part])
+						if(LineAuthor.m_aSixup[g_Config.m_ClDummy].m_aUseCustomColors[Part])
 						{
 							pCurrentLine->m_Sixup.m_aTextures[Part] = pSkinPart->m_ColorTexture;
 							pCurrentLine->m_Sixup.m_aColors[Part] = m_pClient->m_Skins7.GetColor(
-								LineAuthor.m_Sixup.m_aSkinPartColors[Part],
+								LineAuthor.m_aSixup[g_Config.m_ClDummy].m_aSkinPartColors[Part],
 								Part == protocol7::SKINPART_MARKING);
 						}
 						else
@@ -839,13 +839,13 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 							pCurrentLine->m_Sixup.m_aColors[Part] = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 						}
 
-						if(LineAuthor.m_SkinInfo.m_Sixup.m_HatTexture.IsValid())
+						if(LineAuthor.m_SkinInfo.m_aSixup[g_Config.m_ClDummy].m_HatTexture.IsValid())
 						{
 							if(Part == protocol7::SKINPART_BODY && str_comp(pPartName, "standard"))
 								pCurrentLine->m_Sixup.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
 							if(Part == protocol7::SKINPART_DECORATION && str_comp(pPartName, "twinbopp"))
 								pCurrentLine->m_Sixup.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
-							pCurrentLine->m_Sixup.m_HatTexture = LineAuthor.m_SkinInfo.m_Sixup.m_HatTexture;
+							pCurrentLine->m_Sixup.m_HatTexture = LineAuthor.m_SkinInfo.m_aSixup[g_Config.m_ClDummy].m_HatTexture;
 						}
 					}
 				}
@@ -977,17 +977,11 @@ void CChat::OnPrepareLines(float y)
 		TextRender()->DeleteTextContainer(Line.m_TextContainerIndex);
 		Graphics()->DeleteQuadContainer(Line.m_QuadContainerIndex);
 
-		char aName[64 + 12] = "";
-
+		char aClientId[16] = "";
 		if(g_Config.m_ClShowIds && Line.m_ClientId >= 0 && Line.m_aName[0] != '\0')
 		{
-			if(Line.m_ClientId < 10)
-				str_format(aName, sizeof(aName), " %d: ", Line.m_ClientId);
-			else
-				str_format(aName, sizeof(aName), "%d: ", Line.m_ClientId);
+			GameClient()->FormatClientId(Line.m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
 		}
-
-		str_append(aName, Line.m_aName);
 
 		char aCount[12];
 		if(Line.m_ClientId < 0)
@@ -1029,7 +1023,8 @@ void CChat::OnPrepareLines(float y)
 				}
 			}
 
-			TextRender()->TextEx(&Cursor, aName);
+			TextRender()->TextEx(&Cursor, aClientId);
+			TextRender()->TextEx(&Cursor, Line.m_aName);
 			if(Line.m_TimesRepeated > 0)
 				TextRender()->TextEx(&Cursor, aCount);
 
@@ -1099,7 +1094,8 @@ void CChat::OnPrepareLines(float y)
 			NameColor = ColorRGBA(0.8f, 0.8f, 0.8f, 1.f);
 
 		TextRender()->TextColor(NameColor);
-		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, aName);
+		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, aClientId);
+		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, Line.m_aName);
 
 		if(Line.m_TimesRepeated > 0)
 		{
@@ -1303,12 +1299,15 @@ void CChat::OnRender()
 				RenderInfo.m_ColorFeet = Line.m_ColorFeet;
 				RenderInfo.m_Size = TeeSize;
 
-				for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+				if(Client()->IsSixup())
 				{
-					RenderInfo.m_Sixup.m_aColors[Part] = Line.m_Sixup.m_aColors[Part];
-					RenderInfo.m_Sixup.m_aTextures[Part] = Line.m_Sixup.m_aTextures[Part];
-					RenderInfo.m_Sixup.m_HatSpriteIndex = Line.m_Sixup.m_HatSpriteIndex;
-					RenderInfo.m_Sixup.m_HatTexture = Line.m_Sixup.m_HatTexture;
+					for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+					{
+						RenderInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = Line.m_Sixup.m_aColors[Part];
+						RenderInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = Line.m_Sixup.m_aTextures[Part];
+						RenderInfo.m_aSixup[g_Config.m_ClDummy].m_HatSpriteIndex = Line.m_Sixup.m_HatSpriteIndex;
+						RenderInfo.m_aSixup[g_Config.m_ClDummy].m_HatTexture = Line.m_Sixup.m_HatTexture;
+					}
 				}
 
 				float RowHeight = FontSize() + RealMsgPaddingY;

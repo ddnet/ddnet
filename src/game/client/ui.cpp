@@ -1381,19 +1381,20 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 	}
 
 	// render
+	const ColorRGBA HandleColor = ms_ScrollBarColorFunction.GetColor(CheckActiveItem(pId), HotItem() == pId);
 	if(pColorInner)
 	{
 		CUIRect Slider;
 		Handle.VMargin(-2.0f, &Slider);
 		Slider.HMargin(-3.0f, &Slider);
-		Slider.Draw(ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), IGraphics::CORNER_ALL, 5.0f);
+		Slider.Draw(ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f).Multiply(HandleColor), IGraphics::CORNER_ALL, 5.0f);
 		Slider.Margin(2.0f, &Slider);
-		Slider.Draw(*pColorInner, IGraphics::CORNER_ALL, 3.0f);
+		Slider.Draw(pColorInner->Multiply(HandleColor), IGraphics::CORNER_ALL, 3.0f);
 	}
 	else
 	{
 		Rail.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, Rail.h / 2.0f);
-		Handle.Draw(ms_ScrollBarColorFunction.GetColor(CheckActiveItem(pId), HotItem() == pId), IGraphics::CORNER_ALL, Handle.h / 2.0f);
+		Handle.Draw(HandleColor, IGraphics::CORNER_ALL, Handle.h / 2.0f);
 	}
 
 	return ReturnValue;

@@ -251,6 +251,7 @@ protected:
 	int m_TeePartSelected = protocol7::SKINPART_BODY;
 	const CSkins7::CSkin *m_pSelectedSkin = nullptr;
 	CLineInputBuffered<protocol7::MAX_SKIN_ARRAY_SIZE, protocol7::MAX_SKIN_LENGTH> m_SkinNameInput;
+	void PopupConfirmDeleteSkin7();
 
 	// for map download popup
 	int64_t m_DownloadLastCheckTime;
@@ -790,7 +791,7 @@ private:
 	// found in menus_settings.cpp
 	void RenderSettingsDDNet(CUIRect MainView);
 	void RenderSettingsAppearance(CUIRect MainView);
-	ColorHSLA RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha = false, bool ClampedLight = false);
+	bool RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight);
 
 	CServerProcess m_ServerProcess;
 };

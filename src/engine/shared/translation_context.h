@@ -1,7 +1,6 @@
 #ifndef ENGINE_SHARED_TRANSLATION_CONTEXT_H
 #define ENGINE_SHARED_TRANSLATION_CONTEXT_H
 
-#include <base/system.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol7.h>
 
@@ -15,23 +14,7 @@ public:
 		Reset();
 	}
 
-	void Reset()
-	{
-		for(int &LocalClientId : m_aLocalClientId)
-			LocalClientId = -1;
-		m_ShouldSendGameInfo = false;
-		m_GameFlags = 0;
-		m_ScoreLimit = 0;
-		m_TimeLimit = 0;
-		m_MatchNum = 0;
-		m_MatchCurrent = 0;
-		mem_zero(m_aDamageTaken, sizeof(m_aDamageTaken));
-		mem_zero(m_aDamageTakenTick, sizeof(m_aDamageTakenTick));
-		m_FlagCarrierBlue = 0;
-		m_FlagCarrierRed = 0;
-		m_TeamscoreRed = 0;
-		m_TeamscoreBlue = 0;
-	}
+	void Reset();
 
 	// this class is not used
 	// it could be used in the in game menu
@@ -42,12 +25,28 @@ public:
 	class CServerSettings
 	{
 	public:
-		bool m_KickVote = false;
-		int m_KickMin = 0;
-		bool m_SpecVote = false;
-		bool m_TeamLock = false;
-		bool m_TeamBalance = false;
-		int m_PlayerSlots = 0;
+		bool m_KickVote;
+		int m_KickMin;
+		bool m_SpecVote;
+		bool m_TeamLock;
+		bool m_TeamBalance;
+		int m_PlayerSlots;
+
+		CServerSettings()
+		{
+			Reset();
+		}
+
+		void Reset()
+		{
+			m_KickVote = false;
+			m_KickMin = 0;
+			m_SpecVote = false;
+			m_TeamLock = false;
+			m_TeamBalance = false;
+			m_PlayerSlots = 0;
+		}
+
 	} m_ServerSettings;
 
 	class CClientData

@@ -199,17 +199,39 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 			break;
 		}
 
+		if(g_Config.m_ClShowIds)
+		{
+			char aClientId[16];
+			GameClient()->FormatClientId(pInfo->m_ClientId, aClientId, EClientIdFormat::NO_INDENT);
+			TextRender()->TextEx(&Cursor, aClientId);
+		}
+
+		{
+			const char *pClanName = GameClient()->m_aClients[pInfo->m_ClientId].m_aClan;
+
+			if(pClanName[0] != '\0')
+			{
+				if(str_comp(pClanName, GameClient()->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0)
+				{
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor)));
+				}
+				else
+				{
+					TextRender()->TextColor(ColorRGBA(0.7f, 0.7f, 0.7f));
+				}
+
+				TextRender()->TextEx(&Cursor, pClanName);
+				TextRender()->TextEx(&Cursor, " ");
+
+				TextRender()->TextColor(TextRender()->DefaultTextColor());
+			}
+		}
+
 		if(GameClient()->m_aClients[pInfo->m_ClientId].m_AuthLevel)
 		{
 			TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor)));
 		}
 
-		if(g_Config.m_ClShowIds)
-		{
-			char aClientId[5];
-			str_format(aClientId, sizeof(aClientId), "%d: ", pInfo->m_ClientId);
-			TextRender()->TextEx(&Cursor, aClientId);
-		}
 		TextRender()->TextEx(&Cursor, GameClient()->m_aClients[pInfo->m_ClientId].m_aName);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 
@@ -228,7 +250,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	const int NumPlayers = CountEnd - CountStart;
 	const bool LowScoreboardWidth = Scoreboard.w < 700.0f;
 
-	bool Race7 = Client()->IsSixup() && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
+	bool Race7 = Client()->IsSixup() && pGameInfoObj && pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
 
 	// calculate measurements
 	float LineHeight;
@@ -512,13 +534,11 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			}
 			if(g_Config.m_ClShowIds)
 			{
-				str_format(aBuf, sizeof(aBuf), "%s%d: %s", pInfo->m_ClientId < 10 ? " " : "", pInfo->m_ClientId, ClientData.m_aName);
-				TextRender()->TextEx(&Cursor, aBuf);
+				char aClientId[16];
+				GameClient()->FormatClientId(pInfo->m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
+				TextRender()->TextEx(&Cursor, aClientId);
 			}
-			else
-			{
-				TextRender()->TextEx(&Cursor, ClientData.m_aName);
-			}
+			TextRender()->TextEx(&Cursor, ClientData.m_aName);
 
 			// ready / watching
 			if(Client()->IsSixup() && Client()->m_TranslationContext.m_aClients[pInfo->m_ClientId].m_PlayerFlags7 & protocol7::PLAYERFLAG_READY)

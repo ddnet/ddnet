@@ -79,7 +79,7 @@ void CRaceDemo::OnNewSnapshot()
 		vec2 PrevPos = vec2(m_pClient->m_Snap.m_pLocalPrevCharacter->m_X, m_pClient->m_Snap.m_pLocalPrevCharacter->m_Y);
 		vec2 Pos = vec2(m_pClient->m_Snap.m_pLocalCharacter->m_X, m_pClient->m_Snap.m_pLocalCharacter->m_Y);
 
-		if(ForceStart || (!ServerControl && CRaceHelper::IsStart(m_pClient, PrevPos, Pos)))
+		if(ForceStart || (!ServerControl && GameClient()->RaceHelper()->IsStart(PrevPos, Pos)))
 		{
 			if(m_RaceState == RACE_STARTED)
 				Client()->RaceRecord_Stop();

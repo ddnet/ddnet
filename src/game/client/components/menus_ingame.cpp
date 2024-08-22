@@ -186,7 +186,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			}
 		}
 
-		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS && ShowDDRaceButtons)
+		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS && (ShowDDRaceButtons || !(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)))
 		{
 			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 			ButtonBar.VSplitLeft(65.0f, &Button, &ButtonBar);
@@ -200,7 +200,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 	}
 
-	if(m_pClient->m_ReceivedDDNetPlayer && m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj && ShowDDRaceButtons)
+	if(m_pClient->m_ReceivedDDNetPlayer && m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj && (ShowDDRaceButtons || !(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)))
 	{
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS || Paused || Spec)
 		{
@@ -230,18 +230,16 @@ void CMenus::PopupConfirmDisconnectDummy()
 
 void CMenus::RenderPlayers(CUIRect MainView)
 {
-	CUIRect Button, Button2, ButtonBar, Options, Player;
+	CUIRect Button, Button2, ButtonBar, PlayerList, Player;
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
-	// player options
-	MainView.Margin(10.0f, &Options);
-	Options.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-	Options.Margin(10.0f, &Options);
-	Options.HSplitTop(50.0f, &Button, &Options);
-	Ui()->DoLabel(&Button, Localize("Player options"), 34.0f, TEXTALIGN_ML);
+	// list background color
+	MainView.Margin(10.0f, &PlayerList);
+	PlayerList.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+	PlayerList.Margin(10.0f, &PlayerList);
 
 	// headline
-	Options.HSplitTop(34.0f, &ButtonBar, &Options);
+	PlayerList.HSplitTop(34.0f, &ButtonBar, &PlayerList);
 	ButtonBar.VSplitRight(231.0f, &Player, &ButtonBar);
 	Ui()->DoLabel(&Player, Localize("Player"), 24.0f, TEXTALIGN_ML);
 
@@ -273,7 +271,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	}
 
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(24.0f, TotalPlayers, 1, 3, -1, &Options);
+	s_ListBox.DoStart(24.0f, TotalPlayers, 1, 3, -1, &PlayerList);
 
 	// options
 	static char s_aPlayerIds[MAX_CLIENTS][4] = {{0}};

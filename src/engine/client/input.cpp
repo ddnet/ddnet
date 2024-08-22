@@ -68,8 +68,6 @@ CInput::CInput()
 
 	m_MouseFocus = true;
 
-	m_pClipboardText = nullptr;
-
 	m_CompositionCursor = 0;
 	m_CandidateSelectedIndex = -1;
 
@@ -90,7 +88,6 @@ void CInput::Init()
 
 void CInput::Shutdown()
 {
-	SDL_free(m_pClipboardText);
 	CloseJoysticks();
 }
 
@@ -303,11 +300,12 @@ const std::vector<IInput::CTouchFingerState> &CInput::TouchFingerStates() const
 	return m_vTouchFingerStates;
 }
 
-const char *CInput::GetClipboardText()
+std::string CInput::GetClipboardText()
 {
-	SDL_free(m_pClipboardText);
-	m_pClipboardText = SDL_GetClipboardText();
-	return m_pClipboardText;
+	char *pClipboardText = SDL_GetClipboardText();
+	std::string ClipboardText = pClipboardText;
+	SDL_free(pClipboardText);
+	return ClipboardText;
 }
 
 void CInput::SetClipboardText(const char *pText)
@@ -714,35 +712,9 @@ int CInput::Update()
 
 		// handle keys
 		case SDL_KEYDOWN:
-#if defined(CONF_PLATFORM_ANDROID)
-			if(Event.key.keysym.scancode == KEY_AC_BACK && m_BackButtonReleased)
-			{
-				if(m_LastBackPress == -1 || (Now - m_LastBackPress) / (float)time_freq() > 1.0f)
-				{
-					m_NumBackPresses = 1;
-					m_LastBackPress = Now;
-				}
-				else
-				{
-					m_NumBackPresses++;
-					if(m_NumBackPresses >= 3)
-					{
-						// Quit if the Android back-button was pressed 3 times within 1 second
-						return 1;
-					}
-				}
-				m_BackButtonReleased = false;
-			}
-#endif
 			Scancode = TranslateScancode(Event.key);
 			break;
 		case SDL_KEYUP:
-#if defined(CONF_PLATFORM_ANDROID)
-			if(Event.key.keysym.scancode == KEY_AC_BACK && !m_BackButtonReleased)
-			{
-				m_BackButtonReleased = true;
-			}
-#endif
 			Action = IInput::FLAG_RELEASE;
 			Scancode = TranslateScancode(Event.key);
 			break;

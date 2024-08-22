@@ -3,6 +3,7 @@
 
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
+#include <base/log.h>
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
@@ -210,6 +211,12 @@ int CClient::SendMsgActive(CMsgPacker *pMsg, int Flags)
 
 void CClient::SendInfo(int Conn)
 {
+	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
+	MsgVer.AddRaw(&m_ConnectionId, sizeof(m_ConnectionId));
+	MsgVer.AddInt(GameClient()->DDNetVersion());
+	MsgVer.AddString(GameClient()->DDNetVersionStr());
+	SendMsg(Conn, &MsgVer, MSGFLAG_VITAL);
+
 	if(IsSixup())
 	{
 		CMsgPacker Msg(NETMSG_INFO, true);
@@ -219,11 +226,6 @@ void CClient::SendInfo(int Conn)
 		SendMsg(Conn, &Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
 		return;
 	}
-	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
-	MsgVer.AddRaw(&m_ConnectionId, sizeof(m_ConnectionId));
-	MsgVer.AddInt(GameClient()->DDNetVersion());
-	MsgVer.AddString(GameClient()->DDNetVersionStr());
-	SendMsg(Conn, &MsgVer, MSGFLAG_VITAL);
 
 	CMsgPacker Msg(NETMSG_INFO, true);
 	Msg.AddString(GameClient()->NetVersion());
@@ -878,7 +880,7 @@ void CClient::DebugRender()
 		total = 42
 	*/
 	s_FrameTimeAvg = s_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
-	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k) fps: %3d",
+	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB) fps: %3d",
 		m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy],
 		(Graphics()->TextureMemoryUsage() / 1024),
 		(Graphics()->BufferMemoryUsage() / 1024),
@@ -899,7 +901,7 @@ void CClient::DebugRender()
 			SendPackets++;
 		if(!RecvPackets)
 			RecvPackets++;
-		str_format(aBuffer, sizeof(aBuffer), "send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " kbps) avg: %5" PRIu64 "\nrecv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " kbps) avg: %5" PRIu64,
+		str_format(aBuffer, sizeof(aBuffer), "send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64 "\nrecv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64,
 			SendPackets, SendBytes, SendPackets * 42, SendTotal, (SendTotal * 8) / 1024, SendBytes / SendPackets,
 			RecvPackets, RecvBytes, RecvPackets * 42, RecvTotal, (RecvTotal * 8) / 1024, RecvBytes / RecvPackets);
 		Graphics()->QuadsText(2, 14, 16, aBuffer);
@@ -1390,7 +1392,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 #undef GET_INT
 }
 
-static CServerCapabilities GetServerCapabilities(int Version, int Flags)
+static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Sixup)
 {
 	CServerCapabilities Result;
 	bool DDNet = false;
@@ -1399,7 +1401,7 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 		DDNet = Flags & SERVERCAPFLAG_DDNET;
 	}
 	Result.m_ChatTimeoutCode = DDNet;
-	Result.m_AnyPlayerFlag = DDNet;
+	Result.m_AnyPlayerFlag = !Sixup;
 	Result.m_PingEx = false;
 	Result.m_AllowDummy = true;
 	Result.m_SyncWeaponInput = false;
@@ -1500,7 +1502,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			m_ServerCapabilities = GetServerCapabilities(Version, Flags);
+			m_ServerCapabilities = GetServerCapabilities(Version, Flags, IsSixup());
 			m_CanReceiveServerCapabilities = false;
 			m_ServerSentCapabilities = true;
 		}
@@ -1508,7 +1510,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		{
 			if(m_CanReceiveServerCapabilities)
 			{
-				m_ServerCapabilities = GetServerCapabilities(0, 0);
+				m_ServerCapabilities = GetServerCapabilities(0, 0, IsSixup());
 				m_CanReceiveServerCapabilities = false;
 			}
 			bool MapDetailsWerePresent = m_MapDetailsPresent;
@@ -1946,13 +1948,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					if(Msg != NETMSG_SNAPEMPTY && pTmpBuffer3->Crc() != Crc)
 					{
-						if(g_Config.m_Debug)
-						{
-							char aBuf[256];
-							str_format(aBuf, sizeof(aBuf), "snapshot crc error #%d - tick=%d wantedcrc=%d gotcrc=%d compressed_size=%d delta_tick=%d",
-								m_SnapCrcErrors, GameTick, Crc, pTmpBuffer3->Crc(), m_aSnapshotIncomingDataSize[Conn], DeltaTick);
-							m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", aBuf);
-						}
+						log_error("client", "snapshot crc error #%d - tick=%d wantedcrc=%d gotcrc=%d compressed_size=%d delta_tick=%d",
+							m_SnapCrcErrors, GameTick, Crc, pTmpBuffer3->Crc(), m_aSnapshotIncomingDataSize[Conn], DeltaTick);
 
 						m_SnapCrcErrors++;
 						if(m_SnapCrcErrors > 10)
@@ -3794,8 +3791,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		return m_DemoPlayer.ErrorMessage();
 	}
 
-	m_Sixup = str_startswith(m_DemoPlayer.Info()->m_Header.m_aNetversion, "0.7");
-	m_DemoPlayer.SetSixup(m_Sixup);
+	m_Sixup = m_DemoPlayer.IsSixup();
 
 	// load map
 	const CMapInfo *pMapInfo = m_DemoPlayer.GetMapInfo();

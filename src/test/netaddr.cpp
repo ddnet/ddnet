@@ -24,10 +24,6 @@ TEST(NetAddr, FromUrlStringValid)
 	net_addr_str(&Addr, aBuf2, sizeof(aBuf2), false);
 	EXPECT_STREQ(aBuf1, "127.0.0.1:0");
 	EXPECT_STREQ(aBuf2, "127.0.0.1");
-	net_addr_url_str(&Addr, aBuf1, sizeof(aBuf1), true);
-	net_addr_url_str(&Addr, aBuf2, sizeof(aBuf2), false);
-	EXPECT_STREQ(aBuf1, "tw-0.7+udp://127.0.0.1:0");
-	EXPECT_STREQ(aBuf2, "tw-0.7+udp://127.0.0.1");
 
 	EXPECT_EQ(net_addr_from_url(&Addr, "tw-0.6+udp://127.0.0.1", nullptr, 0), 0);
 	net_addr_str(&Addr, aBuf1, sizeof(aBuf1), true);
@@ -40,20 +36,12 @@ TEST(NetAddr, FromUrlStringValid)
 	net_addr_str(&Addr, aBuf2, sizeof(aBuf2), false);
 	EXPECT_STREQ(aBuf1, "127.0.0.1:0");
 	EXPECT_STREQ(aBuf2, "127.0.0.1");
-	net_addr_url_str(&Addr, aBuf1, sizeof(aBuf1), true);
-	net_addr_url_str(&Addr, aBuf2, sizeof(aBuf2), false);
-	EXPECT_STREQ(aBuf1, "tw-0.6+udp://127.0.0.1:0");
-	EXPECT_STREQ(aBuf2, "tw-0.6+udp://127.0.0.1");
 
 	EXPECT_EQ(net_addr_from_url(&Addr, "tw-0.6+udp://[0123:4567:89ab:cdef:1:2:3:4]:5678", nullptr, 0), 0);
 	net_addr_str(&Addr, aBuf1, sizeof(aBuf1), true);
 	net_addr_str(&Addr, aBuf2, sizeof(aBuf2), false);
 	EXPECT_STREQ(aBuf1, "[123:4567:89ab:cdef:1:2:3:4]:5678");
 	EXPECT_STREQ(aBuf2, "[123:4567:89ab:cdef:1:2:3:4]");
-	net_addr_url_str(&Addr, aBuf1, sizeof(aBuf1), true);
-	net_addr_url_str(&Addr, aBuf2, sizeof(aBuf2), false);
-	EXPECT_STREQ(aBuf1, "tw-0.6+udp://[123:4567:89ab:cdef:1:2:3:4]:5678");
-	EXPECT_STREQ(aBuf2, "tw-0.6+udp://[123:4567:89ab:cdef:1:2:3:4]");
 
 	char aHost[128];
 	EXPECT_EQ(net_addr_from_url(&Addr, "tw-0.6+udp://ger10.ddnet.org:5678", aHost, sizeof(aHost)), -1);
@@ -154,16 +142,5 @@ TEST(NetAddr, StrInvalid)
 	net_addr_str(&Addr, aBuf1, sizeof(aBuf1), true);
 	EXPECT_STREQ(aBuf1, "unknown type 0");
 	net_addr_str(&Addr, aBuf2, sizeof(aBuf2), false);
-	EXPECT_STREQ(aBuf2, "unknown type 0");
-}
-
-TEST(NetAddr, UrlStrInvalid)
-{
-	NETADDR Addr = {0};
-	char aBuf1[NETADDR_MAXSTRSIZE];
-	char aBuf2[NETADDR_MAXSTRSIZE];
-	net_addr_url_str(&Addr, aBuf1, sizeof(aBuf1), true);
-	EXPECT_STREQ(aBuf1, "unknown type 0");
-	net_addr_url_str(&Addr, aBuf2, sizeof(aBuf2), false);
 	EXPECT_STREQ(aBuf2, "unknown type 0");
 }

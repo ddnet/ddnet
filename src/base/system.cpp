@@ -867,10 +867,15 @@ void sphore_destroy(SEMAPHORE *sem)
 #elif defined(CONF_PLATFORM_MACOS)
 void sphore_init(SEMAPHORE *sem)
 {
-	char aBuf[32];
-	str_format(aBuf, sizeof(aBuf), "%p", (void *)sem);
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "/%d.%p", pid(), (void *)sem);
 	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
-	dbg_assert(*sem != SEM_FAILED, "sem_open failure");
+	if(*sem == SEM_FAILED)
+	{
+		char aError[128];
+		str_format(aError, sizeof(aError), "sem_open failure, errno=%d, name='%s'", errno, aBuf);
+		dbg_assert(false, aError);
+	}
 }
 void sphore_wait(SEMAPHORE *sem)
 {
@@ -888,8 +893,8 @@ void sphore_signal(SEMAPHORE *sem)
 void sphore_destroy(SEMAPHORE *sem)
 {
 	dbg_assert(sem_close(*sem) == 0, "sem_close failure");
-	char aBuf[32];
-	str_format(aBuf, sizeof(aBuf), "%p", (void *)sem);
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "/%d.%p", pid(), (void *)sem);
 	dbg_assert(sem_unlink(aBuf) == 0, "sem_unlink failure");
 }
 #elif defined(CONF_FAMILY_UNIX)
@@ -1128,22 +1133,6 @@ bool net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 		return false;
 	}
 	return true;
-}
-
-void net_addr_url_str(const NETADDR *addr, char *string, int max_length, int add_port)
-{
-	char ipaddr[512];
-	if(!net_addr_str(addr, ipaddr, sizeof(ipaddr), add_port))
-	{
-		str_copy(string, ipaddr, max_length);
-		return;
-	}
-	str_format(
-		string,
-		max_length,
-		"tw-%s+udp://%s",
-		addr->type & NETTYPE_TW7 ? "0.7" : "0.6",
-		ipaddr);
 }
 
 static int priv_net_extract(const char *hostname, char *host, int max_host, int *port)
@@ -1548,24 +1537,21 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 {
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
-	NETADDR tmpbindaddr = bindaddr;
-	int broadcast = 1;
-	int socket = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV4;
 		netaddr_to_sockaddr_in(&tmpbindaddr, &addr);
-		socket = priv_net_create_socket(AF_INET, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket = priv_net_create_socket(AF_INET, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket >= 0)
 		{
 			sock->type |= NETTYPE_IPV4;
 			sock->ipv4sock = socket;
 
 			/* set broadcast */
+			int broadcast = 1;
 			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
 			{
 				dbg_msg("socket", "Setting BROADCAST on ipv4 failed: %d", net_errno());
@@ -1581,17 +1567,15 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			}
 		}
 	}
+
 #if defined(CONF_WEBSOCKETS)
 	if(bindaddr.type & NETTYPE_WEBSOCKET_IPV4)
 	{
 		char addr_str[NETADDR_MAXSTRSIZE];
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_WEBSOCKET_IPV4;
-
 		net_addr_str(&tmpbindaddr, addr_str, sizeof(addr_str), 0);
-		socket = websocket_create(addr_str, tmpbindaddr.port);
-
+		int socket = websocket_create(addr_str, tmpbindaddr.port);
 		if(socket >= 0)
 		{
 			sock->type |= NETTYPE_WEBSOCKET_IPV4;
@@ -1603,17 +1587,17 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV6;
 		netaddr_to_sockaddr_in6(&tmpbindaddr, &addr);
-		socket = priv_net_create_socket(AF_INET6, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket = priv_net_create_socket(AF_INET6, SOCK_DGRAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket >= 0)
 		{
 			sock->type |= NETTYPE_IPV6;
 			sock->ipv6sock = socket;
 
 			/* set broadcast */
+			int broadcast = 1;
 			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
 			{
 				dbg_msg("socket", "Setting BROADCAST on ipv6 failed: %d", net_errno());
@@ -1633,20 +1617,17 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 		}
 	}
 
-	if(socket < 0)
+	if(sock->type == NETTYPE_INVALID)
 	{
 		free(sock);
 		sock = nullptr;
 	}
 	else
 	{
-		/* set non-blocking */
 		net_set_non_blocking(sock);
-
 		net_buffer_init(&sock->buffer);
 	}
 
-	/* return */
 	return sock;
 }
 
@@ -1862,17 +1843,14 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 {
 	NETSOCKET sock = (NETSOCKET_INTERNAL *)malloc(sizeof(*sock));
 	*sock = invalid_socket;
-	NETADDR tmpbindaddr = bindaddr;
-	int socket4 = -1;
 
 	if(bindaddr.type & NETTYPE_IPV4)
 	{
 		struct sockaddr_in addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV4;
 		netaddr_to_sockaddr_in(&tmpbindaddr, &addr);
-		socket4 = priv_net_create_socket(AF_INET, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket4 = priv_net_create_socket(AF_INET, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket4 >= 0)
 		{
 			sock->type |= NETTYPE_IPV4;
@@ -1880,15 +1858,13 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		}
 	}
 
-	int socket6 = -1;
 	if(bindaddr.type & NETTYPE_IPV6)
 	{
 		struct sockaddr_in6 addr;
-
-		/* bind, we should check for error */
+		NETADDR tmpbindaddr = bindaddr;
 		tmpbindaddr.type = NETTYPE_IPV6;
 		netaddr_to_sockaddr_in6(&tmpbindaddr, &addr);
-		socket6 = priv_net_create_socket(AF_INET6, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
+		int socket6 = priv_net_create_socket(AF_INET6, SOCK_STREAM, (struct sockaddr *)&addr, sizeof(addr));
 		if(socket6 >= 0)
 		{
 			sock->type |= NETTYPE_IPV6;
@@ -1896,13 +1872,12 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 		}
 	}
 
-	if(socket4 < 0 && socket6 < 0)
+	if(sock->type == NETTYPE_INVALID)
 	{
 		free(sock);
 		sock = nullptr;
 	}
 
-	/* return */
 	return sock;
 }
 

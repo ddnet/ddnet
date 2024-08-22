@@ -53,6 +53,14 @@ class CHud : public CComponent
 	char m_aPlayerAngleText[128];
 	STextContainerIndex m_aPlayerSpeedTextContainers[2];
 	char m_aaPlayerSpeedText[2][128];
+	int m_aPlayerSpeed[2];
+	enum class ESpeedChange
+	{
+		NONE,
+		INCREASE,
+		DECREASE
+	};
+	ESpeedChange m_aLastPlayerSpeedChange[2];
 	STextContainerIndex m_aPlayerPositionContainers[2];
 	char m_aaPlayerPositionText[2][128];
 
@@ -96,6 +104,7 @@ public:
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual void OnInit() override;
+	virtual void OnNewSnapshot() override;
 
 	// DDRace
 

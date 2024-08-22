@@ -239,7 +239,8 @@ public:
 	void CreateHammerHit(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreatePlayerSpawn(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreateDeath(vec2 Pos, int ClientId, CClientMask Mask = CClientMask().set());
-	void CreateFinishConfetti(vec2 Pos, CClientMask Mask = CClientMask().set());
+	void CreateBirthdayEffect(vec2 Pos, CClientMask Mask = CClientMask().set());
+	void CreateFinishEffect(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreateSound(vec2 Pos, int Sound, CClientMask Mask = CClientMask().set());
 	void CreateSoundGlobal(int Sound, int Target = -1) const;
 
@@ -249,15 +250,15 @@ public:
 
 	enum
 	{
-		CHAT_SIX = 1 << 0,
-		CHAT_SIXUP = 1 << 1,
+		FLAG_SIX = 1 << 0,
+		FLAG_SIXUP = 1 << 1,
 	};
 
 	// network
 	void CallVote(int ClientId, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc = 0);
-	void SendChatTarget(int To, const char *pText, int Flags = CHAT_SIX | CHAT_SIXUP) const;
+	void SendChatTarget(int To, const char *pText, int VersionFlags = FLAG_SIX | FLAG_SIXUP) const;
 	void SendChatTeam(int Team, const char *pText) const;
-	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
+	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int VersionFlags = FLAG_SIX | FLAG_SIXUP);
 	void SendStartWarning(int ClientId, const char *pMessage);
 	void SendEmoticon(int ClientId, int Emoticon, int TargetClientId) const;
 	void SendWeaponPickup(int ClientId, int Weapon) const;
@@ -430,6 +431,7 @@ private:
 	static void ConTimeCP(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
+	static void ConWhispers(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeout(IConsole::IResult *pResult, void *pUserData);
 	static void ConPractice(IConsole::IResult *pResult, void *pUserData);
