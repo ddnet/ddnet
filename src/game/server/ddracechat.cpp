@@ -974,7 +974,7 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 			const char *pLoUL = Lock ? "unlock" : "lock"; // Lock or Unlock
 			
 			str_format(aBuf, sizeof(aBuf), 
-				"Your team is %s by %s, Please wait for a second and repeat /%s if you wan't to %s your team.", 
+				"Your team is %s by %s, Please wait for a second and repeat /%s if you want to %s your team.", 
 				pLoUL, pSelf->Server()->ClientName(Teams->m_aLastLocker[Team]), pLoUL, pLoUL);
 			pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
 			
