@@ -969,10 +969,17 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 	
 	if (Teams -> m_aLastLocker[Team] != pResult->m_ClientId) 
 	{
-		if (abs (Teams -> m_aLastLockTime[Team] - pSelf -> Server() -> Tick ()) <= 120) 
+		if (absolute (Teams -> m_aLastLockTime[Team] - pSelf -> Server() -> Tick ()) <= 2 * pSelf -> Server() -> TickSpeed()) 
 		{
+			const char *aLoUL = "lock"; // Lock or Unlock
+			
+			if (Lock) {
+				aLoUL = "unlock";
+			}
+			
 			str_format(aBuf, sizeof(aBuf), 
-				"Your team is (un)locked by %s, If you wan't to (un)lock team, Please wait for a second and repeat the command.", pSelf->Server()->ClientName(Teams -> m_aLastLocker[Team]));
+				"Your team is %s by %s, Please wait for a second and repeat /%s if you wan't to %s your team.", 
+				aLoUL, pSelf->Server()->ClientName(Teams -> m_aLastLocker[Team]), aLoUL, aLoUL);
 			pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
 			
 			return ;
