@@ -944,10 +944,11 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 			"Teams are disabled");
 		return;
 	}
-
+	
+	auto *Teams = &(pSelf->m_pController->Teams());
 	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientId);
 
-	bool Lock = pSelf->m_pController->Teams().TeamLocked(Team);
+	bool Lock = Teams -> TeamLocked(Team);
 
 	if(pResult->NumArguments() > 0)
 		Lock = !pResult->GetInteger(0);
@@ -965,15 +966,31 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	char aBuf[512];
+	
+	if (Teams -> m_aLastLocker[Team] != pResult->m_ClientId) 
+	{
+		if (abs (Teams -> m_aLastLockTime[Team] - pSelf -> Server() -> Tick ()) <= 120) 
+		{
+			str_format(aBuf, sizeof(aBuf), 
+				"Your team is (un)locked by %s, If you wan't to (un)lock team, Please wait for a second and repeat the command.", pSelf->Server()->ClientName(Teams -> m_aLastLocker[Team]));
+			pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+			
+			return ;
+		}
+	}
+	
+	Teams -> m_aLastLocker[Team] = pResult -> m_ClientId;
+	Teams -> m_aLastLockTime[Team] = pSelf -> Server () -> Tick ();
+	
 	if(Lock)
 	{
 		pSelf->UnlockTeam(pResult->m_ClientId, Team);
 	}
 	else
 	{
-		pSelf->m_pController->Teams().SetTeamLock(Team, true);
+		Teams -> SetTeamLock(Team, true);
 
-		if(pSelf->m_pController->Teams().TeamFlock(Team))
+		if(Teams -> TeamFlock(Team))
 			str_format(aBuf, sizeof(aBuf), "'%s' locked your team.", pSelf->Server()->ClientName(pResult->m_ClientId));
 		else
 			str_format(aBuf, sizeof(aBuf), "'%s' locked your team. After the race starts, killing will kill everyone in your team.", pSelf->Server()->ClientName(pResult->m_ClientId));
