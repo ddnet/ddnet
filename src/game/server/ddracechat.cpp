@@ -967,9 +967,9 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 
 	char aBuf[512];
 	
-	if (Teams->m_aLastLocker[Team] != pResult->m_ClientId && pResult->NumArguments() == 0) 
+	if(Teams->m_aLastLocker[Team] != pResult->m_ClientId && pResult->NumArguments() == 0) 
 	{
-		if (absolute (Teams->m_aLastLockTime[Team] - pSelf->Server()->Tick ()) <= 2 * pSelf->Server()->TickSpeed()) 
+		if(absolute (Teams->m_aLastLockTime[Team] - pSelf->Server()->Tick ()) <= 2 * pSelf->Server()->TickSpeed()) 
 		{
 			const char *pLoUL = Lock ? "unlock" : "lock"; // Lock or Unlock
 			
