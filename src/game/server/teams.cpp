@@ -30,6 +30,8 @@ void CGameTeams::Reset()
 
 	for(int i = 0; i < NUM_DDRACE_TEAMS; ++i)
 	{
+		m_aLastLocker[i] = -1;
+		m_aLastLockTime[i] = 0;
 		m_aTeamState[i] = TEAMSTATE_EMPTY;
 		m_aTeamLocked[i] = false;
 		m_aTeamFlock[i] = false;
