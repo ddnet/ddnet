@@ -127,6 +127,9 @@ public:
 	void ProcessSaveTeam();
 
 	int GetFirstEmptyTeam() const;
+	
+	int m_aLastLocker[NUM_DDRACE_TEAMS];
+	int m_aLastLockTime[NUM_DDRACE_TEAMS];
 
 	bool TeeStarted(int ClientId)
 	{
