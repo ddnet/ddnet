@@ -1075,7 +1075,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// proof button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_ProofButton = 0;
-		if(DoButton_Ex(&s_ProofButton, "Proof", MapView()->ProofMode()->IsEnabled(), &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.", IGraphics::CORNER_L) ||
+		if(DoButton_Ex(&s_ProofButton, "Proof", MapView()->ProofMode()->IsEnabled(), &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent the area that a player can see with default zoom.", IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_P) && ModPressed))
 		{
 			MapView()->ProofMode()->Toggle();
