@@ -69,7 +69,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 	}
 
-	ButtonBar.VSplitRight(5.0f, &ButtonBar, 0);
+	ButtonBar.VSplitRight(5.0f, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(170.0f, &ButtonBar, &Button);
 
 	static CButtonContainer s_DummyButton;
@@ -107,9 +107,8 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 	}
 
-	ButtonBar.VSplitRight(5.0f, &ButtonBar, 0);
+	ButtonBar.VSplitRight(5.0f, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(140.0f, &ButtonBar, &Button);
-
 	static CButtonContainer s_DemoButton;
 	const bool Recording = DemoRecorder(RECORDER_MANUAL)->IsRecording();
 	if(DoButton_Menu(&s_DemoButton, Recording ? Localize("Stop record") : Localize("Record demo"), 0, &Button))
@@ -130,12 +129,11 @@ void CMenus::RenderGame(CUIRect MainView)
 
 	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj && !Paused && !Spec)
 	{
-		static CButtonContainer s_SpectateButton;
-
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
 		{
-			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 			ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+			ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
+			static CButtonContainer s_SpectateButton;
 			if(!Client()->DummyConnecting() && DoButton_Menu(&s_SpectateButton, Localize("Spectate"), 0, &Button))
 			{
 				if(g_Config.m_ClDummy == 0 || Client()->DummyConnected())
@@ -150,8 +148,8 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_RED)
 			{
-				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				static CButtonContainer s_JoinRedButton;
 				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinRedButton, Localize("Join red"), 0, &Button))
 				{
@@ -162,8 +160,8 @@ void CMenus::RenderGame(CUIRect MainView)
 
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_BLUE)
 			{
-				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				static CButtonContainer s_JoinBlueButton;
 				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinBlueButton, Localize("Join blue"), 0, &Button))
 				{
@@ -174,13 +172,14 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 		else
 		{
-			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != 0)
+			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_RED)
 			{
-				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
-				if(!Client()->DummyConnecting() && DoButton_Menu(&s_SpectateButton, Localize("Join game"), 0, &Button))
+				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
+				static CButtonContainer s_JoinGameButton;
+				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinGameButton, Localize("Join game"), 0, &Button))
 				{
-					m_pClient->SendSwitchTeam(0);
+					m_pClient->SendSwitchTeam(TEAM_RED);
 					SetActive(false);
 				}
 			}
@@ -188,8 +187,8 @@ void CMenus::RenderGame(CUIRect MainView)
 
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS && (ShowDDRaceButtons || !(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)))
 		{
-			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 			ButtonBar.VSplitLeft(65.0f, &Button, &ButtonBar);
+			ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 
 			static CButtonContainer s_KillButton;
 			if(DoButton_Menu(&s_KillButton, Localize("Kill"), 0, &Button))
@@ -204,13 +203,13 @@ void CMenus::RenderGame(CUIRect MainView)
 	{
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS || Paused || Spec)
 		{
-			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 			ButtonBar.VSplitLeft((!Paused && !Spec) ? 65.0f : 120.0f, &Button, &ButtonBar);
+			ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 
 			static CButtonContainer s_PauseButton;
 			if(DoButton_Menu(&s_PauseButton, (!Paused && !Spec) ? Localize("Pause") : Localize("Join game"), 0, &Button))
 			{
-				m_pClient->Console()->ExecuteLine("say /pause");
+				Console()->ExecuteLine("say /pause");
 				SetActive(false);
 			}
 		}
