@@ -2346,7 +2346,7 @@ void CCharacter::DDRaceInit()
 
 	int Team = Teams()->m_Core.Team(m_Core.m_Id);
 
-	if(Teams()->TeamLocked(Team))
+	if(Teams()->TeamLocked(Team) && !Teams()->TeamFlock(Team))
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
