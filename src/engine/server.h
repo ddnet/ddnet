@@ -12,6 +12,7 @@
 
 #include "kernel.h"
 #include "message.h"
+#include <engine/shared/jsonwriter.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
@@ -365,10 +366,10 @@ public:
 	/**
 	 * Used to report custom player info to master servers.
 	 *
-	 * @param aBuf Should be the json key values to add, starting with a ',' beforehand, like: ',"skin": "default", "team": 1'
+	 * @param pJsonWriter A pointer to a CJsonStringWriter which the custom data will be added to.
 	 * @param i The client id.
 	 */
-	virtual void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int Id) = 0;
+	virtual void OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id) = 0;
 };
 
 extern IGameServer *CreateGameServer();

@@ -4842,78 +4842,61 @@ bool CGameContext::RateLimitPlayerMapVote(int ClientId) const
 	return false;
 }
 
-void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int Id)
+void CGameContext::OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id)
 {
-	if(BufSize <= 0)
-		return;
-
-	aBuf[0] = '\0';
-
 	if(!m_apPlayers[Id])
 		return;
 
-	char aCSkinName[64];
-
 	CTeeInfo &TeeInfo = m_apPlayers[Id]->m_TeeInfos;
 
-	char aJsonSkin[400];
-	aJsonSkin[0] = '\0';
+	pJSonWriter->WriteAttribute("skin");
+	pJSonWriter->BeginObject();
 
+	// 0.6
 	if(!Server()->IsSixup(Id))
 	{
-		// 0.6
+		pJSonWriter->WriteAttribute("name");
+		pJSonWriter->WriteStrValue(TeeInfo.m_aSkinName);
+
 		if(TeeInfo.m_UseCustomColor)
 		{
-			str_format(aJsonSkin, sizeof(aJsonSkin),
-				"\"name\":\"%s\","
-				"\"color_body\":%d,"
-				"\"color_feet\":%d",
-				EscapeJson(aCSkinName, sizeof(aCSkinName), TeeInfo.m_aSkinName),
-				TeeInfo.m_ColorBody,
-				TeeInfo.m_ColorFeet);
-		}
-		else
-		{
-			str_format(aJsonSkin, sizeof(aJsonSkin),
-				"\"name\":\"%s\"",
-				EscapeJson(aCSkinName, sizeof(aCSkinName), TeeInfo.m_aSkinName));
+			pJSonWriter->WriteAttribute("color_body");
+			pJSonWriter->WriteIntValue(TeeInfo.m_ColorBody);
+
+			pJSonWriter->WriteAttribute("color_feet");
+			pJSonWriter->WriteIntValue(TeeInfo.m_ColorFeet);
 		}
 	}
+	// 0.7
 	else
 	{
 		const char *apPartNames[protocol7::NUM_SKINPARTS] = {"body", "marking", "decoration", "hands", "feet", "eyes"};
-		char aPartBuf[64];
 
 		for(int i = 0; i < protocol7::NUM_SKINPARTS; ++i)
 		{
-			str_format(aPartBuf, sizeof(aPartBuf),
-				"%s\"%s\":{"
-				"\"name\":\"%s\"",
-				i == 0 ? "" : ",",
-				apPartNames[i],
-				EscapeJson(aCSkinName, sizeof(aCSkinName), TeeInfo.m_apSkinPartNames[i]));
+			pJSonWriter->WriteAttribute(apPartNames[i]);
+			pJSonWriter->BeginObject();
 
-			str_append(aJsonSkin, aPartBuf);
+			pJSonWriter->WriteAttribute("name");
+			pJSonWriter->WriteStrValue(TeeInfo.m_apSkinPartNames[i]);
 
 			if(TeeInfo.m_aUseCustomColors[i])
 			{
-				str_format(aPartBuf, sizeof(aPartBuf),
-					",\"color\":%d",
-					TeeInfo.m_aSkinPartColors[i]);
-				str_append(aJsonSkin, aPartBuf);
+				pJSonWriter->WriteAttribute("color");
+				pJSonWriter->WriteIntValue(TeeInfo.m_aSkinPartColors[i]);
 			}
-			str_append(aJsonSkin, "}");
+
+			pJSonWriter->EndObject();
 		}
 	}
 
+	pJSonWriter->EndObject();
+
+	pJSonWriter->WriteAttribute("afk");
+	pJSonWriter->WriteBoolValue(m_apPlayers[Id]->IsAfk());
+
 	const int Team = m_pController->IsTeamPlay() ? m_apPlayers[Id]->GetTeam() : m_apPlayers[Id]->GetTeam() == TEAM_SPECTATORS ? -1 : GetDDRaceTeam(Id);
-	str_format(aBuf, BufSize,
-		",\"skin\":{"
-		"%s"
-		"},"
-		"\"afk\":%s,"
-		"\"team\":%d",
-		aJsonSkin,
-		JsonBool(m_apPlayers[Id]->IsAfk()),
-		Team);
+
+	pJSonWriter->WriteAttribute("team");
+	pJSonWriter->WriteIntValue(Team);
 }
