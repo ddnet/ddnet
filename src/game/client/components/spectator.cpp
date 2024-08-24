@@ -186,6 +186,16 @@ bool CSpectator::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	return true;
 }
 
+bool CSpectator::OnInput(const IInput::CEvent &Event)
+{
+	if(IsActive() && Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
+	{
+		OnRelease();
+		return true;
+	}
+	return false;
+}
+
 void CSpectator::OnRelease()
 {
 	OnReset();
@@ -258,8 +268,6 @@ void CSpectator::OnRender()
 	float BoxMove = -10.0f;
 	float BoxOffset = 0.0f;
 
-	const bool MousePressed = Input()->KeyPress(KEY_MOUSE_1);
-
 	for(const auto &pInfo : m_pClient->m_Snap.m_apInfoByDDTeamName)
 	{
 		if(!pInfo || pInfo->m_Team == TEAM_SPECTATORS)
@@ -293,13 +301,41 @@ void CSpectator::OnRender()
 		ObjWidth = 600.0f;
 	}
 
+	const vec2 ScreenSize = vec2(Width, Height);
+	const vec2 ScreenCenter = ScreenSize / 2.0f;
+	CUIRect SpectatorRect = {Width / 2.0f - ObjWidth, Height / 2.0f - 300.0f, ObjWidth * 2.0f, 600.0f};
+	CUIRect SpectatorMouseRect;
+	SpectatorRect.Margin(20.0f, &SpectatorMouseRect);
+
+	const bool WasTouchPressed = m_TouchState.m_AnyPressed;
+	Ui()->UpdateTouchState(m_TouchState);
+	if(m_TouchState.m_AnyPressed)
+	{
+		const vec2 TouchPos = (m_TouchState.m_PrimaryPosition - vec2(0.5f, 0.5f)) * ScreenSize;
+		if(SpectatorMouseRect.Inside(ScreenCenter + TouchPos))
+		{
+			m_SelectorMouse = TouchPos;
+		}
+	}
+	else if(WasTouchPressed)
+	{
+		const vec2 TouchPos = (m_TouchState.m_PrimaryPosition - vec2(0.5f, 0.5f)) * ScreenSize;
+		if(!SpectatorRect.Inside(ScreenCenter + TouchPos))
+		{
+			OnRelease();
+			return;
+		}
+	}
+
 	Graphics()->MapScreen(0, 0, Width, Height);
 
-	Graphics()->DrawRect(Width / 2.0f - ObjWidth, Height / 2.0f - 300.0f, ObjWidth * 2, 600.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f), IGraphics::CORNER_ALL, 20.0f);
+	SpectatorRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f), IGraphics::CORNER_ALL, 20.0f);
 
 	// clamp mouse position to selector area
 	m_SelectorMouse.x = clamp(m_SelectorMouse.x, -(ObjWidth - 20.0f), ObjWidth - 20.0f);
 	m_SelectorMouse.y = clamp(m_SelectorMouse.y, -280.0f, 280.0f);
+
+	const bool MousePressed = Input()->KeyPress(KEY_MOUSE_1) || m_TouchState.m_PrimaryPressed;
 
 	// draw selections
 	if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecId == SPEC_FREEVIEW) ||
@@ -543,7 +579,7 @@ void CSpectator::OnRender()
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	RenderTools()->RenderCursor(m_SelectorMouse + vec2(Width, Height) / 2, 48.0f);
+	RenderTools()->RenderCursor(ScreenCenter + m_SelectorMouse, 48.0f);
 }
 
 void CSpectator::OnReset()
