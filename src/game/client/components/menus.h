@@ -607,6 +607,36 @@ protected:
 	void RenderSettings(CUIRect MainView);
 	void RenderSettingsCustom(CUIRect MainView);
 
+	class CMapListItem
+	{
+	public:
+		char m_aFilename[IO_MAX_PATH_LENGTH];
+		bool m_IsDirectory;
+	};
+	class CPopupMapPickerContext
+	{
+	public:
+		std::vector<CMapListItem> m_vMaps;
+		char m_aCurrentMapFolder[IO_MAX_PATH_LENGTH] = "";
+		static int MapListFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
+		void MapListPopulate();
+		CMenus *m_pMenus;
+		int m_Selection;
+	};
+
+	static bool CompareFilenameAscending(const CMapListItem Lhs, const CMapListItem Rhs)
+	{
+		if(str_comp(Lhs.m_aFilename, "..") == 0)
+			return true;
+		if(str_comp(Rhs.m_aFilename, "..") == 0)
+			return false;
+		if(Lhs.m_IsDirectory != Rhs.m_IsDirectory)
+			return Lhs.m_IsDirectory;
+		return str_comp_filenames(Lhs.m_aFilename, Rhs.m_aFilename) < 0;
+	}
+
+	static CUi::EPopupMenuFunctionResult PopupMapPicker(void *pContext, CUIRect View, bool Active);
+
 	void SetNeedSendInfo();
 	void SetActive(bool Active);
 	void UpdateColors();
