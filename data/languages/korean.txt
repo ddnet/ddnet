@@ -535,7 +535,7 @@ Replay feature is disabled!
 == 리플레이 기능을 비활성화했습니다!
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 텍스처 %s 의 너비 또는 높이를 %d 으로 나눌 수 없습니다. 이는 시각적 오류를 발생시킬 수 있습니다.
+== 
 
 Warning
 == 주의

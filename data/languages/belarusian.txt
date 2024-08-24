@@ -1622,7 +1622,7 @@ Go back the specified duration
 
 [Demo player duration]
 %d sec.
-== % сек.
+== %d сек.
 
 Change the skip duration
 == Змяніць працягласць пропуску
@@ -1765,14 +1765,14 @@ Following
 == Бягучыя
 
 Loading commands…
-== Загрузка каманд...
+== Загрузка каманд…
 
 [Spectating]
 Following %s
 == Назіранне за %s
 
 Press a key…
-== Націсніце клавішу...
+== Націсніце клавішу…
 
 Main menu
 == Галоўнае меню
@@ -1805,7 +1805,7 @@ Friends
 == Сябры
 
 Loading…
-== Загрузка...
+== Загрузка…
 
 Player info change cooldown
 == Затрымка абнаўлення інфармацыі пра гульца
@@ -1863,7 +1863,7 @@ Round %d/%d
 
 [Spectators]
 %d others…
-== %d іншых...
+== %d іншых…
 
 [Team and size]
 %d\n(%d/%d)

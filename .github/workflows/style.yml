@@ -40,6 +40,8 @@ jobs:
       run: scripts/fix_style.py --dry-run
     - name: Check header guards
       run: scripts/check_header_guards.py
+    - name: Validate Languages
+      run: scripts/languages/validate.py
     - name: Check languages
       run: scripts/languages/update_all.py
     - name: Check dilated images
