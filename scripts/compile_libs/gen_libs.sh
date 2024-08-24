@@ -80,7 +80,7 @@ cd compile_libs || exit 1
 
 build_cmake_lib zlib https://github.com/madler/zlib
 build_cmake_lib png https://github.com/glennrp/libpng
-build_cmake_lib curl https://github.com/curl/curl
+build_cmake_lib curl https://github.com/curl/curl "curl-8_8_0"
 build_cmake_lib freetype2 https://gitlab.freedesktop.org/freetype/freetype
 build_cmake_lib sdl https://github.com/libsdl-org/SDL SDL2
 build_cmake_lib ogg https://github.com/xiph/ogg
