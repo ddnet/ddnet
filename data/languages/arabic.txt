@@ -1027,7 +1027,7 @@ Existing Player
 == ﺩﻮﺟﻮﻣ ﺐﻋﻼﻟﺍ
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== ﻪﻣﺍﺪﺨﺘﺳﺍ ﺪﻳﺮﺗ ﺖﻟﺯﺎﻣ ﻞﻫ '%s' ﻞﻤﻌﺘﺴﻣ ﻚﻤﺳﺍ
+== 
 
 Checking for existing player with your name
 == ﻚﻤﺳﺎﺑ ﺐﻋﻻ ﺩﻮﺟﻭ ﻦﻣ ﻖﻘﺤﺘﻟﺍ

@@ -1061,7 +1061,7 @@ Replay
 == Visszajátszás
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== Ennek a Textúrának szélessége, vagy magassága (%s) nem megfelelően osztható el ezzel a számmal: (%d), ami vizuális hibákhoz vezethet. (Méretek máshogyan fognak kinézni és a teljesítményt is ronthatja.)
+== 
 
 Getting server list from master server
 == Szerverlista lekérése a fő szerverekről
