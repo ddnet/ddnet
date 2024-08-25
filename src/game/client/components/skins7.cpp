@@ -23,7 +23,7 @@ const char *const CSkins7::ms_apColorComponents[NUM_COLOR_COMPONENTS] = {"hue", 
 
 char *CSkins7::ms_apSkinVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
 int *CSkins7::ms_apUCCVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
-int *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
+int unsigned *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
 
 #define SKINS_DIR "skins7"
 
@@ -57,16 +57,17 @@ int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser
 		log_error("skins7", "Failed to load skin part '%s'", pName);
 		return 0;
 	}
-	if(Info.m_Format != CImageInfo::FORMAT_RGBA)
+	if(!pSelf->Graphics()->IsImageFormatRgba(aFilename, Info))
 	{
 		log_error("skins7", "Failed to load skin part '%s': must be RGBA format", pName);
+		Info.Free();
 		return 0;
 	}
 
 	Part.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info, 0, aFilename);
 	Part.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f);
 
-	int Step = Info.m_Format == CImageInfo::FORMAT_RGBA ? 4 : 3;
+	const int Step = 4;
 	unsigned char *pData = (unsigned char *)Info.m_pData;
 
 	// dig out blood color
@@ -78,7 +79,7 @@ int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser
 		int PartWidth = Info.m_Width / 2;
 		int PartHeight = Info.m_Height / 2;
 
-		int aColors[3] = {0};
+		int64_t aColors[3] = {0};
 		for(int y = PartY; y < PartY + PartHeight; y++)
 			for(int x = PartX; x < PartX + PartWidth; x++)
 				if(pData[y * Pitch + x * Step + 3] > 128)
@@ -105,7 +106,11 @@ int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser
 		Part.m_Flags |= SKINFLAG_SPECIAL;
 	if(DirType != IStorage::TYPE_SAVE)
 		Part.m_Flags |= SKINFLAG_STANDARD;
-	log_debug("skins7", "load skin part %s", Part.m_aName);
+
+	if(pSelf->Config()->m_Debug)
+	{
+		log_trace("skins7", "Loaded skin part '%s'", Part.m_aName);
+	}
 	pSelf->m_avSkinParts[pSelf->m_ScanningPart].emplace_back(Part);
 
 	return 0;
@@ -206,9 +211,10 @@ int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	Skin.m_Flags = SpecialSkin ? SKINFLAG_SPECIAL : 0;
 	if(DirType != IStorage::TYPE_SAVE)
 		Skin.m_Flags |= SKINFLAG_STANDARD;
+
 	if(pSelf->Config()->m_Debug)
 	{
-		log_debug("skins7", "load skin %s", Skin.m_aName);
+		log_trace("skins7", "Loaded skin '%s'", Skin.m_aName);
 	}
 	pSelf->m_vSkins.insert(std::lower_bound(pSelf->m_vSkins.begin(), pSelf->m_vSkins.end(), Skin), Skin);
 
@@ -235,12 +241,12 @@ void CSkins7::OnInit()
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClPlayer7UseCustomColorHands;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClPlayer7UseCustomColorFeet;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClPlayer7UseCustomColorEyes;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = (int *)&Config()->m_ClPlayer7ColorBody;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = &Config()->m_ClPlayer7ColorBody;
 	ms_apColorVariables[Dummy][protocol7::SKINPART_MARKING] = &Config()->m_ClPlayer7ColorMarking;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = (int *)&Config()->m_ClPlayer7ColorDecoration;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = (int *)&Config()->m_ClPlayer7ColorHands;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = (int *)&Config()->m_ClPlayer7ColorFeet;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = (int *)&Config()->m_ClPlayer7ColorEyes;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = &Config()->m_ClPlayer7ColorDecoration;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClPlayer7ColorHands;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClPlayer7ColorFeet;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClPlayer7ColorEyes;
 
 	Dummy = 1;
 	ms_apSkinVariables[Dummy][protocol7::SKINPART_BODY] = Config()->m_ClDummy7SkinBody;
@@ -255,12 +261,12 @@ void CSkins7::OnInit()
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClDummy7UseCustomColorHands;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClDummy7UseCustomColorFeet;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClDummy7UseCustomColorEyes;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = (int *)&Config()->m_ClDummy7ColorBody;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_MARKING] = (int *)&Config()->m_ClDummy7ColorMarking;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = (int *)&Config()->m_ClDummy7ColorDecoration;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = (int *)&Config()->m_ClDummy7ColorHands;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = (int *)&Config()->m_ClDummy7ColorFeet;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = (int *)&Config()->m_ClDummy7ColorEyes;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = &Config()->m_ClDummy7ColorBody;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_MARKING] = &Config()->m_ClDummy7ColorMarking;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = &Config()->m_ClDummy7ColorDecoration;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClDummy7ColorHands;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClDummy7ColorFeet;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClDummy7ColorEyes;
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
@@ -322,45 +328,51 @@ void CSkins7::OnInit()
 	if(m_vSkins.empty())
 		m_vSkins.emplace_back(m_DummySkin);
 
-	{
-		// add xmas hat
-		const char *pFileName = SKINS_DIR "/xmas_hat.png";
-		CImageInfo Info;
-		if(!Graphics()->LoadPng(Info, pFileName, IStorage::TYPE_ALL) || Info.m_Width != 128 || Info.m_Height != 512)
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "failed to load xmas hat '%s'", pFileName);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "skins7", aBuf);
-		}
-		else
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "loaded xmas hat '%s'", pFileName);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "skins7", aBuf);
-			m_XmasHatTexture = Graphics()->LoadTextureRawMove(Info, 0, pFileName);
-		}
-	}
+	LoadXmasHat();
+	LoadBotDecoration();
 	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+}
 
+void CSkins7::LoadXmasHat()
+{
+	const char *pFilename = SKINS_DIR "/xmas_hat.png";
+	CImageInfo Info;
+	if(!Graphics()->LoadPng(Info, pFilename, IStorage::TYPE_ALL) ||
+		!Graphics()->IsImageFormatRgba(pFilename, Info) ||
+		!Graphics()->CheckImageDivisibility(pFilename, Info, 1, 4, false))
 	{
-		// add bot decoration
-		const char *pFileName = SKINS_DIR "/bot.png";
-		CImageInfo Info;
-		if(!Graphics()->LoadPng(Info, pFileName, IStorage::TYPE_ALL) || Info.m_Width != 384 || Info.m_Height != 160)
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "failed to load bot '%s'", pFileName);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "skins7", aBuf);
-		}
-		else
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "loaded bot '%s'", pFileName);
-			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "skins7", aBuf);
-			m_BotTexture = Graphics()->LoadTextureRawMove(Info, 0, pFileName);
-		}
+		log_error("skins7", "Failed to xmas hat '%s'", pFilename);
+		Info.Free();
 	}
-	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+	else
+	{
+		if(Config()->m_Debug)
+		{
+			log_trace("skins7", "Loaded xmas hat '%s'", pFilename);
+		}
+		m_XmasHatTexture = Graphics()->LoadTextureRawMove(Info, 0, pFilename);
+	}
+}
+
+void CSkins7::LoadBotDecoration()
+{
+	const char *pFilename = SKINS_DIR "/bot.png";
+	CImageInfo Info;
+	if(!Graphics()->LoadPng(Info, pFilename, IStorage::TYPE_ALL) ||
+		!Graphics()->IsImageFormatRgba(pFilename, Info) ||
+		!Graphics()->CheckImageDivisibility(pFilename, Info, 12, 5, false))
+	{
+		log_error("skins7", "Failed to load bot '%s'", pFilename);
+		Info.Free();
+	}
+	else
+	{
+		if(Config()->m_Debug)
+		{
+			log_trace("skins7", "Loaded bot '%s'", pFilename);
+		}
+		m_BotTexture = Graphics()->LoadTextureRawMove(Info, 0, pFilename);
+	}
 }
 
 void CSkins7::AddSkin(const char *pSkinName, int Dummy)
@@ -383,10 +395,18 @@ void CSkins7::AddSkin(const char *pSkinName, int Dummy)
 		m_vSkins.emplace_back(Skin);
 }
 
-void CSkins7::RemoveSkin(const CSkin *pSkin)
+bool CSkins7::RemoveSkin(const CSkin *pSkin)
 {
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), SKINS_DIR "/%s.json", pSkin->m_aName);
+	if(!Storage()->RemoveFile(aBuf, IStorage::TYPE_SAVE))
+	{
+		return false;
+	}
+
 	auto Position = std::find(m_vSkins.begin(), m_vSkins.end(), *pSkin);
 	m_vSkins.erase(Position);
+	return true;
 }
 
 int CSkins7::Num()
@@ -456,11 +476,7 @@ void CSkins7::RandomizeSkin(int Dummy)
 
 ColorRGBA CSkins7::GetColor(int Value, bool UseAlpha) const
 {
-	float Dark = DARKEST_COLOR_LGT / 255.0f;
-	ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(Value).UnclampLighting(Dark));
-	float Alpha = UseAlpha ? ((Value >> 24) & 0xff) / 255.0f : 1.0f;
-	Color.a = Alpha;
-	return Color;
+	return color_cast<ColorRGBA>(ColorHSLA(Value, UseAlpha).UnclampLighting(DARKEST_COLOR_LGT));
 }
 
 ColorRGBA CSkins7::GetTeamColor(int UseCustomColors, int PartColor, int Team, int Part) const

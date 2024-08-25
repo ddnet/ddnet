@@ -9,6 +9,14 @@
 #include <map>
 #include <vector>
 
+class CTile;
+class CLayers;
+class CTeleTile;
+class CSpeedupTile;
+class CSwitchTile;
+class CTuneTile;
+class CDoorTile;
+
 enum
 {
 	CANTMOVE_LEFT = 1 << 0,
@@ -28,9 +36,9 @@ public:
 	CCollision();
 	~CCollision();
 
-	void Init(class CLayers *pLayers);
+	void Init(CLayers *pLayers);
 	void Unload();
-	void FillAntibot(CAntibotMapData *pMapData);
+	void FillAntibot(CAntibotMapData *pMapData) const;
 
 	bool CheckPoint(float x, float y) const { return IsSolid(round_to_int(x), round_to_int(y)); }
 	bool CheckPoint(vec2 Pos) const { return CheckPoint(Pos.x, Pos.y); }
@@ -46,7 +54,6 @@ public:
 
 	// DDRace
 	void SetCollisionAt(float x, float y, int id);
-	void SetDTile(float x, float y, bool State);
 	void SetDCollisionAt(float x, float y, int Type, int Flags, int Number);
 	int GetDTileIndex(int Index) const;
 	int GetDTileFlags(int Index) const;
@@ -60,7 +67,7 @@ public:
 	int GetFIndex(int x, int y) const;
 
 	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1) const;
-	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f)
+	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f) const
 	{
 		return GetMoveRestrictions(nullptr, nullptr, Pos, Distance);
 	}
@@ -107,10 +114,14 @@ public:
 
 	vec2 CpSpeed(int index, int Flags = 0) const;
 
-	class CTeleTile *TeleLayer() { return m_pTele; }
-	class CSwitchTile *SwitchLayer() { return m_pSwitch; }
-	class CTuneTile *TuneLayer() { return m_pTune; }
-	class CLayers *Layers() { return m_pLayers; }
+	const CLayers *Layers() const { return m_pLayers; }
+	const CTile *GameLayer() const { return m_pTiles; }
+	const CTeleTile *TeleLayer() const { return m_pTele; }
+	const CSpeedupTile *SpeedupLayer() const { return m_pSpeedup; }
+	const CTile *FrontLayer() const { return m_pFront; }
+	const CSwitchTile *SwitchLayer() const { return m_pSwitch; }
+	const CTuneTile *TuneLayer() const { return m_pTune; }
+
 	int m_HighestSwitchNumber;
 
 	/**
@@ -137,10 +148,18 @@ public:
 	const std::vector<vec2> &TeleOthers(int Number) { return m_TeleOthers[Number]; }
 
 private:
-	class CTile *m_pTiles;
+	CLayers *m_pLayers;
+
 	int m_Width;
 	int m_Height;
-	class CLayers *m_pLayers;
+
+	CTile *m_pTiles;
+	CTeleTile *m_pTele;
+	CSpeedupTile *m_pSpeedup;
+	CTile *m_pFront;
+	CSwitchTile *m_pSwitch;
+	CTuneTile *m_pTune;
+	CDoorTile *m_pDoor;
 
 	// TILE_TELEIN
 	std::map<int, std::vector<vec2>> m_TeleIns;
@@ -150,13 +169,6 @@ private:
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
 	// TILE_TELEINEVIL, TILE_TELECHECK, TILE_TELECHECKIN, TILE_TELECHECKINEVIL
 	std::map<int, std::vector<vec2>> m_TeleOthers;
-
-	class CTeleTile *m_pTele;
-	class CSpeedupTile *m_pSpeedup;
-	class CTile *m_pFront;
-	class CSwitchTile *m_pSwitch;
-	class CTuneTile *m_pTune;
-	class CDoorTile *m_pDoor;
 };
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY);

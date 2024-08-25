@@ -360,9 +360,9 @@ void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
-			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
 		else if(g_Config.m_SvTournamentJoinMsgs == 2)
-			SendChatSpectators(aBuf, CGameContext::CHAT_SIX);
+			SendChatSpectators(aBuf, CGameContext::FLAG_SIX);
 
 		GameServer()->SendChatTarget(ClientId, "DDNet-insta https://github.com/ddnet-insta/ddnet-insta/");
 		GameServer()->SendChatTarget(ClientId, "DDraceNetwork Mod. Version: " GAME_VERSION);
@@ -382,8 +382,8 @@ void CGameControllerInstagib::SendChatSpectators(const char *pMessage, int Flags
 			continue;
 		if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 			continue;
-		bool Send = (Server()->IsSixup(pPlayer->GetCid()) && (Flags & CGameContext::CHAT_SIXUP)) ||
-			    (!Server()->IsSixup(pPlayer->GetCid()) && (Flags & CGameContext::CHAT_SIX));
+		bool Send = (Server()->IsSixup(pPlayer->GetCid()) && (Flags & CGameContext::FLAG_SIXUP)) ||
+			    (!Server()->IsSixup(pPlayer->GetCid()) && (Flags & CGameContext::FLAG_SIX));
 		if(!Send)
 			continue;
 
@@ -403,9 +403,9 @@ void CGameControllerInstagib::OnPlayerDisconnect(class CPlayer *pPlayer, const c
 		else
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientId));
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
-			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
 		else if(g_Config.m_SvTournamentJoinMsgs == 2)
-			SendChatSpectators(aBuf, CGameContext::CHAT_SIX);
+			SendChatSpectators(aBuf, CGameContext::FLAG_SIX);
 
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientId, Server()->ClientName(ClientId));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
@@ -432,7 +432,7 @@ void CGameControllerInstagib::DoTeamChange(CPlayer *pPlayer, int Team, bool DoCh
 	if(DoChatMsg)
 	{
 		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(ClientId), GameServer()->m_pController->GetTeamName(Team));
-		GameServer()->SendChat(-1, TEAM_ALL, aBuf, CGameContext::CHAT_SIX);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf, CGameContext::FLAG_SIX);
 	}
 
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", ClientId, Server()->ClientName(ClientId), Team);

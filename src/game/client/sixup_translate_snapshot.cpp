@@ -524,9 +524,9 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshot *pTo, int Conn)
 
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			StrToInts(ClientInfoObj.m_aaSkinPartNames[Part], 6, m_aClients[i].m_Sixup.m_aaSkinPartNames[Part]);
-			ClientInfoObj.m_aUseCustomColors[Part] = m_aClients[i].m_Sixup.m_aUseCustomColors[Part];
-			ClientInfoObj.m_aSkinPartColors[Part] = m_aClients[i].m_Sixup.m_aSkinPartColors[Part];
+			StrToInts(ClientInfoObj.m_aaSkinPartNames[Part], 6, m_aClients[i].m_aSixup[Conn].m_aaSkinPartNames[Part]);
+			ClientInfoObj.m_aUseCustomColors[Part] = m_aClients[i].m_aSixup[Conn].m_aUseCustomColors[Part];
+			ClientInfoObj.m_aSkinPartColors[Part] = m_aClients[i].m_aSixup[Conn].m_aSkinPartColors[Part];
 		}
 
 		mem_copy(pItem, &ClientInfoObj, sizeof(protocol7::CNetObj_De_ClientInfo));

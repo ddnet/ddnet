@@ -377,6 +377,10 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 {
 	bool Handled = false;
 
+	// Don't allow input while the console is opening/closing
+	if(m_pGameConsole->m_ConsoleState == CONSOLE_OPENING || m_pGameConsole->m_ConsoleState == CONSOLE_CLOSING)
+		return Handled;
+
 	auto &&SelectNextSearchMatch = [&](int Direction) {
 		if(!m_vSearchMatches.empty())
 		{

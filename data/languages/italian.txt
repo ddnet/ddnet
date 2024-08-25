@@ -1180,7 +1180,7 @@ No server selected
 == Nessun server selezionato
 
 Online clanmates (%d)
-== Compagni di clan online
+== Compagni di clan online (%d)
 
 Click to select server. Double click to join your friend.
 == Fare click per selezionare il server. Fai doppio click per unirti al tuo amico.

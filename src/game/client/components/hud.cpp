@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/color.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
@@ -7,6 +8,7 @@
 #include <game/client/animstate.h>
 #include <game/client/components/scoreboard.h>
 #include <game/client/gameclient.h>
+#include <game/client/prediction/entities/character.h>
 #include <game/client/render.h>
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
@@ -1364,15 +1366,21 @@ void CHud::RenderMovementInformation(const int ClientId)
 		TextRender()->Text(xl, y, Fontsize, Localize("Speed:"), -1.0f);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
-		TextRender()->Text(xl, y, Fontsize, "X:", -1.0f);
-		UpdateMovementInformationTextContainer(m_aPlayerSpeedTextContainers[0], Fontsize, DisplaySpeedX, m_aaPlayerSpeedText[0], sizeof(m_aaPlayerSpeedText[0]));
-		RenderMovementInformationTextContainer(m_aPlayerSpeedTextContainers[0], xr, y);
-		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
+		const char aaCoordinates[][4] = {"X:", "Y:"};
+		for(int i = 0; i < 2; i++)
+		{
+			TextRender()->TextColor(ColorRGBA(1, 1, 1, 1));
+			if(m_aLastPlayerSpeedChange[i] == ESpeedChange::INCREASE)
+				TextRender()->TextColor(ColorRGBA(0, 1, 0, 1));
+			if(m_aLastPlayerSpeedChange[i] == ESpeedChange::DECREASE)
+				TextRender()->TextColor(ColorRGBA(1, 0.5f, 0.5f, 1));
+			TextRender()->Text(xl, y, Fontsize, aaCoordinates[i], -1.0f);
+			UpdateMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], Fontsize, i == 0 ? DisplaySpeedX : DisplaySpeedY, m_aaPlayerSpeedText[i], sizeof(m_aaPlayerSpeedText[i]));
+			RenderMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], xr, y);
+			y += MOVEMENT_INFORMATION_LINE_HEIGHT;
+		}
 
-		TextRender()->Text(xl, y, Fontsize, "Y:", -1.0f);
-		UpdateMovementInformationTextContainer(m_aPlayerSpeedTextContainers[1], Fontsize, DisplaySpeedY, m_aaPlayerSpeedText[1], sizeof(m_aaPlayerSpeedText[1]));
-		RenderMovementInformationTextContainer(m_aPlayerSpeedTextContainers[1], xr, y);
-		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
+		TextRender()->TextColor(1, 1, 1, 1);
 	}
 
 	if(g_Config.m_ClShowhudPlayerAngle)
@@ -1419,6 +1427,52 @@ void CHud::RenderLocalTime(float x)
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 	TextRender()->Text(x - 25.0f, (12.5f - 5.f) / 2.f, 5.0f, aTimeStr, -1.0f);
+}
+
+void CHud::OnNewSnapshot()
+{
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		return;
+	if(!m_pClient->m_Snap.m_pGameInfoObj)
+		return;
+
+	int ClientId = -1;
+	if(m_pClient->m_Snap.m_pLocalCharacter && !m_pClient->m_Snap.m_SpecInfo.m_Active && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER))
+		ClientId = m_pClient->m_Snap.m_LocalClientId;
+	else if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+		ClientId = m_pClient->m_Snap.m_SpecInfo.m_SpectatorId;
+
+	if(ClientId == -1)
+		return;
+
+	const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
+	const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
+	const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
+	ivec2 Vel = mix(ivec2(pPrevChar->m_VelX, pPrevChar->m_VelY), ivec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
+
+	CCharacter *pChar = m_pClient->m_PredictedWorld.GetCharacterById(ClientId);
+	if(pChar && pChar->IsGrounded())
+		Vel.y = 0;
+
+	int aVels[2] = {Vel.x, Vel.y};
+
+	for(int i = 0; i < 2; i++)
+	{
+		int AbsVel = abs(aVels[i]);
+		if(AbsVel > m_aPlayerSpeed[i])
+		{
+			m_aLastPlayerSpeedChange[i] = ESpeedChange::INCREASE;
+		}
+		if(AbsVel < m_aPlayerSpeed[i])
+		{
+			m_aLastPlayerSpeedChange[i] = ESpeedChange::DECREASE;
+		}
+		if(AbsVel < 2)
+		{
+			m_aLastPlayerSpeedChange[i] = ESpeedChange::NONE;
+		}
+		m_aPlayerSpeed[i] = AbsVel;
+	}
 }
 
 void CHud::OnRender()

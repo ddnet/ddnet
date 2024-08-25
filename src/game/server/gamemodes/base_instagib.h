@@ -14,8 +14,8 @@ public:
 	class CConfig *Config() { return GameServer()->Config(); }
 	class IConsole *Console() { return GameServer()->Console(); }
 	class IStorage *Storage() { return GameServer()->Storage(); }
-	void SendChatTarget(int To, const char *pText, int Flags = CGameContext::CHAT_SIX | CGameContext::CHAT_SIXUP) const;
-	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int Flags = CGameContext::CHAT_SIX | CGameContext::CHAT_SIXUP);
+	void SendChatTarget(int To, const char *pText, int Flags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP) const;
+	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int Flags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP);
 
 	void OnPlayerConstruct(class CPlayer *pPlayer);
 	void OnCharacterConstruct(class CCharacter *pChr);

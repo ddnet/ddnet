@@ -1075,7 +1075,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// proof button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_ProofButton = 0;
-		if(DoButton_Ex(&s_ProofButton, "Proof", MapView()->ProofMode()->IsEnabled(), &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.", IGraphics::CORNER_L) ||
+		if(DoButton_Ex(&s_ProofButton, "Proof", MapView()->ProofMode()->IsEnabled(), &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent the area that a player can see with default zoom.", IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_P) && ModPressed))
 		{
 			MapView()->ProofMode()->Toggle();
@@ -3665,12 +3665,12 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 	{
 		if(ButtonResult == 1)
 		{
-			const char *pClipboard = Input()->GetClipboardText();
-			if(*pClipboard == '#' || *pClipboard == '$') // ignore leading # (web color format) and $ (console color format)
-				++pClipboard;
-			if(str_isallnum_hex(pClipboard))
+			std::string Clipboard = Input()->GetClipboardText();
+			if(Clipboard[0] == '#' || Clipboard[0] == '$') // ignore leading # (web color format) and $ (console color format)
+				Clipboard = Clipboard.substr(1);
+			if(str_isallnum_hex(Clipboard.c_str()))
 			{
-				std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(pClipboard);
+				std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(Clipboard.c_str());
 				if(ParsedColor)
 				{
 					m_ColorPickerPopupContext.m_State = EEditState::ONE_GO;
@@ -4297,7 +4297,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		s_ScrollToSelectionNext = true;
 	}
 
-	CUIRect AddGroupButton;
+	CUIRect AddGroupButton, CollapseAllButton;
 	LayersBox.HSplitTop(RowHeight + 1.0f, &AddGroupButton, &LayersBox);
 	if(s_ScrollRegion.AddRect(AddGroupButton))
 	{
@@ -4308,6 +4308,35 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			m_Map.NewGroup();
 			m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
 			m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(this, m_SelectedGroup, false));
+		}
+	}
+
+	LayersBox.HSplitTop(5.0f, nullptr, &LayersBox);
+	LayersBox.HSplitTop(RowHeight + 1.0f, &CollapseAllButton, &LayersBox);
+	if(s_ScrollRegion.AddRect(CollapseAllButton))
+	{
+		unsigned long TotalCollapsed = 0;
+		for(const auto &pGroup : m_Map.m_vpGroups)
+		{
+			if(pGroup->m_Collapse)
+			{
+				TotalCollapsed++;
+			}
+		}
+
+		const char *pActionText = TotalCollapsed == m_Map.m_vpGroups.size() ? "Expand all" : "Collapse all";
+
+		CollapseAllButton.HSplitTop(RowHeight, &CollapseAllButton, 0);
+		static int s_CollapseAllButton = 0;
+		if(DoButton_Editor(&s_CollapseAllButton, pActionText, 0, &CollapseAllButton, IGraphics::CORNER_R, "Expand or collapse all groups"))
+		{
+			for(const auto &pGroup : m_Map.m_vpGroups)
+			{
+				if(TotalCollapsed == m_Map.m_vpGroups.size())
+					pGroup->m_Collapse = false;
+				else
+					pGroup->m_Collapse = true;
+			}
 		}
 	}
 
@@ -8880,6 +8909,22 @@ bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 		}
 	}
 	NewMap.m_vpGroups.clear();
+
+	// transfer server settings
+	for(const auto &pSetting : NewMap.m_vSettings)
+	{
+		// Check if setting already exists
+		bool AlreadyExists = false;
+		for(const auto &pExistingSetting : m_Map.m_vSettings)
+		{
+			if(!str_comp(pExistingSetting.m_aCommand, pSetting.m_aCommand))
+				AlreadyExists = true;
+		}
+		if(!AlreadyExists)
+			m_Map.m_vSettings.push_back(pSetting);
+	}
+
+	NewMap.m_vSettings.clear();
 
 	auto IndexMap = SortImages();
 
