@@ -4297,7 +4297,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		s_ScrollToSelectionNext = true;
 	}
 
-	CUIRect AddGroupButton;
+	CUIRect AddGroupButton, CollapseAllButton;
 	LayersBox.HSplitTop(RowHeight + 1.0f, &AddGroupButton, &LayersBox);
 	if(s_ScrollRegion.AddRect(AddGroupButton))
 	{
@@ -4308,6 +4308,35 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			m_Map.NewGroup();
 			m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
 			m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(this, m_SelectedGroup, false));
+		}
+	}
+
+	LayersBox.HSplitTop(5.0f, nullptr, &LayersBox);
+	LayersBox.HSplitTop(RowHeight + 1.0f, &CollapseAllButton, &LayersBox);
+	if(s_ScrollRegion.AddRect(CollapseAllButton))
+	{
+		unsigned long TotalCollapsed = 0;
+		for(const auto &pGroup : m_Map.m_vpGroups)
+		{
+			if(pGroup->m_Collapse)
+			{
+				TotalCollapsed++;
+			}
+		}
+
+		const char *pActionText = TotalCollapsed == m_Map.m_vpGroups.size() ? "Expand all" : "Collapse all";
+
+		CollapseAllButton.HSplitTop(RowHeight, &CollapseAllButton, 0);
+		static int s_CollapseAllButton = 0;
+		if(DoButton_Editor(&s_CollapseAllButton, pActionText, 0, &CollapseAllButton, IGraphics::CORNER_R, "Expand or collapse all groups"))
+		{
+			for(const auto &pGroup : m_Map.m_vpGroups)
+			{
+				if(TotalCollapsed == m_Map.m_vpGroups.size())
+					pGroup->m_Collapse = false;
+				else
+					pGroup->m_Collapse = true;
+			}
 		}
 	}
 
