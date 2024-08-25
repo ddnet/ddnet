@@ -1399,7 +1399,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 	}
 	else if(m_Popup == POPUP_PASSWORD)
 	{
-		CUIRect Label, TextBox, TryAgain, Abort;
+		CUIRect AddressLabel, Address, Icon, Name, Label, TextBox, TryAgain, Abort;
 
 		Box.HSplitBottom(20.f, &Box, &Part);
 		Box.HSplitBottom(24.f, &Box, &Part);
@@ -1414,15 +1414,14 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 			m_Popup = POPUP_NONE;
 
+		char aAddr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Client()->ServerAddress(), aAddr, sizeof(aAddr), true);
+
 		static CButtonContainer s_ButtonTryAgain;
 		if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) || Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER))
-		{
-			char aAddr[NETADDR_MAXSTRSIZE];
-			net_addr_str(&Client()->ServerAddress(), aAddr, sizeof(aAddr), true);
 			Client()->Connect(aAddr, g_Config.m_Password);
-		}
 
-		Box.HSplitBottom(60.f, &Box, &Part);
+		Box.HSplitBottom(32.f, &Box, &Part);
 		Box.HSplitBottom(24.f, &Box, &Part);
 
 		Part.VSplitLeft(60.0f, 0, &Label);
@@ -1431,6 +1430,35 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		TextBox.VSplitRight(60.0f, &TextBox, 0);
 		Ui()->DoLabel(&Label, Localize("Password"), 18.0f, TEXTALIGN_ML);
 		Ui()->DoClearableEditBox(&m_PasswordInput, &TextBox, 12.0f);
+
+		Box.HSplitBottom(32.f, &Box, &Part);
+		Box.HSplitBottom(24.f, &Box, &Part);
+
+		Part.VSplitLeft(60.0f, 0, &AddressLabel);
+		AddressLabel.VSplitLeft(100.0f, 0, &Address);
+		Address.VSplitLeft(20.0f, 0, &Address);
+		Ui()->DoLabel(&AddressLabel, Localize("Address"), 18.0f, TEXTALIGN_ML);
+		Ui()->DoLabel(&Address, aAddr, 18.0f, TEXTALIGN_ML);
+
+		Box.HSplitBottom(32.f, &Box, &Part);
+		Box.HSplitBottom(24.f, &Box, &Part);
+
+		const CServerBrowser::CServerEntry *pEntry = ServerBrowser()->Find(Client()->ServerAddress());
+		if(pEntry != nullptr && pEntry->m_GotInfo)
+		{
+			Part.VSplitLeft(60.0f, 0, &Icon);
+			Icon.VSplitLeft(100.0f, 0, &Name);
+			Icon.VSplitLeft(80.0f, &Icon, 0);
+			Name.VSplitLeft(20.0f, 0, &Name);
+
+			const SCommunityIcon *pIcon = FindCommunityIcon(pEntry->m_Info.m_aCommunityId);
+			if(pIcon != nullptr)
+				RenderCommunityIcon(pIcon, Icon, true);
+			else
+				Ui()->DoLabel(&Icon, Localize("Name"), 18.0f, TEXTALIGN_ML);
+
+			Ui()->DoLabel(&Name, pEntry->m_Info.m_aName, 18.0f, TEXTALIGN_ML);
+		}
 	}
 	else if(m_Popup == POPUP_LANGUAGE)
 	{

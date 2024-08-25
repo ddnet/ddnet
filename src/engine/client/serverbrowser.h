@@ -234,18 +234,6 @@ public:
 class CServerBrowser : public IServerBrowser
 {
 public:
-	class CServerEntry
-	{
-	public:
-		int64_t m_RequestTime;
-		bool m_RequestIgnoreInfo;
-		int m_GotInfo;
-		CServerInfo m_Info;
-
-		CServerEntry *m_pPrevReq; // request list
-		CServerEntry *m_pNextReq;
-	};
-
 	CServerBrowser();
 	virtual ~CServerBrowser();
 
@@ -307,7 +295,7 @@ public:
 	void OnInit();
 
 	void QueueRequest(CServerEntry *pEntry);
-	CServerEntry *Find(const NETADDR &Addr);
+	CServerEntry *Find(const NETADDR &Addr) override;
 	int GetCurrentType() override { return m_ServerlistType; }
 	bool IsRegistered(const NETADDR &Addr);
 
