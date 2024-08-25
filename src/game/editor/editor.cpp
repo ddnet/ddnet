@@ -8910,6 +8910,22 @@ bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 	}
 	NewMap.m_vpGroups.clear();
 
+	// transfer server settings
+	for(const auto &pSetting : NewMap.m_vSettings)
+	{
+		// Check if setting already exists
+		bool AlreadyExists = false;
+		for(const auto &pExistingSetting : m_Map.m_vSettings)
+		{
+			if(!str_comp(pExistingSetting.m_aCommand, pSetting.m_aCommand))
+				AlreadyExists = true;
+		}
+		if(!AlreadyExists)
+			m_Map.m_vSettings.push_back(pSetting);
+	}
+
+	NewMap.m_vSettings.clear();
+
 	auto IndexMap = SortImages();
 
 	if(!IgnoreHistory)
