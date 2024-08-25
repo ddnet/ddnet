@@ -18,7 +18,6 @@ java {
 
 android {
 	compileSdkVersion 34
-	ndkVersion "TW_NDK_VERSION"
 	defaultConfig {
 		applicationId "org.ddnet.client"
 		namespace("org.ddnet.client")
