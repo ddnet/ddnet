@@ -3212,11 +3212,12 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	static CButtonContainer s_ResetId2;
 	DoLine_ColorPicker(&s_ResetId2, 25.0f, 13.0f, 5.0f, &Background, Localize("Entities background color"), &g_Config.m_ClBackgroundEntitiesColor, GreyDefault, false);
 
-	CUIRect EditBox;
+	CUIRect EditBox, ReloadButton;
 	Background.HSplitTop(20.0f, &Label, &Background);
 	Background.HSplitTop(2.0f, nullptr, &Background);
 	Label.VSplitLeft(100.0f, &Label, &EditBox);
-	EditBox.VSplitRight(100.0f, &EditBox, &Button);
+	EditBox.VSplitRight(60.0f, &EditBox, &Button);
+	Button.VSplitMid(&ReloadButton, &Button, 5.0f);
 	EditBox.VSplitRight(5.0f, &EditBox, nullptr);
 
 	Ui()->DoLabel(&Label, Localize("Map"), 14.0f, TEXTALIGN_ML);
@@ -3224,10 +3225,21 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	static CLineInput s_BackgroundEntitiesInput(g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities));
 	Ui()->DoEditBox(&s_BackgroundEntitiesInput, &EditBox, 14.0f);
 
-	static CButtonContainer s_BackgroundEntitiesReloadButton;
-	if(DoButton_Menu(&s_BackgroundEntitiesReloadButton, Localize("Reload"), 0, &Button))
+	static CButtonContainer s_BackgroundEntitiesMapPicker, s_BackgroundEntitiesReload;
+
+	if(DoButton_FontIcon(&s_BackgroundEntitiesReload, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &ReloadButton))
 	{
 		UpdateBackgroundEntities();
+	}
+
+	if(DoButton_FontIcon(&s_BackgroundEntitiesMapPicker, FONT_ICON_FOLDER, 0, &Button))
+	{
+		static SPopupMenuId s_PopupMapPickerId;
+		static CPopupMapPickerContext s_PopupMapPickerContext;
+		s_PopupMapPickerContext.m_pMenus = this;
+
+		s_PopupMapPickerContext.MapListPopulate();
+		Ui()->DoPopupMenu(&s_PopupMapPickerId, Ui()->MouseX(), Ui()->MouseY(), 300.0f, 250.0f, &s_PopupMapPickerContext, PopupMapPicker);
 	}
 
 	Background.HSplitTop(20.0f, &Button, &Background);
@@ -3319,4 +3331,105 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 #endif
+}
+
+CUi::EPopupMenuFunctionResult CMenus::PopupMapPicker(void *pContext, CUIRect View, bool Active)
+{
+	CPopupMapPickerContext *pPopupContext = static_cast<CPopupMapPickerContext *>(pContext);
+	CMenus *pMenus = pPopupContext->m_pMenus;
+
+	static CListBox s_ListBox;
+	s_ListBox.SetActive(Active);
+	s_ListBox.DoStart(20.0f, pPopupContext->m_vMaps.size(), 1, 1, -1, &View, false);
+
+	int MapIndex = 0;
+	for(auto &Map : pPopupContext->m_vMaps)
+	{
+		MapIndex++;
+		const CListboxItem Item = s_ListBox.DoNextItem(&Map, MapIndex == pPopupContext->m_Selection);
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect Label, Icon;
+		Item.m_Rect.VSplitLeft(20.0f, &Icon, &Label);
+
+		char aLabelText[IO_MAX_PATH_LENGTH];
+		str_copy(aLabelText, Map.m_aFilename);
+		if(Map.m_IsDirectory)
+			str_append(aLabelText, "/", sizeof(aLabelText));
+
+		const char *pIconType;
+		if(!Map.m_IsDirectory)
+		{
+			pIconType = FONT_ICON_MAP;
+		}
+		else
+		{
+			if(!str_comp(Map.m_aFilename, ".."))
+				pIconType = FONT_ICON_FOLDER_TREE;
+			else
+				pIconType = FONT_ICON_FOLDER;
+		}
+
+		pMenus->TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+		pMenus->TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
+		pMenus->Ui()->DoLabel(&Icon, pIconType, 12.0f, TEXTALIGN_ML);
+		pMenus->TextRender()->SetRenderFlags(0);
+		pMenus->TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+
+		pMenus->Ui()->DoLabel(&Label, aLabelText, 10.0f, TEXTALIGN_ML);
+	}
+
+	const int NewSelected = s_ListBox.DoEnd();
+	pPopupContext->m_Selection = NewSelected >= 0 ? NewSelected : -1;
+	if(s_ListBox.WasItemSelected() || s_ListBox.WasItemActivated())
+	{
+		const CMapListItem SelectedItem = pPopupContext->m_vMaps[pPopupContext->m_Selection];
+
+		if(SelectedItem.m_IsDirectory)
+		{
+			if(!str_comp(SelectedItem.m_aFilename, ".."))
+			{
+				fs_parent_dir(pPopupContext->m_aCurrentMapFolder);
+			}
+			else
+			{
+				str_append(pPopupContext->m_aCurrentMapFolder, "/", sizeof(pPopupContext->m_aCurrentMapFolder));
+				str_append(pPopupContext->m_aCurrentMapFolder, SelectedItem.m_aFilename, sizeof(pPopupContext->m_aCurrentMapFolder));
+			}
+			pPopupContext->MapListPopulate();
+		}
+		else
+		{
+			str_format(g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), "%s/%s", pPopupContext->m_aCurrentMapFolder, SelectedItem.m_aFilename);
+			pMenus->UpdateBackgroundEntities();
+			return CUi::POPUP_CLOSE_CURRENT;
+		}
+	}
+
+	return CUi::POPUP_KEEP_OPEN;
+}
+
+void CMenus::CPopupMapPickerContext::MapListPopulate()
+{
+	m_vMaps.clear();
+	char aTemp[IO_MAX_PATH_LENGTH];
+	str_format(aTemp, sizeof(aTemp), "maps/%s", m_aCurrentMapFolder);
+	m_pMenus->Storage()->ListDirectoryInfo(IStorage::TYPE_ALL, aTemp, MapListFetchCallback, this);
+	std::stable_sort(m_vMaps.begin(), m_vMaps.end(), CompareFilenameAscending);
+}
+
+int CMenus::CPopupMapPickerContext::MapListFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)
+{
+	CPopupMapPickerContext *pRealUser = (CPopupMapPickerContext *)pUser;
+	if((!IsDir && !str_endswith(pInfo->m_pName, ".map")) || !str_comp(pInfo->m_pName, ".") || (!str_comp(pInfo->m_pName, "..") && (!str_comp(pRealUser->m_aCurrentMapFolder, ""))))
+		return 0;
+
+	CMapListItem Item;
+	str_copy(Item.m_aFilename, pInfo->m_pName);
+	Item.m_IsDirectory = IsDir;
+
+	pRealUser->m_vMaps.emplace_back(Item);
+
+	return 0;
 }
