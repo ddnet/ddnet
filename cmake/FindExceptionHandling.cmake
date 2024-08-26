@@ -11,11 +11,18 @@ if(TARGET_OS STREQUAL "windows")
   if(NOT EXCEPTION_HANDLING_BUNDLED)
     message(FATAL_ERROR "could not find exception handling paths")
   endif()
-  set(EXCEPTION_HANDLING_COPY_FILES 
-    "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/exchndl.dll"
-    "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/dbgcore.dll"
-    "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/dbghelp.dll"
-    "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/mgwhelp.dll"
-    "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/symsrv.dll"
-  )
+  if(TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
+    set(EXCEPTION_HANDLING_COPY_FILES
+      "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/exchndl.dll"
+      "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/mgwhelp.dll"
+    )
+  else()
+    set(EXCEPTION_HANDLING_COPY_FILES
+      "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/exchndl.dll"
+      "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/dbgcore.dll"
+      "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/dbghelp.dll"
+      "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/mgwhelp.dll"
+      "${EXTRA_EXCEPTION_HANDLING_LIBDIR}/symsrv.dll"
+    )
+  endif()
 endif()
