@@ -2147,7 +2147,7 @@ void CGameClient::OnPredict()
 			}
 
 		// check if we want to trigger effects
-		if(Tick > m_aLastNewPredictedTick[Dummy])
+		if(Tick > m_aLastNewPredictedTick[Dummy] && (Tick != FinalTick || !g_Config.m_ClFastInput))
 		{
 			m_aLastNewPredictedTick[Dummy] = Tick;
 			m_NewPredictedTick = true;
