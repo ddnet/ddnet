@@ -55,7 +55,9 @@ MACRO_CONFIG_INT(ClShowSkinName, tc_skin_name, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG
 
 //MACRO_CONFIG_INT(ClFreeGhost, tc_freeghost, 0, 0, 1, CFGFLAG_CLIENT , "")
 
-MACRO_CONFIG_INT(ClSmoothPredictionMargin, tc_prediction_margin_smooth, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Make's prediction margin transition smooth (reverts a ddnet change)")
+MACRO_CONFIG_INT(ClSmoothPredictionMargin, tc_prediction_margin_smooth, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Makes prediction margin transition smooth (reverts a ddnet change)")
+
+MACRO_CONFIG_INT(ClFastInput, tc_fast_input, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Uses input for prediction up to 20ms faster")
 
 
 //Outline Variables
