@@ -124,6 +124,7 @@ class CGameContext : public IGameServer
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetTeamAll(IConsole::IResult *pResult, void *pUserData);
+	static void ConHotReload(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveVote(IConsole::IResult *pResult, void *pUserData);
 	static void ConForceVote(IConsole::IResult *pResult, void *pUserData);
@@ -180,6 +181,9 @@ public:
 	// keep last input to always apply when none is sent
 	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
 	bool m_aPlayerHasInput[MAX_CLIENTS];
+	CSaveTeam *m_apSavedTeams[MAX_CLIENTS];
+	CSaveTee *m_apSavedTees[MAX_CLIENTS];
+	int m_aTeamMapping[MAX_CLIENTS];
 
 	// returns last input if available otherwise nulled PlayerInput object
 	// ClientId has to be valid

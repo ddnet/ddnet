@@ -8587,7 +8587,7 @@ void CEditor::HandleWriterFinishJobs()
 			char aMapName[128];
 			IStorage::StripPathAndExtension(pJob->GetRealFileName(), aMapName, sizeof(aMapName));
 			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
-				Client()->Rcon("reload");
+				Client()->Rcon("hot_reload");
 		}
 	}
 }

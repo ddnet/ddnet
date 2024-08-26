@@ -379,6 +379,7 @@ public:
 
 	void ChangeMap(const char *pMap) override;
 	const char *GetMapName() const override;
+	void ReloadMap() override;
 	int LoadMap(const char *pMapName);
 
 	void SaveDemo(int ClientId, float Time) override;
