@@ -17,6 +17,8 @@
 
 #include "menus.h"
 
+using namespace FontIcons;
+
 void CMenus::RenderStartMenu(CUIRect MainView)
 {
 	GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_START);
@@ -186,13 +188,27 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 
 	// render version
-	CUIRect VersionUpdate, CurVersion;
-	MainView.HSplitBottom(20.0f, nullptr, &VersionUpdate);
-	VersionUpdate.VSplitRight(50.0f, &CurVersion, nullptr);
-	VersionUpdate.VMargin(VMargin, &VersionUpdate);
-
+	CUIRect CurVersion, ConsoleButton;
+	MainView.HSplitBottom(45.0f, nullptr, &CurVersion);
+	CurVersion.VSplitRight(40.0f, &CurVersion, nullptr);
+	CurVersion.HSplitTop(20.0f, &ConsoleButton, &CurVersion);
+	CurVersion.HSplitTop(5.0f, nullptr, &CurVersion);
+	ConsoleButton.VSplitRight(40.0f, nullptr, &ConsoleButton);
 	Ui()->DoLabel(&CurVersion, GAME_RELEASE_VERSION, 14.0f, TEXTALIGN_MR);
 
+	static CButtonContainer s_ConsoleButton;
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	if(DoButton_Menu(&s_ConsoleButton, FONT_ICON_TERMINAL, 0, &ConsoleButton, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.1f)))
+	{
+		GameClient()->m_GameConsole.Toggle(CGameConsole::CONSOLETYPE_LOCAL);
+	}
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+
+	CUIRect VersionUpdate;
+	MainView.HSplitBottom(20.0f, nullptr, &VersionUpdate);
+	VersionUpdate.VMargin(VMargin, &VersionUpdate);
 #if defined(CONF_AUTOUPDATE)
 	CUIRect UpdateButton;
 	VersionUpdate.VSplitRight(100.0f, &VersionUpdate, &UpdateButton);
