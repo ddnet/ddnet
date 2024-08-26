@@ -902,14 +902,9 @@ void CMenus::ConchainBackgroundEntities(IConsole::IResult *pResult, void *pUserD
 	if(pResult->NumArguments())
 	{
 		CMenus *pSelf = (CMenus *)pUserData;
-		pSelf->UpdateBackgroundEntities();
+		if(str_comp(g_Config.m_ClBackgroundEntities, pSelf->m_pClient->m_Background.MapName()) != 0)
+			pSelf->m_pClient->m_Background.LoadBackground();
 	}
-}
-
-void CMenus::UpdateBackgroundEntities()
-{
-	if(str_comp(g_Config.m_ClBackgroundEntities, m_pClient->m_Background.MapName()) != 0)
-		m_pClient->m_Background.LoadBackground();
 }
 
 void CMenus::ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

@@ -3229,7 +3229,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	if(DoButton_FontIcon(&s_BackgroundEntitiesReload, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &ReloadButton))
 	{
-		UpdateBackgroundEntities();
+		m_pClient->m_Background.LoadBackground();
 	}
 
 	if(DoButton_FontIcon(&s_BackgroundEntitiesMapPicker, FONT_ICON_FOLDER, 0, &Button))
@@ -3402,7 +3402,7 @@ CUi::EPopupMenuFunctionResult CMenus::PopupMapPicker(void *pContext, CUIRect Vie
 		else
 		{
 			str_format(g_Config.m_ClBackgroundEntities, sizeof(g_Config.m_ClBackgroundEntities), "%s/%s", pPopupContext->m_aCurrentMapFolder, SelectedItem.m_aFilename);
-			pMenus->UpdateBackgroundEntities();
+			pMenus->m_pClient->m_Background.LoadBackground();
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
