@@ -51,6 +51,8 @@ sed -i "s/TW_VERSION_NAME/${TW_VERSION_NAME}/g" build.gradle
 
 sed -i "s/DDNet/${APK_BASENAME}/g" src/main/res/values/strings.xml
 
+sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/res/xml/shortcuts.xml
+
 sed -i "s/\"DDNet\"/\"${APK_BASENAME}\"/g" src/main/AndroidManifest.xml
 sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/AndroidManifest.xml
 
