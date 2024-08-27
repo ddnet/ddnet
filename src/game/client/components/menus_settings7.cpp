@@ -251,7 +251,7 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		if(DoButton_Menu(&s_CustomSkinDeleteButton, Localize("Delete"), 0, &ButtonMiddle) || Ui()->ConsumeHotkey(CUi::HOTKEY_DELETE))
 		{
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete the skin '%s'?"), m_pSelectedSkin->m_aName);
+			str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete '%s'?"), m_pSelectedSkin->m_aName);
 			PopupConfirm(Localize("Delete skin"), aBuf, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDeleteSkin7);
 		}
 	}
@@ -299,7 +299,7 @@ void CMenus::PopupConfirmDeleteSkin7()
 
 	if(!m_pClient->m_Skins7.RemoveSkin(m_pSelectedSkin))
 	{
-		PopupMessage(Localize("Error"), Localize("Unable to delete the skin"), Localize("Ok"));
+		PopupMessage(Localize("Error"), Localize("Unable to delete skin"), Localize("Ok"));
 		return;
 	}
 	m_pSelectedSkin = nullptr;

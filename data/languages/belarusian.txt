@@ -282,9 +282,6 @@ Player
 Player country:
 == Краіна гульца:
 
-Player options
-== Опцыі гульца
-
 Players
 == Гульцы
 
@@ -868,9 +865,6 @@ Loading ghost files
 Time
 == Час
 
-Reload
-== Перазагрузіць
-
 Deactivate
 == Выключыць
 
@@ -1166,9 +1160,6 @@ Show votes window after voting
 
 DDRace HUD
 == DDRace HUD
-
-Show client IDs in scoreboard
-== Паказваць ID кліента ў табло ачкоў
 
 Show DDRace HUD
 == Паказваць DDRace HUD
@@ -1706,25 +1697,6 @@ Regular background color
 Entities background color
 == Колер фону энтыты
 
-An error during command recording occurred. Try to update your GPU drivers.
-== Адбылася памылка падчас выканання каманды запісу. Паспрабуйце абнавіць драйверы відэакарты.
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== Каманда рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
-
-[Graphics error]
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Памылка падчас ініцыялізацыі. Паспрабуйце змяніць gfx_backend на OpenGL або Vulcan у settings_dnet.cfg ў тэчцы канфігурацыйных файлаў і паспрабуйце яшчэ раз.
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Недахоп VRAM. Паспрабуйце выдаліць карыстацкія тэкстуры (скіны, энтыты і г.д.), асабліва тыя, якія маюць высокую разрознасць.
-
-[Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== Адпраўка каманд рэндэрынгу не ўдалася. Паспрабуйце абнавіць драйверы відэакарты.
-
 Failed saving the replay!
 == Не атрымалася захаваць паўтор!
 
@@ -1874,3 +1846,74 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
+Show client IDs (scoreboard, chat, spectator)
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
+== 

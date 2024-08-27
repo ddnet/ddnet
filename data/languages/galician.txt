@@ -280,9 +280,6 @@ Player
 Player country:
 == País do xogador
 
-Player options
-== Opcións de xogador
-
 Players
 == Xogadores
 
@@ -651,9 +648,6 @@ Connecting dummy
 
 Connect Dummy
 == Conectar Dummy
-
-Reload
-== Recargar
 
 Deactivate
 == Desactivar
@@ -1358,9 +1352,6 @@ Show health, shields and ammo
 DDRace HUD
 == HUD DDRace
 
-Show client IDs in scoreboard
-== Mostrar IDs de cliente na táboa de puntuación
-
 Show DDRace HUD
 == Mostrar o HUD DDRace
 
@@ -1571,6 +1562,15 @@ Relative
 Absolute
 == Absoluto
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
 Error playing demo
 == 
 
@@ -1767,6 +1767,12 @@ Delete folder
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
 Loading…
 == 
 
@@ -1795,6 +1801,9 @@ Info Messages
 == 
 
 Show local time always
+== 
+
+Show client IDs (scoreboard, chat, spectator)
 == 
 
 Always show chat
@@ -1849,6 +1858,39 @@ Regular background color
 == 
 
 Entities background color
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 
 
 Round %d/%d

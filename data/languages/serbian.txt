@@ -281,9 +281,6 @@ Player
 Player country:
 == Država igrača
 
-Player options
-== Podešavanja igrača
-
 Players
 == Igrači
 
@@ -684,9 +681,6 @@ Kill
 
 Pause
 == Pauza
-
-Reload
-== Osveži
 
 Deactivate
 == Deaktiviraj
@@ -1264,9 +1258,6 @@ Show health, shields and ammo
 DDRace HUD
 == DDRace Prikaz
 
-Show client IDs in scoreboard
-== Prikaži identitete na tabli rezultata
-
 Show DDRace HUD
 == Prikaži DDRace Prikaz
 
@@ -1649,6 +1640,15 @@ Could not initialize the given graphics backend, reverting to the default backen
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
 == 
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
 Error playing demo
 == 
 
@@ -1785,6 +1785,12 @@ Netversion
 map not included
 == 
 
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
 Loading…
 == 
 
@@ -1807,6 +1813,9 @@ Info Messages
 == 
 
 Show local time always
+== 
+
+Show client IDs (scoreboard, chat, spectator)
 == 
 
 Always show chat
@@ -1858,6 +1867,39 @@ Regular background color
 == 
 
 Entities background color
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 
 
 Round %d/%d

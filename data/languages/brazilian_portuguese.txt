@@ -311,9 +311,6 @@ Player
 Player country:
 == País do jogador:
 
-Player options
-== Opções do jogador
-
 Players
 == Jogadores
 
@@ -817,9 +814,6 @@ Show DDNet map finishes in server browser
 
 transmits your player name to info.ddnet.org
 == transmite seu nome de jogador para info.ddnet.org
-
-Reload
-== Recarregar
 
 Time
 == Tempo
@@ -1376,9 +1370,6 @@ Show health, shields and ammo
 DDRace HUD
 == HUD do DDRace
 
-Show client IDs in scoreboard
-== Mostrar IDs de cliente no placar
-
 Show DDRace HUD
 == Mostrar HUD do DDRace
 
@@ -1901,3 +1892,54 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
+
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
+Show client IDs (scoreboard, chat, spectator)
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
+== 
