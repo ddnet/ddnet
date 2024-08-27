@@ -278,9 +278,6 @@ Player
 Player country:
 == Filter krajín:
 
-Player options
-== Nastavenia hráča
-
 Players
 == Hráči
 
@@ -1420,9 +1417,6 @@ Show votes window after voting
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== Zobraziť ID klientov vo výsledkovej tabuľke
-
 Show DDRace HUD
 == Zobraziť DDRace HUD
 
@@ -1648,9 +1642,6 @@ Regular background color
 Entities background color
 == Farba pozadia entít
 
-Reload
-== Znovu načítať
-
 Use current map as background
 == Použiť aktuálnu mapu ako pozadie
 
@@ -1850,11 +1841,62 @@ Tee
 Show only chat messages from team members
 == Zobraziť iba správy od členov tímu
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
 [Spectating]
 Following %s
 == 
 
 Example of usage
+== 
+
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
+Show client IDs (scoreboard, chat, spectator)
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 
 
 Round %d/%d
