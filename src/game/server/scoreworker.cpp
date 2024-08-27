@@ -1560,7 +1560,8 @@ bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData
 	}
 	else
 	{
-		str_copy(pResult->m_aMessage, "You have no more unfinished maps on this server!", sizeof(pResult->m_aMessage));
+		str_format(aBuf, sizeof(aBuf), "%s has no more unfinished maps on this server!", pData->m_aRequestingPlayer);
+		str_copy(pResult->m_aMessage, aBuf, sizeof(pResult->m_aMessage));
 	}
 	return false;
 }
