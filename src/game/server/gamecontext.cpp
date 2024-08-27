@@ -3140,6 +3140,8 @@ void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUse
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	int Stars = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
+	if(pResult->m_ClientId != -1)
+		pSelf->m_VoteCreator = pResult->m_ClientId;
 
 	pSelf->m_pScore->RandomUnfinishedMap(pSelf->m_VoteCreator, Stars);
 }
@@ -3394,6 +3396,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 			{
 				str_format(aBuf, sizeof(aBuf), "authorized player forced server option '%s' (%s)", pValue, pReason);
 				pSelf->SendChatTarget(-1, aBuf, FLAG_SIX);
+				pSelf->m_VoteCreator = pResult->m_ClientId;
 				pSelf->Console()->ExecuteLine(pOption->m_aCommand);
 				break;
 			}
