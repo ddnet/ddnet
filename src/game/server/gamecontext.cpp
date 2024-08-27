@@ -3396,6 +3396,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 			{
 				str_format(aBuf, sizeof(aBuf), "authorized player forced server option '%s' (%s)", pValue, pReason);
 				pSelf->SendChatTarget(-1, aBuf, FLAG_SIX);
+				pSelf->m_VoteCreator = pResult->m_ClientId;
 				pSelf->Console()->ExecuteLine(pOption->m_aCommand);
 				break;
 			}
