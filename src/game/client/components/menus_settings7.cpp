@@ -237,6 +237,14 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	// bottom buttons
 	if(s_CustomSkinMenu)
 	{
+		static CButtonContainer s_CustomSkinSaveButton;
+		if(DoButton_Menu(&s_CustomSkinSaveButton, Localize("Save"), 0, &ButtonLeft))
+		{
+			m_Popup = POPUP_SAVE_SKIN;
+			m_SkinNameInput.SelectAll();
+			Ui()->SetActiveItem(&m_SkinNameInput);
+		}
+
 		static CButtonContainer s_RandomizeSkinButton;
 		if(DoButton_Menu(&s_RandomizeSkinButton, Localize("Randomize"), 0, &ButtonMiddle))
 		{

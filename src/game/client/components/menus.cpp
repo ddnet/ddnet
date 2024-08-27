@@ -1282,6 +1282,11 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		pButtonText = m_aMessageButton;
 		TopAlign = true;
 	}
+	else if(m_Popup == POPUP_SAVE_SKIN)
+	{
+		pTitle = Localize("Save skin");
+		pExtraText = Localize("Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.");
+	}
 
 	CUIRect Box, Part;
 	Box = Screen;
@@ -1755,6 +1760,52 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 			m_Popup = POPUP_NONE;
 			SetActive(false);
 		}
+	}
+	else if(m_Popup == POPUP_SAVE_SKIN)
+	{
+		CUIRect Label, TextBox, Yes, No;
+
+		Box.HSplitBottom(20.f, &Box, &Part);
+		Box.HSplitBottom(24.f, &Box, &Part);
+		Part.VMargin(80.0f, &Part);
+
+		Part.VSplitMid(&No, &Yes);
+
+		Yes.VMargin(20.0f, &Yes);
+		No.VMargin(20.0f, &No);
+
+		static CButtonContainer s_ButtonNo;
+		if(DoButton_Menu(&s_ButtonNo, Localize("No"), 0, &No) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+			m_Popup = POPUP_NONE;
+
+		static CButtonContainer s_ButtonYes;
+		if(DoButton_Menu(&s_ButtonYes, Localize("Yes"), m_SkinNameInput.IsEmpty() ? 1 : 0, &Yes) || Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER))
+		{
+			if(m_SkinNameInput.GetLength())
+			{
+				if(m_SkinNameInput.GetString()[0] != 'x' && m_SkinNameInput.GetString()[1] != '_')
+				{
+					if(m_pClient->m_Skins7.SaveSkinfile(m_SkinNameInput.GetString(), m_Dummy))
+					{
+						m_Popup = POPUP_NONE;
+						m_SkinListNeedsUpdate = true;
+					}
+					else
+						PopupMessage(Localize("Error"), Localize("Unable to save the skin"), Localize("Ok"), POPUP_SAVE_SKIN);
+				}
+				else
+					PopupMessage(Localize("Error"), Localize("Unable to save the skin with a reserved name"), Localize("Ok"), POPUP_SAVE_SKIN);
+			}
+		}
+
+		Box.HSplitBottom(60.f, &Box, &Part);
+		Box.HSplitBottom(24.f, &Box, &Part);
+
+		Part.VMargin(60.0f, &Label);
+		Label.VSplitLeft(100.0f, &Label, &TextBox);
+		TextBox.VSplitLeft(20.0f, nullptr, &TextBox);
+		Ui()->DoLabel(&Label, Localize("Name"), 18.0f, TEXTALIGN_ML);
+		Ui()->DoClearableEditBox(&m_SkinNameInput, &TextBox, 12.0f);
 	}
 	else
 	{
