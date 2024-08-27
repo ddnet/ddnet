@@ -1277,7 +1277,7 @@ void CGameContext::OnTick()
 		if(m_SqlRandomMapResult->m_Success)
 		{
 			if(PlayerExists(m_SqlRandomMapResult->m_ClientId) && m_SqlRandomMapResult->m_aMessage[0] != '\0')
-				SendChatTarget(m_SqlRandomMapResult->m_ClientId, m_SqlRandomMapResult->m_aMessage);
+				SendChat(-1, TEAM_ALL, m_SqlRandomMapResult->m_aMessage);
 			if(m_SqlRandomMapResult->m_aMap[0] != '\0')
 				Server()->ChangeMap(m_SqlRandomMapResult->m_aMap);
 			else
