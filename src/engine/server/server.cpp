@@ -2341,7 +2341,7 @@ void CServer::UpdateRegisterServerInfo()
 	JsonWriter.WriteAttribute("map");
 	JsonWriter.BeginObject();
 	JsonWriter.WriteAttribute("name");
-	JsonWriter.WriteStrValue(m_aCurrentMap);
+	JsonWriter.WriteStrValue(GetMapName());
 	JsonWriter.WriteAttribute("sha256");
 	JsonWriter.WriteStrValue(aMapSha256);
 	JsonWriter.WriteAttribute("size");
