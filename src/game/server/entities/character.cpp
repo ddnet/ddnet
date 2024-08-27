@@ -120,7 +120,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 		if(GameServer()->m_apSavedTees[m_pPlayer->GetCid()])
 		{
 			GameServer()->m_apSavedTees[m_pPlayer->GetCid()]->Load(m_pPlayer->GetCharacter(), Team);
-			delete GameServer()->m_apSavedTees[Team];
+			delete GameServer()->m_apSavedTees[m_pPlayer->GetCid()];
 			GameServer()->m_apSavedTees[m_pPlayer->GetCid()] = nullptr;
 		}
 	}
