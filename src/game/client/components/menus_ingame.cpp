@@ -944,7 +944,7 @@ void CMenus::GhostlistPopulate()
 	m_vGhosts.clear();
 	m_GhostPopulateStartTime = time_get_nanoseconds();
 	Storage()->ListDirectoryInfo(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
-	std::sort(m_vGhosts.begin(), m_vGhosts.end());
+	SortGhostlist();
 
 	CGhostItem *pOwnGhost = 0;
 	for(auto &Ghost : m_vGhosts)
@@ -1000,6 +1000,7 @@ void CMenus::UpdateOwnGhost(CGhostItem Item)
 	Item.m_Date = std::time(0);
 	Item.m_Failed = false;
 	m_vGhosts.insert(std::lower_bound(m_vGhosts.begin(), m_vGhosts.end(), Item), Item);
+	SortGhostlist();
 }
 
 void CMenus::DeleteGhostItem(int Index)
@@ -1007,6 +1008,22 @@ void CMenus::DeleteGhostItem(int Index)
 	if(m_vGhosts[Index].HasFile())
 		Storage()->RemoveFile(m_vGhosts[Index].m_aFilename, IStorage::TYPE_SAVE);
 	m_vGhosts.erase(m_vGhosts.begin() + Index);
+}
+
+void CMenus::SortGhostlist()
+{
+	if(g_Config.m_GhSort == GHOST_SORT_NAME)
+		std::stable_sort(m_vGhosts.begin(), m_vGhosts.end(), [](const CGhostItem &Left, const CGhostItem &Right) {
+			return g_Config.m_GhSortOrder ? (str_comp(Left.m_aPlayer, Right.m_aPlayer) > 0) : (str_comp(Left.m_aPlayer, Right.m_aPlayer) < 0);
+		});
+	else if(g_Config.m_GhSort == GHOST_SORT_TIME)
+		std::stable_sort(m_vGhosts.begin(), m_vGhosts.end(), [](const CGhostItem &Left, const CGhostItem &Right) {
+			return g_Config.m_GhSortOrder ? (Left.m_Time > Right.m_Time) : (Left.m_Time < Right.m_Time);
+		});
+	else if(g_Config.m_GhSort == GHOST_SORT_DATE)
+		std::stable_sort(m_vGhosts.begin(), m_vGhosts.end(), [](const CGhostItem &Left, const CGhostItem &Right) {
+			return g_Config.m_GhSortOrder ? (Left.m_Date > Right.m_Date) : (Left.m_Date < Right.m_Date);
+		});
 }
 
 void CMenus::RenderGhost(CUIRect MainView)
@@ -1029,10 +1046,12 @@ void CMenus::RenderGhost(CUIRect MainView)
 	Headers.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 5.0f);
 	Headers.VSplitRight(20.0f, &Headers, 0);
 
-	struct CColumn
+	class CColumn
 	{
+	public:
 		const char *m_pCaption;
 		int m_Id;
+		int m_Sort;
 		float m_Width;
 		CUIRect m_Rect;
 	};
@@ -1046,11 +1065,11 @@ void CMenus::RenderGhost(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{"", -1, 2.0f, {0}},
-		{"", COL_ACTIVE, 30.0f, {0}},
-		{Localizable("Name"), COL_NAME, 200.0f, {0}},
-		{Localizable("Time"), COL_TIME, 90.0f, {0}},
-		{Localizable("Date"), COL_DATE, 150.0f, {0}},
+		{"", -1, GHOST_SORT_NONE, 2.0f, {0}},
+		{"", COL_ACTIVE, GHOST_SORT_NONE, 30.0f, {0}},
+		{Localizable("Name"), COL_NAME, GHOST_SORT_NAME, 200.0f, {0}},
+		{Localizable("Time"), COL_TIME, GHOST_SORT_TIME, 90.0f, {0}},
+		{Localizable("Date"), COL_DATE, GHOST_SORT_DATE, 150.0f, {0}},
 	};
 
 	int NumCols = std::size(s_aCols);
@@ -1065,8 +1084,22 @@ void CMenus::RenderGhost(CUIRect MainView)
 	}
 
 	// do headers
-	for(int i = 0; i < NumCols; i++)
-		DoButton_GridHeader(&s_aCols[i].m_Id, Localize(s_aCols[i].m_pCaption), 0, &s_aCols[i].m_Rect);
+	for(const auto &Col : s_aCols)
+	{
+		if(DoButton_GridHeader(&Col.m_Id, Localize(Col.m_pCaption), g_Config.m_GhSort == Col.m_Sort, &Col.m_Rect))
+		{
+			if(Col.m_Sort != GHOST_SORT_NONE)
+			{
+				if(g_Config.m_GhSort == Col.m_Sort)
+					g_Config.m_GhSortOrder ^= 1;
+				else
+					g_Config.m_GhSortOrder = 0;
+				g_Config.m_GhSort = Col.m_Sort;
+
+				SortGhostlist();
+			}
+		}
+	}
 
 	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
