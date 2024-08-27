@@ -1332,9 +1332,18 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 	Rail.VSplitLeft(pColorInner ? 8.0f : clamp(33.0f, Rail.h, Rail.w / 3.0f), &Handle, 0);
 	Handle.x += (Rail.w - Handle.w) * Current;
 
+	CUIRect HandleArea = Handle;
+	if(!pColorInner)
+	{
+		HandleArea.h = pRect->h * 0.9f;
+		HandleArea.y = pRect->y + pRect->h * 0.05f;
+		HandleArea.w += 6.0f;
+		HandleArea.x -= 3.0f;
+	}
+
 	// logic
 	const bool InsideRail = MouseHovered(&Rail);
-	const bool InsideHandle = MouseHovered(&Handle);
+	const bool InsideHandle = MouseHovered(&HandleArea);
 	bool Grabbed = false; // whether to apply the offset
 
 	if(CheckActiveItem(pId))
@@ -1366,6 +1375,12 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 		Grabbed = true;
 	}
 
+	if(!pColorInner && (InsideHandle || Grabbed) && (CheckActiveItem(pId) || HotItem() == pId))
+	{
+		Handle.h += 3.0f;
+		Handle.y -= 1.5f;
+	}
+
 	if(InsideHandle && !MouseButton(0))
 	{
 		SetHotItem(pId);
@@ -1394,7 +1409,7 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 	else
 	{
 		Rail.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, Rail.h / 2.0f);
-		Handle.Draw(HandleColor, IGraphics::CORNER_ALL, Handle.h / 2.0f);
+		Handle.Draw(HandleColor, IGraphics::CORNER_ALL, Rail.h / 2.0f);
 	}
 
 	return ReturnValue;
