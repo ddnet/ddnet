@@ -3468,8 +3468,18 @@ void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData)
 struct CMapNameItem
 {
 	char m_aName[IO_MAX_PATH_LENGTH - 4];
+	bool m_IsDirectory;
 
-	bool operator<(const CMapNameItem &Other) const { return str_comp_nocase(m_aName, Other.m_aName) < 0; }
+	static bool CompareFilenameAscending(const CMapNameItem Lhs, const CMapNameItem Rhs)
+	{
+		if(str_comp(Lhs.m_aName, "..") == 0)
+			return true;
+		if(str_comp(Rhs.m_aName, "..") == 0)
+			return false;
+		if(Lhs.m_IsDirectory != Rhs.m_IsDirectory)
+			return Lhs.m_IsDirectory;
+		return str_comp_filenames(Lhs.m_aName, Rhs.m_aName) < 0;
+	}
 };
 
 void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
@@ -3477,19 +3487,48 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	std::vector<CMapNameItem> vMapList;
-	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, "maps", MapScan, &vMapList);
-	std::sort(vMapList.begin(), vMapList.end());
+	const char *pDirectory = pResult->GetString(0);
+
+	// Don't allow moving to parent directories
+	if(str_find_nocase(pDirectory, ".."))
+		return;
+
+	char aPath[IO_MAX_PATH_LENGTH] = "maps/";
+	str_append(aPath, pDirectory, sizeof(aPath));
+	pSelf->Storage()->ListDirectory(IStorage::TYPE_ALL, aPath, MapScan, &vMapList);
+	std::sort(vMapList.begin(), vMapList.end(), CMapNameItem::CompareFilenameAscending);
 
 	for(auto &Item : vMapList)
 	{
-		char aDescription[64];
-		str_format(aDescription, sizeof(aDescription), "Map: %s", Item.m_aName);
+		if(!str_comp(Item.m_aName, "..") && (!str_comp(aPath, "maps/")))
+			continue;
 
-		char aCommand[IO_MAX_PATH_LENGTH * 2 + 10];
-		char aMapEscaped[IO_MAX_PATH_LENGTH * 2];
-		char *pDst = aMapEscaped;
-		str_escape(&pDst, Item.m_aName, aMapEscaped + sizeof(aMapEscaped));
-		str_format(aCommand, sizeof(aCommand), "change_map \"%s\"", aMapEscaped);
+		char aDescription[VOTE_DESC_LENGTH];
+		str_format(aDescription, sizeof(aDescription), "%s: %s%s", Item.m_IsDirectory ? "Directory" : "Map", Item.m_aName, Item.m_IsDirectory ? "/" : "");
+
+		char aCommand[VOTE_CMD_LENGTH];
+		char aOptionEscaped[IO_MAX_PATH_LENGTH * 2];
+		char *pDst = aOptionEscaped;
+		str_escape(&pDst, Item.m_aName, aOptionEscaped + sizeof(aOptionEscaped));
+
+		char aDirectory[IO_MAX_PATH_LENGTH] = "";
+		if(pResult->NumArguments())
+			str_copy(aDirectory, pDirectory);
+
+		if(!str_comp(Item.m_aName, ".."))
+		{
+			fs_parent_dir(aDirectory);
+			str_format(aCommand, sizeof(aCommand), "clear_votes; add_map_votes \"%s\"", aDirectory);
+		}
+		else if(Item.m_IsDirectory)
+		{
+			str_append(aDirectory, "/", sizeof(aDirectory));
+			str_append(aDirectory, aOptionEscaped, sizeof(aDirectory));
+
+			str_format(aCommand, sizeof(aCommand), "clear_votes; add_map_votes \"%s\"", aDirectory);
+		}
+		else
+			str_format(aCommand, sizeof(aCommand), "change_map \"%s/%s\"", pDirectory, aOptionEscaped);
 
 		pSelf->AddVote(aDescription, aCommand);
 	}
@@ -3499,11 +3538,15 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 
 int CGameContext::MapScan(const char *pName, int IsDir, int DirType, void *pUserData)
 {
-	if(IsDir || !str_endswith(pName, ".map"))
+	if((!IsDir && !str_endswith(pName, ".map")) || !str_comp(pName, "."))
 		return 0;
 
 	CMapNameItem Item;
-	str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, str_length(pName) - str_length(".map"));
+	Item.m_IsDirectory = IsDir;
+	if(!IsDir)
+		str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, str_length(pName) - str_length(".map"));
+	else
+		str_copy(Item.m_aName, pName);
 	static_cast<std::vector<CMapNameItem> *>(pUserData)->push_back(Item);
 
 	return 0;
@@ -3606,7 +3649,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("remove_vote", "r[name]", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
 	Console()->Register("force_vote", "s[name] s[command] ?r[reason]", CFGFLAG_SERVER, ConForceVote, this, "Force a voting option");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
-	Console()->Register("add_map_votes", "", CFGFLAG_SERVER, ConAddMapVotes, this, "Automatically adds voting options for all maps");
+	Console()->Register("add_map_votes", "?s[directory]", CFGFLAG_SERVER, ConAddMapVotes, this, "Automatically adds voting options for all maps");
 	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
 	Console()->Register("votes", "?i[page]", CFGFLAG_SERVER, ConVotes, this, "Show all votes (page 0 by default, 20 entries per page)");
 	Console()->Register("dump_antibot", "", CFGFLAG_SERVER, ConDumpAntibot, this, "Dumps the antibot status");
