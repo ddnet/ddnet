@@ -105,6 +105,14 @@ void CGameContext::Construct(int Resetting)
 
 	if(Resetting == NO_RESET)
 	{
+		for(auto &pSavedTee : m_apSavedTees)
+			pSavedTee = nullptr;
+
+		for(auto &pSavedTeam : m_apSavedTeams)
+			pSavedTeam = nullptr;
+
+		std::fill(std::begin(m_aTeamMapping), std::end(m_aTeamMapping), -1);
+
 		m_NonEmptySince = 0;
 		m_pVoteOptionHeap = new CHeap();
 	}
@@ -119,7 +127,15 @@ void CGameContext::Destruct(int Resetting)
 		delete pPlayer;
 
 	if(Resetting == NO_RESET)
+	{
+		for(auto &pSavedTee : m_apSavedTees)
+			delete pSavedTee;
+
+		for(auto &pSavedTeam : m_apSavedTeams)
+			delete pSavedTeam;
+
 		delete m_pVoteOptionHeap;
+	}
 
 	if(m_pScore)
 	{
@@ -1710,6 +1726,14 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 	delete m_apPlayers[ClientId];
 	m_apPlayers[ClientId] = 0;
 
+	delete m_apSavedTeams[ClientId];
+	m_apSavedTeams[ClientId] = nullptr;
+
+	delete m_apSavedTees[ClientId];
+	m_apSavedTees[ClientId] = nullptr;
+
+	m_aTeamMapping[ClientId] = -1;
+
 	m_VoteUpdate = true;
 
 	// update spectator modes
@@ -3194,6 +3218,30 @@ void CGameContext::ConSetTeamAll(IConsole::IResult *pResult, void *pUserData)
 			pSelf->m_pController->DoTeamChange(pPlayer, Team, false);
 }
 
+void CGameContext::ConHotReload(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!pSelf->GetPlayerChar(i))
+			continue;
+
+		// Save the tee individually
+		pSelf->m_apSavedTees[i] = new CSaveTee();
+		pSelf->m_apSavedTees[i]->Save(pSelf->GetPlayerChar(i), false);
+
+		// Save the team state
+		pSelf->m_aTeamMapping[i] = pSelf->GetDDRaceTeam(i);
+
+		if(pSelf->m_apSavedTeams[pSelf->m_aTeamMapping[i]])
+			continue;
+
+		pSelf->m_apSavedTeams[pSelf->m_aTeamMapping[i]] = new CSaveTeam();
+		pSelf->m_apSavedTeams[pSelf->m_aTeamMapping[i]]->Save(pSelf, pSelf->m_aTeamMapping[i], true, true);
+	}
+	pSelf->Server()->ReloadMap();
+}
+
 void CGameContext::ConAddVote(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -3552,6 +3600,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("say", "r[message]", CFGFLAG_SERVER, ConSay, this, "Say in chat");
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
 	Console()->Register("set_team_all", "i[team-id]", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
+	Console()->Register("hot_reload", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConHotReload, this, "Reload the map while preserving the state of tees and teams");
 
 	Console()->Register("add_vote", "s[name] r[command]", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
 	Console()->Register("remove_vote", "r[name]", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");

@@ -2551,6 +2551,11 @@ void CServer::ChangeMap(const char *pMap)
 	m_MapReload = str_comp(Config()->m_SvMap, m_aCurrentMap) != 0;
 }
 
+void CServer::ReloadMap()
+{
+	m_MapReload = true;
+}
+
 int CServer::LoadMap(const char *pMapName)
 {
 	m_MapReload = false;
