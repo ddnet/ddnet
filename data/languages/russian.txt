@@ -294,9 +294,6 @@ Player
 Player country:
 == Страна игрока:
 
-Player options
-== Опции игрока
-
 Players
 == Игроки
 
@@ -749,9 +746,6 @@ Fetch Info
 
 Connect Dummy
 == Подключить дамми
-
-Reload
-== Перезагрузить
 
 Deactivate
 == Выключить
@@ -1362,9 +1356,6 @@ Show health, shields and ammo
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== Показывать ид. игроков
-
 Show DDRace HUD
 == Показывать DDRace HUD
 
@@ -1887,3 +1878,54 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping/ru
+
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
+Show client IDs (scoreboard, chat, spectator)
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
+== 

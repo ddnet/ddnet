@@ -280,9 +280,6 @@ Player
 Player country:
 == Pelaajan maa:
 
-Player options
-== Pelaajavalinnat
-
 Players
 == Pelaajat
 
@@ -708,9 +705,6 @@ Kill
 
 Pause
 == Pysäytä
-
-Reload
-== Päivitä
 
 Deactivate
 == Deaktivoi
@@ -1634,9 +1628,6 @@ Show local time always
 DDRace HUD
 == DDrace-HUD
 
-Show client IDs in scoreboard
-== Näytä asiakas-ID:t pistetaulukossa
-
 Show DDRace HUD
 == Näytä DDRace-HUD
 
@@ -1832,6 +1823,15 @@ Loading sound files
 Moved ingame
 == Liikui pelissä
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
 [Spectating]
 Following %s
 == 
@@ -1842,13 +1842,55 @@ Following %s
 Example of usage
 == 
 
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
 Converse
 == 
 
 Tee
 == 
 
+Show client IDs (scoreboard, chat, spectator)
+== 
+
 Show only chat messages from team members
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 
 
 Round %d/%d

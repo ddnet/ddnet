@@ -277,9 +277,6 @@ Player
 Player country:
 == Држава играча
 
-Player options
-== Подешавања играча
-
 Players
 == Играчи
 
@@ -683,9 +680,6 @@ Kill
 
 Pause
 == Пауза
-
-Reload
-== Освежи
 
 Deactivate
 == Деактивирај
@@ -1263,9 +1257,6 @@ Show health, shields and ammo
 DDRace HUD
 == DDRace Приказ
 
-Show client IDs in scoreboard
-== Прикажи идентитете на табли резултата
-
 Show DDRace HUD
 == Прикажи DDRace Приказ
 
@@ -1422,7 +1413,16 @@ Could not initialize the given graphics backend, reverting to the default backen
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
 == 
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
 Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Could not connect dummy
 == 
 
 Error playing demo
@@ -1703,6 +1703,12 @@ Unable to delete the demo '%s'
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
 Loading…
 == 
 
@@ -1764,6 +1770,9 @@ Info Messages
 == 
 
 Show local time always
+== 
+
+Show client IDs (scoreboard, chat, spectator)
 == 
 
 Always show chat
@@ -1848,6 +1857,39 @@ Entities background color
 == 
 
 Unregister protocol and file extensions
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 
 
 Open the directory to add custom assets
