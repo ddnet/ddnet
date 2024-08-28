@@ -52,10 +52,12 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	MainView.HSplitBottom(40.0f, &MainView, &BottomView);
 	BottomView.HSplitTop(20.f, 0, &BottomView);
 
-	CUIRect QuickSearch, Buttons;
+	CUIRect QuickSearch, DirectoryButton, Buttons;
 	CUIRect ButtonLeft, ButtonMiddle, ButtonRight;
 
-	BottomView.VSplitMid(&QuickSearch, &Buttons);
+	BottomView.VSplitMid(&QuickSearch, &Buttons, 10.0f);
+	QuickSearch.VSplitLeft(240.0f, &QuickSearch, &DirectoryButton);
+	QuickSearch.VSplitRight(10.0f, &QuickSearch, nullptr);
 
 	const float ButtonSize = Buttons.w / 3;
 	Buttons.VSplitLeft(ButtonSize, &ButtonLeft, &Buttons);
@@ -299,6 +301,16 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		if(Ui()->DoClearableEditBox(&s_SkinFilterInput, &QuickSearch, 14.0f))
 			m_SkinListNeedsUpdate = true;
 	}
+
+	static CButtonContainer s_DirectoryButton;
+	if(DoButton_Menu(&s_DirectoryButton, Localize("Skins directory"), 0, &DirectoryButton))
+	{
+		char aBuf[128 + IO_MAX_PATH_LENGTH];
+		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "skins7", aBuf, sizeof(aBuf));
+		Storage()->CreateFolder("skins7", IStorage::TYPE_SAVE);
+		Client()->ViewFile(aBuf);
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButton, &DirectoryButton, Localize("Open the directory to add custom skins"));
 }
 
 void CMenus::PopupConfirmDeleteSkin7()
