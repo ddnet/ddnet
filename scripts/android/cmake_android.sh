@@ -7,8 +7,6 @@ export MAKEFLAGS
 
 ANDROID_NDK_VERSION="$(cd "$ANDROID_HOME/ndk" && find . -maxdepth 1 | sort -n | tail -1)"
 ANDROID_NDK_VERSION="${ANDROID_NDK_VERSION:2}"
-# ANDROID_NDK_VERSION must be exported for build.sh step
-export ANDROID_NDK_VERSION
 # ANDROID_NDK_HOME must be exported for cargo-ndk
 export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
 

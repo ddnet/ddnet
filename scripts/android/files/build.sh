@@ -45,7 +45,6 @@ sed -i "s/TW_KEY_NAME/${TW_KEY_NAME_ESCAPED}/g" build.gradle
 sed -i "s/TW_KEY_PW/${TW_KEY_PW_ESCAPED}/g" build.gradle
 sed -i "s/TW_KEY_ALIAS/${TW_KEY_ALIAS_ESCAPED}/g" build.gradle
 
-sed -i "s/TW_NDK_VERSION/${ANDROID_NDK_VERSION}/g" build.gradle
 sed -i "s/TW_VERSION_CODE/${TW_VERSION_CODE}/g" build.gradle
 sed -i "s/TW_VERSION_NAME/${TW_VERSION_NAME}/g" build.gradle
 
