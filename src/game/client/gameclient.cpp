@@ -678,6 +678,8 @@ void CGameClient::UpdatePositions()
 	if(!m_MultiViewActivated && m_MultiView.m_IsInit)
 		ResetMultiView();
 
+	UpdateSpectatorCursor();
+
 	UpdateRenderedCharacters();
 }
 
@@ -1790,6 +1792,11 @@ void CGameClient::OnNewSnapshot()
 				else
 					m_aSwitchStateTeam[g_Config.m_ClDummy] = -1;
 				GotSwitchStateTeam = true;
+			}
+			else if(Item.m_Type == NETOBJTYPE_SPECCURSOR)
+			{
+				m_Snap.m_pSpecCursor = (const CNetObj_SpecCursor *)Item.m_pData;
+				m_Snap.m_pPrevSpecCursor = (const CNetObj_SpecCursor *)Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_SPECCURSOR, Item.m_Id);
 			}
 		}
 	}
@@ -2943,6 +2950,55 @@ void CGameClient::UpdatePrediction()
 		m_GameWorld.NetObjAdd(EntData.m_Item.m_Id, EntData.m_Item.m_Type, EntData.m_Item.m_pData, EntData.m_pDataEx);
 
 	m_GameWorld.NetObjEnd();
+}
+
+void CGameClient::UpdateSpectatorCursor()
+{
+	if(m_Snap.m_pSpecCursor)
+	{
+		const float IntraTickSincePrev = Client()->IntraGameTickSincePrev(g_Config.m_ClDummy);
+
+		// Decode previous cursor position from current snapshot
+		const int TargetX = m_Snap.m_pSpecCursor->m_TargetX;
+		const int TargetY = m_Snap.m_pSpecCursor->m_TargetY;
+
+		const int PrevTargetX = TargetX + m_Snap.m_pSpecCursor->m_DeltaPrevTargetX;
+		const int PrevTargetY = TargetY + m_Snap.m_pSpecCursor->m_DeltaPrevTargetY;
+
+		int PrevPrevTargetX, PrevPrevTargetY;
+		int PrevPrevPrevTargetX, PrevPrevPrevTargetY;
+
+		if(m_Snap.m_pPrevSpecCursor)
+		{
+			PrevPrevTargetX = m_Snap.m_pPrevSpecCursor->m_TargetX;
+			PrevPrevTargetY = m_Snap.m_pPrevSpecCursor->m_TargetY;
+			PrevPrevPrevTargetX = PrevPrevTargetX + m_Snap.m_pPrevSpecCursor->m_DeltaPrevTargetX;
+			PrevPrevPrevTargetY = PrevPrevTargetY + m_Snap.m_pPrevSpecCursor->m_DeltaPrevTargetY;
+		}
+		else
+		{
+			PrevPrevTargetX = PrevTargetX;
+			PrevPrevTargetY = PrevTargetY;
+			PrevPrevPrevTargetX = PrevTargetX;
+			PrevPrevPrevTargetY = PrevTargetX;
+		}
+
+		if(IntraTickSincePrev <= 1.0f)
+		{
+			float Intra = g_Config.m_ClSpecCursorInterp ? IntraTickSincePrev : 1.0f;
+			m_Snap.m_DisplayCursorPos = mix(vec2(PrevPrevPrevTargetX, PrevPrevPrevTargetY), vec2(PrevPrevTargetX, PrevPrevTargetY), Intra);
+		}
+		else if(IntraTickSincePrev <= 2.0f)
+		{
+			float Intra = g_Config.m_ClSpecCursorInterp ? IntraTickSincePrev - 1.0f : 1.0f;
+			m_Snap.m_DisplayCursorPos = mix(vec2(PrevPrevTargetX, PrevPrevTargetY), vec2(PrevTargetX, PrevTargetY), Intra);
+		}
+		else
+		{
+			float Intra = g_Config.m_ClSpecCursorInterp ? IntraTickSincePrev - 2.0f : 1.0f;
+			m_Snap.m_DisplayCursorPos = mix(vec2(PrevTargetX, PrevTargetY), vec2(TargetX, TargetY), Intra);
+		}
+	}
 }
 
 void CGameClient::UpdateRenderedCharacters()

@@ -1170,6 +1170,24 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 	}
 }
 
+void CCharacter::SnapSpecCursor(int SnappingClient)
+{
+	CNetObj_SpecCursor *pCursorInfo = static_cast<CNetObj_SpecCursor *>(Server()->SnapNewItem(NETOBJTYPE_SPECCURSOR, SnappingClient, sizeof(CNetObj_SpecCursor)));
+	if(pCursorInfo)
+	{
+		pCursorInfo->m_Weapon = GetActiveWeapon();
+
+		pCursorInfo->m_TargetX = m_Input.m_TargetX;
+		pCursorInfo->m_TargetY = m_Input.m_TargetY;
+
+		/*
+		 	ensure info density at SERVER_TICK_SPEED even if sv_high_bandwidth is 0
+		*/
+		pCursorInfo->m_DeltaPrevTargetX = m_PrevInput.m_TargetX - m_Input.m_TargetX;
+		pCursorInfo->m_DeltaPrevTargetY = m_PrevInput.m_TargetY - m_Input.m_TargetY;
+	}
+}
+
 bool CCharacter::CanSnapCharacter(int SnappingClient)
 {
 	if(SnappingClient == SERVER_DEMO_CLIENT)

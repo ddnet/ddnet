@@ -378,6 +378,15 @@ Objects = [
 	NetEventEx("MapSoundWorld:Common", "map-sound-world@netevent.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),
+
+	# Spectating cursor
+	NetObjectEx("SpecCursor", "spec-cursor@netobj.ddnet.org", [
+		NetIntAny("m_Weapon"),
+		NetIntAny("m_TargetX"),
+		NetIntAny("m_TargetY"),
+		NetIntAny("m_DeltaPrevTargetX"),
+		NetIntAny("m_DeltaPrevTargetY"),
+	]),
 ]
 
 Messages = [

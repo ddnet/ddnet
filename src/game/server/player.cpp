@@ -410,6 +410,29 @@ void CPlayer::Snap(int SnappingClient)
 		}
 	}
 
+	if(m_ClientId == SnappingClient && !Server()->IsSixup(SnappingClient))
+	{
+		/*
+			Snap spectator cursors for local players by default.
+		 	The information is not visible to local player unless they recorded demo, which the spectator cursor will act as local player's cursor.
+		 */
+		CPlayer *pCursorOwner = this;
+
+		if(m_Team == TEAM_SPECTATORS || IsPaused())
+		{
+			pCursorOwner = m_SpectatorId != SPEC_FREEVIEW ? GameServer()->m_apPlayers[m_SpectatorId] : NULL;
+		}
+
+		if(pCursorOwner)
+		{
+			CCharacter *pCursorOwnerChar = pCursorOwner->GetCharacter();
+			if(pCursorOwnerChar && pCursorOwnerChar->IsAlive())
+			{
+				pCursorOwnerChar->SnapSpecCursor(m_ClientId);
+			}
+		}
+	}
+
 	CNetObj_DDNetPlayer *pDDNetPlayer = Server()->SnapNewItem<CNetObj_DDNetPlayer>(id);
 	if(!pDDNetPlayer)
 		return;

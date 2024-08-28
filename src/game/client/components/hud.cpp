@@ -585,16 +585,35 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::RenderCursor()
 {
-	if(!m_pClient->m_Snap.m_pLocalCharacter || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	int CurWeapon;
+	vec2 TargetPos;
+
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_pLocalCharacter)
+	{
+		// render local cursor
+		CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
+		TargetPos = m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy];
+	}
+	else if(g_Config.m_ClSpecCursor && m_pClient->m_Snap.m_pSpecCursor && m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
+	{
+		// render spec cursor
+		CurWeapon = m_pClient->m_Snap.m_pSpecCursor->m_Weapon % NUM_WEAPONS;
+		TargetPos = m_pClient->m_Snap.m_SpecInfo.m_Position + m_pClient->m_Snap.m_DisplayCursorPos;
+	}
+	else if(g_Config.m_ClSpecCursorDemo && m_pClient->m_Snap.m_pSpecCursor && Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_pLocalCharacter)
+	{
+		CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
+		TargetPos = m_pClient->m_LocalCharacterPos + m_pClient->m_Snap.m_DisplayCursorPos;
+	}
+	else
+	{
 		return;
+	}
 
 	RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
-
-	// render cursor
-	int CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].y);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y);
 }
 
 void CHud::PrepareAmmoHealthAndArmorQuads()

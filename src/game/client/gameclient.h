@@ -313,6 +313,8 @@ public:
 		const CNetObj_PlayerInfo *m_pLocalInfo;
 		const CNetObj_SpectatorInfo *m_pSpectatorInfo;
 		const CNetObj_SpectatorInfo *m_pPrevSpectatorInfo;
+		const CNetObj_SpecCursor *m_pSpecCursor;
+		const CNetObj_SpecCursor *m_pPrevSpecCursor;
 		const CNetObj_Flag *m_apFlags[2];
 		const CNetObj_GameInfo *m_pGameInfoObj;
 		const CNetObj_GameData *m_pGameDataObj;
@@ -337,6 +339,9 @@ public:
 			bool m_UsePosition;
 			vec2 m_Position;
 		} m_SpecInfo;
+
+		// cursor data
+		vec2 m_DisplayCursorPos;
 
 		//
 		struct CCharacterInfo
@@ -794,6 +799,7 @@ private:
 	int m_aShowOthers[NUM_DUMMIES];
 
 	void UpdatePrediction();
+	void UpdateSpectatorCursor();
 	void UpdateRenderedCharacters();
 
 	int m_aLastUpdateTick[MAX_CLIENTS] = {0};
