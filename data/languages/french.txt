@@ -302,9 +302,6 @@ Player
 Player country:
 == Origine des Tees:
 
-Player options
-== Options des joueurs
-
 Players
 == Joueurs
 
@@ -609,9 +606,6 @@ AntiPing: predict other players
 
 Are you sure that you want to disconnect your dummy?
 == Êtes vous sûrs de vouloir déconnecter votre dummy ?
-
-Reload
-== Recharger
 
 Server best:
 == Meilleur score du serveur
@@ -1390,9 +1384,6 @@ Name Plate
 Hook Collisions
 == Collisions du grappin
 
-Show client IDs in scoreboard
-== Afficher les IDs des clients dans le tableau des scores
-
 Hook collision line width
 == Largeur de la ligne de collision du grappin
 
@@ -1874,11 +1865,62 @@ Entities background color
 Moved ingame
 == Déplacé en jeu
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
 [Spectating]
 Following %s
 == 
 
 Example of usage
+== 
+
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
+Show client IDs (scoreboard, chat, spectator)
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 
 
 Round %d/%d

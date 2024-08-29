@@ -343,9 +343,6 @@ HUD
 Player country:
 == 玩家国家 / 地区：
 
-Player options
-== 玩家选项
-
 Players
 == 玩家
 
@@ -831,9 +828,6 @@ Show DDNet map finishes in server browser
 
 transmits your player name to info.ddnet.org
 == 将会发送你的玩家昵称到 info.ddnet.org
-
-Reload
-== 刷新
 
 Enable replays
 == 启用短时回放
@@ -1390,9 +1384,6 @@ Show health, shields and ammo
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== 显示客户端 IDs （计分板中）
-
 Show DDRace HUD
 == 显示 DDRace HUD
 
@@ -1915,3 +1906,54 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/index.php?title=Mapping/zh&variant=zh-hans
+
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
+Show client IDs (scoreboard, chat, spectator)
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
+== 

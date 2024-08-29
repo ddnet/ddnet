@@ -287,9 +287,6 @@ Play background music
 Player
 == Oyuncu
 
-Player options
-== Oyuncu ayarları
-
 Players
 == Oyuncular
 
@@ -664,9 +661,6 @@ Connecting dummy
 
 Connect Dummy
 == Dummy Katıl
-
-Reload
-== Yenile
 
 Deactivate
 == Devre dışı bırak
@@ -1463,9 +1457,6 @@ Show health, shields and ammo
 DDRace HUD
 == DDRace arayüzü
 
-Show client IDs in scoreboard
-== Skor tablosunda ki istemci ID'lerini göster
-
 Show DDRace HUD
 == DDRace arayüzünü göster
 
@@ -1883,3 +1874,54 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping/tr
+
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
+Show client IDs (scoreboard, chat, spectator)
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
+== 

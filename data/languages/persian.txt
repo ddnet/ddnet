@@ -519,9 +519,6 @@ Kill
 Pause
 == ﺚﮑﻣ ﺖﻟﺎﺣ
 
-Player options
-== ﻦﮑﯾﺯﺎﺑ ﺕﺎﻤﯿﻈﻨﺗ
-
 Player
 == ﻦﮑﯾﺯﺎﺑ
 
@@ -542,9 +539,6 @@ Vote command:
 
 Time
 == ﻥﺎﻣﺯ
-
-Reload
-== ﻩﺭﺎﺑﻭﺩ ﯼﺮﯿﮔﺭﺎﺑ
 
 Deactivate
 == ﻥﺩﺮﮐ ﻝﺎﻌﻓﺮﯿﻏ
@@ -1225,9 +1219,6 @@ Show votes window after voting
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== ﺯﺎﯿﺘﻣﺍ ﯼﻮﻠﺑﺎﺗ ﺭﺩ ﺖﻨﯾﻼﮐ ID ﺶﯾﺎﻤﻧ
-
 Show DDRace HUD
 == DDRace HUD ﺶﯾﺎﻤﻧ
 
@@ -1518,7 +1509,16 @@ Could not initialize the given graphics backend, reverting to the default backen
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
 == 
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
 Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Could not connect dummy
 == 
 
 Error playing demo
@@ -1754,6 +1754,12 @@ Delete folder
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
 Loading…
 == 
 
@@ -1785,6 +1791,9 @@ Info Messages
 == 
 
 Show local time always
+== 
+
+Show client IDs (scoreboard, chat, spectator)
 == 
 
 Always show chat
@@ -1839,6 +1848,39 @@ Entities background color
 == 
 
 Unregister protocol and file extensions
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 
 
 Round %d/%d
