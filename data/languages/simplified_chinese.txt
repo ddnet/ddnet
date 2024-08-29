@@ -1539,7 +1539,7 @@ Failed to swap framebuffers. Try to update your GPU drivers.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 未知错误。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将“gfx_backend OpenGL”修改为“gfx_backend Vulkan”（若没有前者则可直接输入后者）再重试。
+== 未知错误。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将 “gfx_backend” 设置为 “gfx_backend OpenGL” 或 “gfx_backend Vulkan” 再重试。
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
@@ -1908,52 +1908,52 @@ https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/index.php?title=Mapping/zh&variant=zh-hans
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== 无法解析连接地址 '%s'。检查本地控制台以获取详情。
 
 Connect address error
-== 
+== 连接地址错误
 
 Could not connect dummy
-== 
+== 无法连接分身
 
 Dummy is not allowed on this server
-== 
+== 此服务器禁止使用分身
 
 Please wait…
-== 
+== 请稍等…
 
 Show client IDs (scoreboard, chat, spectator)
-== 
+== 显示客户端 ID（计分板、聊天、观战者）
 
 Normal:
-== 
+== 正常：
 
 Team:
-== 
+== 队伍：
 
 Dummy settings
-== 
+== 分身设置
 
 Toggle to edit your dummy settings
-== 
+== 切换以编辑分身设置
 
 Randomize
-== 
+== 随机
 
 Are you sure that you want to delete '%s'?
-== 
+== 你确定要删除'%s'吗？
 
 Delete skin
-== 
+== 删除皮肤
 
 Basic
-== 
+== 基本
 
 Custom
-== 
+== 自定义
 
 Unable to delete skin
-== 
+== 无法删除皮肤
 
 Customize
-== 
+== 自定义
