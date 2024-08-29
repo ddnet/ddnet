@@ -18,7 +18,7 @@
 #include "menus.h"
 #include "skins7.h"
 
-const char *const CSkins7::ms_apSkinPartNames[protocol7::NUM_SKINPARTS] = {"body", "marking", "decoration", "hands", "feet", "eyes"}; /* Localize("body","skins");Localize("marking","skins");Localize("decoration","skins");Localize("hands","skins");Localize("feet","skins");Localize("eyes","skins"); */
+const char *const CSkins7::ms_apSkinPartNames[protocol7::NUM_SKINPARTS] = {"body", "marking", "decoration", "hands", "feet", "eyes"};
 const char *const CSkins7::ms_apColorComponents[NUM_COLOR_COMPONENTS] = {"hue", "sat", "lgt", "alp"};
 
 char *CSkins7::ms_apSkinVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
@@ -525,7 +525,7 @@ bool CSkins7::ValidateSkinParts(char *apPartNames[protocol7::NUM_SKINPARTS], int
 bool CSkins7::SaveSkinfile(const char *pSaveSkinName, int Dummy)
 {
 	char aBuf[IO_MAX_PATH_LENGTH];
-	str_format(aBuf, sizeof(aBuf), "skins/%s.json", pSaveSkinName);
+	str_format(aBuf, sizeof(aBuf), SKINS_DIR "/%s.json", pSaveSkinName);
 	IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!File)
 		return false;
@@ -547,7 +547,7 @@ bool CSkins7::SaveSkinfile(const char *pSaveSkinName, int Dummy)
 			Writer.WriteAttribute("filename");
 			Writer.WriteStrValue(ms_apSkinVariables[Dummy][PartIndex]);
 
-			const bool CustomColors = *ms_apUCCVariables[PartIndex];
+			const bool CustomColors = *ms_apUCCVariables[Dummy][PartIndex];
 			Writer.WriteAttribute("custom_colors");
 			Writer.WriteBoolValue(CustomColors);
 

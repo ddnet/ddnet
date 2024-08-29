@@ -103,6 +103,28 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	TrySetRescue(RESCUEMODE_MANUAL);
 	Server()->StartRecord(m_pPlayer->GetCid());
 
+	int Team = GameServer()->m_aTeamMapping[m_pPlayer->GetCid()];
+
+	if(Team != -1)
+	{
+		GameServer()->m_pController->Teams().SetForceCharacterTeam(m_pPlayer->GetCid(), Team);
+		GameServer()->m_aTeamMapping[m_pPlayer->GetCid()] = -1;
+
+		if(GameServer()->m_apSavedTeams[Team])
+		{
+			GameServer()->m_apSavedTeams[Team]->Load(GameServer(), Team, true, true);
+			delete GameServer()->m_apSavedTeams[Team];
+			GameServer()->m_apSavedTeams[Team] = nullptr;
+		}
+
+		if(GameServer()->m_apSavedTees[m_pPlayer->GetCid()])
+		{
+			GameServer()->m_apSavedTees[m_pPlayer->GetCid()]->Load(m_pPlayer->GetCharacter(), Team);
+			delete GameServer()->m_apSavedTees[m_pPlayer->GetCid()];
+			GameServer()->m_apSavedTees[m_pPlayer->GetCid()] = nullptr;
+		}
+	}
+
 	return true;
 }
 

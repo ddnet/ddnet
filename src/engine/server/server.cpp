@@ -2341,7 +2341,7 @@ void CServer::UpdateRegisterServerInfo()
 	JsonWriter.WriteAttribute("map");
 	JsonWriter.BeginObject();
 	JsonWriter.WriteAttribute("name");
-	JsonWriter.WriteStrValue(m_aCurrentMap);
+	JsonWriter.WriteStrValue(GetMapName());
 	JsonWriter.WriteAttribute("sha256");
 	JsonWriter.WriteStrValue(aMapSha256);
 	JsonWriter.WriteAttribute("size");
@@ -2549,6 +2549,11 @@ void CServer::ChangeMap(const char *pMap)
 {
 	str_copy(Config()->m_SvMap, pMap);
 	m_MapReload = str_comp(Config()->m_SvMap, m_aCurrentMap) != 0;
+}
+
+void CServer::ReloadMap()
+{
+	m_MapReload = true;
 }
 
 int CServer::LoadMap(const char *pMapName)

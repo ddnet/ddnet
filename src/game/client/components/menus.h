@@ -445,7 +445,6 @@ protected:
 	void RenderMenubar(CUIRect Box, IClient::EClientState ClientState);
 	void RenderNews(CUIRect MainView);
 	static void ConchainBackgroundEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	void UpdateBackgroundEntities();
 	static void ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	void UpdateMusicState();
 
@@ -769,6 +768,14 @@ public:
 		bool HasFile() const { return m_aFilename[0]; }
 	};
 
+	enum
+	{
+		GHOST_SORT_NONE = -1,
+		GHOST_SORT_NAME,
+		GHOST_SORT_TIME,
+		GHOST_SORT_DATE,
+	};
+
 	std::vector<CGhostItem> m_vGhosts;
 
 	std::chrono::nanoseconds m_GhostPopulateStartTime{0};
@@ -777,6 +784,7 @@ public:
 	CGhostItem *GetOwnGhost();
 	void UpdateOwnGhost(CGhostItem Item);
 	void DeleteGhostItem(int Index);
+	void SortGhostlist();
 
 	bool CanDisplayWarning() const;
 
@@ -803,6 +811,7 @@ public:
 		POPUP_QUIT,
 		POPUP_RESTART,
 		POPUP_WARNING,
+		POPUP_SAVE_SKIN,
 
 		// demo player states
 		DEMOPLAYER_NONE = 0,

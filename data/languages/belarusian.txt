@@ -282,9 +282,6 @@ Player
 Player country:
 == Краіна гульца:
 
-Player options
-== Опцыі гульца
-
 Players
 == Гульцы
 
@@ -868,9 +865,6 @@ Loading ghost files
 Time
 == Час
 
-Reload
-== Перазагрузіць
-
 Deactivate
 == Выключыць
 
@@ -1166,9 +1160,6 @@ Show votes window after voting
 
 DDRace HUD
 == DDRace HUD
-
-Show client IDs in scoreboard
-== Паказваць ID кліента ў табло ачкоў
 
 Show DDRace HUD
 == Паказваць DDRace HUD
@@ -1706,6 +1697,7 @@ Regular background color
 Entities background color
 == Колер фону энтыты
 
+[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Адбылася памылка падчас выканання каманды запісу. Паспрабуйце абнавіць драйверы відэакарты.
 
@@ -1874,3 +1866,54 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
+
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
+Show client IDs (scoreboard, chat, spectator)
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
+== 

@@ -191,6 +191,26 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("player_color_feet", ConchainSpecialInfoupdate, this);
 	Console()->Chain("player_skin", ConchainSpecialInfoupdate, this);
 
+	Console()->Chain("player7_skin", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_skin_body", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_skin_marking", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_skin_decoration", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_skin_hands", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_skin_feet", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_skin_eyes", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_color_body", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_color_marking", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_color_decoration", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_color_hands", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_color_feet", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_color_eyes", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_use_custom_color_body", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_use_custom_color_marking", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_use_custom_color_decoration", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_use_custom_color_hands", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_use_custom_color_feet", ConchainSpecialInfoupdate, this);
+	Console()->Chain("player7_use_custom_color_eyes", ConchainSpecialInfoupdate, this);
+
 	Console()->Chain("dummy_name", ConchainSpecialDummyInfoupdate, this);
 	Console()->Chain("dummy_clan", ConchainSpecialDummyInfoupdate, this);
 	Console()->Chain("dummy_country", ConchainSpecialDummyInfoupdate, this);
@@ -198,6 +218,26 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("dummy_color_body", ConchainSpecialDummyInfoupdate, this);
 	Console()->Chain("dummy_color_feet", ConchainSpecialDummyInfoupdate, this);
 	Console()->Chain("dummy_skin", ConchainSpecialDummyInfoupdate, this);
+
+	Console()->Chain("dummy7_skin", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_skin_body", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_skin_marking", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_skin_decoration", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_skin_hands", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_skin_feet", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_skin_eyes", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_color_body", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_color_marking", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_color_decoration", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_color_hands", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_color_feet", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_color_eyes", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_use_custom_color_body", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_use_custom_color_marking", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_use_custom_color_decoration", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_use_custom_color_hands", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_use_custom_color_feet", ConchainSpecialDummyInfoupdate, this);
+	Console()->Chain("dummy7_use_custom_color_eyes", ConchainSpecialDummyInfoupdate, this);
 
 	Console()->Chain("cl_skin_download_url", ConchainRefreshSkins, this);
 	Console()->Chain("cl_skin_community_download_url", ConchainRefreshSkins, this);

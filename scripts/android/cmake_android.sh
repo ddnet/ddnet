@@ -7,8 +7,6 @@ export MAKEFLAGS
 
 ANDROID_NDK_VERSION="$(cd "$ANDROID_HOME/ndk" && find . -maxdepth 1 | sort -n | tail -1)"
 ANDROID_NDK_VERSION="${ANDROID_NDK_VERSION:2}"
-# ANDROID_NDK_VERSION must be exported for build.sh step
-export ANDROID_NDK_VERSION
 # ANDROID_NDK_HOME must be exported for cargo-ndk
 export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
 
@@ -197,6 +195,7 @@ cd "${BUILD_FOLDER}" || exit 1
 
 mkdir -p src/main
 mkdir -p src/main/res/values
+mkdir -p src/main/res/xml
 mkdir -p src/main/res/mipmap
 
 function copy_dummy_files() {
@@ -213,6 +212,7 @@ copy_dummy_files scripts/android/files/proguard-rules.pro proguard-rules.pro
 copy_dummy_files scripts/android/files/settings.gradle settings.gradle
 copy_dummy_files scripts/android/files/AndroidManifest.xml src/main/AndroidManifest.xml
 copy_dummy_files scripts/android/files/res/values/strings.xml src/main/res/values/strings.xml
+copy_dummy_files scripts/android/files/res/xml/shortcuts.xml src/main/res/xml/shortcuts.xml
 copy_dummy_files other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher.png
 copy_dummy_files other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher_round.png
 

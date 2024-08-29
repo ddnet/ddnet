@@ -30,7 +30,8 @@
 			android:name="org.ddnet.client.NativeMain"
 			android:exported="true"
 			android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-			android:screenOrientation="landscape">
+			android:screenOrientation="landscape"
+			android:launchMode="singleInstance">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
@@ -38,6 +39,9 @@
 			<meta-data
 				android:name="android.app.lib_name"
 				android:value="DDNet" />
+			<meta-data
+				android:name="android.app.shortcuts"
+				android:resource="@xml/shortcuts" />
 		</activity>
 	</application>
 </manifest>

@@ -96,6 +96,7 @@ public:
 				CreateFolder("mapres", TYPE_SAVE);
 				CreateFolder("downloadedmaps", TYPE_SAVE);
 				CreateFolder("skins", TYPE_SAVE);
+				CreateFolder("skins7", TYPE_SAVE);
 				CreateFolder("downloadedskins", TYPE_SAVE);
 				CreateFolder("themes", TYPE_SAVE);
 				CreateFolder("communityicons", TYPE_SAVE);

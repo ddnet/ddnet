@@ -175,12 +175,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		// increase/decrease speed
 		if(!Input()->ModifierIsPressed() && !Input()->ShiftIsPressed() && !Input()->AltIsPressed())
 		{
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
+			if(Input()->KeyPress(KEY_UP) || (m_MenuActive && Input()->KeyPress(KEY_MOUSE_WHEEL_UP)))
 			{
 				DemoPlayer()->AdjustSpeedIndex(+1);
 				UpdateLastSpeedChange();
 			}
-			else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY_DOWN))
+			else if(Input()->KeyPress(KEY_DOWN) || (m_MenuActive && Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN)))
 			{
 				DemoPlayer()->AdjustSpeedIndex(-1);
 				UpdateLastSpeedChange();

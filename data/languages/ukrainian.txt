@@ -1176,9 +1176,6 @@ Player country:
 Player info change cooldown
 == Затримка зміни інформації про гравця
 
-Player options
-== Налаштування гравців
-
 Players
 == Гравці
 
@@ -1245,9 +1242,6 @@ Regular background color
 [Ingame controller mode]
 Relative
 == Відносний
-
-Reload
-== Оновити
 
 Remote console
 == Віддалена консоль
@@ -1416,9 +1410,6 @@ Show chat
 
 Show clan above name plates
 == Показувати клан над ніками
-
-Show client IDs in scoreboard
-== Показувати ID клієнта в таблі
 
 Show DDNet map finishes in server browser
 == Показувати пройдені мапи DDNet у браузері серверів
@@ -1871,3 +1862,54 @@ Zoom in
 
 Zoom out
 == Віддалити
+
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
+Show client IDs (scoreboard, chat, spectator)
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
+== 

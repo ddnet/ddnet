@@ -52,10 +52,12 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	MainView.HSplitBottom(40.0f, &MainView, &BottomView);
 	BottomView.HSplitTop(20.f, 0, &BottomView);
 
-	CUIRect QuickSearch, Buttons;
+	CUIRect QuickSearch, DirectoryButton, Buttons;
 	CUIRect ButtonLeft, ButtonMiddle, ButtonRight;
 
-	BottomView.VSplitMid(&QuickSearch, &Buttons);
+	BottomView.VSplitMid(&QuickSearch, &Buttons, 10.0f);
+	QuickSearch.VSplitLeft(240.0f, &QuickSearch, &DirectoryButton);
+	QuickSearch.VSplitRight(10.0f, &QuickSearch, nullptr);
 
 	const float ButtonSize = Buttons.w / 3;
 	Buttons.VSplitLeft(ButtonSize, &ButtonLeft, &Buttons);
@@ -237,6 +239,14 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	// bottom buttons
 	if(s_CustomSkinMenu)
 	{
+		static CButtonContainer s_CustomSkinSaveButton;
+		if(DoButton_Menu(&s_CustomSkinSaveButton, Localize("Save"), 0, &ButtonLeft))
+		{
+			m_Popup = POPUP_SAVE_SKIN;
+			m_SkinNameInput.SelectAll();
+			Ui()->SetActiveItem(&m_SkinNameInput);
+		}
+
 		static CButtonContainer s_RandomizeSkinButton;
 		if(DoButton_Menu(&s_RandomizeSkinButton, Localize("Randomize"), 0, &ButtonMiddle))
 		{
@@ -251,7 +261,7 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		if(DoButton_Menu(&s_CustomSkinDeleteButton, Localize("Delete"), 0, &ButtonMiddle) || Ui()->ConsumeHotkey(CUi::HOTKEY_DELETE))
 		{
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete the skin '%s'?"), m_pSelectedSkin->m_aName);
+			str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete '%s'?"), m_pSelectedSkin->m_aName);
 			PopupConfirm(Localize("Delete skin"), aBuf, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDeleteSkin7);
 		}
 	}
@@ -291,6 +301,16 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		if(Ui()->DoClearableEditBox(&s_SkinFilterInput, &QuickSearch, 14.0f))
 			m_SkinListNeedsUpdate = true;
 	}
+
+	static CButtonContainer s_DirectoryButton;
+	if(DoButton_Menu(&s_DirectoryButton, Localize("Skins directory"), 0, &DirectoryButton))
+	{
+		char aBuf[128 + IO_MAX_PATH_LENGTH];
+		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "skins7", aBuf, sizeof(aBuf));
+		Storage()->CreateFolder("skins7", IStorage::TYPE_SAVE);
+		Client()->ViewFile(aBuf);
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButton, &DirectoryButton, Localize("Open the directory to add custom skins"));
 }
 
 void CMenus::PopupConfirmDeleteSkin7()
@@ -299,7 +319,7 @@ void CMenus::PopupConfirmDeleteSkin7()
 
 	if(!m_pClient->m_Skins7.RemoveSkin(m_pSelectedSkin))
 	{
-		PopupMessage(Localize("Error"), Localize("Unable to delete the skin"), Localize("Ok"));
+		PopupMessage(Localize("Error"), Localize("Unable to delete skin"), Localize("Ok"));
 		return;
 	}
 	m_pSelectedSkin = nullptr;

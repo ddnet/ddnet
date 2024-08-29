@@ -286,9 +286,6 @@ Player
 Player country:
 == Țara jucătorului:
 
-Player options
-== Opțiuni jucător
-
 Players
 == Jucători
 
@@ -561,7 +558,16 @@ Could not initialize the given graphics backend, reverting to the default backen
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
 == 
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
 Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Could not connect dummy
 == 
 
 Error playing demo
@@ -1106,6 +1112,12 @@ Are you sure that you want to disconnect?
 Connect Dummy
 == 
 
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
 Connecting dummy
 == 
 
@@ -1450,7 +1462,7 @@ Show votes window after voting
 DDRace HUD
 == 
 
-Show client IDs in scoreboard
+Show client IDs (scoreboard, chat, spectator)
 == 
 
 Show DDRace HUD
@@ -1699,9 +1711,6 @@ Regular background color
 Entities background color
 == 
 
-Reload
-== 
-
 Use current map as background
 == 
 
@@ -1736,6 +1745,39 @@ No updates available
 == 
 
 Check now
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 
 
 Emoticons
