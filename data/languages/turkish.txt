@@ -1876,52 +1876,52 @@ https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping/tr
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== '%s' Bağlantı adresi çözümlenemedi. Detaylar için yerel konsola bakın
 
 Connect address error
-== 
+== Bağlantı adresi hatası
 
 Could not connect dummy
-== 
+== Dummy bağlanamadı
 
 Dummy is not allowed on this server
-== 
+== Bu sunucuda dummy izin verilmiyor
 
 Please wait…
-== 
+== Lütfen bekleyin…
 
 Show client IDs (scoreboard, chat, spectator)
-== 
+== İstemci ID'sini göster (skor tablosu, sohbet, izleyici)
 
 Normal:
-== 
+== Normal:
 
 Team:
-== 
+== Takım:
 
 Dummy settings
-== 
+== Dummy ayarları
 
 Toggle to edit your dummy settings
-== 
+== Dummy ayarlarını düzenlemek için açın 
 
 Randomize
-== 
+== Rastgele
 
 Are you sure that you want to delete '%s'?
-== 
+== '%s' bunu silmek istediğine emin misin?
 
 Delete skin
-== 
+== Skini sil
 
 Basic
-== 
+== Basit
 
 Custom
-== 
+== Özel
 
 Unable to delete skin
-== 
+== Skin silinemiyor
 
 Customize
-== 
+== Özelleştir
