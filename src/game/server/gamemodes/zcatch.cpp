@@ -16,7 +16,9 @@
 CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
-	m_GameFlags = GAMEFLAG_FLAGS;
+	m_GameFlags = 0;
+	m_AllowSkinChange = false;
+
 	m_pGameType = "zCatch";
 }
 

@@ -269,6 +269,8 @@ public:
 	void SetGameState(EGameState GameState, int Timer = 0);
 	void StartMatch(bool RoundEnd);
 
+	bool m_AllowSkinChange = true;
+
 	// protected:
 public:
 	struct CGameInfo
@@ -335,6 +337,8 @@ public:
 		it is set to -1 if the game is currently not paused
 	*/
 	int64_t m_GamePauseStartTime;
+
+	bool IsSkinChangeAllowed() const { return m_AllowSkinChange; }
 };
 
 #endif

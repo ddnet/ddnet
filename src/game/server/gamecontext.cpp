@@ -1922,6 +1922,10 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 				pPlayer->m_LastChangeInfo + Server()->TickSpeed() * g_Config.m_SvInfoChangeDelay > Server()->Tick())
 				return 0;
 
+			// ddnet-insta
+			if(!m_pController->IsSkinChangeAllowed())
+				return 0;
+
 			pPlayer->m_LastChangeInfo = Server()->Tick();
 
 			CTeeInfo Info(pMsg->m_apSkinPartNames, pMsg->m_aUseCustomColors, pMsg->m_aSkinPartColors);
