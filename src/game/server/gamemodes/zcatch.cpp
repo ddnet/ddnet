@@ -2,6 +2,7 @@
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
+#include <game/generated/protocol7.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/flag.h>
@@ -41,7 +42,6 @@ void CGameControllerZcatch::Tick()
 		{
 			s_aBodyColors[pPlayer->GetCid()] = pPlayer->m_TeeInfos.m_ColorBody;
 			SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
-			dbg_msg("zcatch", "send skin change");
 		}
 	}
 }
@@ -55,8 +55,16 @@ void CGameControllerZcatch::SendSkinBodyColor7(int ClientId, int Color)
 	if(!pPlayer)
 		return;
 
+	// also update 0.6 just to be sure
 	pPlayer->m_TeeInfos.m_ColorBody = Color;
 	pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+
+	// 0.7
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	{
+		pPlayer->m_TeeInfos.m_aSkinPartColors[p] = Color;
+		pPlayer->m_TeeInfos.m_aUseCustomColors[p] = true;
+	}
 
 	protocol7::CNetMsg_Sv_SkinChange Msg;
 	Msg.m_ClientId = ClientId;
