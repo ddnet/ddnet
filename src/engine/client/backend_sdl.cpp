@@ -443,7 +443,9 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 #ifdef CONF_GLEW_HAS_CONTEXT_INIT
 		if(GLEW_OK != glewContextInit())
 #else
-		if(GLEW_OK != glewInit())
+		GLenum InitResult = glewInit();
+		const char *pVideoDriver = SDL_GetCurrentVideoDriver();
+		if(GLEW_OK != InitResult && pVideoDriver && !str_comp(pVideoDriver, "wayland") && GLEW_ERROR_NO_GLX_DISPLAY != InitResult)
 #endif
 			return false;
 
