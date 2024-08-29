@@ -9,10 +9,13 @@ public:
 	CGameControllerZcatch(class CGameContext *pGameServer);
 	~CGameControllerZcatch() override;
 
+	int m_aBodyColors[MAX_CLIENTS] = {0};
+
 	void OnCaught(class CPlayer *pVictim, class CPlayer *pKiller);
 
 	void Tick() override;
 	void Snap(int SnappingClient) override;
+	void OnPlayerConnect(CPlayer *pPlayer) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
