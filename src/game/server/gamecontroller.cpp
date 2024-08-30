@@ -530,6 +530,11 @@ void IGameController::StartRound()
 	str_format(aBuf, sizeof(aBuf), "start round type='%s' teamplay='%d'", m_pGameType, m_GameFlags & GAMEFLAG_TEAMS);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
+	OnRoundStart();
+}
+
+void IGameController::OnRoundStart() // ddnet-insta
+{
 	// only auto start round if we are in casual mode and there is no tournament running
 	// otherwise set infinite warmup and wait for !restart
 	// if(RoundEnd && (!g_Config.m_SvCasualRounds || g_Config.m_SvTournament))

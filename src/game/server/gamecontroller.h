@@ -311,6 +311,7 @@ public:
 	virtual void OnFlagReturn(class CFlag *pFlag); // ddnet-insta
 	virtual void OnFlagGrab(class CFlag *pFlag); // ddnet-insta
 	virtual void OnFlagCapture(class CFlag *pFlag, float Time); // ddnet-insta
+	virtual void OnRoundStart();
 
 	/*
 		Variable: m_GamePauseStartTime
