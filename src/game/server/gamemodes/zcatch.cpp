@@ -25,6 +25,26 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 		Color = 0;
 }
 
+void CGameControllerZcatch::OnRoundStart()
+{
+	CGameControllerInstagib::OnRoundStart();
+
+	int ActivePlayers = NumActivePlayers();
+	if(ActivePlayers < g_Config.m_SvZcatchMinPlayers && GameState() != EZcatchGameState::RELEASE_GAME)
+	{
+		SendChatTarget(-1, "Not enough players to start a round");
+		SetGameState(EZcatchGameState::WAITING_FOR_PLAYERS);
+	}
+
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		pPlayer->m_GotRespawnInfo = false;
+	}
+}
+
 CGameControllerZcatch::~CGameControllerZcatch() = default;
 
 void CGameControllerZcatch::Tick()
@@ -131,6 +151,21 @@ void CGameControllerZcatch::OnCaught(class CPlayer *pVictim, class CPlayer *pKil
 	if(pVictim->GetCid() == pKiller->GetCid())
 		return;
 
+	if(GameState() == EZcatchGameState::WAITING_FOR_PLAYERS)
+	{
+		if(!pKiller->m_GotRespawnInfo)
+			GameServer()->SendChatTarget(pKiller->GetCid(), "Kill respawned because there are not enough players.");
+		pKiller->m_GotRespawnInfo = true;
+		return;
+	}
+	if(GameState() == EZcatchGameState::RELEASE_GAME)
+	{
+		if(!pKiller->m_GotRespawnInfo)
+			GameServer()->SendChatTarget(pKiller->GetCid(), "Kill respawned because this is a release game.");
+		pKiller->m_GotRespawnInfo = true;
+		return;
+	}
+
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
@@ -203,19 +238,16 @@ void CGameControllerZcatch::CheckGameState()
 
 	if(ActivePlayers >= g_Config.m_SvZcatchMinPlayers && GameState() == EZcatchGameState::WAITING_FOR_PLAYERS)
 	{
+		SendChatTarget(-1, "Enough players connected. Starting game!");
 		SetGameState(EZcatchGameState::RUNNING);
 	}
-	// TODO: this should be in OnStartRound()
-	// else if(ActivePlayers < g_Config.m_SvZcatchMinPlayers && GameState() == EZcatchGameState::RELEASE_GAME)
-	// {
-	// 	SendChatTarget(-1, "Not enough players to start a round");
-	// 	SetGameState(EZcatchGameState::WAITING_FOR_PLAYERS);
-	// }
 }
 
 void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 {
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
+
+	CheckGameState();
 
 	pPlayer->m_TeeInfos.m_ColorBody = GetBodyColor(pPlayer->m_Spree);
 	pPlayer->m_TeeInfos.m_UseCustomColor = 1;

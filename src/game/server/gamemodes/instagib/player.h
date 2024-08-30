@@ -24,6 +24,7 @@ public:
 	void SetTeamRaw(int Team) { m_Team = Team; }
 	// dead players can not respawn
 	bool m_IsDead;
+	bool m_GotRespawnInfo = false;
 
 	/*******************************************************************
 	 * gCTF                                                            *
