@@ -80,5 +80,14 @@ public:
 	//
 	// needed for the wincheck in zcatch to get triggered on kill
 	int NumNonDeadActivePlayers();
+
+	// returns the client id of the player with the highest
+	// killing spree (active spree not high score)
+	// returns -1 if nobody made a kill since spawning
+	int GetHighestSpreeClientId();
+
+	// get the lowest client id that has a tee in the world
+	// returns -1 if no player is alive
+	int GetFirstAlivePlayerId();
 };
 #endif // GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H

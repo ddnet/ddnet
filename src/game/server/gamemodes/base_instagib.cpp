@@ -601,3 +601,28 @@ int CGameControllerInstagib::NumNonDeadActivePlayers()
 			Alive++;
 	return Alive;
 }
+
+int CGameControllerInstagib::GetHighestSpreeClientId()
+{
+	int ClientId = -1;
+	int Spree = 0;
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(pPlayer->m_Spree <= Spree)
+			continue;
+
+		ClientId = pPlayer->GetCid();
+		Spree = pPlayer->m_Spree;
+	}
+	return ClientId;
+}
+
+int CGameControllerInstagib::GetFirstAlivePlayerId()
+{
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer || pPlayer->GetCharacter())
+			return pPlayer->GetCid();
+	return -1;
+}

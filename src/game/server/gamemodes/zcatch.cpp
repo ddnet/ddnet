@@ -317,6 +317,19 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 {
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
 
+	if(CatchGameState() == ECatchGameState::RUNNING)
+	{
+		int KillerId = GetHighestSpreeClientId();
+		if(KillerId == -1)
+			KillerId = GetFirstAlivePlayerId();
+		if(KillerId != -1)
+		{
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "You will join when '%s' dies.", Server()->ClientName(KillerId));
+			SendChatTarget(pPlayer->GetCid(), aBuf);
+			pPlayer->m_IsDead = true;
+		}
+	}
 	CheckGameState();
 
 	pPlayer->m_TeeInfos.m_ColorBody = GetBodyColor(pPlayer->m_Spree);
