@@ -36,6 +36,8 @@ MACRO_CONFIG_INT(SvAnticamper, sv_anticamper, 0, 0, 1, CFGFLAG_SERVER, "Toggle t
 MACRO_CONFIG_INT(SvAnticamperFreeze, sv_anticamper_freeze, 7, 0, 15, CFGFLAG_SERVER, "If a player should freeze on camping (and how long) or die")
 MACRO_CONFIG_INT(SvAnticamperTime, sv_anticamper_time, 10, 5, 120, CFGFLAG_SERVER, "How long to wait till the player dies/freezes")
 MACRO_CONFIG_INT(SvAnticamperRange, sv_anticamper_range, 200, 0, 1000, CFGFLAG_SERVER, "Distance how far away the player must move to escape anticamper")
+MACRO_CONFIG_INT(SvZcatchMinPlayers, sv_zcatch_min_players, 3, 0, MAX_CLIENTS, CFGFLAG_SERVER, "How many active players (not spectators) are required to start a round")
+
 /*
 
 sv_chat_ratelimit_long_messages

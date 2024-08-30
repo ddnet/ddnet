@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
@@ -544,4 +545,31 @@ void CGameControllerInstagib::Anticamper()
 			}
 		}
 	}
+}
+
+int CGameControllerInstagib::NumActivePlayers()
+{
+	int Active = 0;
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer && (pPlayer->GetTeam() != TEAM_SPECTATORS || pPlayer->m_IsDead))
+			Active++;
+	return Active;
+}
+
+int CGameControllerInstagib::NumAlivePlayers()
+{
+	int Alive = 0;
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer && pPlayer->GetCharacter())
+			Alive++;
+	return Alive;
+}
+
+int CGameControllerInstagib::NumNonDeadActivePlayers()
+{
+	int Alive = 0;
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer && !pPlayer->m_IsDead && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			Alive++;
+	return Alive;
 }

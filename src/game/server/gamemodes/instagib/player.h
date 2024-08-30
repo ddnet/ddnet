@@ -22,6 +22,7 @@ public:
 	// Will be -1 when the player is alive
 	int m_KillerId = -1;
 	void SetTeamRaw(int Team) { m_Team = Team; }
+	// dead players can not respawn
 	bool m_IsDead;
 
 	/*******************************************************************

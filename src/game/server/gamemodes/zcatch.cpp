@@ -171,6 +171,8 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 		pPlayer->SetTeamRaw(TEAM_RED);
 	}
 
+	DoWincheckMatch();
+
 	return 0;
 }
 
@@ -188,6 +190,29 @@ bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorRea
 	return true;
 }
 
+void CGameControllerZcatch::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
+{
+	CGameControllerInstagib::DoTeamChange(pPlayer, Team, DoChatMsg);
+
+	CheckGameState();
+}
+
+void CGameControllerZcatch::CheckGameState()
+{
+	int ActivePlayers = NumActivePlayers();
+
+	if(ActivePlayers >= g_Config.m_SvZcatchMinPlayers && GameState() == EZcatchGameState::WAITING_FOR_PLAYERS)
+	{
+		SetGameState(EZcatchGameState::RUNNING);
+	}
+	// TODO: this should be in OnStartRound()
+	// else if(ActivePlayers < g_Config.m_SvZcatchMinPlayers && GameState() == EZcatchGameState::RELEASE_GAME)
+	// {
+	// 	SendChatTarget(-1, "Not enough players to start a round");
+	// 	SetGameState(EZcatchGameState::WAITING_FOR_PLAYERS);
+	// }
+}
+
 void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 {
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
@@ -197,11 +222,39 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 
 	m_aBodyColors[pPlayer->GetCid()] = pPlayer->m_TeeInfos.m_ColorBody;
 	SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
+
+	if(GameState() == EZcatchGameState::WAITING_FOR_PLAYERS)
+		SendChatTarget(pPlayer->GetCid(), "Waiting for more players to start the round.");
+	else if(GameState() == EZcatchGameState::RELEASE_GAME)
+		SendChatTarget(pPlayer->GetCid(), "This is a release game.");
 }
 
 bool CGameControllerZcatch::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
 	CGameControllerInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
+	return false;
+}
+
+bool CGameControllerZcatch::DoWincheckMatch()
+{
+	if(GameState() == EZcatchGameState::RUNNING && NumNonDeadActivePlayers() <= 1)
+	{
+		EndMatch();
+
+		for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+
+			// only release players that actually died
+			// not all spectators
+			if(pPlayer->m_IsDead)
+				pPlayer->SetTeamRaw(TEAM_RED);
+			pPlayer->m_IsDead = false;
+		}
+
+		return true;
+	}
 	return false;
 }
 

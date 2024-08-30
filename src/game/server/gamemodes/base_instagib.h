@@ -61,7 +61,23 @@ public:
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) override;
 
-	//Anticamper
+	// Anticamper
 	void Anticamper();
+
+	// generic helpers
+
+	// returns the amount of tee's that are not spectators
+	int NumActivePlayers();
+
+	// returns the amount of players that currently have a tee in the world
+	int NumAlivePlayers();
+
+	// different than NumAlivePlayers()
+	// it does check m_IsDead which is set in OnCharacterDeath
+	// instead of checking the character which only gets destroyed
+	// after OnCharacterDeath
+	//
+	// needed for the wincheck in zcatch to get triggered on kill
+	int NumNonDeadActivePlayers();
 };
 #endif // GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H
