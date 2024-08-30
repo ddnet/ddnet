@@ -30,15 +30,15 @@ public:
 
 	void SendSkinBodyColor7(int ClientId, int Color);
 
-	enum class EZcatchGameState
+	enum class ECatchGameState
 	{
 		WAITING_FOR_PLAYERS,
 		RELEASE_GAME,
 		RUNNING,
 	};
-	EZcatchGameState m_GameState = EZcatchGameState::WAITING_FOR_PLAYERS;
-	EZcatchGameState GameState() const { return m_GameState; }
-	void SetGameState(EZcatchGameState State) { m_GameState = State; }
+	ECatchGameState m_CatchGameState = ECatchGameState::WAITING_FOR_PLAYERS;
+	ECatchGameState CatchGameState() const;
+	void SetCatchGameState(ECatchGameState State);
 
 	void CheckGameState();
 };

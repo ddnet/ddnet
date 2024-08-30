@@ -74,6 +74,8 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 + `sv_anticamper_freeze` If a player should freeze on camping (and how long) or die
 + `sv_anticamper_time` How long to wait till the player dies/freezes
 + `sv_anticamper_range` Distance how far away the player must move to escape anticamper
++ `sv_zcatch_min_players` How many active players (not spectators) are required to start a round
++ `sv_release_game` auto release on kill (only affects sv_gametype zCatch)
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
 + `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)
