@@ -58,6 +58,26 @@ int CGameControllerZcatch::GetBodyColor(int Kills)
 	return 0;
 }
 
+void CGameControllerZcatch::OnUpdateZcatchColorConfig()
+{
+	const char *pColor = Config()->m_SvZcatchColors;
+
+	if(!str_comp_nocase(pColor, "teetime"))
+		m_CatchColors = ECatchColors::TEETIME;
+	else if(!str_comp_nocase(pColor, "savander"))
+		m_CatchColors = ECatchColors::SAVANDER;
+	else
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "Error: invalid zcatch color scheme '%s' defaulting to 'teetime'", pColor);
+		Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"ddnet-insta",
+			aBuf);
+		str_copy(Config()->m_SvZcatchColors, "teetime");
+	}
+}
+
 void CGameControllerZcatch::SendSkinBodyColor7(int ClientId, int Color)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)

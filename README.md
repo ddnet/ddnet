@@ -95,6 +95,7 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 + `sv_round_stats_format_http` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_round_stats_format_file` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
 + `sv_spawn_weapons` possible values: grenade, laser
++ `sv_zcatch_colors` Color scheme for zCatch options: teetime, savander
 + `sv_tournament_welcome_chat` Chat message shown in chat on join when sv_tournament is 1
 + `sv_round_stats_discord_webhook` If set will post score stats there on round end
 + `sv_round_stats_http_endpoint` If set will post score stats there on round end

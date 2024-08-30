@@ -314,6 +314,7 @@ public:
 	// return true to consume the event
 	// and supress default ddnet selfkill behavior
 	virtual bool OnSelfkill(int ClientId) { return false; };
+	virtual void OnUpdateZcatchColorConfig(){};
 
 	/*
 		Variable: m_GamePauseStartTime

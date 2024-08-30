@@ -14,6 +14,7 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_spawn_weapons", ConchainSpawnWeapons, this);
 	Console()->Chain("sv_tournament_chat_smart", ConchainSmartChat, this);
 	Console()->Chain("sv_tournament_chat", ConchainTournamentChat, this);
+	Console()->Chain("sv_zcatch_colors", ConchainZcatchColors, this);
 
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) Console()->Register(name, params, flags, callback, userdata, help);
 #include <game/server/gamemodes/instagib/rcon_commands.h>
@@ -124,4 +125,12 @@ void CGameContext::ConchainTournamentChat(IConsole::IResult *pResult, void *pUse
 		IConsole::OUTPUT_LEVEL_STANDARD,
 		"ddnet-insta",
 		"Warning: this variable will be set automatically on round end because sv_tournament_chat_smart is active.");
+}
+
+void CGameContext::ConchainZcatchColors(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_pController->OnUpdateZcatchColorConfig();
 }

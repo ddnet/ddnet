@@ -58,5 +58,7 @@ public:
 	int GetBodyColorSavander(int Kills);
 
 	void SendSkinBodyColor7(int ClientId, int Color);
+
+	void OnUpdateZcatchColorConfig() override;
 };
 #endif // GAME_SERVER_GAMEMODES_ZCATCH_H

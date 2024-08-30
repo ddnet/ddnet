@@ -38,6 +38,7 @@ MACRO_CONFIG_INT(SvAnticamperTime, sv_anticamper_time, 10, 5, 120, CFGFLAG_SERVE
 MACRO_CONFIG_INT(SvAnticamperRange, sv_anticamper_range, 200, 0, 1000, CFGFLAG_SERVER, "Distance how far away the player must move to escape anticamper")
 MACRO_CONFIG_INT(SvZcatchMinPlayers, sv_zcatch_min_players, 3, 0, MAX_CLIENTS, CFGFLAG_SERVER, "How many active players (not spectators) are required to start a round")
 MACRO_CONFIG_INT(SvReleaseGame, sv_release_game, 0, 0, 1, CFGFLAG_SERVER, "auto release on kill (only affects sv_gametype zCatch)")
+MACRO_CONFIG_STR(SvZcatchColors, sv_zcatch_colors, 512, "teetime", CFGFLAG_SERVER, "Color scheme for zCatch options: teetime, savander")
 
 /*
 
