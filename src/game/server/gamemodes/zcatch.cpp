@@ -217,6 +217,19 @@ bool CGameControllerZcatch::OnSelfkill(int ClientId)
 	return true;
 }
 
+void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pKiller)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
+	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
+
+	pVictim->SetTeamRaw(TEAM_SPECTATORS);
+	pVictim->m_SpectatorId = pKiller->GetCid();
+	pVictim->m_IsDead = true;
+	pVictim->m_KillerId = pKiller->GetCid();
+	pKiller->m_vVictimIds.emplace_back(pVictim->GetCid());
+}
+
 void CGameControllerZcatch::OnCaught(class CPlayer *pVictim, class CPlayer *pKiller)
 {
 	if(pVictim->GetCid() == pKiller->GetCid())
@@ -237,15 +250,7 @@ void CGameControllerZcatch::OnCaught(class CPlayer *pVictim, class CPlayer *pKil
 		return;
 	}
 
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
-	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
-
-	pVictim->SetTeamRaw(TEAM_SPECTATORS);
-	pVictim->m_IsDead = true;
-	pVictim->m_KillerId = pKiller->GetCid();
-
-	pKiller->m_vVictimIds.emplace_back(pVictim->GetCid());
+	KillPlayer(pVictim, pKiller);
 }
 
 int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
@@ -323,12 +328,7 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 		if(KillerId == -1)
 			KillerId = GetFirstAlivePlayerId();
 		if(KillerId != -1)
-		{
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "You will join when '%s' dies.", Server()->ClientName(KillerId));
-			SendChatTarget(pPlayer->GetCid(), aBuf);
-			pPlayer->m_IsDead = true;
-		}
+			KillPlayer(pPlayer, GameServer()->m_apPlayers[KillerId]);
 	}
 	CheckGameState();
 
