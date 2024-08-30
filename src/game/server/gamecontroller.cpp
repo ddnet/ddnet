@@ -1288,7 +1288,6 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			if(m_GameState == IGS_START_COUNTDOWN_ROUND_START || m_GameState == IGS_GAME_RUNNING)
 			{
 				m_RoundStartTick = Server()->Tick();
-				dbg_msg("ddnet-insta", "reset m_RoundStartTick");
 			}
 			// this is also ddnet-insta specific
 			// no idea how vanilla does it
