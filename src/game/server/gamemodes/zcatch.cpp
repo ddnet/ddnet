@@ -59,6 +59,7 @@ void CGameControllerZcatch::OnRoundStart()
 			continue;
 
 		pPlayer->m_GotRespawnInfo = false;
+		pPlayer->m_vVictimIds.clear();
 	}
 }
 
@@ -163,6 +164,46 @@ void CGameControllerZcatch::OnCharacterSpawn(class CCharacter *pChr)
 	SetSpawnWeapons(pChr);
 }
 
+void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pMsg)
+{
+	GameServer()->SendChatTarget(pPlayer->GetCid(), pMsg);
+	pPlayer->m_KillerId = -1;
+	pPlayer->m_IsDead = false;
+	pPlayer->SetTeamRaw(TEAM_RED);
+}
+
+bool CGameControllerZcatch::OnSelfkill(int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+	if(pPlayer->m_vVictimIds.empty())
+		return false;
+
+	CPlayer *pVictim = nullptr;
+	while(!pVictim)
+	{
+		if(pPlayer->m_vVictimIds.empty())
+			return false;
+
+		int ReleaseId = pPlayer->m_vVictimIds.back();
+		pPlayer->m_vVictimIds.pop_back();
+
+		pVictim = GameServer()->m_apPlayers[ReleaseId];
+	}
+	if(!pVictim)
+		return false;
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "You were released by '%s'", Server()->ClientName(pPlayer->GetCid()));
+	ReleasePlayer(pVictim, aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "You released '%s' (%d players left)", Server()->ClientName(pVictim->GetCid()), pPlayer->m_vVictimIds.size());
+	SendChatTarget(ClientId, aBuf);
+
+	return true;
+}
+
 void CGameControllerZcatch::OnCaught(class CPlayer *pVictim, class CPlayer *pKiller)
 {
 	if(pVictim->GetCid() == pKiller->GetCid())
@@ -190,6 +231,8 @@ void CGameControllerZcatch::OnCaught(class CPlayer *pVictim, class CPlayer *pKil
 	pVictim->SetTeamRaw(TEAM_SPECTATORS);
 	pVictim->m_IsDead = true;
 	pVictim->m_KillerId = pKiller->GetCid();
+
+	pKiller->m_vVictimIds.emplace_back(pVictim->GetCid());
 }
 
 int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
@@ -217,10 +260,7 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 
 		// victim's victims
 		str_format(aBuf, sizeof(aBuf), "You respawned because '%s' died", Server()->ClientName(pVictim->GetPlayer()->GetCid()));
-		GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
-		pPlayer->m_KillerId = -1;
-		pPlayer->m_IsDead = false;
-		pPlayer->SetTeamRaw(TEAM_RED);
+		ReleasePlayer(pPlayer, aBuf);
 	}
 
 	DoWincheckRound();
@@ -276,6 +316,19 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 		SendChatTarget(pPlayer->GetCid(), "Waiting for more players to start the round.");
 	else if(CatchGameState() == ECatchGameState::RELEASE_GAME)
 		SendChatTarget(pPlayer->GetCid(), "This is a release game.");
+}
+
+void CGameControllerZcatch::OnPlayerDisconnect(class CPlayer *pDisconnectingPlayer, const char *pReason)
+{
+	CGameControllerInstagib::OnPlayerDisconnect(pDisconnectingPlayer, pReason);
+
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		pPlayer->m_vVictimIds.erase(std::remove(pPlayer->m_vVictimIds.begin(), pPlayer->m_vVictimIds.end(), pDisconnectingPlayer->GetCid()), pPlayer->m_vVictimIds.end());
+	}
 }
 
 bool CGameControllerZcatch::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)

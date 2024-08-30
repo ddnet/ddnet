@@ -312,6 +312,9 @@ public:
 	virtual void OnFlagGrab(class CFlag *pFlag); // ddnet-insta
 	virtual void OnFlagCapture(class CFlag *pFlag, float Time); // ddnet-insta
 	virtual void OnRoundStart();
+	// return true to consume the event
+	// and supress default ddnet selfkill behavior
+	virtual bool OnSelfkill(int ClientId) { return false; };
 
 	/*
 		Variable: m_GamePauseStartTime

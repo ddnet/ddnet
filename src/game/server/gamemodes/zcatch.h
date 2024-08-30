@@ -12,10 +12,12 @@ public:
 	int m_aBodyColors[MAX_CLIENTS] = {0};
 
 	void OnCaught(class CPlayer *pVictim, class CPlayer *pKiller);
+	void ReleasePlayer(class CPlayer *pPlayer, const char *pMsg);
 
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 	void OnPlayerConnect(CPlayer *pPlayer) override;
+	void OnPlayerDisconnect(class CPlayer *pDisconnectingPlayer, const char *pReason) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
@@ -23,6 +25,7 @@ public:
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 	bool DoWincheckRound() override;
 	void OnRoundStart() override;
+	bool OnSelfkill(int ClientId) override;
 
 	// gets the tee's body color based on the amount of its kills
 	// the value is the integer that will be sent over the network

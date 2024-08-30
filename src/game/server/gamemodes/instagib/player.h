@@ -6,6 +6,7 @@
 
 #include <base/vmath.h>
 #include <optional>
+#include <vector>
 
 // player object
 class CPlayer
@@ -25,6 +26,7 @@ public:
 	// dead players can not respawn
 	bool m_IsDead;
 	bool m_GotRespawnInfo = false;
+	std::vector<int> m_vVictimIds;
 
 	/*******************************************************************
 	 * gCTF                                                            *

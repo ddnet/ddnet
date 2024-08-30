@@ -2846,6 +2846,9 @@ void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId)
 	if(m_World.m_Paused)
 		return;
 
+	if(m_pController->OnSelfkill(ClientId)) // ddnet-insta
+		return;
+
 	if(m_VoteCloseTime && m_VoteCreator == ClientId && GetDDRaceTeam(ClientId) && (IsKickVote() || IsSpecVote()))
 	{
 		SendChatTarget(ClientId, "You are running a vote please try again after the vote is done!");
