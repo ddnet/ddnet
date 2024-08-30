@@ -6,7 +6,7 @@
 class CGameControllerCTF : public CGameControllerInstagib
 {
 	class CFlag *m_apFlags[2];
-	virtual bool DoWincheckMatch() override;
+	virtual bool DoWincheckRound() override;
 
 public:
 	CGameControllerCTF(class CGameContext *pGameServer);

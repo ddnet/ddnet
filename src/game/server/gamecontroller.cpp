@@ -529,6 +529,13 @@ void IGameController::StartRound()
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "start round type='%s' teamplay='%d'", m_pGameType, m_GameFlags & GAMEFLAG_TEAMS);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+
+	// only auto start round if we are in casual mode and there is no tournament running
+	// otherwise set infinite warmup and wait for !restart
+	// if(RoundEnd && (!g_Config.m_SvCasualRounds || g_Config.m_SvTournament))
+	// 	SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
+	// else
+	SetGameState(IGS_START_COUNTDOWN_ROUND_START);
 }
 
 void IGameController::ChangeMap(const char *pToMap)
@@ -651,16 +658,6 @@ void IGameController::Tick()
 			case IGS_END_ROUND:
 				StartRound();
 				break;
-			case IGS_END_MATCH:
-				// start next match
-				// if(m_MatchCount >= m_GameInfo.m_MatchNum-1)
-				// 	CycleMap();
-
-				// if(Config()->m_SvMatchSwap)
-				// 	GameServer()->SwapTeams();
-				// m_MatchCount++;
-				StartMatch(true);
-				break;
 			case IGS_WARMUP_GAME:
 			case IGS_GAME_RUNNING:
 				// not effected
@@ -686,7 +683,6 @@ void IGameController::Tick()
 				break;
 			case IGS_WARMUP_GAME:
 			case IGS_GAME_RUNNING:
-			case IGS_END_MATCH:
 			case IGS_END_ROUND:
 				// not effected
 				break;
@@ -867,13 +863,9 @@ void IGameController::Snap(int SnappingClient)
 			break;
 		case IGS_END_ROUND:
 			pGameData->m_GameStateFlags = pGameData->m_GameStateFlags & ~protocol7::GAMESTATEFLAG_PAUSED; // clear pause
-			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_ROUNDOVER;
-			pGameData->m_GameStateEndTick = Server()->Tick() - m_GameStartTick - TIMER_END / 2 * Server()->TickSpeed() + m_GameStateTimer;
-			break;
-		case IGS_END_MATCH:
-			pGameData->m_GameStateFlags = pGameData->m_GameStateFlags & ~protocol7::GAMESTATEFLAG_PAUSED; // clear pause
+			// pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_ROUNDOVER;
 			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_GAMEOVER;
-			pGameData->m_GameStateEndTick = Server()->Tick() - m_GameStartTick - TIMER_END * Server()->TickSpeed() + m_GameStateTimer;
+			pGameData->m_GameStateEndTick = Server()->Tick() - m_GameStartTick - TIMER_END / 2 * Server()->TickSpeed() + m_GameStateTimer;
 			break;
 		case IGS_GAME_RUNNING:
 			// not effected
@@ -1038,7 +1030,6 @@ void IGameController::CheckReadyStates(int WithoutId)
 		case IGS_WARMUP_GAME:
 		case IGS_START_COUNTDOWN_UNPAUSE:
 		case IGS_START_COUNTDOWN_ROUND_START:
-		case IGS_END_MATCH:
 		case IGS_END_ROUND:
 			// not affected
 			break;
@@ -1073,7 +1064,7 @@ void IGameController::SetPlayersReadyState(bool ReadyState)
 			pPlayer->m_IsReadyToPlay = ReadyState;
 }
 
-bool IGameController::DoWincheckMatch()
+bool IGameController::DoWincheckRound()
 {
 	if(IsTeamplay())
 	{
@@ -1083,7 +1074,7 @@ bool IGameController::DoWincheckMatch()
 		{
 			if(m_aTeamscore[TEAM_RED] != m_aTeamscore[TEAM_BLUE] || m_GameFlags & protocol7::GAMEFLAG_SURVIVAL)
 			{
-				EndMatch();
+				EndRound();
 				return true;
 			}
 			else
@@ -1116,7 +1107,7 @@ bool IGameController::DoWincheckMatch()
 		{
 			if(TopscoreCount == 1)
 			{
-				EndMatch();
+				EndRound();
 				return true;
 			}
 			else
@@ -1124,26 +1115,6 @@ bool IGameController::DoWincheckMatch()
 		}
 	}
 	return false;
-}
-
-void IGameController::StartMatch(bool RoundEnd)
-{
-	ResetGame();
-
-	m_RoundCount = 0;
-	m_aTeamscore[TEAM_RED] = 0;
-	m_aTeamscore[TEAM_BLUE] = 0;
-
-	// only auto start round if we are in casual mode and there is no tournament running
-	// otherwise set infinite warmup and wait for !restart
-	// if(RoundEnd && (!g_Config.m_SvCasualRounds || g_Config.m_SvTournament))
-	// 	SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
-	// else
-	SetGameState(IGS_START_COUNTDOWN_ROUND_START);
-
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "start match type='%s' teamplay='%d'", m_pGameType, m_GameFlags & GAMEFLAG_TEAMS);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 }
 
 int IGameController::GetStartTeam()
@@ -1252,7 +1223,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			else if(Timer == 0)
 			{
 				// start new match
-				StartMatch(false);
+				StartRound();
 			}
 			m_GamePauseStartTime = -1;
 		}
@@ -1295,7 +1266,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			else
 			{
 				// start new match
-				StartMatch(false);
+				StartRound();
 			}
 			m_GamePauseStartTime = -1;
 		}
@@ -1393,15 +1364,14 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 		}
 		break;
 	case IGS_END_ROUND:
-	case IGS_END_MATCH:
 		if(m_Warmup) // game can't end when we are running warmup
 			break;
 		m_GamePauseStartTime = -1;
 		m_GameOverTick = Server()->Tick();
-		if(GameState == IGS_END_ROUND && DoWincheckMatch())
+		if(m_GameState == IGS_END_ROUND)
 			break;
 		// only possible when game is running or over
-		// if(m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_END_MATCH || m_GameState == IGS_END_ROUND || m_GameState == IGS_GAME_PAUSED)
+		// if(m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_END_ROUND || m_GameState == IGS_GAME_PAUSED)
 		{
 			m_GameState = GameState;
 			m_GameStateTimer = Timer * Server()->TickSpeed();
@@ -1409,11 +1379,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			m_SuddenDeath = 0;
 			GameServer()->m_World.m_Paused = true;
 
-			if(g_Config.m_SvTournamentChatSmart)
-			{
-				g_Config.m_SvTournamentChat = 0;
-				GameServer()->SendChat(-1, TEAM_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can use public chat again" : "All can use public chat again");
-			}
+			OnEndRoundInsta();
 		}
 	}
 }

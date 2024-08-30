@@ -233,7 +233,6 @@ public:
 		IGS_GAME_PAUSED, // game paused (infinite or tick timer)
 		IGS_GAME_RUNNING, // game running (infinite)
 
-		IGS_END_MATCH, // match is over (tick timer)
 		IGS_END_ROUND, // round is over (tick timer)
 	};
 	EGameState m_GameState;
@@ -256,18 +255,14 @@ public:
 			return "IGS_GAME_PAUSED";
 		case IGS_GAME_RUNNING:
 			return "IGS_GAME_RUNNING";
-		case IGS_END_MATCH:
-			return "IGS_END_MATCH";
 		case IGS_END_ROUND:
 			return "IGS_END_ROUND";
 		}
 		return "UNKNOWN";
 	}
 
-	virtual void DoWincheckRound() {}
 	bool HasEnoughPlayers() const { return (IsTeamplay() && m_aTeamSize[TEAM_RED] > 0 && m_aTeamSize[TEAM_BLUE] > 0) || (!IsTeamplay() && m_aTeamSize[TEAM_RED] > 1); }
 	void SetGameState(EGameState GameState, int Timer = 0);
-	void StartMatch(bool RoundEnd);
 
 	bool m_AllowSkinChange = true;
 
@@ -288,18 +283,9 @@ public:
 	int m_GameStartTick;
 	int m_aTeamscore[protocol7::NUM_TEAMS];
 
-	void EndMatch()
-	{
-		// can be called twice
-		// for example from gamecontroller score check
-		// and ctf flag capture at the same time
-		if(m_GameState != IGS_END_MATCH)
-			OnEndMatchInsta();
-		SetGameState(IGS_END_MATCH, TIMER_END);
-	}
-	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END / 2); } // never called ddnet-insta has no round support yet
+	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END); }
 
-	void OnEndMatchInsta();
+	void OnEndRoundInsta();
 	void GetRoundEndStatsStrCsv(char *pBuf, size_t Size);
 	void PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Size);
 	void GetRoundEndStatsStrJson(char *pBuf, size_t Size);
@@ -321,7 +307,7 @@ public:
 	};
 
 	int GetStartTeam();
-	virtual bool DoWincheckMatch(); // returns true when the match is over
+	virtual bool DoWincheckRound(); // returns true when the match is over
 	virtual void OnFlagReturn(class CFlag *pFlag); // ddnet-insta
 	virtual void OnFlagGrab(class CFlag *pFlag); // ddnet-insta
 	virtual void OnFlagCapture(class CFlag *pFlag, float Time); // ddnet-insta

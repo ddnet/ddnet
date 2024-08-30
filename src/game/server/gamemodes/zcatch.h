@@ -21,7 +21,7 @@ public:
 	bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
 	void DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg) override;
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
-	bool DoWincheckMatch() override;
+	bool DoWincheckRound() override;
 
 	// gets the tee's body color based on the amount of its kills
 	// the value is the integer that will be sent over the network

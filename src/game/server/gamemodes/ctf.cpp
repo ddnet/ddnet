@@ -183,7 +183,7 @@ void CGameControllerCTF::FlagTick()
 						for(auto &pFlag : m_apFlags)
 							pFlag->Reset();
 					// do a win check(capture could trigger win condition)
-					if(DoWincheckMatch())
+					if(DoWincheckRound())
 						return;
 				}
 			}
@@ -238,7 +238,7 @@ void CGameControllerCTF::FlagTick()
 			}
 		}
 	}
-	DoWincheckMatch();
+	DoWincheckRound();
 }
 
 void CGameControllerCTF::Snap(int SnappingClient)
@@ -290,9 +290,9 @@ void CGameControllerCTF::Snap(int SnappingClient)
 	}
 }
 
-bool CGameControllerCTF::DoWincheckMatch()
+bool CGameControllerCTF::DoWincheckRound()
 {
-	CGameControllerInstagib::DoWincheckMatch();
+	CGameControllerInstagib::DoWincheckRound();
 
 	// check score win condition
 	if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)) ||
@@ -302,7 +302,7 @@ bool CGameControllerCTF::DoWincheckMatch()
 		{
 			if(m_aTeamscore[TEAM_RED] / 100 != m_aTeamscore[TEAM_BLUE] / 100)
 			{
-				EndMatch();
+				EndRound();
 				return true;
 			}
 		}
@@ -310,7 +310,7 @@ bool CGameControllerCTF::DoWincheckMatch()
 		{
 			if(m_aTeamscore[TEAM_RED] != m_aTeamscore[TEAM_BLUE])
 			{
-				EndMatch();
+				EndRound();
 				return true;
 			}
 			else

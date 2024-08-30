@@ -171,7 +171,7 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 		pPlayer->SetTeamRaw(TEAM_RED);
 	}
 
-	DoWincheckMatch();
+	DoWincheckRound();
 
 	return 0;
 }
@@ -235,11 +235,11 @@ bool CGameControllerZcatch::OnEntity(int Index, int x, int y, int Layer, int Fla
 	return false;
 }
 
-bool CGameControllerZcatch::DoWincheckMatch()
+bool CGameControllerZcatch::DoWincheckRound()
 {
 	if(GameState() == EZcatchGameState::RUNNING && NumNonDeadActivePlayers() <= 1)
 	{
-		EndMatch();
+		EndRound();
 
 		for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 		{
