@@ -443,7 +443,9 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 #ifdef CONF_GLEW_HAS_CONTEXT_INIT
 		if(GLEW_OK != glewContextInit())
 #else
-		if(GLEW_OK != glewInit())
+		GLenum InitResult = glewInit();
+		const char *pVideoDriver = SDL_GetCurrentVideoDriver();
+		if(GLEW_OK != InitResult && pVideoDriver && !str_comp(pVideoDriver, "wayland") && GLEW_ERROR_NO_GLX_DISPLAY != InitResult)
 #endif
 			return false;
 
@@ -1019,6 +1021,13 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		SDL_GetVersion(&Linked);
 		dbg_msg("sdl", "SDL version %d.%d.%d (compiled = %d.%d.%d)", Linked.major, Linked.minor, Linked.patch,
 			Compiled.major, Compiled.minor, Compiled.patch);
+
+#if CONF_PLATFORM_LINUX && SDL_VERSION_ATLEAST(2, 0, 22)
+		// needed to workaround SDL from forcing exclusively X11 if linking against the GLX flavour of GLEW instead of the EGL one
+		// w/o this on Wayland systems (no XWayland support) SDL's Video subsystem will fail to load (starting from SDL2.30+)
+		if(Linked.major == 2 && Linked.minor >= 30)
+			SDL_SetHint(SDL_HINT_VIDEODRIVER, "x11,wayland");
+#endif
 	}
 
 	if(!SDL_WasInit(SDL_INIT_VIDEO))
