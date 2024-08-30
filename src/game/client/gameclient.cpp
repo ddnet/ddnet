@@ -2935,7 +2935,6 @@ void CGameClient::UpdateRenderedCharacters()
 		vec2 Pos = UnpredPos;
 
 		CCharacter *pChar = m_PredictedWorld.GetCharacterById(i);
-		
 		// TODO: @Tater remove this garbage
 		if(i == m_Snap.m_LocalClientId)
 		{
@@ -2946,7 +2945,6 @@ void CGameClient::UpdateRenderedCharacters()
 			else
 			{
 				g_Config.m_ClAmIFrozen = 0;
-				g_Config.m_ClFreezeTick = Client()->GameTick(g_Config.m_ClDummy);
 			}
 		}
 
@@ -3121,14 +3119,14 @@ vec2 CGameClient::GetFreezePos(int ClientId)
 		float MixAmount = 0.0f;
 		int SmoothTick;
 		float SmoothIntra;
-		int TicksFrozen = Client()->GameTick(g_Config.m_ClDummy) - g_Config.m_ClFreezeTick;
+		int TicksFrozen = 0;
 
-		if(pChar && g_Config.m_ClAdjustRemovedDelay && ClientId == m_Snap.m_LocalClientId)
+		if(pChar && ClientId == m_Snap.m_LocalClientId)
 		{
 			TicksFrozen = pChar->m_FreezeAccumulation;
 		}
 
-		if(g_Config.m_ClAmIFrozen && g_Config.m_ClRemoveAnti)
+		if(g_Config.m_ClRemoveAnti && pChar->m_FreezeTime > 0)
 		{
 			MixAmount = mix(0.0f, 1.0f, 1.0f - (float)std::min(TicksFrozen, g_Config.m_ClUnfreezeLagDelayTicks) / (float)g_Config.m_ClUnfreezeLagDelayTicks);
 		}
