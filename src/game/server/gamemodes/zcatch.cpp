@@ -64,6 +64,14 @@ void CGameControllerZcatch::OnRoundStart()
 	}
 }
 
+int CGameControllerZcatch::GetAutoTeam(int NotThisId)
+{
+	if(CatchGameState() == ECatchGameState::RUNNING)
+		return TEAM_SPECTATORS;
+
+	return CGameControllerInstagib::GetAutoTeam(NotThisId);
+}
+
 CGameControllerZcatch::~CGameControllerZcatch() = default;
 
 void CGameControllerZcatch::Tick()

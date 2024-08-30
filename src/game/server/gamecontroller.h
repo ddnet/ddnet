@@ -306,7 +306,6 @@ public:
 		TIMER_END = 10,
 	};
 
-	int GetStartTeam();
 	virtual bool DoWincheckRound(); // returns true when the match is over
 	virtual void OnFlagReturn(class CFlag *pFlag); // ddnet-insta
 	virtual void OnFlagGrab(class CFlag *pFlag); // ddnet-insta

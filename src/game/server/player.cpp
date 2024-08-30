@@ -26,7 +26,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientI
 	m_RespawnTick = Server()->Tick(); // ddnet-insta
 	m_HasGhostCharInGame = false; // ddnet-insta
 	m_ClientId = ClientId;
-	m_Team = GameServer()->m_pController->GetStartTeam();
+	m_Team = Team;
 	m_NumInputs = 0;
 	m_Spawning = false;
 	Reset();

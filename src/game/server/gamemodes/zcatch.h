@@ -26,6 +26,7 @@ public:
 	bool DoWincheckRound() override;
 	void OnRoundStart() override;
 	bool OnSelfkill(int ClientId) override;
+	int GetAutoTeam(int NotThisId) override;
 
 	// gets the tee's body color based on the amount of its kills
 	// the value is the integer that will be sent over the network
