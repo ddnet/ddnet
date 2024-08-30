@@ -60,6 +60,7 @@ void CGameControllerZcatch::OnRoundStart()
 
 		pPlayer->m_GotRespawnInfo = false;
 		pPlayer->m_vVictimIds.clear();
+		pPlayer->m_KillerId = -1;
 	}
 }
 
