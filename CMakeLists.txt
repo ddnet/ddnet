@@ -2762,8 +2762,9 @@ if(SERVER)
     gamemodes/tdm.h
     gamemodes/team_fng.cpp
     gamemodes/team_fng.h
-    gamemodes/zcatch.cpp
-    gamemodes/zcatch.h
+    gamemodes/zcatch/colors.cpp
+    gamemodes/zcatch/zcatch.cpp
+    gamemodes/zcatch/zcatch.h
     gameworld.cpp
     gameworld.h
     instagib/gamelogic.cpp

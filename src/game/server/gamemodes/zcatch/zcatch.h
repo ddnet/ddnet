@@ -1,7 +1,7 @@
 #ifndef GAME_SERVER_GAMEMODES_ZCATCH_H
 #define GAME_SERVER_GAMEMODES_ZCATCH_H
 
-#include "base_instagib.h"
+#include "../base_instagib.h"
 
 class CGameControllerZcatch : public CGameControllerInstagib
 {
@@ -29,12 +29,6 @@ public:
 	bool OnSelfkill(int ClientId) override;
 	int GetAutoTeam(int NotThisId) override;
 
-	// gets the tee's body color based on the amount of its kills
-	// the value is the integer that will be sent over the network
-	int GetBodyColor(int Kills);
-
-	void SendSkinBodyColor7(int ClientId, int Color);
-
 	enum class ECatchGameState
 	{
 		WAITING_FOR_PLAYERS,
@@ -46,5 +40,23 @@ public:
 	void SetCatchGameState(ECatchGameState State);
 
 	void CheckGameState();
+
+	// colors
+
+	enum class ECatchColors
+	{
+		TEETIME,
+		SAVANDER
+	};
+	ECatchColors m_CatchColors = ECatchColors::TEETIME;
+
+	// gets the tee's body color based on the amount of its kills
+	// the value is the integer that will be sent over the network
+	int GetBodyColor(int Kills);
+
+	int GetBodyColorTeetime(int Kills);
+	int GetBodyColorSavander(int Kills);
+
+	void SendSkinBodyColor7(int ClientId, int Color);
 };
 #endif // GAME_SERVER_GAMEMODES_ZCATCH_H

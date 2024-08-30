@@ -39,7 +39,7 @@
 #include "gamemodes/itdm.h"
 #include "gamemodes/mod.h"
 #include "gamemodes/solofng.h"
-#include "gamemodes/zcatch.h"
+#include "gamemodes/zcatch/zcatch.h"
 #include "player.h"
 #include "score.h"
 
