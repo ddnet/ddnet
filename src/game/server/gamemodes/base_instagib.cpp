@@ -622,7 +622,7 @@ int CGameControllerInstagib::GetHighestSpreeClientId()
 int CGameControllerInstagib::GetFirstAlivePlayerId()
 {
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
-		if(pPlayer || pPlayer->GetCharacter())
+		if(pPlayer && pPlayer->GetCharacter())
 			return pPlayer->GetCid();
 	return -1;
 }
