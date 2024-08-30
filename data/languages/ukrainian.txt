@@ -165,6 +165,9 @@ AntiPing: predict weapons
 Appearance
 == Вигляд
 
+Are you sure that you want to delete '%s'?
+== Ви дійсно хочете видалити '%s'?
+
 Are you sure that you want to delete the demo '%s'?
 == Ви дійсно хочете видалити демо '%s'?
 
@@ -236,6 +239,9 @@ Background
 
 Background music volume
 == Гучність фонової музики
+
+Basic
+== Базовий
 
 Best
 == НКом
@@ -330,6 +336,9 @@ Communities
 Config directory
 == Тека налаштувань
 
+Connect address error
+== Помилка адреси з'єднання
+
 Connect Dummy
 == Приєднати даммі
 
@@ -366,6 +375,9 @@ Converse
 Copy info
 == Скопіювати
 
+Could not connect dummy
+== Не вдалося під'єднати даммі
+
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
 == Не вдалося ініціалізувати заданий графічний рушій, повертаємося до рушія за замовчуванням.
@@ -373,6 +385,9 @@ Could not initialize the given graphics backend, reverting to the default backen
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
 == Не вдалося ініціалізувати заданий графічний рушій, можливо тому що ви не встановили драйвери на вбудовану відеокарту.
+
+Could not resolve connect address '%s'. See local console for details.
+== Не вдалося визначити адресу з'єднання '%s' (див. локальну консоль).
 
 Could not save downloaded map. Try manually deleting this file: %s
 == Не вдалося зберегти завантажену мапу. Спробуйте самостійно видалити цей файл: %s
@@ -395,8 +410,14 @@ Current
 custom
 == власний
 
+Custom
+== Власний
+
 Custom colors
 == Власні кольори
+
+Customize
+== Налаштування
 
 Cut interval
 == Інтервал
@@ -458,6 +479,9 @@ Delete demo
 Delete folder
 == Видалити теку
 
+Delete skin
+== Видалити скін
+
 Demo
 == Демо
 
@@ -511,6 +535,12 @@ Dummy
 
 Dummy copy
 == Повторювати рухи
+
+Dummy is not allowed on this server
+== Використання даммі заборонене на цьому сервері
+
+Dummy settings
+== Налаштування даммі
 
 Dynamic Camera
 == Рухома камера
@@ -1071,6 +1101,9 @@ No updates available
 None
 == Немає
 
+Normal:
+== Звичайний:
+
 Normal Color
 == Колір звичайних повідомлень
 
@@ -1188,6 +1221,9 @@ Please enter your nickname below.
 Please use a different filename
 == Будь ласка, назвіть файл по-іншому
 
+Please wait…
+== Будь ласка, зачекайте…
+
 Position:
 == Позиція:
 
@@ -1214,6 +1250,9 @@ Quitting. Please wait…
 
 Race
 == Забіг
+
+Randomize
+== Випадково
 
 Ratio
 == У/С
@@ -1410,6 +1449,9 @@ Show chat
 
 Show clan above name plates
 == Показувати клан над ніками
+
+Show client IDs (scoreboard, chat, spectator)
+== Показувати ID клієнта (табло, чат, спостерігачі)
 
 Show DDNet map finishes in server browser
 == Показувати пройдені мапи DDNet у браузері серверів
@@ -1631,6 +1673,9 @@ System message
 Team
 == Команда
 
+Team:
+== Командний:
+
 Team %d
 == Команда %d
 
@@ -1688,6 +1733,9 @@ Toggle ghost
 Toggle keyboard shortcuts
 == Перемкнути скорочення
 
+Toggle to edit your dummy settings
+== Перемкніть, щоб змінити налаштування даммі
+
 transmits your player name to info.ddnet.org
 == передає ваш нікнейм до info.ddnet.org
 
@@ -1723,6 +1771,9 @@ UI controller sens.
 
 UI mouse sens.
 == Чутл. у інтерфейсі
+
+Unable to delete skin
+== Не вдалося видалити скін
 
 Unable to delete the demo '%s'
 == Не вдалося видалити демо '%s'
@@ -1862,54 +1913,3 @@ Zoom in
 
 Zoom out
 == Віддалити
-
-Could not resolve connect address '%s'. See local console for details.
-== 
-
-Connect address error
-== 
-
-Could not connect dummy
-== 
-
-Dummy is not allowed on this server
-== 
-
-Please wait…
-== 
-
-Show client IDs (scoreboard, chat, spectator)
-== 
-
-Normal:
-== 
-
-Team:
-== 
-
-Dummy settings
-== 
-
-Toggle to edit your dummy settings
-== 
-
-Randomize
-== 
-
-Are you sure that you want to delete '%s'?
-== 
-
-Delete skin
-== 
-
-Basic
-== 
-
-Custom
-== 
-
-Unable to delete skin
-== 
-
-Customize
-== 
