@@ -14,6 +14,12 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 
 	m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
 	m_AllowSkinChange = true;
+
+	GameServer()->Tuning()->Set("gun_curvature", 1.25f);
+	GameServer()->Tuning()->Set("gun_speed", 2200);
+	GameServer()->Tuning()->Set("shotgun_curvature", 1.25f);
+	GameServer()->Tuning()->Set("shotgun_speed", 2750);
+	GameServer()->Tuning()->Set("shotgun_speeddiff", 0.8f);
 }
 
 CGameControllerPvp::~CGameControllerPvp() = default;
