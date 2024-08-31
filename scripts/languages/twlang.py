@@ -37,7 +37,7 @@ def decode(fileobj, elements_per_key):
 			if current_key:
 				if len(data[current_key]) != 1+elements_per_key:
 					raise LanguageDecodeError("Wrong number of elements per key", fileobj.name, index)
-				data[current_key].append(index)
+				data[current_key].append(index - 1 if current_context else index)
 			if line in data:
 				raise LanguageDecodeError("Key defined multiple times: " + line, fileobj.name, index)
 			data[(line, current_context)] = [index - 1 if current_context else index]
