@@ -1179,8 +1179,7 @@ void IGameController::UpdateGameInfo(int ClientId)
 		if(Server()->IsSixup(i))
 		{
 			protocol7::CNetMsg_Sv_GameInfo Msg;
-			Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
-			Msg.m_GameFlags = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS;
+			Msg.m_GameFlags = m_GameFlags;
 			Msg.m_MatchCurrent = 1;
 			Msg.m_MatchNum = 0;
 			Msg.m_ScoreLimit = Config()->m_SvScorelimit;
