@@ -17,7 +17,7 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_zcatch_colors", ConchainZcatchColors, this);
 
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) Console()->Register(name, params, flags, callback, userdata, help);
-#include <game/server/gamemodes/instagib/rcon_commands.h>
+#include <game/server/instagib/rcon_commands.h>
 #undef CONSOLE_COMMAND
 
 	// generate callbacks to trigger insta settings update for all instagib configs

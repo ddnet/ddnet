@@ -2749,9 +2749,6 @@ if(SERVER)
     gamemodes/instagib/chat.cpp
     gamemodes/instagib/player.cpp
     gamemodes/instagib/player.h
-    gamemodes/instagib/rcon_commands.cpp
-    gamemodes/instagib/rcon_commands.h
-    gamemodes/instagib/rcon_configs.cpp
     gamemodes/itdm.cpp
     gamemodes/itdm.h
     gamemodes/mod.cpp
@@ -2768,6 +2765,9 @@ if(SERVER)
     gameworld.cpp
     gameworld.h
     instagib/gamelogic.cpp
+    instagib/rcon_commands.cpp
+    instagib/rcon_commands.h
+    instagib/rcon_configs.cpp
     instagib/round_stats.cpp
     instagib/round_stats_csv.cpp
     instagib/round_stats_player.h
