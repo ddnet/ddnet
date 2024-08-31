@@ -40,7 +40,7 @@ gen_rcon_cmds() {
 		desc="${desc::-2}"
 		cmd="$(echo "$cfg" | cut -d',' -f1 | cut -d'"' -f2)"
 		echo "+ \`$cmd\` $desc"
-	done < <(grep '^CONSOLE_COMMAND' src/game/server/gamemodes/instagib/rcon_commands.h)
+	done < <(grep '^CONSOLE_COMMAND' src/game/server/instagib/rcon_commands.h)
 }
 
 insert_at() {
