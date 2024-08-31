@@ -23,6 +23,13 @@ CGameControllerVanilla::~CGameControllerVanilla() = default;
 
 bool CGameControllerVanilla::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	if(Weapon == WEAPON_GUN || Weapon == WEAPON_SHOTGUN)
+		Dmg = 1;
+	if(Weapon == WEAPON_LASER)
+		Dmg = 5;
+	if(Weapon == WEAPON_GRENADE)
+		Dmg = 6;
+
 	// m_pPlayer only inflicts half damage on self
 	if(From == Character.GetPlayer()->GetCid())
 		Dmg = maximum(1, Dmg / 2);
