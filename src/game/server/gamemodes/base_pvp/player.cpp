@@ -3,9 +3,9 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
-#include "../base_instagib.h"
+#include "base_pvp.h"
 
-void CGameControllerInstagib::OnPlayerConstruct(class CPlayer *pPlayer)
+void CGameControllerPvp::OnPlayerConstruct(class CPlayer *pPlayer)
 {
 	pPlayer->m_IsDead = false;
 	pPlayer->m_KillerId = -1;

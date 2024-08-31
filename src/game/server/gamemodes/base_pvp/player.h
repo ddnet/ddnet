@@ -1,4 +1,4 @@
-#ifndef GAME_SERVER_GAMEMODES_INSTAGIB_PLAYER_H
+#ifndef GAME_SERVER_GAMEMODES_BASE_PVP_PLAYER_H
 // hack for headerguard linter
 #endif
 

@@ -1,7 +1,7 @@
 #include <base/system.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
-#include <game/server/gamemodes/base_instagib.h>
+#include <game/server/gamemodes/base_pvp/base_pvp.h>
 #include <game/server/player.h>
 
 #include <game/server/gamecontext.h>
@@ -91,7 +91,7 @@ void CGameContext::ConchainSpawnWeapons(IConsole::IResult *pResult, void *pUserD
 			return;
 		}
 
-		CGameControllerInstagib *pInsta = static_cast<CGameControllerInstagib *>(pUserData);
+		CGameControllerPvp *pInsta = static_cast<CGameControllerPvp *>(pUserData);
 		pInsta->UpdateSpawnWeapons();
 	}
 }

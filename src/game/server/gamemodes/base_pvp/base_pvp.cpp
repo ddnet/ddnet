@@ -5,9 +5,9 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
-#include "base_instagib.h"
+#include "base_pvp.h"
 
-CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer) :
+CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	CGameControllerDDRace(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
@@ -16,9 +16,9 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 	m_AllowSkinChange = true;
 }
 
-CGameControllerInstagib::~CGameControllerInstagib() = default;
+CGameControllerPvp::~CGameControllerPvp() = default;
 
-int CGameControllerInstagib::GetAutoTeam(int NotThisId)
+int CGameControllerPvp::GetAutoTeam(int NotThisId)
 {
 	if(Config()->m_SvTournamentMode)
 		return TEAM_SPECTATORS;
@@ -46,17 +46,17 @@ int CGameControllerInstagib::GetAutoTeam(int NotThisId)
 	return TEAM_SPECTATORS;
 }
 
-void CGameControllerInstagib::SendChatTarget(int To, const char *pText, int Flags) const
+void CGameControllerPvp::SendChatTarget(int To, const char *pText, int Flags) const
 {
 	GameServer()->SendChatTarget(To, pText, Flags);
 }
 
-void CGameControllerInstagib::SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId, int Flags)
+void CGameControllerPvp::SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId, int Flags)
 {
 	GameServer()->SendChat(ClientId, Team, pText, SpamProtectionClientId, Flags);
 }
 
-void CGameControllerInstagib::UpdateSpawnWeapons()
+void CGameControllerPvp::UpdateSpawnWeapons()
 {
 	const char *pWeapons = Config()->m_SvSpawnWeapons;
 	if(!str_comp_nocase(pWeapons, "grenade"))
@@ -70,10 +70,10 @@ void CGameControllerInstagib::UpdateSpawnWeapons()
 	}
 }
 
-void CGameControllerInstagib::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
+void CGameControllerPvp::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 	int Weapon, bool Remove)
 {
-	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	CGameControllerPvp *pSelf = (CGameControllerPvp *)pUserData;
 	CCharacter *pChr = GameServer()->GetPlayerChar(pResult->m_ClientId);
 	if(!pChr)
 		return;
@@ -99,7 +99,7 @@ void CGameControllerInstagib::ModifyWeapons(IConsole::IResult *pResult, void *pU
 	pChr->m_DDRaceState = DDRACE_CHEAT;
 }
 
-int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
+int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
 	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
 
@@ -141,7 +141,7 @@ int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class C
 	return 0;
 }
 
-void CGameControllerInstagib::CheckForceUnpauseGame()
+void CGameControllerPvp::CheckForceUnpauseGame()
 {
 	if(!Config()->m_SvForceReadyAll)
 		return;
@@ -179,7 +179,7 @@ void CGameControllerInstagib::CheckForceUnpauseGame()
 	}
 }
 
-void CGameControllerInstagib::Tick()
+void CGameControllerPvp::Tick()
 {
 	CGameControllerDDRace::Tick();
 
@@ -216,7 +216,7 @@ void CGameControllerInstagib::Tick()
 		Anticamper();
 }
 
-bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
+bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	if(Character.m_IsGodmode)
 	{
@@ -301,9 +301,9 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 	return false;
 }
 
-void CGameControllerInstagib::SetSpawnWeapons(class CCharacter *pChr) const
+void CGameControllerPvp::SetSpawnWeapons(class CCharacter *pChr) const
 {
-	switch(CGameControllerInstagib::GetSpawnWeapons(pChr->GetPlayer()->GetCid()))
+	switch(CGameControllerPvp::GetSpawnWeapons(pChr->GetPlayer()->GetCid()))
 	{
 	case SPAWN_WEAPON_LASER:
 		pChr->GiveWeapon(WEAPON_LASER, false);
@@ -317,7 +317,7 @@ void CGameControllerInstagib::SetSpawnWeapons(class CCharacter *pChr) const
 	}
 }
 
-void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)
+void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 {
 	OnCharacterConstruct(pChr);
 
@@ -328,7 +328,7 @@ void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)
 	pChr->IncreaseHealth(10);
 }
 
-void CGameControllerInstagib::AddSpree(class CPlayer *pPlayer)
+void CGameControllerPvp::AddSpree(class CPlayer *pPlayer)
 {
 	pPlayer->m_Spree++;
 	const int NumMsg = 5;
@@ -344,7 +344,7 @@ void CGameControllerInstagib::AddSpree(class CPlayer *pPlayer)
 	}
 }
 
-void CGameControllerInstagib::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller)
+void CGameControllerPvp::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller)
 {
 	if(g_Config.m_SvKillingspreeKills > 0 && pPlayer->m_Spree >= g_Config.m_SvKillingspreeKills)
 	{
@@ -371,7 +371,7 @@ void CGameControllerInstagib::EndSpree(class CPlayer *pPlayer, class CPlayer *pK
 	pPlayer->m_Spree = 0;
 }
 
-void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
+void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 {
 	OnPlayerConstruct(pPlayer);
 	IGameController::OnPlayerConnect(pPlayer);
@@ -404,7 +404,7 @@ void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 	CheckReadyStates(); // ddnet-insta
 }
 
-void CGameControllerInstagib::SendChatSpectators(const char *pMessage, int Flags)
+void CGameControllerPvp::SendChatSpectators(const char *pMessage, int Flags)
 {
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -421,7 +421,7 @@ void CGameControllerInstagib::SendChatSpectators(const char *pMessage, int Flags
 	}
 }
 
-void CGameControllerInstagib::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
+void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
 {
 	pPlayer->OnDisconnect();
 	int ClientId = pPlayer->GetCid();
@@ -448,7 +448,7 @@ void CGameControllerInstagib::OnPlayerDisconnect(class CPlayer *pPlayer, const c
 	}
 }
 
-void CGameControllerInstagib::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
+void CGameControllerPvp::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 {
 	Team = ClampTeam(Team);
 	if(Team == pPlayer->GetTeam())
@@ -497,7 +497,7 @@ void CGameControllerInstagib::DoTeamChange(CPlayer *pPlayer, int Team, bool DoCh
 	CheckReadyStates();
 }
 
-void CGameControllerInstagib::Anticamper()
+void CGameControllerPvp::Anticamper()
 {
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -575,7 +575,7 @@ void CGameControllerInstagib::Anticamper()
 	}
 }
 
-int CGameControllerInstagib::NumActivePlayers()
+int CGameControllerPvp::NumActivePlayers()
 {
 	int Active = 0;
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
@@ -584,7 +584,7 @@ int CGameControllerInstagib::NumActivePlayers()
 	return Active;
 }
 
-int CGameControllerInstagib::NumAlivePlayers()
+int CGameControllerPvp::NumAlivePlayers()
 {
 	int Alive = 0;
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
@@ -593,7 +593,7 @@ int CGameControllerInstagib::NumAlivePlayers()
 	return Alive;
 }
 
-int CGameControllerInstagib::NumNonDeadActivePlayers()
+int CGameControllerPvp::NumNonDeadActivePlayers()
 {
 	int Alive = 0;
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
@@ -602,7 +602,7 @@ int CGameControllerInstagib::NumNonDeadActivePlayers()
 	return Alive;
 }
 
-int CGameControllerInstagib::GetHighestSpreeClientId()
+int CGameControllerPvp::GetHighestSpreeClientId()
 {
 	int ClientId = -1;
 	int Spree = 0;
@@ -619,7 +619,7 @@ int CGameControllerInstagib::GetHighestSpreeClientId()
 	return ClientId;
 }
 
-int CGameControllerInstagib::GetFirstAlivePlayerId()
+int CGameControllerPvp::GetFirstAlivePlayerId()
 {
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 		if(pPlayer && pPlayer->GetCharacter())

@@ -2725,43 +2725,45 @@ if(SERVER)
     gamecontroller.h
     gamemodes/DDRace.cpp
     gamemodes/DDRace.h
-    gamemodes/base_fng.cpp
-    gamemodes/base_fng.h
-    gamemodes/base_instagib.cpp
-    gamemodes/base_instagib.h
-    gamemodes/ctf.cpp
-    gamemodes/ctf.h
-    gamemodes/dm.cpp
-    gamemodes/dm.h
-    gamemodes/gctf.cpp
-    gamemodes/gctf.h
-    gamemodes/gdm.cpp
-    gamemodes/gdm.h
-    gamemodes/gtdm.cpp
-    gamemodes/gtdm.h
-    gamemodes/ictf.cpp
-    gamemodes/ictf.h
-    gamemodes/idm.cpp
-    gamemodes/idm.h
-    gamemodes/instagib/bangcommands.cpp
-    gamemodes/instagib/character.cpp
-    gamemodes/instagib/character.h
-    gamemodes/instagib/chat.cpp
-    gamemodes/instagib/player.cpp
-    gamemodes/instagib/player.h
-    gamemodes/itdm.cpp
-    gamemodes/itdm.h
+    gamemodes/base_pvp/bangcommands.cpp
+    gamemodes/base_pvp/base_pvp.cpp
+    gamemodes/base_pvp/base_pvp.h
+    gamemodes/base_pvp/character.cpp
+    gamemodes/base_pvp/character.h
+    gamemodes/base_pvp/chat.cpp
+    gamemodes/base_pvp/player.cpp
+    gamemodes/base_pvp/player.h
+    gamemodes/instagib/base_fng.cpp
+    gamemodes/instagib/base_fng.h
+    gamemodes/instagib/base_instagib.cpp
+    gamemodes/instagib/base_instagib.h
+    gamemodes/instagib/ctf.cpp
+    gamemodes/instagib/ctf.h
+    gamemodes/instagib/dm.cpp
+    gamemodes/instagib/dm.h
+    gamemodes/instagib/gctf.cpp
+    gamemodes/instagib/gctf.h
+    gamemodes/instagib/gdm.cpp
+    gamemodes/instagib/gdm.h
+    gamemodes/instagib/gtdm.cpp
+    gamemodes/instagib/gtdm.h
+    gamemodes/instagib/ictf.cpp
+    gamemodes/instagib/ictf.h
+    gamemodes/instagib/idm.cpp
+    gamemodes/instagib/idm.h
+    gamemodes/instagib/itdm.cpp
+    gamemodes/instagib/itdm.h
+    gamemodes/instagib/solofng.cpp
+    gamemodes/instagib/solofng.h
+    gamemodes/instagib/tdm.cpp
+    gamemodes/instagib/tdm.h
+    gamemodes/instagib/team_fng.cpp
+    gamemodes/instagib/team_fng.h
+    gamemodes/instagib/zcatch/colors.cpp
+    gamemodes/instagib/zcatch/zcatch.cpp
+    gamemodes/instagib/zcatch/zcatch.h
     gamemodes/mod.cpp
     gamemodes/mod.h
-    gamemodes/solofng.cpp
-    gamemodes/solofng.h
-    gamemodes/tdm.cpp
-    gamemodes/tdm.h
-    gamemodes/team_fng.cpp
-    gamemodes/team_fng.h
-    gamemodes/zcatch/colors.cpp
-    gamemodes/zcatch/zcatch.cpp
-    gamemodes/zcatch/zcatch.h
     gameworld.cpp
     gameworld.h
     instagib/gamelogic.cpp

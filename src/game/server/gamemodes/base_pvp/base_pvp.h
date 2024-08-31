@@ -1,13 +1,13 @@
-#ifndef GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H
-#define GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H
+#ifndef GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H
+#define GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H
 
-#include "DDRace.h"
+#include "../DDRace.h"
 
-class CGameControllerInstagib : public CGameControllerDDRace
+class CGameControllerPvp : public CGameControllerDDRace
 {
 public:
-	CGameControllerInstagib(class CGameContext *pGameServer);
-	~CGameControllerInstagib() override;
+	CGameControllerPvp(class CGameContext *pGameServer);
+	~CGameControllerPvp() override;
 
 	// convience accessors to copy code from gamecontext to the instagib controller
 	class IServer *Server() const { return GameServer()->Server(); }
@@ -90,4 +90,4 @@ public:
 	// returns -1 if no player is alive
 	int GetFirstAlivePlayerId();
 };
-#endif // GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H
+#endif // GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H

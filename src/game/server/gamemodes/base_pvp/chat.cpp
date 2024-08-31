@@ -4,9 +4,9 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
-#include "../base_instagib.h"
+#include "base_pvp.h"
 
-bool CGameControllerInstagib::AllowPublicChat(const CPlayer *pPlayer)
+bool CGameControllerPvp::AllowPublicChat(const CPlayer *pPlayer)
 {
 	if(!g_Config.m_SvTournamentChat)
 		return true;
@@ -18,7 +18,7 @@ bool CGameControllerInstagib::AllowPublicChat(const CPlayer *pPlayer)
 	return true;
 }
 
-bool CGameControllerInstagib::ParseChatCmd(char Prefix, int ClientId, const char *pCmdWithArgs)
+bool CGameControllerPvp::ParseChatCmd(char Prefix, int ClientId, const char *pCmdWithArgs)
 {
 #define MAX_ARG_LEN 256
 	char aCmd[MAX_ARG_LEN];
@@ -110,7 +110,7 @@ bool CGameControllerInstagib::ParseChatCmd(char Prefix, int ClientId, const char
 	return match;
 }
 
-bool CGameControllerInstagib::OnBangCommand(int ClientId, const char *pCmd, int NumArgs, const char **ppArgs)
+bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumArgs, const char **ppArgs)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return false;
@@ -208,7 +208,7 @@ bool CGameControllerInstagib::OnBangCommand(int ClientId, const char *pCmd, int 
 	return true;
 }
 
-bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer)
+bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer)
 {
 	int ClientId = pPlayer->GetCid();
 

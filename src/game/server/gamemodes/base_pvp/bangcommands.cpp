@@ -3,9 +3,9 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
-#include "../base_instagib.h"
+#include "base_pvp.h"
 
-void CGameControllerInstagib::BangCommandVote(int ClientId, const char *pCommand, const char *pDesc)
+void CGameControllerPvp::BangCommandVote(int ClientId, const char *pCommand, const char *pDesc)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return;
@@ -24,17 +24,17 @@ void CGameControllerInstagib::BangCommandVote(int ClientId, const char *pCommand
 	GameServer()->CallVote(ClientId, pDesc, pCommand, "chat cmd", aChatmsg);
 }
 
-void CGameControllerInstagib::ComCallShuffleVote(int ClientId)
+void CGameControllerPvp::ComCallShuffleVote(int ClientId)
 {
 	BangCommandVote(ClientId, "shuffle_teams", "shuffle teams");
 }
 
-void CGameControllerInstagib::ComCallSwapTeamsVote(int ClientId)
+void CGameControllerPvp::ComCallSwapTeamsVote(int ClientId)
 {
 	BangCommandVote(ClientId, "swap_teams", "swap teams");
 }
 
-void CGameControllerInstagib::ComCallSwapTeamsRandomVote(int ClientId)
+void CGameControllerPvp::ComCallSwapTeamsRandomVote(int ClientId)
 {
 	BangCommandVote(ClientId, "swap_teams_random", "swap teams (random)");
 }

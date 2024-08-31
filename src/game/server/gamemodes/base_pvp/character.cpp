@@ -3,9 +3,9 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
-#include "../base_instagib.h"
+#include "base_pvp.h"
 
-void CGameControllerInstagib::OnCharacterConstruct(class CCharacter *pChr)
+void CGameControllerPvp::OnCharacterConstruct(class CCharacter *pChr)
 {
 	pChr->m_IsGodmode = false;
 }

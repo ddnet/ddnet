@@ -25,6 +25,8 @@ enum
 class CCharacter : public CEntity
 {
 	MACRO_ALLOC_POOL_ID()
+#define IN_CLASS_CHARACTER
+#include <game/server/gamemodes/base_pvp/character.h>
 
 	friend class CSaveTee; // need to use core
 
@@ -263,15 +265,6 @@ public:
 	bool IsSuper() const { return m_Core.m_Super; }
 
 	CSaveTee &GetLastRescueTeeRef(int Mode = RESCUEMODE_AUTO) { return m_RescueTee[Mode]; }
-
-	// ddnet-insta
-	/*
-		Reset instagib tee without resetting ddnet or teeworlds tee
-		update grenade ammo state without selfkill
-		useful for votes
-	*/
-	void ResetInstaSettings();
-	bool m_IsGodmode;
 };
 
 enum
