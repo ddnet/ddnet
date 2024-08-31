@@ -8,5 +8,7 @@ class CGameControllerInstagib : public CGameControllerPvp
 public:
 	CGameControllerInstagib(class CGameContext *pGameServer);
 	~CGameControllerInstagib() override;
+
+	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 };
 #endif // GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H
