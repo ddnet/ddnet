@@ -631,7 +631,7 @@ Loading DDNet Client
 == Загрузка DDNet Client
 
 Normal message
-== Обычное с.
+== Обычное
 
 Connecting dummy
 == Подключение дамми
@@ -643,10 +643,10 @@ Save ghost
 == Сохранять тень
 
 DDNet Client updated!
-== DDNet Client обновлён!
+== DDNet клиент обновлён!
 
 Highlighted message
-== Выделенное с.
+== Выделенное
 
 Demo
 == Демо
@@ -724,7 +724,7 @@ Downloading %s:
 == Скачивание %s:
 
 Update failed! Check log…
-== Ошибка. Проверьте логи…
+== Не удалось обновиться! Подробности в логах…
 
 Restart
 == Рестарт
@@ -844,7 +844,7 @@ DDNet
 == DDNet
 
 Friend message
-== Дружеское с.
+== Дружеское
 
 Save the best demo of each race
 == Сохранять лучшее демо каждой карты
@@ -916,10 +916,10 @@ Ratio
 == Соотношение
 
 Net
-== Сеть
+== Сальдо
 
 FPM
-== FPM
+== У/мин
 
 Spree
 == Серия
@@ -940,7 +940,7 @@ Grabs
 == 9+ упоминаний
 
 Client message
-== Клиентское с.
+== Клиентское
 
 Warning
 == Предупреждение
@@ -973,7 +973,7 @@ Run server
 == Запустить сервер
 
 Server executable not found, can't run server
-== Файл сервера не найден, невозможно запустить
+== Файл сервера не найден, не удалось запустить сервер
 
 Editor
 == Редактор
@@ -1883,7 +1883,7 @@ Could not resolve connect address '%s'. See local console for details.
 == Не удалось определить адрес подключения '%s'. Подробности в локальной консоли.
 
 Connect address error
-== Ошибка подключения сервера 
+== Ошибка адреса подключения
 
 Could not connect dummy
 == Невозможно подключить дамми
@@ -1892,34 +1892,34 @@ Dummy is not allowed on this server
 == Дамми не разрешен на этом сервере
 
 Please wait…
-== Пожалуйста подождите…
+== Пожалуйста, подождите…
 
 Show client IDs (scoreboard, chat, spectator)
-== Показывать ID клиента (Табло, чат, наблюдатель)
+== Показывать ID клиента (табло, чат, наблюдатель)
 
 Normal:
 == Обычный:
 
 Team:
-== Команда:
+== В команде:
 
 Dummy settings
 == Настройки дамми
 
 Toggle to edit your dummy settings
-== Нажмите чтоб изменить настройки дамми
+== Нажмите, чтобы изменить настройки дамми
 
 Randomize
-== Перемешать 
+== Случайный
 
 Are you sure that you want to delete '%s'?
-== Вы уверены что хотите удалить '%s'?
+== Вы уверены, что хотите удалить '%s'?
 
 Delete skin
 == Удалить скин
 
 Basic
-== Базовый
+== Пресеты
 
 Custom
 == Кастомизация
