@@ -1,6 +1,7 @@
 #include <base/system.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
+#include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -560,7 +561,73 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
 	if(Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo > 0) // -1 == unlimited
 		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo--;
-	return false;
+
+	if(Weapon == WEAPON_GUN)
+	{
+		if(!Character.m_Core.m_Jetpack || !Character.m_pPlayer->m_NinjaJetpack || Character.m_Core.m_HasTelegunGun)
+		{
+			int Lifetime = (int)(Server()->TickSpeed() * Character.GetTuning(Character.m_TuneZone)->m_GunLifetime);
+
+			new CVanillaProjectile(
+				Character.GameWorld(),
+				WEAPON_GUN, //Type
+				Character.m_pPlayer->GetCid(), //Owner
+				ProjStartPos, //Pos
+				Direction, //Dir
+				Lifetime, //Span
+				false, //Freeze
+				false, //Explosive
+				-1, //SoundImpact
+				MouseTarget //InitDir
+			);
+
+			GameServer()->CreateSound(Character.m_Pos, SOUND_GUN_FIRE, Character.TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+		}
+	}
+	else if(Weapon == WEAPON_SHOTGUN)
+	{
+		int ShotSpread = 2;
+
+		for(int i = -ShotSpread; i <= ShotSpread; ++i)
+		{
+			float Spreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
+			float Angle = angle(Direction);
+			Angle += Spreading[i + 2];
+			float v = 1 - (absolute(i) / (float)ShotSpread);
+			float Speed = mix((float)GameServer()->Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
+
+			// TODO: not sure about Dir and InitDir and prediction
+
+			new CVanillaProjectile(
+				Character.GameWorld(),
+				WEAPON_SHOTGUN, // Type
+				Character.GetPlayer()->GetCid(), // Owner
+				ProjStartPos, // Pos
+				direction(Angle) * Speed, // Dir
+				(int)(Server()->TickSpeed() * GameServer()->Tuning()->m_ShotgunLifetime), // Span
+				false, // Freeze
+				false, // Explosive
+				-1, // SoundImpact
+				vec2(cosf(Angle), sinf(Angle)) * Speed); // InitDir
+		}
+
+		GameServer()->CreateSound(Character.m_Pos, SOUND_SHOTGUN_FIRE);
+	}
+	else
+	{
+		return false;
+	}
+
+	Character.m_AttackTick = Server()->Tick();
+
+	if(!Character.m_ReloadTimer)
+	{
+		float FireDelay;
+		Character.GetTuning(Character.m_TuneZone)->Get(38 + Character.m_Core.m_ActiveWeapon, &FireDelay);
+		Character.m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+	}
+
+	return true;
 }
 
 int CGameControllerPvp::NumActivePlayers()

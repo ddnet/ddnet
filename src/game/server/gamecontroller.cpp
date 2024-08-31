@@ -799,11 +799,15 @@ void IGameController::Snap(int SnappingClient)
 		return;
 
 	pGameInfoEx->m_Flags =
+		GAMEINFOFLAG_PREDICT_VANILLA | // ddnet-insta
+		GAMEINFOFLAG_ENTITIES_VANILLA | // ddnet-insta
+		GAMEINFOFLAG_BUG_VANILLA_BOUNCE | // ddnet-insta
+		GAMEINFOFLAG_GAMETYPE_VANILLA | // ddnet-insta
 		/* GAMEINFOFLAG_TIMESCORE | */ // ddnet-insta
 		/* GAMEINFOFLAG_GAMETYPE_RACE | */ // ddnet-insta
 		/* GAMEINFOFLAG_GAMETYPE_DDRACE | */ // ddnet-insta
 		/* GAMEINFOFLAG_GAMETYPE_DDNET | */ // ddnet-insta
-		GAMEINFOFLAG_UNLIMITED_AMMO |
+		GAMEINFOFLAG_UNLIMITED_AMMO | // TODO: ddnet-insta unset this for vanilla game types
 		GAMEINFOFLAG_RACE_RECORD_MESSAGE |
 		GAMEINFOFLAG_ALLOW_EYE_WHEEL |
 		GAMEINFOFLAG_ALLOW_HOOK_COLL |

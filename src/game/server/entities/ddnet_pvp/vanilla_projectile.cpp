@@ -177,6 +177,8 @@ void CVanillaProjectile::Tick()
 					pChr->Freeze();
 			}
 		}
+		else if(pTargetChr) // ddnet-insta
+			pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
 
 		if(pOwnerChar && !GameLayerClipped(ColPos) &&
 			((m_Type == WEAPON_GRENADE && pOwnerChar->HasTelegunGrenade()) || (m_Type == WEAPON_GUN && pOwnerChar->HasTelegunGun())))
@@ -235,7 +237,8 @@ void CVanillaProjectile::Tick()
 		}
 		else if(m_Type == WEAPON_GUN)
 		{
-			GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
+			// ddnet-insta commeted out dmg indicators
+			// GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
 			m_MarkedForDestroy = true;
 			return;
 		}
@@ -305,6 +308,15 @@ void CVanillaProjectile::Snap(int SnappingClient)
 
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
+
+	// ddnet-insta
+	if(m_Type == WEAPON_SHOTGUN)
+	{
+		CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetId(), sizeof(CNetObj_Projectile)));
+		if(pProj)
+			FillInfo(pProj);
+		return;
+	}
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	if(SnappingClientVersion < VERSION_DDNET_ENTITY_NETOBJS)
