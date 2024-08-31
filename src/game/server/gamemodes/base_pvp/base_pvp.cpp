@@ -225,39 +225,51 @@ void CGameControllerPvp::Tick()
 bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	if(Character.m_IsGodmode)
-	{
-		Dmg = 0;
-		return false;
-	}
-	// TODO: ddnet-insta cfg team damage
-	// if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From) && !g_Config.m_SvTeamdamage)
+		return true;
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 		return false;
-	if(From == Character.GetPlayer()->GetCid())
-	{
-		Dmg = 0;
-		//Give back ammo on grenade self push//Only if not infinite ammo and activated
-		if(Weapon == WEAPON_GRENADE && g_Config.m_SvGrenadeAmmoRegen && g_Config.m_SvGrenadeAmmoRegenSpeedNade)
-		{
-			Character.SetWeaponAmmo(WEAPON_GRENADE, minimum(Character.GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
-		}
-	}
-
 	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
 	{
 		CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
 		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
-			Dmg = 0;
+			return false;
 	}
 
-	int Health = 10;
+	// instagib damage always kills no matter the armor
+	// max vanilla weapon damage is katana with 9 dmg
+	if(Dmg >= 10)
+	{
+		Character.SetArmor(0);
+		Character.SetHealth(0);
+	}
 
-	// no self damage
-	if(Dmg >= g_Config.m_SvDamageNeededForKill)
-		Health = From == Character.GetPlayer()->GetCid() ? Health : 0;
+	if(Dmg)
+	{
+		if(Character.Armor())
+		{
+			if(Dmg > 1)
+			{
+				Character.AddHealth(-1);
+				Dmg--;
+			}
+
+			if(Dmg > Character.Armor())
+			{
+				Dmg -= Character.Armor();
+				Character.SetArmor(0);
+			}
+			else
+			{
+				Character.AddArmor(-Dmg);
+				Dmg = 0;
+			}
+		}
+
+		Character.AddHealth(-Dmg);
+	}
 
 	// check for death
-	if(Health <= 0)
+	if(Character.Health())
 	{
 		Character.Die(From, Weapon);
 
@@ -268,17 +280,6 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 			{
 				// set attacker's face to happy (taunt!)
 				pChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
-
-				// refill nades
-				int RefillNades = 0;
-				if(g_Config.m_SvGrenadeAmmoRegenOnKill == 1)
-					RefillNades = 1;
-				else if(g_Config.m_SvGrenadeAmmoRegenOnKill == 2)
-					RefillNades = g_Config.m_SvGrenadeAmmoRegenNum;
-				if(RefillNades && g_Config.m_SvGrenadeAmmoRegen && Weapon == WEAPON_GRENADE)
-				{
-					pChr->SetWeaponAmmo(WEAPON_GRENADE, minimum(pChr->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
-				}
 			}
 
 			// do damage Hit sound
@@ -298,11 +299,6 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG);
 	else
 		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);*/
-
-	if(Dmg)
-	{
-		Character.SetEmote(EMOTE_PAIN, Server()->Tick() + 500 * Server()->TickSpeed() / 1000);
-	}
 
 	return false;
 }

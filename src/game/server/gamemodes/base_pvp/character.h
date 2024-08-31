@@ -21,6 +21,15 @@ public:
 	void ResetInstaSettings();
 	bool m_IsGodmode;
 
+	int Health() { return m_Health; };
+	int Armor() { return m_Armor; };
+
+	void SetHealth(int Amount) { m_Health = Amount; };
+	// void SetArmor(int Amount) { m_Armor = Amount; }; // defined by ddnet
+
+	void AddHealth(int Amount) { m_Health += Amount; };
+	void AddArmor(int Amount) { m_Armor += Amount; };
+
 #ifndef IN_CLASS_CHARACTER
 };
 #endif
