@@ -1074,11 +1074,9 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		// proof button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-		static int s_ProofButton = 0;
-		if(DoButton_Ex(&s_ProofButton, "Proof", MapView()->ProofMode()->IsEnabled(), &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent the area that a player can see with default zoom.", IGraphics::CORNER_L) ||
-			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_P) && ModPressed))
+		if(DoButton_Ex(&m_QuickActionProof, m_QuickActionProof.Label(), m_QuickActionProof.Active(), &Button, 0, m_QuickActionProof.Description(), IGraphics::CORNER_L))
 		{
-			MapView()->ProofMode()->Toggle();
+			m_QuickActionProof.Call();
 		}
 
 		TB_Top.VSplitLeft(14.0f, &Button, &TB_Top);
@@ -1254,10 +1252,9 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// refocus button
 		{
 			TB_Bottom.VSplitLeft(50.0f, &Button, &TB_Bottom);
-			static int s_RefocusButton = 0;
 			int FocusButtonChecked = MapView()->IsFocused() ? -1 : 1;
-			if(DoButton_Editor(&s_RefocusButton, "Refocus", FocusButtonChecked, &Button, 0, "[HOME] Restore map focus") || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_HOME)))
-				MapView()->Focus();
+			if(DoButton_Editor(&m_QuickActionRefocus, m_QuickActionRefocus.Label(), FocusButtonChecked, &Button, 0, m_QuickActionRefocus.Description()) || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_HOME)))
+				m_QuickActionRefocus.Call();
 			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
 		}
 
@@ -4302,12 +4299,9 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	if(s_ScrollRegion.AddRect(AddGroupButton))
 	{
 		AddGroupButton.HSplitTop(RowHeight, &AddGroupButton, 0);
-		static int s_AddGroupButton = 0;
-		if(DoButton_Editor(&s_AddGroupButton, "Add group", 0, &AddGroupButton, IGraphics::CORNER_R, "Adds a new group"))
+		if(DoButton_Editor(&m_QuickActionAddGroup, m_QuickActionAddGroup.Label(), 0, &AddGroupButton, IGraphics::CORNER_R, m_QuickActionAddGroup.Description()))
 		{
-			m_Map.NewGroup();
-			m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
-			m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(this, m_SelectedGroup, false));
+			m_QuickActionAddGroup.Call();
 		}
 	}
 
@@ -4806,8 +4800,8 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 	{
 		AddImageButton.HSplitTop(5.0f, nullptr, &AddImageButton);
 		AddImageButton.HSplitTop(RowHeight, &AddImageButton, nullptr);
-		if(DoButton_Editor(&s_AddImageButton, "Add", 0, &AddImageButton, 0, "Load a new image to use in the map"))
-			InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Add Image", "Add", "mapres", false, AddImage, this);
+		if(DoButton_Editor(&s_AddImageButton, m_QuickActionAddImage.Label(), 0, &AddImageButton, 0, m_QuickActionAddImage.Description()))
+			m_QuickActionAddImage.Call();
 	}
 	s_ScrollRegion.End();
 }
@@ -5750,9 +5744,9 @@ void CEditor::RenderStatusbar(CUIRect View, CUIRect *pTooltipRect)
 	CUIRect Button;
 	View.VSplitRight(100.0f, &View, &Button);
 	static int s_EnvelopeButton = 0;
-	if(DoButton_Editor(&s_EnvelopeButton, "Envelopes", ButtonsDisabled ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES, &Button, 0, "Toggles the envelope editor.") == 1)
+	if(DoButton_Editor(&s_EnvelopeButton, m_QuickActionEnvelopes.Label(), m_QuickActionEnvelopes.Color(), &Button, 0, m_QuickActionEnvelopes.Description()) == 1)
 	{
-		m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES ? EXTRAEDITOR_NONE : EXTRAEDITOR_ENVELOPES;
+		m_QuickActionEnvelopes.Call();
 	}
 
 	View.VSplitRight(10.0f, &View, nullptr);
@@ -7919,7 +7913,7 @@ void CEditor::Render()
 			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", true, CallbackSaveCopyMap, this);
 		// ctrl+shift+s to save as
 		else if(Input()->KeyPress(KEY_S) && ModPressed && ShiftPressed)
-			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", true, CallbackSaveMap, this);
+			m_QuickActionSaveAs.Call();
 		// ctrl+s to save
 		else if(Input()->KeyPress(KEY_S) && ModPressed)
 		{
@@ -8362,6 +8356,7 @@ void CEditor::Init()
 	m_vComponents.emplace_back(m_MapView);
 	m_vComponents.emplace_back(m_MapSettingsBackend);
 	m_vComponents.emplace_back(m_LayerSelector);
+	m_vComponents.emplace_back(m_Prompt);
 	for(CEditorComponent &Component : m_vComponents)
 		Component.OnInit(this);
 
