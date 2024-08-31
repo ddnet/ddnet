@@ -29,7 +29,7 @@ CVanillaPickup::CVanillaPickup(CGameWorld *pGameWorld, int Type, int SubType, in
 
 void CVanillaPickup::Reset()
 {
-	int SpawnDelay = m_Type == WEAPON_NINJA ? 90 : 0;
+	int SpawnDelay = m_Type == POWERUP_NINJA ? 90 : 0;
 	if(SpawnDelay > 0)
 		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * SpawnDelay;
 	else
@@ -87,7 +87,7 @@ void CVanillaPickup::Tick()
 
 				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 				{
-					pChr->GiveWeapon(m_Subtype);
+					pChr->GiveWeapon(m_Subtype, false, 10);
 
 					if(m_Subtype == WEAPON_GRENADE)
 						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
@@ -98,6 +98,7 @@ void CVanillaPickup::Tick()
 
 					if(pChr->GetPlayer())
 						GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCid(), m_Subtype);
+					Picked = true;
 				}
 				break;
 
@@ -105,6 +106,7 @@ void CVanillaPickup::Tick()
 			{
 				// activate ninja on target player
 				pChr->GiveNinja();
+				Picked = true;
 				break;
 			}
 			default:
@@ -117,7 +119,7 @@ void CVanillaPickup::Tick()
 				str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d",
 					pChr->GetPlayer()->GetCid(), Server()->ClientName(pChr->GetPlayer()->GetCid()), m_Type);
 				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-				int RespawnTime = m_Type == WEAPON_NINJA ? 90 : 15;
+				int RespawnTime = m_Type == POWERUP_NINJA ? 90 : 15;
 				if(RespawnTime >= 0)
 					m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
 			}

@@ -25,6 +25,45 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 
 CGameControllerPvp::~CGameControllerPvp() = default;
 
+int CGameControllerPvp::GameInfoExFlags(int SnappingClient)
+{
+	int Flags =
+		GAMEINFOFLAG_PREDICT_VANILLA | // ddnet-insta
+		GAMEINFOFLAG_ENTITIES_VANILLA | // ddnet-insta
+		GAMEINFOFLAG_BUG_VANILLA_BOUNCE | // ddnet-insta
+		GAMEINFOFLAG_GAMETYPE_VANILLA | // ddnet-insta
+		/* GAMEINFOFLAG_TIMESCORE | */ // ddnet-insta
+		/* GAMEINFOFLAG_GAMETYPE_RACE | */ // ddnet-insta
+		/* GAMEINFOFLAG_GAMETYPE_DDRACE | */ // ddnet-insta
+		/* GAMEINFOFLAG_GAMETYPE_DDNET | */ // ddnet-insta
+		GAMEINFOFLAG_UNLIMITED_AMMO |
+		GAMEINFOFLAG_RACE_RECORD_MESSAGE |
+		GAMEINFOFLAG_ALLOW_EYE_WHEEL |
+		GAMEINFOFLAG_ALLOW_HOOK_COLL |
+		GAMEINFOFLAG_ALLOW_ZOOM |
+		GAMEINFOFLAG_BUG_DDRACE_GHOST |
+		GAMEINFOFLAG_BUG_DDRACE_INPUT |
+		GAMEINFOFLAG_PREDICT_DDRACE |
+		GAMEINFOFLAG_PREDICT_DDRACE_TILES |
+		GAMEINFOFLAG_ENTITIES_DDNET |
+		GAMEINFOFLAG_ENTITIES_DDRACE |
+		GAMEINFOFLAG_ENTITIES_RACE |
+		GAMEINFOFLAG_RACE;
+	if(!g_Config.m_SvAllowZoom) //ddnet-insta
+		Flags &= ~(GAMEINFOFLAG_ALLOW_ZOOM);
+	if(g_Config.m_SvFastcap) //ddnet-insta
+	{
+		Flags |= GAMEINFOFLAG_GAMETYPE_FASTCAP;
+		Flags |= GAMEINFOFLAG_FLAG_STARTS_RACE;
+	}
+	return Flags;
+}
+
+int CGameControllerPvp::GameInfoExFlags2(int SnappingClient)
+{
+	return GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // ddnet-insta
+}
+
 int CGameControllerPvp::GetAutoTeam(int NotThisId)
 {
 	if(Config()->m_SvTournamentMode)

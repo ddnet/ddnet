@@ -799,15 +799,11 @@ void IGameController::Snap(int SnappingClient)
 		return;
 
 	pGameInfoEx->m_Flags =
-		GAMEINFOFLAG_PREDICT_VANILLA | // ddnet-insta
-		GAMEINFOFLAG_ENTITIES_VANILLA | // ddnet-insta
-		GAMEINFOFLAG_BUG_VANILLA_BOUNCE | // ddnet-insta
-		GAMEINFOFLAG_GAMETYPE_VANILLA | // ddnet-insta
-		/* GAMEINFOFLAG_TIMESCORE | */ // ddnet-insta
-		/* GAMEINFOFLAG_GAMETYPE_RACE | */ // ddnet-insta
-		/* GAMEINFOFLAG_GAMETYPE_DDRACE | */ // ddnet-insta
-		/* GAMEINFOFLAG_GAMETYPE_DDNET | */ // ddnet-insta
-		GAMEINFOFLAG_UNLIMITED_AMMO | // TODO: ddnet-insta unset this for vanilla game types
+		GAMEINFOFLAG_TIMESCORE |
+		GAMEINFOFLAG_GAMETYPE_RACE |
+		GAMEINFOFLAG_GAMETYPE_DDRACE |
+		GAMEINFOFLAG_GAMETYPE_DDNET |
+		GAMEINFOFLAG_UNLIMITED_AMMO |
 		GAMEINFOFLAG_RACE_RECORD_MESSAGE |
 		GAMEINFOFLAG_ALLOW_EYE_WHEEL |
 		GAMEINFOFLAG_ALLOW_HOOK_COLL |
@@ -820,14 +816,8 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_ENTITIES_DDRACE |
 		GAMEINFOFLAG_ENTITIES_RACE |
 		GAMEINFOFLAG_RACE;
-	if(!g_Config.m_SvAllowZoom) //ddnet-insta
-		pGameInfoEx->m_Flags &= ~(GAMEINFOFLAG_ALLOW_ZOOM);
-	if(g_Config.m_SvFastcap) //ddnet-insta
-	{
-		pGameInfoEx->m_Flags |= GAMEINFOFLAG_GAMETYPE_FASTCAP;
-		pGameInfoEx->m_Flags |= GAMEINFOFLAG_FLAG_STARTS_RACE;
-	}
-	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // ddnet-insta
+	pGameInfoEx->m_Flags = GameInfoExFlags(SnappingClient); // ddnet-insta
+	pGameInfoEx->m_Flags2 = GameInfoExFlags2(SnappingClient); // ddnet-insta
 	if(g_Config.m_SvNoWeakHook)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
 	pGameInfoEx->m_Version = GAMEINFO_CURVERSION;

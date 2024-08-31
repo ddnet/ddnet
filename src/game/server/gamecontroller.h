@@ -206,6 +206,8 @@ public:
 	*/
 	virtual bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) { return false; };
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
+	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
+	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };
 	void CheckReadyStates(int WithoutId = -1);
 	bool GetPlayersReadyState(int WithoutId = -1, int *pNumUnready = nullptr);
 	void SetPlayersReadyState(bool ReadyState);

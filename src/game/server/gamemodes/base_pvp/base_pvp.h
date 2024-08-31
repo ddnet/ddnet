@@ -28,6 +28,8 @@ public:
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
 	int GetAutoTeam(int NotThisId) override;
+	int GameInfoExFlags(int SnappingClient) override;
+	int GameInfoExFlags2(int SnappingClient) override;
 
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 

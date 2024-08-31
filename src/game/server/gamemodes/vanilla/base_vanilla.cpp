@@ -21,6 +21,13 @@ CGameControllerVanilla::CGameControllerVanilla(class CGameContext *pGameServer) 
 
 CGameControllerVanilla::~CGameControllerVanilla() = default;
 
+int CGameControllerVanilla::GameInfoExFlags(int SnappingClient)
+{
+	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient);
+	Flags &= ~(GAMEINFOFLAG_UNLIMITED_AMMO);
+	return Flags;
+}
+
 bool CGameControllerVanilla::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	if(Weapon == WEAPON_GUN || Weapon == WEAPON_SHOTGUN)
