@@ -9,6 +9,7 @@ public:
 	CGameControllerVanilla(class CGameContext *pGameServer);
 	~CGameControllerVanilla() override;
 
+	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 };
 #endif

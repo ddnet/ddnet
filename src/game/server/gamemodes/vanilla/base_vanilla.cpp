@@ -1,3 +1,4 @@
+#include <base/math.h>
 #include <base/system.h>
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
@@ -19,6 +20,57 @@ CGameControllerVanilla::CGameControllerVanilla(class CGameContext *pGameServer) 
 }
 
 CGameControllerVanilla::~CGameControllerVanilla() = default;
+
+bool CGameControllerVanilla::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
+{
+	// m_pPlayer only inflicts half damage on self
+	if(From == Character.GetPlayer()->GetCid())
+		Dmg = maximum(1, Dmg / 2);
+
+	Character.m_DamageTaken++;
+
+	// create healthmod indicator
+	if(Server()->Tick() < Character.m_DamageTakenTick + 25)
+	{
+		// make sure that the damage indicators doesn't group together
+		GameServer()->CreateDamageInd(Character.m_Pos, Character.m_DamageTaken * 0.25f, Dmg);
+	}
+	else
+	{
+		Character.m_DamageTaken = 0;
+		GameServer()->CreateDamageInd(Character.m_Pos, 0, Dmg);
+	}
+
+	if(Dmg)
+	{
+		if(Character.m_Armor)
+		{
+			if(Dmg > 1)
+			{
+				Character.m_Health--;
+				Dmg--;
+			}
+
+			if(Dmg > Character.m_Armor)
+			{
+				Dmg -= Character.m_Armor;
+				Character.m_Armor = 0;
+			}
+			else
+			{
+				Character.m_Armor -= Dmg;
+				Dmg = 0;
+			}
+		}
+	}
+
+	if(Dmg > 2)
+		GameServer()->CreateSound(Character.m_Pos, SOUND_PLAYER_PAIN_LONG);
+	else
+		GameServer()->CreateSound(Character.m_Pos, SOUND_PLAYER_PAIN_SHORT);
+
+	return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+}
 
 bool CGameControllerVanilla::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {

@@ -39,7 +39,8 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 
 	dbg_assert(Character.IsAlive(), "tried to apply damage to dead character");
 
-	CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+	if(CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character))
+		return true;
 
 	if(!Character.IsAlive())
 	{

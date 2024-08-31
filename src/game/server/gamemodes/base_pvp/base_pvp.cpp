@@ -243,33 +243,10 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 		Character.SetHealth(0);
 	}
 
-	if(Dmg)
-	{
-		if(Character.Armor())
-		{
-			if(Dmg > 1)
-			{
-				Character.AddHealth(-1);
-				Dmg--;
-			}
-
-			if(Dmg > Character.Armor())
-			{
-				Dmg -= Character.Armor();
-				Character.SetArmor(0);
-			}
-			else
-			{
-				Character.AddArmor(-Dmg);
-				Dmg = 0;
-			}
-		}
-
-		Character.AddHealth(-Dmg);
-	}
+	Character.AddHealth(-Dmg);
 
 	// check for death
-	if(Character.Health())
+	if(Character.Health() <= 0)
 	{
 		Character.Die(From, Weapon);
 
