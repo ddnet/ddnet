@@ -1483,26 +1483,6 @@ void CGameContext::OnClientEnter(int ClientId)
 	}
 	m_pController->OnPlayerConnect(m_apPlayers[ClientId]);
 
-	if(Server()->IsSixup(ClientId))
-	{
-		{
-			protocol7::CNetMsg_Sv_GameInfo Msg;
-			Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
-			Msg.m_MatchCurrent = 1;
-			Msg.m_MatchNum = 0;
-			Msg.m_ScoreLimit = 0;
-			Msg.m_TimeLimit = 0;
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
-		}
-
-		// /team is essential
-		{
-			protocol7::CNetMsg_Sv_CommandInfoRemove Msg;
-			Msg.m_pName = "team";
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
-		}
-	}
-
 	{
 		CNetMsg_Sv_CommandInfoGroupStart Msg;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);

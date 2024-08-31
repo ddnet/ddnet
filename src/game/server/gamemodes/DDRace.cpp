@@ -18,6 +18,7 @@ CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	IGameController(pGameServer)
 {
 	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
+	m_GameFlags = protocol7::GAMEFLAG_RACE;
 }
 
 CGameControllerDDRace::~CGameControllerDDRace() = default;
