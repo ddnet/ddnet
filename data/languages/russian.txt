@@ -1880,52 +1880,52 @@ https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping/ru
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== Не удалось определить адрес подключения '%s'. Подробности в локальной консоли.
 
 Connect address error
-== 
+== Ошибка подключения сервера 
 
 Could not connect dummy
-== 
+== Невозможно подключить дамми
 
 Dummy is not allowed on this server
-== 
+== Дамми не разрешен на этом сервере
 
 Please wait…
-== 
+== Пожалуйста подождите…
 
 Show client IDs (scoreboard, chat, spectator)
-== 
+== Показывать ID клиента (Табло, чат, наблюдатель)
 
 Normal:
-== 
+== Обычный:
 
 Team:
-== 
+== Команда:
 
 Dummy settings
-== 
+== Настройки дамми
 
 Toggle to edit your dummy settings
-== 
+== Нажмите чтоб изменить настройки дамми
 
 Randomize
-== 
+== Перемешать 
 
 Are you sure that you want to delete '%s'?
-== 
+== Вы уверены что хотите удалить '%s'?
 
 Delete skin
-== 
+== Удалить скин
 
 Basic
-== 
+== Базовый
 
 Custom
-== 
+== Кастомизация
 
 Unable to delete skin
-== 
+== Невозможно удалить скин
 
 Customize
-== 
+== Кастомизировать
