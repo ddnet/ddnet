@@ -23,11 +23,7 @@ public:
 private:
 	int m_Type;
 	int m_Subtype;
-
-	// DDRace
-
-	void Move();
-	vec2 m_Core;
+	int m_SpawnTick;
 };
 
 #endif

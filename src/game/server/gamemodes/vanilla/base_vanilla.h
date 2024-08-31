@@ -8,5 +8,7 @@ class CGameControllerVanilla : public CGameControllerPvp
 public:
 	CGameControllerVanilla(class CGameContext *pGameServer);
 	~CGameControllerVanilla() override;
+
+	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 };
 #endif
