@@ -65,7 +65,7 @@ int CGameControllerInstaBaseCTF::OnCharacterDeath(class CCharacter *pVictim, cla
 
 bool CGameControllerInstaBaseCTF::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-	CGameControllerPvp::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
+	CGameControllerInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 	int Team = -1;
