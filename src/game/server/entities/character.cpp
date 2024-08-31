@@ -451,11 +451,11 @@ void CCharacter::FireWeapon()
 	if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
 		return;
 
-	// ddnet-insta
-	if(g_Config.m_SvGrenadeAmmoRegenResetOnFire)
-		m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
-
 	vec2 ProjStartPos = m_Pos + Direction * GetProximityRadius() * 0.75f;
+
+	// ddnet-insta
+	if(GameServer()->m_pController->OnFireWeapon(*this, m_Core.m_ActiveWeapon, Direction, MouseTarget, ProjStartPos))
+		return;
 
 	switch(m_Core.m_ActiveWeapon)
 	{
@@ -599,9 +599,6 @@ void CCharacter::FireWeapon()
 	}
 
 	m_AttackTick = Server()->Tick();
-
-	if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0) // -1 == unlimited
-		m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo--;
 
 	if(!m_ReloadTimer)
 	{

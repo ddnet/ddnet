@@ -12,6 +12,7 @@ class CCharacter : public CEntity
 #endif // IN_CLASS_CHARACTER
 
 	friend class CGameControllerVanilla;
+	friend class CGameControllerPvp;
 
 public:
 	// ddnet-insta

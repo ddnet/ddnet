@@ -554,6 +554,15 @@ void CGameControllerPvp::Anticamper()
 	}
 }
 
+bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
+{
+	if(g_Config.m_SvGrenadeAmmoRegenResetOnFire)
+		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
+	if(Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo > 0) // -1 == unlimited
+		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo--;
+	return false;
+}
+
 int CGameControllerPvp::NumActivePlayers()
 {
 	int Active = 0;
