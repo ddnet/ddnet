@@ -1,5 +1,3 @@
-#include "ctf.h"
-
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <game/mapitems.h>
@@ -10,8 +8,10 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
-CGameControllerCTF::CGameControllerCTF(class CGameContext *pGameServer) :
-	CGameControllerInstagib(pGameServer)
+#include "ctf.h"
+
+CGameControllerBaseCTF::CGameControllerBaseCTF(class CGameContext *pGameServer) :
+	CGameControllerPvp(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 
@@ -19,23 +19,23 @@ CGameControllerCTF::CGameControllerCTF(class CGameContext *pGameServer) :
 	m_apFlags[1] = 0;
 }
 
-CGameControllerCTF::~CGameControllerCTF() = default;
+CGameControllerBaseCTF::~CGameControllerBaseCTF() = default;
 
-void CGameControllerCTF::Tick()
+void CGameControllerBaseCTF::Tick()
 {
-	CGameControllerInstagib::Tick();
+	CGameControllerPvp::Tick();
 
 	FlagTick(); // ddnet-insta
 }
 
-void CGameControllerCTF::OnCharacterSpawn(class CCharacter *pChr)
+void CGameControllerBaseCTF::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerInstagib::OnCharacterSpawn(pChr);
+	CGameControllerPvp::OnCharacterSpawn(pChr);
 }
 
-int CGameControllerCTF::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
+int CGameControllerBaseCTF::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
+	CGameControllerPvp::OnCharacterDeath(pVictim, pKiller, WeaponId);
 	int HadFlag = 0;
 
 	// drop flags
@@ -63,9 +63,9 @@ int CGameControllerCTF::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	return HadFlag;
 }
 
-bool CGameControllerCTF::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
+bool CGameControllerBaseCTF::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-	CGameControllerInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
+	CGameControllerPvp::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 	int Team = -1;
@@ -84,16 +84,16 @@ bool CGameControllerCTF::OnEntity(int Index, int x, int y, int Layer, int Flags,
 	return true;
 }
 
-void CGameControllerCTF::OnFlagReturn(CFlag *pFlag)
+void CGameControllerBaseCTF::OnFlagReturn(CFlag *pFlag)
 {
-	CGameControllerInstagib::OnFlagReturn(pFlag);
+	CGameControllerPvp::OnFlagReturn(pFlag);
 
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", "flag_return");
 	GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_RETURN, -1);
 	GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
 }
 
-void CGameControllerCTF::OnFlagGrab(class CFlag *pFlag)
+void CGameControllerBaseCTF::OnFlagGrab(class CFlag *pFlag)
 {
 	if(!pFlag)
 		return;
@@ -109,7 +109,7 @@ void CGameControllerCTF::OnFlagGrab(class CFlag *pFlag)
 		Teams().OnCharacterStart(pPlayer->GetCid());
 }
 
-void CGameControllerCTF::OnFlagCapture(class CFlag *pFlag, float Time)
+void CGameControllerBaseCTF::OnFlagCapture(class CFlag *pFlag, float Time)
 {
 	if(!pFlag)
 		return;
@@ -123,7 +123,7 @@ void CGameControllerCTF::OnFlagCapture(class CFlag *pFlag, float Time)
 		Teams().OnCharacterFinish(pPlayer->GetCid());
 }
 
-void CGameControllerCTF::FlagTick()
+void CGameControllerBaseCTF::FlagTick()
 {
 	if(GameServer()->m_World.m_ResetRequested || GameServer()->m_World.m_Paused)
 		return;
@@ -241,9 +241,9 @@ void CGameControllerCTF::FlagTick()
 	DoWincheckRound();
 }
 
-void CGameControllerCTF::Snap(int SnappingClient)
+void CGameControllerBaseCTF::Snap(int SnappingClient)
 {
-	CGameControllerInstagib::Snap(SnappingClient);
+	CGameControllerPvp::Snap(SnappingClient);
 
 	int FlagCarrierRed = FLAG_MISSING;
 	if(m_apFlags[TEAM_RED])
@@ -290,9 +290,9 @@ void CGameControllerCTF::Snap(int SnappingClient)
 	}
 }
 
-bool CGameControllerCTF::DoWincheckRound()
+bool CGameControllerBaseCTF::DoWincheckRound()
 {
-	CGameControllerInstagib::DoWincheckRound();
+	CGameControllerPvp::DoWincheckRound();
 
 	// check score win condition
 	if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)) ||

@@ -1,15 +1,15 @@
 #ifndef GAME_SERVER_GAMEMODES_INSTAGIB_GCTF_H
 #define GAME_SERVER_GAMEMODES_INSTAGIB_GCTF_H
 
-#include "ctf.h"
+#include <game/server/gamemodes/base_pvp/ctf.h>
 
-class CGameControllerGCTF : public CGameControllerCTF
+class CGameControllerGCTF : public CGameControllerBaseCTF
 {
 public:
 	CGameControllerGCTF(class CGameContext *pGameServer);
-	~CGameControllerGCTF();
+	~CGameControllerGCTF() override;
 
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	void Tick() override;
 };
-#endif // GAME_SERVER_GAMEMODES_GCTF_H
+#endif
