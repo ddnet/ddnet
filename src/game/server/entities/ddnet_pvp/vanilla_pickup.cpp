@@ -5,7 +5,6 @@
 #include <game/mapitems.h>
 #include <game/teamscore.h>
 
-#include <game/generated/client_data.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
@@ -30,8 +29,9 @@ CVanillaPickup::CVanillaPickup(CGameWorld *pGameWorld, int Type, int SubType, in
 
 void CVanillaPickup::Reset()
 {
-	if(g_pData->m_aPickups[m_Type].m_Spawndelay > 0)
-		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * g_pData->m_aPickups[m_Type].m_Spawndelay;
+	int SpawnDelay = m_Type == WEAPON_NINJA ? 90 : 0;
+	if(SpawnDelay > 0)
+		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * SpawnDelay;
 	else
 		m_SpawnTick = -1;
 }
@@ -117,7 +117,7 @@ void CVanillaPickup::Tick()
 				str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d",
 					pChr->GetPlayer()->GetCid(), Server()->ClientName(pChr->GetPlayer()->GetCid()), m_Type);
 				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-				int RespawnTime = g_pData->m_aPickups[m_Type].m_Respawntime;
+				int RespawnTime = m_Type == WEAPON_NINJA ? 90 : 15;
 				if(RespawnTime >= 0)
 					m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
 			}
