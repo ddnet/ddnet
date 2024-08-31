@@ -3,7 +3,7 @@
 #include "gtdm.h"
 
 CGameControllerGTDM::CGameControllerGTDM(class CGameContext *pGameServer) :
-	CGameControllerTDM(pGameServer)
+	CGameControllerInstaTDM(pGameServer)
 {
 	m_pGameType = "gTDM";
 }
@@ -12,12 +12,12 @@ CGameControllerGTDM::~CGameControllerGTDM() = default;
 
 void CGameControllerGTDM::Tick()
 {
-	CGameControllerTDM::Tick();
+	CGameControllerInstaTDM::Tick();
 }
 
 void CGameControllerGTDM::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerTDM::OnCharacterSpawn(pChr);
+	CGameControllerInstaTDM::OnCharacterSpawn(pChr);
 
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_GRENADE, false, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);

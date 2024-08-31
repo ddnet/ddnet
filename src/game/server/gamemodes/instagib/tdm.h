@@ -1,13 +1,13 @@
 #ifndef GAME_SERVER_GAMEMODES_INSTAGIB_TDM_H
 #define GAME_SERVER_GAMEMODES_INSTAGIB_TDM_H
 
-#include <game/server/gamemodes/base_pvp/dm.h>
+#include <game/server/gamemodes/instagib/dm.h>
 
-class CGameControllerTDM : public CGameControllerBaseDM
+class CGameControllerInstaTDM : public CGameControllerInstaBaseDM
 {
 public:
-	CGameControllerTDM(class CGameContext *pGameServer);
-	~CGameControllerTDM() override;
+	CGameControllerInstaTDM(class CGameContext *pGameServer);
+	~CGameControllerInstaTDM() override;
 
 	void Snap(int SnappingClient) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;

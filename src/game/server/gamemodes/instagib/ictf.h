@@ -1,9 +1,9 @@
 #ifndef GAME_SERVER_GAMEMODES_INSTAGIB_ICTF_H
 #define GAME_SERVER_GAMEMODES_INSTAGIB_ICTF_H
 
-#include <game/server/gamemodes/base_pvp/ctf.h>
+#include <game/server/gamemodes/instagib/ctf.h>
 
-class CGameControllerICTF : public CGameControllerBaseCTF
+class CGameControllerICTF : public CGameControllerInstaBaseCTF
 {
 public:
 	CGameControllerICTF(class CGameContext *pGameServer);

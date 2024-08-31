@@ -3,13 +3,13 @@
 
 #include "tdm.h"
 
-class CGameControllerGTDM : public CGameControllerTDM
+class CGameControllerGTDM : public CGameControllerInstaTDM
 {
 public:
 	CGameControllerGTDM(class CGameContext *pGameServer);
-	~CGameControllerGTDM();
+	~CGameControllerGTDM() override;
 
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	void Tick() override;
 };
-#endif // GAME_SERVER_GAMEMODES_GTDM_H
+#endif

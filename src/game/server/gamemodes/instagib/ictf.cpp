@@ -3,7 +3,7 @@
 #include "ictf.h"
 
 CGameControllerICTF::CGameControllerICTF(class CGameContext *pGameServer) :
-	CGameControllerBaseCTF(pGameServer)
+	CGameControllerInstaBaseCTF(pGameServer)
 {
 	m_pGameType = "iCTF";
 }
@@ -14,12 +14,12 @@ void CGameControllerICTF::Tick()
 {
 	// this is the main part of the gamemode, this function is run every tick
 
-	CGameControllerBaseCTF::Tick();
+	CGameControllerInstaBaseCTF::Tick();
 }
 
 void CGameControllerICTF::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerBaseCTF::OnCharacterSpawn(pChr);
+	CGameControllerInstaBaseCTF::OnCharacterSpawn(pChr);
 
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_LASER, false, -1);

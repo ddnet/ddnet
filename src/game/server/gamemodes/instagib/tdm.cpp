@@ -3,20 +3,20 @@
 
 #include "tdm.h"
 
-CGameControllerTDM::CGameControllerTDM(class CGameContext *pGameServer) :
-	CGameControllerBaseDM(pGameServer)
+CGameControllerInstaTDM::CGameControllerInstaTDM(class CGameContext *pGameServer) :
+	CGameControllerInstaBaseDM(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS;
 }
 
-CGameControllerTDM::~CGameControllerTDM() = default;
+CGameControllerInstaTDM::~CGameControllerInstaTDM() = default;
 
-void CGameControllerTDM::Tick()
+void CGameControllerInstaTDM::Tick()
 {
-	CGameControllerBaseDM::Tick();
+	CGameControllerInstaBaseDM::Tick();
 }
 
-int CGameControllerTDM::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
+int CGameControllerInstaTDM::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
 	CGameControllerPvp::OnCharacterDeath(pVictim, pKiller, WeaponId);
 
@@ -55,7 +55,7 @@ int CGameControllerTDM::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	return false;
 }
 
-void CGameControllerTDM::Snap(int SnappingClient)
+void CGameControllerInstaTDM::Snap(int SnappingClient)
 {
 	CGameControllerPvp::Snap(SnappingClient);
 

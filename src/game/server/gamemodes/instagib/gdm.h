@@ -1,9 +1,9 @@
 #ifndef GAME_SERVER_GAMEMODES_INSTAGIB_GDM_H
 #define GAME_SERVER_GAMEMODES_INSTAGIB_GDM_H
 
-#include <game/server/gamemodes/base_pvp/dm.h>
+#include <game/server/gamemodes/instagib/dm.h>
 
-class CGameControllerGDM : public CGameControllerBaseDM
+class CGameControllerGDM : public CGameControllerInstaBaseDM
 {
 public:
 	CGameControllerGDM(class CGameContext *pGameServer);

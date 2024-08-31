@@ -2743,6 +2743,10 @@ if(SERVER)
     gamemodes/instagib/base_fng.h
     gamemodes/instagib/base_instagib.cpp
     gamemodes/instagib/base_instagib.h
+    gamemodes/instagib/ctf.cpp
+    gamemodes/instagib/ctf.h
+    gamemodes/instagib/dm.cpp
+    gamemodes/instagib/dm.h
     gamemodes/instagib/gctf.cpp
     gamemodes/instagib/gctf.h
     gamemodes/instagib/gdm.cpp
