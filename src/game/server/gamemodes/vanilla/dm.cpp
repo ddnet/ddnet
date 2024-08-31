@@ -20,6 +20,10 @@ void CGameControllerDM::Tick()
 void CGameControllerDM::OnCharacterSpawn(class CCharacter *pChr)
 {
 	CGameControllerVanilla::OnCharacterSpawn(pChr);
+
+	// give default weapons
+	pChr->GiveWeapon(WEAPON_HAMMER, false, -1);
+	pChr->GiveWeapon(WEAPON_GUN, false, 10);
 }
 
 int CGameControllerDM::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)

@@ -40,6 +40,8 @@
 #include "gamemodes/instagib/solofng.h"
 #include "gamemodes/instagib/zcatch/zcatch.h"
 #include "gamemodes/mod.h"
+#include "gamemodes/vanilla/ctf.h"
+#include "gamemodes/vanilla/dm.h"
 #include "player.h"
 #include "score.h"
 
@@ -4000,6 +4002,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerGTDM(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "itdm"))
 		m_pController = new CGameControllerITDM(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "dm"))
+		m_pController = new CGameControllerDM(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "ctf"))
+		m_pController = new CGameControllerCTF(this);
 	else
 	{
 		if(str_comp_nocase(Config()->m_SvGametype, "ddnet"))
