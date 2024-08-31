@@ -2695,6 +2695,8 @@ if(SERVER)
     ddracecommands.cpp
     entities/character.cpp
     entities/character.h
+    entities/ddnet_pvp/vanilla_pickup.cpp
+    entities/ddnet_pvp/vanilla_pickup.h
     entities/door.cpp
     entities/door.h
     entities/dragger.cpp
