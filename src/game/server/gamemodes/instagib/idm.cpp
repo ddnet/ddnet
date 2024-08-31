@@ -3,7 +3,7 @@
 #include "idm.h"
 
 CGameControllerIDM::CGameControllerIDM(class CGameContext *pGameServer) :
-	CGameControllerDM(pGameServer)
+	CGameControllerBaseDM(pGameServer)
 {
 	m_pGameType = "iDM";
 }
@@ -12,12 +12,12 @@ CGameControllerIDM::~CGameControllerIDM() = default;
 
 void CGameControllerIDM::Tick()
 {
-	CGameControllerDM::Tick();
+	CGameControllerBaseDM::Tick();
 }
 
 void CGameControllerIDM::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerDM::OnCharacterSpawn(pChr);
+	CGameControllerBaseDM::OnCharacterSpawn(pChr);
 
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_LASER, false, -1);

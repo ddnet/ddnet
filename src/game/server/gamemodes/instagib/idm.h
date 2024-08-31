@@ -1,15 +1,15 @@
 #ifndef GAME_SERVER_GAMEMODES_INSTAGIB_IDM_H
 #define GAME_SERVER_GAMEMODES_INSTAGIB_IDM_H
 
-#include "dm.h"
+#include <game/server/gamemodes/base_pvp/dm.h>
 
-class CGameControllerIDM : public CGameControllerDM
+class CGameControllerIDM : public CGameControllerBaseDM
 {
 public:
 	CGameControllerIDM(class CGameContext *pGameServer);
-	~CGameControllerIDM();
+	~CGameControllerIDM() override;
 
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	void Tick() override;
 };
-#endif // GAME_SERVER_GAMEMODES_IDM_H
+#endif

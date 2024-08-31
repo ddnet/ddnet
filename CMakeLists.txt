@@ -2731,6 +2731,8 @@ if(SERVER)
     gamemodes/base_pvp/character.cpp
     gamemodes/base_pvp/character.h
     gamemodes/base_pvp/chat.cpp
+    gamemodes/base_pvp/dm.cpp
+    gamemodes/base_pvp/dm.h
     gamemodes/base_pvp/player.cpp
     gamemodes/base_pvp/player.h
     gamemodes/instagib/base_fng.cpp
@@ -2739,8 +2741,6 @@ if(SERVER)
     gamemodes/instagib/base_instagib.h
     gamemodes/instagib/ctf.cpp
     gamemodes/instagib/ctf.h
-    gamemodes/instagib/dm.cpp
-    gamemodes/instagib/dm.h
     gamemodes/instagib/gctf.cpp
     gamemodes/instagib/gctf.h
     gamemodes/instagib/gdm.cpp
@@ -2764,6 +2764,10 @@ if(SERVER)
     gamemodes/instagib/zcatch/zcatch.h
     gamemodes/mod.cpp
     gamemodes/mod.h
+    gamemodes/vanilla/base_vanilla.cpp
+    gamemodes/vanilla/base_vanilla.h
+    gamemodes/vanilla/dm.cpp
+    gamemodes/vanilla/dm.h
     gameworld.cpp
     gameworld.h
     instagib/gamelogic.cpp

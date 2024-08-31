@@ -4,7 +4,7 @@
 #include "tdm.h"
 
 CGameControllerTDM::CGameControllerTDM(class CGameContext *pGameServer) :
-	CGameControllerDM(pGameServer)
+	CGameControllerBaseDM(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS;
 }
@@ -13,12 +13,12 @@ CGameControllerTDM::~CGameControllerTDM() = default;
 
 void CGameControllerTDM::Tick()
 {
-	CGameControllerDM::Tick();
+	CGameControllerBaseDM::Tick();
 }
 
 int CGameControllerTDM::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
+	CGameControllerPvp::OnCharacterDeath(pVictim, pKiller, WeaponId);
 
 	if(pKiller && WeaponId != WEAPON_GAME)
 	{
@@ -57,7 +57,7 @@ int CGameControllerTDM::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 
 void CGameControllerTDM::Snap(int SnappingClient)
 {
-	CGameControllerInstagib::Snap(SnappingClient);
+	CGameControllerPvp::Snap(SnappingClient);
 
 	if(Server()->IsSixup(SnappingClient))
 		return;

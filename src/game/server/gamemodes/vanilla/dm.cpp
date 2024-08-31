@@ -4,26 +4,27 @@
 #include "dm.h"
 
 CGameControllerDM::CGameControllerDM(class CGameContext *pGameServer) :
-	CGameControllerInstagib(pGameServer)
+	CGameControllerVanilla(pGameServer)
 {
 	m_GameFlags = 0;
+	m_pGameType = "DM*";
 }
 
 CGameControllerDM::~CGameControllerDM() = default;
 
 void CGameControllerDM::Tick()
 {
-	CGameControllerInstagib::Tick();
+	CGameControllerVanilla::Tick();
 }
 
 void CGameControllerDM::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerInstagib::OnCharacterSpawn(pChr);
+	CGameControllerVanilla::OnCharacterSpawn(pChr);
 }
 
 int CGameControllerDM::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
+	CGameControllerVanilla::OnCharacterDeath(pVictim, pKiller, WeaponId);
 
 	// check score win condition
 	if((m_GameInfo.m_ScoreLimit > 0 && pKiller->m_Score.value_or(0) >= m_GameInfo.m_ScoreLimit) ||
