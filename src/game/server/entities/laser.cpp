@@ -94,6 +94,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	{
 		pHit->UnFreeze();
 	}
+	pHit->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
 	return true;
 }
 
