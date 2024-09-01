@@ -2501,8 +2501,13 @@ if(CLIENT)
     mapitems/sound.cpp
     mapitems/sound.h
     popups.cpp
+    prompt.cpp
+    prompt.h
     proof_mode.cpp
     proof_mode.h
+    quick_action.h
+    quick_actions.cpp
+    quick_actions.h
     smooth_value.cpp
     smooth_value.h
     tileart.cpp

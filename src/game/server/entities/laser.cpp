@@ -95,6 +95,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 		pHit->TakeDamage(vec2(0, 0), 20, m_Owner, WEAPON_LASER);
 		pHit->UnFreeze();
 	}
+	pHit->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
 	return true;
 }
 
