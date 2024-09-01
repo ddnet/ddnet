@@ -112,6 +112,11 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	}
 }
 
+void CGameControllerDDRace::SetArmorProgress(CCharacter *pCharacer, int Progress)
+{
+	pCharacer->SetArmor(clamp(10 - (Progress / 15), 0, 10));
+}
+
 void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 {
 	IGameController::OnPlayerConnect(pPlayer);

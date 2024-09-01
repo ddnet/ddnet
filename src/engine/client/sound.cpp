@@ -228,10 +228,8 @@ int CSound::Init()
 		return -1;
 	}
 
-	m_MixingRate = g_Config.m_SndRate;
-
 	SDL_AudioSpec Format, FormatOut;
-	Format.freq = m_MixingRate;
+	Format.freq = g_Config.m_SndRate;
 	Format.format = AUDIO_S16;
 	Format.channels = 2;
 	Format.samples = g_Config.m_SndBufferSize;
@@ -239,7 +237,7 @@ int CSound::Init()
 	Format.userdata = this;
 
 	// Open the audio device and start playing sound!
-	m_Device = SDL_OpenAudioDevice(nullptr, 0, &Format, &FormatOut, 0);
+	m_Device = SDL_OpenAudioDevice(nullptr, 0, &Format, &FormatOut, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
 	if(m_Device == 0)
 	{
 		dbg_msg("sound", "unable to open audio: %s", SDL_GetError());
@@ -248,6 +246,7 @@ int CSound::Init()
 	else
 		dbg_msg("sound", "sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
 
+	m_MixingRate = FormatOut.freq;
 	m_MaxFrames = FormatOut.samples * 2;
 #if defined(CONF_VIDEORECORDER)
 	m_MaxFrames = maximum<uint32_t>(m_MaxFrames, 1024 * 2); // make the buffer bigger just in case

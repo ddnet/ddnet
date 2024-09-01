@@ -13,6 +13,7 @@ public:
 	CScore *Score();
 
 	void HandleCharacterTiles(class CCharacter *pChr, int MapIndex) override;
+	void SetArmorProgress(CCharacter *pCharacer, int Progress) override;
 
 	void OnPlayerConnect(class CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;

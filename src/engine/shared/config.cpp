@@ -111,22 +111,29 @@ void SIntConfigVariable::ResetToOld()
 void SColorConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUserData)
 {
 	SColorConfigVariable *pData = static_cast<SColorConfigVariable *>(pUserData);
-
+	char aBuf[IConsole::CMDLINE_LENGTH + 64];
 	if(pResult->NumArguments())
 	{
 		if(pData->CheckReadOnly())
 			return;
 
-		const ColorHSLA Color = pResult->GetColor(0, pData->m_Light);
-		const unsigned Value = Color.Pack(pData->m_Light ? 0.5f : 0.0f, pData->m_Alpha);
+		const auto Color = pResult->GetColor(0, pData->m_Light);
+		if(Color)
+		{
+			const unsigned Value = Color->Pack(pData->m_Light ? 0.5f : 0.0f, pData->m_Alpha);
 
-		*pData->m_pVariable = Value;
-		if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
-			pData->m_OldValue = Value;
+			*pData->m_pVariable = Value;
+			if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
+				pData->m_OldValue = Value;
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "%s is not a valid color.", pResult->GetString(0));
+			pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
+		}
 	}
 	else
 	{
-		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "Value: %u", *pData->m_pVariable);
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
 
@@ -493,8 +500,8 @@ void CConfigManager::Con_Toggle(IConsole::IResult *pResult, void *pUserData)
 		{
 			SColorConfigVariable *pColorVariable = static_cast<SColorConfigVariable *>(pVariable);
 			const float Darkest = pColorVariable->m_Light ? 0.5f : 0.0f;
-			const ColorHSLA Value = *pColorVariable->m_pVariable == pResult->GetColor(1, pColorVariable->m_Light).Pack(Darkest, pColorVariable->m_Alpha) ? pResult->GetColor(2, pColorVariable->m_Light) : pResult->GetColor(1, pColorVariable->m_Light);
-			pColorVariable->SetValue(Value.Pack(Darkest, pColorVariable->m_Alpha));
+			const std::optional<ColorHSLA> Value = *pColorVariable->m_pVariable == pResult->GetColor(1, pColorVariable->m_Light).value_or(ColorHSLA(0, 0, 0)).Pack(Darkest, pColorVariable->m_Alpha) ? pResult->GetColor(2, pColorVariable->m_Light) : pResult->GetColor(1, pColorVariable->m_Light);
+			pColorVariable->SetValue(Value.value_or(ColorHSLA(0, 0, 0)).Pack(Darkest, pColorVariable->m_Alpha));
 		}
 		else if(pVariable->m_Type == SConfigVariable::VAR_STRING)
 		{

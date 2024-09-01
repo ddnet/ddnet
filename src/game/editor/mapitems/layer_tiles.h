@@ -2,6 +2,7 @@
 #define GAME_EDITOR_MAPITEMS_LAYER_TILES_H
 
 #include <game/editor/editor_trackers.h>
+#include <game/editor/enums.h>
 #include <map>
 
 #include "layer.h"
@@ -122,6 +123,8 @@ public:
 	void BrushSelecting(CUIRect Rect) override;
 	int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) override;
 	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
+	void FillGameTiles(EGameTileOp Fill);
+	bool CanFillGameTiles() const;
 	void BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;

@@ -2462,6 +2462,7 @@ if(CLIENT)
     editor_trackers.cpp
     editor_trackers.h
     editor_ui.h
+    enums.h
     explanations.cpp
     layer_selector.cpp
     layer_selector.h
@@ -2500,8 +2501,13 @@ if(CLIENT)
     mapitems/sound.cpp
     mapitems/sound.h
     popups.cpp
+    prompt.cpp
+    prompt.h
     proof_mode.cpp
     proof_mode.h
+    quick_action.h
+    quick_actions.cpp
+    quick_actions.h
     smooth_value.cpp
     smooth_value.h
     tileart.cpp
