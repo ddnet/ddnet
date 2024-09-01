@@ -2,6 +2,7 @@
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
+#include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
@@ -62,14 +63,6 @@ void CGameControllerZcatch::OnRoundStart()
 		pPlayer->m_vVictimIds.clear();
 		pPlayer->m_KillerId = -1;
 	}
-}
-
-int CGameControllerZcatch::GetAutoTeam(int NotThisId)
-{
-	if(CatchGameState() == ECatchGameState::RUNNING)
-		return TEAM_SPECTATORS;
-
-	return CGameControllerInstagib::GetAutoTeam(NotThisId);
 }
 
 CGameControllerZcatch::~CGameControllerZcatch() = default;
@@ -149,11 +142,15 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
 
-	pVictim->SetTeamNoKill(TEAM_SPECTATORS);
+	if(pVictim->GetTeam() != TEAM_SPECTATORS)
+		pVictim->SetTeamNoKill(TEAM_SPECTATORS);
 	pVictim->m_SpectatorId = pKiller->GetCid();
 	pVictim->m_IsDead = true;
 	pVictim->m_KillerId = pKiller->GetCid();
-	pKiller->m_vVictimIds.emplace_back(pVictim->GetCid());
+
+	int Found = count(pKiller->m_vVictimIds.begin(), pKiller->m_vVictimIds.end(), pVictim->GetCid());
+	if(!Found)
+		pKiller->m_vVictimIds.emplace_back(pVictim->GetCid());
 }
 
 void CGameControllerZcatch::OnCaught(class CPlayer *pVictim, class CPlayer *pKiller)
@@ -244,18 +241,32 @@ void CGameControllerZcatch::CheckGameState()
 	}
 }
 
-void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
+int CGameControllerZcatch::GetAutoTeam(int NotThisId)
 {
-	CGameControllerInstagib::OnPlayerConnect(pPlayer);
-
 	if(CatchGameState() == ECatchGameState::RUNNING)
 	{
 		int KillerId = GetHighestSpreeClientId();
 		if(KillerId == -1)
 			KillerId = GetFirstAlivePlayerId();
 		if(KillerId != -1)
-			KillPlayer(pPlayer, GameServer()->m_apPlayers[KillerId]);
+		{
+			CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisId];
+			if(pPlayer)
+			{
+				// avoid team change message by pre setting it
+				pPlayer->SetTeamRaw(TEAM_SPECTATORS);
+				KillPlayer(pPlayer, GameServer()->m_apPlayers[KillerId]);
+			}
+			return TEAM_SPECTATORS;
+		}
 	}
+
+	return CGameControllerInstagib::GetAutoTeam(NotThisId);
+}
+
+void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
+{
+	CGameControllerInstagib::OnPlayerConnect(pPlayer);
 	CheckGameState();
 
 	m_aBodyColors[pPlayer->GetCid()] = GetBodyColor(0);
