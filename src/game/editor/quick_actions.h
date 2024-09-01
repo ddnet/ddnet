@@ -30,6 +30,24 @@ REGISTER_QUICK_ACTION(
 	DEFAULT_BTN,
 	"Saves the current map under a new name (ctrl+shift+s)")
 REGISTER_QUICK_ACTION(
+	LoadCurrentMap,
+	"Load Current Map",
+	[&]() {
+		if(HasUnsavedData())
+		{
+			m_PopupEventType = POPEVENT_LOADCURRENT;
+			m_PopupEventActivated = true;
+		}
+		else
+		{
+			LoadCurrentMap();
+		}
+	},
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Opens the current in game map for editing (ctrl+alt+l)")
+REGISTER_QUICK_ACTION(
 	Envelopes,
 	"Envelopes",
 	[&]() { m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES ? EXTRAEDITOR_NONE : EXTRAEDITOR_ENVELOPES; },
