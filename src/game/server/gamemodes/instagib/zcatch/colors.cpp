@@ -1,6 +1,12 @@
 #include <game/server/player.h>
+#include <game/server/teeinfo.h>
 
 #include "zcatch.h"
+
+static int ColorToSixup(int Color6)
+{
+	return ColorHSLA(Color6).UnclampLighting().Pack(CTeeInfo::ms_DarkestLGT7);
+}
 
 int CGameControllerZcatch::GetBodyColorTeetime(int Kills)
 {
@@ -94,7 +100,7 @@ void CGameControllerZcatch::SendSkinBodyColor7(int ClientId, int Color)
 	// 0.7
 	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 	{
-		pPlayer->m_TeeInfos.m_aSkinPartColors[p] = Color;
+		pPlayer->m_TeeInfos.m_aSkinPartColors[p] = ColorToSixup(Color);
 		pPlayer->m_TeeInfos.m_aUseCustomColors[p] = true;
 	}
 
