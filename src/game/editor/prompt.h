@@ -10,10 +10,10 @@
 class CPrompt : public CEditorComponent
 {
 	bool m_ResetFilterResults = true;
-	const CQuickAction *m_pLastAction = nullptr;
+	CQuickAction *m_pLastAction = nullptr;
 	int m_PromptSelectedIndex = -1;
 
-	std::vector<const CQuickAction *> m_vpFilteredPromptList;
+	std::vector<CQuickAction *> m_vpFilteredPromptList;
 	std::vector<CQuickAction *> m_vQuickActions;
 	CLineInputBuffered<512> m_PromptInput;
 
