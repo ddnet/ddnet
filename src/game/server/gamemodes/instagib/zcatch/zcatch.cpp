@@ -113,7 +113,7 @@ void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pM
 	GameServer()->SendChatTarget(pPlayer->GetCid(), pMsg);
 	pPlayer->m_KillerId = -1;
 	pPlayer->m_IsDead = false;
-	pPlayer->SetTeamRaw(TEAM_RED);
+	pPlayer->SetTeamNoKill(TEAM_RED);
 }
 
 bool CGameControllerZcatch::OnSelfkill(int ClientId)
@@ -154,7 +154,7 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
 
-	pVictim->SetTeamRaw(TEAM_SPECTATORS);
+	pVictim->SetTeamNoKill(TEAM_SPECTATORS);
 	pVictim->m_SpectatorId = pKiller->GetCid();
 	pVictim->m_IsDead = true;
 	pVictim->m_KillerId = pKiller->GetCid();
@@ -308,7 +308,7 @@ bool CGameControllerZcatch::DoWincheckRound()
 			// only release players that actually died
 			// not all spectators
 			if(pPlayer->m_IsDead)
-				pPlayer->SetTeamRaw(TEAM_RED);
+				pPlayer->SetTeamNoKill(TEAM_RED);
 			pPlayer->m_IsDead = false;
 		}
 
