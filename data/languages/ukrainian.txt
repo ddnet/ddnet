@@ -4,7 +4,7 @@
 #modified by:
 #	404_not_found		2011-07-30 19:50:58
 #	EGYT5453			(15.05.2024-04.06.2024)
-# veydzh3r      (31/08/2024 - present)
+# veydzh3r			(31/08/2024-01/09/2024)
 ##### /authors #####
 
 ##### translated strings #####
@@ -17,7 +17,7 @@
 
 [Demo player duration]
 %d min.
-== %d хв.
+== %dхв
 
 %d new mentions
 == Нових згадок: %d
@@ -40,7 +40,7 @@
 
 [Demo player duration]
 %d sec.
-== %d сек.
+== %dс
 
 %d/%d KiB (%.1f KiB/s)
 == %d/%d КіБ (%.1f КіБ/с)
@@ -53,16 +53,16 @@
 == залишилося %dс
 
 %i minute left
-== Залишилося: %i хв.
+== Залишилося: %iхв
 
 %i minutes left
-== Залишилося: %i хв.
+== Залишилося: %iхв
 
 %i second left
-== Залишилося: %i сек.
+== Залишилося: %iс
 
 %i seconds left
-== Залишилося: %i сек.
+== Залишилося: %iс
 
 %s wins!
 == %s перемагає!
@@ -77,17 +77,17 @@
 == Нових згадок: 9+
 
 A demo with this name already exists
-== Демо з цією назвою вже існує
+== Демо з цією назвою уже існує
 
 A folder with this name already exists
-== Тека з цією назвою вже існує
+== Тека з цією назвою уже існує
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
 == Помилка в команді відмальовування. Спробуйте оновити драйвери відеокарти.
 
 A Tee
-== Тії
+== тії
 
 Abort
 == Скасувати
@@ -121,7 +121,7 @@ AFR
 == АФР
 
 Aim bind
-== Прив'язка
+== Прив’язка
 
 All
 == Усі
@@ -206,7 +206,7 @@ Assets
 == Текстури
 
 Assets directory
-== Тека ресурсів
+== Тека текстур
 
 AUS
 == АВС
@@ -263,7 +263,7 @@ Call vote
 == Голосувати
 
 Can't find a Tutorial server
-== Не вдалося знайти сервер-посібник
+== Не вдається знайти навчальний сервер
 
 Cancel
 == Скасувати
@@ -347,7 +347,7 @@ Connected
 == Під’єднано
 
 Connecting dummy
-== Під’єднати даммі
+== Під’єднання даммі
 
 Connecting to
 == Під’єднання до
@@ -454,7 +454,7 @@ Deactivate
 == Деактивувати
 
 Deactivate all
-== Деактивувати усіх
+== Деактивувати всіх
 
 Deaths
 == Смерті
@@ -463,7 +463,7 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Увімкнено режим налагодження. Натисніть Ctrl+Shift+D, щоб його вимкнути.
 
 default
-== за стандартом
+== типово
 
 Default length
 == Звичайна тривалість
@@ -610,7 +610,7 @@ Error saving settings
 == Помилка збереження налаштувань
 
 EUR
-== EUR
+== ЄВР
 
 Example of usage
 == Приклад використання
@@ -838,7 +838,7 @@ Indicate map finish
 == Позначати пройдені мапи
 
 Info Messages
-== Інформаційні повідомлення
+== Інфо. повідомлення
 
 Ingame controller mode
 == Режим контролера у грі
@@ -877,7 +877,7 @@ Join red
 == До червоних
 
 Join Tutorial Server
-== Приєднатися до сервера-посібника
+== Приєднатися до навчального сервера
 
 Jump
 == Стрибок
@@ -910,7 +910,7 @@ Lht.
 == Світл.
 
 Lines %d - %d (%s)
-== Рядки %d — %d (%s)
+== Рядки %d—%d (%s)
 
 Loading…
 == Завантаження…
@@ -925,7 +925,7 @@ Loading DDNet Client
 == Завантаження клієнта DDNet
 
 Loading demo file from storage
-== Завантаження демо-файла зі сховища
+== Завантаження демо-файлу зі сховища
 
 Loading demo files
 == Завантаження демо-файлів
@@ -971,7 +971,7 @@ map not included
 == мапу не включено
 
 Map sound volume
-== Гучність мапи
+== Гучність звуків мапи
 
 Mark the beginning of a cut (right click to reset)
 == Позначити початок фрагмента (права кнопка миші, щоб скинути)
@@ -986,13 +986,13 @@ Match %d of %d
 == Збіг %d з %d
 
 Max CSVs
-== Найбільше CSV-файлів
+== Макс. кількість файлів CSV
 
 Max demos
-== Найбільше демо-файлів
+== Макс. кількість демо-файлів
 
 Max Screenshots
-== Найбільше знімків екрана
+== Макс. кількість знімків екрана
 
 may cause delay
 == може спричинити затримку
@@ -1031,7 +1031,7 @@ Multi-View
 == Мульти-камера
 
 Mute when not active
-== Приглушувати, якщо вікно неактивне
+== Приглушувати звук поза грою
 
 NA
 == ПНА
@@ -1052,7 +1052,7 @@ Netversion
 == Версія
 
 New name:
-== Нова назва
+== Нова назва:
 
 New random timeout code
 == Новий випадковий код тайм-ауту
@@ -1134,7 +1134,7 @@ Only save improvements
 == Зберігати лише покращення
 
 Opacity
-== Непрозорість
+== Непрозор.
 
 Opacity of freeze bars inside freeze
 == Непрозорість смуги заморозки в заморозці
@@ -1159,7 +1159,7 @@ Open the settings file
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Недостатньо відеопам’яті. Спробуйте видалити власні текстури (скіни, сутності і т.п.), особливо ті, що мають високу роздільність.
+== Недостатньо відеопам’яті. Спробуйте видалити власні текстури (скіни, сутності і т.д.), особливо ті, що мають високу роздільність.
 
 Overlay entities
 == Накладати сутності
@@ -1171,7 +1171,7 @@ Particles
 == Частинки
 
 Pause
-== Павза
+== Пауза
 
 Pause the current demo
 == Призупинити
@@ -1262,7 +1262,7 @@ Reason:
 == Причина:
 
 Reconnect in %d sec
-== Повторне під’єднання за %d сек.
+== Повторне під’єднання за %dс
 
 Record demo
 == Запис демо
@@ -1274,7 +1274,7 @@ Red team wins!
 == Червоні перемогли!
 
 Refresh Rate
-== Частота оновлення
+== Частота кадрів
 
 Regular background color
 == Колір звичайного тла
@@ -1365,7 +1365,7 @@ Same clan color in scoreboard
 == Колір співклановців у таблиці
 
 Sat.
-== Насиченість
+== Насич.
 
 Save
 == Зберегти
@@ -1374,7 +1374,7 @@ Save ghost
 == Зберігати привида
 
 Save power by lowering refresh rate (higher input latency)
-== Економія енергії шляхом зниження частоти оновлення (вища затримка введення)
+== Економити енергію шляхом зниження частоти кадрів (вища затримка введення)
 
 Save the best demo of each race
 == Зберігати найкраще демо кожного забігу
@@ -1452,7 +1452,7 @@ Show clan above name plates
 == Показувати клан над ніками
 
 Show client IDs (scoreboard, chat, spectator)
-== Показувати ID клієнта (табло, чат, спостерігачі)
+== Показувати ID клієнта (таблиця, чат, спостерігачі)
 
 Show DDNet map finishes in server browser
 == Показувати пройдені мапи DDNet у браузері серверів
@@ -1464,7 +1464,7 @@ Show dummy actions
 == Показувати дії з даммі
 
 Show entities
-== Показувати сутності
+== Показ сутностей
 
 Show finish messages
 == Показувати повідомлення про фініші
@@ -1666,7 +1666,7 @@ Switch weapon on pickup
 == Змінювати зброю при підхопленні
 
 Switch weapon when out of ammo
-== Змінювати зброю коли закінчуються набої
+== Змінювати зброю при закінченні набоїв
 
 System message
 == Повідомлення системи
@@ -1732,7 +1732,7 @@ Toggle ghost
 == Привид
 
 Toggle keyboard shortcuts
-== Перемкнути скорочення
+== Перемкнути сполучення
 
 Toggle to edit your dummy settings
 == Перемкніть, щоб змінити налаштування даммі
@@ -1747,7 +1747,7 @@ Try again
 == Спробувати ще раз
 
 Trying to determine UDP connectivity…
-== Намагаємося визначити UDP-з'єднання…
+== Спроба визначити UDP-з’єднання…
 
 Tutorial
 == Посібник
@@ -1768,10 +1768,10 @@ UI Color
 == Колір інтерфейсу
 
 UI controller sens.
-== Чутливість в інтерфейсі
+== Чутл. в інтерфейсі
 
 UI mouse sens.
-== Чутливість в інтерфейсі
+== Чутл. в інтерфейсі
 
 Unable to delete skin
 == Не вдалося видалити скін
@@ -1841,7 +1841,7 @@ Video name:
 == Назва відео:
 
 Video was saved to '%s'
-== Відео було збережено до '%s'
+== Відео збережено до '%s'
 
 Videos directory
 == Тека відео
@@ -1901,7 +1901,7 @@ Your movements are not taken into account when calculating the line colors
 == Ваші рухи не враховуються при розранку кольору лінії
 
 You must restart the game for all settings to take effect.
-== Щоб налаштування набрали чинності, перезапустіть гру.
+== Щоб налаштування набули чинності, перезапустіть гру.
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
 == Ваш псевдонім «%s» вже зайнято (%d балів). Усе ще хочете використовувати його?
