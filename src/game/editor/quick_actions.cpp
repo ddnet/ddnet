@@ -4,12 +4,28 @@
 
 #include "editor_actions.h"
 
+void CEditor::FillGameTiles(EGameTileOp FillTile) const
+{
+	std::shared_ptr<CLayerTiles> pTileLayer = std::static_pointer_cast<CLayerTiles>(GetSelectedLayerType(0, LAYERTYPE_TILES));
+	if(pTileLayer)
+		pTileLayer->FillGameTiles(FillTile);
+}
+
+bool CEditor::CanFillGameTiles() const
+{
+	std::shared_ptr<CLayerTiles> pTileLayer = std::static_pointer_cast<CLayerTiles>(GetSelectedLayerType(0, LAYERTYPE_TILES));
+	if(pTileLayer)
+		return pTileLayer->CanFillGameTiles();
+	return false;
+}
+
 void CEditor::AddGroup()
 {
 	m_Map.NewGroup();
 	m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
 	m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(this, m_SelectedGroup, false));
 }
+
 void CEditor::AddTileLayer()
 {
 	std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);

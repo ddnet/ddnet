@@ -11,6 +11,7 @@
 #include <game/client/ui_listbox.h>
 #include <game/mapitems.h>
 
+#include <game/editor/enums.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>
 #include <game/editor/mapitems/layer_front.h>
@@ -323,6 +324,8 @@ public:
 	const CMapView *MapView() const { return &m_MapView; }
 	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
 
+	void FillGameTiles(EGameTileOp FillTile) const;
+	bool CanFillGameTiles() const;
 	void AddGroup();
 	void AddTileLayer();
 	void LayerSelectImage();
