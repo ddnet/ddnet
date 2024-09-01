@@ -71,6 +71,39 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
 	"Pick mapres image for currently selected layer")
+REGISTER_QUICK_ACTION(
+	ShowInfoOff,
+	"Show Info: Off",
+	[&]() {
+		m_ShowTileInfo = SHOW_TILE_OFF;
+		m_ShowEnvelopePreview = SHOWENV_NONE;
+	},
+	ALWAYS_FALSE,
+	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_OFF; },
+	DEFAULT_BTN,
+	"Do not show tile information")
+REGISTER_QUICK_ACTION(
+	ShowInfoDec,
+	"Show Info: Dec",
+	[&]() {
+		m_ShowTileInfo = SHOW_TILE_DECIMAL;
+		m_ShowEnvelopePreview = SHOWENV_NONE;
+	},
+	ALWAYS_FALSE,
+	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_DECIMAL; },
+	DEFAULT_BTN,
+	"[ctrl+i] Show tile information")
+REGISTER_QUICK_ACTION(
+	ShowInfoHex,
+	"Show Info: Hex",
+	[&]() {
+		m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
+		m_ShowEnvelopePreview = SHOWENV_NONE;
+	},
+	ALWAYS_FALSE,
+	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_HEXADECIMAL; },
+	DEFAULT_BTN,
+	"[ctrl+shift+i] Show tile information in hexadecimal")
 
 #undef ALWAYS_FALSE
 #undef DEFAULT_BTN
