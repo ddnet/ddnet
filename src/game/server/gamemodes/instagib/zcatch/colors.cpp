@@ -84,6 +84,33 @@ void CGameControllerZcatch::OnUpdateZcatchColorConfig()
 	}
 }
 
+bool CGameControllerZcatch::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return false;
+
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	int Color = GetBodyColor(pPlayer->m_Spree);
+	if(GameState() == IGS_END_ROUND)
+		Color = m_aBodyColors[pPlayer->GetCid()];
+
+	// 0.6
+	pPlayer->m_TeeInfos.m_ColorBody = Color;
+	pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+
+	// 0.7
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	{
+		pPlayer->m_TeeInfos.m_aSkinPartColors[p] = ColorToSixup(Color);
+		pPlayer->m_TeeInfos.m_aUseCustomColors[p] = true;
+	}
+
+	return false;
+}
+
 void CGameControllerZcatch::SendSkinBodyColor7(int ClientId, int Color)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)

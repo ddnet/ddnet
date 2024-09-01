@@ -2642,6 +2642,8 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	CPlayer *pPlayer = m_apPlayers[ClientId];
 	if(g_Config.m_SvSpamprotection && pPlayer->m_LastChangeInfo && pPlayer->m_LastChangeInfo + Server()->TickSpeed() * g_Config.m_SvInfoChangeDelay > Server()->Tick())
 		return;
+	if(m_pController->OnChangeInfoNetMessage(pMsg, ClientId))
+		return;
 
 	bool SixupNeedsUpdate = false;
 

@@ -28,6 +28,7 @@ public:
 	void OnRoundStart() override;
 	bool OnSelfkill(int ClientId) override;
 	int GetAutoTeam(int NotThisId) override;
+	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
 
 	enum class ECatchGameState
 	{
