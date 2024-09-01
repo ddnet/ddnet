@@ -1452,7 +1452,7 @@ Show clan above name plates
 == Показувати клан над ніками
 
 Show client IDs (scoreboard, chat, spectator)
-== Показувати ID клієнта (таблиці, чату, глядачів)
+== Показувати ID клієнта (таблиця, чат, глядачі)
 
 Show DDNet map finishes in server browser
 == Показувати пройдені мапи DDNet у браузері серверів
