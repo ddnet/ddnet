@@ -58,6 +58,8 @@ public:
 	int GetBodyColorTeetime(int Kills);
 	int GetBodyColorSavander(int Kills);
 
+	void SetCatchColors(class CPlayer *pPlayer);
+
 	void SendSkinBodyColor7(int ClientId, int Color);
 
 	void OnUpdateZcatchColorConfig() override;

@@ -84,16 +84,14 @@ void CGameControllerZcatch::OnUpdateZcatchColorConfig()
 	}
 }
 
-bool CGameControllerZcatch::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId)
+void CGameControllerZcatch::SetCatchColors(CPlayer *pPlayer)
 {
-	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return false;
-
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
-	if(!pPlayer)
-		return false;
-
 	int Color = GetBodyColor(pPlayer->m_Spree);
+
+	// it would be cleaner if this only applied to the winner
+	// we could make sure m_Spree is not reset until the next round starts
+	// but for now it should work because players that connect during round end
+	// will reset m_aBodyColors
 	if(GameState() == IGS_END_ROUND)
 		Color = m_aBodyColors[pPlayer->GetCid()];
 
@@ -107,7 +105,18 @@ bool CGameControllerZcatch::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *
 		pPlayer->m_TeeInfos.m_aSkinPartColors[p] = ColorToSixup(Color);
 		pPlayer->m_TeeInfos.m_aUseCustomColors[p] = true;
 	}
+}
 
+bool CGameControllerZcatch::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return false;
+
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	SetCatchColors(pPlayer);
 	return false;
 }
 

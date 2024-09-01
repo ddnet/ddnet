@@ -83,15 +83,10 @@ void CGameControllerZcatch::Tick()
 		if(!pPlayer)
 			continue;
 
-		int Color = GetBodyColor(pPlayer->m_Spree);
-		if(GameState() == IGS_END_ROUND)
-			Color = m_aBodyColors[pPlayer->GetCid()];
-
 		// this is wasting a bit of clock cycles setting it every tick
 		// it should be set on kill and then not be overwritten by info changes
 		// but there is no git conflict free way of doing that
-		pPlayer->m_TeeInfos.m_ColorBody = Color;
-		pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+		SetCatchColors(pPlayer);
 
 		if(m_aBodyColors[pPlayer->GetCid()] != pPlayer->m_TeeInfos.m_ColorBody)
 		{
@@ -263,10 +258,8 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 	}
 	CheckGameState();
 
-	pPlayer->m_TeeInfos.m_ColorBody = GetBodyColor(pPlayer->m_Spree);
-	pPlayer->m_TeeInfos.m_UseCustomColor = 1;
-
-	m_aBodyColors[pPlayer->GetCid()] = pPlayer->m_TeeInfos.m_ColorBody;
+	m_aBodyColors[pPlayer->GetCid()] = GetBodyColor(0);
+	SetCatchColors(pPlayer);
 	SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
 
 	if(CatchGameState() == ECatchGameState::WAITING_FOR_PLAYERS)
