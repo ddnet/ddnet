@@ -2642,6 +2642,7 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	CPlayer *pPlayer = m_apPlayers[ClientId];
 	if(g_Config.m_SvSpamprotection && pPlayer->m_LastChangeInfo && pPlayer->m_LastChangeInfo + Server()->TickSpeed() * g_Config.m_SvInfoChangeDelay > Server()->Tick())
 		return;
+	// ddnet-insta
 	if(m_pController->OnChangeInfoNetMessage(pMsg, ClientId))
 		return;
 
@@ -2689,12 +2690,16 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 		SixupNeedsUpdate = true;
 	Server()->SetClientCountry(ClientId, pMsg->m_Country);
 
-	str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
-	pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
-	pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
-	pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
-	if(!Server()->IsSixup(ClientId))
-		pPlayer->m_TeeInfos.ToSixup();
+	// ddnet-insta
+	if(m_pController->IsSkinChangeAllowed())
+	{
+		str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
+		pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
+		pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
+		pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
+		if(!Server()->IsSixup(ClientId))
+			pPlayer->m_TeeInfos.ToSixup();
+	}
 
 	if(SixupNeedsUpdate)
 	{
