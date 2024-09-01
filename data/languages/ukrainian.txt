@@ -4,7 +4,7 @@
 #modified by:
 #	404_not_found		2011-07-30 19:50:58
 #	EGYT5453			(15.05.2024-04.06.2024)
-# veydzh3r			(31/08/2024-01/09/2024)
+#	veydzh3r			(31.08.2024-01.09.2024)
 ##### /authors #####
 
 ##### translated strings #####
@@ -33,10 +33,10 @@
 == ще %d…
 
 %d player
-== Гравців: %d
+== Гравці: %d
 
 %d players
-== Гравців: %d
+== Гравці: %d
 
 [Demo player duration]
 %d sec.
@@ -194,7 +194,7 @@ Are you sure that you want to remove the player '%s' from your friends list?
 == Ви дійсно хочете прибрати гравця '%s' зі списку друзів?
 
 Are you sure that you want to reset the controls to their defaults?
-== Ви дійсно хочете скинути налаштування керувань до стандартних значень?
+== Ви дійсно хочете скинути налаштування керувань до початкових значень?
 
 Are you sure that you want to restart?
 == Ви дійсно хочете перезапустити?
@@ -302,7 +302,7 @@ CHN
 == КИТ
 
 Choose default eyes when joining a server
-== Стандартні очі під час приєднання до сервера
+== Типові очі під час приєднання до сервера
 
 Clan
 == Клан
@@ -381,7 +381,7 @@ Could not connect dummy
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== Не вдалося ініціалізувати заданий графічний рушій, повертаємося до стандартного рушія.
+== Не вдалося ініціалізувати заданий графічний рушій, повернення до тпового рушія.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
@@ -1016,7 +1016,7 @@ Move left
 == Вліво
 
 Move player to spectators
-== Зробити гравця спостерігачем
+== Зробити гравця глядачем
 
 Move right
 == Вправо
@@ -1452,7 +1452,7 @@ Show clan above name plates
 == Показувати клан над ніками
 
 Show client IDs (scoreboard, chat, spectator)
-== Показувати ID клієнта (таблиця, чат, спостерігачі)
+== Показувати ID клієнта (таблиці, чату, глядачів)
 
 Show DDNet map finishes in server browser
 == Показувати пройдені мапи DDNet у браузері серверів
