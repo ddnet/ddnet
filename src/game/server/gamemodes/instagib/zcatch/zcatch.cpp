@@ -245,20 +245,7 @@ int CGameControllerZcatch::GetAutoTeam(int NotThisId)
 {
 	if(CatchGameState() == ECatchGameState::RUNNING)
 	{
-		int KillerId = GetHighestSpreeClientId();
-		if(KillerId == -1)
-			KillerId = GetFirstAlivePlayerId();
-		if(KillerId != -1)
-		{
-			CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisId];
-			if(pPlayer)
-			{
-				// avoid team change message by pre setting it
-				pPlayer->SetTeamRaw(TEAM_SPECTATORS);
-				KillPlayer(pPlayer, GameServer()->m_apPlayers[KillerId]);
-			}
-			return TEAM_SPECTATORS;
-		}
+		return TEAM_SPECTATORS;
 	}
 
 	return CGameControllerInstagib::GetAutoTeam(NotThisId);
@@ -268,6 +255,23 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 {
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
 	CheckGameState();
+
+	int KillerId = GetHighestSpreeClientId();
+	if(KillerId != -1)
+	{
+		// avoid team change message by pre setting it
+		pPlayer->SetTeamRaw(TEAM_SPECTATORS);
+		KillPlayer(pPlayer, GameServer()->m_apPlayers[KillerId]);
+	}
+	// complicated way of saying not tournament mode
+	else if(CGameControllerInstagib::GetAutoTeam(pPlayer->GetCid()) != TEAM_SPECTATORS && pPlayer->GetTeam() == TEAM_SPECTATORS)
+	{
+		// auto join running games if nobody made a kill yet
+		// SetTeam will kill us and delay the spawning
+		// so you are stuck in the scoreboard for a second when joining a active round
+		// but lets call that a feature for now so you have to to get ready
+		pPlayer->SetTeam(TEAM_RED);
+	}
 
 	m_aBodyColors[pPlayer->GetCid()] = GetBodyColor(0);
 	SetCatchColors(pPlayer);
