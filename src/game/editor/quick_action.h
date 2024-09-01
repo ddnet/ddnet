@@ -52,6 +52,17 @@ public:
 	int Color() { return m_pfnColorCallback(); }
 
 	const char *Label() const { return m_pLabel; }
+
+	// skips to the part of the label after the first colon
+	// useful for buttons that only show the state
+	const char *LabelShort() const
+	{
+		const char *pShort = str_find(m_pLabel, ": ");
+		if(!pShort)
+			return m_pLabel;
+		return pShort + 2;
+	}
+
 	const char *Description() const { return m_pDescription; }
 };
 
