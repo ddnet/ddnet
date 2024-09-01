@@ -8,6 +8,14 @@
 #define DEFAULT_BTN []() -> int { return -1; }
 
 REGISTER_QUICK_ACTION(
+	ToggleGrid,
+	"Toggle Grid",
+	[&]() { MapView()->MapGrid()->Toggle(); },
+	ALWAYS_FALSE,
+	[&]() -> bool { return MapView()->MapGrid()->IsEnabled(); },
+	DEFAULT_BTN,
+	"[ctrl+g] Toggle Grid")
+REGISTER_QUICK_ACTION(
 	GameTilesAir,
 	"Game tiles: Air",
 	[&]() { FillGameTiles(EGameTileOp::AIR); },

@@ -1102,10 +1102,10 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// grid button
 		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 		static int s_GridButton = 0;
-		if(DoButton_FontIcon(&s_GridButton, FONT_ICON_BORDER_ALL, MapView()->MapGrid()->IsEnabled(), &Button, 0, "[ctrl+g] Toggle Grid", IGraphics::CORNER_L) ||
+		if(DoButton_FontIcon(&s_GridButton, FONT_ICON_BORDER_ALL, m_QuickActionToggleGrid.Active(), &Button, 0, m_QuickActionToggleGrid.Description(), IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_G) && ModPressed && !ShiftPressed))
 		{
-			MapView()->MapGrid()->Toggle();
+			m_QuickActionToggleGrid.Call();
 		}
 
 		// grid settings button
