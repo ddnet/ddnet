@@ -220,7 +220,6 @@ bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorRea
 
 	if(pPlayer->m_IsDead && Team != TEAM_SPECTATORS)
 	{
-
 		str_format(pErrorReason, ErrorReasonSize, "Wait until '%s' dies", Server()->ClientName(pPlayer->m_KillerId));
 		return false;
 	}
