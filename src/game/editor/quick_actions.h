@@ -22,7 +22,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesHookable,
 	"Game tiles: Hookable",
@@ -30,7 +30,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesDeath,
 	"Game tiles: Death",
@@ -38,7 +38,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesUnhookable,
 	"Game tiles: Unhookable",
@@ -46,7 +46,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesHookthrough,
 	"Game tiles: Hookthrough",
@@ -54,7 +54,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesFreeze,
 	"Game tiles: Freeze",
@@ -62,7 +62,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesUnfreeze,
 	"Game tiles: Unfreeze",
@@ -70,7 +70,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesDeepFreeze,
 	"Game tiles: Deep Freeze",
@@ -78,7 +78,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesDeepUnfreeze,
 	"Game tiles: Deep Unfreeze",
@@ -86,7 +86,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesBlueCheckTele,
 	"Game tiles: Blue Check Tele",
@@ -94,7 +94,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesRedCheckTele,
 	"Game tiles: Red Check Tele",
@@ -102,7 +102,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesLiveFreeze,
 	"Game tiles: Live Freeze",
@@ -110,7 +110,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	GameTilesLiveUnfreeze,
 	"Game tiles: Live Unfreeze",
@@ -118,7 +118,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"")
+	"Constructs game tiles from this layer")
 REGISTER_QUICK_ACTION(
 	AddGroup, "Add group", [&]() { AddGroup(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Adds a new group")
 REGISTER_QUICK_ACTION(
