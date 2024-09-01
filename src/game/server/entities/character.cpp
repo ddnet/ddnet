@@ -571,7 +571,7 @@ void CCharacter::FireWeapon()
 			MouseTarget // MouseTarget
 		);
 
-		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
+		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 
