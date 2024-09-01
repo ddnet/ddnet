@@ -8,6 +8,110 @@
 #define DEFAULT_BTN []() -> int { return -1; }
 
 REGISTER_QUICK_ACTION(
+	GameTilesAir,
+	"Game tiles: Air",
+	[&]() { FillGameTiles(EGameTileOp::AIR); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesHookable,
+	"Game tiles: Hookable",
+	[&]() { FillGameTiles(EGameTileOp::HOOKABLE); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesDeath,
+	"Game tiles: Death",
+	[&]() { FillGameTiles(EGameTileOp::DEATH); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesUnhookable,
+	"Game tiles: Unhookable",
+	[&]() { FillGameTiles(EGameTileOp::UNHOOKABLE); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesHookthrough,
+	"Game tiles: Hookthrough",
+	[&]() { FillGameTiles(EGameTileOp::HOOKTHROUGH); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesFreeze,
+	"Game tiles: Freeze",
+	[&]() { FillGameTiles(EGameTileOp::FREEZE); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesUnfreeze,
+	"Game tiles: Unfreeze",
+	[&]() { FillGameTiles(EGameTileOp::UNFREEZE); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesDeepFreeze,
+	"Game tiles: Deep Freeze",
+	[&]() { FillGameTiles(EGameTileOp::DEEP_FREEZE); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesDeepUnfreeze,
+	"Game tiles: Deep Unfreeze",
+	[&]() { FillGameTiles(EGameTileOp::DEEP_UNFREEZE); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesBlueCheckTele,
+	"Game tiles: Blue Check Tele",
+	[&]() { FillGameTiles(EGameTileOp::BLUE_CHECK_TELE); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesRedCheckTele,
+	"Game tiles: Red Check Tele",
+	[&]() { FillGameTiles(EGameTileOp::RED_CHECK_TELE); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesLiveFreeze,
+	"Game tiles: Live Freeze",
+	[&]() { FillGameTiles(EGameTileOp::LIVE_FREEZE); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
+	GameTilesLiveUnfreeze,
+	"Game tiles: Live Unfreeze",
+	[&]() { FillGameTiles(EGameTileOp::LIVE_UNFREEZE); },
+	[&]() -> bool { return !CanFillGameTiles(); },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"")
+REGISTER_QUICK_ACTION(
 	AddGroup, "Add group", [&]() { AddGroup(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Adds a new group")
 REGISTER_QUICK_ACTION(
 	Refocus, "Refocus", [&]() { MapView()->Focus(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "[HOME] Restore map focus")
@@ -29,6 +133,24 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
 	"Saves the current map under a new name (ctrl+shift+s)")
+REGISTER_QUICK_ACTION(
+	LoadCurrentMap,
+	"Load Current Map",
+	[&]() {
+		if(HasUnsavedData())
+		{
+			m_PopupEventType = POPEVENT_LOADCURRENT;
+			m_PopupEventActivated = true;
+		}
+		else
+		{
+			LoadCurrentMap();
+		}
+	},
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Opens the current in game map for editing (ctrl+alt+l)")
 REGISTER_QUICK_ACTION(
 	Envelopes,
 	"Envelopes",
@@ -53,6 +175,39 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
 	"Pick mapres image for currently selected layer")
+REGISTER_QUICK_ACTION(
+	ShowInfoOff,
+	"Show Info: Off",
+	[&]() {
+		m_ShowTileInfo = SHOW_TILE_OFF;
+		m_ShowEnvelopePreview = SHOWENV_NONE;
+	},
+	ALWAYS_FALSE,
+	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_OFF; },
+	DEFAULT_BTN,
+	"Do not show tile information")
+REGISTER_QUICK_ACTION(
+	ShowInfoDec,
+	"Show Info: Dec",
+	[&]() {
+		m_ShowTileInfo = SHOW_TILE_DECIMAL;
+		m_ShowEnvelopePreview = SHOWENV_NONE;
+	},
+	ALWAYS_FALSE,
+	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_DECIMAL; },
+	DEFAULT_BTN,
+	"[ctrl+i] Show tile information")
+REGISTER_QUICK_ACTION(
+	ShowInfoHex,
+	"Show Info: Hex",
+	[&]() {
+		m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
+		m_ShowEnvelopePreview = SHOWENV_NONE;
+	},
+	ALWAYS_FALSE,
+	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_HEXADECIMAL; },
+	DEFAULT_BTN,
+	"[ctrl+shift+i] Show tile information in hexadecimal")
 
 #undef ALWAYS_FALSE
 #undef DEFAULT_BTN

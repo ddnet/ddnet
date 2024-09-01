@@ -101,7 +101,7 @@ void CPrompt::OnRender(CUIRect _)
 	{
 		m_PromptSelectedIndex = 0;
 		m_vpFilteredPromptList.clear();
-		if(m_ResetFilterResults && m_pLastAction)
+		if(m_ResetFilterResults && m_pLastAction && !m_pLastAction->Disabled())
 		{
 			m_vpFilteredPromptList.push_back(m_pLastAction);
 		}
@@ -160,7 +160,7 @@ void CPrompt::OnRender(CUIRect _)
 	{
 		if(m_PromptSelectedIndex >= 0)
 		{
-			const CQuickAction *pBtn = m_vpFilteredPromptList[m_PromptSelectedIndex];
+			CQuickAction *pBtn = m_vpFilteredPromptList[m_PromptSelectedIndex];
 			SetInactive();
 			pBtn->Call();
 			m_pLastAction = pBtn;
