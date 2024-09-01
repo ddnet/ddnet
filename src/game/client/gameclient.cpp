@@ -67,7 +67,6 @@
 #include "components/outlines.h"
 #include "components/particles.h"
 #include "components/player_indicator.h"
-#include "components/verify.h"
 #include "components/players.h"
 #include "components/race_demo.h"
 #include "components/rainbow.h"
@@ -77,6 +76,7 @@
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
+#include "components/verify.h"
 #include "components/voting.h"
 #include "prediction/entities/character.h"
 #include "prediction/entities/projectile.h"
@@ -128,7 +128,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Voting,
 					      &m_Particles, // doesn't render anything, just updates all the particles
 					      &m_RaceDemo,
-                          &m_Rainbow,
+					      &m_Rainbow,
 					      &m_MapSounds,
 					      &m_Background, // render instead of m_MapLayersBackground when g_Config.m_ClOverlayEntities == 100
 					      &m_MapLayersBackground, // first to render
@@ -145,9 +145,9 @@ void CGameClient::OnConsoleInit()
 					      &m_FreezeBars,
 					      &m_DamageInd,
 					      &m_PlayerIndicator,
-                          &m_Verify,
-                          &m_Bindwheel,
-                          &m_Tater,
+					      &m_Verify,
+					      &m_Bindwheel,
+					      &m_Tater,
 					      &m_Hud,
 					      &m_Spectator,
 					      &m_Emoticon,
@@ -172,7 +172,7 @@ void CGameClient::OnConsoleInit()
 						  &m_Motd, // for pressing esc to remove it
 						  &m_Menus,
 						  &m_Spectator,
-                          &m_Bindwheel,
+						  &m_Bindwheel,
 						  &m_Emoticon,
 						  &m_Controls,
 						  &m_Binds});
@@ -2004,6 +2004,32 @@ void CGameClient::OnNewSnapshot()
 				m_Effects.AirJump(Pos, Alpha);
 			}
 
+	if(g_Config.m_ClFreezeStars)
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_Snap.m_aCharacters[i].m_Active && m_Snap.m_aCharacters[i].m_HasExtendedData && m_Snap.m_aCharacters[i].m_PrevExtendedData)
+			{
+				int FreezeTimeNow = m_Snap.m_aCharacters[i].m_ExtendedData.m_FreezeEnd - Client()->GameTick(g_Config.m_ClDummy);
+				int FreezeTimePrev = m_Snap.m_aCharacters[i].m_PrevExtendedData->m_FreezeEnd - Client()->PrevGameTick(g_Config.m_ClDummy);
+				vec2 Pos = vec2(m_Snap.m_aCharacters[i].m_Cur.m_X, m_Snap.m_aCharacters[i].m_Cur.m_Y);
+				int StarsNow = (FreezeTimeNow + 1) / Client()->GameTickSpeed();
+				int StarsPrev = (FreezeTimePrev + 1) / Client()->GameTickSpeed();
+				if(StarsNow < StarsPrev || (StarsPrev == 0 && StarsNow > 0))
+				{
+					int Amount = StarsNow + 1;
+					float a = 3 * pi / 2;
+					float s = a - pi / 3;
+					float e = a + pi / 3;
+					for(int i = 0; i < Amount; i++)
+					{
+						float f = mix(s, e, (i + 1) / (float)(Amount + 2));
+						vec2 Dir = vec2(cos(f), sin(f));
+						m_Effects.DamageIndicator(Pos, Dir);
+					}
+				}
+			}
+		}
+
 	if(m_Snap.m_LocalClientId != m_PrevLocalId)
 		m_PredictedDummyId = m_PrevLocalId;
 	m_PrevLocalId = m_Snap.m_LocalClientId;
@@ -2153,6 +2179,27 @@ void CGameClient::OnPredict()
 			m_NewPredictedTick = true;
 			vec2 Pos = pLocalChar->Core()->m_Pos;
 			int Events = pLocalChar->Core()->m_TriggeredEvents;
+
+			// for(int i = 0; i < MAX_CLIENTS; i++)
+			//{
+			//	if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
+			//	{
+			//		if(pChar->m_FreezeTime % Client()->GameTickSpeed() == Client()->GameTickSpeed() - 1)
+			//		{
+			//			int Amount = (pChar->m_FreezeTime + 1) / Client()->GameTickSpeed();
+			//			float a = 3 * pi / 2;
+			//			float s = a - pi / 3;
+			//			float e = a + pi / 3;
+			//			for(int i = 0; i < Amount; i++)
+			//			{
+			//				float f = mix(s, e, (i + 1) / (float)(Amount + 2));
+			//				vec2 Dir = vec2(cos(f), sin(f));
+			//				m_Effects.DamageIndicator(pChar->m_Pos, Dir);
+			//			}
+			//		}
+			//	}
+			// }
+
 			if(g_Config.m_ClPredict && !m_SuppressEvents)
 				if(Events & COREEVENT_AIR_JUMP)
 					m_Effects.AirJump(Pos, 1.0f);
@@ -2959,7 +3006,7 @@ void CGameClient::UpdateRenderedCharacters()
 				vec2(m_aClients[i].m_RenderPrev.m_X, m_aClients[i].m_RenderPrev.m_Y),
 				vec2(m_aClients[i].m_RenderCur.m_X, m_aClients[i].m_RenderCur.m_Y),
 				m_aClients[i].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy));
-			
+
 			if(g_Config.m_ClRemoveAnti)
 				Pos = GetFreezePos(i);
 
@@ -2990,7 +3037,6 @@ void CGameClient::UpdateRenderedCharacters()
 
 				if(g_Config.m_ClUnpredOthersInFreeze && g_Config.m_ClAmIFrozen)
 					Pos = UnpredPos;
-
 			}
 		}
 		m_Snap.m_aCharacters[i].m_Position = Pos;
@@ -3109,13 +3155,13 @@ vec2 CGameClient::GetSmoothPos(int ClientId)
 vec2 CGameClient::GetFreezePos(int ClientId)
 {
 	vec2 Pos = mix(m_aClients[ClientId].m_PrevPredicted.m_Pos, m_aClients[ClientId].m_Predicted.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
-	//int64_t Now = time_get();
+	// int64_t Now = time_get();
 	CCharacter *pChar = m_PredictedWorld.GetCharacterById(ClientId);
 
 	for(int i = 0; i < 2; i++)
 	{
-		//int64_t Len = clamp(m_aClients[ClientId].m_SmoothLen[i], (int64_t)1, time_freq());
-		//int64_t TimePassed = Now - m_aClients[ClientId].m_SmoothStart[i];
+		// int64_t Len = clamp(m_aClients[ClientId].m_SmoothLen[i], (int64_t)1, time_freq());
+		// int64_t TimePassed = Now - m_aClients[ClientId].m_SmoothStart[i];
 		float MixAmount = 0.0f;
 		int SmoothTick;
 		float SmoothIntra;
@@ -3126,7 +3172,7 @@ vec2 CGameClient::GetFreezePos(int ClientId)
 			TicksFrozen = pChar->m_FreezeAccumulation;
 		}
 
-		if(g_Config.m_ClRemoveAnti && pChar->m_FreezeTime > 0)
+		if(g_Config.m_ClRemoveAnti && pChar && pChar->m_FreezeTime > 0)
 		{
 			MixAmount = mix(0.0f, 1.0f, 1.0f - (float)std::min(TicksFrozen, g_Config.m_ClUnfreezeLagDelayTicks) / (float)g_Config.m_ClUnfreezeLagDelayTicks);
 		}
@@ -4221,7 +4267,7 @@ int CGameClient::FindFirstMultiViewId()
 	return ClientId;
 }
 
-bool CGameClient::CheckNewInput() 
+bool CGameClient::CheckNewInput()
 {
 	return m_Controls.CheckNewInput();
 }
