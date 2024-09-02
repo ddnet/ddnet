@@ -13,8 +13,9 @@
 CGameControllerVanilla::CGameControllerVanilla(class CGameContext *pGameServer) :
 	CGameControllerPvp(pGameServer)
 {
-	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
+	m_GameFlags = 0;
 	m_AllowSkinChange = true;
+	m_DefaultWeapon = WEAPON_GUN;
 }
 
 CGameControllerVanilla::~CGameControllerVanilla() = default;

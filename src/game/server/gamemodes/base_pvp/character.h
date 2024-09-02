@@ -13,6 +13,7 @@ class CCharacter : public CEntity
 
 	friend class CGameControllerVanilla;
 	friend class CGameControllerPvp;
+	friend class CGameControllerCTF;
 
 public:
 	// ddnet-insta
