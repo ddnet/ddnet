@@ -2786,6 +2786,8 @@ if(SERVER)
     gamemodes/vanilla/dm.h
     gameworld.cpp
     gameworld.h
+    instagib/gamecontroller.cpp
+    instagib/gamecontroller.h
     instagib/gamelogic.cpp
     instagib/rcon_commands.cpp
     instagib/rcon_commands.h
