@@ -216,6 +216,20 @@ public:
 			return true to not run the rest of CGameContext::OnChangeInfoNetMessage()
 	*/
 	virtual bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) { return false; }
+
+	/*
+		Function: GetPlayerTeam
+			wraps CPlayer::GetTeam()
+			to spoof fake teams for different versions
+			this can be used to place players into spec for 0.6 and dead spec for 0.7
+
+		Arguments:
+			Sixup - will be true if that team value is sent to a 0.7 connection and false otherwise
+
+		Returns:
+			as integer TEAM_RED, TEAM_BLUE or TEAM_SPECTATORS
+	*/
+	virtual int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup);
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };

@@ -982,6 +982,11 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 
 // ddnet-insta
 
+int IGameController::GetPlayerTeam(CPlayer *pPlayer, bool Sixup)
+{
+	return pPlayer->GetTeam();
+}
+
 void IGameController::ToggleGamePause()
 {
 	SetPlayersReadyState(false);

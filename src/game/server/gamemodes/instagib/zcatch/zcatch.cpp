@@ -99,6 +99,16 @@ void CGameControllerZcatch::OnCharacterSpawn(class CCharacter *pChr)
 	SetSpawnWeapons(pChr);
 }
 
+int CGameControllerZcatch::GetPlayerTeam(class CPlayer *pPlayer, bool Sixup)
+{
+	// spoof fake in game team
+	// to get dead spec tees for 0.7 connections
+	if(Sixup && pPlayer->m_IsDead)
+		return TEAM_RED;
+
+	return IGameController::GetPlayerTeam(pPlayer, Sixup);
+}
+
 void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pMsg)
 {
 	GameServer()->SendChatTarget(pPlayer->GetCid(), pMsg);
@@ -145,11 +155,11 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
 
-	if(pVictim->GetTeam() != TEAM_SPECTATORS)
-		pVictim->SetTeamNoKill(TEAM_SPECTATORS);
 	pVictim->m_SpectatorId = pKiller->GetCid();
 	pVictim->m_IsDead = true;
 	pVictim->m_KillerId = pKiller->GetCid();
+	if(pVictim->GetTeam() != TEAM_SPECTATORS)
+		pVictim->SetTeamNoKill(TEAM_SPECTATORS);
 
 	int Found = count(pKiller->m_vVictimIds.begin(), pKiller->m_vVictimIds.end(), pVictim->GetCid());
 	if(!Found)
@@ -319,8 +329,10 @@ bool CGameControllerZcatch::DoWincheckRound()
 			// only release players that actually died
 			// not all spectators
 			if(pPlayer->m_IsDead)
+			{
+				pPlayer->m_IsDead = false;
 				pPlayer->SetTeamNoKill(TEAM_RED);
-			pPlayer->m_IsDead = false;
+			}
 		}
 
 		return true;

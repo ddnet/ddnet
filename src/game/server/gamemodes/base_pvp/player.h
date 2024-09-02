@@ -25,6 +25,7 @@ public:
 	void SetTeamNoKill(int Team, bool DoChatMsg = false);
 	void SetTeamRaw(int Team) { m_Team = Team; }
 	// dead players can not respawn
+	// will be used like m_RespawnDisabled in 0.7
 	bool m_IsDead;
 	bool m_GotRespawnInfo = false;
 	std::vector<int> m_vVictimIds;

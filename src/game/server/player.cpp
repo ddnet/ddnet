@@ -414,6 +414,10 @@ void CPlayer::Snap(int SnappingClient)
 		// pPlayerInfo->m_Score = m_Score.has_value() ? GameServer()->Score()->PlayerData(m_ClientId)->m_BestTime * 1000 : -1;
 		pPlayerInfo->m_Score = Score; // ddnet-insta
 		pPlayerInfo->m_Latency = Latency;
+
+		// ddnet-insta dead players
+		if(m_IsDead && (!GetCharacter() || !GetCharacter()->IsAlive()))
+			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_DEAD;
 	}
 
 	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
@@ -628,8 +632,15 @@ void CPlayer::Respawn(bool WeakHook)
 		m_Spawning = true;
 
 		// ddnet-insta
-		m_IsReadyToPlay = true;
-		// m_DeadSpecMode = true;
+		if(m_IsDead)
+		{
+			m_DeadSpecMode = true;
+			m_Spawning = false;
+		}
+		else
+		{
+			m_IsReadyToPlay = true;
+		}
 		return;
 	}
 
