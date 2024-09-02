@@ -180,6 +180,22 @@ REGISTER_QUICK_ACTION(
 	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES; },
 	"Toggles the envelope editor.")
 REGISTER_QUICK_ACTION(
+	ServerSettings,
+	"Server settings",
+	[&]() { m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS ? EXTRAEDITOR_NONE : EXTRAEDITOR_SERVER_SETTINGS; },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS; },
+	"Toggles the server settings editor.")
+REGISTER_QUICK_ACTION(
+	History,
+	"History",
+	[&]() { m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_HISTORY ? EXTRAEDITOR_NONE : EXTRAEDITOR_HISTORY; },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_HISTORY; },
+	"Toggles the editor history view.")
+REGISTER_QUICK_ACTION(
 	AddImage,
 	"Add Image",
 	[&]() { InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Add Image", "Add", "mapres", false, AddImage, this); },
