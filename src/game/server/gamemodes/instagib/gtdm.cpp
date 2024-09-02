@@ -6,6 +6,7 @@ CGameControllerGTDM::CGameControllerGTDM(class CGameContext *pGameServer) :
 	CGameControllerInstaTDM(pGameServer)
 {
 	m_pGameType = "gTDM";
+	m_DefaultWeapon = WEAPON_GRENADE;
 }
 
 CGameControllerGTDM::~CGameControllerGTDM() = default;
@@ -20,5 +21,5 @@ void CGameControllerGTDM::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerInstaTDM::OnCharacterSpawn(pChr);
 
 	// give default weapons
-	pChr->GiveWeapon(WEAPON_GRENADE, false, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);
+	pChr->GiveWeapon(m_DefaultWeapon, false, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);
 }

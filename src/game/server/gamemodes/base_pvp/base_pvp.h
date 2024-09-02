@@ -30,6 +30,7 @@ public:
 	int GetAutoTeam(int NotThisId) override;
 	int GameInfoExFlags(int SnappingClient) override;
 	int GameInfoExFlags2(int SnappingClient) override;
+	int GetDefaultWeapon(class CPlayer *pPlayer) override { return m_DefaultWeapon; }
 
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 
@@ -58,6 +59,7 @@ public:
 	};
 	ESpawnWeapons m_SpawnWeapons;
 	ESpawnWeapons GetSpawnWeapons(int ClientId) const { return m_SpawnWeapons; }
+	int GetDefaultWeaponBasedOnSpawnWeapons() const;
 	void SetSpawnWeapons(class CCharacter *pChr) const;
 
 	// ddnet-insta only

@@ -6,6 +6,7 @@ CGameControllerGCTF::CGameControllerGCTF(class CGameContext *pGameServer) :
 	CGameControllerInstaBaseCTF(pGameServer)
 {
 	m_pGameType = "gCTF";
+	m_DefaultWeapon = WEAPON_GRENADE;
 }
 
 CGameControllerGCTF::~CGameControllerGCTF() = default;
@@ -20,5 +21,5 @@ void CGameControllerGCTF::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerInstaBaseCTF::OnCharacterSpawn(pChr);
 
 	// give default weapons
-	pChr->GiveWeapon(WEAPON_GRENADE, false, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);
+	pChr->GiveWeapon(m_DefaultWeapon, false, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);
 }

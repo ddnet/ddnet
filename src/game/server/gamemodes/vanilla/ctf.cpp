@@ -6,6 +6,7 @@ CGameControllerCTF::CGameControllerCTF(class CGameContext *pGameServer) :
 	CGameControllerBaseCTF(pGameServer)
 {
 	m_pGameType = "CTF*";
+	m_DefaultWeapon = WEAPON_GUN;
 }
 
 CGameControllerCTF::~CGameControllerCTF() = default;

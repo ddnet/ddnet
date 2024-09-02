@@ -6,6 +6,7 @@ CGameControllerICTF::CGameControllerICTF(class CGameContext *pGameServer) :
 	CGameControllerInstaBaseCTF(pGameServer)
 {
 	m_pGameType = "iCTF";
+	m_DefaultWeapon = WEAPON_LASER;
 }
 
 CGameControllerICTF::~CGameControllerICTF() = default;
@@ -22,5 +23,5 @@ void CGameControllerICTF::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerInstaBaseCTF::OnCharacterSpawn(pChr);
 
 	// give default weapons
-	pChr->GiveWeapon(WEAPON_LASER, false, -1);
+	pChr->GiveWeapon(m_DefaultWeapon, false, -1);
 }

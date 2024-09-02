@@ -6,6 +6,7 @@ CGameControllerITDM::CGameControllerITDM(class CGameContext *pGameServer) :
 	CGameControllerInstaTDM(pGameServer)
 {
 	m_pGameType = "iTDM";
+	m_DefaultWeapon = WEAPON_LASER;
 }
 
 CGameControllerITDM::~CGameControllerITDM() = default;
@@ -20,5 +21,5 @@ void CGameControllerITDM::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerInstaTDM::OnCharacterSpawn(pChr);
 
 	// give default weapons
-	pChr->GiveWeapon(WEAPON_LASER, false, -1);
+	pChr->GiveWeapon(m_DefaultWeapon, false, -1);
 }

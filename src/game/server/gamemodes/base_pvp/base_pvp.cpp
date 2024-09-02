@@ -104,6 +104,17 @@ void CGameControllerPvp::SendChat(int ClientId, int Team, const char *pText, int
 
 void CGameControllerPvp::UpdateSpawnWeapons()
 {
+	// these gametypes are weapon bound
+	// so the always overwrite sv_spawn_weapons
+	if(m_pGameType[0] == 'g' // gDM, gCTF
+		|| m_pGameType[0] == 'i' // iDM, iCTF
+		|| m_pGameType[0] == 'C' // CTF*
+		|| m_pGameType[0] == 'T' // TDM*
+		|| m_pGameType[0] == 'D') // DM*
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "WARNING: sv_spawn_weapons only has an effect in zCatch (and maybe in fng lol)");
+	}
+
 	const char *pWeapons = Config()->m_SvSpawnWeapons;
 	if(!str_comp_nocase(pWeapons, "grenade"))
 		m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
@@ -111,7 +122,7 @@ void CGameControllerPvp::UpdateSpawnWeapons()
 		m_SpawnWeapons = SPAWN_WEAPON_LASER;
 	else
 	{
-		dbg_msg("ddnet-insta", "warning invalid spawn weapon falling back to grenade");
+		dbg_msg("ddnet-insta", "WARNING: invalid spawn weapon falling back to grenade");
 		m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
 	}
 }
@@ -334,6 +345,22 @@ void CGameControllerPvp::SetSpawnWeapons(class CCharacter *pChr) const
 		dbg_msg("zcatch", "invalid sv_spawn_weapons");
 		break;
 	}
+}
+int CGameControllerPvp::GetDefaultWeaponBasedOnSpawnWeapons() const
+{
+	switch(m_SpawnWeapons)
+	{
+	case SPAWN_WEAPON_LASER:
+		return WEAPON_LASER;
+		break;
+	case SPAWN_WEAPON_GRENADE:
+		return WEAPON_GRENADE;
+		break;
+	default:
+		dbg_msg("zcatch", "invalid sv_spawn_weapons");
+		break;
+	}
+	return WEAPON_GUN;
 }
 
 void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)

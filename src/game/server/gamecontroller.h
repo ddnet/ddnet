@@ -244,13 +244,41 @@ public:
 	virtual int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup);
 
 	/*
-		Function: UpdateSpawnWeapons
-			called when sv_spawn_weapons is updated
+		Function: GetDefaultWeapon
+			Returns the weapon the tee should spawn with.
+			Is not a complete list of all weapons the tee gets on spawn.
+
+			The complete list of weapons depends on the active controller and what it sets in
+			its OnCharacterSpawn() if it is a gamemode without fixed weapons
+			it depends on sv_spawn_weapons then it will call IGameController:SetSpawnWeapons()
 	*/
-	virtual void UpdateSpawnWeapons() {};
+	virtual int GetDefaultWeapon(class CPlayer *pPlayer) { return WEAPON_GUN; }
+
+	/*
+		Function: SetSpawnWeapons
+			Is empty by default because ddnet and many ddnet-insta modes cover that in
+			IGameController::OnCharacterSpawn()
+			This method was added to set spawn weapons independently of the gamecontroller
+			so we can use the same zCatch controller for laser and grenade zCatch
+
+			It is also different from GetDefaultWeapon() because it could set more then one weapon.
+
+			All gamemodes that allow different type of spawn weapons should call SetSpawnWeapons()
+			in their OnCharacterSpawn() hook and also set the default weapon to GetDefaultWeaponBasedOnSpawnWeapons()
+	*/
+	virtual void SetSpawnWeapons(class CCharacter *pChr){};
+
+	/*
+		Function: UpdateSpawnWeapons
+			called when the config sv_spawn_weapons is updated
+			to update the internal enum
+	*/
+	virtual void UpdateSpawnWeapons(){};
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };
+
+	int m_DefaultWeapon = WEAPON_GUN;
 	void CheckReadyStates(int WithoutId = -1);
 	bool GetPlayersReadyState(int WithoutId = -1, int *pNumUnready = nullptr);
 	void SetPlayersReadyState(bool ReadyState);
