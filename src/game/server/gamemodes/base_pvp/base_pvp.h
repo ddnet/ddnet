@@ -50,7 +50,7 @@ public:
 	 *
 	 * called when sv_spawn_weapons is updated
 	 */
-	void UpdateSpawnWeapons() override;
+	void UpdateSpawnWeapons(bool Silent) override;
 	enum ESpawnWeapons
 	{
 		SPAWN_WEAPON_LASER,

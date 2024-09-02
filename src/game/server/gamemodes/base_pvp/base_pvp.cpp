@@ -13,7 +13,8 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 {
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 
-	m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
+	UpdateSpawnWeapons(true);
+
 	m_AllowSkinChange = true;
 
 	GameServer()->Tuning()->Set("gun_curvature", 1.25f);
@@ -102,7 +103,7 @@ void CGameControllerPvp::SendChat(int ClientId, int Team, const char *pText, int
 	GameServer()->SendChat(ClientId, Team, pText, SpamProtectionClientId, Flags);
 }
 
-void CGameControllerPvp::UpdateSpawnWeapons()
+void CGameControllerPvp::UpdateSpawnWeapons(bool Silent)
 {
 	// these gametypes are weapon bound
 	// so the always overwrite sv_spawn_weapons
@@ -112,7 +113,8 @@ void CGameControllerPvp::UpdateSpawnWeapons()
 		|| m_pGameType[0] == 'T' // TDM*
 		|| m_pGameType[0] == 'D') // DM*
 	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "WARNING: sv_spawn_weapons only has an effect in zCatch (and maybe in fng lol)");
+		if(!Silent)
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "WARNING: sv_spawn_weapons only has an effect in zCatch (and maybe in fng lol)");
 	}
 
 	const char *pWeapons = Config()->m_SvSpawnWeapons;
@@ -125,6 +127,8 @@ void CGameControllerPvp::UpdateSpawnWeapons()
 		dbg_msg("ddnet-insta", "WARNING: invalid spawn weapon falling back to grenade");
 		m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
 	}
+
+	m_DefaultWeapon = GetDefaultWeaponBasedOnSpawnWeapons();
 }
 
 void CGameControllerPvp::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,

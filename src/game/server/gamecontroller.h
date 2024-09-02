@@ -272,8 +272,11 @@ public:
 		Function: UpdateSpawnWeapons
 			called when the config sv_spawn_weapons is updated
 			to update the internal enum
+
+		Arguments:
+			Silent - if false it might print warnings to the admin console
 	*/
-	virtual void UpdateSpawnWeapons(){};
+	virtual void UpdateSpawnWeapons(bool Silent = false){};
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };
