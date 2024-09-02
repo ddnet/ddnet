@@ -134,7 +134,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[HOME] Restore map focus.")
+	"[Home] Restore map focus.")
 REGISTER_QUICK_ACTION(
 	Proof,
 	"Proof",
