@@ -32,6 +32,16 @@ This feature is now also possible for 0.6 clients using the /pause chat command.
 
 ![pause game](https://raw.githubusercontent.com/ddnet-insta/images/1a2d10c893605d704aeea8320cf0e65f8e0c2aa3/ready_change.png)
 
+## 0.7 dead players in zCatch
+
+In 0.6 dead players join the spectators team in the zCatch gamemode.
+
+![zCatch 0.6](https://raw.githubusercontent.com/ddnet-insta/images/master/zCatch_teetime_06.png)
+
+In 0.7 they are marked as dead players and are separate from spectators.
+
+![zCatch 0.7](https://raw.githubusercontent.com/ddnet-insta/images/master/zCatch_teetime_07.png)
+
 ## gametype support
 
 ### iCTF
@@ -47,6 +57,14 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 
 Grenade capture the flag. Is a team based mode where every player only has a rocket launcher.
 It kills with one shot and capturing the enemy flag scores your team 100 points.
+
+### zCatch
+
+``sv_gametype zCatch``
+
+If you get killed you stay dead until your killer dies. Last man standing wins.
+It is an instagib gametype so one shot kills. You can choose the weapon with
+`sv_spawn_weapons` the options are `grenade` or `laser`.
 
 # Configs
 
