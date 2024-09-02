@@ -238,13 +238,14 @@ bool CGameControllerZcatch::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, 
 {
 	if(GameServer()->m_World.m_Paused)
 		return false;
-
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
 	if(!pPlayer)
 		return false;
-	int Team = pMsg->m_Team;
 
-	if(pPlayer->m_IsDead && Team == TEAM_SPECTATORS)
+	int Team = pMsg->m_Team;
+	if(
+		(Server()->IsSixup(ClientId) && pPlayer->m_IsDead && Team == TEAM_SPECTATORS) ||
+		(!Server()->IsSixup(ClientId) && pPlayer->m_IsDead && Team == TEAM_RED))
 	{
 		pPlayer->m_WantsToJoinSpectators = !pPlayer->m_WantsToJoinSpectators;
 		char aBuf[512];
@@ -254,7 +255,7 @@ bool CGameControllerZcatch::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, 
 			str_format(aBuf, sizeof(aBuf), "You will join the game once '%s' dies", Server()->ClientName(pPlayer->m_KillerId));
 
 		GameServer()->SendBroadcast(aBuf, ClientId);
-		return false;
+		return true;
 	}
 
 	return false;
