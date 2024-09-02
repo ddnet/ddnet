@@ -110,6 +110,7 @@ It is an instagib gametype so one shot kills. You can choose the weapon with
 + `sv_timelimit` Time limit in minutes (0 disables)
 + `sv_player_ready_mode` When enabled, players can pause/unpause the game and start the game on warmup via their ready state
 + `sv_force_ready_all` minutes after which a game will be force unpaused (0=off) related to sv_player_ready_mode
++ `sv_powerups` Allow powerups like ninja
 + `sv_grenade_ammo_regen` Activate or deactivate grenade ammo regeneration in general
 + `sv_grenade_ammo_regen_time` Grenade ammo regeneration time in miliseconds
 + `sv_grenade_ammo_regen_num` Maximum number of grenades if ammo regeneration on
