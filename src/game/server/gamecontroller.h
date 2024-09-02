@@ -242,6 +242,12 @@ public:
 			as integer TEAM_RED, TEAM_BLUE or TEAM_SPECTATORS
 	*/
 	virtual int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup);
+
+	/*
+		Function: UpdateSpawnWeapons
+			called when sv_spawn_weapons is updated
+	*/
+	virtual void UpdateSpawnWeapons() {};
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };

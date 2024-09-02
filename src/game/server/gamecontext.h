@@ -292,7 +292,6 @@ public:
 	int m_UnstackHackCharacterOffset;
 	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
 	void RegisterInstagibCommands();
-	bool IsInstaControllerActive() const;
 	void SwapTeams();
 	IHttp *m_pHttp;
 	void OnInitInstagib();

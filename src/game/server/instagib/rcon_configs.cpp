@@ -33,15 +33,6 @@ void CGameContext::RegisterInstagibCommands()
 #undef MACRO_CONFIG_STR
 }
 
-bool CGameContext::IsInstaControllerActive() const
-{
-	if(!str_comp_nocase(m_pController->m_pGameType, "ddnet"))
-		return false;
-	if(!str_comp_nocase(m_pController->m_pGameType, "mod"))
-		return false;
-	return true;
-}
-
 void CGameContext::ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -85,14 +76,7 @@ void CGameContext::ConchainSpawnWeapons(IConsole::IResult *pResult, void *pUserD
 	if(pResult->NumArguments())
 	{
 		CGameContext *pSelf = (CGameContext *)pUserData;
-		if(!pSelf->IsInstaControllerActive())
-		{
-			dbg_msg("ddnet-insta", "only available for ddnet insta game types");
-			return;
-		}
-
-		CGameControllerPvp *pInsta = static_cast<CGameControllerPvp *>(pUserData);
-		pInsta->UpdateSpawnWeapons();
+		pSelf->m_pController->UpdateSpawnWeapons();
 	}
 }
 
