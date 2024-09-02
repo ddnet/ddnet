@@ -28,6 +28,10 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 			Character.SetWeaponAmmo(WEAPON_GRENADE, minimum(Character.GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
 		}
 
+		// no pain eyes when hitting our self with laser
+		if(Weapon == WEAPON_LASER)
+			Dmg = 0;
+
 		// no self damage
 		return false;
 	}
