@@ -109,8 +109,8 @@ void cxxbridge1$IConsole_IResult$GetString(const ::IConsole_IResult &self, ::std
 }
 
 void cxxbridge1$IConsole_IResult$GetColor(const ::IConsole_IResult &self, ::std::uint32_t Index, bool Light, ::ColorHSLA *return$) noexcept {
-  ::ColorHSLA (::IConsole_IResult::*GetColor$)(::std::uint32_t, bool) const = &::IConsole_IResult::GetColor;
-  new (return$) ::ColorHSLA((self.*GetColor$)(Index, Light));
+  std::optional<::ColorHSLA> (::IConsole_IResult::*GetColor$)(::std::uint32_t, bool) const = &::IConsole_IResult::GetColor;
+  new(return$)::ColorHSLA((self.*GetColor$)(Index, Light).value_or(::ColorHSLA(0, 0, 0)));
 }
 
 ::std::int32_t cxxbridge1$IConsole_IResult$NumArguments(const ::IConsole_IResult &self) noexcept {

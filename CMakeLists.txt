@@ -2993,6 +2993,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     compression.cpp
     csv.cpp
     datafile.cpp
+    editor.cpp
     fs.cpp
     git_revision.cpp
     hash.cpp
