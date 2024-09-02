@@ -218,6 +218,18 @@ public:
 	virtual bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) { return false; }
 
 	/*
+		Function: OnSetTeamNetMessage
+			hooks into CGameContext::OnSetTeamNetMessage()
+			before any spam protection check
+
+			See also CanJoinTeam() which is called after the validation
+
+		Returns:
+			return true to not run the rest of CGameContext::OnSetTeamNetMessage()
+	*/
+	virtual bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) { return false; };
+
+	/*
 		Function: GetPlayerTeam
 			wraps CPlayer::GetTeam()
 			to spoof fake teams for different versions

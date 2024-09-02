@@ -107,6 +107,10 @@ int CGameControllerZcatch::GetPlayerTeam(class CPlayer *pPlayer, bool Sixup)
 		return TEAM_RED;
 
 	return IGameController::GetPlayerTeam(pPlayer, Sixup);
+
+	// TODO: ddnet insta PLAYERFLAG_DEAD
+	// and then allow joining spectators in zcatch while dead
+	// it should reply with "you will join spectators once xxx dies"
 }
 
 void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pMsg)
@@ -114,7 +118,14 @@ void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pM
 	GameServer()->SendChatTarget(pPlayer->GetCid(), pMsg);
 	pPlayer->m_KillerId = -1;
 	pPlayer->m_IsDead = false;
-	pPlayer->SetTeamNoKill(TEAM_RED);
+
+	if(pPlayer->m_WantsToJoinSpectators)
+	{
+		pPlayer->SetTeam(TEAM_SPECTATORS);
+		pPlayer->m_WantsToJoinSpectators = false;
+	}
+	else
+		pPlayer->SetTeamNoKill(TEAM_RED);
 }
 
 bool CGameControllerZcatch::OnSelfkill(int ClientId)
@@ -222,6 +233,34 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	return 0;
 }
 
+// called before spam protection on client team join request
+bool CGameControllerZcatch::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId)
+{
+	if(GameServer()->m_World.m_Paused)
+		return false;
+
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+	int Team = pMsg->m_Team;
+
+	if(pPlayer->m_IsDead && Team == TEAM_SPECTATORS)
+	{
+		pPlayer->m_WantsToJoinSpectators = !pPlayer->m_WantsToJoinSpectators;
+		char aBuf[512];
+		if(pPlayer->m_WantsToJoinSpectators)
+			str_format(aBuf, sizeof(aBuf), "You will join the spectators once '%s' dies", Server()->ClientName(pPlayer->m_KillerId));
+		else
+			str_format(aBuf, sizeof(aBuf), "You will join the game once '%s' dies", Server()->ClientName(pPlayer->m_KillerId));
+
+		GameServer()->SendBroadcast(aBuf, ClientId);
+		return false;
+	}
+
+	return false;
+}
+
+// called after spam protection on client team join request
 bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisId];

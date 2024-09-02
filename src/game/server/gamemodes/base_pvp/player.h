@@ -28,6 +28,7 @@ public:
 	// will be used like m_RespawnDisabled in 0.7
 	bool m_IsDead;
 	bool m_GotRespawnInfo = false;
+	bool m_WantsToJoinSpectators = false;
 	std::vector<int> m_vVictimIds;
 
 	/*******************************************************************
