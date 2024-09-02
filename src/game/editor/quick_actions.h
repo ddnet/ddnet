@@ -228,6 +228,14 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return m_ShowTileInfo == SHOW_TILE_HEXADECIMAL; },
 	DEFAULT_BTN,
 	"[Ctrl+Shift+I] Show tile information in hexadecimal.")
+REGISTER_QUICK_ACTION(
+	Pipette,
+	"Pipette",
+	[&]() { m_ColorPipetteActive = !m_ColorPipetteActive; },
+	ALWAYS_FALSE,
+	[&]() -> bool { return m_ColorPipetteActive; },
+	DEFAULT_BTN,
+	"[Ctrl+Shift+C] Color pipette. Pick a color from the screen by clicking on it.")
 
 #undef ALWAYS_FALSE
 #undef DEFAULT_BTN
