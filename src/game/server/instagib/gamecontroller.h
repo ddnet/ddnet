@@ -1,4 +1,4 @@
-#ifndef GAME_SERVER_INSTAGIB_GAMECONRTOLLER_H
+#ifndef GAME_SERVER_INSTAGIB_GAMECONTROLLER_H
 // hack for headerguard linter
 #endif
 
