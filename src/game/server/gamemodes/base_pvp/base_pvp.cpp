@@ -331,7 +331,7 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	return false;
 }
 
-void CGameControllerPvp::SetSpawnWeapons(class CCharacter *pChr) const
+void CGameControllerPvp::SetSpawnWeapons(class CCharacter *pChr)
 {
 	switch(CGameControllerPvp::GetSpawnWeapons(pChr->GetPlayer()->GetCid()))
 	{
