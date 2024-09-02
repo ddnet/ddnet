@@ -76,7 +76,8 @@ void CGameContext::ConchainSpawnWeapons(IConsole::IResult *pResult, void *pUserD
 	if(pResult->NumArguments())
 	{
 		CGameContext *pSelf = (CGameContext *)pUserData;
-		pSelf->m_pController->UpdateSpawnWeapons();
+		if(pSelf->m_pController)
+			pSelf->m_pController->UpdateSpawnWeapons();
 	}
 }
 
