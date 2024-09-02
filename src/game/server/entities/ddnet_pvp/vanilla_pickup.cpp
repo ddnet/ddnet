@@ -104,9 +104,20 @@ void CVanillaPickup::Tick()
 
 			case POWERUP_NINJA:
 			{
+				Picked = true;
+
 				// activate ninja on target player
 				pChr->GiveNinja();
-				Picked = true;
+
+				// loop through all players, setting their emotes
+				CCharacter *pC = static_cast<CCharacter *>(GameWorld()->FindFirst(CGameWorld::ENTTYPE_CHARACTER));
+				for(; pC; pC = (CCharacter *)pC->TypeNext())
+				{
+					if(pC != pChr)
+						pC->SetEmote(EMOTE_SURPRISE, Server()->Tick() + Server()->TickSpeed());
+				}
+
+				pChr->SetEmote(EMOTE_ANGRY, Server()->Tick() + 1200 * Server()->TickSpeed() / 1000);
 				break;
 			}
 			default:
