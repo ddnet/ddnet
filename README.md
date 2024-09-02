@@ -58,6 +58,30 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 Grenade capture the flag. Is a team based mode where every player only has a rocket launcher.
 It kills with one shot and capturing the enemy flag scores your team 100 points.
 
+### iDM
+
+``sv_gametype iDM``
+
+Laser death match. One shot kills. First to reach the scorelimit wins.
+
+### gDM
+
+``sv_gametype gDM``
+
+Grenade death match. One shot kills. First to reach the scorelimit wins.
+
+### iTDM
+
+``sv_gametype iTDM``
+
+Laser team death match. One shot kills. First team to reach the scorelimit wins.
+
+### gTDM
+
+``sv_gametype gTDM``
+
+Grenade team death match. One shot kills. First team to reach the scorelimit wins.
+
 ### zCatch
 
 ``sv_gametype zCatch``
@@ -68,7 +92,7 @@ It is an instagib gametype so one shot kills. You can choose the weapon with
 
 # Configs
 
-+ `sv_gametype` Game type (gctf, ictf)
++ `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, zcatch)
 + `sv_spectator_votes` Allow spectators to vote
 + `sv_countdown_unpause` Number of seconds to freeze the game in a countdown before match continues after pause
 + `sv_countdown_round_start` Number of seconds to freeze the game in a countdown before match starts (0 enables only for survival gamemodes, -1 disables)

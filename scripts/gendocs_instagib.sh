@@ -16,7 +16,7 @@ gen_configs() {
 	local desc
 	local cmd
 	# shellcheck disable=SC2016
-	echo '+ `sv_gametype` Game type (gctf, ictf)'
+	echo '+ `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, zcatch)'
 	while read -r cfg; do
 		desc="$(echo "$cfg" | cut -d',' -f7- | cut -d'"' -f2-)"
 		desc="${desc::-2}"
