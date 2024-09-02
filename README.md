@@ -4,6 +4,16 @@ DDNet-insta based on DDRaceNetwork, a Teeworlds mod. See the [website](https://d
 
 For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 
+---
+
+A ddnet based pvp mod. With the focus on correct 0.6 and 0.7 support and staying close to and up to date with ddnet.
+While being highly configurable and feature rich.
+
+Implementing most of the relevant pvp gametypes: gctf, ictf, gdm, idm, gtdm, itdm, zCatch
+
+
+Planned gametypes are: fng, ctf, dm
+
 # Features
 
 ## checkbox votes
