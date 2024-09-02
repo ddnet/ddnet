@@ -166,11 +166,11 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
 
-	pVictim->m_SpectatorId = pKiller->GetCid();
 	pVictim->m_IsDead = true;
 	pVictim->m_KillerId = pKiller->GetCid();
 	if(pVictim->GetTeam() != TEAM_SPECTATORS)
 		pVictim->SetTeamNoKill(TEAM_SPECTATORS);
+	pVictim->m_SpectatorId = pKiller->GetCid();
 
 	int Found = count(pKiller->m_vVictimIds.begin(), pKiller->m_vVictimIds.end(), pVictim->GetCid());
 	if(!Found)
