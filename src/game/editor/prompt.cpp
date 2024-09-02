@@ -126,6 +126,8 @@ void CPrompt::OnRender(CUIRect _)
 	s_ListBox.SetActive(!Ui()->IsPopupOpen());
 	s_ListBox.DoStart(15.0f, m_vpFilteredPromptList.size(), 1, 5, m_PromptSelectedIndex, &Suggestions, false);
 
+	float LabelWidth = Overlay.w > 855.0f ? 200.0f : 100.0f;
+
 	for(size_t i = 0; i < m_vpFilteredPromptList.size(); i++)
 	{
 		const CListboxItem Item = s_ListBox.DoNextItem(m_vpFilteredPromptList[i], m_PromptSelectedIndex >= 0 && (size_t)m_PromptSelectedIndex == i);
@@ -133,9 +135,10 @@ void CPrompt::OnRender(CUIRect _)
 			continue;
 
 		CUIRect LabelColumn, DescColumn;
-		Item.m_Rect.VSplitLeft(5.0f, nullptr, &LabelColumn);
-		LabelColumn.VSplitLeft(100.0f, &LabelColumn, &DescColumn);
-		LabelColumn.VSplitRight(5.0f, &LabelColumn, nullptr);
+		float Margin = 5.0f;
+		Item.m_Rect.VSplitLeft(Margin, nullptr, &LabelColumn);
+		LabelColumn.VSplitLeft(LabelWidth, &LabelColumn, &DescColumn);
+		DescColumn.VSplitRight(Margin, &DescColumn, nullptr);
 
 		SLabelProperties Props;
 		Props.m_MaxWidth = LabelColumn.w;
