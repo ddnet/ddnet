@@ -4358,8 +4358,20 @@ void CClient::RegisterCommands()
 
 	// used for server browser update
 	m_pConsole->Chain("br_filter_string", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_exclude_string", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_full", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_empty", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_spectators", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_friends", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_country", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_country_index", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_pw", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_gametype", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_gametype_strict", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_connecting_players", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_serveraddress", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_unfinished_map", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_login", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("add_favorite", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("remove_favorite", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("end_favorite_group", ConchainServerBrowserUpdate, this);
