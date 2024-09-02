@@ -142,5 +142,5 @@ bool CGameControllerCTF::OnEntity(int Index, int x, int y, int Layer, int Flags,
 		return true; // NOLINT(clang-analyzer-unix.Malloc)
 	}
 
-	return CGameControllerPvp::OnEntity(Index, x, y, Layer, Flags, Initial);
+	return CGameControllerBaseCTF::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 }
