@@ -128,6 +128,30 @@ REGISTER_QUICK_ACTION(
 	DEFAULT_BTN,
 	"Adds a new group.")
 REGISTER_QUICK_ACTION(
+	ResetZoom,
+	"Reset Zoom",
+	[&]() { MapView()->ResetZoom(); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Numpad*] Zoom to normal and remove editor offset.")
+REGISTER_QUICK_ACTION(
+	ZoomOut,
+	"Zoom Out",
+	[&]() { MapView()->Zoom()->ChangeValue(50.0f); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Numpad-] Zoom out.")
+REGISTER_QUICK_ACTION(
+	ZoomIn,
+	"Zoom In",
+	[&]() { MapView()->Zoom()->ChangeValue(-50.0f); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Numpad+] Zoom in.")
+REGISTER_QUICK_ACTION(
 	Refocus,
 	"Refocus",
 	[&]() { MapView()->Focus(); },
