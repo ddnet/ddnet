@@ -3317,7 +3317,7 @@ bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
 					if(g_Config.m_Bindaddr[0])
 						str_format(pError, ErrorSize, "Could not open the network client, try changing or unsetting the bindaddr '%s'.", g_Config.m_Bindaddr);
 					else
-						str_format(pError, ErrorSize, "Could not open the network client.");
+						str_copy(pError, "Could not open the network client.", ErrorSize);
 					return false;
 				}
 			}

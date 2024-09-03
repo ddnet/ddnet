@@ -240,12 +240,12 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 	else if(State == IUpdater::FAIL)
 	{
-		str_format(aBuf, sizeof(aBuf), Localize("Update failed! Check log…"));
+		str_copy(aBuf, Localize("Update failed! Check log…"));
 		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 	}
 	else if(State == IUpdater::NEED_RESTART)
 	{
-		str_format(aBuf, sizeof(aBuf), Localize("DDNet Client updated!"));
+		str_copy(aBuf, Localize("DDNet Client updated!"));
 		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 	}
 	Ui()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_ML);
