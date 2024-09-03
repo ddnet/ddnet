@@ -4088,7 +4088,7 @@ void CClient::InitChecksum()
 {
 	CChecksumData *pData = &m_Checksum.m_Data;
 	pData->m_SizeofData = sizeof(*pData);
-	str_copy(pData->m_aVersionStr, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
+	str_copy(pData->m_aVersionStr, CLIENT_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
 	pData->m_Start = time_get();
 	os_version_str(pData->m_aOsVersion, sizeof(pData->m_aOsVersion));
 	secure_random_fill(&pData->m_Random, sizeof(pData->m_Random));

@@ -1343,7 +1343,7 @@ void CPlayers::OnRender()
 				if(!IsTeamplay && g_Config.m_ClColorFreeze)
 				{
 					aRenderInfo[i].m_CustomColoredSkin = m_pClient->m_aClients[i].m_RenderInfo.m_CustomColoredSkin;
-					aRenderInfo[i].m_ColorFeet = g_Config.m_ClColorFreezeFeet ? aRenderInfo[i].m_ColorFeet : ColorRGBA(1, 1, 1);
+					aRenderInfo[i].m_ColorFeet = g_Config.m_ClColorFreezeFeet ? m_pClient->m_aClients[i].m_RenderInfo.m_ColorFeet : ColorRGBA(1, 1, 1);
 					float Darken = (g_Config.m_ClColorFreezeDarken / 100.0f) * 0.5f + 0.5f;
 					aRenderInfo[i].m_ColorBody = m_pClient->m_aClients[i].m_RenderInfo.m_ColorBody;
 					aRenderInfo[i].m_ColorBody = ColorRGBA(aRenderInfo[i].m_ColorBody.r * Darken, aRenderInfo[i].m_ColorBody.g * Darken, aRenderInfo[i].m_ColorBody.b * Darken, 1.0);

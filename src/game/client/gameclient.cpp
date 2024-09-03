@@ -3174,7 +3174,7 @@ vec2 CGameClient::GetFreezePos(int ClientId)
 
 		if(g_Config.m_ClRemoveAnti && pChar && pChar->m_FreezeTime > 0)
 		{
-			MixAmount = mix(0.0f, 1.0f, 1.0f - (float)std::min(TicksFrozen, g_Config.m_ClUnfreezeLagDelayTicks) / (float)g_Config.m_ClUnfreezeLagDelayTicks);
+			MixAmount = mix(0.0f, 1.0f, 1.0f - std::min((float)TicksFrozen, (float)g_Config.m_ClUnfreezeLagDelayTicks) / (float)g_Config.m_ClUnfreezeLagDelayTicks);
 		}
 		else
 		{

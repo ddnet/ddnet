@@ -16,4 +16,5 @@
 #define DDNET_VERSION_NUMBER 18040
 extern const char *GIT_SHORTREV_HASH;
 #define GAME_NAME "DDNet"
+#define CLIENT_NAME "TClient"
 #endif
