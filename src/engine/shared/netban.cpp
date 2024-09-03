@@ -490,8 +490,7 @@ void CNetBan::ConBans(IConsole::IResult *pResult, void *pUser)
 
 	if(NumBans == 0)
 	{
-		str_format(aMsg, sizeof(aMsg), "The ban list is empty.");
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "The ban list is empty.");
 
 		return;
 	}

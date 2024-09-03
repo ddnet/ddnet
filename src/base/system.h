@@ -1236,6 +1236,7 @@ int str_format_int(char *buffer, size_t buffer_size, int value);
 template<typename... Args>
 int str_format_opt(char *buffer, int buffer_size, const char *format, Args... args)
 {
+	static_assert(sizeof...(args) > 0, "Use str_copy instead of str_format without format arguments");
 	return str_format(buffer, buffer_size, format, args...);
 }
 
