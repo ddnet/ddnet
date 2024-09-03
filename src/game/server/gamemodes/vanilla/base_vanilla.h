@@ -9,7 +9,6 @@ public:
 	CGameControllerVanilla(class CGameContext *pGameServer);
 	~CGameControllerVanilla() override;
 
-	void SetArmorProgress(CCharacter *pCharacer, int Progress) override{};
 	int GameInfoExFlags(int SnappingClient) override;
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
