@@ -176,6 +176,11 @@ void CGameContext::SendBroadcastSix(const char *pText, bool Important)
 		// could also abuse the 0.6 warmup timer for that
 		// but this causes confusion since a sv_warmup(igs countdown) is not a warmup
 		// it is a countdown until the game begins and is a different thing already
+		//
+		// this hack can be put behind a ddnet client version check if
+		// https://github.com/ddnet/ddnet/pull/8892
+		// is merged. If it is merged for long enough the entire ghost char hack can be removed
+		// and we just drop broadcast support for old clients in that weird state
 		if(!pPlayer->m_HasGhostCharInGame && pPlayer->GetTeam() != TEAM_SPECTATORS)
 			SendChatTarget(pPlayer->GetCid(), pText);
 		SendBroadcast(pText, pPlayer->GetCid(), Important);
