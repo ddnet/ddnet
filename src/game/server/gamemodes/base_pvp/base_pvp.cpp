@@ -452,6 +452,9 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 	}
 
 	CheckReadyStates(); // ddnet-insta
+
+	// update game info
+	SendGameInfo(ClientId);
 }
 
 void CGameControllerPvp::SendChatSpectators(const char *pMessage, int Flags)
