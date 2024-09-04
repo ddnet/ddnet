@@ -22,6 +22,7 @@ public:
 
 	// Will be -1 when the player is alive
 	int m_KillerId = -1;
+	void SetTeamSpoofed(int Team, bool DoChatMsg = false);
 	void SetTeamNoKill(int Team, bool DoChatMsg = false);
 	void SetTeamRaw(int Team) { m_Team = Team; }
 	// dead players can not respawn
@@ -79,6 +80,17 @@ public:
 		This variable marks those in game tees
 	*/
 	bool m_HasGhostCharInGame;
+
+	/*
+		m_IsFakeDeadSpec
+
+		Marks players who are sent to the client as dead specs
+		but in reality are real spectators.
+
+		This is used to enable sv_spectator_votes for 0.7
+		So the 0.7 clients think they are in game but in reality they are not.
+	*/
+	bool m_IsFakeDeadSpec = false;
 	int64_t m_LastReadyChangeTick;
 	void IncrementScore() { AddScore(1); }
 	void DecrementScore() { AddScore(-1); }

@@ -12,6 +12,38 @@ void CGameControllerPvp::OnPlayerConstruct(class CPlayer *pPlayer)
 	pPlayer->m_Spree = 0;
 }
 
+void CPlayer::SetTeamSpoofed(int Team, bool DoChatMsg)
+{
+	KillCharacter();
+
+	m_Team = Team;
+	m_LastSetTeam = Server()->Tick();
+	m_LastActionTick = Server()->Tick();
+	m_SpectatorId = SPEC_FREEVIEW;
+
+	protocol7::CNetMsg_Sv_Team Msg;
+	Msg.m_ClientId = m_ClientId;
+	Msg.m_Team = GameServer()->m_pController->GetPlayerTeam(this, true); // might be a fake team
+	Msg.m_Silent = !DoChatMsg;
+	Msg.m_CooldownTick = m_LastSetTeam + Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
+
+	// we got to wait 0.5 secs before respawning
+	m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
+
+	if(Team == TEAM_SPECTATORS)
+	{
+		// update spectator modes
+		for(auto &pPlayer : GameServer()->m_apPlayers)
+		{
+			if(pPlayer && pPlayer->m_SpectatorId == m_ClientId)
+				pPlayer->m_SpectatorId = SPEC_FREEVIEW;
+		}
+	}
+
+	Server()->ExpireServerInfo();
+}
+
 void CPlayer::SetTeamNoKill(int Team, bool DoChatMsg)
 {
 	m_Team = Team;

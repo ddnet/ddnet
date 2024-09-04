@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
@@ -63,6 +64,124 @@ int CGameControllerPvp::GameInfoExFlags(int SnappingClient)
 int CGameControllerPvp::GameInfoExFlags2(int SnappingClient)
 {
 	return GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // ddnet-insta
+}
+
+void CGameControllerPvp::OnUpdateSpectatorVotesConfig()
+{
+	// spec votes was activated
+	// spoof all specatators to in game dead specs for 0.7
+	// so the client side knows it can call votes
+	if(g_Config.m_SvSpectatorVotes && g_Config.m_SvSpectatorVotesSixup)
+	{
+		for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+			if(pPlayer->GetTeam() != TEAM_SPECTATORS)
+				continue;
+			if(!Server()->IsSixup(pPlayer->GetCid()))
+				continue;
+
+			// Every sixup client only needs to see it self as spectator
+			// It does not care about others
+			protocol7::CNetMsg_Sv_Team Msg;
+			Msg.m_ClientId = pPlayer->GetCid();
+			Msg.m_Team = TEAM_RED; // fake
+			Msg.m_Silent = true;
+			Msg.m_CooldownTick = 0;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, pPlayer->GetCid());
+
+			pPlayer->m_IsFakeDeadSpec = true;
+		}
+	}
+	else
+	{
+		// spec votes were deactivated
+		// so revert spoofed in game teams back to regular spectators
+		// make sure this does not mess with ACTUAL dead spec tees
+		for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+			if(!Server()->IsSixup(pPlayer->GetCid()))
+				continue;
+			if(!pPlayer->m_IsFakeDeadSpec)
+				continue;
+
+			if(pPlayer->GetTeam() != TEAM_SPECTATORS)
+			{
+				dbg_msg("ddnet-insta", "ERROR: tried to move player back to team=%d but expected spectators", pPlayer->GetTeam());
+			}
+
+			protocol7::CNetMsg_Sv_Team Msg;
+			Msg.m_ClientId = pPlayer->GetCid();
+			Msg.m_Team = pPlayer->GetTeam(); // restore real team
+			Msg.m_Silent = true;
+			Msg.m_CooldownTick = 0;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, pPlayer->GetCid());
+
+			pPlayer->m_IsFakeDeadSpec = false;
+		}
+	}
+}
+
+// called before spam protection on client team join request
+bool CGameControllerPvp::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	int Team = pMsg->m_Team;
+
+	// user joins the spectators while allow spec is on
+	// we have to mark him as fake dead spec
+	if(Server()->IsSixup(ClientId) && g_Config.m_SvSpectatorVotes && g_Config.m_SvSpectatorVotesSixup && !pPlayer->m_IsFakeDeadSpec)
+	{
+		if(Team == TEAM_SPECTATORS)
+		{
+			pPlayer->m_IsFakeDeadSpec = true;
+			return false;
+		}
+	}
+
+	if(Server()->IsSixup(ClientId) && g_Config.m_SvSpectatorVotes && pPlayer->m_IsFakeDeadSpec)
+	{
+		if(Team != TEAM_SPECTATORS)
+		{
+			// This should be in all cases coming from the hacked recursion branch below
+			//
+			// the 0.7 client should think it is in game
+			// so it should never display a join game button
+			// only a join spectators button
+			return false;
+		}
+
+		pPlayer->m_IsFakeDeadSpec = false;
+
+		// hijack and drop
+		// and then call it again
+		// as a hack to edit the team
+		CNetMsg_Cl_SetTeam Msg;
+		Msg.m_Team = TEAM_RED;
+		GameServer()->OnSetTeamNetMessage(&Msg, ClientId);
+		return true;
+	}
+	return false;
+}
+
+int CGameControllerPvp::GetPlayerTeam(class CPlayer *pPlayer, bool Sixup)
+{
+	if(g_Config.m_SvTournament)
+		return IGameController::GetPlayerTeam(pPlayer, Sixup);
+
+	// hack to let 0.7 players vote as spectators
+	if(g_Config.m_SvSpectatorVotes && g_Config.m_SvSpectatorVotesSixup && Sixup && pPlayer->GetTeam() == TEAM_SPECTATORS)
+	{
+		return TEAM_RED;
+	}
+
+	return IGameController::GetPlayerTeam(pPlayer, Sixup);
 }
 
 int CGameControllerPvp::GetAutoTeam(int NotThisId)
@@ -510,7 +629,7 @@ void CGameControllerPvp::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg
 		return;
 
 	int OldTeam = pPlayer->GetTeam(); // ddnet-insta
-	pPlayer->SetTeam(Team);
+	pPlayer->SetTeamSpoofed(Team);
 	int ClientId = pPlayer->GetCid();
 
 	char aBuf[128];

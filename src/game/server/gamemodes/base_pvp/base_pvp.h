@@ -31,6 +31,9 @@ public:
 	int GameInfoExFlags(int SnappingClient) override;
 	int GameInfoExFlags2(int SnappingClient) override;
 	int GetDefaultWeapon(class CPlayer *pPlayer) override { return m_DefaultWeapon; }
+	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
+	void OnUpdateSpectatorVotesConfig() override;
+	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
 
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 

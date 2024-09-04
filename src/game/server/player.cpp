@@ -418,6 +418,9 @@ void CPlayer::Snap(int SnappingClient)
 		// ddnet-insta dead players
 		if(m_IsDead && (!GetCharacter() || !GetCharacter()->IsAlive()))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_DEAD;
+		// ddnet-insta hack to let 0.7 players vote as spectators
+		if(g_Config.m_SvSpectatorVotes && g_Config.m_SvSpectatorVotesSixup && GetTeam() == TEAM_SPECTATORS)
+			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_DEAD;
 	}
 
 	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))

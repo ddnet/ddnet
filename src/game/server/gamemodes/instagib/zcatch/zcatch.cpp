@@ -106,11 +106,7 @@ int CGameControllerZcatch::GetPlayerTeam(class CPlayer *pPlayer, bool Sixup)
 	if(Sixup && pPlayer->m_IsDead)
 		return TEAM_RED;
 
-	return IGameController::GetPlayerTeam(pPlayer, Sixup);
-
-	// TODO: ddnet insta PLAYERFLAG_DEAD
-	// and then allow joining spectators in zcatch while dead
-	// it should reply with "you will join spectators once xxx dies"
+	return CGameControllerPvp::GetPlayerTeam(pPlayer, Sixup);
 }
 
 void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pMsg)
@@ -243,6 +239,16 @@ bool CGameControllerZcatch::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, 
 		return false;
 
 	int Team = pMsg->m_Team;
+	if(Server()->IsSixup(ClientId) && g_Config.m_SvSpectatorVotes && g_Config.m_SvSpectatorVotesSixup && pPlayer->m_IsFakeDeadSpec)
+	{
+		if(Team == TEAM_SPECTATORS)
+		{
+			// when a sixup fake spec tries to join spectators
+			// he actually tries to join team red
+			Team = TEAM_RED;
+		}
+	}
+
 	if(
 		(Server()->IsSixup(ClientId) && pPlayer->m_IsDead && Team == TEAM_SPECTATORS) ||
 		(!Server()->IsSixup(ClientId) && pPlayer->m_IsDead && Team == TEAM_RED))
@@ -258,7 +264,7 @@ bool CGameControllerZcatch::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, 
 		return true;
 	}
 
-	return false;
+	return CGameControllerPvp::OnSetTeamNetMessage(pMsg, ClientId);
 }
 
 // called after spam protection on client team join request

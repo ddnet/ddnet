@@ -52,6 +52,14 @@ In 0.7 they are marked as dead players and are separate from spectators.
 
 ![zCatch 0.7](https://raw.githubusercontent.com/ddnet-insta/images/master/zCatch_teetime_07.png)
 
+## Allow spectator votes for 0.7
+
+The official teeworlds 0.7 client does block voting on the client side for spectators.
+To make `sv_spectator_votes` portable and fair for both 0.6 and 0.7 players there is an option to allow
+0.7 clients to vote as spectators. It is a bit hacky so it is hidden behind then config `sv_spectator_votes_sixup 1`
+when that is set it will make the 0.7 clients believe they are in game and unlock the call vote menu.
+But this also means that to join the game the users have to press the "spectate" button.
+
 ## gametype support
 
 ### iCTF
@@ -104,6 +112,7 @@ It is an instagib gametype so one shot kills. You can choose the weapon with
 
 + `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, zcatch)
 + `sv_spectator_votes` Allow spectators to vote
++ `sv_spectator_votes_sixup` Allow 0.7 players to vote as spec if sv_spectator_vote is 1 (hacky dead spec)
 + `sv_countdown_unpause` Number of seconds to freeze the game in a countdown before match continues after pause
 + `sv_countdown_round_start` Number of seconds to freeze the game in a countdown before match starts (0 enables only for survival gamemodes, -1 disables)
 + `sv_scorelimit` Score limit (0 disables)

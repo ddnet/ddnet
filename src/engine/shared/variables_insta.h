@@ -11,6 +11,7 @@
 #endif
 
 MACRO_CONFIG_INT(SvSpectatorVotes, sv_spectator_votes, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Allow spectators to vote")
+MACRO_CONFIG_INT(SvSpectatorVotesSixup, sv_spectator_votes_sixup, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Allow 0.7 players to vote as spec if sv_spectator_vote is 1 (hacky dead spec)")
 
 MACRO_CONFIG_INT(SvCountdownUnpause, sv_countdown_unpause, 0, -1, 1000, CFGFLAG_SAVE | CFGFLAG_SERVER, "Number of seconds to freeze the game in a countdown before match continues after pause")
 MACRO_CONFIG_INT(SvCountdownRoundStart, sv_countdown_round_start, 0, -1, 1000, CFGFLAG_SAVE | CFGFLAG_SERVER, "Number of seconds to freeze the game in a countdown before match starts (0 enables only for survival gamemodes, -1 disables)")

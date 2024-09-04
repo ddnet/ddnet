@@ -260,6 +260,7 @@ public:
 	// and supress default ddnet selfkill behavior
 	virtual bool OnSelfkill(int ClientId) { return false; };
 	virtual void OnUpdateZcatchColorConfig(){};
+	virtual void OnUpdateSpectatorVotesConfig(){};
 
 	/*
 		Variable: m_GamePauseStartTime

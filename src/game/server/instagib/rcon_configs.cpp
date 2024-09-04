@@ -15,6 +15,8 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_tournament_chat_smart", ConchainSmartChat, this);
 	Console()->Chain("sv_tournament_chat", ConchainTournamentChat, this);
 	Console()->Chain("sv_zcatch_colors", ConchainZcatchColors, this);
+	Console()->Chain("sv_spectator_votes", ConchainSpectatorVotes, this);
+	Console()->Chain("sv_spectator_votes_sixup", ConchainSpectatorVotes, this);
 
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) Console()->Register(name, params, flags, callback, userdata, help);
 #include <game/server/instagib/rcon_commands.h>
@@ -117,5 +119,15 @@ void CGameContext::ConchainZcatchColors(IConsole::IResult *pResult, void *pUserD
 	pfnCallback(pResult, pCallbackUserData);
 
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->m_pController->OnUpdateZcatchColorConfig();
+	if(pSelf->m_pController)
+		pSelf->m_pController->OnUpdateZcatchColorConfig();
+}
+
+void CGameContext::ConchainSpectatorVotes(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->m_pController)
+		pSelf->m_pController->OnUpdateSpectatorVotesConfig();
 }
