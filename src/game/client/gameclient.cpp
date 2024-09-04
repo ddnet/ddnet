@@ -2500,7 +2500,7 @@ void CGameClient::SendSwitchTeam(int Team)
 void CGameClient::SendStartInfo7(bool Dummy) const
 {
 	protocol7::CNetMsg_Cl_StartInfo Msg;
-	Msg.m_pName = Dummy ? Client()->DummyName() : Config()->m_PlayerName;
+	Msg.m_pName = Dummy ? Client()->DummyName() : Client()->PlayerName();
 	Msg.m_pClan = Dummy ? Config()->m_ClDummyClan : Config()->m_PlayerClan;
 	Msg.m_Country = Dummy ? Config()->m_ClDummyCountry : Config()->m_PlayerCountry;
 	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
