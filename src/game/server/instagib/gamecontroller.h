@@ -220,7 +220,7 @@ public:
 		int m_ScoreLimit;
 		int m_TimeLimit;
 	} m_GameInfo;
-	void UpdateGameInfo(int ClientId);
+	void SendGameInfo(int ClientId);
 	/*
 		Variable: m_GameStartTick
 			Sent in snap to 0.7 clients for timer

@@ -184,7 +184,7 @@ void IGameController::CheckGameInfo()
 	m_GameInfo.m_ScoreLimit = g_Config.m_SvScorelimit;
 	m_GameInfo.m_TimeLimit = g_Config.m_SvTimelimit;
 	if(GameInfoChanged)
-		UpdateGameInfo(-1);
+		SendGameInfo(-1);
 }
 
 bool IGameController::IsFriendlyFire(int ClientId1, int ClientId2)
@@ -205,7 +205,7 @@ bool IGameController::IsFriendlyFire(int ClientId1, int ClientId2)
 	return false;
 }
 
-void IGameController::UpdateGameInfo(int ClientId)
+void IGameController::SendGameInfo(int ClientId)
 {
 	// ddnet-insta
 	for(int i = 0; i < MAX_CLIENTS; i++)
