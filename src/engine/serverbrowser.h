@@ -309,6 +309,9 @@ public:
 
 	static constexpr const char *COMMUNITY_DDNET = "ddnet";
 	static constexpr const char *COMMUNITY_NONE = "none";
+
+	static constexpr const char *COMMUNITY_COUNTRY_NONE = "none";
+	static constexpr const char *COMMUNITY_TYPE_NONE = "None";
 	/**
 	 * Special community value for country/type filters that
 	 * affect all communities.

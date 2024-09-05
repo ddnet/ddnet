@@ -27,9 +27,6 @@
 #include <engine/http.h>
 #include <engine/storage.h>
 
-static constexpr const char *COMMUNITY_COUNTRY_NONE = "none";
-static constexpr const char *COMMUNITY_TYPE_NONE = "None";
-
 class CSortWrap
 {
 	typedef bool (CServerBrowser::*SortFunc)(int, int) const;
