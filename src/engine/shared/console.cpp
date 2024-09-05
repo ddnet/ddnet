@@ -136,7 +136,7 @@ int CConsole::ParseStart(CResult *pResult, const char *pString, int Length)
 	return 0;
 }
 
-int CConsole::ParseArgs(CResult *pResult, const char *pFormat, FCommandCallback pfnCallback)
+int CConsole::ParseArgs(CResult *pResult, const char *pFormat, bool IsColor)
 {
 	char Command = *pFormat;
 	char *pStr;
@@ -235,7 +235,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat, FCommandCallback 
 				if(Command == 'i')
 				{
 					// don't validate colors here
-					if(pfnCallback != &SColorConfigVariable::CommandCallback)
+					if(!IsColor)
 					{
 						int Value;
 						if(!str_toint(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
@@ -514,7 +514,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 
 				if(Stroke || IsStrokeCommand)
 				{
-					if(int Error = ParseArgs(&Result, pCommand->m_pParams, pCommand->m_pfnCallback))
+					if(int Error = ParseArgs(&Result, pCommand->m_pParams, pCommand->m_pfnCallback == &SColorConfigVariable::CommandCallback))
 					{
 						char aBuf[CMDLINE_LENGTH + 64];
 						if(Error == PARSEARGS_INVALID_INTEGER)
