@@ -153,7 +153,7 @@ class CConsole : public IConsole
 		PARSEARGS_INVALID_FLOAT,
 	};
 
-	int ParseArgs(CResult *pResult, const char *pFormat, FCommandCallback pfnCallback = 0);
+	int ParseArgs(CResult *pResult, const char *pFormat, bool IsColor = false);
 
 	/*
 	this function will set pFormat to the next parameter (i,s,r,v,?) it contains and
