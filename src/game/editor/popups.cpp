@@ -371,6 +371,30 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		}
 	}
 
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect No, Yes;
+		Selector.VSplitMid(&No, &Yes);
+
+		pEditor->Ui()->DoLabel(&Label, "Auto map reload", 10.0f, TEXTALIGN_ML);
+
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_Ex(&s_ButtonNo, "No", !g_Config.m_EdAutoMapReload, &No, 0, "Do not run 'hot_reload' on the local server while rcon authed on map save", IGraphics::CORNER_L))
+		{
+			g_Config.m_EdAutoMapReload = false;
+		}
+		if(pEditor->DoButton_Ex(&s_ButtonYes, "Yes", g_Config.m_EdAutoMapReload, &Yes, 0, "Run 'hot_reload' on the local server while rcon authed on map save", IGraphics::CORNER_R))
+		{
+			g_Config.m_EdAutoMapReload = true;
+		}
+	}
+
 	return CUi::POPUP_KEEP_OPEN;
 }
 

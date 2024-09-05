@@ -7691,7 +7691,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Ex(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuEntitiesId;
-		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 92.0f, this, PopupMenuSettings, PopupProperties);
+		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 106.0f, this, PopupMenuSettings, PopupProperties);
 	}
 
 	CUIRect ChangedIndicator, Info, Help, Close;
@@ -8592,7 +8592,7 @@ void CEditor::HandleWriterFinishJobs()
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor/save", aBuf);
 
 	// send rcon.. if we can
-	if(Client()->RconAuthed())
+	if(Client()->RconAuthed() && g_Config.m_EdAutoMapReload)
 	{
 		CServerInfo CurrentServerInfo;
 		Client()->GetServerInfo(&CurrentServerInfo);
