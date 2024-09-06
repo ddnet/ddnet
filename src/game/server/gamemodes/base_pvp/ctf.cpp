@@ -197,6 +197,10 @@ void CGameControllerBaseCTF::FlagTick()
 				if(!apCloseCCharacters[i]->IsAlive() || apCloseCCharacters[i]->GetPlayer()->GetTeam() == TEAM_SPECTATORS || GameServer()->Collision()->IntersectLine(F->GetPos(), apCloseCCharacters[i]->GetPos(), NULL, NULL))
 					continue;
 
+				// only allow flag grabs in team 0
+				if(GameServer()->GetDDRaceTeam(apCloseCCharacters[i]->GetPlayer()->GetCid()))
+					continue;
+
 				if(apCloseCCharacters[i]->GetPlayer()->GetTeam() == F->GetTeam())
 				{
 					// return the flag
