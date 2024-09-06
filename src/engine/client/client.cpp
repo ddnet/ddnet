@@ -621,6 +621,18 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	else
 		m_aNetClient[CONN_MAIN].Connect(aConnectAddrs, NumConnectAddrs);
 
+	const CServerBrowser::CServerEntry *pEntry = m_ServerBrowser.Find(aConnectAddrs[0]);
+	if(pEntry != nullptr && pEntry->m_GotInfo)
+	{
+		if(str_length(pEntry->m_Info.m_aVerifyUrl))
+		{
+			std::shared_ptr<CHttpRequest> pVerifyGet = HttpGet(pEntry->m_Info.m_aVerifyUrl);
+			pVerifyGet->Timeout(CTimeout{10000, 0, 500, 10});
+			pVerifyGet->IpResolve(aConnectAddrs[0].type == NETTYPE_IPV4 ? IPRESOLVE::V4 : IPRESOLVE::V6);
+			Http()->Run(pVerifyGet);
+		}
+	}
+
 	m_aNetClient[CONN_MAIN].RefreshStun();
 	SetState(IClient::STATE_CONNECTING);
 

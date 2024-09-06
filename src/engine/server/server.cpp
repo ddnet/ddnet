@@ -2357,6 +2357,10 @@ void CServer::UpdateRegisterServerInfo()
 	JsonWriter.WriteAttribute("requires_login");
 	JsonWriter.WriteBoolValue(false);
 
+	// Client will send a HTTP GET request to the url of sv_verify_url upon connecting
+	JsonWriter.WriteAttribute("verify_url");
+	JsonWriter.WriteStrValue(g_Config.m_SvVerifyUrl);
+
 	JsonWriter.WriteAttribute("clients");
 	JsonWriter.BeginArray();
 

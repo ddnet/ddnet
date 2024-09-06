@@ -72,6 +72,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	const json_value &Version = ServerInfo["version"];
 	const json_value &Clients = ServerInfo["clients"];
 	const json_value &RequiresLogin = ServerInfo["requires_login"];
+	const json_value &VerifyUrl = ServerInfo["verify_url"];
 
 	Error = false;
 	Error = Error || MaxClients.type != json_integer;
@@ -102,6 +103,11 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	if(RequiresLogin.type == json_boolean)
 	{
 		pOut->m_RequiresLogin = RequiresLogin;
+	}
+	str_copy(pOut->m_aVerifyUrl, "");
+	if(VerifyUrl.type == json_string)
+	{
+		str_copy(pOut->m_aVerifyUrl, VerifyUrl);
 	}
 	pOut->m_Passworded = Passworded;
 	str_copy(pOut->m_aGameType, GameType);
@@ -239,6 +245,7 @@ CServerInfo2::operator CServerInfo() const
 	str_copy(Result.m_aName, m_aName);
 	str_copy(Result.m_aMap, m_aMapName);
 	str_copy(Result.m_aVersion, m_aVersion);
+	str_copy(Result.m_aVerifyUrl, m_aVerifyUrl);
 
 	for(int i = 0; i < minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
 	{
