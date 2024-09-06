@@ -869,11 +869,14 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 			{
 				if(Click == 1)
 				{
-					// Left click: when all are active, only activate one
+					// Left click: when all are active, only activate one and none
 					for(int j = 0; j < MaxItems; ++j)
 					{
-						if(j != ItemIndex)
-							Filter.Add(GetItemName(j));
+						if(const char *pItemName = GetItemName(j);
+							j != ItemIndex &&
+							!((&Filter == &ServerBrowser()->CountriesFilter() && str_comp(pItemName, IServerBrowser::COMMUNITY_COUNTRY_NONE) == 0) ||
+								(&Filter == &ServerBrowser()->TypesFilter() && str_comp(pItemName, IServerBrowser::COMMUNITY_TYPE_NONE) == 0)))
+							Filter.Add(pItemName);
 					}
 				}
 				else if(Click == 2)
@@ -890,7 +893,10 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 				bool AllFilteredExceptUs = true;
 				for(int j = 0; j < MaxItems; ++j)
 				{
-					if(j != ItemIndex && !Filter.Filtered(GetItemName(j)))
+					if(const char *pItemName = GetItemName(j);
+						j != ItemIndex && !Filter.Filtered(pItemName) &&
+						!((&Filter == &ServerBrowser()->CountriesFilter() && str_comp(pItemName, IServerBrowser::COMMUNITY_COUNTRY_NONE) == 0) ||
+							(&Filter == &ServerBrowser()->TypesFilter() && str_comp(pItemName, IServerBrowser::COMMUNITY_TYPE_NONE) == 0)))
 					{
 						AllFilteredExceptUs = false;
 						break;
@@ -898,7 +904,7 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 				}
 				// When last one is removed, re-enable all currently selectable items.
 				// Don't use Clear, to avoid enabling also currently unselectable items.
-				if(AllFilteredExceptUs)
+				if(AllFilteredExceptUs && Active)
 				{
 					for(int j = 0; j < MaxItems; ++j)
 					{
