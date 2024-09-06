@@ -128,30 +128,30 @@ void CGameControllerBaseCTF::FlagTick()
 	if(GameServer()->m_World.m_ResetRequested || GameServer()->m_World.m_Paused)
 		return;
 
-	for(int Fi = 0; Fi < 2; Fi++)
+	for(int FlagColor = 0; FlagColor < 2; FlagColor++)
 	{
-		CFlag *F = m_apFlags[Fi];
+		CFlag *pFlag = m_apFlags[FlagColor];
 
-		if(!F)
+		if(!pFlag)
 			continue;
 
 		//
-		if(F->GetCarrier())
+		if(pFlag->GetCarrier())
 		{
-			if(m_apFlags[Fi ^ 1] && m_apFlags[Fi ^ 1]->IsAtStand())
+			if(m_apFlags[FlagColor ^ 1] && m_apFlags[FlagColor ^ 1]->IsAtStand())
 			{
-				if(distance(F->GetPos(), m_apFlags[Fi ^ 1]->GetPos()) < CFlag::ms_PhysSize + CCharacterCore::PhysicalSize())
+				if(distance(pFlag->GetPos(), m_apFlags[FlagColor ^ 1]->GetPos()) < CFlag::ms_PhysSize + CCharacterCore::PhysicalSize())
 				{
 					// CAPTURE! \o/
-					m_aTeamscore[Fi ^ 1] += 100;
-					F->GetCarrier()->GetPlayer()->AddScore(5);
-					float Diff = Server()->Tick() - F->GetGrabTick();
+					m_aTeamscore[FlagColor ^ 1] += 100;
+					pFlag->GetCarrier()->GetPlayer()->AddScore(5);
+					float Diff = Server()->Tick() - pFlag->GetGrabTick();
 
 					char aBuf[64];
 					str_format(aBuf, sizeof(aBuf), "flag_capture player='%d:%s' team=%d time=%.2f",
-						F->GetCarrier()->GetPlayer()->GetCid(),
-						Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCid()),
-						F->GetCarrier()->GetPlayer()->GetTeam(),
+						pFlag->GetCarrier()->GetPlayer()->GetCid(),
+						Server()->ClientName(pFlag->GetCarrier()->GetPlayer()->GetCid()),
+						pFlag->GetCarrier()->GetPlayer()->GetTeam(),
 						Diff / (float)Server()->TickSpeed());
 					GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
@@ -159,14 +159,14 @@ void CGameControllerBaseCTF::FlagTick()
 					if(CaptureTime <= 60)
 						str_format(aBuf,
 							sizeof(aBuf),
-							"The %s flag was captured by '%s' (%d.%s%d seconds)", Fi ? "blue" : "red",
-							Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCid()), (int)CaptureTime % 60, ((int)(CaptureTime * 100) % 100) < 10 ? "0" : "", (int)(CaptureTime * 100) % 100);
+							"The %s flag was captured by '%s' (%d.%s%d seconds)", FlagColor ? "blue" : "red",
+							Server()->ClientName(pFlag->GetCarrier()->GetPlayer()->GetCid()), (int)CaptureTime % 60, ((int)(CaptureTime * 100) % 100) < 10 ? "0" : "", (int)(CaptureTime * 100) % 100);
 					else
 						str_format(
 							aBuf,
 							sizeof(aBuf),
-							"The %s flag was captured by '%s'", Fi ? "blue" : "red",
-							Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCid()));
+							"The %s flag was captured by '%s'", FlagColor ? "blue" : "red",
+							Server()->ClientName(pFlag->GetCarrier()->GetPlayer()->GetCid()));
 					for(auto &pPlayer : GameServer()->m_apPlayers)
 					{
 						if(!pPlayer)
@@ -176,8 +176,8 @@ void CGameControllerBaseCTF::FlagTick()
 
 						GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
 					}
-					GameServer()->m_pController->OnFlagCapture(F, Diff);
-					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, Fi, F->GetCarrier()->GetPlayer()->GetCid(), Diff, -1);
+					GameServer()->m_pController->OnFlagCapture(pFlag, Diff);
+					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, FlagColor, pFlag->GetCarrier()->GetPlayer()->GetCid(), Diff, -1);
 					GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 					for(int i = 0; i < 2; i++)
 						for(auto &pFlag : m_apFlags)
@@ -191,20 +191,20 @@ void CGameControllerBaseCTF::FlagTick()
 		else
 		{
 			CCharacter *apCloseCCharacters[MAX_CLIENTS];
-			int Num = GameServer()->m_World.FindEntities(F->GetPos(), CFlag::ms_PhysSize, (CEntity **)apCloseCCharacters, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+			int Num = GameServer()->m_World.FindEntities(pFlag->GetPos(), CFlag::ms_PhysSize, (CEntity **)apCloseCCharacters, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 			for(int i = 0; i < Num; i++)
 			{
-				if(!apCloseCCharacters[i]->IsAlive() || apCloseCCharacters[i]->GetPlayer()->GetTeam() == TEAM_SPECTATORS || GameServer()->Collision()->IntersectLine(F->GetPos(), apCloseCCharacters[i]->GetPos(), NULL, NULL))
+				if(!apCloseCCharacters[i]->IsAlive() || apCloseCCharacters[i]->GetPlayer()->GetTeam() == TEAM_SPECTATORS || GameServer()->Collision()->IntersectLine(pFlag->GetPos(), apCloseCCharacters[i]->GetPos(), NULL, NULL))
 					continue;
 
 				// only allow flag grabs in team 0
 				if(GameServer()->GetDDRaceTeam(apCloseCCharacters[i]->GetPlayer()->GetCid()))
 					continue;
 
-				if(apCloseCCharacters[i]->GetPlayer()->GetTeam() == F->GetTeam())
+				if(apCloseCCharacters[i]->GetPlayer()->GetTeam() == pFlag->GetTeam())
 				{
 					// return the flag
-					if(!F->IsAtStand())
+					if(!pFlag->IsAtStand())
 					{
 						CCharacter *pChr = apCloseCCharacters[i];
 						pChr->GetPlayer()->IncrementScore();
@@ -217,26 +217,26 @@ void CGameControllerBaseCTF::FlagTick()
 						GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 						GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_RETURN, -1);
 						GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
-						F->Reset();
+						pFlag->Reset();
 					}
 				}
 				else
 				{
 					// take the flag
-					if(F->IsAtStand())
-						m_aTeamscore[Fi ^ 1]++;
+					if(pFlag->IsAtStand())
+						m_aTeamscore[FlagColor ^ 1]++;
 
-					F->Grab(apCloseCCharacters[i]);
+					pFlag->Grab(apCloseCCharacters[i]);
 
-					F->GetCarrier()->GetPlayer()->IncrementScore();
+					pFlag->GetCarrier()->GetPlayer()->IncrementScore();
 
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "flag_grab player='%d:%s' team=%d",
-						F->GetCarrier()->GetPlayer()->GetCid(),
-						Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCid()),
-						F->GetCarrier()->GetPlayer()->GetTeam());
+						pFlag->GetCarrier()->GetPlayer()->GetCid(),
+						Server()->ClientName(pFlag->GetCarrier()->GetPlayer()->GetCid()),
+						pFlag->GetCarrier()->GetPlayer()->GetTeam());
 					GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_GRAB, Fi, -1);
+					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_GRAB, FlagColor, -1);
 					break;
 				}
 			}
