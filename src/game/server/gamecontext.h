@@ -575,7 +575,6 @@ public:
 		VOTE_TYPE_SPECTATE,
 	};
 	int m_VoteVictim;
-	int m_VoteEnforcer;
 
 	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; }
 	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; }

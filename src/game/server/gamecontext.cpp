@@ -773,7 +773,6 @@ void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char
 {
 	// reset votes
 	m_VoteEnforce = VOTE_ENFORCE_UNKNOWN;
-	m_VoteEnforcer = -1;
 	for(auto &pPlayer : m_apPlayers)
 	{
 		if(pPlayer)
@@ -1204,7 +1203,7 @@ void CGameContext::OnTick()
 			}
 			else if(m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
 			{
-				Console()->ExecuteLine(m_aVoteCommand, m_VoteEnforcer);
+				Console()->ExecuteLine(m_aVoteCommand, m_VoteCreator);
 				SendChat(-1, TEAM_ALL, "Vote passed enforced by authorized player", -1, FLAG_SIX);
 				EndVote();
 			}
@@ -4820,7 +4819,6 @@ void CGameContext::ForceVote(int EnforcerId, bool Success)
 		return;
 
 	m_VoteEnforce = Success ? CGameContext::VOTE_ENFORCE_YES_ADMIN : CGameContext::VOTE_ENFORCE_NO_ADMIN;
-	m_VoteEnforcer = EnforcerId;
 
 	char aBuf[256];
 	const char *pOption = Success ? "yes" : "no";
