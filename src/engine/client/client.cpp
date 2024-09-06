@@ -668,10 +668,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_CurrentServerCurrentPingTime = -1;
 	m_CurrentServerNextPingTime = -1;
 
-	ResetMapDownload();
-	m_aMapdownloadFilename[0] = '\0';
-	m_aMapdownloadFilenameTemp[0] = '\0';
-	m_aMapdownloadName[0] = '\0';
+	ResetMapDownload(true);
 
 	// clear the current server info
 	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
@@ -1528,7 +1525,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				DummyDisconnect(0);
 			}
 
-			ResetMapDownload();
+			ResetMapDownload(true);
 
 			SHA256_DIGEST *pMapSha256 = nullptr;
 			const char *pMapUrl = nullptr;
@@ -2196,7 +2193,7 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo)
 	return Builder.Finish(pTo);
 }
 
-void CClient::ResetMapDownload()
+void CClient::ResetMapDownload(bool ResetActive)
 {
 	if(m_pMapdownloadTask)
 	{
@@ -2215,19 +2212,24 @@ void CClient::ResetMapDownload()
 		Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 	}
 
-	m_MapdownloadChunk = 0;
-	m_MapdownloadSha256Present = false;
-	m_MapdownloadSha256 = SHA256_ZEROED;
-	m_MapdownloadCrc = 0;
-	m_MapdownloadTotalsize = -1;
-	m_MapdownloadAmount = 0;
+	if(ResetActive)
+	{
+		m_MapdownloadChunk = 0;
+		m_MapdownloadSha256Present = false;
+		m_MapdownloadSha256 = SHA256_ZEROED;
+		m_MapdownloadCrc = 0;
+		m_MapdownloadTotalsize = -1;
+		m_MapdownloadAmount = 0;
+		m_aMapdownloadFilename[0] = '\0';
+		m_aMapdownloadFilenameTemp[0] = '\0';
+		m_aMapdownloadName[0] = '\0';
+	}
 }
 
 void CClient::FinishMapDownload()
 {
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
 
-	const int PrevMapdownloadTotalsize = m_MapdownloadTotalsize;
 	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : nullptr;
 
 	bool FileSuccess = true;
@@ -2236,7 +2238,6 @@ void CClient::FinishMapDownload()
 	FileSuccess &= Storage()->RenameFile(m_aMapdownloadFilenameTemp, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 	if(!FileSuccess)
 	{
-		ResetMapDownload();
 		char aError[128 + IO_MAX_PATH_LENGTH];
 		str_format(aError, sizeof(aError), Localize("Could not save downloaded map. Try manually deleting this file: %s"), m_aMapdownloadFilename);
 		DisconnectWithReason(aError);
@@ -2246,19 +2247,17 @@ void CClient::FinishMapDownload()
 	const char *pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, pSha256, m_MapdownloadCrc);
 	if(!pError)
 	{
-		ResetMapDownload();
+		ResetMapDownload(true);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
 		SendReady(CONN_MAIN);
 	}
 	else if(m_pMapdownloadTask) // fallback
 	{
-		ResetMapDownload();
-		m_MapdownloadTotalsize = PrevMapdownloadTotalsize;
+		ResetMapDownload(false);
 		SendMapRequest();
 	}
 	else
 	{
-		ResetMapDownload();
 		DisconnectWithReason(pError);
 	}
 }
@@ -2784,7 +2783,7 @@ void CClient::Update()
 		else if(m_pMapdownloadTask->State() == EHttpState::ERROR || m_pMapdownloadTask->State() == EHttpState::ABORTED)
 		{
 			dbg_msg("webdl", "http failed, falling back to gameserver");
-			ResetMapDownload();
+			ResetMapDownload(false);
 			SendMapRequest();
 		}
 	}
