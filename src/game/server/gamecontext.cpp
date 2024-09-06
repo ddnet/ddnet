@@ -3208,12 +3208,16 @@ void CGameContext::ConHotReload(IConsole::IResult *pResult, void *pUserData)
 		if(!pSelf->GetPlayerChar(i))
 			continue;
 
+		CCharacter *pChar = pSelf->GetPlayerChar(i);
+
 		// Save the tee individually
 		pSelf->m_apSavedTees[i] = new CSaveTee();
-		pSelf->m_apSavedTees[i]->Save(pSelf->GetPlayerChar(i), false);
+		pSelf->m_apSavedTees[i]->Save(pChar, false);
 
 		// Save the team state
 		pSelf->m_aTeamMapping[i] = pSelf->GetDDRaceTeam(i);
+		if(pSelf->m_aTeamMapping[i] == TEAM_SUPER)
+			pSelf->m_aTeamMapping[i] = pChar->m_TeamBeforeSuper;
 
 		if(pSelf->m_apSavedTeams[pSelf->m_aTeamMapping[i]])
 			continue;
