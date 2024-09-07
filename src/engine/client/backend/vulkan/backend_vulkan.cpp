@@ -1508,8 +1508,9 @@ protected:
 			vkInvalidateMappedMemoryRanges(m_VKDevice, 1, &MemRange);
 
 			size_t RealFullImageSize = maximum(ImageTotalSize, (size_t)(Height * m_GetPresentedImgDataHelperMappedLayoutPitch));
-			if(vDstData.size() < RealFullImageSize)
-				vDstData.resize(RealFullImageSize);
+			size_t ExtraRowSize = Width * 4;
+			if(vDstData.size() < RealFullImageSize + ExtraRowSize)
+				vDstData.resize(RealFullImageSize + ExtraRowSize);
 
 			mem_copy(vDstData.data(), pResImageData, RealFullImageSize);
 
@@ -1520,7 +1521,8 @@ protected:
 				{
 					size_t OffsetImagePacked = (Y * Width * 4);
 					size_t OffsetImageUnpacked = (Y * m_GetPresentedImgDataHelperMappedLayoutPitch);
-					mem_copy(vDstData.data() + OffsetImagePacked, vDstData.data() + OffsetImageUnpacked, Width * 4);
+					mem_copy(vDstData.data() + RealFullImageSize, vDstData.data() + OffsetImageUnpacked, Width * 4);
+					mem_copy(vDstData.data() + OffsetImagePacked, vDstData.data() + RealFullImageSize, Width * 4);
 				}
 			}
 
