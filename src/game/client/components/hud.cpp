@@ -1369,7 +1369,8 @@ void CHud::RenderMovementInformation(const int ClientId)
 		const char aaCoordinates[][4] = {"X:", "Y:"};
 		for(int i = 0; i < 2; i++)
 		{
-			TextRender()->TextColor(ColorRGBA(1, 1, 1, 1));
+			if(m_aPlayerSpeed[0] == 0 || m_aPlayerSpeed[1] == 0)
+				TextRender()->TextColor(ColorRGBA(1, 1, 1, 1));
 			if(m_aLastPlayerSpeedChange[i] == ESpeedChange::INCREASE)
 				TextRender()->TextColor(ColorRGBA(0, 1, 0, 1));
 			if(m_aLastPlayerSpeedChange[i] == ESpeedChange::DECREASE)
