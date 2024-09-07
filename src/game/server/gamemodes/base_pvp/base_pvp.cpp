@@ -286,6 +286,16 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	// do scoreing
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
+
+	if(Weapon == WEAPON_SELF)
+		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
+
+	// never count score or win rounds in ddrace teams
+	if(GameServer()->GetDDRaceTeam(pKiller->GetCid()))
+		return 0;
+	if(GameServer()->GetDDRaceTeam(pVictim->GetPlayer()->GetCid()))
+		return 0;
+
 	if(pKiller == pVictim->GetPlayer())
 		pVictim->GetPlayer()->DecrementScore(); // suicide or world
 	else
@@ -295,8 +305,6 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 		else
 			pKiller->IncrementScore(); // normal kill
 	}
-	if(Weapon == WEAPON_SELF)
-		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
 
 	// update spectator modes for dead players in survival
 	// if(m_GameFlags&GAMEFLAG_SURVIVAL)
