@@ -1991,6 +1991,7 @@ void CGameClient::OnNewSnapshot()
 
 	// detect air jump for other players
 	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
 		if(m_Snap.m_aCharacters[i].m_Active && (m_Snap.m_aCharacters[i].m_Cur.m_Jumped & 2) && !(m_Snap.m_aCharacters[i].m_Prev.m_Jumped & 2))
 			if(!Predict() || (i != m_Snap.m_LocalClientId && (!AntiPingPlayers() || i != m_PredictedDummyId)))
 			{
@@ -2003,8 +2004,9 @@ void CGameClient::OnNewSnapshot()
 					Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
 				m_Effects.AirJump(Pos, Alpha);
 			}
-
+	}
 	if(g_Config.m_ClFreezeStars)
+	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(m_Snap.m_aCharacters[i].m_Active && m_Snap.m_aCharacters[i].m_HasExtendedData && m_Snap.m_aCharacters[i].m_PrevExtendedData)
@@ -2020,15 +2022,16 @@ void CGameClient::OnNewSnapshot()
 					float a = 3 * pi / 2;
 					float s = a - pi / 3;
 					float e = a + pi / 3;
-					for(int i = 0; i < Amount; i++)
+					for(int j = 0; j < Amount; j++)
 					{
-						float f = mix(s, e, (i + 1) / (float)(Amount + 2));
+						float f = mix(s, e, (j + 1) / (float)(Amount + 2));
 						vec2 Dir = vec2(cos(f), sin(f));
 						m_Effects.DamageIndicator(Pos, Dir);
 					}
 				}
 			}
 		}
+	}
 
 	if(m_Snap.m_LocalClientId != m_PrevLocalId)
 		m_PredictedDummyId = m_PrevLocalId;
