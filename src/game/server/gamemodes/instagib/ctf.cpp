@@ -136,6 +136,15 @@ void CGameControllerInstaBaseCTF::FlagTick()
 		//
 		if(pFlag->GetCarrier())
 		{
+			// forbid holding flags in ddrace teams
+			if(GameServer()->GetDDRaceTeam(pFlag->GetCarrier()->GetPlayer()->GetCid()))
+			{
+				GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
+				GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
+				pFlag->Drop();
+				continue;
+			}
+
 			if(m_apFlags[FlagColor ^ 1] && m_apFlags[FlagColor ^ 1]->IsAtStand())
 			{
 				if(distance(pFlag->GetPos(), m_apFlags[FlagColor ^ 1]->GetPos()) < CFlag::ms_PhysSize + CCharacterCore::PhysicalSize())
