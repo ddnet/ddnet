@@ -179,9 +179,8 @@ void CGameControllerBaseCTF::FlagTick()
 					GameServer()->m_pController->OnFlagCapture(pFlag, Diff);
 					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, FlagColor, pFlag->GetCarrier()->GetPlayer()->GetCid(), Diff, -1);
 					GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
-					for(int i = 0; i < 2; i++)
-						for(auto &pFlag : m_apFlags)
-							pFlag->Reset();
+					for(CFlag *pF: m_apFlags)
+						pF->Reset();
 					// do a win check(capture could trigger win condition)
 					if(DoWincheckRound())
 						return;
