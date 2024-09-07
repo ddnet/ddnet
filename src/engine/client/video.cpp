@@ -283,6 +283,7 @@ void CVideo::Pause(bool Pause)
 void CVideo::Stop()
 {
 	dbg_assert(!m_Stopped, "Already stopped");
+	m_Stopped = true;
 
 	m_pGraphics->WaitForIdle();
 
@@ -341,8 +342,6 @@ void CVideo::Stop()
 	pSound->PauseAudioDevice();
 	delete ms_pCurrentVideo;
 	pSound->UnpauseAudioDevice();
-
-	m_Stopped = true;
 }
 
 void CVideo::NextVideoFrameThread()
