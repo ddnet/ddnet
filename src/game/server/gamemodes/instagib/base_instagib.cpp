@@ -35,7 +35,7 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 		// no self damage
 		return false;
 	}
-	if(Dmg < g_Config.m_SvDamageNeededForKill)
+	if(Dmg < g_Config.m_SvDamageNeededForKill && Weapon == WEAPON_GRENADE)
 		return false;
 	Dmg = 20;
 
