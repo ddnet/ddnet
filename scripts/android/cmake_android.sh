@@ -10,7 +10,8 @@ ANDROID_NDK_VERSION="${ANDROID_NDK_VERSION:2}"
 # ANDROID_NDK_HOME must be exported for cargo-ndk
 export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
 
-ANDROID_API_LEVEL=34
+# ANDROID_API_LEVEL must specify the _minimum_ supported SDK version, otherwise this will cause linking errors at launch
+ANDROID_API_LEVEL=24
 ANDROID_SUB_BUILD_DIR=build_arch
 
 COLOR_RED="\e[1;31m"
