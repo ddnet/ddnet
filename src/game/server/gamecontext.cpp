@@ -31,6 +31,7 @@
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
+#include "gamemodes/instagib/bolofng.h"
 #include "gamemodes/instagib/gctf.h"
 #include "gamemodes/instagib/gdm.h"
 #include "gamemodes/instagib/gtdm.h"
@@ -3981,6 +3982,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerICTF(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "solofng"))
 		m_pController = new CGameControllerSoloFng(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "bolofng"))
+		m_pController = new CGameControllerBoloFng(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "zcatch"))
 		m_pController = new CGameControllerZcatch(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gdm"))

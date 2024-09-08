@@ -92,7 +92,8 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	}
 	else if(m_Type == WEAPON_LASER)
 	{
-		pHit->UnFreeze();
+		// ddnet-insta fng
+		// pHit->UnFreeze();
 	}
 	pHit->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
 	return true;

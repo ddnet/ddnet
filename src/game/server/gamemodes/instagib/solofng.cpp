@@ -14,6 +14,10 @@ CGameControllerSoloFng::CGameControllerSoloFng(class CGameContext *pGameServer) 
 	CGameControllerBaseFng(pGameServer)
 {
 	m_pGameType = "solofng";
+	m_GameFlags = 0;
+
+	m_SpawnWeapons = ESpawnWeapons::SPAWN_WEAPON_LASER;
+	m_DefaultWeapon = WEAPON_LASER;
 }
 
 CGameControllerSoloFng::~CGameControllerSoloFng() = default;
@@ -26,6 +30,9 @@ void CGameControllerSoloFng::Tick()
 void CGameControllerSoloFng::OnCharacterSpawn(class CCharacter *pChr)
 {
 	CGameControllerBaseFng::OnCharacterSpawn(pChr);
+
+	// give default weapons
+	pChr->GiveWeapon(m_DefaultWeapon, false, -1);
 }
 
 int CGameControllerSoloFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)

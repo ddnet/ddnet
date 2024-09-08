@@ -39,6 +39,33 @@ bool CGameControllerBaseFng::OnEntity(int Index, int x, int y, int Layer, int Fl
 	return false;
 }
 
+bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
+{
+	if(Character.m_IsGodmode)
+		return true;
+	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+		return false;
+	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
+	{
+		CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
+			return false;
+	}
+
+	// no self damage
+	if(From == Character.GetPlayer()->GetCid())
+		return false;
+
+	if(Character.m_FreezeTime)
+	{
+		Dmg = 0;
+		return false;
+	}
+
+	Character.Freeze(10);
+	return false;
+}
+
 void CGameControllerBaseFng::Snap(int SnappingClient)
 {
 	CGameControllerInstagib::Snap(SnappingClient);

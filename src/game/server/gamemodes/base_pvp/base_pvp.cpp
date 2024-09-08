@@ -233,7 +233,15 @@ void CGameControllerPvp::UpdateSpawnWeapons(bool Silent)
 		|| m_pGameType[0] == 'D') // DM*
 	{
 		if(!Silent)
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "WARNING: sv_spawn_weapons only has an effect in zCatch (and maybe in fng lol)");
+		{
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "WARNING: sv_spawn_weapons only has an effect in zCatch");
+		}
+	}
+	if(str_find_nocase(m_pGameType, "fng"))
+	{
+		if(!Silent)
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "WARNING: use sv_gametype fng/solofng/bolofng/boomfng to change weapons in fng");
+		return;
 	}
 
 	const char *pWeapons = Config()->m_SvSpawnWeapons;
