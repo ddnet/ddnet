@@ -2792,7 +2792,6 @@ if(SERVER)
     instagib/gamecontroller.cpp
     instagib/gamecontroller.h
     instagib/gamelogic.cpp
-    instagib/mapitems.h
     instagib/rcon_commands.cpp
     instagib/rcon_commands.h
     instagib/rcon_configs.cpp
