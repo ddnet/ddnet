@@ -33,6 +33,7 @@ public:
 
 	void AddHealth(int Amount) { m_Health += Amount; };
 	void AddArmor(int Amount) { m_Armor += Amount; };
+	int GetAimDir() { return m_Input.m_TargetX < 0 ? -1 : 1; };
 
 #ifndef IN_CLASS_CHARACTER
 };

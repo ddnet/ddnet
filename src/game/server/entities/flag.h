@@ -39,7 +39,7 @@ public:
 
 	/* Functions */
 	void Grab(class CCharacter *pChar);
-	void Drop();
+	void Drop(vec2 Direction = vec2(0, 0));
 };
 
 #endif

@@ -21,6 +21,11 @@ public:
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 
+	// return true to consume the event
+	// and supress default ddnet selfkill behavior
+	bool OnSelfkill(int ClientId) override;
+	bool DropFlag(class CCharacter *pChr) override;
+
 	void FlagTick();
 };
 #endif

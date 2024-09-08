@@ -261,6 +261,7 @@ public:
 	virtual bool OnSelfkill(int ClientId) { return false; };
 	virtual void OnUpdateZcatchColorConfig(){};
 	virtual void OnUpdateSpectatorVotesConfig(){};
+	virtual bool DropFlag(class CCharacter *pChr) { return false; };
 
 	/*
 		Variable: m_GamePauseStartTime

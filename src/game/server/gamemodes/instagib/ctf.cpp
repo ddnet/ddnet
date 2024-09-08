@@ -28,6 +28,41 @@ void CGameControllerInstaBaseCTF::Tick()
 	FlagTick(); // ddnet-insta
 }
 
+bool CGameControllerInstaBaseCTF::OnSelfkill(int ClientId)
+{
+	if(!g_Config.m_SvDropFlagOnSelfkill)
+		return false;
+
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return false;
+
+	return DropFlag(pChr);
+}
+
+bool CGameControllerInstaBaseCTF::DropFlag(class CCharacter *pChr)
+{
+	for(CFlag *pFlag : m_apFlags)
+	{
+		if(!pFlag)
+			continue;
+		if(pFlag->GetCarrier() != pChr)
+			continue;
+
+		GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
+		GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
+
+		// vec2 Dir = vec2(5 * pChr->GetAimDir(), -5);
+		pFlag->Drop(vec2(0, -5));
+		return true;
+	}
+	return false;
+}
+
 void CGameControllerInstaBaseCTF::OnCharacterSpawn(class CCharacter *pChr)
 {
 	CGameControllerPvp::OnCharacterSpawn(pChr);
@@ -47,9 +82,6 @@ int CGameControllerInstaBaseCTF::OnCharacterDeath(class CCharacter *pVictim, cla
 		{
 			GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
 			GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
-			/*pVictim->GetPlayer()->m_Rainbow = false;
-			pVictim->GetPlayer()->m_TeeInfos.m_ColorBody = pVictim->GetPlayer()->m_ColorBodyOld;
-			pVictim->GetPlayer()->m_TeeInfos.m_ColorFeet = pVictim->GetPlayer()->m_ColorFeetOld;*/
 			pFlag->Drop();
 
 			HadFlag |= 1;
@@ -206,6 +238,10 @@ void CGameControllerInstaBaseCTF::FlagTick()
 
 				// only allow flag grabs in team 0
 				if(GameServer()->GetDDRaceTeam(apCloseCCharacters[i]->GetPlayer()->GetCid()))
+					continue;
+
+				// cooldown for recollect after dropping the flag
+				if(pFlag->m_pLastCarrier == apCloseCCharacters[i] && (pFlag->m_DropTick + Server()->TickSpeed() * 2) > Server()->Tick())
 					continue;
 
 				if(apCloseCCharacters[i]->GetPlayer()->GetTeam() == pFlag->GetTeam())

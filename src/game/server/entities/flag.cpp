@@ -20,7 +20,8 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
 
 void CFlag::Reset()
 {
-	m_pCarrier = NULL;
+	m_pLastCarrier = nullptr;
+	m_pCarrier = nullptr;
 	m_AtStand = 1;
 	m_Pos = m_StandPos;
 	m_Vel = vec2(0, 0);
@@ -52,10 +53,11 @@ void CFlag::Grab(CCharacter *pChar)
 	}
 }
 
-void CFlag::Drop()
+void CFlag::Drop(vec2 Direction)
 {
+	m_pLastCarrier = m_pCarrier;
 	m_pCarrier = 0;
-	m_Vel = vec2(0, 0);
+	m_Vel = Direction;
 	m_DropTick = Server()->Tick();
 }
 
