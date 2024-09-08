@@ -139,6 +139,7 @@ It is an instagib gametype so one shot kills. You can choose the weapon with
 + `sv_zcatch_min_players` How many active players (not spectators) are required to start a round
 + `sv_release_game` auto release on kill (only affects sv_gametype zCatch)
 + `sv_drop_flag_on_selfkill` drop flag on selfkill
++ `sv_drop_flag_on_vote` drop flag on vote yes
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
 + `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)

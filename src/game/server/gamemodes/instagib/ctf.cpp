@@ -1,3 +1,4 @@
+#include <base/system.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <game/mapitems.h>
@@ -26,6 +27,30 @@ void CGameControllerInstaBaseCTF::Tick()
 	CGameControllerPvp::Tick();
 
 	FlagTick(); // ddnet-insta
+}
+
+bool CGameControllerInstaBaseCTF::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
+{
+	if(!g_Config.m_SvDropFlagOnVote)
+		return false;
+
+	if(pMsg->m_Vote != 1) // 1 is yes
+		return false;
+
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return false;
+
+	DropFlag(pChr);
+
+	// returning false here lets the vote go through
+	// so pressing vote yes as flag carrier during a vote
+	// will send an actual vote AND drop the flag
+	return false;
 }
 
 bool CGameControllerInstaBaseCTF::OnSelfkill(int ClientId)

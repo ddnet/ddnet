@@ -25,6 +25,7 @@ public:
 	// and supress default ddnet selfkill behavior
 	bool OnSelfkill(int ClientId) override;
 	bool DropFlag(class CCharacter *pChr) override;
+	bool OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId) override;
 
 	void FlagTick();
 };

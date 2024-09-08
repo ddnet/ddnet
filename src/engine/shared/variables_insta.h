@@ -42,6 +42,7 @@ MACRO_CONFIG_INT(SvZcatchMinPlayers, sv_zcatch_min_players, 3, 0, MAX_CLIENTS, C
 MACRO_CONFIG_INT(SvReleaseGame, sv_release_game, 0, 0, 1, CFGFLAG_SERVER, "auto release on kill (only affects sv_gametype zCatch)")
 MACRO_CONFIG_STR(SvZcatchColors, sv_zcatch_colors, 512, "teetime", CFGFLAG_SERVER, "Color scheme for zCatch options: teetime, savander")
 MACRO_CONFIG_INT(SvDropFlagOnSelfkill, sv_drop_flag_on_selfkill, 0, 0, 1, CFGFLAG_SERVER, "drop flag on selfkill")
+MACRO_CONFIG_INT(SvDropFlagOnVote, sv_drop_flag_on_vote, 0, 0, 1, CFGFLAG_SERVER, "drop flag on vote yes")
 
 /*
 

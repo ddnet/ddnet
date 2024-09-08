@@ -2492,16 +2492,14 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 
 void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 {
+	// ddnet-insta
+	if(m_pController->OnVoteNetMessage(pMsg, ClientId))
+		return;
+
 	if(!m_VoteCloseTime)
 		return;
 
 	CPlayer *pPlayer = m_apPlayers[ClientId];
-
-	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
-	{
-		// SendChatTarget(ClientId, "Spectators aren't allowed to vote.");
-		return;
-	}
 
 	if(g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry + Server()->TickSpeed() * 3 > Server()->Tick())
 		return;

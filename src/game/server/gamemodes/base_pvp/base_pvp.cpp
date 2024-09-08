@@ -125,6 +125,18 @@ void CGameControllerPvp::OnUpdateSpectatorVotesConfig()
 	}
 }
 
+bool CGameControllerPvp::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
+	{
+		// SendChatTarget(ClientId, "Spectators aren't allowed to vote.");
+		return true;
+	}
+	return false;
+}
+
 // called before spam protection on client team join request
 bool CGameControllerPvp::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId)
 {

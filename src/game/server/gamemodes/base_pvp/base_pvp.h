@@ -70,6 +70,7 @@ public:
 	bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) override;
 	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;
 	void SetArmorProgress(CCharacter *pCharacer, int Progress) override{};
+	bool OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId) override;
 
 	// Anticamper
 	void Anticamper();

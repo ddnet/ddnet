@@ -87,6 +87,16 @@ public:
 	virtual bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) { return false; };
 
 	/*
+		Function: OnVoteNetMessage
+			hooks into CGameContext::OnVoteNetMessage()
+			before any spam protection check
+
+		Returns:
+			return true to not run the rest of CGameContext::OnVoteNetMessage()
+	*/
+	virtual bool OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId) { return false; }
+
+	/*
 		Function: GetPlayerTeam
 			wraps CPlayer::GetTeam()
 			to spoof fake teams for different versions
