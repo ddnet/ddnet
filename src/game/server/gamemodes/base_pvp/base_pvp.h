@@ -41,6 +41,7 @@ public:
 	void ComCallShuffleVote(int ClientId);
 	void ComCallSwapTeamsVote(int ClientId);
 	void ComCallSwapTeamsRandomVote(int ClientId);
+	void ComDropFlag(int ClientId);
 
 	bool AllowPublicChat(const CPlayer *pPlayer);
 	bool ParseChatCmd(char Prefix, int ClientId, const char *pCmdWithArgs);

@@ -4,6 +4,7 @@
 #include <game/version.h>
 
 #include "base_pvp.h"
+#include "engine/shared/config.h"
 
 void CGameControllerPvp::BangCommandVote(int ClientId, const char *pCommand, const char *pDesc)
 {
@@ -37,4 +38,23 @@ void CGameControllerPvp::ComCallSwapTeamsVote(int ClientId)
 void CGameControllerPvp::ComCallSwapTeamsRandomVote(int ClientId)
 {
 	BangCommandVote(ClientId, "swap_teams_random", "swap teams (random)");
+}
+
+void CGameControllerPvp::ComDropFlag(int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return;
+
+	if(!g_Config.m_SvDropFlagOnVote && !g_Config.m_SvDropFlagOnSelfkill)
+	{
+		SendChatTarget(ClientId, "dropping flags is deactivated");
+		return;
+	}
+
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	DropFlag(pChr);
 }

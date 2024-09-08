@@ -57,6 +57,15 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 	else
 		str_append(aMotd, "* ready mode: off\n");
 
+	if(g_Config.m_SvDropFlagOnVote || g_Config.m_SvDropFlagOnSelfkill)
+	{
+		str_append(aMotd, "* dropping the flag is on '/drop flag'\n");
+		if(g_Config.m_SvDropFlagOnSelfkill)
+			str_append(aMotd, "  - selfkill drops the flag\n");
+		if(g_Config.m_SvDropFlagOnVote)
+			str_append(aMotd, "  - vote yes drops the flag\n");
+	}
+
 	str_format(aBuf, sizeof(aBuf), "* damage needed for kill: %d\n", g_Config.m_SvDamageNeededForKill);
 	str_append(aMotd, aBuf);
 

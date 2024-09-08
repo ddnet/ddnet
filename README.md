@@ -138,8 +138,8 @@ It is an instagib gametype so one shot kills. You can choose the weapon with
 + `sv_anticamper_range` Distance how far away the player must move to escape anticamper
 + `sv_zcatch_min_players` How many active players (not spectators) are required to start a round
 + `sv_release_game` auto release on kill (only affects sv_gametype zCatch)
-+ `sv_drop_flag_on_selfkill` drop flag on selfkill
-+ `sv_drop_flag_on_vote` drop flag on vote yes
++ `sv_drop_flag_on_selfkill` drop flag on selfkill (activates chat cmd '/drop flag')
++ `sv_drop_flag_on_vote` drop flag on vote yes (activates chat cmd '/drop flag')
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
 + `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)
@@ -191,6 +191,7 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `!settings` show current game settings in the message of the day. It will show if spray protection is on or off and similar game relevant settings.
 + `!1v1` `!2v2` `!v1` `!v2` `!1on1` ... call vote to change in game slots
 + `!restart ?(seconds)` call vote to restart game with optional parameter of warmup seconds (default: 10)
++ `/drop flag` if it is a CTF gametype the flagger can drop the flag without dieing if either `sv_drop_flag_on_selfkill` or `sv_drop_flag_on_vote` is set
 
 # Publish round stats
 
