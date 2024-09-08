@@ -16,6 +16,7 @@ public:
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 	void HandleCharacterTiles(class CCharacter *pChr, int MapIndex) override;
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
+	int GameInfoExFlags(int SnappingClient) override;
 
 	void OnSpike(class CCharacter *pChr, int SpikeTile);
 };

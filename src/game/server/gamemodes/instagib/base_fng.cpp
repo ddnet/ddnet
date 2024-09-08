@@ -2,6 +2,7 @@
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
+#include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/mapitems_insta.h>
 #include <game/server/entities/character.h>
@@ -19,6 +20,16 @@ CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) 
 }
 
 CGameControllerBaseFng::~CGameControllerBaseFng() = default;
+
+int CGameControllerBaseFng::GameInfoExFlags(int SnappingClient)
+{
+	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient);
+	Flags &= ~(GAMEINFOFLAG_ENTITIES_DDNET);
+	Flags &= ~(GAMEINFOFLAG_ENTITIES_DDRACE);
+	Flags &= ~(GAMEINFOFLAG_ENTITIES_RACE);
+	Flags |= GAMEINFOFLAG_ENTITIES_FNG;
+	return Flags;
+}
 
 void CGameControllerBaseFng::Tick()
 {
