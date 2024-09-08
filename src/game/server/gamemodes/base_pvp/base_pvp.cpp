@@ -343,7 +343,13 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	if(pKiller && pVictim)
 	{
 		if(pKiller->GetCharacter() && pKiller != pVictim->GetPlayer())
+		{
 			AddSpree(pKiller);
+			if(g_Config.m_SvOnFireMode && Weapon == WEAPON_LASER)
+			{
+				pKiller->GetCharacter()->m_ReloadTimer = 10;
+			}
+		}
 		EndSpree(pVictim->GetPlayer(), pKiller);
 	}
 	return 0;

@@ -43,6 +43,7 @@ MACRO_CONFIG_INT(SvReleaseGame, sv_release_game, 0, 0, 1, CFGFLAG_SERVER, "auto 
 MACRO_CONFIG_STR(SvZcatchColors, sv_zcatch_colors, 512, "teetime", CFGFLAG_SERVER, "Color scheme for zCatch options: teetime, savander")
 MACRO_CONFIG_INT(SvDropFlagOnSelfkill, sv_drop_flag_on_selfkill, 0, 0, 1, CFGFLAG_SERVER, "drop flag on selfkill (activates chat cmd '/drop flag')")
 MACRO_CONFIG_INT(SvDropFlagOnVote, sv_drop_flag_on_vote, 0, 0, 1, CFGFLAG_SERVER, "drop flag on vote yes (activates chat cmd '/drop flag')")
+MACRO_CONFIG_INT(SvOnFireMode, sv_on_fire_mode, 0, 0, 1, CFGFLAG_SERVER, "no reload delay after hitting an enemy with rifle")
 
 /*
 

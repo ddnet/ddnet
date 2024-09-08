@@ -140,6 +140,7 @@ It is an instagib gametype so one shot kills. You can choose the weapon with
 + `sv_release_game` auto release on kill (only affects sv_gametype zCatch)
 + `sv_drop_flag_on_selfkill` drop flag on selfkill (activates chat cmd '/drop flag')
 + `sv_drop_flag_on_vote` drop flag on vote yes (activates chat cmd '/drop flag')
++ `sv_on_fire_mode` no reload delay after hitting an enemy with rifle
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
 + `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)
