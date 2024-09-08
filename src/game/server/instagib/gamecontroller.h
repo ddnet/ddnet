@@ -286,6 +286,7 @@ public:
 	int64_t m_GamePauseStartTime;
 
 	bool IsSkinChangeAllowed() const { return m_AllowSkinChange; }
+	int GameFlags() const { return m_GameFlags; }
 
 private:
 #ifndef IN_CLASS_IGAMECONTROLLER
