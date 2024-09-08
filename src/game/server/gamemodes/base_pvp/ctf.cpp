@@ -80,8 +80,8 @@ bool CGameControllerBaseCTF::DropFlag(class CCharacter *pChr)
 		GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
 		GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
 
-		// vec2 Dir = vec2(5 * pChr->GetAimDir(), -5);
-		pFlag->Drop(vec2(0, -5));
+		vec2 Dir = vec2(5 * pChr->GetAimDir(), -5);
+		pFlag->Drop(Dir);
 		return true;
 	}
 	return false;

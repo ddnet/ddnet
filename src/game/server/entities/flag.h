@@ -13,6 +13,7 @@ public:
 	CCharacter *m_pLastCarrier;
 	vec2 m_Vel;
 	vec2 m_StandPos;
+	bool m_IsGrounded;
 
 	int m_Team;
 	int m_AtStand;
@@ -32,10 +33,10 @@ public:
 	void SetCarrier(CCharacter *pCarrier) { m_pCarrier = pCarrier; }
 
 	/* CEntity functions */
-	virtual void Reset() override;
-	virtual void TickPaused() override;
-	virtual void Snap(int SnappingClient) override;
-	virtual void TickDeferred() override;
+	void Reset() override;
+	void TickPaused() override;
+	void Snap(int SnappingClient) override;
+	void TickDeferred() override;
 
 	/* Functions */
 	void Grab(class CCharacter *pChar);
