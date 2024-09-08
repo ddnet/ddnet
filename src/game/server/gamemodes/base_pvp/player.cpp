@@ -77,3 +77,11 @@ void CPlayer::SetTeamNoKill(int Team, bool DoChatMsg)
 
 	Server()->ExpireServerInfo();
 }
+
+void CPlayer::UpdateLastToucher(int ClientId)
+{
+	if(ClientId == GetCid())
+		return;
+
+	m_LastToucherId = ClientId;
+}

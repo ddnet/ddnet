@@ -2163,6 +2163,7 @@ set_src(GAME_SHARED GLOB src/game
   mapitems_ex.cpp
   mapitems_ex.h
   mapitems_ex_types.h
+  mapitems_insta.h
   prng.cpp
   prng.h
   teamscore.cpp
@@ -2791,6 +2792,7 @@ if(SERVER)
     instagib/gamecontroller.cpp
     instagib/gamecontroller.h
     instagib/gamelogic.cpp
+    instagib/mapitems.h
     instagib/rcon_commands.cpp
     instagib/rcon_commands.h
     instagib/rcon_configs.cpp

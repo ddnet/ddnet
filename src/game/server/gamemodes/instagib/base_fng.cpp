@@ -1,6 +1,9 @@
+#include <base/system.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 #include <game/mapitems.h>
+#include <game/mapitems_insta.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontext.h>
@@ -20,11 +23,33 @@ CGameControllerBaseFng::~CGameControllerBaseFng() = default;
 void CGameControllerBaseFng::Tick()
 {
 	CGameControllerInstagib::Tick();
+
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		CCharacter *pChr = pPlayer->GetCharacter();
+		if(!pChr || !pChr->IsAlive())
+			continue;
+
+		int HookedId = pChr->Core()->HookedPlayer();
+		if(HookedId >= 0 && HookedId < MAX_CLIENTS)
+		{
+			CPlayer *pHooked = GameServer()->m_apPlayers[HookedId];
+			if(pHooked)
+			{
+				pHooked->UpdateLastToucher(pChr->GetPlayer()->GetCid());
+			}
+		}
+	}
 }
 
 void CGameControllerBaseFng::OnCharacterSpawn(class CCharacter *pChr)
 {
 	CGameControllerInstagib::OnCharacterSpawn(pChr);
+
+	pChr->GiveWeapon(WEAPON_HAMMER, false, -1);
 }
 
 int CGameControllerBaseFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
@@ -39,8 +64,50 @@ bool CGameControllerBaseFng::OnEntity(int Index, int x, int y, int Layer, int Fl
 	return false;
 }
 
+void CGameControllerBaseFng::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
+{
+	int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
+	int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
+
+	// //Sensitivity
+	// int S1 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x + pChr->GetProximityRadius() / 3.f, pChr->GetPos().y - pChr->GetProximityRadius() / 3.f));
+	// int S2 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x + pChr->GetProximityRadius() / 3.f, pChr->GetPos().y + pChr->GetProximityRadius() / 3.f));
+	// int S3 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x - pChr->GetProximityRadius() / 3.f, pChr->GetPos().y - pChr->GetProximityRadius() / 3.f));
+	// int S4 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x - pChr->GetProximityRadius() / 3.f, pChr->GetPos().y + pChr->GetProximityRadius() / 3.f));
+	// int Tile1 = GameServer()->Collision()->GetTileIndex(S1);
+	// int Tile2 = GameServer()->Collision()->GetTileIndex(S2);
+	// int Tile3 = GameServer()->Collision()->GetTileIndex(S3);
+	// int Tile4 = GameServer()->Collision()->GetTileIndex(S4);
+	// int FTile1 = GameServer()->Collision()->GetFTileIndex(S1);
+	// int FTile2 = GameServer()->Collision()->GetFTileIndex(S2);
+	// int FTile3 = GameServer()->Collision()->GetFTileIndex(S3);
+	// int FTile4 = GameServer()->Collision()->GetFTileIndex(S4);
+
+	if(((TileIndex == TILE_SPIKE_RED) || (TileFIndex == TILE_SPIKE_RED)))
+		OnSpike(pChr, TILE_SPIKE_RED);
+	else if(((TileIndex == TILE_SPIKE_BLUE) || (TileFIndex == TILE_SPIKE_BLUE)))
+		OnSpike(pChr, TILE_SPIKE_BLUE);
+	else if(((TileIndex == TILE_SPIKE_NEUTRAL) || (TileFIndex == TILE_SPIKE_NEUTRAL)))
+		OnSpike(pChr, TILE_SPIKE_NEUTRAL);
+
+	CGameControllerDDRace::HandleCharacterTiles(pChr, MapIndex);
+}
+
+void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
+{
+	if(!pChr->m_FreezeTime)
+	{
+		pChr->Die(pChr->GetPlayer()->GetCid(), WEAPON_WORLD);
+		return;
+	}
+
+	pChr->Die(pChr->GetPlayer()->m_LastToucherId, WEAPON_NINJA);
+}
+
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	Character.GetPlayer()->UpdateLastToucher(From);
+
 	if(Character.m_IsGodmode)
 		return true;
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))

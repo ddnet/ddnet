@@ -42,6 +42,12 @@ public:
 	bool m_DeadSpecMode; // 0.7 dead players
 
 	/*******************************************************************
+	 * fng                                                             *
+	 *******************************************************************/
+	int m_LastToucherId = -1;
+	void UpdateLastToucher(int ClientId);
+
+	/*******************************************************************
 	 * shared                                                          *
 	 *******************************************************************/
 	// Will also be set if spree chat messages are turned off

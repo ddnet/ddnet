@@ -1,0 +1,11 @@
+#ifndef GAME_MAPITEMS_INSTA_H
+#define GAME_MAPITEMS_INSTA_H
+
+enum
+{
+	TILE_SPIKE_NEUTRAL = 8,
+	TILE_SPIKE_RED = 9,
+	TILE_SPIKE_BLUE = 10,
+};
+
+#endif

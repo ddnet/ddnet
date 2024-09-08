@@ -12,6 +12,7 @@
 #include <game/collision.h>
 #include <game/layers.h>
 #include <game/mapitems.h>
+#include <game/mapitems_insta.h>
 
 #include <engine/shared/config.h>
 
@@ -859,6 +860,13 @@ bool CCollision::TileExists(int Index) const
 		return true;
 	if(m_pTune && m_pTune[Index].m_Type)
 		return true;
+
+	// ddnet-insta
+	if(m_pTiles[Index].m_Index >= TILE_SPIKE_NEUTRAL && m_pTiles[Index].m_Index <= TILE_SPIKE_BLUE)
+	{
+		return true;
+	}
+
 	return TileExistsNext(Index);
 }
 

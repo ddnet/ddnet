@@ -14,6 +14,9 @@ public:
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
+	void HandleCharacterTiles(class CCharacter *pChr, int MapIndex) override;
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
+
+	void OnSpike(class CCharacter *pChr, int SpikeTile);
 };
 #endif // GAME_SERVER_GAMEMODES_BASE_FNG_H
