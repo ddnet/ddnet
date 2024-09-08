@@ -1,10 +1,10 @@
+#include <base/system.h>
 #include <game/server/entities/character.h>
 #include <game/server/instagib/strhelpers.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
 
-#include "base/system.h"
 #include "base_pvp.h"
 
 bool CGameControllerPvp::AllowPublicChat(const CPlayer *pPlayer)

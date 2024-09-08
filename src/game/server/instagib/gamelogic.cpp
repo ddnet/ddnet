@@ -1,10 +1,10 @@
 #include <base/system.h>
 #include <engine/shared/config.h>
+#include <game/generated/protocol.h>
 
 #include "../entities/character.h"
 #include "../gamecontext.h"
 #include "../player.h"
-#include "game/generated/protocol.h"
 
 #include <game/server/gamecontroller.h>
 
