@@ -124,9 +124,12 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		return true;
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 		return false;
-	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
+	CPlayer *pKiller = nullptr;
+	if(From >= 0 && From <= MAX_CLIENTS)
+		pKiller = GameServer()->m_apPlayers[From];
+	if(g_Config.m_SvOnlyHookKills && pKiller)
 	{
-		CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+		CCharacter *pChr = pKiller->GetCharacter();
 		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
 			return false;
 	}
@@ -140,6 +143,9 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		Dmg = 0;
 		return false;
 	}
+
+	if(pKiller)
+		pKiller->IncrementScore();
 
 	Character.Freeze(10);
 	return false;
