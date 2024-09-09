@@ -58,6 +58,12 @@ int CGameControllerPvp::GameInfoExFlags(int SnappingClient)
 		Flags |= GAMEINFOFLAG_GAMETYPE_FASTCAP;
 		Flags |= GAMEINFOFLAG_FLAG_STARTS_RACE;
 	}
+
+	// ddnet clients do not predict sv_old_laser correctly
+	// https://github.com/ddnet/ddnet/issues/7589
+	if(g_Config.m_SvOldLaser)
+		Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
+
 	return Flags;
 }
 
