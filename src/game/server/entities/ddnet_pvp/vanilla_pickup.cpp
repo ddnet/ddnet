@@ -38,6 +38,8 @@ void CVanillaPickup::Reset()
 
 void CVanillaPickup::Tick()
 {
+	Move();
+
 	// wait for respawn
 	if(m_SpawnTick > 0)
 	{
@@ -165,4 +167,18 @@ void CVanillaPickup::Snap(int SnappingClient)
 	}
 
 	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype, m_Number);
+}
+
+void CVanillaPickup::Move()
+{
+	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
+	{
+		int Flags;
+		int index = GameServer()->Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
+		if(index)
+		{
+			m_Core = GameServer()->Collision()->CpSpeed(index, Flags);
+		}
+		m_Pos += m_Core;
+	}
 }
