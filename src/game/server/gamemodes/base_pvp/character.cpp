@@ -105,7 +105,12 @@ void CCharacter::TakeHammerHit(CCharacter *pFrom)
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, Temp);
 
 	CPlayer *pPlayer = pFrom->GetPlayer();
-	if(pPlayer && (GameServer()->m_pController->IsTeamplay() && pPlayer->GetTeam() == m_pPlayer->GetTeam()))
+
+	// this should really never happend but is needed to calm down clang
+	if(!pPlayer)
+		return;
+
+	if(GameServer()->m_pController->IsTeamplay() && pPlayer->GetTeam() == m_pPlayer->GetTeam())
 	{
 		// interaction from team mates protects from spikes
 		m_pPlayer->UpdateLastToucher(-1);
@@ -117,8 +122,7 @@ void CCharacter::TakeHammerHit(CCharacter *pFrom)
 	}
 	else
 	{
-		if(m_pPlayer)
-			m_pPlayer->UpdateLastToucher(pPlayer->GetCid());
+		m_pPlayer->UpdateLastToucher(pPlayer->GetCid());
 	}
 }
 
