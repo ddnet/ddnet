@@ -117,7 +117,8 @@ void CCharacter::TakeHammerHit(CCharacter *pFrom)
 	}
 	else
 	{
-		m_pPlayer->UpdateLastToucher(pPlayer->GetCid());
+		if(m_pPlayer)
+			m_pPlayer->UpdateLastToucher(pPlayer->GetCid());
 	}
 }
 
