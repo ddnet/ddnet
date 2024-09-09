@@ -603,6 +603,24 @@ public:
 	 */
 	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const std::vector<STextColorSplit> &vColorSplits = {});
 
+	/**
+	 * Creates an input field with a search icon and a clear [x] button attached to it.
+	 * The input will have default text "Search" and the hotkey Ctrl+F can be used to activate the input.
+	 *
+	 * @see DoEditBox
+	 *
+	 * @param pLineInput This pointer will be stored and written to on next user input.
+	 *                   So you can not pass in a pointer that goes out of scope such as a local variable.
+	 *                   Pass in either a member variable of the current class or a static variable.
+	 *                   For example ```static CLineInputBuffered<IO_MAX_PATH_LENGTH> s_MyInput;```
+	 * @param pRect the UI rect it will attach to
+	 * @param FontSize Size of the font (`10.0f`, `12.0f` and `14.0f` are commonly used here)
+	 * @param HotkeyEnabled Whether the hotkey to enable this editbox is currently enabled.
+	 *
+	 * @return true if the value of the input field changed since the last call.
+	 */
+	bool DoEditBox_Search(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, bool HotkeyEnabled);
+
 	int DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pId, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props = {});
 	// only used for popup menus
 	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding = 0.0f, bool TransparentInactive = false, bool Enabled = true);
