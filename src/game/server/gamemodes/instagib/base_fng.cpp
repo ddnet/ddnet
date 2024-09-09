@@ -67,6 +67,7 @@ void CGameControllerBaseFng::OnCharacterSpawn(class CCharacter *pChr)
 int CGameControllerBaseFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
 	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
+	DoWincheckRound();
 	return 0;
 }
 
@@ -113,7 +114,37 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		return;
 	}
 
-	pChr->Die(pChr->GetPlayer()->m_LastToucherId, WEAPON_NINJA);
+	CPlayer *pKiller = nullptr;
+	int LastToucherId = pChr->GetPlayer()->m_LastToucherId;
+	if(LastToucherId >= 0 && LastToucherId < MAX_CLIENTS)
+		pKiller = GameServer()->m_apPlayers[LastToucherId];
+
+	if(pKiller)
+	{
+		// all scores are +1
+		// from the kill it self
+
+		if(SpikeTile == TILE_SPIKE_NEUTRAL)
+			pKiller->AddScore(2);
+		if(SpikeTile == TILE_SPIKE_RED)
+		{
+			if(pKiller->GetTeam() == TEAM_RED || !IsTeamPlay())
+				pKiller->AddScore(4);
+			else
+				pKiller->AddScore(-6);
+		}
+		if(SpikeTile == TILE_SPIKE_BLUE)
+		{
+			if(pKiller->GetTeam() == TEAM_BLUE || !IsTeamPlay())
+				pKiller->AddScore(4);
+			else
+				pKiller->AddScore(-6);
+		}
+
+		DoWincheckRound();
+	}
+
+	pChr->Die(LastToucherId, WEAPON_NINJA);
 }
 
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
@@ -145,7 +176,10 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	}
 
 	if(pKiller)
+	{
 		pKiller->IncrementScore();
+		DoWincheckRound();
+	}
 
 	Character.Freeze(10);
 	return false;

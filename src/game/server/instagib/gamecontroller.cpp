@@ -145,20 +145,19 @@ bool IGameController::DoWincheckRound()
 		// gather some stats
 		int Topscore = 0;
 		int TopscoreCount = 0;
-		for(int i = 0; i < MAX_CLIENTS; i++)
-			for(auto &pPlayer : GameServer()->m_apPlayers)
+		for(auto &pPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+			int Score = pPlayer->m_Score.value_or(0);
+			if(Score > Topscore)
 			{
-				if(!pPlayer)
-					continue;
-				int Score = pPlayer->m_Score.value_or(0);
-				if(Score > Topscore)
-				{
-					Topscore = Score;
-					TopscoreCount = 1;
-				}
-				else if(Score == Topscore)
-					TopscoreCount++;
+				Topscore = Score;
+				TopscoreCount = 1;
 			}
+			else if(Score == Topscore)
+				TopscoreCount++;
+		}
 
 		// check score win condition
 		if((m_GameInfo.m_ScoreLimit > 0 && Topscore >= m_GameInfo.m_ScoreLimit) ||
