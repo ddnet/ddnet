@@ -100,6 +100,8 @@ public:
 	void AddVelocity(vec2 Addition);
 	void ApplyMoveRestrictions();
 
+	void SnapSpecCursor(int SnappingClient);
+
 private:
 	// player controlling this character
 	class CPlayer *m_pPlayer;
