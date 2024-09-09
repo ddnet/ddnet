@@ -83,5 +83,17 @@ void CPlayer::UpdateLastToucher(int ClientId)
 	if(ClientId == GetCid())
 		return;
 
+	// TODO: should we really reset the last toucher when we get shot by a team mate?
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(
+		pPlayer &&
+		GameServer()->m_pController &&
+		GameServer()->m_pController->IsTeamplay() &&
+		pPlayer->GetTeam() == GetTeam())
+	{
+		m_LastToucherId = -1;
+		return;
+	}
+
 	m_LastToucherId = ClientId;
 }
