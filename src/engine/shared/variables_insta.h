@@ -44,6 +44,11 @@ MACRO_CONFIG_STR(SvZcatchColors, sv_zcatch_colors, 512, "teetime", CFGFLAG_SERVE
 MACRO_CONFIG_INT(SvDropFlagOnSelfkill, sv_drop_flag_on_selfkill, 0, 0, 1, CFGFLAG_SERVER, "drop flag on selfkill (activates chat cmd '/drop flag')")
 MACRO_CONFIG_INT(SvDropFlagOnVote, sv_drop_flag_on_vote, 0, 0, 1, CFGFLAG_SERVER, "drop flag on vote yes (activates chat cmd '/drop flag')")
 MACRO_CONFIG_INT(SvOnFireMode, sv_on_fire_mode, 0, 0, 1, CFGFLAG_SERVER, "no reload delay after hitting an enemy with rifle")
+MACRO_CONFIG_INT(SvHammerScaleX, sv_hammer_scale_x, 320, 1, 1000, CFGFLAG_SERVER, "(fng) linearly scale up hammer x power, percentage, for hammering enemies and unfrozen teammates")
+MACRO_CONFIG_INT(SvHammerScaleY, sv_hammer_scale_y, 120, 1, 1000, CFGFLAG_SERVER, "(fng) linearly scale up hammer y power, percentage, for hammering enemies and unfrozen teammates")
+MACRO_CONFIG_INT(SvMeltHammerScaleX, sv_melt_hammer_scale_x, 50, 1, 1000, CFGFLAG_SERVER, "(fng) linearly scale up hammer x power, percentage, for hammering frozen teammates")
+MACRO_CONFIG_INT(SvMeltHammerScaleY, sv_melt_hammer_scale_y, 50, 1, 1000, CFGFLAG_SERVER, "(fng) linearly scale up hammer y power, percentage, for hammering frozen teammates")
+MACRO_CONFIG_INT(SvFngHammer, sv_fng_hammer, 1, 0, 1, CFGFLAG_SERVER, "(fng only) use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer")
 
 /*
 

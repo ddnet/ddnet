@@ -14,6 +14,7 @@ class CCharacter : public CEntity
 	friend class CGameControllerVanilla;
 	friend class CGameControllerPvp;
 	friend class CGameControllerCTF;
+	friend class CGameControllerBaseFng;
 
 public:
 	// ddnet-insta
@@ -34,6 +35,9 @@ public:
 	void AddHealth(int Amount) { m_Health += Amount; };
 	void AddArmor(int Amount) { m_Armor += Amount; };
 	int GetAimDir() { return m_Input.m_TargetX < 0 ? -1 : 1; };
+
+	bool OnFngFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos);
+	void TakeHammerHit(CCharacter *pFrom);
 
 #ifndef IN_CLASS_CHARACTER
 };

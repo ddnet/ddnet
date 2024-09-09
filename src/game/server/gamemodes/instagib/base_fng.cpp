@@ -8,6 +8,7 @@
 #include <game/server/entities/character.h>
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamemodes/instagib/base_instagib.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -142,6 +143,14 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 	Character.Freeze(10);
 	return false;
+}
+
+bool CGameControllerBaseFng::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
+{
+	if(Weapon == WEAPON_HAMMER)
+		if(Character.OnFngFireWeapon(Character, Weapon, Direction, MouseTarget, ProjStartPos))
+			return true;
+	return CGameControllerInstagib::OnFireWeapon(Character, Weapon, Direction, MouseTarget, ProjStartPos);
 }
 
 void CGameControllerBaseFng::Snap(int SnappingClient)

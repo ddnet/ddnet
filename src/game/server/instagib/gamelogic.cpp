@@ -79,6 +79,12 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 	str_format(aBuf, sizeof(aBuf), "* allow spec public chat: %s\n", g_Config.m_SvTournamentChat ? "no" : "yes");
 	str_append(aMotd, aBuf);
 
+	if(str_find_nocase(g_Config.m_SvGametype, "fng"))
+	{
+		str_format(aBuf, sizeof(aBuf), "* fng hammer tuning: %s\n", g_Config.m_SvFngHammer ? "on" : "off");
+		str_append(aMotd, aBuf);
+	}
+
 	if(g_Config.m_SvGametype[0] == 'g')
 	{
 		str_format(aBuf, sizeof(aBuf), "* damage needed for kill: %d\n", g_Config.m_SvDamageNeededForKill);
