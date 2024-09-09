@@ -57,7 +57,7 @@ void CUIElement::SUIElementRect::Reset()
 void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
 {
 	bool NeedsRecreate = false;
-	if(m_UIRectQuadContainer == -1 || m_Width != pRect->w || m_Height != pRect->h || mem_comp(&m_QuadColor, &Color, sizeof(Color)) != 0)
+	if(m_UIRectQuadContainer == -1 || m_Width != pRect->w || m_Height != pRect->h || m_QuadColor != Color)
 	{
 		m_pParent->Ui()->Graphics()->DeleteQuadContainer(m_UIRectQuadContainer);
 		NeedsRecreate = true;
