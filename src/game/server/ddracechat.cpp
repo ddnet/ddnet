@@ -376,6 +376,37 @@ void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 	ToggleSpecPause(pResult, pUserData, g_Config.m_SvPauseable ? CPlayer::PAUSE_SPEC : CPlayer::PAUSE_PAUSED);
 }
 
+void CGameContext::ConUnspec(IConsole::IResult *pResult, void *pUserData)
+{
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	int PauseState = pPlayer->IsPaused();
+	int PauseType = g_Config.m_SvPauseable ? CPlayer::PAUSE_SPEC : CPlayer::PAUSE_PAUSED;
+	if(PauseState > 0)
+	{
+		IServer *pServ = pSelf->Server();
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "You are force-paused for %d seconds.", (PauseState - pServ->Tick()) / pServ->TickSpeed());
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+	}
+	else
+	{
+		if(-PauseState != CPlayer::PAUSE_NONE && PauseType != CPlayer::PAUSE_NONE)
+		{
+			pPlayer->Pause(CPlayer::PAUSE_NONE, false);
+
+			if(pPlayer->m_SpectatorId != pResult->m_ClientId)
+				pPlayer->SpectateFreeView();
+		}
+	}
+}
+
 void CGameContext::ConToggleSpecVoted(IConsole::IResult *pResult, void *pUserData)
 {
 	ToggleSpecPauseVoted(pResult, pUserData, g_Config.m_SvPauseable ? CPlayer::PAUSE_SPEC : CPlayer::PAUSE_PAUSED);

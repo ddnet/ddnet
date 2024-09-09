@@ -867,6 +867,12 @@ void CPlayer::SpectatePlayerName(const char *pName)
 	}
 }
 
+void CPlayer::SpectateFreeView()
+{
+	if(m_SpectatorId >= 0)
+		m_SpectatorId = SPEC_FREEVIEW;
+}
+
 void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 {
 	if(Result.m_Success) // SQL request was successful

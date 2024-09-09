@@ -426,6 +426,7 @@ private:
 	static void ConTogglePause(IConsole::IResult *pResult, void *pUserData);
 	static void ConTogglePauseVoted(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleSpec(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnspec(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleSpecVoted(IConsole::IResult *pResult, void *pUserData);
 	static void ConForcePause(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeamTop5(IConsole::IResult *pResult, void *pUserData);

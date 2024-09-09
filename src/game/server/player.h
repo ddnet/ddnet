@@ -67,6 +67,7 @@ public:
 	const CCharacter *GetCharacter() const;
 
 	void SpectatePlayerName(const char *pName);
+	void SpectateFreeView();
 
 	//---------------------------------------------------------
 	// this is used for snapping so we know how we can clip the view for the player
