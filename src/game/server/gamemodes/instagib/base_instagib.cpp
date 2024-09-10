@@ -72,5 +72,5 @@ bool CGameControllerInstagib::OnEntity(int Index, int x, int y, int Layer, int F
 	if(Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1 || Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER || Index == ENTITY_POWERUP_NINJA)
 		return false;
 
-	return CGameControllerPvp::OnEntity(Index, x, y, Layer, Flags, Initial);
+	return CGameControllerPvp::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 }

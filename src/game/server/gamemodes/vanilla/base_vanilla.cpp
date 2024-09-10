@@ -133,5 +133,5 @@ bool CGameControllerVanilla::OnEntity(int Index, int x, int y, int Layer, int Fl
 		return true; // NOLINT(clang-analyzer-unix.Malloc)
 	}
 
-	return CGameControllerPvp::OnEntity(Index, x, y, Layer, Flags, Initial);
+	return CGameControllerPvp::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 }
