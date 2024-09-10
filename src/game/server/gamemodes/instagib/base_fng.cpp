@@ -215,6 +215,14 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		pChr->Die(LastToucherId, WEAPON_NINJA);
 }
 
+void CGameControllerBaseFng::OnSnapDDNetCharacter(CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient)
+{
+	CGameControllerInstagib::OnSnapDDNetCharacter(pChr, pDDNetCharacter, SnappingClient);
+
+	if(pChr->GetPlayer()->GetCid() != SnappingClient && pDDNetCharacter->m_FreezeEnd)
+		pDDNetCharacter->m_FreezeEnd = -1;
+}
+
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	Character.GetPlayer()->UpdateLastToucher(From);
