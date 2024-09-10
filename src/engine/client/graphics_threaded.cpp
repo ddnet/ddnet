@@ -300,7 +300,7 @@ void CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 	FreeTextureIndex(pIndex);
 }
 
-static bool ConvertToRGBA(uint8_t *pDest, const CImageInfo &SrcImage)
+bool ConvertToRGBA(uint8_t *pDest, const CImageInfo &SrcImage)
 {
 	if(SrcImage.m_Format == CImageInfo::FORMAT_RGBA)
 	{
