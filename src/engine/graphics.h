@@ -124,6 +124,8 @@ public:
 	}
 };
 
+bool ConvertToRGBA(uint8_t *pDest, const CImageInfo &SrcImage);
+
 /*
 	Structure: CVideoMode
 */
