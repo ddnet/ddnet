@@ -146,6 +146,7 @@ It is an instagib gametype so one shot kills. You can choose the weapon with
 + `sv_melt_hammer_scale_x` (fng) linearly scale up hammer x power, percentage, for hammering frozen teammates
 + `sv_melt_hammer_scale_y` (fng) linearly scale up hammer y power, percentage, for hammering frozen teammates
 + `sv_fng_hammer` (fng only) use sv_hammer_scale_x/y and sv_melt_hammer_scale_x/y tuning for hammer
++ `sv_punish_freeze_disconnect` (fng) 0=off otherwise bantime in minutes when leaving server while being frozen
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
 + `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)
