@@ -77,9 +77,9 @@ void CGameControllerBaseFng::OnPlayerDisconnect(class CPlayer *pPlayer, const ch
 
 	CCharacter *pChr = pPlayer->GetCharacter();
 	if(!pChr)
-		return;
+		return CGameControllerInstagib::OnPlayerDisconnect(pPlayer, pReason);
 	if(!pChr->m_FreezeTime)
-		return;
+		return CGameControllerInstagib::OnPlayerDisconnect(pPlayer, pReason);
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "ban %d %d \"disconnected while frozen\"", pPlayer->GetCid(), g_Config.m_SvPunishFreezeDisconnect);
