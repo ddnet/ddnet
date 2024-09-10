@@ -96,18 +96,18 @@ void CGameControllerBaseFng::HandleCharacterTiles(CCharacter *pChr, int MapIndex
 	// int FTile3 = GameServer()->Collision()->GetFTileIndex(S3);
 	// int FTile4 = GameServer()->Collision()->GetFTileIndex(S4);
 
-	if(((TileIndex == TILE_SPIKE_RED) || (TileFIndex == TILE_SPIKE_RED)))
-		OnSpike(pChr, TILE_SPIKE_RED);
-	else if(((TileIndex == TILE_SPIKE_BLUE) || (TileFIndex == TILE_SPIKE_BLUE)))
-		OnSpike(pChr, TILE_SPIKE_BLUE);
-	else if(((TileIndex == TILE_SPIKE_NEUTRAL) || (TileFIndex == TILE_SPIKE_NEUTRAL)))
-		OnSpike(pChr, TILE_SPIKE_NEUTRAL);
-	else if(((TileIndex == TILE_SPIKE_GOLD) || (TileFIndex == TILE_SPIKE_GOLD)))
-		OnSpike(pChr, TILE_SPIKE_GOLD);
-	else if(((TileIndex == TILE_SPIKE_GREEN) || (TileFIndex == TILE_SPIKE_GREEN)))
-		OnSpike(pChr, TILE_SPIKE_GREEN);
-	else if(((TileIndex == TILE_SPIKE_PURPLE) || (TileFIndex == TILE_SPIKE_PURPLE)))
-		OnSpike(pChr, TILE_SPIKE_PURPLE);
+	if(((TileIndex == TILE_FNG_SPIKE_RED) || (TileFIndex == TILE_FNG_SPIKE_RED)))
+		OnSpike(pChr, TILE_FNG_SPIKE_RED);
+	else if(((TileIndex == TILE_FNG_SPIKE_BLUE) || (TileFIndex == TILE_FNG_SPIKE_BLUE)))
+		OnSpike(pChr, TILE_FNG_SPIKE_BLUE);
+	else if(((TileIndex == TILE_FNG_SPIKE_NORMAL) || (TileFIndex == TILE_FNG_SPIKE_NORMAL)))
+		OnSpike(pChr, TILE_FNG_SPIKE_NORMAL);
+	else if(((TileIndex == TILE_FNG_SPIKE_GOLD) || (TileFIndex == TILE_FNG_SPIKE_GOLD)))
+		OnSpike(pChr, TILE_FNG_SPIKE_GOLD);
+	else if(((TileIndex == TILE_FNG_SPIKE_GREEN) || (TileFIndex == TILE_FNG_SPIKE_GREEN)))
+		OnSpike(pChr, TILE_FNG_SPIKE_GREEN);
+	else if(((TileIndex == TILE_FNG_SPIKE_PURPLE) || (TileFIndex == TILE_FNG_SPIKE_PURPLE)))
+		OnSpike(pChr, TILE_FNG_SPIKE_PURPLE);
 
 	CGameControllerDDRace::HandleCharacterTiles(pChr, MapIndex);
 }
@@ -130,23 +130,23 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		// all scores are +1
 		// from the kill it self
 
-		if(SpikeTile == TILE_SPIKE_NEUTRAL)
+		if(SpikeTile == TILE_FNG_SPIKE_NORMAL)
 			pKiller->AddScore(2);
-		if(SpikeTile == TILE_SPIKE_GOLD)
+		if(SpikeTile == TILE_FNG_SPIKE_GOLD)
 			pKiller->AddScore(7);
-		if(SpikeTile == TILE_SPIKE_GREEN)
+		if(SpikeTile == TILE_FNG_SPIKE_GREEN)
 			pKiller->AddScore(5);
-		if(SpikeTile == TILE_SPIKE_PURPLE)
+		if(SpikeTile == TILE_FNG_SPIKE_PURPLE)
 			pKiller->AddScore(9);
 
-		if(SpikeTile == TILE_SPIKE_RED)
+		if(SpikeTile == TILE_FNG_SPIKE_RED)
 		{
 			if(pKiller->GetTeam() == TEAM_RED || !IsTeamPlay())
 				pKiller->AddScore(4);
 			else
 				pKiller->AddScore(-6);
 		}
-		if(SpikeTile == TILE_SPIKE_BLUE)
+		if(SpikeTile == TILE_FNG_SPIKE_BLUE)
 		{
 			if(pKiller->GetTeam() == TEAM_BLUE || !IsTeamPlay())
 				pKiller->AddScore(4);
