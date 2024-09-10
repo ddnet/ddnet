@@ -104,6 +104,10 @@ void CGameControllerBaseFng::HandleCharacterTiles(CCharacter *pChr, int MapIndex
 		OnSpike(pChr, TILE_SPIKE_NEUTRAL);
 	else if(((TileIndex == TILE_SPIKE_GOLD) || (TileFIndex == TILE_SPIKE_GOLD)))
 		OnSpike(pChr, TILE_SPIKE_GOLD);
+	else if(((TileIndex == TILE_SPIKE_GREEN) || (TileFIndex == TILE_SPIKE_GREEN)))
+		OnSpike(pChr, TILE_SPIKE_GREEN);
+	else if(((TileIndex == TILE_SPIKE_PURPLE) || (TileFIndex == TILE_SPIKE_PURPLE)))
+		OnSpike(pChr, TILE_SPIKE_PURPLE);
 
 	CGameControllerDDRace::HandleCharacterTiles(pChr, MapIndex);
 }
@@ -130,6 +134,11 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 			pKiller->AddScore(2);
 		if(SpikeTile == TILE_SPIKE_GOLD)
 			pKiller->AddScore(7);
+		if(SpikeTile == TILE_SPIKE_GREEN)
+			pKiller->AddScore(5);
+		if(SpikeTile == TILE_SPIKE_PURPLE)
+			pKiller->AddScore(9);
+
 		if(SpikeTile == TILE_SPIKE_RED)
 		{
 			if(pKiller->GetTeam() == TEAM_RED || !IsTeamPlay())

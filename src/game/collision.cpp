@@ -862,7 +862,8 @@ bool CCollision::TileExists(int Index) const
 		return true;
 
 	// ddnet-insta
-	if(m_pTiles[Index].m_Index >= TILE_SPIKE_GOLD && m_pTiles[Index].m_Index <= TILE_SPIKE_BLUE)
+	if((m_pTiles[Index].m_Index >= TILE_SPIKE_GOLD && m_pTiles[Index].m_Index <= TILE_SPIKE_BLUE) ||
+		(m_pTiles[Index].m_Index >= TILE_SPIKE_GREEN && m_pTiles[Index].m_Index <= TILE_SPIKE_PURPLE))
 	{
 		return true;
 	}
