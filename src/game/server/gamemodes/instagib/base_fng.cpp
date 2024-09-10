@@ -128,6 +128,20 @@ void CGameControllerBaseFng::HandleCharacterTiles(CCharacter *pChr, int MapIndex
 	CGameControllerDDRace::HandleCharacterTiles(pChr, MapIndex);
 }
 
+void CGameControllerBaseFng::OnWrongSpike(class CPlayer *pPlayer)
+{
+	pPlayer->AddScore(-6);
+	CCharacter *pChr = pPlayer->GetCharacter();
+	// this means you can selfkill before the wrong spike hits
+	// to bypass getting frozen
+	// but that seems fine
+	if(!pChr)
+		return;
+
+	pPlayer->UpdateLastToucher(-1);
+	pChr->Freeze(10);
+}
+
 void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 {
 	if(!pChr->m_FreezeTime)
@@ -147,33 +161,58 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		// from the kill it self
 
 		if(SpikeTile == TILE_FNG_SPIKE_NORMAL)
+		{
 			pKiller->AddScore(2);
+			m_aTeamscore[pKiller->GetTeam()] += 5;
+		}
 		if(SpikeTile == TILE_FNG_SPIKE_GOLD)
+		{
 			pKiller->AddScore(7);
+			m_aTeamscore[pKiller->GetTeam()] += 12;
+		}
 		if(SpikeTile == TILE_FNG_SPIKE_GREEN)
+		{
 			pKiller->AddScore(5);
+			m_aTeamscore[pKiller->GetTeam()] += 15;
+		}
 		if(SpikeTile == TILE_FNG_SPIKE_PURPLE)
+		{
 			pKiller->AddScore(9);
+			m_aTeamscore[pKiller->GetTeam()] += 18;
+		}
 
 		if(SpikeTile == TILE_FNG_SPIKE_RED)
 		{
 			if(pKiller->GetTeam() == TEAM_RED || !IsTeamPlay())
+			{
 				pKiller->AddScore(4);
+				m_aTeamscore[pKiller->GetTeam()] += 10;
+			}
 			else
-				pKiller->AddScore(-6);
+			{
+				OnWrongSpike(pKiller);
+			}
 		}
 		if(SpikeTile == TILE_FNG_SPIKE_BLUE)
 		{
 			if(pKiller->GetTeam() == TEAM_BLUE || !IsTeamPlay())
+			{
 				pKiller->AddScore(4);
+				m_aTeamscore[pKiller->GetTeam()] += 10;
+			}
 			else
-				pKiller->AddScore(-6);
+			{
+				OnWrongSpike(pKiller);
+			}
 		}
 
 		DoWincheckRound();
 	}
 
-	pChr->Die(LastToucherId, WEAPON_NINJA);
+	if(LastToucherId == -1)
+		pChr->Die(pChr->GetPlayer()->GetCid(), WEAPON_WORLD);
+	else
+		pChr->Die(LastToucherId, WEAPON_NINJA);
 }
 
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)

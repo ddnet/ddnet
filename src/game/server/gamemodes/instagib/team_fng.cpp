@@ -13,8 +13,9 @@
 CGameControllerTeamFng::CGameControllerTeamFng(class CGameContext *pGameServer) :
 	CGameControllerBaseFng(pGameServer)
 {
-	m_pGameType = "fng";
-	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
+	// this is a base gamemode
+	// full implementations are "fng" and "boomfng"
+	m_GameFlags = GAMEFLAG_TEAMS;
 }
 
 CGameControllerTeamFng::~CGameControllerTeamFng() = default;
@@ -27,6 +28,9 @@ void CGameControllerTeamFng::Tick()
 void CGameControllerTeamFng::OnCharacterSpawn(class CCharacter *pChr)
 {
 	CGameControllerBaseFng::OnCharacterSpawn(pChr);
+
+	// give default weapons
+	pChr->GiveWeapon(m_DefaultWeapon, false, -1);
 }
 
 int CGameControllerTeamFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
@@ -44,4 +48,17 @@ bool CGameControllerTeamFng::OnEntity(int Index, int x, int y, int Layer, int Fl
 void CGameControllerTeamFng::Snap(int SnappingClient)
 {
 	CGameControllerBaseFng::Snap(SnappingClient);
+
+	if(Server()->IsSixup(SnappingClient))
+		return;
+
+	CNetObj_GameData *pGameDataObj = (CNetObj_GameData *)Server()->SnapNewItem(NETOBJTYPE_GAMEDATA, 0, sizeof(CNetObj_GameData));
+	if(!pGameDataObj)
+		return;
+
+	pGameDataObj->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
+	pGameDataObj->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
+
+	pGameDataObj->m_FlagCarrierRed = 0;
+	pGameDataObj->m_FlagCarrierBlue = 0;
 }

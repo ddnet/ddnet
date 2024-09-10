@@ -21,5 +21,6 @@ public:
 	int GameInfoExFlags(int SnappingClient) override;
 
 	void OnSpike(class CCharacter *pChr, int SpikeTile);
+	void OnWrongSpike(class CPlayer *pPlayer);
 };
 #endif // GAME_SERVER_GAMEMODES_BASE_FNG_H
