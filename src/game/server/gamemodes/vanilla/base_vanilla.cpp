@@ -25,6 +25,7 @@ int CGameControllerVanilla::GameInfoExFlags(int SnappingClient)
 {
 	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient);
 	Flags &= ~(GAMEINFOFLAG_UNLIMITED_AMMO);
+	Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
 	return Flags;
 }
 
