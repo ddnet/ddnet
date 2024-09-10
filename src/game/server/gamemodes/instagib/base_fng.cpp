@@ -54,6 +54,19 @@ void CGameControllerBaseFng::Tick()
 				pHooked->UpdateLastToucher(pChr->GetPlayer()->GetCid());
 			}
 		}
+
+		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_RED))
+			OnSpike(pChr, TILE_FNG_SPIKE_RED);
+		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_BLUE))
+			OnSpike(pChr, TILE_FNG_SPIKE_BLUE);
+		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_NORMAL))
+			OnSpike(pChr, TILE_FNG_SPIKE_NORMAL);
+		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_GOLD))
+			OnSpike(pChr, TILE_FNG_SPIKE_GOLD);
+		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_GREEN))
+			OnSpike(pChr, TILE_FNG_SPIKE_GREEN);
+		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_PURPLE))
+			OnSpike(pChr, TILE_FNG_SPIKE_PURPLE);
 	}
 }
 
@@ -91,41 +104,6 @@ bool CGameControllerBaseFng::OnEntity(int Index, int x, int y, int Layer, int Fl
 {
 	CGameControllerInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 	return false;
-}
-
-void CGameControllerBaseFng::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
-{
-	int TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
-	int TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
-
-	// //Sensitivity
-	// int S1 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x + pChr->GetProximityRadius() / 3.f, pChr->GetPos().y - pChr->GetProximityRadius() / 3.f));
-	// int S2 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x + pChr->GetProximityRadius() / 3.f, pChr->GetPos().y + pChr->GetProximityRadius() / 3.f));
-	// int S3 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x - pChr->GetProximityRadius() / 3.f, pChr->GetPos().y - pChr->GetProximityRadius() / 3.f));
-	// int S4 = GameServer()->Collision()->GetPureMapIndex(vec2(pChr->GetPos().x - pChr->GetProximityRadius() / 3.f, pChr->GetPos().y + pChr->GetProximityRadius() / 3.f));
-	// int Tile1 = GameServer()->Collision()->GetTileIndex(S1);
-	// int Tile2 = GameServer()->Collision()->GetTileIndex(S2);
-	// int Tile3 = GameServer()->Collision()->GetTileIndex(S3);
-	// int Tile4 = GameServer()->Collision()->GetTileIndex(S4);
-	// int FTile1 = GameServer()->Collision()->GetFTileIndex(S1);
-	// int FTile2 = GameServer()->Collision()->GetFTileIndex(S2);
-	// int FTile3 = GameServer()->Collision()->GetFTileIndex(S3);
-	// int FTile4 = GameServer()->Collision()->GetFTileIndex(S4);
-
-	if(((TileIndex == TILE_FNG_SPIKE_RED) || (TileFIndex == TILE_FNG_SPIKE_RED)))
-		OnSpike(pChr, TILE_FNG_SPIKE_RED);
-	else if(((TileIndex == TILE_FNG_SPIKE_BLUE) || (TileFIndex == TILE_FNG_SPIKE_BLUE)))
-		OnSpike(pChr, TILE_FNG_SPIKE_BLUE);
-	else if(((TileIndex == TILE_FNG_SPIKE_NORMAL) || (TileFIndex == TILE_FNG_SPIKE_NORMAL)))
-		OnSpike(pChr, TILE_FNG_SPIKE_NORMAL);
-	else if(((TileIndex == TILE_FNG_SPIKE_GOLD) || (TileFIndex == TILE_FNG_SPIKE_GOLD)))
-		OnSpike(pChr, TILE_FNG_SPIKE_GOLD);
-	else if(((TileIndex == TILE_FNG_SPIKE_GREEN) || (TileFIndex == TILE_FNG_SPIKE_GREEN)))
-		OnSpike(pChr, TILE_FNG_SPIKE_GREEN);
-	else if(((TileIndex == TILE_FNG_SPIKE_PURPLE) || (TileFIndex == TILE_FNG_SPIKE_PURPLE)))
-		OnSpike(pChr, TILE_FNG_SPIKE_PURPLE);
-
-	CGameControllerDDRace::HandleCharacterTiles(pChr, MapIndex);
 }
 
 void CGameControllerBaseFng::OnWrongSpike(class CPlayer *pPlayer)

@@ -38,6 +38,13 @@ public:
 
 	bool OnFngFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos);
 	void TakeHammerHit(CCharacter *pFrom);
+	/*
+		Function: IsTouchingTile
+
+		High sensitive tile collision checker. Used for fng spikes.
+		Same radius as vanilla death tiles.
+	*/
+	bool IsTouchingTile(int Tile);
 
 #ifndef IN_CLASS_CHARACTER
 };
