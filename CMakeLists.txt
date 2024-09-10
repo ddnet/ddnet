@@ -2162,6 +2162,8 @@ set_src(GAME_SHARED GLOB src/game
   mapitems_ex.cpp
   mapitems_ex.h
   mapitems_ex_types.h
+  mapitems_fng.h
+  mapitems_vanilla.h
   prng.cpp
   prng.h
   teamscore.cpp

@@ -1,3 +1,6 @@
+#include <game/mapitems_fng.h>
+#include <game/mapitems_vanilla.h>
+
 #include "editor.h"
 
 // DDNet entity explanations by Lady Saavik
