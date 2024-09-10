@@ -246,6 +246,7 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	if(pKiller)
 	{
 		pKiller->IncrementScore();
+		m_aTeamscore[pKiller->GetTeam()]++;
 		DoWincheckRound();
 	}
 

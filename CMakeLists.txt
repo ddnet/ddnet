@@ -2754,6 +2754,8 @@ if(SERVER)
     gamemodes/instagib/base_instagib.h
     gamemodes/instagib/bolofng.cpp
     gamemodes/instagib/bolofng.h
+    gamemodes/instagib/boomfng.cpp
+    gamemodes/instagib/boomfng.h
     gamemodes/instagib/ctf.cpp
     gamemodes/instagib/ctf.h
     gamemodes/instagib/dm.cpp
