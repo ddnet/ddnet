@@ -21,6 +21,11 @@
 
 // ddnet-insta
 
+CClientMask IGameController::FreezeDamageIndicatorMask(class CCharacter *pChr)
+{
+	return pChr->TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD);
+}
+
 int IGameController::GetPlayerTeam(CPlayer *pPlayer, bool Sixup)
 {
 	return pPlayer->GetTeam();

@@ -148,6 +148,7 @@ public:
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };
 	virtual void OnSnapDDNetCharacter(class CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient){};
+	virtual CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr);
 
 	int m_DefaultWeapon = WEAPON_GUN;
 	void CheckReadyStates(int WithoutId = -1);

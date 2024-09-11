@@ -211,6 +211,23 @@ void CGameControllerBaseFng::OnSnapDDNetCharacter(CCharacter *pChr, CNetObj_DDNe
 		pDDNetCharacter->m_FreezeEnd = -1;
 }
 
+CClientMask CGameControllerBaseFng::FreezeDamageIndicatorMask(class CCharacter *pChr)
+{
+	CClientMask Mask = pChr->TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD);
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(pPlayer->GetTeam() == pChr->GetPlayer()->GetTeam() && GameServer()->m_pController->IsTeamPlay())
+			continue;
+		if(pPlayer->GetCid() == pChr->GetPlayer()->GetCid())
+			continue;
+
+		Mask.reset(pPlayer->GetCid());
+	}
+	return Mask;
+}
+
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	Character.GetPlayer()->UpdateLastToucher(From);

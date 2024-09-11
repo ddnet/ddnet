@@ -2130,7 +2130,8 @@ void CCharacter::DDRaceTick()
 	{
 		if(m_FreezeTime % Server()->TickSpeed() == Server()->TickSpeed() - 1)
 		{
-			GameServer()->CreateDamageInd(m_Pos, 0, (m_FreezeTime + 1) / Server()->TickSpeed(), TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD));
+			// ddnet-insta added FreezeDamageIndicatorMask for fng
+			GameServer()->CreateDamageInd(m_Pos, 0, (m_FreezeTime + 1) / Server()->TickSpeed(), GameServer()->m_pController->FreezeDamageIndicatorMask(this));
 		}
 		m_FreezeTime--;
 		m_Input.m_Direction = 0;

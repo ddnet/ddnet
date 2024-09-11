@@ -19,6 +19,7 @@ public:
 	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;
 	int GameInfoExFlags(int SnappingClient) override;
 	void OnSnapDDNetCharacter(class CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient) override;
+	CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr) override;
 
 	void OnSpike(class CCharacter *pChr, int SpikeTile);
 	void OnWrongSpike(class CPlayer *pPlayer);
