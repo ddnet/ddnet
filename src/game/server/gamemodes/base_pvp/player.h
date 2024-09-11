@@ -69,8 +69,13 @@ public:
 	int m_CampTick;
 	vec2 m_CampPos;
 
+	// Will also be set if spree chat messages are turned off
+	// this is the current spree
+	// not to be confused with m_Stats.m_BestSpree which is the highscore
+	int m_Spree;
+
 	CSqlStatsPlayer m_Stats;
-	int Spree() const { return m_Stats.m_Spree; }
+	int Spree() const { return m_Spree; }
 	int Kills() const { return m_Stats.m_Kills; }
 	int Deaths() const { return m_Stats.m_Deaths; }
 

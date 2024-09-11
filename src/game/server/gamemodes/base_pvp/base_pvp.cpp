@@ -1,9 +1,11 @@
 #include <base/system.h>
+#include <engine/server/server.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/instagib/sql_stats.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -24,9 +26,35 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	GameServer()->Tuning()->Set("shotgun_curvature", 1.25f);
 	GameServer()->Tuning()->Set("shotgun_speed", 2750);
 	GameServer()->Tuning()->Set("shotgun_speeddiff", 0.8f);
+
+	dbg_msg("ddnet-insta", "connecting to database ...");
+	// set the stats table to the gametype name in all lowercase
+	// if you want to track stats in a sql database for that gametype
+	m_pStatsTable = "";
+	m_pSqlStats = new CSqlStats(GameServer(), ((CServer *)Server())->DbPool());
+	m_pExtraColumns = nullptr;
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
 }
 
-CGameControllerPvp::~CGameControllerPvp() = default;
+CGameControllerPvp::~CGameControllerPvp()
+{
+	// TODO: we have to make sure to block all operations and save everything if sv_gametype is switched
+	//       there should be no data loss no matter in which state and how often the controller is recreated
+	//
+	//       this also has to save player sprees that were not ended yet!
+	dbg_msg("ddnet-insta", "cleaning up database connection ...");
+	if(m_pSqlStats)
+	{
+		delete m_pSqlStats;
+		m_pSqlStats = nullptr;
+	}
+
+	if(m_pExtraColumns)
+	{
+		delete m_pExtraColumns;
+		m_pExtraColumns = nullptr;
+	}
+}
 
 int CGameControllerPvp::GameInfoExFlags(int SnappingClient)
 {
@@ -598,7 +626,7 @@ void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 
 void CGameControllerPvp::AddSpree(class CPlayer *pPlayer)
 {
-	pPlayer->m_Stats.m_Spree++;
+	pPlayer->m_Spree++;
 	const int NumMsg = 5;
 	char aBuf[128];
 
@@ -636,7 +664,10 @@ void CGameControllerPvp::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller
 		}
 	}
 	// pPlayer->m_GotAward = false;
-	pPlayer->m_Stats.m_Spree = 0;
+
+	if(pPlayer->m_Stats.m_BestSpree < pPlayer->Spree())
+		pPlayer->m_Stats.m_BestSpree = pPlayer->Spree();
+	pPlayer->m_Spree = 0;
 }
 
 void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)

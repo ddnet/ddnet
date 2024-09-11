@@ -27,14 +27,26 @@ void IGameController::OnEndRoundInsta()
 	{
 		if(!pPlayer)
 			continue;
+		if(m_pStatsTable[0] == '\0')
+			continue;
 
 		char aMsg[512];
 		bool Won = IsWinner(pPlayer, aMsg, sizeof(aMsg));
 		bool Lost = IsLoser(pPlayer);
-		dbg_msg("stats", "winner=%d loser=%d msg=%s name: %s", Won, Lost, aMsg, Server()->ClientName(pPlayer->GetCid()));
+		// dbg_msg("stats", "winner=%d loser=%d msg=%s name: %s", Won, Lost, aMsg, Server()->ClientName(pPlayer->GetCid()));
 		if(aMsg[0])
 			GameServer()->SendChatTarget(pPlayer->GetCid(), aMsg);
 
+		dbg_msg("sql", "saving round stats of player '%s' win=%d loss=%d msg='%s'", Server()->ClientName(pPlayer->GetCid()), Won, Lost, aMsg);
+
+		if(pPlayer->Spree() > pPlayer->m_Stats.m_BestSpree)
+			pPlayer->m_Stats.m_BestSpree = pPlayer->Spree();
+		if(Won)
+			pPlayer->m_Stats.m_Wins++;
+		if(Lost)
+			pPlayer->m_Stats.m_Losses++;
+
+		m_pSqlStats->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), m_pStatsTable, &pPlayer->m_Stats);
 		pPlayer->m_Stats.Reset();
 	}
 }

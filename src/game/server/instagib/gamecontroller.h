@@ -13,6 +13,8 @@
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 
+#include <game/server/instagib/sql_stats.h>
+
 struct CScoreLoadBestTimeResult;
 
 class IGameController
@@ -311,6 +313,9 @@ public:
 
 	bool IsSkinChangeAllowed() const { return m_AllowSkinChange; }
 	int GameFlags() const { return m_GameFlags; }
+
+	CSqlStats *m_pSqlStats = nullptr;
+	const char *m_pStatsTable = "";
 
 private:
 #ifndef IN_CLASS_IGAMECONTROLLER

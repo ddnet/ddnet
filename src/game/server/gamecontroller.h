@@ -9,6 +9,8 @@
 #include <game/server/teams.h>
 
 #include <engine/shared/http.h> // ddnet-insta
+#include <game/server/instagib/sql_stats.h> // ddnet-insta
+
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 
