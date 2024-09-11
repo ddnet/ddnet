@@ -20,6 +20,7 @@ public:
 	int GameInfoExFlags(int SnappingClient) override;
 	void OnSnapDDNetCharacter(class CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient) override;
 	CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr) override;
+	bool OnSelfkill(int ClientId) override;
 
 	void OnSpike(class CCharacter *pChr, int SpikeTile);
 	void OnWrongSpike(class CPlayer *pPlayer);

@@ -228,6 +228,21 @@ CClientMask CGameControllerBaseFng::FreezeDamageIndicatorMask(class CCharacter *
 	return Mask;
 }
 
+bool CGameControllerBaseFng::OnSelfkill(int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return false;
+	if(!pChr->m_FreezeTime)
+		return false;
+
+	GameServer()->SendChatTarget(ClientId, "You can't kill while being frozen");
+	return true;
+}
+
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	Character.GetPlayer()->UpdateLastToucher(From);
