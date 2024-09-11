@@ -345,7 +345,7 @@ void CNamePlates::OnRender()
                 }
 			}
 		}
-		if(!m_pClient->m_Snap.m_aCharacters[i].m_Active)
+		if(m_pClient->m_Snap.m_aCharacters[i].m_Active)
 		{
 			// Only render nameplates for active characters
 			const vec2 RenderPos = m_pClient->m_aClients[i].m_RenderPos;
