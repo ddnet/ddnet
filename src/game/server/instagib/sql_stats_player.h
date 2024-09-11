@@ -4,7 +4,6 @@
 class CSqlStatsPlayer
 {
 public:
-	const char *m_pName;
 	// Will also be set if spree chat messages are turned off
 	int m_Spree;
 	// kills, deaths and flag grabs/caps are tracked per round
@@ -24,7 +23,6 @@ public:
 
 	CSqlStatsPlayer()
 	{
-		m_pName = "";
 		Reset();
 	}
 };
