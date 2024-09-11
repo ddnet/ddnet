@@ -60,7 +60,23 @@ To make `sv_spectator_votes` portable and fair for both 0.6 and 0.7 players ther
 when that is set it will make the 0.7 clients believe they are in game and unlock the call vote menu.
 But this also means that to join the game the users have to press the "spectate" button.
 
-## gametype support
+## Lots of little fun opt in features
+
+By default ddnet-insta tries to be ready to be used in competetive games. Being as close to prior implementations
+of the gametypes as possible. With that being said there are lots of opt in configurations to customize the gameplay.
+
+
+Check the [Configs](#Configs) section for a complete list. One of the highlights would be dropping the flag in CTF
+gametypes.
+
+![drop flags](https://raw.githubusercontent.com/ddnet-insta/images/master/drop_flag.gif)
+
+Most of the settings that affect the gameplay can be shown to the user with `sv_show_settings_motd`
+so they know what is going on:
+
+![settings motd](https://raw.githubusercontent.com/ddnet-insta/images/master/settings_motd.png)
+
+## Gametype support
 
 Make sure to also `reload` or switch the map when changing the gametype.
 
