@@ -7,6 +7,7 @@
 #include <base/color.h>
 #include <base/vmath.h>
 #include <engine/client.h>
+#include <engine/client/enums.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
 
@@ -16,6 +17,7 @@
 #include <game/teamscore.h>
 
 #include <game/client/prediction/gameworld.h>
+#include <game/client/race.h>
 
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
@@ -119,6 +121,13 @@ public:
 	const CNetObj_EntityEx *m_pDataEx;
 };
 
+enum class EClientIdFormat
+{
+	NO_INDENT,
+	INDENT_AUTO,
+	INDENT_FORCE, // for rendering settings preview
+};
+
 class CGameClient : public IGameClient
 {
 public:
@@ -203,6 +212,7 @@ private:
 	CLayers m_Layers;
 	CCollision m_Collision;
 	CUi m_UI;
+	CRaceHelper m_RaceHelper;
 
 	void ProcessEvents();
 	void UpdatePositions();
@@ -265,6 +275,8 @@ public:
 	class CRenderTools *RenderTools() { return &m_RenderTools; }
 	class CLayers *Layers() { return &m_Layers; }
 	CCollision *Collision() { return &m_Collision; }
+	const CCollision *Collision() const { return &m_Collision; }
+	const CRaceHelper *RaceHelper() const { return &m_RaceHelper; }
 	class IEditor *Editor() { return m_pEditor; }
 	class IFriends *Friends() { return m_pFriends; }
 	class IFriends *Foes() { return m_pFoes; }
@@ -329,6 +341,7 @@ public:
 		int m_LocalClientId;
 		int m_NumPlayers;
 		int m_aTeamSize[2];
+		int m_HighestClientId;
 
 		// spectate data
 		struct CSpectateInfo
@@ -439,19 +452,21 @@ public:
 		bool m_SpecCharPresent;
 		vec2 m_SpecChar;
 
-		void UpdateRenderInfo(bool IsTeamPlay);
+		void UpdateRenderInfo(bool IsTeamPlay, int Conn);
 		void Reset();
 
 		class CSixup
 		{
 		public:
+			void Reset();
+
 			char m_aaSkinPartNames[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_LENGTH];
 			int m_aUseCustomColors[protocol7::NUM_SKINPARTS];
 			int m_aSkinPartColors[protocol7::NUM_SKINPARTS];
 		};
 
 		// 0.7 Skin
-		CSixup m_Sixup;
+		CSixup m_aSixup[NUM_DUMMIES];
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
@@ -511,7 +526,7 @@ public:
 	void OnConsoleInit() override;
 	void OnStateChange(int NewState, int OldState) override;
 	template<typename T>
-	void ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId);
+	void ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId, int Conn);
 	void ApplySkin7InfoFromSnapObj(const protocol7::CNetObj_De_ClientInfo *pObj, int ClientId) override;
 	int OnDemoRecSnap7(class CSnapshot *pFrom, class CSnapshot *pTo, int Conn) override;
 	void *TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn);
@@ -589,6 +604,7 @@ public:
 	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientId >= 0 && m_PredictedDummyId >= 0 && !m_aClients[m_PredictedDummyId].m_Paused; }
 	const CTuningParams *GetTuning(int i) { return &m_aTuningList[i]; }
 	ColorRGBA GetDDTeamColor(int DDTeam, float Lightness = 0.5f) const;
+	void FormatClientId(int ClientId, char (&aClientId)[16], EClientIdFormat Format) const;
 
 	CGameWorld m_GameWorld;
 	CGameWorld m_PredictedWorld;

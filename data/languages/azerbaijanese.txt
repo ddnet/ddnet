@@ -4,6 +4,7 @@
 #modified by:
 #     Gokturk          2024-06-09 12:00:50
 #     Gokturk          2024-07-17 02:24:00
+#     Gokturk          2024-08-29 23:39:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -273,9 +274,6 @@ Play background music
 
 Player
 == Oyunçu
-
-Player options
-== Oyunçu parametrlər	
 
 Players
 == Oyunçular
@@ -651,9 +649,6 @@ Connecting dummy
 
 Connect Dummy
 == Dummy daxil ol
-
-Reload
-== Yenilə
 
 Deactivate
 == Qeyri-aktiv etmək 
@@ -1450,9 +1445,6 @@ Show health, shields and ammo
 DDRace HUD
 == DDRace interfeysi
 
-Show client IDs in scoreboard
-== Xal lövhəsində klient ID-lərini göstərin
-
 Show DDRace HUD
 == DDRace interfeysi göstər 
 
@@ -1870,3 +1862,54 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
+
+Could not resolve connect address '%s'. See local console for details.
+== '%s' Link ünvanını həll etmək mümkün olmadı. Ətraflı məlumat üçün yerli konsola baxın
+
+Connect address error
+== Link ünvanı xətası
+
+Could not connect dummy
+== Dummy qoşula bilmədi
+
+Dummy is not allowed on this server
+== Bu serverdə dummy icazə verilmir
+
+Please wait…
+== Zəhmət olmasa gözləyin…
+
+Show client IDs (scoreboard, chat, spectator)
+== Klient ID'sini göstərin (aparıcı lövhə, söhbət, izləyici)
+
+Normal:
+== Normal:
+
+Team:
+== Komanda:
+
+Dummy settings
+== Dummy parametrlər
+
+Toggle to edit your dummy settings
+== Dummy parametrlərini redaktə etmək üçün açın
+
+Randomize
+== Təsadüfi
+
+Are you sure that you want to delete '%s'?
+== '%s' Bunu silmək istədiyinizə əminsiniz?
+
+Delete skin
+== Skini silin
+
+Basic
+== Sadə
+
+Custom
+== Xüsusi
+
+Unable to delete skin
+== Skin silinə bilməz
+
+Customize
+== Fərdiləşdirmək

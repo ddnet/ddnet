@@ -41,6 +41,7 @@ void CEmoticon::OnReset()
 	m_Active = false;
 	m_SelectedEmote = -1;
 	m_SelectedEyeEmote = -1;
+	m_TouchPressedOutside = false;
 }
 
 void CEmoticon::OnRelease()
@@ -58,6 +59,16 @@ bool CEmoticon::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	return true;
 }
 
+bool CEmoticon::OnInput(const IInput::CEvent &Event)
+{
+	if(IsActive() && Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
+	{
+		OnRelease();
+		return true;
+	}
+	return false;
+}
+
 void CEmoticon::OnRender()
 {
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -65,6 +76,13 @@ void CEmoticon::OnRender()
 
 	if(!m_Active)
 	{
+		if(m_TouchPressedOutside)
+		{
+			m_SelectedEmote = -1;
+			m_SelectedEyeEmote = -1;
+			m_TouchPressedOutside = false;
+		}
+
 		if(m_WasActive && m_SelectedEmote != -1)
 			Emote(m_SelectedEmote);
 		if(m_WasActive && m_SelectedEyeEmote != -1)
@@ -82,6 +100,29 @@ void CEmoticon::OnRender()
 
 	m_WasActive = true;
 
+	const CUIRect Screen = *Ui()->Screen();
+
+	const bool WasTouchPressed = m_TouchState.m_AnyPressed;
+	Ui()->UpdateTouchState(m_TouchState);
+	if(m_TouchState.m_AnyPressed)
+	{
+		const vec2 TouchPos = (m_TouchState.m_PrimaryPosition - vec2(0.5f, 0.5f)) * Screen.Size();
+		const float TouchCenterDistance = length(TouchPos);
+		if(TouchCenterDistance <= 170.0f)
+		{
+			m_SelectorMouse = TouchPos;
+		}
+		else if(TouchCenterDistance > 190.0f)
+		{
+			m_TouchPressedOutside = true;
+		}
+	}
+	else if(WasTouchPressed)
+	{
+		m_Active = false;
+		return;
+	}
+
 	if(length(m_SelectorMouse) > 170.0f)
 		m_SelectorMouse = normalize(m_SelectorMouse) * 170.0f;
 
@@ -96,7 +137,7 @@ void CEmoticon::OnRender()
 	else if(length(m_SelectorMouse) > 40.0f)
 		m_SelectedEyeEmote = (int)(SelectedAngle / (2 * pi) * NUM_EMOTES);
 
-	CUIRect Screen = *Ui()->Screen();
+	const vec2 ScreenCenter = Screen.Center();
 
 	Ui()->MapScreen();
 
@@ -105,26 +146,22 @@ void CEmoticon::OnRender()
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0, 0, 0, 0.3f);
-	Graphics()->DrawCircle(Screen.w / 2, Screen.h / 2, 190.0f, 64);
+	Graphics()->DrawCircle(ScreenCenter.x, ScreenCenter.y, 190.0f, 64);
 	Graphics()->QuadsEnd();
 
 	Graphics()->WrapClamp();
-	for(int i = 0; i < NUM_EMOTICONS; i++)
+	for(int Emote = 0; Emote < NUM_EMOTICONS; Emote++)
 	{
-		float Angle = 2 * pi * i / NUM_EMOTICONS;
+		float Angle = 2 * pi * Emote / NUM_EMOTICONS;
 		if(Angle > pi)
 			Angle -= 2 * pi;
 
-		bool Selected = m_SelectedEmote == i;
-
-		float Size = Selected ? 80.0f : 50.0f;
-
-		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[i]);
+		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[Emote]);
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
-
 		Graphics()->QuadsBegin();
 		const vec2 Nudge = direction(Angle) * 150.0f;
-		IGraphics::CQuadItem QuadItem(Screen.w / 2 + Nudge.x, Screen.h / 2 + Nudge.y, Size, Size);
+		const float Size = m_SelectedEmote == Emote ? 80.0f : 50.0f;
+		IGraphics::CQuadItem QuadItem(ScreenCenter.x + Nudge.x, ScreenCenter.y + Nudge.y, Size, Size);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 		Graphics()->QuadsEnd();
 	}
@@ -135,34 +172,32 @@ void CEmoticon::OnRender()
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(1.0, 1.0, 1.0, 0.3f);
-		Graphics()->DrawCircle(Screen.w / 2, Screen.h / 2, 100.0f, 64);
+		Graphics()->DrawCircle(ScreenCenter.x, ScreenCenter.y, 100.0f, 64);
 		Graphics()->QuadsEnd();
 
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[m_pClient->m_aLocalIds[g_Config.m_ClDummy]].m_RenderInfo;
 
-		for(int i = 0; i < NUM_EMOTES; i++)
+		for(int Emote = 0; Emote < NUM_EMOTES; Emote++)
 		{
-			float Angle = 2 * pi * i / NUM_EMOTES;
+			float Angle = 2 * pi * Emote / NUM_EMOTES;
 			if(Angle > pi)
 				Angle -= 2 * pi;
 
-			const bool Selected = m_SelectedEyeEmote == i;
-
 			const vec2 Nudge = direction(Angle) * 70.0f;
-			TeeInfo.m_Size = Selected ? 64.0f : 48.0f;
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, i, vec2(-1, 0), vec2(Screen.w / 2 + Nudge.x, Screen.h / 2 + Nudge.y));
+			TeeInfo.m_Size = m_SelectedEyeEmote == Emote ? 64.0f : 48.0f;
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, Emote, vec2(-1, 0), ScreenCenter + Nudge);
 		}
 
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 		Graphics()->SetColor(0, 0, 0, 0.3f);
-		Graphics()->DrawCircle(Screen.w / 2, Screen.h / 2, 30.0f, 64);
+		Graphics()->DrawCircle(ScreenCenter.x, ScreenCenter.y, 30.0f, 64);
 		Graphics()->QuadsEnd();
 	}
 	else
 		m_SelectedEyeEmote = -1;
 
-	RenderTools()->RenderCursor(m_SelectorMouse + vec2(Screen.w, Screen.h) / 2, 24.0f);
+	RenderTools()->RenderCursor(ScreenCenter + m_SelectorMouse, 24.0f);
 }
 
 void CEmoticon::Emote(int Emoticon)

@@ -11,6 +11,7 @@
 #include <game/client/ui_listbox.h>
 #include <game/mapitems.h>
 
+#include <game/editor/enums.h>
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>
 #include <game/editor/mapitems/layer_front.h>
@@ -38,6 +39,8 @@
 #include "layer_selector.h"
 #include "map_view.h"
 #include "smooth_value.h"
+#include <game/editor/prompt.h>
+#include <game/editor/quick_action.h>
 
 #include <deque>
 #include <functional>
@@ -60,7 +63,8 @@ enum
 
 	DIALOG_NONE = 0,
 	DIALOG_FILE,
-	DIALOG_MAPSETTINGS_ERROR
+	DIALOG_MAPSETTINGS_ERROR,
+	DIALOG_QUICK_PROMPT,
 };
 
 class CEditorImage;
@@ -278,6 +282,7 @@ class CEditor : public IEditor
 	std::vector<std::reference_wrapper<CEditorComponent>> m_vComponents;
 	CMapView m_MapView;
 	CLayerSelector m_LayerSelector;
+	CPrompt m_Prompt;
 
 	bool m_EditorWasUsedBefore = false;
 
@@ -319,7 +324,20 @@ public:
 	const CMapView *MapView() const { return &m_MapView; }
 	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
 
+	void FillGameTiles(EGameTileOp FillTile) const;
+	bool CanFillGameTiles() const;
+	void AddGroup();
+	void AddTileLayer();
+	void LayerSelectImage();
+	bool IsNonGameTileLayerSelected() const;
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) CQuickAction m_QuickAction##name;
+#include <game/editor/quick_actions.h>
+#undef REGISTER_QUICK_ACTION
+
 	CEditor() :
+#define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) m_QuickAction##name(text, description, callback, disabled, active, button_color),
+#include <game/editor/quick_actions.h>
+#undef REGISTER_QUICK_ACTION
 		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
 		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f),
 		m_MapSettingsCommandContext(m_MapSettingsBackend.NewContext(&m_SettingsCommandInput))

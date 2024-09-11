@@ -251,6 +251,7 @@ protected:
 	int m_TeePartSelected = protocol7::SKINPART_BODY;
 	const CSkins7::CSkin *m_pSelectedSkin = nullptr;
 	CLineInputBuffered<protocol7::MAX_SKIN_ARRAY_SIZE, protocol7::MAX_SKIN_LENGTH> m_SkinNameInput;
+	void PopupConfirmDeleteSkin7();
 
 	// for map download popup
 	int64_t m_DownloadLastCheckTime;
@@ -444,7 +445,6 @@ protected:
 	void RenderMenubar(CUIRect Box, IClient::EClientState ClientState);
 	void RenderNews(CUIRect MainView);
 	static void ConchainBackgroundEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	void UpdateBackgroundEntities();
 	static void ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	void UpdateMusicState();
 
@@ -606,6 +606,36 @@ protected:
 	void RenderSettings(CUIRect MainView);
 	void RenderSettingsCustom(CUIRect MainView);
 
+	class CMapListItem
+	{
+	public:
+		char m_aFilename[IO_MAX_PATH_LENGTH];
+		bool m_IsDirectory;
+	};
+	class CPopupMapPickerContext
+	{
+	public:
+		std::vector<CMapListItem> m_vMaps;
+		char m_aCurrentMapFolder[IO_MAX_PATH_LENGTH] = "";
+		static int MapListFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
+		void MapListPopulate();
+		CMenus *m_pMenus;
+		int m_Selection;
+	};
+
+	static bool CompareFilenameAscending(const CMapListItem Lhs, const CMapListItem Rhs)
+	{
+		if(str_comp(Lhs.m_aFilename, "..") == 0)
+			return true;
+		if(str_comp(Rhs.m_aFilename, "..") == 0)
+			return false;
+		if(Lhs.m_IsDirectory != Rhs.m_IsDirectory)
+			return Lhs.m_IsDirectory;
+		return str_comp_filenames(Lhs.m_aFilename, Rhs.m_aFilename) < 0;
+	}
+
+	static CUi::EPopupMenuFunctionResult PopupMapPicker(void *pContext, CUIRect View, bool Active);
+
 	void SetNeedSendInfo();
 	void SetActive(bool Active);
 	void UpdateColors();
@@ -740,6 +770,14 @@ public:
 		bool HasFile() const { return m_aFilename[0]; }
 	};
 
+	enum
+	{
+		GHOST_SORT_NONE = -1,
+		GHOST_SORT_NAME,
+		GHOST_SORT_TIME,
+		GHOST_SORT_DATE,
+	};
+
 	std::vector<CGhostItem> m_vGhosts;
 
 	std::chrono::nanoseconds m_GhostPopulateStartTime{0};
@@ -748,6 +786,7 @@ public:
 	CGhostItem *GetOwnGhost();
 	void UpdateOwnGhost(CGhostItem Item);
 	void DeleteGhostItem(int Index);
+	void SortGhostlist();
 
 	bool CanDisplayWarning() const;
 
@@ -774,6 +813,7 @@ public:
 		POPUP_QUIT,
 		POPUP_RESTART,
 		POPUP_WARNING,
+		POPUP_SAVE_SKIN,
 
 		// demo player states
 		DEMOPLAYER_NONE = 0,
@@ -796,7 +836,7 @@ private:
 	void RenderSettingsProfiles(CUIRect MainView);
 
 	ColorHSLA RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColor, bool Alpha);
-	ColorHSLA RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha = false, bool ClampedLight = false);
+	bool RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight);
 
 	CServerProcess m_ServerProcess;
 };

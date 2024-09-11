@@ -294,9 +294,6 @@ Player
 Player country:
 == Страна игрока:
 
-Player options
-== Опции игрока
-
 Players
 == Игроки
 
@@ -634,7 +631,7 @@ Loading DDNet Client
 == Загрузка DDNet Client
 
 Normal message
-== Обычное с.
+== Обычное
 
 Connecting dummy
 == Подключение дамми
@@ -646,10 +643,10 @@ Save ghost
 == Сохранять тень
 
 DDNet Client updated!
-== DDNet Client обновлён!
+== DDNet клиент обновлён!
 
 Highlighted message
-== Выделенное с.
+== Выделенное
 
 Demo
 == Демо
@@ -727,7 +724,7 @@ Downloading %s:
 == Скачивание %s:
 
 Update failed! Check log…
-== Ошибка. Проверьте логи…
+== Не удалось обновиться! Подробности в логах…
 
 Restart
 == Рестарт
@@ -749,9 +746,6 @@ Fetch Info
 
 Connect Dummy
 == Подключить дамми
-
-Reload
-== Перезагрузить
 
 Deactivate
 == Выключить
@@ -805,7 +799,7 @@ Toggle dyncam
 == Смена дин. камеры
 
 Toggle dummy
-== Смена Tee
+== Переключение дамми
 
 Toggle ghost
 == Переключить тень
@@ -850,7 +844,7 @@ DDNet
 == DDNet
 
 Friend message
-== Дружеское с.
+== Дружеское
 
 Save the best demo of each race
 == Сохранять лучшее демо каждой карты
@@ -922,10 +916,10 @@ Ratio
 == Соотношение
 
 Net
-== Сеть
+== Сальдо
 
 FPM
-== FPM
+== У/мин
 
 Spree
 == Серия
@@ -946,7 +940,7 @@ Grabs
 == 9+ упоминаний
 
 Client message
-== Клиентское с.
+== Клиентское
 
 Warning
 == Предупреждение
@@ -979,7 +973,7 @@ Run server
 == Запустить сервер
 
 Server executable not found, can't run server
-== Файл сервера не найден, невозможно запустить
+== Файл сервера не найден, не удалось запустить сервер
 
 Editor
 == Редактор
@@ -1361,9 +1355,6 @@ Show health, shields and ammo
 
 DDRace HUD
 == DDRace HUD
-
-Show client IDs in scoreboard
-== Показывать ид. игроков
 
 Show DDRace HUD
 == Показывать DDRace HUD
@@ -1835,10 +1826,10 @@ No login required
 == Без логина
 
 Player info change cooldown
-== Задержка смены информации об игроке
+== Кулдаун смены данных об игроке
 
 Tee
-== Ти
+== Тии
 
 Always show chat
 == Всегда показывать чат
@@ -1887,3 +1878,54 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping/ru
+
+Could not resolve connect address '%s'. See local console for details.
+== Не удалось определить адрес подключения '%s'. Подробности в локальной консоли.
+
+Connect address error
+== Ошибка адреса подключения
+
+Could not connect dummy
+== Невозможно подключить дамми
+
+Dummy is not allowed on this server
+== Дамми не разрешен на этом сервере
+
+Please wait…
+== Пожалуйста, подождите…
+
+Show client IDs (scoreboard, chat, spectator)
+== Показывать ID клиента (табло, чат, наблюдатель)
+
+Normal:
+== Обычный:
+
+Team:
+== В команде:
+
+Dummy settings
+== Настройки дамми
+
+Toggle to edit your dummy settings
+== Нажмите, чтобы изменить настройки дамми
+
+Randomize
+== Случайный
+
+Are you sure that you want to delete '%s'?
+== Вы уверены, что хотите удалить '%s'?
+
+Delete skin
+== Удалить скин
+
+Basic
+== Пресеты
+
+Custom
+== Кастомизация
+
+Unable to delete skin
+== Невозможно удалить скин
+
+Customize
+== Кастомизировать

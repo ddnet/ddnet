@@ -1074,11 +1074,9 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		// proof button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-		static int s_ProofButton = 0;
-		if(DoButton_Ex(&s_ProofButton, "Proof", MapView()->ProofMode()->IsEnabled(), &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.", IGraphics::CORNER_L) ||
-			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_P) && ModPressed))
+		if(DoButton_Ex(&m_QuickActionProof, m_QuickActionProof.Label(), m_QuickActionProof.Active(), &Button, 0, m_QuickActionProof.Description(), IGraphics::CORNER_L))
 		{
-			MapView()->ProofMode()->Toggle();
+			m_QuickActionProof.Call();
 		}
 
 		TB_Top.VSplitLeft(14.0f, &Button, &TB_Top);
@@ -1104,10 +1102,10 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// grid button
 		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 		static int s_GridButton = 0;
-		if(DoButton_FontIcon(&s_GridButton, FONT_ICON_BORDER_ALL, MapView()->MapGrid()->IsEnabled(), &Button, 0, "[ctrl+g] Toggle Grid", IGraphics::CORNER_L) ||
+		if(DoButton_FontIcon(&s_GridButton, FONT_ICON_BORDER_ALL, m_QuickActionToggleGrid.Active(), &Button, 0, m_QuickActionToggleGrid.Description(), IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_G) && ModPressed && !ShiftPressed))
 		{
-			MapView()->MapGrid()->Toggle();
+			m_QuickActionToggleGrid.Call();
 		}
 
 		// grid settings button
@@ -1123,23 +1121,23 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// zoom group
 		TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
 		static int s_ZoomOutButton = 0;
-		if(DoButton_FontIcon(&s_ZoomOutButton, FONT_ICON_MINUS, 0, &Button, 0, "[NumPad-] Zoom out", IGraphics::CORNER_L))
+		if(DoButton_FontIcon(&s_ZoomOutButton, FONT_ICON_MINUS, 0, &Button, 0, m_QuickActionZoomOut.Description(), IGraphics::CORNER_L))
 		{
-			MapView()->Zoom()->ChangeValue(50.0f);
+			m_QuickActionZoomOut.Call();
 		}
 
 		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 		static int s_ZoomNormalButton = 0;
-		if(DoButton_FontIcon(&s_ZoomNormalButton, FONT_ICON_MAGNIFYING_GLASS, 0, &Button, 0, "[NumPad*] Zoom to normal and remove editor offset", IGraphics::CORNER_NONE))
+		if(DoButton_FontIcon(&s_ZoomNormalButton, FONT_ICON_MAGNIFYING_GLASS, 0, &Button, 0, m_QuickActionResetZoom.Description(), IGraphics::CORNER_NONE))
 		{
-			MapView()->ResetZoom();
+			m_QuickActionResetZoom.Call();
 		}
 
 		TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
 		static int s_ZoomInButton = 0;
-		if(DoButton_FontIcon(&s_ZoomInButton, FONT_ICON_PLUS, 0, &Button, 0, "[NumPad+] Zoom in", IGraphics::CORNER_R))
+		if(DoButton_FontIcon(&s_ZoomInButton, FONT_ICON_PLUS, 0, &Button, 0, m_QuickActionZoomIn.Description(), IGraphics::CORNER_R))
 		{
-			MapView()->Zoom()->ChangeValue(-50.0f);
+			m_QuickActionZoomIn.Call();
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -1230,10 +1228,10 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			static char s_PipetteButton;
 			ColorPalette.VSplitLeft(PipetteButtonWidth, &Button, &ColorPalette);
 			ColorPalette.VSplitLeft(Spacing, nullptr, &ColorPalette);
-			if(DoButton_FontIcon(&s_PipetteButton, FONT_ICON_EYE_DROPPER, m_ColorPipetteActive ? 1 : 0, &Button, 0, "[Ctrl+Shift+C] Color pipette. Pick a color from the screen by clicking on it.", IGraphics::CORNER_ALL) ||
+			if(DoButton_FontIcon(&s_PipetteButton, FONT_ICON_EYE_DROPPER, m_QuickActionPipette.Active(), &Button, 0, m_QuickActionPipette.Description(), IGraphics::CORNER_ALL) ||
 				(CLineInput::GetActiveInput() == nullptr && ModPressed && ShiftPressed && Input()->KeyPress(KEY_C)))
 			{
-				m_ColorPipetteActive = !m_ColorPipetteActive;
+				m_QuickActionPipette.Call();
 			}
 
 			// Palette color pickers
@@ -1254,10 +1252,9 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// refocus button
 		{
 			TB_Bottom.VSplitLeft(50.0f, &Button, &TB_Bottom);
-			static int s_RefocusButton = 0;
 			int FocusButtonChecked = MapView()->IsFocused() ? -1 : 1;
-			if(DoButton_Editor(&s_RefocusButton, "Refocus", FocusButtonChecked, &Button, 0, "[HOME] Restore map focus") || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_HOME)))
-				MapView()->Focus();
+			if(DoButton_Editor(&m_QuickActionRefocus, m_QuickActionRefocus.Label(), FocusButtonChecked, &Button, 0, m_QuickActionRefocus.Description()) || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_HOME)))
+				m_QuickActionRefocus.Call();
 			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
 		}
 
@@ -3665,12 +3662,12 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 	{
 		if(ButtonResult == 1)
 		{
-			const char *pClipboard = Input()->GetClipboardText();
-			if(*pClipboard == '#' || *pClipboard == '$') // ignore leading # (web color format) and $ (console color format)
-				++pClipboard;
-			if(str_isallnum_hex(pClipboard))
+			std::string Clipboard = Input()->GetClipboardText();
+			if(Clipboard[0] == '#' || Clipboard[0] == '$') // ignore leading # (web color format) and $ (console color format)
+				Clipboard = Clipboard.substr(1);
+			if(str_isallnum_hex(Clipboard.c_str()))
 			{
-				std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(pClipboard);
+				std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(Clipboard.c_str());
 				if(ParsedColor)
 				{
 					m_ColorPickerPopupContext.m_State = EEditState::ONE_GO;
@@ -4297,17 +4294,43 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		s_ScrollToSelectionNext = true;
 	}
 
-	CUIRect AddGroupButton;
+	CUIRect AddGroupButton, CollapseAllButton;
 	LayersBox.HSplitTop(RowHeight + 1.0f, &AddGroupButton, &LayersBox);
 	if(s_ScrollRegion.AddRect(AddGroupButton))
 	{
 		AddGroupButton.HSplitTop(RowHeight, &AddGroupButton, 0);
-		static int s_AddGroupButton = 0;
-		if(DoButton_Editor(&s_AddGroupButton, "Add group", 0, &AddGroupButton, IGraphics::CORNER_R, "Adds a new group"))
+		if(DoButton_Editor(&m_QuickActionAddGroup, m_QuickActionAddGroup.Label(), 0, &AddGroupButton, IGraphics::CORNER_R, m_QuickActionAddGroup.Description()))
 		{
-			m_Map.NewGroup();
-			m_SelectedGroup = m_Map.m_vpGroups.size() - 1;
-			m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(this, m_SelectedGroup, false));
+			m_QuickActionAddGroup.Call();
+		}
+	}
+
+	LayersBox.HSplitTop(5.0f, nullptr, &LayersBox);
+	LayersBox.HSplitTop(RowHeight + 1.0f, &CollapseAllButton, &LayersBox);
+	if(s_ScrollRegion.AddRect(CollapseAllButton))
+	{
+		unsigned long TotalCollapsed = 0;
+		for(const auto &pGroup : m_Map.m_vpGroups)
+		{
+			if(pGroup->m_Collapse)
+			{
+				TotalCollapsed++;
+			}
+		}
+
+		const char *pActionText = TotalCollapsed == m_Map.m_vpGroups.size() ? "Expand all" : "Collapse all";
+
+		CollapseAllButton.HSplitTop(RowHeight, &CollapseAllButton, 0);
+		static int s_CollapseAllButton = 0;
+		if(DoButton_Editor(&s_CollapseAllButton, pActionText, 0, &CollapseAllButton, IGraphics::CORNER_R, "Expand or collapse all groups"))
+		{
+			for(const auto &pGroup : m_Map.m_vpGroups)
+			{
+				if(TotalCollapsed == m_Map.m_vpGroups.size())
+					pGroup->m_Collapse = false;
+				else
+					pGroup->m_Collapse = true;
+			}
 		}
 	}
 
@@ -4361,7 +4384,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 		}
 	}
 
-	CEditorImage ImgInfo(this);
+	CImageInfo ImgInfo;
 	if(!Graphics()->LoadPng(ImgInfo, pFileName, StorageType))
 	{
 		ShowFileDialogError("Failed to load image from file '%s'.", pFileName);
@@ -4371,21 +4394,33 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	std::shared_ptr<CEditorImage> pImg = m_Map.m_vpImages[m_SelectedImage];
 	Graphics()->UnloadTexture(&(pImg->m_Texture));
 	pImg->Free();
-	*pImg = ImgInfo;
+	pImg->m_Width = ImgInfo.m_Width;
+	pImg->m_Height = ImgInfo.m_Height;
+	pImg->m_Format = ImgInfo.m_Format;
+	pImg->m_pData = ImgInfo.m_pData;
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
 
-	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
+	if(!pImg->m_External && pImg->m_Format != CImageInfo::FORMAT_RGBA)
 	{
-		DilateImage(ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height);
+		uint8_t *pRgbaData = static_cast<uint8_t *>(malloc((size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
+		ConvertToRGBA(pRgbaData, *pImg);
+		free(pImg->m_pData);
+		pImg->m_pData = pRgbaData;
+		pImg->m_Format = CImageInfo::FORMAT_RGBA;
+	}
+
+	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
+	{
+		DilateImage(pImg->m_pData, pImg->m_Width, pImg->m_Height);
 	}
 
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	int TextureLoadFlag = Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
+	if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 		TextureLoadFlag = 0;
-	pImg->m_Texture = Graphics()->LoadTextureRaw(ImgInfo, TextureLoadFlag, pFileName);
-	ImgInfo.m_pData = nullptr;
+	pImg->m_Texture = Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pFileName);
+
 	SortImages();
 	for(size_t i = 0; i < m_Map.m_vpImages.size(); ++i)
 	{
@@ -4424,7 +4459,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 		return false;
 	}
 
-	CEditorImage ImgInfo(pEditor);
+	CImageInfo ImgInfo;
 	if(!pEditor->Graphics()->LoadPng(ImgInfo, pFileName, StorageType))
 	{
 		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFileName);
@@ -4432,19 +4467,30 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(pEditor);
-	*pImg = ImgInfo;
+	pImg->m_Width = ImgInfo.m_Width;
+	pImg->m_Height = ImgInfo.m_Height;
+	pImg->m_Format = ImgInfo.m_Format;
+	pImg->m_pData = ImgInfo.m_pData;
 	pImg->m_External = IsVanillaImage(aBuf);
 
-	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
+	if(pImg->m_Format != CImageInfo::FORMAT_RGBA)
 	{
-		DilateImage(ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height);
+		uint8_t *pRgbaData = static_cast<uint8_t *>(malloc((size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
+		ConvertToRGBA(pRgbaData, *pImg);
+		free(pImg->m_pData);
+		pImg->m_pData = pRgbaData;
+		pImg->m_Format = CImageInfo::FORMAT_RGBA;
+	}
+
+	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
+	{
+		DilateImage(pImg->m_pData, pImg->m_Width, pImg->m_Height);
 	}
 
 	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
+	if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 		TextureLoadFlag = 0;
-	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo, TextureLoadFlag, pFileName);
-	ImgInfo.m_pData = nullptr;
+	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pFileName);
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pEditor->m_Map.m_vpImages.push_back(pImg);
@@ -4777,8 +4823,8 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 	{
 		AddImageButton.HSplitTop(5.0f, nullptr, &AddImageButton);
 		AddImageButton.HSplitTop(RowHeight, &AddImageButton, nullptr);
-		if(DoButton_Editor(&s_AddImageButton, "Add", 0, &AddImageButton, 0, "Load a new image to use in the map"))
-			InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Add Image", "Add", "mapres", false, AddImage, this);
+		if(DoButton_Editor(&s_AddImageButton, m_QuickActionAddImage.Label(), 0, &AddImageButton, 0, m_QuickActionAddImage.Description()))
+			m_QuickActionAddImage.Call();
 	}
 	s_ScrollRegion.End();
 }
@@ -5716,30 +5762,25 @@ void CEditor::RenderModebar(CUIRect View)
 
 void CEditor::RenderStatusbar(CUIRect View, CUIRect *pTooltipRect)
 {
-	const bool ButtonsDisabled = m_ShowPicker;
-
 	CUIRect Button;
 	View.VSplitRight(100.0f, &View, &Button);
-	static int s_EnvelopeButton = 0;
-	if(DoButton_Editor(&s_EnvelopeButton, "Envelopes", ButtonsDisabled ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES, &Button, 0, "Toggles the envelope editor.") == 1)
+	if(DoButton_Editor(&m_QuickActionEnvelopes, m_QuickActionEnvelopes.Label(), m_QuickActionEnvelopes.Color(), &Button, 0, m_QuickActionEnvelopes.Description()) == 1)
 	{
-		m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES ? EXTRAEDITOR_NONE : EXTRAEDITOR_ENVELOPES;
+		m_QuickActionEnvelopes.Call();
 	}
 
 	View.VSplitRight(10.0f, &View, nullptr);
 	View.VSplitRight(100.0f, &View, &Button);
-	static int s_SettingsButton = 0;
-	if(DoButton_Editor(&s_SettingsButton, "Server settings", ButtonsDisabled ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS, &Button, 0, "Toggles the server settings editor.") == 1)
+	if(DoButton_Editor(&m_QuickActionServerSettings, m_QuickActionServerSettings.Label(), m_QuickActionServerSettings.Color(), &Button, 0, m_QuickActionServerSettings.Description()) == 1)
 	{
-		m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS ? EXTRAEDITOR_NONE : EXTRAEDITOR_SERVER_SETTINGS;
+		m_QuickActionServerSettings.Call();
 	}
 
 	View.VSplitRight(10.0f, &View, nullptr);
 	View.VSplitRight(100.0f, &View, &Button);
-	static int s_HistoryButton = 0;
-	if(DoButton_Editor(&s_HistoryButton, "History", ButtonsDisabled ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_HISTORY, &Button, 0, "Toggles the editor history view.") == 1)
+	if(DoButton_Editor(&m_QuickActionHistory, m_QuickActionHistory.Label(), m_QuickActionHistory.Color(), &Button, 0, m_QuickActionHistory.Description()) == 1)
 	{
-		m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_HISTORY ? EXTRAEDITOR_NONE : EXTRAEDITOR_HISTORY;
+		m_QuickActionHistory.Call();
 	}
 
 	View.VSplitRight(10.0f, pTooltipRect, nullptr);
@@ -7673,7 +7714,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Ex(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuEntitiesId;
-		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 92.0f, this, PopupMenuSettings, PopupProperties);
+		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 106.0f, this, PopupMenuSettings, PopupProperties);
 	}
 
 	CUIRect ChangedIndicator, Info, Help, Close;
@@ -7890,7 +7931,7 @@ void CEditor::Render()
 			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", true, CallbackSaveCopyMap, this);
 		// ctrl+shift+s to save as
 		else if(Input()->KeyPress(KEY_S) && ModPressed && ShiftPressed)
-			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", true, CallbackSaveMap, this);
+			m_QuickActionSaveAs.Call();
 		// ctrl+s to save
 		else if(Input()->KeyPress(KEY_S) && ModPressed)
 		{
@@ -8333,6 +8374,7 @@ void CEditor::Init()
 	m_vComponents.emplace_back(m_MapView);
 	m_vComponents.emplace_back(m_MapSettingsBackend);
 	m_vComponents.emplace_back(m_LayerSelector);
+	m_vComponents.emplace_back(m_Prompt);
 	for(CEditorComponent &Component : m_vComponents)
 		Component.OnInit(this);
 
@@ -8573,21 +8615,29 @@ void CEditor::HandleWriterFinishJobs()
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor/save", aBuf);
 
 	// send rcon.. if we can
-	if(Client()->RconAuthed())
+	if(Client()->RconAuthed() && g_Config.m_EdAutoMapReload)
 	{
 		CServerInfo CurrentServerInfo;
 		Client()->GetServerInfo(&CurrentServerInfo);
-		NETADDR ServerAddr = Client()->ServerAddress();
-		const unsigned char aIpv4Localhost[16] = {127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		const unsigned char aIpv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 
-		// and if we're on localhost
-		if(!mem_comp(ServerAddr.ip, aIpv4Localhost, sizeof(aIpv4Localhost)) || !mem_comp(ServerAddr.ip, aIpv6Localhost, sizeof(aIpv6Localhost)))
+		NETADDR pAddr = Client()->ServerAddress();
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Client()->ServerAddress(), aAddrStr, sizeof(aAddrStr), true);
+
+		// and if we're on a local address
+		bool IsLocalAddress = false;
+		if(pAddr.ip[0] == 127 || pAddr.ip[0] == 10 || (pAddr.ip[0] == 192 && pAddr.ip[1] == 168) || (pAddr.ip[0] == 172 && (pAddr.ip[1] >= 16 && pAddr.ip[1] <= 31)))
+			IsLocalAddress = true;
+
+		if(str_startswith(aAddrStr, "[fe80:") || str_startswith(aAddrStr, "[::1"))
+			IsLocalAddress = true;
+
+		if(IsLocalAddress)
 		{
 			char aMapName[128];
 			IStorage::StripPathAndExtension(pJob->GetRealFileName(), aMapName, sizeof(aMapName));
 			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
-				Client()->Rcon("reload");
+				Client()->Rcon("hot_reload");
 		}
 	}
 }
@@ -8880,6 +8930,22 @@ bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 		}
 	}
 	NewMap.m_vpGroups.clear();
+
+	// transfer server settings
+	for(const auto &pSetting : NewMap.m_vSettings)
+	{
+		// Check if setting already exists
+		bool AlreadyExists = false;
+		for(const auto &pExistingSetting : m_Map.m_vSettings)
+		{
+			if(!str_comp(pExistingSetting.m_aCommand, pSetting.m_aCommand))
+				AlreadyExists = true;
+		}
+		if(!AlreadyExists)
+			m_Map.m_vSettings.push_back(pSetting);
+	}
+
+	NewMap.m_vSettings.clear();
 
 	auto IndexMap = SortImages();
 

@@ -18,11 +18,10 @@ java {
 
 android {
 	compileSdkVersion 34
-	ndkVersion "TW_NDK_VERSION"
 	defaultConfig {
 		applicationId "org.ddnet.client"
 		namespace("org.ddnet.client")
-		minSdkVersion 19
+		minSdkVersion 24
 		targetSdkVersion 34
 		versionCode TW_VERSION_CODE
 		versionName "TW_VERSION_NAME"
@@ -43,6 +42,7 @@ android {
 			proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 		}
 		debug {
+			debuggable true
 			minifyEnabled false
 			shrinkResources false
 		}

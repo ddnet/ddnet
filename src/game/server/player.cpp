@@ -116,6 +116,7 @@ void CPlayer::Reset()
 
 	m_Paused = PAUSE_NONE;
 	m_DND = false;
+	m_Whispers = true;
 
 	m_LastPause = 0;
 	m_Score.reset();
@@ -924,7 +925,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			}
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
-			if(Birthday != 0 && !m_BirthdayAnnounced)
+			if(Birthday != 0 && !m_BirthdayAnnounced && GetCharacter())
 			{
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf),
@@ -936,6 +937,8 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 					Server()->ClientName(m_ClientId), Birthday, Birthday > 1 ? "s" : "");
 				GameServer()->SendBroadcast(aBuf, m_ClientId);
 				m_BirthdayAnnounced = true;
+
+				GameServer()->CreateBirthdayEffect(GetCharacter()->m_Pos, GetCharacter()->TeamMask());
 			}
 			GameServer()->SendRecord(m_ClientId);
 			break;

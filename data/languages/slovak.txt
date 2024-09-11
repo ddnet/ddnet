@@ -3,7 +3,7 @@
 #	Limit and Petr
 #modified by:
 #	LimiT		2011-07-02 20:24:44
-#	dobrykafe	2024-06-09 00:00:00
+#	dobrykafe	2024-08-30 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -277,9 +277,6 @@ Player
 
 Player country:
 == Filter krajín:
-
-Player options
-== Nastavenia hráča
 
 Players
 == Hráči
@@ -1420,9 +1417,6 @@ Show votes window after voting
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== Zobraziť ID klientov vo výsledkovej tabuľke
-
 Show DDRace HUD
 == Zobraziť DDRace HUD
 
@@ -1648,9 +1642,6 @@ Regular background color
 Entities background color
 == Farba pozadia entít
 
-Reload
-== Znovu načítať
-
 Use current map as background
 == Použiť aktuálnu mapu ako pozadie
 
@@ -1850,26 +1841,77 @@ Tee
 Show only chat messages from team members
 == Zobraziť iba správy od členov tímu
 
+Could not resolve connect address '%s'. See local console for details.
+== Nie je možné získať adresu na pripojenie '%s'. Podrobnosti nájdete v miestnej konzole.
+
+Connect address error
+== Chyba v adrese na pripojenie
+
+Could not connect dummy
+== Nepodarilo sa pripojiť dummyho
+
 [Spectating]
 Following %s
-== 
+== Sledujete %s
 
 Example of usage
-== 
+== Príklad použitia
+
+Dummy is not allowed on this server
+== Dummy nie je na tomto serveri povolený
+
+Please wait…
+== Čakajte prosím…
+
+Show client IDs (scoreboard, chat, spectator)
+== Zobraziť ID klientov (výsledková tabuľka, chat, divák)
+
+Normal:
+== Normálny:
+
+Team:
+== Tím:
+
+Dummy settings
+== Nastavenie dummyho
+
+Toggle to edit your dummy settings
+== Prepnutím upravíte nastavenie dummyho
+
+Randomize
+== Randomizovať
+
+Are you sure that you want to delete '%s'?
+== Ste si istí, že chcete zmazať '%s'?
+
+Delete skin
+== Odstrániť skin
+
+Basic
+== Základné
+
+Custom
+== Vlastné
+
+Unable to delete skin
+== Nedá sa odstrániť skin
+
+Customize
+== Prispôsobiť
 
 Round %d/%d
-== 
+== Kolo %d/%d
 
 [Spectators]
 %d others…
-== 
+== %d ďalších…
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== Tím %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/wiki/Mapping

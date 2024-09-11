@@ -7,22 +7,6 @@ class LanguageDecodeError(Exception):
 		error = f"File \"{filename}\", line {line+1}: {message}"
 		super().__init__(error)
 
-
-# Taken from https://stackoverflow.com/questions/30011379/how-can-i-parse-a-c-format-string-in-python
-cfmt = r'''\
-(                                  # start of capture group 1
-%                                  # literal "%"
-(?:                                # first option
-(?:[-+0 #]{0,5})                   # optional flags
-(?:\d+|\*)?                        # width
-(?:\.(?:\d+|\*))?                  # precision
-(?:h|l|ll|w|I|I32|I64)?            # size
-[cCdiouxXeEfgGaAnpsSZ]             # type
-) |                                # OR
-%%)                                # literal "%%"
-'''
-
-
 def decode(fileobj, elements_per_key):
 	data = {}
 	current_context = ""
@@ -45,10 +29,7 @@ def decode(fileobj, elements_per_key):
 			if len(data[current_key]) >= 1+elements_per_key:
 				raise LanguageDecodeError("Wrong number of elements per key", fileobj.name, index)
 			if current_key:
-				original = current_key[0] # pylint: disable=unsubscriptable-object
 				translation = line[3:]
-				if translation and [m.group(1) for m in re.finditer(cfmt, original, flags=re.X)] != [m.group(1) for m in re.finditer(cfmt, translation, flags=re.X)]:
-					raise LanguageDecodeError("Non-matching formatting string", fileobj.name, index)
 				data[current_key].extend([translation])
 			else:
 				raise LanguageDecodeError("Element before key given", fileobj.name, index)
@@ -56,7 +37,7 @@ def decode(fileobj, elements_per_key):
 			if current_key:
 				if len(data[current_key]) != 1+elements_per_key:
 					raise LanguageDecodeError("Wrong number of elements per key", fileobj.name, index)
-				data[current_key].append(index)
+				data[current_key].append(index - 1 if current_context else index)
 			if line in data:
 				raise LanguageDecodeError("Key defined multiple times: " + line, fileobj.name, index)
 			data[(line, current_context)] = [index - 1 if current_context else index]

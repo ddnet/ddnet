@@ -163,18 +163,18 @@
 #define CONF_ARCH_ARM 1
 #define CONF_ARCH_STRING "arm"
 #define CONF_ARCH_ENDIAN_BIG 1
-#endif
-
-#if defined(__ARMEL__)
+#elif defined(__ARMEL__)
 #define CONF_ARCH_ARM 1
 #define CONF_ARCH_STRING "arm"
 #define CONF_ARCH_ENDIAN_LITTLE 1
-#endif
-
-#if defined(__aarch64__) || defined(__arm64__)
+#elif defined(__aarch64__) || defined(__arm64__) || defined(__ARM_ARCH_ISA_A64)
 #define CONF_ARCH_ARM64 1
 #define CONF_ARCH_STRING "arm64"
+#if defined(__ARM_BIG_ENDIAN)
+#define CONF_ARCH_ENDIAN_BIG 1
+#else
 #define CONF_ARCH_ENDIAN_LITTLE 1
+#endif
 #endif
 
 #ifndef CONF_FAMILY_STRING

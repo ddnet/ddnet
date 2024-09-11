@@ -580,7 +580,7 @@ TEST_P(RandomMap, UnfinishedDoesntExist)
 	ASSERT_FALSE(CScoreWorker::RandomUnfinishedMap(m_pConn, &m_RandomMapRequest, m_aError, sizeof(m_aError))) << m_aError;
 	EXPECT_EQ(m_pRandomMapResult->m_ClientId, 0);
 	EXPECT_STREQ(m_pRandomMapResult->m_aMap, "");
-	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "You have no more unfinished maps on this server!");
+	EXPECT_STREQ(m_pRandomMapResult->m_aMessage, "nameless tee has no more unfinished maps on this server!");
 }
 
 auto g_pSqliteConn = CreateSqliteConnection(":memory:", true);

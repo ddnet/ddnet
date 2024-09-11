@@ -30,7 +30,7 @@ public:
 		ACCESS_LEVEL_HELPER,
 		ACCESS_LEVEL_USER,
 
-		TEMPCMD_NAME_LENGTH = 32,
+		TEMPCMD_NAME_LENGTH = 64,
 		TEMPCMD_HELP_LENGTH = 192,
 		TEMPCMD_PARAMS_LENGTH = 96,
 
@@ -53,7 +53,7 @@ public:
 		virtual int GetInteger(unsigned Index) const = 0;
 		virtual float GetFloat(unsigned Index) const = 0;
 		virtual const char *GetString(unsigned Index) const = 0;
-		virtual ColorHSLA GetColor(unsigned Index, bool Light) const = 0;
+		virtual std::optional<ColorHSLA> GetColor(unsigned Index, bool Light) const = 0;
 
 		virtual void RemoveArgument(unsigned Index) = 0;
 

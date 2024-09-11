@@ -4,6 +4,7 @@
 #modified by:
 #	404_not_found		2011-07-30 19:50:58
 #	EGYT5453			(15.05.2024-04.06.2024)
+#	veydzh3r			(31.08.2024-01.09.2024)
 ##### /authors #####
 
 ##### translated strings #####
@@ -32,10 +33,10 @@
 == ще %d…
 
 %d player
-== Гравців: %d
+== Гравці: %d
 
 %d players
-== Гравців: %d
+== Гравці: %d
 
 [Demo player duration]
 %d sec.
@@ -76,10 +77,10 @@
 == Нових згадок: 9+
 
 A demo with this name already exists
-== Демо з цією назвою вже існує
+== Демо з цією назвою уже існує
 
 A folder with this name already exists
-== Тека з цією назвою вже існує
+== Тека з цією назвою уже існує
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
@@ -120,7 +121,7 @@ AFR
 == АФР
 
 Aim bind
-== Прив'язка
+== Прив’язка
 
 All
 == Усі
@@ -165,6 +166,9 @@ AntiPing: predict weapons
 Appearance
 == Вигляд
 
+Are you sure that you want to delete '%s'?
+== Ви дійсно хочете видалити '%s'?
+
 Are you sure that you want to delete the demo '%s'?
 == Ви дійсно хочете видалити демо '%s'?
 
@@ -172,13 +176,13 @@ Are you sure that you want to delete the folder '%s'?
 == Ви дійсно хочете видалити теку '%s'?
 
 Are you sure that you want to disconnect?
-== Ви дійсно хочете від'єднатися?
+== Ви дійсно хочете від’єднатися?
 
 Are you sure that you want to disconnect and switch to a different server?
-== Ви дійсно хочете від'єднатися й приєднатися до іншого сервера?
+== Ви дійсно хочете від’єднатися й приєднатися до іншого сервера?
 
 Are you sure that you want to disconnect your dummy?
-== Ви дійсно хочете від'єднати свого даммі?
+== Ви дійсно хочете від’єднати свого даммі?
 
 Are you sure that you want to quit?
 == Ви дійсно хочете вийти?
@@ -190,7 +194,7 @@ Are you sure that you want to remove the player '%s' from your friends list?
 == Ви дійсно хочете прибрати гравця '%s' зі списку друзів?
 
 Are you sure that you want to reset the controls to their defaults?
-== Ви дійсно хочете скинути налаштування керування до значень за замовчуванням?
+== Ви дійсно хочете скинути налаштування керувань до початкових значень?
 
 Are you sure that you want to restart?
 == Ви дійсно хочете перезапустити?
@@ -208,7 +212,7 @@ AUS
 == АВС
 
 Authed name color in scoreboard
-== Колір авторизованих у таблі
+== Колір авторизованих у таблиці
 
 Auto
 == Авто
@@ -217,7 +221,7 @@ auto
 == автоматично
 
 Automatically create statboard csv
-== Автоматично зберігати статистику у CSV-файл
+== Автоматично зберігати статистику у файл CSV
 
 Automatically record demos
 == Автоматично записувати демо
@@ -232,10 +236,13 @@ Axis
 == Осі
 
 Background
-== Фон
+== Тло
 
 Background music volume
 == Гучність фонової музики
+
+Basic
+== Базовий
 
 Best
 == НКом
@@ -256,7 +263,7 @@ Call vote
 == Голосувати
 
 Can't find a Tutorial server
-== Не вдалося знайти сервер-посібник
+== Не вдається знайти навчальний сервер
 
 Cancel
 == Скасувати
@@ -289,13 +296,13 @@ Check now
 == Перевірити
 
 Checking for existing player with your name
-== Перевіряємо Ваш нікнейм на доступність
+== Перевірка на наявність гравця з вашим ім’ям
 
 CHN
 == КИТ
 
 Choose default eyes when joining a server
-== Очі, які відображатимуться за замовчуванням
+== Типові очі під час приєднання до сервера
 
 Clan
 == Клан
@@ -322,7 +329,7 @@ Close the demo player
 == Закрити програвач демо
 
 Colors of the hook collision line, in case of a possible collision with:
-== Кольори лінії зіткнення гака, якщо він може зіштовхнутися з:
+== Кольори лінії зіткнення гака, в разі можливого зіткнення з:
 
 Communities
 == Спільноти
@@ -330,26 +337,29 @@ Communities
 Config directory
 == Тека налаштувань
 
+Connect address error
+== Помилка адреси з’єднання
+
 Connect Dummy
-== Приєднати даммі
+== Під’єднати даммі
 
 Connected
-== Приєднано
+== Під’єднано
 
 Connecting dummy
-== Приєднуємо даммі
+== Під’єднання даммі
 
 Connecting to
-== Приєднуємося до
+== Під’єднання до
 
 Connection Problems…
-== Проблеми зі з'єднанням…
+== Проблеми зі з’єднанням…
 
 Console
 == Консоль
 
 Continue anyway?
-== Все одно продовжити?
+== Усе одно продовжити?
 
 Controller
 == Контролер
@@ -366,19 +376,25 @@ Converse
 Copy info
 == Скопіювати
 
+Could not connect dummy
+== Не вдалося під’єднати даммі
+
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== Не вдалося ініціалізувати заданий графічний рушій, повертаємося до рушія за замовчуванням.
+== Не вдалося ініціалізувати заданий графічний рушій, повернення до тпового рушія.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== Не вдалося ініціалізувати заданий графічний рушій, можливо тому що ви не встановили драйвери на вбудовану відеокарту.
+== Не вдалося ініціалізувати заданий графічний рушій, імовірно, ви не встановили драйвери на вбудовану відеокарту.
+
+Could not resolve connect address '%s'. See local console for details.
+== Не вдалося визначити адресу з’єднання '%s'. Див. локальну консоль для подробиць.
 
 Could not save downloaded map. Try manually deleting this file: %s
 == Не вдалося зберегти завантажену мапу. Спробуйте самостійно видалити цей файл: %s
 
 Count players only
-== Рахувати тільки гравців
+== Рахувати лише гравців
 
 Countries
 == Країни
@@ -395,8 +411,14 @@ Current
 custom
 == власний
 
+Custom
+== Власний
+
 Custom colors
 == Власні кольори
+
+Customize
+== Налаштувати
 
 Cut interval
 == Інтервал
@@ -417,7 +439,7 @@ DDNet %s is out!
 == Вийшов DDNet %s!
 
 DDNet Client needs to be restarted to complete update!
-== Потрібно перезапустити клієнт DDNet, щоб завершити оновлення!
+== Потрібно перезапустити клієнт DDNet для завершення оновлення!
 
 DDNet Client updated!
 == Клієнт DDNet оновлено!
@@ -426,22 +448,22 @@ DDRace HUD
 == HUD DDRace
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork — кооперативна мережева гра, ціль якої — дістатися разом зі своєю групою тії до фінішної прямої. Новачкам варто почати із серверів "Для новачків" (Novice), на яких є найпростіші мапи. Зважайте на затримку, коли вибираєте сервер.
+== DDraceNetwork — кооперативна мережева гра, ціль якої — дістатися разом зі своєю групою тії до фінішної прямої. Новачкам варто почати із серверів «Для новачків» (Novice), на яких є найпростіші мапи. Зважайте на затримку, коли вибираєте сервер.
 
 Deactivate
 == Деактивувати
 
 Deactivate all
-== Деактивувати усіх
+== Деактивувати всіх
 
 Deaths
-== С
+== Смерті
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Увімкнено режим налагодження. Натисніть Ctrl+Shift+D, щоб його вимкнути.
 
 default
-== за замовчуванням
+== типово
 
 Default length
 == Звичайна тривалість
@@ -458,6 +480,9 @@ Delete demo
 Delete folder
 == Видалити теку
 
+Delete skin
+== Видалити скін
+
 Demo
 == Демо
 
@@ -471,16 +496,16 @@ Demos directory
 == Тека демо
 
 Desktop fullscreen
-== Стільничний повноекранний
+== Робочий стіл на весь екран
 
 Disconnect
-== Від'єднатися
+== Від’єднатися
 
 Disconnect Dummy
-== Від'єднати даммі
+== Від’єднати даммі
 
 Disconnected
-== Від'єднано
+== Від’єднано
 
 Discord
 == Discord
@@ -498,10 +523,10 @@ Download skins
 == Завантажувати скіни
 
 Downloading %s:
-== Завантажуємо %s:
+== Завантаження %s:
 
 Downloading map
-== Завантажуємо мапу
+== Завантаження мапи
 
 Draw!
 == Нічия!
@@ -512,8 +537,14 @@ Dummy
 Dummy copy
 == Повторювати рухи
 
+Dummy is not allowed on this server
+== Використання даммі заборонене на цьому сервері
+
+Dummy settings
+== Налаштування даммі
+
 Dynamic Camera
-== Рухома камера
+== Динамічна камера
 
 Editor
 == Редактор
@@ -546,7 +577,7 @@ Enable regular chat sound
 == Звук звичайного повідомлення
 
 Enable replays
-== Повтори
+== Увімкнути повтори
 
 Enable server message sound
 == Звук повідомлення сервера
@@ -558,13 +589,13 @@ Enter Password
 == Введіть пароль
 
 Enter Username
-== Введіть логін
+== Введіть ім’я користувача
 
 Entities
 == Сутності
 
 Entities background color
-== Колір фону сутностей
+== Колір тла сутностей
 
 Error
 == Помилка
@@ -582,13 +613,13 @@ EUR
 == ЄВР
 
 Example of usage
-== Наприклад
+== Приклад використання
 
 Exclude
 == Виключити
 
 Existing Player
-== Гравець вже існує
+== Гравець уже існує
 
 Export cut as a separate demo
 == Експортувати фрагмент як окреме демо
@@ -651,7 +682,7 @@ Following
 
 [Spectating]
 Following %s
-== Слідуємо за %s
+== Cпостерігання за %s
 
 Force vote
 == Форсувати
@@ -681,7 +712,7 @@ FSAA samples
 == Вибірка FSAA
 
 Fullscreen
-== Повноекранний
+== На весь екран
 
 Game
 == Гра
@@ -708,13 +739,13 @@ Gameplay
 == Ігролад
 
 General
-== Загальне
+== Загальні
 
 Getting game info
-== Отримуємо інформацію про гру
+== Отримання інформації про гру
 
 Getting server list from master server
-== Отримуємо список серверів з головного сервера
+== Отримання списку серверів з головного сервера
 
 Ghost
 == Привид
@@ -726,7 +757,7 @@ Go back one marker
 == Перемотати до попередньої мітки
 
 Go back one tick
-== Перемотати вперед на один тік
+== Перемотати вперед на один такт
 
 Go back the specified duration
 == Перемотати назад
@@ -735,7 +766,7 @@ Go forward one marker
 == Перемотати до наступної мітки
 
 Go forward one tick
-== Перемотати назад на один тік
+== Перемотати вперед на один такт
 
 Go forward the specified duration
 == Перемотати вперед
@@ -801,31 +832,31 @@ HUD
 == HUD
 
 Hue
-== Тон
+== Відтінок
 
 Indicate map finish
 == Позначати пройдені мапи
 
 Info Messages
-== Інфо-повідомлення
+== Інфо. повідомлення
 
 Ingame controller mode
 == Режим контролера у грі
 
 Ingame controller sens.
-== Чутл. у грі
+== Чутливість у грі
 
 Ingame mouse sens.
-== Чутл. у грі
+== Чутливість у грі
 
 Initializing assets
-== Ініціалізуємо текстури
+== Ініціалізація текстур
 
 Initializing components
-== Ініціалізуємо компоненти
+== Ініціалізація компонентів
 
 Initializing map logic
-== Ініціалізуємо логіку мапи
+== Ініціалізація логіки мапи
 
 Internet
 == Інтернет
@@ -834,7 +865,7 @@ Invalid Demo
 == Недійсне демо
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Перед тим як приєднатися до сервера, рекомендуємо змінити налаштування до ваших уподобань.
+== Перед тим, як приєднатися до сервера, рекомендуємо змінити налаштування до ваших уподобань.
 
 Join blue
 == До синіх
@@ -846,7 +877,7 @@ Join red
 == До червоних
 
 Join Tutorial Server
-== Приєднатися до сервера-посібника
+== Приєднатися до навчального сервера
 
 Jump
 == Стрибок
@@ -885,52 +916,52 @@ Loading…
 == Завантаження…
 
 Loading assets
-== Завантажуємо текстури
+== Завантаження текстур
 
 Loading commands…
-== Завантажуємо команди…
+== Завантаження команд…
 
 Loading DDNet Client
-== Завантажуємо клієнт DDNet
+== Завантаження клієнта DDNet
 
 Loading demo file from storage
-== Завантажуємо демо-файл зі сховища
+== Завантаження демо-файлу зі сховища
 
 Loading demo files
-== Завантажуємо демо-файли
+== Завантаження демо-файлів
 
 Loading ghost files
-== Завантажуємо файли привида
+== Завантаження файлів привида
 
 Loading map file from storage
-== Завантажуємо файл мапи зі сховища
+== Завантаження файлу мапи зі сховища
 
 Loading menu images
-== Завантажуємо зображення меню
+== Завантаження зображень меню
 
 Loading menu themes
-== Завантажуємо теми меню
+== Завантаження тем меню
 
 Loading race demo files
-== Завантажуємо демо-файли забігів
+== Завантаження демо-файлів забігів
 
 Loading skin files
-== Завантажуємо файли скінів
+== Завантаження файлів скінів
 
 Loading sound files
-== Завантажуємо звукові файли
+== Завантаження звукових файлів
 
 Lock team
 == Замкнути команду
 
 Locked
-== Заблоковано
+== Замкнено
 
 Main menu
 == Головне меню
 
 Manual
-== Вручну
+== Уручну
 
 Map
 == Мапа
@@ -940,7 +971,7 @@ map not included
 == мапу не включено
 
 Map sound volume
-== Гучність мапи
+== Гучність звуків мапи
 
 Mark the beginning of a cut (right click to reset)
 == Позначити початок фрагмента (права кнопка миші, щоб скинути)
@@ -955,13 +986,13 @@ Match %d of %d
 == Збіг %d з %d
 
 Max CSVs
-== Найбільше CSV-файлів
+== Макс. кількість файлів CSV
 
 Max demos
-== Найбільше демо-файлів
+== Макс. кількість демо-файлів
 
 Max Screenshots
-== Найбільше знімків екрана
+== Макс. кількість знімків екрана
 
 may cause delay
 == може спричинити затримку
@@ -985,7 +1016,7 @@ Move left
 == Вліво
 
 Move player to spectators
-== Зробити гравця спостерігачем
+== Зробити гравця глядачем
 
 Move right
 == Вправо
@@ -1000,7 +1031,7 @@ Multi-View
 == Мульти-камера
 
 Mute when not active
-== Приглушувати, якщо вікно неактивне
+== Приглушувати звук поза грою
 
 NA
 == ПНА
@@ -1021,7 +1052,7 @@ Netversion
 == Версія
 
 New name:
-== Нова назва
+== Нова назва:
 
 New random timeout code
 == Новий випадковий код тайм-ауту
@@ -1033,16 +1064,16 @@ Next weapon
 == Наст. зброя
 
 Nickname
-== Нікнейм
+== Псевдонім
 
 No
 == Ні
 
 No answer from server yet.
-== Сервер ще не відповів.
+== Поки що немає відповіді від сервера.
 
 No controller found. Plug in a controller.
-== Жодного контролера не знайдено. Підключіть контролер.
+== Жодного контролера не знайдено. Під’єднайте контролер.
 
 No demo selected
 == Жодного демо не вибрано
@@ -1071,6 +1102,9 @@ No updates available
 None
 == Немає
 
+Normal:
+== Звичайний:
+
 Normal Color
 == Колір звичайних повідомлень
 
@@ -1078,23 +1112,23 @@ Normal message
 == Звичайні повідомлення
 
 NOT CONNECTED
-== НЕ ПРИЄДНАНО
+== НЕ ПІД’ЄДНАНО
 
 Nothing hookable
 == нічим, за що можна зачепитися
 
 [friends (server browser)]
 Offline (%d)
-== Офлайн (%d)
+== Не в мережі (%d)
 
 Ok
 == Гаразд
 
 Online clanmates (%d)
-== Онлайн клановці (%d)
+== Співклановці в мережі (%d)
 
 Online players (%d)
-== Онлайн гравці (%d)
+== Гравці в мережі (%d)
 
 Only save improvements
 == Зберігати лише покращення
@@ -1125,7 +1159,7 @@ Open the settings file
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Недостатньо відеопам'яті. Спробуйте видалити власні текстури (скіни, сутності і т.п.), особливо ті, що мають високу роздільну здатність.
+== Недостатньо відеопам’яті. Спробуйте видалити власні текстури (скіни, сутності і т.д.), особливо ті, що мають високу роздільність.
 
 Overlay entities
 == Накладати сутності
@@ -1134,7 +1168,7 @@ Parent Folder
 == Батьківська тека
 
 Particles
-== Часточки
+== Частинки
 
 Pause
 == Пауза
@@ -1176,9 +1210,6 @@ Player country:
 Player info change cooldown
 == Затримка зміни інформації про гравця
 
-Player options
-== Налаштування гравців
-
 Players
 == Гравці
 
@@ -1191,11 +1222,14 @@ Please enter your nickname below.
 Please use a different filename
 == Будь ласка, назвіть файл по-іншому
 
+Please wait…
+== Будь ласка, зачекайте…
+
 Position:
 == Позиція:
 
 Preparing demo playback
-== Підготовлюємо відтворення демо
+== Підготовлення відтворення демо
 
 Press a key…
 == Натисніть клавішу…
@@ -1210,13 +1244,16 @@ Quads are used for background decoration
 == Квади використовуються для декорацій
 
 Quit
-== Вихід
+== Вийти
 
 Quitting. Please wait…
 == Вихід. Будь ласка, зачекайте…
 
 Race
 == Забіг
+
+Randomize
+== Навмання
 
 Ratio
 == У/С
@@ -1225,7 +1262,7 @@ Reason:
 == Причина:
 
 Reconnect in %d sec
-== Переприєднання через %dс
+== Повторне під’єднання за %dс
 
 Record demo
 == Запис демо
@@ -1240,14 +1277,11 @@ Refresh Rate
 == Частота кадрів
 
 Regular background color
-== Колір звичайного фону
+== Колір звичайного тла
 
 [Ingame controller mode]
 Relative
 == Відносний
-
-Reload
-== Оновити
 
 Remote console
 == Віддалена консоль
@@ -1286,10 +1320,10 @@ Replay
 == Повтор
 
 Replay feature is disabled!
-== Повтори відключено!
+== Повтори вимкнено!
 
 Requesting to join the game
-== Запитуємо приєднання до гри
+== Запит на приєднання до гри
 
 Reset
 == Скинути
@@ -1301,7 +1335,7 @@ Reset filter
 == Скинути фільтр
 
 Reset to defaults
-== Скинути
+== Скинути до типових
 
 Restart
 == Перезапустити
@@ -1328,7 +1362,7 @@ SA
 == ПДА
 
 Same clan color in scoreboard
-== Колір співклановців у таблі
+== Колір співклановців у таблиці
 
 Sat.
 == Насич.
@@ -1340,7 +1374,7 @@ Save ghost
 == Зберігати привида
 
 Save power by lowering refresh rate (higher input latency)
-== Зберігати енергію зниженням частоти кадрів (вища затримка вводу)
+== Економити енергію шляхом зниження частоти кадрів (вища затримка введення)
 
 Save the best demo of each race
 == Зберігати найкраще демо кожного забігу
@@ -1355,7 +1389,7 @@ Score limit
 == Гра до
 
 Scoreboard
-== Табло
+== Таблиця
 
 Screen
 == Екран
@@ -1367,10 +1401,10 @@ Search
 == Пошук
 
 Searching
-== Шукаємо
+== Пошук
 
 Sending initial client info
-== Надсилаємо початкові дані клієнта
+== Надсилання початкових даних клієнта
 
 Server address:
 == Адреса сервера:
@@ -1391,7 +1425,7 @@ Server not full
 == Неповний сервер
 
 Set all to Rifle
-== Встановити так, як у гвинтівки
+== Установити так, як у гвинтівки
 
 Settings
 == Налаштування
@@ -1417,8 +1451,8 @@ Show chat
 Show clan above name plates
 == Показувати клан над ніками
 
-Show client IDs in scoreboard
-== Показувати ID клієнта в таблі
+Show client IDs (scoreboard, chat, spectator)
+== Показувати ID клієнта (таблиця, чат, глядачі)
 
 Show DDNet map finishes in server browser
 == Показувати пройдені мапи DDNet у браузері серверів
@@ -1430,7 +1464,7 @@ Show dummy actions
 == Показувати дії з даммі
 
 Show entities
-== Сутності
+== Показ сутностей
 
 Show finish messages
 == Показувати повідомлення про фініші
@@ -1439,7 +1473,7 @@ Show freeze bars
 == Показувати смугу заморозки
 
 Show friend mark (♥) in name plates
-== Показувати позначку друга (♥) біля ніків
+== Показувати позначку друга (♥) біля псевдонімів
 
 Show friends only
 == Показувати лише з друзями
@@ -1448,10 +1482,10 @@ Show ghost
 == Показувати привида
 
 Show health, shields and ammo
-== Показувати здоров'я, щити й набої
+== Показувати здоров’я, захист і набої
 
 Show hook strength icon indicator
-== Показувати графічний індикатор сили гака
+== Показувати іконку індикатора сили гака
 
 Show hook strength number indicator
 == Показувати числовий індикатор сили гака
@@ -1475,10 +1509,10 @@ Show local time always
 == Завжди показувати місцевий час
 
 Show name plates
-== Показувати ніки
+== Показувати псевдоніми
 
 Show names in chat in team colors
-== Фарбувати ніки в чаті в кольори команд
+== Показувати імена в чаті в кольорах команди
 
 Show only chat messages from friends
 == Показувати лише повідомлення від друзів
@@ -1517,7 +1551,7 @@ Show text entities
 == Текстові сутності
 
 Show tiles layers from BG map
-== Показувати тайли з мапи фону
+== Показувати плитки з мапи фону
 
 Show quads
 == Показувати квади
@@ -1547,13 +1581,13 @@ Slow down the demo
 == Сповільнити
 
 Smooth Dynamic Camera
-== Гладка рухома камера
+== Гладка динамічна камера
 
 Some map images could not be loaded. Check the local console for details.
-== Деякі зображення мапи не завантажилися. Деталі у локальній консолі.
+== Деякі зображення мапи не завантажилися. Див. локальну консоль для подробиць.
 
 Some map sounds could not be loaded. Check the local console for details.
-== Деякі звуки мапи не завантажилися. Деталі у локальній консолі.
+== Деякі звуки мапи не завантажилися. Див. локальну консоль для подробиць.
 
 Something hookable
 == чимось, за що можна зачепитися
@@ -1577,10 +1611,10 @@ Spectate previous
 == Попер. гравець
 
 Spectator mode
-== Режим спостерігача
+== Режим глядача
 
 Spectators
-== Спостерігачі
+== Глядачі
 
 Speed
 == Швидкість
@@ -1632,13 +1666,16 @@ Switch weapon on pickup
 == Змінювати зброю при підхопленні
 
 Switch weapon when out of ammo
-== Змінювати зброю коли закінчуються набої
+== Змінювати зброю при закінченні набоїв
 
 System message
 == Повідомлення системи
 
 Team
 == Команда
+
+Team:
+== Командний:
 
 Team %d
 == Команда %d
@@ -1695,7 +1732,10 @@ Toggle ghost
 == Привид
 
 Toggle keyboard shortcuts
-== Перемкнути скорочення
+== Перемкнути сполучення
+
+Toggle to edit your dummy settings
+== Перемкніть, щоб змінити налаштування даммі
 
 transmits your player name to info.ddnet.org
 == передає ваш нікнейм до info.ddnet.org
@@ -1707,7 +1747,7 @@ Try again
 == Спробувати ще раз
 
 Trying to determine UDP connectivity…
-== Намагаємося визначити UDP-з'єднання…
+== Спроба визначити UDP-з’єднання…
 
 Tutorial
 == Посібник
@@ -1728,10 +1768,13 @@ UI Color
 == Колір інтерфейсу
 
 UI controller sens.
-== Чутл. у інтерфейсі
+== Чутл. в інтерфейсі
 
 UI mouse sens.
-== Чутл. у інтерфейсі
+== Чутл. в інтерфейсі
+
+Unable to delete skin
+== Не вдалося видалити скін
 
 Unable to delete the demo '%s'
 == Не вдалося видалити демо '%s'
@@ -1756,25 +1799,25 @@ Unregister protocol and file extensions
 == Розреєструвати протокол і розширення файлів
 
 Update failed! Check log…
-== Оновлення не вдалося! Перевірте журнал…
+== Помилка оновлення! Перевірте журнал…
 
 Update now
 == Оновити
 
 Updating…
-== Оновлюємо…
+== Оновлення…
 
 Uploading map data to GPU
-== Вивантажуємо дані мапи до відеокарти
+== Вивантаження даних мапи до відеокарти
 
 Use current map as background
-== Використовувати поточну мапу як фон
+== Використовувати поточну мапу як тло
 
 Use high DPI
 == Високий DPI
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Натисніть "k", щоб умерти (почати спочатку), "q", щоб спостерігати за іншими гравцями. Інші скорочення дивіться у налаштуваннях.
+== Натисніть «k», щоб умерти (почати спочатку), «q», щоб спостерігати за іншими гравцями. Інші призначення клавіш дивіться у налаштуваннях.
 
 Use old chat style
 == Старий стиль чату
@@ -1798,7 +1841,7 @@ Video name:
 == Назва відео:
 
 Video was saved to '%s'
-== Відео було збережено до '%s'
+== Відео збережено до '%s'
 
 Videos directory
 == Тека відео
@@ -1843,13 +1886,13 @@ Why are you slowmo replaying to read this?
 == Чому ви переглядаєте це у повторі?
 
 Windowed
-== Віконний
+== У вікні
 
 Windowed borderless
-== Віконний без рамок
+== Вікно без рамок
 
 Windowed fullscreen
-== Віконний повноекранний
+== Вікно на весь екран
 
 Yes
 == Так
@@ -1858,10 +1901,10 @@ Your movements are not taken into account when calculating the line colors
 == Ваші рухи не враховуються при розранку кольору лінії
 
 You must restart the game for all settings to take effect.
-== Щоб налаштування набрали чинності, перезапустіть гру.
+== Щоб налаштування набули чинності, перезапустіть гру.
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Нікнейм '%s' вже зайнято (%d балів). Все ще хочете використовувати його?
+== Ваш псевдонім «%s» вже зайнято (%d балів). Усе ще хочете використовувати його?
 
 Your skin
 == Ваш скін

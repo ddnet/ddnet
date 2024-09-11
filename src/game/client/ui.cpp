@@ -57,7 +57,7 @@ void CUIElement::SUIElementRect::Reset()
 void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
 {
 	bool NeedsRecreate = false;
-	if(m_UIRectQuadContainer == -1 || m_Width != pRect->w || m_Height != pRect->h || mem_comp(&m_QuadColor, &Color, sizeof(Color)) != 0)
+	if(m_UIRectQuadContainer == -1 || m_Width != pRect->w || m_Height != pRect->h || m_QuadColor != Color)
 	{
 		m_pParent->Ui()->Graphics()->DeleteQuadContainer(m_UIRectQuadContainer);
 		NeedsRecreate = true;
@@ -1332,14 +1332,18 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 	Rail.VSplitLeft(pColorInner ? 8.0f : clamp(33.0f, Rail.h, Rail.w / 3.5f), &Handle, 0);
 	Handle.x += (Rail.w - Handle.w) * Current;
 
+	CUIRect HandleArea = Handle;
 	if(!pColorInner)
 	{
-		Handle.h += 4.0f;
-		Handle.y -= 2.0f;
+		HandleArea.h = pRect->h * 0.9f;
+		HandleArea.y = pRect->y + pRect->h * 0.05f;
+		HandleArea.w += 6.0f;
+		HandleArea.x -= 3.0f;
 	}
+
 	// logic
 	const bool InsideRail = MouseHovered(&Rail);
-	const bool InsideHandle = MouseHovered(&Handle);
+	const bool InsideHandle = MouseHovered(&HandleArea);
 	bool Grabbed = false; // whether to apply the offset
 
 	if(CheckActiveItem(pId))
@@ -1371,6 +1375,12 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 		Grabbed = true;
 	}
 
+	if(!pColorInner && (InsideHandle || Grabbed) && (CheckActiveItem(pId) || HotItem() == pId))
+	{
+		Handle.h += 3.0f;
+		Handle.y -= 1.5f;
+	}
+
 	if(InsideHandle && !MouseButton(0))
 	{
 		SetHotItem(pId);
@@ -1386,19 +1396,20 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 	}
 
 	// render
+	const ColorRGBA HandleColor = ms_ScrollBarColorFunction.GetColor(CheckActiveItem(pId), HotItem() == pId);
 	if(pColorInner)
 	{
 		CUIRect Slider;
 		Handle.VMargin(-2.0f, &Slider);
 		Slider.HMargin(-3.0f, &Slider);
-		Slider.Draw(ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f), IGraphics::CORNER_ALL, 5.0f);
+		Slider.Draw(ColorRGBA(0.15f, 0.15f, 0.15f, 1.0f).Multiply(HandleColor), IGraphics::CORNER_ALL, 5.0f);
 		Slider.Margin(2.0f, &Slider);
-		Slider.Draw(*pColorInner, IGraphics::CORNER_ALL, 3.0f);
+		Slider.Draw(pColorInner->Multiply(HandleColor), IGraphics::CORNER_ALL, 3.0f);
 	}
 	else
 	{
 		Rail.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, Rail.h / 2.0f);
-		Handle.Draw(ms_ScrollBarColorFunction.GetColor(CheckActiveItem(pId), HotItem() == pId), IGraphics::CORNER_ALL, Handle.h / 2.0f);
+		Handle.Draw(HandleColor, IGraphics::CORNER_ALL, Rail.h / 2.0f);
 	}
 
 	return ReturnValue;

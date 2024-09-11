@@ -299,9 +299,6 @@ Player
 Player country:
 == Spielerland:
 
-Player options
-== Spieleroptionen
-
 Players
 == Spieler
 
@@ -364,9 +361,6 @@ Shotgun
 
 Show chat
 == Chat anzeigen
-
-Show client IDs in scoreboard
-== Client-IDs in der Punktetafel anzeigen
 
 Show DDRace HUD
 == DDRace-HUD anzeigen
@@ -814,9 +808,6 @@ Skin prefix
 
 Show HUD
 == HUD zeigen
-
-Reload
-== Neu laden
 
 9+ new mentions
 == 9+ Erwähnungen
@@ -1886,6 +1877,57 @@ Round %d/%d
 
 Team %d (%d/%d)
 == Team %d (%d/%d)
+
+Could not resolve connect address '%s'. See local console for details.
+== Konnte Verbindungsadresse '%s' nicht auflösen, siehe lokale Konsole für Details.
+
+Connect address error
+== Fehler in Verbindungsadresse
+
+Could not connect dummy
+== Konnte Dummy nicht verbinden
+
+Dummy is not allowed on this server
+== Dummy ist auf diesem Server nicht erlaubt
+
+Please wait…
+== Bitte warten…
+
+Show client IDs (scoreboard, chat, spectator)
+== Client-IDs anzeigen (Punktetafel, Chat, Beobachter)
+
+Normal:
+== Normal:
+
+Team:
+== Team:
+
+Dummy settings
+== Dummy-Einstellungen
+
+Toggle to edit your dummy settings
+== Zu Dummy-Einstellungen wechseln
+
+Randomize
+== Randomisieren
+
+Are you sure that you want to delete '%s'?
+== Bist du sicher dass du '%s' löschen willst?
+
+Delete skin
+== Skin löschen
+
+Basic
+== Einfach
+
+Custom
+== Individuell
+
+Unable to delete skin
+== Kann Skin nicht löschen
+
+Customize
+== Anpassen
 
 https://wiki.ddnet.org/wiki/Mapping
 == 

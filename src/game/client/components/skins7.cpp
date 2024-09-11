@@ -18,12 +18,12 @@
 #include "menus.h"
 #include "skins7.h"
 
-const char *const CSkins7::ms_apSkinPartNames[protocol7::NUM_SKINPARTS] = {"body", "marking", "decoration", "hands", "feet", "eyes"}; /* Localize("body","skins");Localize("marking","skins");Localize("decoration","skins");Localize("hands","skins");Localize("feet","skins");Localize("eyes","skins"); */
+const char *const CSkins7::ms_apSkinPartNames[protocol7::NUM_SKINPARTS] = {"body", "marking", "decoration", "hands", "feet", "eyes"};
 const char *const CSkins7::ms_apColorComponents[NUM_COLOR_COMPONENTS] = {"hue", "sat", "lgt", "alp"};
 
 char *CSkins7::ms_apSkinVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
 int *CSkins7::ms_apUCCVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
-int *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
+int unsigned *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
 
 #define SKINS_DIR "skins7"
 
@@ -241,12 +241,12 @@ void CSkins7::OnInit()
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClPlayer7UseCustomColorHands;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClPlayer7UseCustomColorFeet;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClPlayer7UseCustomColorEyes;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = (int *)&Config()->m_ClPlayer7ColorBody;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = &Config()->m_ClPlayer7ColorBody;
 	ms_apColorVariables[Dummy][protocol7::SKINPART_MARKING] = &Config()->m_ClPlayer7ColorMarking;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = (int *)&Config()->m_ClPlayer7ColorDecoration;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = (int *)&Config()->m_ClPlayer7ColorHands;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = (int *)&Config()->m_ClPlayer7ColorFeet;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = (int *)&Config()->m_ClPlayer7ColorEyes;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = &Config()->m_ClPlayer7ColorDecoration;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClPlayer7ColorHands;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClPlayer7ColorFeet;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClPlayer7ColorEyes;
 
 	Dummy = 1;
 	ms_apSkinVariables[Dummy][protocol7::SKINPART_BODY] = Config()->m_ClDummy7SkinBody;
@@ -261,12 +261,12 @@ void CSkins7::OnInit()
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClDummy7UseCustomColorHands;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClDummy7UseCustomColorFeet;
 	ms_apUCCVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClDummy7UseCustomColorEyes;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = (int *)&Config()->m_ClDummy7ColorBody;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_MARKING] = (int *)&Config()->m_ClDummy7ColorMarking;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = (int *)&Config()->m_ClDummy7ColorDecoration;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = (int *)&Config()->m_ClDummy7ColorHands;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = (int *)&Config()->m_ClDummy7ColorFeet;
-	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = (int *)&Config()->m_ClDummy7ColorEyes;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_BODY] = &Config()->m_ClDummy7ColorBody;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_MARKING] = &Config()->m_ClDummy7ColorMarking;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_DECORATION] = &Config()->m_ClDummy7ColorDecoration;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_HANDS] = &Config()->m_ClDummy7ColorHands;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClDummy7ColorFeet;
+	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClDummy7ColorEyes;
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
@@ -395,10 +395,18 @@ void CSkins7::AddSkin(const char *pSkinName, int Dummy)
 		m_vSkins.emplace_back(Skin);
 }
 
-void CSkins7::RemoveSkin(const CSkin *pSkin)
+bool CSkins7::RemoveSkin(const CSkin *pSkin)
 {
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), SKINS_DIR "/%s.json", pSkin->m_aName);
+	if(!Storage()->RemoveFile(aBuf, IStorage::TYPE_SAVE))
+	{
+		return false;
+	}
+
 	auto Position = std::find(m_vSkins.begin(), m_vSkins.end(), *pSkin);
 	m_vSkins.erase(Position);
+	return true;
 }
 
 int CSkins7::Num()
@@ -468,11 +476,7 @@ void CSkins7::RandomizeSkin(int Dummy)
 
 ColorRGBA CSkins7::GetColor(int Value, bool UseAlpha) const
 {
-	float Dark = DARKEST_COLOR_LGT / 255.0f;
-	ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(Value).UnclampLighting(Dark));
-	float Alpha = UseAlpha ? ((Value >> 24) & 0xff) / 255.0f : 1.0f;
-	Color.a = Alpha;
-	return Color;
+	return color_cast<ColorRGBA>(ColorHSLA(Value, UseAlpha).UnclampLighting(DARKEST_COLOR_LGT));
 }
 
 ColorRGBA CSkins7::GetTeamColor(int UseCustomColors, int PartColor, int Team, int Part) const
@@ -521,7 +525,7 @@ bool CSkins7::ValidateSkinParts(char *apPartNames[protocol7::NUM_SKINPARTS], int
 bool CSkins7::SaveSkinfile(const char *pSaveSkinName, int Dummy)
 {
 	char aBuf[IO_MAX_PATH_LENGTH];
-	str_format(aBuf, sizeof(aBuf), "skins/%s.json", pSaveSkinName);
+	str_format(aBuf, sizeof(aBuf), SKINS_DIR "/%s.json", pSaveSkinName);
 	IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!File)
 		return false;
@@ -543,7 +547,7 @@ bool CSkins7::SaveSkinfile(const char *pSaveSkinName, int Dummy)
 			Writer.WriteAttribute("filename");
 			Writer.WriteStrValue(ms_apSkinVariables[Dummy][PartIndex]);
 
-			const bool CustomColors = *ms_apUCCVariables[PartIndex];
+			const bool CustomColors = *ms_apUCCVariables[Dummy][PartIndex];
 			Writer.WriteAttribute("custom_colors");
 			Writer.WriteBoolValue(CustomColors);
 

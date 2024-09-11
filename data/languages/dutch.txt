@@ -290,9 +290,6 @@ Player
 Player country:
 == Speler land:
 
-Player options
-== Speler opties
-
 Players
 == Spelers
 
@@ -662,9 +659,6 @@ Connecting dummy
 
 Connect Dummy
 == Verbind Dummy
-
-Reload
-== Herladen
 
 Deactivate
 == Deactiveren
@@ -1243,7 +1237,16 @@ Could not initialize the given graphics backend, reverting to the default backen
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
 == 
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
 Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Could not connect dummy
 == 
 
 Error playing demo
@@ -1584,6 +1587,12 @@ Unable to delete the demo '%s'
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
 Loading…
 == 
 
@@ -1709,7 +1718,7 @@ Show local time always
 DDRace HUD
 == 
 
-Show client IDs in scoreboard
+Show client IDs (scoreboard, chat, spectator)
 == 
 
 Show DDRace HUD
@@ -1848,6 +1857,39 @@ Entities background color
 == 
 
 Unregister protocol and file extensions
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 
 
 Extras

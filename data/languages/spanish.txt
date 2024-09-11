@@ -299,9 +299,6 @@ Player
 Player country:
 == País del jugador
 
-Player options
-== Opciones de jugador
-
 Players
 == Jugadores
 
@@ -626,7 +623,7 @@ Types
 == Tipos
 
 DDNet %s is out!
-== ¡DDNet %s ya esta disponible!
+== ¡DDNet %s ya está disponible!
 
 Downloading %s:
 == Descargando %s:
@@ -672,9 +669,6 @@ Connecting dummy
 
 Connect Dummy
 == Conectar Dummy
-
-Reload
-== Recargar
 
 Deactivate
 == Desactivar
@@ -1390,9 +1384,6 @@ Show health, shields and ammo
 DDRace HUD
 == HUD DDRace
 
-Show client IDs in scoreboard
-== Mostrar IDs de cliente en la tabla de puntuación
-
 Show DDRace HUD
 == Mostrar el HUD DDRace
 
@@ -1891,3 +1882,54 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping/es
+
+Could not resolve connect address '%s'. See local console for details.
+== No se pudo resolver la dirección de conexión '%s'. Ver la consola local para más detalles.
+
+Connect address error
+== Error de dirección de conexión
+
+Could not connect dummy
+== No se pudo conectar tu dummy
+
+Dummy is not allowed on this server
+== No se permiten dummys en este servidor
+
+Please wait…
+== Espera por favor…
+
+Show client IDs (scoreboard, chat, spectator)
+== Mostrar IDs de cliente (scoreboard, chat, espectador)
+
+Normal:
+== Normal:
+
+Team:
+== Equipo:
+
+Dummy settings
+== Configuración del dummy
+
+Toggle to edit your dummy settings
+== Actívalo para configurar tu dummy
+
+Randomize
+== Aleatorizar
+
+Are you sure that you want to delete '%s'?
+== ¿Estás seguro de que quieres eliminar '%s'?
+
+Delete skin
+== Eliminar skin
+
+Basic
+== Básico
+
+Custom
+== Personalizado
+
+Unable to delete skin
+== No se pudo borrar la skin
+
+Customize
+== Personalizar

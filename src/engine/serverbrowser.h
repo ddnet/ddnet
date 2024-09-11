@@ -295,8 +295,23 @@ public:
 		NUM_TYPES,
 	};
 
+	class CServerEntry
+	{
+	public:
+		int64_t m_RequestTime;
+		bool m_RequestIgnoreInfo;
+		int m_GotInfo;
+		CServerInfo m_Info;
+
+		CServerEntry *m_pPrevReq; // request list
+		CServerEntry *m_pNextReq;
+	};
+
 	static constexpr const char *COMMUNITY_DDNET = "ddnet";
 	static constexpr const char *COMMUNITY_NONE = "none";
+
+	static constexpr const char *COMMUNITY_COUNTRY_NONE = "none";
+	static constexpr const char *COMMUNITY_TYPE_NONE = "None";
 	/**
 	 * Special community value for country/type filters that
 	 * affect all communities.
@@ -341,6 +356,7 @@ public:
 	virtual const IFilterList &TypesFilter() const = 0;
 	virtual void CleanFilters() = 0;
 
+	virtual CServerEntry *Find(const NETADDR &Addr) = 0;
 	virtual int GetCurrentType() = 0;
 	virtual const char *GetTutorialServer() = 0;
 };

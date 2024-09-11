@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <engine/client/enums.h>
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
@@ -29,7 +30,7 @@
 
 void CPlayers::RenderHand(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
 {
-	if(pInfo->m_Sixup.m_aTextures[protocol7::SKINPART_BODY].IsValid())
+	if(pInfo->m_aSixup[g_Config.m_ClDummy].m_aTextures[protocol7::SKINPART_BODY].IsValid())
 		RenderHand7(pInfo, CenterPos, Dir, AngleOffset, PostRotOffset, Alpha);
 	else
 		RenderHand6(pInfo, CenterPos, Dir, AngleOffset, PostRotOffset, Alpha);
@@ -56,12 +57,12 @@ void CPlayers::RenderHand7(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir
 	HandPos += DirX * PostRotOffset.x;
 	HandPos += DirY * PostRotOffset.y;
 
-	ColorRGBA Color = pInfo->m_Sixup.m_aColors[protocol7::SKINPART_HANDS];
+	ColorRGBA Color = pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_HANDS];
 	Color.a = Alpha;
 	IGraphics::CQuadItem QuadOutline(HandPos.x, HandPos.y, 2 * BaseSize, 2 * BaseSize);
 	IGraphics::CQuadItem QuadHand = QuadOutline;
 
-	Graphics()->TextureSet(pInfo->m_Sixup.m_aTextures[protocol7::SKINPART_HANDS]);
+	Graphics()->TextureSet(pInfo->m_aSixup[g_Config.m_ClDummy].m_aTextures[protocol7::SKINPART_HANDS]);
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(Color);
 	Graphics()->QuadsSetRotation(Angle);
@@ -206,55 +207,21 @@ void CPlayers::RenderHookCollLine(
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
 	// draw hook collision line
 	{
-		OtherTeam = m_pClient->IsOtherTeam(ClientId);
-		Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
-
-		IntraTick = Intra;
-		if(ClientId >= 0)
-			IntraTick = m_pClient->m_aClients[ClientId].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
-
-		if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		bool Aim = (Player.m_PlayerFlags & PLAYERFLAG_AIM);
+		if(!Client()->ServerCapAnyPlayerFlag())
 		{
-			// just use the direct input if it's the local player we are rendering
-			Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
-		}
-		else
-		{
-			float AngleIntraTick = IntraTick;
-			// using unpredicted angle when rendering other players in-game
-			if(ClientId >= 0)
-				AngleIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
-			// If the player moves their weapon through top, then change
-			// the end angle by 2*Pi, so that the mix function will use the
-			// short path and not the long one.
-			if(Player.m_Angle > (256.0f * pi) && Prev.m_Angle < 0)
-				Player.m_Angle -= 256.0f * 2 * pi;
-			else if(Player.m_Angle < 0 && Prev.m_Angle > (256.0f * pi))
-				Player.m_Angle += 256.0f * 2 * pi;
-
-			Angle = mix((float)Prev.m_Angle, (float)Player.m_Angle, AngleIntraTick) / 256.0f;
-		}
-
-		vec2 Direction = direction(Angle);
-		if(in_range(ClientId, MAX_CLIENTS - 1))
-			Position = m_pClient->m_aClients[ClientId].m_RenderPos;
-		else
-			Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
-
-		vec2 ExDirection = Direction;
-
-		if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-		{
-			ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
-
-			if(!(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)
+			for(int i = 0; i < NUM_DUMMIES; i++)
 			{
-				ExDirection = vec2(1, 0);
+				if(ClientId == m_pClient->m_aLocalIds[i])
+				{
+					Aim = GameClient()->m_Controls.m_aShowHookColl[i];
+					break;
+				}
 			}
 		}
 
 		bool AlwaysRenderHookColl = GameClient()->m_GameInfo.m_AllowHookColl && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) == 2;
-		bool RenderHookCollPlayer = ClientId >= 0 && Player.m_PlayerFlags & PLAYERFLAG_AIM && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
+		bool RenderHookCollPlayer = ClientId >= 0 && Aim && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
 		if(Local && GameClient()->m_GameInfo.m_AllowHookColl && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			RenderHookCollPlayer = GameClient()->m_Controls.m_aShowHookColl[g_Config.m_ClDummy] && g_Config.m_ClShowHookCollOwn > 0;
 
@@ -1328,7 +1295,7 @@ void CPlayers::OnRender()
 			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");
 			if(pSkin != nullptr)
 			{
-				aRenderInfo[i].m_Sixup.Reset();
+				aRenderInfo[i].m_aSixup[g_Config.m_ClDummy].Reset();
 
 				aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 				aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;

@@ -45,11 +45,12 @@ sed -i "s/TW_KEY_NAME/${TW_KEY_NAME_ESCAPED}/g" build.gradle
 sed -i "s/TW_KEY_PW/${TW_KEY_PW_ESCAPED}/g" build.gradle
 sed -i "s/TW_KEY_ALIAS/${TW_KEY_ALIAS_ESCAPED}/g" build.gradle
 
-sed -i "s/TW_NDK_VERSION/${ANDROID_NDK_VERSION}/g" build.gradle
 sed -i "s/TW_VERSION_CODE/${TW_VERSION_CODE}/g" build.gradle
 sed -i "s/TW_VERSION_NAME/${TW_VERSION_NAME}/g" build.gradle
 
 sed -i "s/DDNet/${APK_BASENAME}/g" src/main/res/values/strings.xml
+
+sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/res/xml/shortcuts.xml
 
 sed -i "s/\"DDNet\"/\"${APK_BASENAME}\"/g" src/main/AndroidManifest.xml
 sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/AndroidManifest.xml

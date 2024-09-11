@@ -49,10 +49,10 @@ struct CGameMsg7
 };
 
 static CGameMsg7 gs_GameMsgList7[protocol7::NUM_GAMEMSGS] = {
-	{/*GAMEMSG_TEAM_SWAP*/ DO_CHAT, PARA_NONE, "Teams were swapped"}, // Localize("Teams were swapped")
+	{/*GAMEMSG_TEAM_SWAP*/ DO_CHAT, PARA_NONE, "Teams were swapped"},
 	{/*GAMEMSG_SPEC_INVALIDID*/ DO_CHAT, PARA_NONE, "Invalid spectator id used"}, //!
-	{/*GAMEMSG_TEAM_SHUFFLE*/ DO_CHAT, PARA_NONE, "Teams were shuffled"}, // Localize("Teams were shuffled")
-	{/*GAMEMSG_TEAM_BALANCE*/ DO_CHAT, PARA_NONE, "Teams have been balanced"}, // Localize("Teams have been balanced")
+	{/*GAMEMSG_TEAM_SHUFFLE*/ DO_CHAT, PARA_NONE, "Teams were shuffled"},
+	{/*GAMEMSG_TEAM_BALANCE*/ DO_CHAT, PARA_NONE, "Teams have been balanced"},
 	{/*GAMEMSG_CTF_DROP*/ DO_SPECIAL, PARA_NONE, ""}, // special - play ctf drop sound
 	{/*GAMEMSG_CTF_RETURN*/ DO_SPECIAL, PARA_NONE, ""}, // special - play ctf return sound
 
@@ -70,56 +70,56 @@ void CGameClient::DoTeamChangeMessage7(const char *pName, int ClientId, int Team
 	char aBuf[128];
 	switch(GetStrTeam7(Team, m_pClient->m_TranslationContext.m_GameFlags & protocol7::GAMEFLAG_TEAMS))
 	{
-	case STR_TEAM_GAME: str_format(aBuf, sizeof(aBuf), Localize("'%s' %sjoined the game"), pName, pPrefix); break;
-	case STR_TEAM_RED: str_format(aBuf, sizeof(aBuf), Localize("'%s' %sjoined the red team"), pName, pPrefix); break;
-	case STR_TEAM_BLUE: str_format(aBuf, sizeof(aBuf), Localize("'%s' %sjoined the blue team"), pName, pPrefix); break;
-	case STR_TEAM_SPECTATORS: str_format(aBuf, sizeof(aBuf), Localize("'%s' %sjoined the spectators"), pName, pPrefix); break;
+	case STR_TEAM_GAME: str_format(aBuf, sizeof(aBuf), "'%s' %sjoined the game", pName, pPrefix); break;
+	case STR_TEAM_RED: str_format(aBuf, sizeof(aBuf), "'%s' %sjoined the red team", pName, pPrefix); break;
+	case STR_TEAM_BLUE: str_format(aBuf, sizeof(aBuf), "'%s' %sjoined the blue team", pName, pPrefix); break;
+	case STR_TEAM_SPECTATORS: str_format(aBuf, sizeof(aBuf), "'%s' %sjoined the spectators", pName, pPrefix); break;
 	}
 	m_Chat.AddLine(-1, 0, aBuf);
 }
 
 template<typename T>
-void CGameClient::ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId)
+void CGameClient::ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId, int Conn)
 {
 	CClientData *pClient = &m_aClients[ClientId];
 	char *apSkinPartsPtr[protocol7::NUM_SKINPARTS];
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		str_utf8_copy_num(pClient->m_Sixup.m_aaSkinPartNames[Part], pMsg->m_apSkinPartNames[Part], sizeof(pClient->m_Sixup.m_aaSkinPartNames[Part]), protocol7::MAX_SKIN_LENGTH);
-		apSkinPartsPtr[Part] = pClient->m_Sixup.m_aaSkinPartNames[Part];
-		pClient->m_Sixup.m_aUseCustomColors[Part] = pMsg->m_aUseCustomColors[Part];
-		pClient->m_Sixup.m_aSkinPartColors[Part] = pMsg->m_aSkinPartColors[Part];
+		str_utf8_copy_num(pClient->m_aSixup[Conn].m_aaSkinPartNames[Part], pMsg->m_apSkinPartNames[Part], sizeof(pClient->m_aSixup[Conn].m_aaSkinPartNames[Part]), protocol7::MAX_SKIN_LENGTH);
+		apSkinPartsPtr[Part] = pClient->m_aSixup[Conn].m_aaSkinPartNames[Part];
+		pClient->m_aSixup[Conn].m_aUseCustomColors[Part] = pMsg->m_aUseCustomColors[Part];
+		pClient->m_aSixup[Conn].m_aSkinPartColors[Part] = pMsg->m_aSkinPartColors[Part];
 	}
-	m_Skins7.ValidateSkinParts(apSkinPartsPtr, pClient->m_Sixup.m_aUseCustomColors, pClient->m_Sixup.m_aSkinPartColors, m_pClient->m_TranslationContext.m_GameFlags);
+	m_Skins7.ValidateSkinParts(apSkinPartsPtr, pClient->m_aSixup[Conn].m_aUseCustomColors, pClient->m_aSixup[Conn].m_aSkinPartColors, m_pClient->m_TranslationContext.m_GameFlags);
 
 	if(time_season() == SEASON_XMAS)
 	{
-		pClient->m_SkinInfo.m_Sixup.m_HatTexture = m_Skins7.m_XmasHatTexture;
-		pClient->m_SkinInfo.m_Sixup.m_HatSpriteIndex = ClientId % CSkins7::HAT_NUM;
+		pClient->m_SkinInfo.m_aSixup[Conn].m_HatTexture = m_Skins7.m_XmasHatTexture;
+		pClient->m_SkinInfo.m_aSixup[Conn].m_HatSpriteIndex = ClientId % CSkins7::HAT_NUM;
 	}
 	else
-		pClient->m_SkinInfo.m_Sixup.m_HatTexture.Invalidate();
+		pClient->m_SkinInfo.m_aSixup[Conn].m_HatTexture.Invalidate();
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		int Id = m_Skins7.FindSkinPart(Part, pClient->m_Sixup.m_aaSkinPartNames[Part], false);
+		int Id = m_Skins7.FindSkinPart(Part, pClient->m_aSixup[Conn].m_aaSkinPartNames[Part], false);
 		const CSkins7::CSkinPart *pSkinPart = m_Skins7.GetSkinPart(Part, Id);
-		if(pClient->m_Sixup.m_aUseCustomColors[Part])
+		if(pClient->m_aSixup[Conn].m_aUseCustomColors[Part])
 		{
-			pClient->m_SkinInfo.m_Sixup.m_aTextures[Part] = pSkinPart->m_ColorTexture;
-			pClient->m_SkinInfo.m_Sixup.m_aColors[Part] = m_Skins7.GetColor(pMsg->m_aSkinPartColors[Part], Part == protocol7::SKINPART_MARKING);
+			pClient->m_SkinInfo.m_aSixup[Conn].m_aTextures[Part] = pSkinPart->m_ColorTexture;
+			pClient->m_SkinInfo.m_aSixup[Conn].m_aColors[Part] = m_Skins7.GetColor(pMsg->m_aSkinPartColors[Part], Part == protocol7::SKINPART_MARKING);
 		}
 		else
 		{
-			pClient->m_SkinInfo.m_Sixup.m_aTextures[Part] = pSkinPart->m_OrgTexture;
-			pClient->m_SkinInfo.m_Sixup.m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+			pClient->m_SkinInfo.m_aSixup[Conn].m_aTextures[Part] = pSkinPart->m_OrgTexture;
+			pClient->m_SkinInfo.m_aSixup[Conn].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 		}
-		if(pClient->m_SkinInfo.m_Sixup.m_HatTexture.IsValid())
+		if(pClient->m_SkinInfo.m_aSixup[Conn].m_HatTexture.IsValid())
 		{
-			if(Part == protocol7::SKINPART_BODY && str_comp(pClient->m_Sixup.m_aaSkinPartNames[Part], "standard"))
-				pClient->m_SkinInfo.m_Sixup.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
-			if(Part == protocol7::SKINPART_DECORATION && !str_comp(pClient->m_Sixup.m_aaSkinPartNames[Part], "twinbopp"))
-				pClient->m_SkinInfo.m_Sixup.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
+			if(Part == protocol7::SKINPART_BODY && str_comp(pClient->m_aSixup[Conn].m_aaSkinPartNames[Part], "standard"))
+				pClient->m_SkinInfo.m_aSixup[Conn].m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
+			if(Part == protocol7::SKINPART_DECORATION && !str_comp(pClient->m_aSixup[Conn].m_aaSkinPartNames[Part], "twinbopp"))
+				pClient->m_SkinInfo.m_aSixup[Conn].m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
 		}
 	}
 }
@@ -136,7 +136,7 @@ void CGameClient::ApplySkin7InfoFromSnapObj(const protocol7::CNetObj_De_ClientIn
 		Msg.m_aUseCustomColors[Part] = pObj->m_aUseCustomColors[Part];
 		Msg.m_aSkinPartColors[Part] = pObj->m_aSkinPartColors[Part];
 	}
-	ApplySkin7InfoFromGameMsg(&Msg, ClientId);
+	ApplySkin7InfoFromGameMsg(&Msg, ClientId, 0);
 }
 
 void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
@@ -196,7 +196,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		{
 			m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
 			m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
-			m_aClients[pMsg7->m_ClientId].UpdateRenderInfo(IsTeamPlay());
+			m_aClients[pMsg7->m_ClientId].UpdateRenderInfo(IsTeamPlay(), Conn);
 
 			// if(pMsg7->m_ClientId == m_LocalClientId)
 			// {
@@ -233,9 +233,9 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		protocol7::CNetMsg_Sv_ServerSettings *pMsg = (protocol7::CNetMsg_Sv_ServerSettings *)pRawMsg;
 
 		if(!m_pClient->m_TranslationContext.m_ServerSettings.m_TeamLock && pMsg->m_TeamLock)
-			m_Chat.AddLine(-1, 0, Localize("Teams were locked"));
+			m_Chat.AddLine(-1, 0, "Teams were locked");
 		else if(m_pClient->m_TranslationContext.m_ServerSettings.m_TeamLock && !pMsg->m_TeamLock)
-			m_Chat.AddLine(-1, 0, Localize("Teams were unlocked"));
+			m_Chat.AddLine(-1, 0, "Teams were unlocked");
 
 		m_pClient->m_TranslationContext.m_ServerSettings.m_KickVote = pMsg->m_KickVote;
 		m_pClient->m_TranslationContext.m_ServerSettings.m_KickMin = pMsg->m_KickMin;
@@ -293,7 +293,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 
 		CTranslationContext::CClientData &Client = m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId];
 		Client.m_Active = true;
-		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId);
+		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId, Conn);
 		// skin will be moved to the 0.6 snap by the translation context
 		// and we drop the game message
 		return nullptr;
@@ -387,18 +387,18 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 				switch(pMsg7->m_Type)
 				{
 				case protocol7::VOTE_START_OP:
-					str_format(aBuf, sizeof(aBuf), Localize("'%s' called vote to change server option '%s' (%s)"), pName, pMsg7->m_pDescription, pMsg7->m_pReason);
+					str_format(aBuf, sizeof(aBuf), "'%s' called vote to change server option '%s' (%s)", pName, pMsg7->m_pDescription, pMsg7->m_pReason);
 					m_Chat.AddLine(-1, 0, aBuf);
 					break;
 				case protocol7::VOTE_START_KICK:
 				{
-					str_format(aBuf, sizeof(aBuf), Localize("'%s' called for vote to kick '%s' (%s)"), pName, pMsg7->m_pDescription, pMsg7->m_pReason);
+					str_format(aBuf, sizeof(aBuf), "'%s' called for vote to kick '%s' (%s)", pName, pMsg7->m_pDescription, pMsg7->m_pReason);
 					m_Chat.AddLine(-1, 0, aBuf);
 					break;
 				}
 				case protocol7::VOTE_START_SPEC:
 				{
-					str_format(aBuf, sizeof(aBuf), Localize("'%s' called for vote to move '%s' to spectators (%s)"), pName, pMsg7->m_pDescription, pMsg7->m_pReason);
+					str_format(aBuf, sizeof(aBuf), "'%s' called for vote to move '%s' to spectators (%s)", pName, pMsg7->m_pDescription, pMsg7->m_pReason);
 					m_Chat.AddLine(-1, 0, aBuf);
 				}
 				}
@@ -409,24 +409,24 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 			switch(pMsg7->m_Type)
 			{
 			case protocol7::VOTE_START_OP:
-				str_format(aBuf, sizeof(aBuf), Localize("Admin forced server option '%s' (%s)"), pMsg7->m_pDescription, pMsg7->m_pReason);
+				str_format(aBuf, sizeof(aBuf), "Admin forced server option '%s' (%s)", pMsg7->m_pDescription, pMsg7->m_pReason);
 				m_Chat.AddLine(-1, 0, aBuf);
 				break;
 			case protocol7::VOTE_START_SPEC:
-				str_format(aBuf, sizeof(aBuf), Localize("Admin moved '%s' to spectator (%s)"), pMsg7->m_pDescription, pMsg7->m_pReason);
+				str_format(aBuf, sizeof(aBuf), "Admin moved '%s' to spectator (%s)", pMsg7->m_pDescription, pMsg7->m_pReason);
 				m_Chat.AddLine(-1, 0, aBuf);
 				break;
 			case protocol7::VOTE_END_ABORT:
 				m_Voting.OnReset();
-				m_Chat.AddLine(-1, 0, Localize("Vote aborted"));
+				m_Chat.AddLine(-1, 0, "Vote aborted");
 				break;
 			case protocol7::VOTE_END_PASS:
 				m_Voting.OnReset();
-				m_Chat.AddLine(-1, 0, pMsg7->m_ClientId == -1 ? Localize("Admin forced vote yes") : Localize("Vote passed"));
+				m_Chat.AddLine(-1, 0, pMsg7->m_ClientId == -1 ? "Admin forced vote yes" : "Vote passed");
 				break;
 			case protocol7::VOTE_END_FAIL:
 				m_Voting.OnReset();
-				m_Chat.AddLine(-1, 0, pMsg7->m_ClientId == -1 ? Localize("Admin forced vote no") : Localize("Vote failed"));
+				m_Chat.AddLine(-1, 0, pMsg7->m_ClientId == -1 ? "Admin forced vote no" : "Vote failed");
 			}
 		}
 
@@ -495,7 +495,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		str_copy(Client.m_aName, pMsg7->m_pName);
 		str_copy(Client.m_aClan, pMsg7->m_pClan);
 		Client.m_Country = pMsg7->m_Country;
-		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId);
+		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId, Conn);
 		if(m_pClient->m_TranslationContext.m_aLocalClientId[Conn] == -1)
 			return nullptr;
 		if(pMsg7->m_Silent || pMsg7->m_Local)
@@ -630,10 +630,10 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 				const char *pMsg = "";
 				switch(GetStrTeam7(aParaI[0], TeamPlay))
 				{
-				case STR_TEAM_GAME: pMsg = Localize("All players were moved to the game"); break;
-				case STR_TEAM_RED: pMsg = Localize("All players were moved to the red team"); break;
-				case STR_TEAM_BLUE: pMsg = Localize("All players were moved to the blue team"); break;
-				case STR_TEAM_SPECTATORS: pMsg = Localize("All players were moved to the spectators"); break;
+				case STR_TEAM_GAME: pMsg = "All players were moved to the game"; break;
+				case STR_TEAM_RED: pMsg = "All players were moved to the red team"; break;
+				case STR_TEAM_BLUE: pMsg = "All players were moved to the blue team"; break;
+				case STR_TEAM_SPECTATORS: pMsg = "All players were moved to the spectators"; break;
 				}
 				m_Broadcast.DoBroadcast(pMsg); // client side broadcast
 			}
@@ -643,8 +643,8 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 				const char *pMsg = "";
 				switch(GetStrTeam7(aParaI[0], TeamPlay))
 				{
-				case STR_TEAM_RED: pMsg = Localize("You were moved to the red team due to team balancing"); break;
-				case STR_TEAM_BLUE: pMsg = Localize("You were moved to the blue team due to team balancing"); break;
+				case STR_TEAM_RED: pMsg = "You were moved to the red team due to team balancing"; break;
+				case STR_TEAM_BLUE: pMsg = "You were moved to the blue team due to team balancing"; break;
 				}
 				m_Broadcast.DoBroadcast(pMsg); // client side broadcast
 			}
@@ -655,7 +655,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 			case protocol7::GAMEMSG_GAME_PAUSED:
 			{
 				int ClientId = clamp(aParaI[0], 0, MAX_CLIENTS - 1);
-				str_format(aBuf, sizeof(aBuf), Localize("'%s' initiated a pause"), m_aClients[ClientId].m_aName);
+				str_format(aBuf, sizeof(aBuf), "'%s' initiated a pause", m_aClients[ClientId].m_aName);
 				SendChat(aBuf);
 			}
 			break;
@@ -669,22 +669,22 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 				{
 					if(aParaI[0])
 					{
-						str_format(aBuf, sizeof(aBuf), Localize("The blue flag was captured by '%s' (%.2f seconds)"), m_aClients[ClientId].m_aName, Time);
+						str_format(aBuf, sizeof(aBuf), "The blue flag was captured by '%s' (%.2f seconds)", m_aClients[ClientId].m_aName, Time);
 					}
 					else
 					{
-						str_format(aBuf, sizeof(aBuf), Localize("The red flag was captured by '%s' (%.2f seconds)"), m_aClients[ClientId].m_aName, Time);
+						str_format(aBuf, sizeof(aBuf), "The red flag was captured by '%s' (%.2f seconds)", m_aClients[ClientId].m_aName, Time);
 					}
 				}
 				else
 				{
 					if(aParaI[0])
 					{
-						str_format(aBuf, sizeof(aBuf), Localize("The blue flag was captured by '%s'"), m_aClients[ClientId].m_aName);
+						str_format(aBuf, sizeof(aBuf), "The blue flag was captured by '%s'", m_aClients[ClientId].m_aName);
 					}
 					else
 					{
-						str_format(aBuf, sizeof(aBuf), Localize("The red flag was captured by '%s'"), m_aClients[ClientId].m_aName);
+						str_format(aBuf, sizeof(aBuf), "The red flag was captured by '%s'", m_aClients[ClientId].m_aName);
 					}
 				}
 				SendChat(aBuf);
@@ -696,7 +696,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		const char *pText = "";
 		if(NumParaI == 0)
 		{
-			pText = Localize(gs_GameMsgList7[GameMsgId].m_pText);
+			pText = gs_GameMsgList7[GameMsgId].m_pText;
 		}
 
 		// handle message

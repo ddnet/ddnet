@@ -40,7 +40,9 @@ else()
   set(TARGET_BITS "64")
 endif()
 
-if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm" OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64")
+if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm" 
+  OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64"
+  OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "ARM64")
   if(TARGET_BITS STREQUAL "32")
     set(TARGET_CPU_ARCHITECTURE "arm")
   else()
@@ -1391,6 +1393,7 @@ set(EXPECTED_DATA
   editor/audio_source.png
   editor/automap/basic_freeze.rules
   editor/automap/ddmax_freeze.rules
+  editor/automap/ddnet_grass.rules
   editor/automap/ddnet_tiles.rules
   editor/automap/ddnet_walls.rules
   editor/automap/desert_main.rules
@@ -1399,7 +1402,6 @@ set(EXPECTED_DATA
   editor/automap/generic_unhookable.rules
   editor/automap/generic_unhookable_0.7.rules
   editor/automap/grass_main.rules
-  editor/automap/grass_main_0.7.rules
   editor/automap/jungle_main.rules
   editor/automap/jungle_midground.rules
   editor/automap/round_tiles.rules
@@ -1487,6 +1489,7 @@ set(EXPECTED_DATA
   mapres/bg_cloud2.png
   mapres/bg_cloud3.png
   mapres/ddmax_freeze.png
+  mapres/ddnet_grass.png
   mapres/ddnet_start.png
   mapres/ddnet_tiles.png
   mapres/ddnet_walls.png
@@ -2126,6 +2129,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   teehistorian_ex.cpp
   teehistorian_ex.h
   teehistorian_ex_chunks.h
+  translation_context.cpp
   translation_context.h
   uuid_manager.cpp
   uuid_manager.h
@@ -2473,6 +2477,7 @@ if(CLIENT)
     editor_trackers.cpp
     editor_trackers.h
     editor_ui.h
+    enums.h
     explanations.cpp
     layer_selector.cpp
     layer_selector.h
@@ -2511,8 +2516,13 @@ if(CLIENT)
     mapitems/sound.cpp
     mapitems/sound.h
     popups.cpp
+    prompt.cpp
+    prompt.h
     proof_mode.cpp
     proof_mode.h
+    quick_action.h
+    quick_actions.cpp
+    quick_actions.h
     smooth_value.cpp
     smooth_value.h
     tileart.cpp
@@ -2935,6 +2945,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     compression.cpp
     csv.cpp
     datafile.cpp
+    editor.cpp
     fs.cpp
     git_revision.cpp
     hash.cpp
@@ -3125,6 +3136,8 @@ set(CPACK_GENERATOR TGZ TXZ)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 if(TARGET_OS STREQUAL "mac")
   set(CPACK_STRIP_FILES FALSE)
+elseif(TARGET_OS STREQUAL "windows" AND TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
+  set(CPACK_STRIP_FILES FALSE)
 else()
   set(CPACK_STRIP_FILES TRUE)
 endif()
@@ -3138,7 +3151,11 @@ set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
 
 if(TARGET_OS AND TARGET_BITS)
   if(TARGET_OS STREQUAL "windows")
-    set(CPACK_SYSTEM_NAME "win${TARGET_BITS}")
+    if (TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
+      set(CPACK_SYSTEM_NAME "win-arm64")
+    else()
+      set(CPACK_SYSTEM_NAME "win${TARGET_BITS}")
+    endif()
     set(CPACK_GENERATOR ZIP)
   elseif(TARGET_OS STREQUAL "linux")
     # Let compiler tell its arch
@@ -3399,7 +3416,7 @@ foreach(ext zip tar.gz tar.xz)
   endforeach()
   foreach(target ${CPACK_TARGETS})
     list(APPEND COPY_TARGET_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${TMPDIR}/)
-    if(NOT TARGET_OS STREQUAL "mac")
+    if(NOT TARGET_OS STREQUAL "mac" AND NOT (TARGET_OS STREQUAL "windows" AND TARGET_CPU_ARCHITECTURE STREQUAL "arm64"))
       list(APPEND STRIP_TARGET_COMMANDS COMMAND strip -s ${TMPDIR}/$<TARGET_FILE_NAME:${target}>)
     endif()
   endforeach()

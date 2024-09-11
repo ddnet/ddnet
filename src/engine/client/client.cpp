@@ -3,6 +3,7 @@
 
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
+#include <base/log.h>
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
@@ -255,11 +256,7 @@ void CClient::SendReady(int Conn)
 
 void CClient::SendMapRequest()
 {
-	if(m_MapdownloadFileTemp)
-	{
-		io_close(m_MapdownloadFileTemp);
-		Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
-	}
+	dbg_assert(!m_MapdownloadFileTemp, "Map download already in progress");
 	m_MapdownloadFileTemp = Storage()->OpenFile(m_aMapdownloadFilenameTemp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(IsSixup())
 	{
@@ -666,6 +663,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_aRconAuthed[0] = 0;
 	mem_zero(m_aRconUsername, sizeof(m_aRconUsername));
 	mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
+	m_MapDetailsPresent = false;
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
 	m_ExpectedRconCommands = -1;
@@ -681,22 +679,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_CurrentServerCurrentPingTime = -1;
 	m_CurrentServerNextPingTime = -1;
 
-	// disable all downloads
-	m_MapdownloadChunk = 0;
-	if(m_pMapdownloadTask)
-		m_pMapdownloadTask->Abort();
-	if(m_MapdownloadFileTemp)
-	{
-		io_close(m_MapdownloadFileTemp);
-		Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
-	}
-	m_MapdownloadFileTemp = 0;
-	m_MapdownloadSha256Present = false;
-	m_MapdownloadSha256 = SHA256_ZEROED;
-	m_MapdownloadCrc = 0;
-	m_MapdownloadTotalsize = -1;
-	m_MapdownloadAmount = 0;
-	m_MapDetailsPresent = false;
+	ResetMapDownload(true);
 
 	// clear the current server info
 	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
@@ -890,7 +873,7 @@ void CClient::DebugRender()
 		total = 42
 	*/
 	s_FrameTimeAvg = s_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
-	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k) fps: %3d",
+	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB) fps: %3d",
 		m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy],
 		(Graphics()->TextureMemoryUsage() / 1024),
 		(Graphics()->BufferMemoryUsage() / 1024),
@@ -911,7 +894,7 @@ void CClient::DebugRender()
 			SendPackets++;
 		if(!RecvPackets)
 			RecvPackets++;
-		str_format(aBuffer, sizeof(aBuffer), "send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " kbps) avg: %5" PRIu64 "\nrecv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " kbps) avg: %5" PRIu64,
+		str_format(aBuffer, sizeof(aBuffer), "send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64 "\nrecv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64,
 			SendPackets, SendBytes, SendPackets * 42, SendTotal, (SendTotal * 8) / 1024, SendBytes / SendPackets,
 			RecvPackets, RecvBytes, RecvPackets * 42, RecvTotal, (RecvTotal * 8) / 1024, RecvBytes / RecvPackets);
 		Graphics()->QuadsText(2, 14, 16, aBuffer);
@@ -1402,7 +1385,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 #undef GET_INT
 }
 
-static CServerCapabilities GetServerCapabilities(int Version, int Flags)
+static CServerCapabilities GetServerCapabilities(int Version, int Flags, bool Sixup)
 {
 	CServerCapabilities Result;
 	bool DDNet = false;
@@ -1411,7 +1394,7 @@ static CServerCapabilities GetServerCapabilities(int Version, int Flags)
 		DDNet = Flags & SERVERCAPFLAG_DDNET;
 	}
 	Result.m_ChatTimeoutCode = DDNet;
-	Result.m_AnyPlayerFlag = DDNet;
+	Result.m_AnyPlayerFlag = !Sixup;
 	Result.m_PingEx = false;
 	Result.m_AllowDummy = true;
 	Result.m_SyncWeaponInput = true;
@@ -1512,7 +1495,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			m_ServerCapabilities = GetServerCapabilities(Version, Flags);
+			m_ServerCapabilities = GetServerCapabilities(Version, Flags, IsSixup());
 			m_CanReceiveServerCapabilities = false;
 			m_ServerSentCapabilities = true;
 		}
@@ -1520,7 +1503,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		{
 			if(m_CanReceiveServerCapabilities)
 			{
-				m_ServerCapabilities = GetServerCapabilities(0, 0);
+				m_ServerCapabilities = GetServerCapabilities(0, 0, IsSixup());
 				m_CanReceiveServerCapabilities = false;
 			}
 			bool MapDetailsWerePresent = m_MapDetailsPresent;
@@ -1553,6 +1536,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				DummyDisconnect(0);
 			}
 
+			ResetMapDownload(true);
+
 			SHA256_DIGEST *pMapSha256 = nullptr;
 			const char *pMapUrl = nullptr;
 			if(MapDetailsWerePresent && str_comp(m_aMapDetailsName, pMap) == 0 && m_MapDetailsCrc == MapCrc)
@@ -1569,12 +1554,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			}
 			else
 			{
-				if(m_MapdownloadFileTemp)
-				{
-					io_close(m_MapdownloadFileTemp);
-					Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
-				}
-
 				// start map download
 				FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, false, m_aMapdownloadFilename, sizeof(m_aMapdownloadFilename));
 				FormatMapDownloadFilename(pMap, pMapSha256, MapCrc, true, m_aMapdownloadFilenameTemp, sizeof(m_aMapdownloadFilenameTemp));
@@ -1583,16 +1562,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				str_format(aBuf, sizeof(aBuf), "starting to download map to '%s'", m_aMapdownloadFilenameTemp);
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", aBuf);
 
-				m_MapdownloadChunk = 0;
 				str_copy(m_aMapdownloadName, pMap);
-
 				m_MapdownloadSha256Present = (bool)pMapSha256;
 				m_MapdownloadSha256 = pMapSha256 ? *pMapSha256 : SHA256_ZEROED;
 				m_MapdownloadCrc = MapCrc;
 				m_MapdownloadTotalsize = MapSize;
-				m_MapdownloadAmount = 0;
-
-				ResetMapDownload();
 
 				if(pMapSha256)
 				{
@@ -1961,13 +1935,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					if(Msg != NETMSG_SNAPEMPTY && pTmpBuffer3->Crc() != Crc)
 					{
-						if(g_Config.m_Debug)
-						{
-							char aBuf[256];
-							str_format(aBuf, sizeof(aBuf), "snapshot crc error #%d - tick=%d wantedcrc=%d gotcrc=%d compressed_size=%d delta_tick=%d",
-								m_SnapCrcErrors, GameTick, Crc, pTmpBuffer3->Crc(), m_aSnapshotIncomingDataSize[Conn], DeltaTick);
-							m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", aBuf);
-						}
+						log_error("client", "snapshot crc error #%d - tick=%d wantedcrc=%d gotcrc=%d compressed_size=%d delta_tick=%d",
+							m_SnapCrcErrors, GameTick, Crc, pTmpBuffer3->Crc(), m_aSnapshotIncomingDataSize[Conn], DeltaTick);
 
 						m_SnapCrcErrors++;
 						if(m_SnapCrcErrors > 10)
@@ -2253,24 +2222,44 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo)
 	return Builder.Finish(pTo);
 }
 
-void CClient::ResetMapDownload()
+void CClient::ResetMapDownload(bool ResetActive)
 {
 	if(m_pMapdownloadTask)
 	{
 		m_pMapdownloadTask->Abort();
-		m_pMapdownloadTask = NULL;
+		m_pMapdownloadTask = nullptr;
 	}
-	m_MapdownloadFileTemp = 0;
-	m_MapdownloadAmount = 0;
+
+	if(m_MapdownloadFileTemp)
+	{
+		io_close(m_MapdownloadFileTemp);
+		m_MapdownloadFileTemp = 0;
+	}
+
+	if(Storage()->FileExists(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE))
+	{
+		Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
+	}
+
+	if(ResetActive)
+	{
+		m_MapdownloadChunk = 0;
+		m_MapdownloadSha256Present = false;
+		m_MapdownloadSha256 = SHA256_ZEROED;
+		m_MapdownloadCrc = 0;
+		m_MapdownloadTotalsize = -1;
+		m_MapdownloadAmount = 0;
+		m_aMapdownloadFilename[0] = '\0';
+		m_aMapdownloadFilenameTemp[0] = '\0';
+		m_aMapdownloadName[0] = '\0';
+	}
 }
 
 void CClient::FinishMapDownload()
 {
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "download complete, loading map");
 
-	int Prev = m_MapdownloadTotalsize;
-	m_MapdownloadTotalsize = -1;
-	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : 0;
+	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : nullptr;
 
 	bool FileSuccess = true;
 	if(Storage()->FileExists(m_aMapdownloadFilename, IStorage::TYPE_SAVE))
@@ -2278,36 +2267,26 @@ void CClient::FinishMapDownload()
 	FileSuccess &= Storage()->RenameFile(m_aMapdownloadFilenameTemp, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 	if(!FileSuccess)
 	{
-		ResetMapDownload();
 		char aError[128 + IO_MAX_PATH_LENGTH];
 		str_format(aError, sizeof(aError), Localize("Could not save downloaded map. Try manually deleting this file: %s"), m_aMapdownloadFilename);
 		DisconnectWithReason(aError);
 		return;
 	}
 
-	// load map
 	const char *pError = LoadMap(m_aMapdownloadName, m_aMapdownloadFilename, pSha256, m_MapdownloadCrc);
 	if(!pError)
 	{
-		ResetMapDownload();
+		ResetMapDownload(true);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
 		SendReady(CONN_MAIN);
 	}
 	else if(m_pMapdownloadTask) // fallback
 	{
-		ResetMapDownload();
-		m_MapdownloadTotalsize = Prev;
+		ResetMapDownload(false);
 		SendMapRequest();
 	}
 	else
 	{
-		if(m_MapdownloadFileTemp)
-		{
-			io_close(m_MapdownloadFileTemp);
-			m_MapdownloadFileTemp = 0;
-			Storage()->RemoveFile(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
-		}
-		ResetMapDownload();
 		DisconnectWithReason(pError);
 	}
 }
@@ -2838,7 +2817,7 @@ void CClient::Update()
 		else if(m_pMapdownloadTask->State() == EHttpState::ERROR || m_pMapdownloadTask->State() == EHttpState::ABORTED)
 		{
 			dbg_msg("webdl", "http failed, falling back to gameserver");
-			ResetMapDownload();
+			ResetMapDownload(false);
 			SendMapRequest();
 		}
 	}
@@ -3376,7 +3355,7 @@ bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
 					if(g_Config.m_Bindaddr[0])
 						str_format(pError, ErrorSize, "Could not open the network client, try changing or unsetting the bindaddr '%s'.", g_Config.m_Bindaddr);
 					else
-						str_format(pError, ErrorSize, "Could not open the network client.");
+						str_copy(pError, "Could not open the network client.", ErrorSize);
 					return false;
 				}
 			}
@@ -3834,8 +3813,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		return m_DemoPlayer.ErrorMessage();
 	}
 
-	m_Sixup = str_startswith(m_DemoPlayer.Info()->m_Header.m_aNetversion, "0.7");
-	m_DemoPlayer.SetSixup(m_Sixup);
+	m_Sixup = m_DemoPlayer.IsSixup();
 
 	// load map
 	const CMapInfo *pMapInfo = m_DemoPlayer.GetMapInfo();
@@ -4418,8 +4396,20 @@ void CClient::RegisterCommands()
 
 	// used for server browser update
 	m_pConsole->Chain("br_filter_string", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_exclude_string", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_full", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_empty", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_spectators", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_friends", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_country", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_country_index", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_pw", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_gametype", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_gametype_strict", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_connecting_players", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("br_filter_serveraddress", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_unfinished_map", ConchainServerBrowserUpdate, this);
+	m_pConsole->Chain("br_filter_login", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("add_favorite", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("remove_favorite", ConchainServerBrowserUpdate, this);
 	m_pConsole->Chain("end_favorite_group", ConchainServerBrowserUpdate, this);

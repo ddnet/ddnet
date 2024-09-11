@@ -3,6 +3,8 @@
 #ifndef GAME_CLIENT_RENDER_H
 #define GAME_CLIENT_RENDER_H
 
+#include <engine/client/enums.h>
+
 #include <base/color.h>
 #include <base/vmath.h>
 
@@ -50,7 +52,8 @@ public:
 		m_TeeRenderFlags = 0;
 		m_FeetFlipped = false;
 
-		m_Sixup.Reset();
+		for(auto &Sixup : m_aSixup)
+			Sixup.Reset();
 	}
 
 	CSkin::SSkinTextures m_OriginalRenderSkin;
@@ -104,7 +107,7 @@ public:
 		ColorRGBA m_BotColor;
 	};
 
-	CSixup m_Sixup;
+	CSixup m_aSixup[NUM_DUMMIES];
 };
 
 // Tee Render Flags

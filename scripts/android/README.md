@@ -4,6 +4,7 @@ Requirements for building for Android
 -	At least 10-15 GiB of free disk space.
 -	First follow the general instructions for setting up https://github.com/ddnet/ddnet for building on Linux.
 	This guide has only been tested on Linux.
+-	Note: Use a stable version of Rust. Using the nightly version results in linking errors.
 -	Install the Android NDK (version 26) in the same location
 	where Android Studio would unpack it (`~/Android/Sdk/ndk/`):
 	```shell

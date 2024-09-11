@@ -30,6 +30,7 @@
 # 2024-04-21 By
 # 2024-06-10 By
 # 2024-07-21 By
+# 2024-08-29 Pioooooo
 ##### /authors #####
 
 ##### translated strings #####
@@ -330,9 +331,6 @@ HUD
 
 Player country:
 == 玩家國家/地區：
-
-Player options
-== 玩家選項
 
 Players
 == 玩家
@@ -820,9 +818,6 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.org
 == 將會發送你的玩家名稱到 info.ddnet.org
 
-Reload
-== 重新整理
-
 Enable replays
 == 啟用短時回放
 
@@ -1227,7 +1222,7 @@ Team %d
 == 隊伍 %d
 
 Position:
-== 坐標	
+== 坐標
 
 Speed:
 == 速度
@@ -1378,9 +1373,6 @@ Show health, shields and ammo
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== 顯示客戶端 IDs (計分板中)
-
 Show DDRace HUD
 == 顯示 DDRace HUD
 
@@ -1512,7 +1504,7 @@ Are you sure that you want to reset the controls to their defaults?
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 初始化失敗。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan” (若沒有前者則可直接輸入後者) 再重試。
+== 初始化失敗。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將 “gfx_backend” 設定為 “gfx_backend OpenGL” 或 “gfx_backend Vulkan” 再重試。
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
@@ -1536,7 +1528,7 @@ Failed to swap framebuffers. Try to update your GPU drivers.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 未知錯誤。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan” (若沒有前者則可直接輸入後者) 再重試。
+== 未知錯誤。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將 “gfx_backend” 設定為 “gfx_backend OpenGL” 或 “gfx_backend Vulkan” 再重試。
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
@@ -1564,7 +1556,7 @@ No controller found. Plug in a controller.
 == 未檢測到任何控制器。請嘗試重新連接控制器。
 
 Unregister protocol and file extensions
-== 未注冊的協議與擴充檔案
+== 清除連結與檔案類型關聯
 
 Open the directory to add custom assets
 == 打開用以新增自定義材質的資料夾路徑
@@ -1903,3 +1895,54 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/index.php?title=Mapping/zh&variant=zh-hant
+
+Could not resolve connect address '%s'. See local console for details.
+== 無法解析連線地址 '%s'。檢查本機控制台以取得詳情。
+
+Connect address error
+== 連線地址錯誤
+
+Could not connect dummy
+== 無法連線分身
+
+Dummy is not allowed on this server
+== 此服務器禁止使用分身
+
+Please wait…
+== 請稍等…
+
+Show client IDs (scoreboard, chat, spectator)
+== 顯示客戶端 ID（計分板、聊天、旁觀者）
+
+Normal:
+== 正常：
+
+Team:
+== 隊伍：
+
+Dummy settings
+== 分身設定
+
+Toggle to edit your dummy settings
+== 切換以編輯分身設定
+
+Randomize
+== 隨機
+
+Are you sure that you want to delete '%s'?
+== 你確定要刪除'%s'嗎？
+
+Delete skin
+== 刪除外觀
+
+Basic
+== 基本
+
+Custom
+== 自定義
+
+Unable to delete skin
+== 無法刪除外觀
+
+Customize
+== 自定義

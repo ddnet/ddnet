@@ -27,9 +27,6 @@
 #include <engine/http.h>
 #include <engine/storage.h>
 
-static constexpr const char *COMMUNITY_COUNTRY_NONE = "none";
-static constexpr const char *COMMUNITY_TYPE_NONE = "None";
-
 class CSortWrap
 {
 	typedef bool (CServerBrowser::*SortFunc)(int, int) const;
@@ -704,7 +701,22 @@ void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs
 		{
 			return;
 		}
-		net_addr_url_str(&pAddrs[i], pBuffer, BufferSize, true);
+		char aIpAddr[512];
+		if(!net_addr_str(&pAddrs[i], aIpAddr, sizeof(aIpAddr), true))
+		{
+			str_copy(pBuffer, aIpAddr, BufferSize);
+			return;
+		}
+		if(pAddrs[i].type & NETTYPE_TW7)
+		{
+			str_format(
+				pBuffer,
+				BufferSize,
+				"tw-0.7+udp://%s",
+				aIpAddr);
+			return;
+		}
+		str_copy(pBuffer, aIpAddr, BufferSize);
 		int Length = str_length(pBuffer);
 		pBuffer += Length;
 		BufferSize -= Length;

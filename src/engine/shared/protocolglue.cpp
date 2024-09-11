@@ -4,6 +4,16 @@
 
 #include "protocolglue.h"
 
+int GameFlags_ClampToSix(int Flags)
+{
+	int Six = 0;
+	if(Flags & GAMEFLAG_TEAMS)
+		Six |= GAMEFLAG_TEAMS;
+	if(Flags & GAMEFLAG_FLAGS)
+		Six |= GAMEFLAG_FLAGS;
+	return Six;
+}
+
 int PlayerFlags_SevenToSix(int Flags)
 {
 	int Six = 0;

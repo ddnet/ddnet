@@ -6,7 +6,7 @@
 #	Petr			2011-04-02 23:02:33
 #	Medik & Petr	2011-07-02 19:37:05
 #	TeeWorlds-org	2011-07-15 00:34:19
-#	dobrykafe		2024-06-09 00:00:00
+#	dobrykafe		2024-08-30 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -280,9 +280,6 @@ Player
 
 Player country:
 == Země hráčů:
-
-Player options
-== Možnosti hráčů
 
 Players
 == Hráči
@@ -645,9 +642,6 @@ Connecting dummy
 
 Connect Dummy
 == Připojit dummyho
-
-Reload
-== Znovu načíst
 
 Deactivate
 == Deaktivovat
@@ -1634,9 +1628,6 @@ Show local time always
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== Zobrazit ID klientů ve výsledkové tabulce
-
 Show DDRace HUD
 == Zobrazit DDRace HUD
 
@@ -1853,26 +1844,77 @@ Tee
 Show only chat messages from team members
 == Zobrazit pouze zprávy od členů týmu
 
+Could not resolve connect address '%s'. See local console for details.
+== Nelze získat adresu k připojení '%s'. Podrobnosti najdete v místní konzoli.
+
+Connect address error
+== Chyba v adrese k připojení
+
+Could not connect dummy
+== Nepodařilo se připojit dummyho
+
 [Spectating]
 Following %s
-== 
+== Sledujete %s
 
 Example of usage
-== 
+== Příklad použití
+
+Dummy is not allowed on this server
+== Dummy není na tomto serveru povolen
+
+Please wait…
+== Čekejte prosím…
+
+Show client IDs (scoreboard, chat, spectator)
+== Zobrazit ID klientů (výsledková tabulka, chat, divák)
+
+Normal:
+== Normální:
+
+Team:
+== Tým:
+
+Dummy settings
+== Nastavení dummyho
+
+Toggle to edit your dummy settings
+== Přepnutím upravíte nastavení dummyho
+
+Randomize
+== Randomizovat
+
+Are you sure that you want to delete '%s'?
+== Jste si jisti, že chcete smazat '%s'?
+
+Delete skin
+== Odstranit skin
+
+Basic
+== Základní
+
+Custom
+== Vlastní
+
+Unable to delete skin
+== Nelze odstranit skin
+
+Customize
+== Přizpůsobit
 
 Round %d/%d
-== 
+== Kolo %d/%d
 
 [Spectators]
 %d others…
-== 
+== %d dalších…
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== Tým %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/wiki/Mapping

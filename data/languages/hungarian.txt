@@ -270,9 +270,6 @@ Pistol
 Player
 == Játékos
 
-Player options
-== Játékosok kezelése
-
 Players
 == Játékosok
 
@@ -789,9 +786,6 @@ Show DDNet map finishes in server browser
 transmits your player name to info.ddnet.org
 == továbbítja a játékosnevedet az info.ddnet.org oldalra
 
-Reload
-== Újratöltés
-
 Hammerfly dummy
 == Másolat kalapácsolás
 
@@ -1059,9 +1053,6 @@ Auto
 
 Replay
 == Visszajátszás
-
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== Ennek a Textúrának szélessége, vagy magassága (%s) nem megfelelően osztható el ezzel a számmal: (%d), ami vizuális hibákhoz vezethet. (Méretek máshogyan fognak kinézni és a teljesítményt is ronthatja.)
 
 Getting server list from master server
 == Szerverlista lekérése a fő szerverekről
@@ -1338,9 +1329,6 @@ Show health, shields and ammo
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== Mutassa a kliensek ID-ét a pontszámtáblán
-
 Show DDRace HUD
 == Mutassa a DDRace HUD-ot (Speciális HUD)
 
@@ -1551,6 +1539,15 @@ Unregister protocol and file extensions
 Open the directory to add custom assets
 == Megnyitni az egyedi Képek helyét
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
 Error playing demo
 == 
 
@@ -1561,6 +1558,9 @@ Saving settings to '%s' failed
 == 
 
 Error saving settings
+== 
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
 Loading demo file from storage
@@ -1772,6 +1772,12 @@ Delete folder
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
 Loading…
 == 
 
@@ -1800,6 +1806,9 @@ Info Messages
 == 
 
 Show local time always
+== 
+
+Show client IDs (scoreboard, chat, spectator)
 == 
 
 Always show chat
@@ -1851,6 +1860,39 @@ Regular background color
 == 
 
 Entities background color
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 
 
 Round %d/%d

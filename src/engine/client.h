@@ -217,6 +217,7 @@ public:
 
 	// server info
 	virtual void GetServerInfo(class CServerInfo *pServerInfo) const = 0;
+	virtual bool ServerCapAnyPlayerFlag() const = 0;
 
 	virtual int GetPredictionTime() = 0;
 

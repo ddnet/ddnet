@@ -160,8 +160,6 @@ class CGameConsole : public CComponent
 	static const ColorRGBA ms_SearchHighlightColor;
 	static const ColorRGBA ms_SearchSelectedColor;
 
-	void Toggle(int Type);
-
 	static void PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData);
@@ -196,6 +194,7 @@ public:
 	virtual bool OnInput(const IInput::CEvent &Event) override;
 	void Prompt(char (&aPrompt)[32]);
 
+	void Toggle(int Type);
 	bool IsClosed() { return m_ConsoleState == CONSOLE_CLOSED; }
 };
 #endif

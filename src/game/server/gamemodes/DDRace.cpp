@@ -18,6 +18,7 @@ CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	IGameController(pGameServer)
 {
 	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
+	m_GameFlags = protocol7::GAMEFLAG_RACE;
 }
 
 CGameControllerDDRace::~CGameControllerDDRace() = default;
@@ -111,6 +112,11 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	}
 }
 
+void CGameControllerDDRace::SetArmorProgress(CCharacter *pCharacer, int Progress)
+{
+	pCharacer->SetArmor(clamp(10 - (Progress / 15), 0, 10));
+}
+
 void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 {
 	IGameController::OnPlayerConnect(pPlayer);
@@ -127,7 +133,7 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 	{
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
-		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
 
 		GameServer()->SendChatTarget(ClientId, "DDraceNetwork Mod. Version: " GAME_VERSION);
 		GameServer()->SendChatTarget(ClientId, "please visit DDNet.org or say /info and make sure to read our /rules");

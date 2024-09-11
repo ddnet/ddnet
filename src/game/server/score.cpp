@@ -37,7 +37,7 @@ void CScore::ExecPlayerThread(
 		return;
 	auto Tmp = std::make_unique<CSqlPlayerRequest>(pResult);
 	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
-	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
 	str_copy(Tmp->m_aServer, g_Config.m_SvSqlServerName, sizeof(Tmp->m_aServer));
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 	Tmp->m_Offset = Offset;
@@ -113,7 +113,7 @@ void CScore::LoadBestTime()
 	m_pGameServer->m_pController->m_pLoadBestTimeResult = LoadBestTimeResult;
 
 	auto Tmp = std::make_unique<CSqlLoadBestTimeData>(LoadBestTimeResult);
-	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
 	m_pPool->Execute(CScoreWorker::LoadBestTime, std::move(Tmp), "load best time");
 }
 
@@ -154,7 +154,7 @@ void CScore::SaveScore(int ClientId, int TimeTicks, const char *pTimestamp, cons
 		dbg_msg("sql", "WARNING: previous save score result didn't complete, overwriting it now");
 	pCurPlayer->m_ScoreFinishResult = std::make_shared<CScorePlayerResult>();
 	auto Tmp = std::make_unique<CSqlScoreData>(pCurPlayer->m_ScoreFinishResult);
-	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
 	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
 	Tmp->m_ClientId = ClientId;
 	str_copy(Tmp->m_aName, Server()->ClientName(ClientId), sizeof(Tmp->m_aName));
@@ -186,7 +186,7 @@ void CScore::SaveTeamScore(int Team, int *pClientIds, unsigned int Size, int Tim
 	Tmp->m_Time = (float)TimeTicks / (float)Server()->TickSpeed();
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
 	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
-	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
 	Tmp->m_TeamrankUuid = RandomUuid();
 
 	m_pPool->ExecuteWrite(CScoreWorker::SaveTeamScore, std::move(Tmp), "save team score");
@@ -262,7 +262,7 @@ void CScore::RandomMap(int ClientId, int Stars)
 
 	auto Tmp = std::make_unique<CSqlRandomMapRequest>(pResult);
 	Tmp->m_Stars = Stars;
-	str_copy(Tmp->m_aCurrentMap, g_Config.m_SvMap, sizeof(Tmp->m_aCurrentMap));
+	str_copy(Tmp->m_aCurrentMap, Server()->GetMapName(), sizeof(Tmp->m_aCurrentMap));
 	str_copy(Tmp->m_aServerType, g_Config.m_SvServerType, sizeof(Tmp->m_aServerType));
 	str_copy(Tmp->m_aRequestingPlayer, GameServer()->Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 
@@ -276,7 +276,7 @@ void CScore::RandomUnfinishedMap(int ClientId, int Stars)
 
 	auto Tmp = std::make_unique<CSqlRandomMapRequest>(pResult);
 	Tmp->m_Stars = Stars;
-	str_copy(Tmp->m_aCurrentMap, g_Config.m_SvMap, sizeof(Tmp->m_aCurrentMap));
+	str_copy(Tmp->m_aCurrentMap, Server()->GetMapName(), sizeof(Tmp->m_aCurrentMap));
 	str_copy(Tmp->m_aServerType, g_Config.m_SvServerType, sizeof(Tmp->m_aServerType));
 	str_copy(Tmp->m_aRequestingPlayer, GameServer()->Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 
@@ -303,14 +303,14 @@ void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 
 	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientId);
 	SaveResult->m_SaveId = RandomUuid();
-	int Result = SaveResult->m_SavedTeam.Save(GameServer(), Team);
+	ESaveResult Result = SaveResult->m_SavedTeam.Save(GameServer(), Team);
 	if(CSaveTeam::HandleSaveError(Result, ClientId, GameServer()))
 		return;
 	pController->Teams().SetSaving(Team, SaveResult);
 
 	auto Tmp = std::make_unique<CSqlTeamSave>(SaveResult);
 	str_copy(Tmp->m_aCode, pCode, sizeof(Tmp->m_aCode));
-	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
 	str_copy(Tmp->m_aServer, pServer, sizeof(Tmp->m_aServer));
 	str_copy(Tmp->m_aClientName, this->Server()->ClientName(ClientId), sizeof(Tmp->m_aClientName));
 	Tmp->m_aGeneratedCode[0] = '\0';
@@ -372,7 +372,7 @@ void CScore::LoadTeam(const char *pCode, int ClientId)
 	pController->Teams().SetSaving(Team, SaveResult);
 	auto Tmp = std::make_unique<CSqlTeamLoad>(SaveResult);
 	str_copy(Tmp->m_aCode, pCode, sizeof(Tmp->m_aCode));
-	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
 	Tmp->m_ClientId = ClientId;
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 	Tmp->m_NumPlayer = 0;

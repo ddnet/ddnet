@@ -17,6 +17,22 @@ CMapSounds::CMapSounds()
 	m_Count = 0;
 }
 
+void CMapSounds::Play(int SoundId)
+{
+	if(SoundId < 0 || SoundId >= m_Count)
+		return;
+
+	m_pClient->m_Sounds.PlaySample(CSounds::CHN_MAPSOUND, m_aSounds[SoundId], 1.0f, 0);
+}
+
+void CMapSounds::PlayAt(int SoundId, vec2 Pos)
+{
+	if(SoundId < 0 || SoundId >= m_Count)
+		return;
+
+	m_pClient->m_Sounds.PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[SoundId], 1.0f, Pos, 0);
+}
+
 void CMapSounds::OnMapLoad()
 {
 	IMap *pMap = Kernel()->RequestInterface<IMap>();

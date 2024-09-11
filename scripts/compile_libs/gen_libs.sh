@@ -46,7 +46,8 @@ fi
 mkdir -p "$1"
 cd "$1" || exit 1
 
-_ANDROID_ABI_LEVEL=34
+# ANDROID_API_LEVEL must specify the _minimum_ supported SDK version, otherwise this will cause linking errors at launch
+ANDROID_API_LEVEL=24
 
 function build_cmake_lib() {
 	if [ ! -d "${1}" ]; then
@@ -59,7 +60,7 @@ function build_cmake_lib() {
 	(
 		cd "${1}" || exit 1
 		cp "${CURDIR}"/scripts/compile_libs/cmake_lib_compile.sh cmake_lib_compile.sh
-		./cmake_lib_compile.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
+		./cmake_lib_compile.sh "$ANDROID_API_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 	)
 }
 
@@ -74,13 +75,13 @@ cd compile_libs || exit 1
 	(
 		cd openssl || exit 1
 		cp "${CURDIR}"/scripts/compile_libs/make_lib_openssl.sh make_lib_openssl.sh
-		./make_lib_openssl.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
+		./make_lib_openssl.sh "$ANDROID_API_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 	)
 )
 
 build_cmake_lib zlib https://github.com/madler/zlib
 build_cmake_lib png https://github.com/glennrp/libpng
-build_cmake_lib curl https://github.com/curl/curl
+build_cmake_lib curl https://github.com/curl/curl "curl-8_8_0"
 build_cmake_lib freetype2 https://gitlab.freedesktop.org/freetype/freetype
 build_cmake_lib sdl https://github.com/libsdl-org/SDL SDL2
 build_cmake_lib ogg https://github.com/xiph/ogg
@@ -97,7 +98,7 @@ build_cmake_lib opus https://github.com/xiph/opus
 		./autogen.sh
 	fi
 	cp "${CURDIR}"/scripts/compile_libs/make_lib_opusfile.sh make_lib_opusfile.sh
-	./make_lib_opusfile.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
+	./make_lib_opusfile.sh "$ANDROID_API_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 )
 
 # SQLite, just download and built by hand
@@ -109,7 +110,7 @@ fi
 (
 	cd sqlite3 || exit 1
 	cp "${CURDIR}"/scripts/compile_libs/make_lib_sqlite3.sh make_lib_sqlite3.sh
-	./make_lib_sqlite3.sh "$_ANDROID_ABI_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
+	./make_lib_sqlite3.sh "$ANDROID_API_LEVEL" "$OS_NAME" "$COMPILEFLAGS" "$LINKFLAGS"
 )
 
 cd ..

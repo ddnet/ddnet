@@ -2,10 +2,11 @@
 #originally created by:
 #	arionwt1997
 #modified by:
-#	Chill & PoKeMoN		2023-03-31 16:00:00
-#	Chill & PoKeMoN		2023-07-02 00:54:00
+#	Chill [TD] & PoKeMoN [TD]		2023-03-31 16:00:00
+#	Chill [TD] & PoKeMoN [TD]		2023-07-02 00:54:00
 #	Chill [TD] & PoKeMoN [TD]		2023-09-22 17:49:00
 #	Chill [TD] & PoKeMoN [TD]		2023-11-14 12:42:00
+#	Chill [TD] & PoKeMoN [TD]		2024-08-23 23:17:00
 #	
 ##### /authors #####
 
@@ -281,9 +282,6 @@ Player
 Player country:
 == Краіна гульца:
 
-Player options
-== Опцыі гульца
-
 Players
 == Гульцы
 
@@ -345,7 +343,7 @@ Shotgun
 == Драбавік
 
 Show chat
-== Паказаць чат
+== Паказваць чат
 
 Show friends only
 == Толькі з сябрамі
@@ -381,7 +379,7 @@ Stop record
 == Стоп запісу
 
 Strict gametype filter
-== Строгі фільтр рэжым.
+== Строгі фільтр рэжымаў
 
 Sudden Death
 == Раптоўная смерць
@@ -867,9 +865,6 @@ Loading ghost files
 Time
 == Час
 
-Reload
-== Перазагрузіць
-
 Deactivate
 == Выключыць
 
@@ -1165,9 +1160,6 @@ Show votes window after voting
 
 DDRace HUD
 == DDRace HUD
-
-Show client IDs in scoreboard
-== Паказваць ID кліента ў табло ачкоў
 
 Show DDRace HUD
 == Паказваць DDRace HUD
@@ -1621,7 +1613,7 @@ Go back the specified duration
 
 [Demo player duration]
 %d sec.
-== % сек.
+== %d сек.
 
 Change the skip duration
 == Змяніць працягласць пропуску
@@ -1705,6 +1697,7 @@ Regular background color
 Entities background color
 == Колер фону энтыты
 
+[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Адбылася памылка падчас выканання каманды запісу. Паспрабуйце абнавіць драйверы відэакарты.
 
@@ -1714,162 +1707,213 @@ A render command failed. Try to update your GPU drivers.
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Памылка падчас ініцыялізацыі. Паспрабуйце змяніць gfx_backend на OpenGL або Vulcan у settings_dnet.cfg ў тэчцы канфігурацыйных файлаў і паспрабуйце яшчэ раз.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Недахоп VRAM. Паспрабуйце выдаліць карыстацкія тэкстуры (скіны, энтыты і г.д.), асабліва тыя, якія маюць высокую разрознасць.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Адпраўка каманд рэндэрынгу не ўдалася. Паспрабуйце абнавіць драйверы відэакарты.
 
 Failed saving the replay!
-== 
+== Не атрымалася захаваць паўтор!
 
 Saving settings to '%s' failed
-== 
+== Захаванне налад у '%s' не атрымалася
 
 Error saving settings
-== 
+== Памылка захавання налад
 
 Loading demo file from storage
-== 
+== Загрузка файла дэма са сховішча
 
 Searching
-== 
+== Пошук
 
 Enter Username
-== 
+== Увядзіце імя карыстальніка
 
 Enter Password
-== 
+== Увядзіце пароль
 
 NOT CONNECTED
-== 
+== НЕ ПАДЛУЧАНА
 
 Match %d of %d
-== 
+== Адпаведна %d з %d
 
 No results
-== 
+== Няма вынікаў
 
 Lines %d - %d (%s)
-== 
+== Радкі %d - %d (%s)
 
 Locked
-== 
+== Зафіксаваныя
 
 Following
-== 
+== Бягучыя
 
 Loading commands…
-== 
+== Загрузка каманд…
 
 [Spectating]
 Following %s
-== 
+== Назіранне за %s
 
 Press a key…
-== 
+== Націсніце клавішу…
 
 Main menu
-== 
+== Галоўнае меню
 
 Are you sure that you want to restart?
-== 
+== Вы ўпэўненыя, што хочаце пачаць нанова?
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== У рэдактары засталася не захаваная карта, магчыма вы хочаце яе захаваць.
 
 Continue anyway?
-== 
+== Працягнуць у любым выпадку?
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d КіБ (%.1f КіБ/с)
 
 Example of usage
-== 
+== Прыклад выкарыстання
 
 No login required
-== 
+== Уваход не патрабуецца
 
 Communities
-== 
+== Суполкі
 
 Server filter
-== 
+== Фільтр сервераў
 
 Friends
-== 
+== Сябры
 
 Loading…
-== 
+== Загрузка…
 
 Player info change cooldown
-== 
+== Затрымка абнаўлення інфармацыі пра гульца
 
 Tee
-== 
+== Tee
 
 Info Messages
-== 
+== Інфа. Паведамленні
 
 Show local time always
-== 
+== Заўсёды паказваць мясцовы час
 
 Always show chat
-== 
+== Заўсёды паказваць чат
 
 Show only chat messages from team members
-== 
+== Паказваць паведамленні чата толькі ад чальцоў каманды
 
 Chat font size
-== 
+== Памер шрыфта чата
 
 Chat width
-== 
+== Шырыня чата
 
 Show friend mark (♥) in name plates
-== 
+== Паказваць адзнаку сябра (♥) у таблічках з імёнамі
 
 Show hook strength icon indicator
-== 
+== Паказваць іконку індыкатара сілы крука
 
 Show hook strength number indicator
-== 
+== Паказваць нумар індыкатара сілы крука
 
 Authed name color in scoreboard
-== 
+== Колер аўтарызаваных гульцоў у табло ачкоў
 
 Same clan color in scoreboard
-== 
+== Колер твайго клана ў табло ачкоў
 
 Show own player's hook collision line
-== 
+== Паказваць сваю лінію сутыкнення крука
 
 Always show own player's hook collision line
-== 
+== Заўсёды паказваць сваю лінію сутыкнення крука
 
 Always show other players' hook collision lines
-== 
+== Заўсёды паказваць лініі сутыкнення крука іншых гульцоў
 
 Show finish messages
-== 
+== Паказваць паведамленні пра фініш
 
 Round %d/%d
-== 
+== Раўнд %d/%d
 
 [Spectators]
 %d others…
-== 
+== %d іншых…
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== Каманда %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping
+
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
+Show client IDs (scoreboard, chat, spectator)
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 

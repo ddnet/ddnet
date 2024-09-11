@@ -320,7 +320,7 @@ void CEditorActionDeleteQuad::Redo()
 CEditorActionEditQuadPoint::CEditorActionEditQuadPoint(CEditor *pEditor, int GroupIndex, int LayerIndex, int QuadIndex, std::vector<CPoint> const &vPreviousPoints, std::vector<CPoint> const &vCurrentPoints) :
 	CEditorActionLayerBase(pEditor, GroupIndex, LayerIndex), m_QuadIndex(QuadIndex), m_vPreviousPoints(vPreviousPoints), m_vCurrentPoints(vCurrentPoints)
 {
-	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit quad points");
+	str_copy(m_aDisplayText, "Edit quad points");
 }
 
 void CEditorActionEditQuadPoint::Undo()
@@ -628,7 +628,7 @@ CEditorActionGroup::CEditorActionGroup(CEditor *pEditor, int GroupIndex, bool De
 	if(m_Delete)
 		str_format(m_aDisplayText, sizeof(m_aDisplayText), "Delete group %d", m_GroupIndex);
 	else
-		str_format(m_aDisplayText, sizeof(m_aDisplayText), "New group");
+		str_copy(m_aDisplayText, "New group", sizeof(m_aDisplayText));
 }
 
 void CEditorActionGroup::Undo()
@@ -1198,7 +1198,7 @@ CEditorActionTileArt::CEditorActionTileArt(CEditor *pEditor, int PreviousImageCo
 	IEditorAction(pEditor), m_PreviousImageCount(PreviousImageCount), m_vImageIndexMap(vImageIndexMap)
 {
 	str_copy(m_aTileArtFile, pTileArtFile);
-	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Tile art");
+	str_copy(m_aDisplayText, "Tile art");
 }
 
 void CEditorActionTileArt::Undo()
@@ -1266,7 +1266,7 @@ CEditorCommandAction::CEditorCommandAction(CEditor *pEditor, EType Type, int *pS
 	switch(m_Type)
 	{
 	case EType::ADD:
-		str_format(m_aDisplayText, sizeof(m_aDisplayText), "Add command");
+		str_copy(m_aDisplayText, "Add command");
 		break;
 	case EType::EDIT:
 		str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit command %d", m_CommandIndex);

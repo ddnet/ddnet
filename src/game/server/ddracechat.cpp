@@ -505,16 +505,22 @@ void CGameContext::ConDND(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
-	if(pPlayer->m_DND)
-	{
-		pPlayer->m_DND = false;
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You will receive global chat and server messages");
-	}
-	else
-	{
-		pPlayer->m_DND = true;
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You will not receive any further global chat and server messages");
-	}
+	pPlayer->m_DND = pResult->NumArguments() == 0 ? !pPlayer->m_DND : pResult->GetInteger(0);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pPlayer->m_DND ? "You will not receive any further global chat and server messages" : "You will receive global chat and server messages");
+}
+
+void CGameContext::ConWhispers(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	pPlayer->m_Whispers = pResult->NumArguments() == 0 ? !pPlayer->m_Whispers : pResult->GetInteger(0);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pPlayer->m_Whispers ? "You will receive whispers" : "You will not receive any further whispers");
 }
 
 void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
@@ -559,7 +565,7 @@ void CGameContext::ConMapInfo(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() > 0)
 		pSelf->Score()->MapInfo(pResult->m_ClientId, pResult->GetString(0));
 	else
-		pSelf->Score()->MapInfo(pResult->m_ClientId, g_Config.m_SvMap);
+		pSelf->Score()->MapInfo(pResult->m_ClientId, pSelf->Server()->GetMapName());
 }
 
 void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)

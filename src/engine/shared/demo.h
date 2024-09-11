@@ -178,7 +178,6 @@ public:
 
 	int Update(bool RealTime = true);
 	bool IsSixup() const { return m_Sixup; }
-	void SetSixup(bool Sixup) { m_Sixup = Sixup; }
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
 	bool IsPlaying() const override { return m_File != nullptr; }

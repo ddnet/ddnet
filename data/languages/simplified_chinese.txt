@@ -41,6 +41,7 @@
 # 2024-04-21 By
 # 2024-06-10 By
 # 2024-07-21 By
+# 2024-08-29 Pioooooo
 ##### /authors #####
 
 ##### translated strings #####
@@ -341,9 +342,6 @@ HUD
 
 Player country:
 == 玩家国家 / 地区：
-
-Player options
-== 玩家选项
 
 Players
 == 玩家
@@ -830,9 +828,6 @@ Show DDNet map finishes in server browser
 
 transmits your player name to info.ddnet.org
 == 将会发送你的玩家昵称到 info.ddnet.org
-
-Reload
-== 刷新
 
 Enable replays
 == 启用短时回放
@@ -1389,9 +1384,6 @@ Show health, shields and ammo
 DDRace HUD
 == DDRace HUD
 
-Show client IDs in scoreboard
-== 显示客户端 IDs （计分板中）
-
 Show DDRace HUD
 == 显示 DDRace HUD
 
@@ -1523,7 +1515,7 @@ Are you sure that you want to reset the controls to their defaults?
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 初始化失败。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将“gfx_backend OpenGL”修改为“gfx_backend Vulkan”（若没有前者则可直接输入后者）再重试。
+== 初始化失败。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将 “gfx_backend” 设置为 “gfx_backend OpenGL” 或 “gfx_backend Vulkan” 再重试。
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
@@ -1547,7 +1539,7 @@ Failed to swap framebuffers. Try to update your GPU drivers.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 未知错误。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将“gfx_backend OpenGL”修改为“gfx_backend Vulkan”（若没有前者则可直接输入后者）再重试。
+== 未知错误。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将 “gfx_backend” 设置为 “gfx_backend OpenGL” 或 “gfx_backend Vulkan” 再重试。
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
@@ -1575,7 +1567,7 @@ No controller found. Plug in a controller.
 == 未检测到任何控制器。请尝试重新连接控制器。
 
 Unregister protocol and file extensions
-== 未注册的协议与扩充文件
+== 清除协议与文件类型关联
 
 Open the directory to add custom assets
 == 打开用以添加自定义资源的文件夹路径
@@ -1914,3 +1906,54 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/index.php?title=Mapping/zh&variant=zh-hans
+
+Could not resolve connect address '%s'. See local console for details.
+== 无法解析连接地址 '%s'。检查本地控制台以获取详情。
+
+Connect address error
+== 连接地址错误
+
+Could not connect dummy
+== 无法连接分身
+
+Dummy is not allowed on this server
+== 此服务器禁止使用分身
+
+Please wait…
+== 请稍等…
+
+Show client IDs (scoreboard, chat, spectator)
+== 显示客户端 ID（计分板、聊天、观战者）
+
+Normal:
+== 正常：
+
+Team:
+== 队伍：
+
+Dummy settings
+== 分身设置
+
+Toggle to edit your dummy settings
+== 切换以编辑分身设置
+
+Randomize
+== 随机
+
+Are you sure that you want to delete '%s'?
+== 你确定要删除'%s'吗？
+
+Delete skin
+== 删除皮肤
+
+Basic
+== 基本
+
+Custom
+== 自定义
+
+Unable to delete skin
+== 无法删除皮肤
+
+Customize
+== 自定义

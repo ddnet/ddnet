@@ -115,7 +115,7 @@ class CConsole : public IConsole
 		const char *GetString(unsigned Index) const override;
 		int GetInteger(unsigned Index) const override;
 		float GetFloat(unsigned Index) const override;
-		ColorHSLA GetColor(unsigned Index, bool Light) const override;
+		std::optional<ColorHSLA> GetColor(unsigned Index, bool Light) const override;
 
 		void RemoveArgument(unsigned Index) override
 		{
@@ -144,7 +144,16 @@ class CConsole : public IConsole
 	};
 
 	int ParseStart(CResult *pResult, const char *pString, int Length);
-	int ParseArgs(CResult *pResult, const char *pFormat);
+
+	enum
+	{
+		PARSEARGS_OK = 0,
+		PARSEARGS_MISSING_VALUE,
+		PARSEARGS_INVALID_INTEGER,
+		PARSEARGS_INVALID_FLOAT,
+	};
+
+	int ParseArgs(CResult *pResult, const char *pFormat, bool IsColor = false);
 
 	/*
 	this function will set pFormat to the next parameter (i,s,r,v,?) it contains and

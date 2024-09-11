@@ -867,10 +867,15 @@ void sphore_destroy(SEMAPHORE *sem)
 #elif defined(CONF_PLATFORM_MACOS)
 void sphore_init(SEMAPHORE *sem)
 {
-	char aBuf[32];
-	str_format(aBuf, sizeof(aBuf), "%p", (void *)sem);
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "/%d.%p", pid(), (void *)sem);
 	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
-	dbg_assert(*sem != SEM_FAILED, "sem_open failure");
+	if(*sem == SEM_FAILED)
+	{
+		char aError[128];
+		str_format(aError, sizeof(aError), "sem_open failure, errno=%d, name='%s'", errno, aBuf);
+		dbg_assert(false, aError);
+	}
 }
 void sphore_wait(SEMAPHORE *sem)
 {
@@ -888,8 +893,8 @@ void sphore_signal(SEMAPHORE *sem)
 void sphore_destroy(SEMAPHORE *sem)
 {
 	dbg_assert(sem_close(*sem) == 0, "sem_close failure");
-	char aBuf[32];
-	str_format(aBuf, sizeof(aBuf), "%p", (void *)sem);
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "/%d.%p", pid(), (void *)sem);
 	dbg_assert(sem_unlink(aBuf) == 0, "sem_unlink failure");
 }
 #elif defined(CONF_FAMILY_UNIX)
@@ -1128,22 +1133,6 @@ bool net_addr_str(const NETADDR *addr, char *string, int max_length, int add_por
 		return false;
 	}
 	return true;
-}
-
-void net_addr_url_str(const NETADDR *addr, char *string, int max_length, int add_port)
-{
-	char ipaddr[512];
-	if(!net_addr_str(addr, ipaddr, sizeof(ipaddr), add_port))
-	{
-		str_copy(string, ipaddr, max_length);
-		return;
-	}
-	str_format(
-		string,
-		max_length,
-		"tw-%s+udp://%s",
-		addr->type & NETTYPE_TW7 ? "0.7" : "0.6",
-		ipaddr);
 }
 
 static int priv_net_extract(const char *hostname, char *host, int max_host, int *port)

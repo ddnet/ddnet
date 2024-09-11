@@ -472,12 +472,30 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 		CServerInfo SetInfo = ParsedInfo;
 		SetInfo.m_Location = ParsedLocation;
 		SetInfo.m_NumAddresses = 0;
+		bool GotVersion6 = false;
 		for(unsigned int a = 0; a < Addresses.u.array.length; a++)
 		{
 			const json_value &Address = Addresses[a];
 			if(Address.type != json_string)
 			{
 				return true;
+			}
+			if(str_startswith(Addresses[a], "tw-0.6+udp://"))
+			{
+				GotVersion6 = true;
+				break;
+			}
+		}
+		for(unsigned int a = 0; a < Addresses.u.array.length; a++)
+		{
+			const json_value &Address = Addresses[a];
+			if(Address.type != json_string)
+			{
+				return true;
+			}
+			if(GotVersion6 && str_startswith(Addresses[a], "tw-0.7+udp://"))
+			{
+				continue;
 			}
 			NETADDR ParsedAddr;
 			if(ServerbrowserParseUrl(&ParsedAddr, Addresses[a]))

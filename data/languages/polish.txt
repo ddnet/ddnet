@@ -282,9 +282,6 @@ Player
 Player country:
 == Narodowość:
 
-Player options
-== Opcje gracza
-
 Players
 == Gracze
 
@@ -682,9 +679,6 @@ Enable replays
 
 Automatically create statboard csv
 == Automatycznie stwórz plik csv z tabelą wyników
-
-Reload
-== Przeładuj
 
 Replay feature is disabled!
 == Funkcja odtwarzania jest wyłączona!
@@ -1639,9 +1633,6 @@ Show health, shields and ammo
 Show local time always
 == Pokazuj czas lokalny
 
-Show client IDs in scoreboard
-== Pokazuj ID klienta w tabeli wyników
-
 Show DDRace HUD
 == Pokazuj HUD DDRace
 
@@ -1808,6 +1799,15 @@ Submitting the render commands failed. Try to update your GPU drivers.
 Failed to swap framebuffers. Try to update your GPU drivers.
 == 
 
+Could not resolve connect address '%s'. See local console for details.
+== 
+
+Connect address error
+== 
+
+Could not connect dummy
+== 
+
 Match %d of %d
 == 
 
@@ -1840,6 +1840,12 @@ Folder Link
 map not included
 == 
 
+Dummy is not allowed on this server
+== 
+
+Please wait…
+== 
+
 Aim bind
 == 
 
@@ -1855,7 +1861,43 @@ Tee
 DDRace HUD
 == 
 
+Show client IDs (scoreboard, chat, spectator)
+== 
+
 Show only chat messages from team members
+== 
+
+Normal:
+== 
+
+Team:
+== 
+
+Dummy settings
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Randomize
+== 
+
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
+Basic
+== 
+
+Custom
+== 
+
+Unable to delete skin
+== 
+
+Customize
 == 
 
 Round %d/%d
