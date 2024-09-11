@@ -158,7 +158,7 @@ void CGameControllerInstaBaseCTF::OnFlagGrab(class CFlag *pFlag)
 		return;
 
 	CPlayer *pPlayer = pFlag->m_pCarrier->GetPlayer();
-	pPlayer->m_FlagGrabs++;
+	pPlayer->m_Stats.m_FlagGrabs++;
 
 	if(g_Config.m_SvFastcap)
 		Teams().OnCharacterStart(pPlayer->GetCid());
@@ -172,7 +172,7 @@ void CGameControllerInstaBaseCTF::OnFlagCapture(class CFlag *pFlag, float Time)
 		return;
 
 	CPlayer *pPlayer = pFlag->m_pCarrier->GetPlayer();
-	pPlayer->m_FlagCaptures++;
+	pPlayer->m_Stats.m_FlagCaptures++;
 
 	if(g_Config.m_SvFastcap)
 		Teams().OnCharacterFinish(pPlayer->GetCid());

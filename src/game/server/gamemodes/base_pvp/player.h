@@ -5,6 +5,7 @@
 #ifndef IN_CLASS_PLAYER
 
 #include <base/vmath.h>
+#include <game/server/instagib/sql_stats_player.h>
 #include <optional>
 #include <vector>
 
@@ -50,27 +51,15 @@ public:
 	/*******************************************************************
 	 * shared                                                          *
 	 *******************************************************************/
-	// Will also be set if spree chat messages are turned off
-	int m_Spree;
 	//Anticamper
 	bool m_SentCampMsg;
 	int m_CampTick;
 	vec2 m_CampPos;
 
-	// kills, deaths and flag grabs/caps are tracked per round
-	int m_Kills;
-	int m_Deaths;
-	int m_FlagCaptures;
-	int m_FlagGrabs;
-
-	void ResetStats()
-	{
-		m_Spree = 0;
-		m_Kills = 0;
-		m_Deaths = 0;
-		m_FlagCaptures = 0;
-		m_FlagGrabs = 0;
-	}
+	CSqlStatsPlayer m_Stats;
+	int Spree() const { return m_Stats.m_Spree; }
+	int Kills() const { return m_Stats.m_Kills; }
+	int Deaths() const { return m_Stats.m_Deaths; }
 
 	/*
 		m_HasGhostCharInGame

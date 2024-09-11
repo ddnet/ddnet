@@ -342,9 +342,9 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 
 	// selfkill is no kill
 	if(pKiller != pVictim->GetPlayer())
-		pKiller->m_Kills++;
+		pKiller->m_Stats.m_Kills++;
 	// but selfkill is a death
-	pVictim->GetPlayer()->m_Deaths++;
+	pVictim->GetPlayer()->m_Stats.m_Deaths++;
 
 	if(pKiller && pVictim)
 	{
@@ -541,23 +541,23 @@ void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 
 void CGameControllerPvp::AddSpree(class CPlayer *pPlayer)
 {
-	pPlayer->m_Spree++;
+	pPlayer->m_Stats.m_Spree++;
 	const int NumMsg = 5;
 	char aBuf[128];
 
-	if(g_Config.m_SvKillingspreeKills > 0 && pPlayer->m_Spree % g_Config.m_SvKillingspreeKills == 0)
+	if(g_Config.m_SvKillingspreeKills > 0 && pPlayer->Spree() % g_Config.m_SvKillingspreeKills == 0)
 	{
 		static const char aaSpreeMsg[NumMsg][32] = {"is on a killing spree", "is on a rampage", "is dominating", "is unstoppable", "is godlike"};
-		int No = pPlayer->m_Spree / g_Config.m_SvKillingspreeKills;
+		int No = pPlayer->Spree() / g_Config.m_SvKillingspreeKills;
 
-		str_format(aBuf, sizeof(aBuf), "'%s' %s with %d kills!", Server()->ClientName(pPlayer->GetCid()), aaSpreeMsg[(No > NumMsg - 1) ? NumMsg - 1 : No], pPlayer->m_Spree);
+		str_format(aBuf, sizeof(aBuf), "'%s' %s with %d kills!", Server()->ClientName(pPlayer->GetCid()), aaSpreeMsg[(No > NumMsg - 1) ? NumMsg - 1 : No], pPlayer->Spree());
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 	}
 }
 
 void CGameControllerPvp::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller)
 {
-	if(g_Config.m_SvKillingspreeKills > 0 && pPlayer->m_Spree >= g_Config.m_SvKillingspreeKills)
+	if(g_Config.m_SvKillingspreeKills > 0 && pPlayer->Spree() >= g_Config.m_SvKillingspreeKills)
 	{
 		CCharacter *pChr = pPlayer->GetCharacter();
 
@@ -574,12 +574,12 @@ void CGameControllerPvp::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller
 
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "'%s' %d-kills killing spree was ended by %s",
-				Server()->ClientName(pPlayer->GetCid()), pPlayer->m_Spree, Server()->ClientName(pKiller->GetCid()));
+				Server()->ClientName(pPlayer->GetCid()), pPlayer->Spree(), Server()->ClientName(pKiller->GetCid()));
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		}
 	}
 	// pPlayer->m_GotAward = false;
-	pPlayer->m_Spree = 0;
+	pPlayer->m_Stats.m_Spree = 0;
 }
 
 void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
@@ -587,7 +587,7 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 	OnPlayerConstruct(pPlayer);
 	IGameController::OnPlayerConnect(pPlayer);
 	int ClientId = pPlayer->GetCid();
-	pPlayer->ResetStats();
+	pPlayer->m_Stats.Reset();
 
 	// init the player
 	Score()->PlayerData(ClientId)->Reset();
@@ -899,11 +899,11 @@ int CGameControllerPvp::GetHighestSpreeClientId()
 	{
 		if(!pPlayer)
 			continue;
-		if(pPlayer->m_Spree <= Spree)
+		if(pPlayer->Spree() <= Spree)
 			continue;
 
 		ClientId = pPlayer->GetCid();
-		Spree = pPlayer->m_Spree;
+		Spree = pPlayer->Spree();
 	}
 	return ClientId;
 }

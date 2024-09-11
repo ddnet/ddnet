@@ -86,10 +86,10 @@ void CGameControllerZcatch::OnUpdateZcatchColorConfig()
 
 void CGameControllerZcatch::SetCatchColors(CPlayer *pPlayer)
 {
-	int Color = GetBodyColor(pPlayer->m_Spree);
+	int Color = GetBodyColor(pPlayer->Spree());
 
 	// it would be cleaner if this only applied to the winner
-	// we could make sure m_Spree is not reset until the next round starts
+	// we could make sure Spree() is not reset until the next round starts
 	// but for now it should work because players that connect during round end
 	// will reset m_aBodyColors
 	if(GameState() == IGS_END_ROUND)
