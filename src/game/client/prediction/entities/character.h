@@ -141,6 +141,7 @@ public:
 
 	bool IsSuper() { return m_Core.m_Super; }
 	int m_FreezeAccumulation;
+	int m_AliveAccumulation;
 
 private:
 	// weapon info

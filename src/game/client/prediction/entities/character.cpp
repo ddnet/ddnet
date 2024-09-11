@@ -975,11 +975,16 @@ void CCharacter::DDRaceTick()
 			m_Input.m_Hook = 0;
 		}
 		if(m_FreezeTime == 1)
-			UnFreeze();		
+			UnFreeze();
+
+		m_AliveAccumulation = std::min(m_AliveAccumulation - 1, 0);
+		m_AliveAccumulation = std::max(m_AliveAccumulation, -g_Config.m_ClUnfreezeLagDelayTicks);
 	}
-	else
+	else 
 	{
-		m_FreezeAccumulation = 0;
+		m_AliveAccumulation = std::max(m_AliveAccumulation, 1);
+		m_AliveAccumulation = std::min(m_AliveAccumulation + 1, g_Config.m_ClUnfreezeLagDelayTicks);
+
 	}
 
 	HandleTuneLayer();
@@ -999,12 +1004,12 @@ void CCharacter::DDRaceTick()
 			break;
 		}
 	}
-	if (m_Core.m_IsInFreeze) {
-		m_FreezeAccumulation = std::min(m_FreezeAccumulation + 1, m_FreezeTime);
+	if (m_Core.m_IsInFreeze && IsGrounded()) {
+		m_FreezeAccumulation = std::min(m_FreezeAccumulation + 1, g_Config.m_ClUnfreezeLagDelayTicks);
 	}
 	else
 	{
-		m_FreezeAccumulation = std::max(m_FreezeAccumulation - 1, 0);
+		m_FreezeAccumulation = std::min(m_FreezeAccumulation, m_FreezeTime);
 	}
 }
 

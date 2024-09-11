@@ -3300,7 +3300,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 				g_Config.m_ClRunOnJoinDelay = Delay;
 			}
 		}
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, ("Update tee skin faster after being frozen (slightly buggy)"), &g_Config.m_ClFreezeUpdateFix, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, ("Update tee skin faster after being frozen"), &g_Config.m_ClFreezeUpdateFix, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, ("Show screen center"), &g_Config.m_ClShowCenterLines, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, ("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, ("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &MainView, LineMargin);
@@ -3331,7 +3331,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 			Ui()->DoEditBox(&s_LastInput, &Button, 12.0f);
 			MainView.HSplitTop(20.0f, &Section, &MainView);
-			DoLine_ColorPicker(&NotifyWhenLastTextID, 22.0f, 150.0f, 14.0f, &Section, ("Notification Color"), &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), false);
+			DoLine_ColorPicker(&NotifyWhenLastTextID, 22.0f, 13.0f, 14.0f, &Section, ("Notification Color"), &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), false);
 		}
 		CUIRect ButtonVerify, EnableVerifySection;
 		MainView.HSplitTop(LineMargin, &EnableVerifySection, &MainView);
@@ -3351,6 +3351,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, ("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowSkinName, ("Show skin names in nameplate"), &g_Config.m_ClShowSkinName, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeStars, ("Freeze Stars"), &g_Config.m_ClFreezeStars, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClColorFreeze, ("Color Frozen Tee Skins"), &g_Config.m_ClColorFreeze, &MainView, LineMargin);
+
 		//{
 		//	CUIRect Button, Label;
 		//	MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -3425,7 +3428,19 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
 		DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 13.0f, 5.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+		Ui()->DoLabel(&Section, Localize("Input"), 20.0f, TEXTALIGN_LEFT);
+		MainView.VSplitLeft(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInput, ("Fast Inputs (-20ms visual input delay)"), &g_Config.m_ClFastInput, &MainView, LineMargin);
+		if(g_Config.m_ClFastInput)
+		{
+			MainView.HSplitTop(10.0f, 0x0, &MainView);
+			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInputOthers, ("Extra tick other tees (increases other tees visual latency, \n makes dragging slightly easier when using fast input)"), &g_Config.m_ClFastInputOthers, &MainView, LineMargin);
+		}
 		{
 			CUIRect Button;
 			CUIRect ExtMenu;
@@ -3597,7 +3612,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClUnfreezeLagDelayTicks * 20);
 			Ui()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClUnfreezeLagDelayTicks = (int)(Ui()->DoScrollbarH(&g_Config.m_ClUnfreezeLagDelayTicks, &Button, (g_Config.m_ClUnfreezeLagDelayTicks) / 200.0f) * 200.0f);
+			g_Config.m_ClUnfreezeLagDelayTicks = (int)(Ui()->DoScrollbarH(&g_Config.m_ClUnfreezeLagDelayTicks, &Button, (g_Config.m_ClUnfreezeLagDelayTicks) / 150.0f) * 150.0f);
+			g_Config.m_ClUnfreezeLagDelayTicks = std::max(g_Config.m_ClUnfreezeLagDelayTicks, g_Config.m_ClUnfreezeLagTicks);
 		}
 		if(g_Config.m_ClRemoveAnti)
 		{
@@ -3608,10 +3624,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Amount", g_Config.m_ClUnfreezeLagTicks * 20);
 			Ui()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClUnfreezeLagTicks = (int)(Ui()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 15.0f) * 15.0f);
-		}
-		if(g_Config.m_ClRemoveAnti)
-		{
-			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAdjustRemovedDelay, ("Add amount back if you are not currently in freeze"), &g_Config.m_ClAdjustRemovedDelay, &MainView, LineMargin);
 		}
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClUnpredOthersInFreeze, ("Dont predict other players if you are frozen"), &g_Config.m_ClUnpredOthersInFreeze, &MainView, LineMargin);
 		

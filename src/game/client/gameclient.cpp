@@ -2129,6 +2129,9 @@ void CGameClient::OnPredict()
 		{
 			m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
 			m_PredictedPrevChar = pLocalChar->GetCore();
+		}
+		if(Tick == FinalTick - (1 - g_Config.m_ClFastInputOthers))
+		{
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
 					m_aClients[i].m_PrevPredicted = pChar->GetCore();
@@ -2163,6 +2166,9 @@ void CGameClient::OnPredict()
 		if(Tick == FinalTick)
 		{
 			m_PredictedChar = pLocalChar->GetCore();
+		}
+		if (Tick == FinalTick - (1 - g_Config.m_ClFastInputOthers)) 
+		{
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
 					m_aClients[i].m_Predicted = pChar->GetCore();
@@ -2182,26 +2188,6 @@ void CGameClient::OnPredict()
 			m_NewPredictedTick = true;
 			vec2 Pos = pLocalChar->Core()->m_Pos;
 			int Events = pLocalChar->Core()->m_TriggeredEvents;
-
-			// for(int i = 0; i < MAX_CLIENTS; i++)
-			//{
-			//	if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
-			//	{
-			//		if(pChar->m_FreezeTime % Client()->GameTickSpeed() == Client()->GameTickSpeed() - 1)
-			//		{
-			//			int Amount = (pChar->m_FreezeTime + 1) / Client()->GameTickSpeed();
-			//			float a = 3 * pi / 2;
-			//			float s = a - pi / 3;
-			//			float e = a + pi / 3;
-			//			for(int i = 0; i < Amount; i++)
-			//			{
-			//				float f = mix(s, e, (i + 1) / (float)(Amount + 2));
-			//				vec2 Dir = vec2(cos(f), sin(f));
-			//				m_Effects.DamageIndicator(pChar->m_Pos, Dir);
-			//			}
-			//		}
-			//	}
-			// }
 
 			if(g_Config.m_ClPredict && !m_SuppressEvents)
 				if(Events & COREEVENT_AIR_JUMP)
@@ -2231,6 +2217,40 @@ void CGameClient::OnPredict()
 
 	if(g_Config.m_ClFastInput)
 		m_PredictedWorld.CopyWorld(&m_PrevPredictedWorld);
+
+	if(g_Config.m_ClRemoveAnti)
+	{
+		m_ExtraPredictedWorld.CopyWorld(&m_PredictedWorld);
+		CCharacter *pExtraChar = m_ExtraPredictedWorld.GetCharacterById(m_Snap.m_LocalClientId);
+		if(pExtraChar)
+		{
+			int AliveAccumulation = pExtraChar->m_AliveAccumulation;
+			bool Unfrozen = false;
+			bool Frozen = false;
+			for(int i = 0; i < g_Config.m_ClUnfreezeLagDelayTicks; i++)
+			{
+				if(!pExtraChar)
+					continue;
+
+				if(Frozen && pExtraChar->m_AliveAccumulation > 0)
+					Unfrozen = true;
+
+				if(pExtraChar->m_AliveAccumulation < 0)
+					Frozen = true;
+
+				if(!Unfrozen)
+				{
+					m_ExtraPredictedWorld.m_GameTick++;
+					m_ExtraPredictedWorld.Tick();
+				}
+				else 
+				{
+					pExtraChar->m_AliveAccumulation = std::max(pExtraChar->m_AliveAccumulation, 1);
+					pExtraChar->m_AliveAccumulation = std::min(pExtraChar->m_AliveAccumulation + 1, g_Config.m_ClUnfreezeLagDelayTicks);
+				}
+			}
+		}
+	}
 
 	// detect mispredictions of other players and make corrections smoother when possible
 	if(g_Config.m_ClAntiPingSmooth && Predict() && AntiPingPlayers() && m_NewTick && m_PredictedTick >= MIN_TICK && absolute(m_PredictedTick - Client()->PredGameTick(g_Config.m_ClDummy)) <= 1 && absolute(Client()->GameTick(g_Config.m_ClDummy) - Client()->PrevGameTick(g_Config.m_ClDummy)) <= 2)
@@ -3148,6 +3168,10 @@ vec2 CGameClient::GetSmoothPos(int ClientId)
 			int SmoothTick;
 			float SmoothIntra;
 			Client()->GetSmoothTick(&SmoothTick, &SmoothIntra, MixAmount);
+
+			if(ClientId != m_Snap.m_LocalClientId && !g_Config.m_ClFastInputOthers && g_Config.m_ClFastInput)
+					SmoothTick -= 1;
+
 			if(SmoothTick > 0 && m_aClients[ClientId].m_aPredTick[(SmoothTick - 1) % 200] >= Client()->PrevGameTick(g_Config.m_ClDummy) && m_aClients[ClientId].m_aPredTick[SmoothTick % 200] <= Client()->PredGameTick(g_Config.m_ClDummy))
 				Pos[i] = mix(m_aClients[ClientId].m_aPredPos[(SmoothTick - 1) % 200][i], m_aClients[ClientId].m_aPredPos[SmoothTick % 200][i], SmoothIntra);
 		}
@@ -3159,33 +3183,55 @@ vec2 CGameClient::GetFreezePos(int ClientId)
 {
 	vec2 Pos = mix(m_aClients[ClientId].m_PrevPredicted.m_Pos, m_aClients[ClientId].m_Predicted.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
 	// int64_t Now = time_get();
-	CCharacter *pChar = m_PredictedWorld.GetCharacterById(ClientId);
+	CCharacter *pChar = m_PredictedWorld.GetCharacterById(m_Snap.m_LocalClientId);
+	CCharacter *pExtraChar = m_ExtraPredictedWorld.GetCharacterById(m_Snap.m_LocalClientId);
+
+	int64_t Now = time_get();
 
 	for(int i = 0; i < 2; i++)
 	{
-		// int64_t Len = clamp(m_aClients[ClientId].m_SmoothLen[i], (int64_t)1, time_freq());
-		// int64_t TimePassed = Now - m_aClients[ClientId].m_SmoothStart[i];
+		//int64_t Len = clamp(m_aClients[ClientId].m_aSmoothLen[i], (int64_t)1, time_freq());
+		//int64_t TimePassed = Now - m_aClients[ClientId].m_aSmoothStart[i];
 		float MixAmount = 0.0f;
 		int SmoothTick;
 		float SmoothIntra;
-		int TicksFrozen = 0;
 
-		if(pChar && ClientId == m_Snap.m_LocalClientId)
+		int AdjustTicks = 0;
+		int DelayTicks = g_Config.m_ClUnfreezeLagDelayTicks;
+		int FreezeTime = 0;
+		if(pExtraChar && pChar)
 		{
-			TicksFrozen = pChar->m_FreezeAccumulation;
+			AdjustTicks = pChar->m_FreezeAccumulation;
+			if(pExtraChar->m_AliveAccumulation > 0)
+				AdjustTicks -= pExtraChar->m_AliveAccumulation;
+
+			AdjustTicks = std::max(AdjustTicks, 0);
+			FreezeTime = pChar->m_FreezeTime;
+
+			AdjustTicks = std::min(FreezeTime, AdjustTicks);
+		}
+		if(g_Config.m_ClRemoveAnti && pChar && AdjustTicks > 0 && FreezeTime > 0)
+		{
+			MixAmount = mix(0.0f, 1.0f, 1.0f - AdjustTicks / (float)DelayTicks);
+		}
+		//else if(AdjustTicks == 0 && ClientId != m_Snap.m_LocalClientId)
+		//{
+		//	MixAmount = 1.f - std::pow(1.f - TimePassed / (float)Len, 1.2f);
+		//}
+		else // our tee when not frozen
+		{
+			MixAmount = 1.f;
 		}
 
-		if(g_Config.m_ClRemoveAnti && pChar && pChar->m_FreezeTime > 0)
-		{
-			MixAmount = mix(0.0f, 1.0f, 1.0f - std::min((float)TicksFrozen, (float)g_Config.m_ClUnfreezeLagDelayTicks) / (float)g_Config.m_ClUnfreezeLagDelayTicks);
-		}
-		else
-		{
-			MixAmount = 1.0f;
-		}
 		Client()->GetSmoothFreezeTick(&SmoothTick, &SmoothIntra, MixAmount);
-		if(SmoothTick > 0 && m_aClients[ClientId].m_aPredTick[(SmoothTick - 1) % 200] >= Client()->PrevGameTick(g_Config.m_ClDummy) && m_aClients[ClientId].m_aPredTick[SmoothTick % 200] <= Client()->PredGameTick(g_Config.m_ClDummy))
+
+		if(ClientId != m_Snap.m_LocalClientId && !g_Config.m_ClFastInputOthers && g_Config.m_ClFastInput)
+			SmoothTick -= 1;
+
+		if(SmoothTick > 0 && m_aClients[ClientId].m_aPredTick[(SmoothTick - 1) % 200] >= Client()->PrevGameTick(g_Config.m_ClDummy) && m_aClients[ClientId].m_aPredTick[SmoothTick % 200] <= Client()->PredGameTick(g_Config.m_ClDummy) + g_Config.m_ClFastInput)
+		{
 			Pos[i] = mix(m_aClients[ClientId].m_aPredPos[(SmoothTick - 1) % 200][i], m_aClients[ClientId].m_aPredPos[SmoothTick % 200][i], SmoothIntra);
+		}
 	}
 	return Pos;
 }
