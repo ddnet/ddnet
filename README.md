@@ -62,6 +62,8 @@ But this also means that to join the game the users have to press the "spectate"
 
 ## gametype support
 
+Make sure to also `reload` or switch the map when changing the gametype.
+
 ### iCTF
 
 ``sv_gametype iCTF``
