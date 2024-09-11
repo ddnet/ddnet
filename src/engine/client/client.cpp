@@ -2929,6 +2929,24 @@ void CClient::Run()
 		g_UuidManager.DebugDump();
 	}
 
+#ifndef CONF_WEBASM
+	char aNetworkError[256];
+	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
+	{
+		log_error("client", "%s", aNetworkError);
+		ShowMessageBox("Network Error", aNetworkError);
+		return;
+	}
+#endif
+
+	if(!m_Http.Init(std::chrono::seconds{1}))
+	{
+		const char *pErrorMessage = "Failed to initialize the HTTP client.";
+		log_error("client", "%s", pErrorMessage);
+		ShowMessageBox("HTTP Error", pErrorMessage);
+		return;
+	}
+
 	// init graphics
 	m_pGraphics = CreateEngineGraphicsThreaded();
 	Kernel()->RegisterInterface(m_pGraphics); // IEngineGraphics
@@ -2951,24 +2969,6 @@ void CClient::Run()
 	// init video recorder aka ffmpeg
 	CVideo::Init();
 #endif
-
-#ifndef CONF_WEBASM
-	char aNetworkError[256];
-	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
-	{
-		log_error("client", "%s", aNetworkError);
-		ShowMessageBox("Network Error", aNetworkError);
-		return;
-	}
-#endif
-
-	if(!m_Http.Init(std::chrono::seconds{1}))
-	{
-		const char *pErrorMessage = "Failed to initialize the HTTP client.";
-		log_error("client", "%s", pErrorMessage);
-		ShowMessageBox("HTTP Error", pErrorMessage);
-		return;
-	}
 
 	// init text render
 	m_pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
