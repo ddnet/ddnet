@@ -2303,7 +2303,6 @@ void CGameClient::OnPredict()
 		CCharacter *pExtraChar = m_ExtraPredictedWorld.GetCharacterById(m_Snap.m_LocalClientId);
 		if(pExtraChar)
 		{
-			int AliveAccumulation = pExtraChar->m_AliveAccumulation;
 			bool Unfrozen = false;
 			bool Frozen = false;
 			for(int i = 0; i < g_Config.m_ClUnfreezeLagDelayTicks; i++)
@@ -3272,8 +3271,6 @@ vec2 CGameClient::GetFreezePos(int ClientId)
 	// int64_t Now = time_get();
 	CCharacter *pChar = m_PredictedWorld.GetCharacterById(m_Snap.m_LocalClientId);
 	CCharacter *pExtraChar = m_ExtraPredictedWorld.GetCharacterById(m_Snap.m_LocalClientId);
-
-	int64_t Now = time_get();
 
 	for(int i = 0; i < 2; i++)
 	{

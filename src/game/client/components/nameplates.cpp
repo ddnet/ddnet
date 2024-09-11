@@ -64,10 +64,6 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 
 		vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset - FontSize - 15.0f);
 
-		bool DirLeft = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId].m_Cur.m_Direction == -1;
-		bool DirRight = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId].m_Cur.m_Direction == 1;
-		bool Jump = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId].m_Cur.m_Jumped & 1;
-
 		if(pPlayerInfo->m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
 			DirLeft = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction == -1;
@@ -186,10 +182,10 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 			{
 				Graphics()->TextureClear();
 				Graphics()->QuadsBegin();
-				rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(m_pClient->m_Snap.m_apPlayerInfos[ClientId]->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f, 0.8f));
+				rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(m_pClient->m_Snap.m_apPlayerInfos[pPlayerInfo->m_ClientId]->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f, 0.8f));
 				Graphics()->SetColor(rgb);
 				float CircleSize = 7.0f;
-				Graphics()->DrawCircle(Position.x - tw / 2.0f - CircleSize, YOffset + FontSize / 2.0f + 1.4f, CircleSize, 24);
+				Graphics()->DrawCircle(Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f - CircleSize, YOffset + FontSize / 2.0f + 1.4f, CircleSize, 24);
 				Graphics()->QuadsEnd();
 			}
 			TextRender()->RenderTextContainer(NamePlate.m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f, YOffset);

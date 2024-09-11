@@ -200,6 +200,7 @@ void CPlayers::RenderHookCollLine(
 		Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, IntraTick);
 	}
 
+	vec2 Direction = direction(Angle);
 	vec2 Position;
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = m_pClient->m_aClients[ClientId].m_RenderPos;
@@ -231,7 +232,7 @@ void CPlayers::RenderHookCollLine(
 #endif
 		if((AlwaysRenderHookColl || RenderHookCollPlayer) && RenderHookCollVideo)
 		{
-			ExDirection = Direction;
+			vec2 ExDirection = Direction;
 
 			if(Local && (!m_pClient->m_Snap.m_SpecInfo.m_Active || m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW) && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			{
