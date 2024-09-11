@@ -1397,22 +1397,10 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 
 	// quick search
 	{
-		SetIconMode(true);
-		CUIRect DemoSearch, SearchIcon;
+		CUIRect DemoSearch;
 		ButtonBarTop.VSplitLeft(ButtonBarBottom.h * 21.0f, &DemoSearch, &ButtonBarTop);
 		ButtonBarTop.VSplitLeft(ButtonBarTop.h / 2.0f, nullptr, &ButtonBarTop);
-		DemoSearch.VSplitLeft(TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS), &SearchIcon, &DemoSearch);
-		DemoSearch.VSplitLeft(5.0f, nullptr, &DemoSearch);
-		Ui()->DoLabel(&SearchIcon, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
-		SetIconMode(false);
-		m_DemoSearchInput.SetEmptyText(Localize("Search"));
-
-		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
-		{
-			Ui()->SetActiveItem(&m_DemoSearchInput);
-			m_DemoSearchInput.SelectAll();
-		}
-		if(Ui()->DoClearableEditBox(&m_DemoSearchInput, &DemoSearch, 12.0f))
+		if(Ui()->DoEditBox_Search(&m_DemoSearchInput, &DemoSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed()))
 		{
 			RefreshFilteredDemos();
 			DemolistOnUpdate(false);

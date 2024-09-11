@@ -282,24 +282,10 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		}
 	}
 
-	// Quick search
+	static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
+	if(Ui()->DoEditBox_Search(&s_SkinFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed()))
 	{
-		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		Ui()->DoLabel(&QuickSearch, FontIcons::FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
-		float SearchWidth = TextRender()->TextWidth(14.0f, FontIcons::FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
-		TextRender()->SetRenderFlags(0);
-		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		QuickSearch.VSplitLeft(SearchWidth + 5.0f, nullptr, &QuickSearch);
-		static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
-		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
-		{
-			Ui()->SetActiveItem(&s_SkinFilterInput);
-			s_SkinFilterInput.SelectAll();
-		}
-		s_SkinFilterInput.SetEmptyText(Localize("Search"));
-		if(Ui()->DoClearableEditBox(&s_SkinFilterInput, &QuickSearch, 14.0f))
-			m_SkinListNeedsUpdate = true;
+		m_SkinListNeedsUpdate = true;
 	}
 
 	static CButtonContainer s_DirectoryButton;

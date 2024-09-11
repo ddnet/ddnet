@@ -257,7 +257,7 @@ void CMenus::SetNeedSendInfo()
 
 void CMenus::RenderSettingsPlayer(CUIRect MainView)
 {
-	CUIRect TabBar, PlayerTab, DummyTab, ChangeInfo, QuickSearch, QuickSearchClearButton;
+	CUIRect TabBar, PlayerTab, DummyTab, ChangeInfo, QuickSearch;
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
 	TabBar.VSplitMid(&TabBar, &ChangeInfo, 20.f);
 	TabBar.VSplitMid(&PlayerTab, &DummyTab);
@@ -340,7 +340,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(10.0f, nullptr, &MainView);
-	MainView.HSplitBottom(25.0f, &MainView, &QuickSearch);
+	MainView.HSplitBottom(20.0f, &MainView, &QuickSearch);
+	MainView.HSplitBottom(5.0f, &MainView, nullptr);
+	QuickSearch.VSplitLeft(220.0f, &QuickSearch, nullptr);
+
 	int OldSelected = -1;
 	static CListBox s_ListBox;
 	s_ListBox.DoStart(48.0f, vpFilteredFlags.size(), 10, 3, OldSelected, &MainView);
@@ -378,30 +381,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		SetNeedSendInfo();
 	}
 
-	// render quick search
-	QuickSearch.VSplitLeft(240.0f, &QuickSearch, nullptr);
-	QuickSearch.HSplitTop(5.0f, nullptr, &QuickSearch);
-
-	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-	Ui()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
-	TextRender()->SetRenderFlags(0);
-	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-
-	float SearchWidth = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
-	QuickSearch.VSplitLeft(SearchWidth - 1.5f, nullptr, &QuickSearch);
-	QuickSearch.VSplitLeft(5.0f, nullptr, &QuickSearch);
-	QuickSearch.VSplitLeft(QuickSearch.w - 10.0f, &QuickSearch, &QuickSearchClearButton);
-
-	TextRender()->SetRenderFlags(0);
-	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-	if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
-	{
-		Ui()->SetActiveItem(&s_FlagFilterInput);
-		s_FlagFilterInput.SelectAll();
-	}
-	s_FlagFilterInput.SetEmptyText(Localize("Search"));
-	Ui()->DoClearableEditBox(&s_FlagFilterInput, &QuickSearch, 14.0f);
+	Ui()->DoEditBox_Search(&s_FlagFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed());
 }
 
 struct CUISkin
@@ -770,8 +750,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	CUIRect QuickSearch, DatabaseButton, DirectoryButton, RefreshButton;
 	MainView.HSplitBottom(20.0f, &MainView, &QuickSearch);
 	MainView.HSplitBottom(5.0f, &MainView, nullptr);
-	QuickSearch.VSplitLeft(240.0f, &QuickSearch, &DatabaseButton);
-	QuickSearch.VSplitRight(10.0f, &QuickSearch, nullptr);
+	QuickSearch.VSplitLeft(220.0f, &QuickSearch, &DatabaseButton);
+	DatabaseButton.VSplitLeft(10.0f, nullptr, &DatabaseButton);
 	DatabaseButton.VSplitLeft(150.0f, &DatabaseButton, &DirectoryButton);
 	DirectoryButton.VSplitRight(175.0f, nullptr, &DirectoryButton);
 	DirectoryButton.VSplitRight(25.0f, &DirectoryButton, &RefreshButton);
@@ -904,24 +884,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		SetNeedSendInfo();
 	}
 
-	// Quick search
+	static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
+	if(Ui()->DoEditBox_Search(&s_SkinFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed()))
 	{
-		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		Ui()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
-		float SearchWidth = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
-		TextRender()->SetRenderFlags(0);
-		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		QuickSearch.VSplitLeft(SearchWidth + 5.0f, nullptr, &QuickSearch);
-		static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
-		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
-		{
-			Ui()->SetActiveItem(&s_SkinFilterInput);
-			s_SkinFilterInput.SelectAll();
-		}
-		s_SkinFilterInput.SetEmptyText(Localize("Search"));
-		if(Ui()->DoClearableEditBox(&s_SkinFilterInput, &QuickSearch, 14.0f))
-			m_SkinListNeedsUpdate = true;
+		m_SkinListNeedsUpdate = true;
 	}
 
 	static CButtonContainer s_SkinDatabaseButton;
