@@ -135,6 +135,15 @@ void CCharacter::TakeHammerHit(CCharacter *pFrom)
 		{
 			m_FreezeTime -= Server()->TickSpeed() * 3;
 		}
+
+		// make sure we don't got negative and let the ddrace tick trigger the unfreeeze
+		if(m_FreezeTime < 2)
+		{
+			m_FreezeTime = 2;
+
+			// reward the unfreezer with one point
+			pPlayer->AddScore(1);
+		}
 	}
 	else
 	{

@@ -1,3 +1,4 @@
+#include <engine/shared/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
@@ -82,6 +83,13 @@ void CPlayer::UpdateLastToucher(int ClientId)
 {
 	if(ClientId == GetCid())
 		return;
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+	{
+		// covers the reset case when -1 is passed explicitly
+		// to reset the last toucher when being hammered by a team mate in fng
+		m_LastToucherId = -1;
+		return;
+	}
 
 	// TODO: should we really reset the last toucher when we get shot by a team mate?
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
