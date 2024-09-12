@@ -4,8 +4,8 @@
 #include "../gamecontext.h"
 #include "../gamecontroller.h"
 #include "../gamemodes/DDRace.h"
-#include "../gamemodes/instagib/gctf.h"
-#include "../gamemodes/instagib/ictf.h"
+#include "../gamemodes/instagib/gctf/gctf.h"
+#include "../gamemodes/instagib/ictf/ictf.h"
 #include "../gamemodes/mod.h"
 #include "../player.h"
 

@@ -2762,14 +2762,14 @@ if(SERVER)
     gamemodes/instagib/dm.h
     gamemodes/instagib/fng.cpp
     gamemodes/instagib/fng.h
-    gamemodes/instagib/gctf.cpp
-    gamemodes/instagib/gctf.h
+    gamemodes/instagib/gctf/gctf.cpp
+    gamemodes/instagib/gctf/gctf.h
     gamemodes/instagib/gdm.cpp
     gamemodes/instagib/gdm.h
     gamemodes/instagib/gtdm.cpp
     gamemodes/instagib/gtdm.h
-    gamemodes/instagib/ictf.cpp
-    gamemodes/instagib/ictf.h
+    gamemodes/instagib/ictf/ictf.cpp
+    gamemodes/instagib/ictf/ictf.h
     gamemodes/instagib/idm.cpp
     gamemodes/instagib/idm.h
     gamemodes/instagib/itdm.cpp
