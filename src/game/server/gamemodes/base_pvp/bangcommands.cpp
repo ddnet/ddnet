@@ -21,7 +21,7 @@ void CGameControllerPvp::BangCommandVote(int ClientId, const char *pCommand, con
 	}
 	char aChatmsg[1024];
 	str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientId), pDesc);
-	GameServer()->m_VoteType = GameServer()->VOTE_TYPE_OPTION;
+	GameServer()->m_VoteType = CGameContext::VOTE_TYPE_OPTION;
 	GameServer()->CallVote(ClientId, pDesc, pCommand, "chat cmd", aChatmsg);
 }
 
