@@ -1,7 +1,7 @@
-#ifndef GAME_SERVER_GAMEMODES_VANILLA_DM_H
-#define GAME_SERVER_GAMEMODES_VANILLA_DM_H
+#ifndef GAME_SERVER_GAMEMODES_VANILLA_DM_DM_H
+#define GAME_SERVER_GAMEMODES_VANILLA_DM_DM_H
 
-#include "base_vanilla.h"
+#include "../base_vanilla.h"
 
 class CGameControllerDM : public CGameControllerVanilla
 {

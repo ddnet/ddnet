@@ -1,7 +1,7 @@
-#ifndef GAME_SERVER_GAMEMODES_INSTAGIB_GTDM_H
-#define GAME_SERVER_GAMEMODES_INSTAGIB_GTDM_H
+#ifndef GAME_SERVER_GAMEMODES_INSTAGIB_GTDM_GTDM_H
+#define GAME_SERVER_GAMEMODES_INSTAGIB_GTDM_GTDM_H
 
-#include "tdm.h"
+#include "../tdm.h"
 
 class CGameControllerGTDM : public CGameControllerInstaTDM
 {

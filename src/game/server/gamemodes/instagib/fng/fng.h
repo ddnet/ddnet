@@ -1,7 +1,7 @@
-#ifndef GAME_SERVER_GAMEMODES_INSTAGIB_FNG_H
-#define GAME_SERVER_GAMEMODES_INSTAGIB_FNG_H
+#ifndef GAME_SERVER_GAMEMODES_INSTAGIB_FNG_FNG_H
+#define GAME_SERVER_GAMEMODES_INSTAGIB_FNG_FNG_H
 
-#include "team_fng.h"
+#include "../team_fng.h"
 
 class CGameControllerFng : public CGameControllerTeamFng
 {

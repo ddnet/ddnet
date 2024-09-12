@@ -1,7 +1,7 @@
-#ifndef GAME_SERVER_GAMEMODES_INSTAGIB_BOOMFNG_H
-#define GAME_SERVER_GAMEMODES_INSTAGIB_BOOMFNG_H
+#ifndef GAME_SERVER_GAMEMODES_INSTAGIB_BOOMFNG_BOOMFNG_H
+#define GAME_SERVER_GAMEMODES_INSTAGIB_BOOMFNG_BOOMFNG_H
 
-#include "team_fng.h"
+#include "../team_fng.h"
 
 class CGameControllerBoomFng : public CGameControllerTeamFng
 {

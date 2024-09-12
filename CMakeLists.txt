@@ -2752,30 +2752,30 @@ if(SERVER)
     gamemodes/instagib/base_fng.h
     gamemodes/instagib/base_instagib.cpp
     gamemodes/instagib/base_instagib.h
-    gamemodes/instagib/bolofng.cpp
-    gamemodes/instagib/bolofng.h
-    gamemodes/instagib/boomfng.cpp
-    gamemodes/instagib/boomfng.h
+    gamemodes/instagib/bolofng/bolofng.cpp
+    gamemodes/instagib/bolofng/bolofng.h
+    gamemodes/instagib/boomfng/boomfng.cpp
+    gamemodes/instagib/boomfng/boomfng.h
     gamemodes/instagib/ctf.cpp
     gamemodes/instagib/ctf.h
     gamemodes/instagib/dm.cpp
     gamemodes/instagib/dm.h
-    gamemodes/instagib/fng.cpp
-    gamemodes/instagib/fng.h
+    gamemodes/instagib/fng/fng.cpp
+    gamemodes/instagib/fng/fng.h
     gamemodes/instagib/gctf/gctf.cpp
     gamemodes/instagib/gctf/gctf.h
-    gamemodes/instagib/gdm.cpp
-    gamemodes/instagib/gdm.h
-    gamemodes/instagib/gtdm.cpp
-    gamemodes/instagib/gtdm.h
+    gamemodes/instagib/gdm/gdm.cpp
+    gamemodes/instagib/gdm/gdm.h
+    gamemodes/instagib/gtdm/gtdm.cpp
+    gamemodes/instagib/gtdm/gtdm.h
     gamemodes/instagib/ictf/ictf.cpp
     gamemodes/instagib/ictf/ictf.h
-    gamemodes/instagib/idm.cpp
-    gamemodes/instagib/idm.h
-    gamemodes/instagib/itdm.cpp
-    gamemodes/instagib/itdm.h
-    gamemodes/instagib/solofng.cpp
-    gamemodes/instagib/solofng.h
+    gamemodes/instagib/idm/idm.cpp
+    gamemodes/instagib/idm/idm.h
+    gamemodes/instagib/itdm/itdm.cpp
+    gamemodes/instagib/itdm/itdm.h
+    gamemodes/instagib/solofng/solofng.cpp
+    gamemodes/instagib/solofng/solofng.h
     gamemodes/instagib/tdm.cpp
     gamemodes/instagib/tdm.h
     gamemodes/instagib/team_fng.cpp
@@ -2787,10 +2787,10 @@ if(SERVER)
     gamemodes/mod.h
     gamemodes/vanilla/base_vanilla.cpp
     gamemodes/vanilla/base_vanilla.h
-    gamemodes/vanilla/ctf.cpp
-    gamemodes/vanilla/ctf.h
-    gamemodes/vanilla/dm.cpp
-    gamemodes/vanilla/dm.h
+    gamemodes/vanilla/ctf/ctf.cpp
+    gamemodes/vanilla/ctf/ctf.h
+    gamemodes/vanilla/dm/dm.cpp
+    gamemodes/vanilla/dm/dm.h
     gameworld.cpp
     gameworld.h
     instagib/gamecontroller.cpp

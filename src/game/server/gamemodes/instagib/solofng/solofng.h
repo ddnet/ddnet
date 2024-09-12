@@ -1,13 +1,13 @@
-#ifndef GAME_SERVER_GAMEMODES_INSTAGIB_BOLOFNG_H
-#define GAME_SERVER_GAMEMODES_INSTAGIB_BOLOFNG_H
+#ifndef GAME_SERVER_GAMEMODES_INSTAGIB_SOLOFNG_SOLOFNG_H
+#define GAME_SERVER_GAMEMODES_INSTAGIB_SOLOFNG_SOLOFNG_H
 
-#include "base_fng.h"
+#include "../base_fng.h"
 
-class CGameControllerBoloFng : public CGameControllerBaseFng
+class CGameControllerSoloFng : public CGameControllerBaseFng
 {
 public:
-	CGameControllerBoloFng(class CGameContext *pGameServer);
-	~CGameControllerBoloFng() override;
+	CGameControllerSoloFng(class CGameContext *pGameServer);
+	~CGameControllerSoloFng() override;
 
 	void Tick() override;
 	void Snap(int SnappingClient) override;
@@ -15,4 +15,4 @@ public:
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 };
-#endif // GAME_SERVER_GAMEMODES_BOLOFNG_H
+#endif
