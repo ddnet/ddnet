@@ -313,7 +313,6 @@ void CMenus::RenderSettingsTeeCustom7(CUIRect MainView)
 	if(DoButton_Menu(&s_RandomSkinButton, s_apDice[s_CurrentDie], 0, &RandomSkinButton, nullptr, IGraphics::CORNER_ALL, 5.0f, -0.2f))
 	{
 		m_pClient->m_Skins7.RandomizeSkin(m_Dummy);
-		Config()->m_ClPlayer7Skin[0] = '\0';
 		SetNeedSendInfo();
 		s_CurrentDie = rand() % std::size(s_apDice);
 	}
@@ -356,7 +355,7 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 		const CSkins7::CSkin *pSkin = s_vpSkinList[i];
 		if(pSkin == nullptr)
 			continue;
-		if(!str_comp(pSkin->m_aName, Config()->m_ClPlayer7Skin))
+		if(!str_comp(pSkin->m_aName, CSkins7::ms_apSkinNameVariables[m_Dummy]))
 		{
 			m_pSelectedSkin = pSkin;
 			s_OldSelected = i;
@@ -401,7 +400,7 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 	{
 		s_LastSelectionTime = Client()->GlobalTime();
 		m_pSelectedSkin = s_vpSkinList[NewSelected];
-		str_copy(Config()->m_ClPlayer7Skin, m_pSelectedSkin->m_aName);
+		str_copy(CSkins7::ms_apSkinNameVariables[m_Dummy], m_pSelectedSkin->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
 			str_copy(CSkins7::ms_apSkinVariables[(int)m_Dummy][Part], m_pSelectedSkin->m_apParts[Part]->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
@@ -492,7 +491,7 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 	if(NewSelected != -1 && NewSelected != s_OldSelected)
 	{
 		str_copy(CSkins7::ms_apSkinVariables[(int)m_Dummy][m_TeePartSelected], s_paList[m_TeePartSelected][NewSelected]->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
-		Config()->m_ClPlayer7Skin[0] = '\0';
+		CSkins7::ms_apSkinNameVariables[m_Dummy][0] = '\0';
 		SetNeedSendInfo();
 	}
 	s_OldSelected = NewSelected;
