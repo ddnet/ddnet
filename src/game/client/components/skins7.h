@@ -52,6 +52,7 @@ public:
 	};
 
 	static const char *const ms_apSkinPartNames[protocol7::NUM_SKINPARTS];
+	static const char *const ms_apSkinPartNamesLocalized[protocol7::NUM_SKINPARTS];
 	static const char *const ms_apColorComponents[NUM_COLOR_COMPONENTS];
 
 	static char *ms_apSkinVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS];
