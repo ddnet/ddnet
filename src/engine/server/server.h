@@ -219,6 +219,7 @@ public:
 	int m_RunServer;
 
 	bool m_MapReload;
+	bool m_SameMapReload;
 	bool m_ReloadedWhenEmpty;
 	int m_RconClientId;
 	int m_RconAuthLevel;
@@ -324,6 +325,7 @@ public:
 	void SendCapabilities(int ClientId);
 	void SendMap(int ClientId);
 	void SendMapData(int ClientId, int Chunk);
+	void SendMapReload(int ClientId);
 	void SendConnectionReady(int ClientId);
 	void SendRconLine(int ClientId, const char *pLine);
 	// Accepts -1 as ClientId to mean "all clients with at least auth level admin"
