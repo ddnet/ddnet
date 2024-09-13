@@ -116,8 +116,7 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	OwnSkinInfo.m_Size = 50.0f;
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		int SkinPart = m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false);
-		const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, SkinPart);
+		const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false);
 		if(aUCCVars[Part])
 		{
 			OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_ColorTexture;
@@ -160,21 +159,12 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	}
 	m_pClient->m_Skins7.ValidateSkinParts(apSkinPartsPtr, aUCCVars, aColorVars, GAMEFLAG_TEAMS);
 
-	CTeeRenderInfo TeamSkinInfo = OwnSkinInfo;
+	CTeeRenderInfo TeamSkinInfo;
+	TeamSkinInfo.m_Size = OwnSkinInfo.m_Size;
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		int SkinPart = m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false);
-		const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, SkinPart);
-		if(aUCCVars[Part])
-		{
-			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_ColorTexture;
-			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(aColorVars[Part], Part == protocol7::SKINPART_MARKING);
-		}
-		else
-		{
-			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_OrgTexture;
-			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-		}
+		const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false);
+		TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = aUCCVars[Part] ? pSkinPart->m_ColorTexture : pSkinPart->m_OrgTexture;
 	}
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
@@ -327,22 +317,21 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 	static float s_LastSelectionTime = -10.0f;
 	static std::vector<const CSkins7::CSkin *> s_vpSkinList;
 	static CListBox s_ListBox;
-	static int s_SkinCount = 0;
-	if(m_SkinListNeedsUpdate || m_pClient->m_Skins7.Num() != s_SkinCount)
+	static size_t s_SkinCount = 0;
+
+	const std::vector<CSkins7::CSkin> &vCurrentSkins = GameClient()->m_Skins7.GetSkins();
+	if(m_SkinListNeedsUpdate || vCurrentSkins.size() != s_SkinCount)
 	{
 		s_vpSkinList.clear();
-		s_SkinCount = m_pClient->m_Skins7.Num();
-		for(int i = 0; i < s_SkinCount; ++i)
+		s_SkinCount = vCurrentSkins.size();
+		for(const CSkins7::CSkin &Skin : vCurrentSkins)
 		{
-			const CSkins7::CSkin *pSkin = m_pClient->m_Skins7.Get(i);
-			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pSkin->m_aName, g_Config.m_ClSkinFilterString))
+			if((Skin.m_Flags & CSkins7::SKINFLAG_SPECIAL) != 0)
+				continue;
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(Skin.m_aName, g_Config.m_ClSkinFilterString))
 				continue;
 
-			// no special skins
-			if((pSkin->m_Flags & CSkins7::SKINFLAG_SPECIAL) == 0)
-			{
-				s_vpSkinList.emplace_back(pSkin);
-			}
+			s_vpSkinList.emplace_back(&Skin);
 		}
 		m_SkinListNeedsUpdate = false;
 	}
@@ -416,24 +405,23 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 {
 	static std::vector<const CSkins7::CSkinPart *> s_paList[protocol7::NUM_SKINPARTS];
 	static CListBox s_ListBox;
-	static int s_aSkinPartCount[protocol7::NUM_SKINPARTS] = {0};
+	static size_t s_aSkinPartCount[protocol7::NUM_SKINPARTS] = {0};
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		if(m_SkinPartListNeedsUpdate || m_pClient->m_Skins7.NumSkinPart(Part) != s_aSkinPartCount[Part])
+		const std::vector<CSkins7::CSkinPart> &vCurrentSkinParts = GameClient()->m_Skins7.GetSkinParts(Part);
+		if(m_SkinPartListNeedsUpdate || vCurrentSkinParts.size() != s_aSkinPartCount[Part])
 		{
 			s_paList[Part].clear();
-			s_aSkinPartCount[Part] = m_pClient->m_Skins7.NumSkinPart(Part);
-			for(int i = 0; i < s_aSkinPartCount[Part]; ++i)
+			s_aSkinPartCount[Part] = vCurrentSkinParts.size();
+			for(const CSkins7::CSkinPart &SkinPart : vCurrentSkinParts)
 			{
-				const CSkins7::CSkinPart *pPart = m_pClient->m_Skins7.GetSkinPart(Part, i);
-				if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pPart->m_aName, g_Config.m_ClSkinFilterString))
+				if((SkinPart.m_Flags & CSkins7::SKINFLAG_SPECIAL) != 0)
 					continue;
 
-				// no special skins
-				if((pPart->m_Flags & CSkins7::SKINFLAG_SPECIAL) == 0)
-				{
-					s_paList[Part].emplace_back(pPart);
-				}
+				if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(SkinPart.m_aName, g_Config.m_ClSkinFilterString))
+					continue;
+
+				s_paList[Part].emplace_back(&SkinPart);
 			}
 		}
 	}
@@ -460,19 +448,18 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 		Item.m_Rect.HSplitBottom(12.0f, &Item.m_Rect, &Label);
 
 		CTeeRenderInfo Info;
-		for(int j = 0; j < protocol7::NUM_SKINPARTS; j++)
+		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			int SkinPart = m_pClient->m_Skins7.FindSkinPart(j, CSkins7::ms_apSkinVariables[(int)m_Dummy][j], false);
-			const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(j, SkinPart);
-			if(*CSkins7::ms_apUCCVariables[(int)m_Dummy][j])
+			const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.FindSkinPart(Part, CSkins7::ms_apSkinVariables[(int)m_Dummy][Part], false);
+			if(*CSkins7::ms_apUCCVariables[(int)m_Dummy][Part])
 			{
-				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = m_TeePartSelected == j ? pPart->m_ColorTexture : pSkinPart->m_ColorTexture;
-				Info.m_aSixup[g_Config.m_ClDummy].m_aColors[j] = m_pClient->m_Skins7.GetColor(*CSkins7::ms_apColorVariables[(int)m_Dummy][j], j == protocol7::SKINPART_MARKING);
+				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = m_TeePartSelected == Part ? pPart->m_ColorTexture : pSkinPart->m_ColorTexture;
+				Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(*CSkins7::ms_apColorVariables[(int)m_Dummy][Part], Part == protocol7::SKINPART_MARKING);
 			}
 			else
 			{
-				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = m_TeePartSelected == j ? pPart->m_OrgTexture : pSkinPart->m_OrgTexture;
-				Info.m_aSixup[0].m_aColors[j] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = m_TeePartSelected == Part ? pPart->m_OrgTexture : pSkinPart->m_OrgTexture;
+				Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
 		Info.m_Size = 50.0f;

@@ -48,11 +48,6 @@ int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser
 		return 0;
 	}
 
-	CSkinPart Part;
-	str_copy(Part.m_aName, pName, minimum<int>(PartNameSize + 1, sizeof(Part.m_aName)));
-	if(pSelf->FindSkinPart(pSelf->m_ScanningPart, Part.m_aName, true) != -1)
-		return 0;
-
 	char aFilename[IO_MAX_PATH_LENGTH];
 	str_format(aFilename, sizeof(aFilename), SKINS_DIR "/%s/%s", CSkins7::ms_apSkinPartNames[pSelf->m_ScanningPart], pName);
 	CImageInfo Info;
@@ -68,6 +63,8 @@ int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser
 		return 0;
 	}
 
+	CSkinPart Part;
+	str_copy(Part.m_aName, pName, minimum<int>(PartNameSize + 1, sizeof(Part.m_aName)));
 	Part.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info, 0, aFilename);
 	Part.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f);
 
@@ -131,14 +128,15 @@ int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	}
 
 	// init
-	CSkin Skin = pSelf->m_DummySkin;
-	int NameLength = str_length(pName);
-	str_copy(Skin.m_aName, pName, 1 + NameLength - str_length(".json"));
-	bool SpecialSkin = pName[0] == 'x' && pName[1] == '_';
+	CSkin Skin;
+	str_copy(Skin.m_aName, pName, 1 + str_length(pName) - str_length(".json"));
+	const bool SpecialSkin = pName[0] == 'x' && pName[1] == '_';
+	Skin.m_Flags = SpecialSkin ? SKINFLAG_SPECIAL : 0;
+	if(DirType != IStorage::TYPE_SAVE)
+		Skin.m_Flags |= SKINFLAG_STANDARD;
 
 	// parse json data
-	json_settings JsonSettings;
-	mem_zero(&JsonSettings, sizeof(JsonSettings));
+	json_settings JsonSettings{};
 	char aError[256];
 	json_value *pJsonData = json_parse_ex(&JsonSettings, static_cast<const json_char *>(pFileData), JsonFileSize, aError);
 	free(pFileData);
@@ -151,63 +149,77 @@ int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 
 	// extract data
 	const json_value &Start = (*pJsonData)["skin"];
-	if(Start.type == json_object)
+	if(Start.type != json_object)
 	{
-		for(int PartIndex = 0; PartIndex < protocol7::NUM_SKINPARTS; ++PartIndex)
+		log_error("skins7", "Failed to parse skin json file '%s': root must be an object", aFilename);
+		json_value_free(pJsonData);
+		return 0;
+	}
+
+	for(int PartIndex = 0; PartIndex < protocol7::NUM_SKINPARTS; ++PartIndex)
+	{
+		Skin.m_aUseCustomColors[PartIndex] = 0;
+		Skin.m_aPartColors[PartIndex] = (PartIndex == protocol7::SKINPART_MARKING ? 0xFF000000u : 0u) + 0x00FF80u;
+
+		const json_value &Part = Start[(const char *)ms_apSkinPartNames[PartIndex]];
+		if(Part.type == json_none)
 		{
-			const json_value &Part = Start[(const char *)ms_apSkinPartNames[PartIndex]];
-			if(Part.type != json_object)
+			Skin.m_apParts[PartIndex] = pSelf->FindDefaultSkinPart(PartIndex);
+			continue;
+		}
+		if(Part.type != json_object)
+		{
+			log_error("skins7", "Failed to parse skin json file '%s': attribute '%s' must specify an object", aFilename, ms_apSkinPartNames[PartIndex]);
+			json_value_free(pJsonData);
+			return 0;
+		}
+
+		// filename
+		const json_value &Filename = Part["filename"];
+		if(Filename.type == json_string)
+		{
+			Skin.m_apParts[PartIndex] = pSelf->FindSkinPart(PartIndex, (const char *)Filename, SpecialSkin);
+		}
+		else
+		{
+			log_error("skins7", "Failed to parse skin json file '%s': part '%s' attribute 'filename' must specify a string", aFilename, ms_apSkinPartNames[PartIndex]);
+			json_value_free(pJsonData);
+			return 0;
+		}
+
+		// use custom colors
+		bool UseCustomColors = false;
+		const json_value &Color = Part["custom_colors"];
+		if(Color.type == json_string)
+			UseCustomColors = str_comp((const char *)Color, "true") == 0;
+		else if(Color.type == json_boolean)
+			UseCustomColors = Color.u.boolean;
+		Skin.m_aUseCustomColors[PartIndex] = UseCustomColors;
+
+		// color components
+		if(!UseCustomColors)
+			continue;
+
+		for(int i = 0; i < NUM_COLOR_COMPONENTS; i++)
+		{
+			if(PartIndex != protocol7::SKINPART_MARKING && i == 3)
 				continue;
 
-			// filename
-			const json_value &Filename = Part["filename"];
-			if(Filename.type == json_string)
+			const json_value &Component = Part[(const char *)ms_apColorComponents[i]];
+			if(Component.type == json_integer)
 			{
-				int SkinPart = pSelf->FindSkinPart(PartIndex, (const char *)Filename, SpecialSkin);
-				if(SkinPart > -1)
-					Skin.m_apParts[PartIndex] = pSelf->GetSkinPart(PartIndex, SkinPart);
-			}
-
-			// use custom colors
-			bool UseCustomColors = false;
-			const json_value &Color = Part["custom_colors"];
-			if(Color.type == json_string)
-				UseCustomColors = str_comp((const char *)Color, "true") == 0;
-			else if(Color.type == json_boolean)
-				UseCustomColors = Color.u.boolean;
-			Skin.m_aUseCustomColors[PartIndex] = UseCustomColors;
-
-			// color components
-			if(!UseCustomColors)
-				continue;
-
-			for(int i = 0; i < NUM_COLOR_COMPONENTS; i++)
-			{
-				if(PartIndex != protocol7::SKINPART_MARKING && i == 3)
-					continue;
-
-				const json_value &Component = Part[(const char *)ms_apColorComponents[i]];
-				if(Component.type == json_integer)
+				switch(i)
 				{
-					switch(i)
-					{
-					case 0: Skin.m_aPartColors[PartIndex] = (Skin.m_aPartColors[PartIndex] & 0xFF00FFFF) | (Component.u.integer << 16); break;
-					case 1: Skin.m_aPartColors[PartIndex] = (Skin.m_aPartColors[PartIndex] & 0xFFFF00FF) | (Component.u.integer << 8); break;
-					case 2: Skin.m_aPartColors[PartIndex] = (Skin.m_aPartColors[PartIndex] & 0xFFFFFF00) | Component.u.integer; break;
-					case 3: Skin.m_aPartColors[PartIndex] = (Skin.m_aPartColors[PartIndex] & 0x00FFFFFF) | (Component.u.integer << 24); break;
-					}
+				case 0: Skin.m_aPartColors[PartIndex] = (Skin.m_aPartColors[PartIndex] & 0xFF00FFFFu) | (Component.u.integer << 16); break;
+				case 1: Skin.m_aPartColors[PartIndex] = (Skin.m_aPartColors[PartIndex] & 0xFFFF00FFu) | (Component.u.integer << 8); break;
+				case 2: Skin.m_aPartColors[PartIndex] = (Skin.m_aPartColors[PartIndex] & 0xFFFFFF00u) | Component.u.integer; break;
+				case 3: Skin.m_aPartColors[PartIndex] = (Skin.m_aPartColors[PartIndex] & 0x00FFFFFFu) | (Component.u.integer << 24); break;
 				}
 			}
 		}
 	}
 
-	// clean up
 	json_value_free(pJsonData);
-
-	// set skin data
-	Skin.m_Flags = SpecialSkin ? SKINFLAG_SPECIAL : 0;
-	if(DirType != IStorage::TYPE_SAVE)
-		Skin.m_Flags |= SKINFLAG_STANDARD;
 
 	if(pSelf->Config()->m_Debug)
 	{
@@ -216,11 +228,6 @@ int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	pSelf->m_vSkins.insert(std::lower_bound(pSelf->m_vSkins.begin(), pSelf->m_vSkins.end(), Skin), Skin);
 
 	return 0;
-}
-
-int CSkins7::GetInitAmount() const
-{
-	return protocol7::NUM_SKINPARTS * 5 + 8;
 }
 
 void CSkins7::OnInit()
@@ -267,6 +274,8 @@ void CSkins7::OnInit()
 	ms_apColorVariables[Dummy][protocol7::SKINPART_FEET] = &Config()->m_ClDummy7ColorFeet;
 	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClDummy7ColorEyes;
 
+	InitPlaceholderSkinParts();
+
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
 		m_avSkinParts[Part].clear();
@@ -282,54 +291,34 @@ void CSkins7::OnInit()
 		}
 
 		// load skin parts
-		char aBuf[64];
+		char aBuf[IO_MAX_PATH_LENGTH];
 		str_format(aBuf, sizeof(aBuf), SKINS_DIR "/%s", ms_apSkinPartNames[Part]);
 		m_ScanningPart = Part;
 		Storage()->ListDirectory(IStorage::TYPE_ALL, aBuf, SkinPartScan, this);
 
-		// add dummy skin part
-		if(m_avSkinParts[Part].empty())
-		{
-			CSkinPart DummySkinPart;
-			DummySkinPart.m_Flags = SKINFLAG_STANDARD;
-			str_copy(DummySkinPart.m_aName, "dummy");
-			DummySkinPart.m_BloodColor = vec3(1.0f, 1.0f, 1.0f);
-			m_avSkinParts[Part].emplace_back(DummySkinPart);
-		}
-
 		GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
 	}
-
-	// create dummy skin
-	m_DummySkin.m_Flags = SKINFLAG_STANDARD;
-	str_copy(m_DummySkin.m_aName, "dummy");
-	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
-	{
-		int Default;
-		if(Part == protocol7::SKINPART_MARKING || Part == protocol7::SKINPART_DECORATION)
-			Default = FindSkinPart(Part, "", false);
-		else
-			Default = FindSkinPart(Part, "standard", false);
-		if(Default < 0)
-			Default = 0;
-		m_DummySkin.m_apParts[Part] = GetSkinPart(Part, Default);
-		m_DummySkin.m_aPartColors[Part] = Part == protocol7::SKINPART_MARKING ? (255 << 24) + 65408 : 65408;
-		m_DummySkin.m_aUseCustomColors[Part] = 0;
-	}
-	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
 
 	// load skins
 	m_vSkins.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, SKINS_DIR, SkinScan, this);
 	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
 
-	// add dummy skin
-	if(m_vSkins.empty())
-		m_vSkins.emplace_back(m_DummySkin);
-
 	LoadXmasHat();
 	LoadBotDecoration();
 	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+}
+
+void CSkins7::InitPlaceholderSkinParts()
+{
+	for(CSkinPart &SkinPart : m_aPlaceholderSkinParts)
+	{
+		SkinPart.m_Flags = SKINFLAG_STANDARD;
+		str_copy(SkinPart.m_aName, "dummy");
+		SkinPart.m_OrgTexture.Invalidate();
+		SkinPart.m_ColorTexture.Invalidate();
+		SkinPart.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	}
 }
 
 void CSkins7::LoadXmasHat()
@@ -374,24 +363,26 @@ void CSkins7::LoadBotDecoration()
 	}
 }
 
-void CSkins7::AddSkin(const char *pSkinName, int Dummy)
+void CSkins7::AddSkinFromConfigVariables(const char *pName, int Dummy)
 {
-	CSkin Skin = m_DummySkin;
-	Skin.m_Flags = 0;
-	str_copy(Skin.m_aName, pSkinName, sizeof(Skin.m_aName));
+	auto OldSkin = std::find_if(m_vSkins.begin(), m_vSkins.end(), [pName](const CSkin &Skin) {
+		return str_comp(Skin.m_aName, pName) == 0;
+	});
+	if(OldSkin != m_vSkins.end())
+	{
+		m_vSkins.erase(OldSkin);
+	}
+
+	CSkin NewSkin;
+	NewSkin.m_Flags = 0;
+	str_copy(NewSkin.m_aName, pName);
 	for(int PartIndex = 0; PartIndex < protocol7::NUM_SKINPARTS; ++PartIndex)
 	{
-		int SkinPart = FindSkinPart(PartIndex, ms_apSkinVariables[Dummy][PartIndex], false);
-		if(SkinPart > -1)
-			Skin.m_apParts[PartIndex] = GetSkinPart(PartIndex, SkinPart);
-		Skin.m_aUseCustomColors[PartIndex] = *ms_apUCCVariables[Dummy][PartIndex];
-		Skin.m_aPartColors[PartIndex] = *ms_apColorVariables[Dummy][PartIndex];
+		NewSkin.m_apParts[PartIndex] = FindSkinPart(PartIndex, ms_apSkinVariables[Dummy][PartIndex], false);
+		NewSkin.m_aUseCustomColors[PartIndex] = *ms_apUCCVariables[Dummy][PartIndex];
+		NewSkin.m_aPartColors[PartIndex] = *ms_apColorVariables[Dummy][PartIndex];
 	}
-	int SkinIndex = Find(Skin.m_aName, false);
-	if(SkinIndex != -1)
-		m_vSkins[SkinIndex] = Skin;
-	else
-		m_vSkins.emplace_back(Skin);
+	m_vSkins.insert(std::lower_bound(m_vSkins.begin(), m_vSkins.end(), NewSkin), NewSkin);
 }
 
 bool CSkins7::RemoveSkin(const CSkin *pSkin)
@@ -403,53 +394,60 @@ bool CSkins7::RemoveSkin(const CSkin *pSkin)
 		return false;
 	}
 
-	auto Position = std::find(m_vSkins.begin(), m_vSkins.end(), *pSkin);
-	m_vSkins.erase(Position);
+	auto FoundSkin = std::find(m_vSkins.begin(), m_vSkins.end(), *pSkin);
+	dbg_assert(FoundSkin != m_vSkins.end(), "Skin not found");
+	m_vSkins.erase(FoundSkin);
 	return true;
 }
 
-int CSkins7::Num()
+const std::vector<CSkins7::CSkin> &CSkins7::GetSkins() const
 {
-	return m_vSkins.size();
+	return m_vSkins;
 }
 
-int CSkins7::NumSkinPart(int Part)
+const std::vector<CSkins7::CSkinPart> &CSkins7::GetSkinParts(int Part) const
 {
-	return m_avSkinParts[Part].size();
+	return m_avSkinParts[Part];
 }
 
-const CSkins7::CSkin *CSkins7::Get(int Index)
+const CSkins7::CSkinPart *CSkins7::FindSkinPartOrNullptr(int Part, const char *pName, bool AllowSpecialPart) const
 {
-	return &m_vSkins[maximum((std::size_t)0, Index % m_vSkins.size())];
-}
-
-int CSkins7::Find(const char *pName, bool AllowSpecialSkin)
-{
-	for(unsigned int i = 0; i < m_vSkins.size(); i++)
+	auto FoundPart = std::find_if(m_avSkinParts[Part].begin(), m_avSkinParts[Part].end(), [pName](const CSkinPart &SkinPart) {
+		return str_comp(SkinPart.m_aName, pName) == 0;
+	});
+	if(FoundPart == m_avSkinParts[Part].end())
 	{
-		if(str_comp(m_vSkins[i].m_aName, pName) == 0 && ((m_vSkins[i].m_Flags & SKINFLAG_SPECIAL) == 0 || AllowSpecialSkin))
-			return i;
+		return nullptr;
 	}
-	return -1;
-}
-
-const CSkins7::CSkinPart *CSkins7::GetSkinPart(int Part, int Index)
-{
-	int Size = m_avSkinParts[Part].size();
-	return &m_avSkinParts[Part][maximum(0, Index % Size)];
-}
-
-int CSkins7::FindSkinPart(int Part, const char *pName, bool AllowSpecialPart)
-{
-	for(unsigned int i = 0; i < m_avSkinParts[Part].size(); i++)
+	if((FoundPart->m_Flags & SKINFLAG_SPECIAL) != 0 && !AllowSpecialPart)
 	{
-		if(str_comp(m_avSkinParts[Part][i].m_aName, pName) == 0 && ((m_avSkinParts[Part][i].m_Flags & SKINFLAG_SPECIAL) == 0 || AllowSpecialPart))
-			return i;
+		return nullptr;
 	}
-	return -1;
+	return &*FoundPart;
 }
 
-void CSkins7::RandomizeSkin(int Dummy)
+const CSkins7::CSkinPart *CSkins7::FindDefaultSkinPart(int Part) const
+{
+	const char *pDefaultPartName = Part == protocol7::SKINPART_MARKING || Part == protocol7::SKINPART_DECORATION ? "" : "default";
+	const CSkinPart *pDefault = FindSkinPartOrNullptr(Part, pDefaultPartName, false);
+	if(pDefault != nullptr)
+	{
+		return pDefault;
+	}
+	return &m_aPlaceholderSkinParts[Part];
+}
+
+const CSkins7::CSkinPart *CSkins7::FindSkinPart(int Part, const char *pName, bool AllowSpecialPart) const
+{
+	const CSkinPart *pSkinPart = FindSkinPartOrNullptr(Part, pName, AllowSpecialPart);
+	if(pSkinPart != nullptr)
+	{
+		return pSkinPart;
+	}
+	return FindDefaultSkinPart(Part);
+}
+
+void CSkins7::RandomizeSkin(int Dummy) const
 {
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
@@ -466,10 +464,23 @@ void CSkins7::RandomizeSkin(int Dummy)
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		const CSkinPart *pSkinPart = GetSkinPart(Part, rand() % NumSkinPart(Part));
-		while(pSkinPart->m_Flags & SKINFLAG_SPECIAL)
-			pSkinPart = GetSkinPart(Part, rand() % NumSkinPart(Part));
-		str_copy(ms_apSkinVariables[Dummy][Part], pSkinPart->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
+		std::vector<const CSkins7::CSkinPart *> vConsideredSkinParts;
+		for(const CSkinPart &SkinPart : GetSkinParts(Part))
+		{
+			if((SkinPart.m_Flags & CSkins7::SKINFLAG_SPECIAL) != 0)
+				continue;
+			vConsideredSkinParts.push_back(&SkinPart);
+		}
+		const CSkins7::CSkinPart *pRandomPart;
+		if(vConsideredSkinParts.empty())
+		{
+			pRandomPart = FindDefaultSkinPart(Part);
+		}
+		else
+		{
+			pRandomPart = vConsideredSkinParts[rand() % vConsideredSkinParts.size()];
+		}
+		str_copy(CSkins7::ms_apSkinVariables[Dummy][Part], pRandomPart->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
 	}
 
 	ms_apSkinNameVariables[Dummy][0] = '\0';
@@ -523,10 +534,13 @@ bool CSkins7::ValidateSkinParts(char *apPartNames[protocol7::NUM_SKINPARTS], int
 	return true;
 }
 
-bool CSkins7::SaveSkinfile(const char *pSaveSkinName, int Dummy)
+bool CSkins7::SaveSkinfile(const char *pName, int Dummy)
 {
+	const bool SpecialSkin = pName[0] == 'x' && pName[1] == '_';
+	dbg_assert(!SpecialSkin, "Cannot save special skins");
+
 	char aBuf[IO_MAX_PATH_LENGTH];
-	str_format(aBuf, sizeof(aBuf), SKINS_DIR "/%s.json", pSaveSkinName);
+	str_format(aBuf, sizeof(aBuf), SKINS_DIR "/%s.json", pName);
 	IOHANDLE File = Storage()->OpenFile(aBuf, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!File)
 		return false;
@@ -573,7 +587,6 @@ bool CSkins7::SaveSkinfile(const char *pSaveSkinName, int Dummy)
 	Writer.EndObject();
 	Writer.EndObject();
 
-	// add new skin to the skin list
-	AddSkin(pSaveSkinName, Dummy);
+	AddSkinFromConfigVariables(pName, Dummy);
 	return true;
 }
