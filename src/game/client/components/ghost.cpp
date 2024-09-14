@@ -366,10 +366,7 @@ void CGhost::OnRender()
 					IsTeamplay = (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0;
 
 				GhostNinjaRenderInfo = Ghost.m_RenderInfo;
-				GhostNinjaRenderInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-				GhostNinjaRenderInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-				GhostNinjaRenderInfo.m_BloodColor = pSkin->m_BloodColor;
-				GhostNinjaRenderInfo.m_SkinMetrics = pSkin->m_Metrics;
+				GhostNinjaRenderInfo.Apply(pSkin);
 				GhostNinjaRenderInfo.m_CustomColoredSkin = IsTeamplay;
 				if(!IsTeamplay)
 				{
@@ -392,11 +389,7 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	IntsToStr(&pGhost->m_Skin.m_Skin0, 6, aSkinName, std::size(aSkinName));
 	CTeeRenderInfo *pRenderInfo = &pGhost->m_RenderInfo;
 
-	const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
-	pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	pRenderInfo->m_BloodColor = pSkin->m_BloodColor;
-	pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
+	pRenderInfo->Apply(m_pClient->m_Skins.Find(aSkinName));
 	pRenderInfo->m_CustomColoredSkin = pGhost->m_Skin.m_UseCustomColor;
 	if(pGhost->m_Skin.m_UseCustomColor)
 	{
@@ -697,11 +690,7 @@ void CGhost::OnRefreshSkins()
 		CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
 		if(aSkinName[0] != '\0')
 		{
-			const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
-			pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-			pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-			pRenderInfo->m_BloodColor = pSkin->m_BloodColor;
-			pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
+			pRenderInfo->Apply(m_pClient->m_Skins.Find(aSkinName));
 		}
 		else
 		{

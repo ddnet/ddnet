@@ -844,10 +844,7 @@ void CPlayers::OnRender()
 			{
 				aRenderInfo[i].m_aSixup[g_Config.m_ClDummy].Reset();
 
-				aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-				aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-				aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
-				aRenderInfo[i].m_SkinMetrics = pSkin->m_Metrics;
+				aRenderInfo[i].Apply(pSkin);
 				aRenderInfo[i].m_CustomColoredSkin = IsTeamplay;
 				if(!IsTeamplay)
 				{
@@ -857,12 +854,8 @@ void CPlayers::OnRender()
 			}
 		}
 	}
-	const CSkin *pSkin = m_pClient->m_Skins.Find("x_spec");
 	CTeeRenderInfo RenderInfoSpec;
-	RenderInfoSpec.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	RenderInfoSpec.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	RenderInfoSpec.m_BloodColor = pSkin->m_BloodColor;
-	RenderInfoSpec.m_SkinMetrics = pSkin->m_Metrics;
+	RenderInfoSpec.Apply(m_pClient->m_Skins.Find("x_spec"));
 	RenderInfoSpec.m_CustomColoredSkin = false;
 	RenderInfoSpec.m_Size = 64.0f;
 	const int LocalClientId = m_pClient->m_Snap.m_LocalClientId;

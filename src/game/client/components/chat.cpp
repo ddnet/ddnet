@@ -876,10 +876,7 @@ void CChat::OnRefreshSkins()
 	{
 		if(Line.m_HasRenderTee)
 		{
-			const CSkin *pSkin = m_pClient->m_Skins.Find(Line.m_aSkinName);
-			Line.m_TeeRenderInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-			Line.m_TeeRenderInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-			Line.m_TeeRenderInfo.m_SkinMetrics = pSkin->m_Metrics;
+			Line.m_TeeRenderInfo.Apply(m_pClient->m_Skins.Find(Line.m_aSkinName));
 		}
 		else
 		{
