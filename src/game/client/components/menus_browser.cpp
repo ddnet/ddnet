@@ -1822,12 +1822,8 @@ bool CMenus::PrintHighlighted(const char *pName, F &&PrintFn)
 
 CTeeRenderInfo CMenus::GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool CustomSkinColors, int CustomSkinColorBody, int CustomSkinColorFeet) const
 {
-	const CSkin *pSkin = m_pClient->m_Skins.Find(pSkinName);
-
 	CTeeRenderInfo TeeInfo;
-	TeeInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	TeeInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	TeeInfo.m_SkinMetrics = pSkin->m_Metrics;
+	TeeInfo.Apply(m_pClient->m_Skins.Find(pSkinName));
 	TeeInfo.m_CustomColoredSkin = CustomSkinColors;
 	if(CustomSkinColors)
 	{
