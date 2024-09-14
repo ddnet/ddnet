@@ -3526,7 +3526,7 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 			str_format(aCommand, sizeof(aCommand), "clear_votes; add_map_votes \"%s\"", aDirectory);
 		}
 		else
-			str_format(aCommand, sizeof(aCommand), "change_map \"%s/%s\"", pDirectory, aOptionEscaped);
+			str_format(aCommand, sizeof(aCommand), "change_map \"%s%s%s\"", pDirectory, pDirectory[0] == '\0' ? "" : "/", aOptionEscaped);
 
 		pSelf->AddVote(aDescription, aCommand);
 	}
