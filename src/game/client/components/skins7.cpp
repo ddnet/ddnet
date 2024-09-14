@@ -9,6 +9,7 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/jsonwriter.h>
+#include <engine/shared/localization.h>
 #include <engine/shared/protocol7.h>
 #include <engine/storage.h>
 
@@ -19,8 +20,10 @@
 #include "skins7.h"
 
 const char *const CSkins7::ms_apSkinPartNames[protocol7::NUM_SKINPARTS] = {"body", "marking", "decoration", "hands", "feet", "eyes"};
+const char *const CSkins7::ms_apSkinPartNamesLocalized[protocol7::NUM_SKINPARTS] = {Localizable("Body", "skins"), Localizable("Marking", "skins"), Localizable("Decoration", "skins"), Localizable("Hands", "skins"), Localizable("Feet", "skins"), Localizable("Eyes", "skins")};
 const char *const CSkins7::ms_apColorComponents[NUM_COLOR_COMPONENTS] = {"hue", "sat", "lgt", "alp"};
 
+char *CSkins7::ms_apSkinNameVariables[NUM_DUMMIES] = {0};
 char *CSkins7::ms_apSkinVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
 int *CSkins7::ms_apUCCVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
 int unsigned *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{0}};
@@ -229,6 +232,7 @@ int CSkins7::GetInitAmount() const
 void CSkins7::OnInit()
 {
 	int Dummy = 0;
+	ms_apSkinNameVariables[Dummy] = Config()->m_ClPlayer7Skin;
 	ms_apSkinVariables[Dummy][protocol7::SKINPART_BODY] = Config()->m_ClPlayer7SkinBody;
 	ms_apSkinVariables[Dummy][protocol7::SKINPART_MARKING] = Config()->m_ClPlayer7SkinMarking;
 	ms_apSkinVariables[Dummy][protocol7::SKINPART_DECORATION] = Config()->m_ClPlayer7SkinDecoration;
@@ -249,6 +253,7 @@ void CSkins7::OnInit()
 	ms_apColorVariables[Dummy][protocol7::SKINPART_EYES] = &Config()->m_ClPlayer7ColorEyes;
 
 	Dummy = 1;
+	ms_apSkinNameVariables[Dummy] = Config()->m_ClDummy7Skin;
 	ms_apSkinVariables[Dummy][protocol7::SKINPART_BODY] = Config()->m_ClDummy7SkinBody;
 	ms_apSkinVariables[Dummy][protocol7::SKINPART_MARKING] = Config()->m_ClDummy7SkinMarking;
 	ms_apSkinVariables[Dummy][protocol7::SKINPART_DECORATION] = Config()->m_ClDummy7SkinDecoration;
@@ -461,17 +466,19 @@ void CSkins7::RandomizeSkin(int Dummy)
 		if(Part == protocol7::SKINPART_MARKING)
 			Alp = rand() % 255;
 		int ColorVariable = (Alp << 24) | (Hue << 16) | (Sat << 8) | Lgt;
-		*CSkins7::ms_apUCCVariables[Dummy][Part] = true;
-		*CSkins7::ms_apColorVariables[Dummy][Part] = ColorVariable;
+		*ms_apUCCVariables[Dummy][Part] = true;
+		*ms_apColorVariables[Dummy][Part] = ColorVariable;
 	}
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		const CSkins7::CSkinPart *pSkinPart = GetSkinPart(Part, rand() % NumSkinPart(Part));
-		while(pSkinPart->m_Flags & CSkins7::SKINFLAG_SPECIAL)
+		const CSkinPart *pSkinPart = GetSkinPart(Part, rand() % NumSkinPart(Part));
+		while(pSkinPart->m_Flags & SKINFLAG_SPECIAL)
 			pSkinPart = GetSkinPart(Part, rand() % NumSkinPart(Part));
-		mem_copy(CSkins7::ms_apSkinVariables[Dummy][Part], pSkinPart->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
+		str_copy(ms_apSkinVariables[Dummy][Part], pSkinPart->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
 	}
+
+	ms_apSkinNameVariables[Dummy][0] = '\0';
 }
 
 ColorRGBA CSkins7::GetColor(int Value, bool UseAlpha) const

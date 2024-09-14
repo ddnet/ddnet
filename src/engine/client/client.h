@@ -182,6 +182,8 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_DummyConnecting = false;
 	bool m_DummyConnected = false;
 	float m_LastDummyConnectTime = 0.0f;
+	bool m_DummyReconnectOnReload = false;
+	bool m_DummyDeactivateOnReconnect = false;
 
 	// graphs
 	CGraph m_InputtimeMarginGraph;
@@ -360,7 +362,7 @@ public:
 
 	int UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo);
 
-	void ResetMapDownload();
+	void ResetMapDownload(bool ResetActive);
 	void FinishMapDownload();
 
 	void RequestDDNetInfo() override;

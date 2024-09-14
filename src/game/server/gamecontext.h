@@ -184,6 +184,7 @@ public:
 	bool m_aPlayerHasInput[MAX_CLIENTS];
 	CSaveTeam *m_apSavedTeams[MAX_CLIENTS];
 	CSaveTee *m_apSavedTees[MAX_CLIENTS];
+	CSaveTee *m_apSavedTeleTees[MAX_CLIENTS];
 	int m_aTeamMapping[MAX_CLIENTS];
 
 	// returns last input if available otherwise nulled PlayerInput object
@@ -617,7 +618,6 @@ public:
 		VOTE_TYPE_SPECTATE,
 	};
 	int m_VoteVictim;
-	int m_VoteEnforcer;
 
 	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; }
 	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; }

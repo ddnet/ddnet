@@ -683,26 +683,15 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 	// render quick search
 	CUIRect QuickSearch;
-	Bottom.VSplitLeft(5.0f, 0, &Bottom);
+	Bottom.VSplitLeft(5.0f, nullptr, &Bottom);
 	Bottom.VSplitLeft(250.0f, &QuickSearch, &Bottom);
-	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-
-	Ui()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
-	float SearchWidth = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
-	TextRender()->SetRenderFlags(0);
-	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-	QuickSearch.VSplitLeft(SearchWidth, 0, &QuickSearch);
-	QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
-
-	if(m_ControlPageOpening || (Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed()))
+	if(m_ControlPageOpening)
 	{
-		Ui()->SetActiveItem(&m_FilterInput);
 		m_ControlPageOpening = false;
+		Ui()->SetActiveItem(&m_FilterInput);
 		m_FilterInput.SelectAll();
 	}
-	m_FilterInput.SetEmptyText(Localize("Search"));
-	Ui()->DoClearableEditBox(&m_FilterInput, &QuickSearch, 14.0f);
+	Ui()->DoEditBox_Search(&m_FilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed());
 
 	// call vote
 	Bottom.VSplitRight(10.0f, &Bottom, 0);

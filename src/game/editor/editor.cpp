@@ -4384,7 +4384,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 		}
 	}
 
-	CEditorImage ImgInfo(this);
+	CImageInfo ImgInfo;
 	if(!Graphics()->LoadPng(ImgInfo, pFileName, StorageType))
 	{
 		ShowFileDialogError("Failed to load image from file '%s'.", pFileName);
@@ -4394,21 +4394,33 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	std::shared_ptr<CEditorImage> pImg = m_Map.m_vpImages[m_SelectedImage];
 	Graphics()->UnloadTexture(&(pImg->m_Texture));
 	pImg->Free();
-	*pImg = ImgInfo;
+	pImg->m_Width = ImgInfo.m_Width;
+	pImg->m_Height = ImgInfo.m_Height;
+	pImg->m_Format = ImgInfo.m_Format;
+	pImg->m_pData = ImgInfo.m_pData;
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
 
-	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
+	if(!pImg->m_External && pImg->m_Format != CImageInfo::FORMAT_RGBA)
 	{
-		DilateImage(ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height);
+		uint8_t *pRgbaData = static_cast<uint8_t *>(malloc((size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
+		ConvertToRGBA(pRgbaData, *pImg);
+		free(pImg->m_pData);
+		pImg->m_pData = pRgbaData;
+		pImg->m_Format = CImageInfo::FORMAT_RGBA;
+	}
+
+	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
+	{
+		DilateImage(pImg->m_pData, pImg->m_Width, pImg->m_Height);
 	}
 
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	int TextureLoadFlag = Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
+	if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 		TextureLoadFlag = 0;
-	pImg->m_Texture = Graphics()->LoadTextureRaw(ImgInfo, TextureLoadFlag, pFileName);
-	ImgInfo.m_pData = nullptr;
+	pImg->m_Texture = Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pFileName);
+
 	SortImages();
 	for(size_t i = 0; i < m_Map.m_vpImages.size(); ++i)
 	{
@@ -4447,7 +4459,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 		return false;
 	}
 
-	CEditorImage ImgInfo(pEditor);
+	CImageInfo ImgInfo;
 	if(!pEditor->Graphics()->LoadPng(ImgInfo, pFileName, StorageType))
 	{
 		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFileName);
@@ -4455,19 +4467,30 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(pEditor);
-	*pImg = ImgInfo;
+	pImg->m_Width = ImgInfo.m_Width;
+	pImg->m_Height = ImgInfo.m_Height;
+	pImg->m_Format = ImgInfo.m_Format;
+	pImg->m_pData = ImgInfo.m_pData;
 	pImg->m_External = IsVanillaImage(aBuf);
 
-	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
+	if(pImg->m_Format != CImageInfo::FORMAT_RGBA)
 	{
-		DilateImage(ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height);
+		uint8_t *pRgbaData = static_cast<uint8_t *>(malloc((size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
+		ConvertToRGBA(pRgbaData, *pImg);
+		free(pImg->m_pData);
+		pImg->m_pData = pRgbaData;
+		pImg->m_Format = CImageInfo::FORMAT_RGBA;
+	}
+
+	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
+	{
+		DilateImage(pImg->m_pData, pImg->m_Width, pImg->m_Height);
 	}
 
 	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
+	if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 		TextureLoadFlag = 0;
-	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo, TextureLoadFlag, pFileName);
-	ImgInfo.m_pData = nullptr;
+	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, pFileName);
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pEditor->m_Map.m_vpImages.push_back(pImg);

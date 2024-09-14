@@ -17,7 +17,7 @@ def parse_config_variables(lines):
 	return matches
 
 def generate_regex(variable_code):
-	return fr'(g_Config\.m_{variable_code}|Config\(\)->m_{variable_code}|m_pConfig->m_{variable_code})'
+	return fr'(g_Config\.m_{variable_code}\b|Config\(\)->m_{variable_code}\b|m_pConfig->m_{variable_code}\b)'
 
 def find_config_variables(config_variables):
 	"""Returns the config variables which were not found."""
