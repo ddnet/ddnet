@@ -128,6 +128,18 @@ It is an instagib gametype so one shot kills. You can choose the weapon with
 
 # Configs
 
+ddnet-insta inherited all configs from ddnet. So make sure to also check ddnet's documentation.
+The following ddnet configs are highly recommended to set in ddnet-insta to get the best pvp
+experience.
+
+```
+sv_tune_reset 0
+sv_destroy_bullets_on_death 0
+sv_destroy_lasers_on_death 0
+```
+
+Below is a list of all the settings that were added in ddnet-insta.
+
 + `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, zcatch)
 + `sv_spectator_votes` Allow spectators to vote
 + `sv_spectator_votes_sixup` Allow 0.7 players to vote as spec if sv_spectator_vote is 1 (hacky dead spec)
