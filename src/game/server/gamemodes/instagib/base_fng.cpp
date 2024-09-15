@@ -190,6 +190,9 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 			}
 		}
 
+		// yes you can multi wrong spikes
+		pKiller->m_LastKillTime = pKiller->HandleMulti();
+
 		DoWincheckRound();
 	}
 

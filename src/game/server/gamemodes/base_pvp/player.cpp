@@ -1,3 +1,4 @@
+#include <base/system.h>
 #include <engine/shared/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
@@ -11,6 +12,26 @@ void CGameControllerPvp::OnPlayerConstruct(class CPlayer *pPlayer)
 	pPlayer->m_IsDead = false;
 	pPlayer->m_KillerId = -1;
 	pPlayer->m_Stats.m_Spree = 0;
+}
+
+int64_t CPlayer::HandleMulti()
+{
+	int64_t TimeNow = time_timestamp();
+	if((TimeNow - m_LastKillTime) > 5)
+	{
+		m_Multi = 1;
+		return TimeNow;
+	}
+	m_Multi++;
+	if(m_Stats.m_BestMulti < m_Multi)
+		m_Stats.m_BestMulti = m_Multi;
+	int Index = m_Multi - 2;
+	m_aMultis[Index > MAX_MULTIS ? MAX_MULTIS : Index]++;
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "'%s' multi x%d!",
+		Server()->ClientName(GetCid()), m_Multi);
+	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+	return TimeNow;
 }
 
 void CPlayer::SetTeamSpoofed(int Team, bool DoChatMsg)
