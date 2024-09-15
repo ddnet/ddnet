@@ -172,9 +172,11 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 
 		if(g_Config.m_ClNameplatesClan)
 		{
-			YOffset -= FontSizeClan;
 			if(NamePlate.m_ClanTextContainerIndex.Valid())
+			{
+				YOffset -= FontSizeClan;
 				TextRender()->RenderTextContainer(NamePlate.m_ClanTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_ClanTextContainerIndex).m_W / 2.0f, YOffset);
+			}
 		}
 
 		if(g_Config.m_ClNameplatesFriendMark && ClientData.m_Friend)
