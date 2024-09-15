@@ -8667,7 +8667,9 @@ void CEditor::OnUpdate()
 	Input()->ConsumeEvents([&](const IInput::CEvent &Event) {
 		for(CEditorComponent &Component : m_vComponents)
 		{
-			if(Component.OnInput(Event))
+			// Events with flag `FLAG_RELEASE` must always be forwarded to all components so keys being
+			// released can be handled in all components also after some components have been disabled.
+			if(Component.OnInput(Event) && (Event.m_Flags & ~IInput::FLAG_RELEASE) != 0)
 				return;
 		}
 		Ui()->OnInput(Event);
