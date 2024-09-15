@@ -61,6 +61,7 @@ public:
 	virtual void BindInt(int Idx, int Value) = 0;
 	virtual void BindInt64(int Idx, int64_t Value) = 0;
 	virtual void BindFloat(int Idx, float Value) = 0;
+	virtual void BindNull(int Idx) = 0;
 
 	// Print expanded sql statement
 	virtual void Print() = 0;

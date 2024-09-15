@@ -89,6 +89,7 @@ public:
 	void BindInt(int Idx, int Value) override;
 	void BindInt64(int Idx, int64_t Value) override;
 	void BindFloat(int Idx, float Value) override;
+	void BindNull(int Idx) override;
 
 	void Print() override {}
 	bool Step(bool *pEnd, char *pError, int ErrorSize) override;
@@ -415,6 +416,22 @@ void CMysqlConnection::BindFloat(int Idx, float Value)
 	pParam->buffer_type = MYSQL_TYPE_FLOAT;
 	pParam->buffer = &m_vStmtParameterExtras[Idx].f;
 	pParam->buffer_length = sizeof(m_vStmtParameterExtras[Idx].i);
+	pParam->length = nullptr;
+	pParam->is_null = nullptr;
+	pParam->is_unsigned = false;
+	pParam->error = nullptr;
+}
+
+void CMysqlConnection::BindNull(int Idx)
+{
+	m_NewQuery = true;
+	Idx -= 1;
+	dbg_assert(0 <= Idx && Idx < (int)m_vStmtParameters.size(), "index out of bounds");
+
+	MYSQL_BIND *pParam = &m_vStmtParameters[Idx];
+	pParam->buffer_type = MYSQL_TYPE_NULL;
+	pParam->buffer = nullptr;
+	pParam->buffer_length = 0;
 	pParam->length = nullptr;
 	pParam->is_null = nullptr;
 	pParam->is_unsigned = false;
