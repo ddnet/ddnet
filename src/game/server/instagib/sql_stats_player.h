@@ -9,6 +9,7 @@ public:
 	// kills, deaths and flag grabs/caps are tracked per round
 	int m_Kills;
 	int m_Deaths;
+	// in zCatch wins and losses are only counted if enough players are connected
 	int m_Wins;
 	int m_Losses;
 
@@ -32,6 +33,14 @@ public:
 
 	// the current multi is in player.h
 	int m_BestMulti;
+	// zCatch only for now but will possibly be shared
+
+	// TODO: this should probably be in the base stats
+	//       any pvp mode could collect points for kills/caps/wins
+	int m_Points; // TODO: this is not tracked yet
+
+	int m_TicksCaught; // TODO: this is not tracked yet
+	int m_TicksInGame; // TODO: this is not tracked yet
 
 	void Reset()
 	{
@@ -45,6 +54,9 @@ public:
 		m_FlaggerKills = 0;
 		m_Wallshots = 0;
 		m_BestMulti = 0;
+		m_Points = 0;
+		m_TicksCaught = 0;
+		m_TicksInGame = 0;
 	}
 
 	void Merge(const CSqlStatsPlayer *pOther)
@@ -59,6 +71,9 @@ public:
 		m_FlaggerKills += pOther->m_FlaggerKills;
 		m_Wallshots += pOther->m_Wallshots;
 		m_BestMulti = std::max(m_BestMulti, pOther->m_BestMulti);
+		m_Points += pOther->m_Points;
+		m_TicksCaught += pOther->m_TicksCaught;
+		m_TicksInGame += pOther->m_TicksInGame;
 	}
 
 	void Dump(const char *pSystem = "stats") const
@@ -73,6 +88,9 @@ public:
 		dbg_msg(pSystem, "  flagger_kills: %d", m_FlaggerKills);
 		dbg_msg(pSystem, "  wallshots: %d", m_Wallshots);
 		dbg_msg(pSystem, "  multi: %d", m_BestMulti);
+		dbg_msg(pSystem, "  points: %d", m_Points);
+		dbg_msg(pSystem, "  ticks_caught: %d", m_TicksCaught);
+		dbg_msg(pSystem, "  ticks_in_game: %d", m_TicksInGame);
 	}
 
 	bool HasValues() const
@@ -86,7 +104,10 @@ public:
 		       m_FlagGrabs ||
 		       m_FlaggerKills ||
 		       m_Wallshots ||
-		       m_BestMulti;
+		       m_BestMulti ||
+		       m_Points ||
+		       m_TicksCaught ||
+		       m_TicksInGame;
 	}
 
 	CSqlStatsPlayer()

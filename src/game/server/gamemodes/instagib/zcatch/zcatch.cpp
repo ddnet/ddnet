@@ -24,6 +24,18 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 
 	for(auto &Color : m_aBodyColors)
 		Color = 0;
+
+	m_pStatsTable = "";
+	if(m_SpawnWeapons == ESpawnWeapons::SPAWN_WEAPON_GRENADE)
+		m_pStatsTable = "zcatch_grenade";
+	else if(m_SpawnWeapons == ESpawnWeapons::SPAWN_WEAPON_LASER)
+		m_pStatsTable = "zcatch_laser";
+	if(m_pStatsTable[0])
+	{
+		m_pExtraColumns = new CZCatchColumns();
+		m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+		m_pSqlStats->CreateTable(m_pStatsTable);
+	}
 }
 
 CGameControllerZcatch::ECatchGameState CGameControllerZcatch::CatchGameState() const

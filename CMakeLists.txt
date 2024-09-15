@@ -2785,6 +2785,7 @@ if(SERVER)
     gamemodes/instagib/team_fng.cpp
     gamemodes/instagib/team_fng.h
     gamemodes/instagib/zcatch/colors.cpp
+    gamemodes/instagib/zcatch/sql_columns.h
     gamemodes/instagib/zcatch/zcatch.cpp
     gamemodes/instagib/zcatch/zcatch.h
     gamemodes/mod.cpp
