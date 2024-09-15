@@ -328,30 +328,6 @@ char *io_read_all_str(IOHANDLE io);
 int io_skip(IOHANDLE io, int size);
 
 /**
- * Writes data from a buffer to a file.
- *
- * @ingroup File-IO
- *
- * @param io Handle to the file.
- * @param buffer Pointer to the data that should be written.
- * @param size Number of bytes to write.
- *
- * @return Number of bytes written.
- */
-unsigned io_write(IOHANDLE io, const void *buffer, unsigned size);
-
-/**
- * Writes a platform dependent newline to a file.
- *
- * @ingroup File-IO
- *
- * @param io Handle to the file.
- *
- * @return `true` on success, `false` on failure.
- */
-bool io_write_newline(IOHANDLE io);
-
-/**
  * Seeks to a specified offset in the file.
  *
  * @ingroup File-IO
@@ -385,6 +361,30 @@ long int io_tell(IOHANDLE io);
  * @return The total size, or `-1` on failure.
  */
 long int io_length(IOHANDLE io);
+
+/**
+ * Writes data from a buffer to a file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ * @param buffer Pointer to the data that should be written.
+ * @param size Number of bytes to write.
+ *
+ * @return Number of bytes written.
+ */
+unsigned io_write(IOHANDLE io, const void *buffer, unsigned size);
+
+/**
+ * Writes a platform dependent newline to a file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ *
+ * @return `true` on success, `false` on failure.
+ */
+bool io_write_newline(IOHANDLE io);
 
 /**
  * Closes a file.
