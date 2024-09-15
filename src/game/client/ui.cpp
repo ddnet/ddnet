@@ -1301,21 +1301,24 @@ float CUi::DoScrollbarV(const void *pId, const CUIRect *pRect, float Current)
 	}
 	else if(HotItem() == pId)
 	{
-		if(MouseButton(0))
+		if(InsideHandle)
+		{
+			if(MouseButton(0))
+			{
+				SetActiveItem(pId);
+				m_ActiveScrollbarOffset = MouseY() - Handle.y;
+				Grabbed = true;
+			}
+		}
+		else if(MouseButtonClicked(0))
 		{
 			SetActiveItem(pId);
-			m_ActiveScrollbarOffset = MouseY() - Handle.y;
+			m_ActiveScrollbarOffset = Handle.h / 2.0f;
 			Grabbed = true;
 		}
 	}
-	else if(MouseButtonClicked(0) && !InsideHandle && InsideRail)
-	{
-		SetActiveItem(pId);
-		m_ActiveScrollbarOffset = Handle.h / 2.0f;
-		Grabbed = true;
-	}
 
-	if(InsideHandle && !MouseButton(0))
+	if(InsideRail && !MouseButton(0))
 	{
 		SetHotItem(pId);
 	}
@@ -1380,18 +1383,21 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 	}
 	else if(HotItem() == pId)
 	{
-		if(MouseButton(0))
+		if(InsideHandle)
+		{
+			if(MouseButton(0))
+			{
+				SetActiveItem(pId);
+				m_ActiveScrollbarOffset = MouseX() - Handle.x;
+				Grabbed = true;
+			}
+		}
+		else if(MouseButtonClicked(0))
 		{
 			SetActiveItem(pId);
-			m_ActiveScrollbarOffset = MouseX() - Handle.x;
+			m_ActiveScrollbarOffset = Handle.w / 2.0f;
 			Grabbed = true;
 		}
-	}
-	else if(MouseButtonClicked(0) && !InsideHandle && InsideRail)
-	{
-		SetActiveItem(pId);
-		m_ActiveScrollbarOffset = Handle.w / 2.0f;
-		Grabbed = true;
 	}
 
 	if(!pColorInner && (InsideHandle || Grabbed) && (CheckActiveItem(pId) || HotItem() == pId))
@@ -1400,7 +1406,7 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 		Handle.y -= 1.5f;
 	}
 
-	if(InsideHandle && !MouseButton(0))
+	if(InsideRail && !MouseButton(0))
 	{
 		SetHotItem(pId);
 	}
