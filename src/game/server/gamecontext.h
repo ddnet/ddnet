@@ -41,7 +41,6 @@
 
 */
 
-
 class CCharacter;
 class IConfigManager;
 class CConfig;
