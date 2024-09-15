@@ -12,6 +12,12 @@ public:
 	// in zCatch wins and losses are only counted if enough players are connected
 	int m_Wins;
 	int m_Losses;
+	// used to track accuracy in any gametype
+	// in grenade, hammer, ninja and shotgun based gametypes the
+	// accuracy can go over 100%
+	// because one shot can have multiple hits
+	int m_ShotsFired;
+	int m_ShotsHit;
 
 	// Will also be set if spree chat messages are turned off
 	// this is the spree highscore
@@ -44,11 +50,16 @@ public:
 
 	void Reset()
 	{
+		// base for all gametypes
 		m_Kills = 0;
 		m_Deaths = 0;
 		m_BestSpree = 0;
 		m_Wins = 0;
 		m_Losses = 0;
+		m_ShotsFired = 0;
+		m_ShotsHit = 0;
+
+		// gametype specific
 		m_FlagCaptures = 0;
 		m_FlagGrabs = 0;
 		m_FlaggerKills = 0;
@@ -61,11 +72,16 @@ public:
 
 	void Merge(const CSqlStatsPlayer *pOther)
 	{
+		// base for all gametypes
 		m_Kills += pOther->m_Kills;
 		m_Deaths += pOther->m_Deaths;
 		m_BestSpree = std::max(m_BestSpree, pOther->m_BestSpree);
 		m_Wins += pOther->m_Wins;
 		m_Losses += pOther->m_Losses;
+		m_ShotsFired += pOther->m_ShotsFired;
+		m_ShotsHit += pOther->m_ShotsHit;
+
+		// gametype specific
 		m_FlagCaptures += pOther->m_FlagCaptures;
 		m_FlagGrabs += pOther->m_FlagGrabs;
 		m_FlaggerKills += pOther->m_FlaggerKills;
@@ -83,6 +99,9 @@ public:
 		dbg_msg(pSystem, "  spree: %d", m_BestSpree);
 		dbg_msg(pSystem, "  wins: %d", m_Wins);
 		dbg_msg(pSystem, "  losses: %d", m_Losses);
+		dbg_msg(pSystem, "  shots_fired: %d", m_ShotsFired);
+		dbg_msg(pSystem, "  shots_hit: %d", m_ShotsHit);
+
 		dbg_msg(pSystem, "  flag_captures: %d", m_FlagCaptures);
 		dbg_msg(pSystem, "  flag_grabs: %d", m_FlagGrabs);
 		dbg_msg(pSystem, "  flagger_kills: %d", m_FlaggerKills);
@@ -100,6 +119,8 @@ public:
 		       m_BestSpree ||
 		       m_Wins ||
 		       m_Losses ||
+		       m_ShotsFired ||
+		       m_ShotsHit ||
 		       m_FlagCaptures ||
 		       m_FlagGrabs ||
 		       m_FlaggerKills ||

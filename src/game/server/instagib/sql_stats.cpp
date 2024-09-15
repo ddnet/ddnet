@@ -59,7 +59,9 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 	str_format(
 		aBuf,
 		sizeof(aBuf),
-		"SELECT name, kills, deaths, spree, wins, losses %s "
+		"SELECT"
+		" name, kills, deaths, spree,"
+		" wins, losses, shots_fired, shots_hit %s "
 		"FROM %s "
 		"WHERE name = ?;",
 		!pData->m_pExtraColumns ? "" : pData->m_pExtraColumns->SelectColumns(),
@@ -94,10 +96,12 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 			"%s INTO %s%s(" // INSERT INTO
 			" name,"
 			" kills, deaths, spree,"
-			" wins, losses %s"
+			" wins, losses,"
+			" shots_fired, shots_hit  %s"
 			") VALUES ("
 			" ?,"
 			" ?, ?, ?,"
+			" ?, ?,"
 			" ?, ? %s"
 			");",
 			pSqlServer->InsertIgnore(),
@@ -121,6 +125,8 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		pSqlServer->BindInt(Offset++, pData->m_Stats.m_BestSpree);
 		pSqlServer->BindInt(Offset++, pData->m_Stats.m_Wins);
 		pSqlServer->BindInt(Offset++, pData->m_Stats.m_Losses);
+		pSqlServer->BindInt(Offset++, pData->m_Stats.m_ShotsFired);
+		pSqlServer->BindInt(Offset++, pData->m_Stats.m_ShotsHit);
 
 		dbg_msg("sql-thread", "pre extra offset %d", Offset);
 
@@ -149,6 +155,8 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		MergeStats.m_BestSpree = pSqlServer->GetInt(Offset++);
 		MergeStats.m_Wins = pSqlServer->GetInt(Offset++);
 		MergeStats.m_Losses = pSqlServer->GetInt(Offset++);
+		MergeStats.m_ShotsFired = pSqlServer->GetInt(Offset++);
+		MergeStats.m_ShotsHit = pSqlServer->GetInt(Offset++);
 
 		dbg_msg("sql-thread", "loaded stats:");
 		MergeStats.Dump("sql-thread");
@@ -166,7 +174,8 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 			"UPDATE %s%s "
 			"SET"
 			" kills = ?, deaths = ?, spree = ?,"
-			" wins = ?, losses = ? %s"
+			" wins = ?, losses = ?,"
+			" shots_fired = ?, shots_hit = ? %s"
 			"WHERE name = ?;",
 			pData->m_aTable,
 			w == Write::NORMAL ? "" : "_backup",
@@ -184,6 +193,8 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		pSqlServer->BindInt(Offset++, MergeStats.m_BestSpree);
 		pSqlServer->BindInt(Offset++, MergeStats.m_Wins);
 		pSqlServer->BindInt(Offset++, MergeStats.m_Losses);
+		pSqlServer->BindInt(Offset++, MergeStats.m_ShotsFired);
+		pSqlServer->BindInt(Offset++, MergeStats.m_ShotsHit);
 
 		if(pData->m_pExtraColumns)
 			pData->m_pExtraColumns->UpdateBindings(&Offset, pSqlServer, &MergeStats);
@@ -246,6 +257,8 @@ bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGa
 		"spree       INTEGER       DEFAULT 0,"
 		"wins        INTEGER       DEFAULT 0,"
 		"losses      INTEGER       DEFAULT 0,"
+		"shots_fired INTEGER       DEFAULT 0,"
+		"shots_hit   INTEGER       DEFAULT 0,"
 		"%s"
 		"PRIMARY KEY (name)"
 		");",

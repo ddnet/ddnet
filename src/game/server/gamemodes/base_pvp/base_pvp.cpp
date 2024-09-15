@@ -1,6 +1,7 @@
 #include <base/system.h>
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
@@ -531,18 +532,42 @@ void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
 
 bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	CPlayer *pPlayer = Character.GetPlayer();
 	if(Character.m_IsGodmode)
 		return true;
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 	{
+		// boosting mates counts neither as hit nor as miss
+		pPlayer->m_Stats.m_ShotsFired--;
 		Dmg = 0;
 		return false;
 	}
 	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
 	{
-		CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+		return false;
+	}
+	CPlayer *pKiller = nullptr;
+	if(From >= 0 && From <= MAX_CLIENTS)
+		pKiller = GameServer()->m_apPlayers[From];
+	if(g_Config.m_SvOnlyHookKills && pKiller)
+	{
+		CCharacter *pChr = pKiller->GetCharacter();
 		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
 			return false;
+	}
+
+	if(From == pPlayer->GetCid())
+	{
+		// self damage counts as boosting
+		// so the hit/misses rate should not be affected
+		//
+		// yes this means that grenade boost kills
+		// can get you a accuracy over 100%
+		pPlayer->m_Stats.m_ShotsFired--;
+	}
+	else if(pKiller)
+	{
+		pKiller->m_Stats.m_ShotsHit++;
 	}
 
 	// instagib damage always kills no matter the armor
@@ -560,14 +585,23 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	{
 		Character.Die(From, Weapon);
 
-		if(From >= 0 && From != Character.GetPlayer()->GetCid() && GameServer()->m_apPlayers[From])
+		if(From != Character.GetPlayer()->GetCid() && pKiller)
 		{
-			CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+			CCharacter *pChr = pKiller->GetCharacter();
 			if(pChr)
 			{
 				// set attacker's face to happy (taunt!)
 				pChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
 			}
+
+			// do damage Hit sound
+			CClientMask Mask = CClientMask().set(From);
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == From)
+					Mask.set(i);
+			}
+			GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_HIT, Mask);
 		}
 		return false;
 	}
@@ -879,6 +913,8 @@ void CGameControllerPvp::Anticamper()
 
 bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
 {
+	Character.GetPlayer()->m_Stats.m_ShotsFired++;
+
 	if(g_Config.m_SvGrenadeAmmoRegenResetOnFire)
 		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
 	if(Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo > 0) // -1 == unlimited
