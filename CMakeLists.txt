@@ -2773,6 +2773,7 @@ if(SERVER)
     gamemodes/instagib/gtdm/gtdm.h
     gamemodes/instagib/ictf/ictf.cpp
     gamemodes/instagib/ictf/ictf.h
+    gamemodes/instagib/ictf/sql_columns.h
     gamemodes/instagib/idm/idm.cpp
     gamemodes/instagib/idm/idm.h
     gamemodes/instagib/itdm/itdm.cpp

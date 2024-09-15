@@ -17,9 +17,16 @@ public:
 	// the players current spree is in CPlayer::m_Spree
 	int m_BestSpree;
 
+	// gctf only
+
 	int m_FlagCaptures;
 	int m_FlagGrabs;
 	int m_FlaggerKills;
+
+	// ictf only
+
+	// TODO: these are not actually incremented yet
+	int m_Wallshots;
 
 	// fng
 
@@ -36,6 +43,7 @@ public:
 		m_FlagCaptures = 0;
 		m_FlagGrabs = 0;
 		m_FlaggerKills = 0;
+		m_Wallshots = 0;
 		m_BestMulti = 0;
 	}
 
@@ -49,6 +57,7 @@ public:
 		m_FlagCaptures += pOther->m_FlagCaptures;
 		m_FlagGrabs += pOther->m_FlagGrabs;
 		m_FlaggerKills += pOther->m_FlaggerKills;
+		m_Wallshots += pOther->m_Wallshots;
 		m_BestMulti = std::max(m_BestMulti, pOther->m_BestMulti);
 	}
 
@@ -62,6 +71,7 @@ public:
 		dbg_msg(pSystem, "  flag_captures: %d", m_FlagCaptures);
 		dbg_msg(pSystem, "  flag_grabs: %d", m_FlagGrabs);
 		dbg_msg(pSystem, "  flagger_kills: %d", m_FlaggerKills);
+		dbg_msg(pSystem, "  wallshots: %d", m_Wallshots);
 		dbg_msg(pSystem, "  multi: %d", m_BestMulti);
 	}
 
@@ -75,6 +85,7 @@ public:
 		       m_FlagCaptures ||
 		       m_FlagGrabs ||
 		       m_FlaggerKills ||
+		       m_Wallshots ||
 		       m_BestMulti;
 	}
 
