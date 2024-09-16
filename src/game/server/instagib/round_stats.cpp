@@ -46,7 +46,7 @@ void IGameController::OnEndRoundInsta()
 		if(Lost)
 			pPlayer->m_Stats.m_Losses++;
 
-		m_pSqlStats->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), m_pStatsTable, &pPlayer->m_Stats);
+		m_pSqlStats->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), StatsTable(), &pPlayer->m_Stats);
 		pPlayer->m_Stats.Reset();
 	}
 }

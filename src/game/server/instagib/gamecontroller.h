@@ -316,6 +316,7 @@ public:
 
 	CSqlStats *m_pSqlStats = nullptr;
 	const char *m_pStatsTable = "";
+	const char *StatsTable() const { return m_pStatsTable; }
 
 private:
 #ifndef IN_CLASS_IGAMECONTROLLER

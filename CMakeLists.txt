@@ -2798,6 +2798,7 @@ if(SERVER)
     gamemodes/vanilla/dm/dm.h
     gameworld.cpp
     gameworld.h
+    instagib/chat_commands.cpp
     instagib/extra_columns.h
     instagib/gamecontroller.cpp
     instagib/gamecontroller.h

@@ -2,11 +2,77 @@
 #include <cstdlib>
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
+#include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 #include <game/server/instagib/extra_columns.h>
 #include <game/server/instagib/sql_stats_player.h>
+#include <game/server/player.h>
 
 #include "sql_stats.h"
+
+class IDbConnection;
+
+CInstaSqlResult::CInstaSqlResult()
+{
+	SetVariant(Variant::DIRECT);
+}
+
+void CInstaSqlResult::SetVariant(Variant v)
+{
+	m_MessageKind = v;
+	switch(v)
+	{
+	case DIRECT:
+	case ALL:
+		for(auto &aMessage : m_Data.m_aaMessages)
+			aMessage[0] = 0;
+		break;
+	case BROADCAST:
+		m_Data.m_aBroadcast[0] = 0;
+		break;
+	}
+}
+
+std::shared_ptr<CInstaSqlResult> CSqlStats::NewInstaSqlResult(int ClientId)
+{
+	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientId];
+	if(pCurPlayer->m_StatsQueryResult != nullptr) // TODO: send player a message: "too many requests"
+		return nullptr;
+	pCurPlayer->m_StatsQueryResult = std::make_shared<CInstaSqlResult>();
+	return pCurPlayer->m_StatsQueryResult;
+}
+
+// this shares one ratelimit with ddnet based requests such as /rank, /times, /top5team and so on
+bool CSqlStats::RateLimitPlayer(int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(pPlayer == 0)
+		return true;
+	if(pPlayer->m_LastSqlQuery + (int64_t)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
+		return true;
+	pPlayer->m_LastSqlQuery = Server()->Tick();
+	return false;
+}
+
+void CSqlStats::ExecPlayerThread(
+	bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
+	const char *pThreadName,
+	int ClientId,
+	const char *pName,
+	const char *pTable,
+	int Offset)
+{
+	auto pResult = NewInstaSqlResult(ClientId);
+	if(pResult == nullptr)
+		return;
+	auto Tmp = std::make_unique<CSqlPlayerStatsRequest>(pResult);
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
+	str_copy(Tmp->m_aTable, pTable, sizeof(Tmp->m_aTable));
+	Tmp->m_Offset = Offset;
+
+	m_pPool->Execute(pFuncPtr, std::move(Tmp), pThreadName);
+}
 
 CSqlStats::CSqlStats(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	m_pPool(pPool),
@@ -32,6 +98,13 @@ CSqlInstaData::~CSqlInstaData()
 	}
 }
 
+void CSqlStats::ShowStats(int ClientId, const char *pName, const char *pTable)
+{
+	if(RateLimitPlayer(ClientId))
+		return;
+	ExecPlayerThread(ShowStatsWorker, "show stats", ClientId, pName, pTable, 0);
+}
+
 void CSqlStats::SaveRoundStats(const char *pName, const char *pTable, CSqlStatsPlayer *pStats)
 {
 	auto Tmp = std::make_unique<CSqlSaveRoundStatsRequest>();
@@ -44,6 +117,58 @@ void CSqlStats::SaveRoundStats(const char *pName, const char *pTable, CSqlStatsP
 	str_copy(Tmp->m_aTable, pTable);
 	mem_copy(&Tmp->m_Stats, pStats, sizeof(Tmp->m_Stats));
 	m_pPool->ExecuteWrite(SaveRoundStatsThread, std::move(Tmp), "save round stats");
+}
+
+bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlPlayerStatsRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
+
+	char aBuf[4096];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"SELECT"
+		" kills, deaths, spree,"
+		" wins, losses, shots_fired, shots_hit %s "
+		"FROM %s "
+		"WHERE name = ?;",
+		!pData->m_pExtraColumns ? "" : pData->m_pExtraColumns->SelectColumns(),
+		pData->m_aTable);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aName);
+	pSqlServer->Print();
+
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "step failed query: %s", aBuf);
+		return true;
+	}
+
+	if(End)
+	{
+		pResult->m_MessageKind = CInstaSqlResult::DIRECT;
+		str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
+			"'%s' is unranked",
+			pData->m_aName);
+	}
+	else
+	{
+		CSqlStatsPlayer Stats;
+		Stats.m_Kills = pSqlServer->GetInt(1);
+
+		pResult->m_MessageKind = CInstaSqlResult::ALL;
+
+		str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
+			"'%s' kills: %d - requested by %s",
+			pData->m_aName, Stats.m_Kills, pData->m_aRequestingPlayer);
+	}
+	return false;
 }
 
 bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)

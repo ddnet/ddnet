@@ -313,6 +313,8 @@ public:
 	static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData);
+	static void ConStatsRound(IConsole::IResult *pResult, void *pUserData);
+	static void ConStatsAllTime(IConsole::IResult *pResult, void *pUserData);
 
 	//
 	void CheckPureTuning();

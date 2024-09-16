@@ -5,6 +5,7 @@
 #ifndef IN_CLASS_PLAYER
 
 #include <base/vmath.h>
+#include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
 #include <optional>
 #include <vector>
@@ -18,6 +19,8 @@ class CPlayer
 
 public:
 	void InstagibTick();
+
+	void ProcessStatsResult(CInstaSqlResult &Result);
 
 	/*******************************************************************
 	 * zCatch                                                          *
@@ -78,6 +81,8 @@ public:
 	int Spree() const { return m_Spree; }
 	int Kills() const { return m_Stats.m_Kills; }
 	int Deaths() const { return m_Stats.m_Deaths; }
+
+	std::shared_ptr<CInstaSqlResult> m_StatsQueryResult;
 
 	/*
 		m_HasGhostCharInGame

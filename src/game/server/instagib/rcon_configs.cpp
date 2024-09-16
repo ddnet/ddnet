@@ -18,6 +18,10 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_spectator_votes", ConchainSpectatorVotes, this);
 	Console()->Chain("sv_spectator_votes_sixup", ConchainSpectatorVotes, this);
 
+	Console()->Register("stats", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStatsRound, this, "Shows the current round stats of player name (your stats by default)");
+	Console()->Register("statsall", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStatsAllTime, this, "Shows the all time stats of player name (your stats by default)");
+	Console()->Register("stats_all", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConStatsAllTime, this, "Shows the all time stats of player name (your stats by default)");
+
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) Console()->Register(name, params, flags, callback, userdata, help);
 #include <game/server/instagib/rcon_commands.h>
 #undef CONSOLE_COMMAND
