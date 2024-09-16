@@ -418,24 +418,30 @@ void CGameControllerPvp::Tick()
 		}
 	}
 
-	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer)
 			continue;
-		if(pPlayer->m_GameStateBroadcast)
-		{
-			char aBuf[512];
-			str_format(
-				aBuf,
-				sizeof(aBuf),
-				"GameState: %s                                                                                                                               ",
-				GameStateToStr(GameState()));
-			GameServer()->SendBroadcast(aBuf, pPlayer->GetCid());
-		}
+
+		OnPlayerTick(pPlayer);
 	}
 	//call anticamper
 	if(g_Config.m_SvAnticamper && !GameServer()->m_World.m_Paused)
 		Anticamper();
+}
+
+void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
+{
+	if(pPlayer->m_GameStateBroadcast)
+	{
+		char aBuf[512];
+		str_format(
+			aBuf,
+			sizeof(aBuf),
+			"GameState: %s                                                                                                                               ",
+			GameStateToStr(GameState()));
+		GameServer()->SendBroadcast(aBuf, pPlayer->GetCid());
+	}
 }
 
 bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)

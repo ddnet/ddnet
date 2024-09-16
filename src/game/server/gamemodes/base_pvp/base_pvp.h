@@ -19,6 +19,7 @@ public:
 
 	void OnPlayerConstruct(class CPlayer *pPlayer);
 	void OnCharacterConstruct(class CCharacter *pChr);
+	void OnPlayerTick(class CPlayer *pPlayer);
 
 	void SendChatSpectators(const char *pMessage, int Flags);
 	void OnPlayerConnect(CPlayer *pPlayer) override;
