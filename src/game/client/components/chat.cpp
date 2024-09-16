@@ -552,14 +552,16 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 {
-	const char *pHL = str_utf8_find_nocase(pLine, pName);
+	const char *pHit = str_utf8_find_nocase(pLine, pName);
 
-	if(pHL)
+	while(pHit)
 	{
 		int Length = str_length(pName);
 
-		if(Length > 0 && (pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
+		if(Length > 0 && (pLine == pHit || pHit[-1] == ' ') && (pHit[Length] == 0 || pHit[Length] == ' ' || pHit[Length] == '.' || pHit[Length] == '!' || pHit[Length] == ',' || pHit[Length] == '?' || pHit[Length] == ':'))
 			return true;
+
+		pHit = str_utf8_find_nocase(pHit + 1, pName);
 	}
 
 	return false;
