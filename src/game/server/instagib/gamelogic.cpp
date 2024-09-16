@@ -329,7 +329,7 @@ void CGameContext::InstagibUnstackChatMessage(char *pUnstacked, const char *pMes
 		m_UnstackHackCharacterOffset++;
 		if(m_UnstackHackCharacterOffset >= (int)(sizeof(aaInvisibleUnicodes) / 8))
 			m_UnstackHackCharacterOffset = 0;
-		str_format(pUnstacked, Size, "%s%s", aaInvisibleUnicodes[m_UnstackHackCharacterOffset], pMessage);
+		str_format(pUnstacked, Size, "%s %s", pMessage, aaInvisibleUnicodes[m_UnstackHackCharacterOffset]);
 	}
 	for(int i = MAX_LINES - 1; i > 0; i--)
 	{
