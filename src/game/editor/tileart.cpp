@@ -17,51 +17,6 @@ bool operator<(const ColorRGBA &Left, const ColorRGBA &Right)
 		return Left.a < Right.a;
 }
 
-static ColorRGBA GetPixelColor(const CImageInfo &Image, size_t x, size_t y)
-{
-	uint8_t *pData = Image.m_pData;
-	const size_t PixelSize = Image.PixelSize();
-	const size_t PixelStartIndex = x * PixelSize + (Image.m_Width * PixelSize * y);
-
-	ColorRGBA Color = {255, 255, 255, 255};
-	if(PixelSize == 1)
-	{
-		Color.a = pData[PixelStartIndex];
-	}
-	else
-	{
-		Color.r = pData[PixelStartIndex + 0];
-		Color.g = pData[PixelStartIndex + 1];
-		Color.b = pData[PixelStartIndex + 2];
-
-		if(PixelSize == 4)
-			Color.a = pData[PixelStartIndex + 3];
-	}
-
-	return Color;
-}
-
-static void SetPixelColor(CImageInfo *pImage, size_t x, size_t y, ColorRGBA Color)
-{
-	uint8_t *pData = pImage->m_pData;
-	const size_t PixelSize = pImage->PixelSize();
-	const size_t PixelStartIndex = x * PixelSize + (pImage->m_Width * PixelSize * y);
-
-	if(PixelSize == 1)
-	{
-		pData[PixelStartIndex] = Color.a;
-	}
-	else
-	{
-		pData[PixelStartIndex + 0] = Color.r;
-		pData[PixelStartIndex + 1] = Color.g;
-		pData[PixelStartIndex + 2] = Color.b;
-
-		if(PixelSize == 4)
-			pData[PixelStartIndex + 3] = Color.a;
-	}
-}
-
 static std::vector<ColorRGBA> GetUniqueColors(const CImageInfo &Image)
 {
 	std::set<ColorRGBA> ColorSet;
@@ -70,7 +25,7 @@ static std::vector<ColorRGBA> GetUniqueColors(const CImageInfo &Image)
 	{
 		for(size_t y = 0; y < Image.m_Height; y++)
 		{
-			ColorRGBA Color = GetPixelColor(Image, x, y);
+			ColorRGBA Color = Image.PixelColor(x, y);
 			if(Color.a > 0 && ColorSet.insert(Color).second)
 				vUniqueColors.push_back(Color);
 		}
@@ -106,12 +61,12 @@ static std::vector<std::array<ColorRGBA, NumTiles>> GroupColors(const std::vecto
 	return vaColorGroups;
 }
 
-static void SetColorTile(CImageInfo *pImage, int x, int y, ColorRGBA Color)
+static void SetColorTile(CImageInfo &Image, int x, int y, ColorRGBA Color)
 {
 	for(int i = 0; i < TileSize; i++)
 	{
 		for(int j = 0; j < TileSize; j++)
-			SetPixelColor(pImage, x * TileSize + i, y * TileSize + j, Color);
+			Image.SetPixelColor(x * TileSize + i, y * TileSize + j, Color);
 	}
 }
 
@@ -128,7 +83,7 @@ static CImageInfo ColorGroupToImage(const std::array<ColorRGBA, NumTiles> &aColo
 		for(int x = 0; x < NumTilesRow; x++)
 		{
 			int ColorIndex = x + NumTilesRow * y;
-			SetColorTile(&Image, x, y, aColorGroup[ColorIndex]);
+			SetColorTile(Image, x, y, aColorGroup[ColorIndex]);
 		}
 	}
 
@@ -179,7 +134,7 @@ static void SetTilelayerIndices(const std::shared_ptr<CLayerTiles> &pLayer, cons
 	for(int x = 0; x < pLayer->m_Width; x++)
 	{
 		for(int y = 0; y < pLayer->m_Height; y++)
-			pLayer->m_pTiles[x + y * pLayer->m_Width].m_Index = GetColorIndex(aColorGroup, GetPixelColor(Image, x, y));
+			pLayer->m_pTiles[x + y * pLayer->m_Width].m_Index = GetColorIndex(aColorGroup, Image.PixelColor(x, y));
 	}
 }
 

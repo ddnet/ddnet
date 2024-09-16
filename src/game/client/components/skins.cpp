@@ -6,6 +6,7 @@
 #include <base/system.h>
 
 #include <engine/engine.h>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
@@ -237,14 +238,7 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	// get feet outline size
 	CheckMetrics(Skin.m_Metrics.m_Feet, pData, Pitch, FeetOutlineOffsetX, FeetOutlineOffsetY, FeetOutlineWidth, FeetOutlineHeight);
 
-	// make the texture gray scale
-	for(size_t i = 0; i < Info.m_Width * Info.m_Height; i++)
-	{
-		int v = (pData[i * PixelStep] + pData[i * PixelStep + 1] + pData[i * PixelStep + 2]) / 3;
-		pData[i * PixelStep] = v;
-		pData[i * PixelStep + 1] = v;
-		pData[i * PixelStep + 2] = v;
-	}
+	ConvertToGrayscale(Info);
 
 	int aFreq[256] = {0};
 	int OrgWeight = 0;

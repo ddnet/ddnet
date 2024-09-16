@@ -14,7 +14,6 @@ public:
 
 	void OnInit(CEditor *pEditor) override;
 	void AnalyseTileFlags();
-	bool DataEquals(const CEditorImage &Other) const;
 
 	IGraphics::CTextureHandle m_Texture;
 	int m_External = 0;
