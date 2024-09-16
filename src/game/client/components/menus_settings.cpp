@@ -633,11 +633,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	// Note: get the skin info after the settings buttons, because they can trigger a refresh
 	// which invalidates the skin.
-	const CSkin *pSkin = m_pClient->m_Skins.Find(pSkinName);
 	CTeeRenderInfo OwnSkinInfo;
-	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
+	OwnSkinInfo.Apply(m_pClient->m_Skins.Find(pSkinName));
 	OwnSkinInfo.m_CustomColoredSkin = *pUseCustomColor;
 	if(*pUseCustomColor)
 	{

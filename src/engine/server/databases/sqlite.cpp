@@ -37,6 +37,7 @@ public:
 	void BindInt(int Idx, int Value) override;
 	void BindInt64(int Idx, int64_t Value) override;
 	void BindFloat(int Idx, float Value) override;
+	void BindNull(int Idx) override;
 
 	void Print() override;
 	bool Step(bool *pEnd, char *pError, int ErrorSize) override;
@@ -237,6 +238,13 @@ void CSqliteConnection::BindInt64(int Idx, int64_t Value)
 void CSqliteConnection::BindFloat(int Idx, float Value)
 {
 	int Result = sqlite3_bind_double(m_pStmt, Idx, (double)Value);
+	AssertNoError(Result);
+	m_Done = false;
+}
+
+void CSqliteConnection::BindNull(int Idx)
+{
+	int Result = sqlite3_bind_null(m_pStmt, Idx);
 	AssertNoError(Result);
 	m_Done = false;
 }

@@ -80,7 +80,7 @@ class CHud : public CComponent
 	void RenderMovementInformation(const int ClientId);
 
 	void UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, char *pPrevValue, size_t Size);
-	void RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, float X, float Y);
+	void RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, const ColorRGBA &Color, float X, float Y);
 
 	void RenderGameTimer();
 	void RenderPauseNotification();

@@ -447,7 +447,9 @@ void CGameClient::OnUpdate()
 	Input()->ConsumeEvents([&](const IInput::CEvent &Event) {
 		for(auto &pComponent : m_vpInput)
 		{
-			if(pComponent->OnInput(Event))
+			// Events with flag `FLAG_RELEASE` must always be forwarded to all components so keys being
+			// released can be handled in all components also after some components have been disabled.
+			if(pComponent->OnInput(Event) && (Event.m_Flags & ~IInput::FLAG_RELEASE) != 0)
 				break;
 		}
 	});
@@ -1554,11 +1556,7 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_SkinInfo.m_Size = 64;
 
 					// find new skin
-					const CSkin *pSkin = m_Skins.Find(pClient->m_aSkinName);
-					pClient->m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-					pClient->m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-					pClient->m_SkinInfo.m_SkinMetrics = pSkin->m_Metrics;
-					pClient->m_SkinInfo.m_BloodColor = pSkin->m_BloodColor;
+					pClient->m_SkinInfo.Apply(m_Skins.Find(pClient->m_aSkinName));
 					pClient->m_SkinInfo.m_CustomColoredSkin = pClient->m_UseCustomColor;
 
 					if(!pClient->m_UseCustomColor)
@@ -3750,13 +3748,9 @@ void CGameClient::RefreshSkins()
 
 	for(auto &Client : m_aClients)
 	{
-		Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
-		Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
 		if(Client.m_aSkinName[0] != '\0')
 		{
-			const CSkin *pSkin = m_Skins.Find(Client.m_aSkinName);
-			Client.m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-			Client.m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+			Client.m_SkinInfo.Apply(m_Skins.Find(Client.m_aSkinName));
 		}
 		else
 		{
