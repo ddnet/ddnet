@@ -432,6 +432,8 @@ void CGameControllerPvp::Tick()
 
 void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
 {
+	pPlayer->InstagibTick();
+
 	if(pPlayer->m_GameStateBroadcast)
 	{
 		char aBuf[512];

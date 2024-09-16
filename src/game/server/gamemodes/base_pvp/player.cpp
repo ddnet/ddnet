@@ -14,6 +14,10 @@ void CGameControllerPvp::OnPlayerConstruct(class CPlayer *pPlayer)
 	pPlayer->m_Stats.m_Spree = 0;
 }
 
+void CPlayer::InstagibTick()
+{
+}
+
 int64_t CPlayer::HandleMulti()
 {
 	int64_t TimeNow = time_timestamp();
