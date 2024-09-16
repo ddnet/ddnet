@@ -22,8 +22,7 @@ public:
 	~CLayerTele();
 
 	CTeleTile *m_pTeleTile;
-	unsigned char m_TeleNum;
-	unsigned char m_TeleCheckpointNum;
+	std::map<int, unsigned char> m_TeleNumbers;
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -33,7 +32,7 @@ public:
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
 	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
-	virtual bool ContainsElementWithId(int Id, bool Checkpoint);
+	virtual bool ContainsElementWithId(int Id, int Index);
 	virtual void GetPos(int Number, int Offset, int &TeleX, int &TeleY);
 
 	int m_GotoTeleOffset;
