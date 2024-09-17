@@ -2300,6 +2300,15 @@ void CGameClient::OnPredict()
 	if(g_Config.m_ClRemoveAnti)
 	{
 		m_ExtraPredictedWorld.CopyWorld(&m_PredictedWorld);
+
+		// Remove other tees to reduce lag and because they aren't really important in this case
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			if(i != m_Snap.m_LocalClientId)
+				if (CCharacter* pDelChar = m_ExtraPredictedWorld.GetCharacterById(i)) 
+					pDelChar->Destroy();
+				
+
+
 		CCharacter *pExtraChar = m_ExtraPredictedWorld.GetCharacterById(m_Snap.m_LocalClientId);
 		if(pExtraChar)
 		{
