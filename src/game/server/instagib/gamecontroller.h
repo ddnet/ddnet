@@ -14,6 +14,7 @@
 #include <game/generated/protocol7.h>
 
 #include <game/server/instagib/sql_stats.h>
+#include <game/server/instagib/sql_stats_player.h>
 
 struct CScoreLoadBestTimeResult;
 
@@ -168,6 +169,17 @@ public:
 			pPlayer - the player to check
 	*/
 	virtual bool IsLoser(const CPlayer *pPlayer) { return false; }
+
+	/*
+		Function: OnShowStatsAll
+			called from the main thread when a SQL worker finished querying stats from the database
+
+		Arguments:
+			pStats - stats struct to display
+			pRequestingPlayer - player who initiated the stats request (might differ from the requested player)
+			pRequestedName - player name the stats belong to
+	*/
+	virtual void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };

@@ -15,6 +15,7 @@ class IDbConnection;
 CInstaSqlResult::CInstaSqlResult()
 {
 	SetVariant(Variant::DIRECT);
+	m_Stats.Reset();
 }
 
 void CInstaSqlResult::SetVariant(Variant v)
@@ -22,6 +23,7 @@ void CInstaSqlResult::SetVariant(Variant v)
 	m_MessageKind = v;
 	switch(v)
 	{
+	case STATS:
 	case DIRECT:
 	case ALL:
 		for(auto &aMessage : m_aaMessages)
@@ -159,14 +161,31 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 	}
 	else
 	{
-		CSqlStatsPlayer Stats;
-		Stats.m_Kills = pSqlServer->GetInt(1);
+		pResult->m_MessageKind = CInstaSqlResult::STATS;
 
-		pResult->m_MessageKind = CInstaSqlResult::ALL;
+		str_copy(pResult->m_Info.m_aRequestedPlayer, pData->m_aName, sizeof(pResult->m_Info.m_aRequestedPlayer));
 
-		str_format(pResult->m_aaMessages[0], sizeof(pResult->m_aaMessages[0]),
-			"'%s' kills: %d - requested by %s",
-			pData->m_aName, Stats.m_Kills, pData->m_aRequestingPlayer);
+		int Offset = 1;
+		pResult->m_Stats.m_Kills = pSqlServer->GetInt(Offset++);
+		pResult->m_Stats.m_Deaths = pSqlServer->GetInt(Offset++);
+		pResult->m_Stats.m_BestSpree = pSqlServer->GetInt(Offset++);
+		pResult->m_Stats.m_Wins = pSqlServer->GetInt(Offset++);
+		pResult->m_Stats.m_Losses = pSqlServer->GetInt(Offset++);
+		pResult->m_Stats.m_ShotsFired = pSqlServer->GetInt(Offset++);
+		pResult->m_Stats.m_ShotsHit = pSqlServer->GetInt(Offset++);
+
+		dbg_msg("sql-thread", "loaded base stats:");
+		pResult->m_Stats.Dump("sql-thread");
+
+		CSqlStatsPlayer EmptyStats;
+		EmptyStats.Reset();
+
+		// merge into empty stats instead of having a ReadStats() and a ReadAndMergeStats() method
+		if(pData->m_pExtraColumns)
+			pData->m_pExtraColumns->ReadAndMergeStats(&Offset, pSqlServer, &pResult->m_Stats, &EmptyStats);
+
+		dbg_msg("sql-thread", "loaded gametype specific stats:");
+		pResult->m_Stats.Dump("sql-thread");
 	}
 	return false;
 }

@@ -59,6 +59,9 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 			// if(Result.m_aBroadcast[0] != 0)
 			// 	GameServer()->SendBroadcast(Result.m_aBroadcast, -1);
 			break;
+		case CInstaSqlResult::STATS:
+			GameServer()->m_pController->OnShowStatsAll(&Result.m_Stats, this, Result.m_Info.m_aRequestedPlayer);
+			break;
 		}
 	}
 }

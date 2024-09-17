@@ -25,6 +25,7 @@ struct CInstaSqlResult : ISqlResult
 		DIRECT,
 		ALL,
 		BROADCAST,
+		STATS,
 	} m_MessageKind;
 
 	char m_aaMessages[MAX_MESSAGES][512];
@@ -33,6 +34,8 @@ struct CInstaSqlResult : ISqlResult
 	{
 		char m_aRequestedPlayer[MAX_NAME_LENGTH];
 	} m_Info = {};
+
+	CSqlStatsPlayer m_Stats;
 
 	void SetVariant(Variant v);
 };

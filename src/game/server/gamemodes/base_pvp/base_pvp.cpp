@@ -102,6 +102,17 @@ int CGameControllerPvp::GameInfoExFlags2(int SnappingClient)
 	return GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // ddnet-insta
 }
 
+void CGameControllerPvp::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
+{
+	char aBuf[1024];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"'%s' kills: %d - requested by %s",
+		pRequestedName, pStats->m_Kills, Server()->ClientName(pRequestingPlayer->GetCid()));
+	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+}
+
 void CGameControllerPvp::OnUpdateSpectatorVotesConfig()
 {
 	// spec votes was activated
