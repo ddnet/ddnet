@@ -299,7 +299,7 @@ void CMenus::RenderSettingsTeeCustom7(CUIRect MainView)
 		CustomColors.HSplitTop(5.0f, nullptr, &CustomColors);
 		CustomColors.HSplitTop(95.0f, &CustomColorScrollbars, &CustomColors);
 
-		if(RenderHslaScrollbars(&CustomColorScrollbars, CSkins7::ms_apColorVariables[(int)m_Dummy][m_TeePartSelected], m_TeePartSelected == protocol7::SKINPART_MARKING, CSkins7::DARKEST_COLOR_LGT))
+		if(RenderHslaScrollbars(&CustomColorScrollbars, CSkins7::ms_apColorVariables[(int)m_Dummy][m_TeePartSelected], m_TeePartSelected == protocol7::SKINPART_MARKING, ColorHSLA::DARKEST_LGT7))
 		{
 			SetNeedSendInfo();
 		}

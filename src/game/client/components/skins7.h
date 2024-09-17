@@ -26,8 +26,6 @@ public:
 		HAT_OFFSET_SIDE = 2,
 	};
 
-	static constexpr float DARKEST_COLOR_LGT = 61.0f / 255.0f;
-
 	struct CSkinPart
 	{
 		int m_Flags;

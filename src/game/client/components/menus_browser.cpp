@@ -1828,8 +1828,8 @@ CTeeRenderInfo CMenus::GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool C
 	TeeInfo.m_CustomColoredSkin = CustomSkinColors;
 	if(CustomSkinColors)
 	{
-		TeeInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(CustomSkinColorBody).UnclampLighting());
-		TeeInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(CustomSkinColorFeet).UnclampLighting());
+		TeeInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(CustomSkinColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
+		TeeInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(CustomSkinColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
 	}
 	else
 	{

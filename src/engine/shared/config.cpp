@@ -117,10 +117,10 @@ void SColorConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUs
 		if(pData->CheckReadOnly())
 			return;
 
-		const auto Color = pResult->GetColor(0, pData->m_Light);
+		const auto Color = pResult->GetColor(0, pData->m_DarkestLighting);
 		if(Color)
 		{
-			const unsigned Value = Color->Pack(pData->m_Light ? 0.5f : 0.0f, pData->m_Alpha);
+			const unsigned Value = Color->Pack(pData->m_DarkestLighting, pData->m_Alpha);
 
 			*pData->m_pVariable = Value;
 			if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
@@ -137,19 +137,17 @@ void SColorConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUs
 		str_format(aBuf, sizeof(aBuf), "Value: %u", *pData->m_pVariable);
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
 
-		ColorHSLA Hsla = ColorHSLA(*pData->m_pVariable, true);
-		if(pData->m_Light)
-			Hsla = Hsla.UnclampLighting();
-		str_format(aBuf, sizeof(aBuf), "H: %d°, S: %d%%, L: %d%%", round_truncate(Hsla.h * 360), round_truncate(Hsla.s * 100), round_truncate(Hsla.l * 100));
+		const ColorHSLA Hsla = ColorHSLA(*pData->m_pVariable, true).UnclampLighting(pData->m_DarkestLighting);
+		str_format(aBuf, sizeof(aBuf), "H: %d°, S: %d%%, L: %d%%", round_to_int(Hsla.h * 360), round_to_int(Hsla.s * 100), round_to_int(Hsla.l * 100));
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
 
 		const ColorRGBA Rgba = color_cast<ColorRGBA>(Hsla);
-		str_format(aBuf, sizeof(aBuf), "R: %d, G: %d, B: %d, #%06X", round_truncate(Rgba.r * 255), round_truncate(Rgba.g * 255), round_truncate(Rgba.b * 255), Rgba.Pack(false));
+		str_format(aBuf, sizeof(aBuf), "R: %d, G: %d, B: %d, #%06X", round_to_int(Rgba.r * 255), round_to_int(Rgba.g * 255), round_to_int(Rgba.b * 255), Rgba.Pack(false));
 		pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
 
 		if(pData->m_Alpha)
 		{
-			str_format(aBuf, sizeof(aBuf), "A: %d%%", round_truncate(Hsla.a * 100));
+			str_format(aBuf, sizeof(aBuf), "A: %d%%", round_to_int(Hsla.a * 100));
 			pData->m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "config", aBuf);
 		}
 	}
@@ -494,19 +492,19 @@ void CConfigManager::Con_Toggle(IConsole::IResult *pResult, void *pUserData)
 		if(pVariable->m_Type == SConfigVariable::VAR_INT)
 		{
 			SIntConfigVariable *pIntVariable = static_cast<SIntConfigVariable *>(pVariable);
-			pIntVariable->SetValue(*pIntVariable->m_pVariable == pResult->GetInteger(1) ? pResult->GetInteger(2) : pResult->GetInteger(1));
+			pIntVariable->SetValue(*pIntVariable->m_pVariable == pResult->GetInteger(pResult->GetInteger(1) ? 2 : 1));
 		}
 		else if(pVariable->m_Type == SConfigVariable::VAR_COLOR)
 		{
 			SColorConfigVariable *pColorVariable = static_cast<SColorConfigVariable *>(pVariable);
-			const float Darkest = pColorVariable->m_Light ? 0.5f : 0.0f;
-			const std::optional<ColorHSLA> Value = *pColorVariable->m_pVariable == pResult->GetColor(1, pColorVariable->m_Light).value_or(ColorHSLA(0, 0, 0)).Pack(Darkest, pColorVariable->m_Alpha) ? pResult->GetColor(2, pColorVariable->m_Light) : pResult->GetColor(1, pColorVariable->m_Light);
-			pColorVariable->SetValue(Value.value_or(ColorHSLA(0, 0, 0)).Pack(Darkest, pColorVariable->m_Alpha));
+			const bool EqualToFirst = *pColorVariable->m_pVariable == pResult->GetColor(1, pColorVariable->m_DarkestLighting).value_or(ColorHSLA(0, 0, 0)).Pack(pColorVariable->m_DarkestLighting, pColorVariable->m_Alpha);
+			const std::optional<ColorHSLA> Value = pResult->GetColor(EqualToFirst ? 2 : 1, pColorVariable->m_DarkestLighting);
+			pColorVariable->SetValue(Value.value_or(ColorHSLA(0, 0, 0)).Pack(pColorVariable->m_DarkestLighting, pColorVariable->m_Alpha));
 		}
 		else if(pVariable->m_Type == SConfigVariable::VAR_STRING)
 		{
 			SStringConfigVariable *pStringVariable = static_cast<SStringConfigVariable *>(pVariable);
-			pStringVariable->SetValue(str_comp(pStringVariable->m_pStr, pResult->GetString(1)) == 0 ? pResult->GetString(2) : pResult->GetString(1));
+			pStringVariable->SetValue(pResult->GetString(str_comp(pStringVariable->m_pStr, pResult->GetString(1)) == 0 ? 2 : 1));
 		}
 		return;
 	}
