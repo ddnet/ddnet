@@ -26,6 +26,7 @@ struct CInstaSqlResult : ISqlResult
 		ALL,
 		BROADCAST,
 		STATS,
+		RANK,
 	} m_MessageKind;
 
 	char m_aaMessages[MAX_MESSAGES][512];
@@ -36,6 +37,19 @@ struct CInstaSqlResult : ISqlResult
 	} m_Info = {};
 
 	CSqlStatsPlayer m_Stats;
+
+	// if it is a /rank_* request the resulting rank will be in m_Rank
+	int m_Rank = 0;
+
+	// and the m_RankedScore is the amount it was ranked by
+	// so this might be the amount of kills for /rank_kills
+	int m_RankedScore = 0;
+
+	// shown to the user
+	char m_aRankColumnDisplay[128];
+
+	// used as a sql table column
+	char m_aRankColumnSql[128];
 
 	void SetVariant(Variant v);
 };
@@ -64,6 +78,12 @@ struct CSqlPlayerStatsRequest : CSqlInstaData
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
 	// relevant for /top5 kind of requests
 	int m_Offset;
+
+	// shown to the user
+	char m_aRankColumnDisplay[128];
+
+	// used as a sql table column
+	char m_aRankColumnSql[128];
 
 	// table name depends on gametype
 	char m_aTable[128];
@@ -108,15 +128,25 @@ class CSqlStats
 	// ratelimited user queries
 
 	static bool ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 
 	std::shared_ptr<CInstaSqlResult> NewInstaSqlResult(int ClientId);
 
 	// Creates for player database requests
-	void ExecPlayerThread(
+	void ExecPlayerStatsThread(
 		bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
 		const char *pThreadName,
 		int ClientId,
 		const char *pName,
+		const char *pTable);
+
+	void ExecPlayerRankOrTopThread(
+		bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
+		const char *pThreadName,
+		int ClientId,
+		const char *pName,
+		const char *pRankColumnDisplay,
+		const char *pRankColumnSql,
 		const char *pTable,
 		int Offset);
 
@@ -132,6 +162,7 @@ public:
 	void SaveRoundStats(const char *pName, const char *pTable, CSqlStatsPlayer *pStats);
 
 	void ShowStats(int ClientId, const char *pName, const char *pTable);
+	void ShowRank(int ClientId, const char *pName, const char *pRankColumnDisplay, const char *pRankColumnSql, const char *pTable);
 };
 
 #endif

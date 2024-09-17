@@ -62,6 +62,9 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 		case CInstaSqlResult::STATS:
 			GameServer()->m_pController->OnShowStatsAll(&Result.m_Stats, this, Result.m_Info.m_aRequestedPlayer);
 			break;
+		case CInstaSqlResult::RANK:
+			GameServer()->m_pController->OnShowRank(Result.m_Rank, Result.m_RankedScore, Result.m_aRankColumnDisplay, this, Result.m_Info.m_aRequestedPlayer);
+			break;
 		}
 	}
 }

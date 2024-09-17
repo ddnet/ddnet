@@ -16,6 +16,7 @@ CInstaSqlResult::CInstaSqlResult()
 {
 	SetVariant(Variant::DIRECT);
 	m_Stats.Reset();
+	m_Rank = 0;
 }
 
 void CInstaSqlResult::SetVariant(Variant v)
@@ -23,6 +24,7 @@ void CInstaSqlResult::SetVariant(Variant v)
 	m_MessageKind = v;
 	switch(v)
 	{
+	case RANK:
 	case STATS:
 	case DIRECT:
 	case ALL:
@@ -56,11 +58,31 @@ bool CSqlStats::RateLimitPlayer(int ClientId)
 	return false;
 }
 
-void CSqlStats::ExecPlayerThread(
+void CSqlStats::ExecPlayerStatsThread(
 	bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
 	const char *pThreadName,
 	int ClientId,
 	const char *pName,
+	const char *pTable)
+{
+	auto pResult = NewInstaSqlResult(ClientId);
+	if(pResult == nullptr)
+		return;
+	auto Tmp = std::make_unique<CSqlPlayerStatsRequest>(pResult);
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
+	str_copy(Tmp->m_aTable, pTable, sizeof(Tmp->m_aTable));
+
+	m_pPool->Execute(pFuncPtr, std::move(Tmp), pThreadName);
+}
+
+void CSqlStats::ExecPlayerRankOrTopThread(
+	bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
+	const char *pThreadName,
+	int ClientId,
+	const char *pName,
+	const char *pRankColumnDisplay,
+	const char *pRankColumnSql,
 	const char *pTable,
 	int Offset)
 {
@@ -70,6 +92,8 @@ void CSqlStats::ExecPlayerThread(
 	auto Tmp = std::make_unique<CSqlPlayerStatsRequest>(pResult);
 	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
+	str_copy(Tmp->m_aRankColumnDisplay, pRankColumnDisplay, sizeof(Tmp->m_aRankColumnDisplay));
+	str_copy(Tmp->m_aRankColumnSql, pRankColumnSql, sizeof(Tmp->m_aRankColumnSql));
 	str_copy(Tmp->m_aTable, pTable, sizeof(Tmp->m_aTable));
 	Tmp->m_Offset = Offset;
 
@@ -104,7 +128,14 @@ void CSqlStats::ShowStats(int ClientId, const char *pName, const char *pTable)
 {
 	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(ShowStatsWorker, "show stats", ClientId, pName, pTable, 0);
+	ExecPlayerStatsThread(ShowStatsWorker, "show stats", ClientId, pName, pTable);
+}
+
+void CSqlStats::ShowRank(int ClientId, const char *pName, const char *pRankColumnDisplay, const char *pRankColumnSql, const char *pTable)
+{
+	if(RateLimitPlayer(ClientId))
+		return;
+	ExecPlayerRankOrTopThread(ShowRankWorker, "show rank", ClientId, pName, pRankColumnDisplay, pRankColumnSql, pTable, 0);
 }
 
 void CSqlStats::SaveRoundStats(const char *pName, const char *pTable, CSqlStatsPlayer *pStats)
@@ -186,6 +217,57 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 
 		dbg_msg("sql-thread", "loaded gametype specific stats:");
 		pResult->m_Stats.Dump("sql-thread");
+	}
+	return false;
+}
+
+bool CSqlStats::ShowRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlPlayerStatsRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
+
+	char aBuf[4096];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"SELECT %s, rank " // column
+		"FROM (SELECT name, %s, RANK() OVER (ORDER BY %s DESC) rank FROM %s) sub_table " // column, column, table
+		"WHERE name = ?;",
+		pData->m_aRankColumnSql,
+		pData->m_aRankColumnSql,
+		pData->m_aRankColumnSql,
+		pData->m_aTable);
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aName);
+	pSqlServer->Print();
+
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "step failed query: %s", aBuf);
+		return true;
+	}
+
+	if(End)
+	{
+		pResult->m_MessageKind = CInstaSqlResult::DIRECT;
+		str_format(pResult->m_aaMessages[0], sizeof(pResult->m_aaMessages[0]),
+			"'%s' is unranked",
+			pData->m_aName);
+	}
+	else
+	{
+		pResult->m_MessageKind = CInstaSqlResult::RANK;
+
+		str_copy(pResult->m_Info.m_aRequestedPlayer, pData->m_aName, sizeof(pResult->m_Info.m_aRequestedPlayer));
+		str_copy(pResult->m_aRankColumnDisplay, pData->m_aRankColumnDisplay, sizeof(pResult->m_aRankColumnDisplay));
+
+		pResult->m_RankedScore = pSqlServer->GetInt(1);
+		pResult->m_Rank = pSqlServer->GetInt(2);
 	}
 	return false;
 }

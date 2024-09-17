@@ -315,6 +315,7 @@ public:
 	static void ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData);
 	static void ConStatsRound(IConsole::IResult *pResult, void *pUserData);
 	static void ConStatsAllTime(IConsole::IResult *pResult, void *pUserData);
+	static void ConRankKills(IConsole::IResult *pResult, void *pUserData);
 
 	//
 	void CheckPureTuning();

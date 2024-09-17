@@ -108,8 +108,19 @@ void CGameControllerPvp::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPl
 	str_format(
 		aBuf,
 		sizeof(aBuf),
-		"'%s' kills: %d - requested by %s",
+		"'%s' kills: %d, requested by '%s'",
 		pRequestedName, pStats->m_Kills, Server()->ClientName(pRequestingPlayer->GetCid()));
+	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+}
+
+void CGameControllerPvp::OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName)
+{
+	char aBuf[1024];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"%d. '%s' %s: %d, requested by '%s'",
+		Rank, pRequestedName, pRankType, RankedScore, Server()->ClientName(pRequestingPlayer->GetCid()));
 	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 }
 

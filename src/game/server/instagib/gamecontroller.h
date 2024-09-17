@@ -180,6 +180,19 @@ public:
 			pRequestedName - player name the stats belong to
 	*/
 	virtual void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
+
+	/*
+		Function: OnShowRank
+			called from the main thread when a SQL worker finished querying a rank from the database
+
+		Arguments:
+			Rank - is the rank the player got with its score compared to all other players (lower is better)
+			RankedScore - is the score that was used to obtain the rank if its ranking kills this will be the amount of kills
+			pRankType - is the displayable string that shows the type of ranks (for example "Kills")
+			pRequestingPlayer - player who initiated the stats request (might differ from the requested player)
+			pRequestedName - player name the stats belong to
+	*/
+	virtual void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };
