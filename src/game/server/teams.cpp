@@ -978,6 +978,44 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPla
 	GameServer()->SendChatTeam(Team, aBuf);
 }
 
+void CGameTeams::CancelTeamSwap(CPlayer *pPlayer, int Team)
+{
+	if(!pPlayer)
+		return;
+
+	char aBuf[128];
+
+	// Notification for the swap initiator
+	str_format(aBuf, sizeof(aBuf),
+		"You have canceled swap with %s.",
+		Server()->ClientName(pPlayer->m_SwapTargetsClientId));
+	GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
+
+	// Notification to the target swap player
+	str_format(aBuf, sizeof(aBuf),
+		"%s has canceled swap with you.",
+		Server()->ClientName(pPlayer->GetCid()));
+	GameServer()->SendChatTarget(pPlayer->m_SwapTargetsClientId, aBuf);
+
+	// Notification for the remaining team
+	str_format(aBuf, sizeof(aBuf),
+		"%s has canceled swap with %s.",
+		Server()->ClientName(pPlayer->GetCid()), Server()->ClientName(pPlayer->m_SwapTargetsClientId));
+	// Do not send the team notification for team 0
+	if(Team != 0)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_Core.Team(i) == Team && i != pPlayer->m_SwapTargetsClientId && i != pPlayer->GetCid())
+			{
+				GameServer()->SendChatTarget(i, aBuf);
+			}
+		}
+	}
+
+	pPlayer->m_SwapTargetsClientId = -1;
+}
+
 void CGameTeams::ProcessSaveTeam()
 {
 	for(int Team = 0; Team < NUM_DDRACE_TEAMS; Team++)
