@@ -983,6 +983,14 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = 0;
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), TeamMask());
 	Teams()->OnCharacterDeath(GetPlayer()->GetCid(), Weapon);
+
+	// Cancel swap requests
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_SwapTargetsClientId == GetPlayer()->GetCid())
+			GameServer()->m_apPlayers[i]->m_SwapTargetsClientId = -1;
+	}
+	GetPlayer()->m_SwapTargetsClientId = -1;
 }
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
