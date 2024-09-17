@@ -32,7 +32,7 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 		switch(Result.m_MessageKind)
 		{
 		case CInstaSqlResult::DIRECT:
-			for(auto &aMessage : Result.m_Data.m_aaMessages)
+			for(auto &aMessage : Result.m_aaMessages)
 			{
 				if(aMessage[0] == 0)
 					break;
@@ -42,7 +42,7 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 		case CInstaSqlResult::ALL:
 		{
 			bool PrimaryMessage = true;
-			for(auto &aMessage : Result.m_Data.m_aaMessages)
+			for(auto &aMessage : Result.m_aaMessages)
 			{
 				if(aMessage[0] == 0)
 					break;

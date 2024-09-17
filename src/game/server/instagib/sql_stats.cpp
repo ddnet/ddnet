@@ -24,11 +24,11 @@ void CInstaSqlResult::SetVariant(Variant v)
 	{
 	case DIRECT:
 	case ALL:
-		for(auto &aMessage : m_Data.m_aaMessages)
+		for(auto &aMessage : m_aaMessages)
 			aMessage[0] = 0;
 		break;
 	case BROADCAST:
-		m_Data.m_aBroadcast[0] = 0;
+		m_aBroadcast[0] = 0;
 		break;
 	}
 }
@@ -153,7 +153,7 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 	if(End)
 	{
 		pResult->m_MessageKind = CInstaSqlResult::DIRECT;
-		str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
+		str_format(pResult->m_aaMessages[0], sizeof(pResult->m_aaMessages[0]),
 			"'%s' is unranked",
 			pData->m_aName);
 	}
@@ -164,7 +164,7 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 
 		pResult->m_MessageKind = CInstaSqlResult::ALL;
 
-		str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
+		str_format(pResult->m_aaMessages[0], sizeof(pResult->m_aaMessages[0]),
 			"'%s' kills: %d - requested by %s",
 			pData->m_aName, Stats.m_Kills, pData->m_aRequestingPlayer);
 	}

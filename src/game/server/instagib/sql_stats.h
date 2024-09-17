@@ -26,15 +26,13 @@ struct CInstaSqlResult : ISqlResult
 		ALL,
 		BROADCAST,
 	} m_MessageKind;
-	union
+
+	char m_aaMessages[MAX_MESSAGES][512];
+	char m_aBroadcast[1024];
+	struct
 	{
-		char m_aaMessages[MAX_MESSAGES][512];
-		char m_aBroadcast[1024];
-		struct
-		{
-			char m_aRequestedPlayer[MAX_NAME_LENGTH];
-		} m_Info = {};
-	} m_Data = {}; // PLAYER_INFO
+		char m_aRequestedPlayer[MAX_NAME_LENGTH];
+	} m_Info = {};
 
 	void SetVariant(Variant v);
 };
