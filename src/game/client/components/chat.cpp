@@ -355,8 +355,6 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				// add separator
 				const char *pSeparator = pCompletionCommand->m_aParams[0] == '\0' ? "" : " ";
 				str_append(aBuf, pSeparator);
-				if(*pSeparator)
-					str_append(aBuf, pSeparator);
 
 				// add part after the name
 				str_append(aBuf, m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength);
@@ -1188,6 +1186,23 @@ void CChat::OnRender()
 
 		m_Input.SetScrollOffset(ScrollOffset);
 		m_Input.SetScrollOffsetChange(ScrollOffsetChange);
+
+		// Autocompletion hint
+		if(m_Input.GetString()[0] == '/' && m_Input.GetString()[1] != '\0' && !m_vCommands.empty())
+		{
+			for(const auto &Command : m_vCommands)
+			{
+				if(str_startswith_nocase(Command.m_aName, m_Input.GetString() + 1))
+				{
+					Cursor.m_X = m_Input.GetCaretPosition().x;
+					Cursor.m_Y = m_Input.GetCaretPosition().y;
+					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.5f);
+					TextRender()->TextEx(&Cursor, Command.m_aName + str_length(m_Input.GetString() + 1));
+					TextRender()->TextColor(TextRender()->DefaultTextColor());
+					break;
+				}
+			}
+		}
 	}
 
 #if defined(CONF_VIDEORECORDER)
