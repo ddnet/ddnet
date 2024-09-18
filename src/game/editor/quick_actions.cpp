@@ -80,3 +80,21 @@ void CEditor::LayerSelectImage()
 	Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 120, 270, &s_LayerPopupContext, PopupLayer);
 	PopupSelectImageInvoke(pTiles->m_Image, Ui()->MouseX(), Ui()->MouseY());
 }
+
+void CEditor::MapDetails()
+{
+	const CUIRect *pScreen = Ui()->Screen();
+	m_Map.m_MapInfoTmp.Copy(m_Map.m_MapInfo);
+	static SPopupMenuId s_PopupMapInfoId;
+	constexpr float PopupWidth = 400.0f;
+	constexpr float PopupHeight = 170.0f;
+	Ui()->DoPopupMenu(
+		&s_PopupMapInfoId,
+		pScreen->w / 2.0f - PopupWidth / 2.0f,
+		pScreen->h / 2.0f - PopupHeight / 2.0f,
+		PopupWidth,
+		PopupHeight,
+		this,
+		PopupMapInfo);
+	Ui()->SetActiveItem(nullptr);
+}

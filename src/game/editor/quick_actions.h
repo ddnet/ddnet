@@ -284,6 +284,14 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return m_ColorPipetteActive; },
 	DEFAULT_BTN,
 	"[Ctrl+Shift+C] Color pipette. Pick a color from the screen by clicking on it.")
+REGISTER_QUICK_ACTION(
+	MapDetails,
+	"Map details",
+	[&]() { MapDetails(); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Adjust the map details of the current map.")
 
 #undef ALWAYS_FALSE
 #undef DEFAULT_BTN

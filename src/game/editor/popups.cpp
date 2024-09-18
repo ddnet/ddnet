@@ -32,7 +32,6 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	static int s_OpenButton = 0;
 	static int s_OpenCurrentMapButton = 0;
 	static int s_AppendButton = 0;
-	static int s_MapInfoButton = 0;
 	static int s_ExitButton = 0;
 
 	CUIRect Slot;
@@ -115,15 +114,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 
 	View.HSplitTop(10.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_MapInfoButton, "Map details", 0, &Slot, 0, "Adjust the map details of the current map"))
+	if(pEditor->DoButton_MenuItem(&pEditor->m_QuickActionMapDetails, pEditor->m_QuickActionMapDetails.Label(), 0, &Slot, 0, pEditor->m_QuickActionMapDetails.Description()))
 	{
-		const CUIRect *pScreen = pEditor->Ui()->Screen();
-		pEditor->m_Map.m_MapInfoTmp.Copy(pEditor->m_Map.m_MapInfo);
-		static SPopupMenuId s_PopupMapInfoId;
-		constexpr float PopupWidth = 400.0f;
-		constexpr float PopupHeight = 170.0f;
-		pEditor->Ui()->DoPopupMenu(&s_PopupMapInfoId, pScreen->w / 2.0f - PopupWidth / 2.0f, pScreen->h / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, pEditor, PopupMapInfo);
-		pEditor->Ui()->SetActiveItem(nullptr);
+		pEditor->m_QuickActionMapDetails.Call();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
