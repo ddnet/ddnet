@@ -3702,6 +3702,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
 	Console()->Register("set_team_all", "i[team-id]", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
 	Console()->Register("hot_reload", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConHotReload, this, "Reload the map while preserving the state of tees and teams");
+	Console()->Register("reload_censorlist", "", CFGFLAG_SERVER, ConReloadCensorlist, this, "Reload the censorlist");
 
 	Console()->Register("add_vote", "s[name] r[command]", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
 	Console()->Register("remove_vote", "r[name]", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
@@ -4024,19 +4025,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerDDRace(this);
 	}
 
-	const char *pCensorFilename = "censorlist.txt";
-	CLineReader LineReader;
-	if(LineReader.OpenFile(Storage()->OpenFile(pCensorFilename, IOFLAG_READ, IStorage::TYPE_ALL)))
-	{
-		while(const char *pLine = LineReader.Get())
-		{
-			m_vCensorlist.emplace_back(pLine);
-		}
-	}
-	else
-	{
-		dbg_msg("censorlist", "failed to open '%s'", pCensorFilename);
-	}
+	ReadCensorList();
 
 	m_TeeHistorianActive = g_Config.m_SvTeeHistorian;
 	if(m_TeeHistorianActive)
@@ -5081,4 +5070,22 @@ void CGameContext::OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int 
 
 	pJSonWriter->WriteAttribute("team");
 	pJSonWriter->WriteIntValue(Team);
+}
+
+void CGameContext::ReadCensorList()
+{
+	const char *pCensorFilename = "censorlist.txt";
+	CLineReader LineReader;
+	m_vCensorlist.clear();
+	if(LineReader.OpenFile(Storage()->OpenFile(pCensorFilename, IOFLAG_READ, IStorage::TYPE_ALL)))
+	{
+		while(const char *pLine = LineReader.Get())
+		{
+			m_vCensorlist.emplace_back(pLine);
+		}
+	}
+	else
+	{
+		dbg_msg("censorlist", "failed to open '%s'", pCensorFilename);
+	}
 }

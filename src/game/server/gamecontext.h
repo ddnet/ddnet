@@ -404,6 +404,7 @@ public:
 	bool RateLimitPlayerMapVote(int ClientId) const;
 
 	void OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id) override;
+	void ReadCensorList();
 
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
@@ -555,6 +556,8 @@ private:
 	static void ConUninvite(IConsole::IResult *pResult, void *pUserData);
 	static void ConFreezeHammer(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnFreezeHammer(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConReloadCensorlist(IConsole::IResult *pResult, void *pUserData);
 
 	CCharacter *GetPracticeCharacter(IConsole::IResult *pResult);
 

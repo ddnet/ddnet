@@ -301,7 +301,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 						const size_t CopyHeight = ImgInfo.m_Height / 16;
 						const size_t OffsetX = (size_t)(TileIndex % 16) * CopyWidth;
 						const size_t OffsetY = (size_t)(TileIndex / 16) * CopyHeight;
-						Graphics()->CopyTextureBufferSub(BuildImageInfo.m_pData, ImgInfo, OffsetX, OffsetY, CopyWidth, CopyHeight);
+						BuildImageInfo.CopyRectFrom(ImgInfo, OffsetX, OffsetY, CopyWidth, CopyHeight, OffsetX, OffsetY);
 					}
 				}
 

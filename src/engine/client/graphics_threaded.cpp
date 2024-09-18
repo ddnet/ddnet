@@ -300,54 +300,6 @@ void CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 	FreeTextureIndex(pIndex);
 }
 
-bool ConvertToRGBA(uint8_t *pDest, const CImageInfo &SrcImage)
-{
-	if(SrcImage.m_Format == CImageInfo::FORMAT_RGBA)
-	{
-		mem_copy(pDest, SrcImage.m_pData, SrcImage.DataSize());
-		return true;
-	}
-	else
-	{
-		const size_t SrcChannelCount = CImageInfo::PixelSize(SrcImage.m_Format);
-		const size_t DstChannelCount = CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA);
-		for(size_t Y = 0; Y < SrcImage.m_Height; ++Y)
-		{
-			for(size_t X = 0; X < SrcImage.m_Width; ++X)
-			{
-				size_t ImgOffsetSrc = (Y * SrcImage.m_Width * SrcChannelCount) + (X * SrcChannelCount);
-				size_t ImgOffsetDest = (Y * SrcImage.m_Width * DstChannelCount) + (X * DstChannelCount);
-				size_t CopySize = SrcChannelCount;
-				if(SrcImage.m_Format == CImageInfo::FORMAT_RGB)
-				{
-					mem_copy(&pDest[ImgOffsetDest], &SrcImage.m_pData[ImgOffsetSrc], CopySize);
-					pDest[ImgOffsetDest + 3] = 255;
-				}
-				else if(SrcImage.m_Format == CImageInfo::FORMAT_SINGLE_COMPONENT)
-				{
-					pDest[ImgOffsetDest + 0] = 255;
-					pDest[ImgOffsetDest + 1] = 255;
-					pDest[ImgOffsetDest + 2] = 255;
-					pDest[ImgOffsetDest + 3] = SrcImage.m_pData[ImgOffsetSrc];
-				}
-			}
-		}
-		return false;
-	}
-}
-
-IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(const CImageInfo &FromImageInfo, int x, int y, size_t w, size_t h, const char *pName)
-{
-	m_vSpriteHelper.resize(w * h * FromImageInfo.PixelSize());
-	CopyTextureFromTextureBufferSub(m_vSpriteHelper.data(), w, h, FromImageInfo, x, y, w, h);
-	CImageInfo SpriteInfo;
-	SpriteInfo.m_Width = w;
-	SpriteInfo.m_Height = h;
-	SpriteInfo.m_Format = FromImageInfo.m_Format;
-	SpriteInfo.m_pData = m_vSpriteHelper.data();
-	return LoadTextureRaw(SpriteInfo, 0, pName);
-}
-
 IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(const CImageInfo &FromImageInfo, const CDataSprite *pSprite)
 {
 	int ImageGridX = FromImageInfo.m_Width / pSprite->m_pSet->m_Gridx;
@@ -356,12 +308,19 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(const CImageInfo
 	int y = pSprite->m_Y * ImageGridY;
 	int w = pSprite->m_W * ImageGridX;
 	int h = pSprite->m_H * ImageGridY;
-	return LoadSpriteTextureImpl(FromImageInfo, x, y, w, h, pSprite->m_pName);
+
+	CImageInfo SpriteInfo;
+	SpriteInfo.m_Width = w;
+	SpriteInfo.m_Height = h;
+	SpriteInfo.m_Format = FromImageInfo.m_Format;
+	SpriteInfo.m_pData = static_cast<uint8_t *>(malloc(SpriteInfo.DataSize()));
+	SpriteInfo.CopyRectFrom(FromImageInfo, x, y, w, h, 0, 0);
+	return LoadTextureRawMove(SpriteInfo, 0, pSprite->m_pName);
 }
 
 bool CGraphics_Threaded::IsImageSubFullyTransparent(const CImageInfo &FromImageInfo, int x, int y, int w, int h)
 {
-	if(FromImageInfo.m_Format == CImageInfo::FORMAT_SINGLE_COMPONENT || FromImageInfo.m_Format == CImageInfo::FORMAT_RGBA)
+	if(FromImageInfo.m_Format == CImageInfo::FORMAT_R || FromImageInfo.m_Format == CImageInfo::FORMAT_RA || FromImageInfo.m_Format == CImageInfo::FORMAT_RGBA)
 	{
 		const uint8_t *pImgData = FromImageInfo.m_pData;
 		const size_t PixelSize = FromImageInfo.PixelSize();
@@ -435,8 +394,8 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(const CImageInfo &I
 	CCommandBuffer::SCommand_Texture_Create Cmd = LoadTextureCreateCommand(TextureHandle.Id(), Image.m_Width, Image.m_Height, Flags);
 
 	// Copy texture data and convert if necessary
-	uint8_t *pTmpData = static_cast<uint8_t *>(malloc(Image.m_Width * Image.m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
-	if(!ConvertToRGBA(pTmpData, Image))
+	uint8_t *pTmpData;
+	if(!ConvertToRgbaAlloc(pTmpData, Image))
 	{
 		dbg_msg("graphics", "converted image '%s' to RGBA, consider making its file format RGBA", pTexName ? pTexName : "(no name)");
 	}
@@ -472,7 +431,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRawMove(CImageInfo &Ima
 	return TextureHandle;
 }
 
-// simple uncompressed RGBA loaders
 IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename, int StorageType, int Flags)
 {
 	dbg_assert(pFilename[0] != '\0', "Cannot load texture from file with empty filename"); // would cause Valgrind to crash otherwise
@@ -544,81 +502,56 @@ bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureId, int x, int 
 	return true;
 }
 
-bool CGraphics_Threaded::LoadPng(CImageInfo &Image, const char *pFilename, int StorageType)
+static SWarning FormatPngliteIncompatibilityWarning(int PngliteIncompatible, const char *pContextName)
 {
-	char aCompleteFilename[IO_MAX_PATH_LENGTH];
-	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType, aCompleteFilename, sizeof(aCompleteFilename));
-	if(File)
+	SWarning Warning;
+	str_format(Warning.m_aWarningMsg, sizeof(Warning.m_aWarningMsg), Localize("\"%s\" is not compatible with pnglite and cannot be loaded by old DDNet versions: "), pContextName);
+	static const int FLAGS[] = {CImageLoader::PNGLITE_COLOR_TYPE, CImageLoader::PNGLITE_BIT_DEPTH, CImageLoader::PNGLITE_INTERLACE_TYPE, CImageLoader::PNGLITE_COMPRESSION_TYPE, CImageLoader::PNGLITE_FILTER_TYPE};
+	static const char *const EXPLANATION[] = {"color type", "bit depth", "interlace type", "compression type", "filter type"};
+
+	bool First = true;
+	for(size_t i = 0; i < std::size(FLAGS); ++i)
 	{
-		io_seek(File, 0, IOSEEK_END);
-		long int FileSize = io_tell(File);
-		if(FileSize <= 0)
+		if((PngliteIncompatible & FLAGS[i]) != 0)
 		{
-			io_close(File);
-			log_error("game/png", "failed to get file size (%ld). filename='%s'", FileSize, pFilename);
-			return false;
-		}
-		io_seek(File, 0, IOSEEK_START);
-
-		TImageByteBuffer ByteBuffer;
-		SImageByteBuffer ImageByteBuffer(&ByteBuffer);
-
-		ByteBuffer.resize(FileSize);
-		io_read(File, &ByteBuffer.front(), FileSize);
-
-		io_close(File);
-
-		uint8_t *pImgBuffer = NULL;
-		EImageFormat ImageFormat;
-		int PngliteIncompatible;
-		if(::LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, Image.m_Width, Image.m_Height, pImgBuffer, ImageFormat))
-		{
-			if(ImageFormat == IMAGE_FORMAT_RGB)
-				Image.m_Format = CImageInfo::FORMAT_RGB;
-			else if(ImageFormat == IMAGE_FORMAT_RGBA)
-				Image.m_Format = CImageInfo::FORMAT_RGBA;
-			else
+			if(!First)
 			{
-				free(pImgBuffer);
-				log_error("game/png", "image had unsupported image format. filename='%s' format='%d'", pFilename, (int)ImageFormat);
-				return false;
+				str_append(Warning.m_aWarningMsg, ", ");
 			}
-			Image.m_pData = pImgBuffer;
-
-			if(m_WarnPngliteIncompatibleImages && PngliteIncompatible != 0)
-			{
-				SWarning Warning;
-				str_format(Warning.m_aWarningMsg, sizeof(Warning.m_aWarningMsg), Localize("\"%s\" is not compatible with pnglite and cannot be loaded by old DDNet versions: "), pFilename);
-				static const int FLAGS[] = {PNGLITE_COLOR_TYPE, PNGLITE_BIT_DEPTH, PNGLITE_INTERLACE_TYPE, PNGLITE_COMPRESSION_TYPE, PNGLITE_FILTER_TYPE};
-				static const char *const EXPLANATION[] = {"color type", "bit depth", "interlace type", "compression type", "filter type"};
-
-				bool First = true;
-				for(size_t i = 0; i < std::size(FLAGS); ++i)
-				{
-					if((PngliteIncompatible & FLAGS[i]) != 0)
-					{
-						if(!First)
-						{
-							str_append(Warning.m_aWarningMsg, ", ");
-						}
-						str_append(Warning.m_aWarningMsg, EXPLANATION[i]);
-						First = false;
-					}
-				}
-				str_append(Warning.m_aWarningMsg, " unsupported");
-				m_vWarnings.emplace_back(Warning);
-			}
-		}
-		else
-		{
-			log_error("game/png", "failed to load file. filename='%s'", pFilename);
-			return false;
+			str_append(Warning.m_aWarningMsg, EXPLANATION[i]);
+			First = false;
 		}
 	}
-	else
-	{
-		log_error("game/png", "failed to open file. filename='%s'", pFilename);
+	str_append(Warning.m_aWarningMsg, " unsupported");
+	return Warning;
+}
+
+bool CGraphics_Threaded::LoadPng(CImageInfo &Image, const char *pFilename, int StorageType)
+{
+	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
+
+	int PngliteIncompatible;
+	if(!CImageLoader::LoadPng(File, pFilename, Image, PngliteIncompatible))
 		return false;
+
+	if(m_WarnPngliteIncompatibleImages && PngliteIncompatible != 0)
+	{
+		m_vWarnings.emplace_back(FormatPngliteIncompatibilityWarning(PngliteIncompatible, pFilename));
+	}
+
+	return true;
+}
+
+bool CGraphics_Threaded::LoadPng(CImageInfo &Image, const uint8_t *pData, size_t DataSize, const char *pContextName)
+{
+	CByteBufferReader Reader(pData, DataSize);
+	int PngliteIncompatible;
+	if(!CImageLoader::LoadPng(Reader, pContextName, Image, PngliteIncompatible))
+		return false;
+
+	if(m_WarnPngliteIncompatibleImages && PngliteIncompatible != 0)
+	{
+		m_vWarnings.emplace_back(FormatPngliteIncompatibilityWarning(PngliteIncompatible, pContextName));
 	}
 
 	return true;
@@ -655,12 +588,7 @@ bool CGraphics_Threaded::CheckImageDivisibility(const char *pContextName, CImage
 			NewHeight = maximum<int>(HighestBit(Image.m_Height), DivY);
 			NewWidth = (NewHeight / DivY) * DivX;
 		}
-
-		uint8_t *pNewImage = ResizeImage(Image.m_pData, Image.m_Width, Image.m_Height, NewWidth, NewHeight, Image.PixelSize());
-		free(Image.m_pData);
-		Image.m_pData = pNewImage;
-		Image.m_Width = NewWidth;
-		Image.m_Height = NewHeight;
+		ResizeImage(Image, NewWidth, NewHeight);
 		ImageIsValid = true;
 	}
 
@@ -680,29 +608,6 @@ bool CGraphics_Threaded::IsImageFormatRgba(const char *pContextName, const CImag
 		return false;
 	}
 	return true;
-}
-
-void CGraphics_Threaded::CopyTextureBufferSub(uint8_t *pDestBuffer, const CImageInfo &SourceImage, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight)
-{
-	const size_t PixelSize = SourceImage.PixelSize();
-	for(size_t Y = 0; Y < SubCopyHeight; ++Y)
-	{
-		const size_t ImgOffset = ((SubOffsetY + Y) * SourceImage.m_Width * PixelSize) + (SubOffsetX * PixelSize);
-		const size_t CopySize = SubCopyWidth * PixelSize;
-		mem_copy(&pDestBuffer[ImgOffset], &SourceImage.m_pData[ImgOffset], CopySize);
-	}
-}
-
-void CGraphics_Threaded::CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, const CImageInfo &SourceImage, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight)
-{
-	const size_t PixelSize = SourceImage.PixelSize();
-	for(size_t Y = 0; Y < SrcSubCopyHeight; ++Y)
-	{
-		const size_t SrcImgOffset = ((SrcSubOffsetY + Y) * SourceImage.m_Width * PixelSize) + (SrcSubOffsetX * PixelSize);
-		const size_t DstImgOffset = (Y * DestWidth * PixelSize);
-		const size_t CopySize = SrcSubCopyWidth * PixelSize;
-		mem_copy(&pDestBuffer[DstImgOffset], &SourceImage.m_pData[SrcImgOffset], CopySize);
-	}
 }
 
 void CGraphics_Threaded::KickCommandBuffer()
@@ -731,24 +636,14 @@ class CScreenshotSaveJob : public IJob
 	IStorage *m_pStorage;
 	IConsole *m_pConsole;
 	char m_aName[IO_MAX_PATH_LENGTH];
-	int m_Width;
-	int m_Height;
-	uint8_t *m_pData;
+	CImageInfo m_Image;
 
 	void Run() override
 	{
 		char aWholePath[IO_MAX_PATH_LENGTH];
 		char aBuf[64 + IO_MAX_PATH_LENGTH];
-		IOHANDLE File = m_pStorage->OpenFile(m_aName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
-		if(File)
+		if(CImageLoader::SavePng(m_pStorage->OpenFile(m_aName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath)), m_aName, m_Image))
 		{
-			TImageByteBuffer ByteBuffer;
-			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
-
-			if(SavePng(IMAGE_FORMAT_RGBA, m_pData, ImageByteBuffer, m_Width, m_Height))
-				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
-			io_close(File);
-
 			str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
 		}
 		else
@@ -759,19 +654,17 @@ class CScreenshotSaveJob : public IJob
 	}
 
 public:
-	CScreenshotSaveJob(IStorage *pStorage, IConsole *pConsole, const char *pName, int Width, int Height, uint8_t *pData) :
+	CScreenshotSaveJob(IStorage *pStorage, IConsole *pConsole, const char *pName, CImageInfo Image) :
 		m_pStorage(pStorage),
 		m_pConsole(pConsole),
-		m_Width(Width),
-		m_Height(Height),
-		m_pData(pData)
+		m_Image(Image)
 	{
 		str_copy(m_aName, pName);
 	}
 
 	~CScreenshotSaveJob() override
 	{
-		free(m_pData);
+		m_Image.Free();
 	}
 };
 
@@ -795,7 +688,7 @@ void CGraphics_Threaded::ScreenshotDirect(bool *pSwapped)
 
 	if(Image.m_pData)
 	{
-		m_pEngine->AddJob(std::make_shared<CScreenshotSaveJob>(m_pStorage, m_pConsole, m_aScreenshotName, Image.m_Width, Image.m_Height, Image.m_pData));
+		m_pEngine->AddJob(std::make_shared<CScreenshotSaveJob>(m_pStorage, m_pConsole, m_aScreenshotName, Image));
 	}
 }
 
