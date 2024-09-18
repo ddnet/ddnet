@@ -106,10 +106,10 @@ int CGameControllerBaseCTF::OnCharacterDeath(class CCharacter *pVictim, class CP
 		{
 			GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
 			GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
-			/*pVictim->GetPlayer()->m_Rainbow = false;
-			pVictim->GetPlayer()->m_TeeInfos.m_ColorBody = pVictim->GetPlayer()->m_ColorBodyOld;
-			pVictim->GetPlayer()->m_TeeInfos.m_ColorFeet = pVictim->GetPlayer()->m_ColorFeetOld;*/
 			pFlag->Drop();
+
+			if(pKiller && pKiller->GetTeam() != pVictim->GetPlayer()->GetTeam())
+				pKiller->IncrementScore();
 
 			HadFlag |= 1;
 		}
