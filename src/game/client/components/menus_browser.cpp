@@ -216,7 +216,16 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		}
 		else if(!ServerBrowser()->NumServers())
 		{
-			Ui()->DoLabel(&View, Localize("No servers found"), 16.0f, TEXTALIGN_MC);
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), Localize("No local servers found (ports %d-%d)"), IServerBrowser::LAN_PORT_BEGIN, IServerBrowser::LAN_PORT_END);
+				Ui()->DoLabel(&View, aBuf, 16.0f, TEXTALIGN_MC);
+			}
+			else
+			{
+				Ui()->DoLabel(&View, Localize("No servers found"), 16.0f, TEXTALIGN_MC);
+			}
 		}
 		else if(ServerBrowser()->NumServers() && !NumServers)
 		{
