@@ -91,6 +91,8 @@ bool CGameControllerCTF::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 		}
 	}
 
+	Character.m_DamageTakenTick = Server()->Tick();
+
 	if(Dmg > 2)
 		GameServer()->CreateSound(Character.m_Pos, SOUND_PLAYER_PAIN_LONG);
 	else

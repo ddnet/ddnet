@@ -79,6 +79,8 @@ bool CGameControllerVanilla::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		}
 	}
 
+	Character.m_DamageTakenTick = Server()->Tick();
+
 	if(From >= 0 && From < MAX_CLIENTS && From != Character.GetPlayer()->GetCid() && GameServer()->m_apPlayers[From])
 	{
 		// do damage Hit sound
