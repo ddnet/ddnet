@@ -37,6 +37,17 @@ void CEditor::AddTileLayer()
 	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
 }
 
+void CEditor::AddFrontLayer()
+{
+	std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	m_Map.MakeFrontLayer(pFrontLayer);
+	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pFrontLayer);
+	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
+	SelectLayer(LayerIndex);
+	m_pBrush->Clear();
+	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+}
+
 bool CEditor::IsNonGameTileLayerSelected() const
 {
 	std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);

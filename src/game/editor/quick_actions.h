@@ -170,6 +170,14 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	AddTileLayer, "Add tile layer", [&]() { AddTileLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Creates a new tile layer.")
 REGISTER_QUICK_ACTION(
+	AddFrontLayer,
+	"Add front layer",
+	[&]() { AddFrontLayer(); },
+	[&]() -> bool { return !GetSelectedGroup()->m_GameGroup || m_Map.m_pFrontLayer; },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Creates a new item layer.")
+REGISTER_QUICK_ACTION(
 	SaveAs,
 	"Save As",
 	[&]() { InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save As", "maps", true, CEditor::CallbackSaveMap, this); },

@@ -543,16 +543,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		// new front layer
 		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
-		static int s_NewFrontLayerButton = 0;
-		if(pEditor->DoButton_Editor(&s_NewFrontLayerButton, "Add front layer", 0, &Button, 0, "Creates a new item layer"))
+		if(pEditor->DoButton_Editor(&pEditor->m_QuickActionAddFrontLayer, pEditor->m_QuickActionAddFrontLayer.Label(), 0, &Button, 0, pEditor->m_QuickActionAddFrontLayer.Description()))
 		{
-			std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeFrontLayer(pFrontLayer);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pFrontLayer);
-			int LayerIndex = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1;
-			pEditor->SelectLayer(LayerIndex);
-			pEditor->m_pBrush->Clear();
-			pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(pEditor, pEditor->m_SelectedGroup, LayerIndex));
+			pEditor->m_QuickActionAddFrontLayer.Call();
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
