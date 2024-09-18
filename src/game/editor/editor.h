@@ -328,6 +328,7 @@ public:
 	bool CanFillGameTiles() const;
 	void AddGroup();
 	void AddTileLayer();
+	void AddFrontLayer();
 	void LayerSelectImage();
 	bool IsNonGameTileLayerSelected() const;
 #define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) CQuickAction m_QuickAction##name;
