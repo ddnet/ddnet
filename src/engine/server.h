@@ -273,7 +273,8 @@ public:
 	virtual bool DnsblWhite(int ClientId) = 0;
 	virtual bool DnsblPending(int ClientId) = 0;
 	virtual bool DnsblBlack(int ClientId) = 0;
-	virtual const char *GetAnnouncementLine(const char *pFileName) = 0;
+	virtual const char *GetAnnouncementLine() = 0;
+	virtual void ReadAnnouncementsFile(const char *pFileName) = 0;
 	virtual bool ClientPrevIngame(int ClientId) = 0;
 	virtual const char *GetNetErrorString(int ClientId) = 0;
 	virtual void ResetNetErrorString(int ClientId) = 0;
