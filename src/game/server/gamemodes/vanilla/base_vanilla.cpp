@@ -79,6 +79,18 @@ bool CGameControllerVanilla::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		}
 	}
 
+	if(From >= 0 && From < MAX_CLIENTS && From != Character.GetPlayer()->GetCid() && GameServer()->m_apPlayers[From])
+	{
+		// do damage Hit sound
+		CClientMask Mask = CClientMask().set(From);
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == From)
+				Mask.set(i);
+		}
+		GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
+	}
+
 	if(Dmg > 2)
 		GameServer()->CreateSound(Character.m_Pos, SOUND_PLAYER_PAIN_LONG);
 	else
