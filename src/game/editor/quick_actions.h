@@ -178,6 +178,8 @@ REGISTER_QUICK_ACTION(
 	DEFAULT_BTN,
 	"Creates a new item layer.")
 REGISTER_QUICK_ACTION(
+	AddQuadsLayer, "Add quads layer", [&]() { AddQuadsLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Creates a new quads layer.")
+REGISTER_QUICK_ACTION(
 	SaveAs,
 	"Save As",
 	[&]() { InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save As", "maps", true, CEditor::CallbackSaveMap, this); },

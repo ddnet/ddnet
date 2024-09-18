@@ -329,6 +329,7 @@ public:
 	void AddGroup();
 	void AddTileLayer();
 	void AddFrontLayer();
+	void AddQuadsLayer();
 	void LayerSelectImage();
 	bool IsNonGameTileLayerSelected() const;
 	void MapDetails();
