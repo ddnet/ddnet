@@ -438,7 +438,7 @@ public:
 		bool m_SpecCharPresent;
 		vec2 m_SpecChar;
 
-		void UpdateRenderInfo(bool IsTeamPlay, int Conn);
+		void UpdateRenderInfo(bool IsTeamPlay);
 		void Reset();
 
 		class CSixup
