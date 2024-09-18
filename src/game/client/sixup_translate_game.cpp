@@ -196,7 +196,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		{
 			m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
 			m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
-			m_aClients[pMsg7->m_ClientId].UpdateRenderInfo(IsTeamPlay(), Conn);
+			m_aClients[pMsg7->m_ClientId].UpdateRenderInfo(IsTeamPlay());
 
 			// if(pMsg7->m_ClientId == m_LocalClientId)
 			// {
