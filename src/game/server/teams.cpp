@@ -877,7 +877,7 @@ void CGameTeams::RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int T
 
 	// Notification for the swap initiator
 	str_format(aBuf, sizeof(aBuf),
-		"You have requested to swap with %s.",
+		"You have requested to swap with %s. Use /cancel to cancel the request.",
 		Server()->ClientName(pTargetPlayer->GetCid()));
 	GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
 

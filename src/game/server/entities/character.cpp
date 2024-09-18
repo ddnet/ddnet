@@ -985,10 +985,10 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	Teams()->OnCharacterDeath(GetPlayer()->GetCid(), Weapon);
 
 	// Cancel swap requests
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(auto &pPlayer : GameServer()->m_apPlayers)
 	{
-		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_SwapTargetsClientId == GetPlayer()->GetCid())
-			GameServer()->m_apPlayers[i]->m_SwapTargetsClientId = -1;
+		if(pPlayer && pPlayer->m_SwapTargetsClientId == GetPlayer()->GetCid())
+			pPlayer->m_SwapTargetsClientId = -1;
 	}
 	GetPlayer()->m_SwapTargetsClientId = -1;
 }
