@@ -330,6 +330,7 @@ public:
 	void AddTileLayer();
 	void LayerSelectImage();
 	bool IsNonGameTileLayerSelected() const;
+	void MapDetails();
 #define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) CQuickAction m_QuickAction##name;
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
