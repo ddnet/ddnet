@@ -40,6 +40,9 @@ int CGameControllerCTF::GameInfoExFlags(int SnappingClient)
 
 bool CGameControllerCTF::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+		return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+
 	if(Weapon == WEAPON_GUN || Weapon == WEAPON_SHOTGUN)
 		Dmg = 1;
 	if(Weapon == WEAPON_LASER)

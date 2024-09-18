@@ -451,7 +451,10 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	if(Character.m_IsGodmode)
 		return true;
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+	{
+		Dmg = 0;
 		return false;
+	}
 	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
 	{
 		CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
