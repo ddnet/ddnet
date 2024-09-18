@@ -152,7 +152,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 		Left.HSplitTop(10.0f, nullptr, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		Ui()->DoScrollbarOption(&g_Config.m_ClRefreshRate, &g_Config.m_ClRefreshRate, &Button, Localize("Refresh Rate"), 10, 10000, &CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE, " Hz");
+		str_copy(aBuf, " ");
+		str_append(aBuf, Localize("Hz", "Hertz"));
+		Ui()->DoScrollbarOption(&g_Config.m_ClRefreshRate, &g_Config.m_ClRefreshRate, &Button, Localize("Refresh Rate"), 10, 10000, &CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE, aBuf);
 		Left.HSplitTop(5.0f, nullptr, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		static int s_LowerRefreshRate;
@@ -1628,7 +1630,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Ui()->DoScrollbarOption(&g_Config.m_GfxRefreshRate, &g_Config.m_GfxRefreshRate, &Button, Localize("Refresh Rate"), 10, 1000, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE | CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, " Hz");
+	str_copy(aBuf, " ");
+	str_append(aBuf, Localize("Hz", "Hertz"));
+	Ui()->DoScrollbarOption(&g_Config.m_GfxRefreshRate, &g_Config.m_GfxRefreshRate, &Button, Localize("Refresh Rate"), 10, 1000, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE | CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, aBuf);
 
 	MainView.HSplitTop(2.0f, nullptr, &MainView);
 	static CButtonContainer s_UiColorResetId;
