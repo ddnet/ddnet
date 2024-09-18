@@ -738,6 +738,54 @@ std::pair<int, int> CEditor::EnvGetSelectedTimeAndValue() const
 	return std::pair<int, int>{CurrentTime, CurrentValue};
 }
 
+void CEditor::SelectNextLayer()
+{
+	int CurrentLayer = 0;
+	for(const auto &Selected : m_vSelectedLayers)
+		CurrentLayer = maximum(Selected, CurrentLayer);
+	SelectLayer(CurrentLayer);
+
+	if(m_vSelectedLayers[0] < (int)m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1)
+	{
+		SelectLayer(m_vSelectedLayers[0] + 1);
+	}
+	else
+	{
+		for(size_t Group = m_SelectedGroup + 1; Group < m_Map.m_vpGroups.size(); Group++)
+		{
+			if(!m_Map.m_vpGroups[Group]->m_vpLayers.empty())
+			{
+				SelectLayer(0, Group);
+				break;
+			}
+		}
+	}
+}
+
+void CEditor::SelectPreviousLayer()
+{
+	int CurrentLayer = std::numeric_limits<int>::max();
+	for(const auto &Selected : m_vSelectedLayers)
+		CurrentLayer = minimum(Selected, CurrentLayer);
+	SelectLayer(CurrentLayer);
+
+	if(m_vSelectedLayers[0] > 0)
+	{
+		SelectLayer(m_vSelectedLayers[0] - 1);
+	}
+	else
+	{
+		for(int Group = m_SelectedGroup - 1; Group >= 0; Group--)
+		{
+			if(!m_Map.m_vpGroups[Group]->m_vpLayers.empty())
+			{
+				SelectLayer(m_Map.m_vpGroups[Group]->m_vpLayers.size() - 1, Group);
+				break;
+			}
+		}
+	}
+}
+
 bool CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
@@ -4195,26 +4243,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		}
 		else
 		{
-			int CurrentLayer = 0;
-			for(const auto &Selected : m_vSelectedLayers)
-				CurrentLayer = maximum(Selected, CurrentLayer);
-			SelectLayer(CurrentLayer);
-
-			if(m_vSelectedLayers[0] < (int)m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1)
-			{
-				SelectLayer(m_vSelectedLayers[0] + 1);
-			}
-			else
-			{
-				for(size_t Group = m_SelectedGroup + 1; Group < m_Map.m_vpGroups.size(); Group++)
-				{
-					if(!m_Map.m_vpGroups[Group]->m_vpLayers.empty())
-					{
-						SelectLayer(0, Group);
-						break;
-					}
-				}
-			}
+			SelectNextLayer();
 		}
 		s_ScrollToSelectionNext = true;
 	}
@@ -4227,27 +4256,9 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		}
 		else
 		{
-			int CurrentLayer = std::numeric_limits<int>::max();
-			for(const auto &Selected : m_vSelectedLayers)
-				CurrentLayer = minimum(Selected, CurrentLayer);
-			SelectLayer(CurrentLayer);
-
-			if(m_vSelectedLayers[0] > 0)
-			{
-				SelectLayer(m_vSelectedLayers[0] - 1);
-			}
-			else
-			{
-				for(int Group = m_SelectedGroup - 1; Group >= 0; Group--)
-				{
-					if(!m_Map.m_vpGroups[Group]->m_vpLayers.empty())
-					{
-						SelectLayer(m_Map.m_vpGroups[Group]->m_vpLayers.size() - 1, Group);
-						break;
-					}
-				}
-			}
+			SelectPreviousLayer();
 		}
+
 		s_ScrollToSelectionNext = true;
 	}
 

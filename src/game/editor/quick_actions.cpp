@@ -157,4 +157,6 @@ void CEditor::DeleteSelectedLayer()
 	if(pCurrentLayer == m_Map.m_pTuneLayer)
 		m_Map.m_pTuneLayer = nullptr;
 	m_Map.m_vpGroups[m_SelectedGroup]->DeleteLayer(m_vSelectedLayers[0]);
+
+	SelectPreviousLayer();
 }
