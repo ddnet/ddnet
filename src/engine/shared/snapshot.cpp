@@ -135,8 +135,15 @@ void CSnapshot::DebugDump() const
 bool CSnapshot::IsValid(size_t ActualSize) const
 {
 	// validate total size
-	if(ActualSize < sizeof(CSnapshot) || m_NumItems < 0 || m_DataSize < 0 || ActualSize != TotalSize())
+	if(ActualSize < sizeof(CSnapshot) ||
+		ActualSize > MAX_SIZE ||
+		m_NumItems < 0 ||
+		m_NumItems > MAX_ITEMS ||
+		m_DataSize < 0 ||
+		ActualSize != TotalSize())
+	{
 		return false;
+	}
 
 	// validate item offsets
 	const int *pOffsets = Offsets();
@@ -744,12 +751,15 @@ int *CSnapshotBuilder::GetItemData(int Key)
 int CSnapshotBuilder::Finish(void *pSnapData)
 {
 	// flatten and make the snapshot
+	dbg_assert(m_NumItems <= CSnapshot::MAX_ITEMS, "Too many snap items");
 	CSnapshot *pSnap = (CSnapshot *)pSnapData;
 	pSnap->m_DataSize = m_DataSize;
 	pSnap->m_NumItems = m_NumItems;
+	const size_t TotalSize = pSnap->TotalSize();
+	dbg_assert(TotalSize <= (size_t)CSnapshot::MAX_SIZE, "Snapshot too large");
 	mem_copy(pSnap->Offsets(), m_aOffsets, pSnap->OffsetSize());
 	mem_copy(pSnap->DataStart(), m_aData, m_DataSize);
-	return pSnap->TotalSize();
+	return TotalSize;
 }
 
 int CSnapshotBuilder::GetTypeFromIndex(int Index) const
@@ -794,11 +804,15 @@ void *CSnapshotBuilder::NewItem(int Type, int Id, int Size)
 		return nullptr;
 	}
 
-	if(m_DataSize + sizeof(CSnapshotItem) + Size >= CSnapshot::MAX_SIZE ||
-		m_NumItems + 1 >= CSnapshot::MAX_ITEMS)
+	if(m_NumItems >= CSnapshot::MAX_ITEMS)
 	{
-		dbg_assert(m_DataSize < CSnapshot::MAX_SIZE, "too much data");
-		dbg_assert(m_NumItems < CSnapshot::MAX_ITEMS, "too many items");
+		return nullptr;
+	}
+
+	const size_t OffsetSize = (m_NumItems + 1) * sizeof(int);
+	const size_t ItemSize = sizeof(CSnapshotItem) + Size;
+	if(sizeof(CSnapshot) + OffsetSize + m_DataSize + ItemSize > CSnapshot::MAX_SIZE)
+	{
 		return nullptr;
 	}
 
@@ -824,11 +838,11 @@ void *CSnapshotBuilder::NewItem(int Type, int Id, int Size)
 	else if(Type < 0)
 		return nullptr;
 
-	mem_zero(pObj, sizeof(CSnapshotItem) + Size);
 	pObj->m_TypeAndId = (Type << 16) | Id;
 	m_aOffsets[m_NumItems] = m_DataSize;
-	m_DataSize += sizeof(CSnapshotItem) + Size;
+	m_DataSize += ItemSize;
 	m_NumItems++;
 
+	mem_zero(pObj->Data(), Size);
 	return pObj->Data();
 }
