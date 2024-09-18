@@ -176,6 +176,7 @@ public:
 	{
 		CONSOLETYPE_LOCAL = 0,
 		CONSOLETYPE_REMOTE,
+		NUM_CONSOLETYPES
 	};
 
 	CGameConsole();

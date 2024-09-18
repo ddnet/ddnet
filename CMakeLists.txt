@@ -1133,11 +1133,10 @@ set(EXPECTED_DATA
   audio/wp_switch-02.wv
   audio/wp_switch-03.wv
   autoexec_server.cfg
+  background_noise.png
   blob.png
   censorlist.txt
   communityicons/none.png
-  console.png
-  console_bar.png
   countryflags/AD.png
   countryflags/AE.png
   countryflags/AF.png
