@@ -1389,17 +1389,13 @@ void CPlayers::OnRender()
 
 		bool Frozen = (m_pClient->m_aClients[ClientId].m_FreezeEnd > 0) && g_Config.m_ClHideFrozenGhosts;
 		bool RenderGhost = true;
-		bool RenderRegular = true;
 		if(g_Config.m_ClHideFrozenGhosts && Frozen && g_Config.m_ClShowOthersGhosts)
 		{
-			if(g_Config.m_ClSwapGhosts)
-				RenderRegular = false;
-			else
+			if(!g_Config.m_ClSwapGhosts)
 				RenderGhost = false;
 		}
 		if(g_Config.m_ClUnpredOthersInFreeze && g_Config.m_ClAmIFrozen && g_Config.m_ClShowOthersGhosts)
 		{
-			RenderRegular = true;
 			RenderGhost = false;
 		}
 
@@ -1409,8 +1405,6 @@ void CPlayers::OnRender()
 		if(RenderGhost && g_Config.m_ClShowOthersGhosts && !Spec && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			RenderPlayerGhost(&m_pClient->m_aClients[ClientId].m_RenderPrev, &m_pClient->m_aClients[ClientId].m_RenderCur, &aRenderInfo[ClientId], ClientId);
 
-		if(RenderRegular || Spec)
-			RenderPlayer(&m_pClient->m_aClients[ClientId].m_RenderPrev, &m_pClient->m_aClients[ClientId].m_RenderCur, &aRenderInfo[ClientId], ClientId);
 		RenderPlayer(&m_pClient->m_aClients[ClientId].m_RenderPrev, &m_pClient->m_aClients[ClientId].m_RenderCur, &aRenderInfo[ClientId], ClientId);
 	}
 	if(RenderLastId != -1 && m_pClient->m_Snap.m_aCharacters[RenderLastId].m_Active && IsPlayerInfoAvailable(RenderLastId))
