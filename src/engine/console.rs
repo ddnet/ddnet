@@ -177,29 +177,29 @@ mod ffi {
         /// # unsafe { *user.cast_mut::<bool>() = true; }
         /// let result: &IConsole_IResult /* = `command "$f00" $ffa500 $12345 shiny cyan -16777216 $f008 $00ffff80` */;
         /// # result = result_param;
-        /// assert_eq!(result.GetColor(0, false), ColorHSLA { h: 0.0, s: 1.0, l: 0.5, a: 1.0 }); // red
-        /// assert_eq!(result.GetColor(1, false), ColorHSLA { h: 0.10784314, s: 1.0, l: 0.5, a: 1.0 }); // DDNet logo color
-        /// assert_eq!(result.GetColor(2, false), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // cannot be parsed => black
-        /// assert_eq!(result.GetColor(3, false), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // unknown color name => black
-        /// assert_eq!(result.GetColor(4, false), ColorHSLA { h: 0.5, s: 1.0, l: 0.5, a: 1.0 }); // cyan
-        /// assert_eq!(result.GetColor(5, false), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // black
-        /// assert_eq!(result.GetColor(6, false), ColorHSLA { h: 0.0, s: 1.0, l: 0.5, a: 0.53333336 }); // red with alpha specified
-        /// assert_eq!(result.GetColor(7, false), ColorHSLA { h: 0.5, s: 1.0, l: 0.5, a: 0.5019608 }); // cyan with alpha specified
-        /// assert_eq!(result.GetColor(8, false), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // out of range => black
+        /// assert_eq!(result.GetColor(0, 0.0), ColorHSLA { h: 0.0, s: 1.0, l: 0.5, a: 1.0 }); // red
+        /// assert_eq!(result.GetColor(1, 0.0), ColorHSLA { h: 0.10784314, s: 1.0, l: 0.5, a: 1.0 }); // DDNet logo color
+        /// assert_eq!(result.GetColor(2, 0.0), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // cannot be parsed => black
+        /// assert_eq!(result.GetColor(3, 0.0), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // unknown color name => black
+        /// assert_eq!(result.GetColor(4, 0.0), ColorHSLA { h: 0.5, s: 1.0, l: 0.5, a: 1.0 }); // cyan
+        /// assert_eq!(result.GetColor(5, 0.0), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // black
+        /// assert_eq!(result.GetColor(6, 0.0), ColorHSLA { h: 0.0, s: 1.0, l: 0.5, a: 0.53333336 }); // red with alpha specified
+        /// assert_eq!(result.GetColor(7, 0.0), ColorHSLA { h: 0.5, s: 1.0, l: 0.5, a: 0.5019608 }); // cyan with alpha specified
+        /// assert_eq!(result.GetColor(8, 0.0), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // out of range => black
         ///
-        /// assert_eq!(result.GetColor(0, true), result.GetColor(0, false));
-        /// assert_eq!(result.GetColor(1, true), result.GetColor(1, false));
-        /// assert_eq!(result.GetColor(2, true), result.GetColor(2, false));
-        /// assert_eq!(result.GetColor(3, true), result.GetColor(3, false));
-        /// assert_eq!(result.GetColor(4, true), result.GetColor(4, false));
-        /// assert_eq!(result.GetColor(5, true), ColorHSLA { h: 0.0, s: 0.0, l: 0.5, a: 1.0 }); // black, but has the `Light` parameter set
-        /// assert_eq!(result.GetColor(6, true), result.GetColor(6, false));
-        /// assert_eq!(result.GetColor(7, true), result.GetColor(7, false));
-        /// assert_eq!(result.GetColor(8, true), result.GetColor(8, false));
+        /// assert_eq!(result.GetColor(0, 0.5), result.GetColor(0, 0.0));
+        /// assert_eq!(result.GetColor(1, 0.5), result.GetColor(1, 0.0));
+        /// assert_eq!(result.GetColor(2, 0.5), result.GetColor(2, 0.0));
+        /// assert_eq!(result.GetColor(3, 0.5), result.GetColor(3, 0.0));
+        /// assert_eq!(result.GetColor(4, 0.5), result.GetColor(4, 0.0));
+        /// assert_eq!(result.GetColor(5, 0.5), ColorHSLA { h: 0.0, s: 0.0, l: 0.5, a: 1.0 }); // black, but has the `Light` parameter set
+        /// assert_eq!(result.GetColor(6, 0.5), result.GetColor(6, 0.0));
+        /// assert_eq!(result.GetColor(7, 0.5), result.GetColor(7, 0.0));
+        /// assert_eq!(result.GetColor(8, 0.5), result.GetColor(8, 0.0));
         /// # }
         /// # assert!(executed);
         /// ```
-        pub fn GetColor(self: &IConsole_IResult, Index: u32, Light: bool) -> ColorHSLA;
+        pub fn GetColor(self: &IConsole_IResult, Index: u32, DarkestLighting: f32) -> ColorHSLA;
 
         /// Get the number of parameters passed.
         ///

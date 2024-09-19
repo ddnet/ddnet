@@ -477,7 +477,7 @@ void CSkins7::RandomizeSkin(int Dummy)
 
 ColorRGBA CSkins7::GetColor(int Value, bool UseAlpha) const
 {
-	return color_cast<ColorRGBA>(ColorHSLA(Value, UseAlpha).UnclampLighting(DARKEST_COLOR_LGT));
+	return color_cast<ColorRGBA>(ColorHSLA(Value, UseAlpha).UnclampLighting(ColorHSLA::DARKEST_LGT7));
 }
 
 ColorRGBA CSkins7::GetTeamColor(int UseCustomColors, int PartColor, int Team, int Part) const
@@ -501,7 +501,7 @@ ColorRGBA CSkins7::GetTeamColor(int UseCustomColors, int PartColor, int Team, in
 
 	int h = TeamHue;
 	int s = clamp(mix(TeamSat, PartSat, 0.2), MinSat, MaxSat);
-	int l = clamp(mix(TeamLgt, PartLgt, 0.2), (int)DARKEST_COLOR_LGT, 200);
+	int l = clamp(mix(TeamLgt, PartLgt, 0.2), (int)ColorHSLA::DARKEST_LGT7, 200);
 
 	int ColorVal = (h << 16) + (s << 8) + l;
 

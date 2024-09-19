@@ -76,8 +76,8 @@ void CTeeInfo::ToSixup()
 
 	if(m_UseCustomColor)
 	{
-		int ColorBody = ColorHSLA(m_ColorBody).UnclampLighting().Pack(ms_DarkestLGT7);
-		int ColorFeet = ColorHSLA(m_ColorFeet).UnclampLighting().Pack(ms_DarkestLGT7);
+		int ColorBody = ColorHSLA(m_ColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
+		int ColorFeet = ColorHSLA(m_ColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
 		m_aUseCustomColors[protocol7::SKINPART_BODY] = true;
 		m_aUseCustomColors[protocol7::SKINPART_MARKING] = true;
 		m_aUseCustomColors[protocol7::SKINPART_DECORATION] = true;
@@ -138,9 +138,9 @@ void CTeeInfo::FromSixup()
 	str_copy(m_aSkinName, g_aStdSkins[BestSkin].m_aSkinName, sizeof(m_aSkinName));
 	m_UseCustomColor = true;
 	m_ColorBody = ColorHSLA(m_aUseCustomColors[protocol7::SKINPART_BODY] ? m_aSkinPartColors[protocol7::SKINPART_BODY] : 255)
-			      .UnclampLighting(ms_DarkestLGT7)
+			      .UnclampLighting(ColorHSLA::DARKEST_LGT7)
 			      .Pack(ColorHSLA::DARKEST_LGT);
 	m_ColorFeet = ColorHSLA(m_aUseCustomColors[protocol7::SKINPART_FEET] ? m_aSkinPartColors[protocol7::SKINPART_FEET] : 255)
-			      .UnclampLighting(ms_DarkestLGT7)
+			      .UnclampLighting(ColorHSLA::DARKEST_LGT7)
 			      .Pack(ColorHSLA::DARKEST_LGT);
 }
