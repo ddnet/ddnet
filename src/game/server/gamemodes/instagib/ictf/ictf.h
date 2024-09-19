@@ -59,6 +59,22 @@ public:
 		InsertBindings(pOffset, pSqlServer, pStats);
 	}
 
+	void Dump(const CSqlStatsPlayer *pStats, const char *pSystem = "stats") const override
+	{
+#define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) \
+	dbg_msg(pSystem, "  %s: %d", sql_name, pStats->m_##name);
+#include "sql_columns.h"
+#undef MACRO_ADD_COLUMN
+	}
+
+	void MergeStats(CSqlStatsPlayer *pOutputStats, const CSqlStatsPlayer *pNewStats) override
+	{
+#define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) \
+	pOutputStats->m_##name = Merge##bind_type##merge_method(pOutputStats->m_##name, pNewStats->m_##name);
+#include "sql_columns.h"
+#undef MACRO_ADD_COLUMN
+	}
+
 	void ReadAndMergeStats(int *pOffset, IDbConnection *pSqlServer, CSqlStatsPlayer *pOutputStats, const CSqlStatsPlayer *pNewStats) override
 	{
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) \

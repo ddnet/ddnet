@@ -53,13 +53,7 @@ public:
 	int m_LastToucherId = -1;
 	void UpdateLastToucher(int ClientId);
 
-	enum
-	{
-		MAX_MULTIS = 10,
-	};
-
 	int m_Multi = 1;
-	int m_aMultis[MAX_MULTIS];
 
 	int64_t m_LastKillTime = 0;
 	int64_t HandleMulti();

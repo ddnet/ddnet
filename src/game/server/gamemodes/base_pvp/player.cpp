@@ -81,7 +81,7 @@ int64_t CPlayer::HandleMulti()
 	if(m_Stats.m_BestMulti < m_Multi)
 		m_Stats.m_BestMulti = m_Multi;
 	int Index = m_Multi - 2;
-	m_aMultis[Index > MAX_MULTIS ? MAX_MULTIS : Index]++;
+	m_Stats.m_aMultis[Index > MAX_MULTIS ? MAX_MULTIS : Index]++;
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "'%s' multi x%d!",
 		Server()->ClientName(GetCid()), m_Multi);

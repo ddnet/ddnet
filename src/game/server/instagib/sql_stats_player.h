@@ -2,6 +2,12 @@
 #define GAME_SERVER_INSTAGIB_SQL_STATS_PLAYER_H
 
 #include <base/system.h>
+#include <game/server/instagib/extra_columns.h>
+
+enum
+{
+	MAX_MULTIS = 10,
+};
 
 class CSqlStatsPlayer
 {
@@ -24,21 +30,25 @@ public:
 	// the players current spree is in CPlayer::m_Spree
 	int m_BestSpree;
 
-	// gctf only
+	/*************************************
+	 * GCTF                              *
+	 *************************************/
 
 	int m_FlagCaptures;
 	int m_FlagGrabs;
 	int m_FlaggerKills;
 
-	// ictf only
+	/*************************************
+	 * ICTF                              *
+	 *************************************/
 
 	// TODO: these are not actually incremented yet
 	int m_Wallshots;
 
-	// fng
+	/*************************************
+	 * zCatch                            *
+	 *************************************/
 
-	// the current multi is in player.h
-	int m_BestMulti;
 	// zCatch only for now but will possibly be shared
 
 	// TODO: this should probably be in the base stats
@@ -47,6 +57,28 @@ public:
 
 	int m_TicksCaught; // TODO: this is not tracked yet
 	int m_TicksInGame; // TODO: this is not tracked yet
+
+	/*************************************
+	 * solofng and fng                   *
+	 *************************************/
+
+	// the current multi is in player.h
+	int m_BestMulti;
+
+	int m_aMultis[MAX_MULTIS];
+
+	int m_Freezes;
+	int m_GoldSpikes;
+	int m_GreenSpikes;
+	int m_PurpleSpikes;
+
+	/*************************************
+	 * fng                               *
+	 *************************************/
+
+	// hammers that led to an unfreeze
+	int m_Unfreezes;
+	int m_WrongSpikes;
 
 	void Reset()
 	{
@@ -64,10 +96,20 @@ public:
 		m_FlagGrabs = 0;
 		m_FlaggerKills = 0;
 		m_Wallshots = 0;
-		m_BestMulti = 0;
 		m_Points = 0;
 		m_TicksCaught = 0;
 		m_TicksInGame = 0;
+		m_BestMulti = 0;
+		m_Freezes = 0;
+		m_GoldSpikes = 0;
+		m_GreenSpikes = 0;
+		m_PurpleSpikes = 0;
+
+		for(auto &Multi : m_aMultis)
+			Multi = 0;
+
+		m_Unfreezes = 0;
+		m_WrongSpikes = 0;
 	}
 
 	void Merge(const CSqlStatsPlayer *pOther)
@@ -81,18 +123,10 @@ public:
 		m_ShotsFired += pOther->m_ShotsFired;
 		m_ShotsHit += pOther->m_ShotsHit;
 
-		// gametype specific
-		m_FlagCaptures += pOther->m_FlagCaptures;
-		m_FlagGrabs += pOther->m_FlagGrabs;
-		m_FlaggerKills += pOther->m_FlaggerKills;
-		m_Wallshots += pOther->m_Wallshots;
-		m_BestMulti = std::max(m_BestMulti, pOther->m_BestMulti);
-		m_Points += pOther->m_Points;
-		m_TicksCaught += pOther->m_TicksCaught;
-		m_TicksInGame += pOther->m_TicksInGame;
+		// gametype specific is implemented in the gametypes callback
 	}
 
-	void Dump(const char *pSystem = "stats") const
+	void Dump(CExtraColumns *pExtraColumns, const char *pSystem = "stats") const
 	{
 		dbg_msg(pSystem, "  kills: %d", m_Kills);
 		dbg_msg(pSystem, "  deaths: %d", m_Deaths);
@@ -102,18 +136,13 @@ public:
 		dbg_msg(pSystem, "  shots_fired: %d", m_ShotsFired);
 		dbg_msg(pSystem, "  shots_hit: %d", m_ShotsHit);
 
-		dbg_msg(pSystem, "  flag_captures: %d", m_FlagCaptures);
-		dbg_msg(pSystem, "  flag_grabs: %d", m_FlagGrabs);
-		dbg_msg(pSystem, "  flagger_kills: %d", m_FlaggerKills);
-		dbg_msg(pSystem, "  wallshots: %d", m_Wallshots);
-		dbg_msg(pSystem, "  multi: %d", m_BestMulti);
-		dbg_msg(pSystem, "  points: %d", m_Points);
-		dbg_msg(pSystem, "  ticks_caught: %d", m_TicksCaught);
-		dbg_msg(pSystem, "  ticks_in_game: %d", m_TicksInGame);
+		if(pExtraColumns)
+			pExtraColumns->Dump(this);
 	}
 
 	bool HasValues() const
 	{
+		// TODO: add a HasValues callback in the gametype instead of listing all here
 		return m_Kills ||
 		       m_Deaths ||
 		       m_BestSpree ||
@@ -125,10 +154,16 @@ public:
 		       m_FlagGrabs ||
 		       m_FlaggerKills ||
 		       m_Wallshots ||
-		       m_BestMulti ||
 		       m_Points ||
 		       m_TicksCaught ||
-		       m_TicksInGame;
+		       m_TicksInGame ||
+		       m_BestMulti ||
+		       m_Freezes ||
+		       m_GoldSpikes ||
+		       m_GreenSpikes ||
+		       m_PurpleSpikes ||
+		       m_Unfreezes ||
+		       m_WrongSpikes;
 	}
 
 	CSqlStatsPlayer()

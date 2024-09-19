@@ -206,7 +206,7 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 		pResult->m_Stats.m_ShotsHit = pSqlServer->GetInt(Offset++);
 
 		dbg_msg("sql-thread", "loaded base stats:");
-		pResult->m_Stats.Dump("sql-thread");
+		pResult->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
 
 		CSqlStatsPlayer EmptyStats;
 		EmptyStats.Reset();
@@ -216,7 +216,7 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 			pData->m_pExtraColumns->ReadAndMergeStats(&Offset, pSqlServer, &pResult->m_Stats, &EmptyStats);
 
 		dbg_msg("sql-thread", "loaded gametype specific stats:");
-		pResult->m_Stats.Dump("sql-thread");
+		pResult->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
 	}
 	return false;
 }
@@ -385,14 +385,14 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		MergeStats.m_ShotsHit = pSqlServer->GetInt(Offset++);
 
 		dbg_msg("sql-thread", "loaded stats:");
-		MergeStats.Dump("sql-thread");
+		MergeStats.Dump(pData->m_pExtraColumns, "sql-thread");
 
 		MergeStats.Merge(&pData->m_Stats);
 		if(pData->m_pExtraColumns)
 			pData->m_pExtraColumns->ReadAndMergeStats(&Offset, pSqlServer, &MergeStats, &pData->m_Stats);
 
 		dbg_msg("sql-thread", "merged stats:");
-		MergeStats.Dump("sql-thread");
+		MergeStats.Dump(pData->m_pExtraColumns, "sql-thread");
 
 		str_format(
 			aBuf,
@@ -438,7 +438,7 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 		if(NumUpdated == 0 && pData->m_Stats.HasValues())
 		{
 			dbg_msg("sql-thread", "update failed no rows changed but got the following stats:");
-			pData->m_Stats.Dump("sql-thread");
+			pData->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
 			return true;
 		}
 		else if(NumUpdated > 1)

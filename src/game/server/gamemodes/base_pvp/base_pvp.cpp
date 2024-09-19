@@ -37,6 +37,18 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
 }
 
+void CGameControllerPvp::OnRoundStart()
+{
+	dbg_msg("ddnet-insta", "starting new round ...");
+
+	// for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	// {
+	// 	if(!pPlayer)
+	// 		continue;
+	//
+	// }
+}
+
 CGameControllerPvp::~CGameControllerPvp()
 {
 	// TODO: we have to make sure to block all operations and save everything if sv_gametype is switched

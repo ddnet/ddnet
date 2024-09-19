@@ -2,7 +2,6 @@
 #define GAME_SERVER_INSTAGIB_EXTRA_COLUMNS_H
 
 #include <engine/server/databases/connection.h>
-#include <game/server/instagib/sql_stats_player.h>
 
 class CExtraColumns
 {
@@ -72,7 +71,7 @@ public:
 		pSqlServer->BindInt((*pOffset)++, pStats->m_Kills);
 		pSqlServer->BindInt((*pOffset)++, pStats->m_Deaths);
 	*/
-	virtual void InsertBindings(int *pOffset, IDbConnection *pSqlServer, const CSqlStatsPlayer *pStats) = 0;
+	virtual void InsertBindings(int *pOffset, IDbConnection *pSqlServer, const class CSqlStatsPlayer *pStats) = 0;
 
 	/*
 		UpdateBindings
@@ -88,7 +87,42 @@ public:
 		pSqlServer->BindInt((*pOffset)++, pStats->m_Kills);
 		pSqlServer->BindInt((*pOffset)++, pStats->m_Deaths);
 	*/
-	virtual void UpdateBindings(int *pOffset, IDbConnection *pSqlServer, const CSqlStatsPlayer *pStats) = 0;
+	virtual void UpdateBindings(int *pOffset, IDbConnection *pSqlServer, const class CSqlStatsPlayer *pStats) = 0;
+
+	/*
+		Dump
+
+		Arguments:
+			pStats - stats to print
+			pSystem - dbg_msg prefix to use
+
+		Callback that should print all the columns it adds
+
+		Example dump code:
+
+		dbg_msg(pSystem, "  Kills: %s", pStats->m_Kills);
+	*/
+	virtual void Dump(const class CSqlStatsPlayer *pStats, const char *pSystem = "stats") const = 0;
+
+	/*
+		MergeStats
+
+		Arguments:
+			pOutputStats - stats object that should be written to
+			pNewStats - stats object with the stats from the current round should be red from
+
+		Callback that merges only the extra columns of two stats objects
+
+		Example merge code:
+
+		pOutputStats->m_Kills += pNewStats->m_Kills;
+		pOutputStats->m_Deaths += pNewStats->m_Deaths;
+
+		Or use one of the merge helpers:
+
+		pOutputStats->m_Deaths = MergeIntAdd(pOutputStats->m_Kills, pNewStats->m_Kills);
+	*/
+	virtual void MergeStats(class CSqlStatsPlayer *pOutputStats, const class CSqlStatsPlayer *pNewStats) = 0;
 
 	/*
 		ReadAndMergeStats
@@ -111,7 +145,7 @@ public:
 
 		pOutputStats->m_Deaths = MergeIntAdd(pSqlServer->GetInt((*pOffset)++), pNewStats->m_Deaths);
 	*/
-	virtual void ReadAndMergeStats(int *pOffset, IDbConnection *pSqlServer, CSqlStatsPlayer *pOutputStats, const CSqlStatsPlayer *pNewStats) = 0;
+	virtual void ReadAndMergeStats(int *pOffset, IDbConnection *pSqlServer, class CSqlStatsPlayer *pOutputStats, const class CSqlStatsPlayer *pNewStats) = 0;
 
 	int MergeIntAdd(int Current, int Other)
 	{

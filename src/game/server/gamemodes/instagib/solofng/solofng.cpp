@@ -18,6 +18,11 @@ CGameControllerSoloFng::CGameControllerSoloFng(class CGameContext *pGameServer) 
 
 	m_SpawnWeapons = ESpawnWeapons::SPAWN_WEAPON_LASER;
 	m_DefaultWeapon = WEAPON_LASER;
+
+	m_pStatsTable = "solofng";
+	m_pExtraColumns = new CSolofngColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerSoloFng::~CGameControllerSoloFng() = default;
