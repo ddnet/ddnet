@@ -1181,6 +1181,83 @@ static int SavedServerInfoType(int Type)
 	return Type;
 }
 
+void CClient::PreprocessConnlessPacket(CNetChunk *pPacket)
+{
+	if(mem_comp(pPacket->m_pData, SERVERBROWSE_INFO, sizeof(SERVERBROWSE_INFO)) == 0)
+	{
+		CUnpacker Up;
+		CServerInfo Info;
+		mem_zero(&Info, sizeof(CServerInfo));
+		Up.Reset((unsigned char *)pPacket->m_pData + sizeof(SERVERBROWSE_INFO), pPacket->m_DataSize - sizeof(SERVERBROWSE_INFO));
+
+#define GET_STRING(array) str_copy(array, Up.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES), sizeof(array))
+
+		TOKEN Token = Up.GetInt();
+		GET_STRING(Info.m_aVersion);
+		GET_STRING(Info.m_aName);
+		str_clean_whitespaces(Info.m_aName);
+
+		char Hostname[64];
+		GET_STRING(Hostname);
+		GET_STRING(Info.m_aMap);
+		GET_STRING(Info.m_aGameType);
+		Info.m_Flags = Up.GetInt();
+		Up.GetInt(); // Server level
+		Info.m_NumPlayers = Up.GetInt();
+		Info.m_MaxPlayers = Up.GetInt();
+		Info.m_NumClients = Up.GetInt();
+		Info.m_MaxClients = Up.GetInt();
+
+		for(int i = 0; i < Info.m_NumClients; i++)
+		{
+			GET_STRING(Info.m_aClients[i].m_aName);
+			GET_STRING(Info.m_aClients[i].m_aClan);
+			Info.m_aClients[i].m_Country = Up.GetInt();
+			Info.m_aClients[i].m_Score = Up.GetInt();
+			Info.m_aClients[i].m_Player = !(Up.GetInt() & 1);
+		}
+
+		CPacker Packer;
+		Packer.Reset();
+
+		char aBuf[128];
+
+#define PUT_INT(num) \
+	{ \
+		str_format(aBuf, sizeof(aBuf), "%d", num); \
+		Packer.AddString(aBuf, 0); \
+	}
+
+		PUT_INT(Token & 0xff);
+		Packer.AddString(Info.m_aVersion);
+		Packer.AddString(Info.m_aName);
+		Packer.AddString(Info.m_aMap);
+		Packer.AddString(Info.m_aGameType);
+
+		PUT_INT(Info.m_Flags);
+		PUT_INT(Info.m_NumPlayers);
+		PUT_INT(Info.m_MaxPlayers);
+		PUT_INT(Info.m_NumClients);
+		PUT_INT(Info.m_MaxClients);
+
+		for(int i = 0; i < Info.m_NumClients; i++)
+		{
+			Packer.AddString(Info.m_aClients[i].m_aName, 0);
+			Packer.AddString(Info.m_aClients[i].m_aClan, 0);
+
+			PUT_INT(Info.m_aClients[i].m_Country);
+			PUT_INT(Info.m_aClients[i].m_Score);
+			PUT_INT(Info.m_aClients[i].m_Player);
+		}
+
+		mem_copy((unsigned char *)pPacket->m_pData + sizeof(SERVERBROWSE_INFO), Packer.Data(), Packer.Size());
+		pPacket->m_DataSize = sizeof(SERVERBROWSE_INFO) + Packer.Size();
+
+#undef PUT_INT
+#undef GET_STRING
+	}
+}
+
 void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, int DataSize)
 {
 	CServerBrowser::CServerEntry *pEntry = m_ServerBrowser.Find(*pFrom);
@@ -2506,6 +2583,11 @@ void CClient::PumpNetwork()
 		{
 			if(Packet.m_ClientId == -1)
 			{
+				if(ResponseToken != NET_SECURITY_TOKEN_UNKNOWN)
+				{
+					PreprocessConnlessPacket(&Packet);
+				}
+
 				ProcessConnlessPacket(&Packet);
 				continue;
 			}

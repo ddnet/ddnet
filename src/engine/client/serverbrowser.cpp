@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "serverbrowser.h"
 
+#include "engine/shared/packer.h"
 #include "serverbrowser_http.h"
 #include "serverbrowser_ping_cache.h"
 
@@ -965,15 +966,14 @@ void CServerBrowser::Refresh(int Type, bool Force)
 	if(Type == IServerBrowser::TYPE_LAN)
 	{
 		unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO) + 1];
+		CPacker Packer;
 		CNetChunk Packet;
+		mem_zero(&Packet, sizeof(Packet));
 
 		/* do the broadcast version */
 		Packet.m_ClientId = -1;
-		mem_zero(&Packet, sizeof(Packet));
 		Packet.m_Address.type = m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST;
 		Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
-		Packet.m_DataSize = sizeof(aBuffer);
-		Packet.m_pData = aBuffer;
 		mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
 
 		int Token = GenerateToken(Packet.m_Address);
@@ -983,12 +983,28 @@ void CServerBrowser::Refresh(int Type, bool Force)
 		Packet.m_aExtraData[0] = GetExtraToken(Token) >> 8;
 		Packet.m_aExtraData[1] = GetExtraToken(Token) & 0xff;
 
+		Packer.Reset();
+		Packer.AddRaw(SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
+		Packer.AddInt(GetBasicToken(Token));
+
 		m_BroadcastTime = time_get();
 
 		for(int i = 8303; i <= 8310; i++)
 		{
 			Packet.m_Address.port = i;
+
+			Packet.m_pData = aBuffer;
+			Packet.m_DataSize = sizeof(aBuffer);
 			m_pNetClient->Send(&Packet);
+
+			// I don't really like it but it has to be on heap to outlive function's scope
+			unsigned char *Data = (unsigned char *)malloc(Packer.Size());
+			mem_copy(Data, Packer.Data(), Packer.Size());
+			Packet.m_pData = Data;
+			Packet.m_DataSize = Packer.Size();
+
+			m_pNetClient->m_ConnlessPackets.push_back(Packet);
+			CNetBase::SendControlMsgWithToken7(m_pNetClient->m_Socket, &Packet.m_Address, NET_TOKEN_NONE, 0, 5, 1, true);
 		}
 
 		if(g_Config.m_Debug)

@@ -121,6 +121,22 @@ void CNetBase::SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *
 	net_udp_send(Socket, pAddr, aBuffer, DataSize + DATA_OFFSET);
 }
 
+int CNetBase::SendConnlessSixup(NETSOCKET Socket, CNetChunk *pChunk, SECURITY_TOKEN Token, SECURITY_TOKEN ResponseToken)
+{
+	if(pChunk->m_DataSize > NET_MAX_PACKETSIZE - 9)
+		return -1;
+
+	unsigned char aBuffer[NET_MAX_PACKETSIZE];
+	aBuffer[0] = NET_PACKETFLAG_CONNLESS << 2 | 1;
+
+	WriteSecurityToken(aBuffer + 1, ResponseToken);
+	WriteSecurityToken(aBuffer + 5, Token);
+	mem_copy(aBuffer + 9, pChunk->m_pData, pChunk->m_DataSize);
+	net_udp_send(Socket, &pChunk->m_Address, aBuffer, pChunk->m_DataSize + 9);
+
+	return 0;
+}
+
 void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup, bool NoCompress)
 {
 	unsigned char aBuffer[NET_MAX_PACKETSIZE];
