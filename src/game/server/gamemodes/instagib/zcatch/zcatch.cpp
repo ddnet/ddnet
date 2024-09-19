@@ -33,6 +33,12 @@ CGameControllerZcatch::ECatchGameState CGameControllerZcatch::CatchGameState() c
 	return m_CatchGameState;
 }
 
+bool CGameControllerZcatch::IsCatchGameRunning() const
+{
+	return CatchGameState() == ECatchGameState::RUNNING ||
+	       CatchGameState() == ECatchGameState::RUNNING_COMPETITIVE;
+}
+
 void CGameControllerZcatch::SetCatchGameState(ECatchGameState State)
 {
 	if(g_Config.m_SvReleaseGame)
@@ -43,22 +49,37 @@ void CGameControllerZcatch::SetCatchGameState(ECatchGameState State)
 	m_CatchGameState = State;
 }
 
-bool CGameControllerZcatch::IsWinner(const CPlayer *pPlayer)
+bool CGameControllerZcatch::IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage)
 {
+	if(pMessage && SizeOfMessage)
+		pMessage[0] = '\0';
+
 	// you can only win on round end
 	if(GameState() != IGS_END_ROUND)
 		return false;
 	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
 		return false;
 	// there are no winners in release games even if the round ends
-	if(CatchGameState() != ECatchGameState::RUNNING)
+	if(!IsCatchGameRunning())
 		return false;
+	// the win does not count in casual rounds
+	if(CatchGameState() != ECatchGameState::RUNNING_COMPETITIVE)
+	{
+		str_copy(pMessage, "The win did not count because the round was started with less than 10 players.", SizeOfMessage);
+		return false;
+	}
 
+	str_copy(pMessage, "+1 win was saved on your name (see /rank_wins).", SizeOfMessage);
 	return !pPlayer->m_IsDead;
 }
 
 bool CGameControllerZcatch::IsLoser(const CPlayer *pPlayer)
 {
+	// because you can not win a casual game
+	// it does also not track your loss
+	if(CatchGameState() != ECatchGameState::RUNNING_COMPETITIVE)
+		return false;
+
 	// rage quit as dead player is counted as a loss
 	// qutting mid game while being alive is not
 	return pPlayer->m_IsDead;
@@ -314,16 +335,28 @@ void CGameControllerZcatch::CheckGameState()
 {
 	int ActivePlayers = NumActivePlayers();
 
-	if(ActivePlayers >= g_Config.m_SvZcatchMinPlayers && CatchGameState() == ECatchGameState::WAITING_FOR_PLAYERS)
+	const int CompetitiveMin = 10;
+
+	if(ActivePlayers >= CompetitiveMin && CatchGameState() != ECatchGameState::RUNNING_COMPETITIVE)
+	{
+		SendChatTarget(-1, "Enough players connected. Starting competitive game!");
+		SetCatchGameState(ECatchGameState::RUNNING_COMPETITIVE);
+	}
+	else if(ActivePlayers >= g_Config.m_SvZcatchMinPlayers && CatchGameState() == ECatchGameState::WAITING_FOR_PLAYERS)
 	{
 		SendChatTarget(-1, "Enough players connected. Starting game!");
+		SetCatchGameState(ECatchGameState::RUNNING);
+	}
+	else if(ActivePlayers < CompetitiveMin && CatchGameState() == ECatchGameState::RUNNING_COMPETITIVE)
+	{
+		SendChatTarget(-1, "Not enough players connected anymore. Starting casual game!");
 		SetCatchGameState(ECatchGameState::RUNNING);
 	}
 }
 
 int CGameControllerZcatch::GetAutoTeam(int NotThisId)
 {
-	if(CatchGameState() == ECatchGameState::RUNNING)
+	if(IsCatchGameRunning())
 	{
 		return TEAM_SPECTATORS;
 	}
@@ -384,7 +417,7 @@ bool CGameControllerZcatch::OnEntity(int Index, int x, int y, int Layer, int Fla
 
 bool CGameControllerZcatch::DoWincheckRound()
 {
-	if(CatchGameState() == ECatchGameState::RUNNING && NumNonDeadActivePlayers() <= 1)
+	if(IsCatchGameRunning() && NumNonDeadActivePlayers() <= 1)
 	{
 		EndRound();
 

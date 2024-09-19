@@ -152,8 +152,10 @@ public:
 
 		Arguments:
 			pPlayer - the player to check
+			pMessage - should be sent to pPlayer in chat contains messages such as "you gained one win", "this win did not count because xyz"
+			SizeOfMessage - size of the message buffer
 	*/
-	virtual bool IsWinner(const CPlayer *pPlayer) { return false; }
+	virtual bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) { return false; }
 
 	/*
 		Function: IsLoser

@@ -28,7 +28,12 @@ void IGameController::OnEndRoundInsta()
 		if(!pPlayer)
 			continue;
 
-		// dbg_msg("stats", "winner=%d loser=%d name: %s", IsWinner(pPlayer), IsLoser(pPlayer), Server()->ClientName(pPlayer->GetCid()));
+		char aMsg[512];
+		bool Won = IsWinner(pPlayer, aMsg, sizeof(aMsg));
+		bool Lost = IsLoser(pPlayer);
+		dbg_msg("stats", "winner=%d loser=%d msg=%s name: %s", Won, Lost, aMsg, Server()->ClientName(pPlayer->GetCid()));
+		if(aMsg[0])
+			GameServer()->SendChatTarget(pPlayer->GetCid(), aMsg);
 
 		pPlayer->m_Stats.Reset();
 	}

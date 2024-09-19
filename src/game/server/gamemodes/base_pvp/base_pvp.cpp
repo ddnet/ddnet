@@ -132,8 +132,11 @@ void CGameControllerPvp::OnUpdateSpectatorVotesConfig()
 	}
 }
 
-bool CGameControllerPvp::IsWinner(const CPlayer *pPlayer)
+bool CGameControllerPvp::IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage)
 {
+	if(pMessage && SizeOfMessage)
+		pMessage[0] = '\0';
+
 	// you can only win on round end
 	if(GameState() != IGS_END_ROUND)
 		return false;
@@ -180,7 +183,7 @@ bool CGameControllerPvp::IsLoser(const CPlayer *pPlayer)
 	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
 		return false;
 
-	return !IsWinner(pPlayer);
+	return !IsWinner(pPlayer, 0, 0);
 }
 
 bool CGameControllerPvp::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)

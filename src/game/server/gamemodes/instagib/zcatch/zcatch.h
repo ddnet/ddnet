@@ -31,7 +31,7 @@ public:
 	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
 	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
 	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
-	bool IsWinner(const CPlayer *pPlayer) override;
+	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
 	bool IsLoser(const CPlayer *pPlayer) override;
 
 	enum class ECatchGameState
@@ -39,12 +39,14 @@ public:
 		WAITING_FOR_PLAYERS,
 		RELEASE_GAME,
 		RUNNING,
+		RUNNING_COMPETITIVE, // NEEDS 10 OR MORE TO START A REAL ROUND
 	};
 	ECatchGameState m_CatchGameState = ECatchGameState::WAITING_FOR_PLAYERS;
 	ECatchGameState CatchGameState() const;
 	void SetCatchGameState(ECatchGameState State);
 
 	void CheckGameState();
+	bool IsCatchGameRunning() const;
 
 	// colors
 
