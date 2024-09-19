@@ -408,6 +408,10 @@ bool CUi::OnInput(const IInput::CEvent &Event)
 			m_HotkeysPressed |= HOTKEY_UP;
 		else if(Event.m_Key == KEY_DOWN)
 			m_HotkeysPressed |= HOTKEY_DOWN;
+		else if(Event.m_Key == KEY_LEFT)
+			m_HotkeysPressed |= HOTKEY_LEFT;
+		else if(Event.m_Key == KEY_RIGHT)
+			m_HotkeysPressed |= HOTKEY_RIGHT;
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_UP)
 			m_HotkeysPressed |= HOTKEY_SCROLL_UP;
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
