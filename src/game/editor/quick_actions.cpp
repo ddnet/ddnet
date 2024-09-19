@@ -1,3 +1,4 @@
+#include <engine/keys.h>
 #include <game/mapitems.h>
 
 #include "editor.h"
@@ -17,6 +18,32 @@ bool CEditor::CanFillGameTiles() const
 	if(pTileLayer)
 		return pTileLayer->CanFillGameTiles();
 	return false;
+}
+
+void CEditor::AddQuadOrSound()
+{
+	std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
+	if(!pLayer)
+		return;
+	if(pLayer->m_Type != LAYERTYPE_QUADS && pLayer->m_Type != LAYERTYPE_SOUNDS)
+		return;
+
+	std::shared_ptr<CLayerGroup> pGroup = GetSelectedGroup();
+
+	float aMapping[4];
+	pGroup->Mapping(aMapping);
+	int x = aMapping[0] + (aMapping[2] - aMapping[0]) / 2;
+	int y = aMapping[1] + (aMapping[3] - aMapping[1]) / 2;
+	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && Input()->ModifierIsPressed())
+	{
+		x += Ui()->MouseWorldX() - (MapView()->GetWorldOffset().x * pGroup->m_ParallaxX / 100) - pGroup->m_OffsetX;
+		y += Ui()->MouseWorldY() - (MapView()->GetWorldOffset().y * pGroup->m_ParallaxY / 100) - pGroup->m_OffsetY;
+	}
+
+	if(pLayer->m_Type == LAYERTYPE_QUADS)
+		m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptyQuad>(this, m_SelectedGroup, m_vSelectedLayers[0], x, y));
+	else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+		m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptySound>(this, m_SelectedGroup, m_vSelectedLayers[0], x, y));
 }
 
 void CEditor::AddGroup()
@@ -45,6 +72,16 @@ void CEditor::AddFrontLayer()
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
 	m_pBrush->Clear();
+	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+}
+
+void CEditor::AddQuadsLayer()
+{
+	std::shared_ptr<CLayer> pQuadLayer = std::make_shared<CLayerQuads>(this);
+	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pQuadLayer);
+	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
+	SelectLayer(LayerIndex);
+	m_Map.m_vpGroups[m_SelectedGroup]->m_Collapse = false;
 	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
 }
 
