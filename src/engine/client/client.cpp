@@ -2006,17 +2006,19 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							if(DemoSnapSize < 0)
 							{
 								dbg_msg("sixup", "demo snapshot failed. error=%d", DemoSnapSize);
-								return;
 							}
 						}
 
-						// add snapshot to demo
-						for(auto &DemoRecorder : m_aDemoRecorder)
+						if(DemoSnapSize >= 0)
 						{
-							if(DemoRecorder.IsRecording())
+							// add snapshot to demo
+							for(auto &DemoRecorder : m_aDemoRecorder)
 							{
-								// write snapshot
-								DemoRecorder.RecordSnapshot(GameTick, IsSixup() ? pSnapSeven : pTmpBuffer3, DemoSnapSize);
+								if(DemoRecorder.IsRecording())
+								{
+									// write snapshot
+									DemoRecorder.RecordSnapshot(GameTick, IsSixup() ? pSnapSeven : pTmpBuffer3, DemoSnapSize);
+								}
 							}
 						}
 					}
