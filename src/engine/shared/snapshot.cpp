@@ -767,17 +767,22 @@ int CSnapshotBuilder::GetTypeFromIndex(int Index) const
 	return CSnapshot::MAX_TYPE - Index;
 }
 
-void CSnapshotBuilder::AddExtendedItemType(int Index)
+bool CSnapshotBuilder::AddExtendedItemType(int Index)
 {
 	dbg_assert(0 <= Index && Index < m_NumExtendedItemTypes, "index out of range");
-	int TypeId = m_aExtendedItemTypes[Index];
-	CUuid Uuid = g_UuidManager.GetUuid(TypeId);
-	int *pUuidItem = (int *)NewItem(0, GetTypeFromIndex(Index), sizeof(Uuid)); // NETOBJTYPE_EX
-	if(pUuidItem)
+	int *pUuidItem = static_cast<int *>(NewItem(0, GetTypeFromIndex(Index), sizeof(CUuid))); // NETOBJTYPE_EX
+	if(pUuidItem == nullptr)
 	{
-		for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
-			pUuidItem[i] = bytes_be_to_uint(&Uuid.m_aData[i * sizeof(int32_t)]);
+		return false;
 	}
+
+	const int TypeId = m_aExtendedItemTypes[Index];
+	const CUuid Uuid = g_UuidManager.GetUuid(TypeId);
+	for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
+	{
+		pUuidItem[i] = bytes_be_to_uint(&Uuid.m_aData[i * sizeof(int32_t)]);
+	}
+	return true;
 }
 
 int CSnapshotBuilder::GetExtendedItemTypeIndex(int TypeId)
@@ -793,8 +798,12 @@ int CSnapshotBuilder::GetExtendedItemTypeIndex(int TypeId)
 	int Index = m_NumExtendedItemTypes;
 	m_NumExtendedItemTypes++;
 	m_aExtendedItemTypes[Index] = TypeId;
-	AddExtendedItemType(Index);
-	return Index;
+	if(AddExtendedItemType(Index))
+	{
+		return Index;
+	}
+	m_NumExtendedItemTypes--;
+	return -1;
 }
 
 void *CSnapshotBuilder::NewItem(int Type, int Id, int Size)
@@ -816,11 +825,15 @@ void *CSnapshotBuilder::NewItem(int Type, int Id, int Size)
 		return nullptr;
 	}
 
-	bool Extended = false;
-	if(Type >= OFFSET_UUID)
+	const bool Extended = Type >= OFFSET_UUID;
+	if(Extended)
 	{
-		Extended = true;
-		Type = GetTypeFromIndex(GetExtendedItemTypeIndex(Type));
+		const int ExtendedItemTypeIndex = GetExtendedItemTypeIndex(Type);
+		if(ExtendedItemTypeIndex == -1)
+		{
+			return nullptr;
+		}
+		Type = GetTypeFromIndex(ExtendedItemTypeIndex);
 	}
 
 	CSnapshotItem *pObj = (CSnapshotItem *)(m_aData + m_DataSize);

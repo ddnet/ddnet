@@ -158,7 +158,7 @@ class CSnapshotBuilder
 	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES];
 	int m_NumExtendedItemTypes;
 
-	void AddExtendedItemType(int Index);
+	bool AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeId);
 	int GetTypeFromIndex(int Index) const;
 
