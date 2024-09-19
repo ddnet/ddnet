@@ -7,6 +7,11 @@ CGameControllerGCTF::CGameControllerGCTF(class CGameContext *pGameServer) :
 {
 	m_pGameType = "gCTF";
 	m_DefaultWeapon = WEAPON_GRENADE;
+
+	m_pStatsTable = "gctf";
+	m_pExtraColumns = new CGCTFColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerGCTF::~CGameControllerGCTF() = default;

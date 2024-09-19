@@ -1,6 +1,7 @@
 #include <base/system.h>
 #include <engine/shared/protocol.h>
 #include <game/server/entities/character.h>
+#include <game/server/instagib/sql_stats.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -11,11 +12,61 @@ void CGameControllerPvp::OnPlayerConstruct(class CPlayer *pPlayer)
 {
 	pPlayer->m_IsDead = false;
 	pPlayer->m_KillerId = -1;
-	pPlayer->m_Stats.m_Spree = 0;
+	pPlayer->m_Spree = 0;
+	pPlayer->m_Stats.Reset();
 }
 
 void CPlayer::InstagibTick()
 {
+	if(m_StatsQueryResult != nullptr && m_StatsQueryResult->m_Completed)
+	{
+		ProcessStatsResult(*m_StatsQueryResult);
+		m_StatsQueryResult = nullptr;
+	}
+}
+
+void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
+{
+	if(Result.m_Success) // SQL request was successful
+	{
+		switch(Result.m_MessageKind)
+		{
+		case CInstaSqlResult::DIRECT:
+			for(auto &aMessage : Result.m_aaMessages)
+			{
+				if(aMessage[0] == 0)
+					break;
+				GameServer()->SendChatTarget(m_ClientId, aMessage);
+			}
+			break;
+		case CInstaSqlResult::ALL:
+		{
+			bool PrimaryMessage = true;
+			for(auto &aMessage : Result.m_aaMessages)
+			{
+				if(aMessage[0] == 0)
+					break;
+
+				if(GameServer()->ProcessSpamProtection(m_ClientId) && PrimaryMessage)
+					break;
+
+				GameServer()->SendChat(-1, TEAM_ALL, aMessage, -1);
+				PrimaryMessage = false;
+			}
+			break;
+		}
+		case CInstaSqlResult::BROADCAST:
+			// if(Result.m_aBroadcast[0] != 0)
+			// 	GameServer()->SendBroadcast(Result.m_aBroadcast, -1);
+			break;
+		case CInstaSqlResult::STATS:
+			GameServer()->m_pController->OnShowStatsAll(&Result.m_Stats, this, Result.m_Info.m_aRequestedPlayer);
+			break;
+		case CInstaSqlResult::RANK:
+			GameServer()->m_pController->OnShowRank(Result.m_Rank, Result.m_RankedScore, Result.m_aRankColumnDisplay, this, Result.m_Info.m_aRequestedPlayer);
+			break;
+		}
+	}
 }
 
 int64_t CPlayer::HandleMulti()

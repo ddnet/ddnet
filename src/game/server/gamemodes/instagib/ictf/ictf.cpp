@@ -7,6 +7,11 @@ CGameControllerICTF::CGameControllerICTF(class CGameContext *pGameServer) :
 {
 	m_pGameType = "iCTF";
 	m_DefaultWeapon = WEAPON_LASER;
+
+	m_pStatsTable = "ictf";
+	m_pExtraColumns = new CICTFColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerICTF::~CGameControllerICTF() = default;

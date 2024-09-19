@@ -1,6 +1,9 @@
 #ifndef GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H
 #define GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H
 
+#include <game/server/instagib/extra_columns.h>
+#include <game/server/instagib/sql_stats.h>
+
 #include "../DDRace.h"
 
 class CGameControllerPvp : public CGameControllerDDRace
@@ -14,6 +17,7 @@ public:
 	class CConfig *Config() { return GameServer()->Config(); }
 	class IConsole *Console() { return GameServer()->Console(); }
 	class IStorage *Storage() { return GameServer()->Storage(); }
+
 	void SendChatTarget(int To, const char *pText, int Flags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP) const;
 	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int Flags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP);
 
@@ -73,6 +77,8 @@ public:
 	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;
 	void SetArmorProgress(CCharacter *pCharacer, int Progress) override{};
 	bool OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId) override;
+	void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
+	void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
 	bool IsLoser(const CPlayer *pPlayer) override;
@@ -104,5 +110,16 @@ public:
 	// get the lowest client id that has a tee in the world
 	// returns -1 if no player is alive
 	int GetFirstAlivePlayerId();
+
+	/*
+		m_pExtraColums
+
+		Should be allocated in the gamemmodes constructor and will be freed by the base constructor.
+		It holds a few methods that describe the extension of the base database layout.
+		If a gamemode needs more columns it can implement one. Otherwise it will be a nullptr which is fine.
+
+		Checkout gctf/gctf.h gctf/gctf.cpp and gctf/sql_columns.h for an example
+	*/
+	CExtraColumns *m_pExtraColumns = nullptr;
 };
 #endif // GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H

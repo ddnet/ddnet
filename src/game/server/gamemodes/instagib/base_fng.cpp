@@ -253,7 +253,11 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	if(Character.m_IsGodmode)
 		return true;
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+	{
+		// boosting mates counts neither as hit nor as miss
+		Character.GetPlayer()->m_Stats.m_ShotsFired--;
 		return false;
+	}
 	CPlayer *pKiller = nullptr;
 	if(From >= 0 && From <= MAX_CLIENTS)
 		pKiller = GameServer()->m_apPlayers[From];
@@ -266,7 +270,15 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 	// no self damage
 	if(From == Character.GetPlayer()->GetCid())
+	{
+		// self damage counts as boosting
+		// so the hit/misses rate should not be affected
+		//
+		// yes this means that grenade boost kills
+		// can get you a accuracy over 100%
+		Character.GetPlayer()->m_Stats.m_ShotsFired--;
 		return false;
+	}
 
 	if(Character.m_FreezeTime)
 	{

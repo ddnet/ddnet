@@ -5,6 +5,7 @@
 #ifndef IN_CLASS_PLAYER
 
 #include <base/vmath.h>
+#include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
 #include <optional>
 #include <vector>
@@ -18,6 +19,8 @@ class CPlayer
 
 public:
 	void InstagibTick();
+
+	void ProcessStatsResult(CInstaSqlResult &Result);
 
 	/*******************************************************************
 	 * zCatch                                                          *
@@ -69,10 +72,17 @@ public:
 	int m_CampTick;
 	vec2 m_CampPos;
 
+	// Will also be set if spree chat messages are turned off
+	// this is the current spree
+	// not to be confused with m_Stats.m_BestSpree which is the highscore
+	int m_Spree;
+
 	CSqlStatsPlayer m_Stats;
-	int Spree() const { return m_Stats.m_Spree; }
+	int Spree() const { return m_Spree; }
 	int Kills() const { return m_Stats.m_Kills; }
 	int Deaths() const { return m_Stats.m_Deaths; }
+
+	std::shared_ptr<CInstaSqlResult> m_StatsQueryResult;
 
 	/*
 		m_HasGhostCharInGame

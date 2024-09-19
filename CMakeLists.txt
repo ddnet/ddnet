@@ -2766,12 +2766,14 @@ if(SERVER)
     gamemodes/instagib/fng/fng.h
     gamemodes/instagib/gctf/gctf.cpp
     gamemodes/instagib/gctf/gctf.h
+    gamemodes/instagib/gctf/sql_columns.h
     gamemodes/instagib/gdm/gdm.cpp
     gamemodes/instagib/gdm/gdm.h
     gamemodes/instagib/gtdm/gtdm.cpp
     gamemodes/instagib/gtdm/gtdm.h
     gamemodes/instagib/ictf/ictf.cpp
     gamemodes/instagib/ictf/ictf.h
+    gamemodes/instagib/ictf/sql_columns.h
     gamemodes/instagib/idm/idm.cpp
     gamemodes/instagib/idm/idm.h
     gamemodes/instagib/itdm/itdm.cpp
@@ -2783,6 +2785,7 @@ if(SERVER)
     gamemodes/instagib/team_fng.cpp
     gamemodes/instagib/team_fng.h
     gamemodes/instagib/zcatch/colors.cpp
+    gamemodes/instagib/zcatch/sql_columns.h
     gamemodes/instagib/zcatch/zcatch.cpp
     gamemodes/instagib/zcatch/zcatch.h
     gamemodes/mod.cpp
@@ -2795,6 +2798,8 @@ if(SERVER)
     gamemodes/vanilla/dm/dm.h
     gameworld.cpp
     gameworld.h
+    instagib/chat_commands.cpp
+    instagib/extra_columns.h
     instagib/gamecontroller.cpp
     instagib/gamecontroller.h
     instagib/gamelogic.cpp
@@ -2804,6 +2809,8 @@ if(SERVER)
     instagib/round_stats.cpp
     instagib/round_stats_csv.cpp
     instagib/round_stats_player.h
+    instagib/sql_stats.cpp
+    instagib/sql_stats.h
     instagib/sql_stats_player.h
     instagib/strhelpers.cpp
     instagib/strhelpers.h

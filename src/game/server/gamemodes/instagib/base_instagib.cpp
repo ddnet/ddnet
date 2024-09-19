@@ -34,6 +34,13 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 			Dmg = 0;
 
 		// no self damage
+		//
+		// self damage counts as boosting
+		// so the hit/misses rate should not be affected
+		//
+		// yes this means that grenade boost kills
+		// can get you a accuracy over 100%
+		Character.GetPlayer()->m_Stats.m_ShotsFired--;
 		return false;
 	}
 	if(Dmg < g_Config.m_SvDamageNeededForKill && Weapon == WEAPON_GRENADE)
