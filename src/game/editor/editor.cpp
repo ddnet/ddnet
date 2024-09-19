@@ -850,41 +850,14 @@ bool CEditor::CallbackSaveImage(const char *pFileName, int StorageType, void *pU
 
 	std::shared_ptr<CEditorImage> pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
 
-	EImageFormat OutputFormat;
-	switch(pImg->m_Format)
+	if(CImageLoader::SavePng(pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType), pFileName, *pImg))
 	{
-	case CImageInfo::FORMAT_RGB:
-		OutputFormat = IMAGE_FORMAT_RGB;
-		break;
-	case CImageInfo::FORMAT_RGBA:
-		OutputFormat = IMAGE_FORMAT_RGBA;
-		break;
-	case CImageInfo::FORMAT_SINGLE_COMPONENT:
-		OutputFormat = IMAGE_FORMAT_R;
-		break;
-	default:
-		dbg_assert(false, "Image has invalid format.");
-		return false;
-	};
-
-	TImageByteBuffer ByteBuffer;
-	SImageByteBuffer ImageByteBuffer(&ByteBuffer);
-	if(SavePng(OutputFormat, pImg->m_pData, ImageByteBuffer, pImg->m_Width, pImg->m_Height))
-	{
-		IOHANDLE File = pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType);
-		if(File)
-		{
-			io_write(File, &ByteBuffer.front(), ByteBuffer.size());
-			io_close(File);
-			pEditor->m_Dialog = DIALOG_NONE;
-			return true;
-		}
-		pEditor->ShowFileDialogError("Failed to open file '%s'.", pFileName);
-		return false;
+		pEditor->m_Dialog = DIALOG_NONE;
+		return true;
 	}
 	else
 	{
-		pEditor->ShowFileDialogError("Failed to write image to file.");
+		pEditor->ShowFileDialogError("Failed to write image to file '%s'.", pFileName);
 		return false;
 	}
 }
@@ -1320,39 +1293,23 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		{
 			TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 
-			bool Invoked = false;
-			static int s_AddItemButton = 0;
-
 			if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
-				Invoked = DoButton_Editor(&s_AddItemButton, "Add Quad", 0, &Button, 0, "[ctrl+q] Add a new quad") ||
-					  (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed);
+				if(DoButton_Editor(&m_QuickActionAddQuad, m_QuickActionAddQuad.Label(), 0, &Button, 0, m_QuickActionAddQuad.Description()) ||
+					(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed))
+				{
+					m_QuickActionAddQuad.Call();
+				}
 			}
 			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
-				Invoked = DoButton_Editor(&s_AddItemButton, "Add Sound", 0, &Button, 0, "[ctrl+q] Add a new sound source") ||
-					  (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed);
-			}
-
-			if(Invoked)
-			{
-				std::shared_ptr<CLayerGroup> pGroup = GetSelectedGroup();
-
-				float aMapping[4];
-				pGroup->Mapping(aMapping);
-				int x = aMapping[0] + (aMapping[2] - aMapping[0]) / 2;
-				int y = aMapping[1] + (aMapping[3] - aMapping[1]) / 2;
-				if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed)
+				if(DoButton_Editor(&m_QuickActionAddSound, m_QuickActionAddSound.Label(), 0, &Button, 0, m_QuickActionAddSound.Description()) ||
+					(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed))
 				{
-					x += Ui()->MouseWorldX() - (MapView()->GetWorldOffset().x * pGroup->m_ParallaxX / 100) - pGroup->m_OffsetX;
-					y += Ui()->MouseWorldY() - (MapView()->GetWorldOffset().y * pGroup->m_ParallaxY / 100) - pGroup->m_OffsetY;
+					m_QuickActionAddSound.Call();
 				}
-
-				if(pLayer->m_Type == LAYERTYPE_QUADS)
-					m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptyQuad>(this, m_SelectedGroup, m_vSelectedLayers[0], x, y));
-				else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-					m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptySound>(this, m_SelectedGroup, m_vSelectedLayers[0], x, y));
 			}
+
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 		}
 
@@ -4401,18 +4358,13 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
 
-	if(!pImg->m_External && pImg->m_Format != CImageInfo::FORMAT_RGBA)
+	if(!pImg->m_External)
 	{
-		uint8_t *pRgbaData = static_cast<uint8_t *>(malloc((size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
-		ConvertToRGBA(pRgbaData, *pImg);
-		free(pImg->m_pData);
-		pImg->m_pData = pRgbaData;
-		pImg->m_Format = CImageInfo::FORMAT_RGBA;
-	}
-
-	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
-	{
-		DilateImage(pImg->m_pData, pImg->m_Width, pImg->m_Height);
+		ConvertToRgba(*pImg);
+		if(g_Config.m_ClEditorDilate == 1)
+		{
+			DilateImage(*pImg);
+		}
 	}
 
 	pImg->m_AutoMapper.Load(pImg->m_aName);
@@ -4473,18 +4425,13 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	pImg->m_pData = ImgInfo.m_pData;
 	pImg->m_External = IsVanillaImage(aBuf);
 
-	if(pImg->m_Format != CImageInfo::FORMAT_RGBA)
+	if(!pImg->m_External)
 	{
-		uint8_t *pRgbaData = static_cast<uint8_t *>(malloc((size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
-		ConvertToRGBA(pRgbaData, *pImg);
-		free(pImg->m_pData);
-		pImg->m_pData = pRgbaData;
-		pImg->m_Format = CImageInfo::FORMAT_RGBA;
-	}
-
-	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1)
-	{
-		DilateImage(pImg->m_pData, pImg->m_Width, pImg->m_Height);
+		ConvertToRgba(*pImg);
+		if(g_Config.m_ClEditorDilate == 1)
+		{
+			DilateImage(*pImg);
+		}
 	}
 
 	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
@@ -7864,11 +7811,21 @@ void CEditor::Render()
 	else if(m_Mode == MODE_SOUNDS)
 		DoToolbarSounds(ToolBar);
 
-	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
+	if(m_Dialog == DIALOG_NONE)
 	{
 		const bool ModPressed = Input()->ModifierIsPressed();
 		const bool ShiftPressed = Input()->ShiftIsPressed();
 		const bool AltPressed = Input()->AltIsPressed();
+
+		if(CLineInput::GetActiveInput() == nullptr)
+		{
+			// ctrl+a to append map
+			if(Input()->KeyPress(KEY_A) && ModPressed)
+			{
+				InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Append map", "Append", "maps", false, CallbackAppendMap, this);
+			}
+		}
+
 		// ctrl+n to create new map
 		if(Input()->KeyPress(KEY_N) && ModPressed)
 		{
@@ -7885,11 +7842,6 @@ void CEditor::Render()
 				Reset();
 				m_aFileName[0] = 0;
 			}
-		}
-		// ctrl+a to append map
-		if(Input()->KeyPress(KEY_A) && ModPressed)
-		{
-			InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Append map", "Append", "maps", false, CallbackAppendMap, this);
 		}
 		// ctrl+o or ctrl+l to open
 		if((Input()->KeyPress(KEY_O) || Input()->KeyPress(KEY_L)) && ModPressed)

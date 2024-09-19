@@ -1,3 +1,4 @@
+#include <engine/keys.h>
 #include <game/mapitems.h>
 
 #include "editor.h"
@@ -19,6 +20,32 @@ bool CEditor::CanFillGameTiles() const
 	return false;
 }
 
+void CEditor::AddQuadOrSound()
+{
+	std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
+	if(!pLayer)
+		return;
+	if(pLayer->m_Type != LAYERTYPE_QUADS && pLayer->m_Type != LAYERTYPE_SOUNDS)
+		return;
+
+	std::shared_ptr<CLayerGroup> pGroup = GetSelectedGroup();
+
+	float aMapping[4];
+	pGroup->Mapping(aMapping);
+	int x = aMapping[0] + (aMapping[2] - aMapping[0]) / 2;
+	int y = aMapping[1] + (aMapping[3] - aMapping[1]) / 2;
+	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && Input()->ModifierIsPressed())
+	{
+		x += Ui()->MouseWorldX() - (MapView()->GetWorldOffset().x * pGroup->m_ParallaxX / 100) - pGroup->m_OffsetX;
+		y += Ui()->MouseWorldY() - (MapView()->GetWorldOffset().y * pGroup->m_ParallaxY / 100) - pGroup->m_OffsetY;
+	}
+
+	if(pLayer->m_Type == LAYERTYPE_QUADS)
+		m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptyQuad>(this, m_SelectedGroup, m_vSelectedLayers[0], x, y));
+	else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+		m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptySound>(this, m_SelectedGroup, m_vSelectedLayers[0], x, y));
+}
+
 void CEditor::AddGroup()
 {
 	m_Map.NewGroup();
@@ -31,6 +58,27 @@ void CEditor::AddTileLayer()
 	std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
 	pTileLayer->m_pEditor = this;
 	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pTileLayer);
+	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
+	SelectLayer(LayerIndex);
+	m_Map.m_vpGroups[m_SelectedGroup]->m_Collapse = false;
+	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+}
+
+void CEditor::AddFrontLayer()
+{
+	std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	m_Map.MakeFrontLayer(pFrontLayer);
+	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pFrontLayer);
+	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
+	SelectLayer(LayerIndex);
+	m_pBrush->Clear();
+	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+}
+
+void CEditor::AddQuadsLayer()
+{
+	std::shared_ptr<CLayer> pQuadLayer = std::make_shared<CLayerQuads>(this);
+	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pQuadLayer);
 	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
 	SelectLayer(LayerIndex);
 	m_Map.m_vpGroups[m_SelectedGroup]->m_Collapse = false;
@@ -68,4 +116,22 @@ void CEditor::LayerSelectImage()
 	s_LayerPopupContext.m_pEditor = this;
 	Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 120, 270, &s_LayerPopupContext, PopupLayer);
 	PopupSelectImageInvoke(pTiles->m_Image, Ui()->MouseX(), Ui()->MouseY());
+}
+
+void CEditor::MapDetails()
+{
+	const CUIRect *pScreen = Ui()->Screen();
+	m_Map.m_MapInfoTmp.Copy(m_Map.m_MapInfo);
+	static SPopupMenuId s_PopupMapInfoId;
+	constexpr float PopupWidth = 400.0f;
+	constexpr float PopupHeight = 170.0f;
+	Ui()->DoPopupMenu(
+		&s_PopupMapInfoId,
+		pScreen->w / 2.0f - PopupWidth / 2.0f,
+		pScreen->h / 2.0f - PopupHeight / 2.0f,
+		PopupWidth,
+		PopupHeight,
+		this,
+		PopupMapInfo);
+	Ui()->SetActiveItem(nullptr);
 }

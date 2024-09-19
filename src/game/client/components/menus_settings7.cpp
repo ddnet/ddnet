@@ -218,6 +218,7 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	if(Ui()->DoEditBox_Search(&s_SkinFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed()))
 	{
 		m_SkinListNeedsUpdate = true;
+		m_SkinPartListNeedsUpdate = true;
 	}
 
 	static CButtonContainer s_DirectoryButton;
@@ -413,17 +414,21 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 
 void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 {
-	static bool s_InitSkinPartList = true;
 	static std::vector<const CSkins7::CSkinPart *> s_paList[protocol7::NUM_SKINPARTS];
 	static CListBox s_ListBox;
-	if(s_InitSkinPartList)
+	static int s_aSkinPartCount[protocol7::NUM_SKINPARTS] = {0};
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+		if(m_SkinPartListNeedsUpdate || m_pClient->m_Skins7.NumSkinPart(Part) != s_aSkinPartCount[Part])
 		{
 			s_paList[Part].clear();
-			for(int i = 0; i < m_pClient->m_Skins7.NumSkinPart(Part); ++i)
+			s_aSkinPartCount[Part] = m_pClient->m_Skins7.NumSkinPart(Part);
+			for(int i = 0; i < s_aSkinPartCount[Part]; ++i)
 			{
 				const CSkins7::CSkinPart *pPart = m_pClient->m_Skins7.GetSkinPart(Part, i);
+				if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pPart->m_aName, g_Config.m_ClSkinFilterString))
+					continue;
+
 				// no special skins
 				if((pPart->m_Flags & CSkins7::SKINFLAG_SPECIAL) == 0)
 				{
@@ -431,8 +436,8 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 				}
 			}
 		}
-		s_InitSkinPartList = false;
 	}
+	m_SkinPartListNeedsUpdate = false;
 
 	static int s_OldSelected = -1;
 	s_ListBox.DoBegin(&MainView);

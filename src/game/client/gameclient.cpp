@@ -1565,7 +1565,7 @@ void CGameClient::OnNewSnapshot()
 						pClient->m_SkinInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
 					}
 
-					pClient->UpdateRenderInfo(IsTeamPlay(), g_Config.m_ClDummy);
+					pClient->UpdateRenderInfo(IsTeamPlay());
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_PLAYERINFO)
@@ -2388,7 +2388,7 @@ void CGameClient::CClientStats::Reset()
 	m_FlagCaptures = 0;
 }
 
-void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay, int Conn)
+void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay)
 {
 	m_RenderInfo = m_SkinInfo;
 
@@ -2403,6 +2403,7 @@ void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay, int Conn)
 			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(aTeamColors[m_Team]));
 
 			// 0.7
+			for(auto &Sixup : m_RenderInfo.m_aSixup)
 			{
 				const ColorRGBA aTeamColorsSixup[2] = {
 					ColorRGBA(0.753f, 0.318f, 0.318f, 1.0f),
@@ -2410,19 +2411,20 @@ void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay, int Conn)
 				const ColorRGBA aMarkingColorsSixup[2] = {
 					ColorRGBA(0.824f, 0.345f, 0.345f, 1.0f),
 					ColorRGBA(0.345f, 0.514f, 0.824f, 1.0f)};
-				float MarkingAlpha = m_RenderInfo.m_aSixup[Conn].m_aColors[protocol7::SKINPART_MARKING].a;
-				for(auto &Color : m_RenderInfo.m_aSixup[Conn].m_aColors)
+				float MarkingAlpha = Sixup.m_aColors[protocol7::SKINPART_MARKING].a;
+				for(auto &Color : Sixup.m_aColors)
 					Color = aTeamColorsSixup[m_Team];
 				if(MarkingAlpha > 0.1f)
-					m_RenderInfo.m_aSixup[Conn].m_aColors[protocol7::SKINPART_MARKING] = aMarkingColorsSixup[m_Team];
+					Sixup.m_aColors[protocol7::SKINPART_MARKING] = aMarkingColorsSixup[m_Team];
 			}
 		}
 		else
 		{
 			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(12829350));
 			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(12829350));
-			for(auto &Color : m_RenderInfo.m_aSixup[Conn].m_aColors)
-				Color = color_cast<ColorRGBA>(ColorHSLA(12829350));
+			for(auto &Sixup : m_RenderInfo.m_aSixup)
+				for(auto &Color : Sixup.m_aColors)
+					Color = color_cast<ColorRGBA>(ColorHSLA(12829350));
 		}
 	}
 }
@@ -3757,8 +3759,7 @@ void CGameClient::RefreshSkins()
 			Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
 			Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
 		}
-		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
-			Client.UpdateRenderInfo(IsTeamPlay(), Dummy);
+		Client.UpdateRenderInfo(IsTeamPlay());
 	}
 
 	for(auto &pComponent : m_vpAll)

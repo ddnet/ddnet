@@ -14,6 +14,7 @@
 #include <vector>
 
 class IEngineGraphics;
+class IConfigManager;
 
 class CInput : public IEngineInput
 {
@@ -59,6 +60,7 @@ public:
 private:
 	IEngineGraphics *m_pGraphics;
 	IConsole *m_pConsole;
+	IConfigManager *m_pConfigManager;
 
 	IEngineGraphics *Graphics() const { return m_pGraphics; }
 	IConsole *Console() const { return m_pConsole; }

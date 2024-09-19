@@ -1,89 +1,94 @@
 #include "image_loader.h"
+
 #include <base/log.h>
 #include <base/system.h>
+
 #include <csetjmp>
 #include <cstdlib>
 
 #include <png.h>
 
-struct SLibPNGWarningItem
+bool CByteBufferReader::Read(void *pData, size_t Size)
 {
-	SImageByteBuffer *m_pByteLoader;
-	const char *m_pFileName;
-	std::jmp_buf m_Buf;
-};
+	if(m_Error)
+		return false;
 
-[[noreturn]] static void LibPNGError(png_structp png_ptr, png_const_charp error_msg)
-{
-	SLibPNGWarningItem *pUserStruct = (SLibPNGWarningItem *)png_get_error_ptr(png_ptr);
-	pUserStruct->m_pByteLoader->m_Err = -1;
-	dbg_msg("png", "error for file \"%s\": %s", pUserStruct->m_pFileName, error_msg);
-	std::longjmp(pUserStruct->m_Buf, 1);
-}
-
-static void LibPNGWarning(png_structp png_ptr, png_const_charp warning_msg)
-{
-	SLibPNGWarningItem *pUserStruct = (SLibPNGWarningItem *)png_get_error_ptr(png_ptr);
-	dbg_msg("png", "warning for file \"%s\": %s", pUserStruct->m_pFileName, warning_msg);
-}
-
-static bool FileMatchesImageType(SImageByteBuffer &ByteLoader)
-{
-	if(ByteLoader.m_pvLoadedImageBytes->size() >= 8)
-		return png_sig_cmp((png_bytep)ByteLoader.m_pvLoadedImageBytes->data(), 0, 8) == 0;
-	return false;
-}
-
-static void ReadDataFromLoadedBytes(png_structp pPNGStruct, png_bytep pOutBytes, png_size_t ByteCountToRead)
-{
-	png_voidp pIO_Ptr = png_get_io_ptr(pPNGStruct);
-
-	SImageByteBuffer *pByteLoader = (SImageByteBuffer *)pIO_Ptr;
-
-	if(pByteLoader->m_pvLoadedImageBytes->size() >= pByteLoader->m_LoadOffset + (size_t)ByteCountToRead)
+	if(m_ReadOffset + Size <= m_Size)
 	{
-		mem_copy(pOutBytes, &(*pByteLoader->m_pvLoadedImageBytes)[pByteLoader->m_LoadOffset], (size_t)ByteCountToRead);
-
-		pByteLoader->m_LoadOffset += (size_t)ByteCountToRead;
+		mem_copy(pData, &m_pData[m_ReadOffset], Size);
+		m_ReadOffset += Size;
+		return true;
 	}
 	else
 	{
-		pByteLoader->m_Err = -1;
-		dbg_msg("png", "could not read bytes, file was too small.");
+		m_Error = true;
+		return false;
 	}
 }
 
-static EImageFormat LibPNGGetImageFormat(int ColorChannelCount)
+void CByteBufferWriter::Write(const void *pData, size_t Size)
+{
+	if(!Size)
+		return;
+
+	const size_t WriteOffset = m_vBuffer.size();
+	m_vBuffer.resize(WriteOffset + Size);
+	mem_copy(&m_vBuffer[WriteOffset], pData, Size);
+}
+
+class CUserErrorStruct
+{
+public:
+	CByteBufferReader *m_pReader;
+	const char *m_pContextName;
+	std::jmp_buf m_JmpBuf;
+};
+
+[[noreturn]] static void PngErrorCallback(png_structp png_ptr, png_const_charp error_msg)
+{
+	CUserErrorStruct *pUserStruct = static_cast<CUserErrorStruct *>(png_get_error_ptr(png_ptr));
+	log_error("png", "error for file \"%s\": %s", pUserStruct->m_pContextName, error_msg);
+	std::longjmp(pUserStruct->m_JmpBuf, 1);
+}
+
+static void PngWarningCallback(png_structp png_ptr, png_const_charp warning_msg)
+{
+	CUserErrorStruct *pUserStruct = static_cast<CUserErrorStruct *>(png_get_error_ptr(png_ptr));
+	log_warn("png", "warning for file \"%s\": %s", pUserStruct->m_pContextName, warning_msg);
+}
+
+static void PngReadDataCallback(png_structp pPngStruct, png_bytep pOutBytes, png_size_t ByteCountToRead)
+{
+	CByteBufferReader *pReader = static_cast<CByteBufferReader *>(png_get_io_ptr(pPngStruct));
+	if(!pReader->Read(pOutBytes, ByteCountToRead))
+	{
+		png_error(pPngStruct, "Could not read all bytes, file was too small");
+	}
+}
+
+static CImageInfo::EImageFormat ImageFormatFromChannelCount(int ColorChannelCount)
 {
 	switch(ColorChannelCount)
 	{
 	case 1:
-		return IMAGE_FORMAT_R;
+		return CImageInfo::FORMAT_R;
 	case 2:
-		return IMAGE_FORMAT_RA;
+		return CImageInfo::FORMAT_RA;
 	case 3:
-		return IMAGE_FORMAT_RGB;
+		return CImageInfo::FORMAT_RGB;
 	case 4:
-		return IMAGE_FORMAT_RGBA;
+		return CImageInfo::FORMAT_RGBA;
 	default:
 		dbg_assert(false, "ColorChannelCount invalid");
 		dbg_break();
 	}
 }
 
-static void LibPNGDeleteReadStruct(png_structp pPNGStruct, png_infop pPNGInfo)
+static int PngliteIncompatibility(png_structp pPngStruct, png_infop pPngInfo)
 {
-	if(pPNGInfo != nullptr)
-		png_destroy_info_struct(pPNGStruct, &pPNGInfo);
-	png_destroy_read_struct(&pPNGStruct, nullptr, nullptr);
-}
-
-static int PngliteIncompatibility(png_structp pPNGStruct, png_infop pPNGInfo)
-{
-	int ColorType = png_get_color_type(pPNGStruct, pPNGInfo);
-	int BitDepth = png_get_bit_depth(pPNGStruct, pPNGInfo);
-	int InterlaceType = png_get_interlace_type(pPNGStruct, pPNGInfo);
 	int Result = 0;
+
+	const int ColorType = png_get_color_type(pPngStruct, pPngInfo);
 	switch(ColorType)
 	{
 	case PNG_COLOR_TYPE_GRAY:
@@ -93,9 +98,10 @@ static int PngliteIncompatibility(png_structp pPNGStruct, png_infop pPNGInfo)
 		break;
 	default:
 		log_debug("png", "color type %d unsupported by pnglite", ColorType);
-		Result |= PNGLITE_COLOR_TYPE;
+		Result |= CImageLoader::PNGLITE_COLOR_TYPE;
 	}
 
+	const int BitDepth = png_get_bit_depth(pPngStruct, pPngInfo);
 	switch(BitDepth)
 	{
 	case 8:
@@ -103,258 +109,294 @@ static int PngliteIncompatibility(png_structp pPNGStruct, png_infop pPNGInfo)
 		break;
 	default:
 		log_debug("png", "bit depth %d unsupported by pnglite", BitDepth);
-		Result |= PNGLITE_BIT_DEPTH;
+		Result |= CImageLoader::PNGLITE_BIT_DEPTH;
 	}
 
+	const int InterlaceType = png_get_interlace_type(pPngStruct, pPngInfo);
 	if(InterlaceType != PNG_INTERLACE_NONE)
 	{
 		log_debug("png", "interlace type %d unsupported by pnglite", InterlaceType);
-		Result |= PNGLITE_INTERLACE_TYPE;
+		Result |= CImageLoader::PNGLITE_INTERLACE_TYPE;
 	}
-	if(png_get_compression_type(pPNGStruct, pPNGInfo) != PNG_COMPRESSION_TYPE_BASE)
+
+	if(png_get_compression_type(pPngStruct, pPngInfo) != PNG_COMPRESSION_TYPE_BASE)
 	{
 		log_debug("png", "non-default compression type unsupported by pnglite");
-		Result |= PNGLITE_COMPRESSION_TYPE;
+		Result |= CImageLoader::PNGLITE_COMPRESSION_TYPE;
 	}
-	if(png_get_filter_type(pPNGStruct, pPNGInfo) != PNG_FILTER_TYPE_BASE)
+
+	if(png_get_filter_type(pPngStruct, pPngInfo) != PNG_FILTER_TYPE_BASE)
 	{
 		log_debug("png", "non-default filter type unsupported by pnglite");
-		Result |= PNGLITE_FILTER_TYPE;
+		Result |= CImageLoader::PNGLITE_FILTER_TYPE;
 	}
+
 	return Result;
 }
 
-bool LoadPng(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, size_t &Width, size_t &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat)
+bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, CImageInfo &Image, int &PngliteIncompatible)
 {
-	SLibPNGWarningItem UserErrorStruct = {&ByteLoader, pFileName, {}};
+	CUserErrorStruct UserErrorStruct = {&Reader, pContextName, {}};
 
-	png_structp pPNGStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-
-	if(pPNGStruct == nullptr)
+	png_structp pPngStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+	if(pPngStruct == nullptr)
 	{
-		dbg_msg("png", "libpng internal failure: png_create_read_struct failed.");
+		log_error("png", "libpng internal failure: png_create_read_struct failed.");
 		return false;
 	}
 
-	png_infop pPNGInfo = nullptr;
+	png_infop pPngInfo = nullptr;
 	png_bytepp pRowPointers = nullptr;
-	Height = 0; // ensure this is not undefined for the error handler
-	if(setjmp(UserErrorStruct.m_Buf))
-	{
+	int Height = 0; // ensure this is not undefined for the Cleanup function
+	const auto &&Cleanup = [&]() {
 		if(pRowPointers != nullptr)
 		{
-			for(size_t i = 0; i < Height; ++i)
+			for(int y = 0; y < Height; ++y)
 			{
-				delete[] pRowPointers[i];
+				delete[] pRowPointers[y];
 			}
 		}
 		delete[] pRowPointers;
-		LibPNGDeleteReadStruct(pPNGStruct, pPNGInfo);
-		return false;
-	}
-	png_set_error_fn(pPNGStruct, &UserErrorStruct, LibPNGError, LibPNGWarning);
-
-	pPNGInfo = png_create_info_struct(pPNGStruct);
-
-	if(pPNGInfo == nullptr)
+		if(pPngInfo != nullptr)
+		{
+			png_destroy_info_struct(pPngStruct, &pPngInfo);
+		}
+		png_destroy_read_struct(&pPngStruct, nullptr, nullptr);
+	};
+	if(setjmp(UserErrorStruct.m_JmpBuf))
 	{
-		png_destroy_read_struct(&pPNGStruct, nullptr, nullptr);
-		dbg_msg("png", "libpng internal failure: png_create_info_struct failed.");
+		Cleanup();
 		return false;
 	}
+	png_set_error_fn(pPngStruct, &UserErrorStruct, PngErrorCallback, PngWarningCallback);
 
-	if(!FileMatchesImageType(ByteLoader))
+	pPngInfo = png_create_info_struct(pPngStruct);
+	if(pPngInfo == nullptr)
 	{
-		LibPNGDeleteReadStruct(pPNGStruct, pPNGInfo);
-		dbg_msg("png", "file does not match image type.");
+		Cleanup();
+		log_error("png", "libpng internal failure: png_create_info_struct failed.");
 		return false;
 	}
 
-	ByteLoader.m_LoadOffset = 8;
-
-	png_set_read_fn(pPNGStruct, (png_bytep)&ByteLoader, ReadDataFromLoadedBytes);
-
-	png_set_sig_bytes(pPNGStruct, 8);
-
-	png_read_info(pPNGStruct, pPNGInfo);
-
-	if(ByteLoader.m_Err != 0)
+	png_byte aSignature[8];
+	if(!Reader.Read(aSignature, sizeof(aSignature)) || png_sig_cmp(aSignature, 0, sizeof(aSignature)) != 0)
 	{
-		LibPNGDeleteReadStruct(pPNGStruct, pPNGInfo);
-		dbg_msg("png", "byte loader error.");
+		Cleanup();
+		log_error("png", "file is not a valid PNG file (signature mismatch).");
 		return false;
 	}
 
-	Width = png_get_image_width(pPNGStruct, pPNGInfo);
-	Height = png_get_image_height(pPNGStruct, pPNGInfo);
-	const int ColorType = png_get_color_type(pPNGStruct, pPNGInfo);
-	const png_byte BitDepth = png_get_bit_depth(pPNGStruct, pPNGInfo);
-	PngliteIncompatible = PngliteIncompatibility(pPNGStruct, pPNGInfo);
+	png_set_read_fn(pPngStruct, (png_bytep)&Reader, PngReadDataCallback);
+	png_set_sig_bytes(pPngStruct, sizeof(aSignature));
+
+	png_read_info(pPngStruct, pPngInfo);
+
+	if(Reader.Error())
+	{
+		// error already logged
+		Cleanup();
+		return false;
+	}
+
+	const int Width = png_get_image_width(pPngStruct, pPngInfo);
+	Height = png_get_image_height(pPngStruct, pPngInfo);
+	const png_byte BitDepth = png_get_bit_depth(pPngStruct, pPngInfo);
+	const int ColorType = png_get_color_type(pPngStruct, pPngInfo);
+
+	if(Width == 0 || Height == 0)
+	{
+		log_error("png", "image has width (%d) or height (%d) of 0.", Width, Height);
+		Cleanup();
+		return false;
+	}
 
 	if(BitDepth == 16)
 	{
-		png_set_strip_16(pPNGStruct);
+		png_set_strip_16(pPngStruct);
 	}
-	else if(BitDepth > 8)
+	else if(BitDepth > 8 || BitDepth == 0)
 	{
-		dbg_msg("png", "non supported bit depth.");
-		LibPNGDeleteReadStruct(pPNGStruct, pPNGInfo);
-		return false;
-	}
-
-	if(Width == 0 || Height == 0 || BitDepth == 0)
-	{
-		dbg_msg("png", "image had width, height or bit depth of 0.");
-		LibPNGDeleteReadStruct(pPNGStruct, pPNGInfo);
+		log_error("png", "bit depth %d not supported.", BitDepth);
+		Cleanup();
 		return false;
 	}
 
 	if(ColorType == PNG_COLOR_TYPE_PALETTE)
-		png_set_palette_to_rgb(pPNGStruct);
+	{
+		png_set_palette_to_rgb(pPngStruct);
+	}
 
 	if(ColorType == PNG_COLOR_TYPE_GRAY && BitDepth < 8)
-		png_set_expand_gray_1_2_4_to_8(pPNGStruct);
+	{
+		png_set_expand_gray_1_2_4_to_8(pPngStruct);
+	}
 
-	if(png_get_valid(pPNGStruct, pPNGInfo, PNG_INFO_tRNS))
-		png_set_tRNS_to_alpha(pPNGStruct);
+	if(png_get_valid(pPngStruct, pPngInfo, PNG_INFO_tRNS))
+	{
+		png_set_tRNS_to_alpha(pPngStruct);
+	}
 
-	png_read_update_info(pPNGStruct, pPNGInfo);
+	png_read_update_info(pPngStruct, pPngInfo);
 
-	const size_t ColorChannelCount = png_get_channels(pPNGStruct, pPNGInfo);
-	const size_t BytesInRow = png_get_rowbytes(pPNGStruct, pPNGInfo);
+	const int ColorChannelCount = png_get_channels(pPngStruct, pPngInfo);
+	const int BytesInRow = png_get_rowbytes(pPngStruct, pPngInfo);
 	dbg_assert(BytesInRow == Width * ColorChannelCount, "bytes in row incorrect.");
 
 	pRowPointers = new png_bytep[Height];
-	for(size_t y = 0; y < Height; ++y)
+	for(int y = 0; y < Height; ++y)
 	{
 		pRowPointers[y] = new png_byte[BytesInRow];
 	}
 
-	png_read_image(pPNGStruct, pRowPointers);
+	png_read_image(pPngStruct, pRowPointers);
 
-	if(ByteLoader.m_Err == 0)
-		pImageBuff = (uint8_t *)malloc(Height * Width * ColorChannelCount * sizeof(uint8_t));
-
-	for(size_t i = 0; i < Height; ++i)
+	if(!Reader.Error())
 	{
-		if(ByteLoader.m_Err == 0)
-			mem_copy(&pImageBuff[i * BytesInRow], pRowPointers[i], BytesInRow);
-		delete[] pRowPointers[i];
+		Image.m_Width = Width;
+		Image.m_Height = Height;
+		Image.m_Format = ImageFormatFromChannelCount(ColorChannelCount);
+		Image.m_pData = static_cast<uint8_t *>(malloc(Image.DataSize()));
+		for(int y = 0; y < Height; ++y)
+		{
+			mem_copy(&Image.m_pData[y * BytesInRow], pRowPointers[y], BytesInRow);
+		}
+		PngliteIncompatible = PngliteIncompatibility(pPngStruct, pPngInfo);
 	}
-	delete[] pRowPointers;
-	pRowPointers = nullptr;
 
-	if(ByteLoader.m_Err != 0)
+	Cleanup();
+
+	return !Reader.Error();
+}
+
+bool CImageLoader::LoadPng(IOHANDLE File, const char *pFilename, CImageInfo &Image, int &PngliteIncompatible)
+{
+	if(!File)
 	{
-		LibPNGDeleteReadStruct(pPNGStruct, pPNGInfo);
-		dbg_msg("png", "byte loader error.");
+		log_error("png", "failed to open file for reading. filename='%s'", pFilename);
 		return false;
 	}
 
-	ImageFormat = LibPNGGetImageFormat(ColorChannelCount);
+	void *pFileData;
+	unsigned FileDataSize;
+	io_read_all(File, &pFileData, &FileDataSize);
+	io_close(File);
 
-	png_destroy_info_struct(pPNGStruct, &pPNGInfo);
-	png_destroy_read_struct(&pPNGStruct, nullptr, nullptr);
+	CByteBufferReader ImageReader(static_cast<const uint8_t *>(pFileData), FileDataSize);
+
+	const bool LoadResult = CImageLoader::LoadPng(ImageReader, pFilename, Image, PngliteIncompatible);
+	free(pFileData);
+	if(!LoadResult)
+	{
+		log_error("png", "failed to load image from file. filename='%s'", pFilename);
+		return false;
+	}
+
+	if(Image.m_Format != CImageInfo::FORMAT_RGB && Image.m_Format != CImageInfo::FORMAT_RGBA)
+	{
+		log_error("png", "image has unsupported format. filename='%s' format='%s'", pFilename, Image.FormatName());
+		Image.Free();
+		return false;
+	}
 
 	return true;
 }
 
-static void WriteDataFromLoadedBytes(png_structp pPNGStruct, png_bytep pOutBytes, png_size_t ByteCountToWrite)
+static void PngWriteDataCallback(png_structp pPngStruct, png_bytep pOutBytes, png_size_t ByteCountToWrite)
 {
-	if(ByteCountToWrite > 0)
-	{
-		png_voidp pIO_Ptr = png_get_io_ptr(pPNGStruct);
-
-		SImageByteBuffer *pByteLoader = (SImageByteBuffer *)pIO_Ptr;
-
-		size_t NewSize = pByteLoader->m_LoadOffset + (size_t)ByteCountToWrite;
-		pByteLoader->m_pvLoadedImageBytes->resize(NewSize);
-
-		mem_copy(&(*pByteLoader->m_pvLoadedImageBytes)[pByteLoader->m_LoadOffset], pOutBytes, (size_t)ByteCountToWrite);
-		pByteLoader->m_LoadOffset = NewSize;
-	}
+	CByteBufferWriter *pWriter = static_cast<CByteBufferWriter *>(png_get_io_ptr(pPngStruct));
+	pWriter->Write(pOutBytes, ByteCountToWrite);
 }
 
-static void FlushPNGWrite(png_structp png_ptr) {}
+static void PngOutputFlushCallback(png_structp png_ptr)
+{
+	// no need to flush memory buffer
+}
 
-static size_t ImageLoaderHelperFormatToColorChannel(EImageFormat Format)
+static int PngColorTypeFromFormat(CImageInfo::EImageFormat Format)
 {
 	switch(Format)
 	{
-	case IMAGE_FORMAT_R:
-		return 1;
-	case IMAGE_FORMAT_RA:
-		return 2;
-	case IMAGE_FORMAT_RGB:
-		return 3;
-	case IMAGE_FORMAT_RGBA:
-		return 4;
+	case CImageInfo::FORMAT_R:
+		return PNG_COLOR_TYPE_GRAY;
+	case CImageInfo::FORMAT_RA:
+		return PNG_COLOR_TYPE_GRAY_ALPHA;
+	case CImageInfo::FORMAT_RGB:
+		return PNG_COLOR_TYPE_RGB;
+	case CImageInfo::FORMAT_RGBA:
+		return PNG_COLOR_TYPE_RGBA;
 	default:
 		dbg_assert(false, "Format invalid");
 		dbg_break();
 	}
 }
 
-bool SavePng(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, size_t Width, size_t Height)
+bool CImageLoader::SavePng(CByteBufferWriter &Writer, const CImageInfo &Image)
 {
-	png_structp pPNGStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-
-	if(pPNGStruct == nullptr)
+	png_structp pPngStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+	if(pPngStruct == nullptr)
 	{
-		dbg_msg("png", "libpng internal failure: png_create_write_struct failed.");
+		log_error("png", "libpng internal failure: png_create_write_struct failed.");
 		return false;
 	}
 
-	png_infop pPNGInfo = png_create_info_struct(pPNGStruct);
-
-	if(pPNGInfo == nullptr)
+	png_infop pPngInfo = png_create_info_struct(pPngStruct);
+	if(pPngInfo == nullptr)
 	{
-		png_destroy_read_struct(&pPNGStruct, nullptr, nullptr);
-		dbg_msg("png", "libpng internal failure: png_create_info_struct failed.");
+		png_destroy_read_struct(&pPngStruct, nullptr, nullptr);
+		log_error("png", "libpng internal failure: png_create_info_struct failed.");
 		return false;
 	}
 
-	WrittenBytes.m_LoadOffset = 0;
-	WrittenBytes.m_pvLoadedImageBytes->clear();
+	png_set_write_fn(pPngStruct, (png_bytep)&Writer, PngWriteDataCallback, PngOutputFlushCallback);
 
-	png_set_write_fn(pPNGStruct, (png_bytep)&WrittenBytes, WriteDataFromLoadedBytes, FlushPNGWrite);
+	png_set_IHDR(pPngStruct, pPngInfo, Image.m_Width, Image.m_Height, 8, PngColorTypeFromFormat(Image.m_Format), PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+	png_write_info(pPngStruct, pPngInfo);
 
-	int ColorType = PNG_COLOR_TYPE_RGB;
-	size_t WriteBytesPerPixel = ImageLoaderHelperFormatToColorChannel(ImageFormat);
-	if(ImageFormat == IMAGE_FORMAT_R)
-	{
-		ColorType = PNG_COLOR_TYPE_GRAY;
-	}
-	else if(ImageFormat == IMAGE_FORMAT_RGBA)
-	{
-		ColorType = PNG_COLOR_TYPE_RGBA;
-	}
-
-	png_set_IHDR(pPNGStruct, pPNGInfo, Width, Height, 8, ColorType, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
-
-	png_write_info(pPNGStruct, pPNGInfo);
-
-	png_bytepp pRowPointers = new png_bytep[Height];
-	size_t WidthBytes = Width * WriteBytesPerPixel;
+	png_bytepp pRowPointers = new png_bytep[Image.m_Height];
+	const int WidthBytes = Image.m_Width * Image.PixelSize();
 	ptrdiff_t BufferOffset = 0;
-	for(size_t y = 0; y < Height; ++y)
+	for(size_t y = 0; y < Image.m_Height; ++y)
 	{
 		pRowPointers[y] = new png_byte[WidthBytes];
-		mem_copy(pRowPointers[y], pRawBuffer + BufferOffset, WidthBytes);
+		mem_copy(pRowPointers[y], Image.m_pData + BufferOffset, WidthBytes);
 		BufferOffset += (ptrdiff_t)WidthBytes;
 	}
-	png_write_image(pPNGStruct, pRowPointers);
+	png_write_image(pPngStruct, pRowPointers);
+	png_write_end(pPngStruct, pPngInfo);
 
-	png_write_end(pPNGStruct, pPNGInfo);
-
-	for(size_t y = 0; y < Height; ++y)
+	for(size_t y = 0; y < Image.m_Height; ++y)
 	{
-		delete[](pRowPointers[y]);
+		delete[] pRowPointers[y];
 	}
-	delete[](pRowPointers);
+	delete[] pRowPointers;
 
-	png_destroy_info_struct(pPNGStruct, &pPNGInfo);
-	png_destroy_write_struct(&pPNGStruct, nullptr);
+	png_destroy_info_struct(pPngStruct, &pPngInfo);
+	png_destroy_write_struct(&pPngStruct, nullptr);
 
 	return true;
+}
+
+bool CImageLoader::SavePng(IOHANDLE File, const char *pFilename, const CImageInfo &Image)
+{
+	if(!File)
+	{
+		log_error("png", "failed to open file for writing. filename='%s'", pFilename);
+		return false;
+	}
+
+	CByteBufferWriter Writer;
+	if(!CImageLoader::SavePng(Writer, Image))
+	{
+		// error already logged
+		io_close(File);
+		return false;
+	}
+
+	const bool WriteSuccess = io_write(File, Writer.Data(), Writer.Size()) == Writer.Size();
+	if(!WriteSuccess)
+	{
+		log_error("png", "failed to write PNG data to file. filename='%s'", pFilename);
+	}
+	io_close(File);
+	return WriteSuccess;
 }

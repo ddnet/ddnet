@@ -887,6 +887,18 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 	io_close(File);
 }
 
+void CGameContext::ConReloadCensorlist(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->ReadCensorList();
+}
+
+void CGameContext::ConReloadAnnouncement(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Server()->ReadAnnouncementsFile(g_Config.m_SvAnnouncementFileName);
+}
+
 void CGameContext::ConDumpAntibot(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

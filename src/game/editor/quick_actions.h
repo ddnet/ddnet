@@ -170,6 +170,16 @@ REGISTER_QUICK_ACTION(
 REGISTER_QUICK_ACTION(
 	AddTileLayer, "Add tile layer", [&]() { AddTileLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Creates a new tile layer.")
 REGISTER_QUICK_ACTION(
+	AddFrontLayer,
+	"Add front layer",
+	[&]() { AddFrontLayer(); },
+	[&]() -> bool { return !GetSelectedGroup()->m_GameGroup || m_Map.m_pFrontLayer; },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Creates a new item layer.")
+REGISTER_QUICK_ACTION(
+	AddQuadsLayer, "Add quads layer", [&]() { AddQuadsLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Creates a new quads layer.")
+REGISTER_QUICK_ACTION(
 	SaveAs,
 	"Save As",
 	[&]() { InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save As", "maps", true, CEditor::CallbackSaveMap, this); },
@@ -276,6 +286,40 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return m_ColorPipetteActive; },
 	DEFAULT_BTN,
 	"[Ctrl+Shift+C] Color pipette. Pick a color from the screen by clicking on it.")
+REGISTER_QUICK_ACTION(
+	MapDetails,
+	"Map details",
+	[&]() { MapDetails(); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Adjust the map details of the current map.")
+REGISTER_QUICK_ACTION(
+	AddQuad,
+	"Add Quad",
+	[&]() { AddQuadOrSound(); },
+	[&]() -> bool {
+		std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
+		if(!pLayer)
+			return false;
+		return pLayer->m_Type != LAYERTYPE_QUADS;
+	},
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+Q] Add a new quad.")
+REGISTER_QUICK_ACTION(
+	AddSound,
+	"Add Sound",
+	[&]() { AddQuadOrSound(); },
+	[&]() -> bool {
+		std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
+		if(!pLayer)
+			return false;
+		return pLayer->m_Type != LAYERTYPE_SOUNDS;
+	},
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+Q] Add a new sound source.")
 
 #undef ALWAYS_FALSE
 #undef DEFAULT_BTN

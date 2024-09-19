@@ -2,6 +2,7 @@
 
 #include <engine/client.h>
 #include <engine/console.h>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/datafile.h>
@@ -509,14 +510,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					pImg->m_Height = ImgInfo.m_Height;
 					pImg->m_Format = ImgInfo.m_Format;
 					pImg->m_pData = ImgInfo.m_pData;
-					if(pImg->m_Format != CImageInfo::FORMAT_RGBA)
-					{
-						uint8_t *pRgbaData = static_cast<uint8_t *>(malloc((size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
-						ConvertToRGBA(pRgbaData, *pImg);
-						free(pImg->m_pData);
-						pImg->m_pData = pRgbaData;
-						pImg->m_Format = CImageInfo::FORMAT_RGBA;
-					}
+					ConvertToRgba(*pImg);
 
 					int TextureLoadFlag = m_pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 					if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)

@@ -1,38 +1,57 @@
 #ifndef ENGINE_GFX_IMAGE_LOADER_H
 #define ENGINE_GFX_IMAGE_LOADER_H
 
-#include <cstddef>
-#include <cstdint>
+#include <base/types.h>
+
+#include <engine/image.h>
+
 #include <vector>
 
-enum EImageFormat
+class CByteBufferReader
 {
-	IMAGE_FORMAT_R = 0,
-	IMAGE_FORMAT_RA,
-	IMAGE_FORMAT_RGB,
-	IMAGE_FORMAT_RGBA,
+	const uint8_t *m_pData;
+	size_t m_Size;
+	size_t m_ReadOffset = 0;
+	bool m_Error = false;
+
+public:
+	CByteBufferReader(const uint8_t *pData, size_t Size) :
+		m_pData(pData),
+		m_Size(Size) {}
+
+	bool Read(void *pData, size_t Size);
+	bool Error() const { return m_Error; }
 };
 
-typedef std::vector<uint8_t> TImageByteBuffer;
-struct SImageByteBuffer
+class CByteBufferWriter
 {
-	SImageByteBuffer(std::vector<uint8_t> *pvBuff) :
-		m_LoadOffset(0), m_pvLoadedImageBytes(pvBuff), m_Err(0) {}
-	size_t m_LoadOffset;
-	std::vector<uint8_t> *m_pvLoadedImageBytes;
-	int m_Err;
+	std::vector<uint8_t> m_vBuffer;
+
+public:
+	void Write(const void *pData, size_t Size);
+	const uint8_t *Data() const { return m_vBuffer.data(); }
+	size_t Size() const { return m_vBuffer.size(); }
 };
 
-enum
+class CImageLoader
 {
-	PNGLITE_COLOR_TYPE = 1 << 0,
-	PNGLITE_BIT_DEPTH = 1 << 1,
-	PNGLITE_INTERLACE_TYPE = 1 << 2,
-	PNGLITE_COMPRESSION_TYPE = 1 << 3,
-	PNGLITE_FILTER_TYPE = 1 << 4,
-};
+	CImageLoader() = delete;
 
-bool LoadPng(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, size_t &Width, size_t &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat);
-bool SavePng(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, size_t Width, size_t Height);
+public:
+	enum
+	{
+		PNGLITE_COLOR_TYPE = 1 << 0,
+		PNGLITE_BIT_DEPTH = 1 << 1,
+		PNGLITE_INTERLACE_TYPE = 1 << 2,
+		PNGLITE_COMPRESSION_TYPE = 1 << 3,
+		PNGLITE_FILTER_TYPE = 1 << 4,
+	};
+
+	static bool LoadPng(CByteBufferReader &Reader, const char *pContextName, CImageInfo &Image, int &PngliteIncompatible);
+	static bool LoadPng(IOHANDLE File, const char *pFilename, CImageInfo &Image, int &PngliteIncompatible);
+
+	static bool SavePng(CByteBufferWriter &Writer, const CImageInfo &Image);
+	static bool SavePng(IOHANDLE File, const char *pFilename, const CImageInfo &Image);
+};
 
 #endif // ENGINE_GFX_IMAGE_LOADER_H

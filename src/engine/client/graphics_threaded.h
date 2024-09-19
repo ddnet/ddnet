@@ -798,8 +798,6 @@ class CGraphics_Threaded : public IEngineGraphics
 	size_t m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
 
-	std::vector<uint8_t> m_vSpriteHelper;
-
 	bool m_WarnPngliteIncompatibleImages = false;
 
 	std::vector<SWarning> m_vWarnings;
@@ -954,7 +952,6 @@ public:
 	bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) override;
 	bool UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, const uint8_t *pData) override;
 
-	CTextureHandle LoadSpriteTextureImpl(const CImageInfo &FromImageInfo, int x, int y, size_t w, size_t h, const char *pName);
 	CTextureHandle LoadSpriteTexture(const CImageInfo &FromImageInfo, const struct CDataSprite *pSprite) override;
 
 	bool IsImageSubFullyTransparent(const CImageInfo &FromImageInfo, int x, int y, int w, int h) override;
@@ -963,12 +960,10 @@ public:
 	// simple uncompressed RGBA loaders
 	IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) override;
 	bool LoadPng(CImageInfo &Image, const char *pFilename, int StorageType) override;
+	bool LoadPng(CImageInfo &Image, const uint8_t *pData, size_t DataSize, const char *pContextName) override;
 
 	bool CheckImageDivisibility(const char *pContextName, CImageInfo &Image, int DivX, int DivY, bool AllowResize) override;
 	bool IsImageFormatRgba(const char *pContextName, const CImageInfo &Image) override;
-
-	void CopyTextureBufferSub(uint8_t *pDestBuffer, const CImageInfo &SourceImage, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) override;
-	void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, const CImageInfo &SourceImage, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) override;
 
 	void TextureSet(CTextureHandle TextureId) override;
 

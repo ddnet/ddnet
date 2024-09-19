@@ -539,6 +539,22 @@ void CEditorActionAddLayer::Undo()
 {
 	// Undo: remove layer from vector but keep it in case we want to add it back
 	auto &vLayers = m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_vpLayers;
+
+	if(m_pLayer->m_Type == LAYERTYPE_TILES)
+	{
+		std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(m_pLayer);
+		if(pLayerTiles->m_Front)
+			m_pEditor->m_Map.m_pFrontLayer = nullptr;
+		else if(pLayerTiles->m_Tele)
+			m_pEditor->m_Map.m_pTeleLayer = nullptr;
+		else if(pLayerTiles->m_Speedup)
+			m_pEditor->m_Map.m_pSpeedupLayer = nullptr;
+		else if(pLayerTiles->m_Switch)
+			m_pEditor->m_Map.m_pSwitchLayer = nullptr;
+		else if(pLayerTiles->m_Tune)
+			m_pEditor->m_Map.m_pTuneLayer = nullptr;
+	}
+
 	vLayers.erase(vLayers.begin() + m_LayerIndex);
 
 	m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_Collapse = false;
@@ -552,6 +568,22 @@ void CEditorActionAddLayer::Redo()
 {
 	// Redo: add back the removed layer contained in this class
 	auto &vLayers = m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_vpLayers;
+
+	if(m_pLayer->m_Type == LAYERTYPE_TILES)
+	{
+		std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(m_pLayer);
+		if(pLayerTiles->m_Front)
+			m_pEditor->m_Map.m_pFrontLayer = std::static_pointer_cast<CLayerFront>(m_pLayer);
+		else if(pLayerTiles->m_Tele)
+			m_pEditor->m_Map.m_pTeleLayer = std::static_pointer_cast<CLayerTele>(m_pLayer);
+		else if(pLayerTiles->m_Speedup)
+			m_pEditor->m_Map.m_pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(m_pLayer);
+		else if(pLayerTiles->m_Switch)
+			m_pEditor->m_Map.m_pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(m_pLayer);
+		else if(pLayerTiles->m_Tune)
+			m_pEditor->m_Map.m_pTuneLayer = std::static_pointer_cast<CLayerTune>(m_pLayer);
+	}
+
 	vLayers.insert(vLayers.begin() + m_LayerIndex, m_pLayer);
 
 	m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->m_Collapse = false;

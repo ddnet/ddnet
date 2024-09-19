@@ -6,6 +6,7 @@
 #include <base/system.h>
 
 #include <engine/engine.h>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
@@ -237,14 +238,7 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	// get feet outline size
 	CheckMetrics(Skin.m_Metrics.m_Feet, pData, Pitch, FeetOutlineOffsetX, FeetOutlineOffsetY, FeetOutlineWidth, FeetOutlineHeight);
 
-	// make the texture gray scale
-	for(size_t i = 0; i < Info.m_Width * Info.m_Height; i++)
-	{
-		int v = (pData[i * PixelStep] + pData[i * PixelStep + 1] + pData[i * PixelStep + 2]) / 3;
-		pData[i * PixelStep] = v;
-		pData[i * PixelStep + 1] = v;
-		pData[i * PixelStep + 2] = v;
-	}
+	ConvertToGrayscale(Info);
 
 	int aFreq[256] = {0};
 	int OrgWeight = 0;
@@ -438,4 +432,46 @@ const CSkin *CSkins::FindImpl(const char *pName)
 	++m_DownloadingSkins;
 
 	return nullptr;
+}
+
+void CSkins::RandomizeSkin(int Dummy)
+{
+	static const float s_aSchemes[] = {1.0f / 2.0f, 1.0f / 3.0f, 1.0f / -3.0f, 1.0f / 12.0f, 1.0f / -12.0f}; // complementary, triadic, analogous
+	const bool UseCustomColor = Dummy ? g_Config.m_ClDummyUseCustomColor : g_Config.m_ClPlayerUseCustomColor;
+	if(UseCustomColor)
+	{
+		float GoalSat = random_float(0.3f, 1.0f);
+		float MaxBodyLht = 1.0f - GoalSat * GoalSat; // max allowed lightness before we start losing saturation
+
+		ColorHSLA Body;
+		Body.h = random_float();
+		Body.l = random_float(0.0f, MaxBodyLht);
+		Body.s = clamp(GoalSat * GoalSat / (1.0f - Body.l), 0.0f, 1.0f);
+
+		ColorHSLA Feet;
+		Feet.h = std::fmod(Body.h + s_aSchemes[rand() % std::size(s_aSchemes)], 1.0f);
+		Feet.l = random_float();
+		Feet.s = clamp(GoalSat * GoalSat / (1.0f - Feet.l), 0.0f, 1.0f);
+
+		unsigned *pColorBody = Dummy ? &g_Config.m_ClDummyColorBody : &g_Config.m_ClPlayerColorBody;
+		unsigned *pColorFeet = Dummy ? &g_Config.m_ClDummyColorFeet : &g_Config.m_ClPlayerColorFeet;
+
+		*pColorBody = Body.Pack(false);
+		*pColorFeet = Feet.Pack(false);
+	}
+
+	const size_t SkinNameSize = Dummy ? sizeof(g_Config.m_ClDummySkin) : sizeof(g_Config.m_ClPlayerSkin);
+	char aRandomSkinName[24];
+	str_copy(aRandomSkinName, "default", SkinNameSize);
+	if(!m_pClient->m_Skins.GetSkinsUnsafe().empty())
+	{
+		do
+		{
+			auto it = m_pClient->m_Skins.GetSkinsUnsafe().begin();
+			std::advance(it, rand() % m_pClient->m_Skins.GetSkinsUnsafe().size());
+			str_copy(aRandomSkinName, (*it).second->GetName(), SkinNameSize);
+		} while(!str_comp(aRandomSkinName, "x_ninja") || !str_comp(aRandomSkinName, "x_spec"));
+	}
+	char *pSkinName = Dummy ? g_Config.m_ClDummySkin : g_Config.m_ClPlayerSkin;
+	str_copy(pSkinName, aRandomSkinName, SkinNameSize);
 }

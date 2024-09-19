@@ -80,6 +80,7 @@ void CInput::Init()
 
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 
 	MouseModeRelative();
 
@@ -824,6 +825,9 @@ int CInput::Update()
 				}
 				break;
 			case SDL_WINDOWEVENT_MINIMIZED:
+#if defined(CONF_PLATFORM_ANDROID) // Save the config when minimized on Android.
+				m_pConfigManager->Save();
+#endif
 				Graphics()->WindowDestroyNtf(Event.window.windowID);
 				break;
 

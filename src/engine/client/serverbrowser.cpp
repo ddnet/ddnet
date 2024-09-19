@@ -989,9 +989,9 @@ void CServerBrowser::Refresh(int Type, bool Force)
 
 		m_BroadcastTime = time_get();
 
-		for(int i = 8303; i <= 8310; i++)
+		for(int Port = LAN_PORT_BEGIN; Port <= LAN_PORT_END; Port++)
 		{
-			Packet.m_Address.port = i;
+			Packet.m_Address.port = Port;
 
 			Packet.m_pData = aBuffer;
 			Packet.m_DataSize = sizeof(aBuffer);

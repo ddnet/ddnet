@@ -529,12 +529,12 @@ ESaveResult CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry, bool 
 	CCharacter *p = (CCharacter *)pGameServer->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; p; p = (CCharacter *)p->TypeNext())
 	{
-		if(pTeams->m_Core.Team(p->GetPlayer()->GetCid()) != Team)
+		if(pTeams->m_Core.Team(p->GetPlayer()->GetCid()) != Team && !Force)
 			continue;
-		if(m_MembersCount == j)
+		if(m_MembersCount == j && !Force)
 			return ESaveResult::CHAR_NOT_FOUND;
 		ESaveResult Result = pGameServer->m_World.BlocksSave(p->GetPlayer()->GetCid());
-		if(Result != ESaveResult::SUCCESS)
+		if(Result != ESaveResult::SUCCESS && !Force)
 			return Result;
 		m_pSavedTees[j].Save(p);
 		aPlayerCids[j] = p->GetPlayer()->GetCid();

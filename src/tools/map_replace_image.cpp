@@ -3,11 +3,13 @@
 
 #include <base/logger.h>
 #include <base/system.h>
+
 #include <engine/gfx/image_loader.h>
-#include <engine/graphics.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
+
 #include <game/mapitems.h>
+
 /*
 	Usage: map_replace_image <source map filepath> <dest map filepath> <current image name> <new image filepath>
 	Notes: map filepath must be relative to user default teeworlds folder
@@ -22,55 +24,6 @@ char g_aNewName[128];
 int g_NewDataId = -1;
 int g_NewDataSize = 0;
 void *g_pNewData = nullptr;
-
-bool LoadPng(CImageInfo *pImg, const char *pFilename)
-{
-	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
-	if(File)
-	{
-		io_seek(File, 0, IOSEEK_END);
-		long int FileSize = io_tell(File);
-		if(FileSize <= 0)
-		{
-			io_close(File);
-			return false;
-		}
-		io_seek(File, 0, IOSEEK_START);
-		TImageByteBuffer ByteBuffer;
-		SImageByteBuffer ImageByteBuffer(&ByteBuffer);
-
-		ByteBuffer.resize(FileSize);
-		io_read(File, &ByteBuffer.front(), FileSize);
-
-		io_close(File);
-
-		uint8_t *pImgBuffer = NULL;
-		EImageFormat ImageFormat;
-		int PngliteIncompatible;
-		if(LoadPng(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
-		{
-			if((ImageFormat == IMAGE_FORMAT_RGBA || ImageFormat == IMAGE_FORMAT_RGB) && pImg->m_Width <= (2 << 13) && pImg->m_Height <= (2 << 13))
-			{
-				pImg->m_pData = pImgBuffer;
-
-				if(ImageFormat == IMAGE_FORMAT_RGB)
-					pImg->m_Format = CImageInfo::FORMAT_RGB;
-				else if(ImageFormat == IMAGE_FORMAT_RGBA)
-					pImg->m_Format = CImageInfo::FORMAT_RGBA;
-				else
-				{
-					free(pImgBuffer);
-					return false;
-				}
-			}
-		}
-		else
-			return false;
-	}
-	else
-		return false;
-	return true;
-}
 
 void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
 {
@@ -87,13 +40,15 @@ void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pImgName,
 	dbg_msg("map_replace_image", "found image '%s'", pImgName);
 
 	CImageInfo ImgInfo;
-	if(!LoadPng(&ImgInfo, pImgFile))
-		return 0;
+	int PngliteIncompatible;
+	if(!CImageLoader::LoadPng(io_open(pImgName, IOFLAG_READ), pImgName, ImgInfo, PngliteIncompatible))
+		return nullptr;
 
 	if(ImgInfo.m_Format != CImageInfo::FORMAT_RGBA)
 	{
-		dbg_msg("map_replace_image", "image '%s' is not in RGBA format", pImgName);
-		return 0;
+		dbg_msg("map_replace_image", "ERROR: only RGBA PNG images are supported");
+		ImgInfo.Free();
+		return nullptr;
 	}
 
 	*pNewImgItem = *pImgItem;

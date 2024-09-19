@@ -5,6 +5,7 @@
 #include <engine/engine.h>
 #include <engine/favorites.h>
 #include <engine/friends.h>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
@@ -215,7 +216,16 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		}
 		else if(!ServerBrowser()->NumServers())
 		{
-			Ui()->DoLabel(&View, Localize("No servers found"), 16.0f, TEXTALIGN_MC);
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), Localize("No local servers found (ports %d-%d)"), IServerBrowser::LAN_PORT_BEGIN, IServerBrowser::LAN_PORT_END);
+				Ui()->DoLabel(&View, aBuf, 16.0f, TEXTALIGN_MC);
+			}
+			else
+			{
+				Ui()->DoLabel(&View, Localize("No servers found"), 16.0f, TEXTALIGN_MC);
+			}
 		}
 		else if(ServerBrowser()->NumServers() && !NumServers)
 		{
@@ -1992,16 +2002,7 @@ void CMenus::LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info,
 	CommunityIcon.m_Sha256 = Sha256;
 	CommunityIcon.m_OrgTexture = Graphics()->LoadTextureRaw(Info, 0, pCommunityId);
 
-	// create gray scale version
-	unsigned char *pData = static_cast<unsigned char *>(Info.m_pData);
-	const size_t Step = Info.PixelSize();
-	for(size_t i = 0; i < Info.m_Width * Info.m_Height; i++)
-	{
-		int v = (pData[i * Step] + pData[i * Step + 1] + pData[i * Step + 2]) / 3;
-		pData[i * Step] = v;
-		pData[i * Step + 1] = v;
-		pData[i * Step + 2] = v;
-	}
+	ConvertToGrayscale(Info);
 	CommunityIcon.m_GreyTexture = Graphics()->LoadTextureRawMove(Info, 0, pCommunityId);
 
 	auto ExistingIcon = std::find_if(m_vCommunityIcons.begin(), m_vCommunityIcons.end(), [pCommunityId](const SCommunityIcon &Element) {

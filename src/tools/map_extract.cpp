@@ -1,10 +1,12 @@
 // Adapted from TWMapImagesRecovery by Tardo: https://github.com/Tardo/TWMapImagesRecovery
+
 #include <base/logger.h>
 #include <base/system.h>
+
 #include <engine/gfx/image_loader.h>
-#include <engine/graphics.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
+
 #include <game/mapitems.h>
 
 static void PrintMapInfo(CDataFileReader &Reader)
@@ -50,22 +52,18 @@ static void ExtractMapImages(CDataFileReader &Reader, const char *pPathSave)
 			continue;
 		}
 
-		IOHANDLE File = io_open(aBuf, IOFLAG_WRITE);
-		if(File)
-		{
-			log_info("map_extract", "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
-			TImageByteBuffer ByteBuffer;
-			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
+		CImageInfo Image;
+		Image.m_Width = pItem->m_Width;
+		Image.m_Height = pItem->m_Height;
+		Image.m_Format = CImageInfo::FORMAT_RGBA;
+		Image.m_pData = static_cast<uint8_t *>(Reader.GetData(pItem->m_ImageData));
 
-			if(SavePng(IMAGE_FORMAT_RGBA, (const uint8_t *)Reader.GetData(pItem->m_ImageData), ImageByteBuffer, pItem->m_Width, pItem->m_Height))
-				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
-			io_close(File);
-			Reader.UnloadData(pItem->m_ImageData);
-		}
-		else
+		log_info("map_extract", "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
+		if(!CImageLoader::SavePng(io_open(aBuf, IOFLAG_WRITE), aBuf, Image))
 		{
-			log_error("map_extract", "failed to open image file for writing. filename='%s'", aBuf);
+			log_error("map_extract", "failed to write image file. filename='%s'", aBuf);
 		}
+		Reader.UnloadData(pItem->m_ImageData);
 	}
 }
 
