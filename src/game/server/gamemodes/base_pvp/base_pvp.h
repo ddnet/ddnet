@@ -74,6 +74,9 @@ public:
 	void SetArmorProgress(CCharacter *pCharacer, int Progress) override{};
 	bool OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId) override;
 
+	bool IsWinner(const CPlayer *pPlayer) override;
+	bool IsLoser(const CPlayer *pPlayer) override;
+
 	// Anticamper
 	void Anticamper();
 

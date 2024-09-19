@@ -31,6 +31,8 @@ public:
 	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
 	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
 	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
+	bool IsWinner(const CPlayer *pPlayer) override;
+	bool IsLoser(const CPlayer *pPlayer) override;
 
 	enum class ECatchGameState
 	{

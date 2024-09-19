@@ -144,6 +144,26 @@ public:
 			Silent - if false it might print warnings to the admin console
 	*/
 	virtual void UpdateSpawnWeapons(bool Silent = false){};
+
+	/*
+		Function: IsWinner
+			called on disconnect and round end
+			used to track stats
+
+		Arguments:
+			pPlayer - the player to check
+	*/
+	virtual bool IsWinner(const CPlayer *pPlayer) { return false; }
+
+	/*
+		Function: IsLoser
+			called on disconnect and round end
+			used to track stats
+
+		Arguments:
+			pPlayer - the player to check
+	*/
+	virtual bool IsLoser(const CPlayer *pPlayer) { return false; }
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };
@@ -193,7 +213,7 @@ public:
 		IGS_END_ROUND, // round is over (tick timer)
 	};
 	EGameState m_GameState;
-	EGameState GameState() { return m_GameState; }
+	EGameState GameState() const { return m_GameState; }
 	int m_GameStateTimer;
 
 	const char *GameStateToStr(EGameState GameState)

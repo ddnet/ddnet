@@ -43,6 +43,27 @@ void CGameControllerZcatch::SetCatchGameState(ECatchGameState State)
 	m_CatchGameState = State;
 }
 
+bool CGameControllerZcatch::IsWinner(const CPlayer *pPlayer)
+{
+	// you can only win on round end
+	if(GameState() != IGS_END_ROUND)
+		return false;
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+		return false;
+	// there are no winners in release games even if the round ends
+	if(CatchGameState() != ECatchGameState::RUNNING)
+		return false;
+
+	return !pPlayer->m_IsDead;
+}
+
+bool CGameControllerZcatch::IsLoser(const CPlayer *pPlayer)
+{
+	// rage quit as dead player is counted as a loss
+	// qutting mid game while being alive is not
+	return pPlayer->m_IsDead;
+}
+
 void CGameControllerZcatch::OnRoundStart()
 {
 	CGameControllerInstagib::OnRoundStart();

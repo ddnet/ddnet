@@ -28,6 +28,8 @@ void IGameController::OnEndRoundInsta()
 		if(!pPlayer)
 			continue;
 
+		// dbg_msg("stats", "winner=%d loser=%d name: %s", IsWinner(pPlayer), IsLoser(pPlayer), Server()->ClientName(pPlayer->GetCid()));
+
 		pPlayer->m_Stats.Reset();
 	}
 }

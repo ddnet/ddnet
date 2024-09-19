@@ -3,6 +3,7 @@
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -129,6 +130,57 @@ void CGameControllerPvp::OnUpdateSpectatorVotesConfig()
 			pPlayer->m_IsFakeDeadSpec = false;
 		}
 	}
+}
+
+bool CGameControllerPvp::IsWinner(const CPlayer *pPlayer)
+{
+	// you can only win on round end
+	if(GameState() != IGS_END_ROUND)
+		return false;
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+		return false;
+
+	if(IsTeamplay())
+	{
+		return m_aTeamscore[pPlayer->GetTeam()] > m_aTeamscore[!pPlayer->GetTeam()];
+	}
+	else
+	{
+		int OwnScore = pPlayer->m_Score.value_or(0);
+		if(!OwnScore)
+			return false;
+
+		int Topscore = 0;
+		for(auto &pOtherPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pOtherPlayer)
+				continue;
+			int Score = pOtherPlayer->m_Score.value_or(0);
+			if(Score > Topscore)
+				Topscore = Score;
+		}
+		return OwnScore >= Topscore;
+	}
+
+	return false;
+}
+
+bool CGameControllerPvp::IsLoser(const CPlayer *pPlayer)
+{
+	// TODO: we could relax this a bit
+	//       and not count every disconnect during a running round as loss
+	//       for example when you or your team is leading or its currently a draw
+	//       then it could be neither a win or a loss to quit mid round
+	//
+	//       the draw case also covers quitting a few seconds after round start
+	//       which is common for users who connected to the wrong server
+	//       or users that quit after the previous round ended
+	if(GameState() != IGS_END_ROUND)
+		return true;
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+		return false;
+
+	return !IsWinner(pPlayer);
 }
 
 bool CGameControllerPvp::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
