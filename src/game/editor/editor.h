@@ -326,6 +326,7 @@ public:
 
 	void FillGameTiles(EGameTileOp FillTile) const;
 	bool CanFillGameTiles() const;
+	void AddQuadOrSound();
 	void AddGroup();
 	void AddTileLayer();
 	void AddFrontLayer();

@@ -1293,39 +1293,23 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		{
 			TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 
-			bool Invoked = false;
-			static int s_AddItemButton = 0;
-
 			if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
-				Invoked = DoButton_Editor(&s_AddItemButton, "Add Quad", 0, &Button, 0, "[ctrl+q] Add a new quad") ||
-					  (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed);
+				if(DoButton_Editor(&m_QuickActionAddQuad, m_QuickActionAddQuad.Label(), 0, &Button, 0, m_QuickActionAddQuad.Description()) ||
+					(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed))
+				{
+					m_QuickActionAddQuad.Call();
+				}
 			}
 			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
-				Invoked = DoButton_Editor(&s_AddItemButton, "Add Sound", 0, &Button, 0, "[ctrl+q] Add a new sound source") ||
-					  (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed);
-			}
-
-			if(Invoked)
-			{
-				std::shared_ptr<CLayerGroup> pGroup = GetSelectedGroup();
-
-				float aMapping[4];
-				pGroup->Mapping(aMapping);
-				int x = aMapping[0] + (aMapping[2] - aMapping[0]) / 2;
-				int y = aMapping[1] + (aMapping[3] - aMapping[1]) / 2;
-				if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed)
+				if(DoButton_Editor(&m_QuickActionAddSound, m_QuickActionAddSound.Label(), 0, &Button, 0, m_QuickActionAddSound.Description()) ||
+					(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed))
 				{
-					x += Ui()->MouseWorldX() - (MapView()->GetWorldOffset().x * pGroup->m_ParallaxX / 100) - pGroup->m_OffsetX;
-					y += Ui()->MouseWorldY() - (MapView()->GetWorldOffset().y * pGroup->m_ParallaxY / 100) - pGroup->m_OffsetY;
+					m_QuickActionAddSound.Call();
 				}
-
-				if(pLayer->m_Type == LAYERTYPE_QUADS)
-					m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptyQuad>(this, m_SelectedGroup, m_vSelectedLayers[0], x, y));
-				else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-					m_EditorHistory.Execute(std::make_shared<CEditorActionNewEmptySound>(this, m_SelectedGroup, m_vSelectedLayers[0], x, y));
 			}
+
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
 		}
 

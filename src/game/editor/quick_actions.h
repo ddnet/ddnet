@@ -292,6 +292,32 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
 	"Adjust the map details of the current map.")
+REGISTER_QUICK_ACTION(
+	AddQuad,
+	"Add Quad",
+	[&]() { AddQuadOrSound(); },
+	[&]() -> bool {
+		std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
+		if(!pLayer)
+			return false;
+		return pLayer->m_Type != LAYERTYPE_QUADS;
+	},
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+Q] Add a new quad.")
+REGISTER_QUICK_ACTION(
+	AddSound,
+	"Add Sound",
+	[&]() { AddQuadOrSound(); },
+	[&]() -> bool {
+		std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
+		if(!pLayer)
+			return false;
+		return pLayer->m_Type != LAYERTYPE_SOUNDS;
+	},
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"[Ctrl+Q] Add a new sound source.")
 
 #undef ALWAYS_FALSE
 #undef DEFAULT_BTN
