@@ -56,11 +56,18 @@ static ColorRGBA GetPingTextColor(int Latency)
 static ColorRGBA GetGametypeTextColor(const char *pGametype)
 {
 	ColorHSLA HslaColor;
-	if(str_comp(pGametype, "DM") == 0 || str_comp(pGametype, "TDM") == 0 || str_comp(pGametype, "CTF") == 0)
+	if(str_comp(pGametype, "DM") == 0 || str_comp(pGametype, "TDM") == 0 || str_comp(pGametype, "CTF") == 0 || str_comp(pGametype, "LMS") == 0 || str_comp(pGametype, "LTS") == 0)
 		HslaColor = ColorHSLA(0.33f, 1.0f, 0.75f);
 	else if(str_find_nocase(pGametype, "catch"))
 		HslaColor = ColorHSLA(0.17f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "idm") || str_find_nocase(pGametype, "itdm") || str_find_nocase(pGametype, "ictf") || str_find_nocase(pGametype, "f-ddrace"))
+	else if(str_find_nocase(pGametype, "dm") || str_find_nocase(pGametype, "tdm") || str_find_nocase(pGametype, "ctf") || str_find_nocase(pGametype, "lms") || str_find_nocase(pGametype, "lts"))
+	{
+		if(pGametype[0] == 'i' || pGametype[0] == 'g')
+			HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
+		else
+			HslaColor = ColorHSLA(0.375f, 1.0f, 0.35f);
+	}
+	else if(str_find_nocase(pGametype, "f-ddrace") || str_find_nocase(pGametype, "freeze"))
 		HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
 	else if(str_find_nocase(pGametype, "fng"))
 		HslaColor = ColorHSLA(0.83f, 1.0f, 0.75f);
