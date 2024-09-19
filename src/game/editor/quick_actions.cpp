@@ -37,6 +37,17 @@ void CEditor::AddTileLayer()
 	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
 }
 
+void CEditor::AddFrontLayer()
+{
+	std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	m_Map.MakeFrontLayer(pFrontLayer);
+	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pFrontLayer);
+	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
+	SelectLayer(LayerIndex);
+	m_pBrush->Clear();
+	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
+}
+
 bool CEditor::IsNonGameTileLayerSelected() const
 {
 	std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
@@ -68,4 +79,22 @@ void CEditor::LayerSelectImage()
 	s_LayerPopupContext.m_pEditor = this;
 	Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 120, 270, &s_LayerPopupContext, PopupLayer);
 	PopupSelectImageInvoke(pTiles->m_Image, Ui()->MouseX(), Ui()->MouseY());
+}
+
+void CEditor::MapDetails()
+{
+	const CUIRect *pScreen = Ui()->Screen();
+	m_Map.m_MapInfoTmp.Copy(m_Map.m_MapInfo);
+	static SPopupMenuId s_PopupMapInfoId;
+	constexpr float PopupWidth = 400.0f;
+	constexpr float PopupHeight = 170.0f;
+	Ui()->DoPopupMenu(
+		&s_PopupMapInfoId,
+		pScreen->w / 2.0f - PopupWidth / 2.0f,
+		pScreen->h / 2.0f - PopupHeight / 2.0f,
+		PopupWidth,
+		PopupHeight,
+		this,
+		PopupMapInfo);
+	Ui()->SetActiveItem(nullptr);
 }
