@@ -30,7 +30,7 @@ void IGameController::OnEndRoundInsta()
 		if(m_pStatsTable[0] == '\0')
 			continue;
 
-		char aMsg[512];
+		char aMsg[512] = {0};
 		bool Won = IsWinner(pPlayer, aMsg, sizeof(aMsg));
 		bool Lost = IsLoser(pPlayer);
 		// dbg_msg("stats", "winner=%d loser=%d msg=%s name: %s", Won, Lost, aMsg, Server()->ClientName(pPlayer->GetCid()));
