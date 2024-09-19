@@ -193,6 +193,23 @@ bool CSpectator::OnInput(const IInput::CEvent &Event)
 		OnRelease();
 		return true;
 	}
+
+	if(g_Config.m_ClSpectatorMouseclicks)
+	{
+		if(m_pClient->m_Snap.m_SpecInfo.m_Active && !IsActive() && !GameClient()->m_MultiViewActivated &&
+			!Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed() && !m_pClient->m_Menus.IsActive())
+		{
+			if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_1)
+			{
+				if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
+					Spectate(SPEC_FREEVIEW);
+				else
+					SpectateClosest();
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
 
