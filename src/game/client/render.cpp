@@ -58,14 +58,14 @@ void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender)
 	Graphics()->QuadContainerUpload(m_TeeQuadContainerIndex);
 }
 
-void CRenderTools::SelectSprite(CDataSprite *pSpr, int Flags, int sx, int sy) const
+void CRenderTools::SelectSprite(const CDataSprite *pSprite, int Flags) const
 {
-	int x = pSpr->m_X + sx;
-	int y = pSpr->m_Y + sy;
-	int w = pSpr->m_W;
-	int h = pSpr->m_H;
-	int cx = pSpr->m_pSet->m_Gridx;
-	int cy = pSpr->m_pSet->m_Gridy;
+	int x = pSprite->m_X;
+	int y = pSprite->m_Y;
+	int w = pSprite->m_W;
+	int h = pSprite->m_H;
+	int cx = pSprite->m_pSet->m_Gridx;
+	int cy = pSprite->m_pSet->m_Gridy;
 
 	GetSpriteScaleImpl(w, h, gs_SpriteWScale, gs_SpriteHScale);
 
@@ -83,18 +83,16 @@ void CRenderTools::SelectSprite(CDataSprite *pSpr, int Flags, int sx, int sy) co
 	Graphics()->QuadsSetSubset(x1, y1, x2, y2);
 }
 
-void CRenderTools::SelectSprite(int Id, int Flags, int sx, int sy) const
+void CRenderTools::SelectSprite(int Id, int Flags) const
 {
-	if(Id < 0 || Id >= g_pData->m_NumSprites)
-		return;
-	SelectSprite(&g_pData->m_aSprites[Id], Flags, sx, sy);
+	dbg_assert(Id >= 0 && Id < g_pData->m_NumSprites, "Id invalid");
+	SelectSprite(&g_pData->m_aSprites[Id], Flags);
 }
 
-void CRenderTools::SelectSprite7(int Id, int Flags, int sx, int sy) const
+void CRenderTools::SelectSprite7(int Id, int Flags) const
 {
-	if(Id < 0 || Id >= client_data7::g_pData->m_NumSprites)
-		return;
-	SelectSprite(&client_data7::g_pData->m_aSprites[Id], Flags, sx, sy);
+	dbg_assert(Id >= 0 && Id < client_data7::g_pData->m_NumSprites, "Id invalid");
+	SelectSprite(&client_data7::g_pData->m_aSprites[Id], Flags);
 }
 
 void CRenderTools::GetSpriteScale(const CDataSprite *pSprite, float &ScaleX, float &ScaleY) const
@@ -310,7 +308,7 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 					Graphics()->TextureSet(pInfo->m_aSixup[g_Config.m_ClDummy].m_BotTexture);
 					Graphics()->QuadsBegin();
 					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-					SelectSprite7(client_data7::SPRITE_TEE_BOT_BACKGROUND, 0, 0, 0);
+					SelectSprite7(client_data7::SPRITE_TEE_BOT_BACKGROUND);
 					Item = BotItem;
 					Graphics()->QuadsDraw(&Item, 1);
 					Graphics()->QuadsEnd();
@@ -322,13 +320,13 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 					Graphics()->TextureSet(pInfo->m_aSixup[g_Config.m_ClDummy].m_BotTexture);
 					Graphics()->QuadsBegin();
 					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-					SelectSprite7(client_data7::SPRITE_TEE_BOT_FOREGROUND, 0, 0, 0);
+					SelectSprite7(client_data7::SPRITE_TEE_BOT_FOREGROUND);
 					Item = BotItem;
 					Graphics()->QuadsDraw(&Item, 1);
 					ColorRGBA Color = pInfo->m_aSixup[g_Config.m_ClDummy].m_BotColor;
 					Color.a = Alpha;
 					Graphics()->SetColor(Color);
-					SelectSprite7(client_data7::SPRITE_TEE_BOT_GLOW, 0, 0, 0);
+					SelectSprite7(client_data7::SPRITE_TEE_BOT_GLOW);
 					Item = BotItem;
 					Graphics()->QuadsDraw(&Item, 1);
 					Graphics()->QuadsEnd();
@@ -343,7 +341,7 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 					ColorRGBA Color = pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_DECORATION];
 					Color.a = Alpha;
 					Graphics()->SetColor(Color);
-					SelectSprite7(OutLine ? client_data7::SPRITE_TEE_DECORATION_OUTLINE : client_data7::SPRITE_TEE_DECORATION, 0, 0, 0);
+					SelectSprite7(OutLine ? client_data7::SPRITE_TEE_DECORATION_OUTLINE : client_data7::SPRITE_TEE_DECORATION);
 					Item = BodyItem;
 					Graphics()->QuadsDraw(&Item, 1);
 					Graphics()->QuadsEnd();
@@ -356,14 +354,14 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 				if(OutLine)
 				{
 					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-					SelectSprite7(client_data7::SPRITE_TEE_BODY_OUTLINE, 0, 0, 0);
+					SelectSprite7(client_data7::SPRITE_TEE_BODY_OUTLINE);
 				}
 				else
 				{
 					ColorRGBA Color = pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_BODY];
 					Color.a = Alpha;
 					Graphics()->SetColor(Color);
-					SelectSprite7(client_data7::SPRITE_TEE_BODY, 0, 0, 0);
+					SelectSprite7(client_data7::SPRITE_TEE_BODY);
 				}
 				Item = BodyItem;
 				Graphics()->QuadsDraw(&Item, 1);
@@ -377,7 +375,7 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 					Graphics()->QuadsSetRotation(pAnim->GetBody()->m_Angle * pi * 2);
 					ColorRGBA MarkingColor = pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_MARKING];
 					Graphics()->SetColor(MarkingColor.r * MarkingColor.a, MarkingColor.g * MarkingColor.a, MarkingColor.b * MarkingColor.a, MarkingColor.a * Alpha);
-					SelectSprite7(client_data7::SPRITE_TEE_MARKING, 0, 0, 0);
+					SelectSprite7(client_data7::SPRITE_TEE_MARKING);
 					Item = BodyItem;
 					Graphics()->QuadsDraw(&Item, 1);
 					Graphics()->QuadsEnd();
@@ -392,7 +390,7 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 					for(int t = 0; t < 2; t++)
 					{
-						SelectSprite7(t == 0 ? client_data7::SPRITE_TEE_BODY_SHADOW : client_data7::SPRITE_TEE_BODY_UPPER_OUTLINE, 0, 0, 0);
+						SelectSprite7(t == 0 ? client_data7::SPRITE_TEE_BODY_SHADOW : client_data7::SPRITE_TEE_BODY_UPPER_OUTLINE);
 						Item = BodyItem;
 						Graphics()->QuadsDraw(&Item, 1);
 					}
@@ -421,19 +419,19 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 					switch(Emote)
 					{
 					case EMOTE_PAIN:
-						SelectSprite7(client_data7::SPRITE_TEE_EYES_PAIN, 0, 0, 0);
+						SelectSprite7(client_data7::SPRITE_TEE_EYES_PAIN);
 						break;
 					case EMOTE_HAPPY:
-						SelectSprite7(client_data7::SPRITE_TEE_EYES_HAPPY, 0, 0, 0);
+						SelectSprite7(client_data7::SPRITE_TEE_EYES_HAPPY);
 						break;
 					case EMOTE_SURPRISE:
-						SelectSprite7(client_data7::SPRITE_TEE_EYES_SURPRISE, 0, 0, 0);
+						SelectSprite7(client_data7::SPRITE_TEE_EYES_SURPRISE);
 						break;
 					case EMOTE_ANGRY:
-						SelectSprite7(client_data7::SPRITE_TEE_EYES_ANGRY, 0, 0, 0);
+						SelectSprite7(client_data7::SPRITE_TEE_EYES_ANGRY);
 						break;
 					default:
-						SelectSprite7(client_data7::SPRITE_TEE_EYES_NORMAL, 0, 0, 0);
+						SelectSprite7(client_data7::SPRITE_TEE_EYES_NORMAL);
 						break;
 					}
 
@@ -456,16 +454,16 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 					switch(pInfo->m_aSixup[g_Config.m_ClDummy].m_HatSpriteIndex)
 					{
 					case 0:
-						SelectSprite7(client_data7::SPRITE_TEE_HATS_TOP1, Flag, 0, 0);
+						SelectSprite7(client_data7::SPRITE_TEE_HATS_TOP1, Flag);
 						break;
 					case 1:
-						SelectSprite7(client_data7::SPRITE_TEE_HATS_TOP2, Flag, 0, 0);
+						SelectSprite7(client_data7::SPRITE_TEE_HATS_TOP2, Flag);
 						break;
 					case 2:
-						SelectSprite7(client_data7::SPRITE_TEE_HATS_SIDE1, Flag, 0, 0);
+						SelectSprite7(client_data7::SPRITE_TEE_HATS_SIDE1, Flag);
 						break;
 					case 3:
-						SelectSprite7(client_data7::SPRITE_TEE_HATS_SIDE2, Flag, 0, 0);
+						SelectSprite7(client_data7::SPRITE_TEE_HATS_SIDE2, Flag);
 					}
 					Item = BodyItem;
 					Graphics()->QuadsDraw(&Item, 1);
@@ -486,7 +484,7 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 			if(OutLine)
 			{
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-				SelectSprite7(client_data7::SPRITE_TEE_FOOT_OUTLINE, 0, 0, 0);
+				SelectSprite7(client_data7::SPRITE_TEE_FOOT_OUTLINE);
 			}
 			else
 			{
@@ -499,7 +497,7 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 					pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_FEET].g * ColorScale,
 					pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_FEET].b * ColorScale,
 					pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_FEET].a * Alpha);
-				SelectSprite7(client_data7::SPRITE_TEE_FOOT, 0, 0, 0);
+				SelectSprite7(client_data7::SPRITE_TEE_FOOT);
 			}
 
 			IGraphics::CQuadItem QuadItem(Position.x + pFoot->m_X * AnimScale, Position.y + pFoot->m_Y * AnimScale, w, h);

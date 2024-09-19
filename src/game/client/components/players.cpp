@@ -66,9 +66,9 @@ void CPlayers::RenderHand7(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir
 	Graphics()->SetColor(Color);
 	Graphics()->QuadsSetRotation(Angle);
 
-	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND_OUTLINE, 0, 0, 0);
+	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND_OUTLINE);
 	Graphics()->QuadsDraw(&QuadOutline, 1);
-	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND, 0, 0, 0);
+	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND);
 	Graphics()->QuadsDraw(&QuadHand, 1);
 
 	Graphics()->QuadsSetRotation(0);
