@@ -3207,11 +3207,11 @@ void CEditor::DoMapEditor(CUIRect View)
 									std::shared_ptr<CLayerTiles> pBrushLayer = std::static_pointer_cast<CLayerTiles>(m_pBrush->m_vpLayers[BrushIndex]);
 
 									if(pLayer->m_Tele <= pBrushLayer->m_Tele && pLayer->m_Speedup <= pBrushLayer->m_Speedup && pLayer->m_Front <= pBrushLayer->m_Front && pLayer->m_Game <= pBrushLayer->m_Game && pLayer->m_Switch <= pBrushLayer->m_Switch && pLayer->m_Tune <= pBrushLayer->m_Tune)
-										pLayer->BrushDraw(pBrushLayer, wx, wy);
+										pLayer->BrushDraw(pBrushLayer, vec2(wx, wy));
 								}
 								else
 								{
-									apEditLayers[k].second->BrushDraw(m_pBrush->m_vpLayers[BrushIndex], wx, wy);
+									apEditLayers[k].second->BrushDraw(m_pBrush->m_vpLayers[BrushIndex], vec2(wx, wy));
 								}
 							}
 						}
@@ -3304,7 +3304,7 @@ void CEditor::DoMapEditor(CUIRect View)
 								BrushIndex = 0;
 
 							if(apEditLayers[k].second->m_Type == m_pBrush->m_vpLayers[BrushIndex]->m_Type)
-								apEditLayers[k].second->BrushPlace(m_pBrush->m_vpLayers[BrushIndex], wx, wy);
+								apEditLayers[k].second->BrushPlace(m_pBrush->m_vpLayers[BrushIndex], vec2(wx, wy));
 						}
 					}
 
@@ -5915,14 +5915,14 @@ float CEditor::EnvelopeToScreenY(const CUIRect &View, float y) const
 	return View.y + View.h - y / m_ZoomEnvelopeY.GetValue() * View.h - m_OffsetEnvelopeY * View.h;
 }
 
-float CEditor::ScreenToEnvelopeDX(const CUIRect &View, float dx)
+float CEditor::ScreenToEnvelopeDX(const CUIRect &View, float DeltaX)
 {
-	return dx / Graphics()->ScreenWidth() * Ui()->Screen()->w / View.w * m_ZoomEnvelopeX.GetValue();
+	return DeltaX / Graphics()->ScreenWidth() * Ui()->Screen()->w / View.w * m_ZoomEnvelopeX.GetValue();
 }
 
-float CEditor::ScreenToEnvelopeDY(const CUIRect &View, float dy)
+float CEditor::ScreenToEnvelopeDY(const CUIRect &View, float DeltaY)
 {
-	return dy / Graphics()->ScreenHeight() * Ui()->Screen()->h / View.h * m_ZoomEnvelopeY.GetValue();
+	return DeltaY / Graphics()->ScreenHeight() * Ui()->Screen()->h / View.h * m_ZoomEnvelopeY.GetValue();
 }
 
 void CEditor::RemoveTimeOffsetEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope)

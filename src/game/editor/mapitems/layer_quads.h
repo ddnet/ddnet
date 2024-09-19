@@ -16,7 +16,7 @@ public:
 
 	void BrushSelecting(CUIRect Rect) override;
 	int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) override;
-	void BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
+	void BrushPlace(std::shared_ptr<CLayer> pBrush, vec2 WorldPos) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;

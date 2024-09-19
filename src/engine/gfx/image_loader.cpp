@@ -44,17 +44,17 @@ public:
 	std::jmp_buf m_JmpBuf;
 };
 
-[[noreturn]] static void PngErrorCallback(png_structp png_ptr, png_const_charp error_msg)
+[[noreturn]] static void PngErrorCallback(png_structp pPngStruct, png_const_charp pErrorMessage)
 {
-	CUserErrorStruct *pUserStruct = static_cast<CUserErrorStruct *>(png_get_error_ptr(png_ptr));
-	log_error("png", "error for file \"%s\": %s", pUserStruct->m_pContextName, error_msg);
+	CUserErrorStruct *pUserStruct = static_cast<CUserErrorStruct *>(png_get_error_ptr(pPngStruct));
+	log_error("png", "error for file \"%s\": %s", pUserStruct->m_pContextName, pErrorMessage);
 	std::longjmp(pUserStruct->m_JmpBuf, 1);
 }
 
-static void PngWarningCallback(png_structp png_ptr, png_const_charp warning_msg)
+static void PngWarningCallback(png_structp pPngStruct, png_const_charp pWarningMessage)
 {
-	CUserErrorStruct *pUserStruct = static_cast<CUserErrorStruct *>(png_get_error_ptr(png_ptr));
-	log_warn("png", "warning for file \"%s\": %s", pUserStruct->m_pContextName, warning_msg);
+	CUserErrorStruct *pUserStruct = static_cast<CUserErrorStruct *>(png_get_error_ptr(pPngStruct));
+	log_warn("png", "warning for file \"%s\": %s", pUserStruct->m_pContextName, pWarningMessage);
 }
 
 static void PngReadDataCallback(png_structp pPngStruct, png_bytep pOutBytes, png_size_t ByteCountToRead)
@@ -307,7 +307,7 @@ static void PngWriteDataCallback(png_structp pPngStruct, png_bytep pOutBytes, pn
 	pWriter->Write(pOutBytes, ByteCountToWrite);
 }
 
-static void PngOutputFlushCallback(png_structp png_ptr)
+static void PngOutputFlushCallback(png_structp pPngStruct)
 {
 	// no need to flush memory buffer
 }

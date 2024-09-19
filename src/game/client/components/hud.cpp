@@ -1040,7 +1040,7 @@ void CHud::RenderPlayerState(const int ClientId)
 	}
 }
 
-void CHud::RenderNinjaBarPos(const float x, float y, const float width, const float height, float Progress, const float Alpha)
+void CHud::RenderNinjaBarPos(const float x, float y, const float Width, const float Height, float Progress, const float Alpha)
 {
 	Progress = clamp(Progress, 0.0f, 1.0f);
 
@@ -1049,9 +1049,9 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 	const float RestPct = 0.5f;
 	const float ProgPct = 0.5f;
 
-	const float EndHeight = width; // to keep the correct scale - the width of the sprite is as long as the height
-	const float BarWidth = width;
-	const float WholeBarHeight = height;
+	const float EndHeight = Width; // to keep the correct scale - the width of the sprite is as long as the height
+	const float BarWidth = Width;
+	const float WholeBarHeight = Height;
 	const float MiddleBarHeight = WholeBarHeight - (EndHeight * 2.0f);
 	const float EndProgressHeight = EndHeight * ProgPct;
 	const float EndRestHeight = EndHeight * RestPct;

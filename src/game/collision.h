@@ -53,7 +53,7 @@ public:
 	bool TestBox(vec2 Pos, vec2 Size) const;
 
 	// DDRace
-	void SetCollisionAt(float x, float y, int id);
+	void SetCollisionAt(float x, float y, int Index);
 	void SetDCollisionAt(float x, float y, int Type, int Flags, int Number);
 	int GetDTileIndex(int Index) const;
 	int GetDTileFlags(int Index) const;
@@ -101,8 +101,8 @@ public:
 	int GetSwitchDelay(int Index) const;
 
 	int IsSolid(int x, int y) const;
-	bool IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1) const;
-	bool IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1) const;
+	bool IsThrough(int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const;
+	bool IsHookBlocker(int x, int y, vec2 Pos0, vec2 Pos1) const;
 	int IsWallJump(int Index) const;
 	int IsNoLaser(int x, int y) const;
 	int IsFNoLaser(int x, int y) const;

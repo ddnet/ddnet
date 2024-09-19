@@ -352,11 +352,11 @@ public:
 
 	// old foolish interface
 	virtual void TextColor(float r, float g, float b, float a) = 0;
-	virtual void TextColor(ColorRGBA rgb) = 0;
+	virtual void TextColor(ColorRGBA Color) = 0;
 	virtual void TextOutlineColor(float r, float g, float b, float a) = 0;
-	virtual void TextOutlineColor(ColorRGBA rgb) = 0;
+	virtual void TextOutlineColor(ColorRGBA Color) = 0;
 	virtual void TextSelectionColor(float r, float g, float b, float a) = 0;
-	virtual void TextSelectionColor(ColorRGBA rgb) = 0;
+	virtual void TextSelectionColor(ColorRGBA Color) = 0;
 	virtual void Text(float x, float y, float Size, const char *pText, float LineWidth = -1.0f) = 0;
 	virtual float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, const STextSizeProperties &TextSizeProps = {}) = 0;
 	virtual STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, float LineSpacing = 0.0f, int Flags = 0) = 0;
