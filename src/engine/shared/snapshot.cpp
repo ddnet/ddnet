@@ -742,8 +742,11 @@ int *CSnapshotBuilder::GetItemData(int Key)
 {
 	for(int i = 0; i < m_NumItems; i++)
 	{
-		if(GetItem(i)->Key() == Key)
-			return GetItem(i)->Data();
+		CSnapshotItem *pItem = GetItem(i);
+		if(pItem->Key() == Key)
+		{
+			return pItem->Data();
+		}
 	}
 	return nullptr;
 }
