@@ -20,6 +20,8 @@ private:
 	FButtonActiveCallback m_pfnActiveCallback;
 	FButtonColorCallback m_pfnColorCallback;
 
+	const char m_ActionButtonId = 0;
+
 public:
 	CQuickAction(
 		const char *pLabel,
@@ -64,6 +66,8 @@ public:
 	}
 
 	const char *Description() const { return m_pDescription; }
+
+	const void *ActionButtonId() const { return &m_ActionButtonId; }
 };
 
 #endif
