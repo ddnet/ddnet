@@ -130,7 +130,7 @@ void CPrompt::OnRender(CUIRect _)
 
 	for(size_t i = 0; i < m_vpFilteredPromptList.size(); i++)
 	{
-		const CListboxItem Item = s_ListBox.DoNextItem(m_vpFilteredPromptList[i], m_PromptSelectedIndex >= 0 && (size_t)m_PromptSelectedIndex == i);
+		const CListboxItem Item = s_ListBox.DoNextItem(m_vpFilteredPromptList[i]->ActionButtonId(), m_PromptSelectedIndex >= 0 && (size_t)m_PromptSelectedIndex == i);
 		if(!Item.m_Visible)
 			continue;
 
