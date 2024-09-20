@@ -112,11 +112,7 @@ void CPrompt::OnRender(CUIRect _)
 
 			if(m_PromptInput.IsEmpty() || FuzzyMatch(pQuickAction->Label(), m_PromptInput.GetString()))
 			{
-				bool Skip = false;
-				if(m_ResetFilterResults)
-					if(pQuickAction == m_pLastAction)
-						Skip = true;
-				if(!Skip)
+				if(!m_ResetFilterResults || pQuickAction != m_pLastAction)
 					m_vpFilteredPromptList.push_back(pQuickAction);
 			}
 		}
@@ -146,9 +142,7 @@ void CPrompt::OnRender(CUIRect _)
 		Ui()->DoLabel(&LabelColumn, m_vpFilteredPromptList[i]->Label(), 10.0f, TEXTALIGN_ML, Props);
 
 		Props.m_MaxWidth = DescColumn.w;
-		ColorRGBA DescColor = TextRender()->DefaultTextColor();
-		DescColor.a = Item.m_Selected ? 1.0f : 0.8f;
-		TextRender()->TextColor(DescColor);
+		TextRender()->TextColor(TextRender()->DefaultTextColor().WithAlpha(Item.m_Selected ? 1.0f : 0.8f));
 		Ui()->DoLabel(&DescColumn, m_vpFilteredPromptList[i]->Description(), 10.0f, TEXTALIGN_MR, Props);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
