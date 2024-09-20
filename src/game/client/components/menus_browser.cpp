@@ -65,7 +65,7 @@ static ColorRGBA GetGametypeTextColor(const char *pGametype)
 		if(pGametype[0] == 'i' || pGametype[0] == 'g')
 			HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
 		else
-			HslaColor = ColorHSLA(0.375f, 1.0f, 0.35f);
+			HslaColor = ColorHSLA(0.40f, 1.0f, 0.75f);
 	}
 	else if(str_find_nocase(pGametype, "f-ddrace") || str_find_nocase(pGametype, "freeze"))
 		HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
