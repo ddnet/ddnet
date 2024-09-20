@@ -100,8 +100,12 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	if(m_Active && !Input()->ModifierIsPressed() && !Input()->ShiftIsPressed() && !Input()->AltIsPressed())
 	{
 		if(Ui()->ConsumeHotkey(CUi::HOTKEY_DOWN))
-			m_ListBoxNewSelOffset += 1;
+			m_ListBoxNewSelOffset += m_ListBoxItemsPerRow;
 		else if(Ui()->ConsumeHotkey(CUi::HOTKEY_UP))
+			m_ListBoxNewSelOffset -= m_ListBoxItemsPerRow;
+		else if(Ui()->ConsumeHotkey(CUi::HOTKEY_RIGHT) && m_ListBoxItemsPerRow > 1)
+			m_ListBoxNewSelOffset += 1;
+		else if(Ui()->ConsumeHotkey(CUi::HOTKEY_LEFT) && m_ListBoxItemsPerRow > 1)
 			m_ListBoxNewSelOffset -= 1;
 		else if(Ui()->ConsumeHotkey(CUi::HOTKEY_PAGE_UP))
 			m_ListBoxNewSelOffset = -ItemsPerRow * RowsPerScroll * 4;
