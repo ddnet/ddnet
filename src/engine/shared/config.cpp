@@ -492,7 +492,8 @@ void CConfigManager::Con_Toggle(IConsole::IResult *pResult, void *pUserData)
 		if(pVariable->m_Type == SConfigVariable::VAR_INT)
 		{
 			SIntConfigVariable *pIntVariable = static_cast<SIntConfigVariable *>(pVariable);
-			pIntVariable->SetValue(*pIntVariable->m_pVariable == pResult->GetInteger(pResult->GetInteger(1) ? 2 : 1));
+			const bool EqualToFirst = *pIntVariable->m_pVariable == pResult->GetInteger(1);
+			pIntVariable->SetValue(pResult->GetInteger(EqualToFirst ? 2 : 1));
 		}
 		else if(pVariable->m_Type == SConfigVariable::VAR_COLOR)
 		{
@@ -504,7 +505,8 @@ void CConfigManager::Con_Toggle(IConsole::IResult *pResult, void *pUserData)
 		else if(pVariable->m_Type == SConfigVariable::VAR_STRING)
 		{
 			SStringConfigVariable *pStringVariable = static_cast<SStringConfigVariable *>(pVariable);
-			pStringVariable->SetValue(pResult->GetString(str_comp(pStringVariable->m_pStr, pResult->GetString(1)) == 0 ? 2 : 1));
+			const bool EqualToFirst = str_comp(pStringVariable->m_pStr, pResult->GetString(1)) == 0;
+			pStringVariable->SetValue(pResult->GetString(EqualToFirst ? 2 : 1));
 		}
 		return;
 	}
