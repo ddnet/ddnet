@@ -136,9 +136,9 @@ void CPrompt::OnRender(CUIRect _)
 
 		CUIRect LabelColumn, DescColumn;
 		float Margin = 5.0f;
-		Item.m_Rect.VSplitLeft(Margin, nullptr, &LabelColumn);
+		Item.m_Rect.VMargin(Margin, &LabelColumn);
 		LabelColumn.VSplitLeft(LabelWidth, &LabelColumn, &DescColumn);
-		DescColumn.VSplitRight(Margin, &DescColumn, nullptr);
+		DescColumn.VSplitLeft(Margin, nullptr, &DescColumn);
 
 		SLabelProperties Props;
 		Props.m_MaxWidth = LabelColumn.w;
