@@ -1434,6 +1434,11 @@ bool CServer::CheckReservedSlotAuth(int ClientId, const char *pPassword)
 	return false;
 }
 
+void CServer::DropOldClient(int ClientId)
+{
+	m_NetServer.Drop(ClientId, "This version of the client is compromised. Do not click the update button. ddnet.org/olddomain");
+}
+
 void CServer::ProcessClientPacket(CNetChunk *pPacket)
 {
 	int ClientId = pPacket->m_ClientId;
@@ -1495,6 +1500,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				{
 					return;
 				}
+
+				if(DDNetVersion < VERSION_DDNET_NEW_DOMAIN)
+				{
+					DropOldClient(ClientId);
+					return;
+				}
+
 				m_aClients[ClientId].m_ConnectionId = *pConnectionId;
 				m_aClients[ClientId].m_DDNetVersion = DDNetVersion;
 				str_copy(m_aClients[ClientId].m_aDDNetVersionStr, pDDNetVersionStr);
@@ -1512,6 +1524,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				{
 					return;
 				}
+
+				if(!m_aClients[ClientId].m_GotDDNetVersionPacket)
+				{
+					DropOldClient(ClientId);
+					return;
+				}
+
 				if(str_comp(pVersion, GameServer()->NetVersion()) != 0 && str_comp(pVersion, "0.7 802f1be60a05665f") != 0)
 				{
 					// wrong version
