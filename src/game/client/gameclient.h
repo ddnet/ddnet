@@ -917,6 +917,8 @@ private:
 	};
 
 	SMultiView m_MultiView;
+
+	void OnSaveCodeNetMessage(const CNetMsg_Sv_SaveCode *pMsg);
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);
