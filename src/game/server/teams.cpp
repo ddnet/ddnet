@@ -1013,12 +1013,50 @@ void CGameTeams::ProcessSaveTeam()
 	{
 		if(m_apSaveTeamResult[Team] == nullptr || !m_apSaveTeamResult[Team]->m_Completed)
 			continue;
-		if(m_apSaveTeamResult[Team]->m_aBroadcast[0] != '\0')
-			GameServer()->SendBroadcast(m_apSaveTeamResult[Team]->m_aBroadcast, -1);
-		if(m_apSaveTeamResult[Team]->m_aMessage[0] != '\0' && m_apSaveTeamResult[Team]->m_Status != CScoreSaveResult::LOAD_FAILED)
-			GameServer()->SendChatTeam(Team, m_apSaveTeamResult[Team]->m_aMessage);
+
+		int TeamSize = m_apSaveTeamResult[Team]->m_SavedTeam.GetMembersCount();
+		int State = -1;
+
 		switch(m_apSaveTeamResult[Team]->m_Status)
 		{
+		case CScoreSaveResult::SAVE_FALLBACKFILE:
+			State = SAVESTATE_FALLBACKFILE;
+			break;
+		case CScoreSaveResult::SAVE_WARNING:
+			State = SAVESTATE_WARNING;
+			break;
+		case CScoreSaveResult::SAVE_SUCCESS:
+			State = SAVESTATE_DONE;
+			break;
+		case CScoreSaveResult::SAVE_FAILED:
+			State = SAVESTATE_ERROR;
+			break;
+		case CScoreSaveResult::LOAD_FAILED:
+		case CScoreSaveResult::LOAD_SUCCESS:
+			State = -1;
+			break;
+		}
+
+		if(State != -1)
+		{
+			GameServer()->SendSaveCode(
+				Team,
+				TeamSize,
+				State,
+				(State == SAVESTATE_DONE) ? "" : m_apSaveTeamResult[Team]->m_aMessage,
+				m_apSaveTeamResult[Team]->m_aRequestingPlayer,
+				m_apSaveTeamResult[Team]->m_aServer,
+				m_apSaveTeamResult[Team]->m_aGeneratedCode,
+				m_apSaveTeamResult[Team]->m_aCode);
+		}
+
+		if(m_apSaveTeamResult[Team]->m_aBroadcast[0] != '\0')
+			GameServer()->SendBroadcast(m_apSaveTeamResult[Team]->m_aBroadcast, -1);
+
+		switch(m_apSaveTeamResult[Team]->m_Status)
+		{
+		case CScoreSaveResult::SAVE_FALLBACKFILE:
+		case CScoreSaveResult::SAVE_WARNING:
 		case CScoreSaveResult::SAVE_SUCCESS:
 		{
 			if(GameServer()->TeeHistorianActive())
@@ -1028,7 +1066,7 @@ void CGameTeams::ProcessSaveTeam()
 					m_apSaveTeamResult[Team]->m_SaveId,
 					m_apSaveTeamResult[Team]->m_SavedTeam.GetString());
 			}
-			for(int i = 0; i < m_apSaveTeamResult[Team]->m_SavedTeam.GetMembersCount(); i++)
+			for(int i = 0; i < TeamSize; i++)
 			{
 				if(m_apSaveTeamResult[Team]->m_SavedTeam.m_pSavedTees->IsHooking())
 				{

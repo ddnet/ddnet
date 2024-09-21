@@ -929,6 +929,9 @@ private:
 	};
 
 	SMultiView m_MultiView;
+
+	void OnSaveCodeNetMessage(const CNetMsg_Sv_SaveCode *pMsg);
+	void StoreSave(const char *pTeamMembers, const char *pGeneratedCode) const;
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);
