@@ -130,7 +130,7 @@ CheckOptions:
   - key:             readability-identifier-naming.StructPrefix
     value:           S
   - key:             readability-identifier-naming.StructIgnoredRegexp
-    value:           '^([CS]|MapObject$|EnvelopedQuad$).*'
+    value:           '^C.*'
   - key:             readability-identifier-naming.ClassIgnoredRegexp
     value:           '^(I|CCommandProcessorFragment_Vulkan$).*'
   - key:             readability-identifier-naming.ParameterCase
