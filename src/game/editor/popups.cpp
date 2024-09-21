@@ -1655,6 +1655,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	{
 		if(pEditor->DoButton_MenuItem(&s_ExternalButton, "Embed", 0, &Slot, 0, "Embeds the image into the map file."))
 		{
+			if(pImg->m_pData == nullptr)
+			{
+				pEditor->ShowFileDialogError("Embedding is not possible because the image could not be loaded.");
+				return CUi::POPUP_KEEP_OPEN;
+			}
 			pImg->m_External = 0;
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
@@ -1730,6 +1735,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 		View.HSplitTop(RowHeight, &Slot, &View);
 		if(pEditor->DoButton_MenuItem(&s_ExportButton, "Export", 0, &Slot, 0, "Export the image"))
 		{
+			if(pImg->m_pData == nullptr)
+			{
+				pEditor->ShowFileDialogError("Exporting is not possible because the image could not be loaded.");
+				return CUi::POPUP_KEEP_OPEN;
+			}
 			pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_IMG, "Save image", "Save", "mapres", false, CallbackSaveImage, pEditor);
 			pEditor->m_FileDialogFileNameInput.Set(pImg->m_aName);
 			return CUi::POPUP_CLOSE_CURRENT;
@@ -1825,6 +1835,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ExportButton, "Export", 0, &Slot, 0, "Export sound"))
 	{
+		if(pSound->m_pData == nullptr)
+		{
+			pEditor->ShowFileDialogError("Exporting is not possible because the sound could not be loaded.");
+			return CUi::POPUP_KEEP_OPEN;
+		}
 		pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_SOUND, "Save sound", "Save", "mapres", false, CallbackSaveSound, pEditor);
 		pEditor->m_FileDialogFileNameInput.Set(pSound->m_aName);
 		return CUi::POPUP_CLOSE_CURRENT;

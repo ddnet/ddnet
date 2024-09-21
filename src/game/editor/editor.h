@@ -200,7 +200,8 @@ public:
 	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
 
 	// io
-	bool Save(const char *pFilename);
+	bool Save(const char *pFilename, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
+	bool PerformPreSaveSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
 	bool Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
 	void PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
 

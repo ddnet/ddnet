@@ -8720,7 +8720,11 @@ bool CEditor::Save(const char *pFilename)
 	if(std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetRealFileName()) == 0; }))
 		return false;
 
-	return m_Map.Save(pFilename);
+	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
+		ShowFileDialogError("%s", pErrorMessage);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/save", pErrorMessage);
+	};
+	return m_Map.Save(pFilename, ErrorHandler);
 }
 
 bool CEditor::HandleMapDrop(const char *pFileName, int StorageType)
