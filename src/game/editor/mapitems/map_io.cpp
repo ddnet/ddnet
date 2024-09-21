@@ -513,11 +513,10 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					ConvertToRgba(*pImg);
 
 					int TextureLoadFlag = m_pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-					if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
+					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 						TextureLoadFlag = 0;
-					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo, TextureLoadFlag, aBuf);
-					ImgInfo.m_pData = nullptr;
 					pImg->m_External = 1;
+					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, aBuf);
 				}
 			}
 			else
