@@ -5,7 +5,6 @@
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
-#include <engine/shared/csv.h>
 #include <engine/textrender.h>
 
 #include <game/generated/protocol.h>
@@ -565,66 +564,6 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 	return false;
 }
 
-#define SAVES_FILE "ddnet-saves.txt"
-const char *SAVES_HEADER[] = {
-	"Time",
-	"Player",
-	"Map",
-	"Code",
-};
-
-void CChat::StoreSave(const char *pText)
-{
-	const char *pStart = str_find(pText, "Team successfully saved by ");
-	const char *pMid = str_find(pText, ". Use '/load ");
-	const char *pOn = str_find(pText, "' on ");
-	const char *pEnd = str_find(pText, pOn ? " to continue" : "' to continue");
-
-	if(!pStart || !pMid || !pEnd || pMid < pStart || pEnd < pMid || (pOn && (pOn < pMid || pEnd < pOn)))
-		return;
-
-	char aName[16];
-	str_truncate(aName, sizeof(aName), pStart + 27, pMid - pStart - 27);
-
-	char aSaveCode[64];
-
-	str_truncate(aSaveCode, sizeof(aSaveCode), pMid + 13, (pOn ? pOn : pEnd) - pMid - 13);
-
-	char aTimestamp[20];
-	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
-
-	// TODO: Find a simple way to get the names of team members. This doesn't
-	// work since team is killed first, then save message gets sent:
-	/*
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		const CNetObj_PlayerInfo *pInfo = GameClient()->m_Snap.m_paInfoByDDTeam[i];
-		if(!pInfo)
-			continue;
-		pInfo->m_Team // All 0
-	}
-	*/
-
-	const bool SavesFileExists = Storage()->FileExists(SAVES_FILE, IStorage::TYPE_SAVE);
-	IOHANDLE File = Storage()->OpenFile(SAVES_FILE, IOFLAG_APPEND, IStorage::TYPE_SAVE);
-	if(!File)
-		return;
-
-	const char *apColumns[4] = {
-		aTimestamp,
-		aName,
-		Client()->GetCurrentMap(),
-		aSaveCode,
-	};
-
-	if(!SavesFileExists)
-	{
-		CsvWrite(File, 4, SAVES_HEADER);
-	}
-	CsvWrite(File, 4, apColumns);
-	io_close(File);
-}
-
 void CChat::AddLine(int ClientId, int Team, const char *pLine)
 {
 	if(*pLine == 0 ||
@@ -668,12 +607,6 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	bool Highlighted = false;
 
 	auto &&FChatMsgCheckAndPrint = [this](CLine *pLine_) {
-		if(pLine_->m_ClientId < 0) // server or client message
-		{
-			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
-				StoreSave(pLine_->m_aText);
-		}
-
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "%s%s%s", pLine_->m_aName, pLine_->m_ClientId >= 0 ? ": " : "", pLine_->m_aText);
 
@@ -943,22 +876,6 @@ void CChat::OnPrepareLines(float y)
 			str_format(aCount, sizeof(aCount), " [%d]", Line.m_TimesRepeated + 1);
 
 		const char *pText = Line.m_aText;
-		if(Config()->m_ClStreamerMode && Line.m_ClientId == SERVER_MSG)
-		{
-			if(str_startswith(Line.m_aText, "Team save in progress. You'll be able to load with '/load ") && str_endswith(Line.m_aText, "'"))
-			{
-				pText = "Team save in progress. You'll be able to load with '/load ***'";
-			}
-			else if(str_startswith(Line.m_aText, "Team save in progress. You'll be able to load with '/load") && str_endswith(Line.m_aText, "if it fails"))
-			{
-				pText = "Team save in progress. You'll be able to load with '/load ***' if save is successful or with '/load *** *** ***' if it fails";
-			}
-			else if(str_startswith(Line.m_aText, "Team successfully saved by ") && str_endswith(Line.m_aText, " to continue"))
-			{
-				pText = "Team successfully saved by ***. Use '/load ***' to continue";
-			}
-		}
-
 		if(g_Config.m_ClChatOld)
 		{
 			Line.m_HasRenderTee = false;
