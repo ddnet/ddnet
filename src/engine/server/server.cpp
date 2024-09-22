@@ -1501,7 +1501,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					return;
 				}
 
-				if(DDNetVersion < VERSION_DDNET_NEW_DOMAIN)
+				if(DDNetVersion < VERSION_DDNET_NEW_DOMAIN && DDNetVersion >= VERSION_DDNET_OLD)
 				{
 					DropOldClient(ClientId);
 					return;
@@ -1522,12 +1522,6 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				const char *pVersion = Unpacker.GetString(CUnpacker::SANITIZE_CC);
 				if(Unpacker.Error())
 				{
-					return;
-				}
-
-				if(!m_aClients[ClientId].m_GotDDNetVersionPacket && !IsSixup(ClientId))
-				{
-					DropOldClient(ClientId);
 					return;
 				}
 
