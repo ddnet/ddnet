@@ -25,7 +25,7 @@ TEST(MapBugs, Update)
 {
 	{
 		CMapBugs Binary = GetMapBugsImpl("Binary", 2022597, BINARY_SHA256);
-		EXPECT_EQ(Binary.Update("grenade-doubleexplosion@ddnet.tw"), MAPBUGUPDATE_OVERRIDDEN);
+		EXPECT_EQ(Binary.Update("grenade-doubleexplosion@ddnet.org"), MAPBUGUPDATE_OVERRIDDEN);
 		EXPECT_EQ(Binary.Update("doesntexist@invalid"), MAPBUGUPDATE_NOTFOUND);
 		EXPECT_TRUE(Binary.Contains(BUG_GRENADE_DOUBLEEXPLOSION));
 	}
@@ -34,7 +34,7 @@ TEST(MapBugs, Update)
 		EXPECT_FALSE(Dm1.Contains(BUG_GRENADE_DOUBLEEXPLOSION));
 		EXPECT_EQ(Dm1.Update("doesntexist@invalid"), MAPBUGUPDATE_NOTFOUND);
 		EXPECT_FALSE(Dm1.Contains(BUG_GRENADE_DOUBLEEXPLOSION));
-		EXPECT_EQ(Dm1.Update("grenade-doubleexplosion@ddnet.tw"), MAPBUGUPDATE_OK);
+		EXPECT_EQ(Dm1.Update("grenade-doubleexplosion@ddnet.org"), MAPBUGUPDATE_OK);
 		EXPECT_TRUE(Dm1.Contains(BUG_GRENADE_DOUBLEEXPLOSION));
 	}
 }

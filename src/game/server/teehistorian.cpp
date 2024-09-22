@@ -7,7 +7,7 @@
 #include <engine/shared/snapshot.h>
 #include <game/gamecore.h>
 
-static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
+static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.org";
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
 static const char TEEHISTORIAN_VERSION[] = "2";
 static const char TEEHISTORIAN_VERSION_MINOR[] = "8";

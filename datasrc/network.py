@@ -243,7 +243,7 @@ Objects = [
 		NetIntAny("m_Test"),
 	]),
 
-	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
+	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.org", [
 		NetIntAny("m_Flags", 0),
 		NetTick("m_FreezeEnd", 0),
 		NetIntRange("m_Jumps", -1, 255, 2),
@@ -260,12 +260,12 @@ Objects = [
 		NetIntAny("m_TargetY", 0),
 	], validate_size=False),
 
-	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
+	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.org", [
 		NetIntAny("m_Flags"),
 		NetIntRange("m_AuthLevel", "AUTHED_NO", "AUTHED_ADMIN"),
 	]),
 
-	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
+	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.org", [
 		NetIntAny("m_Flags", 0),
 		NetIntAny("m_Version", 0),
 		NetIntAny("m_Flags2", 0),
@@ -273,7 +273,7 @@ Objects = [
 
 	# The code assumes that this has the same in-memory representation as
 	# the Projectile net object.
-	NetObjectEx("DDRaceProjectile", "projectile@netobj.ddnet.tw", [
+	NetObjectEx("DDRaceProjectile", "projectile@netobj.ddnet.org", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 		NetIntAny("m_Angle"),
@@ -282,7 +282,7 @@ Objects = [
 		NetTick("m_StartTick"),
 	]),
 
-	NetObjectEx("DDNetLaser", "laser@netobj.ddnet.tw", [
+	NetObjectEx("DDNetLaser", "laser@netobj.ddnet.org", [
 		NetIntAny("m_ToX"),
 		NetIntAny("m_ToY"),
 		NetIntAny("m_FromX"),
@@ -295,7 +295,7 @@ Objects = [
 		NetIntAny("m_Flags", 0),
 	]),
 
-	NetObjectEx("DDNetProjectile", "ddnet-projectile@netobj.ddnet.tw", [
+	NetObjectEx("DDNetProjectile", "ddnet-projectile@netobj.ddnet.org", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 		NetIntAny("m_VelX"),
@@ -308,7 +308,7 @@ Objects = [
 		NetIntAny("m_Flags"),
 	]),
 
-	NetObjectEx("DDNetPickup", "pickup@netobj.ddnet.tw", [
+	NetObjectEx("DDNetPickup", "pickup@netobj.ddnet.org", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 		NetIntRange("m_Type", 0, 'max_int'),
@@ -353,13 +353,13 @@ Objects = [
 		NetIntAny("m_Test"),
 	]),
 
-	NetObjectEx("SpecChar", "spec-char@netobj.ddnet.tw", [
+	NetObjectEx("SpecChar", "spec-char@netobj.ddnet.org", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 	]),
 
 	# Switch state for a player team.
-	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.tw", [
+	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.org", [
 		NetIntAny("m_HighestSwitchNumber", 0),
 		# 256 switches / 32 bits = 8 int32
 		NetArray(NetIntAny("m_aStatus", 0), 8),
@@ -369,7 +369,7 @@ Objects = [
 	], validate_size=False),
 
 	# Switch info for map items
-	NetObjectEx("EntityEx", "entity-ex@netobj.ddnet.tw", [
+	NetObjectEx("EntityEx", "entity-ex@netobj.ddnet.org", [
 		NetIntAny("m_SwitchNumber"),
 		NetIntAny("m_Layer"),
 		NetIntAny("m_EntityClass"),
@@ -521,7 +521,7 @@ Messages = [
 
 	NetMessage("Sv_TeamsStateLegacy", []),
 
-	# deprecated, use showothers@netmsg.ddnet.tw instead
+	# deprecated, use showothers@netmsg.ddnet.org instead
 	NetMessage("Cl_ShowOthersLegacy", [
 		NetBool("m_Show"),
 	]),
@@ -531,29 +531,29 @@ Messages = [
 		NetIntAny("m_Test"),
 	]),
 
-	NetMessageEx("Cl_ShowDistance", "show-distance@netmsg.ddnet.tw", [
+	NetMessageEx("Cl_ShowDistance", "show-distance@netmsg.ddnet.org", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 	]),
 
-	NetMessageEx("Cl_ShowOthers", "showothers@netmsg.ddnet.tw", [
+	NetMessageEx("Cl_ShowOthers", "showothers@netmsg.ddnet.org", [
 		NetIntRange("m_Show", 0, 2),
 	]),
 
-	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.tw", []),
+	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.org", []),
 
-	NetMessageEx("Sv_DDRaceTime", "ddrace-time@netmsg.ddnet.tw", [
+	NetMessageEx("Sv_DDRaceTime", "ddrace-time@netmsg.ddnet.org", [
 		NetIntAny("m_Time"),
 		NetIntAny("m_Check"),
 		NetIntRange("m_Finish", 0, 1),
 	]),
 
-	NetMessageEx("Sv_Record", "record@netmsg.ddnet.tw", [
+	NetMessageEx("Sv_Record", "record@netmsg.ddnet.org", [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
 	]),
     
-	NetMessageEx("Sv_KillMsgTeam", "killmsgteam@netmsg.ddnet.tw", [
+	NetMessageEx("Sv_KillMsgTeam", "killmsgteam@netmsg.ddnet.org", [
 		NetIntRange("m_Team", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_First", -1, 'MAX_CLIENTS-1'),
 	]),

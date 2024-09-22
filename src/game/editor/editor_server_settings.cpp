@@ -1090,7 +1090,7 @@ void CMapSettingsBackend::LoadAllMapSettings()
 	LoadCommand("tune_zone", "i[zone] s[tuning] f[value]", "Tune in zone a variable to value");
 	LoadCommand("tune_zone_enter", "i[zone] r[message]", "which message to display on zone enter; use 0 for normal area");
 	LoadCommand("tune_zone_leave", "i[zone] r[message]", "which message to display on zone leave; use 0 for normal area");
-	LoadCommand("mapbug", "s[mapbug]", "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
+	LoadCommand("mapbug", "s[mapbug]", "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.org)");
 	LoadCommand("switch_open", "i[switch]", "Whether a switch is deactivated by default (otherwise activated)");
 }
 
@@ -2231,7 +2231,7 @@ void SValueLoader::LoadMapBugs(const CSettingValuesBuilder &BugBuilder)
 	// Get argument 0 of setting "mapbug"
 	auto ArgBuilder = BugBuilder.Argument(0);
 	// Add available map bugs options
-	ArgBuilder.Add("grenade-doubleexplosion@ddnet.tw");
+	ArgBuilder.Add("grenade-doubleexplosion@ddnet.org");
 }
 
 void SValueLoader::LoadArgumentTuneValues(CArgumentValuesListBuilder &&ArgBuilder)
