@@ -576,7 +576,7 @@ public:
 
 	class CTeamsCore m_Teams;
 
-	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownId);
+	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int OwnId);
 
 	int GetLastRaceTick() const override;
 

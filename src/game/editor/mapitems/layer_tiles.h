@@ -125,7 +125,7 @@ public:
 	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
 	void FillGameTiles(EGameTileOp Fill);
 	bool CanFillGameTiles() const;
-	void BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
+	void BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;

@@ -157,41 +157,41 @@ void DilateImage(const CImageInfo &Image)
 	DilateImage(Image.m_pData, Image.m_Width, Image.m_Height);
 }
 
-void DilateImageSub(uint8_t *pImageBuff, int w, int h, int x, int y, int sw, int sh)
+void DilateImageSub(uint8_t *pImageBuff, int w, int h, int x, int y, int SubWidth, int SubHeight)
 {
 	uint8_t *apBuffer[2] = {nullptr, nullptr};
 
-	const size_t ImageSize = (size_t)sw * sh * sizeof(uint8_t) * DILATE_BPP;
+	const size_t ImageSize = (size_t)SubWidth * SubHeight * sizeof(uint8_t) * DILATE_BPP;
 	apBuffer[0] = (uint8_t *)malloc(ImageSize);
 	apBuffer[1] = (uint8_t *)malloc(ImageSize);
 	uint8_t *pBufferOriginal = (uint8_t *)malloc(ImageSize);
 
-	for(int Y = 0; Y < sh; ++Y)
+	for(int Y = 0; Y < SubHeight; ++Y)
 	{
 		int SrcImgOffset = ((y + Y) * w * DILATE_BPP) + (x * DILATE_BPP);
-		int DstImgOffset = (Y * sw * DILATE_BPP);
-		int CopySize = sw * DILATE_BPP;
+		int DstImgOffset = (Y * SubWidth * DILATE_BPP);
+		int CopySize = SubWidth * DILATE_BPP;
 		mem_copy(&pBufferOriginal[DstImgOffset], &pImageBuff[SrcImgOffset], CopySize);
 	}
 
-	Dilate(sw, sh, pBufferOriginal, apBuffer[0]);
+	Dilate(SubWidth, SubHeight, pBufferOriginal, apBuffer[0]);
 
 	for(int i = 0; i < 5; i++)
 	{
-		Dilate(sw, sh, apBuffer[0], apBuffer[1]);
-		Dilate(sw, sh, apBuffer[1], apBuffer[0]);
+		Dilate(SubWidth, SubHeight, apBuffer[0], apBuffer[1]);
+		Dilate(SubWidth, SubHeight, apBuffer[1], apBuffer[0]);
 	}
 
-	CopyColorValues(sw, sh, apBuffer[0], pBufferOriginal);
+	CopyColorValues(SubWidth, SubHeight, apBuffer[0], pBufferOriginal);
 
 	free(apBuffer[0]);
 	free(apBuffer[1]);
 
-	for(int Y = 0; Y < sh; ++Y)
+	for(int Y = 0; Y < SubHeight; ++Y)
 	{
 		int SrcImgOffset = ((y + Y) * w * DILATE_BPP) + (x * DILATE_BPP);
-		int DstImgOffset = (Y * sw * DILATE_BPP);
-		int CopySize = sw * DILATE_BPP;
+		int DstImgOffset = (Y * SubWidth * DILATE_BPP);
+		int CopySize = SubWidth * DILATE_BPP;
 		mem_copy(&pImageBuff[SrcImgOffset], &pBufferOriginal[DstImgOffset], CopySize);
 	}
 
