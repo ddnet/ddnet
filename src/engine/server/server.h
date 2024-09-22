@@ -337,7 +337,6 @@ public:
 	void UpdateClientRconCommands();
 
 	bool CheckReservedSlotAuth(int ClientId, const char *pPassword);
-	void DropOldClient(int ClientId);
 	void ProcessClientPacket(CNetChunk *pPacket);
 
 	class CCache
