@@ -708,23 +708,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 	{
 		CUIRect DeleteButton;
 		View.HSplitBottom(12.0f, &View, &DeleteButton);
-		static int s_DeleteButton = 0;
-		if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete layer", 0, &DeleteButton, 0, "Deletes the layer"))
+		if(pEditor->DoButton_Editor(&pEditor->m_QuickActionDeleteLayer, pEditor->m_QuickActionDeleteLayer.Label(), 0, &DeleteButton, 0, pEditor->m_QuickActionDeleteLayer.Description()))
 		{
-			pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionDeleteLayer>(pEditor, pEditor->m_SelectedGroup, pEditor->m_vSelectedLayers[0]));
-
-			if(pCurrentLayer == pEditor->m_Map.m_pFrontLayer)
-				pEditor->m_Map.m_pFrontLayer = nullptr;
-			if(pCurrentLayer == pEditor->m_Map.m_pTeleLayer)
-				pEditor->m_Map.m_pTeleLayer = nullptr;
-			if(pCurrentLayer == pEditor->m_Map.m_pSpeedupLayer)
-				pEditor->m_Map.m_pSpeedupLayer = nullptr;
-			if(pCurrentLayer == pEditor->m_Map.m_pSwitchLayer)
-				pEditor->m_Map.m_pSwitchLayer = nullptr;
-			if(pCurrentLayer == pEditor->m_Map.m_pTuneLayer)
-				pEditor->m_Map.m_pTuneLayer = nullptr;
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->DeleteLayer(pEditor->m_vSelectedLayers[0]);
-
+			pEditor->m_QuickActionDeleteLayer.Call();
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}

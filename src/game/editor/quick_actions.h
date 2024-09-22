@@ -279,6 +279,19 @@ REGISTER_QUICK_ACTION(
 	DEFAULT_BTN,
 	"[Ctrl+Shift+I] Show tile information in hexadecimal.")
 REGISTER_QUICK_ACTION(
+	DeleteLayer,
+	"Delete layer",
+	[&]() { DeleteSelectedLayer(); },
+	[&]() -> bool {
+		std::shared_ptr<CLayer> pCurrentLayer = GetSelectedLayer(0);
+		if(!pCurrentLayer)
+			return true;
+		return m_Map.m_pGameLayer == pCurrentLayer;
+	},
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Deletes the layer.")
+REGISTER_QUICK_ACTION(
 	Pipette,
 	"Pipette",
 	[&]() { m_ColorPipetteActive = !m_ColorPipetteActive; },

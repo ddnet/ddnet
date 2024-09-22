@@ -325,6 +325,9 @@ public:
 	const CMapView *MapView() const { return &m_MapView; }
 	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
 
+	void SelectNextLayer();
+	void SelectPreviousLayer();
+
 	void FillGameTiles(EGameTileOp FillTile) const;
 	bool CanFillGameTiles() const;
 	void AddQuadOrSound();
@@ -332,6 +335,7 @@ public:
 	void AddTileLayer();
 	void AddFrontLayer();
 	void AddQuadsLayer();
+	void DeleteSelectedLayer();
 	void LayerSelectImage();
 	bool IsNonGameTileLayerSelected() const;
 	void MapDetails();

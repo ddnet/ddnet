@@ -135,3 +135,28 @@ void CEditor::MapDetails()
 		PopupMapInfo);
 	Ui()->SetActiveItem(nullptr);
 }
+
+void CEditor::DeleteSelectedLayer()
+{
+	std::shared_ptr<CLayer> pCurrentLayer = GetSelectedLayer(0);
+	if(!pCurrentLayer)
+		return;
+	if(m_Map.m_pGameLayer == pCurrentLayer)
+		return;
+
+	m_EditorHistory.RecordAction(std::make_shared<CEditorActionDeleteLayer>(this, m_SelectedGroup, m_vSelectedLayers[0]));
+
+	if(pCurrentLayer == m_Map.m_pFrontLayer)
+		m_Map.m_pFrontLayer = nullptr;
+	if(pCurrentLayer == m_Map.m_pTeleLayer)
+		m_Map.m_pTeleLayer = nullptr;
+	if(pCurrentLayer == m_Map.m_pSpeedupLayer)
+		m_Map.m_pSpeedupLayer = nullptr;
+	if(pCurrentLayer == m_Map.m_pSwitchLayer)
+		m_Map.m_pSwitchLayer = nullptr;
+	if(pCurrentLayer == m_Map.m_pTuneLayer)
+		m_Map.m_pTuneLayer = nullptr;
+	m_Map.m_vpGroups[m_SelectedGroup]->DeleteLayer(m_vSelectedLayers[0]);
+
+	SelectPreviousLayer();
+}
