@@ -1525,7 +1525,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					return;
 				}
 
-				if(!m_aClients[ClientId].m_GotDDNetVersionPacket)
+				if(!m_aClients[ClientId].m_GotDDNetVersionPacket && !IsSixup(ClientId))
 				{
 					DropOldClient(ClientId);
 					return;
