@@ -174,6 +174,10 @@ void CCharacter::SetSolo(bool Solo)
 
 void CCharacter::SetSuper(bool Super)
 {
+	// Disable invincible mode before activating super mode. Both modes active at the same time wouldn't necessarily break anything but it's not useful.
+	if(Super)
+		SetInvincible(false);
+
 	bool WasSuper = m_Core.m_Super;
 	m_Core.m_Super = Super;
 	if(Super && !WasSuper)
@@ -186,6 +190,15 @@ void CCharacter::SetSuper(bool Super)
 	{
 		Teams()->SetForceCharacterTeam(GetPlayer()->GetCid(), m_TeamBeforeSuper);
 	}
+}
+
+void CCharacter::SetInvincible(bool Invincible)
+{
+	// Disable super mode before activating invincible mode. Both modes active at the same time wouldn't necessarily break anything but it's not useful.
+	if(Invincible)
+		SetSuper(false);
+
+	m_Core.m_Invincible = Invincible;
 }
 
 void CCharacter::SetLiveFrozen(bool Active)
@@ -1220,6 +1233,8 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SOLO;
 	if(m_Core.m_Super)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
+	if(m_Core.m_Invincible)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_INVINCIBLE;
 	if(m_Core.m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
 	if(m_Core.m_CollisionDisabled || !Tuning()->m_PlayerCollision)
