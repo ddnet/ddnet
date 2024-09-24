@@ -956,7 +956,7 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const
 				if(SampleId != m_ToolbarPreviewSound && m_ToolbarPreviewSound >= 0 && Sound()->IsPlaying(m_ToolbarPreviewSound))
 					Sound()->Pause(m_ToolbarPreviewSound);
 
-				Sound()->Play(CSounds::CHN_GUI, SampleId, ISound::FLAG_PREVIEW);
+				Sound()->Play(CSounds::CHN_GUI, SampleId, ISound::FLAG_PREVIEW, 1.0f);
 			}
 		}
 	}

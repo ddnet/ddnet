@@ -6,6 +6,8 @@
 #include <engine/kernel.h>
 #include <engine/storage.h>
 
+#include <base/vmath.h>
+
 class ISound : public IInterface
 {
 	MACRO_INTERFACE("sound")
@@ -74,18 +76,18 @@ public:
 	virtual void SetSampleCurrentTime(int SampleId, float Time) = 0;
 
 	virtual void SetChannel(int ChannelId, float Volume, float Panning) = 0;
-	virtual void SetListenerPos(float x, float y) = 0;
+	virtual void SetListenerPosition(vec2 Position) = 0;
 
 	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume) = 0;
 	virtual void SetVoiceFalloff(CVoiceHandle Voice, float Falloff) = 0;
-	virtual void SetVoiceLocation(CVoiceHandle Voice, float x, float y) = 0;
+	virtual void SetVoicePosition(CVoiceHandle Voice, vec2 Position) = 0;
 	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset) = 0; // in s
 
 	virtual void SetVoiceCircle(CVoiceHandle Voice, float Radius) = 0;
 	virtual void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) = 0;
 
-	virtual CVoiceHandle PlayAt(int ChannelId, int SampleId, int Flags, float x, float y) = 0;
-	virtual CVoiceHandle Play(int ChannelId, int SampleId, int Flags) = 0;
+	virtual CVoiceHandle PlayAt(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position) = 0;
+	virtual CVoiceHandle Play(int ChannelId, int SampleId, int Flags, float Volume) = 0;
 	virtual void Pause(int SampleId) = 0;
 	virtual void Stop(int SampleId) = 0;
 	virtual void StopAll() = 0;
