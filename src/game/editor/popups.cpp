@@ -835,6 +835,37 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 		}
 	}
 
+	// center pivot button
+	View.HSplitBottom(6.0f, &View, nullptr);
+	View.HSplitBottom(12.0f, &View, &Button);
+	static int s_CenterButton = 0;
+	if(pEditor->DoButton_Editor(&s_CenterButton, "Center pivot", 0, &Button, 0, "Centers the pivot of the current quad"))
+	{
+		pEditor->m_QuadTracker.BeginQuadTrack(pLayer, pEditor->m_vSelectedQuads);
+		int Top = pCurrentQuad->m_aPoints[0].y;
+		int Left = pCurrentQuad->m_aPoints[0].x;
+		int Bottom = pCurrentQuad->m_aPoints[0].y;
+		int Right = pCurrentQuad->m_aPoints[0].x;
+
+		for(int k = 1; k < 4; k++)
+		{
+			if(pCurrentQuad->m_aPoints[k].y < Top)
+				Top = pCurrentQuad->m_aPoints[k].y;
+			if(pCurrentQuad->m_aPoints[k].x < Left)
+				Left = pCurrentQuad->m_aPoints[k].x;
+			if(pCurrentQuad->m_aPoints[k].y > Bottom)
+				Bottom = pCurrentQuad->m_aPoints[k].y;
+			if(pCurrentQuad->m_aPoints[k].x > Right)
+				Right = pCurrentQuad->m_aPoints[k].x;
+		}
+
+		pCurrentQuad->m_aPoints[4].x = Left + (Right - Left) / 2;
+		pCurrentQuad->m_aPoints[4].y = Top + (Bottom - Top) / 2;
+		pEditor->m_QuadTracker.EndQuadTrack();
+		pEditor->m_Map.OnModify();
+		return CUi::POPUP_CLOSE_CURRENT;
+	}
+
 	// align button
 	View.HSplitBottom(6.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
