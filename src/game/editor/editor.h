@@ -332,9 +332,14 @@ public:
 	bool CanFillGameTiles() const;
 	void AddQuadOrSound();
 	void AddGroup();
+	void AddSoundLayer();
 	void AddTileLayer();
-	void AddFrontLayer();
 	void AddQuadsLayer();
+	void AddSwitchLayer();
+	void AddFrontLayer();
+	void AddTuneLayer();
+	void AddSpeedupLayer();
+	void AddTeleLayer();
 	void DeleteSelectedLayer();
 	void LayerSelectImage();
 	bool IsNonGameTileLayerSelected() const;
