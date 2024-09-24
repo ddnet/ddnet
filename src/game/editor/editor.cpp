@@ -4508,10 +4508,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
 
 	ConvertToRgba(*pImg);
-	if(g_Config.m_ClEditorDilate == 1)
-	{
-		DilateImage(*pImg);
-	}
+	DilateImage(*pImg);
 
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	int TextureLoadFlag = Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
@@ -4572,10 +4569,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	pImg->m_External = IsVanillaImage(aBuf);
 
 	ConvertToRgba(*pImg);
-	if(g_Config.m_ClEditorDilate == 1)
-	{
-		DilateImage(*pImg);
-	}
+	DilateImage(*pImg);
 
 	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 	if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
