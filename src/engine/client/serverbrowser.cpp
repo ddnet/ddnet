@@ -1172,7 +1172,7 @@ void CServerBrowser::UpdateFromHttp()
 			}
 			// (Also add favorites we're not allowed to ping.)
 			CServerEntry *pEntry = Add(pFavorites[i].m_aAddrs, pFavorites[i].m_NumAddrs);
-			if(pFavorites->m_AllowPing)
+			if(pFavorites[i].m_AllowPing)
 			{
 				QueueRequest(pEntry);
 			}
