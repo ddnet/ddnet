@@ -3216,7 +3216,12 @@ void CEditor::DoMapEditor(CUIRect View)
 			else if(m_pBrush->IsEmpty() && GetSelectedLayerType(0, LAYERTYPE_QUADS) != nullptr)
 				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right mouse to select layer.");
 			else if(m_pBrush->IsEmpty())
-				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Use ctrl+right mouse to select layer.");
+			{
+				if(g_Config.m_EdLayerSelector)
+					str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Use ctrl+right click to select layer for hovered tile.");
+				else
+					str_copy(m_aTooltip, "Use left mouse button to drag and create a brush.");
+			}
 			else
 				str_copy(m_aTooltip, "Use left mouse button to paint with the brush. Right button clears the brush.");
 
@@ -7666,7 +7671,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Ex(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuEntitiesId;
-		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 106.0f, this, PopupMenuSettings, PopupProperties);
+		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 210.0f, 120.0f, this, PopupMenuSettings, PopupProperties);
 	}
 
 	CUIRect ChangedIndicator, Info, Help, Close;

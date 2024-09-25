@@ -388,6 +388,30 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		}
 	}
 
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect No, Yes;
+		Selector.VSplitMid(&No, &Yes);
+
+		pEditor->Ui()->DoLabel(&Label, "Select layers by tile", 10.0f, TEXTALIGN_ML);
+
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_Ex(&s_ButtonNo, "No", !g_Config.m_EdLayerSelector, &No, 0, "Do not select layers when Ctrl+right clicking on a tile", IGraphics::CORNER_L))
+		{
+			g_Config.m_EdLayerSelector = false;
+		}
+		if(pEditor->DoButton_Ex(&s_ButtonYes, "Yes", g_Config.m_EdLayerSelector, &Yes, 0, "Select layers when Ctrl+right clicking on a tile", IGraphics::CORNER_R))
+		{
+			g_Config.m_EdLayerSelector = true;
+		}
+	}
+
 	return CUi::POPUP_KEEP_OPEN;
 }
 
