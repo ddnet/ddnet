@@ -174,14 +174,15 @@ void CCharacter::SetSolo(bool Solo)
 
 void CCharacter::SetSuper(bool Super)
 {
+	bool WasSuper = m_Core.m_Super;
 	m_Core.m_Super = Super;
-	if(Super)
+	if(Super && !WasSuper)
 	{
 		m_TeamBeforeSuper = Team();
 		Teams()->SetCharacterTeam(GetPlayer()->GetCid(), TEAM_SUPER);
 		m_DDRaceState = DDRACE_CHEAT;
 	}
-	else
+	else if(!Super && WasSuper)
 	{
 		Teams()->SetForceCharacterTeam(GetPlayer()->GetCid(), m_TeamBeforeSuper);
 	}
