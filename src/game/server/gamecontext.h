@@ -493,6 +493,7 @@ private:
 	static void ConPracticeUnWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeNinja(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData);

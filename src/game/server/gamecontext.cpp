@@ -3821,6 +3821,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("unweapons", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnWeapons, this, "Removes all weapons from you");
 	Console()->Register("ninja", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeNinja, this, "Makes you a ninja");
 	Console()->Register("unninja", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnNinja, this, "Removes ninja from you");
+	Console()->Register("invincible", "?i['0'|'1']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleInvincible, this, "Toggles invincible mode");
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
 }
 
