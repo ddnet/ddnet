@@ -214,7 +214,6 @@ struct CSqlTeamLoad : ISqlData
 	char m_aCode[128];
 	char m_aMap[MAX_MAP_LENGTH];
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
-	int m_ClientId;
 	// struct holding all player names in the team or an empty string
 	char m_aClientNames[MAX_CLIENTS][MAX_NAME_LENGTH];
 	int m_aClientId[MAX_CLIENTS];

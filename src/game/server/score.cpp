@@ -373,7 +373,6 @@ void CScore::LoadTeam(const char *pCode, int ClientId)
 	auto Tmp = std::make_unique<CSqlTeamLoad>(SaveResult);
 	str_copy(Tmp->m_aCode, pCode, sizeof(Tmp->m_aCode));
 	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
-	Tmp->m_ClientId = ClientId;
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 	Tmp->m_NumPlayer = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
