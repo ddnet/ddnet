@@ -3863,8 +3863,43 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		if(s_ScrollRegion.AddRect(Slot))
 		{
 			Slot.VSplitLeft(15.0f, &VisibleToggle, &Slot);
-			if(DoButton_FontIcon(&m_Map.m_vpGroups[g]->m_Visible, m_Map.m_vpGroups[g]->m_Visible ? FONT_ICON_EYE : FONT_ICON_EYE_SLASH, m_Map.m_vpGroups[g]->m_Collapse ? 1 : 0, &VisibleToggle, 0, "Toggle group visibility", IGraphics::CORNER_L, 8.0f))
+
+			const int MouseClick = DoButton_FontIcon(&m_Map.m_vpGroups[g]->m_Visible, m_Map.m_vpGroups[g]->m_Visible ? FONT_ICON_EYE : FONT_ICON_EYE_SLASH, m_Map.m_vpGroups[g]->m_Collapse ? 1 : 0, &VisibleToggle, 0, "Left click to toggle visibility. Right click to show this group only.", IGraphics::CORNER_L, 8.0f);
+			if(MouseClick == 1)
+			{
 				m_Map.m_vpGroups[g]->m_Visible = !m_Map.m_vpGroups[g]->m_Visible;
+			}
+			else if(MouseClick == 2)
+			{
+				if(Input()->ShiftIsPressed())
+				{
+					if(g != m_SelectedGroup)
+						SelectLayer(0, g);
+				}
+
+				int NumActive = 0;
+				for(auto &Group : m_Map.m_vpGroups)
+				{
+					if(Group == m_Map.m_vpGroups[g])
+					{
+						Group->m_Visible = true;
+						continue;
+					}
+
+					if(Group->m_Visible)
+					{
+						Group->m_Visible = false;
+						NumActive++;
+					}
+				}
+				if(NumActive == 0)
+				{
+					for(auto &Group : m_Map.m_vpGroups)
+					{
+						Group->m_Visible = true;
+					}
+				}
+			}
 
 			str_format(aBuf, sizeof(aBuf), "#%d %s", g, m_Map.m_vpGroups[g]->m_aName);
 
@@ -3988,8 +4023,42 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			Slot.VSplitLeft(12.0f, nullptr, &Slot);
 			Slot.VSplitLeft(15.0f, &VisibleToggle, &Button);
 
-			if(DoButton_FontIcon(&m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible ? FONT_ICON_EYE : FONT_ICON_EYE_SLASH, 0, &VisibleToggle, 0, "Toggle layer visibility", IGraphics::CORNER_L, 8.0f))
+			const int MouseClick = DoButton_FontIcon(&m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible ? FONT_ICON_EYE : FONT_ICON_EYE_SLASH, 0, &VisibleToggle, 0, "Left click to toggle visibility. Right click to show only this layer within its group.", IGraphics::CORNER_L, 8.0f);
+			if(MouseClick == 1)
+			{
 				m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible = !m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible;
+			}
+			else if(MouseClick == 2)
+			{
+				if(Input()->ShiftIsPressed())
+				{
+					if(!IsLayerSelected)
+						SelectLayer(i, g);
+				}
+
+				int NumActive = 0;
+				for(auto &Layer : m_Map.m_vpGroups[g]->m_vpLayers)
+				{
+					if(Layer == m_Map.m_vpGroups[g]->m_vpLayers[i])
+					{
+						Layer->m_Visible = true;
+						continue;
+					}
+
+					if(Layer->m_Visible)
+					{
+						Layer->m_Visible = false;
+						NumActive++;
+					}
+				}
+				if(NumActive == 0)
+				{
+					for(auto &Layer : m_Map.m_vpGroups[g]->m_vpLayers)
+					{
+						Layer->m_Visible = true;
+					}
+				}
+			}
 
 			if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName[0])
 				str_copy(aBuf, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName);
