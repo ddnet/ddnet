@@ -84,58 +84,6 @@
 #include <sys/filio.h>
 #endif
 
-IOHANDLE io_stdin()
-{
-	return stdin;
-}
-
-IOHANDLE io_stdout()
-{
-	return stdout;
-}
-
-IOHANDLE io_stderr()
-{
-	return stderr;
-}
-
-IOHANDLE io_current_exe()
-{
-	// From https://stackoverflow.com/a/1024937.
-#if defined(CONF_FAMILY_WINDOWS)
-	wchar_t wide_path[IO_MAX_PATH_LENGTH];
-	if(GetModuleFileNameW(NULL, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
-	{
-		return 0;
-	}
-	const std::optional<std::string> path = windows_wide_to_utf8(wide_path);
-	return path.has_value() ? io_open(path.value().c_str(), IOFLAG_READ) : 0;
-#elif defined(CONF_PLATFORM_MACOS)
-	char path[IO_MAX_PATH_LENGTH];
-	uint32_t path_size = sizeof(path);
-	if(_NSGetExecutablePath(path, &path_size))
-	{
-		return 0;
-	}
-	return io_open(path, IOFLAG_READ);
-#else
-	static const char *NAMES[] = {
-		"/proc/self/exe", // Linux, Android
-		"/proc/curproc/exe", // NetBSD
-		"/proc/curproc/file", // DragonFly
-	};
-	for(auto &name : NAMES)
-	{
-		IOHANDLE result = io_open(name, IOFLAG_READ);
-		if(result)
-		{
-			return result;
-		}
-	}
-	return 0;
-#endif
-}
-
 static NETSTATS network_stats = {0};
 
 #define VLEN 128
@@ -403,11 +351,6 @@ long int io_length(IOHANDLE io)
 	return length;
 }
 
-int io_error(IOHANDLE io)
-{
-	return ferror((FILE *)io);
-}
-
 unsigned io_write(IOHANDLE io, const void *buffer, unsigned size)
 {
 	return fwrite(buffer, 1, size, (FILE *)io);
@@ -442,6 +385,63 @@ int io_sync(IOHANDLE io)
 	return FlushFileBuffers((HANDLE)_get_osfhandle(_fileno((FILE *)io))) == FALSE;
 #else
 	return fsync(fileno((FILE *)io)) != 0;
+#endif
+}
+
+int io_error(IOHANDLE io)
+{
+	return ferror((FILE *)io);
+}
+
+IOHANDLE io_stdin()
+{
+	return stdin;
+}
+
+IOHANDLE io_stdout()
+{
+	return stdout;
+}
+
+IOHANDLE io_stderr()
+{
+	return stderr;
+}
+
+IOHANDLE io_current_exe()
+{
+	// From https://stackoverflow.com/a/1024937.
+#if defined(CONF_FAMILY_WINDOWS)
+	wchar_t wide_path[IO_MAX_PATH_LENGTH];
+	if(GetModuleFileNameW(NULL, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
+	{
+		return 0;
+	}
+	const std::optional<std::string> path = windows_wide_to_utf8(wide_path);
+	return path.has_value() ? io_open(path.value().c_str(), IOFLAG_READ) : 0;
+#elif defined(CONF_PLATFORM_MACOS)
+	char path[IO_MAX_PATH_LENGTH];
+	uint32_t path_size = sizeof(path);
+	if(_NSGetExecutablePath(path, &path_size))
+	{
+		return 0;
+	}
+	return io_open(path, IOFLAG_READ);
+#else
+	static const char *NAMES[] = {
+		"/proc/self/exe", // Linux, Android
+		"/proc/curproc/exe", // NetBSD
+		"/proc/curproc/file", // DragonFly
+	};
+	for(auto &name : NAMES)
+	{
+		IOHANDLE result = io_open(name, IOFLAG_READ);
+		if(result)
+		{
+			return result;
+		}
+	}
+	return 0;
 #endif
 }
 
@@ -719,17 +719,6 @@ int aio_error(ASYNCIO *aio)
 	return aio->error;
 }
 
-void aio_free(ASYNCIO *aio)
-{
-	aio->lock.lock();
-	if(aio->thread)
-	{
-		thread_detach(aio->thread);
-		aio->thread = 0;
-	}
-	aio_handle_free_and_unlock(aio);
-}
-
 void aio_close(ASYNCIO *aio)
 {
 	{
@@ -753,6 +742,17 @@ void aio_wait(ASYNCIO *aio)
 	}
 	sphore_signal(&aio->sphore);
 	thread_wait(thread);
+}
+
+void aio_free(ASYNCIO *aio)
+{
+	aio->lock.lock();
+	if(aio->thread)
+	{
+		thread_detach(aio->thread);
+		aio->thread = 0;
+	}
+	aio_handle_free_and_unlock(aio);
 }
 
 struct THREAD_RUN
