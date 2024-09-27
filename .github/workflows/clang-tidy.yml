@@ -21,7 +21,7 @@ jobs:
     - name: Install clang-tidy
       run: |
         sudo apt-get update -y
-        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev clang-tidy libvulkan-dev glslang-tools spirv-tools -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev clang-tidy libvulkan-dev glslang-tools spirv-tools libglew-dev -y
 
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
