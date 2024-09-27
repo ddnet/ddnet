@@ -1368,19 +1368,27 @@ void CServer::SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int Cli
 void CServer::SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientId)
 {
 	CMsgPacker Msg(NETMSG_RCON_CMD_REM, true);
-	Msg.AddString(pCommandInfo->m_pName, 256);
+	Msg.AddString(pCommandInfo->m_pName, IConsole::TEMPCMD_NAME_LENGTH);
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
 
-int CServer::GetConsoleAccessLevel(int ClientId)
+void CServer::SendRconCmdGroupStart(int ClientId)
 {
-	return m_aClients[ClientId].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientId].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
+	CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_START, true);
+	Msg.AddInt(NumRconCommands(ClientId));
+	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+}
+
+void CServer::SendRconCmdGroupEnd(int ClientId)
+{
+	CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
+	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
 
 int CServer::NumRconCommands(int ClientId)
 {
 	int Num = 0;
-	int ConsoleAccessLevel = GetConsoleAccessLevel(ClientId);
+	const int ConsoleAccessLevel = m_aClients[ClientId].ConsoleAccessLevel();
 	for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
 		pCmd; pCmd = pCmd->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER))
 	{
@@ -1389,22 +1397,24 @@ int CServer::NumRconCommands(int ClientId)
 	return Num;
 }
 
-void CServer::UpdateClientRconCommands()
+void CServer::UpdateClientRconCommands(int ClientId)
 {
-	int ClientId = Tick() % MAX_CLIENTS;
-
-	if(m_aClients[ClientId].m_State != CClient::STATE_EMPTY && m_aClients[ClientId].m_Authed)
+	CClient &Client = m_aClients[ClientId];
+	if(Client.m_State != CClient::STATE_INGAME ||
+		!Client.m_Authed ||
+		Client.m_pRconCmdToSend == nullptr)
 	{
-		int ConsoleAccessLevel = GetConsoleAccessLevel(ClientId);
-		for(int i = 0; i < MAX_RCONCMD_SEND && m_aClients[ClientId].m_pRconCmdToSend; ++i)
+		return;
+	}
+
+	const int ConsoleAccessLevel = Client.ConsoleAccessLevel();
+	for(int i = 0; i < MAX_RCONCMD_SEND && Client.m_pRconCmdToSend; ++i)
+	{
+		SendRconCmdAdd(Client.m_pRconCmdToSend, ClientId);
+		Client.m_pRconCmdToSend = Client.m_pRconCmdToSend->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
+		if(Client.m_pRconCmdToSend == nullptr)
 		{
-			SendRconCmdAdd(m_aClients[ClientId].m_pRconCmdToSend, ClientId);
-			m_aClients[ClientId].m_pRconCmdToSend = m_aClients[ClientId].m_pRconCmdToSend->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
-			if(m_aClients[ClientId].m_pRconCmdToSend == nullptr)
-			{
-				CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
-				SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
-			}
+			SendRconCmdGroupEnd(ClientId);
 		}
 	}
 }
@@ -1734,7 +1744,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 					m_RconClientId = ClientId;
 					m_RconAuthLevel = m_aClients[ClientId].m_Authed;
-					Console()->SetAccessLevel(m_aClients[ClientId].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientId].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : m_aClients[ClientId].m_Authed == AUTHED_HELPER ? IConsole::ACCESS_LEVEL_HELPER : IConsole::ACCESS_LEVEL_USER);
+					Console()->SetAccessLevel(m_aClients[ClientId].ConsoleAccessLevel());
 					{
 						CRconClientLogger Logger(this, ClientId);
 						CLogScope Scope(&Logger);
@@ -1804,15 +1814,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					int SendRconCmds = IsSixup(ClientId) ? true : Unpacker.GetInt();
 					if(!Unpacker.Error() && SendRconCmds)
 					{
-						// AUTHED_ADMIN - AuthLevel gets the proper IConsole::ACCESS_LEVEL_<x>
-						m_aClients[ClientId].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
-						CMsgPacker MsgStart(NETMSG_RCON_CMD_GROUP_START, true);
-						MsgStart.AddInt(NumRconCommands(ClientId));
-						SendMsg(&MsgStart, MSGFLAG_VITAL, ClientId);
+						m_aClients[ClientId].m_pRconCmdToSend = Console()->FirstCommandInfo(m_aClients[ClientId].ConsoleAccessLevel(), CFGFLAG_SERVER);
+						SendRconCmdGroupStart(ClientId);
 						if(m_aClients[ClientId].m_pRconCmdToSend == nullptr)
 						{
-							CMsgPacker MsgEnd(NETMSG_RCON_CMD_GROUP_END, true);
-							SendMsg(&MsgEnd, MSGFLAG_VITAL, ClientId);
+							SendRconCmdGroupEnd(ClientId);
 						}
 					}
 
@@ -2970,7 +2976,8 @@ int CServer::Run()
 				if(Config()->m_SvHighBandwidth || (m_CurrentGameTick % 2) == 0)
 					DoSnapshot();
 
-				UpdateClientRconCommands();
+				const int CommandSendingClientId = Tick() % MAX_CLIENTS;
+				UpdateClientRconCommands(CommandSendingClientId);
 
 				m_Fifo.Update();
 
@@ -3701,9 +3708,11 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
-				if(pThis->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY ||
-					(pInfo->GetAccessLevel() > AUTHED_ADMIN - pThis->m_aClients[i].m_Authed && AUTHED_ADMIN - pThis->m_aClients[i].m_Authed < OldAccessLevel) ||
-					(pInfo->GetAccessLevel() < AUTHED_ADMIN - pThis->m_aClients[i].m_Authed && AUTHED_ADMIN - pThis->m_aClients[i].m_Authed > OldAccessLevel) ||
+				if(pThis->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+					continue;
+				const int ClientAccessLevel = pThis->m_aClients[i].ConsoleAccessLevel();
+				if((pInfo->GetAccessLevel() > ClientAccessLevel && ClientAccessLevel < OldAccessLevel) ||
+					(pInfo->GetAccessLevel() < ClientAccessLevel && ClientAccessLevel > OldAccessLevel) ||
 					(pThis->m_aClients[i].m_pRconCmdToSend && str_comp(pResult->GetString(0), pThis->m_aClients[i].m_pRconCmdToSend->m_pName) >= 0))
 					continue;
 

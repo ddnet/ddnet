@@ -190,6 +190,11 @@ public:
 		{
 			return m_State != STATE_EMPTY && !m_DebugDummy;
 		}
+
+		int ConsoleAccessLevel() const
+		{
+			return m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
+		}
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
@@ -334,9 +339,10 @@ public:
 
 	void SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int ClientId);
 	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientId);
-	int GetConsoleAccessLevel(int ClientId);
+	void SendRconCmdGroupStart(int ClientId);
+	void SendRconCmdGroupEnd(int ClientId);
 	int NumRconCommands(int ClientId);
-	void UpdateClientRconCommands();
+	void UpdateClientRconCommands(int ClientId);
 
 	bool CheckReservedSlotAuth(int ClientId, const char *pPassword);
 	void ProcessClientPacket(CNetChunk *pPacket);

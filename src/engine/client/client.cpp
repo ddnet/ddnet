@@ -296,7 +296,7 @@ void CClient::Rcon(const char *pCmd)
 
 float CClient::GotRconCommandsPercentage() const
 {
-	if(m_ExpectedRconCommands < 1)
+	if(m_ExpectedRconCommands <= 0)
 		return -1.0f;
 	if(m_GotRconCommands > m_ExpectedRconCommands)
 		return -1.0f;
@@ -2210,8 +2210,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_GROUP_START)
 		{
-			int ExpectedRconCommands = Unpacker.GetInt();
-			if(Unpacker.Error())
+			const int ExpectedRconCommands = Unpacker.GetInt();
+			if(Unpacker.Error() || ExpectedRconCommands < 0)
 				return;
 
 			m_ExpectedRconCommands = ExpectedRconCommands;
