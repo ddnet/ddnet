@@ -938,6 +938,37 @@ bool CEditor::CallbackSaveSound(const char *pFileName, int StorageType, void *pU
 	return false;
 }
 
+bool CEditor::CallbackCustomEntities(const char *pFileName, int StorageType, void *pUser)
+{
+	CEditor *pEditor = (CEditor *)pUser;
+
+	char aBuf[IO_MAX_PATH_LENGTH];
+	IStorage::StripPathAndExtension(pFileName, aBuf, sizeof(aBuf));
+
+	if(std::find(pEditor->m_vSelectEntitiesFiles.begin(), pEditor->m_vSelectEntitiesFiles.end(), std::string(aBuf)) != pEditor->m_vSelectEntitiesFiles.end())
+	{
+		pEditor->ShowFileDialogError("Custom entities cannot have the same name as default entities.");
+		return false;
+	}
+
+	CImageInfo ImgInfo;
+	if(!pEditor->Graphics()->LoadPng(ImgInfo, pFileName, StorageType))
+	{
+		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFileName);
+		return false;
+	}
+
+	pEditor->m_SelectEntitiesImage = aBuf;
+	pEditor->m_AllowPlaceUnusedTiles = -1;
+	pEditor->m_PreventUnusedTilesWasWarned = false;
+
+	pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
+	pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTextureRawMove(ImgInfo, pEditor->GetTextureUsageFlag());
+
+	pEditor->m_Dialog = DIALOG_NONE;
+	return true;
+}
+
 void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, int SampleId)
 {
 	CUIRect Button, SeekBar;

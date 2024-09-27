@@ -230,6 +230,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		pEditor->m_vSelectEntitiesFiles.clear();
 		pEditor->Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, pEditor);
 		std::sort(pEditor->m_vSelectEntitiesFiles.begin(), pEditor->m_vSelectEntitiesFiles.end());
+		pEditor->m_vSelectEntitiesFiles.emplace_back("Custom…");
 
 		static SPopupMenuId s_PopupEntitiesId;
 		pEditor->Ui()->DoPopupMenu(&s_PopupEntitiesId, Slot.x, Slot.y + Slot.h, 250, pEditor->m_vSelectEntitiesFiles.size() * 14.0f + 10.0f, pEditor, PopupEntities);
@@ -2767,12 +2768,17 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEntities(void *pContext, CUIRect Vie
 		{
 			if(pEditor->m_vSelectEntitiesFiles[i] != pEditor->m_SelectEntitiesImage)
 			{
+				if(i == pEditor->m_vSelectEntitiesFiles.size() - 1)
+				{
+					pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Custom Entities", "Load", "assets/entities", false, CallbackCustomEntities, pEditor);
+					return CUi::POPUP_CLOSE_CURRENT;
+				}
+
 				pEditor->m_SelectEntitiesImage = pEditor->m_vSelectEntitiesFiles[i];
 				pEditor->m_AllowPlaceUnusedTiles = pEditor->m_SelectEntitiesImage == "DDNet" ? 0 : -1;
 				pEditor->m_PreventUnusedTilesWasWarned = false;
 
-				if(pEditor->m_EntitiesTexture.IsValid())
-					pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
+				pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
 
 				char aBuf[IO_MAX_PATH_LENGTH];
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", pName);
