@@ -72,9 +72,9 @@ struct CScoreLoadBestTimeResult : ISqlResult
 	float m_CurrentRecord;
 };
 
-struct CSqlLoadBestTimeData : ISqlData
+struct CSqlLoadBestTimeRequest : ISqlData
 {
-	CSqlLoadBestTimeData(std::shared_ptr<CScoreLoadBestTimeResult> pResult) :
+	CSqlLoadBestTimeRequest(std::shared_ptr<CScoreLoadBestTimeResult> pResult) :
 		ISqlData(std::move(pResult))
 	{
 	}
@@ -188,13 +188,13 @@ struct CSqlTeamScoreData : ISqlData
 	CUuid m_TeamrankUuid;
 };
 
-struct CSqlTeamSave : ISqlData
+struct CSqlTeamSaveData : ISqlData
 {
-	CSqlTeamSave(std::shared_ptr<CScoreSaveResult> pResult) :
+	CSqlTeamSaveData(std::shared_ptr<CScoreSaveResult> pResult) :
 		ISqlData(std::move(pResult))
 	{
 	}
-	virtual ~CSqlTeamSave(){};
+	virtual ~CSqlTeamSaveData(){};
 
 	char m_aClientName[MAX_NAME_LENGTH];
 	char m_aMap[MAX_MAP_LENGTH];
@@ -203,13 +203,13 @@ struct CSqlTeamSave : ISqlData
 	char m_aServer[5];
 };
 
-struct CSqlTeamLoad : ISqlData
+struct CSqlTeamLoadRequest : ISqlData
 {
-	CSqlTeamLoad(std::shared_ptr<CScoreSaveResult> pResult) :
+	CSqlTeamLoadRequest(std::shared_ptr<CScoreSaveResult> pResult) :
 		ISqlData(std::move(pResult))
 	{
 	}
-	virtual ~CSqlTeamLoad(){};
+	virtual ~CSqlTeamLoadRequest(){};
 
 	char m_aCode[128];
 	char m_aMap[MAX_MAP_LENGTH];
