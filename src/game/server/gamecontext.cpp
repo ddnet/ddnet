@@ -322,6 +322,10 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		float Dmg = Strength * l;
 		if(!(int)Dmg)
 			continue;
+		
+		//recalculate with different tickspeeds in mind
+		Strength = CWorldCore::PhysicsScalingLinear(Strength, Server()->TickSpeed());
+		Dmg = Strength * l;
 
 		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage || Owner == pChr->GetPlayer()->GetCid())
 		{
@@ -1299,7 +1303,7 @@ void CGameContext::OnTick()
 			if(m_apPlayers[i] && m_apPlayers[i]->GetCharacter())
 			{
 				CNetObj_CharacterCore Char;
-				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char);
+				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char, Server()->TickSpeed());
 				m_TeeHistorian.RecordPlayer(i, &Char);
 			}
 			else
@@ -1548,6 +1552,10 @@ void CGameContext::OnClientEnter(int ClientId)
 	{
 		if(OnClientDDNetVersionKnown(ClientId))
 			return; // kicked
+	}else if(Server()->TickSpeed() != 50)
+	{
+		Server()->Kick(ClientId, "Unsupported client, need at least DDNet version 18.5.2");
+		return;
 	}
 
 	if(!Server()->ClientPrevIngame(ClientId))
@@ -1827,6 +1835,17 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientId)
 	{
 		Server()->Kick(ClientId, "unsupported client");
 		return true;
+	}
+
+	if(ClientVersion < VERSION_DDNET_TICKSPEED && Server()->TickSpeed() != 50)
+	{
+		Server()->Kick(ClientId, "unsupported client, need at least DDNet version 18.5.2");
+		return true;
+	}
+
+	if(Server()->TickSpeed() != 50)
+	{
+		SendTickSpeed(ClientId);
 	}
 
 	CPlayer *pPlayer = m_apPlayers[ClientId];
@@ -3852,8 +3871,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
+	m_Collision.m_TickSpeed = Server()->TickSpeed();
 	m_World.m_pTuningList = m_aTuningList;
 	m_World.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
+	m_World.m_Core.m_GameTickSpeed = Server()->TickSpeed();
 
 	char aMapName[IO_MAX_PATH_LENGTH];
 	int MapSize;
@@ -4472,6 +4493,13 @@ void CGameContext::SendRecord(int ClientId)
 	{
 		Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientId);
 	}
+}
+
+void CGameContext::SendTickSpeed(int ClientID)
+{
+	CNetMsg_Sv_TickSpeed Msg;
+	Msg.m_TickSpeed = Server()->TickSpeed();
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
 bool CGameContext::ProcessSpamProtection(int ClientId, bool RespectChatInitialDelay)

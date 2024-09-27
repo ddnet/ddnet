@@ -93,6 +93,8 @@ protected:
 	int m_aPredTick[NUM_DUMMIES] = {0, 0};
 	float m_aPredIntraTick[NUM_DUMMIES] = {0.0f, 0.0f};
 
+	int m_GameTickSpeed = SERVER_TICK_SPEED;
+
 	float m_LocalTime = 0.0f;
 	float m_GlobalTime = 0.0f;
 	float m_RenderFrameTime = 0.0001f;
@@ -149,7 +151,8 @@ public:
 	inline float PredIntraGameTick(int Conn) const { return m_aPredIntraTick[Conn]; }
 	inline float IntraGameTickSincePrev(int Conn) const { return m_aGameIntraTickSincePrev[Conn]; }
 	inline float GameTickTime(int Conn) const { return m_aGameTickTime[Conn]; }
-	inline int GameTickSpeed() const { return SERVER_TICK_SPEED; }
+	inline int GameTickSpeed() const { return m_GameTickSpeed; }
+	inline void SetGameTickSpeed(int tickspeed) { m_GameTickSpeed = tickspeed; }
 
 	// other time access
 	inline float RenderFrameTime() const { return m_RenderFrameTime; }
@@ -384,6 +387,8 @@ public:
 
 	virtual bool CanDisplayWarning() const = 0;
 	virtual void RenderShutdownMessage() = 0;
+
+	virtual void SetGameTickSpeed(int Tickspeed) = 0;
 
 	virtual CNetObjHandler *GetNetObjHandler() = 0;
 	virtual protocol7::CNetObjHandler *GetNetObjHandler7() = 0;

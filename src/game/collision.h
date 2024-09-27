@@ -51,6 +51,7 @@ public:
 	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces) const;
 	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool *pGrounded = nullptr) const;
 	bool TestBox(vec2 Pos, vec2 Size) const;
+	bool TestBoxSubTile(vec2 Pos, vec2 Size) const;
 
 	// DDRace
 	void SetCollisionAt(float x, float y, int Index);
@@ -123,6 +124,7 @@ public:
 	const CTuneTile *TuneLayer() const { return m_pTune; }
 
 	int m_HighestSwitchNumber;
+	int m_TickSpeed = SERVER_TICK_SPEED;
 
 	/**
 	 * Index all teleporter types (in, out and checkpoints)

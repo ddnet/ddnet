@@ -72,7 +72,7 @@ void CDraggerBeam::Tick()
 	// In the center of the dragger a tee does not experience speed-up
 	else if(distance(pTarget->m_Pos, m_Pos) > 28)
 	{
-		pTarget->AddVelocity(normalize(m_Pos - pTarget->m_Pos) * m_Strength);
+		pTarget->AddVelocity(normalize(m_Pos - pTarget->m_Pos) * CWorldCore::PhysicsScalingAccel(m_Strength, Server()->TickSpeed()));
 	}
 }
 

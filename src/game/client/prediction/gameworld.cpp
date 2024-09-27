@@ -362,7 +362,7 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 					continue;
 				if(Owner == -1 && ActivatedTeam != -1 && pChar->Team() != ActivatedTeam)
 					continue;
-				pChar->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
+				pChar->TakeDamage(ForceDir * CWorldCore::PhysicsScalingLinear(Dmg * 2, GameTickSpeed()), (int)Dmg, Owner, Weapon);
 				if(GetCharacterById(Owner) ? GetCharacterById(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit || NoDamage)
 					break;
 			}
@@ -590,6 +590,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	pFrom->m_pChild = this;
 
 	m_GameTick = pFrom->m_GameTick;
+	m_Core.m_GameTickSpeed = pFrom->m_Core.m_GameTickSpeed;
 	m_pCollision = pFrom->m_pCollision;
 	m_WorldConfig = pFrom->m_WorldConfig;
 	for(int i = 0; i < 2; i++)

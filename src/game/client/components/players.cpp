@@ -201,7 +201,7 @@ void CPlayers::RenderHookCollLine(
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = m_pClient->m_aClients[ClientId].m_RenderPos;
 	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+		Position =  CCharacterCore::ConvertPosition(mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick), Client()->GameTickSpeed());
 	// draw hook collision line
 	{
 		bool Aim = (Player.m_PlayerFlags & PLAYERFLAG_AIM);
@@ -356,7 +356,7 @@ void CPlayers::RenderHook(
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = m_pClient->m_aClients[ClientId].m_RenderPos;
 	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+		Position = CCharacterCore::ConvertPosition(mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick), Client()->GameTickSpeed());
 
 	// draw hook
 	if(Prev.m_HookState > 0 && Player.m_HookState > 0)
@@ -449,7 +449,7 @@ void CPlayers::RenderPlayer(
 		AttackTime = (Client()->PredIntraGameTick(g_Config.m_ClDummy) + (Client()->PredGameTick(g_Config.m_ClDummy) - 1 - Player.m_AttackTick)) / (float)Client()->GameTickSpeed();
 		LastAttackTime = (s_LastPredIntraTick + (Client()->PredGameTick(g_Config.m_ClDummy) - 1 - Player.m_AttackTick)) / (float)Client()->GameTickSpeed();
 	}
-	float AttackTicksPassed = AttackTime * (float)Client()->GameTickSpeed();
+	float AttackTicksPassed = AttackTime * (float)50;
 
 	float Angle;
 	if(Local && (!m_pClient->m_Snap.m_SpecInfo.m_Active || m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW) && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -467,7 +467,7 @@ void CPlayers::RenderPlayer(
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = m_pClient->m_aClients[ClientId].m_RenderPos;
 	else
-		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
+		Position = CCharacterCore::ConvertPosition(mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick), Client()->GameTickSpeed());
 	vec2 Vel = mix(vec2(Prev.m_VelX / 256.0f, Prev.m_VelY / 256.0f), vec2(Player.m_VelX / 256.0f, Player.m_VelY / 256.0f), IntraTick);
 
 	m_pClient->m_Flow.Add(Position, Vel * 100.0f, 10.0f);
@@ -476,8 +476,11 @@ void CPlayers::RenderPlayer(
 
 	RenderInfo.m_FeetFlipped = false;
 
-	bool Stationary = Player.m_VelX <= 1 && Player.m_VelX >= -1;
-	bool InAir = !Collision()->CheckPoint(Player.m_X, Player.m_Y + 16);
+	float minSpeed = Client()->GameTickSpeed()/50.0;
+
+	bool Stationary = Player.m_VelX <= minSpeed && Player.m_VelX >= -minSpeed;
+	vec2 InAirPos = CCharacterCore::ConvertPosition(vec2(Player.m_X, Player.m_Y), Client()->GameTickSpeed());
+	bool InAir = !Collision()->CheckPoint(InAirPos.x, InAirPos.y + 16);
 	bool Running = Player.m_VelX >= 5000 || Player.m_VelX <= -5000;
 	bool WantOtherDir = (Player.m_Direction == -1 && Vel.x > 0) || (Player.m_Direction == 1 && Vel.x < 0);
 	bool Inactive = ClientId >= 0 && (m_pClient->m_aClients[ClientId].m_Afk || m_pClient->m_aClients[ClientId].m_Paused);
@@ -521,7 +524,7 @@ void CPlayers::RenderPlayer(
 		State.Add(&g_pData->m_aAnimations[ANIM_NINJA_SWING], clamp(LastAttackTime * 2.0f, 0.0f, 1.0f), 1.0f);
 
 	// do skidding
-	if(!InAir && WantOtherDir && length(Vel * 50) > 500.0f)
+	if(!InAir && WantOtherDir && length(Vel * Client()->GameTickSpeed()) > 500.0f)
 	{
 		if(time() - m_SkidSoundTime > time_freq() / 10)
 		{
@@ -724,10 +727,10 @@ void CPlayers::RenderPlayer(
 	{
 		vec2 ShadowPosition = Position;
 		if(ClientId >= 0)
-			ShadowPosition = mix(
+			ShadowPosition =  CCharacterCore::ConvertPosition(mix(
 				vec2(m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev.m_X, m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev.m_Y),
 				vec2(m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_X, m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_Y),
-				Client()->IntraGameTick(g_Config.m_ClDummy));
+				Client()->IntraGameTick(g_Config.m_ClDummy)), Client()->GameTickSpeed());
 
 		CTeeRenderInfo Shadow = RenderInfo;
 		RenderTools()->RenderTee(&State, &Shadow, Player.m_Emote, Direction, ShadowPosition, 0.5f); // render ghost
