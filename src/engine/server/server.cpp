@@ -523,6 +523,12 @@ int CServer::TickSpeed()
 	{
 		currentTickSpeed = m_pConfig->m_SvTickSpeed;
 		m_MapReload = true;
+		Config()->m_SvSixup = 0;
+		if(m_pRegister)
+		{
+			m_pRegister->OnConfigChange();
+		}
+		log_info("sixup", "non 50 tickspeed, disabling 0.7 compatibility");
 	}
 	return m_pConfig->m_SvTickSpeed;
 }
