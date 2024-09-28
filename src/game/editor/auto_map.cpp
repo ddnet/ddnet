@@ -45,7 +45,7 @@ CAutoMapper::CAutoMapper(CEditor *pEditor)
 	OnInit(pEditor);
 }
 
-void CAutoMapper::Load(const char *pTileName)
+void CAutoMapper::Load(const char *pTileName, bool Include)
 {
 	char aPath[IO_MAX_PATH_LENGTH];
 	str_format(aPath, sizeof(aPath), "editor/automap/%s.rules", pTileName);
@@ -53,7 +53,10 @@ void CAutoMapper::Load(const char *pTileName)
 	if(!LineReader.OpenFile(Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
 		char aBuf[IO_MAX_PATH_LENGTH + 32];
-		str_format(aBuf, sizeof(aBuf), "failed to load %s", aPath);
+		if(Include)
+			str_format(aBuf, sizeof(aBuf), "failed to include %s", aPath);
+		else
+			str_format(aBuf, sizeof(aBuf), "failed to load %s", aPath);
 		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor/automap", aBuf);
 		return;
 	}
@@ -331,6 +334,20 @@ void CAutoMapper::Load(const char *pTileName)
 			{
 				pCurrentRun->m_AutomapCopy = false;
 			}
+			else if(str_startswith(pLine, "Include "))
+			{
+				pLine += str_length("Include ");
+
+				char aName[512];
+				str_copy(aName, pLine, minimum<int>(sizeof(aName), str_length(pLine) + 1));
+
+				if(str_comp(aName, pTileName) != 0)
+					Load(aName, true);
+
+				pCurrentConf = nullptr;
+				pCurrentRun = nullptr;
+				pCurrentIndex = nullptr;
+			}
 		}
 	}
 
@@ -383,10 +400,14 @@ void CAutoMapper::Load(const char *pTileName)
 	}
 
 	char aBuf[IO_MAX_PATH_LENGTH + 16];
-	str_format(aBuf, sizeof(aBuf), "loaded %s", aPath);
+	if(Include)
+		str_format(aBuf, sizeof(aBuf), "included %s", aPath);
+	else
+		str_format(aBuf, sizeof(aBuf), "loaded %s", aPath);
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor/automap", aBuf);
 
-	m_FileLoaded = true;
+	if(!Include)
+		m_FileLoaded = true;
 }
 
 const char *CAutoMapper::GetConfigName(int Index)
