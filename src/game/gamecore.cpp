@@ -605,13 +605,23 @@ void CCharacterCore::Move()
 	m_Pos = NewPos;
 }
 
+vec2 CCharacterCore::ConvertPosition(vec2 Pos, int TickSpeed)
+{
+	if(TickSpeed > 50)
+	{
+		Pos.x /= TickSpeed / 50.0;
+		Pos.y /= TickSpeed / 50.0;
+	}
+	return Pos;
+}
+
 void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore, int TickSpeed) const
 {
-	pObjCore->m_X = round_to_int(m_Pos.x * (TickSpeed > 50 ? TickSpeed/50.0 : 1));
-	pObjCore->m_Y = round_to_int(m_Pos.y * (TickSpeed > 50 ? TickSpeed/50.0 : 1));
+	pObjCore->m_X = round_to_int(m_Pos.x * (TickSpeed > 50 ? TickSpeed / 50.0 : 1));
+	pObjCore->m_Y = round_to_int(m_Pos.y * (TickSpeed > 50 ? TickSpeed / 50.0 : 1));
 
-	pObjCore->m_VelX = round_to_int(m_Vel.x * 256.0f * (TickSpeed > 50 ? TickSpeed/50.0 : 1));
-	pObjCore->m_VelY = round_to_int(m_Vel.y * 256.0f * (TickSpeed > 50 ? TickSpeed/50.0 : 1));
+	pObjCore->m_VelX = round_to_int(m_Vel.x * 256.0f * (TickSpeed > 50 ? TickSpeed / 50.0 : 1));
+	pObjCore->m_VelY = round_to_int(m_Vel.y * 256.0f * (TickSpeed > 50 ? TickSpeed / 50.0 : 1));
 	pObjCore->m_HookState = m_HookState;
 	pObjCore->m_HookTick = m_HookTick;
 	pObjCore->m_HookX = round_to_int(m_HookPos.x);
@@ -626,10 +636,10 @@ void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore, int TickSpeed) const
 
 void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore, int TickSpeed)
 {
-	m_Pos.x = pObjCore->m_X / (TickSpeed > 50 ? TickSpeed/50.0 : 1);
-	m_Pos.y = pObjCore->m_Y / (TickSpeed > 50 ? TickSpeed/50.0 : 1);
-	m_Vel.x = pObjCore->m_VelX / 256.0f / (TickSpeed > 50 ? TickSpeed/50.0 : 1);
-	m_Vel.y = pObjCore->m_VelY / 256.0f / (TickSpeed > 50 ? TickSpeed/50.0 : 1);
+	m_Pos.x = pObjCore->m_X / (TickSpeed > 50 ? TickSpeed / 50.0 : 1);
+	m_Pos.y = pObjCore->m_Y / (TickSpeed > 50 ? TickSpeed / 50.0 : 1);
+	m_Vel.x = pObjCore->m_VelX / 256.0f / (TickSpeed > 50 ? TickSpeed / 50.0 : 1);
+	m_Vel.y = pObjCore->m_VelY / 256.0f / (TickSpeed > 50 ? TickSpeed / 50.0 : 1);
 	m_HookState = pObjCore->m_HookState;
 	m_HookTick = pObjCore->m_HookTick;
 	m_HookPos.x = pObjCore->m_HookX;
@@ -773,7 +783,6 @@ float CWorldCore::CWorldCore::PhysicsScalingFriction(float Value, int TickSpeed)
 
 	return pow(Value, 1 / speed);
 }
-
 
 void CWorldCore::InitSwitchers(int HighestSwitchNumber)
 {

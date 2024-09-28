@@ -533,7 +533,6 @@ int CServer::TickSpeed()
 	return m_pConfig->m_SvTickSpeed;
 }
 
-
 int CServer::Init()
 {
 	for(auto &Client : m_aClients)

@@ -236,7 +236,7 @@ public:
 	void Tick(bool UseInput, bool DoDeferredTick = true);
 	void Move();
 
-	static vec2 ConvertPosition(vec2 Pos, int TickSpeed) {if(TickSpeed > 50) {Pos.x/=TickSpeed/50.0;Pos.y/=TickSpeed/50.0;} return Pos;}
+	static vec2 ConvertPosition(vec2 Pos, int TickSpeed);
 	void Read(const CNetObj_CharacterCore *pObjCore, int TickSpeed);
 	void Write(CNetObj_CharacterCore *pObjCore, int TickSpeed) const;
 	void Quantize();

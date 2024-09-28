@@ -695,7 +695,7 @@ void CGameClient::UpdatePositions()
 		m_LocalCharacterPos = mix(
 			vec2(m_Snap.m_pLocalPrevCharacter->m_X, m_Snap.m_pLocalPrevCharacter->m_Y),
 			vec2(m_Snap.m_pLocalCharacter->m_X, m_Snap.m_pLocalCharacter->m_Y), Client()->IntraGameTick(g_Config.m_ClDummy));
-		
+
 		m_LocalCharacterPos = CCharacterCore::ConvertPosition(m_LocalCharacterPos, Client()->GameTickSpeed());
 	}
 
@@ -1038,7 +1038,8 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 		m_Ghost.m_AllowRestart = true;
 		m_RaceDemo.m_AllowRestart = true;
-	}else if(MsgId == NETMSGTYPE_SV_TICKSPEED)
+	}
+	else if(MsgId == NETMSGTYPE_SV_TICKSPEED)
 	{
 		CNetMsg_Sv_TickSpeed *pMsg = (CNetMsg_Sv_TickSpeed *)pRawMsg;
 		SetGameTickSpeed(pMsg->m_TickSpeed);

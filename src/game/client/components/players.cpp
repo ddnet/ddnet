@@ -201,7 +201,7 @@ void CPlayers::RenderHookCollLine(
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = m_pClient->m_aClients[ClientId].m_RenderPos;
 	else
-		Position =  CCharacterCore::ConvertPosition(mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick), Client()->GameTickSpeed());
+		Position = CCharacterCore::ConvertPosition(mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick), Client()->GameTickSpeed());
 	// draw hook collision line
 	{
 		bool Aim = (Player.m_PlayerFlags & PLAYERFLAG_AIM);
@@ -476,7 +476,7 @@ void CPlayers::RenderPlayer(
 
 	RenderInfo.m_FeetFlipped = false;
 
-	float minSpeed = Client()->GameTickSpeed()/50.0;
+	float minSpeed = Client()->GameTickSpeed() / 50.0;
 
 	bool Stationary = Player.m_VelX <= minSpeed && Player.m_VelX >= -minSpeed;
 	vec2 InAirPos = CCharacterCore::ConvertPosition(vec2(Player.m_X, Player.m_Y), Client()->GameTickSpeed());
@@ -727,10 +727,11 @@ void CPlayers::RenderPlayer(
 	{
 		vec2 ShadowPosition = Position;
 		if(ClientId >= 0)
-			ShadowPosition =  CCharacterCore::ConvertPosition(mix(
-				vec2(m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev.m_X, m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev.m_Y),
-				vec2(m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_X, m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_Y),
-				Client()->IntraGameTick(g_Config.m_ClDummy)), Client()->GameTickSpeed());
+			ShadowPosition = CCharacterCore::ConvertPosition(mix(
+										 vec2(m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev.m_X, m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev.m_Y),
+										 vec2(m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_X, m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_Y),
+										 Client()->IntraGameTick(g_Config.m_ClDummy)),
+				Client()->GameTickSpeed());
 
 		CTeeRenderInfo Shadow = RenderInfo;
 		RenderTools()->RenderTee(&State, &Shadow, Player.m_Emote, Direction, ShadowPosition, 0.5f); // render ghost

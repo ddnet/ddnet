@@ -322,7 +322,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		float Dmg = Strength * l;
 		if(!(int)Dmg)
 			continue;
-		
+
 		//recalculate with different tickspeeds in mind
 		Strength = CWorldCore::PhysicsScalingLinear(Strength, Server()->TickSpeed());
 		Dmg = Strength * l;
@@ -1552,7 +1552,8 @@ void CGameContext::OnClientEnter(int ClientId)
 	{
 		if(OnClientDDNetVersionKnown(ClientId))
 			return; // kicked
-	}else if(Server()->TickSpeed() != 50)
+	}
+	else if(Server()->TickSpeed() != 50)
 	{
 		Server()->Kick(ClientId, "Unsupported client, need at least DDNet version 18.5.2");
 		return;

@@ -60,7 +60,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 			Strength = Tuning()->m_ShotgunStrength;
 		else
 			Strength = TuningList()[m_TuneZone].m_ShotgunStrength;
-		
+
 		Strength = CWorldCore::PhysicsScalingLinear(Strength, Server()->TickSpeed());
 
 		const vec2 &HitPos = pHit->Core()->m_Pos;

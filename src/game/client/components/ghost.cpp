@@ -557,7 +557,8 @@ int CGhost::Load(const char *pFilename)
 		{
 			if(!GhostLoader()->ReadData(Type, &pGhost->m_StartTick, sizeof(int)))
 				Error = true;
-		}else if(Type == GHOSTDATA_TYPE_TICKSPEED)
+		}
+		else if(Type == GHOSTDATA_TYPE_TICKSPEED)
 		{
 			if(!GhostLoader()->ReadData(Type, &pGhost->m_TickSpeed, sizeof(int)))
 				Error = true;
@@ -585,7 +586,7 @@ int CGhost::Load(const char *pFilename)
 
 	if(pGhost->m_StartTick == -1)
 		pGhost->m_StartTick = pGhost->m_Path.Get(0)->m_Tick;
-	
+
 	if(pGhost->m_TickSpeed <= 0)
 		pGhost->m_TickSpeed = 50;
 
