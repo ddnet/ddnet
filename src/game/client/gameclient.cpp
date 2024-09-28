@@ -4141,9 +4141,9 @@ bool CGameClient::InitMultiView(int Team)
 		vec2 CurPosition(m_Camera.m_Center);
 		if(SpectatorId != SPEC_FREEVIEW)
 		{
-			CCharacterCore current;
-			current.Read(&m_Snap.m_aCharacters[SpectatorId].m_Cur, Client()->GameTickSpeed());
-			CurPosition = current.m_Pos;
+			CCharacterCore Current;
+			Current.Read(&m_Snap.m_aCharacters[SpectatorId].m_Cur, Client()->GameTickSpeed());
+			CurPosition = Current.m_Pos;
 		}
 
 		int ClosestDistance = std::numeric_limits<int>::max();

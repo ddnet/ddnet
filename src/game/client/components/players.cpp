@@ -476,9 +476,9 @@ void CPlayers::RenderPlayer(
 
 	RenderInfo.m_FeetFlipped = false;
 
-	float minSpeed = Client()->GameTickSpeed() / 50.0;
+	float MinSpeed = Client()->GameTickSpeed() / 50.0;
 
-	bool Stationary = Player.m_VelX <= minSpeed && Player.m_VelX >= -minSpeed;
+	bool Stationary = Player.m_VelX <= MinSpeed && Player.m_VelX >= -MinSpeed;
 	vec2 InAirPos = CCharacterCore::ConvertPosition(vec2(Player.m_X, Player.m_Y), Client()->GameTickSpeed());
 	bool InAir = !Collision()->CheckPoint(InAirPos.x, InAirPos.y + 16);
 	bool Running = Player.m_VelX >= 5000 || Player.m_VelX <= -5000;

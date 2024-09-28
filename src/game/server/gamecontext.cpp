@@ -4496,7 +4496,7 @@ void CGameContext::SendRecord(int ClientId)
 	}
 }
 
-void CGameContext::SendTickSpeed(int ClientID)
+void CGameContext::SendTickSpeed(int ClientID) const
 {
 	CNetMsg_Sv_TickSpeed Msg;
 	Msg.m_TickSpeed = Server()->TickSpeed();
