@@ -35,6 +35,11 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	DoBounce();
 }
 
+void CLaser::SetEvalTick(int Tick)
+{
+	m_EvalTick = Tick;
+}
+
 bool CLaser::HitCharacter(vec2 From, vec2 To)
 {
 	static const vec2 StackedLaserShotgunBugSpeed = vec2(-2147483648.0f, -2147483648.0f);
@@ -98,9 +103,11 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	return true;
 }
 
-void CLaser::DoBounce()
+void CLaser::DoBounce(bool EarlyTick)
 {
 	m_EvalTick = Server()->Tick();
+	if(EarlyTick)
+		m_EvalTick--;
 
 	if(m_Energy < 0)
 	{
