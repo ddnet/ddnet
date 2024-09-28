@@ -759,9 +759,9 @@ float CWorldCore::CWorldCore::PhysicsScalingLinear(float Value, int TickSpeed)
 	if(TickSpeed == 50)
 		return Value;
 
-	float speed = TickSpeed / 50.0;
+	float Speed = TickSpeed / 50.0;
 
-	return Value / speed;
+	return Value / Speed;
 }
 
 float CWorldCore::CWorldCore::PhysicsScalingAccel(float Value, int TickSpeed)
@@ -769,9 +769,9 @@ float CWorldCore::CWorldCore::PhysicsScalingAccel(float Value, int TickSpeed)
 	if(TickSpeed == 50)
 		return Value;
 
-	float speed = TickSpeed / 50.0;
+	float Speed = TickSpeed / 50.0;
 
-	return Value / pow(speed, 2);
+	return Value / std::pow(Speed, 2);
 }
 
 float CWorldCore::CWorldCore::PhysicsScalingFriction(float Value, int TickSpeed)
@@ -779,9 +779,9 @@ float CWorldCore::CWorldCore::PhysicsScalingFriction(float Value, int TickSpeed)
 	if(TickSpeed == 50)
 		return Value;
 
-	float speed = TickSpeed / 50.0;
+	float Speed = TickSpeed / 50.0;
 
-	return pow(Value, 1 / speed);
+	return std::pow(Value, 1 / Speed);
 }
 
 void CWorldCore::InitSwitchers(int HighestSwitchNumber)
