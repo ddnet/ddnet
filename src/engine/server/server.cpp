@@ -2773,7 +2773,7 @@ int CServer::Run()
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 	}
 
-	ReadAnnouncementsFile(g_Config.m_SvAnnouncementFileName);
+	ReadAnnouncementsFile();
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
@@ -3618,6 +3618,12 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CServer::ConReloadAnnouncement(IConsole::IResult *pResult, void *pUserData)
+{
+	CServer *pThis = static_cast<CServer *>(pUserData);
+	pThis->ReadAnnouncementsFile();
+}
+
 void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3809,7 +3815,7 @@ void CServer::ConchainAnnouncementFileName(IConsole::IResult *pResult, void *pUs
 	pfnCallback(pResult, pCallbackUserData);
 	if(Changed)
 	{
-		pSelf->ReadAnnouncementsFile(g_Config.m_SvAnnouncementFileName);
+		pSelf->ReadAnnouncementsFile();
 	}
 }
 
@@ -3872,6 +3878,8 @@ void CServer::RegisterCommands()
 	Console()->Register("auth_change_p", "s[ident] s[level] s[hash] s[salt]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAuthUpdateHashed, this, "Update a rcon key with prehashed data");
 	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAuthRemove, this, "Remove a rcon key");
 	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys");
+
+	Console()->Register("reload_announcement", "", CFGFLAG_SERVER, ConReloadAnnouncement, this, "Reload the announcements");
 
 	RustVersionRegister(*Console());
 
@@ -3936,17 +3944,17 @@ void CServer::GetClientAddr(int ClientId, NETADDR *pAddr) const
 	}
 }
 
-void CServer::ReadAnnouncementsFile(const char *pFileName)
+void CServer::ReadAnnouncementsFile()
 {
 	m_vAnnouncements.clear();
 
-	if(pFileName[0] == '\0')
+	if(g_Config.m_SvAnnouncementFileName[0] == '\0')
 		return;
 
 	CLineReader LineReader;
-	if(!LineReader.OpenFile(m_pStorage->OpenFile(pFileName, IOFLAG_READ, IStorage::TYPE_ALL)))
+	if(!LineReader.OpenFile(m_pStorage->OpenFile(g_Config.m_SvAnnouncementFileName, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
-		dbg_msg("announcements", "failed to open '%s'", pFileName);
+		log_error("server", "Failed load announcements from '%s'", g_Config.m_SvAnnouncementFileName);
 		return;
 	}
 	while(const char *pLine = LineReader.Get())
@@ -3956,13 +3964,14 @@ void CServer::ReadAnnouncementsFile(const char *pFileName)
 			m_vAnnouncements.emplace_back(pLine);
 		}
 	}
+	log_info("server", "Loaded %" PRIzu " announcements", m_vAnnouncements.size());
 }
 
 const char *CServer::GetAnnouncementLine()
 {
 	if(m_vAnnouncements.empty())
 	{
-		return 0;
+		return nullptr;
 	}
 	else if(m_vAnnouncements.size() == 1)
 	{
