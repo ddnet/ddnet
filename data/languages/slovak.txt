@@ -3,7 +3,7 @@
 #	Limit and Petr
 #modified by:
 #	LimiT		2011-07-02 20:24:44
-#	dobrykafe	2024-08-30 00:00:00
+#	dobrykafe	2024-09-29 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1899,44 +1899,44 @@ https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
 
 Save skin
-== 
+== Uložiť skin
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Naozaj chcete uložiť svoj skin? Ak skin s týmto názvom už existuje, bude nahradený.
 
 Unable to save the skin
-== 
+== Nie je možné uložiť skin
 
 Unable to save the skin with a reserved name
-== 
+== Nie je možné uložiť skin s rezervovaným názvom
 
 No local servers found (ports %d-%d)
-== 
+== Žiadny miestny server nenájdený (porty %d-%d)
 
 [Hertz]
 Hz
-== 
+== Hz
 
 [skins]
 Body
-== 
+== Telo
 
 [skins]
 Marking
-== 
+== Značenie
 
 [skins]
 Decoration
-== 
+== Dekorácia
 
 [skins]
 Hands
-== 
+== Ruky
 
 [skins]
 Feet
-== 
+== Chodidlá
 
 [skins]
 Eyes
-== 
+== Oči
