@@ -199,6 +199,9 @@ Are you sure that you want to reset the controls to their defaults?
 Are you sure that you want to restart?
 == Ви дійсно хочете перезапустити?
 
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== Ви дійсно хочете зберегти ваш скін? Якщо скін із цією назвою вже існує, його буде замінено.
+
 ASI
 == АЗІ
 
@@ -252,6 +255,10 @@ Blue team
 
 Blue team wins!
 == Сині перемогли!
+
+[skins]
+Body
+== Тулуб
 
 Body
 == Тулуб
@@ -459,6 +466,10 @@ Deaths
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Увімкнено режим налагодження. Натисніть Ctrl+Shift+D, щоб його вимкнути.
 
+[skins]
+Decoration
+== Прикраса
+
 default
 == типово
 
@@ -624,6 +635,10 @@ Export demo cut
 Extras
 == Додатково
 
+[skins]
+Eyes
+== Очі
+
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Помилка під час ініціалізації. Спробуйте змінити gfx_backend на OpenGL чи Vulkan у settings_ddnet.cfg у теці налаштувань і спробуйте ще раз.
@@ -643,6 +658,10 @@ Favorite
 
 Favorites
 == Улюблені
+
+[skins]
+Feet
+== Ноги
 
 Feet
 == Ноги
@@ -783,6 +802,10 @@ Hammer
 Hammerfly dummy
 == Гаммерфлай
 
+[skins]
+Hands
+== Руки
+
 Has people playing
 == Має гравців
 
@@ -827,6 +850,10 @@ HUD
 
 Hue
 == Відтінок
+
+[Hertz]
+Hz
+== Гц
 
 Indicate map finish
 == Позначати пройдені мапи
@@ -976,6 +1003,10 @@ Mark the end of a cut (right click to reset)
 Markers
 == Мітки
 
+[skins]
+Marking
+== Візерунок
+
 Match %d of %d
 == Збіг %d з %d
 
@@ -1071,6 +1102,9 @@ No controller found. Plug in a controller.
 
 No demo selected
 == Жодного демо не вибрано
+
+No local servers found (ports %d-%d)
+== Не знайдено локальних серверів (порти %d—%d)
 
 No login required
 == Без логіна
@@ -1363,6 +1397,9 @@ Save ghost
 
 Save power by lowering refresh rate (higher input latency)
 == Економити енергію шляхом зниження частоти кадрів (вища затримка введення)
+
+Save skin
+== Зберегти скін
 
 Save the best demo of each race
 == Зберігати найкраще демо кожного забігу
@@ -1769,6 +1806,12 @@ Unable to rename the demo
 
 Unable to rename the folder
 == Не вдалося перейменувати теку
+
+Unable to save the skin
+== Не вдалося зберегти скін
+
+Unable to save the skin with a reserved name
+== Не вдалося зберегти скін із зарезервованою назвою
 
 Unfinished map
 == Непройдені мапи
