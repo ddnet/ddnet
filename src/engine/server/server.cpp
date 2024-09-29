@@ -1608,8 +1608,9 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientId].m_State == CClient::STATE_READY && GameServer()->IsClientReady(ClientId))
 			{
+				const NETADDR *pAddr = m_NetServer.ClientAddr(ClientId);
 				char aAddrStr[NETADDR_MAXSTRSIZE];
-				net_addr_str(m_NetServer.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
+				net_addr_str(pAddr, aAddrStr, sizeof(aAddrStr), true);
 
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientId=%d addr=<{%s}> sixup=%d", ClientId, aAddrStr, IsSixup(ClientId));
@@ -1617,7 +1618,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				m_aClients[ClientId].m_State = CClient::STATE_INGAME;
 				if(!IsSixup(ClientId))
 				{
-					SendServerInfo(m_NetServer.ClientAddr(ClientId), -1, SERVERINFO_EXTENDED, false);
+					SendServerInfo(pAddr, -1, SERVERINFO_EXTENDED, false);
 				}
 				else
 				{
@@ -1626,6 +1627,48 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					SendMsg(&Msgp, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
 				}
 				GameServer()->OnClientEnter(ClientId);
+
+				bool IsLocalAddress = false;
+				if(pAddr->ip[0] == 127 || pAddr->ip[0] == 10 || (pAddr->ip[0] == 192 && pAddr->ip[1] == 168) || (pAddr->ip[0] == 172 && (pAddr->ip[1] >= 16 && pAddr->ip[1] <= 31)))
+					IsLocalAddress = true;
+
+				if(str_startswith(aAddrStr, "[fe80:") || str_startswith(aAddrStr, "[::1"))
+					IsLocalAddress = true;
+
+				if(g_Config.m_SvRconAutoAuth && IsLocalAddress && m_aClients[ClientId].m_Authed != AUTHED_ADMIN)
+				{
+					if(!IsSixup(ClientId))
+					{
+						CMsgPacker Msgp(NETMSG_RCON_AUTH_STATUS, true);
+						Msgp.AddInt(1); // authed
+						Msgp.AddInt(1); // cmdlist
+						SendMsg(&Msgp, MSGFLAG_VITAL, ClientId);
+					}
+					else
+					{
+						CMsgPacker Msgp(protocol7::NETMSG_RCON_AUTH_ON, true, true);
+						SendMsg(&Msgp, MSGFLAG_VITAL, ClientId);
+					}
+
+					m_aClients[ClientId].m_Authed = AUTHED_ADMIN;
+					m_aClients[ClientId].m_AuthKey = m_AuthManager.DefaultKey(AUTHED_ADMIN);
+					m_aClients[ClientId].m_pRconCmdToSend = Console()->FirstCommandInfo(0, CFGFLAG_SERVER);
+					CMsgPacker MsgStart(NETMSG_RCON_CMD_GROUP_START, true);
+					MsgStart.AddInt(NumRconCommands(ClientId));
+					SendMsg(&MsgStart, MSGFLAG_VITAL, ClientId);
+					if(m_aClients[ClientId].m_pRconCmdToSend == nullptr)
+					{
+						CMsgPacker MsgEnd(NETMSG_RCON_CMD_GROUP_END, true);
+						SendMsg(&MsgEnd, MSGFLAG_VITAL, ClientId);
+					}
+
+					SendRconLine(ClientId, "Automatic admin authentication successful. Full remote console access granted.");
+					str_format(aBuf, sizeof(aBuf), "ClientId=%d auto authed (local network, admin)", ClientId);
+					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+
+					// DDRace
+					GameServer()->OnSetAuthed(ClientId, AUTHED_ADMIN);
+				}
 			}
 		}
 		else if(Msg == NETMSG_INPUT)
