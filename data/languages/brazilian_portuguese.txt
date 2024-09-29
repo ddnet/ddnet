@@ -1912,21 +1912,6 @@ Please wait…
 Show client IDs (scoreboard, chat, spectator)
 == Mostrar IDs de clientes (placar, chat, observador)
 
-Normal:
-== Normal:
-
-Team:
-== Time:
-
-Dummy settings
-== Configurações do dummy
-
-Toggle to edit your dummy settings
-== Alterne para editar suas configurações do dummy
-
-Randomize
-== Aleatorizar
-
 Are you sure that you want to delete '%s'?
 == Tem certeza que deseja excluir '%s'?
 
@@ -1942,5 +1927,45 @@ Custom
 Unable to delete skin
 == Não foi possível excluir skin
 
-Customize
-== Personalizar
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
+== 
+
+No local servers found (ports %d-%d)
+== 
+
+[Hertz]
+Hz
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
+== 

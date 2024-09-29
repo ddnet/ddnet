@@ -1896,21 +1896,6 @@ Please wait…
 Show client IDs (scoreboard, chat, spectator)
 == Client-IDs anzeigen (Punktetafel, Chat, Beobachter)
 
-Normal:
-== Normal:
-
-Team:
-== Team:
-
-Dummy settings
-== Dummy-Einstellungen
-
-Toggle to edit your dummy settings
-== Zu Dummy-Einstellungen wechseln
-
-Randomize
-== Randomisieren
-
 Are you sure that you want to delete '%s'?
 == Bist du sicher dass du '%s' löschen willst?
 
@@ -1926,8 +1911,48 @@ Custom
 Unable to delete skin
 == Kann Skin nicht löschen
 
-Customize
-== Anpassen
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
+== 
+
+No local servers found (ports %d-%d)
+== 
+
+[Hertz]
+Hz
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
+== 
 
 https://wiki.ddnet.org/wiki/Mapping
 == 

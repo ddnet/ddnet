@@ -417,9 +417,6 @@ Custom
 Custom colors
 == Власні кольори
 
-Customize
-== Налаштувати
-
 Cut interval
 == Інтервал
 
@@ -539,9 +536,6 @@ Dummy copy
 
 Dummy is not allowed on this server
 == Використання даммі заборонене на цьому сервері
-
-Dummy settings
-== Налаштування даммі
 
 Dynamic Camera
 == Динамічна камера
@@ -1102,9 +1096,6 @@ No updates available
 None
 == Немає
 
-Normal:
-== Звичайний:
-
 Normal Color
 == Колір звичайних повідомлень
 
@@ -1251,9 +1242,6 @@ Quitting. Please wait…
 
 Race
 == Забіг
-
-Randomize
-== Навмання
 
 Ratio
 == У/С
@@ -1674,9 +1662,6 @@ System message
 Team
 == Команда
 
-Team:
-== Командний:
-
 Team %d
 == Команда %d
 
@@ -1733,9 +1718,6 @@ Toggle ghost
 
 Toggle keyboard shortcuts
 == Перемкнути сполучення
-
-Toggle to edit your dummy settings
-== Перемкніть, щоб змінити налаштування даммі
 
 transmits your player name to info.ddnet.org
 == передає ваш нікнейм до info.ddnet.org
@@ -1914,3 +1896,46 @@ Zoom in
 
 Zoom out
 == Віддалити
+
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
+== 
+
+No local servers found (ports %d-%d)
+== 
+
+[Hertz]
+Hz
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
+== 
