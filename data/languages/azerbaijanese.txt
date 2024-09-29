@@ -5,6 +5,7 @@
 #     Gokturk          2024-06-09 12:00:50
 #     Gokturk          2024-07-17 02:24:00
 #     Gokturk          2024-08-29 23:39:00
+#     Gokturk          2024-09-29 19:24:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1897,44 +1898,44 @@ Unable to delete skin
 == Skin silinə bilməz
 
 Save skin
-== 
+== Skini saxla
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Skini xilas etmək istəyirsiniz? Bu adda başqa bir skin varsa, mövcud skin əvəzinə bu skin xilas olacaq.
 
 Unable to save the skin
-== 
+== Skini xilas etmək mümkün deyil
 
 Unable to save the skin with a reserved name
-== 
+== Skin xilas edilir, artıq bu adda skin vardı.
 
 No local servers found (ports %d-%d)
-== 
+== Yerli server tapılmadı (port %d-%d)
 
 [Hertz]
 Hz
-== 
+== Hz
 
 [skins]
 Body
-== 
+== Gövdə 
 
 [skins]
 Marking
-== 
+== İşarələmə
 
 [skins]
 Decoration
-== 
+== Dekorasiya
 
 [skins]
 Hands
-== 
+== Əl
 
 [skins]
 Feet
-== 
+== Ayaq
 
 [skins]
 Eyes
-== 
+== Göz
