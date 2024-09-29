@@ -2376,6 +2376,7 @@ void CCharacter::Rescue()
 			return;
 		}
 
+		m_LastRescue = Server()->Tick();
 		float StartTime = m_StartTime;
 		m_RescueTee[GetPlayer()->m_RescueMode].Load(this, Team());
 		// Don't load these from saved tee:
