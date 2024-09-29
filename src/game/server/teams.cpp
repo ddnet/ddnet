@@ -1109,51 +1109,76 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 			ResetRoundState(Team);
 		}
 	}
-	else if(Locked)
-	{
-		SetForceCharacterTeam(ClientId, Team);
-
-		if(GetTeamState(Team) != TEAMSTATE_OPEN && !m_aTeamFlock[m_Core.Team(ClientId)])
-		{
-			ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
-
-			m_aPractice[Team] = false;
-
-			if(Count(Team) > 1)
-			{
-				// Disband team if the team has more players than allowed.
-				if(Count(Team) > g_Config.m_SvMaxTeamSize)
-				{
-					GameServer()->SendChatTeam(Team, "This team was disbanded because there are more players than allowed in the team.");
-					SetTeamLock(Team, false);
-					KillTeam(Team, Weapon == WEAPON_SELF ? ClientId : -1, ClientId);
-					return;
-				}
-
-				KillTeam(Team, Weapon == WEAPON_SELF ? ClientId : -1, ClientId);
-
-				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "Everyone in your locked team was killed because '%s' %s.", Server()->ClientName(ClientId), Weapon == WEAPON_SELF ? "killed" : "died");
-
-				GameServer()->SendChatTeam(Team, aBuf);
-			}
-		}
-	}
 	else
 	{
-		if(m_aTeamState[m_Core.Team(ClientId)] == CGameTeams::TEAMSTATE_STARTED && !m_aTeeStarted[ClientId] && !m_aTeamFlock[m_Core.Team(ClientId)])
+		if(Locked)
 		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "This team cannot finish anymore because '%s' left the team before hitting the start", Server()->ClientName(ClientId));
-			GameServer()->SendChatTeam(Team, aBuf);
-			GameServer()->SendChatTeam(Team, "Enter /practice mode or restart to avoid the entire team being killed in 60 seconds");
+			SetForceCharacterTeam(ClientId, Team);
 
-			m_aTeamUnfinishableKillTick[Team] = Server()->Tick() + 60 * Server()->TickSpeed();
-			ChangeTeamState(Team, CGameTeams::TEAMSTATE_STARTED_UNFINISHABLE);
+			if(GetTeamState(Team) != TEAMSTATE_OPEN && !m_aTeamFlock[m_Core.Team(ClientId)])
+			{
+				ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
+
+				m_aPractice[Team] = false;
+
+				if(Count(Team) > 1)
+				{
+					// Disband team if the team has more players than allowed.
+					if(Count(Team) > g_Config.m_SvMaxTeamSize)
+					{
+						GameServer()->SendChatTeam(Team, "This team was disbanded because there are more players than allowed in the team.");
+						SetTeamLock(Team, false);
+						KillTeam(Team, Weapon == WEAPON_SELF ? ClientId : -1, ClientId);
+						return;
+					}
+
+					KillTeam(Team, Weapon == WEAPON_SELF ? ClientId : -1, ClientId);
+
+					char aBuf[512];
+					str_format(aBuf, sizeof(aBuf), "Everyone in your locked team was killed because '%s' %s.", Server()->ClientName(ClientId), Weapon == WEAPON_SELF ? "killed" : "died");
+
+					GameServer()->SendChatTeam(Team, aBuf);
+				}
+			}
 		}
-		SetForceCharacterTeam(ClientId, TEAM_FLOCK);
-		if(!m_aTeamFlock[m_Core.Team(ClientId)])
-			CheckTeamFinished(Team);
+		else
+		{
+			if(m_aTeamState[m_Core.Team(ClientId)] == CGameTeams::TEAMSTATE_STARTED && !m_aTeeStarted[ClientId] && !m_aTeamFlock[m_Core.Team(ClientId)])
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "This team cannot finish anymore because '%s' left the team before hitting the start", Server()->ClientName(ClientId));
+				GameServer()->SendChatTeam(Team, aBuf);
+				GameServer()->SendChatTeam(Team, "Enter /practice mode or restart to avoid the entire team being killed in 60 seconds");
+
+				m_aTeamUnfinishableKillTick[Team] = Server()->Tick() + 60 * Server()->TickSpeed();
+				ChangeTeamState(Team, CGameTeams::TEAMSTATE_STARTED_UNFINISHABLE);
+			}
+			SetForceCharacterTeam(ClientId, TEAM_FLOCK);
+			if(!m_aTeamFlock[m_Core.Team(ClientId)])
+				CheckTeamFinished(Team);
+		}
+
+		if(GetTeamState(Team) > CGameTeams::TEAMSTATE_OPEN && m_aTeamFlock[Team])
+		{
+			bool AnyStarted = false;
+			for(int i = 0; i < MAX_CLIENTS; ++i)
+			{
+				if(m_Core.Team(i) == Team)
+				{
+					CPlayer *pPlayer = GetPlayer(i);
+					if(pPlayer && pPlayer->IsPlaying() && GetDDRaceState(pPlayer) != DDRACE_NONE)
+					{
+						AnyStarted = true;
+						break;
+					}
+				}
+			}
+
+			if(!AnyStarted)
+			{
+				ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
+			}
+		}
 	}
 }
 
