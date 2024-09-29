@@ -1912,47 +1912,47 @@ Unable to delete skin
 == Kann Skin nicht löschen
 
 Save skin
-== 
+== Skin speichern
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Willst du den Skin wirklich speichern? Wenn ein Skin mit diesem Namen bereits existiert, wird dieser ersetzt.
 
 Unable to save the skin
-== 
+== Konnte Skin nicht speichern
 
 Unable to save the skin with a reserved name
-== 
+== Konnte Skin nicht mit reserviertem Namen speichern
 
 No local servers found (ports %d-%d)
-== 
+== Keine lokalen Server gefunden (Ports %d-%d)
 
 [Hertz]
 Hz
-== 
+== Hz
 
 [skins]
 Body
-== 
+== Körper
 
 [skins]
 Marking
-== 
+== Markierung
 
 [skins]
 Decoration
-== 
+== Dekoration
 
 [skins]
 Hands
-== 
+== Hände
 
 [skins]
 Feet
-== 
+== Füße
 
 [skins]
 Eyes
-== 
+== Augen
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/wiki/Mapping
