@@ -321,7 +321,7 @@ public:
 	//
 	// Returns whether the game should be supplied with the data when the
 	// client connects for the next map.
-	virtual bool OnClientDataPersist(int ClientId, void *pData) = 0;
+	virtual bool OnClientDataPersist(int ClientId, void *pData, bool HotReload) = 0;
 
 	// Called when a client connects.
 	//

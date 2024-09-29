@@ -2827,7 +2827,7 @@ int CServer::Run()
 					{
 						if(m_aClients[i].m_State == CClient::STATE_INGAME)
 						{
-							m_aClients[i].m_HasPersistentData = GameServer()->OnClientDataPersist(i, m_aClients[i].m_pPersistentData);
+							m_aClients[i].m_HasPersistentData = GameServer()->OnClientDataPersist(i, m_aClients[i].m_pPersistentData, SameMapReload);
 						}
 					}
 

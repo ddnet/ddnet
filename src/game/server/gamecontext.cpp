@@ -1647,15 +1647,22 @@ void CGameContext::OnClientEnter(int ClientId)
 	LogEvent("Connect", ClientId);
 }
 
-bool CGameContext::OnClientDataPersist(int ClientId, void *pData)
+bool CGameContext::OnClientDataPersist(int ClientId, void *pData, bool HotReload)
 {
 	CPersistentClientData *pPersistent = (CPersistentClientData *)pData;
-	if(!m_apPlayers[ClientId])
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+	if(!pPlayer)
 	{
 		return false;
 	}
-	pPersistent->m_IsSpectator = m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS;
-	pPersistent->m_IsAfk = m_apPlayers[ClientId]->IsAfk();
+	pPersistent->m_IsSpectator = pPlayer->GetTeam() == TEAM_SPECTATORS;
+	pPersistent->m_IsAfk = pPlayer->IsAfk();
+
+	pPersistent->m_HotReload = HotReload;
+	if(HotReload)
+	{
+		pPersistent->m_HotReloadPlayer.m_Team = pPlayer->GetTeam();
+	}
 	return true;
 }
 
@@ -1688,7 +1695,12 @@ void CGameContext::OnClientConnected(int ClientId, void *pData)
 	}
 
 	// Check which team the player should be on
-	const int StartTeam = (Spec || g_Config.m_SvTournamentMode) ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientId);
+	int StartTeam = (Spec || g_Config.m_SvTournamentMode) ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientId);
+
+	if(pPersistentData && pPersistentData->m_HotReload)
+	{
+		StartTeam = pPersistentData->m_HotReloadPlayer.m_Team;
+	}
 
 	if(m_apPlayers[ClientId])
 		delete m_apPlayers[ClientId];

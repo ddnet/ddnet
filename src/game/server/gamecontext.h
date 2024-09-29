@@ -150,10 +150,18 @@ class CGameContext : public IGameServer
 		CUuid m_PrevGameUuid;
 	};
 
+	struct CHotReloadPlayer
+	{
+		int m_Team;
+	};
+
 	struct CPersistentClientData
 	{
 		bool m_IsSpectator;
 		bool m_IsAfk;
+
+		bool m_HotReload;
+		CHotReloadPlayer m_HotReloadPlayer;
 	};
 
 public:
@@ -315,7 +323,7 @@ public:
 	void OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId);
 	void OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int ClientId);
 
-	bool OnClientDataPersist(int ClientId, void *pData) override;
+	bool OnClientDataPersist(int ClientId, void *pData, bool HotReload) override;
 	void OnClientConnected(int ClientId, void *pData) override;
 	void OnClientEnter(int ClientId) override;
 	void OnClientDrop(int ClientId, const char *pReason) override;
