@@ -1176,6 +1176,7 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 
 			if(!AnyStarted)
 			{
+				ResetSwitchers(Team);
 				ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 			}
 		}
