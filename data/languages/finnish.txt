@@ -1836,7 +1836,22 @@ Could not connect dummy
 Following %s
 == 
 
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
+== 
+
 %d/%d KiB (%.1f KiB/s)
+== 
+
+No local servers found (ports %d-%d)
 == 
 
 Example of usage
@@ -1846,6 +1861,10 @@ Dummy is not allowed on this server
 == 
 
 Please wait…
+== 
+
+[Hertz]
+Hz
 == 
 
 Converse
@@ -1860,19 +1879,10 @@ Show client IDs (scoreboard, chat, spectator)
 Show only chat messages from team members
 == 
 
-Normal:
+Basic
 == 
 
-Team:
-== 
-
-Dummy settings
-== 
-
-Toggle to edit your dummy settings
-== 
-
-Randomize
+Custom
 == 
 
 Are you sure that you want to delete '%s'?
@@ -1881,16 +1891,7 @@ Are you sure that you want to delete '%s'?
 Delete skin
 == 
 
-Basic
-== 
-
-Custom
-== 
-
 Unable to delete skin
-== 
-
-Customize
 == 
 
 Round %d/%d
@@ -1905,6 +1906,30 @@ Round %d/%d
 == 
 
 Team %d (%d/%d)
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
 == 
 
 Spree

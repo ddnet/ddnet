@@ -1872,34 +1872,32 @@ Connect address error
 Could not connect dummy
 == 
 
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
+== 
+
+No local servers found (ports %d-%d)
+== 
+
 Dummy is not allowed on this server
 == 
 
 Please wait…
 == 
 
+[Hertz]
+Hz
+== 
+
 Show client IDs (scoreboard, chat, spectator)
-== 
-
-Normal:
-== 
-
-Team:
-== 
-
-Dummy settings
-== 
-
-Toggle to edit your dummy settings
-== 
-
-Randomize
-== 
-
-Are you sure that you want to delete '%s'?
-== 
-
-Delete skin
 == 
 
 Basic
@@ -1908,10 +1906,37 @@ Basic
 Custom
 == 
 
+Are you sure that you want to delete '%s'?
+== 
+
+Delete skin
+== 
+
 Unable to delete skin
 == 
 
-Customize
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
 == 
 
 https://wiki.ddnet.org/wiki/Mapping

@@ -1914,21 +1914,6 @@ Please wait…
 Show client IDs (scoreboard, chat, spectator)
 == 顯示客戶端 ID（計分板、聊天、旁觀者）
 
-Normal:
-== 正常：
-
-Team:
-== 隊伍：
-
-Dummy settings
-== 分身設定
-
-Toggle to edit your dummy settings
-== 切換以編輯分身設定
-
-Randomize
-== 隨機
-
 Are you sure that you want to delete '%s'?
 == 你確定要刪除'%s'嗎？
 
@@ -1944,5 +1929,45 @@ Custom
 Unable to delete skin
 == 無法刪除外觀
 
-Customize
-== 自定義
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
+== 
+
+No local servers found (ports %d-%d)
+== 
+
+[Hertz]
+Hz
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
+== 

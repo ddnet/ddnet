@@ -1894,21 +1894,6 @@ Please wait…
 Show client IDs (scoreboard, chat, spectator)
 == İstemci ID'sini göster (skor tablosu, sohbet, izleyici)
 
-Normal:
-== Normal:
-
-Team:
-== Takım:
-
-Dummy settings
-== Dummy ayarları
-
-Toggle to edit your dummy settings
-== Dummy ayarlarını düzenlemek için açın 
-
-Randomize
-== Rastgele
-
 Are you sure that you want to delete '%s'?
 == '%s' bunu silmek istediğine emin misin?
 
@@ -1924,5 +1909,45 @@ Custom
 Unable to delete skin
 == Skin silinemiyor
 
-Customize
-== Özelleştir
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
+== 
+
+No local servers found (ports %d-%d)
+== 
+
+[Hertz]
+Hz
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
+== 

@@ -1925,21 +1925,6 @@ Please wait…
 Show client IDs (scoreboard, chat, spectator)
 == 显示客户端 ID（计分板、聊天、观战者）
 
-Normal:
-== 正常：
-
-Team:
-== 队伍：
-
-Dummy settings
-== 分身设置
-
-Toggle to edit your dummy settings
-== 切换以编辑分身设置
-
-Randomize
-== 随机
-
 Are you sure that you want to delete '%s'?
 == 你确定要删除'%s'吗？
 
@@ -1955,5 +1940,45 @@ Custom
 Unable to delete skin
 == 无法删除皮肤
 
-Customize
-== 自定义
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
+== 
+
+No local servers found (ports %d-%d)
+== 
+
+[Hertz]
+Hz
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
+== 
