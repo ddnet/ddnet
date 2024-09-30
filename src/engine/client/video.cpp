@@ -893,13 +893,23 @@ bool CVideo::AddStream(COutputStream *pStream, AVFormatContext *pFormatContext, 
 	switch((*ppCodec)->type)
 	{
 	case AVMEDIA_TYPE_AUDIO:
-		pContext->sample_fmt = (*ppCodec)->sample_fmts ? (*ppCodec)->sample_fmts[0] : AV_SAMPLE_FMT_FLTP;
-		if((*ppCodec)->supported_samplerates)
+	{
+		const AVSampleFormat *pSampleFormats = nullptr;
+		const int *pSampleRates = nullptr;
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 13, 100)
+		avcodec_get_supported_config(pContext, *ppCodec, AV_CODEC_CONFIG_SAMPLE_FORMAT, 0, (const void **)&pSampleFormats, nullptr);
+		avcodec_get_supported_config(pContext, *ppCodec, AV_CODEC_CONFIG_SAMPLE_RATE, 0, (const void **)&pSampleRates, nullptr);
+#else
+		pSampleFormats = (*ppCodec)->sample_fmts;
+		pSampleRates = (*ppCodec)->supported_samplerates;
+#endif
+		pContext->sample_fmt = pSampleFormats ? pSampleFormats[0] : AV_SAMPLE_FMT_FLTP;
+		if(pSampleRates)
 		{
-			pContext->sample_rate = (*ppCodec)->supported_samplerates[0];
-			for(int i = 0; (*ppCodec)->supported_samplerates[i]; i++)
+			pContext->sample_rate = pSampleRates[0];
+			for(int i = 0; pSampleRates[i]; i++)
 			{
-				if((*ppCodec)->supported_samplerates[i] == m_pSound->MixingRate())
+				if(pSampleRates[i] == m_pSound->MixingRate())
 				{
 					pContext->sample_rate = m_pSound->MixingRate();
 					break;
@@ -921,6 +931,7 @@ bool CVideo::AddStream(COutputStream *pStream, AVFormatContext *pFormatContext, 
 		pStream->m_pStream->time_base.num = 1;
 		pStream->m_pStream->time_base.den = pContext->sample_rate;
 		break;
+	}
 
 	case AVMEDIA_TYPE_VIDEO:
 		pContext->codec_id = CodecId;
