@@ -661,7 +661,7 @@ MACRO_CONFIG_INT(SvConnlimitTime, sv_connlimit_time, 20, 0, 1000, CFGFLAG_SERVER
 MACRO_CONFIG_STR(SvConnLoggingServer, sv_conn_logging_server, 128, "", CFGFLAG_SERVER, "Unix socket server for IP address logging (Unix only)")
 #endif
 
-MACRO_CONFIG_INT(CLHammerSpinny, cl_spinny_hammer, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Allow your hammer to spin other weapons")
+MACRO_CONFIG_INT(CLHammerSpinny, cl_spinny_hammer, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Allow your hammer to spin like other weapons")
 
 MACRO_CONFIG_INT(ClUnpredictedShadow, cl_unpredicted_shadow, 0, -1, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show unpredicted shadow tee (0 = off, 1 = on, -1 = don't even show in debug mode)")
 MACRO_CONFIG_INT(ClPredictFreeze, cl_predict_freeze, 1, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict freeze tiles (0 = off, 1 = on, 2 = partial (allow a small amount of movement in freeze)")

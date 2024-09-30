@@ -3199,7 +3199,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Miscellaneous.HSplitTop(20.0f, &Button, &Miscellaneous);
 	if(DoButton_CheckBox(&g_Config.m_CLHammerSpinny, Localize("Spinny Hammer"), g_Config.m_CLHammerSpinny, &Button))
 		g_Config.m_CLHammerSpinny ^= 1;
-	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_CLHammerSpinny, &Button, Localize("Allow your hammer to spin other weapons"));
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_CLHammerSpinny, &Button, Localize("Allow your hammer to spin like other weapons"));
 
 	Miscellaneous.HSplitTop(5.0f, nullptr, &Miscellaneous);
 	Miscellaneous.HSplitTop(20.0f, &Label, &Miscellaneous);
