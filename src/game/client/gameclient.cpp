@@ -316,11 +316,11 @@ void CGameClient::OnInit()
 
 	if(GIT_SHORTREV_HASH)
 	{
-		str_format(m_aDDNetVersionStr, sizeof(m_aDDNetVersionStr), "%s %s (%s)", GAME_NAME, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH);
+		str_format(m_aDDNetVersionStr, sizeof(m_aDDNetVersionStr), "%s %s (%s)", CLIENT_NAME, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH);
 	}
 	else
 	{
-		str_format(m_aDDNetVersionStr, sizeof(m_aDDNetVersionStr), "%s %s", GAME_NAME, GAME_RELEASE_VERSION);
+		str_format(m_aDDNetVersionStr, sizeof(m_aDDNetVersionStr), "%s %s", CLIENT_NAME, GAME_RELEASE_VERSION);
 	}
 
 	// set the language
@@ -2209,7 +2209,7 @@ void CGameClient::OnPredict()
 			m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
 			m_PredictedPrevChar = pLocalChar->GetCore();
 		}
-		if(Tick == FinalTick - (1 - g_Config.m_ClFastInputOthers))
+		if(Tick == FinalTick - std::max(g_Config.m_ClFastInput - g_Config.m_ClFastInputOthers, 0))
 		{
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
@@ -2246,7 +2246,7 @@ void CGameClient::OnPredict()
 		{
 			m_PredictedChar = pLocalChar->GetCore();
 		}
-		if (Tick == FinalTick - (1 - g_Config.m_ClFastInputOthers)) 
+		if(Tick == FinalTick - std::max(g_Config.m_ClFastInput - g_Config.m_ClFastInputOthers, 0)) 
 		{
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
