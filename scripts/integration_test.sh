@@ -50,7 +50,9 @@ function kill_all() {
 
 	if [[ ! -f fail_server.txt ]]; then
 		echo "[*] Shutting down server"
-		echo "shutdown" > server.fifo
+		if ! timeout 3 sh -c "echo shutdown > server.fifo"; then
+			echo "[-] shutdown server timed out"
+		fi
 	fi
 	sleep 1
 
@@ -58,7 +60,9 @@ function kill_all() {
 	for ((i = 1; i < 3; i++)); do
 		if [[ ! -f fail_client$i.txt ]]; then
 			echo "[*] Shutting down client$i"
-			echo "quit" > "client$i.fifo"
+			if ! timeout 3 sh -c "echo quit > \"client$i.fifo\""; then
+				echo "[-] shutdown client $i timed out"
+			fi
 		fi
 	done
 	sleep 1
@@ -75,6 +79,28 @@ function fail() {
 	tail -n2 "$1".log > fail_"$1".txt
 	echo "$1 exited with code $2" >> fail_"$1".txt
 	echo "[-] $1 exited with code $2"
+}
+
+function fifo() {
+	local cmd="$1"
+	local fifo_file="$2"
+	if [ -f fail_fifo_timeout.txt ]; then
+		echo "[fifo] skipping because of timeout cmd: $cmd"
+		return
+	fi
+	if [ "$arg_verbose" == "1" ]; then
+		echo "[fifo] $cmd >> $fifo_file"
+	fi
+	if printf '%s' "$cmd" | grep -q '[`'"'"']'; then
+		echo "[-] fifo commands can not contain backticks or single quotes"
+		echo "[-] invalid fifo command: $cmd"
+		return
+	fi
+	if ! timeout 3 sh -c "printf '%s\n' '$cmd' >> \"$fifo_file\""; then
+		fifo_error="[-] fifo command timeout: $cmd >> $fifo_file"
+		printf '%s\n' "$fifo_error"
+		printf '%s\n' "$fifo_error" >> fail_fifo_timeout.txt
+	fi
 }
 
 # Get unused port from the system by binding to port 0 and immediately closing the socket again
@@ -190,8 +216,8 @@ $tool ../DDNet \
 wait_for_launch client1.fifo 3
 
 echo "[*] Start demo recording"
-echo "record server" > server.fifo
-echo "record client1" > client1.fifo
+fifo "record server" server.fifo
+fifo "record client1" client1.fifo
 
 echo "[*] Launch client 2"
 $tool ../DDNet \
@@ -207,10 +233,11 @@ wait_for_launch client2.fifo 5
 sleep 15
 
 echo "[*] Test chat and chat commands"
-echo "say hello world" > client1.fifo
-echo "rcon_auth rcon" > client1.fifo
+fifo "say hello world" client1.fifo
+fifo "rcon_auth rcon" client1.fifo
 sleep 1
-tr -d '\n' > client1.fifo << EOF
+fifo "$(
+	tr -d '\n' << EOF
 say "/mc
 ;top5
 ;rank
@@ -228,10 +255,13 @@ say "/mc
 ;cmdlist
 ;saytime"
 EOF
+)" client1.fifo
+
 sleep 10
 
 echo "[*] Test rcon commands"
-tr -d '\n' > client1.fifo << EOF
+fifo "$(
+	tr -d '\n' << EOF
 rcon say hello from admin;
 rcon broadcast test;
 rcon status;
@@ -239,15 +269,16 @@ rcon echo test;
 muteid 1 900 spam;
 unban_all;
 EOF
+)" client1.fifo
 sleep 5
 
 echo "[*] Stop demo recording"
-echo "stoprecord" > server.fifo
-echo "stoprecord" > client1.fifo
+fifo "stoprecord" server.fifo
+fifo "stoprecord" client1.fifo
 sleep 1
 
 echo "[*] Test map change"
-echo "rcon sv_map Tutorial" > client1.fifo
+fifo "rcon sv_map Tutorial" client1.fifo
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	sleep 60
 else
@@ -255,8 +286,8 @@ else
 fi
 
 echo "[*] Play demos"
-echo "play demos/server.demo" > client1.fifo
-echo "play demos/client1.demo" > client2.fifo
+fifo "play demos/server.demo" client1.fifo
+fifo "play demos/client1.demo" client2.fifo
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	sleep 40
 else
