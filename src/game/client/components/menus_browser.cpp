@@ -1773,13 +1773,13 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 	/*
 		+---------------------------+ +---communities---+
-		|							| |					|
-		|							| +------tabs-------+
-		|	server list				| |					|
-		|							| |		tool		|
-		|							| |		box			|
-		+---------------------------+ |					|
-			status box				  +-----------------+
+		|                           | |                 |
+		|                           | +------tabs-------+
+		|       server list         | |                 |
+		|                           | |      tool       |
+		|                           | |      box        |
+		+---------------------------+ |                 |
+		        status box            +-----------------+
 	*/
 
 	CUIRect ServerList, StatusBox, ToolBox, TabBar;
