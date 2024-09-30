@@ -50,7 +50,9 @@ function kill_all() {
 
 	if [[ ! -f fail_server.txt ]]; then
 		echo "[*] Shutting down server"
-		echo "shutdown" > server.fifo
+		if ! timeout 3 sh -c "echo shutdown > server.fifo"; then
+			echo "[-] shutdown server timed out"
+		fi
 	fi
 	sleep 1
 
@@ -58,7 +60,9 @@ function kill_all() {
 	for ((i = 1; i < 3; i++)); do
 		if [[ ! -f fail_client$i.txt ]]; then
 			echo "[*] Shutting down client$i"
-			echo "quit" > "client$i.fifo"
+			if ! timeout 3 sh -c "echo quit > \"client$i.fifo\""; then
+				echo "[-] shutdown client $i timed out"
+			fi
 		fi
 	done
 	sleep 1
@@ -90,7 +94,7 @@ export UBSAN_OPTIONS=suppressions=../ubsan.supp:log_path=./SAN:print_stacktrace=
 export ASAN_OPTIONS=log_path=./SAN:print_stacktrace=1:check_initialization_order=1:detect_leaks=$DETECT_LEAKS:halt_on_errors=0
 export LSAN_OPTIONS=suppressions=../lsan.supp:print_suppressions=0
 
-function print_results() {
+function check_asan_and_valgrind_results() {
 	if [ "$arg_valgrind_memcheck" == "1" ]; then
 		# Wait to ensure that the error summary was written to the stderr files because valgrind takes some time
 		# TODO: Instead wait for all started processes to finish
@@ -108,6 +112,74 @@ function print_results() {
 		fi
 	fi
 	return 0
+}
+
+print_results() {
+	for logfile in client1.log client2.log server.log; do
+		if [ "$arg_valgrind_memcheck" == "1" ]; then
+			break
+		fi
+		if [ ! -f "$logfile" ]; then
+			echo "[-] Error: logfile '$logfile' not found"
+			touch fail_logs.txt
+			continue
+		fi
+		logdiff="$(diff -u <(grep -v "console: .* access for .* is now .*abled" "$logfile" | sort) <(sort "stdout_$(basename "$logfile" .log).txt"))"
+		if [ "$logdiff" != "" ]; then
+			echo "[-] Error: logfile '$logfile' differs from stdout"
+			echo "$logdiff"
+			echo "[-] Error: logfile '$logfile' differs from stdout" >> fail_logs.txt
+			echo "$logdiff" >> fail_logs.txt
+		fi
+	done
+
+	for stderr in ./stderr_*.txt; do
+		if [ ! -f "$stderr" ]; then
+			continue
+		fi
+		if [ "$(cat "$stderr")" == "" ]; then
+			continue
+		fi
+		echo "[!] Warning: $stderr"
+		cat "$stderr"
+	done
+
+	if test -n "$(find . -maxdepth 1 -name 'fail_*' -print -quit)"; then
+		for fail in fail_*; do
+			cat "$fail"
+		done
+		check_asan_and_valgrind_results
+		echo "[-] Test failed. See errors above"
+		exit 1
+	fi
+
+	echo "[*] All tests passed"
+	check_asan_and_valgrind_results || exit 1
+}
+
+function fifo() {
+	local cmd="$1"
+	local fifo_file="$2"
+	if [ -f fail_fifo_timeout.txt ]; then
+		echo "[fifo] skipping because of timeout cmd: $cmd"
+		return
+	fi
+	if [ "$arg_verbose" == "1" ]; then
+		echo "[fifo] $cmd >> $fifo_file"
+	fi
+	if printf '%s' "$cmd" | grep -q '[`'"'"']'; then
+		echo "[-] fifo commands can not contain backticks or single quotes"
+		echo "[-] invalid fifo command: $cmd"
+		exit 1
+	fi
+	if ! timeout 3 sh -c "printf '%s\n' '$cmd' >> \"$fifo_file\""; then
+		fifo_error="[-] fifo command timeout: $cmd >> $fifo_file"
+		printf '%s\n' "$fifo_error"
+		printf '%s\n' "$fifo_error" >> fail_fifo_timeout.txt
+		kill_all
+		print_results
+		exit 1
+	fi
 }
 
 rm -rf integration_test
@@ -190,8 +262,8 @@ $tool ../DDNet \
 wait_for_launch client1.fifo 3
 
 echo "[*] Start demo recording"
-echo "record server" > server.fifo
-echo "record client1" > client1.fifo
+fifo "record server" server.fifo
+fifo "record client1" client1.fifo
 
 echo "[*] Launch client 2"
 $tool ../DDNet \
@@ -207,10 +279,11 @@ wait_for_launch client2.fifo 5
 sleep 15
 
 echo "[*] Test chat and chat commands"
-echo "say hello world" > client1.fifo
-echo "rcon_auth rcon" > client1.fifo
+fifo "say hello world" client1.fifo
+fifo "rcon_auth rcon" client1.fifo
 sleep 1
-tr -d '\n' > client1.fifo << EOF
+fifo "$(
+	tr -d '\n' << EOF
 say "/mc
 ;top5
 ;rank
@@ -228,10 +301,13 @@ say "/mc
 ;cmdlist
 ;saytime"
 EOF
+)" client1.fifo
+
 sleep 10
 
 echo "[*] Test rcon commands"
-tr -d '\n' > client1.fifo << EOF
+fifo "$(
+	tr -d '\n' << EOF
 rcon say hello from admin;
 rcon broadcast test;
 rcon status;
@@ -239,15 +315,16 @@ rcon echo test;
 muteid 1 900 spam;
 unban_all;
 EOF
+)" client1.fifo
 sleep 5
 
 echo "[*] Stop demo recording"
-echo "stoprecord" > server.fifo
-echo "stoprecord" > client1.fifo
+fifo "stoprecord" server.fifo
+fifo "stoprecord" client1.fifo
 sleep 1
 
 echo "[*] Test map change"
-echo "rcon sv_map Tutorial" > client1.fifo
+fifo "rcon sv_map Tutorial" client1.fifo
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	sleep 60
 else
@@ -255,8 +332,8 @@ else
 fi
 
 echo "[*] Play demos"
-echo "play demos/server.demo" > client1.fifo
-echo "play demos/client1.demo" > client2.fifo
+fifo "play demos/server.demo" client1.fifo
+fifo "play demos/client1.demo" client2.fifo
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	sleep 40
 else
@@ -313,43 +390,4 @@ elif [ "$arg_valgrind_memcheck" != "1" ] && [ "$rank_time" != "$expected_times" 
 	echo "  got: $rank_time"
 fi
 
-for logfile in client1.log client2.log server.log; do
-	if [ "$arg_valgrind_memcheck" == "1" ]; then
-		break
-	fi
-	if [ ! -f "$logfile" ]; then
-		echo "[-] Error: logfile '$logfile' not found"
-		touch fail_logs.txt
-		continue
-	fi
-	logdiff="$(diff -u <(grep -v "console: .* access for .* is now .*abled" "$logfile" | sort) <(sort "stdout_$(basename "$logfile" .log).txt"))"
-	if [ "$logdiff" != "" ]; then
-		echo "[-] Error: logfile '$logfile' differs from stdout"
-		echo "$logdiff"
-		echo "[-] Error: logfile '$logfile' differs from stdout" >> fail_logs.txt
-		echo "$logdiff" >> fail_logs.txt
-	fi
-done
-
-for stderr in ./stderr_*.txt; do
-	if [ ! -f "$stderr" ]; then
-		continue
-	fi
-	if [ "$(cat "$stderr")" == "" ]; then
-		continue
-	fi
-	echo "[!] Warning: $stderr"
-	cat "$stderr"
-done
-
-if test -n "$(find . -maxdepth 1 -name 'fail_*' -print -quit)"; then
-	for fail in fail_*; do
-		cat "$fail"
-	done
-	print_results
-	echo "[-] Test failed. See errors above"
-	exit 1
-fi
-
-echo "[*] All tests passed"
-print_results || exit 1
+print_results
