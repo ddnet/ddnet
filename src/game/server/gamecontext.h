@@ -154,6 +154,7 @@ class CGameContext : public IGameServer
 	{
 		bool m_IsSpectator;
 		bool m_IsAfk;
+		int m_LastWhisperTo;
 	};
 
 public:
