@@ -2295,7 +2295,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 
 			s_Operation = OP_SELECT;
 		}
-		else if(Ui()->MouseButton(1))
+		else if(Ui()->MouseButtonClicked(1))
 		{
 			if(Input()->ShiftIsPressed())
 			{
