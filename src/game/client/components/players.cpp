@@ -571,12 +571,15 @@ void CPlayers::RenderPlayer(
 				// if active and attack is under way, bash stuffs
 				if(!Inactive || LastAttackTime < m_pClient->m_aTuning[g_Config.m_ClDummy].GetWeaponFireDelay(Player.m_Weapon))
 				{
-					if (g_Config.m_CLHammerSpinny) {
+					if(g_Config.m_CLHammerSpinny)
+					{
 						if(Direction.x < 0)
 							Graphics()->QuadsSetRotation(-pi / 2 - State.GetAttach()->m_Angle * pi * 2 + Angle + pi);
 						else
 							Graphics()->QuadsSetRotation(-pi / 2 + State.GetAttach()->m_Angle * pi * 2 + Angle);
-					} else {
+					}
+					else
+					{
 						if(Direction.x < 0)
 							Graphics()->QuadsSetRotation(-pi / 2 - State.GetAttach()->m_Angle * pi * 2);
 						else
