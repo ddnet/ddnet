@@ -140,18 +140,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		}
 		else
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
-			Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
-			// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
-			if(str_find(aBuf, "/") == 0 || fs_is_file(aBuf))
-			{
-				m_ServerProcess.m_Process = shell_execute(aBuf, EShellExecuteWindowState::BACKGROUND);
-				m_ForceRefreshLanPage = true;
-			}
-			else
-			{
-				Client()->AddWarning(SWarning(Localize("Server executable not found, can't run server")));
-			}
+			RunServer();
 		}
 	}
 #endif
@@ -283,6 +272,24 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 }
 
+void CMenus::RunServer(const char **ppArguments, const size_t NumArguments)
+{
+#if !defined(CONF_PLATFORM_ANDROID)
+	char aBuf[IO_MAX_PATH_LENGTH];
+	Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
+	// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
+	if(str_find(aBuf, "/") == 0 || fs_is_file(aBuf))
+	{
+		m_ServerProcess.m_Process = shell_execute(aBuf, EShellExecuteWindowState::BACKGROUND, ppArguments, NumArguments);
+		m_ForceRefreshLanPage = true;
+	}
+	else
+	{
+		Client()->AddWarning(SWarning(Localize("Server executable not found, can't run server")));
+	}
+#endif
+}
+
 void CMenus::KillServer()
 {
 #if !defined(CONF_PLATFORM_ANDROID)
@@ -295,4 +302,15 @@ void CMenus::KillServer()
 		}
 	}
 #endif
+}
+
+bool CMenus::IsServerRunning() const
+{
+#if !defined(CONF_PLATFORM_ANDROID)
+	if(m_ServerProcess.m_Process)
+	{
+		return true;
+	}
+#endif
+	return false;
 }
