@@ -729,8 +729,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		}
 	}
 	MainView.HSplitTop(5.0f, 0, &MainView);
-	MainView.HSplitTop(82.5f, &Label, &MainView);
-
 
 	// Custom colors button
 	if(DoButton_CheckBox(pUseCustomColor, Localize("Custom colors"), *pUseCustomColor, &CustomColorsButton))
