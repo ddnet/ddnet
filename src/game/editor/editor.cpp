@@ -3164,7 +3164,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		MapView()->MapGrid()->OnRender(View);
 	}
 
-	const bool ShouldPan = (Input()->ModifierIsPressed() && Ui()->MouseButton(0)) || Ui()->MouseButton(2);
+	const bool ShouldPan = Ui()->HotItem() == &m_MapEditorId && ((Input()->ModifierIsPressed() && Ui()->MouseButton(0)) || Ui()->MouseButton(2));
 	if(m_pContainerPanned == &m_MapEditorId)
 	{
 		// do panning
@@ -3174,6 +3174,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				s_Operation = OP_PAN_EDITOR;
 			else
 				s_Operation = OP_PAN_WORLD;
+			Ui()->SetActiveItem(&m_MapEditorId);
 		}
 		else
 			s_Operation = OP_NONE;
@@ -3563,7 +3564,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			}
 		}
 
-		if(Ui()->CheckActiveItem(&m_MapEditorId))
+		if(Ui()->CheckActiveItem(&m_MapEditorId) && m_pContainerPanned == nullptr)
 		{
 			// release mouse
 			if(!Ui()->MouseButton(0))
@@ -3593,7 +3594,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				MapView()->OffsetWorld({0, PanSpeed * m_MouseWorldScale});
 		}
 	}
-	else if(Ui()->CheckActiveItem(&m_MapEditorId))
+	else if(Ui()->CheckActiveItem(&m_MapEditorId) && m_pContainerPanned == nullptr)
 	{
 		// release mouse
 		if(!Ui()->MouseButton(0))
