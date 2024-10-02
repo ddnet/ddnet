@@ -419,6 +419,8 @@ public:
 		bool m_Paused;
 		bool m_Spec;
 
+		int m_Points;
+
 		// Editor allows 256 switches for now.
 		bool m_aSwitchStates[256];
 

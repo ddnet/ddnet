@@ -1107,6 +1107,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		CNetMsg_Sv_MapSoundGlobal *pMsg = (CNetMsg_Sv_MapSoundGlobal *)pRawMsg;
 		m_MapSounds.Play(pMsg->m_SoundId);
 	}
+	else if(MsgId == NETMSGTYPE_SV_POINTS)
+	{
+		CNetMsg_Sv_Points *pMsg = (CNetMsg_Sv_Points *)pRawMsg;
+		m_aClients[pMsg->m_ClientId].m_Points = pMsg->m_Points;
+	}
 }
 
 void CGameClient::OnStateChange(int NewState, int OldState)
@@ -2481,6 +2486,8 @@ void CGameClient::CClientData::Reset()
 	m_Afk = false;
 	m_Paused = false;
 	m_Spec = false;
+
+	m_Points = -1;
 
 	std::fill(std::begin(m_aSwitchStates), std::end(m_aSwitchStates), 0);
 
