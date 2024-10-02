@@ -2297,6 +2297,9 @@ void CServer::FillAntibot(CAntibotRoundData *pData)
 		static_assert(std::size((CAntibotPlayerData{}).m_aAddress) >= NETADDR_MAXSTRSIZE);
 		static_assert(sizeof(*(CNetServer{}).ClientAddrString(i)) == NETADDR_MAXSTRSIZE);
 		mem_copy(pPlayer->m_aAddress, m_NetServer.ClientAddrString(i), NETADDR_MAXSTRSIZE);
+		pPlayer->m_Sixup = m_aClients[i].m_Sixup;
+		pPlayer->m_DnsblState = m_aClients[i].m_DnsblState;
+		pPlayer->m_Authed = m_aClients[i].m_Authed;
 	}
 }
 

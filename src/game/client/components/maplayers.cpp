@@ -1750,9 +1750,9 @@ void CMapLayers::OnRender()
 						RenderTileLayer(TileLayerCounter - 3, Color, pTMap, pGroup);
 						if(g_Config.m_ClTextEntities)
 						{
-							Graphics()->TextureSet(m_pImages->GetOverlayBottom());
-							RenderTileLayer(TileLayerCounter - 2, Color, pTMap, pGroup);
 							Graphics()->TextureSet(m_pImages->GetOverlayTop());
+							RenderTileLayer(TileLayerCounter - 2, Color, pTMap, pGroup);
+							Graphics()->TextureSet(m_pImages->GetOverlayBottom());
 							RenderTileLayer(TileLayerCounter - 1, Color, pTMap, pGroup);
 						}
 					}
