@@ -1176,7 +1176,6 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 
 			if(!AnyStarted)
 			{
-				ResetSwitchers(Team);
 				ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 			}
 		}
@@ -1192,7 +1191,11 @@ void CGameTeams::SetTeamLock(int Team, bool Lock)
 void CGameTeams::SetTeamFlock(int Team, bool Mode)
 {
 	if(Team > TEAM_FLOCK && Team < TEAM_SUPER)
+	{
 		m_aTeamFlock[Team] = Mode;
+		if(!Mode)
+			ResetSwitchers(Team);
+	}
 }
 
 void CGameTeams::ResetInvited(int Team)
