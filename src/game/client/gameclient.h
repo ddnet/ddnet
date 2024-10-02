@@ -786,12 +786,16 @@ public:
 	int FindFirstMultiViewId();
 	void CleanMultiViewId(int ClientId);
 
+	bool m_CanReceivePoints;
+
 private:
 	std::vector<CSnapEntities> m_vSnapEntities;
 	void SnapCollectEntities();
 
 	bool m_aDDRaceMsgSent[NUM_DUMMIES];
 	int m_aShowOthers[NUM_DUMMIES];
+
+	int m_ReceivePoints[NUM_DUMMIES];
 
 	void UpdatePrediction();
 	void UpdateRenderedCharacters();

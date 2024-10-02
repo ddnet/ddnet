@@ -249,6 +249,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	const bool TimeScore = GameClient()->m_GameInfo.m_TimeScore;
 	const int NumPlayers = CountEnd - CountStart;
 	const bool LowScoreboardWidth = Scoreboard.w < 700.0f;
+	const bool CanReceivePoints = GameClient()->m_CanReceivePoints && g_Config.m_ClScoreboardPoints;
 
 	bool Race7 = Client()->IsSixup() && pGameInfoObj && pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE;
 
@@ -316,7 +317,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	}
 
 	const float ScoreOffset = Scoreboard.x + 40.0f;
-	const float ScoreLength = TextRender()->TextWidth(FontSize, TimeScore ? "00:00:00" : "99999");
+	const float ScoreLength = TextRender()->TextWidth(FontSize, TimeScore && !CanReceivePoints ? "00:00:00" : "99999");
 	const float TeeOffset = ScoreOffset + ScoreLength + 20.0f;
 	const float TeeLength = 60.0f * TeeSizeMod;
 	const float NameOffset = TeeOffset + TeeLength;
@@ -333,7 +334,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	CUIRect Headline;
 	Scoreboard.HSplitTop(HeadlineFontsize * 2.0f, &Headline, &Scoreboard);
 	const float HeadlineY = Headline.y + Headline.h / 2.0f - HeadlineFontsize / 2.0f;
-	const char *pScore = TimeScore ? Localize("Time") : Localize("Score");
+	const char *pScore = CanReceivePoints ? Localize("Points") : (TimeScore ? Localize("Time") : Localize("Score"));
 	TextRender()->Text(ScoreOffset + ScoreLength - TextRender()->TextWidth(HeadlineFontsize, pScore), HeadlineY, HeadlineFontsize, pScore);
 	TextRender()->Text(NameOffset, HeadlineY, HeadlineFontsize, Localize("Name"));
 	const char *pClanLabel = Localize("Clan");
@@ -456,7 +457,11 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			}
 
 			// score
-			if(Race7)
+			if(CanReceivePoints)
+			{
+				str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 99999));
+			}
+			else if(Race7)
 			{
 				if(pInfo->m_Score == -1)
 				{
