@@ -327,7 +327,7 @@ void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 	{
 		str_format(aBuf,
 			sizeof(aBuf),
-			"Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails",
+			"Team save in progress. If the code is valid, you'll be able to load with '/load %s'; if not, load with '/load %s'",
 			Tmp->m_aCode,
 			Tmp->m_aGeneratedCode);
 	}
