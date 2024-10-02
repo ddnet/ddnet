@@ -2275,7 +2275,7 @@ void CMenus::OnRender()
 
 	// render debug information
 	if(g_Config.m_Debug)
-		Ui()->DebugRender();
+		Ui()->DebugRender(2.0f, Ui()->Screen()->h - 12.0f);
 
 	if(Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 		SetActive(false);

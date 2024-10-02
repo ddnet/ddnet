@@ -8777,6 +8777,9 @@ void CEditor::OnRender()
 		m_ShowMousePointer = true;
 	}
 
+	if(g_Config.m_Debug)
+		Ui()->DebugRender(2.0f, Ui()->Screen()->h - 27.0f);
+
 	Ui()->FinishCheck();
 	Ui()->ClearHotkeys();
 	Input()->Clear();
