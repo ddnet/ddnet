@@ -317,7 +317,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 	};
 
 	// If we have a valid command, display the help in the tooltip
-	if(Context.CommandIsValid())
+	if(Context.CommandIsValid() && pLineInput->IsActive() && Ui()->HotItem() == nullptr)
 		Context.GetCommandHelpText(m_aTooltip, sizeof(m_aTooltip));
 
 	CUIRect ToolBar = *pRect;
