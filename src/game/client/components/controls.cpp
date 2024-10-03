@@ -212,7 +212,7 @@ int CControls::SnapInput(int *pData)
 		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
 
 		// scale TargetX, TargetY by zoom.
-		if(!m_pClient->m_Snap.m_SpecInfo.m_Active)
+		if(!m_pClient->m_Snap.m_SpecInfo.m_Active && !g_Config.m_ClOldMouseZoom)
 		{
 			m_aInputData[g_Config.m_ClDummy].m_TargetX *= m_pClient->m_Camera.m_Zoom;
 			m_aInputData[g_Config.m_ClDummy].m_TargetY *= m_pClient->m_Camera.m_Zoom;
@@ -247,7 +247,7 @@ int CControls::SnapInput(int *pData)
 			m_aInputData[g_Config.m_ClDummy].m_Direction = 1;
 
 		// scale TargetX, TargetY by zoom.
-		if(!m_pClient->m_Snap.m_SpecInfo.m_Active)
+		if(!m_pClient->m_Snap.m_SpecInfo.m_Active && !g_Config.m_ClOldMouseZoom)
 		{
 			m_aInputData[g_Config.m_ClDummy].m_TargetX *= m_pClient->m_Camera.m_Zoom;
 			m_aInputData[g_Config.m_ClDummy].m_TargetY *= m_pClient->m_Camera.m_Zoom;
@@ -488,8 +488,11 @@ bool CControls::CheckNewInput()
 	{
 		TestInput.m_TargetX = (int)m_aMousePos[g_Config.m_ClDummy].x;
 		TestInput.m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
-		TestInput.m_TargetX *= m_pClient->m_Camera.m_Zoom;
-		TestInput.m_TargetY *= m_pClient->m_Camera.m_Zoom;
+		if(!g_Config.m_ClOldMouseZoom)
+		{
+			TestInput.m_TargetX *= m_pClient->m_Camera.m_Zoom;
+			TestInput.m_TargetY *= m_pClient->m_Camera.m_Zoom;
+		}
 	}
 
 	m_FastInput = TestInput;
