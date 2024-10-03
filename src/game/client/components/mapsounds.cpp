@@ -17,20 +17,20 @@ CMapSounds::CMapSounds()
 	m_Count = 0;
 }
 
-void CMapSounds::Play(int SoundId)
+void CMapSounds::Play(int Channel, int SoundId)
 {
 	if(SoundId < 0 || SoundId >= m_Count)
 		return;
 
-	m_pClient->m_Sounds.PlaySample(CSounds::CHN_MAPSOUND, m_aSounds[SoundId], 0, 1.0f);
+	m_pClient->m_Sounds.PlaySample(Channel, m_aSounds[SoundId], 0, 1.0f);
 }
 
-void CMapSounds::PlayAt(int SoundId, vec2 Position)
+void CMapSounds::PlayAt(int Channel, int SoundId, vec2 Position)
 {
 	if(SoundId < 0 || SoundId >= m_Count)
 		return;
 
-	m_pClient->m_Sounds.PlaySampleAt(CSounds::CHN_MAPSOUND, m_aSounds[SoundId], 0, 1.0f, Position);
+	m_pClient->m_Sounds.PlaySampleAt(Channel, m_aSounds[SoundId], 0, 1.0f, Position);
 }
 
 void CMapSounds::OnMapLoad()
