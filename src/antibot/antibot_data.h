@@ -24,8 +24,10 @@ struct CAntibotPlayerData
 {
 	char m_aAddress[64];
 	bool m_Sixup;
-	int m_DnsblState;
-	int m_Authed;
+	bool m_DnsblNone;
+	bool m_DnsblPending;
+	bool m_DnsblBlack;
+	bool m_Authed;
 };
 
 struct CAntibotInputData

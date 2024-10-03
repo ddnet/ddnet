@@ -2298,8 +2298,10 @@ void CServer::FillAntibot(CAntibotRoundData *pData)
 		static_assert(sizeof(*(CNetServer{}).ClientAddrString(i)) == NETADDR_MAXSTRSIZE);
 		mem_copy(pPlayer->m_aAddress, m_NetServer.ClientAddrString(i), NETADDR_MAXSTRSIZE);
 		pPlayer->m_Sixup = m_aClients[i].m_Sixup;
-		pPlayer->m_DnsblState = m_aClients[i].m_DnsblState;
-		pPlayer->m_Authed = m_aClients[i].m_Authed;
+		pPlayer->m_DnsblNone = m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_NONE;
+		pPlayer->m_DnsblPending = m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_PENDING;
+		pPlayer->m_DnsblBlack = m_aClients[i].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED;
+		pPlayer->m_Authed = m_aClients[i].m_Authed > AUTHED_NO;
 	}
 }
 
