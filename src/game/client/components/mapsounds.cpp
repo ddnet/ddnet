@@ -70,8 +70,14 @@ void CMapSounds::OnMapLoad()
 		}
 		else
 		{
-			const int SoundDataSize = pMap->GetDataSize(pSound->m_SoundData);
 			const void *pData = pMap->GetData(pSound->m_SoundData);
+			if(pData == nullptr)
+			{
+				log_error("mapsounds", "Failed to load map sound %d: failed to load data.", i);
+				ShowWarning = true;
+				continue;
+			}
+			const int SoundDataSize = pMap->GetDataSize(pSound->m_SoundData);
 			m_aSounds[i] = Sound()->LoadOpusFromMem(pData, SoundDataSize);
 			pMap->UnloadData(pSound->m_SoundData);
 		}
@@ -83,47 +89,39 @@ void CMapSounds::OnMapLoad()
 	}
 
 	// enqueue sound sources
-	for(int g = 0; g < Layers()->NumGroups(); g++)
+	for(int GroupIndex = 0; GroupIndex < Layers()->NumGroups(); GroupIndex++)
 	{
-		CMapItemGroup *pGroup = Layers()->GetGroup(g);
-
+		const CMapItemGroup *pGroup = Layers()->GetGroup(GroupIndex);
 		if(!pGroup)
 			continue;
 
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
+		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
-			CMapItemLayer *pLayer = Layers()->GetLayer(pGroup->m_StartLayer + l);
-
+			const CMapItemLayer *pLayer = Layers()->GetLayer(pGroup->m_StartLayer + LayerIndex);
 			if(!pLayer)
 				continue;
+			if(pLayer->m_Type != LAYERTYPE_SOUNDS)
+				continue;
 
-			if(pLayer->m_Type == LAYERTYPE_SOUNDS)
+			const CMapItemLayerSounds *pSoundLayer = reinterpret_cast<const CMapItemLayerSounds *>(pLayer);
+			if(pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
+				continue;
+			if(pSoundLayer->m_Sound < 0 || pSoundLayer->m_Sound >= m_Count || m_aSounds[pSoundLayer->m_Sound] == -1)
+				continue;
+
+			const CSoundSource *pSources = static_cast<CSoundSource *>(Layers()->Map()->GetDataSwapped(pSoundLayer->m_Data));
+			if(!pSources)
+				continue;
+
+			const size_t NumSources = minimum<size_t>(pSoundLayer->m_NumSources, Layers()->Map()->GetDataSize(pSoundLayer->m_Data) / sizeof(CSoundSource));
+			for(size_t SourceIndex = 0; SourceIndex < NumSources; SourceIndex++)
 			{
-				CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
-
-				if(pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
-					continue;
-
-				if(pSoundLayer->m_Sound == -1)
-					continue;
-
-				CSoundSource *pSources = (CSoundSource *)Layers()->Map()->GetDataSwapped(pSoundLayer->m_Data);
-
-				if(!pSources)
-					continue;
-
-				for(int i = 0; i < pSoundLayer->m_NumSources; i++)
-				{
-					CSourceQueueEntry Source;
-					Source.m_Sound = pSoundLayer->m_Sound;
-					Source.m_pSource = &pSources[i];
-					Source.m_HighDetail = pLayer->m_Flags & LAYERFLAG_DETAIL;
-
-					if(!Source.m_pSource || Source.m_Sound < 0 || Source.m_Sound >= m_Count)
-						continue;
-
-					m_vSourceQueue.push_back(Source);
-				}
+				CSourceQueueEntry Source;
+				Source.m_Sound = pSoundLayer->m_Sound;
+				Source.m_HighDetail = pLayer->m_Flags & LAYERFLAG_DETAIL;
+				Source.m_pGroup = pGroup;
+				Source.m_pSource = &pSources[SourceIndex];
+				m_vSourceQueue.push_back(Source);
 			}
 		}
 	}
@@ -190,66 +188,31 @@ void CMapSounds::OnRender()
 		}
 	}
 
-	vec2 Center = m_pClient->m_Camera.m_Center;
-	for(int g = 0; g < Layers()->NumGroups(); g++)
+	const vec2 Center = m_pClient->m_Camera.m_Center;
+	for(const auto &Source : m_vSourceQueue)
 	{
-		CMapItemGroup *pGroup = Layers()->GetGroup(g);
-
-		if(!pGroup)
+		if(!Source.m_Voice.IsValid())
 			continue;
 
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
+		ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+		CMapLayers::EnvelopeEval(Source.m_pSource->m_PosEnvOffset, Source.m_pSource->m_PosEnv, Position, 2, &m_pClient->m_MapLayersBackground);
+
+		float x = fx2f(Source.m_pSource->m_Position.x) + Position.r;
+		float y = fx2f(Source.m_pSource->m_Position.y) + Position.g;
+
+		x += Center.x * (1.0f - Source.m_pGroup->m_ParallaxX / 100.0f);
+		y += Center.y * (1.0f - Source.m_pGroup->m_ParallaxY / 100.0f);
+
+		x -= Source.m_pGroup->m_OffsetX;
+		y -= Source.m_pGroup->m_OffsetY;
+
+		Sound()->SetVoicePosition(Source.m_Voice, vec2(x, y));
+
+		ColorRGBA Volume = ColorRGBA(1.0f, 0.0f, 0.0f, 0.0f);
+		CMapLayers::EnvelopeEval(Source.m_pSource->m_SoundEnvOffset, Source.m_pSource->m_SoundEnv, Volume, 1, &m_pClient->m_MapLayersBackground);
+		if(Volume.r < 1.0f)
 		{
-			CMapItemLayer *pLayer = Layers()->GetLayer(pGroup->m_StartLayer + l);
-
-			if(!pLayer)
-				continue;
-
-			if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-			{
-				CMapItemLayerSounds *pSoundLayer = (CMapItemLayerSounds *)pLayer;
-
-				if(pSoundLayer->m_Version < 1 || pSoundLayer->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
-					continue;
-
-				CSoundSource *pSources = (CSoundSource *)Layers()->Map()->GetDataSwapped(pSoundLayer->m_Data);
-
-				if(!pSources)
-					continue;
-
-				for(int s = 0; s < pSoundLayer->m_NumSources; s++)
-				{
-					for(auto &Voice : m_vSourceQueue)
-					{
-						if(Voice.m_pSource != &pSources[s])
-							continue;
-
-						if(!Voice.m_Voice.IsValid())
-							continue;
-
-						ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-						CMapLayers::EnvelopeEval(Voice.m_pSource->m_PosEnvOffset, Voice.m_pSource->m_PosEnv, Position, 2, &m_pClient->m_MapLayersBackground);
-
-						float x = fx2f(Voice.m_pSource->m_Position.x) + Position.r;
-						float y = fx2f(Voice.m_pSource->m_Position.y) + Position.g;
-
-						x += Center.x * (1.0f - pGroup->m_ParallaxX / 100.0f);
-						y += Center.y * (1.0f - pGroup->m_ParallaxY / 100.0f);
-
-						x -= pGroup->m_OffsetX;
-						y -= pGroup->m_OffsetY;
-
-						Sound()->SetVoicePosition(Voice.m_Voice, vec2(x, y));
-
-						ColorRGBA Volume = ColorRGBA(1.0f, 0.0f, 0.0f, 0.0f);
-						CMapLayers::EnvelopeEval(Voice.m_pSource->m_SoundEnvOffset, Voice.m_pSource->m_SoundEnv, Volume, 1, &m_pClient->m_MapLayersBackground);
-						if(Volume.r < 1.0f)
-						{
-							Sound()->SetVoiceVolume(Voice.m_Voice, Volume.r);
-						}
-					}
-				}
-			}
+			Sound()->SetVoiceVolume(Source.m_Voice, Volume.r);
 		}
 	}
 }
