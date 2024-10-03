@@ -3798,7 +3798,7 @@ public:
 
 		if(m_pGpuList->m_vGpus.empty())
 		{
-			SetWarning(EGfxWarningType::GFX_WARNING_TYPE_INIT_FAILED_MISSING_INTEGRATED_GPU_DRIVER, "No devices with required vulkan version found.");
+			dbg_msg("vulkan", "no devices with required vulkan version found.");
 			return false;
 		}
 
