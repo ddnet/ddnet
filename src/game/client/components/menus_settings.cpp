@@ -3329,8 +3329,12 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		if(g_Config.m_ClFastInput)
 		{
 			MainView.HSplitTop(10.0f, 0x0, &MainView);
-			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInputOthers, ("Extra tick other tees (increases other tees visual latency, \n makes dragging slightly easier when using fast input)"), &g_Config.m_ClFastInputOthers, &MainView, LineMargin);
+			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInputOthers, ("Extra tick other tees (increases other tees visual latency, \nmakes dragging slightly easier when using fast input)"), &g_Config.m_ClFastInputOthers, &MainView, LineMargin);
 		}
+		MainView.HSplitTop(15.0f, 0x0, &MainView);
+		MainView.HSplitTop(10.0f, 0x0, &MainView);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOldMouseZoom, ("Old Mouse Precision (fixes precision at low zoom levels, \nbreaks /tc, /telecursor while zoomed)"), &g_Config.m_ClOldMouseZoom, &MainView, LineMargin);
+
 		{
 			CUIRect Button;
 			CUIRect ExtMenu;
