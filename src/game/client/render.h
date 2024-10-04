@@ -123,6 +123,7 @@ enum
 {
 	TEE_EFFECT_FROZEN = 1,
 	TEE_NO_WEAPON = 2,
+	TEE_EFFECT_SPARKLE = 4,
 };
 
 // sprite renderings
