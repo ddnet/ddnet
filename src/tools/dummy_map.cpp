@@ -81,7 +81,6 @@ void CreateEmptyMap(IStorage *pStorage)
 
 	dbg_msg("dummy_map", "dummy map written to '%s'", pMapName);
 
-	CDataFileReader Reader;
 	void *pData;
 	unsigned DataSize;
 	if(!pStorage->ReadFile(pMapName, IStorage::TYPE_ALL, &pData, &DataSize))
