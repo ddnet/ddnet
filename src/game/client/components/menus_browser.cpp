@@ -351,14 +351,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					Printed = PrintHighlightedMultiple(pItem->m_aName, [&](std::vector<const char *> &vpFilteredStrs, std::vector<int> &vFilterLens) {
 						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props, (int)(vpFilteredStrs[0] - pItem->m_aName));
 
-						for(size_t iFilter = 0; iFilter < vpFilteredStrs.size(); iFilter++)
+						for(size_t j = 0; j < vpFilteredStrs.size(); j++)
 						{
 							TextRender()->TextColor(gs_HighlightedTextColor);
-							Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[iFilter], FontSize, TEXTALIGN_ML, Props, vFilterLens[iFilter], &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
-							if(iFilter != vpFilteredStrs.size() - 1)
+							Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[j], FontSize, TEXTALIGN_ML, Props, vFilterLens[j], &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
+							if(j != vpFilteredStrs.size() - 1)
 							{
 								TextRender()->TextColor(TextRender()->DefaultTextColor());
-								Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[iFilter] + vFilterLens[iFilter], FontSize, TEXTALIGN_ML, Props, (int)(vpFilteredStrs[iFilter + 1] - (vpFilteredStrs[iFilter] + vFilterLens[iFilter])), &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
+								Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[j] + vFilterLens[j], FontSize, TEXTALIGN_ML, Props, (int)(vpFilteredStrs[j + 1] - (vpFilteredStrs[j] + vFilterLens[j])), &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
 							}
 						}
 
@@ -1787,7 +1787,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 		|                           | |      tool       |
 		|                           | |      box        |
 		+---------------------------+ |                 |
-		        status box            +-----------------+
+			status box            +-----------------+
 	*/
 
 	CUIRect ServerList, StatusBox, ToolBox, TabBar;
@@ -1822,46 +1822,46 @@ inline void mergeOverlappingStrings(std::vector<const char *> &vpFilteredStrs, s
 
 	size_t n = vpFilteredStrs.size();
 
-	std::vector<size_t> indices(n);
+	std::vector<size_t> Indices(n);
 	for(size_t i = 0; i < n; ++i)
 	{
-		indices[i] = i;
+		Indices[i] = i;
 	}
-	std::sort(indices.begin(), indices.end(), [&](size_t a, size_t b) {
+	std::sort(Indices.begin(), Indices.end(), [&](size_t a, size_t b) {
 		return vpFilteredStrs[a] < vpFilteredStrs[b];
 	});
 
-	std::vector<const char *> mergedStrs;
-	std::vector<int> mergedLens;
+	std::vector<const char *> vMergedStrs;
+	std::vector<int> vMergedLens;
 
-	const char *currentStr = vpFilteredStrs[indices[0]];
-	int currentLen = vFilterLens[indices[0]];
+	const char *pCurrentStr = vpFilteredStrs[Indices[0]];
+	int CurrentLen = vFilterLens[Indices[0]];
 
 	for(size_t i = 1; i < n; ++i)
 	{
-		const char *nextStr = vpFilteredStrs[indices[i]];
-		int nextLen = vFilterLens[indices[i]];
+		const char *NextStr = vpFilteredStrs[Indices[i]];
+		int NextLen = vFilterLens[Indices[i]];
 
-		if(currentStr + currentLen >= nextStr)
+		if(pCurrentStr + CurrentLen >= NextStr)
 		{
-			int overlap = (nextStr - currentStr) + nextLen;
-			currentLen = std::max(currentLen, overlap);
+			int Overlap = (NextStr - pCurrentStr) + NextLen;
+			CurrentLen = std::max(CurrentLen, Overlap);
 		}
 		else
 		{
-			mergedStrs.push_back(currentStr);
-			mergedLens.push_back(currentLen);
+			vMergedStrs.push_back(pCurrentStr);
+			vMergedLens.push_back(CurrentLen);
 
-			currentStr = nextStr;
-			currentLen = nextLen;
+			pCurrentStr = NextStr;
+			CurrentLen = NextLen;
 		}
 	}
 
-	mergedStrs.push_back(currentStr);
-	mergedLens.push_back(currentLen);
+	vMergedStrs.push_back(pCurrentStr);
+	vMergedLens.push_back(CurrentLen);
 
-	vpFilteredStrs = std::move(mergedStrs);
-	vFilterLens = std::move(mergedLens);
+	vpFilteredStrs = std::move(vMergedStrs);
+	vFilterLens = std::move(vMergedLens);
 }
 
 template<typename F>
