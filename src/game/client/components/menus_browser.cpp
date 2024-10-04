@@ -351,14 +351,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					Printed = PrintHighlightedMultiple(pItem->m_aName, [&](std::vector<const char *> &vpFilteredStrs, std::vector<int> &vFilterLens) {
 						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props, (int)(vpFilteredStrs[0] - pItem->m_aName));
 
-						for(size_t i = 0; i < vpFilteredStrs.size(); i++)
+						for(size_t iFilter = 0; iFilter < vpFilteredStrs.size(); iFilter++)
 						{
 							TextRender()->TextColor(gs_HighlightedTextColor);
-							Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[i], FontSize, TEXTALIGN_ML, Props, vFilterLens[i], &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
-							if(i != vpFilteredStrs.size() - 1)
+							Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[iFilter], FontSize, TEXTALIGN_ML, Props, vFilterLens[iFilter], &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
+							if(iFilter != vpFilteredStrs.size() - 1)
 							{
 								TextRender()->TextColor(TextRender()->DefaultTextColor());
-								Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[i] + vFilterLens[i], FontSize, TEXTALIGN_ML, Props, (int)(vpFilteredStrs[i + 1] - (vpFilteredStrs[i] + vFilterLens[i])), &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
+								Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[iFilter] + vFilterLens[iFilter], FontSize, TEXTALIGN_ML, Props, (int)(vpFilteredStrs[iFilter + 1] - (vpFilteredStrs[iFilter] + vFilterLens[iFilter])), &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
 							}
 						}
 
