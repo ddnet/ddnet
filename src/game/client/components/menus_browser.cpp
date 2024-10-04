@@ -122,9 +122,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 
 		UI_ELEM_LOCK_ICON = 0,
 		UI_ELEM_FAVORITE_ICON,
-		UI_ELEM_NAME_1,
-		UI_ELEM_NAME_2,
-		UI_ELEM_NAME_3,
+		UI_ELEM_NAME,
 		UI_ELEM_GAMETYPE,
 		UI_ELEM_MAP_1,
 		UI_ELEM_MAP_2,
@@ -350,15 +348,24 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				Props.m_EnableWidthCheck = false;
 				bool Printed = false;
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_SERVERNAME))
-					Printed = PrintHighlighted(pItem->m_aName, [&](const char *pFilteredStr, const int FilterLen) {
-						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_1), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props, (int)(pFilteredStr - pItem->m_aName));
-						TextRender()->TextColor(gs_HighlightedTextColor);
-						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_2), &Button, pFilteredStr, FontSize, TEXTALIGN_ML, Props, FilterLen, &pUiElement->Rect(UI_ELEM_NAME_1)->m_Cursor);
+					Printed = PrintHighlightedMultiple(pItem->m_aName, [&](std::vector<const char *> &vpFilteredStrs, std::vector<int> &vFilterLens) {
+						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props, (int)(vpFilteredStrs[0] - pItem->m_aName));
+
+						for(size_t i = 0; i < vpFilteredStrs.size(); i++)
+						{
+							TextRender()->TextColor(gs_HighlightedTextColor);
+							Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[i], FontSize, TEXTALIGN_ML, Props, vFilterLens[i], &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
+							if (i != vpFilteredStrs.size() - 1) {
+								TextRender()->TextColor(TextRender()->DefaultTextColor());
+								Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[i] + vFilterLens[i], FontSize, TEXTALIGN_ML, Props, (int)(vpFilteredStrs[i + 1] - (vpFilteredStrs[i] + vFilterLens[i])), &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
+							}
+						}
+
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
-						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_3), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_ML, Props, -1, &pUiElement->Rect(UI_ELEM_NAME_2)->m_Cursor);
+						Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[vpFilteredStrs.size() - 1] + vFilterLens[vFilterLens.size() - 1], FontSize, TEXTALIGN_ML, Props, -1, &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
 					});
 				if(!Printed)
-					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_1), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props);
+					Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props);
 			}
 			else if(Id == COL_GAMETYPE)
 			{
@@ -1802,6 +1809,99 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 	RenderServerbrowserToolBox(ToolBox);
 }
 
+inline void mergeOverlappingStrings(std::vector<const char *> &vpFilteredStrs, std::vector<int> &vFilterLens)
+{
+	if(vpFilteredStrs.empty())
+		return;
+
+	size_t n = vpFilteredStrs.size();
+
+	std::vector<size_t> indices(n);
+	for(size_t i = 0; i < n; ++i)
+	{
+		indices[i] = i;
+	}
+	std::sort(indices.begin(), indices.end(), [&](size_t a, size_t b) {
+		return vpFilteredStrs[a] < vpFilteredStrs[b];
+	});
+
+	std::vector<const char *> mergedStrs;
+	std::vector<int> mergedLens;
+
+	const char *currentStr = vpFilteredStrs[indices[0]];
+	int currentLen = vFilterLens[indices[0]];
+
+	for(size_t i = 1; i < n; ++i)
+	{
+		const char *nextStr = vpFilteredStrs[indices[i]];
+		int nextLen = vFilterLens[indices[i]];
+
+		if(currentStr + currentLen >= nextStr)
+		{
+			int overlap = (nextStr - currentStr) + nextLen;
+			currentLen = std::max(currentLen, overlap);
+		}
+		else
+		{
+			mergedStrs.push_back(currentStr);
+			mergedLens.push_back(currentLen);
+
+			currentStr = nextStr;
+			currentLen = nextLen;
+		}
+	}
+
+	mergedStrs.push_back(currentStr);
+	mergedLens.push_back(currentLen);
+
+	vpFilteredStrs = std::move(mergedStrs);
+	vFilterLens = std::move(mergedLens);
+}
+
+template<typename F>
+bool CMenus::PrintHighlightedMultiple(const char *pName, F &&PrintFn)
+{
+	const char *pStr = g_Config.m_BrFilterString;
+	char aFilterStr[sizeof(g_Config.m_BrFilterString)];
+	char aFilterStrTrimmed[sizeof(g_Config.m_BrFilterString)];
+
+	std::vector<const char *> vpFilteredStrs;
+	std::vector<int> vFilterLens;
+	while((pStr = str_next_token(pStr, IServerBrowser::SEARCH_EXCLUDE_TOKEN, aFilterStr, sizeof(aFilterStr))))
+	{
+		str_copy(aFilterStrTrimmed, str_utf8_skip_whitespaces(aFilterStr));
+		str_utf8_trim_right(aFilterStrTrimmed);
+		// highlight the parts that matches
+		const char *pFilteredStr;
+		int FilterLen = str_length(aFilterStrTrimmed);
+		if(aFilterStrTrimmed[0] == '"' && aFilterStrTrimmed[FilterLen - 1] == '"')
+		{
+			aFilterStrTrimmed[FilterLen - 1] = '\0';
+			pFilteredStr = str_comp(pName, &aFilterStrTrimmed[1]) == 0 ? pName : nullptr;
+			FilterLen -= 2;
+		}
+		else
+		{
+			const char *pFilteredStrEnd;
+			pFilteredStr = str_utf8_find_nocase(pName, aFilterStrTrimmed, &pFilteredStrEnd);
+			if(pFilteredStr != nullptr && pFilteredStrEnd != nullptr)
+				FilterLen = pFilteredStrEnd - pFilteredStr;
+		}
+		if(pFilteredStr)
+		{
+			vpFilteredStrs.push_back(pFilteredStr);
+			vFilterLens.push_back(FilterLen);
+		}
+	}
+	if(vpFilteredStrs.empty())
+		return false;
+
+	mergeOverlappingStrings(vpFilteredStrs, vFilterLens);
+
+	PrintFn(vpFilteredStrs, vFilterLens);
+	return true;
+}
+
 template<typename F>
 bool CMenus::PrintHighlighted(const char *pName, F &&PrintFn)
 {
@@ -1834,7 +1934,7 @@ bool CMenus::PrintHighlighted(const char *pName, F &&PrintFn)
 			return true;
 		}
 	}
-	return false;
+		return false;
 }
 
 CTeeRenderInfo CMenus::GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool CustomSkinColors, int CustomSkinColorBody, int CustomSkinColorFeet) const

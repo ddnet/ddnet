@@ -521,6 +521,8 @@ protected:
 	void RenderServerbrowserToolBox(CUIRect ToolBox);
 	void RenderServerbrowser(CUIRect MainView);
 	template<typename F>
+	bool PrintHighlightedMultiple(const char *pName, F &&PrintFn);
+	template<typename F>
 	bool PrintHighlighted(const char *pName, F &&PrintFn);
 	CTeeRenderInfo GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool CustomSkinColors, int CustomSkinColorBody, int CustomSkinColorFeet) const;
 	static void ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
