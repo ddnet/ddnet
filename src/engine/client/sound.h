@@ -44,7 +44,7 @@ struct CVoice
 	int m_Tick;
 	int m_Vol; // 0 - 255
 	int m_Flags;
-	int m_X, m_Y;
+	vec2 m_Position;
 	float m_Falloff; // [0.0, 1.0]
 
 	int m_Shape;
@@ -76,8 +76,10 @@ class CSound : public IEngineSound
 	int m_NextVoice = 0;
 	uint32_t m_MaxFrames = 0;
 
-	std::atomic<int> m_CenterX = 0;
-	std::atomic<int> m_CenterY = 0;
+	// This is not an std::atomic<vec2> as this would require linking with
+	// libatomic with clang x86 as there is no native support for this.
+	std::atomic<float> m_ListenerPositionX = 0.0f;
+	std::atomic<float> m_ListenerPositionY = 0.0f;
 	std::atomic<int> m_SoundVolume = 100;
 	int m_MixingRate = 48000;
 
@@ -112,19 +114,19 @@ public:
 	void SetSampleCurrentTime(int SampleId, float Time) override REQUIRES(!m_SoundLock);
 
 	void SetChannel(int ChannelId, float Vol, float Pan) override;
-	void SetListenerPos(float x, float y) override;
+	void SetListenerPosition(vec2 Position) override;
 
 	void SetVoiceVolume(CVoiceHandle Voice, float Volume) override REQUIRES(!m_SoundLock);
 	void SetVoiceFalloff(CVoiceHandle Voice, float Falloff) override REQUIRES(!m_SoundLock);
-	void SetVoiceLocation(CVoiceHandle Voice, float x, float y) override REQUIRES(!m_SoundLock);
+	void SetVoicePosition(CVoiceHandle Voice, vec2 Position) override REQUIRES(!m_SoundLock);
 	void SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset) override REQUIRES(!m_SoundLock); // in s
 
 	void SetVoiceCircle(CVoiceHandle Voice, float Radius) override REQUIRES(!m_SoundLock);
 	void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) override REQUIRES(!m_SoundLock);
 
-	CVoiceHandle Play(int ChannelId, int SampleId, int Flags, float x, float y) REQUIRES(!m_SoundLock);
-	CVoiceHandle PlayAt(int ChannelId, int SampleId, int Flags, float x, float y) override REQUIRES(!m_SoundLock);
-	CVoiceHandle Play(int ChannelId, int SampleId, int Flags) override REQUIRES(!m_SoundLock);
+	CVoiceHandle Play(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position) REQUIRES(!m_SoundLock);
+	CVoiceHandle PlayAt(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position) override REQUIRES(!m_SoundLock);
+	CVoiceHandle Play(int ChannelId, int SampleId, int Flags, float Volume) override REQUIRES(!m_SoundLock);
 	void Pause(int SampleId) override REQUIRES(!m_SoundLock);
 	void Stop(int SampleId) override REQUIRES(!m_SoundLock);
 	void StopAll() override REQUIRES(!m_SoundLock);

@@ -621,6 +621,9 @@ Restarting. Please wait…
 Loading skin files
 == 
 
+Search
+== 
+
 Searching
 == 
 
@@ -757,6 +760,12 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
 There's an unsaved map in the editor, you might want to save it.
 == 
 
@@ -803,6 +812,12 @@ Show DDNet map finishes in server browser
 == 
 
 transmits your player name to info.ddnet.org
+== 
+
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
 == 
 
 Trying to determine UDP connectivity…
@@ -856,7 +871,7 @@ CHN
 Getting server list from master server
 == 
 
-Search
+No local servers found (ports %d-%d)
 == 
 
 Example of usage
@@ -1158,6 +1173,10 @@ Switch weapon when out of ammo
 == 
 
 Skip the main menu
+== 
+
+[Hertz]
+Hz
 == 
 
 Refresh Rate
@@ -1741,19 +1760,10 @@ No updates available
 Check now
 == 
 
-Normal:
+Basic
 == 
 
-Team:
-== 
-
-Dummy settings
-== 
-
-Toggle to edit your dummy settings
-== 
-
-Randomize
+Custom
 == 
 
 Are you sure that you want to delete '%s'?
@@ -1762,16 +1772,7 @@ Are you sure that you want to delete '%s'?
 Delete skin
 == 
 
-Basic
-== 
-
-Custom
-== 
-
 Unable to delete skin
-== 
-
-Customize
 == 
 
 Emoticons
@@ -1865,6 +1866,30 @@ Auto
 == 
 
 Replay
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
 == 
 
 Loading sound files

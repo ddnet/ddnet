@@ -29,8 +29,8 @@ public class NativeMain extends SDLActivity {
 			if(gfxBackend != null) {
 				if(gfxBackend.equals("Vulkan")) {
 					launchArguments = new String[] {"gfx_backend Vulkan"};
-				} else if(gfxBackend.equals("OpenGL")) {
-					launchArguments = new String[] {"gfx_backend OpenGL"};
+				} else if(gfxBackend.equals("GLES")) {
+					launchArguments = new String[] {"gfx_backend GLES"};
 				}
 			}
 		}

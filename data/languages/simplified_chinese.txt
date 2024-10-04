@@ -42,6 +42,7 @@
 # 2024-06-10 By
 # 2024-07-21 By
 # 2024-08-29 Pioooooo
+# 2024-09-29 Pioooooo
 ##### /authors #####
 
 ##### translated strings #####
@@ -1567,7 +1568,7 @@ No controller found. Plug in a controller.
 == 未检测到任何控制器。请尝试重新连接控制器。
 
 Unregister protocol and file extensions
-== 清除协议与文件类型关联
+== 解除协议与文件类型关联
 
 Open the directory to add custom assets
 == 打开用以添加自定义资源的文件夹路径
@@ -1925,21 +1926,6 @@ Please wait…
 Show client IDs (scoreboard, chat, spectator)
 == 显示客户端 ID（计分板、聊天、观战者）
 
-Normal:
-== 正常：
-
-Team:
-== 队伍：
-
-Dummy settings
-== 分身设置
-
-Toggle to edit your dummy settings
-== 切换以编辑分身设置
-
-Randomize
-== 随机
-
 Are you sure that you want to delete '%s'?
 == 你确定要删除'%s'吗？
 
@@ -1955,5 +1941,45 @@ Custom
 Unable to delete skin
 == 无法删除皮肤
 
-Customize
-== 自定义
+Save skin
+== 保存皮肤
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 你确定要保存皮肤吗？如果已经存在同名皮肤，将会被替换。
+
+Unable to save the skin
+== 无法保存皮肤
+
+Unable to save the skin with a reserved name
+== 无法保存使用保留名称的皮肤
+
+No local servers found (ports %d-%d)
+== 未找到本地服务器（端口 %d-%d）
+
+[Hertz]
+Hz
+== Hz
+
+[skins]
+Body
+== 身体
+
+[skins]
+Marking
+== 标记
+
+[skins]
+Decoration
+== 装饰
+
+[skins]
+Hands
+== 手
+
+[skins]
+Feet
+== 脚
+
+[skins]
+Eyes
+== 眼睛

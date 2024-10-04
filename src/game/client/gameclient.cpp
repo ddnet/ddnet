@@ -1105,7 +1105,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 			return;
 
 		CNetMsg_Sv_MapSoundGlobal *pMsg = (CNetMsg_Sv_MapSoundGlobal *)pRawMsg;
-		m_MapSounds.Play(pMsg->m_SoundId);
+		m_MapSounds.Play(CSounds::CHN_GLOBAL, pMsg->m_SoundId);
 	}
 }
 
@@ -1286,7 +1286,7 @@ void CGameClient::ProcessEvents()
 			if(!Config()->m_SndGame)
 				continue;
 
-			m_MapSounds.PlayAt(pEvent->m_SoundId, vec2(pEvent->m_X, pEvent->m_Y));
+			m_MapSounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, vec2(pEvent->m_X, pEvent->m_Y));
 		}
 	}
 }
@@ -2513,14 +2513,11 @@ void CGameClient::CClientData::CSixup::Reset()
 	}
 }
 
-void CGameClient::SendSwitchTeam(int Team)
+void CGameClient::SendSwitchTeam(int Team) const
 {
 	CNetMsg_Cl_SetTeam Msg;
 	Msg.m_Team = Team;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
-
-	if(Team != TEAM_SPECTATORS)
-		m_Camera.OnReset();
 }
 
 void CGameClient::SendStartInfo7(bool Dummy) const

@@ -1333,6 +1333,8 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 			CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 			const vec2 TeeRenderPos = vec2(Skin.x + TeeInfo.m_Size / 2.0f, Skin.y + Skin.h / 2.0f + OffsetToMid.y);
 			RenderTools()->RenderTee(pIdleState, &TeeInfo, CurrentClient.m_Afk ? EMOTE_BLINK : EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+			Ui()->DoButtonLogic(&CurrentClient.m_aSkin, 0, &Skin);
+			GameClient()->m_Tooltips.DoToolTip(&CurrentClient.m_aSkin, &Skin, CurrentClient.m_aSkin);
 		}
 
 		// name
@@ -1501,8 +1503,9 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				if(s_ScrollRegion.RectClipped(Rect))
 					continue;
 
-				const bool Inside = Ui()->HotItem() == Friend.ListItemId() || Ui()->HotItem() == Friend.RemoveButtonId() || Ui()->HotItem() == Friend.CommunityTooltipId();
+				const bool Inside = Ui()->HotItem() == Friend.ListItemId() || Ui()->HotItem() == Friend.RemoveButtonId() || Ui()->HotItem() == Friend.CommunityTooltipId() || Ui()->HotItem() == Friend.SkinTooltipId();
 				int ButtonResult = Ui()->DoButtonLogic(Friend.ListItemId(), 0, &Rect);
+
 				if(Friend.ServerInfo())
 				{
 					GameClient()->m_Tooltips.DoToolTip(Friend.ListItemId(), &Rect, Localize("Click to select server. Double click to join your friend."));
@@ -1533,6 +1536,8 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 					CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 					const vec2 TeeRenderPos = vec2(Skin.x + Skin.w / 2.0f, Skin.y + Skin.h * 0.55f + OffsetToMid.y);
 					RenderTools()->RenderTee(pIdleState, &TeeInfo, Friend.IsAfk() ? EMOTE_BLINK : EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+					Ui()->DoButtonLogic(Friend.SkinTooltipId(), 0, &Skin);
+					GameClient()->m_Tooltips.DoToolTip(Friend.SkinTooltipId(), &Skin, Friend.Skin());
 				}
 				Rect.HSplitTop(11.0f, &NameLabel, &ClanLabel);
 
@@ -1776,13 +1781,13 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 	/*
 		+---------------------------+ +---communities---+
-		|							| |					|
-		|							| +------tabs-------+
-		|	server list				| |					|
-		|							| |		tool		|
-		|							| |		box			|
-		+---------------------------+ |					|
-			status box				  +-----------------+
+		|                           | |                 |
+		|                           | +------tabs-------+
+		|       server list         | |                 |
+		|                           | |      tool       |
+		|                           | |      box        |
+		+---------------------------+ |                 |
+		        status box            +-----------------+
 	*/
 
 	CUIRect ServerList, StatusBox, ToolBox, TabBar;

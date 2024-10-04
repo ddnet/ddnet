@@ -70,9 +70,9 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 
 	void LoadBestTime()
 	{
-		CSqlLoadBestTimeData loadBestTimeData(std::make_shared<CScoreLoadBestTimeResult>());
-		str_copy(loadBestTimeData.m_aMap, "Kobra 3", sizeof(loadBestTimeData.m_aMap));
-		ASSERT_FALSE(CScoreWorker::LoadBestTime(m_pConn, &loadBestTimeData, m_aError, sizeof(m_aError))) << m_aError;
+		CSqlLoadBestTimeRequest loadBestTimeReq(std::make_shared<CScoreLoadBestTimeResult>());
+		str_copy(loadBestTimeReq.m_aMap, "Kobra 3", sizeof(loadBestTimeReq.m_aMap));
+		ASSERT_FALSE(CScoreWorker::LoadBestTime(m_pConn, &loadBestTimeReq, m_aError, sizeof(m_aError))) << m_aError;
 	}
 
 	void InsertMap()

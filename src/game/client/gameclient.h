@@ -554,7 +554,7 @@ public:
 
 	// actions
 	// TODO: move these
-	void SendSwitchTeam(int Team);
+	void SendSwitchTeam(int Team) const;
 	void SendStartInfo7(bool Dummy) const;
 	void SendSkinChange7(bool Dummy);
 	// Returns true if the requested skin change got applied by the server

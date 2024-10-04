@@ -417,6 +417,7 @@ protected:
 		const void *ListItemId() const { return &m_aName; }
 		const void *RemoveButtonId() const { return &m_FriendState; }
 		const void *CommunityTooltipId() const { return &m_IsPlayer; }
+		const void *SkinTooltipId() const { return &m_aSkin; }
 
 		bool operator<(const CFriendItem &Other) const
 		{

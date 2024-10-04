@@ -258,13 +258,13 @@ void CUi::Update(vec2 MouseWorldPos)
 	m_ProgressSpinnerOffset = std::fmod(m_ProgressSpinnerOffset, 1.0f);
 }
 
-void CUi::DebugRender()
+void CUi::DebugRender(float X, float Y)
 {
 	MapScreen();
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "hot=%p nexthot=%p active=%p lastactive=%p", HotItem(), NextHotItem(), ActiveItem(), m_pLastActiveItem);
-	TextRender()->Text(2.0f, Screen()->h - 12.0f, 10.0f, aBuf);
+	TextRender()->Text(X, Y, 10.0f, aBuf);
 }
 
 bool CUi::MouseInside(const CUIRect *pRect) const

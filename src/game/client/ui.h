@@ -470,7 +470,7 @@ public:
 	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
 	bool Enabled() const { return m_Enabled; }
 	void Update(vec2 MouseWorldPos = vec2(-1.0f, -1.0f));
-	void DebugRender();
+	void DebugRender(float X, float Y);
 
 	vec2 MousePos() const { return m_MousePos; }
 	float MouseX() const { return m_MousePos.x; }

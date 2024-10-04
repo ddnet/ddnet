@@ -822,7 +822,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		{
 			if(g_Config.m_SndServerMessage)
 			{
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 1.0f);
 				m_aLastSoundPlayed[CHAT_SERVER] = Now;
 			}
 		}
@@ -840,7 +840,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			Client()->Notify("DDNet Chat", aBuf);
 			if(g_Config.m_SndHighlight)
 			{
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 1.0f);
 				m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
 			}
 
@@ -863,7 +863,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 #endif
 			if(PlaySound)
 			{
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 1.0f);
 				m_aLastSoundPlayed[CHAT_CLIENT] = Now;
 			}
 		}
