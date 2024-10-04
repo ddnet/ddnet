@@ -2169,6 +2169,13 @@ void CGameContext::ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserDat
 		ConUnNinja(pResult, pUserData);
 }
 
+void CGameContext::ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConToggleInvincible(pResult, pUserData);
+}
+
 void CGameContext::ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

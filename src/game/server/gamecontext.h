@@ -391,6 +391,7 @@ private:
 	static void ConUnLiveFreeze(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConSuper(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleInvincible(IConsole::IResult *pResult, void *pUserData);
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConLaser(IConsole::IResult *pResult, void *pUserData);
@@ -492,6 +493,7 @@ private:
 	static void ConPracticeUnWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeNinja(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
