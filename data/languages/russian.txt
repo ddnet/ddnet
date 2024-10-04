@@ -1897,21 +1897,6 @@ Please wait…
 Show client IDs (scoreboard, chat, spectator)
 == Показывать ID клиента (табло, чат, наблюдатель)
 
-Normal:
-== Обычный:
-
-Team:
-== В команде:
-
-Dummy settings
-== Настройки дамми
-
-Toggle to edit your dummy settings
-== Нажмите, чтобы изменить настройки дамми
-
-Randomize
-== Случайный
-
 Are you sure that you want to delete '%s'?
 == Вы уверены, что хотите удалить '%s'?
 
@@ -1927,5 +1912,45 @@ Custom
 Unable to delete skin
 == Невозможно удалить скин
 
-Customize
-== Кастомизировать
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
+== 
+
+No local servers found (ports %d-%d)
+== 
+
+[Hertz]
+Hz
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
+== 

@@ -332,9 +332,14 @@ public:
 	bool CanFillGameTiles() const;
 	void AddQuadOrSound();
 	void AddGroup();
+	void AddSoundLayer();
 	void AddTileLayer();
-	void AddFrontLayer();
 	void AddQuadsLayer();
+	void AddSwitchLayer();
+	void AddFrontLayer();
+	void AddTuneLayer();
+	void AddSpeedupLayer();
+	void AddTeleLayer();
 	void DeleteSelectedLayer();
 	void LayerSelectImage();
 	bool IsNonGameTileLayerSelected() const;
@@ -905,6 +910,7 @@ public:
 	static bool CallbackAddTileart(const char *pFilepath, int StorageType, void *pUser);
 	static bool CallbackSaveImage(const char *pFileName, int StorageType, void *pUser);
 	static bool CallbackSaveSound(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackCustomEntities(const char *pFileName, int StorageType, void *pUser);
 
 	void PopupSelectImageInvoke(int Current, float x, float y);
 	int PopupSelectImageResult();

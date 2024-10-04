@@ -1901,21 +1901,6 @@ Please wait…
 Show client IDs (scoreboard, chat, spectator)
 == Mostrar IDs de cliente (scoreboard, chat, espectador)
 
-Normal:
-== Normal:
-
-Team:
-== Equipo:
-
-Dummy settings
-== Configuración del dummy
-
-Toggle to edit your dummy settings
-== Actívalo para configurar tu dummy
-
-Randomize
-== Aleatorizar
-
 Are you sure that you want to delete '%s'?
 == ¿Estás seguro de que quieres eliminar '%s'?
 
@@ -1931,5 +1916,45 @@ Custom
 Unable to delete skin
 == No se pudo borrar la skin
 
-Customize
-== Personalizar
+Save skin
+== Guardar skin
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== ¿Estás seguro de que quieres guardar tu skin? Si una skin con este nombre ya existe, esta será reemplazada.
+
+Unable to save the skin
+== No se pudo guardar la skin
+
+Unable to save the skin with a reserved name
+== No se pudo guardar la skin con un nombre reservado
+
+No local servers found (ports %d-%d)
+== No se encontraron servidores locales (puertos %d-%d)
+
+[Hertz]
+Hz
+== Hz
+
+[skins]
+Body
+== Cuerpo
+
+[skins]
+Marking
+== Marcas
+
+[skins]
+Decoration
+== Decoración
+
+[skins]
+Hands
+== Manos
+
+[skins]
+Feet
+== Pies
+
+[skins]
+Eyes
+== Ojos

@@ -43,6 +43,38 @@ void CSoundLoading::Run()
 	}
 }
 
+void CSounds::UpdateChannels()
+{
+	const float NewGuiSoundVolume = g_Config.m_SndChatSoundVolume / 100.0f;
+	if(NewGuiSoundVolume != m_GuiSoundVolume)
+	{
+		m_GuiSoundVolume = NewGuiSoundVolume;
+		Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 0.0f);
+	}
+
+	const float NewGameSoundVolume = g_Config.m_SndGameSoundVolume / 100.0f;
+	if(NewGameSoundVolume != m_GameSoundVolume)
+	{
+		m_GameSoundVolume = NewGameSoundVolume;
+		Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f * m_GameSoundVolume, 1.0f);
+		Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 0.0f);
+	}
+
+	const float NewMapSoundVolume = g_Config.m_SndMapSoundVolume / 100.0f;
+	if(NewMapSoundVolume != m_MapSoundVolume)
+	{
+		m_MapSoundVolume = NewMapSoundVolume;
+		Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
+	}
+
+	const float NewBackgroundMusicVolume = g_Config.m_SndBackgroundMusicVolume / 100.0f;
+	if(NewBackgroundMusicVolume != m_BackgroundMusicVolume)
+	{
+		m_BackgroundMusicVolume = NewBackgroundMusicVolume;
+		Sound()->SetChannel(CSounds::CHN_MUSIC, m_BackgroundMusicVolume, 1.0f);
+	}
+}
+
 int CSounds::GetSampleId(int SetId)
 {
 	if(!g_Config.m_SndEnable || !Sound()->IsSoundEnabled() || m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
@@ -67,20 +99,7 @@ int CSounds::GetSampleId(int SetId)
 
 void CSounds::OnInit()
 {
-	// setup sound channels
-	m_GuiSoundVolume = g_Config.m_SndChatSoundVolume / 100.0f;
-	m_GameSoundVolume = g_Config.m_SndGameSoundVolume / 100.0f;
-	m_MapSoundVolume = g_Config.m_SndMapSoundVolume / 100.0f;
-	m_BackgroundMusicVolume = g_Config.m_SndBackgroundMusicVolume / 100.0f;
-
-	Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 0.0f);
-	Sound()->SetChannel(CSounds::CHN_MUSIC, m_BackgroundMusicVolume, 1.0f);
-	Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f * m_GameSoundVolume, 1.0f);
-	Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 0.0f);
-	Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
-
-	Sound()->SetListenerPos(0.0f, 0.0f);
-
+	UpdateChannels();
 	ClearQueue();
 
 	// load sounds
@@ -124,38 +143,8 @@ void CSounds::OnRender()
 			return;
 	}
 
-	// set listener pos
-	Sound()->SetListenerPos(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
-
-	// update volume
-	float NewGuiSoundVol = g_Config.m_SndChatSoundVolume / 100.0f;
-	if(NewGuiSoundVol != m_GuiSoundVolume)
-	{
-		m_GuiSoundVolume = NewGuiSoundVol;
-		Sound()->SetChannel(CSounds::CHN_GUI, m_GuiSoundVolume, 1.0f);
-	}
-
-	float NewGameSoundVol = g_Config.m_SndGameSoundVolume / 100.0f;
-	if(NewGameSoundVol != m_GameSoundVolume)
-	{
-		m_GameSoundVolume = NewGameSoundVol;
-		Sound()->SetChannel(CSounds::CHN_WORLD, 0.9f * m_GameSoundVolume, 1.0f);
-		Sound()->SetChannel(CSounds::CHN_GLOBAL, m_GameSoundVolume, 1.0f);
-	}
-
-	float NewMapSoundVol = g_Config.m_SndMapSoundVolume / 100.0f;
-	if(NewMapSoundVol != m_MapSoundVolume)
-	{
-		m_MapSoundVolume = NewMapSoundVol;
-		Sound()->SetChannel(CSounds::CHN_MAPSOUND, m_MapSoundVolume, 1.0f);
-	}
-
-	float NewBackgroundMusicVol = g_Config.m_SndBackgroundMusicVolume / 100.0f;
-	if(NewBackgroundMusicVol != m_BackgroundMusicVolume)
-	{
-		m_BackgroundMusicVolume = NewBackgroundMusicVol;
-		Sound()->SetChannel(CSounds::CHN_MUSIC, m_BackgroundMusicVolume, 1.0f);
-	}
+	Sound()->SetListenerPosition(m_pClient->m_Camera.m_Center);
+	UpdateChannels();
 
 	// play sound from queue
 	if(m_QueuePos > 0)
@@ -191,49 +180,26 @@ void CSounds::Enqueue(int Channel, int SetId)
 	m_aQueue[m_QueuePos++].m_SetId = SetId;
 }
 
-void CSounds::PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos)
+void CSounds::PlayAndRecord(int Channel, int SetId, float Volume, vec2 Position)
 {
+	// TODO: Volume and position are currently not recorded for sounds played with this function
+	// TODO: This also causes desync sounds during demo playback of demos recorded on high ping servers:
+	//       https://github.com/ddnet/ddnet/issues/1282
 	CNetMsg_Sv_SoundGlobal Msg;
 	Msg.m_SoundId = SetId;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_NOSEND | MSGFLAG_RECORD);
 
-	Play(Channel, SetId, Vol);
+	PlayAt(Channel, SetId, Volume, Position);
 }
 
-void CSounds::Play(int Channel, int SetId, float Vol)
+void CSounds::Play(int Channel, int SetId, float Volume)
 {
-	if(m_pClient->m_SuppressEvents)
-		return;
-	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
-		return;
-
-	int SampleId = GetSampleId(SetId);
-	if(SampleId == -1)
-		return;
-
-	int Flags = 0;
-	if(Channel == CHN_MUSIC)
-		Flags = ISound::FLAG_LOOP;
-
-	Sound()->Play(Channel, SampleId, Flags);
+	PlaySample(Channel, GetSampleId(SetId), 0, Volume);
 }
 
-void CSounds::PlayAt(int Channel, int SetId, float Vol, vec2 Pos)
+void CSounds::PlayAt(int Channel, int SetId, float Volume, vec2 Position)
 {
-	if(m_pClient->m_SuppressEvents)
-		return;
-	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
-		return;
-
-	int SampleId = GetSampleId(SetId);
-	if(SampleId == -1)
-		return;
-
-	int Flags = 0;
-	if(Channel == CHN_MUSIC)
-		Flags = ISound::FLAG_LOOP;
-
-	Sound()->PlayAt(Channel, SampleId, Flags, Pos.x, Pos.y);
+	PlaySampleAt(Channel, GetSampleId(SetId), 0, Volume, Position);
 }
 
 void CSounds::Stop(int SetId)
@@ -259,24 +225,24 @@ bool CSounds::IsPlaying(int SetId)
 	return false;
 }
 
-ISound::CVoiceHandle CSounds::PlaySample(int Channel, int SampleId, float Vol, int Flags)
+ISound::CVoiceHandle CSounds::PlaySample(int Channel, int SampleId, int Flags, float Volume)
 {
-	if((Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if(m_pClient->m_SuppressEvents || (Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
 	if(Channel == CHN_MUSIC)
 		Flags |= ISound::FLAG_LOOP;
 
-	return Sound()->Play(Channel, SampleId, Flags);
+	return Sound()->Play(Channel, SampleId, Flags, Volume);
 }
 
-ISound::CVoiceHandle CSounds::PlaySampleAt(int Channel, int SampleId, float Vol, vec2 Pos, int Flags)
+ISound::CVoiceHandle CSounds::PlaySampleAt(int Channel, int SampleId, int Flags, float Volume, vec2 Position)
 {
-	if((Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
+	if(m_pClient->m_SuppressEvents || (Channel == CHN_MUSIC && !g_Config.m_SndMusic) || SampleId == -1)
 		return ISound::CVoiceHandle();
 
 	if(Channel == CHN_MUSIC)
 		Flags |= ISound::FLAG_LOOP;
 
-	return Sound()->PlayAt(Channel, SampleId, Flags, Pos.x, Pos.y);
+	return Sound()->PlayAt(Channel, SampleId, Flags, Volume, Position);
 }

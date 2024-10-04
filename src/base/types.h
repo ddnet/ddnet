@@ -10,6 +10,11 @@ enum class TRISTATE
 	ALL,
 };
 
+/**
+ * Handle for input/output files/streams.
+ *
+ * @ingroup File-IO
+ */
 typedef void *IOHANDLE;
 
 typedef int (*FS_LISTDIR_CALLBACK)(const char *name, int is_dir, int dir_type, void *user);

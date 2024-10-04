@@ -3574,6 +3574,22 @@ public:
 		return true;
 	}
 
+	bool IsGpuDenied(uint32_t Vendor, uint32_t DriverVersion, uint32_t ApiMajor, uint32_t ApiMinor, uint32_t ApiPatch)
+	{
+#ifdef CONF_FAMILY_WINDOWS
+		// AMD
+		if(0x1002 == Vendor)
+		{
+			auto Major = (DriverVersion >> 22);
+			auto Minor = (DriverVersion >> 12) & 0x3ff;
+			auto Patch = DriverVersion & 0xfff;
+
+			return Major == 2 && Minor == 0 && Patch > 116 && Patch < 220 && ((ApiMajor <= 1 && ApiMinor < 3) || (ApiMajor <= 1 && ApiMinor == 3 && ApiPatch < 206));
+		}
+#endif
+		return false;
+	}
+
 	[[nodiscard]] bool CreateVulkanInstance(const std::vector<std::string> &vVKLayers, const std::vector<std::string> &vVKExtensions, bool TryDebugExtensions)
 	{
 		std::vector<const char *> vLayersCStr;
@@ -3745,10 +3761,12 @@ public:
 
 			STWGraphicGpu::ETWGraphicsGpuType GPUType = VKGPUTypeToGraphicsGpuType(DeviceProp.deviceType);
 
-			int DevAPIMajor = (int)VK_API_VERSION_MAJOR(DeviceProp.apiVersion);
-			int DevAPIMinor = (int)VK_API_VERSION_MINOR(DeviceProp.apiVersion);
+			int DevApiMajor = (int)VK_API_VERSION_MAJOR(DeviceProp.apiVersion);
+			int DevApiMinor = (int)VK_API_VERSION_MINOR(DeviceProp.apiVersion);
+			int DevApiPatch = (int)VK_API_VERSION_PATCH(DeviceProp.apiVersion);
 
-			if(DevAPIMajor > gs_BackendVulkanMajor || (DevAPIMajor == gs_BackendVulkanMajor && DevAPIMinor >= gs_BackendVulkanMinor))
+			auto IsDenied = CCommandProcessorFragment_Vulkan::IsGpuDenied(DeviceProp.vendorID, DeviceProp.driverVersion, DevApiMajor, DevApiMinor, DevApiPatch);
+			if((DevApiMajor > gs_BackendVulkanMajor || (DevApiMajor == gs_BackendVulkanMajor && DevApiMinor >= gs_BackendVulkanMinor)) && !IsDenied)
 			{
 				STWGraphicGpu::STWGraphicGpuItem NewGpu;
 				str_copy(NewGpu.m_aName, DeviceProp.deviceName);
@@ -3780,16 +3798,16 @@ public:
 
 		if(m_pGpuList->m_vGpus.empty())
 		{
-			SetWarning(EGfxWarningType::GFX_WARNING_TYPE_INIT_FAILED_MISSING_INTEGRATED_GPU_DRIVER, "No devices with required vulkan version found.");
+			dbg_msg("vulkan", "no devices with required vulkan version found.");
 			return false;
 		}
 
 		{
 			auto &DeviceProp = vDevicePropList[FoundDeviceIndex];
 
-			int DevAPIMajor = (int)VK_API_VERSION_MAJOR(DeviceProp.apiVersion);
-			int DevAPIMinor = (int)VK_API_VERSION_MINOR(DeviceProp.apiVersion);
-			int DevAPIPatch = (int)VK_API_VERSION_PATCH(DeviceProp.apiVersion);
+			int DevApiMajor = (int)VK_API_VERSION_MAJOR(DeviceProp.apiVersion);
+			int DevApiMinor = (int)VK_API_VERSION_MINOR(DeviceProp.apiVersion);
+			int DevApiPatch = (int)VK_API_VERSION_PATCH(DeviceProp.apiVersion);
 
 			str_copy(pRendererName, DeviceProp.deviceName, gs_GpuInfoStringSize);
 			const char *pVendorNameStr = NULL;
@@ -3827,7 +3845,7 @@ public:
 
 			char aBuff[256];
 			str_copy(pVendorName, pVendorNameStr, gs_GpuInfoStringSize);
-			str_format(pVersionName, gs_GpuInfoStringSize, "Vulkan %d.%d.%d (driver: %s)", DevAPIMajor, DevAPIMinor, DevAPIPatch, GetDriverVerson(aBuff, DeviceProp.driverVersion, DeviceProp.vendorID));
+			str_format(pVersionName, gs_GpuInfoStringSize, "Vulkan %d.%d.%d (driver: %s)", DevApiMajor, DevApiMinor, DevApiPatch, GetDriverVerson(aBuff, DeviceProp.driverVersion, DeviceProp.vendorID));
 
 			// get important device limits
 			m_NonCoherentMemAlignment = DeviceProp.limits.nonCoherentAtomSize;

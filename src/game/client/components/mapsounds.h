@@ -33,8 +33,8 @@ public:
 	CMapSounds();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
-	void Play(int SoundId);
-	void PlayAt(int SoundId, vec2 Pos);
+	void Play(int Channel, int SoundId);
+	void PlayAt(int Channel, int SoundId, vec2 Position);
 
 	virtual void OnMapLoad() override;
 	virtual void OnRender() override;

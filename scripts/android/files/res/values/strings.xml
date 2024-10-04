@@ -2,5 +2,5 @@
 <resources>
 	<string name="app_name">DDNet</string>
 	<string name="shortcut_play_vulkan_short">Play (Vulkan)</string>
-	<string name="shortcut_play_opengl_short">Play (OpenGL)</string>
+	<string name="shortcut_play_gles_short">Play (OpenGL ES)</string>
 </resources>

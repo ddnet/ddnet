@@ -112,7 +112,7 @@ void CScore::LoadBestTime()
 	auto LoadBestTimeResult = std::make_shared<CScoreLoadBestTimeResult>();
 	m_pGameServer->m_pController->m_pLoadBestTimeResult = LoadBestTimeResult;
 
-	auto Tmp = std::make_unique<CSqlLoadBestTimeData>(LoadBestTimeResult);
+	auto Tmp = std::make_unique<CSqlLoadBestTimeRequest>(LoadBestTimeResult);
 	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
 	m_pPool->Execute(CScoreWorker::LoadBestTime, std::move(Tmp), "load best time");
 }
@@ -308,7 +308,7 @@ void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 		return;
 	pController->Teams().SetSaving(Team, SaveResult);
 
-	auto Tmp = std::make_unique<CSqlTeamSave>(SaveResult);
+	auto Tmp = std::make_unique<CSqlTeamSaveData>(SaveResult);
 	str_copy(Tmp->m_aCode, pCode, sizeof(Tmp->m_aCode));
 	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
 	str_copy(Tmp->m_aServer, pServer, sizeof(Tmp->m_aServer));
@@ -370,10 +370,9 @@ void CScore::LoadTeam(const char *pCode, int ClientId)
 	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientId);
 	SaveResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 	pController->Teams().SetSaving(Team, SaveResult);
-	auto Tmp = std::make_unique<CSqlTeamLoad>(SaveResult);
+	auto Tmp = std::make_unique<CSqlTeamLoadRequest>(SaveResult);
 	str_copy(Tmp->m_aCode, pCode, sizeof(Tmp->m_aCode));
 	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
-	Tmp->m_ClientId = ClientId;
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 	Tmp->m_NumPlayer = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
