@@ -355,7 +355,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 						{
 							TextRender()->TextColor(gs_HighlightedTextColor);
 							Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[i], FontSize, TEXTALIGN_ML, Props, vFilterLens[i], &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
-							if (i != vpFilteredStrs.size() - 1) {
+							if(i != vpFilteredStrs.size() - 1)
+							{
 								TextRender()->TextColor(TextRender()->DefaultTextColor());
 								Ui()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME), &Button, vpFilteredStrs[i] + vFilterLens[i], FontSize, TEXTALIGN_ML, Props, (int)(vpFilteredStrs[i + 1] - (vpFilteredStrs[i] + vFilterLens[i])), &pUiElement->Rect(UI_ELEM_NAME)->m_Cursor);
 							}
@@ -1934,7 +1935,7 @@ bool CMenus::PrintHighlighted(const char *pName, F &&PrintFn)
 			return true;
 		}
 	}
-		return false;
+	return false;
 }
 
 CTeeRenderInfo CMenus::GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool CustomSkinColors, int CustomSkinColorBody, int CustomSkinColorFeet) const
