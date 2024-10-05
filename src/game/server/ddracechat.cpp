@@ -2166,6 +2166,13 @@ void CGameContext::ConPracticeJetpack(IConsole::IResult *pResult, void *pUserDat
 		ConJetpack(pResult, pUserData);
 }
 
+void CGameContext::ConPracticeEndlessJump(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConEndlessJump(pResult, pUserData);
+}
+
 void CGameContext::ConPracticeSetJumps(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -2206,6 +2213,13 @@ void CGameContext::ConPracticeUnJetpack(IConsole::IResult *pResult, void *pUserD
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(pSelf->GetPracticeCharacter(pResult))
 		ConUnJetpack(pResult, pUserData);
+}
+
+void CGameContext::ConPracticeUnEndlessJump(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConUnEndlessJump(pResult, pUserData);
 }
 
 void CGameContext::ConPracticeUnWeapons(IConsole::IResult *pResult, void *pUserData)

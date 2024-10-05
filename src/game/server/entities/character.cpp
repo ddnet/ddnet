@@ -161,6 +161,11 @@ void CCharacter::SetJetpack(bool Active)
 	m_Core.m_Jetpack = Active;
 }
 
+void CCharacter::SetEndlessJump(bool Active)
+{
+	m_Core.m_EndlessJump = Active;
+}
+
 void CCharacter::SetJumps(int Jumps)
 {
 	m_Core.m_Jumps = Jumps;
