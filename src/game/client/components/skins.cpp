@@ -461,7 +461,7 @@ void CSkins::RandomizeSkin(int Dummy)
 	}
 
 	const size_t SkinNameSize = Dummy ? sizeof(g_Config.m_ClDummySkin) : sizeof(g_Config.m_ClPlayerSkin);
-	char aRandomSkinName[24];
+	char aRandomSkinName[MAX_SKIN_LENGTH];
 	str_copy(aRandomSkinName, "default", SkinNameSize);
 	if(!m_pClient->m_Skins.GetSkinsUnsafe().empty())
 	{
