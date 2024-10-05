@@ -72,7 +72,7 @@ public:
 		bool m_Afk;
 
 		// skin info
-		char m_aSkin[24 + 1];
+		char m_aSkin[MAX_SKIN_LENGTH];
 		bool m_CustomSkinColors;
 		int m_CustomSkinColorBody;
 		int m_CustomSkinColorFeet;

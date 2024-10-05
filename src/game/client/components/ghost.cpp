@@ -385,7 +385,7 @@ void CGhost::OnRender()
 
 void CGhost::InitRenderInfos(CGhostItem *pGhost)
 {
-	char aSkinName[24];
+	char aSkinName[MAX_SKIN_LENGTH];
 	IntsToStr(&pGhost->m_Skin.m_Skin0, 6, aSkinName, std::size(aSkinName));
 	CTeeRenderInfo *pRenderInfo = &pGhost->m_RenderInfo;
 
@@ -685,7 +685,7 @@ void CGhost::OnRefreshSkins()
 	const auto &&RefindSkin = [&](auto &Ghost) {
 		if(Ghost.Empty())
 			return;
-		char aSkinName[24];
+		char aSkinName[MAX_SKIN_LENGTH];
 		IntsToStr(&Ghost.m_Skin.m_Skin0, 6, aSkinName, std::size(aSkinName));
 		CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
 		if(aSkinName[0] != '\0')
