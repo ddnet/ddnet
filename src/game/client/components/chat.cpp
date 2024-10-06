@@ -19,6 +19,7 @@
 #include <game/localization.h>
 
 #include "chat.h"
+#include "engine/external/remimu.h"
 
 char CChat::ms_aDisplayText[MAX_LINE_LENGTH] = {'\0'};
 
@@ -531,6 +532,16 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_CHAT)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
+
+		if(g_Config.m_ClRegexChatIgnore[0])
+		{
+			RegexToken aTokens[512];
+			int16_t TokenCount = 512;
+			if(regex_parse(g_Config.m_ClRegexChatIgnore, aTokens, &TokenCount, 0))
+				m_pClient->Echo("Regex error");
+			else if(regex_match(aTokens, pMsg->m_pMessage, 0, 0, 0, 0) != -1)
+				return;
+		}
 		AddLine(pMsg->m_ClientId, pMsg->m_Team, pMsg->m_pMessage);
 	}
 	else if(MsgType == NETMSGTYPE_SV_COMMANDINFO)
