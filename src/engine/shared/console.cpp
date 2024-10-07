@@ -511,7 +511,15 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 
 				if(Stroke || IsStrokeCommand)
 				{
-					if(int Error = ParseArgs(&Result, pCommand->m_pParams, pCommand->m_pfnCallback == &SColorConfigVariable::CommandCallback))
+					bool IsColor = false;
+					{
+						FCommandCallback pfnCallback = pCommand->m_pfnCallback;
+						void *pUserData = pCommand->m_pUserData;
+						TraverseChain(&pfnCallback, &pUserData);
+						IsColor = pfnCallback == &SColorConfigVariable::CommandCallback;
+					}
+
+					if(int Error = ParseArgs(&Result, pCommand->m_pParams, IsColor))
 					{
 						char aBuf[CMDLINE_LENGTH + 64];
 						if(Error == PARSEARGS_INVALID_INTEGER)

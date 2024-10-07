@@ -39,7 +39,8 @@ CCamera::CCamera()
 
 float CCamera::CameraSmoothingProgress(float CurrentTime) const
 {
-	return (CurrentTime - m_CameraSmoothingStart) / (m_CameraSmoothingEnd - m_CameraSmoothingStart);
+	float Progress = (CurrentTime - m_CameraSmoothingStart) / (m_CameraSmoothingEnd - m_CameraSmoothingStart);
+	return 1.0 - std::pow(2.0, -10.0 * Progress);
 }
 
 float CCamera::ZoomProgress(float CurrentTime) const
