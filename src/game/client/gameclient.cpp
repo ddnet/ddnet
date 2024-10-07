@@ -2084,34 +2084,6 @@ void CGameClient::OnNewSnapshot()
 				m_Effects.AirJump(Pos, Alpha);
 			}
 	}
-	if(g_Config.m_ClFreezeStars)
-	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(m_Snap.m_aCharacters[i].m_Active && m_Snap.m_aCharacters[i].m_HasExtendedData && m_Snap.m_aCharacters[i].m_PrevExtendedData)
-			{
-				int FreezeTimeNow = m_Snap.m_aCharacters[i].m_ExtendedData.m_FreezeEnd - Client()->GameTick(g_Config.m_ClDummy);
-				int FreezeTimePrev = m_Snap.m_aCharacters[i].m_PrevExtendedData->m_FreezeEnd - Client()->PrevGameTick(g_Config.m_ClDummy);
-				vec2 Pos = vec2(m_Snap.m_aCharacters[i].m_Cur.m_X, m_Snap.m_aCharacters[i].m_Cur.m_Y);
-				int StarsNow = (FreezeTimeNow + 1) / Client()->GameTickSpeed();
-				int StarsPrev = (FreezeTimePrev + 1) / Client()->GameTickSpeed();
-				if(StarsNow < StarsPrev || (StarsPrev == 0 && StarsNow > 0))
-				{
-					int Amount = StarsNow + 1;
-					float a = 3 * pi / 2;
-					float s = a - pi / 3;
-					float e = a + pi / 3;
-					for(int j = 0; j < Amount; j++)
-					{
-						float f = mix(s, e, (j + 1) / (float)(Amount + 2));
-						vec2 Dir = vec2(cos(f), sin(f));
-						m_Effects.DamageIndicator(Pos, Dir);
-					}
-				}
-			}
-		}
-	}
-
 	if(g_Config.m_ClFreezeStars && !m_SuppressEvents)
 	{
 		for(auto &Character : m_Snap.m_aCharacters)
