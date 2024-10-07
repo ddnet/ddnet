@@ -165,10 +165,10 @@ typedef struct _RegexToken {
 /// SAFETY: tokens buffer must have at least the input token_count number of RegexToken objects. They are allowed to be uninitialized.
 static inline int regex_parse(const char * pattern, RegexToken * tokens, int16_t * token_count, int32_t flags)
 {
-    int64_t tokens_len = *token_count;
-    uint64_t pattern_len = strlen(pattern);
     if (token_count == 0)
         return -2;
+    int64_t tokens_len = *token_count;
+    uint64_t pattern_len = strlen(pattern);
     
     // 0: normal
     // 1: just saw a backslash
