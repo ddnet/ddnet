@@ -2140,6 +2140,9 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   websockets.cpp
   websockets.h
 )
+set_src(ENGINE_EXTERNAL GLOB src/engine/external
+  remimu.h
+)
 set_src(ENGINE_GFX GLOB src/engine/gfx
   image.cpp
   image_loader.cpp
@@ -2220,7 +2223,7 @@ set(LIBS
 # Targets
 add_library(engine-gfx EXCLUDE_FROM_ALL OBJECT ${ENGINE_GFX})
 target_include_directories(engine-gfx PRIVATE ${PNG_INCLUDE_DIRS})
-add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
+add_library(engine-shared EXCLUDE_FROM_ALL OBJECT ${ENGINE_EXTERNAL} ${ENGINE_INTERFACE} ${ENGINE_SHARED} ${ENGINE_UUID_SHARED} ${BASE})
 add_library(game-shared EXCLUDE_FROM_ALL OBJECT ${GAME_SHARED} ${GAME_GENERATED_SHARED})
 list(APPEND TARGETS_OWN engine-gfx engine-shared game-shared)
 
