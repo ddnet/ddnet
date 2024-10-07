@@ -150,7 +150,7 @@ int CLayerSounds::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	return pGrabbed->m_vSources.empty() ? 0 : 1;
 }
 
-void CLayerSounds::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy)
+void CLayerSounds::BrushPlace(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 {
 	std::shared_ptr<CLayerSounds> pSoundLayer = std::static_pointer_cast<CLayerSounds>(pBrush);
 	std::vector<CSoundSource> vAddedSources;
@@ -158,8 +158,8 @@ void CLayerSounds::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy
 	{
 		CSoundSource n = Source;
 
-		n.m_Position.x += f2fx(wx);
-		n.m_Position.y += f2fx(wy);
+		n.m_Position.x += f2fx(WorldPos.x);
+		n.m_Position.y += f2fx(WorldPos.y);
 
 		m_vSources.push_back(n);
 		vAddedSources.push_back(n);

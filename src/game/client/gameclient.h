@@ -390,7 +390,7 @@ public:
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
 		int m_Country;
-		char m_aSkinName[24];
+		char m_aSkinName[MAX_SKIN_LENGTH];
 		int m_SkinColor;
 		int m_Team;
 		int m_Emoticon;
@@ -408,6 +408,7 @@ public:
 		bool m_ShotgunHitDisabled;
 		bool m_HookHitDisabled;
 		bool m_Super;
+		bool m_Invincible;
 		bool m_HasTelegunGun;
 		bool m_HasTelegunGrenade;
 		bool m_HasTelegunLaser;
@@ -452,7 +453,7 @@ public:
 		bool m_SpecCharPresent;
 		vec2 m_SpecChar;
 
-		void UpdateRenderInfo(bool IsTeamPlay, int Conn);
+		void UpdateRenderInfo(bool IsTeamPlay);
 		void Reset();
 
 		class CSixup
@@ -568,7 +569,7 @@ public:
 
 	// actions
 	// TODO: move these
-	void SendSwitchTeam(int Team);
+	void SendSwitchTeam(int Team) const;
 	void SendStartInfo7(bool Dummy) const;
 	void SendSkinChange7(bool Dummy);
 	// Returns true if the requested skin change got applied by the server
@@ -590,7 +591,7 @@ public:
 
 	class CTeamsCore m_Teams;
 
-	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownId);
+	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int OwnId);
 
 	int GetLastRaceTick() const override;
 
@@ -785,7 +786,8 @@ public:
 	struct SClientExtrasSkin
 	{
 		IGraphics::CTextureHandle m_SpriteParticleSnowflake;
-		IGraphics::CTextureHandle m_aSpriteParticles[1];
+		IGraphics::CTextureHandle m_SpriteParticleSparkle;
+		IGraphics::CTextureHandle m_aSpriteParticles[2];
 	};
 
 	SClientExtrasSkin m_ExtrasSkin;

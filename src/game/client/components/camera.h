@@ -25,6 +25,20 @@ class CCamera : public CComponent
 	vec2 m_aLastPos[NUM_DUMMIES];
 	vec2 m_PrevCenter;
 
+	int m_PrevSpecId;
+	bool m_WasSpectating;
+
+	bool m_CameraSmoothing;
+	vec2 m_CameraSmoothingCenter;
+	vec2 m_CameraSmoothingTarget;
+	CCubicBezier m_CameraSmoothingBezierX;
+	CCubicBezier m_CameraSmoothingBezierY;
+	float m_CameraSmoothingStart;
+	float m_CameraSmoothingEnd;
+	vec2 m_CenterBeforeSmoothing;
+
+	float CameraSmoothingProgress(float CurrentTime) const;
+
 	CCubicBezier m_ZoomSmoothing;
 	float m_ZoomSmoothingStart;
 	float m_ZoomSmoothingEnd;

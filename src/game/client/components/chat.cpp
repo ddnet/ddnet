@@ -355,8 +355,6 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				// add separator
 				const char *pSeparator = pCompletionCommand->m_aParams[0] == '\0' ? "" : " ";
 				str_append(aBuf, pSeparator);
-				if(*pSeparator)
-					str_append(aBuf, pSeparator);
 
 				// add part after the name
 				str_append(aBuf, m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength);
@@ -552,14 +550,16 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 {
-	const char *pHL = str_utf8_find_nocase(pLine, pName);
+	const char *pHit = str_utf8_find_nocase(pLine, pName);
 
-	if(pHL)
+	while(pHit)
 	{
 		int Length = str_length(pName);
 
-		if(Length > 0 && (pLine == pHL || pHL[-1] == ' ') && (pHL[Length] == 0 || pHL[Length] == ' ' || pHL[Length] == '.' || pHL[Length] == '!' || pHL[Length] == ',' || pHL[Length] == '?' || pHL[Length] == ':'))
+		if(Length > 0 && (pLine == pHit || pHit[-1] == ' ') && (pHit[Length] == 0 || pHit[Length] == ' ' || pHit[Length] == '.' || pHit[Length] == '!' || pHit[Length] == ',' || pHit[Length] == '?' || pHit[Length] == ':'))
 			return true;
+
+		pHit = str_utf8_find_nocase(pHit + 1, pName);
 	}
 
 	return false;
@@ -805,50 +805,9 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		{
 			if(!g_Config.m_ClChatOld)
 			{
-				pCurrentLine->m_CustomColoredSkin = LineAuthor.m_RenderInfo.m_CustomColoredSkin;
-				if(pCurrentLine->m_CustomColoredSkin)
-					pCurrentLine->m_RenderSkin = LineAuthor.m_RenderInfo.m_ColorableRenderSkin;
-				else
-					pCurrentLine->m_RenderSkin = LineAuthor.m_RenderInfo.m_OriginalRenderSkin;
-
 				str_copy(pCurrentLine->m_aSkinName, LineAuthor.m_aSkinName);
-				pCurrentLine->m_ColorBody = LineAuthor.m_RenderInfo.m_ColorBody;
-				pCurrentLine->m_ColorFeet = LineAuthor.m_RenderInfo.m_ColorFeet;
-
-				pCurrentLine->m_RenderSkinMetrics = LineAuthor.m_RenderInfo.m_SkinMetrics;
+				pCurrentLine->m_TeeRenderInfo = LineAuthor.m_RenderInfo;
 				pCurrentLine->m_HasRenderTee = true;
-
-				// 0.7
-				if(Client()->IsSixup())
-				{
-					for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
-					{
-						const char *pPartName = LineAuthor.m_aSixup[g_Config.m_ClDummy].m_aaSkinPartNames[Part];
-						int Id = m_pClient->m_Skins7.FindSkinPart(Part, pPartName, false);
-						const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, Id);
-						if(LineAuthor.m_aSixup[g_Config.m_ClDummy].m_aUseCustomColors[Part])
-						{
-							pCurrentLine->m_Sixup.m_aTextures[Part] = pSkinPart->m_ColorTexture;
-							pCurrentLine->m_Sixup.m_aColors[Part] = m_pClient->m_Skins7.GetColor(
-								LineAuthor.m_aSixup[g_Config.m_ClDummy].m_aSkinPartColors[Part],
-								Part == protocol7::SKINPART_MARKING);
-						}
-						else
-						{
-							pCurrentLine->m_Sixup.m_aTextures[Part] = pSkinPart->m_OrgTexture;
-							pCurrentLine->m_Sixup.m_aColors[Part] = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-						}
-
-						if(LineAuthor.m_SkinInfo.m_aSixup[g_Config.m_ClDummy].m_HatTexture.IsValid())
-						{
-							if(Part == protocol7::SKINPART_BODY && str_comp(pPartName, "standard"))
-								pCurrentLine->m_Sixup.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
-							if(Part == protocol7::SKINPART_DECORATION && str_comp(pPartName, "twinbopp"))
-								pCurrentLine->m_Sixup.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
-							pCurrentLine->m_Sixup.m_HatTexture = LineAuthor.m_SkinInfo.m_aSixup[g_Config.m_ClDummy].m_HatTexture;
-						}
-					}
-				}
 			}
 		}
 	}
@@ -863,7 +822,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		{
 			if(g_Config.m_SndServerMessage)
 			{
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 1.0f);
 				m_aLastSoundPlayed[CHAT_SERVER] = Now;
 			}
 		}
@@ -881,7 +840,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			Client()->Notify("DDNet Chat", aBuf);
 			if(g_Config.m_SndHighlight)
 			{
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 1.0f);
 				m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
 			}
 
@@ -904,7 +863,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 #endif
 			if(PlaySound)
 			{
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 1.0f);
 				m_aLastSoundPlayed[CHAT_CLIENT] = Now;
 			}
 		}
@@ -917,17 +876,11 @@ void CChat::OnRefreshSkins()
 	{
 		if(Line.m_HasRenderTee)
 		{
-			const CSkin *pSkin = m_pClient->m_Skins.Find(Line.m_aSkinName);
-			if(Line.m_CustomColoredSkin)
-				Line.m_RenderSkin = pSkin->m_ColorableSkin;
-			else
-				Line.m_RenderSkin = pSkin->m_OriginalSkin;
-
-			Line.m_RenderSkinMetrics = pSkin->m_Metrics;
+			Line.m_TeeRenderInfo.Apply(m_pClient->m_Skins.Find(Line.m_aSkinName));
 		}
 		else
 		{
-			Line.m_RenderSkin.Reset();
+			Line.m_TeeRenderInfo.Reset();
 		}
 	}
 }
@@ -1233,6 +1186,23 @@ void CChat::OnRender()
 
 		m_Input.SetScrollOffset(ScrollOffset);
 		m_Input.SetScrollOffsetChange(ScrollOffsetChange);
+
+		// Autocompletion hint
+		if(m_Input.GetString()[0] == '/' && m_Input.GetString()[1] != '\0' && !m_vCommands.empty())
+		{
+			for(const auto &Command : m_vCommands)
+			{
+				if(str_startswith_nocase(Command.m_aName, m_Input.GetString() + 1))
+				{
+					Cursor.m_X = m_Input.GetCaretPosition().x;
+					Cursor.m_Y = m_Input.GetCaretPosition().y;
+					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.5f);
+					TextRender()->TextEx(&Cursor, Command.m_aName + str_length(m_Input.GetString() + 1));
+					TextRender()->TextColor(TextRender()->DefaultTextColor());
+					break;
+				}
+			}
+		}
 	}
 
 #if defined(CONF_VIDEORECORDER)
@@ -1291,28 +1261,7 @@ void CChat::OnRender()
 			if(!g_Config.m_ClChatOld && Line.m_HasRenderTee)
 			{
 				const int TeeSize = MessageTeeSize();
-				CTeeRenderInfo RenderInfo;
-				RenderInfo.m_CustomColoredSkin = Line.m_CustomColoredSkin;
-				if(Line.m_CustomColoredSkin)
-					RenderInfo.m_ColorableRenderSkin = Line.m_RenderSkin;
-				else
-					RenderInfo.m_OriginalRenderSkin = Line.m_RenderSkin;
-				RenderInfo.m_SkinMetrics = Line.m_RenderSkinMetrics;
-
-				RenderInfo.m_ColorBody = Line.m_ColorBody;
-				RenderInfo.m_ColorFeet = Line.m_ColorFeet;
-				RenderInfo.m_Size = TeeSize;
-
-				if(Client()->IsSixup())
-				{
-					for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
-					{
-						RenderInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = Line.m_Sixup.m_aColors[Part];
-						RenderInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = Line.m_Sixup.m_aTextures[Part];
-						RenderInfo.m_aSixup[g_Config.m_ClDummy].m_HatSpriteIndex = Line.m_Sixup.m_HatSpriteIndex;
-						RenderInfo.m_aSixup[g_Config.m_ClDummy].m_HatTexture = Line.m_Sixup.m_HatTexture;
-					}
-				}
+				Line.m_TeeRenderInfo.m_Size = TeeSize;
 
 				float RowHeight = FontSize() + RealMsgPaddingY;
 				float OffsetTeeY = TeeSize / 2.0f;
@@ -1320,9 +1269,9 @@ void CChat::OnRender()
 
 				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
-				CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &RenderInfo, OffsetToMid);
+				CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &Line.m_TeeRenderInfo, OffsetToMid);
 				vec2 TeeRenderPos(x + (RealMsgPaddingX + TeeSize) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y);
-				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
+				RenderTools()->RenderTee(pIdleState, &Line.m_TeeRenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
 			}
 
 			const ColorRGBA TextColor = TextRender()->DefaultTextColor().WithMultipliedAlpha(Blend);

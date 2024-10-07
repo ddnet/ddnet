@@ -2,6 +2,7 @@
 
 #include <engine/client.h>
 #include <engine/console.h>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/datafile.h>
@@ -33,7 +34,7 @@ struct CSoundSource_DEPRECATED
 	int m_SoundEnvOffset;
 };
 
-bool CEditorMap::Save(const char *pFileName)
+bool CEditorMap::Save(const char *pFileName, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
 {
 	char aFileNameTmp[IO_MAX_PATH_LENGTH];
 	IStorage::FormatTmpPath(aFileNameTmp, sizeof(aFileNameTmp), pFileName);
@@ -41,11 +42,17 @@ bool CEditorMap::Save(const char *pFileName)
 	char aBuf[IO_MAX_PATH_LENGTH + 64];
 	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", aFileNameTmp);
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
+
+	if(!PerformPreSaveSanityChecks(ErrorHandler))
+	{
+		return false;
+	}
+
 	CDataFileWriter Writer;
 	if(!Writer.Open(m_pEditor->Storage(), aFileNameTmp))
 	{
-		str_format(aBuf, sizeof(aBuf), "failed to open file '%s'...", aFileNameTmp);
-		m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
+		str_format(aBuf, sizeof(aBuf), "Error: Failed to open file '%s' for writing.", aFileNameTmp);
+		ErrorHandler(aBuf);
 		return false;
 	}
 
@@ -401,11 +408,42 @@ bool CEditorMap::Save(const char *pFileName)
 	return true;
 }
 
+bool CEditorMap::PerformPreSaveSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler)
+{
+	bool Success = true;
+	char aErrorMessage[256];
+
+	for(const std::shared_ptr<CEditorImage> &pImage : m_vpImages)
+	{
+		if(!pImage->m_External && pImage->m_pData == nullptr)
+		{
+			str_format(aErrorMessage, sizeof(aErrorMessage), "Error: Saving is not possible because the image '%s' could not be loaded. Remove or replace this image.", pImage->m_aName);
+			ErrorHandler(aErrorMessage);
+			Success = false;
+		}
+	}
+
+	for(const std::shared_ptr<CEditorSound> &pSound : m_vpSounds)
+	{
+		if(pSound->m_pData == nullptr)
+		{
+			str_format(aErrorMessage, sizeof(aErrorMessage), "Error: Saving is not possible because the sound '%s' could not be loaded. Remove or replace this sound.", pSound->m_aName);
+			ErrorHandler(aErrorMessage);
+			Success = false;
+		}
+	}
+
+	return Success;
+}
+
 bool CEditorMap::Load(const char *pFileName, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
 {
 	CDataFileReader DataFile;
 	if(!DataFile.Open(m_pEditor->Storage(), pFileName, StorageType))
+	{
+		ErrorHandler("Error: Failed to open map file. See local console for details.");
 		return false;
+	}
 
 	// check version
 	const CMapItemVersion *pItemVersion = static_cast<CMapItemVersion *>(DataFile.FindItem(MAPITEMTYPE_VERSION, 0));
@@ -509,21 +547,18 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					pImg->m_Height = ImgInfo.m_Height;
 					pImg->m_Format = ImgInfo.m_Format;
 					pImg->m_pData = ImgInfo.m_pData;
-					if(pImg->m_Format != CImageInfo::FORMAT_RGBA)
-					{
-						uint8_t *pRgbaData = static_cast<uint8_t *>(malloc((size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
-						ConvertToRGBA(pRgbaData, *pImg);
-						free(pImg->m_pData);
-						pImg->m_pData = pRgbaData;
-						pImg->m_Format = CImageInfo::FORMAT_RGBA;
-					}
+					ConvertToRgba(*pImg);
 
 					int TextureLoadFlag = m_pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-					if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
+					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 						TextureLoadFlag = 0;
-					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo, TextureLoadFlag, aBuf);
-					ImgInfo.m_pData = nullptr;
 					pImg->m_External = 1;
+					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(*pImg, TextureLoadFlag, aBuf);
+				}
+				else
+				{
+					str_format(aBuf, sizeof(aBuf), "Error: Failed to load external image '%s'.", pImg->m_aName);
+					ErrorHandler(aBuf);
 				}
 			}
 			else
@@ -584,6 +619,11 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				if(m_pEditor->Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
 				{
 					pSound->m_SoundId = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
+				}
+				else
+				{
+					str_format(aBuf, sizeof(aBuf), "Error: Failed to load external sound '%s'.", pSound->m_aName);
+					ErrorHandler(aBuf);
 				}
 			}
 			else

@@ -1253,7 +1253,7 @@ void CGameContext::OnTick()
 
 	if(Server()->Tick() % (g_Config.m_SvAnnouncementInterval * Server()->TickSpeed() * 60) == 0)
 	{
-		const char *pLine = Server()->GetAnnouncementLine(g_Config.m_SvAnnouncementFileName);
+		const char *pLine = Server()->GetAnnouncementLine();
 		if(pLine)
 			SendChat(-1, TEAM_ALL, pLine);
 	}
@@ -3526,7 +3526,7 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 			str_format(aCommand, sizeof(aCommand), "clear_votes; add_map_votes \"%s\"", aDirectory);
 		}
 		else
-			str_format(aCommand, sizeof(aCommand), "change_map \"%s/%s\"", pDirectory, aOptionEscaped);
+			str_format(aCommand, sizeof(aCommand), "change_map \"%s%s%s\"", pDirectory, pDirectory[0] == '\0' ? "" : "/", aOptionEscaped);
 
 		pSelf->AddVote(aDescription, aCommand);
 	}
@@ -3642,6 +3642,8 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("set_team", "i[id] i[team-id] ?i[delay in minutes]", CFGFLAG_SERVER, ConSetTeam, this, "Set team of player to team");
 	Console()->Register("set_team_all", "i[team-id]", CFGFLAG_SERVER, ConSetTeamAll, this, "Set team of all players to team");
 	Console()->Register("hot_reload", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConHotReload, this, "Reload the map while preserving the state of tees and teams");
+	Console()->Register("reload_censorlist", "", CFGFLAG_SERVER, ConReloadCensorlist, this, "Reload the censorlist");
+	Console()->Register("reload_announcement", "", CFGFLAG_SERVER, ConReloadAnnouncement, this, "Reload the announcements");
 
 	Console()->Register("add_vote", "s[name] r[command]", CFGFLAG_SERVER, ConAddVote, this, "Add a voting option");
 	Console()->Register("remove_vote", "r[name]", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
@@ -3667,8 +3669,8 @@ void CGameContext::OnConsoleInit()
 void CGameContext::RegisterDDRaceCommands()
 {
 	Console()->Register("kill_pl", "v[id]", CFGFLAG_SERVER, ConKillPlayer, this, "Kills player v and announces the kill");
-	Console()->Register("totele", "i[number]", CFGFLAG_SERVER | CMDFLAG_TEST, ConToTeleporter, this, "Teleports you to teleporter v");
-	Console()->Register("totelecp", "i[number]", CFGFLAG_SERVER | CMDFLAG_TEST, ConToCheckTeleporter, this, "Teleports you to checkpoint teleporter v");
+	Console()->Register("totele", "i[number]", CFGFLAG_SERVER | CMDFLAG_TEST, ConToTeleporter, this, "Teleports you to teleporter i");
+	Console()->Register("totelecp", "i[number]", CFGFLAG_SERVER | CMDFLAG_TEST, ConToCheckTeleporter, this, "Teleports you to checkpoint teleporter i");
 	Console()->Register("tele", "?i[id] ?i[id]", CFGFLAG_SERVER | CMDFLAG_TEST, ConTeleport, this, "Teleports player i (or you) to player i (or you to where you look at)");
 	Console()->Register("addweapon", "i[weapon-id]", CFGFLAG_SERVER | CMDFLAG_TEST, ConAddWeapon, this, "Gives weapon with id i to you (all = -1, hammer = 0, gun = 1, shotgun = 2, grenade = 3, laser = 4, ninja = 5)");
 	Console()->Register("removeweapon", "i[weapon-id]", CFGFLAG_SERVER | CMDFLAG_TEST, ConRemoveWeapon, this, "removes weapon with id i from you (all = -1, hammer = 0, gun = 1, shotgun = 2, grenade = 3, laser = 4, ninja = 5)");
@@ -3689,6 +3691,7 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("unninja", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnNinja, this, "Removes ninja from you");
 	Console()->Register("super", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConSuper, this, "Makes you super");
 	Console()->Register("unsuper", "", CFGFLAG_SERVER, ConUnSuper, this, "Removes super from you");
+	Console()->Register("invincible", "?i['0'|'1']", CFGFLAG_SERVER | CMDFLAG_TEST, ConToggleInvincible, this, "Toggles invincible mode");
 	Console()->Register("endless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConEndlessHook, this, "Gives you endless hook");
 	Console()->Register("unendless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnEndlessHook, this, "Removes endless hook from you");
 	Console()->Register("solo", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConSolo, this, "Puts you into solo part");
@@ -3797,10 +3800,14 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("lasttp", "", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConLastTele, this, "Teleport yourself to the last location you teleported to");
 	Console()->Register("tc", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConTeleCursor, this, "Teleport yourself to player or to where you are spectating/or looking if no player name is given");
 	Console()->Register("telecursor", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConTeleCursor, this, "Teleport yourself to player or to where you are spectating/or looking if no player name is given");
+	Console()->Register("totele", "i[number]", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToTeleporter, this, "Teleports you to teleporter i");
+	Console()->Register("totelecp", "i[number]", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToCheckTeleporter, this, "Teleports you to checkpoint teleporter i");
 	Console()->Register("unsolo", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnSolo, this, "Puts you out of solo part");
 	Console()->Register("solo", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeSolo, this, "Puts you into solo part");
 	Console()->Register("undeep", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnDeep, this, "Puts you out of deep freeze");
 	Console()->Register("deep", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeDeep, this, "Puts you into deep freeze");
+	Console()->Register("unlivefreeze", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnLiveFreeze, this, "Puts you out of live freeze");
+	Console()->Register("livefreeze", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeLiveFreeze, this, "Makes you live frozen");
 	Console()->Register("addweapon", "i[weapon-id]", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeAddWeapon, this, "Gives weapon with id i to you (all = -1, hammer = 0, gun = 1, shotgun = 2, grenade = 3, laser = 4, ninja = 5)");
 	Console()->Register("removeweapon", "i[weapon-id]", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeRemoveWeapon, this, "removes weapon with id i from you (all = -1, hammer = 0, gun = 1, shotgun = 2, grenade = 3, laser = 4, ninja = 5)");
 	Console()->Register("shotgun", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeShotgun, this, "Gives a shotgun to you");
@@ -3818,6 +3825,9 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("unweapons", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnWeapons, this, "Removes all weapons from you");
 	Console()->Register("ninja", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeNinja, this, "Makes you a ninja");
 	Console()->Register("unninja", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnNinja, this, "Removes ninja from you");
+	Console()->Register("endless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeEndlessHook, this, "Gives you endless hook");
+	Console()->Register("unendless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnEndlessHook, this, "Removes endless hook from you");
+	Console()->Register("invincible", "?i['0'|'1']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleInvincible, this, "Toggles invincible mode");
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
 }
 
@@ -3933,19 +3943,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 	else
 		m_pController = new CGameControllerDDRace(this);
 
-	const char *pCensorFilename = "censorlist.txt";
-	CLineReader LineReader;
-	if(LineReader.OpenFile(Storage()->OpenFile(pCensorFilename, IOFLAG_READ, IStorage::TYPE_ALL)))
-	{
-		while(const char *pLine = LineReader.Get())
-		{
-			m_vCensorlist.emplace_back(pLine);
-		}
-	}
-	else
-	{
-		dbg_msg("censorlist", "failed to open '%s'", pCensorFilename);
-	}
+	ReadCensorList();
 
 	m_TeeHistorianActive = g_Config.m_SvTeeHistorian;
 	if(m_TeeHistorianActive)
@@ -4988,4 +4986,22 @@ void CGameContext::OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int 
 
 	pJSonWriter->WriteAttribute("team");
 	pJSonWriter->WriteIntValue(Team);
+}
+
+void CGameContext::ReadCensorList()
+{
+	const char *pCensorFilename = "censorlist.txt";
+	CLineReader LineReader;
+	m_vCensorlist.clear();
+	if(LineReader.OpenFile(Storage()->OpenFile(pCensorFilename, IOFLAG_READ, IStorage::TYPE_ALL)))
+	{
+		while(const char *pLine = LineReader.Get())
+		{
+			m_vCensorlist.emplace_back(pLine);
+		}
+	}
+	else
+	{
+		dbg_msg("censorlist", "failed to open '%s'", pCensorFilename);
+	}
 }

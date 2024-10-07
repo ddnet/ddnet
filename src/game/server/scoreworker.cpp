@@ -101,7 +101,7 @@ bool CTeamrank::SamePlayers(const std::vector<std::string> *pvSortedNames)
 
 bool CScoreWorker::LoadBestTime(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
 {
-	const auto *pData = dynamic_cast<const CSqlLoadBestTimeData *>(pGameData);
+	const auto *pData = dynamic_cast<const CSqlLoadBestTimeRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScoreLoadBestTimeResult *>(pGameData->m_pResult.get());
 
 	char aBuf[512];
@@ -1028,7 +1028,7 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 
 	if(!g_Config.m_SvRegionalRankings)
 	{
-		str_copy(pResult->m_Data.m_aaMessages[Line], "----------------------------------------", sizeof(pResult->m_Data.m_aaMessages[Line]));
+		str_copy(pResult->m_Data.m_aaMessages[Line], "-----------------------------------------", sizeof(pResult->m_Data.m_aaMessages[Line]));
 		return !End;
 	}
 
@@ -1146,7 +1146,7 @@ bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGame
 		}
 	}
 
-	str_copy(paMessages[Line], "-------------------------------", sizeof(paMessages[Line]));
+	str_copy(paMessages[Line], "---------------------------------", sizeof(paMessages[Line]));
 	return false;
 }
 
@@ -1230,7 +1230,7 @@ bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData 
 				break;
 			}
 		}
-		str_copy(paMessages[Line], "-------------------------------", sizeof(paMessages[Line]));
+		str_copy(paMessages[Line], "---------------------------------", sizeof(paMessages[Line]));
 	}
 	else
 	{
@@ -1352,7 +1352,7 @@ bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	{
 		return true;
 	}
-	str_copy(paMessages[Line], "----------------------------------------------------", sizeof(paMessages[Line]));
+	str_copy(paMessages[Line], "-------------------------------------------", sizeof(paMessages[Line]));
 
 	return false;
 }
@@ -1568,7 +1568,7 @@ bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData
 
 bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
-	const auto *pData = dynamic_cast<const CSqlTeamSave *>(pGameData);
+	const auto *pData = dynamic_cast<const CSqlTeamSaveData *>(pGameData);
 	auto *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
 
 	if(w == Write::NORMAL_SUCCEEDED)
@@ -1715,7 +1715,7 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 {
 	if(w == Write::NORMAL_SUCCEEDED || w == Write::BACKUP_FIRST)
 		return false;
-	const auto *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
+	const auto *pData = dynamic_cast<const CSqlTeamLoadRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
 	pResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 

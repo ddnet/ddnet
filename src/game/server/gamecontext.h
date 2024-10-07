@@ -363,6 +363,7 @@ public:
 	bool RateLimitPlayerMapVote(int ClientId) const;
 
 	void OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id) override;
+	void ReadCensorList();
 
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
@@ -390,6 +391,7 @@ private:
 	static void ConUnLiveFreeze(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConSuper(IConsole::IResult *pResult, void *pUserData);
+	static void ConToggleInvincible(IConsole::IResult *pResult, void *pUserData);
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConLaser(IConsole::IResult *pResult, void *pUserData);
@@ -474,10 +476,14 @@ private:
 	static void ConLastTele(IConsole::IResult *pResult, void *pUserData);
 
 	// Chat commands for practice mode
+	static void ConPracticeToTeleporter(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToCheckTeleporter(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeDeep(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnLiveFreeze(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeLiveFreeze(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeLaser(IConsole::IResult *pResult, void *pUserData);
@@ -491,6 +497,9 @@ private:
 	static void ConPracticeUnWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeNinja(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnNinja(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeEndlessHook(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnEndlessHook(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
@@ -513,6 +522,9 @@ private:
 	static void ConUninvite(IConsole::IResult *pResult, void *pUserData);
 	static void ConFreezeHammer(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnFreezeHammer(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConReloadCensorlist(IConsole::IResult *pResult, void *pUserData);
+	static void ConReloadAnnouncement(IConsole::IResult *pResult, void *pUserData);
 
 	CCharacter *GetPracticeCharacter(IConsole::IResult *pResult);
 

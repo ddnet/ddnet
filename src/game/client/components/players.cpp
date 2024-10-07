@@ -67,9 +67,9 @@ void CPlayers::RenderHand7(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir
 	Graphics()->SetColor(Color);
 	Graphics()->QuadsSetRotation(Angle);
 
-	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND_OUTLINE, 0, 0, 0);
+	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND_OUTLINE);
 	Graphics()->QuadsDraw(&QuadOutline, 1);
-	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND, 0, 0, 0);
+	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND);
 	Graphics()->QuadsDraw(&QuadHand, 1);
 
 	Graphics()->QuadsSetRotation(0);
@@ -555,7 +555,7 @@ void CPlayers::RenderPlayer(
 		if(time() - m_SkidSoundTime > time_freq() / 10)
 		{
 			if(g_Config.m_SndGame)
-				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 0.25f, Position);
+				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 1.0f, Position);
 			m_SkidSoundTime = time();
 		}
 
@@ -772,6 +772,10 @@ void CPlayers::RenderPlayer(
 	if(RenderInfo.m_TeeRenderFlags & TEE_EFFECT_FROZEN)
 	{
 		GameClient()->m_Effects.FreezingFlakes(BodyPos, vec2(32, 32), Alpha);
+	}
+	if(RenderInfo.m_TeeRenderFlags & TEE_EFFECT_SPARKLE)
+	{
+		GameClient()->m_Effects.SparkleTrail(BodyPos, Alpha);
 	}
 
 	if(ClientId < 0)
@@ -1286,6 +1290,8 @@ void CPlayers::OnRender()
 			aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN | TEE_NO_WEAPON;
 		if(m_pClient->m_aClients[i].m_LiveFrozen)
 			aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN;
+		if(m_pClient->m_aClients[i].m_Invincible)
+			aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_SPARKLE;
 
 		const CGameClient::CSnapState::CCharacterInfo &CharacterInfo = m_pClient->m_Snap.m_aCharacters[i];
 		const bool Frozen = CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd != 0;
@@ -1298,10 +1304,7 @@ void CPlayers::OnRender()
 			{
 				aRenderInfo[i].m_aSixup[g_Config.m_ClDummy].Reset();
 
-				aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-				aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-				aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
-				aRenderInfo[i].m_SkinMetrics = pSkin->m_Metrics;
+				aRenderInfo[i].Apply(pSkin);
 				aRenderInfo[i].m_CustomColoredSkin = IsTeamplay;
 				if(!IsTeamplay)
 				{
@@ -1319,12 +1322,8 @@ void CPlayers::OnRender()
 			}
 		}
 	}
-	const CSkin *pSkin = m_pClient->m_Skins.Find("x_spec");
 	CTeeRenderInfo RenderInfoSpec;
-	RenderInfoSpec.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	RenderInfoSpec.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	RenderInfoSpec.m_BloodColor = pSkin->m_BloodColor;
-	RenderInfoSpec.m_SkinMetrics = pSkin->m_Metrics;
+	RenderInfoSpec.Apply(m_pClient->m_Skins.Find("x_spec"));
 	RenderInfoSpec.m_CustomColoredSkin = false;
 	RenderInfoSpec.m_Size = 64.0f;
 	const int LocalClientId = m_pClient->m_Snap.m_LocalClientId;

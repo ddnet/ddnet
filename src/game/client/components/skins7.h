@@ -26,8 +26,6 @@ public:
 		HAT_OFFSET_SIDE = 2,
 	};
 
-	static constexpr float DARKEST_COLOR_LGT = 61.0f / 255.0f;
-
 	struct CSkinPart
 	{
 		int m_Flags;
@@ -52,8 +50,10 @@ public:
 	};
 
 	static const char *const ms_apSkinPartNames[protocol7::NUM_SKINPARTS];
+	static const char *const ms_apSkinPartNamesLocalized[protocol7::NUM_SKINPARTS];
 	static const char *const ms_apColorComponents[NUM_COLOR_COMPONENTS];
 
+	static char *ms_apSkinNameVariables[NUM_DUMMIES];
 	static char *ms_apSkinVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS];
 	static int *ms_apUCCVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS]; // use custom color
 	static unsigned int *ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS];

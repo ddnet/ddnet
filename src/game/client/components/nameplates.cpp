@@ -60,7 +60,10 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 			Jump = Character.m_Cur.m_Jumped & 1;
 		}
 
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		if(OtherTeam && !ForceAlpha)
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
+		else
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset - FontSize - 15.0f);
 

@@ -258,13 +258,13 @@ void CUi::Update(vec2 MouseWorldPos)
 	m_ProgressSpinnerOffset = std::fmod(m_ProgressSpinnerOffset, 1.0f);
 }
 
-void CUi::DebugRender()
+void CUi::DebugRender(float X, float Y)
 {
 	MapScreen();
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "hot=%p nexthot=%p active=%p lastactive=%p", HotItem(), NextHotItem(), ActiveItem(), m_pLastActiveItem);
-	TextRender()->Text(2.0f, Screen()->h - 12.0f, 10.0f, aBuf);
+	TextRender()->Text(X, Y, 10.0f, aBuf);
 }
 
 bool CUi::MouseInside(const CUIRect *pRect) const
@@ -408,6 +408,10 @@ bool CUi::OnInput(const IInput::CEvent &Event)
 			m_HotkeysPressed |= HOTKEY_UP;
 		else if(Event.m_Key == KEY_DOWN)
 			m_HotkeysPressed |= HOTKEY_DOWN;
+		else if(Event.m_Key == KEY_LEFT)
+			m_HotkeysPressed |= HOTKEY_LEFT;
+		else if(Event.m_Key == KEY_RIGHT)
+			m_HotkeysPressed |= HOTKEY_RIGHT;
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_UP)
 			m_HotkeysPressed |= HOTKEY_SCROLL_UP;
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
@@ -1004,6 +1008,25 @@ bool CUi::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float
 	return ReturnValue;
 }
 
+bool CUi::DoEditBox_Search(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, bool HotkeyEnabled)
+{
+	CUIRect QuickSearch = *pRect;
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, FontSize, TEXTALIGN_ML);
+	const float SearchWidth = TextRender()->TextWidth(FontSize, FONT_ICON_MAGNIFYING_GLASS);
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+	QuickSearch.VSplitLeft(SearchWidth + 5.0f, nullptr, &QuickSearch);
+	if(HotkeyEnabled && Input()->ModifierIsPressed() && Input()->KeyPress(KEY_F))
+	{
+		SetActiveItem(pLineInput);
+		pLineInput->SelectAll();
+	}
+	pLineInput->SetEmptyText(Localize("Search"));
+	return DoClearableEditBox(pLineInput, &QuickSearch, FontSize);
+}
+
 int CUi::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pId, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props)
 {
 	CUIRect Text = *pRect, DropDownIcon;
@@ -1282,21 +1305,24 @@ float CUi::DoScrollbarV(const void *pId, const CUIRect *pRect, float Current)
 	}
 	else if(HotItem() == pId)
 	{
-		if(MouseButton(0))
+		if(InsideHandle)
+		{
+			if(MouseButton(0))
+			{
+				SetActiveItem(pId);
+				m_ActiveScrollbarOffset = MouseY() - Handle.y;
+				Grabbed = true;
+			}
+		}
+		else if(MouseButtonClicked(0))
 		{
 			SetActiveItem(pId);
-			m_ActiveScrollbarOffset = MouseY() - Handle.y;
+			m_ActiveScrollbarOffset = Handle.h / 2.0f;
 			Grabbed = true;
 		}
 	}
-	else if(MouseButtonClicked(0) && !InsideHandle && InsideRail)
-	{
-		SetActiveItem(pId);
-		m_ActiveScrollbarOffset = Handle.h / 2.0f;
-		Grabbed = true;
-	}
 
-	if(InsideHandle && !MouseButton(0))
+	if(InsideRail && !MouseButton(0))
 	{
 		SetHotItem(pId);
 	}
@@ -1361,18 +1387,21 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 	}
 	else if(HotItem() == pId)
 	{
-		if(MouseButton(0))
+		if(InsideHandle)
+		{
+			if(MouseButton(0))
+			{
+				SetActiveItem(pId);
+				m_ActiveScrollbarOffset = MouseX() - Handle.x;
+				Grabbed = true;
+			}
+		}
+		else if(MouseButtonClicked(0))
 		{
 			SetActiveItem(pId);
-			m_ActiveScrollbarOffset = MouseX() - Handle.x;
+			m_ActiveScrollbarOffset = Handle.w / 2.0f;
 			Grabbed = true;
 		}
-	}
-	else if(MouseButtonClicked(0) && !InsideHandle && InsideRail)
-	{
-		SetActiveItem(pId);
-		m_ActiveScrollbarOffset = Handle.w / 2.0f;
-		Grabbed = true;
 	}
 
 	if(!pColorInner && (InsideHandle || Grabbed) && (CheckActiveItem(pId) || HotItem() == pId))
@@ -1381,7 +1410,7 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 		Handle.y -= 1.5f;
 	}
 
-	if(InsideHandle && !MouseButton(0))
+	if(InsideRail && !MouseButton(0))
 	{
 		SetHotItem(pId);
 	}

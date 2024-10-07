@@ -76,6 +76,8 @@ void CHud::OnReset()
 	m_ServerRecord = -1.0f;
 	m_aPlayerRecord[0] = -1.0f;
 	m_aPlayerRecord[1] = -1.0f;
+	m_aLastPlayerSpeedChange[0] = ESpeedChange::NONE;
+	m_aLastPlayerSpeedChange[1] = ESpeedChange::NONE;
 
 	ResetHudContainers();
 }
@@ -1244,7 +1246,7 @@ void CHud::RenderPlayerState(const int ClientId)
 	}
 }
 
-void CHud::RenderNinjaBarPos(const float x, float y, const float width, const float height, float Progress, const float Alpha)
+void CHud::RenderNinjaBarPos(const float x, float y, const float Width, const float Height, float Progress, const float Alpha)
 {
 	Progress = clamp(Progress, 0.0f, 1.0f);
 
@@ -1253,9 +1255,9 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float width, const fl
 	const float RestPct = 0.5f;
 	const float ProgPct = 0.5f;
 
-	const float EndHeight = width; // to keep the correct scale - the width of the sprite is as long as the height
-	const float BarWidth = width;
-	const float WholeBarHeight = height;
+	const float EndHeight = Width; // to keep the correct scale - the width of the sprite is as long as the height
+	const float BarWidth = Width;
+	const float WholeBarHeight = Height;
 	const float MiddleBarHeight = WholeBarHeight - (EndHeight * 2.0f);
 	const float EndProgressHeight = EndHeight * ProgPct;
 	const float EndRestHeight = EndHeight * RestPct;
@@ -1481,11 +1483,11 @@ void CHud::UpdateMovementInformationTextContainer(STextContainerIndex &TextConta
 	}
 }
 
-void CHud::RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, float X, float Y)
+void CHud::RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, const ColorRGBA &Color, float X, float Y)
 {
 	if(TextContainer.Valid())
 	{
-		TextRender()->RenderTextContainer(TextContainer, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), X - TextRender()->GetBoundingBoxTextContainer(TextContainer).m_W, Y);
+		TextRender()->RenderTextContainer(TextContainer, Color, TextRender()->DefaultTextOutlineColor(), X - TextRender()->GetBoundingBoxTextContainer(TextContainer).m_W, Y);
 	}
 }
 
@@ -1558,12 +1560,12 @@ void CHud::RenderMovementInformation(const int ClientId)
 
 		TextRender()->Text(xl, y, Fontsize, "X:", -1.0f);
 		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[0], Fontsize, Pos.x, m_aaPlayerPositionText[0], sizeof(m_aaPlayerPositionText[0]));
-		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[0], xr, y);
+		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[0], TextRender()->DefaultTextColor(), xr, y);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		TextRender()->Text(xl, y, Fontsize, "Y:", -1.0f);
 		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[1], Fontsize, Pos.y, m_aaPlayerPositionText[1], sizeof(m_aaPlayerPositionText[1]));
-		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[1], xr, y);
+		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[1], TextRender()->DefaultTextColor(), xr, y);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 	}
 
@@ -1575,14 +1577,14 @@ void CHud::RenderMovementInformation(const int ClientId)
 		const char aaCoordinates[][4] = {"X:", "Y:"};
 		for(int i = 0; i < 2; i++)
 		{
-			TextRender()->TextColor(ColorRGBA(1, 1, 1, 1));
+			ColorRGBA Color(1, 1, 1, 1);
 			if(m_aLastPlayerSpeedChange[i] == ESpeedChange::INCREASE)
-				TextRender()->TextColor(ColorRGBA(0, 1, 0, 1));
+				Color = ColorRGBA(0, 1, 0, 1);
 			if(m_aLastPlayerSpeedChange[i] == ESpeedChange::DECREASE)
-				TextRender()->TextColor(ColorRGBA(1, 0.5f, 0.5f, 1));
+				Color = ColorRGBA(1, 0.5f, 0.5f, 1);
 			TextRender()->Text(xl, y, Fontsize, aaCoordinates[i], -1.0f);
 			UpdateMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], Fontsize, i == 0 ? DisplaySpeedX : DisplaySpeedY, m_aaPlayerSpeedText[i], sizeof(m_aaPlayerSpeedText[i]));
-			RenderMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], xr, y);
+			RenderMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], Color, xr, y);
 			y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 		}
 
@@ -1595,7 +1597,7 @@ void CHud::RenderMovementInformation(const int ClientId)
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		UpdateMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, Fontsize, DisplayAngle, m_aPlayerAngleText, sizeof(m_aPlayerAngleText));
-		RenderMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, xr, y);
+		RenderMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, TextRender()->DefaultTextColor(), xr, y);
 	}
 }
 

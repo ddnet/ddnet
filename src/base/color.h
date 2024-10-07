@@ -176,8 +176,9 @@ public:
 	ColorHSLA(){};
 
 	constexpr static const float DARKEST_LGT = 0.5f;
+	constexpr static const float DARKEST_LGT7 = 61.0f / 255.0f;
 
-	ColorHSLA UnclampLighting(float Darkest = DARKEST_LGT) const
+	ColorHSLA UnclampLighting(float Darkest) const
 	{
 		ColorHSLA col = *this;
 		col.l = Darkest + col.l * (1.0f - Darkest);

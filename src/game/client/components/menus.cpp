@@ -14,6 +14,7 @@
 #include <engine/config.h>
 #include <engine/editor.h>
 #include <engine/friends.h>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
@@ -658,6 +659,27 @@ void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 			NewPage = PAGE_FAVORITES;
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_FavoritesButton, &Button, Localize("Favorites"));
+
+		int MaxPage = PAGE_FAVORITES + ServerBrowser()->FavoriteCommunities().size();
+		if(
+			!Ui()->IsPopupOpen() &&
+			CLineInput::GetActiveInput() == nullptr &&
+			(g_Config.m_UiPage >= PAGE_INTERNET && g_Config.m_UiPage <= MaxPage) &&
+			(m_MenuPage >= PAGE_INTERNET && m_MenuPage <= PAGE_FAVORITE_COMMUNITY_5))
+		{
+			if(Input()->KeyPress(KEY_RIGHT))
+			{
+				NewPage = g_Config.m_UiPage + 1;
+				if(NewPage > MaxPage)
+					NewPage = PAGE_INTERNET;
+			}
+			if(Input()->KeyPress(KEY_LEFT))
+			{
+				NewPage = g_Config.m_UiPage - 1;
+				if(NewPage < PAGE_INTERNET)
+					NewPage = MaxPage;
+			}
+		}
 
 		size_t FavoriteCommunityIndex = 0;
 		static CButtonContainer s_aFavoriteCommunityButtons[5];
@@ -2253,7 +2275,7 @@ void CMenus::OnRender()
 
 	// render debug information
 	if(g_Config.m_Debug)
-		Ui()->DebugRender();
+		Ui()->DebugRender(2.0f, Ui()->Screen()->h - 12.0f);
 
 	if(Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 		SetActive(false);
@@ -2396,16 +2418,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 
 	MenuImage.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info, 0, aPath);
 
-	// create gray scale version
-	unsigned char *pData = static_cast<unsigned char *>(Info.m_pData);
-	const size_t Step = Info.PixelSize();
-	for(size_t i = 0; i < Info.m_Width * Info.m_Height; i++)
-	{
-		int v = (pData[i * Step] + pData[i * Step + 1] + pData[i * Step + 2]) / 3;
-		pData[i * Step] = v;
-		pData[i * Step + 1] = v;
-		pData[i * Step + 2] = v;
-	}
+	ConvertToGrayscale(Info);
 	MenuImage.m_GreyTexture = pSelf->Graphics()->LoadTextureRawMove(Info, 0, aPath);
 
 	str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - str_length(pExtension));

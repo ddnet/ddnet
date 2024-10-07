@@ -1612,6 +1612,12 @@ Render complete
 Are you sure that you want to restart?
 == 
 
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
 There's an unsaved map in the editor, you might want to save it.
 == 
 
@@ -1636,7 +1642,16 @@ Videos directory
 Video was saved to '%s'
 == 
 
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
+== 
+
 %d/%d KiB (%.1f KiB/s)
+== 
+
+No local servers found (ports %d-%d)
 == 
 
 Example of usage
@@ -1772,6 +1787,10 @@ Activate all
 Deactivate all
 == 
 
+[Hertz]
+Hz
+== 
+
 Player info change cooldown
 == 
 
@@ -1850,19 +1869,10 @@ Entities background color
 Unregister protocol and file extensions
 == 
 
-Normal:
+Basic
 == 
 
-Team:
-== 
-
-Dummy settings
-== 
-
-Toggle to edit your dummy settings
-== 
-
-Randomize
+Custom
 == 
 
 Are you sure that you want to delete '%s'?
@@ -1871,16 +1881,7 @@ Are you sure that you want to delete '%s'?
 Delete skin
 == 
 
-Basic
-== 
-
-Custom
-== 
-
 Unable to delete skin
-== 
-
-Customize
 == 
 
 Round %d/%d
@@ -1895,6 +1896,30 @@ Round %d/%d
 == 
 
 Team %d (%d/%d)
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
 == 
 
 FPM

@@ -32,7 +32,6 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	static int s_OpenButton = 0;
 	static int s_OpenCurrentMapButton = 0;
 	static int s_AppendButton = 0;
-	static int s_MapInfoButton = 0;
 	static int s_ExitButton = 0;
 
 	CUIRect Slot;
@@ -115,15 +114,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 
 	View.HSplitTop(10.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_MapInfoButton, "Map details", 0, &Slot, 0, "Adjust the map details of the current map"))
+	if(pEditor->DoButton_MenuItem(&pEditor->m_QuickActionMapDetails, pEditor->m_QuickActionMapDetails.Label(), 0, &Slot, 0, pEditor->m_QuickActionMapDetails.Description()))
 	{
-		const CUIRect *pScreen = pEditor->Ui()->Screen();
-		pEditor->m_Map.m_MapInfoTmp.Copy(pEditor->m_Map.m_MapInfo);
-		static SPopupMenuId s_PopupMapInfoId;
-		constexpr float PopupWidth = 400.0f;
-		constexpr float PopupHeight = 170.0f;
-		pEditor->Ui()->DoPopupMenu(&s_PopupMapInfoId, pScreen->w / 2.0f - PopupWidth / 2.0f, pScreen->h / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, pEditor, PopupMapInfo);
-		pEditor->Ui()->SetActiveItem(nullptr);
+		pEditor->m_QuickActionMapDetails.Call();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -237,6 +230,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		pEditor->m_vSelectEntitiesFiles.clear();
 		pEditor->Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, pEditor);
 		std::sort(pEditor->m_vSelectEntitiesFiles.begin(), pEditor->m_vSelectEntitiesFiles.end());
+		pEditor->m_vSelectEntitiesFiles.emplace_back("Custom…");
 
 		static SPopupMenuId s_PopupEntitiesId;
 		pEditor->Ui()->DoPopupMenu(&s_PopupEntitiesId, Slot.x, Slot.y + Slot.h, 250, pEditor->m_vSelectEntitiesFiles.size() * 14.0f + 10.0f, pEditor, PopupEntities);
@@ -395,6 +389,30 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		}
 	}
 
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect No, Yes;
+		Selector.VSplitMid(&No, &Yes);
+
+		pEditor->Ui()->DoLabel(&Label, "Select layers by tile", 10.0f, TEXTALIGN_ML);
+
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_Ex(&s_ButtonNo, "No", !g_Config.m_EdLayerSelector, &No, 0, "Do not select layers when Ctrl+right clicking on a tile", IGraphics::CORNER_L))
+		{
+			g_Config.m_EdLayerSelector = false;
+		}
+		if(pEditor->DoButton_Ex(&s_ButtonYes, "Yes", g_Config.m_EdLayerSelector, &Yes, 0, "Select layers when Ctrl+right clicking on a tile", IGraphics::CORNER_R))
+		{
+			g_Config.m_EdLayerSelector = true;
+		}
+	}
+
 	return CUi::POPUP_KEEP_OPEN;
 }
 
@@ -486,16 +504,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		// new tele layer
 		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
-		static int s_NewTeleLayerButton = 0;
-		if(pEditor->DoButton_Editor(&s_NewTeleLayerButton, "Add tele layer", 0, &Button, 0, "Creates a new tele layer"))
+		if(pEditor->DoButton_Editor(&pEditor->m_QuickActionAddTeleLayer, pEditor->m_QuickActionAddTeleLayer.Label(), 0, &Button, 0, pEditor->m_QuickActionAddTeleLayer.Description()))
 		{
-			std::shared_ptr<CLayer> pTeleLayer = std::make_shared<CLayerTele>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeTeleLayer(pTeleLayer);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTeleLayer);
-			int LayerIndex = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1;
-			pEditor->SelectLayer(LayerIndex);
-			pEditor->m_pBrush->Clear();
-			pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(pEditor, pEditor->m_SelectedGroup, LayerIndex));
+			pEditor->m_QuickActionAddTeleLayer.Call();
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -505,16 +516,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		// new speedup layer
 		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
-		static int s_NewSpeedupLayerButton = 0;
-		if(pEditor->DoButton_Editor(&s_NewSpeedupLayerButton, "Add speedup layer", 0, &Button, 0, "Creates a new speedup layer"))
+		if(pEditor->DoButton_Editor(&pEditor->m_QuickActionAddSpeedupLayer, pEditor->m_QuickActionAddSpeedupLayer.Label(), 0, &Button, 0, pEditor->m_QuickActionAddSpeedupLayer.Description()))
 		{
-			std::shared_ptr<CLayer> pSpeedupLayer = std::make_shared<CLayerSpeedup>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeSpeedupLayer(pSpeedupLayer);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSpeedupLayer);
-			int LayerIndex = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1;
-			pEditor->SelectLayer(LayerIndex);
-			pEditor->m_pBrush->Clear();
-			pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(pEditor, pEditor->m_SelectedGroup, LayerIndex));
+			pEditor->m_QuickActionAddSpeedupLayer.Call();
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -524,16 +528,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		// new tune layer
 		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
-		static int s_NewTuneLayerButton = 0;
-		if(pEditor->DoButton_Editor(&s_NewTuneLayerButton, "Add tune layer", 0, &Button, 0, "Creates a new tuning layer"))
+		if(pEditor->DoButton_Editor(&pEditor->m_QuickActionAddTuneLayer, pEditor->m_QuickActionAddTuneLayer.Label(), 0, &Button, 0, pEditor->m_QuickActionAddTuneLayer.Description()))
 		{
-			std::shared_ptr<CLayer> pTuneLayer = std::make_shared<CLayerTune>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeTuneLayer(pTuneLayer);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTuneLayer);
-			int LayerIndex = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1;
-			pEditor->SelectLayer(LayerIndex);
-			pEditor->m_pBrush->Clear();
-			pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(pEditor, pEditor->m_SelectedGroup, LayerIndex));
+			pEditor->m_QuickActionAddTuneLayer.Call();
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -543,16 +540,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		// new front layer
 		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
-		static int s_NewFrontLayerButton = 0;
-		if(pEditor->DoButton_Editor(&s_NewFrontLayerButton, "Add front layer", 0, &Button, 0, "Creates a new item layer"))
+		if(pEditor->DoButton_Editor(&pEditor->m_QuickActionAddFrontLayer, pEditor->m_QuickActionAddFrontLayer.Label(), 0, &Button, 0, pEditor->m_QuickActionAddFrontLayer.Description()))
 		{
-			std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeFrontLayer(pFrontLayer);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pFrontLayer);
-			int LayerIndex = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1;
-			pEditor->SelectLayer(LayerIndex);
-			pEditor->m_pBrush->Clear();
-			pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(pEditor, pEditor->m_SelectedGroup, LayerIndex));
+			pEditor->m_QuickActionAddFrontLayer.Call();
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -562,16 +552,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		// new Switch layer
 		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
-		static int s_NewSwitchLayerButton = 0;
-		if(pEditor->DoButton_Editor(&s_NewSwitchLayerButton, "Add switch layer", 0, &Button, 0, "Creates a new switch layer"))
+		if(pEditor->DoButton_Editor(&pEditor->m_QuickActionAddSwitchLayer, pEditor->m_QuickActionAddSwitchLayer.Label(), 0, &Button, 0, pEditor->m_QuickActionAddSwitchLayer.Description()))
 		{
-			std::shared_ptr<CLayer> pSwitchLayer = std::make_shared<CLayerSwitch>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
-			pEditor->m_Map.MakeSwitchLayer(pSwitchLayer);
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSwitchLayer);
-			int LayerIndex = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1;
-			pEditor->SelectLayer(LayerIndex);
-			pEditor->m_pBrush->Clear();
-			pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(pEditor, pEditor->m_SelectedGroup, LayerIndex));
+			pEditor->m_QuickActionAddSwitchLayer.Call();
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -579,15 +562,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	// new quad layer
 	View.HSplitBottom(5.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
-	static int s_NewQuadLayerButton = 0;
-	if(pEditor->DoButton_Editor(&s_NewQuadLayerButton, "Add quads layer", 0, &Button, 0, "Creates a new quad layer"))
+	if(pEditor->DoButton_Editor(&pEditor->m_QuickActionAddQuadsLayer, pEditor->m_QuickActionAddQuadsLayer.Label(), 0, &Button, 0, pEditor->m_QuickActionAddQuadsLayer.Description()))
 	{
-		std::shared_ptr<CLayer> pQuadLayer = std::make_shared<CLayerQuads>(pEditor);
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pQuadLayer);
-		int LayerIndex = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1;
-		pEditor->SelectLayer(LayerIndex);
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
-		pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(pEditor, pEditor->m_SelectedGroup, LayerIndex));
+		pEditor->m_QuickActionAddQuadsLayer.Call();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -603,15 +580,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	// new sound layer
 	View.HSplitBottom(5.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
-	static int s_NewSoundLayerButton = 0;
-	if(pEditor->DoButton_Editor(&s_NewSoundLayerButton, "Add sound layer", 0, &Button, 0, "Creates a new sound layer"))
+	if(pEditor->DoButton_Editor(&pEditor->m_QuickActionAddSoundLayer, pEditor->m_QuickActionAddSoundLayer.Label(), 0, &Button, 0, pEditor->m_QuickActionAddSoundLayer.Description()))
 	{
-		std::shared_ptr<CLayer> pSoundLayer = std::make_shared<CLayerSounds>(pEditor);
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSoundLayer);
-		int LayerIndex = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1;
-		pEditor->SelectLayer(LayerIndex);
-		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
-		pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(pEditor, pEditor->m_SelectedGroup, LayerIndex));
+		pEditor->m_QuickActionAddSoundLayer.Call();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -728,23 +699,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 	{
 		CUIRect DeleteButton;
 		View.HSplitBottom(12.0f, &View, &DeleteButton);
-		static int s_DeleteButton = 0;
-		if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete layer", 0, &DeleteButton, 0, "Deletes the layer"))
+		if(pEditor->DoButton_Editor(&pEditor->m_QuickActionDeleteLayer, pEditor->m_QuickActionDeleteLayer.Label(), 0, &DeleteButton, 0, pEditor->m_QuickActionDeleteLayer.Description()))
 		{
-			pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionDeleteLayer>(pEditor, pEditor->m_SelectedGroup, pEditor->m_vSelectedLayers[0]));
-
-			if(pCurrentLayer == pEditor->m_Map.m_pFrontLayer)
-				pEditor->m_Map.m_pFrontLayer = nullptr;
-			if(pCurrentLayer == pEditor->m_Map.m_pTeleLayer)
-				pEditor->m_Map.m_pTeleLayer = nullptr;
-			if(pCurrentLayer == pEditor->m_Map.m_pSpeedupLayer)
-				pEditor->m_Map.m_pSpeedupLayer = nullptr;
-			if(pCurrentLayer == pEditor->m_Map.m_pSwitchLayer)
-				pEditor->m_Map.m_pSwitchLayer = nullptr;
-			if(pCurrentLayer == pEditor->m_Map.m_pTuneLayer)
-				pEditor->m_Map.m_pTuneLayer = nullptr;
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->DeleteLayer(pEditor->m_vSelectedLayers[0]);
-
+			pEditor->m_QuickActionDeleteLayer.Call();
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -901,6 +858,37 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
+	}
+
+	// center pivot button
+	View.HSplitBottom(6.0f, &View, nullptr);
+	View.HSplitBottom(12.0f, &View, &Button);
+	static int s_CenterButton = 0;
+	if(pEditor->DoButton_Editor(&s_CenterButton, "Center pivot", 0, &Button, 0, "Centers the pivot of the current quad"))
+	{
+		pEditor->m_QuadTracker.BeginQuadTrack(pLayer, pEditor->m_vSelectedQuads);
+		int Top = pCurrentQuad->m_aPoints[0].y;
+		int Left = pCurrentQuad->m_aPoints[0].x;
+		int Bottom = pCurrentQuad->m_aPoints[0].y;
+		int Right = pCurrentQuad->m_aPoints[0].x;
+
+		for(int k = 1; k < 4; k++)
+		{
+			if(pCurrentQuad->m_aPoints[k].y < Top)
+				Top = pCurrentQuad->m_aPoints[k].y;
+			if(pCurrentQuad->m_aPoints[k].x < Left)
+				Left = pCurrentQuad->m_aPoints[k].x;
+			if(pCurrentQuad->m_aPoints[k].y > Bottom)
+				Bottom = pCurrentQuad->m_aPoints[k].y;
+			if(pCurrentQuad->m_aPoints[k].x > Right)
+				Right = pCurrentQuad->m_aPoints[k].x;
+		}
+
+		pCurrentQuad->m_aPoints[4].x = Left + (Right - Left) / 2;
+		pCurrentQuad->m_aPoints[4].y = Top + (Bottom - Top) / 2;
+		pEditor->m_QuadTracker.EndQuadTrack();
+		pEditor->m_Map.OnModify();
+		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
 	// align button
@@ -1675,6 +1663,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	{
 		if(pEditor->DoButton_MenuItem(&s_ExternalButton, "Embed", 0, &Slot, 0, "Embeds the image into the map file."))
 		{
+			if(pImg->m_pData == nullptr)
+			{
+				pEditor->ShowFileDialogError("Embedding is not possible because the image could not be loaded.");
+				return CUi::POPUP_KEEP_OPEN;
+			}
 			pImg->m_External = 0;
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
@@ -1750,6 +1743,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 		View.HSplitTop(RowHeight, &Slot, &View);
 		if(pEditor->DoButton_MenuItem(&s_ExportButton, "Export", 0, &Slot, 0, "Export the image"))
 		{
+			if(pImg->m_pData == nullptr)
+			{
+				pEditor->ShowFileDialogError("Exporting is not possible because the image could not be loaded.");
+				return CUi::POPUP_KEEP_OPEN;
+			}
 			pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_IMG, "Save image", "Save", "mapres", false, CallbackSaveImage, pEditor);
 			pEditor->m_FileDialogFileNameInput.Set(pImg->m_aName);
 			return CUi::POPUP_CLOSE_CURRENT;
@@ -1845,6 +1843,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ExportButton, "Export", 0, &Slot, 0, "Export sound"))
 	{
+		if(pSound->m_pData == nullptr)
+		{
+			pEditor->ShowFileDialogError("Exporting is not possible because the sound could not be loaded.");
+			return CUi::POPUP_KEEP_OPEN;
+		}
 		pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_SOUND, "Save sound", "Save", "mapres", false, CallbackSaveSound, pEditor);
 		pEditor->m_FileDialogFileNameInput.Set(pSound->m_aName);
 		return CUi::POPUP_CLOSE_CURRENT;
@@ -2765,12 +2768,17 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEntities(void *pContext, CUIRect Vie
 		{
 			if(pEditor->m_vSelectEntitiesFiles[i] != pEditor->m_SelectEntitiesImage)
 			{
+				if(i == pEditor->m_vSelectEntitiesFiles.size() - 1)
+				{
+					pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Custom Entities", "Load", "assets/entities", false, CallbackCustomEntities, pEditor);
+					return CUi::POPUP_CLOSE_CURRENT;
+				}
+
 				pEditor->m_SelectEntitiesImage = pEditor->m_vSelectEntitiesFiles[i];
 				pEditor->m_AllowPlaceUnusedTiles = pEditor->m_SelectEntitiesImage == "DDNet" ? 0 : -1;
 				pEditor->m_PreventUnusedTilesWasWarned = false;
 
-				if(pEditor->m_EntitiesTexture.IsValid())
-					pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
+				pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
 
 				char aBuf[IO_MAX_PATH_LENGTH];
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", pName);

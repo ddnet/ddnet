@@ -130,13 +130,13 @@ CheckOptions:
   - key:             readability-identifier-naming.StructPrefix
     value:           S
   - key:             readability-identifier-naming.StructIgnoredRegexp
-    value:           '^([CS]|MapObject$|EnvelopedQuad$).*'
+    value:           '^C.*'
   - key:             readability-identifier-naming.ClassIgnoredRegexp
     value:           '^(I|CCommandProcessorFragment_Vulkan$).*'
   - key:             readability-identifier-naming.ParameterCase
     value:           CamelCase
   - key:             readability-identifier-naming.ParameterIgnoredRegexp
-    value:           '^(p|a|v|[a-z]$|s[hw]$|warning_msg$|error_msg$|string$|integer$|boolean$|object$|index$|rhs$|lhs$|[xy]off$|id$|mode$|rgb$|[xy][0123]$|width$|height$|[sdw][xy]$|ownId$|fnMatchCallback$).*'
+    value:           '^(p|a|v|[a-z]$|[xy][0123]$).*'
   - key:             readability-identifier-naming.ClassMethodIgnoredRegexp
     value:           '^(Con_).*'
   - key:             readability-identifier-naming.ClassMemberIgnoredRegexp
@@ -144,5 +144,5 @@ CheckOptions:
   - key:             readability-identifier-naming.LocalConstantIgnoredRegexp
     value:           '^(p|a|v|s_|MAX_ANIM_SPEED$|DATA_OFFSET$|HEADER_LEN$|MIN_ANIM_SPEED$|[hwdcbqstf]$|[xt][0123]$|result$|sub$|it$|len$|d[xy]$).*'
   - key:             readability-identifier-naming.LocalVariableIgnoredRegexp
-    value:           '^(p|a|s_|FT_|TB_|s_|ul_|v|[xy]i$|[zijklxyhmrgbacwestnduvqf]$|[dmpwsitcf][xy]$|(ch|skel)[0-2]?$|it$|tw$|dt$|th$|ls$|func$|res$|shader$|len$|maxLength$|length$|offset$|offpos$|result$|bg$|sp$|url$|index$|ctxt$|key$|null$|logger$|LAST_MODIFIED$|teleNr$|target$|id$|hit$|hsl[0-2]?$|rgb[0-2]?$|dir$|tmp$|sub$|ret$|rendered$|(lower|upper)(16|26|24|32)|size$|isWeaponCollide$|zerochar$|dist$|sound$|match$|best_matches$|matches$|nohook$|btn$|savedLayers$|l[hw]$|evilz$|sec$|min$|to2$|delay$|mode$|maxModes$|numModes$|[xy]Fract$|[xy]Int$|imgg[xy]$|skip$|localPlayer$|fdratio$|[rgbat][0-2]$|[xy][0-3]$|x[rl]$).*'
+    value:           '^(p|a|s_|FT_|TB_|s_|ul_|v|[xy]i$|[zijklxyhmrgbacwestnduvqf]$|[dmpwsitcf][xy]$|(ch|skel)[0-2]?$|it$|tw$|dt$|th$|ls$|func$|res$|shader$|len$|maxLength$|length$|offset$|offpos$|result$|bg$|sp$|url$|index$|ctxt$|key$|null$|logger$|LAST_MODIFIED$|teleNr$|target$|id$|hit$|hsl[0-2]?$|rgb[0-2]?$|dir$|tmp$|sub$|ret$|rendered$|size$|isWeaponCollide$|zerochar$|dist$|sound$|match$|best_matches$|matches$|nohook$|btn$|savedLayers$|l[hw]$|evilz$|sec$|min$|to2$|delay$|[xy]Fract$|[xy]Int$|imgg[xy]$|skip$|localPlayer$|fdratio$|[rgbat][0-2]$|[xy][0-3]$|x[rl]$).*'
 

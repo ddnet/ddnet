@@ -152,7 +152,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 		Left.HSplitTop(10.0f, nullptr, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		Ui()->DoScrollbarOption(&g_Config.m_ClRefreshRate, &g_Config.m_ClRefreshRate, &Button, Localize("Refresh Rate"), 10, 10000, &CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE, " Hz");
+		str_copy(aBuf, " ");
+		str_append(aBuf, Localize("Hz", "Hertz"));
+		Ui()->DoScrollbarOption(&g_Config.m_ClRefreshRate, &g_Config.m_ClRefreshRate, &Button, Localize("Refresh Rate"), 10, 10000, &CUi::ms_LogarithmicScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE, aBuf);
 		Left.HSplitTop(5.0f, nullptr, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		static int s_LowerRefreshRate;
@@ -257,7 +259,7 @@ void CMenus::SetNeedSendInfo()
 
 void CMenus::RenderSettingsPlayer(CUIRect MainView)
 {
-	CUIRect TabBar, PlayerTab, DummyTab, ChangeInfo, QuickSearch, QuickSearchClearButton;
+	CUIRect TabBar, PlayerTab, DummyTab, ChangeInfo, QuickSearch;
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
 	TabBar.VSplitMid(&TabBar, &ChangeInfo, 20.f);
 	TabBar.VSplitMid(&PlayerTab, &DummyTab);
@@ -340,7 +342,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(10.0f, nullptr, &MainView);
-	MainView.HSplitBottom(25.0f, &MainView, &QuickSearch);
+	MainView.HSplitBottom(20.0f, &MainView, &QuickSearch);
+	MainView.HSplitBottom(5.0f, &MainView, nullptr);
+	QuickSearch.VSplitLeft(220.0f, &QuickSearch, nullptr);
+
 	int OldSelected = -1;
 	static CListBox s_ListBox;
 	s_ListBox.DoStart(48.0f, vpFilteredFlags.size(), 10, 3, OldSelected, &MainView);
@@ -378,30 +383,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		SetNeedSendInfo();
 	}
 
-	// render quick search
-	QuickSearch.VSplitLeft(240.0f, &QuickSearch, nullptr);
-	QuickSearch.HSplitTop(5.0f, nullptr, &QuickSearch);
-
-	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-	Ui()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
-	TextRender()->SetRenderFlags(0);
-	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-
-	float SearchWidth = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
-	QuickSearch.VSplitLeft(SearchWidth - 1.5f, nullptr, &QuickSearch);
-	QuickSearch.VSplitLeft(5.0f, nullptr, &QuickSearch);
-	QuickSearch.VSplitLeft(QuickSearch.w - 10.0f, &QuickSearch, &QuickSearchClearButton);
-
-	TextRender()->SetRenderFlags(0);
-	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-	if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
-	{
-		Ui()->SetActiveItem(&s_FlagFilterInput);
-		s_FlagFilterInput.SelectAll();
-	}
-	s_FlagFilterInput.SetEmptyText(Localize("Search"));
-	Ui()->DoClearableEditBox(&s_FlagFilterInput, &QuickSearch, 14.0f);
+	Ui()->DoEditBox_Search(&s_FlagFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed());
 }
 
 struct CUISkin
@@ -422,50 +404,6 @@ struct CUISkin
 void CMenus::OnRefreshSkins()
 {
 	m_SkinListNeedsUpdate = true;
-}
-
-void CMenus::RandomSkin()
-{
-	static const float s_aSchemes[] = {1.0f / 2.0f, 1.0f / 3.0f, 1.0f / -3.0f, 1.0f / 12.0f, 1.0f / -12.0f}; // complementary, triadic, analogous
-	const bool UseCustomColor = !m_Dummy ? g_Config.m_ClPlayerUseCustomColor : g_Config.m_ClDummyUseCustomColor;
-	if(UseCustomColor)
-	{
-		float GoalSat = random_float(0.3f, 1.0f);
-		float MaxBodyLht = 1.0f - GoalSat * GoalSat; // max allowed lightness before we start losing saturation
-
-		ColorHSLA Body;
-		Body.h = random_float();
-		Body.l = random_float(0.0f, MaxBodyLht);
-		Body.s = clamp(GoalSat * GoalSat / (1.0f - Body.l), 0.0f, 1.0f);
-
-		ColorHSLA Feet;
-		Feet.h = std::fmod(Body.h + s_aSchemes[rand() % std::size(s_aSchemes)], 1.0f);
-		Feet.l = random_float();
-		Feet.s = clamp(GoalSat * GoalSat / (1.0f - Feet.l), 0.0f, 1.0f);
-
-		unsigned *pColorBody = !m_Dummy ? &g_Config.m_ClPlayerColorBody : &g_Config.m_ClDummyColorBody;
-		unsigned *pColorFeet = !m_Dummy ? &g_Config.m_ClPlayerColorFeet : &g_Config.m_ClDummyColorFeet;
-
-		*pColorBody = Body.Pack(false);
-		*pColorFeet = Feet.Pack(false);
-	}
-
-	const size_t SkinNameSize = !m_Dummy ? sizeof(g_Config.m_ClPlayerSkin) : sizeof(g_Config.m_ClDummySkin);
-	char aRandomSkinName[24];
-	str_copy(aRandomSkinName, "default", SkinNameSize);
-	if(!m_pClient->m_Skins.GetSkinsUnsafe().empty())
-	{
-		do
-		{
-			auto it = m_pClient->m_Skins.GetSkinsUnsafe().begin();
-			std::advance(it, rand() % m_pClient->m_Skins.GetSkinsUnsafe().size());
-			str_copy(aRandomSkinName, (*it).second->GetName(), SkinNameSize);
-		} while(!str_comp(aRandomSkinName, "x_ninja") || !str_comp(aRandomSkinName, "x_spec"));
-	}
-	char *pSkinName = !m_Dummy ? g_Config.m_ClPlayerSkin : g_Config.m_ClDummySkin;
-	str_copy(pSkinName, aRandomSkinName, SkinNameSize);
-
-	SetNeedSendInfo();
 }
 
 void CMenus::Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
@@ -659,16 +597,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	// Note: get the skin info after the settings buttons, because they can trigger a refresh
 	// which invalidates the skin.
-	const CSkin *pSkin = m_pClient->m_Skins.Find(pSkinName);
 	CTeeRenderInfo OwnSkinInfo;
-	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
+	OwnSkinInfo.Apply(m_pClient->m_Skins.Find(pSkinName));
 	OwnSkinInfo.m_CustomColoredSkin = *pUseCustomColor;
 	if(*pUseCustomColor)
 	{
-		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting());
-		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*pColorFeet).UnclampLighting());
+		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
+		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*pColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
 	}
 	else
 	{
@@ -702,7 +637,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	if(DoButton_Menu(&s_RandomSkinButton, s_apDice[s_CurrentDie], 0, &RandomSkinButton, nullptr, IGraphics::CORNER_ALL, 5.0f, -0.2f))
 	{
-		RandomSkin();
+		GameClient()->m_Skins.RandomizeSkin(m_Dummy);
+		SetNeedSendInfo();
 		s_CurrentDie = rand() % std::size(s_apDice);
 	}
 	TextRender()->SetRenderFlags(0);
@@ -797,8 +733,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	CUIRect QuickSearch, DatabaseButton, DirectoryButton, RefreshButton;
 	MainView.HSplitBottom(20.0f, &MainView, &QuickSearch);
 	MainView.HSplitBottom(5.0f, &MainView, nullptr);
-	QuickSearch.VSplitLeft(240.0f, &QuickSearch, &DatabaseButton);
-	QuickSearch.VSplitRight(10.0f, &QuickSearch, nullptr);
+	QuickSearch.VSplitLeft(220.0f, &QuickSearch, &DatabaseButton);
+	DatabaseButton.VSplitLeft(10.0f, nullptr, &DatabaseButton);
 	DatabaseButton.VSplitLeft(150.0f, &DatabaseButton, &DirectoryButton);
 	DirectoryButton.VSplitRight(175.0f, nullptr, &DirectoryButton);
 	DirectoryButton.VSplitRight(25.0f, &DirectoryButton, &RefreshButton);
@@ -893,7 +829,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 		if(g_Config.m_Debug)
 		{
-			const ColorRGBA BloodColor = *pUseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting()) : pSkinToBeDraw->m_BloodColor;
+			const ColorRGBA BloodColor = *pUseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT)) : pSkinToBeDraw->m_BloodColor;
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(BloodColor.r, BloodColor.g, BloodColor.b, 1.0f);
@@ -931,24 +867,10 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		SetNeedSendInfo();
 	}
 
-	// Quick search
+	static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
+	if(Ui()->DoEditBox_Search(&s_SkinFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed()))
 	{
-		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		Ui()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
-		float SearchWidth = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
-		TextRender()->SetRenderFlags(0);
-		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		QuickSearch.VSplitLeft(SearchWidth + 5.0f, nullptr, &QuickSearch);
-		static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
-		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
-		{
-			Ui()->SetActiveItem(&s_SkinFilterInput);
-			s_SkinFilterInput.SelectAll();
-		}
-		s_SkinFilterInput.SetEmptyText(Localize("Search"));
-		if(Ui()->DoClearableEditBox(&s_SkinFilterInput, &QuickSearch, 14.0f))
-			m_SkinListNeedsUpdate = true;
+		m_SkinListNeedsUpdate = true;
 	}
 
 	static CButtonContainer s_SkinDatabaseButton;
@@ -1692,7 +1614,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Ui()->DoScrollbarOption(&g_Config.m_GfxRefreshRate, &g_Config.m_GfxRefreshRate, &Button, Localize("Refresh Rate"), 10, 1000, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE | CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, " Hz");
+	str_copy(aBuf, " ");
+	str_append(aBuf, Localize("Hz", "Hertz"));
+	Ui()->DoScrollbarOption(&g_Config.m_GfxRefreshRate, &g_Config.m_GfxRefreshRate, &Button, Localize("Refresh Rate"), 10, 1000, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_INFINITE | CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, aBuf);
 
 	MainView.HSplitTop(2.0f, nullptr, &MainView);
 	static CButtonContainer s_UiColorResetId;

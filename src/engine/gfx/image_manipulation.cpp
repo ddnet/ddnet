@@ -1,6 +1,87 @@
 #include "image_manipulation.h"
+
 #include <base/math.h>
 #include <base/system.h>
+
+bool ConvertToRgba(uint8_t *pDest, const CImageInfo &SourceImage)
+{
+	if(SourceImage.m_Format == CImageInfo::FORMAT_RGBA)
+	{
+		mem_copy(pDest, SourceImage.m_pData, SourceImage.DataSize());
+		return true;
+	}
+	else
+	{
+		const size_t SrcChannelCount = CImageInfo::PixelSize(SourceImage.m_Format);
+		const size_t DstChannelCount = CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA);
+		for(size_t Y = 0; Y < SourceImage.m_Height; ++Y)
+		{
+			for(size_t X = 0; X < SourceImage.m_Width; ++X)
+			{
+				size_t ImgOffsetSrc = (Y * SourceImage.m_Width * SrcChannelCount) + (X * SrcChannelCount);
+				size_t ImgOffsetDest = (Y * SourceImage.m_Width * DstChannelCount) + (X * DstChannelCount);
+				if(SourceImage.m_Format == CImageInfo::FORMAT_RGB)
+				{
+					mem_copy(&pDest[ImgOffsetDest], &SourceImage.m_pData[ImgOffsetSrc], SrcChannelCount);
+					pDest[ImgOffsetDest + 3] = 255;
+				}
+				else if(SourceImage.m_Format == CImageInfo::FORMAT_RA)
+				{
+					pDest[ImgOffsetDest + 0] = SourceImage.m_pData[ImgOffsetSrc];
+					pDest[ImgOffsetDest + 1] = SourceImage.m_pData[ImgOffsetSrc];
+					pDest[ImgOffsetDest + 2] = SourceImage.m_pData[ImgOffsetSrc];
+					pDest[ImgOffsetDest + 3] = SourceImage.m_pData[ImgOffsetSrc + 1];
+				}
+				else if(SourceImage.m_Format == CImageInfo::FORMAT_R)
+				{
+					pDest[ImgOffsetDest + 0] = 255;
+					pDest[ImgOffsetDest + 1] = 255;
+					pDest[ImgOffsetDest + 2] = 255;
+					pDest[ImgOffsetDest + 3] = SourceImage.m_pData[ImgOffsetSrc];
+				}
+				else
+				{
+					dbg_assert(false, "SourceImage.m_Format invalid");
+				}
+			}
+		}
+		return false;
+	}
+}
+
+bool ConvertToRgbaAlloc(uint8_t *&pDest, const CImageInfo &SourceImage)
+{
+	pDest = static_cast<uint8_t *>(malloc(SourceImage.m_Width * SourceImage.m_Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA)));
+	return ConvertToRgba(pDest, SourceImage);
+}
+
+bool ConvertToRgba(CImageInfo &Image)
+{
+	if(Image.m_Format == CImageInfo::FORMAT_RGBA)
+		return true;
+
+	uint8_t *pRgbaData;
+	ConvertToRgbaAlloc(pRgbaData, Image);
+	free(Image.m_pData);
+	Image.m_pData = pRgbaData;
+	Image.m_Format = CImageInfo::FORMAT_RGBA;
+	return false;
+}
+
+void ConvertToGrayscale(const CImageInfo &Image)
+{
+	if(Image.m_Format == CImageInfo::FORMAT_R || Image.m_Format == CImageInfo::FORMAT_RA)
+		return;
+
+	const size_t Step = Image.PixelSize();
+	for(size_t i = 0; i < Image.m_Width * Image.m_Height; ++i)
+	{
+		const int Average = (Image.m_pData[i * Step] + Image.m_pData[i * Step + 1] + Image.m_pData[i * Step + 2]) / 3;
+		Image.m_pData[i * Step] = Average;
+		Image.m_pData[i * Step + 1] = Average;
+		Image.m_pData[i * Step + 2] = Average;
+	}
+}
 
 static constexpr int DILATE_BPP = 4; // RGBA assumed
 static constexpr uint8_t DILATE_ALPHA_THRESHOLD = 10;
@@ -70,41 +151,47 @@ void DilateImage(uint8_t *pImageBuff, int w, int h)
 	DilateImageSub(pImageBuff, w, h, 0, 0, w, h);
 }
 
-void DilateImageSub(uint8_t *pImageBuff, int w, int h, int x, int y, int sw, int sh)
+void DilateImage(const CImageInfo &Image)
+{
+	dbg_assert(Image.m_Format == CImageInfo::FORMAT_RGBA, "Dilate requires RGBA format");
+	DilateImage(Image.m_pData, Image.m_Width, Image.m_Height);
+}
+
+void DilateImageSub(uint8_t *pImageBuff, int w, int h, int x, int y, int SubWidth, int SubHeight)
 {
 	uint8_t *apBuffer[2] = {nullptr, nullptr};
 
-	const size_t ImageSize = (size_t)sw * sh * sizeof(uint8_t) * DILATE_BPP;
+	const size_t ImageSize = (size_t)SubWidth * SubHeight * sizeof(uint8_t) * DILATE_BPP;
 	apBuffer[0] = (uint8_t *)malloc(ImageSize);
 	apBuffer[1] = (uint8_t *)malloc(ImageSize);
 	uint8_t *pBufferOriginal = (uint8_t *)malloc(ImageSize);
 
-	for(int Y = 0; Y < sh; ++Y)
+	for(int Y = 0; Y < SubHeight; ++Y)
 	{
 		int SrcImgOffset = ((y + Y) * w * DILATE_BPP) + (x * DILATE_BPP);
-		int DstImgOffset = (Y * sw * DILATE_BPP);
-		int CopySize = sw * DILATE_BPP;
+		int DstImgOffset = (Y * SubWidth * DILATE_BPP);
+		int CopySize = SubWidth * DILATE_BPP;
 		mem_copy(&pBufferOriginal[DstImgOffset], &pImageBuff[SrcImgOffset], CopySize);
 	}
 
-	Dilate(sw, sh, pBufferOriginal, apBuffer[0]);
+	Dilate(SubWidth, SubHeight, pBufferOriginal, apBuffer[0]);
 
 	for(int i = 0; i < 5; i++)
 	{
-		Dilate(sw, sh, apBuffer[0], apBuffer[1]);
-		Dilate(sw, sh, apBuffer[1], apBuffer[0]);
+		Dilate(SubWidth, SubHeight, apBuffer[0], apBuffer[1]);
+		Dilate(SubWidth, SubHeight, apBuffer[1], apBuffer[0]);
 	}
 
-	CopyColorValues(sw, sh, apBuffer[0], pBufferOriginal);
+	CopyColorValues(SubWidth, SubHeight, apBuffer[0], pBufferOriginal);
 
 	free(apBuffer[0]);
 	free(apBuffer[1]);
 
-	for(int Y = 0; Y < sh; ++Y)
+	for(int Y = 0; Y < SubHeight; ++Y)
 	{
 		int SrcImgOffset = ((y + Y) * w * DILATE_BPP) + (x * DILATE_BPP);
-		int DstImgOffset = (Y * sw * DILATE_BPP);
-		int CopySize = sw * DILATE_BPP;
+		int DstImgOffset = (Y * SubWidth * DILATE_BPP);
+		int CopySize = SubWidth * DILATE_BPP;
 		mem_copy(&pImageBuff[SrcImgOffset], &pBufferOriginal[DstImgOffset], CopySize);
 	}
 
@@ -179,6 +266,15 @@ uint8_t *ResizeImage(const uint8_t *pImageData, int Width, int Height, int NewWi
 	uint8_t *pTmpData = (uint8_t *)malloc((size_t)NewWidth * NewHeight * BPP);
 	ResizeImage(pImageData, Width, Height, pTmpData, NewWidth, NewHeight, BPP);
 	return pTmpData;
+}
+
+void ResizeImage(CImageInfo &Image, int NewWidth, int NewHeight)
+{
+	uint8_t *pNewData = ResizeImage(Image.m_pData, Image.m_Width, Image.m_Height, NewWidth, NewHeight, Image.PixelSize());
+	free(Image.m_pData);
+	Image.m_pData = pNewData;
+	Image.m_Width = NewWidth;
+	Image.m_Height = NewHeight;
 }
 
 int HighestBit(int OfVar)

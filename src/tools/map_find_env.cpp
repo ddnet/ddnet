@@ -4,8 +4,9 @@
 #include <engine/storage.h>
 #include <game/mapitems.h>
 
-struct EnvelopedQuad
+class CEnvelopedQuad
 {
+public:
 	int m_GroupId;
 	int m_LayerId;
 	int m_TilePosX;
@@ -48,7 +49,7 @@ int FxToTilePos(const int FxPos)
 	return std::floor(fx2f(FxPos) / 32);
 }
 
-bool GetEnvelopedQuads(const CQuad *pQuads, const int NumQuads, const int EnvId, const int GroupId, const int LayerId, int &QuadsCounter, EnvelopedQuad pEnvQuads[1024])
+bool GetEnvelopedQuads(const CQuad *pQuads, const int NumQuads, const int EnvId, const int GroupId, const int LayerId, int &QuadsCounter, CEnvelopedQuad pEnvQuads[1024])
 {
 	bool Found = false;
 	for(int i = 0; i < NumQuads; i++)
@@ -68,7 +69,7 @@ bool GetEnvelopedQuads(const CQuad *pQuads, const int NumQuads, const int EnvId,
 	return Found;
 }
 
-void PrintEnvelopedQuads(const EnvelopedQuad pEnvQuads[1024], const int EnvId, const int QuadsCounter)
+void PrintEnvelopedQuads(const CEnvelopedQuad pEnvQuads[1024], const int EnvId, const int QuadsCounter)
 {
 	if(!QuadsCounter)
 	{
@@ -89,7 +90,7 @@ bool FindEnv(const char aFilename[64], const int EnvId)
 
 	int LayersStart, LayersCount, QuadsCounter = 0;
 	InputMap.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersCount);
-	EnvelopedQuad pEnvQuads[1024];
+	CEnvelopedQuad pEnvQuads[1024];
 
 	for(int i = 0; i < LayersCount; i++)
 	{

@@ -1,12 +1,12 @@
 #ifndef GAME_SERVER_TEEINFO_H
 #define GAME_SERVER_TEEINFO_H
 
+#include <engine/shared/protocol.h>
+
 class CTeeInfo
 {
 public:
-	constexpr static const float ms_DarkestLGT7 = 61 / 255.0f;
-
-	char m_aSkinName[24] = {'\0'};
+	char m_aSkinName[MAX_SKIN_LENGTH] = "";
 	int m_UseCustomColor = 0;
 	int m_ColorBody = 0;
 	int m_ColorFeet = 0;

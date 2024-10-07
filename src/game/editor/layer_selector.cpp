@@ -1,3 +1,5 @@
+#include <engine/shared/config.h>
+
 #include "editor.h"
 
 #include "layer_selector.h"
@@ -15,6 +17,8 @@ bool CLayerSelector::SelectByTile()
 	if(Ui()->HotItem() != &Editor()->m_MapEditorId)
 		return false;
 	if(!Input()->ModifierIsPressed() || !Ui()->MouseButtonClicked(1))
+		return false;
+	if(!g_Config.m_EdLayerSelector)
 		return false;
 
 	int MatchedGroup = -1;

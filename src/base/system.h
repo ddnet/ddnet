@@ -219,12 +219,42 @@ bool mem_has_null(const void *block, size_t size);
  */
 enum
 {
+	/**
+	 * Open file for reading.
+	 *
+	 * @see io_open
+	 */
 	IOFLAG_READ = 1,
+	/**
+	 * Open file for writing.
+	 *
+	 * @see io_open
+	 */
 	IOFLAG_WRITE = 2,
+	/**
+	 * Open file for appending at the end.
+	 *
+	 * @see io_open
+	 */
 	IOFLAG_APPEND = 4,
 
+	/**
+	 * Start seeking from the beginning of the file.
+	 *
+	 * @see io_seek
+	 */
 	IOSEEK_START = 0,
+	/**
+	 * Start seeking from the current position.
+	 *
+	 * @see io_seek
+	 */
 	IOSEEK_CUR = 1,
+	/**
+	 * Start seeking from the end of the file.
+	 *
+	 * @see io_seek
+	 */
 	IOSEEK_END = 2,
 };
 
@@ -236,10 +266,9 @@ enum
  * @param File to open.
  * @param flags A set of IOFLAG flags.
  *
- * @sa IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND.
+ * @see IOFLAG_READ, IOFLAG_WRITE, IOFLAG_APPEND.
  *
- * @return A handle to the file on success and 0 on failure.
- *
+ * @return A handle to the file on success, or `nullptr` on failure.
  */
 IOHANDLE io_open(const char *filename, int flags);
 
@@ -253,7 +282,6 @@ IOHANDLE io_open(const char *filename, int flags);
  * @param size Number of bytes to read from the file.
  *
  * @return Number of bytes read.
- *
  */
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size);
 
@@ -279,7 +307,7 @@ void io_read_all(IOHANDLE io, void **result, unsigned *result_len);
  *
  * @param io Handle to the file to read data from.
  *
- * @return The file's remaining contents or null on failure.
+ * @return The file's remaining contents, or `nullptr` on failure.
  *
  * @remark Guarantees that there are no internal null bytes.
  * @remark Guarantees that result will contain zero-termination.
@@ -300,7 +328,42 @@ char *io_read_all_str(IOHANDLE io);
 int io_skip(IOHANDLE io, int size);
 
 /**
- * Writes data from a buffer to file.
+ * Seeks to a specified offset in the file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ * @param offset Offset from position to search.
+ * @param origin Position to start searching from.
+ *
+ * @return `0` on success.
+ */
+int io_seek(IOHANDLE io, int offset, int origin);
+
+/**
+ * Gets the current position in the file.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ *
+ * @return The current position, or `-1` on failure.
+ */
+long int io_tell(IOHANDLE io);
+
+/**
+ * Gets the total length of the file. Resets cursor to the beginning.
+ *
+ * @ingroup File-IO
+ *
+ * @param io Handle to the file.
+ *
+ * @return The total size, or `-1` on failure.
+ */
+long int io_length(IOHANDLE io);
+
+/**
+ * Writes data from a buffer to a file.
  *
  * @ingroup File-IO
  *
@@ -313,50 +376,15 @@ int io_skip(IOHANDLE io, int size);
 unsigned io_write(IOHANDLE io, const void *buffer, unsigned size);
 
 /**
- * Writes a platform dependent newline to file.
+ * Writes a platform dependent newline to a file.
  *
  * @ingroup File-IO
  *
  * @param io Handle to the file.
  *
- * @return true on success, false on failure.
+ * @return `true` on success, `false` on failure.
  */
 bool io_write_newline(IOHANDLE io);
-
-/**
- * Seeks to a specified offset in the file.
- *
- * @ingroup File-IO
- *
- * @param io Handle to the file.
- * @param offset Offset from pos to stop.
- * @param origin Position to start searching from.
- *
- * @return 0 on success.
- */
-int io_seek(IOHANDLE io, int offset, int origin);
-
-/**
- * Gets the current position in the file.
- *
- * @ingroup File-IO
- *
- * @param io Handle to the file.
- *
- * @return The current position. @c -1L if an error occurred.
- */
-long int io_tell(IOHANDLE io);
-
-/**
- * Gets the total length of the file. Resetting cursor to the beginning
- *
- * @ingroup File-IO
- *
- * @param io Handle to the file.
- *
- * @return The total size. @c -1L if an error occurred.
- */
-long int io_length(IOHANDLE io);
 
 /**
  * Closes a file.
@@ -365,7 +393,7 @@ long int io_length(IOHANDLE io);
  *
  * @param io Handle to the file.
  *
- * @return 0 on success.
+ * @return `0` on success.
  */
 int io_close(IOHANDLE io);
 
@@ -376,7 +404,7 @@ int io_close(IOHANDLE io);
  *
  * @param io Handle to the file.
  *
- * @return 0 on success.
+ * @return `0` on success.
  */
 int io_flush(IOHANDLE io);
 
@@ -387,7 +415,7 @@ int io_flush(IOHANDLE io);
  *
  * @param io Handle to the file.
  *
- * @return 0 on success.
+ * @return `0` on success.
  */
 int io_sync(IOHANDLE io);
 
@@ -398,34 +426,57 @@ int io_sync(IOHANDLE io);
  *
  * @param io Handle to the file.
  *
- * @return nonzero on error, 0 otherwise.
+ * @return `0` on success, or non-`0` on error.
  */
 int io_error(IOHANDLE io);
 
 /**
  * @ingroup File-IO
- * @return An <IOHANDLE> to the standard input.
+ *
+ * Returns a handle for the standard input.
+ *
+ * @return An @link IOHANDLE @endlink for the standard input.
+ *
+ * @remark The handle must not be closed.
  */
 IOHANDLE io_stdin();
 
 /**
  * @ingroup File-IO
- * @return An <IOHANDLE> to the standard output.
+ *
+ * Returns a handle for the standard output.
+ *
+ * @return An @link IOHANDLE @endlink for the standard output.
+ *
+ * @remark The handle must not be closed.
  */
 IOHANDLE io_stdout();
 
 /**
  * @ingroup File-IO
- * @return An <IOHANDLE> to the standard error.
+ *
+ * Returns a handle for the standard error.
+ *
+ * @return An @link IOHANDLE @endlink for the standard error.
+ *
+ * @remark The handle must not be closed.
  */
 IOHANDLE io_stderr();
 
 /**
  * @ingroup File-IO
- * @return An <IOHANDLE> to the current executable.
+ *
+ * Returns a handle for the current executable.
+ *
+ * @return An @link IOHANDLE @endlink for the current executable.
  */
 IOHANDLE io_current_exe();
 
+/**
+ * Wrapper for asynchronously writing to an @link IOHANDLE @endlink.
+ *
+ * @ingroup File-IO
+ */
 typedef struct ASYNCIO ASYNCIO;
 
 /**
@@ -436,12 +487,11 @@ typedef struct ASYNCIO ASYNCIO;
  * @param io Handle to the file.
  *
  * @return The handle for asynchronous writing.
- *
  */
 ASYNCIO *aio_new(IOHANDLE io);
 
 /**
- * Locks the ASYNCIO structure so it can't be written into by
+ * Locks the `ASYNCIO` structure so it can't be written into by
  * other threads.
  *
  * @ingroup File-IO
@@ -451,7 +501,7 @@ ASYNCIO *aio_new(IOHANDLE io);
 void aio_lock(ASYNCIO *aio);
 
 /**
- * Unlocks the ASYNCIO structure after finishing the contiguous
+ * Unlocks the `ASYNCIO` structure after finishing the contiguous
  * write.
  *
  * @ingroup File-IO
@@ -477,12 +527,11 @@ void aio_write(ASYNCIO *aio, const void *buffer, unsigned size);
  * @ingroup File-IO
  *
  * @param aio Handle to the file.
- *
  */
 void aio_write_newline(ASYNCIO *aio);
 
 /**
- * Queues a chunk of data for writing. The ASYNCIO struct must be
+ * Queues a chunk of data for writing. The `ASYNCIO` struct must be
  * locked using @link aio_lock @endlink first.
  *
  * @ingroup File-IO
@@ -490,18 +539,16 @@ void aio_write_newline(ASYNCIO *aio);
  * @param aio Handle to the file.
  * @param buffer Pointer to the data that should be written.
  * @param size Number of bytes to write.
- *
  */
 void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size);
 
 /**
- * Queues a newline for writing. The ASYNCIO struct must be locked
+ * Queues a newline for writing. The `ASYNCIO` struct must be locked
  * using @link aio_lock @endlink first.
  *
  * @ingroup File-IO
  *
  * @param aio Handle to the file.
- *
  */
 void aio_write_newline_unlocked(ASYNCIO *aio);
 
@@ -509,16 +556,15 @@ void aio_write_newline_unlocked(ASYNCIO *aio);
  * Checks whether errors have occurred during the asynchronous
  * writing.
  *
- * Call this function regularly to see if there are errors. Call
- * this function after <aio_wait> to see if the process of writing
+ * Call this function regularly to see if there are errors. Call this
+ * function after @link aio_wait @endlink to see if the process of writing
  * to the file succeeded.
  *
  * @ingroup File-IO
  *
  * @param aio Handle to the file.
  *
- * @eturn 0 if no error occurred, and nonzero on error.
- *
+ * @return `0` on success, or non-`0` on error.
  */
 int aio_error(ASYNCIO *aio);
 
@@ -528,7 +574,6 @@ int aio_error(ASYNCIO *aio);
  * @ingroup File-IO
  *
  * @param aio Handle to the file.
- *
  */
 void aio_close(ASYNCIO *aio);
 
@@ -538,17 +583,15 @@ void aio_close(ASYNCIO *aio);
  * @ingroup File-IO
  *
  * @param aio Handle to the file.
- *
  */
 void aio_wait(ASYNCIO *aio);
 
 /**
- * Frees the resources associated to the asynchronous file handle.
+ * Frees the resources associated with the asynchronous file handle.
  *
  * @ingroup File-IO
  *
  * @param aio Handle to the file.
- *
  */
 void aio_free(ASYNCIO *aio);
 

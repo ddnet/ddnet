@@ -5,6 +5,7 @@
 #include <engine/engine.h>
 #include <engine/favorites.h>
 #include <engine/friends.h>
+#include <engine/gfx/image_manipulation.h>
 #include <engine/keys.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
@@ -55,11 +56,18 @@ static ColorRGBA GetPingTextColor(int Latency)
 static ColorRGBA GetGametypeTextColor(const char *pGametype)
 {
 	ColorHSLA HslaColor;
-	if(str_comp(pGametype, "DM") == 0 || str_comp(pGametype, "TDM") == 0 || str_comp(pGametype, "CTF") == 0)
+	if(str_comp(pGametype, "DM") == 0 || str_comp(pGametype, "TDM") == 0 || str_comp(pGametype, "CTF") == 0 || str_comp(pGametype, "LMS") == 0 || str_comp(pGametype, "LTS") == 0)
 		HslaColor = ColorHSLA(0.33f, 1.0f, 0.75f);
 	else if(str_find_nocase(pGametype, "catch"))
 		HslaColor = ColorHSLA(0.17f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "idm") || str_find_nocase(pGametype, "itdm") || str_find_nocase(pGametype, "ictf") || str_find_nocase(pGametype, "f-ddrace"))
+	else if(str_find_nocase(pGametype, "dm") || str_find_nocase(pGametype, "tdm") || str_find_nocase(pGametype, "ctf") || str_find_nocase(pGametype, "lms") || str_find_nocase(pGametype, "lts"))
+	{
+		if(pGametype[0] == 'i' || pGametype[0] == 'g')
+			HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
+		else
+			HslaColor = ColorHSLA(0.40f, 1.0f, 0.75f);
+	}
+	else if(str_find_nocase(pGametype, "f-ddrace") || str_find_nocase(pGametype, "freeze"))
 		HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
 	else if(str_find_nocase(pGametype, "fng"))
 		HslaColor = ColorHSLA(0.83f, 1.0f, 0.75f);
@@ -216,7 +224,16 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		}
 		else if(!ServerBrowser()->NumServers())
 		{
-			Ui()->DoLabel(&View, Localize("No servers found"), 16.0f, TEXTALIGN_MC);
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), Localize("No local servers found (ports %d-%d)"), IServerBrowser::LAN_PORT_BEGIN, IServerBrowser::LAN_PORT_END);
+				Ui()->DoLabel(&View, aBuf, 16.0f, TEXTALIGN_MC);
+			}
+			else
+			{
+				Ui()->DoLabel(&View, Localize("No servers found"), 16.0f, TEXTALIGN_MC);
+			}
 		}
 		else if(ServerBrowser()->NumServers() && !NumServers)
 		{
@@ -1336,6 +1353,8 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 			CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 			const vec2 TeeRenderPos = vec2(Skin.x + TeeInfo.m_Size / 2.0f, Skin.y + Skin.h / 2.0f + OffsetToMid.y);
 			RenderTools()->RenderTee(pIdleState, &TeeInfo, CurrentClient.m_Afk ? EMOTE_BLINK : EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+			Ui()->DoButtonLogic(&CurrentClient.m_aSkin, 0, &Skin);
+			GameClient()->m_Tooltips.DoToolTip(&CurrentClient.m_aSkin, &Skin, CurrentClient.m_aSkin);
 		}
 
 		// name
@@ -1504,8 +1523,9 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				if(s_ScrollRegion.RectClipped(Rect))
 					continue;
 
-				const bool Inside = Ui()->HotItem() == Friend.ListItemId() || Ui()->HotItem() == Friend.RemoveButtonId() || Ui()->HotItem() == Friend.CommunityTooltipId();
+				const bool Inside = Ui()->HotItem() == Friend.ListItemId() || Ui()->HotItem() == Friend.RemoveButtonId() || Ui()->HotItem() == Friend.CommunityTooltipId() || Ui()->HotItem() == Friend.SkinTooltipId();
 				int ButtonResult = Ui()->DoButtonLogic(Friend.ListItemId(), 0, &Rect);
+
 				if(Friend.ServerInfo())
 				{
 					GameClient()->m_Tooltips.DoToolTip(Friend.ListItemId(), &Rect, Localize("Click to select server. Double click to join your friend."));
@@ -1536,6 +1556,8 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 					CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 					const vec2 TeeRenderPos = vec2(Skin.x + Skin.w / 2.0f, Skin.y + Skin.h * 0.55f + OffsetToMid.y);
 					RenderTools()->RenderTee(pIdleState, &TeeInfo, Friend.IsAfk() ? EMOTE_BLINK : EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+					Ui()->DoButtonLogic(Friend.SkinTooltipId(), 0, &Skin);
+					GameClient()->m_Tooltips.DoToolTip(Friend.SkinTooltipId(), &Skin, Friend.Skin());
 				}
 				Rect.HSplitTop(11.0f, &NameLabel, &ClanLabel);
 
@@ -1779,13 +1801,13 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 
 	/*
 		+---------------------------+ +---communities---+
-		|							| |					|
-		|							| +------tabs-------+
-		|	server list				| |					|
-		|							| |		tool		|
-		|							| |		box			|
-		+---------------------------+ |					|
-			status box				  +-----------------+
+		|                           | |                 |
+		|                           | +------tabs-------+
+		|       server list         | |                 |
+		|                           | |      tool       |
+		|                           | |      box        |
+		+---------------------------+ |                 |
+		        status box            +-----------------+
 	*/
 
 	CUIRect ServerList, StatusBox, ToolBox, TabBar;
@@ -1850,17 +1872,13 @@ bool CMenus::PrintHighlighted(const char *pName, F &&PrintFn)
 
 CTeeRenderInfo CMenus::GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool CustomSkinColors, int CustomSkinColorBody, int CustomSkinColorFeet) const
 {
-	const CSkin *pSkin = m_pClient->m_Skins.Find(pSkinName);
-
 	CTeeRenderInfo TeeInfo;
-	TeeInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	TeeInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	TeeInfo.m_SkinMetrics = pSkin->m_Metrics;
+	TeeInfo.Apply(m_pClient->m_Skins.Find(pSkinName));
 	TeeInfo.m_CustomColoredSkin = CustomSkinColors;
 	if(CustomSkinColors)
 	{
-		TeeInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(CustomSkinColorBody).UnclampLighting());
-		TeeInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(CustomSkinColorFeet).UnclampLighting());
+		TeeInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(CustomSkinColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
+		TeeInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(CustomSkinColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
 	}
 	else
 	{
@@ -2024,16 +2042,7 @@ void CMenus::LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info,
 	CommunityIcon.m_Sha256 = Sha256;
 	CommunityIcon.m_OrgTexture = Graphics()->LoadTextureRaw(Info, 0, pCommunityId);
 
-	// create gray scale version
-	unsigned char *pData = static_cast<unsigned char *>(Info.m_pData);
-	const size_t Step = Info.PixelSize();
-	for(size_t i = 0; i < Info.m_Width * Info.m_Height; i++)
-	{
-		int v = (pData[i * Step] + pData[i * Step + 1] + pData[i * Step + 2]) / 3;
-		pData[i * Step] = v;
-		pData[i * Step + 1] = v;
-		pData[i * Step + 2] = v;
-	}
+	ConvertToGrayscale(Info);
 	CommunityIcon.m_GreyTexture = Graphics()->LoadTextureRawMove(Info, 0, pCommunityId);
 
 	auto ExistingIcon = std::find_if(m_vCommunityIcons.begin(), m_vCommunityIcons.end(), [pCommunityId](const SCommunityIcon &Element) {

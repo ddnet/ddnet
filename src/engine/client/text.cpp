@@ -1353,9 +1353,9 @@ public:
 		m_Color.a = a;
 	}
 
-	void TextColor(ColorRGBA rgb) override
+	void TextColor(ColorRGBA Color) override
 	{
-		m_Color = rgb;
+		m_Color = Color;
 	}
 
 	void TextOutlineColor(float r, float g, float b, float a) override
@@ -1366,9 +1366,9 @@ public:
 		m_OutlineColor.a = a;
 	}
 
-	void TextOutlineColor(ColorRGBA rgb) override
+	void TextOutlineColor(ColorRGBA Color) override
 	{
-		m_OutlineColor = rgb;
+		m_OutlineColor = Color;
 	}
 
 	void TextSelectionColor(float r, float g, float b, float a) override
@@ -1379,9 +1379,9 @@ public:
 		m_SelectionColor.a = a;
 	}
 
-	void TextSelectionColor(ColorRGBA rgb) override
+	void TextSelectionColor(ColorRGBA Color) override
 	{
-		m_SelectionColor = rgb;
+		m_SelectionColor = Color;
 	}
 
 	ColorRGBA GetTextColor() const override

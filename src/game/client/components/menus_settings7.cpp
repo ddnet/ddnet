@@ -31,246 +31,62 @@
 
 #include <vector>
 
+using namespace FontIcons;
+
 void CMenus::RenderSettingsTee7(CUIRect MainView)
 {
-	static bool s_CustomSkinMenu = false;
-	// static int s_PlayerCountry = 0;
-	// static char s_aPlayerName[64] = {0};
-	// static char s_aPlayerClan[64] = {0};
+	CUIRect SkinPreview, NormalSkinPreview, RedTeamSkinPreview, BlueTeamSkinPreview, Buttons, QuickSearch, DirectoryButton, RefreshButton, SaveDeleteButton, TabBars, TabBar, LeftTab, RightTab;
+	MainView.HSplitBottom(20.0f, &MainView, &Buttons);
+	MainView.HSplitBottom(5.0f, &MainView, nullptr);
+	Buttons.VSplitRight(25.0f, &Buttons, &RefreshButton);
+	Buttons.VSplitRight(10.0f, &Buttons, nullptr);
+	Buttons.VSplitRight(140.0f, &Buttons, &DirectoryButton);
+	Buttons.VSplitLeft(220.0f, &QuickSearch, &Buttons);
+	Buttons.VSplitLeft(10.0f, nullptr, &Buttons);
+	Buttons.VSplitLeft(120.0f, &SaveDeleteButton, &Buttons);
+	MainView.HSplitTop(50.0f, &TabBars, &MainView);
+	MainView.HSplitTop(10.0f, nullptr, &MainView);
+	TabBars.VSplitMid(&TabBars, &SkinPreview, 20.0f);
 
-	// if(m_pClient->m_IdentityState < 0)
-	// {
-	// 	s_PlayerCountry = Config()->m_PlayerCountry;
-	// 	str_copy(s_aPlayerName, Config()->m_PlayerName, sizeof(s_aPlayerName));
-	// 	str_copy(s_aPlayerClan, Config()->m_PlayerClan, sizeof(s_aPlayerClan));
-	// 	m_pClient->m_IdentityState = 0;
-	// }
+	TabBars.HSplitTop(20.0f, &TabBar, &TabBars);
+	TabBar.VSplitMid(&LeftTab, &RightTab);
+	TabBars.HSplitTop(10.0f, nullptr, &TabBars);
 
-	CUIRect Label, TopView, BottomView, Left, Right;
+	SkinPreview.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
+	SkinPreview.VMargin(10.0f, &SkinPreview);
+	SkinPreview.VSplitRight(50.0f, &SkinPreview, &BlueTeamSkinPreview);
+	SkinPreview.VSplitRight(10.0f, &SkinPreview, nullptr);
+	SkinPreview.VSplitRight(50.0f, &SkinPreview, &RedTeamSkinPreview);
+	SkinPreview.VSplitRight(10.0f, &SkinPreview, nullptr);
+	SkinPreview.VSplitRight(50.0f, &SkinPreview, &NormalSkinPreview);
+	SkinPreview.VSplitRight(10.0f, &SkinPreview, nullptr);
 
-	// cut view
-	MainView.HSplitBottom(40.0f, &MainView, &BottomView);
-	BottomView.HSplitTop(20.f, 0, &BottomView);
-
-	CUIRect QuickSearch, DirectoryButton, Buttons;
-	CUIRect ButtonLeft, ButtonMiddle, ButtonRight;
-
-	BottomView.VSplitMid(&QuickSearch, &Buttons, 10.0f);
-	QuickSearch.VSplitLeft(240.0f, &QuickSearch, &DirectoryButton);
-	QuickSearch.VSplitRight(10.0f, &QuickSearch, nullptr);
-
-	const float ButtonSize = Buttons.w / 3;
-	Buttons.VSplitLeft(ButtonSize, &ButtonLeft, &Buttons);
-	Buttons.VSplitLeft(ButtonSize, &ButtonMiddle, &Buttons);
-	Buttons.VSplitLeft(ButtonSize, &ButtonRight, &Buttons);
-
-	// render skin preview background
-	const float SpacingH = 2.0f;
-	const float SpacingW = 3.0f;
-	const float ButtonHeight = 20.0f;
-	const float SkinHeight = 50.0f;
-	const float BackgroundHeight = (ButtonHeight + SpacingH) + SkinHeight * 2;
-
-	MainView.HSplitTop(20.0f, 0, &MainView);
-	MainView.HSplitTop(BackgroundHeight, &TopView, &MainView);
-	TopView.VSplitMid(&Left, &Right, 3.0f);
-	Left.Draw(vec4(0.0f, 0.0f, 0.0f, 0.25f), 15, 5.0F);
-	Right.Draw(vec4(0.0f, 0.0f, 0.0f, 0.25f), 15, 5.0F);
-
-	Left.HSplitTop(ButtonHeight, &Label, &Left);
-	Ui()->DoLabel(&Label, Localize("Tee"), ButtonHeight * CUi::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
-
-	// Preview
+	static CButtonContainer s_PlayerTabButton;
+	if(DoButton_MenuTab(&s_PlayerTabButton, Localize("Player"), !m_Dummy, &LeftTab, IGraphics::CORNER_L, nullptr, nullptr, nullptr, nullptr, 4.0f))
 	{
-		CUIRect Top, Bottom, TeeLeft, TeeRight;
-
-		Left.HSplitTop(SpacingH, 0, &Left);
-		Left.HSplitTop(SkinHeight * 2, &Top, &Left);
-
-		// split the menu in 2 parts
-		Top.HSplitMid(&Top, &Bottom, SpacingH);
-
-		// handle left
-
-		// validate skin parts for solo mode
-		CTeeRenderInfo OwnSkinInfo;
-		OwnSkinInfo.m_Size = 50.0f;
-
-		char aSkinParts[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_ARRAY_SIZE];
-		char *apSkinPartsPtr[protocol7::NUM_SKINPARTS];
-		int aUCCVars[protocol7::NUM_SKINPARTS];
-		int aColorVars[protocol7::NUM_SKINPARTS];
-		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
-		{
-			str_copy(aSkinParts[Part], CSkins7::ms_apSkinVariables[(int)m_Dummy][Part], protocol7::MAX_SKIN_ARRAY_SIZE);
-			apSkinPartsPtr[Part] = aSkinParts[Part];
-			aUCCVars[Part] = *CSkins7::ms_apUCCVariables[(int)m_Dummy][Part];
-			aColorVars[Part] = *CSkins7::ms_apColorVariables[(int)m_Dummy][Part];
-		}
-
-		m_pClient->m_Skins7.ValidateSkinParts(apSkinPartsPtr, aUCCVars, aColorVars, 0);
-
-		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
-		{
-			int SkinPart = m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false);
-			const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, SkinPart);
-			if(aUCCVars[Part])
-			{
-				OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_ColorTexture;
-				OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(aColorVars[Part], Part == protocol7::SKINPART_MARKING);
-			}
-			else
-			{
-				OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_OrgTexture;
-				OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-			}
-		}
-
-		// draw preview
-		Top.Draw(vec4(0.0f, 0.0f, 0.0f, 0.25f), 15, 5.0F);
-
-		Top.VSplitLeft(Top.w / 3.0f + SpacingW / 2.0f, &Label, &Top);
-		Label.y += 17.0f;
-		Ui()->DoLabel(&Label, Localize("Normal:"), ButtonHeight * CUi::ms_FontmodHeight * 0.8f, TEXTALIGN_CENTER);
-
-		Top.Draw(vec4(0.0f, 0.0f, 0.0f, 0.25f), 15, 5.0F);
-
-		{
-			// interactive tee: tee looking towards cursor, and it is happy when you touch it
-			const vec2 TeePosition = vec2(Top.x + Top.w / 2.0f, Top.y + Top.h / 2.0f + 6.0f);
-			const vec2 DeltaPosition = Ui()->MousePos() - TeePosition;
-			const float Distance = length(DeltaPosition);
-			const float InteractionDistance = 20.0f;
-			const vec2 TeeDirection = Distance < InteractionDistance ? normalize(vec2(DeltaPosition.x, maximum(DeltaPosition.y, 0.5f))) : normalize(DeltaPosition);
-			const int TeeEmote = Distance < InteractionDistance ? EMOTE_HAPPY : EMOTE_NORMAL;
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, TeeEmote, TeeDirection, TeePosition);
-			static char s_InteractiveTeeButtonId;
-			if(Distance < InteractionDistance && Ui()->DoButtonLogic(&s_InteractiveTeeButtonId, 0, &Top))
-			{
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_PLAYER_SPAWN, 1.0f);
-			}
-		}
-
-		// handle right (team skins)
-
-		// validate skin parts for team game mode
-		CTeeRenderInfo TeamSkinInfo = OwnSkinInfo;
-
-		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
-		{
-			str_copy(aSkinParts[Part], CSkins7::ms_apSkinVariables[(int)m_Dummy][Part], protocol7::MAX_SKIN_ARRAY_SIZE);
-			apSkinPartsPtr[Part] = aSkinParts[Part];
-			aUCCVars[Part] = *CSkins7::ms_apUCCVariables[(int)m_Dummy][Part];
-			aColorVars[Part] = *CSkins7::ms_apColorVariables[(int)m_Dummy][Part];
-		}
-
-		m_pClient->m_Skins7.ValidateSkinParts(apSkinPartsPtr, aUCCVars, aColorVars, GAMEFLAG_TEAMS);
-
-		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
-		{
-			int SkinPart = m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false);
-			const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, SkinPart);
-			if(aUCCVars[Part])
-			{
-				TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_ColorTexture;
-				TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(aColorVars[Part], Part == protocol7::SKINPART_MARKING);
-			}
-			else
-			{
-				TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_OrgTexture;
-				TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-			}
-		}
-
-		// draw preview
-		Bottom.Draw(vec4(0.0f, 0.0f, 0.0f, 0.25f), 15, 5.0F);
-
-		Bottom.VSplitLeft(Bottom.w / 3.0f + SpacingW / 2.0f, &Label, &Bottom);
-		Label.y += 17.0f;
-		Ui()->DoLabel(&Label, Localize("Team:"), ButtonHeight * CUi::ms_FontmodHeight * 0.8f, TEXTALIGN_CENTER);
-
-		Bottom.VSplitMid(&TeeLeft, &TeeRight, SpacingW);
-
-		TeeLeft.Draw(vec4(0.0f, 0.0f, 0.0f, 0.25f), 15, 5.0F);
-
-		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
-		{
-			ColorRGBA TeamColor = m_pClient->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_RED, Part);
-			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = TeamColor;
-		}
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(1, 0), vec2(TeeLeft.x + TeeLeft.w / 2.0f, TeeLeft.y + TeeLeft.h / 2.0f + 6.0f));
-
-		TeeRight.Draw(vec4(0.0f, 0.0f, 0.0f, 0.25f), 15, 5.0F);
-
-		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
-		{
-			ColorRGBA TeamColor = m_pClient->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_BLUE, Part);
-			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = TeamColor;
-		}
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(-1, 0), vec2(TeeRight.x + TeeRight.w / 2.0f, TeeRight.y + TeeRight.h / 2.0f + 6.0f));
+		m_Dummy = false;
 	}
 
-	Right.HSplitTop(ButtonHeight, &Label, &Right);
-	Ui()->DoLabel(&Label, Localize("Settings"), ButtonHeight * CUi::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
-
-	// Settings
+	static CButtonContainer s_DummyTabButton;
+	if(DoButton_MenuTab(&s_DummyTabButton, Localize("Dummy"), m_Dummy, &RightTab, IGraphics::CORNER_R, nullptr, nullptr, nullptr, nullptr, 4.0f))
 	{
-		CUIRect Top, Bottom, Dummy, DummyLabel;
-		Right.HSplitTop(SpacingH, 0, &Right);
-		Right.HSplitMid(&Top, &Bottom, SpacingH);
-
-		Right.HSplitTop(20.0f, &Dummy, &Right);
-		Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
-
-		if(DoButton_CheckBox(&m_Dummy, Localize("Dummy settings"), m_Dummy, &DummyLabel))
-		{
-			m_Dummy ^= 1;
-		}
-		GameClient()->m_Tooltips.DoToolTip(&m_Dummy, &DummyLabel, Localize("Toggle to edit your dummy settings"));
+		m_Dummy = true;
 	}
 
-	MainView.HSplitTop(10.0f, 0, &MainView);
+	TabBars.HSplitTop(20.0f, &TabBar, &TabBars);
+	TabBar.VSplitMid(&LeftTab, &RightTab);
 
-	if(s_CustomSkinMenu)
-		RenderSettingsTeeCustom7(MainView);
-	else
-		RenderSettingsTeeBasic7(MainView);
-
-	// bottom buttons
-	if(s_CustomSkinMenu)
+	static CButtonContainer s_BasicTabButton;
+	if(DoButton_MenuTab(&s_BasicTabButton, Localize("Basic"), !m_CustomSkinMenu, &LeftTab, IGraphics::CORNER_L, nullptr, nullptr, nullptr, nullptr, 4.0f))
 	{
-		static CButtonContainer s_CustomSkinSaveButton;
-		if(DoButton_Menu(&s_CustomSkinSaveButton, Localize("Save"), 0, &ButtonLeft))
-		{
-			m_Popup = POPUP_SAVE_SKIN;
-			m_SkinNameInput.SelectAll();
-			Ui()->SetActiveItem(&m_SkinNameInput);
-		}
-
-		static CButtonContainer s_RandomizeSkinButton;
-		if(DoButton_Menu(&s_RandomizeSkinButton, Localize("Randomize"), 0, &ButtonMiddle))
-		{
-			m_pClient->m_Skins7.RandomizeSkin(m_Dummy);
-			Config()->m_ClPlayer7Skin[0] = 0;
-			SetNeedSendInfo();
-		}
-	}
-	else if(m_pSelectedSkin && (m_pSelectedSkin->m_Flags & CSkins7::SKINFLAG_STANDARD) == 0)
-	{
-		static CButtonContainer s_CustomSkinDeleteButton;
-		if(DoButton_Menu(&s_CustomSkinDeleteButton, Localize("Delete"), 0, &ButtonMiddle) || Ui()->ConsumeHotkey(CUi::HOTKEY_DELETE))
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete '%s'?"), m_pSelectedSkin->m_aName);
-			PopupConfirm(Localize("Delete skin"), aBuf, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDeleteSkin7);
-		}
+		m_CustomSkinMenu = false;
 	}
 
-	static CButtonContainer s_CustomSwitchButton;
-	if(DoButton_Menu(&s_CustomSwitchButton, s_CustomSkinMenu ? Localize("Basic") : Localize("Custom"), 0, &ButtonRight))
+	static CButtonContainer s_CustomTabButton;
+	if(DoButton_MenuTab(&s_CustomTabButton, Localize("Custom"), m_CustomSkinMenu, &RightTab, IGraphics::CORNER_R, nullptr, nullptr, nullptr, nullptr, 4.0f))
 	{
-		s_CustomSkinMenu = !s_CustomSkinMenu;
-		if(s_CustomSkinMenu && m_pSelectedSkin)
+		m_CustomSkinMenu = true;
+		if(m_CustomSkinMenu && m_pSelectedSkin)
 		{
 			if(m_pSelectedSkin->m_Flags & CSkins7::SKINFLAG_STANDARD)
 			{
@@ -282,35 +98,151 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		}
 	}
 
-	// Quick search
+	// validate skin parts for solo mode
+	char aSkinParts[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_ARRAY_SIZE];
+	char *apSkinPartsPtr[protocol7::NUM_SKINPARTS];
+	int aUCCVars[protocol7::NUM_SKINPARTS];
+	int aColorVars[protocol7::NUM_SKINPARTS];
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		Ui()->DoLabel(&QuickSearch, FontIcons::FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
-		float SearchWidth = TextRender()->TextWidth(14.0f, FontIcons::FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
-		TextRender()->SetRenderFlags(0);
-		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		QuickSearch.VSplitLeft(SearchWidth + 5.0f, nullptr, &QuickSearch);
-		static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
-		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
+		str_copy(aSkinParts[Part], CSkins7::ms_apSkinVariables[(int)m_Dummy][Part], protocol7::MAX_SKIN_ARRAY_SIZE);
+		apSkinPartsPtr[Part] = aSkinParts[Part];
+		aUCCVars[Part] = *CSkins7::ms_apUCCVariables[(int)m_Dummy][Part];
+		aColorVars[Part] = *CSkins7::ms_apColorVariables[(int)m_Dummy][Part];
+	}
+	m_pClient->m_Skins7.ValidateSkinParts(apSkinPartsPtr, aUCCVars, aColorVars, 0);
+
+	CTeeRenderInfo OwnSkinInfo;
+	OwnSkinInfo.m_Size = 50.0f;
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+	{
+		int SkinPart = m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false);
+		const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, SkinPart);
+		if(aUCCVars[Part])
 		{
-			Ui()->SetActiveItem(&s_SkinFilterInput);
-			s_SkinFilterInput.SelectAll();
+			OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_ColorTexture;
+			OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(aColorVars[Part], Part == protocol7::SKINPART_MARKING);
 		}
-		s_SkinFilterInput.SetEmptyText(Localize("Search"));
-		if(Ui()->DoClearableEditBox(&s_SkinFilterInput, &QuickSearch, 14.0f))
-			m_SkinListNeedsUpdate = true;
+		else
+		{
+			OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_OrgTexture;
+			OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+	}
+
+	char aBuf[128 + IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
+	Ui()->DoLabel(&SkinPreview, aBuf, 14.0f, TEXTALIGN_ML);
+
+	{
+		// interactive tee: tee looking towards cursor, and it is happy when you touch it
+		const vec2 TeePosition = NormalSkinPreview.Center() + vec2(0.0f, 6.0f);
+		const vec2 DeltaPosition = Ui()->MousePos() - TeePosition;
+		const float Distance = length(DeltaPosition);
+		const float InteractionDistance = 20.0f;
+		const vec2 TeeDirection = Distance < InteractionDistance ? normalize(vec2(DeltaPosition.x, maximum(DeltaPosition.y, 0.5f))) : normalize(DeltaPosition);
+		const int TeeEmote = Distance < InteractionDistance ? EMOTE_HAPPY : EMOTE_NORMAL;
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, TeeEmote, TeeDirection, TeePosition);
+		static char s_InteractiveTeeButtonId;
+		if(Distance < InteractionDistance && Ui()->DoButtonLogic(&s_InteractiveTeeButtonId, 0, &NormalSkinPreview))
+		{
+			m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_PLAYER_SPAWN, 1.0f);
+		}
+	}
+
+	// validate skin parts for team game mode
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+	{
+		str_copy(aSkinParts[Part], CSkins7::ms_apSkinVariables[(int)m_Dummy][Part], protocol7::MAX_SKIN_ARRAY_SIZE);
+		apSkinPartsPtr[Part] = aSkinParts[Part];
+		aUCCVars[Part] = *CSkins7::ms_apUCCVariables[(int)m_Dummy][Part];
+		aColorVars[Part] = *CSkins7::ms_apColorVariables[(int)m_Dummy][Part];
+	}
+	m_pClient->m_Skins7.ValidateSkinParts(apSkinPartsPtr, aUCCVars, aColorVars, GAMEFLAG_TEAMS);
+
+	CTeeRenderInfo TeamSkinInfo = OwnSkinInfo;
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+	{
+		int SkinPart = m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false);
+		const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(Part, SkinPart);
+		if(aUCCVars[Part])
+		{
+			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_ColorTexture;
+			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(aColorVars[Part], Part == protocol7::SKINPART_MARKING);
+		}
+		else
+		{
+			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_OrgTexture;
+			TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+	}
+
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+	{
+		TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_RED, Part);
+	}
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(1, 0), RedTeamSkinPreview.Center() + vec2(0.0f, 6.0f));
+
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+	{
+		TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_BLUE, Part);
+	}
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(-1, 0), BlueTeamSkinPreview.Center() + vec2(0.0f, 6.0f));
+
+	if(m_CustomSkinMenu)
+		RenderSettingsTeeCustom7(MainView);
+	else
+		RenderSkinSelection7(MainView);
+
+	if(m_CustomSkinMenu)
+	{
+		static CButtonContainer s_CustomSkinSaveButton;
+		if(DoButton_Menu(&s_CustomSkinSaveButton, Localize("Save"), 0, &SaveDeleteButton))
+		{
+			m_Popup = POPUP_SAVE_SKIN;
+			m_SkinNameInput.SelectAll();
+			Ui()->SetActiveItem(&m_SkinNameInput);
+		}
+	}
+	else if(m_pSelectedSkin && (m_pSelectedSkin->m_Flags & CSkins7::SKINFLAG_STANDARD) == 0)
+	{
+		static CButtonContainer s_CustomSkinDeleteButton;
+		if(DoButton_Menu(&s_CustomSkinDeleteButton, Localize("Delete"), 0, &SaveDeleteButton) || Ui()->ConsumeHotkey(CUi::HOTKEY_DELETE))
+		{
+			str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete '%s'?"), m_pSelectedSkin->m_aName);
+			PopupConfirm(Localize("Delete skin"), aBuf, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDeleteSkin7);
+		}
+	}
+
+	static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
+	if(Ui()->DoEditBox_Search(&s_SkinFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed()))
+	{
+		m_SkinListNeedsUpdate = true;
+		m_SkinPartListNeedsUpdate = true;
 	}
 
 	static CButtonContainer s_DirectoryButton;
 	if(DoButton_Menu(&s_DirectoryButton, Localize("Skins directory"), 0, &DirectoryButton))
 	{
-		char aBuf[128 + IO_MAX_PATH_LENGTH];
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "skins7", aBuf, sizeof(aBuf));
 		Storage()->CreateFolder("skins7", IStorage::TYPE_SAVE);
 		Client()->ViewFile(aBuf);
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButton, &DirectoryButton, Localize("Open the directory to add custom skins"));
+
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	static CButtonContainer s_SkinRefreshButton;
+	if(DoButton_Menu(&s_SkinRefreshButton, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &RefreshButton) ||
+		(!Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed() && (Input()->KeyPress(KEY_F5) || (Input()->ModifierIsPressed() && Input()->KeyPress(KEY_R)))))
+	{
+		// reset render flags for possible loading screen
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+		// TODO: m_pClient->RefreshSkins();
+	}
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 }
 
 void CMenus::PopupConfirmDeleteSkin7()
@@ -325,51 +257,34 @@ void CMenus::PopupConfirmDeleteSkin7()
 	m_pSelectedSkin = nullptr;
 }
 
-void CMenus::RenderSettingsTeeBasic7(CUIRect MainView)
-{
-	RenderSkinSelection7(MainView); // yes thats all here ^^
-}
-
 void CMenus::RenderSettingsTeeCustom7(CUIRect MainView)
 {
-	CUIRect Label, Patterns, Button, Left, Right;
+	CUIRect ButtonBar, SkinPartSelection, CustomColors;
 
-	// render skin preview background
-	float SpacingH = 2.0f;
-	float SpacingW = 3.0f;
-	float ButtonHeight = 20.0f;
+	MainView.HSplitTop(20.0f, &ButtonBar, &MainView);
+	MainView.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_B, 5.0f);
+	MainView.VSplitMid(&SkinPartSelection, &CustomColors, 10.0f);
+	CustomColors.Margin(5.0f, &CustomColors);
+	CUIRect CustomColorsButton, RandomSkinButton;
+	CustomColors.HSplitTop(20.0f, &CustomColorsButton, &CustomColors);
+	CustomColorsButton.VSplitRight(30.0f, &CustomColorsButton, &RandomSkinButton);
+	CustomColorsButton.VSplitRight(20.0f, &CustomColorsButton, nullptr);
 
-	MainView.Draw(vec4(0.0f, 0.0f, 0.0f, 0.25f), 15, 5.0F);
+	const float ButtonWidth = ButtonBar.w / protocol7::NUM_SKINPARTS;
 
-	MainView.HSplitTop(ButtonHeight, &Label, &MainView);
-	Ui()->DoLabel(&Label, Localize("Customize"), ButtonHeight * CUi::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
-
-	// skin part selection
-	MainView.HSplitTop(SpacingH, 0, &MainView);
-	MainView.HSplitTop(ButtonHeight, &Patterns, &MainView);
-	Patterns.Draw(vec4(0.0f, 0.0f, 0.0f, 0.25f), 15, 5.0F);
-
-	float ButtonWidth = (Patterns.w / 6.0f) - (SpacingW * 5.0) / 6.0f;
-
-	static CButtonContainer s_aPatternButtons[protocol7::NUM_SKINPARTS];
+	static CButtonContainer s_aSkinPartButtons[protocol7::NUM_SKINPARTS];
 	for(int i = 0; i < protocol7::NUM_SKINPARTS; i++)
 	{
-		Patterns.VSplitLeft(ButtonWidth, &Button, &Patterns);
-		if(DoButton_MenuTab(&s_aPatternButtons[i], Localize(CSkins7::ms_apSkinPartNames[i], "skins"), m_TeePartSelected == i, &Button, IGraphics::CORNER_ALL))
+		CUIRect Button;
+		ButtonBar.VSplitLeft(ButtonWidth, &Button, &ButtonBar);
+		const int Corners = i == 0 ? IGraphics::CORNER_TL : (i == (protocol7::NUM_SKINPARTS - 1) ? IGraphics::CORNER_TR : IGraphics::CORNER_NONE);
+		if(DoButton_MenuTab(&s_aSkinPartButtons[i], Localize(CSkins7::ms_apSkinPartNamesLocalized[i], "skins"), m_TeePartSelected == i, &Button, Corners, nullptr, nullptr, nullptr, nullptr, 4.0f))
 		{
 			m_TeePartSelected = i;
 		}
-		Patterns.VSplitLeft(SpacingW, 0, &Patterns);
 	}
 
-	MainView.HSplitTop(SpacingH, 0, &MainView);
-	MainView.VSplitMid(&Left, &Right, SpacingW);
-	Right.Margin(5.0f, &Right);
-
-	RenderSkinPartSelection7(Left);
-
-	CUIRect CustomColorsButton;
-	Right.HSplitTop(20.0f, &CustomColorsButton, &Right);
+	RenderSkinPartSelection7(SkinPartSelection);
 
 	int *pUseCustomColor = CSkins7::ms_apUCCVariables[(int)m_Dummy][m_TeePartSelected];
 	if(DoButton_CheckBox(pUseCustomColor, Localize("Custom colors"), *pUseCustomColor, &CustomColorsButton))
@@ -380,15 +295,31 @@ void CMenus::RenderSettingsTeeCustom7(CUIRect MainView)
 
 	if(*pUseCustomColor)
 	{
-		CUIRect CustomColors;
-		Right.HSplitTop(5.0f, nullptr, &Right);
-		Right.HSplitTop(95.0f, &CustomColors, &Right);
+		CUIRect CustomColorScrollbars;
+		CustomColors.HSplitTop(5.0f, nullptr, &CustomColors);
+		CustomColors.HSplitTop(95.0f, &CustomColorScrollbars, &CustomColors);
 
-		if(RenderHslaScrollbars(&CustomColors, CSkins7::ms_apColorVariables[(int)m_Dummy][m_TeePartSelected], m_TeePartSelected == protocol7::SKINPART_MARKING, CSkins7::DARKEST_COLOR_LGT))
+		if(RenderHslaScrollbars(&CustomColorScrollbars, CSkins7::ms_apColorVariables[(int)m_Dummy][m_TeePartSelected], m_TeePartSelected == protocol7::SKINPART_MARKING, ColorHSLA::DARKEST_LGT7))
 		{
 			SetNeedSendInfo();
 		}
 	}
+
+	// Random skin button
+	static CButtonContainer s_RandomSkinButton;
+	static const char *s_apDice[] = {FONT_ICON_DICE_ONE, FONT_ICON_DICE_TWO, FONT_ICON_DICE_THREE, FONT_ICON_DICE_FOUR, FONT_ICON_DICE_FIVE, FONT_ICON_DICE_SIX};
+	static int s_CurrentDie = rand() % std::size(s_apDice);
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	if(DoButton_Menu(&s_RandomSkinButton, s_apDice[s_CurrentDie], 0, &RandomSkinButton, nullptr, IGraphics::CORNER_ALL, 5.0f, -0.2f))
+	{
+		m_pClient->m_Skins7.RandomizeSkin(m_Dummy);
+		SetNeedSendInfo();
+		s_CurrentDie = rand() % std::size(s_apDice);
+	}
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+	GameClient()->m_Tooltips.DoToolTip(&s_RandomSkinButton, &RandomSkinButton, Localize("Create a random skin"));
 }
 
 void CMenus::RenderSkinSelection7(CUIRect MainView)
@@ -403,76 +334,74 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 		s_SkinCount = m_pClient->m_Skins7.Num();
 		for(int i = 0; i < s_SkinCount; ++i)
 		{
-			const CSkins7::CSkin *s = m_pClient->m_Skins7.Get(i);
-
-			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(s->m_aName, g_Config.m_ClSkinFilterString))
+			const CSkins7::CSkin *pSkin = m_pClient->m_Skins7.Get(i);
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pSkin->m_aName, g_Config.m_ClSkinFilterString))
 				continue;
 
 			// no special skins
-			if((s->m_Flags & CSkins7::SKINFLAG_SPECIAL) == 0)
+			if((pSkin->m_Flags & CSkins7::SKINFLAG_SPECIAL) == 0)
 			{
-				s_vpSkinList.emplace_back(s);
+				s_vpSkinList.emplace_back(pSkin);
 			}
 		}
 		m_SkinListNeedsUpdate = false;
 	}
 
-	m_pSelectedSkin = 0;
+	m_pSelectedSkin = nullptr;
 	int s_OldSelected = -1;
-	s_ListBox.DoStart(60.0f, s_vpSkinList.size(), 10, 1, s_OldSelected, &MainView);
+	s_ListBox.DoStart(50.0f, s_vpSkinList.size(), 4, 1, s_OldSelected, &MainView);
 
 	for(int i = 0; i < (int)s_vpSkinList.size(); ++i)
 	{
-		const CSkins7::CSkin *s = s_vpSkinList[i];
-		if(s == 0)
+		const CSkins7::CSkin *pSkin = s_vpSkinList[i];
+		if(pSkin == nullptr)
 			continue;
-		if(!str_comp(s->m_aName, Config()->m_ClPlayer7Skin))
+		if(!str_comp(pSkin->m_aName, CSkins7::ms_apSkinNameVariables[m_Dummy]))
 		{
-			m_pSelectedSkin = s;
+			m_pSelectedSkin = pSkin;
 			s_OldSelected = i;
 		}
 
-		CListboxItem Item = s_ListBox.DoNextItem(&s_vpSkinList[i], s_OldSelected == i);
-		if(Item.m_Visible)
+		const CListboxItem Item = s_ListBox.DoNextItem(&s_vpSkinList[i], s_OldSelected == i);
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect TeePreview, Label;
+		Item.m_Rect.VSplitLeft(60.0f, &TeePreview, &Label);
+
+		CTeeRenderInfo Info;
+		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			CTeeRenderInfo Info;
-			for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+			if(pSkin->m_aUseCustomColors[Part])
 			{
-				if(s->m_aUseCustomColors[Part])
-				{
-					Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = s->m_apParts[Part]->m_ColorTexture;
-					Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(s->m_aPartColors[Part], Part == protocol7::SKINPART_MARKING);
-				}
-				else
-				{
-					Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = s->m_apParts[Part]->m_OrgTexture;
-					Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-				}
+				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkin->m_apParts[Part]->m_ColorTexture;
+				Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(pSkin->m_aPartColors[Part], Part == protocol7::SKINPART_MARKING);
 			}
-
-			Info.m_Size = 50.0f;
-			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
-
+			else
 			{
-				// interactive tee: tee is happy to be selected
-				int TeeEmote = (Item.m_Selected && s_LastSelectionTime + 0.75f > Client()->LocalTime()) ? EMOTE_HAPPY : EMOTE_NORMAL;
-				RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, TeeEmote, vec2(1.0f, 0.0f), vec2(Item.m_Rect.x + Item.m_Rect.w / 2, Item.m_Rect.y + Item.m_Rect.h / 2));
+				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkin->m_apParts[Part]->m_OrgTexture;
+				Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 			}
-
-			CUIRect Label;
-			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
-			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
-
-			Ui()->DoLabel(&Label, s->m_aName, 10.0f, TEXTALIGN_MC);
 		}
+		Info.m_Size = 50.0f;
+
+		{
+			// interactive tee: tee is happy to be selected
+			int TeeEmote = (Item.m_Selected && s_LastSelectionTime + 0.75f > Client()->GlobalTime()) ? EMOTE_HAPPY : EMOTE_NORMAL;
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, TeeEmote, vec2(1.0f, 0.0f), TeePreview.Center() + vec2(0.0f, 6.0f));
+		}
+
+		SLabelProperties Props;
+		Props.m_MaxWidth = Label.w - 5.0f;
+		Ui()->DoLabel(&Label, pSkin->m_aName, 12.0f, TEXTALIGN_ML, Props);
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
 	if(NewSelected != -1 && NewSelected != s_OldSelected)
 	{
-		s_LastSelectionTime = Client()->LocalTime();
+		s_LastSelectionTime = Client()->GlobalTime();
 		m_pSelectedSkin = s_vpSkinList[NewSelected];
-		str_copy(Config()->m_ClPlayer7Skin, m_pSelectedSkin->m_aName);
+		str_copy(CSkins7::ms_apSkinNameVariables[m_Dummy], m_pSelectedSkin->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
 			str_copy(CSkins7::ms_apSkinVariables[(int)m_Dummy][Part], m_pSelectedSkin->m_apParts[Part]->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
@@ -485,94 +414,89 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 
 void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 {
-	static bool s_InitSkinPartList = true;
 	static std::vector<const CSkins7::CSkinPart *> s_paList[protocol7::NUM_SKINPARTS];
 	static CListBox s_ListBox;
-	if(s_InitSkinPartList)
+	static int s_aSkinPartCount[protocol7::NUM_SKINPARTS] = {0};
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+		if(m_SkinPartListNeedsUpdate || m_pClient->m_Skins7.NumSkinPart(Part) != s_aSkinPartCount[Part])
 		{
 			s_paList[Part].clear();
-			for(int i = 0; i < m_pClient->m_Skins7.NumSkinPart(Part); ++i)
+			s_aSkinPartCount[Part] = m_pClient->m_Skins7.NumSkinPart(Part);
+			for(int i = 0; i < s_aSkinPartCount[Part]; ++i)
 			{
-				const CSkins7::CSkinPart *s = m_pClient->m_Skins7.GetSkinPart(Part, i);
+				const CSkins7::CSkinPart *pPart = m_pClient->m_Skins7.GetSkinPart(Part, i);
+				if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pPart->m_aName, g_Config.m_ClSkinFilterString))
+					continue;
+
 				// no special skins
-				if((s->m_Flags & CSkins7::SKINFLAG_SPECIAL) == 0)
+				if((pPart->m_Flags & CSkins7::SKINFLAG_SPECIAL) == 0)
 				{
-					s_paList[Part].emplace_back(s);
+					s_paList[Part].emplace_back(pPart);
 				}
 			}
 		}
-		s_InitSkinPartList = false;
 	}
+	m_SkinPartListNeedsUpdate = false;
 
 	static int s_OldSelected = -1;
 	s_ListBox.DoBegin(&MainView);
-	s_ListBox.DoStart(60.0f, s_paList[m_TeePartSelected].size(), 5, 1, s_OldSelected);
+	s_ListBox.DoStart(72.0f, s_paList[m_TeePartSelected].size(), 4, 1, s_OldSelected, nullptr, false, IGraphics::CORNER_NONE, true);
 
 	for(int i = 0; i < (int)s_paList[m_TeePartSelected].size(); ++i)
 	{
-		const CSkins7::CSkinPart *s = s_paList[m_TeePartSelected][i];
-		if(s == 0)
+		const CSkins7::CSkinPart *pPart = s_paList[m_TeePartSelected][i];
+		if(pPart == nullptr)
 			continue;
-		if(!str_comp(s->m_aName, CSkins7::ms_apSkinVariables[(int)m_Dummy][m_TeePartSelected]))
+		if(!str_comp(pPart->m_aName, CSkins7::ms_apSkinVariables[(int)m_Dummy][m_TeePartSelected]))
 			s_OldSelected = i;
 
 		CListboxItem Item = s_ListBox.DoNextItem(&s_paList[m_TeePartSelected][i], s_OldSelected == i);
-		if(Item.m_Visible)
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect Label;
+		Item.m_Rect.Margin(5.0f, &Item.m_Rect);
+		Item.m_Rect.HSplitBottom(12.0f, &Item.m_Rect, &Label);
+
+		CTeeRenderInfo Info;
+		for(int j = 0; j < protocol7::NUM_SKINPARTS; j++)
 		{
-			CTeeRenderInfo Info;
-			for(int j = 0; j < protocol7::NUM_SKINPARTS; j++)
+			int SkinPart = m_pClient->m_Skins7.FindSkinPart(j, CSkins7::ms_apSkinVariables[(int)m_Dummy][j], false);
+			const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(j, SkinPart);
+			if(*CSkins7::ms_apUCCVariables[(int)m_Dummy][j])
 			{
-				int SkinPart = m_pClient->m_Skins7.FindSkinPart(j, CSkins7::ms_apSkinVariables[(int)m_Dummy][j], false);
-				const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.GetSkinPart(j, SkinPart);
-				if(*CSkins7::ms_apUCCVariables[(int)m_Dummy][j])
-				{
-					if(m_TeePartSelected == j)
-						Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = s->m_ColorTexture;
-					else
-						Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = pSkinPart->m_ColorTexture;
-					Info.m_aSixup[g_Config.m_ClDummy].m_aColors[j] = m_pClient->m_Skins7.GetColor(*CSkins7::ms_apColorVariables[(int)m_Dummy][j], j == protocol7::SKINPART_MARKING);
-				}
-				else
-				{
-					if(m_TeePartSelected == j)
-						Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = s->m_OrgTexture;
-					else
-						Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = pSkinPart->m_OrgTexture;
-					Info.m_aSixup[0].m_aColors[j] = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-				}
+				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = m_TeePartSelected == j ? pPart->m_ColorTexture : pSkinPart->m_ColorTexture;
+				Info.m_aSixup[g_Config.m_ClDummy].m_aColors[j] = m_pClient->m_Skins7.GetColor(*CSkins7::ms_apColorVariables[(int)m_Dummy][j], j == protocol7::SKINPART_MARKING);
 			}
-			Info.m_Size = 50.0f;
-			Item.m_Rect.HSplitTop(5.0f, 0, &Item.m_Rect); // some margin from the top
-			const vec2 TeePos(Item.m_Rect.x + Item.m_Rect.w / 2, Item.m_Rect.y + Item.m_Rect.h / 2);
-
-			if(m_TeePartSelected == protocol7::SKINPART_HANDS)
+			else
 			{
-				// RenderTools()->RenderTeeHand(&Info, TeePos, vec2(1.0f, 0.0f), -pi*0.5f, vec2(18, 0));
+				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[j] = m_TeePartSelected == j ? pPart->m_OrgTexture : pSkinPart->m_OrgTexture;
+				Info.m_aSixup[0].m_aColors[j] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 			}
-			int TeePartEmote = EMOTE_NORMAL;
-			if(m_TeePartSelected == protocol7::SKINPART_EYES)
-			{
-				float LocalTime = Client()->LocalTime();
-				TeePartEmote = (int)(LocalTime * 0.5f) % NUM_EMOTES;
-			}
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, TeePartEmote, vec2(1.0f, 0.0f), TeePos);
-
-			CUIRect Label;
-			Item.m_Rect.Margin(5.0f, &Item.m_Rect);
-			Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
-
-			Ui()->DoLabel(&Label, s->m_aName, 10.0f, TEXTALIGN_MC);
 		}
+		Info.m_Size = 50.0f;
+
+		const vec2 TeePos = Item.m_Rect.Center() + vec2(0.0f, 6.0f);
+		if(m_TeePartSelected == protocol7::SKINPART_HANDS)
+		{
+			// RenderTools()->RenderTeeHand(&Info, TeePos, vec2(1.0f, 0.0f), -pi*0.5f, vec2(18, 0));
+		}
+		int TeePartEmote = EMOTE_NORMAL;
+		if(m_TeePartSelected == protocol7::SKINPART_EYES)
+		{
+			TeePartEmote = (int)(Client()->GlobalTime() * 0.5f) % NUM_EMOTES;
+		}
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, TeePartEmote, vec2(1.0f, 0.0f), TeePos);
+
+		Ui()->DoLabel(&Label, pPart->m_aName, 12.0f, TEXTALIGN_MC);
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
 	if(NewSelected != -1 && NewSelected != s_OldSelected)
 	{
-		const CSkins7::CSkinPart *s = s_paList[m_TeePartSelected][NewSelected];
-		str_copy(CSkins7::ms_apSkinVariables[(int)m_Dummy][m_TeePartSelected], s->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
-		Config()->m_ClPlayer7Skin[0] = 0;
+		str_copy(CSkins7::ms_apSkinVariables[(int)m_Dummy][m_TeePartSelected], s_paList[m_TeePartSelected][NewSelected]->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
+		CSkins7::ms_apSkinNameVariables[m_Dummy][0] = '\0';
 		SetNeedSendInfo();
 	}
 	s_OldSelected = NewSelected;

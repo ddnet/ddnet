@@ -424,7 +424,10 @@ void CServerBrowserHttp::Refresh()
 }
 bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 {
-	return net_addr_from_url(pOut, pUrl, nullptr, 0) != 0;
+	int Failure = net_addr_from_url(pOut, pUrl, nullptr, 0);
+	if(Failure || pOut->port == 0)
+		return true;
+	return false;
 }
 bool CServerBrowserHttp::Validate(json_value *pJson)
 {

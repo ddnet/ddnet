@@ -75,6 +75,7 @@ MACRO_CONFIG_INT(ClShowfps, cl_showfps, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, 
 MACRO_CONFIG_INT(ClShowpred, cl_showpred, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show ingame prediction time in milliseconds")
 MACRO_CONFIG_INT(ClEyeWheel, cl_eye_wheel, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show eye wheel along together with emotes")
 MACRO_CONFIG_INT(ClEyeDuration, cl_eye_duration, 999999, 1, 999999, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How long the eyes emotes last")
+MACRO_CONFIG_INT(ClFreezeStars, cl_freeze_stars, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show old star particles for frozen tees")
 
 MACRO_CONFIG_INT(ClAirjumpindicator, cl_airjumpindicator, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show the air jump indicator")
 MACRO_CONFIG_INT(ClThreadsoundloading, cl_threadsoundloading, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Load sound files threaded")
@@ -99,6 +100,9 @@ MACRO_CONFIG_INT(ClDyncamStabilizing, cl_dyncam_stabilizing, 0, 0, 100, CFGFLAG_
 MACRO_CONFIG_INT(ClMultiViewSensitivity, cl_multiview_sensitivity, 100, 0, 200, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Set how fast the camera will move to the desired location (higher = faster)")
 MACRO_CONFIG_INT(ClMultiViewZoomSmoothness, cl_multiview_zoom_smoothness, 1300, 50, 5000, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Set the smoothness of the multi-view zoom (in ms, higher = slower)")
 
+MACRO_CONFIG_INT(ClSpectatorMouseclicks, cl_spectator_mouseclicks, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enables left-click to toggle between spectating the closest player and free-view")
+MACRO_CONFIG_INT(ClSmoothSpectatingTime, cl_smooth_spectating_time, 300, 0, 5000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Time of smooth camera switch animation when spectating in ms (0 for off)")
+
 MACRO_CONFIG_INT(EdAutosaveInterval, ed_autosave_interval, 10, 0, 240, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Interval in minutes at which a copy of the current editor map is automatically saved to the 'auto' folder (0 for off)")
 MACRO_CONFIG_INT(EdAutosaveMax, ed_autosave_max, 10, 0, 1000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Maximum number of autosaves that are kept per map name (0 = no limit)")
 MACRO_CONFIG_INT(EdSmoothZoomTime, ed_smooth_zoom_time, 250, 0, 5000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Time of smooth zoom animation in the editor in ms (0 for off)")
@@ -108,6 +112,7 @@ MACRO_CONFIG_INT(EdShowkeys, ed_showkeys, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE
 MACRO_CONFIG_INT(EdAlignQuads, ed_align_quads, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable/disable quad alignment. When enabled, red lines appear to show how quad/points are aligned and snapped to other quads/points when moving them")
 MACRO_CONFIG_INT(EdShowQuadsRect, ed_show_quads_rect, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show the bounds of the selected quad. In case of multiple quads, it shows the bounds of the englobing rect. Can be helpful when aligning a group of quads")
 MACRO_CONFIG_INT(EdAutoMapReload, ed_auto_map_reload, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Run 'hot_reload' on the local server while rcon authed on map save")
+MACRO_CONFIG_INT(EdLayerSelector, ed_layer_selector, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Ctrl+right click tiles to select their layers in the editor")
 
 MACRO_CONFIG_INT(ClShowWelcome, cl_show_welcome, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show welcome message indicating the first launch of the client")
 MACRO_CONFIG_INT(ClMotdTime, cl_motd_time, 10, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How long to show the server message of the day")
@@ -139,13 +144,13 @@ MACRO_CONFIG_INT(ClPlayerDefaultEyes, player_default_eyes, 0, 0, 5, CFGFLAG_CLIE
 MACRO_CONFIG_STR(ClSkinPrefix, cl_skin_prefix, 12, "", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Replace the skins by skins with this prefix (e.g. kitty, santa)")
 MACRO_CONFIG_INT(ClFatSkins, cl_fat_skins, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable fat skins")
 
-MACRO_CONFIG_COL(ClPlayer7ColorBody, player7_color_body, 0x1B6F74, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_INSENSITIVE, "Player body color")
-MACRO_CONFIG_COL(ClPlayer7ColorFeet, player7_color_feet, 0x1C873E, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_INSENSITIVE, "Player feet color")
+MACRO_CONFIG_COL(ClPlayer7ColorBody, player7_color_body, 0x1B6F74, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_INSENSITIVE, "Player body color")
+MACRO_CONFIG_COL(ClPlayer7ColorFeet, player7_color_feet, 0x1C873E, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_INSENSITIVE, "Player feet color")
 
-MACRO_CONFIG_COL(ClPlayer7ColorMarking, player7_color_marking, 0xFF0000FF, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_COLALPHA | CFGFLAG_INSENSITIVE, "Player marking color")
-MACRO_CONFIG_COL(ClPlayer7ColorDecoration, player7_color_decoration, 0x1B6F74, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_INSENSITIVE, "Player decoration color")
-MACRO_CONFIG_COL(ClPlayer7ColorHands, player7_color_hands, 0x1B759E, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_INSENSITIVE, "Player hands color")
-MACRO_CONFIG_COL(ClPlayer7ColorEyes, player7_color_eyes, 0x0000FF, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_INSENSITIVE, "Player eyes color")
+MACRO_CONFIG_COL(ClPlayer7ColorMarking, player7_color_marking, 0xFF0000FF, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_COLALPHA | CFGFLAG_INSENSITIVE, "Player marking color")
+MACRO_CONFIG_COL(ClPlayer7ColorDecoration, player7_color_decoration, 0x1B6F74, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_INSENSITIVE, "Player decoration color")
+MACRO_CONFIG_COL(ClPlayer7ColorHands, player7_color_hands, 0x1B759E, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_INSENSITIVE, "Player hands color")
+MACRO_CONFIG_COL(ClPlayer7ColorEyes, player7_color_eyes, 0x0000FF, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_INSENSITIVE, "Player eyes color")
 MACRO_CONFIG_INT(ClPlayer7UseCustomColorBody, player7_use_custom_color_body, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Toggles usage of custom colors for body")
 MACRO_CONFIG_INT(ClPlayer7UseCustomColorMarking, player7_use_custom_color_marking, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Toggles usage of custom colors for marking")
 MACRO_CONFIG_INT(ClPlayer7UseCustomColorDecoration, player7_use_custom_color_decoration, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Toggles usage of custom colors for decoration")
@@ -160,13 +165,13 @@ MACRO_CONFIG_STR(ClPlayer7SkinHands, player7_skin_hands, protocol7::MAX_SKIN_ARR
 MACRO_CONFIG_STR(ClPlayer7SkinFeet, player7_skin_feet, protocol7::MAX_SKIN_ARRAY_SIZE, "standard", CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Player skin feet")
 MACRO_CONFIG_STR(ClPlayer7SkinEyes, player7_skin_eyes, protocol7::MAX_SKIN_ARRAY_SIZE, "standard", CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Player skin eyes")
 
-MACRO_CONFIG_COL(ClDummy7ColorBody, dummy7_color_body, 0x1B6F74, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_INSENSITIVE, "Dummy body color")
-MACRO_CONFIG_COL(ClDummy7ColorFeet, dummy7_color_feet, 0x1C873E, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_INSENSITIVE, "Dummy feet color")
+MACRO_CONFIG_COL(ClDummy7ColorBody, dummy7_color_body, 0x1B6F74, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_INSENSITIVE, "Dummy body color")
+MACRO_CONFIG_COL(ClDummy7ColorFeet, dummy7_color_feet, 0x1C873E, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_INSENSITIVE, "Dummy feet color")
 
-MACRO_CONFIG_COL(ClDummy7ColorMarking, dummy7_color_marking, 0xFF0000FF, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_COLALPHA | CFGFLAG_INSENSITIVE, "Dummy marking color")
-MACRO_CONFIG_COL(ClDummy7ColorDecoration, dummy7_color_decoration, 0x1B6F74, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_INSENSITIVE, "Dummy decoration color")
-MACRO_CONFIG_COL(ClDummy7ColorHands, dummy7_color_hands, 0x1B759E, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_INSENSITIVE, "Dummy hands color")
-MACRO_CONFIG_COL(ClDummy7ColorEyes, dummy7_color_eyes, 0x0000FF, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT | CFGFLAG_INSENSITIVE, "Dummy eyes color")
+MACRO_CONFIG_COL(ClDummy7ColorMarking, dummy7_color_marking, 0xFF0000FF, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_COLALPHA | CFGFLAG_INSENSITIVE, "Dummy marking color")
+MACRO_CONFIG_COL(ClDummy7ColorDecoration, dummy7_color_decoration, 0x1B6F74, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_INSENSITIVE, "Dummy decoration color")
+MACRO_CONFIG_COL(ClDummy7ColorHands, dummy7_color_hands, 0x1B759E, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_INSENSITIVE, "Dummy hands color")
+MACRO_CONFIG_COL(ClDummy7ColorEyes, dummy7_color_eyes, 0x0000FF, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLLIGHT7 | CFGFLAG_INSENSITIVE, "Dummy eyes color")
 MACRO_CONFIG_INT(ClDummy7UseCustomColorBody, dummy7_use_custom_color_body, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Toggles usage of custom colors for body")
 MACRO_CONFIG_INT(ClDummy7UseCustomColorMarking, dummy7_use_custom_color_marking, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Toggles usage of custom colors for marking")
 MACRO_CONFIG_INT(ClDummy7UseCustomColorDecoration, dummy7_use_custom_color_decoration, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Toggles usage of custom colors for decoration")
@@ -229,7 +234,7 @@ MACRO_CONFIG_INT(SvWarmup, sv_warmup, 0, 0, 0, CFGFLAG_SERVER, "Number of second
 MACRO_CONFIG_STR(SvMotd, sv_motd, 900, "", CFGFLAG_SERVER, "Message of the day to display for the clients")
 MACRO_CONFIG_STR(SvGametype, sv_gametype, 32, "ddnet", CFGFLAG_SERVER, "Game type (ddnet, mod)")
 MACRO_CONFIG_INT(SvTournamentMode, sv_tournament_mode, 0, 0, 1, CFGFLAG_SERVER, "Tournament mode. When enabled, players joins the server as spectator")
-MACRO_CONFIG_INT(SvSpamprotection, sv_spamprotection, 1, 0, 1, CFGFLAG_SERVER, "Spam protection")
+MACRO_CONFIG_INT(SvSpamprotection, sv_spamprotection, 1, 0, 1, CFGFLAG_SERVER, "Spam protection for: team change, chat, skin change, emotes and votes")
 
 MACRO_CONFIG_INT(SvSpectatorSlots, sv_spectator_slots, 0, 0, MAX_CLIENTS, CFGFLAG_SERVER, "Number of slots to reserve for spectators")
 MACRO_CONFIG_INT(SvInactiveKickTime, sv_inactivekick_time, 0, 0, 1000, CFGFLAG_SERVER, "How many minutes to wait before taking care of inactive players")
@@ -549,8 +554,8 @@ MACRO_CONFIG_INT(SvMinTeamSize, sv_min_team_size, 2, 1, MAX_CLIENTS, CFGFLAG_SER
 MACRO_CONFIG_INT(SvMaxTeamSize, sv_max_team_size, MAX_CLIENTS, 1, MAX_CLIENTS, CFGFLAG_SERVER | CFGFLAG_GAME, "Maximum team size")
 MACRO_CONFIG_INT(SvMapVote, sv_map_vote, 1, 0, 1, CFGFLAG_SERVER, "Whether to allow /map")
 
-MACRO_CONFIG_STR(SvAnnouncementFileName, sv_announcement_filename, 24, "announcement.txt", CFGFLAG_SERVER, "file which will have the announcement, each one at a line")
-MACRO_CONFIG_INT(SvAnnouncementInterval, sv_announcement_interval, 300, 1, 9999, CFGFLAG_SERVER, "time(minutes) in which the announcement will be displayed from the announcement file")
+MACRO_CONFIG_STR(SvAnnouncementFileName, sv_announcement_filename, IO_MAX_PATH_LENGTH, "announcement.txt", CFGFLAG_SERVER, "File which contains the announcements, one on each line")
+MACRO_CONFIG_INT(SvAnnouncementInterval, sv_announcement_interval, 120, 1, 9999, CFGFLAG_SERVER, "The time (minutes) for how often an announcement will be displayed from the announcement file")
 MACRO_CONFIG_INT(SvAnnouncementRandom, sv_announcement_random, 1, 0, 1, CFGFLAG_SERVER, "Whether announcements are sequential or random")
 
 MACRO_CONFIG_INT(SvOldLaser, sv_old_laser, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether lasers can hit you if you shot them and that they pull you towards the bounce origin (0 for all new maps) or lasers can't hit you if you shot them, and they pull others towards the shooter")
@@ -716,7 +721,9 @@ MACRO_CONFIG_STR(Gfx3DTextureAnalysisRenderer, gfx_3d_texture_analysis_renderer,
 MACRO_CONFIG_STR(Gfx3DTextureAnalysisVersion, gfx_3d_texture_analysis_version, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The version on which the analysis was performed")
 
 MACRO_CONFIG_STR(GfxGpuName, gfx_gpu_name, 256, "auto", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The GPU's name, which will be selected by the backend. (if supported by the backend)")
-#if !defined(CONF_ARCH_IA32) && !defined(CONF_PLATFORM_MACOS)
+#if defined(CONF_PLATFORM_ANDROID)
+MACRO_CONFIG_STR(GfxBackend, gfx_backend, 256, "GLES", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The backend to use (e.g. GLES or Vulkan)")
+#elif !defined(CONF_ARCH_IA32) && !defined(CONF_PLATFORM_MACOS)
 MACRO_CONFIG_STR(GfxBackend, gfx_backend, 256, "Vulkan", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The backend to use (e.g. OpenGL or Vulkan)")
 #else
 MACRO_CONFIG_STR(GfxBackend, gfx_backend, 256, "OpenGL", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The backend to use (e.g. OpenGL or Vulkan)")

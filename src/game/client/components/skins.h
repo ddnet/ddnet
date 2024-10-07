@@ -30,7 +30,7 @@ public:
 	struct CDownloadSkin
 	{
 	private:
-		char m_aName[24];
+		char m_aName[MAX_SKIN_LENGTH];
 
 	public:
 		std::shared_ptr<CSkins::CGetPngFile> m_pTask;
@@ -66,6 +66,7 @@ public:
 	std::unordered_map<std::string_view, std::unique_ptr<CSkin>> &GetSkinsUnsafe() { return m_Skins; }
 	const CSkin *FindOrNullptr(const char *pName, bool IgnorePrefix = false);
 	const CSkin *Find(const char *pName);
+	void RandomizeSkin(int Dummy);
 
 	bool IsDownloadingSkins() { return m_DownloadingSkins; }
 
@@ -81,7 +82,7 @@ private:
 	std::unordered_map<std::string_view, std::unique_ptr<CDownloadSkin>> m_DownloadSkins;
 	CSkin m_PlaceholderSkin;
 	size_t m_DownloadingSkins = 0;
-	char m_aEventSkinPrefix[24];
+	char m_aEventSkinPrefix[MAX_SKIN_LENGTH];
 
 	bool LoadSkinPng(CImageInfo &Info, const char *pName, const char *pPath, int DirType);
 	const CSkin *LoadSkin(const char *pName, const char *pPath, int DirType);

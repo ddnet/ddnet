@@ -67,14 +67,14 @@ bool CLayerSwitch::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 	return true;
 }
 
-void CLayerSwitch::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
+void CLayerSwitch::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
 	std::shared_ptr<CLayerSwitch> pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pBrush);
-	int sx = ConvertX(wx);
-	int sy = ConvertY(wy);
+	int sx = ConvertX(WorldPos.x);
+	int sy = ConvertY(WorldPos.y);
 	if(str_comp(pSwitchLayer->m_aFileName, m_pEditor->m_aFileName))
 	{
 		m_pEditor->m_SwitchNum = pSwitchLayer->m_SwitchNumber;

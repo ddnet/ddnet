@@ -391,7 +391,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 				MapDataMsg.AddInt(0); // crc
 				MapDataMsg.AddInt(0); // chunk index
 				MapDataMsg.AddInt(0); // map size
-				MapDataMsg.AddRaw(NULL, 0); // map data
+				// no map data
 			}
 			else
 			{

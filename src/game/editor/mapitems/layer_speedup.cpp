@@ -65,14 +65,14 @@ bool CLayerSpeedup::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 	return true;
 }
 
-void CLayerSpeedup::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
+void CLayerSpeedup::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
 	std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pBrush);
-	int sx = ConvertX(wx);
-	int sy = ConvertY(wy);
+	int sx = ConvertX(WorldPos.x);
+	int sy = ConvertY(WorldPos.y);
 	if(str_comp(pSpeedupLayer->m_aFileName, m_pEditor->m_aFileName))
 	{
 		m_pEditor->m_SpeedupAngle = pSpeedupLayer->m_SpeedupAngle;

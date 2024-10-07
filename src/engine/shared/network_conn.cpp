@@ -362,7 +362,11 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 				IsPeer = false;
 				for(int i = 0; i < m_NumConnectAddrs; i++)
 				{
-					IsPeer = IsPeer || m_aConnectAddrs[i] == *pAddr;
+					if(m_aConnectAddrs[i] == *pAddr)
+					{
+						IsPeer = true;
+						break;
+					}
 				}
 			}
 			if(IsPeer)

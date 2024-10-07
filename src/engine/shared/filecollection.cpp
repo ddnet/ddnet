@@ -19,7 +19,7 @@ void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pF
 	m_pStorage = pStorage;
 
 	m_pStorage->ListDirectory(IStorage::TYPE_SAVE, m_aPath, FilelistCallback, this);
-	std::sort(m_vFileEntries.begin(), m_vFileEntries.end(), [](const CFileEntry &lhs, const CFileEntry &rhs) { return lhs.m_Timestamp < rhs.m_Timestamp; });
+	std::sort(m_vFileEntries.begin(), m_vFileEntries.end(), [](const CFileEntry &Lhs, const CFileEntry &Rhs) { return Lhs.m_Timestamp < Rhs.m_Timestamp; });
 
 	int FilesDeleted = 0;
 	for(auto FileEntry : m_vFileEntries)

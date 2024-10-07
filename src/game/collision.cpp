@@ -602,28 +602,28 @@ int CCollision::IsSolid(int x, int y) const
 	return index == TILE_SOLID || index == TILE_NOHOOK;
 }
 
-bool CCollision::IsThrough(int x, int y, int xoff, int yoff, vec2 pos0, vec2 pos1) const
+bool CCollision::IsThrough(int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const
 {
 	int pos = GetPureMapIndex(x, y);
 	if(m_pFront && (m_pFront[pos].m_Index == TILE_THROUGH_ALL || m_pFront[pos].m_Index == TILE_THROUGH_CUT))
 		return true;
-	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_DIR && ((m_pFront[pos].m_Flags == ROTATION_0 && pos0.y > pos1.y) || (m_pFront[pos].m_Flags == ROTATION_90 && pos0.x < pos1.x) || (m_pFront[pos].m_Flags == ROTATION_180 && pos0.y < pos1.y) || (m_pFront[pos].m_Flags == ROTATION_270 && pos0.x > pos1.x)))
+	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_DIR && ((m_pFront[pos].m_Flags == ROTATION_0 && Pos0.y > Pos1.y) || (m_pFront[pos].m_Flags == ROTATION_90 && Pos0.x < Pos1.x) || (m_pFront[pos].m_Flags == ROTATION_180 && Pos0.y < Pos1.y) || (m_pFront[pos].m_Flags == ROTATION_270 && Pos0.x > Pos1.x)))
 		return true;
-	int offpos = GetPureMapIndex(x + xoff, y + yoff);
+	int offpos = GetPureMapIndex(x + OffsetX, y + OffsetY);
 	return m_pTiles[offpos].m_Index == TILE_THROUGH || (m_pFront && m_pFront[offpos].m_Index == TILE_THROUGH);
 }
 
-bool CCollision::IsHookBlocker(int x, int y, vec2 pos0, vec2 pos1) const
+bool CCollision::IsHookBlocker(int x, int y, vec2 Pos0, vec2 Pos1) const
 {
 	int pos = GetPureMapIndex(x, y);
 	if(m_pTiles[pos].m_Index == TILE_THROUGH_ALL || (m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_ALL))
 		return true;
-	if(m_pTiles[pos].m_Index == TILE_THROUGH_DIR && ((m_pTiles[pos].m_Flags == ROTATION_0 && pos0.y < pos1.y) ||
-								(m_pTiles[pos].m_Flags == ROTATION_90 && pos0.x > pos1.x) ||
-								(m_pTiles[pos].m_Flags == ROTATION_180 && pos0.y > pos1.y) ||
-								(m_pTiles[pos].m_Flags == ROTATION_270 && pos0.x < pos1.x)))
+	if(m_pTiles[pos].m_Index == TILE_THROUGH_DIR && ((m_pTiles[pos].m_Flags == ROTATION_0 && Pos0.y < Pos1.y) ||
+								(m_pTiles[pos].m_Flags == ROTATION_90 && Pos0.x > Pos1.x) ||
+								(m_pTiles[pos].m_Flags == ROTATION_180 && Pos0.y > Pos1.y) ||
+								(m_pTiles[pos].m_Flags == ROTATION_270 && Pos0.x < Pos1.x)))
 		return true;
-	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_DIR && ((m_pFront[pos].m_Flags == ROTATION_0 && pos0.y < pos1.y) || (m_pFront[pos].m_Flags == ROTATION_90 && pos0.x > pos1.x) || (m_pFront[pos].m_Flags == ROTATION_180 && pos0.y > pos1.y) || (m_pFront[pos].m_Flags == ROTATION_270 && pos0.x < pos1.x)))
+	if(m_pFront && m_pFront[pos].m_Index == TILE_THROUGH_DIR && ((m_pFront[pos].m_Flags == ROTATION_0 && Pos0.y < Pos1.y) || (m_pFront[pos].m_Flags == ROTATION_90 && Pos0.x > Pos1.x) || (m_pFront[pos].m_Flags == ROTATION_180 && Pos0.y > Pos1.y) || (m_pFront[pos].m_Flags == ROTATION_270 && Pos0.x < Pos1.x)))
 		return true;
 	return false;
 }
@@ -1078,12 +1078,12 @@ int CCollision::Entity(int x, int y, int Layer) const
 	}
 }
 
-void CCollision::SetCollisionAt(float x, float y, int id)
+void CCollision::SetCollisionAt(float x, float y, int Index)
 {
 	int Nx = clamp(round_to_int(x) / 32, 0, m_Width - 1);
 	int Ny = clamp(round_to_int(y) / 32, 0, m_Height - 1);
 
-	m_pTiles[Ny * m_Width + Nx].m_Index = id;
+	m_pTiles[Ny * m_Width + Nx].m_Index = Index;
 }
 
 void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Number)

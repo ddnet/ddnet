@@ -256,6 +256,7 @@ public:
 	bool m_ShotgunHitDisabled;
 	bool m_HookHitDisabled;
 	bool m_Super;
+	bool m_Invincible;
 	bool m_HasTelegunGun;
 	bool m_HasTelegunGrenade;
 	bool m_HasTelegunLaser;

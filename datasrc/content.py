@@ -452,6 +452,7 @@ container.sprites.Add(Sprite("hud_lock_mode", set_hud, 10,6,2,2))
 container.sprites.Add(Sprite("hud_team0_mode", set_hud, 12,6,2,2))
 
 container.sprites.Add(Sprite("part_snowflake", set_extras, 0,0,2,2))
+container.sprites.Add(Sprite("part_sparkle", set_extras, 2,0,2,2))
 
 
 anim = Animation("base")

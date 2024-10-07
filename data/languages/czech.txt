@@ -6,7 +6,7 @@
 #	Petr			2011-04-02 23:02:33
 #	Medik & Petr	2011-07-02 19:37:05
 #	TeeWorlds-org	2011-07-15 00:34:19
-#	dobrykafe		2024-08-30 00:00:00
+#	dobrykafe		2024-09-29 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1869,21 +1869,6 @@ Please wait…
 Show client IDs (scoreboard, chat, spectator)
 == Zobrazit ID klientů (výsledková tabulka, chat, divák)
 
-Normal:
-== Normální:
-
-Team:
-== Tým:
-
-Dummy settings
-== Nastavení dummyho
-
-Toggle to edit your dummy settings
-== Přepnutím upravíte nastavení dummyho
-
-Randomize
-== Randomizovat
-
 Are you sure that you want to delete '%s'?
 == Jste si jisti, že chcete smazat '%s'?
 
@@ -1898,9 +1883,6 @@ Custom
 
 Unable to delete skin
 == Nelze odstranit skin
-
-Customize
-== Přizpůsobit
 
 Round %d/%d
 == Kolo %d/%d
@@ -1918,3 +1900,46 @@ Team %d (%d/%d)
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
+
+Save skin
+== Uložit skin
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== Opravdu chcete uložit svůj skin? Pokud skin s tímto názvem již existuje, bude nahrazen.
+
+Unable to save the skin
+== Nelze uložit skin
+
+Unable to save the skin with a reserved name
+== Nelze uložit skin s rezervovaným názvem
+
+No local servers found (ports %d-%d)
+== Žádný místní server nenalezen (porty %d-%d)
+
+[Hertz]
+Hz
+== Hz
+
+[skins]
+Body
+== Tělo
+
+[skins]
+Marking
+== Značení
+
+[skins]
+Decoration
+== Dekorace
+
+[skins]
+Hands
+== Ruce
+
+[skins]
+Feet
+== Chodidla
+
+[skins]
+Eyes
+== Oči

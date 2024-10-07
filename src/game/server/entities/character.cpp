@@ -174,17 +174,33 @@ void CCharacter::SetSolo(bool Solo)
 
 void CCharacter::SetSuper(bool Super)
 {
-	m_Core.m_Super = Super;
+	// Disable invincible mode before activating super mode. Both modes active at the same time wouldn't necessarily break anything but it's not useful.
 	if(Super)
+		SetInvincible(false);
+
+	bool WasSuper = m_Core.m_Super;
+	m_Core.m_Super = Super;
+	if(Super && !WasSuper)
 	{
 		m_TeamBeforeSuper = Team();
 		Teams()->SetCharacterTeam(GetPlayer()->GetCid(), TEAM_SUPER);
 		m_DDRaceState = DDRACE_CHEAT;
 	}
-	else
+	else if(!Super && WasSuper)
 	{
 		Teams()->SetForceCharacterTeam(GetPlayer()->GetCid(), m_TeamBeforeSuper);
 	}
+}
+
+void CCharacter::SetInvincible(bool Invincible)
+{
+	// Disable super mode before activating invincible mode. Both modes active at the same time wouldn't necessarily break anything but it's not useful.
+	if(Invincible)
+		SetSuper(false);
+
+	m_Core.m_Invincible = Invincible;
+	if(Invincible)
+		UnFreeze();
 }
 
 void CCharacter::SetLiveFrozen(bool Active)
@@ -1219,6 +1235,8 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SOLO;
 	if(m_Core.m_Super)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
+	if(m_Core.m_Invincible)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_INVINCIBLE;
 	if(m_Core.m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
 	if(m_Core.m_CollisionDisabled || !Tuning()->m_PlayerCollision)
@@ -1361,7 +1379,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		   Collision()->GetFCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
 		   Collision()->GetFCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
 		   Collision()->GetFCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) &&
-		!m_Core.m_Super && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCid())))
+		!m_Core.m_Super && !m_Core.m_Invincible && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCid())))
 	{
 		Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		return;
@@ -1491,7 +1509,7 @@ void CCharacter::HandleTiles(int Index)
 		return;
 
 	// freeze
-	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Core.m_Super && !m_Core.m_DeepFrozen)
+	if(((m_TileIndex == TILE_FREEZE) || (m_TileFIndex == TILE_FREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && !m_Core.m_DeepFrozen)
 	{
 		Freeze();
 	}
@@ -1499,17 +1517,17 @@ void CCharacter::HandleTiles(int Index)
 		UnFreeze();
 
 	// deep freeze
-	if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Core.m_Super && !m_Core.m_DeepFrozen)
+	if(((m_TileIndex == TILE_DFREEZE) || (m_TileFIndex == TILE_DFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && !m_Core.m_DeepFrozen)
 		m_Core.m_DeepFrozen = true;
-	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Core.m_Super && m_Core.m_DeepFrozen)
+	else if(((m_TileIndex == TILE_DUNFREEZE) || (m_TileFIndex == TILE_DUNFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible && m_Core.m_DeepFrozen)
 		m_Core.m_DeepFrozen = false;
 
 	// live freeze
-	if(((m_TileIndex == TILE_LFREEZE) || (m_TileFIndex == TILE_LFREEZE)) && !m_Core.m_Super)
+	if(((m_TileIndex == TILE_LFREEZE) || (m_TileFIndex == TILE_LFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible)
 	{
 		m_Core.m_LiveFrozen = true;
 	}
-	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !m_Core.m_Super)
+	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible)
 	{
 		m_Core.m_LiveFrozen = false;
 	}
@@ -1690,31 +1708,31 @@ void CCharacter::HandleTiles(int Index)
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aType[Team()] = TILE_SWITCHCLOSE;
 		Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aLastUpdateTick[Team()] = Server()->Tick();
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_FREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()])
 		{
 			Freeze(Collision()->GetSwitchDelay(MapIndex));
 		}
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_DFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()])
 			m_Core.m_DeepFrozen = true;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_DUNFREEZE && Team() != TEAM_SUPER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_DUNFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()])
 			m_Core.m_DeepFrozen = false;
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE && Team() != TEAM_SUPER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_LFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()])
 		{
 			m_Core.m_LiveFrozen = true;
 		}
 	}
-	else if(Collision()->GetSwitchType(MapIndex) == TILE_LUNFREEZE && Team() != TEAM_SUPER)
+	else if(Collision()->GetSwitchType(MapIndex) == TILE_LUNFREEZE && Team() != TEAM_SUPER && !m_Core.m_Invincible)
 	{
 		if(Collision()->GetSwitchNumber(MapIndex) == 0 || Switchers()[Collision()->GetSwitchNumber(MapIndex)].m_aStatus[Team()])
 		{
@@ -1846,7 +1864,7 @@ void CCharacter::HandleTiles(int Index)
 	int z = Collision()->IsTeleport(MapIndex);
 	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !Collision()->TeleOuts(z - 1).empty())
 	{
-		if(m_Core.m_Super)
+		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
 		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(z - 1).size());
 		m_Core.m_Pos = Collision()->TeleOuts(z - 1)[TeleOut];
@@ -1861,7 +1879,7 @@ void CCharacter::HandleTiles(int Index)
 	int evilz = Collision()->IsEvilTeleport(MapIndex);
 	if(evilz && !Collision()->TeleOuts(evilz - 1).empty())
 	{
-		if(m_Core.m_Super)
+		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
 		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(evilz - 1).size());
 		m_Core.m_Pos = Collision()->TeleOuts(evilz - 1)[TeleOut];
@@ -1883,7 +1901,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(Collision()->IsCheckEvilTeleport(MapIndex))
 	{
-		if(m_Core.m_Super)
+		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
@@ -1920,7 +1938,7 @@ void CCharacter::HandleTiles(int Index)
 	}
 	if(Collision()->IsCheckTeleport(MapIndex))
 	{
-		if(m_Core.m_Super)
+		if(m_Core.m_Super || m_Core.m_Invincible)
 			return;
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
@@ -2066,7 +2084,7 @@ void CCharacter::DDRaceTick()
 	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
 		m_LastMove = Server()->Tick();
 
-	if(m_Core.m_LiveFrozen && !m_Core.m_Super)
+	if(m_Core.m_LiveFrozen && !m_Core.m_Super && !m_Core.m_Invincible)
 	{
 		m_Input.m_Direction = 0;
 		m_Input.m_Jump = 0;
@@ -2120,7 +2138,7 @@ void CCharacter::DDRacePostCoreTick()
 
 	m_FrozenLastTick = false;
 
-	if(m_Core.m_DeepFrozen && !m_Core.m_Super)
+	if(m_Core.m_DeepFrozen && !m_Core.m_Super && !m_Core.m_Invincible)
 		Freeze();
 
 	// following jump rules can be overridden by tiles, like Refill Jumps, Stopper and Wall Jump
@@ -2145,9 +2163,9 @@ void CCharacter::DDRacePostCoreTick()
 		m_Core.m_Jumped = 1;
 	}
 
-	if((m_Core.m_Super || m_Core.m_EndlessJump) && m_Core.m_Jumped > 1)
+	if((m_Core.m_Super || m_Core.m_Invincible || m_Core.m_EndlessJump) && m_Core.m_Jumped > 1)
 	{
-		// Super players and players with infinite jumps always have light feet
+		// Super players, invincible players and players with infinite jumps always have light feet
 		m_Core.m_Jumped = 1;
 	}
 
@@ -2192,7 +2210,7 @@ void CCharacter::DDRacePostCoreTick()
 
 bool CCharacter::Freeze(int Seconds)
 {
-	if(Seconds <= 0 || m_Core.m_Super || m_FreezeTime > Seconds * Server()->TickSpeed())
+	if(Seconds <= 0 || m_Core.m_Super || m_Core.m_Invincible || m_FreezeTime > Seconds * Server()->TickSpeed())
 		return false;
 	if(m_FreezeTime == 0 || m_Core.m_FreezeStart < Server()->Tick() - Server()->TickSpeed())
 	{
@@ -2366,7 +2384,7 @@ void CCharacter::DDRaceInit()
 
 void CCharacter::Rescue()
 {
-	if(m_SetSavePos[GetPlayer()->m_RescueMode] && !m_Core.m_Super)
+	if(m_SetSavePos[GetPlayer()->m_RescueMode] && !m_Core.m_Super && !m_Core.m_Invincible)
 	{
 		if(m_LastRescue + (int64_t)g_Config.m_SvRescueDelay * Server()->TickSpeed() > Server()->Tick())
 		{
@@ -2376,6 +2394,7 @@ void CCharacter::Rescue()
 			return;
 		}
 
+		m_LastRescue = Server()->Tick();
 		float StartTime = m_StartTime;
 		m_RescueTee[GetPlayer()->m_RescueMode].Load(this, Team());
 		// Don't load these from saved tee:

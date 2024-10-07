@@ -134,6 +134,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Background, // render instead of m_MapLayersBackground when g_Config.m_ClOverlayEntities == 100
 					      &m_MapLayersBackground, // first to render
 					      &m_Particles.m_RenderTrail,
+					      &m_Particles.m_RenderTrailExtra,
 					      &m_Items,
 					      &m_Ghost,
 					      &m_Players,
@@ -459,7 +460,9 @@ void CGameClient::OnUpdate()
 	Input()->ConsumeEvents([&](const IInput::CEvent &Event) {
 		for(auto &pComponent : m_vpInput)
 		{
-			if(pComponent->OnInput(Event))
+			// Events with flag `FLAG_RELEASE` must always be forwarded to all components so keys being
+			// released can be handled in all components also after some components have been disabled.
+			if(pComponent->OnInput(Event) && (Event.m_Flags & ~IInput::FLAG_RELEASE) != 0)
 				break;
 		}
 	});
@@ -1115,7 +1118,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 			return;
 
 		CNetMsg_Sv_MapSoundGlobal *pMsg = (CNetMsg_Sv_MapSoundGlobal *)pRawMsg;
-		m_MapSounds.Play(pMsg->m_SoundId);
+		m_MapSounds.Play(CSounds::CHN_GLOBAL, pMsg->m_SoundId);
 	}
 }
 
@@ -1296,7 +1299,7 @@ void CGameClient::ProcessEvents()
 			if(!Config()->m_SndGame)
 				continue;
 
-			m_MapSounds.PlayAt(pEvent->m_SoundId, vec2(pEvent->m_X, pEvent->m_Y));
+			m_MapSounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, vec2(pEvent->m_X, pEvent->m_Y));
 		}
 	}
 }
@@ -1561,16 +1564,12 @@ void CGameClient::OnNewSnapshot()
 					if(!m_GameInfo.m_AllowXSkins && (pClient->m_aSkinName[0] == 'x' && pClient->m_aSkinName[1] == '_'))
 						str_copy(pClient->m_aSkinName, "default");
 
-					pClient->m_SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pClient->m_ColorBody).UnclampLighting());
-					pClient->m_SkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pClient->m_ColorFeet).UnclampLighting());
+					pClient->m_SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pClient->m_ColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
+					pClient->m_SkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pClient->m_ColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
 					pClient->m_SkinInfo.m_Size = 64;
 
 					// find new skin
-					const CSkin *pSkin = m_Skins.Find(pClient->m_aSkinName);
-					pClient->m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-					pClient->m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-					pClient->m_SkinInfo.m_SkinMetrics = pSkin->m_Metrics;
-					pClient->m_SkinInfo.m_BloodColor = pSkin->m_BloodColor;
+					pClient->m_SkinInfo.Apply(m_Skins.Find(pClient->m_aSkinName));
 					pClient->m_SkinInfo.m_CustomColoredSkin = pClient->m_UseCustomColor;
 
 					if(!pClient->m_UseCustomColor)
@@ -1579,7 +1578,7 @@ void CGameClient::OnNewSnapshot()
 						pClient->m_SkinInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
 					}
 
-					pClient->UpdateRenderInfo(IsTeamPlay(), g_Config.m_ClDummy);
+					pClient->UpdateRenderInfo(IsTeamPlay());
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_PLAYERINFO)
@@ -1697,6 +1696,7 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_ShotgunHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_SHOTGUN_HIT_DISABLED;
 					pClient->m_HookHitDisabled = pCharacterData->m_Flags & CHARACTERFLAG_HOOK_HIT_DISABLED;
 					pClient->m_Super = pCharacterData->m_Flags & CHARACTERFLAG_SUPER;
+					pClient->m_Invincible = pCharacterData->m_Flags & CHARACTERFLAG_INVINCIBLE;
 
 					// Endless
 					pClient->m_EndlessHook = pCharacterData->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;
@@ -2112,6 +2112,32 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 
+	if(g_Config.m_ClFreezeStars && !m_SuppressEvents)
+	{
+		for(auto &Character : m_Snap.m_aCharacters)
+		{
+			if(Character.m_Active && Character.m_HasExtendedData && Character.m_PrevExtendedData)
+			{
+				int FreezeTimeNow = Character.m_ExtendedData.m_FreezeEnd - Client()->GameTick(g_Config.m_ClDummy);
+				int FreezeTimePrev = Character.m_PrevExtendedData->m_FreezeEnd - Client()->PrevGameTick(g_Config.m_ClDummy);
+				vec2 Pos = vec2(Character.m_Cur.m_X, Character.m_Cur.m_Y);
+				int StarsNow = (FreezeTimeNow + 1) / Client()->GameTickSpeed();
+				int StarsPrev = (FreezeTimePrev + 1) / Client()->GameTickSpeed();
+				if(StarsNow < StarsPrev || (StarsPrev == 0 && StarsNow > 0))
+				{
+					int Amount = StarsNow + 1;
+					float Mid = 3 * pi / 2;
+					float Min = Mid - pi / 3;
+					float Max = Mid + pi / 3;
+					for(int j = 0; j < Amount; j++)
+					{
+						float Angle = mix(Min, Max, (j + 1) / (float)(Amount + 2));
+						m_Effects.DamageIndicator(Pos, direction(Angle));
+					}
+				}
+			}
+		}
+	}
 	if(m_Snap.m_LocalClientId != m_PrevLocalId)
 		m_PredictedDummyId = m_PrevLocalId;
 	m_PrevLocalId = m_Snap.m_LocalClientId;
@@ -2462,7 +2488,7 @@ void CGameClient::CClientStats::Reset()
 	m_FlagCaptures = 0;
 }
 
-void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay, int Conn)
+void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay)
 {
 	m_RenderInfo = m_SkinInfo;
 
@@ -2477,6 +2503,7 @@ void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay, int Conn)
 			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(aTeamColors[m_Team]));
 
 			// 0.7
+			for(auto &Sixup : m_RenderInfo.m_aSixup)
 			{
 				const ColorRGBA aTeamColorsSixup[2] = {
 					ColorRGBA(0.753f, 0.318f, 0.318f, 1.0f),
@@ -2484,19 +2511,20 @@ void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay, int Conn)
 				const ColorRGBA aMarkingColorsSixup[2] = {
 					ColorRGBA(0.824f, 0.345f, 0.345f, 1.0f),
 					ColorRGBA(0.345f, 0.514f, 0.824f, 1.0f)};
-				float MarkingAlpha = m_RenderInfo.m_aSixup[Conn].m_aColors[protocol7::SKINPART_MARKING].a;
-				for(auto &Color : m_RenderInfo.m_aSixup[Conn].m_aColors)
+				float MarkingAlpha = Sixup.m_aColors[protocol7::SKINPART_MARKING].a;
+				for(auto &Color : Sixup.m_aColors)
 					Color = aTeamColorsSixup[m_Team];
 				if(MarkingAlpha > 0.1f)
-					m_RenderInfo.m_aSixup[Conn].m_aColors[protocol7::SKINPART_MARKING] = aMarkingColorsSixup[m_Team];
+					Sixup.m_aColors[protocol7::SKINPART_MARKING] = aMarkingColorsSixup[m_Team];
 			}
 		}
 		else
 		{
 			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(12829350));
 			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(12829350));
-			for(auto &Color : m_RenderInfo.m_aSixup[Conn].m_aColors)
-				Color = color_cast<ColorRGBA>(ColorHSLA(12829350));
+			for(auto &Sixup : m_RenderInfo.m_aSixup)
+				for(auto &Color : Sixup.m_aColors)
+					Color = color_cast<ColorRGBA>(ColorHSLA(12829350));
 		}
 	}
 }
@@ -2529,6 +2557,7 @@ void CGameClient::CClientData::Reset()
 	m_ShotgunHitDisabled = false;
 	m_HookHitDisabled = false;
 	m_Super = false;
+	m_Invincible = false;
 	m_HasTelegunGun = false;
 	m_HasTelegunGrenade = false;
 	m_HasTelegunLaser = false;
@@ -2585,14 +2614,11 @@ void CGameClient::CClientData::CSixup::Reset()
 	}
 }
 
-void CGameClient::SendSwitchTeam(int Team)
+void CGameClient::SendSwitchTeam(int Team) const
 {
 	CNetMsg_Cl_SetTeam Msg;
 	Msg.m_Team = Team;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
-
-	if(Team != TEAM_SPECTATORS)
-		m_Camera.OnReset();
 }
 
 void CGameClient::SendStartInfo7(bool Dummy) const
@@ -2844,16 +2870,16 @@ IGameClient *CreateGameClient()
 	return new CGameClient();
 }
 
-int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownId)
+int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int OwnId)
 {
 	float Distance = 0.0f;
 	int ClosestId = -1;
 
-	const CClientData &OwnClientData = m_aClients[ownId];
+	const CClientData &OwnClientData = m_aClients[OwnId];
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(i == ownId)
+		if(i == OwnId)
 			continue;
 
 		const CClientData &Data = m_aClients[i];
@@ -2869,7 +2895,7 @@ int CGameClient::IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, in
 		bool IsOneSuper = Data.m_Super || OwnClientData.m_Super;
 		bool IsOneSolo = Data.m_Solo || OwnClientData.m_Solo;
 
-		if(!IsOneSuper && (!m_Teams.SameTeam(i, ownId) || IsOneSolo || OwnClientData.m_HookHitDisabled))
+		if(!IsOneSuper && (!m_Teams.SameTeam(i, OwnId) || IsOneSolo || OwnClientData.m_HookHitDisabled))
 			continue;
 
 		vec2 ClosestPoint;
@@ -3852,6 +3878,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 	if(m_ExtrasSkinLoaded)
 	{
 		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleSnowflake);
+		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleSparkle);
 
 		for(auto &SpriteParticle : m_ExtrasSkin.m_aSpriteParticles)
 			SpriteParticle = IGraphics::CTextureHandle();
@@ -3886,7 +3913,11 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE].m_pSet->m_Gridy, true) && Graphics()->IsImageFormatRgba(aPath, ImgInfo))
 	{
 		m_ExtrasSkin.m_SpriteParticleSnowflake = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE]);
+		m_ExtrasSkin.m_SpriteParticleSparkle = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_SPARKLE]);
+
 		m_ExtrasSkin.m_aSpriteParticles[0] = m_ExtrasSkin.m_SpriteParticleSnowflake;
+		m_ExtrasSkin.m_aSpriteParticles[1] = m_ExtrasSkin.m_SpriteParticleSparkle;
+
 		m_ExtrasSkinLoaded = true;
 	}
 	ImgInfo.Free();
@@ -3905,21 +3936,16 @@ void CGameClient::RefreshSkins()
 
 	for(auto &Client : m_aClients)
 	{
-		Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
-		Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
 		if(Client.m_aSkinName[0] != '\0')
 		{
-			const CSkin *pSkin = m_Skins.Find(Client.m_aSkinName);
-			Client.m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-			Client.m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+			Client.m_SkinInfo.Apply(m_Skins.Find(Client.m_aSkinName));
 		}
 		else
 		{
 			Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
 			Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
 		}
-		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
-			Client.UpdateRenderInfo(IsTeamPlay(), Dummy);
+		Client.UpdateRenderInfo(IsTeamPlay());
 	}
 
 	for(auto &pComponent : m_vpAll)
@@ -4064,9 +4090,9 @@ void CGameClient::SnapCollectEntities()
 	class CEntComparer
 	{
 	public:
-		bool operator()(const CSnapEntities &lhs, const CSnapEntities &rhs) const
+		bool operator()(const CSnapEntities &Lhs, const CSnapEntities &Rhs) const
 		{
-			return lhs.m_Item.m_Id < rhs.m_Item.m_Id;
+			return Lhs.m_Item.m_Id < Rhs.m_Item.m_Id;
 		}
 	};
 

@@ -17,6 +17,7 @@
 #   Gokturk          2024-06-09 12:00:50
 #   Gokturk          2024-07-17 02:24:00
 #   Gokturk          2024-08-29 23:31:00
+#   Gokturk          2024-09-29 19:23:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1894,21 +1895,6 @@ Please wait…
 Show client IDs (scoreboard, chat, spectator)
 == İstemci ID'sini göster (skor tablosu, sohbet, izleyici)
 
-Normal:
-== Normal:
-
-Team:
-== Takım:
-
-Dummy settings
-== Dummy ayarları
-
-Toggle to edit your dummy settings
-== Dummy ayarlarını düzenlemek için açın 
-
-Randomize
-== Rastgele
-
 Are you sure that you want to delete '%s'?
 == '%s' bunu silmek istediğine emin misin?
 
@@ -1924,5 +1910,45 @@ Custom
 Unable to delete skin
 == Skin silinemiyor
 
-Customize
-== Özelleştir
+Save skin
+== Skini kaydet
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== Skini kaydetmek istiyor musun? Bu isimde başka bir skin varsa, bu skin varolan skin yerine kaydedilecek.
+
+Unable to save the skin
+== Skin kaydedilemiyor
+
+Unable to save the skin with a reserved name
+== Skin kaydedilemiyor, bu isimde zaten bir skin var.
+
+No local servers found (ports %d-%d)
+== Yerel sunucu bulunamadı (bağlantı noktası %d-%d)
+
+[Hertz]
+Hz
+== Hz
+
+[skins]
+Body
+== Gövde
+
+[skins]
+Marking
+== İşaretleme
+
+[skins]
+Decoration
+== Dekorasyon
+
+[skins]
+Hands
+== El
+
+[skins]
+Feet
+== Ayak
+
+[skins]
+Eyes
+== Göz

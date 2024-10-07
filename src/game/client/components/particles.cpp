@@ -14,6 +14,7 @@ CParticles::CParticles()
 {
 	OnReset();
 	m_RenderTrail.m_pParts = this;
+	m_RenderTrailExtra.m_pParts = this;
 	m_RenderExplosions.m_pParts = this;
 	m_RenderExtra.m_pParts = this;
 	m_RenderGeneral.m_pParts = this;
@@ -181,9 +182,12 @@ void CParticles::OnInit()
 
 	m_ExtraParticleQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 
-	// TODO: Use a loop similar to the one for m_ParticleQuadContainerIndex if you add more additional particles
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	RenderTools()->QuadContainerAddSprite(m_ExtraParticleQuadContainerIndex, 1.f);
+	for(int i = 0; i <= (SPRITE_PART_SPARKLE - SPRITE_PART_SNOWFLAKE); ++i)
+	{
+		Graphics()->QuadsSetSubset(0, 0, 1, 1);
+		RenderTools()->QuadContainerAddSprite(m_ExtraParticleQuadContainerIndex, 1.f);
+	}
+
 	Graphics()->QuadContainerUpload(m_ExtraParticleQuadContainerIndex);
 }
 
@@ -207,7 +211,7 @@ void CParticles::RenderGroup(int Group)
 	IGraphics::CTextureHandle *aParticles = GameClient()->m_ParticlesSkin.m_aSpriteParticles;
 	int FirstParticleOffset = SPRITE_PART_SLICE;
 	int ParticleQuadContainerIndex = m_ParticleQuadContainerIndex;
-	if(Group == GROUP_EXTRA)
+	if(Group == GROUP_EXTRA || Group == GROUP_TRAIL_EXTRA)
 	{
 		aParticles = GameClient()->m_ExtrasSkin.m_aSpriteParticles;
 		FirstParticleOffset = SPRITE_PART_SNOWFLAKE;

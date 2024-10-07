@@ -173,6 +173,7 @@ void CCharacterCore::Reset()
 	m_ShotgunHitDisabled = false;
 	m_HookHitDisabled = false;
 	m_Super = false;
+	m_Invincible = false;
 	m_HasTelegunGun = false;
 	m_HasTelegunGrenade = false;
 	m_HasTelegunLaser = false;
@@ -647,6 +648,7 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 	m_LaserHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_LASER_HIT_DISABLED;
 	m_HookHitDisabled = pObjDDNet->m_Flags & CHARACTERFLAG_HOOK_HIT_DISABLED;
 	m_Super = pObjDDNet->m_Flags & CHARACTERFLAG_SUPER;
+	m_Invincible = pObjDDNet->m_Flags & CHARACTERFLAG_INVINCIBLE;
 
 	// Endless
 	m_EndlessHook = pObjDDNet->m_Flags & CHARACTERFLAG_ENDLESS_HOOK;

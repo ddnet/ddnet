@@ -70,9 +70,9 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 
 	void LoadBestTime()
 	{
-		CSqlLoadBestTimeData loadBestTimeData(std::make_shared<CScoreLoadBestTimeResult>());
-		str_copy(loadBestTimeData.m_aMap, "Kobra 3", sizeof(loadBestTimeData.m_aMap));
-		ASSERT_FALSE(CScoreWorker::LoadBestTime(m_pConn, &loadBestTimeData, m_aError, sizeof(m_aError))) << m_aError;
+		CSqlLoadBestTimeRequest loadBestTimeReq(std::make_shared<CScoreLoadBestTimeResult>());
+		str_copy(loadBestTimeReq.m_aMap, "Kobra 3", sizeof(loadBestTimeReq.m_aMap));
+		ASSERT_FALSE(CScoreWorker::LoadBestTime(m_pConn, &loadBestTimeReq, m_aError, sizeof(m_aError))) << m_aError;
 	}
 
 	void InsertMap()
@@ -160,7 +160,7 @@ TEST_P(SingleScore, Top)
 	ExpectLines(m_pPlayerResult,
 		{"------------ Global Top ------------",
 			"1. nameless tee Time: 01:40.00",
-			"----------------------------------------"});
+			"-----------------------------------------"});
 }
 
 TEST_P(SingleScore, RankRegional)
@@ -197,7 +197,7 @@ TEST_P(SingleScore, TopServer)
 	ExpectLines(m_pPlayerResult,
 		{"------------ Global Top ------------",
 			"1. nameless tee Time: 01:40.00",
-			"----------------------------------------"});
+			"-----------------------------------------"});
 }
 
 TEST_P(SingleScore, RankServerRegional)
@@ -264,7 +264,7 @@ TEST_P(SingleScore, TimesExists)
 
 	str_copy(aBuf, m_pPlayerResult->m_Data.m_aaMessages[1] + str_length(m_pPlayerResult->m_Data.m_aaMessages[1]) - 10, 11);
 	EXPECT_STREQ(aBuf, ", 01:40.00");
-	EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[2], "----------------------------------------------------");
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[2], "-------------------------------------------");
 	for(int i = 3; i < CScorePlayerResult::MAX_MESSAGES; i++)
 	{
 		EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[i], "");
@@ -321,7 +321,7 @@ TEST_P(TeamScore, All)
 	ExpectLines(m_pPlayerResult,
 		{"------- Team Top 5 -------",
 			"1. brainless tee & nameless tee Team Time: 01:40.00",
-			"-------------------------------"});
+			"---------------------------------"});
 }
 
 TEST_P(TeamScore, PlayerExists)
@@ -331,7 +331,7 @@ TEST_P(TeamScore, PlayerExists)
 	ExpectLines(m_pPlayerResult,
 		{"------- Team Top 5 -------",
 			"1. brainless tee & nameless tee Team Time: 01:40.00",
-			"-------------------------------"});
+			"---------------------------------"});
 }
 
 TEST_P(TeamScore, PlayerDoesntExist)
@@ -349,7 +349,7 @@ TEST_P(TeamScore, RankUpdates)
 	ExpectLines(m_pPlayerResult,
 		{"------- Team Top 5 -------",
 			"1. brainless tee & nameless tee Team Time: 01:38.00",
-			"-------------------------------"});
+			"---------------------------------"});
 }
 
 struct MapInfo : public Score

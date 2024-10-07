@@ -160,6 +160,14 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConToggleInvincible(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	if(pChr)
+		pChr->SetInvincible(pResult->NumArguments() == 0 ? !pChr->Core()->m_Invincible : pResult->GetInteger(0));
+}
+
 void CGameContext::ConSolo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -885,6 +893,18 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 	int Len = str_length(SavedTeam.GetString());
 	io_write(File, SavedTeam.GetString(), Len);
 	io_close(File);
+}
+
+void CGameContext::ConReloadCensorlist(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->ReadCensorList();
+}
+
+void CGameContext::ConReloadAnnouncement(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Server()->ReadAnnouncementsFile(g_Config.m_SvAnnouncementFileName);
 }
 
 void CGameContext::ConDumpAntibot(IConsole::IResult *pResult, void *pUserData)

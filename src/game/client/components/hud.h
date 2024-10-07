@@ -80,7 +80,7 @@ class CHud : public CComponent
 	void RenderMovementInformation(const int ClientId);
 
 	void UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, char *pPrevValue, size_t Size);
-	void RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, float X, float Y);
+	void RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, const ColorRGBA &Color, float X, float Y);
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
@@ -110,7 +110,7 @@ public:
 	// DDRace
 
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	void RenderNinjaBarPos(float x, const float y, const float width, const float height, float Progress, float Alpha = 1.0f);
+	void RenderNinjaBarPos(float x, const float y, const float Width, const float Height, float Progress, float Alpha = 1.0f);
 
 private:
 	void RenderRecord();

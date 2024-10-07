@@ -68,14 +68,14 @@ bool CLayerTele::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 	return true;
 }
 
-void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
+void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
 	std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pBrush);
-	int sx = ConvertX(wx);
-	int sy = ConvertY(wy);
+	int sx = ConvertX(WorldPos.x);
+	int sy = ConvertY(WorldPos.y);
 	if(str_comp(pTeleLayer->m_aFileName, m_pEditor->m_aFileName))
 		m_pEditor->m_TeleNumber = pTeleLayer->m_TeleNum;
 

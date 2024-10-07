@@ -95,7 +95,6 @@ class CMenus : public CComponent
 	void DoJoystickBar(const CUIRect *pRect, float Current, float Tolerance, bool Active);
 
 	bool m_SkinListNeedsUpdate = false;
-	void RandomSkin();
 
 	// menus_settings_assets.cpp
 public:
@@ -248,9 +247,11 @@ protected:
 	int m_SettingPlayerPage;
 
 	// 0.7 skins
+	bool m_CustomSkinMenu = false;
 	int m_TeePartSelected = protocol7::SKINPART_BODY;
 	const CSkins7::CSkin *m_pSelectedSkin = nullptr;
 	CLineInputBuffered<protocol7::MAX_SKIN_ARRAY_SIZE, protocol7::MAX_SKIN_LENGTH> m_SkinNameInput;
+	bool m_SkinPartListNeedsUpdate = false;
 	void PopupConfirmDeleteSkin7();
 
 	// for map download popup
@@ -368,7 +369,7 @@ protected:
 		bool m_IsPlayer;
 		bool m_IsAfk;
 		// skin
-		char m_aSkin[24 + 1];
+		char m_aSkin[MAX_SKIN_LENGTH];
 		bool m_CustomSkinColors;
 		int m_CustomSkinColorBody;
 		int m_CustomSkinColorFeet;
@@ -416,6 +417,7 @@ protected:
 		const void *ListItemId() const { return &m_aName; }
 		const void *RemoveButtonId() const { return &m_FriendState; }
 		const void *CommunityTooltipId() const { return &m_IsPlayer; }
+		const void *SkinTooltipId() const { return &m_aSkin; }
 
 		bool operator<(const CFriendItem &Other) const
 		{
@@ -596,7 +598,6 @@ protected:
 	void RenderSettingsTee(CUIRect MainView);
 	void RenderSettingsTee7(CUIRect MainView);
 	void RenderSettingsTeeCustom7(CUIRect MainView);
-	void RenderSettingsTeeBasic7(CUIRect MainView);
 	void RenderSkinSelection7(CUIRect MainView);
 	void RenderSkinPartSelection7(CUIRect MainView);
 	void RenderSettingsControls(CUIRect MainView);

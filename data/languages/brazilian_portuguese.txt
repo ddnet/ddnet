@@ -35,6 +35,7 @@
 # Rafael Fontenelle   2024-06-11 22:43:00
 # Rafael Fontenelle   2024-07-17 12:04:00
 # Rafael Fontenelle   2024-09-02 16:02:00
+# Rafael Fontenelle   2024-09-30 07:53:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1912,21 +1913,6 @@ Please wait…
 Show client IDs (scoreboard, chat, spectator)
 == Mostrar IDs de clientes (placar, chat, observador)
 
-Normal:
-== Normal:
-
-Team:
-== Time:
-
-Dummy settings
-== Configurações do dummy
-
-Toggle to edit your dummy settings
-== Alterne para editar suas configurações do dummy
-
-Randomize
-== Aleatorizar
-
 Are you sure that you want to delete '%s'?
 == Tem certeza que deseja excluir '%s'?
 
@@ -1942,5 +1928,45 @@ Custom
 Unable to delete skin
 == Não foi possível excluir skin
 
-Customize
-== Personalizar
+Save skin
+== Salvar skin
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== Tem certeza de que deseja salvar sua skin? Se uma skin com esse nome já existir, ela será substituída.
+
+Unable to save the skin
+== Não foi possível salvar a skin
+
+Unable to save the skin with a reserved name
+== Não foi possível salvar a skin com um nome reservado
+
+No local servers found (ports %d-%d)
+== Nenhum servidor local encontrado (portas %d-%d)
+
+[Hertz]
+Hz
+== Hz
+
+[skins]
+Body
+== Corpo
+
+[skins]
+Marking
+== Marca
+
+[skins]
+Decoration
+== Decoração
+
+[skins]
+Hands
+== Mãos
+
+[skins]
+Feet
+== Pés
+
+[skins]
+Eyes
+== Olhos

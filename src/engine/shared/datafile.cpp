@@ -102,6 +102,8 @@ struct CDatafile
 
 bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int StorageType)
 {
+	dbg_assert(m_pDataFile == nullptr, "File already open");
+
 	log_trace("datafile", "loading. filename='%s'", pFilename);
 
 	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
@@ -205,7 +207,6 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 		return false;
 	}
 
-	Close();
 	m_pDataFile = pTmpDataFile;
 
 #if defined(CONF_ARCH_ENDIAN_BIG)
@@ -257,27 +258,22 @@ bool CDataFileReader::Close()
 
 IOHANDLE CDataFileReader::File() const
 {
-	if(!m_pDataFile)
-		return 0;
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
 	return m_pDataFile->m_File;
 }
 
 int CDataFileReader::NumData() const
 {
-	if(!m_pDataFile)
-	{
-		return 0;
-	}
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
 	return m_pDataFile->m_Header.m_NumRawData;
 }
 
 // returns the size in the file
 int CDataFileReader::GetFileDataSize(int Index) const
 {
-	if(!m_pDataFile)
-	{
-		return 0;
-	}
+	dbg_assert(m_pDataFile != nullptr, "File not open");
 
 	if(Index == m_pDataFile->m_Header.m_NumRawData - 1)
 		return m_pDataFile->m_Header.m_DataSize - m_pDataFile->m_Info.m_pDataOffsets[Index];
@@ -288,7 +284,9 @@ int CDataFileReader::GetFileDataSize(int Index) const
 // returns the size of the resulting data
 int CDataFileReader::GetDataSize(int Index) const
 {
-	if(!m_pDataFile || Index < 0 || Index >= m_pDataFile->m_Header.m_NumRawData)
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
+	if(Index < 0 || Index >= m_pDataFile->m_Header.m_NumRawData)
 	{
 		return 0;
 	}
@@ -312,10 +310,7 @@ int CDataFileReader::GetDataSize(int Index) const
 
 void *CDataFileReader::GetDataImpl(int Index, bool Swap)
 {
-	if(!m_pDataFile)
-	{
-		return nullptr;
-	}
+	dbg_assert(m_pDataFile != nullptr, "File not open");
 
 	if(Index < 0 || Index >= m_pDataFile->m_Header.m_NumRawData)
 		return nullptr;
@@ -413,6 +408,8 @@ void *CDataFileReader::GetDataSwapped(int Index)
 
 const char *CDataFileReader::GetDataString(int Index)
 {
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
 	if(Index == -1)
 		return "";
 	const int DataSize = GetDataSize(Index);
@@ -426,6 +423,7 @@ const char *CDataFileReader::GetDataString(int Index)
 
 void CDataFileReader::ReplaceData(int Index, char *pData, size_t Size)
 {
+	dbg_assert(m_pDataFile != nullptr, "File not open");
 	dbg_assert(Index >= 0 && Index < m_pDataFile->m_Header.m_NumRawData, "Index invalid");
 
 	free(m_pDataFile->m_ppDataPtrs[Index]);
@@ -435,6 +433,8 @@ void CDataFileReader::ReplaceData(int Index, char *pData, size_t Size)
 
 void CDataFileReader::UnloadData(int Index)
 {
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
 	if(Index < 0 || Index >= m_pDataFile->m_Header.m_NumRawData)
 		return;
 
@@ -445,8 +445,8 @@ void CDataFileReader::UnloadData(int Index)
 
 int CDataFileReader::GetItemSize(int Index) const
 {
-	if(!m_pDataFile)
-		return 0;
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
 	if(Index == m_pDataFile->m_Header.m_NumItems - 1)
 		return m_pDataFile->m_Header.m_ItemSize - m_pDataFile->m_Info.m_pItemOffsets[Index] - sizeof(CDatafileItem);
 	return m_pDataFile->m_Info.m_pItemOffsets[Index + 1] - m_pDataFile->m_Info.m_pItemOffsets[Index] - sizeof(CDatafileItem);
@@ -501,16 +501,7 @@ int CDataFileReader::GetInternalItemType(int ExternalType)
 
 void *CDataFileReader::GetItem(int Index, int *pType, int *pId, CUuid *pUuid)
 {
-	if(!m_pDataFile)
-	{
-		if(pType)
-			*pType = 0;
-		if(pId)
-			*pId = 0;
-		if(pUuid)
-			*pUuid = UUID_ZEROED;
-		return nullptr;
-	}
+	dbg_assert(m_pDataFile != nullptr, "File not open");
 
 	CDatafileItem *pItem = (CDatafileItem *)(m_pDataFile->m_Info.m_pItemStart + m_pDataFile->m_Info.m_pItemOffsets[Index]);
 
@@ -529,11 +520,10 @@ void *CDataFileReader::GetItem(int Index, int *pType, int *pId, CUuid *pUuid)
 
 void CDataFileReader::GetType(int Type, int *pStart, int *pNum)
 {
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
 	*pStart = 0;
 	*pNum = 0;
-
-	if(!m_pDataFile)
-		return;
 
 	Type = GetInternalItemType(Type);
 	for(int i = 0; i < m_pDataFile->m_Header.m_NumItemTypes; i++)
@@ -549,10 +539,7 @@ void CDataFileReader::GetType(int Type, int *pStart, int *pNum)
 
 int CDataFileReader::FindItemIndex(int Type, int Id)
 {
-	if(!m_pDataFile)
-	{
-		return -1;
-	}
+	dbg_assert(m_pDataFile != nullptr, "File not open");
 
 	int Start, Num;
 	GetType(Type, &Start, &Num);
@@ -580,36 +567,29 @@ void *CDataFileReader::FindItem(int Type, int Id)
 
 int CDataFileReader::NumItems() const
 {
-	if(!m_pDataFile)
-		return 0;
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
 	return m_pDataFile->m_Header.m_NumItems;
 }
 
 SHA256_DIGEST CDataFileReader::Sha256() const
 {
-	if(!m_pDataFile)
-	{
-		SHA256_DIGEST Result;
-		for(unsigned char &d : Result.data)
-		{
-			d = 0xff;
-		}
-		return Result;
-	}
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
 	return m_pDataFile->m_Sha256;
 }
 
 unsigned CDataFileReader::Crc() const
 {
-	if(!m_pDataFile)
-		return 0xFFFFFFFF;
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
 	return m_pDataFile->m_Crc;
 }
 
 int CDataFileReader::MapSize() const
 {
-	if(!m_pDataFile)
-		return 0;
+	dbg_assert(m_pDataFile != nullptr, "File not open");
+
 	return m_pDataFile->m_Header.m_Size + m_pDataFile->m_Header.SizeOffset();
 }
 

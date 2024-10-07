@@ -72,7 +72,7 @@ public:
 		bool m_Afk;
 
 		// skin info
-		char m_aSkin[24 + 1];
+		char m_aSkin[MAX_SKIN_LENGTH];
 		bool m_CustomSkinColors;
 		int m_CustomSkinColorBody;
 		int m_CustomSkinColorFeet;
@@ -293,6 +293,9 @@ public:
 		TYPE_FAVORITE_COMMUNITY_4,
 		TYPE_FAVORITE_COMMUNITY_5,
 		NUM_TYPES,
+
+		LAN_PORT_BEGIN = 8303,
+		LAN_PORT_END = 8310,
 	};
 
 	class CServerEntry

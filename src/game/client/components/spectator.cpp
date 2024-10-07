@@ -135,7 +135,7 @@ void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 	int ClosestDistance = std::numeric_limits<int>::max();
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(i == SpectatorId || !Snap.m_apPlayerInfos[i] || Snap.m_apPlayerInfos[i]->m_Team == TEAM_SPECTATORS || (SpectatorId == SPEC_FREEVIEW && i == Snap.m_LocalClientId))
+		if(i == SpectatorId || !Snap.m_aCharacters[i].m_Active || !Snap.m_apPlayerInfos[i] || Snap.m_apPlayerInfos[i]->m_Team == TEAM_SPECTATORS || (SpectatorId == SPEC_FREEVIEW && i == Snap.m_LocalClientId))
 			continue;
 		const CNetObj_Character &MaybeClosestCharacter = Snap.m_aCharacters[i].m_Cur;
 		int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
@@ -193,6 +193,23 @@ bool CSpectator::OnInput(const IInput::CEvent &Event)
 		OnRelease();
 		return true;
 	}
+
+	if(g_Config.m_ClSpectatorMouseclicks)
+	{
+		if(m_pClient->m_Snap.m_SpecInfo.m_Active && !IsActive() && !GameClient()->m_MultiViewActivated &&
+			!Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed() && !m_pClient->m_Menus.IsActive())
+		{
+			if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_1)
+			{
+				if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
+					Spectate(SPEC_FREEVIEW);
+				else
+					SpectateClosest();
+				return true;
+			}
+		}
+	}
+
 	return false;
 }
 

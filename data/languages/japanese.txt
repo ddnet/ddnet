@@ -1268,6 +1268,12 @@ Render complete
 Are you sure that you want to restart?
 == 
 
+Save skin
+== 
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== 
+
 There's an unsaved map in the editor, you might want to save it.
 == 
 
@@ -1299,6 +1305,12 @@ Join Tutorial Server
 == 
 
 Skip Tutorial
+== 
+
+Unable to save the skin
+== 
+
+Unable to save the skin with a reserved name
 == 
 
 Trying to determine UDP connectivity…
@@ -1344,6 +1356,9 @@ SA
 == 
 
 CHN
+== 
+
+No local servers found (ports %d-%d)
 == 
 
 Example of usage
@@ -1537,6 +1552,10 @@ Deactivate all
 == 
 
 Menu opened. Press Esc key again to close menu.
+== 
+
+[Hertz]
+Hz
 == 
 
 Save power by lowering refresh rate (higher input latency)
@@ -1838,19 +1857,10 @@ Chat command (e.g. showall 1)
 Unregister protocol and file extensions
 == 
 
-Normal:
+Basic
 == 
 
-Team:
-== 
-
-Dummy settings
-== 
-
-Toggle to edit your dummy settings
-== 
-
-Randomize
+Custom
 == 
 
 Are you sure that you want to delete '%s'?
@@ -1859,16 +1869,7 @@ Are you sure that you want to delete '%s'?
 Delete skin
 == 
 
-Basic
-== 
-
-Custom
-== 
-
 Unable to delete skin
-== 
-
-Customize
 == 
 
 Extras
@@ -1904,6 +1905,30 @@ Super
 == 
 
 Team %d (%d/%d)
+== 
+
+[skins]
+Body
+== 
+
+[skins]
+Marking
+== 
+
+[skins]
+Decoration
+== 
+
+[skins]
+Hands
+== 
+
+[skins]
+Feet
+== 
+
+[skins]
+Eyes
 == 
 
 Loading sound files

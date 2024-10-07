@@ -65,14 +65,14 @@ bool CLayerTune::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 	return true;
 }
 
-void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
+void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 {
 	if(m_Readonly)
 		return;
 
 	std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pBrush);
-	int sx = ConvertX(wx);
-	int sy = ConvertY(wy);
+	int sx = ConvertX(WorldPos.x);
+	int sy = ConvertY(WorldPos.y);
 	if(str_comp(pTuneLayer->m_aFileName, m_pEditor->m_aFileName))
 	{
 		m_pEditor->m_TuningNum = pTuneLayer->m_TuningNumber;
