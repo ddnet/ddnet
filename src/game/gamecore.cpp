@@ -128,6 +128,7 @@ float VelocityRamp(float Value, float Start, float Range, float Curvature)
 void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams)
 {
 	m_pWorld = pWorld;
+	m_TickSpeed = pWorld->m_GameTickSpeed;
 	m_pCollision = pCollision;
 
 	m_pTeams = pTeams;
@@ -197,11 +198,14 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	const bool Grounded = m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5) || m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5);
 	vec2 TargetDirection = normalize(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
 
-	m_Vel.y += m_Tuning.m_Gravity;
+	m_Vel.y += CWorldCore::PhysicsScalingAccel(m_Tuning.m_Gravity, m_TickSpeed);
 
 	float MaxSpeed = Grounded ? m_Tuning.m_GroundControlSpeed : m_Tuning.m_AirControlSpeed;
+	MaxSpeed = CWorldCore::PhysicsScalingLinear(MaxSpeed, m_TickSpeed);
 	float Accel = Grounded ? m_Tuning.m_GroundControlAccel : m_Tuning.m_AirControlAccel;
+	Accel = CWorldCore::PhysicsScalingAccel(Accel, m_TickSpeed);
 	float Friction = Grounded ? m_Tuning.m_GroundFriction : m_Tuning.m_AirFriction;
+	Friction = CWorldCore::PhysicsScalingFriction(Friction, m_TickSpeed);
 
 	// handle input
 	if(UseInput)
@@ -233,7 +237,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				if(Grounded && (!(m_Jumped & 2) || m_Jumps != 0))
 				{
 					m_TriggeredEvents |= COREEVENT_GROUND_JUMP;
-					m_Vel.y = -m_Tuning.m_GroundJumpImpulse;
+					m_Vel.y = CWorldCore::PhysicsScalingLinear(-m_Tuning.m_GroundJumpImpulse, m_TickSpeed);
 					if(m_Jumps > 1)
 					{
 						m_Jumped |= 1;
@@ -247,7 +251,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				else if(!(m_Jumped & 2))
 				{
 					m_TriggeredEvents |= COREEVENT_AIR_JUMP;
-					m_Vel.y = -m_Tuning.m_AirJumpImpulse;
+					m_Vel.y = CWorldCore::PhysicsScalingLinear(-m_Tuning.m_AirJumpImpulse, m_TickSpeed);
 					m_Jumped |= 3;
 					m_JumpedTotal++;
 				}
@@ -267,7 +271,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				m_HookPos = m_Pos + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				SetHookedPlayer(-1);
-				m_HookTick = (float)SERVER_TICK_SPEED * (1.25f - m_Tuning.m_HookDuration);
+				m_HookTick = (float)m_TickSpeed * (1.25f - m_Tuning.m_HookDuration);
 				m_TriggeredEvents |= COREEVENT_HOOK_LAUNCH;
 			}
 		}
@@ -318,7 +322,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		{
 			HookBase = m_HookTeleBase;
 		}
-		vec2 NewPos = m_HookPos + m_HookDir * m_Tuning.m_HookFireSpeed;
+		vec2 NewPos = m_HookPos + m_HookDir * CWorldCore::PhysicsScalingLinear(m_Tuning.m_HookFireSpeed, m_TickSpeed);
 		if(distance(HookBase, NewPos) > m_Tuning.m_HookLength)
 		{
 			m_HookState = HOOK_RETRACT_START;
@@ -422,7 +426,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		// don't do this hook routine when we are already hooked to a player
 		if(m_HookedPlayer == -1 && distance(m_HookPos, m_Pos) > 46.0f)
 		{
-			vec2 HookVel = normalize(m_HookPos - m_Pos) * m_Tuning.m_HookDragAccel;
+			vec2 HookVel = normalize(m_HookPos - m_Pos) * CWorldCore::PhysicsScalingAccel(m_Tuning.m_HookDragAccel, m_TickSpeed);
 			// the hook as more power to drag you up then down.
 			// this makes it easier to get on top of an platform
 			if(HookVel.y > 0)
@@ -439,13 +443,13 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 
 			// check if we are under the legal limit for the hook
 			const float NewVelLength = length(NewVel);
-			if(NewVelLength < m_Tuning.m_HookDragSpeed || NewVelLength < length(m_Vel))
+			if(NewVelLength < CWorldCore::PhysicsScalingLinear(m_Tuning.m_HookDragSpeed, m_TickSpeed) || NewVelLength < length(m_Vel))
 				m_Vel = NewVel; // no problem. apply
 		}
 
 		// release hook (max default hook time is 1.25 s)
 		m_HookTick++;
-		if(m_HookedPlayer != -1 && (m_HookTick > SERVER_TICK_SPEED + SERVER_TICK_SPEED / 5 || (m_pWorld && !m_pWorld->m_apCharacters[m_HookedPlayer])))
+		if(m_HookedPlayer != -1 && (m_HookTick > m_TickSpeed + m_TickSpeed / 5 || (m_pWorld && !m_pWorld->m_apCharacters[m_HookedPlayer])))
 		{
 			SetHookedPlayer(-1);
 			m_HookState = HOOK_RETRACTED;
@@ -491,8 +495,8 @@ void CCharacterCore::TickDeferred()
 					if(length(m_Vel) > 0.0001f)
 						Velocity = 1 - (dot(normalize(m_Vel), Dir) + 1) / 2; // Wdouble-promotion don't fix this as this might change game physics
 
-					m_Vel += Dir * a * (Velocity * 0.75f);
-					m_Vel *= 0.85f;
+					m_Vel += Dir * CWorldCore::PhysicsScalingLinear(a * (Velocity * 0.75f), m_TickSpeed);
+					m_Vel *= CWorldCore::PhysicsScalingFriction(0.85f, m_TickSpeed);
 				}
 
 				// handle hook influence
@@ -500,8 +504,8 @@ void CCharacterCore::TickDeferred()
 				{
 					if(Distance > PhysicalSize() * 1.50f)
 					{
-						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
-						float DragSpeed = m_Tuning.m_HookDragSpeed;
+						float HookAccel = CWorldCore::PhysicsScalingAccel(m_Tuning.m_HookDragAccel, m_TickSpeed) * (Distance / m_Tuning.m_HookLength);
+						float DragSpeed = CWorldCore::PhysicsScalingLinear(m_Tuning.m_HookDragSpeed, m_TickSpeed);
 
 						vec2 Temp;
 						// add force to the hooked player
@@ -530,7 +534,10 @@ void CCharacterCore::TickDeferred()
 
 void CCharacterCore::Move()
 {
-	float RampValue = VelocityRamp(length(m_Vel) * 50, m_Tuning.m_VelrampStart, m_Tuning.m_VelrampRange, m_Tuning.m_VelrampCurvature);
+	float RampValue = VelocityRamp(length(m_Vel) * 50,
+		CWorldCore::PhysicsScalingLinear(m_Tuning.m_VelrampStart, m_TickSpeed),
+		CWorldCore::PhysicsScalingLinear(m_Tuning.m_VelrampRange, m_TickSpeed),
+		m_Tuning.m_VelrampCurvature);
 
 	m_Vel.x = m_Vel.x * RampValue;
 
@@ -599,13 +606,23 @@ void CCharacterCore::Move()
 	m_Pos = NewPos;
 }
 
-void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore) const
+vec2 CCharacterCore::ConvertPosition(vec2 Pos, int TickSpeed)
 {
-	pObjCore->m_X = round_to_int(m_Pos.x);
-	pObjCore->m_Y = round_to_int(m_Pos.y);
+	if(TickSpeed > 50)
+	{
+		Pos.x /= TickSpeed / 50.0;
+		Pos.y /= TickSpeed / 50.0;
+	}
+	return Pos;
+}
 
-	pObjCore->m_VelX = round_to_int(m_Vel.x * 256.0f);
-	pObjCore->m_VelY = round_to_int(m_Vel.y * 256.0f);
+void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore, int TickSpeed) const
+{
+	pObjCore->m_X = round_to_int(m_Pos.x * (TickSpeed > 50 ? TickSpeed / 50.0 : 1));
+	pObjCore->m_Y = round_to_int(m_Pos.y * (TickSpeed > 50 ? TickSpeed / 50.0 : 1));
+
+	pObjCore->m_VelX = round_to_int(m_Vel.x * 256.0f * (TickSpeed > 50 ? TickSpeed / 50.0 : 1));
+	pObjCore->m_VelY = round_to_int(m_Vel.y * 256.0f * (TickSpeed > 50 ? TickSpeed / 50.0 : 1));
 	pObjCore->m_HookState = m_HookState;
 	pObjCore->m_HookTick = m_HookTick;
 	pObjCore->m_HookX = round_to_int(m_HookPos.x);
@@ -618,12 +635,12 @@ void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore) const
 	pObjCore->m_Angle = m_Angle;
 }
 
-void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore)
+void CCharacterCore::Read(const CNetObj_CharacterCore *pObjCore, int TickSpeed)
 {
-	m_Pos.x = pObjCore->m_X;
-	m_Pos.y = pObjCore->m_Y;
-	m_Vel.x = pObjCore->m_VelX / 256.0f;
-	m_Vel.y = pObjCore->m_VelY / 256.0f;
+	m_Pos.x = pObjCore->m_X / (TickSpeed > 50 ? TickSpeed / 50.0 : 1);
+	m_Pos.y = pObjCore->m_Y / (TickSpeed > 50 ? TickSpeed / 50.0 : 1);
+	m_Vel.x = pObjCore->m_VelX / 256.0f / (TickSpeed > 50 ? TickSpeed / 50.0 : 1);
+	m_Vel.y = pObjCore->m_VelY / 256.0f / (TickSpeed > 50 ? TickSpeed / 50.0 : 1);
 	m_HookState = pObjCore->m_HookState;
 	m_HookTick = pObjCore->m_HookTick;
 	m_HookPos.x = pObjCore->m_HookX;
@@ -695,8 +712,8 @@ void CCharacterCore::ReadDDNet(const CNetObj_DDNetCharacter *pObjDDNet)
 void CCharacterCore::Quantize()
 {
 	CNetObj_CharacterCore Core;
-	Write(&Core);
-	Read(&Core);
+	Write(&Core, m_TickSpeed);
+	Read(&Core, m_TickSpeed);
 }
 
 void CCharacterCore::SetHookedPlayer(int HookedPlayer)
@@ -737,6 +754,36 @@ bool CCharacterCore::IsSwitchActiveCb(int Number, void *pUser)
 		if(pThis->m_Id != -1 && pThis->m_pTeams->Team(pThis->m_Id) != (pThis->m_pTeams->m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER))
 			return pThis->m_pWorld->m_vSwitchers[Number].m_aStatus[pThis->m_pTeams->Team(pThis->m_Id)];
 	return false;
+}
+
+float CWorldCore::CWorldCore::PhysicsScalingLinear(float Value, int TickSpeed)
+{
+	if(TickSpeed == 50)
+		return Value;
+
+	float Speed = TickSpeed / 50.0;
+
+	return Value / Speed;
+}
+
+float CWorldCore::CWorldCore::PhysicsScalingAccel(float Value, int TickSpeed)
+{
+	if(TickSpeed == 50)
+		return Value;
+
+	float Speed = TickSpeed / 50.0;
+
+	return Value / std::pow(Speed, 2);
+}
+
+float CWorldCore::CWorldCore::PhysicsScalingFriction(float Value, int TickSpeed)
+{
+	if(TickSpeed == 50)
+		return Value;
+
+	float Speed = TickSpeed / 50.0;
+
+	return std::pow(Value, 1 / Speed);
 }
 
 void CWorldCore::InitSwitchers(int HighestSwitchNumber)

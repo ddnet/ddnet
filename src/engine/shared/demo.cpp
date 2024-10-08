@@ -8,6 +8,8 @@
 
 #include <engine/shared/config.h>
 
+#include <game/generated/protocol.h>
+
 #if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>
 #endif
@@ -58,12 +60,13 @@ CDemoRecorder::~CDemoRecorder()
 }
 
 // Record
-int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned Crc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
+int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned Crc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser, int TickSpeed)
 {
 	dbg_assert(m_File == 0, "Demo recorder already recording");
 
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
+	m_TickSpeed = TickSpeed;
 
 	IOHANDLE DemoFile = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!DemoFile)
@@ -190,6 +193,26 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	m_File = DemoFile;
 	str_copy(m_aCurrentFilename, pFilename);
 
+	//Manually add tickspeed message to demo when tickrate isn't default
+	if(TickSpeed != 50)
+	{
+		CMsgPacker TickMsg(NETMSGTYPE_SV_TICKSPEED, true);
+		TickMsg.AddInt(TickSpeed);
+		CPacker Packer;
+		Packer.Reset();
+		if(TickMsg.m_MsgId < OFFSET_UUID)
+		{
+			Packer.AddInt((TickMsg.m_MsgId << 1) | (TickMsg.m_System ? 1 : 0));
+		}
+		else
+		{
+			Packer.AddInt(TickMsg.m_System ? 1 : 0); // NETMSG_EX, NETMSGTYPE_EX
+			g_UuidManager.PackUuid(TickMsg.m_MsgId, &Packer);
+		}
+		Packer.AddRaw(TickMsg.Data(), TickMsg.Size());
+		RecordMessage(Packer.Data(), Packer.Size());
+	}
+
 	return 0;
 }
 
@@ -298,7 +321,7 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 
 void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 {
-	if(m_LastKeyFrame == -1 || (Tick - m_LastKeyFrame) > SERVER_TICK_SPEED * 5)
+	if(m_LastKeyFrame == -1 || (Tick - m_LastKeyFrame) > m_TickSpeed * 5)
 	{
 		// write full tickmarker
 		WriteTickMarker(Tick, true);
@@ -429,7 +452,7 @@ void CDemoRecorder::AddDemoMarker(int Tick)
 	if(m_NumTimelineMarkers > 0)
 	{
 		const int Diff = Tick - m_aTimelineMarkers[m_NumTimelineMarkers - 1];
-		if(Diff < (float)SERVER_TICK_SPEED)
+		if(Diff < (float)m_TickSpeed)
 		{
 			if(m_pConsole)
 			{
@@ -614,10 +637,10 @@ void CDemoPlayer::DoTick()
 	int ChunkTick = m_Info.m_Info.m_CurrentTick;
 
 	int64_t Freq = time_freq();
-	int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
-	int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
+	int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / m_Info.m_Info.m_TickSpeed;
+	int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / m_Info.m_Info.m_TickSpeed;
 	m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
-	m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
+	m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / m_Info.m_Info.m_TickSpeed);
 	m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
 	if(m_UpdateIntraTimesFunc)
 		m_UpdateIntraTimesFunc();
@@ -797,6 +820,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	m_Info.m_Info.m_CurrentTick = -1;
 	m_Info.m_PreviousTick = -1;
 	m_Info.m_Info.m_Speed = 1;
+	m_Info.m_Info.m_TickSpeed = 50;
 	m_SpeedIndex = 4;
 	m_LastSnapshotDataSize = -1;
 
@@ -930,7 +954,7 @@ int CDemoPlayer::Play()
 		DoTick();
 
 	// set start info
-	m_Info.m_CurrentTime = m_Info.m_PreviousTick * time_freq() / SERVER_TICK_SPEED;
+	m_Info.m_CurrentTime = m_Info.m_PreviousTick * time_freq() / m_Info.m_Info.m_TickSpeed;
 	m_Info.m_LastUpdate = Time();
 	return 0;
 }
@@ -943,7 +967,7 @@ int CDemoPlayer::SeekPercent(float Percent)
 
 int CDemoPlayer::SeekTime(float Seconds)
 {
-	int WantedTick = m_Info.m_Info.m_CurrentTick + round_truncate(Seconds * (float)SERVER_TICK_SPEED);
+	int WantedTick = m_Info.m_Info.m_CurrentTick + round_truncate(Seconds * (float)m_Info.m_Info.m_TickSpeed);
 	return SetPos(WantedTick);
 }
 
@@ -1008,6 +1032,11 @@ int CDemoPlayer::SetPos(int WantedTick)
 	return 0;
 }
 
+void CDemoPlayer::SetTickSpeed(int TickSpeed)
+{
+	m_Info.m_Info.m_TickSpeed = TickSpeed;
+}
+
 void CDemoPlayer::SetSpeed(float Speed)
 {
 	m_Info.m_Info.m_Speed = clamp(Speed, 0.f, 256.f);
@@ -1041,7 +1070,7 @@ int CDemoPlayer::Update(bool RealTime)
 
 		while(!m_Info.m_Info.m_Paused && IsPlaying())
 		{
-			int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
+			int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / m_Info.m_Info.m_TickSpeed;
 
 			// break if we are ready
 			if(RealTime && CurtickStart > m_Info.m_CurrentTime)
@@ -1054,10 +1083,10 @@ int CDemoPlayer::Update(bool RealTime)
 
 	// update intratick
 	{
-		int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
-		int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
+		int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / m_Info.m_Info.m_TickSpeed;
+		int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / m_Info.m_Info.m_TickSpeed;
 		m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
-		m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
+		m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / m_Info.m_Info.m_TickSpeed);
 		m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
 		if(m_UpdateIntraTimesFunc)
 			m_UpdateIntraTimesFunc();
@@ -1245,7 +1274,7 @@ bool CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 
 	CDemoRecorder DemoRecorder(m_pSnapshotDelta);
 	unsigned char *pMapData = DemoPlayer.GetMapData(m_pStorage);
-	const int Result = DemoRecorder.Start(m_pStorage, m_pConsole, pDst, pInfo->m_Header.m_aNetversion, pMapInfo->m_aName, Sha256, pMapInfo->m_Crc, pInfo->m_Header.m_aType, pMapInfo->m_Size, pMapData, nullptr, pfnFilter, pUser) == -1;
+	const int Result = DemoRecorder.Start(m_pStorage, m_pConsole, pDst, pInfo->m_Header.m_aNetversion, pMapInfo->m_aName, Sha256, pMapInfo->m_Crc, pInfo->m_Header.m_aType, pMapInfo->m_Size, pMapData, nullptr, pfnFilter, pUser, pInfo->m_Info.m_TickSpeed) == -1;
 	free(pMapData);
 	if(Result != 0)
 	{

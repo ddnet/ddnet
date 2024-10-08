@@ -516,6 +516,23 @@ int64_t CServer::TickStartTime(int Tick)
 	return m_GameStartTime + (time_freq() * Tick) / TickSpeed();
 }
 
+int currentTickSpeed = SERVER_TICK_SPEED;
+int CServer::TickSpeed()
+{
+	if(m_pConfig->m_SvTickSpeed != currentTickSpeed)
+	{
+		currentTickSpeed = m_pConfig->m_SvTickSpeed;
+		m_MapReload = true;
+		Config()->m_SvSixup = 0;
+		if(m_pRegister)
+		{
+			m_pRegister->OnConfigChange();
+		}
+		log_info("sixup", "non 50 tickspeed, disabling 0.7 compatibility");
+	}
+	return m_pConfig->m_SvTickSpeed;
+}
+
 int CServer::Init()
 {
 	for(auto &Client : m_aClients)
@@ -3412,7 +3429,8 @@ void CServer::DemoRecorder_HandleAutoStart()
 			m_apCurrentMapData[MAP_TYPE_SIX],
 			nullptr,
 			nullptr,
-			nullptr);
+			nullptr,
+			TickSpeed());
 
 		if(Config()->m_SvAutoDemoMax)
 		{
@@ -3452,7 +3470,8 @@ void CServer::StartRecord(int ClientId)
 			m_apCurrentMapData[MAP_TYPE_SIX],
 			nullptr,
 			nullptr,
-			nullptr);
+			nullptr,
+			TickSpeed());
 	}
 }
 
@@ -3514,7 +3533,8 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 		pServer->m_apCurrentMapData[MAP_TYPE_SIX],
 		nullptr,
 		nullptr,
-		nullptr);
+		nullptr,
+		pServer->TickSpeed());
 }
 
 void CServer::ConStopRecord(IConsole::IResult *pResult, void *pUser)
