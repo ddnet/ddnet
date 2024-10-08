@@ -949,9 +949,9 @@ void CChat::OnPrepareLines(float y)
 			{
 				pText = "Team save in progress. You'll be able to load with '/load ***'";
 			}
-			else if(str_startswith(Line.m_aText, "Team save in progress. You'll be able to load with '/load") && str_endswith(Line.m_aText, "if it fails"))
+			else if(str_startswith(Line.m_aText, "Team save in progress. If the code is valid, you'll be able to load with '/load") && str_endswith(Line.m_aText, "'"))
 			{
-				pText = "Team save in progress. You'll be able to load with '/load ***' if save is successful or with '/load *** *** ***' if it fails";
+				pText = "Team save in progress. If the code is valid, you'll be able to load with '/load ***'; if not, load with '/load *** *** ***'";
 			}
 			else if(str_startswith(Line.m_aText, "Team successfully saved by ") && str_endswith(Line.m_aText, " to continue"))
 			{
