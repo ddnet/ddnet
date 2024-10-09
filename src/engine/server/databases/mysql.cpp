@@ -331,8 +331,11 @@ bool CMysqlConnection::PrepareStatement(const char *pStmt, char *pError, int Err
 	unsigned NumParameters = mysql_stmt_param_count(m_pStmt.get());
 	m_vStmtParameters.resize(NumParameters);
 	m_vStmtParameterExtras.resize(NumParameters);
-	mem_zero(&m_vStmtParameters[0], sizeof(m_vStmtParameters[0]) * m_vStmtParameters.size());
-	mem_zero(&m_vStmtParameterExtras[0], sizeof(m_vStmtParameterExtras[0]) * m_vStmtParameterExtras.size());
+	if(NumParameters)
+	{
+		mem_zero(&m_vStmtParameters[0], sizeof(m_vStmtParameters[0]) * m_vStmtParameters.size());
+		mem_zero(&m_vStmtParameterExtras[0], sizeof(m_vStmtParameterExtras[0]) * m_vStmtParameterExtras.size());
+	}
 	return false;
 }
 
