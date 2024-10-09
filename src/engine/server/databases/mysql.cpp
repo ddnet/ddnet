@@ -333,8 +333,8 @@ bool CMysqlConnection::PrepareStatement(const char *pStmt, char *pError, int Err
 	m_vStmtParameterExtras.resize(NumParameters);
 	if(NumParameters)
 	{
-		mem_zero(&m_vStmtParameters[0], sizeof(m_vStmtParameters[0]) * m_vStmtParameters.size());
-		mem_zero(&m_vStmtParameterExtras[0], sizeof(m_vStmtParameterExtras[0]) * m_vStmtParameterExtras.size());
+		mem_zero(m_vStmtParameters.data(), sizeof(m_vStmtParameters[0]) * m_vStmtParameters.size());
+		mem_zero(m_vStmtParameterExtras.data(), sizeof(m_vStmtParameterExtras[0]) * m_vStmtParameterExtras.size());
 	}
 	return false;
 }
@@ -446,7 +446,7 @@ bool CMysqlConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 	if(m_NewQuery)
 	{
 		m_NewQuery = false;
-		if(mysql_stmt_bind_param(m_pStmt.get(), &m_vStmtParameters[0]))
+		if(mysql_stmt_bind_param(m_pStmt.get(), m_vStmtParameters.data()))
 		{
 			StoreErrorStmt("bind_param");
 			str_copy(pError, m_aErrorDetail, ErrorSize);
@@ -477,7 +477,7 @@ bool CMysqlConnection::ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSi
 	if(m_NewQuery)
 	{
 		m_NewQuery = false;
-		if(mysql_stmt_bind_param(m_pStmt.get(), &m_vStmtParameters[0]))
+		if(mysql_stmt_bind_param(m_pStmt.get(), m_vStmtParameters.data()))
 		{
 			StoreErrorStmt("bind_param");
 			str_copy(pError, m_aErrorDetail, ErrorSize);
