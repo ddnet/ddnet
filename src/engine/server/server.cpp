@@ -1172,6 +1172,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_Snapshots.PurgeAll();
 	pThis->m_aClients[ClientId].m_Sixup = false;
 	pThis->m_aClients[ClientId].m_RedirectDropTime = 0;
+	pThis->m_aClients[ClientId].m_HasPersistentData = false;
 
 	pThis->GameServer()->TeehistorianRecordPlayerDrop(ClientId, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientId, pReason);
