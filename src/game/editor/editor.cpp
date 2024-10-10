@@ -5466,7 +5466,8 @@ void CEditor::RenderFileDialog()
 			str_format(m_aFileSaveName, sizeof(m_aFileSaveName), "%s/%s", m_pFileDialogPath, m_FileDialogFileNameInput.GetString());
 			if(!str_endswith(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]))
 				str_append(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]);
-			if(!str_comp(m_pFileDialogButtonText, "Save") && Storage()->FileExists(m_aFileSaveName, StorageType))
+			const bool SaveAction = m_FileDialogStorageType == IStorage::TYPE_SAVE;
+			if(SaveAction && Storage()->FileExists(m_aFileSaveName, StorageType))
 			{
 				if(m_pfnFileDialogFunc == &CallbackSaveMap)
 					m_PopupEventType = POPEVENT_SAVE;
@@ -5474,12 +5475,16 @@ void CEditor::RenderFileDialog()
 					m_PopupEventType = POPEVENT_SAVE_COPY;
 				else if(m_pfnFileDialogFunc == &CallbackSaveImage)
 					m_PopupEventType = POPEVENT_SAVE_IMG;
-				else
+				else if(m_pfnFileDialogFunc == &CallbackSaveSound)
 					m_PopupEventType = POPEVENT_SAVE_SOUND;
+				else
+					dbg_assert(false, "m_pfnFileDialogFunc unhandled for saving");
 				m_PopupEventActivated = true;
 			}
-			else if(m_pfnFileDialogFunc)
+			else if(m_pfnFileDialogFunc && (SaveAction || m_FilesSelectedIndex >= 0))
+			{
 				m_pfnFileDialogFunc(m_aFileSaveName, StorageType, m_pFileDialogUser);
+			}
 		}
 	}
 
