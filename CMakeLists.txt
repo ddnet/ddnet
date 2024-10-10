@@ -1146,6 +1146,7 @@ set(EXPECTED_DATA
   countryflags/AL.png
   countryflags/AM.png
   countryflags/AO.png
+  countryflags/AQ.png
   countryflags/AR.png
   countryflags/AS.png
   countryflags/AT.png
