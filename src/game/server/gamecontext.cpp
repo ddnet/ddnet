@@ -2080,6 +2080,9 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 		case NETMSGTYPE_CL_KILL:
 			OnKillNetMessage(static_cast<CNetMsg_Cl_Kill *>(pRawMsg), ClientId);
 			break;
+		case NETMSGTYPE_CL_RECEIVEPOINTS:
+			OnReceivePointsMessage(static_cast<CNetMsg_Cl_ReceivePoints *>(pRawMsg), ClientId);
+			break;
 		default:
 			break;
 		}
@@ -2633,6 +2636,7 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 		// reload scores
 		Score()->PlayerData(ClientId)->Reset();
 		m_apPlayers[ClientId]->m_Score.reset();
+		m_apPlayers[ClientId]->m_Points = 0;
 		Score()->LoadPlayerData(ClientId);
 
 		SixupNeedsUpdate = true;
@@ -2816,6 +2820,19 @@ void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId)
 	pPlayer->m_LastKill = Server()->Tick();
 	pPlayer->KillCharacter(WEAPON_SELF);
 	pPlayer->Respawn();
+}
+
+void CGameContext::OnReceivePointsMessage(const CNetMsg_Cl_ReceivePoints *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+	if(pPlayer->m_ReceivePoints != pMsg->m_ReceivePoints)
+	{
+		pPlayer->m_ReceivePoints = pMsg->m_ReceivePoints;
+
+		CNetMsg_Cl_ReceivePoints ReceivePointsMsg;
+		ReceivePointsMsg.m_ReceivePoints = pMsg->m_ReceivePoints;
+		Server()->SendPackMsg(&ReceivePointsMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+	}
 }
 
 void CGameContext::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int ClientId)

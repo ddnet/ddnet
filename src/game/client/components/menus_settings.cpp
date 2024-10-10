@@ -2366,6 +2366,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// Switches of various DDRace HUD elements
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIds, Localize("Show client IDs (scoreboard, chat, spectator)"), &g_Config.m_ClShowIds, &RightView, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScoreboardPoints, Localize("Show points in scoreboard instead of time"), &g_Config.m_ClScoreboardPoints, &RightView, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDDRace, Localize("Show DDRace HUD"), &g_Config.m_ClShowhudDDRace, &RightView, LineSize);
 		if(g_Config.m_ClShowhudDDRace)
 		{
