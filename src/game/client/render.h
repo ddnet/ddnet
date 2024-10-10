@@ -64,6 +64,21 @@ public:
 		m_SkinMetrics = pSkin->m_Metrics;
 	}
 
+	void ApplyColors(bool CustomColoredSkin, int ColorBody, int ColorFeet)
+	{
+		m_CustomColoredSkin = CustomColoredSkin;
+		if(CustomColoredSkin)
+		{
+			m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(ColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
+			m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(ColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
+		}
+		else
+		{
+			m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+			m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+	}
+
 	CSkin::SSkinTextures m_OriginalRenderSkin;
 	CSkin::SSkinTextures m_ColorableRenderSkin;
 
