@@ -2858,6 +2858,97 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoLine_ColorPicker(&s_HookCollNoCollResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Nothing hookable"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollHookableCollResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Something hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollTeeCollResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("A Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
+
+		// ***** Hook collisions preview ***** //
+		RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
+		Ui()->DoLabel(&Label, Localize("Preview"), HeadlineFontSize, TEXTALIGN_ML);
+		RightView.HSplitTop(2 * MarginSmall, nullptr, &RightView);
+
+		auto DoHookCollision = [this](const vec2 &Pos, const float &Length, const ColorRGBA &Color) {
+			Graphics()->TextureClear();
+			if(g_Config.m_ClHookCollSize > 0)
+			{
+				Graphics()->QuadsBegin();
+				Graphics()->SetColor(Color.WithAlpha((float)g_Config.m_ClHookCollAlpha / 100));
+				float LineWidth = 0.5f + (float)(g_Config.m_ClHookCollSize - 1) * 0.25f;
+				IGraphics::CQuadItem QuadItem(Pos.x, Pos.y - LineWidth, Length, LineWidth * 2.f);
+				Graphics()->QuadsDrawTL(&QuadItem, 1);
+				Graphics()->QuadsEnd();
+			}
+			else
+			{
+				Graphics()->LinesBegin();
+				Graphics()->SetColor(Color.WithAlpha((float)g_Config.m_ClHookCollAlpha / 100));
+				IGraphics::CLineItem LineItem(Pos.x, Pos.y, Pos.x + Length, Pos.y);
+				Graphics()->LinesDraw(&LineItem, 1);
+				Graphics()->LinesEnd();
+			}
+		};
+
+		CTeeRenderInfo OwnSkinInfo;
+		OwnSkinInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClPlayerSkin));
+		OwnSkinInfo.m_CustomColoredSkin = g_Config.m_ClPlayerUseCustomColor;
+		if(g_Config.m_ClPlayerUseCustomColor)
+		{
+			OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClPlayerColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
+			OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClPlayerColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
+		}
+		else
+		{
+			OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+			OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
+		}
+		OwnSkinInfo.m_Size = 50.0f;
+
+		CTeeRenderInfo DummySkinInfo;
+		DummySkinInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClDummySkin));
+		DummySkinInfo.m_CustomColoredSkin = g_Config.m_ClDummyUseCustomColor;
+		if(g_Config.m_ClDummyUseCustomColor)
+		{
+			DummySkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClDummyColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
+			DummySkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClDummyColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
+		}
+		else
+		{
+			DummySkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+			DummySkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
+		}
+		DummySkinInfo.m_Size = 50.0f;
+
+		const float LineLength = 150.f;
+		const float LeftMargin = 30.f;
+
+		CUIRect PreviewNoColl;
+		RightView.HSplitTop(50.0f, &PreviewNoColl, &RightView);
+		RightView.HSplitTop(4 * MarginSmall, nullptr, &RightView);
+		vec2 TeeRenderPos = vec2(PreviewNoColl.x + LeftMargin, PreviewNoColl.y + PreviewNoColl.h / 2.0f);
+		DoHookCollision(TeeRenderPos, PreviewNoColl.w - LineLength, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorNoColl)));
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1.0f, 0.0f), TeeRenderPos);
+
+		CUIRect PreviewColl;
+		RightView.HSplitTop(50.0f, &PreviewColl, &RightView);
+		RightView.HSplitTop(4 * MarginSmall, nullptr, &RightView);
+		TeeRenderPos = vec2(PreviewColl.x + LeftMargin, PreviewColl.y + PreviewColl.h / 2.0f);
+		DoHookCollision(TeeRenderPos, PreviewColl.w - LineLength - LeftMargin, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorHookableColl)));
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1.0f, 0.0f), TeeRenderPos);
+
+		CUIRect TileRect;
+		PreviewColl.VSplitRight(LineLength + LeftMargin, &PreviewColl, &TileRect);
+		TileRect.VSplitLeft(50.0f, &TileRect, nullptr);
+		TileRect.Margin(10.0f, &TileRect);
+		CUIRect Rect;
+		TileRect.Margin(3.0f, &Rect);
+		TileRect.Draw(ColorRGBA(.451f, .435f, .349f), IGraphics::CORNER_ALL, 4.0f);
+		Rect.Draw(ColorRGBA(.6f, .573f, .451f), IGraphics::CORNER_ALL, 4.0f);
+
+		CUIRect PreviewCollTee;
+		RightView.HSplitTop(50.0f, &PreviewCollTee, &RightView);
+		RightView.HSplitTop(4 * MarginSmall, nullptr, &RightView);
+		TeeRenderPos = vec2(PreviewCollTee.x + LeftMargin, PreviewCollTee.y + PreviewCollTee.h / 2.0f);
+		const vec2 DummyRenderPos = vec2(PreviewCollTee.x + PreviewCollTee.w - LineLength - 10.f, PreviewCollTee.y + PreviewCollTee.h / 2.0f);
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &DummySkinInfo, 0, vec2(1.0f, 0.0f), DummyRenderPos);
+		DoHookCollision(TeeRenderPos, PreviewCollTee.w - LineLength - LeftMargin - 20.f, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl)));
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1.0f, 0.0f), TeeRenderPos);
 	}
 	else if(s_CurTab == APPEARANCE_TAB_INFO_MESSAGES)
 	{
