@@ -27,13 +27,12 @@ Parts of TaterClient
 - Friend name color in chat
 - Fps spoofer ig?
 - Very pro looking menu trust
-- Customization of alot of sprites
-- 
+- Customization of alot of sprites - but like in the most useless way possible.
 
 To Do:
 Update the client to newest ddnet version... yay.. cant wait once my wifi is back
 Add screenshots of every tab
 Add name color in scoreboard
 Add every setting to the Aiodob Menu
-Add a few near little features i found in a small client c:
-try to get silent commands to work (literally got no coding experience this is the first thing i ever done and succesfully too :D)
+Add a few neat little features i found in a small client c:
+try to get silent commands to work (literally got no coding experience this is the first thing i ever done and succesfully so :D)
