@@ -81,7 +81,6 @@ public:
 	bool m_NinjaJetpack;
 	int m_FreezeTime;
 	bool m_FrozenLastTick;
-	int m_TuneZone;
 	vec2 m_PrevPos;
 	vec2 m_PrevPrevPos;
 	int m_TeleCheckpoint;
@@ -133,6 +132,8 @@ public:
 	bool Match(CCharacter *pChar) const;
 	void ResetPrediction();
 	void SetTuneZone(int Zone);
+	int GetOverriddenTuneZone() const;
+	int GetPureTuneZone() const;
 
 	bool HammerHitDisabled() { return m_Core.m_HammerHitDisabled; }
 	bool ShotgunHitDisabled() { return m_Core.m_ShotgunHitDisabled; }
@@ -164,6 +165,10 @@ private:
 	CNetObj_PlayerInput m_SavedInput;
 
 	int m_NumInputs;
+
+	// tune
+	int m_TuneZone;
+	int m_TuneZoneOverride;
 
 	// the player core for the physics
 	CCharacterCore m_Core;
