@@ -717,21 +717,16 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static std::vector<CUISkin> s_vSkinList;
 	static std::vector<CUISkin> s_vSkinListHelper;
 	static std::vector<CUISkin> s_vFavoriteSkinListHelper;
-	static int s_SkinCount = 0;
 	static CListBox s_ListBox;
 
 	// be nice to the CPU
-	static auto s_SkinLastRebuildTime = time_get_nanoseconds();
-	const auto CurTime = time_get_nanoseconds();
-	if(m_SkinListNeedsUpdate || m_pClient->m_Skins.Num() != s_SkinCount || m_SkinFavoritesChanged || (m_pClient->m_Skins.IsDownloadingSkins() && (CurTime - s_SkinLastRebuildTime > 500ms)))
+	static std::chrono::nanoseconds s_SkinLastRefreshTime = m_pClient->m_Skins.LastRefreshTime();
+	if(m_SkinListNeedsUpdate || m_SkinFavoritesChanged || s_SkinLastRefreshTime != m_pClient->m_Skins.LastRefreshTime())
 	{
-		s_SkinLastRebuildTime = CurTime;
+		s_SkinLastRefreshTime = m_pClient->m_Skins.LastRefreshTime();
 		s_vSkinList.clear();
 		s_vSkinListHelper.clear();
 		s_vFavoriteSkinListHelper.clear();
-		// set skin count early, since Find of the skin class might load
-		// a downloading skin
-		s_SkinCount = m_pClient->m_Skins.Num();
 		m_SkinFavoritesChanged = false;
 
 		auto &&SkinNotFiltered = [&](const CSkin *pSkinToBeSelected) {

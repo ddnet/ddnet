@@ -3,72 +3,38 @@
 #ifndef GAME_CLIENT_COMPONENTS_SKINS_H
 #define GAME_CLIENT_COMPONENTS_SKINS_H
 
-#include <base/system.h>
-#include <engine/shared/http.h>
+#include <base/lock.h>
+
+#include <engine/shared/jobs.h>
+
 #include <game/client/component.h>
 #include <game/client/skin.h>
+
+#include <chrono>
 #include <string_view>
 #include <unordered_map>
+
+class CHttpRequest;
 
 class CSkins : public CComponent
 {
 public:
 	CSkins();
 
-	class CGetPngFile : public CHttpRequest
-	{
-		CSkins *m_pSkins;
+	typedef std::function<void()> TSkinLoadedCallback;
 
-	protected:
-		virtual void OnCompletion(EHttpState State) override;
-
-	public:
-		CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest);
-		CImageInfo m_Info;
-	};
-
-	struct CDownloadSkin
-	{
-	private:
-		char m_aName[MAX_SKIN_LENGTH];
-
-	public:
-		std::shared_ptr<CSkins::CGetPngFile> m_pTask;
-		char m_aPath[IO_MAX_PATH_LENGTH];
-
-		CDownloadSkin(CDownloadSkin &&Other) = default;
-		CDownloadSkin(const char *pName)
-		{
-			str_copy(m_aName, pName);
-		}
-
-		~CDownloadSkin()
-		{
-			if(m_pTask)
-				m_pTask->Abort();
-		}
-		bool operator<(const CDownloadSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
-		bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
-		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
-
-		CDownloadSkin &operator=(CDownloadSkin &&Other) = default;
-
-		const char *GetName() const { return m_aName; }
-	};
-
-	typedef std::function<void(int)> TSkinLoadedCBFunc;
-
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;
+	void OnShutdown() override;
 
-	void Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc);
-	int Num();
-	std::unordered_map<std::string_view, std::unique_ptr<CSkin>> &GetSkinsUnsafe() { return m_Skins; }
+	void Refresh(TSkinLoadedCallback &&SkinLoadedCallback);
+	std::chrono::nanoseconds LastRefreshTime() const { return m_LastRefreshTime; }
+
+	const std::unordered_map<std::string_view, std::unique_ptr<CSkin>> &GetSkinsUnsafe() const { return m_Skins; }
 	const CSkin *FindOrNullptr(const char *pName, bool IgnorePrefix = false);
 	const CSkin *Find(const char *pName);
-	void RandomizeSkin(int Dummy);
 
-	bool IsDownloadingSkins() { return m_DownloadingSkins; }
+	void RandomizeSkin(int Dummy);
 
 	static bool IsVanillaSkin(const char *pName);
 
@@ -78,13 +44,56 @@ public:
 		"twinbop", "twintri", "warpaint", "x_ninja", "x_spec"};
 
 private:
+	class CSkinDownloadJob : public IJob
+	{
+	public:
+		CSkinDownloadJob(CSkins *pSkins, const char *pName);
+		~CSkinDownloadJob();
+
+		bool Abort() override REQUIRES(!m_Lock);
+
+		CImageInfo &ImageInfo() { return m_ImageInfo; }
+
+	protected:
+		void Run() override REQUIRES(!m_Lock);
+
+	private:
+		CSkins *m_pSkins;
+		char m_aName[MAX_SKIN_LENGTH];
+		CLock m_Lock;
+		std::shared_ptr<CHttpRequest> m_pGetRequest;
+		CImageInfo m_ImageInfo;
+	};
+
+	class CLoadingSkin
+	{
+	private:
+		char m_aName[MAX_SKIN_LENGTH];
+
+	public:
+		std::shared_ptr<CSkinDownloadJob> m_pDownloadJob = nullptr;
+
+		CLoadingSkin(CLoadingSkin &&Other) = default;
+		CLoadingSkin(const char *pName);
+		~CLoadingSkin();
+
+		bool operator<(const CLoadingSkin &Other) const;
+		bool operator<(const char *pOther) const;
+		bool operator==(const char *pOther) const;
+
+		CLoadingSkin &operator=(CLoadingSkin &&Other) = default;
+
+		const char *Name() const { return m_aName; }
+	};
+
 	std::unordered_map<std::string_view, std::unique_ptr<CSkin>> m_Skins;
-	std::unordered_map<std::string_view, std::unique_ptr<CDownloadSkin>> m_DownloadSkins;
+
+	std::unordered_map<std::string_view, std::unique_ptr<CLoadingSkin>> m_LoadingSkins;
+	std::chrono::nanoseconds m_LastRefreshTime;
+
 	CSkin m_PlaceholderSkin;
-	size_t m_DownloadingSkins = 0;
 	char m_aEventSkinPrefix[MAX_SKIN_LENGTH];
 
-	bool LoadSkinPng(CImageInfo &Info, const char *pName, const char *pPath, int DirType);
 	const CSkin *LoadSkin(const char *pName, const char *pPath, int DirType);
 	const CSkin *LoadSkin(const char *pName, CImageInfo &Info);
 	const CSkin *FindImpl(const char *pName);

@@ -126,6 +126,11 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 	{
 		curl_easy_setopt(pH, CURLOPT_MAXFILESIZE_LARGE, (curl_off_t)m_MaxResponseSize);
 	}
+	if(m_IfModifiedSince >= 0)
+	{
+		curl_easy_setopt(pH, CURLOPT_TIMEVALUE_LARGE, (curl_off_t)m_IfModifiedSince);
+		curl_easy_setopt(pH, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+	}
 
 	// ‘CURLOPT_PROTOCOLS’ is deprecated: since 7.85.0. Use CURLOPT_PROTOCOLS_STR
 	// Wait until all platforms have 7.85.0
