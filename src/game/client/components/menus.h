@@ -658,7 +658,9 @@ public:
 	bool IsInit() { return m_IsInit; }
 
 	bool IsActive() const { return m_MenuActive; }
+	void RunServer(const char **ppArguments = nullptr, const size_t NumArguments = 0);
 	void KillServer();
+	bool IsServerRunning() const;
 
 	virtual void OnInit() override;
 	void OnConsoleInit() override;
