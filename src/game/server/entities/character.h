@@ -48,6 +48,7 @@ public:
 
 	void SetWeapon(int W);
 	void SetJetpack(bool Active);
+	void SetEndlessJump(bool Active);
 	void SetJumps(int Jumps);
 	void SetSolo(bool Solo);
 	void SetSuper(bool Super);
