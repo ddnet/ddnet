@@ -1542,30 +1542,21 @@ void CGameClient::OnNewSnapshot()
 					}
 					IntsToStr(&pInfo->m_Clan0, 3, pClient->m_aClan, std::size(pClient->m_aClan));
 					pClient->m_Country = pInfo->m_Country;
+
 					IntsToStr(&pInfo->m_Skin0, 6, pClient->m_aSkinName, std::size(pClient->m_aSkinName));
+					if(pClient->m_aSkinName[0] == '\0' ||
+						(!m_GameInfo.m_AllowXSkins && (pClient->m_aSkinName[0] == 'x' && pClient->m_aSkinName[1] == '_')))
+					{
+						str_copy(pClient->m_aSkinName, "default");
+					}
 
 					pClient->m_UseCustomColor = pInfo->m_UseCustomColor;
 					pClient->m_ColorBody = pInfo->m_ColorBody;
 					pClient->m_ColorFeet = pInfo->m_ColorFeet;
 
-					// prepare the info
-					if(!m_GameInfo.m_AllowXSkins && (pClient->m_aSkinName[0] == 'x' && pClient->m_aSkinName[1] == '_'))
-						str_copy(pClient->m_aSkinName, "default");
-
-					pClient->m_SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pClient->m_ColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
-					pClient->m_SkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pClient->m_ColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
 					pClient->m_SkinInfo.m_Size = 64;
-
-					// find new skin
 					pClient->m_SkinInfo.Apply(m_Skins.Find(pClient->m_aSkinName));
-					pClient->m_SkinInfo.m_CustomColoredSkin = pClient->m_UseCustomColor;
-
-					if(!pClient->m_UseCustomColor)
-					{
-						pClient->m_SkinInfo.m_ColorBody = ColorRGBA(1, 1, 1);
-						pClient->m_SkinInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
-					}
-
+					pClient->m_SkinInfo.ApplyColors(pClient->m_UseCustomColor, pClient->m_ColorBody, pClient->m_ColorFeet);
 					pClient->UpdateRenderInfo(IsTeamPlay());
 				}
 			}
@@ -3755,15 +3746,7 @@ void CGameClient::RefreshSkins()
 
 	for(auto &Client : m_aClients)
 	{
-		if(Client.m_aSkinName[0] != '\0')
-		{
-			Client.m_SkinInfo.Apply(m_Skins.Find(Client.m_aSkinName));
-		}
-		else
-		{
-			Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
-			Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
-		}
+		Client.m_SkinInfo.Apply(m_Skins.Find(Client.m_aSkinName));
 		Client.UpdateRenderInfo(IsTeamPlay());
 	}
 

@@ -388,20 +388,8 @@ void CGhost::InitRenderInfos(CGhostItem *pGhost)
 	char aSkinName[MAX_SKIN_LENGTH];
 	IntsToStr(&pGhost->m_Skin.m_Skin0, 6, aSkinName, std::size(aSkinName));
 	CTeeRenderInfo *pRenderInfo = &pGhost->m_RenderInfo;
-
 	pRenderInfo->Apply(m_pClient->m_Skins.Find(aSkinName));
-	pRenderInfo->m_CustomColoredSkin = pGhost->m_Skin.m_UseCustomColor;
-	if(pGhost->m_Skin.m_UseCustomColor)
-	{
-		pRenderInfo->m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
-		pRenderInfo->m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pGhost->m_Skin.m_ColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
-	}
-	else
-	{
-		pRenderInfo->m_ColorBody = ColorRGBA(1, 1, 1);
-		pRenderInfo->m_ColorFeet = ColorRGBA(1, 1, 1);
-	}
-
+	pRenderInfo->ApplyColors(pGhost->m_Skin.m_UseCustomColor, pGhost->m_Skin.m_ColorBody, pGhost->m_Skin.m_ColorFeet);
 	pRenderInfo->m_Size = 64;
 }
 
@@ -687,16 +675,7 @@ void CGhost::OnRefreshSkins()
 			return;
 		char aSkinName[MAX_SKIN_LENGTH];
 		IntsToStr(&Ghost.m_Skin.m_Skin0, 6, aSkinName, std::size(aSkinName));
-		CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
-		if(aSkinName[0] != '\0')
-		{
-			pRenderInfo->Apply(m_pClient->m_Skins.Find(aSkinName));
-		}
-		else
-		{
-			pRenderInfo->m_OriginalRenderSkin.Reset();
-			pRenderInfo->m_ColorableRenderSkin.Reset();
-		}
+		Ghost.m_RenderInfo.Apply(m_pClient->m_Skins.Find(aSkinName));
 	};
 
 	for(auto &Ghost : m_aActiveGhosts)

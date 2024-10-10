@@ -593,17 +593,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// which invalidates the skin.
 	CTeeRenderInfo OwnSkinInfo;
 	OwnSkinInfo.Apply(m_pClient->m_Skins.Find(pSkinName));
-	OwnSkinInfo.m_CustomColoredSkin = *pUseCustomColor;
-	if(*pUseCustomColor)
-	{
-		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
-		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*pColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
-	}
-	else
-	{
-		OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
-		OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
-	}
+	OwnSkinInfo.ApplyColors(*pUseCustomColor, *pColorBody, *pColorFeet);
 	OwnSkinInfo.m_Size = 50.0f;
 
 	// Tee
@@ -786,10 +776,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		Item.m_Rect.VSplitLeft(60.0f, &Button, &Label);
 
 		CTeeRenderInfo Info = OwnSkinInfo;
-		Info.m_CustomColoredSkin = *pUseCustomColor;
-		Info.m_OriginalRenderSkin = pSkinToBeDraw->m_OriginalSkin;
-		Info.m_ColorableRenderSkin = pSkinToBeDraw->m_ColorableSkin;
-		Info.m_SkinMetrics = pSkinToBeDraw->m_Metrics;
+		Info.Apply(pSkinToBeDraw);
 
 		vec2 OffsetToMid;
 		CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &Info, OffsetToMid);
@@ -2514,7 +2501,6 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		static std::vector<SPreviewLine> s_vLines;
 
-		const auto *pDefaultSkin = GameClient()->m_Skins.Find("default");
 		enum ELineFlag
 		{
 			FLAG_TEAM = 1 << 0,
@@ -2552,15 +2538,11 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			str_copy(pLine->m_aName, pName);
 			str_copy(pLine->m_aText, pText);
 		};
-		auto &&SetLineSkin = [RealTeeSize, &pDefaultSkin](int Index, const CSkin *pSkin) {
+		auto &&SetLineSkin = [RealTeeSize](int Index, const CSkin *pSkin) {
 			if(Index >= (int)s_vLines.size())
 				return;
 			s_vLines[Index].m_RenderInfo.m_Size = RealTeeSize;
-			s_vLines[Index].m_RenderInfo.m_CustomColoredSkin = false;
-			if(pSkin != nullptr)
-				s_vLines[Index].m_RenderInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-			else if(pDefaultSkin != nullptr)
-				s_vLines[Index].m_RenderInfo.m_OriginalRenderSkin = pDefaultSkin->m_OriginalSkin;
+			s_vLines[Index].m_RenderInfo.Apply(pSkin);
 		};
 
 		auto &&RenderPreview = [&](int LineIndex, int x, int y, bool Render = true) {
@@ -2666,10 +2648,10 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			SetPreviewLine(PREVIEW_CLIENT, -1, "— ", "Echo command executed", FLAG_CLIENT, 0);
 		}
 
-		SetLineSkin(1, GameClient()->m_Skins.FindOrNullptr("pinky"));
-		SetLineSkin(2, pDefaultSkin);
-		SetLineSkin(3, GameClient()->m_Skins.FindOrNullptr("cammostripes"));
-		SetLineSkin(4, GameClient()->m_Skins.FindOrNullptr("beast"));
+		SetLineSkin(1, GameClient()->m_Skins.Find("pinky"));
+		SetLineSkin(2, GameClient()->m_Skins.Find("default"));
+		SetLineSkin(3, GameClient()->m_Skins.Find("cammostripes"));
+		SetLineSkin(4, GameClient()->m_Skins.Find("beast"));
 
 		// Backgrounds first
 		if(!g_Config.m_ClChatOld)
@@ -2887,32 +2869,12 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		CTeeRenderInfo OwnSkinInfo;
 		OwnSkinInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClPlayerSkin));
-		OwnSkinInfo.m_CustomColoredSkin = g_Config.m_ClPlayerUseCustomColor;
-		if(g_Config.m_ClPlayerUseCustomColor)
-		{
-			OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClPlayerColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
-			OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClPlayerColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
-		}
-		else
-		{
-			OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
-			OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
-		}
+		OwnSkinInfo.ApplyColors(g_Config.m_ClPlayerUseCustomColor, g_Config.m_ClPlayerColorBody, g_Config.m_ClPlayerColorFeet);
 		OwnSkinInfo.m_Size = 50.0f;
 
 		CTeeRenderInfo DummySkinInfo;
 		DummySkinInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClDummySkin));
-		DummySkinInfo.m_CustomColoredSkin = g_Config.m_ClDummyUseCustomColor;
-		if(g_Config.m_ClDummyUseCustomColor)
-		{
-			DummySkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClDummyColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
-			DummySkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClDummyColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
-		}
-		else
-		{
-			DummySkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
-			DummySkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
-		}
+		DummySkinInfo.ApplyColors(g_Config.m_ClDummyUseCustomColor, g_Config.m_ClDummyColorBody, g_Config.m_ClDummyColorFeet);
 		DummySkinInfo.m_Size = 50.0f;
 
 		const float LineLength = 150.f;

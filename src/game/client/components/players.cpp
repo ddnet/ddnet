@@ -862,7 +862,6 @@ void CPlayers::OnRender()
 	}
 	CTeeRenderInfo RenderInfoSpec;
 	RenderInfoSpec.Apply(m_pClient->m_Skins.Find("x_spec"));
-	RenderInfoSpec.m_CustomColoredSkin = false;
 	RenderInfoSpec.m_Size = 64.0f;
 	const int LocalClientId = m_pClient->m_Snap.m_LocalClientId;
 
