@@ -89,13 +89,13 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 		{
 			continue;
 		}
-		if(Sixup)
-			Addr.type |= NETTYPE_TW7;
 
 		SECURITY_TOKEN Token;
 		*pResponseToken = NET_SECURITY_TOKEN_UNKNOWN;
 		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token, pResponseToken) == 0)
 		{
+			if(Sixup)
+				Addr.type |= NETTYPE_TW7;
 			if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
 			{
 				pChunk->m_Flags = NETSENDFLAG_CONNLESS;
@@ -115,6 +115,10 @@ int CNetClient::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken, bool Six
 				if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr, Token, *pResponseToken))
 					m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
 			}
+		}
+		if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONTROL && m_RecvUnpacker.m_Data.m_aChunkData[0] == NET_CTRLMSG_TOKEN)
+		{
+			CheckConnlessPackets(&Addr, *pResponseToken);
 		}
 	}
 	return 0;
@@ -189,4 +193,24 @@ void CNetClient::RefreshStun()
 CONNECTIVITY CNetClient::GetConnectivity(int NetType, NETADDR *pGlobalAddr)
 {
 	return m_pStun->GetConnectivity(NetType, pGlobalAddr);
+}
+
+void CNetClient::CheckConnlessPackets(NETADDR *pAddr, SECURITY_TOKEN Token)
+{
+	NETADDR NullAddr = NETADDR_ZEROED;
+	NullAddr.type = 7;
+	NullAddr.port = pAddr->port;
+
+	for(size_t i = 0; i < m_ConnlessPackets.size(); i++)
+	{
+		CNetChunk &Packet = m_ConnlessPackets[i];
+
+		if(net_addr_comp(&NullAddr, &Packet.m_Address) == 0)
+		{
+			CNetBase::SendConnlessSixup(m_Socket, &Packet, 1, Token);
+
+			free(const_cast<void *>(Packet.m_pData));
+			m_ConnlessPackets.erase(m_ConnlessPackets.begin() + i);
+		}
+	}
 }
