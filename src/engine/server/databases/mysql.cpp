@@ -446,7 +446,8 @@ bool CMysqlConnection::Step(bool *pEnd, char *pError, int ErrorSize)
 	if(m_NewQuery)
 	{
 		m_NewQuery = false;
-		if(mysql_stmt_bind_param(m_pStmt.get(), m_vStmtParameters.data()))
+		unsigned NumParameters = mysql_stmt_param_count(m_pStmt.get());
+		if(NumParameters && mysql_stmt_bind_param(m_pStmt.get(), m_vStmtParameters.data()))
 		{
 			StoreErrorStmt("bind_param");
 			str_copy(pError, m_aErrorDetail, ErrorSize);
@@ -477,7 +478,8 @@ bool CMysqlConnection::ExecuteUpdate(int *pNumUpdated, char *pError, int ErrorSi
 	if(m_NewQuery)
 	{
 		m_NewQuery = false;
-		if(mysql_stmt_bind_param(m_pStmt.get(), m_vStmtParameters.data()))
+		unsigned NumParameters = mysql_stmt_param_count(m_pStmt.get());
+		if(NumParameters && mysql_stmt_bind_param(m_pStmt.get(), m_vStmtParameters.data()))
 		{
 			StoreErrorStmt("bind_param");
 			str_copy(pError, m_aErrorDetail, ErrorSize);
