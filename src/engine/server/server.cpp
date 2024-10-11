@@ -3393,13 +3393,13 @@ void CServer::DemoRecorder_HandleAutoStart()
 		char aTimestamp[20];
 		str_timestamp(aTimestamp, sizeof(aTimestamp));
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "demos/auto/server/%s_%s.demo", m_aCurrentMap, aTimestamp);
+		str_format(aFilename, sizeof(aFilename), "demos/auto/server/%s_%s.demo", GetMapName(), aTimestamp);
 		m_aDemoRecorder[RECORDER_AUTO].Start(
 			Storage(),
 			m_pConsole,
 			aFilename,
 			GameServer()->NetVersion(),
-			m_aCurrentMap,
+			GetMapName(),
 			m_aCurrentMapSha256[MAP_TYPE_SIX],
 			m_aCurrentMapCrc[MAP_TYPE_SIX],
 			"server",
@@ -3423,7 +3423,7 @@ void CServer::SaveDemo(int ClientId, float Time)
 	if(IsRecording(ClientId))
 	{
 		char aNewFilename[IO_MAX_PATH_LENGTH];
-		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%05.2f.demo", m_aCurrentMap, m_aClients[ClientId].m_aName, Time);
+		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%05.2f.demo", GetMapName(), m_aClients[ClientId].m_aName, Time);
 		m_aDemoRecorder[ClientId].Stop(IDemoRecorder::EStopMode::KEEP_FILE, aNewFilename);
 	}
 }
@@ -3433,13 +3433,13 @@ void CServer::StartRecord(int ClientId)
 	if(Config()->m_SvPlayerDemoRecord)
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientId);
+		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", GetMapName(), m_NetServer.Address().port, ClientId);
 		m_aDemoRecorder[ClientId].Start(
 			Storage(),
 			Console(),
 			aFilename,
 			GameServer()->NetVersion(),
-			m_aCurrentMap,
+			GetMapName(),
 			m_aCurrentMapSha256[MAP_TYPE_SIX],
 			m_aCurrentMapCrc[MAP_TYPE_SIX],
 			"server",
@@ -3501,7 +3501,7 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 		pServer->Console(),
 		aFilename,
 		pServer->GameServer()->NetVersion(),
-		pServer->m_aCurrentMap,
+		pServer->GetMapName(),
 		pServer->m_aCurrentMapSha256[MAP_TYPE_SIX],
 		pServer->m_aCurrentMapCrc[MAP_TYPE_SIX],
 		"server",
