@@ -246,6 +246,7 @@ CServer::CServer()
 	m_SameMapReload = false;
 	m_ReloadedWhenEmpty = false;
 	m_aCurrentMap[0] = '\0';
+	m_pCurrentMapName = m_aCurrentMap;
 
 	m_RconClientId = IServer::RCON_CID_SERV;
 	m_RconAuthLevel = AUTHED_ADMIN;
@@ -2541,14 +2542,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 
 const char *CServer::GetMapName() const
 {
-	// get the name of the map without his path
-	const char *pMapShortName = &Config()->m_SvMap[0];
-	for(int i = 0; i < str_length(Config()->m_SvMap) - 1; i++)
-	{
-		if(Config()->m_SvMap[i] == '/' || Config()->m_SvMap[i] == '\\')
-			pMapShortName = &Config()->m_SvMap[i + 1];
-	}
-	return pMapShortName;
+	return m_pCurrentMapName;
 }
 
 void CServer::ChangeMap(const char *pMap)
@@ -2587,6 +2581,7 @@ int CServer::LoadMap(const char *pMapName)
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBufMsg);
 
 	str_copy(m_aCurrentMap, pMapName);
+	m_pCurrentMapName = fs_filename(m_aCurrentMap);
 
 	// load complete map into memory for download
 	{
