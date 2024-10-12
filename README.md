@@ -34,7 +34,7 @@ Parts of TaterClient
 - Prediction support for my servers explosion gun
 
 To Do:
-Update the client to newest ddnet version... yay.. cant wait once my wifi is back
-Add screenshots of every tab
-Add a few neat little features i found in a small client c:
-try to get silent commands to work (literally got no coding experience this is the first thing i ever done and succesfully so :D)
+- Update the client to newest ddnet version... yay.. cant wait once my wifi is back
+- Add screenshots of every tab
+- Add a few neat little features i found in a small client c:
+- try to get silent commands to work (literally got no coding experience this is the first thing i ever done and succesfully so :D)
