@@ -3,9 +3,9 @@ Foxs turn on copying files from other clients and making a *semi* All In One cli
 Will upload my stuff in a few days, gotta wait till i get my new router :p 
 literally got no internet at all on my pc for a few days
 
--Client will include-
+---Client will include---
 
-Parts of TaterClient 
+-Parts of Tater Client-
 - Bind Wheel
 - Skin Profiles
 - AutoVerify
