@@ -17,22 +17,24 @@ Parts of TaterClient
 -Parts of Chillerbot-
 - War List - its almost like the normal chillerbot except that the commands are also in the console (I'm too dumb to make silent chat commands, chillervot please would love that feauture or maybe i missed it while copying- i mean proffesionally writting code myself ofc)
 - Skin Stealer
-- Camp - might be bannale I have no clue tbh
+- Camp - might be bannable I have no clue tbh
 - Finish Rename
 - Auto reply - When alt tabbed
 
 -Aiodob Client-
 - disable chat bubble
 - Friend/Foe nameplate colors
-- Friend name color in chat
+- Friend name color in chat and scorebaord
+- (spec) next to names of people spectating in scoreboard
+- darker names of people who are afk in scoreboard
+- strong/weak hook color for cl_nameplate_ids
 - Fps spoofer ig?
 - Very pro looking menu trust
 - Customization of alot of sprites - but like in the most useless way possible.
+- Prediction support for my servers explosion gun
 
 To Do:
 Update the client to newest ddnet version... yay.. cant wait once my wifi is back
 Add screenshots of every tab
-Add name color in scoreboard
-Add every setting to the Aiodob Menu
 Add a few neat little features i found in a small client c:
 try to get silent commands to work (literally got no coding experience this is the first thing i ever done and succesfully so :D)
