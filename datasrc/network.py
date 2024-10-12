@@ -593,4 +593,8 @@ Messages = [
 	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),
+    
+	NetMessageEx("Sv_TickSpeed", "tickspeed@netmsg.ddnet.org", [
+		NetIntRange("m_TickSpeed", 50, 200),
+	]),
 ]

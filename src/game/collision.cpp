@@ -507,6 +507,9 @@ void CCollision::MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, i
 
 bool CCollision::TestBox(vec2 Pos, vec2 Size) const
 {
+	if(m_TickSpeed > 50)
+		return TestBoxSubTile(Pos, Size);
+
 	Size *= 0.5f;
 	if(CheckPoint(Pos.x - Size.x, Pos.y - Size.y))
 		return true;
@@ -519,6 +522,20 @@ bool CCollision::TestBox(vec2 Pos, vec2 Size) const
 	return false;
 }
 
+bool CCollision::TestBoxSubTile(vec2 Pos, vec2 Size) const
+{
+	Size *= 0.5f;
+	if(CheckPoint(floor(Pos.x - Size.x), floor(Pos.y - Size.y)))
+		return true;
+	if(CheckPoint(ceil(Pos.x + Size.x), floor(Pos.y - Size.y)))
+		return true;
+	if(CheckPoint(floor(Pos.x - Size.x), ceil(Pos.y + Size.y)))
+		return true;
+	if(CheckPoint(ceil(Pos.x + Size.x), ceil(Pos.y + Size.y)))
+		return true;
+	return false;
+}
+
 void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool *pGrounded) const
 {
 	// do the move
@@ -527,6 +544,9 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elast
 
 	float Distance = length(Vel);
 	int Max = (int)Distance;
+
+	if(m_TickSpeed > 50)
+		Max *= 16;
 
 	if(Distance > 0.00001f)
 	{

@@ -287,7 +287,7 @@ public:
 
 	//int Tick()
 	int64_t TickStartTime(int Tick);
-	//int TickSpeed()
+	int TickSpeed() override;
 
 	int Init();
 

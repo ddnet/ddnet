@@ -87,6 +87,8 @@ void CCharacter::HandleJetpack()
 			float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
 			if(!m_TuneZone)
 				Strength = m_LastJetpackStrength;
+
+			Strength = CWorldCore::PhysicsScalingAccel(Strength, GameWorld()->GameTickSpeed());
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCid(), m_Core.m_ActiveWeapon);
 		}
 	}
@@ -324,6 +326,8 @@ void CCharacter::FireWeapon()
 				Dir = vec2(0.f, -1.f);
 
 			float Strength = GetTuning(m_TuneZone)->m_HammerStrength;
+
+			Strength = CWorldCore::PhysicsScalingLinear(Strength, GameWorld()->GameTickSpeed());
 
 			vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 			Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
@@ -647,7 +651,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed);
 		if(Force == 255 && MaxSpeed)
 		{
-			m_Core.m_Vel = Direction * (MaxSpeed / 5);
+			m_Core.m_Vel = Direction * CWorldCore::PhysicsScalingLinear(MaxSpeed / 5, GameWorld()->GameTickSpeed());
 		}
 		else
 		{
@@ -682,6 +686,8 @@ void CCharacter::HandleSkippableTiles(int Index)
 				TeeSpeed = std::sqrt(std::pow(TempVel.x, 2) + std::pow(TempVel.y, 2));
 
 				DiffAngle = SpeederAngle - TeeAngle;
+				Force = CWorldCore::PhysicsScalingAccel(Force, GameWorld()->GameTickSpeed());
+				MaxSpeed = CWorldCore::PhysicsScalingLinear(MaxSpeed, GameWorld()->GameTickSpeed());
 				SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
 				if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 					TempVel += Direction * Force;
@@ -691,7 +697,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 					TempVel += Direction * SpeedLeft;
 			}
 			else
-				TempVel += Direction * Force;
+				TempVel += Direction * CWorldCore::PhysicsScalingAccel(Force, GameWorld()->GameTickSpeed());
 			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}
 	}
@@ -1159,7 +1165,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_LastWeapon = WEAPON_HAMMER;
 	m_QueuedWeapon = -1;
 	m_LastRefillJumps = false;
-	m_PrevPrevPos = m_PrevPos = m_Pos = vec2(pChar->m_X, pChar->m_Y);
+	m_PrevPrevPos = m_PrevPos = m_Pos = CCharacterCore::ConvertPosition(vec2(pChar->m_X, pChar->m_Y), pGameWorld->GameTickSpeed());
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = Id;
@@ -1222,7 +1228,7 @@ void CCharacter::ResetPrediction()
 
 void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
 {
-	m_Core.Read((const CNetObj_CharacterCore *)pChar);
+	m_Core.Read((const CNetObj_CharacterCore *)pChar, GameWorld()->GameTickSpeed());
 	m_IsLocal = IsLocal;
 
 	if(pExtended)

@@ -65,6 +65,7 @@ public:
 	public:
 		bool m_Paused;
 		float m_Speed;
+		int m_TickSpeed;
 
 		int m_FirstTick;
 		int m_CurrentTick;
@@ -89,6 +90,7 @@ public:
 	virtual int SeekTime(float Seconds) = 0;
 	virtual int SeekTick(ETickOffset TickOffset) = 0;
 	virtual int SetPos(int WantedTick) = 0;
+	virtual void SetTickSpeed(int TickSpeed) = 0;
 	virtual void Pause() = 0;
 	virtual void Unpause() = 0;
 	virtual const char *ErrorMessage() const = 0;
