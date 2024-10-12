@@ -15,7 +15,8 @@ literally got no internet at all on my pc for a few days
 - Render Cursor in Spec - with an opacity config
 
 ### -Parts of Chillerbot-
-- War List - its almost like the normal chillerbot except that the commands are also in the console (I'm too dumb to make silent chat commands, chillervot please would love that feauture or maybe i missed it while copying- i mean proffesionally writting code myself ofc)
+- War List - its almost like the normal chillerbot except that the commands are also in the console
+- silent chat commands if turned on or when using "." as the prefix
 - Skin Stealer
 - Camp - might be bannable I have no clue tbh
 - Finish Rename
