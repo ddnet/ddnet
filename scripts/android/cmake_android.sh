@@ -26,6 +26,9 @@ if [ -z ${1+x} ]; then
 	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Did not pass Android build type"
 else
 	ANDROID_BUILD=$1
+	if [[ "${ANDROID_BUILD}" == "x64" ]]; then
+		ANDROID_BUILD="x86_64"
+	fi
 	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Android build type: ${ANDROID_BUILD}"
 fi
 
@@ -168,7 +171,7 @@ if [[ "${ANDROID_BUILD}" == "x86" || "${ANDROID_BUILD}" == "all" ]]; then
 	PID_BUILD_X86=$!
 fi
 
-if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "x64" || "${ANDROID_BUILD}" == "all" ]]; then
+if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "all" ]]; then
 	build_for_type x86_64 x86_64 x86_64-linux-android &
 	PID_BUILD_X86_64=$!
 fi
@@ -236,7 +239,7 @@ if [[ "${ANDROID_BUILD}" == "x86" || "${ANDROID_BUILD}" == "all" ]]; then
 	copy_libs x86 x86
 fi
 
-if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "x64" || "${ANDROID_BUILD}" == "all" ]]; then
+if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "all" ]]; then
 	copy_libs x86_64 x86_64
 fi
 
