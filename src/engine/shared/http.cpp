@@ -379,6 +379,7 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 	// before the result has been initialized/updated in OnCompletion.
 	OnCompletion(State);
 	m_State = State;
+	m_WaitCondition.notify_all();
 }
 
 void CHttpRequest::WriteToFile(IStorage *pStorage, const char *pDest, int StorageType)
@@ -402,18 +403,11 @@ void CHttpRequest::Header(const char *pNameColonValue)
 
 void CHttpRequest::Wait()
 {
-	using namespace std::chrono_literals;
-
-	// This is so uncommon that polling just might work
-	for(;;)
-	{
+	std::unique_lock Lock(m_WaitMutex);
+	m_WaitCondition.wait(Lock, [this]() {
 		EHttpState State = m_State.load(std::memory_order_seq_cst);
-		if(State != EHttpState::QUEUED && State != EHttpState::RUNNING)
-		{
-			return;
-		}
-		std::this_thread::sleep_for(10ms);
-	}
+		return State != EHttpState::QUEUED && State != EHttpState::RUNNING;
+	});
 }
 
 void CHttpRequest::Result(unsigned char **ppResult, size_t *pResultLength) const
@@ -604,6 +598,7 @@ void CHttp::RunLoop()
 				goto error_configure;
 			}
 
+			pRequest->m_State = EHttpState::RUNNING;
 			m_RunningRequests.emplace(pEH, std::move(pRequest));
 			NewRequests.pop_front();
 			continue;
