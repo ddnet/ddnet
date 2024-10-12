@@ -1320,6 +1320,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					const char *pButtonName = nullptr;
 					CUi::FPopupMenuFunction pfnPopupFunc = nullptr;
 					int Rows = 0;
+					int ExtraWidth = 0;
 					if(pS == m_Map.m_pSwitchLayer)
 					{
 						pButtonName = "Switch";
@@ -1342,7 +1343,8 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					{
 						pButtonName = "Tele";
 						pfnPopupFunc = PopupTele;
-						Rows = 3;
+						Rows = m_TeleNumbers.size() + 1;
+						ExtraWidth = 50;
 					}
 
 					if(pButtonName != nullptr)
@@ -1357,7 +1359,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 							static SPopupMenuId s_PopupModifierId;
 							if(!Ui()->IsPopupOpen(&s_PopupModifierId))
 							{
-								Ui()->DoPopupMenu(&s_PopupModifierId, Button.x, Button.y + Button.h, 120, 10.0f + Rows * 13.0f, this, pfnPopupFunc);
+								Ui()->DoPopupMenu(&s_PopupModifierId, Button.x, Button.y + Button.h, 120 + ExtraWidth, 10.0f + Rows * 13.0f, this, pfnPopupFunc);
 							}
 						}
 						TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
@@ -8113,7 +8115,7 @@ void CEditor::Render()
 				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_Tele;
 			});
 			if(HasTeleTiles)
-				str_copy(m_aTooltip, "Use shift+mousewheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number.");
+				str_copy(m_aTooltip, "Use shift+mousewheel up/down to adjust the tele number. Use ctrl+f to change current tele number to the first unused number.");
 
 			if(Input()->ShiftIsPressed())
 			{
@@ -9067,9 +9069,6 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 		// Only handle tele, switch and tune layers
 		if(pLayerTiles->m_Tele)
 		{
-			int NextFreeTeleNumber = FindNextFreeTeleNumber();
-			int NextFreeCPNumber = FindNextFreeTeleNumber(true);
-
 			std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
 			for(int y = 0; y < pTeleLayer->m_Height; y++)
 			{
@@ -9081,13 +9080,19 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 					if(UseNextFree)
 					{
-						if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
-							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeCPNumber;
-						else
-							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeTeleNumber;
+						pTeleLayer->m_pTeleTile[i].m_Number = FindNextFreeTeleNumber(pTeleLayer->m_pTiles[i].m_Index);
 					}
 					else
 						AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number);
+
+					if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index) &&
+						m_TeleNumbers[pTeleLayer->m_pTiles[i].m_Index] != pTeleLayer->m_pTeleTile[i].m_Number)
+					{
+						if(UseNextFree || Adjust != 0)
+							m_TeleNumbers[pTeleLayer->m_pTiles[i].m_Index] = pTeleLayer->m_pTeleTile[i].m_Number;
+						else if(!UseNextFree && Adjust == 0)
+							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleNumbers[pTeleLayer->m_pTiles[i].m_Index];
+					}
 				}
 			}
 		}
@@ -9147,12 +9152,12 @@ int CEditor::FindNextFreeSwitchNumber()
 	return Number;
 }
 
-int CEditor::FindNextFreeTeleNumber(bool IsCheckpoint)
+int CEditor::FindNextFreeTeleNumber(int Index)
 {
 	int Number = -1;
 	for(int i = 1; i <= 255; i++)
 	{
-		if(!m_Map.m_pTeleLayer->ContainsElementWithId(i, IsCheckpoint))
+		if(!m_Map.m_pTeleLayer->ContainsElementWithId(i, Index))
 		{
 			Number = i;
 			break;

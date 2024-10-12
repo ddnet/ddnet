@@ -280,6 +280,8 @@ struct CTeamrank
 	bool NextSqlResult(IDbConnection *pSqlServer, bool *pEnd, char *pError, int ErrorSize);
 
 	bool SamePlayers(const std::vector<std::string> *pvSortedNames);
+
+	static bool GetSqlTop5Team(IDbConnection *pSqlServer, bool *pEnd, char *pError, int ErrorSize, char (*paMessages)[512], int *StartLine, int Count);
 };
 
 struct CScoreWorker

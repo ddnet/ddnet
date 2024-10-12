@@ -64,6 +64,21 @@ public:
 		m_SkinMetrics = pSkin->m_Metrics;
 	}
 
+	void ApplyColors(bool CustomColoredSkin, int ColorBody, int ColorFeet)
+	{
+		m_CustomColoredSkin = CustomColoredSkin;
+		if(CustomColoredSkin)
+		{
+			m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(ColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
+			m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(ColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
+		}
+		else
+		{
+			m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+			m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+	}
+
 	CSkin::SSkinTextures m_OriginalRenderSkin;
 	CSkin::SSkinTextures m_ColorableRenderSkin;
 
@@ -225,6 +240,8 @@ public:
 	// render a rectangle made of IndexIn tiles, over a background made of IndexOut tiles
 	// the rectangle include all tiles in [RectX, RectX+RectW-1] x [RectY, RectY+RectH-1]
 	void RenderTileRectangle(int RectX, int RectY, int RectW, int RectH, unsigned char IndexIn, unsigned char IndexOut, float Scale, ColorRGBA Color, int RenderFlags) const;
+
+	void RenderTile(int x, int y, unsigned char Index, float Scale, ColorRGBA Color) const;
 
 	// helpers
 	void CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight);

@@ -593,17 +593,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// which invalidates the skin.
 	CTeeRenderInfo OwnSkinInfo;
 	OwnSkinInfo.Apply(m_pClient->m_Skins.Find(pSkinName));
-	OwnSkinInfo.m_CustomColoredSkin = *pUseCustomColor;
-	if(*pUseCustomColor)
-	{
-		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
-		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*pColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
-	}
-	else
-	{
-		OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
-		OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
-	}
+	OwnSkinInfo.ApplyColors(*pUseCustomColor, *pColorBody, *pColorFeet);
 	OwnSkinInfo.m_Size = 50.0f;
 
 	// Tee
@@ -786,10 +776,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		Item.m_Rect.VSplitLeft(60.0f, &Button, &Label);
 
 		CTeeRenderInfo Info = OwnSkinInfo;
-		Info.m_CustomColoredSkin = *pUseCustomColor;
-		Info.m_OriginalRenderSkin = pSkinToBeDraw->m_OriginalSkin;
-		Info.m_ColorableRenderSkin = pSkinToBeDraw->m_ColorableSkin;
-		Info.m_SkinMetrics = pSkinToBeDraw->m_Metrics;
+		Info.Apply(pSkinToBeDraw);
 
 		vec2 OffsetToMid;
 		CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &Info, OffsetToMid);
@@ -2514,7 +2501,6 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		static std::vector<SPreviewLine> s_vLines;
 
-		const auto *pDefaultSkin = GameClient()->m_Skins.Find("default");
 		enum ELineFlag
 		{
 			FLAG_TEAM = 1 << 0,
@@ -2552,15 +2538,11 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			str_copy(pLine->m_aName, pName);
 			str_copy(pLine->m_aText, pText);
 		};
-		auto &&SetLineSkin = [RealTeeSize, &pDefaultSkin](int Index, const CSkin *pSkin) {
+		auto &&SetLineSkin = [RealTeeSize](int Index, const CSkin *pSkin) {
 			if(Index >= (int)s_vLines.size())
 				return;
 			s_vLines[Index].m_RenderInfo.m_Size = RealTeeSize;
-			s_vLines[Index].m_RenderInfo.m_CustomColoredSkin = false;
-			if(pSkin != nullptr)
-				s_vLines[Index].m_RenderInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-			else if(pDefaultSkin != nullptr)
-				s_vLines[Index].m_RenderInfo.m_OriginalRenderSkin = pDefaultSkin->m_OriginalSkin;
+			s_vLines[Index].m_RenderInfo.Apply(pSkin);
 		};
 
 		auto &&RenderPreview = [&](int LineIndex, int x, int y, bool Render = true) {
@@ -2666,10 +2648,10 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			SetPreviewLine(PREVIEW_CLIENT, -1, "— ", "Echo command executed", FLAG_CLIENT, 0);
 		}
 
-		SetLineSkin(1, GameClient()->m_Skins.FindOrNullptr("pinky"));
-		SetLineSkin(2, pDefaultSkin);
-		SetLineSkin(3, GameClient()->m_Skins.FindOrNullptr("cammostripes"));
-		SetLineSkin(4, GameClient()->m_Skins.FindOrNullptr("beast"));
+		SetLineSkin(1, GameClient()->m_Skins.Find("pinky"));
+		SetLineSkin(2, GameClient()->m_Skins.Find("default"));
+		SetLineSkin(3, GameClient()->m_Skins.Find("cammostripes"));
+		SetLineSkin(4, GameClient()->m_Skins.Find("beast"));
 
 		// Backgrounds first
 		if(!g_Config.m_ClChatOld)
@@ -2842,7 +2824,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		}
 
 		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
-		Ui()->DoScrollbarOption(&g_Config.m_ClHookCollSize, &g_Config.m_ClHookCollSize, &Button, Localize("Hook collision line width"), 0, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
+		Ui()->DoScrollbarOption(&g_Config.m_ClHookCollSize, &g_Config.m_ClHookCollSize, &Button, Localize("Hook collision line width"), 0, 10000, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
 
 		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
 		Ui()->DoScrollbarOption(&g_Config.m_ClHookCollAlpha, &g_Config.m_ClHookCollAlpha, &Button, Localize("Hook collision line opacity"), 0, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
@@ -2858,6 +2840,93 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoLine_ColorPicker(&s_HookCollNoCollResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Nothing hookable"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollHookableCollResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Something hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollTeeCollResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("A Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
+
+		// ***** Hook collisions preview ***** //
+		RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
+		Ui()->DoLabel(&Label, Localize("Preview"), HeadlineFontSize, TEXTALIGN_ML);
+		RightView.HSplitTop(2 * MarginSmall, nullptr, &RightView);
+
+		auto DoHookCollision = [this](const vec2 &Pos, const float &Length, const ColorRGBA &Color) {
+			Graphics()->TextureClear();
+			if(g_Config.m_ClHookCollSize > 0)
+			{
+				Graphics()->QuadsBegin();
+				Graphics()->SetColor(Color.WithAlpha((float)g_Config.m_ClHookCollAlpha / 100));
+				float LineWidth = 0.5f + (float)(g_Config.m_ClHookCollSize - 1) * 0.25f;
+				IGraphics::CQuadItem QuadItem(Pos.x, Pos.y - LineWidth, Length, LineWidth * 2.f);
+				Graphics()->QuadsDrawTL(&QuadItem, 1);
+				Graphics()->QuadsEnd();
+			}
+			else
+			{
+				Graphics()->LinesBegin();
+				Graphics()->SetColor(Color.WithAlpha((float)g_Config.m_ClHookCollAlpha / 100));
+				IGraphics::CLineItem LineItem(Pos.x, Pos.y, Pos.x + Length, Pos.y);
+				Graphics()->LinesDraw(&LineItem, 1);
+				Graphics()->LinesEnd();
+			}
+		};
+
+		CTeeRenderInfo OwnSkinInfo;
+		OwnSkinInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClPlayerSkin));
+		OwnSkinInfo.ApplyColors(g_Config.m_ClPlayerUseCustomColor, g_Config.m_ClPlayerColorBody, g_Config.m_ClPlayerColorFeet);
+		OwnSkinInfo.m_Size = 50.0f;
+
+		CTeeRenderInfo DummySkinInfo;
+		DummySkinInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClDummySkin));
+		DummySkinInfo.ApplyColors(g_Config.m_ClDummyUseCustomColor, g_Config.m_ClDummyColorBody, g_Config.m_ClDummyColorFeet);
+		DummySkinInfo.m_Size = 50.0f;
+
+		const float LineLength = 150.f;
+		const float LeftMargin = 30.f;
+
+		CUIRect PreviewNoColl;
+		RightView.HSplitTop(50.0f, &PreviewNoColl, &RightView);
+		RightView.HSplitTop(4 * MarginSmall, nullptr, &RightView);
+		vec2 TeeRenderPos = vec2(PreviewNoColl.x + LeftMargin, PreviewNoColl.y + PreviewNoColl.h / 2.0f);
+		DoHookCollision(TeeRenderPos, PreviewNoColl.w - LineLength, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorNoColl)));
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1.0f, 0.0f), TeeRenderPos);
+
+		CUIRect NoHookTileRect;
+		PreviewNoColl.VSplitRight(LineLength, &PreviewNoColl, &NoHookTileRect);
+		NoHookTileRect.VSplitLeft(50.0f, &NoHookTileRect, nullptr);
+		NoHookTileRect.Margin(10.0f, &NoHookTileRect);
+
+		// Render unhookable tile
+		int TileScale = 32.0f;
+		Graphics()->TextureClear();
+		Graphics()->TextureSet(m_pClient->m_MapImages.GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
+		Graphics()->BlendNormal();
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		RenderTools()->RenderTile(NoHookTileRect.x, NoHookTileRect.y, TILE_NOHOOK, TileScale, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+
+		CUIRect PreviewColl;
+		RightView.HSplitTop(50.0f, &PreviewColl, &RightView);
+		RightView.HSplitTop(4 * MarginSmall, nullptr, &RightView);
+		TeeRenderPos = vec2(PreviewColl.x + LeftMargin, PreviewColl.y + PreviewColl.h / 2.0f);
+		DoHookCollision(TeeRenderPos, PreviewColl.w - LineLength, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorHookableColl)));
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1.0f, 0.0f), TeeRenderPos);
+
+		CUIRect HookTileRect;
+		PreviewColl.VSplitRight(LineLength, &PreviewColl, &HookTileRect);
+		HookTileRect.VSplitLeft(50.0f, &HookTileRect, nullptr);
+		HookTileRect.Margin(10.0f, &HookTileRect);
+
+		// Render hookable tile
+		Graphics()->TextureClear();
+		Graphics()->TextureSet(m_pClient->m_MapImages.GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
+		Graphics()->BlendNormal();
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		RenderTools()->RenderTile(HookTileRect.x, HookTileRect.y, TILE_SOLID, TileScale, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+
+		CUIRect PreviewCollTee;
+		RightView.HSplitTop(50.0f, &PreviewCollTee, &RightView);
+		RightView.HSplitTop(4 * MarginSmall, nullptr, &RightView);
+		TeeRenderPos = vec2(PreviewCollTee.x + LeftMargin, PreviewCollTee.y + PreviewCollTee.h / 2.0f);
+		const vec2 DummyRenderPos = vec2(PreviewCollTee.x + PreviewCollTee.w - LineLength - 5.f + LeftMargin, PreviewCollTee.y + PreviewCollTee.h / 2.0f);
+		DoHookCollision(TeeRenderPos, PreviewCollTee.w - LineLength - 15.f, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHookCollColorTeeColl)));
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &DummySkinInfo, 0, vec2(1.0f, 0.0f), DummyRenderPos);
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &OwnSkinInfo, 0, vec2(1.0f, 0.0f), TeeRenderPos);
 	}
 	else if(s_CurTab == APPEARANCE_TAB_INFO_MESSAGES)
 	{
