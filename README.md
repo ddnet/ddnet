@@ -3,7 +3,7 @@ Foxs turn on copying files from other clients and making a *semi* All In One cli
 Will upload my stuff in a few days, gotta wait till i get my new router :p 
 literally got no internet at all on my pc for a few days
 
----Client will include---
+###---Client will include---
 
 -Parts of Tater Client-
 - Bind Wheel
@@ -14,18 +14,19 @@ literally got no internet at all on my pc for a few days
 - Nameplates in spec ig?
 - Render Cursor in Spec - with an opacity config
 
--Parts of Chillerbot-
+###-Parts of Chillerbot-
 - War List - its almost like the normal chillerbot except that the commands are also in the console (I'm too dumb to make silent chat commands, chillervot please would love that feauture or maybe i missed it while copying- i mean proffesionally writting code myself ofc)
 - Skin Stealer
 - Camp - might be bannable I have no clue tbh
 - Finish Rename
 - Auto reply - When alt tabbed
 
--Aiodob Client-
+###-Aiodob Client-
 - disable chat bubble
 - Friend/Foe nameplate colors
 - Friend name color in chat and scorebaord
-- (spec) next to names of people spectating in scoreboard
+- (spec) next to names of people spectating in scoreboard and chat
+- Show when others are in a menu (Zzz emote for now)
 - darker names of people who are afk in scoreboard
 - strong/weak hook color for cl_nameplate_ids
 - Fps spoofer ig?
