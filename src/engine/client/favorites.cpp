@@ -135,16 +135,14 @@ void CFavorites::Add(const NETADDR *pAddrs, int NumAddrs)
 	// other favorite.
 	for(int i = 0; i < NumAddrs; i++)
 	{
-		NETADDR Addr = pAddrs[i];
-		Addr.type &= ~(NETTYPE_TW7);
-		CEntry *pEntry = Entry(Addr);
+		CEntry *pEntry = Entry(pAddrs[i]);
 		if(pEntry == nullptr)
 		{
 			continue;
 		}
 		for(int j = 0; j < pEntry->m_NumAddrs; j++)
 		{
-			if(pEntry->m_aAddrs[j] == Addr)
+			if(pEntry->m_aAddrs[j] == pAddrs[i])
 			{
 				pEntry->m_aAddrs[j] = pEntry->m_aAddrs[pEntry->m_NumAddrs - 1];
 				pEntry->m_NumAddrs -= 1;
@@ -164,10 +162,8 @@ void CFavorites::Add(const NETADDR *pAddrs, int NumAddrs)
 	NewEntry.m_NumAddrs = std::min(NumAddrs, (int)std::size(NewEntry.m_aAddrs));
 	for(int i = 0; i < NewEntry.m_NumAddrs; i++)
 	{
-		NETADDR Addr = pAddrs[i];
-		Addr.type &= ~(NETTYPE_TW7);
-		NewEntry.m_aAddrs[i] = Addr;
-		m_ByAddr[Addr] = m_vEntries.size();
+		NewEntry.m_aAddrs[i] = pAddrs[i];
+		m_ByAddr[pAddrs[i]] = m_vEntries.size();
 	}
 	NewEntry.m_AllowPing = false;
 	m_vEntries.push_back(NewEntry);
@@ -211,10 +207,7 @@ void CFavorites::AllEntries(const CEntry **ppEntries, int *pNumEntries)
 
 CFavorites::CEntry *CFavorites::Entry(const NETADDR &Addr)
 {
-	NETADDR AddrAnyProtocol = Addr;
-	AddrAnyProtocol.type &= ~(NETTYPE_TW7);
-
-	auto Entry = m_ByAddr.find(AddrAnyProtocol);
+	auto Entry = m_ByAddr.find(Addr);
 	if(Entry == m_ByAddr.end())
 	{
 		return nullptr;
@@ -224,10 +217,7 @@ CFavorites::CEntry *CFavorites::Entry(const NETADDR &Addr)
 
 const CFavorites::CEntry *CFavorites::Entry(const NETADDR &Addr) const
 {
-	NETADDR AddrAnyProtocol = Addr;
-	AddrAnyProtocol.type &= ~(NETTYPE_TW7);
-
-	auto Entry = m_ByAddr.find(AddrAnyProtocol);
+	auto Entry = m_ByAddr.find(Addr);
 	if(Entry == m_ByAddr.end())
 	{
 		return nullptr;
