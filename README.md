@@ -13,6 +13,7 @@ literally got no internet at all on my pc for a few days
 - Ping Circle next to names
 - Nameplates in spec ig?
 - Render Cursor in Spec - with an opacity config
+- Run on Join in Console
 
 ### -Parts of Chillerbot-
 - War List - its almost like the normal chillerbot except that the commands are also in the console
@@ -71,6 +72,9 @@ cb_nameplates_war_reason
 cb_war_list_auto_relaod
 cb_silent_chat_commands
 
+tc_run_on_join_console
+tc_run_on_join_console_msg
+tc_run_on_join_delay
 tc_cursor_in_spec
 tc_do_cursor_opacity
 tc_cursor_opacity_in_spec
