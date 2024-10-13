@@ -909,6 +909,11 @@ void CMenus::OnInit()
 	// load community icons
 	m_vCommunityIcons.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "communityicons", CommunityIconScan, this);
+
+	// Quad for the direction arrows above the player
+	m_DirectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
+	RenderTools()->QuadContainerAddSprite(m_DirectionQuadContainerIndex, 0.f, 0.f, 22.f);
+	Graphics()->QuadContainerUpload(m_DirectionQuadContainerIndex);
 }
 
 void CMenus::OnConsoleInit()
