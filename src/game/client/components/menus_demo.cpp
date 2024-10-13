@@ -90,8 +90,6 @@ void CMenus::HandleDemoSeeking(float PositionToSeek, float TimeToSeek)
 		else
 			DemoPlayer()->SeekPercent(PositionToSeek);
 		m_pClient->m_SuppressEvents = false;
-		m_pClient->m_MapLayersBackground.EnvelopeUpdate();
-		m_pClient->m_MapLayersForeground.EnvelopeUpdate();
 		if(!DemoPlayer()->BaseInfo()->m_Paused && PositionToSeek == 1.0f)
 			DemoPlayer()->Pause();
 	}
@@ -103,8 +101,6 @@ void CMenus::DemoSeekTick(IDemoPlayer::ETickOffset TickOffset)
 	DemoPlayer()->SeekTick(TickOffset);
 	m_pClient->m_SuppressEvents = false;
 	DemoPlayer()->Pause();
-	m_pClient->m_MapLayersBackground.EnvelopeUpdate();
-	m_pClient->m_MapLayersForeground.EnvelopeUpdate();
 }
 
 void CMenus::RenderDemoPlayer(CUIRect MainView)
