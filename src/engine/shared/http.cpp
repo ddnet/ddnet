@@ -378,7 +378,10 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 	// or other threads may try to access the result of a completed HTTP request,
 	// before the result has been initialized/updated in OnCompletion.
 	OnCompletion(State);
-	m_State = State;
+	{
+		std::unique_lock WaitLock(m_WaitMutex);
+		m_State = State;
+	}
 	m_WaitCondition.notify_all();
 }
 
@@ -598,7 +601,10 @@ void CHttp::RunLoop()
 				goto error_configure;
 			}
 
-			pRequest->m_State = EHttpState::RUNNING;
+			{
+				std::unique_lock WaitLock(pRequest->m_WaitMutex);
+				pRequest->m_State = EHttpState::RUNNING;
+			}
 			m_RunningRequests.emplace(pEH, std::move(pRequest));
 			NewRequests.pop_front();
 			continue;
