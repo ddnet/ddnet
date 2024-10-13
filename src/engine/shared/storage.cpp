@@ -559,8 +559,14 @@ public:
 			*pResultLen = 0;
 			return false;
 		}
-		io_read_all(File, ppResult, pResultLen);
+		const bool ReadSuccess = io_read_all(File, ppResult, pResultLen);
 		io_close(File);
+		if(!ReadSuccess)
+		{
+			*ppResult = nullptr;
+			*pResultLen = 0;
+			return false;
+		}
 		return true;
 	}
 

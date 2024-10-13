@@ -237,7 +237,13 @@ enum
 	 * @see io_open
 	 */
 	IOFLAG_APPEND = 4,
+};
 
+/**
+ * @ingroup File-IO
+ */
+enum ESeekOrigin
+{
 	/**
 	 * Start seeking from the beginning of the file.
 	 *
@@ -294,10 +300,14 @@ unsigned io_read(IOHANDLE io, void *buffer, unsigned size);
  * @param result Receives the file's remaining contents.
  * @param result_len Receives the file's remaining length.
  *
+ * @return `true` on success, `false` on failure.
+ *
  * @remark Does NOT guarantee that there are no internal null bytes.
  * @remark The result must be freed after it has been used.
+ * @remark The function will fail if more than 1 GiB of memory would
+ * have to be allocated. Large files should not be loaded into memory.
  */
-void io_read_all(IOHANDLE io, void **result, unsigned *result_len);
+bool io_read_all(IOHANDLE io, void **result, unsigned *result_len);
 
 /**
  * Reads the rest of the file into a zero-terminated buffer with
@@ -312,6 +322,8 @@ void io_read_all(IOHANDLE io, void **result, unsigned *result_len);
  * @remark Guarantees that there are no internal null bytes.
  * @remark Guarantees that result will contain zero-termination.
  * @remark The result must be freed after it has been used.
+ * @remark The function will fail if more than 1 GiB of memory would
+ * have to be allocated. Large files should not be loaded into memory.
  */
 char *io_read_all_str(IOHANDLE io);
 
@@ -325,7 +337,7 @@ char *io_read_all_str(IOHANDLE io);
  *
  * @return 0 on success.
  */
-int io_skip(IOHANDLE io, int size);
+int io_skip(IOHANDLE io, int64_t size);
 
 /**
  * Seeks to a specified offset in the file.
@@ -338,7 +350,7 @@ int io_skip(IOHANDLE io, int size);
  *
  * @return `0` on success.
  */
-int io_seek(IOHANDLE io, int offset, int origin);
+int io_seek(IOHANDLE io, int64_t offset, ESeekOrigin origin);
 
 /**
  * Gets the current position in the file.
@@ -349,7 +361,7 @@ int io_seek(IOHANDLE io, int offset, int origin);
  *
  * @return The current position, or `-1` on failure.
  */
-long int io_tell(IOHANDLE io);
+int64_t io_tell(IOHANDLE io);
 
 /**
  * Gets the total length of the file. Resets cursor to the beginning.
@@ -360,7 +372,7 @@ long int io_tell(IOHANDLE io);
  *
  * @return The total size, or `-1` on failure.
  */
-long int io_length(IOHANDLE io);
+int64_t io_length(IOHANDLE io);
 
 /**
  * Writes data from a buffer to a file.

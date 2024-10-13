@@ -97,10 +97,10 @@ private:
 	// Playback
 	struct SKeyFrame
 	{
-		long m_Filepos;
+		int64_t m_Filepos;
 		int m_Tick;
 
-		SKeyFrame(long Filepos, int Tick) :
+		SKeyFrame(int64_t Filepos, int Tick) :
 			m_Filepos(Filepos), m_Tick(Tick)
 		{
 		}
@@ -108,7 +108,7 @@ private:
 
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
-	long m_MapOffset;
+	int64_t m_MapOffset;
 	char m_aFilename[IO_MAX_PATH_LENGTH];
 	char m_aErrorMessage[256];
 	std::vector<SKeyFrame> m_vKeyFrames;
