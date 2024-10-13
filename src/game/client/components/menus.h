@@ -96,6 +96,8 @@ class CMenus : public CComponent
 
 	bool m_SkinListNeedsUpdate = false;
 
+	int m_DirectionQuadContainerIndex;
+
 	// menus_settings_assets.cpp
 public:
 	struct SCustomItem
