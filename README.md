@@ -26,9 +26,11 @@ literally got no internet at all on my pc for a few days
 - disable chat bubble
 - Friend/Foe nameplate colors
 - Friend name color in chat and scorebaord
-- (spec) next to names of people spectating in scoreboard and chat
+- (s) next to names of people spectating in scoreboard and chat
+- show tee sitting in scoreboard if the player is spectating
 - Show when others are in a menu (Zzz emote for now)
 - darker names of people who are afk in scoreboard
+- different name color for afk friends
 - strong/weak hook color for cl_nameplate_ids
 - Fps spoofer ig?
 - Very pro looking menu trust
@@ -42,7 +44,9 @@ ac_chatbubble
 ac_show_others_in_menu
 ac_show_ids_chat
 ac_do_afk_name_color
+ac_do_afk_friend_color
 ac_do_scoreboard_specmark
+ac_do_scoreboard_spec_tee
 ac_do_chat_specmark
 ac_do_friend_name_color
 ac_do_friend_color_scoreboard
