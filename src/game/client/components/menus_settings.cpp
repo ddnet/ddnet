@@ -2802,7 +2802,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		const float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 		const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
-		const ColorRGBA rgb = g_Config.m_ClNameplatesTeamcolors ? m_pClient->GetDDTeamColor(13, 0.75f) : TextRender()->DefaultTextColor();
+		const ColorRGBA Rgb = g_Config.m_ClNameplatesTeamcolors ? m_pClient->GetDDTeamColor(13, 0.75f) : TextRender()->DefaultTextColor();
 		float YOffset = TeeRenderPos.y - 38;
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 
@@ -2834,7 +2834,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		if(g_Config.m_ClNameplates)
 		{
 			YOffset -= FontSize;
-			TextRender()->TextColor(rgb);
+			TextRender()->TextColor(Rgb);
 			TextRender()->TextOutlineColor(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f));
 			TextRender()->Text(TeeRenderPos.x - TextRender()->TextWidth(FontSize, g_Config.m_PlayerName) / 2.0f, YOffset, FontSize, g_Config.m_PlayerName);
 			if(g_Config.m_ClNameplatesClan)
@@ -2854,7 +2854,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			if(g_Config.m_ClNameplatesIds)
 			{
 				YOffset -= FontSize;
-				TextRender()->TextColor(rgb);
+				TextRender()->TextColor(Rgb);
 				TextRender()->Text(TeeRenderPos.x - TextRender()->TextWidth(FontSize, "0") / 2.0f, YOffset, FontSize, "0");
 			}
 
