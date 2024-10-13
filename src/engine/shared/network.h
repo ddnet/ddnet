@@ -8,6 +8,7 @@
 
 #include <base/math.h>
 #include <base/system.h>
+#include <vector>
 
 class CHuffman;
 class CNetBan;
@@ -515,6 +516,8 @@ class CNetClient
 	CStun *m_pStun = nullptr;
 
 public:
+	std::vector<CNetChunk> m_ConnlessPackets;
+
 	NETSOCKET m_Socket;
 	// openness
 	bool Open(NETADDR BindAddr);
@@ -547,6 +550,9 @@ public:
 	void FeedStunServer(NETADDR StunServer);
 	void RefreshStun();
 	CONNECTIVITY GetConnectivity(int NetType, NETADDR *pGlobalAddr);
+
+	// 0.7 stuff
+	void CheckConnlessPackets(NETADDR *pAddr, SECURITY_TOKEN Token);
 };
 
 // TODO: both, fix these. This feels like a junk class for stuff that doesn't fit anywhere
@@ -566,6 +572,7 @@ public:
 	static void SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken, bool Sixup = false);
 	static void SendControlMsgWithToken7(NETSOCKET Socket, NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, TOKEN MyToken, bool Extended);
 	static void SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, bool Extended, unsigned char aExtra[4]);
+	static int SendConnlessSixup(NETSOCKET Socket, CNetChunk *pChunk, SECURITY_TOKEN Token, SECURITY_TOKEN ResponseToken);
 	static void SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup = false, bool NoCompress = false);
 
 	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr);
