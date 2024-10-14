@@ -576,7 +576,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				{
 					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAfkColor)));
 				}
-				if(g_Config.m_ClDoFriendAfkColor && ClientData.m_Friend)
+				if(g_Config.m_ClDoFriendAfkColor && ClientData.m_Friend && ClientData.m_Afk)
 					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendAfkColor)));
 				TextRender()->TextEx(&Cursor, ClientData.m_aName);
 
