@@ -230,6 +230,7 @@ public:
 	int m_RescueMode;
 
 	CSaveTee m_LastTeleTee;
+	CSaveTee m_SavedPracticeTee{};
 };
 
 #endif
