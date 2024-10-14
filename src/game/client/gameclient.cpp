@@ -78,7 +78,20 @@
 #include "prediction/entities/character.h"
 #include "prediction/entities/projectile.h"
 
-using namespace std::chrono_literals;
+// Tater
+#include "components/player_indicator.h"
+#include "components/verify.h"
+
+// Chillerbot
+#include "components/chillerbot/chathelper.h"
+// #include "components/chillerbot/chillconsole.h"
+#include "components/chillerbot/chatcommand.h"
+#include "components/chillerbot/chillerbotux.h"
+#include "components/chillerbot/terminalui/terminalui.h"
+#include "components/chillerbot/unix.h"
+#include "components/chillerbot/warlist.h"
+
+	using namespace std::chrono_literals;
 
 const char *CGameClient::Version() const { return GAME_VERSION; }
 const char *CGameClient::NetVersion() const { return GAME_NETVERSION; }
@@ -123,6 +136,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Sounds,
 					      &m_Voting,
 					      &m_Particles, // doesn't render anything, just updates all the particles
+					      &m_SkinProfiles,
 					      &m_RaceDemo,
 					      &m_MapSounds,
 					      &m_Background, // render instead of m_MapLayersBackground when g_Config.m_ClOverlayEntities == 100
@@ -138,6 +152,9 @@ void CGameClient::OnConsoleInit()
 					      &m_Particles.m_RenderExtra,
 					      &m_Particles.m_RenderGeneral,
 					      &m_FreezeBars,
+					      &m_Bindwheel,
+					      &m_PlayerIndicator,
+					      &m_Verify,
 					      &m_DamageInd,
 					      &m_Hud,
 					      &m_Spectator,
@@ -153,6 +170,14 @@ void CGameClient::OnConsoleInit()
 					      &m_Tooltips,
 					      &CMenus::m_Binder,
 					      &m_GameConsole,
+					      /* <<< chillerbot-ux */
+					      &m_ChillerBotUX,
+					      &m_ChatHelper,
+					      &m_WarList,
+					      &m_ChatCommand,
+					      /* &m_ChillConsole, */
+					      &m_Unix,
+					      /* >>> chillerbot-ux */
 					      &m_MenuBackground});
 
 	// build the input stack
@@ -162,6 +187,7 @@ void CGameClient::OnConsoleInit()
 						  &m_Chat, // chat has higher prio, due to that you can quit it by pressing esc
 						  &m_Motd, // for pressing esc to remove it
 						  &m_Spectator,
+						  &m_Bindwheel,
 						  &m_Emoticon,
 						  &m_Menus,
 						  &m_Controls,
@@ -2512,6 +2538,22 @@ void CGameClient::SendSwitchTeam(int Team) const
 	CNetMsg_Cl_SetTeam Msg;
 	Msg.m_Team = Team;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+}
+
+void CGameClient::SendFinishName()
+{
+	CNetMsg_Cl_ChangeInfo Msg;
+	Msg.m_pName = g_Config.m_ClFinishName;
+	Msg.m_pClan = g_Config.m_PlayerClan;
+	Msg.m_Country = g_Config.m_PlayerCountry;
+	Msg.m_pSkin = g_Config.m_ClPlayerSkin;
+	Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+	Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
+	Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
+	CMsgPacker Packer(&Msg);
+	Msg.Pack(&Packer);
+	Client()->SendMsg(0, &Packer, MSGFLAG_VITAL);
+	m_aCheckInfo[0] = Client()->GameTickSpeed();
 }
 
 void CGameClient::SendStartInfo7(bool Dummy) const

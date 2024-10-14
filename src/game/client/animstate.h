@@ -23,6 +23,7 @@ public:
 	void Add(CAnimation *pAnim, float Time, float Amount);
 
 	const static CAnimState *GetIdle();
+	const static CAnimState *GetSpec();
 };
 
 #endif

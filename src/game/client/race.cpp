@@ -124,3 +124,105 @@ bool CRaceHelper::IsStart(vec2 Prev, vec2 Pos) const
 	}
 	return false;
 }
+
+bool CRaceHelper::IsFinish(vec2 Pos1, vec2 Pos2) const
+{
+	const CCollision *pCollision = m_pGameClient->Collision();
+	std::vector<int> vIndices = pCollision->GetMapIndices(Pos2, Pos1);
+	if(!vIndices.empty())
+		for(int &Indice : vIndices)
+		{
+			if(pCollision->GetTileIndex(Indice) == TILE_FINISH)
+				return true;
+			if(pCollision->GetFTileIndex(Indice) == TILE_FINISH)
+				return true;
+		}
+	else
+	{
+		if(pCollision->GetTileIndex(pCollision->GetPureMapIndex(Pos1)) == TILE_FINISH)
+			return true;
+		if(pCollision->GetFTileIndex(pCollision->GetPureMapIndex(Pos1)) == TILE_FINISH)
+			return true;
+	}
+	return false;
+}
+
+bool CRaceHelper::IsNearStart(vec2 Pos, int RadiusInTiles) const
+{
+	const CCollision *pCollision = m_pGameClient->Collision();
+	float d = RadiusInTiles * 32.0f;
+	vec2 TL = Pos;
+	vec2 TR = Pos;
+	vec2 BL = Pos;
+	vec2 BR = Pos;
+	// top left
+	TL.x = clamp(TL.x - d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	TL.y = clamp(TL.y - d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	// top right
+	TR.x = clamp(TR.x + d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	TR.y = clamp(TR.y - d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	// bottom left
+	BL.x = clamp(BL.x - d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	BL.y = clamp(BL.y + d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	// bottom right
+	BR.x = clamp(BR.x + d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	BR.y = clamp(BR.y + d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	if(IsStart(TL, TR))
+		return true;
+	if(IsStart(BL, BR))
+		return true;
+	if(IsStart(TL, BL))
+		return true;
+	if(IsStart(TR, BR))
+		return true;
+	return false;
+}
+
+bool CRaceHelper::IsNearFinish(vec2 Pos, int RadiusInTiles) const
+{
+	const CCollision *pCollision = m_pGameClient->Collision();
+	float d = RadiusInTiles * g_Config.m_ClFinishRenameDistance;
+	vec2 TL = Pos;
+	vec2 TR = Pos;
+	vec2 BL = Pos;
+	vec2 BR = Pos;
+	// top left
+	TL.x = clamp(TL.x - d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	TL.y = clamp(TL.y - d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	// top right
+	TR.x = clamp(TR.x + d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	TR.y = clamp(TR.y - d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	// bottom left
+	BL.x = clamp(BL.x - d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	BL.y = clamp(BL.y + d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	// bottom right
+	BR.x = clamp(BR.x + d, 0.0f, (float)(pCollision->GetWidth() * 32));
+	BR.y = clamp(BR.y + d, 0.0f, (float)(pCollision->GetHeight() * 32));
+	if(IsFinish(TL, TR))
+		return true;
+	if(IsFinish(BL, BR))
+		return true;
+	if(IsFinish(TL, BL))
+		return true;
+	if(IsFinish(TR, BR))
+		return true;
+	return false;
+}
+
+bool CRaceHelper::IsClusterRangeFinish(vec2 Pos, int RadiusInTiles) const
+{
+	for(int x = -RadiusInTiles * 32; x < RadiusInTiles * 32; x += 4 * 32)
+		for(int y = -RadiusInTiles * 32; y < RadiusInTiles * 32; y += 4 * 32)
+			if(IsNearFinish(vec2(Pos.x + x, Pos.y + y)))
+				return true;
+	return false;
+}
+
+bool CRaceHelper::IsClusterRangeStart(vec2 Pos, int RadiusInTiles) const
+{
+	for(int x = -RadiusInTiles * 32; x < RadiusInTiles * 32; x += 4 * 32)
+		for(int y = -RadiusInTiles * 32; y < RadiusInTiles * 32; y += 4 * 32)
+			if(IsNearStart(vec2(Pos.x + x, Pos.y + y)))
+				return true;
+	return false;
+}
