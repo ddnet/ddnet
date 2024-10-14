@@ -3630,7 +3630,8 @@ void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	NETADDR Addr;
-	if(net_addr_from_str(&Addr, pResult->GetString(0)) != 0)
+
+	if(net_addr_from_url(&Addr, pResult->GetString(0), nullptr, 0) != 0 && net_addr_from_str(&Addr, pResult->GetString(0)) != 0)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "invalid address '%s'", pResult->GetString(0));
