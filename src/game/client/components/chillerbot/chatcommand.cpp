@@ -20,7 +20,7 @@ bool CChatCommand::OnChatMsg(int ClientId, int Team, const char *pMsg)
 {
 	if(!pMsg[1])
 		return false;
-	if(pMsg[0] == '.' || pMsg[0] == ':' || pMsg[0] == '!' || pMsg[0] == '#' || pMsg[0] == '$' || pMsg[0] == '/')
+	if(pMsg[0] == '.' || pMsg[0] == ':' || pMsg[0] == '!' || pMsg[0] == '#' || pMsg[0] == '$')
 		if(ParseChatCmd(pMsg[0], ClientId, Team, pMsg + 1))
 			return true;
 
