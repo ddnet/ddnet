@@ -180,13 +180,25 @@ void CControls::OnMessage(int Msg, void *pRawMsg)
 
 int CControls::SnapInput(int *pData)
 {
-	// update player state
-	if(m_pClient->m_Chat.IsActive())
-		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_CHATTING;
-	else if(m_pClient->m_Menus.IsActive())
-		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;
-	else
-		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
+	bool skip_next = false;
+	// Check if the chat bubble should be shown
+	if(g_Config.m_ClChatBubble == 1)
+		// update player state
+		if(m_pClient->m_Chat.IsActive())
+		{
+			m_aInputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_CHATTING;
+			skip_next = true;
+		}
+
+	if(!skip_next)
+	{
+		// update player state
+
+		if(m_pClient->m_Menus.IsActive() && g_Config.m_ClShowOwnMenuToOthers)
+			m_aInputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_IN_MENU;
+		else
+			m_aInputData[g_Config.m_ClDummy].m_PlayerFlags = PLAYERFLAG_PLAYING;
+	}
 
 	if(m_pClient->m_Scoreboard.Active())
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SCOREBOARD;
@@ -221,7 +233,7 @@ int CControls::SnapInput(int *pData)
 		// send once a second just to be sure
 		Send = Send || time_get() > m_LastSendTime + time_freq();
 	}
-	else
+
 	{
 		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePos[g_Config.m_ClDummy].x;
 		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;

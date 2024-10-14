@@ -231,6 +231,10 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 		{
 			TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor)));
 		}
+		if(GameClient()->m_aClients[pInfo->m_ClientId].m_Friend)
+		{
+			TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClDoFriendNameColor)));
+		}
 
 		TextRender()->TextEx(&Cursor, GameClient()->m_aClients[pInfo->m_ClientId].m_aName);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
@@ -526,7 +530,13 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				vec2 OffsetToMid;
 				CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &TeeInfo, OffsetToMid);
 				const vec2 TeeRenderPos = vec2(TeeOffset + TeeLength / 2, Row.y + Row.h / 2.0f + OffsetToMid.y);
-				RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+				if(g_Config.m_ClScoreboardSpecPlayer && ClientData.m_Paused || ClientData.m_Spec)
+				{
+					RenderTools()->RenderTee(CAnimState::GetSpec(), &TeeInfo, EMOTE_BLINK, vec2(1.0f, 0.0f), TeeRenderPos);
+				}
+				else
+					RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+
 			}
 
 			// name
@@ -544,6 +554,30 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					GameClient()->FormatClientId(pInfo->m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
 					TextRender()->TextEx(&Cursor, aClientId);
 				}
+				if(g_Config.m_ClScoreboardSpecMark && ClientData.m_Paused || ClientData.m_Spec)
+				{
+					const char *pSpecMark = "(s)";
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSpecColor)));
+					TextRender()->TextEx(&Cursor, pSpecMark);
+				}
+				/*
+				if(m_pClient->m_Menus.IsActive())
+				{
+					const char *pSpecMark = "≡ ";
+					TextRender()->TextColor(0.1f, 1.0f, 0.1f, TextColor.a);
+					TextRender()->TextEx(&Cursor, pSpecMark);
+				}
+				*/
+				if(g_Config.m_ClDoFriendColorScoreboard && ClientData.m_Friend)
+				{
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendColor)));
+				}
+				if(g_Config.m_ClAfkNameColor && ClientData.m_Afk)
+				{
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAfkColor)));
+				}
+				if(g_Config.m_ClDoFriendAfkColor && ClientData.m_Friend)
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendAfkColor)));
 				TextRender()->TextEx(&Cursor, ClientData.m_aName);
 
 				// ready / watching

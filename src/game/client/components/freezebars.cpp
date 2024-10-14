@@ -4,9 +4,9 @@
 
 void CFreezeBars::RenderFreezeBar(const int ClientId)
 {
-	const float FreezeBarWidth = 64.0f;
-	const float FreezeBarHalfWidth = 32.0f;
-	const float FreezeBarHight = 16.0f;
+	const float FreezeBarWidth = (g_Config.m_ClFreezeBarWidth + 64.0f);
+	const float FreezeBarHalfWidth = (g_Config.m_ClFreezeBarX + 32.0f);
+	const float FreezeBarHight = (g_Config.m_ClFreezeBarHeight + 16.0f);
 
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientId].m_Predicted;
@@ -25,7 +25,7 @@ void CFreezeBars::RenderFreezeBar(const int ClientId)
 
 	vec2 Position = m_pClient->m_aClients[ClientId].m_RenderPos;
 	Position.x -= FreezeBarHalfWidth;
-	Position.y += 32;
+	Position.y += (g_Config.m_ClFreezeBarY + 32);
 
 	float Alpha = m_pClient->IsOtherTeam(ClientId) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 	if(pCharacter->m_IsInFreeze)
@@ -36,7 +36,7 @@ void CFreezeBars::RenderFreezeBar(const int ClientId)
 	RenderFreezeBarPos(Position.x, Position.y, FreezeBarWidth, FreezeBarHight, FreezeProgress, Alpha);
 }
 
-void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float Width, const float Height, float Progress, const float Alpha)
+void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, const float height, float Progress, const float Alpha)
 {
 	Progress = clamp(Progress, 0.0f, 1.0f);
 
@@ -45,9 +45,9 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float Width, 
 	const float RestPct = 0.5f;
 	const float ProgPct = 0.5f;
 
-	const float EndWidth = Height; // to keep the correct scale - the height of the sprite is as long as the width
-	const float BarHeight = Height;
-	const float WholeBarWidth = Width;
+	const float EndWidth = height; // to keep the correct scale - the height of the sprite is as long as the width
+	const float BarHeight = height;
+	const float WholeBarWidth = width;
 	const float MiddleBarWidth = WholeBarWidth - (EndWidth * 2.0f);
 	const float EndProgressWidth = EndWidth * ProgPct;
 	const float EndRestWidth = EndWidth * RestPct;

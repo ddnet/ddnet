@@ -40,18 +40,37 @@ class CChat : public CComponent
 		char m_aName[64];
 		char m_aText[MAX_LINE_LENGTH];
 		bool m_Friend;
+		bool m_Paused;
 		bool m_Highlighted;
 
 		STextContainerIndex m_TextContainerIndex;
 		int m_QuadContainerIndex;
 
 		char m_aSkinName[std::size(g_Config.m_ClPlayerSkin)];
-		bool m_HasRenderTee;
-		CTeeRenderInfo m_TeeRenderInfo;
+		CSkin::SSkinTextures m_RenderSkin;
+		CSkin::SSkinMetrics m_RenderSkinMetrics;
+		bool m_CustomColoredSkin;
+		ColorRGBA m_ColorBody;
+		ColorRGBA m_ColorFeet;
 
+		bool m_HasRenderTee;
 		float m_TextYOffset;
 
 		int m_TimesRepeated;
+
+		class CSixup
+		{
+		public:
+			IGraphics::CTextureHandle m_aTextures[protocol7::NUM_SKINPARTS];
+			IGraphics::CTextureHandle m_HatTexture;
+			IGraphics::CTextureHandle m_BotTexture;
+			int m_HatSpriteIndex;
+			ColorRGBA m_BotColor;
+			ColorRGBA m_aColors[protocol7::NUM_SKINPARTS];
+		};
+
+		// 0.7 Skin
+		CSixup m_Sixup;
 	};
 
 	bool m_PrevScoreBoardShowed;
@@ -113,6 +132,9 @@ class CChat : public CComponent
 
 	std::vector<CCommand> m_vCommands;
 	bool m_CommandsNeedSorting;
+
+	std::vector<CCommand> m_bCommands;
+	bool m_bCommandsNeedSorting;
 
 	struct CHistoryEntry
 	{
