@@ -350,7 +350,20 @@ void CChatHelper::OnChatMessage(int ClientId, int Team, const char *pMsg)
 		m_pChillerBot->SetComponentNoteLong("last ping", aBuf);
 	}
 	if(g_Config.m_ClTabbedOutMsg)
-		SayFormat(g_Config.m_ClAutoReplyMsg);
+	{
+	
+		if(!GameClient()->m_Snap.m_pLocalCharacter)
+			return;
+
+			IEngineGraphics *pGraphics = ((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>());
+			if(pGraphics && !pGraphics->WindowActive() && Graphics())
+			{
+				Client()->Notify("chillerbot-ux", "current tile changed");
+				Graphics()->NotifyWindow();
+				SayFormat(g_Config.m_ClAutoReplyMsg);
+			}
+	}
+}
 }
 
 void CChatHelper::OnMessage(int MsgType, void *pRawMsg)
