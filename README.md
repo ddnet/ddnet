@@ -18,7 +18,7 @@ literally got no internet at all on my pc for a few days
 ### -Parts of Chillerbot-
 - War List - its almost like the normal chillerbot except that the commands are also in the console
 - silent chat commands if turned on or when using "." as the prefix
-- Skin Stealer
+- ~~Skin Stealer~~ broke it and lazy
 - Camp - might be bannable I have no clue tbh
 - Finish Rename
 - Auto reply - When alt tabbed
@@ -63,9 +63,6 @@ cb_auto_reply_msg
 cb_tabbed_out_msg
 cb_chillerbot_hud
 cb_change_tile_notification
-cb_skin_stealer
-cb_skin_steal_radius
-cb_skin_steal_color
 cb_enable_warlist
 cb_war_list_advanced
 cb_nameplates_war_reason
