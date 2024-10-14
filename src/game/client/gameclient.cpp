@@ -3736,7 +3736,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 void CGameClient::RefreshSkins()
 {
 	const auto SkinStartLoadTime = time_get_nanoseconds();
-	m_Skins.Refresh([&](int) {
+	m_Skins.Refresh([&]() {
 		// if skin refreshing takes to long, swap to a loading screen
 		if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
 		{

@@ -574,6 +574,14 @@ public:
 		return pResult;
 	}
 
+	bool RetrieveTimes(const char *pFilename, int Type, time_t *pCreated, time_t *pModified) override
+	{
+		dbg_assert(Type == TYPE_ABSOLUTE || (Type >= TYPE_SAVE && Type < m_NumPaths), "Type invalid");
+
+		char aBuffer[IO_MAX_PATH_LENGTH];
+		return fs_file_time(GetPath(Type, pFilename, aBuffer, sizeof(aBuffer)), pCreated, pModified) == 0;
+	}
+
 	bool CalculateHashes(const char *pFilename, int Type, SHA256_DIGEST *pSha256, unsigned *pCrc) override
 	{
 		dbg_assert(pSha256 != nullptr || pCrc != nullptr, "At least one output argument required");

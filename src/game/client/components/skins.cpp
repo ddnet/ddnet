@@ -1,6 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "skins.h"
+
 #include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
@@ -9,14 +11,12 @@
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
+#include <engine/shared/http.h>
 #include <engine/storage.h>
 
-#include <game/generated/client_data.h>
-
 #include <game/client/gameclient.h>
+#include <game/generated/client_data.h>
 #include <game/localization.h>
-
-#include "skins.h"
 
 CSkins::CSkins() :
 	m_PlaceholderSkin("dummy")
@@ -43,33 +43,16 @@ bool CSkins::IsVanillaSkin(const char *pName)
 	return std::any_of(std::begin(VANILLA_SKINS), std::end(VANILLA_SKINS), [pName](const char *pVanillaSkin) { return str_comp(pName, pVanillaSkin) == 0; });
 }
 
-void CSkins::CGetPngFile::OnCompletion(EHttpState State)
+class CSkinScanUser
 {
-	// Maybe this should start another thread to load the png in instead of stalling the curl thread
-	if(State == EHttpState::DONE)
-	{
-		m_pSkins->LoadSkinPng(m_Info, Dest(), Dest(), IStorage::TYPE_SAVE);
-	}
-}
-
-CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest) :
-	CHttpRequest(pUrl),
-	m_pSkins(pSkins)
-{
-	WriteToFile(pStorage, pDest, IStorage::TYPE_SAVE);
-	Timeout(CTimeout{0, 0, 0, 0});
-	LogProgress(HTTPLOG::NONE);
-}
-
-struct SSkinScanUser
-{
+public:
 	CSkins *m_pThis;
-	CSkins::TSkinLoadedCBFunc m_SkinLoadedFunc;
+	CSkins::TSkinLoadedCallback m_SkinLoadedCallback;
 };
 
 int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	auto *pUserReal = static_cast<SSkinScanUser *>(pUser);
+	auto *pUserReal = static_cast<CSkinScanUser *>(pUser);
 	CSkins *pSelf = pUserReal->m_pThis;
 
 	if(IsDir)
@@ -94,7 +77,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	char aPath[IO_MAX_PATH_LENGTH];
 	str_format(aPath, sizeof(aPath), "skins/%s", pName);
 	pSelf->LoadSkin(aSkinName, aPath, DirType);
-	pUserReal->m_SkinLoadedFunc((int)pSelf->m_Skins.size());
+	pUserReal->m_SkinLoadedCallback();
 	return 0;
 }
 
@@ -136,19 +119,12 @@ static void CheckMetrics(CSkin::SSkinMetricVariable &Metrics, const uint8_t *pIm
 const CSkin *CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 {
 	CImageInfo Info;
-	if(!LoadSkinPng(Info, pName, pPath, DirType))
-		return nullptr;
-	return LoadSkin(pName, Info);
-}
-
-bool CSkins::LoadSkinPng(CImageInfo &Info, const char *pName, const char *pPath, int DirType)
-{
 	if(!Graphics()->LoadPng(Info, pPath, DirType))
 	{
 		log_error("skins", "Failed to load skin PNG: %s", pName);
-		return false;
+		return nullptr;
 	}
-	return true;
+	return LoadSkin(pName, Info);
 }
 
 const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
@@ -298,6 +274,8 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	auto &&pSkin = std::make_unique<CSkin>(std::move(Skin));
 	const auto SkinInsertIt = m_Skins.insert({pSkin->GetName(), std::move(pSkin)});
 
+	m_LastRefreshTime = time_get_nanoseconds();
+
 	return SkinInsertIt.first->second.get();
 }
 
@@ -313,32 +291,34 @@ void CSkins::OnInit()
 		}
 	}
 
-	// load skins;
-	Refresh([this](int SkinCounter) {
+	// load skins
+	Refresh([this]() {
 		GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
 	});
 }
 
-void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
+void CSkins::OnShutdown()
 {
+	m_LoadingSkins.clear();
+}
+
+void CSkins::Refresh(TSkinLoadedCallback &&SkinLoadedCallback)
+{
+	m_LoadingSkins.clear();
+
 	for(const auto &[_, pSkin] : m_Skins)
 	{
 		pSkin->m_OriginalSkin.Unload(Graphics());
 		pSkin->m_ColorableSkin.Unload(Graphics());
 	}
-
 	m_Skins.clear();
-	m_DownloadSkins.clear();
-	m_DownloadingSkins = 0;
-	SSkinScanUser SkinScanUser;
-	SkinScanUser.m_pThis = this;
-	SkinScanUser.m_SkinLoadedFunc = SkinLoadedFunc;
-	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, &SkinScanUser);
-}
 
-int CSkins::Num()
-{
-	return m_Skins.size();
+	CSkinScanUser SkinScanUser;
+	SkinScanUser.m_pThis = this;
+	SkinScanUser.m_SkinLoadedCallback = SkinLoadedCallback;
+	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, &SkinScanUser);
+
+	m_LastRefreshTime = time_get_nanoseconds();
 }
 
 const CSkin *CSkins::Find(const char *pName)
@@ -365,7 +345,7 @@ const CSkin *CSkins::FindOrNullptr(const char *pName, bool IgnorePrefix)
 	const char *pSkinPrefix = m_aEventSkinPrefix[0] != '\0' ? m_aEventSkinPrefix : g_Config.m_ClSkinPrefix;
 	if(!IgnorePrefix && pSkinPrefix[0] != '\0')
 	{
-		char aNameWithPrefix[48]; // Larger than skin name length to allow IsValidName to check if it's too long
+		char aNameWithPrefix[2 * MAX_SKIN_LENGTH + 2]; // Larger than skin name length to allow IsValidName to check if it's too long
 		str_format(aNameWithPrefix, sizeof(aNameWithPrefix), "%s_%s", pSkinPrefix, pName);
 		// If we find something, use it, otherwise fall back to normal skins.
 		const auto *pResult = FindImpl(aNameWithPrefix);
@@ -393,44 +373,26 @@ const CSkin *CSkins::FindImpl(const char *pName)
 	if(!CSkin::IsValidName(pName))
 		return nullptr;
 
-	const auto SkinDownloadIt = m_DownloadSkins.find(pName);
-	if(SkinDownloadIt != m_DownloadSkins.end())
+	auto ExistingLoadingSkin = m_LoadingSkins.find(pName);
+	if(ExistingLoadingSkin != m_LoadingSkins.end())
 	{
-		if(SkinDownloadIt->second->m_pTask && SkinDownloadIt->second->m_pTask->State() == EHttpState::DONE && SkinDownloadIt->second->m_pTask->m_Info.m_pData)
+		std::unique_ptr<CLoadingSkin> &pLoadingSkin = ExistingLoadingSkin->second;
+		if(!pLoadingSkin->m_pDownloadJob || !pLoadingSkin->m_pDownloadJob->Done())
+			return nullptr;
+
+		if(pLoadingSkin->m_pDownloadJob->State() == IJob::STATE_DONE && pLoadingSkin->m_pDownloadJob->ImageInfo().m_pData)
 		{
-			char aPath[IO_MAX_PATH_LENGTH];
-			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", SkinDownloadIt->second->GetName());
-			Storage()->RenameFile(SkinDownloadIt->second->m_aPath, aPath, IStorage::TYPE_SAVE);
-			const auto *pSkin = LoadSkin(SkinDownloadIt->second->GetName(), SkinDownloadIt->second->m_pTask->m_Info);
-			SkinDownloadIt->second->m_pTask = nullptr;
-			--m_DownloadingSkins;
-			return pSkin;
+			LoadSkin(pLoadingSkin->Name(), pLoadingSkin->m_pDownloadJob->ImageInfo());
 		}
-		if(SkinDownloadIt->second->m_pTask && (SkinDownloadIt->second->m_pTask->State() == EHttpState::ERROR || SkinDownloadIt->second->m_pTask->State() == EHttpState::ABORTED))
-		{
-			SkinDownloadIt->second->m_pTask = nullptr;
-			--m_DownloadingSkins;
-		}
+		pLoadingSkin->m_pDownloadJob = nullptr;
 		return nullptr;
 	}
 
-	CDownloadSkin Skin{pName};
-
-	char aEscapedName[256];
-	EscapeUrl(aEscapedName, sizeof(aEscapedName), pName);
-	char aUrl[IO_MAX_PATH_LENGTH];
-	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClDownloadCommunitySkins != 0 ? g_Config.m_ClSkinCommunityDownloadUrl : g_Config.m_ClSkinDownloadUrl, aEscapedName);
-
-	char aBuf[IO_MAX_PATH_LENGTH];
-	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s", IStorage::FormatTmpPath(aBuf, sizeof(aBuf), pName));
-
-	Skin.m_pTask = std::make_shared<CGetPngFile>(this, aUrl, Storage(), Skin.m_aPath);
-	Http()->Run(Skin.m_pTask);
-
-	auto &&pDownloadSkin = std::make_unique<CDownloadSkin>(std::move(Skin));
-	m_DownloadSkins.insert({pDownloadSkin->GetName(), std::move(pDownloadSkin)});
-	++m_DownloadingSkins;
-
+	CLoadingSkin LoadingSkin(pName);
+	LoadingSkin.m_pDownloadJob = std::make_shared<CSkinDownloadJob>(this, pName);
+	Engine()->AddJob(LoadingSkin.m_pDownloadJob);
+	auto &&pLoadingSkin = std::make_unique<CLoadingSkin>(std::move(LoadingSkin));
+	m_LoadingSkins.insert({pLoadingSkin->Name(), std::move(pLoadingSkin)});
 	return nullptr;
 }
 
@@ -463,15 +425,191 @@ void CSkins::RandomizeSkin(int Dummy)
 	const size_t SkinNameSize = Dummy ? sizeof(g_Config.m_ClDummySkin) : sizeof(g_Config.m_ClPlayerSkin);
 	char aRandomSkinName[MAX_SKIN_LENGTH];
 	str_copy(aRandomSkinName, "default", SkinNameSize);
-	if(!m_pClient->m_Skins.GetSkinsUnsafe().empty())
+	if(!m_Skins.empty())
 	{
 		do
 		{
-			auto it = m_pClient->m_Skins.GetSkinsUnsafe().begin();
-			std::advance(it, rand() % m_pClient->m_Skins.GetSkinsUnsafe().size());
+			auto it = m_Skins.begin();
+			std::advance(it, rand() % m_Skins.size());
 			str_copy(aRandomSkinName, (*it).second->GetName(), SkinNameSize);
 		} while(!str_comp(aRandomSkinName, "x_ninja") || !str_comp(aRandomSkinName, "x_spec"));
 	}
 	char *pSkinName = Dummy ? g_Config.m_ClDummySkin : g_Config.m_ClPlayerSkin;
 	str_copy(pSkinName, aRandomSkinName, SkinNameSize);
+}
+
+CSkins::CSkinDownloadJob::CSkinDownloadJob(CSkins *pSkins, const char *pName) :
+	m_pSkins(pSkins)
+{
+	str_copy(m_aName, pName);
+	Abortable(true);
+}
+
+CSkins::CSkinDownloadJob::~CSkinDownloadJob()
+{
+	m_ImageInfo.Free();
+}
+
+bool CSkins::CSkinDownloadJob::Abort()
+{
+	if(!IJob::Abort())
+	{
+		return false;
+	}
+
+	const CLockScope LockScope(m_Lock);
+	if(m_pGetRequest)
+	{
+		m_pGetRequest->Abort();
+		m_pGetRequest = nullptr;
+	}
+	return true;
+}
+
+void CSkins::CSkinDownloadJob::Run()
+{
+	const char *pBaseUrl = g_Config.m_ClDownloadCommunitySkins != 0 ? g_Config.m_ClSkinCommunityDownloadUrl : g_Config.m_ClSkinDownloadUrl;
+
+	char aEscapedName[256];
+	EscapeUrl(aEscapedName, sizeof(aEscapedName), m_aName);
+
+	char aUrl[IO_MAX_PATH_LENGTH];
+	str_format(aUrl, sizeof(aUrl), "%s%s.png", pBaseUrl, aEscapedName);
+
+	char aPathReal[IO_MAX_PATH_LENGTH];
+	str_format(aPathReal, sizeof(aPathReal), "downloadedskins/%s.png", m_aName);
+
+	const CTimeout Timeout{10000, 0, 8192, 10};
+	const size_t MaxResponseSize = 10 * 1024 * 1024; // 10 MiB
+
+	// We assume the file does not exist if we could not get the times
+	time_t FileCreatedTime, FileModifiedTime;
+	const bool GotFileTimes = m_pSkins->Storage()->RetrieveTimes(aPathReal, IStorage::TYPE_SAVE, &FileCreatedTime, &FileModifiedTime);
+
+	std::shared_ptr<CHttpRequest> pGet = HttpGet(aUrl);
+	pGet->Timeout(Timeout);
+	pGet->MaxResponseSize(MaxResponseSize);
+	if(GotFileTimes)
+	{
+		pGet->IfModifiedSince(FileModifiedTime);
+		pGet->FailOnErrorStatus(false);
+	}
+	pGet->LogProgress(HTTPLOG::NONE);
+	{
+		const CLockScope LockScope(m_Lock);
+		m_pGetRequest = pGet;
+	}
+	m_pSkins->Http()->Run(pGet);
+
+	// Load existing file while waiting for the HTTP request
+	if(GotFileTimes)
+	{
+		m_pSkins->Graphics()->LoadPng(m_ImageInfo, aPathReal, IStorage::TYPE_SAVE);
+	}
+
+	pGet->Wait();
+	{
+		const CLockScope LockScope(m_Lock);
+		m_pGetRequest = nullptr;
+	}
+	if(pGet->State() != EHttpState::DONE || State() == IJob::STATE_ABORTED || pGet->StatusCode() >= 400)
+	{
+		return;
+	}
+	if(pGet->StatusCode() == 304) // 304 Not Modified
+	{
+		if(m_ImageInfo.m_pData != nullptr)
+		{
+			return; // Local skin is up-to-date and was loaded successfully
+		}
+
+		log_error("skins", "Failed to load PNG of existing downloaded skin '%s' from '%s', downloading it again", m_aName, aPathReal);
+		pGet = HttpGet(aUrl);
+		pGet->Timeout(Timeout);
+		pGet->MaxResponseSize(MaxResponseSize);
+		pGet->LogProgress(HTTPLOG::NONE);
+		{
+			const CLockScope LockScope(m_Lock);
+			m_pGetRequest = pGet;
+		}
+		m_pSkins->Http()->Run(pGet);
+		pGet->Wait();
+		{
+			const CLockScope LockScope(m_Lock);
+			m_pGetRequest = nullptr;
+		}
+		if(pGet->State() != EHttpState::DONE || State() == IJob::STATE_ABORTED)
+		{
+			return;
+		}
+	}
+
+	unsigned char *pResult;
+	size_t ResultSize;
+	pGet->Result(&pResult, &ResultSize);
+
+	if(!m_pSkins->Graphics()->LoadPng(m_ImageInfo, pResult, ResultSize, aUrl))
+	{
+		log_error("skins", "Failed to load PNG of skin '%s' downloaded from '%s'", m_aName, aUrl);
+		return;
+	}
+
+	if(State() == IJob::STATE_ABORTED)
+	{
+		return;
+	}
+
+	char aBuf[IO_MAX_PATH_LENGTH];
+	char aPathTemp[IO_MAX_PATH_LENGTH];
+	str_format(aPathTemp, sizeof(aPathTemp), "downloadedskins/%s", IStorage::FormatTmpPath(aBuf, sizeof(aBuf), m_aName));
+
+	IOHANDLE TempFile = m_pSkins->Storage()->OpenFile(aPathTemp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(!TempFile)
+	{
+		log_error("skins", "Failed to open temporary skin file '%s' for writing", aPathTemp);
+		return;
+	}
+	if(io_write(TempFile, pResult, ResultSize) != ResultSize)
+	{
+		log_error("skins", "Failed to write downloaded skin data to '%s'", aPathTemp);
+		io_close(TempFile);
+		m_pSkins->Storage()->RemoveFile(aPathTemp, IStorage::TYPE_SAVE);
+		return;
+	}
+	io_close(TempFile);
+
+	if(!m_pSkins->Storage()->RenameFile(aPathTemp, aPathReal, IStorage::TYPE_SAVE))
+	{
+		log_error("skins", "Failed to rename temporary skin file '%s' to '%s'", aPathTemp, aPathReal);
+		m_pSkins->Storage()->RemoveFile(aPathTemp, IStorage::TYPE_SAVE);
+		return;
+	}
+}
+
+CSkins::CLoadingSkin::CLoadingSkin(const char *pName)
+{
+	str_copy(m_aName, pName);
+}
+
+CSkins::CLoadingSkin::~CLoadingSkin()
+{
+	if(m_pDownloadJob)
+	{
+		m_pDownloadJob->Abort();
+	}
+}
+
+bool CSkins::CLoadingSkin::operator<(const CLoadingSkin &Other) const
+{
+	return str_comp(m_aName, Other.m_aName) < 0;
+}
+
+bool CSkins::CLoadingSkin::operator<(const char *pOther) const
+{
+	return str_comp(m_aName, pOther) < 0;
+}
+
+bool CSkins::CLoadingSkin::operator==(const char *pOther) const
+{
+	return !str_comp(m_aName, pOther);
 }
