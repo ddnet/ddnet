@@ -116,6 +116,8 @@ class CHttpRequest : public IHttpRequest
 	char m_aErr[256]; // 256 == CURL_ERROR_SIZE
 	std::atomic<EHttpState> m_State{EHttpState::QUEUED};
 	std::atomic<bool> m_Abort{false};
+	std::mutex m_WaitMutex;
+	std::condition_variable m_WaitCondition;
 
 	int m_StatusCode = 0;
 	bool m_HeadersEnded = false;
