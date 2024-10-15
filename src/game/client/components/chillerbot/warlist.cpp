@@ -446,8 +446,6 @@ void CWarList::SetNameplateColor(int ClientId, ColorRGBA *pColor)
 		*pColor = ColorRGBA(0.0f, 0.9f, 0.2f, 1.0f);
 	else if(IsWarClanmate(ClientId))
 		*pColor = ColorRGBA(7.0f, 0.5f, 0.2f, 1.0f);
-	else
-		*pColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 bool CWarList::RemoveTeamNameFromVector(const char *pDir, const char *pName)
