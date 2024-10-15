@@ -73,7 +73,7 @@ void CBackground::LoadBackground()
 		}
 		else if(m_pMap->Load(aBuf))
 		{
-			m_pLayers->InitBackground(m_pMap);
+			m_pLayers->Init(m_pMap, true);
 			NeedImageLoading = true;
 			m_Loaded = true;
 		}
