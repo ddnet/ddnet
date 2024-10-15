@@ -3,9 +3,17 @@ Foxs turn on copying files from other clients and making a *semi* All In One cli
 
 
 
-To use the clien, download the DDNet.exe and put it into your game folder
-if on steam you can go to manage > browse local files and replace it but I dont recommend this though, cause Steam auto Updates if not turned off
-alternatively you can download the game.zip [from here](https://ddnet.org/downloads/DDNet-18.6-win64.zip) and replace the DDNet.exe and youre good to go
+## How to use the Client
+
+simply put, download the DDNet.exe and put it into your game folder. if you dont know how then:
+
+### Steam
+go to manage > browse local files and find the DDNet.exe, then replace it and you're done! You might wanna turn off auto update though.
+### Windows
+download the game.zip [from here](https://ddnet.org/), extract it, replace the DDNet.exe and you're good to go!
+### Different OS?
+If on a different operating system you have to build the Client yourself.
+steps on how to do that are on the official [ddnet github](https://github.com/ddnet/ddnet/)
 
 ## ---Client will include---
 
