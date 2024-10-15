@@ -36,7 +36,7 @@ literally got no internet at all on my pc for a few days
 - Fps spoofer ig?
 - Very pro looking menu trust
 - Customization of alot of sprites - but like in the most useless way possible.
-- Prediction support for my servers explosion gun
+- Prediction support for my servers explosion gun (server software isnt updated yet)
 
 
 ## Screenshots
