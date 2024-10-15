@@ -355,15 +355,24 @@ void CChatHelper::OnChatMessage(int ClientId, int Team, const char *pMsg)
 		if(!GameClient()->m_Snap.m_pLocalCharacter)
 			return;
 
-			IEngineGraphics *pGraphics = ((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>());
-			if(pGraphics && !pGraphics->WindowActive() && Graphics())
+		IEngineGraphics *pGraphics = ((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>());
+		if (pGraphics && !pGraphics->WindowActive() && Graphics())
+		{
+
+		
+			if(Team == 3) // whisper recv
+				{
+				char bBuf[2048] = "/w ";
+					str_append(bBuf, g_Config.m_ClAutoReplyMsg);
+						SayFormat(bBuf);
+				}
+			else
 			{
-				Client()->Notify("chillerbot-ux", "current tile changed");
-				Graphics()->NotifyWindow();
 				SayFormat(g_Config.m_ClAutoReplyMsg);
 			}
+		}
 	}
-}
+
 }
 
 void CChatHelper::OnMessage(int MsgType, void *pRawMsg)
