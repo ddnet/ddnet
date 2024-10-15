@@ -362,13 +362,15 @@ void CChatHelper::OnChatMessage(int ClientId, int Team, const char *pMsg)
 		
 			if(Team == 3) // whisper recv
 				{
-				char bBuf[2048] = "/w ";
+				char bBuf[2048] = "/w %n ";
 					str_append(bBuf, g_Config.m_ClAutoReplyMsg);
 						SayFormat(bBuf);
 				}
 			else
 			{
-				SayFormat(g_Config.m_ClAutoReplyMsg);
+				char bBuf[2048] = "%n: ";
+				str_append(bBuf, g_Config.m_ClAutoReplyMsg);
+				SayFormat(bBuf);
 			}
 		}
 	}
