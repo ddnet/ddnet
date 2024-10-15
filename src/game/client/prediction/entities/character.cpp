@@ -58,7 +58,7 @@ void CCharacter::HandleJetpack()
 	bool FullAuto = false;
 	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
 		FullAuto = true;
-	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
+	if(m_Core.m_Jetpack || g_Config.m_SvExplGun && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
 
 	// check if we gonna fire
@@ -265,7 +265,7 @@ void CCharacter::FireWeapon()
 	bool FullAuto = false;
 	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
 		FullAuto = true;
-	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
+	if(m_Core.m_Jetpack || g_Config.m_SvExplGun && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
 	if(m_FrozenLastTick)
 		FullAuto = true;
@@ -365,23 +365,47 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_GUN:
 	{
-		if(!m_Core.m_Jetpack)
+		if(g_Config.m_SvExplGun)
 		{
-			int Lifetime = (int)(GameWorld()->GameTickSpeed() * GetTuning(m_TuneZone)->m_GunLifetime);
+			if(!m_Core.m_Jetpack)
+			{
+				int Lifetime = (int)(GameWorld()->GameTickSpeed() * GetTuning(m_TuneZone)->m_GunLifetime);
 
-			new CProjectile(
-				GameWorld(),
-				WEAPON_GUN, //Type
-				GetCid(), //Owner
-				ProjStartPos, //Pos
-				Direction, //Dir
-				Lifetime, //Span
-				false, //Freeze
-				false, //Explosive
-				0, //Force
-				-1 //SoundImpact
-			);
+				new CProjectile(
+					GameWorld(),
+					WEAPON_GUN, // Type
+					GetCid(), // Owner
+					ProjStartPos, // Pos
+					Direction, // Dir
+					Lifetime, // Span
+					false, // Freeze
+					true, // Explosive
+					0, // Force
+					SOUND_GRENADE_EXPLODE // SoundImpact
+				);
+			}
 		}
+		else
+		{
+			if(!m_Core.m_Jetpack)
+			{
+				int Lifetime = (int)(GameWorld()->GameTickSpeed() * GetTuning(m_TuneZone)->m_GunLifetime);
+	
+				new CProjectile(
+					GameWorld(),
+					WEAPON_GUN, // Type
+					GetCid(), // Owner
+					ProjStartPos, // Pos
+					Direction, // Dir
+					Lifetime, // Span
+					false, // Freeze
+					false, // Explosive
+					0, // Force
+					-1 // SoundImpact
+				);
+			}
+		}	
+	
 	}
 	break;
 
