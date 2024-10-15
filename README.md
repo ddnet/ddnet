@@ -1,7 +1,11 @@
 Foxs turn on copying files from other clients and making a *semi* All In One client, which will be called... Aiodob
 
-Will upload my stuff in a few days, gotta wait till i get my new router :p 
-literally got no internet at all on my pc for a few days
+
+
+
+To use the clien, download the DDNet.exe and put it into your game folder
+if on steam you can go to manage > browse local files and replace it but I dont recommend this though, cause Steam auto Updates if not turned off
+alternatively you can download the game.zip [from here](https://ddnet.org/downloads/DDNet-18.6-win64.zip) and replace the DDNet.exe and youre good to go
 
 ## ---Client will include---
 
