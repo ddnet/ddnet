@@ -2881,3 +2881,44 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 
 	return CUi::POPUP_KEEP_OPEN;
 }
+
+CUi::EPopupMenuFunctionResult CEditor::PopupEnvelopeCurvetype(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	if(pEditor->m_SelectedEnvelope < 0 || pEditor->m_SelectedEnvelope >= (int)pEditor->m_Map.m_vpEnvelopes.size())
+	{
+		return CUi::POPUP_CLOSE_CURRENT;
+	}
+	std::shared_ptr<CEnvelope> pEnvelope = pEditor->m_Map.m_vpEnvelopes[pEditor->m_SelectedEnvelope];
+
+	if(pEditor->m_PopupEnvelopeSelectedPoint < 0 || pEditor->m_PopupEnvelopeSelectedPoint >= (int)pEnvelope->m_vPoints.size())
+	{
+		return CUi::POPUP_CLOSE_CURRENT;
+	}
+	CEnvPoint_runtime &SelectedPoint = pEnvelope->m_vPoints[pEditor->m_PopupEnvelopeSelectedPoint];
+
+	static const char *const TYPE_NAMES[NUM_CURVETYPES] = {"Step", "Linear", "Slow", "Fast", "Smooth", "Bezier"};
+	static char s_aButtonIds[NUM_CURVETYPES] = {0};
+
+	for(int Type = 0; Type < NUM_CURVETYPES; Type++)
+	{
+		CUIRect Button;
+		View.HSplitTop(14.0f, &Button, &View);
+
+		if(pEditor->DoButton_MenuItem(&s_aButtonIds[Type], TYPE_NAMES[Type], Type == SelectedPoint.m_Curvetype, &Button))
+		{
+			const int PrevCurve = SelectedPoint.m_Curvetype;
+			if(PrevCurve != Type)
+			{
+				SelectedPoint.m_Curvetype = Type;
+				pEditor->m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEditPoint>(pEditor,
+					pEditor->m_SelectedEnvelope, pEditor->m_PopupEnvelopeSelectedPoint, 0, CEditorActionEnvelopeEditPoint::EEditType::CURVE_TYPE, PrevCurve, SelectedPoint.m_Curvetype));
+				pEditor->m_Map.OnModify();
+				return CUi::POPUP_CLOSE_CURRENT;
+			}
+		}
+	}
+
+	return CUi::POPUP_KEEP_OPEN;
+}
