@@ -113,16 +113,14 @@ private:
 	CGhostItem m_aActiveGhosts[MAX_ACTIVE_GHOSTS];
 	CGhostItem m_CurGhost;
 
-	char m_aTmpFilename[128];
+	char m_aTmpFilename[IO_MAX_PATH_LENGTH];
 
-	int m_NewRenderTick;
-	int m_StartRenderTick;
-	int m_LastDeathTick;
-	int m_LastRaceTick;
-	bool m_Recording;
-	bool m_Rendering;
-
-	bool m_RenderingStartedByServer;
+	int m_NewRenderTick = -1;
+	int m_StartRenderTick = -1;
+	int m_LastDeathTick = -1;
+	bool m_Recording = false;
+	bool m_Rendering = false;
+	bool m_RenderingStartedByServer = false;
 
 	static void GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 	static void GetGhostCharacter(CGhostCharacter *pGhostChar, const CNetObj_Character *pChar, const CNetObj_DDNetCharacter *pDDnetChar);
@@ -149,7 +147,6 @@ private:
 public:
 	bool m_AllowRestart;
 
-	CGhost();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
 	virtual void OnRender() override;
@@ -174,8 +171,6 @@ public:
 
 	class IGhostLoader *GhostLoader() const { return m_pGhostLoader; }
 	class IGhostRecorder *GhostRecorder() const { return m_pGhostRecorder; }
-
-	int GetLastRaceTick() const;
 };
 
 #endif

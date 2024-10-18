@@ -209,6 +209,7 @@ private:
 	int m_aLastNewPredictedTick[NUM_DUMMIES];
 
 	int m_LastRoundStartTick;
+	int m_LastRaceTick;
 
 	int m_LastFlagCarrierRed;
 	int m_LastFlagCarrierBlue;
@@ -579,7 +580,8 @@ public:
 
 	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int OwnId);
 
-	int GetLastRaceTick() const override;
+	int LastRaceTick() const;
+	int CurrentRaceTime() const;
 
 	bool IsTeamPlay() { return m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS; }
 
