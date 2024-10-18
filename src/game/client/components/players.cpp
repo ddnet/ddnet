@@ -194,6 +194,8 @@ void CPlayers::RenderHookCollLine(
 	{
 		// just use the direct input if it's the local player we are rendering
 		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * m_pClient->m_Camera.m_Zoom);
+		if(g_Config.m_ClOldMouseZoom)
+			Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
 	}
 	else
 	{
@@ -239,6 +241,11 @@ void CPlayers::RenderHookCollLine(
 				ExDirection = normalize(
 					vec2((int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x * m_pClient->m_Camera.m_Zoom),
 						(int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y * m_pClient->m_Camera.m_Zoom)));
+
+				if(g_Config.m_ClOldMouseZoom)
+					ExDirection = normalize(
+						vec2((int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x),
+							(int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)));
 
 				// fix direction if mouse is exactly in the center
 				if(!(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)
@@ -477,6 +484,8 @@ void CPlayers::RenderPlayer(
 	{
 		// just use the direct input if it's the local player we are rendering
 		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * m_pClient->m_Camera.m_Zoom);
+		if(g_Config.m_ClOldMouseZoom)
+			Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
 	}
 	else
 	{
