@@ -1,19 +1,22 @@
 /* (c) Rajh, Redix and Sushi. */
 
+#include "ghost.h"
+
+#include <base/log.h>
+
 #include <engine/ghost.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
+#include <game/client/components/menus.h>
+#include <game/client/components/players.h>
+#include <game/client/components/skins.h>
+#include <game/client/gameclient.h>
 #include <game/client/race.h>
 
-#include "ghost.h"
-#include "menus.h"
-#include "players.h"
-#include "skins.h"
-
-#include <game/client/gameclient.h>
-
 const char *CGhost::ms_pGhostDir = "ghosts";
+
+static const LOG_COLOR LOG_COLOR_GHOST{165, 153, 153};
 
 void CGhost::GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
 {
@@ -400,11 +403,13 @@ void CGhost::StopRecord(int Time)
 	m_Recording = false;
 	bool RecordingToFile = GhostRecorder()->IsRecording();
 
-	if(RecordingToFile)
-		GhostRecorder()->Stop(m_CurGhost.m_Path.Size(), Time);
-
 	CMenus::CGhostItem *pOwnGhost = m_pClient->m_Menus.GetOwnGhost();
-	if(Time > 0 && (!pOwnGhost || Time < pOwnGhost->m_Time || !g_Config.m_ClRaceGhostSaveBest))
+	const bool StoreGhost = Time > 0 && (!pOwnGhost || Time < pOwnGhost->m_Time || !g_Config.m_ClRaceGhostSaveBest);
+
+	if(RecordingToFile)
+		GhostRecorder()->Stop(m_CurGhost.m_Path.Size(), StoreGhost ? Time : -1);
+
+	if(StoreGhost)
 	{
 		// add to active ghosts
 		int Slot = GetSlot();
@@ -429,11 +434,8 @@ void CGhost::StopRecord(int Time)
 		// add item to menu list
 		m_pClient->m_Menus.UpdateOwnGhost(Item);
 	}
-	else if(RecordingToFile) // no new record
-		Storage()->RemoveFile(m_aTmpFilename, IStorage::TYPE_SAVE);
 
-	m_aTmpFilename[0] = 0;
-
+	m_aTmpFilename[0] = '\0';
 	m_CurGhost.Reset();
 }
 
@@ -457,17 +459,10 @@ int CGhost::Load(const char *pFilename)
 	if(Slot == -1)
 		return -1;
 
-	if(GhostLoader()->Load(pFilename, Client()->GetCurrentMap(), Client()->GetCurrentMapSha256(), Client()->GetCurrentMapCrc()) != 0)
+	if(!GhostLoader()->Load(pFilename, Client()->GetCurrentMap(), Client()->GetCurrentMapSha256(), Client()->GetCurrentMapCrc()))
 		return -1;
 
 	const CGhostInfo *pInfo = GhostLoader()->GetInfo();
-
-	if(pInfo->m_NumTicks <= 0 || pInfo->m_Time <= 0)
-	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost", "invalid header info");
-		GhostLoader()->Close();
-		return -1;
-	}
 
 	// select ghost
 	CGhostItem *pGhost = &m_aActiveGhosts[Slot];
@@ -518,7 +513,7 @@ int CGhost::Load(const char *pFilename)
 
 	if(Error || Index != pInfo->m_NumTicks)
 	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ghost", "invalid ghost data");
+		log_error_color(LOG_COLOR_GHOST, "ghost", "Failed to read all ghost data (error='%d', got '%d' ticks, wanted '%d' ticks)", Error, Index, pInfo->m_NumTicks);
 		pGhost->Reset();
 		return -1;
 	}
