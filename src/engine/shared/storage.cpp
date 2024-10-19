@@ -120,6 +120,10 @@ public:
 			CreateFolder("editor", TYPE_SAVE);
 			CreateFolder("ghosts", TYPE_SAVE);
 			CreateFolder("teehistorian", TYPE_SAVE);
+
+			CreateFolder("chillerbot", TYPE_SAVE);
+			CreateFolder("chillerbot/warlist", TYPE_SAVE);
+			CreateFolder("chillerbot/term_hist", TYPE_SAVE);
 		}
 
 		return m_NumPaths ? 0 : 1;
@@ -577,7 +581,6 @@ public:
 	bool RetrieveTimes(const char *pFilename, int Type, time_t *pCreated, time_t *pModified) override
 	{
 		dbg_assert(Type == TYPE_ABSOLUTE || (Type >= TYPE_SAVE && Type < m_NumPaths), "Type invalid");
-
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		return fs_file_time(GetPath(Type, pFilename, aBuffer, sizeof(aBuffer)), pCreated, pModified) == 0;
 	}

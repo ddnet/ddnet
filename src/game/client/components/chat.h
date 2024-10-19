@@ -40,18 +40,39 @@ class CChat : public CComponent
 		char m_aName[64];
 		char m_aText[MAX_LINE_LENGTH];
 		bool m_Friend;
+		bool m_Paused;
+		bool m_IsWar;
+		bool m_IsTeam;
 		bool m_Highlighted;
 
 		STextContainerIndex m_TextContainerIndex;
 		int m_QuadContainerIndex;
 
 		char m_aSkinName[std::size(g_Config.m_ClPlayerSkin)];
-		bool m_HasRenderTee;
-		CTeeRenderInfo m_TeeRenderInfo;
+		CSkin::SSkinTextures m_RenderSkin;
+		CSkin::SSkinMetrics m_RenderSkinMetrics;
+		bool m_CustomColoredSkin;
+		ColorRGBA m_ColorBody;
+		ColorRGBA m_ColorFeet;
 
+		bool m_HasRenderTee;
 		float m_TextYOffset;
 
 		int m_TimesRepeated;
+
+		class CSixup
+		{
+		public:
+			IGraphics::CTextureHandle m_aTextures[protocol7::NUM_SKINPARTS];
+			IGraphics::CTextureHandle m_HatTexture;
+			IGraphics::CTextureHandle m_BotTexture;
+			int m_HatSpriteIndex;
+			ColorRGBA m_BotColor;
+			ColorRGBA m_aColors[protocol7::NUM_SKINPARTS];
+		};
+
+		// 0.7 Skin
+		CSixup m_Sixup;
 	};
 
 	bool m_PrevScoreBoardShowed;
@@ -97,13 +118,20 @@ class CChat : public CComponent
 		char m_aName[IConsole::TEMPCMD_NAME_LENGTH];
 		char m_aParams[IConsole::TEMPCMD_PARAMS_LENGTH];
 		char m_aHelpText[IConsole::TEMPCMD_HELP_LENGTH];
+		char m_aWar[IConsole::TEMPCMD_NAME_LENGTH];
 
 		CCommand() = default;
 		CCommand(const char *pName, const char *pParams, const char *pHelpText)
 		{
+
+			
+			const char *cstrs[] = {"one", "two", "three"};
+			
+
 			str_copy(m_aName, pName);
 			str_copy(m_aParams, pParams);
 			str_copy(m_aHelpText, pHelpText);
+			str_copy(m_aWar, "war");
 		}
 
 		bool operator<(const CCommand &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
@@ -113,6 +141,9 @@ class CChat : public CComponent
 
 	std::vector<CCommand> m_vCommands;
 	bool m_CommandsNeedSorting;
+
+	std::vector<CCommand> m_bCommands;
+	bool m_bCommandsNeedSorting;
 
 	struct CHistoryEntry
 	{

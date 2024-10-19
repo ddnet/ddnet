@@ -60,6 +60,23 @@
 #include "components/tooltips.h"
 #include "components/voting.h"
 
+// Tater
+
+#include "components/bindwheel.h"
+#include "components/player_indicator.h"
+#include "components/skinprofiles.h"
+#include "components/verify.h"
+
+// Chillerbot
+
+#include "components/chillerbot/chathelper.h"
+// #include "components/chillerbot/chillconsole.h"
+#include "components/chillerbot/chatcommand.h"
+#include "components/chillerbot/chillerbotux.h"
+#include "components/chillerbot/terminalui/terminalui.h"
+#include "components/chillerbot/unix.h"
+#include "components/chillerbot/warlist.h"
+
 class CGameInfo
 {
 public:
@@ -165,7 +182,22 @@ public:
 	CRaceDemo m_RaceDemo;
 	CGhost m_Ghost;
 
-	CTooltips m_Tooltips;
+	CTooltips m_Tooltips;	
+
+	// Tater	
+
+	CSkinProfiles m_SkinProfiles;
+	CBindWheel m_Bindwheel;
+	CVerify m_Verify;
+	CPlayerIndicator m_PlayerIndicator;
+
+	// chillerbot-ux
+
+	CChillerBotUX m_ChillerBotUX;
+	CChatHelper m_ChatHelper;
+	CUnix m_Unix;
+	CWarList m_WarList;
+	CChatCommand m_ChatCommand;
 
 private:
 	std::vector<class CComponent *> m_vpAll;
@@ -416,6 +448,8 @@ public:
 		bool m_Friend;
 		bool m_Foe;
 
+		bool m_IsWar;
+
 		int m_AuthLevel;
 		bool m_Afk;
 		bool m_Paused;
@@ -556,6 +590,7 @@ public:
 
 	// actions
 	// TODO: move these
+	void SendFinishName();
 	void SendSwitchTeam(int Team) const;
 	void SendStartInfo7(bool Dummy) const;
 	void SendSkinChange7(bool Dummy);

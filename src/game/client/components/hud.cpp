@@ -517,8 +517,13 @@ void CHud::RenderTextInfo()
 #endif
 	if(Showfps)
 	{
-		// calculate avg. fps
-		m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;
+		if(g_Config.m_ClFpsSpoofer == 1)
+		{
+			m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * (g_Config.m_ClFpsSpooferMargin * 0.001f);
+		}
+		else
+			m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;
+
 		char aBuf[64];
 		int FrameTime = (int)(1.0f / m_FrameTimeAvg + 0.5f);
 		str_format(aBuf, sizeof(aBuf), "%d", FrameTime);
@@ -528,9 +533,11 @@ void CHud::RenderTextInfo()
 		static float s_TextWidth000 = TextRender()->TextWidth(12.f, "000", -1, -1.0f);
 		static float s_TextWidth0000 = TextRender()->TextWidth(12.f, "0000", -1, -1.0f);
 		static float s_TextWidth00000 = TextRender()->TextWidth(12.f, "00000", -1, -1.0f);
+		static float s_TextWidth000000 = TextRender()->TextWidth(12.f, "000000", -1, -1.0f);
 		static const float s_aTextWidth[5] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000};
 
 		int DigitIndex = GetDigitsIndex(FrameTime, 4);
+
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_aTextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);
@@ -587,17 +594,32 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::RenderCursor()
 {
-	if(!m_pClient->m_Snap.m_pLocalCharacter || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if((!m_pClient->m_Snap.m_pLocalCharacter && !(g_Config.m_ClRenderCursorSpec && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW)) || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
+	int CurWeapon = 1;
 	RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
 
 	// render cursor
-	int CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].y);
+	if (m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
+	{
+
+		CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
+		Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+		Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].y);
+	}
+	else
+	{
+		if(g_Config.m_ClDoCursorSpecOpacity)
+			Graphics()->SetColor(1.f, 1.f, 1.f, g_Config.m_ClRenderCursorSpecOpacity * 0.01);
+		else
+			Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+		Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].y);
+	}
 }
+
 
 void CHud::PrepareAmmoHealthAndArmorQuads()
 {

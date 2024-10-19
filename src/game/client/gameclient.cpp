@@ -78,7 +78,20 @@
 #include "prediction/entities/character.h"
 #include "prediction/entities/projectile.h"
 
-using namespace std::chrono_literals;
+// Tater
+#include "components/player_indicator.h"
+#include "components/verify.h"
+
+// Chillerbot
+#include "components/chillerbot/chathelper.h"
+// #include "components/chillerbot/chillconsole.h"
+#include "components/chillerbot/chatcommand.h"
+#include "components/chillerbot/chillerbotux.h"
+#include "components/chillerbot/terminalui/terminalui.h"
+#include "components/chillerbot/unix.h"
+#include "components/chillerbot/warlist.h"
+
+	using namespace std::chrono_literals;
 
 const char *CGameClient::Version() const { return GAME_VERSION; }
 const char *CGameClient::NetVersion() const { return GAME_NETVERSION; }
@@ -123,6 +136,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Sounds,
 					      &m_Voting,
 					      &m_Particles, // doesn't render anything, just updates all the particles
+					      &m_SkinProfiles,
 					      &m_RaceDemo,
 					      &m_MapSounds,
 					      &m_Background, // render instead of m_MapLayersBackground when g_Config.m_ClOverlayEntities == 100
@@ -138,6 +152,9 @@ void CGameClient::OnConsoleInit()
 					      &m_Particles.m_RenderExtra,
 					      &m_Particles.m_RenderGeneral,
 					      &m_FreezeBars,
+					      &m_Bindwheel,
+					      &m_PlayerIndicator,
+					      &m_Verify,
 					      &m_DamageInd,
 					      &m_Hud,
 					      &m_Spectator,
@@ -153,6 +170,14 @@ void CGameClient::OnConsoleInit()
 					      &m_Tooltips,
 					      &CMenus::m_Binder,
 					      &m_GameConsole,
+					      /* <<< chillerbot-ux */
+					      &m_ChillerBotUX,
+					      &m_ChatHelper,
+					      &m_WarList,
+					      &m_ChatCommand,
+					      /* &m_ChillConsole, */
+					      &m_Unix,
+					      /* >>> chillerbot-ux */
 					      &m_MenuBackground});
 
 	// build the input stack
@@ -162,6 +187,7 @@ void CGameClient::OnConsoleInit()
 						  &m_Chat, // chat has higher prio, due to that you can quit it by pressing esc
 						  &m_Motd, // for pressing esc to remove it
 						  &m_Spectator,
+						  &m_Bindwheel,
 						  &m_Emoticon,
 						  &m_Menus,
 						  &m_Controls,
@@ -334,9 +360,9 @@ void CGameClient::OnInit()
 	// update and swap after font loading, they are quite huge
 	Client()->UpdateAndSwap();
 
-	const char *pLoadingDDNetCaption = Localize("Loading DDNet Client");
-	const char *pLoadingMessageComponents = Localize("Initializing components");
-	const char *pLoadingMessageComponentsSpecial = Localize("Why are you slowmo replaying to read this?");
+	const char *pLoadingDDNetCaption = Localize("AIODOB :D");
+	const char *pLoadingMessageComponents = Localize("AIODOB :D");
+	const char *pLoadingMessageComponentsSpecial = Localize("Madly in love with Sulie");
 	char aLoadingMessage[256];
 
 	// init all components
@@ -366,7 +392,7 @@ void CGameClient::OnInit()
 	m_HudSkinLoaded = false;
 
 	// setup load amount, load textures
-	const char *pLoadingMessageAssets = Localize("Initializing assets");
+	const char *pLoadingMessageAssets = Localize("Mhm oh yeah mhm yeah baby");
 	for(int i = 0; i < g_pData->m_NumImages; i++)
 	{
 		if(i == IMAGE_GAME)
@@ -391,7 +417,7 @@ void CGameClient::OnInit()
 			client_data7::g_pData->m_aImages[i].m_Id = IGraphics::CTextureHandle();
 		else if(i == client_data7::IMAGE_DEADTEE)
 			client_data7::g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(client_data7::g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL, 0);
-		m_Menus.RenderLoading(pLoadingDDNetCaption, Localize("Initializing assets"), 1);
+		m_Menus.RenderLoading(pLoadingDDNetCaption, Localize("Love Sulie"), 1);
 	}
 
 	m_GameWorld.m_pCollision = Collision();
@@ -529,7 +555,7 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 void CGameClient::OnConnected()
 {
 	const char *pConnectCaption = DemoPlayer()->IsPlaying() ? Localize("Preparing demo playback") : Localize("Connected");
-	const char *pLoadMapContent = Localize("Initializing map logic");
+	const char *pLoadMapContent = Localize("Initializing boahhhhh");
 	// render loading before skip is calculated
 	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false);
 	m_Layers.Init(Kernel()->RequestInterface<IMap>(), false);
@@ -1616,6 +1642,7 @@ void CGameClient::OnNewSnapshot()
 					m_aClients[Item.m_Id].m_Paused = pInfo->m_Flags & EXPLAYERFLAG_PAUSED;
 					m_aClients[Item.m_Id].m_Spec = pInfo->m_Flags & EXPLAYERFLAG_SPEC;
 
+
 					if(Item.m_Id == m_Snap.m_LocalClientId && (m_aClients[Item.m_Id].m_Paused || m_aClients[Item.m_Id].m_Spec))
 					{
 						m_Snap.m_SpecInfo.m_Active = true;
@@ -1896,6 +1923,7 @@ void CGameClient::OnNewSnapshot()
 
 		// update foe state
 		m_aClients[i].m_Foe = !(i == m_Snap.m_LocalClientId || !m_Snap.m_apPlayerInfos[i] || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
+
 	}
 
 	// sort player infos by name
@@ -2494,6 +2522,8 @@ void CGameClient::CClientData::Reset()
 	m_Friend = false;
 	m_Foe = false;
 
+	m_IsWar = false;
+
 	m_AuthLevel = AUTHED_NO;
 	m_Afk = false;
 	m_Paused = false;
@@ -2535,6 +2565,22 @@ void CGameClient::SendSwitchTeam(int Team) const
 	CNetMsg_Cl_SetTeam Msg;
 	Msg.m_Team = Team;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+}
+
+void CGameClient::SendFinishName()
+{
+	CNetMsg_Cl_ChangeInfo Msg;
+	Msg.m_pName = g_Config.m_ClFinishName;
+	Msg.m_pClan = g_Config.m_PlayerClan;
+	Msg.m_Country = g_Config.m_PlayerCountry;
+	Msg.m_pSkin = g_Config.m_ClPlayerSkin;
+	Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+	Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
+	Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
+	CMsgPacker Packer(&Msg);
+	Msg.Pack(&Packer);
+	Client()->SendMsg(0, &Packer, MSGFLAG_VITAL);
+	m_aCheckInfo[0] = Client()->GameTickSpeed();
 }
 
 void CGameClient::SendStartInfo7(bool Dummy) const

@@ -297,7 +297,7 @@ void CSkins7::OnInit()
 			m_avSkinParts[Part].emplace_back(DummySkinPart);
 		}
 
-		GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+		GameClient()->m_Menus.RenderLoading(Localize("AIODOB :D"), Localize("Bla Kaanun"), 0);
 	}
 
 	// create dummy skin
@@ -316,12 +316,12 @@ void CSkins7::OnInit()
 		m_DummySkin.m_aPartColors[Part] = Part == protocol7::SKINPART_MARKING ? (255 << 24) + 65408 : 65408;
 		m_DummySkin.m_aUseCustomColors[Part] = 0;
 	}
-	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+	GameClient()->m_Menus.RenderLoading(Localize("AIODOB :D"), Localize("what"), 0);
 
 	// load skins
 	m_vSkins.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, SKINS_DIR, SkinScan, this);
-	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+	GameClient()->m_Menus.RenderLoading(Localize("AIODOB :D"), Localize("YESSSIRRRR"), 0);
 
 	// add dummy skin
 	if(m_vSkins.empty())
@@ -329,7 +329,7 @@ void CSkins7::OnInit()
 
 	LoadXmasHat();
 	LoadBotDecoration();
-	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+	GameClient()->m_Menus.RenderLoading(Localize("AIODOB :D"), Localize("Kaanun bla?"), 0);
 }
 
 void CSkins7::LoadXmasHat()

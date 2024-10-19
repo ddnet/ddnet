@@ -2057,6 +2057,8 @@ set_src(ENGINE_INTERFACE GLOB src/engine
 set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   assertion_logger.cpp
   assertion_logger.h
+  chillerbot/langparser.cpp
+  chillerbot/langparser.h
   compression.cpp
   compression.h
   config.cpp
@@ -2149,6 +2151,7 @@ set_src(ENGINE_GFX GLOB src/engine/gfx
   image_manipulation.h
 )
 set_src(GAME_SHARED GLOB src/game
+  aiodob_variables.h
   alloc.h
   collision.cpp
   collision.h
@@ -2330,12 +2333,34 @@ if(CLIENT)
     components/background.h
     components/binds.cpp
     components/binds.h
+    components/bindwheel.cpp
+    components/bindwheel.h
+    components/skinprofiles.cpp
+    components/skinprofiles.h
+    components/player_indicator.cpp
+    components/player_indicator.h
+    components/verify.cpp
+    components/verify.h
     components/broadcast.cpp
     components/broadcast.h
     components/camera.cpp
     components/camera.h
     components/chat.cpp
     components/chat.h
+    components/chillerbot/chatcommand.cpp
+    components/chillerbot/chatcommand.h
+    components/chillerbot/chatcommands.h
+    components/chillerbot/chathelper.cpp
+    components/chillerbot/chathelper.h
+    components/chillerbot/chillerbotux.cpp
+    components/chillerbot/chillerbotux.h
+    components/chillerbot/unix.cpp
+    components/chillerbot/unix.h
+    components/chillerbot/version.h
+    components/chillerbot/warlist.cpp
+    components/chillerbot/warlist.h
+    components/chillerbot/warlist_commands_advanced.cpp
+    components/chillerbot/warlist_commands_simple.cpp
     components/console.cpp
     components/console.h
     components/controls.cpp
@@ -2372,6 +2397,7 @@ if(CLIENT)
     components/menu_background.h
     components/menus.cpp
     components/menus.h
+    components/menus_aiodob.cpp
     components/menus_browser.cpp
     components/menus_demo.cpp
     components/menus_ingame.cpp

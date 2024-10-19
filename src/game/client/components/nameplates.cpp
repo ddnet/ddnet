@@ -14,6 +14,8 @@
 #include "controls.h"
 #include "nameplates.h"
 
+#include <game/client/components/chillerbot/warlist.h>
+
 void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha)
 {
 	SPlayerNamePlate &NamePlate = m_aNamePlates[pPlayerInfo->m_ClientId];
@@ -63,11 +65,22 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		if(OtherTeam && !ForceAlpha)
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 		else
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		const float ShowDirectionImgSize = 22.0f;
-		YOffset -= ShowDirectionImgSize;
-		const vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
+		vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset - FontSize - 15.0f);
+
+		if(pPlayerInfo->m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		{
+			DirLeft = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction == -1;
+			DirRight = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction == 1;
+			Jump = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Jump == 1;
+		}
+		if(Client()->DummyConnected() && Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_ClientId == m_pClient->m_aLocalIds[!g_Config.m_ClDummy])
+		{
+			DirLeft = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Direction == -1;
+			DirRight = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Direction == 1;
+			Jump = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Jump == 1;
+		}
 		if(DirLeft)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
@@ -163,6 +176,7 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 			else if(ClientData.m_Team == TEAM_BLUE)
 				TColor = ColorRGBA(0.7f, 0.7f, 1.0f, a);
 		}
+		m_pClient->m_WarList.SetNameplateColor(pPlayerInfo->m_ClientId, &TColor);
 
 		TOutlineColor.a *= Alpha;
 		TColor.a *= Alpha;
@@ -170,6 +184,16 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		if(NamePlate.m_NameTextContainerIndex.Valid())
 		{
 			YOffset -= FontSize;
+			if((g_Config.m_ClPingNameCircle || (m_pClient->m_Scoreboard.Active() && !pPlayerInfo->m_Local)) && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
+			{
+				Graphics()->TextureClear();
+				Graphics()->QuadsBegin();
+				rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(m_pClient->m_Snap.m_apPlayerInfos[pPlayerInfo->m_ClientId]->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f, 0.8f));
+				Graphics()->SetColor(rgb);
+				float CircleSize = 7.0f;
+				Graphics()->DrawCircle(Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f - CircleSize, YOffset + FontSize / 2.0f + 1.4f, CircleSize, 24);
+				Graphics()->QuadsEnd();
+			}
 			TextRender()->RenderTextContainer(NamePlate.m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f, YOffset);
 		}
 
@@ -192,15 +216,6 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 			const char *pFriendMark = "♥";
 			TextRender()->TextColor(Color);
 			TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, pFriendMark) / 2.0f, YOffset, FontSize, pFriendMark);
-		}
-
-		if(g_Config.m_Debug || g_Config.m_ClNameplatesIds) // render client id when in debug as well
-		{
-			YOffset -= FontSize;
-			char aBuf[12];
-			str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
-			TextRender()->TextColor(rgb);
-			TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
 		}
 	}
 
@@ -265,6 +280,61 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		}
 	}
 
+	if((g_Config.m_Debug || g_Config.m_ClNameplatesIds) && g_Config.m_ClNameplates)
+	{
+		const bool Following = (m_pClient->m_Snap.m_SpecInfo.m_Active && !GameClient()->m_MultiViewActivated && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW);
+		if(m_pClient->m_Snap.m_LocalClientId != -1 || Following)
+		{
+			const int SelectedId = Following ? m_pClient->m_Snap.m_SpecInfo.m_SpectatorId : m_pClient->m_Snap.m_LocalClientId;
+			const CGameClient::CSnapState::CCharacterInfo &Selected = m_pClient->m_Snap.m_aCharacters[SelectedId];
+			const CGameClient::CSnapState::CCharacterInfo &Other = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId];
+			if(Selected.m_HasExtendedData && Other.m_HasExtendedData)
+			{
+				if(SelectedId == pPlayerInfo->m_ClientId)
+				{
+					TextRender()->TextColor(rgb);
+				}
+				else
+				{
+					ColorRGBA StrongWeakIdColor;
+
+					if(Selected.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId)
+					{
+						StrongWeakIdColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
+					}
+					else
+					{
+						StrongWeakIdColor = color_cast<ColorRGBA>(ColorHSLA(41131));
+					}
+
+					if(g_Config.m_ClStrongWeakColorId)
+					{
+						YOffset -= FontSize;
+						char aBuf[12];
+						str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
+						TextRender()->TextColor(StrongWeakIdColor);
+						TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
+					}
+					else
+					{
+						YOffset -= FontSize;
+						char aBuf[12];
+						str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
+						TextRender()->TextColor(rgb);
+						TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
+					}
+
+					if(OtherTeam && !ForceAlpha)
+						StrongWeakIdColor.a = g_Config.m_ClShowOthersAlpha / 100.0f;
+					else if(g_Config.m_ClNameplatesAlways == 0)
+						StrongWeakIdColor.a = clamp(1 - std::pow(distance(m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
+					else
+						StrongWeakIdColor.a = 1.0f;
+				}
+			}
+		}
+	}
+
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
 
@@ -293,7 +363,7 @@ void CNamePlates::OnRender()
 	// this may need to be changed or calculated differently in the future
 	ScreenX0 -= 400;
 	ScreenX1 += 400;
-	//ScreenY0 -= 0;
+	// ScreenY0 -= 0;
 	ScreenY1 += 800;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -311,7 +381,10 @@ void CNamePlates::OnRender()
 			// don't render offscreen
 			if(in_range(RenderPos.x, ScreenX0, ScreenX1) && in_range(RenderPos.y, ScreenY0, ScreenY1))
 			{
-				RenderNameplate(RenderPos, pInfo, 0.4f, true);
+				if(!g_Config.m_ClRenderNameplateSpec)
+				{
+					RenderNameplate(RenderPos, pInfo, 0.4f, true);
+				}
 			}
 		}
 		if(m_pClient->m_Snap.m_aCharacters[i].m_Active)

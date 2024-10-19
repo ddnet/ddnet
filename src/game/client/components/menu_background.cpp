@@ -159,7 +159,7 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 
 	if(time_get_nanoseconds() - pSelf->m_ThemeScanStartTime > 500ms)
 	{
-		pSelf->GameClient()->m_Menus.RenderLoading(Localize("Loading menu themes"), "", 0, false);
+		pSelf->GameClient()->m_Menus.RenderLoading(Localize("AIODOB :D"), "Mhm oh yeah", 0, false);
 	}
 	return 0;
 }

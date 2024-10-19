@@ -274,6 +274,9 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	// options
 	static char s_aPlayerIds[MAX_CLIENTS][4] = {{0}};
+	static CButtonContainer s_CopySkins[MAX_CLIENTS];
+	static CButtonContainer s_CopyNames[MAX_CLIENTS];
+	static CButtonContainer s_CopyClan[MAX_CLIENTS]; 
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -296,7 +299,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		if(Count % 2 == 1)
 			Row.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 		Row.VSplitRight(s_ListBox.ScrollbarWidthMax() - s_ListBox.ScrollbarWidth(), &Row, nullptr);
-		Row.VSplitRight(300.0f, &Player, &Row);
+		Row.VSplitRight(500.0f, &Player, &Row);
 
 		// player info
 		Player.VSplitLeft(28.0f, &Button, &Player);
@@ -317,11 +320,56 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Row.VSplitRight(210.0f, &Button2, &Row);
 
 		Ui()->DoLabel(&Player, CurrentClient.m_aName, 14.0f, TEXTALIGN_ML);
+	
 		Ui()->DoLabel(&Button, CurrentClient.m_aClan, 14.0f, TEXTALIGN_ML);
-
+		
 		m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
-			Button2.x, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
+			Button2.x + 250.0f, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
 
+
+		/* * * * * * * * * * * * * * * * 
+		 *							   *
+		 *TODO: FIX BUTTON POSITIONS;  *
+		 *							   *
+		 * * * * * * * * * * * * * * * */ 
+		 
+
+		// copy name button
+
+		Row.VSplitLeft(-425.0f, &Player, &Row);
+		Row.VSplitLeft(100.0f, &Player, &Row);
+		if(DoButton_Menu(&s_CopyNames[Index], Localize("Name"), 0, &Player))
+		{
+			str_copy(g_Config.m_PlayerName, CurrentClient.m_aName, sizeof(g_Config.m_PlayerName));
+
+			m_pClient->SendInfo(false);
+		}
+		
+		// copy clan button
+		Row.VSplitLeft(15.0f, &Button, &Row);
+		Row.VSplitLeft(100.0f, &Button, &Row);
+		if(DoButton_Menu(&s_CopyClan[Index], Localize("Clan"), 0, &Button))
+		{
+			str_copy(g_Config.m_PlayerClan, CurrentClient.m_aClan, sizeof(g_Config.m_PlayerClan));
+
+			m_pClient->SendInfo(false);
+		}
+		
+		//copy skin button
+		Row.VSplitLeft(15.0f, &Button2, &Row);
+		Row.VSplitLeft(100.0f, &Button2, &Row);
+		if(DoButton_Menu(&s_CopySkins[Index], Localize("Skin"), 0, &Button2))
+		{
+			g_Config.m_ClPlayerUseCustomColor = CurrentClient.m_UseCustomColor;
+			g_Config.m_ClPlayerColorBody = CurrentClient.m_ColorBody;
+			g_Config.m_ClPlayerColorFeet = CurrentClient.m_ColorFeet;
+			str_copy(g_Config.m_ClPlayerSkin, CurrentClient.m_aSkinName, sizeof(g_Config.m_ClPlayerSkin));
+
+			m_pClient->SendInfo(false);
+		} 
+			
+		
+		Row.VSplitRight(207.0f, &Button2, &Row);
 		// ignore chat button
 		Row.HMargin(2.0f, &Row);
 		Row.VSplitLeft(Width, &Button, &Row);

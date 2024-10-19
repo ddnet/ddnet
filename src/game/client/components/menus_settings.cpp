@@ -857,66 +857,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 }
 
-typedef struct
-{
-	const char *m_pName;
-	const char *m_pCommand;
-	int m_KeyId;
-	int m_ModifierCombination;
-} CKeyInfo;
-
-static CKeyInfo gs_aKeys[] =
-	{
-		{Localizable("Move left"), "+left", 0, 0},
-		{Localizable("Move right"), "+right", 0, 0},
-		{Localizable("Jump"), "+jump", 0, 0},
-		{Localizable("Fire"), "+fire", 0, 0},
-		{Localizable("Hook"), "+hook", 0, 0},
-		{Localizable("Hook collisions"), "+showhookcoll", 0, 0},
-		{Localizable("Pause"), "say /pause", 0, 0},
-		{Localizable("Kill"), "kill", 0, 0},
-		{Localizable("Zoom in"), "zoom+", 0, 0},
-		{Localizable("Zoom out"), "zoom-", 0, 0},
-		{Localizable("Default zoom"), "zoom", 0, 0},
-		{Localizable("Show others"), "say /showothers", 0, 0},
-		{Localizable("Show all"), "say /showall", 0, 0},
-		{Localizable("Toggle dyncam"), "toggle cl_dyncam 0 1", 0, 0},
-		{Localizable("Toggle ghost"), "toggle cl_race_show_ghost 0 1", 0, 0},
-
-		{Localizable("Hammer"), "+weapon1", 0, 0},
-		{Localizable("Pistol"), "+weapon2", 0, 0},
-		{Localizable("Shotgun"), "+weapon3", 0, 0},
-		{Localizable("Grenade"), "+weapon4", 0, 0},
-		{Localizable("Laser"), "+weapon5", 0, 0},
-		{Localizable("Next weapon"), "+nextweapon", 0, 0},
-		{Localizable("Prev. weapon"), "+prevweapon", 0, 0},
-
-		{Localizable("Vote yes"), "vote yes", 0, 0},
-		{Localizable("Vote no"), "vote no", 0, 0},
-
-		{Localizable("Chat"), "+show_chat; chat all", 0, 0},
-		{Localizable("Team chat"), "+show_chat; chat team", 0, 0},
-		{Localizable("Converse"), "+show_chat; chat all /c ", 0, 0},
-		{Localizable("Chat command"), "+show_chat; chat all /", 0, 0},
-		{Localizable("Show chat"), "+show_chat", 0, 0},
-
-		{Localizable("Toggle dummy"), "toggle cl_dummy 0 1", 0, 0},
-		{Localizable("Dummy copy"), "toggle cl_dummy_copy_moves 0 1", 0, 0},
-		{Localizable("Hammerfly dummy"), "toggle cl_dummy_hammer 0 1", 0, 0},
-
-		{Localizable("Emoticon"), "+emote", 0, 0},
-		{Localizable("Spectator mode"), "+spectate", 0, 0},
-		{Localizable("Spectate next"), "spectate_next", 0, 0},
-		{Localizable("Spectate previous"), "spectate_previous", 0, 0},
-		{Localizable("Console"), "toggle_local_console", 0, 0},
-		{Localizable("Remote console"), "toggle_remote_console", 0, 0},
-		{Localizable("Screenshot"), "screenshot", 0, 0},
-		{Localizable("Scoreboard"), "+scoreboard", 0, 0},
-		{Localizable("Statboard"), "+statboard", 0, 0},
-		{Localizable("Lock team"), "say /lock", 0, 0},
-		{Localizable("Show entities"), "toggle cl_overlay_entities 0 100", 0, 0},
-		{Localizable("Show HUD"), "toggle cl_showhud 0 1", 0, 0},
-};
 
 void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 {
@@ -1931,7 +1871,10 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Graphics"),
 		Localize("Sound"),
 		Localize("DDNet"),
-		Localize("Assets")};
+		Localize("Assets"),
+		("Aiodob"),
+		("Skin Profiles")};
+
 	static CButtonContainer s_aTabButtons[SETTINGS_LENGTH];
 
 	for(int i = 0; i < SETTINGS_LENGTH; i++)
@@ -1994,6 +1937,14 @@ void CMenus::RenderSettings(CUIRect MainView)
 	{
 		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_ASSETS);
 		RenderSettingsCustom(MainView);
+	}
+	else if(g_Config.m_UiSettingsPage == SETTINGS_AIODOB)
+	{
+		RenderSettingsAiodob(MainView);
+	}
+	else if(g_Config.m_UiSettingsPage == SETTINGS_SKINPROFILES)
+	{
+		RenderSettingsProfiles(MainView);
 	}
 	else
 	{

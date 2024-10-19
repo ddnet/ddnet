@@ -2057,7 +2057,11 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						int64_t TimeLeft = (TickStart - Now) * 1000 / time_freq();
 						m_aGameTime[Conn].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / GameTickSpeed(), TimeLeft, CSmoothTime::ADJUSTDIRECTION_DOWN);
 					}
-
+					if(g_Config.m_ClRunOnJoinConsole && m_aReceivedSnapshots[Conn] > g_Config.m_ClRunOnJoinDelay && !m_aCodeRunAfterJoinConsole[Conn])
+					{
+						m_pConsole->ExecuteLine(g_Config.m_ClRunOnJoinMsg);
+						m_aCodeRunAfterJoinConsole[Conn] = true;
+					}
 					if(m_aReceivedSnapshots[Conn] > GameTickSpeed() && !m_aCodeRunAfterJoin[Conn])
 					{
 						if(m_ServerCapabilities.m_ChatTimeoutCode)
@@ -4750,6 +4754,13 @@ int main(int argc, const char **argv)
 		pConsole->SetUnknownCommandCallback(IConsole::EmptyUnknownCommandCallback, nullptr);
 	}
 
+	// execute tclient config file
+	IOHANDLE File = pStorage->OpenFile(AIODOBCONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(File)
+	{
+		io_close(File);
+		pConsole->ExecuteFile(AIODOBCONFIG_FILE);
+	}
 	// execute autoexec file
 	if(pStorage->FileExists(AUTOEXEC_CLIENT_FILE, IStorage::TYPE_ALL))
 	{
