@@ -21,7 +21,7 @@
 MACRO_CONFIG_INT(ClFinishRename, cb_finish_rename, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Change name to cb_finish_name if finish is near.")
 MACRO_CONFIG_STR(ClFinishName, cb_finish_name, 16, "Aiodob", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Change to this name if cb_finish_rename is active.")
 MACRO_CONFIG_INT(ClCampHack, cb_camp_hack, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "0=off 1=mark with gun 2=auto walk")
-MACRO_CONFIG_STR(ClAutoReplyMsg, cb_auto_reply_msg, 32, "%n I am currently tabbed out", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply when pinged in chat and cb_auto_reply is set to 1")
+MACRO_CONFIG_STR(ClAutoReplyMsg, cb_auto_reply_msg, 32, "I'm currently tabbed out", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply when pinged in chat and cb_auto_reply is set to 1")
 MACRO_CONFIG_INT(ClTabbedOutMsg, cb_tabbed_out_msg, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Let others know when pinged in chat that you are tabbed out")
 
 MACRO_CONFIG_INT(ClChillerbotHud, cb_chillerbot_hud, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show enabled chillerbot components in hud")
@@ -127,8 +127,8 @@ MACRO_CONFIG_INT(ClApplyProfileEmote, tc_profile_emote, 1, 0, 1, CFGFLAG_CLIENT 
 
 	// War / Team color (chillerbots Warlist)
 
-	MACRO_CONFIG_COL(ClWarColor, ac_war_color, 16777123, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color")
-	MACRO_CONFIG_COL(ClTeamColor, ac_team_color, 5504948, CFGFLAG_CLIENT | CFGFLAG_SAVE, "System message color")
+	MACRO_CONFIG_COL(ClWarColor, ac_war_color, 16777123, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enemy Name Color")
+	MACRO_CONFIG_COL(ClTeamColor, ac_team_color, 5504948, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Teammate Name Color")
 
 	// Misc Color
 	MACRO_CONFIG_COL(ClAfkColor, ac_afk_color, 10951270, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Afk name color")
@@ -163,6 +163,7 @@ MACRO_CONFIG_INT(ClScoreboardSpecMark, ac_do_scoreboard_specmark, 0, 0, 1, CFGFL
 MACRO_CONFIG_INT(ClScoreboardSpecPlayer, ac_do_scoreboard_spec_tee, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Changes The Tee in The Scoreboard to a Spectating Tee if The Player is Spectating")
 
 MACRO_CONFIG_INT(ClChatSpecMark, ac_do_chat_specmark, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Spectator mark (s) Next to names in chat")
+MACRO_CONFIG_INT(ClChatWarlistMark, ac_do_chat_Warlist_mark, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows A symbol next to teammates / enemies")
 
 // friend name settings
 
@@ -178,7 +179,15 @@ MACRO_CONFIG_INT(ClFoeNameColor, ac_foe_name_color, 0, 0, 1, CFGFLAG_CLIENT | CF
 
 // unused or shouldnt be used
 
+MACRO_CONFIG_INT(ClTest2, ac_test, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "test")
+// string
 MACRO_CONFIG_STR(ClTest, ac_test, 24, "test", CFGFLAG_CLIENT | CFGFLAG_SAVE, "test")
+
+MACRO_CONFIG_STR(ClChatFriendMsg, ac_chat_friend_msg, 8, "♥ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Friends in Chat")
+MACRO_CONFIG_STR(ClChatSpecMsg, ac_chat_spec_msg, 8, "(s) ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Specating People in Chat")
+MACRO_CONFIG_STR(ClChatEnemyMsg, ac_chat_enemy_msg, 8, "♦ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Enemies in Chat")
+MACRO_CONFIG_STR(ClChatTeammateMsg, ac_chat_teammate_msg, 8, "♦ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Teammates in Chat")
+
 MACRO_CONFIG_INT(ClShowSpecials, ac_specials, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Autocrashes the game if someone with cheats is detected")
 MACRO_CONFIG_INT(ClFinishRenameDistance, ac_finish_rename_distance, 32, 32, 1000, CFGFLAG_CLIENT | CFGFLAG_SAVE, " (dont change buggy) distance to where the game detects the finish line")
 
@@ -298,6 +307,8 @@ MACRO_CONFIG_INT(ClHookHeadSprite, cle_sprite_hook_head, 0, -51, 87, CFGFLAG_CLI
 
 
 
+
+
 // Custom Vairiables from My Server for the editor
 // ignore these you cant do anything with them except if you make ur own version on a server
 
@@ -311,3 +322,9 @@ MACRO_CONFIG_INT(SvAutoExplGun, sv_auto_explgun, 0, 0, 1, CFGFLAG_SERVER | CFGFL
 MACRO_CONFIG_INT(SvAutoFreezeGun, sv_auto_Freezegun, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Test | auto enables guns")
 
 MACRO_CONFIG_INT(SvExplGun, sv_explgun, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "enables the ''better version'' of the explosion gun")
+
+MACRO_CONFIG_INT(SvFakeGrenade, sv_fake_grenade, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Grenade doesnt explode")
+MACRO_CONFIG_INT(SvDisableFreeze, sv_disable_freeze, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "fake freeze?")
+
+MACRO_CONFIG_INT(ClDisableFreeze, cl_disable_freeze, 0, 0, 1, CFGFLAG_CLIENT, "fake freeze?")
+MACRO_CONFIG_INT(ClFakeGrenade, cl_fake_grenade, 0, 0, 1, CFGFLAG_CLIENT, "Grenade doesnt explode")
