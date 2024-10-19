@@ -447,6 +447,8 @@ public:
 		bool m_Friend;
 		bool m_Foe;
 
+		bool m_IsWar;
+
 		int m_AuthLevel;
 		bool m_Afk;
 		bool m_Paused;

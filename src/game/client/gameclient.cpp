@@ -360,9 +360,9 @@ void CGameClient::OnInit()
 	// update and swap after font loading, they are quite huge
 	Client()->UpdateAndSwap();
 
-	const char *pLoadingDDNetCaption = Localize("Loading DDNet Client");
-	const char *pLoadingMessageComponents = Localize("Initializing components");
-	const char *pLoadingMessageComponentsSpecial = Localize("Why are you slowmo replaying to read this?");
+	const char *pLoadingDDNetCaption = Localize("AIODOB :D");
+	const char *pLoadingMessageComponents = Localize("AIODOB :D");
+	const char *pLoadingMessageComponentsSpecial = Localize("Madly in love with Sulie");
 	char aLoadingMessage[256];
 
 	// init all components
@@ -392,7 +392,7 @@ void CGameClient::OnInit()
 	m_HudSkinLoaded = false;
 
 	// setup load amount, load textures
-	const char *pLoadingMessageAssets = Localize("Initializing assets");
+	const char *pLoadingMessageAssets = Localize("Mhm oh yeah mhm yeah baby");
 	for(int i = 0; i < g_pData->m_NumImages; i++)
 	{
 		if(i == IMAGE_GAME)
@@ -417,7 +417,7 @@ void CGameClient::OnInit()
 			client_data7::g_pData->m_aImages[i].m_Id = IGraphics::CTextureHandle();
 		else if(i == client_data7::IMAGE_DEADTEE)
 			client_data7::g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(client_data7::g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL, 0);
-		m_Menus.RenderLoading(pLoadingDDNetCaption, Localize("Initializing assets"), 1);
+		m_Menus.RenderLoading(pLoadingDDNetCaption, Localize("Love Sulie"), 1);
 	}
 
 	m_GameWorld.m_pCollision = Collision();
@@ -555,7 +555,7 @@ int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 void CGameClient::OnConnected()
 {
 	const char *pConnectCaption = DemoPlayer()->IsPlaying() ? Localize("Preparing demo playback") : Localize("Connected");
-	const char *pLoadMapContent = Localize("Initializing map logic");
+	const char *pLoadMapContent = Localize("Initializing boahhhhh");
 	// render loading before skip is calculated
 	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false);
 	m_Layers.Init(Kernel());
@@ -1632,6 +1632,7 @@ void CGameClient::OnNewSnapshot()
 					m_aClients[Item.m_Id].m_Paused = pInfo->m_Flags & EXPLAYERFLAG_PAUSED;
 					m_aClients[Item.m_Id].m_Spec = pInfo->m_Flags & EXPLAYERFLAG_SPEC;
 
+
 					if(Item.m_Id == m_Snap.m_LocalClientId && (m_aClients[Item.m_Id].m_Paused || m_aClients[Item.m_Id].m_Spec))
 					{
 						m_Snap.m_SpecInfo.m_Active = true;
@@ -1912,6 +1913,7 @@ void CGameClient::OnNewSnapshot()
 
 		// update foe state
 		m_aClients[i].m_Foe = !(i == m_Snap.m_LocalClientId || !m_Snap.m_apPlayerInfos[i] || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
+
 	}
 
 	// sort player infos by name
@@ -2496,6 +2498,8 @@ void CGameClient::CClientData::Reset()
 	m_EmoticonIgnore = false;
 	m_Friend = false;
 	m_Foe = false;
+
+	m_IsWar = false;
 
 	m_AuthLevel = AUTHED_NO;
 	m_Afk = false;
