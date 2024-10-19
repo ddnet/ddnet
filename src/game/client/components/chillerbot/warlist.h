@@ -156,6 +156,9 @@ public:
 
 
 
+	void RemoveWarNoMsg(const char *pName);
+	void RemoveTeamNoMsg(const char *pName);
+
 	void AddSimpleWar(const char *pName);
 	void RemoveSimpleWar(const char *pName);
 
