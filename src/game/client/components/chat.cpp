@@ -21,6 +21,8 @@
 #include <game/localization.h>
 
 #include "chat.h"
+#include <game/client/components/chillerbot/chathelper.h>
+#include <game/client/components/chillerbot/chillerbotux.h>
 
 char CChat::ms_aDisplayText[MAX_LINE_LENGTH] = {'\0'};
 
@@ -113,6 +115,8 @@ void CChat::Reset()
 		Line.m_aName[0] = 0;
 		Line.m_Friend = false;
 		Line.m_Paused = false;
+		Line.m_IsWar = false;
+		Line.m_IsTeam = false;
 		Line.m_TimesRepeated = 0;
 		Line.m_HasRenderTee = false;
 	}
@@ -737,6 +741,8 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	pCurrentLine->m_NameColor = -2;
 	pCurrentLine->m_Friend = false;
 	pCurrentLine->m_Paused = false;
+	pCurrentLine->m_IsWar = false;
+	pCurrentLine->m_IsTeam = false;
 	pCurrentLine->m_HasRenderTee = false;
 
 	TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
@@ -774,7 +780,12 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	}
 	else
 	{
+		// in menu icon? ☼
+
 		auto &LineAuthor = m_pClient->m_aClients[pCurrentLine->m_ClientId];
+		auto IsWar = m_pClient->m_WarList.IsWar(pCurrentLine->m_ClientId);
+
+		auto IsTeam = m_pClient->m_WarList.IsTeam(pCurrentLine->m_ClientId);
 
 		if(LineAuthor.m_Team == TEAM_SPECTATORS)
 			pCurrentLine->m_NameColor = TEAM_SPECTATORS;
@@ -807,6 +818,8 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		str_copy(pCurrentLine->m_aText, pLine);
 		pCurrentLine->m_Friend = LineAuthor.m_Friend;
 		pCurrentLine->m_Paused = LineAuthor.m_Paused || LineAuthor.m_Spec;
+		pCurrentLine->m_IsWar = IsWar;
+		pCurrentLine->m_IsTeam = IsTeam;
 
 		if(pCurrentLine->m_aName[0] != '\0')
 		{
@@ -870,7 +883,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		{
 			if(g_Config.m_SndServerMessage)
 			{
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 1.0f);
 				m_aLastSoundPlayed[CHAT_SERVER] = Now;
 			}
 		}
@@ -888,7 +901,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			Client()->Notify("DDNet Chat", aBuf);
 			if(g_Config.m_SndHighlight)
 			{
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 1.0f);
 				m_aLastSoundPlayed[CHAT_HIGHLIGHT] = Now;
 			}
 
@@ -911,7 +924,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 #endif
 			if(PlaySound)
 			{
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 0);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 1.0f);
 				m_aLastSoundPlayed[CHAT_CLIENT] = Now;
 			}
 		}
@@ -1030,13 +1043,22 @@ void CChat::OnPrepareLines(float y)
 
 				if(Line.m_Friend && g_Config.m_ClMessageFriend)
 				{
-					TextRender()->TextEx(&Cursor, "♥ ");
+					
+					TextRender()->TextEx(&Cursor, g_Config.m_ClChatFriendMsg);
 				}
 				if(Line.m_Paused && g_Config.m_ClChatSpecMark)
 				{
-					TextRender()->TextEx(&Cursor, "(s) ");
+					TextRender()->TextEx(&Cursor, g_Config.m_ClChatSpecMsg);
 				}
-			}
+				if(Line.m_IsWar)
+				{
+					TextRender()->TextEx(&Cursor, "♦ ");
+				}
+				if(Line.m_IsTeam)
+				{
+					TextRender()->TextEx(&Cursor, "♦ ");
+				}
+		}
 
 			TextRender()->TextEx(&Cursor, aClientId);
 			TextRender()->TextEx(&Cursor, Line.m_aName);
@@ -1085,14 +1107,36 @@ void CChat::OnPrepareLines(float y)
 			if(Line.m_Friend && g_Config.m_ClMessageFriend)
 			{
 				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor)).WithAlpha(1.f));
-				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, "♥ ");
+				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClChatFriendMsg);
 			}
 
 			if(Line.m_Paused && g_Config.m_ClChatSpecMark)
 			{
 				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSpecColor)).WithAlpha(1.f));
-				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, "(s) ");
+				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClChatSpecMsg);
 			}
+			if(g_Config.m_ClChatWarlistMark)
+			{
+				// if player is enemy
+				if(Line.m_IsWar && !Line.m_IsTeam)
+				{
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor)).WithAlpha(1.f));
+					TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClChatEnemyMsg);
+				}
+				// if player is teammate
+				else if(Line.m_IsTeam && !Line.m_IsWar)
+				{
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClTeamColor)).WithAlpha(1.f));
+					TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClChatTeammateMsg);
+				}
+				// if player is in both war and team only put war message
+				else if (Line.m_IsTeam && Line.m_IsWar)
+				{
+					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor)).WithAlpha(1.f));
+					TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClChatEnemyMsg);
+				}
+			}
+			
 		}
 
 		// render name

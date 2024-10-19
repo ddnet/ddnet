@@ -41,6 +41,8 @@ class CChat : public CComponent
 		char m_aText[MAX_LINE_LENGTH];
 		bool m_Friend;
 		bool m_Paused;
+		bool m_IsWar;
+		bool m_IsTeam;
 		bool m_Highlighted;
 
 		STextContainerIndex m_TextContainerIndex;
@@ -116,13 +118,20 @@ class CChat : public CComponent
 		char m_aName[IConsole::TEMPCMD_NAME_LENGTH];
 		char m_aParams[IConsole::TEMPCMD_PARAMS_LENGTH];
 		char m_aHelpText[IConsole::TEMPCMD_HELP_LENGTH];
+		char m_aWar[IConsole::TEMPCMD_NAME_LENGTH];
 
 		CCommand() = default;
 		CCommand(const char *pName, const char *pParams, const char *pHelpText)
 		{
+
+			
+			const char *cstrs[] = {"one", "two", "three"};
+			
+
 			str_copy(m_aName, pName);
 			str_copy(m_aParams, pParams);
 			str_copy(m_aHelpText, pHelpText);
+			str_copy(m_aWar, "war");
 		}
 
 		bool operator<(const CCommand &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }

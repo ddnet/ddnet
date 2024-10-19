@@ -538,6 +538,7 @@ void CHud::RenderTextInfo()
 
 		int DigitIndex = GetDigitsIndex(FrameTime, 4);
 
+
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_aTextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;

@@ -239,7 +239,6 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 					Graphics()->QuadsBegin();
 					ColorRGBA StrongWeakStatusColor;
 					int StrongWeakSpriteId;
-
 					if(Selected.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId)
 					{
 						StrongWeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
