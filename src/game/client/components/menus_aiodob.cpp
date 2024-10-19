@@ -1,4 +1,4 @@
-#include <base/log.h>
+﻿#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -134,7 +134,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				
 					static CLineInput s_ReplyMsg;
 					s_ReplyMsg.SetBuffer(g_Config.m_ClAutoReplyMsg, sizeof(g_Config.m_ClAutoReplyMsg));
-					s_ReplyMsg.SetEmptyText("Use '%n' to ping back");
+					s_ReplyMsg.SetEmptyText("I'm Currently Tabbed Out");
 					
 					if(DoButton_CheckBox(&g_Config.m_ClTabbedOutMsg, "Auto reply", g_Config.m_ClTabbedOutMsg, &ChillerBotSettings))
 					{
@@ -193,7 +193,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 		
 			{
 			WarSettings.HSplitTop(Margin, nullptr, &WarSettings);
-				WarSettings.HSplitTop(115.0f, &WarSettings, &PlayerIndicatorSettings);
+				WarSettings.HSplitTop(200.0f, &WarSettings, &PlayerIndicatorSettings);
 			if(s_ScrollRegion.AddRect(WarSettings))
 			{
 				WarSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -209,6 +209,39 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 				static CButtonContainer s_WarColor;
 				DoLine_ColorPicker(&s_WarColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &WarSettings, Localize("Nameplate Color of Enemies"), &g_Config.m_ClWarColor, ColorRGBA(1.0f, 0.3f, 0.3f), true);
+				
+				WarSettings.HSplitTop(2.0f, &Button, &WarSettings);
+				Button.VSplitLeft(25.0f, &Button, &WarSettings);
+				{
+					WarSettings.HSplitTop(19.9f, &Button, &MainView);
+
+					Button.VSplitLeft(0.0f, &Button, &WarSettings);
+					Button.VSplitLeft(140.0f, &Label, &Button);
+					Button.VSplitLeft(85.0f, &Button, 0);
+
+					static CLineInput s_ReplyMsg;
+					s_ReplyMsg.SetBuffer(g_Config.m_ClChatEnemyMsg, sizeof(g_Config.m_ClChatEnemyMsg));
+					s_ReplyMsg.SetEmptyText("♦ ");
+					Ui()->DoEditBox(&s_ReplyMsg, &Button, 14.0f);
+					
+					Ui()->DoLabel(&Label, " Enemy Prefix", 13.0f, TEXTALIGN_LEFT);
+					
+				}
+				WarSettings.HSplitTop(21.0f, &Button, &WarSettings);
+				{
+					WarSettings.HSplitTop(19.9f, &Button, &MainView);
+
+					Button.VSplitLeft(0.0f, &Button, &WarSettings);
+					Button.VSplitLeft(140.0f, &Label, &Button);
+					Button.VSplitLeft(85.0f, &Button, 0);
+
+					static CLineInput s_ReplyMsg;
+					s_ReplyMsg.SetBuffer(g_Config.m_ClChatTeammateMsg, sizeof(g_Config.m_ClChatTeammateMsg));
+					s_ReplyMsg.SetEmptyText("♦ ");
+					Ui()->DoEditBox(&s_ReplyMsg, &Button, 14.0f);
+
+					Ui()->DoLabel(&Label, " Teammate Prefix", 13.0f, TEXTALIGN_LEFT);
+				}
 
 				ColorRGBA TeamColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClTeamColor));
 				ColorRGBA WarColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClWarColor));
