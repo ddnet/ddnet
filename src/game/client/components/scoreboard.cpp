@@ -229,7 +229,7 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
 		}
-		auto IsWar = m_pClient->m_WarList.IsWar(pInfo->m_ClientId);
+		
 
 
 		if(GameClient()->m_aClients[pInfo->m_ClientId].m_AuthLevel)
@@ -585,9 +585,6 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				}
 				if(g_Config.m_ClDoFriendAfkColor && ClientData.m_Friend && ClientData.m_Afk)
 					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendAfkColor)));
-				
-				if(GameClient()->m_aClients[pInfo->m_ClientId].m_IsWar);
-					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor)));
 				TextRender()->TextEx(&Cursor, ClientData.m_aName);
 
 				// ready / watching
