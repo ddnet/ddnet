@@ -28,6 +28,8 @@ void CWarList::ReloadList()
 	m_WarDirs = 0;
 	m_TeamDirs = 0;
 	m_TraitorDirs = 0;
+	m_vHelperlist.clear();
+	m_vMutelist.clear();
 	m_vWarlist.clear();
 	m_vTeamlist.clear();
 	m_vTraitorlist.clear();
@@ -44,9 +46,13 @@ void CWarList::ReloadList()
 		LoadWarClanList();
 		LoadTeamClanList();
 		LoadWarClanPrefixList();
+		LoadMuteNames("chillerbot/warlist/mutes/mutes");
+		LoadHelperNames("chillerbot/warlist/helper/helper");
 	}
 	else // simple warlist
 	{
+		LoadMuteNames("chillerbot/warlist/mutes/mutes");
+		LoadHelperNames("chillerbot/warlist/helper/helper");
 		LoadWarNames("chillerbot/warlist/war/war");
 		LoadTeamNames("chillerbot/warlist/team/team");
 	}
@@ -58,6 +64,22 @@ void CWarList::ReloadList()
 	// TODO: fix on initial load
 	// 		 maybe https://github.com/chillerbot/chillerbot-ux/issues/22 is needed
 	m_pClient->m_ChillerBotUX.SetComponentNoteLong("war list", aBuf);
+}
+
+void CWarList::GetHelperlistPathByNeedle(const char *pSearch, int Size, char *pPath)
+{
+	pPath[0] = '\0';
+	for(auto &Entry : m_vHelperlist)
+		if(str_find(Entry.first.c_str(), pSearch))
+			str_copy(pPath, Entry.second.c_str(), Size);
+}
+
+void CWarList::GetMutelistPathByNeedle(const char *pSearch, int Size, char *pPath)
+{
+	pPath[0] = '\0';
+	for(auto &Entry : m_vMutelist)
+		if(str_find(Entry.first.c_str(), pSearch))
+			str_copy(pPath, Entry.second.c_str(), Size);
 }
 
 void CWarList::GetWarlistPathByNeedle(const char *pSearch, int Size, char *pPath)
@@ -116,6 +138,26 @@ void CWarList::GetNeutrallistPathByName(const char *pName, int Size, char *pPath
 			str_copy(pPath, Entry.second.c_str(), Size);
 }
 
+int CWarList::LoadHelperDir(const char *pDirname, int IsDir, int DirType, void *pUser)
+{
+	CWarList *pSelf = (CWarList *)pUser;
+	if(!IsDir || !str_comp(".", pDirname) || !str_comp("..", pDirname))
+		return 0;
+	char aFilename[1024];
+	str_format(aFilename, sizeof(aFilename), "chillerbot/warlist/helper/helper", pDirname);
+	return pSelf->LoadHelperNames(aFilename);
+}
+
+int CWarList::LoadMuteDir(const char *pDirname, int IsDir, int DirType, void *pUser)
+{
+	CWarList *pSelf = (CWarList *)pUser;
+	if(!IsDir || !str_comp(".", pDirname) || !str_comp("..", pDirname))
+		return 0;
+	char aFilename[1024];
+	str_format(aFilename, sizeof(aFilename), "chillerbot/warlist/mutes/mutes", pDirname);
+	return pSelf->LoadMuteNames(aFilename);
+}
+
 int CWarList::LoadWarDir(const char *pDirname, int IsDir, int DirType, void *pUser)
 {
 	CWarList *pSelf = (CWarList *)pUser;
@@ -156,6 +198,16 @@ int CWarList::LoadNeutralDir(const char *pDirname, int IsDir, int DirType, void 
 	return pSelf->LoadNeutralNames(aFilename);
 }
 
+void CWarList::LoadHelperList()
+{
+	Storage()->ListDirectory(IStorage::TYPE_ALL, "chillerbot/warlist/helper", LoadHelperDir, this);
+}
+
+void CWarList::LoadMuteList()
+{
+	Storage()->ListDirectory(IStorage::TYPE_ALL, "chillerbot/warlist/mutes", LoadMuteDir, this);
+}
+
 void CWarList::LoadWarList()
 {
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "chillerbot/warlist/war", LoadWarDir, this);
@@ -189,6 +241,16 @@ void CWarList::LoadTeamClanList()
 void CWarList::LoadWarClanPrefixList()
 {
 	LoadWarClanPrefixNames("chillerbot/warlist/warlist_clans_prefix.txt");
+}
+
+bool CWarList::IsMutelist(const char *pName)
+{
+	return std::any_of(std::begin(m_vMutelist), std::end(m_vMutelist), [&pName](const std::pair<std::string, std::string> &Entry) { return std::string(pName) == Entry.first; });
+}
+
+bool CWarList::IsHelperlist(const char *pName)
+{
+	return std::any_of(std::begin(m_vHelperlist), std::end(m_vHelperlist), [&pName](const std::pair<std::string, std::string> &Entry) { return std::string(pName) == Entry.first; });
 }
 
 bool CWarList::IsWarlist(const char *pName)
@@ -304,6 +366,48 @@ bool CWarList::IsWar(const char *pName, const char *pClan)
 	return IsWarlist(pName) || IsTraitorlist(pName) || IsWarClanlist(pClan);
 }
 
+bool CWarList::IsMute(int ClientId)
+{
+	const char *pName = m_pClient->m_aClients[ClientId].m_aName;
+	const char *pClan = m_pClient->m_aClients[ClientId].m_aClan;
+	if(!str_comp(pName, m_aWarPlayers[ClientId].m_aName))
+	{
+		return m_aWarPlayers[ClientId].m_IsMute;
+	}
+	str_copy(m_aWarPlayers[ClientId].m_aName, pName, sizeof(m_aWarPlayers[ClientId].m_aName));
+	str_copy(m_aWarPlayers[ClientId].m_aClan, pClan, sizeof(m_aWarPlayers[ClientId].m_aClan));
+	m_aWarPlayers[ClientId].m_IsHelper = IsHelperlist(pName);
+	m_aWarPlayers[ClientId].m_IsMute = IsMutelist(pName);
+	m_aWarPlayers[ClientId].m_IsWar = IsWarlist(pName);
+	m_aWarPlayers[ClientId].m_IsTeam = IsTeamlist(pName);
+	m_aWarPlayers[ClientId].m_IsTraitor = IsTraitorlist(pName);
+	m_aWarPlayers[ClientId].m_IsWarClan = IsWarClanlist(pClan);
+	m_aWarPlayers[ClientId].m_IsTeamClan = IsTeamClanlist(pClan);
+	m_aWarPlayers[ClientId].m_IsWarClanmate = IsWarClanmate(pClan);
+	return false;
+}
+
+bool CWarList::IsHelper(int ClientId)
+{
+	const char *pName = m_pClient->m_aClients[ClientId].m_aName;
+	const char *pClan = m_pClient->m_aClients[ClientId].m_aClan;
+	if(!str_comp(pName, m_aWarPlayers[ClientId].m_aName))
+	{
+		return m_aWarPlayers[ClientId].m_IsHelper;
+	}
+	str_copy(m_aWarPlayers[ClientId].m_aName, pName, sizeof(m_aWarPlayers[ClientId].m_aName));
+	str_copy(m_aWarPlayers[ClientId].m_aClan, pClan, sizeof(m_aWarPlayers[ClientId].m_aClan));
+	m_aWarPlayers[ClientId].m_IsHelper = IsHelperlist(pName);
+	m_aWarPlayers[ClientId].m_IsMute = IsMutelist(pName);
+	m_aWarPlayers[ClientId].m_IsWar = IsWarlist(pName);
+	m_aWarPlayers[ClientId].m_IsTeam = IsTeamlist(pName);
+	m_aWarPlayers[ClientId].m_IsTraitor = IsTraitorlist(pName);
+	m_aWarPlayers[ClientId].m_IsWarClan = IsWarClanlist(pClan);
+	m_aWarPlayers[ClientId].m_IsTeamClan = IsTeamClanlist(pClan);
+	m_aWarPlayers[ClientId].m_IsWarClanmate = IsWarClanmate(pClan);
+	return false;
+}
+
 bool CWarList::IsWar(int ClientId)
 {
 	const char *pName = m_pClient->m_aClients[ClientId].m_aName;
@@ -314,6 +418,8 @@ bool CWarList::IsWar(int ClientId)
 	}
 	str_copy(m_aWarPlayers[ClientId].m_aName, pName, sizeof(m_aWarPlayers[ClientId].m_aName));
 	str_copy(m_aWarPlayers[ClientId].m_aClan, pClan, sizeof(m_aWarPlayers[ClientId].m_aClan));
+	m_aWarPlayers[ClientId].m_IsHelper = IsHelperlist(pName);
+	m_aWarPlayers[ClientId].m_IsMute = IsMutelist(pName);
 	m_aWarPlayers[ClientId].m_IsWar = IsWarlist(pName);
 	m_aWarPlayers[ClientId].m_IsTeam = IsTeamlist(pName);
 	m_aWarPlayers[ClientId].m_IsTraitor = IsTraitorlist(pName);
@@ -333,6 +439,8 @@ bool CWarList::IsTeam(int ClientId)
 	}
 	str_copy(m_aWarPlayers[ClientId].m_aName, pName, sizeof(m_aWarPlayers[ClientId].m_aName));
 	str_copy(m_aWarPlayers[ClientId].m_aClan, pClan, sizeof(m_aWarPlayers[ClientId].m_aClan));
+	m_aWarPlayers[ClientId].m_IsHelper = IsHelperlist(pName);
+	m_aWarPlayers[ClientId].m_IsMute = IsMutelist(pName);
 	m_aWarPlayers[ClientId].m_IsWar = IsWarlist(pName);
 	m_aWarPlayers[ClientId].m_IsTeam = IsTeamlist(pName);
 	m_aWarPlayers[ClientId].m_IsTraitor = IsTraitorlist(pName);
@@ -352,6 +460,8 @@ bool CWarList::IsTraitor(int ClientId)
 	}
 	str_copy(m_aWarPlayers[ClientId].m_aName, pName, sizeof(m_aWarPlayers[ClientId].m_aName));
 	str_copy(m_aWarPlayers[ClientId].m_aClan, pClan, sizeof(m_aWarPlayers[ClientId].m_aClan));
+	m_aWarPlayers[ClientId].m_IsHelper = IsHelperlist(pName);
+	m_aWarPlayers[ClientId].m_IsMute = IsMutelist(pName);
 	m_aWarPlayers[ClientId].m_IsWar = IsWarlist(pName);
 	m_aWarPlayers[ClientId].m_IsTeam = IsTeamlist(pName);
 	m_aWarPlayers[ClientId].m_IsTraitor = IsTraitorlist(pName);
@@ -373,6 +483,8 @@ bool CWarList::IsWarClan(int ClientId)
 	}
 	str_copy(m_aWarPlayers[ClientId].m_aName, pName, sizeof(m_aWarPlayers[ClientId].m_aName));
 	str_copy(m_aWarPlayers[ClientId].m_aClan, pClan, sizeof(m_aWarPlayers[ClientId].m_aClan));
+	m_aWarPlayers[ClientId].m_IsHelper = IsHelperlist(pName);
+	m_aWarPlayers[ClientId].m_IsMute = IsMutelist(pName);
 	m_aWarPlayers[ClientId].m_IsWar = IsWarlist(pName);
 	m_aWarPlayers[ClientId].m_IsTeam = IsTeamlist(pName);
 	m_aWarPlayers[ClientId].m_IsTraitor = IsTraitorlist(pName);
@@ -394,6 +506,8 @@ bool CWarList::IsTeamClan(int ClientId)
 	}
 	str_copy(m_aWarPlayers[ClientId].m_aName, pName, sizeof(m_aWarPlayers[ClientId].m_aName));
 	str_copy(m_aWarPlayers[ClientId].m_aClan, pClan, sizeof(m_aWarPlayers[ClientId].m_aClan));
+	m_aWarPlayers[ClientId].m_IsHelper = IsHelperlist(pName);
+	m_aWarPlayers[ClientId].m_IsMute = IsMutelist(pName);
 	m_aWarPlayers[ClientId].m_IsWar = IsWarlist(pName);
 	m_aWarPlayers[ClientId].m_IsTeam = IsTeamlist(pName);
 	m_aWarPlayers[ClientId].m_IsTraitor = IsTraitorlist(pName);
@@ -415,6 +529,8 @@ bool CWarList::IsWarClanmate(int ClientId)
 	}
 	str_copy(m_aWarPlayers[ClientId].m_aName, pName, sizeof(m_aWarPlayers[ClientId].m_aName));
 	str_copy(m_aWarPlayers[ClientId].m_aClan, pClan, sizeof(m_aWarPlayers[ClientId].m_aClan));
+	m_aWarPlayers[ClientId].m_IsHelper = IsHelperlist(pName);
+	m_aWarPlayers[ClientId].m_IsMute = IsMutelist(pName);
 	m_aWarPlayers[ClientId].m_IsWar = IsWarlist(pName);
 	m_aWarPlayers[ClientId].m_IsTeam = IsTeamlist(pName);
 	m_aWarPlayers[ClientId].m_IsTraitor = IsTraitorlist(pName);
@@ -438,6 +554,8 @@ void CWarList::SetNameplateColor(int ClientId, ColorRGBA *pColor)
 		*pColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendColor));
 	else if(g_Config.m_ClFoeNameColor && ClientData.m_Foe)
 		*pColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFoeColor));
+	else if(IsHelper(ClientId))
+		*pColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHelperColor));
 	else if(IsTraitor(ClientId))
 		*pColor = ColorRGBA(0.1f, 0.1f, 0.1f, 1.0f);
 	else if(IsWarClan(ClientId))
@@ -446,6 +564,48 @@ void CWarList::SetNameplateColor(int ClientId, ColorRGBA *pColor)
 		*pColor = ColorRGBA(0.0f, 0.9f, 0.2f, 1.0f);
 	else if(IsWarClanmate(ClientId))
 		*pColor = ColorRGBA(7.0f, 0.5f, 0.2f, 1.0f);
+}
+
+bool CWarList::RemoveMuteNameFromVector(const char *pDir, const char *pName)
+{
+	int Hits = 0;
+	m_vMutelist.erase(
+		std::remove_if(m_vMutelist.begin(), m_vMutelist.end(),
+			[pName, pDir, &Hits](const std::pair<std::string, std::string> &Entry) {
+				// keep the same name in other directories
+				if(str_comp(pDir, Entry.second.c_str()))
+					return false;
+
+				if(!str_comp(pName, Entry.first.c_str()))
+				{
+					Hits++;
+					return true;
+				}
+				return false;
+			}),
+		m_vMutelist.end());
+	return Hits > 0;
+}
+
+bool CWarList::RemoveHelperNameFromVector(const char *pDir, const char *pName)
+{
+	int Hits = 0;
+	m_vHelperlist.erase(
+		std::remove_if(m_vHelperlist.begin(), m_vHelperlist.end(),
+			[pName, pDir, &Hits](const std::pair<std::string, std::string> &Entry) {
+				// keep the same name in other directories
+				if(str_comp(pDir, Entry.second.c_str()))
+					return false;
+
+				if(!str_comp(pName, Entry.first.c_str()))
+				{
+					Hits++;
+					return true;
+				}
+				return false;
+			}),
+		m_vHelperlist.end());
+	return Hits > 0;
 }
 
 bool CWarList::RemoveTeamNameFromVector(const char *pDir, const char *pName)
@@ -468,6 +628,8 @@ bool CWarList::RemoveTeamNameFromVector(const char *pDir, const char *pName)
 		m_vTeamlist.end());
 	return Hits > 0;
 }
+
+
 
 bool CWarList::RemoveWarNameFromVector(const char *pDir, const char *pName)
 {
@@ -543,6 +705,159 @@ bool CWarList::WriteTeamNames(const char *pDir)
 	io_close(File);
 	return true;
 }
+
+//MuteStuff
+
+bool CWarList::WriteMuteNames(const char *pDir)
+{
+	if(!Storage())
+		return false;
+
+	char aFilename[IO_MAX_PATH_LENGTH];
+	str_format(aFilename, sizeof(aFilename), "%s/names.txt", pDir);
+	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(!File)
+	{
+		return false;
+	}
+
+	for(auto &Entry : m_vMutelist)
+	{
+		// only write names from that directory
+		if(str_comp(Entry.second.c_str(), pDir))
+			continue;
+
+		io_write(File, Entry.first.c_str(), str_length(Entry.first.c_str()));
+		io_write(File, "\n", 1);
+	}
+
+	io_close(File);
+	return true;
+}
+
+int CWarList::LoadMuteNames(const char *pDir)
+{
+	if(!Storage())
+	{
+		// str_format(aBuf, sizeof(aBuf), "failed to open '%s' storage is nullptr", pDir);
+		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "warlist", aBuf);
+		return 1;
+	}
+
+	char aFilename[IO_MAX_PATH_LENGTH];
+	str_format(aFilename, sizeof(aFilename), "%s/names.txt", pDir);
+	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+
+	char aBuf[128];
+	if(!File)
+	{
+		// str_format(aBuf, sizeof(aBuf), "failed to open war list file '%s'", aFilename);
+		// Print(aBuf);
+		return 0;
+	}
+	m_MuteDirs++;
+	const char *pLine;
+	CLineReader Reader;
+
+	str_format(aBuf, sizeof(aBuf), "loading mute list file '%s'", aFilename);
+	Print(aBuf);
+
+	if(!Reader.OpenFile(File))
+	{
+		str_format(aBuf, sizeof(aBuf), "failed to open '%s'", aFilename);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "warlist", aBuf);
+		return 0;
+	}
+
+	while((pLine = Reader.Get()))
+	{
+		if(!str_skip_whitespaces_const(pLine)[0])
+			continue;
+		std::pair<std::string, std::string> Entry;
+		Entry.first = std::string(pLine);
+		Entry.second = std::string(pDir);
+		m_vMutelist.emplace_back(Entry);
+	}
+
+	return 0;
+}
+
+// Helper sutff
+
+bool CWarList::WriteHelperNames(const char *pDir)
+{
+	if(!Storage())
+		return false;
+
+	char aFilename[IO_MAX_PATH_LENGTH];
+	str_format(aFilename, sizeof(aFilename), "%s/names.txt", pDir);
+	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(!File)
+	{
+		return false;
+	}
+
+	for(auto &Entry : m_vHelperlist)
+	{
+		// only write names from that directory
+		if(str_comp(Entry.second.c_str(), pDir))
+			continue;
+
+		io_write(File, Entry.first.c_str(), str_length(Entry.first.c_str()));
+		io_write(File, "\n", 1);
+	}
+
+	io_close(File);
+	return true;
+}
+
+int CWarList::LoadHelperNames(const char *pDir)
+{
+	if(!Storage())
+	{
+		// str_format(aBuf, sizeof(aBuf), "failed to open '%s' storage is nullptr", pDir);
+		// Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "warlist", aBuf);
+		return 1;
+	}
+
+	char aFilename[IO_MAX_PATH_LENGTH];
+	str_format(aFilename, sizeof(aFilename), "%s/names.txt", pDir);
+	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_READ, IStorage::TYPE_ALL);
+
+	char aBuf[128];
+	if(!File)
+	{
+		// str_format(aBuf, sizeof(aBuf), "failed to open war list file '%s'", aFilename);
+		// Print(aBuf);
+		return 0;
+	}
+	m_HelperDirs++;
+	const char *pLine;
+	CLineReader Reader;
+
+	str_format(aBuf, sizeof(aBuf), "loading helper list file '%s'", aFilename);
+	Print(aBuf);
+
+	if(!Reader.OpenFile(File))
+	{
+		str_format(aBuf, sizeof(aBuf), "failed to open '%s'", aFilename);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "warlist", aBuf);
+		return 0;
+	}
+
+	while((pLine = Reader.Get()))
+	{
+		if(!str_skip_whitespaces_const(pLine)[0])
+			continue;
+		std::pair<std::string, std::string> Entry;
+		Entry.first = std::string(pLine);
+		Entry.second = std::string(pDir);
+		m_vHelperlist.emplace_back(Entry);
+	}
+
+	return 0;
+}
+
 
 int CWarList::LoadWarNames(const char *pDir)
 {
@@ -842,21 +1157,46 @@ void CWarList::OnConsoleInit()
 	// Lots of love to chillerbot! But please, if you read this, make this be a default thing
 	// and also add silent commands with "." cause im too stupid! pls thx c:
 
+	
+	// Add Mute
+	Console()->Register("addhelper", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddHelper, this, "Adds a Name to The Helperlist");
+	Console()->Register("add_helper", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddHelper, this, "Adds a Name to The Helperlist");
+	Console()->Register("helper", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddHelper, this, "Adds a Name to The Helperlist");
+
+	// Remove Mute
+	Console()->Register("unhelper", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveHelper, this, "Removes a Name From The Helperlist");
+	Console()->Register("delhelper", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveHelper, this, "Removes a Namer From The Helperlist");
+	Console()->Register("del_helper", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveHelper, this, "Removes a Name From The Helperlist");
+	Console()->Register("removehelper", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveHelper, this, "Removes a Name From The Helperlist");
+
+
+
+	// Add Mute
+	Console()->Register("addmute", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddMute, this, "Adds a Muted Player to The Mutelist");
+	Console()->Register("add_mute", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddMute, this, "Adds a Muted Player to The Mutelist");
+	Console()->Register("mute", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddMute, this, "Adds a Muted Player to The Mutelist");
+
+	// Remove Mute
+	Console()->Register("unmute", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveMute, this, "Removes a Muted Player From The Mutelist");
+	Console()->Register("delmute", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveMute, this, "Removes a Muted Player From The Mutelist");
+	Console()->Register("del_mute", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveMute, this, "Removes a Muted Player From The Mutelist");
+	Console()->Register("removemute", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveMute, this, "Removes a Muted Player From The Mutelist");
+
 	// Add Team
-	Console()->Register("addteam", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddTeam, this, "Adds a Teammate to The List");
-	Console()->Register("add_team", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddTeam, this, "Adds a Teammate to The List");
-	Console()->Register("team", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddTeam, this, "Adds a Teammate to The List");
+	Console()->Register("addteam", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddTeam, this, "Adds a Teammate to The Teamlist");
+	Console()->Register("add_team", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddTeam, this, "Adds a Teammate to The Teamlist");
+	Console()->Register("team", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddTeam, this, "Adds a Teammate to The Teamlist");
 
 	// Remove Team
-	Console()->Register("unteam", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveTeam, this, "adds a war to the list");
-	Console()->Register("delteam", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveTeam, this, "removes a Name from the Warlist");
-	Console()->Register("del_team", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveTeam, this, "removes a Name from the Warlist");
-	Console()->Register("removeteam", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveTeam, this, "removes a Name from the Warlist");
+	Console()->Register("unteam", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveTeam, this, "removes a war to the Teamlist");
+	Console()->Register("delteam", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveTeam, this, "removes a Name from the Teamlist");
+	Console()->Register("del_team", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveTeam, this, "removes a Name from the Teamlist");
+	Console()->Register("removeteam", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveTeam, this, "removes a Name from the Teamlist");
 
 	// Add War
-	Console()->Register("addwar", "s[name] ?s[clan]", CFGFLAG_CLIENT,ConAddWar, this, "Adds an Enemy to The List");
-	Console()->Register("add_war", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddWar, this, "Adds an Enemy to The List");
-	Console()->Register("war", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddWar, this, "Adds an Enemy to The List");
+	Console()->Register("addwar", "s[name] ?s[clan]", CFGFLAG_CLIENT,ConAddWar, this, "Adds an Enemy to The Warlist");
+	Console()->Register("add_war", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddWar, this, "Adds an Enemy to The Warlist");
+	Console()->Register("war", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddWar, this, "Adds an Enemy to The Warlist");
 
 	// Remove War
 	Console()->Register("unwar", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveWar, this, "Removes an Enemy From The Warlist");
@@ -867,6 +1207,33 @@ void CWarList::OnConsoleInit()
 
 
 	
+}
+
+void CWarList::ConAddHelper(IConsole::IResult *pResult, void *pUserData)
+{
+	CWarList *pSelf = (CWarList *)pUserData;
+	pSelf->AddSimpleHelper(pResult->GetString(0));
+}
+
+void CWarList::ConRemoveHelper(IConsole::IResult *pResult, void *pUserData)
+{
+	CWarList *pSelf = (CWarList *)pUserData;
+	pSelf->RemoveSimpleHelper(pResult->GetString(0));
+}
+
+
+
+
+void CWarList::ConAddMute(IConsole::IResult *pResult, void *pUserData)
+{
+	CWarList *pSelf = (CWarList *)pUserData;
+	pSelf->AddSimpleMute(pResult->GetString(0));
+}
+
+void CWarList::ConRemoveMute(IConsole::IResult *pResult, void *pUserData)
+{
+	CWarList *pSelf = (CWarList *)pUserData;
+	pSelf->RemoveSimpleMute(pResult->GetString(0));
 }
 
 void CWarList::ConAddTeam(IConsole::IResult *pResult, void *pUserData)
@@ -958,7 +1325,7 @@ bool CWarList::AddWar(const char *pFolder, const char *pName)
 		m_pClient->m_Chat.AddLine(-2, 0, aBuf);
 		return false;
 	}
-
+	
 	io_write(File, pName, str_length(pName));
 	io_write_newline(File);
 	io_close(File);
@@ -978,6 +1345,53 @@ bool CWarList::AddTeam(const char *pFolder, const char *pName)
 	if(!File)
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to open war list file '%s'", aFilename);
+		m_pClient->m_Chat.AddLine(-2, 0, aBuf);
+		return false;
+	}
+
+	io_write(File, pName, str_length(pName));
+	io_write_newline(File);
+	io_close(File);
+
+	str_format(aBuf, sizeof(aBuf), "Added '%s' to the folder %s", pName, pFolder);
+	ReloadList();
+	m_pClient->m_Chat.AddLine(-2, 0, aBuf);
+	return true;
+}
+
+
+bool CWarList::AddHelper(const char *pFolder, const char *pName)
+{
+	char aBuf[512];
+	char aFilename[1024];
+	str_format(aFilename, sizeof(aFilename), "chillerbot/warlist/helper/helper/names.txt", pFolder);
+	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_APPEND, IStorage::TYPE_SAVE);
+	if(!File)
+	{
+		str_format(aBuf, sizeof(aBuf), "failed to open helper list file '%s'", aFilename);
+		m_pClient->m_Chat.AddLine(-2, 0, aBuf);
+		return false;
+	}
+
+	io_write(File, pName, str_length(pName));
+	io_write_newline(File);
+	io_close(File);
+
+	str_format(aBuf, sizeof(aBuf), "Added '%s' to the folder %s", pName, pFolder);
+	ReloadList();
+	m_pClient->m_Chat.AddLine(-2, 0, aBuf);
+	return true;
+}
+
+bool CWarList::AddMute(const char *pFolder, const char *pName)
+{
+	char aBuf[512];
+	char aFilename[1024];
+	str_format(aFilename, sizeof(aFilename), "chillerbot/warlist/mutes/mutes/names.txt", pFolder);
+	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_APPEND, IStorage::TYPE_SAVE);
+	if(!File)
+	{
+		str_format(aBuf, sizeof(aBuf), "failed to open mute list file '%s'", aFilename);
 		m_pClient->m_Chat.AddLine(-2, 0, aBuf);
 		return false;
 	}

@@ -266,8 +266,14 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	float Spacing;
 	float RoundRadius;
 	float FontSize;
+	float IconSize;
+	float IconRowY;
+	float SpecDiff;
 	if(NumPlayers <= 8)
 	{
+		SpecDiff = 36.0f;
+		IconRowY = 13.0f;
+		IconSize = 34.0f;
 		LineHeight = 60.0f;
 		TeeSizeMod = 1.0f;
 		Spacing = 16.0f;
@@ -276,6 +282,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	}
 	else if(NumPlayers <= 12)
 	{
+		SpecDiff = 36.0f;
+		IconRowY = 9.0f;
+		IconSize = 32.0f;
 		LineHeight = 50.0f;
 		TeeSizeMod = 0.9f;
 		Spacing = 5.0f;
@@ -284,6 +293,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	}
 	else if(NumPlayers <= 16)
 	{
+		SpecDiff = 36.0f;
+		IconRowY = 6.0f;
+		IconSize = 30.0f;
 		LineHeight = 40.0f;
 		TeeSizeMod = 0.8f;
 		Spacing = 0.0f;
@@ -292,6 +304,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	}
 	else if(NumPlayers <= 24)
 	{
+		SpecDiff = 36.0f;
+		IconRowY = 2.0f;
+		IconSize = 26.0f;
 		LineHeight = 27.0f;
 		TeeSizeMod = 0.6f;
 		Spacing = 0.0f;
@@ -300,6 +315,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	}
 	else if(NumPlayers <= 32)
 	{
+		SpecDiff = 22.5f;
+		IconRowY = 1.0f;
+		IconSize = 19.0f;
 		LineHeight = 20.0f;
 		TeeSizeMod = 0.4f;
 		Spacing = 0.0f;
@@ -308,6 +326,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	}
 	else if(LowScoreboardWidth)
 	{
+		SpecDiff = 36.0f;
+		IconRowY = 8.0f;
+		IconSize = 25.0f;
 		LineHeight = 15.0f;
 		TeeSizeMod = 0.25f;
 		Spacing = 0.0f;
@@ -316,7 +337,10 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	}
 	else
 	{
-		LineHeight = 10.0f;
+		SpecDiff = 36.0f;
+		IconRowY = 7.0f;
+		IconSize = 25.0f;
+		LineHeight = 7.0f;
 		TeeSizeMod = 0.2f;
 		Spacing = 0.0f;
 		RoundRadius = 2.0f;
@@ -512,6 +536,8 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 			auto IsWar = GameClient()->m_WarList.IsWar(pInfo->m_ClientId);
 			auto IsTeam = GameClient()->m_WarList.IsTeam(pInfo->m_ClientId);
+			auto IsHelper = GameClient()->m_WarList.IsHelper(pInfo->m_ClientId);
+			auto IsMuted = GameClient()->m_WarList.IsMute(pInfo->m_ClientId);
 
 			// skin
 			if(RenderDead)
@@ -561,11 +587,12 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					GameClient()->FormatClientId(pInfo->m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
 					TextRender()->TextEx(&Cursor, aClientId);
 				}
-				if(g_Config.m_ClScoreSpecMark && ClientData.m_Paused || ClientData.m_Spec)
+				if(g_Config.m_ClScoreSpecPrefix && ClientData.m_Paused || ClientData.m_Spec)
 				{
-					const char *pSpecMark = "(s)";
+					const char *pSpecMark = g_Config.m_ClSpecPrefix;
 					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSpecColor)));
 					TextRender()->TextEx(&Cursor, pSpecMark);
+
 				}
 				/*
 				if(m_pClient->m_Menus.IsActive())
@@ -614,6 +641,46 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 						}
 						else
 							TextRender()->TextColor(rgb.WithAlpha(1.0f));
+					}
+
+					if(IsHelper)
+					{
+						ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHelperColor));
+						if(g_Config.m_ClDoAfkColors && ClientData.m_Afk)
+						{
+							TextRender()->TextColor(rgb.WithAlpha(0.4f));
+						}
+						else
+							TextRender()->TextColor(rgb.WithAlpha(1.0f));
+					}
+
+
+					if(IsMuted && g_Config.m_ClMutedIconScore)
+					{
+						ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
+						ColorRGBA Color = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedIconColor));
+						TextRender()->TextEx(&Cursor, "    ");
+						Graphics()->BlendNormal();
+						
+						Graphics()->TextureSet(g_pData->m_aImages[IMAGE_MUTED_ICON].m_Id);
+
+						
+						Graphics()->QuadsBegin();
+	
+						Graphics()->SetColor(Color);
+						if (g_Config.m_ClScoreSpecPrefix && ClientData.m_Paused || ClientData.m_Spec)
+						{
+							IGraphics::CQuadItem QuadItem(NameOffset + SpecDiff, Row.y + IconRowY, IconSize, IconSize);
+							Graphics()->QuadsDrawTL(&QuadItem, 1);
+							Graphics()->QuadsEnd();
+						}
+						else
+						{
+						IGraphics::CQuadItem QuadItem(NameOffset, Row.y + IconRowY, IconSize, IconSize);
+						Graphics()->QuadsDrawTL(&QuadItem, 1);
+						Graphics()->QuadsEnd();
+						}
+					
 					}
 				}
 				

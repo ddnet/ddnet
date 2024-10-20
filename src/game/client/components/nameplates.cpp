@@ -25,9 +25,12 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 	const float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 	const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
 
+	const auto IsMute = GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[pPlayerInfo->m_ClientId].m_aName);
+
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 	float YOffset = Position.y - 30;
 	ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
+	ColorRGBA Color = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedIconColor));
 
 	// render players' key presses
 	int ShowDirection = g_Config.m_ClShowDirection;
@@ -183,6 +186,16 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 				Graphics()->DrawCircle(Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f - CircleSize, YOffset + FontSize / 2.0f + 1.4f, CircleSize, 24);
 				Graphics()->QuadsEnd();
 			}
+			if(IsMute && g_Config.m_ClMutedIconNameplate)
+			{
+				const vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
+				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_MUTED_ICON].m_Id);
+				Graphics()->SetColor(Color);
+				Graphics()->QuadsSetRotation(0);
+				Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, Position.x + TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f + 2, YOffset + 3.0f);
+			}
+		
+
 			TextRender()->RenderTextContainer(NamePlate.m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f, YOffset);
 		}
 

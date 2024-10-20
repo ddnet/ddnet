@@ -767,14 +767,28 @@ void CPlayers::RenderPlayer(
 	{
 		if((Player.m_PlayerFlags & PLAYERFLAG_IN_MENU) && !m_pClient->m_aClients[ClientId].m_Afk)
 		{
-			int CurEmoticon = (SPRITE_ZZZ - SPRITE_OOP);
-			Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[CurEmoticon]);
-			int QuadOffset = QuadOffsetToEmoticon + CurEmoticon;
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-			Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x + 24.f, Position.y - 40.f);
+			if((Player.m_PlayerFlags & PLAYERFLAG_IN_MENU) && !m_pClient->m_aClients[ClientId].m_Afk && g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientId].m_Afk && !(Client()->DummyConnected() && ClientId == m_pClient->m_aLocalIds[!g_Config.m_ClDummy]))
+			{
+				int CurEmoticon = (SPRITE_ZZZ - SPRITE_OOP);
+				Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[CurEmoticon]);
+				int QuadOffset = QuadOffsetToEmoticon + CurEmoticon;
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x + 24.f, Position.y - 40.f);
 
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-			Graphics()->QuadsSetRotation(0);
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+				Graphics()->QuadsSetRotation(0);
+			}
+			else
+			{
+				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SETTINGS_ICON].m_Id);
+
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, 0, Position.x + 24.f, Position.y - 37.25f, 0.85f, 1.125f);
+
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+				Graphics()->QuadsSetRotation(0);
+			}
+	
 		}
 	}
 

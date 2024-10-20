@@ -11,6 +11,8 @@ class CWarList : public CComponent
 	{
 		CWarPlayer()
 		{
+			m_IsHelper = false;
+			m_IsMute = false;
 			m_IsWar = false;
 			m_IsTeam = false;
 			m_IsTraitor = false;
@@ -19,6 +21,8 @@ class CWarList : public CComponent
 			m_aName[0] = '\0';
 			m_aClan[0] = '\0';
 		}
+		bool m_IsHelper;
+		bool m_IsMute;
 		bool m_IsWar;
 		bool m_IsTeam;
 		bool m_IsTraitor;
@@ -47,6 +51,18 @@ class CWarList : public CComponent
 
 		pair<PlayerName, FilePath>
 	*/
+	std::vector<std::pair<std::string, std::string>> m_vHelperlist;
+	/*
+		m_vHelperlist
+
+		pair<PlayerName, FilePath>
+	*/
+	std::vector<std::pair<std::string, std::string>> m_vMutelist;
+	/*
+		m_vMutelist
+
+		pair<PlayerName, FilePath>
+	*/
 	std::vector<std::pair<std::string, std::string>> m_vTraitorlist;
 	/*
 		m_vNeutrallist
@@ -67,6 +83,22 @@ class CWarList : public CComponent
 	int m_WarDirs;
 	int m_TeamDirs;
 	int m_TraitorDirs;
+
+	void GetMutelistPathByNeedle(const char *pSearch, int Size, char *pPath);
+	bool RemoveMuteNameFromVector(const char *pDir, const char *pName);
+	bool WriteMuteNames(const char *pDir);
+	int LoadMuteNames(const char *pDir);
+	void LoadMuteList();
+	int m_MuteDirs;
+	static int LoadMuteDir(const char *pDirname, int IsDir, int DirType, void *pUser);
+
+	void GetHelperlistPathByNeedle(const char *pSearch, int Size, char *pPath);
+	bool RemoveHelperNameFromVector(const char *pDir, const char *pName);
+	bool WriteHelperNames(const char *pDir);
+	int LoadHelperNames(const char *pDir);
+	void LoadHelperList();
+	int m_HelperDirs;
+	static int LoadHelperDir(const char *pDirname, int IsDir, int DirType, void *pUser);
 
 	static int LoadWarDir(const char *pDirname, int IsDir, int DirType, void *pUser);
 	static int LoadTeamDir(const char *pDirname, int IsDir, int DirType, void *pUser);
@@ -103,10 +135,17 @@ class CWarList : public CComponent
 	int LoadTeamClanNames(const char *pFilename);
 	int LoadWarClanPrefixNames(const char *pFilename);
 
+
 	virtual void OnRender() override;
 	virtual void OnConsoleInit() override;
 	
 	virtual void OnInit() override;
+
+	static void ConRemoveMute(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddMute(IConsole::IResult *pResult, void *pUserData);
+
+	static void ConRemoveHelper(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddHelper(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConRemoveTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveWar(IConsole::IResult *pResult, void *pUserData);
@@ -115,6 +154,11 @@ class CWarList : public CComponent
 	static void ConWarlist(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainWarList(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
+
+
+	bool AddMute(const char *pFolder, const char *pName);
+	bool AddHelper(const char *pFolder, const char *pName);
 
 	/*
 		AddWar
@@ -155,20 +199,34 @@ public:
 	bool OnChatCmdAdvanced(char Prefix, int ClientId, int Team, const char *pCmd, int NumArgs, const char **ppArgs, const char *pRawArgLine);
 
 
-
+	void RemoveHelperNoMsg(const char *pName);
 	void RemoveWarNoMsg(const char *pName);
 	void RemoveTeamNoMsg(const char *pName);
 
-	void AddSimpleWar(const char *pName);
-	void RemoveSimpleWar(const char *pName);
 
+	void AddSimpleWar(const char *pName);
 	void AddSimpleTeam(const char *pName);
+	// New
+	void AddSimpleHelper(const char *pName);
+	void AddSimpleMute(const char *pName);
+
+	void RemoveSimpleHelper(const char *pName);
+	void RemoveSimpleMute(const char *pName);
+
+
 	void RemoveSimpleTeam(const char *pName);
+	void RemoveSimpleWar(const char *pName);
 
 	void GetWarReason(const char *pName, char *pReason, int ReasonSize);
 	void GetWarClansStr(char *pBuf, int Size);
 
 	// non cached used when its about the name and there is no up to date id
+	bool IsMute(int ClientId);
+	bool IsMutelist(const char *pName);
+
+	bool IsHelper(int ClientId);
+	bool IsHelperlist(const char *pName);
+
 	bool IsWar(const char *pName, const char *pClan);
 	bool IsWarlist(const char *pName);
 	bool IsTeamlist(const char *pName);
