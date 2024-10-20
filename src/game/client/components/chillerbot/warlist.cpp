@@ -430,9 +430,9 @@ void CWarList::SetNameplateColor(int ClientId, ColorRGBA *pColor)
 	if(!g_Config.m_ClWarList)
 		return;
 
-	if(IsWar(ClientId))
+	if(IsWar(ClientId) && g_Config.m_ClDoEnemyNameColor)
 		*pColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor));
-	else if(IsTeam(ClientId))
+	else if(IsTeam(ClientId) && g_Config.m_ClDoTeammateNameColor)
 		*pColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClTeamColor));
 	else if(g_Config.m_ClDoFriendNameColor && ClientData.m_Friend)
 		*pColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendColor));

@@ -10,10 +10,7 @@
 #include "warlist.h"
 #include <engine/client.h>
 
-
-
-
-	void CWarList::AddSimpleWar(const char *pName)
+void CWarList::AddSimpleWar(const char *pName)
 {
 	if(!pName || pName[0] == '\0')
 	{
@@ -32,24 +29,7 @@
 	}
 
 	AddWar("war", pName);
-}
-
-void CWarList::RemoveSimpleWar(const char *pName)
-{
-	char aBuf[512];
-	if(!RemoveWarNameFromVector("chillerbot/warlist/war/war", pName))
-	{
-		str_format(aBuf, sizeof(aBuf), "Name '%s' not found in the war list", pName);
-		m_pClient->m_Chat.AddLine(-2, 0, aBuf);
-		return;
-	}
-	if(!WriteWarNames("chillerbot/warlist/war/war"))
-	{
-		m_pClient->m_Chat.AddLine(-2, 0, "Error: failed to write war names");
-	}
-	str_format(aBuf, sizeof(aBuf), "Removed '%s' from the war list", pName);
-	m_pClient->m_Chat.AddLine(-2, 0, aBuf);
-	ReloadList();
+	RemoveTeamNoMsg(pName);
 }
 
 void CWarList::AddSimpleTeam(const char *pName)
@@ -71,7 +51,27 @@ void CWarList::AddSimpleTeam(const char *pName)
 	}
 
 	AddTeam("team", pName);
+	RemoveWarNoMsg(pName);
 }
+
+void CWarList::RemoveSimpleWar(const char *pName)
+{
+	char aBuf[512];
+	if(!RemoveWarNameFromVector("chillerbot/warlist/war/war", pName))
+	{
+		str_format(aBuf, sizeof(aBuf), "Name '%s' not found in the war list", pName);
+		m_pClient->m_Chat.AddLine(-2, 0, aBuf);
+		return;
+	}
+	if(!WriteWarNames("chillerbot/warlist/war/war"))
+	{
+		m_pClient->m_Chat.AddLine(-2, 0, "Error: failed to write war names");
+	}
+	str_format(aBuf, sizeof(aBuf), "Removed '%s' from the war list", pName);
+	m_pClient->m_Chat.AddLine(-2, 0, aBuf);
+	ReloadList();
+}
+
 
 void CWarList::RemoveSimpleTeam(const char *pName)
 {
@@ -88,6 +88,31 @@ void CWarList::RemoveSimpleTeam(const char *pName)
 	}
 	str_format(aBuf, sizeof(aBuf), "Removed '%s' from the team list", pName);
 	m_pClient->m_Chat.AddLine(-2, 0, aBuf);
+	ReloadList();
+}
+
+
+// Send no message if removing an name from the list
+
+void CWarList::RemoveTeamNoMsg(const char *pName)
+{
+	if(!RemoveTeamNameFromVector("chillerbot/warlist/team/team", pName))
+	{
+		return;
+	}
+	if(!WriteTeamNames("chillerbot/warlist/team/team"))
+	{}
+	ReloadList();
+}
+
+void CWarList::RemoveWarNoMsg(const char *pName)
+{
+	if(!RemoveWarNameFromVector("chillerbot/warlist/war/war", pName))
+	{
+		return;
+	}
+	if(!WriteWarNames("chillerbot/warlist/war/war"))
+	{}
 	ReloadList();
 }
 
