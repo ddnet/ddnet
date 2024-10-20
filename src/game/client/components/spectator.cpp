@@ -383,6 +383,7 @@ void CSpectator::OnRender()
 			Spectate(m_SelectedSpectatorId);
 		}
 	}
+	// Free-View Text Color 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, FreeViewSelected ? 1.0f : 0.5f);
 	TextRender()->Text(Width / 2.0f - (ObjWidth - 40.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1.0f);
 
@@ -396,6 +397,7 @@ void CSpectator::OnRender()
 			GameClient()->m_MultiViewActivated = true;
 		}
 	}
+	// Multi-View Text Color
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, MultiViewSelected ? 1.0f : 0.5f);
 	TextRender()->Text(Width / 2.0f - (ObjWidth - 40.0f) + (ObjWidth * 2.0f / 3.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Multi-View"), -1.0f);
 
@@ -518,6 +520,12 @@ void CSpectator::OnRender()
 				}
 			}
 		}
+
+		auto IsWar = GameClient()->m_WarList.IsWar(pInfo->m_ClientId);
+
+		auto IsTeam = GameClient()->m_WarList.IsTeam(pInfo->m_ClientId);
+
+
 		float TeeAlpha;
 		if(Client()->State() == IClient::STATE_DEMOPLAYBACK &&
 			!m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Active)
@@ -527,9 +535,30 @@ void CSpectator::OnRender()
 		}
 		else
 		{
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, PlayerSelected ? 1.0f : 0.5f);
-			TeeAlpha = 1.0f;
+		
+				if(IsWar && g_Config.m_ClSpecMenuEnemy)
+				{
+				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor));
+					if(PlayerSelected)
+					TextRender()->TextColor(rgb.WithAlpha(1.0f));
+					else
+					TextRender()->TextColor(rgb.WithAlpha(0.5f));
+				}
+				else if(IsTeam && g_Config.m_ClSpecMenuTeammate)
+				{
+					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClTeamColor));
+					if(PlayerSelected)
+						TextRender()->TextColor(rgb.WithAlpha(1.0f));
+					else
+						TextRender()->TextColor(rgb.WithAlpha(0.5f));
+				}
+				else
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, PlayerSelected ? 1.0f : 0.5f);
+				TeeAlpha = 1.0f;
+			
+
 		}
+
 		CTextCursor NameCursor;
 		TextRender()->SetCursor(&NameCursor, Width / 2.0f + x + 50.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
 		NameCursor.m_LineWidth = 180.0f;
@@ -584,13 +613,32 @@ void CSpectator::OnRender()
 
 		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos, TeeAlpha);
 
-		if(m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Friend)
-		{
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
-			TextRender()->TextColor(rgb.WithAlpha(1.f));
-			TextRender()->Text(Width / 2.0f + x - TeeInfo.m_Size / 2.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, "♥", 220.0f);
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-		}
+			if(IsWar || IsTeam)
+			{
+				if(IsWar && g_Config.m_ClSpecMenuEnemyPrefix)
+				{
+					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor));
+					TextRender()->TextColor(rgb.WithAlpha(1.f));
+					TextRender()->Text(Width / 2.0f + x - TeeInfo.m_Size / 2.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, g_Config.m_ClEnemyPrefix, 220.0f);
+
+				}
+				else if(IsTeam && g_Config.m_ClSpecMenuTeammatePrefix)
+				{
+					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClTeamColor));
+					TextRender()->TextColor(rgb.WithAlpha(1.f));
+					TextRender()->Text(Width / 2.0f + x - TeeInfo.m_Size / 2.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, g_Config.m_ClTeammatePrefix, 220.0f);
+
+				}
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+			}
+			else if(m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Friend)
+			{
+				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
+				TextRender()->TextColor(rgb.WithAlpha(1.f));
+				TextRender()->Text(Width / 2.0f + x - TeeInfo.m_Size / 2.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, g_Config.m_ClFriendPrefix, 220.0f);
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+			}
+		
 
 		y += LineHeight;
 	}

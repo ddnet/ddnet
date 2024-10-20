@@ -770,12 +770,13 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 
 	if(pCurrentLine->m_ClientId == SERVER_MSG)
 	{
-		str_copy(pCurrentLine->m_aName, "*** ");
+		str_copy(pCurrentLine->m_aName, g_Config.m_ClServerMsgPrefix);
 		str_copy(pCurrentLine->m_aText, pLine);
 	}
 	else if(pCurrentLine->m_ClientId == CLIENT_MSG)
 	{
-		str_copy(pCurrentLine->m_aName, "— ");
+		// Alt + 0151
+		str_copy(pCurrentLine->m_aName, g_Config.m_ClClientMsgPrefix);
 		str_copy(pCurrentLine->m_aText, pLine);
 	}
 	else
@@ -783,9 +784,10 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		// in menu icon? ☼
 
 		auto &LineAuthor = m_pClient->m_aClients[pCurrentLine->m_ClientId];
-		auto IsWar = m_pClient->m_WarList.IsWar(pCurrentLine->m_ClientId);
 
-		auto IsTeam = m_pClient->m_WarList.IsTeam(pCurrentLine->m_ClientId);
+		const auto IsWar = GameClient()->m_WarList.IsWar(pCurrentLine->m_ClientId);
+		const auto IsTeam = GameClient()->m_WarList.IsTeam(pCurrentLine->m_ClientId);
+
 
 		if(LineAuthor.m_Team == TEAM_SPECTATORS)
 			pCurrentLine->m_NameColor = TEAM_SPECTATORS;
@@ -1044,19 +1046,19 @@ void CChat::OnPrepareLines(float y)
 				if(Line.m_Friend && g_Config.m_ClMessageFriend)
 				{
 					
-					TextRender()->TextEx(&Cursor, g_Config.m_ClChatFriendMsg);
+					TextRender()->TextEx(&Cursor, g_Config.m_ClFriendPrefix);
 				}
 				if(Line.m_Paused && g_Config.m_ClChatSpecMark)
 				{
-					TextRender()->TextEx(&Cursor, g_Config.m_ClChatSpecMsg);
+					TextRender()->TextEx(&Cursor, g_Config.m_ClSpecPrefix);
 				}
-				if(Line.m_IsWar)
+				if(Line.m_IsWar && g_Config.m_ClChatTeammateMark)
 				{
-					TextRender()->TextEx(&Cursor, "♦ ");
+					TextRender()->TextEx(&Cursor, g_Config.m_ClTeammatePrefix);
 				}
-				if(Line.m_IsTeam)
+				if(Line.m_IsTeam && g_Config.m_ClChatEnemyMark)
 				{
-					TextRender()->TextEx(&Cursor, "♦ ");
+					TextRender()->TextEx(&Cursor, g_Config.m_ClEnemyPrefix);
 				}
 		}
 
@@ -1104,39 +1106,34 @@ void CChat::OnPrepareLines(float y)
 		{
 			Cursor.m_X += RealMsgPaddingTee;
 
-			if(Line.m_Friend && g_Config.m_ClMessageFriend)
-			{
-				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor)).WithAlpha(1.f));
-				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClChatFriendMsg);
-			}
-
 			if(Line.m_Paused && g_Config.m_ClChatSpecMark)
 			{
 				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSpecColor)).WithAlpha(1.f));
-				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClChatSpecMsg);
+				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClSpecPrefix);
 			}
-			if(g_Config.m_ClChatWarlistMark)
+			// if player is enemy
+			if(Line.m_IsWar && !Line.m_IsTeam && g_Config.m_ClChatEnemyMark)
 			{
-				// if player is enemy
-				if(Line.m_IsWar && !Line.m_IsTeam)
-				{
-					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor)).WithAlpha(1.f));
-					TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClChatEnemyMsg);
-				}
-				// if player is teammate
-				else if(Line.m_IsTeam && !Line.m_IsWar)
-				{
-					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClTeamColor)).WithAlpha(1.f));
-					TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClChatTeammateMsg);
-				}
-				// if player is in both war and team only put war message
-				else if (Line.m_IsTeam && Line.m_IsWar)
-				{
-					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor)).WithAlpha(1.f));
-					TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClChatEnemyMsg);
-				}
+				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor)).WithAlpha(1.f));
+				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClEnemyPrefix);
 			}
-			
+			// if player is teammate
+			else if(Line.m_IsTeam && !Line.m_IsWar && g_Config.m_ClChatTeammateMark)
+			{
+				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClTeamColor)).WithAlpha(1.f));
+				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClTeammatePrefix);
+			}
+			// if player is in both war and team only put war message
+			else if(Line.m_IsTeam && Line.m_IsWar && g_Config.m_ClChatEnemyMark)
+			{
+				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor)).WithAlpha(1.f));
+				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClEnemyPrefix);
+			}
+			else if(Line.m_Friend && g_Config.m_ClMessageFriend)
+			{
+				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor)).WithAlpha(1.f));
+				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClFriendPrefix);
+			}
 		}
 
 		// render name

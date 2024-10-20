@@ -519,7 +519,7 @@ void CHud::RenderTextInfo()
 	{
 		if(g_Config.m_ClFpsSpoofer == 1)
 		{
-			m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * (g_Config.m_ClFpsSpooferMargin * 0.001f);
+			m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * (g_Config.m_ClFpsSpoofPercentage * 0.001f);
 		}
 		else
 			m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;

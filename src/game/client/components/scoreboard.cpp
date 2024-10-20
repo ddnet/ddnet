@@ -229,7 +229,6 @@ void CScoreboard::RenderSpectators(CUIRect Spectators)
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
 		}
-		
 
 
 		if(GameClient()->m_aClients[pInfo->m_ClientId].m_AuthLevel)
@@ -511,6 +510,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 
 			const CGameClient::CClientData &ClientData = GameClient()->m_aClients[pInfo->m_ClientId];
 
+			auto IsWar = GameClient()->m_WarList.IsWar(pInfo->m_ClientId);
+			auto IsTeam = GameClient()->m_WarList.IsTeam(pInfo->m_ClientId);
+
 			// skin
 			if(RenderDead)
 			{
@@ -535,7 +537,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				vec2 OffsetToMid;
 				CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &TeeInfo, OffsetToMid);
 				const vec2 TeeRenderPos = vec2(TeeOffset + TeeLength / 2, Row.y + Row.h / 2.0f + OffsetToMid.y);
-				if(g_Config.m_ClScoreboardSpecPlayer && ClientData.m_Paused || ClientData.m_Spec)
+				if(g_Config.m_ClScoreSpecPlayer && ClientData.m_Paused || ClientData.m_Spec)
 				{
 					RenderTools()->RenderTee(CAnimState::GetSpec(), &TeeInfo, EMOTE_BLINK, vec2(1.0f, 0.0f), TeeRenderPos);
 				}
@@ -559,7 +561,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					GameClient()->FormatClientId(pInfo->m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
 					TextRender()->TextEx(&Cursor, aClientId);
 				}
-				if(g_Config.m_ClScoreboardSpecMark && ClientData.m_Paused || ClientData.m_Spec)
+				if(g_Config.m_ClScoreSpecMark && ClientData.m_Paused || ClientData.m_Spec)
 				{
 					const char *pSpecMark = "(s)";
 					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSpecColor)));
@@ -574,17 +576,49 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				}
 				*/
 
+				if(g_Config.m_ClDoAfkColors && ClientData.m_Afk)
+				{
+					TextRender()->TextColor(1.f, 1.f, 1.f, 0.4f);
+				}
+				if(g_Config.m_ClDoFriendColorScore && ClientData.m_Friend)
+				{
+					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendColor));
+					if(g_Config.m_ClDoAfkColors && ClientData.m_Afk)
+					{
+						TextRender()->TextColor(rgb.WithAlpha(0.4f));
+					}
+					else
+						TextRender()->TextColor(rgb.WithAlpha(1.0f));
 
-				if(g_Config.m_ClDoFriendColorScoreboard && ClientData.m_Friend)
-				{
-					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendColor)));
 				}
-				if(g_Config.m_ClAfkNameColor && ClientData.m_Afk)
+				if(g_Config.m_ClDoWarListColorScore)
 				{
-					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAfkColor)));
+					if (IsTeam)
+					{
+						ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClTeamColor));
+						if(g_Config.m_ClDoAfkColors && ClientData.m_Afk)
+						{
+							TextRender()->TextColor(rgb.WithAlpha(0.4f));
+						}
+						else
+							TextRender()->TextColor(rgb.WithAlpha(1.0f));
+
+					}
+						
+					if (IsWar)
+					{
+						ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor));
+						if(g_Config.m_ClDoAfkColors && ClientData.m_Afk)
+						{
+							TextRender()->TextColor(rgb.WithAlpha(0.4f));
+						}
+						else
+							TextRender()->TextColor(rgb.WithAlpha(1.0f));
+					}
 				}
-				if(g_Config.m_ClDoFriendAfkColor && ClientData.m_Friend && ClientData.m_Afk)
-					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendAfkColor)));
+				
+
+
 				TextRender()->TextEx(&Cursor, ClientData.m_aName);
 
 				// ready / watching
