@@ -166,13 +166,12 @@ MACRO_CONFIG_INT(ClDoAfkColors, ac_do_afk_colors, 0, 0, 1, CFGFLAG_SAVE | CFGFLA
 
 
 MACRO_CONFIG_INT(ClShowIdsChat, ac_show_ids_chat, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Whether to Show Client IDs in Chat")
-MACRO_CONFIG_INT(ClAfkNameColor, ac_do_afk_name_color, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Afk Name Color in Scoreboard")
-MACRO_CONFIG_INT(ClScoreSpecMark, ac_do_score_specmark, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggle Spectator Mark (s) Next to Names in Scoreboard")
+MACRO_CONFIG_INT(ClScoreSpecMark, ac_do_score_spec_prefix, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggle Spectator Mark (s) Next to Names in Scoreboard")
 MACRO_CONFIG_INT(ClScoreSpecPlayer, ac_do_score_spec_tee, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Changes The Tee in The Scoreboard to a Spectating Tee if The Player is Spectating")
 
-MACRO_CONFIG_INT(ClChatSpecMark, ac_do_chat_specmark, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Spectator Mark (s) Next to Names in Chat")
-MACRO_CONFIG_INT(ClChatEnemyMark, ac_do_chat_warmark, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Enemy Mark ♦  Next to Names in Chat")
-MACRO_CONFIG_INT(ClChatTeammateMark, ac_do_chat_teammark, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Teammate Mark ♦  Next to names in Chat")
+MACRO_CONFIG_INT(ClChatSpecMark, ac_do_chat_spec_prefix, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Spectator Mark (s) Next to Names in Chat")
+MACRO_CONFIG_INT(ClChatEnemyMark, ac_do_chat_war_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Enemy Mark ♦  Next to Names in Chat")
+MACRO_CONFIG_INT(ClChatTeammateMark, ac_do_chat_team_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Teammate Mark ♦  Next to names in Chat")
 
 
 
@@ -182,29 +181,27 @@ MACRO_CONFIG_INT(ClDoWarListColorScore, ac_do_warlist_color_score, 1, 0, 1, CFGF
 
 // friend name settings
 
-MACRO_CONFIG_INT(ClDoFriendAfkColor, ac_do_afk_friend_color, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Friend name color in scoreboard")
 
 MACRO_CONFIG_INT(ClDoFriendNameColor, ac_do_friend_name_color, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Friend name colors")
 MACRO_CONFIG_INT(ClDoFriendColorScore, ac_do_friend_color_score, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Friend name colors in scoreboard")
 MACRO_CONFIG_INT(ClDoFriendColorInchat, ac_do_friend_color_chat, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on friend color in chat")
 
+// unused or shouldnt be used
+
 // foe name color (pretty much useless after I got the warlist to work)
 
 MACRO_CONFIG_INT(ClFoeNameColor, ac_foe_name_color, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Foe name colors")
 
-// unused or shouldnt be used
-
 MACRO_CONFIG_INT(ClTest2, ac_test, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "test")
+MACRO_CONFIG_INT(ClShowSpecials, ac_specials, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Autocrashes the game if someone with cheats is detected")
+MACRO_CONFIG_INT(ClFinishRenameDistance, ac_finish_rename_distance, 32, 32, 1000, CFGFLAG_CLIENT | CFGFLAG_SAVE, " (dont change buggy) distance to where the game detects the finish line")
 
 
 // string
 
 MACRO_CONFIG_STR(ClTest, ac_test, 24, "test", CFGFLAG_CLIENT | CFGFLAG_SAVE, "test")
 
-MACRO_CONFIG_INT(ClSpecMenuTeammate, ac_specmenu_team_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Name Colors in The Spectate Menu")
-MACRO_CONFIG_INT(ClSpecMenuEnemy, ac_specmenu_war_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Name Colors in The Spectate Menu")
-MACRO_CONFIG_INT(ClSpecMenuEnemyPrefix, ac_specmenu_war_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Prefix Next to Names in The Spectate Menu")
-MACRO_CONFIG_INT(ClSpecMenuTeammatePrefix, ac_specmenu_team prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Prefix Next to Names in The Spectate Menu")
+// Prefixes
 
 MACRO_CONFIG_STR(ClClientMsgPrefix, ac_client_msg_prefix, 24, "— ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client (Echo) Message Prefix")
 MACRO_CONFIG_STR(ClServerMsgPrefix, ac_server_msg_prefix, 24, "*** ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Server Message Prefix")
@@ -213,8 +210,27 @@ MACRO_CONFIG_STR(ClSpecPrefix, ac_spec_prefix, 8, "(s) ", CFGFLAG_CLIENT | CFGFL
 MACRO_CONFIG_STR(ClEnemyPrefix, ac_war_prefix, 8, "♦ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Enemies in Chat (alt + num4 = ♦)")
 MACRO_CONFIG_STR(ClTeammatePrefix, ac_team_prefix, 8, "♦ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Teammates in Chat (alt + num4 = ♦)")
 
-MACRO_CONFIG_INT(ClShowSpecials, ac_specials, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Autocrashes the game if someone with cheats is detected")
-MACRO_CONFIG_INT(ClFinishRenameDistance, ac_finish_rename_distance, 32, 32, 1000, CFGFLAG_CLIENT | CFGFLAG_SAVE, " (dont change buggy) distance to where the game detects the finish line")
+// Custom Warlist Commands
+
+MACRO_CONFIG_STR(ClChatPrefix, ac_chat_prefix, 2, "-", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
+
+MACRO_CONFIG_STR(ClAddMuteString, ac_addmute_string, 12, "add_mute", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
+MACRO_CONFIG_STR(ClAddWarString, ac_addwar_string, 12, "add_war", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
+MACRO_CONFIG_STR(ClAddTeamString, ac_addteam_string, 12, "add_team", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
+MACRO_CONFIG_STR(ClRemoveMuteString, ac_delmute_string, 12, "del_mute", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
+MACRO_CONFIG_STR(ClRemoveWarString, ac_delwar_string, 12, "del_war", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
+MACRO_CONFIG_STR(ClRemoveTeamString, ac_delteam_string, 12, "del_team", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
+
+
+// In Spec Menu Prefixes
+
+MACRO_CONFIG_INT(ClSpecMenuFriend, ac_specmenu_friend_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Friend Name Colors in The Spectate Menu")
+MACRO_CONFIG_INT(ClSpecMenuFriendPrefix, ac_specmenu_friend_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Friend Prefix Next to Names in The Spectate Menu")
+MACRO_CONFIG_INT(ClSpecMenuTeammate, ac_specmenu_team_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Name Colors in The Spectate Menu")
+MACRO_CONFIG_INT(ClSpecMenuEnemy, ac_specmenu_war_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Name Colors in The Spectate Menu")
+MACRO_CONFIG_INT(ClSpecMenuEnemyPrefix, ac_specmenu_war_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Prefix Next to Names in The Spectate Menu")
+MACRO_CONFIG_INT(ClSpecMenuTeammatePrefix, ac_specmenu_team prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Prefix Next to Names in The Spectate Menu")
+
 
 // Ui
 
