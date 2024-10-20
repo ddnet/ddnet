@@ -996,6 +996,9 @@ endif()
 ########################################################################
 
 set(EXPECTED_DATA
+  aiodob/muted_icon.png
+  aiodob/settings_icon.png
+  aiodob/Test.png
   announcement.txt
   arrow.png
   assets/entities/comfort/ddnet.png
