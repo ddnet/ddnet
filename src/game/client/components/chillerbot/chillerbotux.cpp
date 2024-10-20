@@ -133,8 +133,34 @@ void CChillerBotUX::CheckEmptyTick()
 
 bool CChillerBotUX::OnSendChat(int Team, const char* pLine)
 {
+	char aTrimmedLine[512];
+	str_copy(aTrimmedLine, pLine);
+	int Length = 0;
+	char *p = aTrimmedLine;
+	char *pEnd = nullptr;
+	while(*p)
+	{
+		char *pStrOld = p;
+		int Code = str_utf8_decode((const char **)(&p));
+		// check if unicode is not empty
+		if(!str_utf8_isspace(Code))
+		{
+			pEnd = nullptr;
+		}
+		else if(pEnd == 0)
+			pEnd = pStrOld;
+		if(++Length >= 256)
+		{
+			*p = '\0';
+			break;
+		}
+	}
+	if(pEnd != nullptr)
+		*pEnd = '\0';
+	ReturnFromAfk(aTrimmedLine);
+
 	int ClientId = m_pClient->m_aLocalIds[g_Config.m_ClDummy];
-	if (m_pClient->m_ChatCommand.OnChatMsg(ClientId, Team, pLine))
+	if(m_pClient->m_ChatCommand.OnChatMsg(ClientId, Team, aTrimmedLine))
 	{
 		if(g_Config.m_ClSilentChatCommands)
 			return false;
