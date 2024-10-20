@@ -26,7 +26,7 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 	const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
 
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
-	float YOffset = Position.y - 38;
+	float YOffset = Position.y - 30;
 	ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 
 	// render players' key presses
@@ -65,22 +65,11 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		if(OtherTeam && !ForceAlpha)
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
 		else
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset - FontSize - 15.0f);
-
-		if(pPlayerInfo->m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-		{
-			DirLeft = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction == -1;
-			DirRight = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction == 1;
-			Jump = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Jump == 1;
-		}
-		if(Client()->DummyConnected() && Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_ClientId == m_pClient->m_aLocalIds[!g_Config.m_ClDummy])
-		{
-			DirLeft = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Direction == -1;
-			DirRight = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Direction == 1;
-			Jump = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Jump == 1;
-		}
+		const float ShowDirectionImgSize = 22.0f;
+		YOffset -= ShowDirectionImgSize;
+		const vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
 		if(DirLeft)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
@@ -184,7 +173,7 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		if(NamePlate.m_NameTextContainerIndex.Valid())
 		{
 			YOffset -= FontSize;
-			if((g_Config.m_ClPingNameCircle || (m_pClient->m_Scoreboard.Active() && !pPlayerInfo->m_Local)) && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
+			if((g_Config.m_ClPingNameCircle && !pPlayerInfo->m_Local) && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
 			{
 				Graphics()->TextureClear();
 				Graphics()->QuadsBegin();
