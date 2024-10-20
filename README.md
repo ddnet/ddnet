@@ -210,6 +210,7 @@ To Do:
 - ~~Add a few neat little features i found in a small client c:~~
 - ~~try to get silent commands to     work~~ **I love you Chillerbot :D**
 - add Client/Server Msg Prefix functionality
+- add Helper List
 - show mutes in console
 - when friend joines ping you or make name be in a color
 
