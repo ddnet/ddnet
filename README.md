@@ -37,18 +37,20 @@ steps on how to do that are on the official [ddnet github](https://github.com/dd
 
 ### -Aiodob Client-
 - disable chat bubble
-- Friend/Foe nameplate colors
+- customizeable in chat Prefixes (default: war = "♦ " , team = "♦ " , Friend = "♥ " , spec = "(s) "
 - Friend name color in chat and scorebaord
 - (s) next to names of people spectating in scoreboard and chat
 - show tee sitting in scoreboard if the player is spectating
-- Show when others are in a menu (Zzz emote for now)
 - darker names of people who are afk in scoreboard
-- different name color for afk friends
+- Show when others are in a menu (Zzz emote for now)
+- Friend/Foe/Team/War nameplate colors
 - strong/weak hook color for cl_nameplate_ids
+- In Spectate Menu Prefixes and Name Colors 
+- Custom Chat Commands - add your own command that the warlist recognizes (eg. !addteeeem qxdFox)
 - Fps spoofer ig?
 - Very pro looking menu trust
+- Prediction support for my servers explosion gun
 - Customization of alot of sprites - but like in the most useless way possible.
-- Prediction support for my servers explosion gun (server software isnt updated yet)
 
 
 ## Screenshots
@@ -66,20 +68,44 @@ steps on how to do that are on the official [ddnet github](https://github.com/dd
 
 # Command List:
 ```
-ac_strong_weak_color_is
 ac_chatbubble
-ac_show_others_in_menu
-ac_show_ids_chat
-ac_do_afk_name_color
-ac_do_afk_friend_color
+ac_client_msg_prefix
+ac_server_msg_prefix
+ac_friend_prefix
+ac_spec_prefix
+ac_team_prefix
+ac_war_prefix
+ac_addmute_string
+ac_addwar_string
+ac_addteam_string
+ac_delmute_string
+ac_delwar_string
+ac_delteam_string
+ac_specmenu_friend_color
+ac_specmenu_friend_prefix
+ac_specmenu_team_color
+ac_specmenu_war_color
+ac_specmenu_war_prefix
+ac_specmenu_team
+ac_do_afk_colors
 ac_do_scoreboard_specmark
 ac_do_scoreboard_spec_tee
-ac_do_chat_specmark
+ac_do_chat_spec_prefix
+ac_do_chat_team_prefix
+ac_do_chat_war_prefix
 ac_do_friend_name_color
 ac_do_friend_color_scoreboard
 ac_do_friend_color_chat
+ac_do_score_spec_tee
+ac_do_score_spec_prefix
+ac_do_warlist_color_score
 ac_fps_spoofer
 ac_fps_spoofer_margin
+ac_show_others_in_menu
+ac_show_ids_chat
+ac_strong_weak_color_id
+ac_team_name_color
+ac_war_name_color
 
 cb_finish_rename
 cb_finish_name
