@@ -435,7 +435,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				// add separator
 				const char *pSeparator = "";
 				if(*(m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength) != ' ')
-					pSeparator = m_PlaceholderOffset == 0 ? ": " : "";
+					pSeparator = m_PlaceholderOffset == 0 ? ": " : " ";
 				else if(m_PlaceholderOffset == 0)
 					pSeparator = ":";
 				if(*pSeparator)
@@ -447,6 +447,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				m_PlaceholderLength = str_length(pSeparator) + str_length(pCompletionString);
 				m_Input.Set(aBuf);
 				m_Input.SetCursorOffset(m_PlaceholderOffset + m_PlaceholderLength);
+
 			}
 		}
 	}
