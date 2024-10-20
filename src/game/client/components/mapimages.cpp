@@ -357,13 +357,8 @@ void CMapImages::ChangeEntitiesPath(const char *pPath)
 		{
 			for(int LayerType = 0; LayerType < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++LayerType)
 			{
-				if(m_aaEntitiesTextures[ModType][LayerType].IsValid())
-				{
-					Graphics()->UnloadTexture(&(m_aaEntitiesTextures[ModType][LayerType]));
-				}
-				m_aaEntitiesTextures[ModType][LayerType] = IGraphics::CTextureHandle();
+				Graphics()->UnloadTexture(&m_aaEntitiesTextures[ModType][LayerType]);
 			}
-
 			m_aEntitiesIsLoaded[ModType] = false;
 		}
 	}
@@ -382,10 +377,6 @@ void CMapImages::SetTextureScale(int Scale)
 		Graphics()->UnloadTexture(&m_OverlayBottomTexture);
 		Graphics()->UnloadTexture(&m_OverlayTopTexture);
 		Graphics()->UnloadTexture(&m_OverlayCenterTexture);
-
-		m_OverlayBottomTexture = IGraphics::CTextureHandle();
-		m_OverlayTopTexture = IGraphics::CTextureHandle();
-		m_OverlayCenterTexture = IGraphics::CTextureHandle();
 
 		InitOverlayTextures();
 	}
