@@ -141,7 +141,7 @@ MACRO_CONFIG_INT(ClApplyProfileEmote, tc_profile_emote, 1, 0, 1, CFGFLAG_CLIENT 
 	MACRO_CONFIG_COL(ClFoeColor, ac_foe_color, 16777123, CFGFLAG_CLIENT | CFGFLAG_SAVE, "foe color (old does still work)")
 
 	// Aiodob Menu color plates
-	MACRO_CONFIG_COL(AiodobColor, Aiodob_color, 413139148, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLALPHA, "Box Color in Aiodob Menu") // 160 70 175 228 hasalpha
+	MACRO_CONFIG_COL(AiodobColor, Aiodob_color, 654311494, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLALPHA, "Box Color in Aiodob Menu") // 160 70 175 228 hasalpha
 
 // Int Variables
 
@@ -157,21 +157,36 @@ MACRO_CONFIG_INT(ClShowOwnMenuToOthers, ac_show_self_in_menu, 1, 0, 1, CFGFLAG_C
 
 // misc
 
-MACRO_CONFIG_INT(ClShowIdsChat, ac_show_ids_chat, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Whether to show client IDs in chat")
-MACRO_CONFIG_INT(ClAfkNameColor, ac_do_afk_name_color, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Afk Name Color in Scoreboard")
-MACRO_CONFIG_INT(ClScoreboardSpecMark, ac_do_scoreboard_specmark, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggle Spectator mark (s) Next to names in scoreboard")
-MACRO_CONFIG_INT(ClScoreboardSpecPlayer, ac_do_scoreboard_spec_tee, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Changes The Tee in The Scoreboard to a Spectating Tee if The Player is Spectating")
+MACRO_CONFIG_INT(ClDoTeammateNameColor, ac_team_name_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Teammate Nameplate Color")
+MACRO_CONFIG_INT(ClDoEnemyNameColor, ac_war_name_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enemy Nameplate Color")
 
-MACRO_CONFIG_INT(ClChatSpecMark, ac_do_chat_specmark, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Spectator mark (s) Next to names in chat")
-MACRO_CONFIG_INT(ClChatWarlistMark, ac_do_chat_Warlist_mark, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows A symbol next to teammates / enemies")
+MACRO_CONFIG_INT(ClShowAiodobPreview, ac_show_preview, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Chat Preview in Aiodob Settings Menu")
+
+MACRO_CONFIG_INT(ClDoAfkColors, ac_do_afk_colors, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Makes Names Darker in Scoreboard if Player is afk")
+
+
+MACRO_CONFIG_INT(ClShowIdsChat, ac_show_ids_chat, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Whether to Show Client IDs in Chat")
+MACRO_CONFIG_INT(ClAfkNameColor, ac_do_afk_name_color, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Afk Name Color in Scoreboard")
+MACRO_CONFIG_INT(ClScoreSpecMark, ac_do_score_specmark, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggle Spectator Mark (s) Next to Names in Scoreboard")
+MACRO_CONFIG_INT(ClScoreSpecPlayer, ac_do_score_spec_tee, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Changes The Tee in The Scoreboard to a Spectating Tee if The Player is Spectating")
+
+MACRO_CONFIG_INT(ClChatSpecMark, ac_do_chat_specmark, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Spectator Mark (s) Next to Names in Chat")
+MACRO_CONFIG_INT(ClChatEnemyMark, ac_do_chat_warmark, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Enemy Mark ♦  Next to Names in Chat")
+MACRO_CONFIG_INT(ClChatTeammateMark, ac_do_chat_teammark, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Teammate Mark ♦  Next to names in Chat")
+
+
+
+
+MACRO_CONFIG_INT(ClDoWarListColorScore, ac_do_warlist_color_score, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Friend name colors")
+
 
 // friend name settings
 
 MACRO_CONFIG_INT(ClDoFriendAfkColor, ac_do_afk_friend_color, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Friend name color in scoreboard")
 
 MACRO_CONFIG_INT(ClDoFriendNameColor, ac_do_friend_name_color, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Friend name colors")
-MACRO_CONFIG_INT(ClDoFriendColorScoreboard, ac_do_friend_color_scoreboard, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Friend name colors in scoreboard")
-MACRO_CONFIG_INT(ClDoFriendColorInchat, ac_do_friend_color_chat, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on friend color in chat")
+MACRO_CONFIG_INT(ClDoFriendColorScore, ac_do_friend_color_score, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Friend name colors in scoreboard")
+MACRO_CONFIG_INT(ClDoFriendColorInchat, ac_do_friend_color_chat, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on friend color in chat")
 
 // foe name color (pretty much useless after I got the warlist to work)
 
@@ -180,13 +195,23 @@ MACRO_CONFIG_INT(ClFoeNameColor, ac_foe_name_color, 0, 0, 1, CFGFLAG_CLIENT | CF
 // unused or shouldnt be used
 
 MACRO_CONFIG_INT(ClTest2, ac_test, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "test")
+
+
 // string
+
 MACRO_CONFIG_STR(ClTest, ac_test, 24, "test", CFGFLAG_CLIENT | CFGFLAG_SAVE, "test")
 
-MACRO_CONFIG_STR(ClChatFriendMsg, ac_chat_friend_msg, 8, "♥ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Friends in Chat")
-MACRO_CONFIG_STR(ClChatSpecMsg, ac_chat_spec_msg, 8, "(s) ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Specating People in Chat")
-MACRO_CONFIG_STR(ClChatEnemyMsg, ac_chat_enemy_msg, 8, "♦ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Enemies in Chat")
-MACRO_CONFIG_STR(ClChatTeammateMsg, ac_chat_teammate_msg, 8, "♦ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Teammates in Chat")
+MACRO_CONFIG_INT(ClSpecMenuTeammate, ac_specmenu_team_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Name Colors in The Spectate Menu")
+MACRO_CONFIG_INT(ClSpecMenuEnemy, ac_specmenu_war_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Name Colors in The Spectate Menu")
+MACRO_CONFIG_INT(ClSpecMenuEnemyPrefix, ac_specmenu_war_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Prefix Next to Names in The Spectate Menu")
+MACRO_CONFIG_INT(ClSpecMenuTeammatePrefix, ac_specmenu_team prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Prefix Next to Names in The Spectate Menu")
+
+MACRO_CONFIG_STR(ClClientMsgPrefix, ac_client_msg_prefix, 24, "— ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Client (Echo) Message Prefix")
+MACRO_CONFIG_STR(ClServerMsgPrefix, ac_server_msg_prefix, 24, "*** ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Server Message Prefix")
+MACRO_CONFIG_STR(ClFriendPrefix, ac_friend_prefix, 8, "♥ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Friends in Chat (alt + num3 = ♥)")
+MACRO_CONFIG_STR(ClSpecPrefix, ac_spec_prefix, 8, "(s) ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Specating People in Chat")
+MACRO_CONFIG_STR(ClEnemyPrefix, ac_war_prefix, 8, "♦ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Enemies in Chat (alt + num4 = ♦)")
+MACRO_CONFIG_STR(ClTeammatePrefix, ac_team_prefix, 8, "♦ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Teammates in Chat (alt + num4 = ♦)")
 
 MACRO_CONFIG_INT(ClShowSpecials, ac_specials, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Autocrashes the game if someone with cheats is detected")
 MACRO_CONFIG_INT(ClFinishRenameDistance, ac_finish_rename_distance, 32, 32, 1000, CFGFLAG_CLIENT | CFGFLAG_SAVE, " (dont change buggy) distance to where the game detects the finish line")
@@ -198,7 +223,7 @@ MACRO_CONFIG_INT(ClCornerRoundness, ac_corner_roundness, 100, -5000, 5000, CFGFL
 
 MACRO_CONFIG_INT(ClFpsSpoofer, ac_fps_spoofer, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Spoof Da Fps counter")
 
-MACRO_CONFIG_INT(ClFpsSpooferMargin, ac_fps_spoofer_margin, 100, -5000, 5000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Fps Spoofer Margin")
+MACRO_CONFIG_INT(ClFpsSpoofPercentage, ac_fps_spoofer_percentage, 100, -5000, 5000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Fps Spoofer Percentage")
 
 
 // Tee
