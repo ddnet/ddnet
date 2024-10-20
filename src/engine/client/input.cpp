@@ -301,6 +301,14 @@ const std::vector<IInput::CTouchFingerState> &CInput::TouchFingerStates() const
 	return m_vTouchFingerStates;
 }
 
+void CInput::ClearTouchDeltas()
+{
+	for(CTouchFingerState &TouchFingerState : m_vTouchFingerStates)
+	{
+		TouchFingerState.m_Delta = vec2(0.0f, 0.0f);
+	}
+}
+
 std::string CInput::GetClipboardText()
 {
 	char *pClipboardText = SDL_GetClipboardText();
@@ -348,10 +356,7 @@ void CInput::Clear()
 	mem_zero(m_aInputState, sizeof(m_aInputState));
 	mem_zero(m_aInputCount, sizeof(m_aInputCount));
 	m_vInputEvents.clear();
-	for(CTouchFingerState &TouchFingerState : m_vTouchFingerStates)
-	{
-		TouchFingerState.m_Delta = vec2(0.0f, 0.0f);
-	}
+	ClearTouchDeltas();
 }
 
 float CInput::GetUpdateTime() const
