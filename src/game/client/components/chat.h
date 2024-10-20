@@ -43,6 +43,7 @@ class CChat : public CComponent
 		bool m_Paused;
 		bool m_IsWar;
 		bool m_IsTeam;
+		bool m_IsMute;
 		bool m_Highlighted;
 
 		STextContainerIndex m_TextContainerIndex;

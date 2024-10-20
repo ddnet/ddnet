@@ -117,6 +117,7 @@ void CChat::Reset()
 		Line.m_Paused = false;
 		Line.m_IsWar = false;
 		Line.m_IsTeam = false;
+		Line.m_IsMute = false;
 		Line.m_TimesRepeated = 0;
 		Line.m_HasRenderTee = false;
 	}
@@ -640,7 +641,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	if(*pLine == 0 ||
 		(ClientId == SERVER_MSG && !g_Config.m_ClShowChatSystem) ||
 		(ClientId >= 0 && (m_pClient->m_aClients[ClientId].m_aName[0] == '\0' || // unknown client
-					  m_pClient->m_aClients[ClientId].m_ChatIgnore ||
+					  m_pClient->m_aClients[ClientId].m_ChatIgnore || GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[ClientId].m_aName) || 
 					  (m_pClient->m_Snap.m_LocalClientId != ClientId && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientId].m_Friend) ||
 					  (m_pClient->m_Snap.m_LocalClientId != ClientId && g_Config.m_ClShowChatTeamMembersOnly && m_pClient->IsOtherTeam(ClientId) && m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientId) != TEAM_FLOCK) ||
 					  (m_pClient->m_Snap.m_LocalClientId != ClientId && m_pClient->m_aClients[ClientId].m_Foe))))
@@ -702,11 +703,12 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
 			else if(pLine_->m_ClientId == CLIENT_MSG)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
-			else // regular message
+			else // regular messages
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
 		}
 
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pLine_->m_Whisper ? "whisper" : (pLine_->m_Team ? "teamchat" : "chat"), aBuf, ChatLogColor);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pLine_->m_Whisper ? "whisper" : pLine_->m_IsMute ? "[Muted]" : (pLine_->m_Team ? "teamchat" : "chat"),
+			aBuf, ChatLogColor);
 	};
 
 	CLine *pCurrentLine = &m_aLines[m_CurrentLine];
@@ -785,9 +787,9 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		// in menu icon? ☼
 
 		auto &LineAuthor = m_pClient->m_aClients[pCurrentLine->m_ClientId];
-
-		const auto IsWar = GameClient()->m_WarList.IsWar(pCurrentLine->m_ClientId);
-		const auto IsTeam = GameClient()->m_WarList.IsTeam(pCurrentLine->m_ClientId);
+		const auto IsWar = GameClient()->m_WarList.IsWarlist(m_pClient->m_aClients[ClientId].m_aName);
+		const auto IsTeam = GameClient()->m_WarList.IsTeamlist(m_pClient->m_aClients[ClientId].m_aName);
+		const auto IsMute = GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[ClientId].m_aName);
 
 
 		if(LineAuthor.m_Team == TEAM_SPECTATORS)
@@ -823,6 +825,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		pCurrentLine->m_Paused = LineAuthor.m_Paused || LineAuthor.m_Spec;
 		pCurrentLine->m_IsWar = IsWar;
 		pCurrentLine->m_IsTeam = IsTeam;
+		pCurrentLine->m_IsMute = IsMute;
 
 		if(pCurrentLine->m_aName[0] != '\0')
 		{

@@ -2485,6 +2485,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			pLine->m_Player = ClientId >= 0;
 			pLine->m_Highlighted = Flag & FLAG_HIGHLIGHT;
 			pLine->m_Client = Flag & FLAG_CLIENT;
+			pLine->m_TimesRepeated = Repeats;
 			str_copy(pLine->m_aName, pName);
 			str_copy(pLine->m_aText, pText);
 		};

@@ -536,7 +536,15 @@ void CSpectator::OnRender()
 		else
 		{
 		
-				if(IsWar && g_Config.m_ClSpecMenuEnemy)
+				if(m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Friend && g_Config.m_ClSpecMenuFriend)
+				{
+				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendColor));
+				if(PlayerSelected)
+					TextRender()->TextColor(rgb.WithAlpha(1.0f));
+				else
+					TextRender()->TextColor(rgb.WithAlpha(0.5f));
+				}
+				else if(IsWar && g_Config.m_ClSpecMenuEnemy)
 				{
 				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor));
 					if(PlayerSelected)
@@ -631,7 +639,7 @@ void CSpectator::OnRender()
 				}
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
-			else if(m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Friend)
+			else if(m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Friend && g_Config.m_ClSpecMenuFriendPrefix)
 			{
 				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
 				TextRender()->TextColor(rgb.WithAlpha(1.f));
