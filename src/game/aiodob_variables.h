@@ -125,10 +125,15 @@ MACRO_CONFIG_INT(ClApplyProfileEmote, tc_profile_emote, 1, 0, 1, CFGFLAG_CLIENT 
 
 // Color Variables
 
+	// Icon Color
+
+	MACRO_CONFIG_COL(ClMutedIconColor, ac_muted_icon_color, 5439743, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Muted Icon Color")
+
 	// War / Team color (chillerbots Warlist)
 
 	MACRO_CONFIG_COL(ClWarColor, ac_war_color, 16777123, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enemy Name Color")
 	MACRO_CONFIG_COL(ClTeamColor, ac_team_color, 5504948, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Teammate Name Color")
+	MACRO_CONFIG_COL(ClHelperColor, ac_helper_color, 2686902, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Helper Name Color")
 
 	// Misc Color
 	MACRO_CONFIG_COL(ClAfkColor, ac_afk_color, 10951270, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Afk name color")
@@ -145,17 +150,21 @@ MACRO_CONFIG_INT(ClApplyProfileEmote, tc_profile_emote, 1, 0, 1, CFGFLAG_CLIENT 
 
 // Int Variables
 
-MACRO_CONFIG_INT(ClStrongWeakColorId, ac_strong_weak_color_id, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render ClientIds in Nameplate Same Color as Strong/Weak Hook Color")
+MACRO_CONFIG_INT(ClMutedIconNameplate, ac_muted_icon_nameplate, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows an Icon Next to Nameplates of Muted Players ")
+MACRO_CONFIG_INT(ClMutedIconScore, ac_muted_icon_Scoreboard, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows an Icon Next to Nameplates of Muted Players ")
+
 
 
 // chatbubble / Menu
 
 MACRO_CONFIG_INT(ClChatBubble, ac_chatbubble, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Chatbubble on or Off")
-MACRO_CONFIG_INT(ClShowOthersInMenu, ac_show_others_in_menu , 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows The Zzz Emote if Someones in The Menu")
-MACRO_CONFIG_INT(ClShowOwnMenuToOthers, ac_show_self_in_menu, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show The Zzz to Others When In The Menu")
+MACRO_CONFIG_INT(ClShowOthersInMenu, ac_show_others_in_menu , 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows The Settings Emote if Someones in The Menu")
+MACRO_CONFIG_INT(ClShowOwnMenuToOthers, ac_show_self_in_menu, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show The Settings Emot to Others When In The Menu")
 
 
 // misc
+
+MACRO_CONFIG_INT(ClStrongWeakColorId, ac_strong_weak_color_id, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render ClientIds in Nameplate Same Color as Strong/Weak Hook Color")
 
 MACRO_CONFIG_INT(ClDoTeammateNameColor, ac_team_name_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Teammate Nameplate Color")
 MACRO_CONFIG_INT(ClDoEnemyNameColor, ac_war_name_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enemy Nameplate Color")
@@ -166,12 +175,13 @@ MACRO_CONFIG_INT(ClDoAfkColors, ac_do_afk_colors, 0, 0, 1, CFGFLAG_SAVE | CFGFLA
 
 
 MACRO_CONFIG_INT(ClShowIdsChat, ac_show_ids_chat, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Whether to Show Client IDs in Chat")
-MACRO_CONFIG_INT(ClScoreSpecMark, ac_do_score_spec_prefix, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggle Spectator Mark (s) Next to Names in Scoreboard")
+MACRO_CONFIG_INT(ClScoreSpecPrefix, ac_do_score_spec_prefix, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggle Spectator Prefix Next to Names in Scoreboard")
 MACRO_CONFIG_INT(ClScoreSpecPlayer, ac_do_score_spec_tee, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Changes The Tee in The Scoreboard to a Spectating Tee if The Player is Spectating")
 
-MACRO_CONFIG_INT(ClChatSpecMark, ac_do_chat_spec_prefix, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Spectator Mark (s) Next to Names in Chat")
-MACRO_CONFIG_INT(ClChatEnemyMark, ac_do_chat_war_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Enemy Mark ♦  Next to Names in Chat")
-MACRO_CONFIG_INT(ClChatTeammateMark, ac_do_chat_team_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Teammate Mark ♦  Next to names in Chat")
+MACRO_CONFIG_INT(ClChatSpecPrefix, ac_do_chat_spec_prefix, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Spectator Prefix Next to Names in Chat")
+MACRO_CONFIG_INT(ClChatEnemyPrefix, ac_do_chat_war_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Enemy Prefix  Next to Names in Chat")
+MACRO_CONFIG_INT(ClChatTeammatePrefix, ac_do_chat_team_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Teammate Prefix Next to names in Chat")
+MACRO_CONFIG_INT(ClChatHelperPrefix, ac_do_chat_helper_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Helper Prefix Next to names in Chat")
 
 
 
@@ -209,14 +219,17 @@ MACRO_CONFIG_STR(ClFriendPrefix, ac_friend_prefix, 8, "♥ ", CFGFLAG_CLIENT | C
 MACRO_CONFIG_STR(ClSpecPrefix, ac_spec_prefix, 8, "(s) ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Specating People in Chat")
 MACRO_CONFIG_STR(ClEnemyPrefix, ac_war_prefix, 8, "♦ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Enemies in Chat (alt + num4 = ♦)")
 MACRO_CONFIG_STR(ClTeammatePrefix, ac_team_prefix, 8, "♦ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Teammates in Chat (alt + num4 = ♦)")
+MACRO_CONFIG_STR(ClHelperPrefix, ac_helper_prefix, 8, "♦ ", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Show Next To Helpers in Chat (alt + num4 = ♦)")
 
 // Custom Warlist Commands
 
 MACRO_CONFIG_STR(ClChatPrefix, ac_chat_prefix, 2, "-", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
 
+MACRO_CONFIG_STR(ClAddHelperString, ac_addhelper_string, 12, "add_helper", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
 MACRO_CONFIG_STR(ClAddMuteString, ac_addmute_string, 12, "add_mute", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
 MACRO_CONFIG_STR(ClAddWarString, ac_addwar_string, 12, "add_war", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
 MACRO_CONFIG_STR(ClAddTeamString, ac_addteam_string, 12, "add_team", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
+MACRO_CONFIG_STR(ClRemoveHelperString, ac_delhelper_string, 12, "del_helper", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
 MACRO_CONFIG_STR(ClRemoveMuteString, ac_delmute_string, 12, "del_mute", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
 MACRO_CONFIG_STR(ClRemoveWarString, ac_delwar_string, 12, "del_war", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
 MACRO_CONFIG_STR(ClRemoveTeamString, ac_delteam_string, 12, "del_team", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
@@ -226,8 +239,11 @@ MACRO_CONFIG_STR(ClRemoveTeamString, ac_delteam_string, 12, "del_team", CFGFLAG_
 
 MACRO_CONFIG_INT(ClSpecMenuFriend, ac_specmenu_friend_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Friend Name Colors in The Spectate Menu")
 MACRO_CONFIG_INT(ClSpecMenuFriendPrefix, ac_specmenu_friend_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Friend Prefix Next to Names in The Spectate Menu")
+
+MACRO_CONFIG_INT(ClSpecMenuHelper, ac_specmenu_helper_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Name Colors in The Spectate Menu")
 MACRO_CONFIG_INT(ClSpecMenuTeammate, ac_specmenu_team_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Name Colors in The Spectate Menu")
 MACRO_CONFIG_INT(ClSpecMenuEnemy, ac_specmenu_war_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Name Colors in The Spectate Menu")
+MACRO_CONFIG_INT(ClSpecMenuHelperPrefix, ac_specmenu_helper_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Prefix Next to Names in The Spectate Menu")
 MACRO_CONFIG_INT(ClSpecMenuEnemyPrefix, ac_specmenu_war_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Prefix Next to Names in The Spectate Menu")
 MACRO_CONFIG_INT(ClSpecMenuTeammatePrefix, ac_specmenu_team prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Prefix Next to Names in The Spectate Menu")
 
@@ -369,3 +385,4 @@ MACRO_CONFIG_INT(SvDisableFreeze, sv_disable_freeze, 0, 0, 1, CFGFLAG_SERVER | C
 
 MACRO_CONFIG_INT(ClDisableFreeze, cl_disable_freeze, 0, 0, 1, CFGFLAG_CLIENT, "fake freeze?")
 MACRO_CONFIG_INT(ClFakeGrenade, cl_fake_grenade, 0, 0, 1, CFGFLAG_CLIENT, "Grenade doesnt explode")
+
