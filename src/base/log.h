@@ -32,6 +32,12 @@ struct LOG_COLOR
 #define log_debug(sys, ...) log_log(LEVEL_DEBUG, sys, __VA_ARGS__)
 #define log_trace(sys, ...) log_log(LEVEL_TRACE, sys, __VA_ARGS__)
 
+#define log_error_color(color, sys, ...) log_log_color(LEVEL_ERROR, color, sys, __VA_ARGS__)
+#define log_warn_color(color, sys, ...) log_log_color(LEVEL_WARN, color, sys, __VA_ARGS__)
+#define log_info_color(color, sys, ...) log_log_color(LEVEL_INFO, color, sys, __VA_ARGS__)
+#define log_debug_color(color, sys, ...) log_log_color(LEVEL_DEBUG, color, sys, __VA_ARGS__)
+#define log_trace_color(color, sys, ...) log_log_color(LEVEL_TRACE, color, sys, __VA_ARGS__)
+
 /**
  * @defgroup Log
  *
