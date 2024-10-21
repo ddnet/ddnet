@@ -220,7 +220,6 @@ public:
 	void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientId = -1, bool InterpretSemicolons = true) override;
 	bool ExecuteFile(const char *pFilename, int ClientId = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) override;
 
-	char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) override;
 	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const override;
 	void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) override;
 	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
