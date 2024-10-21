@@ -1,19 +1,35 @@
-Foxs turn on copying files from other clients and making a *semi* All In One client, which will be called... Aiodob
+Foxs turn on copying files from other clients and making a *semi* All In One client, which will be called... Aiodob.
 
-
-
+If anyones got a better name make an Issue please. I want something sick, nothing like.. idk.. THE Client or sum
 
 ## How to use the Client
 
-simply put, download the DDNet.exe and put it into your game folder. if you dont know how then:
-
 ### Steam
-go to manage > browse local files and find the DDNet.exe, then replace it and you're done! You might wanna turn off auto update though.
+go to manage > browse local files and find the ddnet folder, then replace it with mine, if you dont want to replace the whole folder you can only add the .exe and in the data directory you have to add my aiodob folder, it conains images that are important
+And as a side note you might wanna turn off auto updates
 ### Windows
-download the game.zip [from here](https://ddnet.org/), extract it, replace the DDNet.exe and you're good to go!
+download the Game.zip and extract it to somewhere. Create a *Shortcut* and place *the shortcut* on your desktop and you're done!
 ### Different OS?
 If on a different operating system you have to build the Client yourself.
 steps on how to do that are on the official [ddnet github](https://github.com/ddnet/ddnet/)
+
+## Why This Change?
+
+### Images.
+
+I've looked into it for about 10 minutes and already figured that I wont be able to make this happen with just an exe. Sorry but not sorry :p 
+
+If anyones willing to help me with this, please feel free to
+
+### heres why this will be changed: 
+
+Basically the new images need to be loaded somehow and I cant just embed them into the .exe, cause I'm also too stupid for that
+I thought about autoupadtes and it downloading it from my servers but I have no clue how that would work.
+If anyone can help me with this Issue then please feel free to, I wont pay or anything, this Client will be finished soon, so there wont be as many updates anymore
+
+
+
+
 
 ## ---Client will include---
 
@@ -207,6 +223,10 @@ cle_spritr_hook_chain
 cle_sprite_hook_head
 ```
 
+
+
+
+
 To Do:
 - ~~Add a few neat little features i found in a small client c:~~
 - ~~try to get silent commands to     work~~ **I love you Chillerbot :D**
@@ -216,6 +236,8 @@ To Do:
 - when friend joines ping you or make name be in a color
 
 Maybe:
-
 - show in scoreboard when someones in a menu
-- show when someones looking at the scoreboard 
+- show when someones looking at the scoreboard
+
+BIG Maybe: 
+- Sex list.
