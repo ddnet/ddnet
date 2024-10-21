@@ -55,15 +55,8 @@ steps on how to do that are on the official [ddnet github](https://github.com/dd
 
 ## Screenshots
 
-![image](https://github.com/user-attachments/assets/b60876a7-16e8-4146-ae98-62cff353736a)
+![Aiodob_Client](https://github.com/user-attachments/assets/41cffa14-79e4-4b1c-8ba6-016148e8fa78)
 ![image](https://github.com/user-attachments/assets/a48c68f6-8c62-4ad1-9bf9-61fa16bd16ea)
-![image](https://github.com/user-attachments/assets/45a99201-0a8b-4313-b94e-e4feb47d6df9)
-![image](https://github.com/user-attachments/assets/0f70064f-56d8-42a5-ab08-64cb9dafa952)
-![image](https://github.com/user-attachments/assets/f5e768d0-1042-4ca9-91d3-6355e0c8c0fe)
-
-
-
-
 
 
 # Command List:
