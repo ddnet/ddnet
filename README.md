@@ -74,17 +74,25 @@ ac_addteam_string
 ac_delmute_string
 ac_delwar_string
 ac_delteam_string
+ac_muted_icon_nameplate
+ac_muted_icon_Scoreboard
 ac_specmenu_friend_color
 ac_specmenu_friend_prefix
 ac_specmenu_team_color
+ac_specmenu_team_prefix
+ac_specmenu_helper_color
+ac_specmenu_helper_prefix
 ac_specmenu_war_color
 ac_specmenu_war_prefix
 ac_specmenu_team
 ac_do_afk_colors
 ac_do_scoreboard_specmark
 ac_do_scoreboard_spec_tee
+ac_do_chat_server_prefix
+ac_do_chat_client_prefix
 ac_do_chat_spec_prefix
 ac_do_chat_team_prefix
+ac_do_chat_helper_prefix
 ac_do_chat_war_prefix
 ac_do_friend_name_color
 ac_do_friend_color_scoreboard
@@ -202,9 +210,9 @@ cle_sprite_hook_head
 To Do:
 - ~~Add a few neat little features i found in a small client c:~~
 - ~~try to get silent commands to     work~~ **I love you Chillerbot :D**
-- add Client/Server Msg Prefix functionality
-- add Helper List
-- show mutes in console
+- ~~add Client/Server Msg Prefix functionality~~
+- ~~add Helper List~~
+- show mutes in console *someone help I'm too dumb for this :3*
 - when friend joines ping you or make name be in a color
 
 Maybe:
