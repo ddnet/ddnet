@@ -554,7 +554,7 @@ void CWarList::SetNameplateColor(int ClientId, ColorRGBA *pColor)
 		*pColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendColor));
 	else if(g_Config.m_ClFoeNameColor && ClientData.m_Foe)
 		*pColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFoeColor));
-	else if(IsHelper(ClientId))
+	else if(IsHelper(ClientId) && g_Config.m_ClDoHelperNameColor)
 		*pColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHelperColor));
 	else if(IsTraitor(ClientId))
 		*pColor = ColorRGBA(0.1f, 0.1f, 0.1f, 1.0f);
