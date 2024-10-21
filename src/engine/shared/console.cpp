@@ -293,15 +293,6 @@ char CConsole::NextParam(const char *&pFormat)
 	return *pFormat;
 }
 
-char *CConsole::Format(char *pBuf, int Size, const char *pFrom, const char *pStr)
-{
-	char aTimeBuf[80];
-	str_timestamp_format(aTimeBuf, sizeof(aTimeBuf), FORMAT_TIME);
-
-	str_format(pBuf, Size, "[%s][%s]: %s", aTimeBuf, pFrom, pStr);
-	return pBuf;
-}
-
 LEVEL IConsole::ToLogLevel(int Level)
 {
 	switch(Level)

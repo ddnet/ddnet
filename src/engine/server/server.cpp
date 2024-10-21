@@ -3548,8 +3548,7 @@ void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
 		{
 			char aStr[9];
 			str_format(aStr, sizeof(aStr), "Value: %d", pServer->m_aClients[pServer->m_RconClientId].m_ShowIps);
-			char aBuf[32];
-			pServer->SendRconLine(pServer->m_RconClientId, pServer->Console()->Format(aBuf, sizeof(aBuf), "server", aStr));
+			pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aStr);
 		}
 	}
 }
