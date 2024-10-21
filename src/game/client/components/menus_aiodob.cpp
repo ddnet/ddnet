@@ -194,7 +194,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 		
 		{
 			ChatSettings.HSplitTop(Margin, nullptr, &ChatSettings);
-			ChatSettings.HSplitTop(210.0f, &ChatSettings, &ColorSettings);
+			ChatSettings.HSplitTop(250.0f, &ChatSettings, &ColorSettings);
 			if(s_ScrollRegion.AddRect(ChatSettings))
 			{
 				ChatSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -209,7 +209,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoFriendColorInchat, ("Chat Friend Name"), &g_Config.m_ClDoFriendColorInchat, &ChatSettings, LineSize);
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIdsChat, ("Client Ids in Chat"), &g_Config.m_ClShowIdsChat, &ChatSettings, LineSize);
 
-
+				// enemy prefix
 
 				ChatSettings.HSplitTop(2.0f, &Button, &ChatSettings);
 				{
@@ -229,6 +229,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
 				}
 
+				// helper prefix
 				
 				ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
 				{
@@ -248,8 +249,9 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
 				}
 
-				ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
+				// teammate prefix
 
+				ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
 				{
 					ChatSettings.HSplitTop(19.9f, &Button, &MainView);
 
@@ -266,6 +268,8 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					}
 					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
 				}
+
+				// friend prefix
 
 				ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
 
@@ -286,6 +290,8 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
 				}
 
+				// spectate prefix
+
 				ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
 				{
 					ChatSettings.HSplitTop(19.9f, &Button, &MainView);
@@ -304,12 +310,53 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
 				}
 
+				// server prefix
+
+					ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
+				{
+					ChatSettings.HSplitTop(19.9f, &Button, &MainView);
+
+					Button.VSplitLeft(0.0f, &Button, &ChatSettings);
+					Button.VSplitLeft(140.0f, &Label, &Button);
+					Button.VSplitLeft(85.0f, &Button, 0);
+
+					static CLineInput s_PrefixMsg;
+					s_PrefixMsg.SetBuffer(g_Config.m_ClServerPrefix, sizeof(g_Config.m_ClServerPrefix));
+					s_PrefixMsg.SetEmptyText("*** ");
+					if(DoButton_CheckBox(&g_Config.m_ClChatServerPrefix, "Server Prefix", g_Config.m_ClChatServerPrefix, &ChatSettings))
+					{
+						g_Config.m_ClChatServerPrefix ^= 1;
+					}
+					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
+				}
+
+				//client prefix
+
+					ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
+				{
+					ChatSettings.HSplitTop(19.9f, &Button, &MainView);
+
+					Button.VSplitLeft(0.0f, &Button, &ChatSettings);
+					Button.VSplitLeft(140.0f, &Label, &Button);
+					Button.VSplitLeft(85.0f, &Button, 0);
+
+					static CLineInput s_PrefixMsg;
+					s_PrefixMsg.SetBuffer(g_Config.m_ClClientPrefix, sizeof(g_Config.m_ClClientPrefix));
+					s_PrefixMsg.SetEmptyText("alt0151");
+					if(DoButton_CheckBox(&g_Config.m_ClChatClientPrefix, "Client Prefix", g_Config.m_ClChatClientPrefix, &ChatSettings))
+					{
+						g_Config.m_ClChatClientPrefix ^= 1;
+					}
+					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
+				}
+
+
 			}
 		}
 	
 		{
 			ColorSettings.HSplitTop(Margin, nullptr, &ColorSettings);
-			ColorSettings.HSplitTop(185.0f, &ColorSettings, &NameplateSettings);
+			ColorSettings.HSplitTop(210.0f, &ColorSettings, &NameplateSettings);
 			if(s_ScrollRegion.AddRect(ColorSettings))
 			{
 				ColorSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -317,6 +364,9 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 				ColorSettings.HSplitTop(HeaderHeight, &Button, &ColorSettings);
 				Ui()->DoLabel(&Button, Localize("Color Settings"), FontSize, TEXTALIGN_MC);
+
+				static CButtonContainer s_MutedColor;
+				DoLine_ColorPicker(&s_MutedColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &ColorSettings, Localize("Color of The Muted Icon"), &g_Config.m_ClMutedIconColor, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(5439743)), true);
 
 				static CButtonContainer s_TeamColor;
 				DoLine_ColorPicker(&s_TeamColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &ColorSettings, Localize("Name Color of Teammates"), &g_Config.m_ClTeamColor, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(5504948)), true);
@@ -326,7 +376,6 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 				static CButtonContainer s_HelperColor;
 				DoLine_ColorPicker(&s_HelperColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &ColorSettings, Localize("Name Color of Helpers"), &g_Config.m_ClHelperColor, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(2686902)), true);
-
 
 				static CButtonContainer s_FriendColor;
 				DoLine_ColorPicker(&s_FriendColor, ColorPickerLineSize + 0.25f, ColorPickerLabelSize + 0.25f, ColorPickerLineSpacing, &ColorSettings, Localize("Name Color of Friends"), &g_Config.m_ClFriendColor, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(14745554)), true);
@@ -339,7 +388,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 		{
 			NameplateSettings.HSplitTop(Margin, nullptr, &NameplateSettings);
-			NameplateSettings.HSplitTop(105.0f, &NameplateSettings, &ScoreboardSettings);
+			NameplateSettings.HSplitTop(140.0f, &NameplateSettings, &ScoreboardSettings);
 			if(s_ScrollRegion.AddRect(NameplateSettings))
 			{
 				NameplateSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -348,9 +397,13 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				NameplateSettings.HSplitTop(HeaderHeight, &Button, &NameplateSettings);
 				Ui()->DoLabel(&Button, Localize("Nameplate Settings"), FontSize, TEXTALIGN_MC);
 
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMutedIconNameplate, Localize("Show Muted Icon in Nameplates"), &g_Config.m_ClMutedIconNameplate, &NameplateSettings, LineSize);
+
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoFriendNameColor, Localize("Do Friend Nameplate Color"), &g_Config.m_ClDoFriendNameColor, &NameplateSettings, LineSize);
 
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoTeammateNameColor, Localize("Do Teammate Nameplate Color"), &g_Config.m_ClDoTeammateNameColor, &NameplateSettings, LineSize);
+
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoHelperNameColor, Localize("Do Helper Nameplate Color"), &g_Config.m_ClDoHelperNameColor, &NameplateSettings, LineSize);
 
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoEnemyNameColor, Localize("Do Enemy Nameplate Color"), &g_Config.m_ClDoEnemyNameColor, &NameplateSettings, LineSize);
 
@@ -360,7 +413,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 		{
 			ScoreboardSettings.HSplitTop(Margin, nullptr, &ScoreboardSettings);
-			ScoreboardSettings.HSplitTop(145.0f, &ScoreboardSettings, &MenuSettings);
+			ScoreboardSettings.HSplitTop(140.0f, &ScoreboardSettings, &MenuSettings);
 			if(s_ScrollRegion.AddRect(ScoreboardSettings))
 			{
 				ScoreboardSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -369,7 +422,8 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				ScoreboardSettings.HSplitTop(HeaderHeight, &Button, &ScoreboardSettings);
 				Ui()->DoLabel(&Button, Localize("Scoreboard Settings"), FontSize, TEXTALIGN_MC);
 
-				
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMutedIconScore, Localize("Show an Indicator Next to Muted Playersr in Scoreboard"), &g_Config.m_ClMutedIconScore, &ScoreboardSettings, LineSize);
+
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoWarListColorScore, Localize("Do Team/War Name Colors in Scoreboard"), &g_Config.m_ClDoWarListColorScore, &ScoreboardSettings, LineSize);
 
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoAfkColors, Localize("Afk Name Colors in Scoreboard"), &g_Config.m_ClDoAfkColors, &ScoreboardSettings, LineSize);
@@ -377,15 +431,13 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScoreSpecPlayer, Localize("Make Tees Sit in Scoreboard When Spectating"), &g_Config.m_ClScoreSpecPlayer, &ScoreboardSettings, LineSize);
 				
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScoreSpecPrefix, Localize("Show Spec Prefix in Scoreboard"), &g_Config.m_ClScoreSpecPrefix, &ScoreboardSettings, LineSize);
-			
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMutedIconScore, Localize("Show Spec Prefix in Scoreboard"), &g_Config.m_ClMutedIconScore, &ScoreboardSettings, LineSize);
-			
+	
 			}
 		}
 
 			{
 			MenuSettings.HSplitTop(Margin, nullptr, &MenuSettings);
-			MenuSettings.HSplitTop(145.0f, &MenuSettings, 0);
+			MenuSettings.HSplitTop(180.0f, &MenuSettings, 0);
 			if(s_ScrollRegion.AddRect(MenuSettings))
 			{
 				MenuSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -394,7 +446,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				MenuSettings.HSplitTop(HeaderHeight, &Button, &MenuSettings);
 				Ui()->DoLabel(&Button, Localize("Menu Settings"), FontSize, TEXTALIGN_MC);
 
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowOthersInMenu, Localize("Show Zzz Emote When Tee's in a Menu"), &g_Config.m_ClShowOthersInMenu, &MenuSettings, LineSize);
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowOthersInMenu, Localize("Show Settigns Icon When Tee's in a Menu"), &g_Config.m_ClShowOthersInMenu, &MenuSettings, LineSize);
 
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuTeammate, Localize("Team Colors in Spectate Menu"), &g_Config.m_ClSpecMenuTeammate, &MenuSettings, LineSize);
 
@@ -403,6 +455,10 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuEnemy, Localize("Enemy Colors in Spectate Menu"), &g_Config.m_ClSpecMenuEnemy, &MenuSettings, LineSize);
 
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuEnemyPrefix, Localize("Enemy Prefix in Spectate Menu"), &g_Config.m_ClSpecMenuEnemyPrefix, &MenuSettings, LineSize);
+
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuFriend, Localize("Friend Colors in Spectate Menu"), &g_Config.m_ClSpecMenuFriend, &MenuSettings, LineSize);
+
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuFriendPrefix, Localize("Friend Prefix in Spectate Menu"), &g_Config.m_ClSpecMenuFriendPrefix, &MenuSettings, LineSize);
 			}
 		}
 
@@ -693,18 +749,24 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 				// Set preview lines
 				{
+			
 					char aLineBuilder[128];
 
 					str_format(aLineBuilder, sizeof(aLineBuilder), "'%s' entered and joined the game", aBuf);
-					SetPreviewLine(PREVIEW_SYS, -1, g_Config.m_ClServerMsgPrefix, aLineBuilder, 0, 0);
-
+					if(g_Config.m_ClChatServerPrefix)
+						SetPreviewLine(PREVIEW_SYS, -1, g_Config.m_ClServerPrefix, aLineBuilder, 0, 0);
+					else
+						SetPreviewLine(PREVIEW_SYS, -1, "*** ", aLineBuilder, 0, 0);
 					str_format(aLineBuilder, sizeof(aLineBuilder), "Hey, how are you %s?", aBuf);
 					SetPreviewLine(PREVIEW_HIGHLIGHT, 7, "Random Tee", aLineBuilder, FLAG_HIGHLIGHT, 0);
 
 					SetPreviewLine(PREVIEW_TEAM, 11, "Your Teammate", "Let's speedrun this!", FLAG_TEAM, 0);
 					SetPreviewLine(PREVIEW_FRIEND, 8, "Friend", "Hello there", FLAG_FRIEND, 0);
 					SetPreviewLine(PREVIEW_SPAMMER, 9, "Spammer", "Hey fools, I'm spamming here!", 0, 5);
-					SetPreviewLine(PREVIEW_CLIENT, -1, g_Config.m_ClClientMsgPrefix, "Echo command executed", FLAG_CLIENT, 0);
+					if(g_Config.m_ClChatClientPrefix)
+						SetPreviewLine(PREVIEW_CLIENT, -1, g_Config.m_ClClientPrefix, "Echo command executed", FLAG_CLIENT, 0);
+					else
+						SetPreviewLine(PREVIEW_CLIENT, -1, "— ", "Echo command executed", FLAG_CLIENT, 0);
 					SetPreviewLine(PREVIEW_ENEMY, 6, "Enemy", "Nobo", FLAG_ENEMY, 0);
 					SetPreviewLine(PREVIEW_HELPER, 3, "Helper", "Ima Help this random :>", FLAG_HELPER, 0);
 					SetPreviewLine(PREVIEW_TEAMMATE, 10, "Teammate", "Help me There's too many!", FLAG_TEAMMATE, 0);
@@ -713,13 +775,14 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				}
 				
 				SetLineSkin(1, GameClient()->m_Skins.Find("pinky"));
-				SetLineSkin(2, GameClient()->m_Skins.Find("default"));
+				SetLineSkin(2, GameClient()->m_Skins.Find("-Baby_Dou_KZ-"));
 				SetLineSkin(3, GameClient()->m_Skins.Find("cammostripes"));
 				SetLineSkin(4, GameClient()->m_Skins.Find("beast"));
-				SetLineSkin(5, GameClient()->m_Skins.Find("pinky"));
-				SetLineSkin(3, GameClient()->m_Skins.Find("Robot"));
-				SetLineSkin(6, GameClient()->m_Skins.Find("Catnoa"));
-				SetLineSkin(7, GameClient()->m_Skins.Find("Bot"));
+				SetLineSkin(5, GameClient()->m_Skins.Find("default"));
+				SetLineSkin(6, GameClient()->m_Skins.Find("Robot"));
+				SetLineSkin(7, GameClient()->m_Skins.Find("Catnoa"));
+				SetLineSkin(8, GameClient()->m_Skins.Find("turtle"));
+		
 
 				// Backgrounds first
 				if(!g_Config.m_ClChatOld)

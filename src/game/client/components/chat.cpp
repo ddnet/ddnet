@@ -641,7 +641,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	if(*pLine == 0 ||
 		(ClientId == SERVER_MSG && !g_Config.m_ClShowChatSystem) ||
 		(ClientId >= 0 && (m_pClient->m_aClients[ClientId].m_aName[0] == '\0' || // unknown client
-					  m_pClient->m_aClients[ClientId].m_ChatIgnore || GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[ClientId].m_aName) || 
+					  m_pClient->m_aClients[ClientId].m_ChatIgnore || GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[ClientId].m_aName) || /* make this still appear in console */
 					  (m_pClient->m_Snap.m_LocalClientId != ClientId && g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[ClientId].m_Friend) ||
 					  (m_pClient->m_Snap.m_LocalClientId != ClientId && g_Config.m_ClShowChatTeamMembersOnly && m_pClient->IsOtherTeam(ClientId) && m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientId) != TEAM_FLOCK) ||
 					  (m_pClient->m_Snap.m_LocalClientId != ClientId && m_pClient->m_aClients[ClientId].m_Foe))))
@@ -745,7 +745,9 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	pCurrentLine->m_Friend = false;
 	pCurrentLine->m_Paused = false;
 	pCurrentLine->m_IsWar = false;
+	pCurrentLine->m_IsHelper = false;
 	pCurrentLine->m_IsTeam = false;
+	pCurrentLine->m_IsMute = false;
 	pCurrentLine->m_HasRenderTee = false;
 
 	TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
@@ -770,26 +772,32 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	}
 
 	pCurrentLine->m_Highlighted = Highlighted;
+	const auto IsWar = GameClient()->m_WarList.IsWarlist(m_pClient->m_aClients[ClientId].m_aName);
+	const auto IsHelper = GameClient()->m_WarList.IsHelperlist(m_pClient->m_aClients[ClientId].m_aName);
+	const auto IsTeam = GameClient()->m_WarList.IsTeamlist(m_pClient->m_aClients[ClientId].m_aName);
+	const auto IsMute = GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[ClientId].m_aName);
 
 	if(pCurrentLine->m_ClientId == SERVER_MSG)
 	{
-		str_copy(pCurrentLine->m_aName, g_Config.m_ClServerMsgPrefix);
+		if(g_Config.m_ClChatServerPrefix)
+			str_copy(pCurrentLine->m_aName, g_Config.m_ClServerPrefix);
+		else
+			str_copy(pCurrentLine->m_aName, "*** ");
 		str_copy(pCurrentLine->m_aText, pLine);
 	}
 	else if(pCurrentLine->m_ClientId == CLIENT_MSG)
 	{
-		// Alt + 0151
-		str_copy(pCurrentLine->m_aName, g_Config.m_ClClientMsgPrefix);
+		if(g_Config.m_ClChatClientPrefix)
+			str_copy(pCurrentLine->m_aName, g_Config.m_ClClientPrefix);
+		else
+			str_copy(pCurrentLine->m_aName, "— ");
 		str_copy(pCurrentLine->m_aText, pLine);
+		
 	}
 	else
 	{
-		// in menu icon? ☼
-
 		auto &LineAuthor = m_pClient->m_aClients[pCurrentLine->m_ClientId];
-		const auto IsWar = GameClient()->m_WarList.IsWarlist(m_pClient->m_aClients[ClientId].m_aName);
-		const auto IsTeam = GameClient()->m_WarList.IsTeamlist(m_pClient->m_aClients[ClientId].m_aName);
-		const auto IsMute = GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[ClientId].m_aName);
+
 
 
 		if(LineAuthor.m_Team == TEAM_SPECTATORS)
@@ -824,6 +832,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		pCurrentLine->m_Friend = LineAuthor.m_Friend;
 		pCurrentLine->m_Paused = LineAuthor.m_Paused || LineAuthor.m_Spec;
 		pCurrentLine->m_IsWar = IsWar;
+		pCurrentLine->m_IsHelper = IsHelper;
 		pCurrentLine->m_IsTeam = IsTeam;
 		pCurrentLine->m_IsMute = IsMute;
 
@@ -1052,15 +1061,19 @@ void CChat::OnPrepareLines(float y)
 					
 					TextRender()->TextEx(&Cursor, g_Config.m_ClFriendPrefix);
 				}
-				if(Line.m_Paused && g_Config.m_ClChatSpecMark)
+				if(Line.m_Paused && g_Config.m_ClChatSpecPrefix)
 				{
 					TextRender()->TextEx(&Cursor, g_Config.m_ClSpecPrefix);
 				}
-				if(Line.m_IsWar && g_Config.m_ClChatTeammateMark)
+				if(Line.m_IsWar && g_Config.m_ClChatTeammatePrefix)
 				{
 					TextRender()->TextEx(&Cursor, g_Config.m_ClTeammatePrefix);
 				}
-				if(Line.m_IsTeam && g_Config.m_ClChatEnemyMark)
+				if(Line.m_IsHelper && g_Config.m_ClChatHelperPrefix)
+				{
+					TextRender()->TextEx(&Cursor, g_Config.m_ClHelperPrefix);
+				}
+				if(Line.m_IsTeam && g_Config.m_ClChatEnemyPrefix)
 				{
 					TextRender()->TextEx(&Cursor, g_Config.m_ClEnemyPrefix);
 				}
@@ -1110,28 +1123,33 @@ void CChat::OnPrepareLines(float y)
 		{
 			Cursor.m_X += RealMsgPaddingTee;
 
-			if(Line.m_Paused && g_Config.m_ClChatSpecMark)
+			if(Line.m_Paused && g_Config.m_ClChatSpecPrefix)
 			{
 				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSpecColor)).WithAlpha(1.f));
 				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClSpecPrefix);
 			}
 			// if player is enemy
-			if(Line.m_IsWar && !Line.m_IsTeam && g_Config.m_ClChatEnemyMark)
+			if(Line.m_IsWar && !Line.m_IsTeam && g_Config.m_ClChatEnemyPrefix)
 			{
 				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor)).WithAlpha(1.f));
 				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClEnemyPrefix);
 			}
 			// if player is teammate
-			else if(Line.m_IsTeam && !Line.m_IsWar && g_Config.m_ClChatTeammateMark)
+			else if(Line.m_IsTeam && !Line.m_IsWar && g_Config.m_ClChatTeammatePrefix)
 			{
 				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClTeamColor)).WithAlpha(1.f));
 				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClTeammatePrefix);
 			}
 			// if player is in both war and team only put war message
-			else if(Line.m_IsTeam && Line.m_IsWar && g_Config.m_ClChatEnemyMark)
+			else if(Line.m_IsTeam && Line.m_IsWar && g_Config.m_ClChatEnemyPrefix)
 			{
 				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor)).WithAlpha(1.f));
 				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClEnemyPrefix);
+			}
+			else if(Line.m_IsHelper && g_Config.m_ClChatHelperPrefix)
+			{
+				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHelperColor)).WithAlpha(1.f));
+				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, g_Config.m_ClHelperPrefix);
 			}
 			else if(Line.m_Friend && g_Config.m_ClMessageFriend)
 			{
