@@ -593,4 +593,8 @@ Messages = [
 	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),
+
+	NetMessageEx("Cl_ReceivePoints", "receive-points@netmsg.ddnet.org", [
+		NetBool("m_ReceivePoints"),
+	]),
 ]
