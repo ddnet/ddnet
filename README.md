@@ -9,6 +9,13 @@ go to manage > browse local files and find the ddnet folder, then replace it wit
 And as a side note you might wanna turn off auto updates
 ### Windows
 download the Game.zip and extract it to somewhere. Create a *Shortcut* and place *the shortcut* on your desktop and you're done!
+
+### Windows protected your PC?
+
+I mean the source is literally right here.
+
+press on More Info and run anyway :p
+
 ### Different OS?
 If on a different operating system you have to build the Client yourself.
 steps on how to do that are on the official [ddnet github](https://github.com/ddnet/ddnet/)
@@ -21,13 +28,7 @@ I've looked into it for about 10 minutes and already figured that I wont be able
 
 If anyones willing to help me with this, please feel free to
 
-### Windows protected your PC?
-
-I mean the source is literally right here.
-
-press on More Info and run anyway :p
-
-### heres why this will be changed: 
+### further explanation: 
 
 Basically the new images need to be loaded somehow and I cant just embed them into the .exe, cause I'm also too stupid for that
 I thought about autoupadtes and it downloading it from my servers but I have no clue how that would work.
