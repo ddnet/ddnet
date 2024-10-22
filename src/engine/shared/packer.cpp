@@ -26,39 +26,48 @@ void CPacker::AddInt(int i)
 	m_pCurrent = pNext;
 }
 
-void CPacker::AddString(const char *pStr, int Limit)
+void CPacker::AddString(const char *pStr, int Limit, bool AllowTruncation)
 {
 	if(m_Error)
 		return;
 
+	unsigned char *const pPrevCurrent = m_pCurrent;
 	if(Limit <= 0)
 	{
 		Limit = PACKER_BUFFER_SIZE;
 	}
-	while(*pStr && Limit != 0)
+	while(*pStr)
 	{
 		int Codepoint = str_utf8_decode(&pStr);
 		if(Codepoint == -1)
 		{
 			Codepoint = 0xfffd; // Unicode replacement character.
 		}
-		char aGarbage[4];
-		int Length = str_utf8_encode(aGarbage, Codepoint);
+		char aEncoded[4];
+		const int Length = str_utf8_encode(aEncoded, Codepoint);
+		// Limit must ensure space for null termination if desired.
 		if(Limit < Length)
 		{
-			break;
+			if(AllowTruncation)
+			{
+				break;
+			}
+			m_Error = true;
+			m_pCurrent = pPrevCurrent;
+			return;
 		}
 		// Ensure space for the null termination.
-		if(m_pEnd - m_pCurrent < Length + 1)
+		if(m_pCurrent + Length + 1 > m_pEnd)
 		{
 			m_Error = true;
-			break;
+			m_pCurrent = pPrevCurrent;
+			return;
 		}
-		Length = str_utf8_encode((char *)m_pCurrent, Codepoint);
+		mem_copy(m_pCurrent, aEncoded, Length);
 		m_pCurrent += Length;
 		Limit -= Length;
 	}
-	*m_pCurrent++ = 0;
+	*m_pCurrent++ = '\0';
 }
 
 void CPacker::AddRaw(const void *pData, int Size)
