@@ -21,6 +21,12 @@ I've looked into it for about 10 minutes and already figured that I wont be able
 
 If anyones willing to help me with this, please feel free to
 
+### Windows protected your PC?
+
+I mean the source is literally right here.
+
+press on More Info and run anyway :p
+
 ### heres why this will be changed: 
 
 Basically the new images need to be loaded somehow and I cant just embed them into the .exe, cause I'm also too stupid for that
