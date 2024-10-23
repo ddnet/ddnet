@@ -658,7 +658,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					if(IsMuted && g_Config.m_ClMutedIconScore)
 					{
 						ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
-						ColorRGBA Color = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedIconColor));
+						ColorRGBA Color = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedColor));
 						TextRender()->TextEx(&Cursor, "    ");
 						Graphics()->BlendNormal();
 						
