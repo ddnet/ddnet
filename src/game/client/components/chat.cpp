@@ -237,6 +237,7 @@ void CChat::OnInit()
 
 bool CChat::OnInput(const IInput::CEvent &Event)
 {
+
 	if(m_Mode == MODE_NONE)
 		return false;
 
@@ -638,6 +639,24 @@ void CChat::StoreSave(const char *pText)
 
 void CChat::AddLine(int ClientId, int Team, const char *pLine)
 {
+
+
+	const auto MutedMsg = GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[ClientId].m_aName);
+
+	
+	if(MutedMsg && g_Config.m_ClShowMutedInConsole)
+	{
+		char Muted[2048] = "[Muted] ";
+		char bBuf[2048] = "%n: ";
+
+		str_append(Muted, pLine);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_pClient->m_aClients[ClientId].m_aName, Muted, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedColor)));
+		
+		
+		// no auto reply yet, idk if ever ,but im happy that i got it to show in the console
+		// m_pClient->m_Chat.SendChat(0, bBuf);
+	}
+
 	if(*pLine == 0 ||
 		(ClientId == SERVER_MSG && !g_Config.m_ClShowChatSystem) ||
 		(ClientId >= 0 && (m_pClient->m_aClients[ClientId].m_aName[0] == '\0' || // unknown client
