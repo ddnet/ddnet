@@ -110,6 +110,12 @@ public:
 	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) = 0;
 	virtual bool ExecuteFile(const char *pFilename, int ClientId = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) = 0;
 
+	/**
+	 * @deprecated Prefer using the `log_*` functions from base/log.h instead of this function for the following reasons:
+	 * - They support `printf`-formatting without a separate buffer.
+	 * - They support all five log levels.
+	 * - They do not require a pointer to `IConsole` to be used.
+	 */
 	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const = 0;
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) = 0;
