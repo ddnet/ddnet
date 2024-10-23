@@ -1,4 +1,4 @@
-﻿
+
 
 #include <base/log.h>
 #include <base/math.h>
@@ -194,7 +194,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 		
 		{
 			ChatSettings.HSplitTop(Margin, nullptr, &ChatSettings);
-			ChatSettings.HSplitTop(250.0f, &ChatSettings, &ColorSettings);
+			ChatSettings.HSplitTop(275.0f, &ChatSettings, &ColorSettings);
 			if(s_ScrollRegion.AddRect(ChatSettings))
 			{
 				ChatSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -205,7 +205,8 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 				
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowAiodobPreview, ("Show Chat Preview"), &g_Config.m_ClShowAiodobPreview, &ChatSettings, LineSize);
-				ChatSettings.HSplitTop(1.0f, &Button, &ChatSettings);
+				ChatSettings.HSplitTop(4.0f, &Button, &ChatSettings);
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowMutedInConsole, ("Show Messages of Muted People in The Console"), &g_Config.m_ClShowMutedInConsole, &ChatSettings, LineSize);
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoFriendColorInchat, ("Chat Friend Name"), &g_Config.m_ClDoFriendColorInchat, &ChatSettings, LineSize);
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIdsChat, ("Client Ids in Chat"), &g_Config.m_ClShowIdsChat, &ChatSettings, LineSize);
 
@@ -366,7 +367,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				Ui()->DoLabel(&Button, Localize("Color Settings"), FontSize, TEXTALIGN_MC);
 
 				static CButtonContainer s_MutedColor;
-				DoLine_ColorPicker(&s_MutedColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &ColorSettings, Localize("Color of The Muted Icon"), &g_Config.m_ClMutedIconColor, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(5439743)), true);
+				DoLine_ColorPicker(&s_MutedColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &ColorSettings, Localize("Color of The Muted Icon"), &g_Config.m_ClMutedColor, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(5439743)), true);
 
 				static CButtonContainer s_TeamColor;
 				DoLine_ColorPicker(&s_TeamColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &ColorSettings, Localize("Name Color of Teammates"), &g_Config.m_ClTeamColor, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(5504948)), true);
