@@ -127,7 +127,7 @@ MACRO_CONFIG_INT(ClApplyProfileEmote, tc_profile_emote, 1, 0, 1, CFGFLAG_CLIENT 
 
 	// Icon Color
 
-	MACRO_CONFIG_COL(ClMutedIconColor, ac_muted_icon_color, 5439743, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Muted Icon Color")
+	MACRO_CONFIG_COL(ClMutedColor, ac_muted_color, 12792139, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Muted Icon Color")
 
 	// War / Team color (chillerbots Warlist)
 
@@ -150,7 +150,9 @@ MACRO_CONFIG_INT(ClApplyProfileEmote, tc_profile_emote, 1, 0, 1, CFGFLAG_CLIENT 
 
 // Int Variables
 
-MACRO_CONFIG_INT(ClMutedIconNameplate, ac_muted_icon_nameplate, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows an Icon Next to Nameplates of Muted Players ")
+MACRO_CONFIG_INT(ClShowMutedInConsole, ac_show_muted_in_console, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows messaged of muted people in the console")
+
+MACRO_CONFIG_INT(ClMutedIconNameplate, ac_muted_icon_nameplate, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows an Icon Next to Nameplates of Muted Players")
 MACRO_CONFIG_INT(ClMutedIconScore, ac_muted_icon_Scoreboard, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows an Icon Next to Nameplates of Muted Players ")
 
 // chatbubble / Menu
@@ -219,7 +221,6 @@ MACRO_CONFIG_STR(ClHelperPrefix, ac_helper_prefix, 8, "♦ ", CFGFLAG_CLIENT | C
 
 // Custom Warlist Commands
 
-MACRO_CONFIG_STR(ClChatPrefix, ac_chat_prefix, 2, "-", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
 
 MACRO_CONFIG_STR(ClAddHelperString, ac_addhelper_string, 12, "add_helper", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
 MACRO_CONFIG_STR(ClAddMuteString, ac_addmute_string, 12, "add_mute", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
@@ -249,7 +250,6 @@ MACRO_CONFIG_INT(ClSpecMenuTeammatePrefix, ac_specmenu_team prefix, 1, 0, 1, CFG
 // Ui
 
 MACRO_CONFIG_INT(ClCornerRoundness, ac_corner_roundness, 100, -5000, 5000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How round corners are in scrollable menus")
-
 
 MACRO_CONFIG_INT(ClFpsSpoofer, ac_fps_spoofer, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Spoof Da Fps counter")
 
