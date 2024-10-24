@@ -129,6 +129,11 @@ enum
 	VERSION_DDNET_REDIRECT = 17020,
 };
 
+enum
+{
+	NUM_TUNEZONES = 256,
+};
+
 typedef std::bitset<MAX_CLIENTS> CClientMask;
 
 #endif
