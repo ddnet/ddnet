@@ -26,7 +26,9 @@ class CCharacter : public CEntity
 {
 	MACRO_ALLOC_POOL_ID()
 
-	friend class CSaveTee; // need to use core
+	// need to use core
+	friend class CSaveTee;
+	friend class CSaveHotReloadTee;
 
 public:
 	CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput);
