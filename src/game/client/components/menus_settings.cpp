@@ -2775,6 +2775,12 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		}
 
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
+		if(DoButton_CheckBox(&g_Config.m_ClNameplatesNetwork, Localize("Show connection problems icon"), g_Config.m_ClNameplatesNetwork, &Button))
+		{
+			g_Config.m_ClNameplatesNetwork = g_Config.m_ClNameplatesNetwork ^ 1;
+		}
+
+		LeftView.HSplitTop(LineSize, &Button, &LeftView);
 		if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection >= 1 && g_Config.m_ClShowDirection != 3, &Button))
 		{
 			g_Config.m_ClShowDirection = g_Config.m_ClShowDirection ^ 1;
@@ -2863,6 +2869,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 				TextRender()->Text(TeeRenderPos.x - TextRender()->TextWidth(FontSize, "0") / 2.0f, YOffset, FontSize, "0");
 			}
 
+			float XOffset = TeeRenderPos.x;
+			bool ChangedOffset = false;
 			if(g_Config.m_ClNameplatesStrong)
 			{
 				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_STRONGWEAK].m_Id);
@@ -2878,14 +2886,37 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 				const float StrongImgSize = 40.0f;
 				YOffset -= StrongImgSize * ScaleY;
-				RenderTools()->DrawSprite(TeeRenderPos.x, YOffset + (StrongImgSize / 2.0f) * ScaleY, StrongImgSize);
+				ChangedOffset = true;
+				if(g_Config.m_ClNameplatesNetwork)
+					XOffset = XOffset - (StrongImgSize / 2);
+				RenderTools()->DrawSprite(XOffset, YOffset + (StrongImgSize / 2.0f) * ScaleY, StrongImgSize);
 				Graphics()->QuadsEnd();
 
 				if(g_Config.m_ClNameplatesStrong == 2)
 				{
-					YOffset -= FontSize;
-					TextRender()->Text(TeeRenderPos.x - TextRender()->TextWidth(FontSize, "0") / 2.0f, YOffset, FontSize, "0");
+					TextRender()->Text(TeeRenderPos.x - TextRender()->TextWidth(FontSize, "0") / 2.0f, YOffset - FontSize, FontSize, "0");
 				}
+			}
+
+			if(g_Config.m_ClNameplatesNetwork)
+			{
+				ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_NETWORKICONS].m_Id);
+
+				Graphics()->QuadsBegin();
+				RenderTools()->SelectSprite(SPRITE_NETWORK_BAD);
+				float ScaleX, ScaleY;
+				RenderTools()->GetSpriteScale(SPRITE_NETWORK_BAD, ScaleX, ScaleY);
+
+				const float NetworkImgSize = 40.0f;
+				if(!ChangedOffset)
+					YOffset -= NetworkImgSize * ScaleY;
+				else
+					XOffset += NetworkImgSize;
+
+				Graphics()->SetColor(Color);
+				RenderTools()->DrawSprite(XOffset, YOffset + (NetworkImgSize / 2.0f) * ScaleY, NetworkImgSize);
+				Graphics()->QuadsEnd();
 			}
 		}
 

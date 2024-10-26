@@ -424,6 +424,14 @@ void CPlayer::Snap(int SnappingClient)
 	if(m_Paused == PAUSE_PAUSED)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
 
+	IServer::CClientInfo Info;
+	if(Server()->GetClientInfo(id, &Info))
+	{
+		// Send "connection problems" flag if player hasn't sent any packets after 5 seconds.
+		if(Server()->Tick() - Info.m_LastPacketTick >= 5 * Server()->TickSpeed())
+			pDDNetPlayer->m_Flags |= EXPLAYERFLAG_CONNECTION_PROBLEMS;
+	}
+
 	if(Server()->IsSixup(SnappingClient) && m_pCharacter && m_pCharacter->m_DDRaceState == DDRACE_STARTED &&
 		GameServer()->m_apPlayers[SnappingClient]->m_TimerType == TIMERTYPE_SIXUP)
 	{

@@ -145,6 +145,7 @@ public:
 
 		int m_LastAckedSnapshot;
 		int m_LastInputTick;
+		int m_LastPacketTick;
 		CSnapshotStorage m_Snapshots;
 
 		CInput m_LatestInput;

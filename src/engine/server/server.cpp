@@ -214,6 +214,7 @@ void CServer::CClient::Reset()
 	m_Snapshots.PurgeAll();
 	m_LastAckedSnapshot = -1;
 	m_LastInputTick = -1;
+	m_LastPacketTick = -1;
 	m_SnapRate = CClient::SNAPRATE_INIT;
 	m_Score = -1;
 	m_NextMapChunk = 0;
@@ -587,6 +588,7 @@ bool CServer::GetClientInfo(int ClientId, CClientInfo *pInfo) const
 		pInfo->m_Latency = m_aClients[ClientId].m_Latency;
 		pInfo->m_GotDDNetVersion = m_aClients[ClientId].m_DDNetVersionSettled;
 		pInfo->m_DDNetVersion = m_aClients[ClientId].m_DDNetVersion >= 0 ? m_aClients[ClientId].m_DDNetVersion : VERSION_VANILLA;
+		pInfo->m_LastPacketTick = m_aClients[ClientId].m_LastPacketTick;
 		if(m_aClients[ClientId].m_GotDDNetVersionPacket)
 		{
 			pInfo->m_pConnectionId = &m_aClients[ClientId].m_ConnectionId;
@@ -1458,6 +1460,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		return;
 	}
 
+	m_aClients[ClientId].m_LastPacketTick = Tick();
 	if(Config()->m_SvNetlimit && Msg != NETMSG_REQUEST_MAP_DATA)
 	{
 		int64_t Now = time_get();
