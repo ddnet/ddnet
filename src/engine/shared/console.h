@@ -84,8 +84,8 @@ class CConsole : public IConsole
 		const char *m_pCommand;
 		const char *m_apArgs[MAX_PARTS];
 
-		CResult()
-
+		CResult(int ClientId) :
+			IResult(ClientId)
 		{
 			mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
 			m_pArgsStart = 0;

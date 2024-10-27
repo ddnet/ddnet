@@ -376,7 +376,7 @@ bool CConsole::LineIsValid(const char *pStr)
 
 	do
 	{
-		CResult Result;
+		CResult Result(-1);
 		const char *pEnd = pStr;
 		const char *pNextPart = 0;
 		int InString = 0;
@@ -427,8 +427,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 	}
 	while(pStr && *pStr)
 	{
-		CResult Result;
-		Result.m_ClientId = ClientId;
+		CResult Result(ClientId);
 		const char *pEnd = pStr;
 		const char *pNextPart = 0;
 		int InString = 0;
@@ -754,7 +753,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 {
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
-	CResult Result;
+	CResult Result(pResult->m_ClientId);
 	Result.m_pCommand = "access_status";
 	char aBuf[4];
 	str_format(aBuf, sizeof(aBuf), "%d", (int)IConsole::ACCESS_LEVEL_USER);
