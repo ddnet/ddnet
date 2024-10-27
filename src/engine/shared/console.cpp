@@ -522,9 +522,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 					}
 					else if(m_StoreCommands && pCommand->m_Flags & CFGFLAG_STORE)
 					{
-						m_ExecutionQueue.AddEntry();
-						m_ExecutionQueue.m_pLast->m_pCommand = pCommand;
-						m_ExecutionQueue.m_pLast->m_Result = Result;
+						m_vExecutionQueue.emplace_back(pCommand, Result);
 					}
 					else
 					{
@@ -781,7 +779,6 @@ CConsole::CConsole(int FlagMask)
 	m_StoreCommands = true;
 	m_apStrokeStr[0] = "0";
 	m_apStrokeStr[1] = "1";
-	m_ExecutionQueue.Reset();
 	m_pFirstCommand = 0;
 	m_pFirstExec = 0;
 	m_pfnTeeHistorianCommandCallback = 0;
@@ -1030,9 +1027,11 @@ void CConsole::StoreCommands(bool Store)
 {
 	if(!Store)
 	{
-		for(CExecutionQueue::CQueueEntry *pEntry = m_ExecutionQueue.m_pFirst; pEntry; pEntry = pEntry->m_pNext)
-			pEntry->m_pCommand->m_pfnCallback(&pEntry->m_Result, pEntry->m_pCommand->m_pUserData);
-		m_ExecutionQueue.Reset();
+		for(CExecutionQueueEntry &Entry : m_vExecutionQueue)
+		{
+			Entry.m_pCommand->m_pfnCallback(&Entry.m_Result, Entry.m_pCommand->m_pUserData);
+		}
+		m_vExecutionQueue.clear();
 	}
 	m_StoreCommands = Store;
 }
