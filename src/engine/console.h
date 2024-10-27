@@ -47,7 +47,12 @@ public:
 		unsigned m_NumArgs;
 
 	public:
-		IResult() { m_NumArgs = 0; }
+		IResult(int ClientId) :
+			m_NumArgs(0),
+			m_ClientId(ClientId) {}
+		IResult(const IResult &Other) :
+			m_NumArgs(Other.m_NumArgs),
+			m_ClientId(Other.m_ClientId) {}
 		virtual ~IResult() {}
 
 		virtual int GetInteger(unsigned Index) const = 0;
