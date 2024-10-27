@@ -950,6 +950,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		m_aReceivedTuning[Conn] = true;
 		// apply new tuning
 		m_aTuning[Conn] = NewTuning;
+		TuningList()[0] = NewTuning;
 		return;
 	}
 
@@ -3799,6 +3800,13 @@ void CGameClient::LoadMapSettings()
 	for(int i = 0; i < NUM_TUNEZONES; i++)
 	{
 		TuningList()[i] = TuningParams;
+
+		// only hardcode ddrace tuning for the tune zones
+		// and not the base tuning
+		// that one will be sent by the server if needed
+		if(!i)
+			continue;
+
 		TuningList()[i].Set("gun_curvature", 0);
 		TuningList()[i].Set("gun_speed", 1400);
 		TuningList()[i].Set("shotgun_curvature", 0);
