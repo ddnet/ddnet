@@ -21,7 +21,7 @@
 MACRO_CONFIG_INT(ClFinishRename, cb_finish_rename, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Change name to cb_finish_name if finish is near.")
 MACRO_CONFIG_STR(ClFinishName, cb_finish_name, 16, "Aiodob", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Change to this name if cb_finish_rename is active.")
 MACRO_CONFIG_INT(ClCampHack, cb_camp_hack, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "0=off 1=mark with gun 2=auto walk")
-MACRO_CONFIG_STR(ClAutoReplyMsg, cb_auto_reply_msg, 32, "I'm currently tabbed out", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply when pinged in chat and cb_auto_reply is set to 1")
+MACRO_CONFIG_STR(ClAutoReplyMsg, cb_auto_reply_msg, 255, "I'm currently tabbed out", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply when pinged in chat and cb_auto_reply is set to 1")
 MACRO_CONFIG_INT(ClTabbedOutMsg, cb_tabbed_out_msg, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Let others know when pinged in chat that you are tabbed out")
 
 MACRO_CONFIG_INT(ClChillerbotHud, cb_chillerbot_hud, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show enabled chillerbot components in hud")
@@ -163,6 +163,10 @@ MACRO_CONFIG_INT(ClShowOwnMenuToOthers, ac_show_self_in_menu, 1, 0, 1, CFGFLAG_C
 
 
 // misc
+
+MACRO_CONFIG_INT(ClReplyMuted, ac_reply_muted, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "replies to muted player")
+
+
 MACRO_CONFIG_INT(ClShowIdsChat, ac_show_ids_chat, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Whether to Show Client IDs in Chat")
 
 MACRO_CONFIG_INT(ClStrongWeakColorId, ac_strong_weak_color_id, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render ClientIds in Nameplate Same Color as Strong/Weak Hook Color")
@@ -231,8 +235,11 @@ MACRO_CONFIG_STR(ClRemoveMuteString, ac_delmute_string, 12, "del_mute", CFGFLAG_
 MACRO_CONFIG_STR(ClRemoveWarString, ac_delwar_string, 12, "del_war", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
 MACRO_CONFIG_STR(ClRemoveTeamString, ac_delteam_string, 12, "del_team", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
 
+MACRO_CONFIG_STR(ClAutoReplyMutedMsg, ac_auto_reply_muted_msg, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
 
-MACRO_CONFIG_STR(ClTest, ac_test, 24, "test", CFGFLAG_CLIENT | CFGFLAG_SAVE, "test")
+
+
+MACRO_CONFIG_STR(ClTest, ac_test, 32, "test", CFGFLAG_CLIENT | CFGFLAG_SAVE, "test")
 
 // In Spec Menu Prefixes
 
@@ -249,14 +256,31 @@ MACRO_CONFIG_INT(ClSpecMenuTeammatePrefix, ac_specmenu_team prefix, 1, 0, 1, CFG
 
 // Ui
 
+MACRO_CONFIG_INT(ClShowAllSettings, ac_show_all_settings, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(doesnt do anything) shows all settings in the Aiodob Menu")
+
 MACRO_CONFIG_INT(ClCornerRoundness, ac_corner_roundness, 100, -5000, 5000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How round corners are in scrollable menus")
 
 MACRO_CONFIG_INT(ClFpsSpoofer, ac_fps_spoofer, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Spoof Da Fps counter")
 
 MACRO_CONFIG_INT(ClFpsSpoofPercentage, ac_fps_spoofer_percentage, 100, -5000, 5000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Fps Spoofer Percentage")
 
+MACRO_CONFIG_INT(ClAidsPingDetection, ac_aids_ping_detection, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "shows ping range 76-77 in black (ping of a weirdo)")
+
 
 // Tee
+
+// Rainbow
+
+MACRO_CONFIG_INT(ClRainbowHook, tc_rainbow_hook, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on rainbow hook client side")
+MACRO_CONFIG_INT(ClRainbowModeHook, tc_rainbow_mode_hook, 1, 1, 4, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Rainbow mode (1: off, 2: rainbow, 3: pulse, 4: darkness)")
+
+MACRO_CONFIG_INT(ClRainbowOthers, tc_rainbow_others, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on rainbow client side for others")
+MACRO_CONFIG_INT(ClRainbowMode, tc_rainbow_mode, 1, 1, 4, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Rainbow mode (1: off, 2: rainbow, 3: pulse, 4: darkness)")
+
+
+
+MACRO_CONFIG_INT(ClSmallSkins, cle_small_skins, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Small tees")
+
 
 MACRO_CONFIG_INT(ClTeeSize, cle_tee_size, 0, -5640, 4360, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Size of tees")
 MACRO_CONFIG_INT(ClTeeWalkRuntime, cle_tee_walkruntime, 0, -5000, 5000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "weird animations?? walk/run -time")
