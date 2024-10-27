@@ -327,12 +327,6 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			Button2.x + 250.0f, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
 
 
-		/* * * * * * * * * * * * * * * * 
-		 *							   *
-		 *TODO: FIX BUTTON POSITIONS;  *
-		 *							   *
-		 * * * * * * * * * * * * * * * */ 
-		 
 
 		// copy name button
 

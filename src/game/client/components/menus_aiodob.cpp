@@ -1,4 +1,4 @@
-
+﻿
 
 #include <base/log.h>
 #include <base/math.h>
@@ -47,9 +47,8 @@ using namespace std::chrono_literals;
 enum {
 		AIODOB_TAB_PAGE1 = 0,
 		AIODOB_TAB_BINDWHEEL = 1,
-		AIODOB_TAB_PAGE3 = 2,
-		AIODOB_TAB_PAGE4 = 3,
-		NUMBER_OF_AIODOB_TABS = 4,
+		AIODOB_TAB_VISUAL = 2,
+		NUMBER_OF_AIODOB_TABS = 3,
 
 	};
 
@@ -66,8 +65,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 	const char *apTabNames[NUMBER_OF_AIODOB_TABS] = {
 		Localize("Usefull Settings"),
 		Localize("BindWheel"),
-		Localize("Useless Stuff"),
-		Localize("Mostly Useless Stuff")};
+		Localize("Visual Settings")};
 
 	for(int Tab = AIODOB_TAB_PAGE1; Tab < NUMBER_OF_AIODOB_TABS; ++Tab)
 	{
@@ -118,21 +116,21 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 		{
 			ChillerBotSettings.VMargin(5.0f, &ChillerBotSettings);
-			ChillerBotSettings.HSplitTop(100.0f, &ChillerBotSettings, &ChatSettings);
+			ChillerBotSettings.HSplitTop(125.0f, &ChillerBotSettings, &ChatSettings);
 			if(s_ScrollRegion.AddRect(ChillerBotSettings))
 			{
 				ChillerBotSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
 				ChillerBotSettings.VMargin(Margin, &ChillerBotSettings);
 
 				ChillerBotSettings.HSplitTop(HeaderHeight, &Button, &ChillerBotSettings);
-				Ui()->DoLabel(&Button, Localize("Chillerbot Features"), FontSize, TEXTALIGN_MC);
+				Ui()->DoLabel(&Button, Localize("Other Features"), FontSize, TEXTALIGN_MC);
 				{
 					
 					ChillerBotSettings.HSplitTop(20.0f, &Button, &MainView);
 					
 					Button.VSplitLeft(0.0f, &Button, &ChillerBotSettings);
 					Button.VSplitLeft(100.0f, &Label, &Button);
-					Button.VSplitLeft(230.0f, &Button, 0);
+					Button.VSplitLeft(300.0f, &Button, 0);
 				
 					static CLineInput s_ReplyMsg;
 					s_ReplyMsg.SetBuffer(g_Config.m_ClAutoReplyMsg, sizeof(g_Config.m_ClAutoReplyMsg));
@@ -144,7 +142,29 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					}
 					Ui()->DoEditBox(&s_ReplyMsg, &Button, 14.0f);
 				}
+
 				ChillerBotSettings.HSplitTop(21.0f, &Button, &ChillerBotSettings);
+								
+				{
+					ChillerBotSettings.HSplitTop(20.0f, &Button, &MainView);
+
+					Button.VSplitLeft(0.0f, &Button, &ChillerBotSettings);
+					Button.VSplitLeft(110.0f, &Label, &Button);
+					Button.VSplitLeft(290.0f, &Button, 0);
+
+					static CLineInput s_ReplyMsg;
+					s_ReplyMsg.SetBuffer(g_Config.m_ClAutoReplyMutedMsg, sizeof(g_Config.m_ClAutoReplyMutedMsg));
+					s_ReplyMsg.SetEmptyText("You're muted, I can't see your messages");
+
+					if(DoButton_CheckBox(&g_Config.m_ClReplyMuted, "Muted Reply", g_Config.m_ClReplyMuted, &ChillerBotSettings))
+					{
+						g_Config.m_ClReplyMuted ^= 1;
+					}
+					Ui()->DoEditBox(&s_ReplyMsg, &Button, 14.0f);
+				}
+
+				ChillerBotSettings.HSplitTop(21.0f, &Button, &ChillerBotSettings);
+
 				{
 					ChillerBotSettings.HSplitTop(19.9f, &Button, &MainView);
 				
@@ -165,25 +185,6 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				}
 				ChillerBotSettings.HSplitTop(20.0f, &Button, &ChillerBotSettings);
 
-
-				/* Disabled due to breaking randomly and I cant be bothered to fix it sorry :p
-				{ 
-					ChillerBotSettings.HSplitTop(19.9f, &Button, &MainView);
-
-					Button.VSplitLeft(0.0f, &Button, &ChillerBotSettings);
-					Button.VSplitLeft(140.0f, &Label, &Button);
-					Button.VSplitLeft(190.0f, &Button, 0);
-
-		
-
-					if(DoButton_CheckBox(&g_Config.m_ClSkinStealer, "Skin Stealer", g_Config.m_ClSkinStealer, &ChillerBotSettings))
-					{
-						str_format(aBuf, sizeof(aBuf), "cb_skin_stealer %d", !g_Config.m_ClSkinStealer);
-						Console()->ExecuteLine(aBuf);
-					}
-			
-				}*/
-				
 				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChangeTileNotification, ("Notify When Player is Being Moved"), &g_Config.m_ClChangeTileNotification, &ChillerBotSettings, LineSize));
 
 			
@@ -194,7 +195,10 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 		
 		{
 			ChatSettings.HSplitTop(Margin, nullptr, &ChatSettings);
-			ChatSettings.HSplitTop(275.0f, &ChatSettings, &ColorSettings);
+			if(g_Config.m_ClShowAiodobPreview)
+				ChatSettings.HSplitTop(275.0f, &ChatSettings, &ColorSettings);
+			else
+				ChatSettings.HSplitTop(124.0f, &ChatSettings, &ColorSettings);
 			if(s_ScrollRegion.AddRect(ChatSettings))
 			{
 				ChatSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -203,161 +207,164 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				ChatSettings.HSplitTop(HeaderHeight, &Button, &ChatSettings);
 				Ui()->DoLabel(&Button, Localize("Chat Settings"), FontSize, TEXTALIGN_MC);
 
-				
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowAiodobPreview, ("Show Chat Preview"), &g_Config.m_ClShowAiodobPreview, &ChatSettings, LineSize);
-				ChatSettings.HSplitTop(4.0f, &Button, &ChatSettings);
+		
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowMutedInConsole, ("Show Messages of Muted People in The Console"), &g_Config.m_ClShowMutedInConsole, &ChatSettings, LineSize);
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoFriendColorInchat, ("Chat Friend Name"), &g_Config.m_ClDoFriendColorInchat, &ChatSettings, LineSize);
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIdsChat, ("Client Ids in Chat"), &g_Config.m_ClShowIdsChat, &ChatSettings, LineSize);
 
-				// enemy prefix
-
+				ChatSettings.HSplitTop(4.0f, &Button, &ChatSettings);
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowAiodobPreview, ("Show Prefix Settings And Chat Preview"), &g_Config.m_ClShowAiodobPreview, &ChatSettings, LineSize);
 				ChatSettings.HSplitTop(2.0f, &Button, &ChatSettings);
+				if(g_Config.m_ClShowAiodobPreview)
 				{
-					ChatSettings.HSplitTop(19.9f, &Button, &MainView);
+					// enemy prefix
 
-					Button.VSplitLeft(0.0f, &Button, &ChatSettings);
-					Button.VSplitLeft(140.0f, &Label, &Button);
-					Button.VSplitLeft(85.0f, &Button, 0);
-
-					static CLineInput s_PrefixMsg;
-					s_PrefixMsg.SetBuffer(g_Config.m_ClEnemyPrefix, sizeof(g_Config.m_ClEnemyPrefix));
-					s_PrefixMsg.SetEmptyText("alt + num4");
-					if(DoButton_CheckBox(&g_Config.m_ClChatEnemyPrefix, "Enemy Prefix", g_Config.m_ClChatEnemyPrefix, &ChatSettings))
+					ChatSettings.HSplitTop(2.0f, &Button, &ChatSettings);
 					{
-						g_Config.m_ClChatEnemyPrefix ^= 1;
+						ChatSettings.HSplitTop(19.9f, &Button, &MainView);
+
+						Button.VSplitLeft(0.0f, &Button, &ChatSettings);
+						Button.VSplitLeft(140.0f, &Label, &Button);
+						Button.VSplitLeft(85.0f, &Button, 0);
+
+						static CLineInput s_PrefixMsg;
+						s_PrefixMsg.SetBuffer(g_Config.m_ClEnemyPrefix, sizeof(g_Config.m_ClEnemyPrefix));
+						s_PrefixMsg.SetEmptyText("alt + num4");
+						if(DoButton_CheckBox(&g_Config.m_ClChatEnemyPrefix, "Enemy Prefix", g_Config.m_ClChatEnemyPrefix, &ChatSettings))
+						{
+							g_Config.m_ClChatEnemyPrefix ^= 1;
+						}
+						Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
 					}
-					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
-				}
 
-				// helper prefix
-				
-				ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
-				{
-					ChatSettings.HSplitTop(19.9f, &Button, &MainView);
-
-					Button.VSplitLeft(0.0f, &Button, &ChatSettings);
-					Button.VSplitLeft(140.0f, &Label, &Button);
-					Button.VSplitLeft(85.0f, &Button, 0);
-
-					static CLineInput s_PrefixMsg;
-					s_PrefixMsg.SetBuffer(g_Config.m_ClHelperPrefix, sizeof(g_Config.m_ClHelperPrefix));
-					s_PrefixMsg.SetEmptyText("alt + num4");
-					if(DoButton_CheckBox(&g_Config.m_ClChatHelperPrefix, "Helper Prefix", g_Config.m_ClChatHelperPrefix, &ChatSettings))
-					{
-						g_Config.m_ClChatHelperPrefix ^= 1;
-					}
-					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
-				}
-
-				// teammate prefix
-
-				ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
-				{
-					ChatSettings.HSplitTop(19.9f, &Button, &MainView);
-
-					Button.VSplitLeft(0.0f, &Button, &ChatSettings);
-					Button.VSplitLeft(140.0f, &Label, &Button);
-					Button.VSplitLeft(85.0f, &Button, 0);
-
-					static CLineInput s_PrefixMsg;
-					s_PrefixMsg.SetBuffer(g_Config.m_ClTeammatePrefix, sizeof(g_Config.m_ClTeammatePrefix));
-					s_PrefixMsg.SetEmptyText("alt + num4");
-					if(DoButton_CheckBox(&g_Config.m_ClChatTeammatePrefix, "Teammate Prefix", g_Config.m_ClChatTeammatePrefix, &ChatSettings))
-					{
-						g_Config.m_ClChatTeammatePrefix ^= 1;
-					}
-					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
-				}
-
-				// friend prefix
-
-				ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
-
-				{
-					ChatSettings.HSplitTop(19.9f, &Button, &MainView);
-
-					Button.VSplitLeft(0.0f, &Button, &ChatSettings);
-					Button.VSplitLeft(140.0f, &Label, &Button);
-					Button.VSplitLeft(85.0f, &Button, 0);
-
-					static CLineInput s_PrefixMsg;
-					s_PrefixMsg.SetBuffer(g_Config.m_ClFriendPrefix, sizeof(g_Config.m_ClFriendPrefix));
-					s_PrefixMsg.SetEmptyText("alt + num3");
-					if(DoButton_CheckBox(&g_Config.m_ClMessageFriend, "Friend Prefix", g_Config.m_ClMessageFriend, &ChatSettings))
-					{
-						g_Config.m_ClMessageFriend ^= 1;
-					}
-					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
-				}
-
-				// spectate prefix
-
-				ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
-				{
-					ChatSettings.HSplitTop(19.9f, &Button, &MainView);
-
-					Button.VSplitLeft(0.0f, &Button, &ChatSettings);
-					Button.VSplitLeft(140.0f, &Label, &Button);
-					Button.VSplitLeft(85.0f, &Button, 0);
-
-					static CLineInput s_PrefixMsg;
-					s_PrefixMsg.SetBuffer(g_Config.m_ClSpecPrefix, sizeof(g_Config.m_ClSpecPrefix));
-					s_PrefixMsg.SetEmptyText("(s) ");
-					if(DoButton_CheckBox(&g_Config.m_ClChatSpecPrefix, "Spec Prefix", g_Config.m_ClChatSpecPrefix, &ChatSettings))
-					{
-						g_Config.m_ClChatSpecPrefix ^= 1;
-					}
-					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
-				}
-
-				// server prefix
+					// helper prefix
 
 					ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
-				{
-					ChatSettings.HSplitTop(19.9f, &Button, &MainView);
-
-					Button.VSplitLeft(0.0f, &Button, &ChatSettings);
-					Button.VSplitLeft(140.0f, &Label, &Button);
-					Button.VSplitLeft(85.0f, &Button, 0);
-
-					static CLineInput s_PrefixMsg;
-					s_PrefixMsg.SetBuffer(g_Config.m_ClServerPrefix, sizeof(g_Config.m_ClServerPrefix));
-					s_PrefixMsg.SetEmptyText("*** ");
-					if(DoButton_CheckBox(&g_Config.m_ClChatServerPrefix, "Server Prefix", g_Config.m_ClChatServerPrefix, &ChatSettings))
 					{
-						g_Config.m_ClChatServerPrefix ^= 1;
-					}
-					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
-				}
+						ChatSettings.HSplitTop(19.9f, &Button, &MainView);
 
-				//client prefix
+						Button.VSplitLeft(0.0f, &Button, &ChatSettings);
+						Button.VSplitLeft(140.0f, &Label, &Button);
+						Button.VSplitLeft(85.0f, &Button, 0);
+
+						static CLineInput s_PrefixMsg;
+						s_PrefixMsg.SetBuffer(g_Config.m_ClHelperPrefix, sizeof(g_Config.m_ClHelperPrefix));
+						s_PrefixMsg.SetEmptyText("alt + num4");
+						if(DoButton_CheckBox(&g_Config.m_ClChatHelperPrefix, "Helper Prefix", g_Config.m_ClChatHelperPrefix, &ChatSettings))
+						{
+							g_Config.m_ClChatHelperPrefix ^= 1;
+						}
+						Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
+					}
+
+					// teammate prefix
 
 					ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
-				{
-					ChatSettings.HSplitTop(19.9f, &Button, &MainView);
-
-					Button.VSplitLeft(0.0f, &Button, &ChatSettings);
-					Button.VSplitLeft(140.0f, &Label, &Button);
-					Button.VSplitLeft(85.0f, &Button, 0);
-
-					static CLineInput s_PrefixMsg;
-					s_PrefixMsg.SetBuffer(g_Config.m_ClClientPrefix, sizeof(g_Config.m_ClClientPrefix));
-					s_PrefixMsg.SetEmptyText("alt0151");
-					if(DoButton_CheckBox(&g_Config.m_ClChatClientPrefix, "Client Prefix", g_Config.m_ClChatClientPrefix, &ChatSettings))
 					{
-						g_Config.m_ClChatClientPrefix ^= 1;
-					}
-					Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
-				}
+						ChatSettings.HSplitTop(19.9f, &Button, &MainView);
 
+						Button.VSplitLeft(0.0f, &Button, &ChatSettings);
+						Button.VSplitLeft(140.0f, &Label, &Button);
+						Button.VSplitLeft(85.0f, &Button, 0);
+
+						static CLineInput s_PrefixMsg;
+						s_PrefixMsg.SetBuffer(g_Config.m_ClTeammatePrefix, sizeof(g_Config.m_ClTeammatePrefix));
+						s_PrefixMsg.SetEmptyText("alt + num4");
+						if(DoButton_CheckBox(&g_Config.m_ClChatTeammatePrefix, "Teammate Prefix", g_Config.m_ClChatTeammatePrefix, &ChatSettings))
+						{
+							g_Config.m_ClChatTeammatePrefix ^= 1;
+						}
+						Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
+					}
+
+					// friend prefix
+
+					ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
+
+					{
+						ChatSettings.HSplitTop(19.9f, &Button, &MainView);
+
+						Button.VSplitLeft(0.0f, &Button, &ChatSettings);
+						Button.VSplitLeft(140.0f, &Label, &Button);
+						Button.VSplitLeft(85.0f, &Button, 0);
+
+						static CLineInput s_PrefixMsg;
+						s_PrefixMsg.SetBuffer(g_Config.m_ClFriendPrefix, sizeof(g_Config.m_ClFriendPrefix));
+						s_PrefixMsg.SetEmptyText("alt + num3");
+						if(DoButton_CheckBox(&g_Config.m_ClMessageFriend, "Friend Prefix", g_Config.m_ClMessageFriend, &ChatSettings))
+						{
+							g_Config.m_ClMessageFriend ^= 1;
+						}
+						Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
+					}
+
+					// spectate prefix
+
+					ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
+					{
+						ChatSettings.HSplitTop(19.9f, &Button, &MainView);
+
+						Button.VSplitLeft(0.0f, &Button, &ChatSettings);
+						Button.VSplitLeft(140.0f, &Label, &Button);
+						Button.VSplitLeft(85.0f, &Button, 0);
+
+						static CLineInput s_PrefixMsg;
+						s_PrefixMsg.SetBuffer(g_Config.m_ClSpecPrefix, sizeof(g_Config.m_ClSpecPrefix));
+						s_PrefixMsg.SetEmptyText("(s) ");
+						if(DoButton_CheckBox(&g_Config.m_ClChatSpecPrefix, "Spec Prefix", g_Config.m_ClChatSpecPrefix, &ChatSettings))
+						{
+							g_Config.m_ClChatSpecPrefix ^= 1;
+						}
+						Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
+					}
+
+					// server prefix
+
+					ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
+					{
+						ChatSettings.HSplitTop(19.9f, &Button, &MainView);
+
+						Button.VSplitLeft(0.0f, &Button, &ChatSettings);
+						Button.VSplitLeft(140.0f, &Label, &Button);
+						Button.VSplitLeft(85.0f, &Button, 0);
+
+						static CLineInput s_PrefixMsg;
+						s_PrefixMsg.SetBuffer(g_Config.m_ClServerPrefix, sizeof(g_Config.m_ClServerPrefix));
+						s_PrefixMsg.SetEmptyText("*** ");
+						if(DoButton_CheckBox(&g_Config.m_ClChatServerPrefix, "Server Prefix", g_Config.m_ClChatServerPrefix, &ChatSettings))
+						{
+							g_Config.m_ClChatServerPrefix ^= 1;
+						}
+						Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
+					}
+
+					// client prefix
+
+					ChatSettings.HSplitTop(21.0f, &Button, &ChatSettings);
+					{
+						ChatSettings.HSplitTop(19.9f, &Button, &MainView);
+
+						Button.VSplitLeft(0.0f, &Button, &ChatSettings);
+						Button.VSplitLeft(140.0f, &Label, &Button);
+						Button.VSplitLeft(85.0f, &Button, 0);
+
+						static CLineInput s_PrefixMsg;
+						s_PrefixMsg.SetBuffer(g_Config.m_ClClientPrefix, sizeof(g_Config.m_ClClientPrefix));
+						s_PrefixMsg.SetEmptyText("alt0151");
+						if(DoButton_CheckBox(&g_Config.m_ClChatClientPrefix, "Client Prefix", g_Config.m_ClChatClientPrefix, &ChatSettings))
+						{
+							g_Config.m_ClChatClientPrefix ^= 1;
+						}
+						Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
+					}
+				}
 
 			}
 		}
 	
 		{
 			ColorSettings.HSplitTop(Margin, nullptr, &ColorSettings);
-			ColorSettings.HSplitTop(210.0f, &ColorSettings, &NameplateSettings);
+			ColorSettings.HSplitTop(215.0f, &ColorSettings, &NameplateSettings);
 			if(s_ScrollRegion.AddRect(ColorSettings))
 			{
 				ColorSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -1189,8 +1196,8 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClResetBindWheelMouse, ("Reset position of mouse when opening bindwheel"), &g_Config.m_ClResetBindWheelMouse, &Button, LineMargin);
 	}
 
-		// Tater Client Bind wheel
-	if(s_CurTab == AIODOB_TAB_PAGE3)
+	// Tater Client Bind wheel
+	if(s_CurTab == AIODOB_TAB_VISUAL)
 	{
 		static CScrollRegion s_ScrollRegion;
 		vec2 ScrollOffset(0.0f, 0.0f);
@@ -1205,53 +1212,69 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 		// left side in settings menu
 
-		CUIRect PlayerSettings, HookSettings, WeaponSettings, HammerSettings, ResetButton, GunSettings;
-		MainView.VSplitMid(&WeaponSettings, &ResetButton);
+		CUIRect PlayerSettings, FreezeBarSettings, WeaponSettings, ResetButton;
+		MainView.VSplitMid(&PlayerSettings, &ResetButton);
 
 	
 		// Weapon Settings
 
 		{
-			WeaponSettings.VMargin(5.0f, &WeaponSettings);
-			if(g_Config.m_ClShowWeapons == 1)
+			PlayerSettings.VMargin(5.0f, &PlayerSettings);
+			PlayerSettings.HSplitTop(100.0f, &PlayerSettings, &FreezeBarSettings);
+			if(s_ScrollRegion.AddRect(PlayerSettings))
 			{
-				WeaponSettings.HSplitTop(60.0f, &WeaponSettings, &HammerSettings);
-			}
-			else
-			{
-				if(g_Config.m_ClWeaponRot == 0)
+				PlayerSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
+				PlayerSettings.VMargin(Margin, &PlayerSettings);
+
+				PlayerSettings.HSplitTop(HeaderHeight, &Button, &PlayerSettings);
+				Ui()->DoLabel(&Button, Localize("Tee Settings"), FontSize, TEXTALIGN_MC);
+
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSmallSkins, ("Small Skins"), &g_Config.m_ClSmallSkins, &PlayerSettings, LineMargin);
+
+				// create dropdown for rainbow modes
+
 				{
-					WeaponSettings.HSplitTop(195.0f, &WeaponSettings, &HammerSettings);
-				}
-				else
-				{
-					WeaponSettings.HSplitTop(165.0f, &WeaponSettings, &HammerSettings);
-				}
-			}
+					PlayerSettings.HSplitTop(19.9f, &Button, &MainView);
 
-			if(s_ScrollRegion.AddRect(WeaponSettings))
-			{
-				WeaponSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				WeaponSettings.VMargin(Margin, &WeaponSettings);
+					Button.VSplitLeft(0.0f, &Button, &PlayerSettings);
+					Button.VSplitLeft(140.0f, &Label, &Button);
+					Button.VSplitLeft(85.0f, &Button, 0);
 
-				WeaponSettings.HSplitTop(HeaderHeight, &Button, &WeaponSettings);
-				Ui()->DoLabel(&Button, Localize("All Weapons Settings"), FontSize, TEXTALIGN_MC);
+					static std::vector<const char *> s_DropDownNames = {Localize("Off"), Localize("Rainbow"), Localize("Pulse"), Localize("Black")};
+	
+					static CUi::SDropDownState s_RainbowDropDownState;
+					static CScrollRegion s_RainbowDropDownScrollRegion;
+					s_RainbowDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_RainbowDropDownScrollRegion;
 
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowWeapons, Localize("Don't Show Weapons"), &g_Config.m_ClShowWeapons, &WeaponSettings, LineSize);
-				if(g_Config.m_ClShowWeapons == 0)
-				{
-					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWeaponRot, Localize("Turn off the rotating thing idfk the word :p"), &g_Config.m_ClWeaponRot, &WeaponSettings, LineSize);
+					int OldSelected = g_Config.m_ClRainbowMode - 1;
 
-					WeaponSettings.HSplitTop(2 * LineSize, &Button, &WeaponSettings);
-					Ui()->DoScrollbarOption(&g_Config.m_ClWeaponSize, &g_Config.m_ClWeaponSize, &Button, Localize("Weapon Size"), -2, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
+					CUIRect DropDownRect;
 
-					WeaponSettings.HSplitTop(2 * LineSize, &Button, &WeaponSettings);
-					Ui()->DoScrollbarOption(&g_Config.m_ClWeaponRotSize2, &g_Config.m_ClWeaponRotSize2, &Button, Localize("Pointing Left?"), -1, 50, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
+					PlayerSettings.HSplitTop(20.0f, &DropDownRect, &PlayerSettings);
 
-					if(g_Config.m_ClWeaponRot == 0)
+					Button.VSplitLeft(-140.0f, &Button, &PlayerSettings);
+					Button.VSplitLeft(140.0f, &DropDownRect, 0);
+					
+						
+				
+
+					PlayerSettings.HSplitTop(20.0f, &DropDownRect, &PlayerSettings);
+
+					Button.VSplitLeft(0.0f, &Button, &PlayerSettings);
+					Button.VSplitLeft(140.0f, &DropDownRect, &Button);
+					
+						
+					const int NewRainbowMode = Ui()->DoDropDown(&DropDownRect, OldSelected, s_DropDownNames.data(), s_DropDownNames.size(), s_RainbowDropDownState);
+
+			
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, ("Rainbow Others"), &g_Config.m_ClRainbowOthers, &MainView, LineMargin);
+				
+				
+					if(OldSelected != NewRainbowMode)
 					{
-						WeaponSettings.HSplitTop(2 * LineSize, &Button, &WeaponSettings);
-						Ui()->DoScrollbarOption(&g_Config.m_ClWeaponRotSize3, &g_Config.m_ClWeaponRotSize3, &Button, Localize("Pointing Right?"), -1, 50, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
+						g_Config.m_ClRainbowMode = NewRainbowMode + 1;
+						OldSelected = NewRainbowMode;
+						dbg_msg("rainbow", "rainbow mode changed to %d", g_Config.m_ClRainbowMode);
 					}
 				}
 			}
@@ -1259,333 +1282,10 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 		// Hammer Settings
 
-		{
-			HammerSettings.HSplitTop(Margin, nullptr, &HammerSettings);
-			HammerSettings.HSplitTop(115.0f, &HammerSettings, &GunSettings);
-			if(s_ScrollRegion.AddRect(HammerSettings))
-			{
-				if(g_Config.m_ClShowWeapons == 0)
-				{
-					HammerSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-					HammerSettings.VMargin(Margin, &HammerSettings);
-
-					HammerSettings.HSplitTop(HeaderHeight, &Button, &HammerSettings);
-					Ui()->DoLabel(&Button, Localize("Hammer Settings"), FontSize, TEXTALIGN_MC);
-
-					HammerSettings.HSplitTop(2 * LineSize, &Button, &HammerSettings);
-					Ui()->DoScrollbarOption(&g_Config.m_ClHammerDir, &g_Config.m_ClHammerDir, &Button, Localize("Hammer Direction"), -50, 50, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-					HammerSettings.HSplitTop(2 * LineSize, &Button, &HammerSettings);
-					Ui()->DoScrollbarOption(&g_Config.m_ClHammerRot, &g_Config.m_ClHammerRot, &Button, Localize("Breaks da Hammer"), -50, 50, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-				}
-			}
-		}
-
-		// Gun Settings
-
-		{
-			GunSettings.HSplitTop(Margin, nullptr, &GunSettings);
-			GunSettings.HSplitTop(275.0f, &GunSettings, 0);
-			if(s_ScrollRegion.AddRect(GunSettings))
-			{
-				if(g_Config.m_ClShowWeapons == 0)
-				{
-					GunSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-					GunSettings.VMargin(Margin, &GunSettings);
-
-					GunSettings.HSplitTop(HeaderHeight, &Button, &GunSettings);
-					Ui()->DoLabel(&Button, Localize("Gun Settings"), FontSize, TEXTALIGN_MC);
-
-					GunSettings.HSplitTop(2 * LineSize, &Button, &GunSettings);
-					Ui()->DoScrollbarOption(&g_Config.m_ClGunPos, &g_Config.m_ClGunPos, &Button, Localize("Gun y position"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-					GunSettings.HSplitTop(2 * LineSize, &Button, &GunSettings);
-					Ui()->DoScrollbarOption(&g_Config.m_ClGunPosSitting, &g_Config.m_ClGunPosSitting, &Button, Localize("Gun y position while sitting"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-					GunSettings.HSplitTop(2 * LineSize, &Button, &GunSettings);
-					Ui()->DoScrollbarOption(&g_Config.m_ClGunReload, &g_Config.m_ClGunReload, &Button, Localize("How long the reload animation is"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-					GunSettings.HSplitTop(2 * LineSize, &Button, &GunSettings);
-					Ui()->DoScrollbarOption(&g_Config.m_ClGunRecoil, &g_Config.m_ClGunRecoil, &Button, Localize("How far the recoil goes"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-				
-					GunSettings.HSplitTop(2 * LineSize, &Button, &GunSettings);
-					Ui()->DoScrollbarOption(&g_Config.m_ClBulletSize, &g_Config.m_ClBulletSize, &Button, Localize("Bullet Effect Size"), -8, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-					GunSettings.HSplitTop(2 * LineSize, &Button, &GunSettings);
-					Ui()->DoScrollbarOption(&g_Config.m_ClBulletLifetime, &g_Config.m_ClBulletLifetime, &Button, Localize("Bullet Effect Lifetime"), -1, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-				
-				
-				
-				
-				}
-			}
-		}
-
-		// right side in settings menu
-
-		// defaults
-		{
-			ResetButton.VMargin(5.0f, &ResetButton);
-			ResetButton.HSplitTop(40.0f, &ResetButton, &PlayerSettings);
-			if(s_ScrollRegion.AddRect(ResetButton))
-			{
-				ResetButton.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 7.5f));
-				ResetButton.Margin(10.0f, &ResetButton);
-				static CButtonContainer s_DefaultButton;
-				if(DoButton_Menu(&s_DefaultButton, Localize("Reset to dumbos to defaults"), 0, &ResetButton))
-				{
-					PopupConfirm(Localize("Reset Dumbos"), Localize("Are you sure that you want to reset the Dumbo things to Default?"),
-						Localize("Reset"), Localize("Cancel"), &CMenus::ResetSettingsCustomization);
-				}
-			}
-		}
-
-		// Player Settings
-
-		{
-			PlayerSettings.HSplitTop(Margin, nullptr, &PlayerSettings);
-			PlayerSettings.HSplitTop(235.0f, &PlayerSettings, &HookSettings);
-			if(s_ScrollRegion.AddRect(PlayerSettings))
-			{
-				PlayerSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				PlayerSettings.VMargin(10.0f, &PlayerSettings);
-
-				PlayerSettings.HSplitTop(HeaderHeight, &Button, &PlayerSettings);
-				Ui()->DoLabel(&Button, Localize("Player Settings"), FontSize, TEXTALIGN_MC);
-
-				PlayerSettings.HSplitTop(2 * LineSize, &Button, &PlayerSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClTeeSize, &g_Config.m_ClTeeSize, &Button, Localize("Tee Size"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				PlayerSettings.HSplitTop(2 * LineSize, &Button, &PlayerSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClTeeWalkRuntime, &g_Config.m_ClTeeWalkRuntime, &Button, Localize("Tee Walk/Run -Time?"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				PlayerSettings.HSplitTop(2 * LineSize, &Button, &PlayerSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClTeeFeetInAir, &g_Config.m_ClTeeFeetInAir, &Button, Localize("In Air Feet"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				PlayerSettings.HSplitTop(2 * LineSize, &Button, &PlayerSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClTeeSitting, &g_Config.m_ClTeeSitting, &Button, Localize("Tee While Sitting"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				PlayerSettings.HSplitTop(2 * LineSize, &Button, &PlayerSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClTeeFeetWalking, &g_Config.m_ClTeeFeetWalking, &Button, Localize("Tee While Walking"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-			}
-		}
-
-		// Hook Settings
-
-		{
-			HookSettings.HSplitTop(Margin, nullptr, &HookSettings);
-			HookSettings.HSplitTop(115.0f, &HookSettings, 0);
-			if(s_ScrollRegion.AddRect(HookSettings))
-			{
-				HookSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				;
-				HookSettings.VMargin(Margin, &HookSettings);
-
-				HookSettings.HSplitTop(HeaderHeight, &Button, &HookSettings);
-				Ui()->DoLabel(&Button, Localize("Hook Settings"), FontSize, TEXTALIGN_MC);
-
-				HookSettings.HSplitTop(2 * LineSize, &Button, &HookSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClHookSizeX, &g_Config.m_ClHookSizeX, &Button, Localize("Hook Size X"), -2, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				HookSettings.HSplitTop(2 * LineSize, &Button, &HookSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClHookSizeY, &g_Config.m_ClHookSizeY, &Button, Localize("Hook Size Y"), -2, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-			}
-		}
-
-		s_ScrollRegion.End();
-	}
-
-
-// Page 4
-
-	if(s_CurTab == AIODOB_TAB_PAGE4)
-	{
-		static CScrollRegion s_ScrollRegion;
-		vec2 ScrollOffset(0.0f, 0.0f);
-		CScrollRegionParams ScrollParams;
-		ScrollParams.m_ScrollUnit = 120.0f;
-		s_ScrollRegion.Begin(&MainView, &ScrollOffset, &ScrollParams);
-		MainView.y += ScrollOffset.y;
-
-		const float FontSize = 14.0f;
-		const float Margin = 10.0f;
-		const float HeaderHeight = FontSize + 5.0f + Margin;
-
-		// left side in settings menu
-
-		CUIRect ReloadSettings, DoubleJumpSettings, SnofflakeSettings, SpriteReset, FreezeBarSettings, HookSettings, HammerSettings, GunSettings, GrenadeSettings, LaserSettings, ShotgunSettings, NinjaSettings;
-		MainView.VSplitMid(&ReloadSettings, &SpriteReset);
-
-		// Reload Settings
-
-		{
-			ReloadSettings.VMargin(5.0f, &ReloadSettings);
-			ReloadSettings.HSplitTop(90.0f, &ReloadSettings, &DoubleJumpSettings);
-			if(s_ScrollRegion.AddRect(ReloadSettings))
-			{
-				ReloadSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				ReloadSettings.VMargin(Margin, &ReloadSettings);
-
-				ReloadSettings.HSplitTop(HeaderHeight, &Button, &ReloadSettings);
-				Ui()->DoLabel(&Button, Localize("Reload Settings"), FontSize, TEXTALIGN_MC);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoReloadSprite, Localize("Auto Reload Sprites (might crash on older machines)"), &g_Config.m_ClAutoReloadSprite, &ReloadSettings, LineSize);
-				ReloadSettings.Margin(10.0f, &ReloadSettings);
-				static CButtonContainer s_ReloadButtom;
-				if(DoButton_Menu(&s_ReloadButtom, Localize("Reload Sprites"), 0, &ReloadSettings) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
-				{
-					GameClient()->LoadGameSkin(g_Config.m_ClAssetGame);
-				}
-			}
-		}
-
-		{
-			DoubleJumpSettings.HSplitTop(Margin, nullptr, &DoubleJumpSettings);
-			DoubleJumpSettings.HSplitTop(315.0f, &DoubleJumpSettings, &SnofflakeSettings);
-			if(s_ScrollRegion.AddRect(DoubleJumpSettings))
-			{
-				DoubleJumpSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				DoubleJumpSettings.VMargin(10.0f, &DoubleJumpSettings);
-
-				DoubleJumpSettings.HSplitTop(HeaderHeight, &Button, &DoubleJumpSettings);
-				Ui()->DoLabel(&Button, Localize("Double Jump Settings"), FontSize, TEXTALIGN_MC);
-
-				DoubleJumpSettings.HSplitTop(2 * LineSize, &Button, &DoubleJumpSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClDjSprite, &g_Config.m_ClDjSprite, &Button, Localize("What sprite DJ uses"), -8, 19, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-
-				DoubleJumpSettings.HSplitTop(2 * LineSize, &Button, &DoubleJumpSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClDjPosY, &g_Config.m_ClDjPosY, &Button, Localize("Dj Y spawn area"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				DoubleJumpSettings.HSplitTop(2 * LineSize, &Button, &DoubleJumpSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClDjPosX, &g_Config.m_ClDjPosX, &Button, Localize("Dj X spawn area"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				DoubleJumpSettings.HSplitTop(2 * LineSize, &Button, &DoubleJumpSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClDjGravity, &g_Config.m_ClDjGravity, &Button, Localize("Dj Gravity"), -1500, 1500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				DoubleJumpSettings.HSplitTop(2 * LineSize, &Button, &DoubleJumpSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClDjLifespan, &g_Config.m_ClDjLifespan, &Button, Localize("Dj Sprite Lifetime"), 0, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				DoubleJumpSettings.HSplitTop(2 * LineSize, &Button, &DoubleJumpSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClDjSize, &g_Config.m_ClDjSize, &Button, Localize("Dj Sprite Size"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				DoubleJumpSettings.HSplitTop(2 * LineSize, &Button, &DoubleJumpSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClDjRotSpeed, &g_Config.m_ClDjRotSpeed, &Button, Localize("Dj Sprite Rotation Speed"), -100, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-			}
-		}
-
-		// Snofflake Settings
-
-		{
-			SnofflakeSettings.HSplitTop(Margin, nullptr, &SnofflakeSettings);
-			SnofflakeSettings.HSplitTop(235.0f, &SnofflakeSettings, &HookSettings);
-			if(s_ScrollRegion.AddRect(SnofflakeSettings))
-			{
-				SnofflakeSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				SnofflakeSettings.VMargin(10.0f, &SnofflakeSettings);
-
-				SnofflakeSettings.HSplitTop(HeaderHeight, &Button, &SnofflakeSettings);
-				Ui()->DoLabel(&Button, Localize("Snow Flake Settings"), FontSize, TEXTALIGN_MC);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSnowflakeCollision, Localize("Snowflake Collision with Tiles"), &g_Config.m_ClSnowflakeCollision, &SnofflakeSettings, LineSize);
-
-				SnofflakeSettings.HSplitTop(2 * LineSize, &Button, &SnofflakeSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClSnowflakeLifeSpan, &g_Config.m_ClSnowflakeLifeSpan, &Button, Localize("Snowflake Lifetime"), -2, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				SnofflakeSettings.HSplitTop(2 * LineSize, &Button, &SnofflakeSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClSnowflakeGravity, &g_Config.m_ClSnowflakeGravity, &Button, Localize("Snowflake Gravity"), -750, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				// not well working code
-				// DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSnowflakeCollision, Localize("Random Snowflake Size"), &g_Config.m_ClSnowflakeCollision, &SnofflakeSettings, LineSize);
-				// SnofflakeSettings.HSplitTop(2 * LineSize, &Button, &SnofflakeSettings);
-				// Ui()->DoScrollbarOption(&g_Config.m_ClSnowflakeSize, &g_Config.m_ClSnowflakeSize, &Button, Localize("Lifetime of Snowflake"), -2, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-
-				SnofflakeSettings.HSplitTop(2 * LineSize, &Button, &SnofflakeSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClSnowflakeY, &g_Config.m_ClSnowflakeY, &Button, Localize("Snowflake Y spawn area"), 0, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				SnofflakeSettings.HSplitTop(2 * LineSize, &Button, &SnofflakeSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClSnowflakeX, &g_Config.m_ClSnowflakeX, &Button, Localize("Snowflake X spawn area"), 0, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-			}
-		}
-
-		{
-			HookSettings.HSplitTop(Margin, nullptr, &HookSettings);
-			HookSettings.HSplitTop(115.0f, &HookSettings, &NinjaSettings);
-			if(s_ScrollRegion.AddRect(HookSettings))
-			{
-				HookSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				HookSettings.VMargin(Margin, &HookSettings);
-
-				HookSettings.HSplitTop(HeaderHeight, &Button, &HookSettings);
-				Ui()->DoLabel(&Button, Localize("Hook Settings"), FontSize, TEXTALIGN_MC);
-
-				HookSettings.HSplitTop(2 * LineSize, &Button, &HookSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClHookHeadSprite, &g_Config.m_ClHookHeadSprite, &Button, Localize("What Sprite The Hook Head Uses"), -51, 87, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-				if(g_Config.m_ClHookHeadSprite == -3)
-				{
-					g_Config.m_ClHookHeadSprite = -4;
-				}
-				if(g_Config.m_ClHookHeadSprite == -7)
-				{
-					g_Config.m_ClHookHeadSprite = -8;
-				}
-
-				HookSettings.HSplitTop(2 * LineSize, &Button, &HookSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClHookChainSprite, &g_Config.m_ClHookChainSprite, &Button, Localize("What Sprite The Hook Chain Uses"), -50, 88, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-				if(g_Config.m_ClHookChainSprite == -5)
-				{
-					g_Config.m_ClHookChainSprite = -6;
-				}
-				if(g_Config.m_ClHookChainSprite == -4)
-				{
-					g_Config.m_ClHookChainSprite = -6;
-				}
-				if(g_Config.m_ClHookChainSprite == -7)
-				{
-					g_Config.m_ClHookChainSprite = -8;
-				}
-			}
-		}
-
-		{
-			NinjaSettings.HSplitTop(Margin, nullptr, &NinjaSettings);
-			NinjaSettings.HSplitTop(115.0f, &NinjaSettings, 0);
-			if(s_ScrollRegion.AddRect(NinjaSettings))
-			{
-				NinjaSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				NinjaSettings.VMargin(Margin, &NinjaSettings);
-
-				NinjaSettings.HSplitTop(HeaderHeight, &Button, &NinjaSettings);
-				Ui()->DoLabel(&Button, Localize("Ninja Settings"), FontSize, TEXTALIGN_MC);
-
-				NinjaSettings.HSplitTop(2 * LineSize, &Button, &NinjaSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClNinjaSprite, &g_Config.m_ClNinjaSprite, &Button, Localize("What Sprite Ninja uses"), -44, 94, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-
-				NinjaSettings.HSplitTop(2 * LineSize, &Button, &NinjaSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClNinjaCursorSprite, &g_Config.m_ClNinjaCursorSprite, &Button, Localize("What Sprite The Ninja Cursor uses"), -45, 93, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-			}
-		}
-		// right side in settings menu
-
-		// defaults
-		{
-			SpriteReset.VMargin(5.0f, &SpriteReset);
-			SpriteReset.HSplitTop(40.0f, &SpriteReset, &FreezeBarSettings);
-			if(s_ScrollRegion.AddRect(SpriteReset))
-			{
-				SpriteReset.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 7.5f));
-				SpriteReset.Margin(10.0f, &SpriteReset);
-				static CButtonContainer s_DefaultButton;
-				if(DoButton_Menu(&s_DefaultButton, Localize("Reset to Sprite Settings to defaults"), 0, &SpriteReset))
-				{
-					PopupConfirm(Localize("Reset Sprite Settings?"), Localize("Are you sure that you want to reset the Sprite Settings to Default?"),
-						Localize("Reset"), Localize("Cancel"), &CMenus::ResetSettingsSprites);
-				}
-			}
-		}
-
+		
 		{
 			FreezeBarSettings.HSplitTop(Margin, nullptr, &FreezeBarSettings);
-			FreezeBarSettings.HSplitTop(195.0f, &FreezeBarSettings, &HammerSettings);
+			FreezeBarSettings.HSplitTop(195.0f, &FreezeBarSettings, 0);
 			if(s_ScrollRegion.AddRect(FreezeBarSettings))
 			{
 				FreezeBarSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -1607,109 +1307,57 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				Ui()->DoScrollbarOption(&g_Config.m_ClFreezeBarY, &g_Config.m_ClFreezeBarY, &Button, Localize("Freeze Bar Y Position"), -500, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
 			}
 		}
+
+		// right side in settings menu
+
+		// defaults
 		{
-			HammerSettings.HSplitTop(Margin, nullptr, &HammerSettings);
-			HammerSettings.HSplitTop(115.0f, &HammerSettings, &GunSettings);
-			if(s_ScrollRegion.AddRect(HammerSettings))
+			ResetButton.VMargin(5.0f, &ResetButton);
+			ResetButton.HSplitTop(40.0f, &ResetButton, &PlayerSettings);
+			if(s_ScrollRegion.AddRect(ResetButton))
 			{
-				HammerSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				HammerSettings.VMargin(Margin, &HammerSettings);
-
-				HammerSettings.HSplitTop(HeaderHeight, &Button, &HammerSettings);
-				Ui()->DoLabel(&Button, Localize("Hammer Settings"), FontSize, TEXTALIGN_MC);
-
-				HammerSettings.HSplitTop(2 * LineSize, &Button, &HammerSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClHammerSprite, &g_Config.m_ClHammerSprite, &Button, Localize("What Sprite The Hammer uses"), -41, 97, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-
-				HammerSettings.HSplitTop(2 * LineSize, &Button, &HammerSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClHammerCursorSprite, &g_Config.m_ClHammerCursorSprite, &Button, Localize("What Sprite The Hammer Cursor uses"), -41, 97, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-			}
-		}
-		{
-			GunSettings.HSplitTop(Margin, nullptr, &GunSettings);
-			GunSettings.HSplitTop(155.0f, &GunSettings, &GrenadeSettings);
-			if(s_ScrollRegion.AddRect(GunSettings))
-			{
-				GunSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				GunSettings.VMargin(Margin, &GunSettings);
-
-				GunSettings.HSplitTop(HeaderHeight, &Button, &GunSettings);
-				Ui()->DoLabel(&Button, Localize("Gun Settings"), FontSize, TEXTALIGN_MC);
-
-				GunSettings.HSplitTop(2 * LineSize, &Button, &GunSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClGunSprite, &g_Config.m_ClGunSprite, &Button, Localize("What Sprite The Gun uses"), -26, 112, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-
-				GunSettings.HSplitTop(2 * LineSize, &Button, &GunSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClGunCursorSprite, &g_Config.m_ClGunCursorSprite, &Button, Localize("What Sprite The Gun Cursor uses"), -26, 111, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-
-				GunSettings.HSplitTop(2 * LineSize, &Button, &GunSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClSpriteGunFire, &g_Config.m_ClSpriteGunFire, &Button, Localize("What Sprite The Gun fire is"), -29, 106, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
+				ResetButton.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 7.5f));
+				ResetButton.Margin(10.0f, &ResetButton);
+				static CButtonContainer s_DefaultButton;
+				if(DoButton_Menu(&s_DefaultButton, Localize("Reset Sliders to Default"), 0, &ResetButton))
+				{
+					PopupConfirm(Localize("Reset Sliders"), Localize("Are You Sure You Want to Reset All Sliders to Default?"),
+						Localize("Reset"), Localize("Cancel"), &CMenus::ResetSettingsCustomization);
+				}
 			}
 		}
 
+
 		{
-			GrenadeSettings.HSplitTop(Margin, nullptr, &GrenadeSettings);
-			GrenadeSettings.HSplitTop(115.0f, &GrenadeSettings, &LaserSettings);
-			if(s_ScrollRegion.AddRect(GrenadeSettings))
+			WeaponSettings.HSplitTop(Margin, nullptr, &WeaponSettings);
+			WeaponSettings.HSplitTop(115.0f, &WeaponSettings, 0);
+			if(s_ScrollRegion.AddRect(WeaponSettings))
 			{
-				GrenadeSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				GrenadeSettings.VMargin(Margin, &GrenadeSettings);
+				WeaponSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
+				;
+				WeaponSettings.VMargin(Margin, &WeaponSettings);
 
-				GrenadeSettings.HSplitTop(HeaderHeight, &Button, &GrenadeSettings);
-				Ui()->DoLabel(&Button, Localize("Grenade Settings"), FontSize, TEXTALIGN_MC);
+				WeaponSettings.HSplitTop(HeaderHeight, &Button, &WeaponSettings);
+				Ui()->DoLabel(&Button, Localize("Hook Settings"), FontSize, TEXTALIGN_MC);
 
-				GrenadeSettings.HSplitTop(2 * LineSize, &Button, &GrenadeSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClGrenadeSprite, &g_Config.m_ClGrenadeSprite, &Button, Localize("What Sprite The Grenade uses"), -38, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
+				WeaponSettings.HSplitTop(2 * LineSize, &Button, &WeaponSettings);
+				Ui()->DoScrollbarOption(&g_Config.m_ClHookSizeX, &g_Config.m_ClHookSizeX, &Button, Localize("Hook Size X"), -2, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
 
-				GrenadeSettings.HSplitTop(2 * LineSize, &Button, &GrenadeSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClGrenadeCursorSprite, &g_Config.m_ClGrenadeCursorSprite, &Button, Localize("What Sprite The Grenade Cursor uses"), -39, 99, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
+				WeaponSettings.HSplitTop(2 * LineSize, &Button, &WeaponSettings);
+				Ui()->DoScrollbarOption(&g_Config.m_ClHookSizeY, &g_Config.m_ClHookSizeY, &Button, Localize("Hook Size Y"), -2, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
 			}
 		}
 
-		{
-			LaserSettings.HSplitTop(Margin, nullptr, &LaserSettings);
-			LaserSettings.HSplitTop(115.0f, &LaserSettings, &ShotgunSettings);
-			if(s_ScrollRegion.AddRect(LaserSettings))
-			{
-				LaserSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				LaserSettings.VMargin(Margin, &LaserSettings);
-
-				LaserSettings.HSplitTop(HeaderHeight, &Button, &LaserSettings);
-				Ui()->DoLabel(&Button, Localize("Laser Settings"), FontSize, TEXTALIGN_MC);
-
-				LaserSettings.HSplitTop(2 * LineSize, &Button, &LaserSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClLaserSprite, &g_Config.m_ClLaserSprite, &Button, Localize("What Sprite The Laser uses"), -47, 91, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-
-				LaserSettings.HSplitTop(2 * LineSize, &Button, &LaserSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClLaserCursorSprite, &g_Config.m_ClLaserCursorSprite, &Button, Localize("What Sprite The Laser Cursor uses"), -48, 90, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-			}
-		}
-
-		{
-			ShotgunSettings.HSplitTop(Margin, nullptr, &ShotgunSettings);
-			ShotgunSettings.HSplitTop(115.0f, &ShotgunSettings, 0);
-			if(s_ScrollRegion.AddRect(ShotgunSettings))
-			{
-				ShotgunSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				ShotgunSettings.VMargin(Margin, &ShotgunSettings);
-
-				ShotgunSettings.HSplitTop(HeaderHeight, &Button, &ShotgunSettings);
-				Ui()->DoLabel(&Button, Localize("Shotgun Settings"), FontSize, TEXTALIGN_MC);
-
-				ShotgunSettings.HSplitTop(2 * LineSize, &Button, &ShotgunSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClShotgunSprite, &g_Config.m_ClShotgunSprite, &Button, Localize("What Sprite The Shotgun uses"), -32, 106, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-
-				ShotgunSettings.HSplitTop(2 * LineSize, &Button, &ShotgunSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClShotgunCursorSprite, &g_Config.m_ClShotgunCursorSprite, &Button, Localize("What Sprite The Shotgun Cursor uses"), -33, 105, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "");
-			}
-		}
-		if(g_Config.m_ClAutoReloadSprite == 1)
-		{
-			GameClient()->LoadGameSkin(g_Config.m_ClAssetGame);
-		}
 		s_ScrollRegion.End();
 	}
+}
 
+void CMenus::ResetSettingsCustomization()
+{
+	g_Config.m_ClFreezeBarWidth = 0;
+	g_Config.m_ClFreezeBarHeight = 0;
+	g_Config.m_ClFreezeBarX = 0;
+	g_Config.m_ClFreezeBarY = 0;
 }
 
 void CMenus::ResetSettingsSprites()
@@ -1755,41 +1403,6 @@ void CMenus::ResetSettingsSprites()
 
 	GameClient()->LoadGameSkin(g_Config.m_ClAssetGame);
 }
-
-void CMenus::ResetSettingsCustomization()
-{
-	g_Config.m_ClTeeSize = 0;
-	g_Config.m_ClTeeWalkRuntime = 0;
-	g_Config.m_ClTeeFeetInAir = 0;
-	g_Config.m_ClTeeSitting = 0;
-	g_Config.m_ClTeeFeetWalking = 0;
-
-	g_Config.m_ClHookSizeX = 0;
-	g_Config.m_ClHookSizeY = 0;
-
-	g_Config.m_ClHammerDir = 0;
-	g_Config.m_ClHammerRot = 0;
-
-	g_Config.m_ClWeaponSize = 0;
-	g_Config.m_ClWeaponRot = 0;
-	g_Config.m_ClWeaponRotSize2 = 0;
-	g_Config.m_ClWeaponRotSize3 = 0;
-
-	g_Config.m_ClGunPosSitting = 0;
-	g_Config.m_ClGunPos = 0;
-	g_Config.m_ClGunReload = 0;
-	g_Config.m_ClGunRecoil = 0;
-	g_Config.m_ClBulletSize = 0;
-	g_Config.m_ClBulletLifetime = 0;
-
-
-	g_Config.m_ClFreezeBarWidth = 0;
-	g_Config.m_ClFreezeBarHeight = 0;
-	g_Config.m_ClFreezeBarX = 0;
-	g_Config.m_ClFreezeBarY = 0;
-}
-
-
 
 void CMenus::RenderSettingsProfiles(CUIRect MainView)
 {

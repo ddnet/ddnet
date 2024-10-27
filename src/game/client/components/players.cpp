@@ -24,6 +24,7 @@
 
 #include "players.h"
 
+#include "rainbow.h"
 #include <base/color.h>
 #include <base/math.h>
 
@@ -379,8 +380,10 @@ void CPlayers::RenderHook(
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteHookHead);
 		Graphics()->QuadsSetRotation(angle(Dir) + pi);
 		// render head
-		int QuadOffset = NUM_WEAPONS * (g_Config.m_ClHookSizeX + 2) + (g_Config.m_ClHookSizeY + 2);
+		int QuadOffset = NUM_WEAPONS * 2 + 2;
+		
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+
 		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookPos.x, HookPos.y);
 
 		// render chain
@@ -426,7 +429,7 @@ void CPlayers::RenderPlayer(
 		Alpha = g_Config.m_ClRaceGhostAlpha / 100.0f;
 
 	// set size
-	RenderInfo.m_Size = g_Config.m_ClTeeSize + 64;
+	RenderInfo.m_Size = 64.0f;
 
 	float IntraTick = Intra;
 	if(ClientId >= 0)
@@ -483,8 +486,8 @@ void CPlayers::RenderPlayer(
 	bool Inactive = ClientId >= 0 && (m_pClient->m_aClients[ClientId].m_Afk || m_pClient->m_aClients[ClientId].m_Paused);
 
 	// evaluate animation
-	float WalkTime = std::fmod(Position.x, (g_Config.m_ClTeeWalkRuntime + 100.0f)) / 100.0f;
-	float RunTime = std::fmod(Position.x, (g_Config.m_ClTeeWalkRuntime + 200.0f)) / 200.0f;
+	float WalkTime = std::fmod(Position.x, 100.0f) / 100.0f;
+	float RunTime = std::fmod(Position.x, 200.0f) / 200.0f;
 
 	// Don't do a moon walk outside the left border
 	if(WalkTime < 0)
@@ -496,12 +499,12 @@ void CPlayers::RenderPlayer(
 	State.Set(&g_pData->m_aAnimations[ANIM_BASE], 0);
 
 	if(InAir)
-		State.Add(&g_pData->m_aAnimations[ANIM_INAIR], 0, (g_Config.m_ClTeeFeetInAir + 1.0f)); // TODO: some sort of time here
+		State.Add(&g_pData->m_aAnimations[ANIM_INAIR], 0, 1.0f); // TODO: some sort of time here
 	else if(Stationary)
 	{
 		if(Inactive)
 		{
-			State.Add(Direction.x < 0 ? &g_pData->m_aAnimations[ANIM_SIT_LEFT] : &g_pData->m_aAnimations[ANIM_SIT_RIGHT], 0, (g_Config.m_ClTeeSitting + 1.0f)); // TODO: some sort of time here
+			State.Add(Direction.x < 0 ? &g_pData->m_aAnimations[ANIM_SIT_LEFT] : &g_pData->m_aAnimations[ANIM_SIT_RIGHT], 0, 1.0f); // TODO: some sort of time here
 			RenderInfo.m_FeetFlipped = true;
 		}
 		else
@@ -512,7 +515,7 @@ void CPlayers::RenderPlayer(
 		if(Running)
 			State.Add(Player.m_VelX < 0 ? &g_pData->m_aAnimations[ANIM_RUN_LEFT] : &g_pData->m_aAnimations[ANIM_RUN_RIGHT], RunTime, 1.0f);
 		else
-			State.Add(&g_pData->m_aAnimations[ANIM_WALK], WalkTime, (g_Config.m_ClTeeFeetWalking + 1.0f));
+			State.Add(&g_pData->m_aAnimations[ANIM_WALK], WalkTime, 1.0f);
 	}
 
 	if(Player.m_Weapon == WEAPON_HAMMER)
@@ -526,7 +529,7 @@ void CPlayers::RenderPlayer(
 		if(time() - m_SkidSoundTime > time_freq() / 10)
 		{
 			if(g_Config.m_SndGame)
-				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 0.25f, Position);
+				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 1.0f, Position);
 			m_SkidSoundTime = time();
 		}
 
@@ -538,7 +541,7 @@ void CPlayers::RenderPlayer(
 
 	// draw gun
 	{
-		if(!(RenderInfo.m_TeeRenderFlags & WEAPON_GUN))
+		if(!(RenderInfo.m_TeeRenderFlags & TEE_NO_WEAPON))
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			Graphics()->QuadsSetRotation(State.GetAttach()->m_Angle * pi * 2 + Angle);
@@ -549,7 +552,7 @@ void CPlayers::RenderPlayer(
 			// normal weapons
 			int CurrentWeapon = clamp(Player.m_Weapon, 0, NUM_WEAPONS - 1);
 			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[CurrentWeapon]);
-			int QuadOffset = CurrentWeapon * (g_Config.m_ClWeaponSize + 2 + (g_Config.m_ClShowWeapons * 100)) + (Direction.x < g_Config.m_ClWeaponRot ? (g_Config.m_ClWeaponRotSize2 + 1 + (g_Config.m_ClShowWeapons * 100)) : g_Config.m_ClWeaponRotSize3 + (g_Config.m_ClShowWeapons * 100));
+			int QuadOffset = CurrentWeapon * 2 + (Direction.x < 0 ? 1 : 0);
 
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 
@@ -572,9 +575,9 @@ void CPlayers::RenderPlayer(
 				if(!Inactive || LastAttackTime < m_pClient->m_aTuning[g_Config.m_ClDummy].GetWeaponFireDelay(Player.m_Weapon))
 				{
 					if(Direction.x < 0)
-						Graphics()->QuadsSetRotation(-pi / (g_Config.m_ClHammerRot + 2) - State.GetAttach()->m_Angle * pi * (g_Config.m_ClHammerDir + 2));
+						Graphics()->QuadsSetRotation(-pi / 2 - State.GetAttach()->m_Angle * pi * 2);
 					else
-						Graphics()->QuadsSetRotation(-pi / (g_Config.m_ClHammerRot + 2) + State.GetAttach()->m_Angle * pi * (g_Config.m_ClHammerDir + 2));
+						Graphics()->QuadsSetRotation(-pi / 2 + State.GetAttach()->m_Angle * pi * 2);
 				}
 				else
 					Graphics()->QuadsSetRotation(Direction.x < 0 ? 100.0f : 500.0f);
@@ -652,15 +655,15 @@ void CPlayers::RenderPlayer(
 			{
 				// TODO: should be an animation
 				Recoil = 0;
-				float a = AttackTicksPassed / (g_Config.m_ClGunReload + 5.0f);
+				float a = AttackTicksPassed / 5.0f;
 				if(a < 1)
 					Recoil = std::sin(a * pi);
-				WeaponPosition = Position + Dir * g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsetx - Dir * Recoil * (g_Config.m_ClGunRecoil - 10.0f);
+				WeaponPosition = Position + Dir * g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsetx - Dir * Recoil * 10.0f;
 				WeaponPosition.y += g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsety;
 				if(IsSit)
-					WeaponPosition.y += (g_Config.m_ClGunPosSitting + 3.0f);
-				if(Player.m_Weapon == WEAPON_GUN)
-					WeaponPosition.y -= (g_Config.m_ClGunPos + 4);
+					WeaponPosition.y += 3.0f;
+				if(Player.m_Weapon == WEAPON_GUN && g_Config.m_ClOldGunPosition)
+					WeaponPosition.y -= 8;
 				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
 			}
 
@@ -788,20 +791,7 @@ void CPlayers::RenderPlayer(
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 				Graphics()->QuadsSetRotation(0);
 			}
-	
 		}
-	}
-
-	if(g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientId].m_Afk && !(Client()->DummyConnected() && ClientId == m_pClient->m_aLocalIds[!g_Config.m_ClDummy]))
-	{
-		int CurEmoticon = (SPRITE_ZZZ - SPRITE_OOP);
-		Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[CurEmoticon]);
-		int QuadOffset = QuadOffsetToEmoticon + CurEmoticon;
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x + 24.f, Position.y - 40.f);
-
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		Graphics()->QuadsSetRotation(0);
 	}
 
 	if(g_Config.m_ClShowEmotes && !m_pClient->m_aClients[ClientId].m_EmoticonIgnore && m_pClient->m_aClients[ClientId].m_EmoticonStartTick != -1)

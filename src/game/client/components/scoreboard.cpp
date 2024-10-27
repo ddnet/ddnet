@@ -581,6 +581,22 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				{
 					TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor)));
 				}
+
+					if(IsMuted && g_Config.m_ClMutedIconScore)
+				{
+					ColorRGBA Color = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedColor));
+						TextRender()->TextEx(&Cursor, "  ");
+					Graphics()->BlendNormal();
+					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_MUTED_ICON].m_Id);
+					Graphics()->QuadsBegin();
+					Graphics()->SetColor(Color);
+				
+					IGraphics::CQuadItem QuadItem(NameOffset - 1, Row.y + IconRowY, IconSize, IconSize);
+					Graphics()->QuadsDrawTL(&QuadItem, 2);
+					Graphics()->QuadsEnd();
+
+				}
+
 				if(g_Config.m_ClShowIds)
 				{
 					char aClientId[16];
@@ -655,33 +671,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					}
 
 
-					if(IsMuted && g_Config.m_ClMutedIconScore)
-					{
-						ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
-						ColorRGBA Color = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedColor));
-						TextRender()->TextEx(&Cursor, "    ");
-						Graphics()->BlendNormal();
-						
-						Graphics()->TextureSet(g_pData->m_aImages[IMAGE_MUTED_ICON].m_Id);
-
-						
-						Graphics()->QuadsBegin();
-	
-						Graphics()->SetColor(Color);
-						if (g_Config.m_ClScoreSpecPrefix && ClientData.m_Paused || ClientData.m_Spec)
-						{
-							IGraphics::CQuadItem QuadItem(NameOffset + SpecDiff, Row.y + IconRowY, IconSize, IconSize);
-							Graphics()->QuadsDrawTL(&QuadItem, 1);
-							Graphics()->QuadsEnd();
-						}
-						else
-						{
-						IGraphics::CQuadItem QuadItem(NameOffset, Row.y + IconRowY, IconSize, IconSize);
-						Graphics()->QuadsDrawTL(&QuadItem, 1);
-						Graphics()->QuadsEnd();
-						}
-					
-					}
+				
 				}
 				
 
@@ -719,6 +709,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			// ping
 			if(g_Config.m_ClEnablePingColor)
 			{
+				if(g_Config.m_ClAidsPingDetection && pInfo->m_Latency == 77 || pInfo->m_Latency == 76)
+					TextRender()->TextColor(0.f, 0.f, 0.f, 1.f);
+				else
 				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f)));
 			}
 			else

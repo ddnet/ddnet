@@ -31,7 +31,7 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 	float YOffset = Position.y - 30;
 	ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 	ColorRGBA Color = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedColor));
-	
+
 	// render players' key presses
 	int ShowDirection = g_Config.m_ClShowDirection;
 #if defined(CONF_VIDEORECORDER)
@@ -219,6 +219,43 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 			TextRender()->TextColor(Color);
 			TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, pFriendMark) / 2.0f, YOffset, FontSize, pFriendMark);
 		}
+
+		{
+
+			const bool Following = (m_pClient->m_Snap.m_SpecInfo.m_Active && !GameClient()->m_MultiViewActivated && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW);
+			const int SelectedId = Following ? m_pClient->m_Snap.m_SpecInfo.m_SpectatorId : m_pClient->m_Snap.m_LocalClientId;
+			const CGameClient::CSnapState::CCharacterInfo &Selected = m_pClient->m_Snap.m_aCharacters[SelectedId];
+			const CGameClient::CSnapState::CCharacterInfo &Other = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId];
+
+			ColorRGBA StrongWeakIdColor;
+
+			if(Selected.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId)
+			{
+				StrongWeakIdColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
+			}
+			else
+			{
+				StrongWeakIdColor = color_cast<ColorRGBA>(ColorHSLA(41131));
+			}
+
+			if(g_Config.m_ClStrongWeakColorId)
+			{
+				YOffset -= FontSize;
+				char aBuf[12];
+				str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
+				TextRender()->TextColor(StrongWeakIdColor);
+				TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
+			}
+			else
+			{
+				YOffset -= FontSize;
+				char aBuf[12];
+				str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
+				TextRender()->TextColor(rgb);
+				TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
+			}
+		}
+
 	}
 
 	if((g_Config.m_Debug || g_Config.m_ClNameplatesStrong) && g_Config.m_ClNameplates)
@@ -277,61 +314,6 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 					char aBuf[12];
 					str_format(aBuf, sizeof(aBuf), "%d", Other.m_ExtendedData.m_StrongWeakId);
 					TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
-				}
-			}
-		}
-	}
-
-	if((g_Config.m_Debug || g_Config.m_ClNameplatesIds) && g_Config.m_ClNameplates)
-	{
-		const bool Following = (m_pClient->m_Snap.m_SpecInfo.m_Active && !GameClient()->m_MultiViewActivated && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW);
-		if(m_pClient->m_Snap.m_LocalClientId != -1 || Following)
-		{
-			const int SelectedId = Following ? m_pClient->m_Snap.m_SpecInfo.m_SpectatorId : m_pClient->m_Snap.m_LocalClientId;
-			const CGameClient::CSnapState::CCharacterInfo &Selected = m_pClient->m_Snap.m_aCharacters[SelectedId];
-			const CGameClient::CSnapState::CCharacterInfo &Other = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientId];
-			if(Selected.m_HasExtendedData && Other.m_HasExtendedData)
-			{
-				if(SelectedId == pPlayerInfo->m_ClientId)
-				{
-					TextRender()->TextColor(rgb);
-				}
-				else
-				{
-					ColorRGBA StrongWeakIdColor;
-
-					if(Selected.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId)
-					{
-						StrongWeakIdColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
-					}
-					else
-					{
-						StrongWeakIdColor = color_cast<ColorRGBA>(ColorHSLA(41131));
-					}
-
-					if(g_Config.m_ClStrongWeakColorId)
-					{
-						YOffset -= FontSize;
-						char aBuf[12];
-						str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
-						TextRender()->TextColor(StrongWeakIdColor);
-						TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
-					}
-					else
-					{
-						YOffset -= FontSize;
-						char aBuf[12];
-						str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
-						TextRender()->TextColor(rgb);
-						TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
-					}
-
-					if(OtherTeam && !ForceAlpha)
-						StrongWeakIdColor.a = g_Config.m_ClShowOthersAlpha / 100.0f;
-					else if(g_Config.m_ClNameplatesAlways == 0)
-						StrongWeakIdColor.a = clamp(1 - std::pow(distance(m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
-					else
-						StrongWeakIdColor.a = 1.0f;
 				}
 			}
 		}
