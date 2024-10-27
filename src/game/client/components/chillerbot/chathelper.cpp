@@ -349,7 +349,27 @@ void CChatHelper::OnChatMessage(int ClientId, int Team, const char *pMsg)
 		str_format(aBuf, sizeof(aBuf), "%s: %s", m_pClient->m_aClients[ClientId].m_aName, pMsg);
 		m_pChillerBot->SetComponentNoteLong("last ping", aBuf);
 	}
-	if(g_Config.m_ClTabbedOutMsg)
+	if(g_Config.m_ClReplyMuted && GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[ClientId].m_aName))
+	{
+		if(!GameClient()->m_Snap.m_pLocalCharacter)
+			return;
+
+		IEngineGraphics *pGraphics = ((IEngineGraphics *)Kernel()->RequestInterface<IEngineGraphics>());
+
+		if(Team == 3) // whisper recv
+		{
+			char bBuf[2048] = "/w %n ";
+			str_append(bBuf, g_Config.m_ClAutoReplyMutedMsg);
+			SayFormat(bBuf);
+		}
+		else
+		{
+			char bBuf[2048] = "%n: ";
+			str_append(bBuf, g_Config.m_ClAutoReplyMutedMsg);
+			SayFormat(bBuf);
+		}
+	}
+	if(g_Config.m_ClTabbedOutMsg && !GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[ClientId].m_aName))
 	{
 	
 		if(!GameClient()->m_Snap.m_pLocalCharacter)

@@ -75,7 +75,8 @@ class CChillerBotUX : public CComponent
 	int m_LastForceDir;
 	int64_t m_LastNotification;
 	int64_t m_NextSkinSteal;
-	// used for notifications when tabbed out
+	// used for notifications when 
+	// out
 	int m_LastTile = -1;
 
 	void SaveSkins();

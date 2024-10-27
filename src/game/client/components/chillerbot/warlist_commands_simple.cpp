@@ -142,7 +142,7 @@ void CWarList::RemoveSimpleMute(const char *pName)
 	char aBuf[512];
 	if(!RemoveMuteNameFromVector("chillerbot/warlist/mutes/mutes", pName))
 	{
-		str_format(aBuf, sizeof(aBuf), "Name '%s' not found in the war list", pName);
+		str_format(aBuf, sizeof(aBuf), "Name '%s' not found in the mute list", pName);
 		m_pClient->m_Chat.AddLine(-2, 0, aBuf);
 		return;
 	}

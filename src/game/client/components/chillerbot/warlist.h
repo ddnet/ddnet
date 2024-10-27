@@ -207,6 +207,8 @@ public:
 	void AddSimpleWar(const char *pName);
 	void AddSimpleTeam(const char *pName);
 	// New
+	void CloneSkin(const char *pName);
+
 	void AddSimpleHelper(const char *pName);
 	void AddSimpleMute(const char *pName);
 

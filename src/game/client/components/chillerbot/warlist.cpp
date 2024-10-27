@@ -1169,8 +1169,6 @@ void CWarList::OnConsoleInit()
 	Console()->Register("del_helper", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveHelper, this, "Removes a Name From The Helperlist");
 	Console()->Register("removehelper", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveHelper, this, "Removes a Name From The Helperlist");
 
-
-
 	// Add Mute
 	Console()->Register("addmute", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddMute, this, "Adds a Muted Player to The Mutelist");
 	Console()->Register("add_mute", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddMute, this, "Adds a Muted Player to The Mutelist");
