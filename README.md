@@ -240,6 +240,9 @@ To Do:
 - ~~add Client/Server Msg Prefix functionality~~
 - ~~add Helper List~~
 - ~~show mutes in console~~
+- work on the visuals tab in settings more
+- add !skin command (clone wont come I dont think I dont like it)
+- add auto reply to muted players
 - when friend joines ping you or make name be in a color
 
 Maybe:
