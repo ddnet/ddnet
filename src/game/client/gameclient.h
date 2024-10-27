@@ -66,6 +66,7 @@
 #include "components/player_indicator.h"
 #include "components/skinprofiles.h"
 #include "components/verify.h"
+#include "components/rainbow.h"
 
 // Chillerbot
 
@@ -190,6 +191,7 @@ public:
 	CBindWheel m_Bindwheel;
 	CVerify m_Verify;
 	CPlayerIndicator m_PlayerIndicator;
+	CRainbow m_Rainbow;
 
 	// chillerbot-ux
 

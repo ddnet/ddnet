@@ -15,6 +15,8 @@
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 
+#include "game/client/components/rainbow.h"
+
 #include <game/mapitems.h>
 
 static float gs_SpriteWScale;
@@ -183,6 +185,7 @@ void CRenderTools::GetRenderTeeAnimScaleAndBaseSize(const CTeeRenderInfo *pInfo,
 void CRenderTools::GetRenderTeeBodyScale(float BaseSize, float &BodyScale)
 {
 	BodyScale = g_Config.m_ClFatSkins ? BaseSize * 1.3f : BaseSize;
+	BodyScale = g_Config.m_ClSmallSkins ? BaseSize * 0.89f : BaseSize;
 	BodyScale /= 64.0f;
 }
 
@@ -214,10 +217,14 @@ void CRenderTools::GetRenderTeeFeetSize(const CAnimState *pAnim, const CTeeRende
 	float FeetScaleWidth, FeetScaleHeight;
 	GetRenderTeeFeetScale(BaseSize, FeetScaleWidth, FeetScaleHeight);
 
+	
+
+
 	Width = pInfo->m_SkinMetrics.m_Feet.WidthNormalized() * 64.0f * FeetScaleWidth;
 	Height = pInfo->m_SkinMetrics.m_Feet.HeightNormalized() * 32.0f * FeetScaleHeight;
 	FeetOffset.x = pInfo->m_SkinMetrics.m_Feet.OffsetXNormalized() * 64.0f * FeetScaleWidth;
 	FeetOffset.y = pInfo->m_SkinMetrics.m_Feet.OffsetYNormalized() * 32.0f * FeetScaleHeight;
+
 }
 
 void CRenderTools::GetRenderTeeOffsetToRenderedTee(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, vec2 &TeeOffsetToMid)
@@ -580,31 +587,63 @@ void CRenderTools::RenderTee6(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 			// draw feet
 			const CAnimKeyframe *pFoot = Filling ? pAnim->GetFrontFoot() : pAnim->GetBackFoot();
 
-			float w = BaseSize;
-			float h = BaseSize / 2;
+			// beta make dis work gooder thx
 
-			int QuadOffset = 7;
-			if(Dir.x < 0 && pInfo->m_FeetFlipped)
+			if(g_Config.m_ClSmallSkins)
 			{
-				QuadOffset += 2;
+				float w = BaseSize / 1.15;
+				float h = BaseSize / 2.15;
+				int QuadOffset = 7;
+				if(Dir.x < 0 && pInfo->m_FeetFlipped)
+				{
+					QuadOffset += 2;
+				}
+
+				Graphics()->QuadsSetRotation(pFoot->m_Angle * pi * 2);
+
+				bool Indicate = !pInfo->m_GotAirJump && g_Config.m_ClAirjumpindicator;
+				float ColorScale = 1.0f;
+
+				if(!OutLine)
+				{
+					++QuadOffset;
+					if(Indicate)
+						ColorScale = 0.5f;
+				}
+
+				Graphics()->SetColor(pInfo->m_ColorFeet.r * ColorScale, pInfo->m_ColorFeet.g * ColorScale, pInfo->m_ColorFeet.b * ColorScale, Alpha);
+
+				Graphics()->TextureSet(OutLine == 1 ? pSkinTextures->m_FeetOutline : pSkinTextures->m_Feet);
+				Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset, Position.x + pFoot->m_X * AnimScale, Position.y + pFoot->m_Y * AnimScale, w / 64.f, h / 32.f);
 			}
-
-			Graphics()->QuadsSetRotation(pFoot->m_Angle * pi * 2);
-
-			bool Indicate = !pInfo->m_GotAirJump && g_Config.m_ClAirjumpindicator;
-			float ColorScale = 1.0f;
-
-			if(!OutLine)
+			else
 			{
-				++QuadOffset;
-				if(Indicate)
-					ColorScale = 0.5f;
+				float w = BaseSize;
+				float h = BaseSize / 2;
+				int QuadOffset = 7;
+				if(Dir.x < 0 && pInfo->m_FeetFlipped)
+				{
+					QuadOffset += 2;
+				}
+
+				Graphics()->QuadsSetRotation(pFoot->m_Angle * pi * 2);
+
+				bool Indicate = !pInfo->m_GotAirJump && g_Config.m_ClAirjumpindicator;
+				float ColorScale = 1.0f;
+
+				if(!OutLine)
+				{
+					++QuadOffset;
+					if(Indicate)
+						ColorScale = 0.5f;
+				}
+
+				Graphics()->SetColor(pInfo->m_ColorFeet.r * ColorScale, pInfo->m_ColorFeet.g * ColorScale, pInfo->m_ColorFeet.b * ColorScale, Alpha);
+
+				Graphics()->TextureSet(OutLine == 1 ? pSkinTextures->m_FeetOutline : pSkinTextures->m_Feet);
+				Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset, Position.x + pFoot->m_X * AnimScale, Position.y + pFoot->m_Y * AnimScale, w / 64.f, h / 32.f);
 			}
-
-			Graphics()->SetColor(pInfo->m_ColorFeet.r * ColorScale, pInfo->m_ColorFeet.g * ColorScale, pInfo->m_ColorFeet.b * ColorScale, Alpha);
-
-			Graphics()->TextureSet(OutLine == 1 ? pSkinTextures->m_FeetOutline : pSkinTextures->m_Feet);
-			Graphics()->RenderQuadContainerAsSprite(m_TeeQuadContainerIndex, QuadOffset, Position.x + pFoot->m_X * AnimScale, Position.y + pFoot->m_Y * AnimScale, w / 64.f, h / 32.f);
+			
 		}
 	}
 }

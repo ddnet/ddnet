@@ -81,6 +81,7 @@
 // Tater
 #include "components/player_indicator.h"
 #include "components/verify.h"
+#include "components/rainbow.h"
 
 // Chillerbot
 #include "components/chillerbot/chathelper.h"
@@ -138,6 +139,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Particles, // doesn't render anything, just updates all the particles
 					      &m_SkinProfiles,
 					      &m_RaceDemo,
+					      &m_Rainbow,
 					      &m_MapSounds,
 					      &m_Background, // render instead of m_MapLayersBackground when g_Config.m_ClOverlayEntities == 100
 					      &m_MapLayersBackground, // first to render
