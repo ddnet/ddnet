@@ -5,7 +5,7 @@
 class IConfigManager;
 
 #define NUM_BINDWHEEL 8
-#define MAX_BINDWHEEL_DESC 11
+#define MAX_BINDWHEEL_DESC 16
 #define MAX_BINDWHEEL_CMD 128
 
 class CBindWheel : public CComponent

@@ -237,22 +237,24 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 			{
 				StrongWeakIdColor = color_cast<ColorRGBA>(ColorHSLA(41131));
 			}
-
-			if(g_Config.m_ClStrongWeakColorId)
+			if(g_Config.m_ClNameplatesIds)
 			{
-				YOffset -= FontSize;
-				char aBuf[12];
-				str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
-				TextRender()->TextColor(StrongWeakIdColor);
-				TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
-			}
-			else
-			{
-				YOffset -= FontSize;
-				char aBuf[12];
-				str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
-				TextRender()->TextColor(rgb);
-				TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
+				if(g_Config.m_ClStrongWeakColorId)
+				{
+					YOffset -= FontSize;
+					char aBuf[12];
+					str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
+					TextRender()->TextColor(StrongWeakIdColor);
+					TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
+				}
+				else
+				{
+					YOffset -= FontSize;
+					char aBuf[12];
+					str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientId);
+					TextRender()->TextColor(rgb);
+					TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
+				}
 			}
 		}
 

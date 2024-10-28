@@ -229,7 +229,7 @@ void CMenus::PopupConfirmDisconnectDummy()
 
 void CMenus::RenderPlayers(CUIRect MainView)
 {
-	CUIRect Button, Button2, ButtonBar, PlayerList, Player;
+	CUIRect Button, Button2, ButtonBar, PlayerList, Player, RestoreName;
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
 	// list background color
@@ -237,10 +237,51 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	PlayerList.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 	PlayerList.Margin(10.0f, &PlayerList);
 
+
+
+
 	// headline
 	PlayerList.HSplitTop(34.0f, &ButtonBar, &PlayerList);
 	ButtonBar.VSplitRight(231.0f, &Player, &ButtonBar);
 	Ui()->DoLabel(&Player, Localize("Player"), 24.0f, TEXTALIGN_ML);
+
+	const char Name = *g_Config.m_PlayerName;
+	const char Clan = *g_Config.m_PlayerClan;
+
+	Player.HSplitTop(20.0f, &Player, &RestoreName);
+	Player.HSplitTop(0.0f, &Player, &RestoreName);
+	RestoreName.VSplitRight(20.0f, &RestoreName, &RestoreName);
+	RestoreName.VSplitRight(100.0f, &RestoreName, &RestoreName);
+	static CButtonContainer s_Restore[MAX_CLIENTS];
+	static CButtonContainer s_Save[MAX_CLIENTS];
+
+	if(DoButton_Menu(s_Restore, Localize("Restore Everything"), 0, &RestoreName, nullptr, 15, 5, 0, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f)))
+	{
+		dbg_msg("chillerbot", "restored player skin '%s'", g_Config.m_ClSavedPlayerSkin);
+		str_copy(g_Config.m_ClPlayerSkin, g_Config.m_ClSavedPlayerSkin, sizeof(g_Config.m_ClPlayerSkin));
+		str_copy(g_Config.m_PlayerName, g_Config.m_ClSavedName, sizeof(g_Config.m_PlayerName));
+		str_copy(g_Config.m_PlayerClan, g_Config.m_ClSavedClan, sizeof(g_Config.m_PlayerClan));
+		g_Config.m_ClPlayerUseCustomColor = g_Config.m_ClSavedPlayerUseCustomColor;
+		g_Config.m_ClPlayerColorBody = g_Config.m_ClSavedPlayerColorBody;
+		g_Config.m_ClPlayerColorFeet = g_Config.m_ClSavedPlayerColorFeet;
+
+
+		m_pClient->SendInfo(false);
+	}
+
+	RestoreName.VSplitLeft(-400.0f, &RestoreName, 0);
+	RestoreName.VSplitLeft(-500.0f, &Player, &RestoreName);
+	if(DoButton_Menu(s_Save, Localize("Save Everything"), 0, &RestoreName, nullptr, 15, 5, 0, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f)))
+	{
+		dbg_msg("Aiodob", "saved player skin '%s'", g_Config.m_ClPlayerSkin);
+		str_copy(g_Config.m_ClSavedPlayerSkin, g_Config.m_ClPlayerSkin, sizeof(g_Config.m_ClSavedPlayerSkin));
+		str_copy(g_Config.m_ClSavedName, g_Config.m_PlayerName, sizeof(g_Config.m_ClSavedName));
+		str_copy(g_Config.m_ClSavedClan, g_Config.m_PlayerClan, sizeof(g_Config.m_ClSavedClan));
+		g_Config.m_ClSavedPlayerUseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+		g_Config.m_ClSavedPlayerColorBody = g_Config.m_ClPlayerColorBody;
+		g_Config.m_ClSavedPlayerColorFeet = g_Config.m_ClPlayerColorFeet;
+
+	}
 
 	ButtonBar.HMargin(1.0f, &ButtonBar);
 	float Width = ButtonBar.h * 2.0f;
@@ -326,15 +367,19 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
 			Button2.x + 250.0f, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
 
-
-
 		// copy name button
 
 		Row.VSplitLeft(-425.0f, &Player, &Row);
 		Row.VSplitLeft(100.0f, &Player, &Row);
-		if(DoButton_Menu(&s_CopyNames[Index], Localize("Name"), 0, &Player))
+
+		if(DoButton_Menu(&s_CopyNames[Index], Localize("Name"), 0, &Player, nullptr, 15, 5, 0, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f)))
 		{
-			str_copy(g_Config.m_PlayerName, CurrentClient.m_aName, sizeof(g_Config.m_PlayerName));
+			char aBuf[2048] = ".";
+			
+
+			str_append(aBuf, CurrentClient.m_aName);
+			str_copy(g_Config.m_PlayerName, aBuf, sizeof(g_Config.m_PlayerName));
+			
 
 			m_pClient->SendInfo(false);
 		}
@@ -342,7 +387,9 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		// copy clan button
 		Row.VSplitLeft(15.0f, &Button, &Row);
 		Row.VSplitLeft(100.0f, &Button, &Row);
-		if(DoButton_Menu(&s_CopyClan[Index], Localize("Clan"), 0, &Button))
+
+		Button.Draw(ColorRGBA(0.0f, 0.0f, 1.0f, 0.01f), IGraphics::CORNER_ALL, 5.0f);
+		if(DoButton_Menu(&s_CopyClan[Index], Localize("Clan"), 0, &Button, nullptr, 15, 5, 0, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f)))
 		{
 			str_copy(g_Config.m_PlayerClan, CurrentClient.m_aClan, sizeof(g_Config.m_PlayerClan));
 
@@ -352,7 +399,8 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		//copy skin button
 		Row.VSplitLeft(15.0f, &Button2, &Row);
 		Row.VSplitLeft(100.0f, &Button2, &Row);
-		if(DoButton_Menu(&s_CopySkins[Index], Localize("Skin"), 0, &Button2))
+		Button2.Draw(ColorRGBA(1.0f, 0.0f, 0.0f, 0.01f), IGraphics::CORNER_ALL, 5.0f);
+		if(DoButton_Menu(&s_CopySkins[Index], Localize("Skin"), 0, &Button2, nullptr, 15, 5, 0,ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f )))
 		{
 			g_Config.m_ClPlayerUseCustomColor = CurrentClient.m_UseCustomColor;
 			g_Config.m_ClPlayerColorBody = CurrentClient.m_ColorBody;
@@ -398,7 +446,9 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 			m_pClient->Client()->ServerBrowserUpdate();
 		}
+
 	}
+
 
 	s_ListBox.DoEnd();
 }

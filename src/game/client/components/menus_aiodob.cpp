@@ -116,7 +116,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 		{
 			ChillerBotSettings.VMargin(5.0f, &ChillerBotSettings);
-			ChillerBotSettings.HSplitTop(125.0f, &ChillerBotSettings, &ChatSettings);
+			ChillerBotSettings.HSplitTop(145.0f, &ChillerBotSettings, &ChatSettings);
 			if(s_ScrollRegion.AddRect(ChillerBotSettings))
 			{
 				ChillerBotSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -186,6 +186,8 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				ChillerBotSettings.HSplitTop(20.0f, &Button, &ChillerBotSettings);
 
 				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChangeTileNotification, ("Notify When Player is Being Moved"), &g_Config.m_ClChangeTileNotification, &ChillerBotSettings, LineSize));
+				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatBubble, ("Show Chat Bubble"), &g_Config.m_ClChatBubble, &ChillerBotSettings, LineSize))
+					;
 
 			
 
@@ -430,7 +432,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				ScoreboardSettings.HSplitTop(HeaderHeight, &Button, &ScoreboardSettings);
 				Ui()->DoLabel(&Button, Localize("Scoreboard Settings"), FontSize, TEXTALIGN_MC);
 
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMutedIconScore, Localize("Show an Indicator Next to Muted Playersr in Scoreboard"), &g_Config.m_ClMutedIconScore, &ScoreboardSettings, LineSize);
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMutedIconScore, Localize("Show an Indicator Next to Muted Players in Scoreboard"), &g_Config.m_ClMutedIconScore, &ScoreboardSettings, LineSize);
 
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoWarListColorScore, Localize("Do Team/War Name Colors in Scoreboard"), &g_Config.m_ClDoWarListColorScore, &ScoreboardSettings, LineSize);
 
@@ -904,16 +906,16 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 			{
 				if(g_Config.m_ClDoCursorSpecOpacity)
 				{
-					MiscSettings.HSplitTop(200.0f, &MiscSettings, &PlayerIndicatorSettings);
+					MiscSettings.HSplitTop(180.0f, &MiscSettings, &PlayerIndicatorSettings);
 				}
 				else
 				{
-					MiscSettings.HSplitTop(160.0f, &MiscSettings, &PlayerIndicatorSettings);
+					MiscSettings.HSplitTop(140.0f, &MiscSettings, &PlayerIndicatorSettings);
 				}
 			}
 			else
 			{
-				MiscSettings.HSplitTop(140.0f, &MiscSettings, &PlayerIndicatorSettings);
+				MiscSettings.HSplitTop(120.0f, &MiscSettings, &PlayerIndicatorSettings);
 			}
 
 			if(s_ScrollRegion.AddRect(MiscSettings))
@@ -925,7 +927,6 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				Ui()->DoLabel(&Button, Localize("Miscellaneous"), FontSize, TEXTALIGN_MC);
 
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoVerify, ("Auto Verify"), &g_Config.m_ClAutoVerify, &MiscSettings, LineSize);
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatBubble, ("Show Chat Bubble"), &g_Config.m_ClChatBubble, &MiscSettings, LineSize);
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, ("Show Ping Circles Next To Names"), &g_Config.m_ClPingNameCircle, &MiscSettings, LineSize);
 
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, ("Show Cursor While Spectating"), &g_Config.m_ClRenderCursorSpec, &MiscSettings, LineSize);
