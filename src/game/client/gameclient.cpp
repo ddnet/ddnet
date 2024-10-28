@@ -663,6 +663,9 @@ void CGameClient::OnReset()
 	std::fill(std::begin(m_aShowOthers), std::end(m_aShowOthers), SHOW_OTHERS_NOT_SET);
 	std::fill(std::begin(m_aLastUpdateTick), std::end(m_aLastUpdateTick), 0);
 
+	std::fill(std::begin(m_ReceivePoints), std::end(m_ReceivePoints), -1);
+	m_CanReceivePoints = false;
+
 	m_PredictedDummyId = -1;
 	m_IsDummySwapping = false;
 	m_CharOrder.Reset();
@@ -870,6 +873,7 @@ void CGameClient::OnDummyDisconnect()
 	m_aShowOthers[1] = SHOW_OTHERS_NOT_SET;
 	m_aLastNewPredictedTick[1] = -1;
 	m_PredictedDummyId = -1;
+	m_ReceivePoints[1] = -1;
 }
 
 int CGameClient::GetLastRaceTick() const
@@ -1135,6 +1139,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 		CNetMsg_Sv_MapSoundGlobal *pMsg = (CNetMsg_Sv_MapSoundGlobal *)pRawMsg;
 		m_MapSounds.Play(CSounds::CHN_GLOBAL, pMsg->m_SoundId);
+	}
+	else if(MsgId == NETMSGTYPE_CL_RECEIVEPOINTS)
+	{
+		CNetMsg_Cl_ReceivePoints *pMsg = (CNetMsg_Cl_ReceivePoints *)pRawMsg;
+		m_CanReceivePoints = pMsg->m_ReceivePoints;
 	}
 }
 
@@ -2041,6 +2050,15 @@ void CGameClient::OnNewSnapshot()
 
 		// update state
 		m_aShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
+	}
+
+	if(m_ReceivePoints[g_Config.m_ClDummy] == -1 || m_ReceivePoints[g_Config.m_ClDummy] != g_Config.m_ClScoreboardPoints)
+	{
+		CNetMsg_Cl_ReceivePoints Msg;
+		Msg.m_ReceivePoints = g_Config.m_ClScoreboardPoints;
+		Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+
+		m_ReceivePoints[g_Config.m_ClDummy] = g_Config.m_ClScoreboardPoints;
 	}
 
 	float ZoomToSend = m_Camera.m_Zoom;

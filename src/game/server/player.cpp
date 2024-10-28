@@ -121,6 +121,8 @@ void CPlayer::Reset()
 
 	m_LastPause = 0;
 	m_Score.reset();
+	m_ReceivePoints = false;
+	m_Points = 0;
 
 	// Variable initialized:
 	m_Last_Team = 0;
@@ -352,6 +354,12 @@ void CPlayer::Snap(int SnappingClient)
 	if(SnappingClient != m_ClientId && g_Config.m_SvHideScore)
 		Score = -9999;
 
+	CNetObj_DDNetPlayer *pDDNetPlayer = Server()->SnapNewItem<CNetObj_DDNetPlayer>(id);
+	if(pDDNetPlayer && GameServer()->m_apPlayers[SnappingClient]->m_ReceivePoints)
+	{
+		Score = GameServer()->m_apPlayers[m_ClientId]->m_Points;
+	}
+
 	if(!Server()->IsSixup(SnappingClient))
 	{
 		CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<CNetObj_PlayerInfo>(id);
@@ -411,7 +419,6 @@ void CPlayer::Snap(int SnappingClient)
 		}
 	}
 
-	CNetObj_DDNetPlayer *pDDNetPlayer = Server()->SnapNewItem<CNetObj_DDNetPlayer>(id);
 	if(!pDDNetPlayer)
 		return;
 
@@ -924,6 +931,9 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 				GameServer()->Score()->PlayerData(m_ClientId)->Set(Result.m_Data.m_Info.m_Time.value(), Result.m_Data.m_Info.m_aTimeCp);
 				m_Score = Result.m_Data.m_Info.m_Time;
 			}
+
+			m_Points = (Result.m_Data.m_Info.m_Points < 0) ? m_Points + Result.m_Data.m_Info.m_Points : Result.m_Data.m_Info.m_Points;
+
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
 			if(Birthday != 0 && !m_BirthdayAnnounced && GetCharacter())
