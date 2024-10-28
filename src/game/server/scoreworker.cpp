@@ -1126,7 +1126,7 @@ bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGame
 		"    SELECT RANK() OVER w AS Ranking, COUNT(*) AS Teamsize, Id, Server "
 		"    FROM ("
 		"      SELECT tr.Map, tr.Time, tr.Id, rr.Server FROM %s_teamrace as tr "
-		"      INNER JOIN %s_race as rr ON tr.Map = rr.Map AND tr.Name = rr.Name AND tr.Time = rr.Time AND tr.Timestamp = rr.Timestamp"
+		"      INNER JOIN %s_race as rr ON tr.Map = rr.Map AND tr.Name = rr.Name AND tr.Time = rr.Time"
 		"    ) AS ll "
 		"    WHERE Map = ? "
 		"    GROUP BY ID "
