@@ -560,7 +560,7 @@ void CGameClient::OnConnected()
 	const char *pLoadMapContent = Localize("Initializing boahhhhh");
 	// render loading before skip is calculated
 	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false);
-	m_Layers.Init(Kernel());
+	m_Layers.Init(Kernel()->RequestInterface<IMap>(), false);
 	m_Collision.Init(Layers());
 	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 	m_RaceHelper.Init(this);
@@ -600,6 +600,7 @@ void CGameClient::OnReset()
 	std::fill(std::begin(m_aLastNewPredictedTick), std::end(m_aLastNewPredictedTick), -1);
 
 	m_LastRoundStartTick = -1;
+	m_LastRaceTick = -1;
 	m_LastFlagCarrierRed = -4;
 	m_LastFlagCarrierBlue = -4;
 
@@ -876,9 +877,18 @@ void CGameClient::OnDummyDisconnect()
 	m_ReceivePoints[1] = -1;
 }
 
-int CGameClient::GetLastRaceTick() const
+int CGameClient::LastRaceTick() const
 {
-	return m_Ghost.GetLastRaceTick();
+	return m_LastRaceTick;
+}
+
+int CGameClient::CurrentRaceTime() const
+{
+	if(m_LastRaceTick < 0)
+	{
+		return 0;
+	}
+	return (Client()->GameTick(g_Config.m_ClDummy) - m_LastRaceTick) / Client()->GameTickSpeed();
 }
 
 bool CGameClient::Predict() const
@@ -972,6 +982,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		m_aReceivedTuning[Conn] = true;
 		// apply new tuning
 		m_aTuning[Conn] = NewTuning;
+		TuningList()[0] = NewTuning;
 		return;
 	}
 
@@ -2136,6 +2147,19 @@ void CGameClient::OnNewSnapshot()
 			}
 		}
 	}
+
+	// Record m_LastRaceTick for g_Config.m_ClConfirmDisconnect/QuitTime
+	if(m_GameInfo.m_Race &&
+		Client()->State() == IClient::STATE_ONLINE &&
+		m_Snap.m_pGameInfoObj &&
+		!m_Snap.m_SpecInfo.m_Active &&
+		m_Snap.m_pLocalCharacter &&
+		m_Snap.m_pLocalPrevCharacter)
+	{
+		const bool RaceFlag = m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME;
+		m_LastRaceTick = RaceFlag ? -m_Snap.m_pGameInfoObj->m_WarmupTimer : -1;
+	}
+
 	if(m_Snap.m_LocalClientId != m_PrevLocalId)
 		m_PredictedDummyId = m_PrevLocalId;
 	m_PrevLocalId = m_Snap.m_LocalClientId;
@@ -3802,7 +3826,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 void CGameClient::RefreshSkins()
 {
 	const auto SkinStartLoadTime = time_get_nanoseconds();
-	m_Skins.Refresh([&](int) {
+	m_Skins.Refresh([&]() {
 		// if skin refreshing takes to long, swap to a loading screen
 		if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
 		{
@@ -3842,6 +3866,13 @@ void CGameClient::LoadMapSettings()
 	for(int i = 0; i < NUM_TUNEZONES; i++)
 	{
 		TuningList()[i] = TuningParams;
+
+		// only hardcode ddrace tuning for the tune zones
+		// and not the base tuning
+		// that one will be sent by the server if needed
+		if(!i)
+			continue;
+
 		TuningList()[i].Set("gun_curvature", 0);
 		TuningList()[i].Set("gun_speed", 1400);
 		TuningList()[i].Set("shotgun_curvature", 0);

@@ -459,12 +459,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_MenuTab(&s_PlayerTabButton, Localize("Player"), !m_Dummy, &PlayerTab, IGraphics::CORNER_L, nullptr, nullptr, nullptr, nullptr, 4.0f))
 	{
 		m_Dummy = false;
+		m_SkinListScrollToSelected = true;
 	}
 
 	static CButtonContainer s_DummyTabButton;
 	if(DoButton_MenuTab(&s_DummyTabButton, Localize("Dummy"), m_Dummy, &DummyTab, IGraphics::CORNER_R, nullptr, nullptr, nullptr, nullptr, 4.0f))
 	{
 		m_Dummy = true;
+		m_SkinListScrollToSelected = true;
 	}
 
 	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_NextChangeInfo && m_pClient->m_NextChangeInfo > Client()->GameTick(g_Config.m_ClDummy))
@@ -611,6 +613,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(Ui()->DoClearableEditBox(&s_SkinInput, &Button, 14.0f))
 	{
 		SetNeedSendInfo();
+		m_SkinListScrollToSelected = true;
 	}
 
 	// Random skin button
@@ -707,21 +710,16 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static std::vector<CUISkin> s_vSkinList;
 	static std::vector<CUISkin> s_vSkinListHelper;
 	static std::vector<CUISkin> s_vFavoriteSkinListHelper;
-	static int s_SkinCount = 0;
 	static CListBox s_ListBox;
 
 	// be nice to the CPU
-	static auto s_SkinLastRebuildTime = time_get_nanoseconds();
-	const auto CurTime = time_get_nanoseconds();
-	if(m_SkinListNeedsUpdate || m_pClient->m_Skins.Num() != s_SkinCount || m_SkinFavoritesChanged || (m_pClient->m_Skins.IsDownloadingSkins() && (CurTime - s_SkinLastRebuildTime > 500ms)))
+	static std::chrono::nanoseconds s_SkinLastRefreshTime = m_pClient->m_Skins.LastRefreshTime();
+	if(m_SkinListNeedsUpdate || m_SkinFavoritesChanged || s_SkinLastRefreshTime != m_pClient->m_Skins.LastRefreshTime())
 	{
-		s_SkinLastRebuildTime = CurTime;
+		s_SkinLastRefreshTime = m_pClient->m_Skins.LastRefreshTime();
 		s_vSkinList.clear();
 		s_vSkinListHelper.clear();
 		s_vFavoriteSkinListHelper.clear();
-		// set skin count early, since Find of the skin class might load
-		// a downloading skin
-		s_SkinCount = m_pClient->m_Skins.Num();
 		m_SkinFavoritesChanged = false;
 
 		auto &&SkinNotFiltered = [&](const CSkin *pSkinToBeSelected) {
@@ -767,7 +765,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		const CSkin *pSkinToBeDraw = s_vSkinList[i].m_pSkin;
 		if(str_comp(pSkinToBeDraw->GetName(), pSkinName) == 0)
+		{
 			OldSelected = i;
+			if(m_SkinListScrollToSelected)
+			{
+				s_ListBox.ScrollToSelected();
+				m_SkinListScrollToSelected = false;
+			}
+		}
 
 		const CListboxItem Item = s_ListBox.DoNextItem(pSkinToBeDraw, OldSelected >= 0 && (size_t)OldSelected == i);
 		if(!Item.m_Visible)

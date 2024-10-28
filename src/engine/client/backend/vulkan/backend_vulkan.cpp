@@ -3584,7 +3584,7 @@ public:
 			auto Minor = (DriverVersion >> 12) & 0x3ff;
 			auto Patch = DriverVersion & 0xfff;
 
-			return Major == 2 && Minor == 0 && Patch > 116 && Patch < 220 && ((ApiMajor <= 1 && ApiMinor < 3) || (ApiMajor <= 1 && ApiMinor == 3 && ApiPatch < 206));
+			return Major == 2 && Minor == 0 && Patch > 137 && Patch < 220 && ((ApiMajor <= 1 && ApiMinor < 3) || (ApiMajor <= 1 && ApiMinor == 3 && ApiPatch < 206));
 		}
 #endif
 		return false;

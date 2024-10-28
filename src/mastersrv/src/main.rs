@@ -695,6 +695,7 @@ fn handle_register(
             })?;
             Some(token)
         }
+        Protocol::Ddper6 => None,
     };
 
     let addr = register.address.with_ip(remote_addr);

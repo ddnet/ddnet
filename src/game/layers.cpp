@@ -11,49 +11,51 @@ CLayers::CLayers()
 	Unload();
 }
 
-void CLayers::Init(class IKernel *pKernel)
+void CLayers::Init(IMap *pMap, bool GameOnly)
 {
 	Unload();
 
-	m_pMap = pKernel->RequestInterface<IMap>();
+	m_pMap = pMap;
 	m_pMap->GetType(MAPITEMTYPE_GROUP, &m_GroupsStart, &m_GroupsNum);
 	m_pMap->GetType(MAPITEMTYPE_LAYER, &m_LayersStart, &m_LayersNum);
 
-	for(int g = 0; g < NumGroups(); g++)
+	for(int GroupIndex = 0; GroupIndex < NumGroups(); GroupIndex++)
 	{
-		CMapItemGroup *pGroup = GetGroup(g);
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
+		CMapItemGroup *pGroup = GetGroup(GroupIndex);
+		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
-			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + l);
+			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + LayerIndex);
+			if(pLayer->m_Type != LAYERTYPE_TILES)
+				continue;
 
-			if(pLayer->m_Type == LAYERTYPE_TILES)
+			CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
+			bool IsEntities = false;
+
+			if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
 			{
-				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
-				bool IsEntities = false;
+				m_pGameLayer = pTilemap;
+				m_pGameGroup = pGroup;
 
-				if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
+				// make sure the game group has standard settings
+				m_pGameGroup->m_OffsetX = 0;
+				m_pGameGroup->m_OffsetY = 0;
+				m_pGameGroup->m_ParallaxX = 100;
+				m_pGameGroup->m_ParallaxY = 100;
+
+				if(m_pGameGroup->m_Version >= 2)
 				{
-					m_pGameLayer = pTilemap;
-					m_pGameGroup = pGroup;
-
-					// make sure the game group has standard settings
-					m_pGameGroup->m_OffsetX = 0;
-					m_pGameGroup->m_OffsetY = 0;
-					m_pGameGroup->m_ParallaxX = 100;
-					m_pGameGroup->m_ParallaxY = 100;
-
-					if(m_pGameGroup->m_Version >= 2)
-					{
-						m_pGameGroup->m_UseClipping = 0;
-						m_pGameGroup->m_ClipX = 0;
-						m_pGameGroup->m_ClipY = 0;
-						m_pGameGroup->m_ClipW = 0;
-						m_pGameGroup->m_ClipH = 0;
-					}
-
-					IsEntities = true;
-					//break;
+					m_pGameGroup->m_UseClipping = 0;
+					m_pGameGroup->m_ClipX = 0;
+					m_pGameGroup->m_ClipY = 0;
+					m_pGameGroup->m_ClipW = 0;
+					m_pGameGroup->m_ClipH = 0;
 				}
+
+				IsEntities = true;
+			}
+
+			if(!GameOnly)
+			{
 				if(pTilemap->m_Flags & TILESLAYERFLAG_TELE)
 				{
 					if(pTilemap->m_Version <= 2)
@@ -63,6 +65,7 @@ void CLayers::Init(class IKernel *pKernel)
 					m_pTeleLayer = pTilemap;
 					IsEntities = true;
 				}
+
 				if(pTilemap->m_Flags & TILESLAYERFLAG_SPEEDUP)
 				{
 					if(pTilemap->m_Version <= 2)
@@ -72,6 +75,7 @@ void CLayers::Init(class IKernel *pKernel)
 					m_pSpeedupLayer = pTilemap;
 					IsEntities = true;
 				}
+
 				if(pTilemap->m_Flags & TILESLAYERFLAG_FRONT)
 				{
 					if(pTilemap->m_Version <= 2)
@@ -81,6 +85,7 @@ void CLayers::Init(class IKernel *pKernel)
 					m_pFrontLayer = pTilemap;
 					IsEntities = true;
 				}
+
 				if(pTilemap->m_Flags & TILESLAYERFLAG_SWITCH)
 				{
 					if(pTilemap->m_Version <= 2)
@@ -90,6 +95,7 @@ void CLayers::Init(class IKernel *pKernel)
 					m_pSwitchLayer = pTilemap;
 					IsEntities = true;
 				}
+
 				if(pTilemap->m_Flags & TILESLAYERFLAG_TUNE)
 				{
 					if(pTilemap->m_Version <= 2)
@@ -99,58 +105,12 @@ void CLayers::Init(class IKernel *pKernel)
 					m_pTuneLayer = pTilemap;
 					IsEntities = true;
 				}
-
-				if(IsEntities)
-				{ // Ensure default color for entities layers
-					pTilemap->m_Color = CColor(255, 255, 255, 255);
-				}
 			}
-		}
-	}
 
-	InitTilemapSkip();
-}
-
-void CLayers::InitBackground(class IMap *pMap)
-{
-	Unload();
-
-	m_pMap = pMap;
-	m_pMap->GetType(MAPITEMTYPE_GROUP, &m_GroupsStart, &m_GroupsNum);
-	m_pMap->GetType(MAPITEMTYPE_LAYER, &m_LayersStart, &m_LayersNum);
-
-	for(int g = 0; g < NumGroups(); g++)
-	{
-		CMapItemGroup *pGroup = GetGroup(g);
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
-		{
-			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + l);
-
-			if(pLayer->m_Type == LAYERTYPE_TILES)
+			if(IsEntities)
 			{
-				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
-
-				if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
-				{
-					m_pGameLayer = pTilemap;
-					m_pGameGroup = pGroup;
-
-					// make sure the game group has standard settings
-					m_pGameGroup->m_OffsetX = 0;
-					m_pGameGroup->m_OffsetY = 0;
-					m_pGameGroup->m_ParallaxX = 100;
-					m_pGameGroup->m_ParallaxY = 100;
-
-					if(m_pGameGroup->m_Version >= 2)
-					{
-						m_pGameGroup->m_UseClipping = 0;
-						m_pGameGroup->m_ClipX = 0;
-						m_pGameGroup->m_ClipY = 0;
-						m_pGameGroup->m_ClipW = 0;
-						m_pGameGroup->m_ClipH = 0;
-					}
-					//We don't care about tile layers.
-				}
+				// Ensure default color for entities layers
+				pTilemap->m_Color = CColor(255, 255, 255, 255);
 			}
 		}
 	}
@@ -178,32 +138,30 @@ void CLayers::Unload()
 
 void CLayers::InitTilemapSkip()
 {
-	for(int g = 0; g < NumGroups(); g++)
+	for(int GroupIndex = 0; GroupIndex < NumGroups(); GroupIndex++)
 	{
-		const CMapItemGroup *pGroup = GetGroup(g);
-
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
+		const CMapItemGroup *pGroup = GetGroup(GroupIndex);
+		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
-			const CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + l);
+			const CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + LayerIndex);
+			if(pLayer->m_Type != LAYERTYPE_TILES)
+				continue;
 
-			if(pLayer->m_Type == LAYERTYPE_TILES)
+			const CMapItemLayerTilemap *pTilemap = reinterpret_cast<const CMapItemLayerTilemap *>(pLayer);
+			CTile *pTiles = static_cast<CTile *>(m_pMap->GetData(pTilemap->m_Data));
+			for(int y = 0; y < pTilemap->m_Height; y++)
 			{
-				const CMapItemLayerTilemap *pTilemap = (CMapItemLayerTilemap *)pLayer;
-				CTile *pTiles = (CTile *)m_pMap->GetData(pTilemap->m_Data);
-				for(int y = 0; y < pTilemap->m_Height; y++)
+				for(int x = 1; x < pTilemap->m_Width;)
 				{
-					for(int x = 1; x < pTilemap->m_Width;)
+					int SkippedX;
+					for(SkippedX = 1; x + SkippedX < pTilemap->m_Width && SkippedX < 255; SkippedX++)
 					{
-						int SkippedX;
-						for(SkippedX = 1; x + SkippedX < pTilemap->m_Width && SkippedX < 255; SkippedX++)
-						{
-							if(pTiles[y * pTilemap->m_Width + x + SkippedX].m_Index)
-								break;
-						}
-
-						pTiles[y * pTilemap->m_Width + x].m_Skip = SkippedX - 1;
-						x += SkippedX;
+						if(pTiles[y * pTilemap->m_Width + x + SkippedX].m_Index)
+							break;
 					}
+
+					pTiles[y * pTilemap->m_Width + x].m_Skip = SkippedX - 1;
+					x += SkippedX;
 				}
 			}
 		}

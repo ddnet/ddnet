@@ -249,11 +249,9 @@ static const CMenus::SCustomItem *GetCustomItem(int CurTab, size_t Index)
 template<typename TName>
 void ClearAssetList(std::vector<TName> &vList, IGraphics *pGraphics)
 {
-	for(size_t i = 0; i < vList.size(); ++i)
+	for(TName &Asset : vList)
 	{
-		if(vList[i].m_RenderTexture.IsValid())
-			pGraphics->UnloadTexture(&(vList[i].m_RenderTexture));
-		vList[i].m_RenderTexture = IGraphics::CTextureHandle();
+		pGraphics->UnloadTexture(&Asset.m_RenderTexture);
 	}
 	vList.clear();
 }
@@ -266,9 +264,7 @@ void CMenus::ClearCustomItems(int CurTab)
 		{
 			for(auto &Image : Entity.m_aImages)
 			{
-				if(Image.m_Texture.IsValid())
-					Graphics()->UnloadTexture(&Image.m_Texture);
-				Image.m_Texture = IGraphics::CTextureHandle();
+				Graphics()->UnloadTexture(&Image.m_Texture);
 			}
 		}
 		m_vEntitiesList.clear();
