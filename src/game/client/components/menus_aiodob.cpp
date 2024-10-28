@@ -1,4 +1,4 @@
-﻿
+
 
 #include <base/log.h>
 #include <base/math.h>
@@ -1238,11 +1238,15 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					PlayerSettings.HSplitTop(19.9f, &Button, &MainView);
 
 					Button.VSplitLeft(0.0f, &Button, &PlayerSettings);
-					Button.VSplitLeft(140.0f, &Label, &Button);
-					Button.VSplitLeft(85.0f, &Button, 0);
+					Button.VSplitLeft(150.0f, &Label, &Button);
+					Button.VSplitLeft(95.0f, &Button, 0);
 
 					static std::vector<const char *> s_DropDownNames = {Localize("Off"), Localize("Rainbow"), Localize("Pulse"), Localize("Black")};
 	
+					PlayerSettings.HSplitTop(2.4f, &Label, &PlayerSettings);
+					PlayerSettings.VSplitLeft(25.0f, &PlayerSettings, &PlayerSettings);
+					Ui()->DoLabel(&PlayerSettings, "Rainbow Settings:", 13.0f, TEXTALIGN_LEFT);
+
 					static CUi::SDropDownState s_RainbowDropDownState;
 					static CScrollRegion s_RainbowDropDownScrollRegion;
 					s_RainbowDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_RainbowDropDownScrollRegion;
