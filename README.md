@@ -94,6 +94,7 @@ ac_war_prefix
 ac_addmute_string
 ac_addwar_string
 ac_addteam_string
+ac_dont_send_dots_chat
 ac_delmute_string
 ac_delwar_string
 ac_delteam_string
