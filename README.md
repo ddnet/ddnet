@@ -244,7 +244,7 @@ To Do:
 - add !skin command (clone wont come I dont think I dont like it)
 - ~~add auto reply to muted players~~
 - when friend joines ping you or make name be in a color
-- toggle to turn off never sending a message that starts with "." (currently does that so you cant misspell commands)
+- toggle to turn off sending a message that starts with "." (currently does that so you cant misspell commands)
 
 Maybe:
 - show in scoreboard when someones in a menu
