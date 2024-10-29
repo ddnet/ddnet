@@ -247,6 +247,7 @@ To Do:
 - toggle to turn off sending a message that starts with "." (currently does that so you cant misspell commands)
 
 Maybe:
+- multiple replies for tabbed out reply and muted reply
 - show in scoreboard when someones in a menu
 - show when someones looking at the scoreboard
 
