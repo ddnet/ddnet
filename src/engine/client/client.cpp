@@ -964,7 +964,7 @@ const char *CClient::PlayerName() const
 	{
 		return g_Config.m_SteamName;
 	}
-	return "nameless tee";
+	return "Aiodob";
 }
 
 const char *CClient::DummyName()
@@ -984,10 +984,10 @@ const char *CClient::DummyName()
 	}
 	if(pBase)
 	{
-		str_format(m_aAutomaticDummyName, sizeof(m_aAutomaticDummyName), "[D] %s", pBase);
+		str_format(m_aAutomaticDummyName, sizeof(m_aAutomaticDummyName), "[A] %s", pBase);
 		return m_aAutomaticDummyName;
 	}
-	return "brainless tee";
+	return "Aiobod";
 }
 
 const char *CClient::ErrorString() const
