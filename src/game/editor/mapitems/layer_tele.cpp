@@ -109,10 +109,6 @@ void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 					// as tiles with number 0 would be ignored by previous versions.
 					m_pTeleTile[Index].m_Number = 255;
 				}
-				else if(m_pEditor->m_TeleNumbers[TgtIndex] != pTeleLayer->m_TeleNumbers[TgtIndex])
-				{
-					m_pTeleTile[Index].m_Number = m_pEditor->m_TeleNumbers[TgtIndex];
-				}
 				else if(pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number)
 				{
 					m_pTeleTile[Index].m_Number = pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number;
@@ -280,7 +276,7 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 						// as tiles with number 0 would be ignored by previous versions.
 						m_pTeleTile[TgtIndex].m_Number = 255;
 					}
-					else if((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && m_pEditor->m_TeleNumbers[m_pTiles[TgtIndex].m_Index]) || m_pEditor->m_TeleNumbers[m_pTiles[TgtIndex].m_Index] != pLt->m_TeleNumbers[m_pTiles[TgtIndex].m_Index])
+					else if((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && m_pEditor->m_TeleNumbers[m_pTiles[TgtIndex].m_Index]))
 						m_pTeleTile[TgtIndex].m_Number = m_pEditor->m_TeleNumbers[m_pTiles[TgtIndex].m_Index];
 					else
 						m_pTeleTile[TgtIndex].m_Number = pLt->m_pTeleTile[SrcIndex].m_Number;
