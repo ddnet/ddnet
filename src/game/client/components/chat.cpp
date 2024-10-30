@@ -95,12 +95,7 @@ void CChat::RebuildChat()
 	}
 }
 
-void CChat::OnWindowResize()
-{
-	RebuildChat();
-}
-
-void CChat::Reset()
+void CChat::ClearLines()
 {
 	for(auto &Line : m_aLines)
 	{
@@ -115,6 +110,16 @@ void CChat::Reset()
 	}
 	m_PrevScoreBoardShowed = false;
 	m_PrevShowChat = false;
+}
+
+void CChat::OnWindowResize()
+{
+	RebuildChat();
+}
+
+void CChat::Reset()
+{
+	ClearLines();
 
 	m_Show = false;
 	m_CompletionUsed = false;
@@ -183,6 +188,11 @@ void CChat::ConEcho(IConsole::IResult *pResult, void *pUserData)
 	((CChat *)pUserData)->Echo(pResult->GetString(0));
 }
 
+void CChat::ConClearChat(IConsole::IResult *pResult, void *pUserData)
+{
+	((CChat *)pUserData)->ClearLines();
+}
+
 void CChat::ConchainChatOld(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -217,6 +227,7 @@ void CChat::OnConsoleInit()
 	Console()->Register("chat", "s['team'|'all'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
 	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
 	Console()->Register("echo", "r[message]", CFGFLAG_CLIENT | CFGFLAG_STORE, ConEcho, this, "Echo the text in chat window");
+	Console()->Register("clear_chat", "", CFGFLAG_CLIENT | CFGFLAG_STORE, ConClearChat, this, "Clear chat messages");
 }
 
 void CChat::OnInit()
