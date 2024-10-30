@@ -9096,9 +9096,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 					if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index) &&
 						m_TeleNumbers[pTeleLayer->m_pTiles[i].m_Index] != pTeleLayer->m_pTeleTile[i].m_Number)
 					{
-						if(UseNextFree || Adjust != 0)
-							m_TeleNumbers[pTeleLayer->m_pTiles[i].m_Index] = pTeleLayer->m_pTeleTile[i].m_Number;
-						else if(!UseNextFree && Adjust == 0)
+						if(!UseNextFree && Adjust == 0)
 							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleNumbers[pTeleLayer->m_pTiles[i].m_Index];
 					}
 				}
