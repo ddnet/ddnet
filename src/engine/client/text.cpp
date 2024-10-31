@@ -321,9 +321,6 @@ private:
 	CAtlas m_TextureAtlas;
 	std::unordered_map<std::tuple<FT_Face, int, int>, SGlyph, SGlyphKeyHash, SGlyphKeyEquals> m_Glyphs;
 
-	// Data used for rendering glyphs
-	uint8_t m_aaGlyphData[NUM_FONT_TEXTURES][64 * 1024];
-
 	// Font faces
 	FT_Face m_DefaultFace = nullptr;
 	FT_Face m_IconFace = nullptr;
@@ -485,13 +482,13 @@ private:
 		return OutlineThickness;
 	}
 
-	void UploadGlyph(int TextureIndex, int PosX, int PosY, size_t Width, size_t Height, const unsigned char *pData)
+	void UploadGlyph(int TextureIndex, int PosX, int PosY, size_t Width, size_t Height, uint8_t *pData)
 	{
 		for(size_t y = 0; y < Height; ++y)
 		{
 			mem_copy(&m_apTextureData[TextureIndex][PosX + ((y + PosY) * m_TextureDimension)], &pData[y * Width], Width);
 		}
-		Graphics()->UpdateTextTexture(m_aTextures[TextureIndex], PosX, PosY, Width, Height, pData);
+		Graphics()->UpdateTextTexture(m_aTextures[TextureIndex], PosX, PosY, Width, Height, pData, true);
 	}
 
 	bool FitGlyph(size_t Width, size_t Height, int &PosX, int &PosY)
@@ -549,16 +546,19 @@ private:
 			}
 
 			// prepare glyph data
-			mem_zero(m_aaGlyphData[FONT_TEXTURE_FILL], (size_t)Width * Height * sizeof(uint8_t));
+			const size_t GlyphDataSize = (size_t)Width * Height * sizeof(uint8_t);
+			uint8_t *pGlyphDataFill = static_cast<uint8_t *>(malloc(GlyphDataSize));
+			uint8_t *pGlyphDataOutline = static_cast<uint8_t *>(malloc(GlyphDataSize));
+			mem_zero(pGlyphDataFill, GlyphDataSize);
 			for(unsigned py = 0; py < pBitmap->rows; ++py)
 			{
-				mem_copy(&m_aaGlyphData[FONT_TEXTURE_FILL][(py + y) * Width + x], &pBitmap->buffer[py * pBitmap->width], pBitmap->width);
+				mem_copy(&pGlyphDataFill[(py + y) * Width + x], &pBitmap->buffer[py * pBitmap->width], pBitmap->width);
 			}
+			Grow(pGlyphDataFill, pGlyphDataOutline, Width, Height, OutlineThickness);
 
 			// upload the glyph
-			UploadGlyph(FONT_TEXTURE_FILL, X, Y, Width, Height, m_aaGlyphData[FONT_TEXTURE_FILL]);
-			Grow(m_aaGlyphData[FONT_TEXTURE_FILL], m_aaGlyphData[FONT_TEXTURE_OUTLINE], Width, Height, OutlineThickness);
-			UploadGlyph(FONT_TEXTURE_OUTLINE, X, Y, Width, Height, m_aaGlyphData[FONT_TEXTURE_OUTLINE]);
+			UploadGlyph(FONT_TEXTURE_FILL, X, Y, Width, Height, pGlyphDataFill);
+			UploadGlyph(FONT_TEXTURE_OUTLINE, X, Y, Width, Height, pGlyphDataOutline);
 		}
 
 		// set glyph info
@@ -696,7 +696,7 @@ public:
 		for(size_t TextureIndex = 0; TextureIndex < NUM_FONT_TEXTURES; ++TextureIndex)
 		{
 			mem_zero(m_apTextureData[TextureIndex], m_TextureDimension * m_TextureDimension * sizeof(uint8_t));
-			Graphics()->UpdateTextTexture(m_aTextures[TextureIndex], 0, 0, m_TextureDimension, m_TextureDimension, m_apTextureData[TextureIndex]);
+			Graphics()->UpdateTextTexture(m_aTextures[TextureIndex], 0, 0, m_TextureDimension, m_TextureDimension, m_apTextureData[TextureIndex], false);
 		}
 
 		m_TextureAtlas.Clear(m_TextureDimension);
