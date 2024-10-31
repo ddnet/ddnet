@@ -558,9 +558,6 @@ private:
 
 		// set glyph info
 		{
-			const int BmpWidth = pBitmap->width + x * 2;
-			const int BmpHeight = pBitmap->rows + y * 2;
-
 			Glyph.m_Height = Height;
 			Glyph.m_Width = Width;
 			Glyph.m_CharHeight = RealHeight;
@@ -571,8 +568,8 @@ private:
 
 			Glyph.m_aUVs[0] = X;
 			Glyph.m_aUVs[1] = Y;
-			Glyph.m_aUVs[2] = Glyph.m_aUVs[0] + BmpWidth;
-			Glyph.m_aUVs[3] = Glyph.m_aUVs[1] + BmpHeight;
+			Glyph.m_aUVs[2] = Glyph.m_aUVs[0] + Width;
+			Glyph.m_aUVs[3] = Glyph.m_aUVs[1] + Height;
 
 			Glyph.m_State = SGlyph::EState::RENDERED;
 		}
