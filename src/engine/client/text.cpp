@@ -788,14 +788,6 @@ public:
 				}
 
 				const FT_Bitmap *pBitmap = &Face->glyph->bitmap;
-
-				// prepare glyph data
-				const size_t GlyphDataSize = (size_t)pBitmap->width * pBitmap->rows * sizeof(uint8_t);
-				if(pBitmap->pixel_mode == FT_PIXEL_MODE_GRAY)
-					mem_copy(m_aaGlyphData[FONT_TEXTURE_FILL], pBitmap->buffer, GlyphDataSize);
-				else
-					mem_zero(m_aaGlyphData[FONT_TEXTURE_FILL], GlyphDataSize);
-
 				for(unsigned OffY = 0; OffY < pBitmap->rows; ++OffY)
 				{
 					for(unsigned OffX = 0; OffX < pBitmap->width; ++OffX)
@@ -803,18 +795,11 @@ public:
 						const int ImgOffX = clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
 						const int ImgOffY = clamp(y + OffY, y, (y + TexSubHeight) - 1);
 						const size_t ImageOffset = ImgOffY * (TextImage.m_Width * PixelSize) + ImgOffX * PixelSize;
-						const size_t GlyphOffset = OffY * pBitmap->width + OffX;
-						for(size_t i = 0; i < PixelSize; ++i)
+						for(size_t i = 0; i < PixelSize - 1; ++i)
 						{
-							if(i != PixelSize - 1)
-							{
-								*(TextImage.m_pData + ImageOffset + i) = 255;
-							}
-							else
-							{
-								*(TextImage.m_pData + ImageOffset + i) = *(m_aaGlyphData[FONT_TEXTURE_FILL] + GlyphOffset);
-							}
+							TextImage.m_pData[ImageOffset + i] = 255;
 						}
+						TextImage.m_pData[ImageOffset + PixelSize - 1] = pBitmap->buffer[OffY * pBitmap->width + OffX];
 					}
 				}
 
