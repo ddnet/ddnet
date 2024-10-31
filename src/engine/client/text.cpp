@@ -510,6 +510,11 @@ private:
 		}
 
 		const FT_Bitmap *pBitmap = &Glyph.m_Face->glyph->bitmap;
+		if(pBitmap->pixel_mode != FT_PIXEL_MODE_GRAY)
+		{
+			log_debug("textrender", "Error loading glyph, unsupported pixel mode. Chr=%d GlyphIndex=%u PixelMode=%d", Glyph.m_Chr, Glyph.m_GlyphIndex, pBitmap->pixel_mode);
+			return false;
+		}
 
 		const unsigned RealWidth = pBitmap->width;
 		const unsigned RealHeight = pBitmap->rows;
@@ -788,6 +793,13 @@ public:
 				}
 
 				const FT_Bitmap *pBitmap = &Face->glyph->bitmap;
+				if(pBitmap->pixel_mode != FT_PIXEL_MODE_GRAY)
+				{
+					log_debug("textrender", "Error loading glyph, unsupported pixel mode. Chr=%d GlyphIndex=%u PixelMode=%d", NextCharacter, GlyphIndex, pBitmap->pixel_mode);
+					pCurrent = pTmp;
+					continue;
+				}
+
 				for(unsigned OffY = 0; OffY < pBitmap->rows; ++OffY)
 				{
 					for(unsigned OffX = 0; OffX < pBitmap->width; ++OffX)
