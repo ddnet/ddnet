@@ -1205,7 +1205,7 @@ void CChat::OnRender()
 			{
 				if(str_startswith_nocase(Command.m_aName, m_Input.GetString() + 1))
 				{
-					Cursor.m_X = m_Input.GetCaretPosition().x;
+					Cursor.m_X = Cursor.m_X + TextRender()->TextWidth(Cursor.m_FontSize, m_Input.GetString(), -1, Cursor.m_LineWidth);
 					Cursor.m_Y = m_Input.GetCaretPosition().y;
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.5f);
 					TextRender()->TextEx(&Cursor, Command.m_aName + str_length(m_Input.GetString() + 1));
