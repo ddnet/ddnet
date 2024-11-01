@@ -1832,6 +1832,9 @@ Connect address error
 Could not connect dummy
 == 
 
+Some fonts could not be loaded. Check the local console for details.
+== 
+
 [Spectating]
 Following %s
 == 

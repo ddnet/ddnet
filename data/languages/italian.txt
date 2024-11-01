@@ -1435,6 +1435,9 @@ The format of texture %s is not RGBA which will cause visual bugs.
 Loading demo file from storage
 == 
 
+Some fonts could not be loaded. Check the local console for details.
+== 
+
 Why are you slowmo replaying to read this?
 == 
 

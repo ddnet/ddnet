@@ -1534,9 +1534,6 @@ Saving settings to '%s' failed
 Error saving settings
 == ﺕﺎﻤﯿﻈﻨﺗ ﻥﺩﺮﻛ ﻩﺮﯿﺧﺫ ﺭﺩ ﺎﻄﺧ
 
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
-
 The format of texture %s is not RGBA which will cause visual bugs.
 == .ﺩﻮﺷ ﯽﻣ ىﺮﻫﺎﻇ  ﻝﺎﻜﺷﺍ ﺩﺎﺠﯾﺍ ﺚﻋﺎﺑ ﻪﻛ ﺖﺴﯿﻧ %s RGBA ﯽﻜﯿﻓﺍﺮﮔ ﺖﻟﺎﺣ ﺖﻣﺮﻓ
 
@@ -1938,3 +1935,9 @@ Moved ingame
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+Some fonts could not be loaded. Check the local console for details.
+== 

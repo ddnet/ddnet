@@ -1566,6 +1566,9 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Loading demo file from storage
 == 
 
+Some fonts could not be loaded. Check the local console for details.
+== 
+
 Quitting. Please wait…
 == 
 
