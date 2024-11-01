@@ -1912,6 +1912,9 @@ Custom
 Unable to delete skin
 == Невозможно удалить скин
 
+Some fonts could not be loaded. Check the local console for details.
+== 
+
 Save skin
 == 
 

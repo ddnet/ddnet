@@ -1939,3 +1939,6 @@ Feet
 [skins]
 Eyes
 == Göz
+
+Some fonts could not be loaded. Check the local console for details.
+== 

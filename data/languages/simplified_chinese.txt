@@ -1983,3 +1983,6 @@ Feet
 [skins]
 Eyes
 == 眼睛
+
+Some fonts could not be loaded. Check the local console for details.
+== 
