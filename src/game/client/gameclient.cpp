@@ -769,6 +769,8 @@ void CGameClient::OnRender()
 
 	CLineInput::RenderCandidates();
 
+	const bool WasNewTick = m_NewTick;
+
 	// clear new tick flags
 	m_NewTick = false;
 	m_NewPredictedTick = false;
@@ -777,7 +779,7 @@ void CGameClient::OnRender()
 		g_Config.m_ClDummy = 0;
 
 	// resend player and dummy info if it was filtered by server
-	if(Client()->State() == IClient::STATE_ONLINE && !m_Menus.IsActive())
+	if(Client()->State() == IClient::STATE_ONLINE && !m_Menus.IsActive() && WasNewTick)
 	{
 		if(m_aCheckInfo[0] == 0)
 		{
@@ -805,7 +807,9 @@ void CGameClient::OnRender()
 		}
 
 		if(m_aCheckInfo[0] > 0)
-			m_aCheckInfo[0]--;
+		{
+			m_aCheckInfo[0] -= minimum(Client()->GameTick(0) - Client()->PrevGameTick(0), m_aCheckInfo[0]);
+		}
 
 		if(Client()->DummyConnected())
 		{
@@ -835,7 +839,9 @@ void CGameClient::OnRender()
 			}
 
 			if(m_aCheckInfo[1] > 0)
-				m_aCheckInfo[1]--;
+			{
+				m_aCheckInfo[1] -= minimum(Client()->GameTick(1) - Client()->PrevGameTick(1), m_aCheckInfo[1]);
+			}
 		}
 	}
 }
@@ -2541,7 +2547,7 @@ void CGameClient::SendSwitchTeam(int Team) const
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
-void CGameClient::SendStartInfo7(bool Dummy) const
+void CGameClient::SendStartInfo7(bool Dummy)
 {
 	protocol7::CNetMsg_Cl_StartInfo Msg;
 	Msg.m_pName = Dummy ? Client()->DummyName() : Client()->PlayerName();
@@ -2557,6 +2563,7 @@ void CGameClient::SendStartInfo7(bool Dummy) const
 	if(Msg.Pack(&Packer))
 		return;
 	Client()->SendMsg((int)Dummy, &Packer, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+	m_aCheckInfo[(int)Dummy] = -1;
 }
 
 void CGameClient::SendSkinChange7(bool Dummy)
