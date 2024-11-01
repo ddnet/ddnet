@@ -1264,7 +1264,7 @@ public:
 				SFontLanguageVariant Variant;
 				str_format(Variant.m_aLanguageFile, sizeof(Variant.m_aLanguageFile), "languages/%s.txt", Variants.u.object.values[i].name);
 				str_copy(Variant.m_aFamilyName, pFamilyName->u.string.ptr);
-				m_vVariants.emplace_back(std::move(Variant));
+				m_vVariants.emplace_back(Variant);
 			}
 		}
 		else
