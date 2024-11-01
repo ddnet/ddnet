@@ -1608,6 +1608,9 @@ Slow down the demo
 Smooth Dynamic Camera
 == Гладка динамічна камера
 
+Some fonts could not be loaded. Check the local console for details.
+== Не вдалося завантажити деякі шрифти. Див. локальну консоль для подробиць.
+
 Some map images could not be loaded. Check the local console for details.
 == Деякі зображення мапи не завантажилися. Див. локальну консоль для подробиць.
 
@@ -1939,6 +1942,3 @@ Zoom in
 
 Zoom out
 == Віддалити
-
-Some fonts could not be loaded. Check the local console for details.
-== 
