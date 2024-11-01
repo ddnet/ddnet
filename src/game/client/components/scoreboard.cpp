@@ -593,7 +593,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					if(NumPlayers <= 9)
 						TextRender()->TextEx(&Cursor, "    ");
 					if(NumPlayers > 9)
-						TextRender()->TextEx(&Cursor, "  ");
+						TextRender()->TextEx(&Cursor, "   ");
 					Graphics()->BlendNormal();
 					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_MUTED_ICON].m_Id);
 					Graphics()->QuadsBegin();
@@ -717,7 +717,8 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			// ping
 			if(g_Config.m_ClEnablePingColor)
 			{
-				if(g_Config.m_ClAidsPingDetection && pInfo->m_Latency == 77 || pInfo->m_Latency == 76)
+				if(g_Config.m_ClAidsPingDetection)
+					if(pInfo->m_Latency == 77 || pInfo->m_Latency == 76)
 					TextRender()->TextColor(0.f, 0.f, 0.f, 1.f);
 				else
 				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f)));
