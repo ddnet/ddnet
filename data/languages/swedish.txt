@@ -7,7 +7,7 @@
 #	3edcxzaq1		2020-06-25 00:00:00
 #	cur.ie			2020-09-28 00:00:00
 #	simpygirl		2022-02-20 00:00:00
-#	furo			2024-09-29 00:00:00
+#	furo			2024-11-01 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1944,4 +1944,4 @@ Eyes
 == Ögon
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Vissa typsnitt kunde inte laddas in. Se den lokala konsolen för detaljer.
