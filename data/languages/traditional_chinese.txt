@@ -32,6 +32,7 @@
 # 2024-07-21 By
 # 2024-08-29 Pioooooo
 # 2024-09-29 Pioooooo
+# 2024-11-01 Pioooooo
 ##### /authors #####
 
 ##### translated strings #####
@@ -1974,4 +1975,4 @@ Eyes
 == 眼睛
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== 未能載入某些字體。檢查本機控制台以取得詳情。
