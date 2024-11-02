@@ -24,6 +24,7 @@
 
 #include "players.h"
 
+#include "rainbow.h"
 #include <base/color.h>
 #include <base/math.h>
 
@@ -66,9 +67,9 @@ void CPlayers::RenderHand7(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir
 	Graphics()->SetColor(Color);
 	Graphics()->QuadsSetRotation(Angle);
 
-	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND_OUTLINE, 0, 0, 0);
+	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND_OUTLINE);
 	Graphics()->QuadsDraw(&QuadOutline, 1);
-	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND, 0, 0, 0);
+	RenderTools()->SelectSprite7(client_data7::SPRITE_TEE_HAND);
 	Graphics()->QuadsDraw(&QuadHand, 1);
 
 	Graphics()->QuadsSetRotation(0);
@@ -380,7 +381,9 @@ void CPlayers::RenderHook(
 		Graphics()->QuadsSetRotation(angle(Dir) + pi);
 		// render head
 		int QuadOffset = NUM_WEAPONS * (g_Config.m_ClHookSizeX + 2) + (g_Config.m_ClHookSizeY + 2);
+		
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+
 		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookPos.x, HookPos.y);
 
 		// render chain
@@ -526,7 +529,7 @@ void CPlayers::RenderPlayer(
 		if(time() - m_SkidSoundTime > time_freq() / 10)
 		{
 			if(g_Config.m_SndGame)
-				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 0.25f, Position);
+				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 1.0f, Position);
 			m_SkidSoundTime = time();
 		}
 
@@ -538,7 +541,7 @@ void CPlayers::RenderPlayer(
 
 	// draw gun
 	{
-		if(!(RenderInfo.m_TeeRenderFlags & WEAPON_GUN))
+		if(!(RenderInfo.m_TeeRenderFlags & TEE_NO_WEAPON))
 		{
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			Graphics()->QuadsSetRotation(State.GetAttach()->m_Angle * pi * 2 + Angle);
@@ -568,7 +571,7 @@ void CPlayers::RenderPlayer(
 				if(IsSit)
 					WeaponPosition.y += 3.0f;
 
-				// if active and attack is under way, bash stuffs
+			// if active and attack is under way, bash stuffs
 				if(!Inactive || LastAttackTime < m_pClient->m_aTuning[g_Config.m_ClDummy].GetWeaponFireDelay(Player.m_Weapon))
 				{
 					if(Direction.x < 0)
@@ -742,6 +745,10 @@ void CPlayers::RenderPlayer(
 	{
 		GameClient()->m_Effects.FreezingFlakes(BodyPos, vec2(32, 32), Alpha);
 	}
+	if(RenderInfo.m_TeeRenderFlags & TEE_EFFECT_SPARKLE)
+	{
+		GameClient()->m_Effects.SparkleTrail(BodyPos, Alpha);
+	}
 
 	if(ClientId < 0)
 		return;
@@ -759,24 +766,6 @@ void CPlayers::RenderPlayer(
 		Graphics()->QuadsSetRotation(0);
 	}
 
-
-
-	if(g_Config.m_ClShowOthersInMenu)
-		{
-			if((Player.m_PlayerFlags & PLAYERFLAG_IN_MENU) && !m_pClient->m_aClients[ClientId].m_Afk)
-			{
-			int CurEmoticon = (SPRITE_ZZZ - SPRITE_OOP);
-			Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[CurEmoticon]);
-			int QuadOffset = QuadOffsetToEmoticon + CurEmoticon;
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-			Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, Position.x + 24.f, Position.y - 40.f);
-
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-			Graphics()->QuadsSetRotation(0);
-			}
-		}
-
-
 	if(g_Config.m_ClAfkEmote && m_pClient->m_aClients[ClientId].m_Afk && !(Client()->DummyConnected() && ClientId == m_pClient->m_aLocalIds[!g_Config.m_ClDummy]))
 	{
 		int CurEmoticon = (SPRITE_ZZZ - SPRITE_OOP);
@@ -787,6 +776,20 @@ void CPlayers::RenderPlayer(
 
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(0);
+	}
+
+	if(g_Config.m_ClShowOthersInMenu)
+	{
+		if((Player.m_PlayerFlags & PLAYERFLAG_IN_MENU) && !m_pClient->m_aClients[ClientId].m_Afk)
+		{
+				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SETTINGS_ICON].m_Id);
+
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, 0, Position.x + 24.f, Position.y - 37.25f, 0.85f, 1.125f);
+
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+				Graphics()->QuadsSetRotation(0);
+		}
 	}
 
 	if(g_Config.m_ClShowEmotes && !m_pClient->m_aClients[ClientId].m_EmoticonIgnore && m_pClient->m_aClients[ClientId].m_EmoticonStartTick != -1)
@@ -851,6 +854,8 @@ void CPlayers::OnRender()
 			aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN | TEE_NO_WEAPON;
 		if(m_pClient->m_aClients[i].m_LiveFrozen)
 			aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN;
+		if(m_pClient->m_aClients[i].m_Invincible)
+			aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_SPARKLE;
 
 		const CGameClient::CSnapState::CCharacterInfo &CharacterInfo = m_pClient->m_Snap.m_aCharacters[i];
 		const bool Frozen = CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd != 0;
@@ -862,10 +867,7 @@ void CPlayers::OnRender()
 			{
 				aRenderInfo[i].m_aSixup[g_Config.m_ClDummy].Reset();
 
-				aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-				aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-				aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
-				aRenderInfo[i].m_SkinMetrics = pSkin->m_Metrics;
+				aRenderInfo[i].Apply(pSkin);
 				aRenderInfo[i].m_CustomColoredSkin = IsTeamplay;
 				if(!IsTeamplay)
 				{
@@ -875,13 +877,8 @@ void CPlayers::OnRender()
 			}
 		}
 	}
-	const CSkin *pSkin = m_pClient->m_Skins.Find("x_spec");
 	CTeeRenderInfo RenderInfoSpec;
-	RenderInfoSpec.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	RenderInfoSpec.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	RenderInfoSpec.m_BloodColor = pSkin->m_BloodColor;
-	RenderInfoSpec.m_SkinMetrics = pSkin->m_Metrics;
-	RenderInfoSpec.m_CustomColoredSkin = false;
+	RenderInfoSpec.Apply(m_pClient->m_Skins.Find("x_spec"));
 	RenderInfoSpec.m_Size = 64.0f;
 	const int LocalClientId = m_pClient->m_Snap.m_LocalClientId;
 
