@@ -1,4 +1,4 @@
-﻿
+
 
 #include <base/log.h>
 #include <base/math.h>
@@ -114,7 +114,10 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 		{
 			ChillerBotSettings.VMargin(5.0f, &ChillerBotSettings);
-			ChillerBotSettings.HSplitTop(165.0f, &ChillerBotSettings, &ChatSettings);
+			if(g_Config.m_ClNotifyOnJoin)
+				ChillerBotSettings.HSplitTop(205.0f, &ChillerBotSettings, &ChatSettings);
+			else
+			ChillerBotSettings.HSplitTop(185.0f, &ChillerBotSettings, &ChatSettings);
 			if(s_ScrollRegion.AddRect(ChillerBotSettings))
 			{
 				ChillerBotSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -169,7 +172,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					
 					Button.VSplitLeft(0.0f, &Button, &ChillerBotSettings);
 					Button.VSplitLeft(140.0f, &Label, &Button);
-					Button.VSplitLeft(190.0f, &Button, 0);
+					Button.VSplitLeft(170.0f, &Button, 0);
 
 					static CLineInput s_ReplyMsg;
 					s_ReplyMsg.SetBuffer(g_Config.m_ClFinishName, sizeof(g_Config.m_ClFinishName));
@@ -181,6 +184,50 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					}
 					Ui()->DoEditBox(&s_ReplyMsg, &Button, 14.0f);
 				}
+				ChillerBotSettings.HSplitTop(21.0f, &Button, &ChillerBotSettings);
+
+				{
+					ChillerBotSettings.HSplitTop(19.9f, &Button, &MainView);
+
+					Button.VSplitLeft(0.0f, &Button, &ChillerBotSettings);
+					Button.VSplitLeft(150.0f, &Label, &Button);
+					Button.VSplitLeft(170.0f, &Button, 0);
+
+					static CLineInput s_NotifyName;
+					s_NotifyName.SetBuffer(g_Config.m_ClAutoNotifyName, sizeof(g_Config.m_ClAutoNotifyName));
+					s_NotifyName.SetEmptyText("qxdFox");
+
+
+					if(DoButton_CheckBox(&g_Config.m_ClNotifyOnJoin, "Notify on Join Name", g_Config.m_ClNotifyOnJoin, &ChillerBotSettings))
+					{
+						g_Config.m_ClNotifyOnJoin ^= 1;
+
+					}
+					Ui()->DoEditBox(&s_NotifyName, &Button, 14.0f);
+
+					static CLineInput s_NotifyMsg;
+					s_NotifyMsg.SetBuffer(g_Config.m_ClAutoNotifyMsg, sizeof(g_Config.m_ClAutoNotifyMsg));
+					s_NotifyMsg.SetEmptyText("Your Fav Person Has Joined!");
+
+					if(g_Config.m_ClNotifyOnJoin)
+					{
+						ChillerBotSettings.HSplitTop(21.0f, &Button, &ChillerBotSettings);
+						ChillerBotSettings.HSplitTop(19.9f, &Button, &MainView);
+
+						Button.VSplitLeft(25.0f, &Button, &ChillerBotSettings);
+						Button.VSplitLeft(125.0f, &Label, &Button);
+						Button.VSplitLeft(275.0f, &Button, 0);
+
+									ChillerBotSettings.HSplitTop(2.8f, &Label, &ChillerBotSettings);
+						Ui()->DoLabel(&ChillerBotSettings, "Noitfy Message:", 12.5f, TEXTALIGN_LEFT);
+
+						Ui()->DoEditBox(&s_NotifyMsg, &Button, 14.0f);
+
+						
+					}
+				}
+				ChillerBotSettings.VSplitLeft(-25.0f, &Button, &ChillerBotSettings);
+
 				ChillerBotSettings.HSplitTop(20.0f, &Button, &ChillerBotSettings);
 
 				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChangeTileNotification, ("Notify When Player is Being Moved"), &g_Config.m_ClChangeTileNotification, &ChillerBotSettings, LineSize));
