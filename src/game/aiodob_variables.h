@@ -25,7 +25,7 @@ MACRO_CONFIG_STR(ClAutoReplyMsg, cb_auto_reply_msg, 255, "I'm currently tabbed o
 MACRO_CONFIG_INT(ClTabbedOutMsg, cb_tabbed_out_msg, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Let others know when pinged in chat that you are tabbed out")
 
 MACRO_CONFIG_INT(ClChillerbotHud, cb_chillerbot_hud, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show enabled chillerbot components in hud")
-MACRO_CONFIG_INT(ClChangeTileNotification, cb_change_tile_notification, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Notify when leaving current tile type")
+MACRO_CONFIG_INT(ClChangeTileNotification, cb_change_tile_notification, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Notify when leaving current tile type")
 MACRO_CONFIG_INT(ClShowLastKiller, cb_show_last_killer, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show last killer in hud requires cb_chillerbot_hud 1")
 MACRO_CONFIG_INT(ClShowLastPing, cb_show_last_ping, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show last chat ping in hud requires cb_chillerbot_hud 1")
 MACRO_CONFIG_INT(ClRenderLaserHead, cb_render_laser_head, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render laser bubbles")
@@ -212,6 +212,12 @@ MACRO_CONFIG_INT(ClChatHelperPrefix, ac_do_chat_helper_prefix, 1, 0, 1, CFGFLAG_
 MACRO_CONFIG_INT(ClChatServerPrefix, ac_do_chat_server_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Server Prefix")
 MACRO_CONFIG_INT(ClChatClientPrefix, ac_do_chat_client_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggles Client Prefix")
 
+MACRO_CONFIG_INT(ClSendDotsChat, ac_send_dots_chat, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Doesnt send a message if it start with a '.'")
+
+MACRO_CONFIG_INT(ClNotifyOnJoin, ac_auto_notify_on_join, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Whispers a person if they join")
+
+MACRO_CONFIG_INT(ClAutoAddOnNameChange, ac_auto_add_on_name_change, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Automatically adds a player back to a list if their name changed")
+
 
 // string
 
@@ -244,7 +250,15 @@ MACRO_CONFIG_STR(ClRemoveWarString, ac_delwar_string, 12, "del_war", CFGFLAG_CLI
 MACRO_CONFIG_STR(ClRemoveTeamString, ac_delteam_string, 12, "del_team", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
 
 MACRO_CONFIG_STR(ClAutoReplyMutedMsg, ac_auto_reply_muted_msg, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
+MACRO_CONFIG_STR(ClAutoReplyMutedMsg2, ac_auto_reply_muted_msg2, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
+MACRO_CONFIG_STR(ClAutoReplyMutedMsg3, ac_auto_reply_muted_msg3, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
+MACRO_CONFIG_STR(ClAutoReplyMutedMsg4, ac_auto_reply_muted_msg4, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
+MACRO_CONFIG_STR(ClAutoReplyMutedMsg5, ac_auto_reply_muted_msg5, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
+MACRO_CONFIG_STR(ClAutoReplyMutedMsg6, ac_auto_reply_muted_msg6, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
 
+
+MACRO_CONFIG_STR(ClAutoNotifyName, ac_auto_notify_name, 16, "qxdFox", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Name of Player to Whisper Something When They Join")
+MACRO_CONFIG_STR(ClAutoNotifyMsg, ac_auto_notify_msg, 256, "Your Fav Person Has Joined!", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Auto Whisper Them")
 
 
 MACRO_CONFIG_STR(ClTest, ac_test, 32, "test", CFGFLAG_CLIENT | CFGFLAG_SAVE, "test")
