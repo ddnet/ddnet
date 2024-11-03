@@ -84,6 +84,8 @@ If anyone can help me with this Issue then please feel free to, I wont pay or an
 
 # Command List:
 ```
+ac_auto_add_on_name_change
+ac_auto_notify_on_join
 ac_chatbubble
 ac_client_msg_prefix
 ac_server_msg_prefix
@@ -126,6 +128,7 @@ ac_do_score_spec_prefix
 ac_do_warlist_color_score
 ac_fps_spoofer
 ac_fps_spoofer_margin
+ac_send_dots_chat
 ac_show_others_in_menu
 ac_show_ids_chat
 ac_strong_weak_color_id
@@ -167,6 +170,8 @@ tc_player_indicator_freeze
 tc_indicator_inteam
 tc_indicator_tees
 tc_reset_bindwheel_mouse
+tc_rainbow_others
+tc_rainbow_mode
 tc_auto_verify
 tc_profile_skin
 tc_profile_name
@@ -175,6 +180,7 @@ tc_profile_flag
 tc_profile_colors
 tc_profile_emote
 
+cle_small_skins
 cle_tee_size
 cle_tee_walkruntime
 cle_tee_feet_inair
