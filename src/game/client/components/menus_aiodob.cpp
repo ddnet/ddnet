@@ -90,9 +90,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 	const float ColorPickerLabelSize = 13.0f;
 	const float ColorPickerLineSpacing = 5.0f;
 
-	
-
-	// Client Page 1
+	// Client Page 2
 
 	
 
@@ -111,12 +109,12 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 		// left side in settings menu
 
-		CUIRect ChillerBotSettings, MiscSettings, PlayerIndicatorSettings, UiSettings, ColorSettings, ChatSettings, ScoreboardSettings, NameplateSettings, PreviewSettings, MenuSettings;
+		CUIRect ChillerBotSettings, MiscSettings, PlayerIndicatorSettings, UiSettings, ColorSettings, ChatSettings, ScoreboardSettings, NameplateSettings, MenuSettings;
 		MainView.VSplitMid(&ChillerBotSettings, &UiSettings);
 
 		{
 			ChillerBotSettings.VMargin(5.0f, &ChillerBotSettings);
-			ChillerBotSettings.HSplitTop(145.0f, &ChillerBotSettings, &ChatSettings);
+			ChillerBotSettings.HSplitTop(165.0f, &ChillerBotSettings, &ChatSettings);
 			if(s_ScrollRegion.AddRect(ChillerBotSettings))
 			{
 				ChillerBotSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -186,9 +184,9 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				ChillerBotSettings.HSplitTop(20.0f, &Button, &ChillerBotSettings);
 
 				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChangeTileNotification, ("Notify When Player is Being Moved"), &g_Config.m_ClChangeTileNotification, &ChillerBotSettings, LineSize));
-				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatBubble, ("Show Chat Bubble"), &g_Config.m_ClChatBubble, &ChillerBotSettings, LineSize))
-					;
-
+				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatBubble, ("Show Chat Bubble"), &g_Config.m_ClChatBubble, &ChillerBotSettings, LineSize));
+				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoAddOnNameChange, Localize("Auto Add Poeple Back to Lists on Name Change"), &g_Config.m_ClAutoAddOnNameChange, &ChillerBotSettings, LineSize));
+		
 			
 
 			}
@@ -198,7 +196,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 		{
 			ChatSettings.HSplitTop(Margin, nullptr, &ChatSettings);
 			if(g_Config.m_ClShowAiodobPreview)
-				ChatSettings.HSplitTop(275.0f, &ChatSettings, &ColorSettings);
+				ChatSettings.HSplitTop(405.0f, &ChatSettings, &ColorSettings);
 			else
 				ChatSettings.HSplitTop(124.0f, &ChatSettings, &ColorSettings);
 			if(s_ScrollRegion.AddRect(ChatSettings))
@@ -214,11 +212,6 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoFriendColorInchat, ("Chat Friend Name"), &g_Config.m_ClDoFriendColorInchat, &ChatSettings, LineSize);
 				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowIdsChat, ("Client Ids in Chat"), &g_Config.m_ClShowIdsChat, &ChatSettings, LineSize);
 
-				ChatSettings.HSplitTop(4.0f, &Button, &ChatSettings);
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowAiodobPreview, ("Show Prefix Settings And Chat Preview"), &g_Config.m_ClShowAiodobPreview, &ChatSettings, LineSize);
-				ChatSettings.HSplitTop(2.0f, &Button, &ChatSettings);
-				if(g_Config.m_ClShowAiodobPreview)
-				{
 					// enemy prefix
 
 					ChatSettings.HSplitTop(2.0f, &Button, &ChatSettings);
@@ -359,7 +352,364 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 						}
 						Ui()->DoEditBox(&s_PrefixMsg, &Button, 14.0f);
 					}
-				}
+
+					ChatSettings.HSplitTop(55.0f, &Button, &ChatSettings);
+					Ui()->DoLabel(&Button, Localize("Chat Preview"), FontSize + 3, TEXTALIGN_ML);
+					ChatSettings.HSplitTop(-15.0f, &Button, &ChatSettings);
+
+					{
+						CChat &Chat = GameClient()->m_Chat;
+
+						ColorRGBA SystemColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
+						ColorRGBA HighlightedColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
+						ColorRGBA TeamColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
+						ColorRGBA FriendColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
+						ColorRGBA SpecColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClSpecColor));
+						ColorRGBA EnemyColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClWarColor));
+						ColorRGBA HelperColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClHelperColor));
+						ColorRGBA TeammateColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClTeamColor));
+						ColorRGBA NormalColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageColor));
+						ColorRGBA ClientColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageClientColor));
+						ColorRGBA DefaultNameColor(0.8f, 0.8f, 0.8f, 1.0f);
+
+						const float RealFontSize = 10.0f;
+						const float RealMsgPaddingX = 12;
+						const float RealMsgPaddingY = 4;
+						const float RealMsgPaddingTee = 16;
+						const float RealOffsetY = RealFontSize + RealMsgPaddingY;
+
+						const float X = RealMsgPaddingX / 2.0f + ChatSettings.x;
+						float Y = ChatSettings.y;
+						float LineWidth = g_Config.m_ClChatWidth * 2 - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
+
+						str_copy(aBuf, Client()->PlayerName());
+
+						const CAnimState *pIdleState = CAnimState::GetIdle();
+						const float RealTeeSize = 16;
+						const float RealTeeSizeHalved = 8;
+						constexpr float TWSkinUnreliableOffset = -0.25f;
+						const float OffsetTeeY = RealTeeSizeHalved;
+						const float FullHeightMinusTee = RealOffsetY - RealTeeSize;
+
+						struct SPreviewLine
+						{
+							int m_ClShowIdsChat;
+							bool m_Team;
+							char m_aName[64];
+							char m_aText[256];
+							bool m_Spec;
+							bool m_Enemy;
+							bool m_Helper;
+							bool m_Teammate;
+							bool m_Friend;
+							bool m_Player;
+							bool m_Client;
+							bool m_Highlighted;
+							int m_TimesRepeated;
+
+							CTeeRenderInfo m_RenderInfo;
+						};
+
+						static std::vector<SPreviewLine> s_vLines;
+
+						enum ELineFlag
+						{
+							FLAG_TEAM = 1 << 0,
+							FLAG_FRIEND = 1 << 1,
+							FLAG_HIGHLIGHT = 1 << 2,
+							FLAG_CLIENT = 1 << 3,
+							FLAG_ENEMY = 1 << 4,
+							FLAG_HELPER = 1 << 5,
+							FLAG_TEAMMATE = 1 << 6,
+							FLAG_SPEC = 1 << 7
+						};
+						enum
+						{
+							PREVIEW_SYS,
+							PREVIEW_HIGHLIGHT,
+							PREVIEW_TEAM,
+							PREVIEW_FRIEND,
+							PREVIEW_SPAMMER,
+							PREVIEW_ENEMY,
+							PREVIEW_HELPER,
+							PREVIEW_TEAMMATE,
+							PREVIEW_SPEC,
+							PREVIEW_CLIENT
+						};
+						auto &&SetPreviewLine = [](int Index, int ClientId, const char *pName, const char *pText, int Flag, int Repeats) {
+							SPreviewLine *pLine;
+							if((int)s_vLines.size() <= Index)
+							{
+								s_vLines.emplace_back();
+								pLine = &s_vLines.back();
+							}
+							else
+							{
+								pLine = &s_vLines[Index];
+							}
+							pLine->m_ClShowIdsChat = ClientId;
+							pLine->m_Team = Flag & FLAG_TEAM;
+							pLine->m_Friend = Flag & FLAG_FRIEND;
+							pLine->m_Player = ClientId >= 0;
+							pLine->m_Highlighted = Flag & FLAG_HIGHLIGHT;
+							pLine->m_Client = Flag & FLAG_CLIENT;
+							pLine->m_Spec = Flag & FLAG_SPEC;
+							pLine->m_Enemy = Flag & FLAG_ENEMY;
+							pLine->m_Helper = Flag & FLAG_HELPER;
+							pLine->m_Teammate = Flag & FLAG_TEAMMATE;
+							str_copy(pLine->m_aName, pName);
+							str_copy(pLine->m_aText, pText);
+						};
+						auto &&SetLineSkin = [RealTeeSize](int Index, const CSkin *pSkin) {
+							if(Index >= (int)s_vLines.size())
+								return;
+							s_vLines[Index].m_RenderInfo.m_Size = RealTeeSize;
+							s_vLines[Index].m_RenderInfo.Apply(pSkin);
+						};
+
+						auto &&RenderPreview = [&](int LineIndex, int x, int y, bool Render = true) {
+							if(LineIndex >= (int)s_vLines.size())
+								return vec2(0, 0);
+							CTextCursor LocalCursor;
+							TextRender()->SetCursor(&LocalCursor, x, y, RealFontSize, Render ? TEXTFLAG_RENDER : 0);
+							LocalCursor.m_LineWidth = LineWidth;
+							const auto &Line = s_vLines[LineIndex];
+
+							char aClientId[16] = "";
+							if(g_Config.m_ClShowIdsChat && Line.m_ClShowIdsChat >= 0 && Line.m_aName[0] != '\0')
+							{
+								GameClient()->FormatClientId(Line.m_ClShowIdsChat, aClientId, EClientIdFormat::INDENT_FORCE);
+							}
+
+							char aCount[12];
+							if(Line.m_ClShowIdsChat < 0)
+								str_format(aCount, sizeof(aCount), "[%d] ", Line.m_TimesRepeated + 1);
+							else
+								str_format(aCount, sizeof(aCount), " [%d]", Line.m_TimesRepeated + 1);
+
+							if(Line.m_Player)
+							{
+								LocalCursor.m_X += RealMsgPaddingTee;
+
+								if(Line.m_Enemy && g_Config.m_ClChatEnemyPrefix)
+								{
+									if(Render)
+										TextRender()->TextColor(EnemyColor);
+									TextRender()->TextEx(&LocalCursor, g_Config.m_ClEnemyPrefix, -1);
+								}
+								if(Line.m_Helper && g_Config.m_ClChatHelperPrefix)
+								{
+									if(Render)
+										TextRender()->TextColor(HelperColor);
+									TextRender()->TextEx(&LocalCursor, g_Config.m_ClHelperPrefix, -1);
+								}
+								if(Line.m_Teammate && g_Config.m_ClChatTeammatePrefix)
+								{
+									if(Render)
+										TextRender()->TextColor(TeammateColor);
+									TextRender()->TextEx(&LocalCursor, g_Config.m_ClTeammatePrefix, -1);
+								}
+								if(Line.m_Friend && g_Config.m_ClMessageFriend)
+								{
+									if(Render)
+										TextRender()->TextColor(FriendColor);
+									TextRender()->TextEx(&LocalCursor, g_Config.m_ClFriendPrefix, -1);
+								}
+								if(Line.m_Spec && g_Config.m_ClChatSpecPrefix)
+								{
+									if(Render)
+										TextRender()->TextColor(SpecColor);
+									TextRender()->TextEx(&LocalCursor, g_Config.m_ClSpecPrefix, -1);
+								}
+							}
+
+							ColorRGBA NameColor;
+							if(Line.m_Friend && g_Config.m_ClDoFriendColorInchat)
+								NameColor = FriendColor;
+							else if(Line.m_Team)
+								NameColor = CalculateNameColor(color_cast<ColorHSLA>(TeamColor));
+							else if(Line.m_Player)
+								NameColor = DefaultNameColor;
+							else if(Line.m_Client)
+								NameColor = ClientColor;
+							else
+								NameColor = SystemColor;
+
+							if(Render)
+								TextRender()->TextColor(NameColor);
+
+							TextRender()->TextEx(&LocalCursor, aClientId);
+							TextRender()->TextEx(&LocalCursor, Line.m_aName);
+
+							if(Line.m_TimesRepeated > 0)
+							{
+								if(Render)
+									TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
+								TextRender()->TextEx(&LocalCursor, aCount, -1);
+							}
+
+							if(Line.m_ClShowIdsChat >= 0 && Line.m_aName[0] != '\0')
+							{
+								if(Render)
+									TextRender()->TextColor(NameColor);
+								TextRender()->TextEx(&LocalCursor, ": ", -1);
+							}
+
+							CTextCursor AppendCursor = LocalCursor;
+							AppendCursor.m_LongestLineWidth = 0.0f;
+							if(!g_Config.m_ClChatOld)
+							{
+								AppendCursor.m_StartX = LocalCursor.m_X;
+								AppendCursor.m_LineWidth -= LocalCursor.m_LongestLineWidth;
+							}
+
+							if(Render)
+							{
+								if(Line.m_Highlighted)
+									TextRender()->TextColor(HighlightedColor);
+								else if(Line.m_Team)
+									TextRender()->TextColor(TeamColor);
+								else if(Line.m_Player)
+									TextRender()->TextColor(NormalColor);
+							}
+
+							TextRender()->TextEx(&AppendCursor, Line.m_aText, -1);
+							if(Render)
+								TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+							return vec2{LocalCursor.m_LongestLineWidth + AppendCursor.m_LongestLineWidth, AppendCursor.Height() + RealMsgPaddingY};
+						};
+
+						// Set preview lines
+						{
+							char aLineBuilder[128];
+
+							str_format(aLineBuilder, sizeof(aLineBuilder), "'%s' entered and joined the game", aBuf);
+							if(g_Config.m_ClChatServerPrefix)
+								SetPreviewLine(PREVIEW_SYS, -1, g_Config.m_ClServerPrefix, aLineBuilder, 0, 0);
+							else
+								SetPreviewLine(PREVIEW_SYS, -1, "*** ", aLineBuilder, 0, 0);
+							str_format(aLineBuilder, sizeof(aLineBuilder), "Hey, how are you %s?", aBuf);
+							SetPreviewLine(PREVIEW_HIGHLIGHT, 7, "Random Tee", aLineBuilder, FLAG_HIGHLIGHT, 0);
+
+							SetPreviewLine(PREVIEW_TEAM, 11, "Your Teammate", "Let's speedrun this!", FLAG_TEAM, 0);
+							SetPreviewLine(PREVIEW_FRIEND, 8, "Friend", "Hello there", FLAG_FRIEND, 0);
+							SetPreviewLine(PREVIEW_SPAMMER, 9, "Spammer", "Hey fools, I'm spamming here!", 0, 5);
+							if(g_Config.m_ClChatClientPrefix)
+								SetPreviewLine(PREVIEW_CLIENT, -1, g_Config.m_ClClientPrefix, "Echo command executed", FLAG_CLIENT, 0);
+							else
+								SetPreviewLine(PREVIEW_CLIENT, -1, "— ", "Echo command executed", FLAG_CLIENT, 0);
+							SetPreviewLine(PREVIEW_ENEMY, 6, "Enemy", "Nobo", FLAG_ENEMY, 0);
+							SetPreviewLine(PREVIEW_HELPER, 3, "Helper", "Ima Help this random :>", FLAG_HELPER, 0);
+							SetPreviewLine(PREVIEW_TEAMMATE, 10, "Teammate", "Help me There's too many!", FLAG_TEAMMATE, 0);
+							SetPreviewLine(PREVIEW_SPEC, 11, "Random Spectator", "Crazy Gameplay dude", FLAG_SPEC, 0);
+						}
+
+						SetLineSkin(1, GameClient()->m_Skins.Find("pinky"));
+						SetLineSkin(2, GameClient()->m_Skins.Find("-Baby_Dou_KZ-"));
+						SetLineSkin(3, GameClient()->m_Skins.Find("cammostripes"));
+						SetLineSkin(4, GameClient()->m_Skins.Find("beast"));
+						SetLineSkin(5, GameClient()->m_Skins.Find("default"));
+						SetLineSkin(6, GameClient()->m_Skins.Find("Robot"));
+						SetLineSkin(7, GameClient()->m_Skins.Find("Catnoa"));
+						SetLineSkin(8, GameClient()->m_Skins.Find("turtle"));
+
+						// Backgrounds first
+						if(!g_Config.m_ClChatOld)
+						{
+							Graphics()->TextureClear();
+							Graphics()->QuadsBegin();
+							Graphics()->SetColor(0, 0, 0, 0.12f);
+
+							float TempY = Y;
+							const float RealBackgroundRounding = Chat.MessageRounding() * 2.0f;
+
+							auto &&RenderMessageBackground = [&](int LineIndex) {
+								auto Size = RenderPreview(LineIndex, 0, 0, false);
+								Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Size.x + RealMsgPaddingX * 1.5f, Size.y, RealBackgroundRounding, IGraphics::CORNER_ALL);
+								return Size.y;
+							};
+
+							if(g_Config.m_ClShowChatSystem)
+							{
+								TempY += RenderMessageBackground(PREVIEW_SYS);
+							}
+
+							if(!g_Config.m_ClShowChatFriends)
+							{
+								if(!g_Config.m_ClShowChatTeamMembersOnly)
+									TempY += RenderMessageBackground(PREVIEW_HIGHLIGHT);
+								TempY += RenderMessageBackground(PREVIEW_TEAM);
+							}
+
+							if(!g_Config.m_ClShowChatTeamMembersOnly)
+								TempY += RenderMessageBackground(PREVIEW_FRIEND);
+
+							if(!g_Config.m_ClShowChatFriends && !g_Config.m_ClShowChatTeamMembersOnly)
+							{
+								TempY += RenderMessageBackground(PREVIEW_SPAMMER);
+							}
+
+							TempY += RenderMessageBackground(PREVIEW_ENEMY);
+							TempY += RenderMessageBackground(PREVIEW_HELPER);
+							TempY += RenderMessageBackground(PREVIEW_TEAMMATE);
+							TempY += RenderMessageBackground(PREVIEW_SPEC);
+
+							TempY += RenderMessageBackground(PREVIEW_CLIENT);
+
+							Graphics()->QuadsEnd();
+						}
+
+						// System
+						if(g_Config.m_ClShowChatSystem)
+						{
+							Y += RenderPreview(PREVIEW_SYS, X, Y).y;
+						}
+
+						if(!g_Config.m_ClShowChatFriends)
+						{
+							// Highlighted
+							if(!g_Config.m_ClChatOld && !g_Config.m_ClShowChatTeamMembersOnly)
+								RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_HIGHLIGHT].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+							if(!g_Config.m_ClShowChatTeamMembersOnly)
+								Y += RenderPreview(PREVIEW_HIGHLIGHT, X, Y).y;
+
+							// Team
+							if(!g_Config.m_ClChatOld)
+								RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_TEAM].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+							Y += RenderPreview(PREVIEW_TEAM, X, Y).y;
+						}
+
+						// Friend
+						if(!g_Config.m_ClChatOld && !g_Config.m_ClShowChatTeamMembersOnly)
+							RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_FRIEND].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+						if(!g_Config.m_ClShowChatTeamMembersOnly)
+							Y += RenderPreview(PREVIEW_FRIEND, X, Y).y;
+
+						// Normal
+						if(!g_Config.m_ClShowChatFriends && !g_Config.m_ClShowChatTeamMembersOnly)
+						{
+							if(!g_Config.m_ClChatOld)
+								RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_SPAMMER].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+							Y += RenderPreview(PREVIEW_SPAMMER, X, Y).y;
+						}
+						// Enemy
+						RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_ENEMY].m_RenderInfo, EMOTE_ANGRY, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+						Y += RenderPreview(PREVIEW_ENEMY, X, Y).y;
+						// Helper
+						RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_HELPER].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+						Y += RenderPreview(PREVIEW_HELPER, X, Y).y;
+						// Teammate
+						RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_TEAMMATE].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+						Y += RenderPreview(PREVIEW_TEAMMATE, X, Y).y;
+						// Spectating
+						RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_SPEC].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+						Y += RenderPreview(PREVIEW_SPEC, X, Y).y;
+						// Client
+						RenderPreview(PREVIEW_CLIENT, X, Y);
+
+						TextRender()->TextColor(TextRender()->DefaultTextColor());
+					}
 
 			}
 		}
@@ -398,7 +748,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 		{
 			NameplateSettings.HSplitTop(Margin, nullptr, &NameplateSettings);
-			NameplateSettings.HSplitTop(140.0f, &NameplateSettings, &ScoreboardSettings);
+			NameplateSettings.HSplitTop(140.0f, &NameplateSettings, 0);
 			if(s_ScrollRegion.AddRect(NameplateSettings))
 			{
 				NameplateSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -421,56 +771,6 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 			}
 		}
 
-		{
-			ScoreboardSettings.HSplitTop(Margin, nullptr, &ScoreboardSettings);
-			ScoreboardSettings.HSplitTop(140.0f, &ScoreboardSettings, &MenuSettings);
-			if(s_ScrollRegion.AddRect(ScoreboardSettings))
-			{
-				ScoreboardSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				ScoreboardSettings.VMargin(Margin, &ScoreboardSettings);
-
-				ScoreboardSettings.HSplitTop(HeaderHeight, &Button, &ScoreboardSettings);
-				Ui()->DoLabel(&Button, Localize("Scoreboard Settings"), FontSize, TEXTALIGN_MC);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMutedIconScore, Localize("Show an Indicator Next to Muted Players in Scoreboard"), &g_Config.m_ClMutedIconScore, &ScoreboardSettings, LineSize);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoWarListColorScore, Localize("Do Team/War Name Colors in Scoreboard"), &g_Config.m_ClDoWarListColorScore, &ScoreboardSettings, LineSize);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoAfkColors, Localize("Afk Name Colors in Scoreboard"), &g_Config.m_ClDoAfkColors, &ScoreboardSettings, LineSize);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScoreSpecPlayer, Localize("Make Tees Sit in Scoreboard When Spectating"), &g_Config.m_ClScoreSpecPlayer, &ScoreboardSettings, LineSize);
-				
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScoreSpecPrefix, Localize("Show Spec Prefix in Scoreboard"), &g_Config.m_ClScoreSpecPrefix, &ScoreboardSettings, LineSize);
-	
-			}
-		}
-
-			{
-			MenuSettings.HSplitTop(Margin, nullptr, &MenuSettings);
-			MenuSettings.HSplitTop(180.0f, &MenuSettings, 0);
-			if(s_ScrollRegion.AddRect(MenuSettings))
-			{
-				MenuSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				MenuSettings.VMargin(Margin, &MenuSettings);
-
-				MenuSettings.HSplitTop(HeaderHeight, &Button, &MenuSettings);
-				Ui()->DoLabel(&Button, Localize("Menu Settings"), FontSize, TEXTALIGN_MC);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowOthersInMenu, Localize("Show Settigns Icon When Tee's in a Menu"), &g_Config.m_ClShowOthersInMenu, &MenuSettings, LineSize);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuTeammate, Localize("Team Colors in Spectate Menu"), &g_Config.m_ClSpecMenuTeammate, &MenuSettings, LineSize);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuTeammatePrefix, Localize("Team Prefix in Spectate Menu"), &g_Config.m_ClSpecMenuTeammatePrefix, &MenuSettings, LineSize);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuEnemy, Localize("Enemy Colors in Spectate Menu"), &g_Config.m_ClSpecMenuEnemy, &MenuSettings, LineSize);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuEnemyPrefix, Localize("Enemy Prefix in Spectate Menu"), &g_Config.m_ClSpecMenuEnemyPrefix, &MenuSettings, LineSize);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuFriend, Localize("Friend Colors in Spectate Menu"), &g_Config.m_ClSpecMenuFriend, &MenuSettings, LineSize);
-
-				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuFriendPrefix, Localize("Friend Prefix in Spectate Menu"), &g_Config.m_ClSpecMenuFriendPrefix, &MenuSettings, LineSize);
-			}
-		}
 
 		// right side
 
@@ -481,14 +781,14 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 			if(g_Config.m_ClFpsSpoofer)
 			{
 				if(g_Config.m_ClShowAiodobPreview)
-					UiSettings.HSplitTop(160.0f, &UiSettings, &PreviewSettings);
+					UiSettings.HSplitTop(160.0f, &UiSettings, &MiscSettings);
 				else
 					UiSettings.HSplitTop(160.0f, &UiSettings, &MiscSettings);
 			}
 			else
 			{
 				if(g_Config.m_ClShowAiodobPreview)
-					UiSettings.HSplitTop(125.0f, &UiSettings, &PreviewSettings);
+					UiSettings.HSplitTop(125.0f, &UiSettings, &MiscSettings);
 				else
 					UiSettings.HSplitTop(125.0f, &UiSettings, &MiscSettings);
 			}
@@ -517,386 +817,6 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					UiSettings.HSplitTop(2 * LineSize, &Button, &UiSettings);
 					Ui()->DoScrollbarOption(&g_Config.m_ClFpsSpoofPercentage, &g_Config.m_ClFpsSpoofPercentage, &Button, Localize("Fps Spoofer Margin"), 1, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
 				}
-			}
-		}
-
-		if(g_Config.m_ClShowAiodobPreview)
-		{
-			PreviewSettings.HSplitTop(Margin, nullptr, &PreviewSettings);
-			PreviewSettings.HSplitTop(180.0f, &PreviewSettings, &MiscSettings);
-			if(s_ScrollRegion.AddRect(PreviewSettings))
-			{
-				PreviewSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				PreviewSettings.VMargin(Margin, &PreviewSettings);
-
-				PreviewSettings.HSplitTop(HeaderHeight, &Button, &PreviewSettings);
-				Ui()->DoLabel(&Button, Localize("Chat Preview"), FontSize, TEXTALIGN_MC);
-
-				CChat &Chat = GameClient()->m_Chat;
-			
-			
-				ColorRGBA SystemColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
-				ColorRGBA HighlightedColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
-				ColorRGBA TeamColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
-				ColorRGBA FriendColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
-				ColorRGBA SpecColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClSpecColor));
-				ColorRGBA EnemyColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClWarColor));
-				ColorRGBA HelperColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClHelperColor));
-				ColorRGBA TeammateColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClTeamColor));
-				ColorRGBA NormalColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageColor));
-				ColorRGBA ClientColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageClientColor));
-				ColorRGBA DefaultNameColor(0.8f, 0.8f, 0.8f, 1.0f);
-
-				const float RealFontSize = 10.0f;
-				const float RealMsgPaddingX = 12;
-				const float RealMsgPaddingY = 4;
-				const float RealMsgPaddingTee = 16;
-				const float RealOffsetY = RealFontSize + RealMsgPaddingY;
-
-				const float X = RealMsgPaddingX / 2.0f + PreviewSettings.x;
-				float Y = PreviewSettings.y;
-				float LineWidth = g_Config.m_ClChatWidth * 2 - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
-
-				str_copy(aBuf, Client()->PlayerName());
-
-				const CAnimState *pIdleState = CAnimState::GetIdle();
-				const float RealTeeSize = 16;
-				const float RealTeeSizeHalved = 8;
-				constexpr float TWSkinUnreliableOffset = -0.25f;
-				const float OffsetTeeY = RealTeeSizeHalved;
-				const float FullHeightMinusTee = RealOffsetY - RealTeeSize;
-
-				struct SPreviewLine
-				{
-					int m_ClShowIdsChat;
-					bool m_Team;
-					char m_aName[64];
-					char m_aText[256];
-					bool m_Spec;
-					bool m_Enemy;
-					bool m_Helper;
-					bool m_Teammate;
-					bool m_Friend;
-					bool m_Player;
-					bool m_Client;
-					bool m_Highlighted;
-					int m_TimesRepeated;
-
-					CTeeRenderInfo m_RenderInfo;
-				};
-
-				static std::vector<SPreviewLine> s_vLines;
-
-	
-				enum ELineFlag
-				{
-					FLAG_TEAM = 1 << 0,
-					FLAG_FRIEND = 1 << 1,
-					FLAG_HIGHLIGHT = 1 << 2,
-					FLAG_CLIENT = 1 << 3,
-					FLAG_ENEMY = 1 << 4,
-					FLAG_HELPER = 1 << 5,
-					FLAG_TEAMMATE = 1 << 6,
-					FLAG_SPEC = 1 << 7
-				};
-				enum
-				{
-					PREVIEW_SYS,
-					PREVIEW_HIGHLIGHT,
-					PREVIEW_TEAM,
-					PREVIEW_FRIEND,
-					PREVIEW_SPAMMER,
-					PREVIEW_ENEMY,
-					PREVIEW_HELPER,
-					PREVIEW_TEAMMATE,
-					PREVIEW_SPEC,
-					PREVIEW_CLIENT
-				};
-				auto &&SetPreviewLine = [](int Index, int ClientId, const char *pName, const char *pText, int Flag, int Repeats) {
-					SPreviewLine *pLine;
-					if((int)s_vLines.size() <= Index)
-					{
-						s_vLines.emplace_back();
-						pLine = &s_vLines.back();
-					}
-					else
-					{
-						pLine = &s_vLines[Index];
-					}
-					pLine->m_ClShowIdsChat = ClientId;
-					pLine->m_Team = Flag & FLAG_TEAM;
-					pLine->m_Friend = Flag & FLAG_FRIEND;
-					pLine->m_Player = ClientId >= 0;
-					pLine->m_Highlighted = Flag & FLAG_HIGHLIGHT;
-					pLine->m_Client = Flag & FLAG_CLIENT;
-					pLine->m_Spec = Flag & FLAG_SPEC;
-					pLine->m_Enemy = Flag & FLAG_ENEMY;
-					pLine->m_Helper = Flag & FLAG_HELPER;
-					pLine->m_Teammate = Flag & FLAG_TEAMMATE;
-					str_copy(pLine->m_aName, pName);
-					str_copy(pLine->m_aText, pText);
-				};
-				auto &&SetLineSkin = [RealTeeSize](int Index, const CSkin *pSkin) {
-					if(Index >= (int)s_vLines.size())
-						return;
-					s_vLines[Index].m_RenderInfo.m_Size = RealTeeSize;
-					s_vLines[Index].m_RenderInfo.Apply(pSkin);
-				};
-
-				auto &&RenderPreview = [&](int LineIndex, int x, int y, bool Render = true) {
-					if(LineIndex >= (int)s_vLines.size())
-						return vec2(0, 0);
-					CTextCursor LocalCursor;
-					TextRender()->SetCursor(&LocalCursor, x, y, RealFontSize, Render ? TEXTFLAG_RENDER : 0);
-					LocalCursor.m_LineWidth = LineWidth;
-					const auto &Line = s_vLines[LineIndex];
-
-					char aClientId[16] = "";
-					if(g_Config.m_ClShowIdsChat && Line.m_ClShowIdsChat >= 0 && Line.m_aName[0] != '\0')
-					{
-						GameClient()->FormatClientId(Line.m_ClShowIdsChat, aClientId, EClientIdFormat::INDENT_FORCE);
-					}
-
-					char aCount[12];
-					if(Line.m_ClShowIdsChat < 0)
-						str_format(aCount, sizeof(aCount), "[%d] ", Line.m_TimesRepeated + 1);
-					else
-						str_format(aCount, sizeof(aCount), " [%d]", Line.m_TimesRepeated + 1);
-
-					if(Line.m_Player)
-					{
-						LocalCursor.m_X += RealMsgPaddingTee;
-
-						if(Line.m_Enemy && g_Config.m_ClChatEnemyPrefix)
-						{
-							if(Render)
-								TextRender()->TextColor(EnemyColor);
-							TextRender()->TextEx(&LocalCursor, g_Config.m_ClEnemyPrefix, -1);
-						}
-						if(Line.m_Helper && g_Config.m_ClChatHelperPrefix)
-						{
-							if(Render)
-								TextRender()->TextColor(HelperColor);
-							TextRender()->TextEx(&LocalCursor, g_Config.m_ClHelperPrefix, -1);
-						}
-						if(Line.m_Teammate && g_Config.m_ClChatTeammatePrefix)
-						{
-							if(Render)
-								TextRender()->TextColor(TeammateColor);
-							TextRender()->TextEx(&LocalCursor, g_Config.m_ClTeammatePrefix, -1);
-						}
-						if(Line.m_Friend && g_Config.m_ClMessageFriend)
-						{
-							if(Render)
-								TextRender()->TextColor(FriendColor);
-							TextRender()->TextEx(&LocalCursor, g_Config.m_ClFriendPrefix, -1);
-						}
-						if(Line.m_Spec && g_Config.m_ClChatSpecPrefix)
-						{
-							if(Render)
-								TextRender()->TextColor(SpecColor);
-							TextRender()->TextEx(&LocalCursor, g_Config.m_ClSpecPrefix, -1);
-						}
-					}
-
-					ColorRGBA NameColor;
-					if(Line.m_Friend && g_Config.m_ClDoFriendColorInchat)
-						NameColor = FriendColor;
-					else if(Line.m_Team)
-						NameColor = CalculateNameColor(color_cast<ColorHSLA>(TeamColor));
-					else if(Line.m_Player)
-						NameColor = DefaultNameColor;
-					else if(Line.m_Client)
-						NameColor = ClientColor;
-					else
-						NameColor = SystemColor;
-
-					if(Render)
-						TextRender()->TextColor(NameColor);
-
-					TextRender()->TextEx(&LocalCursor, aClientId);
-					TextRender()->TextEx(&LocalCursor, Line.m_aName);
-
-					if(Line.m_TimesRepeated > 0)
-					{
-						if(Render)
-							TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
-						TextRender()->TextEx(&LocalCursor, aCount, -1);
-					}
-
-					if(Line.m_ClShowIdsChat >= 0 && Line.m_aName[0] != '\0')
-					{
-						if(Render)
-							TextRender()->TextColor(NameColor);
-						TextRender()->TextEx(&LocalCursor, ": ", -1);
-					}
-
-
-					CTextCursor AppendCursor = LocalCursor;
-					AppendCursor.m_LongestLineWidth = 0.0f;
-					if(!g_Config.m_ClChatOld)
-					{
-						AppendCursor.m_StartX = LocalCursor.m_X;
-						AppendCursor.m_LineWidth -= LocalCursor.m_LongestLineWidth;
-					}
-
-					if(Render)
-					{
-						if(Line.m_Highlighted)
-							TextRender()->TextColor(HighlightedColor);
-						else if(Line.m_Team)
-							TextRender()->TextColor(TeamColor);
-						else if(Line.m_Player)
-							TextRender()->TextColor(NormalColor);
-					}
-
-					TextRender()->TextEx(&AppendCursor, Line.m_aText, -1);
-					if(Render)
-						TextRender()->TextColor(TextRender()->DefaultTextColor());
-
-					return vec2{LocalCursor.m_LongestLineWidth + AppendCursor.m_LongestLineWidth, AppendCursor.Height() + RealMsgPaddingY};
-				};
-
-				// Set preview lines
-				{
-			
-					char aLineBuilder[128];
-
-					str_format(aLineBuilder, sizeof(aLineBuilder), "'%s' entered and joined the game", aBuf);
-					if(g_Config.m_ClChatServerPrefix)
-						SetPreviewLine(PREVIEW_SYS, -1, g_Config.m_ClServerPrefix, aLineBuilder, 0, 0);
-					else
-						SetPreviewLine(PREVIEW_SYS, -1, "*** ", aLineBuilder, 0, 0);
-					str_format(aLineBuilder, sizeof(aLineBuilder), "Hey, how are you %s?", aBuf);
-					SetPreviewLine(PREVIEW_HIGHLIGHT, 7, "Random Tee", aLineBuilder, FLAG_HIGHLIGHT, 0);
-
-					SetPreviewLine(PREVIEW_TEAM, 11, "Your Teammate", "Let's speedrun this!", FLAG_TEAM, 0);
-					SetPreviewLine(PREVIEW_FRIEND, 8, "Friend", "Hello there", FLAG_FRIEND, 0);
-					SetPreviewLine(PREVIEW_SPAMMER, 9, "Spammer", "Hey fools, I'm spamming here!", 0, 5);
-					if(g_Config.m_ClChatClientPrefix)
-						SetPreviewLine(PREVIEW_CLIENT, -1, g_Config.m_ClClientPrefix, "Echo command executed", FLAG_CLIENT, 0);
-					else
-						SetPreviewLine(PREVIEW_CLIENT, -1, "— ", "Echo command executed", FLAG_CLIENT, 0);
-					SetPreviewLine(PREVIEW_ENEMY, 6, "Enemy", "Nobo", FLAG_ENEMY, 0);
-					SetPreviewLine(PREVIEW_HELPER, 3, "Helper", "Ima Help this random :>", FLAG_HELPER, 0);
-					SetPreviewLine(PREVIEW_TEAMMATE, 10, "Teammate", "Help me There's too many!", FLAG_TEAMMATE, 0);
-					SetPreviewLine(PREVIEW_SPEC, 11, "Random Spectator", "Crazy Gameplay dude", FLAG_SPEC, 0);
-
-				}
-				
-				SetLineSkin(1, GameClient()->m_Skins.Find("pinky"));
-				SetLineSkin(2, GameClient()->m_Skins.Find("-Baby_Dou_KZ-"));
-				SetLineSkin(3, GameClient()->m_Skins.Find("cammostripes"));
-				SetLineSkin(4, GameClient()->m_Skins.Find("beast"));
-				SetLineSkin(5, GameClient()->m_Skins.Find("default"));
-				SetLineSkin(6, GameClient()->m_Skins.Find("Robot"));
-				SetLineSkin(7, GameClient()->m_Skins.Find("Catnoa"));
-				SetLineSkin(8, GameClient()->m_Skins.Find("turtle"));
-		
-
-				// Backgrounds first
-				if(!g_Config.m_ClChatOld)
-				{
-					Graphics()->TextureClear();
-					Graphics()->QuadsBegin();
-					Graphics()->SetColor(0, 0, 0, 0.12f);
-
-					float TempY = Y;
-					const float RealBackgroundRounding = Chat.MessageRounding() * 2.0f;
-
-					auto &&RenderMessageBackground = [&](int LineIndex) {
-						auto Size = RenderPreview(LineIndex, 0, 0, false);
-						Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Size.x + RealMsgPaddingX * 1.5f, Size.y, RealBackgroundRounding, IGraphics::CORNER_ALL);
-						return Size.y;
-					};
-
-					if(g_Config.m_ClShowChatSystem)
-					{
-						TempY += RenderMessageBackground(PREVIEW_SYS);
-					}
-
-					if(!g_Config.m_ClShowChatFriends)
-					{
-						if(!g_Config.m_ClShowChatTeamMembersOnly)
-							TempY += RenderMessageBackground(PREVIEW_HIGHLIGHT);
-						TempY += RenderMessageBackground(PREVIEW_TEAM);
-					}
-
-					if(!g_Config.m_ClShowChatTeamMembersOnly)
-						TempY += RenderMessageBackground(PREVIEW_FRIEND);
-
-					if(!g_Config.m_ClShowChatFriends && !g_Config.m_ClShowChatTeamMembersOnly)
-					{
-						TempY += RenderMessageBackground(PREVIEW_SPAMMER);
-					}
-
-					TempY += RenderMessageBackground(PREVIEW_ENEMY);
-					TempY += RenderMessageBackground(PREVIEW_HELPER);
-					TempY += RenderMessageBackground(PREVIEW_TEAMMATE);
-					TempY += RenderMessageBackground(PREVIEW_SPEC);
-
-					TempY += RenderMessageBackground(PREVIEW_CLIENT);
-
-			
-
-					Graphics()->QuadsEnd();
-				}
-
-				// System
-				if(g_Config.m_ClShowChatSystem)
-				{
-					Y += RenderPreview(PREVIEW_SYS, X, Y).y;
-				}
-
-				if(!g_Config.m_ClShowChatFriends)
-				{
-					// Highlighted
-					if(!g_Config.m_ClChatOld && !g_Config.m_ClShowChatTeamMembersOnly)
-						RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_HIGHLIGHT].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-					if(!g_Config.m_ClShowChatTeamMembersOnly)
-						Y += RenderPreview(PREVIEW_HIGHLIGHT, X, Y).y;
-
-					// Team
-					if(!g_Config.m_ClChatOld)
-						RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_TEAM].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-					Y += RenderPreview(PREVIEW_TEAM, X, Y).y;
-				}
-
-				// Friend
-				if(!g_Config.m_ClChatOld && !g_Config.m_ClShowChatTeamMembersOnly)
-					RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_FRIEND].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-				if(!g_Config.m_ClShowChatTeamMembersOnly)
-					Y += RenderPreview(PREVIEW_FRIEND, X, Y).y;
-
-				// Normal
-				if(!g_Config.m_ClShowChatFriends && !g_Config.m_ClShowChatTeamMembersOnly)
-				{
-					if(!g_Config.m_ClChatOld)
-						RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_SPAMMER].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-					Y += RenderPreview(PREVIEW_SPAMMER, X, Y).y;
-
-
-
-				}
-				// Enemy
-				RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_ENEMY].m_RenderInfo, EMOTE_ANGRY, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-				Y += RenderPreview(PREVIEW_ENEMY, X, Y).y;
-				// Helper
-				RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_HELPER].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-				Y += RenderPreview(PREVIEW_HELPER, X, Y).y;
-				// Teammate
-				RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_TEAMMATE].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-				Y += RenderPreview(PREVIEW_TEAMMATE, X, Y).y;
-				// Spectating
-				RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_SPEC].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-				Y += RenderPreview(PREVIEW_SPEC, X, Y).y;
-				// Client
-				RenderPreview(PREVIEW_CLIENT, X, Y);
-
-			
-
-
-				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
 		}
 		
@@ -965,14 +885,9 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 		{
 			PlayerIndicatorSettings.HSplitTop(Margin, nullptr, &PlayerIndicatorSettings);
 			if(g_Config.m_ClIndicatorVariableDistance)
-			{
-				PlayerIndicatorSettings.HSplitTop(350.0f, &PlayerIndicatorSettings, 0);
-			}
+				PlayerIndicatorSettings.HSplitTop(350.0f, &PlayerIndicatorSettings, &ScoreboardSettings);
 			else
-			{
-				PlayerIndicatorSettings.HSplitTop(300.0f, &PlayerIndicatorSettings, 0);
-			}
-
+				PlayerIndicatorSettings.HSplitTop(300.0f, &PlayerIndicatorSettings, &ScoreboardSettings);
 			if(s_ScrollRegion.AddRect(PlayerIndicatorSettings))
 			{
 				PlayerIndicatorSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -1052,6 +967,57 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					g_Config.m_ClIndicatorMaxDistance = NewValue * 50;
 				}
 			}
+
+					{
+				ScoreboardSettings.HSplitTop(Margin, nullptr, &ScoreboardSettings);
+				ScoreboardSettings.HSplitTop(140.0f, &ScoreboardSettings, &MenuSettings);
+				if(s_ScrollRegion.AddRect(ScoreboardSettings))
+				{
+					ScoreboardSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
+					ScoreboardSettings.VMargin(Margin, &ScoreboardSettings);
+
+					ScoreboardSettings.HSplitTop(HeaderHeight, &Button, &ScoreboardSettings);
+					Ui()->DoLabel(&Button, Localize("Scoreboard Settings"), FontSize, TEXTALIGN_MC);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMutedIconScore, Localize("Show an Indicator Next to Muted Players in Scoreboard"), &g_Config.m_ClMutedIconScore, &ScoreboardSettings, LineSize);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoWarListColorScore, Localize("Do Team/War Name Colors in Scoreboard"), &g_Config.m_ClDoWarListColorScore, &ScoreboardSettings, LineSize);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoAfkColors, Localize("Afk Name Colors in Scoreboard"), &g_Config.m_ClDoAfkColors, &ScoreboardSettings, LineSize);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScoreSpecPlayer, Localize("Make Tees Sit in Scoreboard When Spectating"), &g_Config.m_ClScoreSpecPlayer, &ScoreboardSettings, LineSize);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScoreSpecPrefix, Localize("Show Spec Prefix in Scoreboard"), &g_Config.m_ClScoreSpecPrefix, &ScoreboardSettings, LineSize);
+				}
+			}
+
+			{
+				MenuSettings.HSplitTop(Margin, nullptr, &MenuSettings);
+				MenuSettings.HSplitTop(180.0f, &MenuSettings, 0);
+				if(s_ScrollRegion.AddRect(MenuSettings))
+				{
+					MenuSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
+					MenuSettings.VMargin(Margin, &MenuSettings);
+
+					MenuSettings.HSplitTop(HeaderHeight, &Button, &MenuSettings);
+					Ui()->DoLabel(&Button, Localize("Menu Settings"), FontSize, TEXTALIGN_MC);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowOthersInMenu, Localize("Show Settigns Icon When Tee's in a Menu"), &g_Config.m_ClShowOthersInMenu, &MenuSettings, LineSize);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuTeammate, Localize("Team Colors in Spectate Menu"), &g_Config.m_ClSpecMenuTeammate, &MenuSettings, LineSize);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuTeammatePrefix, Localize("Team Prefix in Spectate Menu"), &g_Config.m_ClSpecMenuTeammatePrefix, &MenuSettings, LineSize);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuEnemy, Localize("Enemy Colors in Spectate Menu"), &g_Config.m_ClSpecMenuEnemy, &MenuSettings, LineSize);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuEnemyPrefix, Localize("Enemy Prefix in Spectate Menu"), &g_Config.m_ClSpecMenuEnemyPrefix, &MenuSettings, LineSize);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuFriend, Localize("Friend Colors in Spectate Menu"), &g_Config.m_ClSpecMenuFriend, &MenuSettings, LineSize);
+
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuFriendPrefix, Localize("Friend Prefix in Spectate Menu"), &g_Config.m_ClSpecMenuFriendPrefix, &MenuSettings, LineSize);
+				}
+			}
+
 		}
 		s_ScrollRegion.End();
 	}
@@ -1197,7 +1163,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClResetBindWheelMouse, ("Reset position of mouse when opening bindwheel"), &g_Config.m_ClResetBindWheelMouse, &Button, LineMargin);
 	}
 
-	// Tater Client Bind wheel
+	
 	if(s_CurTab == AIODOB_TAB_VISUAL)
 	{
 		static CScrollRegion s_ScrollRegion;
@@ -1331,28 +1297,6 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 				}
 			}
 		}
-
-
-		{
-			WeaponSettings.HSplitTop(Margin, nullptr, &WeaponSettings);
-			WeaponSettings.HSplitTop(115.0f, &WeaponSettings, 0);
-			if(s_ScrollRegion.AddRect(WeaponSettings))
-			{
-				WeaponSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
-				;
-				WeaponSettings.VMargin(Margin, &WeaponSettings);
-
-				WeaponSettings.HSplitTop(HeaderHeight, &Button, &WeaponSettings);
-				Ui()->DoLabel(&Button, Localize("Hook Settings"), FontSize, TEXTALIGN_MC);
-
-				WeaponSettings.HSplitTop(2 * LineSize, &Button, &WeaponSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClHookSizeX, &g_Config.m_ClHookSizeX, &Button, Localize("Hook Size X"), -2, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-
-				WeaponSettings.HSplitTop(2 * LineSize, &Button, &WeaponSettings);
-				Ui()->DoScrollbarOption(&g_Config.m_ClHookSizeY, &g_Config.m_ClHookSizeY, &Button, Localize("Hook Size Y"), -2, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
-			}
-		}
-
 		s_ScrollRegion.End();
 	}
 }
