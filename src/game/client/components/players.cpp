@@ -998,7 +998,7 @@ void CPlayers::OnInit()
 				else
 					RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_aSpriteMuzzles[n], ScaleX, ScaleY);
 			}
-
+			
 			float SWidth = (g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleX) * (4.0f / 3.0f);
 			float SHeight = g_pData->m_Weapons.m_aId[i].m_VisualSize * ScaleY;
 

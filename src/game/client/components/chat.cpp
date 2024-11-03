@@ -791,7 +791,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	}
 
 	pCurrentLine->m_Highlighted = Highlighted;
-	const auto IsWar = GameClient()->m_WarList.IsWarlist(m_pClient->m_aClients[ClientId].m_aName);
+	const auto IsWar = GameClient()->m_WarList.IsWarlist(m_pClient->m_aClients[ClientId].m_aName) || GameClient()->m_WarList.IsTemplist(m_pClient->m_aClients[ClientId].m_aName);
 	const auto IsHelper = GameClient()->m_WarList.IsHelperlist(m_pClient->m_aClients[ClientId].m_aName);
 	const auto IsTeam = GameClient()->m_WarList.IsTeamlist(m_pClient->m_aClients[ClientId].m_aName);
 	const auto IsMute = GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[ClientId].m_aName);
@@ -921,38 +921,11 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 				m_aLastSoundPlayed[CHAT_SERVER] = Now;
 			}
 
-			/*
-						const char *Name = m_pClient->m_aClients[ClientId].m_aName;
-
-						char *bBuf[16] = m_aLines[m_CurrentLine].m_aText;
-
-
-							char aBuf[1024];
-						str_format(aBuf, sizeof(aBuf), "%s", m_aLines[m_CurrentLine].m_Friend);
-
-							m_pClient->m_Chat.AddLine(-2, 0, bBuf);
-
-						if(str_find_nocase(pLine, "entered and joined the game"))
-						{
-
-
-							int Code = str_utf8_decode(&bBuf);
-							if(!str_utf8_isspace(Code))
-
-
-								m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 222.0f);
-								m_aLastSoundPlayed[CHAT_SERVER] = Now;
-
-
-						}
-
-						*/
-			//
-
-			if(str_find_nocase(pLine, "' changed name to '"))
+			if(g_Config.m_ClAutoAddOnNameChange)
 			{
-				if(g_Config.m_ClAutoAddOnNameChange)
+				if(str_find_nocase(pLine, "' changed name to '"))
 				{
+			
 					const char *aName = str_find_nocase(pLine, " '");
 					const char *OldName = str_find_nocase(pLine, "'");
 					const char *NameLength = str_find_nocase(pLine, "' ");
@@ -960,60 +933,110 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 
 					{
 						int n = str_length(aName);
-
 						string s(aName);
-
 						s.erase(s.begin());
 						s.erase(s.begin());
 						s.erase(s.begin() + n - 3);
 
-						// copying the contents of the string to
-						// char array
 						char name[16];
-
 						strcpy(name, s.c_str());
 
 						int a = str_length(NameLength);
-
 						int b = str_length(OldName);
 
 						int Length = b - a;
-
 						string oName(OldName);
-
 						oName.erase(Length);
-
 						oName.erase(oName.begin());
 
 						char CharOname[16];
-
 						strcpy(CharOname, oName.c_str());
-
-						if(GameClient()->m_WarList.IsMutelist(CharOname))
-							GameClient()->m_WarList.AddSimpleMute(name);
-						if(GameClient()->m_WarList.IsWarlist(CharOname))
-							GameClient()->m_WarList.AddSimpleWar(name);
-						if(GameClient()->m_WarList.IsHelperlist(CharOname))
-							GameClient()->m_WarList.AddSimpleHelper(name);
+						if (!GameClient()->m_WarList.IsTeamlist(name))
+						{
+							if(GameClient()->m_WarList.IsMutelist(CharOname))
+								GameClient()->m_WarList.AddSimpleMute(name);
+							if(GameClient()->m_WarList.IsWarlist(CharOname) || (GameClient()->m_WarList.IsTemplist(CharOname)))
+								GameClient()->m_WarList.AddSimpleTempWar(name);
+							if(GameClient()->m_WarList.IsHelperlist(CharOname))
+								GameClient()->m_WarList.AddSimpleHelper(name);
+						}
 					}
 				}
 			}
 
-			if(g_Config.m_ClNotifyOnJoin)
+			if(g_Config.m_ClAutoJoinTeam)
 			{
-				if(str_find_nocase(pLine, g_Config.m_ClAutoNotifyName))
+				if(str_find_nocase(pLine, "' joined team "))
 				{
-					if(str_find_nocase(pLine, "entered and joined the game"))
+					const char *FindTeam = str_find_nocase(pLine, "m ");
+					const char *PName = str_find_nocase(pLine, "'");
+					const char *NameLength = str_find_nocase(pLine, "' ");
+					using namespace std;
+					if(str_find_nocase(pLine, g_Config.m_ClAutoJoinTeamName))
 					{
-						/*
-							char Whisper[2048] = "/w ";
-							str_append(Whisper, g_Config.m_ClAutoWhisperName);
-							str_append(Whisper, " ");
-							str_append(Whisper, g_Config.m_ClAutoWhisperMsg);
-							m_pClient->m_Chat.SendChat(0, Whisper);
-						*/
-						m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CTF_CAPTURE, 1.0f);
-						m_pClient->m_Chat.AddLine(-2, 0, g_Config.m_ClAutoNotifyMsg);
+		
+						int n = str_length(FindTeam);
+						string s(FindTeam);
+						s.erase(s.begin());
+						s.erase(s.begin());
+
+						char Team[16];
+						strcpy(Team, s.c_str());
+
+						
+						int a = str_length(NameLength);
+						int b = str_length(PName);
+
+						int Length = b - a;
+						string Name(PName);
+						Name.erase(Length);
+						Name.erase(Name.begin());
+
+						char PlayerName[16];
+						strcpy(PlayerName, Name.c_str());
+
+
+						int NameToJoin = str_comp(g_Config.m_ClAutoJoinTeamName, PlayerName);
+						if(!Team == 0 && NameToJoin == 0)
+						{
+							char aBuf[2048] = "/team ";
+							str_append(aBuf, Team);
+							m_pClient->m_Chat.SendChat(0, aBuf);
+							char Joined[2048] = "Auto Joined ";
+							str_append(Joined, PlayerName);
+
+							m_pClient->m_Chat.AddLine(-2, 0, Joined);
+						}
+					}
+				}
+			}
+
+			if(str_find_nocase(pLine, g_Config.m_ClAutoNotifyName))
+			{
+				if(str_find_nocase(pLine, "entered and joined the game"))
+				{
+					const char *PName = str_find_nocase(pLine, "'");
+					const char *NameLength = str_find_nocase(pLine, "' ");
+					using namespace std;
+					if(str_find_nocase(pLine, g_Config.m_ClAutoNotifyName))
+					{
+						int a = str_length(NameLength);
+						int b = str_length(PName);
+
+						int Length = b - a;
+						string Name(PName);
+						Name.erase(Length);
+						Name.erase(Name.begin());
+
+						char PlayerName[16];
+						strcpy(PlayerName, Name.c_str());
+
+						int NameToJoin = str_comp(g_Config.m_ClAutoNotifyName, PlayerName);
+						if(NameToJoin == 0)
+						{
+							m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CTF_CAPTURE, 1.0f);
+							m_pClient->m_Chat.AddLine(-2, 0, g_Config.m_ClAutoNotifyMsg);
+						}
 					}
 				}
 			}
