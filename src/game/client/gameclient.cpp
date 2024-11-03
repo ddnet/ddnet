@@ -1172,6 +1172,7 @@ void CGameClient::OnShutdown()
 {
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnShutdown();
+	Storage()->RemoveFile("chillerbot/templist/temp/tempwar/names.txt", IStorage::TYPE_SAVE);
 }
 
 void CGameClient::OnEnterGame()
