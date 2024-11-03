@@ -920,6 +920,103 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_SERVER, 1.0f);
 				m_aLastSoundPlayed[CHAT_SERVER] = Now;
 			}
+
+			/*
+						const char *Name = m_pClient->m_aClients[ClientId].m_aName;
+
+						char *bBuf[16] = m_aLines[m_CurrentLine].m_aText;
+
+
+							char aBuf[1024];
+						str_format(aBuf, sizeof(aBuf), "%s", m_aLines[m_CurrentLine].m_Friend);
+
+							m_pClient->m_Chat.AddLine(-2, 0, bBuf);
+
+						if(str_find_nocase(pLine, "entered and joined the game"))
+						{
+
+
+							int Code = str_utf8_decode(&bBuf);
+							if(!str_utf8_isspace(Code))
+
+
+								m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 222.0f);
+								m_aLastSoundPlayed[CHAT_SERVER] = Now;
+
+
+						}
+
+						*/
+			//
+
+			if(str_find_nocase(pLine, "' changed name to '"))
+			{
+				if(g_Config.m_ClAutoAddOnNameChange)
+				{
+					const char *aName = str_find_nocase(pLine, " '");
+					const char *OldName = str_find_nocase(pLine, "'");
+					const char *NameLength = str_find_nocase(pLine, "' ");
+					using namespace std;
+
+					{
+						int n = str_length(aName);
+
+						string s(aName);
+
+						s.erase(s.begin());
+						s.erase(s.begin());
+						s.erase(s.begin() + n - 3);
+
+						// copying the contents of the string to
+						// char array
+						char name[16];
+
+						strcpy(name, s.c_str());
+
+						int a = str_length(NameLength);
+
+						int b = str_length(OldName);
+
+						int Length = b - a;
+
+						string oName(OldName);
+
+						oName.erase(Length);
+
+						oName.erase(oName.begin());
+
+						char CharOname[16];
+
+						strcpy(CharOname, oName.c_str());
+
+						if(GameClient()->m_WarList.IsMutelist(CharOname))
+							GameClient()->m_WarList.AddSimpleMute(name);
+						if(GameClient()->m_WarList.IsWarlist(CharOname))
+							GameClient()->m_WarList.AddSimpleWar(name);
+						if(GameClient()->m_WarList.IsHelperlist(CharOname))
+							GameClient()->m_WarList.AddSimpleHelper(name);
+					}
+				}
+			}
+
+			if(g_Config.m_ClNotifyOnJoin)
+			{
+				if(str_find_nocase(pLine, g_Config.m_ClAutoNotifyName))
+				{
+					if(str_find_nocase(pLine, "entered and joined the game"))
+					{
+						/*
+							char Whisper[2048] = "/w ";
+							str_append(Whisper, g_Config.m_ClAutoWhisperName);
+							str_append(Whisper, " ");
+							str_append(Whisper, g_Config.m_ClAutoWhisperMsg);
+							m_pClient->m_Chat.SendChat(0, Whisper);
+						*/
+						m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CTF_CAPTURE, 1.0f);
+						m_pClient->m_Chat.AddLine(-2, 0, g_Config.m_ClAutoNotifyMsg);
+					}
+				}
+			}
 		}
 	}
 	else if(ClientId == CLIENT_MSG)
@@ -1487,8 +1584,16 @@ void CChat::SendChat(int Team, const char *pLine)
 	if(*str_utf8_skip_whitespaces(pLine) == '\0')
 		return;
 
-	if(!m_pClient->m_ChillerBotUX.OnSendChat(Team, pLine) || (pLine[0] == '.'))
-		return;
+	if(g_Config.m_ClSendDotsChat)
+	{
+		if(!m_pClient->m_ChillerBotUX.OnSendChat(Team, pLine))
+			return;
+	}
+	else
+	{
+		if(!m_pClient->m_ChillerBotUX.OnSendChat(Team, pLine) || (pLine[0] == '.'))
+			return;
+	}
 
 	m_LastChatSend = time();
 
