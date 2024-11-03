@@ -484,7 +484,7 @@ bool CGraphics_Threaded::UnloadTextTextures(CTextureHandle &TextTexture, CTextur
 	return true;
 }
 
-bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, const uint8_t *pData)
+bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, uint8_t *pData, bool IsMovedPointer)
 {
 	CCommandBuffer::SCommand_TextTexture_Update Cmd;
 	Cmd.m_Slot = TextureId.Id();
@@ -493,10 +493,17 @@ bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureId, int x, int 
 	Cmd.m_Width = Width;
 	Cmd.m_Height = Height;
 
-	const size_t MemSize = Width * Height;
-	uint8_t *pTmpData = static_cast<uint8_t *>(malloc(MemSize));
-	mem_copy(pTmpData, pData, MemSize);
-	Cmd.m_pData = pTmpData;
+	if(IsMovedPointer)
+	{
+		Cmd.m_pData = pData;
+	}
+	else
+	{
+		const size_t MemSize = Width * Height;
+		uint8_t *pTmpData = static_cast<uint8_t *>(malloc(MemSize));
+		mem_copy(pTmpData, pData, MemSize);
+		Cmd.m_pData = pTmpData;
+	}
 	AddCmd(Cmd);
 
 	return true;
