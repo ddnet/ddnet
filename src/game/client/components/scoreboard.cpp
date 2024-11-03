@@ -720,7 +720,6 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				if(g_Config.m_ClAidsPingDetection)
 					if(pInfo->m_Latency == 77 || pInfo->m_Latency == 76)
 					TextRender()->TextColor(0.f, 0.f, 0.f, 1.f);
-				else
 				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f)));
 			}
 			else
