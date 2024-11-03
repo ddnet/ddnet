@@ -20,6 +20,7 @@
 #	kaban		2023-09-21 19:00:00
 #	ByFox		2023-11-14 11:24:00
 #	Sedonya		2024-06-20 03:18:10
+#       WTF             2024-11-03 15:57:20
 ##### /authors #####
 
 ##### translated strings #####
@@ -1913,47 +1914,47 @@ Unable to delete skin
 == Невозможно удалить скин
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Некоторые шрифты не удалось загрузить. Проверьте детали в локальной консоли.
 
 Save skin
-== 
+== Сохранить скин
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Вы уверены, что хотите сохранить ваш скин? Если скин с этим именем уже существует, он будет заменен.
 
 Unable to save the skin
-== 
+== Не удалось сохранить скин
 
 Unable to save the skin with a reserved name
-== 
+== Не удалось сохранить скин с зарезервированным именем
 
 No local servers found (ports %d-%d)
-== 
+== Локальные серверы не найдены (порты %d-%d)
 
 [Hertz]
 Hz
-== 
+== Гц
 
 [skins]
 Body
-== 
+== Тело
 
 [skins]
 Marking
-== 
+== Отметка
 
 [skins]
 Decoration
-== 
+== Украшение
 
 [skins]
 Hands
-== 
+== Руки
 
 [skins]
 Feet
-== 
+== Ноги
 
 [skins]
 Eyes
-== 
+== Глаза
