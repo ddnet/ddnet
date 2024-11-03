@@ -214,9 +214,10 @@ MACRO_CONFIG_INT(ClChatClientPrefix, ac_do_chat_client_prefix, 1, 0, 1, CFGFLAG_
 
 MACRO_CONFIG_INT(ClSendDotsChat, ac_send_dots_chat, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Doesnt send a message if it start with a '.'")
 
-MACRO_CONFIG_INT(ClNotifyOnJoin, ac_auto_notify_on_join, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Whispers a person if they join")
-
+MACRO_CONFIG_INT(ClNotifyOnJoin, ac_auto_notify_on_join, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Notifies you if a player joined")
 MACRO_CONFIG_INT(ClAutoAddOnNameChange, ac_auto_add_on_name_change, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Automatically adds a player back to a list if their name changed")
+MACRO_CONFIG_INT(ClAutoJoinTeam, ac_auto_join_team, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Joins that players team if they join one")
+
 
 
 // string
@@ -240,25 +241,22 @@ MACRO_CONFIG_STR(ClHelperPrefix, ac_helper_prefix, 8, "♦ ", CFGFLAG_CLIENT | C
 // Custom Warlist Commands
 
 
-MACRO_CONFIG_STR(ClAddHelperString, ac_addhelper_string, 12, "add_helper", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
-MACRO_CONFIG_STR(ClAddMuteString, ac_addmute_string, 12, "add_mute", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
-MACRO_CONFIG_STR(ClAddWarString, ac_addwar_string, 12, "add_war", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
-MACRO_CONFIG_STR(ClAddTeamString, ac_addteam_string, 12, "add_team", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
-MACRO_CONFIG_STR(ClRemoveHelperString, ac_delhelper_string, 12, "del_helper", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
-MACRO_CONFIG_STR(ClRemoveMuteString, ac_delmute_string, 12, "del_mute", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
-MACRO_CONFIG_STR(ClRemoveWarString, ac_delwar_string, 12, "del_war", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
-MACRO_CONFIG_STR(ClRemoveTeamString, ac_delteam_string, 12, "del_team", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custrom War Command String")
+MACRO_CONFIG_STR(ClAddHelperString, ac_addhelper_string, 12, "add_helper", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
+MACRO_CONFIG_STR(ClAddMuteString, ac_addmute_string, 12, "add_mute", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
+MACRO_CONFIG_STR(ClAddWarString, ac_addwar_string, 12, "add_war", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
+MACRO_CONFIG_STR(ClAddTeamString, ac_addteam_string, 12, "add_team", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
+MACRO_CONFIG_STR(ClAddTempWarString, ac_addtempWar_string, 12, "add_temp_war", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
+MACRO_CONFIG_STR(ClRemoveTempWarString, ac_deltempwar_string, 12, "del_temp_war", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
+MACRO_CONFIG_STR(ClRemoveHelperString, ac_delhelper_string, 12, "del_helper", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
+MACRO_CONFIG_STR(ClRemoveMuteString, ac_delmute_string, 12, "del_mute", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
+MACRO_CONFIG_STR(ClRemoveWarString, ac_delwar_string, 12, "del_war", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
+MACRO_CONFIG_STR(ClRemoveTeamString, ac_delteam_string, 12, "del_team", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom War Command String")
 
 MACRO_CONFIG_STR(ClAutoReplyMutedMsg, ac_auto_reply_muted_msg, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
-MACRO_CONFIG_STR(ClAutoReplyMutedMsg2, ac_auto_reply_muted_msg2, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
-MACRO_CONFIG_STR(ClAutoReplyMutedMsg3, ac_auto_reply_muted_msg3, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
-MACRO_CONFIG_STR(ClAutoReplyMutedMsg4, ac_auto_reply_muted_msg4, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
-MACRO_CONFIG_STR(ClAutoReplyMutedMsg5, ac_auto_reply_muted_msg5, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
-MACRO_CONFIG_STR(ClAutoReplyMutedMsg6, ac_auto_reply_muted_msg6, 255, "I can't see your messages, you're muted", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply with then a muted player pings you")
-
 
 MACRO_CONFIG_STR(ClAutoNotifyName, ac_auto_notify_name, 16, "qxdFox", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Name of Player to Whisper Something When They Join")
 MACRO_CONFIG_STR(ClAutoNotifyMsg, ac_auto_notify_msg, 256, "Your Fav Person Has Joined!", CFGFLAG_CLIENT | CFGFLAG_SAVE, "What to Auto Whisper Them")
+MACRO_CONFIG_STR(ClAutoJoinTeamName, ac_auto_join_team_name, 16, "", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Name of Player to Whisper Something When They Join")
 
 
 MACRO_CONFIG_STR(ClTest, ac_test, 32, "test", CFGFLAG_CLIENT | CFGFLAG_SAVE, "test")
