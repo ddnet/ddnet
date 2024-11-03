@@ -11,6 +11,7 @@ class CWarList : public CComponent
 	{
 		CWarPlayer()
 		{
+			m_IsTempWar = false;
 			m_IsHelper = false;
 			m_IsMute = false;
 			m_IsWar = false;
@@ -21,6 +22,7 @@ class CWarList : public CComponent
 			m_aName[0] = '\0';
 			m_aClan[0] = '\0';
 		}
+		bool m_IsTempWar;
 		bool m_IsHelper;
 		bool m_IsMute;
 		bool m_IsWar;
@@ -54,6 +56,12 @@ class CWarList : public CComponent
 	std::vector<std::pair<std::string, std::string>> m_vHelperlist;
 	/*
 		m_vHelperlist
+
+		pair<PlayerName, FilePath>
+	*/
+	std::vector<std::pair<std::string, std::string>> m_vTemplist;
+	/*
+		m_vTemplist
 
 		pair<PlayerName, FilePath>
 	*/
@@ -100,6 +108,16 @@ class CWarList : public CComponent
 	int m_HelperDirs;
 	static int LoadHelperDir(const char *pDirname, int IsDir, int DirType, void *pUser);
 
+	void GetTemplistPathByNeedle(const char *pSearch, int Size, char *pPath);
+	bool RemoveTempNameFromVector(const char *pDir, const char *pName);
+	bool WriteTempNames(const char *pDir);
+	int LoadTempNames(const char *pDir);
+	void LoadTempList();
+	int m_TempDirs;
+	static int LoadTempDir(const char *pDirname, int IsDir, int DirType, void *pUser);
+
+
+
 	static int LoadWarDir(const char *pDirname, int IsDir, int DirType, void *pUser);
 	static int LoadTeamDir(const char *pDirname, int IsDir, int DirType, void *pUser);
 	static int LoadTraitorDir(const char *pDirname, int IsDir, int DirType, void *pUser);
@@ -141,6 +159,10 @@ class CWarList : public CComponent
 	
 	virtual void OnInit() override;
 
+	static void ConRemoveTempWar(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddTempWar(IConsole::IResult *pResult, void *pUserData);
+
+
 	static void ConRemoveMute(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddMute(IConsole::IResult *pResult, void *pUserData);
 
@@ -155,7 +177,7 @@ class CWarList : public CComponent
 
 	static void ConchainWarList(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
-
+	bool AddTempWar(const char *pFolder, const char *pName);
 
 	bool AddMute(const char *pFolder, const char *pName);
 	bool AddHelper(const char *pFolder, const char *pName);
@@ -211,10 +233,11 @@ public:
 
 	void AddSimpleHelper(const char *pName);
 	void AddSimpleMute(const char *pName);
+	void AddSimpleTempWar(const char *pName);
 
 	void RemoveSimpleHelper(const char *pName);
 	void RemoveSimpleMute(const char *pName);
-
+	void RemoveSimpleTempWar(const char *pName);
 
 	void RemoveSimpleTeam(const char *pName);
 	void RemoveSimpleWar(const char *pName);
@@ -228,6 +251,9 @@ public:
 
 	bool IsHelper(int ClientId);
 	bool IsHelperlist(const char *pName);
+
+	bool IsTemp(int ClientId);
+	bool IsTemplist(const char *pName);
 
 	bool IsWar(const char *pName, const char *pClan);
 	bool IsWarlist(const char *pName);

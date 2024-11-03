@@ -10,6 +10,27 @@
 #include "warlist.h"
 #include <engine/client.h>
 
+void CWarList::AddSimpleTempWar(const char *pName)
+{
+	if(!pName || pName[0] == '\0')
+	{
+		m_pClient->m_Chat.AddLine(-2, 0, "Error: missing argument <name>");
+		return;
+	}
+	if(!Storage()->CreateFolder("chillerbot/templist/temp", IStorage::TYPE_SAVE))
+	{
+		m_pClient->m_Chat.AddLine(-2, 0, "Error: failed to create temp folder");
+		return;
+	}
+	if(!Storage()->CreateFolder("chillerbot/templist/temp/tempwar", IStorage::TYPE_SAVE))
+	{
+		m_pClient->m_Chat.AddLine(-2, 0, "Error: failed to create temp/tempwar folder");
+		return;
+	}
+
+	AddTempWar("tempwar", pName);
+}
+
 void CWarList::AddSimpleMute(const char *pName)
 {
 	if(!pName || pName[0] == '\0')
@@ -99,6 +120,25 @@ void CWarList::AddSimpleTeam(const char *pName)
 	RemoveWarNoMsg(pName);
 	RemoveHelperNoMsg(pName);
 }
+
+void CWarList::RemoveSimpleTempWar(const char *pName)
+{
+	char aBuf[512];
+	if(!RemoveTempNameFromVector("chillerbot/templist/temp/tempwar", pName))
+	{
+		str_format(aBuf, sizeof(aBuf), "Name '%s' not found in the temp war list", pName);
+		m_pClient->m_Chat.AddLine(-2, 0, aBuf);
+		return;
+	}
+	if(!WriteTempNames("chillerbot/templist/temp/tempwar"))
+	{
+		m_pClient->m_Chat.AddLine(-2, 0, "Error: failed to write temp war names");
+	}
+	str_format(aBuf, sizeof(aBuf), "Removed '%s' from the temp war list", pName);
+	m_pClient->m_Chat.AddLine(-2, 0, aBuf);
+	ReloadList();
+}
+
 
 void CWarList::RemoveSimpleHelper(const char *pName)
 {
@@ -227,7 +267,26 @@ bool CWarList::OnChatCmdSimple(char Prefix, int ClientId, int Team, const char *
 		m_pClient->m_Chat.AddLine(-2, 0, "!delhelper <name>");
 		m_pClient->m_Chat.AddLine(-2, 0, "!mute <name>");
 		m_pClient->m_Chat.AddLine(-2, 0, "!delmute <name>");
+		m_pClient->m_Chat.AddLine(-2, 0, "!tempwar <name>");
+		m_pClient->m_Chat.AddLine(-2, 0, "!deltempwar <name>");
 		// m_pClient->m_Chat.AddLine(-2, 0, "!search <name>");
+	}
+	else if(!str_comp(pCmd, "discord"))
+	{
+		m_pClient->m_Chat.AddLine(-2, 0, "https://discord.gg/hAWVx9YJxA");
+	}
+	else if(!str_comp(pCmd, "github"))
+	{
+		m_pClient->m_Chat.AddLine(-2, 0, "https://github.com/qxdFox/Aiodob-Client-DDNet");
+	}
+	else if(!str_comp(pCmd, "kill"))
+	{
+		m_pClient->SendKill(-1);
+	}
+	else if(!str_comp(pCmd, "tempwar") || !str_comp(pCmd, "addtempwar") || !str_comp(pCmd, g_Config.m_ClAddTempWarString)) // "team <name>"
+	{
+		AddSimpleTempWar(pRawArgLine);
+		return true;
 	}
 	else if(!str_comp(pCmd, "helper") || !str_comp(pCmd, "addhelper") || !str_comp(pCmd, g_Config.m_ClAddHelperString)) // "team <name>"
 	{
@@ -257,6 +316,11 @@ bool CWarList::OnChatCmdSimple(char Prefix, int ClientId, int Team, const char *
 	else if(!str_comp(pCmd, "delmute") || !str_comp(pCmd, "unmute") || !str_comp(pCmd, g_Config.m_ClRemoveMuteString)) // "delwar <name>"
 	{
 		RemoveSimpleMute(pRawArgLine);
+		return true;
+	}
+	else if(!str_comp(pCmd, "deltempwar") || !str_comp(pCmd, "untempwar") || !str_comp(pCmd, g_Config.m_ClRemoveTempWarString)) // "delwar <name>"
+	{
+		RemoveSimpleTempWar(pRawArgLine);
 		return true;
 	}
 	else if(!str_comp(pCmd, "delwar") || !str_comp(pCmd, "unwar") || !str_comp(pCmd, "peace") || !str_comp(pCmd, g_Config.m_ClRemoveWarString)) // "delwar <name>"

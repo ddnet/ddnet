@@ -537,6 +537,7 @@ void CChillerBotUX::OnInit()
 void CChillerBotUX::OnShutdown()
 {
 	RestoreSkins();
+	Storage()->RemoveFile("chillerbot/templist/temp/tempwar/names.txt", IStorage::TYPE_SAVE);
 }
 
 void CChillerBotUX::UpdateComponents()
