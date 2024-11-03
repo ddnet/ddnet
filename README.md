@@ -74,6 +74,7 @@ If anyone can help me with this Issue then please feel free to, I wont pay or an
 - Very pro looking menu trust
 - Prediction support for my servers explosion gun
 - Customization of alot of sprites - but like in the most useless way possible.
+- automatically adds people back to lists if they changed their name
 
 
 ## Screenshots
