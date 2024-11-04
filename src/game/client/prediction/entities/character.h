@@ -106,6 +106,8 @@ public:
 	void SetNinjaActivationDir(vec2 ActivationDir) { m_Core.m_Ninja.m_ActivationDir = ActivationDir; }
 	void SetNinjaActivationTick(int ActivationTick) { m_Core.m_Ninja.m_ActivationTick = ActivationTick; }
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Core.m_Ninja.m_CurrentMoveTime = CurrentMoveTime; }
+	void SetDeepFrozen(bool Active) { m_Core.m_DeepFrozen = Active; }
+	void SetLiveFrozen(bool Active) { m_Core.m_LiveFrozen = Active; }
 	int GetCid() { return m_Id; }
 	void SetInput(const CNetObj_PlayerInput *pNewInput)
 	{

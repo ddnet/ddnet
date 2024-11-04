@@ -62,3 +62,6 @@ MACRO_TUNING_PARAM(HammerHitFireDelay, hammer_hit_fire_delay, 320, "Delay of ham
 
 MACRO_TUNING_PARAM(GroundElasticityX, ground_elasticity_x, 0, "Wall elasticity")
 MACRO_TUNING_PARAM(GroundElasticityY, ground_elasticity_y, 0, "Ground/ceiling elasticity")
+
+MACRO_TUNING_PARAM(LaserUnDeep, laser_undeep, 0, "Allow laser to remove the deep freeze effect")
+MACRO_TUNING_PARAM(LaserUnLiveFreeze, laser_unlivefreeze, 0, "Allow laser to remove the live freeze effect")
