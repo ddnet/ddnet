@@ -8,16 +8,18 @@
 #	Learath2		2012-01-01 22:54:29
 #	ardadem			2020-08-20 00:00:00
 #	ardadem			2020-08-22 00:00:00
-#   h-kaan          2023-08-23 15:57:36
-#   h-kaan          2023-08-30 01:52:04
-#   h-kaan          2023-09-21 21:04:35
-#   eghwand          2024-03-03 13:24:20
-#   Gokturk          2024-04-23 01:56:10
-#   Gokturk          2024-04-24 03:01:50
-#   Gokturk          2024-06-09 12:00:50
-#   Gokturk          2024-07-17 02:24:00
-#   Gokturk          2024-08-29 23:31:00
-#   Gokturk          2024-09-29 19:23:00
+# h-kaan          2023-08-23 15:57:36
+# h-kaan          2023-08-30 01:52:04
+# h-kaan          2023-09-21 21:04:35
+# eghwand          2024-03-03 13:24:20
+# Gokturk          2024-04-23 01:56:10
+# Gokturk          2024-04-24 03:01:50
+# Gokturk          2024-06-09 12:00:50
+# Gokturk          2024-07-17 02:24:00
+# Gokturk          2024-08-29 23:31:00
+# Gokturk          2024-09-29 19:23:00
+# Gokturk          2024-09-29 19:23:00
+# Gokturk          2024-11-04 11:32:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1954,4 +1956,4 @@ Eyes
 == Göz
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Bazı fontlar yüklenemiyor. Detaylar için ana konsolu kontrol edin
