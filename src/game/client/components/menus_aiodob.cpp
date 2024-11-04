@@ -226,8 +226,10 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 						
 					}
 				}
-				ChillerBotSettings.VSplitLeft(-25.0f, &Button, &ChillerBotSettings);
-
+				if(g_Config.m_ClNotifyOnJoin)
+				{
+					ChillerBotSettings.VSplitLeft(-25.0f, &Button, &ChillerBotSettings);
+				}
 				ChillerBotSettings.HSplitTop(20.0f, &Button, &ChillerBotSettings);
 
 				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChangeTileNotification, ("Notify When Player is Being Moved"), &g_Config.m_ClChangeTileNotification, &ChillerBotSettings, LineSize));
