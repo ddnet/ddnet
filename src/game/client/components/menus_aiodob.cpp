@@ -234,7 +234,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChangeTileNotification, ("Notify When Player is Being Moved"), &g_Config.m_ClChangeTileNotification, &ChillerBotSettings, LineSize));
 				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatBubble, ("Show Chat Bubble"), &g_Config.m_ClChatBubble, &ChillerBotSettings, LineSize));
-				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoAddOnNameChange, Localize("Auto Add Poeple Back to Lists on Name Change"), &g_Config.m_ClAutoAddOnNameChange, &ChillerBotSettings, LineSize));
+				if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoAddOnNameChange, Localize("Auto Add People Back to Lists on Name Change"), &g_Config.m_ClAutoAddOnNameChange, &ChillerBotSettings, LineSize));
 		
 			
 
@@ -1019,7 +1019,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 					{
 				ScoreboardSettings.HSplitTop(Margin, nullptr, &ScoreboardSettings);
-				ScoreboardSettings.HSplitTop(140.0f, &ScoreboardSettings, &MenuSettings);
+				ScoreboardSettings.HSplitTop(155.0f, &ScoreboardSettings, &MenuSettings);
 				if(s_ScrollRegion.AddRect(ScoreboardSettings))
 				{
 					ScoreboardSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -1030,7 +1030,9 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMutedIconScore, Localize("Show an Indicator Next to Muted Players in Scoreboard"), &g_Config.m_ClMutedIconScore, &ScoreboardSettings, LineSize);
 
-					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoWarListColorScore, Localize("Do Team/War Name Colors in Scoreboard"), &g_Config.m_ClDoWarListColorScore, &ScoreboardSettings, LineSize);
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoWarListColorScore, Localize("Do Warlist Name Colors in Scoreboard"), &g_Config.m_ClDoWarListColorScore, &ScoreboardSettings, LineSize);
+					
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoFriendColorScore, Localize("Do Friend Name Colors in Scoreboard"), &g_Config.m_ClDoFriendColorScore, &ScoreboardSettings, LineSize);
 
 					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDoAfkColors, Localize("Afk Name Colors in Scoreboard"), &g_Config.m_ClDoAfkColors, &ScoreboardSettings, LineSize);
 
@@ -1042,7 +1044,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 			{
 				MenuSettings.HSplitTop(Margin, nullptr, &MenuSettings);
-				MenuSettings.HSplitTop(180.0f, &MenuSettings, 0);
+				MenuSettings.HSplitTop(120.0f, &MenuSettings, 0);
 				if(s_ScrollRegion.AddRect(MenuSettings))
 				{
 					MenuSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
@@ -1053,15 +1055,9 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowOthersInMenu, Localize("Show Settigns Icon When Tee's in a Menu"), &g_Config.m_ClShowOthersInMenu, &MenuSettings, LineSize);
 
-					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuTeammate, Localize("Team Colors in Spectate Menu"), &g_Config.m_ClSpecMenuTeammate, &MenuSettings, LineSize);
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuColors, Localize("Player Colors in Spectate Menu"), &g_Config.m_ClSpecMenuColors, &MenuSettings, LineSize);
 
-					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuTeammatePrefix, Localize("Team Prefix in Spectate Menu"), &g_Config.m_ClSpecMenuTeammatePrefix, &MenuSettings, LineSize);
-
-					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuEnemy, Localize("Enemy Colors in Spectate Menu"), &g_Config.m_ClSpecMenuEnemy, &MenuSettings, LineSize);
-
-					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuEnemyPrefix, Localize("Enemy Prefix in Spectate Menu"), &g_Config.m_ClSpecMenuEnemyPrefix, &MenuSettings, LineSize);
-
-					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuFriend, Localize("Friend Colors in Spectate Menu"), &g_Config.m_ClSpecMenuFriend, &MenuSettings, LineSize);
+					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuPrefixes, Localize("Player Prefixes in Spectate Menu"), &g_Config.m_ClSpecMenuPrefixes, &MenuSettings, LineSize);
 
 					DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSpecMenuFriendPrefix, Localize("Friend Prefix in Spectate Menu"), &g_Config.m_ClSpecMenuFriendPrefix, &MenuSettings, LineSize);
 				}

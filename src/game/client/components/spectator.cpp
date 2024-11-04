@@ -538,7 +538,7 @@ void CSpectator::OnRender()
 		else
 		{
 			
-				if(IsHelper && g_Config.m_ClSpecMenuHelper)
+				if(IsHelper && g_Config.m_ClSpecMenuColors)
 				{
 					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHelperColor));
 					if(PlayerSelected)
@@ -546,7 +546,7 @@ void CSpectator::OnRender()
 					else
 						TextRender()->TextColor(rgb.WithAlpha(0.5f));
 				}
-				else if(IsWar && g_Config.m_ClSpecMenuEnemy)
+				else if(IsWar && g_Config.m_ClSpecMenuColors)
 				{
 				ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor));
 					if(PlayerSelected)
@@ -554,7 +554,7 @@ void CSpectator::OnRender()
 					else
 					TextRender()->TextColor(rgb.WithAlpha(0.5f));
 				}
-				else if(IsTeam && g_Config.m_ClSpecMenuTeammate)
+				else if(IsTeam && g_Config.m_ClSpecMenuColors)
 				{
 					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClTeamColor));
 					if(PlayerSelected)
@@ -562,7 +562,7 @@ void CSpectator::OnRender()
 					else
 						TextRender()->TextColor(rgb.WithAlpha(0.5f));
 				}
-				else if(m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Friend && g_Config.m_ClSpecMenuFriend)
+				else if(m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Friend && g_Config.m_ClSpecMenuColors)
 				{
 					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClFriendColor));
 					if(PlayerSelected)
@@ -640,20 +640,20 @@ void CSpectator::OnRender()
 			}
 			else if(IsWar || IsTeam || IsHelper)
 			{
-				if(IsHelper && g_Config.m_ClSpecMenuHelperPrefix)
+				if(IsHelper && g_Config.m_ClSpecMenuPrefixes)
 				{
 					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClHelperColor));
 					TextRender()->TextColor(rgb.WithAlpha(1.f));
 					TextRender()->Text(Width / 2.0f + x - TeeInfo.m_Size / 2.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, g_Config.m_ClHelperPrefix, 220.0f);
 				}
-				else if(IsWar && g_Config.m_ClSpecMenuEnemyPrefix)
+				else if(IsWar && g_Config.m_ClSpecMenuPrefixes)
 				{
 					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClWarColor));
 					TextRender()->TextColor(rgb.WithAlpha(1.f));
 					TextRender()->Text(Width / 2.0f + x - TeeInfo.m_Size / 2.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, g_Config.m_ClEnemyPrefix, 220.0f);
 
 				}
-				else if(IsTeam && g_Config.m_ClSpecMenuTeammatePrefix)
+				else if(IsTeam && g_Config.m_ClSpecMenuPrefixes)
 				{
 					ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClTeamColor));
 					TextRender()->TextColor(rgb.WithAlpha(1.f));
