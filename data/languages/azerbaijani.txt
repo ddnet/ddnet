@@ -6,6 +6,7 @@
 #     Gokturk          2024-07-17 02:24:00
 #     Gokturk          2024-08-29 23:39:00
 #     Gokturk          2024-09-29 19:24:00
+#     Gokturk          2024-11-04 11:35:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1941,4 +1942,4 @@ Eyes
 == Göz
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Bəzi yazı fontları yüklənə bilmir. Ətraflı məlumat üçün əsas konsolu yoxlayın

@@ -1447,7 +1447,7 @@ set(EXPECTED_DATA
   gui_logo.png
   hud.png
   languages/arabic.txt
-  languages/azerbaijanese.txt
+  languages/azerbaijani.txt
   languages/belarusian.txt
   languages/bosnian.txt
   languages/brazilian_portuguese.txt
