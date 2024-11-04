@@ -249,6 +249,7 @@ To Do:
 - toggle to turn off sending a message that starts with "." (currently does that so you cant misspell commands)
 
 Maybe:
+- do chat message only when a friended tee says something
 - multiple replies for tabbed out reply and muted reply
 - show in scoreboard when someones in a menu
 - show when someones looking at the scoreboard
