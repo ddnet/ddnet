@@ -263,15 +263,12 @@ MACRO_CONFIG_STR(ClTest, ac_test, 32, "test", CFGFLAG_CLIENT | CFGFLAG_SAVE, "te
 
 // In Spec Menu Prefixes
 
-MACRO_CONFIG_INT(ClSpecMenuFriend, ac_specmenu_friend_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Friend Name Colors in The Spectate Menu")
+MACRO_CONFIG_INT(ClSpecMenuColors, ac_specmenu_colors, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on colors in the spectate menu")
+
 MACRO_CONFIG_INT(ClSpecMenuFriendPrefix, ac_specmenu_friend_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Friend Prefix Next to Names in The Spectate Menu")
 
-MACRO_CONFIG_INT(ClSpecMenuHelper, ac_specmenu_helper_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Name Colors in The Spectate Menu")
-MACRO_CONFIG_INT(ClSpecMenuTeammate, ac_specmenu_team_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Name Colors in The Spectate Menu")
-MACRO_CONFIG_INT(ClSpecMenuEnemy, ac_specmenu_war_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Name Colors in The Spectate Menu")
-MACRO_CONFIG_INT(ClSpecMenuHelperPrefix, ac_specmenu_helper_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Prefix Next to Names in The Spectate Menu")
-MACRO_CONFIG_INT(ClSpecMenuEnemyPrefix, ac_specmenu_war_prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on War Prefix Next to Names in The Spectate Menu")
-MACRO_CONFIG_INT(ClSpecMenuTeammatePrefix, ac_specmenu_team prefix, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Team Prefix Next to Names in The Spectate Menu")
+MACRO_CONFIG_INT(ClSpecMenuPrefixes, ac_specmenu_prefixes, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turns on Prefixes Next to Names in The Spectate Menu")
+
 
 
 // Ui
