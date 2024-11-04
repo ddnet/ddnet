@@ -103,15 +103,9 @@ ac_delwar_string
 ac_delteam_string
 ac_muted_icon_nameplate
 ac_muted_icon_Scoreboard
-ac_specmenu_friend_color
+ac_specmenu_colors
 ac_specmenu_friend_prefix
-ac_specmenu_team_color
-ac_specmenu_team_prefix
-ac_specmenu_helper_color
-ac_specmenu_helper_prefix
-ac_specmenu_war_color
-ac_specmenu_war_prefix
-ac_specmenu_team
+ac_specmenu_prefixes
 ac_do_afk_colors
 ac_do_scoreboard_specmark
 ac_do_scoreboard_spec_tee
