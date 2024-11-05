@@ -79,8 +79,10 @@ If anyone can help me with this Issue then please feel free to, I wont pay or an
 
 ## Screenshots
 
-![Aiodob_Client](https://github.com/user-attachments/assets/41cffa14-79e4-4b1c-8ba6-016148e8fa78)
-![image](https://github.com/user-attachments/assets/a48c68f6-8c62-4ad1-9bf9-61fa16bd16ea)
+![Usefull Settings](https://github.com/user-attachments/assets/831914d2-2305-4ab9-9aed-03c99bc664dc)
+![Bindwheel](https://github.com/user-attachments/assets/ca857ca5-439a-414e-a5c2-935bc52f5845)
+![Visual Sound Settings](https://github.com/user-attachments/assets/d98a00bb-badf-4f03-811b-d669657492e3)
+
 
 
 # Command List:
