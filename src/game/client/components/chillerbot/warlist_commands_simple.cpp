@@ -277,11 +277,11 @@ bool CWarList::OnChatCmdSimple(char Prefix, int ClientId, int Team, const char *
 	}
 	else if(!str_comp(pCmd, "github"))
 	{
-		m_pClient->m_Chat.AddLine(-2, 0, "https://github.com/qxdFox/Aiodob-Client-DDNet");
+		open_link("https://github.com/qxdFox/Aiodob-Client-DDNet");
 	}
 	else if(!str_comp(pCmd, "kill"))
 	{
-		m_pClient->SendKill(-1);
+		m_pClient->m_Chat.SendChat(0, "/kill");
 	}
 	else if(!str_comp(pCmd, "tempwar") || !str_comp(pCmd, "addtempwar") || !str_comp(pCmd, g_Config.m_ClAddTempWarString)) // "team <name>"
 	{
