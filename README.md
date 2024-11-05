@@ -65,8 +65,8 @@ If anyone can help me with this Issue then please feel free to, I wont pay or an
 - (s) next to names of people spectating in scoreboard and chat
 - show tee sitting in scoreboard if the player is spectating
 - darker names of people who are afk in scoreboard
-- Show when others are in a menu (Zzz emote for now)
-- Friend/Foe/Team/War nameplate colors
+- Show when others are in a menu
+- Friend/Foe/Team/War/Helper nameplate colors
 - strong/weak hook color for cl_nameplate_ids
 - In Spectate Menu Prefixes and Name Colors 
 - Custom Chat Commands - add your own command that the warlist recognizes (eg. !addteeeem qxdFox)
