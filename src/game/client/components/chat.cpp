@@ -652,9 +652,6 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, MutedWhisper, pLine, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedColor)));
 		else if(Team == 0)
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Muted, pLine, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedColor)));
-		
-		// no auto reply yet, idk if ever ,but im happy that i got it to show in the console
-		// m_pClient->m_Chat.SendChat(0, bBuf);
 	}
 
 	if(*pLine == 0 ||
@@ -963,54 +960,6 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 					}
 				}
 			}
-
-			if(g_Config.m_ClAutoJoinTeam)
-			{
-				if(str_find_nocase(pLine, "' joined team "))
-				{
-					const char *FindTeam = str_find_nocase(pLine, "m ");
-					const char *PName = str_find_nocase(pLine, "'");
-					const char *NameLength = str_find_nocase(pLine, "' ");
-					using namespace std;
-					if(str_find_nocase(pLine, g_Config.m_ClAutoJoinTeamName))
-					{
-		
-						int n = str_length(FindTeam);
-						string s(FindTeam);
-						s.erase(s.begin());
-						s.erase(s.begin());
-
-						char Team[16];
-						strcpy(Team, s.c_str());
-
-						
-						int a = str_length(NameLength);
-						int b = str_length(PName);
-
-						int Length = b - a;
-						string Name(PName);
-						Name.erase(Length);
-						Name.erase(Name.begin());
-
-						char PlayerName[16];
-						strcpy(PlayerName, Name.c_str());
-
-
-						int NameToJoin = str_comp(g_Config.m_ClAutoJoinTeamName, PlayerName);
-						if(!Team == 0 && NameToJoin == 0)
-						{
-							char aBuf[2048] = "/team ";
-							str_append(aBuf, Team);
-							m_pClient->m_Chat.SendChat(0, aBuf);
-							char Joined[2048] = "Auto Joined ";
-							str_append(Joined, PlayerName);
-
-							m_pClient->m_Chat.AddLine(-2, 0, Joined);
-						}
-					}
-				}
-			}
-
 			if(str_find_nocase(pLine, g_Config.m_ClAutoNotifyName))
 			{
 				if(str_find_nocase(pLine, "entered and joined the game"))
@@ -1070,10 +1019,17 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		if(Now - m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq() * 3 / 10)
 		{
 			bool PlaySound = m_aLines[m_CurrentLine].m_Team ? g_Config.m_SndTeamChat : g_Config.m_SndChat;
+			bool PlaySoundFriend = m_aLines[m_CurrentLine].m_Team ? g_Config.m_SndTeamChat : g_Config.m_SndFriendChat;
+
+			char Name[1024];
+			str_format(Name, sizeof(Name), "%s", m_aLines[m_CurrentLine].m_aName);
+
+
 #if defined(CONF_VIDEORECORDER)
 			if(IVideo::Current())
 			{
 				PlaySound &= (bool)g_Config.m_ClVideoShowChat;
+				PlaySoundFriend &= (bool)g_Config.m_ClVideoShowChat;
 			}
 #endif
 			if(PlaySound)
@@ -1081,6 +1037,13 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 1.0f);
 				m_aLastSoundPlayed[CHAT_CLIENT] = Now;
 			}
+			if(!PlaySound && PlaySoundFriend && (GameClient()->Friends()->IsFriend(Name, "\0", true)))
+			{
+				Client()->Notify("DDNet Chat", Name);
+				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 1.0f);
+				m_aLastSoundPlayed[CHAT_CLIENT] = Now;
+			}
+
 		}
 	}
 }
