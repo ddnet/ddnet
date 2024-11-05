@@ -228,8 +228,6 @@ public:
 
 	void AddSimpleWar(const char *pName);
 	void AddSimpleTeam(const char *pName);
-	// New
-	void CloneSkin(const char *pName);
 
 	void AddSimpleHelper(const char *pName);
 	void AddSimpleMute(const char *pName);
@@ -238,6 +236,10 @@ public:
 	void RemoveSimpleHelper(const char *pName);
 	void RemoveSimpleMute(const char *pName);
 	void RemoveSimpleTempWar(const char *pName);
+
+	void DelClone();
+
+	void Skin(const char *pName);
 
 	void RemoveSimpleTeam(const char *pName);
 	void RemoveSimpleWar(const char *pName);

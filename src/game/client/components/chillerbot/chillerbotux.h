@@ -75,12 +75,9 @@ class CChillerBotUX : public CComponent
 	int m_LastForceDir;
 	int64_t m_LastNotification;
 	int64_t m_NextSkinSteal;
-	// used for notifications when 
+	// used for notifications when
 	// out
 	int m_LastTile = -1;
-
-	void SaveSkins();
-	void RestoreSkins();
 
 	// broadcasts
 	char m_aBroadcastText[1024];
@@ -127,7 +124,6 @@ class CChillerBotUX : public CComponent
 	static void ConchainFinishRename(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainShowLastKiller(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainShowLastPing(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainSkinStealer(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }

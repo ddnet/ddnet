@@ -195,6 +195,101 @@ void CWarList::RemoveSimpleMute(const char *pName)
 	ReloadList();
 }
 
+void CWarList::DelClone()
+{
+
+	if(!g_Config.m_ClDummy)
+	{
+		g_Config.m_ClCopyingSkin = 0;
+
+		str_copy(g_Config.m_ClPlayerSkin, g_Config.m_ClSavedPlayerSkin, sizeof(g_Config.m_ClPlayerSkin));
+		g_Config.m_ClPlayerUseCustomColor = g_Config.m_ClSavedPlayerUseCustomColor;
+		g_Config.m_ClPlayerColorBody = g_Config.m_ClSavedPlayerColorBody;
+		g_Config.m_ClPlayerColorFeet = g_Config.m_ClSavedPlayerColorFeet;
+
+		m_pClient->m_Chat.AddLine(-2, 0, "Deleted Main Clone");
+	}
+	else if(g_Config.m_ClDummy)	
+	{
+		g_Config.m_ClCopyingSkinDummy = 0;
+
+		str_copy(g_Config.m_ClDummySkin, g_Config.m_ClSavedDummySkin, sizeof(g_Config.m_ClDummySkin));
+		g_Config.m_ClDummyUseCustomColor = g_Config.m_ClSavedDummyUseCustomColor;
+		g_Config.m_ClDummyColorBody = g_Config.m_ClSavedDummyColorBody;
+		g_Config.m_ClDummyColorFeet = g_Config.m_ClSavedDummyColorFeet;
+
+
+		m_pClient->m_Chat.AddLine(-2, 0, "Deleted Dummy Clone");
+	}
+}
+
+
+void CWarList::Skin(const char* pName)
+{
+	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(!m_pClient->m_Snap.m_apInfoByName[i])
+			continue;
+
+		int Index = m_pClient->m_Snap.m_apInfoByName[i]->m_ClientId;
+		if(Index == m_pClient->m_Snap.m_LocalClientId)
+			continue;
+
+		if(!g_Config.m_ClDummy)
+		{
+			if(str_comp(m_pClient->m_aClients[Index].m_aName, pName) == 0)
+			{
+				if(g_Config.m_ClCopyingSkin == 0)
+				{
+					// save skins then load new ones
+
+					str_copy(g_Config.m_ClSavedPlayerSkin, g_Config.m_ClPlayerSkin, sizeof(g_Config.m_ClSavedPlayerSkin));
+					g_Config.m_ClSavedPlayerUseCustomColor = g_Config.m_ClPlayerUseCustomColor;
+					g_Config.m_ClSavedPlayerColorBody = g_Config.m_ClPlayerColorBody;
+					g_Config.m_ClSavedPlayerColorFeet = g_Config.m_ClPlayerColorFeet;
+
+					g_Config.m_ClCopyingSkin = 1;
+				}
+
+				char aBuf[2048] = "Copying Skin of ";
+				str_append(aBuf, m_pClient->m_aClients[Index].m_aName);
+				m_pClient->m_Chat.AddLine(-2, 0, aBuf);
+
+				str_copy(g_Config.m_ClPlayerSkin, m_pClient->m_aClients[Index].m_aSkinName, sizeof(g_Config.m_ClPlayerSkin));
+				g_Config.m_ClPlayerUseCustomColor = m_pClient->m_aClients[Index].m_UseCustomColor;
+				g_Config.m_ClPlayerColorBody = m_pClient->m_aClients[Index].m_ColorBody;
+				g_Config.m_ClPlayerColorFeet = m_pClient->m_aClients[Index].m_ColorFeet;
+			}
+		}
+		else
+		{
+			if(str_comp(m_pClient->m_aClients[Index].m_aName, pName) == 0)
+			{
+				if(g_Config.m_ClCopyingSkinDummy == 0)
+				{
+					// save skins then load new ones
+
+					str_copy(g_Config.m_ClSavedDummySkin, g_Config.m_ClDummySkin, sizeof(g_Config.m_ClSavedDummySkin));
+					g_Config.m_ClSavedDummyUseCustomColor = g_Config.m_ClDummyUseCustomColor;
+					g_Config.m_ClSavedDummyColorBody = g_Config.m_ClDummyColorBody;
+					g_Config.m_ClSavedDummyColorFeet = g_Config.m_ClDummyColorFeet;
+
+					g_Config.m_ClCopyingSkinDummy = 1;
+				}
+
+				char aBuf[2048] = "Copying Skin of ";
+				str_append(aBuf, m_pClient->m_aClients[Index].m_aName);
+				m_pClient->m_Chat.AddLine(-2, 0, aBuf);
+
+				str_copy(g_Config.m_ClDummySkin, m_pClient->m_aClients[Index].m_aSkinName, sizeof(g_Config.m_ClDummySkin));
+				g_Config.m_ClDummyUseCustomColor = m_pClient->m_aClients[Index].m_UseCustomColor;
+				g_Config.m_ClDummyColorBody = m_pClient->m_aClients[Index].m_ColorBody;
+				g_Config.m_ClDummyColorFeet = m_pClient->m_aClients[Index].m_ColorFeet;
+			}
+		}
+	}
+}
+
 void CWarList::RemoveSimpleTeam(const char *pName)
 {
 	char aBuf[512];
@@ -258,7 +353,7 @@ bool CWarList::OnChatCmdSimple(char Prefix, int ClientId, int Team, const char *
 	}
 	else if(!str_comp(pCmd, "help"))
 	{
-		m_pClient->m_Chat.AddLine(-2, 0, "=== Chillerbot warlist ===");
+		m_pClient->m_Chat.AddLine(-2, 0, "=== Aiodob warlist ===");
 		m_pClient->m_Chat.AddLine(-2, 0, "!war <name>");
 		m_pClient->m_Chat.AddLine(-2, 0, "!delwar <name>");
 		m_pClient->m_Chat.AddLine(-2, 0, "!team <name>");
@@ -331,6 +426,24 @@ bool CWarList::OnChatCmdSimple(char Prefix, int ClientId, int Team, const char *
 	else if(!str_comp(pCmd, "delteam") || !str_comp(pCmd, "unteam") || !str_comp(pCmd, "unfriend") || !str_comp(pCmd, g_Config.m_ClRemoveTeamString)) // "delteam <name>"
 	{
 		RemoveSimpleTeam(pRawArgLine);
+		return true;
+	}
+	else if(!str_comp(pCmd, "delclone") || !str_comp(pCmd, "unclone") || !str_comp(pCmd, "unskin") || !str_comp(pCmd, "delskin"))
+	{
+		DelClone();
+		if(!g_Config.m_ClDummy)
+			m_pClient->SendInfo(false);
+		else if(g_Config.m_ClDummy)
+			m_pClient->SendDummyInfo(false);
+		return true;
+	}
+	else if(!str_comp(pCmd, "skin"))
+	{
+		Skin(pRawArgLine);
+		if(!g_Config.m_ClDummy)
+			m_pClient->SendInfo(false);
+		else if(g_Config.m_ClDummy)
+			m_pClient->SendDummyInfo(false);
 		return true;
 	}
 	else if(
