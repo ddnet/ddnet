@@ -652,6 +652,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, MutedWhisper, pLine, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedColor)));
 		else if(Team == 0)
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, Muted, pLine, color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMutedColor)));
+		
 	}
 
 	if(*pLine == 0 ||
@@ -960,6 +961,59 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 					}
 				}
 			}
+
+			if(g_Config.m_ClAutoJoinTeam)
+			{
+				if(str_find_nocase(pLine, "' joined team "))
+				{
+					const char *FindTeam = str_find_nocase(pLine, "m ");
+					const char *PName = str_find_nocase(pLine, "'");
+					const char *NameLength = str_find_nocase(pLine, "' ");
+					using namespace std;
+					if(str_find_nocase(pLine, g_Config.m_ClAutoJoinTeamName))
+					{
+		
+						int n = str_length(FindTeam);
+						string s(FindTeam);
+						s.erase(s.begin());
+						s.erase(s.begin());
+
+						char Team[16];
+						strcpy(Team, s.c_str());
+
+						
+						int a = str_length(NameLength);
+						int b = str_length(PName);
+
+						int Length = b - a;
+						string Name(PName);
+						Name.erase(Length);
+						Name.erase(Name.begin());
+
+						char PlayerName[16];
+						strcpy(PlayerName, Name.c_str());
+
+						//	if player name is friend
+
+						//	if(GameClient()->Friends()->IsFriend(PlayerName, "\0", true))
+						//		m_pClient->m_Chat.AddLine(-2, 0, PlayerName);
+
+						int NameToJoin = str_comp(g_Config.m_ClAutoJoinTeamName, PlayerName);
+						int Team0 = str_comp(Team, "0");
+						if(Team0 > 0 && NameToJoin == 0)
+						{
+							char aBuf[2048] = "/team ";
+							str_append(aBuf, Team);
+							m_pClient->m_Chat.SendChat(0, aBuf);
+							char Joined[2048] = "Auto Joined ";
+							str_append(Joined, PlayerName);
+
+							m_pClient->m_Chat.AddLine(-2, 0, Joined);
+						}
+					}
+				}
+			}
+
 			if(str_find_nocase(pLine, g_Config.m_ClAutoNotifyName))
 			{
 				if(str_find_nocase(pLine, "entered and joined the game"))
