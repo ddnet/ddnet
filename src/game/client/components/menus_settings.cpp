@@ -2757,7 +2757,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, 0, vec2(1.0f, 0.0f), TeeRenderPos);
 
 		const float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
-		const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
+		const float FontSizeClan = 18.0f + 15.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
 		const ColorRGBA Rgb = g_Config.m_ClNameplatesTeamcolors ? m_pClient->GetDDTeamColor(13, 0.75f) : TextRender()->DefaultTextColor();
 		float YOffset = TeeRenderPos.y - 38;
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);

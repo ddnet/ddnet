@@ -65,7 +65,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 	const char *apTabNames[NUMBER_OF_AIODOB_TABS] = {
 		Localize("Usefull Settings"),
 		Localize("BindWheel"),
-		Localize("Visual Settings")};
+		Localize("Visual/Sound Settings")};
 
 	for(int Tab = AIODOB_TAB_PAGE1; Tab < NUMBER_OF_AIODOB_TABS; ++Tab)
 	{
@@ -1224,7 +1224,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 
 		// left side in settings menu
 
-		CUIRect PlayerSettings, FreezeBarSettings, WeaponSettings, ResetButton;
+		CUIRect PlayerSettings, FreezeBarSettings,ResetButton, SoundSettings;
 		MainView.VSplitMid(&PlayerSettings, &ResetButton);
 
 	
@@ -1329,7 +1329,7 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 		// defaults
 		{
 			ResetButton.VMargin(5.0f, &ResetButton);
-			ResetButton.HSplitTop(40.0f, &ResetButton, &PlayerSettings);
+			ResetButton.HSplitTop(40.0f, &ResetButton, &SoundSettings);
 			if(s_ScrollRegion.AddRect(ResetButton))
 			{
 				ResetButton.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 7.5f));
@@ -1340,6 +1340,29 @@ void CMenus::RenderSettingsAiodob(CUIRect MainView)
 					PopupConfirm(Localize("Reset Sliders"), Localize("Are You Sure You Want to Reset All Sliders to Default?"),
 						Localize("Reset"), Localize("Cancel"), &CMenus::ResetSettingsCustomization);
 				}
+			}
+		}
+
+		{
+			SoundSettings.HSplitTop(Margin, nullptr, &SoundSettings);
+			SoundSettings.HSplitTop(100.0f, &SoundSettings, 0);
+			if(s_ScrollRegion.AddRect(SoundSettings))
+			{
+				SoundSettings.Draw(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_AiodobColor, true)), IGraphics::CORNER_ALL, (g_Config.m_ClCornerRoundness / 5.0f));
+				SoundSettings.VMargin(Margin, &SoundSettings);
+
+				SoundSettings.HSplitTop(HeaderHeight, &Button, &SoundSettings);
+				Ui()->DoLabel(&Button, Localize("Sound Settings"), FontSize, TEXTALIGN_MC);
+
+				
+
+				DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_SndFriendChat, ("Do Chat Sound For Friends Only"), &g_Config.m_SndFriendChat, &SoundSettings, LineMargin);
+				if(g_Config.m_SndFriendChat)
+				{
+					g_Config.m_SndChat = 0;
+				}
+
+
 			}
 		}
 		s_ScrollRegion.End();

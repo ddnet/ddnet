@@ -265,22 +265,9 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		g_Config.m_ClPlayerColorBody = g_Config.m_ClSavedPlayerColorBody;
 		g_Config.m_ClPlayerColorFeet = g_Config.m_ClSavedPlayerColorFeet;
 
+		g_Config.m_ClCopyingSkin = 0;
 
 		m_pClient->SendInfo(false);
-	}
-
-	RestoreName.VSplitLeft(-400.0f, &RestoreName, 0);
-	RestoreName.VSplitLeft(-500.0f, &Player, &RestoreName);
-	if(DoButton_Menu(s_Save, Localize("Save Everything"), 0, &RestoreName, nullptr, 15, 5, 0, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f)))
-	{
-		dbg_msg("Aiodob", "saved player skin '%s'", g_Config.m_ClPlayerSkin);
-		str_copy(g_Config.m_ClSavedPlayerSkin, g_Config.m_ClPlayerSkin, sizeof(g_Config.m_ClSavedPlayerSkin));
-		str_copy(g_Config.m_ClSavedName, g_Config.m_PlayerName, sizeof(g_Config.m_ClSavedName));
-		str_copy(g_Config.m_ClSavedClan, g_Config.m_PlayerClan, sizeof(g_Config.m_ClSavedClan));
-		g_Config.m_ClSavedPlayerUseCustomColor = g_Config.m_ClPlayerUseCustomColor;
-		g_Config.m_ClSavedPlayerColorBody = g_Config.m_ClPlayerColorBody;
-		g_Config.m_ClSavedPlayerColorFeet = g_Config.m_ClPlayerColorFeet;
-
 	}
 
 	ButtonBar.HMargin(1.0f, &ButtonBar);
@@ -376,12 +363,9 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		{
 			char aBuf[2048] = ".";
 			
+			g_Config.m_ClCopyingSkin = 1;
 
 			str_append(aBuf, CurrentClient.m_aName);
-			str_copy(g_Config.m_PlayerName, aBuf, sizeof(g_Config.m_PlayerName));
-			
-
-			m_pClient->SendInfo(false);
 		}
 		
 		// copy clan button
@@ -392,6 +376,8 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		if(DoButton_Menu(&s_CopyClan[Index], Localize("Clan"), 0, &Button, nullptr, 15, 5, 0, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f)))
 		{
 			str_copy(g_Config.m_PlayerClan, CurrentClient.m_aClan, sizeof(g_Config.m_PlayerClan));
+
+			g_Config.m_ClCopyingSkin = 1;
 
 			m_pClient->SendInfo(false);
 		}
@@ -406,6 +392,8 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			g_Config.m_ClPlayerColorBody = CurrentClient.m_ColorBody;
 			g_Config.m_ClPlayerColorFeet = CurrentClient.m_ColorFeet;
 			str_copy(g_Config.m_ClPlayerSkin, CurrentClient.m_aSkinName, sizeof(g_Config.m_ClPlayerSkin));
+
+			g_Config.m_ClCopyingSkin = 1;
 
 			m_pClient->SendInfo(false);
 		} 

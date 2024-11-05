@@ -23,7 +23,7 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 	const bool OtherTeam = m_pClient->IsOtherTeam(pPlayerInfo->m_ClientId);
 
 	const float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
-	const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
+	const float FontSizeClan = 18.0f + 15.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
 
 	const auto IsMute = GameClient()->m_WarList.IsMutelist(m_pClient->m_aClients[pPlayerInfo->m_ClientId].m_aName);
 
