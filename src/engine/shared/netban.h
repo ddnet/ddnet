@@ -191,6 +191,7 @@ public:
 	static void ConUnbanRange(class IConsole::IResult *pResult, void *pUser);
 	static void ConUnbanAll(class IConsole::IResult *pResult, void *pUser);
 	static void ConBans(class IConsole::IResult *pResult, void *pUser);
+	static void ConBansFind(class IConsole::IResult *pResult, void *pUser);
 	static void ConBansSave(class IConsole::IResult *pResult, void *pUser);
 };
 
