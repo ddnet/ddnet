@@ -386,15 +386,8 @@ void CMapLayers::OnMapLoad()
 
 			if(pLayer->m_Type == LAYERTYPE_TILES && Graphics()->IsTileBufferingEnabled())
 			{
-				bool DoTextureCoords = false;
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				if(pTMap->m_Image == -1)
-				{
-					if(IsEntityLayer)
-						DoTextureCoords = true;
-				}
-				else
-					DoTextureCoords = true;
+				const bool DoTextureCoords = IsEntityLayer || (pTMap->m_Image >= 0 && pTMap->m_Image < m_pImages->Num());
 
 				int DataIndex = 0;
 				unsigned int TileSize = 0;
@@ -740,7 +733,7 @@ void CMapLayers::OnMapLoad()
 				m_vpQuadLayerVisuals.push_back(new SQuadLayerVisuals());
 				SQuadLayerVisuals *pQLayerVisuals = m_vpQuadLayerVisuals.back();
 
-				bool Textured = (pQLayer->m_Image != -1);
+				const bool Textured = pQLayer->m_Image >= 0 && pQLayer->m_Image < m_pImages->Num();
 
 				vtmpQuads.clear();
 				vtmpQuadsTextured.clear();
@@ -1543,15 +1536,18 @@ void CMapLayers::OnRender()
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
 					CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-					if(pTMap->m_Image < 0 || pTMap->m_Image >= m_pImages->Num())
+					if(IsGameLayer)
 					{
-						if(!IsGameLayer)
-							Graphics()->TextureClear();
-						else
-							Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
+						Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
+					}
+					else if(pTMap->m_Image >= 0 && pTMap->m_Image < m_pImages->Num())
+					{
+						Graphics()->TextureSet(m_pImages->Get(pTMap->m_Image));
 					}
 					else
-						Graphics()->TextureSet(m_pImages->Get(pTMap->m_Image));
+					{
+						Graphics()->TextureClear();
+					}
 
 					CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
 					unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Data);
@@ -1608,10 +1604,14 @@ void CMapLayers::OnRender()
 				else if(pLayer->m_Type == LAYERTYPE_QUADS)
 				{
 					CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-					if(pQLayer->m_Image < 0 || pQLayer->m_Image >= m_pImages->Num())
-						Graphics()->TextureClear();
-					else
+					if(pQLayer->m_Image >= 0 && pQLayer->m_Image < m_pImages->Num())
+					{
 						Graphics()->TextureSet(m_pImages->Get(pQLayer->m_Image));
+					}
+					else
+					{
+						Graphics()->TextureClear();
+					}
 
 					CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
 					if(m_Type == TYPE_BACKGROUND_FORCE || m_Type == TYPE_FULL_DESIGN)
