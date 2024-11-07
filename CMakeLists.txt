@@ -2361,8 +2361,7 @@ if(CLIENT)
     components/chillerbot/version.h
     components/chillerbot/warlist.cpp
     components/chillerbot/warlist.h
-    components/chillerbot/warlist_commands_advanced.cpp
-    components/chillerbot/warlist_commands_simple.cpp
+    components/chillerbot/warlist_commands.cpp
     components/console.cpp
     components/console.h
     components/controls.cpp
