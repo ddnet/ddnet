@@ -1139,7 +1139,7 @@ int CMenus::GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stor
 
 	if(time_get_nanoseconds() - pSelf->m_GhostPopulateStartTime > 500ms)
 	{
-		pSelf->RenderLoading(Localize("Loading ghost files"), "", 0, false);
+		pSelf->RenderLoading(Localize("Loading ghost files"), "", 0);
 	}
 
 	return 0;

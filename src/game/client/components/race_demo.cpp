@@ -233,7 +233,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 
 	if(time_get_nanoseconds() - pRealUser->m_pThis->m_RaceDemosLoadStartTime > 500ms)
 	{
-		pRealUser->m_pThis->GameClient()->m_Menus.RenderLoading(Localize("Loading race demo files"), "", 0, false);
+		pRealUser->m_pThis->GameClient()->m_Menus.RenderLoading(Localize("Loading race demo files"), "", 0);
 	}
 
 	return 0;
