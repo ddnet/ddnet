@@ -2351,6 +2351,48 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		// Settings of the HUD element for votes
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowVotesAfterVoting, Localize("Show votes window after voting"), &g_Config.m_ClShowVotesAfterVoting, &LeftView, LineSize);
 
+		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
+		Ui()->DoLabel(&Label, Localize("Console"), HeadlineFontSize, TEXTALIGN_ML);
+		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClCustomConsole, Localize("Enable customizable console"), &g_Config.m_ClCustomConsole, &LeftView, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClCustomConsoleBar, Localize("Enable customizable bar"), &g_Config.m_ClCustomConsoleBar, &LeftView, LineSize);
+
+		int i = 0;
+		static CButtonContainer s_aResetIDs[24];
+		if(g_Config.m_ClCustomConsole) {
+			DoLine_ColorPicker(&s_aResetIDs[i++],
+				ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing,
+				&LeftView, Localize("Local console color"),
+				&g_Config.m_ClLocalConsoleColor,
+				ColorRGBA(0.2f, 0.2f, 0.2f),
+				false);
+
+			DoLine_ColorPicker(&s_aResetIDs[i++],
+				ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing,
+				&LeftView, Localize("Remote console color"),
+				&g_Config.m_ClRemoteConsoleColor,
+				ColorRGBA(0.4f, 0.2f, 0.2f),
+				false);
+		}
+		if(g_Config.m_ClCustomConsoleBar) {
+			DoLine_ColorPicker(&s_aResetIDs[i++],
+				      ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing,
+				      &LeftView, Localize("Console bar color"),
+				      &g_Config.m_ClConsoleBarColor,
+				      ColorRGBA(8883654),
+				      false);
+
+		}
+
+		if(g_Config.m_ClCustomConsole) {
+			LeftView.HSplitTop(20.f, &Button, &LeftView);
+			Ui()->DoScrollbarOption(&g_Config.m_ClLocalConsoleAlpha, &g_Config.m_ClLocalConsoleAlpha, &Button, Localize("Local Console Opacity"), 0, 100, &CUi::ms_LinearScrollbarScale, 0u, "%");
+			//rcon
+			LeftView.HSplitTop(20.f, &Button, &LeftView);
+			Ui()->DoScrollbarOption(&g_Config.m_ClRemoteConsoleAlpha, &g_Config.m_ClRemoteConsoleAlpha, &Button, Localize("Remote Console Opacity"), 0, 100, &CUi::ms_LinearScrollbarScale, 0u, "%");
+		}
+
 		// ***** DDRace HUD ***** //
 		RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
 		Ui()->DoLabel(&Label, Localize("DDRace HUD"), HeadlineFontSize, TEXTALIGN_ML);

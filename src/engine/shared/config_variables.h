@@ -732,6 +732,16 @@ MACRO_CONFIG_INT(GfxDriverIsBlocked, gfx_driver_is_blocked, 0, 0, 1, CFGFLAG_SAV
 
 MACRO_CONFIG_INT(ClVideoRecorderFPS, cl_video_recorder_fps, 60, 1, 1000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "At which FPS the videorecorder should record demos.")
 
+MACRO_CONFIG_INT(ClCustomConsole, xc_custom_console, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable customizable console")
+MACRO_CONFIG_INT(ClCustomConsoleBar, xc_custom_console_bar, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable customizable console bar")
+
+MACRO_CONFIG_COL(ClLocalConsoleColor, cl_local_console_col, 51, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Local console color")
+MACRO_CONFIG_COL(ClRemoteConsoleColor, cl_remote_console_col, 21837, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Rcon color")
+MACRO_CONFIG_COL(ClConsoleBarColor, cl_console_bar_col, 10902439, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Consolebar color")
+MACRO_CONFIG_INT(ClLocalConsoleAlpha, cl_local_console_alpha, 80, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Local console alpha")
+MACRO_CONFIG_INT(ClRemoteConsoleAlpha, cl_remote_console_alpha, 80, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Rcon alpha")
+
+
 /*
  * Add config variables for mods below this comment to avoid merge conflicts.
  */
