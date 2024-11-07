@@ -80,9 +80,11 @@ void CBackground::LoadBackground()
 
 		if(m_Loaded)
 		{
-			CMapLayers::OnMapLoad();
 			if(NeedImageLoading)
+			{
 				m_pImages->LoadBackground(m_pLayers, m_pMap);
+			}
+			CMapLayers::OnMapLoad();
 		}
 	}
 }
