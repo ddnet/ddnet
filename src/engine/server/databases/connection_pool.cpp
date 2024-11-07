@@ -1,5 +1,6 @@
 #include "connection_pool.h"
 #include "connection.h"
+#include <engine/shared/config.h>
 
 #include <base/system.h>
 #include <cstring>
@@ -186,11 +187,13 @@ void CDbConnectionPool::OnShutdown()
 class CBackup
 {
 public:
-	CBackup(std::shared_ptr<CDbConnectionPool::CSharedData> pShared) :
-		m_pShared(std::move(pShared)) {}
+	CBackup(std::shared_ptr<CDbConnectionPool::CSharedData> pShared, int DebugSql) :
+		m_DebugSql(DebugSql), m_pShared(std::move(pShared)) {}
 	static void Start(void *pUser);
 
 private:
+	bool m_DebugSql;
+
 	void ProcessQueries();
 
 	std::unique_ptr<IDbConnection> m_pWriteBackup;
@@ -228,7 +231,8 @@ void CBackup::ProcessQueries()
 		else if(pThreadData->m_Mode == CSqlExecData::WRITE_ACCESS && m_pWriteBackup.get())
 		{
 			bool Success = CDbConnectionPool::ExecSqlFunc(m_pWriteBackup.get(), pThreadData, Write::BACKUP_FIRST);
-			dbg_msg("sql", "[%i] %s done on write backup database, Success=%i", JobNum, pThreadData->m_pName, Success);
+			if(m_DebugSql || !Success)
+				dbg_msg("sql", "[%i] %s done on write backup database, Success=%i", JobNum, pThreadData->m_pName, Success);
 		}
 		m_pShared->m_NumWorker.Signal();
 	}
@@ -241,13 +245,15 @@ void CBackup::ProcessQueries()
 class CWorker
 {
 public:
-	CWorker(std::shared_ptr<CDbConnectionPool::CSharedData> pShared) :
-		m_pShared(std::move(pShared)) {}
+	CWorker(std::shared_ptr<CDbConnectionPool::CSharedData> pShared, int DebugSql) :
+		m_DebugSql(DebugSql), m_pShared(std::move(pShared)) {}
 	static void Start(void *pUser);
 	void ProcessQueries();
 
 private:
 	void Print(IConsole *pConsole, CDbConnectionPool::Mode DatabaseMode);
+
+	bool m_DebugSql;
 
 	// There are two possible configurations
 	//  * sqlite mode: There exists exactly one READ and the same WRITE server
@@ -314,7 +320,8 @@ void CWorker::ProcessQueries()
 				if(CDbConnectionPool::ExecSqlFunc(m_vpReadConnections[CurServer].get(), pThreadData.get(), Write::NORMAL))
 				{
 					ReadServer = CurServer;
-					dbg_msg("sql", "[%i] %s done on read database %d", JobNum, pThreadData->m_pName, CurServer);
+					if(m_DebugSql)
+						dbg_msg("sql", "[%i] %s done on read database %d", JobNum, pThreadData->m_pName, CurServer);
 					Success = true;
 					break;
 				}
@@ -337,7 +344,8 @@ void CWorker::ProcessQueries()
 			}
 			else if(CDbConnectionPool::ExecSqlFunc(m_pWriteConnection.get(), pThreadData.get(), Write::NORMAL))
 			{
-				dbg_msg("sql", "[%i] %s done on write database", JobNum, pThreadData->m_pName);
+				if(m_DebugSql)
+					dbg_msg("sql", "[%i] %s done on write database", JobNum, pThreadData->m_pName);
 				Success = true;
 			}
 			// enter fail mode if not successful
@@ -345,7 +353,8 @@ void CWorker::ProcessQueries()
 			const Write w = Success ? Write::NORMAL_SUCCEEDED : Write::NORMAL_FAILED;
 			if(m_pWriteBackup && CDbConnectionPool::ExecSqlFunc(m_pWriteBackup.get(), pThreadData.get(), w))
 			{
-				dbg_msg("sql", "[%i] %s done move write on backup database to non-backup table", JobNum, pThreadData->m_pName);
+				if(m_DebugSql)
+					dbg_msg("sql", "[%i] %s done move write on backup database to non-backup table", JobNum, pThreadData->m_pName);
 				Success = true;
 			}
 		}
@@ -467,8 +476,8 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 CDbConnectionPool::CDbConnectionPool()
 {
 	m_pShared = std::make_shared<CSharedData>();
-	m_pWorkerThread = thread_init(CWorker::Start, new CWorker(m_pShared), "database worker thread");
-	m_pBackupThread = thread_init(CBackup::Start, new CBackup(m_pShared), "database backup worker thread");
+	m_pWorkerThread = thread_init(CWorker::Start, new CWorker(m_pShared, g_Config.m_DbgSql), "database worker thread");
+	m_pBackupThread = thread_init(CBackup::Start, new CBackup(m_pShared, g_Config.m_DbgSql), "database backup worker thread");
 }
 
 CDbConnectionPool::~CDbConnectionPool()
