@@ -208,7 +208,7 @@ public:
 	virtual int *GetInput(int Tick, int IsDummy = 0) const = 0;
 
 	// remote console
-	virtual void RconAuth(const char *pUsername, const char *pPassword) = 0;
+	virtual void RconAuth(const char *pUsername, const char *pPassword, bool Dummy) = 0;
 	virtual bool RconAuthed() const = 0;
 	virtual bool UseTempRconCommands() const = 0;
 	virtual void Rcon(const char *pLine) = 0;

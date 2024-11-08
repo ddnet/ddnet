@@ -310,7 +310,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			}
 			else
 			{
-				m_pGameConsole->Client()->RconAuth(m_aUser, pLine);
+				m_pGameConsole->Client()->RconAuth(m_aUser, pLine, g_Config.m_ClDummy);
 				m_UserGot = false;
 			}
 		}
