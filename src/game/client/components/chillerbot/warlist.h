@@ -81,6 +81,7 @@ class CWarList : public CComponent
 	std::vector<std::string> m_vWarClanlist;
 	std::vector<std::string> m_vTeamClanlist;
 	std::vector<std::string> m_vWarClanPrefixlist;
+	void GetTeamlistPathByNeedle(const char *pSearch, int Size, char *pPath);
 	void GetWarlistPathByNeedle(const char *pSearch, int Size, char *pPath);
 	void GetTraitorlistPathByNeedle(const char *pSearch, int Size, char *pPath);
 	void GetNeutrallistPathByNeedle(const char *pSearch, int Size, char *pPath);
@@ -93,6 +94,7 @@ class CWarList : public CComponent
 	int m_TraitorDirs;
 
 	void GetMutelistPathByNeedle(const char *pSearch, int Size, char *pPath);
+	void GetMutelistPathByName(const char *pName, int Size, char *pPath);
 	bool RemoveMuteNameFromVector(const char *pDir, const char *pName);
 	bool WriteMuteNames(const char *pDir);
 	int LoadMuteNames(const char *pDir);
@@ -101,6 +103,7 @@ class CWarList : public CComponent
 	static int LoadMuteDir(const char *pDirname, int IsDir, int DirType, void *pUser);
 
 	void GetHelperlistPathByNeedle(const char *pSearch, int Size, char *pPath);
+	void GetHelperlistPathByName(const char *pName, int Size, char *pPath);
 	bool RemoveHelperNameFromVector(const char *pDir, const char *pName);
 	bool WriteHelperNames(const char *pDir);
 	int LoadHelperNames(const char *pDir);
@@ -109,6 +112,7 @@ class CWarList : public CComponent
 	static int LoadHelperDir(const char *pDirname, int IsDir, int DirType, void *pUser);
 
 	void GetTemplistPathByNeedle(const char *pSearch, int Size, char *pPath);
+	void GetTemplistPathByName(const char *pName, int Size, char *pPath);
 	bool RemoveTempNameFromVector(const char *pDir, const char *pName);
 	bool WriteTempNames(const char *pDir);
 	int LoadTempNames(const char *pDir);
@@ -218,7 +222,6 @@ public:
 	bool OnChatCmd(char Prefix, int ClientId, int Team, const char *pCmd, int NumArgs, const char **ppArgs, const char *pRawArgLine);
 
 	bool OnChatCmdSimple(char Prefix, int ClientId, int Team, const char *pCmd, int NumArgs, const char **ppArgs, const char *pRawArgLine);
-	bool OnChatCmdAdvanced(char Prefix, int ClientId, int Team, const char *pCmd, int NumArgs, const char **ppArgs, const char *pRawArgLine);
 
 
 	void RemoveHelperNoMsg(const char *pName);

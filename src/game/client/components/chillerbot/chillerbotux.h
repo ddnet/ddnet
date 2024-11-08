@@ -87,7 +87,6 @@ class CChillerBotUX : public CComponent
 	bool IsPlayerInfoAvailable(int ClientId) const;
 
 	void GoAfk(int Minutes, const char *pMsg = 0);
-	void SkinStealTick();
 	void ChangeTileNotifyTick();
 	void FinishRenameTick();
 	void CampHackTick();

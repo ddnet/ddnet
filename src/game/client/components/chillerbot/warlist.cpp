@@ -38,19 +38,6 @@ void CWarList::ReloadList()
 	m_vWarClanlist.clear();
 	m_vTeamClanlist.clear();
 
-	if(g_Config.m_ClWarListAdvanced)
-	{
-		LoadWarList();
-		LoadTeamList();
-		LoadTraitorList();
-		LoadNeutralList();
-		LoadWarClanList();
-		LoadTeamClanList();
-		LoadWarClanPrefixList();
-		LoadMuteNames("chillerbot/warlist/mutes/mutes");
-		LoadHelperNames("chillerbot/warlist/helper/helper");
-	}
-	else // simple warlist
 	{
 		LoadMuteNames("chillerbot/warlist/mutes/mutes");
 		LoadHelperNames("chillerbot/warlist/helper/helper");
@@ -62,11 +49,21 @@ void CWarList::ReloadList()
 	for(auto &WarPlayer : m_aWarPlayers)
 		WarPlayer.m_aName[0] = '\0';
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "team: %d war: %d", m_TeamDirs, (m_WarDirs + m_TraitorDirs));
+	str_format(aBuf, sizeof(aBuf), "team: %d war: %d", m_vHelperlist, (m_WarDirs + m_TraitorDirs));
 	// TODO: fix on initial load
 	// 		 maybe https://github.com/chillerbot/chillerbot-ux/issues/22 is needed
 	m_pClient->m_ChillerBotUX.SetComponentNoteLong("war list", aBuf);
 }
+
+void CWarList::GetTemplistPathByNeedle(const char *pSearch, int Size, char *pPath)
+{
+	pPath[0] = '\0';
+	for(auto &Entry : m_vTemplist)
+		if(str_find(Entry.first.c_str(), pSearch))
+			str_copy(pPath, Entry.second.c_str(), Size);
+
+}
+
 
 void CWarList::GetHelperlistPathByNeedle(const char *pSearch, int Size, char *pPath)
 {
@@ -87,7 +84,15 @@ void CWarList::GetMutelistPathByNeedle(const char *pSearch, int Size, char *pPat
 void CWarList::GetWarlistPathByNeedle(const char *pSearch, int Size, char *pPath)
 {
 	pPath[0] = '\0';
-	for(auto &Entry : m_vWarlist)
+	for(auto &Entry : m_vTeamlist)
+		if(str_find(Entry.first.c_str(), pSearch))
+			str_copy(pPath, Entry.second.c_str(), Size);
+}
+
+void CWarList::GetTeamlistPathByNeedle(const char *pSearch, int Size, char *pPath)
+{
+	pPath[0] = '\0';
+	for(auto &Entry : m_vTraitorlist)
 		if(str_find(Entry.first.c_str(), pSearch))
 			str_copy(pPath, Entry.second.c_str(), Size);
 }
@@ -105,6 +110,30 @@ void CWarList::GetNeutrallistPathByNeedle(const char *pSearch, int Size, char *p
 	pPath[0] = '\0';
 	for(auto &Entry : m_vNeutrallist)
 		if(str_find(Entry.first.c_str(), pSearch))
+			str_copy(pPath, Entry.second.c_str(), Size);
+}
+
+void CWarList::GetMutelistPathByName(const char *pName, int Size, char *pPath)
+{
+	pPath[0] = '\0';
+	for(auto &Entry : m_vMutelist)
+		if(std::string(pName) == Entry.first)
+			str_copy(pPath, Entry.second.c_str(), Size);
+}
+
+void CWarList::GetHelperlistPathByName(const char *pName, int Size, char *pPath)
+{
+	pPath[0] = '\0';
+	for(auto &Entry : m_vHelperlist)
+		if(std::string(pName) == Entry.first)
+			str_copy(pPath, Entry.second.c_str(), Size);
+}
+
+void CWarList::GetTemplistPathByName(const char *pName, int Size, char *pPath)
+{
+	pPath[0] = '\0';
+	for(auto &Entry : m_vTemplist)
+		if(std::string(pName) == Entry.first)
 			str_copy(pPath, Entry.second.c_str(), Size);
 }
 
@@ -1608,23 +1637,34 @@ bool CWarList::SearchName(const char *pName, bool AllowPartialMatch, bool Silent
 	else
 		GetWarlistPathByName(pName, sizeof(aBuf), aBuf);
 	if(aBuf[0])
-		str_format(aFilenames[0], sizeof(aFilenames[0]), "%s/names.txt", aBuf);
+		str_format(aFilenames[0], sizeof(aFilenames[0]), "chillerbot/warlist/war/war/names.txt", aBuf);
 	else
 		aFilenames[0][0] = '\0';
+
 	if(AllowPartialMatch)
-		GetTraitorlistPathByNeedle(pName, sizeof(aBuf), aBuf);
+		GetTeamlistPathByNeedle(pName, sizeof(aBuf), aBuf);
 	else
-		GetTraitorlistPathByName(pName, sizeof(aBuf), aBuf);
+		GetTeamlistPathByName(pName, sizeof(aBuf), aBuf);
 	if(aBuf[0])
-		str_format(aFilenames[1], sizeof(aFilenames[1]), "%s/names.txt", aBuf);
+		str_format(aFilenames[1], sizeof(aFilenames[1]), "chillerbot/warlist/team/team/names.txt", aBuf);
 	else
 		aFilenames[1][0] = '\0';
+
 	if(AllowPartialMatch)
-		GetNeutrallistPathByNeedle(pName, sizeof(aBuf), aBuf);
+		GetMutelistPathByNeedle(pName, sizeof(aBuf), aBuf);
 	else
-		GetNeutrallistPathByName(pName, sizeof(aBuf), aBuf);
+		GetMutelistPathByName(pName, sizeof(aBuf), aBuf);
 	if(aBuf[0])
-		str_format(aFilenames[2], sizeof(aFilenames[2]), "%s/names.txt", aBuf);
+		str_format(aFilenames[2], sizeof(aFilenames[2]), "chillerbot/warlist/mutes/mutes/names.txt", aBuf);
+	else
+		aFilenames[2][0] = '\0';
+
+	if(AllowPartialMatch)
+		GetHelperlistPathByNeedle(pName, sizeof(aBuf), aBuf);
+	else
+		GetHelperlistPathByName(pName, sizeof(aBuf), aBuf);
+	if(aBuf[0])
+		str_format(aFilenames[2], sizeof(aFilenames[2]), "chillerbot/warlist/helper/helper/names.txt", aBuf);
 	else
 		aFilenames[2][0] = '\0';
 
@@ -1678,7 +1718,5 @@ bool CWarList::OnChatCmd(char Prefix, int ClientId, int Team, const char *pCmd, 
 	if(ClientId != m_pClient->m_Snap.m_LocalClientId)
 		return false;
 
-	if(g_Config.m_ClWarListAdvanced)
-		return OnChatCmdAdvanced(Prefix, ClientId, Team, pCmd, NumArgs, ppArgs, pRawArgLine);
 	return OnChatCmdSimple(Prefix, ClientId, Team, pCmd, NumArgs, ppArgs, pRawArgLine);
 }
