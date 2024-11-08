@@ -46,11 +46,11 @@ MACRO_CONFIG_INT(ClTermBrowserSearchTop, cb_term_browser_search_top, 1, 0, 1, CF
 
 // warlist
 MACRO_CONFIG_INT(ClWarList, cb_enable_warlist, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Display nameplate color based on chillerbot/warlist directory")
-MACRO_CONFIG_INT(ClWarListAdvanced, cb_war_list_advanced, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Activates more complex warlist mode")
 MACRO_CONFIG_INT(ClNameplatesWarReason, cb_nameplates_war_reason, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show war reason in name plates")
 MACRO_CONFIG_INT(ClWarListAutoReload, cb_war_list_auto_reload, 10, 0, 600, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Reload warlist every x seconds 0=off")
 MACRO_CONFIG_INT(ClSilentChatCommands, cb_silent_chat_commands, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Dont Send a Chatmessage After Correctly Typing in a Chat Command (!help...)")
 
+MACRO_CONFIG_INT(ClSweatMode, ac_sweat_mode, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "sweat mode")
 
 
 
@@ -268,6 +268,26 @@ MACRO_CONFIG_INT(ClAidsPingDetection, ac_aids_ping_detection, 0, 0, 1, CFGFLAG_C
 
 
 // Tee
+
+MACRO_CONFIG_INT(ClOwnTeeSkin, cle_own_tee_skin, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Renders your own skin differently for yourself")
+
+MACRO_CONFIG_INT(ClOwnTeeSkinCustomColor, cle_own_tee_custom_color, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Renders your own skin differently for yourself")
+
+MACRO_CONFIG_STR(ClOwnTeeSkinName, cle_own_tee_skin_name, 24, "default", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Own Tee Skin Name")
+
+
+
+
+
+// Effects
+
+MACRO_CONFIG_INT(ClSparkleEffect, cle_sparkle_effect, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on Sparkle Effect Client Side")
+MACRO_CONFIG_INT(ClSparkleEffectOthers, cle_sparkle_effect_others, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on Sparkle Effect Client Side")
+
+
+MACRO_CONFIG_INT(ClPlayerTrail, cle_player_trail, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on Sparkle Effect Client Side")
+
+
 
 // Rainbow
 
