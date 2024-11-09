@@ -2183,7 +2183,7 @@ void CCharacter::DDRacePostCoreTick()
 	std::vector<int> vIndices;
 	if(m_Core.m_BouncePostions.empty())
 	{
-	 	vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
+		vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
 	}
 	else
 	{
