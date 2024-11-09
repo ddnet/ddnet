@@ -16,6 +16,7 @@
 
 static constexpr float ROW_HEIGHT = 46.0f;
 static constexpr float FONT_SIZE = 36.0f;
+static constexpr float RACE_FLAG_SIZE = 52.0f;
 
 void CInfoMessages::OnWindowResize()
 {
@@ -65,6 +66,10 @@ void CInfoMessages::OnInit()
 		RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[i].m_pSpriteBody, ScaleX, ScaleY);
 		RenderTools()->QuadContainerAddSprite(m_SpriteQuadContainerIndex, 96.f * ScaleX, 96.f * ScaleY);
 	}
+
+	Graphics()->QuadsSetSubset(0, 0, 1, 1);
+	m_QuadOffsetRaceFlag = RenderTools()->QuadContainerAddSprite(m_SpriteQuadContainerIndex, 0.0f, 0.0f, RACE_FLAG_SIZE, RACE_FLAG_SIZE);
+
 	Graphics()->QuadContainerUpload(m_SpriteQuadContainerIndex);
 }
 
@@ -389,13 +394,9 @@ void CInfoMessages::RenderFinishMsg(const CInfoMsg &InfoMsg, float x, float y)
 	}
 
 	// render flag
-	const float FlagSize = 52.0f;
-	x -= FlagSize;
+	x -= RACE_FLAG_SIZE;
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_RACEFLAG].m_Id);
-	Graphics()->QuadsBegin();
-	IGraphics::CQuadItem QuadItem(x, y, FlagSize, FlagSize);
-	Graphics()->QuadsDrawTL(&QuadItem, 1);
-	Graphics()->QuadsEnd();
+	Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, m_QuadOffsetRaceFlag, x, y);
 
 	// render victim name
 	if(InfoMsg.m_VictimTextContainerIndex.Valid())

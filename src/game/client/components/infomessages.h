@@ -8,7 +8,8 @@
 #include <game/client/render.h>
 class CInfoMessages : public CComponent
 {
-	int m_SpriteQuadContainerIndex;
+	int m_SpriteQuadContainerIndex = -1;
+	int m_QuadOffsetRaceFlag = -1;
 
 	enum
 	{
