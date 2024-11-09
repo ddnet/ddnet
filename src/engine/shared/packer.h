@@ -8,7 +8,7 @@ class CPacker
 public:
 	enum
 	{
-		PACKER_BUFFER_SIZE = 1024 * 2
+		PACKER_BUFFER_SIZE = 1024 * 64
 	};
 
 private:
