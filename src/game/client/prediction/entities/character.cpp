@@ -1042,7 +1042,24 @@ void CCharacter::DDRacePostCoreTick()
 	HandleSkippableTiles(CurrentIndex);
 
 	// handle Anti-Skip tiles
-	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
+	std::vector<int> vIndices;
+	if(m_Core.m_BouncePostions.empty())
+	{
+	 	vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
+	}
+	else
+	{
+		// handle bouncing being multiple straight lines
+		vIndices = Collision()->GetMapIndices(m_PrevPos, m_Core.m_BouncePostions.front());
+		for(size_t i = 0; i < m_Core.m_BouncePostions.size() - 1; ++i)
+		{
+			std::vector<int> vStepIndices = Collision()->GetMapIndices(m_Core.m_BouncePostions[i], m_Core.m_BouncePostions[i + 1]);
+			vIndices.insert(vIndices.end(), vStepIndices.begin(), vStepIndices.end());
+		}
+		std::vector<int> vLastStepIndices = Collision()->GetMapIndices(m_Core.m_BouncePostions.back(), m_Pos);
+		vIndices.insert(vIndices.end(), vLastStepIndices.begin(), vLastStepIndices.end());
+	}
+
 	if(!vIndices.empty())
 		for(int Index : vIndices)
 			HandleTiles(Index);
