@@ -7934,21 +7934,22 @@ void CEditor::Render()
 		}
 	}
 
-	float Brightness = 0.25f;
+	const float BackgroundBrightness = 0.26f;
+	const float BackgroundScale = 80.0f;
 
 	if(m_GuiActive)
 	{
-		RenderBackground(MenuBar, m_BackgroundTexture, 128.0f, Brightness * 0);
+		RenderBackground(MenuBar, IGraphics::CTextureHandle(), BackgroundScale, 0.0f);
 		MenuBar.Margin(2.0f, &MenuBar);
 
-		RenderBackground(ToolBox, m_BackgroundTexture, 128.0f, Brightness);
+		RenderBackground(ToolBox, g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id, BackgroundScale, BackgroundBrightness);
 		ToolBox.Margin(2.0f, &ToolBox);
 
-		RenderBackground(ToolBar, m_BackgroundTexture, 128.0f, Brightness);
+		RenderBackground(ToolBar, g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id, BackgroundScale, BackgroundBrightness);
 		ToolBar.Margin(2.0f, &ToolBar);
 		ToolBar.VSplitLeft(m_ToolBoxWidth, &ModeBar, &ToolBar);
 
-		RenderBackground(StatusBar, m_BackgroundTexture, 128.0f, Brightness);
+		RenderBackground(StatusBar, g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id, BackgroundScale, BackgroundBrightness);
 		StatusBar.Margin(2.0f, &StatusBar);
 	}
 
@@ -8079,7 +8080,7 @@ void CEditor::Render()
 		{
 			if(m_ActiveExtraEditor != EXTRAEDITOR_NONE)
 			{
-				RenderBackground(ExtraEditor, m_BackgroundTexture, 128.0f, Brightness);
+				RenderBackground(ExtraEditor, g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id, BackgroundScale, BackgroundBrightness);
 				ExtraEditor.HMargin(2.0f, &ExtraEditor);
 				ExtraEditor.VSplitRight(2.0f, &ExtraEditor, nullptr);
 			}
@@ -8480,7 +8481,6 @@ void CEditor::Init()
 		Component.OnInit(this);
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL);
-	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_NORMAL] = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_RESIZE_H] = Graphics()->LoadTexture("editor/cursor_resize.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_RESIZE_V] = m_aCursorTextures[CURSOR_RESIZE_H];

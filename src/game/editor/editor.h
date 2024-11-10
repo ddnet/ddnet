@@ -439,7 +439,6 @@ public:
 		}
 
 		m_CheckerTexture.Invalidate();
-		m_BackgroundTexture.Invalidate();
 		for(auto &CursorTexture : m_aCursorTextures)
 			CursorTexture.Invalidate();
 
@@ -819,7 +818,6 @@ public:
 	bool m_ColorPipetteActive = false;
 
 	IGraphics::CTextureHandle m_CheckerTexture;
-	IGraphics::CTextureHandle m_BackgroundTexture;
 
 	enum ECursorType
 	{
