@@ -370,7 +370,7 @@ if ! grep -q "demo_player: Stopped playback" client2.log; then
 	echo "[-] Error: demo playback of client demo in client 2 was not started/finished"
 fi
 
-ranks="$(sqlite3 -cmd '.timeout 10000' ddnet-server.sqlite < <(echo "select * from record_race;"))"
+ranks="$(sqlite3 -init /dev/null -cmd '.timeout 10000' ddnet-server.sqlite < <(echo "select * from record_race;"))"
 rank_time="$(echo "$ranks" | awk -F '|' '{ print "player:", $2, "time:", $4, "cps:", $6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28 }')"
 expected_times="\
 player: client2 time: 1020.98 cps: 0.02 0.1 0.2 0.26 0.32 600.36 600.42 600.46 600.5 1020.54 1020.58 1020.6 1020.64 1020.66 1020.7 1020.72 1020.76 1020.78 1020.8 1020.84 1020.86 1020.88 1020.9

@@ -77,7 +77,7 @@ void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
 	if(str_comp(pTeleLayer->m_aFileName, m_pEditor->m_aFileName))
-		m_pEditor->m_TeleNumber = pTeleLayer->m_TeleNum;
+		m_pEditor->m_TeleNumbers = pTeleLayer->m_TeleNumbers;
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pTeleLayer);
 
@@ -99,22 +99,15 @@ void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 				m_pTeleTile[Index].m_Type,
 				m_pTiles[Index].m_Index};
 
-			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index)) && pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index != TILE_AIR)
+			unsigned char TgtIndex = pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index;
+			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(TgtIndex)) && TgtIndex != TILE_AIR)
 			{
-				bool IsCheckpoint = IsTeleTileCheckpoint(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index);
-				if(!IsCheckpoint && !IsTeleTileNumberUsed(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index, false))
+				bool IsCheckpoint = IsTeleTileCheckpoint(TgtIndex);
+				if(!IsCheckpoint && !IsTeleTileNumberUsed(TgtIndex, false))
 				{
 					// Tele tile number is unused. Set a known value which is not 0,
 					// as tiles with number 0 would be ignored by previous versions.
 					m_pTeleTile[Index].m_Number = 255;
-				}
-				else if(!IsCheckpoint && m_pEditor->m_TeleNumber != pTeleLayer->m_TeleNum)
-				{
-					m_pTeleTile[Index].m_Number = m_pEditor->m_TeleNumber;
-				}
-				else if(IsCheckpoint && m_pEditor->m_TeleCheckpointNumber != pTeleLayer->m_TeleCheckpointNum)
-				{
-					m_pTeleTile[Index].m_Number = m_pEditor->m_TeleCheckpointNumber;
 				}
 				else if(pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number)
 				{
@@ -122,7 +115,7 @@ void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 				}
 				else
 				{
-					if((!IsCheckpoint && !m_pEditor->m_TeleNumber) || (IsCheckpoint && !m_pEditor->m_TeleCheckpointNumber))
+					if(!m_pEditor->m_TeleNumbers[TgtIndex])
 					{
 						m_pTeleTile[Index].m_Number = 0;
 						m_pTeleTile[Index].m_Type = 0;
@@ -138,7 +131,7 @@ void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 					}
 					else
 					{
-						m_pTeleTile[Index].m_Number = IsCheckpoint ? m_pEditor->m_TeleCheckpointNumber : m_pEditor->m_TeleNumber;
+						m_pTeleTile[Index].m_Number = m_pEditor->m_TeleNumbers[TgtIndex];
 					}
 				}
 
@@ -283,10 +276,8 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 						// as tiles with number 0 would be ignored by previous versions.
 						m_pTeleTile[TgtIndex].m_Number = 255;
 					}
-					else if(!IsCheckpoint && ((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && m_pEditor->m_TeleNumber) || m_pEditor->m_TeleNumber != pLt->m_TeleNum))
-						m_pTeleTile[TgtIndex].m_Number = m_pEditor->m_TeleNumber;
-					else if(IsCheckpoint && ((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && m_pEditor->m_TeleCheckpointNumber) || m_pEditor->m_TeleCheckpointNumber != pLt->m_TeleCheckpointNum))
-						m_pTeleTile[TgtIndex].m_Number = m_pEditor->m_TeleCheckpointNumber;
+					else if((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && m_pEditor->m_TeleNumbers[m_pTiles[TgtIndex].m_Index]))
+						m_pTeleTile[TgtIndex].m_Number = m_pEditor->m_TeleNumbers[m_pTiles[TgtIndex].m_Index];
 					else
 						m_pTeleTile[TgtIndex].m_Number = pLt->m_pTeleTile[SrcIndex].m_Number;
 				}
@@ -303,13 +294,13 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 	FlagModified(sx, sy, w, h);
 }
 
-bool CLayerTele::ContainsElementWithId(int Id, bool Checkpoint)
+bool CLayerTele::ContainsElementWithId(int Id, int Index)
 {
 	for(int y = 0; y < m_Height; ++y)
 	{
 		for(int x = 0; x < m_Width; ++x)
 		{
-			if(IsTeleTileNumberUsed(m_pTeleTile[y * m_Width + x].m_Type, Checkpoint) && m_pTeleTile[y * m_Width + x].m_Number == Id)
+			if(m_pTeleTile[y * m_Width + x].m_Type == Index && m_pTeleTile[y * m_Width + x].m_Number == Id)
 			{
 				return true;
 			}

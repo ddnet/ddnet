@@ -1146,6 +1146,7 @@ set(EXPECTED_DATA
   countryflags/AL.png
   countryflags/AM.png
   countryflags/AO.png
+  countryflags/AQ.png
   countryflags/AR.png
   countryflags/AS.png
   countryflags/AT.png
@@ -1446,7 +1447,7 @@ set(EXPECTED_DATA
   gui_logo.png
   hud.png
   languages/arabic.txt
-  languages/azerbaijanese.txt
+  languages/azerbaijani.txt
   languages/belarusian.txt
   languages/bosnian.txt
   languages/brazilian_portuguese.txt

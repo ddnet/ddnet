@@ -237,7 +237,7 @@ void CGameConsole::CInstance::ClearBacklog()
 
 	m_Backlog.Init();
 	m_BacklogCurLine = 0;
-	UpdateSearch();
+	ClearSearch();
 }
 
 void CGameConsole::CInstance::UpdateBacklogTextAttributes()
@@ -310,7 +310,7 @@ void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 			}
 			else
 			{
-				m_pGameConsole->Client()->RconAuth(m_aUser, pLine);
+				m_pGameConsole->Client()->RconAuth(m_aUser, pLine, g_Config.m_ClDummy);
 				m_UserGot = false;
 			}
 		}
@@ -575,10 +575,18 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			m_BacklogCurLine = 0;
 			Handled = true;
 		}
+		else if(Event.m_Key == KEY_ESCAPE && m_Searching)
+		{
+			m_Searching = false;
+			m_Input.Clear();
+			Handled = true;
+		}
 		else if(Event.m_Key == KEY_F && m_pGameConsole->Input()->ModifierIsPressed())
 		{
-			m_Searching = !m_Searching;
-			ClearSearch();
+			m_Searching = true;
+			m_Input.Set(m_aCurrentSearchString);
+			m_Input.SelectAll();
+			UpdateSearch();
 			Handled = true;
 		}
 	}
@@ -1446,7 +1454,7 @@ bool CGameConsole::OnInput(const IInput::CEvent &Event)
 	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
 		return false;
 
-	if(Event.m_Key == KEY_ESCAPE && (Event.m_Flags & IInput::FLAG_PRESS))
+	if(Event.m_Key == KEY_ESCAPE && (Event.m_Flags & IInput::FLAG_PRESS) && !CurrentConsole()->m_Searching)
 		Toggle(m_ConsoleType);
 	else if(!CurrentConsole()->OnInput(Event))
 	{

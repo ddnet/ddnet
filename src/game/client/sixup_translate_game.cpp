@@ -94,7 +94,7 @@ void CGameClient::ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId, int Con
 
 	if(time_season() == SEASON_XMAS)
 	{
-		pClient->m_SkinInfo.m_aSixup[Conn].m_HatTexture = m_Skins7.m_XmasHatTexture;
+		pClient->m_SkinInfo.m_aSixup[Conn].m_HatTexture = m_Skins7.XmasHatTexture();
 		pClient->m_SkinInfo.m_aSixup[Conn].m_HatSpriteIndex = ClientId % CSkins7::HAT_NUM;
 	}
 	else
@@ -102,8 +102,7 @@ void CGameClient::ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId, int Con
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		int Id = m_Skins7.FindSkinPart(Part, pClient->m_aSixup[Conn].m_aaSkinPartNames[Part], false);
-		const CSkins7::CSkinPart *pSkinPart = m_Skins7.GetSkinPart(Part, Id);
+		const CSkins7::CSkinPart *pSkinPart = m_Skins7.FindSkinPart(Part, pClient->m_aSixup[Conn].m_aaSkinPartNames[Part], false);
 		if(pClient->m_aSixup[Conn].m_aUseCustomColors[Part])
 		{
 			pClient->m_SkinInfo.m_aSixup[Conn].m_aTextures[Part] = pSkinPart->m_ColorTexture;

@@ -131,7 +131,7 @@ protected:
 	private:
 		enum
 		{
-			MAX_BANS = 1024,
+			MAX_BANS = 2048,
 		};
 
 		CBan<CDataType> *m_aapHashList[HashCount][256];
@@ -191,6 +191,7 @@ public:
 	static void ConUnbanRange(class IConsole::IResult *pResult, void *pUser);
 	static void ConUnbanAll(class IConsole::IResult *pResult, void *pUser);
 	static void ConBans(class IConsole::IResult *pResult, void *pUser);
+	static void ConBansFind(class IConsole::IResult *pResult, void *pUser);
 	static void ConBansSave(class IConsole::IResult *pResult, void *pUser);
 };
 

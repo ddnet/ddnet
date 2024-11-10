@@ -1,8 +1,9 @@
-##### authors #####
+﻿##### authors #####
 #	OneShadow		2016-03-27
 #	Quick			2020-07-12
 #	younesdevil		2021-12-07
 #	Player			2023-01-26
+#	ArAsH			2024-10-21
 ##### /authors #####
 
 ##### translated strings #####
@@ -329,7 +330,7 @@ Browser
 == ﻮﺠﺘﺴﺟ
 
 Ghost
-== ﺡﻭﺭ ﺖﻟﺎﺣ 
+== ﺡﻭﺭ ﺖﻟﺎﺣ
 
 Loading DDNet Client
 == ﺖﻨﯾﺪﯾﺩ ﺖﻨﯾﻼﮐ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ ﻝﺎﺣﺭﺩ
@@ -960,7 +961,7 @@ Speed up the demo
 == ﻮﻣﺩ ﺖﻋﺮﺳ ﻥﺩﺮﮐ ﺩﺎﯾﺯ
 
 Export cut as a separate demo
-==  ﻪﻧﺎﮔﺍﺪﺟ ﻮﻣﺩ ﻥﺍﻮﻨﻋ ﻪﺑ ﺵﺮﺑ ﻥﺩﺮﮐ ﺝﺭﺎﺧ 
+==  ﻪﻧﺎﮔﺍﺪﺟ ﻮﻣﺩ ﻥﺍﻮﻨﻋ ﻪﺑ ﺵﺮﺑ ﻥﺩﺮﮐ ﺝﺭﺎﺧ
 
 Go back one marker
 == ﺩﺮﮔﺮﺑ ﺐﻘﻋ ﻪﺑ ﺮﮕﻧﺎﺸﻧ ﮏﯾ
@@ -1082,7 +1083,7 @@ Absolute
 == ﻖﻠﻄﻣ [ﯼﺯﺎﺑ ﺮﻟﺮﺘﻨﮐ ﺖﻟﺎﺣ]
 
 Ingame controller mode
-== [ﯼﺯﺎﺑ ﺮﻟﺮﺘﻨﮐ ﺖﻟﺎﺣ]
+== ﯼﺯﺎﺑ ﺮﻟﺮﺘﻨﮐ ﺖﻟﺎﺣ
 
 Ingame controller sens.
 == ﯼﺯﺎﺑ ﺮﻟﺮﺘﻨﮐ ﺮﮕﺴﺣ
@@ -1115,7 +1116,7 @@ Controller
 == ﺮﻟﺮﺘﻨﮐ
 
 Reset controls
-== ﺎﻫ ﻝﺮﺘﻨﮐ ﻥﺩﺮﮐ ﺖﺴﯾﺭ 
+== ﺎﻫ ﻝﺮﺘﻨﮐ ﻥﺩﺮﮐ ﺖﺴﯾﺭ
 
 Are you sure that you want to reset the controls to their defaults?
 == ؟ﺪﯿﻧﺍﺩﺮﮔﺯﺎﺑ ﺽﺮﻓ ﺶﯿﭘ ﺖﻟﺎﺣ ﻪﺑ ﺍﺭ ﺎﻫ ﻝﺮﺘﻨﮐ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﮐ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
@@ -1503,436 +1504,440 @@ Best
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== .ﺩﻮﺷﯽﻣ ﻩﺩﺍﺩ ﺖﺸﮔﺯﺎﺑ ﺽﺮﻓﺶﯿﭘ ﻂﺑﺍﺭ ﻪﺑ ﻥﻮﻨﻛﺍ ،ﺩﺮﻛ ﻩﺩﺎﻔﺘﺳﺍ ﻩﺪﺷ ﻩﺩﺍﺩ ﯽﻜﯿﻓﺍﺮﮔ ﻂﺑﺍﺭ ﺯﺍ ﻥﺍﻮﺗﯽﻤﻧ
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== .ﺪﯾﺍ ﻩﺩﺮﻜﻧ ﺐﺼﻧ ﺍﺭ ﻚﯿﻓﺍﺮﮔ ﺕﺭﺎﻛ ﺭﻮﯾﺍﺭﺩ ﻪﻛ ﺖﺳﺍ ﻞﯿﻟﺩ ﻦﯾﺍ ﻪﺑ ًﻻﺎﻤﺘﺣﺍ ،ﺩﺮﻛ ﻪﯿﻟﻭﺍ ﯽﻫﺩﺭﺍﺪﻘﻣ ﺍﺭ ﻩﺪﺷ ﻩﺩﺍﺩ ﻚﯿﻓﺍﺮﮔ ﺪﻧﺍ ﻚﺑ ﻥﺍﻮﺗ ﯽﻤﻧ
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== .ﺪﯿﻨﻛ ﻪﻌﺟﺍﺮﻣ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ﻪﺑ ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺩﻮﺒﻧ ﻦﻜﻤﻣ '%s' ﺱﺭﺩﺁ ﻪﺑ ﻝﺎﺼﺗﺍ
 
 Connect address error
-== 
+== ﻝﺎﺼﺗﺍ ﺱﺭﺩﺁ ىﺎﻄﺧ
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== %s :ﺪﯿﻨﻛ ﻑﺬﺣ ﺍﺭ ﻞﯾﺎﻓ ﻦﯾﺍ ﯽﺘﺳﺩ ﺕﺭﻮﺻ ﻪﺑ ﺪﯿﻨﻛ ﯽﻌﺳ .ﺪﺸﻧ ﻩﺮﯿﺧﺫ ﻩﺪﺷ ﺩﻮﻠﻧﺍﺩ ﭗﻣ
 
 Could not connect dummy
-== 
+== ﺪﺸﻧ ﻞﺼﺘﻣ ﯽﻣﺍﺩ
 
 Error playing demo
-== 
+== ﻮﻣﺩ ﻥﺩﺮﻛ ﺍﺮﺟﺍ ﺭﺩ ﺎﻄﺧ
 
 Failed saving the replay!
-== 
+== !ﺩﻮﺑ ﻖﻓﻮﻣﺎﻧ ﺩﺪﺠﻣ ﺶﺨﭘ ﻥﺩﺮﻛ ﻩﺮﯿﺧﺫ
 
 Saving settings to '%s' failed
-== 
+== ﺪﺸﻧ ﻡﺎﺠﻧﺍ "%s" ﺭﺩ ﺕﺎﻤﯿﻈﻨﺗ ﻥﺩﺮﻛ ﻩﺮﯿﺧﺫ
 
 Error saving settings
-== 
+== ﺕﺎﻤﯿﻈﻨﺗ ﻥﺩﺮﻛ ﻩﺮﯿﺧﺫ ﺭﺩ ﺎﻄﺧ
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== .ﺩﻮﺷ ﯽﻣ ىﺮﻫﺎﻇ  ﻝﺎﻜﺷﺍ ﺩﺎﺠﯾﺍ ﺚﻋﺎﺑ ﻪﻛ ﺖﺴﯿﻧ %s RGBA ﯽﻜﯿﻓﺍﺮﮔ ﺖﻟﺎﺣ ﺖﻣﺮﻓ
+
+Loading demo file from storage
+== ﻪﻈﻓﺎﺣ ﺯﺍ ﻮﻣﺩ ﻞﯾﺎﻓ ىﺮﯿﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ
+
+Initializing map logic
+== ﭗﻣ ﻖﻄﻨﻣ ىﺯﺍﺪﻧﺍ ﻩﺍﺭ
+
+Quitting. Please wait…
+== …ﺪﯿﻨﻛﺮﺒﺻ ﺎﻔﻄﻟ .ﻥﺪﺷ ﺝﺭﺎﺧ ﻝﺎﺣ ﺭﺩ
+
+Restarting. Please wait…
+== ﺪﯿﻨﻛ ﺮﺒﺻ ﺎﻔﻄﻟ .ﺩﺪﺠﻣ ىﺯﺍﺪﻧﺍ ﻩﺍﺭ ﻝﺎﺣ ﺭﺩ
+
+Searching
+== ﻮﺟ ﻭ ﺖﺴﺟ ﻝﺎﺣ ﺭﺩ
+
+Enter Username
+== ﺪﯿﻨﻛ ﺩﺭﺍﻭ ﺍﺭ ىﺮﺑﺭﺎﻛ ﻡﺎﻧ
+
+Enter Password
+== ﺪﯿﻨﻛ ﺩﺭﺍﻭ ﺍﺭ ﺭﻮﺒﻋﺰﻣﺭ
+
+NOT CONNECTED
+== ﺪﺸﻧ ﻞﺼﺘﻣ
+
+Match %d of %d
+== %d ﺯﺍ %d ﻪﻘﺑﺎﺴﻣ
+
+No results
+== ﻪﺠﯿﺘﻧ ﻥﻭﺪﺑ
+
+Lines %d - %d (%s)
+== %d - %d (%s) ﻁﻮﻄﺧ
+
+Locked
+== ﺪﺷ ﻞﻔﻗ
+
+Following
+== ﻥﺩﺮﻛ ﻝﺎﺒﻧﺩ
+
+Loading commands…
+== …ﺕﺍﺭﻮﺘﺳﺩ ىﺮﯿﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ
+
+Multi-View
+== ﯽﻧﺎﮕﻤﻫ-ﺪﯾﺩ
+
+[Spectating]
+Following %s
+== %s ﻥﺩﺮﻛ ﻝﺎﺒﻧﺩ
+
+Some map images could not be loaded. Check the local console for details.
+== .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺪﻧﺪﺸﻧ ىﺮﯿﮔﺭﺎﺑ ﭗﻣ ﺮﯾﻭﺎﺼﺗ ﺯﺍ ﯽﺧﺮ
+
+Some map sounds could not be loaded. Check the local console for details.
+== .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺪﻧﺪﺸﻧ ىﺮﯿﮔﺭﺎﺑ ﭗﻣ ىﺎﻫﺍﺪﺻ ﺯﺍ ﯽﺧﺮﺑ
+
+Loading menu themes
+== ﻮﻨﻣ ىﺎﻫ ﻢﺗ ىﺮﯿﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ
+
+Press a key…
+== …ﺪﯿﻫﺩ ﺭﺎﺸﻓ ﺍﺭ ﺪﯿﻠﻛ ﻚﯾ
+
+Main menu
+== ﯽﻠﺻﺍ ىﻮﻨﻣ
+
+Rename folder
+== ﻪﺷﻮﭘ ﻡﺎﻧ ﺮﯿﯿﻐﺗ
+
+Render complete
+== ﺪﺷ ﻞﻣﺎﻛ ﺭﺪﻧﺭ
+
+Are you sure that you want to restart?
+== ؟ﺪﯿﻨﻛ ىﺯﺍﺪﻧﺍ ﻩﺍﺭ ﻩﺭﺎﺑﻭﺩ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
+
+Save skin
+== ﻦﯿﻜﺳﺍ ﻩﺮﯿﺧﺫ
+
+Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
+== ﺯﺍ ﻡﺎﻧ ﻦﯾﺍ ﺎﺑ ﯽﻨﯿﻜﺳﺍ ﺮﮔﺍ ؟ﺪﯿﻨﻛ ﻩﺮﯿﺧﺫ ﺍﺭ ﺩﻮﺧ ﻦﯿﻜﺳﺍ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ .ﺪﺷ ﺪﻫﺍﻮﺧ ﻦﯾﺰﮕﯾﺎﺟ ،ﺪﺷﺎﺑ ﻪﺘﺷﺍﺩ ﺩﻮﺟﻭ ﻞﺒﻗ
+
+There's an unsaved map in the editor, you might want to save it.
+== .ﺪﯿﻨﻛ ﻩﺮﯿﺧﺫ ﺍﺭ ﻥﺁ ﺪﯿﻫﺍﻮﺨﺑ ﺖﺳﺍ ﻦﻜﻤﻣ ،ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﺭﻮﺘﯾﺩﺍ ﺭﺩ ﻩﺪﺸﻧ ﻩﺮﯿﺧﺫ ﭗﻣ ﻚﯾ
+
+Continue anyway?
+== ؟ﺪﯿﻫﺩ ﻪﻣﺍﺩﺍ ﻝﺎﺣ ﺮﻫ ﻪﺑ
+
+A demo with this name already exists
+== ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﻞﺒﻗ ﺯﺍ ﻡﺎﻧ ﻦﯾﺍ ﺎﺑ ﻮﻣﺩ ﻚﯾ
+
+A folder with this name already exists
+== ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﻞﺒﻗ ﺯﺍ ﻡﺎﻧ ﻦﯾﺍ ﺎﺑ ﻪﺷﻮﭘ ﻚﯾ
+
+Unable to rename the folder
+== ﺖﺴﯿﻧ ﻦﻜﻤﻣ ﻪﺷﻮﭘ ﻡﺎﻧ ﺮﯿﯿﻐﺗ
+
+(paused)
+== (ﻩﺪﺷ ﺚﻜﻣ)
+
+Videos directory
+== ﺎﻫ ﻮﯾﺪﯾﻭ ﺖﺳﺮﻬﻓ
+
+Video was saved to '%s'
+== ﺪﺷ ﻩﺮﯿﺧﺫ "%s" ﺭﺩ ﻮﺋﺪﯾﻭ
+
+Unable to save the skin
+== ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﻦﯿﻜﺳﺍ ﻩﺮﯿﺧﺫ ﻥﺎﻜﻣﺍ
+
+Unable to save the skin with a reserved name
+== ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﻩﺪﺷ ﻭﺭﺯﺭ ﻡﺎﻧ ﺎﺑ ﻦﯿﻜﺳﺍ ﻩﺮﯿﺧﺫ ﻥﺎﻜﻣﺍ
+
+%d/%d KiB (%.1f KiB/s)
+== %d/%d KiB (%.1f KiB/s)
+
+No local servers found (ports %d-%d)
+== (%d-%d ﺕﺭﻮﭘ) ﺪﺸﻧ ﺖﻓﺎﯾ ﯽﻠﺤﻣ ﺭﻭﺮﺳ ﭻﯿﻫ
+
+Example of usage
+== ﺩﺮﺑﺭﺎﻛ ﻪﻧﻮﻤﻧ
+
+No login required
+== ﺪﺷﺎﺑ ﯽﻤﻧ ﺩﻭﺭﻭ ﻪﺑ ﺯﺎﯿﻧ
+
+Communities
+== ﻊﻣﺍﻮﺟ
+
+Copy info
+== ﺕﺎﻋﻼﻃﺍ ﯽﭙﻛ
+
+No server selected
+== ﺖﺳﺍ ﻩﺪﺸﻧ ﺏﺎﺨﺘﻧﺍ ىﺭﻭﺮﺳ ﭻﯿﻫ
+
+Online players (%d)
+== (%d) ﻦﯾﻼﻧﺁ ﻥﺎﻨﻜﯾﺯﺎﺑ
+
+Online clanmates (%d)
+== (%d) ﻦﯾﻼﻧﺁ ىﺎﻫ ﯽﻨﻠﻛ ﻢﻫ
+
+[friends (server browser)]
+Offline (%d)
+== ﻥﺎﺘﺳﻭﺩ] (%d) ﻦﯾﻼﻓﺁ
+
+Click to select server. Double click to join your friend.
+== .ﺪﯿﻨﻛ ﻚﯿﻠﻛ ﺭﺎﺑﻭﺩ ﺩﻮﺧ ﺖﺳﻭﺩ ﻪﺑ ﻦﺘﺳﻮﯿﭘ ىﺍﺮﺑ .ﺪﯿﻨﻛ ﻚﯿﻠﻛ ﺭﻭﺮﺳ ﺏﺎﺨﺘﻧﺍ ىﺍﺮﺑ
+
+Click to remove this player from your friends list.
+== .ﺪﯿﻨﻛ ﻚﯿﻠﻛ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ ﺖﺴﯿﻟ ﺯﺍ ﻦﻜﯾﺯﺎﺑ ﻦﯾﺍ ﻑﺬﺣ ىﺍﺮﺑ
+
+Click to remove this clan from your friends list.
+== .ﺪﯿﻨﻛ ﻚﯿﻠﻛ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ ﺖﺴﯿﻟ ﺯﺍ ﻦﻠﻛ ﻦﯾﺍ ﻑﺬﺣ ىﺍﺮﺑ
+
+None
+== ﻡﺍﺪﻛ ﭻﯿﻫ
+
+Add Clan
+== ﻦﻠﻛ ﻥﺩﺮﻛ ﻪﻓﺎﺿﺍ
+
+Server filter
+== ﺭﻭﺮﺳ ﺮﺘﻠﯿﻓ
+
+Friends
+== ﻥﺎﺘﺳﻭﺩ
+
+Go back the specified duration
+== ﺪﯿﻧﺍﺩﺮﮔﺮﺑ ﺐﻘﻋ ﻪﺑ ﺍﺭ ﻩﺪﺷ ﺺﺨﺸﻣ ﻥﺎﻣﺯ ﺕﺪﻣ
+
+[Demo player duration]
+%d min.
+== ﻪﻘﯿﻗﺩ %d
+
+[Demo player duration]
+%d sec.
+== ﻪﯿﻧﺎﺛ %d
+
+Change the skip duration
+== ﻩﺪﺷ ﭗﯿﻜﺳﺍ ﻥﺎﻣﺯ ﺕﺪﻣ ﺮﯿﯿﻐﺗ
+
+Go forward the specified duration
+== ﻩﺪﺷ ﺺﺨﺸﻣ ﻥﺎﻣﺯ ﺕﺪﻣ ﻥﺩﺮﺑ ﻮﻠﺟ
+
+Mark the beginning of a cut (right click to reset)
+== (ﺪﯿﻨﻛ ﺖﺳﺍﺭ ﻚﯿﻠﻛ ﺩﺪﺠﻣ ﻢﯿﻈﻨﺗ ىﺍﺮﺑ) ﺪﯿﻧﺰﺑ ﺖﻣﻼﻋ ﺍﺭ ﺵﺮﺑ ﻚﯾ ﻉﻭﺮﺷ
+
+Mark the end of a cut (right click to reset)
+== (ﺪﯿﻨﻛ ﺖﺳﺍﺭ ﻚﯿﻠﻛ ﺩﺪﺠﻣ ﻢﯿﻈﻨﺗ ىﺍﺮﺑ) ﺪﯿﻧﺰﺑ ﺖﻣﻼﻋ ﺍﺭ ﺵﺮﺑ ﻚﯾ ىﺎﻬﺘﻧﺍ
+
+Close the demo player
+== ﺪﯾﺪﻨﺒﺑ ﺍﺭ ﻮﻣﺩ ﻩﺪﻨﻨﻛ ﺶﺨﭘ
+
+Export demo cut
+== ﻩﺪﺷ ﺵﺮﺑ ﻮﻣﺩ ﻥﺩﺮﻛ ﺭﺩﺎﺻ
+
+Cut interval
+== ﺵﺮﺑ ﻪﻠﺻﺎﻓ
+
+Cut length
+== ﺵﺮﺑ ﻝﻮﻃ
+
+Render cut to video
+== ﻮﯾﺪﯾﻭ ﻪﺑ ﺵﺮﺑ ﺭﺪﻧﺭ
+
+Please use a different filename
+== ﺪﯿﻨﻛ ﻩﺩﺎﻔﺘﺳﺍ ىﺮﮕﯾﺩ ﻞﯾﺎﻓ ﻡﺎﻧ ﺯﺍ ﺎﻔﻄﻟ
+
+All combined
+== ﺪﯿﻨﻛ ﻩﺩﺎﻔﺘﺳﺍ ىﺮﮕﯾﺩ ﻞﯾﺎﻓ ﻡﺎﻧ ﺯﺍ ﺎﻔﻄﻟ
+
+No demo selected
+== ﺖﺳﺍ ﻩﺪﺸﻧ ﺏﺎﺨﺘﻧﺍ ىﺍ ﻮﻣﺩ ﭻﯿﻫ
+
+Folder Link
+== ﻪﺷﻮﭘ ﻚﻨﯿﻟ
+
+Created
+== ﺪﺷ ﺩﺎﺠﯾﺍ
+
+Netversion
+== ﺖﻧ ﻪﺨﺴﻧ
+
+[Demo details]
+map not included
+== ﺖﺳﺍ ﻩﺪﺸﻧ ﻩﺪﻧﺎﺠﻨﮔ ﭗﻣ
+
+Are you sure that you want to delete the folder '%s'?
+== ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺍﺭ '%s' ﻪﺷﻮﭘ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
+
+Delete folder
+== ﻪﺷﻮﭘ ﻑﺬﺣ
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== .ﺖﺳﺍ ﯽﻟﺎﺧ ﻪﻛ ﺪﯾﻮﺷ ﻦﺌﻤﻄﻣ ﺍﺪﺘﺑﺍ .ﺖﺴﯿﻧ ﻦﻜﻤﻣ "%s" ﻪﺷﻮﭘ ﻑﺬﺣ
+
+Dummy is not allowed on this server
+== ﺖﺴﯿﻧ ﺯﺎﺠﻣ ﺭﻭﺮﺳ ﻦﯾﺍ ﺭﺩ ﯽﻣﺍﺩ
+
+Please wait…
+== ﺪﯿﻨﻛ ﺮﺒﺻ ﺎﻔﻄﻟ…
+
+Loading…
+== ىﺮﯿﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ…
+
+Ghosts directory
+== ﯽﻠﺒﻗ ىﺎﻫ ﻥﺍﺭ ﺖﺴﯿﻟ ىﺭﻮﺘﻛﺮﯾﺍﺩﯽﻠﺒﻗ ىﺎﻫ ﻥﺍﺭ ﺖﺴﯿﻟ ىﺭﻮﺘﻛﺮﯾﺍﺩ
+
+Activate all
+== ﻪﻤﻫ ىﺯﺎﺳ ﻝﺎﻌﻓ
+
+Deactivate all
+== ﻪﻤﻫ ىﺯﺎﺳ ﻝﺎﻌﻓﺮﯿﻏ
+
+[Hertz]
+Hz
+== Hz
+
+Player info change cooldown
+== اطلاعات بازیکن تغییر زمان جریمه شده
+
+Create a random skin
+== ﯽﻓﺩﺎﺼﺗ ﻦﯿﻜﺳﺍ ﺖﺧﺎﺳ
+
+Axis
+== ﺭﻮﺤﻣ
+
+Graphics card
+== ﻚﯿﻓﺍﺮﮔ ﺕﺭﺎﻛ
+
+Tee
+== ﯽﺗ
+
+Info Messages
+== ﺎﻫ ﻡﺎﯿﭘ ﺕﺎﻋﻼﻃﺍ
+
+Show local time always
+==  ﺖﭼ ﯽﮕﺸﯿﻤﻫ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
+
+Show client IDs (scoreboard, chat, spectator)
+==  (ﺮﮔﺎﺷﺎﻤﺗ ،ﺖﭼ ،ﺯﺎﯿﺘﻣﺍ) ﺖﻨﯾﻼﻛ ىﺎﻫ ﻪﺳﺎﻨﺷ ﺶﯾﺎﻤﻧ
+
+Always show chat
+==  ﺖﭼ ﯽﮕﺸﯿﻤﻫ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
+
+Show only chat messages from team members
+== ﺩﻮﺸﯿﻣ ﺖﻓﺎﯾﺭﺩ ﻢﯿﺗ ىﺎﻀﻋﺍ ﺯﺍ ﻪﻛ ﯽﯾﺎﻫ ﻡﺎﯿﭘ ﺶﯾﺎﻤﻧ
+
+Chat font size
+==  ﺖﭼ ﺖﻧﻮﻓ ﻩﺯﺍﺪﻧﺍ
+
+Chat width
+==   ﺖﭼ ﺽﺮﻋ
+
+Show friend mark (♥) in name plates
+== ﻥﺎﻨﻜﯾﺯﺎﺑ ﻢﺳﺍ ﺭﺎﻨﻛ ﺭﺩ (♥) ﺖﺳﻭﺩ ﺖﻣﻼﻋ ﺶﯾﺎﻤﻧ
+
+Show hook strength icon indicator
+== کﻮﻫ ﺕﺭﺪﻗ ﺩﺪﻋ ﺮﮕﻧﺎﺸﻧ ﺶﯾﺎﻤﻧ
+
+Show hook strength number indicator
+== کﻮﻫ ﺕﺭﺪﻗ ﺩﺪﻋ ﺮﮕﻧﺎﺸﻧ ﺶﯾﺎﻤﻧ
+
+Authed name color in scoreboard
+==  ﺯﺎﯿﺘﻣﺍ ىﻮﻠﺑﺎﺗ ﺭﺩ ﻩﺪﺷ ﺪﯿﯾﺎﺗ ﻡﺎﻧ ﮓﻧﺭ
+
+Same clan color in scoreboard
+==  ﺯﺎﯿﺘﻣﺍ ىﻮﻠﺑﺎﺗ ﺭﺩ ﯽﻨﻠﻛ ﻢﻫ ﮓﻧﺭ
+
+Show own player's hook collision line
+== ﻦﻜﯾﺯﺎﺑ کﻮﻫ ﺭﺰﯿﻟ ﺶﯾﺎﻤﻧ
+
+Always show own player's hook collision line
+== ﻦﻜﯾﺯﺎﺑ کﻮﻫ ﺭﺰﯿﻟ ﯽﮕﺸﯿﻤﻫ ﺶﯾﺎﻤﻧ
+
+Always show other players' hook collision lines
+== ﺮﮕﯾﺩ ﻥﺎﻨﻜﯾﺯﺎﺑ کﻮﻫ ﺭﺰﯿﻟ ﯽﮕﺸﯿﻤﻫ ﺶﯾﺎﻤﻧ
+
+Show finish messages
+==  ﭗﻣ ﻥﺎﯾﺎﭘ ىﺎﻫ ﻡﺎﯿﭘ ﺶﯾﺎﻤﻧ
+
+Enable ghost
+== ﺡﻭﺭ ﺖﻟﺎﺣ ىﺯﺎﺳ ﻝﺎﻌﻓ
+
+Only save improvements
+== ﺩﻮﺷ ﻩﺮﯿﺧﺫ ﺎﻫ ﺩﻮﺒﻬﺑ ﻂﻘﻓ
+
+Regular background color
+== ﻢﻈﻨﻣ ﻪﻨﯿﻣﺯ ﺲﭘ ﮓﻧﺭ
+
+Entities background color
+==  ﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ ﻪﻨﯿﻣﺯ ﺲﭘ ﮓﻧﺭ
+
+Unregister protocol and file extensions
+==  ﺖﺳﺍ ﻩﺪﺸﻧ ﺖﺒﺛ ﻞﯾﺎﻓ ﺪﻧﻮﺴﭘ ﻭ ﻞﻜﺗﻭﺮﭘ
+
+Basic
+== ﻪﯾﺎﭘ
+
+Custom
+== ﯽﺷﺭﺎﻔﺳ
+
+Are you sure that you want to delete '%s'?
+==  ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺍﺭ '%s' ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
+
+Delete skin
+== ﻦﯿﻜﺳﺍ ﻑﺬﺣ
+
+Unable to delete skin
+== ﺖﺴﯿﻧ ﻦﻜﻤﻣ ﻦﯿﻜﺳﺍ ﻑﺬﺣ
+
+Round %d/%d
+== %d/%d  ﺪﻧﺍﺭ
+
+[Spectators]
+%d others…
+== ﺮﮕﯾﺩ %d
+
+[Team and size]
+%d\n(%d/%d)
+== %d\n(%d/%d)
+
+Team %d (%d/%d)
+== %d (%d/%d) ﻢﯿﺗ
+
+[skins]
+Body
+== ﻥﺪﺑ
+
+[skins]
+Marking
+== ىﺭﺍﺬﮔ ﺖﻣﻼﻋ
+
+[skins]
+Decoration
+== ﻥﻮﯿﺳﺍﺭﻮﻛﺩ
+
+[skins]
+Hands
+== ﺎﻫ ﺖﺳﺩ
+
+[skins]
+Feet
+== ﺎﭘ
+
+[skins]
+Eyes
+== ﻢﺸﭼ
+
+FPM
+== FPM
+
+Spree
+== ﯽﻨﻜﺷ ﻥﻮﻧﺎﻗ
+
+Grabs
+== ﻥﺩﺯ ﮓﻨﭼ
+
+Moved ingame
+== ﺪﺷ ﻞﻘﺘﻨﻣ ىﺯﺎﺑ
+
+
+https://wiki.ddnet.org/wiki/Mapping
+== https://wiki.ddnet.org/wiki/Mapping
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
-The format of texture %s is not RGBA which will cause visual bugs.
-== 
-
-Loading demo file from storage
-== 
-
-Initializing map logic
-== 
-
-Quitting. Please wait…
-== 
-
-Restarting. Please wait…
-== 
-
-Searching
-== 
-
-Enter Username
-== 
-
-Enter Password
-== 
-
-NOT CONNECTED
-== 
-
-Match %d of %d
-== 
-
-No results
-== 
-
-Lines %d - %d (%s)
-== 
-
-Locked
-== 
-
-Following
-== 
-
-Loading commands…
-== 
-
-Multi-View
-== 
-
-[Spectating]
-Following %s
-== 
-
-Some map images could not be loaded. Check the local console for details.
-== 
-
-Some map sounds could not be loaded. Check the local console for details.
-== 
-
-Loading menu themes
-== 
-
-Press a key…
-== 
-
-Main menu
-== 
-
-Rename folder
-== 
-
-Render complete
-== 
-
-Are you sure that you want to restart?
-== 
-
-Save skin
-== 
-
-Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
-
-There's an unsaved map in the editor, you might want to save it.
-== 
-
-Continue anyway?
-== 
-
-A demo with this name already exists
-== 
-
-A folder with this name already exists
-== 
-
-Unable to rename the folder
-== 
-
-(paused)
-== 
-
-Videos directory
-== 
-
-Video was saved to '%s'
-== 
-
-Unable to save the skin
-== 
-
-Unable to save the skin with a reserved name
-== 
-
-%d/%d KiB (%.1f KiB/s)
-== 
-
-No local servers found (ports %d-%d)
-== 
-
-Example of usage
-== 
-
-No login required
-== 
-
-Communities
-== 
-
-Copy info
-== 
-
-No server selected
-== 
-
-Online players (%d)
-== 
-
-Online clanmates (%d)
-== 
-
-[friends (server browser)]
-Offline (%d)
-== 
-
-Click to select server. Double click to join your friend.
-== 
-
-Click to remove this player from your friends list.
-== 
-
-Click to remove this clan from your friends list.
-== 
-
-None
-== 
-
-Add Clan
-== 
-
-Server filter
-== 
-
-Friends
-== 
-
-Go back the specified duration
-== 
-
-[Demo player duration]
-%d min.
-== 
-
-[Demo player duration]
-%d sec.
-== 
-
-Change the skip duration
-== 
-
-Go forward the specified duration
-== 
-
-Mark the beginning of a cut (right click to reset)
-== 
-
-Mark the end of a cut (right click to reset)
-== 
-
-Close the demo player
-== 
-
-Export demo cut
-== 
-
-Cut interval
-== 
-
-Cut length
-== 
-
-Render cut to video
-== 
-
-Please use a different filename
-== 
-
-All combined
-== 
-
-No demo selected
-== 
-
-Folder Link
-== 
-
-Created
-== 
-
-Netversion
-== 
-
-[Demo details]
-map not included
-== 
-
-Are you sure that you want to delete the folder '%s'?
-== 
-
-Delete folder
-== 
-
-Unable to delete the folder '%s'. Make sure it's empty first.
-== 
-
-Dummy is not allowed on this server
-== 
-
-Please wait…
-== 
-
-Loading…
-== 
-
-Ghosts directory
-== 
-
-Activate all
-== 
-
-Deactivate all
-== 
-
-[Hertz]
-Hz
-== 
-
-Player info change cooldown
-== 
-
-Create a random skin
-== 
-
-Axis
-== 
-
-Graphics card
-== 
-
-Tee
-== 
-
-Info Messages
-== 
-
-Show local time always
-== 
-
-Show client IDs (scoreboard, chat, spectator)
-== 
-
-Always show chat
-== 
-
-Show only chat messages from team members
-== 
-
-Chat font size
-== 
-
-Chat width
-== 
-
-Show friend mark (♥) in name plates
-== 
-
-Show hook strength icon indicator
-== 
-
-Show hook strength number indicator
-== 
-
-Authed name color in scoreboard
-== 
-
-Same clan color in scoreboard
-== 
-
-Show own player's hook collision line
-== 
-
-Always show own player's hook collision line
-== 
-
-Always show other players' hook collision lines
-== 
-
-Show finish messages
-== 
-
-Enable ghost
-== 
-
-Only save improvements
-== 
-
-Regular background color
-== 
-
-Entities background color
-== 
-
-Unregister protocol and file extensions
-== 
-
-Basic
-== 
-
-Custom
-== 
-
-Are you sure that you want to delete '%s'?
-== 
-
-Delete skin
-== 
-
-Unable to delete skin
-== 
-
-Round %d/%d
-== 
-
-[Spectators]
-%d others…
-== 
-
-[Team and size]
-%d\n(%d/%d)
-== 
-
-Team %d (%d/%d)
-== 
-
-[skins]
-Body
-== 
-
-[skins]
-Marking
-== 
-
-[skins]
-Decoration
-== 
-
-[skins]
-Hands
-== 
-
-[skins]
-Feet
-== 
-
-[skins]
-Eyes
-== 
-
-FPM
-== 
-
-Spree
-== 
-
-Grabs
-== 
-
-Moved ingame
-== 
-
-https://wiki.ddnet.org/wiki/Mapping
+Some fonts could not be loaded. Check the local console for details.
 == 

@@ -665,7 +665,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 
 void CMenus::Connect(const char *pAddress)
 {
-	if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
+	if(Client()->State() == IClient::STATE_ONLINE && GameClient()->CurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 	{
 		str_copy(m_aNextServer, pAddress);
 		PopupConfirm(Localize("Disconnect"), Localize("Are you sure that you want to disconnect and switch to a different server?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmSwitchServer);
@@ -1874,17 +1874,7 @@ CTeeRenderInfo CMenus::GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool C
 {
 	CTeeRenderInfo TeeInfo;
 	TeeInfo.Apply(m_pClient->m_Skins.Find(pSkinName));
-	TeeInfo.m_CustomColoredSkin = CustomSkinColors;
-	if(CustomSkinColors)
-	{
-		TeeInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(CustomSkinColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
-		TeeInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(CustomSkinColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
-	}
-	else
-	{
-		TeeInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
-		TeeInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
-	}
+	TeeInfo.ApplyColors(CustomSkinColors, CustomSkinColorBody, CustomSkinColorFeet);
 	TeeInfo.m_Size = minimum(Size.x, Size.y);
 	return TeeInfo;
 }

@@ -95,6 +95,9 @@ class CMenus : public CComponent
 	void DoJoystickBar(const CUIRect *pRect, float Current, float Tolerance, bool Active);
 
 	bool m_SkinListNeedsUpdate = false;
+	bool m_SkinListScrollToSelected = false;
+
+	int m_DirectionQuadContainerIndex;
 
 	// menus_settings_assets.cpp
 public:

@@ -219,8 +219,15 @@ public:
 	void MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer);
 };
 
-struct CProperty
+class CProperty
 {
+public:
+	CProperty(const char *pName, int Value, int Type, int Min, int Max) :
+		m_pName(pName), m_Value(Value), m_Type(Type), m_Min(Min), m_Max(Max) {}
+
+	CProperty(std::nullptr_t) :
+		m_pName(nullptr), m_Value(0), m_Type(0), m_Min(0), m_Max(0) {}
+
 	const char *m_pName;
 	int m_Value;
 	int m_Type;
@@ -442,8 +449,16 @@ public:
 
 		// DDRace
 
-		m_TeleNumber = 1;
-		m_TeleCheckpointNumber = 1;
+		m_ViewTeleNumber = 1;
+		m_TeleNumbers = {
+			{TILE_TELEINEVIL, 1},
+			{TILE_TELEINWEAPON, 1},
+			{TILE_TELEINHOOK, 1},
+			{TILE_TELEIN, 1},
+			{TILE_TELEOUT, 1},
+			{TILE_TELECHECK, 1},
+			{TILE_TELECHECKOUT, 1}};
+
 		m_SwitchNum = 1;
 		m_TuningNum = 1;
 		m_SwitchDelay = 0;
@@ -902,6 +917,8 @@ public:
 	static CUi::EPopupMenuFunctionResult PopupEntities(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupProofMode(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupAnimateSettings(void *pContext, CUIRect View, bool Active);
+	int m_PopupEnvelopeSelectedPoint = -1;
+	static CUi::EPopupMenuFunctionResult PopupEnvelopeCurvetype(void *pContext, CUIRect View, bool Active);
 
 	static bool CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static bool CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
@@ -1142,9 +1159,8 @@ public:
 	IGraphics::CTextureHandle GetSwitchTexture();
 	IGraphics::CTextureHandle GetTuneTexture();
 
-	unsigned char m_TeleNumber;
-	unsigned char m_TeleCheckpointNumber;
 	unsigned char m_ViewTeleNumber;
+	std::map<int, unsigned char> m_TeleNumbers;
 
 	unsigned char m_TuningNum;
 
@@ -1158,7 +1174,7 @@ public:
 
 	void AdjustBrushSpecialTiles(bool UseNextFree, int Adjust = 0);
 	int FindNextFreeSwitchNumber();
-	int FindNextFreeTeleNumber(bool IsCheckpoint = false);
+	int FindNextFreeTeleNumber(int Index);
 
 	// Undo/Redo
 	CEditorHistory m_EditorHistory;

@@ -271,9 +271,9 @@ void CClient::SendMapRequest()
 	}
 }
 
-void CClient::RconAuth(const char *pName, const char *pPassword)
+void CClient::RconAuth(const char *pName, const char *pPassword, bool Dummy)
 {
-	if(RconAuthed())
+	if(m_aRconAuthed[Dummy] != 0)
 		return;
 
 	if(pName != m_aRconUsername)
@@ -285,7 +285,7 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 	{
 		CMsgPacker Msg7(protocol7::NETMSG_RCON_AUTH, true, true);
 		Msg7.AddString(pPassword);
-		SendMsgActive(&Msg7, MSGFLAG_VITAL);
+		SendMsg(Dummy, &Msg7, MSGFLAG_VITAL);
 		return;
 	}
 
@@ -293,7 +293,7 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 	Msg.AddString(pName);
 	Msg.AddString(pPassword);
 	Msg.AddInt(1);
-	SendMsgActive(&Msg, MSGFLAG_VITAL);
+	SendMsg(Dummy, &Msg, MSGFLAG_VITAL);
 }
 
 void CClient::Rcon(const char *pCmd)
@@ -551,6 +551,9 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	Disconnect();
 	dbg_assert(m_State == IClient::STATE_OFFLINE, "Disconnect must ensure that client is offline");
 
+	char aLastAddr[NETADDR_MAXSTRSIZE];
+	net_addr_str(&ServerAddress(), aLastAddr, sizeof(aLastAddr), true);
+
 	if(pAddress != m_aConnectAddressStr)
 		str_copy(m_aConnectAddressStr, pAddress);
 
@@ -594,6 +597,12 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 			OnlySixup = false;
 		net_addr_str(&NextAddr, aNextAddr, sizeof(aNextAddr), true);
 		log_debug("client", "resolved connect address '%s' to %s", aBuffer, aNextAddr);
+
+		if(!str_comp(aNextAddr, aLastAddr))
+		{
+			m_SendPassword = true;
+		}
+
 		aConnectAddrs[NumConnectAddrs] = NextAddr;
 		NumConnectAddrs += 1;
 	}
@@ -762,12 +771,7 @@ void CClient::DummyDisconnect(const char *pReason)
 	m_aNetClient[CONN_DUMMY].Disconnect(pReason);
 	g_Config.m_ClDummy = 0;
 
-	if(!m_aRconAuthed[0] && m_aRconAuthed[1])
-	{
-		RconAuth(m_aRconUsername, m_aRconPassword);
-	}
 	m_aRconAuthed[1] = 0;
-
 	m_aapSnapshots[1][SNAP_CURRENT] = 0;
 	m_aapSnapshots[1][SNAP_PREV] = 0;
 	m_aReceivedSnapshots[1] = 0;
@@ -781,13 +785,6 @@ void CClient::DummyDisconnect(const char *pReason)
 bool CClient::DummyAllowed() const
 {
 	return m_ServerCapabilities.m_AllowDummy;
-}
-
-int CClient::GetCurrentRaceTime()
-{
-	if(GameClient()->GetLastRaceTick() < 0)
-		return 0;
-	return (GameTick(g_Config.m_ClDummy) - GameClient()->GetLastRaceTick()) / GameTickSpeed();
 }
 
 void CClient::GetServerInfo(CServerInfo *pServerInfo) const
@@ -1781,6 +1778,9 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			if(!Unpacker.Error())
 			{
 				m_aRconAuthed[Conn] = ResultInt;
+
+				if(m_aRconAuthed[Conn])
+					RconAuth(m_aRconUsername, m_aRconPassword, g_Config.m_ClDummy ^ 1);
 			}
 			if(Conn == CONN_MAIN)
 			{
@@ -3673,7 +3673,8 @@ void CClient::Con_AddFavorite(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	NETADDR Addr;
-	if(net_addr_from_str(&Addr, pResult->GetString(0)) != 0)
+
+	if(net_addr_from_url(&Addr, pResult->GetString(0), nullptr, 0) != 0 && net_addr_from_str(&Addr, pResult->GetString(0)) != 0)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "invalid address '%s'", pResult->GetString(0));

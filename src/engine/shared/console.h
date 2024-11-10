@@ -84,8 +84,8 @@ class CConsole : public IConsole
 		const char *m_pCommand;
 		const char *m_apArgs[MAX_PARTS];
 
-		CResult()
-
+		CResult(int ClientId) :
+			IResult(ClientId)
 		{
 			mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
 			m_pArgsStart = 0;
@@ -93,18 +93,14 @@ class CConsole : public IConsole
 			mem_zero(m_apArgs, sizeof(m_apArgs));
 		}
 
-		CResult &operator=(const CResult &Other)
+		CResult(const CResult &Other) :
+			IResult(Other)
 		{
-			if(this != &Other)
-			{
-				IResult::operator=(Other);
-				mem_copy(m_aStringStorage, Other.m_aStringStorage, sizeof(m_aStringStorage));
-				m_pArgsStart = m_aStringStorage + (Other.m_pArgsStart - Other.m_aStringStorage);
-				m_pCommand = m_aStringStorage + (Other.m_pCommand - Other.m_aStringStorage);
-				for(unsigned i = 0; i < Other.m_NumArgs; ++i)
-					m_apArgs[i] = m_aStringStorage + (Other.m_apArgs[i] - Other.m_aStringStorage);
-			}
-			return *this;
+			mem_copy(m_aStringStorage, Other.m_aStringStorage, sizeof(m_aStringStorage));
+			m_pArgsStart = m_aStringStorage + (Other.m_pArgsStart - Other.m_aStringStorage);
+			m_pCommand = m_aStringStorage + (Other.m_pCommand - Other.m_aStringStorage);
+			for(unsigned i = 0; i < Other.m_NumArgs; ++i)
+				m_apArgs[i] = m_aStringStorage + (Other.m_apArgs[i] - Other.m_aStringStorage);
 		}
 
 		void AddArgument(const char *pArg)
@@ -163,35 +159,16 @@ class CConsole : public IConsole
 	*/
 	char NextParam(const char *&pFormat);
 
-	class CExecutionQueue
+	class CExecutionQueueEntry
 	{
-		CHeap m_Queue;
-
 	public:
-		struct CQueueEntry
-		{
-			CQueueEntry *m_pNext;
-			CCommand *m_pCommand;
-			CResult m_Result;
-		} * m_pFirst, *m_pLast;
-
-		void AddEntry()
-		{
-			CQueueEntry *pEntry = m_Queue.Allocate<CQueueEntry>();
-			pEntry->m_pNext = 0;
-			if(!m_pFirst)
-				m_pFirst = pEntry;
-			if(m_pLast)
-				m_pLast->m_pNext = pEntry;
-			m_pLast = pEntry;
-			(void)new(&(pEntry->m_Result)) CResult;
-		}
-		void Reset()
-		{
-			m_Queue.Reset();
-			m_pFirst = m_pLast = 0;
-		}
-	} m_ExecutionQueue;
+		CCommand *m_pCommand;
+		CResult m_Result;
+		CExecutionQueueEntry(CCommand *pCommand, CResult Result) :
+			m_pCommand(pCommand),
+			m_Result(Result) {}
+	};
+	std::vector<CExecutionQueueEntry> m_vExecutionQueue;
 
 	void AddCommandSorted(CCommand *pCommand);
 	CCommand *FindCommand(const char *pName, int FlagMask);
@@ -220,7 +197,6 @@ public:
 	void ExecuteLineFlag(const char *pStr, int FlagMask, int ClientId = -1, bool InterpretSemicolons = true) override;
 	bool ExecuteFile(const char *pFilename, int ClientId = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) override;
 
-	char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) override;
 	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const override;
 	void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) override;
 	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;

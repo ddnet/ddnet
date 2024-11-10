@@ -286,6 +286,7 @@ void CNetBan::Init(IConsole *pConsole, IStorage *pStorage)
 	Console()->Register("unban_range", "s[first ip] s[last ip]", CFGFLAG_SERVER | CFGFLAG_MASTER | CFGFLAG_STORE, ConUnbanRange, this, "Unban ip range");
 	Console()->Register("unban_all", "", CFGFLAG_SERVER | CFGFLAG_MASTER | CFGFLAG_STORE, ConUnbanAll, this, "Unban all entries");
 	Console()->Register("bans", "?i[page]", CFGFLAG_SERVER | CFGFLAG_MASTER, ConBans, this, "Show banlist (page 1 by default, 20 entries per page)");
+	Console()->Register("bans_find", "s[ip]", CFGFLAG_SERVER | CFGFLAG_MASTER, ConBansFind, this, "Find all ban records for the specified IP address");
 	Console()->Register("bans_save", "s[file]", CFGFLAG_SERVER | CFGFLAG_MASTER | CFGFLAG_STORE, ConBansSave, this, "Save banlist in a file");
 }
 
@@ -525,6 +526,55 @@ void CNetBan::ConBans(IConsole::IResult *pResult, void *pUser)
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
 	}
 	str_format(aMsg, sizeof(aMsg), "%d %s, showing entries %d - %d (page %d/%d)", Count, Count == 1 ? "ban" : "bans", Start, End > Count ? Count - 1 : End - 1, Page, NumPages);
+	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
+}
+
+void CNetBan::ConBansFind(IConsole::IResult *pResult, void *pUser)
+{
+	CNetBan *pThis = static_cast<CNetBan *>(pUser);
+
+	const char *pStr = pResult->GetString(0);
+	char aBuf[256], aMsg[256];
+
+	NETADDR Addr;
+	if(net_addr_from_str(&Addr, pStr) != 0)
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "bans_find error (invalid network address)");
+		return;
+	}
+
+	int Count = 0;
+	int Found = 0;
+	// Check first for bans
+	for(CBanAddr *pBan = pThis->m_BanAddrPool.First(); pBan; pBan = pBan->m_pNext, Count++)
+	{
+		if(NetComp(&pBan->m_Data, &Addr) == 0)
+		{
+			pThis->MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_LIST);
+			str_format(aMsg, sizeof(aMsg), "#%i %s", Count, aBuf);
+			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
+
+			Found++;
+		}
+	}
+	// check ban ranges
+	for(CBanRange *pBan = pThis->m_BanRangePool.First(); pBan; pBan = pBan->m_pNext, Count++)
+	{
+		if(pThis->NetMatch(&pBan->m_Data, &Addr))
+		{
+			pThis->MakeBanInfo(pBan, aBuf, sizeof(aBuf), MSGTYPE_LIST);
+			str_format(aMsg, sizeof(aMsg), "#%i %s", Count, aBuf);
+			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
+
+			Found++;
+		}
+	}
+
+	if(Found)
+		str_format(aMsg, sizeof(aMsg), "%i ban records found.", Found);
+	else
+		str_copy(aMsg, "No ban records found.", sizeof(aMsg));
+
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", aMsg);
 }
 

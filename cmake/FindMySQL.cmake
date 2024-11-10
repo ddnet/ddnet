@@ -36,16 +36,44 @@ if(NOT CMAKE_CROSSCOMPILING)
   endif()
 endif()
 
-set_extra_dirs_lib(MYSQL mysql)
+if(DEFINED ENV{MYSQL_LIBRARY_PATH})
+  list(APPEND MYSQL_CONFIG_LIBRARY_PATH $ENV{MYSQL_LIBRARY_PATH})
+endif()
+
+if(DEFINED ENV{MYSQL_INCLUDE_PATH})
+  set(MYSQL_CONFIG_INCLUDE_DIR $ENV{MYSQL_INCLUDE_PATH})
+endif()
+
 find_library(MYSQL_LIBRARY
   NAMES "mysqlclient" "mysqlclient_r" "mariadbclient"
-  HINTS ${MYSQL_CONFIG_LIBRARY_PATH}
+  HINTS 
+    ${MYSQL_CONFIG_LIBRARY_PATH}
+    $ENV{MYSQL_LIBRARY_PATH}
+    ${CMAKE_CURRENT_LIST_DIR}/../mysql
+    /run/current-system/sw/lib
+    ${NIX_STORE_DIR}
+  PATHS
+    /nix/store
+  PATH_SUFFIXES
+    mysql
+    mariadb
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
-set_extra_dirs_include(MYSQL mysql "${MYSQL_LIBRARY}")
+
 find_path(MYSQL_INCLUDEDIR
   NAMES "mysql.h"
-  HINTS ${MYSQL_CONFIG_INCLUDE_DIR}
+  HINTS 
+    ${MYSQL_CONFIG_INCLUDE_DIR}
+    $ENV{MYSQL_INCLUDE_PATH}
+    ${CMAKE_CURRENT_LIST_DIR}/../mysql
+    /run/current-system/sw/include
+    ${NIX_STORE_DIR}
+  PATHS
+    /nix/store
+  PATH_SUFFIXES
+    mysql
+    mariadb
+    mysql/mysql
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
@@ -55,6 +83,14 @@ find_package_handle_standard_args(MySQL DEFAULT_MSG MYSQL_LIBRARY MYSQL_INCLUDED
 if(MYSQL_FOUND)
   set(MYSQL_LIBRARIES ${MYSQL_LIBRARY})
   set(MYSQL_INCLUDE_DIRS ${MYSQL_INCLUDEDIR})
-
+  
+  if(NOT TARGET MySQL::MySQL)
+    add_library(MySQL::MySQL UNKNOWN IMPORTED)
+    set_target_properties(MySQL::MySQL PROPERTIES
+      IMPORTED_LOCATION "${MYSQL_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${MYSQL_INCLUDE_DIRS}"
+    )
+  endif()
+  
   mark_as_advanced(MYSQL_INCLUDEDIR MYSQL_LIBRARY)
 endif()

@@ -277,6 +277,14 @@ void CGameContext::ConJetpack(IConsole::IResult *pResult, void *pUserData)
 		pChr->SetJetpack(true);
 }
 
+void CGameContext::ConEndlessJump(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	if(pChr)
+		pChr->SetEndlessJump(true);
+}
+
 void CGameContext::ConSetJumps(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -315,6 +323,14 @@ void CGameContext::ConUnJetpack(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
 	if(pChr)
 		pChr->SetJetpack(false);
+}
+
+void CGameContext::ConUnEndlessJump(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
+	if(pChr)
+		pChr->SetEndlessJump(false);
 }
 
 void CGameContext::ConUnWeapons(IConsole::IResult *pResult, void *pUserData)

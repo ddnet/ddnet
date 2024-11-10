@@ -246,6 +246,7 @@ CServer::CServer()
 	m_SameMapReload = false;
 	m_ReloadedWhenEmpty = false;
 	m_aCurrentMap[0] = '\0';
+	m_pCurrentMapName = m_aCurrentMap;
 
 	m_RconClientId = IServer::RCON_CID_SERV;
 	m_RconAuthLevel = AUTHED_ADMIN;
@@ -2541,14 +2542,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 
 const char *CServer::GetMapName() const
 {
-	// get the name of the map without his path
-	const char *pMapShortName = &Config()->m_SvMap[0];
-	for(int i = 0; i < str_length(Config()->m_SvMap) - 1; i++)
-	{
-		if(Config()->m_SvMap[i] == '/' || Config()->m_SvMap[i] == '\\')
-			pMapShortName = &Config()->m_SvMap[i + 1];
-	}
-	return pMapShortName;
+	return m_pCurrentMapName;
 }
 
 void CServer::ChangeMap(const char *pMap)
@@ -2587,6 +2581,7 @@ int CServer::LoadMap(const char *pMapName)
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBufMsg);
 
 	str_copy(m_aCurrentMap, pMapName);
+	m_pCurrentMapName = fs_filename(m_aCurrentMap);
 
 	// load complete map into memory for download
 	{
@@ -2855,7 +2850,9 @@ int CServer::Run()
 					m_CurrentGameTick = MIN_TICK;
 					m_ServerInfoFirstRequest = 0;
 					Kernel()->ReregisterInterface(GameServer());
+					Console()->StoreCommands(true);
 					GameServer()->OnInit(m_pPersistentData);
+					Console()->StoreCommands(false);
 					if(ErrorShutdown())
 					{
 						break;
@@ -3396,13 +3393,13 @@ void CServer::DemoRecorder_HandleAutoStart()
 		char aTimestamp[20];
 		str_timestamp(aTimestamp, sizeof(aTimestamp));
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "demos/auto/server/%s_%s.demo", m_aCurrentMap, aTimestamp);
+		str_format(aFilename, sizeof(aFilename), "demos/auto/server/%s_%s.demo", GetMapName(), aTimestamp);
 		m_aDemoRecorder[RECORDER_AUTO].Start(
 			Storage(),
 			m_pConsole,
 			aFilename,
 			GameServer()->NetVersion(),
-			m_aCurrentMap,
+			GetMapName(),
 			m_aCurrentMapSha256[MAP_TYPE_SIX],
 			m_aCurrentMapCrc[MAP_TYPE_SIX],
 			"server",
@@ -3426,7 +3423,7 @@ void CServer::SaveDemo(int ClientId, float Time)
 	if(IsRecording(ClientId))
 	{
 		char aNewFilename[IO_MAX_PATH_LENGTH];
-		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%05.2f.demo", m_aCurrentMap, m_aClients[ClientId].m_aName, Time);
+		str_format(aNewFilename, sizeof(aNewFilename), "demos/%s_%s_%05.2f.demo", GetMapName(), m_aClients[ClientId].m_aName, Time);
 		m_aDemoRecorder[ClientId].Stop(IDemoRecorder::EStopMode::KEEP_FILE, aNewFilename);
 	}
 }
@@ -3436,13 +3433,13 @@ void CServer::StartRecord(int ClientId)
 	if(Config()->m_SvPlayerDemoRecord)
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, ClientId);
+		str_format(aFilename, sizeof(aFilename), "demos/%s_%d_%d_tmp.demo", GetMapName(), m_NetServer.Address().port, ClientId);
 		m_aDemoRecorder[ClientId].Start(
 			Storage(),
 			Console(),
 			aFilename,
 			GameServer()->NetVersion(),
-			m_aCurrentMap,
+			GetMapName(),
 			m_aCurrentMapSha256[MAP_TYPE_SIX],
 			m_aCurrentMapCrc[MAP_TYPE_SIX],
 			"server",
@@ -3504,7 +3501,7 @@ void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 		pServer->Console(),
 		aFilename,
 		pServer->GameServer()->NetVersion(),
-		pServer->m_aCurrentMap,
+		pServer->GetMapName(),
 		pServer->m_aCurrentMapSha256[MAP_TYPE_SIX],
 		pServer->m_aCurrentMapCrc[MAP_TYPE_SIX],
 		"server",
@@ -3551,8 +3548,7 @@ void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
 		{
 			char aStr[9];
 			str_format(aStr, sizeof(aStr), "Value: %d", pServer->m_aClients[pServer->m_RconClientId].m_ShowIps);
-			char aBuf[32];
-			pServer->SendRconLine(pServer->m_RconClientId, pServer->Console()->Format(aBuf, sizeof(aBuf), "server", aStr));
+			pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aStr);
 		}
 	}
 }

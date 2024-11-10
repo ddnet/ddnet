@@ -295,7 +295,7 @@ public:
 
 	bool RconAuthed() const override { return m_aRconAuthed[g_Config.m_ClDummy] != 0; }
 	bool UseTempRconCommands() const override { return m_UseTempRconCommands != 0; }
-	void RconAuth(const char *pName, const char *pPassword) override;
+	void RconAuth(const char *pName, const char *pPassword, bool Dummy = g_Config.m_ClDummy) override;
 	void Rcon(const char *pCmd) override;
 	bool ReceivingRconCommands() const override { return m_ExpectedRconCommands > 0; }
 	float GotRconCommandsPercentage() const override;
@@ -488,8 +488,6 @@ public:
 
 	void GenerateTimeoutSeed() override;
 	void GenerateTimeoutCodes(const NETADDR *pAddrs, int NumAddrs);
-
-	int GetCurrentRaceTime() override;
 
 	const char *GetCurrentMap() const override;
 	const char *GetCurrentMapPath() const override;

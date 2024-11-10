@@ -340,7 +340,10 @@ void CGameClient::OnInit()
 	for(int i = 0; i < OLD_NUM_NETOBJTYPES; i++)
 		Client()->SnapSetStaticsize7(i, m_NetObjHandler7.GetObjSize(i));
 
-	TextRender()->LoadFonts();
+	if(!TextRender()->LoadFonts())
+	{
+		Client()->AddWarning(SWarning(Localize("Some fonts could not be loaded. Check the local console for details.")));
+	}
 	TextRender()->SetFontLanguageVariant(g_Config.m_ClLanguagefile);
 
 	// update and swap after font loading, they are quite huge
@@ -544,7 +547,7 @@ void CGameClient::OnConnected()
 	const char *pLoadMapContent = Localize("Initializing map logic");
 	// render loading before skip is calculated
 	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false);
-	m_Layers.Init(Kernel());
+	m_Layers.Init(Kernel()->RequestInterface<IMap>(), false);
 	m_Collision.Init(Layers());
 	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 	m_RaceHelper.Init(this);
@@ -584,6 +587,7 @@ void CGameClient::OnReset()
 	std::fill(std::begin(m_aLastNewPredictedTick), std::end(m_aLastNewPredictedTick), -1);
 
 	m_LastRoundStartTick = -1;
+	m_LastRaceTick = -1;
 	m_LastFlagCarrierRed = -4;
 	m_LastFlagCarrierBlue = -4;
 
@@ -616,7 +620,7 @@ void CGameClient::OnReset()
 
 	// m_Snap was cleared in InvalidateSnapshot
 
-	std::fill(std::begin(m_aLocalTuneZone), std::end(m_aLocalTuneZone), 0);
+	std::fill(std::begin(m_aLocalTuneZone), std::end(m_aLocalTuneZone), -1);
 	std::fill(std::begin(m_aReceivedTuning), std::end(m_aReceivedTuning), false);
 	std::fill(std::begin(m_aExpectingTuningForZone), std::end(m_aExpectingTuningForZone), -1);
 	std::fill(std::begin(m_aExpectingTuningSince), std::end(m_aExpectingTuningSince), 0);
@@ -777,6 +781,8 @@ void CGameClient::OnRender()
 
 	CLineInput::RenderCandidates();
 
+	const bool WasNewTick = m_NewTick;
+
 	// clear new tick flags
 	m_NewTick = false;
 	m_NewPredictedTick = false;
@@ -785,7 +791,7 @@ void CGameClient::OnRender()
 		g_Config.m_ClDummy = 0;
 
 	// resend player and dummy info if it was filtered by server
-	if(Client()->State() == IClient::STATE_ONLINE && !m_Menus.IsActive())
+	if(Client()->State() == IClient::STATE_ONLINE && !m_Menus.IsActive() && WasNewTick)
 	{
 		if(m_aCheckInfo[0] == 0)
 		{
@@ -813,7 +819,9 @@ void CGameClient::OnRender()
 		}
 
 		if(m_aCheckInfo[0] > 0)
-			m_aCheckInfo[0]--;
+		{
+			m_aCheckInfo[0] -= minimum(Client()->GameTick(0) - Client()->PrevGameTick(0), m_aCheckInfo[0]);
+		}
 
 		if(Client()->DummyConnected())
 		{
@@ -843,7 +851,9 @@ void CGameClient::OnRender()
 			}
 
 			if(m_aCheckInfo[1] > 0)
-				m_aCheckInfo[1]--;
+			{
+				m_aCheckInfo[1] -= minimum(Client()->GameTick(1) - Client()->PrevGameTick(1), m_aCheckInfo[1]);
+			}
 		}
 	}
 }
@@ -856,9 +866,18 @@ void CGameClient::OnDummyDisconnect()
 	m_PredictedDummyId = -1;
 }
 
-int CGameClient::GetLastRaceTick() const
+int CGameClient::LastRaceTick() const
 {
-	return m_Ghost.GetLastRaceTick();
+	return m_LastRaceTick;
+}
+
+int CGameClient::CurrentRaceTime() const
+{
+	if(m_LastRaceTick < 0)
+	{
+		return 0;
+	}
+	return (Client()->GameTick(g_Config.m_ClDummy) - m_LastRaceTick) / Client()->GameTickSpeed();
 }
 
 bool CGameClient::Predict() const
@@ -1554,30 +1573,21 @@ void CGameClient::OnNewSnapshot()
 					}
 					IntsToStr(&pInfo->m_Clan0, 3, pClient->m_aClan, std::size(pClient->m_aClan));
 					pClient->m_Country = pInfo->m_Country;
+
 					IntsToStr(&pInfo->m_Skin0, 6, pClient->m_aSkinName, std::size(pClient->m_aSkinName));
+					if(pClient->m_aSkinName[0] == '\0' ||
+						(!m_GameInfo.m_AllowXSkins && (pClient->m_aSkinName[0] == 'x' && pClient->m_aSkinName[1] == '_')))
+					{
+						str_copy(pClient->m_aSkinName, "default");
+					}
 
 					pClient->m_UseCustomColor = pInfo->m_UseCustomColor;
 					pClient->m_ColorBody = pInfo->m_ColorBody;
 					pClient->m_ColorFeet = pInfo->m_ColorFeet;
 
-					// prepare the info
-					if(!m_GameInfo.m_AllowXSkins && (pClient->m_aSkinName[0] == 'x' && pClient->m_aSkinName[1] == '_'))
-						str_copy(pClient->m_aSkinName, "default");
-
-					pClient->m_SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(pClient->m_ColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT));
-					pClient->m_SkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(pClient->m_ColorFeet).UnclampLighting(ColorHSLA::DARKEST_LGT));
 					pClient->m_SkinInfo.m_Size = 64;
-
-					// find new skin
 					pClient->m_SkinInfo.Apply(m_Skins.Find(pClient->m_aSkinName));
-					pClient->m_SkinInfo.m_CustomColoredSkin = pClient->m_UseCustomColor;
-
-					if(!pClient->m_UseCustomColor)
-					{
-						pClient->m_SkinInfo.m_ColorBody = ColorRGBA(1, 1, 1);
-						pClient->m_SkinInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
-					}
-
+					pClient->m_SkinInfo.ApplyColors(pClient->m_UseCustomColor, pClient->m_ColorBody, pClient->m_ColorFeet);
 					pClient->UpdateRenderInfo(IsTeamPlay());
 				}
 			}
@@ -2110,6 +2120,19 @@ void CGameClient::OnNewSnapshot()
 			}
 		}
 	}
+
+	// Record m_LastRaceTick for g_Config.m_ClConfirmDisconnect/QuitTime
+	if(m_GameInfo.m_Race &&
+		Client()->State() == IClient::STATE_ONLINE &&
+		m_Snap.m_pGameInfoObj &&
+		!m_Snap.m_SpecInfo.m_Active &&
+		m_Snap.m_pLocalCharacter &&
+		m_Snap.m_pLocalPrevCharacter)
+	{
+		const bool RaceFlag = m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME;
+		m_LastRaceTick = RaceFlag ? -m_Snap.m_pGameInfoObj->m_WarmupTimer : -1;
+	}
+
 	if(m_Snap.m_LocalClientId != m_PrevLocalId)
 		m_PredictedDummyId = m_PrevLocalId;
 	m_PrevLocalId = m_Snap.m_LocalClientId;
@@ -2593,7 +2616,7 @@ void CGameClient::SendSwitchTeam(int Team) const
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
-void CGameClient::SendStartInfo7(bool Dummy) const
+void CGameClient::SendStartInfo7(bool Dummy)
 {
 	protocol7::CNetMsg_Cl_StartInfo Msg;
 	Msg.m_pName = Dummy ? Client()->DummyName() : Client()->PlayerName();
@@ -2609,6 +2632,7 @@ void CGameClient::SendStartInfo7(bool Dummy) const
 	if(Msg.Pack(&Packer))
 		return;
 	Client()->SendMsg((int)Dummy, &Packer, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+	m_aCheckInfo[(int)Dummy] = -1;
 }
 
 void CGameClient::SendSkinChange7(bool Dummy)
@@ -2940,6 +2964,7 @@ void CGameClient::UpdatePrediction()
 		{
 			if(m_aReceivedTuning[g_Config.m_ClDummy])
 			{
+				TuningList()[m_aExpectingTuningForZone[g_Config.m_ClDummy]] = m_aTuning[g_Config.m_ClDummy];
 				m_GameWorld.TuningList()[m_aExpectingTuningForZone[g_Config.m_ClDummy]] = m_aTuning[g_Config.m_ClDummy];
 				m_aReceivedTuning[g_Config.m_ClDummy] = false;
 				m_aExpectingTuningForZone[g_Config.m_ClDummy] = -1;
@@ -3898,7 +3923,7 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 void CGameClient::RefreshSkins()
 {
 	const auto SkinStartLoadTime = time_get_nanoseconds();
-	m_Skins.Refresh([&](int) {
+	m_Skins.Refresh([&]() {
 		// if skin refreshing takes to long, swap to a loading screen
 		if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
 		{
@@ -3908,15 +3933,7 @@ void CGameClient::RefreshSkins()
 
 	for(auto &Client : m_aClients)
 	{
-		if(Client.m_aSkinName[0] != '\0')
-		{
-			Client.m_SkinInfo.Apply(m_Skins.Find(Client.m_aSkinName));
-		}
-		else
-		{
-			Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
-			Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
-		}
+		Client.m_SkinInfo.Apply(m_Skins.Find(Client.m_aSkinName));
 		Client.UpdateRenderInfo(IsTeamPlay());
 	}
 
@@ -3946,6 +3963,13 @@ void CGameClient::LoadMapSettings()
 	for(int i = 0; i < NUM_TUNEZONES; i++)
 	{
 		TuningList()[i] = TuningParams;
+
+		// only hardcode ddrace tuning for the tune zones
+		// and not the base tuning
+		// that one will be sent by the server if needed
+		if(!i)
+			continue;
+
 		TuningList()[i].Set("gun_curvature", 0);
 		TuningList()[i].Set("gun_speed", 1400);
 		TuningList()[i].Set("shotgun_curvature", 0);

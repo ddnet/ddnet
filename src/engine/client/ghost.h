@@ -3,13 +3,15 @@
 
 #include <engine/ghost.h>
 
-#include <base/system.h>
+#include <cstdint>
 
 enum
 {
 	MAX_ITEM_SIZE = 128,
 	NUM_ITEMS_PER_CHUNK = 50,
+	MAX_CHUNK_SIZE = MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK,
 };
+static_assert(MAX_CHUNK_SIZE % sizeof(int32_t) == 0, "Chunk size must be aligned with int32_t");
 
 // version 4-6
 struct CGhostHeader
@@ -23,32 +25,15 @@ struct CGhostHeader
 	unsigned char m_aTime[sizeof(int32_t)];
 	SHA256_DIGEST m_MapSha256;
 
-	int GetTicks() const
-	{
-		return bytes_be_to_uint(m_aNumTicks);
-	}
-
-	int GetTime() const
-	{
-		return bytes_be_to_uint(m_aTime);
-	}
-
-	CGhostInfo ToGhostInfo() const
-	{
-		CGhostInfo Result;
-		mem_zero(&Result, sizeof(Result));
-		str_copy(Result.m_aOwner, m_aOwner);
-		str_copy(Result.m_aMap, m_aMap);
-		Result.m_NumTicks = GetTicks();
-		Result.m_Time = GetTime();
-		return Result;
-	}
+	int GetTicks() const;
+	int GetTime() const;
+	CGhostInfo ToGhostInfo() const;
 };
 
 class CGhostItem
 {
 public:
-	unsigned char m_aData[MAX_ITEM_SIZE];
+	alignas(int32_t) unsigned char m_aData[MAX_ITEM_SIZE];
 	int m_Type;
 
 	CGhostItem() :
@@ -61,14 +46,15 @@ public:
 class CGhostRecorder : public IGhostRecorder
 {
 	IOHANDLE m_File;
-	class IConsole *m_pConsole;
+	char m_aFilename[IO_MAX_PATH_LENGTH];
 	class IStorage *m_pStorage;
 
-	CGhostItem m_LastItem;
-
-	char m_aBuffer[MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK];
+	alignas(int32_t) char m_aBuffer[MAX_CHUNK_SIZE];
+	alignas(int32_t) char m_aBufferTemp[MAX_CHUNK_SIZE];
 	char *m_pBufferPos;
+	const char *m_pBufferEnd;
 	int m_BufferNumItems;
+	CGhostItem m_LastItem;
 
 	void ResetBuffer();
 	void FlushChunk();
@@ -78,45 +64,49 @@ public:
 
 	void Init();
 
-	int Start(const char *pFilename, const char *pMap, SHA256_DIGEST MapSha256, const char *pName) override;
-	int Stop(int Ticks, int Time) override;
+	int Start(const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, const char *pName) override;
+	void Stop(int Ticks, int Time) override;
 
-	void WriteData(int Type, const void *pData, int Size) override;
+	void WriteData(int Type, const void *pData, size_t Size) override;
 	bool IsRecording() const override { return m_File != nullptr; }
 };
 
 class CGhostLoader : public IGhostLoader
 {
 	IOHANDLE m_File;
-	class IConsole *m_pConsole;
+	char m_aFilename[IO_MAX_PATH_LENGTH];
 	class IStorage *m_pStorage;
 
 	CGhostHeader m_Header;
 	CGhostInfo m_Info;
 
-	CGhostItem m_LastItem;
-
-	char m_aBuffer[MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK];
+	alignas(int32_t) char m_aBuffer[MAX_CHUNK_SIZE];
+	alignas(int32_t) char m_aBufferTemp[MAX_CHUNK_SIZE];
 	char *m_pBufferPos;
+	const char *m_pBufferEnd;
 	int m_BufferNumItems;
 	int m_BufferCurItem;
 	int m_BufferPrevItem;
+	CGhostItem m_LastItem;
 
 	void ResetBuffer();
-	int ReadChunk(int *pType);
+	IOHANDLE ReadHeader(CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc, bool LogMapMismatch) const;
+	bool ValidateHeader(const CGhostHeader &Header, const char *pFilename) const;
+	bool CheckHeaderMap(const CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc, bool LogMapMismatch) const;
+	bool ReadChunk(int *pType);
 
 public:
 	CGhostLoader();
 
 	void Init();
 
-	int Load(const char *pFilename, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc) override;
+	bool Load(const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc) override;
 	void Close() override;
 	const CGhostInfo *GetInfo() const override { return &m_Info; }
 
 	bool ReadNextType(int *pType) override;
-	bool ReadData(int Type, void *pData, int Size) override;
+	bool ReadData(int Type, void *pData, size_t Size) override;
 
-	bool GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, const char *pMap, SHA256_DIGEST MapSha256, unsigned MapCrc) override;
+	bool GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc) override;
 };
 #endif

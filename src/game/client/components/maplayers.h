@@ -30,12 +30,10 @@ class CMapLayers : public CComponent
 
 	CLayers *m_pLayers;
 	CMapImages *m_pImages;
-	int m_Type;
-	int m_CurrentLocalTick;
-	int m_LastLocalTick;
-	bool m_EnvelopeUpdate;
 
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
+	int m_Type;
+	bool m_OnlineOnly;
 
 	struct STileLayerVisuals
 	{
@@ -159,8 +157,6 @@ public:
 	void RenderTileBorder(int LayerIndex, const ColorRGBA &Color, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1);
 	void RenderKillTileBorder(int LayerIndex, const ColorRGBA &Color, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup);
 	void RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer, CMapItemGroup *pGroup, bool ForceRender = false);
-
-	void EnvelopeUpdate();
 
 	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser);
 };

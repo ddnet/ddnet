@@ -1548,7 +1548,7 @@ void CUi::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressS
 	Graphics()->QuadsEnd();
 }
 
-void CUi::DoPopupMenu(const SPopupMenuId *pId, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props)
+void CUi::DoPopupMenu(const SPopupMenuId *pId, float X, float Y, float Width, float Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props)
 {
 	constexpr float Margin = SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN;
 	if(X + Width > Screen()->w - Margin)

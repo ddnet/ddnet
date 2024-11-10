@@ -1943,3 +1943,6 @@ Feet
 [skins]
 Eyes
 == Oči
+
+Some fonts could not be loaded. Check the local console for details.
+== 

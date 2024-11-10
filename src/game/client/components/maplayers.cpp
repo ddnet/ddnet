@@ -24,13 +24,9 @@
 
 using namespace std::chrono_literals;
 
-CMapLayers::CMapLayers(int t, bool OnlineOnly)
+CMapLayers::CMapLayers(int Type, bool OnlineOnly)
 {
-	m_Type = t;
-	m_pLayers = 0;
-	m_CurrentLocalTick = 0;
-	m_LastLocalTick = 0;
-	m_EnvelopeUpdate = false;
+	m_Type = Type;
 	m_OnlineOnly = OnlineOnly;
 }
 
@@ -43,17 +39,6 @@ void CMapLayers::OnInit()
 CCamera *CMapLayers::GetCurCamera()
 {
 	return &m_pClient->m_Camera;
-}
-
-void CMapLayers::EnvelopeUpdate()
-{
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
-		m_CurrentLocalTick = pInfo->m_CurrentTick;
-		m_LastLocalTick = pInfo->m_CurrentTick;
-		m_EnvelopeUpdate = true;
-	}
 }
 
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser)
@@ -75,73 +60,31 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 	if(EnvelopePoints.NumPoints() == 0)
 		return;
 
-	const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pThis->Client()->GameTickSpeed();
-
 	static std::chrono::nanoseconds s_Time{0};
 	static auto s_LastLocalTime = time_get_nanoseconds();
-	if(pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(pThis->m_OnlineOnly && (pItem->m_Version < 2 || pItem->m_Synchronized))
 	{
-		const IDemoPlayer::CInfo *pInfo = pThis->DemoPlayer()->BaseInfo();
-
-		if(!pInfo->m_Paused || pThis->m_EnvelopeUpdate)
+		if(pThis->m_pClient->m_Snap.m_pGameInfoObj)
 		{
-			if(pThis->m_CurrentLocalTick != pInfo->m_CurrentTick)
-			{
-				pThis->m_LastLocalTick = pThis->m_CurrentLocalTick;
-				pThis->m_CurrentLocalTick = pInfo->m_CurrentTick;
-			}
-			if(pItem->m_Version < 2 || pItem->m_Synchronized)
-			{
-				if(pThis->m_pClient->m_Snap.m_pGameInfoObj)
-				{
-					// get the lerp of the current tick and prev
-					int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-					int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-					s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
-											    0,
-											    (CurTick - MinTick),
-											    (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-										    TickToNanoSeconds.count())) +
-						 MinTick * TickToNanoSeconds;
-				}
-			}
-			else
-			{
-				int MinTick = pThis->m_LastLocalTick;
-				s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(0,
-										    pThis->m_CurrentLocalTick - MinTick,
-										    (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-									    TickToNanoSeconds.count())) +
-					 MinTick * TickToNanoSeconds;
-			}
+			// get the lerp of the current tick and prev
+			const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pThis->Client()->GameTickSpeed();
+			const int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+			const int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+			s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
+									    0,
+									    (CurTick - MinTick),
+									    (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
+								    TickToNanoSeconds.count())) +
+				 MinTick * TickToNanoSeconds;
 		}
-		CRenderTools::RenderEvalEnvelope(&EnvelopePoints, s_Time + (int64_t)TimeOffsetMillis * std::chrono::nanoseconds(1ms), Result, Channels);
 	}
 	else
 	{
-		if(pThis->m_OnlineOnly && (pItem->m_Version < 2 || pItem->m_Synchronized))
-		{
-			if(pThis->m_pClient->m_Snap.m_pGameInfoObj) // && !(pThis->m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags&GAMESTATEFLAG_PAUSED))
-			{
-				// get the lerp of the current tick and prev
-				int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
-										    0,
-										    (CurTick - MinTick),
-										    (double)pThis->Client()->IntraGameTick(g_Config.m_ClDummy)) *
-									    TickToNanoSeconds.count())) +
-					 MinTick * TickToNanoSeconds;
-			}
-		}
-		else
-		{
-			auto CurTime = time_get_nanoseconds();
-			s_Time += CurTime - s_LastLocalTime;
-			s_LastLocalTime = CurTime;
-		}
-		CRenderTools::RenderEvalEnvelope(&EnvelopePoints, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
+		const auto CurTime = time_get_nanoseconds();
+		s_Time += CurTime - s_LastLocalTime;
+		s_LastLocalTime = CurTime;
 	}
+	CRenderTools::RenderEvalEnvelope(&EnvelopePoints, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
 }
 
 void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, unsigned char Flags, unsigned char Index, int x, int y, const ivec2 &Offset, int Scale, CMapItemGroup *pGroup)
@@ -443,15 +386,8 @@ void CMapLayers::OnMapLoad()
 
 			if(pLayer->m_Type == LAYERTYPE_TILES && Graphics()->IsTileBufferingEnabled())
 			{
-				bool DoTextureCoords = false;
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				if(pTMap->m_Image == -1)
-				{
-					if(IsEntityLayer)
-						DoTextureCoords = true;
-				}
-				else
-					DoTextureCoords = true;
+				const bool DoTextureCoords = IsEntityLayer || (pTMap->m_Image >= 0 && pTMap->m_Image < m_pImages->Num());
 
 				int DataIndex = 0;
 				unsigned int TileSize = 0;
@@ -797,7 +733,7 @@ void CMapLayers::OnMapLoad()
 				m_vpQuadLayerVisuals.push_back(new SQuadLayerVisuals());
 				SQuadLayerVisuals *pQLayerVisuals = m_vpQuadLayerVisuals.back();
 
-				bool Textured = (pQLayer->m_Image != -1);
+				const bool Textured = pQLayer->m_Image >= 0 && pQLayer->m_Image < m_pImages->Num();
 
 				vtmpQuads.clear();
 				vtmpQuadsTextured.clear();
@@ -1600,15 +1536,18 @@ void CMapLayers::OnRender()
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
 					CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-					if(pTMap->m_Image < 0 || pTMap->m_Image >= m_pImages->Num())
+					if(IsGameLayer)
 					{
-						if(!IsGameLayer)
-							Graphics()->TextureClear();
-						else
-							Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
+						Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
+					}
+					else if(pTMap->m_Image >= 0 && pTMap->m_Image < m_pImages->Num())
+					{
+						Graphics()->TextureSet(m_pImages->Get(pTMap->m_Image));
 					}
 					else
-						Graphics()->TextureSet(m_pImages->Get(pTMap->m_Image));
+					{
+						Graphics()->TextureClear();
+					}
 
 					CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
 					unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Data);
@@ -1665,10 +1604,14 @@ void CMapLayers::OnRender()
 				else if(pLayer->m_Type == LAYERTYPE_QUADS)
 				{
 					CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-					if(pQLayer->m_Image < 0 || pQLayer->m_Image >= m_pImages->Num())
-						Graphics()->TextureClear();
-					else
+					if(pQLayer->m_Image >= 0 && pQLayer->m_Image < m_pImages->Num())
+					{
 						Graphics()->TextureSet(m_pImages->Get(pQLayer->m_Image));
+					}
+					else
+					{
+						Graphics()->TextureClear();
+					}
 
 					CQuad *pQuads = (CQuad *)m_pLayers->Map()->GetDataSwapped(pQLayer->m_Data);
 					if(m_Type == TYPE_BACKGROUND_FORCE || m_Type == TYPE_FULL_DESIGN)

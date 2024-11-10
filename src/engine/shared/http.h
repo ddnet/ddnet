@@ -86,6 +86,7 @@ class CHttpRequest : public IHttpRequest
 
 	CTimeout m_Timeout = CTimeout{0, 0, 0, 0};
 	int64_t m_MaxResponseSize = -1;
+	int64_t m_IfModifiedSince = -1;
 	REQUEST m_Type = REQUEST::GET;
 
 	SHA256_DIGEST m_ActualSha256 = SHA256_ZEROED;
@@ -116,6 +117,8 @@ class CHttpRequest : public IHttpRequest
 	char m_aErr[256]; // 256 == CURL_ERROR_SIZE
 	std::atomic<EHttpState> m_State{EHttpState::QUEUED};
 	std::atomic<bool> m_Abort{false};
+	std::mutex m_WaitMutex;
+	std::condition_variable m_WaitCondition;
 
 	int m_StatusCode = 0;
 	bool m_HeadersEnded = false;
@@ -150,6 +153,7 @@ public:
 
 	void Timeout(CTimeout Timeout) { m_Timeout = Timeout; }
 	void MaxResponseSize(int64_t MaxResponseSize) { m_MaxResponseSize = MaxResponseSize; }
+	void IfModifiedSince(int64_t IfModifiedSince) { m_IfModifiedSince = IfModifiedSince; }
 	void LogProgress(HTTPLOG LogProgress) { m_LogProgress = LogProgress; }
 	void IpResolve(IPRESOLVE IpResolve) { m_IpResolve = IpResolve; }
 	void FailOnErrorStatus(bool FailOnErrorStatus) { m_FailOnErrorStatus = FailOnErrorStatus; }

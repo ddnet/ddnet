@@ -1320,6 +1320,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					const char *pButtonName = nullptr;
 					CUi::FPopupMenuFunction pfnPopupFunc = nullptr;
 					int Rows = 0;
+					int ExtraWidth = 0;
 					if(pS == m_Map.m_pSwitchLayer)
 					{
 						pButtonName = "Switch";
@@ -1342,7 +1343,8 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					{
 						pButtonName = "Tele";
 						pfnPopupFunc = PopupTele;
-						Rows = 3;
+						Rows = m_TeleNumbers.size() + 1;
+						ExtraWidth = 50;
 					}
 
 					if(pButtonName != nullptr)
@@ -1357,7 +1359,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 							static SPopupMenuId s_PopupModifierId;
 							if(!Ui()->IsPopupOpen(&s_PopupModifierId))
 							{
-								Ui()->DoPopupMenu(&s_PopupModifierId, Button.x, Button.y + Button.h, 120, 10.0f + Rows * 13.0f, this, pfnPopupFunc);
+								Ui()->DoPopupMenu(&s_PopupModifierId, Button.x, Button.y + Button.h, 120 + ExtraWidth, 10.0f + Rows * 13.0f, this, pfnPopupFunc);
 							}
 						}
 						TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
@@ -5464,7 +5466,8 @@ void CEditor::RenderFileDialog()
 			str_format(m_aFileSaveName, sizeof(m_aFileSaveName), "%s/%s", m_pFileDialogPath, m_FileDialogFileNameInput.GetString());
 			if(!str_endswith(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]))
 				str_append(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]);
-			if(!str_comp(m_pFileDialogButtonText, "Save") && Storage()->FileExists(m_aFileSaveName, StorageType))
+			const bool SaveAction = m_FileDialogStorageType == IStorage::TYPE_SAVE;
+			if(SaveAction && Storage()->FileExists(m_aFileSaveName, StorageType))
 			{
 				if(m_pfnFileDialogFunc == &CallbackSaveMap)
 					m_PopupEventType = POPEVENT_SAVE;
@@ -5472,12 +5475,16 @@ void CEditor::RenderFileDialog()
 					m_PopupEventType = POPEVENT_SAVE_COPY;
 				else if(m_pfnFileDialogFunc == &CallbackSaveImage)
 					m_PopupEventType = POPEVENT_SAVE_IMG;
-				else
+				else if(m_pfnFileDialogFunc == &CallbackSaveSound)
 					m_PopupEventType = POPEVENT_SAVE_SOUND;
+				else
+					dbg_assert(false, "m_pfnFileDialogFunc unhandled for saving");
 				m_PopupEventActivated = true;
 			}
-			else if(m_pfnFileDialogFunc)
+			else if(m_pfnFileDialogFunc && (SaveAction || m_FilesSelectedIndex >= 0))
+			{
 				m_pfnFileDialogFunc(m_aFileSaveName, StorageType, m_pFileDialogUser);
+			}
 		}
 	}
 
@@ -6779,21 +6786,29 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				CurveButton.w = CurveBar.h;
 				CurveButton.x -= CurveButton.w / 2.0f;
 				const void *pId = &pEnvelope->m_vPoints[i].m_Curvetype;
-				const char *apTypeName[] = {"N", "L", "S", "F", "M", "B"};
+				static const char *const TYPE_NAMES[NUM_CURVETYPES] = {"N", "L", "S", "F", "M", "B"};
 				const char *pTypeName = "!?";
-				if(0 <= pEnvelope->m_vPoints[i].m_Curvetype && pEnvelope->m_vPoints[i].m_Curvetype < (int)std::size(apTypeName))
-					pTypeName = apTypeName[pEnvelope->m_vPoints[i].m_Curvetype];
+				if(0 <= pEnvelope->m_vPoints[i].m_Curvetype && pEnvelope->m_vPoints[i].m_Curvetype < (int)std::size(TYPE_NAMES))
+					pTypeName = TYPE_NAMES[pEnvelope->m_vPoints[i].m_Curvetype];
 
 				if(CurveButton.x >= View.x)
 				{
-					if(DoButton_Editor(pId, pTypeName, 0, &CurveButton, 0, "Switch curve type (N = step, L = linear, S = slow, F = fast, M = smooth, B = bezier)"))
+					const int ButtonResult = DoButton_Editor(pId, pTypeName, 0, &CurveButton, BUTTON_CONTEXT, "Switch curve type (N = step, L = linear, S = slow, F = fast, M = smooth, B = bezier).");
+					if(ButtonResult == 1)
 					{
-						int PrevCurve = pEnvelope->m_vPoints[i].m_Curvetype;
-						pEnvelope->m_vPoints[i].m_Curvetype = (pEnvelope->m_vPoints[i].m_Curvetype + 1) % NUM_CURVETYPES;
+						const int PrevCurve = pEnvelope->m_vPoints[i].m_Curvetype;
+						const int Direction = Input()->ShiftIsPressed() ? -1 : 1;
+						pEnvelope->m_vPoints[i].m_Curvetype = (pEnvelope->m_vPoints[i].m_Curvetype + Direction + NUM_CURVETYPES) % NUM_CURVETYPES;
 
 						m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEditPoint>(this,
 							m_SelectedEnvelope, i, 0, CEditorActionEnvelopeEditPoint::EEditType::CURVE_TYPE, PrevCurve, pEnvelope->m_vPoints[i].m_Curvetype));
 						m_Map.OnModify();
+					}
+					else if(ButtonResult == 2)
+					{
+						m_PopupEnvelopeSelectedPoint = i;
+						static SPopupMenuId s_PopupCurvetypeId;
+						Ui()->DoPopupMenu(&s_PopupCurvetypeId, Ui()->MouseX(), Ui()->MouseY(), 80, NUM_CURVETYPES * 14.0f + 10.0f, this, PopupEnvelopeCurvetype);
 					}
 				}
 			}
@@ -8113,7 +8128,7 @@ void CEditor::Render()
 				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_Tele;
 			});
 			if(HasTeleTiles)
-				str_copy(m_aTooltip, "Use shift+mousewheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number.");
+				str_copy(m_aTooltip, "Use shift+mousewheel up/down to adjust the tele number. Use ctrl+f to change current tele number to the first unused number.");
 
 			if(Input()->ShiftIsPressed())
 			{
@@ -9067,9 +9082,6 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 		// Only handle tele, switch and tune layers
 		if(pLayerTiles->m_Tele)
 		{
-			int NextFreeTeleNumber = FindNextFreeTeleNumber();
-			int NextFreeCPNumber = FindNextFreeTeleNumber(true);
-
 			std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
 			for(int y = 0; y < pTeleLayer->m_Height; y++)
 			{
@@ -9081,13 +9093,17 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 					if(UseNextFree)
 					{
-						if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
-							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeCPNumber;
-						else
-							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeTeleNumber;
+						pTeleLayer->m_pTeleTile[i].m_Number = FindNextFreeTeleNumber(pTeleLayer->m_pTiles[i].m_Index);
 					}
 					else
 						AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number);
+
+					if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index) &&
+						m_TeleNumbers[pTeleLayer->m_pTiles[i].m_Index] != pTeleLayer->m_pTeleTile[i].m_Number)
+					{
+						if(!UseNextFree && Adjust == 0)
+							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleNumbers[pTeleLayer->m_pTiles[i].m_Index];
+					}
 				}
 			}
 		}
@@ -9147,12 +9163,12 @@ int CEditor::FindNextFreeSwitchNumber()
 	return Number;
 }
 
-int CEditor::FindNextFreeTeleNumber(bool IsCheckpoint)
+int CEditor::FindNextFreeTeleNumber(int Index)
 {
 	int Number = -1;
 	for(int i = 1; i <= 255; i++)
 	{
-		if(!m_Map.m_pTeleLayer->ContainsElementWithId(i, IsCheckpoint))
+		if(!m_Map.m_pTeleLayer->ContainsElementWithId(i, Index))
 		{
 			Number = i;
 			break;
