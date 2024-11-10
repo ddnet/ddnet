@@ -33,7 +33,6 @@ class CMapLayers : public CComponent
 
 	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
 	int m_Type;
-	bool m_OnlineOnly;
 
 	struct STileLayerVisuals
 	{

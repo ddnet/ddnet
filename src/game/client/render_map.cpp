@@ -887,7 +887,6 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 		EndY -= EdgeY / 2;
 	}
 
-
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	ColorRGBA col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorTele));
@@ -930,7 +929,7 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 			float Size = (float)g_Config.m_ClOutlineWidth;
 			int NumQuads = 0;
 
-			//Do lonely corners first
+			// Do lonely corners first
 			if(Neighbors[0] && !Neighbors[1] && !Neighbors[3])
 			{
 				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Size);
@@ -951,19 +950,19 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Scale - Size, Size, Size);
 				NumQuads++;
 			}
-			//Top
+			// Top
 			if(Neighbors[1])
 			{
 				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Scale, Size);
 				NumQuads++;
 			}
-			//Bottom
+			// Bottom
 			if(Neighbors[6])
 			{
 				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size, Scale, Size);
 				NumQuads++;
 			}
-			//Left
+			// Left
 			if(Neighbors[3])
 			{
 				if(!Neighbors[1] && !Neighbors[6])
@@ -976,7 +975,7 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size, Size, Scale - Size * 2.0f);
 				NumQuads++;
 			}
-			//Right
+			// Right
 			if(Neighbors[4])
 			{
 				if(!Neighbors[1] && !Neighbors[6])
@@ -993,6 +992,8 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 			Graphics()->QuadsDrawTL(Array, NumQuads);
 		}
 	Graphics()->QuadsEnd();
+}
+
 void CRenderTools::RenderTile(int x, int y, unsigned char Index, float Scale, ColorRGBA Color) const
 {
 	if(Graphics()->HasTextureArraysSupport())

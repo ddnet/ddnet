@@ -115,14 +115,14 @@ void CTater::RandomSkin(void *pUserData)
 {
 	CTater *pThis = static_cast<CTater *>(pUserData);
 	// get the skin count
-	int skinCount = pThis->m_pClient->m_Skins.Num();
+	int skinCount = (int)pThis->m_pClient->m_Skins.GetSkinsUnsafe().size();
 
 	// get a random skin number
 	int skinNumber = std::rand() % skinCount;
 
 	// get all skins as a maps
 	const std::unordered_map<std::string_view, std::unique_ptr<CSkin>> &skins = pThis->m_pClient->m_Skins.GetSkinsUnsafe();
-
+	
 	// map to array
 	int counter = 0;
 	std::vector<std::pair<std::string_view, CSkin *>> skinArray;
