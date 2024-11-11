@@ -538,6 +538,7 @@ void CPlayers::RenderPlayer(
 	}
 
 	// draw gun
+	if(Player.m_Weapon >= 0)
 	{
 		if(!(RenderInfo.m_TeeRenderFlags & TEE_NO_WEAPON))
 		{

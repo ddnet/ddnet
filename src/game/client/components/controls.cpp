@@ -174,7 +174,7 @@ void CControls::OnMessage(int Msg, void *pRawMsg)
 		if(g_Config.m_ClAutoswitchWeapons)
 			m_aInputData[g_Config.m_ClDummy].m_WantedWeapon = pMsg->m_Weapon + 1;
 		// We don't really know ammo count, until we'll switch to that weapon, but any non-zero count will suffice here
-		m_aAmmoCount[pMsg->m_Weapon % NUM_WEAPONS] = 10;
+		m_aAmmoCount[maximum(0, pMsg->m_Weapon % NUM_WEAPONS)] = 10;
 	}
 }
 
@@ -334,7 +334,7 @@ void CControls::OnRender()
 	if(g_Config.m_ClAutoswitchWeaponsOutOfAmmo && !GameClient()->m_GameInfo.m_UnlimitedAmmo && m_pClient->m_Snap.m_pLocalCharacter)
 	{
 		// Keep track of ammo count, we know weapon ammo only when we switch to that weapon, this is tracked on server and protocol does not track that
-		m_aAmmoCount[m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS] = m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount;
+		m_aAmmoCount[maximum(0, m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS)] = m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount;
 		// Autoswitch weapon if we're out of ammo
 		if(m_aInputData[g_Config.m_ClDummy].m_Fire % 2 != 0 &&
 			m_pClient->m_Snap.m_pLocalCharacter->m_AmmoCount == 0 &&
