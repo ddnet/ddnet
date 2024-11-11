@@ -36,21 +36,12 @@ if(NOT CMAKE_CROSSCOMPILING)
   endif()
 endif()
 
-if(DEFINED ENV{MYSQL_LIBRARY_PATH})
-  list(APPEND MYSQL_CONFIG_LIBRARY_PATH $ENV{MYSQL_LIBRARY_PATH})
-endif()
-
-if(DEFINED ENV{MYSQL_INCLUDE_PATH})
-  set(MYSQL_CONFIG_INCLUDE_DIR $ENV{MYSQL_INCLUDE_PATH})
-endif()
+set_extra_dirs_lib(MYSQL mysql)
 
 find_library(MYSQL_LIBRARY
   NAMES "mysqlclient" "mysqlclient_r" "mariadbclient"
+  #explicitly tell CMake to search through the nix/store when using nix/NixOS
   HINTS 
-    ${MYSQL_CONFIG_LIBRARY_PATH}
-    $ENV{MYSQL_LIBRARY_PATH}
-    ${CMAKE_CURRENT_LIST_DIR}/../mysql
-    /run/current-system/sw/lib
     ${NIX_STORE_DIR}
   PATHS
     /nix/store
@@ -59,14 +50,9 @@ find_library(MYSQL_LIBRARY
     mariadb
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
-
 find_path(MYSQL_INCLUDEDIR
   NAMES "mysql.h"
   HINTS 
-    ${MYSQL_CONFIG_INCLUDE_DIR}
-    $ENV{MYSQL_INCLUDE_PATH}
-    ${CMAKE_CURRENT_LIST_DIR}/../mysql
-    /run/current-system/sw/include
     ${NIX_STORE_DIR}
   PATHS
     /nix/store
