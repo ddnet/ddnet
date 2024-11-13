@@ -707,7 +707,19 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
 		}
 
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pLine_->m_Whisper ? "whisper" : (pLine_->m_Team ? "teamchat" : "chat"), aBuf, ChatLogColor);
+		const char *pFrom;
+		if(pLine_->m_Whisper)
+			pFrom = "chat/whisper";
+		else if(pLine_->m_Team)
+			pFrom = "chat/team";
+		else if(pLine_->m_ClientId == SERVER_MSG)
+			pFrom = "chat/server";
+		else if(pLine_->m_ClientId == CLIENT_MSG)
+			pFrom = "chat/client";
+		else
+			pFrom = "chat/all";
+
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, pFrom, aBuf, ChatLogColor);
 	};
 
 	CLine *pCurrentLine = &m_aLines[m_CurrentLine];
@@ -743,6 +755,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	pCurrentLine->m_NameColor = -2;
 	pCurrentLine->m_Friend = false;
 	pCurrentLine->m_HasRenderTee = false;
+	pCurrentLine->m_CustomColor = std::nullopt;
 
 	TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
 	Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
@@ -776,6 +789,8 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	{
 		str_copy(pCurrentLine->m_aName, "— ");
 		str_copy(pCurrentLine->m_aText, pLine);
+		// Set custom color
+		pCurrentLine->m_CustomColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
 	}
 	else
 	{
@@ -1044,7 +1059,9 @@ void CChat::OnPrepareLines(float y)
 
 		// render name
 		ColorRGBA NameColor;
-		if(Line.m_ClientId == SERVER_MSG)
+		if(Line.m_CustomColor)
+			NameColor = *Line.m_CustomColor;
+		else if(Line.m_ClientId == SERVER_MSG)
 			NameColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
 		else if(Line.m_ClientId == CLIENT_MSG)
 			NameColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
@@ -1077,20 +1094,22 @@ void CChat::OnPrepareLines(float y)
 			TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, ": ");
 		}
 
-		// render line
-		ColorRGBA Color;
-		if(Line.m_ClientId == SERVER_MSG)
-			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
-		else if(Line.m_ClientId == CLIENT_MSG)
-			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
-		else if(Line.m_Highlighted)
-			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
-		else if(Line.m_Team)
-			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
-		else // regular message
-			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
-
-		TextRender()->TextColor(Color);
+		// Only apply msg color if no custom color is set
+		if(!Line.m_CustomColor)
+		{
+			ColorRGBA Color;
+			if(Line.m_ClientId == SERVER_MSG)
+				Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
+			else if(Line.m_ClientId == CLIENT_MSG)
+				Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
+			else if(Line.m_Highlighted)
+				Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
+			else if(Line.m_Team)
+				Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
+			else // regular message
+				Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
+			TextRender()->TextColor(Color);
+		}
 
 		CTextCursor AppendCursor = Cursor;
 		AppendCursor.m_LongestLineWidth = 0.0f;
