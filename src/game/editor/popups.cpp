@@ -1439,20 +1439,20 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 			{
 				auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentInPoint;
 
-				pEditor->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pEditor, pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::TANGENT_IN, static_cast<int>(OldTime * 1000.0f), f2fx(OldValue), static_cast<int>(CurrentTime * 1000.0f), f2fx(CurrentValue)));
+				pEditor->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pEditor, pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::TANGENT_IN, OldTime, OldValue, static_cast<int>(CurrentTime * 1000.0f), f2fx(CurrentValue)));
 				CurrentTime = (pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel]) / 1000.0f;
 			}
 			else if(pEditor->IsTangentOutSelected())
 			{
 				auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentOutPoint;
 
-				pEditor->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pEditor, pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::TANGENT_OUT, static_cast<int>(OldTime * 1000.0f), f2fx(OldValue), static_cast<int>(CurrentTime * 1000.0f), f2fx(CurrentValue)));
+				pEditor->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pEditor, pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::TANGENT_OUT, OldTime, OldValue, static_cast<int>(CurrentTime * 1000.0f), f2fx(CurrentValue)));
 				CurrentTime = (pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel]) / 1000.0f;
 			}
 			else
 			{
 				auto [SelectedIndex, SelectedChannel] = pEditor->m_vSelectedEnvelopePoints.front();
-				pEditor->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pEditor, pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::POINT, static_cast<int>(OldTime * 1000.0f), f2fx(OldValue), static_cast<int>(CurrentTime * 1000.0f), f2fx(CurrentValue)));
+				pEditor->m_EnvelopeEditorHistory.Execute(std::make_shared<CEditorActionEditEnvelopePointValue>(pEditor, pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEditEnvelopePointValue::EType::POINT, OldTime, OldValue, static_cast<int>(CurrentTime * 1000.0f), f2fx(CurrentValue)));
 
 				if(SelectedIndex != 0)
 				{
