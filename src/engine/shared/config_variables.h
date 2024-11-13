@@ -200,6 +200,9 @@ MACRO_CONFIG_INT(UiColorizeGametype, ui_colorize_gametype, 1, 0, 1, CFGFLAG_CLIE
 MACRO_CONFIG_INT(UiCloseWindowAfterChangingSetting, ui_close_window_after_changing_setting, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Close window after changing setting")
 MACRO_CONFIG_INT(UiUnreadNews, ui_unread_news, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Whether there is unread news")
 
+MACRO_CONFIG_INT(UiCollapseCommunities, ui_collapse_communities, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Collapse the browsers communities tab")
+MACRO_CONFIG_INT(UiCollapseServerDetails, ui_collapse_server_details, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Collapse the browsers server details in the info tab")
+
 MACRO_CONFIG_INT(GfxNoclip, gfx_noclip, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Disable clipping")
 
 // dummy

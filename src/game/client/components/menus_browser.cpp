@@ -968,7 +968,11 @@ void CMenus::RenderServerbrowserCommunitiesFilter(CUIRect View)
 	View.HSplitTop(19.0f, &Tab, &View);
 	Tab.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f), IGraphics::CORNER_T, 4.0f);
 	Ui()->DoLabel(&Tab, Localize("Communities"), 12.0f, TEXTALIGN_MC);
-	View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
+	if (Ui()->MouseButtonClicked(0) && Tab.Inside(Ui()->MousePos())) {
+		g_Config.m_UiCollapseCommunities = !g_Config.m_UiCollapseCommunities;
+	}
+	if (!g_Config.m_UiCollapseCommunities)
+		View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
 
 	const int MaxEntries = ServerBrowser()->Communities().size();
 	const int EntriesPerRow = 1;
@@ -987,6 +991,8 @@ void CMenus::RenderServerbrowserCommunitiesFilter(CUIRect View)
 		return ServerBrowser()->Communities()[ItemIndex].Name();
 	};
 	const auto &&RenderItem = [&](int ItemIndex, CUIRect Item, const void *pItemId, bool Active) {
+		if (g_Config.m_UiCollapseCommunities)
+			return;
 		const float Alpha = (Active ? 0.9f : 0.2f) + (Ui()->HotItem() == pItemId ? 0.1f : 0.0f);
 
 		CUIRect Icon, Label, FavoriteButton;
@@ -1021,7 +1027,7 @@ void CMenus::RenderServerbrowserCommunitiesFilter(CUIRect View)
 	};
 
 	s_vFavoriteButtonIds.resize(MaxEntries);
-	RenderServerbrowserDDNetFilter(View, ServerBrowser()->CommunitiesFilter(), ItemHeight + 2.0f * Spacing, MaxEntries, EntriesPerRow, s_ScrollRegion, s_vItemIds, true, GetItemName, RenderItem);
+	RenderServerbrowserDDNetFilter(View, ServerBrowser()->CommunitiesFilter(), g_Config.m_UiCollapseCommunities ? 0 : ItemHeight + 2.0f * Spacing, MaxEntries, EntriesPerRow, s_ScrollRegion, s_vItemIds, true, GetItemName, RenderItem);
 }
 
 void CMenus::RenderServerbrowserCountriesFilter(CUIRect View)
@@ -1129,10 +1135,15 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 	const float FontSize = (RowHeight - 4.0f) * CUi::ms_FontmodHeight; // based on DoButton_CheckBox
 
 	CUIRect ServerDetails, Scoreboard;
-	View.HSplitTop(4.0f * 15.0f + RowHeight + 2.0f * 5.0f + 2.0f * 2.0f, &ServerDetails, &Scoreboard);
-	ServerDetails.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
+	if (!g_Config.m_UiCollapseServerDetails || !pSelectedServer) {
+		View.HSplitTop(4.0f * 15.0f + RowHeight + 2.0f * 5.0f + 2.0f * 2.0f, &ServerDetails, &Scoreboard);
+		ServerDetails.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
+	}
+	else {
+		View.HMargin(5.0f, &Scoreboard);
+	} 
 
-	if(pSelectedServer)
+	if(pSelectedServer && !g_Config.m_UiCollapseServerDetails)
 	{
 		ServerDetails.Margin(5.0f, &ServerDetails);
 
@@ -1214,7 +1225,8 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 		Ui()->DoLabel(&Row, aTemp, FontSize, TEXTALIGN_ML);
 
 		RenderServerbrowserInfoScoreboard(Scoreboard, pSelectedServer);
-	}
+	} else if (pSelectedServer)
+		RenderServerbrowserInfoScoreboard(Scoreboard, pSelectedServer);
 	else
 	{
 		Ui()->DoLabel(&ServerDetails, Localize("No server selected"), FontSize, TEXTALIGN_MC);
@@ -1709,7 +1721,11 @@ void CMenus::RenderServerbrowserTabBar(CUIRect TabBar)
 	static CButtonContainer s_InfoTabButton;
 	if(DoButton_MenuTab(&s_InfoTabButton, FONT_ICON_INFO, g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO, &InfoTabButton, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_BROWSER_INFO], &ColorInactive, &ColorActive))
 	{
-		g_Config.m_UiToolboxPage = UI_TOOLBOX_PAGE_INFO;
+		if (g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO) {
+			g_Config.m_UiCollapseServerDetails = !g_Config.m_UiCollapseServerDetails;
+		} else {
+			g_Config.m_UiToolboxPage = UI_TOOLBOX_PAGE_INFO;
+		}
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_InfoTabButton, &InfoTabButton, Localize("Server info"));
 
@@ -1791,11 +1807,12 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 	if((g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES) && !ServerBrowser()->Communities().empty())
 	{
 		CUIRect CommunityFilter;
-		ToolBox.HSplitTop(19.0f + 4.0f * 17.0f + CScrollRegion::HEIGHT_MAGIC_FIX, &CommunityFilter, &ToolBox);
+		int CommunityFilterHeight = g_Config.m_UiCollapseCommunities ? 
+			0 : 4*17;
+		ToolBox.HSplitTop(19.0f + CommunityFilterHeight + CScrollRegion::HEIGHT_MAGIC_FIX, &CommunityFilter, &ToolBox);
 		ToolBox.HSplitTop(8.0f, nullptr, &ToolBox);
 		RenderServerbrowserCommunitiesFilter(CommunityFilter);
 	}
-
 	ToolBox.HSplitTop(24.0f, &TabBar, &ToolBox);
 	ServerList.HSplitBottom(65.0f, &ServerList, &StatusBox);
 
