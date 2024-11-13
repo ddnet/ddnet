@@ -964,14 +964,26 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 
 void CMenus::RenderServerbrowserCommunitiesFilter(CUIRect View)
 {
-	CUIRect Tab;
+	CUIRect Tab, CollapsedIndicatorIcon;
 	View.HSplitTop(19.0f, &Tab, &View);
-	Tab.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f), IGraphics::CORNER_T, 4.0f);
+	Tab.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f), g_Config.m_UiCollapseCommunities ? IGraphics::CORNER_ALL : IGraphics::CORNER_T, 4.0f);
+	Tab.VSplitRight(12.0f, &Tab, &CollapsedIndicatorIcon);
 	Ui()->DoLabel(&Tab, Localize("Communities"), 12.0f, TEXTALIGN_MC);
-	if (Ui()->MouseButtonClicked(0) && Tab.Inside(Ui()->MousePos())) {
+	if(Ui()->MouseButtonClicked(0) && Tab.Inside(Ui()->MousePos()))
+	{
 		g_Config.m_UiCollapseCommunities = !g_Config.m_UiCollapseCommunities;
 	}
-	if (!g_Config.m_UiCollapseCommunities)
+
+	{
+		// render chevron icon to indicate the collapsed status
+		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		Ui()->DoLabel(&CollapsedIndicatorIcon, g_Config.m_UiCollapseCommunities ? FONT_ICON_CHEVRON_UP : FONT_ICON_CHEVRON_DOWN, CollapsedIndicatorIcon.h * CUi::ms_FontmodHeight, TEXTALIGN_MR);
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+	}
+
+	if(!g_Config.m_UiCollapseCommunities)
 		View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
 
 	const int MaxEntries = ServerBrowser()->Communities().size();
@@ -991,7 +1003,7 @@ void CMenus::RenderServerbrowserCommunitiesFilter(CUIRect View)
 		return ServerBrowser()->Communities()[ItemIndex].Name();
 	};
 	const auto &&RenderItem = [&](int ItemIndex, CUIRect Item, const void *pItemId, bool Active) {
-		if (g_Config.m_UiCollapseCommunities)
+		if(g_Config.m_UiCollapseCommunities)
 			return;
 		const float Alpha = (Active ? 0.9f : 0.2f) + (Ui()->HotItem() == pItemId ? 0.1f : 0.0f);
 
@@ -1135,13 +1147,15 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 	const float FontSize = (RowHeight - 4.0f) * CUi::ms_FontmodHeight; // based on DoButton_CheckBox
 
 	CUIRect ServerDetails, Scoreboard;
-	if (!g_Config.m_UiCollapseServerDetails || !pSelectedServer) {
+	if(!g_Config.m_UiCollapseServerDetails || !pSelectedServer)
+	{
 		View.HSplitTop(4.0f * 15.0f + RowHeight + 2.0f * 5.0f + 2.0f * 2.0f, &ServerDetails, &Scoreboard);
 		ServerDetails.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
 	}
-	else {
+	else
+	{
 		View.HMargin(5.0f, &Scoreboard);
-	} 
+	}
 
 	if(pSelectedServer && !g_Config.m_UiCollapseServerDetails)
 	{
@@ -1225,7 +1239,8 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 		Ui()->DoLabel(&Row, aTemp, FontSize, TEXTALIGN_ML);
 
 		RenderServerbrowserInfoScoreboard(Scoreboard, pSelectedServer);
-	} else if (pSelectedServer)
+	}
+	else if(pSelectedServer)
 		RenderServerbrowserInfoScoreboard(Scoreboard, pSelectedServer);
 	else
 	{
@@ -1721,9 +1736,12 @@ void CMenus::RenderServerbrowserTabBar(CUIRect TabBar)
 	static CButtonContainer s_InfoTabButton;
 	if(DoButton_MenuTab(&s_InfoTabButton, FONT_ICON_INFO, g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO, &InfoTabButton, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_BROWSER_INFO], &ColorInactive, &ColorActive))
 	{
-		if (g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO) {
+		if(g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO)
+		{
 			g_Config.m_UiCollapseServerDetails = !g_Config.m_UiCollapseServerDetails;
-		} else {
+		}
+		else
+		{
 			g_Config.m_UiToolboxPage = UI_TOOLBOX_PAGE_INFO;
 		}
 	}
@@ -1807,8 +1825,9 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 	if((g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES) && !ServerBrowser()->Communities().empty())
 	{
 		CUIRect CommunityFilter;
-		int CommunityFilterHeight = g_Config.m_UiCollapseCommunities ? 
-			0 : 4*17;
+		int CommunityFilterHeight = g_Config.m_UiCollapseCommunities ?
+						    0 :
+						    4 * 17;
 		ToolBox.HSplitTop(19.0f + CommunityFilterHeight + CScrollRegion::HEIGHT_MAGIC_FIX, &CommunityFilter, &ToolBox);
 		ToolBox.HSplitTop(8.0f, nullptr, &ToolBox);
 		RenderServerbrowserCommunitiesFilter(CommunityFilter);
