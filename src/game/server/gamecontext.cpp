@@ -4673,8 +4673,13 @@ void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 	if(!CheckClientId2(VictimId))
 		return;
 
-	if(m_apPlayers[ClientId])
-		m_apPlayers[ClientId]->m_LastWhisperTo = VictimId;
+	if(!m_apPlayers[ClientId])
+		return;
+
+	if(!m_apPlayers[VictimId])
+		return;
+
+	m_apPlayers[ClientId]->m_LastWhisperTo = VictimId;
 
 	char aCensoredMessage[256];
 	CensorMessage(aCensoredMessage, pMessage, sizeof(aCensoredMessage));
