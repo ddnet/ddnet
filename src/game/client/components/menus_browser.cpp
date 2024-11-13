@@ -1734,7 +1734,10 @@ void CMenus::RenderServerbrowserTabBar(CUIRect TabBar)
 	GameClient()->m_Tooltips.DoToolTip(&s_FilterTabButton, &FilterTabButton, Localize("Server filter"));
 
 	static CButtonContainer s_InfoTabButton;
-	if(DoButton_MenuTab(&s_InfoTabButton, FONT_ICON_INFO, g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO, &InfoTabButton, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_BROWSER_INFO], &ColorInactive, &ColorActive))
+	const char *ServerInfoIcon = FONT_ICON_INFO;
+	if(g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO && g_Config.m_UiCollapseServerDetails)
+		ServerInfoIcon = FONT_ICON_CHEVRON_UP;
+	if(DoButton_MenuTab(&s_InfoTabButton, ServerInfoIcon, g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO, &InfoTabButton, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_BROWSER_INFO], &ColorInactive, &ColorActive))
 	{
 		if(g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO)
 		{
