@@ -10,7 +10,8 @@
 
 #include "uuid_manager.h"
 
-#include <array>
+#include <cstdint>
+#include <map>
 #include <vector>
 
 enum
@@ -97,9 +98,9 @@ private:
 
 	struct CItemTypeInfo
 	{
-		int m_Num;
-		int m_First;
-		int m_Last;
+		int m_Num = 0;
+		int m_First = -1;
+		int m_Last = -1;
 	};
 
 	struct CExtendedItemType
@@ -114,7 +115,7 @@ private:
 	};
 
 	IOHANDLE m_File;
-	std::array<CItemTypeInfo, MAX_ITEM_TYPES> m_aItemTypes;
+	std::map<uint16_t, CItemTypeInfo, std::less<>> m_ItemTypes; // item types must be sorted in ascending order
 	std::vector<CItemInfo> m_vItems;
 	std::vector<CDataInfo> m_vDatas;
 	std::vector<CExtendedItemType> m_vExtendedItemTypes;
@@ -128,7 +129,7 @@ public:
 	{
 		m_File = Other.m_File;
 		Other.m_File = 0;
-		m_aItemTypes = std::move(Other.m_aItemTypes);
+		m_ItemTypes = std::move(Other.m_ItemTypes);
 		m_vItems = std::move(Other.m_vItems);
 		m_vDatas = std::move(Other.m_vDatas);
 		m_vExtendedItemTypes = std::move(Other.m_vExtendedItemTypes);
