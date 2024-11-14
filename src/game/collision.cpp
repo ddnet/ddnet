@@ -519,7 +519,7 @@ bool CCollision::TestBox(vec2 Pos, vec2 Size) const
 	return false;
 }
 
-void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool *pGrounded, std::vector<vec2> *pBouncePositions) const
+void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, std::vector<vec2> *pBouncePositions, bool *pGrounded) const
 {
 	// do the move
 	vec2 Pos = *pInoutPos;
@@ -564,8 +564,7 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elast
 					NewPos.y = Pos.y;
 					Vel.y *= -ElasticityY;
 					Hits++;
-					if(pBouncePositions)
-						pBouncePositions->push_back(NewPos);
+					pBouncePositions->push_back(NewPos);
 				}
 
 				if(TestBox(vec2(NewPos.x, Pos.y), Size))
@@ -573,8 +572,7 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elast
 					NewPos.x = Pos.x;
 					Vel.x *= -ElasticityX;
 					Hits++;
-					if(pBouncePositions)
-						pBouncePositions->push_back(NewPos);
+					pBouncePositions->push_back(NewPos);
 				}
 
 				// neither of the tests got a collision.
@@ -587,8 +585,7 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elast
 					Vel.y *= -ElasticityY;
 					NewPos.x = Pos.x;
 					Vel.x *= -ElasticityX;
-					if(pBouncePositions)
-						pBouncePositions->push_back(NewPos);
+					pBouncePositions->push_back(NewPos);
 				}
 			}
 

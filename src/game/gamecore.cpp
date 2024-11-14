@@ -538,13 +538,13 @@ void CCharacterCore::Move()
 
 	vec2 OldVel = m_Vel;
 	bool Grounded = false;
-	m_BouncePostions.clear();
+	m_BouncePositions.clear();
 
 	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(),
 		vec2(m_Tuning.m_GroundElasticityX,
 			m_Tuning.m_GroundElasticityY),
-		&Grounded,
-		&m_BouncePostions);
+		&m_BouncePositions,
+		&Grounded);
 
 	if(Grounded)
 	{
