@@ -659,6 +659,15 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
 	View.Margin(5.0f, &View);
 
+	// Communities filter
+	if((g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES) && !ServerBrowser()->Communities().empty())
+	{
+		CUIRect TabContents;
+		View.HSplitTop(minimum(4.0f * 22.0f + CScrollRegion::HEIGHT_MAGIC_FIX, View.h), &TabContents, &View);
+		RenderServerbrowserCommunitiesFilter(TabContents);
+		View.HSplitTop(6.0f, nullptr, &View);
+	}
+
 	CUIRect Button, ResetButton;
 	View.HSplitBottom(RowHeight, &View, &ResetButton);
 	View.HSplitBottom(3.0f, &View, nullptr);
@@ -782,31 +791,20 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 		static CButtonContainer s_CountriesButton;
 		if(DoButton_MenuTab(&s_CountriesButton, Localize("Countries"), s_ActiveTab == FILTERTAB_COUNTRIES, &CountriesTab, IGraphics::CORNER_TL, nullptr, &ColorInactive, &ColorActive, nullptr, 4.0f))
-		{
 			s_ActiveTab = FILTERTAB_COUNTRIES;
-		}
-
 		static CButtonContainer s_TypesButton;
 		if(DoButton_MenuTab(&s_TypesButton, Localize("Types"), s_ActiveTab == FILTERTAB_TYPES, &TypesTab, IGraphics::CORNER_TR, nullptr, &ColorInactive, &ColorActive, nullptr, 4.0f))
-		{
 			s_ActiveTab = FILTERTAB_TYPES;
-		}
 
 		if(s_ActiveTab == FILTERTAB_COUNTRIES)
-		{
 			RenderServerbrowserCountriesFilter(TabContents);
-		}
 		else if(s_ActiveTab == FILTERTAB_TYPES)
-		{
 			RenderServerbrowserTypesFilter(TabContents);
-		}
 	}
 
 	static CButtonContainer s_ResetButton;
 	if(DoButton_Menu(&s_ResetButton, Localize("Reset filter"), 0, &ResetButton))
-	{
 		ResetServerbrowserFilters();
-	}
 }
 
 void CMenus::ResetServerbrowserFilters()
@@ -1787,14 +1785,6 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 	MainView.Margin(10.0f, &MainView);
 	MainView.VSplitRight(205.0f, &ServerList, &ToolBox);
 	ServerList.VSplitRight(5.0f, &ServerList, nullptr);
-
-	if((g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES) && !ServerBrowser()->Communities().empty())
-	{
-		CUIRect CommunityFilter;
-		ToolBox.HSplitTop(19.0f + 4.0f * 17.0f + CScrollRegion::HEIGHT_MAGIC_FIX, &CommunityFilter, &ToolBox);
-		ToolBox.HSplitTop(8.0f, nullptr, &ToolBox);
-		RenderServerbrowserCommunitiesFilter(CommunityFilter);
-	}
 
 	ToolBox.HSplitTop(24.0f, &TabBar, &ToolBox);
 	ServerList.HSplitBottom(65.0f, &ServerList, &StatusBox);
