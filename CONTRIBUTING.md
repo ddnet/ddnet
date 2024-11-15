@@ -149,6 +149,22 @@ if(Foo) { .. }
 
 Unless the alternative code is more complex and harder to read.
 
+### Using integers in boolean contexts should be avoided
+
+❌
+
+```C++
+int Foo = 0;
+if(!Foo) { .. }
+```
+
+✅
+
+```C++
+int Foo = 0;
+if(Foo != 0) { .. }
+```
+
 ### Methods with default arguments should be avoided
 
 Default arguments tend to break quickly, if you have multiple you have to specify each even if you only want to change the last one.
