@@ -3,6 +3,7 @@
 #include "layer_tiles.h"
 
 #include <engine/keys.h>
+#include <engine/shared/config.h>
 #include <engine/shared/map.h>
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
@@ -313,7 +314,17 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 					unsigned char TgtIndex = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type;
 					if(IsValidTeleTile(TgtIndex) && IsTeleTileNumberUsedAny(TgtIndex))
 					{
-						m_pEditor->m_TeleNumbers[TgtIndex] = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
+						if(g_Config.m_EdSimplifyTeles)
+						{
+							if(IsTeleTileNumberUsed(TgtIndex, false))
+								m_pEditor->SetTeleNumbers(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number);
+							else if(IsTeleTileNumberUsed(TgtIndex, true))
+								m_pEditor->SetTeleNumbers(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number, true);
+						}
+						else
+						{
+							m_pEditor->m_TeleNumbers[TgtIndex] = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
+						}
 					}
 				}
 				else

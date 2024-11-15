@@ -1343,7 +1343,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					{
 						pButtonName = "Tele";
 						pfnPopupFunc = PopupTele;
-						Rows = m_TeleNumbers.size() + 1;
+						Rows = g_Config.m_EdSimplifyTeles ? 3 : m_TeleNumbers.size() + 1;
 						ExtraWidth = 50;
 					}
 
@@ -7787,7 +7787,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Ex(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuEntitiesId;
-		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 210.0f, 120.0f, this, PopupMenuSettings, PopupProperties);
+		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 220.0f, 134.0f, this, PopupMenuSettings, PopupProperties);
 	}
 
 	CUIRect ChangedIndicator, Info, Help, Close;
@@ -9082,6 +9082,9 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 		// Only handle tele, switch and tune layers
 		if(pLayerTiles->m_Tele)
 		{
+			int NextFreeTeleNumber = FindNextFreeTeleNumberAny();
+			int NextFreeCPNumber = FindNextFreeTeleNumberAny(true);
+
 			std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
 			for(int y = 0; y < pTeleLayer->m_Height; y++)
 			{
@@ -9093,7 +9096,18 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 					if(UseNextFree)
 					{
-						pTeleLayer->m_pTeleTile[i].m_Number = FindNextFreeTeleNumber(pTeleLayer->m_pTiles[i].m_Index);
+						if(g_Config.m_EdSimplifyTeles)
+						{
+							if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
+								pTeleLayer->m_pTeleTile[i].m_Number = NextFreeCPNumber;
+							else if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
+								pTeleLayer->m_pTeleTile[i].m_Number = NextFreeTeleNumber;
+						}
+						else
+						{
+							if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
+								pTeleLayer->m_pTeleTile[i].m_Number = FindNextFreeTeleNumber(pTeleLayer->m_pTiles[i].m_Index);
+						}
 					}
 					else
 						AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number);
@@ -9175,6 +9189,31 @@ int CEditor::FindNextFreeTeleNumber(int Index)
 		}
 	}
 	return Number;
+}
+
+int CEditor::FindNextFreeTeleNumberAny(bool Checkpoint)
+{
+	int Number = -1;
+	for(int i = 1; i <= 255; i++)
+	{
+		if(!m_Map.m_pTeleLayer->ContainsTeleWithId(i, Checkpoint))
+		{
+			Number = i;
+			break;
+		}
+	}
+	return Number;
+}
+
+void CEditor::SetTeleNumbers(int Number, bool Checkpoint)
+{
+	for(auto &[Tele, Value] : m_TeleNumbers)
+	{
+		if(Checkpoint && IsTeleTileNumberUsed(Tele, true))
+			Value = Number;
+		else if(!Checkpoint && IsTeleTileNumberUsed(Tele, false))
+			Value = Number;
+	};
 }
 
 IEditor *CreateEditor() { return new CEditor; }
