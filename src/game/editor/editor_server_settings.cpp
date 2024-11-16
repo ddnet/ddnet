@@ -1675,7 +1675,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 	m_vPossibleMatches.clear();
 	m_DropdownContext.m_Selected = -1;
 
-	if(m_CommentOffset == 0)
+	if(m_CommentOffset == 0 || (m_aCommand[0] == '\0' && !m_DropdownContext.m_ShortcutUsed))
 		return;
 
 	// First case: argument index under cursor is -1 => we're on the command/setting name
@@ -1870,13 +1870,13 @@ int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, cons
 	// This method CheckCollision(ECollisionCheckResult&) returns an integer which is the index of the colliding line. If no
 	//   colliding line was found, then it returns -1.
 
-	if(m_CommentOffset == 0)
+	const int InputLength = str_length(pInputString);
+
+	if(m_CommentOffset == 0 || InputLength == 0)
 	{ // Ignore comments
 		Result = ECollisionCheckResult::ADD;
 		return -1;
 	}
-
-	const int InputLength = str_length(pInputString);
 
 	struct SArgument
 	{
@@ -1912,9 +1912,6 @@ int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, cons
 		// If we don't allow unknown commands, then we know there is no collision
 		// and the check results in an error.
 		if(!m_AllowUnknownCommands)
-			return -1;
-
-		if(InputLength == 0)
 			return -1;
 
 		// If we get here, it means we allow unknown commands.
@@ -2050,7 +2047,7 @@ bool CMapSettingsBackend::CContext::Valid() const
 {
 	// Check if the entire setting is valid or not
 
-	if(m_CommentOffset == 0)
+	if(m_CommentOffset == 0 || m_aCommand[0] == '\0')
 		return true; // A "comment" setting is considered valid.
 
 	// Check if command is valid
