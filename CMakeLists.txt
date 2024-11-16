@@ -2602,7 +2602,7 @@ if(CLIENT)
   target_link_libraries(game-client ${LIBS_CLIENT})
 
   if(MSVC)
-    target_link_options(game-client PRIVATE /ENTRY:mainCRTStartup)
+    target_link_options(game-client PRIVATE /ENTRY:mainCRTStartup /STACK:2097152)
   endif()
 
   target_include_directories(game-client SYSTEM PRIVATE
@@ -2792,6 +2792,11 @@ if(SERVER)
   set_property(TARGET game-server
       PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
   )
+
+  if(MSVC)
+    target_link_options(game-server PRIVATE /STACK:2097152)
+  endif()
+
   target_link_libraries(game-server ${LIBS_SERVER})
   target_include_directories(game-server PRIVATE ${PNG_INCLUDE_DIRS})
   list(APPEND TARGETS_OWN game-server)
