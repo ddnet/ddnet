@@ -1560,6 +1560,7 @@ public:
 
 		const char *pCurrent = pText;
 		const char *pEnd = pCurrent + Length;
+		const char *pPrevBatchEnd = nullptr;
 		const char *pEllipsis = "…";
 		const SGlyph *pEllipsisGlyph = nullptr;
 		if(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END)
@@ -1966,6 +1967,9 @@ public:
 
 			if(NewLine)
 			{
+				if(pPrevBatchEnd == pBatchEnd)
+					break;
+				pPrevBatchEnd = pBatchEnd;
 				if(!StartNewLine())
 					break;
 				GotNewLineLast = true;
