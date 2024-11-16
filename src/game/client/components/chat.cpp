@@ -1094,22 +1094,20 @@ void CChat::OnPrepareLines(float y)
 			TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, ": ");
 		}
 
-		// Only apply msg color if no custom color is set
-		if(!Line.m_CustomColor)
-		{
-			ColorRGBA Color;
-			if(Line.m_ClientId == SERVER_MSG)
-				Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
-			else if(Line.m_ClientId == CLIENT_MSG)
-				Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
-			else if(Line.m_Highlighted)
-				Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
-			else if(Line.m_Team)
-				Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
-			else // regular message
-				Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
-			TextRender()->TextColor(Color);
-		}
+		ColorRGBA Color;
+		if(Line.m_CustomColor)
+			Color = *Line.m_CustomColor;
+		else if(Line.m_ClientId == SERVER_MSG)
+			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
+		else if(Line.m_ClientId == CLIENT_MSG)
+			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
+		else if(Line.m_Highlighted)
+			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
+		else if(Line.m_Team)
+			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
+		else // regular message
+			Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
+		TextRender()->TextColor(Color);
 
 		CTextCursor AppendCursor = Cursor;
 		AppendCursor.m_LongestLineWidth = 0.0f;
