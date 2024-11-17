@@ -26,6 +26,20 @@ using namespace FontIcons;
 
 static const ColorRGBA gs_HighlightedTextColor = ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f);
 
+static ColorRGBA PlayerBackgroundColor(bool Friend, bool Clan, bool Afk, bool Inside)
+{
+	static const ColorRGBA COLORS[] = {ColorRGBA(0.5f, 1.0f, 0.5f), ColorRGBA(0.4f, 0.4f, 1.0f), ColorRGBA(0.75f, 0.75f, 0.75f)};
+	static const ColorRGBA COLORS_AFK[] = {ColorRGBA(1.0f, 1.0f, 0.5f), ColorRGBA(0.4f, 0.75f, 1.0f), ColorRGBA(0.6f, 0.6f, 0.6f)};
+	int i;
+	if(Friend)
+		i = 0;
+	else if(Clan)
+		i = 1;
+	else
+		i = 2;
+	return (Afk ? COLORS_AFK[i] : COLORS[i]).WithAlpha(Inside ? 0.45f : 0.3f);
+}
+
 template<size_t N>
 static void FormatServerbrowserPing(char (&aBuffer)[N], const CServerInfo *pInfo)
 {
@@ -656,7 +670,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	const float RowHeight = 18.0f;
 	const float FontSize = (RowHeight - 4.0f) * CUi::ms_FontmodHeight; // based on DoButton_CheckBox
 
-	View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
 	View.Margin(5.0f, &View);
 
 	CUIRect Button, ResetButton;
@@ -1130,7 +1143,6 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 
 	CUIRect ServerDetails, Scoreboard;
 	View.HSplitTop(4.0f * 15.0f + RowHeight + 2.0f * 5.0f + 2.0f * 2.0f, &ServerDetails, &Scoreboard);
-	ServerDetails.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
 
 	if(pSelectedServer)
 	{
@@ -1208,10 +1220,14 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 		LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
 		Ui()->DoLabel(&Row, Localize("Ping"), FontSize, TEXTALIGN_ML);
 
+		if(g_Config.m_UiColorizePing)
+			TextRender()->TextColor(GetPingTextColor(pSelectedServer->m_Latency));
 		char aTemp[16];
 		FormatServerbrowserPing(aTemp, pSelectedServer);
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
 		Ui()->DoLabel(&Row, aTemp, FontSize, TEXTALIGN_ML);
+		if(g_Config.m_UiColorizePing)
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
 
 		RenderServerbrowserInfoScoreboard(Scoreboard, pSelectedServer);
 	}
@@ -1227,12 +1243,10 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 
 	static CListBox s_ListBox;
 	View.VSplitLeft(5.0f, nullptr, &View);
-	if(!s_ListBox.ScrollbarShown())
-		View.VSplitRight(5.0f, &View, nullptr);
-	s_ListBox.DoAutoSpacing(1.0f);
+	s_ListBox.DoAutoSpacing(2.0f);
 	s_ListBox.SetScrollbarWidth(16.0f);
 	s_ListBox.SetScrollbarMargin(5.0f);
-	s_ListBox.DoStart(25.0f, pSelectedServer->m_NumReceivedClients, 1, 3, -1, &View);
+	s_ListBox.DoStart(25.0f, pSelectedServer->m_NumReceivedClients, 1, 3, -1, &View, false, IGraphics::CORNER_NONE, true);
 
 	for(int i = 0; i < pSelectedServer->m_NumReceivedClients; i++)
 	{
@@ -1244,31 +1258,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 		CUIRect Skin, Name, Clan, Score, Flag;
 		Name = Item.m_Rect;
 
-		ColorRGBA Color;
-		const float Alpha = (i % 2 + 1) * 0.05f;
-		switch(CurrentClient.m_FriendState)
-		{
-		case IFriends::FRIEND_NO:
-			Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
-			break;
-		case IFriends::FRIEND_PLAYER:
-			if(CurrentClient.m_Afk)
-				Color = ColorRGBA(1.0f, 1.0f, 0.5f, 0.15f + Alpha);
-			else
-				Color = ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f + Alpha);
-			break;
-		case IFriends::FRIEND_CLAN:
-			if(CurrentClient.m_Afk)
-				Color = ColorRGBA(0.4f, 0.75f, 1.0f, 0.15f + Alpha);
-			else
-				Color = ColorRGBA(0.4f, 0.4f, 1.0f, 0.15f + Alpha);
-			break;
-		default:
-			dbg_assert(false, "Invalid friend state");
-			dbg_break();
-			break;
-		}
-
+		const ColorRGBA Color = PlayerBackgroundColor(CurrentClient.m_FriendState == IFriends::FRIEND_PLAYER, CurrentClient.m_FriendState == IFriends::FRIEND_CLAN, CurrentClient.m_Afk, false);
 		Name.Draw(Color, IGraphics::CORNER_ALL, 4.0f);
 		Name.VSplitLeft(1.0f, nullptr, &Name);
 		Name.VSplitLeft(34.0f, &Score, &Name);
@@ -1383,13 +1373,9 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 {
 	const float FontSize = 10.0f;
 	static bool s_aListExtended[NUM_FRIEND_TYPES] = {true, true, false};
-	static const ColorRGBA s_aListColors[NUM_FRIEND_TYPES] = {ColorRGBA(0.5f, 1.0f, 0.5f, 1.0f), ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f), ColorRGBA(1.0f, 0.5f, 0.5f, 1.0f)};
-	// Alternates of s_aListColors include: AFK friend color, AFK clanmate color, Offline clan color.
-	static const ColorRGBA s_aListColorAlternates[NUM_FRIEND_TYPES] = {ColorRGBA(1.0f, 1.0f, 0.5f, 1.0f), ColorRGBA(0.4f, 0.75f, 1.0f, 1.0f), ColorRGBA(0.7f, 0.45f, 0.75f, 1.0f)};
 	const float SpacingH = 2.0f;
 
 	CUIRect List, ServerFriends;
-	View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_NONE, 0.0f);
 	View.HSplitBottom(70.0f, &List, &ServerFriends);
 	List.HSplitTop(5.0f, nullptr, &List);
 	List.VSplitLeft(5.0f, nullptr, &List);
@@ -1430,13 +1416,12 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 	// friends list
 	static CScrollRegion s_ScrollRegion;
-	if(!s_ScrollRegion.ScrollbarShown())
-		List.VSplitRight(5.0f, &List, nullptr);
 	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollbarWidth = 16.0f;
 	ScrollParams.m_ScrollbarMargin = 5.0f;
 	ScrollParams.m_ScrollUnit = 80.0f;
+	ScrollParams.m_Flags = CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH;
 	s_ScrollRegion.Begin(&List, &ScrollOffset, &ScrollParams);
 	List.y += ScrollOffset.y;
 
@@ -1458,7 +1443,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		switch(FriendType)
 		{
 		case FRIEND_PLAYER_ON:
-			str_format(aBuf, sizeof(aBuf), Localize("Online players (%d)"), (int)m_avFriends[FriendType].size());
+			str_format(aBuf, sizeof(aBuf), Localize("Online friends (%d)"), (int)m_avFriends[FriendType].size());
 			break;
 		case FRIEND_CLAN_ON:
 			str_format(aBuf, sizeof(aBuf), Localize("Online clanmates (%d)"), (int)m_avFriends[FriendType].size());
@@ -1502,8 +1487,8 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				{
 					GameClient()->m_Tooltips.DoToolTip(Friend.ListItemId(), &Rect, Localize("Click to select server. Double click to join your friend."));
 				}
-				const bool AlternateColor = (FriendType != FRIEND_OFF && Friend.IsAfk()) || (Friend.FriendState() == IFriends::FRIEND_CLAN && FriendType == FRIEND_OFF);
-				Rect.Draw((AlternateColor ? s_aListColorAlternates[FriendType] : s_aListColors[FriendType]).WithAlpha(Inside ? 0.5f : 0.3f), IGraphics::CORNER_ALL, 5.0f);
+				const ColorRGBA Color = PlayerBackgroundColor(FriendType == FRIEND_PLAYER_ON, FriendType == FRIEND_CLAN_ON, FriendType == FRIEND_OFF ? true : Friend.IsAfk(), Inside);
+				Rect.Draw(Color, IGraphics::CORNER_ALL, 5.0f);
 				Rect.Margin(2.0f, &Rect);
 
 				CUIRect RemoveButton, NameLabel, ClanLabel, InfoLabel;
@@ -1598,12 +1583,34 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				}
 			}
 
+			// Render empty description
 			if(m_avFriends[FriendType].empty())
 			{
-				CUIRect Label;
-				List.HSplitTop(12.0f, &Label, &List);
-				s_ScrollRegion.AddRect(Label);
-				Ui()->DoLabel(&Label, Localize("None"), Label.h * CUi::ms_FontmodHeight, TEXTALIGN_ML);
+				const char *pText;
+				switch(FriendType)
+				{
+				case FRIEND_PLAYER_ON:
+					pText = Localize("Add friends by entering their name below or by clicking their name in the player list.");
+					break;
+				case FRIEND_CLAN_ON:
+					pText = Localize("Add clanmates by entering their clan below and leaving the name blank.");
+					break;
+				case FRIEND_OFF:
+					pText = Localize("Offline friends and clanmates will appear here.");
+					break;
+				default:
+					dbg_assert(false, "Invalid friend state");
+					dbg_break();
+				}
+				const float DescriptionMargin = 2.0f;
+				const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pText, -1, List.w - 2 * DescriptionMargin);
+				CUIRect EmptyDescription;
+				List.HSplitTop(BoundingBox.m_H + 2 * DescriptionMargin, &EmptyDescription, &List);
+				s_ScrollRegion.AddRect(EmptyDescription);
+				EmptyDescription.Margin(DescriptionMargin, &EmptyDescription);
+				SLabelProperties DescriptionProps;
+				DescriptionProps.m_MaxWidth = EmptyDescription.w;
+				Ui()->DoLabel(&EmptyDescription, pText, FontSize, TEXTALIGN_ML, DescriptionProps);
 			}
 		}
 
@@ -1726,7 +1733,7 @@ void CMenus::RenderServerbrowserTabBar(CUIRect TabBar)
 
 void CMenus::RenderServerbrowserToolBox(CUIRect ToolBox)
 {
-	ToolBox.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
+	ToolBox.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f), IGraphics::CORNER_B, 4.0f);
 
 	switch(g_Config.m_UiToolboxPage)
 	{
