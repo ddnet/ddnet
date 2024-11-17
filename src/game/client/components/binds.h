@@ -8,6 +8,7 @@
 
 #include <game/client/component.h>
 
+#include <map>
 #include <vector>
 
 class IConfigManager;
@@ -22,24 +23,29 @@ class CBinds : public CComponent
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 
+public:
+	CBinds();
+	~CBinds();
+	virtual int Sizeof() const override { return sizeof(*this); }
+
 	class CBindSlot
 	{
 	public:
 		int m_Key;
 		int m_ModifierMask;
+		CBindSlot(int KeyId, int ModifierMask);
 
-		CBindSlot(int Key, int ModifierMask) :
-			m_Key(Key),
-			m_ModifierMask(ModifierMask)
+		bool operator==(const CBindSlot &other) const
 		{
+			return m_Key == other.m_Key && m_ModifierMask == other.m_ModifierMask;
+		}
+		bool operator<(const CBindSlot &other) const
+		{
+			if(m_ModifierMask != other.m_ModifierMask)
+				return m_ModifierMask < other.m_ModifierMask;
+			return m_Key < other.m_Key;
 		}
 	};
-	CBindSlot GetBindSlot(const char *pBindString) const;
-
-public:
-	CBinds();
-	~CBinds();
-	virtual int Sizeof() const override { return sizeof(*this); }
 
 	class CBindsSpecial : public CComponent
 	{
@@ -48,6 +54,8 @@ public:
 		virtual int Sizeof() const override { return sizeof(*this); }
 		virtual bool OnInput(const IInput::CEvent &Event) override;
 	};
+
+	CBindSlot GetBindSlot(const char *pBindString) const;
 
 	bool m_MouseOnAction;
 
@@ -67,22 +75,30 @@ public:
 	void Bind(int KeyId, const char *pStr, bool FreeOnly = false, int ModifierCombination = MODIFIER_NONE);
 	void SetDefaults();
 	void UnbindAll();
-	const char *Get(int KeyId, int ModifierCombination);
+	char *Get(CBindSlot BindSlot);
+	inline char *Get(int KeyId, int ModifierMask) { return Get(CBindSlot(KeyId, ModifierMask)); }
 	void GetKey(const char *pBindStr, char *pBuf, size_t BufSize);
+	size_t GetName(int KeyId, int ModifierMask, char *pBuf, size_t BufSize);
 	static int GetModifierMask(IInput *pInput);
 	static int GetModifierMaskOfKey(int Key);
 	static const char *GetModifierName(int Modifier);
-	static void GetKeyBindModifiersName(int ModifierCombination, char *pBuf, size_t BufSize);
+	static size_t GetKeyBindModifiersName(int ModifierCombination, char *pBuf, size_t BufSize);
 
 	virtual void OnConsoleInit() override;
 	virtual bool OnInput(const IInput::CEvent &Event) override;
 
 	// DDRace
-
 	void SetDDRaceBinds(bool FreeOnly);
 
 private:
-	char *m_aapKeyBindings[MODIFIER_COMBINATION_COUNT][KEY_LAST];
+	// struct CBindSlotHash // for unordered_map
+	// {
+	// 	std::size_t operator()(const CBindSlot &bindSlot) const
+	// 	{
+	// 		return std::hash<int>()(bindSlot.m_Key) ^ (std::hash<int>()(bindSlot.m_ModifierMask) << 1);
+	// 	}
+	// };
+	std::map<CBindSlot, char *> m_Binds;
 	std::vector<CBindSlot> m_vActiveBinds;
 };
 #endif
