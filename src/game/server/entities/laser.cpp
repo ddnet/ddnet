@@ -255,8 +255,6 @@ void CLaser::DoBounce()
 				m_Type == WEAPON_LASER && (TileFIndex != TILE_ALLOW_TELE_GUN && TileFIndex != TILE_ALLOW_BLUE_TELE_GUN && !IsSwitchTeleGun && !IsBlueSwitchTeleGun);
 		}
 	}
-
-	//m_Owner = -1;
 }
 
 void CLaser::Reset()
@@ -295,16 +293,11 @@ void CLaser::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient) && NetworkClipped(SnappingClient, m_From))
 		return;
 	CCharacter *pOwnerChar = 0;
-	if(m_Owner >= 0)
-		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	if(!pOwnerChar)
+	pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	if(!pOwnerChar && g_Config.m_SvDestroyLasersOnDeath)
 		return;
 
-	pOwnerChar = nullptr;
 	CClientMask TeamMask = CClientMask().set();
-
-	if(m_Owner >= 0)
-		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
 	if(pOwnerChar && pOwnerChar->IsAlive())
 		TeamMask = pOwnerChar->TeamMask();
