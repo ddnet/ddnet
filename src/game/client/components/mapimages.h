@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_MAPIMAGES_H
 #define GAME_CLIENT_COMPONENTS_MAPIMAGES_H
 
+#include <engine/console.h>
 #include <engine/graphics.h>
 
 #include <game/client/component.h>
@@ -43,7 +44,6 @@ class CMapImages : public CComponent
 
 public:
 	CMapImages();
-	CMapImages(int TextureSize);
 	virtual int Sizeof() const override { return sizeof(*this); }
 
 	IGraphics::CTextureHandle Get(int Index) const { return m_aTextures[Index]; }
@@ -77,6 +77,7 @@ private:
 	IGraphics::CTextureHandle m_OverlayCenterTexture;
 	int m_TextureScale;
 
+	static void ConchainClTextEntitiesSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	void InitOverlayTextures();
 	IGraphics::CTextureHandle UploadEntityLayerText(int TextureSize, int MaxWidth, int YOffset);
 	void UpdateEntityLayerText(CImageInfo &TextImage, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber = -1);
