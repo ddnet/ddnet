@@ -25,15 +25,9 @@ const char *const gs_apModEntitiesNames[] = {
 	"f-ddrace",
 };
 
-CMapImages::CMapImages() :
-	CMapImages(100)
-{
-}
-
-CMapImages::CMapImages(int TextureSize)
+CMapImages::CMapImages()
 {
 	m_Count = 0;
-	m_TextureScale = TextureSize;
 	mem_zero(m_aEntitiesIsLoaded, sizeof(m_aEntitiesIsLoaded));
 	m_SpeedupArrowIsLoaded = false;
 
@@ -44,6 +38,7 @@ CMapImages::CMapImages(int TextureSize)
 
 void CMapImages::OnInit()
 {
+	m_TextureScale = g_Config.m_ClTextEntitiesSize;
 	InitOverlayTextures();
 
 	if(str_comp(g_Config.m_ClAssetsEntities, "default") == 0)
@@ -52,6 +47,8 @@ void CMapImages::OnInit()
 	{
 		str_format(m_aEntitiesPath, sizeof(m_aEntitiesPath), "assets/entities/%s", g_Config.m_ClAssetsEntities);
 	}
+
+	Console()->Chain("cl_text_entities_size", ConchainClTextEntitiesSize, this);
 }
 
 void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
@@ -378,6 +375,16 @@ void CMapImages::ChangeEntitiesPath(const char *pPath)
 			}
 			m_aEntitiesIsLoaded[ModType] = false;
 		}
+	}
+}
+
+void CMapImages::ConchainClTextEntitiesSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		CMapImages *pThis = static_cast<CMapImages *>(pUserData);
+		pThis->SetTextureScale(g_Config.m_ClTextEntitiesSize);
 	}
 }
 
