@@ -148,6 +148,10 @@ Linker to use. Default value is OFF to try mold, lld, gold.
 * **-DSECURITY_COMPILER_FLAGS=[ON|OFF]** <br>
 Whether to set security-relevant compiler flags like `-D_FORTIFY_SOURCE=2` and `-fstack-protector-all`. Default Value is ON.
 
+* **-DPOLLY=[OFF|ON]** <br>
+This enables the Polly LLVM optimizer. Requires a clang compiler with polly enabled.
+Polly is a high-level loop and data-locality optimizer and optimization infrastructure for LLVM. It uses an abstract mathematical representation based on integer polyhedra to analyze and optimize the memory access pattern of a program. https://polly.llvm.org/
+
 Running tests (Debian/Ubuntu)
 -----------------------------
 
@@ -209,7 +213,7 @@ Now open up your Project folder, Visual Studio should automatically detect and c
 
 On your tools hotbar next to the triangular "Run" Button, you can now select what you want to start (e.g game-client or game-server) and build it.
 
-Building on Windows with standalone MSVC build tools 
+Building on Windows with standalone MSVC build tools
 --------------------------------------
 
 First off you will need to install the MSVC [Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/), [Python 3](https://www.python.org/downloads/) as well as [Rust](https://www.rust-lang.org/tools/install).

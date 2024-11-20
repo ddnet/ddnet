@@ -40,7 +40,7 @@ else()
   set(TARGET_BITS "64")
 endif()
 
-if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm" 
+if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm"
   OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64"
   OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "ARM64")
   if(TARGET_BITS STREQUAL "32")
@@ -116,6 +116,7 @@ option(DISCORD_DYNAMIC "Enable discovering Discord rich presence libraries at ru
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
 option(DEV "Don't generate stuff necessary for packaging" OFF)
 option(VULKAN "Enable the vulkan backend" ${AUTO_VULKAN_BACKEND})
+option(POLLY "Enable the polly LLVM optimizer" OFF)
 
 option(EXCEPTION_HANDLING "Enable exception handling (only works with Windows as of now)" OFF)
 option(IPO "Enable interprocedural optimizations" OFF)
@@ -342,6 +343,11 @@ if(NOT MSVC AND NOT HAIKU)
   # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wdouble-promotion) # Many occurrences
   # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wnull-dereference) # Many occurrences
   # add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wuseless-cast) # TODO: Enable for C++ code except gtest
+
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND POLLY)
+    add_c_compiler_flag_if_supported(OUR_FLAGS_OWN -mllvm=-polly)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -mllvm=-polly)
+  endif()
 endif()
 
 if(MSVC)
