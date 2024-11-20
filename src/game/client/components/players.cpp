@@ -608,16 +608,20 @@ void CPlayers::RenderPlayer(
 				if(IsSit)
 					WeaponPosition.y += 3.0f;
 
-				// if active and attack is under way, bash stuffs
-				if(!Inactive || LastAttackTime < m_pClient->m_aTuning[g_Config.m_ClDummy].GetWeaponFireDelay(Player.m_Weapon))
+				// set rotation
+				float QuadsRotation = -pi / 2;
+				QuadsRotation += State.GetAttach()->m_Angle * (Direction.x < 0 ? -1 : 1) * pi * 2;
+				if(g_Config.m_ClHammerRotatesWithCursor)
 				{
-					if(Direction.x < 0)
-						Graphics()->QuadsSetRotation(-pi / 2 - State.GetAttach()->m_Angle * pi * 2);
-					else
-						Graphics()->QuadsSetRotation(-pi / 2 + State.GetAttach()->m_Angle * pi * 2);
+					QuadsRotation += Angle;
+					if (Direction.x < 0)
+						QuadsRotation += pi;
 				}
-				else
-					Graphics()->QuadsSetRotation(Direction.x < 0 ? 100.0f : 500.0f);
+				else if(Inactive && LastAttackTime > m_pClient->m_aTuning[g_Config.m_ClDummy].GetWeaponFireDelay(Player.m_Weapon))
+				{
+					QuadsRotation = Direction.x < 0 ? 100.0f : 500.0f;
+				}
+				Graphics()->QuadsSetRotation(QuadsRotation);
 
 				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
 			}

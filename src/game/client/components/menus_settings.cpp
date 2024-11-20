@@ -3581,8 +3581,14 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		// checkbox for hiding nameplates
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderNameplateSpec, ("Hide nameplates in spec"), &g_Config.m_ClRenderNameplateSpec, &MainView, LineMargin);
 
-		// create dropdown for rainbow modes
+		// hammer rotates with cursor
+		CUIRect HammerRotatesWithCursorButton;
+		MainView.HSplitTop(20.0f, &HammerRotatesWithCursorButton, &MainView);
+		if(DoButton_CheckBox(&g_Config.m_ClHammerRotatesWithCursor, Localize("Hammer rotates with cursor"), g_Config.m_ClHammerRotatesWithCursor, &HammerRotatesWithCursorButton))
+			g_Config.m_ClHammerRotatesWithCursor ^= 1;
+		GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClHammerRotatesWithCursor, &HammerRotatesWithCursorButton, Localize("Allow your hammer to rotate like other weapons"));
 
+		// create dropdown for rainbow modes
 		static std::vector<const char *> s_DropDownNames = {Localize("Rainbow"), Localize("Pulse"), Localize("Black")};
 
 		static CUi::SDropDownState s_RainbowDropDownState;
