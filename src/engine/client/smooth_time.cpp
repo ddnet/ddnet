@@ -51,7 +51,8 @@ int64_t CSmoothTime::Get(int64_t Now) const
 
 void CSmoothTime::UpdateInt(int64_t Target)
 {
-	if (g_Config.m_ClSmoothPredictionMargin) {
+	if(g_Config.m_ClSmoothPredictionMargin)
+	{
 		int64_t Now = time_get();
 		m_Current = Get(Now) - GetMargin(Now);
 		m_Snap = Now;

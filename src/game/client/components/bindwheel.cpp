@@ -163,7 +163,7 @@ void CBindWheel::OnRender()
 
 		char aBuf[MAX_BINDWHEEL_DESC];
 		str_format(aBuf, sizeof(aBuf), "%s", m_BindWheelList[i].description);
-		//str_format(aBuf, sizeof(aBuf), "%d -> %d", inv, orgAngle);
+		// str_format(aBuf, sizeof(aBuf), "%d -> %d", inv, orgAngle);
 		float x = Screen.w / 2 + NudgeX - TextRender()->TextWidth(Size, aBuf, -1, -1.0f) * 0.5;
 		float y = Screen.h / 2 + NudgeY;
 		float LineWidth = -1.0f;
@@ -191,7 +191,7 @@ void CBindWheel::OnRender()
 
 void CBindWheel::Binwheel(int Bind)
 {
-	//bindwheel 0 "123456789" "say hey"
+	// bindwheel 0 "123456789" "say hey"
 	Console()->ExecuteLine(m_BindWheelList[Bind].command);
 }
 
@@ -220,4 +220,3 @@ void CBindWheel::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserD
 		pConfigManager->WriteLine(aBuf);
 	}
 }
-

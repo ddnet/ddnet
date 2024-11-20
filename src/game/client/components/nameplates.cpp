@@ -324,7 +324,7 @@ void CNamePlates::OnRender()
 	// this may need to be changed or calculated differently in the future
 	ScreenX0 -= 400;
 	ScreenX1 += 400;
-	//ScreenY0 -= 0;
+	// ScreenY0 -= 0;
 	ScreenY1 += 800;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -342,10 +342,10 @@ void CNamePlates::OnRender()
 			// don't render offscreen
 			if(in_range(RenderPos.x, ScreenX0, ScreenX1) && in_range(RenderPos.y, ScreenY0, ScreenY1))
 			{
-                if(!g_Config.m_ClRenderNameplateSpec)
-                {
-                    RenderNameplate(RenderPos, pInfo, 0.4f, true);
-                }
+				if(!g_Config.m_ClRenderNameplateSpec)
+				{
+					RenderNameplate(RenderPos, pInfo, 0.4f, true);
+				}
 			}
 		}
 		if(m_pClient->m_Snap.m_aCharacters[i].m_Active)

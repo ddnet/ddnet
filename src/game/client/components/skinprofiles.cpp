@@ -45,9 +45,9 @@ void CSkinProfiles::AddProfile(int BodyColor, int FeetColor, int CountryFlag, in
 {
 	CProfile profile = CProfile(BodyColor, FeetColor, CountryFlag, Emote, pSkinName, pName, pClan);
 
-	//str_copy(profile.SkinName, pSkinName, sizeof(profile.SkinName));
-	//str_copy(profile.Clan, pClan, sizeof(profile.Clan));
-	//str_copy(profile.Name, pName, sizeof(profile.Name));
+	// str_copy(profile.SkinName, pSkinName, sizeof(profile.SkinName));
+	// str_copy(profile.Clan, pClan, sizeof(profile.Clan));
+	// str_copy(profile.Name, pName, sizeof(profile.Name));
 
 	m_Profiles.push_back(profile);
 }

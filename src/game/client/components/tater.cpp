@@ -122,7 +122,7 @@ void CTater::RandomSkin(void *pUserData)
 
 	// get all skins as a maps
 	const std::unordered_map<std::string_view, std::unique_ptr<CSkin>> &skins = pThis->m_pClient->m_Skins.GetSkinsUnsafe();
-	
+
 	// map to array
 	int counter = 0;
 	std::vector<std::pair<std::string_view, CSkin *>> skinArray;
