@@ -5,20 +5,17 @@
 
 class CRainbow : public CComponent
 {
-
-
-
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnRender() override;
-    
-    void TransformColor(unsigned char mode, int tick, CTeeRenderInfo *pinfo); 
-    enum COLORMODE
-    {
-        COLORMODE_RAINBOW = 1,
-        COLORMODE_PULSE,
-        COLORMODE_DARKNESS,
-    };
+
+	void TransformColor(unsigned char mode, int tick, CTeeRenderInfo *pinfo);
+	enum COLORMODE
+	{
+		COLORMODE_RAINBOW = 1,
+		COLORMODE_PULSE,
+		COLORMODE_DARKNESS,
+	};
 };
 
 #endif

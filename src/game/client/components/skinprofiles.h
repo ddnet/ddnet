@@ -4,8 +4,8 @@
 #include <engine/console.h>
 #include <engine/keys.h>
 #include <engine/shared/protocol.h>
-#include <vector>
 #include <game/client/component.h>
+#include <vector>
 
 #define PROFILES_FILE "tclient_profiles.cfg"
 
@@ -33,16 +33,16 @@ public:
 
 class CSkinProfiles : public CComponent
 {
-	static void ConAddProfile(IConsole::IResult* pResult, void* pUserData);
+	static void ConAddProfile(IConsole::IResult *pResult, void *pUserData);
 	class IStorage *m_pStorage;
 	IOHANDLE m_ProfilesFile;
 
-	public:
-		std::vector<CProfile> m_Profiles;
-		void AddProfile(int BodyColor, int FeetColor, int CountryFlag, int Emote, const char *pSkinName, const char *pName, const char *pClan);
-		bool SaveProfiles();
-		void WriteLine(const char *pLine);
-		virtual int Sizeof() const override { return sizeof(*this); }
-		virtual void OnInit() override;
+public:
+	std::vector<CProfile> m_Profiles;
+	void AddProfile(int BodyColor, int FeetColor, int CountryFlag, int Emote, const char *pSkinName, const char *pName, const char *pClan);
+	bool SaveProfiles();
+	void WriteLine(const char *pLine);
+	virtual int Sizeof() const override { return sizeof(*this); }
+	virtual void OnInit() override;
 };
 #endif
