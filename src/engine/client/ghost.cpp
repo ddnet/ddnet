@@ -81,7 +81,7 @@ void CGhostRecorder::ResetBuffer()
 	m_BufferNumItems = 0;
 }
 
-static void DiffItem(const int32_t *pPast, const int32_t *pCurrent, int32_t *pOut, size_t Size)
+static void DiffItem(const uint32_t *pPast, const uint32_t *pCurrent, uint32_t *pOut, size_t Size)
 {
 	while(Size)
 	{
@@ -97,7 +97,7 @@ void CGhostRecorder::WriteData(int Type, const void *pData, size_t Size)
 {
 	dbg_assert((bool)m_File, "File not open");
 	dbg_assert(Type >= 0 && Type <= (int)std::numeric_limits<unsigned char>::max(), "Type invalid");
-	dbg_assert(Size > 0 && Size <= MAX_ITEM_SIZE && Size % sizeof(int32_t) == 0, "Size invalid");
+	dbg_assert(Size > 0 && Size <= MAX_ITEM_SIZE && Size % sizeof(uint32_t) == 0, "Size invalid");
 
 	if((size_t)(m_pBufferEnd - m_pBufferPos) < Size)
 	{
@@ -108,7 +108,7 @@ void CGhostRecorder::WriteData(int Type, const void *pData, size_t Size)
 	mem_copy(Data.m_aData, pData, Size);
 	if(m_LastItem.m_Type == Data.m_Type)
 	{
-		DiffItem((const int32_t *)m_LastItem.m_aData, (const int32_t *)Data.m_aData, (int32_t *)m_pBufferPos, Size / sizeof(int32_t));
+		DiffItem((const uint32_t *)m_LastItem.m_aData, (const uint32_t *)Data.m_aData, (uint32_t *)m_pBufferPos, Size / sizeof(uint32_t));
 	}
 	else
 	{
@@ -134,7 +134,7 @@ void CGhostRecorder::FlushChunk()
 	{
 		return;
 	}
-	dbg_assert(Size % sizeof(int32_t) == 0, "Chunk size invalid");
+	dbg_assert(Size % sizeof(uint32_t) == 0, "Chunk size invalid");
 
 	Size = CVariableInt::Compress(m_aBuffer, Size, m_aBufferTemp, sizeof(m_aBufferTemp));
 	if(Size < 0)
@@ -426,7 +426,7 @@ bool CGhostLoader::ReadNextType(int *pType)
 	return true;
 }
 
-static void UndiffItem(const int32_t *pPast, const int32_t *pDiff, int32_t *pOut, size_t Size)
+static void UndiffItem(const uint32_t *pPast, const uint32_t *pDiff, uint32_t *pOut, size_t Size)
 {
 	while(Size)
 	{
@@ -442,7 +442,7 @@ bool CGhostLoader::ReadData(int Type, void *pData, size_t Size)
 {
 	dbg_assert((bool)m_File, "File not open");
 	dbg_assert(Type >= 0 && Type <= (int)std::numeric_limits<unsigned char>::max(), "Type invalid");
-	dbg_assert(Size > 0 && Size <= MAX_ITEM_SIZE && Size % sizeof(int32_t) == 0, "Size invalid");
+	dbg_assert(Size > 0 && Size <= MAX_ITEM_SIZE && Size % sizeof(uint32_t) == 0, "Size invalid");
 
 	if((size_t)(m_pBufferEnd - m_pBufferPos) < Size)
 	{
@@ -453,7 +453,7 @@ bool CGhostLoader::ReadData(int Type, void *pData, size_t Size)
 	CGhostItem Data(Type);
 	if(m_LastItem.m_Type == Data.m_Type)
 	{
-		UndiffItem((const int32_t *)m_LastItem.m_aData, (const int32_t *)m_pBufferPos, (int32_t *)Data.m_aData, Size / sizeof(int32_t));
+		UndiffItem((const uint32_t *)m_LastItem.m_aData, (const uint32_t *)m_pBufferPos, (uint32_t *)Data.m_aData, Size / sizeof(uint32_t));
 	}
 	else
 	{

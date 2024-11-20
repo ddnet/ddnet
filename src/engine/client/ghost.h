@@ -11,7 +11,7 @@ enum
 	NUM_ITEMS_PER_CHUNK = 50,
 	MAX_CHUNK_SIZE = MAX_ITEM_SIZE * NUM_ITEMS_PER_CHUNK,
 };
-static_assert(MAX_CHUNK_SIZE % sizeof(int32_t) == 0, "Chunk size must be aligned with int32_t");
+static_assert(MAX_CHUNK_SIZE % sizeof(uint32_t) == 0, "Chunk size must be aligned with uint32_t");
 
 // version 4-6
 struct CGhostHeader
@@ -33,7 +33,7 @@ struct CGhostHeader
 class CGhostItem
 {
 public:
-	alignas(int32_t) unsigned char m_aData[MAX_ITEM_SIZE];
+	alignas(uint32_t) unsigned char m_aData[MAX_ITEM_SIZE];
 	int m_Type;
 
 	CGhostItem() :
@@ -49,8 +49,8 @@ class CGhostRecorder : public IGhostRecorder
 	char m_aFilename[IO_MAX_PATH_LENGTH];
 	class IStorage *m_pStorage;
 
-	alignas(int32_t) char m_aBuffer[MAX_CHUNK_SIZE];
-	alignas(int32_t) char m_aBufferTemp[MAX_CHUNK_SIZE];
+	alignas(uint32_t) char m_aBuffer[MAX_CHUNK_SIZE];
+	alignas(uint32_t) char m_aBufferTemp[MAX_CHUNK_SIZE];
 	char *m_pBufferPos;
 	const char *m_pBufferEnd;
 	int m_BufferNumItems;
@@ -80,8 +80,8 @@ class CGhostLoader : public IGhostLoader
 	CGhostHeader m_Header;
 	CGhostInfo m_Info;
 
-	alignas(int32_t) char m_aBuffer[MAX_CHUNK_SIZE];
-	alignas(int32_t) char m_aBufferTemp[MAX_CHUNK_SIZE];
+	alignas(uint32_t) char m_aBuffer[MAX_CHUNK_SIZE];
+	alignas(uint32_t) char m_aBufferTemp[MAX_CHUNK_SIZE];
 	char *m_pBufferPos;
 	const char *m_pBufferEnd;
 	int m_BufferNumItems;
