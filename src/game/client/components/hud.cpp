@@ -645,11 +645,11 @@ void CHud::RenderTextInfo()
 		{
 			if(NumInTeam > 1 && NumInTeam - NumFrozen == 1)
 			{
-				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "%s", g_Config.m_ClNotifyWhenLastText);
-                TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClNotifyWhenLastColor)));
-				TextRender()->Text(170, 4, 14, aBuf, -1.0f);
-                TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				const float Size = 11.0f;
+				CUIRect BoundingBox{m_Width / 4.0f - m_Width / 8.0f, 2.0f, m_Width / 4.0f, Size};
+				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClNotifyWhenLastColor)));
+				Ui()->DoLabel(&BoundingBox, g_Config.m_ClNotifyWhenLastText, Size, TEXTALIGN_CENTER);
+				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
 		}
 		//Show freeze text
@@ -659,7 +659,7 @@ void CHud::RenderTextInfo()
 		else if(g_Config.m_ClShowFrozenText == 2)
 			str_format(aBuf, sizeof(aBuf), "%d / %d", NumFrozen, NumInTeam);
 		if(g_Config.m_ClShowFrozenText > 0)
-			TextRender()->Text(m_Width / 2 - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 12, 10, aBuf, -1.0f);
+			TextRender()->Text(m_Width / 2.0f - TextRender()->TextWidth(10.f, aBuf) / 2.0f, 12.0f, 10.0f, aBuf);
 
 		//str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_PrevPredicted.m_FreezeEnd);
 		//str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_ClWhatsMyPing);
