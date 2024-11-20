@@ -623,10 +623,14 @@ void CHud::RenderTextInfo()
 	{
 		int NumInTeam = 0;
 		int NumFrozen = 0;
-		int LocalTeamID = m_pClient->m_Snap.m_SpecInfo.m_Active == 1 && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != -1 ?
-					  m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId) :
-					  m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientId);
-
+		int LocalTeamID = 0;
+		if(m_pClient->m_Snap.m_LocalClientId >= 0 && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0)
+		{
+			if(m_pClient->m_Snap.m_SpecInfo.m_Active == 1 && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != -1)
+				LocalTeamID = m_pClient->m_Teams.Team(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId);
+			else
+				LocalTeamID = m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientId);
+		}
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(!m_pClient->m_Snap.m_apPlayerInfos[i])
