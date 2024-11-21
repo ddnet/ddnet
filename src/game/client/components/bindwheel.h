@@ -4,13 +4,16 @@
 #include <game/client/component.h>
 class IConfigManager;
 
-#define NUM_BINDWHEEL 8
-#define MAX_BINDWHEEL_DESC 11
-#define MAX_BINDWHEEL_CMD 128
+enum
+{
+	BINDWHEEL_MAX_NAME = 64,
+	BINDWHEEL_MAX_CMD = 256,
+	MAX_BINDS = 64
+};
 
 class CBindWheel : public CComponent
 {
-    void DrawCircle(float x, float y, float r, int Segments);
+	void DrawCircle(float x, float y, float r, int Segments);
 
 	bool m_WasActive;
 	bool m_Active;
@@ -18,18 +21,27 @@ class CBindWheel : public CComponent
 	vec2 m_SelectorMouse;
 	int m_SelectedBind;
 
-	static void ConBindwheel(IConsole::IResult *pResult, void *pUserData);
-	static void ConBind(IConsole::IResult *pResult, void *pUserData);
+	static void ConOpenBindwheel(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddBindwheel_Legacy(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddBindwheel(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveBindwheel(IConsole::IResult *pResult, void *pUserData);
+
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 
 public:
-	struct SClientBindWheel
+	struct SBind
 	{
-		char description[MAX_BINDWHEEL_DESC];
-		char command[MAX_BINDWHEEL_CMD];
-	};
-	SClientBindWheel m_BindWheelList[NUM_BINDWHEEL];
+		char m_aName[BINDWHEEL_MAX_NAME];
+		char m_aCommand[BINDWHEEL_MAX_CMD];
 
+		bool operator==(const SBind &Other) const
+		{
+			return str_comp(m_aName, Other.m_aName) == 0 &&
+			       str_comp(m_aCommand, Other.m_aCommand) == 0;
+		}
+	};
+
+	std::vector<SBind> m_vBinds;
 
 	CBindWheel();
 	virtual int Sizeof() const override { return sizeof(*this); }
@@ -39,11 +51,11 @@ public:
 	virtual void OnConsoleInit() override;
 	virtual void OnRelease() override;
 	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
-	static void ConchainBindwheel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	
-	void updateBinds(int Bindpos, char *Description, char *Command);
-	void Binwheel(int Bind);
 
+	void AddBind(const char *Name, const char *Command);
+	void RemoveBind(const char *Name, const char *Command);
+
+	void Bindwheel(int Bind);
 };
 
 #endif

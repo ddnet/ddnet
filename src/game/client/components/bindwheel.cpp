@@ -1,5 +1,3 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
@@ -19,39 +17,65 @@ CBindWheel::CBindWheel()
 	OnReset();
 }
 
-void CBindWheel::ConBindwheel(IConsole::IResult *pResult, void *pUserData)
+void CBindWheel::ConOpenBindwheel(IConsole::IResult *pResult, void *pUserData)
 {
 	CBindWheel *pSelf = (CBindWheel *)pUserData;
 	if(pSelf->Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		pSelf->m_Active = pResult->GetInteger(0) != 0;
 }
 
-void CBindWheel::ConBind(IConsole::IResult *pResult, void *pUserData)
+void CBindWheel::ConAddBindwheel_Legacy(IConsole::IResult *pResult, void *pUserData)
 {
-	int bindpos = pResult->GetInteger(0);
-	char command[MAX_BINDWHEEL_CMD];
-	char description[MAX_BINDWHEEL_DESC];
-	str_format(description, sizeof(description), "%s", pResult->GetString(1));
-	str_format(command, sizeof(command), "%s", pResult->GetString(2));
+	int Bindpos_Legacy = pResult->GetInteger(0);
+	const char *aName = pResult->GetString(1);
+	const char *aCommand = pResult->GetString(2);
 
 	CBindWheel *pThis = static_cast<CBindWheel *>(pUserData);
-	pThis->updateBinds(bindpos, description, command);
+	pThis->AddBind(aName, aCommand);
 }
 
-void CBindWheel::ConchainBindwheel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CBindWheel::ConAddBindwheel(IConsole::IResult *pResult, void *pUserData)
 {
-	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() == 3)
-	{
-		int bindpos = pResult->GetInteger(0);
-		char command[MAX_BINDWHEEL_CMD];
-		char description[MAX_BINDWHEEL_DESC];
-		str_format(description, sizeof(description), "%s", pResult->GetString(1));
-		str_format(command, sizeof(command), "%s", pResult->GetString(2));
+	const char *aName = pResult->GetString(0);
+	const char *aCommand = pResult->GetString(1);
 
-		CBindWheel *pThis = static_cast<CBindWheel *>(pUserData);
-		pThis->updateBinds(bindpos, description, command);
+	CBindWheel *pThis = static_cast<CBindWheel *>(pUserData);
+	pThis->AddBind(aName, aCommand);
+}
+
+void CBindWheel::ConRemoveBindwheel(IConsole::IResult *pResult, void *pUserData)
+{
+	const char *aName = pResult->GetString(0);
+	const char *aCommand = pResult->GetString(1);
+
+	CBindWheel *pThis = static_cast<CBindWheel *>(pUserData);
+	pThis->RemoveBind(aName, aCommand);
+}
+
+void CBindWheel::AddBind(const char *pName, const char *pCommand)
+{
+	if(pName[0] == 0 && pCommand[0] == 0 || m_vBinds.size() > MAX_BINDS)
+		return;
+
+	for each(SBind Bind in m_vBinds)
+	{
+		if(!str_comp(Bind.m_aName, pName) && !str_comp(Bind.m_aCommand, pCommand))
+			return;
 	}
+	SBind TempBind;
+	str_copy(TempBind.m_aName, pName);
+	str_copy(TempBind.m_aCommand, pCommand);
+	m_vBinds.push_back(TempBind);
+}
+
+void CBindWheel::RemoveBind(const char *pName, const char *pCommand)
+{
+	SBind TempBind;
+	str_copy(TempBind.m_aName, pName);
+	str_copy(TempBind.m_aCommand, pCommand);
+	auto it = std::find(m_vBinds.begin(), m_vBinds.end(), TempBind);
+	if(it != m_vBinds.end()) 
+		m_vBinds.erase(it);
 }
 
 void CBindWheel::OnConsoleInit()
@@ -60,22 +84,11 @@ void CBindWheel::OnConsoleInit()
 	if(pConfigManager)
 		pConfigManager->RegisterTCallback(ConfigSaveCallback, this);
 
-	Console()->Register("+bindwheel", "", CFGFLAG_CLIENT, ConBindwheel, this, "Open bindwheel selector");
-	Console()->Register("bindwheel", "i[bindwheel] s[description:128] s[command:10]", CFGFLAG_CLIENT, ConBind, this, "Edit the command");
-	Console()->Chain("bindwheel", ConchainBindwheel, this);
+	Console()->Register("+bindwheel", "", CFGFLAG_CLIENT, ConOpenBindwheel, this, "Open bindwheel selector");
 
-	for(int i = 0; i < NUM_BINDWHEEL; i++)
-	{
-		if(!(str_comp(m_BindWheelList[i].description, "EMPTY") == 0))
-		{
-			str_format(m_BindWheelList[i].description, sizeof(m_BindWheelList[i].description), "%s", "EMPTY");
-		}
-
-		if(str_comp(m_BindWheelList[i].command, "") == 0)
-		{
-			str_format(m_BindWheelList[i].command, sizeof(m_BindWheelList[i].command), "%s", "");
-		}
-	}
+	Console()->Register("bindwheel", "i[index] s[name] s[command]", CFGFLAG_CLIENT, ConAddBindwheel_Legacy, this, "USE add_bindwheel INSTEAD, DONT USE THIS!");
+	Console()->Register("add_bindwheel", "s[name] s[command]", CFGFLAG_CLIENT, ConAddBindwheel, this, "Add a bind to the bindwheel");
+	Console()->Register("remove_bindwheel", "s[name] s[command]", CFGFLAG_CLIENT, ConRemoveBindwheel, this, "Remove a bind from the bindwheel");
 }
 
 void CBindWheel::OnReset()
@@ -93,9 +106,7 @@ void CBindWheel::OnRelease()
 bool CBindWheel::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 {
 	if(!m_Active)
-	{
 		return false;
-	}
 
 	Ui()->ConvertMouseMove(&x, &y, CursorType);
 	m_SelectorMouse += vec2(x, y);
@@ -114,7 +125,7 @@ void CBindWheel::OnRender()
 		if(g_Config.m_ClResetBindWheelMouse)
 			m_SelectorMouse = vec2(0, 0);
 		if(m_WasActive && m_SelectedBind != -1)
-			Binwheel(m_SelectedBind);
+			Bindwheel(m_SelectedBind);
 		m_WasActive = false;
 		return;
 	}
@@ -130,45 +141,32 @@ void CBindWheel::OnRender()
 
 	m_SelectedBind = -1;
 	if(length(m_SelectorMouse) > 110.0f)
-		m_SelectedBind = (int)(SelectedAngle / (2 * pi) * NUM_BINDWHEEL);
+		m_SelectedBind = (int)(SelectedAngle / (2 * pi) * m_vBinds.size());
 
 	CUIRect Screen = *Ui()->Screen();
 
 	Ui()->MapScreen();
 
 	Graphics()->BlendNormal();
-
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(0, 0, 0, 0.3f);
 	DrawCircle(Screen.w / 2, Screen.h / 2, 190.0f, 64);
 	Graphics()->QuadsEnd();
-
 	Graphics()->WrapClamp();
-	for(int i = 0; i < NUM_BINDWHEEL; i++)
+
+	const float Theta = pi * 2 / m_vBinds.size();
+	for(int i = 0; i < static_cast<int>(m_vBinds.size()); i++)
 	{
-		float Angle = 2 * pi * i / NUM_BINDWHEEL;
-		float margin = 140.0f;
-
-		if(Angle > pi)
-		{
-			Angle -= 2 * pi;
-		}
-		bool Selected = m_SelectedBind == i;
-
-		float Size = Selected ? 14.0 : 12.0f;
-
-		float NudgeX = margin * cosf(Angle);
-		float NudgeY = 150.0f * sinf(Angle);
-
-		char aBuf[MAX_BINDWHEEL_DESC];
-		str_format(aBuf, sizeof(aBuf), "%s", m_BindWheelList[i].description);
-		// str_format(aBuf, sizeof(aBuf), "%d -> %d", inv, orgAngle);
-		float x = Screen.w / 2 + NudgeX - TextRender()->TextWidth(Size, aBuf, -1, -1.0f) * 0.5;
-		float y = Screen.h / 2 + NudgeY;
-		float LineWidth = -1.0f;
-		TextRender()->Text(x, y, Size, aBuf, LineWidth);
+		const SBind &Bind = m_vBinds[i];
+		const float Angle = Theta * i;
+		vec2 Pos = vec2(std::cosf(Angle), std::sinf(Angle));
+		Pos *= 140.0f;
+		const float FontSize = (i == m_SelectedBind) ? 20.0f : 12.0f;
+		float Width = TextRender()->TextWidth(FontSize, Bind.m_aName);
+		TextRender()->Text(Screen.w / 2.0f + Pos.x - Width / 2.0f, Screen.h / 2.0f + Pos.y - FontSize / 2.0f, FontSize, Bind.m_aName);
 	}
+
 	Graphics()->WrapNormal();
 
 	if(GameClient()->m_GameInfo.m_AllowEyeWheel && g_Config.m_ClEyeWheel)
@@ -189,21 +187,9 @@ void CBindWheel::OnRender()
 	RenderTools()->RenderCursor(m_SelectorMouse + vec2(Screen.w, Screen.h) / 2, 24.0f);
 }
 
-void CBindWheel::Binwheel(int Bind)
+void CBindWheel::Bindwheel(int Bind)
 {
-	// bindwheel 0 "123456789" "say hey"
-	Console()->ExecuteLine(m_BindWheelList[Bind].command);
-}
-
-void CBindWheel::updateBinds(int Bindpos, char *Description, char *Command)
-{
-	str_format(m_BindWheelList[Bindpos].command, sizeof(m_BindWheelList[Bindpos].command), "%s", Command);
-	str_format(m_BindWheelList[Bindpos].description, sizeof(m_BindWheelList[Bindpos].description), "%s", Description);
-
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "[%d]: '%s' -> '%s'", Bindpos, m_BindWheelList[Bindpos].description, m_BindWheelList[Bindpos].command);
-
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "updateBinds", aBuf);
+	Console()->ExecuteLine(m_vBinds[Bind].m_aCommand);
 }
 
 void CBindWheel::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
@@ -211,12 +197,9 @@ void CBindWheel::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserD
 	CBindWheel *pSelf = (CBindWheel *)pUserData;
 
 	char aBuf[128] = {};
-	for(int i = 0; i < NUM_BINDWHEEL; ++i)
+	for each(SBind Bind in pSelf->m_vBinds)
 	{
-		char *command = pSelf->m_BindWheelList[i].command;
-		char *description = pSelf->m_BindWheelList[i].description;
-		str_format(aBuf, sizeof(aBuf), "bindwheel %d \"%s\" \"%s\"", i, description, command);
-
+		str_format(aBuf, sizeof(aBuf), "add_bindwheel \"%s\" \"%s\"", Bind.m_aName, Bind.m_aCommand);
 		pConfigManager->WriteLine(aBuf);
 	}
 }

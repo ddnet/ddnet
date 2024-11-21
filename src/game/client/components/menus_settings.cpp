@@ -19,6 +19,7 @@
 #include <game/client/components/chat.h>
 #include <game/client/components/menu_background.h>
 #include <game/client/components/sounds.h>
+#include <game/client/components/bindwheel.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/skin.h>
@@ -3287,8 +3288,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
 		//RightView.VSplitRight(10.0f, &RightView, nullptr);
-
-		for each(CUIRect Section in s_SectionBoxes)
+		for(CUIRect Section in s_SectionBoxes)
 		{
 			Section.w += MarginSmall * 2.0f;
 			Section.h += MarginSmall;
@@ -3627,19 +3627,19 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)
 	{
-		CUIRect Section;
+		CUIRect Section, LeftColumn, RightColumn;
 		CUIRect Screen = *Ui()->Screen();
-		MainView.VSplitLeft(MainView.w * 0.5f, &MainView, &Column);
-		CUIRect LeftColumn = MainView;
+		MainView.VSplitMid(&LeftColumn, &RightColumn, 0.0f);
+		 
 		MainView.HSplitTop(30.0f, &Section, &MainView);
 
-		CUIRect buttons[NUM_BINDWHEEL];
-		char pD[NUM_BINDWHEEL][MAX_BINDWHEEL_DESC];
-		char pC[NUM_BINDWHEEL][MAX_BINDWHEEL_CMD];
+		//CUIRect buttons[NUM_BINDWHEEL];
 
 		const float Radius = 190.0f;
 		vec2 Pos{Screen.w / 2.0f - 55.0f, Screen.h / 2.0f};
-
+		CUIRect CircleRect;
+		MainView.VSplitLeft(Radius * 2.0f, nullptr, &CircleRect);
+		Pos = vec2(CircleRect.x + CircleRect.w / 2.0f, CircleRect.y + CircleRect.h / 2.0f);
 		// Draw Circle
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
@@ -3647,66 +3647,89 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Graphics()->DrawCircle(Pos.x, Pos.y, Radius, 64);
 		Graphics()->QuadsEnd();
 
-		for(int i = 0; i < NUM_BINDWHEEL; i++)
+		float FontSize = 12.0f;
+
+		CBindWheel::SBind s_HoveredBind;
+
+		float MinHoveredDist = 9999.0f;
+		const float Theta = pi * 2 / GameClient()->m_Bindwheel.m_vBinds.size();
+		for(int i = 0; i < static_cast<int>(GameClient()->m_Bindwheel.m_vBinds.size()); i++)
 		{
-			float Angle = 2 * pi * i / NUM_BINDWHEEL;
-			float Size = 12.0f;
-			const char *pText = GameClient()->m_Bindwheel.m_BindWheelList[i].description;
-			const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(Size, pText);
-			vec2 TextPos;
-			TextPos.x = Pos.x + Radius * cosf(Angle) * 0.75f - BoundingBox.m_W / 2.0f;
-			TextPos.y = Pos.y + Radius * sinf(Angle) * 0.75f - BoundingBox.m_H / 2.0f;
-			TextRender()->Text(TextPos.x, TextPos.y, Size, pText);
+			const CBindWheel::SBind Bind = GameClient()->m_Bindwheel.m_vBinds[i];
+			const float Angle = Theta * i;
+			vec2 TextPos = vec2(std::cosf(Angle), std::sinf(Angle));
+			TextPos *= 140.0f;
+			float Width = TextRender()->TextWidth(FontSize, Bind.m_aName);
+			TextPos += Pos;
+
+			if(distance(Pos, Ui()->MousePos()) < 190.0f)
+			{
+				//float MouseAngle = angle(Ui()->MousePos() - Pos);
+				FontSize = 20.0f;
+			}
+			TextRender()->Text(TextPos.x - Width / 2.0f, TextPos.y, FontSize, Bind.m_aName);
+
 		}
 
-		static CLineInput s_BindWheelDesc[NUM_BINDWHEEL];
-		static CLineInput s_BindWheelCmd[NUM_BINDWHEEL];
+		CUIRect BindWheelZone, BindWheelList, BindWheelOptions;
+		LeftColumn.HSplitTop(60.0f, &BindWheelZone, &LeftColumn);
+		BindWheelZone.VSplitMid(&BindWheelOptions, &BindWheelList, 10.0f);
+		BindWheelList.h = 20.0f;
 
-		for(int i = 0; i < NUM_BINDWHEEL; i++)
+		static CButtonContainer s_aResetIDs[24];
+		static CUi::SDropDownState s_BackendDropDownState;
+		static CScrollRegion s_BackendDropDownScrollRegion;
+
+		static int s_SelectedBind = -1;
+
+		auto &vBindsList = GameClient()->m_Bindwheel.m_vBinds;
+		std::vector<const char *> vBindsName;
+
+		for(auto &Bind : vBindsList)
+			vBindsName.push_back(Bind.m_aName);
+
+		s_BackendDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_BackendDropDownScrollRegion;
+		s_SelectedBind = Ui()->DoDropDown(&BindWheelList, s_SelectedBind, vBindsName.data(), vBindsName.size(), s_BackendDropDownState);
+
+		// Input fields
+		static char s_aBindName[BINDWHEEL_MAX_NAME];
+		static char s_aBindCommand[BINDWHEEL_MAX_CMD];
+
+		BindWheelOptions.HSplitTop(20.0f, &Button, &BindWheelOptions);
+		BindWheelOptions.HSplitTop(5.0f, nullptr, &BindWheelOptions);
+		static CLineInput s_NameInput;
+		s_NameInput.SetBuffer(s_aBindName, sizeof(s_aBindName));
+		s_NameInput.SetEmptyText("Name");
+		Ui()->DoEditBox(&s_NameInput, &Button, 14.0f);
+
+		BindWheelOptions.HSplitTop(20.0f, &Button, &BindWheelOptions);
+		BindWheelOptions.HSplitTop(5.0f, nullptr, &BindWheelOptions);
+		static CLineInput s_BindInput;
+		s_BindInput.SetBuffer(s_aBindCommand, sizeof(s_aBindCommand));
+		s_BindInput.SetEmptyText("Command");
+		Ui()->DoEditBox(&s_BindInput, &Button, 14.0f);
+
+		BindWheelOptions.HSplitTop(20.0f, &Button, &BindWheelOptions);
+		BindWheelOptions.HSplitTop(5.0f, nullptr, &BindWheelOptions);
+		CUIRect LeftButton, RightButton;
+		Button.VSplitMid(&LeftButton, &RightButton, 5.0f);
+
+		CBindWheel::SBind Bind;
+		str_copy(Bind.m_aName, s_aBindName);
+		str_copy(Bind.m_aCommand, s_aBindCommand);
+
+
+		static CButtonContainer s_NewBindButton, s_RemoveBindButton;
+		if(DoButton_Menu(&s_NewBindButton, Localize("Add bind"), 0, &RightButton) && str_length(s_aBindName) > 0)
 		{
-			if(i == NUM_BINDWHEEL / 2)
-			{
-				MainView = Column;
-				MainView.VSplitRight(500.0f, nullptr, &MainView);
-
-				MainView.HSplitTop(LineSize, &Section, &MainView);
-				MainView.VSplitLeft(MainView.w * 0.5f, nullptr, &MainView);
-			}
-
-			str_format(pD[i], sizeof(pD[i]), "%s", GameClient()->m_Bindwheel.m_BindWheelList[i].description);
-
-			str_format(pC[i], sizeof(pC[i]), "%s", GameClient()->m_Bindwheel.m_BindWheelList[i].command);
-
-			// Description
-			MainView.HSplitTop(15.0f, nullptr, &MainView);
-			MainView.HSplitTop(LineSize, &buttons[i], &MainView);
-			buttons[i].VSplitLeft(80.0f, &Label, &buttons[i]);
-			buttons[i].VSplitLeft(150.0f, &buttons[i], nullptr);
-			char aBuf[MAX_BINDWHEEL_CMD];
-			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Description"), i + 1);
-			Ui()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_ML);
-
-			s_BindWheelDesc[i].SetBuffer(GameClient()->m_Bindwheel.m_BindWheelList[i].description, sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].description));
-			s_BindWheelDesc[i].SetEmptyText(Localize("Description"));
-
-			Ui()->DoEditBox(&s_BindWheelDesc[i], &buttons[i], 14.0f);
-
-			// Command
-			MainView.HSplitTop(MarginSmall, nullptr, &MainView);
-			MainView.HSplitTop(LineSize, &buttons[i], &MainView);
-			buttons[i].VSplitLeft(80.0f, &Label, &buttons[i]);
-			buttons[i].VSplitLeft(150.0f, &buttons[i], nullptr);
-			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Command"), i + 1);
-			Ui()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_ML);
-
-			s_BindWheelCmd[i].SetBuffer(GameClient()->m_Bindwheel.m_BindWheelList[i].command, sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].command));
-			s_BindWheelCmd[i].SetEmptyText(Localize("Command"));
-
-			Ui()->DoEditBox(&s_BindWheelCmd[i], &buttons[i], 14.0f);
+			GameClient()->m_Bindwheel.AddBind(Bind.m_aName, Bind.m_aCommand);
+		}
+		if(DoButton_Menu(&s_RemoveBindButton, Localize("Remove bind"), 0, &LeftButton) && s_SelectedBind >= 0)
+		{
+			GameClient()->m_Bindwheel.RemoveBind(Bind.m_aName, Bind.m_aCommand);
 		}
 
 		// Do Settings Key
-
 		CKeyInfo Key = CKeyInfo{"Bind Wheel Key", "+bindwheel", 0, 0};
 		for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
 		{
