@@ -3638,7 +3638,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		const float Radius = 190.0f;
 		vec2 Pos{Screen.w / 2.0f - 55.0f, Screen.h / 2.0f};
-		CUIRect CircleRect;
 		Pos = vec2(MainView.x + MainView.w / 1.5f, MainView.y + MainView.h / 2.0f);
 		// Draw Circle
 		Graphics()->TextureClear();

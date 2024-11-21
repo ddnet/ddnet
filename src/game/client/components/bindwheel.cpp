@@ -31,7 +31,7 @@ void CBindWheel::ConOpenBindwheel(IConsole::IResult *pResult, void *pUserData)
 
 void CBindWheel::ConAddBindwheel_Legacy(IConsole::IResult *pResult, void *pUserData)
 {
-	int Bindpos_Legacy = pResult->GetInteger(0);
+	//int Bindpos_Legacy = pResult->GetInteger(0);
 	const char *aName = pResult->GetString(1);
 	const char *aCommand = pResult->GetString(2);
 
@@ -65,7 +65,7 @@ void CBindWheel::ConRemoveAllBinds(IConsole::IResult *pResult, void *pUserData)
 
 void CBindWheel::AddBind(const char *pName, const char *pCommand)
 {
-	if(pName[0] == 0 && pCommand[0] == 0 || m_vBinds.size() > MAX_BINDS)
+	if((pName[0] == 0 && pCommand[0] == 0) || m_vBinds.size() > MAX_BINDS)
 		return;
 
 	// Don't allow duplicates
