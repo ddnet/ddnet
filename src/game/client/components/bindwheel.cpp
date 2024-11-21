@@ -57,7 +57,7 @@ void CBindWheel::AddBind(const char *pName, const char *pCommand)
 	if(pName[0] == 0 && pCommand[0] == 0 || m_vBinds.size() > MAX_BINDS)
 		return;
 
-	for each(SBind Bind in m_vBinds)
+	for(SBind &Bind : m_vBinds)
 	{
 		if(!str_comp(Bind.m_aName, pName) && !str_comp(Bind.m_aCommand, pCommand))
 			return;
@@ -197,7 +197,7 @@ void CBindWheel::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserD
 	CBindWheel *pSelf = (CBindWheel *)pUserData;
 
 	char aBuf[128] = {};
-	for each(SBind Bind in pSelf->m_vBinds)
+	for(SBind &Bind : pSelf->m_vBinds)
 	{
 		str_format(aBuf, sizeof(aBuf), "add_bindwheel \"%s\" \"%s\"", Bind.m_aName, Bind.m_aCommand);
 		pConfigManager->WriteLine(aBuf);

@@ -3288,7 +3288,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
 		//RightView.VSplitRight(10.0f, &RightView, nullptr);
-		for(CUIRect Section in s_SectionBoxes)
+		for(CUIRect &Section : s_SectionBoxes)
 		{
 			Section.w += MarginSmall * 2.0f;
 			Section.h += MarginSmall;
