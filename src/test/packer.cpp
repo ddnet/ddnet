@@ -266,56 +266,62 @@ TEST(Packer, AddStringBroken)
 	ExpectAddString5("\x80\x80", 6, false, nullptr);
 }
 
-TEST(Packer, Error)
+TEST(Packer, Error1)
 {
 	char aData[CPacker::PACKER_BUFFER_SIZE];
 	mem_zero(aData, sizeof(aData));
 
-	{
-		CPacker Packer;
-		Packer.Reset();
-		EXPECT_EQ(Packer.Error(), false);
-		Packer.AddRaw(aData, sizeof(aData) - 1);
-		EXPECT_EQ(Packer.Error(), false);
-		EXPECT_EQ(Packer.Size(), sizeof(aData) - 1);
-		Packer.AddInt(1);
-		EXPECT_EQ(Packer.Error(), false);
-		EXPECT_EQ(Packer.Size(), sizeof(aData));
-		Packer.AddInt(2);
-		EXPECT_EQ(Packer.Error(), true);
-		Packer.AddInt(3);
-		EXPECT_EQ(Packer.Error(), true);
-	}
+	CPacker Packer;
+	Packer.Reset();
+	EXPECT_EQ(Packer.Error(), false);
+	Packer.AddRaw(aData, sizeof(aData) - 1);
+	EXPECT_EQ(Packer.Error(), false);
+	EXPECT_EQ(Packer.Size(), sizeof(aData) - 1);
+	Packer.AddInt(1);
+	EXPECT_EQ(Packer.Error(), false);
+	EXPECT_EQ(Packer.Size(), sizeof(aData));
+	Packer.AddInt(2);
+	EXPECT_EQ(Packer.Error(), true);
+	Packer.AddInt(3);
+	EXPECT_EQ(Packer.Error(), true);
+}
 
-	{
-		CPacker Packer;
-		Packer.Reset();
-		EXPECT_EQ(Packer.Error(), false);
-		Packer.AddRaw(aData, sizeof(aData) - 1);
-		EXPECT_EQ(Packer.Error(), false);
-		EXPECT_EQ(Packer.Size(), sizeof(aData) - 1);
-		Packer.AddRaw(aData, 1);
-		EXPECT_EQ(Packer.Error(), false);
-		EXPECT_EQ(Packer.Size(), sizeof(aData));
-		Packer.AddRaw(aData, 1);
-		EXPECT_EQ(Packer.Error(), true);
-		Packer.AddRaw(aData, 1);
-		EXPECT_EQ(Packer.Error(), true);
-	}
+TEST(Packer, Error2)
+{
+	char aData[CPacker::PACKER_BUFFER_SIZE];
+	mem_zero(aData, sizeof(aData));
 
-	{
-		CPacker Packer;
-		Packer.Reset();
-		EXPECT_EQ(Packer.Error(), false);
-		Packer.AddRaw(aData, sizeof(aData) - 5);
-		EXPECT_EQ(Packer.Error(), false);
-		EXPECT_EQ(Packer.Size(), sizeof(aData) - 5);
-		Packer.AddString("test");
-		EXPECT_EQ(Packer.Error(), false);
-		EXPECT_EQ(Packer.Size(), sizeof(aData));
-		Packer.AddString("test");
-		EXPECT_EQ(Packer.Error(), true);
-		Packer.AddString("test");
-		EXPECT_EQ(Packer.Error(), true);
-	}
+	CPacker Packer;
+	Packer.Reset();
+	EXPECT_EQ(Packer.Error(), false);
+	Packer.AddRaw(aData, sizeof(aData) - 1);
+	EXPECT_EQ(Packer.Error(), false);
+	EXPECT_EQ(Packer.Size(), sizeof(aData) - 1);
+	Packer.AddRaw(aData, 1);
+	EXPECT_EQ(Packer.Error(), false);
+	EXPECT_EQ(Packer.Size(), sizeof(aData));
+	Packer.AddRaw(aData, 1);
+	EXPECT_EQ(Packer.Error(), true);
+	Packer.AddRaw(aData, 1);
+	EXPECT_EQ(Packer.Error(), true);
+}
+
+TEST(Packer, Error3)
+{
+	char aData[CPacker::PACKER_BUFFER_SIZE];
+	mem_zero(aData, sizeof(aData));
+
+	CPacker Packer;
+	Packer.Reset();
+	EXPECT_EQ(Packer.Error(), false);
+	Packer.AddRaw(aData, sizeof(aData) - 5);
+	EXPECT_EQ(Packer.Error(), false);
+	EXPECT_EQ(Packer.Size(), sizeof(aData) - 5);
+	Packer.AddString("test");
+	EXPECT_EQ(Packer.Error(), false);
+	EXPECT_EQ(Packer.Size(), sizeof(aData));
+	Packer.AddString("test");
+	EXPECT_EQ(Packer.Error(), true);
+	Packer.AddString("test");
+	EXPECT_EQ(Packer.Error(), true);
 }

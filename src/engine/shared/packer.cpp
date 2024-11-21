@@ -5,14 +5,20 @@
 #include "compression.h"
 #include "packer.h"
 
-void CPacker::Reset()
+CAbstractPacker::CAbstractPacker(unsigned char *pBuffer, size_t Size) :
+	m_pBuffer(pBuffer),
+	m_BufferSize(Size)
 {
-	m_Error = false;
-	m_pCurrent = m_aBuffer;
-	m_pEnd = m_pCurrent + PACKER_BUFFER_SIZE;
 }
 
-void CPacker::AddInt(int i)
+void CAbstractPacker::Reset()
+{
+	m_Error = false;
+	m_pCurrent = m_pBuffer;
+	m_pEnd = m_pCurrent + m_BufferSize;
+}
+
+void CAbstractPacker::AddInt(int i)
 {
 	if(m_Error)
 		return;
@@ -26,7 +32,7 @@ void CPacker::AddInt(int i)
 	m_pCurrent = pNext;
 }
 
-void CPacker::AddString(const char *pStr, int Limit, bool AllowTruncation)
+void CAbstractPacker::AddString(const char *pStr, int Limit, bool AllowTruncation)
 {
 	if(m_Error)
 		return;
@@ -34,7 +40,7 @@ void CPacker::AddString(const char *pStr, int Limit, bool AllowTruncation)
 	unsigned char *const pPrevCurrent = m_pCurrent;
 	if(Limit <= 0)
 	{
-		Limit = PACKER_BUFFER_SIZE;
+		Limit = m_BufferSize;
 	}
 	while(*pStr)
 	{
@@ -70,7 +76,7 @@ void CPacker::AddString(const char *pStr, int Limit, bool AllowTruncation)
 	*m_pCurrent++ = '\0';
 }
 
-void CPacker::AddRaw(const void *pData, int Size)
+void CAbstractPacker::AddRaw(const void *pData, int Size)
 {
 	if(m_Error)
 		return;
