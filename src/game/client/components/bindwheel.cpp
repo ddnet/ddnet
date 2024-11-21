@@ -16,12 +16,17 @@ CBindWheel::CBindWheel()
 {
 	OnReset();
 }
+void CBindWheel::ConExecuteHover(IConsole::IResult *pResult, void *pUserData)
+{
+	CBindWheel *pThis = (CBindWheel *)pUserData;
+	pThis->ExecuteHover();
+}
 
 void CBindWheel::ConOpenBindwheel(IConsole::IResult *pResult, void *pUserData)
 {
-	CBindWheel *pSelf = (CBindWheel *)pUserData;
-	if(pSelf->Client()->State() != IClient::STATE_DEMOPLAYBACK)
-		pSelf->m_Active = pResult->GetInteger(0) != 0;
+	CBindWheel *pThis = (CBindWheel *)pUserData;
+	if(pThis->Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		pThis->m_Active = pResult->GetInteger(0) != 0;
 }
 
 void CBindWheel::ConAddBindwheel_Legacy(IConsole::IResult *pResult, void *pUserData)
@@ -52,16 +57,23 @@ void CBindWheel::ConRemoveBindwheel(IConsole::IResult *pResult, void *pUserData)
 	pThis->RemoveBind(aName, aCommand);
 }
 
+void CBindWheel::ConRemoveAllBinds(IConsole::IResult *pResult, void *pUserData)
+{
+	CBindWheel *pThis = static_cast<CBindWheel *>(pUserData);
+	pThis->RemoveAllBinds();
+}
+
 void CBindWheel::AddBind(const char *pName, const char *pCommand)
 {
 	if(pName[0] == 0 && pCommand[0] == 0 || m_vBinds.size() > MAX_BINDS)
 		return;
 
-	for(SBind &Bind : m_vBinds)
-	{
-		if(!str_comp(Bind.m_aName, pName) && !str_comp(Bind.m_aCommand, pCommand))
-			return;
-	}
+	// Don't allow duplicates
+	// for(SBind &Bind : m_vBinds)
+	//{
+	//	if(!str_comp(Bind.m_aName, pName) && !str_comp(Bind.m_aCommand, pCommand))
+	//		return;
+	//}
 	SBind TempBind;
 	str_copy(TempBind.m_aName, pName);
 	str_copy(TempBind.m_aCommand, pCommand);
@@ -74,8 +86,21 @@ void CBindWheel::RemoveBind(const char *pName, const char *pCommand)
 	str_copy(TempBind.m_aName, pName);
 	str_copy(TempBind.m_aCommand, pCommand);
 	auto it = std::find(m_vBinds.begin(), m_vBinds.end(), TempBind);
-	if(it != m_vBinds.end()) 
+	if(it != m_vBinds.end())
 		m_vBinds.erase(it);
+}
+
+void CBindWheel::RemoveBind(int Index)
+{
+	if(Index >= static_cast<int>(m_vBinds.size()) || Index < 0)
+		return;
+	auto Pos = m_vBinds.begin() + Index;
+	m_vBinds.erase(Pos);
+}
+
+void CBindWheel::RemoveAllBinds()
+{
+	m_vBinds.clear();
 }
 
 void CBindWheel::OnConsoleInit()
@@ -85,10 +110,12 @@ void CBindWheel::OnConsoleInit()
 		pConfigManager->RegisterTCallback(ConfigSaveCallback, this);
 
 	Console()->Register("+bindwheel", "", CFGFLAG_CLIENT, ConOpenBindwheel, this, "Open bindwheel selector");
+	Console()->Register("+bindwheel_execute_hover", "", CFGFLAG_CLIENT, ConOpenBindwheel, this, "Execute hovered bindwheel bind");
 
-	Console()->Register("bindwheel", "i[index] s[name] s[command]", CFGFLAG_CLIENT, ConAddBindwheel_Legacy, this, "USE add_bindwheel INSTEAD, DONT USE THIS!");
+	Console()->Register("bindwheel", "i[index] s[name] s[command]", CFGFLAG_CLIENT, ConAddBindwheel_Legacy, this, "DONT USE THIS! USE add_bindwheel INSTEAD!");
 	Console()->Register("add_bindwheel", "s[name] s[command]", CFGFLAG_CLIENT, ConAddBindwheel, this, "Add a bind to the bindwheel");
 	Console()->Register("remove_bindwheel", "s[name] s[command]", CFGFLAG_CLIENT, ConRemoveBindwheel, this, "Remove a bind from the bindwheel");
+	Console()->Register("delete_all_bindwheel_binds", "", CFGFLAG_CLIENT, ConRemoveAllBinds, this, "Removes all bindwheel binds");
 }
 
 void CBindWheel::OnReset()
@@ -125,7 +152,7 @@ void CBindWheel::OnRender()
 		if(g_Config.m_ClResetBindWheelMouse)
 			m_SelectorMouse = vec2(0, 0);
 		if(m_WasActive && m_SelectedBind != -1)
-			Bindwheel(m_SelectedBind);
+			ExecuteBindwheel(m_SelectedBind);
 		m_WasActive = false;
 		return;
 	}
@@ -135,13 +162,16 @@ void CBindWheel::OnRender()
 	if(length(m_SelectorMouse) > 170.0f)
 		m_SelectorMouse = normalize(m_SelectorMouse) * 170.0f;
 
-	float SelectedAngle = angle(m_SelectorMouse) + 2 * pi / 24;
+	int SegmentCount = m_vBinds.size();
+	float SegmentAngle = 2 * pi / SegmentCount;
+
+	float SelectedAngle = angle(m_SelectorMouse) + SegmentAngle / 2;
 	if(SelectedAngle < 0)
 		SelectedAngle += 2 * pi;
 
 	m_SelectedBind = -1;
 	if(length(m_SelectorMouse) > 110.0f)
-		m_SelectedBind = (int)(SelectedAngle / (2 * pi) * m_vBinds.size());
+		m_SelectedBind = (int)(SelectedAngle / (2 * pi) * SegmentCount);
 
 	CUIRect Screen = *Ui()->Screen();
 
@@ -160,7 +190,7 @@ void CBindWheel::OnRender()
 	{
 		const SBind &Bind = m_vBinds[i];
 		const float Angle = Theta * i;
-		vec2 Pos = vec2(std::cosf(Angle), std::sinf(Angle));
+		vec2 Pos = direction(Angle);
 		Pos *= 140.0f;
 		const float FontSize = (i == m_SelectedBind) ? 20.0f : 12.0f;
 		float Width = TextRender()->TextWidth(FontSize, Bind.m_aName);
@@ -169,35 +199,31 @@ void CBindWheel::OnRender()
 
 	Graphics()->WrapNormal();
 
-	if(GameClient()->m_GameInfo.m_AllowEyeWheel && g_Config.m_ClEyeWheel)
-	{
-		Graphics()->TextureClear();
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1.0, 1.0, 1.0, 0.3f);
-		DrawCircle(Screen.w / 2, Screen.h / 2, 100.0f, 64);
-		Graphics()->QuadsEnd();
-
-		Graphics()->TextureClear();
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(0, 0, 0, 0.3f);
-		DrawCircle(Screen.w / 2, Screen.h / 2, 30.0f, 64);
-		Graphics()->QuadsEnd();
-	}
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(1.0, 1.0, 1.0, 0.3f);
+	DrawCircle(Screen.w / 2, Screen.h / 2, 100.0f, 64);
+	Graphics()->QuadsEnd();
 
 	RenderTools()->RenderCursor(m_SelectorMouse + vec2(Screen.w, Screen.h) / 2, 24.0f);
 }
 
-void CBindWheel::Bindwheel(int Bind)
+void CBindWheel::ExecuteBindwheel(int Bind)
 {
 	Console()->ExecuteLine(m_vBinds[Bind].m_aCommand);
+}
+void CBindWheel::ExecuteHover()
+{
+	if(m_SelectedBind >= 0)
+		Console()->ExecuteLine(m_vBinds[m_SelectedBind].m_aCommand);
 }
 
 void CBindWheel::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
-	CBindWheel *pSelf = (CBindWheel *)pUserData;
+	CBindWheel *pThis = (CBindWheel *)pUserData;
 
 	char aBuf[128] = {};
-	for(SBind &Bind : pSelf->m_vBinds)
+	for(SBind &Bind : pThis->m_vBinds)
 	{
 		str_format(aBuf, sizeof(aBuf), "add_bindwheel \"%s\" \"%s\"", Bind.m_aName, Bind.m_aCommand);
 		pConfigManager->WriteLine(aBuf);

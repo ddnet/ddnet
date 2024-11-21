@@ -25,6 +25,8 @@ class CBindWheel : public CComponent
 	static void ConAddBindwheel_Legacy(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddBindwheel(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveBindwheel(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveAllBinds(IConsole::IResult *pResult, void *pUserData);
+	static void ConExecuteHover(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 
@@ -54,8 +56,11 @@ public:
 
 	void AddBind(const char *Name, const char *Command);
 	void RemoveBind(const char *Name, const char *Command);
+	void RemoveBind(int Index);
+	void RemoveAllBinds();
 
-	void Bindwheel(int Bind);
+	void ExecuteHover();
+	void ExecuteBindwheel(int Bind);
 };
 
 #endif
