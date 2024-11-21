@@ -3294,7 +3294,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
 		Ui()->DoScrollbarOption(&g_Config.m_ClFrozenMaxRows, &g_Config.m_ClFrozenMaxRows, &Button, Localize("Max Rows"), 1, 6);
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
-		Ui()->DoScrollbarOption(&g_Config.m_ClFrozenMaxRows, &g_Config.m_ClFrozenMaxRows, &Button, Localize("Max Columns"), 8, 27);
+		Ui()->DoScrollbarOption(&g_Config.m_ClFrozenHudTeeSize, &g_Config.m_ClFrozenHudTeeSize, &Button, Localize("Tee Size"), 8, 27);
 
 		{
 			CUIRect CheckBoxRect, CheckBoxRect2;
