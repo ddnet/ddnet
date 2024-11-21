@@ -3280,6 +3280,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		s_ScrollRegion.Begin(&MainView, &ScrollOffset, &ScrollParams);
 
 		static std::vector<CUIRect> s_SectionBoxes;
+		static vec2 s_ScrollOffset(0.0f, 0.0f);
 
 		MainView.y += ScrollOffset.y;
 
@@ -3294,9 +3295,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Section.h += MarginSmall;
 			Section.x -= MarginSmall;
 			//Section.y -= MarginExtraSmall * 0.5;
+			Section.y -= s_ScrollOffset.y - ScrollOffset.y;
 			float Shade = 0.0f;
 			Section.Draw(ColorRGBA(Shade, Shade, Shade, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 		}
+		s_ScrollOffset = ScrollOffset;
 		s_SectionBoxes.clear();
 
 		// ***** LeftView ***** //
