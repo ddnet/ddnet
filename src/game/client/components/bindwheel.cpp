@@ -110,7 +110,7 @@ void CBindWheel::OnConsoleInit()
 		pConfigManager->RegisterTCallback(ConfigSaveCallback, this);
 
 	Console()->Register("+bindwheel", "", CFGFLAG_CLIENT, ConOpenBindwheel, this, "Open bindwheel selector");
-	Console()->Register("+bindwheel_execute_hover", "", CFGFLAG_CLIENT, ConOpenBindwheel, this, "Execute hovered bindwheel bind");
+	Console()->Register("+bindwheel_execute_hover", "", CFGFLAG_CLIENT, ConExecuteHover, this, "Execute hovered bindwheel bind");
 
 	Console()->Register("bindwheel", "i[index] s[name] s[command]", CFGFLAG_CLIENT, ConAddBindwheel_Legacy, this, "DONT USE THIS! USE add_bindwheel INSTEAD!");
 	Console()->Register("add_bindwheel", "s[name] s[command]", CFGFLAG_CLIENT, ConAddBindwheel, this, "Add a bind to the bindwheel");

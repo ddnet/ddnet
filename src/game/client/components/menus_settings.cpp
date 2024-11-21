@@ -3686,7 +3686,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 				int HoveringIndex = (int)(HoveringAngle / (2 * pi) * SegmentCount);
 				if(HoveringIndex == i)
 				{
-					FontSize = 30.0f;
+					FontSize = 28.0f;
 					if(Ui()->MouseButtonClicked(0))
 					{
 						s_SelectedBindIndex = i;
@@ -3760,16 +3760,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			str_copy(GameClient()->m_Bindwheel.m_vBinds[s_AltSelectedBindIndex].m_aCommand, BindA.m_aCommand);
 		}
 
-		BindWheelOptions.HSplitTop(MarginSmall * 2.0f, nullptr, &BindWheelOptions);
-		BindWheelOptions.HSplitTop(ButtonSize, &Button, &BindWheelOptions);
-		if(DoButton_Menu(&s_RemoveButton, Localize("Remove Bind"), 0, &Button) && s_SelectedBindIndex >= 0)
-		{
-			GameClient()->m_Bindwheel.RemoveBind(s_SelectedBindIndex);
-			s_SelectedBindIndex = -1;
-			s_AltSelectedBindIndex = -1;
-		}
-
-		BindWheelOptions.HSplitTop(MarginSmall, nullptr, &BindWheelOptions);
+		BindWheelOptions.HSplitTop(MarginSmall * 4.0f, nullptr, &BindWheelOptions);
 		BindWheelOptions.HSplitTop(ButtonSize, &Button, &BindWheelOptions);
 		if(DoButton_Menu(&s_OverrideButton, Localize("Override Bind"), 0, &Button) && s_SelectedBindIndex >= 0)
 		{
@@ -3782,6 +3773,19 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			str_copy(GameClient()->m_Bindwheel.m_vBinds[s_SelectedBindIndex].m_aName, TempBind.m_aName);
 			str_copy(GameClient()->m_Bindwheel.m_vBinds[s_SelectedBindIndex].m_aCommand, s_aBindCommand);
 		}
+
+		BindWheelOptions.HSplitTop(MarginSmall, nullptr, &BindWheelOptions);
+		BindWheelOptions.HSplitTop(ButtonSize, &Button, &BindWheelOptions);
+		if(DoButton_Menu(&s_RemoveButton, Localize("Remove Bind"), 0, &Button) && s_SelectedBindIndex >= 0)
+		{
+			GameClient()->m_Bindwheel.RemoveBind(s_SelectedBindIndex);
+			s_SelectedBindIndex = -1;
+			s_AltSelectedBindIndex = -1;
+		}
+		BindWheelOptions.HSplitTop(10.0f, nullptr, &BindWheelOptions);
+		BindWheelOptions.HSplitTop(25.0f, &Button, &BindWheelOptions);
+		Ui()->DoLabel(&Button, Localize("Use left mouse to select\nUse right mouse to alt-select"), 14.0f, TEXTALIGN_ML);
+
 
 		// Do Settings Key
 		CKeyInfo Key = CKeyInfo{"Bind Wheel Key", "+bindwheel", 0, 0};
