@@ -3750,7 +3750,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		BindWheelOptions.HSplitTop(MarginSmall, nullptr, &BindWheelOptions);
 		BindWheelOptions.HSplitTop(ButtonSize, &Button, &BindWheelOptions);
-		if(DoButton_Menu(&s_SwapButton, Localize("Swap Selected"), 0, &Button) && s_SelectedBindIndex >= 0)
+		if(DoButton_Menu(&s_SwapButton, Localize("Swap Selected"), 0, &Button) && s_SelectedBindIndex >= 0 && s_AltSelectedBindIndex >= 0)
 		{
 			CBindWheel::SBind BindA = GameClient()->m_Bindwheel.m_vBinds[s_SelectedBindIndex];
 			CBindWheel::SBind BindB = GameClient()->m_Bindwheel.m_vBinds[s_AltSelectedBindIndex];
@@ -3762,7 +3762,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		BindWheelOptions.HSplitTop(MarginSmall * 4.0f, nullptr, &BindWheelOptions);
 		BindWheelOptions.HSplitTop(ButtonSize, &Button, &BindWheelOptions);
-		if(DoButton_Menu(&s_OverrideButton, Localize("Override Bind"), 0, &Button) && s_SelectedBindIndex >= 0)
+		if(DoButton_Menu(&s_OverrideButton, Localize("Override Selected"), 0, &Button) && s_SelectedBindIndex >= 0)
 		{
 			CBindWheel::SBind TempBind;
 			if(str_length(s_aBindName) == 0)
