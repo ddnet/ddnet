@@ -8,77 +8,56 @@
 
 #include <game/client/gameclient.h>
 
+#include <cmath>
+
+#include "base/color.h"
+#include "engine/shared/protocol.h"
 #include "rainbow.h"
 
-void CRainbow::TransformColor(unsigned char mode, int tick, CTeeRenderInfo *pinfo)
+void CRainbow::TransformColor(unsigned char Mode, int Tick, CTeeRenderInfo *pInfo)
 {
-	if(!mode)
+	if(!Mode)
 		return;
 
-	int deftick = tick % 255;
-
-	const ColorHSLA playercolbody = ColorHSLA(g_Config.m_ClPlayerColorBody);
-	const ColorHSLA playercolfeet = ColorHSLA(g_Config.m_ClPlayerColorFeet);
-
-	const ColorRGBA col = color_cast<ColorRGBA>(ColorHSLA((float)deftick / 255.0f, 1.0f, 0.5f));
-	if(mode == COLORMODE_RAINBOW)
+	int Deftick = Tick % 255 + 1;
+	if(Mode == COLORMODE_RAINBOW)
 	{
-		pinfo->m_CustomColoredSkin = true;
-		pinfo->m_ColorBody = col;
-		pinfo->m_ColorFeet = col;
-		pinfo->m_BloodColor = col;
+		const ColorRGBA Col = color_cast<ColorRGBA>(ColorHSLA((float)Deftick / 255.0f, 1.0f, 0.5f));
+		pInfo->m_CustomColoredSkin = true;
+		pInfo->m_ColorBody = Col;
+		pInfo->m_ColorFeet = Col;
+		pInfo->m_BloodColor = Col;
 		return;
 	}
-	else if(mode == COLORMODE_PULSE)
+	else if(Mode == COLORMODE_PULSE)
 	{
-		pinfo->m_CustomColoredSkin = true;
-		pinfo->m_ColorBody.s = 1.0f;
-		pinfo->m_ColorFeet.s = 1.0f;
-		pinfo->m_BloodColor.s = 1.0f;
-		pinfo->m_ColorBody.l = 0.5f + fabs(((float)deftick / 255.0f) - 0.5f);
-		pinfo->m_ColorFeet.l = 0.5f + fabs(((float)deftick / 255.0f) - 0.5f);
-		pinfo->m_BloodColor.l = 0.5f + fabs(((float)deftick / 255.0f) - 0.5f);
-
-		pinfo->m_ColorBody.h = (float)deftick / 255.0f;
-		pinfo->m_ColorFeet.h = (float)deftick / 255.0f;
-		pinfo->m_BloodColor.h = (float)deftick / 255.0f;
-
+		float Light = 0.5f + (std::sin(((float)Deftick / 255.0f) * 2 * pi) + 1.f) / 4.f;
+		pInfo->m_CustomColoredSkin = true;
+		ColorHSLA Body = color_cast<ColorHSLA>(pInfo->m_ColorBody);
+		Body.l = Light;
+		pInfo->m_ColorBody = color_cast<ColorRGBA>(Body);
+		pInfo->m_BloodColor = pInfo->m_ColorBody;
+		ColorHSLA Feet = color_cast<ColorHSLA>(pInfo->m_ColorFeet);
+		Feet.l = Light;
+		pInfo->m_ColorFeet = color_cast<ColorRGBA>(Feet);
 		return;
 	}
-	else if(mode == COLORMODE_DARKNESS)
+	else if(Mode == COLORMODE_DARKNESS)
 	{
-		pinfo->m_CustomColoredSkin = true;
-		pinfo->m_ColorBody = ColorRGBA(0.0f, 0.0f, 0.0f);
-		pinfo->m_ColorFeet = ColorRGBA(0.0f, 0.0f, 0.0f);
-		pinfo->m_BloodColor = ColorRGBA(0.0f, 0.0f, 0.0f);
-		return;
-	}
-	else
-	{
-		pinfo->m_CustomColoredSkin = true;
-		pinfo->m_ColorBody = color_cast<ColorRGBA>(playercolbody);
-		pinfo->m_ColorFeet = color_cast<ColorRGBA>(playercolfeet);
-		pinfo->m_BloodColor = pinfo->m_BloodColor;
+		pInfo->m_CustomColoredSkin = true;
+		pInfo->m_ColorBody = ColorRGBA(0.0f, 0.0f, 0.0f);
+		pInfo->m_ColorFeet = ColorRGBA(0.0f, 0.0f, 0.0f);
+		pInfo->m_BloodColor = ColorRGBA(0.0f, 0.0f, 0.0f);
 		return;
 	}
 }
 
 void CRainbow::OnRender()
 {
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		// check if local player
-		bool Local = m_pClient->m_Snap.m_LocalClientId == i;
-
-		CTeeRenderInfo *RenderInfo = &m_pClient->m_aClients[i].m_RenderInfo;
-		// check if rainbow is enabled
-		if(g_Config.m_ClRainbow && Local) // rainbow is enabled and is own player
-		{
-			TransformColor(g_Config.m_ClRainbowMode, m_pClient->m_GameWorld.m_GameTick, RenderInfo);
-		}
-		else if(g_Config.m_ClRainbowOthers && !Local) // rainbow is enabled and is not own player
-		{
-			TransformColor(g_Config.m_ClRainbowMode, m_pClient->m_GameWorld.m_GameTick, RenderInfo);
-		}
-	}
+	if(g_Config.m_ClRainbowOthers)
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+			if(i != m_pClient->m_Snap.m_LocalClientId)
+				TransformColor(g_Config.m_ClRainbowMode, m_pClient->m_GameWorld.m_GameTick, &m_pClient->m_aClients[i].m_RenderInfo);
+	if(g_Config.m_ClRainbow)
+		TransformColor(g_Config.m_ClRainbowMode, m_pClient->m_GameWorld.m_GameTick, &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_RenderInfo);
 }
