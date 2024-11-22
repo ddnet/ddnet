@@ -563,16 +563,17 @@ void CServer::SetRconCid(int ClientId)
 
 int CServer::GetAuthedState(int ClientId) const
 {
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
 	return m_aClients[ClientId].m_Authed;
 }
 
 const char *CServer::GetAuthName(int ClientId) const
 {
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
 	int Key = m_aClients[ClientId].m_AuthKey;
-	if(Key == -1)
-	{
-		return 0;
-	}
+	dbg_assert(Key != -1, "Client not authed");
 	return m_AuthManager.KeyIdent(Key);
 }
 
@@ -657,11 +658,6 @@ bool CServer::ClientSlotEmpty(int ClientId) const
 bool CServer::ClientIngame(int ClientId) const
 {
 	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME;
-}
-
-bool CServer::ClientAuthed(int ClientId) const
-{
-	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_Authed;
 }
 
 int CServer::Port() const
