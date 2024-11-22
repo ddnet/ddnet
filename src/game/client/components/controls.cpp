@@ -497,9 +497,5 @@ bool CControls::CheckNewInput()
 
 	m_FastInput = TestInput;
 
-	if (NewInput) 
-	{
-		return true;
-	}
-	return false;
+	return NewInput;
 }

@@ -667,7 +667,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-int ClampedIndex(int x, int y, int w, int h) 
+int ClampedIndex(int x, int y, int w, int h)
 {
 	x = std::clamp(x, 0, w - 1);
 	y = std::clamp(y, 0, h - 1);
@@ -686,7 +686,7 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 	int MaxScale = 12;
 	if(EndX - StartX > Graphics()->ScreenWidth() / MaxScale || EndY - StartY > Graphics()->ScreenHeight() / MaxScale)
 	{
-		int EdgeX = (EndX - StartX)-(Graphics()->ScreenWidth() / MaxScale);
+		int EdgeX = (EndX - StartX) - (Graphics()->ScreenWidth() / MaxScale);
 		StartX += EdgeX / 2;
 		EndX -= EdgeX / 2;
 		int EdgeY = (EndY - StartY) - (Graphics()->ScreenHeight() / MaxScale);
@@ -695,21 +695,17 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 	}
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	ColorRGBA col = ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f);
-	if (TileType == TILE_FREEZE) {
-		col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorFreeze));
-	}
+	ColorRGBA Col = ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f);
+	if(TileType == TILE_FREEZE)
+		Col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorFreeze));
 	else if(TileType == TILE_SOLID)
-	{
-		col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorSolid));
-	}
+		Col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorSolid));
 	else if(TileType == TILE_UNFREEZE)
-	{
-		col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorUnfreeze));
-	}
-	Graphics()->SetColor(col.r, col.g, col.b, Alpha);
+		Col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorUnfreeze));
+	Graphics()->SetColor(Col.r, Col.g, Col.b, Alpha);
 
 	for(int y = StartY; y < EndY; y++)
+	{
 		for(int x = StartX; x < EndX; x++)
 		{
 			int mx = x;
@@ -722,7 +718,7 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 			bool IsUnFreeze = Index == TILE_UNFREEZE || Index == TILE_DUNFREEZE;
 			bool IsSolid = Index == TILE_SOLID || Index == TILE_NOHOOK;
 
-			if(!(IsSolid || IsFreeze || IsUnFreeze)) //Not an tile we care about
+			if(!(IsSolid || IsFreeze || IsUnFreeze)) // Not an tile we care about
 				continue;
 			if(IsSolid && !(TileType == TILE_SOLID))
 				continue;
@@ -736,7 +732,7 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 			if(IsFreeze && TileType == TILE_FREEZE)
 			{
 				int IndexN;
-				
+
 				IndexN = pTiles[ClampedIndex(mx - 1, my - 1, w, h)].m_Index;
 				Neighbors[0] = IndexN == TILE_AIR || IndexN == TILE_UNFREEZE || IndexN == TILE_DUNFREEZE;
 				IndexN = pTiles[ClampedIndex(mx - 0, my - 1, w, h)].m_Index;
@@ -795,11 +791,10 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 				Neighbors[7] = IndexN != TILE_UNFREEZE && IndexN != TILE_DUNFREEZE;
 			}
 
-
 			float Size = (float)g_Config.m_ClOutlineWidth;
 			int NumQuads = 0;
 
-			//Do lonely corners first
+			// Do lonely corners first
 			if(Neighbors[0] && !Neighbors[1] && !Neighbors[3])
 			{
 				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Size, Size);
@@ -820,19 +815,19 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale + Scale - Size, my * Scale + Scale - Size, Size, Size);
 				NumQuads++;
 			}
-			//Top
+			// Top
 			if(Neighbors[1])
 			{
 				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale, Scale, Size);
 				NumQuads++;
 			}
-			//Bottom
+			// Bottom
 			if(Neighbors[6])
 			{
 				Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Scale - Size, Scale, Size);
 				NumQuads++;
 			}
-			//Left
+			// Left
 			if(Neighbors[3])
 			{
 				if(!Neighbors[1] && !Neighbors[6])
@@ -845,7 +840,7 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 					Array[NumQuads] = IGraphics::CQuadItem(mx * Scale, my * Scale + Size, Size, Scale - Size * 2.0f);
 				NumQuads++;
 			}
-			//Right
+			// Right
 			if(Neighbors[4])
 			{
 				if(!Neighbors[1] && !Neighbors[6])
@@ -859,9 +854,9 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 				NumQuads++;
 			}
 
-
 			Graphics()->QuadsDrawTL(Array, NumQuads);
 		}
+	}
 	Graphics()->QuadsEnd();
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
@@ -889,8 +884,8 @@ void CRenderTools::RenderTeleOutlines(CTile *pTiles, CTeleTile *pTele, int w, in
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
-	ColorRGBA col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorTele));
-	Graphics()->SetColor(col.r, col.g, col.b, Alpha);
+	ColorRGBA Col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorTele));
+	Graphics()->SetColor(Col.r, Col.g, Col.b, Alpha);
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)

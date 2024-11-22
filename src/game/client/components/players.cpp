@@ -439,7 +439,7 @@ void CPlayers::RenderPlayer(
 
 	bool Local = m_pClient->m_Snap.m_LocalClientId == ClientId;
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientId);
-	//float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
+	// float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 	bool Spec = m_pClient->m_Snap.m_SpecInfo.m_Active;
 
 	float Alpha = 1.0f;
@@ -603,18 +603,18 @@ void CPlayers::RenderPlayer(
 				// static position for hammer
 				WeaponPosition = Position + vec2(State.GetAttach()->m_X, State.GetAttach()->m_Y);
 				WeaponPosition.y += g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsety;
-				if(Direction.x < 0)
+				if(Direction.x < 0.0f)
 					WeaponPosition.x -= g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsetx;
 				if(IsSit)
 					WeaponPosition.y += 3.0f;
 
 				// set rotation
-				float QuadsRotation = -pi / 2;
+				float QuadsRotation = -pi / 2.0f;
 				QuadsRotation += State.GetAttach()->m_Angle * (Direction.x < 0 ? -1 : 1) * pi * 2;
 				if(g_Config.m_ClHammerRotatesWithCursor)
 				{
 					QuadsRotation += Angle;
-					if (Direction.x < 0)
+					if(Direction.x < 0.0f)
 						QuadsRotation += pi;
 				}
 				else if(Inactive && LastAttackTime > m_pClient->m_aTuning[g_Config.m_ClDummy].GetWeaponFireDelay(Player.m_Weapon))
@@ -884,7 +884,6 @@ void CPlayers::RenderPlayerGhost(
 	if(!OtherTeam && FrozenSwappingHide)
 		Alpha = 1.0f;
 
-
 	// set size
 	RenderInfo.m_Size = 64.0f;
 
@@ -956,7 +955,7 @@ void CPlayers::RenderPlayerGhost(
 
 	m_pClient->m_Flow.Add(Position, Vel * 100.0f, 10.0f);
 
-	RenderInfo.m_GotAirJump = Player.m_Jumped & 2 ? 0 : 1;
+	RenderInfo.m_GotAirJump = Player.m_Jumped & 2 ? false : true;
 
 	RenderInfo.m_FeetFlipped = false;
 
@@ -1007,12 +1006,12 @@ void CPlayers::RenderPlayerGhost(
 	// do skidding
 	if(!InAir && WantOtherDir && length(Vel * 50) > 500.0f)
 	{
-		static int64_t SkidSoundTime = 0;
-		if(time() - SkidSoundTime > time_freq() / 10)
+		static int64_t s_SkidSoundTime = 0;
+		if(time() - s_SkidSoundTime > time_freq() / 10)
 		{
 			if(g_Config.m_SndGame)
 				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 0.25f, Position);
-			SkidSoundTime = time();
+			s_SkidSoundTime = time();
 		}
 
 		m_pClient->m_Effects.SkidTrail(
@@ -1208,7 +1207,7 @@ void CPlayers::RenderPlayerGhost(
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
 
 	float TeeAnimScale, TeeBaseSize;
-	RenderTools()->GetRenderTeeAnimScaleAndBaseSize(&RenderInfo, TeeAnimScale, TeeBaseSize);
+	CRenderTools::GetRenderTeeAnimScaleAndBaseSize(&RenderInfo, TeeAnimScale, TeeBaseSize);
 	vec2 BodyPos = Position + vec2(State.GetBody()->m_X, State.GetBody()->m_Y) * TeeAnimScale;
 	if(RenderInfo.m_TeeRenderFlags & TEE_EFFECT_FROZEN)
 	{
@@ -1413,7 +1412,7 @@ void CPlayers::OnRender()
 
 		bool Spec = m_pClient->m_Snap.m_SpecInfo.m_Active;
 
-		//If we are frozen and hiding frozen ghosts and not swapping render only the regular player
+		// If we are frozen and hiding frozen ghosts and not swapping render only the regular player
 		if(RenderGhost && g_Config.m_ClShowOthersGhosts && !Spec && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			RenderPlayerGhost(&m_pClient->m_aClients[ClientId].m_RenderPrev, &m_pClient->m_aClients[ClientId].m_RenderCur, &aRenderInfo[ClientId], ClientId);
 

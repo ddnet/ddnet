@@ -19,7 +19,7 @@ void CRainbow::TransformColor(unsigned char Mode, int Tick, CTeeRenderInfo *pInf
 	if(!Mode)
 		return;
 
-	int Deftick = Tick % 255 + 1;
+	int Deftick = Tick % 255;
 	if(Mode == COLORMODE_RAINBOW)
 	{
 		const ColorRGBA Col = color_cast<ColorRGBA>(ColorHSLA((float)Deftick / 255.0f, 1.0f, 0.5f));
@@ -31,7 +31,7 @@ void CRainbow::TransformColor(unsigned char Mode, int Tick, CTeeRenderInfo *pInf
 	}
 	else if(Mode == COLORMODE_PULSE)
 	{
-		float Light = 0.5f + (std::sin(((float)Deftick / 255.0f) * 2 * pi) + 1.f) / 4.f;
+		float Light = 0.5f + (std::sin(((float)Deftick / 255.0f) * 2.0f * pi) + 1.0f) / 4.0f;
 		pInfo->m_CustomColoredSkin = true;
 		ColorHSLA Body = color_cast<ColorHSLA>(pInfo->m_ColorBody);
 		Body.l = Light;

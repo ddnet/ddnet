@@ -135,7 +135,6 @@ protected:
 public:
 	bool m_OnlineOnly;
 
-
 	enum
 	{
 		TYPE_BACKGROUND = 0,

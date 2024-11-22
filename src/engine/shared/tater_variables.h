@@ -1,3 +1,4 @@
+// This file can be included several times.
 
 #ifndef MACRO_CONFIG_INT
 #error "The config macros must be defined"

@@ -474,7 +474,7 @@ bool CConfigManager::TSave()
 		WriteLine(aLineBuf); \
 	}
 
-#include "././game/tater_variables.h"
+#include "tater_variables.h"
 
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
@@ -484,7 +484,6 @@ bool CConfigManager::TSave()
 	{
 		Callback.m_pfnFunc(this, Callback.m_pUserData);
 	}
-
 
 	if(io_sync(m_ConfigFile) != 0)
 	{
@@ -521,7 +520,6 @@ void CConfigManager::RegisterTCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData
 {
 	m_vTCallbacks.emplace_back(pfnFunc, pUserData);
 }
-
 
 void CConfigManager::WriteLine(const char *pLine)
 {

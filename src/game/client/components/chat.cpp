@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <engine/editor.h>
+#include <engine/external/remimu.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
@@ -19,7 +20,6 @@
 #include <game/localization.h>
 
 #include "chat.h"
-#include "engine/external/remimu.h"
 
 char CChat::ms_aDisplayText[MAX_LINE_LENGTH] = {'\0'};
 

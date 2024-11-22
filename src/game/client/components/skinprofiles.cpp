@@ -67,31 +67,31 @@ bool CSkinProfiles::SaveProfiles()
 	char aBuf[256];
 	char aBufTemp[128];
 	char aEscapeBuf[256];
-	for(int i = 0; i < (int)m_Profiles.size(); ++i)
+	for(auto &Profile : m_Profiles)
 	{
 		str_copy(aBuf, "add_profile ", sizeof(aBuf));
 
-		str_format(aBufTemp, sizeof(aBufTemp), "%d ", m_Profiles[i].BodyColor);
+		str_format(aBufTemp, sizeof(aBufTemp), "%d ", Profile.BodyColor);
 		str_append(aBuf, aBufTemp, sizeof(aBuf));
 
-		str_format(aBufTemp, sizeof(aBufTemp), "%d ", m_Profiles[i].FeetColor);
+		str_format(aBufTemp, sizeof(aBufTemp), "%d ", Profile.FeetColor);
 		str_append(aBuf, aBufTemp, sizeof(aBuf));
 
-		str_format(aBufTemp, sizeof(aBufTemp), "%d ", m_Profiles[i].CountryFlag);
+		str_format(aBufTemp, sizeof(aBufTemp), "%d ", Profile.CountryFlag);
 		str_append(aBuf, aBufTemp, sizeof(aBuf));
 
-		str_format(aBufTemp, sizeof(aBufTemp), "%d ", m_Profiles[i].Emote);
+		str_format(aBufTemp, sizeof(aBufTemp), "%d ", Profile.Emote);
 		str_append(aBuf, aBufTemp, sizeof(aBuf));
 
-		EscapeParam(aEscapeBuf, m_Profiles[i].SkinName, sizeof(aEscapeBuf));
+		EscapeParam(aEscapeBuf, Profile.SkinName, sizeof(aEscapeBuf));
 		str_format(aBufTemp, sizeof(aBufTemp), "\"%s\" ", aEscapeBuf);
 		str_append(aBuf, aBufTemp, sizeof(aBuf));
 
-		EscapeParam(aEscapeBuf, m_Profiles[i].Name, sizeof(aEscapeBuf));
+		EscapeParam(aEscapeBuf, Profile.Name, sizeof(aEscapeBuf));
 		str_format(aBufTemp, sizeof(aBufTemp), "\"%s\" ", aEscapeBuf);
 		str_append(aBuf, aBufTemp, sizeof(aBuf));
 
-		EscapeParam(aEscapeBuf, m_Profiles[i].Clan, sizeof(aEscapeBuf));
+		EscapeParam(aEscapeBuf, Profile.Clan, sizeof(aEscapeBuf));
 		str_format(aBufTemp, sizeof(aBufTemp), "\"%s\"", aEscapeBuf);
 		str_append(aBuf, aBufTemp, sizeof(aBuf));
 

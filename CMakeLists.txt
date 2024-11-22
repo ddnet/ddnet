@@ -2129,6 +2129,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   storage.cpp
   stun.cpp
   stun.h
+  tater_variables.h
   teehistorian_ex.cpp
   teehistorian_ex.h
   teehistorian_ex_chunks.h
@@ -2171,7 +2172,6 @@ set_src(GAME_SHARED GLOB src/game
   mapitems_ex_types.h
   prng.cpp
   prng.h
-  tater_variables.h
   teamscore.cpp
   teamscore.h
   tuning.h

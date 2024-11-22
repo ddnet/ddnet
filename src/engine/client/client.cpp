@@ -2093,7 +2093,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							char aBufTO[256];
 							str_format(aBufTO, sizeof(aBufTO), "/timeout %s", m_aTimeoutCodes[Conn]);
 							TOMsgp.m_pMessage = aBufTO;
-							CMsgPacker PackerTO(TOMsgp.ms_MsgId, false);
+							CMsgPacker PackerTO(CNetMsg_Cl_Say::ms_MsgId, false);
 							TOMsgp.Pack(&PackerTO);
 							SendMsg(Conn, &PackerTO, MSGFLAG_VITAL);
 
@@ -3371,8 +3371,7 @@ bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
 	BindAddr.type = NETTYPE_ALL;
 	for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
 	{
-		int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort :
-                                                                                      g_Config.m_ClContactPort;
+		int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
 		if(PortRef < 1024) // Reject users setting ports that we don't want to use
 		{
 			PortRef = 0;
