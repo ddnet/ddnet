@@ -948,9 +948,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 			pParams[i] = value;
 		}
 
-		// No jetpack on DDNet incompatible servers:
-		NewTuning.m_JetpackStrength = 0;
-
 		m_ServerMode = SERVERMODE_PURE;
 
 		m_aReceivedTuning[Conn] = true;
