@@ -11,6 +11,7 @@
 #include <cmath>
 
 #include "base/color.h"
+#include "engine/shared/protocol.h"
 #include "rainbow.h"
 
 void CRainbow::TransformColor(unsigned char Mode, int Tick, CTeeRenderInfo *pInfo)
@@ -54,8 +55,9 @@ void CRainbow::TransformColor(unsigned char Mode, int Tick, CTeeRenderInfo *pInf
 void CRainbow::OnRender()
 {
 	if(g_Config.m_ClRainbowOthers)
-		for(auto &Client : m_pClient->m_aClients)
-			TransformColor(g_Config.m_ClRainbowMode, m_pClient->m_GameWorld.m_GameTick, &Client.m_RenderInfo);
-	else if(g_Config.m_ClRainbow)
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+			if(i != m_pClient->m_Snap.m_LocalClientId)
+				TransformColor(g_Config.m_ClRainbowMode, m_pClient->m_GameWorld.m_GameTick, &m_pClient->m_aClients[i].m_RenderInfo);
+	if(g_Config.m_ClRainbow)
 		TransformColor(g_Config.m_ClRainbowMode, m_pClient->m_GameWorld.m_GameTick, &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_RenderInfo);
 }
