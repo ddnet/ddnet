@@ -7,7 +7,7 @@ class IConfigManager;
 enum
 {
 	BINDWHEEL_MAX_NAME = 64,
-	BINDWHEEL_MAX_CMD = 256,
+	BINDWHEEL_MAX_CMD = 1024,
 	MAX_BINDS = 64
 };
 
