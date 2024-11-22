@@ -265,10 +265,7 @@ void CHud::RenderScoreHud()
 
 				if(GameFlags & GAMEFLAG_FLAGS)
 				{
-					int BlinkTimer = (m_pClient->m_aFlagDropTick[t] != 0 &&
-								 (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_aFlagDropTick[t]) / Client()->GameTickSpeed() >= 25) ?
-                                                                 10 :
-                                                                 20;
+					int BlinkTimer = (m_pClient->m_aFlagDropTick[t] != 0 && (Client()->GameTick(g_Config.m_ClDummy) - m_pClient->m_aFlagDropTick[t]) / Client()->GameTickSpeed() >= 25) ? 10 : 20;
 					if(aFlagCarrier[t] == FLAG_ATSTAND || (aFlagCarrier[t] == FLAG_TAKEN && ((Client()->GameTick(g_Config.m_ClDummy) / BlinkTimer) & 1)))
 					{
 						// draw flag
@@ -304,7 +301,6 @@ void CHud::RenderScoreHud()
 						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[Id].m_RenderInfo;
 						TeeInfo.m_Size = ScoreSingleBoxHeight;
 
-						
 						const CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
 						CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
@@ -575,19 +571,19 @@ void CHud::RenderTextInfo()
 
 	if(g_Config.m_ClMiniDebug)
 	{
-		float FontSize = 8;
-		float TextHeight = 11;
+		float FontSize = 8.0f;
+		float TextHeight = 11.0f;
 		char aBuf[64];
-		float yOff = 3;
+		float OffsetY = 3.0f;
 
 		int PlayerId = m_pClient->m_Snap.m_LocalClientId;
 		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
 			PlayerId = m_pClient->m_Snap.m_SpecInfo.m_SpectatorId;
 
 		if(g_Config.m_ClShowhudDDRace && m_pClient->m_Snap.m_aCharacters[PlayerId].m_HasExtendedData && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
-			yOff += 50;
+			OffsetY += 50.0f;
 		else if(g_Config.m_ClShowhudHealthAmmo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
-			yOff += 27;
+			OffsetY += 27.0f;
 
 		vec2 Pos;
 		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW)
@@ -596,29 +592,29 @@ void CHud::RenderTextInfo()
 			Pos = m_pClient->m_aClients[PlayerId].m_RenderPos;
 
 		str_format(aBuf, sizeof(aBuf), "X: %.2f", Pos.x / 32.0f);
-		TextRender()->Text(4, yOff, FontSize, aBuf, -1.0f);
+		TextRender()->Text(4, OffsetY, FontSize, aBuf, -1.0f);
 
-		yOff += TextHeight;
+		OffsetY += TextHeight;
 		str_format(aBuf, sizeof(aBuf), "Y: %.2f", Pos.y / 32.0f);
-		TextRender()->Text(4, yOff, FontSize, aBuf, -1.0f);
+		TextRender()->Text(4, OffsetY, FontSize, aBuf, -1.0f);
 		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
 		{
-			yOff += TextHeight;
+			OffsetY += TextHeight;
 			str_format(aBuf, sizeof(aBuf), "Angle: %d", m_pClient->m_aClients[PlayerId].m_RenderCur.m_Angle);
-			TextRender()->Text(4, yOff, FontSize, aBuf, -1.0f);
+			TextRender()->Text(4.0f, OffsetY, FontSize, aBuf, -1.0f);
 
-			yOff += TextHeight;
-			str_format(aBuf, sizeof(aBuf), "VelY: %.2f", m_pClient->m_Snap.m_aCharacters[PlayerId].m_Cur.m_VelY / 256.0f * 50.0 / 32.0f);
-			TextRender()->Text(4, yOff, FontSize, aBuf, -1.0f);
+			OffsetY += TextHeight;
+			str_format(aBuf, sizeof(aBuf), "VelY: %.2f", m_pClient->m_Snap.m_aCharacters[PlayerId].m_Cur.m_VelY / 256.0f * 50.0f / 32.0f);
+			TextRender()->Text(4.0f, OffsetY, FontSize, aBuf, -1.0f);
 
-			yOff += TextHeight;
+			OffsetY += TextHeight;
 
-			str_format(aBuf, sizeof(aBuf), "VelX: %.2f", m_pClient->m_Snap.m_aCharacters[PlayerId].m_Cur.m_VelX / 256.0f * 50.0 / 32.0f);
-			TextRender()->Text(4, yOff, FontSize, aBuf, -1.0f);
+			str_format(aBuf, sizeof(aBuf), "VelX: %.2f", m_pClient->m_Snap.m_aCharacters[PlayerId].m_Cur.m_VelX / 256.0f * 50.0f / 32.0f);
+			TextRender()->Text(4.0f, OffsetY, FontSize, aBuf, -1.0f);
 		}
 	}
 
-	//render team in freeze text and last notify
+	// render team in freeze text and last notify
 	if((g_Config.m_ClShowFrozenText > 0 || g_Config.m_ClShowFrozenHud > 0 || g_Config.m_ClNotifyWhenLast) && GameClient()->m_GameInfo.m_EntitiesDDRace)
 	{
 		int NumInTeam = 0;
@@ -644,7 +640,7 @@ void CHud::RenderTextInfo()
 			}
 		}
 
-		//Notify when last
+		// Notify when last
 		if(g_Config.m_ClNotifyWhenLast)
 		{
 			if(NumInTeam > 1 && NumInTeam - NumFrozen == 1)
@@ -656,18 +652,18 @@ void CHud::RenderTextInfo()
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
 		}
-		//Show freeze text
+		// Show freeze text
 		char aBuf[64];
 		if(g_Config.m_ClShowFrozenText == 1)
 			str_format(aBuf, sizeof(aBuf), "%d / %d", NumInTeam - NumFrozen, NumInTeam);
 		else if(g_Config.m_ClShowFrozenText == 2)
 			str_format(aBuf, sizeof(aBuf), "%d / %d", NumFrozen, NumInTeam);
 		if(g_Config.m_ClShowFrozenText > 0)
-			TextRender()->Text(m_Width / 2.0f - TextRender()->TextWidth(10.f, aBuf) / 2.0f, 12.0f, 10.0f, aBuf);
+			TextRender()->Text(m_Width / 2.0f - TextRender()->TextWidth(10.0f, aBuf) / 2.0f, 12.0f, 10.0f, aBuf);
 
-		//str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_PrevPredicted.m_FreezeEnd);
-		//str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_ClWhatsMyPing);
-		//TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 20, 10, aBuf, -1.0f);
+		// str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_PrevPredicted.m_FreezeEnd);
+		// str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_ClWhatsMyPing);
+		// TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 20, 10, aBuf, -1.0f);
 
 		if(g_Config.m_ClShowFrozenHud > 0 && !m_pClient->m_Scoreboard.Active() && !(LocalTeamID == 0 && g_Config.m_ClFrozenHudTeamOnly))
 		{
@@ -677,24 +673,23 @@ void CHud::RenderTextInfo()
 			FreezeInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 			FreezeInfo.m_BloodColor = pSkin->m_BloodColor;
 			FreezeInfo.m_SkinMetrics = pSkin->m_Metrics;
-			FreezeInfo.m_ColorBody = ColorRGBA(1, 1, 1);
-			FreezeInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
+			FreezeInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+			FreezeInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
 			FreezeInfo.m_CustomColoredSkin = false;
-			
 
 			float progressiveOffset = 0.0f;
 			float TeeSize = g_Config.m_ClFrozenHudTeeSize;
-			int MaxTees = (int)(8.3 * (m_Width / m_Height) * 13.0f / TeeSize);
+			int MaxTees = (int)(8.3f * (m_Width / m_Height) * 13.0f / TeeSize);
 			if(!g_Config.m_ClShowfps && !g_Config.m_ClShowpred)
-				MaxTees = (int)(9.5 * (m_Width / m_Height) * 13.0f / TeeSize);
+				MaxTees = (int)(9.5f * (m_Width / m_Height) * 13.0f / TeeSize);
 			int MaxRows = g_Config.m_ClFrozenMaxRows;
-			float StartPos = m_Width / 2 + 38.0f * (m_Width / m_Height) / 1.78;
+			float StartPos = m_Width / 2.0f + 38.0f * (m_Width / m_Height) / 1.78f;
 
 			int TotalRows = std::min(MaxRows, (NumInTeam + MaxTees - 1) / MaxTees);
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
-			Graphics()->DrawRectExt(StartPos - TeeSize / 2, 0.0f, TeeSize * std::min(NumInTeam, MaxTees), TeeSize + 3.0f + (TotalRows - 1) * TeeSize, 5.0f, IGraphics::CORNER_B);
+			Graphics()->DrawRectExt(StartPos - TeeSize / 2.0f, 0.0f, TeeSize * std::min(NumInTeam, MaxTees), TeeSize + 3.0f + (TotalRows - 1) * TeeSize, 5.0f, IGraphics::CORNER_B);
 			Graphics()->QuadsEnd();
 
 			bool Overflow = NumInTeam > MaxTees * MaxRows;
@@ -737,19 +732,19 @@ void CHud::RenderTextInfo()
 						TeeInfo.m_Size = TeeSize;
 						const CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
-						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+						CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 						vec2 TeeRenderPos(StartPos + progressiveOffset, TeeSize * (0.7f) + CurrentRow * TeeSize);
 						float Alpha = 1.0f;
 						CNetObj_Character CurChar = m_pClient->m_aClients[i].m_RenderCur;
 						if(g_Config.m_ClShowFrozenHudSkins && Frozen)
 						{
 							Alpha = 0.6f;
-							TeeInfo.m_ColorBody.r *= 0.4;
-							TeeInfo.m_ColorBody.g *= 0.4;
-							TeeInfo.m_ColorBody.b *= 0.4;
-							TeeInfo.m_ColorFeet.r *= 0.4;
-							TeeInfo.m_ColorFeet.g *= 0.4;
-							TeeInfo.m_ColorFeet.b *= 0.4;
+							TeeInfo.m_ColorBody.r *= 0.4f;
+							TeeInfo.m_ColorBody.g *= 0.4f;
+							TeeInfo.m_ColorBody.b *= 0.4f;
+							TeeInfo.m_ColorFeet.r *= 0.4f;
+							TeeInfo.m_ColorFeet.g *= 0.4f;
+							TeeInfo.m_ColorFeet.b *= 0.4f;
 						}
 						if(Frozen)
 							RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_PAIN, vec2(1.0f, 0.0f), TeeRenderPos, Alpha);

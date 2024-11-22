@@ -25,6 +25,7 @@
 // components
 #include "components/background.h"
 #include "components/binds.h"
+#include "components/bindwheel.h"
 #include "components/broadcast.h"
 #include "components/camera.h"
 #include "components/chat.h"
@@ -48,25 +49,23 @@
 #include "components/menus.h"
 #include "components/motd.h"
 #include "components/nameplates.h"
+#include "components/outlines.h"
 #include "components/particles.h"
 #include "components/player_indicator.h"
-#include "components/verify.h"
-#include "components/bindwheel.h"
-#include "components/tater.h"
-#include "components/outlines.h"
 #include "components/players.h"
 #include "components/race_demo.h"
 #include "components/rainbow.h"
 #include "components/scoreboard.h"
+#include "components/skinprofiles.h"
 #include "components/skins.h"
 #include "components/skins7.h"
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
+#include "components/tater.h"
 #include "components/tooltips.h"
+#include "components/verify.h"
 #include "components/voting.h"
-#include "components/skinprofiles.h"
-
 
 class CGameInfo
 {
@@ -154,11 +153,11 @@ public:
 	CStatboard m_Statboard;
 	CSounds m_Sounds;
 	CEmoticon m_Emoticon;
-    CBindWheel m_Bindwheel;
-    CTater m_Tater;
+	CBindWheel m_Bindwheel;
+	CTater m_Tater;
 	CDamageInd m_DamageInd;
 	CVoting m_Voting;
-    CVerify m_Verify;
+	CVerify m_Verify;
 	CSpectator m_Spectator;
 
 	CPlayers m_Players;
@@ -177,7 +176,7 @@ public:
 	CMapSounds m_MapSounds;
 
 	CRaceDemo m_RaceDemo;
-    CRainbow m_Rainbow;
+	CRainbow m_Rainbow;
 	CGhost m_Ghost;
 
 	CTooltips m_Tooltips;

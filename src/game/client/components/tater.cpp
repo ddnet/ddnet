@@ -26,115 +26,108 @@ void CTater::ConchainRandomColor(IConsole::IResult *pResult, void *pUserData, IC
 	CTater *pThis = static_cast<CTater *>(pUserData);
 	// resolve type to randomize
 	// check length of type (0 = all, 1 = body, 2 = feet, 3 = skin, 4 = flag)
-	bool randomizeBody = false;
-	bool randomizeFeet = false;
-	bool randomizeSkin = false;
-	bool randomizeFlag = false;
+	bool RandomizeBody = false;
+	bool RandomizeFeet = false;
+	bool RandomizeSkin = false;
+	bool RandomizeFlag = false;
 
 	if(pResult->NumArguments() == 0)
 	{
-		randomizeBody = true;
-		randomizeFeet = true;
-		randomizeSkin = true;
-		randomizeFlag = true;
+		RandomizeBody = true;
+		RandomizeFeet = true;
+		RandomizeSkin = true;
+		RandomizeFlag = true;
 	}
 	else if(pResult->NumArguments() == 1)
 	{
-		const char *type = pResult->GetString(0);
-		int length = type ? str_length(type) : 0;
-		if(length == 1 && type[0] == '0')
-		{ // randomize all
-			randomizeBody = true;
-			randomizeFeet = true;
-			randomizeSkin = true;
-			randomizeFlag = true;
+		const char *Type = pResult->GetString(0);
+		int Length = Type ? str_length(Type) : 0;
+		if(Length == 1 && Type[0] == '0')
+		{ // Randomize all
+			RandomizeBody = true;
+			RandomizeFeet = true;
+			RandomizeSkin = true;
+			RandomizeFlag = true;
 		}
-		else if(length == 1)
-		{ // randomize body
-			randomizeBody = type[0] == '1';
+		else if(Length == 1)
+		{
+			// randomize body
+			RandomizeBody = Type[0] == '1';
 		}
-		else if(length == 2)
+		else if(Length == 2)
 		{
 			// check for body and feet
-			randomizeBody = type[0] == '1';
-			randomizeFeet = type[1] == '1';
+			RandomizeBody = Type[0] == '1';
+			RandomizeFeet = Type[1] == '1';
 		}
-		else if(length == 3)
+		else if(Length == 3)
 		{
 			// check for body, feet and skin
-			randomizeBody = type[0] == '1';
-			randomizeFeet = type[1] == '1';
-			randomizeSkin = type[2] == '1';
+			RandomizeBody = Type[0] == '1';
+			RandomizeFeet = Type[1] == '1';
+			RandomizeSkin = Type[2] == '1';
 		}
-		else if(length == 4)
+		else if(Length == 4)
 		{
 			// check for body, feet, skin and flag
-			randomizeBody = type[0] == '1';
-			randomizeFeet = type[1] == '1';
-			randomizeSkin = type[2] == '1';
-			randomizeFlag = type[3] == '1';
+			RandomizeBody = Type[0] == '1';
+			RandomizeFeet = Type[1] == '1';
+			RandomizeSkin = Type[2] == '1';
+			RandomizeFlag = Type[3] == '1';
 		}
 	}
 
-	if(randomizeBody)
-	{
+	if(RandomizeBody)
 		RandomBodyColor();
-	}
-	if(randomizeFeet)
-	{
+	if(RandomizeFeet)
 		RandomFeetColor();
-	}
-	if(randomizeSkin)
-	{
+	if(RandomizeSkin)
 		RandomSkin(pUserData);
-	}
-	if(randomizeFlag)
-	{
+	if(RandomizeFlag)
 		RandomFlag(pUserData);
-	}
 	pThis->m_pClient->SendInfo(false);
 }
 
 void CTater::OnConsoleInit()
 {
-	Console()->Register("tc_random_player", "s[type]", CFGFLAG_CLIENT, ConRandomTee, this, "randomize player color (0 = all, 1 = body, 2 = feet, 3 = skin, 4 = flag) example: 0011 = randomize skin and flag [number is position] ");
+	Console()->Register("tc_random_player", "s[type]", CFGFLAG_CLIENT, ConRandomTee, this, "Randomize player color (0 = all, 1 = body, 2 = feet, 3 = skin, 4 = flag) example: 0011 = randomize skin and flag [number is position] ");
 	Console()->Chain("tc_random_player", ConchainRandomColor, this);
 }
 
 void CTater::RandomBodyColor()
 {
-	g_Config.m_ClPlayerColorBody = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
+	g_Config.m_ClPlayerColorBody = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1.0f).Pack(false);
 }
 
 void CTater::RandomFeetColor()
 {
-	g_Config.m_ClPlayerColorFeet = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
+	g_Config.m_ClPlayerColorFeet = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1.0f).Pack(false);
 }
 
 void CTater::RandomSkin(void *pUserData)
 {
 	CTater *pThis = static_cast<CTater *>(pUserData);
 	// get the skin count
-	int skinCount = (int)pThis->m_pClient->m_Skins.GetSkinsUnsafe().size();
+	int SkinCount = (int)pThis->m_pClient->m_Skins.GetSkinsUnsafe().size();
 
 	// get a random skin number
-	int skinNumber = std::rand() % skinCount;
+	int SkinNumber = std::rand() % SkinCount;
 
 	// get all skins as a maps
-	const std::unordered_map<std::string_view, std::unique_ptr<CSkin>> &skins = pThis->m_pClient->m_Skins.GetSkinsUnsafe();
+	const std::unordered_map<std::string_view, std::unique_ptr<CSkin>> &Skins = pThis->m_pClient->m_Skins.GetSkinsUnsafe();
 
 	// map to array
-	int counter = 0;
-	std::vector<std::pair<std::string_view, CSkin *>> skinArray;
-	for(const auto &skin : skins)
+	int Counter = 0;
+	std::vector<std::pair<std::string_view, CSkin *>> SkinArray;
+	for(const auto &Skin : Skins)
 	{
-		if(counter == skinNumber)
+		if(Counter == SkinNumber)
 		{
 			// set the skin name
-			const char *skinName = skin.first.data();
-			str_copy(g_Config.m_ClPlayerSkin, skinName, sizeof(g_Config.m_ClPlayerSkin));
+			const char *SkinName = Skin.first.data();
+			str_copy(g_Config.m_ClPlayerSkin, SkinName, sizeof(g_Config.m_ClPlayerSkin));
 		}
-		counter++;
+		Counter++;
 	}
 }
 
@@ -142,13 +135,13 @@ void CTater::RandomFlag(void *pUserData)
 {
 	CTater *pThis = static_cast<CTater *>(pUserData);
 	// get the flag count
-	int flagCount = pThis->m_pClient->m_CountryFlags.Num();
+	int FlagCount = pThis->m_pClient->m_CountryFlags.Num();
 
 	// get a random flag number
-	int flagNumber = std::rand() % flagCount;
+	int FlagNumber = std::rand() % FlagCount;
 
 	// get the flag name
-	const CCountryFlags::CCountryFlag *pFlag = pThis->m_pClient->m_CountryFlags.GetByIndex(flagNumber);
+	const CCountryFlags::CCountryFlag *pFlag = pThis->m_pClient->m_CountryFlags.GetByIndex(FlagNumber);
 
 	// set the flag code as number
 	g_Config.m_PlayerCountry = pFlag->m_CountryCode;

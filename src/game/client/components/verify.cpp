@@ -41,9 +41,9 @@ void CVerify::OnRender()
 		}
 		else
 		{
-			unsigned char *cChar[128];
-			size_t cSize[128];
-			pGet->Result(cChar, cSize);
+			unsigned char *ppResult[128];
+			size_t pResultLength[128];
+			pGet->Result(ppResult, pResultLength);
 			dbg_msg("verify", "Verified client! Took %d ms", (int)Time.count());
 			verified = true;
 		}

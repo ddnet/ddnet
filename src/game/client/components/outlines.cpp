@@ -50,8 +50,7 @@ void COutlines::OnRender()
 				if(!pTiles)
 					return;
 				unsigned int Size = GameClient()->Layers()->Map()->GetDataSize(pTMap->m_Data);
-				if(IsGameLayer)
-					pGameTiles = pTiles;
+				pGameTiles = pTiles;
 				if((g_Config.m_ClOutlineFreeze || g_Config.m_ClOutlineSolid || g_Config.m_ClOutlineUnFreeze) && IsGameLayer && Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTile))
 				{
 					if(g_Config.m_ClOutlineUnFreeze)
@@ -72,7 +71,7 @@ void COutlines::OnRender()
 					return;
 				if(IsGameLayer)
 					pGameTiles = pTiles;
-				if(g_Config.m_ClOutlineTele && IsTeleLayer)
+				if(g_Config.m_ClOutlineTele)
 				{
 					CTeleTile *pTeleTiles = (CTeleTile *)GameClient()->Layers()->Map()->GetData(pTMap->m_Tele);
 					unsigned int TeleSize = GameClient()->Layers()->Map()->GetDataSize(pTMap->m_Tele);

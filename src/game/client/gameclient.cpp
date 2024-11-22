@@ -2267,7 +2267,7 @@ void CGameClient::OnPredict()
 		{
 			m_PredictedChar = pLocalChar->GetCore();
 		}
-		if(Tick == FinalTick - std::max(g_Config.m_ClFastInput - g_Config.m_ClFastInputOthers, 0)) 
+		if(Tick == FinalTick - std::max(g_Config.m_ClFastInput - g_Config.m_ClFastInputOthers, 0))
 		{
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
@@ -2325,10 +2325,8 @@ void CGameClient::OnPredict()
 		// Remove other tees to reduce lag and because they aren't really important in this case
 		for(int i = 0; i < MAX_CLIENTS; i++)
 			if(i != m_Snap.m_LocalClientId)
-				if (CCharacter* pDelChar = m_ExtraPredictedWorld.GetCharacterById(i)) 
+				if(CCharacter *pDelChar = m_ExtraPredictedWorld.GetCharacterById(i))
 					pDelChar->Destroy();
-				
-
 
 		CCharacter *pExtraChar = m_ExtraPredictedWorld.GetCharacterById(m_Snap.m_LocalClientId);
 		if(pExtraChar)
@@ -2351,7 +2349,7 @@ void CGameClient::OnPredict()
 					m_ExtraPredictedWorld.m_GameTick++;
 					m_ExtraPredictedWorld.Tick();
 				}
-				else 
+				else
 				{
 					pExtraChar->m_AliveAccumulation = std::max(pExtraChar->m_AliveAccumulation, 1);
 					pExtraChar->m_AliveAccumulation = std::min(pExtraChar->m_AliveAccumulation + 1, g_Config.m_ClUnfreezeLagDelayTicks);
@@ -3288,7 +3286,7 @@ vec2 CGameClient::GetSmoothPos(int ClientId)
 			Client()->GetSmoothTick(&SmoothTick, &SmoothIntra, MixAmount);
 
 			if(ClientId != m_Snap.m_LocalClientId && !g_Config.m_ClFastInputOthers && g_Config.m_ClFastInput)
-					SmoothTick -= 1;
+				SmoothTick -= 1;
 
 			if(SmoothTick > 0 && m_aClients[ClientId].m_aPredTick[(SmoothTick - 1) % 200] >= Client()->PrevGameTick(g_Config.m_ClDummy) && m_aClients[ClientId].m_aPredTick[SmoothTick % 200] <= Client()->PredGameTick(g_Config.m_ClDummy))
 				Pos[i] = mix(m_aClients[ClientId].m_aPredPos[(SmoothTick - 1) % 200][i], m_aClients[ClientId].m_aPredPos[SmoothTick % 200][i], SmoothIntra);
@@ -3306,8 +3304,8 @@ vec2 CGameClient::GetFreezePos(int ClientId)
 
 	for(int i = 0; i < 2; i++)
 	{
-		//int64_t Len = clamp(m_aClients[ClientId].m_aSmoothLen[i], (int64_t)1, time_freq());
-		//int64_t TimePassed = Now - m_aClients[ClientId].m_aSmoothStart[i];
+		// int64_t Len = clamp(m_aClients[ClientId].m_aSmoothLen[i], (int64_t)1, time_freq());
+		// int64_t TimePassed = Now - m_aClients[ClientId].m_aSmoothStart[i];
 		float MixAmount = 0.0f;
 		int SmoothTick;
 		float SmoothIntra;
@@ -3327,17 +3325,11 @@ vec2 CGameClient::GetFreezePos(int ClientId)
 			AdjustTicks = std::min(FreezeTime, AdjustTicks);
 		}
 		if(g_Config.m_ClRemoveAnti && pChar && AdjustTicks > 0 && FreezeTime > 0)
-		{
 			MixAmount = mix(0.0f, 1.0f, 1.0f - AdjustTicks / (float)DelayTicks);
-		}
-		//else if(AdjustTicks == 0 && ClientId != m_Snap.m_LocalClientId)
-		//{
+		// else if(AdjustTicks == 0 && ClientId != m_Snap.m_LocalClientId)
 		//	MixAmount = 1.f - std::pow(1.f - TimePassed / (float)Len, 1.2f);
-		//}
 		else // our tee when not frozen
-		{
 			MixAmount = 1.f;
-		}
 
 		Client()->GetSmoothFreezeTick(&SmoothTick, &SmoothIntra, MixAmount);
 
