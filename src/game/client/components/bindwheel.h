@@ -1,6 +1,6 @@
 
-#ifndef GAME_CLIENT_COMPONENTS_BIND_WHEEL_H
-#define GAME_CLIENT_COMPONENTS_BIND_WHEEL_H
+#ifndef GAME_CLIENT_COMPONENTS_BINDWHEEL_H
+#define GAME_CLIENT_COMPONENTS_BINDWHEEL_H
 #include <game/client/component.h>
 class IConfigManager;
 
@@ -22,7 +22,7 @@ class CBindWheel : public CComponent
 	int m_SelectedBind;
 
 	static void ConOpenBindwheel(IConsole::IResult *pResult, void *pUserData);
-	static void ConAddBindwheel_Legacy(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddBindwheelLegacy(IConsole::IResult *pResult, void *pUserData);
 	static void ConAddBindwheel(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveBindwheel(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveAllBinds(IConsole::IResult *pResult, void *pUserData);
@@ -38,8 +38,7 @@ public:
 
 		bool operator==(const SBind &Other) const
 		{
-			return str_comp(m_aName, Other.m_aName) == 0 &&
-			       str_comp(m_aCommand, Other.m_aCommand) == 0;
+			return str_comp(m_aName, Other.m_aName) == 0 && str_comp(m_aCommand, Other.m_aCommand) == 0;
 		}
 	};
 
