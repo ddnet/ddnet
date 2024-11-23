@@ -3234,11 +3234,12 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	const float LineSize = 20.0f;
 	const float ColorPickerLineSize = 25.0f;
 	const float HeadlineFontSize = 20.0f;
-	const float HeadlineHeight = 30.0f;
+	const float HeadlineHeight = HeadlineFontSize + 0.0f;
+	const float Margin = 10.0f;
 	const float MarginSmall = 5.0f;
 	const float MarginExtraSmall = 2.5f;
-	const float MarginBetweenSections = MarginSmall * 2.0f + MarginExtraSmall;
-	const float MarginBetweenViews = 20.0f - MarginExtraSmall;
+	const float MarignBetweenSections = 30.0f;
+	const float MarginBetweenViews = 30.0f;
 
 	const float ColorPickerLabelSize = 13.0f;
 	const float ColorPickerLineSpacing = 5.0f;
@@ -3288,13 +3289,17 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.VSplitLeft(5.0f, nullptr, &MainView); // Padding for scrollbar
 
 		MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
+		LeftView.VSplitLeft(MarginSmall, nullptr, &LeftView);
+		RightView.VSplitRight(MarginSmall, &RightView, nullptr);
+
 		//RightView.VSplitRight(10.0f, &RightView, nullptr);
 		for(CUIRect &Section : s_SectionBoxes)
 		{
-			Section.w += MarginSmall * 2.0f;
-			Section.h += MarginSmall;
-			Section.x -= MarginSmall;
-			//Section.y -= MarginExtraSmall * 0.5;
+			float Padding = MarginBetweenViews * 0.6666f;
+			Section.w += Padding;
+			Section.h += Padding;
+			Section.x -= Padding * 0.5f;
+			Section.y -= Padding * 0.5f;
 			Section.y -= s_PrevScrollOffset.y - ScrollOffset.y;
 			float Shade = 0.0f;
 			Section.Draw(ColorRGBA(Shade, Shade, Shade, 0.25f), IGraphics::CORNER_ALL, 10.0f);
@@ -3306,7 +3311,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Column = LeftView;
 
 		// ***** Visual Miscellaneous ***** //
-		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+		Column.HSplitTop(Margin, nullptr, &Column);
 		s_SectionBoxes.push_back(Column);
 		Column.HSplitTop(HeadlineHeight, &Label, &Column);
 		Ui()->DoLabel(&Label, Localize("Visual"), HeadlineFontSize, TEXTALIGN_ML);
@@ -3321,14 +3326,17 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClHammerRotatesWithCursor, Localize("Make hammer rotate with cursor"), &g_Config.m_ClHammerRotatesWithCursor, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, Localize("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &Column, LineSize);
 		CUIRect FeetBox;
-		Column.HSplitTop(LineSize, &FeetBox, &Column);
+		Column.HSplitTop(LineSize + MarginExtraSmall, &FeetBox, &Column);
 		if(g_Config.m_ClWhiteFeet)
 		{
+			FeetBox.HSplitTop(MarginExtraSmall, nullptr, &FeetBox);
 			FeetBox.VSplitMid(&FeetBox, nullptr);
 			static CLineInput s_WhiteFeet(g_Config.m_ClWhiteFeetSkin, sizeof(g_Config.m_ClWhiteFeetSkin));
 			s_WhiteFeet.SetEmptyText("x_ninja");
 			Ui()->DoEditBox(&s_WhiteFeet, &FeetBox, 12.0f);
 		}
+		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 		// ***** Input ***** //
@@ -3410,6 +3418,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			if(!open_link("https://ger10.ddnet.org/"))
 				dbg_msg("menus", "couldn't open link");
 		}
+		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 		// ***** Player Indicator ***** //
@@ -3456,7 +3465,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Column = RightView;
 
 		// ***** HUD ***** //
-		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+		Column.HSplitTop(Margin, nullptr, &Column);
 		s_SectionBoxes.push_back(Column);
 		Column.HSplitTop(HeadlineHeight, &Label, &Column);
 		Ui()->DoLabel(&Label, Localize("HUD"), HeadlineFontSize, TEXTALIGN_ML);
@@ -3467,16 +3476,18 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, Localize("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, Localize("Show when you are the last alive"), &g_Config.m_ClNotifyWhenLast, &Column, LineSize);
 		CUIRect NotificationConfig;
-		Column.HSplitTop(LineSize, &NotificationConfig, &Column);
+		Column.HSplitTop(LineSize + MarginSmall, &NotificationConfig, &Column);
 		if(g_Config.m_ClNotifyWhenLast)
 		{
 			NotificationConfig.VSplitMid(&Button, &NotificationConfig);
 			static CLineInput s_LastInput(g_Config.m_ClNotifyWhenLastText, sizeof(g_Config.m_ClNotifyWhenLastText));
-			s_LastInput.SetEmptyText(Localize("Last Alive!"));
+			s_LastInput.SetEmptyText(Localize("Last!"));
+			Button.HSplitTop(MarginSmall, nullptr, &Button);
 			Ui()->DoEditBox(&s_LastInput, &Button, 12.0f);
 			static CButtonContainer s_ClientNotifyWhenLastColor;
 			DoLine_ColorPicker(&s_ClientNotifyWhenLastColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &NotificationConfig, "", &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 		}
+		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 		// ***** Frozen Tee Display ***** //
@@ -3587,6 +3598,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			if(NewId != 0)
 				m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
 		}
+		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 		// ***** Rainbow ***** //
@@ -3612,8 +3624,10 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			RainbowSelectedOld = RainbowSelectedNew;
 			dbg_msg("rainbow", "rainbow mode changed to %d", g_Config.m_ClRainbowMode);
 		}
+		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
 		// ***** END OF PAGE 1 SETTINGS ***** //
 		RightView = Column;
 
