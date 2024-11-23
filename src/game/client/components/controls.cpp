@@ -208,36 +208,42 @@ int CControls::SnapInput(int *pData)
 
 		// set the target anyway though so that we can keep seeing our surroundings,
 		// even if chat or menu are activated
-		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePos[g_Config.m_ClDummy].x;
-		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
-
-		// scale TargetX, TargetY by zoom.
+		vec2 Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
+		if(g_Config.m_ClImproveMousePrecision)
+			Pos *= length(Pos) * 2000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
 		if(!m_pClient->m_Snap.m_SpecInfo.m_Active && !g_Config.m_ClOldMouseZoom)
-		{
-			m_aInputData[g_Config.m_ClDummy].m_TargetX *= m_pClient->m_Camera.m_Zoom;
-			m_aInputData[g_Config.m_ClDummy].m_TargetY *= m_pClient->m_Camera.m_Zoom;
-		}
+			Pos *= m_pClient->m_Camera.m_Zoom;
+		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)Pos.x;
+		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)Pos.y;
+
+		if(!m_aInputData[g_Config.m_ClDummy].m_TargetX && !m_aInputData[g_Config.m_ClDummy].m_TargetY)
+			m_aInputData[g_Config.m_ClDummy].m_TargetX = 1;
 
 		// send once a second just to be sure
 		Send = Send || time_get() > m_LastSendTime + time_freq();
 	}
 	else
 	{
-		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePos[g_Config.m_ClDummy].x;
-		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
-
+		vec2 Pos;
 		if(g_Config.m_ClSubTickAiming && m_aMousePosOnAction[g_Config.m_ClDummy] != vec2(0.0f, 0.0f))
 		{
-			m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePosOnAction[g_Config.m_ClDummy].x;
-			m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePosOnAction[g_Config.m_ClDummy].y;
+			Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
 			m_aMousePosOnAction[g_Config.m_ClDummy] = vec2(0.0f, 0.0f);
 		}
+		else
+			Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
+		if(!m_pClient->m_Snap.m_SpecInfo.m_Active)
+		{
+			if(g_Config.m_ClImproveMousePrecision)
+				Pos *= length(Pos) * 2000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
+			if(!g_Config.m_ClOldMouseZoom)
+				Pos *= m_pClient->m_Camera.m_Zoom;
+		}
+		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)Pos.x;
+		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)Pos.y;
 
 		if(!m_aInputData[g_Config.m_ClDummy].m_TargetX && !m_aInputData[g_Config.m_ClDummy].m_TargetY)
-		{
 			m_aInputData[g_Config.m_ClDummy].m_TargetX = 1;
-			m_aMousePos[g_Config.m_ClDummy].x = 1;
-		}
 
 		// set direction
 		m_aInputData[g_Config.m_ClDummy].m_Direction = 0;
@@ -245,13 +251,6 @@ int CControls::SnapInput(int *pData)
 			m_aInputData[g_Config.m_ClDummy].m_Direction = -1;
 		if(!m_aInputDirectionLeft[g_Config.m_ClDummy] && m_aInputDirectionRight[g_Config.m_ClDummy])
 			m_aInputData[g_Config.m_ClDummy].m_Direction = 1;
-
-		// scale TargetX, TargetY by zoom.
-		if(!m_pClient->m_Snap.m_SpecInfo.m_Active && !g_Config.m_ClOldMouseZoom)
-		{
-			m_aInputData[g_Config.m_ClDummy].m_TargetX *= m_pClient->m_Camera.m_Zoom;
-			m_aInputData[g_Config.m_ClDummy].m_TargetY *= m_pClient->m_Camera.m_Zoom;
-		}
 
 		// dummy copy moves
 		if(g_Config.m_ClDummyCopyMoves)
