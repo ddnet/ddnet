@@ -195,7 +195,7 @@ void CPlayers::RenderHookCollLine(
 		// just use the direct input if it's the local player we are rendering
 		vec2 Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
 		if(g_Config.m_ClImproveMousePrecision)
-			Pos *= length(Pos) * 2000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
+			Pos *= length(Pos) * 1000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
 		if(!g_Config.m_ClOldMouseZoom)
 			Pos *= m_pClient->m_Camera.m_Zoom;
 		Pos.x = (int)Pos.x;
@@ -474,7 +474,7 @@ void CPlayers::RenderPlayer(
 		// just use the direct input if it's the local player we are rendering
 		vec2 Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
 		if(g_Config.m_ClImproveMousePrecision)
-			Pos *= length(Pos) * 2000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
+			Pos *= length(Pos) * 1000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
 		if(!g_Config.m_ClOldMouseZoom)
 			Pos *= m_pClient->m_Camera.m_Zoom;
 		Pos.x = (int)Pos.x;
@@ -909,7 +909,7 @@ void CPlayers::RenderPlayerGhost(
 		// just use the direct input if it's the local player we are rendering
 		vec2 Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
 		if(g_Config.m_ClImproveMousePrecision)
-			Pos *= length(Pos) * 2000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
+			Pos *= length(Pos) * 1000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
 		if(!g_Config.m_ClOldMouseZoom)
 			Pos *= m_pClient->m_Camera.m_Zoom;
 		Pos.x = (int)Pos.x;
