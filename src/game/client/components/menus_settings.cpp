@@ -3354,6 +3354,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Column.HSplitTop(LineSize, nullptr, &Column);
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOldMouseZoom, Localize("Old Mouse Precision (fixes precision at low zoom levels, \nbreaks /tc, /telecursor while zoomed)"), &g_Config.m_ClOldMouseZoom, &Column, LineSize);
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClImproveMousePrecision, Localize("Improve mouse precision by scaling max distance to 2000"), &g_Config.m_ClImproveMousePrecision, &Column, LineSize);
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 		// ***** Anti Latency Tools ***** //
@@ -3615,6 +3617,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		int RainbowSelectedOld = g_Config.m_ClRainbowMode - 1;
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbow, Localize("Rainbow"), &g_Config.m_ClRainbow, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, Localize("Rainbow Others"), &g_Config.m_ClRainbowOthers, &Column, LineSize);
+		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 		CUIRect DropDownRect;
 		Column.HSplitTop(LineSize, &DropDownRect, &Column);
 		const int RainbowSelectedNew = Ui()->DoDropDown(&DropDownRect, RainbowSelectedOld, s_DropDownNames.data(), s_DropDownNames.size(), s_RainbowDropDownState);
@@ -3634,7 +3637,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		// Scroll
 		CUIRect ScrollRegion;
 		ScrollRegion.x = MainView.x;
-		ScrollRegion.y = maximum(LeftView.y, RightView.y) + MarginSmall;
+		ScrollRegion.y = maximum(LeftView.y, RightView.y) + MarginSmall * 2.0f;
 		ScrollRegion.w = MainView.w;
 		ScrollRegion.h = 0.0f;
 		s_ScrollRegion.AddRect(ScrollRegion);

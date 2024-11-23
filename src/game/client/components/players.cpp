@@ -193,16 +193,21 @@ void CPlayers::RenderHookCollLine(
 	if(Local && (!m_pClient->m_Snap.m_SpecInfo.m_Active || m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW) && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * m_pClient->m_Camera.m_Zoom);
-		if(g_Config.m_ClOldMouseZoom)
-			Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
+		vec2 Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
+		if(g_Config.m_ClImproveMousePrecision)
+			Pos *= length(Pos) * 2000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
+		if(!g_Config.m_ClOldMouseZoom)
+			Pos *= m_pClient->m_Camera.m_Zoom;
+		Pos.x = (int)Pos.x;
+		Pos.y = (int)Pos.y;
+		Angle = angle(Pos);
 	}
 	else
 	{
 		Angle = GetPlayerTargetAngle(&Prev, &Player, ClientId, IntraTick);
 	}
 
-	vec2 Direction = direction(Angle);
+	vec2 ExDirection = direction(Angle);
 	vec2 Position;
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = m_pClient->m_aClients[ClientId].m_RenderPos;
@@ -234,23 +239,6 @@ void CPlayers::RenderHookCollLine(
 #endif
 		if((AlwaysRenderHookColl || RenderHookCollPlayer) && RenderHookCollVideo)
 		{
-			vec2 ExDirection = Direction;
-
-			if(Local && (!m_pClient->m_Snap.m_SpecInfo.m_Active || m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW) && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-			{
-				ExDirection = normalize(
-					vec2((int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x * m_pClient->m_Camera.m_Zoom),
-						(int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y * m_pClient->m_Camera.m_Zoom)));
-
-				if(g_Config.m_ClOldMouseZoom)
-					ExDirection = normalize(
-						vec2((int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x),
-							(int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)));
-
-				// fix direction if mouse is exactly in the center
-				if(!(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)
-					ExDirection = vec2(1, 0);
-			}
 			Graphics()->TextureClear();
 			vec2 InitPos = Position;
 			vec2 FinishPos = InitPos + ExDirection * (m_pClient->m_aTuning[g_Config.m_ClDummy].m_HookLength - 42.0f);
@@ -484,9 +472,14 @@ void CPlayers::RenderPlayer(
 	if(Local && (!m_pClient->m_Snap.m_SpecInfo.m_Active || m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW) && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * m_pClient->m_Camera.m_Zoom);
-		if(g_Config.m_ClOldMouseZoom)
-			Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
+		vec2 Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
+		if(g_Config.m_ClImproveMousePrecision)
+			Pos *= length(Pos) * 2000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
+		if(!g_Config.m_ClOldMouseZoom)
+			Pos *= m_pClient->m_Camera.m_Zoom;
+		Pos.x = (int)Pos.x;
+		Pos.y = (int)Pos.y;
+		Angle = angle(Pos);
 	}
 	else
 	{
@@ -914,7 +907,14 @@ void CPlayers::RenderPlayerGhost(
 	if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
+		vec2 Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
+		if(g_Config.m_ClImproveMousePrecision)
+			Pos *= length(Pos) * 2000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
+		if(!g_Config.m_ClOldMouseZoom)
+			Pos *= m_pClient->m_Camera.m_Zoom;
+		Pos.x = (int)Pos.x;
+		Pos.y = (int)Pos.y;
+		Angle = angle(Pos);
 	}
 	else
 	{
