@@ -259,7 +259,6 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("cl_vanilla_skins_only", ConchainRefreshSkins, this);
 
 	Console()->Chain("cl_dummy", ConchainSpecialDummy, this);
-	Console()->Chain("cl_text_entities_size", ConchainClTextEntitiesSize, this);
 
 	Console()->Chain("cl_menu_map", ConchainMenuMap, this);
 }
@@ -418,8 +417,6 @@ void CGameClient::OnInit()
 
 	GenerateTimeoutCode(g_Config.m_ClTimeoutCode);
 	GenerateTimeoutCode(g_Config.m_ClDummyTimeoutCode);
-
-	m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
 
 	// Aggressively try to grab window again since some Windows users report
 	// window not being focused after starting client.
@@ -962,9 +959,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 			pParams[i] = value;
 		}
-
-		// No jetpack on DDNet incompatible servers:
-		NewTuning.m_JetpackStrength = 0;
 
 		m_ServerMode = SERVERMODE_PURE;
 
@@ -2845,17 +2839,6 @@ void CGameClient::ConchainSpecialDummy(IConsole::IResult *pResult, void *pUserDa
 	{
 		if(g_Config.m_ClDummy && !((CGameClient *)pUserData)->Client()->DummyConnected())
 			g_Config.m_ClDummy = 0;
-	}
-}
-
-void CGameClient::ConchainClTextEntitiesSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-
-	if(pResult->NumArguments())
-	{
-		CGameClient *pGameClient = (CGameClient *)pUserData;
-		pGameClient->m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
 	}
 }
 

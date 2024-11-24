@@ -793,12 +793,10 @@ void CHud::RenderCursor()
 	if((!m_pClient->m_Snap.m_pLocalCharacter && !(g_Config.m_ClRenderCursorSpec && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW)) || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	int CurWeapon = 1;
 	RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
 
 	// render cursor
-	if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
-		CurWeapon = m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS;
+	int CurWeapon = maximum(0, m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
 	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].y);
@@ -889,7 +887,7 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 		// ammo display
 		float AmmoOffsetY = GameClient()->m_GameInfo.m_HudHealthArmor ? 24 : 0;
 		int CurWeapon = pCharacter->m_Weapon % NUM_WEAPONS;
-		if(m_pClient->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon].IsValid())
+		if(CurWeapon >= 0 && m_pClient->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon].IsValid())
 		{
 			Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
 			if(AmmoOffsetY > 0)

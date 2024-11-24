@@ -30,17 +30,17 @@ With the exception of base/system.{h,cpp}
 
 For single words
 
-- `int length = 0;` :x:
-- `int Length = 0;` :white_check_mark:
+- `int length = 0;` ❌
+- `int Length = 0;` ✅
 
 For multiple words:
 
-- `int maxLength = 0;` :x:
-- `int MaxLength = 0;` :white_check_mark:
+- `int maxLength = 0;` ❌
+- `int MaxLength = 0;` ✅
 
 ### Variable names should be descriptive
 
-:x: Avoid:
+❌ Avoid:
 
 ```C++
 for(int i = 0; i < MAX_CLIENTS; i++)
@@ -55,7 +55,7 @@ for(int i = 0; i < MAX_CLIENTS; i++)
 }
 ```
 
-:white_check_mark: Instead do:
+✅ Instead do:
 
 ```C++
 for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
@@ -133,14 +133,14 @@ Do not use the `goto` keyword in new code, there are better control flow constru
 
 Do not set variables in if statements.
 
-:x:
+❌
 
 ```C++
 int Foo;
 if((Foo = 2)) { .. }
 ```
 
-:white_check_mark:
+✅
 
 ```C++
 int Foo = 2;
@@ -148,6 +148,22 @@ if(Foo) { .. }
 ```
 
 Unless the alternative code is more complex and harder to read.
+
+### Using integers in boolean contexts should be avoided
+
+❌
+
+```C++
+int Foo = 0;
+if(!Foo) { .. }
+```
+
+✅
+
+```C++
+int Foo = 0;
+if(Foo != 0) { .. }
+```
 
 ### Methods with default arguments should be avoided
 
@@ -161,13 +177,13 @@ Try finding descriptive names instead.
 
 While the code base already has a lot of methods that start with a ``Get`` prefix. If new getters are added they should not contain a prefix.
 
-:x:
+❌
 
 ```C++
 int GetMyVariable() { return m_MyVariable; }
 ```
 
-:white_check_mark:
+✅
 
 ```C++
 int MyVariable() { return m_MyVariable; }
@@ -175,7 +191,7 @@ int MyVariable() { return m_MyVariable; }
 
 ### Class member variables should be initialized where they are declared
 
-Instead of doing this :x::
+Instead of doing this ❌:
 
 ```C++
 class CFoo
@@ -184,7 +200,7 @@ class CFoo
 };
 ```
 
-Do this instead if possible :white_check_mark::
+Do this instead if possible ✅:
 
 ```C++
 class CFoo
@@ -211,17 +227,17 @@ Use `bool` instead. And `true` means success and `false` means failure.
 
 See https://github.com/ddnet/ddnet/issues/6436
 
-### filenames
+### Filenames
 
 Code file names should be all lowercase and words should be separated with underscores.
 
-:x:
+❌
 
 ```C++
 src/game/FooBar.cpp
 ```
 
-:white_check_mark:
+✅
 
 ```C++
 src/game/foo_bar.cpp

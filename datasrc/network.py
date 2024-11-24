@@ -199,7 +199,7 @@ Objects = [
 		NetIntRange("m_Health", 0, 10),
 		NetIntRange("m_Armor", 0, 10),
 		NetIntRange("m_AmmoCount", 0, 10),
-		NetIntRange("m_Weapon", 0, 'NUM_WEAPONS-1'),
+		NetIntRange("m_Weapon", -1, 'NUM_WEAPONS-1'),
 		NetIntRange("m_Emote", 0, len(Emotes)),
 		NetIntRange("m_AttackTick", 0, 'max_int'),
 	]),

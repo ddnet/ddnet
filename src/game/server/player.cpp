@@ -378,7 +378,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags = PlayerFlags_SixToSeven(m_PlayerFlags);
 		if(SnappingClientVersion >= VERSION_DDRACE && (m_PlayerFlags & PLAYERFLAG_AIM))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_AIM;
-		if(Server()->ClientAuthed(m_ClientId))
+		if(Server()->GetAuthedState(m_ClientId) != AUTHED_NO)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 
 		// Times are in milliseconds for 0.7

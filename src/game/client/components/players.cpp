@@ -578,6 +578,7 @@ void CPlayers::RenderPlayer(
 
 	vec2 GhostWeaponPos = vec2(0, 0);
 	// draw gun
+	if(Player.m_Weapon >= 0)
 	{
 		if(!(RenderInfo.m_TeeRenderFlags & TEE_NO_WEAPON))
 		{
