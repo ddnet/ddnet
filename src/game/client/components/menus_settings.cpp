@@ -3227,6 +3227,55 @@ enum
 	NUMBER_OF_TCLIENT_TABS = 3
 };
 
+bool CMenus::DoSliderWithScaledValue(const void *pId, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, int Scale, const IScrollbarScale *pScale, unsigned Flags, const char *pSuffix)
+{
+	const bool NoClampValue = Flags & CUi::SCROLLBAR_OPTION_NOCLAMPVALUE;
+
+	int Value = *pOption;
+	Min /= Scale;
+	Max /= Scale;
+	// Allow adjustment of slider options when ctrl is pressed (to avoid scrolling, or accidently adjusting the value)
+	int Increment = std::max(1, (Max - Min) / 35);
+	if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && Ui()->MouseInside(pRect))
+	{
+		Value += Increment;
+		Value = clamp(Value, Min, Max);
+	}
+	if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && Ui()->MouseInside(pRect))
+	{
+		Value -= Increment;
+		Value = clamp(Value, Min, Max);
+	}
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "%s: %i%s", pStr, Value * Scale, pSuffix);
+
+	if(NoClampValue)
+	{
+		// clamp the value internally for the scrollbar
+		Value = clamp(Value, Min, Max);
+	}
+
+	CUIRect Label, ScrollBar;
+	pRect->VSplitMid(&Label, &ScrollBar, minimum(10.0f, pRect->w * 0.05f));
+
+	const float FontSize = Label.h * CUi::ms_FontmodHeight * 0.8f;
+	Ui()->DoLabel(&Label, aBuf, FontSize, TEXTALIGN_ML);
+
+	Value = pScale->ToAbsolute(Ui()->DoScrollbarH(pId, &ScrollBar, pScale->ToRelative(Value, Min, Max)), Min, Max);
+	if(NoClampValue && ((Value == Min && *pOption < Min) || (Value == Max && *pOption > Max)))
+	{
+		Value = *pOption; 
+	}
+
+	if(*pOption != Value)
+	{
+		*pOption = Value;
+		return true;
+	}
+	return false;
+}
+
 void CMenus::RenderSettingsTClient(CUIRect MainView)
 {
 	static int s_CurCustomTab = 0;
@@ -3347,15 +3396,19 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInput, Localize("Fast Inputs (-20ms input delay)"), &g_Config.m_ClFastInput, &Column, LineSize);
+
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 		if(g_Config.m_ClFastInput)
 			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInputOthers, Localize("Extra tick other tees (increases other tees latency, \nmakes dragging slightly easier when using fast input)"), &g_Config.m_ClFastInputOthers, &Column, LineSize);
 		else
 			Column.HSplitTop(LineSize, nullptr, &Column);
+		// A little extra spacing because these are multi line
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOldMouseZoom, Localize("Old Mouse Precision (fixes precision at low zoom levels, \nbreaks /tc, /telecursor while zoomed)"), &g_Config.m_ClOldMouseZoom, &Column, LineSize);
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClImproveMousePrecision, Localize("Improve mouse precision by scaling max distance to 1000"), &g_Config.m_ClImproveMousePrecision, &Column, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClImproveMousePrecision, Localize("Improve mouse precision by scaling sent max distance to 1000"), &g_Config.m_ClImproveMousePrecision, &Column, LineSize);
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 		// ***** Anti Latency Tools ***** //
@@ -3370,17 +3423,12 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, Localize("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &Column, LineSize);
 		if(g_Config.m_ClRemoveAnti)
 		{
-			static int ValueUnfreezeLagTicks, ValueUnfreezeLagDelayTicks;
-			ValueUnfreezeLagTicks = g_Config.m_ClUnfreezeLagTicks * 20;
-			ValueUnfreezeLagDelayTicks = g_Config.m_ClUnfreezeLagDelayTicks * 20;
-			if(ValueUnfreezeLagDelayTicks < ValueUnfreezeLagTicks)
-				ValueUnfreezeLagDelayTicks = ValueUnfreezeLagTicks;
+			if(g_Config.m_ClUnfreezeLagDelayTicks < g_Config.m_ClUnfreezeLagTicks)
+				g_Config.m_ClUnfreezeLagDelayTicks = g_Config.m_ClUnfreezeLagTicks;
 			Column.HSplitTop(LineSize, &Button, &Column);
-			Ui()->DoScrollbarOption(&g_Config.m_ClUnfreezeLagTicks, &ValueUnfreezeLagTicks, &Button, Localize("Amount"), 100, 300, &CUi::ms_LinearScrollbarScale, 0, "ms");
+			DoSliderWithScaledValue(&g_Config.m_ClUnfreezeLagTicks, &g_Config.m_ClUnfreezeLagTicks, &Button, Localize("Amount"), 100, 300, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
 			Column.HSplitTop(LineSize, &Button, &Column);
-			Ui()->DoScrollbarOption(&g_Config.m_ClUnfreezeLagDelayTicks, &ValueUnfreezeLagDelayTicks, &Button, Localize("Delay"), 100, 3000, &CUi::ms_LinearScrollbarScale, 0, "ms");
-			g_Config.m_ClUnfreezeLagTicks = ValueUnfreezeLagTicks / 20;
-			g_Config.m_ClUnfreezeLagDelayTicks = ValueUnfreezeLagDelayTicks / 20;
+			DoSliderWithScaledValue(&g_Config.m_ClUnfreezeLagDelayTicks, &g_Config.m_ClUnfreezeLagDelayTicks, &Button, Localize("Delay"), 100, 3000, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
 		}
 		else
 			Column.HSplitTop(LineSize * 2, nullptr, &Column);
@@ -3402,13 +3450,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Column.HSplitTop(LineSize, &Button, &Column);
 		if(g_Config.m_ClRunOnJoinConsole)
 		{
-			static int Value;
-			Value = g_Config.m_ClRunOnJoinDelay * 20;
-			Ui()->DoScrollbarOption(&g_Config.m_ClRunOnJoinDelay, &Value, &Button, Localize("Delay"), 140, 2000, &CUi::ms_LinearScrollbarScale, 0, "ms");
-			Value /= 20;
-			// Only set if the scroll value or already set is under psuedo-max of 100 (200ms)
-			if(Value < 100 || g_Config.m_ClRunOnJoinDelay < 100)
-				g_Config.m_ClRunOnJoinDelay = Value;
+			DoSliderWithScaledValue(&g_Config.m_ClRunOnJoinDelay, &g_Config.m_ClRunOnJoinDelay, &Button, Localize("Delay"), 140, 2000, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
 		}
 		CUIRect ButtonVerify, EnableVerifySection;
 		Column.HSplitTop(LineSize, &EnableVerifySection, &Column);

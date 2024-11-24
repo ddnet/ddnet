@@ -1458,6 +1458,19 @@ bool CUi::DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect,
 			Value = Max;
 	}
 
+	// Allow adjustment of slider options when ctrl is pressed (to avoid scrolling, or accidently adjusting the value)
+	int Increment = std::max(1, (Max - Min) / 35);
+	if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && MouseInside(pRect))
+	{
+		Value += Increment;
+		Value = clamp(Value, Min, Max);
+	}
+	if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && MouseInside(pRect))
+	{
+		Value -= Increment;
+		Value = clamp(Value, Min, Max);
+	}
+
 	char aBuf[256];
 	if(!Infinite || Value != Max)
 		str_format(aBuf, sizeof(aBuf), "%s: %i%s", pStr, Value, pSuffix);

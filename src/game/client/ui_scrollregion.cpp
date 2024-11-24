@@ -92,6 +92,10 @@ void CScrollRegion::End()
 		if(!ProgrammaticScroll)
 			m_ScrollSpeedMultiplier = 1.0f;
 
+		// Hack to allow slider scroll adjustment -Tater
+		if(Input()->ModifierIsPressed())
+			m_ScrollDirection = SCROLLRELATIVE_NONE;
+
 		if(m_ScrollDirection != SCROLLRELATIVE_NONE)
 		{
 			const bool IsPageScroll = Input()->AltIsPressed();
@@ -131,15 +135,19 @@ void CScrollRegion::End()
 	if(absolute(m_AnimInitScrollY - m_AnimTargetScrollY) < 0.5f)
 		m_AnimTime = 0.0f;
 
-	if(m_AnimTime > 0.0f)
+	// Hack to allow slider scroll adjustment -Tater
+	if(!Input()->ModifierIsPressed())
 	{
-		m_AnimTime -= Client()->RenderFrameTime();
-		float AnimProgress = (1.0f - std::pow(m_AnimTime / m_AnimTimeMax, 3.0f)); // cubic ease out
-		m_ScrollY = m_AnimInitScrollY + (m_AnimTargetScrollY - m_AnimInitScrollY) * AnimProgress;
-	}
-	else
-	{
-		m_ScrollY = m_AnimTargetScrollY;
+		if(m_AnimTime > 0.0f)
+		{
+			m_AnimTime -= Client()->RenderFrameTime();
+			float AnimProgress = (1.0f - std::pow(m_AnimTime / m_AnimTimeMax, 3.0f)); // cubic ease out
+			m_ScrollY = m_AnimInitScrollY + (m_AnimTargetScrollY - m_AnimInitScrollY) * AnimProgress;
+		}
+		else
+		{
+			m_ScrollY = m_AnimTargetScrollY;
+		}
 	}
 
 	Slider.y += m_ScrollY / MaxScroll * MaxSlider;
