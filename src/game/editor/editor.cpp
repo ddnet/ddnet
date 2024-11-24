@@ -1406,6 +1406,20 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 	}
 }
 
+void CEditor::DoToolbarImages(CUIRect ToolBar)
+{
+	CUIRect ToolBarTop, ToolBarBottom;
+	ToolBar.HSplitMid(&ToolBarTop, &ToolBarBottom, 5.0f);
+
+	if(m_SelectedImage >= 0 && (size_t)m_SelectedImage < m_Map.m_vpImages.size())
+	{
+		const std::shared_ptr<CEditorImage> pSelectedImage = m_Map.m_vpImages[m_SelectedImage];
+		char aLabel[64];
+		str_format(aLabel, sizeof(aLabel), "Size: %" PRIzu " × %" PRIzu, pSelectedImage->m_Width, pSelectedImage->m_Height);
+		Ui()->DoLabel(&ToolBarBottom, aLabel, 12.0f, TEXTALIGN_ML);
+	}
+}
+
 void CEditor::DoToolbarSounds(CUIRect ToolBar)
 {
 	CUIRect ToolBarTop, ToolBarBottom;
@@ -5275,23 +5289,30 @@ void CEditor::RenderFileDialog()
 			Preview.Margin(10.0f, &Preview);
 			if(m_FilePreviewState == PREVIEW_LOADED)
 			{
+				CUIRect PreviewLabel, PreviewImage;
+				Preview.HSplitTop(20.0f, &PreviewLabel, &PreviewImage);
+
+				char aLabel[64];
+				str_format(aLabel, sizeof(aLabel), "Size: %d × %d", m_FilePreviewImageWidth, m_FilePreviewImageHeight);
+				Ui()->DoLabel(&PreviewLabel, aLabel, 12.0f, TEXTALIGN_ML);
+
 				int w = m_FilePreviewImageWidth;
 				int h = m_FilePreviewImageHeight;
-				if(m_FilePreviewImageWidth > Preview.w)
+				if(m_FilePreviewImageWidth > PreviewImage.w)
 				{
-					h = m_FilePreviewImageHeight * Preview.w / m_FilePreviewImageWidth;
-					w = Preview.w;
+					h = m_FilePreviewImageHeight * PreviewImage.w / m_FilePreviewImageWidth;
+					w = PreviewImage.w;
 				}
-				if(h > Preview.h)
+				if(h > PreviewImage.h)
 				{
-					w = w * Preview.h / h;
-					h = Preview.h;
+					w = w * PreviewImage.h / h;
+					h = PreviewImage.h;
 				}
 
 				Graphics()->TextureSet(m_FilePreviewImage);
 				Graphics()->BlendNormal();
 				Graphics()->QuadsBegin();
-				IGraphics::CQuadItem QuadItem(Preview.x, Preview.y, w, h);
+				IGraphics::CQuadItem QuadItem(PreviewImage.x, PreviewImage.y, w, h);
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
 				Graphics()->QuadsEnd();
 			}
@@ -7934,6 +7955,8 @@ void CEditor::Render()
 	// do the toolbar
 	if(m_Mode == MODE_LAYERS)
 		DoToolbarLayers(ToolBar);
+	else if(m_Mode == MODE_IMAGES)
+		DoToolbarImages(ToolBar);
 	else if(m_Mode == MODE_SOUNDS)
 		DoToolbarSounds(ToolBar);
 
