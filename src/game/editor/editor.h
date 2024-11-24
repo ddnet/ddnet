@@ -973,6 +973,7 @@ public:
 	};
 	void DoMapEditor(CUIRect View);
 	void DoToolbarLayers(CUIRect Toolbar);
+	void DoToolbarImages(CUIRect Toolbar);
 	void DoToolbarSounds(CUIRect Toolbar);
 	void DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index);
 	void PreparePointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex);
