@@ -3652,7 +3652,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("Rainbow"), HeadlineFontSize, TEXTALIGN_ML);
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-		static std::vector<const char *> s_DropDownNames = {Localize("Rainbow"), Localize("Pulse"), Localize("Black")};
+		static std::vector<const char *> s_DropDownNames = {Localize("Rainbow"), Localize("Pulse"), Localize("Black"), Localize("Random")};
 		static CUi::SDropDownState s_RainbowDropDownState;
 		static CScrollRegion s_RainbowDropDownScrollRegion;
 		s_RainbowDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_RainbowDropDownScrollRegion;
@@ -3669,6 +3669,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			RainbowSelectedOld = RainbowSelectedNew;
 			dbg_msg("rainbow", "rainbow mode changed to %d", g_Config.m_ClRainbowMode);
 		}
+		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+		Column.HSplitTop(LineSize, &Button, &Column);
+		Ui()->DoScrollbarOption(&g_Config.m_ClRainbowSpeed, &g_Config.m_ClRainbowSpeed, &Button, Localize("Rainbow speed"), 0, 5000, &CUi::ms_LogarithmicScrollbarScale, 0, "%");
 		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
