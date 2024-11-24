@@ -790,13 +790,17 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::RenderCursor()
 {
-	if((!m_pClient->m_Snap.m_pLocalCharacter && !(g_Config.m_ClRenderCursorSpec && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW)) || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(!m_pClient->m_Snap.m_pLocalCharacter && !g_Config.m_ClRenderCursorSpec)
+		return;
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 
 	RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
 
+	int CurWeapon = 1;
 	// render cursor
-	int CurWeapon = maximum(0, m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
+	if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW && m_pClient->m_Snap.m_pLocalCharacter)
+		CurWeapon = maximum(0, m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
 	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].y);
