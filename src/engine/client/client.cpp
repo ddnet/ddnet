@@ -898,7 +898,13 @@ void CClient::DebugRender()
 		{
 			if(m_SnapshotDelta.GetDataRate(i))
 			{
-				str_format(aBuffer, sizeof(aBuffer), "%5d %20s: %8d %8d %8d", i, GameClient()->GetItemName(i), m_SnapshotDelta.GetDataRate(i) / 8, m_SnapshotDelta.GetDataUpdates(i),
+				str_format(
+					aBuffer,
+					sizeof(aBuffer),
+					"%5d %20s: %8" PRIu64 " %8" PRIu64 " %8" PRIu64,
+					i,
+					GameClient()->GetItemName(i),
+					m_SnapshotDelta.GetDataRate(i) / 8, m_SnapshotDelta.GetDataUpdates(i),
 					(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
 				Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
 				y++;
@@ -911,14 +917,28 @@ void CClient::DebugRender()
 				int Type = m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT]->m_pAltSnap->GetExternalItemType(i);
 				if(Type == UUID_INVALID)
 				{
-					str_format(aBuffer, sizeof(aBuffer), "%5d %20s: %8d %8d %8d", i, "Unknown UUID", m_SnapshotDelta.GetDataRate(i) / 8, m_SnapshotDelta.GetDataUpdates(i),
+					str_format(
+						aBuffer,
+						sizeof(aBuffer),
+						"%5d %20s: %8" PRIu64 " %8" PRIu64 " %8" PRIu64,
+						i,
+						"Unknown UUID",
+						m_SnapshotDelta.GetDataRate(i) / 8,
+						m_SnapshotDelta.GetDataUpdates(i),
 						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
 					Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
 					y++;
 				}
 				else if(Type != i)
 				{
-					str_format(aBuffer, sizeof(aBuffer), "%5d %20s: %8d %8d %8d", Type, GameClient()->GetItemName(Type), m_SnapshotDelta.GetDataRate(i) / 8, m_SnapshotDelta.GetDataUpdates(i),
+					str_format(
+						aBuffer,
+						sizeof(aBuffer),
+						"%5d %20s: %8" PRIu64 " %8" PRIu64 " %8" PRIu64,
+						Type,
+						GameClient()->GetItemName(Type),
+						m_SnapshotDelta.GetDataRate(i) / 8,
+						m_SnapshotDelta.GetDataUpdates(i),
 						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
 					Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
 					y++;
