@@ -1,6 +1,6 @@
 [![DDraceNetwork](https://user-images.githubusercontent.com/55141362/212435433-55e4e969-64ed-4ab2-8652-91901d2314a9.png)](https://ddnet.tw) 
 
-[![Build](https://github.com/sjrc6/TaterClient-ddnet/actions/workflows/build.yaml/badge.svg)](https://github.com/sjrc6/TaterClient-ddnet/actions/workflows/build.yaml)
+[![Build](https://github.com/sjrc6/TaterClient-ddnet/workflows/Build/badge.svg)](https://github.com/sjrc6/TaterClient-ddnet/actions/workflows/build.yaml)
 
 ### Taters custom ddnet client with some small modifications 
 Not guarenteed to be bug free, but I will try to fix them. 
@@ -15,9 +15,11 @@ Thanks to tela for the logo png <3
 Download the exe from https://github.com/sjrc6/TaterClient-ddnet/releases, or build it using the build instuctions from the main repository. 
 
 # Settings Page: 
-![image](https://user-images.githubusercontent.com/22122579/182528606-cfb47e19-fb99-47c8-887f-43115ecf1f3e.png)
-![image](https://user-images.githubusercontent.com/22122579/182528639-e69d7e35-286d-4d14-9171-4274ef39b2e7.png)
-![image](https://user-images.githubusercontent.com/22122579/182528667-cf5bfbbf-ec10-4491-8c1b-21ff3b949715.png)
+![image](https://github.com/user-attachments/assets/a6ccb206-9fed-48be-a2d2-8fc50a6be882)
+![image](https://github.com/user-attachments/assets/9251509a-d852-41ac-bf6b-9a610db08945)
+![image](https://github.com/user-attachments/assets/47dab977-1311-4963-a11a-81b78005b12b)
+![image](https://github.com/user-attachments/assets/29bddfd9-fcf1-420c-b7e0-958493051a3c)
+
 ![image](https://user-images.githubusercontent.com/22122579/182528700-4c8238c3-836e-49c3-9996-68025e7f5d58.png)
 
 
