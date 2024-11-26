@@ -1107,16 +1107,6 @@ public:
 	void DrawRect4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) override;
 	void DrawCircle(float CenterX, float CenterY, float Radius, int Segments) override;
 
-	const GL_STexCoord *GetCurTextureCoordinates() override
-	{
-		return m_aTexture;
-	}
-
-	const GL_SColor *GetCurColor() override
-	{
-		return m_aColor;
-	}
-
 	int CreateQuadContainer(bool AutomaticUpload = true) override;
 	void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) override;
 	void QuadContainerUpload(int ContainerIndex) override;

@@ -369,26 +369,11 @@ public:
 		CQuadItem() {}
 		CQuadItem(float x, float y, float w, float h) :
 			m_X(x), m_Y(y), m_Width(w), m_Height(h) {}
-		void Set(float x, float y, float w, float h)
-		{
-			m_X = x;
-			m_Y = y;
-			m_Width = w;
-			m_Height = h;
-		}
-
-		CFreeformItem ToFreeForm() const
-		{
-			return CFreeformItem(m_X, m_Y, m_X + m_Width, m_Y, m_X, m_Y + m_Height, m_X + m_Width, m_Y + m_Height);
-		}
 	};
 	virtual void QuadsDraw(CQuadItem *pArray, int Num) = 0;
 	virtual void QuadsDrawTL(const CQuadItem *pArray, int Num) = 0;
 
 	virtual void QuadsTex3DDrawTL(const CQuadItem *pArray, int Num) = 0;
-
-	virtual const GL_STexCoord *GetCurTextureCoordinates() = 0;
-	virtual const GL_SColor *GetCurColor() = 0;
 
 	virtual int CreateQuadContainer(bool AutomaticUpload = true) = 0;
 	virtual void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) = 0;
