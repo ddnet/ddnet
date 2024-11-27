@@ -13,39 +13,56 @@ on:
       body:
         description: 'Release description'
         required: false
-
-env:
-  BUILD_PREFIX: ddnet
+     
+      run_id:
+        description: 'Run ID of the build workflow to download artifacts from'
+        required: true
 
 jobs:
   release:
     runs-on: ubuntu-latest
+
+    env:
+      BUILD_PREFIX: ddnet
+      CLIENT_NAME: TClient
+      TARGET_REPOSITORY: ${{ github.repository }} 
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Download Ubuntu artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.BUILD_PREFIX }}-ubuntu-latest
-          path: ./artifacts/
+          path: ./artifacts/ubuntu
+          github-token: ${{ secrets.GH_PAT }}
+          repository: ${{ env.TARGET_REPOSITORY }}
+          run-id: ${{ github.event.inputs.run_id }}
 
       - name: Download Windows artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.BUILD_PREFIX }}-windows-latest
-          path: ./artifacts/
+          path: ./artifacts/windows
+          github-token: ${{ secrets.GH_PAT }}
+          repository: ${{ env.TARGET_REPOSITORY }}
+          run-id: ${{ github.event.inputs.run_id }}
 
       - name: Download macOS artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: ${{ env.BUILD_PREFIX }}-macos-latest
-          path: ./artifacts/
+          name: ${{ env.BUILD_PREFIX }}-macOS-latest
+          path: ./artifacts/macOS
+          github-token: ${{ secrets.GH_PAT }}
+          repository: ${{ env.TARGET_REPOSITORY }}
+          run-id: ${{ github.event.inputs.run_id }}
 
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.event.inputs.tag_name }}
           release_name: ${{ github.event.inputs.release_name }}
@@ -53,26 +70,97 @@ jobs:
           draft: false
           prerelease: false
 
+      - name: Rename and Move Artifacts
+        run: |
+          declare -a multi_ext=("tar.gz" "tar.bz2" "tar.xz" "tar.Z")
+
+          for dir in ./artifacts/*/ ; do
+            os=$(basename "$dir")
+            # Find the single file in the OS directory
+            file=$(find "$dir" -type f | head -n 1)
+
+            if [ -z "$file" ]; then
+              echo "No artifact found in directory $dir. Skipping."
+              continue
+            fi
+            filename=$(basename "$file")
+            extension=""
+            for ext in "${multi_ext[@]}"; do
+              if [[ "$filename" == *.$ext ]]; then
+                extension="$ext"
+                break
+              fi
+            done
+            if [ -z "$extension" ]; then
+              extension="${filename##*.}"
+            fi
+            new_name="${CLIENT_NAME}-${os}.${extension}"
+            echo "Renaming $file to $new_name"
+            mv "$file" "./artifacts/$new_name"
+            echo "Moved $new_name to ./artifacts/"
+          done
+
+
+      - name: Extract and Copy DDNet.exe
+        run: |
+          # Define variables
+          WINDOWS_ZIP="./artifacts/${CLIENT_NAME}-windows.zip"
+          TEMP_DIR="./artifacts/windows_temp"
+          mkdir -p "$TEMP_DIR"
+          echo "Extracting $WINDOWS_ZIP to $TEMP_DIR"
+          unzip -q "$WINDOWS_ZIP" -d "$TEMP_DIR"
+          DDNET_EXE=$(find "$TEMP_DIR" -type f -iname "DDNet.exe")
+          if [ -z "$DDNET_EXE" ]; then
+            echo "DDNet.exe not found in the extracted files."
+            exit 1
+          fi
+          echo "Copying DDNet.exe to ./artifacts/"
+          cp "$DDNET_EXE" ./artifacts/
+          rm -rf "$TEMP_DIR"
+          echo "DDNet.exe has been successfully copied to ./artifacts/"
+
+      - name: List artifacts directory
+        run: |
+          echo "Listing ./artifacts directory:"
+          ls -R ./artifacts
+
       - name: Upload Ubuntu
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/ubuntu/${{ env.BUILD_PREFIX }}-ubuntu-latest.zip
-          asset_name: ${{ env.BUILD_PREFIX }}-ubuntu-latest.zip
-          asset_content_type: application/zip
+          asset_path: ./artifacts/${{ env.CLIENT_NAME }}-ubuntu.tar.xz
+          asset_name: ${{ env.CLIENT_NAME }}-ubuntu.tar.xz
+          asset_content_type: application/tar.xz
+          
 
       - name: Upload Windows
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/windows/${{ env.BUILD_PREFIX }}-windows-latest.zip
-          asset_name: ${{ env.BUILD_PREFIX }}-windows-latest.zip
+          asset_path: ./artifacts/${{ env.CLIENT_NAME }}-windows.zip
+          asset_name: ${{ env.CLIENT_NAME }}-windows.zip
           asset_content_type: application/zip
 
       - name: Upload macOS
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/macos/${{ env.BUILD_PREFIX }}-macos-latest.zip
-          asset_name: ${{ env.BUILD_PREFIX }}-macos-latest.zip
-          asset_content_type: application/zip
+          asset_path: ./artifacts/${{ env.CLIENT_NAME }}-macOS.dmg
+          asset_name: ${{ env.CLIENT_NAME }}-macOS.dmg
+          asset_content_type: application/dmg
+
+      - name: Upload Raw exe
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/DDNet.exe
+          asset_name: DDNet.exe
+          asset_content_type: application/dmg
