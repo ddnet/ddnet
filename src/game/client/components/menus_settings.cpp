@@ -3488,9 +3488,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Column.HSplitTop(LineSize, &Button, &Column);
 			Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorOffsetMax, &g_Config.m_ClIndicatorOffsetMax, &Button, Localize("Indicator max offset"), 16, 200);
 			Column.HSplitTop(LineSize, &Button, &Column);
-			int Value = g_Config.m_ClIndicatorMaxDistance * 50;
-			Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorMaxDistance, &Value, &Button, Localize("Indicator max distance"), 500, 7000);
-			g_Config.m_ClIndicatorMaxDistance = Value / 50;
+			Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorMaxDistance, &g_Config.m_ClIndicatorMaxDistance, &Button, Localize("Indicator max distance"), 500, 7000);
 		}
 		else
 		{
