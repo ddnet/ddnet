@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>T-Client</title>
+    <title>Tater Client</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
@@ -31,7 +31,7 @@
 
     <main>
         <header data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="250">
-            <img src="assets/logo.png" alt="T-Client Logo" class="hero-logo">
+            <img src="assets/logo.png" alt="T-Client Logo" class="hero-logo" id="heroLogo">
             <p class="hero-text">DDNet Client with extended features</p>
             <div class="scroll-indicator">
                 <p>Scroll down to download</p>
@@ -99,49 +99,44 @@
                     </div>
                 </div>
             </div>
-            <h2 style="margin: 0 auto;">No Cheats!</h2>
         </section>
 
         <section id="download" data-aos="fade-up" data-aos-duration="500">
-            <div class="download-version">
-                <p class="os">Windows x64</p>
-                <a href="https://github.com/sjrc6/TaterClient-ddnet/releases/latest/download/TClient-windows.zip" target="_blank">
-                    <button class="download-btn">
-                        <img src="assets/download-icon.svg" alt="Download">
-                        <span>Download</span>
-                    </button>
-                </a>
-                <p class="version">Latest: {version}</p>
+            <div class="download-buttons">
+                <div class="download-version">
+                    <a href="https://github.com/sjrc6/TaterClient-ddnet/releases/latest/download/TClient-windows.zip" target="_blank">
+                        <button class="download-btn win-download">
+                            <img src="assets/windows-icon.svg" alt="Download">
+                            <span>Download</span>
+                        </button>
+                    </a>
+                </div>
+                <div class="download-version">
+                    <a href="https://github.com/sjrc6/TaterClient-ddnet/releases/latest/download/DDNet.exe" target="_blank">
+                        <button class="download-btn file-download">
+                            <img src="assets/exe-icon.svg" alt="Download">
+                            <span>Download</span>
+                        </button>
+                    </a>
+                </div>
+                <div class="download-version">
+                    <a href="https://github.com/sjrc6/TaterClient-ddnet/releases/latest/download/TClient-macOS.dmg" target="_blank">
+                        <button class="mac-download">
+                            <img src="assets/macos-icon.svg" alt="Download">
+                            <span>Download</span>
+                        </button>
+                    </a>
+                </div>
+                <div class="download-version">
+                    <a href="https://github.com/sjrc6/TaterClient-ddnet/releases/latest/download/TClient-ubuntu.tar.xz" target="_blank">
+                        <button class="download-btn linux-download">
+                            <img src="assets/linux-icon.svg" alt="Download">
+                            <span>Download</span>
+                        </button>
+                    </a>
+                </div>
             </div>
-            <div class="download-version">
-                <p class="os">Bare EXE (Windows)</p>
-                <a href="https://github.com/sjrc6/TaterClient-ddnet/releases/latest/download/DDNet.exe" target="_blank">
-                    <button class="download-btn">
-                        <img src="assets/download-icon.svg" alt="Download">
-                        <span>Download</span>
-                    </button>
-                </a>
-                <p class="version">Latest: {version}</p>
-            </div>
-            <div class="download-version">
-                <p class="os">Linux</p>
-                <a href="https://github.com/sjrc6/TaterClient-ddnet/releases/latest/download/TClient-macOS.dmg" target="_blank">
-                    <button class="download-btn">
-                        <img src="assets/download-icon.svg" alt="Download">
-                        <span>Download</span>
-                    </button>
-                </a>
-                <p class="version">Latest: {version}</p>
-            </div>            <div class="download-version">
-                <p class="os">MacOS</p>
-                <a href="https://github.com/sjrc6/TaterClient-ddnet/releases/latest/download/TClient-ubuntu.tar.xz" target="_blank">
-                    <button class="download-btn">
-                        <img src="assets/download-icon.svg" alt="Download">
-                        <span>Download</span>
-                    </button>
-                </a>
-                <p class="version">Latest: {version}</p>
-            </div>
+            <p class="version">Latest: {version}</p>
         </section>
     </main>
 
@@ -157,6 +152,25 @@
     <script src="script.js"></script>
     <script>
       AOS.init();
+
+      const heroLogo = document.getElementById('heroLogo');
+
+      const sounds = [
+      'assets/sounds/tee_scream1.ogg',
+      'assets/sounds/tee_scream2.ogg'
+      ];
+
+      let clickCount = 0;
+
+      heroLogo.addEventListener('click', () => {
+        const soundToPlay = sounds[clickCount % 2];
+
+        const audio = new Audio(soundToPlay);
+        audio.volume = 0.5;
+        audio.play();
+
+        clickCount++;
+      });
     </script>
 </body>
 </html>

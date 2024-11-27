@@ -130,10 +130,10 @@ nav {
 
 .discord-link {
     text-decoration: none;
-    color: inherit; /* Optional: Keeps the link text color consistent */
-    display: flex; /* Optional: Aligns icon and text neatly */
-    align-items: center; /* Optional: Centers icon vertically with text */
-    gap: 12px; /* Optional: Adds spacing between text and icon */
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 
@@ -152,14 +152,36 @@ header {
 }
 
 .hero-logo {
+    cursor: pointer;
+    position: relative;
     max-width: 600px;
     margin-bottom: 30px;
+    animation: logo-anim ease-in-out 5s infinite;
+    transition: all 0.2s ease-in-out
+}
+
+.hero-logo:hover {
+    transform: scale(1.2);
+    filter: brightness(1.2);
 }
 
 .hero-text {
     font-size: 35px;
     font-weight: 200;
     margin-bottom: 20px;
+}
+
+/* Logo Animation */
+@keyframes logo-anim {
+  0% {
+    bottom: 10px;
+  }
+  50% {
+    bottom: 0px;
+  }
+  100% {
+    bottom: 10px;
+  }
 }
 
 /* Features */
@@ -193,7 +215,8 @@ h2 {
 }
 
 .feature-card:hover {
-    transform: scale(1.45);
+    transform: scale(1.2);
+    box-shadow: 0px 0px 45px var(--bg-dark);
     z-index: 2;
 }
 
@@ -343,7 +366,16 @@ h2 {
     text-align: center;
     margin-bottom: 80px;
     display: flex;
-    justify-content:center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.download-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
 }
 
 .download-version {
@@ -351,7 +383,6 @@ h2 {
 }
 
 .download-btn {
-    background: linear-gradient(144deg, var(--primary-color), var(--primary-dark));
     border: none;
     border-radius: 15px;
     padding: 12px 24px;
@@ -363,8 +394,31 @@ h2 {
     transition: all 0.2s ease-out;
 }
 
-.download-btn:hover {
+.file-download {
+    background: linear-gradient(144deg, var(--primary-color), var(--primary-dark));
+}
+
+.file-download:hover {
     box-shadow: 0px 0px 10px var(--primary-color);
+}
+
+.win-download {
+    background: linear-gradient(144deg, rgba(6,0,106), rgba(0,212,255));
+}
+
+.win-download:hover {
+    box-shadow: 0px 0px 10px #0368b3;
+}
+
+.linux-download {
+    background: linear-gradient(144deg, rgba(255,183,6,1) 0%, rgba(255,87,0,1) 100%);
+}
+
+.linux-download:hover {
+    box-shadow: 0px 0px 10px #ff8703;
+}
+
+.download-btn:hover {
     transform: scale(1.1);
 }
 
@@ -381,10 +435,41 @@ h2 {
     font-weight: 700;
 }
 
-.version, .os {
-    font-size: 16px;
+.version {
+    font-size: 20px;
     font-weight: 500;
     margin: 2px 0;
+}
+
+.mac-download {
+    background: linear-gradient(144deg, rgba(255,255,255,1) 0%, rgba(153,153,153,1) 100%);
+    border: none;
+    border-radius: 15px;
+    padding: 12px 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    margin-bottom: 15px;
+    transition: all 0.2s ease-out;
+}
+
+.mac-download:hover {
+    box-shadow: 0px 0px 10px #cecece;
+    transform: scale(1.1);
+}
+
+.mac-download img {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+}
+
+.mac-download span {
+    font-family: 'Montserrat';
+    color: #101010;
+    font-size: 20px;
+    font-weight: 700;
 }
 
 /* Footer */
@@ -513,6 +598,13 @@ footer {
     .nav-links a {
         width: 100%;
         text-align: center;
+        padding: 8px 0;
+    }
+    
+    .discord-link {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
         padding: 8px 0;
     }
 
