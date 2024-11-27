@@ -1,0 +1,16 @@
+<svg width="100.000000" height="100.000000" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<desc>
+			Created with Pixso.
+	</desc>
+	<defs>
+		<clipPath id="clip2_32">
+			<rect id="Arrow-down" width="100.000000" height="100.000000" fill="white" fill-opacity="0"/>
+		</clipPath>
+	</defs>
+	<g clip-path="url(#clip2_32)">
+		<path id="path" d="M47.03 25.02L47.01 25C47.01 23.32 48.33 22 50.01 22C51.69 22 53.01 23.32 53.01 25L52.99 25.02L47.03 25.02ZM52.99 74.77L53.01 74.79C53.01 76.47 51.69 77.79 50.01 77.79C48.33 77.79 47.01 76.47 47.01 74.79L47.03 74.77L52.99 74.77Z" fill="#000000" fill-opacity="0" fill-rule="nonzero"/>
+		<path id="path" d="M50.01 25L50.01 74.79" stroke="#FFFFFF" stroke-opacity="1.000000" stroke-width="6.000000" stroke-linejoin="round" stroke-linecap="round"/>
+		<path id="path" d="M72.87 47.9L72.87 47.87C74.06 46.69 75.93 46.69 77.12 47.87C78.3 49.06 78.3 50.93 77.12 52.12L77.09 52.12L72.87 47.9ZM22.9 52.12L22.87 52.12C21.69 50.93 21.69 49.06 22.87 47.87C24.06 46.69 25.93 46.69 27.12 47.87L27.12 47.9L22.9 52.12Z" fill="#000000" fill-opacity="0" fill-rule="nonzero"/>
+		<path id="path" d="M75 50L50 75L25 50" stroke="#FFFFFF" stroke-opacity="1.000000" stroke-width="6.000000" stroke-linejoin="round" stroke-linecap="round"/>
+	</g>
+</svg>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 25.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 60 60" style="enable-background:new 0 0 60 60;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:none;}
+	.st1{display:none;fill:#101010;}
+	.st2{fill:url(#image.png_1_);}
+</style>
+<pattern  y="60" width="1" height="1" patternUnits="userSpaceOnUse" id="pattern_2_460" viewBox="0 -1 1 1" style="overflow:visible;">
+	<g>
+		<rect y="-1" class="st0" width="1" height="1"/>
+		<g transform="matrix(0.001953,0,0,0.001953,0,0)">
+			
+				<image style="overflow:visible;enable-background:new    ;" width="512" height="512" id="image2_46_0_1_" xlink:href="B2272D1A.png"  transform="matrix(1.953000e-03 0 0 -1.953000e-03 0 0)">
+			</image>
+		</g>
+	</g>
+</pattern>
+<desc>Created with Pixso.</desc>
+<path id="Rectangle_3" class="st1" d="M10,0h40c5.5,0,10,4.5,10,10v40c0,5.5-4.5,10-10,10H10C4.5,60,0,55.5,0,50V10
+	C0,4.5,4.5,0,10,0z"/>
+<pattern  id="image.png_1_" xlink:href="#pattern_2_460" patternTransform="matrix(45 0 0 -45 359120 -377125)">
+</pattern>
+<rect id="image.png" x="7" y="7" class="st2" width="45" height="45"/>
+</svg>
