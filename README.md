@@ -1,4 +1,4 @@
-[![DDraceNetwork](https://user-images.githubusercontent.com/55141362/212435433-55e4e969-64ed-4ab2-8652-91901d2314a9.png)](https://ddnet.tw) 
+[![DDraceNetwork](docs/assets/TClient_Logo_Horizontal.svg)](https://tclient.app) 
 
 [![Build](https://github.com/sjrc6/TaterClient-ddnet/workflows/Build/badge.svg)](https://github.com/sjrc6/TaterClient-ddnet/actions/workflows/build.yaml)
 
