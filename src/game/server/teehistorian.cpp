@@ -1,11 +1,25 @@
 #include "teehistorian.h"
 
 #include <base/system.h>
-#include <engine/external/json-parser/json.h>
+
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>
+#include <engine/shared/packer.h>
 #include <engine/shared/snapshot.h>
+
 #include <game/gamecore.h>
+
+class CTeehistorianPacker : public CAbstractPacker
+{
+public:
+	CTeehistorianPacker() :
+		CAbstractPacker(m_aBuffer, sizeof(m_aBuffer))
+	{
+	}
+
+private:
+	unsigned char m_aBuffer[1024 * 64];
+};
 
 static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
@@ -215,7 +229,7 @@ void CTeeHistorian::WriteExtra(CUuid Uuid, const void *pData, int DataSize)
 {
 	EnsureTickWritten();
 
-	CPacker Ex;
+	CTeehistorianPacker Ex;
 	Ex.Reset();
 	Ex.AddInt(-TEEHISTORIAN_EX);
 	Ex.AddRaw(&Uuid, sizeof(Uuid));
@@ -277,7 +291,7 @@ void CTeeHistorian::RecordPlayer(int ClientId, const CNetObj_CharacterCore *pCha
 	{
 		EnsureTickWrittenPlayerData(ClientId);
 
-		CPacker Buffer;
+		CTeehistorianPacker Buffer;
 		Buffer.Reset();
 		if(pPrev->m_Alive)
 		{
@@ -320,7 +334,7 @@ void CTeeHistorian::RecordDeadPlayer(int ClientId)
 	{
 		EnsureTickWrittenPlayerData(ClientId);
 
-		CPacker Buffer;
+		CTeehistorianPacker Buffer;
 		Buffer.Reset();
 		Buffer.AddInt(-TEEHISTORIAN_PLAYER_OLD);
 		Buffer.AddInt(ClientId);
@@ -341,7 +355,7 @@ void CTeeHistorian::RecordPlayerTeam(int ClientId, int Team)
 
 		EnsureTickWritten();
 
-		CPacker Buffer;
+		CTeehistorianPacker Buffer;
 		Buffer.Reset();
 		Buffer.AddInt(ClientId);
 		Buffer.AddInt(Team);
@@ -363,7 +377,7 @@ void CTeeHistorian::RecordTeamPractice(int Team, bool Practice)
 
 		EnsureTickWritten();
 
-		CPacker Buffer;
+		CTeehistorianPacker Buffer;
 		Buffer.Reset();
 		Buffer.AddInt(Team);
 		Buffer.AddInt(Practice);
@@ -392,7 +406,7 @@ void CTeeHistorian::EnsureTickWritten()
 
 void CTeeHistorian::WriteTick()
 {
-	CPacker TickPacker;
+	CTeehistorianPacker TickPacker;
 	TickPacker.Reset();
 
 	int dt = m_Tick - m_LastWrittenTick - 1;
@@ -424,7 +438,7 @@ void CTeeHistorian::BeginInputs()
 
 void CTeeHistorian::RecordPlayerInput(int ClientId, uint32_t UniqueClientId, const CNetObj_PlayerInput *pInput)
 {
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 
 	CTeehistorianPlayer *pPrev = &m_aPrevPlayers[ClientId];
 	CNetObj_PlayerInput DiffInput;
@@ -473,7 +487,7 @@ void CTeeHistorian::RecordPlayerMessage(int ClientId, const void *pMsg, int MsgS
 {
 	EnsureTickWritten();
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(-TEEHISTORIAN_MESSAGE);
 	Buffer.AddInt(ClientId);
@@ -499,7 +513,7 @@ void CTeeHistorian::RecordPlayerJoin(int ClientId, int Protocol)
 	EnsureTickWritten();
 
 	{
-		CPacker Buffer;
+		CTeehistorianPacker Buffer;
 		Buffer.Reset();
 		Buffer.AddInt(ClientId);
 		if(m_Debug)
@@ -510,7 +524,7 @@ void CTeeHistorian::RecordPlayerJoin(int ClientId, int Protocol)
 		WriteExtra(Uuid, Buffer.Data(), Buffer.Size());
 	}
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(-TEEHISTORIAN_JOIN);
 	Buffer.AddInt(ClientId);
@@ -527,7 +541,7 @@ void CTeeHistorian::RecordPlayerRejoin(int ClientId)
 {
 	EnsureTickWritten();
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(ClientId);
 
@@ -543,7 +557,7 @@ void CTeeHistorian::RecordPlayerReady(int ClientId)
 {
 	EnsureTickWritten();
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(ClientId);
 
@@ -559,7 +573,7 @@ void CTeeHistorian::RecordPlayerDrop(int ClientId, const char *pReason)
 {
 	EnsureTickWritten();
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(-TEEHISTORIAN_DROP);
 	Buffer.AddInt(ClientId);
@@ -577,7 +591,7 @@ void CTeeHistorian::RecordPlayerName(int ClientId, const char *pName)
 {
 	EnsureTickWritten();
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(ClientId);
 	Buffer.AddString(pName, 0);
@@ -594,7 +608,7 @@ void CTeeHistorian::RecordConsoleCommand(int ClientId, int FlagMask, const char 
 {
 	EnsureTickWritten();
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(-TEEHISTORIAN_CONSOLE_COMMAND);
 	Buffer.AddInt(ClientId);
@@ -628,7 +642,7 @@ void CTeeHistorian::RecordPlayerSwap(int ClientId1, int ClientId2)
 {
 	EnsureTickWritten();
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(ClientId1);
 	Buffer.AddInt(ClientId2);
@@ -640,7 +654,7 @@ void CTeeHistorian::RecordTeamSaveSuccess(int Team, CUuid SaveId, const char *pT
 {
 	EnsureTickWritten();
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);
 	Buffer.AddRaw(&SaveId, sizeof(SaveId));
@@ -660,7 +674,7 @@ void CTeeHistorian::RecordTeamSaveFailure(int Team)
 {
 	EnsureTickWritten();
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);
 
@@ -676,7 +690,7 @@ void CTeeHistorian::RecordTeamLoadSuccess(int Team, CUuid SaveId, const char *pT
 {
 	EnsureTickWritten();
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);
 	Buffer.AddRaw(&SaveId, sizeof(SaveId));
@@ -696,7 +710,7 @@ void CTeeHistorian::RecordTeamLoadFailure(int Team)
 {
 	EnsureTickWritten();
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(Team);
 
@@ -723,7 +737,7 @@ void CTeeHistorian::EndTick()
 
 void CTeeHistorian::RecordDDNetVersionOld(int ClientId, int DDNetVersion)
 {
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(ClientId);
 	Buffer.AddInt(DDNetVersion);
@@ -738,7 +752,7 @@ void CTeeHistorian::RecordDDNetVersionOld(int ClientId, int DDNetVersion)
 
 void CTeeHistorian::RecordDDNetVersion(int ClientId, CUuid ConnectionId, int DDNetVersion, const char *pDDNetVersionStr)
 {
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(ClientId);
 	Buffer.AddRaw(&ConnectionId, sizeof(ConnectionId));
@@ -757,7 +771,7 @@ void CTeeHistorian::RecordDDNetVersion(int ClientId, CUuid ConnectionId, int DDN
 
 void CTeeHistorian::RecordAuthInitial(int ClientId, int Level, const char *pAuthName)
 {
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(ClientId);
 	Buffer.AddInt(Level);
@@ -773,7 +787,7 @@ void CTeeHistorian::RecordAuthInitial(int ClientId, int Level, const char *pAuth
 
 void CTeeHistorian::RecordAuthLogin(int ClientId, int Level, const char *pAuthName)
 {
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(ClientId);
 	Buffer.AddInt(Level);
@@ -789,7 +803,7 @@ void CTeeHistorian::RecordAuthLogin(int ClientId, int Level, const char *pAuthNa
 
 void CTeeHistorian::RecordAuthLogout(int ClientId)
 {
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(ClientId);
 
@@ -813,7 +827,7 @@ void CTeeHistorian::RecordAntibot(const void *pData, int DataSize)
 
 void CTeeHistorian::RecordPlayerFinish(int ClientId, int TimeTicks)
 {
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(ClientId);
 	Buffer.AddInt(TimeTicks);
@@ -827,7 +841,7 @@ void CTeeHistorian::RecordPlayerFinish(int ClientId, int TimeTicks)
 
 void CTeeHistorian::RecordTeamFinish(int TeamId, int TimeTicks)
 {
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(TeamId);
 	Buffer.AddInt(TimeTicks);
@@ -852,7 +866,7 @@ void CTeeHistorian::Finish()
 		EndTick();
 	}
 
-	CPacker Buffer;
+	CTeehistorianPacker Buffer;
 	Buffer.Reset();
 	Buffer.AddInt(-TEEHISTORIAN_FINISH);
 

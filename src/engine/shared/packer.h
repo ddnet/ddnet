@@ -3,29 +3,51 @@
 #ifndef ENGINE_SHARED_PACKER_H
 #define ENGINE_SHARED_PACKER_H
 
-class CPacker
-{
-public:
-	enum
-	{
-		PACKER_BUFFER_SIZE = 1024 * 64
-	};
+#include <cstddef>
 
+/**
+ * Abstract packer implementation. Subclasses must supply the buffer.
+ */
+class CAbstractPacker
+{
 private:
-	unsigned char m_aBuffer[PACKER_BUFFER_SIZE];
+	unsigned char *const m_pBuffer;
+	const size_t m_BufferSize;
 	unsigned char *m_pCurrent;
 	unsigned char *m_pEnd;
 	bool m_Error;
 
+protected:
+	CAbstractPacker(unsigned char *pBuffer, size_t Size);
+
 public:
 	void Reset();
 	void AddInt(int i);
-	void AddString(const char *pStr, int Limit = PACKER_BUFFER_SIZE);
+	void AddString(const char *pStr, int Limit = 0, bool AllowTruncation = true);
 	void AddRaw(const void *pData, int Size);
 
-	int Size() const { return (int)(m_pCurrent - m_aBuffer); }
-	const unsigned char *Data() const { return m_aBuffer; }
+	int Size() const { return (int)(m_pCurrent - m_pBuffer); }
+	const unsigned char *Data() const { return m_pBuffer; }
 	bool Error() const { return m_Error; }
+};
+
+/**
+ * Default packer with buffer for networking.
+ */
+class CPacker : public CAbstractPacker
+{
+public:
+	enum
+	{
+		PACKER_BUFFER_SIZE = 1024 * 2
+	};
+	CPacker() :
+		CAbstractPacker(m_aBuffer, sizeof(m_aBuffer))
+	{
+	}
+
+private:
+	unsigned char m_aBuffer[PACKER_BUFFER_SIZE];
 };
 
 class CUnpacker
