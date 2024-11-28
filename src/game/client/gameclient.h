@@ -780,7 +780,7 @@ public:
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 
 	int m_MultiViewTeam;
-	int m_MultiViewPersonalZoom;
+	float m_MultiViewPersonalZoom;
 	bool m_MultiViewShowHud;
 	bool m_MultiViewActivated;
 	bool m_aMultiViewId[MAX_CLIENTS];
