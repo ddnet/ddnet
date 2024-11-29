@@ -1386,7 +1386,10 @@ void CCharacter::HandleSkippableTiles(int Index)
 		   Collision()->GetFCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) &&
 		!m_Core.m_Super && !m_Core.m_Invincible && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCid())))
 	{
-		Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+		if(Team() && Teams()->IsPractice(Team()))
+			Freeze();
+		else
+			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		return;
 	}
 
