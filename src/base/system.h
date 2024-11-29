@@ -2633,10 +2633,12 @@ enum class EShellExecuteWindowState
  *
  * @param file The file to execute.
  * @param window_state The window state how the process window should be shown.
+ * @param arguments Optional array of arguments to pass to the process.
+ * @param num_arguments The number of arguments.
  *
  * @return Handle of the new process, or @link INVALID_PROCESS @endlink on error.
  */
-PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state);
+PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, const char **arguments = nullptr, const size_t num_arguments = 0);
 
 /**
  * Sends kill signal to a process.
