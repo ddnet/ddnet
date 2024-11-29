@@ -246,12 +246,21 @@ int CControls::SnapInput(int *pData)
 		if(!m_aInputDirectionLeft[g_Config.m_ClDummy] && m_aInputDirectionRight[g_Config.m_ClDummy])
 			m_aInputData[g_Config.m_ClDummy].m_Direction = 1;
 
+		// cancel camera offset before scaling
+		vec2 CameraOffset = m_pClient->m_Camera.CalculateCameraOffset();
+		m_aInputData[g_Config.m_ClDummy].m_TargetX -= CameraOffset.x;
+		m_aInputData[g_Config.m_ClDummy].m_TargetY -= CameraOffset.y;
+
 		// scale TargetX, TargetY by zoom.
 		if(!m_pClient->m_Snap.m_SpecInfo.m_Active)
 		{
 			m_aInputData[g_Config.m_ClDummy].m_TargetX *= m_pClient->m_Camera.m_Zoom;
 			m_aInputData[g_Config.m_ClDummy].m_TargetY *= m_pClient->m_Camera.m_Zoom;
 		}
+
+		// reapply camera offset
+		m_aInputData[g_Config.m_ClDummy].m_TargetX += CameraOffset.x;
+		m_aInputData[g_Config.m_ClDummy].m_TargetY += CameraOffset.y;
 
 		// dummy copy moves
 		if(g_Config.m_ClDummyCopyMoves)

@@ -194,17 +194,8 @@ void CCamera::OnRender()
 			}
 		}
 
-		vec2 TargetCameraOffset(0, 0);
+		vec2 TargetCameraOffset = CalculateCameraOffset();
 		s_LastMousePos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
-		float l = length(s_LastMousePos);
-		if(l > 0.0001f) // make sure that this isn't 0
-		{
-			float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
-			float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
-			float OffsetAmount = maximum(l - DeadZone, 0.0f) * FollowFactor;
-
-			TargetCameraOffset = normalize(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]) * OffsetAmount;
-		}
 
 		if(g_Config.m_ClDyncamSmoothness > 0)
 			s_aCurrentCameraOffset[g_Config.m_ClDummy] += (TargetCameraOffset - s_aCurrentCameraOffset[g_Config.m_ClDummy]) * minimum(DeltaTime * s_SpeedBias, 1.0f);
@@ -477,4 +468,20 @@ bool CCamera::ZoomAllowed() const
 	return GameClient()->m_Snap.m_SpecInfo.m_Active ||
 	       GameClient()->m_GameInfo.m_AllowZoom ||
 	       Client()->State() == IClient::STATE_DEMOPLAYBACK;
+}
+
+vec2 CCamera::CalculateCameraOffset() const
+{
+	vec2 Result(0, 0);
+	vec2 MousePos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
+	float l = length(MousePos);
+	if(l > 0.0001f) // make sure that this isn't 0
+	{
+		float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
+		float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
+		float OffsetAmount = maximum(l - DeadZone, 0.0f) * FollowFactor;
+
+		Result = normalize(MousePos) * OffsetAmount;
+	}
+	return Result;
 }

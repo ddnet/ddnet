@@ -75,6 +75,8 @@ public:
 	void SetZoom(float Target, int Smoothness);
 	bool ZoomAllowed() const;
 
+	vec2 CalculateCameraOffset() const;
+
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData);
