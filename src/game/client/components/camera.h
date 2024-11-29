@@ -50,6 +50,9 @@ class CCamera : public CComponent
 	float MinZoomLevel();
 	float MaxZoomLevel();
 
+	vec2 m_LastMousePos;
+	float m_DyncamSmoothingSpeedBias;
+
 public:
 	static constexpr float ZOOM_STEP = 0.866025f;
 
@@ -58,6 +61,9 @@ public:
 	bool m_Zooming;
 	float m_Zoom;
 	float m_ZoomSmoothingTarget;
+
+	vec2 m_DyncamTargetCameraOffset;
+	vec2 m_aDyncamCurrentCameraOffset[NUM_DUMMIES];
 
 	CCamera();
 	virtual int Sizeof() const override { return sizeof(*this); }
@@ -74,6 +80,11 @@ public:
 
 	void SetZoom(float Target, int Smoothness);
 	bool ZoomAllowed() const;
+
+	int Deadzone() const;
+	int FollowFactor() const;
+
+	void UpdateCamera();
 
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);

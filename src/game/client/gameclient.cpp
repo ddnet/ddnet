@@ -757,6 +757,9 @@ void CGameClient::OnRender()
 		}
 	}
 
+	// update camera data prior to CControls::OnRender to allow CControls::m_aTargetPos to compensate using camera data
+	m_Camera.UpdateCamera();
+
 	// render all systems
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnRender();
