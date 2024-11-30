@@ -439,10 +439,12 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 
 	if(pChr && pPlayer && pSelf->GetPlayerChar(TeleTo))
 	{
-		vec2 Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
-		if(!pPlayer->IsPaused() && !pResult->NumArguments())
+		// default to view pos when character is not available
+		vec2 Pos = pPlayer->m_ViewPos;
+		if(pResult->NumArguments() == 0 && !pPlayer->IsPaused() && pChr->IsAlive())
 		{
-			Pos += vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+			vec2 Target = vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+			Pos = pPlayer->m_CameraInfo.ConvertTargetToWorld(pChr->GetPos(), Target);
 		}
 		pSelf->Teleport(pChr, Pos);
 		pChr->ResetJumps();

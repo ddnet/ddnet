@@ -157,7 +157,7 @@ void CCamera::UpdateCamera()
 	if(l > 0.0001f) // make sure that this isn't 0
 	{
 		float OffsetAmount = maximum(l - Deadzone(), 0.0f) * (FollowFactor() / 100.0f);
-		m_DyncamTargetCameraOffset = normalize(MousePos) * OffsetAmount;
+		m_DyncamTargetCameraOffset = normalize_pre_length(MousePos, l) * OffsetAmount;
 	}
 
 	m_LastMousePos = MousePos;

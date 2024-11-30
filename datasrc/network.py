@@ -540,6 +540,12 @@ Messages = [
 		NetIntRange("m_Show", 0, 2),
 	]),
 
+	NetMessageEx("Cl_CameraInfo", "camera-info@netmsg.ddnet.org", [
+		NetIntAny("m_Zoom"),
+		NetIntAny("m_Deadzone"),
+		NetIntAny("m_FollowFactor"),
+	]),
+
 	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.tw", []),
 
 	NetMessageEx("Sv_DDRaceTime", "ddrace-time@netmsg.ddnet.tw", [

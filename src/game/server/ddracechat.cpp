@@ -1920,10 +1920,12 @@ void CGameContext::ConTeleCursor(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	// default to view pos when character is not available
 	vec2 Pos = pPlayer->m_ViewPos;
-	if(pResult->NumArguments() == 0 && !pPlayer->IsPaused())
+	if(pResult->NumArguments() == 0 && !pPlayer->IsPaused() && pPlayer->GetCharacter() && pPlayer->GetCharacter()->IsAlive())
 	{
-		Pos += vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+		vec2 Target = vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+		Pos = pPlayer->m_CameraInfo.ConvertTargetToWorld(pPlayer->GetCharacter()->GetPos(), Target);
 	}
 	else if(pResult->NumArguments() > 0)
 	{
