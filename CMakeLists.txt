@@ -2405,13 +2405,11 @@ if(CLIENT)
     components/spectator.h
     components/statboard.cpp
     components/statboard.h
-    components/tooltips.cpp
-    components/tooltips.h
-    components/tclient/outlines.cpp
-    components/tclient/outlines.h
     components/tclient/bindwheel.cpp
     components/tclient/bindwheel.h
     components/tclient/menus_tclient.cpp
+    components/tclient/outlines.cpp
+    components/tclient/outlines.h
     components/tclient/player_indicator.cpp
     components/tclient/player_indicator.h
     components/tclient/rainbow.cpp
@@ -2422,6 +2420,8 @@ if(CLIENT)
     components/tclient/tater.h
     components/tclient/verify.cpp
     components/tclient/verify.h
+    components/tooltips.cpp
+    components/tooltips.h
     components/voting.cpp
     components/voting.h
     gameclient.cpp
