@@ -2407,14 +2407,15 @@ if(CLIENT)
     components/statboard.h
     components/tooltips.cpp
     components/tooltips.h
-    components/tclient/bindwheel.cpp
-    components/tclient/bindwheel.h
     components/tclient/outlines.cpp
     components/tclient/outlines.h
-    components/tclient/rainbow.cpp
-    components/tclient/rainbow.h
+    components/tclient/bindwheel.cpp
+    components/tclient/bindwheel.h
+    components/tclient/menus_tclient.cpp
     components/tclient/player_indicator.cpp
     components/tclient/player_indicator.h
+    components/tclient/rainbow.cpp
+    components/tclient/rainbow.h
     components/tclient/skinprofiles.cpp
     components/tclient/skinprofiles.h
     components/tclient/tater.cpp

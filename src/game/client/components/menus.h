@@ -839,6 +839,8 @@ private:
 	// found in menus_settings.cpp
 	void RenderSettingsDDNet(CUIRect MainView);
 	void RenderSettingsAppearance(CUIRect MainView);
+
+	// found in menus_tclient.cpp
 	void RenderSettingsTClient(CUIRect MainView);
 	void RenderSettingsProfiles(CUIRect MainView);
 
