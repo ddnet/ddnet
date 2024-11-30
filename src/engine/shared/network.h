@@ -452,7 +452,7 @@ public:
 
 	// status requests
 	const NETADDR *ClientAddr(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
-	const char (*ClientAddrString(int ClientID) const)[NETADDR_MAXSTRSIZE] { return m_aSlots[ClientID].m_Connection.PeerAddressString(); }
+	const char (*ClientAddrString(int ClientId) const)[NETADDR_MAXSTRSIZE] { return m_aSlots[ClientId].m_Connection.PeerAddressString(); }
 	bool HasSecurityToken(int ClientId) const { return m_aSlots[ClientId].m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
 	NETADDR Address() const { return m_Address; }
 	NETSOCKET Socket() const { return m_Socket; }

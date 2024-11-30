@@ -343,12 +343,12 @@ mod ffi {
         /// When `InterpretSemicolons` is `false`, semicolons are not
         /// interpreted unless the command starts with `mc;`.
         ///
-        /// The `ClientID` parameter defaults to -1, `InterpretSemicolons` to
+        /// The `ClientId` parameter defaults to -1, `InterpretSemicolons` to
         /// `true` in C++.
         pub fn ExecuteLine(
             self: Pin<&mut IConsole>,
             pStr: StrRef<'_>,
-            ClientID: i32,
+            ClientId: i32,
             InterpretSemicolons: bool,
         );
 

@@ -452,8 +452,8 @@ public:
 	const char *GetAnnouncementLine() override;
 	void ReadAnnouncementsFile();
 
-	int *GetIdMap(int ClientID) override;
-	int *GetReverseIdMap(int ClientID) override;
+	int *GetIdMap(int ClientId) override;
+	int *GetReverseIdMap(int ClientId) override;
 
 	void InitDnsbl(int ClientId);
 	bool DnsblWhite(int ClientId) override

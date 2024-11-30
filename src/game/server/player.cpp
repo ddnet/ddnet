@@ -505,7 +505,8 @@ void CPlayer::FakeSnap()
 		if(!pClientInfo)
 			return;
 
-		StrToInts(&pClientInfo->m_Name0, 4, GameServer()->m_PlayerMapping.GetSeeOthersName(m_ClientId));
+		char aName[MAX_NAME_LENGTH];
+		StrToInts(&pClientInfo->m_Name0, 4, GameServer()->m_PlayerMapping.GetSeeOthersName(m_ClientId, aName));
 		StrToInts(&pClientInfo->m_Clan0, 3, "");
 		StrToInts(&pClientInfo->m_Skin0, 6, "default");
 		pClientInfo->m_UseCustomColor = 1;
@@ -532,22 +533,22 @@ void CPlayer::FakeSnap()
 	StrToInts(&pClientInfo->m_Skin0, 6, "default");
 }
 
-void CPlayer::SendConnect(int FakeID, int ClientID)
+void CPlayer::SendConnect(int FakeId, int ClientId)
 {
 	if(!Server()->IsSixup(m_ClientId))
 		return;
 
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
 	if(!pPlayer)
 		return;
 
 	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
-	NewClientInfoMsg.m_ClientId = FakeID;
-	NewClientInfoMsg.m_Local = ClientID == m_ClientId;
+	NewClientInfoMsg.m_ClientId = FakeId;
+	NewClientInfoMsg.m_Local = ClientId == m_ClientId;
 	NewClientInfoMsg.m_Team = pPlayer->GetTeam();
-	NewClientInfoMsg.m_pName = Server()->ClientName(ClientID);
-	NewClientInfoMsg.m_pClan = Server()->ClientClan(ClientID);
-	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientID);
+	NewClientInfoMsg.m_pName = Server()->ClientName(ClientId);
+	NewClientInfoMsg.m_pClan = Server()->ClientClan(ClientId);
+	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientId);
 	NewClientInfoMsg.m_Silent = 1;
 
 	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
@@ -560,13 +561,13 @@ void CPlayer::SendConnect(int FakeID, int ClientID)
 	Server()->SendPackMsg(&NewClientInfoMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD | MSGFLAG_NOTRANSLATE, m_ClientId);
 }
 
-void CPlayer::SendDisconnect(int FakeID)
+void CPlayer::SendDisconnect(int FakeId)
 {
 	if(!Server()->IsSixup(m_ClientId))
 		return;
 
 	protocol7::CNetMsg_Sv_ClientDrop ClientDropMsg;
-	ClientDropMsg.m_ClientId = FakeID;
+	ClientDropMsg.m_ClientId = FakeId;
 	ClientDropMsg.m_pReason = "";
 	ClientDropMsg.m_Silent = 1;
 

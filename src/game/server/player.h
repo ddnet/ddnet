@@ -47,9 +47,9 @@ public:
 	void PostPostTick();
 	void Snap(int SnappingClient);
 	void FakeSnap();
-	void SendConnect(int FakeID, int ClientID);
-	void SendDisconnect(int FakeID);
-	int m_aStrongWeakId[LEGACY_MAX_CLIENTS];
+	void SendConnect(int FakeId, int ClientId);
+	void SendDisconnect(int FakeId);
+	int m_aStrongWeakId[MAX_CLIENTS];
 
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);

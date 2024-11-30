@@ -62,13 +62,13 @@ void CEventHandler::Snap(int SnappingClient)
 				{
 					CNetEvent_Death *pDeath = (CNetEvent_Death *)pData;
 					// save real id
-					int ClientID = pDeath->m_ClientId;
+					int ClientId = pDeath->m_ClientId;
 
 					// translate id
-					int ID = pDeath->m_ClientId;
-					if(!GameServer()->Server()->Translate(ID, SnappingClient))
+					int TranslatedId = pDeath->m_ClientId;
+					if(!GameServer()->Server()->Translate(TranslatedId, SnappingClient))
 						continue;
-					pDeath->m_ClientId = ID;
+					pDeath->m_ClientId = TranslatedId;
 
 					// create event
 					void *pItem = GameServer()->Server()->SnapNewItem(Type, i, Size);
@@ -76,7 +76,7 @@ void CEventHandler::Snap(int SnappingClient)
 						mem_copy(pItem, pData, Size);
 
 					// reset id for others
-					pDeath->m_ClientId = ClientID;
+					pDeath->m_ClientId = ClientId;
 				}
 				else
 				{

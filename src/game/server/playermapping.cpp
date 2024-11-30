@@ -57,8 +57,7 @@ CPlayer *CPlayerMapping::CPlayerMap::GetPlayer() const
 
 void CPlayerMapping::CPlayerMap::InitPlayer(bool Rejoin)
 {
-	for(bool &Reserved : m_aReserved)
-		Reserved = false;
+	std::fill(std::begin(m_aReserved), std::end(m_aReserved), false);
 
 	// make sure no rests from before are in the client, so we can freshly start and insert our stuff
 	if(Rejoin)
@@ -292,11 +291,11 @@ void CPlayerMapping::CPlayerMap::InsertNextEmpty(int ClientId)
 
 	for(int i = 0; i < GetMapSize() - m_NumSeeOthers; i++)
 	{
-		int CId = m_pMap[i];
-		if(CId != -1 && m_aReserved[CId])
+		int MappedId = m_pMap[i];
+		if(MappedId != -1 && m_aReserved[MappedId])
 			continue;
 
-		if(CId == -1 || (!m_pPlayerMapping->GameServer()->GetPlayerChar(CId) || m_pPlayerMapping->GameServer()->GetPlayerChar(CId)->NetworkClipped(m_ClientId)))
+		if(MappedId == -1 || (!m_pPlayerMapping->GameServer()->GetPlayerChar(MappedId) || m_pPlayerMapping->GameServer()->GetPlayerChar(MappedId)->NetworkClipped(m_ClientId)))
 		{
 			Add(i, ClientId);
 			break;
@@ -304,7 +303,7 @@ void CPlayerMapping::CPlayerMap::InsertNextEmpty(int ClientId)
 	}
 }
 
-int CPlayerMapping::GetSeeOthersId(int ClientId)
+int CPlayerMapping::GetSeeOthersId(int ClientId) const
 {
 	return LEGACY_MAX_CLIENTS - 2;
 }
@@ -319,7 +318,7 @@ void CPlayerMapping::ResetSeeOthers(int ClientId)
 	m_aMap[ClientId].ResetSeeOthers();
 }
 
-int CPlayerMapping::GetTotalOverhang(int ClientId)
+int CPlayerMapping::GetTotalOverhang(int ClientId) const
 {
 	return m_aMap[ClientId].m_TotalOverhang;
 }
@@ -355,7 +354,7 @@ void CPlayerMapping::UpdatePlayerMap(int ClientId)
 	}
 }
 
-int CPlayerMapping::GetSeeOthersInd(int ClientId, int MapId)
+int CPlayerMapping::GetSeeOthersInd(int ClientId, int MapId) const
 {
 	if(m_aMap[ClientId].m_TotalOverhang && MapId == GetSeeOthersId(ClientId))
 		return SEE_OTHERS_IND_BUTTON;
@@ -364,28 +363,26 @@ int CPlayerMapping::GetSeeOthersInd(int ClientId, int MapId)
 	return -1;
 }
 
-const char *CPlayerMapping::GetSeeOthersName(int ClientId)
+const char *CPlayerMapping::GetSeeOthersName(int ClientId, char (&aName)[MAX_NAME_LENGTH]) const
 {
-	static char s_aName[MAX_NAME_LENGTH];
 	CPlayerMap::ESeeOthers State = static_cast<CPlayerMap::ESeeOthers>(m_aMap[ClientId].m_SeeOthersState);
-	const char *pDot = "\xe2\x8b\x85";
-
 	if(State == CPlayerMap::ESeeOthers::STATE_PAGE_FIRST)
 	{
 		if(m_aMap[ClientId].m_TotalOverhang > (int)CPlayerMap::ESeeOthers::MAX_NUM_SEE_OTHERS)
-			str_format(s_aName, sizeof(s_aName), "%s 1/2", pDot);
+			str_copy(aName, "⋅ 1/2");
 		else
-			str_format(s_aName, sizeof(s_aName), "%s Close", pDot);
+			str_copy(aName, "⋅ Close");
 	}
 	else if(State == CPlayerMap::ESeeOthers::STATE_PAGE_SECOND)
 	{
-		str_format(s_aName, sizeof(s_aName), "%s 2/2 | Close", pDot);
+		str_copy(aName, "⋅ 2/2 | Close");
 	}
 	else
 	{
-		str_format(s_aName, sizeof(s_aName), "%s %d others", pDot, m_aMap[ClientId].m_TotalOverhang);
+		str_format(aName, sizeof(aName), "⋅ %d others", m_aMap[ClientId].m_TotalOverhang);
 	}
-	return s_aName;
+
+	return aName;
 }
 
 void CPlayerMapping::CPlayerMap::CycleSeeOthers()
@@ -463,11 +460,12 @@ void CPlayerMapping::CPlayerMap::UpdateSeeOthers() const
 	ClientDropMsg.m_pReason = "";
 	ClientDropMsg.m_Silent = 1;
 
+	char aName[MAX_NAME_LENGTH];
 	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
 	NewClientInfoMsg.m_ClientId = SeeOthersId;
 	NewClientInfoMsg.m_Local = 0;
 	NewClientInfoMsg.m_Team = TEAM_BLUE;
-	NewClientInfoMsg.m_pName = m_pPlayerMapping->GetSeeOthersName(m_ClientId);
+	NewClientInfoMsg.m_pName = m_pPlayerMapping->GetSeeOthersName(m_ClientId, aName);
 	NewClientInfoMsg.m_pClan = "";
 	NewClientInfoMsg.m_Country = -1;
 	NewClientInfoMsg.m_Silent = 1;

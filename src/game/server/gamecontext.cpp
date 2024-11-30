@@ -1881,7 +1881,7 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 				if(ProcessSpamProtection(ClientId))
 					return nullptr;
 
-				if (!Server()->ReverseTranslate(pMsg7->m_Target, ClientId))
+				if(!Server()->ReverseTranslate(pMsg7->m_Target, ClientId))
 					return 0;
 
 				WhisperId(ClientId, pMsg7->m_Target, pMsg7->m_pMessage);
@@ -4659,17 +4659,6 @@ void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 		Msg.m_Mode = protocol7::NUM_CHATS + TEAM_WHISPER_SEND;
 		Server()->SendPackMsgForce(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 	}
-	/*else if (GetClientVersion(ClientId) >= VERSION_DDNET_WHISPER)
-	{
-		CNetMsg_Sv_Chat Msg;
-		Msg.m_Team = TEAM_WHISPER_SEND;
-		Msg.m_ClientId = VictimId;
-		Msg.m_pMessage = aCensoredMessage;
-		if(g_Config.m_SvDemoChat)
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
-		else
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
-	}*/
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "[→ %s] %s", Server()->ClientName(VictimId), aCensoredMessage);
@@ -4688,17 +4677,6 @@ void CGameContext::WhisperId(int ClientId, int VictimId, const char *pMessage)
 		Msg.m_Mode = protocol7::NUM_CHATS + TEAM_WHISPER_RECV;
 		Server()->SendPackMsgForce(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, VictimId);
 	}
-	/*else if (GetClientVersion(VictimId) >= VERSION_DDNET_WHISPER)
-	{
-		CNetMsg_Sv_Chat Msg2;
-		Msg2.m_Team = TEAM_WHISPER_RECV;
-		Msg2.m_ClientId = ClientId;
-		Msg2.m_pMessage = aCensoredMessage;
-		if(g_Config.m_SvDemoChat)
-			Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL, VictimId);
-		else
-			Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL | MSGFLAG_NORECORD, VictimId);
-	}*/
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientId), aCensoredMessage);
@@ -4974,7 +4952,7 @@ void CGameContext::ReadCensorList()
 	}
 }
 
-void CGameContext::OnSetTimedOut(int ClientID, int OrigID)
+void CGameContext::OnSetTimedOut(int ClientId)
 {
-	m_PlayerMapping.InitPlayerMap(ClientID, true);
+	m_PlayerMapping.InitPlayerMap(ClientId, true);
 }

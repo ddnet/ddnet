@@ -3,9 +3,6 @@
 #ifndef GAME_SERVER_PLAYERMAPPING_H
 #define GAME_SERVER_PLAYERMAPPING_H
 
-#include <engine/shared/config.h>
-#include <game/server/gameworld.h>
-
 class CGameContext;
 class CPlayer;
 
@@ -41,7 +38,7 @@ class CPlayerMapping
 		void Add(int MapId, int ClientId);
 		int Remove(int MapId);
 		void InsertNextEmpty(int ClientId);
-		int GetMapSize() { return LEGACY_MAX_CLIENTS - m_NumReserved; }
+		int GetMapSize() const { return LEGACY_MAX_CLIENTS - m_NumReserved; }
 		// See others
 		int m_SeeOthersState;
 		int m_TotalOverhang;
@@ -75,12 +72,12 @@ public:
 		SPEC_SELECT_FLAG_RED = LEGACY_MAX_CLIENTS - protocol7::SPEC_FLAGRED,
 		SPEC_SELECT_FLAG_BLUE = LEGACY_MAX_CLIENTS - protocol7::SPEC_FLAGBLUE,
 	};
-	int GetSeeOthersId(int ClientId);
+	int GetSeeOthersId(int ClientId) const;
 	void DoSeeOthers(int ClientId);
 	void ResetSeeOthers(int ClientId);
-	int GetTotalOverhang(int ClientId);
-	int GetSeeOthersInd(int ClientId, int MapId);
-	const char *GetSeeOthersName(int ClientId);
+	int GetTotalOverhang(int ClientId) const;
+	int GetSeeOthersInd(int ClientId, int MapId) const;
+	const char *GetSeeOthersName(int ClientId, char (&aName)[MAX_NAME_LENGTH]) const;
 };
 
 #endif

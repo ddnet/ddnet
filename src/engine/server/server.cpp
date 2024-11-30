@@ -4046,14 +4046,14 @@ const char *CServer::GetAnnouncementLine()
 	return m_vAnnouncements[m_AnnouncementLastLine].c_str();
 }
 
-int *CServer::GetIdMap(int ClientID)
+int *CServer::GetIdMap(int ClientId)
 {
-	return m_aClients[ClientID].m_aIdMap;
+	return m_aClients[ClientId].m_aIdMap;
 }
 
-int *CServer::GetReverseIdMap(int ClientID)
+int *CServer::GetReverseIdMap(int ClientId)
 {
-	return m_aClients[ClientID].m_aReverseIdMap;
+	return m_aClients[ClientId].m_aReverseIdMap;
 }
 
 bool CServer::SetTimedOut(int ClientId, int OrigId)
@@ -4075,8 +4075,8 @@ bool CServer::SetTimedOut(int ClientId, int OrigId)
 	m_aClients[ClientId].m_GotDDNetVersionPacket = m_aClients[OrigId].m_GotDDNetVersionPacket;
 	m_aClients[ClientId].m_DDNetVersionSettled = m_aClients[OrigId].m_DDNetVersionSettled;
 
-	// important ot call OnSetTimedOut before we remove the original client but after we swapped already
-	GameServer()->OnSetTimedOut(ClientId, OrigId);
+	// important to call OnSetTimedOut before we remove the original client but after we swapped already
+	GameServer()->OnSetTimedOut(ClientId);
 
 	DelClientCallback(OrigId, "Timeout Protection used", this);
 	return true;

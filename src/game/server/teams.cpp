@@ -593,8 +593,6 @@ void CGameTeams::SendTeamsState(int ClientId)
 	if(!m_pGameContext->m_apPlayers[ClientId])
 		return;
 
-	int ClientVersion = m_pGameContext->m_apPlayers[ClientId]->GetClientVersion();
-	bool LegacyTeams = ClientVersion >= VERSION_DDNET_UNIQUE_TEAMS;
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
 	CMsgPacker MsgLegacy(NETMSGTYPE_SV_TEAMSSTATELEGACY);
 
@@ -613,9 +611,9 @@ void CGameTeams::SendTeamsState(int ClientId)
 			{
 				int Team = -1;
 				if(Indicator == CPlayerMapping::SEE_OTHERS_IND_BUTTON)
-					Team = LegacyTeams ? 49 : 25;
+					Team = 49;
 				else if(Indicator == CPlayerMapping::SEE_OTHERS_IND_PLAYER)
-					Team = LegacyTeams ? 28 : 24;
+					Team = 28;
 
 				if(Team != -1)
 				{
@@ -625,10 +623,10 @@ void CGameTeams::SendTeamsState(int ClientId)
 			}
 
 			int Team = 0;
-			int ID = i;
-			if(Server()->ReverseTranslate(ID, ClientId))
+			int TranslatedId = i;
+			if(Server()->ReverseTranslate(TranslatedId, ClientId))
 			{
-				Team = m_Core.Team(ID);
+				Team = m_Core.Team(TranslatedId);
 				if(Team == TEAM_SUPER)
 					Team = LEGACY_MAX_CLIENTS;
 				else if(Team > LEGACY_MAX_CLIENTS)
@@ -640,6 +638,7 @@ void CGameTeams::SendTeamsState(int ClientId)
 	}
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	int ClientVersion = m_pGameContext->m_apPlayers[ClientId]->GetClientVersion();
 	if(!Server()->IsSixup(ClientId) && VERSION_DDRACE < ClientVersion && ClientVersion < VERSION_DDNET_MSG_LEGACY)
 	{
 		Server()->SendMsg(&MsgLegacy, MSGFLAG_VITAL, ClientId);

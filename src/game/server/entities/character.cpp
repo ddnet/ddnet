@@ -1307,8 +1307,8 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_FreezeEnd = m_Core.m_DeepFrozen ? -1 : m_FreezeTime == 0 ? 0 : Server()->Tick() + m_FreezeTime;
 	pDDNetCharacter->m_Jumps = m_Core.m_Jumps;
 	pDDNetCharacter->m_TeleCheckpoint = m_TeleCheckpoint;
-	CPlayer *pSnap = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : 0;
-	pDDNetCharacter->m_StrongWeakId = pSnap ? pSnap->m_aStrongWeakId[Id] : m_StrongWeakId;
+	CPlayer *pSnappedPlayer = SnappingClient >= 0 ? GameServer()->m_apPlayers[SnappingClient] : nullptr;
+	pDDNetCharacter->m_StrongWeakId = pSnappedPlayer ? pSnappedPlayer->m_aStrongWeakId[Id] : m_StrongWeakId;
 
 	// Display Information
 	pDDNetCharacter->m_JumpedTotal = m_Core.m_JumpedTotal;

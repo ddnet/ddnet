@@ -601,7 +601,7 @@ public:
 
 	void SendRecord(int ClientId);
 	void OnSetAuthed(int ClientId, int Level) override;
-	void OnSetTimedOut(int ClientID, int OrigID) override;
+	void OnSetTimedOut(int ClientId) override;
 
 	void ResetTuning();
 };
