@@ -358,6 +358,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 								Line = GetString();
 							}
 							Begin = i + 1;
+							str_sanitize_cc(Line.data());
 							m_pfnClipboardLineCallback(Line.c_str());
 						}
 					}
