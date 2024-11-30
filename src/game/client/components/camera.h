@@ -46,14 +46,15 @@ private:
 	float m_ZoomSmoothingEnd;
 
 	void ScaleZoom(float Factor);
-	void ChangeZoom(float Target, int Smoothness);
+	void ChangeZoom(float Target, int Smoothness, bool IsUser);
 	float ZoomProgress(float CurrentTime) const;
 
 	float MinZoomLevel();
 	float MaxZoomLevel();
 
-	vec2 m_LastMousePos;
+	vec2 m_LastTargetPos;
 	float m_DyncamSmoothingSpeedBias;
+	bool m_SpectatingCameraActivated;
 
 public:
 	static constexpr float ZOOM_STEP = 0.866025f;
@@ -63,6 +64,10 @@ public:
 	bool m_Zooming;
 	float m_Zoom;
 	float m_ZoomSmoothingTarget;
+
+	bool m_AutoSpecCamera;
+	float m_UserZoomTarget;
+	float m_SpecZoomTarget;
 
 	vec2 m_DyncamTargetCameraOffset;
 	vec2 m_aDyncamCurrentCameraOffset[NUM_DUMMIES];
@@ -80,7 +85,7 @@ public:
 	void GotoSwitch(int Number, int Offset = -1);
 	void GotoTele(int Number, int Offset = -1);
 
-	void SetZoom(float Target, int Smoothness);
+	void SetZoom(float Target, int Smoothness, bool IsUser);
 	bool ZoomAllowed() const;
 
 	int Deadzone() const;
@@ -88,6 +93,9 @@ public:
 	int CamType() const { return m_CamType; }
 
 	void UpdateCamera();
+	void ResetAutoSpecCamera();
+	bool SpectatingCameraActivated() const { return m_SpectatingCameraActivated; }
+	bool CanUseAutoSpecCamera() const;
 
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);
