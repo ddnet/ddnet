@@ -316,6 +316,13 @@ Objects = [
 		NetIntAny("m_SwitchNumber"),
 	]),
 
+	NetObjectEx("DDNetSpectatorInfo", "spectator-info@netobj.ddnet.org", [
+		NetBool("m_HasCameraInfo"),
+		NetIntRange("m_Zoom", 0, 'max_int'),
+		NetIntRange("m_Deadzone", 0, 'max_int'),
+		NetIntRange("m_FollowFactor", 0, 'max_int'),
+	]),
+
 	## Events
 
 	NetEvent("Common", [

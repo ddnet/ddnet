@@ -413,6 +413,25 @@ void CPlayer::Snap(int SnappingClient)
 		}
 	}
 
+	if(m_ClientId == SnappingClient)
+	{
+		// send extended spectator info even when playing, this allows demo to record camera settings for local player
+		const int SpectatingClient = ((m_Team != TEAM_SPECTATORS && !m_Paused) || m_SpectatorId < 0 || m_SpectatorId >= MAX_CLIENTS) ? id : m_SpectatorId;
+		const CPlayer *pSpecPlayer = GameServer()->m_apPlayers[SpectatingClient];
+
+		if(pSpecPlayer)
+		{
+			CNetObj_DDNetSpectatorInfo *pDDNetSpectatorInfo = Server()->SnapNewItem<CNetObj_DDNetSpectatorInfo>(id);
+			if(!pDDNetSpectatorInfo)
+				return;
+
+			pDDNetSpectatorInfo->m_HasCameraInfo = pSpecPlayer->m_CameraInfo.m_HasCameraInfo;
+			pDDNetSpectatorInfo->m_Zoom = pSpecPlayer->m_CameraInfo.m_Zoom * 1000.0f;
+			pDDNetSpectatorInfo->m_Deadzone = pSpecPlayer->m_CameraInfo.m_Deadzone;
+			pDDNetSpectatorInfo->m_FollowFactor = pSpecPlayer->m_CameraInfo.m_FollowFactor;
+		}
+	}
+
 	CNetObj_DDNetPlayer *pDDNetPlayer = Server()->SnapNewItem<CNetObj_DDNetPlayer>(id);
 	if(!pDDNetPlayer)
 		return;
@@ -973,6 +992,7 @@ vec2 CPlayer::CCameraInfo::ConvertTargetToWorld(vec2 Position, vec2 Target) cons
 
 void CPlayer::CCameraInfo::Write(const CNetMsg_Cl_CameraInfo *Msg)
 {
+	m_HasCameraInfo = true;
 	m_Zoom = Msg->m_Zoom / 1000.0f;
 	m_Deadzone = Msg->m_Deadzone;
 	m_FollowFactor = Msg->m_FollowFactor;
@@ -980,6 +1000,7 @@ void CPlayer::CCameraInfo::Write(const CNetMsg_Cl_CameraInfo *Msg)
 
 void CPlayer::CCameraInfo::Reset()
 {
+	m_HasCameraInfo = false;
 	m_Zoom = 1.0f;
 	m_Deadzone = 0.0f;
 	m_FollowFactor = 0.0f;

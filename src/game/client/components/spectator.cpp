@@ -187,6 +187,15 @@ bool CSpectator::OnInput(const IInput::CEvent &Event)
 		}
 	}
 
+	if(m_pClient->m_Camera.SpectatingPlayer() && m_pClient->m_Camera.CanUseAutoSpecCamera())
+	{
+		if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_2)
+		{
+			m_pClient->m_Camera.ResetAutoSpecCamera();
+			return true;
+		}
+	}
+
 	return false;
 }
 
