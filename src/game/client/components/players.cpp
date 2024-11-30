@@ -24,7 +24,7 @@
 
 #include "players.h"
 
-#include "rainbow.h"
+#include <game/client/components/tclient/rainbow.h>
 #include <base/color.h>
 #include <base/math.h>
 
