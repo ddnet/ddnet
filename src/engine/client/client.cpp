@@ -4803,11 +4803,9 @@ int main(int argc, const char **argv)
 	}
 
 	// execute tclient config file
-	IOHANDLE File = pStorage->OpenFile(TCONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(File)
+	if(pStorage->FileExists(CONFIG_FILE_TCLIENT, IStorage::TYPE_ALL))
 	{
-		io_close(File);
-		pConsole->ExecuteFile(TCONFIG_FILE);
+		pConsole->ExecuteFile(CONFIG_FILE_TCLIENT);
 	}
 
 	// execute autoexec file

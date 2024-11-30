@@ -15,11 +15,21 @@
 #include <engine/shared/protocol.h>
 
 #define CONFIG_FILE "settings_ddnet.cfg"
+#define CONFIG_FILE_TCLIENT "settings_tclient.cfg"
 #define AUTOEXEC_FILE "autoexec.cfg"
 #define AUTOEXEC_CLIENT_FILE "autoexec_client.cfg"
 #define AUTOEXEC_SERVER_FILE "autoexec_server.cfg"
-#define TCONFIG_FILE "settings_tclient.cfg"
 #define MAX_CALLBACKS 64;
+
+inline const char *ConfigFile(EClient Client) {
+	switch(Client)
+	{
+	case CFGCLIENT_TCLIENT:
+		return CONFIG_FILE_TCLIENT;
+	default:
+		return CONFIG_FILE;
+	}
+}
 
 class CConfig
 {
@@ -34,6 +44,7 @@ public:
 	static constexpr const char *ms_p##Name = Def; \
 	char m_##Name[Len]; // Flawfinder: ignore
 #include "config_variables.h"
+#include "config_variables_tclient.h"
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
@@ -70,6 +81,7 @@ struct SConfigVariable
 		VAR_COLOR,
 		VAR_STRING,
 	};
+	EClient m_Client;
 	IConsole *m_pConsole;
 	const char *m_pScriptName;
 	EVariableType m_Type;
@@ -79,7 +91,8 @@ struct SConfigVariable
 	// but the underlying config variable can still be modified programatically.
 	bool m_ReadOnly = false;
 
-	SConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp) :
+	SConfigVariable(EClient Client, IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp) :
+		m_Client(Client),
 		m_pConsole(pConsole),
 		m_pScriptName(pScriptName),
 		m_Type(Type),
@@ -109,8 +122,8 @@ struct SIntConfigVariable : public SConfigVariable
 	int m_Max;
 	int m_OldValue;
 
-	SIntConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, int *pVariable, int Default, int Min, int Max) :
-		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
+	SIntConfigVariable(EClient Client, IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, int *pVariable, int Default, int Min, int Max) :
+		SConfigVariable(Client, pConsole, pScriptName, Type, Flags, pHelp),
 		m_pVariable(pVariable),
 		m_Default(Default),
 		m_Min(Min),
@@ -140,8 +153,8 @@ struct SColorConfigVariable : public SConfigVariable
 	bool m_Alpha;
 	unsigned m_OldValue;
 
-	SColorConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, unsigned *pVariable, unsigned Default) :
-		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
+	SColorConfigVariable(EClient Client, IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, unsigned *pVariable, unsigned Default) :
+		SConfigVariable(Client, pConsole, pScriptName, Type, Flags, pHelp),
 		m_pVariable(pVariable),
 		m_Default(Default),
 		m_Alpha(Flags & CFGFLAG_COLALPHA),
@@ -181,7 +194,7 @@ struct SStringConfigVariable : public SConfigVariable
 	size_t m_MaxSize;
 	char *m_pOldValue;
 
-	SStringConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, char *pStr, const char *pDefault, size_t MaxSize, char *pOldValue);
+	SStringConfigVariable(EClient Client, IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, char *pStr, const char *pDefault, size_t MaxSize, char *pOldValue);
 	~SStringConfigVariable() override = default;
 
 	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
@@ -199,9 +212,8 @@ class CConfigManager : public IConfigManager
 	IConsole *m_pConsole;
 	class IStorage *m_pStorage;
 
-	IOHANDLE m_ConfigFile;
-	bool m_Failed;
-
+	IOHANDLE m_ConfigFile[CFGCLIENT_MAX];
+	bool m_Failed[CFGCLIENT_MAX];
 	struct SCallback
 	{
 		SAVECALLBACKFUNC m_pfnFunc;
@@ -213,8 +225,7 @@ class CConfigManager : public IConfigManager
 		{
 		}
 	};
-	std::vector<SCallback> m_vCallbacks;
-	std::vector<SCallback> m_vTCallbacks;
+	std::vector<SCallback> m_vCallbacks[CFGCLIENT_MAX];
 
 	std::vector<SConfigVariable *> m_vpAllVariables;
 	std::vector<SConfigVariable *> m_vpGameVariables;
@@ -233,14 +244,12 @@ public:
 	void ResetGameSettings() override;
 	void SetReadOnly(const char *pScriptName, bool ReadOnly) override;
 	bool Save() override;
-	bool TSave() override;
 
 	CConfig *Values() override { return &g_Config; }
 
-	void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) override;
-	void RegisterTCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) override;
+	void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData, EClient Client = EClient::CFGCLIENT_NONE) override;
 
-	void WriteLine(const char *pLine) override;
+	void WriteLine(const char *pLine, EClient Client = EClient::CFGCLIENT_NONE) override;
 
 	void StoreUnknownCommand(const char *pCommand) override;
 

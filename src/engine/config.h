@@ -5,6 +5,13 @@
 
 #include "kernel.h"
 
+enum EClient
+{
+	CFGCLIENT_NONE = 0,
+	CFGCLIENT_TCLIENT,
+	CFGCLIENT_MAX,
+};
+
 class IConfigManager : public IInterface
 {
 	MACRO_INTERFACE("config")
@@ -17,13 +24,13 @@ public:
 	virtual void ResetGameSettings() = 0;
 	virtual void SetReadOnly(const char *pScriptName, bool ReadOnly) = 0;
 	virtual bool Save() = 0;
-	virtual bool TSave() = 0;
 	virtual class CConfig *Values() = 0;
 
-	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) = 0;
-	virtual void RegisterTCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) = 0;
+	virtual void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData, EClient pClient = EClient::CFGCLIENT_NONE) = 0;
+	void RegisterCallbackTClient(SAVECALLBACKFUNC pfnFunc, void *pUserData) { RegisterCallback(pfnFunc, pUserData, EClient::CFGCLIENT_TCLIENT); }
 
-	virtual void WriteLine(const char *pLine) = 0;
+	virtual void WriteLine(const char *pLine, EClient pClient = EClient::CFGCLIENT_NONE) = 0;
+	void WriteLineTClient(const char *pLine) { WriteLine(pLine, EClient::CFGCLIENT_TCLIENT); }
 
 	virtual void StoreUnknownCommand(const char *pCommand) = 0;
 

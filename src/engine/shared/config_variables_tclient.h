@@ -1,13 +1,13 @@
 // This file can be included several times.
 
 #ifndef MACRO_CONFIG_INT
-#error "The config macros must be defined"
-#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) ;
-#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) ;
-#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
+#error "Config macros must be defined"
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc);
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc);
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc);
 #endif
 
-// Tater Client Variables
+// TClient Client Variables
 MACRO_CONFIG_INT(ClRunOnJoinConsole, tc_run_on_join_console, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Whether to use run on join in chat or console")
 MACRO_CONFIG_INT(ClRunOnJoinDelay, tc_run_on_join_delay, 2, 7, 50000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tick Delay before using run on join")
 

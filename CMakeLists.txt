@@ -40,7 +40,7 @@ else()
   set(TARGET_BITS "64")
 endif()
 
-if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm" 
+if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm"
   OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64"
   OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "ARM64")
   if(TARGET_BITS STREQUAL "32")
@@ -74,7 +74,7 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
   include(CheckLinkerFlag)
 endif()
 include(CheckSymbolExists)
-if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Emscripten"))
+if(NOT(CMAKE_SYSTEM_NAME STREQUAL "Emscripten"))
   include(CheckAtomic)
 endif()
 
@@ -346,7 +346,7 @@ endif()
 
 if(MSVC)
   if(EXCEPTION_HANDLING)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS /DCONF_EXCEPTION_HANDLING)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS /DCONF_EXCEPTION_HANDLING)
   endif()
 endif()
 
@@ -463,7 +463,7 @@ function(set_extra_dirs_include VARIABLE NAME LIBRARY)
   if(IS_BUNDLED)
     set(TMP_TARGET_OS ${TARGET_OS})
     if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-     set(TMP_TARGET_OS webasm)
+      set(TMP_TARGET_OS webasm)
     endif()
     set("HINTS_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" "ddnet-libs/${NAME}/include/${TMP_TARGET_OS}" PARENT_SCOPE)
   endif()
@@ -731,18 +731,18 @@ elseif(TARGET_OS STREQUAL "mac")
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
 elseif(TARGET_OS STREQUAL "haiku")
-    set(PLATFORM_CLIENT)
-    find_package(OpenGL)
-    set(PLATFORM_LIBS GL network)
-    set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY})
-    set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
+  set(PLATFORM_CLIENT)
+  find_package(OpenGL)
+  set(PLATFORM_LIBS GL network)
+  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY})
+  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
 elseif(TARGET_OS STREQUAL "android")
-    set(PLATFORM_CLIENT
-      src/android/android_main.cpp
-    )
-    set(PLATFORM_LIBS ${TW_ANDROID_LIBS})
-    set(PLATFORM_CLIENT_LIBS ${PLATFORM_LIBS})
-    set(PLATFORM_CLIENT_INCLUDE_DIRS)
+  set(PLATFORM_CLIENT
+    src/android/android_main.cpp
+  )
+  set(PLATFORM_LIBS ${TW_ANDROID_LIBS})
+  set(PLATFORM_CLIENT_LIBS ${PLATFORM_LIBS})
+  set(PLATFORM_CLIENT_INCLUDE_DIRS)
 else()
   find_package(Notify)
   find_package(OpenGL)
@@ -928,11 +928,11 @@ if(CMAKE_OSX_ARCHITECTURES)
 endif()
 
 set(RUST_SRC
-      ${RUST_BASE}
-      ${RUST_ENGINE_INTERFACE}
-      ${RUST_ENGINE_SHARED}
-      Cargo.toml
-      Cargo.lock
+  ${RUST_BASE}
+  ${RUST_ENGINE_INTERFACE}
+  ${RUST_ENGINE_SHARED}
+  Cargo.toml
+  Cargo.lock
 )
 set(RUST_TARGETS engine_shared)
 if(NOT CMAKE_OSX_ARCHITECTURES)
@@ -2062,6 +2062,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   config.cpp
   config.h
   config_variables.h
+  config_variables_tclient.h
   console.cpp
   console.h
   csv.cpp
@@ -2129,7 +2130,6 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   storage.cpp
   stun.cpp
   stun.h
-  tater_variables.h
   teehistorian_ex.cpp
   teehistorian_ex.h
   teehistorian_ex_chunks.h
@@ -2616,7 +2616,7 @@ if(CLIENT)
     )
   endif()
   set_property(TARGET game-client
-      PROPERTY OUTPUT_NAME ${CLIENT_EXECUTABLE}
+    PROPERTY OUTPUT_NAME ${CLIENT_EXECUTABLE}
   )
   target_link_libraries(game-client ${LIBS_CLIENT})
 
@@ -2809,7 +2809,7 @@ if(SERVER)
     $<TARGET_OBJECTS:rust-bridge-shared>
   )
   set_property(TARGET game-server
-      PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
+    PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
   )
   target_link_libraries(game-server ${LIBS_SERVER})
   target_include_directories(game-server PRIVATE ${PNG_INCLUDE_DIRS})
@@ -2820,7 +2820,7 @@ if(SERVER)
     set(SERVER_LAUNCHER_SRC src/macos/server.mm)
     add_executable(game-server-launcher ${SERVER_LAUNCHER_SRC})
     set_property(TARGET game-server-launcher
-        PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}-Launcher
+      PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}-Launcher
     )
     target_link_libraries(game-server-launcher ${COCOA})
     list(APPEND TARGETS_OWN game-server-launcher)
@@ -3159,7 +3159,7 @@ set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
 
 if(TARGET_OS AND TARGET_BITS)
   if(TARGET_OS STREQUAL "windows")
-    if (TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
+    if(TARGET_CPU_ARCHITECTURE STREQUAL "arm64")
       set(CPACK_SYSTEM_NAME "win-arm64")
     else()
       set(CPACK_SYSTEM_NAME "win${TARGET_BITS}")
@@ -3424,7 +3424,7 @@ foreach(ext zip tar.gz tar.xz)
   endforeach()
   foreach(target ${CPACK_TARGETS})
     list(APPEND COPY_TARGET_COMMANDS COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${target}> ${TMPDIR}/)
-    if(NOT TARGET_OS STREQUAL "mac" AND NOT (TARGET_OS STREQUAL "windows" AND TARGET_CPU_ARCHITECTURE STREQUAL "arm64"))
+    if(NOT TARGET_OS STREQUAL "mac" AND NOT(TARGET_OS STREQUAL "windows" AND TARGET_CPU_ARCHITECTURE STREQUAL "arm64"))
       list(APPEND STRIP_TARGET_COMMANDS COMMAND strip -s ${TMPDIR}/$<TARGET_FILE_NAME:${target}>)
     endif()
   endforeach()
@@ -3616,7 +3616,7 @@ foreach(target ${TARGETS_OWN})
     target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION="${VERSION}")
   endif()
   if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-   target_compile_definitions(${target} PRIVATE CONF_WEBASM)
+    target_compile_definitions(${target} PRIVATE CONF_WEBASM)
   endif()
 endforeach()
 

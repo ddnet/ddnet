@@ -4,13 +4,11 @@
 // This file can be included several times.
 
 #ifndef MACRO_CONFIG_INT
-#error "The config macros must be defined"
-#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) ;
-#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) ;
-#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
+#error "Config macros must be defined"
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc);
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc);
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc);
 #endif
-
-#include "tater_variables.h"
 
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict client movements")
@@ -29,13 +27,14 @@ MACRO_CONFIG_INT(ClNameplates, cl_nameplates, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_
 MACRO_CONFIG_INT(ClAfkEmote, cl_afk_emote, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show zzz emote next to afk players")
 MACRO_CONFIG_INT(ClNameplatesAlways, cl_nameplates_always, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Always show name plates disregarding of distance")
 MACRO_CONFIG_INT(ClNameplatesTeamcolors, cl_nameplates_teamcolors, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Use team colors for name plates")
-MACRO_CONFIG_INT(ClNameplatesSize, cl_nameplates_size, 50, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Size of the name plates from 0 to 100%")
+MACRO_CONFIG_INT(ClNameplatesSize, cl_nameplates_size, 50, -50, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Size of the name plates")
 MACRO_CONFIG_INT(ClNameplatesClan, cl_nameplates_clan, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show clan in name plates")
-MACRO_CONFIG_INT(ClNameplatesClanSize, cl_nameplates_clan_size, 30, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Size of the clan plates from 0 to 100%")
-MACRO_CONFIG_INT(ClNameplatesIds, cl_nameplates_ids, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show IDs in name plates")
+MACRO_CONFIG_INT(ClNameplatesClanSize, cl_nameplates_clan_size, 30, -50, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Size of the clan plates")
+MACRO_CONFIG_INT(ClNameplatesIds, cl_nameplates_ids, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show client IDs in name plates")
 MACRO_CONFIG_INT(ClNameplatesOwn, cl_nameplates_own, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show own name plate (useful for demo recording)")
 MACRO_CONFIG_INT(ClNameplatesFriendMark, cl_nameplates_friendmark, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show friend mark (♥) in name plates")
 MACRO_CONFIG_INT(ClNameplatesStrong, cl_nameplates_strong, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show strong/weak in name plates (0 - off, 1 - icons, 2 - icons + numbers)")
+MACRO_CONFIG_INT(ClNameplatesStrongSize, cl_nameplates_strong_size, 30, -50, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Size of strong/weak state icons and numbers")
 MACRO_CONFIG_INT(ClTextEntities, cl_text_entities, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render textual entity data")
 MACRO_CONFIG_INT(ClTextEntitiesSize, cl_text_entities_size, 100, 1, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Size of textual entity data from 1 to 100%")
 MACRO_CONFIG_INT(ClStreamerMode, cl_streamer_mode, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Censor sensitive information such as /save password")
@@ -86,6 +85,7 @@ MACRO_CONFIG_INT(ClMouseDeadzone, cl_mouse_deadzone, 0, 0, 3000, CFGFLAG_CLIENT 
 MACRO_CONFIG_INT(ClMouseFollowfactor, cl_mouse_followfactor, 0, 0, 200, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Factor for the camera to follow the cursor")
 MACRO_CONFIG_INT(ClMouseMaxDistance, cl_mouse_max_distance, 400, 0, 5000, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Maximum cursor distance")
 MACRO_CONFIG_INT(ClMouseMinDistance, cl_mouse_min_distance, 0, 0, 5000, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Minimum cursor distance")
+MACRO_CONFIG_INT(ClMousePositionMultiplier, cl_mouse_position_multiplier, 100, 1, 1000000, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "The percentage to multiply mouse position before rounding")
 
 MACRO_CONFIG_INT(ClDyncam, cl_dyncam, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Enable dyncam")
 MACRO_CONFIG_INT(ClDyncamMaxDistance, cl_dyncam_max_distance, 1000, 0, 2000, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Maximum dynamic camera cursor distance")
@@ -683,7 +683,8 @@ MACRO_CONFIG_INT(ClChatOld, cl_chat_old, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE,
 MACRO_CONFIG_INT(ClChatFontSize, cl_chat_size, 60, 10, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Chat font size")
 MACRO_CONFIG_INT(ClChatWidth, cl_chat_width, 200, 140, 400, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Chat width")
 
-MACRO_CONFIG_INT(ClShowDirection, cl_show_direction, 1, 0, 3, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show key presses (1 = other players', 2 = also your own, 3 = only your own")
+MACRO_CONFIG_INT(ClShowDirection, cl_show_direction, 1, 0, 3, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show key presses (1 = other players', 2 = everyone, 3 = only your own")
+MACRO_CONFIG_INT(ClDirectionSize, cl_direction_size, 30, -50, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Size of key press icons")
 MACRO_CONFIG_INT(ClOldGunPosition, cl_old_gun_position, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Tees hold gun a bit higher like in TW 0.6.1 and older")
 MACRO_CONFIG_INT(ClConfirmDisconnectTime, cl_confirm_disconnect_time, 20, -1, 1440, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Confirmation popup before disconnecting after game time (in minutes, -1 to turn off, 0 to always turn on)")
 MACRO_CONFIG_INT(ClConfirmQuitTime, cl_confirm_quit_time, 20, -1, 1440, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Confirmation popup before quitting after game time (in minutes, -1 to turn off, 0 to always turn on)")

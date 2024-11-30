@@ -109,7 +109,7 @@ void CBindWheel::OnConsoleInit()
 {
 	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 	if(pConfigManager)
-		pConfigManager->RegisterTCallback(ConfigSaveCallback, this);
+		pConfigManager->RegisterCallbackTClient(ConfigSaveCallback, this);
 
 	Console()->Register("+bindwheel", "", CFGFLAG_CLIENT, ConOpenBindwheel, this, "Open bindwheel selector");
 	Console()->Register("+bindwheel_execute_hover", "", CFGFLAG_CLIENT, ConExecuteHover, this, "Execute hovered bindwheel bind");

@@ -194,8 +194,8 @@ void SColorConfigVariable::ResetToOld()
 
 // -----
 
-SStringConfigVariable::SStringConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, char *pStr, const char *pDefault, size_t MaxSize, char *pOldValue) :
-	SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
+SStringConfigVariable::SStringConfigVariable(EClient Client, IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, char *pStr, const char *pDefault, size_t MaxSize, char *pOldValue) :
+	SConfigVariable(Client, pConsole, pScriptName, Type, Flags, pHelp),
 	m_pStr(pStr),
 	m_pDefault(pDefault),
 	m_MaxSize(MaxSize),
@@ -276,14 +276,15 @@ CConfigManager::CConfigManager()
 {
 	m_pConsole = nullptr;
 	m_pStorage = nullptr;
-	m_ConfigFile = 0;
-	m_Failed = false;
+	mem_zero(m_Failed, sizeof(m_Failed));
 }
 
 void CConfigManager::Init()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
+
+	EClient Client;
 
 	const auto &&AddVariable = [this](SConfigVariable *pVariable) {
 		m_vpAllVariables.push_back(pVariable);
@@ -295,7 +296,7 @@ void CConfigManager::Init()
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	{ \
 		const char *pHelp = Min == Max ? Desc " (default: " #Def ")" : (Max == 0 ? Desc " (default: " #Def ", min: " #Min ")" : Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
-		AddVariable(m_ConfigHeap.Allocate<SIntConfigVariable>(m_pConsole, #ScriptName, SConfigVariable::VAR_INT, Flags, pHelp, &g_Config.m_##Name, Def, Min, Max)); \
+		AddVariable(m_ConfigHeap.Allocate<SIntConfigVariable>(Client, m_pConsole, #ScriptName, SConfigVariable::VAR_INT, Flags, pHelp, &g_Config.m_##Name, Def, Min, Max)); \
 	}
 
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
@@ -304,7 +305,7 @@ void CConfigManager::Init()
 		char *pHelp = static_cast<char *>(m_ConfigHeap.Allocate(HelpSize)); \
 		const bool Alpha = ((Flags)&CFGFLAG_COLALPHA) != 0; \
 		str_format(pHelp, HelpSize, "%s (default: $%0*X)", Desc, Alpha ? 8 : 6, color_cast<ColorRGBA>(ColorHSLA(Def, Alpha)).Pack(Alpha)); \
-		AddVariable(m_ConfigHeap.Allocate<SColorConfigVariable>(m_pConsole, #ScriptName, SConfigVariable::VAR_COLOR, Flags, pHelp, &g_Config.m_##Name, Def)); \
+		AddVariable(m_ConfigHeap.Allocate<SColorConfigVariable>(Client, m_pConsole, #ScriptName, SConfigVariable::VAR_COLOR, Flags, pHelp, &g_Config.m_##Name, Def)); \
 	}
 
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
@@ -313,10 +314,13 @@ void CConfigManager::Init()
 		char *pHelp = static_cast<char *>(m_ConfigHeap.Allocate(HelpSize)); \
 		str_format(pHelp, HelpSize, "%s (default: \"%s\", max length: %d)", Desc, Def, Len - 1); \
 		char *pOldValue = static_cast<char *>(m_ConfigHeap.Allocate(Len)); \
-		AddVariable(m_ConfigHeap.Allocate<SStringConfigVariable>(m_pConsole, #ScriptName, SConfigVariable::VAR_STRING, Flags, pHelp, g_Config.m_##Name, Def, Len, pOldValue)); \
+		AddVariable(m_ConfigHeap.Allocate<SStringConfigVariable>(Client, m_pConsole, #ScriptName, SConfigVariable::VAR_STRING, Flags, pHelp, g_Config.m_##Name, Def, Len, pOldValue)); \
 	}
 
+	Client = CFGCLIENT_NONE;
 #include "config_variables.h"
+	Client = CFGCLIENT_TCLIENT;
+#include "config_variables_tclient.h"
 
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
@@ -371,163 +375,92 @@ bool CConfigManager::Save()
 	if(!m_pStorage || !g_Config.m_ClSaveSettings)
 		return true;
 
-	char aConfigFileTmp[IO_MAX_PATH_LENGTH];
-	m_ConfigFile = m_pStorage->OpenFile(IStorage::FormatTmpPath(aConfigFileTmp, sizeof(aConfigFileTmp), CONFIG_FILE), IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	char aConfigTmpPath[EClient::CFGCLIENT_MAX][IO_MAX_PATH_LENGTH];
 
-	if(!m_ConfigFile)
+	mem_zero(m_Failed, sizeof(m_Failed));
+
+	// Open temp files
+	for(int i = 0; i < EClient::CFGCLIENT_MAX; ++i)
 	{
-		log_error("config", "ERROR: opening %s failed", aConfigFileTmp);
-		return false;
+		m_ConfigFile[i] = m_pStorage->OpenFile(IStorage::FormatTmpPath(aConfigTmpPath[i], sizeof(aConfigTmpPath[i]), ConfigFile(static_cast<EClient>(i))), IOFLAG_WRITE, IStorage::TYPE_SAVE);
+		if(!m_ConfigFile[i])
+		{
+			log_error("config", "ERROR: opening %s failed", aConfigTmpPath[i]);
+			return false;
+		}
 	}
 
-	m_Failed = false;
-
+	// Write variables
 	char aLineBuf[2048];
 	for(const SConfigVariable *pVariable : m_vpAllVariables)
 	{
 		if((pVariable->m_Flags & CFGFLAG_SAVE) != 0 && !pVariable->IsDefault())
 		{
+			dbg_assert(pVariable->m_Client >= 0 && pVariable->m_Client < EClient::CFGCLIENT_MAX, "Client out of range");
 			pVariable->Serialize(aLineBuf, sizeof(aLineBuf));
-			WriteLine(aLineBuf);
+			WriteLine(aLineBuf, pVariable->m_Client);
 		}
 	}
 
-	for(const auto &Callback : m_vCallbacks)
+	// Do callbacks
+	for(int i = 0; i < EClient::CFGCLIENT_MAX; ++i)
 	{
-		Callback.m_pfnFunc(this, Callback.m_pUserData);
+		for(const auto &Callback : m_vCallbacks[i])
+			Callback.m_pfnFunc(this, Callback.m_pUserData);
 	}
 
+	// Write unknown commands
 	for(const char *pCommand : m_vpUnknownCommands)
-	{
 		WriteLine(pCommand);
-	}
 
-	if(m_Failed)
+	// sync, close, error check
+	bool Failed = false;
+	for(int i = 0; i < EClient::CFGCLIENT_MAX; ++i)
 	{
-		log_error("config", "ERROR: writing to %s failed", aConfigFileTmp);
+		if(io_sync(m_ConfigFile[i]) != 0)
+		{
+			m_Failed[i] = true;
+			log_error("config", "ERROR: synchronizing %s failed", aConfigTmpPath[i]);
+		}
+		if(io_close(m_ConfigFile[i]) != 0)
+		{
+			m_Failed[i] = true;
+			log_error("config", "ERROR: closing %s failed", aConfigTmpPath[i]);
+		}
+		if(m_Failed[i])
+		{
+			log_error("config", "ERROR: writing to %s failed", aConfigTmpPath[i]);
+			Failed = true;
+		}
 	}
-
-	if(io_sync(m_ConfigFile) != 0)
-	{
-		m_Failed = true;
-		log_error("config", "ERROR: synchronizing %s failed", aConfigFileTmp);
-	}
-
-	if(io_close(m_ConfigFile) != 0)
-	{
-		m_Failed = true;
-		log_error("config", "ERROR: closing %s failed", aConfigFileTmp);
-	}
-
-	m_ConfigFile = 0;
-
-	if(m_Failed)
-	{
+	if(Failed)
 		return false;
+
+	for(int i = 0; i < EClient::CFGCLIENT_MAX; ++i)
+	{
+		if(!m_pStorage->RenameFile(aConfigTmpPath[i], ConfigFile(static_cast<EClient>(i)), IStorage::TYPE_SAVE))
+		{
+			log_error("config", "ERROR: renaming %s to %s failed", aConfigTmpPath[i], ConfigFile(static_cast<EClient>(i)));
+			return false;
+		}
 	}
 
-	if(!m_pStorage->RenameFile(aConfigFileTmp, CONFIG_FILE, IStorage::TYPE_SAVE))
-	{
-		log_error("config", "ERROR: renaming %s to " CONFIG_FILE " failed", aConfigFileTmp);
-		return false;
-	}
-	TSave();
 	return true;
 }
 
-bool CConfigManager::TSave()
+void CConfigManager::RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData, EClient pClient)
 {
-	if(!m_pStorage || !g_Config.m_ClSaveSettings)
-		return true;
-
-	char aConfigFileTmp[IO_MAX_PATH_LENGTH];
-	m_ConfigFile = m_pStorage->OpenFile(IStorage::FormatTmpPath(aConfigFileTmp, sizeof(aConfigFileTmp), TCONFIG_FILE), IOFLAG_WRITE, IStorage::TYPE_SAVE);
-
-	if(!m_ConfigFile)
-	{
-		dbg_msg("config", "ERROR: opening %s failed", aConfigFileTmp);
-		return false;
-	}
-
-	m_Failed = false;
-
-	char aLineBuf[1024 * 2];
-	char aEscapeBuf[1024 * 2];
-
-#define MACRO_CONFIG_INT(Name, ScriptName, def, min, max, flags, desc) \
-	if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) \
-	{ \
-		str_format(aLineBuf, sizeof(aLineBuf), "%s %i", #ScriptName, g_Config.m_##Name); \
-		WriteLine(aLineBuf); \
-	}
-#define MACRO_CONFIG_COL(Name, ScriptName, def, flags, desc) \
-	if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) \
-	{ \
-		str_format(aLineBuf, sizeof(aLineBuf), "%s %u", #ScriptName, g_Config.m_##Name); \
-		WriteLine(aLineBuf); \
-	}
-#define MACRO_CONFIG_STR(Name, ScriptName, len, def, flags, desc) \
-	if((flags)&CFGFLAG_SAVE && str_comp(g_Config.m_##Name, def) != 0) \
-	{ \
-		EscapeParam(aEscapeBuf, g_Config.m_##Name, sizeof(aEscapeBuf)); \
-		str_format(aLineBuf, sizeof(aLineBuf), "%s \"%s\"", #ScriptName, aEscapeBuf); \
-		WriteLine(aLineBuf); \
-	}
-
-#include "tater_variables.h"
-
-#undef MACRO_CONFIG_INT
-#undef MACRO_CONFIG_COL
-#undef MACRO_CONFIG_STR
-
-	for(const auto &Callback : m_vTCallbacks)
-	{
-		Callback.m_pfnFunc(this, Callback.m_pUserData);
-	}
-
-	if(io_sync(m_ConfigFile) != 0)
-	{
-		m_Failed = true;
-	}
-
-	if(io_close(m_ConfigFile) != 0)
-		m_Failed = true;
-
-	m_ConfigFile = 0;
-
-	if(m_Failed)
-	{
-		dbg_msg("config", "ERROR: writing to %s failed", aConfigFileTmp);
-		return false;
-	}
-
-	if(!m_pStorage->RenameFile(aConfigFileTmp, TCONFIG_FILE, IStorage::TYPE_SAVE))
-	{
-		dbg_msg("config", "ERROR: renaming %s to " TCONFIG_FILE " failed", aConfigFileTmp);
-		return false;
-	}
-
-	log_info("config", "saved to " CONFIG_FILE);
-	return true;
+	m_vCallbacks[pClient].emplace_back(pfnFunc, pUserData);
 }
 
-void CConfigManager::RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
+void CConfigManager::WriteLine(const char *pLine, EClient pClient)
 {
-	m_vCallbacks.emplace_back(pfnFunc, pUserData);
-}
-
-void CConfigManager::RegisterTCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
-{
-	m_vTCallbacks.emplace_back(pfnFunc, pUserData);
-}
-
-void CConfigManager::WriteLine(const char *pLine)
-{
-	if(!m_ConfigFile ||
-		io_write(m_ConfigFile, pLine, str_length(pLine)) != static_cast<unsigned>(str_length(pLine)) ||
-		!io_write_newline(m_ConfigFile))
+	IOHANDLE ConfigFile = m_ConfigFile[pClient];
+	if(!ConfigFile ||
+		io_write(ConfigFile, pLine, str_length(pLine)) != static_cast<unsigned>(str_length(pLine)) ||
+		!io_write_newline(ConfigFile))
 	{
-		m_Failed = true;
+		m_Failed[pClient] = true;
 	}
 }
 
