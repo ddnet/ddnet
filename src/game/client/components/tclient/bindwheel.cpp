@@ -2,8 +2,8 @@
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 
-#include "chat.h"
-#include "emoticon.h"
+#include "../chat.h"
+#include "../emoticon.h"
 
 #include <game/client/animstate.h>
 #include <game/client/render.h>
