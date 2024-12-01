@@ -1815,7 +1815,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 					if(m_pClient->m_Skins7.SaveSkinfile(m_SkinNameInput.GetString(), m_Dummy))
 					{
 						m_Popup = POPUP_NONE;
-						m_SkinListNeedsUpdate = true;
+						m_SkinList7LastRefreshTime = std::nullopt;
 					}
 					else
 						PopupMessage(Localize("Error"), Localize("Unable to save the skin"), Localize("Ok"), POPUP_SAVE_SKIN);

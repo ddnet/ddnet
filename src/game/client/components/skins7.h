@@ -13,6 +13,7 @@
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 
+#include <chrono>
 #include <vector>
 
 class CSkins7 : public CComponent
@@ -66,6 +67,8 @@ public:
 	int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;
 
+	std::chrono::nanoseconds LastRefreshTime() const { return m_LastRefreshTime; }
+
 	const std::vector<CSkin> &GetSkins() const;
 	const std::vector<CSkinPart> &GetSkinParts(int Part) const;
 	const CSkinPart *FindSkinPartOrNullptr(int Part, const char *pName, bool AllowSpecialPart) const;
@@ -87,6 +90,7 @@ public:
 
 private:
 	int m_ScanningPart;
+	std::chrono::nanoseconds m_LastRefreshTime;
 
 	std::vector<CSkinPart> m_avSkinParts[protocol7::NUM_SKINPARTS];
 	CSkinPart m_aPlaceholderSkinParts[protocol7::NUM_SKINPARTS];
