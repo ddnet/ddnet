@@ -9,10 +9,13 @@ If ddnet devs are reading this and want to steal my changes please feel free.
 
 Thanks to tela for the logo png <3 
 
+### Links:
+[Discord](https://discord.gg/BgPSapKRkZ)
+[Website](https://tclient.app)
+
 # Installation:
 
-
-Download the exe from https://github.com/sjrc6/TaterClient-ddnet/releases, or build it using the build instuctions from the main repository. 
+Download from https://github.com/sjrc6/TaterClient-ddnet/releases, or build it using the build instuctions from the main repository. 
 
 # Settings Page: 
 ![image](https://github.com/user-attachments/assets/a6ccb206-9fed-48be-a2d2-8fc50a6be882)
