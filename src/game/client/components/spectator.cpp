@@ -426,6 +426,9 @@ void CSpectator::OnRender()
 		if(!m_pClient->m_Snap.m_apInfoByDDTeamName[i] || m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 			continue;
 
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId == m_pClient->m_Snap.m_LocalClientId)
+			continue;
+
 		++Count;
 
 		if(Count == PerLine + 1 || (Count > PerLine + 1 && (Count - 1) % PerLine == 0))
