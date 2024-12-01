@@ -146,6 +146,7 @@ public:
 	bool NativeMousePressed(int Index) const override;
 
 	const std::vector<CTouchFingerState> &TouchFingerStates() const override;
+	void ClearTouchDeltas() override;
 
 	std::string GetClipboardText() override;
 	void SetClipboardText(const char *pText) override;

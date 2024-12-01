@@ -1,0 +1,311 @@
+{
+	"direct-touch-ingame": "action",
+	"direct-touch-spectate": "aim",
+	"touch-buttons": [
+		{
+			"x": 0,
+			"y": 833333,
+			"w": 200000,
+			"h": 166667,
+			"shape": "rect",
+			"visibilities": [
+				"ingame"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Move left",
+				"label-type": "localized",
+				"command": "+left"
+			}
+		},
+		{
+			"x": 200000,
+			"y": 833333,
+			"w": 200000,
+			"h": 166667,
+			"shape": "rect",
+			"visibilities": [
+				"ingame"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Move right",
+				"label-type": "localized",
+				"command": "+right"
+			}
+		},
+		{
+			"x": 100000,
+			"y": 666667,
+			"w": 200000,
+			"h": 166667,
+			"shape": "rect",
+			"visibilities": [
+				"ingame"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Jump",
+				"label-type": "localized",
+				"command": "+jump"
+			}
+		},
+		{
+			"x": 116667,
+			"y": 16667,
+			"w": 83333,
+			"h": 83333,
+			"shape": "rect",
+			"visibilities": [
+				"ingame"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Prev. weapon",
+				"label-type": "localized",
+				"command": "+prevweapon"
+			}
+		},
+		{
+			"x": 200000,
+			"y": 16667,
+			"w": 83333,
+			"h": 83333,
+			"shape": "rect",
+			"visibilities": [
+				"ingame"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Next weapon",
+				"label-type": "localized",
+				"command": "+nextweapon"
+			}
+		},
+		{
+			"x": 16667,
+			"y": 16667,
+			"w": 83333,
+			"h": 83333,
+			"shape": "rect",
+			"visibilities": [
+			],
+			"behavior": {
+				"type": "predefined",
+				"id": "extra-menu",
+				"number": 1
+			}
+		},
+		{
+			"x": 300000,
+			"y": 16667,
+			"w": 83333,
+			"h": 83333,
+			"shape": "rect",
+			"visibilities": [
+				"extra-menu",
+				"zoom-allowed"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Zoom out",
+				"label-type": "localized",
+				"command": "zoom-"
+			}
+		},
+		{
+			"x": 383333,
+			"y": 16667,
+			"w": 83333,
+			"h": 83333,
+			"shape": "rect",
+			"visibilities": [
+				"extra-menu",
+				"zoom-allowed"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Default zoom",
+				"label-type": "localized",
+				"command": "zoom"
+			}
+		},
+		{
+			"x": 466666,
+			"y": 16667,
+			"w": 83333,
+			"h": 83333,
+			"shape": "rect",
+			"visibilities": [
+				"extra-menu",
+				"zoom-allowed"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Zoom in",
+				"label-type": "localized",
+				"command": "zoom+"
+			}
+		},
+		{
+			"x": 16667,
+			"y": 133333,
+			"w": 83333,
+			"h": 66667,
+			"shape": "rect",
+			"visibilities": [
+				"extra-menu"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Scoreboard",
+				"label-type": "localized",
+				"command": "+scoreboard"
+			}
+		},
+		{
+			"x": 116667,
+			"y": 133333,
+			"w": 83333,
+			"h": 66667,
+			"shape": "rect",
+			"visibilities": [
+				"ingame",
+				"extra-menu"
+			],
+			"behavior": {
+				"type": "predefined",
+				"id": "emoticon"
+			}
+		},
+		{
+			"x": 116667,
+			"y": 133333,
+			"w": 83333,
+			"h": 66667,
+			"shape": "rect",
+			"visibilities": [
+				"-ingame",
+				"extra-menu"
+			],
+			"behavior": {
+				"type": "predefined",
+				"id": "spectate"
+			}
+		},
+		{
+			"x": 216667,
+			"y": 133333,
+			"w": 83333,
+			"h": 66667,
+			"shape": "rect",
+			"visibilities": [
+				"extra-menu",
+				"-demo-player"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Chat",
+				"label-type": "localized",
+				"command": "chat all"
+			}
+		},
+		{
+			"x": 316667,
+			"y": 133333,
+			"w": 83333,
+			"h": 66667,
+			"shape": "rect",
+			"visibilities": [
+				"extra-menu",
+				"-demo-player"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Team chat",
+				"label-type": "localized",
+				"command": "chat team"
+			}
+		},
+		{
+			"x": 16667,
+			"y": 333333,
+			"w": 83333,
+			"h": 66667,
+			"shape": "rect",
+			"visibilities": [
+				"extra-menu",
+				"vote-active",
+				"-demo-player"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Vote yes",
+				"label-type": "localized",
+				"command": "vote yes"
+			}
+		},
+		{
+			"x": 116667,
+			"y": 333333,
+			"w": 83333,
+			"h": 66667,
+			"shape": "rect",
+			"visibilities": [
+				"extra-menu",
+				"vote-active",
+				"-demo-player"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Vote no",
+				"label-type": "localized",
+				"command": "vote no"
+			}
+		},
+		{
+			"x": 766667,
+			"y": 16667,
+			"w": 100000,
+			"h": 100000,
+			"shape": "rect",
+			"visibilities": [
+				"dummy-connected"
+			],
+			"behavior": {
+				"type": "bind",
+				"label": "Toggle dummy",
+				"label-type": "localized",
+				"command": "toggle cl_dummy 0 1"
+			}
+		},
+		{
+			"x": 883333,
+			"y": 16667,
+			"w": 100000,
+			"h": 100000,
+			"shape": "rect",
+			"visibilities": [
+				"ingame"
+			],
+			"behavior": {
+				"type": "predefined",
+				"id": "swap-action"
+			}
+		},
+		{
+			"x": 755000,
+			"y": 580000,
+			"w": 225000,
+			"h": 400000,
+			"shape": "circle",
+			"visibilities": [
+				"ingame"
+			],
+			"behavior": {
+				"type": "predefined",
+				"id": "joystick-action"
+			}
+		}
+	]
+}
