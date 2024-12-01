@@ -1408,7 +1408,6 @@ set(EXPECTED_DATA
   editor/automap/round_tiles.rules
   editor/automap/water.rules
   editor/automap/winter_main.rules
-  editor/background.png
   editor/checker.png
   editor/cursor.png
   editor/cursor_resize.png
