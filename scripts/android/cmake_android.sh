@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # $HOME must be used instead of ~ else cargo-ndk cannot find the folder
 export ANDROID_HOME=$HOME/Android/Sdk
@@ -157,40 +158,19 @@ function build_for_type() {
 mkdir -p "${BUILD_FOLDER}"
 
 if [[ "${ANDROID_BUILD}" == "arm" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type arm armeabi-v7a armv7-linux-androideabi &
-	PID_BUILD_ARM=$!
+	build_for_type arm armeabi-v7a armv7-linux-androideabi
 fi
 
 if [[ "${ANDROID_BUILD}" == "arm64" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type arm64 arm64-v8a aarch64-linux-android &
-	PID_BUILD_ARM64=$!
+	build_for_type arm64 arm64-v8a aarch64-linux-android
 fi
 
 if [[ "${ANDROID_BUILD}" == "x86" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type x86 x86 i686-linux-android &
-	PID_BUILD_X86=$!
+	build_for_type x86 x86 i686-linux-android
 fi
 
 if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type x86_64 x86_64 x86_64-linux-android &
-	PID_BUILD_X86_64=$!
-fi
-
-if [ -n "$PID_BUILD_ARM" ] && ! wait "$PID_BUILD_ARM"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for arm failed"
-	exit 1
-fi
-if [ -n "$PID_BUILD_ARM64" ] && ! wait "$PID_BUILD_ARM64"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for arm64 failed"
-	exit 1
-fi
-if [ -n "$PID_BUILD_X86" ] && ! wait "$PID_BUILD_X86"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for x86 failed"
-	exit 1
-fi
-if [ -n "$PID_BUILD_X86_64" ] && ! wait "$PID_BUILD_X86_64"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for x86_64 failed"
-	exit 1
+	build_for_type x86_64 x86_64 x86_64-linux-android
 fi
 
 printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Copying project files..."
