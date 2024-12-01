@@ -207,8 +207,8 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
 	if(Ui()->DoEditBox_Search(&s_SkinFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed()))
 	{
-		m_SkinListNeedsUpdate = true;
-		m_SkinPartListNeedsUpdate = true;
+		m_SkinList7LastRefreshTime = std::nullopt;
+		m_SkinPartsList7LastRefreshTime = std::nullopt;
 	}
 
 	static CButtonContainer s_DirectoryButton;
@@ -317,14 +317,11 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 	static float s_LastSelectionTime = -10.0f;
 	static std::vector<const CSkins7::CSkin *> s_vpSkinList;
 	static CListBox s_ListBox;
-	static size_t s_SkinCount = 0;
 
-	const std::vector<CSkins7::CSkin> &vCurrentSkins = GameClient()->m_Skins7.GetSkins();
-	if(m_SkinListNeedsUpdate || vCurrentSkins.size() != s_SkinCount)
+	if(!m_SkinList7LastRefreshTime.has_value() || m_SkinList7LastRefreshTime.value() != m_SkinList7LastRefreshTime)
 	{
 		s_vpSkinList.clear();
-		s_SkinCount = vCurrentSkins.size();
-		for(const CSkins7::CSkin &Skin : vCurrentSkins)
+		for(const CSkins7::CSkin &Skin : GameClient()->m_Skins7.GetSkins())
 		{
 			if((Skin.m_Flags & CSkins7::SKINFLAG_SPECIAL) != 0)
 				continue;
@@ -333,7 +330,6 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 
 			s_vpSkinList.emplace_back(&Skin);
 		}
-		m_SkinListNeedsUpdate = false;
 	}
 
 	m_pSelectedSkin = nullptr;
@@ -405,15 +401,12 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 {
 	static std::vector<const CSkins7::CSkinPart *> s_paList[protocol7::NUM_SKINPARTS];
 	static CListBox s_ListBox;
-	static size_t s_aSkinPartCount[protocol7::NUM_SKINPARTS] = {0};
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		const std::vector<CSkins7::CSkinPart> &vCurrentSkinParts = GameClient()->m_Skins7.GetSkinParts(Part);
-		if(m_SkinPartListNeedsUpdate || vCurrentSkinParts.size() != s_aSkinPartCount[Part])
+		if(!m_SkinList7LastRefreshTime.has_value() || m_SkinList7LastRefreshTime.value() != GameClient()->m_Skins7.LastRefreshTime())
 		{
 			s_paList[Part].clear();
-			s_aSkinPartCount[Part] = vCurrentSkinParts.size();
-			for(const CSkins7::CSkinPart &SkinPart : vCurrentSkinParts)
+			for(const CSkins7::CSkinPart &SkinPart : GameClient()->m_Skins7.GetSkinParts(Part))
 			{
 				if((SkinPart.m_Flags & CSkins7::SKINFLAG_SPECIAL) != 0)
 					continue;
@@ -425,7 +418,6 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 			}
 		}
 	}
-	m_SkinPartListNeedsUpdate = false;
 
 	static int s_OldSelected = -1;
 	s_ListBox.DoBegin(&MainView);

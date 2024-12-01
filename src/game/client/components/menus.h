@@ -8,6 +8,7 @@
 
 #include <chrono>
 #include <deque>
+#include <optional>
 #include <unordered_set>
 #include <vector>
 
@@ -94,8 +95,10 @@ class CMenus : public CComponent
 	void DoJoystickAxisPicker(CUIRect View);
 	void DoJoystickBar(const CUIRect *pRect, float Current, float Tolerance, bool Active);
 
-	bool m_SkinListNeedsUpdate = false;
+	std::optional<std::chrono::nanoseconds> m_SkinListLastRefreshTime;
 	bool m_SkinListScrollToSelected = false;
+	std::optional<std::chrono::nanoseconds> m_SkinList7LastRefreshTime;
+	std::optional<std::chrono::nanoseconds> m_SkinPartsList7LastRefreshTime;
 
 	int m_DirectionQuadContainerIndex;
 
@@ -585,7 +588,6 @@ protected:
 	void UpdateCommunityIcons();
 
 	// skin favorite list
-	bool m_SkinFavoritesChanged = false;
 	std::unordered_set<std::string> m_SkinFavorites;
 	static void Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData);
 	static void Con_RemFavoriteSkin(IConsole::IResult *pResult, void *pUserData);
@@ -668,7 +670,6 @@ public:
 
 	virtual void OnStateChange(int NewState, int OldState) override;
 	virtual void OnWindowResize() override;
-	virtual void OnRefreshSkins() override;
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual bool OnInput(const IInput::CEvent &Event) override;
