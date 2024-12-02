@@ -4103,9 +4103,6 @@ bool CGameClient::InitMultiView(int Team)
 		int Count = 0;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_apPlayerInfos[i] && m_Snap.m_apPlayerInfos[i]->m_ClientId == m_Snap.m_LocalClientId)
-				continue;
-
 			vec2 PlayerPos;
 
 			// get the position of the player
