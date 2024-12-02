@@ -123,7 +123,7 @@ void CSpectator::ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData
 void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
-	pSelf->SpectateClosest(true);
+	pSelf->SpectateClosest();
 }
 
 void CSpectator::ConMultiView(IConsole::IResult *pResult, void *pUserData)
@@ -181,7 +181,7 @@ bool CSpectator::OnInput(const IInput::CEvent &Event)
 				if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
 					Spectate(SPEC_FREEVIEW);
 				else
-					SpectateClosest(Client()->State() == IClient::STATE_DEMOPLAYBACK);
+					SpectateClosest();
 				return true;
 			}
 		}
@@ -618,7 +618,7 @@ void CSpectator::Spectate(int SpectatorId)
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
-void CSpectator::SpectateClosest(bool AllowSelf)
+void CSpectator::SpectateClosest()
 {
 	if(!CanChangeSpectatorId())
 		return;
@@ -640,9 +640,6 @@ void CSpectator::SpectateClosest(bool AllowSelf)
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(i == SpectatorId || !Snap.m_aCharacters[i].m_Active || !Snap.m_apPlayerInfos[i] || Snap.m_apPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
-			continue;
-
-		if(!AllowSelf && i == Snap.m_LocalClientId)
 			continue;
 
 		const CNetObj_Character &MaybeClosestCharacter = Snap.m_aCharacters[i].m_Cur;
