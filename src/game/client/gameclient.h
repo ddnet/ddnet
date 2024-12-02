@@ -819,8 +819,11 @@ private:
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
 	CTuningParams *TuningList() { return m_aTuningList; }
 
+	float m_LastShowDistanceZoom;
 	float m_LastZoom;
 	float m_LastScreenAspect;
+	float m_LastDeadzone;
+	float m_LastFollowFactor;
 	bool m_LastDummyConnected;
 
 	void HandleMultiView();

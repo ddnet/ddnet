@@ -146,8 +146,9 @@ void CPlayer::Reset()
 	m_SwapTargetsClientId = -1;
 	m_BirthdayAnnounced = false;
 	m_RescueMode = RESCUEMODE_AUTO;
-
 	m_CanUseSpectatingPlayerFlag = false;
+
+	m_CameraInfo.Reset();
 }
 
 static int PlayerFlags_SixToSeven(int Flags)
@@ -958,4 +959,32 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			break;
 		}
 	}
+}
+
+vec2 CPlayer::CCameraInfo::ConvertTargetToWorld(vec2 Position, vec2 Target) const
+{
+	vec2 TargetCameraOffset(0, 0);
+	float l = length(Target);
+
+	if(l > 0.0001f) // make sure that this isn't 0
+	{
+		float OffsetAmount = maximum(l - m_Deadzone, 0.0f) * (m_FollowFactor / 100.0f);
+		TargetCameraOffset = normalize_pre_length(Target, l) * OffsetAmount;
+	}
+
+	return Position + (Target - TargetCameraOffset) * m_Zoom + TargetCameraOffset;
+}
+
+void CPlayer::CCameraInfo::Write(const CNetMsg_Cl_CameraInfo *Msg)
+{
+	m_Zoom = Msg->m_Zoom / 1000.0f;
+	m_Deadzone = Msg->m_Deadzone;
+	m_FollowFactor = Msg->m_FollowFactor;
+}
+
+void CPlayer::CCameraInfo::Reset()
+{
+	m_Zoom = 1.0f;
+	m_Deadzone = 0.0f;
+	m_FollowFactor = 0.0f;
 }

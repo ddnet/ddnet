@@ -215,13 +215,6 @@ int CControls::SnapInput(int *pData)
 		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePos[g_Config.m_ClDummy].x;
 		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
 
-		// scale TargetX, TargetY by zoom.
-		if(!m_pClient->m_Snap.m_SpecInfo.m_Active)
-		{
-			m_aInputData[g_Config.m_ClDummy].m_TargetX *= m_pClient->m_Camera.m_Zoom;
-			m_aInputData[g_Config.m_ClDummy].m_TargetY *= m_pClient->m_Camera.m_Zoom;
-		}
-
 		// send once a second just to be sure
 		Send = Send || time_get() > m_LastSendTime + time_freq();
 	}
@@ -249,13 +242,6 @@ int CControls::SnapInput(int *pData)
 			m_aInputData[g_Config.m_ClDummy].m_Direction = -1;
 		if(!m_aInputDirectionLeft[g_Config.m_ClDummy] && m_aInputDirectionRight[g_Config.m_ClDummy])
 			m_aInputData[g_Config.m_ClDummy].m_Direction = 1;
-
-		// scale TargetX, TargetY by zoom.
-		if(!m_pClient->m_Snap.m_SpecInfo.m_Active)
-		{
-			m_aInputData[g_Config.m_ClDummy].m_TargetX *= m_pClient->m_Camera.m_Zoom;
-			m_aInputData[g_Config.m_ClDummy].m_TargetY *= m_pClient->m_Camera.m_Zoom;
-		}
 
 		// dummy copy moves
 		if(g_Config.m_ClDummyCopyMoves)
