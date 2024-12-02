@@ -338,9 +338,9 @@ void CProjectile::Snap(int SnappingClient)
 		{
 			return;
 		}
-		FillExtraInfo(pDDNetProjectile);
+		FillExtraInfo(pDDNetProjectile, SnappingClient);
 	}
-	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfoLegacy(&DDRaceProjectile))
+	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfoLegacy(&DDRaceProjectile, SnappingClient))
 	{
 		int Type = SnappingClientVersion < VERSION_DDNET_MSG_LEGACY ? (int)NETOBJTYPE_PROJECTILE : NETOBJTYPE_DDRACEPROJECTILE;
 		void *pProj = Server()->SnapNewItem(Type, GetId(), sizeof(DDRaceProjectile));
@@ -373,7 +373,7 @@ void CProjectile::SetBouncing(int Value)
 	m_Bouncing = Value;
 }
 
-bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj)
+bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj, int SnappingClient)
 {
 	const int MaxPos = 0x7fffffff / 100;
 	if(absolute((int)m_Pos.y) + 1 >= MaxPos || absolute((int)m_Pos.x) + 1 >= MaxPos)
@@ -384,9 +384,13 @@ bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj)
 	//Send additional/modified info, by modifying the fields of the netobj
 	float Angle = -std::atan2(m_Direction.x, m_Direction.y);
 
+	int Owner = m_Owner;
+	if(!Server()->Translate(Owner, SnappingClient))
+		Owner = -1;
+
 	int Data = 0;
-	Data |= (absolute(m_Owner) & 255) << 0;
-	if(m_Owner < 0)
+	Data |= (absolute(Owner) & 255) << 0;
+	if(Owner < 0)
 		Data |= LEGACYPROJECTILEFLAG_NO_OWNER;
 	//This bit tells the client to use the extra info
 	Data |= LEGACYPROJECTILEFLAG_IS_DDNET;
@@ -406,7 +410,7 @@ bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj)
 	return true;
 }
 
-void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
+void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj, int SnappingClient)
 {
 	int Flags = 0;
 	if(m_Bouncing & 1)
@@ -426,7 +430,11 @@ void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 		Flags |= PROJECTILEFLAG_FREEZE;
 	}
 
-	if(m_Owner < 0)
+	int Owner = m_Owner;
+	if(!Server()->Translate(Owner, SnappingClient))
+		Owner = -1;
+
+	if(Owner < 0)
 	{
 		pProj->m_VelX = round_to_int(m_Direction.x * 1e6f);
 		pProj->m_VelY = round_to_int(m_Direction.y * 1e6f);
@@ -442,7 +450,7 @@ void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 	pProj->m_Y = round_to_int(m_Pos.y * 100.0f);
 	pProj->m_Type = m_Type;
 	pProj->m_StartTick = m_StartTick;
-	pProj->m_Owner = m_Owner;
+	pProj->m_Owner = Owner;
 	pProj->m_Flags = Flags;
 	pProj->m_SwitchNumber = m_Number;
 	pProj->m_TuneZone = m_TuneZone;

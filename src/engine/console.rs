@@ -309,10 +309,16 @@ mod ffi {
         /// # result = result_param;
         /// assert_eq!(result.GetVictim(), 63);
         /// # }
+        /// // …
+        /// # 130 => {
+        /// let result: &IConsole_IResult /* = `command all` last invocation */;
+        /// # result = result_param;
+        /// assert_eq!(result.GetVictim(), 127);
+        /// # }
         /// # _ => {}
         /// # }
         /// # }
-        /// # assert!(executed == 67);
+        /// # assert!(executed == 131);
         /// ```
         pub fn GetVictim(self: &IConsole_IResult) -> i32;
 
@@ -337,12 +343,12 @@ mod ffi {
         /// When `InterpretSemicolons` is `false`, semicolons are not
         /// interpreted unless the command starts with `mc;`.
         ///
-        /// The `ClientID` parameter defaults to -1, `InterpretSemicolons` to
+        /// The `ClientId` parameter defaults to -1, `InterpretSemicolons` to
         /// `true` in C++.
         pub fn ExecuteLine(
             self: Pin<&mut IConsole>,
             pStr: StrRef<'_>,
-            ClientID: i32,
+            ClientId: i32,
             InterpretSemicolons: bool,
         );
 
