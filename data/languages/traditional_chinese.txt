@@ -2061,6 +2061,9 @@ Width of your own hook collision line
 Width of others' hook collision line
 == 其他玩家的鉤鎖輔助線寬度
 
+Preview 'Hook collisions' being pressed
+== 
+
 Aim
 == 瞄準
 

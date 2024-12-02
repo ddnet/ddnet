@@ -1724,6 +1724,9 @@ Nothing hookable
 Something hookable
 == 
 
+Preview 'Hook collisions' being pressed
+== 
+
 Show kill messages
 == 
 
