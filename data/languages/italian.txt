@@ -1936,6 +1936,9 @@ Width of others' hook collision line
 A Tee
 == 
 
+Preview 'Hook collisions' being pressed
+== 
+
 Show finish messages
 == 
 

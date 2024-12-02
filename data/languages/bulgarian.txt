@@ -1693,6 +1693,9 @@ Something hookable
 A Tee
 == 
 
+Preview 'Hook collisions' being pressed
+== 
+
 Show kill messages
 == 
 
