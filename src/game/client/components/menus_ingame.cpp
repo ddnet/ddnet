@@ -310,9 +310,9 @@ void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 	Row.VSplitLeft(5.0f, nullptr, &Row);
 	Row.VSplitLeft(240.0f, &Button, &Row);
 	static CButtonContainer s_ResetButton;
-	if(DoButton_Menu(&s_ResetButton, Localize("Reset to default"), 0, &Button))
+	if(DoButton_Menu(&s_ResetButton, Localize("Reset to defaults"), 0, &Button))
 	{
-		PopupConfirm(Localize("Reset to default"),
+		PopupConfirm(Localize("Reset to defaults"),
 			Localize("Are you sure that you want to reset the touch controls to default?"),
 			Localize("Yes"), Localize("No"),
 			&CMenus::PopupConfirmResetTouchControls);
@@ -326,7 +326,7 @@ void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 	if(DoButton_Menu(&s_ClipboardImportButton, Localize("Import from clipboard"), 0, &Button))
 	{
 		PopupConfirm(Localize("Import from clipboard"),
-			Localize("Are you sure that you want to import the touch controls from the clipboard? The will overwrite your current touch controls."),
+			Localize("Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls."),
 			Localize("Yes"), Localize("No"),
 			&CMenus::PopupConfirmImportTouchControlsClipboard);
 	}
