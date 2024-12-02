@@ -623,7 +623,7 @@ void CSpectator::Spectate(int SpectatorId)
 
 void CSpectator::SpectateClosest(bool AllowSelf)
 {
-	if(CanChangeSpectatorId())
+	if(!CanChangeSpectatorId())
 		return;
 
 	const CGameClient::CSnapState &Snap = m_pClient->m_Snap;
