@@ -14,6 +14,7 @@ class CCamera : public CComponent
 {
 	friend class CMenuBackground;
 
+public:
 	enum
 	{
 		CAMTYPE_UNDEFINED = -1,
@@ -21,6 +22,7 @@ class CCamera : public CComponent
 		CAMTYPE_PLAYER,
 	};
 
+private:
 	int m_CamType;
 	vec2 m_aLastPos[NUM_DUMMIES];
 	vec2 m_PrevCenter;
@@ -83,6 +85,7 @@ public:
 
 	int Deadzone() const;
 	int FollowFactor() const;
+	int CamType() const { return m_CamType; }
 
 	void UpdateCamera();
 
