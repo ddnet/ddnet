@@ -3053,7 +3053,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Preview +hookcoll pressed toggle *****
 		RightView.HSplitTop(LineSize, &Button, &RightView);
-		if(DoButton_CheckBox(&s_HookCollPressed, Localize("Preview \"Hook collisions\" being pressed"), s_HookCollPressed, &Button))
+		if(DoButton_CheckBox(&s_HookCollPressed, Localize("Preview 'Hook collisions' being pressed"), s_HookCollPressed, &Button))
 			s_HookCollPressed = !s_HookCollPressed;
 	}
 	else if(s_CurTab == APPEARANCE_TAB_INFO_MESSAGES)

@@ -1990,6 +1990,9 @@ Width of your own hook collision line
 Width of others' hook collision line
 == 
 
+Preview 'Hook collisions' being pressed
+== 
+
 Basic
 == 
 

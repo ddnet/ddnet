@@ -2051,3 +2051,6 @@ Active: Fire
 
 Active: Hook
 == Aktiv: Haken
+
+Preview 'Hook collisions' being pressed
+== Vorschau für 'Hakenkollisionen' gedrückt
