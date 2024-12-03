@@ -2062,7 +2062,7 @@ Width of others' hook collision line
 == 其他玩家的鉤鎖輔助線寬度
 
 Preview 'Hook collisions' being pressed
-== 
+== 預覽按下時的鉤索輔助線
 
 Aim
 == 瞄準
