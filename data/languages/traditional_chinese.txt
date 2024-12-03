@@ -2047,13 +2047,13 @@ Error loading touch controls
 == 加載觸控設置錯誤
 
 Could not load touch controls from file. See local console for details.
-== 無法從文件加載觸控設置。檢查本地控制台以獲取詳情。
+== 無法從文件加載觸控設置。檢查本機控制台以獲取詳情。
 
 Could not load default touch controls from file. See local console for details.
-== 無法從文件加載默認觸控設置。檢查本地控制台以獲取詳情。
+== 無法從文件加載默認觸控設置。檢查本機控制台以獲取詳情。
 
 Could not load touch controls from clipboard. See local console for details.
-== 無法從剪貼板加載觸控設置。檢查本地控制台以獲取詳情。
+== 無法從剪貼板加載觸控設置。檢查本機控制台以獲取詳情。
 
 Width of your own hook collision line
 == 自己的鉤索輔助線寬度
