@@ -128,8 +128,6 @@ public:
 		int m_Max;
 	} m_Latency;
 
-	bool m_CanUseSpectatingPlayerFlag;
-
 private:
 	const uint32_t m_UniqueClientId;
 	CCharacter *m_pCharacter;

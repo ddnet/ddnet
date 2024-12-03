@@ -146,7 +146,6 @@ void CPlayer::Reset()
 	m_SwapTargetsClientId = -1;
 	m_BirthdayAnnounced = false;
 	m_RescueMode = RESCUEMODE_AUTO;
-	m_CanUseSpectatingPlayerFlag = false;
 
 	m_CameraInfo.Reset();
 }
@@ -530,7 +529,7 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 	AfkTimer();
 
-	if(((pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_CAM) || !m_CanUseSpectatingPlayerFlag) && ((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorId == SPEC_FREEVIEW)
+	if(((pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_CAM) || GetClientVersion() < VERSION_DDNET_PLAYERFLAG_SPEC_CAM) && ((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorId == SPEC_FREEVIEW)
 		m_ViewPos = vec2(pNewInput->m_TargetX, pNewInput->m_TargetY);
 
 	// check for activity
@@ -548,9 +547,6 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *pNewInput)
 {
 	m_PlayerFlags = pNewInput->m_PlayerFlags;
-
-	// enable spectating flag feature if the player has ever used it
-	m_CanUseSpectatingPlayerFlag = m_CanUseSpectatingPlayerFlag || (m_PlayerFlags & PLAYERFLAG_SPEC_CAM);
 
 	if(!m_pCharacter && m_Team != TEAM_SPECTATORS && (pNewInput->m_Fire & 1))
 		m_Spawning = true;
