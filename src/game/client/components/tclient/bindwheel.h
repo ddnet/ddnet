@@ -1,4 +1,3 @@
-
 #ifndef GAME_CLIENT_COMPONENTS_BINDWHEEL_H
 #define GAME_CLIENT_COMPONENTS_BINDWHEEL_H
 #include <game/client/component.h>

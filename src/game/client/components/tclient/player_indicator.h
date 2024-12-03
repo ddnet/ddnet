@@ -1,4 +1,3 @@
-
 #ifndef GAME_CLIENT_COMPONENTS_PLAYER_INDICATOR_H
 #define GAME_CLIENT_COMPONENTS_PLAYER_INDICATOR_H
 #include <game/client/component.h>

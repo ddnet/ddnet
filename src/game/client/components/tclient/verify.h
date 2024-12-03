@@ -1,4 +1,3 @@
-
 #ifndef GAME_CLIENT_COMPONENTS_VERIFY_H
 #define GAME_CLIENT_COMPONENTS_VERIFY_H
 #include <game/client/component.h>

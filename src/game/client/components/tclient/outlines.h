@@ -1,4 +1,3 @@
-
 #ifndef GAME_CLIENT_COMPONENTS_OUTLINES_H
 #define GAME_CLIENT_COMPONENTS_OUTLINES_H
 #include <game/client/component.h>

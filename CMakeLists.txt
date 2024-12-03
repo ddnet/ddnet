@@ -1639,6 +1639,7 @@ set(EXPECTED_DATA
   skins/ghost.png
   skins/ghostjtj.png
   skins/giraffe.png
+  skins/glow_mermyfox.png
   skins/greensward.png
   skins/greyfox.png
   skins/greyfox_2.png
@@ -2420,6 +2421,8 @@ if(CLIENT)
     components/tclient/tater.h
     components/tclient/verify.cpp
     components/tclient/verify.h
+    components/tclient/warlist.cpp
+    components/tclient/warlist.h
     components/tooltips.cpp
     components/tooltips.h
     components/voting.cpp
