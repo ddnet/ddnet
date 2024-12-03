@@ -3,8 +3,8 @@ set -e
 
 # $HOME must be used instead of ~ else cargo-ndk cannot find the folder
 export ANDROID_HOME=$HOME/Android/Sdk
-MAKEFLAGS=-j$(nproc)
-export MAKEFLAGS
+BUILD_FLAGS="${BUILD_FLAGS:--j$(nproc)}"
+export BUILD_FLAGS
 
 ANDROID_NDK_VERSION="$(cd "$ANDROID_HOME/ndk" && find . -maxdepth 1 | sort -n | tail -1)"
 ANDROID_NDK_VERSION="${ANDROID_NDK_VERSION:2}"
@@ -151,7 +151,9 @@ function build_for_type() {
 		-DVIDEORECORDER=OFF
 	(
 		cd "${BUILD_FOLDER}/$ANDROID_SUB_BUILD_DIR/$1" || exit 1
-		cmake --build . --target game-client
+		# We want word splitting
+		# shellcheck disable=SC2086
+		cmake --build . --target game-client $BUILD_FLAGS
 	)
 }
 
