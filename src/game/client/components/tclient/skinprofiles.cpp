@@ -13,12 +13,8 @@ static void EscapeParam(char *pDst, const char *pSrc, int Size)
 
 void CSkinProfiles::WriteLine(const char *pLine)
 {
-	if(!m_ProfilesFile ||
-		io_write(m_ProfilesFile, pLine, str_length(pLine)) != static_cast<unsigned>(str_length(pLine)) ||
-		!io_write_newline(m_ProfilesFile))
-	{
+	if(!m_ProfilesFile || io_write(m_ProfilesFile, pLine, str_length(pLine)) != static_cast<unsigned>(str_length(pLine)) || !io_write_newline(m_ProfilesFile))
 		return;
-	}
 }
 
 void CSkinProfiles::OnInit()

@@ -798,10 +798,17 @@ void CHud::RenderCursor()
 	RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
 
 	int CurWeapon = 1;
+	if(g_Config.m_ClRenderCursorSpec) 
+	{
+		Graphics()->SetColor(1.f, 1.f, 1.f, g_Config.m_ClRenderCursorSpecAlpha / 100.0f);
+	}
+
 	// render cursor
 	if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW && m_pClient->m_Snap.m_pLocalCharacter)
+	{
 		CurWeapon = maximum(0, m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+		Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	}
 	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
 	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].y);
 }
