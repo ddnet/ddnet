@@ -37,6 +37,12 @@ CHud::CHud()
 		m_aPlayerSpeedTextContainers[i].Reset();
 		m_aPlayerPositionContainers[i].Reset();
 	}
+
+	m_LastSpectatingPlayer = false;
+	m_LastFreeView = false;
+	m_SpectatingPlayerTime = -INFINITY;
+	m_FreeViewTime = -INFINITY;
+	m_SpectatorModeEffectColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void CHud::ResetHudContainers()
@@ -80,6 +86,12 @@ void CHud::OnReset()
 	m_aLastPlayerSpeedChange[1] = ESpeedChange::NONE;
 
 	ResetHudContainers();
+
+	m_LastSpectatingPlayer = false;
+	m_LastFreeView = false;
+	m_SpectatingPlayerTime = -INFINITY;
+	m_FreeViewTime = -INFINITY;
+	m_SpectatorModeEffectColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
 void CHud::OnInit()
@@ -1417,6 +1429,92 @@ void CHud::RenderSpectatorHud()
 	TextRender()->Text(m_Width - 174.0f, m_Height - 15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
 }
 
+void CHud::RenderSpectatorModeEffect()
+{
+	// do not show any visual effects in demo follow mode, because the spectator id changes there are not user inputs.
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecId == SPEC_FOLLOW)
+		return;
+
+	const bool SpectatingPlayer = m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW;
+	const bool FreeView = m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW;
+	if(SpectatingPlayer && !m_LastSpectatingPlayer)
+	{
+		m_SpectatingPlayerTime = Client()->LocalTime();
+		int Team = m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId]->m_Team;
+		m_SpectatorModeEffectColor = Team == 0 ? ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f) : GameClient()->GetDDTeamColor(Team);
+	}
+	if(FreeView && !m_LastFreeView)
+	{
+		m_FreeViewTime = Client()->LocalTime();
+	}
+	m_LastSpectatingPlayer = SpectatingPlayer;
+	m_LastFreeView = FreeView;
+
+	// draw cursor confinement border
+	const float Now = Client()->LocalTime();
+	const float SpectatingPlayerEffectDuration = 0.375f;
+	if(Now - m_SpectatingPlayerTime < SpectatingPlayerEffectDuration)
+	{
+		const float Progress = (Now - m_SpectatingPlayerTime) / SpectatingPlayerEffectDuration;
+
+		IGraphics::CFreeformItem aFreeform[4];
+		size_t NumItems = 0;
+		const float ValueBegin = clamp(Progress * 3.0f, 0.0f, 1.0f);
+		const float ValueTransition = clamp(Progress * 3.0f - 1.0f, 0.0f, 1.0f);
+		const float ValueEnd = clamp(Progress * 3.0f - 2.0f, 0.0f, 1.0f);
+
+		const float Thickness = 2.0f;
+		aFreeform[NumItems++] = IGraphics::CFreeformItem(
+			0.0f, mix(0.0f, m_Height, ValueTransition),
+			Thickness, mix(Thickness, m_Height - Thickness, ValueTransition),
+			0.0f, mix(0.0f, m_Height, ValueBegin),
+			Thickness, mix(Thickness, m_Height - Thickness, ValueBegin));
+		aFreeform[NumItems++] = IGraphics::CFreeformItem(
+			mix(0.0f, m_Width, ValueTransition), 0.0f,
+			mix(Thickness, m_Width - Thickness, ValueTransition), Thickness,
+			mix(0.0f, m_Width, ValueBegin), 0.0f,
+			mix(Thickness, m_Width - Thickness, ValueBegin), Thickness);
+		aFreeform[NumItems++] = IGraphics::CFreeformItem(
+			m_Width, mix(0.0f, m_Height, ValueEnd),
+			m_Width - Thickness, mix(Thickness, m_Height - Thickness, ValueEnd),
+			m_Width, mix(0.0f, m_Height, ValueTransition),
+			m_Width - Thickness, mix(Thickness, m_Height - Thickness, ValueTransition));
+		aFreeform[NumItems++] = IGraphics::CFreeformItem(
+			mix(0.0f, m_Width - 180.0f, ValueEnd), m_Height,
+			mix(Thickness, m_Width - 180.0f, ValueEnd), m_Height - Thickness,
+			mix(0.0f, m_Width, ValueTransition), m_Height,
+			mix(Thickness, m_Width, ValueTransition), m_Height - Thickness);
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(m_SpectatorModeEffectColor);
+		Graphics()->QuadsDrawFreeform(aFreeform, NumItems);
+		Graphics()->QuadsEnd();
+	}
+	else if(SpectatingPlayer && Now - m_SpectatingPlayerTime > SpectatingPlayerEffectDuration)
+	{
+		Graphics()->DrawRect(m_Width - 180.0f, m_Height - 2.0f, 180.0f, 2.0f, m_SpectatorModeEffectColor, IGraphics::CORNER_NONE, 0.0f);
+	}
+
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+	{
+		const float FreeViewEffectDuration = 0.15f;
+		if(FreeView && Now - m_FreeViewTime < FreeViewEffectDuration)
+		{
+			const float Progress = (Now - m_FreeViewTime) / FreeViewEffectDuration;
+			const float ValueBegin = clamp(Progress * 2.0f, 0.0f, 1.0f);
+			const float ValueEnd = clamp(Progress * 2.0f - 1.0f, 0.0f, 1.0f);
+			const float FlashValue = sin(Progress * pi);
+			ColorRGBA Color = m_SpectatorModeEffectColor;
+			Color.a = mix(1.0f, 0.0f, ValueEnd);
+			Graphics()->DrawRect(
+				m_Width - 180.0f, m_Height - mix(0.0f, 15.0f, ValueBegin),
+				180.0f, 15.0f,
+				Color, IGraphics::CORNER_TL,
+				mix(0.0f, 5.0f, ValueBegin));
+		}
+	}
+}
+
 void CHud::RenderLocalTime(float x)
 {
 	if(!g_Config.m_ClShowLocalTimeAlways && !m_pClient->m_Scoreboard.Active())
@@ -1529,6 +1627,7 @@ void CHud::OnRender()
 			}
 			RenderSpectatorHud();
 		}
+		RenderSpectatorModeEffect();
 
 		if(g_Config.m_ClShowhudTimer)
 			RenderGameTimer();

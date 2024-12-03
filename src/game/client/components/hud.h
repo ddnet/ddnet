@@ -90,6 +90,7 @@ class CHud : public CComponent
 	int m_LastLocalClientId = -1;
 
 	void RenderSpectatorHud();
+	void RenderSpectatorModeEffect();
 	void RenderWarmupTimer();
 	void RenderLocalTime(float x);
 
@@ -158,6 +159,12 @@ private:
 	int m_PracticeModeOffset;
 	int m_Team0ModeOffset;
 	int m_LockModeOffset;
+
+	bool m_LastSpectatingPlayer;
+	bool m_LastFreeView;
+	float m_SpectatingPlayerTime;
+	float m_FreeViewTime;
+	ColorRGBA m_SpectatorModeEffectColor;
 };
 
 #endif
