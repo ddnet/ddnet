@@ -17,10 +17,10 @@
 == %ds a ieșit
 
 %i minute left
-== %i minute rămas
+== %i minut rămas
 
 %i minutes left
-== %i minutes rămase
+== %i minute rămase
 
 %i second left
 == %i secundă rămasă
@@ -47,7 +47,7 @@ All
 == Toți
 
 Are you sure that you want to quit?
-== Sigur vrei să ieși?
+== Ești sigur că vrei să ieși?
 
 Automatically record demos
 == Înregistrează automat demo-uri
@@ -74,10 +74,10 @@ Chat
 == Chat
 
 Clan
-== Clanul
+== Clan
 
 Client
-== Clientul
+== Client
 
 Connecting to
 == Conectare la
@@ -104,13 +104,13 @@ Delete
 == Șterge
 
 Delete demo
-== Șterge demonstrația
+== Șterge demo-ul
 
 Demofile: %s
 == Fișier demo: %s
 
 Demos
-== Demo
+== Demo-uri
 
 Disconnect
 == Deconectare
@@ -128,7 +128,7 @@ Dynamic Camera
 == Cameră dinamică
 
 Emoticon
-== Figurine
+== Emoticon
 
 Error
 == Eroare
@@ -185,7 +185,7 @@ Graphics
 == Grafică
 
 Grenade
-== Grenade
+== Grenadă
 
 Hammer
 == Ciocan
@@ -203,10 +203,10 @@ Invalid Demo
 == Demo nevalid
 
 Join blue
-== La albaștri
+== Intră la albaștri
 
 Join red
-== La roșii
+== Intră la roșii
 
 Jump
 == Salt
@@ -236,7 +236,7 @@ Movement
 == Mișcare
 
 Mute when not active
-== Opreşte sunetul la inactivate
+== Opreşte sunetul când nu este activ
 
 Name
 == Nume
@@ -245,7 +245,7 @@ Next weapon
 == Arma următoare
 
 Nickname
-== Pseudonim
+== Poreclă
 
 No
 == Nu
@@ -257,10 +257,10 @@ No servers found
 == Nici un server găsit
 
 No servers match your filter criteria
-== Nici un server nu corespunde criteriilor
+== Nici un server nu corespunde criteriilor 
 
 Ok
-== Bine
+== Ok
 
 Parent Folder
 == Dosarul părinte
@@ -314,13 +314,13 @@ Remove
 == Șterge
 
 Remove friend
-== Șterge prietenul
+== Șterge prieten
 
 Rename demo
-== Redenumește demo-ul
+== Redenumește demo
 
 Reset filter
-== Filtru implicit
+== Resetează filtrul
 
 Score
 == Scor
@@ -329,7 +329,7 @@ Score limit
 == Limita de scor
 
 Scoreboard
-== Scoruri
+== Tabela de scor
 
 Screenshot
 == Captură de ecran
@@ -341,7 +341,7 @@ Server info
 == Info. server
 
 Server not full
-== Are locuri libere
+== Server-ul nu e plin
 
 Shotgun
 == Pușcă
@@ -350,16 +350,16 @@ Show chat
 == Afișare chat
 
 Show friends only
-== Arată prietenii
+== Arată doar prietenii
 
 Show ingame HUD
-== Arată scorul în joc
+== Afișează HUD în joc
 
 Show name plates
-== Arată pseudonimele
+== Arată poreclele
 
 Show only chat messages from friends
-== Arată doar chatul prietenilor
+== Arată doar mesaje de la prieteni în chat
 
 Sound
 == Sunet
@@ -404,7 +404,7 @@ The audio device couldn't be initialised.
 == Dispozitivul audio nu a putut fi inițializat.
 
 The server is running a non-standard tuning on a pure game type.
-== Serverul folosește parametri ne-standard într-un joc standard.
+== Serverul folosește parametri non-standard într-un joc standard.
 
 Time limit
 == Timp limită
@@ -419,13 +419,13 @@ Type
 == Tip
 
 Unable to rename the demo
-== Nu pot redenumi demo-ul
+== Nu se poate redenumi demo-ul
 
 Use sounds
-== Folosește sunetul
+== Folosește sunete
 
 Use team colors for name plates
-== Folosește culorile echipelor pe etichetele de nume
+== Folosește culorile echipelor pentru etichetele de nume
 
 V-Sync
 == Sincronizare verticală (V-Sync)
@@ -466,7 +466,7 @@ New name:
 == Nume nou:
 
 Sat.
-== Saturație
+== Sat.
 
 Miscellaneous
 == Diverse
@@ -484,7 +484,7 @@ Join game
 == Intră în joc
 
 FSAA samples
-== Eșantioane FSAA
+== Mostre FSAA
 
 Sound volume
 == Volum sunet
@@ -493,10 +493,10 @@ Max Screenshots
 == Număr maxim de capturi de ecran
 
 Laser
-== Carabină
+== Laser
 
 Hue
-== Tentă
+== Nuanță
 
 Record demo
 == Înreg. demo
@@ -520,344 +520,344 @@ LAN
 == Rețea
 
 Name plates size
-== Dimensiune nume placă
+== Dimensiune plăcuțe de nume
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Eșuat în timpul inițializării. Încercați să schimbați gfx_backend la OpenGL sau Vulkan în settings_ddnet.cfg din dosarul de configurare și încercați din nou.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Fără memorie video (VRAM). Încercați să eliminați resursele personalizate (costume, entități etc.), în special cele cu rezoluție mare.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== A apărut o eroare în timpul înregistrării comenzii. Încercați să vă actualizați driverele plăcii grafice (GPU).
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== O comandă de randare a eșuat. Încercați să vă actualizați driverele plăcii grafice (GPU).
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Trimiterea comenzilor de randare a eșuat. Încercați să vă actualizați driverele plăcii grafice (GPU).
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== A eșuat schimbul tamponelor de cadre. Încercați să vă actualizați driverele plăcii grafice (GPU).
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Eroare necunoscută. Încercați să schimbați gfx_backend la OpenGL sau Vulkan în settings_ddnet.cfg din dosarul de configurare și încercați din nou.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Nu s-a putut inițializa backend-ul grafic dat, se revine la backend-ul implicit.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Nu s-a putut inițializa backend-ul grafic dat, probabil pentru că nu ați instalat driverul plăcii grafice integrate.
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== Nu s-a putut rezolva adresa de conectare '%s'. Consultați consola pentru detalii.
 
 Connect address error
-== 
+== Eroare adresă de conectare
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Nu s-a putut salva harta descărcată. Încercați să ștergeți manual acest fișier: %s
 
 Could not connect dummy
-== 
+== Nu s-a putut conecta manechinul
 
 Error playing demo
-== 
+== Eroare la redarea demo-ului
 
 Successfully saved the replay!
-== 
+== Reluare salvată cu succes!
 
 Failed saving the replay!
-== 
+== A eșuat salvarea reluării!
 
 Saving settings to '%s' failed
-== 
+== Salvarea setărilor în '%s' a eșuat
 
 Error saving settings
-== 
+== Eroare la salvarea setărilor
 
 Replay feature is disabled!
-== 
+== Funcția de reluare este dezactivată!
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Lățimea texturii %s nu este divizibilă cu %d, sau înălțimea nu este divizibilă cu %d, ceea ce poate cauza erori vizuale.
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Formatul texturii %s nu este RGBA, ceea ce va cauza erori vizuale.
 
 Preparing demo playback
-== 
+== Se pregătește redarea demo-ului
 
 Connected
-== 
+== Conectat
 
 Loading map file from storage
-== 
+== Se încarcă fișierul de hartă din stocare
 
 Loading demo file from storage
-== 
+== Se încarcă fișierul demo din stocare
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Unele fonturi nu au putut fi încărcate. Verificați consola pentru detalii.
 
 Loading DDNet Client
-== 
+== Se încarcă client-ul DDNet
 
 Initializing components
-== 
+== Se inițializează componentele
 
 Why are you slowmo replaying to read this?
-== 
+== De ce re-joci în slowmo ca să citești asta?
 
 Initializing assets
-== 
+== Se inițializează resursele
 
 Initializing map logic
-== 
+== Se inițializează logica hărții
 
 Sending initial client info
-== 
+== Se trimit informațiile inițiale despre client
 
 Warning
-== 
+== Avertisment
 
 Quitting. Please wait…
-== 
+== Ieșire. Așteptați, vă rog…
 
 Restarting. Please wait…
-== 
+== Repornire. Așteptați, vă rog…
 
 Loading skin files
-== 
+== Se încarcă fișiere costume
 
 Search
-== 
+== Caută
 
 Searching
-== 
+== Se caută
 
 Enter Username
-== 
+== Introduceți numele de utilizator
 
 Enter Password
-== 
+== Introduceți parola
 
 NOT CONNECTED
-== 
+== NU ESTE CONECTAT
 
 Match %d of %d
-== 
+== Corespunde %d din %d
 
 No results
-== 
+== Nu există rezultate
 
 Lines %d - %d (%s)
-== 
+== Liniile %d - %d (%s)
 
 Locked
-== 
+== Blocat
 
 Following
-== 
+== Urmărind
 
 Loading commands…
-== 
+== Se încarcă comenzile…
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Modul de depanare activat. Apăsați Ctrl+Shift+D pentru a dezactiva modul de depanare.
 
 Position:
-== 
+== Poziție:
 
 Speed:
-== 
+== Viteză:
 
 Angle:
-== 
+== Unghi:
 
 Multi-View
-== 
+== Multi-vedere
 
 [Spectating]
 Following %s
-== 
+== Urmărind %s
 
 Server best:
-== 
+== Record server:
 
 Personal best:
-== 
+== Record personal:
 
 Team %d
-== 
+== Echipa %d
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Unele imagini ale hărții nu au putut fi încărcate. Verificați consola pentru detalii.
 
 Uploading map data to GPU
-== 
+== Se încarcă datele hărții pe placa grafică (GPU)
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Unele sunete ale hărții nu au putut fi încărcate. Verificați consola pentru detalii.
 
 Loading menu themes
-== 
+== Se încarcă temele meniului
 
 Reset
-== 
+== Resetează
 
 Press a key…
-== 
+== Apasă o tastă…
 
 Settings
-== 
+== Setări
 
 Editor
-== 
+== Editor
 
 Main menu
-== 
+== Meniul principal
 
 Browser
-== 
+== Browser
 
 Ghost
-== 
+== Fantomă
 
 Reconnect in %d sec
-== 
+== Reconectare în %d sec
 
 Rename folder
-== 
+== Redenumește dosarul
 
 Render demo
-== 
+== Randează demo
 
 Render complete
-== 
+== Randare completă
 
 Restart
-== 
+== Repornire
 
 Are you sure that you want to restart?
-== 
+== Ești sigur că vrei să repornești?
 
 Welcome to DDNet
-== 
+== Bine ai venit pe DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDraceNetwork este un joc online cooperativ în care scopul tău și al grupului tău este să ajungeți la linia de sosire a hărții. Ca începător, ar trebui să începi pe serverele Novice, care găzduiesc cele mai ușoare hărți. Ține cont de ping pentru a alege un server aproape de tine.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Folosește tasta k pentru a te "ucide" (reporni), q pentru a pune pauză și a privi alți jucători. Vezi setările pentru alte taste configurabile.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== Este recomandat să verifici setările pentru a le ajusta după preferințele tale înainte de a intra pe un server.
 
 Please enter your nickname below.
-== 
+== Introdu porecla ta mai jos.
 
 Existing Player
-== 
+== Jucător existent
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Porecla ta '%s' este deja folosită (%d puncte). Vrei totuși să o folosești?
 
 Checking for existing player with your name
-== 
+== Se verifică existența unui jucător cu numele tău
 
 Save skin
-== 
+== Salvează costumul
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Ești sigur că vrei să salvezi costumul? Dacă un costum cu acest nume există deja, acesta va fi înlocuit.
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== Există o hartă nesalvată în editor, poate vrei să o salvezi.
 
 Continue anyway?
-== 
+== Continui oricum?
 
 A demo with this name already exists
-== 
+== Un demo cu acest nume există deja
 
 A folder with this name already exists
-== 
+== Un dosar cu acest nume există deja
 
 Unable to rename the folder
-== 
+== Nu se poate redenumi dosarul
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== Fișierul '%s' există deja, vrei să-l suprascrii?
 
 Replace video
-== 
+== Înlocuiește videoclipul
 
 (paused)
-== 
+== (pauză)
 
 Speed
-== 
+== Viteză
 
 Video name:
-== 
+== Nume videoclip:
 
 Videos directory
-== 
+== Director videoclipuri
 
 Video was saved to '%s'
-== 
+== Videoclipul a fost salvat în '%s'
 
 Join Tutorial Server
-== 
+== Intră pe serverul de tutorial
 
 Skip Tutorial
-== 
+== Sari peste tutorial
 
 Show DDNet map finishes in server browser
-== 
+== Afișează finalizările hărților DDNet în browserul de servere
 
 transmits your player name to info.ddnet.org
-== 
+== transmite numele tău de jucător către info.ddnet.org
 
 Unable to save the skin
-== 
+== Nu se poate salva costumul
 
 Unable to save the skin with a reserved name
-== 
+== Nu se poate salva costumul cu un nume rezervat
 
 Trying to determine UDP connectivity…
-== 
+== Se încearcă determinarea conectivității UDP…
 
 UDP seems to be filtered.
-== 
+== UDP pare să fie filtrat.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== Adresele IP UDP și TCP par să fie diferite. Încercați să dezactivați VPN-ul, proxy-ul sau acceleratoarele de rețea.
 
 No answer from server yet.
-== 
+== Încă nu a răspuns serverul.
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 Getting game info
-== 
+== Se obțin informațiile jocului
 
 Requesting to join the game
-== 
+== Se solicită intrarea în joc
 
 Theme
-== 
+== Temă
 
 Loading menu images
 == 
