@@ -48,8 +48,9 @@ enum
 {
 	TCLIENT_TAB_SETTINGS = 0,
 	TCLIENT_TAB_BINDWHEEL = 1,
-	TCLIENT_TAB_DISCORD = 2,
-	NUMBER_OF_TCLIENT_TABS = 3
+	TCLIENT_TAB_WARLIST = 2,
+	TCLIENT_TAB_INFO = 3,
+	NUMBER_OF_TCLIENT_TABS = 4
 };
 
 typedef struct
@@ -136,7 +137,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	const char *apTabNames[] = {
 		Localize("Settings"),
 		Localize("Bindwheel"),
-		Localize("Discord")};
+		Localize("Warlist"),
+		Localize("Info")};
 
 	for(int Tab = 0; Tab < NUMBER_OF_TCLIENT_TABS; ++Tab)
 	{
@@ -145,10 +147,10 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 													 IGraphics::CORNER_NONE;
 		if(DoButton_MenuTab(&s_aPageTabs[Tab], apTabNames[Tab], s_CurCustomTab == Tab, &Button, Corners, nullptr, nullptr, nullptr, nullptr, 4.0f))
 		{
-			if(Tab == TCLIENT_TAB_DISCORD)
-				PopupConfirm(Localize("Open TClient Discord"), Localize("Click open to open the TClient Discord invite in your browser"), Localize("Open"), Localize("Cancel"), &CMenus::OpenTClientDiscord);
-			else
-				s_CurCustomTab = Tab;
+			// if(Tab == TCLIENT_TAB_DISCORD)
+			//	PopupConfirm(Localize("Open TClient Discord"), Localize("Click open to open the TClient Discord invite in your browser"), Localize("Open"), Localize("Cancel"), &CMenus::OpenTClientDiscord);
+			// else
+			s_CurCustomTab = Tab;
 			break;
 		}
 	}
@@ -706,6 +708,98 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClResetBindWheelMouse, Localize("Reset position of mouse when opening bindwheel"), &g_Config.m_ClResetBindWheelMouse, &Button, LineSize);
 	}
+
+	if(s_CurCustomTab == TCLIENT_TAB_INFO)
+	{
+		MainView.HSplitTop(MarginSmall, nullptr, &MainView);
+
+		MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
+		LeftView.VSplitLeft(MarginSmall, nullptr, &LeftView);
+		RightView.VSplitRight(MarginSmall, &RightView, nullptr);
+
+		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
+		Ui()->DoLabel(&Label, Localize("TClient Links"), HeadlineFontSize, TEXTALIGN_ML);
+		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
+
+		static CButtonContainer s_DiscordButton, s_WebsiteButton, s_GithubButton, s_SupportButton;
+		CUIRect ButtonLeft, ButtonRight;
+
+		LeftView.HSplitTop(LineSize, &Button, &LeftView);
+		Button.VSplitMid(&ButtonLeft, &ButtonRight, MarginSmall);
+		if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &ButtonLeft, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+			Client()->ViewLink("https://discord.gg/fBvhH93Bt6");
+		if(DoButton_Menu(&s_WebsiteButton, Localize("Wesbite"), 0, &ButtonRight, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+			Client()->ViewLink("https://tclient.app/");
+
+		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
+		LeftView.HSplitTop(LineSize, &Button, &LeftView);
+		Button.VSplitMid(&ButtonLeft, &ButtonRight, MarginSmall);
+
+		if(DoButton_Menu(&s_GithubButton, Localize("Github"), 0, &ButtonLeft, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+			Client()->ViewLink("https://github.com/sjrc6/TaterClient-ddnet");
+		if(DoButton_Menu(&s_SupportButton, Localize("Support"), 0, &ButtonRight, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+			Client()->ViewLink("https://ko-fi.com/Totar");
+
+		// =======RIGHT VIEW========
+
+		RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
+		Ui()->DoLabel(&Label, Localize("TClient Developers"), HeadlineFontSize, TEXTALIGN_ML);
+		RightView.HSplitTop(MarginSmall, nullptr, &RightView);
+		RightView.HSplitTop(MarginSmall, nullptr, &RightView);
+
+		const float TeeSize = 50.0f;
+		const float CardSize = TeeSize + MarginSmall;
+		CUIRect TeeRect, DevCardRect;
+		static CButtonContainer s_LinkButton1, s_LinkButton2, s_LinkButton3, s_LinkButton4;
+		bool WhiteFeetTemp = g_Config.m_ClWhiteFeet;
+		g_Config.m_ClWhiteFeet = false;
+		{
+			RightView.HSplitTop(TeeSize + MarginSmall, &DevCardRect, &RightView);
+			DevCardRect.VSplitLeft(TeeSize + MarginSmall, &TeeRect, &Label);
+			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Tater"), &Label, &Button);
+			Button.VSplitLeft(MarginSmall, nullptr, &Button);
+			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
+			Ui()->DoLabel(&Label, "Tater", LineSize, TEXTALIGN_ML);
+			if(DoButton_FontIcon(&s_LinkButton1, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
+				Client()->ViewLink("https://github.com/sjrc6");
+			RenderDevSkin(TeeRect.Center(), 50.0f, "glow_mermyfox", "mermyfox", true, 15911221, 9981775, 0);
+		}
+		{
+			RightView.HSplitTop(TeeSize + MarginSmall, &DevCardRect, &RightView);
+			DevCardRect.VSplitLeft(TeeSize + MarginSmall, &TeeRect, &Label);
+			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Solly"), &Label, &Button);
+			Button.VSplitLeft(MarginSmall, nullptr, &Button);
+			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
+			Ui()->DoLabel(&Label, "Solly", LineSize, TEXTALIGN_ML);
+			if(DoButton_FontIcon(&s_LinkButton3, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
+				Client()->ViewLink("https://github.com/SollyBunny");
+			RenderDevSkin(TeeRect.Center(), 50.0f, "tuzi", "tuzi", false, 10944256, 2621184, 0);
+		}
+		{
+			RightView.HSplitTop(TeeSize + MarginSmall, &DevCardRect, &RightView);
+			DevCardRect.VSplitLeft(TeeSize + MarginSmall, &TeeRect, &Label);
+			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Daniel"), &Label, &Button);
+			Button.VSplitLeft(MarginSmall, nullptr, &Button);
+			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
+			Ui()->DoLabel(&Label, "Daniel", LineSize, TEXTALIGN_ML);
+			if(DoButton_FontIcon(&s_LinkButton2, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
+				Client()->ViewLink("https://github.com/danielkempf");
+			RenderDevSkin(TeeRect.Center(), 50.0f, "greyfox", "greyfox", true, 10944256, 2621184, 0);
+		}
+
+		{
+			RightView.HSplitTop(TeeSize + MarginSmall, &DevCardRect, &RightView);
+			DevCardRect.VSplitLeft(TeeSize + MarginSmall, &TeeRect, &Label);
+			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Teero"), &Label, &Button);
+			Button.VSplitLeft(MarginSmall, nullptr, &Button);
+			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
+			Ui()->DoLabel(&Label, "Teero", LineSize, TEXTALIGN_ML);
+			if(DoButton_FontIcon(&s_LinkButton4, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
+				Client()->ViewLink("https://github.com/Teero888");
+			RenderDevSkin(TeeRect.Center(), 50.0f, "glow_mermyfox", "mermyfox", true, 15873791, 16449344, 0);
+		}
+		g_Config.m_ClWhiteFeet = WhiteFeetTemp;
+	}
 }
 
 void CMenus::RenderSettingsProfiles(CUIRect MainView)
@@ -1122,4 +1216,33 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 			dbg_msg("menus", "couldn't open file");
 		}
 	}
+}
+
+void CMenus::RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, const char *pBackupSkin, bool CustomColors, int FeetColor, int BodyColor, int Emote)
+{
+	CTeeRenderInfo SkinInfo;
+	const CSkin *pSkin = m_pClient->m_Skins.Find(pSkinName);
+	if(strcmp(pSkin->GetName(),pSkinName) != 0)
+		pSkin = m_pClient->m_Skins.Find(pBackupSkin);
+
+	SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+	SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	SkinInfo.m_SkinMetrics = pSkin->m_Metrics;
+	SkinInfo.m_CustomColoredSkin = CustomColors;
+	if(SkinInfo.m_CustomColoredSkin)
+	{
+		SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(BodyColor).UnclampLighting(ColorHSLA::DARKEST_LGT));
+		SkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(FeetColor).UnclampLighting(ColorHSLA::DARKEST_LGT));
+	}
+	else
+	{
+		SkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+		SkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
+	}
+	SkinInfo.m_Size = Size;
+	const CAnimState *pIdleState = CAnimState::GetIdle();
+	vec2 OffsetToMid;
+	CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &SkinInfo, OffsetToMid);
+	vec2 TeeRenderPos(RenderPos.x, RenderPos.y + OffsetToMid.y);
+	RenderTools()->RenderTee(pIdleState, &SkinInfo, Emote, vec2(1.0f, 0.0f), TeeRenderPos);
 }
