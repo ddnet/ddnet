@@ -403,6 +403,11 @@ void CSpectator::OnRender()
 		if(!m_pClient->m_Snap.m_apInfoByDDTeamName[i] || m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 			continue;
 
+		// always show self when multiview is enabled
+		bool ExcludeSelf = !m_pClient->m_MultiViewActivated && !g_Config.m_ClEnableSelfSpectate;
+		if(ExcludeSelf && m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId == m_pClient->m_Snap.m_LocalClientId)
+			continue;
+
 		++Count;
 
 		if(Count == PerLine + 1 || (Count > PerLine + 1 && (Count - 1) % PerLine == 0))
@@ -422,6 +427,9 @@ void CSpectator::OnRender()
 			if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
 				continue;
 
+			if(ExcludeSelf && pInfo2->m_ClientId == m_pClient->m_Snap.m_LocalClientId)
+				continue;
+
 			NextDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientId);
 			break;
 		}
@@ -433,6 +441,9 @@ void CSpectator::OnRender()
 				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_apInfoByDDTeamName[j];
 
 				if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
+					continue;
+
+				if(ExcludeSelf && pInfo2->m_ClientId == m_pClient->m_Snap.m_LocalClientId)
 					continue;
 
 				OldDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientId);
@@ -640,6 +651,9 @@ void CSpectator::SpectateClosest()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(i == SpectatorId || !Snap.m_aCharacters[i].m_Active || !Snap.m_apPlayerInfos[i] || Snap.m_apPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
+			continue;
+
+		if(!g_Config.m_ClEnableSelfSpectate && i == Snap.m_LocalClientId)
 			continue;
 
 		const CNetObj_Character &MaybeClosestCharacter = Snap.m_aCharacters[i].m_Cur;
