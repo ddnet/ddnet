@@ -33,7 +33,7 @@
 # 2024-08-29 Pioooooo
 # 2024-09-29 Pioooooo
 # 2024-11-01 Pioooooo
-# 2024-12-03 豆腐渣 & Pioooooo
+# 2024-12-03 豆腐渣 & Pioooooo & By
 ##### /authors #####
 
 ##### translated strings #####
@@ -2009,13 +2009,13 @@ Are you sure that you want to reset the touch controls to default?
 == 確定要將觸控設置重置為默認設置嗎？
 
 Import from clipboard
-== 從剪貼板導入
+== 從剪貼簿導入
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 確定要從剪貼板導入觸控設置嗎？這將覆蓋當前的觸控設置。
+== 確定要從剪貼簿導入觸控設置嗎？這將覆蓋當前的觸控設置。
 
 Export to clipboard
-== 導出到剪貼板
+== 導出到剪貼簿
 
 Direct touch input while ingame
 == 遊戲時直接觸摸操作
@@ -2047,19 +2047,19 @@ Error loading touch controls
 == 加載觸控設置錯誤
 
 Could not load touch controls from file. See local console for details.
-== 無法從文件加載觸控設置。查看本地控制台以獲取詳情。
+== 無法從文件加載觸控設置。檢查本地控制台以獲取詳情。
 
 Could not load default touch controls from file. See local console for details.
-== 無法從文件加載默認觸控設置。查看本地控制台以獲取詳情。
+== 無法從文件加載默認觸控設置。檢查本地控制台以獲取詳情。
 
 Could not load touch controls from clipboard. See local console for details.
-== 無法從剪貼板加載觸控設置。查看本地控制台以獲取詳情。
+== 無法從剪貼板加載觸控設置。檢查本地控制台以獲取詳情。
 
 Width of your own hook collision line
-== 自己的鉤鎖輔助線寬度
+== 自己的鉤索輔助線寬度
 
 Width of others' hook collision line
-== 其他玩家的鉤鎖輔助線寬度
+== 其他玩家的鉤索輔助線寬度
 
 Preview 'Hook collisions' being pressed
 == 預覽按下時的鉤索輔助線
