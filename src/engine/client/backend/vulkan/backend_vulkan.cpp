@@ -3311,6 +3311,19 @@ protected:
 		else
 		{
 			ExecBuffer.m_HasDynamicState = false;
+			VkViewport Viewport;
+			Viewport.x = 0.0f;
+			Viewport.y = 0.0f;
+			Viewport.width = (float)m_VKSwapImgAndViewportExtent.m_SwapImageViewport.width;
+			Viewport.height = (float)m_VKSwapImgAndViewportExtent.m_SwapImageViewport.height;
+			Viewport.minDepth = 0.0f;
+			Viewport.maxDepth = 1.0f;
+			VkRect2D Scissor;
+			auto ScissorViewport = m_VKSwapImgAndViewportExtent.GetPresentedImageViewport();
+			Scissor.offset = {0, 0};
+			Scissor.extent = {ScissorViewport.width, ScissorViewport.height};
+			ExecBuffer.m_Viewport = Viewport;
+			ExecBuffer.m_Scissor = Scissor;
 		}
 	}
 
@@ -3322,12 +3335,8 @@ protected:
 			m_vLastPipeline[RenderThreadIndex] = BindingPipe;
 		}
 
-		size_t DynamicStateIndex = GetDynamicModeIndexFromExecBuffer(ExecBuffer);
-		if(DynamicStateIndex == VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT)
-		{
-			vkCmdSetViewport(CommandBuffer, 0, 1, &ExecBuffer.m_Viewport);
-			vkCmdSetScissor(CommandBuffer, 0, 1, &ExecBuffer.m_Scissor);
-		}
+		vkCmdSetViewport(CommandBuffer, 0, 1, &ExecBuffer.m_Viewport);
+		vkCmdSetScissor(CommandBuffer, 0, 1, &ExecBuffer.m_Scissor);
 	}
 
 	/**************************
