@@ -642,6 +642,9 @@ void CSpectator::SpectateClosest()
 		if(i == SpectatorId || !Snap.m_aCharacters[i].m_Active || !Snap.m_apPlayerInfos[i] || Snap.m_apPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
 			continue;
 
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK && i == Snap.m_LocalClientId)
+			continue;
+
 		const CNetObj_Character &MaybeClosestCharacter = Snap.m_aCharacters[i].m_Cur;
 		int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
 		if(NewSpectatorId == -1 || Distance < ClosestDistance)
