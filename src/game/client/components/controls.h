@@ -20,6 +20,8 @@ public:
 	vec2 m_aMousePosOnAction[NUM_DUMMIES];
 	vec2 m_aTargetPos[NUM_DUMMIES];
 
+	vec2 m_MouseOvershoot;
+
 	int m_aAmmoCount[NUM_WEAPONS];
 
 	int64_t m_LastSendTime;

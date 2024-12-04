@@ -165,6 +165,8 @@ private:
 	float m_SpectatingPlayerTime;
 	float m_FreeViewTime;
 	ColorRGBA m_SpectatorModeEffectColor;
+
+	float m_OvershootIndicatorActivatedTime;
 };
 
 #endif

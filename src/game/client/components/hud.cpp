@@ -1427,6 +1427,32 @@ void CHud::RenderSpectatorHud()
 		str_copy(aBuf, Localize("Free-View"));
 	}
 	TextRender()->Text(m_Width - 174.0f, m_Height - 15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
+
+	// draw overshoot indicator
+	vec2 Overshoot = GameClient()->m_Controls.m_MouseOvershoot;
+	float Length = length(GameClient()->m_Controls.m_MouseOvershoot);
+	if(Length > 1.0f)
+	{
+		m_OvershootIndicatorActivatedTime = Client()->LocalTime();
+	}
+
+	const float IndicatorDuration = 2.0f;
+	const float IndicatorTime = Client()->LocalTime() - m_OvershootIndicatorActivatedTime;
+	if(IndicatorTime < IndicatorDuration)
+	{
+		float Shake = mix(sin(Client()->LocalTime() * pi * 20.0f) * 2.5f, 0.0f, clamp(IndicatorTime, 0.0f, 0.5f) / 0.5f);
+		Overshoot = normalize_pre_length(Overshoot, Length) * clamp(Length / 10.0f, -5.0f, 5.0f);
+
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(0.0f, 0.0f, 0.0f, 0.4f);
+		Graphics()->DrawCircle(m_Width - 200.0f + Shake, m_Height - 7.5f, 7.5f, 32);
+
+		// todo: add icon and tune the design
+		Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+		Graphics()->DrawCircle(m_Width - 200.0f - Overshoot.x + Shake, m_Height - 7.5f - Overshoot.y, 5.0f, 32);
+		Graphics()->QuadsEnd();
+	}
 }
 
 void CHud::RenderSpectatorModeEffect()
@@ -1605,6 +1631,7 @@ void CHud::OnRender()
 			}
 			RenderMovementInformation(m_pClient->m_Snap.m_LocalClientId);
 			RenderDDRaceEffects();
+			m_OvershootIndicatorActivatedTime = -INFINITY;
 		}
 		else if(m_pClient->m_Snap.m_SpecInfo.m_Active)
 		{
@@ -1626,6 +1653,10 @@ void CHud::OnRender()
 				RenderMovementInformation(SpectatorId);
 			}
 			RenderSpectatorHud();
+		}
+		else
+		{
+			m_OvershootIndicatorActivatedTime = -INFINITY;
 		}
 		RenderSpectatorModeEffect();
 
