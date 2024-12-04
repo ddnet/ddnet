@@ -359,6 +359,8 @@ void CControls::OnRender()
 	{
 		m_aTargetPos[g_Config.m_ClDummy] = m_aMousePos[g_Config.m_ClDummy];
 	}
+
+	m_MouseOvershoot += (-m_MouseOvershoot) * (1 - exp(-10.0f * Client()->RenderFrameTime()));
 }
 
 bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
@@ -406,6 +408,7 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 
 void CControls::ClampMousePos()
 {
+	const vec2 MousePos = m_aMousePos[g_Config.m_ClDummy];
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId < 0)
 	{
 		m_aMousePos[g_Config.m_ClDummy].x = clamp(m_aMousePos[g_Config.m_ClDummy].x, -201.0f * 32, (Collision()->GetWidth() + 201.0f) * 32.0f);
@@ -429,6 +432,8 @@ void CControls::ClampMousePos()
 		if(MouseDistance > MouseMax)
 			m_aMousePos[g_Config.m_ClDummy] = normalize_pre_length(m_aMousePos[g_Config.m_ClDummy], MouseDistance) * MouseMax;
 	}
+
+	m_MouseOvershoot += m_aMousePos[g_Config.m_ClDummy] - MousePos;
 }
 
 float CControls::GetMinMouseDistance() const

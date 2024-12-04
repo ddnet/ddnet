@@ -19,6 +19,7 @@ class CSpectator : public CComponent
 	bool m_Active;
 	bool m_WasActive;
 
+	int m_LastViewedClientId;
 	int m_SelectedSpectatorId;
 	vec2 m_SelectorMouse;
 
