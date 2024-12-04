@@ -310,7 +310,8 @@ void CCharacter::HandleNinja()
 			GetTuning(m_TuneZone)->m_GroundElasticityX,
 			GetTuning(m_TuneZone)->m_GroundElasticityY);
 
-		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), GroundElasticity);
+		m_Core.m_BouncePositions.clear();
+		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), GroundElasticity, &m_Core.m_BouncePositions);
 
 		// reset velocity so the client doesn't predict stuff
 		ResetVelocity();
@@ -2183,7 +2184,24 @@ void CCharacter::DDRacePostCoreTick()
 		return;
 
 	// handle Anti-Skip tiles
-	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
+	std::vector<int> vIndices;
+	if(m_Core.m_BouncePositions.empty())
+	{
+		vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
+	}
+	else
+	{
+		// handle bouncing being multiple straight lines
+		vIndices = Collision()->GetMapIndices(m_PrevPos, m_Core.m_BouncePositions.front());
+		for(size_t i = 0; i < m_Core.m_BouncePositions.size() - 1; ++i)
+		{
+			std::vector<int> vStepIndices = Collision()->GetMapIndices(m_Core.m_BouncePositions[i], m_Core.m_BouncePositions[i + 1]);
+			vIndices.insert(vIndices.end(), vStepIndices.begin(), vStepIndices.end());
+		}
+		std::vector<int> vLastStepIndices = Collision()->GetMapIndices(m_Core.m_BouncePositions.back(), m_Pos);
+		vIndices.insert(vIndices.end(), vLastStepIndices.begin(), vLastStepIndices.end());
+	}
+
 	if(!vIndices.empty())
 	{
 		for(int &Index : vIndices)
