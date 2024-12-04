@@ -200,6 +200,19 @@ void CSpectator::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
+	// we consider playing as "viewing" your own tee
+	int CurrentViewingClientId = GameClient()->m_Snap.m_SpecInfo.m_Active ? GameClient()->m_Snap.m_SpecInfo.m_SpectatorId : GameClient()->m_Snap.m_LocalClientId;
+	if(CurrentViewingClientId != SPEC_FREEVIEW && CurrentViewingClientId != m_LastViewedClientId)
+	{
+		m_LastViewedClientId = CurrentViewingClientId;
+	}
+
+	// if the last viewed disappeared, it was not considered viewed anymore
+	if(m_LastViewedClientId != SPEC_FREEVIEW && !GameClient()->m_Snap.m_aCharacters[m_LastViewedClientId].m_Active)
+	{
+		m_LastViewedClientId = SPEC_FREEVIEW;
+	}
+
 	if(!GameClient()->m_MultiViewActivated && m_MultiViewActivateDelay != 0.0f)
 	{
 		if(m_MultiViewActivateDelay <= Client()->LocalTime())
@@ -581,6 +594,8 @@ void CSpectator::OnReset()
 	m_WasActive = false;
 	m_Active = false;
 	m_SelectedSpectatorId = NO_SELECTION;
+
+	m_LastViewedClientId = SPEC_FREEVIEW;
 }
 
 void CSpectator::Spectate(int SpectatorId)
@@ -640,6 +655,9 @@ void CSpectator::SpectateClosest()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(i == SpectatorId || !Snap.m_aCharacters[i].m_Active || !Snap.m_apPlayerInfos[i] || Snap.m_apPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
+			continue;
+
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK && i == m_LastViewedClientId)
 			continue;
 
 		const CNetObj_Character &MaybeClosestCharacter = Snap.m_aCharacters[i].m_Cur;
