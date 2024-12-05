@@ -86,6 +86,8 @@ void CHud::OnInit()
 {
 	OnReset();
 
+	Graphics()->SetColor(1.0, 1.0, 1.0, 1.0);
+
 	m_HudQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	PrepareAmmoHealthAndArmorQuads();

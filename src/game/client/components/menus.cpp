@@ -806,6 +806,8 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 		Ui()->RenderProgressBar(ProgressBar, CurLoadRenderCount / (float)m_LoadingState.m_Total);
 	}
 
+	Graphics()->SetColor(1.0, 1.0, 1.0, 1.0);
+
 	Client()->UpdateAndSwap();
 }
 
