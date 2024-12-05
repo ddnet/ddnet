@@ -184,6 +184,7 @@ public:
 	CSaveTeam *m_apSavedTeams[MAX_CLIENTS];
 	CSaveTee *m_apSavedTees[MAX_CLIENTS];
 	CSaveTee *m_apSavedTeleTees[MAX_CLIENTS];
+	CSaveTee *m_apSavedSaveTees[MAX_CLIENTS];
 	int m_aTeamMapping[MAX_CLIENTS];
 
 	// returns last input if available otherwise nulled PlayerInput object
@@ -505,6 +506,8 @@ private:
 	static void ConPracticeEndlessHook(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnEndlessHook(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeSave(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeLoad(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
