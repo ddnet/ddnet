@@ -1233,7 +1233,7 @@ Online clanmates (%d)
 == Співклановці в мережі (%d)
 
 Online friends (%d)
-== Друзі в мережі
+== Друзі в мережі (%d)
 
 Only save improvements
 == Зберігати лише покращення
