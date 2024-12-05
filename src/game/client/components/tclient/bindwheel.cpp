@@ -219,15 +219,24 @@ void CBindWheel::ExecuteHover()
 	if(m_SelectedBind >= 0)
 		Console()->ExecuteLine(m_vBinds[m_SelectedBind].m_aCommand);
 }
+static void EscapeParam(char *pDst, const char *pSrc, int Size)
+{
+	str_escape(&pDst, pSrc, pDst + Size);
+}
 
 void CBindWheel::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	CBindWheel *pThis = (CBindWheel *)pUserData;
 
-	char aBuf[128] = {};
+	char aBuf[2048];
+	char aEscapeName[BINDWHEEL_MAX_NAME + 256];
+	char aEscapeCommand[BINDWHEEL_MAX_CMD + 256];
+
 	for(SBind &Bind : pThis->m_vBinds)
 	{
-		str_format(aBuf, sizeof(aBuf), "add_bindwheel \"%s\" \"%s\"", Bind.m_aName, Bind.m_aCommand);
+		EscapeParam(aEscapeName, Bind.m_aName, sizeof(aEscapeName));
+		EscapeParam(aEscapeCommand, Bind.m_aCommand, sizeof(aEscapeCommand));
+		str_format(aBuf, sizeof(aBuf), "add_bindwheel \"%s\" \"%s\"", aEscapeName, aEscapeCommand);
 		pConfigManager->WriteLine(aBuf);
 	}
 }

@@ -12,6 +12,7 @@
 
 void CWarList::OnNewSnapshot()
 {
+	UpdateWarPlayers();
 }
 
 void CWarList::OnConsoleInit()
@@ -20,7 +21,13 @@ void CWarList::OnConsoleInit()
 	if(pConfigManager)
 		pConfigManager->RegisterTCallback(ConfigSaveCallback, this);
 
-	// TODO: PUT CON COMMANDS HERE
+	Console()->Register("update_war_type", "s[type] s[name] i[color]", CFGFLAG_CLIENT, ConUpsertWarType, this, "Update or add a specific war entry");
+	Console()->Register("add_war_entry", "s[type] s[name] s[clan] r[reason]", CFGFLAG_CLIENT, ConAddWarEntry, this, "Adds a specific war entry");
+
+	Console()->Register("war_name", "s[type] s[name] r[reason]", CFGFLAG_CLIENT, ConName, this, "Add a name war entry");
+	Console()->Register("war_clan", "s[type] s[clan] r[reason]", CFGFLAG_CLIENT, ConClan, this, "Add a clan war entry");
+	Console()->Register("remove_war_name", "s[type] s[name]", CFGFLAG_CLIENT, ConRemoveName, this, "Remove a name war entry");
+	Console()->Register("remove_war_clan", "s[type] s[clan]", CFGFLAG_CLIENT, ConRemoveClan, this, "Remove a clan war entry");
 
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	IOHANDLE File = m_pStorage->OpenFile(WARLIST_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
@@ -65,7 +72,7 @@ void CWarList::ConRemoveName(IConsole::IResult *pResult, void *pUserData)
 	CWarList *pThis = static_cast<CWarList *>(pUserData);
 	pThis->RemoveWarEntry(pName, "", pType);
 }
-void CWarList::ConRemoveClan(IConsole::IResult *pResult, void *pUserData) 
+void CWarList::ConRemoveClan(IConsole::IResult *pResult, void *pUserData)
 {
 	const char *pType = pResult->GetString(0);
 	const char *pClan = pResult->GetString(1);
@@ -74,7 +81,7 @@ void CWarList::ConRemoveClan(IConsole::IResult *pResult, void *pUserData)
 }
 
 // Backend Commands for config file
-void CWarList::ConAddWarEntry(IConsole::IResult *pResult, void *pUserData) 
+void CWarList::ConAddWarEntry(IConsole::IResult *pResult, void *pUserData)
 {
 	const char *pType = pResult->GetString(0);
 	const char *pName = pResult->GetString(1);
@@ -83,7 +90,7 @@ void CWarList::ConAddWarEntry(IConsole::IResult *pResult, void *pUserData)
 	CWarList *pThis = static_cast<CWarList *>(pUserData);
 	pThis->AddWarEntry(pName, pClan, pReason, pType);
 }
-void CWarList::ConUpsertWarType(IConsole::IResult *pResult, void *pUserData) 
+void CWarList::ConUpsertWarType(IConsole::IResult *pResult, void *pUserData)
 {
 	int Index = pResult->GetInteger(0);
 	const char *pType = pResult->GetString(1);
@@ -126,9 +133,9 @@ void CWarList::AddWarEntry(const char *pName, const char *pClan, const char *pRe
 	CWarEntry Entry(WarType);
 	str_copy(Entry.m_aReason, pReason);
 
-	if(pClan)
+	if(str_comp(pClan, "") != 0)
 		str_copy(Entry.m_aClan, pClan);
-	else if(pName)
+	else if(str_comp(pName, "") != 0)
 		str_copy(Entry.m_aName, pName);
 	else
 		return;
@@ -264,6 +271,11 @@ void CWarList::WriteLine(const char *pLine)
 		return;
 }
 
+static void EscapeParam(char *pDst, const char *pSrc, int Size)
+{
+	str_escape(&pDst, pSrc, pDst + Size);
+}
+
 void CWarList::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	CWarList *pThis = (CWarList *)pUserData;
@@ -286,7 +298,11 @@ void CWarList::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserDat
 		if(WarType.m_Imported)
 			continue;
 
-		str_format(aBuf, sizeof(aBuf), "update_war_type %d \"%s\" %d", i, WarType.m_aWarType, WarType.m_Color.Pack());
+		char aEscapeType[MAX_WARLIST_TYPE_LENGTH * 2];
+		EscapeParam(aEscapeType, WarType.m_aWarType, sizeof(aEscapeType));
+		ColorHSLA Color = color_cast<ColorHSLA>(WarType.m_Color);
+
+		str_format(aBuf, sizeof(aBuf), "update_war_type %d \"%s\" %d", i, aEscapeType, Color.Pack(false));
 		pThis->WriteLine(aBuf);
 	}
 	for(CWarEntry &Entry : pThis->m_WarEntries)
@@ -295,7 +311,16 @@ void CWarList::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserDat
 		if(Entry.m_Imported)
 			continue;
 
-		str_format(aBuf, sizeof(aBuf), "add_war_entry \"%s\" \"%s\" \"%s\" \"%s\"", Entry.m_pWarType->m_aWarType, Entry.m_aName, Entry.m_aClan, Entry.m_aReason);
+		char aEscapeType[MAX_WARLIST_TYPE_LENGTH * 2];
+		char aEscapeName[MAX_NAME_LENGTH * 2];
+		char aEscapeClan[MAX_CLAN_LENGTH * 2];
+		char aEscapeReason[MAX_WARLIST_REASON_LENGTH * 2];
+		EscapeParam(aEscapeType, Entry.m_pWarType->m_aWarType, sizeof(aEscapeType));
+		EscapeParam(aEscapeName, Entry.m_aName, sizeof(aEscapeName));
+		EscapeParam(aEscapeClan, Entry.m_aClan, sizeof(aEscapeClan));
+		EscapeParam(aEscapeReason, Entry.m_aReason, sizeof(aEscapeReason));
+
+		str_format(aBuf, sizeof(aBuf), "add_war_entry \"%s\" \"%s\" \"%s\" \"%s\"", aEscapeType, aEscapeName, aEscapeClan, aEscapeReason);
 		pThis->WriteLine(aBuf);
 	}
 
