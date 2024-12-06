@@ -48,6 +48,10 @@
 
 extern bool IsInterrupted();
 
+#if defined(CONF_PLATFORM_ANDROID)
+extern std::vector<std::string> FetchAndroidServerCommandQueue();
+#endif
+
 void CServerBan::InitServerBan(IConsole *pConsole, IStorage *pStorage, CServer *pServer)
 {
 	CNetBan::Init(pConsole, pStorage);
@@ -2936,6 +2940,14 @@ int CServer::Run()
 				UpdateClientRconCommands();
 
 				m_Fifo.Update();
+
+#if defined(CONF_PLATFORM_ANDROID)
+				std::vector<std::string> vAndroidCommandQueue = FetchAndroidServerCommandQueue();
+				for(const std::string &Command : vAndroidCommandQueue)
+				{
+					Console()->ExecuteLineFlag(Command.c_str(), CFGFLAG_SERVER, -1);
+				}
+#endif
 
 				// master server stuff
 				m_pRegister->Update();

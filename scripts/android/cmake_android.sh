@@ -153,6 +153,7 @@ function build_for_type() {
 		-DANDROID_NDK="$ANDROID_NDK_HOME" \
 		-DANDROID_ABI="${2}" \
 		-DANDROID_ARM_NEON=TRUE \
+		-DANDROID_PACKAGE_NAME="${PACKAGE_NAME//./_}" \
 		-DCMAKE_ANDROID_NDK="$ANDROID_NDK_HOME" \
 		-DCMAKE_SYSTEM_NAME=Android \
 		-DCMAKE_SYSTEM_VERSION="$ANDROID_API_LEVEL" \
@@ -160,7 +161,7 @@ function build_for_type() {
 		-DCARGO_NDK_TARGET="${3}" \
 		-DCARGO_NDK_API="$ANDROID_API_LEVEL" \
 		-B"${BUILD_FOLDER}/$ANDROID_SUB_BUILD_DIR/$1" \
-		-DSERVER=OFF \
+		-DSERVER=ON \
 		-DTOOLS=OFF \
 		-DDEV=TRUE \
 		-DCMAKE_CROSSCOMPILING=ON \
@@ -170,7 +171,7 @@ function build_for_type() {
 		cd "${BUILD_FOLDER}/$ANDROID_SUB_BUILD_DIR/$1" || exit 1
 		# We want word splitting
 		# shellcheck disable=SC2086
-		cmake --build . --target game-client $BUILD_FLAGS
+		cmake --build . --target game-client game-server $BUILD_FLAGS
 	)
 }
 
@@ -228,6 +229,7 @@ log_info "Copying libraries..."
 function copy_libs() {
 	mkdir -p "lib/$2"
 	cp "$ANDROID_SUB_BUILD_DIR/$1/libDDNet.so" "lib/$2" || exit 1
+	cp "$ANDROID_SUB_BUILD_DIR/$1/libDDNet-Server.so" "lib/$2" || exit 1
 }
 
 if [[ "${ANDROID_BUILD}" == "arm" || "${ANDROID_BUILD}" == "all" ]]; then

@@ -17,6 +17,10 @@
 
 #include "menus.h"
 
+#if defined(CONF_PLATFORM_ANDROID)
+#include <android/android_main.h>
+#endif
+
 using namespace FontIcons;
 
 void CMenus::RenderStartMenu(CUIRect MainView)
@@ -124,37 +128,26 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	if(DoButton_Menu(&s_SettingsButton, Localize("Settings"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "settings" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)) || CheckHotKey(KEY_S))
 		NewPage = PAGE_SETTINGS;
 
-#if !defined(CONF_PLATFORM_ANDROID)
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static CButtonContainer s_LocalServerButton;
 
+#if !defined(CONF_PLATFORM_ANDROID)
 	if(!is_process_alive(m_ServerProcess.m_Process))
 		KillServer();
+#endif
 
-	if(DoButton_Menu(&s_LocalServerButton, m_ServerProcess.m_Process ? Localize("Stop server") : Localize("Run server"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "local_server" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, m_ServerProcess.m_Process ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)) || (CheckHotKey(KEY_R) && Input()->KeyPress(KEY_R)))
+	if(DoButton_Menu(&s_LocalServerButton, IsServerRunning() ? Localize("Stop server") : Localize("Run server"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "local_server" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, IsServerRunning() ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)) || (CheckHotKey(KEY_R) && Input()->KeyPress(KEY_R)))
 	{
-		if(m_ServerProcess.m_Process)
+		if(IsServerRunning())
 		{
 			KillServer();
 		}
 		else
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
-			Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
-			// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
-			if(str_find(aBuf, "/") == 0 || fs_is_file(aBuf))
-			{
-				m_ServerProcess.m_Process = shell_execute(aBuf, EShellExecuteWindowState::BACKGROUND);
-				m_ForceRefreshLanPage = true;
-			}
-			else
-			{
-				Client()->AddWarning(SWarning(Localize("Server executable not found, can't run server")));
-			}
+			RunServer();
 		}
 	}
-#endif
 
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
@@ -283,16 +276,52 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 }
 
+void CMenus::RunServer()
+{
+#if defined(CONF_PLATFORM_ANDROID)
+	if(StartAndroidServer())
+	{
+		m_ForceRefreshLanPage = true;
+	}
+	else
+	{
+		Client()->AddWarning(SWarning(Localize("Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.")));
+	}
+#else
+	char aBuf[IO_MAX_PATH_LENGTH];
+	Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
+	// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
+	if(str_find(aBuf, "/") == 0 || fs_is_file(aBuf))
+	{
+		m_ServerProcess.m_Process = shell_execute(aBuf, EShellExecuteWindowState::BACKGROUND);
+		m_ForceRefreshLanPage = true;
+	}
+	else
+	{
+		Client()->AddWarning(SWarning(Localize("Server executable not found, can't run server")));
+	}
+#endif
+}
+
 void CMenus::KillServer()
 {
-#if !defined(CONF_PLATFORM_ANDROID)
-	if(m_ServerProcess.m_Process)
+#if defined(CONF_PLATFORM_ANDROID)
+	ExecuteAndroidServerCommand("shutdown");
+	m_ForceRefreshLanPage = true;
+#else
+	if(m_ServerProcess.m_Process && kill_process(m_ServerProcess.m_Process))
 	{
-		if(kill_process(m_ServerProcess.m_Process))
-		{
-			m_ServerProcess.m_Process = INVALID_PROCESS;
-			m_ForceRefreshLanPage = true;
-		}
+		m_ServerProcess.m_Process = INVALID_PROCESS;
+		m_ForceRefreshLanPage = true;
 	}
+#endif
+}
+
+bool CMenus::IsServerRunning() const
+{
+#if defined(CONF_PLATFORM_ANDROID)
+	return IsAndroidServerRunning();
+#else
+	return m_ServerProcess.m_Process != INVALID_PROCESS;
 #endif
 }

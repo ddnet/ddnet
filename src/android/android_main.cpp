@@ -1,7 +1,5 @@
 #include "android_main.h"
 
-#include <SDL.h>
-
 #include <base/hash.h>
 #include <base/log.h>
 #include <base/system.h>
@@ -10,6 +8,10 @@
 
 #include <string>
 #include <vector>
+
+#include <jni.h>
+
+#include <SDL.h>
 
 static bool UnpackAsset(const char *pFilename)
 {
@@ -226,11 +228,65 @@ const char *InitAndroid()
 	return nullptr;
 }
 
-// See NativeMain.java
+// See ClientActivity.java
 constexpr uint32_t COMMAND_USER = 0x8000;
 constexpr uint32_t COMMAND_RESTART_APP = COMMAND_USER + 1;
 
 void RestartAndroidApp()
 {
 	SDL_AndroidSendMessage(COMMAND_RESTART_APP, 0);
+}
+
+bool StartAndroidServer()
+{
+	// We need the notification-permission to show a notification for the foreground service.
+	// We use SDL for this instead of doing it on the Java side because this function blocks
+	// until the user made a choice, which is easier to handle.
+	if(!SDL_AndroidRequestPermission("android.permission.POST_NOTIFICATIONS"))
+	{
+		return false;
+	}
+
+	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_AndroidGetJNIEnv());
+	jobject Activity = (jobject)SDL_AndroidGetActivity();
+	jclass ActivityClass = pEnv->GetObjectClass(Activity);
+
+	jmethodID MethodId = pEnv->GetMethodID(ActivityClass, "startServer", "()V");
+	pEnv->CallVoidMethod(Activity, MethodId);
+
+	pEnv->DeleteLocalRef(Activity);
+	pEnv->DeleteLocalRef(ActivityClass);
+
+	return true;
+}
+
+void ExecuteAndroidServerCommand(const char *pCommand)
+{
+	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_AndroidGetJNIEnv());
+	jobject Activity = (jobject)SDL_AndroidGetActivity();
+	jclass ActivityClass = pEnv->GetObjectClass(Activity);
+
+	jstring Command = pEnv->NewStringUTF(pCommand);
+
+	jmethodID MethodId = pEnv->GetMethodID(ActivityClass, "executeCommand", "(Ljava/lang/String;)V");
+	pEnv->CallVoidMethod(Activity, MethodId, Command);
+
+	pEnv->DeleteLocalRef(Command);
+	pEnv->DeleteLocalRef(Activity);
+	pEnv->DeleteLocalRef(ActivityClass);
+}
+
+bool IsAndroidServerRunning()
+{
+	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_AndroidGetJNIEnv());
+	jobject Activity = (jobject)SDL_AndroidGetActivity();
+	jclass ActivityClass = pEnv->GetObjectClass(Activity);
+
+	jmethodID MethodId = pEnv->GetMethodID(ActivityClass, "isServerRunning", "()Z");
+	const bool Result = pEnv->CallBooleanMethod(Activity, MethodId);
+
+	pEnv->DeleteLocalRef(Activity);
+	pEnv->DeleteLocalRef(ActivityClass);
+
+	return Result;
 }

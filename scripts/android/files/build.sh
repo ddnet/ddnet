@@ -59,7 +59,8 @@ if [ "${APK_PACKAGE_FOLDER}" != "org/ddnet/client" ]; then
 	mv src/main/java/org/ddnet/client src/main/java/"${APK_PACKAGE_FOLDER}"
 fi
 
-sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/java/"${APK_PACKAGE_FOLDER}"/NativeMain.java
+sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/java/"${APK_PACKAGE_FOLDER}"/ClientActivity.java
+sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" src/main/java/"${APK_PACKAGE_FOLDER}"/ServerService.java
 sed -i "s/org.ddnet.client/${APK_PACKAGE_NAME}/g" proguard-rules.pro
 
 # disable hid manager for now
