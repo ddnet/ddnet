@@ -1387,7 +1387,16 @@ void CCharacter::HandleSkippableTiles(int Index)
 		!m_Core.m_Super && !m_Core.m_Invincible && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCid())))
 	{
 		if(Team() && Teams()->IsPractice(Team()))
+		{
 			Freeze();
+			// Rate limit death effects to once per second
+			if(Server()->Tick() - m_pPlayer->m_DieTick >= Server()->TickSpeed())
+			{
+				m_pPlayer->m_DieTick = Server()->Tick();
+				GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, TeamMask());
+				GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCid(), TeamMask());
+			}
+		}
 		else
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		return;
