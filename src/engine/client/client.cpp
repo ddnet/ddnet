@@ -3017,6 +3017,9 @@ void CClient::Run()
 	Graphics()->Clear(0, 0, 0);
 	Graphics()->Swap();
 
+	// init localization first, making sure all errors during init can be localized
+	GameClient()->InitializeLanguage();
+
 	// init sound, allowed to fail
 	const bool SoundInitFailed = Sound()->Init() != 0;
 
