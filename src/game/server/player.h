@@ -191,6 +191,19 @@ public:
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
 
+	// camera info is used sparingly for converting aim target to absolute world coordinates
+	class CCameraInfo
+	{
+		float m_Zoom;
+		int m_Deadzone;
+		int m_FollowFactor;
+
+	public:
+		vec2 ConvertTargetToWorld(vec2 Position, vec2 Target) const;
+		void Write(const CNetMsg_Cl_CameraInfo *pMsg);
+		void Reset();
+	} m_CameraInfo;
+
 	int m_ChatScore;
 
 	bool m_Moderating;

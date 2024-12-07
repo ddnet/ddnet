@@ -401,11 +401,6 @@ struct CUISkin
 	bool operator==(const char *pOther) const { return !str_comp_nocase(m_pSkin->GetName(), pOther); }
 };
 
-void CMenus::OnRefreshSkins()
-{
-	m_SkinListNeedsUpdate = true;
-}
-
 void CMenus::Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
 {
 	auto *pSelf = (CMenus *)pUserData;
@@ -417,7 +412,7 @@ void CMenus::Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 	pSelf->m_SkinFavorites.emplace(pStr);
-	pSelf->m_SkinFavoritesChanged = true;
+	pSelf->m_SkinListLastRefreshTime = std::nullopt;
 }
 
 void CMenus::Con_RemFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
@@ -427,7 +422,7 @@ void CMenus::Con_RemFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
 	if(it != pSelf->m_SkinFavorites.end())
 	{
 		pSelf->m_SkinFavorites.erase(it);
-		pSelf->m_SkinFavoritesChanged = true;
+		pSelf->m_SkinListLastRefreshTime = std::nullopt;
 	}
 }
 
@@ -740,14 +735,12 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static CListBox s_ListBox;
 
 	// be nice to the CPU
-	static std::chrono::nanoseconds s_SkinLastRefreshTime = m_pClient->m_Skins.LastRefreshTime();
-	if(m_SkinListNeedsUpdate || m_SkinFavoritesChanged || s_SkinLastRefreshTime != m_pClient->m_Skins.LastRefreshTime())
+	if(!m_SkinListLastRefreshTime.has_value() || m_SkinListLastRefreshTime.value() != m_pClient->m_Skins.LastRefreshTime())
 	{
-		s_SkinLastRefreshTime = m_pClient->m_Skins.LastRefreshTime();
+		m_SkinListLastRefreshTime = m_pClient->m_Skins.LastRefreshTime();
 		s_vSkinList.clear();
 		s_vSkinListHelper.clear();
 		s_vFavoriteSkinListHelper.clear();
-		m_SkinFavoritesChanged = false;
 
 		auto &&SkinNotFiltered = [&](const CSkin *pSkinToBeSelected) {
 			// filter quick search
@@ -783,7 +776,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		std::sort(s_vFavoriteSkinListHelper.begin(), s_vFavoriteSkinListHelper.end());
 		s_vSkinList = s_vFavoriteSkinListHelper;
 		s_vSkinList.insert(s_vSkinList.end(), s_vSkinListHelper.begin(), s_vSkinListHelper.end());
-		m_SkinListNeedsUpdate = false;
 	}
 
 	int RainbowSelectedOld = -1;
@@ -847,7 +839,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 				{
 					m_SkinFavorites.emplace(pSkinToBeDraw->GetName());
 				}
-				m_SkinListNeedsUpdate = true;
+				m_SkinListLastRefreshTime = std::nullopt;
 			}
 		}
 	}
@@ -862,7 +854,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
 	if(Ui()->DoEditBox_Search(&s_SkinFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed()))
 	{
-		m_SkinListNeedsUpdate = true;
+		m_SkinListLastRefreshTime = std::nullopt;
 	}
 
 	static CButtonContainer s_SkinDatabaseButton;
@@ -3098,7 +3090,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Preview +hookcoll pressed toggle *****
 		RightView.HSplitTop(LineSize, &Button, &RightView);
-		if(DoButton_CheckBox(&s_HookCollPressed, Localize("Preview \"Hook collisions\" being pressed"), s_HookCollPressed, &Button))
+		if(DoButton_CheckBox(&s_HookCollPressed, Localize("Preview 'Hook collisions' being pressed"), s_HookCollPressed, &Button))
 			s_HookCollPressed = !s_HookCollPressed;
 	}
 	else if(s_CurTab == APPEARANCE_TAB_INFO_MESSAGES)

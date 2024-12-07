@@ -325,7 +325,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 	ToolBar.VSplitRight(ToolBar.h, &ToolBar, &Button);
 
 	// Do the unknown command toggle button
-	if(DoButton_FontIcon(&Context.m_AllowUnknownCommands, FONT_ICON_QUESTION, Context.m_AllowUnknownCommands, &Button, 0, "Disallow/allow unknown commands", IGraphics::CORNER_R))
+	if(DoButton_FontIcon(&Context.m_AllowUnknownCommands, FONT_ICON_QUESTION, Context.m_AllowUnknownCommands, &Button, 0, "Disallow/allow unknown or invalid commands", IGraphics::CORNER_R))
 	{
 		Context.m_AllowUnknownCommands = !Context.m_AllowUnknownCommands;
 		Context.Update();
@@ -1393,7 +1393,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 		// Validate argument from the parsed argument of the current setting.
 		// If current setting is not valid, then there are no arguments which results in an error.
 
-		char Type = 'u'; // u = unknown, only possible for unknown commands when m_AllowUnknownCommands is true.
+		char Type = 'u'; // u = unknown
 		if(ArgIndex < CommandArgCount)
 		{
 			SParsedMapSettingArg &Arg = m_pBackend->m_ParsedCommandArgs[m_pCurrentSetting].at(ArgIndex);
@@ -1479,10 +1479,6 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 		NewArg.m_Error = Error != SCommandParseError::ERROR_NONE || Length == 0 || m_Error.m_Type != SCommandParseError::ERROR_NONE;
 		NewArg.m_ExpectedType = Type;
 
-		// Do not emit an error if we allow unknown commands and the current setting is invalid
-		if(m_AllowUnknownCommands && m_pCurrentSetting == nullptr)
-			NewArg.m_Error = false;
-
 		// Check error and fill the error field with different messages
 		if(Error == SCommandParseError::ERROR_INVALID_VALUE || Error == SCommandParseError::ERROR_UNKNOWN_VALUE || Error == SCommandParseError::ERROR_OUT_OF_RANGE || Error == SCommandParseError::ERROR_INCOMPLETE)
 		{
@@ -1524,7 +1520,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 					m_Error.m_ArgIndex = ArgIndex;
 					break;
 				}
-				else if(!m_AllowUnknownCommands)
+				else
 				{
 					char aFormattedValue[256];
 					FormatDisplayValue(m_aCommand, aFormattedValue);
@@ -1699,7 +1695,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 		}
 
 		// If there are no matches, then the command is unknown
-		if(m_vPossibleMatches.empty() && !m_AllowUnknownCommands)
+		if(m_vPossibleMatches.empty())
 		{
 			// Fill the error if we do not allow unknown commands
 			char aFormattedValue[256];
@@ -1827,7 +1823,7 @@ void CMapSettingsBackend::CContext::ColorArguments(std::vector<STextColorSplit> 
 
 	if(m_pLineInput && !m_pLineInput->IsEmpty())
 	{
-		if(!CommandIsValid() && !m_AllowUnknownCommands && m_CommentOffset != 0)
+		if(!CommandIsValid() && m_CommentOffset != 0)
 		{
 			// If command is invalid, override color splits with red, but not comment
 			int ErrorLength = m_CommentOffset == -1 ? -1 : m_CommentOffset;
@@ -2047,6 +2043,10 @@ bool CMapSettingsBackend::CContext::Valid() const
 {
 	// Check if the entire setting is valid or not
 
+	// We don't need to check whether a command is valid if we allow unknown commands
+	if(m_AllowUnknownCommands)
+		return true;
+
 	if(m_CommentOffset == 0 || m_aCommand[0] == '\0')
 		return true; // A "comment" setting is considered valid.
 
@@ -2066,9 +2066,7 @@ bool CMapSettingsBackend::CContext::Valid() const
 	}
 	else
 	{
-		// If we have an invalid setting, then we consider the entire setting as valid if we allow unknown commands
-		// as we cannot handle them.
-		return m_AllowUnknownCommands;
+		return false;
 	}
 }
 

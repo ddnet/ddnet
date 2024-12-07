@@ -1133,11 +1133,10 @@ set(EXPECTED_DATA
   audio/wp_switch-02.wv
   audio/wp_switch-03.wv
   autoexec_server.cfg
+  background_noise.png
   blob.png
   censorlist.txt
   communityicons/none.png
-  console.png
-  console_bar.png
   countryflags/AD.png
   countryflags/AE.png
   countryflags/AF.png
@@ -1409,7 +1408,6 @@ set(EXPECTED_DATA
   editor/automap/round_tiles.rules
   editor/automap/water.rules
   editor/automap/winter_main.rules
-  editor/background.png
   editor/checker.png
   editor/cursor.png
   editor/cursor_resize.png
@@ -1848,6 +1846,7 @@ set(EXPECTED_DATA
   themes/winter.png
   themes/winter_day.map
   themes/winter_night.map
+  touch_controls.json
   wordlist.txt
 )
 
@@ -2425,6 +2424,8 @@ if(CLIENT)
     components/tclient/warlist.h
     components/tooltips.cpp
     components/tooltips.h
+    components/touch_controls.cpp
+    components/touch_controls.h
     components/voting.cpp
     components/voting.h
     gameclient.cpp

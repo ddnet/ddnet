@@ -27,6 +27,7 @@
 #	Nouaa			2022-10-25 18:00:00
 #	Sukya			2023-05-20 19:38:00
 #	Emilcha			2024-06-09 11:31:00
+#	Yubel			2024-12-04 16:17:00
 
 ##### /authors #####
 
@@ -66,7 +67,7 @@ All
 == Tout le monde
 
 Are you sure that you want to quit?
-== Êtes-vous sûrs de vouloir quitter ?
+== Êtes-vous sûr de vouloir quitter ?
 
 Automatically record demos
 == Enregistrer les démos automatiquement
@@ -153,7 +154,7 @@ Error
 == Erreur
 
 Error loading demo
-== Erreur pendant le chargement de la démo
+== Erreur lors du chargement de la démo
 
 Favorite
 == Favori
@@ -605,7 +606,7 @@ AntiPing: predict other players
 == AntiPing: prédit le déplacement des autres joueurs
 
 Are you sure that you want to disconnect your dummy?
-== Êtes vous sûrs de vouloir déconnecter votre dummy ?
+== Êtes-vous sûr de vouloir déconnecter votre dummy ?
 
 Server best:
 == Meilleur score du serveur
@@ -647,7 +648,7 @@ Show text entities
 == Afficher le texte des entités
 
 Connecting dummy
-== Connection du dummy
+== Connexion du dummy
 
 Render demo
 == Convertir une démo
@@ -683,13 +684,13 @@ System message
 == Message du système
 
 Are you sure that you want to disconnect?
-== Êtes-vous sûrs de vouloir vous déconnecter ?
+== Êtes-vous sûr de vouloir vous déconnecter ?
 
 Deactivate
 == Désactiver
 
 Update failed! Check log…
-== La mise à jour a échoué ! Vérifier les logs…
+== La mise à jour a échouée ! Vérifiez les logs…
 
 %.2f KiB
 == %.2f Kio
@@ -734,7 +735,7 @@ Show only chat messages from friends
 == Ne montrer que les messages des amis
 
 Remove chat
-== Desactiver le chat
+== Désactiver le chat
 
 Pause
 == Pause
@@ -764,7 +765,7 @@ Exclude
 == Exclure
 
 Disconnect Dummy
-== Deconnecter le dummy
+== Déconnecter le dummy
 
 Show clan above name plates
 == Afficher le clan au dessus du pseudonyme
@@ -1140,7 +1141,7 @@ https://ddnet.org/discord
 == https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== Êtes vous sur de vouloir vous déconnecter et changer de serveur?
+== Êtes-vous sûr de vouloir vous déconnecter et changer de serveur ?
 
 Show local player's key presses
 == Montrer les touches appuyées des autres joueurs
@@ -1158,7 +1159,7 @@ Run on join
 == Exécuter en rejoignant
 
 Chat command (e.g. showall 1)
-== Commande du chat (ex: showall 1)
+== Commande du chat (ex : showall 1)
 
 The format of texture %s is not RGBA which will cause visual bugs.
 == La texture %s n'est pas au format RGBA, ce qui causera des bugs visuels.
@@ -1188,13 +1189,13 @@ auto
 == Automatique
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== Lorsque vous franchissez la ligne de départ, montrez un fantôme reproduisant les mouvements de votre meilleur temps
+== Lorsque vous franchissez la ligne de départ, montre un fantôme reproduisant les mouvements de votre meilleur temps
 
 Opacity
 == Opacité
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== Ajustez l'opacité des entités appartenant à d'autres équipes, telles que les tees et les noms des joueurs
+== Ajustez l'opacité des entités appartenant à d'autres équipes, telle que les tees et les noms des joueurs
 
 Quads are used for background decoration
 == Les quads sont utilisés pour la décoration de l'arrière-plan
@@ -1215,16 +1216,16 @@ Team %d
 == Équipe %d
 
 Position:
-== Position:
+== Position :
 
 Speed:
-== Vitesse:
+== Vitesse :
 
 Angle:
-== Angle:
+== Angle :
 
 Trying to determine UDP connectivity…
-== Tentative de connection UDP…
+== Tentative de connexion UDP…
 
 UDP seems to be filtered.
 == UDP semble filtré.
@@ -1384,9 +1385,6 @@ Name Plate
 Hook Collisions
 == Collisions du grappin
 
-Hook collision line width
-== Largeur de la ligne de collision du grappin
-
 Hook collision line opacity
 == Opacité de la ligne de collision du grappin
 
@@ -1438,11 +1436,11 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Mémoire graphique insuffisante. Essayez de retirer des ressources personnalisées (skins, entités, etc.), spécialement celles de haute résolution.
+== Mémoire graphique insuffisante. Essayez de retirer des ressources personnalisées (skins, entités, etc.), en particulier celles de haute résolution.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== Une erreur pendant l'enregistrement des commandes est survenue. Essayez de mettre à jour vos pilotes GPU.
+== Une erreur est survenue pendant l'enregistrement des commandes. Essayez de mettre à jour vos pilotes GPU.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
@@ -1471,10 +1469,10 @@ File '%s' already exists, do you want to overwrite it?
 == Le fichier '%s' existe déjà, voulez-vous l'écraser ?
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== Êtes-vous sûrs de vouloir retirer le joueur '%s' de votre liste d'amis ? 
+== Êtes-vous sûr de vouloir retirer le joueur '%s' de votre liste d'amis ? 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== Êtes-vous sûrs de vouloir retirer le clan '%s' de votre liste d'amis ?
+== Êtes-vous sûr de vouloir retirer le clan '%s' de votre liste d'amis ?
 
 Go back one tick
 == Reculer d'une image
@@ -1492,7 +1490,7 @@ Open the directory that contains the demo files
 == Ouvrir le dossier contenant les fichiers démo
 
 Are you sure that you want to delete the demo '%s'?
-== Êtes-vous sûrs de vouloir supprimer la démo '%s' ?
+== Êtes-vous sûr de vouloir supprimer la démo '%s' ?
 
 Unable to delete the demo '%s'
 == Impossible de supprimer la démo '%s'
@@ -1504,7 +1502,7 @@ Open the settings file
 == Ouvrir le fichier de configuration
 
 Open the directory that contains the configuration and user files
-== Ouvrir le dossier de configuration et des fichiers personnalisés
+== Ouvrir le dossier contenant les fichiers de configuration et d'utilisateurs
 
 Open the directory to add custom themes
 == Ouvrir le dossier pour ajouter un thème personnalisé
@@ -1519,7 +1517,7 @@ Reset controls
 == Réinitialiser les contrôles
 
 Are you sure that you want to reset the controls to their defaults?
-== Êtes-vous sûrs de vouloir réinitialiser les contrôles aux valeurs par défaut ?
+== Êtes-vous sûr de vouloir réinitialiser les contrôles aux valeurs par défaut ?
 
 Rifle Laser Outline Color
 == Couleur fusil laser (contour)
@@ -1556,16 +1554,13 @@ Open the directory to add custom assets
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== Impossible d'initialiser l'interface graphique, tu n'as probablement pas installé les pilotes de ta carte graphique.
+== Impossible d'initialiser l'interface graphique, vous n'avez probablement pas installé les pilotes de votre carte graphique.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== Impossible de sauvegarder la carte téléchargé. Essayez de supprimer ce fichier manuellement: %s
+== Impossible de sauvegarder la carte téléchargée. Essayez de supprimer ce fichier manuellement: %s
 
 Copy info
 == Copier les infos
-
-Online players (%d)
-== Joueurs en ligne (%d)
 
 Online clanmates (%d)
 == Membres du clan en ligne (%d)
@@ -1583,11 +1578,8 @@ Click to remove this player from your friends list.
 Click to remove this clan from your friends list.
 == Cliquez pour retirer ce clan de votre liste d'amis
 
-None
-== Aucuns
-
 Add Clan
-== Ajouter clan
+== Ajouter un clan
 
 Create a random skin
 == Créer un skin aléatoire
@@ -1599,7 +1591,7 @@ Failed saving the replay!
 == Erreur durant la sauvegarde du replay !
 
 Saving settings to '%s' failed
-== La sauvegarde des paramètres vers '%s' à échoué
+== La sauvegarde des paramètres vers '%s' a échouée
 
 Error saving settings
 == Erreur de sauvegarde des paramètres
@@ -1641,7 +1633,7 @@ Following
 == Suivi
 
 Loading commands…
-== Chargement des commandes
+== Chargement des commandes…
 
 Multi-View
 == Multi-vues
@@ -1677,7 +1669,7 @@ Continue anyway?
 == Continuer quand même ?
 
 A demo with this name already exists
-== Une demo avec ce nom existe déjà
+== Une démo avec ce nom existe déjà
 
 A folder with this name already exists
 == Un dossier avec ce nom existe déjà
@@ -1788,10 +1780,10 @@ Ghosts directory
 == Dossier des fantômes
 
 Activate all
-== Tous activer
+== Tout activer
 
 Deactivate all
-== Tous désactiver
+== Tout désactiver
 
 Player info change cooldown
 == Délai de changement des informations du joueur
@@ -1866,104 +1858,208 @@ Moved ingame
 == Déplacé en jeu
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== Impossible de résoudre l'adresse de connexion '%s'. Consultez la console locale pour plus de détails.
 
 Connect address error
-== 
+== Erreur d'adresse de connexion
 
 Could not connect dummy
-== 
+== Impossible de connecter le dummy
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Certaines polices n'ont pas pu être chargées. Consultez la console locale pour plus de détails.
 
 [Spectating]
 Following %s
-== 
+== Suivi de %s
 
 Save skin
-== 
+== Enregistrer le skin
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Êtes-vous sûr de vouloir enregistrer votre skin ? Si un skin déjà existant possède ce nom, il sera remplacé.
 
 Unable to save the skin
-== 
+== Impossible d'enregistrer le skin
 
 Unable to save the skin with a reserved name
-== 
+== Impossible d'enregistrer le skin avec un nom réservé
 
 No local servers found (ports %d-%d)
-== 
+== Aucun serveur local trouvé (ports %d-%d)
 
 Example of usage
-== 
+== Exemple d'utilisation
+
+Online friends (%d)
+== Amis connectés (%d)
+
+Add friends by entering their name below or by clicking their name in the player list.
+== Ajoutez des amis en entrant leurs noms ci-dessous ou en cliquant sur leurs noms dans la liste des joueurs.
+
+Add clanmates by entering their clan below and leaving the name blank.
+== Ajoutez des membres du clan en entrant le nom de clan ci-dessous et en laissant le nom de joueur vide.
+
+Offline friends and clanmates will appear here.
+== Les amis hors-lignes et les membres du clan apparaîtront ici.
 
 Dummy is not allowed on this server
-== 
+== Le dummy n'est pas autorisé sur ce serveur
 
 Please wait…
-== 
+== Veuillez patienter…
+
+Edit touch controls
+== Modifier les contrôles tactiles
+
+Close
+== Fermer
+
+Save changes
+== Enregistrer les modifications
+
+Error saving touch controls
+== Erreur lors de l'enregistrement des contrôles tactiles
+
+Could not save touch controls to file. See local console for details.
+== Impossible d'enregistrer les contrôles tactiles dans le fichier. Consultez la console locale pour plus de détails.
+
+Unsaved changes
+== Modifications non-enregistrées
+
+Discard changes
+== Annuler les modifications
+
+Are you sure that you want to discard the current changes to the touch controls?
+== Êtes-vous sûr de vouloir annuler les modifications actuelles des contrôles tactiles ?
+
+Are you sure that you want to reset the touch controls to default?
+== Êtes-vous sûr de vouloir réinitialiser les contrôles tactiles aux valeurs par défaut ?
+
+Import from clipboard
+== Importer depuis le presse-papiers
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== Êtes-vous sûr de vouloir importer les contrôles tactiles depuis le presse-papiers ? Cela va remplacer les contrôles tactiles actuels.
+
+Export to clipboard
+== Exporter au presse-papiers
+
+Direct touch input while ingame
+== Entrée tactile directe en jeu
+
+[Direct touch input]
+Disabled
+== Désactivée
+
+[Direct touch input]
+Active action
+== Action active
+
+[Direct touch input]
+Aim
+== Viser
+
+[Direct touch input]
+Fire
+== Tirer
+
+[Direct touch input]
+Hook
+== Grappin
+
+Direct touch input while spectating
+== Entrée tactile directe en mode spec.
+
+Error loading touch controls
+== Erreur lors du chargement des contrôles tactiles
+
+Could not load touch controls from file. See local console for details.
+== Impossible de charger les contrôles tactiles depuis le fichier. Consultez la console locale pour plus de détails.
+
+Could not load default touch controls from file. See local console for details.
+== Impossible de charger les contrôles tactiles par défaut depuis le fichier. Consultez la console locale pour plus de détails.
+
+Could not load touch controls from clipboard. See local console for details.
+== Impossible de charger les contrôles tactiles depuis le presse-papiers. Consultez la console locale pour plus de détails.
 
 [Hertz]
 Hz
-== 
+== Hz
 
 Show client IDs (scoreboard, chat, spectator)
-== 
+== Afficher les IDs des clients (tableau des scores, chat, spectateur)
+
+Width of your own hook collision line
+== Largeur de la ligne de collision de votre grappin
+
+Width of others' hook collision line
+== Largeur de la ligne de collision du grappin des autres joueurs
+
+Preview 'Hook collisions' being pressed
+== Prévisualiser lorsque 'Collision du grappin' est utilisée
 
 Basic
-== 
+== Basique
 
 Custom
-== 
+== Personnalisé
 
 Are you sure that you want to delete '%s'?
-== 
+== Êtes-vous sûr de vouloir supprimer '%s' ?
 
 Delete skin
-== 
+== Supprimer le skin
 
 Unable to delete skin
-== 
+== Impossible de supprimer le skin
 
 Round %d/%d
-== 
+== Manche %d/%d
 
 [Spectators]
 %d others…
-== 
+== %d autres…
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== Équipe %d (%d/%d)
 
 [skins]
 Body
-== 
+== Corps
 
 [skins]
 Marking
-== 
+== Marquage
 
 [skins]
 Decoration
-== 
+== Décoration
 
 [skins]
 Hands
-== 
+== Mains
 
 [skins]
 Feet
-== 
+== Pieds
 
 [skins]
 Eyes
-== 
+== Yeux
+
+Aim
+== Viser
+
+Active: Fire
+== Actif : Tirer
+
+Active: Hook
+== Actif : Grappin
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/wiki/Mapping

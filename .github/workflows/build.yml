@@ -216,3 +216,64 @@ jobs:
       with:
         name: ddnet-${{ matrix.os }}
         path: release/artifacts
+
+  build-android:
+    runs-on: ubuntu-24.04
+    env:
+      CARGO_HTTP_MULTIPLEXING: false
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Prepare
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install cmake ninja-build openjdk-21-jdk p7zip-full curl glslang-tools openssl
+        cargo install cargo-ndk
+        rustup target add armv7-linux-androideabi
+        rustup target add i686-linux-android
+        rustup target add aarch64-linux-android
+        rustup target add x86_64-linux-android
+        mkdir ~/Android
+        cd ~/Android
+        mkdir Sdk
+        cd Sdk
+        mkdir ndk
+        cd ndk
+        wget --quiet https://dl.google.com/android/repository/android-ndk-r26d-linux.zip
+        unzip android-ndk-r26d-linux.zip
+        rm android-ndk-r26d-linux.zip
+        cd ~/Android/Sdk
+        mkdir build-tools
+        cd build-tools
+        wget --quiet https://dl.google.com/android/repository/build-tools_r30.0.3-linux.zip
+        unzip build-tools_r30.0.3-linux.zip
+        rm build-tools_r30.0.3-linux.zip
+        mv android-11 30.0.3
+        cd ~/Android/Sdk
+        mkdir cmdline-tools
+        cd cmdline-tools
+        wget --quiet https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+        unzip commandlinetools-linux-11076708_latest.zip
+        rm commandlinetools-linux-11076708_latest.zip
+        mv cmdline-tools latest
+        yes | latest/bin/sdkmanager --licenses
+
+    - name: Build
+      env:
+        TW_KEY_NAME: /home/runner/DDNet.jks
+        TW_KEY_ALIAS: DDNet-Key
+      run: |
+        export TW_KEY_PW="$(openssl rand -base64 32)"
+        keytool -genkey -v -keystore "$TW_KEY_NAME" -keyalg RSA -keysize 2048 -validity 10000 -alias "$TW_KEY_ALIAS" -storepass "$TW_KEY_PW" -dname "CN=DDNet CI, OU=DDNet, O=DDNet"
+        mkdir build-android
+        scripts/android/cmake_android.sh all DDNet org.ddnet.client Release build-android
+        mkdir artifacts
+        mv build-android/DDNet.apk artifacts
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddnet-android
+        path: artifacts

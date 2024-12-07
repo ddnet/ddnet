@@ -439,7 +439,6 @@ public:
 		}
 
 		m_CheckerTexture.Invalidate();
-		m_BackgroundTexture.Invalidate();
 		for(auto &CursorTexture : m_aCursorTextures)
 			CursorTexture.Invalidate();
 
@@ -819,7 +818,6 @@ public:
 	bool m_ColorPipetteActive = false;
 
 	IGraphics::CTextureHandle m_CheckerTexture;
-	IGraphics::CTextureHandle m_BackgroundTexture;
 
 	enum ECursorType
 	{
@@ -973,6 +971,7 @@ public:
 	};
 	void DoMapEditor(CUIRect View);
 	void DoToolbarLayers(CUIRect Toolbar);
+	void DoToolbarImages(CUIRect Toolbar);
 	void DoToolbarSounds(CUIRect Toolbar);
 	void DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index);
 	void PreparePointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex);

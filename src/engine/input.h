@@ -8,6 +8,7 @@
 #include <base/types.h>
 #include <base/vmath.h>
 
+#include <chrono>
 #include <cstdint>
 #include <functional>
 #include <string>
@@ -128,6 +129,10 @@ public:
 		 * @remark This is reset to zero at the end of each frame.
 		 */
 		vec2 m_Delta;
+		/**
+		 * The time when this finger was first pressed down.
+		 */
+		std::chrono::nanoseconds m_PressTime;
 	};
 	/**
 	 * Returns a vector of the states of all touch fingers currently being pressed down on touch devices.
@@ -137,6 +142,12 @@ public:
 	 * @return vector of all touch finger states
 	 */
 	virtual const std::vector<CTouchFingerState> &TouchFingerStates() const = 0;
+	/**
+	 * Must be called after the touch finger states have been used during the client update to ensure that
+	 * touch deltas are only accumulated until the next update. If the touch states are only used during
+	 * rendering, i.e. for user interfaces, then this is called automatically by calling @link Clear @endlink.
+	 */
+	virtual void ClearTouchDeltas() = 0;
 
 	// clipboard
 	virtual std::string GetClipboardText() = 0;

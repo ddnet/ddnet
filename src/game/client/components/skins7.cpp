@@ -307,6 +307,8 @@ void CSkins7::OnInit()
 	LoadXmasHat();
 	LoadBotDecoration();
 	GameClient()->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading skin files"), 0);
+
+	m_LastRefreshTime = time_get_nanoseconds();
 }
 
 void CSkins7::InitPlaceholderSkinParts()

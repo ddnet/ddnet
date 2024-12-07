@@ -1271,9 +1271,6 @@ Copy info
 No server selected
 == Palvelinta ei ole valittu
 
-Online players (%d)
-== Online pelaajat (%d)
-
 Online clanmates (%d)
 == Online klaanikaverit (%d)
 
@@ -1289,9 +1286,6 @@ Click to remove this player from your friends list.
 
 Click to remove this clan from your friends list.
 == Klikkaa poistaaksesi tämän klaanin ystävälistaltasi.
-
-None
-== Ei mitään
 
 Are you sure that you want to remove the player '%s' from your friends list?
 == Oletko varma että haluat poistaa pelaajan '%s' ystävälistaltasi?
@@ -1670,9 +1664,6 @@ Same clan color in scoreboard
 Hook collision line
 == Koukku törmäysviiva
 
-Hook collision line width
-== Koukku törmäysviivan paksuus
-
 Hook collision line opacity
 == Koukku törmäysviivan läpinäkyvyys
 
@@ -1860,10 +1851,96 @@ No local servers found (ports %d-%d)
 Example of usage
 == 
 
+Online friends (%d)
+== 
+
+Add friends by entering their name below or by clicking their name in the player list.
+== 
+
+Add clanmates by entering their clan below and leaving the name blank.
+== 
+
+Offline friends and clanmates will appear here.
+== 
+
 Dummy is not allowed on this server
 == 
 
 Please wait…
+== 
+
+Edit touch controls
+== 
+
+Close
+== 
+
+Save changes
+== 
+
+Error saving touch controls
+== 
+
+Could not save touch controls to file. See local console for details.
+== 
+
+Unsaved changes
+== 
+
+Discard changes
+== 
+
+Are you sure that you want to discard the current changes to the touch controls?
+== 
+
+Are you sure that you want to reset the touch controls to default?
+== 
+
+Import from clipboard
+== 
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== 
+
+Export to clipboard
+== 
+
+Direct touch input while ingame
+== 
+
+[Direct touch input]
+Disabled
+== 
+
+[Direct touch input]
+Active action
+== 
+
+[Direct touch input]
+Aim
+== 
+
+[Direct touch input]
+Fire
+== 
+
+[Direct touch input]
+Hook
+== 
+
+Direct touch input while spectating
+== 
+
+Error loading touch controls
+== 
+
+Could not load touch controls from file. See local console for details.
+== 
+
+Could not load default touch controls from file. See local console for details.
+== 
+
+Could not load touch controls from clipboard. See local console for details.
 == 
 
 [Hertz]
@@ -1880,6 +1957,15 @@ Show client IDs (scoreboard, chat, spectator)
 == 
 
 Show only chat messages from team members
+== 
+
+Width of your own hook collision line
+== 
+
+Width of others' hook collision line
+== 
+
+Preview 'Hook collisions' being pressed
 == 
 
 Basic
@@ -1939,6 +2025,15 @@ Spree
 == 
 
 Grabs
+== 
+
+Aim
+== 
+
+Active: Fire
+== 
+
+Active: Hook
 == 
 
 https://wiki.ddnet.org/wiki/Mapping

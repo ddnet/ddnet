@@ -26,7 +26,7 @@ class CSpectator : public CComponent
 
 	float m_MultiViewActivateDelay;
 
-	bool CanChangeSpectator();
+	bool CanChangeSpectatorId();
 	void SpectateNext(bool Reverse);
 
 	static void ConKeySpectator(IConsole::IResult *pResult, void *pUserData);

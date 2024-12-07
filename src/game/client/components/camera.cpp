@@ -35,6 +35,11 @@ CCamera::CCamera()
 	m_WasSpectating = false;
 
 	m_CameraSmoothing = false;
+
+	m_LastMousePos = vec2(0, 0);
+	m_DyncamTargetCameraOffset = vec2(0, 0);
+	mem_zero(m_aDyncamCurrentCameraOffset, sizeof(m_aDyncamCurrentCameraOffset));
+	m_DyncamSmoothingSpeedBias = 0.5f;
 }
 
 float CCamera::CameraSmoothingProgress(float CurrentTime) const
@@ -89,7 +94,7 @@ void CCamera::ChangeZoom(float Target, int Smoothness)
 	m_Zooming = true;
 }
 
-void CCamera::OnRender()
+void CCamera::UpdateCamera()
 {
 	if(m_Zooming)
 	{
@@ -112,6 +117,58 @@ void CCamera::OnRender()
 		m_Zoom = clamp(m_Zoom, MinZoomLevel(), MaxZoomLevel());
 	}
 
+	if(!ZoomAllowed())
+	{
+		m_ZoomSet = false;
+		m_Zoom = 1.0f;
+		m_Zooming = false;
+	}
+	else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
+	{
+		m_ZoomSet = true;
+		OnReset();
+	}
+
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active && !m_pClient->m_Snap.m_SpecInfo.m_UsePosition)
+		return;
+
+	float DeltaTime = Client()->RenderFrameTime();
+
+	if(g_Config.m_ClDyncamSmoothness > 0)
+	{
+		float CameraSpeed = (1.0f - (g_Config.m_ClDyncamSmoothness / 100.0f)) * 9.5f + 0.5f;
+		float CameraStabilizingFactor = 1 + g_Config.m_ClDyncamStabilizing / 100.0f;
+
+		m_DyncamSmoothingSpeedBias += CameraSpeed * DeltaTime;
+		if(g_Config.m_ClDyncam)
+		{
+			m_DyncamSmoothingSpeedBias -= length(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] - m_LastMousePos) * std::log10(CameraStabilizingFactor) * 0.02f;
+			m_DyncamSmoothingSpeedBias = clamp(m_DyncamSmoothingSpeedBias, 0.5f, CameraSpeed);
+		}
+		else
+		{
+			m_DyncamSmoothingSpeedBias = maximum(5.0f, CameraSpeed); // make sure toggle back is fast
+		}
+	}
+
+	m_DyncamTargetCameraOffset = vec2(0, 0);
+	vec2 MousePos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
+	float l = length(MousePos);
+	if(l > 0.0001f) // make sure that this isn't 0
+	{
+		float OffsetAmount = maximum(l - Deadzone(), 0.0f) * (FollowFactor() / 100.0f);
+		m_DyncamTargetCameraOffset = normalize_pre_length(MousePos, l) * OffsetAmount;
+	}
+
+	m_LastMousePos = MousePos;
+	if(g_Config.m_ClDyncamSmoothness > 0)
+		m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy] += (m_DyncamTargetCameraOffset - m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy]) * minimum(DeltaTime * m_DyncamSmoothingSpeedBias, 1.0f);
+	else
+		m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy] = m_DyncamTargetCameraOffset;
+}
+
+void CCamera::OnRender()
+{
 	if(m_CameraSmoothing)
 	{
 		if(!m_pClient->m_Snap.m_SpecInfo.m_Active)
@@ -139,18 +196,6 @@ void CCamera::OnRender()
 		}
 	}
 
-	if(!ZoomAllowed())
-	{
-		m_ZoomSet = false;
-		m_Zoom = 1.0f;
-		m_Zooming = false;
-	}
-	else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
-	{
-		m_ZoomSet = true;
-		OnReset();
-	}
-
 	// update camera center
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && !m_pClient->m_Snap.m_SpecInfo.m_UsePosition)
 	{
@@ -172,49 +217,10 @@ void CCamera::OnRender()
 			m_CamType = CAMTYPE_PLAYER;
 		}
 
-		float DeltaTime = Client()->RenderFrameTime();
-		static vec2 s_LastMousePos(0, 0);
-		static vec2 s_aCurrentCameraOffset[NUM_DUMMIES] = {vec2(0, 0), vec2(0, 0)};
-		static float s_SpeedBias = 0.5f;
-
-		if(g_Config.m_ClDyncamSmoothness > 0)
-		{
-			float CameraSpeed = (1.0f - (g_Config.m_ClDyncamSmoothness / 100.0f)) * 9.5f + 0.5f;
-			float CameraStabilizingFactor = 1 + g_Config.m_ClDyncamStabilizing / 100.0f;
-
-			s_SpeedBias += CameraSpeed * DeltaTime;
-			if(g_Config.m_ClDyncam)
-			{
-				s_SpeedBias -= length(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] - s_LastMousePos) * std::log10(CameraStabilizingFactor) * 0.02f;
-				s_SpeedBias = clamp(s_SpeedBias, 0.5f, CameraSpeed);
-			}
-			else
-			{
-				s_SpeedBias = maximum(5.0f, CameraSpeed); // make sure toggle back is fast
-			}
-		}
-
-		vec2 TargetCameraOffset(0, 0);
-		s_LastMousePos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
-		float l = length(s_LastMousePos);
-		if(l > 0.0001f) // make sure that this isn't 0
-		{
-			float DeadZone = g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
-			float FollowFactor = (g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor) / 100.0f;
-			float OffsetAmount = maximum(l - DeadZone, 0.0f) * FollowFactor;
-
-			TargetCameraOffset = normalize(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]) * OffsetAmount;
-		}
-
-		if(g_Config.m_ClDyncamSmoothness > 0)
-			s_aCurrentCameraOffset[g_Config.m_ClDummy] += (TargetCameraOffset - s_aCurrentCameraOffset[g_Config.m_ClDummy]) * minimum(DeltaTime * s_SpeedBias, 1.0f);
-		else
-			s_aCurrentCameraOffset[g_Config.m_ClDummy] = TargetCameraOffset;
-
 		if(m_pClient->m_Snap.m_SpecInfo.m_Active)
-			m_Center = m_pClient->m_Snap.m_SpecInfo.m_Position + s_aCurrentCameraOffset[g_Config.m_ClDummy];
+			m_Center = m_pClient->m_Snap.m_SpecInfo.m_Position + m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy];
 		else
-			m_Center = m_pClient->m_LocalCharacterPos + s_aCurrentCameraOffset[g_Config.m_ClDummy];
+			m_Center = m_pClient->m_LocalCharacterPos + m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy];
 	}
 
 	if(m_ForceFreeview && m_CamType == CAMTYPE_SPEC)
@@ -276,9 +282,9 @@ void CCamera::OnRender()
 
 void CCamera::OnConsoleInit()
 {
-	Console()->Register("zoom+", "", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increase");
-	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease");
-	Console()->Register("zoom", "?i", CFGFLAG_CLIENT, ConZoom, this, "Change zoom");
+	Console()->Register("zoom+", "?f[amount]", CFGFLAG_CLIENT, ConZoomPlus, this, "Zoom increase");
+	Console()->Register("zoom-", "?f[amount]", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease");
+	Console()->Register("zoom", "?f", CFGFLAG_CLIENT, ConZoom, this, "Change zoom");
 	Console()->Register("set_view", "i[x]i[y]", CFGFLAG_CLIENT, ConSetView, this, "Set camera position to x and y in the map");
 	Console()->Register("set_view_relative", "i[x]i[y]", CFGFLAG_CLIENT, ConSetViewRelative, this, "Set camera position relative to current view in the map");
 	Console()->Register("goto_switch", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoSwitch, this, "View switch found (at offset) with given number");
@@ -299,10 +305,12 @@ void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->ZoomAllowed())
 		return;
 
-	pSelf->ScaleZoom(CCamera::ZOOM_STEP);
+	float ZoomAmount = pResult->NumArguments() ? pResult->GetFloat(0) : 1.0f;
+
+	pSelf->ScaleZoom(std::pow(CCamera::ZOOM_STEP, ZoomAmount));
 
 	if(pSelf->GameClient()->m_MultiViewActivated)
-		pSelf->GameClient()->m_MultiViewPersonalZoom++;
+		pSelf->GameClient()->m_MultiViewPersonalZoom += ZoomAmount;
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 {
@@ -310,10 +318,13 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->ZoomAllowed())
 		return;
 
-	pSelf->ScaleZoom(1 / CCamera::ZOOM_STEP);
+	float ZoomAmount = pResult->NumArguments() ? pResult->GetFloat(0) : 1.0f;
+	ZoomAmount *= -1.0f;
+
+	pSelf->ScaleZoom(std::pow(CCamera::ZOOM_STEP, ZoomAmount));
 
 	if(pSelf->GameClient()->m_MultiViewActivated)
-		pSelf->GameClient()->m_MultiViewPersonalZoom--;
+		pSelf->GameClient()->m_MultiViewPersonalZoom += ZoomAmount;
 }
 void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 {
@@ -322,10 +333,10 @@ void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	float TargetLevel = pResult->NumArguments() ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
-	pSelf->ChangeZoom(std::pow(CCamera::ZOOM_STEP, TargetLevel - 10), pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime);
+	pSelf->ChangeZoom(std::pow(CCamera::ZOOM_STEP, TargetLevel - 10.0f), pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime);
 
 	if(pSelf->GameClient()->m_MultiViewActivated && pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active)
-		pSelf->GameClient()->m_MultiViewPersonalZoom = 0;
+		pSelf->GameClient()->m_MultiViewPersonalZoom = TargetLevel - 10.0f;
 }
 void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)
 {
@@ -472,4 +483,14 @@ bool CCamera::ZoomAllowed() const
 	return GameClient()->m_Snap.m_SpecInfo.m_Active ||
 	       GameClient()->m_GameInfo.m_AllowZoom ||
 	       Client()->State() == IClient::STATE_DEMOPLAYBACK;
+}
+
+int CCamera::Deadzone() const
+{
+	return g_Config.m_ClDyncam ? g_Config.m_ClDyncamDeadzone : g_Config.m_ClMouseDeadzone;
+}
+
+int CCamera::FollowFactor() const
+{
+	return g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor;
 }

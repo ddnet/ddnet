@@ -1382,9 +1382,6 @@ Show jumps indicator
 Hook collision line
 == Linha de colisão do gancho
 
-Hook collision line width
-== Largura da linha de colisão do gancho
-
 Hook collision line opacity
 == Opacidade da linha de colisão do gancho
 
@@ -1580,9 +1577,6 @@ A demo with this name already exists
 No server selected
 == Nenhum serviço selecionado
 
-Online players (%d)
-== Jogadores online (%d)
-
 Online clanmates (%d)
 == Colegas de clã online (%d)
 
@@ -1598,9 +1592,6 @@ Click to remove this player from your friends list.
 
 Click to remove this clan from your friends list.
 == Clique para remover este clã a partir de sua lista de amigos.
-
-None
-== Ninguém
 
 Add Clan
 == Adicionar clã
@@ -1974,3 +1965,107 @@ Eyes
 
 Some fonts could not be loaded. Check the local console for details.
 == Algumas fontes não puderam ser carregadas. Verifique o console local para detalhes.
+
+Online friends (%d)
+== Amigos online (%d)
+
+Add friends by entering their name below or by clicking their name in the player list.
+== Adicione amigos digitando o nome deles abaixo ou clicando no nome deles na lista de jogadores.
+
+Add clanmates by entering their clan below and leaving the name blank.
+== Adicione companheiros de clã inserindo o clã deles abaixo e deixando o nome em branco.
+
+Offline friends and clanmates will appear here.
+== Amigos offline e companheiros de clã aparecerão aqui.
+
+Edit touch controls
+== Editar controles de toque
+
+Close
+== Fechar
+
+Save changes
+== Salvar alterações
+
+Error saving touch controls
+== Erro ao salvar controles de toque
+
+Could not save touch controls to file. See local console for details.
+== Não foi possível salvar os controles de toque no arquivo. Veja o console local para detalhes.
+
+Unsaved changes
+== Alterações não salvas
+
+Discard changes
+== Descartar alterações
+
+Are you sure that you want to discard the current changes to the touch controls?
+== Tem certeza de que deseja descartar as alterações atuais nos controles de toque?
+
+Are you sure that you want to reset the touch controls to default?
+== Tem certeza de que deseja redefinir os controles de toque para o padrão?
+
+Import from clipboard
+== Importar da área de transferência
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== Tem certeza de que deseja importar os controles de toque da área de transferência? Isso substituirá seus controles de toque atuais.
+
+Export to clipboard
+== Exportar para área de transferência
+
+Direct touch input while ingame
+== Entrada de toque direto durante o jogo
+
+[Direct touch input]
+Disabled
+== Desabilitada
+
+[Direct touch input]
+Active action
+== Ação ativa
+
+[Direct touch input]
+Aim
+== Mira
+
+[Direct touch input]
+Fire
+== Atirar
+
+[Direct touch input]
+Hook
+== Gancho
+
+Direct touch input while spectating
+== Entrada de toque direto durante observação
+
+Error loading touch controls
+== Erro ao carregar controles de toque
+
+Could not load touch controls from file. See local console for details.
+== Não foi possível carregar controles de toque do arquivo. Veja o console local para detalhes.
+
+Could not load default touch controls from file. See local console for details.
+== Não foi possível carregar controles de toque padrão do arquivo. Veja o console local para detalhes.
+
+Could not load touch controls from clipboard. See local console for details.
+== Não foi possível carregar controles de toque da área de transferência. Veja o console local para detalhes.
+
+Width of your own hook collision line
+== Largura de sua própria linha de colisão do gancho
+
+Width of others' hook collision line
+== Largura de linha de colisão do gancho dos outros
+
+Preview 'Hook collisions' being pressed
+== Prévia de 'colisões de gancho' sendo pressionada
+
+Aim
+== Mira
+
+Active: Fire
+== Ativo: atirar
+
+Active: Hook
+== Ativo: Gancho

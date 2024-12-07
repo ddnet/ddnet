@@ -9,18 +9,19 @@
 #	kneekoo		2011-07-01 18:40:49
 #	kneekoo		2011-07-05 23:34:34
 #	kneekoo		2012-05-01 02:01:47
+#   Sans        2024-12-04 02:19:00
 ##### /authors #####
 
 ##### translated strings #####
 
 %ds left
-== %ds a ieșit
+== %ds rămase
 
 %i minute left
-== %i minute rămas
+== %i minut rămas
 
 %i minutes left
-== %i minutes rămase
+== %i minute rămase
 
 %i second left
 == %i secundă rămasă
@@ -47,7 +48,7 @@ All
 == Toți
 
 Are you sure that you want to quit?
-== Sigur vrei să ieși?
+== Ești sigur că vrei să ieși?
 
 Automatically record demos
 == Înregistrează automat demo-uri
@@ -74,10 +75,10 @@ Chat
 == Chat
 
 Clan
-== Clanul
+== Clan
 
 Client
-== Clientul
+== Client
 
 Connecting to
 == Conectare la
@@ -104,13 +105,13 @@ Delete
 == Șterge
 
 Delete demo
-== Șterge demonstrația
+== Șterge demo-ul
 
 Demofile: %s
 == Fișier demo: %s
 
 Demos
-== Demo
+== Demo-uri
 
 Disconnect
 == Deconectare
@@ -128,7 +129,7 @@ Dynamic Camera
 == Cameră dinamică
 
 Emoticon
-== Figurine
+== Emoticon
 
 Error
 == Eroare
@@ -158,7 +159,7 @@ Free-View
 == Vizualizare liberă
 
 Fullscreen
-== Ecrat complet
+== Ecran complet
 
 Game
 == Joc
@@ -185,7 +186,7 @@ Graphics
 == Grafică
 
 Grenade
-== Grenade
+== Lansator de grenade
 
 Hammer
 == Ciocan
@@ -203,10 +204,10 @@ Invalid Demo
 == Demo nevalid
 
 Join blue
-== La albaștri
+== Intră la albaștri
 
 Join red
-== La roșii
+== Intră la roșii
 
 Jump
 == Salt
@@ -236,7 +237,7 @@ Movement
 == Mișcare
 
 Mute when not active
-== Opreşte sunetul la inactivate
+== Opreşte sunetul când nu este activ
 
 Name
 == Nume
@@ -245,7 +246,7 @@ Next weapon
 == Arma următoare
 
 Nickname
-== Pseudonim
+== Poreclă
 
 No
 == Nu
@@ -260,7 +261,7 @@ No servers match your filter criteria
 == Nici un server nu corespunde criteriilor
 
 Ok
-== Bine
+== Ok
 
 Parent Folder
 == Dosarul părinte
@@ -314,13 +315,13 @@ Remove
 == Șterge
 
 Remove friend
-== Șterge prietenul
+== Șterge prieten
 
 Rename demo
-== Redenumește demo-ul
+== Redenumește demo
 
 Reset filter
-== Filtru implicit
+== Resetează filtrul
 
 Score
 == Scor
@@ -329,7 +330,7 @@ Score limit
 == Limita de scor
 
 Scoreboard
-== Scoruri
+== Tabela de scor
 
 Screenshot
 == Captură de ecran
@@ -341,25 +342,25 @@ Server info
 == Info. server
 
 Server not full
-== Are locuri libere
+== Server-ul nu e plin
 
 Shotgun
-== Pușcă
+== Pușcă de vânatoare
 
 Show chat
 == Afișare chat
 
 Show friends only
-== Arată prietenii
+== Arată doar prietenii
 
 Show ingame HUD
-== Arată scorul în joc
+== Afișează interfața din joc
 
 Show name plates
-== Arată pseudonimele
+== Arată poreclele
 
 Show only chat messages from friends
-== Arată doar chatul prietenilor
+== Arată doar mesaje de la prieteni în chat
 
 Sound
 == Sunet
@@ -404,7 +405,7 @@ The audio device couldn't be initialised.
 == Dispozitivul audio nu a putut fi inițializat.
 
 The server is running a non-standard tuning on a pure game type.
-== Serverul folosește parametri ne-standard într-un joc standard.
+== Serverul folosește parametri non-standard într-un joc standard.
 
 Time limit
 == Timp limită
@@ -419,13 +420,13 @@ Type
 == Tip
 
 Unable to rename the demo
-== Nu pot redenumi demo-ul
+== Nu se poate redenumi demo-ul
 
 Use sounds
-== Folosește sunetul
+== Folosește sunete
 
 Use team colors for name plates
-== Folosește culorile echipelor pe etichetele de nume
+== Folosește culorile echipelor pentru etichetele de nume
 
 V-Sync
 == Sincronizare verticală (V-Sync)
@@ -466,7 +467,7 @@ New name:
 == Nume nou:
 
 Sat.
-== Saturație
+== Sat.
 
 Miscellaneous
 == Diverse
@@ -484,7 +485,7 @@ Join game
 == Intră în joc
 
 FSAA samples
-== Eșantioane FSAA
+== Mostre FSAA
 
 Sound volume
 == Volum sunet
@@ -493,10 +494,10 @@ Max Screenshots
 == Număr maxim de capturi de ecran
 
 Laser
-== Carabină
+== Laser
 
 Hue
-== Tentă
+== Nuanță
 
 Record demo
 == Înreg. demo
@@ -520,1431 +521,1526 @@ LAN
 == Rețea
 
 Name plates size
-== Dimensiune nume placă
+== Dimensiune plăcuțe de nume
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Eșuat în timpul inițializării. Încercați să schimbați gfx_backend la OpenGL sau Vulkan în settings_ddnet.cfg din dosarul de configurare și încercați din nou.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Fără memorie video (VRAM). Încercați să eliminați resursele personalizate (costume, entități etc.), în special cele cu rezoluție mare.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== A apărut o eroare în timpul înregistrării comenzii. Încercați să vă actualizați driverele plăcii grafice (GPU).
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== O comandă de randare a eșuat. Încercați să vă actualizați driverele plăcii grafice (GPU).
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Trimiterea comenzilor de randare a eșuat. Încercați să vă actualizați driverele plăcii grafice (GPU).
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== A eșuat schimbul tamponelor de cadre. Încercați să vă actualizați driverele plăcii grafice (GPU).
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Eroare necunoscută. Încercați să schimbați gfx_backend la OpenGL sau Vulkan în settings_ddnet.cfg din dosarul de configurare și încercați din nou.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Nu s-a putut inițializa backend-ul grafic dat, se revine la backend-ul implicit.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Nu s-a putut inițializa backend-ul grafic dat, probabil pentru că nu ați instalat driverul plăcii grafice integrate.
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== Nu s-a putut rezolva adresa de conectare '%s'. Consultați consola pentru detalii.
 
 Connect address error
-== 
+== Eroare adresă de conectare
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Nu s-a putut salva harta descărcată. Încercați să ștergeți manual acest fișier: %s
 
 Could not connect dummy
-== 
+== Nu s-a putut conecta manechinul
 
 Error playing demo
-== 
+== Eroare la redarea demo-ului
 
 Successfully saved the replay!
-== 
+== Reluare salvată cu succes!
 
 Failed saving the replay!
-== 
+== A eșuat salvarea reluării!
 
 Saving settings to '%s' failed
-== 
+== Salvarea setărilor în '%s' a eșuat
 
 Error saving settings
-== 
+== Eroare la salvarea setărilor
 
 Replay feature is disabled!
-== 
+== Funcția de reluare este dezactivată!
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Lățimea texturii %s nu este divizibilă cu %d, sau înălțimea nu este divizibilă cu %d, ceea ce poate cauza erori vizuale.
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Formatul texturii %s nu este RGBA, ceea ce va cauza erori vizuale.
 
 Preparing demo playback
-== 
+== Se pregătește redarea demo-ului
 
 Connected
-== 
+== Conectat
 
 Loading map file from storage
-== 
+== Se încarcă fișierul de hartă din stocare
 
 Loading demo file from storage
-== 
+== Se încarcă fișierul demo din stocare
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Unele fonturi nu au putut fi încărcate. Verificați consola pentru detalii.
 
 Loading DDNet Client
-== 
+== Se încarcă client-ul DDNet
 
 Initializing components
-== 
+== Se inițializează componentele
 
 Why are you slowmo replaying to read this?
-== 
+== De ce re-joci în slowmo ca să citești asta?
 
 Initializing assets
-== 
+== Se inițializează resursele
 
 Initializing map logic
-== 
+== Se inițializează logica hărții
 
 Sending initial client info
-== 
+== Se trimit informațiile inițiale despre client
 
 Warning
-== 
+== Avertisment
 
 Quitting. Please wait…
-== 
+== Ieșire. Așteptați, vă rog…
 
 Restarting. Please wait…
-== 
+== Repornire. Așteptați, vă rog…
 
 Loading skin files
-== 
+== Se încarcă fișiere costume
 
 Search
-== 
+== Caută
 
 Searching
-== 
+== Se caută
 
 Enter Username
-== 
+== Introduceți numele de utilizator
 
 Enter Password
-== 
+== Introduceți parola
 
 NOT CONNECTED
-== 
+== NU ESTE CONECTAT
 
 Match %d of %d
-== 
+== Corespunde %d din %d
 
 No results
-== 
+== Nu există rezultate
 
 Lines %d - %d (%s)
-== 
+== Liniile %d - %d (%s)
 
 Locked
-== 
+== Blocat
 
 Following
-== 
+== Urmărind
 
 Loading commands…
-== 
+== Se încarcă comenzile…
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Modul de depanare activat. Apăsați Ctrl+Shift+D pentru a dezactiva modul de depanare.
 
 Position:
-== 
+== Poziție:
 
 Speed:
-== 
+== Viteză:
 
 Angle:
-== 
+== Unghi:
 
 Multi-View
-== 
+== Multi-vedere
 
 [Spectating]
 Following %s
-== 
+== Urmărind %s
 
 Server best:
-== 
+== Record server:
 
 Personal best:
-== 
+== Record personal:
 
 Team %d
-== 
+== Echipa %d
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Unele imagini ale hărții nu au putut fi încărcate. Verificați consola pentru detalii.
 
 Uploading map data to GPU
-== 
+== Se încarcă datele hărții pe placa grafică (GPU)
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Unele sunete ale hărții nu au putut fi încărcate. Verificați consola pentru detalii.
 
 Loading menu themes
-== 
+== Se încarcă temele meniului
 
 Reset
-== 
+== Resetează
 
 Press a key…
-== 
+== Apasă o tastă…
 
 Settings
-== 
+== Setări
 
 Editor
-== 
+== Editor
 
 Main menu
-== 
+== Meniul principal
 
 Browser
-== 
+== Browser
 
 Ghost
-== 
+== Fantomă
 
 Reconnect in %d sec
-== 
+== Reconectare în %d sec
 
 Rename folder
-== 
+== Redenumește dosarul
 
 Render demo
-== 
+== Randează demo
 
 Render complete
-== 
+== Randare completă
 
 Restart
-== 
+== Repornire
 
 Are you sure that you want to restart?
-== 
+== Ești sigur că vrei să repornești?
 
 Welcome to DDNet
-== 
+== Bine ai venit pe DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDraceNetwork este un joc online cooperativ în care scopul tău și al grupului tău este să ajungeți la linia de sosire a hărții. Ca începător, ar trebui să începi pe serverele Novice, care găzduiesc cele mai ușoare hărți. Ține cont de ping pentru a alege un server aproape de tine.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Folosește tasta k pentru a te "ucide" (reporni), q pentru a pune pauză și a privi alți jucători. Vezi setările pentru alte taste configurabile.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== Este recomandat să verifici setările pentru a le ajusta după preferințele tale înainte de a intra pe un server.
 
 Please enter your nickname below.
-== 
+== Introdu porecla ta mai jos.
 
 Existing Player
-== 
+== Jucător existent
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Porecla ta '%s' este deja folosită (%d puncte). Vrei totuși să o folosești?
 
 Checking for existing player with your name
-== 
+== Se verifică existența unui jucător cu numele tău
 
 Save skin
-== 
+== Salvează costumul
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Ești sigur că vrei să salvezi costumul? Dacă un costum cu acest nume există deja, acesta va fi înlocuit.
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== Există o hartă nesalvată în editor, poate vrei să o salvezi.
 
 Continue anyway?
-== 
+== Continui oricum?
 
 A demo with this name already exists
-== 
+== Un demo cu acest nume există deja
 
 A folder with this name already exists
-== 
+== Un dosar cu acest nume există deja
 
 Unable to rename the folder
-== 
+== Nu se poate redenumi dosarul
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== Fișierul '%s' există deja, vrei să-l suprascrii?
 
 Replace video
-== 
+== Înlocuiește videoclipul
 
 (paused)
-== 
+== (pauză)
 
 Speed
-== 
+== Viteză
 
 Video name:
-== 
+== Nume videoclip:
 
 Videos directory
-== 
+== Dosar videoclipuri
 
 Video was saved to '%s'
-== 
+== Videoclipul a fost salvat în '%s'
 
 Join Tutorial Server
-== 
+== Intră pe serverul de tutorial
 
 Skip Tutorial
-== 
+== Sari peste tutorial
 
 Show DDNet map finishes in server browser
-== 
+== Afișează finalizările hărților DDNet în browserul de servere
 
 transmits your player name to info.ddnet.org
-== 
+== transmite numele tău de jucător către info.ddnet.org
 
 Unable to save the skin
-== 
+== Nu se poate salva costumul
 
 Unable to save the skin with a reserved name
-== 
+== Nu se poate salva costumul cu un nume rezervat
 
 Trying to determine UDP connectivity…
-== 
+== Se încearcă determinarea conectivității UDP…
 
 UDP seems to be filtered.
-== 
+== UDP pare să fie filtrat.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== Adresele IP UDP și TCP par să fie diferite. Încercați să dezactivați VPN-ul, proxy-ul sau acceleratoarele de rețea.
 
 No answer from server yet.
-== 
+== Încă nu a răspuns serverul.
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 Getting game info
-== 
+== Se obțin informațiile jocului
 
 Requesting to join the game
-== 
+== Se solicită intrarea în joc
 
 Theme
-== 
+== Temă
 
 Loading menu images
-== 
+== Se încarcă imaginile meniului
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Se obține lista serverelor de la serverul principal
 
 No local servers found (ports %d-%d)
-== 
+== Nu s-au găsit servere locale (porturi %d-%d)
 
 Example of usage
-== 
+== Exemplu de utilizare
 
 Exclude
-== 
+== Exclude
 
 %d of %d servers
-== 
+== %d din %d servere
 
 %d of %d server
-== 
+== %d din %d server
 
 %d players
-== 
+== %d jucători
 
 %d player
-== 
+== %d jucător
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Ești sigur că vrei să te deconectezi și să treci la un alt server?
 
 No login required
-== 
+== Nu este necesar să te autentifici
 
 Filter connecting players
-== 
+== Filtrează jucătorii care se conectează
 
 Indicate map finish
-== 
+== Indică finalizarea hărții
 
 Unfinished map
-== 
+== Hartă neterminată
 
 Countries
-== 
+== Țări
 
 Types
-== 
+== Tipuri
 
 Communities
-== 
+== Comunități
 
 Copy info
-== 
+== Copiază informațiile
 
 Leak IP
-== 
+== Expune IP-ul
 
 No server selected
-== 
+== Niciun server selectat
 
-Online players (%d)
-== 
+Online friends (%d)
+== Prieteni online (%d)
 
 Online clanmates (%d)
-== 
+== Membri de clan online (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Offline (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Fă clic pentru a selecta serverul. Dublu clic pentru a te alătura prietenului tău.
 
 Click to remove this player from your friends list.
-== 
+== Fă clic pentru a elimina acest jucător din lista de prieteni.
 
 Click to remove this clan from your friends list.
-== 
+== Fă clic pentru a elimina acest clan din lista de prieteni.
 
-None
-== 
+Add friends by entering their name below or by clicking their name in the player list.
+== Adaugă prieteni introducând numele lor mai jos sau făcând clic pe numele lor în lista de jucători.
+
+Add clanmates by entering their clan below and leaving the name blank.
+== Adaugă membri de clan introducând numele clanului mai jos și lăsând numele gol.
+
+Offline friends and clanmates will appear here.
+== Prietenii și membrii de clan offline vor apărea aici.
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Ești sigur că vrei să elimini jucătorul '%s' din lista de prieteni?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Ești sigur că vrei să elimini clanul '%s' din lista de prieteni?
 
 Add Clan
-== 
+== Adaugă Clan
 
 Server filter
-== 
+== Filtru server
 
 Friends
-== 
+== Prieteni
 
 Play the current demo
-== 
+== Redă demo-ul curent
 
 Pause the current demo
-== 
+== Pune pe pauză demo-ul curent
 
 Stop the current demo
-== 
+== Oprește demo-ul curent
 
 Go back the specified duration
-== 
+== Mergi înapoi cu durata specificată
 
 [Demo player duration]
 %d min.
-== 
+== %d min.
 
 [Demo player duration]
 %d sec.
-== 
+== %d sec.
 
 Change the skip duration
-== 
+== Schimbă durata de sărire
 
 Go forward the specified duration
-== 
+== Mergi înainte cu durata specificată
 
 Go back one tick
-== 
+== Mergi înapoi un pas
 
 Go forward one tick
-== 
+== Mergi înainte un pas
 
 Go back one marker
-== 
+== Mergi înapoi un marcaj
 
 Go forward one marker
-== 
+== Mergi înainte un marcaj
 
 Slow down the demo
-== 
+== Încetinește demo-ul
 
 Speed up the demo
-== 
+== Accelerează demo-ul
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Marchează începutul unei secțiuni (clic dreapta pentru resetare)
 
 Mark the end of a cut (right click to reset)
-== 
+== Marchează sfârșitul unei secțiuni (clic dreapta pentru resetare)
 
 Export cut as a separate demo
-== 
+== Exportă secțiunea ca un demo separat
 
 Close the demo player
-== 
+== Închide player-ul demo
 
 Toggle keyboard shortcuts
-== 
+== Comutează scurtăturile de tastatură
 
 Export demo cut
-== 
+== Exportă secțiunea demo
 
 Cut interval
-== 
+== Interval de tăiere
 
 Cut length
-== 
+== Lungime secțiune
 
 Remove chat
-== 
+== Elimină chatul
 
 Render cut to video
-== 
+== Randează secțiunea în video
 
 Please use a different filename
-== 
+== Folosește un alt nume de fișier
 
 File already exists, do you want to overwrite it?
-== 
+== Fișierul există deja, vrei să-l suprascrii?
 
 Loading demo files
-== 
+== Se încarcă fișierele demo
 
 All combined
-== 
+== Toate combinate
 
 Demo
-== 
+== Demo
 
 Length
-== 
+== Lungime
 
 Date
-== 
+== Dată
 
 No demo selected
-== 
+== Niciun demo selectat
 
 Folder Link
-== 
+== Link folder
 
 Created
-== 
+== Creat
 
 Markers
-== 
+== Marcaje
 
 Netversion
-== 
+== Versiune rețea
 
 Size
-== 
+== Dimensiune
 
 [Demo details]
 map not included
-== 
+== harta nu este inclusă
 
 %.2f MiB
-== 
+== %.2f MiB
 
 %.2f KiB
-== 
+== %.2f KiB
 
 Fetch Info
-== 
+== Preia informații
 
 Demos directory
-== 
+== Dosar demo-uri
 
 Open the directory that contains the demo files
-== 
+== Deschide dosarul care conține fișierele demo
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Ești sigur că vrei să ștergi folderul '%s'?
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Ești sigur că vrei să ștergi demo-ul '%s'?
 
 Delete folder
-== 
+== Șterge folderul
 
 Unable to delete the demo '%s'
-== 
+== Nu se poate șterge demo-ul '%s'
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Nu se poate șterge folderul '%s'. Asigură-te mai întâi că este gol.
 
 Are you sure that you want to disconnect?
-== 
+== Ești sigur că vrei să te deconectezi?
 
 Connect Dummy
-== 
+== Conectează manechinul
 
 Dummy is not allowed on this server
-== 
+== Manechinul nu este permis pe acest server
 
 Please wait…
-== 
+== Te rog așteaptă…
 
 Connecting dummy
-== 
+== Se conectează manechinul
 
 Disconnect Dummy
-== 
+== Deconectează manechinul
 
 Are you sure that you want to disconnect your dummy?
-== 
+== Ești sigur că vrei să deconectezi manechinul?
 
 Kill
-== 
+== Ucide
 
 Pause
-== 
+== Pauză
+
+Edit touch controls
+== Editează controalele tactile
+
+Close
+== Închide
+
+Save changes
+== Salvează modificările
+
+Error saving touch controls
+== Eroare la salvarea controalelor tactile
+
+Could not save touch controls to file. See local console for details.
+== Nu s-au putut salva controalele tactile în fișier. Verifică consola locală pentru detalii.
+
+Unsaved changes
+== Modificări nesalvate
+
+Discard changes
+== Renunță la modificări
+
+Are you sure that you want to discard the current changes to the touch controls?
+== Ești sigur că vrei să renunți la modificările curente ale controalelor tactile?
+
+Are you sure that you want to reset the touch controls to default?
+== Ești sigur că vrei să resetezi controalele tactile la valorile implicite?
+
+Import from clipboard
+== Importă din clipboard
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== Ești sigur că vrei să imporți controalele tactile din clipboard? Acest lucru va suprascrie setările actuale.
+
+Export to clipboard
+== Exportă în clipboard
+
+Direct touch input while ingame
+== Intrare tactilă directă în timpul jocului
+
+[Direct touch input]
+Disabled
+== Dezactivat
+
+[Direct touch input]
+Active action
+== Acțiune activă
+
+[Direct touch input]
+Aim
+== Țintește
+
+[Direct touch input]
+Fire
+== Trage
+
+[Direct touch input]
+Hook
+== Cârlig
+
+Direct touch input while spectating
+== Intrare tactilă directă în timpul vizionării
+
+Error loading touch controls
+== Eroare la încărcarea controalelor tactile
+
+Could not load touch controls from file. See local console for details.
+== Nu s-au putut încărca controalele tactile din fișier. Verifică consola locală pentru detalii.
+
+Could not load default touch controls from file. See local console for details.
+== Nu s-au putut încărca controalele tactile implicite din fișier. Verifică consola locală pentru detalii.
+
+Could not load touch controls from clipboard. See local console for details.
+== Nu s-au putut încărca controalele tactile din clipboard. Verifică consola locală pentru detalii.
 
 Loading…
-== 
+== Se încarcă…
 
 Loading ghost files
-== 
+== Se încarcă fișierele fantomă
 
 Time
-== 
+== Timp
 
 Ghosts directory
-== 
+== Dosar fantome
 
 Activate all
-== 
+== Activează toate
 
 Deactivate all
-== 
+== Dezactivează toate
 
 Deactivate
-== 
+== Dezactivează
 
 Activate
-== 
+== Activează
 
 Save
-== 
+== Salvează
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Meniul a fost deschis. Apasă tasta Esc din nou pentru a închide meniul.
 
 Smooth Dynamic Camera
-== 
+== Cameră dinamică lină
 
 Switch weapon when out of ammo
-== 
+== Schimbă arma când rămâi fără muniție
 
 Skip the main menu
-== 
+== Sari peste meniul principal
 
 [Hertz]
 Hz
-== 
+== Hz
 
 Refresh Rate
-== 
+== Rata de refresh
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Economisește energie prin reducerea ratei de refresh (latență mai mare la intrări)
 
 Settings file
-== 
+== Fișier de setări
 
 Open the settings file
-== 
+== Deschide fișierul de setări
 
 Config directory
-== 
+== Dosarul de configurare
 
 Open the directory that contains the configuration and user files
-== 
+== Deschide dosarul care conține fișierele de configurare și utilizator
 
 Themes directory
-== 
+== Dosar teme
 
 Open the directory to add custom themes
-== 
+== Deschide dosarul pentru a adăuga teme personalizate
 
 Automatically take statboard screenshot
-== 
+== Fă automat captură de ecran pentru tabela de statistici
 
 Automatically create statboard csv
-== 
+== Creează automat fișier CSV pentru tabela de statistici
 
 Max CSVs
-== 
+== Număr maxim de fișiere CSV
 
 Dummy
-== 
+== Manechin
 
 Player info change cooldown
-== 
+== Timp de așteptare pentru schimbarea informațiilor jucătorului
 
 Download skins
-== 
+== Descarcă costume
 
 Download community skins
-== 
+== Descarcă costume comunitare
 
 Vanilla skins only
-== 
+== Doar costume de bază (Vanilla)
 
 Fat skins (DDFat)
-== 
+== Costume mari (DDFat)
 
 Skin prefix
-== 
+== Prefix costum
 
 Create a random skin
-== 
+== Creează un costum aleatoriu
 
 Choose default eyes when joining a server
-== 
+== Alege ochii implicați la conectarea pe un server
 
 Skin Database
-== 
+== Baza de date a costumelor
 
 Skins directory
-== 
+== Dosar costume
 
 Open the directory to add custom skins
-== 
+== Deschide dosarul pentru a adăuga costume personalizate
 
 Hook collisions
-== 
+== Coliziuni cârlig
 
 Zoom in
-== 
+== Mărește
 
 Zoom out
-== 
+== Micșorează
 
 Default zoom
-== 
+== Zoom implicit
 
 Show others
-== 
+== Arată alții
 
 Show all
-== 
+== Arată toți
 
 Toggle dyncam
-== 
+== Comutează camera dinamică
 
 Toggle ghost
-== 
+== Comutează fantoma
 
 Converse
-== 
+== Conversație
 
 Chat command
-== 
+== Comandă chat
 
 Toggle dummy
-== 
+== Comutează manechinul
 
 Dummy copy
-== 
+== Copiere manechin
 
 Hammerfly dummy
-== 
+== Manechin hammerfly
 
 Statboard
-== 
+== Tabela de statistici
 
 Lock team
-== 
+== Blochează echipa
 
 Show entities
-== 
+== Arată entitățile
 
 Show HUD
-== 
+== Arată interfața
 
 Enable controller
-== 
+== Activează controlerul
 
 Controller
-== 
+== Controler
 
 Ingame controller mode
-== 
+== Mod controler în joc
 
 [Ingame controller mode]
 Relative
-== 
+== Relativ
 
 [Ingame controller mode]
 Absolute
-== 
+== Absolut
 
 Ingame controller sens.
-== 
+== Sensibilitate controler în joc
 
 UI controller sens.
-== 
+== Sensibilitate controler interfață
 
 Controller jitter tolerance
-== 
+== Toleranță la zgomot controler
 
 No controller found. Plug in a controller.
-== 
+== Nu s-a găsit niciun controler. Conectează un controler.
 
 Axis
-== 
+== Axă
 
 Status
-== 
+== Status
 
 Aim bind
-== 
+== Legare țintire
 
 Mouse
-== 
+== Mouse
 
 Ingame mouse sens.
-== 
+== Sensibilitate mouse în joc
 
 UI mouse sens.
-== 
+== Sensibilitate mouse interfață
 
 Reset controls
-== 
+== Resetează controalele
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Ești sigur că vrei să resetezi controalele la valorile implicite?
 
 Cancel
-== 
+== Anulează
 
 Windowed
-== 
+== Fereastră
 
 Windowed borderless
-== 
+== Fereastră fără margini
 
 Windowed fullscreen
-== 
+== Fereastră pe tot ecranul
 
 Desktop fullscreen
-== 
+== Ecran complet desktop
 
 Screen
-== 
+== Ecran
 
 may cause delay
-== 
+== poate cauza întârzieri
 
 Allows maps to render with more detail
-== 
+== Permite redarea hărților cu mai multe detalii
 
 Use high DPI
-== 
+== Folosește DPI înalt
 
 Renderer
-== 
+== Motor grafic
 
 default
-== 
+== implicit
 
 custom
-== 
+== personalizat
 
 Graphics card
-== 
+== Placă grafică
 
 auto
-== 
+== automat
 
 Enable game sounds
-== 
+== Activează sunetele jocului
 
 Enable gun sound
-== 
+== Activează sunetul armelor
 
 Enable long pain sound (used when shooting in freeze)
-== 
+== Activează sunetul lung de durere (utilizat când tragi în timp ce ești înghețat)
 
 Enable server message sound
-== 
+== Activează sunetul mesajelor serverului
 
 Enable regular chat sound
-== 
+== Activează sunetul chat-ului obișnuit
 
 Enable team chat sound
-== 
+== Activează sunetul chat-ului de echipă
 
 Enable highlighted chat sound
-== 
+== Activează sunetul pentru chat-ul evidențiat
 
 Game sound volume
-== 
+== Volumul sunetului jocului
 
 Chat sound volume
-== 
+== Volumul sunetului din chat
 
 Map sound volume
-== 
+== Volumul sunetelor hărții
 
 Background music volume
-== 
+== Volumul muzicii de fundal
 
 Tee
-== 
+== Tee
 
 Appearance
-== 
+== Apariție
 
 DDNet
-== 
+== DDNet
 
 Assets
-== 
+== Resurse
 
 DDNet Client needs to be restarted to complete update!
-== 
+== Clientul DDNet trebuie repornit pentru a finaliza actualizarea!
 
 HUD
-== 
+== Interfață
 
 Name Plate
-== 
+== Etichetă de nume
 
 Hook Collisions
-== 
+== Coliziuni cârlig
 
 Info Messages
-== 
+== Mesaje informative
 
 Show health, shields and ammo
-== 
+== Arată viața, scuturile și muniția
 
 Show score
-== 
+== Arată scorul
 
 Show local time always
-== 
+== Arată ora locală mereu
 
 Show votes window after voting
-== 
+== Arată fereastra de voturi după votare
 
 DDRace HUD
-== 
+== Interfață DDRace
 
 Show client IDs (scoreboard, chat, spectator)
-== 
+== Arată ID-urile de client (tabelă, chat, spectator)
 
 Show DDRace HUD
-== 
+== Arată interfața DDRace
 
 Show jumps indicator
-== 
+== Arată indicatorul săriturilor
 
 Show dummy actions
-== 
+== Arată acțiunile manechinului
 
 Show player position
-== 
+== Arată poziția jucătorului
 
 Show player speed
-== 
+== Arată viteza jucătorului
 
 Show player target angle
-== 
+== Arată unghiul țintei jucătorului
 
 Show freeze bars
-== 
+== Arată barele de îngheț
 
 Opacity of freeze bars inside freeze
-== 
+== Opacitatea barelor de îngheț în stare de îngheț
 
 Always show chat
-== 
+== Arată mereu chat-ul
 
 Show names in chat in team colors
-== 
+== Arată numele în chat în culorile echipei
 
 Show only chat messages from team members
-== 
+== Arată doar mesajele din chat de la membrii echipei
 
 Use old chat style
-== 
+== Folosește stilul vechi de chat
 
 Chat font size
-== 
+== Dimensiunea fontului în chat
 
 Chat width
-== 
+== Lățimea chat-ului
 
 Messages
-== 
+== Mesaje
 
 System message
-== 
+== Mesaj de sistem
 
 Highlighted message
-== 
+== Mesaj evidențiat
 
 Team message
-== 
+== Mesaj de echipă
 
 Friend message
-== 
+== Mesaj de prieten
 
 Normal message
-== 
+== Mesaj normal
 
 Client message
-== 
+== Mesaj client
 
 Preview
-== 
+== Previzualizare
 
 Show clan above name plates
-== 
+== Arată clanul deasupra etichetelor de nume
 
 Clan plates size
-== 
+== Dimensiunea etichetelor de clan
 
 Show friend mark (♥) in name plates
-== 
+== Arată semnul prietenilor (♥) pe etichetele de nume
 
 Show hook strength icon indicator
-== 
+== Arată indicatorul de putere al cârligului
 
 Show hook strength number indicator
-== 
+== Arată indicatorul numeric de putere al cârligului
 
 Show other players' key presses
-== 
+== Arată tastele apăsate de alți jucători
 
 Show local player's key presses
-== 
+== Arată tastele apăsate de jucătorul local
 
 Authed name color in scoreboard
-== 
+== Culoarea numelui autentificat în tabela de scor
 
 Same clan color in scoreboard
-== 
+== Culoarea comună a clanului în tabela de scor
 
 Hook collision line
-== 
+== Linie de coliziune cârlig
 
 Show own player's hook collision line
-== 
+== Arată linia de coliziune a cârligului propriu
 
 Always show own player's hook collision line
-== 
+== Arată mereu linia de coliziune a cârligului propriu
 
 Show other players' hook collision lines
-== 
+== Arată liniile de coliziune ale cârligelor altor jucători
 
 Always show other players' hook collision lines
-== 
+== Arată mereu liniile de coliziune ale cârligelor altor jucători
 
-Hook collision line width
-== 
+Width of your own hook collision line
+== Lățimea liniei de coliziune a cârligului propriu
+
+Width of others' hook collision line
+== Lățimea liniei de coliziune a cârligelor altor jucători
 
 Hook collision line opacity
-== 
+== Opacitatea liniei de coliziune a cârligului
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Culorile liniei de coliziune a cârligului, în cazul unei posibile coliziuni cu:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Mișcările tale nu sunt luate în considerare la calcularea culorilor liniei
 
 Nothing hookable
-== 
+== Nimic agățabil
 
 Something hookable
-== 
+== Ceva agățabil
 
 A Tee
-== 
+== Un Tee
+
+Preview 'Hook collisions' being pressed
+== Previzualizare 'Coliziuni cârlig' în timpul apăsării
 
 Show kill messages
-== 
+== Arată mesajele de ucidere
 
 Show finish messages
-== 
+== Arată mesajele de finalizare
 
 Normal Color
-== 
+== Culoare normală
 
 Highlight Color
-== 
+== Culoare evidențiată
 
 Weapons
-== 
+== Arme
 
 Rifle Laser Outline Color
-== 
+== Culoarea conturului puștii
 
 Rifle Laser Inner Color
-== 
+== Culoarea interioară a puștii
 
 Shotgun Laser Outline Color
-== 
+== Culoarea conturului laserului puștii de vânătoare
 
 Shotgun Laser Inner Color
-== 
+== Culoarea interioară a laserului puștii de vânătoare
 
 Entities
-== 
+== Entități
 
 Door Laser Outline Color
-== 
+== Culoarea conturului laserului ușii
 
 Door Laser Inner Color
-== 
+== Culoarea interioară a laserului ușii
 
 Freeze Laser Outline Color
-== 
+== Culoarea conturului laserului de îngheț
 
 Freeze Laser Inner Color
-== 
+== Culoarea interioară a laserului de îngheț
 
 Set all to Rifle
-== 
+== Setează toate pe Pușcă
 
 Save the best demo of each race
-== 
+== Salvează cel mai bun demo al fiecărei curse
 
 Enable replays
-== 
+== Activează reluările
 
 Default length
-== 
+== Lungime implicită
 
 Enable ghost
-== 
+== Activează fantoma
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Când treci linia de start, arată un Tee fantomă care reproduce mișcările celui mai bun timp al tău
 
 Show ghost
-== 
+== Arată fantoma
 
 Opacity
-== 
+== Opacitate
 
 Save ghost
-== 
+== Salvează fantoma
 
 Only save improvements
-== 
+== Salvează doar îmbunătățirile
 
 Gameplay
-== 
+== Gameplay
 
 Overlay entities
-== 
+== Suprapune entitățile
 
 Show text entities
-== 
+== Arată entitățile text
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Ajustează opacitatea entităților aparținând altor echipe, cum ar fi Tee-urile și etichetele de nume
 
 Show others (own team only)
-== 
+== Arată alții (doar echipa proprie)
 
 Show quads
-== 
+== Arată quad-urile
 
 Quads are used for background decoration
-== 
+== Quad-urile sunt utilizate pentru decorarea fundalului
 
 AntiPing
-== 
+== AntiPing
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Încearcă să prezică alte entități pentru a oferi senzația de latență scăzută
 
 AntiPing: predict other players
-== 
+== AntiPing: prezice alți jucători
 
 AntiPing: predict weapons
-== 
+== AntiPing: prezice armele
 
 AntiPing: predict grenade paths
-== 
+== AntiPing: prezice traiectoria grenadelor
 
 Background
-== 
+== Fundal
 
 Regular background color
-== 
+== Culoare de fundal obișnuită
 
 Entities background color
-== 
+== Culoarea de fundal a entităților
 
 Use current map as background
-== 
+== Folosește harta curentă ca fundal
 
 Show tiles layers from BG map
-== 
+== Arată straturile de țigle din harta de fundal
 
 New random timeout code
-== 
+== Cod nou de timeout aleatoriu
 
 Run on join
-== 
+== Rulează la conectare
 
 Chat command (e.g. showall 1)
-== 
+== Comandă chat (ex: showall 1)
 
 Unregister protocol and file extensions
-== 
+== Deregistrează protocolul și extensiile fișierelor
 
 DDNet %s is available:
-== 
+== DDNet %s este disponibil:
 
 Update now
-== 
+== Actualizează acum
 
 Updating…
-== 
+== Se actualizează…
 
 DDNet Client updated!
-== 
+== Clientul DDNet a fost actualizat!
 
 No updates available
-== 
+== Nu există actualizări disponibile
 
 Check now
-== 
+== Verifică acum
 
 Basic
-== 
+== Bazic
 
 Custom
-== 
+== Personalizat
 
 Are you sure that you want to delete '%s'?
-== 
+== Ești sigur că vrei să ștergi '%s'?
 
 Delete skin
-== 
+== Șterge costumul
 
 Unable to delete skin
-== 
+== Nu se poate șterge costumul
 
 Emoticons
-== 
+== Emoticoane
 
 Particles
-== 
+== Particule
 
 Extras
-== 
+== Extra
 
 Loading assets
-== 
+== Se încarcă resursele
 
 Assets directory
-== 
+== Dosar resurse
 
 Open the directory to add custom assets
-== 
+== Deschide dosarul pentru a adăuga resurse personalizate
 
 Discord
-== 
+== Discord
 
 https://ddnet.org/discord
-== 
+== https://ddnet.org/discord
 
 Learn
-== 
+== Învață
 
 https://wiki.ddnet.org/
-== 
+== https://wiki.ddnet.org/
 
 Tutorial
-== 
+== Tutorial
 
 Can't find a Tutorial server
-== 
+== Nu se poate găsi un server de Tutorial
 
 Website
-== 
+== Website
 
 Stop server
-== 
+== Oprește server
 
 Run server
-== 
+== Rulează server
 
 Server executable not found, can't run server
-== 
+== Executabilul serverului nu a fost găsit, nu se poate rula serverul
 
 [Start menu]
 Play
-== 
+== Joacă
 
 DDNet %s is out!
-== 
+== DDNet %s a fost lansat!
 
 Downloading %s:
-== 
+== Descarcă %s:
 
 Update failed! Check log…
-== 
+== Actualizarea a eșuat! Verifică jurnalul…
 
 Loading race demo files
-== 
+== Se încarcă fișierele demo de cursă
 
 Round %d/%d
-== 
+== Runda %d/%d
 
 [Spectators]
 %d others…
-== 
+== %d alți spectatori…
 
 Super
-== 
+== Super
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== Echipa %d (%d/%d)
 
 Manual
-== 
+== Manual
 
 Race
-== 
+== Cursă
 
 Auto
-== 
+== Automat
 
 Replay
-== 
+== Repetă
 
 [skins]
 Body
-== 
+== Corp
 
 [skins]
 Marking
-== 
+== Marcaj
 
 [skins]
 Decoration
-== 
+== Decorație
 
 [skins]
 Hands
-== 
+== Mâini
 
 [skins]
 Feet
-== 
+== Picioare
 
 [skins]
 Eyes
-== 
+== Ochii
 
 Loading sound files
-== 
+== Se încarcă fișierele audio
 
 Follow
-== 
+== Urmărește
 
 Frags
-== 
+== Frags
 
 Deaths
-== 
+== Decese
 
 Suicides
-== 
+== Sinucideri
 
 Ratio
-== 
+== Rata
 
 Net
-== 
+== Rețea
 
 FPM
-== 
+== FPM
 
 Spree
-== 
+== Serii de ucideri
 
 Best
-== 
+== Cel mai bun
 
 Grabs
-== 
+== Prinderi
+
+Aim
+== Țintă
+
+Active: Fire
+== Activ: Foc
+
+Active: Hook
+== Activ: Cârlig
 
 1 new mention
-== 
+== 1 mențiune nouă
 
 %d new mentions
-== 
+== %d mențiuni noi
 
 9+ new mentions
-== 
+== 9+ mențiuni noi
 
 Moved ingame
-== 
+== Mutat în joc
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/wiki/Mapping

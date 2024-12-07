@@ -7,6 +7,7 @@
 #     Gokturk          2024-08-29 23:39:00
 #     Gokturk          2024-09-29 19:24:00
 #     Gokturk          2024-11-04 11:35:00
+#     Gokturk & seishiroon          2024-12-03 16:35:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1159,9 +1160,6 @@ Leak IP
 No server selected
 == Heç bir server seçilmədi
 
-Online players (%d)
-== Onlayn oyunçular (%d)
-
 Online clanmates (%d)
 == Onlayn klandaşlar (%d)
 
@@ -1177,9 +1175,6 @@ Click to remove this player from your friends list.
 
 Click to remove this clan from your friends list.
 == Bu klanı dostlarınızın siyahısından silmək üçün klikləyin.
-
-None
-== Yox
 
 Are you sure that you want to remove the player '%s' from your friends list?
 == '%s' oyunçu dostlarınız siyahısından silmək istədiyinizə əminsiniz?
@@ -1482,9 +1477,6 @@ Show local player's key presses
 
 Hook collision line
 == Qarmaq izi
-
-Hook collision line width
-== Qarmaq izinin qalınlığı
 
 Hook collision line opacity
 == Kanca çizgisi opaklığı
@@ -1942,4 +1934,108 @@ Eyes
 == Göz
 
 Some fonts could not be loaded. Check the local console for details.
-== Bəzi yazı fontları yüklənə bilmir. Ətraflı məlumat üçün əsas konsolu yoxlayın
+== Bəzi yazı fontları yüklənə bilmir. Ətraflı məlumat üçün əsas konsolu yoxlayın.
+
+Online friends (%d)
+== Onlayn dostlar (%d)
+
+Add friends by entering their name below or by clicking their name in the player list.
+== Aşağıya ad yazaraq və ya oyunçu siyahısından adlarına tıklayaraq dost əlavə edin.
+
+Add clanmates by entering their clan below and leaving the name blank.
+== Klan yoldaşlarınızı klan adını aşağıya yazaraq və ad hissəsini boş buraxaraq əlavə edin.
+
+Offline friends and clanmates will appear here.
+== Oflayn dostlar və klan yoldaşları burada görünəcək.
+
+Edit touch controls
+== Toxunuş idarəetmələrini düzəlt
+
+Close
+== Bağla
+
+Save changes
+== Dəyişiklikləri yadda saxla
+
+Error saving touch controls
+== Toxunuş idarəetmələri saxlanılarkən xəta baş verdi
+
+Could not save touch controls to file. See local console for details.
+== Toxunuş idarəetmələrini fayllara yadda saxlamaq mümkün olmadı. Ətraflı məlumat üçün konsola baxın.
+
+Unsaved changes
+== Yadda saxlanılmamış dəyişikliklər
+
+Discard changes
+== Dəyişiklikləri ləğv et
+
+Are you sure that you want to discard the current changes to the touch controls?
+== Toxunuş idarəetmələrindəki dəyişiklikləri ləğv etmək istədiyinizə əminsinizmi?
+
+Are you sure that you want to reset the touch controls to default?
+== oxunuş idarəetmələrini varsayılan parametrlərə qaytarmaq istədiyinizə əminsinizmi?
+
+Import from clipboard
+== Panodan içəri idxal et
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== Toxunuş idarəetmələrini panodan idxal etmək istədiyinizə əminsinizmi? Bu, mövcud idarəetmələrin üzərinə yazılacaq.
+
+Export to clipboard
+== Panoya ixrac et
+
+Direct touch input while ingame
+== Oyun içində olarkən birbaşa toxunuş girişi
+
+[Direct touch input]
+Disabled
+== Deaktiv edilib
+
+[Direct touch input]
+Active action
+== Aktiv hərəkət
+
+[Direct touch input]
+Aim
+== Aim
+
+[Direct touch input]
+Fire
+== Atəş
+
+[Direct touch input]
+Hook
+== Qarmaq
+
+Direct touch input while spectating
+== İzləmə rejimində olarkən birbaşa toxunuş girişi
+
+Error loading touch controls
+== Toxunuş idarəetmələri yüklənərkən xəta baş verdi
+
+Could not load touch controls from file. See local console for details.
+== Toxunuş idarəetmələrini fayllardan yükləmək mümkün olmadı. Ətraflı məlumat üçün konsola baxın.
+
+Could not load default touch controls from file. See local console for details.
+== Varsayılan toxunuş idarəetmələrini fayllardan yükləmək mümkün olmadı. Ətraflı məlumat üçün konsola baxın.
+
+Could not load touch controls from clipboard. See local console for details.
+== Toxunuş idarəetmələrini panodan yükləmək mümkün olmadı. Ətraflı məlumat üçün konsola baxın.
+
+Width of your own hook collision line
+== Öz qarmağınızın toqquşma xəttinin qalınlığı
+
+Width of others' hook collision line
+== Başqalarının qarmaqlarının toqquşma xəttinin qalınlığı
+
+Preview 'Hook collisions' being pressed
+== ‘Qarmaq toqquşmaları’ basılarkən önizləmə
+
+Aim
+== Aim
+
+Active: Fire
+== Aktiv: Atəş
+
+Active: Hook
+== Aktiv: Qarmaq

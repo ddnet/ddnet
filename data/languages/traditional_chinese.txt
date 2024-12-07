@@ -33,6 +33,7 @@
 # 2024-08-29 Pioooooo
 # 2024-09-29 Pioooooo
 # 2024-11-01 Pioooooo
+# 2024-12-03 豆腐渣 & Pioooooo & By
 ##### /authors #####
 
 ##### translated strings #####
@@ -1384,9 +1385,6 @@ Show jumps indicator
 Hook collision line
 == 鉤索輔助線
 
-Hook collision line width
-== 輔助線寬度
-
 Hook collision line opacity
 == 輔助線不透明度
 
@@ -1576,9 +1574,6 @@ Copy info
 Create a random skin
 == 隨機創造外觀
 
-Online players (%d)
-== 在綫玩家 (%d)
-
 Online clanmates (%d)
 == 在綫戰隊隊友 (%d)
 
@@ -1594,9 +1589,6 @@ Click to remove this player from your friends list.
 
 Click to remove this clan from your friends list.
 == 點擊以將此戰隊從好友列表中移除
-
-None
-== 無
 
 Add Clan
 == 新增戰隊
@@ -1976,3 +1968,107 @@ Eyes
 
 Some fonts could not be loaded. Check the local console for details.
 == 未能載入某些字體。檢查本機控制台以取得詳情。
+
+Online friends (%d)
+== 在線好友（%d人）
+
+Add friends by entering their name below or by clicking their name in the player list.
+== 在下方輸入好友名稱或點擊玩家列表中的好友的名稱即可添加好友
+
+Add clanmates by entering their clan below and leaving the name blank.
+== 在下方輸入戰隊名並留空名稱即可添加戰隊
+
+Offline friends and clanmates will appear here.
+== 離線好友和戰隊會顯示在這裡
+
+Edit touch controls
+== 編輯觸控設置
+
+Close
+== 關閉
+
+Save changes
+== 保存更改
+
+Error saving touch controls
+== 保存觸控設置錯誤
+
+Could not save touch controls to file. See local console for details.
+== 無法將觸控設置保存到文件。檢查本地控制台以獲得詳情
+
+Unsaved changes
+== 更改未保存
+
+Discard changes
+== 放棄更改
+
+Are you sure that you want to discard the current changes to the touch controls?
+== 確定要放棄當前對觸控設置的更改嗎？
+
+Are you sure that you want to reset the touch controls to default?
+== 確定要將觸控設置重置為默認設置嗎？
+
+Import from clipboard
+== 從剪貼簿導入
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== 確定要從剪貼簿導入觸控設置嗎？這將覆蓋當前的觸控設置。
+
+Export to clipboard
+== 導出到剪貼簿
+
+Direct touch input while ingame
+== 遊戲時直接觸摸操作
+
+[Direct touch input]
+Disabled
+== 禁用
+
+[Direct touch input]
+Active action
+== 當前行為
+
+[Direct touch input]
+Aim
+== 瞄準
+
+[Direct touch input]
+Fire
+== 開火
+
+[Direct touch input]
+Hook
+== 鉤索
+
+Direct touch input while spectating
+== 旁觀時直接觸摸操作
+
+Error loading touch controls
+== 加載觸控設置錯誤
+
+Could not load touch controls from file. See local console for details.
+== 無法從文件加載觸控設置。檢查本機控制台以獲取詳情。
+
+Could not load default touch controls from file. See local console for details.
+== 無法從文件加載默認觸控設置。檢查本機控制台以獲取詳情。
+
+Could not load touch controls from clipboard. See local console for details.
+== 無法從剪貼板加載觸控設置。檢查本機控制台以獲取詳情。
+
+Width of your own hook collision line
+== 自己的鉤索輔助線寬度
+
+Width of others' hook collision line
+== 其他玩家的鉤索輔助線寬度
+
+Preview 'Hook collisions' being pressed
+== 預覽按下時的鉤索輔助線
+
+Aim
+== 瞄準
+
+Active: Fire
+== 當前：開火
+
+Active: Hook
+== 當前：鉤鎖

@@ -393,6 +393,7 @@ public:
 	virtual int TranslateSnap(class CSnapshot *pSnapDstSix, class CSnapshot *pSnapSrcSeven, int Conn, bool Dummy) = 0;
 
 	virtual bool CheckNewInput() = 0;
+	virtual void InitializeLanguage() = 0;
 };
 
 void SnapshotRemoveExtraProjectileInfo(class CSnapshot *pSnap);

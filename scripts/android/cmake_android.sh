@@ -1,9 +1,17 @@
 #!/bin/bash
+set -e
 
-# $HOME must be used instead of ~ else cargo-ndk cannot find the folder
-export ANDROID_HOME=$HOME/Android/Sdk
-MAKEFLAGS=-j$(nproc)
-export MAKEFLAGS
+# Ensure that binaries from MSYS2 are preferred over Windows-native commands like find and sort which work differently.
+PATH="/usr/bin/:$PATH"
+
+# $ANDROID_HOME can be used-defined, else the default location is used. Important notes:
+# - The path must not contain spaces on Windows.
+# - $HOME must be used instead of ~ else cargo-ndk cannot find the folder.
+ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
+export ANDROID_HOME
+
+BUILD_FLAGS="${BUILD_FLAGS:--j$(nproc)}"
+export BUILD_FLAGS
 
 ANDROID_NDK_VERSION="$(cd "$ANDROID_HOME/ndk" && find . -maxdepth 1 | sort -n | tail -1)"
 ANDROID_NDK_VERSION="${ANDROID_NDK_VERSION:2}"
@@ -122,8 +130,6 @@ fi
 
 export TW_VERSION_NAME=$ANDROID_VERSION_NAME
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Building cmake..."
-
 function build_for_type() {
 	cmake \
 		-H. \
@@ -150,47 +156,32 @@ function build_for_type() {
 		-DVIDEORECORDER=OFF
 	(
 		cd "${BUILD_FOLDER}/$ANDROID_SUB_BUILD_DIR/$1" || exit 1
-		cmake --build . --target game-client
+		# We want word splitting
+		# shellcheck disable=SC2086
+		cmake --build . --target game-client $BUILD_FLAGS
 	)
 }
 
 mkdir -p "${BUILD_FOLDER}"
 
 if [[ "${ANDROID_BUILD}" == "arm" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type arm armeabi-v7a armv7-linux-androideabi &
-	PID_BUILD_ARM=$!
+	printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Building cmake (arm)..."
+	build_for_type arm armeabi-v7a armv7-linux-androideabi
 fi
 
 if [[ "${ANDROID_BUILD}" == "arm64" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type arm64 arm64-v8a aarch64-linux-android &
-	PID_BUILD_ARM64=$!
+	printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Building cmake (arm64)..."
+	build_for_type arm64 arm64-v8a aarch64-linux-android
 fi
 
 if [[ "${ANDROID_BUILD}" == "x86" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type x86 x86 i686-linux-android &
-	PID_BUILD_X86=$!
+	printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Building cmake (x86)..."
+	build_for_type x86 x86 i686-linux-android
 fi
 
 if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "all" ]]; then
-	build_for_type x86_64 x86_64 x86_64-linux-android &
-	PID_BUILD_X86_64=$!
-fi
-
-if [ -n "$PID_BUILD_ARM" ] && ! wait "$PID_BUILD_ARM"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for arm failed"
-	exit 1
-fi
-if [ -n "$PID_BUILD_ARM64" ] && ! wait "$PID_BUILD_ARM64"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for arm64 failed"
-	exit 1
-fi
-if [ -n "$PID_BUILD_X86" ] && ! wait "$PID_BUILD_X86"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for x86 failed"
-	exit 1
-fi
-if [ -n "$PID_BUILD_X86_64" ] && ! wait "$PID_BUILD_X86_64"; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Building for x86_64 failed"
-	exit 1
+	printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Building cmake (x86_64)..."
+	build_for_type x86_64 x86_64 x86_64-linux-android
 fi
 
 printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Copying project files..."
@@ -259,14 +250,8 @@ cp ./cacert.pem ./assets/asset_integrity_files/data/cacert.pem || exit 1
 printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Creating integrity index file..."
 (
 	cd assets/asset_integrity_files || exit 1
-
 	tmpfile="$(mktemp /tmp/hash_strings.XXX)"
-
-	find data -iname "*" -type f -print0 | while IFS= read -r -d $'\0' file; do
-		sha_hash=$(sha256sum "$file" | cut -d' ' -f 1)
-		echo "$file $sha_hash" >> "$tmpfile"
-	done
-
+	find data -iname "*" -type f -print0 | xargs -0 sha256sum | awk '{gsub(/^\*/, "", $2); print substr($0, index($0, $2)), $1}' > "$tmpfile"
 	full_hash="$(sha256sum "$tmpfile" | cut -d' ' -f 1)"
 
 	rm -f "integrity.txt"

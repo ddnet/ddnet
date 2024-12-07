@@ -7,7 +7,7 @@
 #	3edcxzaq1		2020-06-25 00:00:00
 #	cur.ie			2020-09-28 00:00:00
 #	simpygirl		2022-02-20 00:00:00
-#	furo			2024-11-01 00:00:00
+#	furo			2024-12-04 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1279,9 +1279,6 @@ Copy info
 No server selected
 == Ingen server vald
 
-Online players (%d)
-== Online spelare (%d)
-
 Online clanmates (%d)
 == Online klanmedlemmar (%d)
 
@@ -1297,9 +1294,6 @@ Click to remove this player from your friends list.
 
 Click to remove this clan from your friends list.
 == Klicka för att ta bort denna klan från din kompis lista.
-
-None
-== Ingen
 
 Are you sure that you want to remove the player '%s' from your friends list?
 == Är du säker på att du vill ta bort spelare '%s' från din kompis lista?
@@ -1536,9 +1530,6 @@ Opacity of freeze bars inside freeze
 
 Hook collision line
 == Hook kollisions linje
-
-Hook collision line width
-== Hook kollisions linje bredd
 
 Hook collision line opacity
 == Hook kollisions linje opacitet
@@ -1945,3 +1936,107 @@ Eyes
 
 Some fonts could not be loaded. Check the local console for details.
 == Vissa typsnitt kunde inte laddas in. Se den lokala konsolen för detaljer.
+
+Online friends (%d)
+== Online kompisar (%d)
+
+Add friends by entering their name below or by clicking their name in the player list.
+== Lägg till en kompis genom att skriva in deras namn nedanför eller genom att klicka på deras namn i spellistan.
+
+Add clanmates by entering their clan below and leaving the name blank.
+== Lägg till en klanmedlem genom att skriva in deras klan nedanför och lämna namn fältet blankt.
+
+Offline friends and clanmates will appear here.
+== Offline kompisar och klanmedlemmar kommer att synas här.
+
+Edit touch controls
+== Ändra pekskärms kontrollerna
+
+Close
+== Stäng
+
+Save changes
+== Spara ändringar
+
+Error saving touch controls
+== Misslyckades med att spara pekskärms kontrollerna
+
+Could not save touch controls to file. See local console for details.
+== Kunde inte spara pekskärms kontrollerna till en fil. Se den lokala konsolen för detaljer.
+
+Unsaved changes
+== Osparade ändringar
+
+Discard changes
+== Kasta ändringar
+
+Are you sure that you want to discard the current changes to the touch controls?
+== Är du säker att du vill kasta de nuvarande ändringar till pekskärms kontrollerna?
+
+Are you sure that you want to reset the touch controls to default?
+== Är du säker på att du vill nollställa pekskärms kontrollerna till standardinställningarna?
+
+Import from clipboard
+== Importera från urklipp
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== Är du säker att du vill importera pekskärms kontrollerna från urklipp? Detta kommer att skriva över dina nuvarande inställningar.
+
+Export to clipboard
+== Exportera till urklipp
+
+Direct touch input while ingame
+== Direkt pekskärms kontroller medan du är i spel
+
+[Direct touch input]
+Disabled
+== Inaktiverad
+
+[Direct touch input]
+Active action
+== Aktivt läge
+
+[Direct touch input]
+Aim
+== Sikta
+
+[Direct touch input]
+Fire
+== Skjut
+
+[Direct touch input]
+Hook
+== Hook
+
+Direct touch input while spectating
+== Direkt pekskärms kontroller medan du är i åskådarläge
+
+Error loading touch controls
+== Misslyckades att ladda in pekskärms kontrollerna
+
+Could not load touch controls from file. See local console for details.
+== Misslyckades att ladda in pekskärms kontrollerna från fil. Se den lokala konsolen för detaljer.
+
+Could not load default touch controls from file. See local console for details.
+== Misslyckades att ladda in standard pekskärms kontrollerna från fil. Se den lokala konsolen för detaljer.
+
+Could not load touch controls from clipboard. See local console for details.
+== Misslyckades att ladda in pekskärms kontrollerna från urkipp. Se den lokala konsolen för detaljer.
+
+Width of your own hook collision line
+== Bredd av din egna hook kollisions linje
+
+Width of others' hook collision line
+== Bredd av andras hook kollisions linjer
+
+Preview 'Hook collisions' being pressed
+== Förhandsvisning när 'Hook kollisions' är aktivt
+
+Aim
+== Sikta
+
+Active: Fire
+== Läge: Skjut
+
+Active: Hook
+== Läge: Hook

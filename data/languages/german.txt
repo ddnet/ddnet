@@ -90,7 +90,7 @@ Client
 == Client
 
 Colors of the hook collision line, in case of a possible collision with:
-== Die Farbe der Hakenkollisionlinie bei einer möglichen Kollision mit:
+== Die Farbe der Hakenkollisionslinie bei einer möglichen Kollision mit:
 
 Connecting to
 == Verbinden mit
@@ -848,9 +848,6 @@ Hook collision line
 Hook collision line opacity
 == Deckkraft der Hakenkollisionslinie
 
-Hook collision line width
-== Breite der Hakenkollisionslinie
-
 Fetch Info
 == Neu laden
 
@@ -1559,9 +1556,6 @@ Open the settings file
 Create a random skin
 == Erstelle einen zufälligen Skin
 
-Online players (%d)
-== Online-Spieler (%d)
-
 Online clanmates (%d)
 == Online-Clanmitglieder (%d)
 
@@ -1577,9 +1571,6 @@ Click to remove this player from your friends list.
 
 Click to remove this clan from your friends list.
 == Klicke um diesen Clan aus deiner Freundesliste zu entfernen.
-
-None
-== Keine
 
 Add Clan
 == Clan hinzufügen
@@ -1959,3 +1950,107 @@ https://wiki.ddnet.org/wiki/Mapping
 
 Some fonts could not be loaded. Check the local console for details.
 == Einige Schriften konnten nicht geladen werden. Prüf die lokale Konsole für Details.
+
+Online friends (%d)
+== Online-Freunde (%d)
+
+Add friends by entering their name below or by clicking their name in the player list.
+== Freunde hinzufügen durch Eingabe des Namens oder durch Klicken auf ihren Namen in Spielerliste.
+
+Add clanmates by entering their clan below and leaving the name blank.
+== Clanmitglieder hinzufügen durch Eingabe des Clans und Leerlassen des Namens.
+
+Offline friends and clanmates will appear here.
+== Offline-Freunde und Clanmitglieder erscheinen hier.
+
+Edit touch controls
+== Berührungseingaben bearbeiten
+
+Close
+== Schließen
+
+Save changes
+== Änderungen speichern
+
+Error saving touch controls
+== Berührungseingaben konnten nicht gespeichert werden
+
+Could not save touch controls to file. See local console for details.
+== Konnte Berührungseingaben nicht in Datei speichern. Siehe lokale Konsole für Details.
+
+Unsaved changes
+== Ungespeicherte Änderungen
+
+Discard changes
+== Änderungen verwerfen
+
+Are you sure that you want to discard the current changes to the touch controls?
+== Willst du wirklich die aktuellen Änderungen zu Berührungseingaben verwerfen?
+
+Are you sure that you want to reset the touch controls to default?
+== Willst du wirklich die Berührungseingaben zurücksetzen?
+
+Import from clipboard
+== Aus Zwischenablage importieren
+
+Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
+== Willst du wirklich Berührungseingaben aus der Zwischenablage importieren? Dies überschreibt deine aktuellen Berührungseingaben.
+
+Export to clipboard
+== In Zwischenablage exportieren
+
+Direct touch input while ingame
+== Direkte Berührungseingaben beim Spielen
+
+[Direct touch input]
+Disabled
+== Deaktiviert
+
+[Direct touch input]
+Active action
+== Aktive Aktion
+
+[Direct touch input]
+Aim
+== Zielen
+
+[Direct touch input]
+Fire
+== Feuern
+
+[Direct touch input]
+Hook
+== Haken
+
+Direct touch input while spectating
+== Direkte Berührungseingaben beim Zuschauen
+
+Error loading touch controls
+== Konnte Berührungssteuerung nicht laden
+
+Could not load touch controls from file. See local console for details.
+== Konnte Berührungssteuerung nicht von Datei laden. Siehe Details in der lokalen Konsole.
+
+Could not load default touch controls from file. See local console for details.
+== Konnte Standard-Berührungssteuerung nicht von Datei laden. Siehe Details in der lokalen Konsole.
+
+Could not load touch controls from clipboard. See local console for details.
+== Konnte Berührungssteuerung nicht von Zwischenablage laden. Siehe Details in der lokalen Konsole.
+
+Width of your own hook collision line
+== Breite der eigenen Hakenkollisionslinie
+
+Width of others' hook collision line
+== Breite der Hakenkollisionslinie anderer
+
+Aim
+== Zielen
+
+Active: Fire
+== Aktiv: Feuern
+
+Active: Hook
+== Aktiv: Haken
+
+Preview 'Hook collisions' being pressed
+== Vorschau für 'Hakenkollisionen' gedrückt

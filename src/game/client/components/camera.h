@@ -14,6 +14,7 @@ class CCamera : public CComponent
 {
 	friend class CMenuBackground;
 
+public:
 	enum
 	{
 		CAMTYPE_UNDEFINED = -1,
@@ -21,6 +22,7 @@ class CCamera : public CComponent
 		CAMTYPE_PLAYER,
 	};
 
+private:
 	int m_CamType;
 	vec2 m_aLastPos[NUM_DUMMIES];
 	vec2 m_PrevCenter;
@@ -50,6 +52,9 @@ class CCamera : public CComponent
 	float MinZoomLevel();
 	float MaxZoomLevel();
 
+	vec2 m_LastMousePos;
+	float m_DyncamSmoothingSpeedBias;
+
 public:
 	static constexpr float ZOOM_STEP = 0.866025f;
 
@@ -58,6 +63,9 @@ public:
 	bool m_Zooming;
 	float m_Zoom;
 	float m_ZoomSmoothingTarget;
+
+	vec2 m_DyncamTargetCameraOffset;
+	vec2 m_aDyncamCurrentCameraOffset[NUM_DUMMIES];
 
 	CCamera();
 	virtual int Sizeof() const override { return sizeof(*this); }
@@ -74,6 +82,12 @@ public:
 
 	void SetZoom(float Target, int Smoothness);
 	bool ZoomAllowed() const;
+
+	int Deadzone() const;
+	int FollowFactor() const;
+	int CamType() const { return m_CamType; }
+
+	void UpdateCamera();
 
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);

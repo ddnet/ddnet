@@ -1406,6 +1406,20 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 	}
 }
 
+void CEditor::DoToolbarImages(CUIRect ToolBar)
+{
+	CUIRect ToolBarTop, ToolBarBottom;
+	ToolBar.HSplitMid(&ToolBarTop, &ToolBarBottom, 5.0f);
+
+	if(m_SelectedImage >= 0 && (size_t)m_SelectedImage < m_Map.m_vpImages.size())
+	{
+		const std::shared_ptr<CEditorImage> pSelectedImage = m_Map.m_vpImages[m_SelectedImage];
+		char aLabel[64];
+		str_format(aLabel, sizeof(aLabel), "Size: %" PRIzu " × %" PRIzu, pSelectedImage->m_Width, pSelectedImage->m_Height);
+		Ui()->DoLabel(&ToolBarBottom, aLabel, 12.0f, TEXTALIGN_ML);
+	}
+}
+
 void CEditor::DoToolbarSounds(CUIRect ToolBar)
 {
 	CUIRect ToolBarTop, ToolBarBottom;
@@ -5275,23 +5289,30 @@ void CEditor::RenderFileDialog()
 			Preview.Margin(10.0f, &Preview);
 			if(m_FilePreviewState == PREVIEW_LOADED)
 			{
+				CUIRect PreviewLabel, PreviewImage;
+				Preview.HSplitTop(20.0f, &PreviewLabel, &PreviewImage);
+
+				char aLabel[64];
+				str_format(aLabel, sizeof(aLabel), "Size: %d × %d", m_FilePreviewImageWidth, m_FilePreviewImageHeight);
+				Ui()->DoLabel(&PreviewLabel, aLabel, 12.0f, TEXTALIGN_ML);
+
 				int w = m_FilePreviewImageWidth;
 				int h = m_FilePreviewImageHeight;
-				if(m_FilePreviewImageWidth > Preview.w)
+				if(m_FilePreviewImageWidth > PreviewImage.w)
 				{
-					h = m_FilePreviewImageHeight * Preview.w / m_FilePreviewImageWidth;
-					w = Preview.w;
+					h = m_FilePreviewImageHeight * PreviewImage.w / m_FilePreviewImageWidth;
+					w = PreviewImage.w;
 				}
-				if(h > Preview.h)
+				if(h > PreviewImage.h)
 				{
-					w = w * Preview.h / h;
-					h = Preview.h;
+					w = w * PreviewImage.h / h;
+					h = PreviewImage.h;
 				}
 
 				Graphics()->TextureSet(m_FilePreviewImage);
 				Graphics()->BlendNormal();
 				Graphics()->QuadsBegin();
-				IGraphics::CQuadItem QuadItem(Preview.x, Preview.y, w, h);
+				IGraphics::CQuadItem QuadItem(PreviewImage.x, PreviewImage.y, w, h);
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
 				Graphics()->QuadsEnd();
 			}
@@ -7913,27 +7934,30 @@ void CEditor::Render()
 		}
 	}
 
-	float Brightness = 0.25f;
+	const float BackgroundBrightness = 0.26f;
+	const float BackgroundScale = 80.0f;
 
 	if(m_GuiActive)
 	{
-		RenderBackground(MenuBar, m_BackgroundTexture, 128.0f, Brightness * 0);
+		RenderBackground(MenuBar, IGraphics::CTextureHandle(), BackgroundScale, 0.0f);
 		MenuBar.Margin(2.0f, &MenuBar);
 
-		RenderBackground(ToolBox, m_BackgroundTexture, 128.0f, Brightness);
+		RenderBackground(ToolBox, g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id, BackgroundScale, BackgroundBrightness);
 		ToolBox.Margin(2.0f, &ToolBox);
 
-		RenderBackground(ToolBar, m_BackgroundTexture, 128.0f, Brightness);
+		RenderBackground(ToolBar, g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id, BackgroundScale, BackgroundBrightness);
 		ToolBar.Margin(2.0f, &ToolBar);
 		ToolBar.VSplitLeft(m_ToolBoxWidth, &ModeBar, &ToolBar);
 
-		RenderBackground(StatusBar, m_BackgroundTexture, 128.0f, Brightness);
+		RenderBackground(StatusBar, g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id, BackgroundScale, BackgroundBrightness);
 		StatusBar.Margin(2.0f, &StatusBar);
 	}
 
 	// do the toolbar
 	if(m_Mode == MODE_LAYERS)
 		DoToolbarLayers(ToolBar);
+	else if(m_Mode == MODE_IMAGES)
+		DoToolbarImages(ToolBar);
 	else if(m_Mode == MODE_SOUNDS)
 		DoToolbarSounds(ToolBar);
 
@@ -8056,7 +8080,7 @@ void CEditor::Render()
 		{
 			if(m_ActiveExtraEditor != EXTRAEDITOR_NONE)
 			{
-				RenderBackground(ExtraEditor, m_BackgroundTexture, 128.0f, Brightness);
+				RenderBackground(ExtraEditor, g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id, BackgroundScale, BackgroundBrightness);
 				ExtraEditor.HMargin(2.0f, &ExtraEditor);
 				ExtraEditor.VSplitRight(2.0f, &ExtraEditor, nullptr);
 			}
@@ -8457,7 +8481,6 @@ void CEditor::Init()
 		Component.OnInit(this);
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL);
-	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_NORMAL] = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_RESIZE_H] = Graphics()->LoadTexture("editor/cursor_resize.png", IStorage::TYPE_ALL);
 	m_aCursorTextures[CURSOR_RESIZE_V] = m_aCursorTextures[CURSOR_RESIZE_H];
