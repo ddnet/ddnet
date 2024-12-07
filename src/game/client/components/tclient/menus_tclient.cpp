@@ -771,8 +771,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		bool WhiteFeetTemp = g_Config.m_ClWhiteFeet;
 		g_Config.m_ClWhiteFeet = false;
 		{
-			RightView.HSplitTop(TeeSize + MarginSmall, &DevCardRect, &RightView);
-			DevCardRect.VSplitLeft(TeeSize + MarginSmall, &TeeRect, &Label);
+			RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
+			DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
 			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Tater"), &Label, &Button);
 			Button.VSplitLeft(MarginSmall, nullptr, &Button);
 			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
@@ -782,8 +782,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			RenderDevSkin(TeeRect.Center(), 50.0f, "glow_mermyfox", "mermyfox", true, 15911221, 9981775, 0, false);
 		}
 		{
-			RightView.HSplitTop(TeeSize + MarginSmall, &DevCardRect, &RightView);
-			DevCardRect.VSplitLeft(TeeSize + MarginSmall, &TeeRect, &Label);
+			RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
+			DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
 			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Solly"), &Label, &Button);
 			Button.VSplitLeft(MarginSmall, nullptr, &Button);
 			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
@@ -793,8 +793,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			RenderDevSkin(TeeRect.Center(), 50.0f, "tuzi", "tuzi", false, 10944256, 2621184, 2, true);
 		}
 		{
-			RightView.HSplitTop(TeeSize + MarginSmall, &DevCardRect, &RightView);
-			DevCardRect.VSplitLeft(TeeSize + MarginSmall, &TeeRect, &Label);
+			RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
+			DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
 			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Daniel"), &Label, &Button);
 			Button.VSplitLeft(MarginSmall, nullptr, &Button);
 			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
@@ -805,8 +805,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		}
 
 		{
-			RightView.HSplitTop(TeeSize + MarginSmall, &DevCardRect, &RightView);
-			DevCardRect.VSplitLeft(TeeSize + MarginSmall, &TeeRect, &Label);
+			RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
+			DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
 			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Teero"), &Label, &Button);
 			Button.VSplitLeft(MarginSmall, nullptr, &Button);
 			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
