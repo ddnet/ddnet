@@ -1646,6 +1646,7 @@ void CGameClient::OnNewSnapshot()
 					m_aClients[Item.m_Id].m_Afk = pInfo->m_Flags & EXPLAYERFLAG_AFK;
 					m_aClients[Item.m_Id].m_Paused = pInfo->m_Flags & EXPLAYERFLAG_PAUSED;
 					m_aClients[Item.m_Id].m_Spec = pInfo->m_Flags & EXPLAYERFLAG_SPEC;
+					m_aClients[Item.m_Id].m_ConnectionProblems = pInfo->m_Flags & EXPLAYERFLAG_CONNECTION_PROBLEMS;
 
 					if(Item.m_Id == m_Snap.m_LocalClientId && (m_aClients[Item.m_Id].m_Paused || m_aClients[Item.m_Id].m_Spec))
 					{
@@ -2579,6 +2580,7 @@ void CGameClient::CClientData::Reset()
 	m_Afk = false;
 	m_Paused = false;
 	m_Spec = false;
+	m_ConnectionProblems = false;
 
 	std::fill(std::begin(m_aSwitchStates), std::end(m_aSwitchStates), 0);
 

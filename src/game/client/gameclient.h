@@ -421,6 +421,7 @@ public:
 		bool m_Afk;
 		bool m_Paused;
 		bool m_Spec;
+		bool m_ConnectionProblems;
 
 		// Editor allows 256 switches for now.
 		bool m_aSwitchStates[256];

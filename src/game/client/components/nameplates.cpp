@@ -204,6 +204,9 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		}
 	}
 
+	float XOffset = Position.x;
+	bool ChangedOffset = false;
+	bool ConnectionProblems = m_pClient->m_aClients[pPlayerInfo->m_ClientId].m_ConnectionProblems;
 	if((g_Config.m_Debug || g_Config.m_ClNameplatesStrong) && g_Config.m_ClNameplates)
 	{
 		const bool Following = (m_pClient->m_Snap.m_SpecInfo.m_Active && !GameClient()->m_MultiViewActivated && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW);
@@ -251,17 +254,50 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 
 					const float StrongWeakImgSize = 40.0f;
 					YOffset -= StrongWeakImgSize * ScaleY;
-					RenderTools()->DrawSprite(Position.x, YOffset + (StrongWeakImgSize / 2.0f) * ScaleY, StrongWeakImgSize);
+					ChangedOffset = true;
+					if(ConnectionProblems && g_Config.m_ClNameplatesNetwork)
+						XOffset = XOffset - (StrongWeakImgSize / 2);
+
+					RenderTools()->DrawSprite(XOffset, YOffset + (StrongWeakImgSize / 2.0f) * ScaleY, StrongWeakImgSize);
 					Graphics()->QuadsEnd();
 				}
 				if(g_Config.m_Debug || g_Config.m_ClNameplatesStrong == 2)
 				{
-					YOffset -= FontSize;
 					char aBuf[12];
 					str_format(aBuf, sizeof(aBuf), "%d", Other.m_ExtendedData.m_StrongWeakId);
-					TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset, FontSize, aBuf);
+					TextRender()->Text(Position.x - TextRender()->TextWidth(FontSize, aBuf) / 2.0f, YOffset - FontSize, FontSize, aBuf);
 				}
 			}
+		}
+	}
+
+	// Connection problems icon
+	if(g_Config.m_ClNameplates && g_Config.m_ClNameplatesNetwork)
+	{
+		if(ConnectionProblems)
+		{
+			ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+			if(OtherTeam && !ForceAlpha)
+				Color.a = g_Config.m_ClShowOthersAlpha / 100.0f;
+			else if(g_Config.m_ClNameplatesAlways == 0)
+				Color.a = clamp(1 - std::pow(distance(m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
+
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_NETWORKICONS].m_Id);
+
+			Graphics()->QuadsBegin();
+			RenderTools()->SelectSprite(SPRITE_NETWORK_BAD);
+			float ScaleX, ScaleY;
+			RenderTools()->GetSpriteScale(SPRITE_NETWORK_BAD, ScaleX, ScaleY);
+
+			const float NetworkImgSize = 40.0f;
+			if(!ChangedOffset)
+				YOffset -= NetworkImgSize * ScaleY;
+			else
+				XOffset += NetworkImgSize;
+
+			Graphics()->SetColor(Color);
+			RenderTools()->DrawSprite(XOffset, YOffset + (NetworkImgSize / 2.0f) * ScaleY, NetworkImgSize);
+			Graphics()->QuadsEnd();
 		}
 	}
 

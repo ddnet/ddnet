@@ -238,6 +238,7 @@ image_audio_source = Image("audio_source", "editor/audio_source.png")
 image_strongweak = Image("strongweak", "strong_weak.png")
 image_hud = Image("hud", "hud.png")
 image_extras = Image("extras", "extras.png")
+image_networkicons = Image("networkicons", "network.png", 1)
 
 container.images.Add(image_null)
 container.images.Add(image_game)
@@ -255,6 +256,7 @@ container.images.Add(image_strongweak)
 container.images.Add(image_hud)
 container.images.Add(image_extras)
 container.images.Add(Image("raceflag", "race_flag.png"))
+container.images.Add(image_networkicons)
 
 container.pickups.Add(Pickup("health"))
 container.pickups.Add(Pickup("armor"))
@@ -276,6 +278,7 @@ set_audio_source = SpriteSet("audio_source", image_audio_source, 1, 1)
 set_strongweak = SpriteSet("strongweak", image_strongweak, 2, 1)
 set_hud = SpriteSet("hud", image_hud, 16, 16)
 set_extras = SpriteSet("extras", image_extras, 16, 16)
+set_networkicons = SpriteSet("networkicons", image_networkicons, 1, 2)
 
 container.spritesets.Add(set_particles)
 container.spritesets.Add(set_game)
@@ -288,6 +291,7 @@ container.spritesets.Add(set_audio_source)
 container.spritesets.Add(set_strongweak)
 container.spritesets.Add(set_hud)
 container.spritesets.Add(set_extras)
+container.spritesets.Add(set_networkicons)
 
 container.sprites.Add(Sprite("part_slice", set_particles, 0,0,1,1))
 container.sprites.Add(Sprite("part_ball", set_particles, 1,0,1,1))
@@ -452,6 +456,9 @@ container.sprites.Add(Sprite("hud_team0_mode", set_hud, 12,6,2,2))
 
 container.sprites.Add(Sprite("part_snowflake", set_extras, 0,0,2,2))
 container.sprites.Add(Sprite("part_sparkle", set_extras, 2,0,2,2))
+
+container.sprites.Add(Sprite("network_good", set_networkicons, 0,0,1,1))
+container.sprites.Add(Sprite("network_bad", set_networkicons, 0,1,1,1))
 
 
 anim = Animation("base")

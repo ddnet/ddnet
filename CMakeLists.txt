@@ -1484,6 +1484,7 @@ set(EXPECTED_DATA
   languages/traditional_chinese.txt
   languages/turkish.txt
   languages/ukrainian.txt
+  license.txt
   mapres/basic_freeze.png
   mapres/bg_cloud1.png
   mapres/bg_cloud2.png
@@ -1567,6 +1568,7 @@ set(EXPECTED_DATA
   menuimages/local_server.png
   menuimages/play_game.png
   menuimages/settings.png
+  network.png
   particles.png
   race_flag.png
   shader/pipeline.frag

@@ -44,6 +44,7 @@ public:
 		int m_DDNetVersion;
 		const char *m_pDDNetVersionStr;
 		const CUuid *m_pConnectionId;
+		int m_LastPacketTick;
 	};
 
 	int Tick() const { return m_CurrentGameTick; }
