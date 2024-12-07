@@ -40,7 +40,7 @@
 
 void CMenus::OpenTClientDiscord()
 {
-	if(!open_link("https://discord.gg/fBvhH93Bt6"))
+	if(!Client()->ViewLink("https://discord.gg/fBvhH93Bt6"))
 		PopupWarning(Localize("Open TClient Discord"), Localize("Failed to open the TClient Discord in your browser"), Localize("Aww"), std::chrono::nanoseconds(0));
 }
 
@@ -307,7 +307,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		static CButtonContainer s_VerifyButton;
 		if(DoButton_Menu(&s_VerifyButton, Localize("Manual Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
 		{
-			if(!open_link("https://ger10.ddnet.org/"))
+			if(!Client()->ViewLink("https://ger10.ddnet.org/"))
 				dbg_msg("menus", "couldn't open link");
 		}
 		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
@@ -1226,10 +1226,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	if(DoButton_Menu(&s_ProfilesFile, Localize("Profiles file"), 0, &FileButton))
 	{
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, PROFILES_FILE, aTempBuf, sizeof(aTempBuf));
-		if(!open_file(aTempBuf))
-		{
-			dbg_msg("menus", "couldn't open file");
-		}
+		Client()->ViewFile(aTempBuf);
 	}
 }
 
