@@ -338,12 +338,13 @@ mod ffi {
         /// interpreted unless the command starts with `mc;`.
         ///
         /// The `ClientID` parameter defaults to -1, `InterpretSemicolons` to
-        /// `true` in C++.
+        /// `true`, `AllowDangerous` to `true` in C++.
         pub fn ExecuteLine(
             self: Pin<&mut IConsole>,
             pStr: StrRef<'_>,
             ClientID: i32,
             InterpretSemicolons: bool,
+            AllowDangerous: bool,
         );
 
         /// Log a message.

@@ -110,9 +110,9 @@ public:
 	virtual void StoreCommands(bool Store) = 0;
 
 	virtual bool LineIsValid(const char *pStr) = 0;
-	virtual void ExecuteLine(const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) = 0;
-	virtual void ExecuteLineFlag(const char *pStr, int FlasgMask, int ClientId = -1, bool InterpretSemicolons = true) = 0;
-	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = -1, bool InterpretSemicolons = true) = 0;
+	virtual void ExecuteLine(const char *pStr, int ClientId = -1, bool InterpretSemicolons = true, bool AllowDangerous = true) = 0;
+	virtual void ExecuteLineFlag(const char *pStr, int FlasgMask, int ClientId = -1, bool InterpretSemicolons = true, bool AllowDangerous = true) = 0;
+	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientId = -1, bool InterpretSemicolons = true, bool AllowDangerous = true) = 0;
 	virtual bool ExecuteFile(const char *pFilename, int ClientId = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) = 0;
 
 	/**

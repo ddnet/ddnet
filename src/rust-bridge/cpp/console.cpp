@@ -123,9 +123,9 @@ void cxxbridge1$IConsole_IResult$GetColor(const ::IConsole_IResult &self, ::std:
   return (self.*GetVictim$)();
 }
 
-void cxxbridge1$IConsole$ExecuteLine(::IConsole &self, ::StrRef *pStr, ::std::int32_t ClientId, bool InterpretSemicolons) noexcept {
-  void (::IConsole::*ExecuteLine$)(::StrRef, ::std::int32_t, bool) = &::IConsole::ExecuteLine;
-  (self.*ExecuteLine$)(::std::move(*pStr), ClientId, InterpretSemicolons);
+void cxxbridge1$IConsole$ExecuteLine(::IConsole &self, ::StrRef *pStr, ::std::int32_t ClientId, bool InterpretSemicolons, bool AllowDangerous) noexcept {
+  void (::IConsole::*ExecuteLine$)(::StrRef, ::std::int32_t, bool, bool) = &::IConsole::ExecuteLine;
+  (self.*ExecuteLine$)(::std::move(*pStr), ClientId, InterpretSemicolons, AllowDangerous);
 }
 
 void cxxbridge1$IConsole$Print(const ::IConsole &self, ::std::int32_t Level, ::StrRef *pFrom, ::StrRef *pStr, ::ColorRGBA *PrintColor) noexcept {

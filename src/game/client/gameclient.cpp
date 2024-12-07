@@ -171,7 +171,7 @@ void CGameClient::OnConsoleInit()
 
 	// add basic console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
-	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself to restart");
+	Console()->Register("kill", "", CFGFLAG_CLIENT | CFGFLAG_DANGEROUS, ConKill, this, "Kill yourself to restart");
 	Console()->Register("ready_change", "", CFGFLAG_CLIENT, ConReadyChange7, this, "Change ready state (0.7 only)");
 
 	// register tune zone command to allow the client prediction to load tunezones from the map

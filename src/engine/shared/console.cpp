@@ -417,7 +417,7 @@ bool CConsole::LineIsValid(const char *pStr)
 	return true;
 }
 
-void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bool InterpretSemicolons)
+void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bool InterpretSemicolons, bool AllowDangerous)
 {
 	const char *pWithoutPrefix = str_startswith(pStr, "mc;");
 	if(pWithoutPrefix)
@@ -469,7 +469,15 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 
 		if(pCommand)
 		{
-			if(ClientId == IConsole::CLIENT_ID_GAME && !(pCommand->m_Flags & CFGFLAG_GAME))
+			if(!AllowDangerous && (pCommand->m_Flags & CFGFLAG_DANGEROUS))
+			{
+				if(Stroke)
+				{
+					log_info("console", "This command is dangerous, run console_allow_dangerous to allow it");
+					log_info("console", "Help: %s Usage: %s %s", pCommand->m_pHelp, pCommand->m_pName, pCommand->m_pParams);
+				}
+			}
+			else if(ClientId == IConsole::CLIENT_ID_GAME && !(pCommand->m_Flags & CFGFLAG_GAME))
 			{
 				if(Stroke)
 				{
@@ -615,17 +623,17 @@ CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 	return 0x0;
 }
 
-void CConsole::ExecuteLine(const char *pStr, int ClientId, bool InterpretSemicolons)
+void CConsole::ExecuteLine(const char *pStr, int ClientId, bool InterpretSemicolons, bool AllowDangerous)
 {
-	CConsole::ExecuteLineStroked(1, pStr, ClientId, InterpretSemicolons); // press it
-	CConsole::ExecuteLineStroked(0, pStr, ClientId, InterpretSemicolons); // then release it
+	CConsole::ExecuteLineStroked(1, pStr, ClientId, InterpretSemicolons, AllowDangerous); // press it
+	CConsole::ExecuteLineStroked(0, pStr, ClientId, InterpretSemicolons, AllowDangerous); // then release it
 }
 
-void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientId, bool InterpretSemicolons)
+void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientId, bool InterpretSemicolons, bool AllowDangerous)
 {
 	int Temp = m_FlagMask;
 	m_FlagMask = FlagMask;
-	ExecuteLine(pStr, ClientId, InterpretSemicolons);
+	ExecuteLine(pStr, ClientId, InterpretSemicolons, AllowDangerous);
 	m_FlagMask = Temp;
 }
 

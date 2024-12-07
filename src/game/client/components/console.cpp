@@ -296,7 +296,7 @@ void CGameConsole::CInstance::Reset()
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 {
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
-		m_pGameConsole->m_pConsole->ExecuteLine(pLine);
+		m_pGameConsole->m_pConsole->ExecuteLine(pLine, -1, true, m_pGameConsole->m_AllowDangerous);
 	else
 	{
 		if(m_pGameConsole->Client()->RconAuthed())
@@ -1536,6 +1536,15 @@ void CGameConsole::ConConsolePageDown(IConsole::IResult *pResult, void *pUserDat
 		pConsole->m_BacklogCurLine = 0;
 }
 
+void CGameConsole::ConConsoleAllowDangerous(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameConsole *pSelf = (CGameConsole *)pUserData;
+	if(pResult->NumArguments() == 1)
+		pSelf->m_AllowDangerous = pResult->GetInteger(0) > 0;
+	else
+		pSelf->m_AllowDangerous = !pSelf->m_AllowDangerous;
+}
+
 void CGameConsole::ConchainConsoleOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CGameConsole *pSelf = (CGameConsole *)pUserData;
@@ -1581,6 +1590,8 @@ void CGameConsole::OnConsoleInit()
 	Console()->Register("console_page_up", "", CFGFLAG_CLIENT, ConConsolePageUp, this, "Previous page in console");
 	Console()->Register("console_page_down", "", CFGFLAG_CLIENT, ConConsolePageDown, this, "Next page in console");
 	Console()->Chain("console_output_level", ConchainConsoleOutputLevel, this);
+
+	Console()->Register("console_allow_dangerous", "?i[allow]", CFGFLAG_CLIENT, ConConsoleAllowDangerous, this, "Allow dangerous commands to be run in console");
 }
 
 void CGameConsole::OnInit()

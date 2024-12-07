@@ -157,6 +157,8 @@ class CGameConsole : public CComponent
 	bool m_WantsSelectionCopy = false;
 	CUi::CTouchState m_TouchState;
 
+	bool m_AllowDangerous = false;
+
 	static const ColorRGBA ms_SearchHighlightColor;
 	static const ColorRGBA ms_SearchSelectedColor;
 
@@ -169,6 +171,7 @@ class CGameConsole : public CComponent
 	static void ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageUp(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageDown(IConsole::IResult *pResult, void *pUserData);
+	static void ConConsoleAllowDangerous(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainConsoleOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
