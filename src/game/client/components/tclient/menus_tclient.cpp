@@ -824,8 +824,6 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	CUIRect Label, LabelMid, Section, LabelRight;
 	static int s_SelectedProfile = -1;
 
-	const float LineSize = 20.0f;
-	const float MarginSmall = 5.0f;
 	const float FontSize = 14.0f;
 
 	char *pSkinName = g_Config.m_ClPlayerSkin;
