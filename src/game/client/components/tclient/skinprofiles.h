@@ -5,6 +5,7 @@
 #include <engine/keys.h>
 #include <engine/shared/protocol.h>
 #include <game/client/component.h>
+#include <base/system.h>
 #include <vector>
 
 #define PROFILES_FILE "tclient_profiles.cfg"
