@@ -8,15 +8,15 @@
 #include "message.h"
 #include <base/hash.h>
 
+#include <engine/client/enums.h>
+#include <engine/friends.h>
 #include <engine/shared/translation_context.h>
 
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 
-#include <engine/friends.h>
 #include <functional>
-
-#include <engine/client/enums.h>
+#include <optional>
 
 struct SWarning;
 
@@ -301,7 +301,7 @@ public:
 	virtual void GetSmoothFreezeTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
 
 	virtual void AddWarning(const SWarning &Warning) = 0;
-	virtual SWarning *GetCurWarning() = 0;
+	virtual std::optional<SWarning> CurrentWarning() = 0;
 
 	virtual CChecksumData *ChecksumData() = 0;
 	virtual int UdpConnectivity(int NetType) = 0;

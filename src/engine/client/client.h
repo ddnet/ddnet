@@ -5,6 +5,7 @@
 
 #include <deque>
 #include <memory>
+#include <mutex>
 
 #include <base/hash.h>
 
@@ -236,6 +237,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		int m_State = STATE_INIT;
 	} m_VersionInfo;
 
+	std::mutex m_WarningsMutex;
 	std::vector<SWarning> m_vWarnings;
 	std::vector<SWarning> m_vQuittingWarnings;
 
@@ -511,7 +513,7 @@ public:
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) override;
 
 	void AddWarning(const SWarning &Warning) override;
-	SWarning *GetCurWarning() override;
+	std::optional<SWarning> CurrentWarning() override;
 	std::vector<SWarning> &&QuittingWarnings() { return std::move(m_vQuittingWarnings); }
 
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
