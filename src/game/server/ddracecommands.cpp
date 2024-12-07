@@ -168,6 +168,16 @@ void CGameContext::ConToggleInvincible(IConsole::IResult *pResult, void *pUserDa
 		pChr->SetInvincible(pResult->NumArguments() == 0 ? !pChr->Core()->m_Invincible : pResult->GetInteger(0));
 }
 
+void CGameContext::ConToggleKillable(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(pPlayer)
+	{
+		pPlayer->m_Killable = (pResult->NumArguments() == 0) ? !pPlayer->m_Killable : pResult->GetInteger(0);
+	}
+}
+
 void CGameContext::ConSolo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

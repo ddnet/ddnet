@@ -2269,6 +2269,13 @@ void CGameContext::ConPracticeToggleInvincible(IConsole::IResult *pResult, void 
 		ConToggleInvincible(pResult, pUserData);
 }
 
+void CGameContext::ConPracticeToggleKillable(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pSelf->GetPracticeCharacter(pResult))
+		ConToggleKillable(pResult, pUserData);
+}
+
 void CGameContext::ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
