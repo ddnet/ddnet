@@ -858,6 +858,62 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	Teams.SwapTeamCharacters(pPlayer, pSwapPlayer, Team);
 }
 
+void CGameContext::ConCancelSwap(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(!g_Config.m_SvSwap)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Swap is disabled on this server.");
+		return;
+	}
+
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Swap is not available on forced solo servers.");
+		return;
+	}
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientId);
+
+	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Join a team to use swap feature, which means you can swap positions with each other.");
+		return;
+	}
+
+	bool SwapPending = pPlayer->m_SwapTargetsClientId != -1 && !pSelf->Server()->ClientSlotEmpty(pPlayer->m_SwapTargetsClientId);
+
+	if(!SwapPending)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"You do not have a pending swap request.");
+		return;
+	}
+
+	Teams.CancelTeamSwap(pPlayer, Team);
+}
+
 void CGameContext::ConSave(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
