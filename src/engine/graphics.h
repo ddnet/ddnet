@@ -13,6 +13,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include <vector>
 
 #define GRAPHICS_TYPE_UNSIGNED_BYTE 0x1401
@@ -467,7 +468,7 @@ public:
 	// this function always returns the pixels in RGB
 	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
 
-	virtual SWarning *GetCurWarning() = 0;
+	virtual std::optional<SWarning> CurrentWarning() = 0;
 
 	// returns true if the error msg was shown
 	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;

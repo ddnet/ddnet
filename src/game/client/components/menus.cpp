@@ -6,6 +6,7 @@
 #include <cmath>
 #include <vector>
 
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 #include <base/vmath.h>
@@ -988,10 +989,11 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	// no multiline support for console
 	std::string BodyStr = pBody;
 	while(BodyStr.find('\n') != std::string::npos)
+	{
 		BodyStr.replace(BodyStr.find('\n'), 1, " ");
-	dbg_msg(pTopic, "%s", BodyStr.c_str());
+	}
+	log_warn("client", "%s: %s", pTopic, BodyStr.c_str());
 
-	// reset active item
 	Ui()->SetActiveItem(nullptr);
 
 	str_copy(m_aMessageTopic, pTopic);
