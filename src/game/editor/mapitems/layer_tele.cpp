@@ -310,6 +310,21 @@ bool CLayerTele::ContainsElementWithId(int Id, int Index)
 	return false;
 }
 
+bool CLayerTele::ContainsTeleWithId(int Id, bool Checkpoint)
+{
+	for(int y = 0; y < m_Height; ++y)
+	{
+		for(int x = 0; x < m_Width; ++x)
+		{
+			if(IsTeleTileNumberUsed(m_pTeleTile[y * m_Width + x].m_Type, Checkpoint) && m_pTeleTile[y * m_Width + x].m_Number == Id)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void CLayerTele::GetPos(int Number, int Offset, int &TeleX, int &TeleY)
 {
 	int Match = -1;
