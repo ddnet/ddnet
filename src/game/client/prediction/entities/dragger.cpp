@@ -13,12 +13,7 @@ void CDragger::Tick()
 {
 	if(GameWorld()->GameTick() % (int)(GameWorld()->GameTickSpeed() * 0.15f) == 0)
 	{
-		int Flags;
-		int index = Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
-		if(index)
-		{
-			m_Core = Collision()->CpSpeed(index, Flags);
-		}
+		Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
 		m_Pos += m_Core;
 
 		LookForPlayersToDrag();

@@ -190,12 +190,7 @@ void CPickup::Move()
 {
 	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
 	{
-		int Flags;
-		int index = GameServer()->Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
-		if(index)
-		{
-			m_Core = GameServer()->Collision()->CpSpeed(index, Flags);
-		}
+		GameServer()->Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
 		m_Pos += m_Core;
 	}
 }

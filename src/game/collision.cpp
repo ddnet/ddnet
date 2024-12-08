@@ -786,51 +786,46 @@ int CCollision::GetSwitchDelay(int Index) const
 	return 0;
 }
 
-int CCollision::IsMover(int x, int y, int *pFlags) const
+int CCollision::MoverSpeed(int x, int y, vec2 *pSpeed) const
 {
 	int Nx = clamp(x / 32, 0, m_Width - 1);
 	int Ny = clamp(y / 32, 0, m_Height - 1);
 	int Index = m_pTiles[Ny * m_Width + Nx].m_Index;
-	*pFlags = m_pTiles[Ny * m_Width + Nx].m_Flags;
-	if(Index < 0)
-		return 0;
-	if(Index == TILE_CP || Index == TILE_CP_F)
-		return Index;
-	else
-		return 0;
-}
 
-vec2 CCollision::CpSpeed(int Index, int Flags) const
-{
-	if(Index < 0)
-		return vec2(0, 0);
-	vec2 target;
-	if(Index == TILE_CP || Index == TILE_CP_F)
-		switch(Flags)
-		{
-		case ROTATION_0:
-			target.x = 0;
-			target.y = -4;
-			break;
-		case ROTATION_90:
-			target.x = 4;
-			target.y = 0;
-			break;
-		case ROTATION_180:
-			target.x = 0;
-			target.y = 4;
-			break;
-		case ROTATION_270:
-			target.x = -4;
-			target.y = 0;
-			break;
-		default:
-			target = vec2(0, 0);
-			break;
-		}
+	if(Index != TILE_CP && Index != TILE_CP_F)
+	{
+		return 0;
+	}
+
+	vec2 Target;
+	switch(m_pTiles[Ny * m_Width + Nx].m_Flags)
+	{
+	case ROTATION_0:
+		Target.x = 0.0f;
+		Target.y = -4.0f;
+		break;
+	case ROTATION_90:
+		Target.x = 4.0f;
+		Target.y = 0.0f;
+		break;
+	case ROTATION_180:
+		Target.x = 0.0f;
+		Target.y = 4.0f;
+		break;
+	case ROTATION_270:
+		Target.x = -4.0f;
+		Target.y = 0.0f;
+		break;
+	default:
+		Target = vec2(0.0f, 0.0f);
+		break;
+	}
 	if(Index == TILE_CP_F)
-		target *= 4;
-	return target;
+	{
+		Target *= 4.0f;
+	}
+	*pSpeed = Target;
+	return Index;
 }
 
 int CCollision::GetPureMapIndex(float x, float y) const

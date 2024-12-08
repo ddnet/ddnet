@@ -36,13 +36,8 @@ void CDragger::Tick()
 {
 	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
 	{
-		int Flags;
 		m_EvalTick = Server()->Tick();
-		int index = GameServer()->Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
-		if(index)
-		{
-			m_Core = GameServer()->Collision()->CpSpeed(index, Flags);
-		}
+		GameServer()->Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
 		m_Pos += m_Core;
 
 		// Adopt the new position for all outgoing laser beams

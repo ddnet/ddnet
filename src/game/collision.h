@@ -110,9 +110,7 @@ public:
 	int IsTimeCheckpoint(int Index) const;
 	int IsFTimeCheckpoint(int Index) const;
 
-	int IsMover(int x, int y, int *pFlags) const;
-
-	vec2 CpSpeed(int index, int Flags = 0) const;
+	int MoverSpeed(int x, int y, vec2 *pSpeed) const;
 
 	const CLayers *Layers() const { return m_pLayers; }
 	const CTile *GameLayer() const { return m_pTiles; }
