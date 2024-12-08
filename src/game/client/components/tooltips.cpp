@@ -26,6 +26,17 @@ inline void CTooltips::ClearActiveTooltip()
 	m_PreviousTooltip.reset();
 }
 
+// TClient
+void CTooltips::SetFadeTime(const void *pId, float Time)
+{
+	uintptr_t Id = reinterpret_cast<uintptr_t>(pId);
+	const auto it = m_Tooltips.find(Id);
+	if(it != m_Tooltips.end())
+	{
+		it->second.m_FadeTime = Time;
+	}
+}
+
 void CTooltips::DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint)
 {
 	uintptr_t Id = reinterpret_cast<uintptr_t>(pId);
@@ -75,7 +86,10 @@ void CTooltips::OnRender()
 		m_PreviousTooltip.emplace(Tooltip);
 
 		// Delay tooltip until 1 second passed. Start fade-in in the last 0.25 seconds.
-		constexpr float SecondsBeforeFadeIn = 0.75f;
+		float SecondsBeforeFadeIn = 0.75f;
+
+		SecondsBeforeFadeIn = Tooltip.m_FadeTime;
+
 		const float SecondsSinceActivation = (time_get() - m_HoverTime) / (float)time_freq();
 		if(SecondsSinceActivation < SecondsBeforeFadeIn)
 			return;
