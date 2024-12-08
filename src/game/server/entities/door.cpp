@@ -30,10 +30,10 @@ void CDoor::ResetCollision()
 	{
 		vec2 CurrentPos(m_Pos.x + (m_Direction.x * i),
 			m_Pos.y + (m_Direction.y * i));
-		if(GameServer()->Collision()->CheckPoint(CurrentPos) || GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y) || GameServer()->Collision()->GetFTile(m_Pos.x, m_Pos.y))
+		if(GameServer()->Collision()->CheckPoint(CurrentPos) || GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y) || GameServer()->Collision()->GetFrontTile(m_Pos.x, m_Pos.y))
 			break;
 		else
-			GameServer()->Collision()->SetDCollisionAt(
+			GameServer()->Collision()->SetDoorCollisionAt(
 				m_Pos.x + (m_Direction.x * i),
 				m_Pos.y + (m_Direction.y * i), TILE_STOPA, 0 /*Flags*/,
 				m_Number);

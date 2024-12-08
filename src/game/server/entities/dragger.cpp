@@ -96,7 +96,7 @@ void CDragger::LookForPlayersToDrag()
 		// Dragger beams can be created only for reachable, alive players
 		int IsReachable =
 			m_IgnoreWalls ?
-				!GameServer()->Collision()->IntersectNoLaserNW(m_Pos, pTarget->m_Pos, 0, 0) :
+				!GameServer()->Collision()->IntersectNoLaserNoWalls(m_Pos, pTarget->m_Pos, 0, 0) :
 				!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
 		if(IsReachable && pTarget->IsAlive())
 		{
