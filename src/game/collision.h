@@ -55,9 +55,7 @@ public:
 	// DDRace
 	void SetCollisionAt(float x, float y, int Index);
 	void SetDCollisionAt(float x, float y, int Type, int Flags, int Number);
-	int GetDTileIndex(int Index) const;
-	int GetDTileFlags(int Index) const;
-	int GetDTileNumber(int Index) const;
+	void GetDoorTile(int Index, CDoorTile *pDoorTile) const;
 	int GetFCollisionAt(float x, float y) const { return GetFTile(round_to_int(x), round_to_int(y)); }
 	int IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
 	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;

@@ -300,12 +300,11 @@ int CCollision::GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void 
 		}
 		if(pfnSwitchActive)
 		{
-			int TeleNumber = GetDTileNumber(ModMapIndex);
-			if(pfnSwitchActive(TeleNumber, pUser))
+			CDoorTile DoorTile;
+			GetDoorTile(ModMapIndex, &DoorTile);
+			if(pfnSwitchActive(DoorTile.m_Number, pUser))
 			{
-				int Tile = GetDTileIndex(ModMapIndex);
-				int Flags = GetDTileFlags(ModMapIndex);
-				Restrictions |= ::GetMoveRestrictions(d, Tile, Flags);
+				Restrictions |= ::GetMoveRestrictions(d, DoorTile.m_Index, DoorTile.m_Flags);
 			}
 		}
 	}
@@ -1093,27 +1092,16 @@ void CCollision::SetDCollisionAt(float x, float y, int Type, int Flags, int Numb
 	m_pDoor[Ny * m_Width + Nx].m_Number = Number;
 }
 
-int CCollision::GetDTileIndex(int Index) const
+void CCollision::GetDoorTile(int Index, CDoorTile *pDoorTile) const
 {
 	if(!m_pDoor || Index < 0 || !m_pDoor[Index].m_Index)
-		return 0;
-	return m_pDoor[Index].m_Index;
-}
-
-int CCollision::GetDTileNumber(int Index) const
-{
-	if(!m_pDoor || Index < 0 || !m_pDoor[Index].m_Index)
-		return 0;
-	if(m_pDoor[Index].m_Number)
-		return m_pDoor[Index].m_Number;
-	return 0;
-}
-
-int CCollision::GetDTileFlags(int Index) const
-{
-	if(!m_pDoor || Index < 0 || !m_pDoor[Index].m_Index)
-		return 0;
-	return m_pDoor[Index].m_Flags;
+	{
+		pDoorTile->m_Index = 0;
+		pDoorTile->m_Flags = 0;
+		pDoorTile->m_Number = 0;
+		return;
+	}
+	*pDoorTile = m_pDoor[Index];
 }
 
 void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY)
