@@ -194,6 +194,8 @@ public:
 	// camera info is used sparingly for converting aim target to absolute world coordinates
 	class CCameraInfo
 	{
+		friend class CPlayer;
+		bool m_HasCameraInfo;
 		float m_Zoom;
 		int m_Deadzone;
 		int m_FollowFactor;
