@@ -513,7 +513,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 
 	m_NumInputs++;
 
-	if(m_pCharacter && !m_Paused && !(pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_CAM))
+	if(m_pCharacter && !m_Paused && !(pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_TARGET))
 		m_pCharacter->OnPredictedInput(pNewInput);
 
 	// Magic number when we can hope that client has successfully identified itself
@@ -528,8 +528,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	Server()->SetClientFlags(m_ClientId, pNewInput->m_PlayerFlags);
 
 	AfkTimer();
-
-	if(((pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_CAM) || GetClientVersion() < VERSION_DDNET_PLAYERFLAG_SPEC_CAM) && ((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorId == SPEC_FREEVIEW)
+	bool IsSpecTarget = (pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_TARGET && GetClientVersion() >= VERSION_DDNET_PLAYERFLAG_SPEC_TARGET) || GetClientVersion() < VERSION_DDNET_PLAYERFLAG_SPEC_TARGET;
+	if(IsSpecTarget && ((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorId == SPEC_FREEVIEW)
 		m_ViewPos = vec2(pNewInput->m_TargetX, pNewInput->m_TargetY);
 
 	// check for activity
@@ -555,7 +555,7 @@ void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *pNewInput)
 	if(m_PlayerFlags & PLAYERFLAG_CHATTING)
 		return;
 
-	if(m_pCharacter && !m_Paused && !(m_PlayerFlags & PLAYERFLAG_SPEC_CAM))
+	if(m_pCharacter && !m_Paused && !(m_PlayerFlags & PLAYERFLAG_SPEC_TARGET))
 		m_pCharacter->OnDirectInput(pNewInput);
 }
 
