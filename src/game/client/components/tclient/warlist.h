@@ -18,14 +18,15 @@ enum
 class CWarType
 {
 public:
-	char m_aWarType[MAX_WARLIST_TYPE_LENGTH] = "";
+	// Intentionally named redundantly because it was confusing otherwise
+	char m_aWarName[MAX_WARLIST_TYPE_LENGTH] = "";
 	ColorRGBA m_Color = ColorRGBA(1, 1, 1, 1);
 	bool m_Removable = true;
 	bool m_Imported = false;
 
 	CWarType(const char *pName, ColorRGBA Color = ColorRGBA(1, 1, 1, 1), bool Removable = true, bool IsImport = false)
 	{
-		str_copy(m_aWarType, pName);
+		str_copy(m_aWarName, pName);
 		m_Color = Color;
 		m_Removable = Removable;
 		m_Imported = IsImport;
@@ -33,7 +34,7 @@ public:
 
 	bool operator==(const CWarType &Other) const
 	{
-		return str_comp(m_aWarType, Other.m_aWarType) == 0;
+		return str_comp(m_aWarName, Other.m_aWarName) == 0;
 	}
 };
 
@@ -135,8 +136,10 @@ public:
 	CWarType m_WarTypeNone = CWarType("none", ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), false);
 
 	// duplicate war types are NOT allowed
-	std::vector<CWarType> m_WarTypes = {CWarType("war", ColorRGBA(1.0f, 0.2f, 0.2f, 1.0f), false), CWarType("team", ColorRGBA(0.0f, 0.9f, 0.2f, 1.0f), false)};
-
+	std::vector<CWarType *> m_WarTypes = {
+		new CWarType("enemy", ColorRGBA(1.0f, 0.2f, 0.2f, 1.0f), false),
+		new CWarType("team", ColorRGBA(0.0f, 0.9f, 0.2f, 1.0f), false)
+	};
 	// TODO: add a special backend command that allows for changing the names of the default war types
 
 	// Duplicate war entries ARE allowed
@@ -162,6 +165,8 @@ public:
 
 	void RemoveWarEntry(const char *pName, const char *pClan, const char *pType);
 	void RemoveWarType(const char *pType);
+
+	void RemoveWarEntry(CWarEntry *Entry);
 
 	void RemoveWarEntry(int Index);
 	void RemoveWarType(int Index);

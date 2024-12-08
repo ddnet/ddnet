@@ -16,6 +16,7 @@ struct CTooltip
 	const char *m_pText;
 	float m_WidthHint;
 	bool m_OnScreen; // used to know if the tooltip should be rendered.
+	float m_FadeTime = 0.75;
 };
 
 /**
@@ -53,6 +54,9 @@ public:
 	 * @param WidthHint The maximum width of the tooltip, or -1.0f for unlimited.
 	 */
 	void DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
+
+	// TClient
+	void SetFadeTime(const void *pId, float Time);
 
 	virtual void OnReset() override;
 	virtual void OnRender() override;

@@ -69,6 +69,8 @@ static bool s_StartedTime = false;
 const float LineSize = 20.0f;
 const float ColorPickerLineSize = 25.0f;
 const float HeadlineFontSize = 20.0f;
+const float StandardFontSize = 14.0f;
+
 const float HeadlineHeight = HeadlineFontSize + 0.0f;
 const float Margin = 10.0f;
 const float MarginSmall = 5.0f;
@@ -726,6 +728,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClResetBindWheelMouse, Localize("Reset position of mouse when opening bindwheel"), &g_Config.m_ClResetBindWheelMouse, &Button, LineSize);
 	}
 
+	if(s_CurCustomTab == TCLIENT_TAB_WARLIST)
+	{
+		RenderSettingsWarList(MainView);
+	}
+
 	if(s_CurCustomTab == TCLIENT_TAB_INFO)
 	{
 		MainView.HSplitTop(MarginSmall, nullptr, &MainView);
@@ -816,6 +823,252 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			RenderDevSkin(TeeRect.Center(), 50.0f, "glow_mermyfox", "mermyfox", true, 15873791, 16449285, 0, false);
 		}
 		g_Config.m_ClWhiteFeet = WhiteFeetTemp;
+	}
+}
+
+void CMenus::RenderSettingsWarList(CUIRect MainView)
+{
+	CUIRect RightView, LeftView, Column1, Column2, Column3, Column4, Button, ButtonL, ButtonR, Label;
+
+	MainView.HSplitTop(MarginSmall, nullptr, &MainView);
+	MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
+	LeftView.VSplitLeft(MarginSmall, nullptr, &LeftView);
+	RightView.VSplitRight(MarginSmall, &RightView, nullptr);
+
+	// WAR LIST will have 4 columns
+	//  [War entries] - [Entry Editing] - [Group Types] - [Recent Players]
+	//									 [Group Editing]
+
+	// putting this here so it can be updated by the entry list
+	static char s_aEntryName[MAX_NAME_LENGTH];
+	static char s_aEntryClan[MAX_CLAN_LENGTH];
+	static char s_aEntryReason[MAX_WARLIST_REASON_LENGTH];
+	static int s_IsClan = 1;
+	static int s_IsName = 0;
+
+	LeftView.VSplitMid(&Column1, &Column2, Margin);
+	RightView.VSplitMid(&Column3, &Column4, Margin);
+
+	// ======WAR ENTRIES======
+	Column1.HSplitTop(HeadlineHeight, &Label, &Column1);
+	Ui()->DoLabel(&Label, Localize("War Entries"), HeadlineFontSize, TEXTALIGN_ML);
+	Column1.HSplitTop(MarginSmall, nullptr, &Column1);
+	CUIRect EntriesSearch;
+
+	Column1.HSplitBottom(25.0f, &Column1, &EntriesSearch);
+	EntriesSearch.HSplitTop(MarginSmall, nullptr, &EntriesSearch);
+
+	static CWarEntry *pSelectedEntry = nullptr;
+	static CWarType *pSelectedType = nullptr;
+
+	// Filter the list
+	static CLineInputBuffered<128> s_EntriesFilterInput;
+	std::vector<CWarEntry *> vpFilteredEntries;
+	for(size_t i = 0; i < GameClient()->m_WarList.m_WarEntries.size(); ++i)
+	{
+		CWarEntry *pEntry = &GameClient()->m_WarList.m_WarEntries[i];
+		bool Matches = false;
+		if(str_find_nocase(pEntry->m_aName, s_EntriesFilterInput.GetString()))
+			Matches = true;
+		if(str_find_nocase(pEntry->m_aClan, s_EntriesFilterInput.GetString()))
+			Matches = true;
+		if(str_find_nocase(pEntry->m_pWarType->m_aWarName, s_EntriesFilterInput.GetString()))
+			Matches = true;
+		if(Matches)
+			vpFilteredEntries.push_back(pEntry);
+	}
+
+	int SelectedOld = -1;
+	static CListBox s_EntriesListBox;
+	s_EntriesListBox.DoStart(35.0f, vpFilteredEntries.size(), 1, 2, SelectedOld, &Column1);
+
+	static std::vector<unsigned char> s_vItemIds;
+	static std::vector<CButtonContainer> s_vDeleteButtons;
+
+	const int MaxEntries = GameClient()->m_WarList.m_WarEntries.size();
+	s_vItemIds.resize(MaxEntries);
+	s_vDeleteButtons.resize(MaxEntries);
+
+	for(size_t i = 0; i < vpFilteredEntries.size(); i++)
+	{
+		CWarEntry *pEntry = vpFilteredEntries[i];
+
+		// idk why it wants this, it was complaining
+		if(!pEntry)
+			continue;
+
+		if(pSelectedEntry && pEntry == pSelectedEntry)
+			SelectedOld = i;
+
+		const CListboxItem Item = s_EntriesListBox.DoNextItem(&s_vItemIds[i], SelectedOld >= 0 && (size_t)SelectedOld == i);
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect EntryRect, DeleteButton, EntryTypeRect, WarType, ToolTip;
+		Item.m_Rect.Margin(0.0f, &EntryRect);
+		EntryRect.VSplitLeft(26.0f, &DeleteButton, &EntryRect);
+		DeleteButton.HMargin(7.5f, &DeleteButton);
+		DeleteButton.VSplitLeft(MarginSmall, nullptr, &DeleteButton);
+		DeleteButton.VSplitRight(MarginExtraSmall, &DeleteButton, nullptr);
+
+		if(DoButton_FontIcon(&s_vDeleteButtons[i], FONT_ICON_TRASH, 0, &DeleteButton, IGraphics::CORNER_ALL))
+			GameClient()->m_WarList.RemoveWarEntry(pEntry);
+
+		bool IsClan = false;
+		char aBuf[32];
+		if(str_comp(pEntry->m_aClan, "") != 0)
+		{
+			str_copy(aBuf, pEntry->m_aClan);
+			IsClan = true;
+		}
+		else
+		{
+			str_copy(aBuf, pEntry->m_aName);
+		}
+		EntryRect.VSplitLeft(35.0f, &EntryTypeRect, &EntryRect);
+
+		if(IsClan)
+		{
+			RenderFontIcon(EntryTypeRect, FONT_ICON_USERS, 18.0f, TEXTALIGN_MC);
+		}
+		else
+		{
+			// TODO: stop misusing this function
+			// TODO: render the real skin with skin remembering component (to be added)
+			RenderDevSkin(EntryTypeRect.Center(), 35.0f, "defualt", "default", false, 0, 0, 0, false);
+		}
+
+		if(str_comp(pEntry->m_aReason, "") != 0)
+		{
+			EntryRect.VSplitRight(20.0f, &EntryRect, &ToolTip);
+			RenderFontIcon(ToolTip, FONT_ICON_COMMENT, 18.0f, TEXTALIGN_MC);
+			GameClient()->m_Tooltips.DoToolTip(&s_vItemIds[i], &ToolTip, pEntry->m_aReason);
+			GameClient()->m_Tooltips.SetFadeTime(&s_vItemIds[i], 0.0f);
+		}
+
+		EntryRect.HMargin(MarginExtraSmall, &EntryRect);
+		EntryRect.HSplitMid(&EntryRect, &WarType, MarginSmall);
+
+		Ui()->DoLabel(&EntryRect, aBuf, StandardFontSize, TEXTALIGN_ML);
+		TextRender()->TextColor(pEntry->m_pWarType->m_Color);
+		Ui()->DoLabel(&WarType, pEntry->m_pWarType->m_aWarName, StandardFontSize, TEXTALIGN_ML);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
+	const int NewSelected = s_EntriesListBox.DoEnd();
+	if(SelectedOld != NewSelected || (NewSelected >= 0 && Ui()->HotItem() == &s_vItemIds[NewSelected] && Ui()->MouseButtonClicked(0)))
+	{
+		pSelectedEntry = vpFilteredEntries[NewSelected];
+		if(!Ui()->LastMouseButton(1) && !Ui()->LastMouseButton(2))
+		{
+			str_copy(s_aEntryName, pSelectedEntry->m_aName);
+			str_copy(s_aEntryClan, pSelectedEntry->m_aClan);
+			str_copy(s_aEntryReason, pSelectedEntry->m_aReason);
+			if(str_comp(pSelectedEntry->m_aClan, "") != 0)
+			{
+				s_IsName = 0;
+				s_IsClan = 1;
+			}
+			else
+			{
+				s_IsName = 1;
+				s_IsClan = 0;
+			}
+			pSelectedType = pSelectedEntry->m_pWarType;
+		}
+	}
+
+	Ui()->DoEditBox_Search(&s_EntriesFilterInput, &EntriesSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed());
+
+	// ======WAR ENTRY EDITING======
+
+	Column2.HSplitTop(HeadlineHeight, nullptr, &Column2);
+	Column2.HSplitTop(MarginSmall, nullptr, &Column2);
+	Column2.HSplitTop(HeadlineFontSize, &Button, &Column2);
+
+	Button.VSplitMid(&ButtonL, &ButtonR, MarginSmall);
+	static CLineInput s_NameInput;
+	s_NameInput.SetBuffer(s_aEntryName, sizeof(s_aEntryName));
+	s_NameInput.SetEmptyText("Name");
+	if(s_IsName)
+		Ui()->DoEditBox(&s_NameInput, &ButtonL, 12.0f);
+	else
+	{
+		ButtonL.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), 15, 3.0f);
+		Ui()->ClipEnable(&ButtonL);
+		ButtonL.VMargin(2.0f, &ButtonL);
+		const STextBoundingBox BoundingBox = s_NameInput.Render(&ButtonL, 12.0f, TEXTALIGN_ML, false, -1.0f, 0.0f);
+		Ui()->ClipDisable();
+	}
+
+	static CLineInput s_ClanInput;
+	s_ClanInput.SetBuffer(s_aEntryClan, sizeof(s_aEntryClan));
+	s_ClanInput.SetEmptyText("Clan");
+	if(s_IsClan)
+		Ui()->DoEditBox(&s_ClanInput, &ButtonR, 12.0f);
+	else
+	{
+		ButtonR.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), 15, 3.0f);
+		Ui()->ClipEnable(&ButtonR);
+		ButtonR.VMargin(2.0f, &ButtonR);
+		const STextBoundingBox BoundingBox = s_ClanInput.Render(&ButtonR, 12.0f, TEXTALIGN_ML, false, -1.0f, 0.0f);
+		Ui()->ClipDisable();
+	}
+	Column2.HSplitTop(MarginSmall, nullptr, &Column2);
+	Column2.HSplitTop(HeadlineFontSize, &Button, &Column2);
+	static CLineInput s_ReasonInput;
+	s_ReasonInput.SetBuffer(s_aEntryReason, sizeof(s_aEntryReason));
+	s_ReasonInput.SetEmptyText("Reason");
+	Ui()->DoEditBox(&s_ReasonInput, &Button, 12.0f);
+
+	Column2.HSplitTop(MarginSmall, nullptr, &Column2);
+	Column2.HSplitTop(LineSize, &Button, &Column2);
+	Button.VSplitMid(&ButtonL, &ButtonR, MarginSmall);
+	static unsigned char s_NameRadio, s_ClanRadio;
+	if(DoButton_CheckBox_Common(&s_NameRadio, "Name", s_IsName ? "X" : "", &ButtonL))
+	{
+		s_IsName = 1;
+		s_IsClan = 0;
+	}
+	if(DoButton_CheckBox_Common(&s_ClanRadio, "Clan", s_IsClan ? "X" : "", &ButtonR))
+	{
+		s_IsName = 0;
+		s_IsClan = 1;
+	}
+	if(!s_IsName)
+		str_copy(s_aEntryName, "");
+	if(!s_IsClan)
+		str_copy(s_aEntryClan, "");
+
+	static CButtonContainer s_AddButton, s_OverrideButton;
+
+	Column2.HSplitTop(MarginSmall, nullptr, &Column2);
+	Column2.HSplitTop(LineSize, &Button, &Column2);
+	Button.VSplitMid(&ButtonL, &ButtonR, MarginSmall);
+
+	if(DoButton_Menu(&s_OverrideButton, Localize("Override Entry"), 0, &ButtonL) && pSelectedEntry)
+	{
+		if(pSelectedEntry && pSelectedType)
+		{
+			str_copy(pSelectedEntry->m_aName, s_aEntryName);
+			str_copy(pSelectedEntry->m_aClan, s_aEntryClan);
+			str_copy(pSelectedEntry->m_aReason, s_aEntryReason);
+			pSelectedEntry->m_pWarType = pSelectedType;
+		}
+	}
+	if(DoButton_Menu(&s_AddButton, Localize("Add Entry"), 0, &ButtonR))
+	{
+		if(pSelectedType)
+			GameClient()->m_WarList.AddWarEntry(s_aEntryName, s_aEntryClan, s_aEntryReason, pSelectedType->m_aWarName);
+	}
+	Column2.HSplitTop(MarginSmall, nullptr, &Column2);
+	Column2.HSplitTop(HeadlineFontSize + MarginSmall, &Button, &Column2);
+	if(pSelectedType)
+	{
+		float Shade = 0.0f;
+		Button.Draw(ColorRGBA(Shade, Shade, Shade, 0.25f), 15, 3.0f);
+		TextRender()->TextColor(pSelectedType->m_Color);
+		Ui()->DoLabel(&Button, pSelectedType->m_aWarName, HeadlineFontSize, TEXTALIGN_MC);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
 }
 
@@ -1253,7 +1506,7 @@ void CMenus::RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, co
 		SkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
 		SkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
 	}
-	if (Rainbow) 
+	if(Rainbow)
 	{
 		ColorRGBA Col = color_cast<ColorRGBA>(ColorHSLA(DefTick, 1.0f, 0.5f));
 		SkinInfo.m_ColorBody = Col;
@@ -1265,4 +1518,13 @@ void CMenus::RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, co
 	CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &SkinInfo, OffsetToMid);
 	vec2 TeeRenderPos(RenderPos.x, RenderPos.y + OffsetToMid.y);
 	RenderTools()->RenderTee(pIdleState, &SkinInfo, Emote, vec2(1.0f, 0.0f), TeeRenderPos);
+}
+
+void CMenus::RenderFontIcon(const CUIRect Rect, const char *pText, float Size, int Align)
+{
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
+	Ui()->DoLabel(&Rect, pText, Size, Align);
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 }
