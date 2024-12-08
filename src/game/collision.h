@@ -54,17 +54,15 @@ public:
 
 	// DDRace
 	void SetCollisionAt(float x, float y, int Index);
-	void SetDCollisionAt(float x, float y, int Type, int Flags, int Number);
-	int GetDTileIndex(int Index) const;
-	int GetDTileFlags(int Index) const;
-	int GetDTileNumber(int Index) const;
-	int GetFCollisionAt(float x, float y) const { return GetFTile(round_to_int(x), round_to_int(y)); }
+	void SetDoorCollisionAt(float x, float y, int Type, int Flags, int Number);
+	void GetDoorTile(int Index, CDoorTile *pDoorTile) const;
+	int GetFrontCollisionAt(float x, float y) const { return GetFrontTile(round_to_int(x), round_to_int(y)); }
 	int IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
-	int IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
+	int IntersectNoLaserNoWalls(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
 	int IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
 	int GetIndex(int x, int y) const;
 	int GetIndex(vec2 PrevPos, vec2 Pos) const;
-	int GetFIndex(int x, int y) const;
+	int GetFrontIndex(int x, int y) const;
 
 	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1) const;
 	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f) const
@@ -73,7 +71,7 @@ public:
 	}
 
 	int GetTile(int x, int y) const;
-	int GetFTile(int x, int y) const;
+	int GetFrontTile(int x, int y) const;
 	int Entity(int x, int y, int Layer) const;
 	int GetPureMapIndex(float x, float y) const;
 	int GetPureMapIndex(vec2 Pos) const { return GetPureMapIndex(Pos.x, Pos.y); }
@@ -83,9 +81,9 @@ public:
 	bool TileExistsNext(int Index) const;
 	vec2 GetPos(int Index) const;
 	int GetTileIndex(int Index) const;
-	int GetFTileIndex(int Index) const;
+	int GetFrontTileIndex(int Index) const;
 	int GetTileFlags(int Index) const;
-	int GetFTileFlags(int Index) const;
+	int GetFrontTileFlags(int Index) const;
 	int IsTeleport(int Index) const;
 	int IsEvilTeleport(int Index) const;
 	bool IsCheckTeleport(int Index) const;
@@ -105,14 +103,12 @@ public:
 	bool IsHookBlocker(int x, int y, vec2 Pos0, vec2 Pos1) const;
 	int IsWallJump(int Index) const;
 	int IsNoLaser(int x, int y) const;
-	int IsFNoLaser(int x, int y) const;
+	int IsFrontNoLaser(int x, int y) const;
 
 	int IsTimeCheckpoint(int Index) const;
-	int IsFTimeCheckpoint(int Index) const;
+	int IsFrontTimeCheckpoint(int Index) const;
 
-	int IsMover(int x, int y, int *pFlags) const;
-
-	vec2 CpSpeed(int index, int Flags = 0) const;
+	int MoverSpeed(int x, int y, vec2 *pSpeed) const;
 
 	const CLayers *Layers() const { return m_pLayers; }
 	const CTile *GameLayer() const { return m_pTiles; }

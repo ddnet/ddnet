@@ -36,13 +36,8 @@ void CDragger::Tick()
 {
 	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
 	{
-		int Flags;
 		m_EvalTick = Server()->Tick();
-		int index = GameServer()->Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
-		if(index)
-		{
-			m_Core = GameServer()->Collision()->CpSpeed(index, Flags);
-		}
+		GameServer()->Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
 		m_Pos += m_Core;
 
 		// Adopt the new position for all outgoing laser beams
@@ -101,7 +96,7 @@ void CDragger::LookForPlayersToDrag()
 		// Dragger beams can be created only for reachable, alive players
 		int IsReachable =
 			m_IgnoreWalls ?
-				!GameServer()->Collision()->IntersectNoLaserNW(m_Pos, pTarget->m_Pos, 0, 0) :
+				!GameServer()->Collision()->IntersectNoLaserNoWalls(m_Pos, pTarget->m_Pos, 0, 0) :
 				!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
 		if(IsReachable && pTarget->IsAlive())
 		{

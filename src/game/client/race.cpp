@@ -109,7 +109,7 @@ bool CRaceHelper::IsStart(vec2 Prev, vec2 Pos) const
 			{
 				if(m_pGameClient->Collision()->GetTileIndex(Index) == TILE_START)
 					return true;
-				if(m_pGameClient->Collision()->GetFTileIndex(Index) == TILE_START)
+				if(m_pGameClient->Collision()->GetFrontTileIndex(Index) == TILE_START)
 					return true;
 			}
 		}
@@ -118,7 +118,7 @@ bool CRaceHelper::IsStart(vec2 Prev, vec2 Pos) const
 			const int Index = m_pGameClient->Collision()->GetPureMapIndex(Pos);
 			if(m_pGameClient->Collision()->GetTileIndex(Index) == TILE_START)
 				return true;
-			if(m_pGameClient->Collision()->GetFTileIndex(Index) == TILE_START)
+			if(m_pGameClient->Collision()->GetFrontTileIndex(Index) == TILE_START)
 				return true;
 		}
 	}
