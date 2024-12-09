@@ -9,6 +9,8 @@
 
 #include <game/gamecore.h>
 
+#include <memory>
+
 static const char *TOOL_NAME = "demo_extract_chat";
 
 class CClientSnapshotHandler
@@ -195,8 +197,8 @@ public:
 
 static int ExtractDemoChat(const char *pDemoFilePath, IStorage *pStorage)
 {
-	CSnapshotDelta DemoSnapshotDelta;
-	CDemoPlayer DemoPlayer(&DemoSnapshotDelta, false);
+	std::unique_ptr<CSnapshotDelta> pDemoSnapshotDelta = std::make_unique<CSnapshotDelta>();
+	CDemoPlayer DemoPlayer(pDemoSnapshotDelta.get(), false);
 
 	if(DemoPlayer.Load(pStorage, nullptr, pDemoFilePath, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 	{
