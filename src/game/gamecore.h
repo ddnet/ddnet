@@ -241,6 +241,7 @@ public:
 
 	int m_Colliding;
 	bool m_LeftWall;
+	std::vector<vec2> m_BouncePositions;
 
 	// DDNet Character
 	void SetTeamsCore(CTeamsCore *pTeams);
