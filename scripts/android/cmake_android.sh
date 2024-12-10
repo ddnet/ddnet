@@ -29,51 +29,63 @@ COLOR_RESET="\e[0m"
 
 SHOW_USAGE_INFO=0
 
+log_info() {
+	printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "$1"
+}
+
+log_warn() {
+	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "$1" 1>&2
+}
+
+log_error() {
+	printf "${COLOR_RED}%s${COLOR_RESET}\n" "$1" 1>&2
+}
+
 if [ -z ${1+x} ]; then
 	SHOW_USAGE_INFO=1
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Did not pass Android build type"
+	log_error "Did not pass Android build type"
 else
 	ANDROID_BUILD=$1
 	if [[ "${ANDROID_BUILD}" == "x64" ]]; then
 		ANDROID_BUILD="x86_64"
 	fi
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Android build type: ${ANDROID_BUILD}"
+	log_warn "Android build type: ${ANDROID_BUILD}"
 fi
 
 if [ -z ${2+x} ]; then
 	SHOW_USAGE_INFO=1
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Did not pass game name"
+	log_error "Did not pass game name"
 else
 	GAME_NAME=$2
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Game name: ${GAME_NAME}"
+	log_warn "Game name: ${GAME_NAME}"
 fi
 
 if [ -z ${3+x} ]; then
 	SHOW_USAGE_INFO=1
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Did not pass package name"
+	log_error "Did not pass package name"
 else
 	PACKAGE_NAME=$3
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Package name: ${PACKAGE_NAME}"
+	log_warn "Package name: ${PACKAGE_NAME}"
 fi
 
 if [ -z ${4+x} ]; then
 	SHOW_USAGE_INFO=1
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Did not pass build type"
+	log_error "Did not pass build type"
 else
 	BUILD_TYPE=$4
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Build type: ${BUILD_TYPE}"
+	log_warn "Build type: ${BUILD_TYPE}"
 fi
 
 if [ -z ${5+x} ]; then
 	SHOW_USAGE_INFO=1
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Did not pass build folder"
+	log_error "Did not pass build folder"
 else
 	BUILD_FOLDER=$5
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Build folder: ${BUILD_FOLDER}"
+	log_warn "Build folder: ${BUILD_FOLDER}"
 fi
 
 if [ $SHOW_USAGE_INFO == 1 ]; then
-	printf "${COLOR_RED}%s${COLOR_RESET}\n" "Usage: ./cmake_android.sh <x86/x86_64/arm/arm64/all> <Game name> <Package name> <Debug/Release> <Build folder>"
+	log_error "Usage: ./cmake_android.sh <x86/x86_64/arm/arm64/all> <Game name> <Package name> <Debug/Release> <Build folder>"
 	exit 1
 fi
 
@@ -85,17 +97,17 @@ DEFAULT_KEY_PW=android
 DEFAULT_KEY_ALIAS=androiddebugkey
 
 if [ -z ${TW_KEY_NAME+x} ]; then
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Did not pass a key path for the APK signer, using default: ${DEFAULT_KEY_NAME}"
+	log_warn "Did not pass a key path for the APK signer, using default: ${DEFAULT_KEY_NAME}"
 else
 	DEFAULT_KEY_NAME=$TW_KEY_NAME
 fi
 if [ -z ${TW_KEY_PW+x} ]; then
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Did not pass a key password for the APK signer, using default: ${DEFAULT_KEY_PW}"
+	log_warn "Did not pass a key password for the APK signer, using default: ${DEFAULT_KEY_PW}"
 else
 	DEFAULT_KEY_PW=$TW_KEY_PW
 fi
 if [ -z ${TW_KEY_ALIAS+x} ]; then
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Did not pass a key alias for the APK signer, using default: ${DEFAULT_KEY_ALIAS}"
+	log_warn "Did not pass a key alias for the APK signer, using default: ${DEFAULT_KEY_ALIAS}"
 else
 	DEFAULT_KEY_ALIAS=$TW_KEY_ALIAS
 fi
@@ -110,7 +122,7 @@ if [ -z ${TW_VERSION_CODE+x} ]; then
 	if [ -z ${ANDROID_VERSION_CODE+x} ]; then
 		ANDROID_VERSION_CODE=1
 	fi
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Did not pass a version code, using default: ${ANDROID_VERSION_CODE}"
+	log_warn "Did not pass a version code, using default: ${ANDROID_VERSION_CODE}"
 else
 	ANDROID_VERSION_CODE=$TW_VERSION_CODE
 fi
@@ -123,7 +135,7 @@ if [ -z ${TW_VERSION_NAME+x} ]; then
 	if [ -z ${ANDROID_VERSION_NAME+x} ]; then
 		ANDROID_VERSION_NAME="1.0"
 	fi
-	printf "${COLOR_YELLOW}%s${COLOR_RESET}\n" "Did not pass a version name, using default: ${ANDROID_VERSION_NAME}"
+	log_warn "Did not pass a version name, using default: ${ANDROID_VERSION_NAME}"
 else
 	ANDROID_VERSION_NAME=$TW_VERSION_NAME
 fi
@@ -165,26 +177,26 @@ function build_for_type() {
 mkdir -p "${BUILD_FOLDER}"
 
 if [[ "${ANDROID_BUILD}" == "arm" || "${ANDROID_BUILD}" == "all" ]]; then
-	printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Building cmake (arm)..."
+	log_info "Building cmake (arm)..."
 	build_for_type arm armeabi-v7a armv7-linux-androideabi
 fi
 
 if [[ "${ANDROID_BUILD}" == "arm64" || "${ANDROID_BUILD}" == "all" ]]; then
-	printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Building cmake (arm64)..."
+	log_info "Building cmake (arm64)..."
 	build_for_type arm64 arm64-v8a aarch64-linux-android
 fi
 
 if [[ "${ANDROID_BUILD}" == "x86" || "${ANDROID_BUILD}" == "all" ]]; then
-	printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Building cmake (x86)..."
+	log_info "Building cmake (x86)..."
 	build_for_type x86 x86 i686-linux-android
 fi
 
 if [[ "${ANDROID_BUILD}" == "x86_64" || "${ANDROID_BUILD}" == "all" ]]; then
-	printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Building cmake (x86_64)..."
+	log_info "Building cmake (x86_64)..."
 	build_for_type x86_64 x86_64 x86_64-linux-android
 fi
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Copying project files..."
+log_info "Copying project files..."
 
 cd "${BUILD_FOLDER}" || exit 1
 
@@ -211,7 +223,7 @@ copy_dummy_files scripts/android/files/res/xml/shortcuts.xml src/main/res/xml/sh
 copy_dummy_files other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher.png
 copy_dummy_files other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher_round.png
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Copying libraries..."
+log_info "Copying libraries..."
 
 function copy_libs() {
 	mkdir -p "lib/$2"
@@ -239,15 +251,15 @@ if [[ "${ANDROID_BUILD}" == "all" ]]; then
 	ANDROID_BUILD_DUMMY=arm
 fi
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Copying data folder..."
+log_info "Copying data folder..."
 mkdir -p assets/asset_integrity_files
 cp -R "$ANDROID_SUB_BUILD_DIR/$ANDROID_BUILD_DUMMY/data" ./assets/asset_integrity_files
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Downloading certificate..."
+log_info "Downloading certificate..."
 curl -s -S --remote-name --time-cond cacert.pem https://curl.se/ca/cacert.pem
 cp ./cacert.pem ./assets/asset_integrity_files/data/cacert.pem || exit 1
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Creating integrity index file..."
+log_info "Creating integrity index file..."
 (
 	cd assets/asset_integrity_files || exit 1
 	tmpfile="$(mktemp /tmp/hash_strings.XXX)"
@@ -261,7 +273,7 @@ printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Creating integrity index file..."
 	} > "integrity.txt"
 )
 
-printf "${COLOR_CYAN}%s${COLOR_RESET}\n" "Preparing gradle build..."
+log_info "Preparing gradle build..."
 
 rm -R -f src/main/java/org
 mkdir -p src/main/java
