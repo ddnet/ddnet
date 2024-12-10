@@ -287,7 +287,15 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	}
 	if(Data.m_ShowDirection)
 	{
-		if(Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_Local) // always render local input when not in demo playback
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK &&
+			Client()->DummyConnected() && pPlayerInfo->m_ClientId == m_pClient->m_aLocalIds[!g_Config.m_ClDummy])
+		{
+			const auto &InputData = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy];
+			Data.m_DirLeft = InputData.m_Direction == -1;
+			Data.m_DirJump = InputData.m_Jump == 1;
+			Data.m_DirRight = InputData.m_Direction == 1;
+		}
+		else if(Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_Local) // always render local input when not in demo playback
 		{
 			const auto &InputData = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy];
 			Data.m_DirLeft = InputData.m_Direction == -1;
