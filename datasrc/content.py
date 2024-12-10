@@ -273,7 +273,7 @@ set_speedup_arrow = SpriteSet("speedup_arrow", image_speedup_arrow, 1, 1)
 set_guibuttons = SpriteSet("guibuttons", image_guibuttons, 12, 4)
 set_guiicons = SpriteSet("guiicons", image_guiicons, 12, 2)
 set_audio_source = SpriteSet("audio_source", image_audio_source, 1, 1)
-set_strongweak = SpriteSet("strongweak", image_strongweak, 2, 1)
+set_strongweak = SpriteSet("strongweak", image_strongweak, 3, 1)
 set_hud = SpriteSet("hud", image_hud, 16, 16)
 set_extras = SpriteSet("extras", image_extras, 16, 16)
 
@@ -417,6 +417,7 @@ container.sprites.Add(Sprite("audio_source", set_audio_source, 0,0,1,1))
 
 container.sprites.Add(Sprite("hook_strong", set_strongweak, 0,0,1,1))
 container.sprites.Add(Sprite("hook_weak", set_strongweak, 1,0,1,1))
+container.sprites.Add(Sprite("hook_icon", set_strongweak, 2,0,1,1))
 
 container.sprites.Add(Sprite("hud_airjump", set_hud, 0,0,2,2))
 container.sprites.Add(Sprite("hud_airjump_empty", set_hud, 2,0,2,2))
