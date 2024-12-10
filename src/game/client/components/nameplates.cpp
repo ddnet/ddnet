@@ -38,7 +38,7 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		bool DirLeft;
 		bool DirRight;
 		bool Jump;
-		if(Client()->DummyConnected() && Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_ClientId == m_pClient->m_aLocalIds[!g_Config.m_ClDummy])
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_ClientId == m_pClient->m_aLocalIds[!g_Config.m_ClDummy])
 		{
 			const auto &InputData = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy];
 			DirLeft = InputData.m_Direction == -1;
