@@ -332,12 +332,18 @@ public:
 		int m_HighestClientId;
 
 		// spectate data
-		struct CSpectateInfo
+		class CSpectateInfo
 		{
+		public:
 			bool m_Active;
 			int m_SpectatorId;
 			bool m_UsePosition;
 			vec2 m_Position;
+
+			bool m_HasCameraInfo;
+			float m_Zoom;
+			int m_Deadzone;
+			int m_FollowFactor;
 		} m_SpecInfo;
 
 		//
@@ -367,6 +373,35 @@ public:
 	int m_aExpectingTuningForZone[NUM_DUMMIES];
 	int m_aExpectingTuningSince[NUM_DUMMIES];
 	CTuningParams m_aTuning[NUM_DUMMIES];
+
+	// spectate cursor data
+	class CCursorInfo
+	{
+		friend class CGameClient;
+		static constexpr int CURSOR_SAMPLES = 8; // how many samples to keep
+		static constexpr int SAMPLE_FRAME_WINDOW = 3; // how many samples should be used for polynomial interpolation
+		static constexpr int SAMPLE_FRAME_OFFSET = 2; // how many samples in the past should be included
+		static constexpr double INTERP_DELAY = 4.25; // how many ticks in the past to show, enables extrapolation with smaller value (<= SAMPLE_FRAME_WINDOW - SAMPLE_FRAME_OFFSET + 3)
+		static constexpr double REST_THRESHOLD = 3.0; // how many ticks of the same samples are considered to be resting
+
+		int m_CursorOwnerId;
+		double m_aTargetSamplesTime[CURSOR_SAMPLES];
+		vec2 m_aTargetSamplesData[CURSOR_SAMPLES];
+		int m_NumSamples;
+
+		bool m_Available;
+		int m_Weapon;
+		vec2 m_Target;
+		vec2 m_WorldTarget;
+		vec2 m_Position;
+
+	public:
+		bool IsAvailable() const { return m_Available; }
+		int Weapon() const { return m_Weapon; }
+		vec2 Target() const { return m_Target; }
+		vec2 WorldTarget() const { return m_WorldTarget; }
+		vec2 Position() const { return m_Position; }
+	} m_CursorInfo;
 
 	// client data
 	struct CClientData
@@ -800,6 +835,7 @@ private:
 	int m_aShowOthers[NUM_DUMMIES];
 
 	void UpdatePrediction();
+	void UpdateSpectatorCursor();
 	void UpdateRenderedCharacters();
 
 	int m_aLastUpdateTick[MAX_CLIENTS] = {0};
