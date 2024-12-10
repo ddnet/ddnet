@@ -518,6 +518,8 @@ void CPlayers::RenderPlayer(
 
 	bool Stationary = Player.m_VelX <= 1 && Player.m_VelX >= -1;
 	bool InAir = !Collision()->CheckPoint(Player.m_X, Player.m_Y + 16);
+	if(g_Config.m_ClAntiPingImproved && !Local)
+		InAir = !Collision()->CheckPoint(Position.x, Position.y + 16);
 	bool Running = Player.m_VelX >= 5000 || Player.m_VelX <= -5000;
 	bool WantOtherDir = (Player.m_Direction == -1 && Vel.x > 0) || (Player.m_Direction == 1 && Vel.x < 0);
 	bool Inactive = ClientId >= 0 && (m_pClient->m_aClients[ClientId].m_Afk || m_pClient->m_aClients[ClientId].m_Paused);
@@ -779,7 +781,6 @@ void CPlayers::RenderPlayer(
 		CTeeRenderInfo Shadow = RenderInfo;
 		RenderTools()->RenderTee(&State, &Shadow, Player.m_Emote, Direction, ShadowPosition, 0.5f); // render ghost
 	}
-
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
 
 	float TeeAnimScale, TeeBaseSize;

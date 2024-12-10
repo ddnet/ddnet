@@ -269,7 +269,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 
 		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClPredictionMargin, &g_Config.m_ClPredictionMargin, &Button, Localize("Prediction Margin"), 10, 25, &CUi::ms_LinearScrollbarScale, 0, "ms");
+		Ui()->DoScrollbarOption(&g_Config.m_ClPredictionMargin, &g_Config.m_ClPredictionMargin, &Button, Localize("Prediction Margin"), 10, 25, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, Localize("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &Column, LineSize);
 		if(g_Config.m_ClRemoveAnti)
 		{
