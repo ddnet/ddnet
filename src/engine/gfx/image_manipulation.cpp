@@ -101,6 +101,10 @@ static void Dilate(int w, int h, const uint8_t *pSrc, uint8_t *pDest)
 			if(pSrc[m + DILATE_BPP - 1] > DILATE_ALPHA_THRESHOLD)
 				continue;
 
+			// --- Implementation Note ---
+			// The sum and counter variable can be used to compute a smoother dilated image.
+			// In this reference implementation, the loop breaks as soon as Counter == 1.
+			// We break the loop here to match the selection of the previously used algorithm.
 			int aSumOfOpaque[] = {0, 0, 0};
 			int Counter = 0;
 			for(int c = 0; c < 4; c++)
