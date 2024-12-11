@@ -86,12 +86,9 @@ void CGameContext::Construct(int Resetting)
 	mem_zero(&m_aPlayerHasInput, sizeof(m_aPlayerHasInput));
 
 	m_pController = 0;
-	m_aVoteCommand[0] = 0;
-	m_VoteType = VOTE_TYPE_UNKNOWN;
-	m_VoteCloseTime = 0;
+
 	m_pVoteOptionFirst = 0;
 	m_pVoteOptionLast = 0;
-	m_NumVoteOptions = 0;
 	m_LastMapVote = 0;
 
 	m_SqlRandomMapResult = nullptr;
@@ -99,6 +96,18 @@ void CGameContext::Construct(int Resetting)
 	m_pScore = nullptr;
 	m_NumMutes = 0;
 	m_NumVoteMutes = 0;
+
+	m_VoteCreator = -1;
+	m_VoteType = VOTE_TYPE_UNKNOWN;
+	m_VoteCloseTime = 0;
+	m_VoteUpdate = false;
+	m_VotePos = 0;
+	m_aVoteDescription[0] = '\0';
+	m_aSixupVoteDescription[0] = '\0';
+	m_aVoteCommand[0] = '\0';
+	m_aVoteReason[0] = '\0';
+	m_NumVoteOptions = 0;
+	m_VoteEnforce = VOTE_ENFORCE_UNKNOWN;
 
 	m_LatestLog = 0;
 	mem_zero(&m_aLogs, sizeof(m_aLogs));
@@ -1074,7 +1083,14 @@ void CGameContext::OnTick()
 		else if(m_VoteEnforce == VOTE_ENFORCE_CANCEL)
 		{
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "'%s' canceled their vote", Server()->ClientName(m_VoteCreator));
+			if(m_VoteCreator == -1)
+			{
+				str_copy(aBuf, "Vote canceled");
+			}
+			else
+			{
+				str_format(aBuf, sizeof(aBuf), "'%s' canceled their vote", Server()->ClientName(m_VoteCreator));
+			}
 			SendChat(-1, TEAM_ALL, aBuf);
 			EndVote();
 		}
@@ -1206,7 +1222,7 @@ void CGameContext::OnTick()
 				EndVote();
 				SendChat(-1, TEAM_ALL, "Vote passed", -1, FLAG_SIX);
 
-				if(m_apPlayers[m_VoteCreator] && !IsKickVote() && !IsSpecVote())
+				if(m_VoteCreator != -1 && m_apPlayers[m_VoteCreator] && !IsKickVote() && !IsSpecVote())
 					m_apPlayers[m_VoteCreator]->m_LastVoteCall = 0;
 			}
 			else if(m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
@@ -1282,7 +1298,7 @@ void CGameContext::OnTick()
 	{
 		if(m_SqlRandomMapResult->m_Success)
 		{
-			if(PlayerExists(m_SqlRandomMapResult->m_ClientId) && m_SqlRandomMapResult->m_aMessage[0] != '\0')
+			if(m_SqlRandomMapResult->m_ClientId != -1 && m_apPlayers[m_SqlRandomMapResult->m_ClientId] && m_SqlRandomMapResult->m_aMessage[0] != '\0')
 				SendChat(-1, TEAM_ALL, m_SqlRandomMapResult->m_aMessage);
 			if(m_SqlRandomMapResult->m_aMap[0] != '\0')
 				Server()->ChangeMap(m_SqlRandomMapResult->m_aMap);
@@ -1724,6 +1740,10 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 	m_aTeamMapping[ClientId] = -1;
 
 	m_VoteUpdate = true;
+	if(m_VoteCreator == ClientId)
+	{
+		m_VoteCreator = -1;
+	}
 
 	// update spectator modes
 	for(auto &pPlayer : m_apPlayers)
@@ -3133,20 +3153,18 @@ void CGameContext::ConRandomMap(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	int Stars = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
-
-	pSelf->m_pScore->RandomMap(pSelf->m_VoteCreator, Stars);
+	const int ClientId = pResult->m_ClientId == -1 ? pSelf->m_VoteCreator : pResult->m_ClientId;
+	const int Stars = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
+	pSelf->m_pScore->RandomMap(ClientId, Stars);
 }
 
 void CGameContext::ConRandomUnfinishedMap(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	int Stars = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
-	if(pResult->m_ClientId != -1)
-		pSelf->m_VoteCreator = pResult->m_ClientId;
-
-	pSelf->m_pScore->RandomUnfinishedMap(pSelf->m_VoteCreator, Stars);
+	const int ClientId = pResult->m_ClientId == -1 ? pSelf->m_VoteCreator : pResult->m_ClientId;
+	const int Stars = pResult->NumArguments() ? pResult->GetInteger(0) : -1;
+	pSelf->m_pScore->RandomUnfinishedMap(ClientId, Stars);
 }
 
 void CGameContext::ConRestart(IConsole::IResult *pResult, void *pUserData)
@@ -4468,17 +4486,18 @@ IGameServer *CreateGameServer() { return new CGameContext; }
 
 void CGameContext::OnSetAuthed(int ClientId, int Level)
 {
-	if(m_apPlayers[ClientId])
+	if(m_apPlayers[ClientId] && m_VoteCloseTime && Level != AUTHED_NO)
 	{
 		char aBuf[512], aIp[NETADDR_MAXSTRSIZE];
 		Server()->GetClientAddr(ClientId, aIp, sizeof(aIp));
 		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", aIp, g_Config.m_SvVoteKickBantime);
-		if(!str_comp_nocase(m_aVoteCommand, aBuf) && Level > Server()->GetAuthedState(m_VoteCreator))
+		if(!str_comp_nocase(m_aVoteCommand, aBuf) && (m_VoteCreator == -1 || Level > Server()->GetAuthedState(m_VoteCreator)))
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "CGameContext", "Vote aborted by authorized login.");
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "Vote aborted by authorized login.");
 		}
 	}
+
 	if(m_TeeHistorianActive)
 	{
 		if(Level != AUTHED_NO)
