@@ -21,6 +21,7 @@
 #	ByFox		2023-11-14 11:24:00
 #	Sedonya		2024-06-20 03:18:10
 #       WTF             2024-11-03 15:57:20
+#	Риксед		2024-12-11 16:34:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1951,105 +1952,105 @@ Eyes
 == Глаза
 
 Online friends (%d)
-== 
+== Друзья в сети (%d)
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 
+== Чтобы добавить друзей, впишите их имена ниже или нажимите по их имени в списке игроков.
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
+== Чтобы добавить соклановцев, впишите их клан и оставьте имя пустым.
 
 Offline friends and clanmates will appear here.
-== 
+== Друзья не в сети и соклановцы появятся здесь.
 
 Edit touch controls
-== 
+== Изменить сенсорное управление
 
 Close
-== 
+== Закрыть
 
 Save changes
-== 
+== Сохранить изменение
 
 Error saving touch controls
-== 
+== Ошибка при сохранении сенсорного управления
 
 Could not save touch controls to file. See local console for details.
-== 
+== Не удалось сохранить сенсорное управление в файл. Просмотрите локальную консоль для подробностей.
 
 Unsaved changes
-== 
+== Несохранённые изменения
 
 Discard changes
-== 
+== Отменить изменения
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 
+== Вы уверены что хотите отменить изменения сенсорного управления?
 
 Are you sure that you want to reset the touch controls to default?
-== 
+== Вы уверены, что хотите сбросить сенсорное управление
 
 Import from clipboard
-== 
+== Импортировать из буфера обмена
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
+== Вы уверены, что хотите импортировать сенсорное управление из буфера обмена? Это перезапишет ваше действующее сенсорное управление.
 
 Export to clipboard
-== 
+== Экспортировать в буфер обмена
 
 Direct touch input while ingame
-== 
+== Сенсорный ввод напрямую пока вы находитесь в игре
 
 [Direct touch input]
 Disabled
-== 
+== Отменено
 
 [Direct touch input]
 Active action
-== 
+== Активное действие
 
 [Direct touch input]
 Aim
-== 
+== Прицеливаться
 
 [Direct touch input]
 Fire
-== 
+== Стрелять
 
 [Direct touch input]
 Hook
-== 
+== Крюк
 
 Direct touch input while spectating
-== 
+== Сенсорный ввод напрямую пока вы в режиме наблюдателя
 
 Error loading touch controls
-== 
+== Ошибка при загрузке сенсорного управления
 
 Could not load touch controls from file. See local console for details.
-== 
+== Не удалось загрузить сенсорное управление из файла. Просмотрите локальную консоль для подробностей.
 
 Could not load default touch controls from file. See local console for details.
-== 
+== Не удалось загрузить стандартное сенсорное управление из файла. Просмотрите локальную консоль для подробностей.
 
 Could not load touch controls from clipboard. See local console for details.
-== 
+== Не удалось загрузить сенсорное управление из буфера обмена. Просмотрите локальную консоль для подробностей.
 
 Width of your own hook collision line
-== 
+== Ширина вашей линии коллизий крюка
 
 Width of others' hook collision line
-== 
+== Ширина чужих линий коллизий крюка
 
 Preview 'Hook collisions' being pressed
-== 
+== Предпросмотр нажатия 'Коллизий крюка'
 
 Aim
-== 
+== Прицеливаться
 
 Active: Fire
-== 
+== Активно: Стрелять
 
 Active: Hook
-== 
+== Активно: Крюк
