@@ -3675,6 +3675,13 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 
 void CServer::LogoutClient(int ClientId, const char *pReason)
 {
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+
+	if(m_aClients[ClientId].m_State != CClient::STATE_INGAME)
+	{
+		return;
+	}
+
 	if(!IsSixup(ClientId))
 	{
 		CMsgPacker Msg(NETMSG_RCON_AUTH_STATUS, true);
