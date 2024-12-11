@@ -413,6 +413,30 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		}
 	}
 
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect No, Yes;
+		Selector.VSplitMid(&No, &Yes);
+
+		pEditor->Ui()->DoLabel(&Label, "Simplify Tele popup", 10.0f, TEXTALIGN_ML);
+
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_Ex(&s_ButtonNo, "No", !g_Config.m_EdSimplifyTeles, &No, 0, "Show extended Tele popup", IGraphics::CORNER_L))
+		{
+			g_Config.m_EdSimplifyTeles = false;
+		}
+		if(pEditor->DoButton_Ex(&s_ButtonYes, "Yes", g_Config.m_EdSimplifyTeles, &Yes, 0, "Show simplified Tele popup", IGraphics::CORNER_R))
+		{
+			g_Config.m_EdSimplifyTeles = true;
+		}
+	}
+
 	return CUi::POPUP_KEEP_OPEN;
 }
 
@@ -2436,25 +2460,27 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 	static const int s_NumTeleTiles = 7;
+	const int NumTeleButtons = g_Config.m_EdSimplifyTeles ? 2 : 7;
+	static bool s_PreviousSimplify;
 
 	static int s_aPreviousTeleNumbers[s_NumTeleTiles];
-	static int s_PreviousViewTeleNumber;
+	static int s_PreviousViewTeleNumber = pEditor->m_ViewTeleNumber;
 
 	CUIRect NumberPicker;
 	CUIRect FindEmptySlot;
 	CUIRect FindFreeViewSlot;
-	CUIRect aFindFreeTeleSlots[s_NumTeleTiles];
+	std::vector<CUIRect> vFindFreeTeleSlots(NumTeleButtons);
 
 	View.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
 	NumberPicker.VSplitRight(2.f, &NumberPicker, nullptr);
 
-	for(auto &Slot : aFindFreeTeleSlots)
+	for(auto &Slot : vFindFreeTeleSlots)
 	{
 		FindEmptySlot.HSplitTop(13.0f, &Slot, &FindEmptySlot);
 	}
 	FindEmptySlot.HSplitTop(13.0f, &FindFreeViewSlot, &FindEmptySlot);
 
-	for(auto &Slot : aFindFreeTeleSlots)
+	for(auto &Slot : vFindFreeTeleSlots)
 	{
 		Slot.HMargin(1.0f, &Slot);
 	}
@@ -2478,18 +2504,39 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 	// find next free numbers buttons
 	{
 		static int s_aNextFreeTeleButtonIds[s_NumTeleTiles] = {0};
-		for(int i = 0; i < s_NumTeleTiles; i++)
+		for(int i = 0; i < NumTeleButtons; i++)
 		{
-			if(pEditor->DoButton_Editor(&s_aNextFreeTeleButtonIds[i], "F", 0, &aFindFreeTeleSlots[i], 0, "[ctrl+f] Find next free tele number") ||
+			if(pEditor->DoButton_Editor(&s_aNextFreeTeleButtonIds[i], "F", 0, &vFindFreeTeleSlots[i], 0, "[ctrl+f] Find next free tele number") ||
 				(Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 			{
-				int Tile = (*std::next(pEditor->m_TeleNumbers.begin(), i)).first;
-				int TeleNumber = pEditor->FindNextFreeTeleNumber(Tile);
-
-				if(TeleNumber != -1)
+				if(g_Config.m_EdSimplifyTeles)
 				{
-					pEditor->m_TeleNumbers[Tile] = TeleNumber;
+					if(i == 0)
+					{
+						int TeleNumber = pEditor->FindNextFreeTeleNumberAny();
+
+						if(TeleNumber != -1)
+							pEditor->SetTeleNumbers(TeleNumber);
+					}
+					else if(i == 1)
+					{
+						int TeleNumber = pEditor->FindNextFreeTeleNumberAny(true);
+
+						if(TeleNumber != -1)
+							pEditor->SetTeleNumbers(TeleNumber, true);
+					}
 					pEditor->AdjustBrushSpecialTiles(false);
+				}
+				else
+				{
+					int Tile = (*std::next(pEditor->m_TeleNumbers.begin(), i)).first;
+					int TeleNumber = pEditor->FindNextFreeTeleNumber(Tile);
+
+					if(TeleNumber != -1)
+					{
+						pEditor->m_TeleNumbers[Tile] = TeleNumber;
+						pEditor->AdjustBrushSpecialTiles(false);
+					}
 				}
 			}
 		}
@@ -2497,12 +2544,16 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 		static int s_NextFreeViewPid = 0;
 		int btn = pEditor->DoButton_Editor(&s_NextFreeViewPid, "N", 0, &FindFreeViewSlot, 0, "[n] Show next tele with this number");
 		if(btn || (Active && pEditor->Input()->KeyPress(KEY_N)))
-			s_vColors[s_NumTeleTiles] = ViewTele(pEditor) ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
+			s_vColors[NumTeleButtons] = ViewTele(pEditor) ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
 	}
 
 	// number picker
 	{
-		static const char *s_apTeleLabelText[] = {
+		static const char *s_apSimplifyTeleLabelText[] = {
+			"Number",
+			"Checkpoint"};
+
+		static const char *s_apTeleLabelTextExtended[] = {
 			"Red Tele", // TILE_TELEINEVIL
 			"Weapon Tele", // TILE_TELEINWEAPON
 			"Hook Tele", // TILE_TELEINHOOK
@@ -2512,11 +2563,17 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 			"CP Tele To", // TILE_TELECHECKOUT
 		};
 
+		const char **ppTeleLabelText = g_Config.m_EdSimplifyTeles ? s_apSimplifyTeleLabelText : s_apTeleLabelTextExtended;
+
 		std::vector<CProperty> vProps;
-		for(int i = 0; i < s_NumTeleTiles; i++)
+		for(int i = 0; i < NumTeleButtons; i++)
 		{
-			unsigned char TeleNumber = (*std::next(pEditor->m_TeleNumbers.begin(), i)).second;
-			vProps.emplace_back(s_apTeleLabelText[i], TeleNumber, PROPTYPE_INT, 1, 255);
+			unsigned char TeleNumber;
+			if(g_Config.m_EdSimplifyTeles)
+				TeleNumber = i == 0 ? pEditor->m_TeleNumbers[TILE_TELEINEVIL] : pEditor->m_TeleNumbers[TILE_TELECHECK];
+			else
+				TeleNumber = (*std::next(pEditor->m_TeleNumbers.begin(), i)).second;
+			vProps.emplace_back(ppTeleLabelText[i], TeleNumber, PROPTYPE_INT, 1, 255);
 		}
 		vProps.emplace_back("View", pEditor->m_ViewTeleNumber, PROPTYPE_INT, 1, 255);
 		vProps.emplace_back(nullptr);
@@ -2526,31 +2583,73 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 		int NewVal = 0;
 		int Prop = pEditor->DoProperties(&NumberPicker, vProps.data(), s_aIds, &NewVal, s_vColors);
 
-		if(Prop >= 0 && Prop < s_NumTeleTiles)
+		if(Prop >= 0 && Prop < NumTeleButtons)
 		{
-			auto Tele = (*std::next(pEditor->m_TeleNumbers.begin(), Prop));
-			pEditor->m_TeleNumbers[Tele.first] = (NewVal - 1 + 255) % 255 + 1;
-			pEditor->AdjustBrushSpecialTiles(false);
+			if(g_Config.m_EdSimplifyTeles)
+			{
+				if(Prop == 0)
+				{
+					pEditor->SetTeleNumbers((NewVal - 1 + 255) % 255 + 1);
+				}
+				else if(Prop == 1)
+				{
+					pEditor->SetTeleNumbers((NewVal - 1 + 255) % 255 + 1, true);
+				}
+				pEditor->AdjustBrushSpecialTiles(false);
+			}
+			else
+			{
+				auto Tele = (*std::next(pEditor->m_TeleNumbers.begin(), Prop));
+				pEditor->m_TeleNumbers[Tele.first] = (NewVal - 1 + 255) % 255 + 1;
+				pEditor->AdjustBrushSpecialTiles(false);
+			}
 		}
-		else if(Prop == s_NumTeleTiles)
+		else if(Prop == NumTeleButtons)
 			pEditor->m_ViewTeleNumber = (NewVal - 1 + 255) % 255 + 1;
 
-		for(int i = 0; i < s_NumTeleTiles; i++)
+		for(int i = 0; i < NumTeleButtons; i++)
 		{
-			auto Tele = (*std::next(pEditor->m_TeleNumbers.begin(), i));
-			if(s_aPreviousTeleNumbers[i] == 1 || s_aPreviousTeleNumbers[i] != Tele.second)
-				s_vColors[i] = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(Tele.second, Tele.first) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+			if(g_Config.m_EdSimplifyTeles)
+			{
+				if(i == 0)
+				{
+					if(s_aPreviousTeleNumbers[i] == 1 || s_aPreviousTeleNumbers[i] != pEditor->m_TeleNumbers[TILE_TELEINEVIL] || s_PreviousSimplify != static_cast<bool>(g_Config.m_EdSimplifyTeles))
+						s_vColors[i] = pEditor->m_Map.m_pTeleLayer->ContainsTeleWithId(pEditor->m_TeleNumbers[TILE_TELEINEVIL], false) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+				}
+				else if(i == 1)
+				{
+					if(s_aPreviousTeleNumbers[i] == 1 || s_aPreviousTeleNumbers[i] != pEditor->m_TeleNumbers[TILE_TELECHECK] || s_PreviousSimplify != static_cast<bool>(g_Config.m_EdSimplifyTeles))
+						s_vColors[i] = pEditor->m_Map.m_pTeleLayer->ContainsTeleWithId(pEditor->m_TeleNumbers[TILE_TELECHECK], true) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+				}
+			}
+			else
+			{
+				auto Tele = (*std::next(pEditor->m_TeleNumbers.begin(), i));
+				if(s_aPreviousTeleNumbers[i] == 1 || s_aPreviousTeleNumbers[i] != Tele.second)
+					s_vColors[i] = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(Tele.second, Tele.first) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+			}
 		}
 
 		if(s_PreviousViewTeleNumber != pEditor->m_ViewTeleNumber)
-			s_vColors[s_NumTeleTiles] = ViewTele(pEditor) ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
+			s_vColors[NumTeleButtons] = ViewTele(pEditor) ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
 	}
 
-	for(int i = 0; i < s_NumTeleTiles; i++)
+	for(int i = 0; i < NumTeleButtons; i++)
 	{
-		s_aPreviousTeleNumbers[i] = (*std::next(pEditor->m_TeleNumbers.begin(), i)).second;
+		if(g_Config.m_EdSimplifyTeles)
+		{
+			if(i == 0)
+				s_aPreviousTeleNumbers[i] = pEditor->m_TeleNumbers[TILE_TELEINEVIL];
+			else if(i == 1)
+				s_aPreviousTeleNumbers[i] = pEditor->m_TeleNumbers[TILE_TELECHECK];
+		}
+		else
+		{
+			s_aPreviousTeleNumbers[i] = (*std::next(pEditor->m_TeleNumbers.begin(), i)).second;
+		}
 	}
 	s_PreviousViewTeleNumber = pEditor->m_ViewTeleNumber;
+	s_PreviousSimplify = g_Config.m_EdSimplifyTeles;
 
 	return CUi::POPUP_KEEP_OPEN;
 }
