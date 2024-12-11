@@ -1955,7 +1955,7 @@ Online friends (%d)
 == Друзья в сети (%d)
 
 Add friends by entering their name below or by clicking their name in the player list.
-== Чтобы добавить друзей, впишите их имена ниже или нажимая по их имени в списке игроков.
+== Чтобы добавить друзей, впишите их имена ниже или нажимите по их имени в списке игроков.
 
 Add clanmates by entering their clan below and leaving the name blank.
 == Чтобы добавить соклановцев, впишите их клан и оставьте имя пустым.
