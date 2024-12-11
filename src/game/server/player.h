@@ -82,6 +82,9 @@ public:
 
 	int m_SentSnaps = 0;
 
+	// killable state in practice
+	bool m_Killable = false;
+	bool GetKillable() const { return m_Killable; }
 	// used for spectator mode
 	int m_SpectatorId;
 
