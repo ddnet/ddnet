@@ -311,7 +311,7 @@ void CBinds::OnConsoleInit()
 	Console()->Register("bind", "s[key] ?r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute a command or view keybindings");
 	Console()->Register("binds", "?s[key]", CFGFLAG_CLIENT, ConBinds, this, "Print command executed by this keybinding or all binds");
 	Console()->Register("unbind", "s[key]", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key");
-	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys");
+	Console()->Register("unbindall", "", CFGFLAG_CLIENT | CFGFLAG_DANGEROUS, ConUnbindAll, this, "Unbind all keys");
 
 	SetDefaults();
 }
