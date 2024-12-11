@@ -1951,108 +1951,108 @@ Eyes
 == Ojos
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== No se pudieron cargar algunas fuentes. Revisa la consola local para más detalles.
 
 Online friends (%d)
-== 
+== Amigos en línea (%d)
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 
+== Agrega amigos ingresando su nombre aquí abajo o haciendo clic en su nombre en la lista de jugadores.
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
+== Agrega compañeros de clan ingresando el nombre del clan aquí abajo y dejando el campo del nombre en blanco.
 
 Offline friends and clanmates will appear here.
-== 
+== Tus amigos y compañeros de clan que estén desconectados aparecerán aquí.
 
 Edit touch controls
-== 
+== Editar controles táctiles
 
 Close
-== 
+== Cerrar
 
 Save changes
-== 
+== Guardar cambios
 
 Error saving touch controls
-== 
+== Error al guardar los controles táctiles
 
 Could not save touch controls to file. See local console for details.
-== 
+== No se pudieron guardar los controles táctiles. Revisa la consola local para más detalles
 
 Unsaved changes
-== 
+== Cambios sin guardar
 
 Discard changes
-== 
+== Descartar cambios
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 
+== ¿Estás seguro de que quieres descartar los cambios actuales a los controles táctiles?
 
 Are you sure that you want to reset the touch controls to default?
-== 
+== ¿Estás seguro de que quieres restablecer los controles táctiles a su configuración predeterminada?
 
 Import from clipboard
-== 
+== Importar desde el portapapeles
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
+== ¿Estás seguro de que quieres importar los controles táctiles desde el portapapeles? Esto sobreescribirá tus controles táctiles actuales.
 
 Export to clipboard
-== 
+== Exportar al portapapeles
 
 Direct touch input while ingame
-== 
+== Entrada táctil directa dentro del juego
 
 [Direct touch input]
 Disabled
-== 
+== Desactivado
 
 [Direct touch input]
 Active action
-== 
+== Acción activa
 
 [Direct touch input]
 Aim
-== 
+== Apuntar
 
 [Direct touch input]
 Fire
-== 
+== Disparar
 
 [Direct touch input]
 Hook
-== 
+== Gancho
 
 Direct touch input while spectating
-== 
+== Entrada táctil directa en espectador
 
 Error loading touch controls
-== 
+== Error al cargar los controles táctiles
 
 Could not load touch controls from file. See local console for details.
-== 
+== No se pudieron cargar los controles táctiles desde el archivo. Revisa la consola local para más detalles.
 
 Could not load default touch controls from file. See local console for details.
-== 
+== No se pudieron cargar los controles táctiles predeterminados desde el archivo. Revisa la consola local para más detalles.
 
 Could not load touch controls from clipboard. See local console for details.
-== 
+== No se pudieron cargar los controles táctiles desde el portapapeles. Revisa la consola local para más detalles.
 
 Width of your own hook collision line
-== 
+== Ancho de tu propia línea de colisión del gancho
 
 Width of others' hook collision line
-== 
+== Ancho de la línea de colisión del gancho de los demás
 
 Preview 'Hook collisions' being pressed
-== 
+== Vista previa al presionar 'Colisiones de gancho'
 
 Aim
-== 
+== Apuntar
 
 Active: Fire
-== 
+== Activo: Disparar
 
 Active: Hook
-== 
+== Activo: Gancho
