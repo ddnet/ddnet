@@ -814,16 +814,17 @@ void CGameContext::SendVoteSet(int ClientId)
 	{
 		Msg6.m_Timeout = Msg7.m_Timeout = (m_VoteCloseTime - time_get()) / time_freq();
 		Msg6.m_pDescription = m_aVoteDescription;
-		Msg7.m_pDescription = m_aSixupVoteDescription;
 		Msg6.m_pReason = Msg7.m_pReason = m_aVoteReason;
 
-		int &Type = (Msg7.m_Type = protocol7::VOTE_UNKNOWN);
+		Msg7.m_pDescription = m_aSixupVoteDescription;
 		if(IsKickVote())
-			Type = protocol7::VOTE_START_KICK;
+			Msg7.m_Type = protocol7::VOTE_START_KICK;
 		else if(IsSpecVote())
-			Type = protocol7::VOTE_START_SPEC;
+			Msg7.m_Type = protocol7::VOTE_START_SPEC;
 		else if(IsOptionVote())
-			Type = protocol7::VOTE_START_OP;
+			Msg7.m_Type = protocol7::VOTE_START_OP;
+		else
+			Msg7.m_Type = protocol7::VOTE_UNKNOWN;
 	}
 	else
 	{
@@ -831,13 +832,14 @@ void CGameContext::SendVoteSet(int ClientId)
 		Msg6.m_pDescription = Msg7.m_pDescription = "";
 		Msg6.m_pReason = Msg7.m_pReason = "";
 
-		int &Type = (Msg7.m_Type = protocol7::VOTE_UNKNOWN);
 		if(m_VoteEnforce == VOTE_ENFORCE_NO || m_VoteEnforce == VOTE_ENFORCE_NO_ADMIN)
-			Type = protocol7::VOTE_END_FAIL;
+			Msg7.m_Type = protocol7::VOTE_END_FAIL;
 		else if(m_VoteEnforce == VOTE_ENFORCE_YES || m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
-			Type = protocol7::VOTE_END_PASS;
+			Msg7.m_Type = protocol7::VOTE_END_PASS;
 		else if(m_VoteEnforce == VOTE_ENFORCE_ABORT || m_VoteEnforce == VOTE_ENFORCE_CANCEL)
-			Type = protocol7::VOTE_END_ABORT;
+			Msg7.m_Type = protocol7::VOTE_END_ABORT;
+		else
+			Msg7.m_Type = protocol7::VOTE_UNKNOWN;
 
 		if(m_VoteEnforce == VOTE_ENFORCE_NO_ADMIN || m_VoteEnforce == VOTE_ENFORCE_YES_ADMIN)
 			Msg7.m_ClientId = -1;
@@ -1218,7 +1220,6 @@ void CGameContext::OnTick()
 				EndVote();
 				SendChat(-1, TEAM_ALL, "Vote failed enforced by authorized player", -1, FLAG_SIX);
 			}
-			//else if(m_VoteEnforce == VOTE_ENFORCE_NO || time_get() > m_VoteCloseTime)
 			else if(m_VoteEnforce == VOTE_ENFORCE_NO || (time_get() > m_VoteCloseTime && g_Config.m_SvVoteMajority))
 			{
 				EndVote();
@@ -2478,9 +2479,7 @@ void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 	if(g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry + Server()->TickSpeed() * 3 > Server()->Tick())
 		return;
 
-	int64_t Now = Server()->Tick();
-
-	pPlayer->m_LastVoteTry = Now;
+	pPlayer->m_LastVoteTry = Server()->Tick();
 	pPlayer->UpdatePlaytime();
 
 	if(!pMsg->m_Vote)
