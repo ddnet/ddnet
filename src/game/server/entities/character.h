@@ -197,7 +197,7 @@ public:
 	void ResetJumps();
 	int m_DDRaceState;
 	int Team();
-	bool CanCollide(int ClientId);
+	bool CanCollide(int ClientId) override;
 	bool SameTeam(int ClientId);
 	void StopRecording();
 	bool m_NinjaJetpack;
