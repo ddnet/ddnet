@@ -3303,7 +3303,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		static SPopupMenuId s_PopupMapPickerId;
 		static CPopupMapPickerContext s_PopupMapPickerContext;
 		s_PopupMapPickerContext.m_pMenus = this;
-
 		s_PopupMapPickerContext.MapListPopulate();
 		Ui()->DoPopupMenu(&s_PopupMapPickerId, Ui()->MouseX(), Ui()->MouseY(), 300.0f, 250.0f, &s_PopupMapPickerContext, PopupMapPicker);
 	}
@@ -3406,7 +3405,7 @@ CUi::EPopupMenuFunctionResult CMenus::PopupMapPicker(void *pContext, CUIRect Vie
 
 	static CListBox s_ListBox;
 	s_ListBox.SetActive(Active);
-	s_ListBox.DoStart(20.0f, pPopupContext->m_vMaps.size(), 1, 1, -1, &View, false);
+	s_ListBox.DoStart(20.0f, pPopupContext->m_vMaps.size(), 1, 3, -1, &View, false);
 
 	int MapIndex = 0;
 	for(auto &Map : pPopupContext->m_vMaps)
@@ -3450,7 +3449,7 @@ CUi::EPopupMenuFunctionResult CMenus::PopupMapPicker(void *pContext, CUIRect Vie
 	pPopupContext->m_Selection = NewSelected >= 0 ? NewSelected : -1;
 	if(s_ListBox.WasItemSelected() || s_ListBox.WasItemActivated())
 	{
-		const CMapListItem SelectedItem = pPopupContext->m_vMaps[pPopupContext->m_Selection];
+		const CMapListItem &SelectedItem = pPopupContext->m_vMaps[pPopupContext->m_Selection];
 
 		if(SelectedItem.m_IsDirectory)
 		{
@@ -3483,6 +3482,7 @@ void CMenus::CPopupMapPickerContext::MapListPopulate()
 	str_format(aTemp, sizeof(aTemp), "maps/%s", m_aCurrentMapFolder);
 	m_pMenus->Storage()->ListDirectoryInfo(IStorage::TYPE_ALL, aTemp, MapListFetchCallback, this);
 	std::stable_sort(m_vMaps.begin(), m_vMaps.end(), CompareFilenameAscending);
+	m_Selection = -1;
 }
 
 int CMenus::CPopupMapPickerContext::MapListFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)
