@@ -92,6 +92,7 @@ public:
 	/*
 		Function: ClosestCharacter
 			Finds the closest CCharacter to a specific point.
+			See also `ClosestEntity()`
 
 		Arguments:
 			Pos - The center position.
@@ -102,6 +103,22 @@ public:
 			Returns a pointer to the closest CCharacter or NULL if no CCharacter is close enough.
 	*/
 	CCharacter *ClosestCharacter(vec2 Pos, float Radius, const CEntity *pNotThis);
+
+	/*
+		Function: ClosestEntity
+			Finds the closest CEntity to a specific point.
+			See also `ClosestCharacter()`
+
+		Arguments:
+			Pos - The center position.
+			Radius - How far off the CEntity is allowed to be
+			Type - Type of the entity to find.
+			pNotThis - Entity to ignore
+
+		Returns:
+			Returns a pointer to the closest CEntity or NULL if no CEntity is close enough.
+	*/
+	CEntity *ClosestEntity(vec2 Pos, float Radius, int Type, const CEntity *pNotThis);
 
 	/*
 		Function: InsertEntity
