@@ -304,7 +304,7 @@ void CGameClient::OnInit()
 			dbg_assert(false, "Invalid callback loading detail");
 			dbg_break();
 		}
-		m_Menus.RenderLoading(pTitle, pMessage, 0, false);
+		m_Menus.RenderLoading(pTitle, pMessage, 0);
 	});
 
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
@@ -428,6 +428,7 @@ void CGameClient::OnInit()
 		pChecksum->m_aComponentsChecksum[i] = Size;
 	}
 
+	m_Menus.FinishLoading();
 	log_trace("gameclient", "initialization finished after %.2fms", (time_get() - OnInitStart) * 1000.0f / (float)time_freq());
 }
 
@@ -553,14 +554,14 @@ void CGameClient::OnConnected()
 	const char *pConnectCaption = DemoPlayer()->IsPlaying() ? Localize("Preparing demo playback") : Localize("Connected");
 	const char *pLoadMapContent = Localize("Initializing map logic");
 	// render loading before skip is calculated
-	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false);
+	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0);
 	m_Layers.Init(Kernel()->RequestInterface<IMap>(), false);
 	m_Collision.Init(Layers());
 	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 	m_RaceHelper.Init(this);
 
 	// render loading before going through all components
-	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false);
+	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0);
 	for(auto &pComponent : m_vpAll)
 	{
 		pComponent->OnMapLoad();
@@ -568,7 +569,7 @@ void CGameClient::OnConnected()
 	}
 
 	Client()->SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_GETTING_READY);
-	m_Menus.RenderLoading(pConnectCaption, Localize("Sending initial client info"), 0, false);
+	m_Menus.RenderLoading(pConnectCaption, Localize("Sending initial client info"), 0);
 
 	// send the initial info
 	SendInfo(true);
@@ -3840,7 +3841,7 @@ void CGameClient::RefreshSkins()
 		// if skin refreshing takes to long, swap to a loading screen
 		if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
 		{
-			m_Menus.RenderLoading(Localize("Loading skin files"), "", 0, false);
+			m_Menus.RenderLoading(Localize("Loading skin files"), "", 0);
 		}
 	});
 

@@ -8,6 +8,7 @@
 
 #include <game/client/gameclient.h>
 #include <game/layers.h>
+#include <game/localization.h>
 
 #include "background.h"
 
@@ -31,6 +32,11 @@ CBackground::~CBackground()
 CBackgroundEngineMap *CBackground::CreateBGMap()
 {
 	return new CBackgroundEngineMap;
+}
+
+const char *CBackground::LoadingTitle() const
+{
+	return Localize("Loading background map");
 }
 
 void CBackground::OnInit()

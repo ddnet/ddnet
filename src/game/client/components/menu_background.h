@@ -33,9 +33,6 @@ class CMenuBackground : public CBackground
 {
 	std::chrono::nanoseconds m_ThemeScanStartTime{0};
 
-protected:
-	bool CanRenderMenuBackground() override { return false; }
-
 public:
 	enum
 	{
@@ -78,6 +75,7 @@ public:
 		PREDEFINED_THEMES_COUNT = 3,
 	};
 
+private:
 	CCamera m_Camera;
 
 	CBackgroundEngineMap *CreateBGMap() override;
@@ -91,6 +89,7 @@ public:
 	float m_MoveTime;
 
 	bool m_IsInit;
+	bool m_Loading;
 
 	void ResetPositions();
 
@@ -99,6 +98,7 @@ public:
 
 	std::vector<CTheme> m_vThemes;
 
+public:
 	CMenuBackground();
 	~CMenuBackground() override {}
 	virtual int Sizeof() const override { return sizeof(*this); }
@@ -110,8 +110,10 @@ public:
 	void LoadMenuBackground(bool HasDayHint = true, bool HasNightHint = true);
 
 	bool Render();
+	bool IsLoading() const { return m_Loading; }
 
 	class CCamera *GetCurCamera() override;
+	const char *LoadingTitle() const override;
 
 	void ChangePosition(int PositionNumber);
 
