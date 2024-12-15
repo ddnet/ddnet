@@ -74,8 +74,6 @@ CMenus::CMenus()
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
 
-	m_ServerProcess.m_Process = INVALID_PROCESS;
-
 	for(SUIAnimator &animator : m_aAnimatorsSettingsTab)
 	{
 		animator.m_YOffset = -2.5f;

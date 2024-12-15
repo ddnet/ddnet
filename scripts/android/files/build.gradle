@@ -61,6 +61,9 @@ android {
 	lintOptions {
 		abortOnError false
 	}
+	dependencies {
+		implementation 'androidx.core:core:1.13.1'
+	}
 }
 
 allprojects {

@@ -41,21 +41,27 @@
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.INTERNET" />
 
+	<!-- Local server runs in a foreground service with a notification to control it -->
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+	<uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+	<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
 	<!-- usesCleartextTraffic because unencrypted UDP packets -->
 	<application
 		android:usesCleartextTraffic="true"
 		android:label="@string/app_name"
 		android:hasCode="true"
 		android:supportsRtl="true"
-		android:isGame="true"
+		android:appCategory="game"
 		android:icon="@mipmap/ic_launcher"
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
 		android:hardwareAccelerated="true">
 		<activity
-			android:name="org.ddnet.client.NativeMain"
+			android:name="org.ddnet.client.ClientActivity"
 			android:alwaysRetainTaskState="true"
 			android:exported="true"
+			android:process=":client_process"
 			android:configChanges="layoutDirection|locale|orientation|uiMode|screenLayout|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
 			android:preferMinimalPostProcessing="true"
 			android:screenOrientation="landscape"
@@ -75,5 +81,17 @@
 				android:name="android.app.shortcuts"
 				android:resource="@xml/shortcuts" />
 		</activity>
+		<!-- Server service must run in a different process because it needs to be terminated to restart the server -->
+		<service
+			android:name="org.ddnet.client.ServerService"
+			android:exported="false"
+			android:process=":server_process"
+			android:foregroundServiceType="specialUse" />
+			<property
+				android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+				android:value="This service is used for hosting a LAN server to play the game in a local area network as well as without internet. A foreground service is used because the server should also continue running while the client activity is not in the foreground as other players may be connected to the server." />
+			<meta-data
+				android:name="android.app.lib_name"
+				android:value="DDNet-Server" />
 	</application>
 </manifest>

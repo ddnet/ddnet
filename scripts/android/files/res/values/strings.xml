@@ -3,4 +3,12 @@
 	<string name="app_name">DDNet</string>
 	<string name="shortcut_play_vulkan_short">Play (Vulkan)</string>
 	<string name="shortcut_play_gles_short">Play (OpenGL ES)</string>
+	<string name="server_name">DDNet-Server</string>
+	<string name="server_notification_description_default">DDNet-Server is running…</string>
+	<string name="server_notification_description_stopping">DDNet-Server is stopping…</string>
+	<string name="server_notification_action_stop">Stop</string>
+	<string name="server_notification_action_run_command">Run command</string>
+	<string name="server_notification_channel_description">Notification to control the local DDNet-Server while it\'s running.</string>
+	<string name="server_error_external_files_inaccessible">Error starting DDNet-Server: could not access external files directory.</string>
+	<string name="server_error_exit_code">DDNet-Server stopped with error code \'%1$d\'.</string>
 </resources>

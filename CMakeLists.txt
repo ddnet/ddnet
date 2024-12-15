@@ -689,8 +689,8 @@ endif()
 if(CLIENT AND NOT(SDL2_FOUND))
   message(SEND_ERROR "You must install SDL2 to compile the ${CMAKE_PROJECT_NAME} client")
 endif()
-if(TARGET_OS STREQUAL "android" AND CLIENT AND NOT(CRYPTO_FOUND))
-  message(SEND_ERROR "You must install OpenSSL to compile the ${CMAKE_PROJECT_NAME} client")
+if(TARGET_OS STREQUAL "android" AND NOT(CRYPTO_FOUND))
+  message(SEND_ERROR "You must install OpenSSL to compile ${CMAKE_PROJECT_NAME}")
 endif()
 if(NOT(GTEST_FOUND))
   if(DOWNLOAD_GTEST)
@@ -741,7 +741,7 @@ elseif(TARGET_OS STREQUAL "android")
       src/android/android_main.cpp
     )
     set(PLATFORM_LIBS ${TW_ANDROID_LIBS})
-    set(PLATFORM_CLIENT_LIBS ${PLATFORM_LIBS})
+    set(PLATFORM_CLIENT_LIBS ${TW_ANDROID_LIBS_CLIENT})
     set(PLATFORM_CLIENT_INCLUDE_DIRS)
 else()
   find_package(Notify)
@@ -2782,14 +2782,25 @@ if(SERVER)
   )
 
   # Target
-  add_executable(game-server
-    ${DEPS}
-    ${SERVER_SRC}
-    ${SERVER_ICON}
-    $<TARGET_OBJECTS:engine-shared>
-    $<TARGET_OBJECTS:game-shared>
-    $<TARGET_OBJECTS:rust-bridge-shared>
-  )
+  if(TARGET_OS STREQUAL "android")
+    add_library(game-server SHARED
+      ${DEPS}
+      ${SERVER_SRC}
+      ${SERVER_ICON}
+      $<TARGET_OBJECTS:engine-shared>
+      $<TARGET_OBJECTS:game-shared>
+      $<TARGET_OBJECTS:rust-bridge-shared>
+    )
+  else()
+    add_executable(game-server
+      ${DEPS}
+      ${SERVER_SRC}
+      ${SERVER_ICON}
+      $<TARGET_OBJECTS:engine-shared>
+      $<TARGET_OBJECTS:game-shared>
+      $<TARGET_OBJECTS:rust-bridge-shared>
+    )
+  endif()
   set_property(TARGET game-server
       PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
   )
@@ -3599,6 +3610,13 @@ foreach(target ${TARGETS_OWN})
   endif()
   if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
    target_compile_definitions(${target} PRIVATE CONF_WEBASM)
+  endif()
+  if(TARGET_OS STREQUAL "android")
+    if(ANDROID_PACKAGE_NAME)
+      target_compile_definitions(${target} PRIVATE ANDROID_PACKAGE_NAME=${ANDROID_PACKAGE_NAME})
+    else()
+      message(FATAL_ERROR "ANDROID_PACKAGE_NAME must define the package name when compiling for Android (using underscores instead of dots, e.g. org_example_app)")
+    endif()
   endif()
 endforeach()
 
