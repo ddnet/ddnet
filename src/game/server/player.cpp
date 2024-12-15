@@ -512,8 +512,8 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 	AfkTimer();
 
 	m_NumInputs++;
-
-	if(m_pCharacter && !m_Paused && !(pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_TARGET))
+	bool IsSpecTarget = pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_TARGET && GetClientVersion() >= VERSION_DDNET_PLAYERFLAG_SPEC_TARGET;
+	if(m_pCharacter && !m_Paused && !(IsSpecTarget))
 		m_pCharacter->OnPredictedInput(pNewInput);
 
 	// Magic number when we can hope that client has successfully identified itself
@@ -555,7 +555,8 @@ void CPlayer::OnPredictedEarlyInput(CNetObj_PlayerInput *pNewInput)
 	if(m_PlayerFlags & PLAYERFLAG_CHATTING)
 		return;
 
-	if(m_pCharacter && !m_Paused && !(m_PlayerFlags & PLAYERFLAG_SPEC_TARGET))
+	bool IsSpecTarget = pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_TARGET && GetClientVersion() >= VERSION_DDNET_PLAYERFLAG_SPEC_TARGET;
+	if(m_pCharacter && !m_Paused && !(IsSpecTarget))
 		m_pCharacter->OnDirectInput(pNewInput);
 }
 
