@@ -40,6 +40,7 @@ void CScorePlayerResult::SetVariant(Variant v)
 		break;
 	case PLAYER_INFO:
 		m_Data.m_Info.m_Birthday = 0;
+		m_Data.m_Info.m_Points = 0;
 		m_Data.m_Info.m_Time.reset();
 		for(float &TimeCp : m_Data.m_Info.m_aTimeCp)
 			TimeCp = 0;
@@ -249,6 +250,28 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 		if(sscanf(aCurrent, "%d-%d-%d", &CurrentYear, &CurrentMonth, &CurrentDay) == 3 && sscanf(aStamp, "%d-%d-%d", &StampYear, &StampMonth, &StampDay) == 3 && CurrentMonth == StampMonth && CurrentDay == StampDay)
 			pResult->m_Data.m_Info.m_Birthday = CurrentYear - StampYear;
 	}
+
+	str_format(aBuf, sizeof(aBuf),
+		"SELECT Points "
+		"FROM %s_points "
+		"WHERE Name = ?",
+		pSqlServer->GetPrefix());
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aRequestingPlayer);
+
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End && !pSqlServer->IsNull(1))
+	{
+		int Points = pSqlServer->GetInt(1);
+		pResult->m_Data.m_Info.m_Points = Points;
+	}
+
 	return false;
 }
 
