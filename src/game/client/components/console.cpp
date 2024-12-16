@@ -295,12 +295,31 @@ void CGameConsole::CInstance::Reset()
 
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
 {
+	if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
+	{
+		const char *pPrevEntry = m_History.Last();
+		if(pPrevEntry == nullptr || str_comp(pPrevEntry, pLine) != 0)
+		{
+			const size_t Size = str_length(pLine) + 1;
+			char *pEntry = m_History.Allocate(Size);
+			str_copy(pEntry, pLine, Size);
+		}
+		// print out the user's commands before they get run
+		char aBuf[IConsole::CMDLINE_LENGTH + 3];
+		str_format(aBuf, sizeof(aBuf), "> %s", pLine);
+		m_pGameConsole->PrintLine(m_Type, aBuf);
+	}
+
 	if(m_Type == CGameConsole::CONSOLETYPE_LOCAL)
+	{
 		m_pGameConsole->m_pConsole->ExecuteLine(pLine);
+	}
 	else
 	{
 		if(m_pGameConsole->Client()->RconAuthed())
+		{
 			m_pGameConsole->Client()->Rcon(pLine);
+		}
 		else
 		{
 			if(!m_UserGot && m_UsernameReq)
@@ -404,22 +423,9 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			{
 				if(!m_Input.IsEmpty() || (m_UsernameReq && !m_pGameConsole->Client()->RconAuthed() && !m_UserGot))
 				{
-					if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
-					{
-						const char *pPrevEntry = m_History.Last();
-						if(pPrevEntry == nullptr || str_comp(pPrevEntry, m_Input.GetString()) != 0)
-						{
-							char *pEntry = m_History.Allocate(m_Input.GetLength() + 1);
-							str_copy(pEntry, m_Input.GetString(), m_Input.GetLength() + 1);
-						}
-						// print out the user's commands before they get run
-						char aBuf[IConsole::CMDLINE_LENGTH + 3];
-						str_format(aBuf, sizeof(aBuf), "> %s", m_Input.GetString());
-						m_pGameConsole->PrintLine(m_Type, aBuf);
-					}
 					ExecuteLine(m_Input.GetString());
 					m_Input.Clear();
-					m_pHistoryEntry = 0x0;
+					m_pHistoryEntry = nullptr;
 				}
 			}
 			else
@@ -577,16 +583,12 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		}
 		else if(Event.m_Key == KEY_ESCAPE && m_Searching)
 		{
-			m_Searching = false;
-			m_Input.Clear();
+			SetSearching(false);
 			Handled = true;
 		}
 		else if(Event.m_Key == KEY_F && m_pGameConsole->Input()->ModifierIsPressed())
 		{
-			m_Searching = true;
-			m_Input.Set(m_aCurrentSearchString);
-			m_Input.SelectAll();
-			UpdateSearch();
+			SetSearching(true);
 			Handled = true;
 		}
 	}
@@ -723,6 +725,23 @@ void CGameConsole::CInstance::UpdateEntryTextAttributes(CBacklogEntry *pEntry) c
 	m_pGameConsole->TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
 	pEntry->m_YOffset = Cursor.Height();
 	pEntry->m_LineCount = Cursor.m_LineCount;
+}
+
+void CGameConsole::CInstance::SetSearching(bool Searching)
+{
+	m_Searching = Searching;
+	if(Searching)
+	{
+		m_Input.SetClipboardLineCallback(nullptr); // restore default behavior (replace newlines with spaces)
+		m_Input.Set(m_aCurrentSearchString);
+		m_Input.SelectAll();
+		UpdateSearch();
+	}
+	else
+	{
+		m_Input.SetClipboardLineCallback([this](const char *pLine) { ExecuteLine(pLine); });
+		m_Input.Clear();
+	}
 }
 
 void CGameConsole::CInstance::ClearSearch()
