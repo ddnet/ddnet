@@ -19,8 +19,18 @@ CURRENT:
 	packet header: 3 bytes
 		unsigned char flags_ack; // 6bit flags, 2bit ack
 			0.6:   ORNCaaAA
-			0.6.5: ORNCTUAA
+			0.6.5: ORNCT-AA
 			0.7:   --NORCAA
+
+		O = flag compression
+		R = flag resend
+		N = flag connless
+		C = flag control
+		T = flag token (0.6.5 only not supported by ddnet)
+		- = unused, should be zero
+		a = should be zero otherwise it messes up the ack number
+		A = bit of ack number
+
 
 		unsigned char ack; // 8 bit ack
 		unsigned char num_chunks; // 8 bit chunks
