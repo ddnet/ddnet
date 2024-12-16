@@ -32,16 +32,41 @@
 
 // for platform specific features that aren't available or are broken in SDL
 #include <SDL_syswm.h>
+#ifdef KeyPress
+#undef KeyPress // Undo pollution from X11/Xlib.h included by SDL_syswm.h on Linux
+#endif
+
+static void AssertKeyValid(int Key)
+{
+	if(Key < KEY_FIRST || Key >= KEY_LAST)
+	{
+		char aError[32];
+		str_format(aError, sizeof(aError), "Key invalid: %d", Key);
+		dbg_assert(false, aError);
+	}
+}
 
 void CInput::AddKeyEvent(int Key, int Flags)
 {
+	AssertKeyValid(Key);
 	dbg_assert((Flags & (FLAG_PRESS | FLAG_RELEASE)) != 0 && (Flags & ~(FLAG_PRESS | FLAG_RELEASE)) == 0, "Flags invalid");
+
 	CEvent Event;
 	Event.m_Key = Key;
 	Event.m_Flags = Flags;
 	Event.m_aText[0] = '\0';
 	Event.m_InputCount = m_InputCounter;
 	m_vInputEvents.emplace_back(Event);
+
+	if(Flags & IInput::FLAG_PRESS)
+	{
+		m_aCurrentKeyStates[Key] = true;
+		m_aFrameKeyStates[Key] = true;
+	}
+	if(Flags & IInput::FLAG_RELEASE)
+	{
+		m_aCurrentKeyStates[Key] = false;
+	}
 }
 
 void CInput::AddTextEvent(const char *pText)
@@ -56,8 +81,8 @@ void CInput::AddTextEvent(const char *pText)
 
 CInput::CInput()
 {
-	mem_zero(m_aInputCount, sizeof(m_aInputCount));
-	mem_zero(m_aInputState, sizeof(m_aInputState));
+	std::fill(std::begin(m_aCurrentKeyStates), std::end(m_aCurrentKeyStates), false);
+	std::fill(std::begin(m_aFrameKeyStates), std::end(m_aFrameKeyStates), false);
 
 	m_vInputEvents.reserve(32);
 	m_LastUpdate = 0;
@@ -353,8 +378,7 @@ void CInput::ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) co
 
 void CInput::Clear()
 {
-	mem_zero(m_aInputState, sizeof(m_aInputState));
-	mem_zero(m_aInputCount, sizeof(m_aInputCount));
+	std::fill(std::begin(m_aFrameKeyStates), std::end(m_aFrameKeyStates), false);
 	m_vInputEvents.clear();
 	ClearTouchDeltas();
 }
@@ -364,11 +388,22 @@ float CInput::GetUpdateTime() const
 	return m_UpdateTime;
 }
 
-bool CInput::KeyState(int Key) const
+bool CInput::KeyIsPressed(int Key) const
 {
-	if(Key < KEY_FIRST || Key >= KEY_LAST)
-		return false;
-	return m_aInputState[Key];
+	AssertKeyValid(Key);
+	return m_aCurrentKeyStates[Key];
+}
+
+bool CInput::KeyPress(int Key) const
+{
+	AssertKeyValid(Key);
+	return m_aFrameKeyStates[Key];
+}
+
+const char *CInput::KeyName(int Key) const
+{
+	AssertKeyValid(Key);
+	return g_aaKeyStrings[Key];
 }
 
 int CInput::FindKeyByName(const char *pKeyName) const
@@ -391,56 +426,6 @@ int CInput::FindKeyByName(const char *pKeyName) const
 	return KEY_UNKNOWN;
 }
 
-void CInput::UpdateMouseState()
-{
-	const int MouseState = SDL_GetMouseState(nullptr, nullptr);
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
-		m_aInputState[KEY_MOUSE_1] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_RIGHT))
-		m_aInputState[KEY_MOUSE_2] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_MIDDLE))
-		m_aInputState[KEY_MOUSE_3] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_X1))
-		m_aInputState[KEY_MOUSE_4] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_X2))
-		m_aInputState[KEY_MOUSE_5] = 1;
-	if(MouseState & SDL_BUTTON(6))
-		m_aInputState[KEY_MOUSE_6] = 1;
-	if(MouseState & SDL_BUTTON(7))
-		m_aInputState[KEY_MOUSE_7] = 1;
-	if(MouseState & SDL_BUTTON(8))
-		m_aInputState[KEY_MOUSE_8] = 1;
-	if(MouseState & SDL_BUTTON(9))
-		m_aInputState[KEY_MOUSE_9] = 1;
-}
-
-void CInput::UpdateJoystickState()
-{
-	if(!g_Config.m_InpControllerEnable)
-		return;
-	IJoystick *pJoystick = GetActiveJoystick();
-	if(!pJoystick)
-		return;
-
-	const float DeadZone = GetJoystickDeadzone();
-	for(int Axis = 0; Axis < pJoystick->GetNumAxes(); Axis++)
-	{
-		const float Value = pJoystick->GetAxisValue(Axis);
-		const int LeftKey = KEY_JOY_AXIS_0_LEFT + 2 * Axis;
-		const int RightKey = LeftKey + 1;
-		m_aInputState[LeftKey] = Value <= -DeadZone;
-		m_aInputState[RightKey] = Value >= DeadZone;
-	}
-
-	for(int Hat = 0; Hat < pJoystick->GetNumHats(); Hat++)
-	{
-		int HatKeys[2];
-		pJoystick->GetHatValue(Hat, HatKeys);
-		for(int Key = KEY_JOY_HAT0_UP + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_DOWN + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
-			m_aInputState[Key] = HatKeys[0] == Key || HatKeys[1] == Key;
-	}
-}
-
 void CInput::HandleJoystickAxisMotionEvent(const SDL_JoyAxisEvent &Event)
 {
 	if(!g_Config.m_InpControllerEnable)
@@ -455,27 +440,21 @@ void CInput::HandleJoystickAxisMotionEvent(const SDL_JoyAxisEvent &Event)
 	const int RightKey = LeftKey + 1;
 	const float DeadZone = GetJoystickDeadzone();
 
-	if(Event.value <= SDL_JOYSTICK_AXIS_MIN * DeadZone && !m_aInputState[LeftKey])
+	if(Event.value <= SDL_JOYSTICK_AXIS_MIN * DeadZone && !m_aCurrentKeyStates[LeftKey])
 	{
-		m_aInputState[LeftKey] = true;
-		m_aInputCount[LeftKey] = m_InputCounter;
 		AddKeyEvent(LeftKey, IInput::FLAG_PRESS);
 	}
-	else if(Event.value > SDL_JOYSTICK_AXIS_MIN * DeadZone && m_aInputState[LeftKey])
+	else if(Event.value > SDL_JOYSTICK_AXIS_MIN * DeadZone && m_aCurrentKeyStates[LeftKey])
 	{
-		m_aInputState[LeftKey] = false;
 		AddKeyEvent(LeftKey, IInput::FLAG_RELEASE);
 	}
 
-	if(Event.value >= SDL_JOYSTICK_AXIS_MAX * DeadZone && !m_aInputState[RightKey])
+	if(Event.value >= SDL_JOYSTICK_AXIS_MAX * DeadZone && !m_aCurrentKeyStates[RightKey])
 	{
-		m_aInputState[RightKey] = true;
-		m_aInputCount[RightKey] = m_InputCounter;
 		AddKeyEvent(RightKey, IInput::FLAG_PRESS);
 	}
-	else if(Event.value < SDL_JOYSTICK_AXIS_MAX * DeadZone && m_aInputState[RightKey])
+	else if(Event.value < SDL_JOYSTICK_AXIS_MAX * DeadZone && m_aCurrentKeyStates[RightKey])
 	{
-		m_aInputState[RightKey] = false;
 		AddKeyEvent(RightKey, IInput::FLAG_RELEASE);
 	}
 }
@@ -494,13 +473,10 @@ void CInput::HandleJoystickButtonEvent(const SDL_JoyButtonEvent &Event)
 
 	if(Event.type == SDL_JOYBUTTONDOWN)
 	{
-		m_aInputState[Key] = true;
-		m_aInputCount[Key] = m_InputCounter;
 		AddKeyEvent(Key, IInput::FLAG_PRESS);
 	}
 	else if(Event.type == SDL_JOYBUTTONUP)
 	{
-		m_aInputState[Key] = false;
 		AddKeyEvent(Key, IInput::FLAG_RELEASE);
 	}
 }
@@ -520,19 +496,16 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 
 	for(int Key = KEY_JOY_HAT0_UP + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_DOWN + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
 	{
-		if(Key != HatKeys[0] && Key != HatKeys[1] && m_aInputState[Key])
+		if(Key != HatKeys[0] && Key != HatKeys[1] && m_aCurrentKeyStates[Key])
 		{
-			m_aInputState[Key] = false;
 			AddKeyEvent(Key, IInput::FLAG_RELEASE);
 		}
 	}
 
 	for(int CurrentKey : HatKeys)
 	{
-		if(CurrentKey != KEY_UNKNOWN && !m_aInputState[CurrentKey])
+		if(CurrentKey != KEY_UNKNOWN && !m_aCurrentKeyStates[CurrentKey])
 		{
-			m_aInputState[CurrentKey] = true;
-			m_aInputCount[CurrentKey] = m_InputCounter;
 			AddKeyEvent(CurrentKey, IInput::FLAG_PRESS);
 		}
 	}
@@ -673,20 +646,6 @@ int CInput::Update()
 
 	// keep the counter between 1..0xFFFFFFFF, 0 means not pressed
 	m_InputCounter = (m_InputCounter % std::numeric_limits<decltype(m_InputCounter)>::max()) + 1;
-
-	// Ensure that we have the latest keyboard, mouse and joystick state
-	SDL_PumpEvents();
-
-	int NumKeyStates;
-	const Uint8 *pState = SDL_GetKeyboardState(&NumKeyStates);
-	if(NumKeyStates >= KEY_MOUSE_1)
-		NumKeyStates = KEY_MOUSE_1;
-	mem_copy(m_aInputState, pState, NumKeyStates);
-	mem_zero(m_aInputState + NumKeyStates, KEY_LAST - NumKeyStates);
-
-	// these states must always be updated manually because they are not in the SDL_GetKeyboardState from SDL
-	UpdateMouseState();
-	UpdateJoystickState();
 
 	SDL_Event Event;
 	bool IgnoreKeys = false;
@@ -861,11 +820,6 @@ int CInput::Update()
 
 		if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && !HasComposition())
 		{
-			if(Action & IInput::FLAG_PRESS)
-			{
-				m_aInputState[Scancode] = 1;
-				m_aInputCount[Scancode] = m_InputCounter;
-			}
 			AddKeyEvent(Scancode, Action);
 		}
 	}
