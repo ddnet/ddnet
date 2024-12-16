@@ -84,6 +84,12 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	}
 	else if(m_Type == WEAPON_LASER)
 	{
+		if((!m_TuneZone && Tuning()->m_LaserUnDeep) || (m_TuneZone && TuningList()[m_TuneZone].m_LaserUnDeep))
+			pHit->SetDeepFrozen(false);
+
+		if((!m_TuneZone && Tuning()->m_LaserUnLiveFreeze) || (m_TuneZone && TuningList()[m_TuneZone].m_LaserUnLiveFreeze))
+			pHit->SetLiveFrozen(false);
+
 		pHit->UnFreeze();
 	}
 	return true;
