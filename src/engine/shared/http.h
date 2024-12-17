@@ -259,6 +259,13 @@ inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *
 }
 
 void EscapeUrl(char *pBuf, int Size, const char *pStr);
+
+template<int N>
+void EscapeUrl(char (&aBuf)[N], const char *pStr)
+{
+	EscapeUrl(aBuf, N, pStr);
+}
+
 bool HttpHasIpresolveBug();
 
 // In an ideal world this would be a kernel interface
