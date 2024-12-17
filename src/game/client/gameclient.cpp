@@ -2153,8 +2153,7 @@ void CGameClient::OnNewSnapshot()
 					vec2(m_Snap.m_aCharacters[i].m_Cur.m_X, m_Snap.m_aCharacters[i].m_Cur.m_Y),
 					Client()->IntraGameTick(g_Config.m_ClDummy));
 				float Alpha = 1.0f;
-				bool SameTeam = m_Teams.SameTeam(m_Snap.m_LocalClientId, i);
-				if(!SameTeam || m_aClients[i].m_Solo || m_aClients[m_Snap.m_LocalClientId].m_Solo)
+				if(IsOtherTeam(i))
 					Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
 				m_Effects.AirJump(Pos, Alpha);
 			}
