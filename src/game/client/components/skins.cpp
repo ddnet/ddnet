@@ -471,7 +471,7 @@ void CSkins::CSkinDownloadJob::Run()
 	const char *pBaseUrl = g_Config.m_ClDownloadCommunitySkins != 0 ? g_Config.m_ClSkinCommunityDownloadUrl : g_Config.m_ClSkinDownloadUrl;
 
 	char aEscapedName[256];
-	EscapeUrl(aEscapedName, sizeof(aEscapedName), m_aName);
+	EscapeUrl(aEscapedName, m_aName);
 
 	char aUrl[IO_MAX_PATH_LENGTH];
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", pBaseUrl, aEscapedName);
