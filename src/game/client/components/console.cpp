@@ -556,12 +556,12 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		}
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_UP)
 		{
-			m_BacklogCurLine += GetLinesToScroll(-1, 1);
+			m_BacklogCurLine += GetLinesToScroll(-1, g_Config.m_ConsoleScrollStep);
 			Handled = true;
 		}
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
 		{
-			--m_BacklogCurLine;
+			m_BacklogCurLine -= GetLinesToScroll(1, g_Config.m_ConsoleScrollStep);
 			if(m_BacklogCurLine < 0)
 			{
 				m_BacklogCurLine = 0;
