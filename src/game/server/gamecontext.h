@@ -182,8 +182,7 @@ public:
 	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
 	bool m_aPlayerHasInput[MAX_CLIENTS];
 	CSaveTeam *m_apSavedTeams[MAX_CLIENTS];
-	CSaveTee *m_apSavedTees[MAX_CLIENTS];
-	CSaveTee *m_apSavedTeleTees[MAX_CLIENTS];
+	CSaveHotReloadTee *m_apSavedTees[MAX_CLIENTS];
 	int m_aTeamMapping[MAX_CLIENTS];
 
 	// returns last input if available otherwise nulled PlayerInput object

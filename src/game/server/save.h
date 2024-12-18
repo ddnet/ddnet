@@ -148,6 +148,21 @@ private:
 	char m_aGameUuid[UUID_MAXSTRSIZE];
 };
 
+class CSaveHotReloadTee
+{
+public:
+	CSaveHotReloadTee() = default;
+	~CSaveHotReloadTee() = default;
+	void Save(CCharacter *pchr, bool AddPenalty = true);
+	bool Load(CCharacter *pchr, int Team, bool IsSwap = false);
+
+private:
+	CSaveTee m_SaveTee;
+	int m_Super;
+	int m_Invincible;
+	CSaveTee m_SavedTeleTee;
+};
+
 class CSaveTeam
 {
 public:
