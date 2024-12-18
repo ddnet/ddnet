@@ -788,6 +788,8 @@ public:
 	bool m_MultiViewActivated;
 	bool m_aMultiViewId[MAX_CLIENTS];
 
+	bool m_SpecOthers;
+
 	void ResetMultiView();
 	int FindFirstMultiViewId();
 	void CleanMultiViewId(int ClientId);
