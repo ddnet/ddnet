@@ -355,3 +355,10 @@ void CWarList::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserDat
 
 	return;
 }
+
+CWarList::~CWarList()
+{
+	for(CWarType *WarType : m_WarTypes)
+		delete WarType; 
+	m_WarTypes.clear(); 
+}

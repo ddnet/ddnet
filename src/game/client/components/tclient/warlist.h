@@ -132,6 +132,8 @@ class CWarList : public CComponent
 	IOHANDLE m_WarlistFile;
 
 public:
+	~CWarList();
+
 	// None type war entries will float to the top of the list, so they can be assigned a type
 	CWarType m_WarTypeNone = CWarType("none", ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), false);
 

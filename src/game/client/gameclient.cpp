@@ -2506,12 +2506,6 @@ void CGameClient::OnPredict()
 	// TClient
 	// New antiping smoothing
 	CCharacter *pSmoothLocalChar = m_PredSmoothingWorld.GetCharacterById(m_Snap.m_LocalClientId);
-	if(!pSmoothLocalChar)
-	{
-		m_PredSmoothingWorld.CopyWorld(&m_PredictedWorld);
-		pSmoothLocalChar = m_PredSmoothingWorld.GetCharacterById(m_Snap.m_LocalClientId);
-	}
-
 	if(g_Config.m_ClAntiPingImproved &&
 		Predict() && AntiPingPlayers() &&
 		pSmoothLocalChar &&
@@ -2528,8 +2522,8 @@ void CGameClient::OnPredict()
 			pSmoothDummyChar = m_PredSmoothingWorld.GetCharacterById(m_PredictedDummyId);
 			pPredDummyChar = m_PredictedWorld.GetCharacterById(m_PredictedDummyId);
 		}
-		CNetObj_PlayerInput *pInputData = &m_PredictedWorld.GetCharacterById(m_Snap.m_LocalClientId)->LatestInput();
-		CNetObj_PlayerInput *pDummyInputData = !pPredDummyChar ? 0 : &m_PredictedWorld.GetCharacterById(m_PredictedDummyId)->LatestInput();
+		CNetObj_PlayerInput *pInputData = m_PredictedWorld.GetCharacterById(m_Snap.m_LocalClientId)->LatestInput();
+		CNetObj_PlayerInput *pDummyInputData = !pPredDummyChar ? 0 : m_PredictedWorld.GetCharacterById(m_PredictedDummyId)->LatestInput();
 		bool DummyFirst = pInputData && pDummyInputData && pSmoothDummyChar->GetCid() < pSmoothLocalChar->GetCid();
 		if(DummyFirst)
 			pSmoothDummyChar->OnDirectInput(pDummyInputData);
@@ -2567,9 +2561,8 @@ void CGameClient::OnPredict()
 			PrevGameTick = Client()->GameTick(g_Config.m_ClDummy) + (int)Client()->IntraGameTick(g_Config.m_ClDummy);
 
 			vec2 ServerPos = m_aClients[i].m_aPredPos[GameTick % 200];
-			vec2 PrevServerPos = m_aClients[i].m_aPredPos[(GameTick - 1) % 200];
+			// vec2 PrevServerPos = m_aClients[i].m_aPredPos[(GameTick - 1) % 200];
 
-			vec2 IntraServerPos = mix(PrevServerPos, ServerPos, Client()->IntraGameTick(g_Config.m_ClDummy));
 			vec2 PredDir = normalize(PredPos - ServerPos);
 			vec2 LastDir = normalize(PrevPredPos - ServerPos);
 
@@ -2611,7 +2604,6 @@ void CGameClient::OnPredict()
 
 			int HistoryCount = (PredStartTick - HistoryStartTick + 1);
 			HistoryVector = HistoryVector / HistoryCount;
-			float HistoryLength = length(HistoryVector);
 			HistoryVector = normalize(HistoryVector);
 			float Variance = 0.0f;
 			// Find the variance over the history window
@@ -2693,6 +2685,7 @@ void CGameClient::OnPredict()
 		}
 	}
 	// Copy the current pred world so on the next tick we have the "previous" pred world to advance and test against
+
 	if(m_NewPredictedTick)
 		m_PredSmoothingWorld.CopyWorld(&m_PredictedWorld);
 
