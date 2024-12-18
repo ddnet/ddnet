@@ -600,7 +600,7 @@ void CInput::SetCompositionWindowPosition(float X, float Y, float H)
 	SDL_SetTextInputRect(&Rect);
 }
 
-static int TranslateScancode(const SDL_KeyboardEvent &KeyEvent)
+static int TranslateKeyEventKey(const SDL_KeyboardEvent &KeyEvent)
 {
 	// See SDL_Keymod for possible modifiers:
 	// NONE   =     0
@@ -618,20 +618,71 @@ static int TranslateScancode(const SDL_KeyboardEvent &KeyEvent)
 	// Sum if you want to ignore multiple modifiers.
 	if(KeyEvent.keysym.mod & g_Config.m_InpIgnoredModifiers)
 	{
-		return 0;
+		return KEY_UNKNOWN;
 	}
 
-	int Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(KeyEvent.keysym.sym) : KeyEvent.keysym.scancode;
+	int Key = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(KeyEvent.keysym.sym) : KeyEvent.keysym.scancode;
 
 #if defined(CONF_PLATFORM_ANDROID)
 	// Translate the Android back-button to the escape-key so it can be used to open/close the menu, close popups etc.
-	if(Scancode == KEY_AC_BACK)
+	if(Key == KEY_AC_BACK)
 	{
-		Scancode = KEY_ESCAPE;
+		Key = KEY_ESCAPE;
 	}
 #endif
 
-	return Scancode;
+	return Key;
+}
+
+static int TranslateMouseButtonEventKey(const SDL_MouseButtonEvent &MouseButtonEvent)
+{
+	switch(MouseButtonEvent.button)
+	{
+	case SDL_BUTTON_LEFT:
+		return KEY_MOUSE_1;
+	case SDL_BUTTON_RIGHT:
+		return KEY_MOUSE_2;
+	case SDL_BUTTON_MIDDLE:
+		return KEY_MOUSE_3;
+	case SDL_BUTTON_X1:
+		return KEY_MOUSE_4;
+	case SDL_BUTTON_X2:
+		return KEY_MOUSE_5;
+	case 6:
+		return KEY_MOUSE_6;
+	case 7:
+		return KEY_MOUSE_7;
+	case 8:
+		return KEY_MOUSE_8;
+	case 9:
+		return KEY_MOUSE_9;
+	default:
+		return KEY_UNKNOWN;
+	}
+}
+
+static int TranslateMouseWheelEventKey(const SDL_MouseWheelEvent &MouseWheelEvent)
+{
+	if(MouseWheelEvent.y > 0)
+	{
+		return KEY_MOUSE_WHEEL_UP;
+	}
+	else if(MouseWheelEvent.y < 0)
+	{
+		return KEY_MOUSE_WHEEL_DOWN;
+	}
+	else if(MouseWheelEvent.x > 0)
+	{
+		return KEY_MOUSE_WHEEL_RIGHT;
+	}
+	else if(MouseWheelEvent.x < 0)
+	{
+		return KEY_MOUSE_WHEEL_LEFT;
+	}
+	else
+	{
+		return KEY_UNKNOWN;
+	}
 }
 
 int CInput::Update()
@@ -649,10 +700,16 @@ int CInput::Update()
 
 	SDL_Event Event;
 	bool IgnoreKeys = false;
+
+	const auto &&AddKeyEventChecked = [&](int Key, int Flags) {
+		if(Key != KEY_UNKNOWN && !IgnoreKeys && !HasComposition())
+		{
+			AddKeyEvent(Key, Flags);
+		}
+	};
+
 	while(SDL_PollEvent(&Event))
 	{
-		int Scancode = 0;
-		int Action = IInput::FLAG_PRESS;
 		switch(Event.type)
 		{
 		case SDL_SYSWMEVENT:
@@ -678,11 +735,11 @@ int CInput::Update()
 
 		// handle keys
 		case SDL_KEYDOWN:
-			Scancode = TranslateScancode(Event.key);
+			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_PRESS);
 			break;
+
 		case SDL_KEYUP:
-			Action = IInput::FLAG_RELEASE;
-			Scancode = TranslateScancode(Event.key);
+			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_RELEASE);
 			break;
 
 		// handle the joystick events
@@ -708,41 +765,16 @@ int CInput::Update()
 			break;
 
 		// handle mouse buttons
-		case SDL_MOUSEBUTTONUP:
-			Action = IInput::FLAG_RELEASE;
-
-			[[fallthrough]];
 		case SDL_MOUSEBUTTONDOWN:
-			if(Event.button.button == SDL_BUTTON_LEFT)
-				Scancode = KEY_MOUSE_1;
-			if(Event.button.button == SDL_BUTTON_RIGHT)
-				Scancode = KEY_MOUSE_2;
-			if(Event.button.button == SDL_BUTTON_MIDDLE)
-				Scancode = KEY_MOUSE_3;
-			if(Event.button.button == SDL_BUTTON_X1)
-				Scancode = KEY_MOUSE_4;
-			if(Event.button.button == SDL_BUTTON_X2)
-				Scancode = KEY_MOUSE_5;
-			if(Event.button.button == 6)
-				Scancode = KEY_MOUSE_6;
-			if(Event.button.button == 7)
-				Scancode = KEY_MOUSE_7;
-			if(Event.button.button == 8)
-				Scancode = KEY_MOUSE_8;
-			if(Event.button.button == 9)
-				Scancode = KEY_MOUSE_9;
+			AddKeyEventChecked(TranslateMouseButtonEventKey(Event.button), IInput::FLAG_PRESS);
+			break;
+
+		case SDL_MOUSEBUTTONUP:
+			AddKeyEventChecked(TranslateMouseButtonEventKey(Event.button), IInput::FLAG_RELEASE);
 			break;
 
 		case SDL_MOUSEWHEEL:
-			if(Event.wheel.y > 0)
-				Scancode = KEY_MOUSE_WHEEL_UP;
-			if(Event.wheel.y < 0)
-				Scancode = KEY_MOUSE_WHEEL_DOWN;
-			if(Event.wheel.x > 0)
-				Scancode = KEY_MOUSE_WHEEL_LEFT;
-			if(Event.wheel.x < 0)
-				Scancode = KEY_MOUSE_WHEEL_RIGHT;
-			Action |= IInput::FLAG_RELEASE;
+			AddKeyEventChecked(TranslateMouseWheelEventKey(Event.wheel), IInput::FLAG_PRESS | IInput::FLAG_RELEASE);
 			break;
 
 		case SDL_FINGERDOWN:
@@ -816,11 +848,6 @@ int CInput::Update()
 			str_copy(m_aDropFile, Event.drop.file);
 			SDL_free(Event.drop.file);
 			break;
-		}
-
-		if(Scancode > KEY_FIRST && Scancode < g_MaxKeys && !IgnoreKeys && !HasComposition())
-		{
-			AddKeyEvent(Scancode, Action);
 		}
 	}
 
