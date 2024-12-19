@@ -130,6 +130,30 @@ bool CMenus::DoSliderWithScaledValue(const void *pId, int *pOption, const CUIRec
 	return false;
 }
 
+int CMenus::DoButtonLineSize_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, float LineSize, bool Fake, const char *pImageName, int Corners, float Rounding, float FontFactor, ColorRGBA Color)
+{
+	CUIRect Text = *pRect;
+
+	if(Checked)
+		Color = ColorRGBA(0.6f, 0.6f, 0.6f, 0.5f);
+	Color.a *= Ui()->ButtonColorMul(pButtonContainer);
+
+	if(Fake)
+		Color.a *= 0.5f;
+
+	pRect->Draw(Color, Corners, Rounding);
+
+	Text.HMargin(LineSize / 2.0f, &Text);
+	Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
+	Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
+	Ui()->DoLabel(&Text, pText, Text.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
+
+	if(Fake)
+		return 0;
+
+	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect);
+}
+
 void CMenus::RenderSettingsTClient(CUIRect MainView)
 {
 	s_Time += Client()->RenderFrameTime() * (1.0f / 100.0f);
@@ -749,94 +773,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 	if(s_CurCustomTab == TCLIENT_TAB_INFO)
 	{
-		MainView.HSplitTop(MarginSmall, nullptr, &MainView);
-
-		MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
-		LeftView.VSplitLeft(MarginSmall, nullptr, &LeftView);
-		RightView.VSplitRight(MarginSmall, &RightView, nullptr);
-
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("TClient Links"), HeadlineFontSize, TEXTALIGN_ML);
-		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
-
-		static CButtonContainer s_DiscordButton, s_WebsiteButton, s_GithubButton, s_SupportButton;
-		CUIRect ButtonLeft, ButtonRight;
-
-		LeftView.HSplitTop(LineSize, &Button, &LeftView);
-		Button.VSplitMid(&ButtonLeft, &ButtonRight, MarginSmall);
-		if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &ButtonLeft, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-			Client()->ViewLink("https://discord.gg/fBvhH93Bt6");
-		if(DoButton_Menu(&s_WebsiteButton, Localize("Wesbite"), 0, &ButtonRight, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-			Client()->ViewLink("https://tclient.app/");
-
-		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
-		LeftView.HSplitTop(LineSize, &Button, &LeftView);
-		Button.VSplitMid(&ButtonLeft, &ButtonRight, MarginSmall);
-
-		if(DoButton_Menu(&s_GithubButton, Localize("Github"), 0, &ButtonLeft, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-			Client()->ViewLink("https://github.com/sjrc6/TaterClient-ddnet");
-		if(DoButton_Menu(&s_SupportButton, Localize("Support"), 0, &ButtonRight, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
-			Client()->ViewLink("https://ko-fi.com/Totar");
-
-		// =======RIGHT VIEW========
-
-		RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
-		Ui()->DoLabel(&Label, Localize("TClient Developers"), HeadlineFontSize, TEXTALIGN_ML);
-		RightView.HSplitTop(MarginSmall, nullptr, &RightView);
-		RightView.HSplitTop(MarginSmall, nullptr, &RightView);
-
-		const float TeeSize = 50.0f;
-		const float CardSize = TeeSize + MarginSmall;
-		CUIRect TeeRect, DevCardRect;
-		static CButtonContainer s_LinkButton1, s_LinkButton2, s_LinkButton3, s_LinkButton4;
-		bool WhiteFeetTemp = g_Config.m_ClWhiteFeet;
-		g_Config.m_ClWhiteFeet = false;
-		{
-			RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
-			DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
-			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Tater"), &Label, &Button);
-			Button.VSplitLeft(MarginSmall, nullptr, &Button);
-			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
-			Ui()->DoLabel(&Label, "Tater", LineSize, TEXTALIGN_ML);
-			if(DoButton_FontIcon(&s_LinkButton1, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
-				Client()->ViewLink("https://github.com/sjrc6");
-			RenderDevSkin(TeeRect.Center(), 50.0f, "glow_mermyfox", "mermyfox", true, 15911221, 9981775, 0, false);
-		}
-		{
-			RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
-			DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
-			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Solly"), &Label, &Button);
-			Button.VSplitLeft(MarginSmall, nullptr, &Button);
-			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
-			Ui()->DoLabel(&Label, "Solly", LineSize, TEXTALIGN_ML);
-			if(DoButton_FontIcon(&s_LinkButton3, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
-				Client()->ViewLink("https://github.com/SollyBunny");
-			RenderDevSkin(TeeRect.Center(), 50.0f, "tuzi", "tuzi", false, 10944256, 2621184, 2, true);
-		}
-		{
-			RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
-			DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
-			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Daniel"), &Label, &Button);
-			Button.VSplitLeft(MarginSmall, nullptr, &Button);
-			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
-			Ui()->DoLabel(&Label, "Daniel", LineSize, TEXTALIGN_ML);
-			if(DoButton_FontIcon(&s_LinkButton2, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
-				Client()->ViewLink("https://github.com/danielkempf");
-			RenderDevSkin(TeeRect.Center(), 50.0f, "greyfox", "greyfox", true, 10944256, 2621184, 2, false);
-		}
-
-		{
-			RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
-			DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
-			Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Teero"), &Label, &Button);
-			Button.VSplitLeft(MarginSmall, nullptr, &Button);
-			Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
-			Ui()->DoLabel(&Label, "Teero", LineSize, TEXTALIGN_ML);
-			if(DoButton_FontIcon(&s_LinkButton4, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
-				Client()->ViewLink("https://github.com/Teero888");
-			RenderDevSkin(TeeRect.Center(), 50.0f, "glow_mermyfox", "mermyfox", true, 15873791, 16449285, 0, false);
-		}
-		g_Config.m_ClWhiteFeet = WhiteFeetTemp;
+		RenderSettingsInfo(MainView);
 	}
 }
 
@@ -845,7 +782,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	CUIRect RightView, LeftView, Column1, Column2, Column3, Column4, Button, ButtonL, ButtonR, Label;
 
 	MainView.HSplitTop(MarginSmall, nullptr, &MainView);
-	MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
+	MainView.VSplitMid(&LeftView, &RightView, Margin);
 	LeftView.VSplitLeft(MarginSmall, nullptr, &LeftView);
 	RightView.VSplitRight(MarginSmall, &RightView, nullptr);
 
@@ -857,8 +794,8 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	static char s_aEntryName[MAX_NAME_LENGTH];
 	static char s_aEntryClan[MAX_CLAN_LENGTH];
 	static char s_aEntryReason[MAX_WARLIST_REASON_LENGTH];
-	static int s_IsClan = 1;
-	static int s_IsName = 0;
+	static int s_IsClan = 0;
+	static int s_IsName = 1;
 
 	LeftView.VSplitMid(&Column1, &Column2, Margin);
 	RightView.VSplitMid(&Column3, &Column4, Margin);
@@ -873,7 +810,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	EntriesSearch.HSplitTop(MarginSmall, nullptr, &EntriesSearch);
 
 	static CWarEntry *pSelectedEntry = nullptr;
-	static CWarType *pSelectedType = nullptr;
+	static CWarType *pSelectedType = GameClient()->m_WarList.m_WarTypes[0];
 
 	// Filter the list
 	static CLineInputBuffered<128> s_EntriesFilterInput;
@@ -892,9 +829,9 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 			vpFilteredEntries.push_back(pEntry);
 	}
 
-	int SelectedOld = -1;
+	int SelectedOldEntry = -1;
 	static CListBox s_EntriesListBox;
-	s_EntriesListBox.DoStart(35.0f, vpFilteredEntries.size(), 1, 2, SelectedOld, &Column1);
+	s_EntriesListBox.DoStart(35.0f, vpFilteredEntries.size(), 1, 2, SelectedOldEntry, &Column1);
 
 	static std::vector<unsigned char> s_vItemIds;
 	static std::vector<CButtonContainer> s_vDeleteButtons;
@@ -912,9 +849,9 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 			continue;
 
 		if(pSelectedEntry && pEntry == pSelectedEntry)
-			SelectedOld = i;
+			SelectedOldEntry = i;
 
-		const CListboxItem Item = s_EntriesListBox.DoNextItem(&s_vItemIds[i], SelectedOld >= 0 && (size_t)SelectedOld == i);
+		const CListboxItem Item = s_EntriesListBox.DoNextItem(&s_vItemIds[i], SelectedOldEntry >= 0 && (size_t)SelectedOldEntry == i);
 		if(!Item.m_Visible)
 			continue;
 
@@ -968,10 +905,10 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 		Ui()->DoLabel(&WarType, pEntry->m_pWarType->m_aWarName, StandardFontSize, TEXTALIGN_ML);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
-	const int NewSelected = s_EntriesListBox.DoEnd();
-	if(SelectedOld != NewSelected || (NewSelected >= 0 && Ui()->HotItem() == &s_vItemIds[NewSelected] && Ui()->MouseButtonClicked(0)))
+	const int NewSelectedEntry = s_EntriesListBox.DoEnd();
+	if(SelectedOldEntry != NewSelectedEntry || (SelectedOldEntry >= 0 && Ui()->HotItem() == &s_vItemIds[NewSelectedEntry] && Ui()->MouseButtonClicked(0)))
 	{
-		pSelectedEntry = vpFilteredEntries[NewSelected];
+		pSelectedEntry = vpFilteredEntries[NewSelectedEntry];
 		if(!Ui()->LastMouseButton(1) && !Ui()->LastMouseButton(2))
 		{
 			str_copy(s_aEntryName, pSelectedEntry->m_aName);
@@ -1027,12 +964,6 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 		s_ClanInput.Render(&ButtonR, 12.0f, TEXTALIGN_ML, false, -1.0f, 0.0f);
 		Ui()->ClipDisable();
 	}
-	Column2.HSplitTop(MarginSmall, nullptr, &Column2);
-	Column2.HSplitTop(HeadlineFontSize, &Button, &Column2);
-	static CLineInput s_ReasonInput;
-	s_ReasonInput.SetBuffer(s_aEntryReason, sizeof(s_aEntryReason));
-	s_ReasonInput.SetEmptyText("Reason");
-	Ui()->DoEditBox(&s_ReasonInput, &Button, 12.0f);
 
 	Column2.HSplitTop(MarginSmall, nullptr, &Column2);
 	Column2.HSplitTop(LineSize, &Button, &Column2);
@@ -1053,13 +984,20 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	if(!s_IsClan)
 		str_copy(s_aEntryClan, "");
 
+	Column2.HSplitTop(MarginSmall, nullptr, &Column2);
+	Column2.HSplitTop(HeadlineFontSize, &Button, &Column2);
+	static CLineInput s_ReasonInput;
+	s_ReasonInput.SetBuffer(s_aEntryReason, sizeof(s_aEntryReason));
+	s_ReasonInput.SetEmptyText("Reason");
+	Ui()->DoEditBox(&s_ReasonInput, &Button, 12.0f);
+
 	static CButtonContainer s_AddButton, s_OverrideButton;
 
 	Column2.HSplitTop(MarginSmall, nullptr, &Column2);
-	Column2.HSplitTop(LineSize, &Button, &Column2);
+	Column2.HSplitTop(LineSize * 2.0f, &Button, &Column2);
 	Button.VSplitMid(&ButtonL, &ButtonR, MarginSmall);
 
-	if(DoButton_Menu(&s_OverrideButton, Localize("Override Entry"), 0, &ButtonL) && pSelectedEntry)
+	if(DoButtonLineSize_Menu(&s_OverrideButton, Localize("Override Entry"), 0, &ButtonL, LineSize) && pSelectedEntry)
 	{
 		if(pSelectedEntry && pSelectedType)
 		{
@@ -1069,7 +1007,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 			pSelectedEntry->m_pWarType = pSelectedType;
 		}
 	}
-	if(DoButton_Menu(&s_AddButton, Localize("Add Entry"), 0, &ButtonR))
+	if(DoButtonLineSize_Menu(&s_AddButton, Localize("Add Entry"), 0, &ButtonR, LineSize))
 	{
 		if(pSelectedType)
 			GameClient()->m_WarList.AddWarEntry(s_aEntryName, s_aEntryClan, s_aEntryReason, pSelectedType->m_aWarName);
@@ -1083,6 +1021,212 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 		TextRender()->TextColor(pSelectedType->m_Color);
 		Ui()->DoLabel(&Button, pSelectedType->m_aWarName, HeadlineFontSize, TEXTALIGN_MC);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
+
+	// ======WAR TYPE EDITING======
+
+	Column3.HSplitTop(HeadlineHeight, &Label, &Column3);
+	Ui()->DoLabel(&Label, Localize("War Groups"), HeadlineFontSize, TEXTALIGN_ML);
+	Column3.HSplitTop(MarginSmall, nullptr, &Column3);
+
+	static char s_aTypeName[MAX_WARLIST_TYPE_LENGTH];
+	static ColorRGBA s_GroupColor = ColorRGBA(1, 1, 1, 1);
+
+	CUIRect WarTypeList;
+	Column3.HSplitBottom(180.0f, &WarTypeList, &Column3);
+	m_pRemoveWarType = nullptr;
+	int SelectedOldType = -1;
+	static CListBox s_WarTypeListBox;
+	s_WarTypeListBox.DoStart(25.0f, GameClient()->m_WarList.m_WarTypes.size(), 1, 2, SelectedOldType, &WarTypeList);
+
+	static std::vector<unsigned char> s_vTypeItemIds;
+	static std::vector<CButtonContainer> s_vTypeDeleteButtons;
+
+	const int MaxTypes = GameClient()->m_WarList.m_WarTypes.size();
+	s_vTypeItemIds.resize(MaxTypes);
+	s_vTypeDeleteButtons.resize(MaxTypes);
+
+	for(int i = 0; i < GameClient()->m_WarList.m_WarTypes.size(); i++)
+	{
+		CWarType *pType = GameClient()->m_WarList.m_WarTypes[i];
+
+		if(!pType)
+			continue;
+
+		if(pSelectedType && pType == pSelectedType)
+			SelectedOldType = i;
+
+		const CListboxItem Item = s_WarTypeListBox.DoNextItem(&s_vTypeItemIds[i], SelectedOldType >= 0 && SelectedOldType == i);
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect TypeRect, DeleteButton;
+		Item.m_Rect.Margin(0.0f, &TypeRect);
+
+		if(pType->m_Removable)
+		{
+			TypeRect.VSplitRight(20.0f, &TypeRect, &DeleteButton);
+			DeleteButton.HSplitTop(20.0f, &DeleteButton, nullptr);
+			DeleteButton.Margin(2.0f, &DeleteButton);
+			if(DoButtonNoRect_FontIcon(&s_vTypeDeleteButtons[i], FONT_ICON_TRASH, 0, &DeleteButton, IGraphics::CORNER_ALL))
+				m_pRemoveWarType = pType;
+		}
+		TextRender()->TextColor(pType->m_Color);
+		Ui()->DoLabel(&TypeRect, pType->m_aWarName, StandardFontSize, TEXTALIGN_ML);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+		// EntryRect.HMargin(MarginExtraSmall, &EntryRect);
+		// EntryRect.HSplitMid(&EntryRect, &WarType, MarginSmall);
+
+		// Ui()->DoLabel(&EntryRect, aBuf, StandardFontSize, TEXTALIGN_ML);
+		// TextRender()->TextColor(pEntry->m_pWarType->m_Color);
+		// Ui()->DoLabel(&WarType, pEntry->m_pWarType->m_aWarName, StandardFontSize, TEXTALIGN_ML);
+		// TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
+	const int NewSelectedType = s_WarTypeListBox.DoEnd();
+	if((SelectedOldType != NewSelectedType && NewSelectedType >= 0) || (NewSelectedType >= 0 && Ui()->HotItem() == &s_vTypeItemIds[NewSelectedType] && Ui()->MouseButtonClicked(0)))
+	{
+		pSelectedType = GameClient()->m_WarList.m_WarTypes[NewSelectedType];
+		if(!Ui()->LastMouseButton(1) && !Ui()->LastMouseButton(2))
+		{
+			str_copy(s_aTypeName, pSelectedType->m_aWarName);
+			s_GroupColor = pSelectedType->m_Color;
+		}
+	}
+	if(m_pRemoveWarType != nullptr)
+	{
+		char aMessage[256];
+		str_format(aMessage, sizeof(aMessage),
+			Localize("Are you sure that you want to remove '%s' from your war groups?"),
+			m_pRemoveWarType->m_aWarName);
+		PopupConfirm(Localize("Remove War Group"), aMessage, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmRemoveWarType);
+	}
+
+	static CLineInput s_TypeNameInput;
+	Column3.HSplitTop(MarginSmall, nullptr, &Column3);
+	Column3.HSplitTop(HeadlineFontSize + MarginSmall, &Button, &Column3);
+	s_TypeNameInput.SetBuffer(s_aTypeName, sizeof(s_aTypeName));
+	s_TypeNameInput.SetEmptyText("Group Name");
+	Ui()->DoEditBox(&s_TypeNameInput, &Button, 12.0f);
+	static CButtonContainer s_AddGroupButton, s_OverrideGroupButton, s_GroupColorPicker;
+
+	static unsigned int ColorValue = 0;
+	ColorValue = color_cast<ColorHSLA>(s_GroupColor).Pack(false);
+	ColorHSLA PickedColor = DoLine_ColorPicker(&s_GroupColorPicker, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column3, Localize("Color"), &ColorValue, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+	s_GroupColor = color_cast<ColorRGBA>(PickedColor);
+
+	Column3.HSplitTop(MarginSmall, nullptr, &Column3);
+	Column3.HSplitTop(LineSize * 2.0f, &Button, &Column3);
+	Button.VSplitMid(&ButtonL, &ButtonR, MarginSmall);
+	bool OverrideDisabled = NewSelectedType == 0;
+	if(DoButtonLineSize_Menu(&s_OverrideGroupButton, Localize("Override Group"), 0, &ButtonL, LineSize, OverrideDisabled) && pSelectedEntry)
+	{
+		if(pSelectedType)
+		{
+			str_copy(pSelectedType->m_aWarName, s_aTypeName);
+			pSelectedType->m_Color = s_GroupColor;
+		}
+	}
+	bool AddDisabled = str_comp(GameClient()->m_WarList.FindWarType(s_aTypeName)->m_aWarName, "none") != 0 || str_comp(s_aTypeName, "none") == 0;
+	if(DoButtonLineSize_Menu(&s_AddGroupButton, Localize("Add Group"), 0, &ButtonR, LineSize, AddDisabled))
+	{
+		GameClient()->m_WarList.AddWarType(s_aTypeName, s_GroupColor);
+	}
+}
+
+void CMenus::PopupConfirmRemoveWarType()
+{
+	GameClient()->m_WarList.RemoveWarType(m_pRemoveWarType->m_aWarName);
+	m_pRemoveWarType = nullptr;
+}
+
+void CMenus::RenderSettingsInfo(CUIRect MainView)
+{
+	CUIRect LeftView, RightView, Button, Label;
+	MainView.HSplitTop(MarginSmall, nullptr, &MainView);
+
+	MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
+	LeftView.VSplitLeft(MarginSmall, nullptr, &LeftView);
+	RightView.VSplitRight(MarginSmall, &RightView, nullptr);
+
+	LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
+	Ui()->DoLabel(&Label, Localize("TClient Links"), HeadlineFontSize, TEXTALIGN_ML);
+	LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
+
+	static CButtonContainer s_DiscordButton, s_WebsiteButton, s_GithubButton, s_SupportButton;
+	CUIRect ButtonLeft, ButtonRight;
+
+	LeftView.HSplitTop(LineSize, &Button, &LeftView);
+	Button.VSplitMid(&ButtonLeft, &ButtonRight, MarginSmall);
+	if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &ButtonLeft, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		Client()->ViewLink("https://discord.gg/fBvhH93Bt6");
+	if(DoButton_Menu(&s_WebsiteButton, Localize("Wesbite"), 0, &ButtonRight, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		Client()->ViewLink("https://tclient.app/");
+
+	LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
+	LeftView.HSplitTop(LineSize, &Button, &LeftView);
+	Button.VSplitMid(&ButtonLeft, &ButtonRight, MarginSmall);
+
+	if(DoButton_Menu(&s_GithubButton, Localize("Github"), 0, &ButtonLeft, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		Client()->ViewLink("https://github.com/sjrc6/TaterClient-ddnet");
+	if(DoButton_Menu(&s_SupportButton, Localize("Support"), 0, &ButtonRight, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+		Client()->ViewLink("https://ko-fi.com/Totar");
+
+	// =======RIGHT VIEW========
+
+	RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("TClient Developers"), HeadlineFontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(MarginSmall, nullptr, &RightView);
+	RightView.HSplitTop(MarginSmall, nullptr, &RightView);
+
+	const float TeeSize = 50.0f;
+	const float CardSize = TeeSize + MarginSmall;
+	CUIRect TeeRect, DevCardRect;
+	static CButtonContainer s_LinkButton1, s_LinkButton2, s_LinkButton3, s_LinkButton4;
+	{
+		RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
+		DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
+		Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Tater"), &Label, &Button);
+		Button.VSplitLeft(MarginSmall, nullptr, &Button);
+		Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
+		Ui()->DoLabel(&Label, "Tater", LineSize, TEXTALIGN_ML);
+		if(DoButton_FontIcon(&s_LinkButton1, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
+			Client()->ViewLink("https://github.com/sjrc6");
+		RenderDevSkin(TeeRect.Center(), 50.0f, "glow_mermyfox", "mermyfox", true, 0, 0, 0, false, ColorRGBA(0.92f, 0.29f, 0.48f, 1.0f), ColorRGBA(0.55f, 0.64f, 0.76f, 1.0f));
+	}
+	{
+		RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
+		DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
+		Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Solly"), &Label, &Button);
+		Button.VSplitLeft(MarginSmall, nullptr, &Button);
+		Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
+		Ui()->DoLabel(&Label, "Solly", LineSize, TEXTALIGN_ML);
+		if(DoButton_FontIcon(&s_LinkButton3, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
+			Client()->ViewLink("https://github.com/SollyBunny");
+		RenderDevSkin(TeeRect.Center(), 50.0f, "tuzi", "tuzi", false, 0, 0, 2, true);
+	}
+	{
+		RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
+		DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
+		Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Daniel"), &Label, &Button);
+		Button.VSplitLeft(MarginSmall, nullptr, &Button);
+		Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
+		Ui()->DoLabel(&Label, "Daniel", LineSize, TEXTALIGN_ML);
+		if(DoButton_FontIcon(&s_LinkButton2, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
+			Client()->ViewLink("https://github.com/danielkempf");
+		RenderDevSkin(TeeRect.Center(), 50.0f, "greyfox", "greyfox", true, 0, 0, 2, false, ColorRGBA(0.00f, 0.09f, 1.00f, 1.00f), ColorRGBA(1.00f, 0.92f, 0.00f, 1.00f));
+	}
+
+	{
+		RightView.HSplitTop(CardSize, &DevCardRect, &RightView);
+		DevCardRect.VSplitLeft(CardSize, &TeeRect, &Label);
+		Label.VSplitLeft(TextRender()->TextWidth(LineSize, "Teero"), &Label, &Button);
+		Button.VSplitLeft(MarginSmall, nullptr, &Button);
+		Button.w = LineSize, Button.h = LineSize, Button.y = Label.y + (Label.h / 2.0f - Button.h / 2.0f);
+		Ui()->DoLabel(&Label, "Teero", LineSize, TEXTALIGN_ML);
+		if(DoButton_FontIcon(&s_LinkButton4, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
+			Client()->ViewLink("https://github.com/Teero888");
+		RenderDevSkin(TeeRect.Center(), 50.0f, "glow_mermyfox", "mermyfox", true, 0, 0, 0, false, ColorRGBA(1.00f, 1.00f, 1.00f, 1.00f), ColorRGBA(1.00f, 0.02f, 0.13f, 1.00f));
 	}
 }
 
@@ -1497,8 +1641,11 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	}
 }
 
-void CMenus::RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, const char *pBackupSkin, bool CustomColors, int FeetColor, int BodyColor, int Emote, bool Rainbow)
+void CMenus::RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, const char *pBackupSkin, bool CustomColors, int FeetColor, int BodyColor, int Emote, bool Rainbow, ColorRGBA ColorFeet, ColorRGBA ColorBody)
 {
+	bool WhiteFeetTemp = g_Config.m_ClWhiteFeet;
+	g_Config.m_ClWhiteFeet = false;
+
 	float DefTick = std::fmod(s_Time, 1.0f);
 
 	CTeeRenderInfo SkinInfo;
@@ -1514,6 +1661,11 @@ void CMenus::RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, co
 	{
 		SkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(BodyColor).UnclampLighting(ColorHSLA::DARKEST_LGT));
 		SkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(FeetColor).UnclampLighting(ColorHSLA::DARKEST_LGT));
+		if(ColorFeet.a != 0.0f)
+		{
+			SkinInfo.m_ColorBody = ColorBody;
+			SkinInfo.m_ColorFeet = ColorFeet;
+		}
 	}
 	else
 	{
@@ -1532,6 +1684,7 @@ void CMenus::RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, co
 	CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &SkinInfo, OffsetToMid);
 	vec2 TeeRenderPos(RenderPos.x, RenderPos.y + OffsetToMid.y);
 	RenderTools()->RenderTee(pIdleState, &SkinInfo, Emote, vec2(1.0f, 0.0f), TeeRenderPos);
+	g_Config.m_ClWhiteFeet = WhiteFeetTemp;
 }
 
 void CMenus::RenderFontIcon(const CUIRect Rect, const char *pText, float Size, int Align)
@@ -1541,4 +1694,23 @@ void CMenus::RenderFontIcon(const CUIRect Rect, const char *pText, float Size, i
 	Ui()->DoLabel(&Rect, pText, Size, Align);
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+}
+
+int CMenus::DoButtonNoRect_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners)
+{
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
+	TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+	TextRender()->TextColor(TextRender()->DefaultTextSelectionColor());
+	if(Ui()->HotItem() == pButtonContainer)
+	{
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
+	CUIRect Temp;
+	pRect->HMargin(0.0f, &Temp);
+	Ui()->DoLabel(&Temp, pText, Temp.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+
+	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect);
 }

@@ -133,7 +133,7 @@ void CWarList::AddWarEntry(const char *pName, const char *pClan, const char *pRe
 		return;
 
 	CWarType *WarType = FindWarType(pType);
-	if(WarType == &m_WarTypeNone)
+	if(WarType == m_pWarTypeNone)
 	{
 		AddWarType(pType, ColorRGBA(0, 0, 1, 1));
 		WarType = FindWarType(pType);
@@ -156,7 +156,7 @@ void CWarList::AddWarType(const char *pType, ColorRGBA Color)
 		return;
 
 	CWarType *Type = FindWarType(pType);
-	if(Type == &m_WarTypeNone)
+	if(Type == m_pWarTypeNone)
 	{
 		CWarType *NewType = new CWarType(pType, Color);
 		m_WarTypes.push_back(NewType);
@@ -201,7 +201,7 @@ void CWarList::RemoveWarType(const char *pType)
 		{
 			if(*Entry.m_pWarType == **it)
 			{
-				Entry.m_pWarType = &m_WarTypeNone;
+				Entry.m_pWarType = m_pWarTypeNone;
 			}
 		}
 		m_WarTypes.erase(it);
@@ -216,7 +216,7 @@ CWarType *CWarList::FindWarType(const char *pType)
 	if(it != m_WarTypes.end())
 		return *it; 
 	else
-		return &m_WarTypeNone;
+		return m_pWarTypeNone;
 }
 
 CWarEntry *CWarList::FindWarEntry(const char *pName, const char *pClan, const char *pType)
@@ -361,4 +361,10 @@ CWarList::~CWarList()
 	for(CWarType *WarType : m_WarTypes)
 		delete WarType; 
 	m_WarTypes.clear(); 
+}
+
+CWarList::CWarList()
+{
+	str_copy(m_WarTypes[0]->m_aWarName, "none");
+	m_WarTypes[0]->m_Color = ColorRGBA(1, 1, 1, 1);
 }

@@ -401,13 +401,13 @@ ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetId, const float Lin
 		Ui()->DoLabel(&Label, pText, LabelSize, TEXTALIGN_ML);
 	}
 
-	const ColorHSLA PickedColor = DoButton_ColorPicker(&ColorPickerButton, pColorValue, Alpha);
-
 	ResetButton.HMargin(2.0f, &ResetButton);
 	if(DoButton_Menu(pResetId, Localize("Reset"), 0, &ResetButton, nullptr, IGraphics::CORNER_ALL, 4.0f, 0.1f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f)))
 	{
 		*pColorValue = color_cast<ColorHSLA>(DefaultColor).Pack(Alpha);
 	}
+
+	const ColorHSLA PickedColor = DoButton_ColorPicker(&ColorPickerButton, pColorValue, Alpha);
 
 	return PickedColor;
 }

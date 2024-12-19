@@ -128,20 +128,27 @@ class CWarList : public CComponent
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 
 	void WriteLine(const char *pLine);
-	class IStorage *m_pStorage;
-	IOHANDLE m_WarlistFile;
+	class IStorage *m_pStorage = nullptr;
+	IOHANDLE m_WarlistFile = nullptr;
 
 public:
+	CWarList();
 	~CWarList();
 
-	// None type war entries will float to the top of the list, so they can be assigned a type
-	CWarType m_WarTypeNone = CWarType("none", ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), false);
 
 	// duplicate war types are NOT allowed
 	std::vector<CWarType *> m_WarTypes = {
+		new CWarType("none", ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), false),
 		new CWarType("enemy", ColorRGBA(1.0f, 0.2f, 0.2f, 1.0f), false),
-		new CWarType("team", ColorRGBA(0.0f, 0.9f, 0.2f, 1.0f), false)
+		new CWarType("team", ColorRGBA(0.0f, 0.9f, 0.2f, 1.0f), false),
+		new CWarType("aaaaaa", ColorRGBA(1.0f, 0.9f, 0.2f, 1.0f), true)
+
+
 	};
+
+	// None type war entries will float to the top of the list, so they can be assigned a type
+	CWarType *m_pWarTypeNone = m_WarTypes[0];
+
 	// TODO: add a special backend command that allows for changing the names of the default war types
 
 	// Duplicate war entries ARE allowed
