@@ -579,6 +579,55 @@ void CGameWorld::NetObjEnd()
 	}
 }
 
+void CGameWorld::CopyWorldClean(CGameWorld *pFrom)
+{
+	if(pFrom == this || !pFrom)
+		return;
+	m_IsValidCopy = false;
+
+	m_GameTick = pFrom->m_GameTick;
+	m_pCollision = pFrom->m_pCollision;
+	m_WorldConfig = pFrom->m_WorldConfig;
+	for(int i = 0; i < 2; i++)
+	{
+		m_Core.m_aTuning[i] = pFrom->m_Core.m_aTuning[i];
+	}
+	m_pTuningList = pFrom->m_pTuningList;
+	m_Teams = pFrom->m_Teams;
+	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
+	// delete the previous entities
+	Clear();
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		m_apCharacters[i] = 0;
+		m_Core.m_apCharacters[i] = 0;
+	}
+	// copy and add the new entities
+	for(int Type = 0; Type < NUM_ENTTYPES; Type++)
+	{
+		for(CEntity *pEnt = pFrom->FindLast(Type); pEnt; pEnt = pEnt->TypePrev())
+		{
+			CEntity *pCopy = 0;
+			if(Type == ENTTYPE_PROJECTILE)
+				pCopy = new CProjectile(*((CProjectile *)pEnt));
+			else if(Type == ENTTYPE_LASER)
+				pCopy = new CLaser(*((CLaser *)pEnt));
+			else if(Type == ENTTYPE_DRAGGER)
+				pCopy = new CDragger(*((CDragger *)pEnt));
+			else if(Type == ENTTYPE_CHARACTER)
+				pCopy = new CCharacter(*((CCharacter *)pEnt));
+			else if(Type == ENTTYPE_PICKUP)
+				pCopy = new CPickup(*((CPickup *)pEnt));
+			if(pCopy)
+			{
+				pCopy->m_pParent = nullptr;
+				pCopy->m_pChild = nullptr;
+				this->InsertEntity(pCopy);
+			}
+		}
+	}
+}
+
 void CGameWorld::CopyWorld(CGameWorld *pFrom)
 {
 	if(pFrom == this || !pFrom)

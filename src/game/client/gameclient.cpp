@@ -2404,7 +2404,7 @@ void CGameClient::OnPredict()
 
 	if(g_Config.m_ClRemoveAnti)
 	{
-		m_ExtraPredictedWorld.CopyWorld(&m_PredictedWorld);
+		m_ExtraPredictedWorld.CopyWorldClean(&m_PredictedWorld);
 
 		// Remove other tees to reduce lag and because they aren't really important in this case
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -2687,7 +2687,7 @@ void CGameClient::OnPredict()
 	// Copy the current pred world so on the next tick we have the "previous" pred world to advance and test against
 
 	if(m_NewPredictedTick)
-		m_PredSmoothingWorld.CopyWorld(&m_PredictedWorld);
+		m_PredSmoothingWorld.CopyWorldClean(&m_PredictedWorld);
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
