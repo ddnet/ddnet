@@ -2176,29 +2176,22 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 
 	if(pMsg->m_pMessage[0] == '/')
 	{
-		if(str_startswith_nocase(pMsg->m_pMessage + 1, "w "))
+		const char *pWhisper;
+		if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "w ")))
 		{
-			char aWhisperMsg[256];
-			str_copy(aWhisperMsg, pMsg->m_pMessage + sizeof("w "));
-			Whisper(pPlayer->GetCid(), aWhisperMsg);
+			Whisper(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
-		else if(str_startswith_nocase(pMsg->m_pMessage + 1, "whisper "))
+		else if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "whisper ")))
 		{
-			char aWhisperMsg[256];
-			str_copy(aWhisperMsg, pMsg->m_pMessage + sizeof("whisper "));
-			Whisper(pPlayer->GetCid(), aWhisperMsg);
+			Whisper(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
-		else if(str_startswith_nocase(pMsg->m_pMessage + 1, "c "))
+		else if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "c ")))
 		{
-			char aWhisperMsg[256];
-			str_copy(aWhisperMsg, pMsg->m_pMessage + sizeof("c "));
-			Converse(pPlayer->GetCid(), aWhisperMsg);
+			Converse(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
-		else if(str_startswith_nocase(pMsg->m_pMessage + 1, "converse "))
+		else if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "converse ")))
 		{
-			char aWhisperMsg[256];
-			str_copy(aWhisperMsg, pMsg->m_pMessage + sizeof("converse "));
-			Converse(pPlayer->GetCid(), aWhisperMsg);
+			Converse(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
 		else
 		{
