@@ -161,6 +161,8 @@ class CGameConsole : public CComponent
 	static const ColorRGBA ms_SearchHighlightColor;
 	static const ColorRGBA ms_SearchSelectedColor;
 
+	int PossibleMaps(const char *pStr, IConsole::FPossibleCallback pfnCallback = IConsole::EmptyPossibleCommandCallback, void *pUser = nullptr);
+
 	static void PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData);
