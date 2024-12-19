@@ -2301,7 +2301,7 @@ void CGameClient::OnPredict()
 	int FinalTickSelf = FinalTickRegular + g_Config.m_ClFastInput; // the final tick for just our local tee
 	int FinalTickOthers = FinalTickSelf; // the final tick for all other tees
 	if(g_Config.m_ClFastInput && !g_Config.m_ClFastInputOthers)
-		FinalTickOthers = FinalTickSelf - g_Config.m_ClFastInput; 
+		FinalTickOthers = FinalTickSelf - g_Config.m_ClFastInput;
 
 	for(int Tick = Client()->GameTick(g_Config.m_ClDummy) + 1; Tick <= FinalTickSelf; Tick++)
 	{
@@ -2443,8 +2443,8 @@ void CGameClient::OnPredict()
 	}
 
 	// detect mispredictions of other players and make corrections smoother when possible
-	if(g_Config.m_ClAntiPingSmooth && 
-		Predict() && AntiPingPlayers() && 
+	if(g_Config.m_ClAntiPingSmooth &&
+		Predict() && AntiPingPlayers() &&
 		m_NewTick && m_PredictedTick >= MIN_TICK &&
 		absolute(m_PredictedTick - Client()->PredGameTick(g_Config.m_ClDummy)) <= 1 &&
 		absolute(Client()->GameTick(g_Config.m_ClDummy) - Client()->PrevGameTick(g_Config.m_ClDummy)) <= 2)
@@ -2511,9 +2511,9 @@ void CGameClient::OnPredict()
 		pSmoothLocalChar &&
 		RealPredTick && m_PredictedTick >= MIN_TICK)
 	{
-		int PredTime = clamp(Client()->GetPredictionTime(), 0, 8000); //Milliseconds for some reason?? TODO: Use more precision
+		int PredTime = clamp(Client()->GetPredictionTime(), 0, 8000); // Milliseconds for some reason?? TODO: Use more precision
 
-		// Nightmare: in order to get 100% accurate comparison to detect mispredictions we must 
+		// Nightmare: in order to get 100% accurate comparison to detect mispredictions we must
 		// tick the PREVIOUS predicted world with our CURRENT predicted inputs
 		CCharacter *pSmoothDummyChar = 0;
 		CCharacter *pPredDummyChar = 0;
@@ -2574,12 +2574,12 @@ void CGameClient::OnPredict()
 				if(m_aClients[i].m_aPredTick[Tick % 200] == 0)
 					continue;
 				vec2 Pos = m_aClients[i].m_aPredPos[Tick % 200];
-				if(Tick == GameTick - 1) 
+				if(Tick == GameTick - 1)
 				{
 					MaxPos = Pos;
 					MinPos = Pos;
 				}
-				else 
+				else
 				{
 					MaxPos.x = std::max(Pos.x, MaxPos.x);
 					MaxPos.y = std::max(Pos.y, MaxPos.y);
@@ -2634,7 +2634,7 @@ void CGameClient::OnPredict()
 			float Confidence = 1.0f;
 			if(PredDir == vec2(0, 0))
 				Confidence = 1.0f;
-			else	
+			else
 			{
 				Confidence = std::max(0.0f, dot(LastDir, PredDir));
 				Confidence = std::pow(Confidence, 4.0f); // Can be adjusted
@@ -2645,7 +2645,7 @@ void CGameClient::OnPredict()
 			// Manage uncertainty value
 			float TickSize = TickDuration / ((float)PredTime * 1.5f); // 20ms / PredTime
 			float PrevConfidence = 1.0f - m_aClients[i].m_Uncertainty;
-			float NewConfidence = PrevConfidence - Uncertainty + TickSize; 
+			float NewConfidence = PrevConfidence - Uncertainty + TickSize;
 			NewConfidence = std::clamp(NewConfidence, -1.25f, 1.0f); // A certain about of "negative buffer" is allowed
 			m_aClients[i].m_Uncertainty = 1.0f - NewConfidence;
 			NewConfidence = std::max(0.0f, NewConfidence);
@@ -2661,7 +2661,7 @@ void CGameClient::OnPredict()
 			vec2 ConfidenceVector = ConfidenceParallel * std::max(TrustFactor, NewConfidence) + ConfidencePerp * NewConfidence;
 
 			// Minor safe gaurd against insane predictions
-			if (length(ConfidenceVector) > HistoryDistance) 
+			if(length(ConfidenceVector) > HistoryDistance)
 				ConfidenceVector = mix(normalize(ConfidenceVector) * HistoryDistance, ConfidenceVector, NewConfidence);
 
 			vec2 ConfidencePos = ServerPos + ConfidenceVector;
@@ -2670,18 +2670,17 @@ void CGameClient::OnPredict()
 			ConfidencePos.x = std::clamp(ConfidencePos.x, MinPos.x, MaxPos.x);
 			ConfidencePos.y = std::clamp(ConfidencePos.y, MinPos.y, MaxPos.y);
 
-			//m_aClients[i].m_DebugVector = ConfidenceParallel;
-			//m_aClients[i].m_DebugVector2 = ConfidencePerp;
-			//m_aClients[i].m_DebugVector3 = HistoryVector * 25.0f;
+			// m_aClients[i].m_DebugVector = ConfidenceParallel;
+			// m_aClients[i].m_DebugVector2 = ConfidencePerp;
+			// m_aClients[i].m_DebugVector3 = HistoryVector * 25.0f;
 
 			m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_ImprovedPredPos;
 			m_aClients[i].m_ImprovedPredPos = ConfidencePos;
 
-
-			//char aBuf[256];
-			//str_format(aBuf, sizeof(aBuf), "Trust: %.2f, Confidence: %.2f", TrustFactor, NewConfidence);
-			//if(NewConfidence != 1.0f || TrustFactor != 1.0f)
-				//Echo(aBuf);
+			// char aBuf[256];
+			// str_format(aBuf, sizeof(aBuf), "Trust: %.2f, Confidence: %.2f", TrustFactor, NewConfidence);
+			// if(NewConfidence != 1.0f || TrustFactor != 1.0f)
+			// Echo(aBuf);
 		}
 	}
 	// Copy the current pred world so on the next tick we have the "previous" pred world to advance and test against
