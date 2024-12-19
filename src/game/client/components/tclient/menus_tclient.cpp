@@ -289,6 +289,20 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			Ui()->DoScrollbarOption(&g_Config.m_ClPredMarginInFreezeAmount, &g_Config.m_ClPredMarginInFreezeAmount, &Button, Localize("Frozen Margin"), 0, 100, &CUi::ms_LinearScrollbarScale, 0, "ms");
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
+		// ***** Improved Anti Ping ***** //
+		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+		s_SectionBoxes.push_back(Column);
+		Column.HSplitTop(HeadlineHeight, &Label, &Column);
+		Ui()->DoLabel(&Label, Localize("TClient Anti Ping"), HeadlineFontSize, TEXTALIGN_ML);
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingImproved, Localize("Use new Antiping algorithm"), &g_Config.m_ClAntiPingImproved, &Column, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingStableDirection, Localize("Optimistic prediction along stable direction"), &g_Config.m_ClAntiPingStableDirection, &Column, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingNevativeBuffer, Localize("Negative stability buffer (for Gores)"), &g_Config.m_ClAntiPingNevativeBuffer, &Column, LineSize);
+		Column.HSplitTop(LineSize, &Button, &Column);
+		Ui()->DoScrollbarOption(&g_Config.m_ClAntiPingUncertaintyScale, &g_Config.m_ClAntiPingUncertaintyScale, &Button, Localize("Uncertainty Duration"), 50, 400, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "%");
+		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
 		// ***** Other ***** //
 		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
 		s_SectionBoxes.push_back(Column);

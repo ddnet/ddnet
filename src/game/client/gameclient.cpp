@@ -2643,10 +2643,12 @@ void CGameClient::OnPredict()
 			float TickDuration = (float)1000 / (float)Client()->GameTickSpeed();
 
 			// Manage uncertainty value
-			float TickSize = TickDuration / ((float)PredTime * 1.5f); // 20ms / PredTime
+			float PredTimeScale = (float)g_Config.m_ClAntiPingUncertaintyScale / 100.0f;
+			float TickSize = TickDuration / ((float)PredTime * PredTimeScale); // 20ms / PredTime
 			float PrevConfidence = 1.0f - m_aClients[i].m_Uncertainty;
 			float NewConfidence = PrevConfidence - Uncertainty + TickSize;
-			NewConfidence = std::clamp(NewConfidence, -1.25f, 1.0f); // A certain about of "negative buffer" is allowed
+			float MinConfidence = g_Config.m_ClAntiPingNevativeBuffer ? -1.0f : 0.0f;
+			NewConfidence = std::clamp(NewConfidence, MinConfidence, 1.0f); // A certain about of "negative buffer" is allowed
 			m_aClients[i].m_Uncertainty = 1.0f - NewConfidence;
 			NewConfidence = std::max(0.0f, NewConfidence);
 
@@ -2658,6 +2660,10 @@ void CGameClient::OnPredict()
 			if(dotPF == 0.0f)
 				ConfidenceParallel = vec2(0, 0);
 			vec2 ConfidencePerp = PredVector - ConfidenceParallel;
+
+			if(!g_Config.m_ClAntiPingStableDirection)
+				TrustFactor = 0.0f;
+
 			vec2 ConfidenceVector = ConfidenceParallel * std::max(TrustFactor, NewConfidence) + ConfidencePerp * NewConfidence;
 
 			// Minor safe gaurd against insane predictions
@@ -2670,22 +2676,12 @@ void CGameClient::OnPredict()
 			ConfidencePos.x = std::clamp(ConfidencePos.x, MinPos.x, MaxPos.x);
 			ConfidencePos.y = std::clamp(ConfidencePos.y, MinPos.y, MaxPos.y);
 
-			// m_aClients[i].m_DebugVector = ConfidenceParallel;
-			// m_aClients[i].m_DebugVector2 = ConfidencePerp;
-			// m_aClients[i].m_DebugVector3 = HistoryVector * 25.0f;
-
 			m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_ImprovedPredPos;
 			m_aClients[i].m_ImprovedPredPos = ConfidencePos;
-
-			// char aBuf[256];
-			// str_format(aBuf, sizeof(aBuf), "Trust: %.2f, Confidence: %.2f", TrustFactor, NewConfidence);
-			// if(NewConfidence != 1.0f || TrustFactor != 1.0f)
-			// Echo(aBuf);
 		}
 	}
 	// Copy the current pred world so on the next tick we have the "previous" pred world to advance and test against
-
-	if(m_NewPredictedTick)
+	if(m_NewPredictedTick && g_Config.m_ClAntiPingImproved)
 		m_PredSmoothingWorld.CopyWorldClean(&m_PredictedWorld);
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
