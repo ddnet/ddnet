@@ -104,7 +104,10 @@ enum
 
 	NET_CONNLIMIT_IPS = 16,
 
-	NET_ENUM_TERMINATOR
+	NET_ENUM_TERMINATOR,
+
+	NET_TOKENCACHE_ADDRESSEXPIRY = 64,
+	NET_TOKENCACHE_PACKETEXPIRY = 5,
 };
 enum
 {
@@ -516,11 +519,46 @@ public:
 	CNetBan *NetBan() const { return m_pNetBan; }
 };
 
+class CNetTokenCache
+{
+public:
+	void Init(NETSOCKET Socket);
+	void SendPacketConnless(CNetChunk *pChunk);
+	void FetchToken(NETADDR *pAddr);
+	void AddToken(const NETADDR *pAddr, TOKEN Token);
+	TOKEN GetToken(const NETADDR *pAddr);
+	TOKEN GenerateToken();
+	void Update();
+
+private:
+	class CConnlessPacketInfo
+	{
+	public:
+		NETADDR m_Addr;
+		int m_DataSize;
+		unsigned char m_aData[NET_MAX_PAYLOAD];
+		int64_t m_Expiry;
+	};
+
+	class CAddressInfo
+	{
+	public:
+		NETADDR m_Addr;
+		TOKEN m_Token;
+		int64_t m_Expiry;
+	};
+
+	NETSOCKET m_Socket;
+	std::vector<CAddressInfo> m_TokenCache;
+	std::vector<CConnlessPacketInfo> m_ConnlessPackets;
+};
+
 // client side
 class CNetClient
 {
 	CNetConnection m_Connection;
 	CNetRecvUnpacker m_RecvUnpacker;
+	CNetTokenCache m_TokenCache;
 
 	CStun *m_pStun = nullptr;
 
@@ -576,6 +614,7 @@ public:
 	static void SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken, bool Sixup = false);
 	static void SendControlMsgWithToken7(NETSOCKET Socket, NETADDR *pAddr, TOKEN Token, int Ack, int ControlMsg, TOKEN MyToken, bool Extended);
 	static void SendPacketConnless(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, bool Extended, unsigned char aExtra[4]);
+	static void SendPacketConnlessWithToken7(NETSOCKET Socket, NETADDR *pAddr, const void *pData, int DataSize, SECURITY_TOKEN Token, SECURITY_TOKEN ResponseToken);
 	static void SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup = false, bool NoCompress = false);
 
 	static int UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken = nullptr, SECURITY_TOKEN *pResponseToken = nullptr);
