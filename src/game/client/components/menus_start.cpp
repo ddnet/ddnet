@@ -152,16 +152,10 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static CButtonContainer s_MapEditorButton;
-	if(DoButton_Menu(&s_MapEditorButton, Localize("Editor"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "editor" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, m_pClient->Editor()->HasUnsavedData() ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)) || (!m_EditorHotkeyWasPressed && Client()->LocalTime() - m_EditorHotKeyChecktime < 0.1f && CheckHotKey(KEY_E)))
+	if(DoButton_Menu(&s_MapEditorButton, Localize("Editor"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "editor" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, m_pClient->Editor()->HasUnsavedData() ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)) || CheckHotKey(KEY_E))
 	{
 		g_Config.m_ClEditor = 1;
 		Input()->MouseModeRelative();
-		m_EditorHotkeyWasPressed = true;
-	}
-	if(!Input()->KeyIsPressed(KEY_E))
-	{
-		m_EditorHotkeyWasPressed = false;
-		m_EditorHotKeyChecktime = Client()->LocalTime();
 	}
 
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space

@@ -478,8 +478,6 @@ protected:
 
 	// found in menus_start.cpp
 	void RenderStartMenu(CUIRect MainView);
-	bool m_EditorHotkeyWasPressed = true;
-	float m_EditorHotKeyChecktime = 0.0f;
 
 	// found in menus_ingame.cpp
 	STextContainerIndex m_MotdTextContainerIndex;
