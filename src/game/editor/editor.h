@@ -1174,6 +1174,8 @@ public:
 	void AdjustBrushSpecialTiles(bool UseNextFree, int Adjust = 0);
 	int FindNextFreeSwitchNumber();
 	int FindNextFreeTeleNumber(int Index);
+	int FindNextFreeTeleNumberAny(bool Checkpoint = false);
+	void SetTeleNumbers(int Number, bool Checkpoint = false);
 
 	// Undo/Redo
 	CEditorHistory m_EditorHistory;
