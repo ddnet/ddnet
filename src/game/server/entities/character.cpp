@@ -123,13 +123,6 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 			delete GameServer()->m_apSavedTees[m_pPlayer->GetCid()];
 			GameServer()->m_apSavedTees[m_pPlayer->GetCid()] = nullptr;
 		}
-
-		if(GameServer()->m_apSavedTeleTees[m_pPlayer->GetCid()])
-		{
-			m_pPlayer->m_LastTeleTee = *GameServer()->m_apSavedTeleTees[m_pPlayer->GetCid()];
-			delete GameServer()->m_apSavedTeleTees[m_pPlayer->GetCid()];
-			GameServer()->m_apSavedTeleTees[m_pPlayer->GetCid()] = nullptr;
-		}
 	}
 
 	return true;
