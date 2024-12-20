@@ -2942,6 +2942,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     bezier.cpp
     blocklist_driver.cpp
     bytes_be.cpp
+    chunk_header.cpp
     color.cpp
     compression.cpp
     csv.cpp
