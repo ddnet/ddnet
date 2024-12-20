@@ -506,7 +506,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 						FCommandCallback pfnCallback = pCommand->m_pfnCallback;
 						void *pUserData = pCommand->m_pUserData;
 						TraverseChain(&pfnCallback, &pUserData);
-						IsColor = pfnCallback == &SColorConfigVariable::CommandCallback;
+						IsColor = (pfnCallback == &SColorConfigVariable::CommandCallback) || pStr;
 					}
 
 					if(int Error = ParseArgs(&Result, pCommand->m_pParams, IsColor))
