@@ -2326,12 +2326,12 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 
 		if(g_Config.m_SvVoteKickMin && !GetDDRaceTeam(ClientId))
 		{
-			char aaAddresses[MAX_CLIENTS][NETADDR_MAXSTRSIZE] = {{0}};
+			NETADDR aAddresses[MAX_CLIENTS];
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
 				if(m_apPlayers[i])
 				{
-					Server()->GetClientAddr(i, aaAddresses[i], NETADDR_MAXSTRSIZE);
+					Server()->GetClientAddr(i, &aAddresses[i]);
 				}
 			}
 			int NumPlayers = 0;
@@ -2344,7 +2344,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 					{
 						if(m_apPlayers[j] && m_apPlayers[j]->GetTeam() != TEAM_SPECTATORS && !GetDDRaceTeam(j))
 						{
-							if(str_comp(aaAddresses[i], aaAddresses[j]) == 0)
+							if(!net_addr_comp_noport(&aAddresses[i], &aAddresses[j]))
 							{
 								NumPlayers--;
 								break;
