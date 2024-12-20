@@ -621,8 +621,9 @@ void CServer::SetClientDDNetVersion(int ClientId, int DDNetVersion)
 
 void CServer::GetClientAddr(int ClientId, char *pAddrStr, int Size) const
 {
-	if(ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_State == CClient::STATE_INGAME)
-		net_addr_str(m_NetServer.ClientAddr(ClientId), pAddrStr, Size, false);
+	NETADDR Addr;
+	GetClientAddr(ClientId, &Addr);
+	net_addr_str(&Addr, pAddrStr, Size, false);
 }
 
 const char *CServer::ClientName(int ClientId) const
@@ -3968,10 +3969,9 @@ CServer *CreateServer() { return new CServer(); }
 
 void CServer::GetClientAddr(int ClientId, NETADDR *pAddr) const
 {
-	if(ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_State == CClient::STATE_INGAME)
-	{
-		*pAddr = *m_NetServer.ClientAddr(ClientId);
-	}
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
+	*pAddr = *m_NetServer.ClientAddr(ClientId);
 }
 
 void CServer::ReadAnnouncementsFile()
