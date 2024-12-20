@@ -425,8 +425,6 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					{
 						if(DDTeam == TEAM_SUPER)
 							str_copy(aBuf, Localize("Super"));
-						else if(CurrentDDTeamSize <= 1)
-							str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
 						else
 							str_format(aBuf, sizeof(aBuf), Localize("%d\n(%d/%d)", "Team and size"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
 						TextRender()->Text(State.m_TeamStartX, maximum(State.m_TeamStartY + Row.h / 2.0f - TeamFontSize, State.m_TeamStartY + 3.0f /* padding top */), TeamFontSize, aBuf);
@@ -435,10 +433,8 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					{
 						if(DDTeam == TEAM_SUPER)
 							str_copy(aBuf, Localize("Super"));
-						else if(CurrentDDTeamSize > 1)
-							str_format(aBuf, sizeof(aBuf), Localize("Team %d (%d/%d)"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
 						else
-							str_format(aBuf, sizeof(aBuf), Localize("Team %d"), DDTeam);
+							str_format(aBuf, sizeof(aBuf), Localize("Team %d (%d/%d)"), DDTeam, CurrentDDTeamSize, MaxTeamSize);
 						TextRender()->Text(Row.x + Row.w / 2.0f - TextRender()->TextWidth(TeamFontSize, aBuf) / 2.0f + 10.0f, Row.y + Row.h, TeamFontSize, aBuf);
 					}
 
