@@ -24,6 +24,8 @@ Such fix commits should ideally be squashed into one big commit using ``git comm
 
 A lot of the style offenses can be fixed automatically by running the fix script `./scripts/fix_style.py`
 
+We use clang-format 10. If your package manager no longer provides this version, you can download it from https://pypi.org/project/clang-format/10.0.1.1/.
+
 ### Upper camel case for variables, methods, class names
 
 With the exception of base/system.{h,cpp}

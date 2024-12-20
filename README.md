@@ -8,6 +8,7 @@ You can get binary releases on the [DDNet website](https://ddnet.org/downloads/)
 
 - [Code Browser](https://ddnet.org/codebrowser/DDNet/)
 - [Source Code Documentation](https://codedoc.ddnet.org/) (very incomplete, only a few items are documented)
+- [Contributing Guide](CONTRIBUTING.md)
 
 If you want to learn about the source code, you can check the [Development](https://wiki.ddnet.org/wiki/Development) article on the wiki.
 
