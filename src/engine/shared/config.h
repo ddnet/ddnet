@@ -25,6 +25,9 @@ public:
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	static constexpr int ms_##Name = Def; \
 	int m_##Name;
+#define MACRO_CONFIG_FLOAT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	static constexpr float ms_##Name = Def; \
+	float m_##Name;
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
 	static constexpr unsigned ms_##Name = Def; \
 	unsigned m_##Name;
@@ -33,6 +36,7 @@ public:
 	char m_##Name[Len]; // Flawfinder: ignore
 #include "config_variables.h"
 #undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_FLOAT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 };
@@ -65,6 +69,7 @@ struct SConfigVariable
 	enum EVariableType
 	{
 		VAR_INT,
+		VAR_FLOAT,
 		VAR_COLOR,
 		VAR_STRING,
 	};
@@ -126,6 +131,37 @@ struct SIntConfigVariable : public SConfigVariable
 	void Serialize(char *pOut, size_t Size, int Value) const;
 	void Serialize(char *pOut, size_t Size) const override;
 	void SetValue(int Value);
+	void ResetToDefault() override;
+	void ResetToOld() override;
+};
+
+struct SFloatConfigVariable : public SConfigVariable
+{
+	float *m_pVariable;
+	float m_Default;
+	float m_Min;
+	float m_Max;
+	float m_OldValue;
+
+	SFloatConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, float *pVariable, float Default, float Min, float Max) :
+		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
+		m_pVariable(pVariable),
+		m_Default(Default),
+		m_Min(Min),
+		m_Max(Max),
+		m_OldValue(Default)
+	{
+		*m_pVariable = m_Default;
+	}
+
+	~SFloatConfigVariable() override = default;
+
+	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
+	void Register() override;
+	bool IsDefault() const override;
+	void Serialize(char *pOut, size_t Size, float Value) const;
+	void Serialize(char *pOut, size_t Size) const override;
+	void SetValue(float Value);
 	void ResetToDefault() override;
 	void ResetToOld() override;
 };
