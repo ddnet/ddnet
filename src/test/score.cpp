@@ -42,7 +42,7 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 	{
 		Connect();
 		LoadBestTime();
-		InsertMap();
+		InsertMap("Kobra 3", "Zerodin", "Novice", 5, 5);
 	}
 
 	~Score()
@@ -75,15 +75,15 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		ASSERT_FALSE(CScoreWorker::LoadBestTime(m_pConn, &loadBestTimeReq, m_aError, sizeof(m_aError))) << m_aError;
 	}
 
-	void InsertMap()
+	void InsertMap(const char *pName, const char *pMapper, const char *pServer, int Points, int Stars)
 	{
 		char aTimestamp[32];
 		str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf),
 			"%s into %s_maps(Map, Server, Mapper, Points, Stars, Timestamp) "
-			"VALUES (\"Kobra 3\", \"Novice\", \"Zerodin\", 5, 5, %s)",
-			m_pConn->InsertIgnore(), m_pConn->GetPrefix(), m_pConn->InsertTimestampAsUtc());
+			"VALUES (\"%s\", \"%s\", \"%s\", %d, %d, %s)",
+			m_pConn->InsertIgnore(), m_pConn->GetPrefix(), pName, pServer, pMapper, Points, Stars, m_pConn->InsertTimestampAsUtc());
 		ASSERT_FALSE(m_pConn->PrepareStatement(aBuf, m_aError, sizeof(m_aError))) << m_aError;
 		m_pConn->BindString(1, aTimestamp);
 		int NumInserted = 0;
@@ -418,6 +418,21 @@ TEST_P(MapInfo, Fuzzy)
 	}
 }
 
+TEST_P(MapInfo, FuzzyCase)
+{
+	InsertMap("Reflect", "DarkOort", "Dummy", 20, 3);
+	InsertMap("reflects", "Ninjed & Pipou", "Solo", 16, 4);
+	str_copy(m_PlayerRequest.m_aName, "reflect", sizeof(m_PlayerRequest.m_aName));
+	ASSERT_FALSE(CScoreWorker::MapInfo(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+
+	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::DIRECT);
+	EXPECT_THAT(m_pPlayerResult->m_Data.m_aaMessages[0], testing::MatchesRegex("\"Reflect\" by DarkOort on Dummy, ★★★✰✰, 20 points, released .* ago, 0 finishes by 0 tees"));
+	for(int i = 1; i < CScorePlayerResult::MAX_MESSAGES; i++)
+	{
+		EXPECT_STREQ(m_pPlayerResult->m_Data.m_aaMessages[i], "");
+	}
+}
+
 TEST_P(MapInfo, DoesntExit)
 {
 	str_copy(m_PlayerRequest.m_aName, "f", sizeof(m_PlayerRequest.m_aName));
@@ -451,6 +466,18 @@ TEST_P(MapVote, Fuzzy)
 	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aMap, "Kobra 3");
 	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aReason, "/map");
 	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aServer, "novice");
+}
+
+TEST_P(MapVote, FuzzyCase)
+{
+	InsertMap("Reflect", "DarkOort", "Dummy", 20, 3);
+	InsertMap("reflects", "Ninjed & Pipou", "Solo", 16, 4);
+	str_copy(m_PlayerRequest.m_aName, "reflect", sizeof(m_PlayerRequest.m_aName));
+	ASSERT_FALSE(CScoreWorker::MapVote(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::MAP_VOTE);
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aMap, "Reflect");
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aReason, "/map");
+	EXPECT_STREQ(m_pPlayerResult->m_Data.m_MapVote.m_aServer, "dummy");
 }
 
 TEST_P(MapVote, DoesntExist)

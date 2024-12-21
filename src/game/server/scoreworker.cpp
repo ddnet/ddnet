@@ -322,7 +322,7 @@ bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		"FROM %s_maps "
 		"WHERE Map LIKE %s "
 		"ORDER BY "
-		"  CASE WHEN Map = ? THEN 0 ELSE 1 END, "
+		"  CASE WHEN LOWER(Map) = LOWER(?) THEN 0 ELSE 1 END, "
 		"  CASE WHEN Map LIKE ? THEN 0 ELSE 1 END, "
 		"  LENGTH(Map), Map "
 		"LIMIT 1",
@@ -395,7 +395,7 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		"  SELECT * FROM %s_maps "
 		"  WHERE Map LIKE %s "
 		"  ORDER BY "
-		"    CASE WHEN Map = ? THEN 0 ELSE 1 END, "
+		"    CASE WHEN LOWER(Map) = LOWER(?) THEN 0 ELSE 1 END, "
 		"    CASE WHEN Map LIKE ? THEN 0 ELSE 1 END, "
 		"    LENGTH(Map), "
 		"    Map "

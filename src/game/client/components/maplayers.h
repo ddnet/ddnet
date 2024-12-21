@@ -126,11 +126,9 @@ class CMapLayers : public CComponent
 	std::vector<SQuadLayerVisuals *> m_vpQuadLayerVisuals;
 
 	virtual CCamera *GetCurCamera();
+	virtual const char *LoadingTitle() const;
 
 	void LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, int &QuadLayerCount, bool &PassedGameLayer);
-
-protected:
-	virtual bool CanRenderMenuBackground() { return true; }
 
 public:
 	bool m_OnlineOnly;

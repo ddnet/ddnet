@@ -93,13 +93,11 @@ private:
 	void AddTextEvent(const char *pText);
 
 	// quick access to input
-	uint32_t m_aInputCount[g_MaxKeys];
-	unsigned char m_aInputState[g_MaxKeys];
+	bool m_aCurrentKeyStates[KEY_LAST];
+	bool m_aFrameKeyStates[KEY_LAST];
 	uint32_t m_InputCounter;
 	std::vector<CTouchFingerState> m_vTouchFingerStates;
 
-	void UpdateMouseState();
-	void UpdateJoystickState();
 	void HandleJoystickAxisMotionEvent(const SDL_JoyAxisEvent &Event);
 	void HandleJoystickButtonEvent(const SDL_JoyButtonEvent &Event);
 	void HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event);
@@ -111,8 +109,6 @@ private:
 	void HandleTextEditingEvent(const char *pText, int Start, int Length);
 
 	char m_aDropFile[IO_MAX_PATH_LENGTH];
-
-	bool KeyState(int Key) const;
 
 	void ProcessSystemMessage(SDL_SysWMmsg *pMsg);
 
@@ -127,11 +123,12 @@ public:
 	void Clear() override;
 	float GetUpdateTime() const override;
 
-	bool ModifierIsPressed() const override { return KeyState(KEY_LCTRL) || KeyState(KEY_RCTRL) || KeyState(KEY_LGUI) || KeyState(KEY_RGUI); }
-	bool ShiftIsPressed() const override { return KeyState(KEY_LSHIFT) || KeyState(KEY_RSHIFT); }
-	bool AltIsPressed() const override { return KeyState(KEY_LALT) || KeyState(KEY_RALT); }
-	bool KeyIsPressed(int Key) const override { return KeyState(Key); }
-	bool KeyPress(int Key, bool CheckCounter) const override { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
+	bool ModifierIsPressed() const override { return KeyIsPressed(KEY_LCTRL) || KeyIsPressed(KEY_RCTRL) || KeyIsPressed(KEY_LGUI) || KeyIsPressed(KEY_RGUI); }
+	bool ShiftIsPressed() const override { return KeyIsPressed(KEY_LSHIFT) || KeyIsPressed(KEY_RSHIFT); }
+	bool AltIsPressed() const override { return KeyIsPressed(KEY_LALT) || KeyIsPressed(KEY_RALT); }
+	bool KeyIsPressed(int Key) const override;
+	bool KeyPress(int Key) const override;
+	const char *KeyName(int Key) const override;
 	int FindKeyByName(const char *pKeyName) const override;
 
 	size_t NumJoysticks() const override { return m_vJoysticks.size(); }

@@ -41,6 +41,11 @@ CCamera *CMapLayers::GetCurCamera()
 	return &m_pClient->m_Camera;
 }
 
+const char *CMapLayers::LoadingTitle() const
+{
+	return GameClient()->DemoPlayer()->IsPlaying() ? Localize("Preparing demo playback") : Localize("Connected");
+}
+
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser)
 {
 	CMapLayers *pThis = (CMapLayers *)pUser;
@@ -276,15 +281,10 @@ void CMapLayers::OnMapLoad()
 	if(!Graphics()->IsTileBufferingEnabled() && !Graphics()->IsQuadBufferingEnabled())
 		return;
 
-	const char *pConnectCaption = GameClient()->DemoPlayer()->IsPlaying() ? Localize("Preparing demo playback") : Localize("Connected");
-	const char *pLoadMapContent = Localize("Uploading map data to GPU");
-
-	auto CurTime = time_get_nanoseconds();
+	const char *pLoadingTitle = LoadingTitle();
+	const char *pLoadingMessage = Localize("Uploading map data to GPU");
 	auto &&RenderLoading = [&]() {
-		if(CanRenderMenuBackground())
-			GameClient()->m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false);
-		else if(time_get_nanoseconds() - CurTime > 500ms)
-			GameClient()->m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false, false);
+		GameClient()->m_Menus.RenderLoading(pLoadingTitle, pLoadingMessage, 0);
 	};
 
 	//clear everything and destroy all buffers

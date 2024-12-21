@@ -112,7 +112,6 @@ class CGameConsole : public CComponent
 		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor) REQUIRES(!m_BacklogPendingLock);
 		int GetLinesToScroll(int Direction, int LinesToScroll);
 		void ScrollToCenter(int StartLine, int EndLine);
-		void ClearSearch();
 		void Dump() REQUIRES(!m_BacklogPendingLock);
 
 		const char *GetString() const { return m_Input.GetString(); }
@@ -135,6 +134,8 @@ class CGameConsole : public CComponent
 		void UpdateEntryTextAttributes(CBacklogEntry *pEntry) const;
 
 	private:
+		void SetSearching(bool Searching);
+		void ClearSearch();
 		void UpdateSearch();
 
 		friend class CGameConsole;
