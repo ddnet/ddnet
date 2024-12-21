@@ -35,6 +35,13 @@ struct SPlayerNamePlate
 	char m_aClan[MAX_CLAN_LENGTH];
 	STextContainerIndex m_ClanTextContainerIndex;
 	float m_ClanTextFontSize;
+
+	// TClient
+	STextContainerIndex m_SkinNameConIndex;
+	char m_aSkinName[MAX_SKIN_LENGTH] = "";
+
+	STextContainerIndex m_WarReasonConIndex;
+	char m_aWarReason[MAX_WARLIST_REASON_LENGTH] = "";
 };
 
 class CNamePlates : public CComponent
