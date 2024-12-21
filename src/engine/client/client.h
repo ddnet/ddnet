@@ -246,7 +246,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int64_t m_BenchmarkStopTime = 0;
 
 	CChecksum m_Checksum;
-	int m_OwnExecutableSize = 0;
+	int64_t m_OwnExecutableSize = 0;
 	IOHANDLE m_OwnExecutable = 0;
 
 	// favorite command handling
