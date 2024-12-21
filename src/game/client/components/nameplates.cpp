@@ -22,8 +22,6 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 
 	const float FontSize = 18.0f + 20.0f * g_Config.m_ClNameplatesSize / 100.0f;
 	const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNameplatesClanSize / 100.0f;
-	//TClient
-	bool ClanPlateOverride = g_Config.m_ClWarList && g_Config.m_ClWarListShowClan && GameClient()->m_WarList.GetWarData(pPlayerInfo->m_ClientId).IsWarClan;
 
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 	float YOffset = Position.y - 38;
@@ -128,7 +126,7 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 			Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 		}
 
-		if(g_Config.m_ClNameplatesClan || ClanPlateOverride)
+		if(g_Config.m_ClNameplatesClan)
 		{
 			if(str_comp(ClientData.m_aClan, NamePlate.m_aClan) != 0 || FontSizeClan != NamePlate.m_ClanTextFontSize)
 			{
@@ -180,8 +178,6 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 		TOutlineColor.a *= Alpha;
 		TColor.a *= Alpha;
 
-		bool ShowingClanWar = (ClanPlateOverride) || g_Config.m_ClNameplatesClan;
-		bool ShowClanWarInName = !ShowingClanWar && GameClient()->m_WarList.GetWarData(pPlayerInfo->m_ClientId).IsWarClan && !GameClient()->m_WarList.GetWarData(pPlayerInfo->m_ClientId).IsWarName;
 		if(NamePlate.m_NameTextContainerIndex.Valid())
 		{
 			YOffset -= FontSize;
@@ -195,80 +191,24 @@ void CNamePlates::RenderNameplate(vec2 Position, const CNetObj_PlayerInfo *pPlay
 				Graphics()->DrawCircle(Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f - CircleSize, YOffset + FontSize / 2.0f + 1.4f, CircleSize, 24);
 				Graphics()->QuadsEnd();
 			}
-			if(ShowClanWarInName)
-			{
-				ColorRGBA WarColor = GameClient()->m_WarList.GetClanColor(pPlayerInfo->m_ClientId);
-				WarColor.a *= Alpha;
-				TextRender()->RenderTextContainer(NamePlate.m_NameTextContainerIndex, WarColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f, YOffset);
-			}
-			else if (GameClient()->m_WarList.GetWarData(pPlayerInfo->m_ClientId).IsWarName) 
-			{
-				ColorRGBA WarColor = GameClient()->m_WarList.GetNameplateColor(pPlayerInfo->m_ClientId);
-				WarColor.a *= Alpha;
-				TextRender()->RenderTextContainer(NamePlate.m_NameTextContainerIndex, WarColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f, YOffset);
-			}
-			else
-				TextRender()->RenderTextContainer(NamePlate.m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f, YOffset);
+			TextRender()->RenderTextContainer(NamePlate.m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_NameTextContainerIndex).m_W / 2.0f, YOffset);
 		}
 
-		if(g_Config.m_ClNameplatesClan || ShowingClanWar)
+		if(g_Config.m_ClNameplatesClan)
 		{
 			YOffset -= FontSizeClan;
 			if(NamePlate.m_ClanTextContainerIndex.Valid())
-			{
-				if(GameClient()->m_WarList.GetWarData(pPlayerInfo->m_ClientId).IsWarClan)
-				{
-					ColorRGBA WarColor = GameClient()->m_WarList.GetClanColor(pPlayerInfo->m_ClientId);
-					WarColor.a *= Alpha;
-					TextRender()->RenderTextContainer(NamePlate.m_ClanTextContainerIndex, WarColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_ClanTextContainerIndex).m_W / 2.0f, YOffset);
-				}
-				else
-					TextRender()->RenderTextContainer(NamePlate.m_ClanTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_ClanTextContainerIndex).m_W / 2.0f, YOffset);
-			}
-		}
-		// TClient
-		if(g_Config.m_ClWarList && g_Config.m_ClWarListReason)
-		{
-			if(str_comp(GameClient()->m_WarList.GetWarData(pPlayerInfo->m_ClientId).m_aReason, NamePlate.m_aWarReason) != 0)
-			{
-				str_copy(NamePlate.m_aWarReason, GameClient()->m_WarList.GetWarData(pPlayerInfo->m_ClientId).m_aReason);
-				CTextCursor Cursor;
-				TextRender()->SetCursor(&Cursor, 0, 0, FontSizeClan, TEXTFLAG_RENDER);
-				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-				RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
-				TextRender()->RecreateTextContainer(NamePlate.m_WarReasonConIndex, &Cursor, NamePlate.m_aWarReason);
-				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
-			}
-		}
-
-		if(g_Config.m_ClWarList && g_Config.m_ClWarListReason && NamePlate.m_WarReasonConIndex.Valid())
-		{
-			YOffset -= FontSizeClan;
-			ColorRGBA RColor = TColor, ROColor = TOutlineColor;
-			RColor.a *= 0.5f, ROColor.a *= 0.5f;
-			TextRender()->RenderTextContainer(NamePlate.m_WarReasonConIndex, RColor, ROColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_WarReasonConIndex).m_W / 2.0f, YOffset);
+				TextRender()->RenderTextContainer(NamePlate.m_ClanTextContainerIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_ClanTextContainerIndex).m_W / 2.0f, YOffset);
 		}
 
 		if(g_Config.m_ClShowSkinName)
 		{
-			if(str_comp(m_pClient->m_aClients[pPlayerInfo->m_ClientId].m_aSkinName, NamePlate.m_aSkinName) != 0)
-			{
-				str_copy(NamePlate.m_aSkinName, m_pClient->m_aClients[pPlayerInfo->m_ClientId].m_aSkinName);
-				CTextCursor Cursor;
-				TextRender()->SetCursor(&Cursor, 0, 0, FontSizeClan, TEXTFLAG_RENDER);
-				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-				RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
-				TextRender()->RecreateTextContainer(NamePlate.m_SkinNameConIndex, &Cursor, NamePlate.m_aSkinName);
-				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
-			}
-		}
-
-		if(g_Config.m_ClShowSkinName && NamePlate.m_SkinNameConIndex.Valid())
-		{
 			YOffset -= FontSizeClan;
-			TextRender()->RenderTextContainer(NamePlate.m_SkinNameConIndex, TColor, TOutlineColor, Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_SkinNameConIndex).m_W / 2.0f, YOffset);
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "%s", m_pClient->m_aClients[pPlayerInfo->m_ClientId].m_aSkinName);
+			float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
+			TextRender()->TextColor(rgb);
+			TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 		}
 
 		if(g_Config.m_ClNameplatesFriendMark && ClientData.m_Friend)
