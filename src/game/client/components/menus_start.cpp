@@ -196,6 +196,15 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	ConsoleButton.VSplitRight(40.0f, nullptr, &ConsoleButton);
 	Ui()->DoLabel(&CurVersion, GAME_RELEASE_VERSION, 14.0f, TEXTALIGN_MR);
 
+	CUIRect TClientVersion;
+	MainView.HSplitTop(75.0f, &TClientVersion, nullptr);
+	MainView.HSplitTop(15.0f, &TClientVersion, nullptr);
+	TClientVersion.VSplitRight(40.0f, &TClientVersion, nullptr);
+	char aTBuf[64];
+	str_format(aTBuf, sizeof(aTBuf), "TClient %s", TCLIENT_VERSION);
+	Ui()->DoLabel(&TClientVersion, aTBuf, 14.0f, TEXTALIGN_MR);
+
+
 	static CButtonContainer s_ConsoleButton;
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);

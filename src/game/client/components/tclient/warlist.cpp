@@ -113,7 +113,7 @@ void CWarList::UpdateWarEntry(int Index, const char *pName, const char *pClan, c
 
 void CWarList::UpsertWarType(int Index, const char *pType, ColorRGBA Color)
 {
-	if(str_comp(pType, "none"))
+	if(str_comp(pType, "none") == 0)
 		return;
 
 	if(Index >= 0 && Index < static_cast<int>(m_WarTypes.size()))
@@ -135,7 +135,7 @@ void CWarList::AddWarEntry(const char *pName, const char *pClan, const char *pRe
 	CWarType *WarType = FindWarType(pType);
 	if(WarType == m_pWarTypeNone)
 	{
-		AddWarType(pType, ColorRGBA(0, 0, 1, 1));
+		AddWarType(pType, ColorRGBA(0, 0, 0, 1));
 		WarType = FindWarType(pType);
 	}
 
@@ -176,11 +176,10 @@ void CWarList::RemoveWarEntry(const char *pName, const char *pClan, const char *
 		m_WarEntries.erase(it);
 }
 
-
 void CWarList::RemoveWarEntry(CWarEntry *Entry)
 {
 	auto it = std::find_if(m_WarEntries.begin(), m_WarEntries.end(),
-		[Entry](const CWarEntry &WarEntry) {return &WarEntry == Entry;});
+		[Entry](const CWarEntry &WarEntry) { return &WarEntry == Entry; });
 	if(it != m_WarEntries.end())
 		m_WarEntries.erase(it);
 }
@@ -212,9 +211,9 @@ CWarType *CWarList::FindWarType(const char *pType)
 {
 	CWarType Type(pType);
 	auto it = std::find_if(m_WarTypes.begin(), m_WarTypes.end(),
-		[&Type](CWarType *warTypePtr) {return *warTypePtr == Type;});
+		[&Type](CWarType *warTypePtr) { return *warTypePtr == Type; });
 	if(it != m_WarTypes.end())
-		return *it; 
+		return *it;
 	else
 		return m_pWarTypeNone;
 }
@@ -261,16 +260,18 @@ void CWarList::UpdateWarPlayers()
 
 		m_WarPlayers[i].IsWarName = false;
 		m_WarPlayers[i].IsWarClan = false;
+		m_WarPlayers[i].m_NameColor = ColorRGBA(1, 1, 1, 1);
+		m_WarPlayers[i].m_ClanColor = ColorRGBA(1, 1, 1, 1);
 
 		for(CWarEntry &Entry : m_WarEntries)
 		{
-			if(str_comp(GameClient()->m_aClients[i].m_aName, Entry.m_aName))
+			if(str_comp(GameClient()->m_aClients[i].m_aName, Entry.m_aName) == 0)
 			{
 				str_copy(m_WarPlayers[i].m_aReason, Entry.m_aReason);
 				m_WarPlayers[i].IsWarName = true;
 				m_WarPlayers[i].m_NameColor = Entry.m_pWarType->m_Color;
 			}
-			else if(str_comp(GameClient()->m_aClients[i].m_aClan, Entry.m_aClan))
+			else if(str_comp(GameClient()->m_aClients[i].m_aClan, Entry.m_aClan) == 0)
 			{
 				// Name war reason has priority over clan war reason
 				if(!m_WarPlayers[i].IsWarName)
@@ -359,8 +360,8 @@ void CWarList::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserDat
 CWarList::~CWarList()
 {
 	for(CWarType *WarType : m_WarTypes)
-		delete WarType; 
-	m_WarTypes.clear(); 
+		delete WarType;
+	m_WarTypes.clear();
 }
 
 CWarList::CWarList()

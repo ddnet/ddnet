@@ -802,10 +802,18 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 
 	// ======WAR ENTRIES======
 	Column1.HSplitTop(HeadlineHeight, &Label, &Column1);
+	Label.VSplitRight(25.0f, &Label, &Button);
 	Ui()->DoLabel(&Label, Localize("War Entries"), HeadlineFontSize, TEXTALIGN_ML);
 	Column1.HSplitTop(MarginSmall, nullptr, &Column1);
-	CUIRect EntriesSearch;
 
+	static CButtonContainer s_ReverseEntries;
+	static bool s_Reversed = true;
+	if(DoButton_FontIcon(&s_ReverseEntries, FONT_ICON_CHEVRON_DOWN, 0, &Button, IGraphics::CORNER_ALL))
+	{
+		s_Reversed = !s_Reversed;
+	}
+
+	CUIRect EntriesSearch;
 	Column1.HSplitBottom(25.0f, &Column1, &EntriesSearch);
 	EntriesSearch.HSplitTop(MarginSmall, nullptr, &EntriesSearch);
 
@@ -829,6 +837,10 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 			vpFilteredEntries.push_back(pEntry);
 	}
 
+	if(s_Reversed)
+	{
+		std::reverse(vpFilteredEntries.begin(), vpFilteredEntries.end());
+	}
 	int SelectedOldEntry = -1;
 	static CListBox s_EntriesListBox;
 	s_EntriesListBox.DoStart(35.0f, vpFilteredEntries.size(), 1, 2, SelectedOldEntry, &Column1);
@@ -999,7 +1011,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 
 	if(DoButtonLineSize_Menu(&s_OverrideButton, Localize("Override Entry"), 0, &ButtonL, LineSize) && pSelectedEntry)
 	{
-		if(pSelectedEntry && pSelectedType)
+		if(pSelectedEntry && pSelectedType && (str_comp(s_aEntryName, "") != 0 || str_comp(s_aEntryClan, "") != 0))
 		{
 			str_copy(pSelectedEntry->m_aName, s_aEntryName);
 			str_copy(pSelectedEntry->m_aClan, s_aEntryClan);
@@ -1074,14 +1086,6 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 		TextRender()->TextColor(pType->m_Color);
 		Ui()->DoLabel(&TypeRect, pType->m_aWarName, StandardFontSize, TEXTALIGN_ML);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
-
-		// EntryRect.HMargin(MarginExtraSmall, &EntryRect);
-		// EntryRect.HSplitMid(&EntryRect, &WarType, MarginSmall);
-
-		// Ui()->DoLabel(&EntryRect, aBuf, StandardFontSize, TEXTALIGN_ML);
-		// TextRender()->TextColor(pEntry->m_pWarType->m_Color);
-		// Ui()->DoLabel(&WarType, pEntry->m_pWarType->m_aWarName, StandardFontSize, TEXTALIGN_ML);
-		// TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
 	const int NewSelectedType = s_WarTypeListBox.DoEnd();
 	if((SelectedOldType != NewSelectedType && NewSelectedType >= 0) || (NewSelectedType >= 0 && Ui()->HotItem() == &s_vTypeItemIds[NewSelectedType] && Ui()->MouseButtonClicked(0)))
@@ -1110,18 +1114,18 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	Ui()->DoEditBox(&s_TypeNameInput, &Button, 12.0f);
 	static CButtonContainer s_AddGroupButton, s_OverrideGroupButton, s_GroupColorPicker;
 
+	Column3.HSplitTop(MarginSmall, nullptr, &Column3);
 	static unsigned int ColorValue = 0;
 	ColorValue = color_cast<ColorHSLA>(s_GroupColor).Pack(false);
 	ColorHSLA PickedColor = DoLine_ColorPicker(&s_GroupColorPicker, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column3, Localize("Color"), &ColorValue, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 	s_GroupColor = color_cast<ColorRGBA>(PickedColor);
 
-	Column3.HSplitTop(MarginSmall, nullptr, &Column3);
 	Column3.HSplitTop(LineSize * 2.0f, &Button, &Column3);
 	Button.VSplitMid(&ButtonL, &ButtonR, MarginSmall);
 	bool OverrideDisabled = NewSelectedType == 0;
-	if(DoButtonLineSize_Menu(&s_OverrideGroupButton, Localize("Override Group"), 0, &ButtonL, LineSize, OverrideDisabled) && pSelectedEntry)
+	if(DoButtonLineSize_Menu(&s_OverrideGroupButton, Localize("Override Group"), 0, &ButtonL, LineSize, OverrideDisabled) && pSelectedType)
 	{
-		if(pSelectedType)
+		if(pSelectedType && str_comp(s_aTypeName, "") != 0)
 		{
 			str_copy(pSelectedType->m_aWarName, s_aTypeName);
 			pSelectedType->m_Color = s_GroupColor;
@@ -1132,6 +1136,76 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	{
 		GameClient()->m_WarList.AddWarType(s_aTypeName, s_GroupColor);
 	}
+
+	// ======ONLINE PLAYER LIST======
+
+	Column4.HSplitTop(HeadlineHeight, &Label, &Column4);
+	Ui()->DoLabel(&Label, Localize("Online Players"), HeadlineFontSize, TEXTALIGN_ML);
+	Column4.HSplitTop(MarginSmall, nullptr, &Column4);
+
+	CUIRect PlayerList;
+	Column4.HSplitBottom(0.0f, &PlayerList, &Column4);
+	static CListBox s_PlayerListBox;
+	s_PlayerListBox.DoStart(30.0f, MAX_CLIENTS, 1, 2, -1, &PlayerList);
+
+	static std::vector<unsigned char> s_vPlayerItemIds;
+	static std::vector<CButtonContainer> s_vNameButtons;
+	static std::vector<CButtonContainer> s_vClanButtons;
+
+	s_vPlayerItemIds.resize(MAX_CLIENTS);
+	s_vNameButtons.resize(MAX_CLIENTS);
+	s_vClanButtons.resize(MAX_CLIENTS);
+
+	static int SelectedID = -1;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!m_pClient->m_Snap.m_apPlayerInfos[i])
+			continue;
+
+		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[i].m_RenderInfo;
+
+		const CListboxItem Item = s_PlayerListBox.DoNextItem(&s_vPlayerItemIds[i], false);
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect PlayerRect, TeeRect, NameRect, ClanRect;
+		Item.m_Rect.Margin(0.0f, &PlayerRect);
+		PlayerRect.VSplitLeft(25.0f, &TeeRect, &PlayerRect);
+		// RenderDevSkin(TeeRect.Center(), 35.0f, TeeInfo., "default", false, 0, 0, 0, false);
+
+		PlayerRect.VSplitMid(&NameRect, &ClanRect, 0);
+		PlayerRect = NameRect;
+		PlayerRect.x = TeeRect.x;
+		PlayerRect.w += TeeRect.w;
+		TextRender()->TextColor(GameClient()->m_WarList.GetWarData(i).m_NameColor);
+		ColorRGBA NameButtonColor = Ui()->CheckActiveItem(&s_vNameButtons[i]) ? ColorRGBA(1, 1, 1, 0.75f) :
+											(Ui()->HotItem() == &s_vNameButtons[i] ? ColorRGBA(1, 1, 1, 0.33f) : ColorRGBA(1, 1, 1, 0.0f));
+		PlayerRect.Draw(NameButtonColor, IGraphics::CORNER_L, 5.0f);
+		Ui()->DoLabel(&NameRect, GameClient()->m_aClients[i].m_aName, StandardFontSize, TEXTALIGN_ML);
+		if(Ui()->DoButtonLogic(&s_vNameButtons[i], false, &PlayerRect))
+		{
+			s_IsName = 1;
+			s_IsClan = 0;
+			str_copy(s_aEntryName, GameClient()->m_aClients[i].m_aName);
+		}
+
+		TextRender()->TextColor(GameClient()->m_WarList.GetWarData(i).m_ClanColor);
+		ColorRGBA ClanButtonColor = Ui()->CheckActiveItem(&s_vClanButtons[i]) ? ColorRGBA(1, 1, 1, 0.75f) :
+											(Ui()->HotItem() == &s_vClanButtons[i] ? ColorRGBA(1, 1, 1, 0.33f) : ColorRGBA(1, 1, 1, 0.0f));
+		ClanRect.Draw(ClanButtonColor, IGraphics::CORNER_R, 5.0f);
+		Ui()->DoLabel(&ClanRect, GameClient()->m_aClients[i].m_aClan, StandardFontSize, TEXTALIGN_ML);
+		if(Ui()->DoButtonLogic(&s_vClanButtons[i], false, &ClanRect))
+		{
+			s_IsName = 0;
+			s_IsClan = 1;
+			str_copy(s_aEntryClan, GameClient()->m_aClients[i].m_aClan);
+		}
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+		TeeInfo.m_Size = 25.0f;
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, 0, vec2(1.0f, 0.0f), TeeRect.Center() + vec2(-1.0f, 2.5f));
+	}
+	s_PlayerListBox.DoEnd();
 }
 
 void CMenus::PopupConfirmRemoveWarType()
