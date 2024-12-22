@@ -230,6 +230,14 @@ CWarEntry *CWarList::FindWarEntry(const char *pName, const char *pClan, const ch
 		return nullptr;
 }
 
+ColorRGBA CWarList::GetPriorityColor(int ClientId)
+{
+	if(m_WarPlayers[ClientId].IsWarClan && !m_WarPlayers[ClientId].IsWarName)
+		return m_WarPlayers[ClientId].m_ClanColor;
+	else
+		return m_WarPlayers[ClientId].m_NameColor;
+}
+
 ColorRGBA CWarList::GetNameplateColor(int ClientId)
 {
 	return m_WarPlayers[ClientId].m_NameColor;
@@ -237,6 +245,10 @@ ColorRGBA CWarList::GetNameplateColor(int ClientId)
 ColorRGBA CWarList::GetClanColor(int ClientId)
 {
 	return m_WarPlayers[ClientId].m_ClanColor;
+}
+bool CWarList::GetAnyWar(int ClientId)
+{
+	return m_WarPlayers[ClientId].IsWarClan || m_WarPlayers[ClientId].IsWarName;
 }
 
 void CWarList::GetReason(char *pReason, int ClientId)

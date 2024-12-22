@@ -84,16 +84,63 @@ public:
 		m_Name.Reset();
 		m_Clan.Reset();
 		m_WeakStrongId.Reset();
+		
+		//TClient
+		m_SkinName.Reset();
+		m_Reason.Reset();
 	}
 	void DeleteTextContainers(ITextRender &TextRender)
 	{
 		TextRender.DeleteTextContainer(m_Name.m_TextContainerIndex);
 		TextRender.DeleteTextContainer(m_Clan.m_TextContainerIndex);
 		TextRender.DeleteTextContainer(m_WeakStrongId.m_TextContainerIndex);
+		TextRender.DeleteTextContainer(m_SkinName.m_TextContainerIndex);
+		TextRender.DeleteTextContainer(m_Reason.m_TextContainerIndex);
+
 	}
 	CNamePlateName m_Name;
 	CNamePlateClan m_Clan;
 	CNamePlateHookWeakStrongId m_WeakStrongId;
+
+	// TClient
+	class CNamePlateSkin
+	{
+	public:
+		CNamePlateSkin()
+		{
+			Reset();
+		}
+		void Reset()
+		{
+			m_TextContainerIndex.Reset();
+			m_aSkin[0] = '\0';
+			m_FontSize = -INFINITY;
+		}
+		void Update(CNamePlates &This, const char *pSkin, float FontSize);
+		STextContainerIndex m_TextContainerIndex;
+		char m_aSkin[MAX_SKIN_LENGTH];
+		float m_FontSize;
+	};
+	class CNamePlateReason
+	{
+	public:
+		CNamePlateReason()
+		{
+			Reset();
+		}
+		void Reset()
+		{
+			m_TextContainerIndex.Reset();
+			m_aReason[0] = '\0';
+			m_FontSize = -INFINITY;
+		}
+		void Update(CNamePlates &This, const char *pReason, float FontSize);
+		STextContainerIndex m_TextContainerIndex;
+		char m_aReason[MAX_WARLIST_REASON_LENGTH];
+		float m_FontSize;
+	};
+	CNamePlateSkin m_SkinName;
+	CNamePlateReason m_Reason;
 };
 
 class CNamePlates : public CComponent
@@ -101,6 +148,11 @@ class CNamePlates : public CComponent
 	friend class CNamePlate::CNamePlateName;
 	friend class CNamePlate::CNamePlateClan;
 	friend class CNamePlate::CNamePlateHookWeakStrongId;
+
+	//TClient
+	friend class CNamePlate::CNamePlateSkin;
+	friend class CNamePlate::CNamePlateReason;
+
 
 	CNamePlate m_aNamePlates[MAX_CLIENTS];
 
@@ -130,6 +182,12 @@ class CNamePlates : public CComponent
 		bool m_ShowHookWeakStrongId;
 		int m_HookWeakStrongId;
 		float m_FontSizeHookWeakStrong;
+
+		//TClient
+		int m_RealClientId;
+		bool m_IsGame = false;
+		bool m_ShowClanWarInName = false;
+		bool m_IsLocal = false;
 	};
 	void RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateData &Data);
 

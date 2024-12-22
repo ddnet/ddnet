@@ -544,6 +544,11 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					GameClient()->FormatClientId(pInfo->m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
 					TextRender()->TextEx(&Cursor, aClientId);
 				}
+
+				// TClient
+				if(pInfo->m_ClientId >= 0 && g_Config.m_ClWarList && g_Config.m_ClWarListScoreboard && GameClient()->m_WarList.GetAnyWar(pInfo->m_ClientId))
+					TextRender()->TextColor(GameClient()->m_WarList.GetNameplateColor(pInfo->m_ClientId));
+
 				TextRender()->TextEx(&Cursor, ClientData.m_aName);
 
 				// ready / watching
@@ -564,6 +569,11 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				{
 					TextRender()->TextColor(TextColor);
 				}
+
+				// TClient
+				if(pInfo->m_ClientId >= 0 && g_Config.m_ClWarList && g_Config.m_ClWarListScoreboard && GameClient()->m_WarList.GetAnyWar(pInfo->m_ClientId))
+					TextRender()->TextColor(GameClient()->m_WarList.GetClanColor(pInfo->m_ClientId));
+
 				CTextCursor Cursor;
 				TextRender()->SetCursor(&Cursor, ClanOffset + (ClanLength - minimum(TextRender()->TextWidth(FontSize, ClientData.m_aClan), ClanLength)) / 2.0f, Row.y + (Row.h - FontSize) / 2.0f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
 				Cursor.m_LineWidth = ClanLength;

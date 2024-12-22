@@ -178,8 +178,11 @@ public:
 	void RemoveWarEntry(int Index);
 	void RemoveWarType(int Index);
 
+	ColorRGBA GetPriorityColor(int ClientId);
 	ColorRGBA GetNameplateColor(int ClientId);
 	ColorRGBA GetClanColor(int ClientId);
+	bool GetAnyWar(int ClientId);
+
 
 	void GetReason(char *pReason, int ClientId);
 	CWarDataCache GetWarData(int ClientId);
