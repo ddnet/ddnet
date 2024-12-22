@@ -37,6 +37,7 @@ public:
 	void RandomizeSkin(int Dummy);
 
 	static bool IsVanillaSkin(const char *pName);
+	static bool IsSpecialSkin(const char *pName);
 
 	constexpr static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
 		"cammo", "cammostripes", "coala", "default", "limekitty",

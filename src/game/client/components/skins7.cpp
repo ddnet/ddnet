@@ -466,21 +466,21 @@ void CSkins7::RandomizeSkin(int Dummy) const
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		std::vector<const CSkins7::CSkinPart *> vConsideredSkinParts;
+		std::vector<const CSkins7::CSkinPart *> vpConsideredSkinParts;
 		for(const CSkinPart &SkinPart : GetSkinParts(Part))
 		{
 			if((SkinPart.m_Flags & CSkins7::SKINFLAG_SPECIAL) != 0)
 				continue;
-			vConsideredSkinParts.push_back(&SkinPart);
+			vpConsideredSkinParts.push_back(&SkinPart);
 		}
 		const CSkins7::CSkinPart *pRandomPart;
-		if(vConsideredSkinParts.empty())
+		if(vpConsideredSkinParts.empty())
 		{
 			pRandomPart = FindDefaultSkinPart(Part);
 		}
 		else
 		{
-			pRandomPart = vConsideredSkinParts[rand() % vConsideredSkinParts.size()];
+			pRandomPart = vpConsideredSkinParts[rand() % vpConsideredSkinParts.size()];
 		}
 		str_copy(CSkins7::ms_apSkinVariables[Dummy][Part], pRandomPart->m_aName, protocol7::MAX_SKIN_ARRAY_SIZE);
 	}

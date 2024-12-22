@@ -621,6 +621,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		GameClient()->m_Skins.RandomizeSkin(m_Dummy);
 		SetNeedSendInfo();
+		m_SkinListScrollToSelected = true;
 		s_CurrentDie = rand() % std::size(s_apDice);
 	}
 	TextRender()->SetRenderFlags(0);
@@ -721,7 +722,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 				return false;
 
 			// no special skins
-			if((pSkinToBeSelected->GetName()[0] == 'x' && pSkinToBeSelected->GetName()[1] == '_'))
+			if(CSkins::IsSpecialSkin(pSkinToBeSelected->GetName()))
 				return false;
 
 			return true;
