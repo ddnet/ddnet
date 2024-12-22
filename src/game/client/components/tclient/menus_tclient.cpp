@@ -130,7 +130,7 @@ bool CMenus::DoSliderWithScaledValue(const void *pId, int *pOption, const CUIRec
 	return false;
 }
 
-int CMenus::DoButtonLineSize_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, float LineSize, bool Fake, const char *pImageName, int Corners, float Rounding, float FontFactor, ColorRGBA Color)
+int CMenus::DoButtonLineSize_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, float Line_Size, bool Fake, const char *pImageName, int Corners, float Rounding, float FontFactor, ColorRGBA Color)
 {
 	CUIRect Text = *pRect;
 
@@ -143,7 +143,7 @@ int CMenus::DoButtonLineSize_Menu(CButtonContainer *pButtonContainer, const char
 
 	pRect->Draw(Color, Corners, Rounding);
 
-	Text.HMargin(LineSize / 2.0f, &Text);
+	Text.HMargin(Line_Size / 2.0f, &Text);
 	Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
 	Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
 	Ui()->DoLabel(&Text, pText, Text.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
@@ -1058,7 +1058,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	s_vTypeItemIds.resize(MaxTypes);
 	s_vTypeDeleteButtons.resize(MaxTypes);
 
-	for(int i = 0; i < GameClient()->m_WarList.m_WarTypes.size(); i++)
+	for(int i = 0; i < (int)GameClient()->m_WarList.m_WarTypes.size(); i++)
 	{
 		CWarType *pType = GameClient()->m_WarList.m_WarTypes[i];
 
@@ -1156,7 +1156,6 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	s_vNameButtons.resize(MAX_CLIENTS);
 	s_vClanButtons.resize(MAX_CLIENTS);
 
-	static int SelectedID = -1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(!m_pClient->m_Snap.m_apPlayerInfos[i])
