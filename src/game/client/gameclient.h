@@ -183,7 +183,7 @@ public:
 	// TClient Components
 	CSkinProfiles m_SkinProfiles;
 	CBindchat m_Bindchat;
-	CBindwheel m_Bindwheel;
+	CBindWheel m_Bindwheel;
 	CTater m_Tater;
 	CPlayerIndicator m_PlayerIndicator;
 	COutlines m_Outlines;

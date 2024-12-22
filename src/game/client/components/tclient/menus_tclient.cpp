@@ -182,7 +182,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 	CUIRect TabBar, Column, LeftView, RightView, Button, Label;
 
-	MainView.HSplitTop(LineSize, &TabBar, &MainView);
+	MainView.HSplitTop(LineSize * 1.2f, &TabBar, &MainView);
 	const float TabWidth = TabBar.w / NUMBER_OF_TCLIENT_TABS;
 	static CButtonContainer s_aPageTabs[NUMBER_OF_TCLIENT_TABS] = {};
 	const char *apTabNames[] = {
@@ -681,8 +681,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			}
 			else if(Ui()->MouseButtonClicked(1) && s_SelectedBindIndex >= 0 && HoveringIndex >= 0 && HoveringIndex != s_SelectedBindIndex)
 			{
-				CBindwheel::CBind BindA = GameClient()->m_Bindwheel.m_vBinds[s_SelectedBindIndex];
-				CBindwheel::CBind BindB = GameClient()->m_Bindwheel.m_vBinds[HoveringIndex];
+				CBindWheel::CBind BindA = GameClient()->m_Bindwheel.m_vBinds[s_SelectedBindIndex];
+				CBindWheel::CBind BindB = GameClient()->m_Bindwheel.m_vBinds[HoveringIndex];
 				str_copy(GameClient()->m_Bindwheel.m_vBinds[s_SelectedBindIndex].m_aName, BindB.m_aName);
 				str_copy(GameClient()->m_Bindwheel.m_vBinds[s_SelectedBindIndex].m_aCommand, BindB.m_aCommand);
 				str_copy(GameClient()->m_Bindwheel.m_vBinds[HoveringIndex].m_aName, BindA.m_aName);
@@ -712,7 +712,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			else if(i == HoveringIndex)
 				SegmentFontSize = FontSize;
 
-			const CBindwheel::CBind Bind = GameClient()->m_Bindwheel.m_vBinds[i];
+			const CBindWheel::CBind Bind = GameClient()->m_Bindwheel.m_vBinds[i];
 			const float Angle = Theta * i;
 			vec2 TextPos = direction(Angle);
 			TextPos *= Radius * 0.75f;
@@ -747,7 +747,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
 		if(DoButton_Menu(&s_OverrideButton, Localize("Override Selected"), 0, &Button) && s_SelectedBindIndex >= 0)
 		{
-			CBindwheel::CBind TempBind;
+			CBindWheel::CBind TempBind;
 			if(str_length(s_aBindName) == 0)
 				str_copy(TempBind.m_aName, "*");
 			else
@@ -762,7 +762,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Button.VSplitMid(&ButtonRemove, &ButtonAdd, MarginSmall);
 		if(DoButton_Menu(&s_AddButton, Localize("Add Bind"), 0, &ButtonAdd))
 		{
-			CBindwheel::CBind TempBind;
+			CBindWheel::CBind TempBind;
 			if(str_length(s_aBindName) == 0)
 				str_copy(TempBind.m_aName, "*");
 			else
@@ -1005,8 +1005,9 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	Ui()->DoEditBox_Search(&s_EntriesFilterInput, &EntriesSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed());
 
 	// ======WAR ENTRY EDITING======
-
-	Column2.HSplitTop(HeadlineHeight, nullptr, &Column2);
+	Column2.HSplitTop(HeadlineHeight, &Label, &Column2);
+	Label.VSplitRight(25.0f, &Label, &Button);
+	Ui()->DoLabel(&Label, Localize("Edit Entry"), HeadlineFontSize, TEXTALIGN_ML);
 	Column2.HSplitTop(MarginSmall, nullptr, &Column2);
 	Column2.HSplitTop(HeadlineFontSize, &Button, &Column2);
 
