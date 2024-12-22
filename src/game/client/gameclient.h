@@ -58,6 +58,7 @@
 #include "components/spectator.h"
 #include "components/statboard.h"
 #include "components/tooltips.h"
+#include "components/tclient/bindchat.h"
 #include "components/tclient/bindwheel.h"
 #include "components/tclient/outlines.h"
 #include "components/tclient/player_indicator.h"
@@ -154,6 +155,7 @@ public:
 	CStatboard m_Statboard;
 	CSounds m_Sounds;
 	CEmoticon m_Emoticon;
+	
 	CDamageInd m_DamageInd;
 	CTouchControls m_TouchControls;
 	CVoting m_Voting;
@@ -180,7 +182,8 @@ public:
 
 	// TClient Components
 	CSkinProfiles m_SkinProfiles;
-	CBindWheel m_Bindwheel;
+	CBindchat m_Bindchat;
+	CBindwheel m_Bindwheel;
 	CTater m_Tater;
 	CPlayerIndicator m_PlayerIndicator;
 	COutlines m_Outlines;

@@ -261,7 +261,10 @@ CWarDataCache CWarList::GetWarData(int ClientId)
 	return m_WarPlayers[ClientId];
 }
 
-void CWarList::SortWarEntries() {}
+void CWarList::SortWarEntries()
+{
+	// TODO
+}
 
 void CWarList::UpdateWarPlayers()
 {
@@ -283,7 +286,9 @@ void CWarList::UpdateWarPlayers()
 				m_WarPlayers[i].IsWarName = true;
 				m_WarPlayers[i].m_NameColor = Entry.m_pWarType->m_Color;
 			}
-			else if(str_comp(GameClient()->m_aClients[i].m_aClan, Entry.m_aClan) == 0)
+
+		  else if(str_comp(GameClient()->m_aClients[i].m_aClan, Entry.m_aClan) == 0)
+
 			{
 				// Name war reason has priority over clan war reason
 				if(!m_WarPlayers[i].IsWarName)

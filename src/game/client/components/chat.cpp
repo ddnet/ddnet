@@ -262,7 +262,10 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 			m_CommandsNeedSorting = false;
 		}
 
-		SendChatQueued(m_Input.GetString());
+		if (m_pClient->m_Bindchat.ChatDoBinds(m_Input.GetString()))
+			; // Do nothing as bindchat was executed
+		else
+			SendChatQueued(m_Input.GetString());
 		m_pHistoryEntry = nullptr;
 		DisableMode();
 		m_pClient->OnRelease();
@@ -312,7 +315,11 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				});
 		}
 
-		if(m_aCompletionBuffer[0] == '/' && !m_vCommands.empty())
+		if (m_pClient->m_Bindchat.ChatDoAutocomplete(ShiftPressed))
+		{
+
+		}
+		else if(m_aCompletionBuffer[0] == '/' && !m_vCommands.empty())
 		{
 			CCommand *pCompletionCommand = 0;
 

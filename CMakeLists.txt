@@ -2405,6 +2405,8 @@ if(CLIENT)
     components/spectator.h
     components/statboard.cpp
     components/statboard.h
+    components/tclient/bindchat.cpp
+    components/tclient/bindchat.h
     components/tclient/bindwheel.cpp
     components/tclient/bindwheel.h
     components/tclient/menus_tclient.cpp

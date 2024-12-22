@@ -145,6 +145,8 @@ class CChat : public CComponent
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void StoreSave(const char *pText);
 
+	friend class CBindchat;
+
 public:
 	CChat();
 	int Sizeof() const override { return sizeof(*this); }

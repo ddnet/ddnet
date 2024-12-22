@@ -48,9 +48,10 @@ enum
 {
 	TCLIENT_TAB_SETTINGS = 0,
 	TCLIENT_TAB_BINDWHEEL = 1,
-	TCLIENT_TAB_WARLIST = 2,
-	TCLIENT_TAB_INFO = 3,
-	NUMBER_OF_TCLIENT_TABS = 4
+	TCLIENT_TAB_BINDCHAT = 2,
+	TCLIENT_TAB_WARLIST = 3,
+	TCLIENT_TAB_INFO = 4,
+	NUMBER_OF_TCLIENT_TABS = 5
 };
 
 typedef struct
@@ -66,6 +67,8 @@ using namespace FontIcons;
 static float s_Time = 0.0f;
 static bool s_StartedTime = false;
 
+const float FontSize = 14.0f;
+const float EditBoxFontSize = 12.0f;
 const float LineSize = 20.0f;
 const float ColorPickerLineSize = 25.0f;
 const float HeadlineFontSize = 20.0f;
@@ -113,8 +116,8 @@ bool CMenus::DoSliderWithScaledValue(const void *pId, int *pOption, const CUIRec
 	CUIRect Label, ScrollBar;
 	pRect->VSplitMid(&Label, &ScrollBar, minimum(10.0f, pRect->w * 0.05f));
 
-	const float FontSize = Label.h * CUi::ms_FontmodHeight * 0.8f;
-	Ui()->DoLabel(&Label, aBuf, FontSize, TEXTALIGN_ML);
+	const float LabelFontSize = Label.h * CUi::ms_FontmodHeight * 0.8f;
+	Ui()->DoLabel(&Label, aBuf, LabelFontSize, TEXTALIGN_ML);
 
 	Value = pScale->ToAbsolute(Ui()->DoScrollbarH(pId, &ScrollBar, pScale->ToRelative(Value, Min, Max)), Min, Max);
 	if(NoClampValue && ((Value == Min && *pOption < Min) || (Value == Max && *pOption > Max)))
@@ -128,6 +131,17 @@ bool CMenus::DoSliderWithScaledValue(const void *pId, int *pOption, const CUIRec
 		return true;
 	}
 	return false;
+}
+
+
+bool CMenus::DoEditBoxWithLabel(CLineInput *LineInput, const CUIRect *pRect, const char *pLabel, const char *pDefault, char *pBuf, size_t BufSize)
+{
+	CUIRect Button, Label;
+	pRect->VSplitLeft(100.0f, &Label, &Button);
+	Ui()->DoLabel(&Label, pLabel, FontSize, TEXTALIGN_ML);
+	LineInput->SetBuffer(pBuf, BufSize);
+	LineInput->SetEmptyText(pDefault);
+	return Ui()->DoEditBox(LineInput, &Button, EditBoxFontSize);
 }
 
 int CMenus::DoButtonLineSize_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, float Line_Size, bool Fake, const char *pImageName, int Corners, float Rounding, float FontFactor, ColorRGBA Color)
@@ -152,6 +166,7 @@ int CMenus::DoButtonLineSize_Menu(CButtonContainer *pButtonContainer, const char
 		return 0;
 
 	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect);
+
 }
 
 void CMenus::RenderSettingsTClient(CUIRect MainView)
@@ -173,22 +188,16 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	const char *apTabNames[] = {
 		Localize("Settings"),
 		Localize("Bindwheel"),
+		Localize("Chat Binds"),
 		Localize("Warlist"),
 		Localize("Info")};
 
 	for(int Tab = 0; Tab < NUMBER_OF_TCLIENT_TABS; ++Tab)
 	{
 		TabBar.VSplitLeft(TabWidth, &Button, &TabBar);
-		const int Corners = Tab == 0 ? IGraphics::CORNER_L : Tab == NUMBER_OF_TCLIENT_TABS - 1 ? IGraphics::CORNER_R :
-													 IGraphics::CORNER_NONE;
+		const int Corners = Tab == 0 ? IGraphics::CORNER_L : Tab == NUMBER_OF_TCLIENT_TABS - 1 ? IGraphics::CORNER_R : IGraphics::CORNER_NONE;
 		if(DoButton_MenuTab(&s_aPageTabs[Tab], apTabNames[Tab], s_CurCustomTab == Tab, &Button, Corners, nullptr, nullptr, nullptr, nullptr, 4.0f))
-		{
-			// if(Tab == TCLIENT_TAB_DISCORD)
-			//	PopupConfirm(Localize("Open TClient Discord"), Localize("Click open to open the TClient Discord invite in your browser"), Localize("Open"), Localize("Cancel"), &CMenus::OpenTClientDiscord);
-			// else
 			s_CurCustomTab = Tab;
-			break;
-		}
 	}
 
 	MainView.HSplitTop(MarginSmall, nullptr, &MainView);
@@ -256,7 +265,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			FeetBox.VSplitMid(&FeetBox, nullptr);
 			static CLineInput s_WhiteFeet(g_Config.m_ClWhiteFeetSkin, sizeof(g_Config.m_ClWhiteFeetSkin));
 			s_WhiteFeet.SetEmptyText("x_ninja");
-			Ui()->DoEditBox(&s_WhiteFeet, &FeetBox, 12.0f);
+			Ui()->DoEditBox(&s_WhiteFeet, &FeetBox, EditBoxFontSize);
 		}
 		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 
@@ -420,7 +429,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			static CLineInput s_LastInput(g_Config.m_ClNotifyWhenLastText, sizeof(g_Config.m_ClNotifyWhenLastText));
 			s_LastInput.SetEmptyText(Localize("Last!"));
 			Button.HSplitTop(MarginSmall, nullptr, &Button);
-			Ui()->DoEditBox(&s_LastInput, &Button, 12.0f);
+			Ui()->DoEditBox(&s_LastInput, &Button, EditBoxFontSize);
 			static CButtonContainer s_ClientNotifyWhenLastColor;
 			DoLine_ColorPicker(&s_ClientNotifyWhenLastColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &NotificationConfig, "", &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 		}
@@ -582,6 +591,57 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		s_ScrollRegion.End();
 	}
 
+	if(s_CurCustomTab == TCLIENT_TAB_BINDCHAT)
+	{
+		MainView.HSplitTop(MarginBetweenSections, nullptr, &MainView);
+		Column = MainView;
+
+		Column.HSplitTop(HeadlineHeight, &Label, &Column);
+		Ui()->DoLabel(&Label, Localize("Kaomoji"), HeadlineFontSize, TEXTALIGN_ML);
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+		auto DoBindchat = [&](CLineInput &LineInput, const char *pLabel, const char *pName, const char *pCommand)
+		{
+			Column.HSplitTop(LineSize, &Button, &Column);
+			char *BindCommand;
+			int BindIndex = GameClient()->m_Bindchat.GetBind(pCommand);
+			bool BindNew = BindIndex == -1;
+			if(BindNew)
+			{
+				static char s_aBindCommandTemp[BINDCHAT_MAX_CMD] = "";
+				BindCommand = s_aBindCommandTemp;
+				BindNew = true; // Make a new bind, as we arent editing one
+			}
+			else
+			{
+				auto *Bind = GameClient()->m_Bindchat.Get(BindIndex);
+				BindCommand = Bind->m_aName;
+			}
+			if(DoEditBoxWithLabel(&LineInput, &Button, pLabel, pName, BindCommand, BINDCHAT_MAX_CMD))
+			{
+				if(BindNew && BindCommand[0] != '\0' && LineInput.IsActive())
+				{
+					GameClient()->m_Bindchat.AddBind(BindCommand, pCommand);
+					BindCommand[0] = '\0'; // Reset for new usage
+				}
+				if(!BindNew && BindCommand[0] == '\0')
+					GameClient()->m_Bindchat.RemoveBind(BindIndex);
+			}
+		};
+
+		static CLineInput s_KaomojiShrug;
+		DoBindchat(s_KaomojiShrug, Localize("Shrug:"), "!shrug", "say ¯\\_(ツ)_/¯");
+
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		static CLineInput s_KaomojiFlip;
+		DoBindchat(s_KaomojiFlip, Localize("Flip:"), "!flip", "say (╯°□°)╯︵ ┻━┻");
+
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		static CLineInput s_KaomojiUnflip;
+		DoBindchat(s_KaomojiUnflip, Localize("Unflip:"), "!unflip", "say ┬─┬ノ( º _ ºノ)");
+
+	}
+
 	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)
 	{
 		MainView.HSplitTop(MarginBetweenSections, nullptr, &MainView);
@@ -621,8 +681,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			}
 			else if(Ui()->MouseButtonClicked(1) && s_SelectedBindIndex >= 0 && HoveringIndex >= 0 && HoveringIndex != s_SelectedBindIndex)
 			{
-				CBindWheel::SBind BindA = GameClient()->m_Bindwheel.m_vBinds[s_SelectedBindIndex];
-				CBindWheel::SBind BindB = GameClient()->m_Bindwheel.m_vBinds[HoveringIndex];
+				CBindwheel::CBind BindA = GameClient()->m_Bindwheel.m_vBinds[s_SelectedBindIndex];
+				CBindwheel::CBind BindB = GameClient()->m_Bindwheel.m_vBinds[HoveringIndex];
 				str_copy(GameClient()->m_Bindwheel.m_vBinds[s_SelectedBindIndex].m_aName, BindB.m_aName);
 				str_copy(GameClient()->m_Bindwheel.m_vBinds[s_SelectedBindIndex].m_aCommand, BindB.m_aCommand);
 				str_copy(GameClient()->m_Bindwheel.m_vBinds[HoveringIndex].m_aName, BindA.m_aName);
@@ -643,43 +703,43 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		const float Theta = pi * 2.0f / GameClient()->m_Bindwheel.m_vBinds.size();
 		for(int i = 0; i < static_cast<int>(GameClient()->m_Bindwheel.m_vBinds.size()); i++)
 		{
-			float FontSize = 12.0f;
+			float SegmentFontSize = FontSize * 1.2f;
 			if(i == s_SelectedBindIndex)
 			{
-				FontSize = 20.0f;
+				SegmentFontSize = FontSize * 1.7f;
 				TextRender()->TextColor(ColorRGBA(0.5f, 1.0f, 0.75f, 1.0f));
 			}
 			else if(i == HoveringIndex)
-				FontSize = 14.0f;
+				SegmentFontSize = FontSize;
 
-			const CBindWheel::SBind Bind = GameClient()->m_Bindwheel.m_vBinds[i];
+			const CBindwheel::CBind Bind = GameClient()->m_Bindwheel.m_vBinds[i];
 			const float Angle = Theta * i;
 			vec2 TextPos = direction(Angle);
 			TextPos *= Radius * 0.75f;
 
-			float Width = TextRender()->TextWidth(FontSize, Bind.m_aName);
+			float Width = TextRender()->TextWidth(SegmentFontSize, Bind.m_aName);
 			TextPos += Pos;
 			TextPos.x -= Width / 2.0f;
-			TextRender()->Text(TextPos.x, TextPos.y, FontSize, Bind.m_aName);
+			TextRender()->Text(TextPos.x, TextPos.y, SegmentFontSize, Bind.m_aName);
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
 		Button.VSplitLeft(100.0f, &Label, &Button);
-		Ui()->DoLabel(&Label, Localize("Name:"), 14.0f, TEXTALIGN_ML);
+		Ui()->DoLabel(&Label, Localize("Name:"), FontSize, TEXTALIGN_ML);
 		static CLineInput s_NameInput;
 		s_NameInput.SetBuffer(s_aBindName, sizeof(s_aBindName));
 		s_NameInput.SetEmptyText("Name");
-		Ui()->DoEditBox(&s_NameInput, &Button, 12.0f);
+		Ui()->DoEditBox(&s_NameInput, &Button, EditBoxFontSize);
 
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
 		Button.VSplitLeft(100.0f, &Label, &Button);
-		Ui()->DoLabel(&Label, Localize("Command:"), 14.0f, TEXTALIGN_ML);
+		Ui()->DoLabel(&Label, Localize("Command:"), FontSize, TEXTALIGN_ML);
 		static CLineInput s_BindInput;
 		s_BindInput.SetBuffer(s_aBindCommand, sizeof(s_aBindCommand));
 		s_BindInput.SetEmptyText(Localize("Command"));
-		Ui()->DoEditBox(&s_BindInput, &Button, 12.0f);
+		Ui()->DoEditBox(&s_BindInput, &Button, EditBoxFontSize);
 
 		static CButtonContainer s_AddButton, s_RemoveButton, s_OverrideButton;
 
@@ -687,7 +747,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
 		if(DoButton_Menu(&s_OverrideButton, Localize("Override Selected"), 0, &Button) && s_SelectedBindIndex >= 0)
 		{
-			CBindWheel::SBind TempBind;
+			CBindwheel::CBind TempBind;
 			if(str_length(s_aBindName) == 0)
 				str_copy(TempBind.m_aName, "*");
 			else
@@ -702,7 +762,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Button.VSplitMid(&ButtonRemove, &ButtonAdd, MarginSmall);
 		if(DoButton_Menu(&s_AddButton, Localize("Add Bind"), 0, &ButtonAdd))
 		{
-			CBindWheel::SBind TempBind;
+			CBindwheel::CBind TempBind;
 			if(str_length(s_aBindName) == 0)
 				str_copy(TempBind.m_aName, "*");
 			else
@@ -719,11 +779,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 		LeftView.HSplitTop(LineSize, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Use left mouse to select"), 14.0f, TEXTALIGN_ML);
+		Ui()->DoLabel(&Label, Localize("Use left mouse to select"), FontSize, TEXTALIGN_ML);
 		LeftView.HSplitTop(LineSize, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Use right mouse to swap with selected"), 14.0f, TEXTALIGN_ML);
+		Ui()->DoLabel(&Label, Localize("Use right mouse to swap with selected"), FontSize, TEXTALIGN_ML);
 		LeftView.HSplitTop(LineSize, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Use middle mouse select without copy"), 14.0f, TEXTALIGN_ML);
+		Ui()->DoLabel(&Label, Localize("Use middle mouse select without copy"), FontSize, TEXTALIGN_ML);
 
 		// Do Settings Key
 		CKeyInfo Key = CKeyInfo{"Bind Wheel Key", "+bindwheel", 0, 0};
@@ -751,7 +811,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_pName));
 
-		Ui()->DoLabel(&KeyLabel, aBuf, 14.0f, TEXTALIGN_ML);
+		Ui()->DoLabel(&KeyLabel, aBuf, FontSize, TEXTALIGN_ML);
 		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
 		int NewId = DoKeyReader((void *)&Key.m_pName, &Button, OldId, OldModifierCombination, &NewModifierCombination);
 		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
@@ -819,6 +879,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 
 	static CWarEntry *pSelectedEntry = nullptr;
 	static CWarType *pSelectedType = GameClient()->m_WarList.m_WarTypes[0];
+
 
 	// Filter the list
 	static CLineInputBuffered<128> s_EntriesFilterInput;
@@ -891,6 +952,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 		EntryRect.VSplitLeft(35.0f, &EntryTypeRect, &EntryRect);
 
 		if(IsClan)
+
 		{
 			RenderFontIcon(EntryTypeRect, FONT_ICON_USERS, 18.0f, TEXTALIGN_MC);
 		}
@@ -1307,8 +1369,6 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 {
 	CUIRect Label, LabelMid, Section, LabelRight;
 	static int s_SelectedProfile = -1;
-
-	const float FontSize = 14.0f;
 
 	char *pSkinName = g_Config.m_ClPlayerSkin;
 	int *pUseCustomColor = &g_Config.m_ClPlayerUseCustomColor;
