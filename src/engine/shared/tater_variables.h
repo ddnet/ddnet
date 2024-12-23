@@ -143,6 +143,7 @@ MACRO_CONFIG_INT(ClWarListShowClan, tc_warlist_show_clan_if_war, 0, 0, 1, CFGFLA
 MACRO_CONFIG_INT(ClWarListReason, tc_warlist_reason, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show war reason")
 MACRO_CONFIG_INT(ClWarListChat, tc_warlist_chat, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show war colors in chat")
 MACRO_CONFIG_INT(ClWarListScoreboard, tc_warlist_scoreboard, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show war colors in scoreboard")
+MACRO_CONFIG_INT(ClWarListAllowDuplicates, tc_warlist_allow_duplicates, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Allow duplicate war entrys")
 
 // AAAAAAA
 MACRO_CONFIG_INT(ClAmIFrozen, EEEfrz, 0, 0, 1, CFGFLAG_CLIENT, "")

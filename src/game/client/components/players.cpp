@@ -199,8 +199,6 @@ void CPlayers::RenderHookCollLine(
 		{
 			if(g_Config.m_ClImproveMousePrecision && MaxDistance < 1000) // Don't scale if it would reduce precision
 				Pos *= length(Pos) * 1000.0f / (float)MaxDistance;
-			if(!m_pClient->m_Snap.m_SpecInfo.m_Active && !g_Config.m_ClOldMouseZoom)
-				Pos *= m_pClient->m_Camera.m_Zoom;
 		}
 		Pos.x = (int)Pos.x;
 		Pos.y = (int)Pos.y;
@@ -492,8 +490,6 @@ void CPlayers::RenderPlayer(
 		{
 			if(g_Config.m_ClImproveMousePrecision && MaxDistance < 1000) // Don't scale if it would reduce precision
 				Pos *= length(Pos) * 1000.0f / (float)MaxDistance;
-			if(!m_pClient->m_Snap.m_SpecInfo.m_Active && !g_Config.m_ClOldMouseZoom)
-				Pos *= m_pClient->m_Camera.m_Zoom;
 		}
 		Pos.x = (int)Pos.x;
 		Pos.y = (int)Pos.y;
@@ -933,8 +929,6 @@ void CPlayers::RenderPlayerGhost(
 		{
 			if(g_Config.m_ClImproveMousePrecision && MaxDistance < 1000) // Don't scale if it would reduce precision
 				Pos *= length(Pos) * 1000.0f / (float)MaxDistance;
-			if(!m_pClient->m_Snap.m_SpecInfo.m_Active && !g_Config.m_ClOldMouseZoom)
-				Pos *= m_pClient->m_Camera.m_Zoom;
 		}
 		Pos.x = (int)Pos.x;
 		Pos.y = (int)Pos.y;

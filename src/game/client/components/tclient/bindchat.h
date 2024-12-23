@@ -62,6 +62,7 @@ public:
 	int GetBind(const char *pCommand);
 	CBind *Get(int Index);
 
+	bool CheckBindChat(const char *pText);
 	bool ChatDoBinds(const char *pText);
 	bool ChatDoAutocomplete(bool ShiftPressed);
 };

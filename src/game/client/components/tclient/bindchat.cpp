@@ -218,6 +218,19 @@ void CBindchat::ExecuteBind(int Bind, const char *pArgs)
 	Console()->ExecuteLine(aBuf);
 }
 
+bool CBindchat::CheckBindChat(const char *pText)
+{
+	CChat &Chat = GameClient()->m_Chat;
+	const char *pSpace = str_find(pText, " ");
+	size_t SpaceIndex = pSpace ? pSpace - pText : strlen(pText);
+	for(const CBind &Bind : m_vBinds)
+	{
+		if(str_comp_nocase_num(pText, Bind.m_aName, SpaceIndex) == 0)
+			return true;
+	}
+	return false;
+}
+
 bool CBindchat::ChatDoBinds(const char *pText)
 {
 	CChat &Chat = GameClient()->m_Chat;

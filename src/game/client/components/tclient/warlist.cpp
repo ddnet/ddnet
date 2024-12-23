@@ -173,9 +173,11 @@ void CWarList::AddWarEntryInGame(int WarType, const char *pName, const char *pRe
 	{
 		str_copy(Entry.m_aName, pName);
 	}
-
+	if(!g_Config.m_ClWarListAllowDuplicates)
+		RemoveWarEntryDuplicates(Entry.m_aName, Entry.m_aClan);
 	m_WarEntries.push_back(Entry);
 }
+
 void CWarList::RemoveWarEntryInGame(int WarType, const char *pName, bool IsClan)
 {
 	if(str_comp(pName, "") == 0)
@@ -213,6 +215,7 @@ void CWarList::RemoveWarEntryInGame(int WarType, const char *pName, bool IsClan)
 	}
 	RemoveWarEntry(Entry.m_aName, Entry.m_aClan, Entry.m_pWarType->m_aWarName);
 }
+
 void CWarList::UpdateWarEntry(int Index, const char *pName, const char *pClan, const char *pReason, CWarType *pType)
 {
 	if(Index >= 0 && Index < static_cast<int>(m_WarEntries.size()))
@@ -260,7 +263,27 @@ void CWarList::AddWarEntry(const char *pName, const char *pClan, const char *pRe
 	else if(str_comp(pName, "") != 0)
 		str_copy(Entry.m_aName, pName);
 
+	if(!g_Config.m_ClWarListAllowDuplicates)
+		RemoveWarEntryDuplicates(pName, pClan);
 	m_WarEntries.push_back(Entry);
+}
+
+void CWarList::RemoveWarEntryDuplicates(const char *pName, const char *pClan)
+{
+	if(str_comp(pName, "") == 0 && str_comp(pClan, "") == 0)
+		return;
+
+	for(auto it = m_WarEntries.begin(); it != m_WarEntries.end();)
+	{
+		bool IsDuplicate =
+			(str_comp(it->m_aName, pName) == 0) &&
+			(str_comp(it->m_aClan, pClan) == 0);
+
+		if(IsDuplicate)
+			it = m_WarEntries.erase(it);
+		else
+			++it;
+	}
 }
 
 void CWarList::AddWarType(const char *pType, ColorRGBA Color)
@@ -296,6 +319,7 @@ void CWarList::RemoveWarEntry(CWarEntry *Entry)
 	if(it != m_WarEntries.end())
 		m_WarEntries.erase(it);
 }
+
 void CWarList::RemoveWarType(const char *pType)
 {
 	CWarType Type(pType);
@@ -355,10 +379,12 @@ ColorRGBA CWarList::GetNameplateColor(int ClientId)
 {
 	return m_WarPlayers[ClientId].m_NameColor;
 }
+
 ColorRGBA CWarList::GetClanColor(int ClientId)
 {
 	return m_WarPlayers[ClientId].m_ClanColor;
 }
+
 bool CWarList::GetAnyWar(int ClientId)
 {
 	return m_WarPlayers[ClientId].IsWarClan || m_WarPlayers[ClientId].IsWarName;

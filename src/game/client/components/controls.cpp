@@ -243,8 +243,6 @@ int CControls::SnapInput(int *pData)
 		{
 			if(g_Config.m_ClImproveMousePrecision && MaxDistance < 1000) // Don't scale if it would reduce precision
 				Pos *= length(Pos) * 1000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
-			if(!g_Config.m_ClOldMouseZoom)
-				Pos *= m_pClient->m_Camera.m_Zoom;
 		}
 		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)Pos.x;
 		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)Pos.y;
