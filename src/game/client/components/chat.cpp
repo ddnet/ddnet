@@ -428,7 +428,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 
 				// quote the name
 				char aQuoted[128];
-				if(m_Input.GetString()[0] == '/' && (str_find(pCompletionString, " ") || str_find(pCompletionString, "\"")))
+				if((m_Input.GetString()[0] == '/' || m_pClient->m_Bindchat.ChatDoBinds(m_Input.GetString())) && (str_find(pCompletionString, " ") || str_find(pCompletionString, "\"")))
 				{
 					// escape the name
 					str_copy(aQuoted, "\"");
