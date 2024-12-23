@@ -220,7 +220,6 @@ void CBindchat::ExecuteBind(int Bind, const char *pArgs)
 
 bool CBindchat::CheckBindChat(const char *pText)
 {
-	CChat &Chat = GameClient()->m_Chat;
 	const char *pSpace = str_find(pText, " ");
 	size_t SpaceIndex = pSpace ? pSpace - pText : strlen(pText);
 	for(const CBind &Bind : m_vBinds)

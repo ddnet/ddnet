@@ -501,11 +501,6 @@ bool CControls::CheckNewInput()
 	{
 		TestInput.m_TargetX = (int)m_aMousePos[g_Config.m_ClDummy].x;
 		TestInput.m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
-		if(!g_Config.m_ClOldMouseZoom)
-		{
-			TestInput.m_TargetX *= m_pClient->m_Camera.m_Zoom;
-			TestInput.m_TargetY *= m_pClient->m_Camera.m_Zoom;
-		}
 	}
 
 	m_FastInput = TestInput;
