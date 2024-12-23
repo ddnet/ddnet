@@ -87,12 +87,12 @@ class CWarList : public CComponent
 	//
 	// Preset Commands
 	// .war [name] [reason]
-	// .clanwar [clan] [reason]
+	// .clanwar [name] [reason]
 	// .team [name] [reason]
 	// .clanteam [name] [reason]
 	// .delwar [name]
 	// .delteam [name]
-	// .delclanwar [clan]
+	// .delclanwar [name]
 	// .delclanteam [team]
 	//
 	// Generic Commands
@@ -102,12 +102,16 @@ class CWarList : public CComponent
 	// .delclan [type] [clan]
 	//
 	// Backend commands
-	// update_war_type [index] [type] [color]
+	// update_war_group [index] [type] [color]
 	// add_war_entry [type] [name] [clan] [reason]
 
 	// Preset war Commands
-	static void ConNameWar(IConsole::IResult *pResult, void *pUserData);
-	static void ConClanWar(IConsole::IResult *pResult, void *pUserData);
+	static void ConNameIndex(IConsole::IResult *pResult, void *pUserData);
+	static void ConClanIndex(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveNameIndex(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemoveClanIndex(IConsole::IResult *pResult, void *pUserData);
+
+
 	static void ConNameTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConClanTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveNameWar(IConsole::IResult *pResult, void *pUserData);
@@ -141,13 +145,10 @@ public:
 		new CWarType("none", ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), false),
 		new CWarType("enemy", ColorRGBA(1.0f, 0.2f, 0.2f, 1.0f), false),
 		new CWarType("team", ColorRGBA(0.0f, 0.9f, 0.2f, 1.0f), false),
-		new CWarType("aaaaaa", ColorRGBA(1.0f, 0.9f, 0.2f, 1.0f), true)
-	};
+		};
 
 	// None type war entries will float to the top of the list, so they can be assigned a type
 	CWarType *m_pWarTypeNone = m_WarTypes[0];
-
-	// TODO: add a special backend command that allows for changing the names of the default war types
 
 	// Duplicate war entries ARE allowed
 	std::vector<CWarEntry> m_WarEntries;
@@ -166,6 +167,9 @@ public:
 
 	// Adds a new war entry if the specified index is not found
 	void UpsertWarType(int Index, const char *pType, ColorRGBA Color);
+
+	void AddWarEntryInGame(int WarType, const char *pName, const char *pReason, bool IsClan);
+	void RemoveWarEntryInGame(int WarType, const char *pName, bool IsClan);
 
 	void AddWarEntry(const char *pName, const char *pClan, const char *pReason, const char *pType);
 	void AddWarType(const char *pType, ColorRGBA Color);

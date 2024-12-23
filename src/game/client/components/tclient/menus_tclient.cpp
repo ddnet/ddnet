@@ -47,11 +47,11 @@ void CMenus::OpenTClientDiscord()
 enum
 {
 	TCLIENT_TAB_SETTINGS = 0,
-	TCLIENT_TAB_BINDWHEEL = 1,
-	TCLIENT_TAB_BINDCHAT = 2,
-	TCLIENT_TAB_WARLIST = 3,
-	TCLIENT_TAB_INFO = 4,
-	NUMBER_OF_TCLIENT_TABS = 5
+	TCLIENT_TAB_BINDWHEEL,
+	TCLIENT_TAB_BINDCHAT,
+	TCLIENT_TAB_WARLIST,
+	TCLIENT_TAB_INFO,
+	NUMBER_OF_TCLIENT_TABS
 };
 
 typedef struct
@@ -133,11 +133,10 @@ bool CMenus::DoSliderWithScaledValue(const void *pId, int *pOption, const CUIRec
 	return false;
 }
 
-
 bool CMenus::DoEditBoxWithLabel(CLineInput *LineInput, const CUIRect *pRect, const char *pLabel, const char *pDefault, char *pBuf, size_t BufSize)
 {
 	CUIRect Button, Label;
-	pRect->VSplitLeft(100.0f, &Label, &Button);
+	pRect->VSplitLeft(175.0f, &Label, &Button);
 	Ui()->DoLabel(&Label, pLabel, FontSize, TEXTALIGN_ML);
 	LineInput->SetBuffer(pBuf, BufSize);
 	LineInput->SetEmptyText(pDefault);
@@ -278,7 +277,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("Input"), HeadlineFontSize, TEXTALIGN_ML);
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInput, Localize("Fast Inputs (-20ms input delay)"), &g_Config.m_ClFastInput, &Column, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInput, Localize("Fast Inputs (-20ms visual delay)"), &g_Config.m_ClFastInput, &Column, LineSize);
 
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 		if(g_Config.m_ClFastInput)
@@ -594,7 +593,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	if(s_CurCustomTab == TCLIENT_TAB_BINDCHAT)
 	{
 		MainView.HSplitTop(MarginBetweenSections, nullptr, &MainView);
-		Column = MainView;
+		MainView.VSplitMid(&LeftView, &RightView, Margin);
+
+		Column = LeftView;
 
 		Column.HSplitTop(HeadlineHeight, &Label, &Column);
 		Ui()->DoLabel(&Label, Localize("Kaomoji"), HeadlineFontSize, TEXTALIGN_ML);
@@ -604,11 +605,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		{
 			Column.HSplitTop(LineSize, &Button, &Column);
 			char *BindCommand;
-			int BindIndex = GameClient()->m_Bindchat.GetBind(pCommand);
+			int BindIndex = GameClient()->m_Bindchat.GetBindNoDefault(pCommand);
 			bool BindNew = BindIndex == -1;
+			static char s_aBindCommandTemp[BINDCHAT_MAX_CMD] = "";
 			if(BindNew)
 			{
-				static char s_aBindCommandTemp[BINDCHAT_MAX_CMD] = "";
 				BindCommand = s_aBindCommandTemp;
 				BindNew = true; // Make a new bind, as we arent editing one
 			}
@@ -639,6 +640,44 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 		static CLineInput s_KaomojiUnflip;
 		DoBindchat(s_KaomojiUnflip, Localize("Unflip:"), "!unflip", "say ┬─┬ノ( º _ ºノ)");
+
+		Column = RightView;
+
+		Column.HSplitTop(HeadlineHeight, &Label, &Column);
+		Ui()->DoLabel(&Label, Localize("Warlist"), HeadlineFontSize, TEXTALIGN_ML);
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+
+		static CLineInput s_Warlist1, s_Warlist2, s_Warlist3, s_Warlist4, s_Warlist5, s_Warlist6, s_Warlist7, s_Warlist8;
+		char aBuf[128];
+		char aGroup1Name[MAX_WARLIST_TYPE_LENGTH]; // enemy by default
+		char aGroup2Name[MAX_WARLIST_TYPE_LENGTH]; // team by default
+		str_copy(aGroup1Name, GameClient()->m_WarList.m_WarTypes[1]->m_aWarName);
+		str_copy(aGroup2Name, GameClient()->m_WarList.m_WarTypes[2]->m_aWarName);
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		str_format(aBuf, sizeof(aBuf), "Add %s name:", aGroup1Name);
+		DoBindchat(s_Warlist1, aBuf, ".war", "war_name_index 1");
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		str_format(aBuf, sizeof(aBuf), "Add %s clan:", aGroup1Name);
+		DoBindchat(s_Warlist2, aBuf, ".warclan", "war_clan_index 1");
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		str_format(aBuf, sizeof(aBuf), "Add %s name:", aGroup2Name);
+		DoBindchat(s_Warlist3, aBuf, ".team", "war_name_index 2");
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		str_format(aBuf, sizeof(aBuf), "Add %s clan:", aGroup2Name);
+		DoBindchat(s_Warlist4, aBuf, ".teamclan", "war_clan_index 2");
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		str_format(aBuf, sizeof(aBuf), "Remove %s name:", aGroup1Name);
+		DoBindchat(s_Warlist5, aBuf, ".delwar", "remove_war_name_index 1");
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		str_format(aBuf, sizeof(aBuf), "Remove %s clan:", aGroup1Name);
+		DoBindchat(s_Warlist6, aBuf, ".delwarclan", "remove_war_clan_index 1");
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		str_format(aBuf, sizeof(aBuf), "Remove %s name:", aGroup2Name);
+		DoBindchat(s_Warlist7, aBuf, ".delteam", "remove_war_name_index 2");
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		str_format(aBuf, sizeof(aBuf), "Remove %s clan:", aGroup2Name);
+		DoBindchat(s_Warlist8, aBuf, ".delteamclan", "remove_war_clan_index 2");
 
 	}
 

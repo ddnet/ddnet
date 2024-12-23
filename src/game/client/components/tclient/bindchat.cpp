@@ -56,7 +56,6 @@ void CBindchat::ConRemoveBindchat(IConsole::IResult *pResult, void *pUserData)
 	pThis->RemoveBind(aName);
 }
 
-
 void CBindchat::ConRemoveBindchatAll(IConsole::IResult *pResult, void *pUserData)
 {
 	CBindchat *pThis = static_cast<CBindchat *>(pUserData);
@@ -84,11 +83,44 @@ void CBindchat::AddBind(const char *pName, const char *pCommand)
 	m_vBinds.push_back(Bind);
 }
 
+void CBindchat::AddBindDefault(const char *pName, const char *pCommand)
+{
+	if((pName[0] == '\0' && pCommand[0] == '\0') || m_vBinds.size() >= BINDCHAT_MAX_BINDS)
+		return;
+
+	// If a bind for this command is found then don't add this
+	for(auto It = m_vBinds.begin(); It != m_vBinds.end(); ++It)
+	{
+		if(str_comp(It->m_aCommand, pCommand) == 0)
+			return;
+	}
+
+	CBind Bind;
+	Bind.m_Default = true;
+	str_copy(Bind.m_aName, pName);
+	str_copy(Bind.m_aCommand, pCommand);
+	m_vBinds.push_back(Bind);
+}
+
+void CBindchat::RemoveBindCommand(const char *pCommand)
+{
+	if(pCommand[0] == '\0')
+		return;
+	for(auto It = m_vBinds.begin(); It != m_vBinds.end(); ++It)
+	{
+		if(str_comp(It->m_aCommand, pCommand) == 0)
+		{
+			m_vBinds.erase(It);
+			return;
+		}
+	}
+}
+
 void CBindchat::RemoveBind(const char *pName)
 {
 	if(pName[0] == '\0')
 		return;
-	for (auto It = m_vBinds.begin(); It != m_vBinds.end(); ++It)
+	for(auto It = m_vBinds.begin(); It != m_vBinds.end(); ++It)
 	{
 		if(str_comp(It->m_aName, pName) == 0)
 		{
@@ -109,6 +141,18 @@ void CBindchat::RemoveBind(int Index)
 void CBindchat::RemoveAllBinds()
 {
 	m_vBinds.clear();
+}
+
+int CBindchat::GetBindNoDefault(const char *pCommand)
+{
+	if(pCommand[0] == '\0')
+		return -1;
+	for(auto It = m_vBinds.begin(); It != m_vBinds.end(); ++It)
+	{
+		if(str_comp_nocase(It->m_aCommand, pCommand) == 0 && !It->m_Default)
+			return &*It - m_vBinds.data();
+	}
+	return -1;
 }
 
 int CBindchat::GetBind(const char *pCommand)
@@ -141,6 +185,25 @@ void CBindchat::OnConsoleInit()
 	Console()->Register("unbindchat", "s[name] r[command]", CFGFLAG_CLIENT, ConRemoveBindchat, this, "Remove a chat bind");
 	Console()->Register("unbindchatall", "", CFGFLAG_CLIENT, ConRemoveBindchatAll, this, "Removes all chat binds");
 	Console()->Register("bindchatdefaults", "", CFGFLAG_CLIENT, ConBindchatDefaults, this, "Adds default chat binds");
+
+	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	IOHANDLE File = m_pStorage->OpenFile(BINDCHAT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	if(File)
+	{
+		io_close(File);
+		Console()->ExecuteFile(BINDCHAT_FILE);
+	}
+
+	// Default Binds
+	// Default Binds
+	AddBindDefault(".war", "war_name_index 1");
+	AddBindDefault(".warclan", "war_clan_index 1");
+	AddBindDefault(".team", "war_name_index 2");
+	AddBindDefault(".teamclan", "war_clan_index 2");
+	AddBindDefault(".delwar", "remove_war_name_index 1");
+	AddBindDefault(".delwarclan", "remove_war_clan_index 1");
+	AddBindDefault(".delteam", "remove_war_name_index 2");
+	AddBindDefault(".delteamclan", "remove_war_clan_index 2");
 }
 
 void CBindchat::ExecuteBind(int Bind, const char *pArgs)
@@ -176,9 +239,10 @@ bool CBindchat::ChatDoBinds(const char *pText)
 	return false;
 }
 
-bool CBindchat::ChatDoAutocomplete(bool ShiftPressed) {
+bool CBindchat::ChatDoAutocomplete(bool ShiftPressed)
+{
 	CChat &Chat = GameClient()->m_Chat;
-	
+
 	if(m_vBinds.size() == 0)
 		return false;
 	if(*Chat.m_aCompletionBuffer == '\0')
@@ -233,12 +297,28 @@ bool CBindchat::ChatDoAutocomplete(bool ShiftPressed) {
 	return pCompletionBind != nullptr;
 }
 
+void CBindchat::WriteLine(const char *pLine)
+{
+	if(!m_BindchatFile || io_write(m_BindchatFile, pLine, str_length(pLine)) != static_cast<unsigned>(str_length(pLine)) || !io_write_newline(m_BindchatFile))
+		return;
+}
 void CBindchat::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
 {
 	CBindchat *pThis = (CBindchat *)pUserData;
+	bool Failed = false;
+	pThis->m_BindchatFile = pThis->m_pStorage->OpenFile(BINDCHAT_FILE, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(!pThis->m_BindchatFile)
+	{
+		dbg_msg("config", "ERROR: opening %s failed", BINDCHAT_FILE);
+		return;
+	}
 
 	for(CBind &Bind : pThis->m_vBinds)
 	{
+		// Default binds do not need to be saved because they will get added on launch
+		if(Bind.m_Default)
+			continue;
+
 		char aBuf[BINDCHAT_MAX_CMD * 2] = "";
 		char *pEnd = aBuf + sizeof(aBuf);
 		char *pDst;
@@ -251,6 +331,14 @@ void CBindchat::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserDa
 		pDst = aBuf + str_length(aBuf);
 		str_escape(&pDst, Bind.m_aCommand, pEnd);
 		str_append(aBuf, "\"");
-		pConfigManager->WriteLine(aBuf);
+		pThis->WriteLine(aBuf);
 	}
+
+	if(io_sync(pThis->m_BindchatFile) != 0)
+		Failed = true;
+	if(io_close(pThis->m_BindchatFile) != 0)
+		Failed = true;
+	pThis->m_BindchatFile = {};
+	if(Failed)
+		dbg_msg("config", "ERROR: writing to %s failed", BINDCHAT_FILE);
 }
