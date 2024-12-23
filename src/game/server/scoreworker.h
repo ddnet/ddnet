@@ -51,6 +51,7 @@ struct CScorePlayerResult : ISqlResult
 			float m_aTimeCp[NUM_CHECKPOINTS];
 			int m_Birthday; // 0 indicates no birthday
 			char m_aRequestedPlayer[MAX_NAME_LENGTH];
+			int m_Points;
 		} m_Info = {};
 		struct
 		{
