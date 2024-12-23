@@ -44,8 +44,15 @@ CRingBufferBase::CItem *CRingBufferBase::MergeBack(CItem *pItem)
 
 void CRingBufferBase::Init(void *pMemory, int Size, int Flags)
 {
-	m_Size = (Size) / sizeof(CItem) * sizeof(CItem);
-	m_pFirst = (CItem *)pMemory;
+	m_Size = Size / sizeof(CItem) * sizeof(CItem);
+	m_pBuffer = static_cast<CItem *>(pMemory);
+	m_Flags = Flags;
+	Clear();
+}
+
+void CRingBufferBase::Clear()
+{
+	m_pFirst = m_pBuffer;
 	m_pFirst->m_pPrev = nullptr;
 	m_pFirst->m_pNext = nullptr;
 	m_pFirst->m_Free = 1;
@@ -53,7 +60,6 @@ void CRingBufferBase::Init(void *pMemory, int Size, int Flags)
 	m_pLast = m_pFirst;
 	m_pProduce = m_pFirst;
 	m_pConsume = m_pFirst;
-	m_Flags = Flags;
 }
 
 void *CRingBufferBase::Allocate(int Size)
