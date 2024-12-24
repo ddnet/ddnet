@@ -64,6 +64,7 @@
 #include "components/tclient/player_indicator.h"
 #include "components/tclient/rainbow.h"
 #include "components/tclient/skinprofiles.h"
+#include "components/tclient/statusbar.h"
 #include "components/tclient/tater.h"
 #include "components/tclient/verify.h"
 #include "components/tclient/warlist.h"
@@ -182,6 +183,7 @@ public:
 
 	// TClient Components
 	CSkinProfiles m_SkinProfiles;
+	CStatusBar m_StatusBar;
 	CBindchat m_Bindchat;
 	CBindWheel m_Bindwheel;
 	CTater m_Tater;

@@ -2418,6 +2418,8 @@ if(CLIENT)
     components/tclient/rainbow.h
     components/tclient/skinprofiles.cpp
     components/tclient/skinprofiles.h
+    components/tclient/statusbar.cpp
+    components/tclient/statusbar.h
     components/tclient/tater.cpp
     components/tclient/tater.h
     components/tclient/verify.cpp
