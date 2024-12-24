@@ -1190,7 +1190,12 @@ void CChat::OnRender()
 	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
 
 	float x = 5.0f;
-	float y = 300.0f - 20.0f * FontSize() / 6.f;
+
+
+	// TClient
+	float y = 300.0f - (20.0f * FontSize() / 6.f + (g_Config.m_ClStatusBar ? g_Config.m_ClStatusBarHeight : 0)); 
+	// float y = 300.0f - 20.0f * FontSize() / 6.f;
+
 	float ScaledFontSize = FontSize() * (8 / 6.f);
 	if(m_Mode != MODE_NONE)
 	{
