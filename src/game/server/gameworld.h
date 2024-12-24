@@ -75,7 +75,7 @@ public:
 	int FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Type);
 
 	/*
-		Function: InterserctCharacters
+		Function: IntersectCharacter
 			Finds the CCharacters that intersects the line. // made for types lasers=1 and doors=0
 
 		Arguments:
@@ -89,6 +89,23 @@ public:
 			Returns a pointer to the closest hit or NULL of there is no intersection.
 	*/
 	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis = nullptr, int CollideWith = -1, const CCharacter *pThisOnly = nullptr);
+
+	/**
+	 * Finds the CEntity that intersects the line.
+	 *
+	 * @see IntersectCharacter
+	 *
+	 * @param Pos0 Start position
+	 * @param Pos1 End position
+	 * @param Radius How for from the line the CCharacter is allowed to be.
+	 * @param Type Type of the entity to intersect.
+	 * @param NewPos Intersection position
+	 * @param pNotThis Entity to ignore intersecting with
+	 *
+	 * @return Pointer to the closest hit or NULL of there is no intersection.
+	 */
+	CEntity *IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis = nullptr, int CollideWith = -1, const CEntity *pThisOnly = nullptr);
+
 	/*
 		Function: ClosestCharacter
 			Finds the closest CCharacter to a specific point.
