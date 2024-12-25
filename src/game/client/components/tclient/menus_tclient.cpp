@@ -248,6 +248,46 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("Visual"), HeadlineFontSize, TEXTALIGN_ML);
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 
+		static std::vector<const char *> s_FontDropDownNames = {};
+		static CUi::SDropDownState s_FontDropDownState;
+		static CScrollRegion s_FontDropDownScrollRegion;
+		s_FontDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_FontDropDownScrollRegion;
+		s_FontDropDownState.m_SelectionPopupContext.m_SpecialFontRenderMode = true;
+		int FontSelectedOld = -1;
+		for(size_t i = 0; i < TextRender()->GetCustomFaces()->size(); ++i)
+		{
+			if(s_FontDropDownNames.size() != TextRender()->GetCustomFaces()->size())
+				s_FontDropDownNames.push_back(TextRender()->GetCustomFaces()->at(i).c_str());
+
+			if(str_find_nocase(g_Config.m_ClCustomFont, TextRender()->GetCustomFaces()->at(i).c_str()))
+				FontSelectedOld = i;
+		}
+		CUIRect FontDropDownRect, FontDirectory;
+		Column.HSplitTop(LineSize, &FontDropDownRect, &Column);
+		FontDropDownRect.VSplitLeft(100.0f, &Label, &FontDropDownRect);
+		FontDropDownRect.VSplitRight(20.0f, &FontDropDownRect, &FontDirectory);
+		FontDropDownRect.VSplitRight(MarginSmall, &FontDropDownRect, nullptr);
+
+		Ui()->DoLabel(&Label, Localize("Custom Font: "), FontSize, TEXTALIGN_ML);
+		const int FontSelectedNew = Ui()->DoDropDown(&FontDropDownRect, FontSelectedOld, s_FontDropDownNames.data(), s_FontDropDownNames.size(), s_FontDropDownState);
+		if(FontSelectedOld != FontSelectedNew)
+		{
+			str_copy(g_Config.m_ClCustomFont, s_FontDropDownNames[FontSelectedNew]);
+			FontSelectedOld = FontSelectedNew;
+			TextRender()->SetCustomFace(g_Config.m_ClCustomFont);
+		}
+
+		CUIRect DirectoryButton;
+		static CButtonContainer s_FontDirectoryId;
+		if(DoButton_FontIcon(&s_FontDirectoryId, FONT_ICON_FOLDER, 0, &FontDirectory, IGraphics::CORNER_ALL))
+		{
+			char aBuf[IO_MAX_PATH_LENGTH];
+			Storage()->CreateFolder("tclient", IStorage::TYPE_ABSOLUTE);
+			Storage()->CreateFolder("tclient/fonts", IStorage::TYPE_ABSOLUTE);
+			Client()->ViewFile("tclient/fonts");
+		}
+
+		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, Localize("Update tee skin faster after being frozen"), &g_Config.m_ClFreezeUpdateFix, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, Localize("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderNameplateSpec, Localize("Hide nameplates in spec"), &g_Config.m_ClRenderNameplateSpec, &Column, LineSize);
@@ -266,37 +306,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			s_WhiteFeet.SetEmptyText("x_ninja");
 			Ui()->DoEditBox(&s_WhiteFeet, &FeetBox, EditBoxFontSize);
 		}
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		static std::vector<const char *> s_FontDropDownNames = {};
-		static CUi::SDropDownState s_FontDropDownState;
-		static CScrollRegion s_FontDropDownScrollRegion;
-		s_FontDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_FontDropDownScrollRegion;
-		s_FontDropDownState.m_SelectionPopupContext.m_SpecialFontRenderMode = true;
-		int FontSelectedOld = -1;
-		for(size_t i = 0; i < TextRender()->GetCustomFaces()->size(); ++i)
-		{
-			if(s_FontDropDownNames.size() != TextRender()->GetCustomFaces()->size())
-				s_FontDropDownNames.push_back(TextRender()->GetCustomFaces()->at(i).c_str());
-
-			if(str_find_nocase(g_Config.m_ClCustomFont, TextRender()->GetCustomFaces()->at(i).c_str()))
-				FontSelectedOld = i;
-		}
-
-		CUIRect FontDropDownRect;
-		Column.HSplitTop(LineSize, &FontDropDownRect, &Column);
-		FontDropDownRect.VSplitLeft(100.0f, &Label, &FontDropDownRect);
-		Ui()->DoLabel(&Label, Localize("Custom Font: "), FontSize, TEXTALIGN_ML);
-		const int FontSelectedNew = Ui()->DoDropDown(&FontDropDownRect, FontSelectedOld, s_FontDropDownNames.data(), s_FontDropDownNames.size(), s_FontDropDownState);
-		if(FontSelectedOld != FontSelectedNew)
-		{
-			str_copy(g_Config.m_ClCustomFont, s_FontDropDownNames[FontSelectedNew]);
-			FontSelectedOld = FontSelectedNew;
-			TextRender()->SetCustomFace(g_Config.m_ClCustomFont);
-		}
-
 		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
-
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 		// ***** Input ***** //
@@ -1352,12 +1362,13 @@ void CMenus::PopupConfirmRemoveWarType()
 
 void CMenus::RenderSettingsInfo(CUIRect MainView)
 {
-	CUIRect LeftView, RightView, Button, Label;
+	CUIRect LeftView, RightView, Button, Label, LowerLeftView;
 	MainView.HSplitTop(MarginSmall, nullptr, &MainView);
 
 	MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
 	LeftView.VSplitLeft(MarginSmall, nullptr, &LeftView);
 	RightView.VSplitRight(MarginSmall, &RightView, nullptr);
+	LeftView.HSplitMid(&LeftView, &LowerLeftView, 0.0f);
 
 	LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
 	Ui()->DoLabel(&Label, Localize("TClient Links"), HeadlineFontSize, TEXTALIGN_ML);
@@ -1379,11 +1390,10 @@ void CMenus::RenderSettingsInfo(CUIRect MainView)
 
 	if(DoButtonLineSize_Menu(&s_GithubButton, Localize("Github"), 0, &ButtonLeft, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 		Client()->ViewLink("https://github.com/sjrc6/TaterClient-ddnet");
-	if(DoButtonLineSize_Menu(&s_SupportButton, Localize("Support"), 0, &ButtonRight, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+	if(DoButtonLineSize_Menu(&s_SupportButton, Localize("Support ♥"), 0, &ButtonRight, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 		Client()->ViewLink("https://ko-fi.com/Totar");
 
-	LeftView.HSplitTop(40.0f, nullptr, &LeftView);
-
+	LeftView = LowerLeftView;
 	LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
 	Ui()->DoLabel(&Label, Localize("Config Files"), HeadlineFontSize, TEXTALIGN_ML);
 	LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
@@ -1395,12 +1405,12 @@ void CMenus::RenderSettingsInfo(CUIRect MainView)
 	Button.VSplitMid(&TClientConfig, &ProfilesFile, MarginSmall);
 
 	static CButtonContainer s_Config, s_Profiles, s_Warlist, s_Chatbinds;
-	if(DoButtonLineSize_Menu(&s_Config, Localize("TClient Config"), 0, &TClientConfig, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+	if(DoButtonLineSize_Menu(&s_Config, Localize("TClient Settings"), 0, &TClientConfig, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, TCONFIG_FILE, aBuf, sizeof(aBuf));
 		Client()->ViewFile(aBuf);
 	}
-	if(DoButtonLineSize_Menu(&s_Profiles, Localize("Profiles File"), 0, &ProfilesFile, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+	if(DoButtonLineSize_Menu(&s_Profiles, Localize("Profiles"), 0, &ProfilesFile, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, PROFILES_FILE, aBuf, sizeof(aBuf));
 		Client()->ViewFile(aBuf);
@@ -1410,12 +1420,12 @@ void CMenus::RenderSettingsInfo(CUIRect MainView)
 	LeftView.HSplitTop(LineSize * 2.0f, &Button, &LeftView);
 	Button.VSplitMid(&WarlistFile, &ChatbindsFile, MarginSmall);
 
-	if(DoButtonLineSize_Menu(&s_Warlist, Localize("Warlist File"), 0, &WarlistFile, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+	if(DoButtonLineSize_Menu(&s_Warlist, Localize("Warlist"), 0, &WarlistFile, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, WARLIST_FILE, aBuf, sizeof(aBuf));
 		Client()->ViewFile(aBuf);
 	}
-	if(DoButtonLineSize_Menu(&s_Chatbinds, Localize("Chatbinds File"), 0, &ChatbindsFile, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
+	if(DoButtonLineSize_Menu(&s_Chatbinds, Localize("Chatbinds"), 0, &ChatbindsFile, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, BINDCHAT_FILE, aBuf, sizeof(aBuf));
 		Client()->ViewFile(aBuf);
