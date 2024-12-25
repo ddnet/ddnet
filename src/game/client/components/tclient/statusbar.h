@@ -96,8 +96,9 @@ public:
 
 	void UpdateStatusBarSize();
 
-
+	bool m_PingActive = false;
 	float m_FrameTimeAverage = 0.0f;
+	int m_PlayerId = 0;
 	// float Width();
 	// void Render();
 	// float Width();

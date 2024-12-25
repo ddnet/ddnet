@@ -2548,17 +2548,17 @@ void CGameClient::OnPredict()
 		}
 		CNetObj_PlayerInput *pInputData = m_PredictedWorld.GetCharacterById(m_Snap.m_LocalClientId)->LatestInput();
 		CNetObj_PlayerInput *pDummyInputData = !pPredDummyChar ? 0 : m_PredictedWorld.GetCharacterById(m_PredictedDummyId)->LatestInput();
-		bool DummyFirst = pInputData && pDummyInputData && pSmoothDummyChar->GetCid() < pSmoothLocalChar->GetCid();
-		if(DummyFirst)
+		bool DummyFirst = pSmoothLocalChar && pSmoothDummyChar && pSmoothDummyChar->GetCid() < pSmoothLocalChar->GetCid();
+		if(DummyFirst && pSmoothDummyChar)
 			pSmoothDummyChar->OnDirectInput(pDummyInputData);
-		if(pInputData)
+		if(pInputData && pSmoothLocalChar)
 			pSmoothLocalChar->OnDirectInput(pInputData);
-		if(pDummyInputData && !DummyFirst)
+		if(pDummyInputData && !DummyFirst && pSmoothDummyChar)
 			pSmoothDummyChar->OnDirectInput(pDummyInputData);
 		m_PredSmoothingWorld.m_GameTick++;
-		if(pInputData)
+		if(pInputData && pSmoothLocalChar)
 			pSmoothLocalChar->OnPredictedInput(pInputData);
-		if(pDummyInputData)
+		if(pDummyInputData && pSmoothDummyChar)
 			pSmoothDummyChar->OnPredictedInput(pDummyInputData);
 		m_PredSmoothingWorld.Tick();
 

@@ -1829,6 +1829,12 @@ set(EXPECTED_DATA
   skins7/x_ninja.json
   skins7/xmas_hat.png
   strong_weak.png
+  tclient/fonts/Cabin-Regular.ttf
+  tclient/fonts/GoogleSans-Regular.ttf
+  tclient/fonts/minecraft_font.ttf
+  tclient/fonts/Montserrat-Regular.ttf
+  tclient/fonts/Nunito-Black.ttf
+  tclient/fonts/Rubik-Regular.ttf
   themes/auto.png
   themes/autumn.png
   themes/autumn_day.map

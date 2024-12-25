@@ -14,6 +14,7 @@ class CTater : public CComponent
 public:
 	CTater();
 	virtual int Sizeof() const override { return sizeof(*this); }
+	virtual void OnInit() override;
 
 	virtual void OnConsoleInit() override;
 };

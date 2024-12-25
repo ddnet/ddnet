@@ -51,11 +51,11 @@ float CStatusBar::AngleWidth()
 }
 void CStatusBar::AngleRender()
 {
-	CNetObj_Character *pCharacter = &m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientId].m_Cur;
+	CNetObj_Character *pCharacter = &m_pClient->m_Snap.m_aCharacters[m_PlayerId].m_Cur;
 	float Angle = 0.0f;
-	if(m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientId].m_HasExtendedDisplayInfo)
+	if(m_pClient->m_Snap.m_aCharacters[m_PlayerId].m_HasExtendedDisplayInfo)
 	{
-		CNetObj_DDNetCharacter *pExtendedData = &m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientId].m_ExtendedData;
+		CNetObj_DDNetCharacter *pExtendedData = &m_pClient->m_Snap.m_aCharacters[m_PlayerId].m_ExtendedData;
 		Angle = atan2f(pExtendedData->m_TargetY, pExtendedData->m_TargetX);
 	}
 	else
@@ -69,17 +69,18 @@ void CStatusBar::AngleRender()
 
 float CStatusBar::PingWidth()
 {
-	if(!m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_LocalClientId])
+	if(!m_pClient->m_Snap.m_apPlayerInfos[m_PlayerId])
 		return 0.0f;
 
 	return TextRender()->TextWidth(m_FontSize, "0000");
 }
 void CStatusBar::PingRender() {
 
-	const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_LocalClientId];
+	const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_apPlayerInfos[m_PlayerId];
 	char aBuf[32];
-	str_format(aBuf, sizeof(aBuf), "%d", GameClient()->Client()->NetClient()->GetLatency());
+	str_format(aBuf, sizeof(aBuf), "%d", pInfo->m_Latency);
 	TextRender()->Text(m_CursorX, m_CursorY, m_FontSize, aBuf);
+	m_PingActive = true;
 }
 
 float CStatusBar::PredictionWidth()
@@ -150,11 +151,19 @@ float CStatusBar::LabelWidth(const char *pLabel) { return 0.0f; }
 
 void CStatusBar::OnRender()
 {
+	m_PingActive = false;
+
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
 	if(!g_Config.m_ClStatusBar || !m_pClient->m_Snap.m_pGameInfoObj)
 		return;
+
+	m_PlayerId = m_pClient->m_Snap.m_LocalClientId;
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+		m_PlayerId = m_pClient->m_Snap.m_SpecInfo.m_SpectatorId;
+
+
 	UpdateStatusBarSize();
 
 	Graphics()->MapScreen(0.0f, 0.0f, m_Width, m_Height);

@@ -88,6 +88,11 @@ void CTater::ConchainRandomColor(IConsole::IResult *pResult, void *pUserData, IC
 	pThis->m_pClient->SendInfo(false);
 }
 
+void CTater::OnInit()
+{
+	TextRender()->SetCustomFace(g_Config.m_ClCustomFont);
+}
+
 void CTater::OnConsoleInit()
 {
 	Console()->Register("tc_random_player", "s[type]", CFGFLAG_CLIENT, ConRandomTee, this, "Randomize player color (0 = all, 1 = body, 2 = feet, 3 = skin, 4 = flag) example: 0011 = randomize skin and flag [number is position] ");

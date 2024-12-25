@@ -165,7 +165,6 @@ int CMenus::DoButtonLineSize_Menu(CButtonContainer *pButtonContainer, const char
 		return 0;
 
 	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect);
-
 }
 
 void CMenus::RenderSettingsTClient(CUIRect MainView)
@@ -194,7 +193,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	for(int Tab = 0; Tab < NUMBER_OF_TCLIENT_TABS; ++Tab)
 	{
 		TabBar.VSplitLeft(TabWidth, &Button, &TabBar);
-		const int Corners = Tab == 0 ? IGraphics::CORNER_L : Tab == NUMBER_OF_TCLIENT_TABS - 1 ? IGraphics::CORNER_R : IGraphics::CORNER_NONE;
+		const int Corners = Tab == 0 ? IGraphics::CORNER_L : Tab == NUMBER_OF_TCLIENT_TABS - 1 ? IGraphics::CORNER_R :
+													 IGraphics::CORNER_NONE;
 		if(DoButton_MenuTab(&s_aPageTabs[Tab], apTabNames[Tab], s_CurCustomTab == Tab, &Button, Corners, nullptr, nullptr, nullptr, nullptr, 4.0f))
 			s_CurCustomTab = Tab;
 	}
@@ -266,6 +266,35 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			s_WhiteFeet.SetEmptyText("x_ninja");
 			Ui()->DoEditBox(&s_WhiteFeet, &FeetBox, EditBoxFontSize);
 		}
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+		static std::vector<const char *> s_FontDropDownNames = {};
+		static CUi::SDropDownState s_FontDropDownState;
+		static CScrollRegion s_FontDropDownScrollRegion;
+		s_FontDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_FontDropDownScrollRegion;
+		s_FontDropDownState.m_SelectionPopupContext.m_SpecialFontRenderMode = true;
+		int FontSelectedOld = -1;
+		for(size_t i = 0; i < TextRender()->GetCustomFaces()->size(); ++i)
+		{
+			if(s_FontDropDownNames.size() != TextRender()->GetCustomFaces()->size())
+				s_FontDropDownNames.push_back(TextRender()->GetCustomFaces()->at(i).c_str());
+
+			if(str_find_nocase(g_Config.m_ClCustomFont, TextRender()->GetCustomFaces()->at(i).c_str()))
+				FontSelectedOld = i;
+		}
+
+		CUIRect FontDropDownRect;
+		Column.HSplitTop(LineSize, &FontDropDownRect, &Column);
+		FontDropDownRect.VSplitLeft(100.0f, &Label, &FontDropDownRect);
+		Ui()->DoLabel(&Label, Localize("Custom Font: "), FontSize, TEXTALIGN_ML);
+		const int FontSelectedNew = Ui()->DoDropDown(&FontDropDownRect, FontSelectedOld, s_FontDropDownNames.data(), s_FontDropDownNames.size(), s_FontDropDownState);
+		if(FontSelectedOld != FontSelectedNew)
+		{
+			str_copy(g_Config.m_ClCustomFont, s_FontDropDownNames[FontSelectedNew]);
+			FontSelectedOld = FontSelectedNew;
+			TextRender()->SetCustomFace(g_Config.m_ClCustomFont);
+		}
+
 		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
@@ -573,8 +602,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Ui()->DoScrollbarOption(&g_Config.m_ClRainbowSpeed, &g_Config.m_ClRainbowSpeed, &Button, Localize("Rainbow speed"), 0, 5000, &CUi::ms_LogarithmicScrollbarScale, 0, "%");
 		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
+
 		// ***** END OF PAGE 1 SETTINGS ***** //
 		RightView = Column;
 
@@ -599,8 +628,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("Kaomoji"), HeadlineFontSize, TEXTALIGN_ML);
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-		auto DoBindchat = [&](CLineInput &LineInput, const char *pLabel, const char *pName, const char *pCommand)
-		{
+		auto DoBindchat = [&](CLineInput &LineInput, const char *pLabel, const char *pName, const char *pCommand) {
 			Column.HSplitTop(LineSize, &Button, &Column);
 			char *BindCommand;
 			int BindIndex = GameClient()->m_Bindchat.GetBindNoDefault(pCommand);
@@ -645,7 +673,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("Warlist"), HeadlineFontSize, TEXTALIGN_ML);
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-
 		static CLineInput s_Warlist1, s_Warlist2, s_Warlist3, s_Warlist4, s_Warlist5, s_Warlist6, s_Warlist7, s_Warlist8;
 		char aBuf[128];
 		char aGroup1Name[MAX_WARLIST_TYPE_LENGTH]; // enemy by default
@@ -676,7 +703,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 		str_format(aBuf, sizeof(aBuf), "Remove %s clan:", aGroup2Name);
 		DoBindchat(s_Warlist8, aBuf, ".delteamclan", "remove_war_clan_index 2");
-
 	}
 
 	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)
@@ -917,7 +943,6 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	static CWarEntry *pSelectedEntry = nullptr;
 	static CWarType *pSelectedType = GameClient()->m_WarList.m_WarTypes[0];
 
-
 	// Filter the list
 	static CLineInputBuffered<128> s_EntriesFilterInput;
 	std::vector<CWarEntry *> vpFilteredEntries;
@@ -1135,7 +1160,6 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
 
-
 	Column2.HSplitBottom(150.0f, nullptr, &Column2);
 
 	Column2.HSplitTop(HeadlineHeight, &Label, &Column2);
@@ -1147,7 +1171,6 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListChat, Localize("Colors in chat"), &g_Config.m_ClWarListChat, &Column2, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListScoreboard, Localize("Colors in scoreboard"), &g_Config.m_ClWarListScoreboard, &Column2, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListShowClan, Localize("Show clan if war"), &g_Config.m_ClWarListShowClan, &Column2, LineSize);
-
 
 	// ======WAR TYPE EDITING======
 
@@ -1397,7 +1420,6 @@ void CMenus::RenderSettingsInfo(CUIRect MainView)
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, BINDCHAT_FILE, aBuf, sizeof(aBuf));
 		Client()->ViewFile(aBuf);
 	}
-
 
 	// =======RIGHT VIEW========
 

@@ -157,7 +157,8 @@ MACRO_CONFIG_COL(ClStatusBarTextColor, tc_statusbar_text_color, 4278190335, CFGF
 MACRO_CONFIG_COL(ClStatusBarAlpha, tc_statusbar_alpha, 75, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Status bar background alpha")
 MACRO_CONFIG_COL(ClStatusBarTextAlpha, tc_statusbar_text_alpha, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Status bar text alpha")
 
-
+// Font
+MACRO_CONFIG_STR(ClCustomFont, tc_custom_font, 255, "Dejavu Sans", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom font face")
 
 
 

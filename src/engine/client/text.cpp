@@ -603,6 +603,8 @@ public:
 			delete[] pTextureData;
 		}
 	}
+	// TClient
+	std::vector<FT_Face> *GetFaces() { return &m_vFtFaces; }
 
 	FT_Face DefaultFace() const
 	{
@@ -959,6 +961,10 @@ class CTextRender : public IEngineTextRender
 
 	std::chrono::nanoseconds m_CursorRenderTime;
 
+	// TClient
+	std::vector<std::string> m_CustomFontFaces;
+	std::vector<std::string> m_DefaultFontFaces;
+
 	int GetFreeTextContainerIndex()
 	{
 		if(m_FirstFreeTextContainerIndex == -1)
@@ -1153,6 +1159,76 @@ public:
 		m_pGraphics = nullptr;
 		m_pStorage = nullptr;
 	}
+	// TClient
+	static int LaziestFileCallback(const char *pFilename, int IsDir, int StorageType, void *pUser)
+	{
+		std::vector<std::string> *pVector = static_cast<std::vector<std::string>*>(pUser);
+		if(IsDir)
+			return 0;
+		pVector->push_back(std::string(pFilename));
+		return 0;
+	}
+
+	// TClient
+	void CheckDefaultFaces()
+	{
+		for(const auto &CurrentFace : *m_pGlyphMap->GetFaces())
+			m_DefaultFontFaces.push_back(std::string(CurrentFace->family_name));
+	}
+	// TClient
+	void UpdateCustomFontList()
+	{
+		std::vector<std::string> m_AllFaces;
+		for(const auto &CurrentFace : *m_pGlyphMap->GetFaces())
+			m_AllFaces.push_back(std::string(CurrentFace->family_name));
+
+		m_CustomFontFaces.clear();
+		m_CustomFontFaces.push_back(std::string("DejaVu Sans"));
+		for(const auto &face : m_AllFaces)
+			if(std::find(m_DefaultFontFaces.begin(), m_DefaultFontFaces.end(), face) == m_DefaultFontFaces.end())
+				m_CustomFontFaces.push_back(face);
+	}
+	// TClient
+	void LoadCustomFonts() 
+	{
+		CheckDefaultFaces();
+		std::vector<std::string> vCustomFonts;
+		Storage()->ListDirectory(IStorage::TYPE_ALL, "tclient/fonts", LaziestFileCallback, &vCustomFonts);
+		std::sort(vCustomFonts.begin(), vCustomFonts.end());
+		for(std::string sFile : vCustomFonts)
+		{
+			char aFontName[IO_MAX_PATH_LENGTH];
+			str_format(aFontName, sizeof(aFontName), "tclient/fonts/%s", sFile.c_str());
+			void *pFontData;
+			unsigned FontDataSize;
+			if(Storage()->ReadFile(aFontName, IStorage::TYPE_ALL, &pFontData, &FontDataSize))
+			{
+				if(LoadFontCollection(aFontName, static_cast<FT_Byte *>(pFontData), (FT_Long)FontDataSize))
+				{
+					m_vpFontData.push_back(pFontData);
+				}
+				else
+				{
+					free(pFontData);
+				}
+			}
+			else
+			{
+				log_error("textrender", "Failed to open/read font file '%s'", aFontName);
+			}
+		}
+		UpdateCustomFontList();
+	}
+	// TClient
+	std::vector<std::string> *GetCustomFaces() override
+	{
+		return &m_CustomFontFaces;
+	}
+	// TClient
+	void SetCustomFace(const char *pFace) override
+	{
+		m_pGlyphMap->SetDefaultFaceByName(pFace);
+	}
 
 	bool LoadFonts() override
 	{
@@ -1239,6 +1315,8 @@ public:
 			log_error("textrender", "Font index malformed: 'default' must be a string");
 			Success = false;
 		}
+		// TClient
+		LoadCustomFonts();
 
 		// extract language variant family names
 		const json_value &Variants = (*pJsonData)["language variants"];
