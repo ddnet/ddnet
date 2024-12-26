@@ -28,6 +28,11 @@ struct CSample
 	{
 		return m_NumFrames / (float)m_Rate;
 	}
+
+	bool IsLoaded() const
+	{
+		return m_pData != nullptr;
+	}
 };
 
 struct CChannel
@@ -68,12 +73,12 @@ class CSound : public IEngineSound
 	SDL_AudioDeviceID m_Device = 0;
 	CLock m_SoundLock;
 
-	CSample m_aSamples[NUM_SAMPLES] = {{0}};
-	int m_FirstFreeSampleIndex = 0;
+	CSample m_aSamples[NUM_SAMPLES] GUARDED_BY(m_SoundLock) = {{0}};
+	int m_FirstFreeSampleIndex GUARDED_BY(m_SoundLock) = 0;
 
-	CVoice m_aVoices[NUM_VOICES] = {{0}};
-	CChannel m_aChannels[NUM_CHANNELS] = {{255, 0}};
-	int m_NextVoice = 0;
+	CVoice m_aVoices[NUM_VOICES] GUARDED_BY(m_SoundLock) = {{0}};
+	CChannel m_aChannels[NUM_CHANNELS] GUARDED_BY(m_SoundLock) = {{255, 0}};
+	int m_NextVoice GUARDED_BY(m_SoundLock) = 0;
 	uint32_t m_MaxFrames = 0;
 
 	// This is not an std::atomic<vec2> as this would require linking with
@@ -88,7 +93,7 @@ class CSound : public IEngineSound
 
 	int *m_pMixBuffer = nullptr;
 
-	CSample *AllocSample();
+	CSample *AllocSample() REQUIRES(!m_SoundLock);
 	void RateConvert(CSample &Sample) const;
 
 	bool DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) const;
@@ -97,7 +102,7 @@ class CSound : public IEngineSound
 	void UpdateVolume();
 
 public:
-	int Init() override;
+	int Init() override REQUIRES(!m_SoundLock);
 	int Update() override;
 	void Shutdown() override REQUIRES(!m_SoundLock);
 
@@ -105,15 +110,15 @@ public:
 
 	int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override REQUIRES(!m_SoundLock);
 	int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override REQUIRES(!m_SoundLock);
-	int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor) override REQUIRES(!m_SoundLock);
-	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override REQUIRES(!m_SoundLock);
+	int LoadOpusFromMem(const void *pData, unsigned DataSize, bool ForceLoad) override REQUIRES(!m_SoundLock);
+	int LoadWVFromMem(const void *pData, unsigned DataSize, bool ForceLoad) override REQUIRES(!m_SoundLock);
 	void UnloadSample(int SampleId) override REQUIRES(!m_SoundLock);
 
-	float GetSampleTotalTime(int SampleId) override; // in s
+	float GetSampleTotalTime(int SampleId) override REQUIRES(!m_SoundLock); // in s
 	float GetSampleCurrentTime(int SampleId) override REQUIRES(!m_SoundLock); // in s
 	void SetSampleCurrentTime(int SampleId, float Time) override REQUIRES(!m_SoundLock);
 
-	void SetChannel(int ChannelId, float Vol, float Pan) override;
+	void SetChannel(int ChannelId, float Vol, float Pan) override REQUIRES(!m_SoundLock);
 	void SetListenerPosition(vec2 Position) override;
 
 	void SetVoiceVolume(CVoiceHandle Voice, float Volume) override REQUIRES(!m_SoundLock);
