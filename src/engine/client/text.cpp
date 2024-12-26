@@ -23,6 +23,19 @@
 
 using namespace std::chrono_literals;
 
+// TClient
+void ReplaceHyphensWithSpaces(char *Str)
+{
+	if(Str == nullptr)
+		return;
+	while(*Str)
+	{
+		if(*Str == '-')
+			*Str = ' ';
+		Str++;
+	}
+}
+
 enum
 {
 	FONT_NAME_SIZE = 128,
@@ -329,6 +342,7 @@ private:
 	std::vector<FT_Face> m_vFallbackFaces;
 	std::vector<FT_Face> m_vFtFaces;
 
+
 	FT_Face GetFaceByName(const char *pFamilyName)
 	{
 		if(pFamilyName == nullptr || pFamilyName[0] == '\0')
@@ -348,6 +362,16 @@ private:
 
 			// Second best match: font face with matching family
 			if(!FamilyNameMatch && str_comp(pFamilyName, CurrentFace->family_name) == 0)
+			{
+				FamilyNameMatch = CurrentFace;
+			}
+
+			// TClient
+			// Third best match: match the fucking font name
+			char aBuf[256];
+			str_copy(aBuf, FT_Get_Postscript_Name(CurrentFace));
+			ReplaceHyphensWithSpaces(aBuf);
+			if(!FamilyNameMatch && str_comp(pFamilyName, aBuf) == 0)
 			{
 				FamilyNameMatch = CurrentFace;
 			}
@@ -1173,14 +1197,24 @@ public:
 	void CheckDefaultFaces()
 	{
 		for(const auto &CurrentFace : *m_pGlyphMap->GetFaces())
-			m_DefaultFontFaces.push_back(std::string(CurrentFace->family_name));
+		{
+			char aBuf[256];
+			str_copy(aBuf, FT_Get_Postscript_Name(CurrentFace));
+			ReplaceHyphensWithSpaces(aBuf);
+			m_DefaultFontFaces.push_back(std::string(aBuf));
+		}
 	}
 	// TClient
 	void UpdateCustomFontList()
 	{
 		std::vector<std::string> m_AllFaces;
 		for(const auto &CurrentFace : *m_pGlyphMap->GetFaces())
-			m_AllFaces.push_back(std::string(CurrentFace->family_name));
+		{
+			char aBuf[256];
+			str_copy(aBuf, FT_Get_Postscript_Name(CurrentFace));
+			ReplaceHyphensWithSpaces(aBuf);
+			m_AllFaces.push_back(std::string(aBuf));
+		}
 
 		m_CustomFontFaces.clear();
 		m_CustomFontFaces.push_back(std::string("DejaVu Sans"));

@@ -275,6 +275,14 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			str_copy(g_Config.m_ClCustomFont, s_FontDropDownNames[FontSelectedNew]);
 			FontSelectedOld = FontSelectedNew;
 			TextRender()->SetCustomFace(g_Config.m_ClCustomFont);
+
+			// Attempt to reset all the containers
+			TextRender()->OnPreWindowResize();
+			GameClient()->OnWindowResize();
+			GameClient()->Editor()->OnWindowResize();
+			TextRender()->OnWindowResize();
+			GameClient()->m_MapImages.SetTextureScale(101);
+			GameClient()->m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
 		}
 
 		CUIRect DirectoryButton;
@@ -292,8 +300,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, Localize("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderNameplateSpec, Localize("Hide nameplates in spec"), &g_Config.m_ClRenderNameplateSpec, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowSkinName, Localize("Show skin names in nameplate"), &g_Config.m_ClShowSkinName, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeStars, Localize("Freeze Stars"), &g_Config.m_ClFreezeStars, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClColorFreeze, Localize("Color Frozen Tee Skins"), &g_Config.m_ClColorFreeze, &Column, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeStars, Localize("Freeze stars"), &g_Config.m_ClFreezeStars, &Column, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClColorFreeze, Localize("Color frozen tee skins"), &g_Config.m_ClColorFreeze, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClHammerRotatesWithCursor, Localize("Make hammer rotate with cursor"), &g_Config.m_ClHammerRotatesWithCursor, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, Localize("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &Column, LineSize);
 		CUIRect FeetBox;
@@ -365,11 +373,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("TClient Anti Ping"), HeadlineFontSize, TEXTALIGN_ML);
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingImproved, Localize("Use new Antiping algorithm"), &g_Config.m_ClAntiPingImproved, &Column, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingImproved, Localize("Use new antiping algorithm"), &g_Config.m_ClAntiPingImproved, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingStableDirection, Localize("Optimistic prediction along stable direction"), &g_Config.m_ClAntiPingStableDirection, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingNevativeBuffer, Localize("Negative stability buffer (for Gores)"), &g_Config.m_ClAntiPingNevativeBuffer, &Column, LineSize);
 		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClAntiPingUncertaintyScale, &g_Config.m_ClAntiPingUncertaintyScale, &Button, Localize("Uncertainty Duration"), 50, 400, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "%");
+		Ui()->DoScrollbarOption(&g_Config.m_ClAntiPingUncertaintyScale, &g_Config.m_ClAntiPingUncertaintyScale, &Button, Localize("Uncertainty duration"), 50, 400, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "%");
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 		// ***** Other ***** //
@@ -388,7 +396,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		CUIRect ButtonVerify, EnableVerifySection;
 		Column.HSplitTop(LineSize, &EnableVerifySection, &Column);
 		EnableVerifySection.VSplitMid(&EnableVerifySection, &ButtonVerify);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoVerify, Localize("Auto Verify"), &g_Config.m_ClAutoVerify, &EnableVerifySection, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoVerify, Localize("Auto verify"), &g_Config.m_ClAutoVerify, &EnableVerifySection, LineSize);
 		static CButtonContainer s_VerifyButton;
 		if(DoButton_Menu(&s_VerifyButton, Localize("Manual Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
 		{
@@ -447,7 +455,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, Localize("Show screen center"), &g_Config.m_ClShowCenterLines, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, Localize("Show Position and angle (Mini debug)"), &g_Config.m_ClMiniDebug, &Column, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, Localize("Show position and angle (mini debug)"), &g_Config.m_ClMiniDebug, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, Localize("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &Column, LineSize);
 
 		Column.HSplitTop(LineSize, &Button, &Column);
@@ -492,13 +500,13 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			CUIRect CheckBoxRect, CheckBoxRect2;
 			Column.HSplitTop(LineSize, &CheckBoxRect, &Column);
 			Column.HSplitTop(LineSize, &CheckBoxRect2, &Column);
-			if(DoButton_CheckBox(&g_Config.m_ClShowFrozenText, Localize("Tees Left Alive Text"), g_Config.m_ClShowFrozenText >= 1, &CheckBoxRect))
+			if(DoButton_CheckBox(&g_Config.m_ClShowFrozenText, Localize("Tees left alive text"), g_Config.m_ClShowFrozenText >= 1, &CheckBoxRect))
 				g_Config.m_ClShowFrozenText = g_Config.m_ClShowFrozenText >= 1 ? 0 : 1;
 
 			if(g_Config.m_ClShowFrozenText)
 			{
 				static int s_CountFrozenText = 0;
-				if(DoButton_CheckBox(&s_CountFrozenText, Localize("Count Frozen Tees"), g_Config.m_ClShowFrozenText == 2, &CheckBoxRect2))
+				if(DoButton_CheckBox(&s_CountFrozenText, Localize("Count frozen tees"), g_Config.m_ClShowFrozenText == 2, &CheckBoxRect2))
 					g_Config.m_ClShowFrozenText = g_Config.m_ClShowFrozenText != 2 ? 2 : 1;
 			}
 		}
@@ -518,16 +526,16 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineTele, Localize("Outline teleporter"), &g_Config.m_ClOutlineTele, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineUnFreeze, Localize("Outline unfreeze & undeep"), &g_Config.m_ClOutlineUnFreeze, &Column, LineSize);
 		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClOutlineWidth, &g_Config.m_ClOutlineWidth, &Button, Localize("Outline Width"), 1, 16);
+		Ui()->DoScrollbarOption(&g_Config.m_ClOutlineWidth, &g_Config.m_ClOutlineWidth, &Button, Localize("Outline width"), 1, 16);
 		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClOutlineAlpha, &g_Config.m_ClOutlineAlpha, &Button, Localize("Outline Alpha"), 0, 100);
+		Ui()->DoScrollbarOption(&g_Config.m_ClOutlineAlpha, &g_Config.m_ClOutlineAlpha, &Button, Localize("Outline alpha"), 0, 100);
 		Column.HSplitTop(LineSize, &Button, &Column);
 		Ui()->DoScrollbarOption(&g_Config.m_ClOutlineAlphaSolid, &g_Config.m_ClOutlineAlphaSolid, &Button, Localize("Outline Alpha (walls)"), 0, 100);
 		static CButtonContainer OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID;
-		DoLine_ColorPicker(&OutlineColorFreezeID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Freeze Outline Color"), &g_Config.m_ClOutlineColorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f), false);
-		DoLine_ColorPicker(&OutlineColorSolidID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Walls Outline Color"), &g_Config.m_ClOutlineColorSolid, ColorRGBA(0.0f, 0.0f, 0.0f), false);
-		DoLine_ColorPicker(&OutlineColorTeleID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Teleporter Outline Color"), &g_Config.m_ClOutlineColorTele, ColorRGBA(0.0f, 0.0f, 0.0f), false);
-		DoLine_ColorPicker(&OutlineColorUnfreezeID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+		DoLine_ColorPicker(&OutlineColorFreezeID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Freeze outline color"), &g_Config.m_ClOutlineColorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+		DoLine_ColorPicker(&OutlineColorSolidID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Walls outline color"), &g_Config.m_ClOutlineColorSolid, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+		DoLine_ColorPicker(&OutlineColorTeleID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Teleporter outline color"), &g_Config.m_ClOutlineColorTele, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+		DoLine_ColorPicker(&OutlineColorUnfreezeID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Unfreeze outline color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f), false);
 		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 		// ***** Ghost Tools ***** //
@@ -540,13 +548,13 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowOthersGhosts, Localize("Show unpredicted ghosts for other players"), &g_Config.m_ClShowOthersGhosts, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSwapGhosts, Localize("Swap ghosts and normal players"), &g_Config.m_ClSwapGhosts, &Column, LineSize);
 		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClPredGhostsAlpha, &g_Config.m_ClPredGhostsAlpha, &Button, Localize("Predicted Alpha"), 0, 100, &CUi::ms_LinearScrollbarScale, 0, "%");
+		Ui()->DoScrollbarOption(&g_Config.m_ClPredGhostsAlpha, &g_Config.m_ClPredGhostsAlpha, &Button, Localize("Predicted alpha"), 0, 100, &CUi::ms_LinearScrollbarScale, 0, "%");
 		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClUnpredGhostsAlpha, &g_Config.m_ClUnpredGhostsAlpha, &Button, Localize("Unpredicted Alpha"), 0, 100, &CUi::ms_LinearScrollbarScale, 0, "%");
+		Ui()->DoScrollbarOption(&g_Config.m_ClUnpredGhostsAlpha, &g_Config.m_ClUnpredGhostsAlpha, &Button, Localize("Unpredicted alpha"), 0, 100, &CUi::ms_LinearScrollbarScale, 0, "%");
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClHideFrozenGhosts, Localize("Hide ghosts of frozen players"), &g_Config.m_ClHideFrozenGhosts, &Column, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderGhostAsCircle, Localize("Render ghosts as circles"), &g_Config.m_ClRenderGhostAsCircle, &Column, LineSize);
 
-		static CKeyInfo Key = CKeyInfo{"Toggle Ghosts Key", "toggle tc_show_others_ghosts 0 1", 0, 0};
+		static CKeyInfo Key = CKeyInfo{"Toggle ghosts key", "toggle tc_show_others_ghosts 0 1", 0, 0};
 		Key.m_ModifierCombination = Key.m_KeyId = 0;
 		for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
 		{
@@ -596,7 +604,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		s_RainbowDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_RainbowDropDownScrollRegion;
 		int RainbowSelectedOld = g_Config.m_ClRainbowMode - 1;
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbow, Localize("Rainbow"), &g_Config.m_ClRainbow, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, Localize("Rainbow Others"), &g_Config.m_ClRainbowOthers, &Column, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, Localize("Rainbow others"), &g_Config.m_ClRainbowOthers, &Column, LineSize);
 		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 		CUIRect DropDownRect;
 		Column.HSplitTop(LineSize, &DropDownRect, &Column);
