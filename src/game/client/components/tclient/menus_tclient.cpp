@@ -285,11 +285,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			GameClient()->m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
 		}
 
-		CUIRect DirectoryButton;
 		static CButtonContainer s_FontDirectoryId;
 		if(DoButton_FontIcon(&s_FontDirectoryId, FONT_ICON_FOLDER, 0, &FontDirectory, IGraphics::CORNER_ALL))
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->CreateFolder("tclient", IStorage::TYPE_ABSOLUTE);
 			Storage()->CreateFolder("tclient/fonts", IStorage::TYPE_ABSOLUTE);
 			Client()->ViewFile("tclient/fonts");

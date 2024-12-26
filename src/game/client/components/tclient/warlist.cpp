@@ -65,7 +65,6 @@ void CWarList::ConRemoveNameIndex(IConsole::IResult *pResult, void *pUserData)
 {
 	int Index = pResult->GetInteger(0);
 	const char *pName = pResult->GetString(1);
-	const char *pReason = pResult->GetString(2);
 	CWarList *pThis = static_cast<CWarList *>(pUserData);
 	pThis->RemoveWarEntryInGame(Index, pName, false);
 }
@@ -73,7 +72,6 @@ void CWarList::ConRemoveClanIndex(IConsole::IResult *pResult, void *pUserData)
 {
 	int Index = pResult->GetInteger(0);
 	const char *pName = pResult->GetString(1);
-	const char *pReason = pResult->GetString(2);
 	CWarList *pThis = static_cast<CWarList *>(pUserData);
 	pThis->RemoveWarEntryInGame(Index, pName, true);
 }
