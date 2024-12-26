@@ -160,7 +160,8 @@ MACRO_CONFIG_COL(ClStatusBarTextAlpha, tc_statusbar_text_alpha, 100, CFGFLAG_CLI
 // Font
 MACRO_CONFIG_STR(ClCustomFont, tc_custom_font, 255, "DejaVu Sans", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom font face")
 
-
+// Flags
+MACRO_CONFIG_INT(ClTClientSettingsTabs, tc_tclient_settings_tabs, 0, 0, 65536, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Bit flags to disable settings tabs")
 
 // AAAAAAA
 MACRO_CONFIG_INT(ClAmIFrozen, EEEfrz, 0, 0, 1, CFGFLAG_CLIENT, "")

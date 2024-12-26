@@ -48,8 +48,9 @@ enum
 {
 	TCLIENT_TAB_SETTINGS = 0,
 	TCLIENT_TAB_BINDWHEEL,
-	TCLIENT_TAB_BINDCHAT,
 	TCLIENT_TAB_WARLIST,
+	TCLIENT_TAB_BINDCHAT,
+	TCLIENT_TAB_STATUSBAR,
 	TCLIENT_TAB_INFO,
 	NUMBER_OF_TCLIENT_TABS
 };
@@ -83,6 +84,18 @@ const float MarginBetweenViews = 30.0f;
 
 const float ColorPickerLabelSize = 13.0f;
 const float ColorPickerLineSpacing = 5.0f;
+
+void SetFlag(int32_t &Flags, int n, bool Value)
+{
+	if(Value)
+		Flags |= (1 << n);
+	else
+		Flags &= ~(1 << n);
+}
+bool IsFlagSet(int32_t Flags, int n)
+{
+	return (Flags & (1 << n)) != 0;
+}
 
 bool CMenus::DoSliderWithScaledValue(const void *pId, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, int Scale, const IScrollbarScale *pScale, unsigned Flags, const char *pSuffix)
 {
@@ -179,19 +192,33 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	static int s_CurCustomTab = 0;
 
 	CUIRect TabBar, Column, LeftView, RightView, Button, Label;
+	int TabCount = NUMBER_OF_TCLIENT_TABS;
+	for(int Tab = 0; Tab < NUMBER_OF_TCLIENT_TABS; ++Tab)
+	{
+		if(IsFlagSet(g_Config.m_ClTClientSettingsTabs, Tab))
+		{
+			TabCount--;
+			if(s_CurCustomTab == Tab)
+				s_CurCustomTab++;
+		}
+	}
 
 	MainView.HSplitTop(LineSize * 1.2f, &TabBar, &MainView);
-	const float TabWidth = TabBar.w / NUMBER_OF_TCLIENT_TABS;
+	const float TabWidth = TabBar.w / TabCount;
 	static CButtonContainer s_aPageTabs[NUMBER_OF_TCLIENT_TABS] = {};
 	const char *apTabNames[] = {
 		Localize("Settings"),
 		Localize("Bindwheel"),
-		Localize("Chat Binds"),
 		Localize("Warlist"),
+		Localize("Chat Binds"),
+		Localize("Status Bar"),
 		Localize("Info")};
 
 	for(int Tab = 0; Tab < NUMBER_OF_TCLIENT_TABS; ++Tab)
 	{
+		if(IsFlagSet(g_Config.m_ClTClientSettingsTabs, Tab))
+			continue;
+
 		TabBar.VSplitLeft(TabWidth, &Button, &TabBar);
 		const int Corners = Tab == 0 ? IGraphics::CORNER_L : Tab == NUMBER_OF_TCLIENT_TABS - 1 ? IGraphics::CORNER_R :
 													 IGraphics::CORNER_NONE;
@@ -909,7 +936,10 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	{
 		RenderSettingsWarList(MainView);
 	}
-
+	if(s_CurCustomTab == TCLIENT_TAB_STATUSBAR)
+	{
+		RenderSettingsStatusBar(MainView);
+	}
 	if(s_CurCustomTab == TCLIENT_TAB_INFO)
 	{
 		RenderSettingsInfo(MainView);
@@ -1493,6 +1523,35 @@ void CMenus::RenderSettingsInfo(CUIRect MainView)
 			Client()->ViewLink("https://github.com/Teero888");
 		RenderDevSkin(TeeRect.Center(), 50.0f, "glow_mermyfox", "mermyfox", true, 0, 0, 0, false, ColorRGBA(1.00f, 1.00f, 1.00f, 1.00f), ColorRGBA(1.00f, 0.02f, 0.13f, 1.00f));
 	}
+
+	RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("Hide Settings Tabs"), HeadlineFontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(MarginSmall, nullptr, &RightView);
+	CUIRect LeftSettings, RightSettings;
+
+	RightView.VSplitMid(&LeftSettings, &RightSettings, MarginSmall);
+
+
+	static int s_ShowSettings = IsFlagSet(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_SETTINGS);
+	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowSettings, Localize("Settings"), &s_ShowSettings, &LeftSettings, LineSize);
+	SetFlag(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_SETTINGS, s_ShowSettings);
+	static int s_ShowBindWheel = IsFlagSet(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_BINDWHEEL);
+	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowBindWheel, Localize("Bindwheel"), &s_ShowBindWheel, &RightSettings, LineSize);
+	SetFlag(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_BINDWHEEL, s_ShowBindWheel);
+	static int s_ShowWarlist = IsFlagSet(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_WARLIST);
+	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowWarlist, Localize("Warlist"), &s_ShowWarlist, &LeftSettings, LineSize);
+	SetFlag(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_WARLIST, s_ShowWarlist);
+	static int s_ShowBindChat = IsFlagSet(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_BINDCHAT);
+	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowBindChat, Localize("Chat Binds"), &s_ShowBindChat, &RightSettings, LineSize);
+	SetFlag(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_BINDCHAT, s_ShowBindChat);
+	static int s_ShowStatusBar = IsFlagSet(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_STATUSBAR);
+	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowStatusBar, Localize("Status Bar"), &s_ShowStatusBar, &LeftSettings, LineSize);
+	SetFlag(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_STATUSBAR, s_ShowStatusBar);
+
+
+
+
+
 }
 
 void CMenus::RenderSettingsProfiles(CUIRect MainView)
@@ -1902,6 +1961,21 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 		Storage()->GetCompletePath(IStorage::TYPE_SAVE, PROFILES_FILE, aTempBuf, sizeof(aTempBuf));
 		Client()->ViewFile(aTempBuf);
 	}
+}
+
+void CMenus::RenderSettingsStatusBar(CUIRect MainView)
+{
+	CUIRect LeftView, RightView, /*Button,*/ Label, LowerLeftView;
+	MainView.HSplitTop(MarginSmall, nullptr, &MainView);
+
+	MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
+	LeftView.VSplitLeft(MarginSmall, nullptr, &LeftView);
+	RightView.VSplitRight(MarginSmall, &RightView, nullptr);
+	LeftView.HSplitMid(&LeftView, &LowerLeftView, 0.0f);
+
+	LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
+	Ui()->DoLabel(&Label, Localize("Status Bar"), HeadlineFontSize, TEXTALIGN_ML);
+	LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 }
 
 void CMenus::RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, const char *pBackupSkin, bool CustomColors, int FeetColor, int BodyColor, int Emote, bool Rainbow, ColorRGBA ColorFeet, ColorRGBA ColorBody)

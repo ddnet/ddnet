@@ -856,6 +856,8 @@ private:
 	void RenderSettingsProfiles(CUIRect MainView);
 	void RenderSettingsWarList(CUIRect MainView);
 	void RenderSettingsInfo(CUIRect MainView);
+	void RenderSettingsStatusBar(CUIRect MainView);
+
 	const CWarType *m_pRemoveWarType = nullptr;
 	void PopupConfirmRemoveWarType();
 	void RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, const char *pBackupSkin, bool CustomColors, int FeetColor, int BodyColor, int Emote, bool Rainbow, 
