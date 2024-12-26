@@ -261,6 +261,8 @@ bool CBindchat::ChatDoAutocomplete(bool ShiftPressed)
 		return false;
 
 	const CBind *pCompletionBind = nullptr;
+	int InitialCompletionChosen = Chat.m_CompletionChosen;
+	int InitialCompletionUsed = Chat.m_CompletionUsed;
 
 	if(ShiftPressed && Chat.m_CompletionUsed)
 		Chat.m_CompletionChosen--;
@@ -269,15 +271,27 @@ bool CBindchat::ChatDoAutocomplete(bool ShiftPressed)
 	Chat.m_CompletionChosen = (Chat.m_CompletionChosen + m_vBinds.size()) % m_vBinds.size(); // size != 0
 
 	Chat.m_CompletionUsed = true;
-	for(const CBind &Bind : m_vBinds)
+	int Index = Chat.m_CompletionChosen;
+	for (int i = 0; i < (int)m_vBinds.size(); i++) 
 	{
-		if(str_startswith_nocase(Bind.m_aName, Chat.m_aCompletionBuffer))
+		int CommandIndex = (Index + i) % m_vBinds.size();
+		if(str_startswith_nocase(m_vBinds.at(CommandIndex).m_aName, Chat.m_aCompletionBuffer))
 		{
-			pCompletionBind = &Bind;
-			Chat.m_CompletionChosen = &Bind - m_vBinds.data();
+			pCompletionBind = &m_vBinds.at(CommandIndex);
+			Chat.m_CompletionChosen = CommandIndex;
 			break;
 		}
+
 	}
+	//for(const CBind &Bind : m_vBinds)
+	//{
+	//	if(str_startswith_nocase(Bind.m_aName, Chat.m_aCompletionBuffer))
+	//	{
+	//		pCompletionBind = &Bind;
+	//		Chat.m_CompletionChosen = &Bind - m_vBinds.data();
+	//		break;
+	//	}
+	//}
 
 	// insert the command
 	if(pCompletionBind)
@@ -295,15 +309,20 @@ bool CBindchat::ChatDoAutocomplete(bool ShiftPressed)
 		// str_next_token(pCompletionBind->m_aCommand, " ", commandBuf, sizeof(commandBuf));
 		// CCommandInfo *pInfo = m_pClient->Console()->GetCommandInfo(commandBuf, CFGFLAG_CLIENT, false);
 		// if(pInfo && pInfo->m_pParams != '\0')
-		const char pSeperator[] = " ";
+		const char *pSeperator = " ";
 		str_append(aBuf, pSeperator);
 
 		// add part after the name
 		str_append(aBuf, Chat.m_Input.GetString() + Chat.m_PlaceholderOffset + Chat.m_PlaceholderLength);
 
-		Chat.m_PlaceholderLength = sizeof(pSeperator) + str_length(pCompletionBind->m_aName) + 1;
+		Chat.m_PlaceholderLength = str_length(pSeperator) + str_length(pCompletionBind->m_aName);
 		Chat.m_Input.Set(aBuf);
 		Chat.m_Input.SetCursorOffset(Chat.m_PlaceholderOffset + Chat.m_PlaceholderLength);
+	}
+	else 
+	{
+		Chat.m_CompletionChosen = InitialCompletionChosen;
+		Chat.m_CompletionUsed = InitialCompletionUsed;
 	}
 
 	return pCompletionBind != nullptr;
