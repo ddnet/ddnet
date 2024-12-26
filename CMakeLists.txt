@@ -1833,10 +1833,10 @@ set(EXPECTED_DATA
   tclient/fonts/GoogleSans-Regular.ttf
   tclient/fonts/Inter_24pt-Regular.ttf
   tclient/fonts/Inter_24pt-SemiBold.ttf
-  tclient/fonts/minecraft_font.ttf
   tclient/fonts/Montserrat-Regular.ttf
   tclient/fonts/Nunito-Black.ttf
   tclient/fonts/Rubik-Regular.ttf
+  tclient/fonts/minecraft_font.ttf
   themes/auto.png
   themes/autumn.png
   themes/autumn_day.map
