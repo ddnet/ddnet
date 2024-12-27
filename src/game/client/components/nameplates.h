@@ -85,7 +85,7 @@ public:
 		m_Clan.Reset();
 		m_WeakStrongId.Reset();
 		
-		//TClient
+		// TClient
 		m_SkinName.Reset();
 		m_Reason.Reset();
 	}
@@ -149,7 +149,7 @@ class CNamePlates : public CComponent
 	friend class CNamePlate::CNamePlateClan;
 	friend class CNamePlate::CNamePlateHookWeakStrongId;
 
-	//TClient
+	// TClient
 	friend class CNamePlate::CNamePlateSkin;
 	friend class CNamePlate::CNamePlateReason;
 
@@ -183,7 +183,7 @@ class CNamePlates : public CComponent
 		int m_HookWeakStrongId;
 		float m_FontSizeHookWeakStrong;
 
-		//TClient
+		// TClient
 		int m_RealClientId;
 		bool m_IsGame = false;
 		bool m_ShowClanWarInName = false;

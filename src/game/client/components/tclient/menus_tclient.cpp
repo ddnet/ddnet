@@ -169,7 +169,7 @@ int CMenus::DoButtonLineSize_Menu(CButtonContainer *pButtonContainer, const char
 
 	pRect->Draw(Color, Corners, Rounding);
 
-	Text.HMargin(Line_Size / 2.0f, &Text);
+	Text.HMargin((Text.h - Line_Size) / 2.0f, &Text);
 	Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
 	Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
 	Ui()->DoLabel(&Text, pText, Text.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
@@ -230,448 +230,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 	if(s_CurCustomTab == TCLIENT_TAB_SETTINGS)
 	{
-		static CScrollRegion s_ScrollRegion;
-		vec2 ScrollOffset(0.0f, 0.0f);
-		CScrollRegionParams ScrollParams;
-		ScrollParams.m_ScrollUnit = 120.0f;
-		ScrollParams.m_Flags = CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH;
-		ScrollParams.m_ScrollbarMargin = 5.0f;
-		s_ScrollRegion.Begin(&MainView, &ScrollOffset, &ScrollParams);
-
-		static std::vector<CUIRect> s_SectionBoxes;
-		static vec2 s_PrevScrollOffset(0.0f, 0.0f);
-
-		MainView.y += ScrollOffset.y;
-
-		MainView.VSplitRight(5.0f, &MainView, nullptr); // Padding for scrollbar
-		MainView.VSplitLeft(5.0f, nullptr, &MainView); // Padding for scrollbar
-
-		MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
-		LeftView.VSplitLeft(MarginSmall, nullptr, &LeftView);
-		RightView.VSplitRight(MarginSmall, &RightView, nullptr);
-
-		// RightView.VSplitRight(10.0f, &RightView, nullptr);
-		for(CUIRect &Section : s_SectionBoxes)
-		{
-			float Padding = MarginBetweenViews * 0.6666f;
-			Section.w += Padding;
-			Section.h += Padding;
-			Section.x -= Padding * 0.5f;
-			Section.y -= Padding * 0.5f;
-			Section.y -= s_PrevScrollOffset.y - ScrollOffset.y;
-			float Shade = 0.0f;
-			Section.Draw(ColorRGBA(Shade, Shade, Shade, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		}
-		s_PrevScrollOffset = ScrollOffset;
-		s_SectionBoxes.clear();
-
-		// ***** LeftView ***** //
-		Column = LeftView;
-
-		// ***** Visual Miscellaneous ***** //
-		Column.HSplitTop(Margin, nullptr, &Column);
-		s_SectionBoxes.push_back(Column);
-		Column.HSplitTop(HeadlineHeight, &Label, &Column);
-		Ui()->DoLabel(&Label, Localize("Visual"), HeadlineFontSize, TEXTALIGN_ML);
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		static std::vector<const char *> s_FontDropDownNames = {};
-		static CUi::SDropDownState s_FontDropDownState;
-		static CScrollRegion s_FontDropDownScrollRegion;
-		s_FontDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_FontDropDownScrollRegion;
-		s_FontDropDownState.m_SelectionPopupContext.m_SpecialFontRenderMode = true;
-		int FontSelectedOld = -1;
-		for(size_t i = 0; i < TextRender()->GetCustomFaces()->size(); ++i)
-		{
-			if(s_FontDropDownNames.size() != TextRender()->GetCustomFaces()->size())
-				s_FontDropDownNames.push_back(TextRender()->GetCustomFaces()->at(i).c_str());
-
-			if(str_find_nocase(g_Config.m_ClCustomFont, TextRender()->GetCustomFaces()->at(i).c_str()))
-				FontSelectedOld = i;
-		}
-		CUIRect FontDropDownRect, FontDirectory;
-		Column.HSplitTop(LineSize, &FontDropDownRect, &Column);
-		FontDropDownRect.VSplitLeft(100.0f, &Label, &FontDropDownRect);
-		FontDropDownRect.VSplitRight(20.0f, &FontDropDownRect, &FontDirectory);
-		FontDropDownRect.VSplitRight(MarginSmall, &FontDropDownRect, nullptr);
-
-		Ui()->DoLabel(&Label, Localize("Custom Font: "), FontSize, TEXTALIGN_ML);
-		const int FontSelectedNew = Ui()->DoDropDown(&FontDropDownRect, FontSelectedOld, s_FontDropDownNames.data(), s_FontDropDownNames.size(), s_FontDropDownState);
-		if(FontSelectedOld != FontSelectedNew)
-		{
-			str_copy(g_Config.m_ClCustomFont, s_FontDropDownNames[FontSelectedNew]);
-			FontSelectedOld = FontSelectedNew;
-			TextRender()->SetCustomFace(g_Config.m_ClCustomFont);
-
-			// Attempt to reset all the containers
-			TextRender()->OnPreWindowResize();
-			GameClient()->OnWindowResize();
-			GameClient()->Editor()->OnWindowResize();
-			TextRender()->OnWindowResize();
-			GameClient()->m_MapImages.SetTextureScale(101);
-			GameClient()->m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
-		}
-
-		static CButtonContainer s_FontDirectoryId;
-		if(DoButton_FontIcon(&s_FontDirectoryId, FONT_ICON_FOLDER, 0, &FontDirectory, IGraphics::CORNER_ALL))
-		{
-			Storage()->CreateFolder("tclient", IStorage::TYPE_ABSOLUTE);
-			Storage()->CreateFolder("tclient/fonts", IStorage::TYPE_ABSOLUTE);
-			Client()->ViewFile("tclient/fonts");
-		}
-
-		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, Localize("Update tee skin faster after being frozen"), &g_Config.m_ClFreezeUpdateFix, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, Localize("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderNameplateSpec, Localize("Hide nameplates in spec"), &g_Config.m_ClRenderNameplateSpec, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowSkinName, Localize("Show skin names in nameplate"), &g_Config.m_ClShowSkinName, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeStars, Localize("Freeze stars"), &g_Config.m_ClFreezeStars, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClColorFreeze, Localize("Color frozen tee skins"), &g_Config.m_ClColorFreeze, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClHammerRotatesWithCursor, Localize("Make hammer rotate with cursor"), &g_Config.m_ClHammerRotatesWithCursor, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, Localize("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &Column, LineSize);
-		CUIRect FeetBox;
-		Column.HSplitTop(LineSize + MarginExtraSmall, &FeetBox, &Column);
-		if(g_Config.m_ClWhiteFeet)
-		{
-			FeetBox.HSplitTop(MarginExtraSmall, nullptr, &FeetBox);
-			FeetBox.VSplitMid(&FeetBox, nullptr);
-			static CLineInput s_WhiteFeet(g_Config.m_ClWhiteFeetSkin, sizeof(g_Config.m_ClWhiteFeetSkin));
-			s_WhiteFeet.SetEmptyText("x_ninja");
-			Ui()->DoEditBox(&s_WhiteFeet, &FeetBox, EditBoxFontSize);
-		}
-		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
-		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-
-		// ***** Input ***** //
-		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
-		s_SectionBoxes.push_back(Column);
-		Column.HSplitTop(HeadlineHeight, &Label, &Column);
-		Ui()->DoLabel(&Label, Localize("Input"), HeadlineFontSize, TEXTALIGN_ML);
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInput, Localize("Fast Inputs (-20ms visual delay)"), &g_Config.m_ClFastInput, &Column, LineSize);
-
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		if(g_Config.m_ClFastInput)
-			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInputOthers, Localize("Extra tick other tees (increases other tees latency, \nmakes dragging slightly easier when using fast input)"), &g_Config.m_ClFastInputOthers, &Column, LineSize);
-		else
-			Column.HSplitTop(LineSize, nullptr, &Column);
-		// A little extra spacing because these are multi line
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClImproveMousePrecision, Localize("Improve mouse precision by scaling sent max distance to 1000"), &g_Config.m_ClImproveMousePrecision, &Column, LineSize);
-		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-
-		// ***** Anti Latency Tools ***** //
-		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
-		s_SectionBoxes.push_back(Column);
-		Column.HSplitTop(HeadlineHeight, &Label, &Column);
-		Ui()->DoLabel(&Label, Localize("Anti Latency Tools"), HeadlineFontSize, TEXTALIGN_ML);
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClPredictionMargin, &g_Config.m_ClPredictionMargin, &Button, Localize("Prediction Margin"), 10, 25, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, Localize("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &Column, LineSize);
-		if(g_Config.m_ClRemoveAnti)
-		{
-			if(g_Config.m_ClUnfreezeLagDelayTicks < g_Config.m_ClUnfreezeLagTicks)
-				g_Config.m_ClUnfreezeLagDelayTicks = g_Config.m_ClUnfreezeLagTicks;
-			Column.HSplitTop(LineSize, &Button, &Column);
-			DoSliderWithScaledValue(&g_Config.m_ClUnfreezeLagTicks, &g_Config.m_ClUnfreezeLagTicks, &Button, Localize("Amount"), 100, 300, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
-			Column.HSplitTop(LineSize, &Button, &Column);
-			DoSliderWithScaledValue(&g_Config.m_ClUnfreezeLagDelayTicks, &g_Config.m_ClUnfreezeLagDelayTicks, &Button, Localize("Delay"), 100, 3000, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
-		}
-		else
-			Column.HSplitTop(LineSize * 2, nullptr, &Column);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClUnpredOthersInFreeze, Localize("Dont predict other players if you are frozen"), &g_Config.m_ClUnpredOthersInFreeze, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPredMarginInFreeze, Localize("Adjust your prediction margin while frozen"), &g_Config.m_ClPredMarginInFreeze, &Column, LineSize);
-		Column.HSplitTop(LineSize, &Button, &Column);
-		if(g_Config.m_ClPredMarginInFreeze)
-			Ui()->DoScrollbarOption(&g_Config.m_ClPredMarginInFreezeAmount, &g_Config.m_ClPredMarginInFreezeAmount, &Button, Localize("Frozen Margin"), 0, 100, &CUi::ms_LinearScrollbarScale, 0, "ms");
-		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-
-		// ***** Improved Anti Ping ***** //
-		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
-		s_SectionBoxes.push_back(Column);
-		Column.HSplitTop(HeadlineHeight, &Label, &Column);
-		Ui()->DoLabel(&Label, Localize("TClient Anti Ping"), HeadlineFontSize, TEXTALIGN_ML);
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingImproved, Localize("Use new antiping algorithm"), &g_Config.m_ClAntiPingImproved, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingStableDirection, Localize("Optimistic prediction along stable direction"), &g_Config.m_ClAntiPingStableDirection, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingNevativeBuffer, Localize("Negative stability buffer (for Gores)"), &g_Config.m_ClAntiPingNevativeBuffer, &Column, LineSize);
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClAntiPingUncertaintyScale, &g_Config.m_ClAntiPingUncertaintyScale, &Button, Localize("Uncertainty duration"), 50, 400, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "%");
-		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-
-		// ***** Other ***** //
-		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
-		s_SectionBoxes.push_back(Column);
-		Column.HSplitTop(HeadlineHeight, &Label, &Column);
-		Ui()->DoLabel(&Label, Localize("Other"), HeadlineFontSize, TEXTALIGN_ML);
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRunOnJoinConsole, Localize("Run cl_run_on_join as console command"), &g_Config.m_ClRunOnJoinConsole, &Column, LineSize);
-		Column.HSplitTop(LineSize, &Button, &Column);
-		if(g_Config.m_ClRunOnJoinConsole)
-		{
-			DoSliderWithScaledValue(&g_Config.m_ClRunOnJoinDelay, &g_Config.m_ClRunOnJoinDelay, &Button, Localize("Delay"), 140, 2000, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
-		}
-		CUIRect ButtonVerify, EnableVerifySection;
-		Column.HSplitTop(LineSize, &EnableVerifySection, &Column);
-		EnableVerifySection.VSplitMid(&EnableVerifySection, &ButtonVerify);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoVerify, Localize("Auto verify"), &g_Config.m_ClAutoVerify, &EnableVerifySection, LineSize);
-		static CButtonContainer s_VerifyButton;
-		if(DoButton_Menu(&s_VerifyButton, Localize("Manual Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
-		{
-			if(!Client()->ViewLink("https://ger10.ddnet.org/"))
-				dbg_msg("menus", "couldn't open link");
-		}
-		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
-		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-
-		// ***** Player Indicator ***** //
-		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
-		s_SectionBoxes.push_back(Column);
-		Column.HSplitTop(HeadlineHeight, &Label, &Column);
-		Ui()->DoLabel(&Label, Localize("Player Indicator"), HeadlineFontSize, TEXTALIGN_ML);
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicator, Localize("Show any enabled Indicators"), &g_Config.m_ClPlayerIndicator, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorHideVisible, Localize("Hide indicator for tees on your screen"), &g_Config.m_ClIndicatorHideVisible, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicatorFreeze, Localize("Show only freeze Players"), &g_Config.m_ClPlayerIndicatorFreeze, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorTeamOnly, Localize("Only show after joining a team"), &g_Config.m_ClIndicatorTeamOnly, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorTees, Localize("Render tiny tees instead of circles"), &g_Config.m_ClIndicatorTees, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListIndicator, Localize("Use warlist groups for indicator"), &g_Config.m_ClWarListIndicator, &Column, LineSize);
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorRadius, &g_Config.m_ClIndicatorRadius, &Button, Localize("Indicator size"), 1, 16);
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorOpacity, &g_Config.m_ClIndicatorOpacity, &Button, Localize("Indicator opacity"), 0, 100);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorVariableDistance, Localize("Change indicator offset based on distance to other tees"), &g_Config.m_ClIndicatorVariableDistance, &Column, LineSize);
-		if(g_Config.m_ClIndicatorVariableDistance)
-		{
-			Column.HSplitTop(LineSize, &Button, &Column);
-			Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorOffset, &g_Config.m_ClIndicatorOffset, &Button, Localize("Indicator min offset"), 16, 200);
-			Column.HSplitTop(LineSize, &Button, &Column);
-			Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorOffsetMax, &g_Config.m_ClIndicatorOffsetMax, &Button, Localize("Indicator max offset"), 16, 200);
-			Column.HSplitTop(LineSize, &Button, &Column);
-			Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorMaxDistance, &g_Config.m_ClIndicatorMaxDistance, &Button, Localize("Indicator max distance"), 500, 7000);
-		}
-		else
-		{
-			Column.HSplitTop(LineSize, &Button, &Column);
-			Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorOffset, &g_Config.m_ClIndicatorOffset, &Button, Localize("Indicator offset"), 16, 200);
-			Column.HSplitTop(LineSize * 2, nullptr, &Column);
-		}
-		if (g_Config.m_ClWarListIndicator) 
-		{
-			char aBuf[128];
-			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListIndicatorAll, Localize("Show all warlist groups"), &g_Config.m_ClWarListIndicatorAll, &Column, LineSize);
-			str_format(aBuf, sizeof(aBuf), "Show %s group", GameClient()->m_WarList.m_WarTypes.at(1)->m_aWarName);
-			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListIndicatorEnemy, aBuf, &g_Config.m_ClWarListIndicatorEnemy, &Column, LineSize);
-			str_format(aBuf, sizeof(aBuf), "Show %s group", GameClient()->m_WarList.m_WarTypes.at(2)->m_aWarName);
-			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListIndicatorTeam, aBuf, &g_Config.m_ClWarListIndicatorTeam, &Column, LineSize);
-		}
-		else
-		{
-			static CButtonContainer IndicatorAliveColorID, IndicatorDeadColorID, IndicatorSavedColorID;
-			DoLine_ColorPicker(&IndicatorAliveColorID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Indicator alive color"), &g_Config.m_ClIndicatorAlive, ColorRGBA(0.0f, 0.0f, 0.0f), false);
-			DoLine_ColorPicker(&IndicatorDeadColorID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Indicator in freeze color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f), false);
-			DoLine_ColorPicker(&IndicatorSavedColorID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Indicator safe color"), &g_Config.m_ClIndicatorSaved, ColorRGBA(0.0f, 0.0f, 0.0f), false);
-		}
-		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-
-		// ***** RightView ***** //
-		LeftView = Column;
-		Column = RightView;
-
-		// ***** HUD ***** //
-		Column.HSplitTop(Margin, nullptr, &Column);
-		s_SectionBoxes.push_back(Column);
-		Column.HSplitTop(HeadlineHeight, &Label, &Column);
-		Ui()->DoLabel(&Label, Localize("HUD"), HeadlineFontSize, TEXTALIGN_ML);
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, Localize("Show screen center"), &g_Config.m_ClShowCenterLines, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, Localize("Show position and angle (mini debug)"), &g_Config.m_ClMiniDebug, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, Localize("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &Column, LineSize);
-
-		Column.HSplitTop(LineSize, &Button, &Column);
-		if(g_Config.m_ClRenderCursorSpec)
-		{
-			Ui()->DoScrollbarOption(&g_Config.m_ClRenderCursorSpecAlpha, &g_Config.m_ClRenderCursorSpecAlpha, &Button, Localize("Spectate cursor alpha"), 0, 100);
-		}
-
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, Localize("Show when you are the last alive"), &g_Config.m_ClNotifyWhenLast, &Column, LineSize);
-		CUIRect NotificationConfig;
-		Column.HSplitTop(LineSize + MarginSmall, &NotificationConfig, &Column);
-		if(g_Config.m_ClNotifyWhenLast)
-		{
-			NotificationConfig.VSplitMid(&Button, &NotificationConfig);
-			static CLineInput s_LastInput(g_Config.m_ClNotifyWhenLastText, sizeof(g_Config.m_ClNotifyWhenLastText));
-			s_LastInput.SetEmptyText(Localize("Last!"));
-			Button.HSplitTop(MarginSmall, nullptr, &Button);
-			Ui()->DoEditBox(&s_LastInput, &Button, EditBoxFontSize);
-			static CButtonContainer s_ClientNotifyWhenLastColor;
-			DoLine_ColorPicker(&s_ClientNotifyWhenLastColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &NotificationConfig, "", &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
-		}
-		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
-		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-
-		// ***** Frozen Tee Display ***** //
-		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
-		s_SectionBoxes.push_back(Column);
-		Column.HSplitTop(HeadlineHeight, &Label, &Column);
-		Ui()->DoLabel(&Label, Localize("Frozen Tee Display"), HeadlineFontSize, TEXTALIGN_ML);
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFrozenHud, Localize("Show frozen tee display"), &g_Config.m_ClShowFrozenHud, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFrozenHudSkins, Localize("Use skins instead of ninja tees"), &g_Config.m_ClShowFrozenHudSkins, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFrozenHudTeamOnly, Localize("Only show after joining a team"), &g_Config.m_ClFrozenHudTeamOnly, &Column, LineSize);
-
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClFrozenMaxRows, &g_Config.m_ClFrozenMaxRows, &Button, Localize("Max Rows"), 1, 6);
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClFrozenHudTeeSize, &g_Config.m_ClFrozenHudTeeSize, &Button, Localize("Tee Size"), 8, 27);
-
-		{
-			CUIRect CheckBoxRect, CheckBoxRect2;
-			Column.HSplitTop(LineSize, &CheckBoxRect, &Column);
-			Column.HSplitTop(LineSize, &CheckBoxRect2, &Column);
-			if(DoButton_CheckBox(&g_Config.m_ClShowFrozenText, Localize("Tees left alive text"), g_Config.m_ClShowFrozenText >= 1, &CheckBoxRect))
-				g_Config.m_ClShowFrozenText = g_Config.m_ClShowFrozenText >= 1 ? 0 : 1;
-
-			if(g_Config.m_ClShowFrozenText)
-			{
-				static int s_CountFrozenText = 0;
-				if(DoButton_CheckBox(&s_CountFrozenText, Localize("Count frozen tees"), g_Config.m_ClShowFrozenText == 2, &CheckBoxRect2))
-					g_Config.m_ClShowFrozenText = g_Config.m_ClShowFrozenText != 2 ? 2 : 1;
-			}
-		}
-		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-
-		// ***** Tile Outlines ***** //
-		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
-		s_SectionBoxes.push_back(Column);
-		Column.HSplitTop(HeadlineHeight, &Label, &Column);
-		Ui()->DoLabel(&Label, Localize("Tile Outlines"), HeadlineFontSize, TEXTALIGN_ML);
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutline, Localize("Show any enabled outlines"), &g_Config.m_ClOutline, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineEntities, Localize("Only show outlines in entities"), &g_Config.m_ClOutlineEntities, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineFreeze, Localize("Outline freeze & deep"), &g_Config.m_ClOutlineFreeze, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineSolid, Localize("Outline walls"), &g_Config.m_ClOutlineSolid, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineTele, Localize("Outline teleporter"), &g_Config.m_ClOutlineTele, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineUnFreeze, Localize("Outline unfreeze & undeep"), &g_Config.m_ClOutlineUnFreeze, &Column, LineSize);
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClOutlineWidth, &g_Config.m_ClOutlineWidth, &Button, Localize("Outline width"), 1, 16);
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClOutlineAlpha, &g_Config.m_ClOutlineAlpha, &Button, Localize("Outline alpha"), 0, 100);
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClOutlineAlphaSolid, &g_Config.m_ClOutlineAlphaSolid, &Button, Localize("Outline Alpha (walls)"), 0, 100);
-		static CButtonContainer OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID;
-		DoLine_ColorPicker(&OutlineColorFreezeID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Freeze outline color"), &g_Config.m_ClOutlineColorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f), false);
-		DoLine_ColorPicker(&OutlineColorSolidID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Walls outline color"), &g_Config.m_ClOutlineColorSolid, ColorRGBA(0.0f, 0.0f, 0.0f), false);
-		DoLine_ColorPicker(&OutlineColorTeleID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Teleporter outline color"), &g_Config.m_ClOutlineColorTele, ColorRGBA(0.0f, 0.0f, 0.0f), false);
-		DoLine_ColorPicker(&OutlineColorUnfreezeID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Unfreeze outline color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f), false);
-		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-
-		// ***** Ghost Tools ***** //
-		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
-		s_SectionBoxes.push_back(Column);
-		Column.HSplitTop(HeadlineHeight, &Label, &Column);
-		Ui()->DoLabel(&Label, Localize("Ghost Tools"), HeadlineFontSize, TEXTALIGN_ML);
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowOthersGhosts, Localize("Show unpredicted ghosts for other players"), &g_Config.m_ClShowOthersGhosts, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSwapGhosts, Localize("Swap ghosts and normal players"), &g_Config.m_ClSwapGhosts, &Column, LineSize);
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClPredGhostsAlpha, &g_Config.m_ClPredGhostsAlpha, &Button, Localize("Predicted alpha"), 0, 100, &CUi::ms_LinearScrollbarScale, 0, "%");
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClUnpredGhostsAlpha, &g_Config.m_ClUnpredGhostsAlpha, &Button, Localize("Unpredicted alpha"), 0, 100, &CUi::ms_LinearScrollbarScale, 0, "%");
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClHideFrozenGhosts, Localize("Hide ghosts of frozen players"), &g_Config.m_ClHideFrozenGhosts, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderGhostAsCircle, Localize("Render ghosts as circles"), &g_Config.m_ClRenderGhostAsCircle, &Column, LineSize);
-
-		static CKeyInfo Key = CKeyInfo{"Toggle ghosts key", "toggle tc_show_others_ghosts 0 1", 0, 0};
-		Key.m_ModifierCombination = Key.m_KeyId = 0;
-		for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
-		{
-			for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
-			{
-				const char *pBind = m_pClient->m_Binds.Get(KeyId, Mod);
-				if(!pBind[0])
-					continue;
-
-				if(str_comp(pBind, Key.m_pCommand) == 0)
-				{
-					Key.m_KeyId = KeyId;
-					Key.m_ModifierCombination = Mod;
-					break;
-				}
-			}
-		}
-
-		CUIRect KeyButton, KeyLabel;
-		Column.HSplitTop(LineSize, &KeyButton, &Column);
-		KeyButton.VSplitMid(&KeyLabel, &KeyButton);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize(Key.m_pName));
-		Ui()->DoLabel(&KeyLabel, aBuf, 12.0f, TEXTALIGN_ML);
-		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
-		int NewId = DoKeyReader(&Key, &KeyButton, OldId, OldModifierCombination, &NewModifierCombination);
-		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
-		{
-			if(OldId != 0 || NewId == 0)
-				m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
-			if(NewId != 0)
-				m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
-		}
-		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
-		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-
-		// ***** Rainbow ***** //
-		Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
-		s_SectionBoxes.push_back(Column);
-		Column.HSplitTop(HeadlineHeight, &Label, &Column);
-		Ui()->DoLabel(&Label, Localize("Rainbow"), HeadlineFontSize, TEXTALIGN_ML);
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		static std::vector<const char *> s_DropDownNames = {Localize("Rainbow"), Localize("Pulse"), Localize("Black"), Localize("Random")};
-		static CUi::SDropDownState s_RainbowDropDownState;
-		static CScrollRegion s_RainbowDropDownScrollRegion;
-		s_RainbowDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_RainbowDropDownScrollRegion;
-		int RainbowSelectedOld = g_Config.m_ClRainbowMode - 1;
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbow, Localize("Rainbow"), &g_Config.m_ClRainbow, &Column, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, Localize("Rainbow others"), &g_Config.m_ClRainbowOthers, &Column, LineSize);
-		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
-		CUIRect DropDownRect;
-		Column.HSplitTop(LineSize, &DropDownRect, &Column);
-		const int RainbowSelectedNew = Ui()->DoDropDown(&DropDownRect, RainbowSelectedOld, s_DropDownNames.data(), s_DropDownNames.size(), s_RainbowDropDownState);
-		if(RainbowSelectedOld != RainbowSelectedNew)
-		{
-			g_Config.m_ClRainbowMode = RainbowSelectedNew + 1;
-			RainbowSelectedOld = RainbowSelectedNew;
-			dbg_msg("rainbow", "rainbow mode changed to %d", g_Config.m_ClRainbowMode);
-		}
-		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
-		Column.HSplitTop(LineSize, &Button, &Column);
-		Ui()->DoScrollbarOption(&g_Config.m_ClRainbowSpeed, &g_Config.m_ClRainbowSpeed, &Button, Localize("Rainbow speed"), 0, 5000, &CUi::ms_LogarithmicScrollbarScale, 0, "%");
-		Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
-		s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
-		Column.HSplitTop(MarginSmall, nullptr, &Column);
-
-		// ***** END OF PAGE 1 SETTINGS ***** //
-		RightView = Column;
-
-		// Scroll
-		CUIRect ScrollRegion;
-		ScrollRegion.x = MainView.x;
-		ScrollRegion.y = maximum(LeftView.y, RightView.y) + MarginSmall * 2.0f;
-		ScrollRegion.w = MainView.w;
-		ScrollRegion.h = 0.0f;
-		s_ScrollRegion.AddRect(ScrollRegion);
-		s_ScrollRegion.End();
+		RenderSettingsTClientSettngs(MainView);
 	}
 
 	if(s_CurCustomTab == TCLIENT_TAB_BINDCHAT)
@@ -958,6 +517,454 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 	{
 		RenderSettingsInfo(MainView);
 	}
+}
+
+void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
+{
+	CUIRect Column, LeftView, RightView, Button, Label;
+
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollUnit = 120.0f;
+	ScrollParams.m_Flags = CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH;
+	ScrollParams.m_ScrollbarMargin = 5.0f;
+	s_ScrollRegion.Begin(&MainView, &ScrollOffset, &ScrollParams);
+
+	static std::vector<CUIRect> s_SectionBoxes;
+	static vec2 s_PrevScrollOffset(0.0f, 0.0f);
+
+	MainView.y += ScrollOffset.y;
+
+	MainView.VSplitRight(5.0f, &MainView, nullptr); // Padding for scrollbar
+	MainView.VSplitLeft(5.0f, nullptr, &MainView); // Padding for scrollbar
+
+	MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
+	LeftView.VSplitLeft(MarginSmall, nullptr, &LeftView);
+	RightView.VSplitRight(MarginSmall, &RightView, nullptr);
+
+	// RightView.VSplitRight(10.0f, &RightView, nullptr);
+	for(CUIRect &Section : s_SectionBoxes)
+	{
+		float Padding = MarginBetweenViews * 0.6666f;
+		Section.w += Padding;
+		Section.h += Padding;
+		Section.x -= Padding * 0.5f;
+		Section.y -= Padding * 0.5f;
+		Section.y -= s_PrevScrollOffset.y - ScrollOffset.y;
+		float Shade = 0.0f;
+		Section.Draw(ColorRGBA(Shade, Shade, Shade, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+	}
+	s_PrevScrollOffset = ScrollOffset;
+	s_SectionBoxes.clear();
+
+	// ***** LeftView ***** //
+	Column = LeftView;
+
+	// ***** Visual Miscellaneous ***** //
+	Column.HSplitTop(Margin, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("Visual"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	static std::vector<const char *> s_FontDropDownNames = {};
+	static CUi::SDropDownState s_FontDropDownState;
+	static CScrollRegion s_FontDropDownScrollRegion;
+	s_FontDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_FontDropDownScrollRegion;
+	s_FontDropDownState.m_SelectionPopupContext.m_SpecialFontRenderMode = true;
+	int FontSelectedOld = -1;
+	for(size_t i = 0; i < TextRender()->GetCustomFaces()->size(); ++i)
+	{
+		if(s_FontDropDownNames.size() != TextRender()->GetCustomFaces()->size())
+			s_FontDropDownNames.push_back(TextRender()->GetCustomFaces()->at(i).c_str());
+
+		if(str_find_nocase(g_Config.m_ClCustomFont, TextRender()->GetCustomFaces()->at(i).c_str()))
+			FontSelectedOld = i;
+	}
+	CUIRect FontDropDownRect, FontDirectory;
+	Column.HSplitTop(LineSize, &FontDropDownRect, &Column);
+	FontDropDownRect.VSplitLeft(100.0f, &Label, &FontDropDownRect);
+	FontDropDownRect.VSplitRight(20.0f, &FontDropDownRect, &FontDirectory);
+	FontDropDownRect.VSplitRight(MarginSmall, &FontDropDownRect, nullptr);
+
+	Ui()->DoLabel(&Label, Localize("Custom Font: "), FontSize, TEXTALIGN_ML);
+	const int FontSelectedNew = Ui()->DoDropDown(&FontDropDownRect, FontSelectedOld, s_FontDropDownNames.data(), s_FontDropDownNames.size(), s_FontDropDownState);
+	if(FontSelectedOld != FontSelectedNew)
+	{
+		str_copy(g_Config.m_ClCustomFont, s_FontDropDownNames[FontSelectedNew]);
+		FontSelectedOld = FontSelectedNew;
+		TextRender()->SetCustomFace(g_Config.m_ClCustomFont);
+
+		// Attempt to reset all the containers
+		TextRender()->OnPreWindowResize();
+		GameClient()->OnWindowResize();
+		GameClient()->Editor()->OnWindowResize();
+		TextRender()->OnWindowResize();
+		GameClient()->m_MapImages.SetTextureScale(101);
+		GameClient()->m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
+	}
+
+	static CButtonContainer s_FontDirectoryId;
+	if(DoButton_FontIcon(&s_FontDirectoryId, FONT_ICON_FOLDER, 0, &FontDirectory, IGraphics::CORNER_ALL))
+	{
+		Storage()->CreateFolder("tclient", IStorage::TYPE_ABSOLUTE);
+		Storage()->CreateFolder("tclient/fonts", IStorage::TYPE_ABSOLUTE);
+		Client()->ViewFile("tclient/fonts");
+	}
+
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeUpdateFix, Localize("Update tee skin faster after being frozen"), &g_Config.m_ClFreezeUpdateFix, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, Localize("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderNameplateSpec, Localize("Hide nameplates in spec"), &g_Config.m_ClRenderNameplateSpec, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowSkinName, Localize("Show skin names in nameplate"), &g_Config.m_ClShowSkinName, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFreezeStars, Localize("Freeze stars"), &g_Config.m_ClFreezeStars, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClColorFreeze, Localize("Color frozen tee skins"), &g_Config.m_ClColorFreeze, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClHammerRotatesWithCursor, Localize("Make hammer rotate with cursor"), &g_Config.m_ClHammerRotatesWithCursor, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, Localize("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &Column, LineSize);
+	CUIRect FeetBox;
+	Column.HSplitTop(LineSize + MarginExtraSmall, &FeetBox, &Column);
+	if(g_Config.m_ClWhiteFeet)
+	{
+		FeetBox.HSplitTop(MarginExtraSmall, nullptr, &FeetBox);
+		FeetBox.VSplitMid(&FeetBox, nullptr);
+		static CLineInput s_WhiteFeet(g_Config.m_ClWhiteFeetSkin, sizeof(g_Config.m_ClWhiteFeetSkin));
+		s_WhiteFeet.SetEmptyText("x_ninja");
+		Ui()->DoEditBox(&s_WhiteFeet, &FeetBox, EditBoxFontSize);
+	}
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
+	// ***** Input ***** //
+	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("Input"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInput, Localize("Fast Inputs (-20ms visual delay)"), &g_Config.m_ClFastInput, &Column, LineSize);
+
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+	if(g_Config.m_ClFastInput)
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFastInputOthers, Localize("Extra tick other tees (increases other tees latency, \nmakes dragging slightly easier when using fast input)"), &g_Config.m_ClFastInputOthers, &Column, LineSize);
+	else
+		Column.HSplitTop(LineSize, nullptr, &Column);
+	// A little extra spacing because these are multi line
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClImproveMousePrecision, Localize("Improve mouse precision by scaling sent max distance to 1000"), &g_Config.m_ClImproveMousePrecision, &Column, LineSize);
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
+	// ***** Anti Latency Tools ***** //
+	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("Anti Latency Tools"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClPredictionMargin, &g_Config.m_ClPredictionMargin, &Button, Localize("Prediction Margin"), 10, 25, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, Localize("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &Column, LineSize);
+	if(g_Config.m_ClRemoveAnti)
+	{
+		if(g_Config.m_ClUnfreezeLagDelayTicks < g_Config.m_ClUnfreezeLagTicks)
+			g_Config.m_ClUnfreezeLagDelayTicks = g_Config.m_ClUnfreezeLagTicks;
+		Column.HSplitTop(LineSize, &Button, &Column);
+		DoSliderWithScaledValue(&g_Config.m_ClUnfreezeLagTicks, &g_Config.m_ClUnfreezeLagTicks, &Button, Localize("Amount"), 100, 300, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
+		Column.HSplitTop(LineSize, &Button, &Column);
+		DoSliderWithScaledValue(&g_Config.m_ClUnfreezeLagDelayTicks, &g_Config.m_ClUnfreezeLagDelayTicks, &Button, Localize("Delay"), 100, 3000, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
+	}
+	else
+		Column.HSplitTop(LineSize * 2, nullptr, &Column);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClUnpredOthersInFreeze, Localize("Dont predict other players if you are frozen"), &g_Config.m_ClUnpredOthersInFreeze, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPredMarginInFreeze, Localize("Adjust your prediction margin while frozen"), &g_Config.m_ClPredMarginInFreeze, &Column, LineSize);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	if(g_Config.m_ClPredMarginInFreeze)
+		Ui()->DoScrollbarOption(&g_Config.m_ClPredMarginInFreezeAmount, &g_Config.m_ClPredMarginInFreezeAmount, &Button, Localize("Frozen Margin"), 0, 100, &CUi::ms_LinearScrollbarScale, 0, "ms");
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
+	// ***** Improved Anti Ping ***** //
+	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("TClient Anti Ping"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingImproved, Localize("Use new antiping algorithm"), &g_Config.m_ClAntiPingImproved, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingStableDirection, Localize("Optimistic prediction along stable direction"), &g_Config.m_ClAntiPingStableDirection, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingNevativeBuffer, Localize("Negative stability buffer (for Gores)"), &g_Config.m_ClAntiPingNevativeBuffer, &Column, LineSize);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClAntiPingUncertaintyScale, &g_Config.m_ClAntiPingUncertaintyScale, &Button, Localize("Uncertainty duration"), 50, 400, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "%");
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
+	// ***** Other ***** //
+	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("Other"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRunOnJoinConsole, Localize("Run cl_run_on_join as console command"), &g_Config.m_ClRunOnJoinConsole, &Column, LineSize);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	if(g_Config.m_ClRunOnJoinConsole)
+	{
+		DoSliderWithScaledValue(&g_Config.m_ClRunOnJoinDelay, &g_Config.m_ClRunOnJoinDelay, &Button, Localize("Delay"), 140, 2000, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
+	}
+	CUIRect ButtonVerify, EnableVerifySection;
+	Column.HSplitTop(LineSize, &EnableVerifySection, &Column);
+	EnableVerifySection.VSplitMid(&EnableVerifySection, &ButtonVerify);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoVerify, Localize("Auto verify"), &g_Config.m_ClAutoVerify, &EnableVerifySection, LineSize);
+	static CButtonContainer s_VerifyButton;
+	if(DoButton_Menu(&s_VerifyButton, Localize("Manual Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
+	{
+		if(!Client()->ViewLink("https://ger10.ddnet.org/"))
+			dbg_msg("menus", "couldn't open link");
+	}
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
+	// ***** Player Indicator ***** //
+	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("Player Indicator"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicator, Localize("Show any enabled Indicators"), &g_Config.m_ClPlayerIndicator, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorHideVisible, Localize("Hide indicator for tees on your screen"), &g_Config.m_ClIndicatorHideVisible, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPlayerIndicatorFreeze, Localize("Show only freeze Players"), &g_Config.m_ClPlayerIndicatorFreeze, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorTeamOnly, Localize("Only show after joining a team"), &g_Config.m_ClIndicatorTeamOnly, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorTees, Localize("Render tiny tees instead of circles"), &g_Config.m_ClIndicatorTees, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListIndicator, Localize("Use warlist groups for indicator"), &g_Config.m_ClWarListIndicator, &Column, LineSize);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorRadius, &g_Config.m_ClIndicatorRadius, &Button, Localize("Indicator size"), 1, 16);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorOpacity, &g_Config.m_ClIndicatorOpacity, &Button, Localize("Indicator opacity"), 0, 100);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClIndicatorVariableDistance, Localize("Change indicator offset based on distance to other tees"), &g_Config.m_ClIndicatorVariableDistance, &Column, LineSize);
+	if(g_Config.m_ClIndicatorVariableDistance)
+	{
+		Column.HSplitTop(LineSize, &Button, &Column);
+		Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorOffset, &g_Config.m_ClIndicatorOffset, &Button, Localize("Indicator min offset"), 16, 200);
+		Column.HSplitTop(LineSize, &Button, &Column);
+		Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorOffsetMax, &g_Config.m_ClIndicatorOffsetMax, &Button, Localize("Indicator max offset"), 16, 200);
+		Column.HSplitTop(LineSize, &Button, &Column);
+		Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorMaxDistance, &g_Config.m_ClIndicatorMaxDistance, &Button, Localize("Indicator max distance"), 500, 7000);
+	}
+	else
+	{
+		Column.HSplitTop(LineSize, &Button, &Column);
+		Ui()->DoScrollbarOption(&g_Config.m_ClIndicatorOffset, &g_Config.m_ClIndicatorOffset, &Button, Localize("Indicator offset"), 16, 200);
+		Column.HSplitTop(LineSize * 2, nullptr, &Column);
+	}
+	if(g_Config.m_ClWarListIndicator)
+	{
+		char aBuf[128];
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListIndicatorAll, Localize("Show all warlist groups"), &g_Config.m_ClWarListIndicatorAll, &Column, LineSize);
+		str_format(aBuf, sizeof(aBuf), "Show %s group", GameClient()->m_WarList.m_WarTypes.at(1)->m_aWarName);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListIndicatorEnemy, aBuf, &g_Config.m_ClWarListIndicatorEnemy, &Column, LineSize);
+		str_format(aBuf, sizeof(aBuf), "Show %s group", GameClient()->m_WarList.m_WarTypes.at(2)->m_aWarName);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListIndicatorTeam, aBuf, &g_Config.m_ClWarListIndicatorTeam, &Column, LineSize);
+	}
+	else
+	{
+		static CButtonContainer IndicatorAliveColorID, IndicatorDeadColorID, IndicatorSavedColorID;
+		DoLine_ColorPicker(&IndicatorAliveColorID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Indicator alive color"), &g_Config.m_ClIndicatorAlive, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+		DoLine_ColorPicker(&IndicatorDeadColorID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Indicator in freeze color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+		DoLine_ColorPicker(&IndicatorSavedColorID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Indicator safe color"), &g_Config.m_ClIndicatorSaved, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+	}
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
+	// ***** RightView ***** //
+	LeftView = Column;
+	Column = RightView;
+
+	// ***** HUD ***** //
+	Column.HSplitTop(Margin, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("HUD"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, Localize("Show screen center"), &g_Config.m_ClShowCenterLines, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, Localize("Show position and angle (mini debug)"), &g_Config.m_ClMiniDebug, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, Localize("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &Column, LineSize);
+
+	Column.HSplitTop(LineSize, &Button, &Column);
+	if(g_Config.m_ClRenderCursorSpec)
+	{
+		Ui()->DoScrollbarOption(&g_Config.m_ClRenderCursorSpecAlpha, &g_Config.m_ClRenderCursorSpecAlpha, &Button, Localize("Spectate cursor alpha"), 0, 100);
+	}
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, Localize("Show when you are the last alive"), &g_Config.m_ClNotifyWhenLast, &Column, LineSize);
+	CUIRect NotificationConfig;
+	Column.HSplitTop(LineSize + MarginSmall, &NotificationConfig, &Column);
+	if(g_Config.m_ClNotifyWhenLast)
+	{
+		NotificationConfig.VSplitMid(&Button, &NotificationConfig);
+		static CLineInput s_LastInput(g_Config.m_ClNotifyWhenLastText, sizeof(g_Config.m_ClNotifyWhenLastText));
+		s_LastInput.SetEmptyText(Localize("Last!"));
+		Button.HSplitTop(MarginSmall, nullptr, &Button);
+		Ui()->DoEditBox(&s_LastInput, &Button, EditBoxFontSize);
+		static CButtonContainer s_ClientNotifyWhenLastColor;
+		DoLine_ColorPicker(&s_ClientNotifyWhenLastColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &NotificationConfig, "", &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+	}
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
+	// ***** Frozen Tee Display ***** //
+	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("Frozen Tee Display"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFrozenHud, Localize("Show frozen tee display"), &g_Config.m_ClShowFrozenHud, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFrozenHudSkins, Localize("Use skins instead of ninja tees"), &g_Config.m_ClShowFrozenHudSkins, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClFrozenHudTeamOnly, Localize("Only show after joining a team"), &g_Config.m_ClFrozenHudTeamOnly, &Column, LineSize);
+
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClFrozenMaxRows, &g_Config.m_ClFrozenMaxRows, &Button, Localize("Max Rows"), 1, 6);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClFrozenHudTeeSize, &g_Config.m_ClFrozenHudTeeSize, &Button, Localize("Tee Size"), 8, 27);
+
+	{
+		CUIRect CheckBoxRect, CheckBoxRect2;
+		Column.HSplitTop(LineSize, &CheckBoxRect, &Column);
+		Column.HSplitTop(LineSize, &CheckBoxRect2, &Column);
+		if(DoButton_CheckBox(&g_Config.m_ClShowFrozenText, Localize("Tees left alive text"), g_Config.m_ClShowFrozenText >= 1, &CheckBoxRect))
+			g_Config.m_ClShowFrozenText = g_Config.m_ClShowFrozenText >= 1 ? 0 : 1;
+
+		if(g_Config.m_ClShowFrozenText)
+		{
+			static int s_CountFrozenText = 0;
+			if(DoButton_CheckBox(&s_CountFrozenText, Localize("Count frozen tees"), g_Config.m_ClShowFrozenText == 2, &CheckBoxRect2))
+				g_Config.m_ClShowFrozenText = g_Config.m_ClShowFrozenText != 2 ? 2 : 1;
+		}
+	}
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
+	// ***** Tile Outlines ***** //
+	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("Tile Outlines"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutline, Localize("Show any enabled outlines"), &g_Config.m_ClOutline, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineEntities, Localize("Only show outlines in entities"), &g_Config.m_ClOutlineEntities, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineFreeze, Localize("Outline freeze & deep"), &g_Config.m_ClOutlineFreeze, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineSolid, Localize("Outline walls"), &g_Config.m_ClOutlineSolid, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineTele, Localize("Outline teleporter"), &g_Config.m_ClOutlineTele, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClOutlineUnFreeze, Localize("Outline unfreeze & undeep"), &g_Config.m_ClOutlineUnFreeze, &Column, LineSize);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClOutlineWidth, &g_Config.m_ClOutlineWidth, &Button, Localize("Outline width"), 1, 16);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClOutlineAlpha, &g_Config.m_ClOutlineAlpha, &Button, Localize("Outline alpha"), 0, 100);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClOutlineAlphaSolid, &g_Config.m_ClOutlineAlphaSolid, &Button, Localize("Outline Alpha (walls)"), 0, 100);
+	static CButtonContainer OutlineColorFreezeID, OutlineColorSolidID, OutlineColorTeleID, OutlineColorUnfreezeID;
+	DoLine_ColorPicker(&OutlineColorFreezeID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Freeze outline color"), &g_Config.m_ClOutlineColorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+	DoLine_ColorPicker(&OutlineColorSolidID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Walls outline color"), &g_Config.m_ClOutlineColorSolid, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+	DoLine_ColorPicker(&OutlineColorTeleID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Teleporter outline color"), &g_Config.m_ClOutlineColorTele, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+	DoLine_ColorPicker(&OutlineColorUnfreezeID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Unfreeze outline color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
+	// ***** Ghost Tools ***** //
+	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("Ghost Tools"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowOthersGhosts, Localize("Show unpredicted ghosts for other players"), &g_Config.m_ClShowOthersGhosts, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSwapGhosts, Localize("Swap ghosts and normal players"), &g_Config.m_ClSwapGhosts, &Column, LineSize);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClPredGhostsAlpha, &g_Config.m_ClPredGhostsAlpha, &Button, Localize("Predicted alpha"), 0, 100, &CUi::ms_LinearScrollbarScale, 0, "%");
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClUnpredGhostsAlpha, &g_Config.m_ClUnpredGhostsAlpha, &Button, Localize("Unpredicted alpha"), 0, 100, &CUi::ms_LinearScrollbarScale, 0, "%");
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClHideFrozenGhosts, Localize("Hide ghosts of frozen players"), &g_Config.m_ClHideFrozenGhosts, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderGhostAsCircle, Localize("Render ghosts as circles"), &g_Config.m_ClRenderGhostAsCircle, &Column, LineSize);
+
+	static CKeyInfo Key = CKeyInfo{"Toggle ghosts key", "toggle tc_show_others_ghosts 0 1", 0, 0};
+	Key.m_ModifierCombination = Key.m_KeyId = 0;
+	for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
+	{
+		for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+		{
+			const char *pBind = m_pClient->m_Binds.Get(KeyId, Mod);
+			if(!pBind[0])
+				continue;
+
+			if(str_comp(pBind, Key.m_pCommand) == 0)
+			{
+				Key.m_KeyId = KeyId;
+				Key.m_ModifierCombination = Mod;
+				break;
+			}
+		}
+	}
+
+	CUIRect KeyButton, KeyLabel;
+	Column.HSplitTop(LineSize, &KeyButton, &Column);
+	KeyButton.VSplitMid(&KeyLabel, &KeyButton);
+	char aBuf[64];
+	str_format(aBuf, sizeof(aBuf), "%s:", Localize(Key.m_pName));
+	Ui()->DoLabel(&KeyLabel, aBuf, 12.0f, TEXTALIGN_ML);
+	int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
+	int NewId = DoKeyReader(&Key, &KeyButton, OldId, OldModifierCombination, &NewModifierCombination);
+	if(NewId != OldId || NewModifierCombination != OldModifierCombination)
+	{
+		if(OldId != 0 || NewId == 0)
+			m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
+		if(NewId != 0)
+			m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
+	}
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
+	// ***** Rainbow ***** //
+	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("Rainbow"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	static std::vector<const char *> s_DropDownNames = {Localize("Rainbow"), Localize("Pulse"), Localize("Black"), Localize("Random")};
+	static CUi::SDropDownState s_RainbowDropDownState;
+	static CScrollRegion s_RainbowDropDownScrollRegion;
+	s_RainbowDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_RainbowDropDownScrollRegion;
+	int RainbowSelectedOld = g_Config.m_ClRainbowMode - 1;
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbow, Localize("Rainbow"), &g_Config.m_ClRainbow, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, Localize("Rainbow others"), &g_Config.m_ClRainbowOthers, &Column, LineSize);
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	CUIRect DropDownRect;
+	Column.HSplitTop(LineSize, &DropDownRect, &Column);
+	const int RainbowSelectedNew = Ui()->DoDropDown(&DropDownRect, RainbowSelectedOld, s_DropDownNames.data(), s_DropDownNames.size(), s_RainbowDropDownState);
+	if(RainbowSelectedOld != RainbowSelectedNew)
+	{
+		g_Config.m_ClRainbowMode = RainbowSelectedNew + 1;
+		RainbowSelectedOld = RainbowSelectedNew;
+		dbg_msg("rainbow", "rainbow mode changed to %d", g_Config.m_ClRainbowMode);
+	}
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClRainbowSpeed, &g_Config.m_ClRainbowSpeed, &Button, Localize("Rainbow speed"), 0, 5000, &CUi::ms_LogarithmicScrollbarScale, 0, "%");
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	// ***** END OF PAGE 1 SETTINGS ***** //
+	RightView = Column;
+
+	// Scroll
+	CUIRect ScrollRegion;
+	ScrollRegion.x = MainView.x;
+	ScrollRegion.y = maximum(LeftView.y, RightView.y) + MarginSmall * 2.0f;
+	ScrollRegion.w = MainView.w;
+	ScrollRegion.h = 0.0f;
+	s_ScrollRegion.AddRect(ScrollRegion);
+	s_ScrollRegion.End();
 }
 
 void CMenus::RenderSettingsWarList(CUIRect MainView)
@@ -1545,7 +1552,6 @@ void CMenus::RenderSettingsInfo(CUIRect MainView)
 
 	RightView.VSplitMid(&LeftSettings, &RightSettings, MarginSmall);
 
-
 	static int s_ShowSettings = IsFlagSet(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_SETTINGS);
 	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowSettings, Localize("Settings"), &s_ShowSettings, &LeftSettings, LineSize);
 	SetFlag(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_SETTINGS, s_ShowSettings);
@@ -1561,11 +1567,6 @@ void CMenus::RenderSettingsInfo(CUIRect MainView)
 	static int s_ShowStatusBar = IsFlagSet(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_STATUSBAR);
 	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowStatusBar, Localize("Status Bar"), &s_ShowStatusBar, &LeftSettings, LineSize);
 	SetFlag(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_STATUSBAR, s_ShowStatusBar);
-
-
-
-
-
 }
 
 void CMenus::RenderSettingsProfiles(CUIRect MainView)
@@ -1979,17 +1980,148 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 void CMenus::RenderSettingsStatusBar(CUIRect MainView)
 {
-	CUIRect LeftView, RightView, /*Button,*/ Label, LowerLeftView;
+	CUIRect LeftView, RightView, Button, Label, StatusBar;
 	MainView.HSplitTop(MarginSmall, nullptr, &MainView);
+
+	MainView.HSplitBottom(100.0f, &MainView, &StatusBar);
 
 	MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
 	LeftView.VSplitLeft(MarginSmall, nullptr, &LeftView);
 	RightView.VSplitRight(MarginSmall, &RightView, nullptr);
-	LeftView.HSplitMid(&LeftView, &LowerLeftView, 0.0f);
 
 	LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
 	Ui()->DoLabel(&Label, Localize("Status Bar"), HeadlineFontSize, TEXTALIGN_ML);
 	LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClStatusBar, Localize("Show status bar"), &g_Config.m_ClStatusBar, &LeftView, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClStatusBarLabels, Localize("Show labels on status bar items"), &g_Config.m_ClStatusBarLabels, &LeftView, LineSize);
+	LeftView.HSplitTop(LineSize, &Button, &LeftView);
+	Ui()->DoScrollbarOption(&g_Config.m_ClStatusBarHeight, &g_Config.m_ClStatusBarHeight, &Button, Localize("Status bar height"), 1, 16);
+
+	LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
+
+	LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
+	Ui()->DoLabel(&Label, Localize("Local Time"), HeadlineFontSize, TEXTALIGN_ML);
+	LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClStatusBar12HourClock, Localize("Use 12 hour clock"), &g_Config.m_ClStatusBar12HourClock, &LeftView, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClStatusBarLocalTimeSeocnds, Localize("Show seconds on clock"), &g_Config.m_ClStatusBarLocalTimeSeocnds, &LeftView, LineSize);
+	LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
+
+	LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
+	Ui()->DoLabel(&Label, Localize("Colors"), HeadlineFontSize, TEXTALIGN_ML);
+	LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
+	static CButtonContainer s_StatusbarColor, s_StatusbarTextColor;
+
+	DoLine_ColorPicker(&s_StatusbarColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Status bar color"), &g_Config.m_ClStatusBarColor, ColorRGBA(0.0f, 0.0f, 0.0f), false);
+	DoLine_ColorPicker(&s_StatusbarTextColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Text color"), &g_Config.m_ClStatusBarTextColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+	LeftView.HSplitTop(LineSize, &Button, &LeftView);
+	Ui()->DoScrollbarOption(&g_Config.m_ClStatusBarAlpha, &g_Config.m_ClStatusBarAlpha, &Button, Localize("Status bar alpha"), 0, 100);
+	LeftView.HSplitTop(LineSize, &Button, &LeftView);
+	Ui()->DoScrollbarOption(&g_Config.m_ClStatusBarTextAlpha, &g_Config.m_ClStatusBarTextAlpha, &Button, Localize("Text alpha"), 0, 100);
+
+	//RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
+	//Ui()->DoLabel(&Label, Localize("Status Bar Codes:"), HeadlineFontSize, TEXTALIGN_ML);
+	//RightView.HSplitTop(MarginSmall, nullptr, &RightView);
+	//RightView.HSplitTop(LineSize, &Label, &RightView);
+	//Ui()->DoLabel(&Label, Localize("a = Angle"), FontSize, TEXTALIGN_ML);
+	//RightView.HSplitTop(LineSize, &Label, &RightView);
+	//Ui()->DoLabel(&Label, Localize("p = Ping"), FontSize, TEXTALIGN_ML);
+	//RightView.HSplitTop(LineSize, &Label, &RightView);
+	//Ui()->DoLabel(&Label, Localize("d = Prediction"), FontSize, TEXTALIGN_ML);
+	//RightView.HSplitTop(LineSize, &Label, &RightView);
+	//Ui()->DoLabel(&Label, Localize("l = Local Time"), FontSize, TEXTALIGN_ML);
+	//RightView.HSplitTop(LineSize, &Label, &RightView);
+	//Ui()->DoLabel(&Label, Localize("r = Race Time"), FontSize, TEXTALIGN_ML);
+	//RightView.HSplitTop(LineSize, &Label, &RightView);
+	//Ui()->DoLabel(&Label, Localize("f = FPS"), FontSize, TEXTALIGN_ML);
+	//RightView.HSplitTop(LineSize, &Label, &RightView);
+	//Ui()->DoLabel(&Label, Localize("v = Velocity"), FontSize, TEXTALIGN_ML);
+	//RightView.HSplitTop(LineSize, &Label, &RightView);
+	//Ui()->DoLabel(&Label, Localize("z = Zoom"), FontSize, TEXTALIGN_ML);
+	//RightView.HSplitTop(LineSize, &Label, &RightView);
+	//Ui()->DoLabel(&Label, Localize("_ or \' \' = Space"), FontSize, TEXTALIGN_ML);
+
+	StatusBar.HSplitBottom(50.0f, nullptr, &StatusBar);
+	StatusBar.Draw(ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+	int ItemCount = GameClient()->m_StatusBar.m_StatusBarItems.size();
+	float AvailableWidth = StatusBar.w;
+	// AvailableWidth -= (ItemCount - 1) * MarginSmall;
+	float ItemWidth = AvailableWidth / (float)ItemCount;
+	CUIRect StatusItemButton;
+	static std::vector<CButtonContainer *> s_pItemButtons;
+	static std::vector<CButtonContainer> s_ItemButtons;
+	static vec2 s_ActivePos = vec2(0, 0);
+	struct SSwapItem
+	{
+		vec2 InitialPosition = vec2(0, 0);
+		float Duration = 0.0f;
+	};
+
+	static std::vector<SSwapItem> s_ItemSwaps;
+
+	if((int)s_ItemButtons.size() != ItemCount)
+	{
+		s_ItemSwaps.resize(ItemCount);
+		s_pItemButtons.resize(ItemCount);
+		s_ItemButtons.resize(ItemCount);
+		for(int i = 0; i < ItemCount; ++i)
+		{
+			s_pItemButtons[i] = &s_ItemButtons[i];
+		}
+	}
+	bool StatusItemActive = false;
+	int HotStatusIndex = 0;
+	static int s_SelectedItem = -1;
+	for(int i = 0; i < ItemCount; ++i)
+	{
+		if(Ui()->ActiveItem() == s_pItemButtons[i])
+		{
+			StatusItemActive = true;
+			HotStatusIndex = i;
+		}
+	}
+
+	for(int i = 0; i < ItemCount; ++i)
+	{
+		// if(i > 0)
+		//	StatusBar.VSplitLeft(MarginSmall, nullptr, &StatusBar);
+		StatusBar.VSplitLeft(ItemWidth, &StatusItemButton, &StatusBar);
+		StatusItemButton.Margin(5.0f, &StatusItemButton);
+		CStatusItem *StatusItem = GameClient()->m_StatusBar.m_StatusBarItems[i];
+		ColorRGBA Col = ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f);
+		if(s_SelectedItem == i)
+			Col = ColorRGBA(1.0f, 0.0f, 0.0f, 0.5f);
+
+		if(StatusItemActive && Ui()->ActiveItem() != s_pItemButtons[i] && Ui()->MouseInside(&StatusItemButton))
+		{
+			std::swap(s_pItemButtons[i], s_pItemButtons[HotStatusIndex]);
+			std::swap(GameClient()->m_StatusBar.m_StatusBarItems[i], GameClient()->m_StatusBar.m_StatusBarItems[HotStatusIndex]);
+			s_SelectedItem = -2;
+			s_ItemSwaps[HotStatusIndex].InitialPosition = vec2(StatusItemButton.x, StatusItemButton.y);
+			s_ItemSwaps[HotStatusIndex].Duration = 0.15f;
+			s_ItemSwaps[i].InitialPosition = vec2(s_ActivePos.x, s_ActivePos.y);
+			s_ItemSwaps[i].Duration = 0.15f;
+		}
+		CUIRect TempItemButton = StatusItemButton;
+		s_ItemSwaps[i].Duration = std::max(0.0f, s_ItemSwaps[i].Duration - Client()->RenderFrameTime());
+		if(s_ItemSwaps[i].Duration > 0.0f)
+		{
+			float Progress = std::pow(2.0, -5.0 * (1.0 - s_ItemSwaps[i].Duration / 0.15f));
+			TempItemButton.x = mix(TempItemButton.x, s_ItemSwaps[i].InitialPosition.x, Progress);
+		}
+
+		if(DoButtonLineSize_Menu(s_pItemButtons[i], StatusItem->m_aName, 0, &TempItemButton, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, Col))
+		{
+			if(s_SelectedItem == -2)
+				s_SelectedItem++;
+			else if(s_SelectedItem != i)
+				s_SelectedItem = i;
+			else
+				s_SelectedItem = -1;
+		}
+		if(Ui()->ActiveItem() == s_pItemButtons[i])
+			s_ActivePos = vec2(StatusItemButton.x, StatusItemButton.y);
+	}
 }
 
 void CMenus::RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, const char *pBackupSkin, bool CustomColors, int FeetColor, int BodyColor, int Emote, bool Rainbow, ColorRGBA ColorFeet, ColorRGBA ColorBody)

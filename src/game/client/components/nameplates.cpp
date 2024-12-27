@@ -143,7 +143,7 @@ void CNamePlates::RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateD
 		YOffset -= Data.m_FontSize;
 		NamePlate.m_Name.Update(*this, Data.m_ClientId, Data.m_pName, Data.m_ShowFriendMark, Data.m_FontSize);
 
-		//TClient
+		// TClient
 		if(Data.m_IsGame && Data.m_RealClientId >= 0)
 			if((g_Config.m_ClPingNameCircle || (m_pClient->m_Scoreboard.Active() && !m_pClient->m_Snap.m_apPlayerInfos[Data.m_RealClientId]->m_Local)) && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
 			{
@@ -185,7 +185,7 @@ void CNamePlates::RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateD
 		if(NamePlate.m_Reason.m_TextContainerIndex.Valid())
 			TextRender()->RenderTextContainer(NamePlate.m_Reason.m_TextContainerIndex, Data.m_Color.WithAlpha(Data.m_Alpha * 0.5f), Data.m_OutlineColor.WithAlpha(Data.m_Alpha / 4.0f), Data.m_Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_Reason.m_TextContainerIndex).m_W / 2.0f, YOffset);
 	}
-	//TClient tc_skin_name
+	// TClient tc_skin_name
 	if(Data.m_IsGame && !Data.m_IsLocal && Data.m_RealClientId >= 0 && g_Config.m_ClShowSkinName)
 	{
 		YOffset -= Data.m_FontSizeClan;
@@ -197,7 +197,7 @@ void CNamePlates::RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateD
 	if(Data.m_ShowDirection)
 	{
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Data.m_Alpha);
-		YOffset -= 6.5f; //TClient
+		YOffset -= 6.5f; // TClient
 		YOffset -= Data.m_FontSizeDirection;
 		const vec2 ShowDirectionPos = vec2(Data.m_Position.x - Data.m_FontSizeDirection / 2.0f, YOffset + Data.m_FontSizeDirection / 2.0f);
 		if(Data.m_DirLeft)

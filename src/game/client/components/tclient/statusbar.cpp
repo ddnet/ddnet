@@ -170,13 +170,13 @@ void CStatusBar::OnRender()
 	Graphics()->DrawRect(m_BarX, m_BarY, m_Width, m_BarHeight, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClStatusBarColor)).WithAlpha(g_Config.m_ClStatusBarAlpha / 100.0f), 0, 0);
 	TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClStatusBarTextColor)).WithAlpha(g_Config.m_ClStatusBarTextAlpha / 100.0f));
 
-	//	std::vector<CStatusItem *> m_StatusBarList = {&m_LocalTime, &m_LocalTime, &m_Space, &m_LocalTime};
+	//	std::vector<CStatusItem *> m_StatusBarItems = {&m_LocalTime, &m_LocalTime, &m_Space, &m_LocalTime};
 	int SpaceCount = 0;
-	const int ItemCount = (int)m_StatusBarList.size();
+	const int ItemCount = (int)m_StatusBarItems.size();
 	float UsedWidth = 0.0f;
 	float AvailableWidth = m_Width - m_Margin * 2.0f; // 1 extra margin on the sides
 	// Count the number of spaces and determine how much unused space there is
-	for(const CStatusItem *Item : m_StatusBarList)
+	for(const CStatusItem *Item : m_StatusBarItems)
 	{
 		if(str_comp(Item->m_aName, "Space") == 0)
 			++SpaceCount;
@@ -196,7 +196,7 @@ void CStatusBar::OnRender()
 
 	m_CursorX = m_Margin;
 	// Render items
-	for(const CStatusItem *Item : m_StatusBarList)
+	for(const CStatusItem *Item : m_StatusBarItems)
 	{
 		m_CursorX += m_Margin;
 		float ItemWidth = Item->GetWidth();

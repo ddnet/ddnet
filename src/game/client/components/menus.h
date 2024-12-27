@@ -853,6 +853,7 @@ private:
 
 	// found in menus_tclient.cpp
 	void RenderSettingsTClient(CUIRect MainView);
+	void RenderSettingsTClientSettngs(CUIRect MainView);
 	void RenderSettingsProfiles(CUIRect MainView);
 	void RenderSettingsWarList(CUIRect MainView);
 	void RenderSettingsInfo(CUIRect MainView);
