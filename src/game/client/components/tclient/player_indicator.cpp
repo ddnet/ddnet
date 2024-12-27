@@ -54,6 +54,12 @@ void CPlayerIndicator::OnRender()
 				if(g_Config.m_ClPlayerIndicatorFreeze && !(OtherTee.m_FreezeEnd > 0 || OtherTee.m_DeepFrozen))
 					continue;
 
+				// Hide tees on our screen if the config is set to do so
+				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+				if(g_Config.m_ClIndicatorHideVisible && in_range(m_pClient->m_aClients[i].m_RenderPos.x, ScreenX0, ScreenX1) && in_range(m_pClient->m_aClients[i].m_RenderPos.y, ScreenY0, ScreenY1))
+					continue;
+
 				vec2 Norm = NormalizedDirection(m_pClient->m_aClients[i].m_RenderPos, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_RenderPos) * (-1);
 
 				float Offset = g_Config.m_ClIndicatorOffset;
@@ -94,6 +100,39 @@ void CPlayerIndicator::OnRender()
 				{
 					Col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndicatorAlive));
 				}
+				bool HideIfNotWar = false;
+				if(g_Config.m_ClWarListIndicator)
+				{
+					HideIfNotWar = true;
+					if(g_Config.m_ClWarListIndicatorAll)
+					{
+						if(GameClient()->m_WarList.GetAnyWar(i))
+						{
+							Col = GameClient()->m_WarList.GetPriorityColor(i);
+							HideIfNotWar = false;
+						}
+					}
+					if(g_Config.m_ClWarListIndicatorTeam)
+					{
+						if(GameClient()->m_WarList.GetWarData(i).m_WarGroupMatches[2])
+						{
+							Col = GameClient()->m_WarList.m_WarTypes[2]->m_Color;
+							HideIfNotWar = false;
+						}
+					}
+					if(g_Config.m_ClWarListIndicatorEnemy)
+					{
+						if(GameClient()->m_WarList.GetWarData(i).m_WarGroupMatches[1])
+						{
+							Col = GameClient()->m_WarList.m_WarTypes[1]->m_Color;
+							HideIfNotWar = false;
+						}
+					}
+				}
+
+				if(HideIfNotWar)
+					continue;
+
 				Col.a = Alpha;
 
 				TeeInfo.m_Size = g_Config.m_ClIndicatorRadius * 4.0f;

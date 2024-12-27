@@ -23,7 +23,7 @@ public:
 	ColorRGBA m_Color = ColorRGBA(1, 1, 1, 1);
 	bool m_Removable = true;
 	bool m_Imported = false;
-
+	int m_Index = 0;
 	CWarType(const char *pName, ColorRGBA Color = ColorRGBA(1, 1, 1, 1), bool Removable = true, bool IsImport = false)
 	{
 		str_copy(m_aWarName, pName);
@@ -78,6 +78,9 @@ public:
 	ColorRGBA m_ClanColor = ColorRGBA(1, 1, 1, 1);
 	bool IsWarName = false;
 	bool IsWarClan = false;
+
+	std::vector<char> m_WarGroupMatches = {false, false, false};
+
 	char m_aReason[MAX_WARLIST_REASON_LENGTH] = "";
 };
 
@@ -111,7 +114,6 @@ class CWarList : public CComponent
 	static void ConRemoveNameIndex(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveClanIndex(IConsole::IResult *pResult, void *pUserData);
 
-
 	static void ConNameTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConClanTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConRemoveNameWar(IConsole::IResult *pResult, void *pUserData);
@@ -139,13 +141,12 @@ public:
 	CWarList();
 	~CWarList();
 
-
 	// duplicate war types are NOT allowed
 	std::vector<CWarType *> m_WarTypes = {
 		new CWarType("none", ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), false),
 		new CWarType("enemy", ColorRGBA(1.0f, 0.2f, 0.2f, 1.0f), false),
 		new CWarType("team", ColorRGBA(0.0f, 0.9f, 0.2f, 1.0f), false),
-		};
+	};
 
 	// None type war entries will float to the top of the list, so they can be assigned a type
 	CWarType *m_pWarTypeNone = m_WarTypes[0];
@@ -187,7 +188,6 @@ public:
 	ColorRGBA GetNameplateColor(int ClientId);
 	ColorRGBA GetClanColor(int ClientId);
 	bool GetAnyWar(int ClientId);
-
 
 	void GetReason(char *pReason, int ClientId);
 	CWarDataCache GetWarData(int ClientId);

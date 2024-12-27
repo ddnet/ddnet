@@ -395,7 +395,7 @@ void CWarList::GetReason(char *pReason, int ClientId)
 
 CWarDataCache CWarList::GetWarData(int ClientId)
 {
-		return m_WarPlayers[ClientId];
+	return m_WarPlayers[ClientId];
 }
 
 void CWarList::SortWarEntries()
@@ -405,6 +405,9 @@ void CWarList::SortWarEntries()
 
 void CWarList::UpdateWarPlayers()
 {
+	for(int i = 0; i < (int)m_WarTypes.size(); ++i)
+		m_WarTypes[i]->m_Index = i;
+
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(!GameClient()->m_aClients[i].m_Active)
@@ -414,6 +417,8 @@ void CWarList::UpdateWarPlayers()
 		m_WarPlayers[i].IsWarClan = false;
 		m_WarPlayers[i].m_NameColor = ColorRGBA(1, 1, 1, 1);
 		m_WarPlayers[i].m_ClanColor = ColorRGBA(1, 1, 1, 1);
+		m_WarPlayers[i].m_WarGroupMatches.clear();
+		m_WarPlayers[i].m_WarGroupMatches.resize((int)m_WarTypes.size(), false);
 
 		for(CWarEntry &Entry : m_WarEntries)
 		{
@@ -422,8 +427,8 @@ void CWarList::UpdateWarPlayers()
 				str_copy(m_WarPlayers[i].m_aReason, Entry.m_aReason);
 				m_WarPlayers[i].IsWarName = true;
 				m_WarPlayers[i].m_NameColor = Entry.m_pWarType->m_Color;
+				m_WarPlayers[i].m_WarGroupMatches[Entry.m_pWarType->m_Index] = true;
 			}
-
 			else if(str_comp(GameClient()->m_aClients[i].m_aClan, Entry.m_aClan) == 0 && str_comp(Entry.m_aClan, "") != 0)
 			{
 				// Name war reason has priority over clan war reason
@@ -432,6 +437,7 @@ void CWarList::UpdateWarPlayers()
 
 				m_WarPlayers[i].IsWarClan = true;
 				m_WarPlayers[i].m_ClanColor = Entry.m_pWarType->m_Color;
+				m_WarPlayers[i].m_WarGroupMatches[Entry.m_pWarType->m_Index] = true;
 			}
 		}
 	}
