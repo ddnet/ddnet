@@ -18,7 +18,7 @@ public:
 	char m_aDisplayName[32];
 	char m_aDesc[128];
 	char m_aLetters[STATUSBAR_TYPE_LETTERS] = {};
-	bool m_ShowLabel;
+	bool m_ShowLabel = true;
 	CStatusItem(std::function<void()> Render, std::function<float()> Width, const char *pLetters, const char *pName, const char *pDisplayName, const char *pDesc, bool ShowLabel = true)
 	{
 		RenderItem = Render;
@@ -48,7 +48,7 @@ public:
 	CStatusItem m_Prediction = CStatusItem(std::bind(&CStatusBar::PredictionRender, this), std::bind(&CStatusBar::PredictionWidth, this),
 		"d", "Prediction", "Pred", "Displays your current prediction amount");
 	CStatusItem m_Position = CStatusItem(std::bind(&CStatusBar::PositionRender, this), std::bind(&CStatusBar::PositionWidth, this),
-		"c", "Position", "", "Displays position");
+		"c", "Position", "Pos", "Displays position");
 	CStatusItem m_LocalTime = CStatusItem(std::bind(&CStatusBar::LocalTimeRender, this), std::bind(&CStatusBar::LocalTimeWidth, this),
 		"l", "Local Time", "", "Displays your local time", false);
 	CStatusItem m_RaceTime = CStatusItem(std::bind(&CStatusBar::RaceTimeRender, this), std::bind(&CStatusBar::RaceTimeWidth, this),
@@ -79,6 +79,7 @@ private:
 	float m_Width, m_Height;
 	float m_BarHeight, m_Margin;
 
+	int m_CurrentRaceTime = 0;
 	float GetDurationWidth(int Time);
 	int GetDigitsIndex(const int Value, const int Max);
 	float AngleWidth();

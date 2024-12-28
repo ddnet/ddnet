@@ -2030,6 +2030,8 @@ void CMenus::RenderSettingsStatusBar(CUIRect MainView)
 	RightView.HSplitTop(LineSize, &Label, &RightView);
 	Ui()->DoLabel(&Label, Localize("d = Prediction"), FontSize, TEXTALIGN_ML);
 	RightView.HSplitTop(LineSize, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("c = Position"), FontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(LineSize, &Label, &RightView);
 	Ui()->DoLabel(&Label, Localize("l = Local Time"), FontSize, TEXTALIGN_ML);
 	RightView.HSplitTop(LineSize, &Label, &RightView);
 	Ui()->DoLabel(&Label, Localize("r = Race Time"), FontSize, TEXTALIGN_ML);
