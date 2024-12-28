@@ -183,7 +183,6 @@ void CStatusBar::VelocityRender()
 	const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[m_PlayerId].m_Prev;
 	const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[m_PlayerId].m_Cur;
 	const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
-	const vec2 Pos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pCurChar->m_X, pCurChar->m_Y), IntraTick) / 32.0f;
 	const vec2 Vel = mix(vec2(pPrevChar->m_VelX, pPrevChar->m_VelY), vec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
 	float VelspeedX = Vel.x / 256.0f * Client()->GameTickSpeed();
 	if(Vel.x >= -1 && Vel.x <= 1)
