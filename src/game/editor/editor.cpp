@@ -5173,7 +5173,7 @@ void CEditor::RenderFileDialog()
 	static CListBox s_ListBox;
 	s_ListBox.SetActive(!Ui()->IsPopupOpen());
 
-	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
+	if(m_FileDialogSaveAction)
 	{
 		Ui()->DoLabel(&FileBoxLabel, "Filename:", 10.0f, TEXTALIGN_ML);
 		if(DoEditBox(&m_FileDialogFileNameInput, &FileBox, 10.0f))
@@ -5487,8 +5487,8 @@ void CEditor::RenderFileDialog()
 			str_format(m_aFileSaveName, sizeof(m_aFileSaveName), "%s/%s", m_pFileDialogPath, m_FileDialogFileNameInput.GetString());
 			if(!str_endswith(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]))
 				str_append(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]);
-			const bool SaveAction = m_FileDialogStorageType == IStorage::TYPE_SAVE;
-			if(SaveAction && Storage()->FileExists(m_aFileSaveName, StorageType))
+
+			if(m_FileDialogSaveAction && Storage()->FileExists(m_aFileSaveName, StorageType))
 			{
 				if(m_pfnFileDialogFunc == &CallbackSaveMap)
 					m_PopupEventType = POPEVENT_SAVE;
@@ -5502,7 +5502,7 @@ void CEditor::RenderFileDialog()
 					dbg_assert(false, "m_pfnFileDialogFunc unhandled for saving");
 				m_PopupEventActivated = true;
 			}
-			else if(m_pfnFileDialogFunc && (SaveAction || m_FilesSelectedIndex >= 0))
+			else if(m_pfnFileDialogFunc && (m_FileDialogSaveAction || m_FilesSelectedIndex >= 0))
 			{
 				m_pfnFileDialogFunc(m_aFileSaveName, StorageType, m_pFileDialogUser);
 			}
@@ -5722,6 +5722,7 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 	{
 		m_FileDialogMultipleStorages = false;
 	}
+	m_FileDialogSaveAction = m_FileDialogStorageType == IStorage::TYPE_SAVE;
 
 	Ui()->ClosePopupMenus();
 	m_pFileDialogTitle = pTitle;
