@@ -235,12 +235,6 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat, bool IsColor)
 					if(!IsColor)
 					{
 						int Value;
-						if(str_comp(pResult->GetString(pResult->NumArguments() - 1), "all") == 0 ||
-							str_comp(pResult->GetString(pResult->NumArguments() - 1), "me") == 0)
-						{
-							Error = PARSEARGS_OK;
-							break;
-						}
 						if(!str_toint(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
 							Value == std::numeric_limits<int>::max() || Value == std::numeric_limits<int>::min())
 						{
