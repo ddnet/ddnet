@@ -637,13 +637,25 @@ void CSound::UnloadSample(int SampleId)
 	if(SampleId == -1)
 		return;
 
-	Stop(SampleId);
-
-	// Free data
+	dbg_assert(SampleId >= 0 && SampleId < NUM_SAMPLES, "SampleId invalid");
 	const CLockScope LockScope(m_SoundLock);
 	CSample &Sample = m_aSamples[SampleId];
-	free(Sample.m_pData);
-	Sample.m_pData = nullptr;
+
+	if(Sample.IsLoaded())
+	{
+		// Stop voices using this sample
+		for(auto &Voice : m_aVoices)
+		{
+			if(Voice.m_pSample == &Sample)
+			{
+				Voice.m_pSample = nullptr;
+			}
+		}
+
+		// Free data
+		free(Sample.m_pData);
+		Sample.m_pData = nullptr;
+	}
 
 	// Free slot
 	if(Sample.m_NextFreeSampleIndex == SAMPLE_INDEX_USED)
