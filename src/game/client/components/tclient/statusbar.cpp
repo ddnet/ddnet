@@ -144,10 +144,47 @@ void CStatusBar::UpdateStatusBarSize()
 void CStatusBar::OnInit()
 {
 	UpdateStatusBarSize();
+	ApplyStatusBarScheme(g_Config.m_ClStatusBarScheme);
 }
 
 void CStatusBar::LabelRender(const char *pLabel) {}
 float CStatusBar::LabelWidth(const char *pLabel) { return 0.0f; }
+
+void CStatusBar::ApplyStatusBarScheme(const char *pScheme)
+{
+	m_StatusBarItems.clear();
+	for(int i = 0; pScheme[i] != '\0'; ++i)
+	{
+		char letter = pScheme[i];
+		for(const auto &itemType : m_StatusItemTypes)
+		{
+			for(int l = 0; l < STATUSBAR_TYPE_LETTERS; ++l)
+			{
+				if(itemType.m_aLetters[l] == letter)
+				{
+					m_StatusBarItems.push_back(new CStatusItem(itemType));
+					break;
+				}
+			}
+		}
+	}
+}
+
+void CStatusBar::UpdateStatusBarScheme(char *pScheme)
+{
+	int index = 0;
+	for(const auto &item : m_StatusBarItems)
+	{
+		if(index >= STATUSBAR_MAX_SIZE)
+		{
+			break;
+		}
+		pScheme[index++] = item->m_aLetters[0];
+	}
+	pScheme[index] = '\0';
+}
+
+
 
 void CStatusBar::OnRender()
 {

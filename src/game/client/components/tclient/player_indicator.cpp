@@ -101,6 +101,7 @@ void CPlayerIndicator::OnRender()
 					Col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClIndicatorAlive));
 				}
 				bool HideIfNotWar = false;
+				ColorRGBA PrevCol = Col;
 				if(g_Config.m_ClWarListIndicator)
 				{
 					HideIfNotWar = true;
@@ -132,6 +133,8 @@ void CPlayerIndicator::OnRender()
 
 				if(HideIfNotWar)
 					continue;
+				if(!g_Config.m_ClWarListIndicatorColors)
+					Col = PrevCol;
 
 				Col.a = Alpha;
 

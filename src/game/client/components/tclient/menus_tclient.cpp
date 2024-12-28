@@ -382,14 +382,14 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		const float Theta = pi * 2.0f / GameClient()->m_Bindwheel.m_vBinds.size();
 		for(int i = 0; i < static_cast<int>(GameClient()->m_Bindwheel.m_vBinds.size()); i++)
 		{
-			float SegmentFontSize = FontSize * 1.2f;
+			float SegmentFontSize = FontSize * 1.1f;
 			if(i == s_SelectedBindIndex)
 			{
 				SegmentFontSize = FontSize * 1.7f;
 				TextRender()->TextColor(ColorRGBA(0.5f, 1.0f, 0.75f, 1.0f));
 			}
 			else if(i == HoveringIndex)
-				SegmentFontSize = FontSize;
+				SegmentFontSize = FontSize * 1.35;
 
 			const CBindWheel::CBind Bind = GameClient()->m_Bindwheel.m_vBinds[i];
 			const float Angle = Theta * i;
@@ -759,6 +759,7 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	}
 	if(g_Config.m_ClWarListIndicator)
 	{
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListIndicatorColors, Localize("Use warlist colors instead of regular colors"), &g_Config.m_ClWarListIndicatorColors, &Column, LineSize);
 		char aBuf[128];
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListIndicatorAll, Localize("Show all warlist groups"), &g_Config.m_ClWarListIndicatorAll, &Column, LineSize);
 		str_format(aBuf, sizeof(aBuf), "Show %s group", GameClient()->m_WarList.m_WarTypes.at(1)->m_aWarName);
@@ -766,7 +767,7 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 		str_format(aBuf, sizeof(aBuf), "Show %s group", GameClient()->m_WarList.m_WarTypes.at(2)->m_aWarName);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListIndicatorTeam, aBuf, &g_Config.m_ClWarListIndicatorTeam, &Column, LineSize);
 	}
-	else
+	if(!g_Config.m_ClWarListIndicatorColors || !g_Config.m_ClWarListIndicator)
 	{
 		static CButtonContainer IndicatorAliveColorID, IndicatorDeadColorID, IndicatorSavedColorID;
 		DoLine_ColorPicker(&IndicatorAliveColorID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Indicator alive color"), &g_Config.m_ClIndicatorAlive, ColorRGBA(0.0f, 0.0f, 0.0f), false);
@@ -2019,33 +2020,96 @@ void CMenus::RenderSettingsStatusBar(CUIRect MainView)
 	LeftView.HSplitTop(LineSize, &Button, &LeftView);
 	Ui()->DoScrollbarOption(&g_Config.m_ClStatusBarTextAlpha, &g_Config.m_ClStatusBarTextAlpha, &Button, Localize("Text alpha"), 0, 100);
 
-	//RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
-	//Ui()->DoLabel(&Label, Localize("Status Bar Codes:"), HeadlineFontSize, TEXTALIGN_ML);
-	//RightView.HSplitTop(MarginSmall, nullptr, &RightView);
-	//RightView.HSplitTop(LineSize, &Label, &RightView);
-	//Ui()->DoLabel(&Label, Localize("a = Angle"), FontSize, TEXTALIGN_ML);
-	//RightView.HSplitTop(LineSize, &Label, &RightView);
-	//Ui()->DoLabel(&Label, Localize("p = Ping"), FontSize, TEXTALIGN_ML);
-	//RightView.HSplitTop(LineSize, &Label, &RightView);
-	//Ui()->DoLabel(&Label, Localize("d = Prediction"), FontSize, TEXTALIGN_ML);
-	//RightView.HSplitTop(LineSize, &Label, &RightView);
-	//Ui()->DoLabel(&Label, Localize("l = Local Time"), FontSize, TEXTALIGN_ML);
-	//RightView.HSplitTop(LineSize, &Label, &RightView);
-	//Ui()->DoLabel(&Label, Localize("r = Race Time"), FontSize, TEXTALIGN_ML);
-	//RightView.HSplitTop(LineSize, &Label, &RightView);
-	//Ui()->DoLabel(&Label, Localize("f = FPS"), FontSize, TEXTALIGN_ML);
-	//RightView.HSplitTop(LineSize, &Label, &RightView);
-	//Ui()->DoLabel(&Label, Localize("v = Velocity"), FontSize, TEXTALIGN_ML);
-	//RightView.HSplitTop(LineSize, &Label, &RightView);
-	//Ui()->DoLabel(&Label, Localize("z = Zoom"), FontSize, TEXTALIGN_ML);
-	//RightView.HSplitTop(LineSize, &Label, &RightView);
-	//Ui()->DoLabel(&Label, Localize("_ or \' \' = Space"), FontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("Status Bar Codes:"), HeadlineFontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(MarginSmall, nullptr, &RightView);
+	RightView.HSplitTop(LineSize, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("a = Angle"), FontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(LineSize, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("p = Ping"), FontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(LineSize, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("d = Prediction"), FontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(LineSize, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("l = Local Time"), FontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(LineSize, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("r = Race Time"), FontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(LineSize, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("f = FPS"), FontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(LineSize, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("v = Velocity"), FontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(LineSize, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("z = Zoom"), FontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(LineSize, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("_ or \' \' = Space"), FontSize, TEXTALIGN_ML);
+	static int s_SelectedItem = -1;
+	static int s_TypeSelectedOld = -1;
 
-	StatusBar.HSplitBottom(50.0f, nullptr, &StatusBar);
+	CUIRect StatusScheme, StatusButtons, ItemLabel;
+	static CButtonContainer s_ApplyButton, s_AddButton, s_RemoveButton;
+	StatusBar.HSplitBottom(LineSize + MarginSmall, &StatusBar, &StatusScheme);
+	StatusBar.HSplitTop(LineSize + MarginSmall, &ItemLabel, &StatusBar);
+	StatusScheme.HSplitTop(MarginSmall, nullptr, &StatusScheme);
+
+	if(s_TypeSelectedOld >= 0)
+		Ui()->DoLabel(&ItemLabel, GameClient()->m_StatusBar.m_StatusItemTypes[s_TypeSelectedOld].m_aDesc, FontSize, TEXTALIGN_ML);
+
+	StatusScheme.VSplitMid(&StatusButtons, &StatusScheme, MarginSmall);
+	StatusScheme.VSplitMid(&Label, &StatusScheme, MarginSmall);
+	StatusScheme.VSplitMid(&StatusScheme, &Button, MarginSmall);
+	if(DoButton_Menu(&s_ApplyButton, Localize("Apply"), 0, &Button))
+	{
+		GameClient()->m_StatusBar.ApplyStatusBarScheme(g_Config.m_ClStatusBarScheme);
+		GameClient()->m_StatusBar.UpdateStatusBarScheme(g_Config.m_ClStatusBarScheme);
+		s_SelectedItem = -1;
+	}
+	Ui()->DoLabel(&Label, Localize("Status Scheme:"), FontSize, TEXTALIGN_MR);
+	static CLineInput s_StatusScheme(g_Config.m_ClStatusBarScheme, sizeof(g_Config.m_ClStatusBarScheme));
+	s_StatusScheme.SetEmptyText("");
+	Ui()->DoEditBox(&s_StatusScheme, &StatusScheme, EditBoxFontSize);
+
+	static std::vector<const char *> s_DropDownNames = {};
+	for(int i = 0; i < (int)GameClient()->m_StatusBar.m_StatusItemTypes.size(); ++i)
+		if(s_DropDownNames.size() != GameClient()->m_StatusBar.m_StatusItemTypes.size())
+			s_DropDownNames.push_back(GameClient()->m_StatusBar.m_StatusItemTypes[i].m_aName);
+
+	static CUi::SDropDownState s_DropDownState;
+	static CScrollRegion s_DropDownScrollRegion;
+	s_DropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_DropDownScrollRegion;
+	CUIRect DropDownRect;
+
+	StatusButtons.VSplitMid(&DropDownRect, &StatusButtons, MarginSmall);
+	const int TypeSelectedNew = Ui()->DoDropDown(&DropDownRect, s_TypeSelectedOld, s_DropDownNames.data(), s_DropDownNames.size(), s_DropDownState);
+	if(s_TypeSelectedOld != TypeSelectedNew)
+	{
+		s_TypeSelectedOld = TypeSelectedNew;
+		if(s_SelectedItem >= 0)
+		{
+			GameClient()->m_StatusBar.m_StatusBarItems[s_SelectedItem] = &GameClient()->m_StatusBar.m_StatusItemTypes[s_TypeSelectedOld];
+			GameClient()->m_StatusBar.UpdateStatusBarScheme(g_Config.m_ClStatusBarScheme);
+		}
+	}
+	CUIRect ButtonL, ButtonR;
+	StatusButtons.VSplitMid(&ButtonL, &ButtonR, MarginSmall);
+	if(DoButton_Menu(&s_AddButton, Localize("Add Item"), 0, &ButtonL) && s_TypeSelectedOld >= 0)
+	{
+		GameClient()->m_StatusBar.m_StatusBarItems.push_back(&GameClient()->m_StatusBar.m_StatusItemTypes[s_TypeSelectedOld]);
+		GameClient()->m_StatusBar.UpdateStatusBarScheme(g_Config.m_ClStatusBarScheme);
+		s_SelectedItem = (int)GameClient()->m_StatusBar.m_StatusBarItems.size() - 1;
+	}
+	if(DoButton_Menu(&s_RemoveButton, Localize("Remove Item"), 0, &ButtonR) && s_SelectedItem >= 0)
+	{
+		GameClient()->m_StatusBar.m_StatusBarItems.erase(GameClient()->m_StatusBar.m_StatusBarItems.begin() + s_SelectedItem);
+		GameClient()->m_StatusBar.UpdateStatusBarScheme(g_Config.m_ClStatusBarScheme);
+		s_SelectedItem = -1;
+	}
+
+	// color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClStatusBarColor)).WithAlpha(0.5f)
 	StatusBar.Draw(ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, 5.0f);
 	int ItemCount = GameClient()->m_StatusBar.m_StatusBarItems.size();
 	float AvailableWidth = StatusBar.w;
 	// AvailableWidth -= (ItemCount - 1) * MarginSmall;
+	AvailableWidth -= MarginSmall;
+	StatusBar.VSplitLeft(MarginExtraSmall, nullptr, &StatusBar);
 	float ItemWidth = AvailableWidth / (float)ItemCount;
 	CUIRect StatusItemButton;
 	static std::vector<CButtonContainer *> s_pItemButtons;
@@ -2071,7 +2135,6 @@ void CMenus::RenderSettingsStatusBar(CUIRect MainView)
 	}
 	bool StatusItemActive = false;
 	int HotStatusIndex = 0;
-	static int s_SelectedItem = -1;
 	for(int i = 0; i < ItemCount; ++i)
 	{
 		if(Ui()->ActiveItem() == s_pItemButtons[i])
@@ -2086,13 +2149,15 @@ void CMenus::RenderSettingsStatusBar(CUIRect MainView)
 		// if(i > 0)
 		//	StatusBar.VSplitLeft(MarginSmall, nullptr, &StatusBar);
 		StatusBar.VSplitLeft(ItemWidth, &StatusItemButton, &StatusBar);
-		StatusItemButton.Margin(5.0f, &StatusItemButton);
+		StatusItemButton.HMargin(MarginSmall, &StatusItemButton);
+		StatusItemButton.VMargin(MarginExtraSmall, &StatusItemButton);
 		CStatusItem *StatusItem = GameClient()->m_StatusBar.m_StatusBarItems[i];
 		ColorRGBA Col = ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f);
 		if(s_SelectedItem == i)
-			Col = ColorRGBA(1.0f, 0.0f, 0.0f, 0.5f);
-
-		if(StatusItemActive && Ui()->ActiveItem() != s_pItemButtons[i] && Ui()->MouseInside(&StatusItemButton))
+			Col = ColorRGBA(1.0f, 0.35f, 0.35f, 0.75f);
+		CUIRect TempItemButton = StatusItemButton;
+		TempItemButton.y = 0, TempItemButton.h = 10000.0f;
+		if(StatusItemActive && Ui()->ActiveItem() != s_pItemButtons[i] && Ui()->MouseInside(&TempItemButton))
 		{
 			std::swap(s_pItemButtons[i], s_pItemButtons[HotStatusIndex]);
 			std::swap(GameClient()->m_StatusBar.m_StatusBarItems[i], GameClient()->m_StatusBar.m_StatusBarItems[HotStatusIndex]);
@@ -2101,27 +2166,37 @@ void CMenus::RenderSettingsStatusBar(CUIRect MainView)
 			s_ItemSwaps[HotStatusIndex].Duration = 0.15f;
 			s_ItemSwaps[i].InitialPosition = vec2(s_ActivePos.x, s_ActivePos.y);
 			s_ItemSwaps[i].Duration = 0.15f;
+			GameClient()->m_StatusBar.UpdateStatusBarScheme(g_Config.m_ClStatusBarScheme);
 		}
-		CUIRect TempItemButton = StatusItemButton;
+		TempItemButton = StatusItemButton;
 		s_ItemSwaps[i].Duration = std::max(0.0f, s_ItemSwaps[i].Duration - Client()->RenderFrameTime());
 		if(s_ItemSwaps[i].Duration > 0.0f)
 		{
 			float Progress = std::pow(2.0, -5.0 * (1.0 - s_ItemSwaps[i].Duration / 0.15f));
 			TempItemButton.x = mix(TempItemButton.x, s_ItemSwaps[i].InitialPosition.x, Progress);
 		}
-
-		if(DoButtonLineSize_Menu(s_pItemButtons[i], StatusItem->m_aName, 0, &TempItemButton, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, Col))
+		if(DoButtonLineSize_Menu(s_pItemButtons[i], StatusItem->m_aDisplayName, 0, &TempItemButton, LineSize, false, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, Col))
 		{
 			if(s_SelectedItem == -2)
 				s_SelectedItem++;
 			else if(s_SelectedItem != i)
+			{
 				s_SelectedItem = i;
+				for(int t = 0; t < (int)GameClient()->m_StatusBar.m_StatusItemTypes.size(); ++t)
+					if(str_comp(GameClient()->m_StatusBar.m_StatusItemTypes[t].m_aName, StatusItem->m_aName) == 0)
+						s_TypeSelectedOld = t;
+			}
 			else
+			{
 				s_SelectedItem = -1;
+				s_TypeSelectedOld = -1;
+			}
 		}
 		if(Ui()->ActiveItem() == s_pItemButtons[i])
 			s_ActivePos = vec2(StatusItemButton.x, StatusItemButton.y);
 	}
+	if(!StatusItemActive)
+		s_SelectedItem = std::max(-1, s_SelectedItem);
 }
 
 void CMenus::RenderDevSkin(vec2 RenderPos, float Size, const char *pSkinName, const char *pBackupSkin, bool CustomColors, int FeetColor, int BodyColor, int Emote, bool Rainbow, ColorRGBA ColorFeet, ColorRGBA ColorBody)
