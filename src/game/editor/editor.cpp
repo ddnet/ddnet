@@ -5215,6 +5215,10 @@ void CEditor::RenderFileDialog()
 			Ui()->SetActiveItem(&m_FileDialogFilterInput);
 			m_FileDialogFilterInput.SelectAll();
 		}
+		if(m_FileDialogOpening)
+		{
+			UpdateFileNameInput();
+		}
 		if(Ui()->DoClearableEditBox(&m_FileDialogFilterInput, &FileBox, 10.0f))
 		{
 			RefreshFilteredFileList();
