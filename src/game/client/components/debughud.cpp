@@ -320,5 +320,5 @@ void CDebugHud::RenderTaterDebug()
 	RenderTuning();
 	RenderNetCorrections();
 	RenderHint();
-	RenderTaterDebug();
+	// RenderTaterDebug();
 }

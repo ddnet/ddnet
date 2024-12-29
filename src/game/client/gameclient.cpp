@@ -134,6 +134,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Items,
 					      &m_Ghost,
 					      &m_Players,
+					      &m_Trails,
 					      &m_MapLayersForeground,
 					      &m_Outlines,
 					      &m_Particles.m_RenderExplosions,

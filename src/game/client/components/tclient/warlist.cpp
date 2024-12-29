@@ -173,7 +173,10 @@ void CWarList::AddWarEntryInGame(int WarType, const char *pName, const char *pRe
 	}
 	if(!g_Config.m_ClWarListAllowDuplicates)
 		RemoveWarEntryDuplicates(Entry.m_aName, Entry.m_aClan);
-	m_WarEntries.push_back(Entry);
+
+	AddWarEntry(Entry.m_aName, Entry.m_aClan, Entry.m_aReason, Entry.m_pWarType->m_aWarName);
+	//if(str_comp(Entry.m_aClan, "") != 0 || str_comp(Entry.m_aName, "") != 0)
+	//	m_WarEntries.push_back(Entry);
 }
 
 void CWarList::RemoveWarEntryInGame(int WarType, const char *pName, bool IsClan)

@@ -1,0 +1,27 @@
+#ifndef GAME_CLIENT_COMPONENTS_TRAILS_H
+#define GAME_CLIENT_COMPONENTS_TRAILS_H
+#include <game/client/component.h>
+
+class CTrails : public CComponent
+{
+
+public:
+	CTrails();
+	virtual int Sizeof() const override { return sizeof(*this); }
+	virtual void OnRender() override;
+	virtual void OnReset() override;
+
+
+private:
+	vec2 m_PositionHistory[MAX_CLIENTS][200];
+	int m_PositionTick[MAX_CLIENTS][200];
+	bool m_HistoryValid[MAX_CLIENTS] = {};
+
+	void ClearAllHistory();
+	void ClearHistory(int ClientId);
+
+	bool ShouldPredictPlayer(int ClientId);
+};
+
+
+#endif

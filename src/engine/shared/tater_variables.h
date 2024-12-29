@@ -167,6 +167,9 @@ MACRO_CONFIG_INT(ClStatusBarTextAlpha, tc_statusbar_text_alpha, 100, 0, 100, CFG
 MACRO_CONFIG_INT(ClStatusBarLabels, tc_status_bar_labels, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show labels on status bar entries")
 MACRO_CONFIG_STR(ClStatusBarScheme, tc_status_bar_scheme, 16, "ac pf r", CFGFLAG_CLIENT | CFGFLAG_SAVE, "The order in which to show status bar items")
 
+// Trails
+MACRO_CONFIG_INT(ClTeeTrails, tc_tee_trails, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable Tee Trails")
+
 // Font
 MACRO_CONFIG_STR(ClCustomFont, tc_custom_font, 255, "DejaVu Sans", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom font face")
 
