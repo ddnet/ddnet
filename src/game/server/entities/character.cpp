@@ -1083,7 +1083,8 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 	}
 
 	if(m_pPlayer->GetCid() == SnappingClient || SnappingClient == SERVER_DEMO_CLIENT ||
-		(!g_Config.m_SvStrictSpectateMode && m_pPlayer->GetCid() == GameServer()->m_apPlayers[SnappingClient]->m_SpectatorId))
+		(g_Config.m_SvStrictSpectateMode == 0 && GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS) ||
+		(g_Config.m_SvStrictSpectateMode == 1 && m_pPlayer->GetCid() == GameServer()->m_apPlayers[SnappingClient]->m_SpectatorId))
 	{
 		Health = m_Health;
 		Armor = m_Armor;
