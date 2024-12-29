@@ -2,8 +2,9 @@ package org.ddnet.client;
 
 import java.io.File;
 
-import androidx.core.app.RemoteInput;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.RemoteInput;
+import androidx.core.app.ServiceCompat;
 
 import android.app.*;
 import android.content.*;
@@ -63,19 +64,12 @@ public class ServerService extends Service {
 
 		createNotificationChannel();
 
-		Notification notification = createRunningNotification();
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(
-				NOTIFICATION_ID,
-				notification,
-				ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
-			);
-		} else {
-			startForeground(
-				NOTIFICATION_ID,
-				notification
-			);
-		}
+		ServiceCompat.startForeground(
+			this,
+			NOTIFICATION_ID,
+			createRunningNotification(),
+			ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
+		);
 
 		thread = new NativeServerThread(this);
 		thread.start();
