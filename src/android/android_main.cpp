@@ -241,8 +241,9 @@ bool StartAndroidServer()
 {
 	// We need the notification-permission to show a notification for the foreground service.
 	// We use SDL for this instead of doing it on the Java side because this function blocks
-	// until the user made a choice, which is easier to handle.
-	if(!SDL_AndroidRequestPermission("android.permission.POST_NOTIFICATIONS"))
+	// until the user made a choice, which is easier to handle. Only Android 13 (API 33) and
+	// newer support requesting this permission at runtime.
+	if(SDL_GetAndroidSDKVersion() >= 33 && !SDL_AndroidRequestPermission("android.permission.POST_NOTIFICATIONS"))
 	{
 		return false;
 	}
