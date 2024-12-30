@@ -15,6 +15,21 @@ A non-exhaustive list of things that usually get rejected:
     + Existing maps should not break.
     + New gameplay should not make runs easier on already completed maps.
 
+## Programming languages
+
+We currently use the following languages to develop DDNet.
+
+- C++
+- very marginally Rust
+- Python for code generation and supporting tools
+- CMake for building
+
+Adding code in another programming language is not possible.
+
+For platform support, we also use other programming languages like Java on
+Android or Objective-C++ on macOS, but this is confined to platform-specific
+code.
+
 ## Code style
 
 There are a few style rules. Some of them are enforced by CI and some of them are manually checked by reviewers.
