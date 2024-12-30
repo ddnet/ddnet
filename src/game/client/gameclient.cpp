@@ -392,14 +392,6 @@ void CGameClient::OnInit()
 			g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL);
 		m_Menus.RenderLoading(pLoadingDDNetCaption, pLoadingMessageAssets, 1);
 	}
-	for(int i = 0; i < client_data7::g_pData->m_NumImages; i++)
-	{
-		if(client_data7::g_pData->m_aImages[i].m_pFilename[0] == '\0') // handle special null image without filename
-			client_data7::g_pData->m_aImages[i].m_Id = IGraphics::CTextureHandle();
-		else if(i == client_data7::IMAGE_DEADTEE)
-			client_data7::g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(client_data7::g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL, 0);
-		m_Menus.RenderLoading(pLoadingDDNetCaption, Localize("Initializing assets"), 1);
-	}
 
 	m_GameWorld.m_pCollision = Collision();
 	m_GameWorld.m_pTuningList = m_aTuningList;
