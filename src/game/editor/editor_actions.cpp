@@ -940,6 +940,10 @@ void CEditorActionEditLayerTilesProp::Undo()
 	{
 		pLayerTiles->m_AutoMapperConfig = m_Previous;
 	}
+	else if(m_Prop == ETilesProp::PROP_LIVE_GAMETILES)
+	{
+		pLayerTiles->m_LiveGameTiles = m_Previous;
+	}
 	else if(m_Prop == ETilesProp::PROP_SEED)
 	{
 		pLayerTiles->m_Seed = m_Previous;
@@ -1019,6 +1023,10 @@ void CEditorActionEditLayerTilesProp::Redo()
 	else if(m_Prop == ETilesProp::PROP_AUTOMAPPER)
 	{
 		pLayerTiles->m_AutoMapperConfig = m_Current;
+	}
+	else if(m_Prop == ETilesProp::PROP_LIVE_GAMETILES)
+	{
+		pLayerTiles->m_LiveGameTiles = m_Current;
 	}
 	else if(m_Prop == ETilesProp::PROP_SEED)
 	{
