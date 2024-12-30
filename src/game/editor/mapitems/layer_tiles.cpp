@@ -86,6 +86,14 @@ void CLayerTiles::SetTile(int x, int y, CTile Tile)
 	auto CurrentTile = m_pTiles[y * m_Width + x];
 	SetTileIgnoreHistory(x, y, Tile);
 	RecordStateChange(x, y, CurrentTile, Tile);
+
+	if(m_FillGameTile != -1 && m_LiveGameTiles)
+	{
+		std::shared_ptr<CLayerTiles> pGLayer = m_pEditor->m_Map.m_pGameLayer;
+		bool HasTile = Tile.m_Index != 0;
+		const CTile ResultTile = {(unsigned char)(HasTile ? m_FillGameTile : TILE_AIR)};
+		pGLayer->SetTile(x, y, ResultTile);
+	}
 }
 
 void CLayerTiles::SetTileIgnoreHistory(int x, int y, CTile Tile) const
@@ -785,6 +793,7 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 	if(Result > -1)
 	{
 		std::shared_ptr<CLayerGroup> pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
+		m_FillGameTile = Result;
 		const int OffsetX = -pGroup->m_OffsetX / 32;
 		const int OffsetY = -pGroup->m_OffsetY / 32;
 
@@ -1011,6 +1020,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT, -1000000, 1000000},
 		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
 		{"Reference", m_AutoMapperReference, PROPTYPE_AUTOMAPPER_REFERENCE, 0, 0},
+		{"Live Gametiles", m_LiveGameTiles, PROPTYPE_BOOL, 0, 1},
 		{"Seed", m_Seed, PROPTYPE_INT, 0, 1000000000},
 		{nullptr},
 	};
@@ -1126,6 +1136,10 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	else if(Prop == ETilesProp::PROP_AUTOMAPPER_REFERENCE)
 	{
 		m_AutoMapperReference = NewVal;
+	}
+	else if(Prop == ETilesProp::PROP_LIVE_GAMETILES)
+	{
+		m_LiveGameTiles = NewVal != 0;
 	}
 
 	s_Tracker.End(Prop, State);

@@ -169,7 +169,7 @@ void CEditor::LayerSelectImage()
 
 	static SLayerPopupContext s_LayerPopupContext = {};
 	s_LayerPopupContext.m_pEditor = this;
-	Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 120, 270, &s_LayerPopupContext, PopupLayer);
+	Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 150, 300, &s_LayerPopupContext, PopupLayer);
 	PopupSelectImageInvoke(pTiles->m_Image, Ui()->MouseX(), Ui()->MouseY());
 }
 
