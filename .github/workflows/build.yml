@@ -190,6 +190,12 @@ jobs:
         cd fancy
         ./DDNet-Server shutdown
 
+    - name: Test tools
+      if: contains(matrix.os, 'ubuntu-latest')
+      run: |
+        cd fancy
+        ../scripts/test_tools.sh
+
     - name: Run integration tests with Valgrind's Memcheck
       if: contains(matrix.os, 'ubuntu-latest')
       run: |
