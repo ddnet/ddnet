@@ -120,9 +120,16 @@ void CCamera::UpdateCamera()
 	// use hardcoded smooth camera for spectating unless player explictly turn it off
 	bool IsSpectatingPlayer = !GameClient()->m_MultiViewActivated;
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	{
 		IsSpectatingPlayer = IsSpectatingPlayer && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0;
+	}
 	else
-		IsSpectatingPlayer = IsSpectatingPlayer && m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0;
+	{
+		IsSpectatingPlayer = IsSpectatingPlayer && m_pClient->m_Snap.m_SpecInfo.m_Active &&
+				     m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0 &&
+				     m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != m_pClient->m_aLocalIds[0] &&
+				     (!m_pClient->Client()->DummyConnected() || m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != m_pClient->m_aLocalIds[1]);
+	}
 
 	bool UsingAutoSpecCamera = m_AutoSpecCamera && CanUseAutoSpecCamera();
 	float CurrentZoom = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
