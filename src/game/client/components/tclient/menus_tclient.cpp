@@ -664,7 +664,7 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 
 	Column.HSplitTop(LineSize, &Button, &Column);
-	Ui()->DoScrollbarOption(&g_Config.m_ClPredictionMargin, &g_Config.m_ClPredictionMargin, &Button, Localize("Prediction Margin"), 10, 25, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
+	Ui()->DoScrollbarOption(&g_Config.m_ClPredictionMargin, &g_Config.m_ClPredictionMargin, &Button, Localize("Prediction Margin"), 10, 75, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, Localize("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &Column, LineSize);
 	if(g_Config.m_ClRemoveAnti)
 	{
@@ -952,6 +952,35 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	Column.HSplitTop(LineSize, &Button, &Column);
 	Ui()->DoScrollbarOption(&g_Config.m_ClRainbowSpeed, &g_Config.m_ClRainbowSpeed, &Button, Localize("Rainbow speed"), 0, 5000, &CUi::ms_LogarithmicScrollbarScale, 0, "%");
 	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+
+	// ***** Tee Trails ***** //
+	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, Localize("Tee Trails"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrail, Localize("Enable tee trails"), &g_Config.m_ClTeeTrail, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailOthers, Localize("Tee trail others"), &g_Config.m_ClTeeTrailOthers, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailRainbow, Localize("Rainbow tee trail"), &g_Config.m_ClTeeTrailRainbow, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailFade, Localize("Fade trail alpha"), &g_Config.m_ClTeeTrailFade, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailTaper, Localize("Taper trail width"), &g_Config.m_ClTeeTrailTaper, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailUseTeeColor, Localize("Use tee color for trail"), &g_Config.m_ClTeeTrailUseTeeColor, &Column, LineSize);
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailWidth, &g_Config.m_ClTeeTrailWidth, &Button, Localize("Trail width"), 0, 20);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailLength, &g_Config.m_ClTeeTrailLength, &Button, Localize("Trail length"), 0, 200);
+	Column.HSplitTop(LineSize, &Button, &Column);
+	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailAlpha, &g_Config.m_ClTeeTrailAlpha, &Button, Localize("Trail alpha"), 0, 100);
+	static CButtonContainer s_TeeTrailColor;
+	DoLine_ColorPicker(&s_TeeTrailColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Tee trail color"), &g_Config.m_ClTeeTrailColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+
+
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 

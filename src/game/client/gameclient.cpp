@@ -132,9 +132,9 @@ void CGameClient::OnConsoleInit()
 					      &m_Particles.m_RenderTrail,
 					      &m_Particles.m_RenderTrailExtra,
 					      &m_Items,
+					      &m_Trails,
 					      &m_Ghost,
 					      &m_Players,
-					      &m_Trails,
 					      &m_MapLayersForeground,
 					      &m_Outlines,
 					      &m_Particles.m_RenderExplosions,
@@ -3754,6 +3754,9 @@ vec2 CGameClient::GetFreezePos(int ClientId)
 			MixAmount = 1.f;
 
 		Client()->GetSmoothFreezeTick(&SmoothTick, &SmoothIntra, MixAmount);
+
+		m_SmoothTick[i] = SmoothTick;
+		m_SmoothIntraTick[i] = SmoothIntra;
 
 		if(ClientId != m_Snap.m_LocalClientId && g_Config.m_ClFastInputOthers && g_Config.m_ClFastInput)
 			SmoothTick += g_Config.m_ClFastInput;

@@ -164,11 +164,22 @@ MACRO_CONFIG_COL(ClStatusBarTextColor, tc_statusbar_text_color, 4278190335, CFGF
 MACRO_CONFIG_INT(ClStatusBarAlpha, tc_statusbar_alpha, 75, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Status bar background alpha")
 MACRO_CONFIG_INT(ClStatusBarTextAlpha, tc_statusbar_text_alpha, 100, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Status bar text alpha")
 
-MACRO_CONFIG_INT(ClStatusBarLabels, tc_status_bar_labels, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show labels on status bar entries")
-MACRO_CONFIG_STR(ClStatusBarScheme, tc_status_bar_scheme, 16, "ac pf r", CFGFLAG_CLIENT | CFGFLAG_SAVE, "The order in which to show status bar items")
+MACRO_CONFIG_INT(ClStatusBarLabels, tc_statusbar_labels, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show labels on status bar entries")
+MACRO_CONFIG_STR(ClStatusBarScheme, tc_statusbar_scheme, 16, "ac pf r", CFGFLAG_CLIENT | CFGFLAG_SAVE, "The order in which to show status bar items")
 
 // Trails
-MACRO_CONFIG_INT(ClTeeTrails, tc_tee_trails, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable Tee Trails")
+MACRO_CONFIG_INT(ClTeeTrail, tc_tee_trail, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable Tee trails")
+MACRO_CONFIG_INT(ClTeeTrailOthers, tc_tee_trail_others, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show tee trails for other players")
+MACRO_CONFIG_INT(ClTeeTrailWidth, tc_tee_trail_width, 15, 0, 20, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tee trail width")
+MACRO_CONFIG_INT(ClTeeTrailLength, tc_tee_trail_length, 25, 5, 200, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tee trail length")
+MACRO_CONFIG_INT(ClTeeTrailAlpha, tc_tee_trail_alpha, 80, 1, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tee trail alpha")
+MACRO_CONFIG_COL(ClTeeTrailColor, tc_tee_trail_color, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tee trail color")
+MACRO_CONFIG_INT(ClTeeTrailUseTeeColor, tc_tee_trail_use_tee_color, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Use the color of the tee as the color of the trail")
+MACRO_CONFIG_INT(ClTeeTrailTaper, tc_tee_trail_taper, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Taper tee trail over length")
+MACRO_CONFIG_INT(ClTeeTrailFade, tc_tee_trail_fade, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Fade trail alpha over length")
+MACRO_CONFIG_INT(ClTeeTrailRainbow, tc_tee_trail_rainbow, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Rainbow tee trails")
+
+
 
 // Font
 MACRO_CONFIG_STR(ClCustomFont, tc_custom_font, 255, "DejaVu Sans", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Custom font face")

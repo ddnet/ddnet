@@ -527,6 +527,10 @@ public:
 
 	CClientData m_aClients[MAX_CLIENTS];
 
+	// TClient
+	int m_SmoothTick[2] = {};
+	float m_SmoothIntraTick[2] = {};
+
 	class CClientStats
 	{
 		int m_IngameTicks;

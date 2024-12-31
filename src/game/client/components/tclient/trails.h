@@ -15,12 +15,15 @@ public:
 private:
 	vec2 m_PositionHistory[MAX_CLIENTS][200];
 	int m_PositionTick[MAX_CLIENTS][200];
+
 	bool m_HistoryValid[MAX_CLIENTS] = {};
 
 	void ClearAllHistory();
 	void ClearHistory(int ClientId);
+	void ManageServerIntraTick();
 
 	bool ShouldPredictPlayer(int ClientId);
+	float m_RealIntraTick = 0.0f;
 };
 
 
