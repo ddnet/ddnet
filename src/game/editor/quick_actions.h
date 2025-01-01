@@ -9,12 +9,12 @@
 
 REGISTER_QUICK_ACTION(
 	ToggleGrid,
-	"Toggle Grid",
+	"Toggle grid",
 	[&]() { MapView()->MapGrid()->Toggle(); },
 	ALWAYS_FALSE,
 	[&]() -> bool { return MapView()->MapGrid()->IsEnabled(); },
 	DEFAULT_BTN,
-	"[Ctrl+G] Toggle Grid.")
+	"[Ctrl+G] Toggle grid.")
 REGISTER_QUICK_ACTION(
 	GameTilesAir,
 	"Game tiles: Air",
@@ -22,7 +22,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesHookable,
 	"Game tiles: Hookable",
@@ -30,7 +30,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesDeath,
 	"Game tiles: Death",
@@ -38,7 +38,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesUnhookable,
 	"Game tiles: Unhookable",
@@ -46,7 +46,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesHookthrough,
 	"Game tiles: Hookthrough",
@@ -54,7 +54,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesFreeze,
 	"Game tiles: Freeze",
@@ -62,7 +62,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesUnfreeze,
 	"Game tiles: Unfreeze",
@@ -70,7 +70,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesDeepFreeze,
 	"Game tiles: Deep Freeze",
@@ -78,7 +78,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesDeepUnfreeze,
 	"Game tiles: Deep Unfreeze",
@@ -86,7 +86,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesBlueCheckTele,
 	"Game tiles: Blue Check Tele",
@@ -94,7 +94,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesRedCheckTele,
 	"Game tiles: Red Check Tele",
@@ -102,7 +102,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesLiveFreeze,
 	"Game tiles: Live Freeze",
@@ -110,7 +110,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	GameTilesLiveUnfreeze,
 	"Game tiles: Live Unfreeze",
@@ -118,7 +118,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !CanFillGameTiles(); },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Constructs game tiles from this layer.")
+	"Construct game tiles from this layer.")
 REGISTER_QUICK_ACTION(
 	AddGroup,
 	"Add group",
@@ -126,10 +126,10 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Adds a new group.")
+	"Add a new group.")
 REGISTER_QUICK_ACTION(
 	ResetZoom,
-	"Reset Zoom",
+	"Reset zoom",
 	[&]() { MapView()->ResetZoom(); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
@@ -137,7 +137,7 @@ REGISTER_QUICK_ACTION(
 	"[Numpad*] Zoom to normal and remove editor offset.")
 REGISTER_QUICK_ACTION(
 	ZoomOut,
-	"Zoom Out",
+	"Zoom out",
 	[&]() { MapView()->Zoom()->ChangeValue(50.0f); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
@@ -145,7 +145,7 @@ REGISTER_QUICK_ACTION(
 	"[Numpad-] Zoom out.")
 REGISTER_QUICK_ACTION(
 	ZoomIn,
-	"Zoom In",
+	"Zoom in",
 	[&]() { MapView()->Zoom()->ChangeValue(-50.0f); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
@@ -166,9 +166,9 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	[&]() -> bool { return MapView()->ProofMode()->IsEnabled(); },
 	DEFAULT_BTN,
-	"Toggles proof borders. These borders represent the area that a player can see with default zoom.")
+	"Toggle proof borders. These borders represent the area that a player can see with default zoom.")
 REGISTER_QUICK_ACTION(
-	AddTileLayer, "Add tile layer", [&]() { AddTileLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Creates a new tile layer.")
+	AddTileLayer, "Add tile layer", [&]() { AddTileLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Create a new tile layer.")
 REGISTER_QUICK_ACTION(
 	AddSwitchLayer,
 	"Add switch layer",
@@ -176,7 +176,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !GetSelectedGroup()->m_GameGroup || m_Map.m_pSwitchLayer; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Creates a new switch layer.")
+	"Create a new switch layer.")
 REGISTER_QUICK_ACTION(
 	AddTuneLayer,
 	"Add tune layer",
@@ -184,7 +184,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !GetSelectedGroup()->m_GameGroup || m_Map.m_pTuneLayer; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Creates a new tuning layer.")
+	"Create a new tuning layer.")
 REGISTER_QUICK_ACTION(
 	AddSpeedupLayer,
 	"Add speedup layer",
@@ -192,7 +192,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !GetSelectedGroup()->m_GameGroup || m_Map.m_pSpeedupLayer; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Creates a new speedup layer.")
+	"Create a new speedup layer.")
 REGISTER_QUICK_ACTION(
 	AddTeleLayer,
 	"Add tele layer",
@@ -200,7 +200,7 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !GetSelectedGroup()->m_GameGroup || m_Map.m_pTeleLayer; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Creates a new tele layer.")
+	"Create a new tele layer.")
 REGISTER_QUICK_ACTION(
 	AddFrontLayer,
 	"Add front layer",
@@ -208,22 +208,22 @@ REGISTER_QUICK_ACTION(
 	[&]() -> bool { return !GetSelectedGroup()->m_GameGroup || m_Map.m_pFrontLayer; },
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Creates a new item layer.")
+	"Create a new item layer.")
 REGISTER_QUICK_ACTION(
-	AddQuadsLayer, "Add quads layer", [&]() { AddQuadsLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Creates a new quads layer.")
+	AddQuadsLayer, "Add quads layer", [&]() { AddQuadsLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Create a new quads layer.")
 REGISTER_QUICK_ACTION(
-	AddSoundLayer, "Add sound layer", [&]() { AddSoundLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Creates a new sound layer.")
+	AddSoundLayer, "Add sound layer", [&]() { AddSoundLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Create a new sound layer.")
 REGISTER_QUICK_ACTION(
 	SaveAs,
-	"Save As",
-	[&]() { InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save As", "maps", true, CEditor::CallbackSaveMap, this); },
+	"Save as",
+	[&]() { InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save as", "maps", true, CEditor::CallbackSaveMap, this); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+Shift+S] Saves the current map under a new name.")
+	"[Ctrl+Shift+S] Save the current map under a new name.")
 REGISTER_QUICK_ACTION(
 	LoadCurrentMap,
-	"Load Current Map",
+	"Load current map",
 	[&]() {
 		if(HasUnsavedData())
 		{
@@ -238,7 +238,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"[Ctrl+Alt+L] Opens the current in game map for editing.")
+	"[Ctrl+Alt+L] Open the current ingame map for editing.")
 REGISTER_QUICK_ACTION(
 	Envelopes,
 	"Envelopes",
@@ -246,7 +246,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES; },
-	"Toggles the envelope editor.")
+	"Toggle the envelope editor.")
 REGISTER_QUICK_ACTION(
 	ServerSettings,
 	"Server settings",
@@ -254,7 +254,7 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS; },
-	"Toggles the server settings editor.")
+	"Toggle the server settings editor.")
 REGISTER_QUICK_ACTION(
 	History,
 	"History",
@@ -262,10 +262,10 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
 	[&]() -> int { return m_ShowPicker ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_HISTORY; },
-	"Toggles the editor history view.")
+	"Toggle the editor history view.")
 REGISTER_QUICK_ACTION(
 	AddImage,
-	"Add Image",
+	"Add image",
 	[&]() { InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Add Image", "Add", "mapres", false, AddImage, this); },
 	ALWAYS_FALSE,
 	ALWAYS_FALSE,
@@ -273,7 +273,7 @@ REGISTER_QUICK_ACTION(
 	"Load a new image to use in the map.")
 REGISTER_QUICK_ACTION(
 	LayerPropAddImage,
-	"Layer: Add Image",
+	"Layer: add image",
 	[&]() { LayerSelectImage(); },
 	[&]() -> bool { return !IsNonGameTileLayerSelected(); },
 	ALWAYS_FALSE,
@@ -281,7 +281,7 @@ REGISTER_QUICK_ACTION(
 	"Pick mapres image for currently selected layer.")
 REGISTER_QUICK_ACTION(
 	ShowInfoOff,
-	"Show Info: Off",
+	"Show info: Off",
 	[&]() {
 		m_ShowTileInfo = SHOW_TILE_OFF;
 		m_ShowEnvelopePreview = SHOWENV_NONE;
@@ -292,7 +292,7 @@ REGISTER_QUICK_ACTION(
 	"Do not show tile information.")
 REGISTER_QUICK_ACTION(
 	ShowInfoDec,
-	"Show Info: Dec",
+	"Show info: Dec",
 	[&]() {
 		m_ShowTileInfo = SHOW_TILE_DECIMAL;
 		m_ShowEnvelopePreview = SHOWENV_NONE;
@@ -303,7 +303,7 @@ REGISTER_QUICK_ACTION(
 	"[Ctrl+I] Show tile information.")
 REGISTER_QUICK_ACTION(
 	ShowInfoHex,
-	"Show Info: Hex",
+	"Show info: Hex",
 	[&]() {
 		m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
 		m_ShowEnvelopePreview = SHOWENV_NONE;
@@ -324,7 +324,7 @@ REGISTER_QUICK_ACTION(
 	},
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
-	"Deletes the layer.")
+	"Delete the layer.")
 REGISTER_QUICK_ACTION(
 	Pipette,
 	"Pipette",
@@ -343,7 +343,7 @@ REGISTER_QUICK_ACTION(
 	"Adjust the map details of the current map.")
 REGISTER_QUICK_ACTION(
 	AddQuad,
-	"Add Quad",
+	"Add quad",
 	[&]() { AddQuadOrSound(); },
 	[&]() -> bool {
 		std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
@@ -355,8 +355,8 @@ REGISTER_QUICK_ACTION(
 	DEFAULT_BTN,
 	"[Ctrl+Q] Add a new quad.")
 REGISTER_QUICK_ACTION(
-	AddSound,
-	"Add Sound",
+	AddSoundSource,
+	"Add sound source",
 	[&]() { AddQuadOrSound(); },
 	[&]() -> bool {
 		std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);

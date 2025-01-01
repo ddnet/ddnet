@@ -123,7 +123,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	// redo button
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 	static int s_RedoButton = 0;
-	if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_ServerSettingsHistory.CanRedo() ? 0 : -1, &Button, 0, "[Ctrl+Y] Redo command edit", IGraphics::CORNER_R, 11.0f) == 1 || (CanMoveDown && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_DOWN)))
+	if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_ServerSettingsHistory.CanRedo() ? 0 : -1, &Button, 0, "[Ctrl+Y] Redo the last command edit.", IGraphics::CORNER_R, 11.0f) == 1 || (CanMoveDown && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_DOWN)))
 	{
 		m_ServerSettingsHistory.Redo();
 	}
@@ -132,7 +132,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 	ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 	static int s_UndoButton = 0;
-	if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_ServerSettingsHistory.CanUndo() ? 0 : -1, &Button, 0, "[Ctrl+Z] Undo command edit", IGraphics::CORNER_L, 11.0f) == 1 || (CanMoveUp && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_UP)))
+	if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_ServerSettingsHistory.CanUndo() ? 0 : -1, &Button, 0, "[Ctrl+Z] Undo the last command edit.", IGraphics::CORNER_L, 11.0f) == 1 || (CanMoveUp && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_UP)))
 	{
 		m_ServerSettingsHistory.Undo();
 	}
@@ -318,14 +318,17 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 
 	// If we have a valid command, display the help in the tooltip
 	if(Context.CommandIsValid() && pLineInput->IsActive() && Ui()->HotItem() == nullptr)
+	{
 		Context.GetCommandHelpText(m_aTooltip, sizeof(m_aTooltip));
+		str_append(m_aTooltip, ".");
+	}
 
 	CUIRect ToolBar = *pRect;
 	CUIRect Button;
 	ToolBar.VSplitRight(ToolBar.h, &ToolBar, &Button);
 
 	// Do the unknown command toggle button
-	if(DoButton_FontIcon(&Context.m_AllowUnknownCommands, FONT_ICON_QUESTION, Context.m_AllowUnknownCommands, &Button, 0, "Disallow/allow unknown or invalid commands", IGraphics::CORNER_R))
+	if(DoButton_FontIcon(&Context.m_AllowUnknownCommands, FONT_ICON_QUESTION, Context.m_AllowUnknownCommands, &Button, 0, "Disallow/allow unknown or invalid commands.", IGraphics::CORNER_R))
 	{
 		Context.m_AllowUnknownCommands = !Context.m_AllowUnknownCommands;
 		Context.Update();
@@ -336,7 +339,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 	Context.ColorArguments(vColorSplits);
 
 	// Do and render clearable edit box with the colors
-	if(DoClearableEditBox(pLineInput, &ToolBar, FontSize, IGraphics::CORNER_L, "Enter a server setting.", vColorSplits))
+	if(DoClearableEditBox(pLineInput, &ToolBar, FontSize, IGraphics::CORNER_L, "Enter a server setting. Press ctrl+space to show available settings.", vColorSplits))
 	{
 		Context.Update(); // Update the context when contents change
 		Context.m_DropdownContext.m_ShouldHide = false;
@@ -645,11 +648,11 @@ void CEditor::RenderMapSettingsErrorDialog()
 						FixBtn.HMargin(1.0f, &FixBtn);
 
 						// Delete button
-						if(DoButton_FontIcon(&pInvalidSetting->m_Context.m_Deleted, FONT_ICON_TRASH, pInvalidSetting->m_Context.m_Deleted, &DelBtn, 0, "Delete this command", IGraphics::CORNER_ALL, 10.0f))
+						if(DoButton_FontIcon(&pInvalidSetting->m_Context.m_Deleted, FONT_ICON_TRASH, pInvalidSetting->m_Context.m_Deleted, &DelBtn, 0, "Delete this command.", IGraphics::CORNER_ALL, 10.0f))
 							pInvalidSetting->m_Context.m_Deleted = !pInvalidSetting->m_Context.m_Deleted;
 
 						// Fix button
-						if(DoButton_Editor(&pInvalidSetting->m_Context.m_Fixed, "Fix", !pInvalidSetting->m_Context.m_Deleted ? (s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1)) : -1, &FixBtn, 0, "Fix this command"))
+						if(DoButton_Editor(&pInvalidSetting->m_Context.m_Fixed, "Fix", !pInvalidSetting->m_Context.m_Deleted ? (s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1)) : -1, &FixBtn, 0, "Fix this command."))
 						{
 							s_FixingCommandIndex = i;
 							SetInput(pInvalidSetting->m_aSetting);
@@ -669,7 +672,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 
 						// Buttons
 						static int s_Cancel = 0, s_Ok = 0;
-						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, 0, "Cancel fixing this command") || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, 0, "Cancel fixing this command.") || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 						{
 							s_FixingCommandIndex = -1;
 							s_Input.Clear();
@@ -682,7 +685,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						s_Context.CheckCollision(vSettingsValid, Res);
 						bool Valid = s_Context.Valid() && Res == ECollisionCheckResult::ADD;
 
-						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm editing of this command") || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm editing of this command.") || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 						{
 							// Mark the setting is being fixed
 							pInvalidSetting->m_Context.m_Fixed = true;
@@ -768,7 +771,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 					Label.VSplitRight(50.0f, &Label, &ChooseBtn);
 					Label.VSplitRight(5.0f, &Label, nullptr);
 					ChooseBtn.HMargin(1.0f, &ChooseBtn);
-					if(DoButton_Editor(&vDuplicates, "Choose", Chosen == -1, &ChooseBtn, 0, "Choose this command"))
+					if(DoButton_Editor(&vDuplicates, "Choose", Chosen == -1, &ChooseBtn, 0, "Choose this command."))
 					{
 						if(Chosen != -1)
 							vSettingsInvalid[vDuplicates[Chosen]].m_Context.m_Chosen = false;
@@ -803,7 +806,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						SubSlot.VSplitRight(50.0f, &SubSlot, &ChooseBtn);
 						SubSlot.VSplitRight(5.0f, &SubSlot, nullptr);
 						ChooseBtn.HMargin(1.0f, &ChooseBtn);
-						if(DoButton_Editor(&Duplicate.m_Context.m_Chosen, "Choose", IsInvalid && !Duplicate.m_Context.m_Fixed ? -1 : Duplicate.m_Context.m_Chosen, &ChooseBtn, 0, "Override with this command"))
+						if(DoButton_Editor(&Duplicate.m_Context.m_Chosen, "Choose", IsInvalid && !Duplicate.m_Context.m_Fixed ? -1 : Duplicate.m_Context.m_Chosen, &ChooseBtn, 0, "Override with this command."))
 						{
 							Duplicate.m_Context.m_Chosen = !Duplicate.m_Context.m_Chosen;
 							if(Chosen != -1 && Chosen != DuplicateIndex)
@@ -820,7 +823,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 								SubSlot.VSplitRight(30.0f, &SubSlot, &FixBtn);
 								SubSlot.VSplitRight(10.0f, &SubSlot, nullptr);
 								FixBtn.HMargin(1.0f, &FixBtn);
-								if(DoButton_Editor(&Duplicate.m_Context.m_Fixed, "Fix", s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1), &FixBtn, 0, "Fix this command (needed before it can be chosen)"))
+								if(DoButton_Editor(&Duplicate.m_Context.m_Fixed, "Fix", s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1), &FixBtn, 0, "Fix this command (needed before it can be chosen)."))
 								{
 									s_FixingCommandIndex = Duplicate.m_Index;
 									SetInput(Duplicate.m_aSetting);
@@ -845,7 +848,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						OkBtn.HMargin(1.0f, &OkBtn);
 
 						static int s_Cancel = 0, s_Ok = 0;
-						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, 0, "Cancel fixing this command") || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, 0, "Cancel fixing this command.") || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 						{
 							s_FixingCommandIndex = -1;
 							s_Input.Clear();
@@ -862,7 +865,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						s_Context.CheckCollision({m_Map.m_vSettings[i]}, Res);
 						bool Valid = s_Context.Valid() && Res == ECollisionCheckResult::REPLACE;
 
-						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm editing of this command") || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm editing of this command.") || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 						{
 							if(Valid) // Just to make sure
 							{
@@ -1088,8 +1091,8 @@ void CMapSettingsBackend::LoadAllMapSettings()
 	// Load list of commands
 	LoadCommand("tune", "s[tuning] f[value]", "Tune variable to value or show current value");
 	LoadCommand("tune_zone", "i[zone] s[tuning] f[value]", "Tune in zone a variable to value");
-	LoadCommand("tune_zone_enter", "i[zone] r[message]", "which message to display on zone enter; use 0 for normal area");
-	LoadCommand("tune_zone_leave", "i[zone] r[message]", "which message to display on zone leave; use 0 for normal area");
+	LoadCommand("tune_zone_enter", "i[zone] r[message]", "Which message to display on zone enter; use 0 for normal area");
+	LoadCommand("tune_zone_leave", "i[zone] r[message]", "Which message to display on zone leave; use 0 for normal area");
 	LoadCommand("mapbug", "s[mapbug]", "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 	LoadCommand("switch_open", "i[switch]", "Whether a switch is deactivated by default (otherwise activated)");
 }

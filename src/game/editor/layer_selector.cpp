@@ -13,7 +13,7 @@ void CLayerSelector::OnInit(CEditor *pEditor)
 
 bool CLayerSelector::SelectByTile()
 {
-	// ctrl+rightclick a map index to select the layer that has a tile there
+	// ctrl+right click a map index to select the layer that has a tile there
 	if(Ui()->HotItem() != &Editor()->m_MapEditorId)
 		return false;
 	if(!Input()->ModifierIsPressed() || !Ui()->MouseButtonClicked(1))

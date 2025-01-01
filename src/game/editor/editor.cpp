@@ -323,7 +323,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 
 	if(s_pLastTextId == pId)
 	{
-		str_copy(m_aTooltip, "Type your number");
+		str_copy(m_aTooltip, "Type your number. Press enter to confirm.");
 		Ui()->SetActiveItem(&s_NumberInput);
 		DoEditBox(&s_NumberInput, pRect, 10.0f, Corners);
 
@@ -975,7 +975,7 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const
 	// play/pause button
 	{
 		View.VSplitLeft(View.h, &Button, &View);
-		if(DoButton_FontIcon(pPlayPauseButtonId, Sound()->IsPlaying(SampleId) ? FONT_ICON_PAUSE : FONT_ICON_PLAY, 0, &Button, 0, "Play/pause audio preview", IGraphics::CORNER_ALL) ||
+		if(DoButton_FontIcon(pPlayPauseButtonId, Sound()->IsPlaying(SampleId) ? FONT_ICON_PAUSE : FONT_ICON_PLAY, 0, &Button, 0, "Play/pause audio preview.", IGraphics::CORNER_ALL) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_SPACE)))
 		{
 			if(Sound()->IsPlaying(SampleId))
@@ -995,7 +995,7 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const
 	{
 		View.VSplitLeft(2.0f, nullptr, &View);
 		View.VSplitLeft(View.h, &Button, &View);
-		if(DoButton_FontIcon(pStopButtonId, FONT_ICON_STOP, 0, &Button, 0, "Stop audio preview", IGraphics::CORNER_ALL))
+		if(DoButton_FontIcon(pStopButtonId, FONT_ICON_STOP, 0, &Button, 0, "Stop audio preview.", IGraphics::CORNER_ALL))
 		{
 			Sound()->Stop(SampleId);
 		}
@@ -1094,7 +1094,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// detail button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_HqButton = 0;
-		if(DoButton_Editor(&s_HqButton, "HD", m_ShowDetail, &Button, 0, "[ctrl+h] Toggle High Detail") ||
+		if(DoButton_Editor(&s_HqButton, "HD", m_ShowDetail, &Button, 0, "[Ctrl+H] Toggle high detail.") ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_H) && ModPressed))
 		{
 			m_ShowDetail = !m_ShowDetail;
@@ -1105,7 +1105,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// animation button
 		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 		static char s_AnimateButton;
-		if(DoButton_FontIcon(&s_AnimateButton, FONT_ICON_CIRCLE_PLAY, m_Animate, &Button, 0, "[ctrl+m] Toggle animation", IGraphics::CORNER_L) ||
+		if(DoButton_FontIcon(&s_AnimateButton, FONT_ICON_CIRCLE_PLAY, m_Animate, &Button, 0, "[Ctrl+M] Toggle animation.", IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_M) && ModPressed))
 		{
 			m_AnimateStart = time_get();
@@ -1115,7 +1115,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// animation settings button
 		TB_Top.VSplitLeft(14.0f, &Button, &TB_Top);
 		static char s_AnimateSettingsButton;
-		if(DoButton_FontIcon(&s_AnimateSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, 0, "Change animation settings.", IGraphics::CORNER_R, 8.0f))
+		if(DoButton_FontIcon(&s_AnimateSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, 0, "Change the animation settings.", IGraphics::CORNER_R, 8.0f))
 		{
 			m_AnimateUpdatePopup = true;
 			static SPopupMenuId s_PopupAnimateSettingsId;
@@ -1144,7 +1144,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// zoom button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_ZoomButton = 0;
-		if(DoButton_Editor(&s_ZoomButton, "Zoom", m_PreviewZoom, &Button, 0, "Toggles preview of how layers will be zoomed in-game"))
+		if(DoButton_Editor(&s_ZoomButton, "Zoom", m_PreviewZoom, &Button, 0, "Toggle preview of how layers will be zoomed ingame."))
 		{
 			m_PreviewZoom = !m_PreviewZoom;
 		}
@@ -1163,7 +1163,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// grid settings button
 		TB_Top.VSplitLeft(14.0f, &Button, &TB_Top);
 		static char s_GridSettingsButton;
-		if(DoButton_FontIcon(&s_GridSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, 0, "Change grid settings.", IGraphics::CORNER_R, 8.0f))
+		if(DoButton_FontIcon(&s_GridSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, 0, "Change the grid settings.", IGraphics::CORNER_R, 8.0f))
 		{
 			MapView()->MapGrid()->DoSettingsPopup(vec2(Button.x, Button.y + Button.h));
 		}
@@ -1197,14 +1197,14 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// undo/redo group
 		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 		static int s_UndoButton = 0;
-		if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_EditorHistory.CanUndo() - 1, &Button, 0, "[ctrl+z] Undo last action", IGraphics::CORNER_L))
+		if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_EditorHistory.CanUndo() - 1, &Button, 0, "[Ctrl+Z] Undo the last action.", IGraphics::CORNER_L))
 		{
 			m_EditorHistory.Undo();
 		}
 
 		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 		static int s_RedoButton = 0;
-		if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_EditorHistory.CanRedo() - 1, &Button, 0, "[ctrl+y] Redo last action", IGraphics::CORNER_R))
+		if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_EditorHistory.CanRedo() - 1, &Button, 0, "[Ctrl+Y] Redo the last action.", IGraphics::CORNER_R))
 		{
 			m_EditorHistory.Redo();
 		}
@@ -1218,7 +1218,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			// flip buttons
 			TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 			static int s_FlipXButton = 0;
-			if(DoButton_FontIcon(&s_FlipXButton, FONT_ICON_ARROWS_LEFT_RIGHT, Enabled, &Button, 0, "[N] Flip brush horizontal", IGraphics::CORNER_L) || (Input()->KeyPress(KEY_N) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
+			if(DoButton_FontIcon(&s_FlipXButton, FONT_ICON_ARROWS_LEFT_RIGHT, Enabled, &Button, 0, "[N] Flip the brush horizontally.", IGraphics::CORNER_L) || (Input()->KeyPress(KEY_N) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
 			{
 				for(auto &pLayer : m_pBrush->m_vpLayers)
 					pLayer->BrushFlipX();
@@ -1226,7 +1226,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 			TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 			static int s_FlipyButton = 0;
-			if(DoButton_FontIcon(&s_FlipyButton, FONT_ICON_ARROWS_UP_DOWN, Enabled, &Button, 0, "[M] Flip brush vertical", IGraphics::CORNER_R) || (Input()->KeyPress(KEY_M) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
+			if(DoButton_FontIcon(&s_FlipyButton, FONT_ICON_ARROWS_UP_DOWN, Enabled, &Button, 0, "[M] Flip the brush vertically.", IGraphics::CORNER_R) || (Input()->KeyPress(KEY_M) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
 			{
 				for(auto &pLayer : m_pBrush->m_vpLayers)
 					pLayer->BrushFlipY();
@@ -1247,7 +1247,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				}
 
 			static int s_CcwButton = 0;
-			if(DoButton_FontIcon(&s_CcwButton, FONT_ICON_ARROW_ROTATE_LEFT, Enabled, &Button, 0, "[R] Rotates the brush counter clockwise", IGraphics::CORNER_L) || (Input()->KeyPress(KEY_R) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
+			if(DoButton_FontIcon(&s_CcwButton, FONT_ICON_ARROW_ROTATE_LEFT, Enabled, &Button, 0, "[R] Rotate the brush counter-clockwise.", IGraphics::CORNER_L) || (Input()->KeyPress(KEY_R) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
 			{
 				for(auto &pLayer : m_pBrush->m_vpLayers)
 					pLayer->BrushRotate(-s_RotationAmount / 360.0f * pi * 2);
@@ -1259,7 +1259,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 			TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 			static int s_CwButton = 0;
-			if(DoButton_FontIcon(&s_CwButton, FONT_ICON_ARROW_ROTATE_RIGHT, Enabled, &Button, 0, "[T] Rotates the brush clockwise", IGraphics::CORNER_R) || (Input()->KeyPress(KEY_T) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
+			if(DoButton_FontIcon(&s_CwButton, FONT_ICON_ARROW_ROTATE_RIGHT, Enabled, &Button, 0, "[T] Rotate the brush clockwise.", IGraphics::CORNER_R) || (Input()->KeyPress(KEY_T) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
 			{
 				for(auto &pLayer : m_pBrush->m_vpLayers)
 					pLayer->BrushRotate(s_RotationAmount / 360.0f * pi * 2);
@@ -1350,7 +1350,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					if(pButtonName != nullptr)
 					{
 						static char s_aButtonTooltip[64];
-						str_format(s_aButtonTooltip, sizeof(s_aButtonTooltip), "[ctrl+t] %s", pButtonName);
+						str_format(s_aButtonTooltip, sizeof(s_aButtonTooltip), "[Ctrl+T] %s", pButtonName);
 
 						TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
 						static int s_ModifierButton = 0;
@@ -1384,10 +1384,10 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			}
 			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
-				if(DoButton_Editor(&m_QuickActionAddSound, m_QuickActionAddSound.Label(), 0, &Button, 0, m_QuickActionAddSound.Description()) ||
+				if(DoButton_Editor(&m_QuickActionAddSoundSource, m_QuickActionAddSoundSource.Label(), 0, &Button, 0, m_QuickActionAddSoundSource.Description()) ||
 					(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed))
 				{
-					m_QuickActionAddSound.Call();
+					m_QuickActionAddSoundSource.Call();
 				}
 			}
 
@@ -1398,7 +1398,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		{
 			TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
 			static int s_BrushDrawModeButton = 0;
-			if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[ctrl+d] Toggle brush draw mode") ||
+			if(DoButton_Editor(&s_BrushDrawModeButton, "Destructive", m_BrushDrawDestructive, &Button, 0, "[Ctrl+D] Toggle brush draw mode: preserve or override existing tiles.") ||
 				(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_D) && ModPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
@@ -2300,7 +2300,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 		ms_pUiGotContext = pId;
 
 		Graphics()->SetColor(1, 1, 1, 1);
-		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move pivot. Hold alt to ignore grid. Hold shift and right click to delete.");
+		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move pivot. Hold alt to ignore grid. Shift+right click to delete.");
 
 		if(Ui()->MouseButton(0))
 		{
@@ -2609,7 +2609,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 		vec2(fx2f(pQuad->m_aPoints[3].x), fx2f(pQuad->m_aPoints[3].y)),
 		vec2(fx2f(pQuad->m_aPoints[2].x), fx2f(pQuad->m_aPoints[2].y))};
 
-	str_copy(m_aTooltip, "Left click inside the quad to select an area to slice. Hold alt to ignore grid. Right click to leave knife mode");
+	str_copy(m_aTooltip, "Left click inside the quad to select an area to slice. Hold alt to ignore grid. Right click to leave knife mode.");
 
 	if(Ui()->MouseButtonClicked(1))
 	{
@@ -3262,16 +3262,16 @@ void CEditor::DoMapEditor(CUIRect View)
 				}
 			}
 			else if(m_pBrush->IsEmpty() && GetSelectedLayerType(0, LAYERTYPE_QUADS) != nullptr)
-				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right mouse to select layer.");
+				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right click to select layer.");
 			else if(m_pBrush->IsEmpty())
 			{
 				if(g_Config.m_EdLayerSelector)
-					str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Use ctrl+right click to select layer for hovered tile.");
+					str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Use ctrl+right click to select layer of hovered tile.");
 				else
 					str_copy(m_aTooltip, "Use left mouse button to drag and create a brush.");
 			}
 			else
-				str_copy(m_aTooltip, "Use left mouse button to paint with the brush. Right button clears the brush.");
+				str_copy(m_aTooltip, "Use left mouse button to paint with the brush. Right click to clear the brush.");
 
 			if(Ui()->CheckActiveItem(&m_MapEditorId))
 			{
@@ -3336,11 +3336,6 @@ void CEditor::DoMapEditor(CUIRect View)
 						}
 						else
 						{
-							// grab brush
-							char aBuf[256];
-							str_format(aBuf, sizeof(aBuf), "grabbing %f %f %f %f", r.x, r.y, r.w, r.h);
-							Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
-
 							// TODO: do all layers
 							int Grabs = 0;
 							for(size_t k = 0; k < NumEditLayers; k++)
@@ -3569,9 +3564,8 @@ void CEditor::DoMapEditor(CUIRect View)
 							str_copy(aTooltipPositionsCopy, aTooltipPositions);
 							str_format(aTooltipPositions, sizeof(aTooltipPositions), "%s, %s %s", aTooltipPositionsCopy, MapView()->ProofMode()->m_vpMenuBackgroundPositionNames[k], aNumBuf);
 						}
-						str_format(m_aMenuBackgroundTooltip, sizeof(m_aMenuBackgroundTooltip), "%s %s", aTooltipPrefix, aTooltipPositions);
+						str_format(m_aTooltip, sizeof(m_aTooltip), "%s %s.", aTooltipPrefix, aTooltipPositions);
 
-						str_copy(m_aTooltip, m_aMenuBackgroundTooltip);
 						if(Ui()->MouseButton(0))
 							Ui()->SetActiveItem(&MapView()->ProofMode()->m_vMenuBackgroundPositions[i]);
 					}
@@ -3715,7 +3709,7 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 	pRect->Margin(1.0f, &ColorRect);
 	ColorRect.Draw(Color, IGraphics::CORNER_ALL, 3.0f);
 
-	const int ButtonResult = DoButton_Editor_Common(pId, nullptr, 0, pRect, 0, "Click to show the color picker. Shift+rightclick to copy color to clipboard. Shift+leftclick to paste color from clipboard.");
+	const int ButtonResult = DoButton_Editor_Common(pId, nullptr, 0, pRect, 0, "Click to show the color picker. Shift+right click to copy color to clipboard. Shift+left click to paste color from clipboard.");
 	if(Input()->ShiftIsPressed())
 	{
 		if(ButtonResult == 1)
@@ -3954,7 +3948,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			bool Clicked;
 			bool Abrupted;
 			if(int Result = DoButton_DraggableEx(m_Map.m_vpGroups[g].get(), aBuf, g == m_SelectedGroup, &Slot, &Clicked, &Abrupted,
-				   BUTTON_CONTEXT, m_Map.m_vpGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", IGraphics::CORNER_R))
+				   BUTTON_CONTEXT, m_Map.m_vpGroups[g]->m_Collapse ? "Select group. Shift+left click to select all layers. Double click to expand." : "Select group. Shift+left click to select all layers. Double click to collapse.", IGraphics::CORNER_R))
 			{
 				if(s_Operation == OP_NONE)
 				{
@@ -4138,7 +4132,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			bool Clicked;
 			bool Abrupted;
 			if(int Result = DoButton_DraggableEx(m_Map.m_vpGroups[g]->m_vpLayers[i].get(), aBuf, Checked, &Button, &Clicked, &Abrupted,
-				   BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", IGraphics::CORNER_R))
+				   BUTTON_CONTEXT, "Select layer. Hold shift to select multiple.", IGraphics::CORNER_R))
 			{
 				if(s_Operation == OP_NONE)
 				{
@@ -4412,7 +4406,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 		CollapseAllButton.HSplitTop(RowHeight, &CollapseAllButton, 0);
 		static int s_CollapseAllButton = 0;
-		if(DoButton_Editor(&s_CollapseAllButton, pActionText, 0, &CollapseAllButton, IGraphics::CORNER_R, "Expand or collapse all groups"))
+		if(DoButton_Editor(&s_CollapseAllButton, pActionText, 0, &CollapseAllButton, IGraphics::CORNER_R, "Expand or collapse all groups."))
 		{
 			for(const auto &pGroup : m_Map.m_vpGroups)
 			{
@@ -5053,7 +5047,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 	{
 		AddSoundButton.HSplitTop(5.0f, nullptr, &AddSoundButton);
 		AddSoundButton.HSplitTop(RowHeight, &AddSoundButton, nullptr);
-		if(DoButton_Editor(&s_AddSoundButton, "Add", 0, &AddSoundButton, 0, "Load a new sound to use in the map"))
+		if(DoButton_Editor(&s_AddSoundButton, "Add sound", 0, &AddSoundButton, 0, "Load a new sound to use in the map."))
 			InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_SOUND, "Add Sound", "Add", "mapres", false, AddSound, this);
 	}
 	s_ScrollRegion.End();
@@ -5150,7 +5144,7 @@ void CEditor::RenderFileDialog()
 		static int s_ButtonTimeModified = 0;
 		char aBufLabelButtonTimeModified[64];
 		str_format(aBufLabelButtonTimeModified, sizeof(aBufLabelButtonTimeModified), "Time modified %s", aSortIndicator[m_SortByTimeModified + 1]);
-		if(DoButton_Editor(&s_ButtonTimeModified, aBufLabelButtonTimeModified, 0, &ButtonTimeModified, 0, "Sort by time modified"))
+		if(DoButton_Editor(&s_ButtonTimeModified, aBufLabelButtonTimeModified, 0, &ButtonTimeModified, 0, "Sort by time modified."))
 		{
 			if(m_SortByTimeModified == 1)
 			{
@@ -5171,7 +5165,7 @@ void CEditor::RenderFileDialog()
 		static int s_ButtonFileName = 0;
 		char aBufLabelButtonFilename[64];
 		str_format(aBufLabelButtonFilename, sizeof(aBufLabelButtonFilename), "Filename %s", aSortIndicator[m_SortByFilename + 1]);
-		if(DoButton_Editor(&s_ButtonFileName, aBufLabelButtonFilename, 0, &ButtonFileName, 0, "Sort by file name"))
+		if(DoButton_Editor(&s_ButtonFileName, aBufLabelButtonFilename, 0, &ButtonFileName, 0, "Sort by file name."))
 		{
 			if(m_SortByFilename == 1)
 			{
@@ -5582,7 +5576,7 @@ void CEditor::RenderFileDialog()
 	{
 		ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 		ButtonBar.VSplitRight(90.0f, &ButtonBar, &Button);
-		if(DoButton_Editor(&s_ShowDirectoryButton, "Show directory", 0, &Button, 0, "Open the current directory in the file browser"))
+		if(DoButton_Editor(&s_ShowDirectoryButton, "Show directory", 0, &Button, 0, "Open the current directory in the file browser."))
 		{
 			char aOpenPath[IO_MAX_PATH_LENGTH];
 			Storage()->GetCompletePath(m_FilesSelectedIndex >= 0 ? m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType : IStorage::TYPE_SAVE, m_pFileDialogPath, aOpenPath, sizeof(aOpenPath));
@@ -6315,7 +6309,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		// redo button
 		ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 		static int s_RedoButton = 0;
-		if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_EnvelopeEditorHistory.CanRedo() ? 0 : -1, &Button, 0, "[Ctrl+Y] Redo last action", IGraphics::CORNER_R, 11.0f) == 1)
+		if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_EnvelopeEditorHistory.CanRedo() ? 0 : -1, &Button, 0, "[Ctrl+Y] Redo the last action.", IGraphics::CORNER_R, 11.0f) == 1)
 		{
 			m_EnvelopeEditorHistory.Redo();
 		}
@@ -6324,14 +6318,14 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 		ToolBar.VSplitRight(10.0f, &ToolBar, nullptr);
 		static int s_UndoButton = 0;
-		if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_EnvelopeEditorHistory.CanUndo() ? 0 : -1, &Button, 0, "[Ctrl+Z] Undo last action", IGraphics::CORNER_L, 11.0f) == 1)
+		if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_EnvelopeEditorHistory.CanUndo() ? 0 : -1, &Button, 0, "[Ctrl+Z] Undo the last action.", IGraphics::CORNER_L, 11.0f) == 1)
 		{
 			m_EnvelopeEditorHistory.Undo();
 		}
 
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_NewSoundButton = 0;
-		if(DoButton_Editor(&s_NewSoundButton, "Sound+", 0, &Button, 0, "Creates a new sound envelope"))
+		if(DoButton_Editor(&s_NewSoundButton, "Sound+", 0, &Button, 0, "Create a new sound envelope."))
 		{
 			m_Map.OnModify();
 			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::SOUND);
@@ -6340,7 +6334,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_New4dButton = 0;
-		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, 0, "Creates a new color envelope"))
+		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, 0, "Create a new color envelope."))
 		{
 			m_Map.OnModify();
 			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::COLOR);
@@ -6349,7 +6343,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_New2dButton = 0;
-		if(DoButton_Editor(&s_New2dButton, "Pos.+", 0, &Button, 0, "Creates a new position envelope"))
+		if(DoButton_Editor(&s_New2dButton, "Pos.+", 0, &Button, 0, "Create a new position envelope."))
 		{
 			m_Map.OnModify();
 			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::POSITION);
@@ -6361,7 +6355,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			ToolBar.VSplitRight(10.0f, &ToolBar, nullptr);
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 			static int s_DeleteButton = 0;
-			if(DoButton_Editor(&s_DeleteButton, "✗", 0, &Button, 0, "Delete this envelope"))
+			if(DoButton_Editor(&s_DeleteButton, "✗", 0, &Button, 0, "Delete this envelope."))
 			{
 				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEveloppeDelete>(this, m_SelectedEnvelope));
 				m_Map.DeleteEnvelope(m_SelectedEnvelope);
@@ -6375,7 +6369,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 			static int s_MoveRightButton = 0;
-			if(DoButton_Ex(&s_MoveRightButton, "→", 0, &Button, 0, "Move this envelope to the right", IGraphics::CORNER_R))
+			if(DoButton_Ex(&s_MoveRightButton, "→", 0, &Button, 0, "Move this envelope to the right.", IGraphics::CORNER_R))
 			{
 				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::ORDER, m_SelectedEnvelope, m_SelectedEnvelope + 1));
 				m_Map.SwapEnvelopes(m_SelectedEnvelope, m_SelectedEnvelope + 1);
@@ -6387,7 +6381,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			// Move left button
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 			static int s_MoveLeftButton = 0;
-			if(DoButton_Ex(&s_MoveLeftButton, "←", 0, &Button, 0, "Move this envelope to the left", IGraphics::CORNER_L))
+			if(DoButton_Ex(&s_MoveLeftButton, "←", 0, &Button, 0, "Move this envelope to the left.", IGraphics::CORNER_L))
 			{
 				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::ORDER, m_SelectedEnvelope, m_SelectedEnvelope - 1));
 				m_Map.SwapEnvelopes(m_SelectedEnvelope - 1, m_SelectedEnvelope);
@@ -6401,7 +6395,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 				ToolBar.VSplitRight(20.0f, &ToolBar, &Button);
 				static int s_ZoomOutButton = 0;
-				if(DoButton_FontIcon(&s_ZoomOutButton, FONT_ICON_MINUS, 0, &Button, 0, "[NumPad-] Zoom out horizontally, hold shift to zoom vertically", IGraphics::CORNER_R, 9.0f))
+				if(DoButton_FontIcon(&s_ZoomOutButton, FONT_ICON_MINUS, 0, &Button, 0, "[NumPad-] Zoom out horizontally, hold shift to zoom vertically.", IGraphics::CORNER_R, 9.0f))
 				{
 					if(Input()->ShiftIsPressed())
 						m_ZoomEnvelopeY.ChangeValue(0.1f * m_ZoomEnvelopeY.GetValue());
@@ -6411,12 +6405,12 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 				ToolBar.VSplitRight(20.0f, &ToolBar, &Button);
 				static int s_ResetZoomButton = 0;
-				if(DoButton_FontIcon(&s_ResetZoomButton, FONT_ICON_MAGNIFYING_GLASS, 0, &Button, 0, "[NumPad*] Reset zoom to default value", IGraphics::CORNER_NONE, 9.0f))
+				if(DoButton_FontIcon(&s_ResetZoomButton, FONT_ICON_MAGNIFYING_GLASS, 0, &Button, 0, "[NumPad*] Reset zoom to default value.", IGraphics::CORNER_NONE, 9.0f))
 					ResetZoomEnvelope(pEnvelope, s_ActiveChannels);
 
 				ToolBar.VSplitRight(20.0f, &ToolBar, &Button);
 				static int s_ZoomInButton = 0;
-				if(DoButton_FontIcon(&s_ZoomInButton, FONT_ICON_PLUS, 0, &Button, 0, "[NumPad+] Zoom in horizontally, hold shift to zoom vertically", IGraphics::CORNER_L, 9.0f))
+				if(DoButton_FontIcon(&s_ZoomInButton, FONT_ICON_PLUS, 0, &Button, 0, "[NumPad+] Zoom in horizontally, hold shift to zoom vertically.", IGraphics::CORNER_L, 9.0f))
 				{
 					if(Input()->ShiftIsPressed())
 						m_ZoomEnvelopeY.ChangeValue(-0.1f * m_ZoomEnvelopeY.GetValue());
@@ -6459,7 +6453,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		static int s_EnvelopeSelector = 0;
-		auto NewValueRes = UiDoValueSelector(&s_EnvelopeSelector, &Shifter, aBuf, m_SelectedEnvelope + 1, 1, m_Map.m_vpEnvelopes.size(), 1, 1.0f, "Select Envelope", false, false, IGraphics::CORNER_NONE, &EnvColor, false);
+		auto NewValueRes = UiDoValueSelector(&s_EnvelopeSelector, &Shifter, aBuf, m_SelectedEnvelope + 1, 1, m_Map.m_vpEnvelopes.size(), 1, 1.0f, "Select the envelope.", false, false, IGraphics::CORNER_NONE, &EnvColor, false);
 		int NewValue = NewValueRes.m_Value;
 		if(NewValue - 1 != m_SelectedEnvelope)
 		{
@@ -6468,7 +6462,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		static int s_PrevButton = 0;
-		if(DoButton_FontIcon(&s_PrevButton, FONT_ICON_MINUS, 0, &Dec, 0, "Previous Envelope", IGraphics::CORNER_L, 7.0f))
+		if(DoButton_FontIcon(&s_PrevButton, FONT_ICON_MINUS, 0, &Dec, 0, "Select previous envelope.", IGraphics::CORNER_L, 7.0f))
 		{
 			m_SelectedEnvelope--;
 			if(m_SelectedEnvelope < 0)
@@ -6477,7 +6471,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		static int s_NextButton = 0;
-		if(DoButton_FontIcon(&s_NextButton, FONT_ICON_PLUS, 0, &Inc, 0, "Next Envelope", IGraphics::CORNER_R, 7.0f))
+		if(DoButton_FontIcon(&s_NextButton, FONT_ICON_PLUS, 0, &Inc, 0, "Select next envelope.", IGraphics::CORNER_R, 7.0f))
 		{
 			m_SelectedEnvelope++;
 			if(m_SelectedEnvelope >= (int)m_Map.m_vpEnvelopes.size())
@@ -6495,7 +6489,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			ToolBar.VSplitLeft(ToolBar.w > ToolBar.h * 40 ? 80.0f : 60.0f, &Button, &ToolBar);
 
 			s_NameInput.SetBuffer(pEnvelope->m_aName, sizeof(pEnvelope->m_aName));
-			if(DoEditBox(&s_NameInput, &Button, 10.0f, IGraphics::CORNER_ALL, "The name of the selected envelope"))
+			if(DoEditBox(&s_NameInput, &Button, 10.0f, IGraphics::CORNER_ALL, "The name of the selected envelope."))
 			{
 				m_Map.OnModify();
 			}
@@ -6534,10 +6528,10 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		};
 
 		static const char *s_aapDescriptions[4][CEnvPoint::MAX_CHANNELS] = {
-			{"Volume of the envelope", "", "", ""},
+			{"Volume of the envelope.", "", "", ""},
 			{"", "", "", ""},
-			{"X-axis of the envelope", "Y-axis of the envelope", "Rotation of the envelope", ""},
-			{"Red value of the envelope", "Green value of the envelope", "Blue value of the envelope", "Alpha value of the envelope"},
+			{"X-axis of the envelope.", "Y-axis of the envelope.", "Rotation of the envelope.", ""},
+			{"Red value of the envelope.", "Green value of the envelope.", "Blue value of the envelope.", "Alpha value of the envelope."},
 		};
 
 		static int s_aChannelButtons[CEnvPoint::MAX_CHANNELS] = {0};
@@ -6566,7 +6560,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ToolBar.VSplitLeft(40.0f, &Button, &ToolBar);
 
 		static int s_SyncButton;
-		if(DoButton_Editor(&s_SyncButton, "Sync", pEnvelope->m_Synchronized, &Button, 0, "Synchronize envelope animation to game time (restarts when you touch the start line)"))
+		if(DoButton_Editor(&s_SyncButton, "Sync", pEnvelope->m_Synchronized, &Button, 0, "Synchronize envelope animation to game time (restarts when you touch the start line)."))
 		{
 			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::SYNC, pEnvelope->m_Synchronized, !pEnvelope->m_Synchronized));
 			pEnvelope->m_Synchronized = !pEnvelope->m_Synchronized;
@@ -6662,7 +6656,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 
 			m_ShowEnvelopePreview = SHOWENV_SELECTED;
-			str_copy(m_aTooltip, "Double-click to create a new point. Use shift to change the zoom axis. Press S to scale selected envelope points.");
+			str_copy(m_aTooltip, "Double click to create a new point. Use shift to change the zoom axis. Press S to scale selected envelope points.");
 		}
 
 		UpdateZoomEnvelopeX(View);
@@ -7157,7 +7151,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 							m_ShowEnvelopePreview = SHOWENV_SELECTED;
 							Graphics()->SetColor(1, 1, 1, 1);
-							str_copy(m_aTooltip, "Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time. Shift + right-click to delete.");
+							str_copy(m_aTooltip, "Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time. Shift+right click to delete.");
 							ms_pUiGotContext = pId;
 						}
 						else
@@ -7292,7 +7286,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 								m_ShowEnvelopePreview = SHOWENV_SELECTED;
 								Graphics()->SetColor(1, 1, 1, 1);
-								str_copy(m_aTooltip, "Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift + right-click to reset.");
+								str_copy(m_aTooltip, "Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset.");
 								ms_pUiGotContext = pId;
 							}
 							else
@@ -7425,7 +7419,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 								m_ShowEnvelopePreview = SHOWENV_SELECTED;
 								Graphics()->SetColor(1, 1, 1, 1);
-								str_copy(m_aTooltip, "Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift + right-click to reset.");
+								str_copy(m_aTooltip, "Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift+right click to reset.");
 								ms_pUiGotContext = pId;
 							}
 							else
@@ -7886,7 +7880,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		static int s_ChangedIndicator;
-		DoButton_Editor_Common(&s_ChangedIndicator, "", 0, &ChangedIndicator, 0, "This map has unsaved changes"); // just for the tooltip, result unused
+		DoButton_Editor_Common(&s_ChangedIndicator, "", 0, &ChangedIndicator, 0, "This map has unsaved changes."); // just for the tooltip, result unused
 	}
 
 	char aBuf[IO_MAX_PATH_LENGTH + 32];
@@ -7903,7 +7897,8 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	Ui()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_MR);
 
 	static int s_HelpButton = 0;
-	if(DoButton_Editor(&s_HelpButton, "?", 0, &Help, 0, "[F1] Open the DDNet Wiki page for the Map Editor in a web browser") || (Input()->KeyPress(KEY_F1) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
+	if(DoButton_Editor(&s_HelpButton, "?", 0, &Help, 0, "[F1] Open the DDNet Wiki page for the map editor in a web browser.") ||
+		(Input()->KeyPress(KEY_F1) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
 	{
 		const char *pLink = Localize("https://wiki.ddnet.org/wiki/Mapping");
 		if(!Client()->ViewLink(pLink))
@@ -7913,7 +7908,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	}
 
 	static int s_CloseButton = 0;
-	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, 0, "Exits from the editor"))
+	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, 0, "[Escape] Exit from the editor."))
 	{
 		OnClose();
 		g_Config.m_ClEditor = 0;
@@ -8209,7 +8204,7 @@ void CEditor::Render()
 				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_Tele;
 			});
 			if(HasTeleTiles)
-				str_copy(m_aTooltip, "Use shift+mousewheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number.");
+				str_copy(m_aTooltip, "Use shift+mouse wheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number.");
 
 			if(Input()->ShiftIsPressed())
 			{

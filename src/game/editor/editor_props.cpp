@@ -40,7 +40,7 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 			str_format(aBuf, sizeof(aBuf), "%d", pProps[i].m_Value);
-			auto NewValueRes = UiDoValueSelector((char *)&pIds[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0, pColor);
+			auto NewValueRes = UiDoValueSelector((char *)&pIds[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Right click to edit as text.", false, false, 0, pColor);
 			int NewValue = NewValueRes.m_Value;
 			if(NewValue != pProps[i].m_Value || (NewValueRes.m_State != EEditState::NONE && NewValueRes.m_State != EEditState::EDITING))
 			{
@@ -48,13 +48,13 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 				Change = i;
 				State = NewValueRes.m_State;
 			}
-			if(DoButton_FontIcon((char *)&pIds[i] + 1, FONT_ICON_MINUS, 0, &Dec, 0, "Decrease", IGraphics::CORNER_L, 7.0f))
+			if(DoButton_FontIcon((char *)&pIds[i] + 1, FONT_ICON_MINUS, 0, &Dec, 0, "Decrease value.", IGraphics::CORNER_L, 7.0f))
 			{
 				*pNewVal = clamp(pProps[i].m_Value - 1, pProps[i].m_Min, pProps[i].m_Max);
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
-			if(DoButton_FontIcon(((char *)&pIds[i]) + 2, FONT_ICON_PLUS, 0, &Inc, 0, "Increase", IGraphics::CORNER_R, 7.0f))
+			if(DoButton_FontIcon(((char *)&pIds[i]) + 2, FONT_ICON_PLUS, 0, &Inc, 0, "Increase value.", IGraphics::CORNER_R, 7.0f))
 			{
 				*pNewVal = clamp(pProps[i].m_Value + 1, pProps[i].m_Min, pProps[i].m_Max);
 				Change = i;
@@ -87,16 +87,16 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			int Step = Shift ? 1 : 45;
 			int Value = pProps[i].m_Value;
 
-			auto NewValueRes = UiDoValueSelector(&pIds[i], &Shifter, "", Value, pProps[i].m_Min, pProps[i].m_Max, Shift ? 1 : 45, Shift ? 1.0f : 10.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0);
+			auto NewValueRes = UiDoValueSelector(&pIds[i], &Shifter, "", Value, pProps[i].m_Min, pProps[i].m_Max, Shift ? 1 : 45, Shift ? 1.0f : 10.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Right click to edit as text.", false, false, 0);
 			int NewValue = NewValueRes.m_Value;
-			if(DoButton_FontIcon(&pIds[i] + 1, FONT_ICON_MINUS, 0, &Dec, 0, "Decrease", IGraphics::CORNER_L, 7.0f))
+			if(DoButton_FontIcon(&pIds[i] + 1, FONT_ICON_MINUS, 0, &Dec, 0, "Decrease value.", IGraphics::CORNER_L, 7.0f))
 			{
 				NewValue = (std::ceil((pProps[i].m_Value / (float)Step)) - 1) * Step;
 				if(NewValue < 0)
 					NewValue += 360;
 				State = EEditState::ONE_GO;
 			}
-			if(DoButton_FontIcon(&pIds[i] + 2, FONT_ICON_PLUS, 0, &Inc, 0, "Increase", IGraphics::CORNER_R, 7.0f))
+			if(DoButton_FontIcon(&pIds[i] + 2, FONT_ICON_PLUS, 0, &Inc, 0, "Increase value.", IGraphics::CORNER_R, 7.0f))
 			{
 				NewValue = (pProps[i].m_Value + Step) / Step * Step;
 				State = EEditState::ONE_GO;
@@ -153,25 +153,25 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			Shifter.VSplitRight(10.0f, &Shifter, &Down);
 			Shifter.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_NONE, 0.0f);
 			Ui()->DoLabel(&Shifter, "Y", 10.0f, TEXTALIGN_MC);
-			if(DoButton_FontIcon(&pIds[i], FONT_ICON_MINUS, 0, &Left, 0, "Left", IGraphics::CORNER_L, 7.0f))
+			if(DoButton_FontIcon(&pIds[i], FONT_ICON_MINUS, 0, &Left, 0, "Shift left.", IGraphics::CORNER_L, 7.0f))
 			{
 				*pNewVal = DIRECTION_LEFT;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
-			if(DoButton_FontIcon(((char *)&pIds[i]) + 3, FONT_ICON_PLUS, 0, &Right, 0, "Right", IGraphics::CORNER_R, 7.0f))
+			if(DoButton_FontIcon(((char *)&pIds[i]) + 3, FONT_ICON_PLUS, 0, &Right, 0, "Shift right.", IGraphics::CORNER_R, 7.0f))
 			{
 				*pNewVal = DIRECTION_RIGHT;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
-			if(DoButton_FontIcon(((char *)&pIds[i]) + 1, FONT_ICON_MINUS, 0, &Up, 0, "Up", IGraphics::CORNER_L, 7.0f))
+			if(DoButton_FontIcon(((char *)&pIds[i]) + 1, FONT_ICON_MINUS, 0, &Up, 0, "Shift up.", IGraphics::CORNER_L, 7.0f))
 			{
 				*pNewVal = DIRECTION_UP;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
-			if(DoButton_FontIcon(((char *)&pIds[i]) + 2, FONT_ICON_PLUS, 0, &Down, 0, "Down", IGraphics::CORNER_R, 7.0f))
+			if(DoButton_FontIcon(((char *)&pIds[i]) + 2, FONT_ICON_PLUS, 0, &Down, 0, "Shift down.", IGraphics::CORNER_R, 7.0f))
 			{
 				*pNewVal = DIRECTION_DOWN;
 				Change = i;
@@ -239,7 +239,7 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			else
 				aBuf[0] = '\0';
 
-			auto NewValueRes = UiDoValueSelector((char *)&pIds[i], &Shifter, aBuf, CurValue, 0, m_Map.m_vpEnvelopes.size(), 1, 1.0f, "Set Envelope", false, false, IGraphics::CORNER_NONE);
+			auto NewValueRes = UiDoValueSelector((char *)&pIds[i], &Shifter, aBuf, CurValue, 0, m_Map.m_vpEnvelopes.size(), 1, 1.0f, "Select envelope.", false, false, IGraphics::CORNER_NONE);
 			int NewVal = NewValueRes.m_Value;
 			if(NewVal != CurValue || (NewValueRes.m_State != EEditState::NONE && NewValueRes.m_State != EEditState::EDITING))
 			{
@@ -248,13 +248,13 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 				State = NewValueRes.m_State;
 			}
 
-			if(DoButton_FontIcon((char *)&pIds[i] + 1, FONT_ICON_MINUS, 0, &Dec, 0, "Previous Envelope", IGraphics::CORNER_L, 7.0f))
+			if(DoButton_FontIcon((char *)&pIds[i] + 1, FONT_ICON_MINUS, 0, &Dec, 0, "Select previous envelope.", IGraphics::CORNER_L, 7.0f))
 			{
 				*pNewVal = pProps[i].m_Value - 1;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
-			if(DoButton_FontIcon(((char *)&pIds[i]) + 2, FONT_ICON_PLUS, 0, &Inc, 0, "Next Envelope", IGraphics::CORNER_R, 7.0f))
+			if(DoButton_FontIcon(((char *)&pIds[i]) + 2, FONT_ICON_PLUS, 0, &Inc, 0, "Select next envelope.", IGraphics::CORNER_R, 7.0f))
 			{
 				*pNewVal = pProps[i].m_Value + 1;
 				Change = i;
