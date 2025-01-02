@@ -300,7 +300,7 @@ void CCharacter::FireWeapon()
 		// reset objects Hit
 		m_NumObjectsHit = 0;
 
-		if(m_Core.m_HammerHitDisabled)
+		if(m_Core.m_HammerHitDisabled && !m_Core.m_Super)
 			break;
 
 		CEntity *apEnts[MAX_CLIENTS];
@@ -1018,13 +1018,15 @@ void CCharacter::DDRacePostCoreTick()
 	if(m_Core.m_DeepFrozen && !m_Core.m_Super && !m_Core.m_Invincible)
 		Freeze();
 
+	bool EndlessJump = m_Core.m_Super || m_Core.m_Invincible || m_Core.m_EndlessJump;
+
 	// following jump rules can be overridden by tiles, like Refill Jumps, Stopper and Wall Jump
-	if(m_Core.m_Jumps == -1)
+	if(m_Core.m_Jumps == -1 && !EndlessJump)
 	{
 		// The player has only one ground jump, so his feet are always dark
 		m_Core.m_Jumped |= 2;
 	}
-	else if(m_Core.m_Jumps == 0)
+	else if(m_Core.m_Jumps == 0 && !EndlessJump)
 	{
 		// The player has no jumps at all, so his feet are always dark
 		m_Core.m_Jumped |= 2;
