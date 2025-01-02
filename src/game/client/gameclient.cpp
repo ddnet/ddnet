@@ -3090,6 +3090,8 @@ void CGameClient::UpdatePrediction()
 				pDummyChar->SetInput(pInput);
 	}
 
+	m_Collision.SetTime(static_cast<double>(m_GameWorld.GameTick() - m_LastRoundStartTick)/m_GameWorld.GameTickSpeed()); //Set time for moving tiles
+
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(CCharacter *pChar = m_GameWorld.GetCharacterById(i))
 		{

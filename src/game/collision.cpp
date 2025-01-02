@@ -94,6 +94,11 @@ void CCollision::Init(class CLayers *pLayers)
 			m_pFront = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->FrontLayer()->m_Front));
 	}
 
+	if(m_pLayers->QuadLayer())
+	{
+		m_pQuadLayer = m_pLayers->QuadLayer();
+	}
+
 	for(int i = 0; i < m_Width * m_Height; i++)
 	{
 		int Index;
@@ -169,6 +174,7 @@ void CCollision::Unload()
 	m_pTune = nullptr;
 	delete[] m_pDoor;
 	m_pDoor = nullptr;
+	m_pQuadLayer = nullptr;
 }
 
 void CCollision::FillAntibot(CAntibotMapData *pMapData) const
@@ -325,8 +331,46 @@ int CCollision::GetTile(int x, int y) const
 	return 0;
 }
 
+int CCollision::GetQuadIndex(int x, int y, QuadData *pOutQuad, int *StartNum) const
+{
+	CQuad *pQuad = nullptr;
+	vec2 Pos(0, 0);
+	float Angle = 0.0f;
+	int Num;
+	if(StartNum)
+		Num = *StartNum;
+	else
+		Num = 0;
+	while(true)
+	{
+		Num = GetQuadAt(x, y,&pQuad, Num, &Pos, &Angle);
+		Num++;
+		if(!pQuad)
+			break;
+		if(pQuad->m_ColorEnvOffset >= TILE_SOLID && pQuad->m_ColorEnvOffset <= TILE_NOLASER)
+			if(pOutQuad)
+			{
+				pOutQuad->m_pQuad = pQuad;
+				pOutQuad->m_Pos = Pos;
+				pOutQuad->m_Angle = Angle;
+			}
+			if(StartNum)
+				*StartNum = Num;
+			return pQuad->m_ColorEnvOffset;
+	}
+	if(pOutQuad)
+	{
+		pOutQuad->m_pQuad = pQuad;
+		pOutQuad->m_Pos = Pos;
+		pOutQuad->m_Angle = Angle;
+	}
+	if(StartNum)
+		*StartNum = Num;
+	return 0;
+}
+
 // TODO: rewrite this smarter!
-int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const
+int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, QuadData *pOutQuad) const
 {
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
@@ -339,7 +383,7 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 		int ix = round_to_int(Pos.x);
 		int iy = round_to_int(Pos.y);
 
-		if(CheckPoint(ix, iy))
+		if(CheckPoint(ix, iy, pOutQuad))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -357,7 +401,7 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 	return 0;
 }
 
-int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr) const
+int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, QuadData *pOutQuad) const
 {
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
@@ -390,7 +434,7 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 		}
 
 		int hit = 0;
-		if(CheckPoint(ix, iy))
+		if(CheckPoint(ix, iy, pOutQuad))
 		{
 			if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
 				hit = GetCollisionAt(ix, iy);
@@ -417,7 +461,7 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 	return 0;
 }
 
-int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr) const
+int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, QuadData *pOutQuad) const
 {
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
@@ -447,7 +491,7 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 			return TILE_TELEINWEAPON;
 		}
 
-		if(CheckPoint(ix, iy))
+		if(CheckPoint(ix, iy, pOutQuad))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -599,6 +643,46 @@ int CCollision::IsSolid(int x, int y) const
 {
 	int index = GetTile(x, y);
 	return index == TILE_SOLID || index == TILE_NOHOOK;
+}
+
+int CCollision::IsSolidQuad(int x, int y, QuadData *pOutQuad, int *StartNum) const
+{
+	CQuad *pQuad = nullptr;
+	vec2 Pos(0, 0);
+	float Angle = 0.f;
+	int Num;
+	if(StartNum)
+		Num = *StartNum;
+	else
+		Num = 0;
+	while(true)
+	{
+		Num = GetQuadAt(x, y,&pQuad, Num, &Pos, &Angle);
+		Num++;
+		if(!pQuad)
+			break;
+		if(pQuad->m_ColorEnvOffset == TILE_SOLID || pQuad->m_ColorEnvOffset == TILE_NOHOOK)
+		{
+			if(pOutQuad)
+			{
+				pOutQuad->m_pQuad = pQuad;
+				pOutQuad->m_Pos = Pos;
+				pOutQuad->m_Angle = Angle;
+			}
+			if(StartNum)
+				*StartNum = Num;
+			return true;
+		}
+	}
+	if(pOutQuad)
+	{
+		pOutQuad->m_pQuad = pQuad;
+		pOutQuad->m_Pos = Pos;
+		pOutQuad->m_Angle = Angle;
+	}
+	if(StartNum)
+		*StartNum = Num;
+	return false;
 }
 
 bool CCollision::IsThrough(int x, int y, int OffsetX, int OffsetY, vec2 Pos0, vec2 Pos1) const
@@ -1196,7 +1280,7 @@ int CCollision::IntersectNoLaserNoWalls(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 	return 0;
 }
 
-int CCollision::IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const
+int CCollision::IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, QuadData *pOutQuad) const
 {
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
@@ -1205,7 +1289,7 @@ int CCollision::IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pO
 	{
 		float a = (float)i / d;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		if(IsSolid(round_to_int(Pos.x), round_to_int(Pos.y)) || (!GetTile(round_to_int(Pos.x), round_to_int(Pos.y)) && !GetFrontTile(round_to_int(Pos.x), round_to_int(Pos.y))))
+		if(IsSolid(round_to_int(Pos.x), round_to_int(Pos.y)) || IsSolidQuad(round_to_int(Pos.x), round_to_int(Pos.y), pOutQuad) || (!GetTile(round_to_int(Pos.x), round_to_int(Pos.y)) && !GetFrontTile(round_to_int(Pos.x), round_to_int(Pos.y)) && !GetQuadIndex(round_to_int(Pos.x), round_to_int(Pos.y))))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -1292,4 +1376,372 @@ size_t CCollision::TeleAllSize(int Number)
 	if(m_TeleOthers.count(Number) > 0)
 		Total += m_TeleOthers[Number].size();
 	return Total;
+}
+
+void CCollision::Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation) const
+{
+	float x = pPoint->x - pCenter->x;
+	float y = pPoint->y - pCenter->y;
+	pPoint->x = (x * cosf(Rotation) - y * sinf(Rotation) + pCenter->x);
+	pPoint->y = (x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y);
+}
+
+int CCollision::GetQuadAt(float x, float y, CQuad **pOut, int StartNum, vec2 *QuadCurPos, float *QuadCurAngle) const
+{
+
+	
+	if(!m_pQuadLayer)
+		return 0;
+	
+	int Num;
+
+	CQuad *pQuad = nullptr;
+	SAnimationTransformCache AnimationCache;
+			
+			CQuad *pQuads = (CQuad*) m_pLayers->Map()->GetDataSwapped(m_pQuadLayer->m_Data);
+			vec2 Pos(0.0f, 0.0f);
+			float Ang = 0.0f;
+			for(Num = StartNum; Num < m_pQuadLayer->m_NumQuads; Num++)
+			{
+				vec2 Position(0.0f, 0.0f);
+				float Angle = 0.0f;
+				if(pQuads[Num].m_PosEnv >= 0)
+				{
+					if(pQuads[Num].m_PosEnv != AnimationCache.PosEnv || AnimationCache.PosEnvOffset != pQuads[Num].m_PosEnvOffset)
+					{
+						AnimationCache.PosEnv = pQuads[Num].m_PosEnv;
+						AnimationCache.PosEnvOffset = pQuads[Num].m_PosEnvOffset;
+						GetAnimationTransform(m_Time + (AnimationCache.PosEnvOffset / 1000.0), AnimationCache.PosEnv, m_pLayers, AnimationCache.Position, AnimationCache.Angle);
+					}
+					Position = AnimationCache.Position;
+					Angle = AnimationCache.Angle;
+				}
+				
+				vec2 p0 = Position + vec2(fx2f(pQuads[Num].m_aPoints[0].x), fx2f(pQuads[Num].m_aPoints[0].y));
+				vec2 p1 = Position + vec2(fx2f(pQuads[Num].m_aPoints[1].x), fx2f(pQuads[Num].m_aPoints[1].y));
+				vec2 p2 = Position + vec2(fx2f(pQuads[Num].m_aPoints[2].x), fx2f(pQuads[Num].m_aPoints[2].y));
+				vec2 p3 = Position + vec2(fx2f(pQuads[Num].m_aPoints[3].x), fx2f(pQuads[Num].m_aPoints[3].y));
+				
+				if(Angle != 0)
+				{
+					vec2 center(fx2f(pQuads[Num].m_aPoints[4].x), fx2f(pQuads[Num].m_aPoints[4].y));
+					Rotate(&center, &p0, Angle);
+					Rotate(&center, &p1, Angle);
+					Rotate(&center, &p2, Angle);
+					Rotate(&center, &p3, Angle);
+				}
+				if(OutOfRange(x, p0.x, p1.x, p2.x, p3.x))
+					continue;
+				if(OutOfRange(y, p0.y, p1.y, p2.y, p3.y))
+					continue;
+				
+				if(InsideQuad(p0, p1, p2, p3, vec2(x, y)))
+				{
+					pQuad = &pQuads[Num];
+					Pos = Position;
+					Ang = Angle;
+					break;
+				}
+			}
+
+		
+		if(pOut)
+			*pOut = pQuad;
+		if(QuadCurPos)
+			*QuadCurPos = Pos;
+		if(QuadCurAngle)
+			*QuadCurAngle = Ang;
+	
+	
+	return Num;
+}
+void CCollision::GetAnimationTransform(float GlobalTime, int Env, CLayers* pLayers, vec2& Position, float& Angle) const
+{
+	CEnvPoint *pPoints = 0;
+	
+	Position.x = 0.0f;
+	Position.y = 0.0f;
+	Angle = 0.0f;
+	
+	{
+		int Start, Num;
+		pLayers->Map()->GetType(MAPITEMTYPE_ENVPOINTS, &Start, &Num);
+		if(Num)
+			pPoints = (CEnvPoint *)pLayers->Map()->GetItem(Start, 0, 0);
+	}
+	
+	int Start, Num;
+	pLayers->Map()->GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
+	if(Env >= Num)
+		return;
+	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pLayers->Map()->GetItem(Start+Env, 0, 0);
+	pPoints += pItem->m_StartPoint;
+	if(pItem->m_NumPoints == 0)
+		return;
+	
+	if(pItem->m_NumPoints == 1)
+	{
+		Position.x = fx2f(pPoints[0].m_aValues[0]);
+		Position.y = fx2f(pPoints[0].m_aValues[1]);
+		Angle = fx2f(pPoints[0].m_aValues[2])/360.0f*pi*2.0f;
+		return;
+	}
+	float Time = fmod(GlobalTime, pPoints[pItem->m_NumPoints-1].m_Time/1000.0f)*1000.0f;
+	for(int i = 0; i < pItem->m_NumPoints-1; i++)
+	{
+		if(Time >= pPoints[i].m_Time && Time <= pPoints[i+1].m_Time)
+		{
+			float Delta = pPoints[i+1].m_Time-pPoints[i].m_Time;
+			float a = (Time-pPoints[i].m_Time)/Delta;
+			if(pPoints[i].m_Curvetype == CURVETYPE_SMOOTH)
+				a = -2*a*a*a + 3*a*a; // second hermite basis
+			else if(pPoints[i].m_Curvetype == CURVETYPE_SLOW)
+				a = a*a*a;
+			else if(pPoints[i].m_Curvetype == CURVETYPE_FAST)
+			{
+				a = 1-a;
+				a = 1-a*a*a;
+			}
+			else if (pPoints[i].m_Curvetype == CURVETYPE_STEP)
+				a = 0;
+			else
+			{
+				// linear
+			}
+			// X
+			{
+				float v0 = fx2f(pPoints[i].m_aValues[0]);
+				float v1 = fx2f(pPoints[i+1].m_aValues[0]);
+				Position.x = v0 + (v1-v0) * a;
+			}
+			// Y
+			{
+				float v0 = fx2f(pPoints[i].m_aValues[1]);
+				float v1 = fx2f(pPoints[i+1].m_aValues[1]);
+				Position.y = v0 + (v1-v0) * a;
+			}
+			// angle
+			{
+				float v0 = fx2f(pPoints[i].m_aValues[2]);
+				float v1 = fx2f(pPoints[i+1].m_aValues[2]);
+				Angle = (v0 + (v1-v0) * a)/360.0f*pi*2.0f;
+			}
+			return;
+		}
+	}
+	Position.x = fx2f(pPoints[pItem->m_NumPoints-1].m_aValues[0]);
+	Position.y = fx2f(pPoints[pItem->m_NumPoints-1].m_aValues[1]);
+	Angle = fx2f(pPoints[pItem->m_NumPoints-1].m_aValues[2]);
+	return;
+}
+
+bool CCollision::OutOfRange(double value, double q0, double q1, double q2, double q3) const
+{
+	if(q0 > q1)
+	{
+		if(q2 > q3)
+		{
+			const double Min = minimum(q1, q3);
+			if(value < Min)
+				return true;
+			const double Max = maximum(q0, q2);
+			if(value > Max)
+				return true;
+		}
+		else
+		{
+			const double Min = minimum(q1, q2);
+			if(value < Min)
+				return true;
+			const double Max = maximum(q0, q3);
+			if(value > Max)
+				return true;
+		}
+	}
+	else
+	{
+		// q1 is bigger than q0
+		if(q2 > q3)
+		{
+			const double Min = minimum(q0, q3);
+			if(value < Min)
+				return true;
+			const double Max = maximum(q1, q2);
+			if(value > Max)
+				return true;
+		}
+		else
+		{
+			// q3 is bigger than q2
+			const double Min = minimum(q0, q2);
+			if(value < Min)
+				return true;
+			const double Max = maximum(q1, q3);
+			if(value > Max)
+				return true;
+		}
+	}
+	return false;
+}
+//t0, t1 and t2 are position of triangle vertices
+bool CCollision::InsideTriangle(const vec2& t0, const vec2& t1, const vec2& t2, const vec2& p) const
+{
+    vec3 bary = BarycentricCoordinates(t0, t1, t2, p);
+    return (bary.x >= 0.0f && bary.y >= 0.0f && bary.x + bary.y < 1.0f);
+}
+//q0, q1, q2 and q3 are position of quad vertices
+bool CCollision::InsideQuad(const vec2& q0, const vec2& q1, const vec2& q2, const vec2& q3, const vec2& p) const
+{
+	return InsideTriangle(q0, q1, q2, p) || InsideTriangle(q1, q2, q3, p);
+}
+
+vec3 CCollision::BarycentricCoordinates(const vec2& t0, const vec2& t1, const vec2& t2, const vec2& p) const
+{
+    vec2 e0 = t1 - t0;
+    vec2 e1 = t2 - t0;
+    vec2 e2 = p - t0;
+    
+    float d00 = dot(e0, e0);
+    float d01 = dot(e0, e1);
+    float d11 = dot(e1, e1);
+    float d20 = dot(e2, e0);
+    float d21 = dot(e2, e1);
+    float denom = d00 * d11 - d01 * d01;
+    
+    vec3 bary;
+    bary.x = (d11 * d20 - d01 * d21) / denom;
+    bary.y = (d00 * d21 - d01 * d20) / denom;
+    bary.z = 1.0f - bary.x - bary.y;
+    
+    return bary;
+}
+
+int CCollision::GetCollisionAt(float x, float y) const
+{
+	int i = GetTile(round_to_int(x), round_to_int(y));
+	if(i)
+		return i;
+	else
+		return GetQuadIndex(round_to_int(x), round_to_int(y));
+}
+
+bool CCollision::PushBoxOutsideQuads(vec2 *pInoutPos, vec2 Size, int *CollidedSides) const
+{
+	vec2 Pos = *pInoutPos;
+
+	QuadData QData1 = {nullptr, vec2(0.0f, 0.0f), 0.0f}; //corner 0
+	QuadData QData2 = {nullptr, vec2(0.0f, 0.0f), 0.0f}; //corner 1
+	QuadData QData3 = {nullptr, vec2(0.0f, 0.0f), 0.0f}; //corner 2
+	QuadData QData4 = {nullptr, vec2(0.0f, 0.0f), 0.0f}; //corner 3
+
+	GetQuadAt(Pos,&QData1);
+
+	GetQuadAt(Pos + vec2(Size.x,0.0f),&QData2);
+
+	GetQuadAt(Pos + vec2(0.0f,Size.y),&QData3);
+
+	GetQuadAt(Pos + Size,&QData4);
+
+	if(QData1.m_pQuad)
+	{
+		vec2 Pos1,Pos2;
+		IntersectLine(Pos + vec2(Size.x,0.0f), Pos, nullptr, &Pos1);
+		IntersectLine(Pos + vec2(0.0f,Size.y), Pos, nullptr, &Pos2);
+
+		float d1 = distance(Pos, Pos1);
+		float d2 = distance(Pos, Pos2);
+
+		if(d1 < d2)
+		{
+			Pos = Pos1; //left
+			if(CollidedSides)
+				*CollidedSides |= CANTMOVE_LEFT;
+		}
+		else
+		{
+			Pos = Pos2; //up
+			if(CollidedSides)
+				*CollidedSides |= CANTMOVE_UP;
+		}
+			
+	}
+
+	if(QData2.m_pQuad)
+	{
+		vec2 Pos1,Pos2;
+		
+		IntersectLine(Pos, Pos + vec2(Size.x,0.0f), nullptr, &Pos1);
+		IntersectLine(Pos + Size, Pos + vec2(Size.x,0.0f), nullptr, &Pos2);
+
+		float d1 = distance(Pos + vec2(Size.x,0.0f), Pos1);
+		float d2 = distance(Pos + vec2(Size.x,0.0f), Pos2);
+
+		if(d1 < d2)
+		{
+			Pos = Pos1 - vec2(Size.x,0.0f); //right
+			if(CollidedSides)
+				*CollidedSides |= CANTMOVE_RIGHT;
+		}
+		else
+		{
+			Pos = Pos2 - vec2(Size.x,0.0f); //up
+			if(CollidedSides)
+				*CollidedSides |= CANTMOVE_UP;
+		}
+	}
+
+	if(QData3.m_pQuad)
+	{
+		vec2 Pos1,Pos2;
+		
+		IntersectLine(Pos, Pos + vec2(0.0f,Size.y), nullptr, &Pos1);
+		IntersectLine(Pos + Size, Pos + vec2(0.0f,Size.y), nullptr, &Pos2);
+
+		float d1 = distance(Pos + vec2(0.0f,Size.y), Pos1);
+		float d2 = distance(Pos + vec2(0.0f,Size.y), Pos2);
+
+		if(d1 < d2)
+		{
+			Pos = Pos1 - vec2(0.0f,Size.y); //left
+			if(CollidedSides)
+				*CollidedSides |= CANTMOVE_LEFT;
+		}
+		else
+		{
+			Pos = Pos2 - vec2(0.0f,Size.y); //down
+			if(CollidedSides)
+				*CollidedSides |= CANTMOVE_DOWN;
+		}
+	}
+
+	if(QData4.m_pQuad)
+	{
+		vec2 Pos1,Pos2;
+		
+		IntersectLine(Pos + vec2(Size.x,0.0f), Pos + Size, nullptr, &Pos1);
+		IntersectLine(Pos + vec2(0.0f,Size.y), Pos + Size, nullptr, &Pos2);
+
+		float d1 = distance(Pos + Size, Pos1);
+		float d2 = distance(Pos + Size, Pos2);
+
+		if(d1 < d2)
+		{
+			Pos = Pos1 - Size; //right
+			if(CollidedSides)
+				*CollidedSides |= CANTMOVE_RIGHT;
+		}
+		else
+		{
+			Pos = Pos2 - Size; //down
+			if(CollidedSides)
+				*CollidedSides |= CANTMOVE_DOWN;
+		}
+	}
+	if(Pos != *pInoutPos)
+	{
+		*pInoutPos = Pos;
+		return true;
+	}
+
+	return false;
 }

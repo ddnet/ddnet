@@ -165,6 +165,7 @@ private:
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void SetTimeCheckpoint(int TimeCheckpoint);
 	void HandleTiles(int Index);
+	void HandleQuads();
 	float m_Time;
 	int m_LastBroadcast;
 	void DDRaceInit();
