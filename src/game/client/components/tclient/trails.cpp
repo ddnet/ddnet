@@ -293,10 +293,12 @@ void CTrails::OnRender()
 
 			vec2 Pos = Trail.at(i).Pos;
 			vec2 NextPos = Trail.at(i + 1).Pos;
+			if(distance(Pos, NextPos) > 600.0f)
+				continue;
 			Graphics()->SetColor(FullCol);
 			if(LineMode)
 			{
-				Graphics()->SetColor(Trail.at(i).Col);
+				Graphics()->SetColor(Trail.at(i).Col.WithAlpha(Trail.at(i).Alpha));
 				LineItem = IGraphics::CLineItem(Pos.x, Pos.y, NextPos.x, NextPos.y);
 				Graphics()->LinesDraw(&LineItem, 1);
 			}
