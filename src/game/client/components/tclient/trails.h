@@ -36,10 +36,7 @@ private:
 
 	void ClearAllHistory();
 	void ClearHistory(int ClientId);
-	void ManageServerIntraTick();
-
 	bool ShouldPredictPlayer(int ClientId);
-	float m_RealIntraTick = 0.0f;
 };
 
 #endif
