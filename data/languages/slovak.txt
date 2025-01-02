@@ -1597,7 +1597,7 @@ Overlay entities
 Show text entities
 == Zobraziť textové entity
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Nepriehľadnosť entít patriacich iným tímom ako sú hráči a menovky
 
 Show others (own team only)
@@ -1932,7 +1932,17 @@ Feet
 Eyes
 == Oči
 
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== 
+
 Some fonts could not be loaded. Check the local console for details.
+== 
+
+Loading background map
+== 
+
+[Spectating Camera Mode Icon]
+AUTO
 == 
 
 Online friends (%d)
@@ -1947,10 +1957,16 @@ Add clanmates by entering their clan below and leaving the name blank.
 Offline friends and clanmates will appear here.
 == 
 
+Toggle auto camera
+== 
+
 Edit touch controls
 == 
 
 Close
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
 == 
 
 Save changes
@@ -2021,6 +2037,21 @@ Could not load default touch controls from file. See local console for details.
 Could not load touch controls from clipboard. See local console for details.
 == 
 
+Show client IDs in name plates
+== 
+
+Hook Strength
+== 
+
+Size of hook strength icon and number indicator
+== 
+
+Key Presses
+== 
+
+Size of key press icons
+== 
+
 Width of your own hook collision line
 == 
 
@@ -2028,6 +2059,9 @@ Width of others' hook collision line
 == 
 
 Preview 'Hook collisions' being pressed
+== 
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 
 
 Aim

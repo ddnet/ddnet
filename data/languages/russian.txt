@@ -1283,7 +1283,7 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == Прозр.
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Регулирует прозрачность объектов другой команды, такие как Tee и имена.
 
 Quads are used for background decoration
@@ -2054,3 +2054,37 @@ Active: Fire
 
 Active: Hook
 == Активно: Крюк
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== 
+
+Loading background map
+== 
+
+[Spectating Camera Mode Icon]
+AUTO
+== 
+
+Toggle auto camera
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== 
+
+Show client IDs in name plates
+== 
+
+Hook Strength
+== 
+
+Size of hook strength icon and number indicator
+== 
+
+Key Presses
+== 
+
+Size of key press icons
+== 
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== 

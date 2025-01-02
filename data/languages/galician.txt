@@ -1253,7 +1253,7 @@ Show player speed
 Show player target angle
 == Mostrar o ángulo do obxectivo do xogador
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Axusta a opacidade de entidades pertencentes a outros equipos, como os tees e os nomes.
 
 Opacity of freeze bars inside freeze
@@ -1574,6 +1574,9 @@ Saving settings to '%s' failed
 Error saving settings
 == 
 
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== 
+
 Loading demo file from storage
 == 
 
@@ -1584,6 +1587,9 @@ Quitting. Please wait…
 == 
 
 Restarting. Please wait…
+== 
+
+Loading background map
 == 
 
 Searching
@@ -1621,6 +1627,10 @@ Multi-View
 
 [Spectating]
 Following %s
+== 
+
+[Spectating Camera Mode Icon]
+AUTO
 == 
 
 Some map images could not be loaded. Check the local console for details.
@@ -1745,6 +1755,9 @@ Mark the end of a cut (right click to reset)
 Close the demo player
 == 
 
+Toggle auto camera
+== 
+
 Export demo cut
 == 
 
@@ -1798,6 +1811,9 @@ Edit touch controls
 == 
 
 Close
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
 == 
 
 Save changes
@@ -1902,6 +1918,12 @@ Info Messages
 Show local time always
 == 
 
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
 Show client IDs (scoreboard, chat, spectator)
 == 
 
@@ -1920,16 +1942,25 @@ Chat width
 Show friend mark (♥) in name plates
 == 
 
+Show client IDs in name plates
+== 
+
+Hook Strength
+== 
+
 Show hook strength icon indicator
 == 
 
 Show hook strength number indicator
 == 
 
-Authed name color in scoreboard
+Size of hook strength icon and number indicator
 == 
 
-Same clan color in scoreboard
+Key Presses
+== 
+
+Size of key press icons
 == 
 
 Show own player's hook collision line
@@ -1981,6 +2012,9 @@ Delete skin
 == 
 
 Unable to delete skin
+== 
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 
 
 Round %d/%d

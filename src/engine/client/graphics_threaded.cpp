@@ -512,7 +512,8 @@ bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureId, int x, int 
 static SWarning FormatPngliteIncompatibilityWarning(int PngliteIncompatible, const char *pContextName)
 {
 	SWarning Warning;
-	str_format(Warning.m_aWarningMsg, sizeof(Warning.m_aWarningMsg), Localize("\"%s\" is not compatible with pnglite and cannot be loaded by old DDNet versions: "), pContextName);
+	str_format(Warning.m_aWarningMsg, sizeof(Warning.m_aWarningMsg), Localize("\"%s\" is not compatible with pnglite and cannot be loaded by old DDNet versions:"), pContextName);
+	str_append(Warning.m_aWarningMsg, " ");
 	static const int FLAGS[] = {CImageLoader::PNGLITE_COLOR_TYPE, CImageLoader::PNGLITE_BIT_DEPTH, CImageLoader::PNGLITE_INTERLACE_TYPE, CImageLoader::PNGLITE_COMPRESSION_TYPE, CImageLoader::PNGLITE_FILTER_TYPE};
 	static const char *const EXPLANATION[] = {"color type", "bit depth", "interlace type", "compression type", "filter type"};
 
