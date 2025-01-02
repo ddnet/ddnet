@@ -16,6 +16,8 @@ class CSpeedupTile;
 class CSwitchTile;
 class CTuneTile;
 class CDoorTile;
+struct CQuad;
+struct CMapItemLayerQuads;
 
 enum
 {
@@ -23,6 +25,12 @@ enum
 	CANTMOVE_RIGHT = 1 << 1,
 	CANTMOVE_UP = 1 << 2,
 	CANTMOVE_DOWN = 1 << 3,
+};
+struct QuadData
+{
+	CQuad *m_pQuad;
+	vec2 m_Pos;
+	float m_Angle;
 };
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel);
@@ -40,17 +48,18 @@ public:
 	void Unload();
 	void FillAntibot(CAntibotMapData *pMapData) const;
 
-	bool CheckPoint(float x, float y) const { return IsSolid(round_to_int(x), round_to_int(y)); }
-	bool CheckPoint(vec2 Pos) const { return CheckPoint(Pos.x, Pos.y); }
-	int GetCollisionAt(float x, float y) const { return GetTile(round_to_int(x), round_to_int(y)); }
+	bool CheckPoint(float x, float y, QuadData *pOutQuad = nullptr, int *StartNum = nullptr) const { return IsSolid(round_to_int(x), round_to_int(y)) || IsSolidQuad(round_to_int(x), round_to_int(y), pOutQuad, StartNum); }
+	bool CheckPoint(vec2 Pos, QuadData *pOutQuad = nullptr, int *StartNum = nullptr) const { return CheckPoint(Pos.x, Pos.y, pOutQuad, StartNum); }
+	int GetCollisionAt(float x, float y) const;
 	int GetWidth() const { return m_Width; }
 	int GetHeight() const { return m_Height; }
-	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
-	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr = nullptr) const;
-	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr = nullptr) const;
+	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, QuadData *pOutQuad = nullptr) const;
+	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr = nullptr, QuadData *pOutQuad = nullptr) const;
+	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr = nullptr, QuadData *pOutQuad = nullptr) const;
 	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces) const;
 	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool *pGrounded = nullptr) const;
 	bool TestBox(vec2 Pos, vec2 Size) const;
+	bool PushBoxOutsideQuads(vec2 *pInoutPos, vec2 Size, int *CollidedSides) const;
 
 	// DDRace
 	void SetCollisionAt(float x, float y, int Index);
@@ -59,10 +68,35 @@ public:
 	int GetFrontCollisionAt(float x, float y) const { return GetFrontTile(round_to_int(x), round_to_int(y)); }
 	int IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
 	int IntersectNoLaserNoWalls(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
-	int IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
+	int IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, QuadData *pOutQuad = nullptr) const;
 	int GetIndex(int x, int y) const;
 	int GetIndex(vec2 PrevPos, vec2 Pos) const;
 	int GetFrontIndex(int x, int y) const;
+
+	//Quads
+	CMapItemLayerQuads *GetQuadHandle(const char* pName) const { return m_pQuadLayer; }
+	int GetQuadAt(float x, float y, CQuad **pOut = nullptr, int StartNum = 0, vec2 *QuadCurPos = nullptr, float *QuadCurAngle = nullptr) const;
+	int GetQuadAt(vec2 Pos, CQuad **pOut = nullptr, int StartNum = 0, vec2 *QuadCurPos = nullptr, float *QuadCurAngle = nullptr) const { return GetQuadAt(Pos.x, Pos.y, pOut, StartNum, QuadCurPos, QuadCurAngle); }
+	int GetQuadAt(float x, float y, QuadData *pOut = nullptr, int StartNum = 0) const { return GetQuadAt(x, y, &pOut->m_pQuad, StartNum, &pOut->m_Pos, &pOut->m_Angle); }
+	int GetQuadAt(vec2 Pos, QuadData *pOut = nullptr, int StartNum = 0) const { return GetQuadAt(Pos.x, Pos.y, &pOut->m_pQuad, StartNum, &pOut->m_Pos, &pOut->m_Angle); }
+	void GetAnimationTransform(float GlobalTime, int Env, class CLayers* pLayers, vec2& Position, float& Angle) const;
+	double m_Time;
+	void SetTime(double Time) { m_Time = Time; }
+	bool OutOfRange(double value, double q0, double q1, double q2, double q3) const;
+	bool InsideTriangle(const vec2& t0, const vec2& t1, const vec2& t2, const vec2& p) const;
+	bool InsideQuad(const vec2& q0, const vec2& q1, const vec2& q2, const vec2& q3, const vec2& p) const;
+	vec3 BarycentricCoordinates(const vec2& t0, const vec2& t1, const vec2& t2, const vec2& p) const;
+	void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation) const;
+	struct SAnimationTransformCache
+	{
+		vec2 Position = vec2(0.0f, 0.f);
+		float Angle = 0;
+		int PosEnv = -1;
+		int PosEnvOffset = 0;
+	};
+
+	int IsSolidQuad(int x, int y, QuadData *pOutQuad = nullptr, int *StartNum = nullptr) const;
+	int GetQuadIndex(int x, int y, QuadData *pOutQuad = nullptr, int *StartNum = nullptr) const;
 
 	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1) const;
 	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f) const
@@ -156,6 +190,7 @@ private:
 	CSwitchTile *m_pSwitch;
 	CTuneTile *m_pTune;
 	CDoorTile *m_pDoor;
+	CMapItemLayerQuads *m_pQuadLayer;
 
 	// TILE_TELEIN
 	std::map<int, std::vector<vec2>> m_TeleIns;

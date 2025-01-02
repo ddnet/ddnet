@@ -913,7 +913,7 @@ void CCharacter::TickDeferred()
 		m_Core.Write(&Current);
 
 		// only allow dead reckoning for a top of 3 seconds
-		if(m_Core.m_Reset || m_ReckoningTick + Server()->TickSpeed() * 3 < Server()->Tick() || mem_comp(&Predicted, &Current, sizeof(CNetObj_Character)) != 0)
+		if(m_Core.m_HookedQuad.m_pQuad || m_Core.m_QuadCollided || m_Core.m_Reset || m_ReckoningTick + Server()->TickSpeed() * 3 < Server()->Tick() || mem_comp(&Predicted, &Current, sizeof(CNetObj_Character)) != 0)
 		{
 			m_ReckoningTick = Server()->Tick();
 			m_SendCore = m_Core;
@@ -1988,6 +1988,171 @@ void CCharacter::HandleTiles(int Index)
 	}
 }
 
+void CCharacter::HandleQuads()
+{
+	CQuad* pQuad = nullptr;
+	int StartNum = 0;
+	int Number = 0;
+	while(true)
+	{
+		StartNum = Collision()->GetQuadAt(m_Pos,&pQuad,StartNum);
+		StartNum++;
+		if(!pQuad)
+			break;
+
+		Number = pQuad->m_aColors[0].r;
+		if(Number == 0)
+			Number++;
+
+		//printf("QuadenvOffset: %d\n",pQuad->m_ColorEnvOffset);
+
+		if(pQuad->m_ColorEnvOffset == TILE_FREEZE)
+		{
+			Freeze();
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_DFREEZE)
+		{
+			m_Core.m_DeepFrozen = true;
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_LFREEZE)
+		{
+			m_Core.m_LiveFrozen = true;
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_DUNFREEZE)
+		{
+			m_Core.m_DeepFrozen = false;
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_LUNFREEZE)
+		{
+			m_Core.m_LiveFrozen = false;
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_UNFREEZE)
+		{
+			UnFreeze();
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_DEATH)
+		{
+			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+		}
+		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && pQuad->m_ColorEnvOffset == TILE_TELEIN && !Collision()->TeleOuts(Number - 1).empty())
+		{
+			if(!(m_Core.m_Super || m_Core.m_Invincible))
+			{
+				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(Number - 1).size());
+				m_Core.m_Pos = Collision()->TeleOuts(Number - 1)[TeleOut];
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+				}
+				if(g_Config.m_SvTeleportLoseWeapons)
+					ResetPickups();
+			}
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_TELEINEVIL && !Collision()->TeleOuts(Number - 1).empty())
+		{
+			if(!(m_Core.m_Super || m_Core.m_Invincible))
+			{
+				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(Number - 1).size());
+				m_Core.m_Pos = Collision()->TeleOuts(Number - 1)[TeleOut];
+				if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
+				{
+					m_Core.m_Vel = vec2(0, 0);
+
+					if(!g_Config.m_SvTeleportHoldHook)
+					{
+						ResetHook();
+						GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+					}
+					if(g_Config.m_SvTeleportLoseWeapons)
+					{
+						ResetPickups();
+					}
+				}
+			}
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_TELECHECKINEVIL)
+		{
+			if(!(m_Core.m_Super || m_Core.m_Invincible))
+			{
+				bool dontteletospawn = false;
+				// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+				for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+				{
+					if(!Collision()->TeleCheckOuts(k).empty())
+					{
+						int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+						m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+						m_Core.m_Vel = vec2(0, 0);
+
+						if(!g_Config.m_SvTeleportHoldHook)
+						{
+							ResetHook();
+							GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+						}
+
+						dontteletospawn = true;
+						break;
+					}
+				}
+				// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
+				if(!dontteletospawn)
+				{
+					vec2 SpawnPos;
+					if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+					{
+						m_Core.m_Pos = SpawnPos;
+						m_Core.m_Vel = vec2(0, 0);
+
+						if(!g_Config.m_SvTeleportHoldHook)
+						{
+							ResetHook();
+							GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+						}
+					}
+				}
+			}
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_TELECHECKIN)
+		{
+			if(!(m_Core.m_Super || m_Core.m_Invincible))
+			{
+				bool dontteletospawn = false;
+				// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+				for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+				{
+					if(!Collision()->TeleCheckOuts(k).empty())
+					{
+						int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+						m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+
+						if(!g_Config.m_SvTeleportHoldHook)
+						{
+							ResetHook();
+						}
+						dontteletospawn = true;
+						break;
+					}
+				}
+				// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
+				if(!dontteletospawn)
+				{
+					vec2 SpawnPos;
+					if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+					{
+						m_Core.m_Pos = SpawnPos;
+
+						if(!g_Config.m_SvTeleportHoldHook)
+						{
+							ResetHook();
+						}
+					}
+				}
+			}
+		}
+	}
+
+}
+
 void CCharacter::HandleTuneLayer()
 {
 	m_TuneZoneOld = m_TuneZone;
@@ -2216,6 +2381,8 @@ void CCharacter::DDRacePostCoreTick()
 		if(!m_Alive)
 			return;
 	}
+
+	HandleQuads();
 
 	// teleport gun
 	if(m_TeleGunTeleport)

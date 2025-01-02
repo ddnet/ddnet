@@ -12,6 +12,8 @@
 #include <game/client/ui_rect.h>
 #include <game/generated/protocol7.h>
 
+#include <game/envelope_access.h>
+
 class CAnimState;
 class CSpeedupTile;
 class CSwitchTile;
@@ -151,35 +153,6 @@ enum
 	LAYERRENDERFLAG_TRANSPARENT = 2,
 
 	TILERENDERFLAG_EXTEND = 4,
-};
-
-class IEnvelopePointAccess
-{
-public:
-	virtual ~IEnvelopePointAccess() = default;
-	virtual int NumPoints() const = 0;
-	virtual const CEnvPoint *GetPoint(int Index) const = 0;
-	virtual const CEnvPointBezier *GetBezier(int Index) const = 0;
-};
-
-class CMapBasedEnvelopePointAccess : public IEnvelopePointAccess
-{
-	int m_StartPoint;
-	int m_NumPoints;
-	int m_NumPointsMax;
-	CEnvPoint *m_pPoints;
-	CEnvPointBezier *m_pPointsBezier;
-	CEnvPointBezier_upstream *m_pPointsBezierUpstream;
-
-public:
-	CMapBasedEnvelopePointAccess(class CDataFileReader *pReader);
-	CMapBasedEnvelopePointAccess(class IMap *pMap);
-	void SetPointsRange(int StartPoint, int NumPoints);
-	int StartPoint() const;
-	int NumPoints() const override;
-	int NumPointsMax() const;
-	const CEnvPoint *GetPoint(int Index) const override;
-	const CEnvPointBezier *GetBezier(int Index) const override;
 };
 
 typedef void (*ENVELOPE_EVAL)(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser);

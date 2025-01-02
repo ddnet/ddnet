@@ -154,6 +154,9 @@ public:
 	float m_CurrentRecord;
 	CGameTeams &Teams() { return m_Teams; }
 	std::shared_ptr<CScoreLoadBestTimeResult> m_pLoadBestTimeResult;
+
+	//Time for Moving tiles:
+	double GetTime() { return static_cast<double>(Server()->Tick() - m_RoundStartTick)/Server()->TickSpeed(); }
 };
 
 #endif

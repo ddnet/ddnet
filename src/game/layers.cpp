@@ -6,6 +6,9 @@
 
 #include <engine/map.h>
 
+#include <game/gamecore.h> //TODO: DELETE THIS WHEN READY
+#include <base/system.h> //TODO: DELETE THIS WHEN READY
+
 CLayers::CLayers()
 {
 	Unload();
@@ -25,92 +28,105 @@ void CLayers::Init(IMap *pMap, bool GameOnly)
 		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
 			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + LayerIndex);
-			if(pLayer->m_Type != LAYERTYPE_TILES)
-				continue;
-
-			CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
-			bool IsEntities = false;
-
-			if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
+			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
-				m_pGameLayer = pTilemap;
-				m_pGameGroup = pGroup;
+				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
+				bool IsEntities = false;
 
-				// make sure the game group has standard settings
-				m_pGameGroup->m_OffsetX = 0;
-				m_pGameGroup->m_OffsetY = 0;
-				m_pGameGroup->m_ParallaxX = 100;
-				m_pGameGroup->m_ParallaxY = 100;
-
-				if(m_pGameGroup->m_Version >= 2)
+				if(pTilemap->m_Flags & TILESLAYERFLAG_GAME)
 				{
-					m_pGameGroup->m_UseClipping = 0;
-					m_pGameGroup->m_ClipX = 0;
-					m_pGameGroup->m_ClipY = 0;
-					m_pGameGroup->m_ClipW = 0;
-					m_pGameGroup->m_ClipH = 0;
+					m_pGameLayer = pTilemap;
+					m_pGameGroup = pGroup;
+
+					// make sure the game group has standard settings
+					m_pGameGroup->m_OffsetX = 0;
+					m_pGameGroup->m_OffsetY = 0;
+					m_pGameGroup->m_ParallaxX = 100;
+					m_pGameGroup->m_ParallaxY = 100;
+
+					if(m_pGameGroup->m_Version >= 2)
+					{
+						m_pGameGroup->m_UseClipping = 0;
+						m_pGameGroup->m_ClipX = 0;
+						m_pGameGroup->m_ClipY = 0;
+						m_pGameGroup->m_ClipW = 0;
+						m_pGameGroup->m_ClipH = 0;
+					}
+
+					IsEntities = true;
 				}
 
-				IsEntities = true;
+				if(!GameOnly)
+				{
+					if(pTilemap->m_Flags & TILESLAYERFLAG_TELE)
+					{
+						if(pTilemap->m_Version <= 2)
+						{
+							pTilemap->m_Tele = *((int *)(pTilemap) + 15);
+						}
+						m_pTeleLayer = pTilemap;
+						IsEntities = true;
+					}
+
+					if(pTilemap->m_Flags & TILESLAYERFLAG_SPEEDUP)
+					{
+						if(pTilemap->m_Version <= 2)
+						{
+							pTilemap->m_Speedup = *((int *)(pTilemap) + 16);
+						}
+						m_pSpeedupLayer = pTilemap;
+						IsEntities = true;
+					}
+
+					if(pTilemap->m_Flags & TILESLAYERFLAG_FRONT)
+					{
+						if(pTilemap->m_Version <= 2)
+						{
+							pTilemap->m_Front = *((int *)(pTilemap) + 17);
+						}
+						m_pFrontLayer = pTilemap;
+						IsEntities = true;
+					}
+
+					if(pTilemap->m_Flags & TILESLAYERFLAG_SWITCH)
+					{
+						if(pTilemap->m_Version <= 2)
+						{
+							pTilemap->m_Switch = *((int *)(pTilemap) + 18);
+						}
+						m_pSwitchLayer = pTilemap;
+						IsEntities = true;
+					}
+
+					if(pTilemap->m_Flags & TILESLAYERFLAG_TUNE)
+					{
+						if(pTilemap->m_Version <= 2)
+						{
+							pTilemap->m_Tune = *((int *)(pTilemap) + 19);
+						}
+						m_pTuneLayer = pTilemap;
+						IsEntities = true;
+					}
+				}
+
+				if(IsEntities)
+				{
+					// Ensure default color for entities layers
+					pTilemap->m_Color = CColor(255, 255, 255, 255);
+				}
 			}
-
-			if(!GameOnly)
+			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
-				if(pTilemap->m_Flags & TILESLAYERFLAG_TELE)
+				char aBuf[30] = {0}; //for now
+
+				CMapItemLayerQuads *pTilemap = reinterpret_cast<CMapItemLayerQuads *>(pLayer);
+				IntsToStr(pTilemap->m_aName, std::size(pTilemap->m_aName), aBuf, std::size(aBuf));
+				bool IsEntities = false;
+				if(!str_comp_nocase("GameQuads", aBuf))
 				{
-					if(pTilemap->m_Version <= 2)
-					{
-						pTilemap->m_Tele = *((int *)(pTilemap) + 15);
-					}
-					m_pTeleLayer = pTilemap;
+					m_pQuadLayer = pTilemap;
 					IsEntities = true;
 				}
-
-				if(pTilemap->m_Flags & TILESLAYERFLAG_SPEEDUP)
-				{
-					if(pTilemap->m_Version <= 2)
-					{
-						pTilemap->m_Speedup = *((int *)(pTilemap) + 16);
-					}
-					m_pSpeedupLayer = pTilemap;
-					IsEntities = true;
-				}
-
-				if(pTilemap->m_Flags & TILESLAYERFLAG_FRONT)
-				{
-					if(pTilemap->m_Version <= 2)
-					{
-						pTilemap->m_Front = *((int *)(pTilemap) + 17);
-					}
-					m_pFrontLayer = pTilemap;
-					IsEntities = true;
-				}
-
-				if(pTilemap->m_Flags & TILESLAYERFLAG_SWITCH)
-				{
-					if(pTilemap->m_Version <= 2)
-					{
-						pTilemap->m_Switch = *((int *)(pTilemap) + 18);
-					}
-					m_pSwitchLayer = pTilemap;
-					IsEntities = true;
-				}
-
-				if(pTilemap->m_Flags & TILESLAYERFLAG_TUNE)
-				{
-					if(pTilemap->m_Version <= 2)
-					{
-						pTilemap->m_Tune = *((int *)(pTilemap) + 19);
-					}
-					m_pTuneLayer = pTilemap;
-					IsEntities = true;
-				}
-			}
-
-			if(IsEntities)
-			{
-				// Ensure default color for entities layers
-				pTilemap->m_Color = CColor(255, 255, 255, 255);
 			}
 		}
 	}
@@ -134,6 +150,7 @@ void CLayers::Unload()
 	m_pFrontLayer = nullptr;
 	m_pSwitchLayer = nullptr;
 	m_pTuneLayer = nullptr;
+	m_pQuadLayer = nullptr;
 }
 
 void CLayers::InitTilemapSkip()

@@ -11,11 +11,13 @@
 
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+#include "collision.h"
 
 #include "prng.h"
 
 class CCollision;
 class CTeamsCore;
+struct CQuad;
 
 class CTuneParam
 {
@@ -182,12 +184,16 @@ public:
 	static constexpr vec2 PhysicalSizeVec2() { return vec2(28.0f, 28.0f); };
 	vec2 m_Pos;
 	vec2 m_Vel;
+	//QuadData m_StandingQuad;
 
 	vec2 m_HookPos;
 	vec2 m_HookDir;
 	vec2 m_HookTeleBase;
 	int m_HookTick;
 	int m_HookState;
+	QuadData m_HookedQuad;
+	vec2 m_QuadHookedPos;
+	bool m_QuadCollided;
 	std::set<int> m_AttachedPlayers;
 	int HookedPlayer() const { return m_HookedPlayer; }
 	void SetHookedPlayer(int HookedPlayer);
@@ -270,6 +276,7 @@ public:
 private:
 	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;
+	int m_QuadRestrictions;
 	int m_HookedPlayer;
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 };

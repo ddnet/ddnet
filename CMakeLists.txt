@@ -2151,6 +2151,8 @@ set_src(GAME_SHARED GLOB src/game
   alloc.h
   collision.cpp
   collision.h
+  envelope_access.cpp
+  envelope_access.h
   gamecore.cpp
   gamecore.h
   layers.cpp
