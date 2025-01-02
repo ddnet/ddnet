@@ -631,11 +631,15 @@ void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientId, boo
 
 bool CConsole::ExecuteFile(const char *pFilename, int ClientId, bool LogFailure, int StorageType)
 {
-	// make sure that this isn't being executed already
+	int Count = 0;
+	// make sure that this isn't being executed already and that recursion limit isn't met
 	for(CExecFile *pCur = m_pFirstExec; pCur; pCur = pCur->m_pPrev)
-		if(str_comp(pFilename, pCur->m_pFilename) == 0)
-			return false;
+	{
+		Count++;
 
+		if(str_comp(pFilename, pCur->m_pFilename) == 0 || Count > FILE_RECURSION_LIMIT)
+			return false;
+	}
 	if(!m_pStorage)
 		return false;
 

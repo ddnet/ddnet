@@ -38,6 +38,8 @@ public:
 
 		CLIENT_ID_GAME = -2,
 		CLIENT_ID_NO_GAME = -3,
+
+		FILE_RECURSION_LIMIT = 16,
 	};
 
 	// TODO: rework this interface to reduce the amount of virtual calls
