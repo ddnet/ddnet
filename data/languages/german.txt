@@ -1236,7 +1236,7 @@ Super
 Team %d
 == Team %d
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Deckkraft von Entitäten die zu einem anderen Team gehören, z.B. Tees und Namensschilder
 
 Position:
@@ -2054,3 +2054,37 @@ Active: Hook
 
 Preview 'Hook collisions' being pressed
 == Vorschau für 'Hakenkollisionen' gedrückt
+
+Loading background map
+== Hintergrund-Karte laden
+
+[Spectating Camera Mode Icon]
+AUTO
+== AUTO
+
+Toggle auto camera
+== Auto-Kamera wechseln
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/wiki/Touch_controls
+
+Show client IDs in name plates
+== Client-IDs in Spielernamen anzeigen
+
+Hook Strength
+== Hakenstärke
+
+Size of hook strength icon and number indicator
+== Größe des Hakenstärke-Symbole und der Zahl
+
+Key Presses
+== Tastendrücke
+
+Size of key press icons
+== Größe der Tastendruck-Symbole
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== Server konnte nicht gestartet werden. Erlaub Benachrichtigungen in den App-Einstellungen so dass der Server im Hintergrund laufen kann.
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" is nicht mit pnglite kompatibel und kann in alten DDNet-Versionen nicht geladen werden:

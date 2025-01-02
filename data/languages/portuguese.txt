@@ -917,6 +917,9 @@ Replay feature is disabled!
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== 
+
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
@@ -957,6 +960,9 @@ Restarting. Please wait…
 == 
 
 Loading skin files
+== 
+
+Loading background map
 == 
 
 Searching
@@ -1006,6 +1012,10 @@ Multi-View
 
 [Spectating]
 Following %s
+== 
+
+[Spectating Camera Mode Icon]
+AUTO
 == 
 
 Server best:
@@ -1284,6 +1294,9 @@ Close the demo player
 Toggle keyboard shortcuts
 == 
 
+Toggle auto camera
+== 
+
 Export demo cut
 == 
 
@@ -1373,6 +1386,9 @@ Edit touch controls
 == 
 
 Close
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
 == 
 
 Save changes
@@ -1671,6 +1687,12 @@ Show health, shields and ammo
 Show local time always
 == 
 
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
 DDRace HUD
 == 
 
@@ -1722,10 +1744,22 @@ Preview
 Show friend mark (♥) in name plates
 == 
 
+Show client IDs in name plates
+== 
+
+Hook Strength
+== 
+
 Show hook strength icon indicator
 == 
 
 Show hook strength number indicator
+== 
+
+Size of hook strength icon and number indicator
+== 
+
+Key Presses
 == 
 
 Show other players' key presses
@@ -1734,10 +1768,7 @@ Show other players' key presses
 Show local player's key presses
 == 
 
-Authed name color in scoreboard
-== 
-
-Same clan color in scoreboard
+Size of key press icons
 == 
 
 Hook collision line
@@ -1848,7 +1879,7 @@ Overlay entities
 Show text entities
 == 
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == 
 
 Show others (own team only)
@@ -1923,9 +1954,6 @@ Can't find a Tutorial server
 Run server
 == 
 
-Server executable not found, can't run server
-== 
-
 [Start menu]
 Play
 == 
@@ -1937,6 +1965,12 @@ Downloading %s:
 == 
 
 Update failed! Check log…
+== 
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== 
+
+Server executable not found, can't run server
 == 
 
 Loading race demo files
