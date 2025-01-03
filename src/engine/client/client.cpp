@@ -4707,7 +4707,23 @@ int main(int argc, const char **argv)
 		delete pEngine;
 	});
 
-	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_CLIENT, argc, argv);
+	IStorage *pStorage;
+	{
+		CMemoryLogger MemoryLogger;
+		MemoryLogger.SetParent(log_get_scope_logger());
+		{
+			CLogScope LogScope(&MemoryLogger);
+			pStorage = CreateStorage(IStorage::EInitializationType::CLIENT, argc, argv);
+		}
+		if(!pStorage)
+		{
+			log_error("client", "Failed to initialize the storage location (see details above)");
+			std::string Message = "Failed to initialize the storage location. See details below.\n\n" + MemoryLogger.ConcatenatedLines();
+			pClient->ShowMessageBox("Storage Error", Message.c_str());
+			PerformAllCleanup();
+			return -1;
+		}
+	}
 	pKernel->RegisterInterface(pStorage);
 
 	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
