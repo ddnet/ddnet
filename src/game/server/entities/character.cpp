@@ -913,7 +913,7 @@ void CCharacter::TickDeferred()
 		m_Core.Write(&Current);
 
 		// only allow dead reckoning for a top of 3 seconds
-		if(m_Core.m_Reset || m_ReckoningTick + Server()->TickSpeed() * 3 < Server()->Tick() || mem_comp(&Predicted, &Current, sizeof(CNetObj_Character)) != 0)
+		if(m_Core.m_HookedQuad.m_pQuad || m_Core.m_QuadCollided || m_Core.m_Reset || m_ReckoningTick + Server()->TickSpeed() * 3 < Server()->Tick() || mem_comp(&Predicted, &Current, sizeof(CNetObj_Character)) != 0)
 		{
 			m_ReckoningTick = Server()->Tick();
 			m_SendCore = m_Core;
@@ -1988,6 +1988,49 @@ void CCharacter::HandleTiles(int Index)
 	}
 }
 
+void CCharacter::HandleQuads()
+{
+	CQuad* pQuad = nullptr;
+	int StartNum = 0;
+	while(true)
+	{
+		StartNum = Collision()->GetQuadAt(m_Pos,&pQuad,StartNum);
+		StartNum++;
+		if(!pQuad)
+			break;
+
+		if(pQuad->m_ColorEnvOffset == TILE_FREEZE)
+		{
+			Freeze();
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_DFREEZE)
+		{
+			m_Core.m_DeepFrozen = true;
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_LFREEZE)
+		{
+			m_Core.m_LiveFrozen = true;
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_DUNFREEZE)
+		{
+			m_Core.m_DeepFrozen = false;
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_LUNFREEZE)
+		{
+			m_Core.m_LiveFrozen = false;
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_UNFREEZE)
+		{
+			UnFreeze();
+		}
+		if(pQuad->m_ColorEnvOffset == TILE_DEATH)
+		{
+			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+		}
+	}
+
+}
+
 void CCharacter::HandleTuneLayer()
 {
 	m_TuneZoneOld = m_TuneZone;
@@ -2216,6 +2259,8 @@ void CCharacter::DDRacePostCoreTick()
 		if(!m_Alive)
 			return;
 	}
+
+	HandleQuads();
 
 	// teleport gun
 	if(m_TeleGunTeleport)
