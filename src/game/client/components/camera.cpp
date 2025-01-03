@@ -60,14 +60,11 @@ float CCamera::ZoomProgress(float CurrentTime) const
 void CCamera::ScaleZoom(float Factor)
 {
 	float CurrentTarget = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
-	bool IsUserZoom = !m_IsSpectatingPlayer;
-
-	ChangeZoom(CurrentTarget * Factor, m_pClient->m_Snap.m_SpecInfo.m_Active && GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, IsUserZoom);
+	ChangeZoom(CurrentTarget * Factor, m_pClient->m_Snap.m_SpecInfo.m_Active && GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, true);
 
 	if(m_IsSpectatingPlayer)
 	{
 		m_AutoSpecCamera = false;
-		m_SpecZoomTarget = m_ZoomSmoothingTarget;
 	}
 }
 
@@ -112,7 +109,6 @@ void CCamera::ChangeZoom(float Target, int Smoothness, bool IsUser)
 void CCamera::ResetAutoSpecCamera()
 {
 	m_AutoSpecCamera = true;
-	m_SpecZoomTarget = CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10);
 }
 
 void CCamera::UpdateCamera()
@@ -136,19 +132,36 @@ void CCamera::UpdateCamera()
 
 	if(IsSpectatingPlayer && UsingAutoSpecCamera && CurrentZoom != m_pClient->m_Snap.m_SpecInfo.m_Zoom)
 	{
-		ChangeZoom(m_pClient->m_Snap.m_SpecInfo.m_Zoom, 250, false);
+		bool ChangeTarget = m_PrevSpecId != m_pClient->m_Snap.m_SpecInfo.m_SpectatorId;
+		float SmoothTime = ChangeTarget ? g_Config.m_ClSmoothSpectatingTime : 250;
+		ChangeZoom(m_pClient->m_Snap.m_SpecInfo.m_Zoom, SmoothTime, false);
+
 		// it is auto spec camera zooming if only the zoom is changed during activation, not at the start of the activation
-		m_AutoSpecCameraZooming = IsSpectatingPlayer && m_UsingAutoSpecCamera;
+		m_AutoSpecCameraZooming = !ChangeTarget && IsSpectatingPlayer && m_UsingAutoSpecCamera;
+
+		// snap zoom when going in and out of spectating
+		if(!m_WasSpectating)
+		{
+			m_Zoom = m_ZoomSmoothingTarget;
+			m_Zooming = false;
+		}
 	}
-	else if((IsSpectatingPlayer && !UsingAutoSpecCamera) && CurrentZoom != m_SpecZoomTarget)
+	else if((IsSpectatingPlayer && !UsingAutoSpecCamera) && CurrentZoom != m_UserZoomTarget)
 	{
-		ChangeZoom(m_SpecZoomTarget, g_Config.m_ClSmoothZoomTime, false);
+		ChangeZoom(m_UserZoomTarget, g_Config.m_ClSmoothZoomTime, false);
 		m_AutoSpecCameraZooming = false;
 	}
 	else if(!IsSpectatingPlayer && CurrentZoom != m_UserZoomTarget)
 	{
 		ChangeZoom(m_UserZoomTarget, GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, false);
 		m_AutoSpecCameraZooming = false;
+
+		// snap zoom when going in and out of spectating
+		if(m_WasSpectating && !m_pClient->m_Snap.m_SpecInfo.m_Active)
+		{
+			m_Zoom = m_ZoomSmoothingTarget;
+			m_Zooming = false;
+		}
 	}
 
 	if(m_Zooming)
@@ -395,7 +408,6 @@ void CCamera::OnReset()
 	m_Zooming = false;
 	m_AutoSpecCameraZooming = false;
 	m_UserZoomTarget = CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10);
-	m_SpecZoomTarget = CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10);
 }
 
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
@@ -443,7 +455,6 @@ void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 	if(IsSpectating && !IsReset)
 	{
 		pSelf->m_AutoSpecCamera = false;
-		pSelf->m_SpecZoomTarget = pSelf->m_ZoomSmoothingTarget;
 	}
 
 	if(pSelf->GameClient()->m_MultiViewActivated && pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active)
