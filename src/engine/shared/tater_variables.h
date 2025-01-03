@@ -24,7 +24,7 @@ MACRO_CONFIG_INT(ClPingNameCircle, tc_nameplate_ping_circle, 0, 0, 1, CFGFLAG_CL
 MACRO_CONFIG_INT(ClSpecmenuID, tc_spec_menu_ID, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows player IDs in spectate menu")
 
 MACRO_CONFIG_INT(ClLimitMouseToScreen, tc_limit_mouse_to_screen, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Limit mouse to screen boundries")
-MACRO_CONFIG_INT(ClImproveMousePrecision, tc_improve_mouse_precision, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Improve mouse precision by scaling max distance to 1000")
+MACRO_CONFIG_INT(ClScaleMouseDistance, tc_scale_mouse_distance, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Improve mouse precision by scaling max distance to 1000")
 
 MACRO_CONFIG_INT(ClHammerRotatesWithCursor, tc_hammer_rotates_with_cursor, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Allow your hammer to rotate like other weapons")
 
@@ -136,7 +136,7 @@ MACRO_CONFIG_INT(ClApplyProfileEmote, tc_profile_emote, 1, 0, 1, CFGFLAG_CLIENT 
 MACRO_CONFIG_INT(ClAutoVerify, tc_auto_verify, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Auto verify")
 
 // Rainbow
-MACRO_CONFIG_INT(ClRainbow, tc_rainbow, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on rainbow client side")
+MACRO_CONFIG_INT(ClRainbowTees, tc_rainbow_tees, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on rainbow client side")
 MACRO_CONFIG_INT(ClRainbowHook, tc_rainbow_hook, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Rainbow hook")
 MACRO_CONFIG_INT(ClRainbowWeapon, tc_rainbow_weapon, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Rainbow Weapons")
 

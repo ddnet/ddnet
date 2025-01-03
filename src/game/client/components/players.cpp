@@ -96,7 +96,7 @@ void CPlayers::RenderHand6(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir
 
 	const CSkin::SSkinTextures *pSkinTextures = pInfo->m_CustomColoredSkin ? &pInfo->m_ColorableRenderSkin : &pInfo->m_OriginalRenderSkin;
 
-	if(!g_Config.m_ClRainbow)
+	if(!g_Config.m_ClRainbowTees)
 	{
 		Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
 	}
@@ -197,7 +197,7 @@ void CPlayers::RenderHookCollLine(
 		const int MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
 		if(MaxDistance > 5) // Only multiply mouse coords if not angle bind
 		{
-			if(g_Config.m_ClImproveMousePrecision && MaxDistance < 1000) // Don't scale if it would reduce precision
+			if(g_Config.m_ClScaleMouseDistance && MaxDistance < 1000) // Don't scale if it would reduce precision
 				Pos *= length(Pos) * 1000.0f / (float)MaxDistance;
 		}
 		Pos.x = (int)Pos.x;
@@ -403,7 +403,7 @@ void CPlayers::RenderHook(
 
 		bool Local = m_pClient->m_Snap.m_LocalClientId == ClientId;
 		bool DontOthers = !g_Config.m_ClRainbowOthers && !Local;
-		if(g_Config.m_ClRainbow && g_Config.m_ClRainbowHook && !DontOthers)
+		if(g_Config.m_ClRainbowHook && !DontOthers)
 			Graphics()->SetColor(GameClient()->m_Rainbow.m_RainbowColor.WithAlpha(Alpha));
 
 		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookPos.x, HookPos.y);
@@ -426,7 +426,7 @@ void CPlayers::RenderHook(
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		if(g_Config.m_ClRainbow && g_Config.m_ClRainbowHook && !DontOthers)
+		if(g_Config.m_ClRainbowHook && !DontOthers)
 			Graphics()->SetColor(GameClient()->m_Rainbow.m_RainbowColor.WithAlpha(Alpha));
 
 		RenderHand(&RenderInfo, Position, normalize(HookPos - Pos), -pi / 2, vec2(20, 0), Alpha);
@@ -500,7 +500,7 @@ void CPlayers::RenderPlayer(
 		const int MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
 		if(MaxDistance > 5) // Only multiply mouse coords if not angle bind
 		{
-			if(g_Config.m_ClImproveMousePrecision && MaxDistance < 1000) // Don't scale if it would reduce precision
+			if(g_Config.m_ClScaleMouseDistance && MaxDistance < 1000) // Don't scale if it would reduce precision
 				Pos *= length(Pos) * 1000.0f / (float)MaxDistance;
 		}
 		Pos.x = (int)Pos.x;
@@ -616,7 +616,7 @@ void CPlayers::RenderPlayer(
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 
 			bool DontOthers = !g_Config.m_ClRainbowOthers && !Local;
-			if(g_Config.m_ClRainbow && g_Config.m_ClRainbowWeapon && !DontOthers)
+			if(g_Config.m_ClRainbowWeapon && !DontOthers)
 				Graphics()->SetColor(GameClient()->m_Rainbow.m_RainbowColor.WithAlpha(Alpha));
 
 			vec2 Dir = Direction;
@@ -780,7 +780,7 @@ void CPlayers::RenderPlayer(
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			Graphics()->QuadsSetRotation(0);
 
-			if(g_Config.m_ClRainbow && !DontOthers)
+			if(g_Config.m_ClRainbowTees && !DontOthers)
 				Graphics()->SetColor(GameClient()->m_Rainbow.m_RainbowColor.WithAlpha(Alpha));
 
 			switch(Player.m_Weapon)
@@ -947,7 +947,7 @@ void CPlayers::RenderPlayerGhost(
 		const int MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
 		if(MaxDistance > 5) // Only multiply mouse coords if not angle bind
 		{
-			if(g_Config.m_ClImproveMousePrecision && MaxDistance < 1000) // Don't scale if it would reduce precision
+			if(g_Config.m_ClScaleMouseDistance && MaxDistance < 1000) // Don't scale if it would reduce precision
 				Pos *= length(Pos) * 1000.0f / (float)MaxDistance;
 		}
 		Pos.x = (int)Pos.x;

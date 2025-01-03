@@ -676,8 +676,8 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	// A little extra spacing because these are multi line
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-	Column.HSplitTop(MarginSmall, nullptr, &Column);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClImproveMousePrecision, Localize("Improve mouse precision by scaling sent max distance to 1000"), &g_Config.m_ClImproveMousePrecision, &Column, LineSize);
+	//Column.HSplitTop(MarginSmall, nullptr, &Column);
+	//DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScaleMouseDistance, Localize("Improve mouse precision by scaling sent max distance to 1000"), &g_Config.m_ClScaleMouseDistance, &Column, LineSize);
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 	// ***** Anti Latency Tools ***** //
@@ -960,7 +960,7 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	static CScrollRegion s_RainbowDropDownScrollRegion;
 	s_RainbowDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_RainbowDropDownScrollRegion;
 	int RainbowSelectedOld = g_Config.m_ClRainbowMode - 1;
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbow, Localize("Rainbow"), &g_Config.m_ClRainbow, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowTees, Localize("Rainbow Tees"), &g_Config.m_ClRainbowTees, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowWeapon, Localize("Rainbow weapons"), &g_Config.m_ClRainbowWeapon, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowHook, Localize("Rainbow hook"), &g_Config.m_ClRainbowHook, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, Localize("Rainbow others"), &g_Config.m_ClRainbowOthers, &Column, LineSize);

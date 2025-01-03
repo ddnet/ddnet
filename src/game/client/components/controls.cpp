@@ -215,7 +215,7 @@ int CControls::SnapInput(int *pData)
 		const int MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
 		if(!m_pClient->m_Snap.m_SpecInfo.m_Active && MaxDistance > 5) // Only multiply mouse coords if not angle bind
 		{
-			if(g_Config.m_ClImproveMousePrecision && MaxDistance < 1000) // Don't scale if it would reduce precision
+			if(g_Config.m_ClScaleMouseDistance && MaxDistance < 1000) // Don't scale if it would reduce precision
 				Pos *= length(Pos) * 1000.0f / (float)MaxDistance;
 		}
 		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)Pos.x;
@@ -241,7 +241,7 @@ int CControls::SnapInput(int *pData)
 		const int MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
 		if(!m_pClient->m_Snap.m_SpecInfo.m_Active && MaxDistance > 5) // Only multiply mouse coords if not angle bind
 		{
-			if(g_Config.m_ClImproveMousePrecision && MaxDistance < 1000) // Don't scale if it would reduce precision
+		if(g_Config.m_ClScaleMouseDistance && MaxDistance < 1000) // Don't scale if it would reduce precision
 				Pos *= length(Pos) * 1000.0f / (float)(g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance);
 		}
 		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)Pos.x;

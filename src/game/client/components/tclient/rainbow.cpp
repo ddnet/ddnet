@@ -21,8 +21,10 @@ T color_lerp(T a, T b, float c)
 
 void CRainbow::OnRender()
 {
-	if(!g_Config.m_ClRainbow && !g_Config.m_ClRainbowOthers)
+
+	if(!g_Config.m_ClRainbowTees && !g_Config.m_ClRainbowWeapon && !g_Config.m_ClRainbowHook)
 		return;
+
 	if(g_Config.m_ClRainbowMode == 0)
 		return;
 
@@ -68,7 +70,7 @@ void CRainbow::OnRender()
 		CTeeRenderInfo *RenderInfo = &m_pClient->m_aClients[i].m_RenderInfo;
 
 		// check if rainbow is enabled
-		if(Local ? g_Config.m_ClRainbow : g_Config.m_ClRainbowOthers)
+		if(Local ? g_Config.m_ClRainbowTees : (g_Config.m_ClRainbowTees && g_Config.m_ClRainbowOthers))
 		{
 			RenderInfo->m_BloodColor = Col;
 			RenderInfo->m_ColorBody = Col;

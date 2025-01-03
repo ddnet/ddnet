@@ -2571,13 +2571,13 @@ void CGameClient::OnPredict()
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(!m_Snap.m_aCharacters[i].m_Active || i == m_Snap.m_LocalClientId || !m_aLastActive[i])
+			if(!m_Snap.m_aCharacters[i].m_Active || !m_aLastActive[i])
 				continue;
 
-			if (i == m_PredictedDummyId) 
+			if(i == m_PredictedDummyId || i == m_Snap.m_LocalClientId) 
 			{
-				m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_aPredPos[(FinalTickOthers - 1) % 200];
-				m_aClients[i].m_ImprovedPredPos = m_aClients[i].m_aPredPos[FinalTickOthers % 200];
+				m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_PrevPredicted.m_Pos;
+				m_aClients[i].m_ImprovedPredPos = m_aClients[i].m_Predicted.m_Pos;
 				continue;
 			}
 
