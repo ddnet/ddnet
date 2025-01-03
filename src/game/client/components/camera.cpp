@@ -117,7 +117,7 @@ void CCamera::UpdateCamera()
 	bool IsSpectatingPlayer = !GameClient()->m_MultiViewActivated;
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		IsSpectatingPlayer = IsSpectatingPlayer && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0;
+		IsSpectatingPlayer = IsSpectatingPlayer && (!m_pClient->m_Snap.m_SpecInfo.m_Active || m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0);
 	}
 	else
 	{
@@ -129,9 +129,10 @@ void CCamera::UpdateCamera()
 
 	bool UsingAutoSpecCamera = m_AutoSpecCamera && CanUseAutoSpecCamera();
 	float CurrentZoom = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
-
+	bool ZoomChanged = false;
 	if(IsSpectatingPlayer && UsingAutoSpecCamera && CurrentZoom != m_pClient->m_Snap.m_SpecInfo.m_Zoom)
 	{
+		// start spectating player / turn on auto spec camera
 		bool ChangeTarget = m_PrevSpecId != m_pClient->m_Snap.m_SpecInfo.m_SpectatorId;
 		float SmoothTime = ChangeTarget ? g_Config.m_ClSmoothSpectatingTime : 250;
 		ChangeZoom(m_pClient->m_Snap.m_SpecInfo.m_Zoom, SmoothTime, false);
@@ -139,29 +140,30 @@ void CCamera::UpdateCamera()
 		// it is auto spec camera zooming if only the zoom is changed during activation, not at the start of the activation
 		m_AutoSpecCameraZooming = !ChangeTarget && IsSpectatingPlayer && m_UsingAutoSpecCamera;
 
-		// snap zoom when going in and out of spectating
-		if(!m_WasSpectating)
-		{
-			m_Zoom = m_ZoomSmoothingTarget;
-			m_Zooming = false;
-		}
+		ZoomChanged = true;
 	}
 	else if((IsSpectatingPlayer && !UsingAutoSpecCamera) && CurrentZoom != m_UserZoomTarget)
 	{
+		// turning off auto spec camera
 		ChangeZoom(m_UserZoomTarget, g_Config.m_ClSmoothZoomTime, false);
 		m_AutoSpecCameraZooming = false;
+
+		ZoomChanged = true;
 	}
 	else if(!IsSpectatingPlayer && CurrentZoom != m_UserZoomTarget)
 	{
+		// stop spectating player
 		ChangeZoom(m_UserZoomTarget, GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, false);
 		m_AutoSpecCameraZooming = false;
 
-		// snap zoom when going in and out of spectating
-		if(m_WasSpectating && !m_pClient->m_Snap.m_SpecInfo.m_Active)
-		{
-			m_Zoom = m_ZoomSmoothingTarget;
-			m_Zooming = false;
-		}
+		ZoomChanged = true;
+	}
+
+	// snap zoom when going in and out of spectating
+	if(ZoomChanged && m_WasSpectating != m_pClient->m_Snap.m_SpecInfo.m_Active)
+	{
+		m_Zoom = m_ZoomSmoothingTarget;
+		m_Zooming = false;
 	}
 
 	if(m_Zooming)
@@ -386,6 +388,8 @@ void CCamera::OnRender()
 
 	m_PrevCenter = m_Center;
 	m_PrevSpecId = SpecId;
+
+	// demo always count as spectating
 	m_WasSpectating = m_pClient->m_Snap.m_SpecInfo.m_Active;
 }
 
