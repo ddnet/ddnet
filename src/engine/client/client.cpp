@@ -2543,6 +2543,9 @@ void CClient::PumpNetwork()
 		{
 			if(Packet.m_ClientId == -1)
 			{
+				if(ResponseToken != NET_SECURITY_TOKEN_UNKNOWN)
+					PreprocessConnlessPacket7(&Packet);
+
 				ProcessConnlessPacket(&Packet);
 				continue;
 			}
