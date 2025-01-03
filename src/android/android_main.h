@@ -51,9 +51,12 @@ void RestartAndroidApp();
  * This will request the notification-permission as it is required for
  * foreground services to show a notification.
  *
+ * @param ppArguments Array of arguments to pass to the server on launch.
+ * @param NumArguments The number of arguments.
+ *
  * @return `true` on success, `false` on error.
  */
-bool StartAndroidServer();
+bool StartAndroidServer(const char **ppArguments, size_t NumArguments);
 
 /**
  * Adds a command to the execution queue of the local server.

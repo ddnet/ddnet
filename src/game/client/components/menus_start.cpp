@@ -273,7 +273,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 void CMenus::RunServer()
 {
 #if defined(CONF_PLATFORM_ANDROID)
-	if(StartAndroidServer())
+	if(StartAndroidServer({}, 0))
 	{
 		m_ForceRefreshLanPage = true;
 	}
