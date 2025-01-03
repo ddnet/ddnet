@@ -96,7 +96,7 @@ void CPlayers::RenderHand6(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir
 
 	const CSkin::SSkinTextures *pSkinTextures = pInfo->m_CustomColoredSkin ? &pInfo->m_ColorableRenderSkin : &pInfo->m_OriginalRenderSkin;
 
-	if(!(g_Config.m_ClRainbow == 1 || g_Config.m_ClRainbowOthers == 1))
+	if(!g_Config.m_ClRainbow)
 	{
 		Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
 	}
@@ -374,6 +374,7 @@ void CPlayers::RenderHook(
 	if(Prev.m_HookState > 0 && Player.m_HookState > 0)
 	{
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
 		if(ClientId < 0)
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
 
@@ -399,6 +400,12 @@ void CPlayers::RenderHook(
 		// render head
 		int QuadOffset = NUM_WEAPONS * 2 + 2;
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+
+		bool Local = m_pClient->m_Snap.m_LocalClientId == ClientId;
+		bool DontOthers = !g_Config.m_ClRainbowOthers && !Local;
+		if(g_Config.m_ClRainbow && g_Config.m_ClRainbowHook && !DontOthers)
+			Graphics()->SetColor(GameClient()->m_Rainbow.m_RainbowColor.WithAlpha(Alpha));
+
 		Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, HookPos.x, HookPos.y);
 
 		// render chain
@@ -418,6 +425,9 @@ void CPlayers::RenderHook(
 
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+		if(g_Config.m_ClRainbow && g_Config.m_ClRainbowHook && !DontOthers)
+			Graphics()->SetColor(GameClient()->m_Rainbow.m_RainbowColor.WithAlpha(Alpha));
 
 		RenderHand(&RenderInfo, Position, normalize(HookPos - Pos), -pi / 2, vec2(20, 0), Alpha);
 	}
@@ -441,6 +451,8 @@ void CPlayers::RenderPlayer(
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientId);
 	// float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 	bool Spec = m_pClient->m_Snap.m_SpecInfo.m_Active;
+
+	RenderTools()->m_LocalTeeRender = Local; // TClient
 
 	float Alpha = 1.0f;
 	if(OtherTeam || ClientId < 0)
@@ -603,6 +615,10 @@ void CPlayers::RenderPlayer(
 
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 
+			bool DontOthers = !g_Config.m_ClRainbowOthers && !Local;
+			if(g_Config.m_ClRainbow && g_Config.m_ClRainbowWeapon && !DontOthers)
+				Graphics()->SetColor(GameClient()->m_Rainbow.m_RainbowColor.WithAlpha(Alpha));
+
 			vec2 Dir = Direction;
 			float Recoil = 0.0f;
 			vec2 WeaponPosition;
@@ -764,6 +780,9 @@ void CPlayers::RenderPlayer(
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			Graphics()->QuadsSetRotation(0);
 
+			if(g_Config.m_ClRainbow && !DontOthers)
+				Graphics()->SetColor(GameClient()->m_Rainbow.m_RainbowColor.WithAlpha(Alpha));
+
 			switch(Player.m_Weapon)
 			{
 			case WEAPON_GUN: RenderHand(&RenderInfo, WeaponPosition, Direction, -3 * pi / 4, vec2(-15, 4), Alpha); break;
@@ -788,7 +807,6 @@ void CPlayers::RenderPlayer(
 		RenderTools()->RenderTee(&State, &Shadow, Player.m_Emote, Direction, ShadowPosition, 0.5f); // render ghost
 	}
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
-
 	float TeeAnimScale, TeeBaseSize;
 	CRenderTools::GetRenderTeeAnimScaleAndBaseSize(&RenderInfo, TeeAnimScale, TeeBaseSize);
 	vec2 BodyPos = Position + vec2(State.GetBody()->m_X, State.GetBody()->m_Y) * TeeAnimScale;
@@ -882,6 +900,8 @@ void CPlayers::RenderPlayerGhost(
 	bool Local = m_pClient->m_Snap.m_LocalClientId == ClientId;
 	bool OtherTeam = m_pClient->IsOtherTeam(ClientId);
 	float Alpha = 1.0f;
+
+	RenderTools()->m_LocalTeeRender = Local; // TClient
 
 	bool FrozenSwappingHide = (m_pClient->m_aClients[ClientId].m_FreezeEnd > 0) && g_Config.m_ClHideFrozenGhosts && g_Config.m_ClSwapGhosts;
 
