@@ -229,6 +229,13 @@ int CControls::SnapInput(int *pData)
 			m_aMousePosOnAction[g_Config.m_ClDummy] = vec2(0.0f, 0.0f);
 		}
 
+		if(g_Config.m_ClSnapAimTo45)
+		{
+			vec2 snapped_vec = snap_to_45(vec2(m_aInputData[g_Config.m_ClDummy].m_TargetX, m_aInputData[g_Config.m_ClDummy].m_TargetY));
+			m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)snapped_vec.x;
+			m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)snapped_vec.y;
+		}
+
 		if(!m_aInputData[g_Config.m_ClDummy].m_TargetX && !m_aInputData[g_Config.m_ClDummy].m_TargetY)
 		{
 			m_aInputData[g_Config.m_ClDummy].m_TargetX = 1;
