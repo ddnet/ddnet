@@ -158,6 +158,7 @@ void CCamera::UpdateCamera()
 		{
 			m_Zoom = m_ZoomSmoothingTarget;
 			m_Zooming = false;
+			m_AutoSpecCameraZooming = false;
 		}
 		else
 		{
@@ -167,6 +168,7 @@ void CCamera::UpdateCamera()
 			{
 				m_Zoom = m_ZoomSmoothingTarget;
 				m_Zooming = false;
+				m_AutoSpecCameraZooming = false;
 			}
 		}
 		m_Zoom = clamp(m_Zoom, MinZoomLevel(), MaxZoomLevel());
@@ -177,6 +179,7 @@ void CCamera::UpdateCamera()
 		m_ZoomSet = false;
 		m_Zoom = 1.0f;
 		m_Zooming = false;
+		m_AutoSpecCameraZooming = false;
 	}
 	else if(!m_ZoomSet && g_Config.m_ClDefaultZoom != 10)
 	{
@@ -390,6 +393,7 @@ void CCamera::OnReset()
 
 	m_Zoom = CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10);
 	m_Zooming = false;
+	m_AutoSpecCameraZooming = false;
 	m_UserZoomTarget = CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10);
 	m_SpecZoomTarget = CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10);
 }
