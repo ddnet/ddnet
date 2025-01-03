@@ -449,6 +449,8 @@ void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 
 	if(!pSelf->CanUseAutoSpecCamera() || !pSelf->m_IsSpectatingPlayer)
 		pSelf->ChangeZoom(CCamera::ZoomStepsToValue(TargetLevel - 10.0f), pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, true);
+	else
+		pSelf->m_UserZoomTarget = CCamera::ZoomStepsToValue(TargetLevel - 10.0f);
 
 	pSelf->m_AutoSpecCamera = IsReset;
 
