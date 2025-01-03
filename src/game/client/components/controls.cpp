@@ -22,6 +22,7 @@ CControls::CControls()
 	mem_zero(m_aMousePos, sizeof(m_aMousePos));
 	mem_zero(m_aMousePosOnAction, sizeof(m_aMousePosOnAction));
 	mem_zero(m_aTargetPos, sizeof(m_aTargetPos));
+	mem_zero(m_aInputType, sizeof(m_aInputType));
 }
 
 void CControls::OnReset()
@@ -197,6 +198,11 @@ int CControls::SnapInput(int *pData)
 	if(Client()->ServerCapAnyPlayerFlag() && m_pClient->m_Camera.CamType() == CCamera::CAMTYPE_SPEC)
 		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_SPEC_CAM;
 
+	if(m_aInputType[g_Config.m_ClDummy] != CControls::INPUT_TYPE_RELATIVE)
+	{
+		m_aInputData[g_Config.m_ClDummy].m_PlayerFlags |= PLAYERFLAG_INPUT_ABSOLUTE;
+	}
+
 	bool Send = m_aLastData[g_Config.m_ClDummy].m_PlayerFlags != m_aInputData[g_Config.m_ClDummy].m_PlayerFlags;
 
 	m_aLastData[g_Config.m_ClDummy].m_PlayerFlags = m_aInputData[g_Config.m_ClDummy].m_PlayerFlags;
@@ -292,6 +298,7 @@ int CControls::SnapInput(int *pData)
 			m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)(std::cos(t * 3) * 100.0f);
 		}
 #endif
+
 		// check if we need to send input
 		Send = Send || m_aInputData[g_Config.m_ClDummy].m_Direction != m_aLastData[g_Config.m_ClDummy].m_Direction;
 		Send = Send || m_aInputData[g_Config.m_ClDummy].m_Jump != m_aLastData[g_Config.m_ClDummy].m_Jump;
@@ -370,7 +377,10 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	{
 		vec2 AbsoluteDirection;
 		if(Input()->GetActiveJoystick()->Absolute(&AbsoluteDirection.x, &AbsoluteDirection.y))
+		{
 			m_aMousePos[g_Config.m_ClDummy] = AbsoluteDirection * GetMaxMouseDistance();
+			m_pClient->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_ABSOLUTE;
+		}
 		return true;
 	}
 
@@ -400,6 +410,7 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 		Factor *= m_pClient->m_Camera.m_Zoom;
 
 	m_aMousePos[g_Config.m_ClDummy] += vec2(x, y) * Factor;
+	m_pClient->m_Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_RELATIVE;
 	ClampMousePos();
 	return true;
 }
