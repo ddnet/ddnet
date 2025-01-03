@@ -145,7 +145,7 @@ void CNamePlates::RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateD
 
 		// TClient
 		if(Data.m_IsGame && Data.m_RealClientId >= 0)
-			if((g_Config.m_ClPingNameCircle || (m_pClient->m_Scoreboard.Active() && !m_pClient->m_Snap.m_apPlayerInfos[Data.m_RealClientId]->m_Local)) && !(Client()->State() == IClient::STATE_DEMOPLAYBACK))
+			if((g_Config.m_ClPingNameCircle || (m_pClient->m_Scoreboard.Active() && !m_pClient->m_Snap.m_apPlayerInfos[Data.m_RealClientId]->m_Local)) && (Client()->State() != IClient::STATE_DEMOPLAYBACK))
 			{
 				Graphics()->TextureClear();
 				Graphics()->QuadsBegin();
@@ -154,6 +154,15 @@ void CNamePlates::RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateD
 				Graphics()->DrawCircle(Data.m_Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_Name.m_TextContainerIndex).m_W / 2.0f - CircleSize, YOffset + Data.m_FontSize / 2.0f + 1.4f, CircleSize, 24);
 				Graphics()->QuadsEnd();
 			}
+		if(Data.m_IsGame && Data.m_RealClientId >= 0)
+			if(Client()->State() != IClient::STATE_DEMOPLAYBACK && (m_pClient->m_aClients[Data.m_RealClientId].m_Foe || m_pClient->m_aClients[Data.m_RealClientId].m_ChatIgnore))
+			{
+				TextRender()->TextColor(TextRender()->DefaultTextColor());
+				TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+				TextRender()->Text(Data.m_Position.x + TextRender()->GetBoundingBoxTextContainer(NamePlate.m_Name.m_TextContainerIndex).m_W / 2.0f, YOffset, Data.m_FontSize, FontIcons::FONT_ICON_COMMENT_SLASH);
+				TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+			}
+
 		ColorRGBA WarColor = Color;
 		if(Data.m_IsGame && Data.m_RealClientId >= 0 && !Data.m_ShowClanWarInName && GameClient()->m_WarList.GetWarData(Data.m_RealClientId).IsWarName)
 			WarColor = GameClient()->m_WarList.GetNameplateColor(Data.m_RealClientId).WithAlpha(Data.m_Alpha);

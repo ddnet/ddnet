@@ -283,6 +283,17 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		static CLineInput s_KaomojiUnflip;
 		DoBindchat(s_KaomojiUnflip, Localize("Unflip:"), "!unflip", "say ┬─┬ノ( º _ ºノ)");
 
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		Column.HSplitTop(HeadlineHeight, &Label, &Column);
+		Ui()->DoLabel(&Label, Localize("Mute Commands"), HeadlineFontSize, TEXTALIGN_ML);
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+		static CLineInput s_Mute, s_UnMute;
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		DoBindchat(s_Mute, Localize("Mute:"), "!mute", "add_foe");
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		DoBindchat(s_UnMute, Localize("Un-Mute:"), "!unmute", "remove_foe");
+
 		Column = RightView;
 
 		Column.HSplitTop(HeadlineHeight, &Label, &Column);
@@ -955,14 +966,12 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-
 	// ***** Tee Trails ***** //
 	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
 	s_SectionBoxes.push_back(Column);
 	Column.HSplitTop(HeadlineHeight, &Label, &Column);
 	Ui()->DoLabel(&Label, Localize("Tee Trails"), HeadlineFontSize, TEXTALIGN_ML);
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
-
 
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrail, Localize("Enable tee trails"), &g_Config.m_ClTeeTrail, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailOthers, Localize("Tee trail others"), &g_Config.m_ClTeeTrailOthers, &Column, LineSize);
@@ -979,7 +988,6 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailAlpha, &g_Config.m_ClTeeTrailAlpha, &Button, Localize("Trail alpha"), 0, 100);
 	static CButtonContainer s_TeeTrailColor;
 	DoLine_ColorPicker(&s_TeeTrailColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Tee trail color"), &g_Config.m_ClTeeTrailColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
-
 
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 	Column.HSplitTop(MarginSmall, nullptr, &Column);

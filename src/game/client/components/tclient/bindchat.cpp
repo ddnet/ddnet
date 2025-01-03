@@ -195,7 +195,6 @@ void CBindchat::OnConsoleInit()
 	}
 
 	// Default Binds
-	// Default Binds
 	AddBindDefault(".war", "war_name_index 1");
 	AddBindDefault(".warclan", "war_clan_index 1");
 	AddBindDefault(".team", "war_name_index 2");
@@ -204,6 +203,8 @@ void CBindchat::OnConsoleInit()
 	AddBindDefault(".delwarclan", "remove_war_clan_index 1");
 	AddBindDefault(".delteam", "remove_war_name_index 2");
 	AddBindDefault(".delteamclan", "remove_war_clan_index 2");
+	AddBindDefault("!mute", "add_foe");
+	AddBindDefault("!unmute", "remove_foe");
 }
 
 void CBindchat::ExecuteBind(int Bind, const char *pArgs)
