@@ -250,119 +250,6 @@ h2 {
     line-height: 1.4;
 }
 
-/* FAQ */
-#faq {
-    margin-bottom: 80px;
-}
-
-.faq-container {
-    background: var(--bg-dark);
-    border-radius: 25px;
-    padding: 20px;
-}
-
-.faq-item {
-    background: var(--card-bg);
-    border-radius: 15px;
-    margin-bottom: 15px;
-    padding: 15px;
-    height: auto;
-}
-
-.qa-pair {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.qa-block {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    height: 40px;
-}
-
-.qa-icon {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(137deg, var(--bg-dark), var(--darker-bg));
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.qa-text {
-    font-size: 18px;
-    font-weight: 500;
-}
-
-.more {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 18px;
-    font-weight: 700;
-    margin-top: 15px;
-}
-
-/* Install */
-#install {
-    margin-bottom: 80px;
-}
-
-.install-container {
-    background: var(--bg-dark);
-    border-radius: 25px;
-    padding: 20px;
-    height: auto;
-}
-
-.install-content {
-    background: var(--card-bg);
-    border-radius: 15px;
-    padding: 20px;
-    height: auto;
-}
-
-.install-container h3 {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-.steps {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.step {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    height: 40px;
-}
-
-.step-number {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(137deg, var(--bg-dark), var(--darker-bg));
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: 700;
-}
-
-.step span:last-child {
-    font-size: 18px;
-    font-weight: 500;
-}
-
 /* Download */
 #download {
     text-align: center;
@@ -418,6 +305,14 @@ h2 {
 
 .linux-download:hover {
     box-shadow: 0px 0px 10px #ff8703;
+}
+
+.android-download {
+    background: linear-gradient(144deg, rgb(0, 165, 14) 0%, rgb(59, 255, 38) 100%);
+}
+
+.android-download:hover {
+    box-shadow: 0px 0px 10px #35ff46;
 }
 
 .download-btn:hover {
