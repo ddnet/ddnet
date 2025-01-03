@@ -189,7 +189,14 @@ void CPlayers::RenderHookCollLine(
 	if(Local && !m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * m_pClient->m_Camera.m_Zoom);
+		if(g_Config.m_ClSnapAimTo45)
+		{
+			Angle = angle(snap_to_45(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * m_pClient->m_Camera.m_Zoom));
+		}
+		else
+		{
+			Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * m_pClient->m_Camera.m_Zoom);	
+		}
 	}
 	else
 	{
@@ -232,9 +239,9 @@ void CPlayers::RenderHookCollLine(
 
 			if(Local && !m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			{
-				ExDirection = normalize(
-					vec2((int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x * m_pClient->m_Camera.m_Zoom),
-						(int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y * m_pClient->m_Camera.m_Zoom)));
+				// ExDirection = normalize(
+				// 	vec2((int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x * m_pClient->m_Camera.m_Zoom),
+				// 		(int)((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y * m_pClient->m_Camera.m_Zoom)));
 
 				// fix direction if mouse is exactly in the center
 				if(!(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)
@@ -456,7 +463,14 @@ void CPlayers::RenderPlayer(
 	if(Local && !m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * m_pClient->m_Camera.m_Zoom);
+		if(g_Config.m_ClSnapAimTo45)
+		{
+			Angle = angle(snap_to_45(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * m_pClient->m_Camera.m_Zoom));
+		}
+		else
+		{
+			Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * m_pClient->m_Camera.m_Zoom);
+		}
 	}
 	else
 	{
