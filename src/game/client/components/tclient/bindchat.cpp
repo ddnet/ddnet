@@ -239,6 +239,9 @@ bool CBindchat::CheckBindChat(const char *pText)
 
 bool CBindchat::ChatDoBinds(const char *pText)
 {
+	if(pText[0] == ' ')
+		return false;
+
 	CChat &Chat = GameClient()->m_Chat;
 	const char *pSpace = str_find(pText, " ");
 	size_t SpaceIndex = pSpace ? pSpace - pText : strlen(pText);
