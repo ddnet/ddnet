@@ -2574,6 +2574,13 @@ void CGameClient::OnPredict()
 			if(!m_Snap.m_aCharacters[i].m_Active || i == m_Snap.m_LocalClientId || !m_aLastActive[i])
 				continue;
 
+			if (i == m_PredictedDummyId) 
+			{
+				m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_aPredPos[(FinalTickOthers - 1) % 200];
+				m_aClients[i].m_ImprovedPredPos = m_aClients[i].m_aPredPos[FinalTickOthers % 200];
+				continue;
+			}
+
 			CCharacter *pChar = m_PredSmoothingWorld.GetCharacterById(i);
 			if(!pChar)
 				continue;

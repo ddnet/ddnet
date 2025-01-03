@@ -36,6 +36,9 @@ void CNamePlate::CNamePlateName::Update(CNamePlates &This, int Id, const char *p
 	if(m_FriendMark)
 	{
 		This.TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		//if(g_Config.m_ClWarList && This.m_pClient->m_WarList.GetAnyWar(Id))
+		//	This.TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, "♥");
 	}
 	This.TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
@@ -164,9 +167,9 @@ void CNamePlates::RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateD
 			}
 
 		ColorRGBA WarColor = Color;
-		if(Data.m_IsGame && Data.m_RealClientId >= 0 && !Data.m_ShowClanWarInName && GameClient()->m_WarList.GetWarData(Data.m_RealClientId).IsWarName)
+		if(g_Config.m_ClWarList && Data.m_IsGame && Data.m_RealClientId >= 0 && !Data.m_ShowClanWarInName && GameClient()->m_WarList.GetWarData(Data.m_RealClientId).IsWarName)
 			WarColor = GameClient()->m_WarList.GetNameplateColor(Data.m_RealClientId).WithAlpha(Data.m_Alpha);
-		else if(Data.m_IsGame && Data.m_RealClientId >= 0 && Data.m_ShowClanWarInName && GameClient()->m_WarList.GetWarData(Data.m_RealClientId).IsWarClan)
+		else if(g_Config.m_ClWarList && Data.m_IsGame && Data.m_RealClientId >= 0 && Data.m_ShowClanWarInName && GameClient()->m_WarList.GetWarData(Data.m_RealClientId).IsWarClan)
 			WarColor = GameClient()->m_WarList.GetClanColor(Data.m_RealClientId).WithAlpha(Data.m_Alpha);
 
 		if(NamePlate.m_Name.m_TextContainerIndex.Valid())
@@ -179,7 +182,7 @@ void CNamePlates::RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateD
 		NamePlate.m_Clan.Update(*this, Data.m_pClan, Data.m_FontSizeClan);
 
 		ColorRGBA WarColor = Color;
-		if(Data.m_IsGame && Data.m_RealClientId >= 0 && GameClient()->m_WarList.GetWarData(Data.m_RealClientId).IsWarClan)
+		if(g_Config.m_ClWarList && Data.m_IsGame && Data.m_RealClientId >= 0 && GameClient()->m_WarList.GetWarData(Data.m_RealClientId).IsWarClan)
 			WarColor = GameClient()->m_WarList.GetClanColor(Data.m_RealClientId).WithAlpha(Data.m_Alpha);
 
 		if(NamePlate.m_Clan.m_TextContainerIndex.Valid())
