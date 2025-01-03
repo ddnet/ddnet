@@ -58,6 +58,15 @@ jobs:
           repository: ${{ env.TARGET_REPOSITORY }}
           run-id: ${{ github.event.inputs.run_id }}
 
+      - name: Download Android artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.BUILD_PREFIX }}-android
+          path: ./artifacts/android
+          github-token: ${{ secrets.GH_PAT }}
+          repository: ${{ env.TARGET_REPOSITORY }}
+          run-id: ${{ github.event.inputs.run_id }}
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -155,6 +164,16 @@ jobs:
           asset_name: ${{ env.CLIENT_NAME }}-macOS.dmg
           asset_content_type: application/dmg
 
+      - name: Upload Android
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/${{ env.CLIENT_NAME }}-android.apk
+          asset_name: ${{ env.CLIENT_NAME }}-android.apk
+          asset_content_type: application/apk
+
       - name: Upload Raw exe
         uses: actions/upload-release-asset@v1
         env:
@@ -163,4 +182,5 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./artifacts/DDNet.exe
           asset_name: DDNet.exe
-          asset_content_type: application/dmg
+          asset_content_type: application/exe
+          
