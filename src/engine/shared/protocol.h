@@ -130,6 +130,11 @@ enum
 	VERSION_DDNET_PLAYERFLAG_SPEC_CAM = 18090,
 };
 
+enum
+{
+	NUM_TUNEZONES = 256,
+};
+
 typedef std::bitset<MAX_CLIENTS> CClientMask;
 
 #endif
