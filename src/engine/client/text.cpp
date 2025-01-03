@@ -1183,6 +1183,7 @@ public:
 		m_pGraphics = nullptr;
 		m_pStorage = nullptr;
 	}
+
 	// TClient
 	static int LaziestFileCallback(const char *pFilename, int IsDir, int StorageType, void *pUser)
 	{
@@ -1192,7 +1193,6 @@ public:
 		pVector->push_back(std::string(pFilename));
 		return 0;
 	}
-
 	// TClient
 	void CheckDefaultFaces()
 	{
@@ -1351,6 +1351,7 @@ public:
 		}
 		// TClient
 		LoadCustomFonts();
+		m_pGlyphMap->AddFallbackFaceByName("DejaVu Sans");
 
 		// extract language variant family names
 		const json_value &Variants = (*pJsonData)["language variants"];
