@@ -45,6 +45,7 @@
 # 2024-09-29 Pioooooo
 # 2024-11-01 Pioooooo
 # 2024-12-03 豆腐渣 & Pioooooo
+# 2025-01-03 Pioooooo
 ##### /authors #####
 
 ##### translated strings #####
@@ -2085,35 +2086,35 @@ Active: Hook
 == 当前：钩索
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" 与 pnglite 不兼容，无法被旧版本 DDNet 加载
 
 Loading background map
-== 
+== 加载背景地图
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== 自动
 
 Toggle auto camera
-== 
+== 切换自动视角
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls/zh
 
 Show client IDs in name plates
-== 
+== 显示客户端 ID
 
 Hook Strength
-== 
+== 钩索强度
 
 Size of hook strength icon and number indicator
-== 
+== 钩索强度图标与数值的大小
 
 Key Presses
-== 
+== 按键显示
 
 Size of key press icons
-== 
+== 按键显示图标大小
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== 服务器无法启动。请确保在应用程序设置中授予通知权限，以便服务器可以在后台运行。
