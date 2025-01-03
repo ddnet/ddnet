@@ -252,13 +252,13 @@ void CStatusBar::ApplyStatusBarScheme(const char *pScheme)
 	for(int i = 0; pScheme[i] != '\0'; ++i)
 	{
 		char letter = pScheme[i];
-		for(const auto &itemType : m_StatusItemTypes)
+		for(auto &itemType : m_StatusItemTypes)
 		{
 			for(int l = 0; l < STATUSBAR_TYPE_LETTERS; ++l)
 			{
 				if(itemType.m_aLetters[l] == letter)
 				{
-					m_StatusBarItems.push_back(new CStatusItem(itemType));
+					m_StatusBarItems.push_back(&itemType);
 					break;
 				}
 			}
