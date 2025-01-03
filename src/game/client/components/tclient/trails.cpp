@@ -105,12 +105,8 @@ void CTrails::OnRender()
 
 		vec2 CurServerPos = vec2(GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur.m_X, GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur.m_Y);
 		vec2 PrevServerPos = vec2(GameClient()->m_Snap.m_aCharacters[ClientId].m_Prev.m_X, GameClient()->m_Snap.m_aCharacters[ClientId].m_Prev.m_Y);
-		m_PositionHistory[ClientId][GameTick % 200] = mix(PrevServerPos, CurServerPos, Client()->IntraGameTick(g_Config.m_ClDummy));
 		m_PositionTick[ClientId][GameTick % 200] = GameTick;
-
-		// Slightly messy way to make the position of our player accurate without ugly logic in the loop
-		vec2 SavedTempPredPos = GameClient()->m_aClients[ClientId].m_aPredPos[PredTick % 200];
-		GameClient()->m_aClients[ClientId].m_aPredPos[PredTick % 200] = GameClient()->m_aClients[ClientId].m_RenderPos;
+		m_PositionHistory[ClientId][GameTick % 200] = CurServerPos;
 
 		IGraphics::CLineItem LineItem;
 		bool LineMode = g_Config.m_ClTeeTrailWidth == 0;
@@ -152,6 +148,8 @@ void CTrails::OnRender()
 					continue;
 				Part.Pos = m_PositionHistory[ClientId][PosTick % 200];
 			}
+			Part.Tick = PosTick;
+			Part.UnMovedPos = Part.Pos;
 			Trail.push_back(Part);
 		}
 
@@ -159,12 +157,18 @@ void CTrails::OnRender()
 		// this was not trivial to figure out
 		int TrimTicks = (int)IntraTick;
 		for(int i = 0; i < TrimTicks; i++)
-			Trail.pop_back();
+			if((int)Trail.size() > 0)
+				Trail.pop_back();
 
 		// Stuff breaks if we have less than 3 points because we cannot calculate an angle between segments to preserve constant width
 		// TODO: Pad the list with generated entries in the same direction as before
 		if((int)Trail.size() < 3)
 			continue;
+
+		if(PredictPlayer)
+			Trail.at(0).Pos = GameClient()->m_aClients[ClientId].m_RenderPos;
+		else
+			Trail.at(0).Pos = mix(PrevServerPos, CurServerPos, Client()->IntraGameTick(g_Config.m_ClDummy));
 
 		Trail.at(Trail.size() - 1).Pos = mix(Trail.at(Trail.size() - 1).Pos, Trail.at(Trail.size() - 2).Pos, std::fmod(IntraTick, 1.0f));
 
@@ -187,6 +191,15 @@ void CTrails::OnRender()
 				float Cycle = (1.0f / TrailLength) * 0.5f;
 				float Hue = std::fmod(((StartTick - i + 6361 * ClientId) % 1000000) * Cycle, 1.0f);
 				Part.Col = color_cast<ColorRGBA>(ColorHSLA(Hue, 1.0f, 0.5f));
+			}
+			if(g_Config.m_ClTeeTrailSpeed)
+			{
+				float Speed = 0.0f;
+				if(i == 0)
+					Speed = distance(Trail.at(i + 1).UnMovedPos, Trail.at(i).UnMovedPos) / std::abs(Trail.at(i + 1).Tick - Trail.at(i).Tick);
+				else
+					Speed = distance(Part.UnMovedPos, Trail.at(i - 1).UnMovedPos) / std::abs(Part.Tick - Trail.at(i - 1).Tick);
+				Part.Col = color_cast<ColorRGBA>(ColorHSLA(65280 * ((int)(Speed * Speed / 12.5f) + 1)).UnclampLighting(ColorHSLA::DARKEST_LGT));
 			}
 
 			Part.Width = g_Config.m_ClTeeTrailWidth;
@@ -328,8 +341,5 @@ void CTrails::OnRender()
 			Graphics()->LinesEnd();
 		else
 			Graphics()->TrianglesEnd();
-
-		GameClient()->m_aClients[ClientId].m_aPredPos[PredTick % 200] = SavedTempPredPos;
-		m_PositionHistory[ClientId][GameTick % 200] = CurServerPos;
 	}
 }

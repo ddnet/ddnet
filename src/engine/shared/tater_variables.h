@@ -178,6 +178,7 @@ MACRO_CONFIG_INT(ClTeeTrailUseTeeColor, tc_tee_trail_use_tee_color, 1, 0, 1, CFG
 MACRO_CONFIG_INT(ClTeeTrailTaper, tc_tee_trail_taper, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Taper tee trail over length")
 MACRO_CONFIG_INT(ClTeeTrailFade, tc_tee_trail_fade, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Fade trail alpha over length")
 MACRO_CONFIG_INT(ClTeeTrailRainbow, tc_tee_trail_rainbow, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Rainbow tee trails")
+MACRO_CONFIG_INT(ClTeeTrailSpeed, tc_tee_trail_speed, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Speed color tee trails")
 
 
 

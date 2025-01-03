@@ -5,6 +5,7 @@
 struct STrailPart
 {
 	vec2 Pos = vec2(0, 0);
+	vec2 UnMovedPos = vec2(0, 0);
 	ColorRGBA Col = {};
 	float Alpha = 1.0f;
 	float Width = 0.0f;
@@ -13,7 +14,7 @@ struct STrailPart
 	vec2 Bot = vec2(0, 0);
 	bool Flip = false;
 	float Progress = 1.0f;
-
+	int Tick = -1;
 
 	bool operator==(const STrailPart &Other) const
 	{
