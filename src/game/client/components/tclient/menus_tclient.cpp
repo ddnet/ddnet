@@ -149,7 +149,7 @@ bool CMenus::DoSliderWithScaledValue(const void *pId, int *pOption, const CUIRec
 bool CMenus::DoEditBoxWithLabel(CLineInput *LineInput, const CUIRect *pRect, const char *pLabel, const char *pDefault, char *pBuf, size_t BufSize)
 {
 	CUIRect Button, Label;
-	pRect->VSplitLeft(175.0f, &Label, &Button);
+	pRect->VSplitLeft(210.0f, &Label, &Button);
 	Ui()->DoLabel(&Label, pLabel, FontSize, TEXTALIGN_ML);
 	LineInput->SetBuffer(pBuf, BufSize);
 	LineInput->SetEmptyText(pDefault);
@@ -300,7 +300,9 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("Warlist"), HeadlineFontSize, TEXTALIGN_ML);
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-		static CLineInput s_Warlist1, s_Warlist2, s_Warlist3, s_Warlist4, s_Warlist5, s_Warlist6, s_Warlist7, s_Warlist8;
+		static CLineInput s_Warlist1, s_Warlist2, s_Warlist3, s_Warlist4, s_Warlist5, s_Warlist6, s_Warlist7, s_Warlist8,
+			s_Warlist9, s_Warlist10, s_Warlist11, s_Warlist12;
+
 		char aBuf[128];
 		char aGroup1Name[MAX_WARLIST_TYPE_LENGTH]; // enemy by default
 		char aGroup2Name[MAX_WARLIST_TYPE_LENGTH]; // team by default
@@ -330,6 +332,15 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
 		str_format(aBuf, sizeof(aBuf), "Remove %s clan:", aGroup2Name);
 		DoBindchat(s_Warlist8, aBuf, ".delteamclan", "remove_war_clan_index 2");
+
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		DoBindchat(s_Warlist9, "Add [group] [name] [reason]", ".name", "war_name");
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		DoBindchat(s_Warlist10, "Add [group] [clan] [reason]", ".clan", "war_clan");
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		DoBindchat(s_Warlist11, "Remove [group] [name]", ".delname", "remove_war_name");
+		Column.HSplitTop(MarginSmall, nullptr, &Column);
+		DoBindchat(s_Warlist12, "Remove [group] [clan]", ".delclan", "remove_war_clan");
 	}
 
 	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)

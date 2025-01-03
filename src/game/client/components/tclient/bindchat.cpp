@@ -203,6 +203,12 @@ void CBindchat::OnConsoleInit()
 	AddBindDefault(".delwarclan", "remove_war_clan_index 1");
 	AddBindDefault(".delteam", "remove_war_name_index 2");
 	AddBindDefault(".delteamclan", "remove_war_clan_index 2");
+
+	AddBindDefault(".name", "war_name");
+	AddBindDefault(".clan", "war_clan");
+	AddBindDefault(".delname", "remove_war_name");
+	AddBindDefault(".delclan", "remove_war_clan");
+
 	AddBindDefault("!mute", "add_foe");
 	AddBindDefault("!unmute", "remove_foe");
 }
