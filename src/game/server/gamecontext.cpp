@@ -120,6 +120,9 @@ void CGameContext::Construct(int Resetting)
 		for(auto &pSavedTeleTee : m_apSavedTeleTees)
 			pSavedTeleTee = nullptr;
 
+		for(auto &pSavedSaveTee : m_apSavedSaveTees)
+			pSavedSaveTee = nullptr;
+
 		for(auto &pSavedTeam : m_apSavedTeams)
 			pSavedTeam = nullptr;
 
@@ -145,6 +148,9 @@ void CGameContext::Destruct(int Resetting)
 
 		for(auto &pSavedTeleTee : m_apSavedTeleTees)
 			delete pSavedTeleTee;
+
+		for(auto &pSavedSaveTee : m_apSavedSaveTees)
+			delete pSavedSaveTee;
 
 		for(auto &pSavedTeam : m_apSavedTeams)
 			delete pSavedTeam;
@@ -1737,6 +1743,9 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 	delete m_apSavedTeleTees[ClientId];
 	m_apSavedTeleTees[ClientId] = nullptr;
 
+	delete m_apSavedSaveTees[ClientId];
+	m_apSavedSaveTees[ClientId] = nullptr;
+
 	m_aTeamMapping[ClientId] = -1;
 
 	m_VoteUpdate = true;
@@ -3249,7 +3258,10 @@ void CGameContext::ConHotReload(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_apSavedTees[i]->Save(pChar, false);
 
 		if(pSelf->m_apPlayers[i])
+		{
 			pSelf->m_apSavedTeleTees[i] = new CSaveTee(pSelf->m_apPlayers[i]->m_LastTeleTee);
+			pSelf->m_apSavedSaveTees[i] = new CSaveTee(pSelf->m_apPlayers[i]->m_SavedPracticeTee);
+		}
 
 		// Save the team state
 		pSelf->m_aTeamMapping[i] = pSelf->GetDDRaceTeam(i);
@@ -3857,6 +3869,8 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("endless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeEndlessHook, this, "Gives you endless hook");
 	Console()->Register("unendless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnEndlessHook, this, "Removes endless hook from you");
 	Console()->Register("invincible", "?i['0'|'1']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleInvincible, this, "Toggles invincible mode");
+	Console()->Register("savepractice", "", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConPracticeSave, this, "Set lasttp for all players in team");
+	Console()->Register("loadpractice", "", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConPracticeLoad, this, "Load lasttp for all players in team");
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
 }
 

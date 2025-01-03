@@ -895,6 +895,67 @@ void CGameContext::ConLoad(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Score()->GetSaves(pResult->m_ClientId);
 }
 
+void CGameContext::ConPracticeSave(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pSelf = (CGameContext *)pUserData;
+	auto *pCaller = pSelf->GetPracticeCharacter(pResult);
+	if(!pCaller)
+		return;
+
+	int Team = pCaller->Team();
+
+	auto &Teams = pSelf->m_pController->Teams().m_Core;
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		auto *pPlayer = pSelf->m_apPlayers[i];
+		if(!pPlayer || Teams.Team(i) != Team)
+			continue;
+		auto *pChr = pPlayer->GetCharacter();
+		if(!pChr)
+			continue;
+
+		pPlayer->m_SavedPracticeTee.Save(pChr);
+	}
+}
+
+void CGameContext::ConPracticeLoad(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pSelf = (CGameContext *)pUserData;
+	auto *pCaller = pSelf->GetPracticeCharacter(pResult);
+	if(!pCaller)
+		return;
+
+	int Team = pCaller->Team();
+
+	auto &Teams = pSelf->m_pController->Teams().m_Core;
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		auto *pPlayer = pSelf->m_apPlayers[i];
+		if(!pPlayer || Teams.Team(i) != Team)
+			continue;
+		auto *pChr = pPlayer->GetCharacter();
+		if(!pChr)
+			continue;
+
+		if(!pPlayer->m_SavedPracticeTee.GetPos().x)
+		{
+			pSelf->SendChatTarget(pResult->m_ClientId, "You haven't previously saved. Use /savepractice before using this command.");
+			return;
+		}
+	}
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		auto *pPlayer = pSelf->m_apPlayers[i];
+		if(!pPlayer || Teams.Team(i) != Team)
+			continue;
+		auto *pChr = pPlayer->GetCharacter();
+		if(!pChr)
+			continue;
+		pPlayer->m_SavedPracticeTee.Load(pChr, Team, true);
+		pPlayer->Pause(CPlayer::PAUSE_NONE, true);
+	}
+}
+
 void CGameContext::ConTeamRank(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
