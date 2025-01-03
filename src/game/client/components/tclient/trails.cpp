@@ -189,7 +189,7 @@ void CTrails::OnRender()
 			if(g_Config.m_ClTeeTrailRainbow)
 			{
 				float Cycle = (1.0f / TrailLength) * 0.5f;
-				float Hue = std::fmod(((StartTick - i + 6361 * ClientId) % 1000000) * Cycle, 1.0f);
+				float Hue = std::fmod(((StartTick - i + 7247 * ClientId) % 1000000) * Cycle, 1.0f);
 				Part.Col = color_cast<ColorRGBA>(ColorHSLA(Hue, 1.0f, 0.5f));
 			}
 			if(g_Config.m_ClTeeTrailSpeed)
