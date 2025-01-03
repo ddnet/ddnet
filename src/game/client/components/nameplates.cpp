@@ -203,34 +203,6 @@ void CNamePlates::RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateD
 			TextRender()->RenderTextContainer(NamePlate.m_SkinName.m_TextContainerIndex, Color, OutlineColor, Data.m_Position.x - TextRender()->GetBoundingBoxTextContainer(NamePlate.m_SkinName.m_TextContainerIndex).m_W / 2.0f, YOffset);
 	}
 
-	if(Data.m_ShowDirection)
-	{
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Data.m_Alpha);
-		YOffset -= 6.5f; // TClient
-		YOffset -= Data.m_FontSizeDirection;
-		const vec2 ShowDirectionPos = vec2(Data.m_Position.x - Data.m_FontSizeDirection / 2.0f, YOffset + Data.m_FontSizeDirection / 2.0f);
-		if(Data.m_DirLeft)
-		{
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			Graphics()->QuadsSetRotation(pi);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x - Data.m_FontSizeDirection, ShowDirectionPos.y, Data.m_FontSizeDirection, Data.m_FontSizeDirection);
-		}
-		if(Data.m_DirJump)
-		{
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			Graphics()->QuadsSetRotation(pi * 1.5f);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x, ShowDirectionPos.y - Data.m_FontSizeDirection / 2.0f, Data.m_FontSizeDirection, Data.m_FontSizeDirection);
-		}
-		if(Data.m_DirRight)
-		{
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			Graphics()->QuadsSetRotation(0.0f);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x + Data.m_FontSizeDirection, ShowDirectionPos.y, Data.m_FontSizeDirection, Data.m_FontSizeDirection);
-		}
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		Graphics()->QuadsSetRotation(0.0f);
-	}
-
 	if(Data.m_ShowHookWeakStrongId || (Data.m_ShowHookWeakStrong && Data.m_HookWeakStrong != TRISTATE::SOME)) // Don't show hook icon if there's no ID or hook strength to show
 	{
 		ColorRGBA HookWeakStrongColor;
@@ -285,6 +257,34 @@ void CNamePlates::RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateD
 			RenderTools()->DrawSprite(X, YOffset + StrongWeakImgSize / 2.7f, StrongWeakImgSize);
 			Graphics()->QuadsEnd();
 		}
+	}
+
+	if(Data.m_ShowDirection)
+	{
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, Data.m_Alpha);
+		YOffset -= 6.5f; // TClient
+		YOffset -= Data.m_FontSizeDirection;
+		const vec2 ShowDirectionPos = vec2(Data.m_Position.x - Data.m_FontSizeDirection / 2.0f, YOffset + Data.m_FontSizeDirection / 2.0f);
+		if(Data.m_DirLeft)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsSetRotation(pi);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x - Data.m_FontSizeDirection, ShowDirectionPos.y, Data.m_FontSizeDirection, Data.m_FontSizeDirection);
+		}
+		if(Data.m_DirJump)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsSetRotation(pi * 1.5f);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x, ShowDirectionPos.y - Data.m_FontSizeDirection / 2.0f, Data.m_FontSizeDirection, Data.m_FontSizeDirection);
+		}
+		if(Data.m_DirRight)
+		{
+			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->QuadsSetRotation(0.0f);
+			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x + Data.m_FontSizeDirection, ShowDirectionPos.y, Data.m_FontSizeDirection, Data.m_FontSizeDirection);
+		}
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->QuadsSetRotation(0.0f);
 	}
 
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
