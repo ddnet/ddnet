@@ -452,9 +452,11 @@ public:
 			Type = fs_is_relative_path(pPath) ? TYPE_ALL : TYPE_ABSOLUTE;
 	}
 
-	IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = 0, int BufferSize = 0) override
+	IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = nullptr, int BufferSize = 0) override
 	{
 		TranslateType(Type, pFilename);
+
+		dbg_assert((Flags & IOFLAG_WRITE) == 0 || Type == TYPE_SAVE || Type == TYPE_ABSOLUTE, "IOFLAG_WRITE only usable with TYPE_SAVE and TYPE_ABSOLUTE");
 
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(!pBuffer)
@@ -462,54 +464,49 @@ public:
 			pBuffer = aBuffer;
 			BufferSize = sizeof(aBuffer);
 		}
+		pBuffer[0] = '\0';
 
 		if(Type == TYPE_ABSOLUTE)
 		{
 			return io_open(GetPath(TYPE_ABSOLUTE, pFilename, pBuffer, BufferSize), Flags);
 		}
+
 		if(str_startswith(pFilename, "mapres/../skins/"))
 		{
 			pFilename = pFilename + 10; // just start from skins/
 		}
-		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != NULL || str_find(pFilename, "..\\") != NULL
+		if(pFilename[0] == '/' || pFilename[0] == '\\' || str_find(pFilename, "../") != nullptr || str_find(pFilename, "..\\") != nullptr
 #ifdef CONF_FAMILY_WINDOWS
 			|| (pFilename[0] && pFilename[1] == ':')
 #endif
 		)
 		{
 			// don't escape base directory
+			return nullptr;
 		}
-		else if(Flags & IOFLAG_WRITE)
+		else if(Type == TYPE_ALL)
 		{
-			return io_open(GetPath(TYPE_SAVE, pFilename, pBuffer, BufferSize), Flags);
+			// check all available directories
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
+			{
+				IOHANDLE Handle = io_open(GetPath(i, pFilename, pBuffer, BufferSize), Flags);
+				if(Handle)
+				{
+					return Handle;
+				}
+			}
+			return nullptr;
+		}
+		else if(Type >= TYPE_SAVE && Type < m_NumPaths)
+		{
+			// check wanted directory
+			return io_open(GetPath(Type, pFilename, pBuffer, BufferSize), Flags);
 		}
 		else
 		{
-			if(Type == TYPE_ALL)
-			{
-				// check all available directories
-				for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
-				{
-					IOHANDLE Handle = io_open(GetPath(i, pFilename, pBuffer, BufferSize), Flags);
-					if(Handle)
-						return Handle;
-				}
-			}
-			else if(Type >= TYPE_SAVE && Type < m_NumPaths)
-			{
-				// check wanted directory
-				IOHANDLE Handle = io_open(GetPath(Type, pFilename, pBuffer, BufferSize), Flags);
-				if(Handle)
-					return Handle;
-			}
-			else
-			{
-				dbg_assert(false, "Type invalid");
-			}
+			dbg_assert(false, "Type invalid");
+			return nullptr;
 		}
-
-		pBuffer[0] = 0;
-		return 0;
 	}
 
 	template<typename F>
