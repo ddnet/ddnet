@@ -8,6 +8,7 @@
 #include <base/vmath.h>
 #include <game/client/gameclient.h>
 #include <game/collision.h>
+#include <game/localization.h>
 #include <game/mapitems.h>
 
 #include "camera.h"
@@ -44,6 +45,8 @@ CCamera::CCamera()
 	m_AutoSpecCamera = true;
 	m_AutoSpecCameraZooming = false;
 	m_UsingAutoSpecCamera = false;
+
+	mem_zero(m_aAutoSpecCameraTooltip, sizeof(m_aAutoSpecCameraTooltip));
 }
 
 float CCamera::CameraSmoothingProgress(float CurrentTime) const
@@ -62,10 +65,7 @@ void CCamera::ScaleZoom(float Factor)
 	float CurrentTarget = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
 	ChangeZoom(CurrentTarget * Factor, m_pClient->m_Snap.m_SpecInfo.m_Active && GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, true);
 
-	if(m_IsSpectatingPlayer)
-	{
-		m_AutoSpecCamera = false;
-	}
+	m_AutoSpecCamera = false;
 }
 
 float CCamera::MaxZoomLevel()
@@ -448,18 +448,15 @@ void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	bool IsReset = !pResult->NumArguments();
-	bool IsSpectating = pSelf->m_IsSpectatingPlayer;
 
 	float TargetLevel = !IsReset ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
-	if(IsSpectating && IsReset)
-		pSelf->ResetAutoSpecCamera();
-	else
-		pSelf->ChangeZoom(CCamera::ZoomStepsToValue(TargetLevel - 10.0f), pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, true);
 
-	if(IsSpectating && !IsReset)
-	{
-		pSelf->m_AutoSpecCamera = false;
-	}
+	if(!pSelf->CanUseAutoSpecCamera() || !pSelf->m_IsSpectatingPlayer)
+		pSelf->ChangeZoom(CCamera::ZoomStepsToValue(TargetLevel - 10.0f), pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, true);
+	else
+		pSelf->m_UserZoomTarget = CCamera::ZoomStepsToValue(TargetLevel - 10.0f);
+
+	pSelf->m_AutoSpecCamera = IsReset;
 
 	if(pSelf->GameClient()->m_MultiViewActivated && pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active)
 		pSelf->GameClient()->m_MultiViewPersonalZoom = TargetLevel - 10.0f;
@@ -629,5 +626,40 @@ bool CCamera::CanUseAutoSpecCamera() const
 		return m_pClient->m_Snap.m_SpecInfo.m_HasCameraInfo && m_pClient->m_DemoSpecId == SPEC_FOLLOW;
 	}
 
-	return m_pClient->m_Snap.m_SpecInfo.m_HasCameraInfo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != m_pClient->m_Snap.m_LocalClientId;
+	return g_Config.m_ClSpecAutoSync && m_pClient->m_Snap.m_SpecInfo.m_HasCameraInfo &&
+	       m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != m_pClient->m_aLocalIds[0] &&
+	       (!m_pClient->Client()->DummyConnected() || m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != m_pClient->m_aLocalIds[1]);
+}
+
+void CCamera::ToggleAutoSpecCamera()
+{
+	if(!g_Config.m_ClSpecAutoSync)
+	{
+		g_Config.m_ClSpecAutoSync = 1;
+		m_pClient->m_Camera.m_AutoSpecCamera = true;
+	}
+	else if(m_pClient->m_Camera.m_AutoSpecCamera && m_pClient->m_Camera.SpectatingPlayer() && m_pClient->m_Camera.CanUseAutoSpecCamera())
+	{
+		m_pClient->m_Camera.m_AutoSpecCamera = false;
+	}
+	else
+	{
+		g_Config.m_ClSpecAutoSync = 0;
+	}
+}
+
+void CCamera::UpdateAutoSpecCameraTooltip()
+{
+	const char *pFeatureText = Localize("Auto-sync player camera");
+
+	if(!g_Config.m_ClSpecAutoSync)
+		str_format(m_aAutoSpecCameraTooltip, sizeof(m_aAutoSpecCameraTooltip), "%s: %s", pFeatureText, Localize("Disabled", "Auto camera"));
+	else if(!SpectatingPlayer())
+		str_format(m_aAutoSpecCameraTooltip, sizeof(m_aAutoSpecCameraTooltip), "%s: %s", pFeatureText, Localize("Enabled", "Auto camera"));
+	else if(!CanUseAutoSpecCamera())
+		str_format(m_aAutoSpecCameraTooltip, sizeof(m_aAutoSpecCameraTooltip), "%s: %s", pFeatureText, Localize("Unavailable for this player", "Auto camera"));
+	else if(!m_AutoSpecCamera)
+		str_format(m_aAutoSpecCameraTooltip, sizeof(m_aAutoSpecCameraTooltip), "%s: %s", pFeatureText, Localize("Inactive", "Auto camera"));
+	else
+		str_format(m_aAutoSpecCameraTooltip, sizeof(m_aAutoSpecCameraTooltip), "%s: %s", pFeatureText, Localize("Active", "Auto camera"));
 }
