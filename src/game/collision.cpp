@@ -1678,23 +1678,20 @@ bool CCollision::PushBoxOutsideQuads(vec2 *pInoutPos, vec2 Size, int *CollidedSi
 {
 	vec2 Pos = *pInoutPos;
 
-	vec2 Corner1 = Pos - Size;
-	vec2 Corner2 = Pos + vec2(Size.x, -Size.y);
-	vec2 Corner3 = Pos + vec2(-Size.x, Size.y);
-	vec2 Corner4 = Pos + Size;
-
 	QuadData QData1 = {nullptr, vec2(0.0f, 0.0f), 0.0f}; //corner 0
 	QuadData QData2 = {nullptr, vec2(0.0f, 0.0f), 0.0f}; //corner 1
 	QuadData QData3 = {nullptr, vec2(0.0f, 0.0f), 0.0f}; //corner 2
 	QuadData QData4 = {nullptr, vec2(0.0f, 0.0f), 0.0f}; //corner 3
 
+	vec2 Corner1 = Pos - Size;
+	vec2 Corner2 = Pos + vec2(Size.x, -Size.y);
+	vec2 Corner3 = Pos + vec2(-Size.x, Size.y);
+	vec2 Corner4 = Pos + Size;
+	
+
 	GetQuadAt(Corner1,&QData1);
 
-	GetQuadAt(Corner2,&QData2);
-
-	GetQuadAt(Corner3,&QData3);
-
-	GetQuadAt(Corner4,&QData4);
+	
 
 	if(QData1.m_pQuad && (QData1.m_pQuad->m_ColorEnvOffset == TILE_SOLID || QData1.m_pQuad->m_ColorEnvOffset == TILE_NOHOOK))
 	{
@@ -1720,6 +1717,12 @@ bool CCollision::PushBoxOutsideQuads(vec2 *pInoutPos, vec2 Size, int *CollidedSi
 			
 	}
 
+	Corner1 = Pos - Size;
+	Corner2 = Pos + vec2(Size.x, -Size.y);
+	Corner3 = Pos + vec2(-Size.x, Size.y);
+	Corner4 = Pos + Size;
+	GetQuadAt(Corner2,&QData2);
+
 	if(QData2.m_pQuad && (QData2.m_pQuad->m_ColorEnvOffset == TILE_SOLID || QData2.m_pQuad->m_ColorEnvOffset == TILE_NOHOOK))
 	{
 		vec2 Pos1,Pos2;
@@ -1738,18 +1741,24 @@ bool CCollision::PushBoxOutsideQuads(vec2 *pInoutPos, vec2 Size, int *CollidedSi
 		}
 		else
 		{
-			Pos = Pos2 - vec2(-Size.x,Size.y); //up
+			Pos = Pos2 + vec2(-Size.x,Size.y); //up
 			if(CollidedSides)
 				*CollidedSides |= CANTMOVE_UP;
 		}
 	}
+
+	Corner1 = Pos - Size;
+	Corner2 = Pos + vec2(Size.x, -Size.y);
+	Corner3 = Pos + vec2(-Size.x, Size.y);
+	Corner4 = Pos + Size;
+	GetQuadAt(Corner3,&QData3);
 
 	if(QData3.m_pQuad && (QData3.m_pQuad->m_ColorEnvOffset == TILE_SOLID || QData3.m_pQuad->m_ColorEnvOffset == TILE_NOHOOK))
 	{
 		vec2 Pos1,Pos2;
 		
 		IntersectLine(Corner1, Corner3, &Pos1, nullptr);
-		IntersectLine(Corner4, Corner3, &Pos2, nullptr);
+		IntersectLine(Corner4, Corner3, nullptr,&Pos2);
 
 		float d1 = distance(Corner3, Pos1);
 		float d2 = distance(Corner3, Pos2);
@@ -1762,11 +1771,17 @@ bool CCollision::PushBoxOutsideQuads(vec2 *pInoutPos, vec2 Size, int *CollidedSi
 		}
 		else
 		{
-			Pos = Pos2 + Size; //left
+			Pos = Pos2 + vec2(Size.x,-Size.y); //left
 			if(CollidedSides)
 				*CollidedSides |= CANTMOVE_LEFT;
 		}
 	}
+
+	Corner1 = Pos - Size;
+	Corner2 = Pos + vec2(Size.x, -Size.y);
+	Corner3 = Pos + vec2(-Size.x, Size.y);
+	Corner4 = Pos + Size;
+	GetQuadAt(Corner4,&QData4);
 
 	if(QData4.m_pQuad && (QData4.m_pQuad->m_ColorEnvOffset == TILE_SOLID || QData4.m_pQuad->m_ColorEnvOffset == TILE_NOHOOK))
 	{
