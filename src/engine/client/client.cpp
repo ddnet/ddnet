@@ -1017,7 +1017,9 @@ const char *CClient::DummyName()
 	}
 	if(pBase)
 	{
-		str_format(m_aAutomaticDummyName, sizeof(m_aAutomaticDummyName), "[D] %s", pBase);
+		char aBuf[MAX_NAME_ARRAY_SIZE + 4];
+		str_format(aBuf, sizeof(aBuf), "[D] %s", pBase);
+		str_utf8_copy_num(m_aAutomaticDummyName, aBuf, MAX_NAME_LENGTH);
 		return m_aAutomaticDummyName;
 	}
 	return "brainless tee";
@@ -4376,6 +4378,26 @@ void CClient::ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserD
 	}
 }
 
+void CClient::ConchainPlayerName(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+
+	// truncate after the string config variable is set
+	char aTruncated[MAX_NAME_ARRAY_SIZE];
+	str_utf8_copy_num(aTruncated, g_Config.m_PlayerName, MAX_NAME_LENGTH);
+	mem_copy(g_Config.m_PlayerName, aTruncated, sizeof(g_Config.m_PlayerName));
+}
+
+void CClient::ConchainPlayerClan(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+
+	// truncate after the string config variable is set
+	char aTruncated[MAX_CLAN_ARRAY_SIZE];
+	str_utf8_copy_num(aTruncated, g_Config.m_PlayerClan, MAX_CLAN_LENGTH);
+	mem_copy(g_Config.m_PlayerClan, aTruncated, sizeof(g_Config.m_PlayerClan));
+}
+
 void CClient::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
@@ -4454,6 +4476,9 @@ void CClient::RegisterCommands()
 
 	m_pConsole->Chain("loglevel", ConchainLoglevel, this);
 	m_pConsole->Chain("stdout_output_level", ConchainStdoutOutputLevel, this);
+
+	m_pConsole->Chain("player_name", ConchainPlayerName, this);
+	m_pConsole->Chain("player_clan", ConchainPlayerClan, this);
 }
 
 static CClient *CreateClient()

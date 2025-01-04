@@ -39,7 +39,7 @@ void CRaceDemo::GetPath(char *pBuf, int Size, int Time) const
 {
 	const char *pMap = Client()->GetCurrentMap();
 
-	char aPlayerName[MAX_NAME_LENGTH];
+	char aPlayerName[MAX_NAME_ARRAY_SIZE];
 	str_copy(aPlayerName, Client()->PlayerName());
 	str_sanitize_filename(aPlayerName);
 
@@ -149,7 +149,7 @@ void CRaceDemo::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		if(pMsg->m_ClientId == -1 && m_RaceState == RACE_STARTED)
 		{
-			char aName[MAX_NAME_LENGTH];
+			char aName[MAX_NAME_ARRAY_SIZE];
 			int Time = CRaceHelper::TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
 			if(Time > 0 && m_pClient->m_Snap.m_LocalClientId >= 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_aName) == 0)
 			{
@@ -217,7 +217,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 
 	if(g_Config.m_ClDemoName)
 	{
-		char aPlayerName[MAX_NAME_LENGTH];
+		char aPlayerName[MAX_NAME_ARRAY_SIZE];
 		str_copy(aPlayerName, pParam->m_pThis->Client()->PlayerName());
 		str_sanitize_filename(aPlayerName);
 

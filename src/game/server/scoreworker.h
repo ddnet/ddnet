@@ -50,7 +50,7 @@ struct CScorePlayerResult : ISqlResult
 			std::optional<float> m_Time;
 			float m_aTimeCp[NUM_CHECKPOINTS];
 			int m_Birthday; // 0 indicates no birthday
-			char m_aRequestedPlayer[MAX_NAME_LENGTH];
+			char m_aRequestedPlayer[MAX_NAME_ARRAY_SIZE];
 		} m_Info = {};
 		struct
 		{
@@ -94,7 +94,7 @@ struct CSqlPlayerRequest : ISqlData
 	char m_aName[MAX_MAP_LENGTH];
 	// current map
 	char m_aMap[MAX_MAP_LENGTH];
-	char m_aRequestingPlayer[MAX_NAME_LENGTH];
+	char m_aRequestingPlayer[MAX_NAME_ARRAY_SIZE];
 	// relevant for /top5 kind of requests
 	int m_Offset;
 	char m_aServer[5];
@@ -122,7 +122,7 @@ struct CSqlRandomMapRequest : ISqlData
 
 	char m_aServerType[32];
 	char m_aCurrentMap[MAX_MAP_LENGTH];
-	char m_aRequestingPlayer[MAX_NAME_LENGTH];
+	char m_aRequestingPlayer[MAX_NAME_ARRAY_SIZE];
 	int m_Stars;
 };
 
@@ -145,7 +145,7 @@ struct CSqlScoreData : ISqlData
 	float m_aCurrentTimeCp[NUM_CHECKPOINTS];
 	int m_Num;
 	bool m_Search;
-	char m_aRequestingPlayer[MAX_NAME_LENGTH];
+	char m_aRequestingPlayer[MAX_NAME_ARRAY_SIZE];
 };
 
 struct CScoreSaveResult : ISqlResult
@@ -184,7 +184,7 @@ struct CSqlTeamScoreData : ISqlData
 	float m_Time;
 	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
 	unsigned int m_Size;
-	char m_aaNames[MAX_CLIENTS][MAX_NAME_LENGTH];
+	char m_aaNames[MAX_CLIENTS][MAX_NAME_ARRAY_SIZE];
 	CUuid m_TeamrankUuid;
 };
 
@@ -196,7 +196,7 @@ struct CSqlTeamSaveData : ISqlData
 	}
 	virtual ~CSqlTeamSaveData(){};
 
-	char m_aClientName[MAX_NAME_LENGTH];
+	char m_aClientName[MAX_NAME_ARRAY_SIZE];
 	char m_aMap[MAX_MAP_LENGTH];
 	char m_aCode[128];
 	char m_aGeneratedCode[128];
@@ -213,9 +213,9 @@ struct CSqlTeamLoadRequest : ISqlData
 
 	char m_aCode[128];
 	char m_aMap[MAX_MAP_LENGTH];
-	char m_aRequestingPlayer[MAX_NAME_LENGTH];
+	char m_aRequestingPlayer[MAX_NAME_ARRAY_SIZE];
 	// struct holding all player names in the team or an empty string
-	char m_aClientNames[MAX_CLIENTS][MAX_NAME_LENGTH];
+	char m_aClientNames[MAX_CLIENTS][MAX_NAME_ARRAY_SIZE];
 	int m_aClientId[MAX_CLIENTS];
 	int m_NumPlayer;
 };
@@ -261,7 +261,7 @@ public:
 struct CTeamrank
 {
 	CUuid m_TeamId;
-	char m_aaNames[MAX_CLIENTS][MAX_NAME_LENGTH];
+	char m_aaNames[MAX_CLIENTS][MAX_NAME_ARRAY_SIZE];
 	unsigned int m_NumNames;
 	CTeamrank();
 

@@ -85,7 +85,7 @@ void CGameClient::ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId, int Con
 	char *apSkinPartsPtr[protocol7::NUM_SKINPARTS];
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		str_utf8_copy_num(pClient->m_aSixup[Conn].m_aaSkinPartNames[Part], pMsg->m_apSkinPartNames[Part], sizeof(pClient->m_aSixup[Conn].m_aaSkinPartNames[Part]), protocol7::MAX_SKIN_LENGTH);
+		str_utf8_copy_num(pClient->m_aSixup[Conn].m_aaSkinPartNames[Part], pMsg->m_apSkinPartNames[Part], protocol7::MAX_SKIN_LENGTH);
 		apSkinPartsPtr[Part] = pClient->m_aSixup[Conn].m_aaSkinPartNames[Part];
 		pClient->m_aSixup[Conn].m_aUseCustomColors[Part] = pMsg->m_aUseCustomColors[Part];
 		pClient->m_aSixup[Conn].m_aSkinPartColors[Part] = pMsg->m_aSkinPartColors[Part];
@@ -491,8 +491,12 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		CTranslationContext::CClientData &Client = m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId];
 		Client.m_Active = true;
 		Client.m_Team = pMsg7->m_Team;
-		str_copy(Client.m_aName, pMsg7->m_pName);
-		str_copy(Client.m_aClan, pMsg7->m_pClan);
+		str_utf8_copy_num(Client.m_aName, pMsg7->m_pName, MAX_NAME_LENGTH);
+		str_utf8_copy_num(Client.m_aClan, pMsg7->m_pClan, MAX_CLAN_LENGTH);
+		str_copy(Client.m_aNameCompat, pMsg7->m_pName);
+		str_utf8_fix_truncation(Client.m_aNameCompat);
+		str_copy(Client.m_aClanCompat, pMsg7->m_pClan);
+		str_utf8_fix_truncation(Client.m_aClanCompat);
 		Client.m_Country = pMsg7->m_Country;
 		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId, Conn);
 		if(m_pClient->m_TranslationContext.m_aLocalClientId[Conn] == -1)

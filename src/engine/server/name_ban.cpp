@@ -88,8 +88,8 @@ void CNameBans::Dump() const
 
 const CNameBan *CNameBans::IsBanned(const char *pName) const
 {
-	char aTrimmed[MAX_NAME_LENGTH];
-	str_copy(aTrimmed, str_utf8_skip_whitespaces(pName));
+	char aTrimmed[MAX_NAME_ARRAY_SIZE];
+	str_utf8_copy_num(aTrimmed, str_utf8_skip_whitespaces(pName), MAX_NAME_LENGTH);
 	str_utf8_trim_right(aTrimmed);
 
 	int aSkeleton[MAX_NAME_SKELETON_LENGTH];

@@ -18,7 +18,8 @@ class CClientSnapshotHandler
 public:
 	struct CClientData
 	{
-		char m_aName[MAX_NAME_LENGTH];
+		bool m_HasExtendedClientInfo;
+		char m_aName[MAX_NAME_ARRAY_SIZE];
 	};
 	CClientData m_aClients[MAX_CLIENTS];
 
@@ -100,7 +101,22 @@ public:
 				if(ClientId < MAX_CLIENTS)
 				{
 					CClientData *pClient = &m_aClients[ClientId];
-					IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName, sizeof(pClient->m_aName));
+					if(!pClient->m_HasExtendedClientInfo)
+						IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName, sizeof(pClient->m_aName));
+				}
+			}
+			else if(Item.m_Type == NETOBJTYPE_DDNETCLIENTINFO)
+			{
+				const CNetObj_DDNetClientInfo *pInfo = (const CNetObj_DDNetClientInfo *)Item.m_pData;
+				int ClientId = Item.m_Id;
+				if(ClientId < MAX_CLIENTS)
+				{
+					CClientData *pClient = &m_aClients[ClientId];
+					pClient->m_HasExtendedClientInfo = true;
+
+					CUnpacker DDNetClientInfo;
+					DDNetClientInfo.Reset(pInfo->m_aData, sizeof(pInfo->m_aData));
+					str_utf8_copy_num(pClient->m_aName, DDNetClientInfo.GetString(), MAX_NAME_LENGTH);
 				}
 			}
 		}

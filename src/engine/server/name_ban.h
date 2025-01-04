@@ -8,7 +8,7 @@
 
 enum
 {
-	MAX_NAME_SKELETON_LENGTH = MAX_NAME_LENGTH * 4,
+	MAX_NAME_SKELETON_LENGTH = MAX_NAME_ARRAY_SIZE * 4,
 	MAX_NAMEBAN_REASON_LENGTH = 64
 };
 
@@ -17,7 +17,7 @@ class CNameBan
 public:
 	CNameBan(const char *pName, const char *pReason, int Distance, bool IsSubstring);
 
-	char m_aName[MAX_NAME_LENGTH];
+	char m_aName[MAX_NAME_ARRAY_SIZE];
 	char m_aReason[MAX_NAMEBAN_REASON_LENGTH];
 	int m_aSkeleton[MAX_NAME_SKELETON_LENGTH];
 	int m_SkeletonLength;

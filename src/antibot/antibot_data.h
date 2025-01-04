@@ -5,12 +5,13 @@
 
 enum
 {
-	ANTIBOT_ABI_VERSION = 9,
+	ANTIBOT_ABI_VERSION = 10,
 
 	ANTIBOT_MSGFLAG_NONVITAL = 1,
 	ANTIBOT_MSGFLAG_FLUSH = 2,
 
 	ANTIBOT_MAX_CLIENTS = 64,
+	ANTIBOT_MAX_NAME_ARRAY_SIZE = 65, // MAX_NAME_LENGTH * UTF8_BYTE_LENGTH + 1
 };
 
 struct CAntibotMapData
@@ -41,7 +42,7 @@ struct CAntibotInputData
 
 struct CAntibotCharacterData
 {
-	char m_aName[16];
+	char m_aName[ANTIBOT_MAX_NAME_ARRAY_SIZE];
 	CAntibotInputData m_aLatestInputs[3];
 
 	bool m_Alive;

@@ -80,8 +80,10 @@ public:
 		int m_ColorBody;
 		int m_ColorFeet;
 
-		char m_aName[MAX_NAME_LENGTH];
-		char m_aClan[MAX_CLAN_LENGTH];
+		char m_aName[MAX_NAME_ARRAY_SIZE];
+		char m_aNameCompat[MAX_NAME_LENGTH];
+		char m_aClan[MAX_CLAN_ARRAY_SIZE];
+		char m_aClanCompat[MAX_CLAN_LENGTH];
 		int m_Country;
 		char m_aSkinName[protocol7::MAX_SKIN_LENGTH];
 		int m_SkinColor;

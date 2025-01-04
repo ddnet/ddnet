@@ -96,7 +96,7 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 			const char *pLookFor = "flag was captured by '";
 			if((p = str_find(pMsg->m_pMessage, pLookFor)))
 			{
-				char aName[MAX_NAME_LENGTH];
+				char aName[MAX_NAME_ARRAY_SIZE];
 				p += str_length(pLookFor);
 				t = str_rchr(p, '\'');
 

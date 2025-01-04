@@ -15,6 +15,7 @@
 #include <engine/map.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
+#include <engine/shared/packer.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
@@ -1581,11 +1582,19 @@ void CGameClient::OnNewSnapshot()
 				{
 					CClientData *pClient = &m_aClients[ClientId];
 
-					if(!IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName, std::size(pClient->m_aName)))
+					if(!IntsToStr(&pInfo->m_Name0, 4, pClient->m_aNameCompat, std::size(pClient->m_aNameCompat)))
 					{
-						str_copy(pClient->m_aName, "nameless tee");
+						str_copy(pClient->m_aNameCompat, "nameless tee");
 					}
-					IntsToStr(&pInfo->m_Clan0, 3, pClient->m_aClan, std::size(pClient->m_aClan));
+					IntsToStr(&pInfo->m_Clan0, 3, pClient->m_aClanCompat, std::size(pClient->m_aClanCompat));
+
+					// only use legacy name if a extended client info does not exist
+					if(!pClient->m_HasExtendedClientInfo)
+					{
+						str_copy(pClient->m_aName, pClient->m_aNameCompat);
+						str_copy(pClient->m_aClan, pClient->m_aClanCompat);
+					}
+
 					pClient->m_Country = pInfo->m_Country;
 
 					IntsToStr(&pInfo->m_Skin0, 6, pClient->m_aSkinName, std::size(pClient->m_aSkinName));
@@ -1603,6 +1612,27 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_SkinInfo.Apply(m_Skins.Find(pClient->m_aSkinName));
 					pClient->m_SkinInfo.ApplyColors(pClient->m_UseCustomColor, pClient->m_ColorBody, pClient->m_ColorFeet);
 					pClient->UpdateRenderInfo(IsTeamPlay());
+				}
+			}
+			else if(Item.m_Type == NETOBJTYPE_DDNETCLIENTINFO)
+			{
+				const CNetObj_DDNetClientInfo *pInfo = (const CNetObj_DDNetClientInfo *)Item.m_pData;
+				int ClientId = Item.m_Id;
+				if(ClientId < MAX_CLIENTS)
+				{
+					CClientData *pClient = &m_aClients[ClientId];
+					pClient->m_HasExtendedClientInfo = true;
+
+					CUnpacker DDNetClientInfo;
+					DDNetClientInfo.Reset(pInfo->m_aData, sizeof(pInfo->m_aData));
+					str_utf8_copy_num(pClient->m_aName, DDNetClientInfo.GetString(), MAX_NAME_LENGTH);
+					str_utf8_copy_num(pClient->m_aClan, DDNetClientInfo.GetString(), MAX_CLAN_LENGTH);
+					if(DDNetClientInfo.Error() || pClient->m_aName[0] == '\0')
+					{
+						pClient->m_HasExtendedClientInfo = false;
+						str_copy(pClient->m_aName, pClient->m_aNameCompat);
+						str_copy(pClient->m_aClan, pClient->m_aClanCompat);
+					}
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_PLAYERINFO)
@@ -2551,8 +2581,11 @@ void CGameClient::CClientData::Reset()
 	m_ColorBody = 0;
 	m_ColorFeet = 0;
 
+	m_HasExtendedClientInfo = false;
 	m_aName[0] = '\0';
+	m_aNameCompat[0] = '\0';
 	m_aClan[0] = '\0';
+	m_aClanCompat[0] = '\0';
 	m_Country = -1;
 	m_aSkinName[0] = '\0';
 	m_SkinColor = 0;

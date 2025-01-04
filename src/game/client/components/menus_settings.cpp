@@ -292,16 +292,16 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	if(!m_Dummy)
 	{
 		pCountry = &g_Config.m_PlayerCountry;
-		s_NameInput.SetBuffer(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName));
+		s_NameInput.SetBuffer(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), MAX_NAME_LENGTH);
 		s_NameInput.SetEmptyText(Client()->PlayerName());
-		s_ClanInput.SetBuffer(g_Config.m_PlayerClan, sizeof(g_Config.m_PlayerClan));
+		s_ClanInput.SetBuffer(g_Config.m_PlayerClan, sizeof(g_Config.m_PlayerClan), MAX_CLAN_LENGTH);
 	}
 	else
 	{
 		pCountry = &g_Config.m_ClDummyCountry;
-		s_NameInput.SetBuffer(g_Config.m_ClDummyName, sizeof(g_Config.m_ClDummyName));
+		s_NameInput.SetBuffer(g_Config.m_ClDummyName, sizeof(g_Config.m_ClDummyName), MAX_NAME_LENGTH);
 		s_NameInput.SetEmptyText(Client()->DummyName());
-		s_ClanInput.SetBuffer(g_Config.m_ClDummyClan, sizeof(g_Config.m_ClDummyClan));
+		s_ClanInput.SetBuffer(g_Config.m_ClDummyClan, sizeof(g_Config.m_ClDummyClan), MAX_CLAN_LENGTH);
 	}
 
 	// player name

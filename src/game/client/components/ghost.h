@@ -91,7 +91,7 @@ private:
 		CGhostSkin m_Skin;
 		CGhostPath m_Path;
 		int m_StartTick;
-		char m_aPlayer[MAX_NAME_LENGTH];
+		char m_aPlayer[MAX_NAME_ARRAY_SIZE];
 		int m_PlaybackPos;
 
 		CGhostItem() { Reset(); }

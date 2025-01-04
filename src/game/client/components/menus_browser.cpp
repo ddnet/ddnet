@@ -1642,7 +1642,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
 		Ui()->DoLabel(&Button, aBuf, FontSize + 2.0f, TEXTALIGN_ML);
 		Button.VSplitLeft(80.0f, nullptr, &Button);
-		static CLineInputBuffered<MAX_NAME_LENGTH> s_NameInput;
+		static CLineInputBuffered<MAX_NAME_ARRAY_SIZE, MAX_NAME_LENGTH> s_NameInput;
 		Ui()->DoEditBox(&s_NameInput, &Button, FontSize + 2.0f);
 
 		ServerFriends.HSplitTop(3.0f, nullptr, &ServerFriends);
@@ -1650,7 +1650,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
 		Ui()->DoLabel(&Button, aBuf, FontSize + 2.0f, TEXTALIGN_ML);
 		Button.VSplitLeft(80.0f, nullptr, &Button);
-		static CLineInputBuffered<MAX_CLAN_LENGTH> s_ClanInput;
+		static CLineInputBuffered<MAX_CLAN_ARRAY_SIZE, MAX_CLAN_LENGTH> s_ClanInput;
 		Ui()->DoEditBox(&s_ClanInput, &Button, FontSize + 2.0f);
 
 		ServerFriends.HSplitTop(3.0f, nullptr, &ServerFriends);

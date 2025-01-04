@@ -14,7 +14,7 @@ CSaveTee::CSaveTee() = default;
 void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 {
 	m_ClientId = pChr->m_pPlayer->GetCid();
-	str_copy(m_aName, pChr->Server()->ClientName(m_ClientId), sizeof(m_aName));
+	str_copy(m_aName, pChr->Server()->ClientName(m_ClientId));
 
 	m_Alive = pChr->m_Alive;
 
@@ -824,7 +824,7 @@ int CSaveTeam::FromString(const char *pString)
 	return 0;
 }
 
-bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientId, int NumPlayer, char *pMessage, int MessageLen) const
+bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_ARRAY_SIZE], const int *pClientId, int NumPlayer, char *pMessage, int MessageLen) const
 {
 	if(NumPlayer > m_MembersCount)
 	{

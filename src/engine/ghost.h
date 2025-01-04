@@ -9,7 +9,7 @@
 class CGhostInfo
 {
 public:
-	char m_aOwner[MAX_NAME_LENGTH];
+	char m_aOwner[MAX_NAME_ARRAY_SIZE];
 	char m_aMap[64];
 	int m_NumTicks;
 	int m_Time;

@@ -34,7 +34,7 @@ public:
 		}
 		void Update(CNamePlates &This, int Id, const char *pName, bool FriendMark, float FontSize);
 		STextContainerIndex m_TextContainerIndex;
-		char m_aName[MAX_NAME_LENGTH];
+		char m_aName[MAX_NAME_ARRAY_SIZE];
 		int m_Id;
 		bool m_FriendMark;
 		float m_FontSize;
@@ -54,7 +54,7 @@ public:
 		}
 		void Update(CNamePlates &This, const char *pClan, float FontSize);
 		STextContainerIndex m_TextContainerIndex;
-		char m_aClan[MAX_CLAN_LENGTH];
+		char m_aClan[MAX_CLAN_ARRAY_SIZE];
 		float m_FontSize;
 	};
 	class CNamePlateHookWeakStrongId

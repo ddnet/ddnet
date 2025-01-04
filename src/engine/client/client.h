@@ -263,7 +263,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
 
 	// For DummyName function
-	char m_aAutomaticDummyName[MAX_NAME_LENGTH];
+	char m_aAutomaticDummyName[MAX_NAME_ARRAY_SIZE];
 
 public:
 	IConfigManager *ConfigManager() { return m_pConfigManager; }
@@ -441,6 +441,8 @@ public:
 	static void ConchainReplays(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainPlayerName(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainPlayerClan(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void Con_DemoSlice(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);

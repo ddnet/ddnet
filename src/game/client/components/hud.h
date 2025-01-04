@@ -33,7 +33,7 @@ struct SScoreInfo
 	float m_ScoreTextWidth;
 	char m_aScoreText[16];
 	char m_aRankText[16];
-	char m_aPlayerNameText[MAX_NAME_LENGTH];
+	char m_aPlayerNameText[MAX_NAME_ARRAY_SIZE];
 	int m_RoundRectQuadContainerIndex;
 	STextContainerIndex m_OptionalNameTextContainerIndex;
 

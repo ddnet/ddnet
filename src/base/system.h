@@ -2451,6 +2451,25 @@ int str_utf8_check(const char *str);
 void str_utf8_copy_num(char *dst, const char *src, int dst_size, int num);
 
 /*
+	Function: str_utf8_copy_num
+		Copies a number of utf8 characters from one string to another.
+
+	Parameters:
+		dst - Array that shall receive the string.
+		src - String to be copied.
+		num - maximum number of utf8 characters to be copied.
+
+	Remarks:
+		- The strings are treated as zero-terminated strings.
+		- Garantees that dst string will contain zero-termination.
+*/
+template<int N>
+void str_utf8_copy_num(char (&dst)[N], const char *src, int num)
+{
+	str_utf8_copy_num(dst, src, N, num);
+}
+
+/*
 	Function: str_utf8_stats
 		Determines the byte size and utf8 character count of a utf8 string.
 

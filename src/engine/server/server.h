@@ -151,8 +151,10 @@ public:
 		CInput m_aInputs[200]; // TODO: handle input better
 		int m_CurrentInput;
 
-		char m_aName[MAX_NAME_LENGTH];
-		char m_aClan[MAX_CLAN_LENGTH];
+		char m_aName[MAX_NAME_ARRAY_SIZE];
+		char m_aClan[MAX_CLAN_ARRAY_SIZE];
+		char m_aNameCompat[MAX_NAME_LENGTH];
+		char m_aClanCompat[MAX_CLAN_LENGTH];
 		int m_Country;
 		std::optional<int> m_Score;
 		int m_Authed;
@@ -301,7 +303,9 @@ public:
 	void SetClientDDNetVersion(int ClientId, int DDNetVersion) override;
 	void GetClientAddr(int ClientId, char *pAddrStr, int Size) const override;
 	const char *ClientName(int ClientId) const override;
+	const char *ClientNameCompat(int ClientId) const override;
 	const char *ClientClan(int ClientId) const override;
+	const char *ClientClanCompat(int ClientId) const override;
 	int ClientCountry(int ClientId) const override;
 	bool ClientSlotEmpty(int ClientId) const override;
 	bool ClientIngame(int ClientId) const override;

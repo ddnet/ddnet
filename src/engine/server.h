@@ -54,7 +54,9 @@ public:
 	virtual int ClientCount() const = 0;
 	virtual int DistinctClientCount() const = 0;
 	virtual const char *ClientName(int ClientId) const = 0;
+	virtual const char *ClientNameCompat(int ClientId) const = 0;
 	virtual const char *ClientClan(int ClientId) const = 0;
+	virtual const char *ClientClanCompat(int ClientId) const = 0;
 	virtual int ClientCountry(int ClientId) const = 0;
 	virtual bool ClientSlotEmpty(int ClientId) const = 0;
 	virtual bool ClientIngame(int ClientId) const = 0;

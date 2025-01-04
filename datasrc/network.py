@@ -323,6 +323,10 @@ Objects = [
 		NetIntRange("m_FollowFactor", 0, 'max_int'),
 	]),
 
+	NetObjectEx("DDNetClientInfo", "client-info@netobj.ddnet.org", [
+		NetArray(NetIntAny("m_aData"), 17 + 13),
+	]),
+
 	## Events
 
 	NetEvent("Common", [

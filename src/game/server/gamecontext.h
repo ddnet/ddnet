@@ -572,7 +572,7 @@ private:
 		bool m_FromServer;
 		char m_aDescription[128];
 		int m_ClientVersion;
-		char m_aClientName[MAX_NAME_LENGTH];
+		char m_aClientName[MAX_NAME_ARRAY_SIZE];
 		char m_aClientAddrStr[NETADDR_MAXSTRSIZE];
 	};
 	CLog m_aLogs[MAX_LOGS];

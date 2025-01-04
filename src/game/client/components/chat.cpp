@@ -594,7 +594,7 @@ void CChat::StoreSave(const char *pText)
 	if(!pStart || !pMid || !pEnd || pMid < pStart || pEnd < pMid || (pOn && (pOn < pMid || pEnd < pOn)))
 		return;
 
-	char aName[16];
+	char aName[MAX_NAME_ARRAY_SIZE];
 	str_truncate(aName, sizeof(aName), pStart + 27, pMid - pStart - 27);
 
 	char aSaveCode[64];

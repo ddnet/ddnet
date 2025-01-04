@@ -370,8 +370,8 @@ protected:
 	// friends
 	class CFriendItem
 	{
-		char m_aName[MAX_NAME_LENGTH];
-		char m_aClan[MAX_CLAN_LENGTH];
+		char m_aName[MAX_NAME_ARRAY_SIZE];
+		char m_aClan[MAX_CLAN_ARRAY_SIZE];
 		const CServerInfo *m_pServerInfo;
 		int m_FriendState;
 		bool m_IsPlayer;
@@ -764,7 +764,7 @@ public:
 	struct CGhostItem
 	{
 		char m_aFilename[IO_MAX_PATH_LENGTH];
-		char m_aPlayer[MAX_NAME_LENGTH];
+		char m_aPlayer[MAX_NAME_ARRAY_SIZE];
 
 		bool m_Failed;
 		int m_Time;

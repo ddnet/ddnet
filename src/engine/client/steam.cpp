@@ -10,7 +10,7 @@ class CSteam : public ISteam
 	HSteamPipe m_SteamPipe;
 	ISteamApps *m_pSteamApps;
 	ISteamFriends *m_pSteamFriends;
-	char m_aPlayerName[16];
+	char m_aPlayerName[MAX_NAME_ARRAY_SIZE];
 	bool m_GotConnectAddr;
 	NETADDR m_ConnectAddr;
 
@@ -23,7 +23,7 @@ public:
 		m_pSteamFriends = SteamAPI_SteamFriends_v017();
 
 		ReadLaunchCommandLine();
-		str_copy(m_aPlayerName, SteamAPI_ISteamFriends_GetPersonaName(m_pSteamFriends));
+		str_utf8_copy_num(m_aPlayerName, SteamAPI_ISteamFriends_GetPersonaName(m_pSteamFriends), MAX_NAME_LENGTH);
 	}
 	~CSteam() override
 	{

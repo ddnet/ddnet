@@ -342,11 +342,11 @@ bool CServer::SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set
 	}
 
 	// trim the name
-	char aTrimmedName[MAX_NAME_LENGTH];
-	str_copy(aTrimmedName, str_utf8_skip_whitespaces(pNameRequest));
+	char aTrimmedName[MAX_NAME_ARRAY_SIZE];
+	str_utf8_copy_num(aTrimmedName, str_utf8_skip_whitespaces(pNameRequest), MAX_NAME_LENGTH);
 	str_utf8_trim_right(aTrimmedName);
 
-	char aNameTry[MAX_NAME_LENGTH];
+	char aNameTry[MAX_NAME_ARRAY_SIZE];
 	str_copy(aNameTry, aTrimmedName);
 
 	if(!IsClientNameAvailable(ClientId, aNameTry))
@@ -366,6 +366,7 @@ bool CServer::SetClientNameImpl(int ClientId, const char *pNameRequest, bool Set
 	{
 		// set the client name
 		str_copy(m_aClients[ClientId].m_aName, aNameTry);
+		str_utf8_copy_num(m_aClients[ClientId].m_aNameCompat, aNameTry, MAX_NAME_LENGTH);
 		GameServer()->TeehistorianRecordPlayerName(ClientId, m_aClients[ClientId].m_aName);
 	}
 
@@ -398,8 +399,8 @@ bool CServer::SetClientClanImpl(int ClientId, const char *pClanRequest, bool Set
 	}
 
 	// trim the clan
-	char aTrimmedClan[MAX_CLAN_LENGTH];
-	str_copy(aTrimmedClan, str_utf8_skip_whitespaces(pClanRequest));
+	char aTrimmedClan[MAX_CLAN_ARRAY_SIZE];
+	str_utf8_copy_num(aTrimmedClan, str_utf8_skip_whitespaces(pClanRequest), MAX_CLAN_LENGTH);
 	str_utf8_trim_right(aTrimmedClan);
 
 	bool Changed = str_comp(m_aClients[ClientId].m_aClan, aTrimmedClan) != 0;
@@ -408,6 +409,7 @@ bool CServer::SetClientClanImpl(int ClientId, const char *pClanRequest, bool Set
 	{
 		// set the client clan
 		str_copy(m_aClients[ClientId].m_aClan, aTrimmedClan);
+		str_utf8_copy_num(m_aClients[ClientId].m_aClanCompat, aTrimmedClan, MAX_CLAN_LENGTH);
 	}
 
 	return Changed;
@@ -636,12 +638,32 @@ const char *CServer::ClientName(int ClientId) const
 		return "(connecting)";
 }
 
+const char *CServer::ClientNameCompat(int ClientId) const
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS || m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
+		return "(invalid)";
+	if(m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME)
+		return m_aClients[ClientId].m_aNameCompat;
+	else
+		return "(connecting)";
+}
+
 const char *CServer::ClientClan(int ClientId) const
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS || m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
 		return "";
 	if(m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME)
 		return m_aClients[ClientId].m_aClan;
+	else
+		return "";
+}
+
+const char *CServer::ClientClanCompat(int ClientId) const
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS || m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
+		return "";
+	if(m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME)
+		return m_aClients[ClientId].m_aClanCompat;
 	else
 		return "";
 }
@@ -2116,8 +2138,8 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 
 			int PreviousSize = q.Size();
 
-			q.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
-			q.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
+			q.AddString(ClientName(i), MAX_NAME_ARRAY_SIZE); // client name
+			q.AddString(ClientClan(i), MAX_CLAN_ARRAY_SIZE); // client clan
 
 			ADD_INT(q, m_aClients[i].m_Country); // client country
 
@@ -2216,8 +2238,8 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 		{
 			if(m_aClients[i].IncludedInServerInfo())
 			{
-				Packer.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
-				Packer.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
+				Packer.AddString(ClientName(i), MAX_NAME_ARRAY_SIZE); // client name
+				Packer.AddString(ClientClan(i), MAX_CLAN_ARRAY_SIZE); // client clan
 				Packer.AddInt(m_aClients[i].m_Country); // client country
 				Packer.AddInt(m_aClients[i].m_Score.value_or(-1)); // client score
 				Packer.AddInt(GameServer()->IsClientPlayer(i) ? 0 : 1); // flag spectator=1, bot=2 (player=0)

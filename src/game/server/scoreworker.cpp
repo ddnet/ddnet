@@ -114,7 +114,7 @@ bool CTeamrank::GetSqlTop5Team(IDbConnection *pSqlServer, bool *pEnd, char *pErr
 		char aNames[2300] = {0};
 		for(int i = 0; i < TeamSize; i++)
 		{
-			char aName[MAX_NAME_LENGTH];
+			char aName[MAX_NAME_ARRAY_SIZE];
 			pSqlServer->GetString(1, aName, sizeof(aName));
 			str_append(aNames, aName);
 			if(i < TeamSize - 2)
@@ -1057,7 +1057,7 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 
 	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
 	{
-		char aName[MAX_NAME_LENGTH];
+		char aName[MAX_NAME_ARRAY_SIZE];
 		pSqlServer->GetString(1, aName, sizeof(aName));
 		float Time = pSqlServer->GetFloat(2);
 		str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
@@ -1092,7 +1092,7 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	// show top
 	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
 	{
-		char aName[MAX_NAME_LENGTH];
+		char aName[MAX_NAME_ARRAY_SIZE];
 		pSqlServer->GetString(1, aName, sizeof(aName));
 		float Time = pSqlServer->GetFloat(2);
 		str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
@@ -1381,7 +1381,7 @@ bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		}
 		else // last 5 times of the server
 		{
-			char aName[MAX_NAME_LENGTH];
+			char aName[MAX_NAME_ARRAY_SIZE];
 			pSqlServer->GetString(5, aName, sizeof(aName));
 			if(Stamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 			{
@@ -1435,7 +1435,7 @@ bool CScoreWorker::ShowPoints(IDbConnection *pSqlServer, const ISqlData *pGameDa
 	{
 		int Rank = pSqlServer->GetInt(1);
 		int Count = pSqlServer->GetInt(2);
-		char aName[MAX_NAME_LENGTH];
+		char aName[MAX_NAME_ARRAY_SIZE];
 		pSqlServer->GetString(3, aName, sizeof(aName));
 		pResult->m_MessageKind = CScorePlayerResult::ALL;
 		str_format(paMessages[0], sizeof(paMessages[0]),
@@ -1484,7 +1484,7 @@ bool CScoreWorker::ShowTopPoints(IDbConnection *pSqlServer, const ISqlData *pGam
 	{
 		int Rank = pSqlServer->GetInt(1);
 		int Points = pSqlServer->GetInt(2);
-		char aName[MAX_NAME_LENGTH];
+		char aName[MAX_NAME_ARRAY_SIZE];
 		pSqlServer->GetString(3, aName, sizeof(aName));
 		str_format(paMessages[Line], sizeof(paMessages[Line]),
 			"%d. %s Points: %d", Rank, aName, Points);

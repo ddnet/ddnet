@@ -146,14 +146,29 @@ int CGameClient::TranslateSnap(CSnapshot *pSnapDstSix, CSnapshot *pSnapSrcSeven,
 			return -2;
 
 		CNetObj_ClientInfo Info6 = {};
-		StrToInts(&Info6.m_Name0, 4, Client.m_aName);
-		StrToInts(&Info6.m_Clan0, 3, Client.m_aClan);
+		StrToInts(&Info6.m_Name0, 4, Client.m_aNameCompat);
+		StrToInts(&Info6.m_Clan0, 3, Client.m_aClanCompat);
 		Info6.m_Country = Client.m_Country;
 		StrToInts(&Info6.m_Skin0, 6, Client.m_aSkinName);
 		Info6.m_UseCustomColor = Client.m_UseCustomColor;
 		Info6.m_ColorBody = Client.m_ColorBody;
 		Info6.m_ColorFeet = Client.m_ColorFeet;
 		mem_copy(pObj, &Info6, sizeof(CNetObj_ClientInfo));
+
+		// use packer to pack into a int array
+		CPacker DDNetClientInfo;
+		DDNetClientInfo.Reset();
+		DDNetClientInfo.AddString(Client.m_aName);
+		DDNetClientInfo.AddString(Client.m_aClan);
+
+		if(!DDNetClientInfo.Error())
+		{
+			CNetObj_DDNetClientInfo *pObjEx = (CNetObj_DDNetClientInfo *)Builder.NewItem(NETOBJTYPE_DDNETCLIENTINFO, i, sizeof(CNetObj_DDNetClientInfo));
+			if(!pObjEx)
+				return -3;
+
+			mem_copy(pObjEx->m_aData, DDNetClientInfo.Data(), minimum(sizeof(pObjEx->m_aData), (size_t)DDNetClientInfo.Size()));
+		}
 	}
 
 	bool NewGameData = false;
@@ -518,8 +533,14 @@ int CGameClient::OnDemoRecSnap7(CSnapshot *pFrom, CSnapshot *pTo, int Conn)
 		protocol7::CNetObj_De_ClientInfo ClientInfoObj;
 		ClientInfoObj.m_Local = i == Client()->m_TranslationContext.m_aLocalClientId[Conn];
 		ClientInfoObj.m_Team = ClientData.m_Team;
-		StrToInts(ClientInfoObj.m_aName, 4, m_aClients[i].m_aName);
-		StrToInts(ClientInfoObj.m_aClan, 3, m_aClients[i].m_aClan);
+		char aBufName[MAX_NAME_LENGTH];
+		str_copy(aBufName, ClientData.m_aName);
+		str_utf8_trim_right(aBufName);
+		StrToInts(ClientInfoObj.m_aName, 4, aBufName);
+		char aBufClan[MAX_CLAN_LENGTH];
+		str_copy(aBufClan, ClientData.m_aClan);
+		str_utf8_trim_right(aBufClan);
+		StrToInts(ClientInfoObj.m_aClan, 3, aBufClan);
 		ClientInfoObj.m_Country = ClientData.m_Country;
 
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)

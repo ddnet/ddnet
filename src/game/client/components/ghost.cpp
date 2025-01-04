@@ -129,7 +129,7 @@ void CGhost::GetPath(char *pBuf, int Size, const char *pPlayerName, int Time) co
 	char aSha256[SHA256_MAXSTRSIZE];
 	sha256_str(Sha256, aSha256, sizeof(aSha256));
 
-	char aPlayerName[MAX_NAME_LENGTH];
+	char aPlayerName[MAX_NAME_ARRAY_SIZE];
 	str_copy(aPlayerName, pPlayerName);
 	str_sanitize_filename(aPlayerName);
 
@@ -616,7 +616,7 @@ void CGhost::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		if(pMsg->m_ClientId == -1 && m_Recording)
 		{
-			char aName[MAX_NAME_LENGTH];
+			char aName[MAX_NAME_ARRAY_SIZE];
 			int Time = CRaceHelper::TimeFromFinishMessage(pMsg->m_pMessage, aName, sizeof(aName));
 			if(Time > 0 && m_pClient->m_Snap.m_LocalClientId >= 0 && str_comp(aName, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_aName) == 0)
 			{
