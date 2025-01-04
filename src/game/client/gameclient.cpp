@@ -2599,7 +2599,7 @@ void CGameClient::OnPredict()
 			PrevGameTick = Client()->GameTick(g_Config.m_ClDummy) + (int)Client()->IntraGameTick(g_Config.m_ClDummy);
 
 			vec2 ServerPos = m_aClients[i].m_aPredPos[GameTick % 200];
-			// vec2 PrevServerPos = m_aClients[i].m_aPredPos[(GameTick - 1) % 200];
+			vec2 PrevServerPos = m_aClients[i].m_aPredPos[(GameTick - 1) % 200];
 
 			vec2 PredDir = normalize(PredPos - ServerPos);
 			vec2 LastDir = normalize(PrevPredPos - ServerPos);
@@ -2716,6 +2716,11 @@ void CGameClient::OnPredict()
 
 			m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_ImprovedPredPos;
 			m_aClients[i].m_ImprovedPredPos = ConfidencePos;
+			if (distance(ServerPos, PrevServerPos) > 600.0f) 
+			{
+				m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_ImprovedPredPos;
+			}
+
 		}
 	}
 	// Copy the current pred world so on the next tick we have the "previous" pred world to advance and test against
