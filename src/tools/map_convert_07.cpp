@@ -114,7 +114,7 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
+	IStorage *pStorage = CreateStorage(IStorage::EInitializationType::BASIC, argc, argv);
 	if(!pStorage)
 	{
 		dbg_msg("map_convert_07", "error loading storage");
