@@ -1732,8 +1732,16 @@ CUi::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the image from the map"))
 	{
-		pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_SelectedImage);
-		pEditor->m_Map.ModifyImageIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedImage));
+		if(IsAssetUsed(FILETYPE_IMG, pEditor->m_SelectedImage, pEditor))
+		{
+			pEditor->m_PopupEventType = POPEVENT_REMOVE_USED_IMAGE;
+			pEditor->m_PopupEventActivated = true;
+		}
+		else
+		{
+			pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_SelectedImage);
+			pEditor->m_Map.ModifyImageIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedImage));
+		}
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -1834,8 +1842,16 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the sound from the map"))
 	{
-		pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
-		pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedSound));
+		if(IsAssetUsed(FILETYPE_SOUND, pEditor->m_SelectedImage, pEditor))
+		{
+			pEditor->m_PopupEventType = POPEVENT_REMOVE_USED_SOUND;
+			pEditor->m_PopupEventActivated = true;
+		}
+		else
+		{
+			pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
+			pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedSound));
+		}
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -2066,6 +2082,16 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Too many colors";
 		pMessage = "The client only supports 64 images but more would be needed to add the selected image as tileart.";
 	}
+	else if(pEditor->m_PopupEventType == POPEVENT_REMOVE_USED_IMAGE)
+	{
+		pTitle = "Remove image";
+		pMessage = "This image is used in the map. Removing it will reset all layers that use this image to their default.\n\nRemove anyway?";
+	}
+	else if(pEditor->m_PopupEventType == POPEVENT_REMOVE_USED_SOUND)
+	{
+		pTitle = "Remove sound";
+		pMessage = "This sound is used in the map. Removing it will reset all layers that use this sound to their default.\n\nRemove anyway?";
+	}
 	else
 	{
 		dbg_assert(false, "m_PopupEventType invalid");
@@ -2171,6 +2197,16 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		else if(pEditor->m_PopupEventType == POPEVENT_PIXELART_MANY_COLORS)
 		{
 			pEditor->AddTileart();
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_REMOVE_USED_IMAGE)
+		{
+			pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_SelectedImage);
+			pEditor->m_Map.ModifyImageIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedImage));
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_REMOVE_USED_SOUND)
+		{
+			pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
+			pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedSound));
 		}
 		pEditor->m_PopupEventWasActivated = false;
 		return CUi::POPUP_CLOSE_CURRENT;

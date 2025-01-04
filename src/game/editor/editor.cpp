@@ -4703,6 +4703,49 @@ bool CEditor::ReplaceSoundCallback(const char *pFileName, int StorageType, void 
 	return static_cast<CEditor *>(pUser)->ReplaceSound(pFileName, StorageType, true);
 }
 
+bool CEditor::IsAssetUsed(int FileType, int Index, void *pUser)
+{
+	CEditor *pEditor = (CEditor *)pUser;
+	for(int g = 0; g < (int)pEditor->m_Map.m_vpGroups.size(); g++)
+	{
+		for(int i = 0; i < (int)pEditor->m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
+		{
+			int LayerType = pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type;
+			if(FileType == FILETYPE_IMG)
+			{
+				if(LayerType == LAYERTYPE_TILES)
+				{
+					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
+					if(pTiles->m_Image == Index)
+					{
+						return true;
+					}
+				}
+				else if(LayerType == LAYERTYPE_QUADS)
+				{
+					std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
+					if(pQuads->m_Image == Index)
+					{
+						return true;
+					}
+				}
+			}
+			else if(FileType == FILETYPE_SOUND)
+			{
+				if(LayerType == LAYERTYPE_SOUNDS)
+				{
+					std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
+					if(pSounds->m_Sound == pEditor->m_SelectedImage)
+					{
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
 void CEditor::SelectGameLayer()
 {
 	for(size_t g = 0; g < m_Map.m_vpGroups.size(); g++)
