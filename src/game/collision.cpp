@@ -1379,12 +1379,12 @@ size_t CCollision::TeleAllSize(int Number)
 	return Total;
 }
 
-void CCollision::Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation) const
+void CCollision::Rotate(vec2 Center, vec2 *pPoint, float Rotation) const
 {
-	float x = pPoint->x - pCenter->x;
-	float y = pPoint->y - pCenter->y;
-	pPoint->x = (x * cosf(Rotation) - y * sinf(Rotation) + pCenter->x);
-	pPoint->y = (x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y);
+	float x = pPoint->x - Center.x;
+	float y = pPoint->y - Center.y;
+	pPoint->x = (x * cosf(Rotation) - y * sinf(Rotation) + Center.x);
+	pPoint->y = (x * sinf(Rotation) + y * cosf(Rotation) + Center.y);
 }
 
 int CCollision::GetQuadAt(float x, float y, CQuad **pOut, int StartNum, vec2 *QuadCurPos, float *QuadCurAngle) const
@@ -1426,10 +1426,10 @@ int CCollision::GetQuadAt(float x, float y, CQuad **pOut, int StartNum, vec2 *Qu
 				if(Angle != 0)
 				{
 					vec2 center(fx2f(pQuads[Num].m_aPoints[4].x), fx2f(pQuads[Num].m_aPoints[4].y));
-					Rotate(&center, &p0, Angle);
-					Rotate(&center, &p1, Angle);
-					Rotate(&center, &p2, Angle);
-					Rotate(&center, &p3, Angle);
+					Rotate(center, &p0, Angle);
+					Rotate(center, &p1, Angle);
+					Rotate(center, &p2, Angle);
+					Rotate(center, &p3, Angle);
 				}
 				if(OutOfRange(x, p0.x, p1.x, p2.x, p3.x))
 					continue;
@@ -1547,7 +1547,7 @@ void CCollision::GetAnimationTransform(float GlobalTime, int Env, CLayers* pLaye
 						else if(c == 1)
 							Position.y = bezier(p0.y, p1.y, p2.y, p3.y, a);
 						else if(c == 2)
-							Angle = bezier(p0.y, p1.y, p2.y, p3.y, a);
+							Angle = bezier(p0.y, p1.y, p2.y, p3.y, a)/360.0f*pi*2.0f;
 					}
 
 					return;

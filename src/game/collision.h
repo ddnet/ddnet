@@ -86,7 +86,7 @@ public:
 	bool InsideTriangle(const vec2& t0, const vec2& t1, const vec2& t2, const vec2& p) const;
 	bool InsideQuad(const vec2& q0, const vec2& q1, const vec2& q2, const vec2& q3, const vec2& p) const;
 	vec3 BarycentricCoordinates(const vec2& t0, const vec2& t1, const vec2& t2, const vec2& p) const;
-	void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation) const;
+	void Rotate(vec2 Center, vec2 *pPoint, float Rotation) const;
 	struct SAnimationTransformCache
 	{
 		vec2 Position = vec2(0.0f, 0.f);

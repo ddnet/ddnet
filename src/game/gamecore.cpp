@@ -453,6 +453,8 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			float tempangle;
 			m_pCollision->GetAnimationTransform(m_pCollision->m_Time + (m_HookedQuad.m_pQuad->m_PosEnvOffset / 1000.0),m_HookedQuad.m_pQuad->m_PosEnv,(CLayers *)m_pCollision->Layers(), temppos, tempangle);
 			m_HookPos = temppos + vec2(fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].x),fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].y)) + m_QuadHookedPos;
+			if(tempangle-m_HookedQuad.m_Angle != 0)
+			m_pCollision->Rotate(temppos + vec2(fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].x),fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].y)), &m_HookPos, tempangle - m_HookedQuad.m_Angle);
 		}
 
 		if(m_HookedPlayer != -1 && m_pWorld)
