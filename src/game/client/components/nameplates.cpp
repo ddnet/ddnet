@@ -14,17 +14,28 @@
 #include "controls.h"
 #include "nameplates.h"
 
-void CNamePlate::CNamePlateName::Update(CNamePlates &This, int Id, const char *pName, bool FriendMark, float FontSize)
+void CNamePlate::CNamePlateName::Update(CNamePlates &This, int Id, const char *pName, bool FriendMark, float FontSize, int RealId)
 {
+
+	bool NameWar = false;
+	if(g_Config.m_ClWarList && !g_Config.m_ClNamePlatesClan && !g_Config.m_ClWarListShowClan
+		&& This.GameClient()->m_WarList.GetClanWar(RealId))
+		NameWar = true;
+	if(g_Config.m_ClWarList && This.GameClient()->m_WarList.GetNameWar(RealId))
+		NameWar = true;
+
+
 	if(Id == m_Id &&
 		str_comp(m_aName, pName) == 0 &&
-		m_FriendMark == FriendMark && m_FontSize == FontSize)
+		m_FriendMark == FriendMark && m_FontSize == FontSize
+		&& m_NameWar == NameWar)
 		return;
 	m_Id = Id;
 	str_copy(m_aName, pName);
 	m_FriendMark = FriendMark;
 	m_FontSize = FontSize;
 
+	m_NameWar = NameWar;
 	// create namePlates at standard zoom
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	This.Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -36,9 +47,8 @@ void CNamePlate::CNamePlateName::Update(CNamePlates &This, int Id, const char *p
 	if(m_FriendMark)
 	{
 		This.TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
-		//if(g_Config.m_ClWarList && This.m_pClient->m_WarList.GetAnyWar(Id))
-		//	This.TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
-
+		if(NameWar)
+			This.TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, "♥");
 	}
 	This.TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
@@ -144,7 +154,7 @@ void CNamePlates::RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateD
 	if((Data.m_pName && Data.m_pName[0] != '\0') || Data.m_ClientId >= 0 || Data.m_ShowFriendMark)
 	{
 		YOffset -= Data.m_FontSize;
-		NamePlate.m_Name.Update(*this, Data.m_ClientId, Data.m_pName, Data.m_ShowFriendMark, Data.m_FontSize);
+		NamePlate.m_Name.Update(*this, Data.m_ClientId, Data.m_pName, Data.m_ShowFriendMark, Data.m_FontSize, Data.m_RealClientId);
 
 		// TClient
 		if(Data.m_IsGame && Data.m_RealClientId >= 0)

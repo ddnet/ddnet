@@ -175,7 +175,7 @@ void CWarList::AddWarEntryInGame(int WarType, const char *pName, const char *pRe
 		RemoveWarEntryDuplicates(Entry.m_aName, Entry.m_aClan);
 
 	AddWarEntry(Entry.m_aName, Entry.m_aClan, Entry.m_aReason, Entry.m_pWarType->m_aWarName);
-	//if(str_comp(Entry.m_aClan, "") != 0 || str_comp(Entry.m_aName, "") != 0)
+	// if(str_comp(Entry.m_aClan, "") != 0 || str_comp(Entry.m_aName, "") != 0)
 	//	m_WarEntries.push_back(Entry);
 }
 
@@ -388,7 +388,22 @@ ColorRGBA CWarList::GetClanColor(int ClientId)
 
 bool CWarList::GetAnyWar(int ClientId)
 {
+	if(ClientId < 0)
+		return false;
 	return m_WarPlayers[ClientId].IsWarClan || m_WarPlayers[ClientId].IsWarName;
+}
+
+bool CWarList::GetNameWar(int ClientId)
+{
+	if(ClientId < 0)
+		return false;
+	return m_WarPlayers[ClientId].IsWarName;
+}
+bool CWarList::GetClanWar(int ClientId)
+{
+	if(ClientId < 0)
+		return false;
+	return m_WarPlayers[ClientId].IsWarClan;
 }
 
 void CWarList::GetReason(char *pReason, int ClientId)

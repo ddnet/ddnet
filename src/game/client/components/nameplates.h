@@ -32,12 +32,14 @@ public:
 			m_FriendMark = false;
 			m_FontSize = -INFINITY;
 		}
-		void Update(CNamePlates &This, int Id, const char *pName, bool FriendMark, float FontSize);
+		void Update(CNamePlates &This, int Id, const char *pName, bool FriendMark, float FontSize, int RealId = -1);
 		STextContainerIndex m_TextContainerIndex;
 		char m_aName[MAX_NAME_LENGTH];
 		int m_Id;
 		bool m_FriendMark;
 		float m_FontSize;
+
+		bool m_NameWar = false;
 	};
 	class CNamePlateClan
 	{

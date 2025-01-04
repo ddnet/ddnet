@@ -188,6 +188,8 @@ public:
 	ColorRGBA GetNameplateColor(int ClientId);
 	ColorRGBA GetClanColor(int ClientId);
 	bool GetAnyWar(int ClientId);
+	bool GetNameWar(int ClientId);
+	bool GetClanWar(int ClientId);
 
 	void GetReason(char *pReason, int ClientId);
 	CWarDataCache GetWarData(int ClientId);
