@@ -612,7 +612,7 @@ void CCharacterCore::Move()
 			m_Tuning.m_GroundElasticityY),
 		&Grounded);
 	
-	Grounded |= (m_QuadRestrictions & CANTMOVE_DOWN);
+	Grounded = Grounded || (m_QuadRestrictions & CANTMOVE_DOWN);
 
 	if(Grounded)
 	{
