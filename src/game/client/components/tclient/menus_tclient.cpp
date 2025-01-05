@@ -630,9 +630,9 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	static CButtonContainer s_FontDirectoryId;
 	if(DoButton_FontIcon(&s_FontDirectoryId, FONT_ICON_FOLDER, 0, &FontDirectory, IGraphics::CORNER_ALL))
 	{
-		Storage()->CreateFolder("tclient", IStorage::TYPE_ABSOLUTE);
-		Storage()->CreateFolder("tclient/fonts", IStorage::TYPE_ABSOLUTE);
-		Client()->ViewFile("tclient/fonts");
+		Storage()->CreateFolder("data/tclient", IStorage::TYPE_ABSOLUTE);
+		Storage()->CreateFolder("data/tclient/fonts", IStorage::TYPE_ABSOLUTE);
+		Client()->ViewFile("data/tclient/fonts");
 	}
 
 	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);

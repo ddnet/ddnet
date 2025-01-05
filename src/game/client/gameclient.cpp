@@ -3784,6 +3784,7 @@ vec2 CGameClient::GetFreezePos(int ClientId)
 	}
 	return Pos;
 }
+
 void CGameClient::Echo(const char *pString)
 {
 	m_Chat.Echo(pString);
