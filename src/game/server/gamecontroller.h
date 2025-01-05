@@ -95,6 +95,7 @@ public:
 	virtual void OnCharacterSpawn(class CCharacter *pChr);
 
 	virtual void HandleCharacterTiles(class CCharacter *pChr, int MapIndex);
+	virtual void HandleCharacterQuad(class CCharacter *pChr, CQuad *pQuad);
 	virtual void SetArmorProgress(CCharacter *pCharacer, int Progress){};
 
 	/*

@@ -2037,6 +2037,194 @@ void CCharacter::HandleQuads()
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		}
 		
+		// endless hook
+		if(pQuad->m_ColorEnvOffset == TILE_EHOOK_ENABLE)
+		{
+			SetEndlessHook(true);
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_EHOOK_DISABLE)
+		{
+			SetEndlessHook(false);
+		}
+
+		// hit others
+		if((pQuad->m_ColorEnvOffset == TILE_HIT_DISABLE) && (!m_Core.m_HammerHitDisabled || !m_Core.m_ShotgunHitDisabled || !m_Core.m_GrenadeHitDisabled || !m_Core.m_LaserHitDisabled))
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't hit others");
+			m_Core.m_HammerHitDisabled = true;
+			m_Core.m_ShotgunHitDisabled = true;
+			m_Core.m_GrenadeHitDisabled = true;
+			m_Core.m_LaserHitDisabled = true;
+		}
+		else if((pQuad->m_ColorEnvOffset == TILE_HIT_ENABLE) && (m_Core.m_HammerHitDisabled || m_Core.m_ShotgunHitDisabled || m_Core.m_GrenadeHitDisabled || m_Core.m_LaserHitDisabled))
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can hit others");
+			m_Core.m_ShotgunHitDisabled = false;
+			m_Core.m_GrenadeHitDisabled = false;
+			m_Core.m_HammerHitDisabled = false;
+			m_Core.m_LaserHitDisabled = false;
+		}
+
+		// collide with others
+		if((pQuad->m_ColorEnvOffset == TILE_NPC_DISABLE) && !m_Core.m_CollisionDisabled)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't collide with others");
+			m_Core.m_CollisionDisabled = true;
+		}
+		else if((pQuad->m_ColorEnvOffset == TILE_NPC_ENABLE) && m_Core.m_CollisionDisabled)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can collide with others");
+			m_Core.m_CollisionDisabled = false;
+		}
+
+		// hook others
+		if((pQuad->m_ColorEnvOffset == TILE_NPH_DISABLE) && !m_Core.m_HookHitDisabled)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't hook others");
+			m_Core.m_HookHitDisabled = true;
+		}
+		else if((pQuad->m_ColorEnvOffset == TILE_NPH_ENABLE) && m_Core.m_HookHitDisabled)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can hook others");
+			m_Core.m_HookHitDisabled = false;
+		}
+
+		// unlimited air jumps
+		if((pQuad->m_ColorEnvOffset == TILE_UNLIMITED_JUMPS_ENABLE) && !m_Core.m_EndlessJump)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You have unlimited air jumps");
+			m_Core.m_EndlessJump = true;
+		}
+		else if((pQuad->m_ColorEnvOffset == TILE_UNLIMITED_JUMPS_DISABLE) && m_Core.m_EndlessJump)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You don't have unlimited air jumps");
+			m_Core.m_EndlessJump = false;
+		}
+
+		// walljump
+		if(pQuad->m_ColorEnvOffset == TILE_WALLJUMP)
+		{
+			if(m_Core.m_Vel.y > 0 && m_Core.m_Colliding && m_Core.m_LeftWall)
+			{
+				m_Core.m_LeftWall = false;
+				m_Core.m_JumpedTotal = m_Core.m_Jumps >= 2 ? m_Core.m_Jumps - 2 : 0;
+				m_Core.m_Jumped = 1;
+			}
+		}
+
+		// jetpack gun
+		if(((pQuad->m_ColorEnvOffset == TILE_JETPACK_ENABLE)) && !m_Core.m_Jetpack)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You have a jetpack gun");
+			m_Core.m_Jetpack = true;
+		}
+		else if(((pQuad->m_ColorEnvOffset == TILE_JETPACK_DISABLE)) && m_Core.m_Jetpack)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You lost your jetpack gun");
+			m_Core.m_Jetpack = false;
+		}
+
+		// Teleport gun
+		if((pQuad->m_ColorEnvOffset == TILE_TELE_GUN_ENABLE) && !m_Core.m_HasTelegunGun)
+		{
+			m_Core.m_HasTelegunGun = true;
+
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport gun enabled");
+		}
+		else if((pQuad->m_ColorEnvOffset == TILE_TELE_GUN_DISABLE) && m_Core.m_HasTelegunGun)
+		{
+			m_Core.m_HasTelegunGun = false;
+
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport gun disabled");
+		}
+
+		if((pQuad->m_ColorEnvOffset == TILE_TELE_GRENADE_ENABLE) && !m_Core.m_HasTelegunGrenade)
+		{
+			m_Core.m_HasTelegunGrenade = true;
+
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport grenade enabled");
+		}
+		else if((pQuad->m_ColorEnvOffset == TILE_TELE_GRENADE_DISABLE) && m_Core.m_HasTelegunGrenade)
+		{
+			m_Core.m_HasTelegunGrenade = false;
+
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport grenade disabled");
+		}
+
+		if((pQuad->m_ColorEnvOffset == TILE_TELE_LASER_ENABLE) && !m_Core.m_HasTelegunLaser)
+		{
+			m_Core.m_HasTelegunLaser = true;
+
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport laser enabled");
+		}
+		else if((pQuad->m_ColorEnvOffset == TILE_TELE_LASER_DISABLE) && m_Core.m_HasTelegunLaser)
+		{
+			m_Core.m_HasTelegunLaser = false;
+
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "Teleport laser disabled");
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_HIT_ENABLE && m_Core.m_HammerHitDisabled && Delay == WEAPON_HAMMER)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can hammer hit others");
+			m_Core.m_HammerHitDisabled = false;
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_HIT_DISABLE && !(m_Core.m_HammerHitDisabled) && Delay == WEAPON_HAMMER)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't hammer hit others");
+			m_Core.m_HammerHitDisabled = true;
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_HIT_ENABLE && m_Core.m_ShotgunHitDisabled && Delay == WEAPON_SHOTGUN)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can shoot others with shotgun");
+			m_Core.m_ShotgunHitDisabled = false;
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_HIT_DISABLE && !(m_Core.m_ShotgunHitDisabled) && Delay == WEAPON_SHOTGUN)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't shoot others with shotgun");
+			m_Core.m_ShotgunHitDisabled = true;
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_HIT_ENABLE && m_Core.m_GrenadeHitDisabled && Delay == WEAPON_GRENADE)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can shoot others with grenade");
+			m_Core.m_GrenadeHitDisabled = false;
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_HIT_DISABLE && !(m_Core.m_GrenadeHitDisabled) && Delay == WEAPON_GRENADE)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't shoot others with grenade");
+			m_Core.m_GrenadeHitDisabled = true;
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_HIT_ENABLE && m_Core.m_LaserHitDisabled && Delay == WEAPON_LASER)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can shoot others with laser");
+			m_Core.m_LaserHitDisabled = false;
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_HIT_DISABLE && !(m_Core.m_LaserHitDisabled) && Delay == WEAPON_LASER)
+		{
+			GameServer()->SendChatTarget(GetPlayer()->GetCid(), "You can't shoot others with laser");
+			m_Core.m_LaserHitDisabled = true;
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_JUMP)
+		{
+			int NewJumps = Delay;
+			if(NewJumps == 255)
+			{
+				NewJumps = -1;
+			}
+
+			if(NewJumps != m_Core.m_Jumps)
+			{
+				char aBuf[256];
+				if(NewJumps == -1)
+					str_copy(aBuf, "You only have your ground jump now");
+				else if(NewJumps == 1)
+					str_format(aBuf, sizeof(aBuf), "You can jump %d time", NewJumps);
+				else
+					str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
+				GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
+				m_Core.m_Jumps = NewJumps;
+			}
+		}
+
 		// handle switch tiles
 		if(pQuad->m_ColorEnvOffset == TILE_SWITCHOPEN && Team() != TEAM_SUPER && Number > 0)
 		{
@@ -2066,6 +2254,8 @@ void CCharacter::HandleQuads()
 			Switchers()[Number].m_aType[Team()] = TILE_SWITCHCLOSE;
 			Switchers()[Number].m_aLastUpdateTick[Team()] = Server()->Tick();
 		}
+
+		//Teleports
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && pQuad->m_ColorEnvOffset == TILE_TELEIN && !Collision()->TeleOuts(Number - 1).empty())
 		{
 			if(!(m_Core.m_Super || m_Core.m_Invincible))
@@ -2181,6 +2371,7 @@ void CCharacter::HandleQuads()
 				}
 			}
 		}
+		GameServer()->m_pController->HandleCharacterQuad(this, pQuad);
 	}
 
 }
