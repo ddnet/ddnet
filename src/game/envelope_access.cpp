@@ -3,11 +3,11 @@
 
 #include <base/vmath.h>
 
-#include <game/mapitems.h>
-#include <game/mapitems_ex.h>
-#include <game/envelope_access.h>
 #include <engine/shared/datafile.h>
 #include <engine/shared/map.h>
+#include <game/envelope_access.h>
+#include <game/mapitems.h>
+#include <game/mapitems_ex.h>
 
 CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pReader)
 {

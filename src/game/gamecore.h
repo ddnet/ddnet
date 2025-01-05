@@ -9,9 +9,9 @@
 #include <set>
 #include <vector>
 
+#include "collision.h"
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
-#include "collision.h"
 
 #include "prng.h"
 

@@ -1990,13 +1990,13 @@ void CCharacter::HandleTiles(int Index)
 
 void CCharacter::HandleQuads()
 {
-	CQuad* pQuad = nullptr;
+	CQuad *pQuad = nullptr;
 	int StartNum = 0;
 	int Number = 0;
 	int Delay = 0;
 	while(true)
 	{
-		StartNum = Collision()->GetQuadAt(m_Pos,&pQuad,StartNum);
+		StartNum = Collision()->GetQuadAt(m_Pos, &pQuad, StartNum);
 		StartNum++;
 		if(!pQuad)
 			break;
@@ -2036,7 +2036,7 @@ void CCharacter::HandleQuads()
 		{
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		}
-		
+
 		// endless hook
 		if(pQuad->m_ColorEnvOffset == TILE_EHOOK_ENABLE)
 		{
@@ -2373,7 +2373,6 @@ void CCharacter::HandleQuads()
 		}
 		GameServer()->m_pController->HandleCharacterQuad(this, pQuad);
 	}
-
 }
 
 void CCharacter::HandleTuneLayer()

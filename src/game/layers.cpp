@@ -6,8 +6,8 @@
 
 #include <engine/map.h>
 
-#include <game/gamecore.h> //TODO: DELETE THIS WHEN READY
 #include <base/system.h> //TODO: DELETE THIS WHEN READY
+#include <game/gamecore.h> //TODO: DELETE THIS WHEN READY
 
 CLayers::CLayers()
 {

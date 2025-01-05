@@ -220,7 +220,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			m_StandingQuad.m_Angle = 0;
 		}
 	}*/
-	
+
 	vec2 TargetDirection = normalize(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
 
 	m_Vel.y += m_Tuning.m_Gravity;
@@ -327,8 +327,8 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	{
 		SetHookedPlayer(-1);
 		m_HookPos = m_Pos;
-		m_HookedQuad = {nullptr, vec2(0,0), 0};
-		m_QuadHookedPos = vec2(0,0);
+		m_HookedQuad = {nullptr, vec2(0, 0), 0};
+		m_QuadHookedPos = vec2(0, 0);
 	}
 	else if(m_HookState >= HOOK_RETRACT_START && m_HookState < HOOK_RETRACT_END)
 	{
@@ -380,9 +380,9 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			else if(m_HookedQuad.m_pQuad->m_ColorEnvOffset == TILE_SOLID)
 			{
 				GoingToHitGround = true;
-				m_QuadHookedPos = NewPos - (m_HookedQuad.m_Pos + vec2(fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].x),fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].y)));
+				m_QuadHookedPos = NewPos - (m_HookedQuad.m_Pos + vec2(fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].x), fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].y)));
 			}
-			
+
 			m_Reset = true;
 		}
 
@@ -451,10 +451,10 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		{
 			vec2 temppos;
 			float tempangle;
-			m_pCollision->GetAnimationTransform(m_pCollision->m_Time + (m_HookedQuad.m_pQuad->m_PosEnvOffset / 1000.0),m_HookedQuad.m_pQuad->m_PosEnv,(CLayers *)m_pCollision->Layers(), temppos, tempangle);
-			m_HookPos = temppos + vec2(fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].x),fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].y)) + m_QuadHookedPos;
-			if(tempangle-m_HookedQuad.m_Angle != 0)
-			m_pCollision->Rotate(temppos + vec2(fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].x),fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].y)), &m_HookPos, tempangle - m_HookedQuad.m_Angle);
+			m_pCollision->GetAnimationTransform(m_pCollision->m_Time + (m_HookedQuad.m_pQuad->m_PosEnvOffset / 1000.0), m_HookedQuad.m_pQuad->m_PosEnv, (CLayers *)m_pCollision->Layers(), temppos, tempangle);
+			m_HookPos = temppos + vec2(fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].x), fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].y)) + m_QuadHookedPos;
+			if(tempangle - m_HookedQuad.m_Angle != 0)
+				m_pCollision->Rotate(temppos + vec2(fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].x), fx2f(m_HookedQuad.m_pQuad->m_aPoints[4].y)), &m_HookPos, tempangle - m_HookedQuad.m_Angle);
 		}
 
 		if(m_HookedPlayer != -1 && m_pWorld)
@@ -611,7 +611,7 @@ void CCharacterCore::Move()
 		vec2(m_Tuning.m_GroundElasticityX,
 			m_Tuning.m_GroundElasticityY),
 		&Grounded);
-	
+
 	Grounded = Grounded || (m_QuadRestrictions & CANTMOVE_DOWN);
 
 	if(Grounded)

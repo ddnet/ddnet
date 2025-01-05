@@ -74,18 +74,18 @@ public:
 	int GetFrontIndex(int x, int y) const;
 
 	//Quads
-	CMapItemLayerQuads *GetQuadHandle(const char* pName) const { return m_pQuadLayer; }
+	CMapItemLayerQuads *GetQuadHandle(const char *pName) const { return m_pQuadLayer; }
 	int GetQuadAt(float x, float y, CQuad **pOut = nullptr, int StartNum = 0, vec2 *QuadCurPos = nullptr, float *QuadCurAngle = nullptr) const;
 	int GetQuadAt(vec2 Pos, CQuad **pOut = nullptr, int StartNum = 0, vec2 *QuadCurPos = nullptr, float *QuadCurAngle = nullptr) const { return GetQuadAt(Pos.x, Pos.y, pOut, StartNum, QuadCurPos, QuadCurAngle); }
 	int GetQuadAt(float x, float y, QuadData *pOut = nullptr, int StartNum = 0) const { return GetQuadAt(x, y, &pOut->m_pQuad, StartNum, &pOut->m_Pos, &pOut->m_Angle); }
 	int GetQuadAt(vec2 Pos, QuadData *pOut = nullptr, int StartNum = 0) const { return GetQuadAt(Pos.x, Pos.y, &pOut->m_pQuad, StartNum, &pOut->m_Pos, &pOut->m_Angle); }
-	void GetAnimationTransform(float GlobalTime, int Env, class CLayers* pLayers, vec2& Position, float& Angle) const;
+	void GetAnimationTransform(float GlobalTime, int Env, class CLayers *pLayers, vec2 &Position, float &Angle) const;
 	double m_Time;
 	void SetTime(double Time) { m_Time = Time; }
 	bool OutOfRange(double value, double q0, double q1, double q2, double q3) const;
-	bool InsideTriangle(const vec2& t0, const vec2& t1, const vec2& t2, const vec2& p) const;
-	bool InsideQuad(const vec2& q0, const vec2& q1, const vec2& q2, const vec2& q3, const vec2& p) const;
-	vec3 BarycentricCoordinates(const vec2& t0, const vec2& t1, const vec2& t2, const vec2& p) const;
+	bool InsideTriangle(const vec2 &t0, const vec2 &t1, const vec2 &t2, const vec2 &p) const;
+	bool InsideQuad(const vec2 &q0, const vec2 &q1, const vec2 &q2, const vec2 &q3, const vec2 &p) const;
+	vec3 BarycentricCoordinates(const vec2 &t0, const vec2 &t1, const vec2 &t2, const vec2 &p) const;
 	void Rotate(vec2 Center, vec2 *pPoint, float Rotation) const;
 	struct SAnimationTransformCache
 	{
