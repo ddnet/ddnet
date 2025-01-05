@@ -64,7 +64,12 @@ void CTrails::OnRender()
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
 		bool Local = m_pClient->m_Snap.m_LocalClientId == ClientId;
+
+		bool ZoomAllowed = GameClient()->m_Camera.ZoomAllowed();
 		if(!g_Config.m_ClTeeTrailOthers && !Local)
+			continue;
+
+		if(!Local && !ZoomAllowed)
 			continue;
 
 		if(!m_pClient->m_Snap.m_aCharacters[ClientId].m_Active)
