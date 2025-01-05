@@ -199,7 +199,10 @@ void CWarList::RemoveWarEntryInGame(int WarType, const char *pName, bool IsClan)
 			if(str_comp(GameClient()->m_aClients[i].m_aName, pName) == 0)
 			{
 				if(str_comp(GameClient()->m_aClients[i].m_aClan, "") != 0)
+				{
 					str_copy(Entry.m_aClan, GameClient()->m_aClients[i].m_aClan);
+					break;
+				}
 				else
 				{
 					char aBuf[128];

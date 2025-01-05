@@ -67,7 +67,9 @@ public:
 
 	bool operator==(const CWarEntry &Other) const
 	{
-		return (str_comp(m_aName, Other.m_aName) == 0 || str_comp(m_aClan, Other.m_aClan) == 0) && m_pWarType == Other.m_pWarType;
+		bool NameMatch = str_comp(m_aName, Other.m_aName) == 0 && str_comp(m_aName, "") != 0;
+		bool ClanMatch = str_comp(m_aClan, Other.m_aClan) == 0 && str_comp(m_aClan, "") != 0;
+		return (NameMatch || ClanMatch) && m_pWarType == Other.m_pWarType;
 	}
 };
 
