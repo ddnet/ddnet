@@ -488,22 +488,18 @@ void CServer::Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimR
 	m_NetServer.NetBan()->BanAddr(&Addr, Seconds, pReason, VerbatimReason);
 }
 
-void CServer::RedirectClient(int ClientId, int Port, bool Verbose)
+void CServer::RedirectClient(int ClientId, int Port)
 {
-	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
-		return;
+	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid client id");
 
-	char aBuf[512];
 	bool SupportsRedirect = GetClientVersion(ClientId) >= VERSION_DDNET_REDIRECT;
-	if(Verbose)
-	{
-		str_format(aBuf, sizeof(aBuf), "redirecting '%s' to port %d supported=%d", ClientName(ClientId), Port, SupportsRedirect);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "redirect", aBuf);
-	}
+
+	log_info("server", "redirecting client, cid=%d port=%d supported=%d", ClientId, Port, SupportsRedirect);
 
 	if(!SupportsRedirect)
 	{
-		bool SamePort = Port == m_NetServer.Address().port;
+		char aBuf[128];
+		bool SamePort = Port == this->Port();
 		str_format(aBuf, sizeof(aBuf), "Redirect unsupported: please connect to port %d", Port);
 		Kick(ClientId, SamePort ? "Redirect unsupported: please reconnect" : aBuf);
 		return;
