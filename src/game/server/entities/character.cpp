@@ -1993,6 +1993,7 @@ void CCharacter::HandleQuads()
 	CQuad* pQuad = nullptr;
 	int StartNum = 0;
 	int Number = 0;
+	int Delay = 0;
 	while(true)
 	{
 		StartNum = Collision()->GetQuadAt(m_Pos,&pQuad,StartNum);
@@ -2003,6 +2004,7 @@ void CCharacter::HandleQuads()
 		Number = pQuad->m_aColors[0].r;
 		if(Number == 0)
 			Number++;
+		Delay = pQuad->m_aColors[0].g;
 
 		//printf("QuadenvOffset: %d\n",pQuad->m_ColorEnvOffset);
 
@@ -2033,6 +2035,36 @@ void CCharacter::HandleQuads()
 		if(pQuad->m_ColorEnvOffset == TILE_DEATH)
 		{
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+		}
+		
+		// handle switch tiles
+		if(pQuad->m_ColorEnvOffset == TILE_SWITCHOPEN && Team() != TEAM_SUPER && Number > 0)
+		{
+			Switchers()[Number].m_aStatus[Team()] = true;
+			Switchers()[Number].m_aEndTick[Team()] = 0;
+			Switchers()[Number].m_aType[Team()] = TILE_SWITCHOPEN;
+			Switchers()[Number].m_aLastUpdateTick[Team()] = Server()->Tick();
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_SWITCHTIMEDOPEN && Team() != TEAM_SUPER && Number > 0)
+		{
+			Switchers()[Number].m_aStatus[Team()] = true;
+			Switchers()[Number].m_aEndTick[Team()] = Server()->Tick() + 1 + Delay * Server()->TickSpeed();
+			Switchers()[Number].m_aType[Team()] = TILE_SWITCHTIMEDOPEN;
+			Switchers()[Number].m_aLastUpdateTick[Team()] = Server()->Tick();
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_SWITCHTIMEDCLOSE && Team() != TEAM_SUPER && Number > 0)
+		{
+			Switchers()[Number].m_aStatus[Team()] = false;
+			Switchers()[Number].m_aEndTick[Team()] = Server()->Tick() + 1 + Delay * Server()->TickSpeed();
+			Switchers()[Number].m_aType[Team()] = TILE_SWITCHTIMEDCLOSE;
+			Switchers()[Number].m_aLastUpdateTick[Team()] = Server()->Tick();
+		}
+		else if(pQuad->m_ColorEnvOffset == TILE_SWITCHCLOSE && Team() != TEAM_SUPER && Number > 0)
+		{
+			Switchers()[Number].m_aStatus[Team()] = false;
+			Switchers()[Number].m_aEndTick[Team()] = 0;
+			Switchers()[Number].m_aType[Team()] = TILE_SWITCHCLOSE;
+			Switchers()[Number].m_aLastUpdateTick[Team()] = Server()->Tick();
 		}
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && pQuad->m_ColorEnvOffset == TILE_TELEIN && !Collision()->TeleOuts(Number - 1).empty())
 		{
