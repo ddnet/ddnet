@@ -126,6 +126,10 @@ if(TARGET_OS STREQUAL "mac")
     set(TOOLS ON)
 endif()
 
+if(TARGET_OS STREQUAL "android")
+    set(DISCORD OFF)
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
   include(${PROJECT_SOURCE_DIR}/cmake/toolchains/Emscripten.toolchain)
 endif()
