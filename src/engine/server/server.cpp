@@ -488,6 +488,24 @@ void CServer::Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimR
 	m_NetServer.NetBan()->BanAddr(&Addr, Seconds, pReason, VerbatimReason);
 }
 
+void CServer::ReconnectClient(int ClientId)
+{
+	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid client id");
+
+	if(GetClientVersion(ClientId) < VERSION_DDNET_RECONNECT)
+	{
+		RedirectClient(ClientId, m_NetServer.Address().port);
+		return;
+	}
+	log_info("server", "telling client to reconnect, cid=%d", ClientId);
+
+	CMsgPacker Msg(NETMSG_RECONNECT, true);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
+
+	m_aClients[ClientId].m_RedirectDropTime = time_get() + time_freq() * 10;
+	m_aClients[ClientId].m_State = CClient::STATE_REDIRECTED;
+}
+
 void CServer::RedirectClient(int ClientId, int Port)
 {
 	dbg_assert(0 <= ClientId && ClientId < MAX_CLIENTS, "invalid client id");
