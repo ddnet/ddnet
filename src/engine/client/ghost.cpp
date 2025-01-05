@@ -9,27 +9,32 @@
 #include <engine/storage.h>
 
 static const unsigned char gs_aHeaderMarker[8] = {'T', 'W', 'G', 'H', 'O', 'S', 'T', 0};
-static const unsigned char gs_CurVersion = 6;
+static const unsigned char gs_CurVersion = 7;
 
 static const LOG_COLOR LOG_COLOR_GHOST{165, 153, 153};
 
-int CGhostHeader::GetTicks() const
+const char *CGhostHeader::Owner() const { return (Version() <= 6) ? m_Data.m_Version6.m_aOwner : m_Data.m_Version7.m_aOwner; }
+size_t CGhostHeader::OwnerBufferSize() const { return (Version() <= 6) ? sizeof(m_Data.m_Version6.m_aOwner) : sizeof(m_Data.m_Version7.m_aOwner); }
+const char *CGhostHeader::Map() const { return (Version() <= 6) ? m_Data.m_Version6.m_aMap : m_Data.m_Version7.m_aMap; }
+size_t CGhostHeader::MapBufferSize() const { return (Version() <= 6) ? sizeof(m_Data.m_Version6.m_aMap) : sizeof(m_Data.m_Version7.m_aMap); }
+int CGhostHeader::Ticks() const { return bytes_be_to_uint((Version() <= 6) ? m_Data.m_Version6.m_aNumTicks : m_Data.m_Version7.m_aNumTicks); }
+int CGhostHeader::Time() const { return bytes_be_to_uint((Version() <= 6) ? m_Data.m_Version6.m_aTime : m_Data.m_Version7.m_aTime); }
+SHA256_DIGEST CGhostHeader::MapSha256() const { return (Version() <= 6) ? m_Data.m_Version6.m_MapSha256 : m_Data.m_Version7.m_MapSha256; }
+unsigned CGhostHeader::MapCrc() const
 {
-	return bytes_be_to_uint(m_aNumTicks);
-}
-
-int CGhostHeader::GetTime() const
-{
-	return bytes_be_to_uint(m_aTime);
+	dbg_assert(Version() < 6, "MapCrc is only valid for version < 6");
+	if(Version() < 6)
+		return bytes_be_to_uint(m_Data.m_Version6.m_aZeroes);
+	return 0;
 }
 
 CGhostInfo CGhostHeader::ToGhostInfo() const
 {
 	CGhostInfo Result;
-	str_copy(Result.m_aOwner, m_aOwner);
-	str_copy(Result.m_aMap, m_aMap);
-	Result.m_NumTicks = GetTicks();
-	Result.m_Time = GetTime();
+	str_copy(Result.m_aOwner, Owner());
+	str_copy(Result.m_aMap, Map());
+	Result.m_NumTicks = Ticks();
+	Result.m_Time = Time();
 	return Result;
 }
 
@@ -60,11 +65,11 @@ int CGhostRecorder::Start(const char *pFilename, const char *pMap, const SHA256_
 	// write header
 	CGhostHeader Header;
 	mem_zero(&Header, sizeof(Header));
-	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
-	Header.m_Version = gs_CurVersion;
-	str_copy(Header.m_aOwner, pName);
-	str_copy(Header.m_aMap, pMap);
-	Header.m_MapSha256 = MapSha256;
+	mem_copy(Header.m_Identifier.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_Identifier.m_aMarker));
+	Header.m_Identifier.m_Version = gs_CurVersion;
+	str_copy(Header.m_Data.m_Version7.m_aOwner, pName);
+	str_copy(Header.m_Data.m_Version7.m_aMap, pMap);
+	Header.m_Data.m_Version7.m_MapSha256 = MapSha256;
 	io_write(m_File, &Header, sizeof(Header));
 
 	m_LastItem.Reset();
@@ -181,7 +186,7 @@ void CGhostRecorder::Stop(int Ticks, int Time)
 		FlushChunk();
 
 		// write number of ticks and time
-		io_seek(m_File, offsetof(CGhostHeader, m_aNumTicks), IOSEEK_START);
+		io_seek(m_File, offsetof(CGhostHeader, m_Data.m_Version7.m_aNumTicks), IOSEEK_START);
 
 		unsigned char aNumTicks[sizeof(int32_t)];
 		uint_to_bytes_be(aNumTicks, Ticks);
@@ -234,9 +239,16 @@ IOHANDLE CGhostLoader::ReadHeader(CGhostHeader &Header, const char *pFilename, c
 		return nullptr;
 	}
 
-	if(io_read(File, &Header, sizeof(Header)) != sizeof(Header))
+	if(io_read(File, &Header.m_Identifier, sizeof(Header.m_Identifier)) != sizeof(Header.m_Identifier))
 	{
-		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': failed to read header", pFilename);
+		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': failed to read header identifier", pFilename);
+		io_close(File);
+		return nullptr;
+	}
+
+	if(io_read(File, &Header.m_Data, Header.HeaderDataSize()) != Header.HeaderDataSize())
+	{
+		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': failed to read header data", pFilename);
 		io_close(File);
 		return nullptr;
 	}
@@ -253,38 +265,38 @@ IOHANDLE CGhostLoader::ReadHeader(CGhostHeader &Header, const char *pFilename, c
 
 bool CGhostLoader::ValidateHeader(const CGhostHeader &Header, const char *pFilename) const
 {
-	if(mem_comp(Header.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) != 0)
+	if(mem_comp(Header.m_Identifier.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) != 0)
 	{
 		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': invalid header marker", pFilename);
 		return false;
 	}
 
-	if(Header.m_Version < 4 || Header.m_Version > gs_CurVersion)
+	if(Header.m_Identifier.m_Version < 4 || Header.m_Identifier.m_Version > gs_CurVersion)
 	{
-		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': ghost version '%d' is not supported", pFilename, Header.m_Version);
+		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': ghost version '%d' is not supported", pFilename, Header.m_Identifier.m_Version);
 		return false;
 	}
 
-	if(!mem_has_null(Header.m_aOwner, sizeof(Header.m_aOwner)) || !str_utf8_check(Header.m_aOwner))
+	if(!mem_has_null(Header.Owner(), Header.OwnerBufferSize()) || !str_utf8_check(Header.Owner()))
 	{
 		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': owner name is invalid", pFilename);
 		return false;
 	}
 
-	if(!mem_has_null(Header.m_aMap, sizeof(Header.m_aMap)) || !str_utf8_check(Header.m_aMap))
+	if(!mem_has_null(Header.Map(), Header.MapBufferSize()) || !str_utf8_check(Header.Map()))
 	{
 		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': map name is invalid", pFilename);
 		return false;
 	}
 
-	const int NumTicks = Header.GetTicks();
+	const int NumTicks = Header.Ticks();
 	if(NumTicks <= 0)
 	{
 		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': number of ticks '%d' is invalid", pFilename, NumTicks);
 		return false;
 	}
 
-	const int Time = Header.GetTime();
+	const int Time = Header.Time();
 	if(Time <= 0)
 	{
 		log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': time '%d' is invalid", pFilename, Time);
@@ -296,23 +308,23 @@ bool CGhostLoader::ValidateHeader(const CGhostHeader &Header, const char *pFilen
 
 bool CGhostLoader::CheckHeaderMap(const CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc, bool LogMapMismatch) const
 {
-	if(str_comp(Header.m_aMap, pMap) != 0)
+	if(str_comp(Header.Map(), pMap) != 0)
 	{
 		if(LogMapMismatch)
 		{
-			log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': ghost map name '%s' does not match current map '%s'", pFilename, Header.m_aMap, pMap);
+			log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': ghost map name '%s' does not match current map '%s'", pFilename, Header.Map(), pMap);
 		}
 		return false;
 	}
 
-	if(Header.m_Version >= 6)
+	if(Header.m_Identifier.m_Version >= 6)
 	{
-		if(Header.m_MapSha256 != MapSha256 && g_Config.m_ClRaceGhostStrictMap)
+		if(Header.MapSha256() != MapSha256 && g_Config.m_ClRaceGhostStrictMap)
 		{
 			if(LogMapMismatch)
 			{
 				char aGhostSha256[SHA256_MAXSTRSIZE];
-				sha256_str(Header.m_MapSha256, aGhostSha256, sizeof(aGhostSha256));
+				sha256_str(Header.MapSha256(), aGhostSha256, sizeof(aGhostSha256));
 				char aMapSha256[SHA256_MAXSTRSIZE];
 				sha256_str(MapSha256, aMapSha256, sizeof(aMapSha256));
 				log_error_color(LOG_COLOR_GHOST, "ghost_loader", "Failed to read ghost file '%s': ghost map SHA256 mismatch (wanted='%s', ghost='%s')", pFilename, aMapSha256, aGhostSha256);
@@ -322,7 +334,7 @@ bool CGhostLoader::CheckHeaderMap(const CGhostHeader &Header, const char *pFilen
 	}
 	else
 	{
-		const unsigned GhostMapCrc = bytes_be_to_uint(Header.m_aZeroes);
+		const unsigned GhostMapCrc = Header.MapCrc();
 		if(GhostMapCrc != MapCrc && g_Config.m_ClRaceGhostStrictMap)
 		{
 			if(LogMapMismatch)
@@ -347,7 +359,7 @@ bool CGhostLoader::Load(const char *pFilename, const char *pMap, const SHA256_DI
 		return false;
 	}
 
-	if(Header.m_Version < 6)
+	if(Header.m_Identifier.m_Version < 6)
 	{
 		io_skip(File, -(int)sizeof(SHA256_DIGEST));
 	}
@@ -363,7 +375,7 @@ bool CGhostLoader::Load(const char *pFilename, const char *pMap, const SHA256_DI
 
 bool CGhostLoader::ReadChunk(int *pType)
 {
-	if(m_Header.m_Version != 4)
+	if(m_Header.m_Identifier.m_Version != 4)
 	{
 		m_LastItem.Reset();
 	}

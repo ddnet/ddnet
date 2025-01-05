@@ -13,21 +13,60 @@ enum
 };
 static_assert(MAX_CHUNK_SIZE % sizeof(uint32_t) == 0, "Chunk size must be aligned with uint32_t");
 
-// version 4-6
-struct CGhostHeader
+class CGhostHeader
 {
-	unsigned char m_aMarker[8];
-	unsigned char m_Version;
-	char m_aOwner[MAX_NAME_LENGTH];
-	char m_aMap[64];
-	unsigned char m_aZeroes[sizeof(int32_t)]; // Crc before version 6
-	unsigned char m_aNumTicks[sizeof(int32_t)];
-	unsigned char m_aTime[sizeof(int32_t)];
-	SHA256_DIGEST m_MapSha256;
+public:
+	class CHeaderIdentifier
+	{
+	public:
+		unsigned char m_aMarker[8];
+		unsigned char m_Version;
+	} m_Identifier;
 
-	int GetTicks() const;
-	int GetTime() const;
+	/** 
+	 * Detailed ghost info in the header
+	 * 
+	 * although coincidentally the ghost header now has v6 and v7 versions,
+	 * this has nothing to do with sixup layers or teeworlds 0.7 whatsoever
+	 */
+	union CHeaderData
+	{
+		// version 4-6
+		class CVersion6
+		{
+		public:
+			char m_aOwner[MAX_NAME_LENGTH];
+			char m_aMap[64];
+			unsigned char m_aZeroes[sizeof(int32_t)]; // Crc before version 6
+			unsigned char m_aNumTicks[sizeof(int32_t)];
+			unsigned char m_aTime[sizeof(int32_t)];
+			SHA256_DIGEST m_MapSha256;
+		} m_Version6;
+
+		// version 7
+		class CVersion7
+		{
+		public:
+			char m_aOwner[MAX_NAME_ARRAY_SIZE];
+			char m_aMap[64];
+			unsigned char m_aNumTicks[sizeof(int32_t)];
+			unsigned char m_aTime[sizeof(int32_t)];
+			SHA256_DIGEST m_MapSha256;
+		} m_Version7;
+	} m_Data;
+
+	int Version() const { return m_Identifier.m_Version; }
+	const char *Owner() const;
+	size_t OwnerBufferSize() const;
+	const char *Map() const;
+	size_t MapBufferSize() const;
+	int Ticks() const;
+	int Time() const;
+	SHA256_DIGEST MapSha256() const;
+	unsigned MapCrc() const;
+
 	CGhostInfo ToGhostInfo() const;
+	size_t HeaderDataSize() const { return (Version() <= 6) ? sizeof(CHeaderData::CVersion6) : sizeof(CHeaderData::CVersion7); }
 };
 
 class CGhostItem
