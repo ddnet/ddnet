@@ -250,6 +250,95 @@ h2 {
     line-height: 1.4;
 }
 
+/* Latest release */
+
+#latest-release {
+    margin-bottom: 80px;
+}
+
+.latest-release {
+    text-align: center;
+}
+
+.changelog-preview {
+    max-width: 800px;
+    margin: 0 auto 30px auto;
+}
+
+.changelog-preview .release {
+    background: var(--bg-dark);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s ease;
+}
+
+.changelog-preview .release-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--darker-bg);
+    text-align: left;
+    justify-content: left;
+}
+
+.changelog-preview .release-version {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(180deg, var(--primary-color), var(--primary-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.changelog-preview .release-date {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--darker-bg);
+    border-radius: 20px;
+}
+
+.changelog-preview .release-content {
+    color: var(--text-color);
+    line-height: 1.6;
+    font-family: 'Montserrat', sans-serif;
+    max-height: 200px;
+    overflow: hidden;
+    position: relative;
+    text-align: left;
+}
+
+.changelog-preview .release-content::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(transparent, var(--bg-dark));
+}
+
+.changelog-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(144deg, var(--primary-color), var(--primary-dark));
+    border-radius: 15px;
+    color: var(--text-color);
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease-out;
+}
+
+.changelog-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0px 0px 10px var(--primary-color);
+}
+
 /* Download */
 #download {
     text-align: center;
