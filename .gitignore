@@ -141,3 +141,5 @@ tags
 *.vcxproj
 *.zip
 /build
+
+!steam_api.dll

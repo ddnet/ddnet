@@ -3301,6 +3301,7 @@ set(CPACK_DIRS
 set(CPACK_FILES
   license.txt
   storage.cfg
+  steam_appid.txt
   ${COPY_FILES}
 )
 
@@ -3672,3 +3673,15 @@ foreach(target ${TARGETS_DEP})
     target_compile_options(${target} PRIVATE ${OUR_FLAGS_DEP})
   endif()
 endforeach()
+
+if(TARGET_OS STREQUAL "windows" AND STEAM AND NOT CMAKE_BUILD_TYPE STREQUAL Debug)
+    add_custom_command(
+        TARGET game-client POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/steam_api.dll"
+            "$<TARGET_FILE_DIR:game-client>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/steam_appid.txt"
+            "$<TARGET_FILE_DIR:game-client>"
+    )
+endif()

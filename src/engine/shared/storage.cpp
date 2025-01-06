@@ -822,8 +822,7 @@ public:
 
 	bool CreateFolder(const char *pFoldername, int Type) override
 	{
-		if(Type >= TYPE_SAVE && Type < m_NumPaths) // How tf does this do anything, it crashes without this
-			dbg_assert(Type >= TYPE_SAVE && Type < m_NumPaths, "Type invalid");
+		dbg_assert((Type >= TYPE_SAVE && Type < m_NumPaths) || Type == TYPE_ABSOLUTE, "Type invalid");
 
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer));
