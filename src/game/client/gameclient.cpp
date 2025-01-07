@@ -3119,7 +3119,7 @@ void CGameClient::UpdatePrediction()
 void CGameClient::UpdateSpectatorCursor()
 {
 	int CursorOwnerId = m_Snap.m_LocalClientId;
-	if(m_Snap.m_SpecInfo.m_Active)
+	if(m_Snap.m_SpecInfo.m_Active || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		CursorOwnerId = m_Snap.m_SpecInfo.m_SpectatorId;
 	}
