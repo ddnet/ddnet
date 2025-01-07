@@ -1245,6 +1245,64 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float Width, const fl
 	Graphics()->WrapNormal();
 }
 
+void CHud::RenderSpectatorsNum()
+{
+	if(!g_Config.m_ClShowhudSpectatorNumber)
+	{
+		return;
+	}
+
+	int Number = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(i == m_pClient->m_aLocalIds[0] || (m_pClient->Client()->DummyConnected() && i == m_pClient->m_aLocalIds[1]))
+			continue;
+
+		if((!Client()->IsSixup() && m_pClient->m_aClients[i].m_Active && m_pClient->m_aClients[i].m_Watching) ||
+			(Client()->IsSixup() && Client()->m_TranslationContext.m_aClients[i].m_PlayerFlags7 & protocol7::PLAYERFLAG_WATCHING))
+		{
+			Number++;
+		}
+	}
+	if(Number == 0)
+		return;
+
+	char aBuf[16];
+	str_format(aBuf, sizeof(aBuf), "%d", Number);
+
+	const float Fontsize = 6.0f;
+	const float BoxHeight = 14.f;
+	const float BoxWidth = 13.f + TextRender()->TextWidth(Fontsize, aBuf);
+
+	float StartX = m_Width - BoxWidth;
+	float StartY = 285.0f - BoxHeight - 4; // 4 units distance to the next display;
+	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
+	{
+		StartY -= 4;
+	}
+	StartY -= GetMovementInformationBoxHeight();
+
+	if(g_Config.m_ClShowhudScore)
+	{
+		StartY -= 56;
+	}
+
+	if(g_Config.m_ClShowhudDummyActions && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) && Client()->DummyConnected())
+	{
+		StartY = StartY - 29.0f - 4; // dummy actions height and padding
+	}
+
+	Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
+
+	float y = StartY + BoxHeight / 3;
+	float x = StartX + 2;
+
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->Text(x, y, Fontsize, FontIcons::FONT_ICON_EYE, -1.0f);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+	TextRender()->Text(x + Fontsize + 3.f, y, Fontsize, aBuf, -1.0f);
+}
+
 void CHud::RenderDummyActions()
 {
 	if(!g_Config.m_ClShowhudDummyActions || (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) || !Client()->DummyConnected())
@@ -1580,6 +1638,7 @@ void CHud::OnRender()
 			{
 				RenderPlayerState(m_pClient->m_Snap.m_LocalClientId);
 			}
+			RenderSpectatorsNum();
 			RenderMovementInformation(m_pClient->m_Snap.m_LocalClientId);
 			RenderDDRaceEffects();
 		}
