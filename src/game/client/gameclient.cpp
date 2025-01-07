@@ -2685,7 +2685,7 @@ void CGameClient::OnPredict()
 			float TickSize = TickDuration / ((float)PredTime * PredTimeScale); // 20ms / PredTime
 			float PrevConfidence = 1.0f - m_aClients[i].m_Uncertainty;
 			float NewConfidence = PrevConfidence - Uncertainty + TickSize;
-			float MinConfidence = g_Config.m_ClAntiPingNevativeBuffer ? -1.0f : 0.0f;
+			float MinConfidence = g_Config.m_ClAntiPingNegativeBuffer ? -1.0f : 0.0f;
 			NewConfidence = std::clamp(NewConfidence, MinConfidence, 1.0f); // A certain about of "negative buffer" is allowed
 			m_aClients[i].m_Uncertainty = 1.0f - NewConfidence;
 			NewConfidence = std::max(0.0f, NewConfidence);
