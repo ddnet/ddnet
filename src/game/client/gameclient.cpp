@@ -2574,7 +2574,7 @@ void CGameClient::OnPredict()
 			if(!m_Snap.m_aCharacters[i].m_Active || !m_aLastActive[i])
 				continue;
 
-			if(i == m_PredictedDummyId || i == m_Snap.m_LocalClientId) 
+			if(i == m_PredictedDummyId || i == m_Snap.m_LocalClientId)
 			{
 				m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_PrevPredicted.m_Pos;
 				m_aClients[i].m_ImprovedPredPos = m_aClients[i].m_Predicted.m_Pos;
@@ -2716,11 +2716,10 @@ void CGameClient::OnPredict()
 
 			m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_ImprovedPredPos;
 			m_aClients[i].m_ImprovedPredPos = ConfidencePos;
-			if (distance(ServerPos, PrevServerPos) > 600.0f) 
+			if(distance(ServerPos, PrevServerPos) > 600.0f)
 			{
 				m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_ImprovedPredPos;
 			}
-
 		}
 	}
 	// Copy the current pred world so on the next tick we have the "previous" pred world to advance and test against
@@ -3574,10 +3573,9 @@ void CGameClient::UpdateRenderedCharacters()
 				vec2(m_aClients[i].m_RenderCur.m_X, m_aClients[i].m_RenderCur.m_Y),
 				m_aClients[i].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy));
 
-
 			if(g_Config.m_ClRemoveAnti)
 				Pos = GetFreezePos(i);
-			
+
 			if(i == m_Snap.m_LocalClientId)
 			{
 				m_aClients[i].m_IsPredictedLocal = true;
@@ -3720,8 +3718,8 @@ vec2 CGameClient::GetSmoothPos(int ClientId)
 			if(ClientId != m_Snap.m_LocalClientId && g_Config.m_ClFastInputOthers && g_Config.m_ClFastInput)
 				SmoothTick += g_Config.m_ClFastInput;
 
-			if(SmoothTick > 0 && 
-				m_aClients[ClientId].m_aPredTick[(SmoothTick - 1) % 200] >= Client()->PrevGameTick(g_Config.m_ClDummy) && 
+			if(SmoothTick > 0 &&
+				m_aClients[ClientId].m_aPredTick[(SmoothTick - 1) % 200] >= Client()->PrevGameTick(g_Config.m_ClDummy) &&
 				m_aClients[ClientId].m_aPredTick[SmoothTick % 200] <= Client()->PredGameTick(g_Config.m_ClDummy) + g_Config.m_ClFastInput)
 				Pos[i] = mix(m_aClients[ClientId].m_aPredPos[(SmoothTick - 1) % 200][i], m_aClients[ClientId].m_aPredPos[SmoothTick % 200][i], SmoothIntra);
 		}
@@ -3775,8 +3773,8 @@ vec2 CGameClient::GetFreezePos(int ClientId)
 		else if(ClientId == m_Snap.m_LocalClientId && g_Config.m_ClFastInput)
 			SmoothTick += g_Config.m_ClFastInput;
 
-		if(SmoothTick > 0 && 
-			m_aClients[ClientId].m_aPredTick[(SmoothTick - 1) % 200] >= Client()->PrevGameTick(g_Config.m_ClDummy) && 
+		if(SmoothTick > 0 &&
+			m_aClients[ClientId].m_aPredTick[(SmoothTick - 1) % 200] >= Client()->PrevGameTick(g_Config.m_ClDummy) &&
 			m_aClients[ClientId].m_aPredTick[SmoothTick % 200] <= Client()->PredGameTick(g_Config.m_ClDummy) + g_Config.m_ClFastInput)
 		{
 			Pos[i] = mix(m_aClients[ClientId].m_aPredPos[(SmoothTick - 1) % 200][i], m_aClients[ClientId].m_aPredPos[SmoothTick % 200][i], SmoothIntra);

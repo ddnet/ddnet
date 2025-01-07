@@ -259,7 +259,7 @@ void CDebugHud::RenderHint()
 	TextRender()->Text(Spacing, Height - FontSize - Spacing, FontSize, Localize("Debug mode enabled. Press Ctrl+Shift+D to disable debug mode."));
 }
 
-void CDebugHud::RenderTaterDebug() 
+void CDebugHud::RenderTaterDebug()
 {
 	if(!g_Config.m_Debug)
 		return;
@@ -312,7 +312,7 @@ void CDebugHud::RenderTaterDebug()
 	}
 }
 
-	void CDebugHud::OnRender()
+void CDebugHud::OnRender()
 {
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;

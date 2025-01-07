@@ -16,19 +16,15 @@
 
 void CNamePlate::CNamePlateName::Update(CNamePlates &This, int Id, const char *pName, bool FriendMark, float FontSize, int RealId)
 {
-
 	bool NameWar = false;
-	if(g_Config.m_ClWarList && !g_Config.m_ClNamePlatesClan && !g_Config.m_ClWarListShowClan
-		&& This.GameClient()->m_WarList.GetClanWar(RealId))
+	if(g_Config.m_ClWarList && !g_Config.m_ClNamePlatesClan && !g_Config.m_ClWarListShowClan && This.GameClient()->m_WarList.GetClanWar(RealId))
 		NameWar = true;
 	if(g_Config.m_ClWarList && This.GameClient()->m_WarList.GetNameWar(RealId))
 		NameWar = true;
 
-
 	if(Id == m_Id &&
 		str_comp(m_aName, pName) == 0 &&
-		m_FriendMark == FriendMark && m_FontSize == FontSize
-		&& m_NameWar == NameWar)
+		m_FriendMark == FriendMark && m_FontSize == FontSize && m_NameWar == NameWar)
 		return;
 	m_Id = Id;
 	str_copy(m_aName, pName);

@@ -220,8 +220,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			continue;
 
 		TabBar.VSplitLeft(TabWidth, &Button, &TabBar);
-		const int Corners = Tab == 0 ? IGraphics::CORNER_L : Tab == NUMBER_OF_TCLIENT_TABS - 1 ? IGraphics::CORNER_R :
-													 IGraphics::CORNER_NONE;
+		const int Corners = Tab == 0 ? IGraphics::CORNER_L : Tab == NUMBER_OF_TCLIENT_TABS - 1 ? IGraphics::CORNER_R : IGraphics::CORNER_NONE;
 		if(DoButton_MenuTab(&s_aPageTabs[Tab], apTabNames[Tab], s_CurCustomTab == Tab, &Button, Corners, nullptr, nullptr, nullptr, nullptr, 4.0f))
 			s_CurCustomTab = Tab;
 	}

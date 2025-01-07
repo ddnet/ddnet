@@ -615,8 +615,8 @@ void CHud::RenderTextInfo()
 			TextRender()->Text(4.0f, OffsetY, FontSize, aBuf, -1.0f);
 		}
 	}
-	if(g_Config.m_ClRenderCursorSpec && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW) 
-	{	
+	if(g_Config.m_ClRenderCursorSpec && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW)
+	{
 		int CurWeapon = 1;
 		Graphics()->SetColor(1.f, 1.f, 1.f, g_Config.m_ClRenderCursorSpecAlpha / 100.0f);
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);

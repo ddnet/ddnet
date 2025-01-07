@@ -21,7 +21,6 @@ T color_lerp(T a, T b, float c)
 
 void CRainbow::OnRender()
 {
-
 	if(!g_Config.m_ClRainbowTees && !g_Config.m_ClRainbowWeapon && !g_Config.m_ClRainbowHook)
 		return;
 
