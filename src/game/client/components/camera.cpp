@@ -36,14 +36,10 @@ CCamera::CCamera()
 
 	m_CameraSmoothing = false;
 
-	m_LastTargetPos = vec2(0, 0);
+	m_LastMousePos = vec2(0, 0);
 	m_DyncamTargetCameraOffset = vec2(0, 0);
 	mem_zero(m_aDyncamCurrentCameraOffset, sizeof(m_aDyncamCurrentCameraOffset));
 	m_DyncamSmoothingSpeedBias = 0.5f;
-
-	m_AutoSpecCamera = true;
-	m_AutoSpecCameraZooming = false;
-	m_UsingAutoSpecCamera = false;
 }
 
 float CCamera::CameraSmoothingProgress(float CurrentTime) const
@@ -60,15 +56,7 @@ float CCamera::ZoomProgress(float CurrentTime) const
 void CCamera::ScaleZoom(float Factor)
 {
 	float CurrentTarget = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
-	bool IsUserZoom = !m_IsSpectatingPlayer;
-
-	ChangeZoom(CurrentTarget * Factor, m_pClient->m_Snap.m_SpecInfo.m_Active && GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, IsUserZoom);
-
-	if(m_IsSpectatingPlayer)
-	{
-		m_AutoSpecCamera = false;
-		m_SpecZoomTarget = m_ZoomSmoothingTarget;
-	}
+	ChangeZoom(CurrentTarget * Factor, m_pClient->m_Snap.m_SpecInfo.m_Active && GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime);
 }
 
 float CCamera::MaxZoomLevel()
@@ -81,7 +69,7 @@ float CCamera::MinZoomLevel()
 	return 0.01f;
 }
 
-void CCamera::ChangeZoom(float Target, int Smoothness, bool IsUser)
+void CCamera::ChangeZoom(float Target, int Smoothness)
 {
 	if(Target > MaxZoomLevel() || Target < MinZoomLevel())
 	{
@@ -103,47 +91,11 @@ void CCamera::ChangeZoom(float Target, int Smoothness, bool IsUser)
 	m_ZoomSmoothingStart = Now;
 	m_ZoomSmoothingEnd = Now + (float)Smoothness / 1000;
 
-	if(IsUser)
-		m_UserZoomTarget = Target;
-
 	m_Zooming = true;
-}
-
-void CCamera::ResetAutoSpecCamera()
-{
-	m_AutoSpecCamera = true;
-	m_SpecZoomTarget = CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10);
 }
 
 void CCamera::UpdateCamera()
 {
-	// use hardcoded smooth camera for spectating unless player explictly turn it off
-	bool IsSpectatingPlayer = !GameClient()->m_MultiViewActivated;
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
-		IsSpectatingPlayer = IsSpectatingPlayer && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0;
-	else
-		IsSpectatingPlayer = IsSpectatingPlayer && m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0;
-
-	bool UsingAutoSpecCamera = m_AutoSpecCamera && CanUseAutoSpecCamera();
-	float CurrentZoom = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
-
-	if(IsSpectatingPlayer && UsingAutoSpecCamera && CurrentZoom != m_pClient->m_Snap.m_SpecInfo.m_Zoom)
-	{
-		ChangeZoom(m_pClient->m_Snap.m_SpecInfo.m_Zoom, 250, false);
-		// it is auto spec camera zooming if only the zoom is changed during activation, not at the start of the activation
-		m_AutoSpecCameraZooming = IsSpectatingPlayer && m_UsingAutoSpecCamera;
-	}
-	else if((IsSpectatingPlayer && !UsingAutoSpecCamera) && CurrentZoom != m_SpecZoomTarget)
-	{
-		ChangeZoom(m_SpecZoomTarget, g_Config.m_ClSmoothZoomTime, false);
-		m_AutoSpecCameraZooming = false;
-	}
-	else if(!IsSpectatingPlayer && CurrentZoom != m_UserZoomTarget)
-	{
-		ChangeZoom(m_UserZoomTarget, GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, false);
-		m_AutoSpecCameraZooming = false;
-	}
-
 	if(m_Zooming)
 	{
 		float Time = Client()->LocalTime();
@@ -178,29 +130,19 @@ void CCamera::UpdateCamera()
 	}
 
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && !m_pClient->m_Snap.m_SpecInfo.m_UsePosition)
-	{
-		m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy] = vec2(0, 0);
-		m_IsSpectatingPlayer = IsSpectatingPlayer;
-		m_UsingAutoSpecCamera = UsingAutoSpecCamera;
 		return;
-	}
-
-	vec2 TargetPos = IsSpectatingPlayer ? m_pClient->m_CursorInfo.Target() : m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
-	int Smoothness = IsSpectatingPlayer ? 50 : g_Config.m_ClDyncamSmoothness;
-	int Stabilizing = IsSpectatingPlayer ? 50 : g_Config.m_ClDyncamStabilizing;
-	bool IsDyncam = IsSpectatingPlayer ? true : g_Config.m_ClDyncam;
 
 	float DeltaTime = Client()->RenderFrameTime();
 
-	if(Smoothness > 0)
+	if(g_Config.m_ClDyncamSmoothness > 0)
 	{
-		float CameraSpeed = (1.0f - (Smoothness / 100.0f)) * 9.5f + 0.5f;
-		float CameraStabilizingFactor = 1 + Stabilizing / 100.0f;
+		float CameraSpeed = (1.0f - (g_Config.m_ClDyncamSmoothness / 100.0f)) * 9.5f + 0.5f;
+		float CameraStabilizingFactor = 1 + g_Config.m_ClDyncamStabilizing / 100.0f;
 
 		m_DyncamSmoothingSpeedBias += CameraSpeed * DeltaTime;
-		if(IsDyncam)
+		if(g_Config.m_ClDyncam)
 		{
-			m_DyncamSmoothingSpeedBias -= length(TargetPos - m_LastTargetPos) * std::log10(CameraStabilizingFactor) * 0.02f;
+			m_DyncamSmoothingSpeedBias -= length(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] - m_LastMousePos) * std::log10(CameraStabilizingFactor) * 0.02f;
 			m_DyncamSmoothingSpeedBias = clamp(m_DyncamSmoothingSpeedBias, 0.5f, CameraSpeed);
 		}
 		else
@@ -210,47 +152,19 @@ void CCamera::UpdateCamera()
 	}
 
 	m_DyncamTargetCameraOffset = vec2(0, 0);
-	float l = length(TargetPos);
+	vec2 MousePos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
+	float l = length(MousePos);
 	if(l > 0.0001f) // make sure that this isn't 0
 	{
-		float CurrentDeadzone = Deadzone();
-		float CurrentFollowFactor = FollowFactor();
-
-		// use provided camera setting from server
-		if(IsSpectatingPlayer)
-		{
-			CurrentDeadzone = m_pClient->m_Snap.m_SpecInfo.m_Deadzone;
-			CurrentFollowFactor = m_pClient->m_Snap.m_SpecInfo.m_FollowFactor;
-
-			if(!UsingAutoSpecCamera)
-			{
-				// turn off dyncam if user zooms when spectating
-				CurrentDeadzone = 0;
-				CurrentFollowFactor = 0;
-			}
-		}
-
-		float OffsetAmount = maximum(l - CurrentDeadzone, 0.0f) * (CurrentFollowFactor / 100.0f);
-		m_DyncamTargetCameraOffset = normalize(TargetPos) * OffsetAmount;
+		float OffsetAmount = maximum(l - Deadzone(), 0.0f) * (FollowFactor() / 100.0f);
+		m_DyncamTargetCameraOffset = normalize_pre_length(MousePos, l) * OffsetAmount;
 	}
 
-	m_LastTargetPos = TargetPos;
-	vec2 CurrentCameraOffset = m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy];
-	float SpeedBias = m_CameraSmoothing ? 50.0f : m_DyncamSmoothingSpeedBias;
-	if(Smoothness > 0)
-		CurrentCameraOffset += (m_DyncamTargetCameraOffset - CurrentCameraOffset) * minimum(DeltaTime * SpeedBias, 1.0f);
+	m_LastMousePos = MousePos;
+	if(g_Config.m_ClDyncamSmoothness > 0)
+		m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy] += (m_DyncamTargetCameraOffset - m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy]) * minimum(DeltaTime * m_DyncamSmoothingSpeedBias, 1.0f);
 	else
-		CurrentCameraOffset = m_DyncamTargetCameraOffset;
-
-	// directly put the camera in place when switching in and out of freeview or spectate mode
-	if(m_IsSpectatingPlayer != IsSpectatingPlayer)
-	{
-		CurrentCameraOffset = m_DyncamTargetCameraOffset;
-	}
-
-	m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy] = CurrentCameraOffset;
-	m_IsSpectatingPlayer = IsSpectatingPlayer;
-	m_UsingAutoSpecCamera = UsingAutoSpecCamera;
+		m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy] = m_DyncamTargetCameraOffset;
 }
 
 void CCamera::OnRender()
@@ -381,10 +295,8 @@ void CCamera::OnReset()
 {
 	m_CameraSmoothing = false;
 
-	m_Zoom = CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10);
+	m_Zoom = std::pow(CCamera::ZOOM_STEP, g_Config.m_ClDefaultZoom - 10);
 	m_Zooming = false;
-	m_UserZoomTarget = CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10);
-	m_SpecZoomTarget = CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10);
 }
 
 void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
@@ -395,7 +307,7 @@ void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 
 	float ZoomAmount = pResult->NumArguments() ? pResult->GetFloat(0) : 1.0f;
 
-	pSelf->ScaleZoom(CCamera::ZoomStepsToValue(ZoomAmount));
+	pSelf->ScaleZoom(std::pow(CCamera::ZOOM_STEP, ZoomAmount));
 
 	if(pSelf->GameClient()->m_MultiViewActivated)
 		pSelf->GameClient()->m_MultiViewPersonalZoom += ZoomAmount;
@@ -409,7 +321,7 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 	float ZoomAmount = pResult->NumArguments() ? pResult->GetFloat(0) : 1.0f;
 	ZoomAmount *= -1.0f;
 
-	pSelf->ScaleZoom(CCamera::ZoomStepsToValue(ZoomAmount));
+	pSelf->ScaleZoom(std::pow(CCamera::ZOOM_STEP, ZoomAmount));
 
 	if(pSelf->GameClient()->m_MultiViewActivated)
 		pSelf->GameClient()->m_MultiViewPersonalZoom += ZoomAmount;
@@ -420,20 +332,8 @@ void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->ZoomAllowed())
 		return;
 
-	bool IsReset = !pResult->NumArguments();
-	bool IsSpectating = pSelf->m_IsSpectatingPlayer;
-
-	float TargetLevel = !IsReset ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
-	if(IsSpectating && IsReset)
-		pSelf->ResetAutoSpecCamera();
-	else
-		pSelf->ChangeZoom(CCamera::ZoomStepsToValue(TargetLevel - 10.0f), pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, true);
-
-	if(IsSpectating && !IsReset)
-	{
-		pSelf->m_AutoSpecCamera = false;
-		pSelf->m_SpecZoomTarget = pSelf->m_ZoomSmoothingTarget;
-	}
+	float TargetLevel = pResult->NumArguments() ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
+	pSelf->ChangeZoom(std::pow(CCamera::ZOOM_STEP, TargetLevel - 10.0f), pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime);
 
 	if(pSelf->GameClient()->m_MultiViewActivated && pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active)
 		pSelf->GameClient()->m_MultiViewPersonalZoom = TargetLevel - 10.0f;
@@ -573,9 +473,9 @@ void CCamera::GotoTele(int Number, int Offset)
 	SetView(MatchPos);
 }
 
-void CCamera::SetZoom(float Target, int Smoothness, bool IsUser)
+void CCamera::SetZoom(float Target, int Smoothness)
 {
-	ChangeZoom(Target, Smoothness, IsUser);
+	ChangeZoom(Target, Smoothness);
 }
 
 bool CCamera::ZoomAllowed() const
@@ -593,15 +493,4 @@ int CCamera::Deadzone() const
 int CCamera::FollowFactor() const
 {
 	return g_Config.m_ClDyncam ? g_Config.m_ClDyncamFollowFactor : g_Config.m_ClMouseFollowfactor;
-}
-
-bool CCamera::CanUseAutoSpecCamera() const
-{
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		// only follow mode has the correct camera info
-		return m_pClient->m_Snap.m_SpecInfo.m_HasCameraInfo && m_pClient->m_DemoSpecId == SPEC_FOLLOW;
-	}
-
-	return m_pClient->m_Snap.m_SpecInfo.m_HasCameraInfo && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != m_pClient->m_Snap.m_LocalClientId;
 }
