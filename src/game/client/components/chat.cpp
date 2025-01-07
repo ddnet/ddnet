@@ -106,7 +106,7 @@ void CChat::ClearLines()
 		Line.m_aName[0] = 0;
 		Line.m_Friend = false;
 		Line.m_TimesRepeated = 0;
-		Line.m_HasRenderTee = false;
+		Line.m_pManagedTeeRenderInfo = nullptr;
 	}
 	m_PrevScoreBoardShowed = false;
 	m_PrevShowChat = false;
@@ -758,8 +758,8 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	pCurrentLine->m_Whisper = Team >= 2;
 	pCurrentLine->m_NameColor = -2;
 	pCurrentLine->m_Friend = false;
-	pCurrentLine->m_HasRenderTee = false;
 	pCurrentLine->m_CustomColor = CustomColor;
+	pCurrentLine->m_pManagedTeeRenderInfo = nullptr;
 
 	TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
 	Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
@@ -831,12 +831,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 
 		if(pCurrentLine->m_aName[0] != '\0')
 		{
-			if(!g_Config.m_ClChatOld)
-			{
-				str_copy(pCurrentLine->m_aSkinName, LineAuthor.m_aSkinName);
-				pCurrentLine->m_TeeRenderInfo = LineAuthor.m_RenderInfo;
-				pCurrentLine->m_HasRenderTee = true;
-			}
+			pCurrentLine->m_pManagedTeeRenderInfo = GameClient()->CreateManagedTeeRenderInfo(LineAuthor);
 		}
 	}
 
@@ -894,21 +889,6 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 1.0f);
 				m_aLastSoundPlayed[CHAT_CLIENT] = Now;
 			}
-		}
-	}
-}
-
-void CChat::OnRefreshSkins()
-{
-	for(auto &Line : m_aLines)
-	{
-		if(Line.m_HasRenderTee)
-		{
-			Line.m_TeeRenderInfo.Apply(m_pClient->m_Skins.Find(Line.m_aSkinName));
-		}
-		else
-		{
-			Line.m_TeeRenderInfo.Reset();
 		}
 	}
 }
@@ -985,11 +965,6 @@ void CChat::OnPrepareLines(float y)
 			{
 				pText = "Team successfully saved by ***. Use '/load ***' to continue";
 			}
-		}
-
-		if(g_Config.m_ClChatOld)
-		{
-			Line.m_HasRenderTee = false;
 		}
 
 		// get the y offset (calculate it if we haven't done that yet)
@@ -1288,10 +1263,11 @@ void CChat::OnRender()
 
 		if(Line.m_TextContainerIndex.Valid())
 		{
-			if(!g_Config.m_ClChatOld && Line.m_HasRenderTee)
+			if(!g_Config.m_ClChatOld && Line.m_pManagedTeeRenderInfo != nullptr)
 			{
+				CTeeRenderInfo &TeeRenderInfo = Line.m_pManagedTeeRenderInfo->TeeRenderInfo();
 				const int TeeSize = MessageTeeSize();
-				Line.m_TeeRenderInfo.m_Size = TeeSize;
+				TeeRenderInfo.m_Size = TeeSize;
 
 				float RowHeight = FontSize() + RealMsgPaddingY;
 				float OffsetTeeY = TeeSize / 2.0f;
@@ -1299,9 +1275,9 @@ void CChat::OnRender()
 
 				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
-				CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &Line.m_TeeRenderInfo, OffsetToMid);
+				CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeRenderInfo, OffsetToMid);
 				vec2 TeeRenderPos(x + (RealMsgPaddingX + TeeSize) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y);
-				RenderTools()->RenderTee(pIdleState, &Line.m_TeeRenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
+				RenderTools()->RenderTee(pIdleState, &TeeRenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
 			}
 
 			const ColorRGBA TextColor = TextRender()->DefaultTextColor().WithMultipliedAlpha(Blend);
