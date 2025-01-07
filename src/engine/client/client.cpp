@@ -1761,6 +1761,18 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				SendMsg(Conn, &MsgP, MSGFLAG_VITAL);
 			}
 		}
+		else if(Msg == NETMSG_RECONNECT)
+		{
+			if(Conn == CONN_MAIN)
+			{
+				Connect(m_aConnectAddressStr);
+			}
+			else
+			{
+				DummyDisconnect("reconnect");
+				DummyConnect();
+			}
+		}
 		else if(Msg == NETMSG_REDIRECT)
 		{
 			int RedirectPort = Unpacker.GetInt();
@@ -1778,7 +1790,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			}
 			else
 			{
-				DummyDisconnect(nullptr);
+				DummyDisconnect("redirect");
 				if(ServerAddress().port != RedirectPort)
 				{
 					// Only allow redirecting to the same port to reconnect. The dummy
