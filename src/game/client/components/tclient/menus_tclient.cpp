@@ -717,7 +717,7 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingImproved, Localize("Use new antiping algorithm"), &g_Config.m_ClAntiPingImproved, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingStableDirection, Localize("Optimistic prediction along stable direction"), &g_Config.m_ClAntiPingStableDirection, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingNevativeBuffer, Localize("Negative stability buffer (for Gores)"), &g_Config.m_ClAntiPingNevativeBuffer, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAntiPingNegativeBuffer, Localize("Negative stability buffer (for Gores)"), &g_Config.m_ClAntiPingNegativeBuffer, &Column, LineSize);
 	Column.HSplitTop(LineSize, &Button, &Column);
 	Ui()->DoScrollbarOption(&g_Config.m_ClAntiPingUncertaintyScale, &g_Config.m_ClAntiPingUncertaintyScale, &Button, Localize("Uncertainty duration"), 50, 400, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "%");
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
