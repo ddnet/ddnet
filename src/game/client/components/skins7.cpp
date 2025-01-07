@@ -430,7 +430,7 @@ const CSkins7::CSkinPart *CSkins7::FindSkinPartOrNullptr(int Part, const char *p
 
 const CSkins7::CSkinPart *CSkins7::FindDefaultSkinPart(int Part) const
 {
-	const char *pDefaultPartName = Part == protocol7::SKINPART_MARKING || Part == protocol7::SKINPART_DECORATION ? "" : "default";
+	const char *pDefaultPartName = Part == protocol7::SKINPART_MARKING || Part == protocol7::SKINPART_DECORATION ? "" : "standard";
 	const CSkinPart *pDefault = FindSkinPartOrNullptr(Part, pDefaultPartName, false);
 	if(pDefault != nullptr)
 	{
