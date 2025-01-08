@@ -77,7 +77,6 @@ public:
 	bool m_AutoSpecCameraZooming;
 	bool m_AutoSpecCamera;
 	float m_UserZoomTarget;
-	float m_SpecZoomTarget;
 
 	vec2 m_DyncamTargetCameraOffset;
 	vec2 m_aDyncamCurrentCameraOffset[NUM_DUMMIES];

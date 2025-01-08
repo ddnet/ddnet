@@ -43,6 +43,11 @@ bool CSkins::IsVanillaSkin(const char *pName)
 	return std::any_of(std::begin(VANILLA_SKINS), std::end(VANILLA_SKINS), [pName](const char *pVanillaSkin) { return str_comp(pName, pVanillaSkin) == 0; });
 }
 
+bool CSkins::IsSpecialSkin(const char *pName)
+{
+	return str_startswith(pName, "x_") != nullptr;
+}
+
 class CSkinScanUser
 {
 public:
@@ -422,20 +427,26 @@ void CSkins::RandomizeSkin(int Dummy)
 		*pColorFeet = Feet.Pack(false);
 	}
 
-	const size_t SkinNameSize = Dummy ? sizeof(g_Config.m_ClDummySkin) : sizeof(g_Config.m_ClPlayerSkin);
-	char aRandomSkinName[MAX_SKIN_LENGTH];
-	str_copy(aRandomSkinName, "default", SkinNameSize);
-	if(!m_Skins.empty())
+	std::vector<const CSkin *> vpConsideredSkins;
+	for(const auto &[_, pSkin] : m_Skins)
 	{
-		do
-		{
-			auto it = m_Skins.begin();
-			std::advance(it, rand() % m_Skins.size());
-			str_copy(aRandomSkinName, (*it).second->GetName(), SkinNameSize);
-		} while(!str_comp(aRandomSkinName, "x_ninja") || !str_comp(aRandomSkinName, "x_spec"));
+		if(IsSpecialSkin(pSkin->GetName()))
+			continue;
+		vpConsideredSkins.push_back(pSkin.get());
 	}
+	const CSkin *pRandomSkin;
+	if(vpConsideredSkins.empty())
+	{
+		pRandomSkin = Find("default");
+	}
+	else
+	{
+		pRandomSkin = vpConsideredSkins[rand() % vpConsideredSkins.size()];
+	}
+
 	char *pSkinName = Dummy ? g_Config.m_ClDummySkin : g_Config.m_ClPlayerSkin;
-	str_copy(pSkinName, aRandomSkinName, SkinNameSize);
+	const size_t SkinNameSize = Dummy ? sizeof(g_Config.m_ClDummySkin) : sizeof(g_Config.m_ClPlayerSkin);
+	str_copy(pSkinName, pRandomSkin->GetName(), SkinNameSize);
 }
 
 CSkins::CSkinDownloadJob::CSkinDownloadJob(CSkins *pSkins, const char *pName) :

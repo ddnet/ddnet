@@ -7,7 +7,7 @@
 #	3edcxzaq1		2020-06-25 00:00:00
 #	cur.ie			2020-09-28 00:00:00
 #	simpygirl		2022-02-20 00:00:00
-#	furo			2024-12-04 00:00:00
+#	furo			2025-01-04 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1591,7 +1591,7 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == Opacitet
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Justera opaciteten av entities som tillhör ett annat lag, som t.ex. tees och namnskyltar
 
 Quads are used for background decoration
@@ -2040,3 +2040,37 @@ Active: Fire
 
 Active: Hook
 == Läge: Hook
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" är inte en kompatibel med pnglite och kan inte laddas in av äldre versioner av DDNet:
+
+Loading background map
+== Laddar bakgrundsmap
+
+[Spectating Camera Mode Icon]
+AUTO
+== AUTO
+
+Toggle auto camera
+== Växla auto kamera
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/wiki/Touch_controls
+
+Show client IDs in name plates
+== Visa klient IDs i namnskyltar
+
+Hook Strength
+== Hook styrka
+
+Size of hook strength icon and number indicator
+== Storlek av hook styrka ikon och nummer indikator
+
+Key Presses
+== Knapptryckningar
+
+Size of key press icons
+== Storlek av knapptrycknings ikoner
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== Servern kunde inte startas. Appen måste ha behörighet för notiser för att servern ska kunna köras i bakgrunden.

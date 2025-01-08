@@ -1324,7 +1324,7 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == Providnost
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Podesite neprozirnost entiteta koji pripadaju drugim timovima, kao što su majice i natpisne pločice
 
 Quads are used for background decoration
@@ -1652,10 +1652,16 @@ Saving settings to '%s' failed
 Error saving settings
 == 
 
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== 
+
 Loading demo file from storage
 == 
 
 Some fonts could not be loaded. Check the local console for details.
+== 
+
+Loading background map
 == 
 
 Searching
@@ -1690,6 +1696,10 @@ Loading commands…
 
 [Spectating]
 Following %s
+== 
+
+[Spectating Camera Mode Icon]
+AUTO
 == 
 
 Some map images could not be loaded. Check the local console for details.
@@ -1787,6 +1797,9 @@ Change the skip duration
 Go forward the specified duration
 == 
 
+Toggle auto camera
+== 
+
 Render cut to video
 == 
 
@@ -1816,6 +1829,9 @@ Edit touch controls
 == 
 
 Close
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
 == 
 
 Save changes
@@ -1914,6 +1930,12 @@ Info Messages
 Show local time always
 == 
 
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
 Show client IDs (scoreboard, chat, spectator)
 == 
 
@@ -1932,16 +1954,25 @@ Chat width
 Show friend mark (♥) in name plates
 == 
 
+Show client IDs in name plates
+== 
+
+Hook Strength
+== 
+
 Show hook strength icon indicator
 == 
 
 Show hook strength number indicator
 == 
 
-Authed name color in scoreboard
+Size of hook strength icon and number indicator
 == 
 
-Same clan color in scoreboard
+Key Presses
+== 
+
+Size of key press icons
 == 
 
 Show own player's hook collision line
@@ -1990,6 +2021,9 @@ Delete skin
 == 
 
 Unable to delete skin
+== 
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 
 
 Round %d/%d

@@ -4,6 +4,7 @@
 #define GAME_CLIENT_COMPONENTS_SCOREBOARD_H
 
 #include <engine/console.h>
+#include <engine/graphics.h>
 
 #include <game/client/component.h>
 #include <game/client/ui_rect.h>
@@ -32,10 +33,13 @@ class CScoreboard : public CComponent
 	bool m_Active;
 	float m_ServerRecord;
 
+	IGraphics::CTextureHandle m_DeadTeeTexture;
+
 public:
 	CScoreboard();
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnConsoleInit() override;
+	virtual void OnInit() override;
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual void OnRelease() override;

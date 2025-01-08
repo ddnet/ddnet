@@ -1326,7 +1326,7 @@ Show text entities
 Opacity
 == Непразр.
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Рэгуляванне непразрыстасці аб'ектаў іншых каманд, такіх як Tee і таблічкі з імёнамі.
 
 Show others (own team only)
@@ -1867,7 +1867,17 @@ Connect address error
 Could not connect dummy
 == 
 
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== 
+
 Some fonts could not be loaded. Check the local console for details.
+== 
+
+Loading background map
+== 
+
+[Spectating Camera Mode Icon]
+AUTO
 == 
 
 Save skin
@@ -1897,6 +1907,9 @@ Add clanmates by entering their clan below and leaving the name blank.
 Offline friends and clanmates will appear here.
 == 
 
+Toggle auto camera
+== 
+
 Dummy is not allowed on this server
 == 
 
@@ -1907,6 +1920,9 @@ Edit touch controls
 == 
 
 Close
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
 == 
 
 Save changes
@@ -1984,6 +2000,21 @@ Hz
 Show client IDs (scoreboard, chat, spectator)
 == 
 
+Show client IDs in name plates
+== 
+
+Hook Strength
+== 
+
+Size of hook strength icon and number indicator
+== 
+
+Key Presses
+== 
+
+Size of key press icons
+== 
+
 Width of your own hook collision line
 == 
 
@@ -2006,6 +2037,9 @@ Delete skin
 == 
 
 Unable to delete skin
+== 
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 
 
 [skins]

@@ -761,6 +761,7 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 
 	const int CurLoadRenderCount = m_LoadingState.m_Current;
 	m_LoadingState.m_Current += IncreaseCounter;
+	dbg_assert(m_LoadingState.m_Current <= m_LoadingState.m_Total, "Invalid progress for RenderLoading");
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync

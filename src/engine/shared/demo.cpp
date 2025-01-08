@@ -26,8 +26,6 @@ static const unsigned char gs_CurVersion = 6;
 static const unsigned char gs_OldVersion = 3;
 static const unsigned char gs_Sha256Version = 6;
 static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
-static const int gs_LengthOffset = 152;
-static const int gs_NumMarkersOffset = 176;
 
 static const ColorRGBA gs_DemoPrintColor{0.75f, 0.7f, 0.7f, 1.0f};
 
@@ -121,9 +119,31 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	}
 
 	if(m_NoMapData)
+	{
 		MapSize = 0;
+	}
 	else if(MapFile)
-		MapSize = io_length(MapFile);
+	{
+		const int64_t MapFileSize = io_length(MapFile);
+		if(MapFileSize > (int64_t)std::numeric_limits<unsigned>::max())
+		{
+			if(CloseMapFile)
+			{
+				io_close(MapFile);
+			}
+			MapSize = 0;
+			if(m_pConsole)
+			{
+				char aBuf[32 + IO_MAX_PATH_LENGTH];
+				str_format(aBuf, sizeof(aBuf), "Mapfile '%s' too large for demo, recording without it", pMap);
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf, gs_DemoPrintColor);
+			}
+		}
+		else
+		{
+			MapSize = MapFileSize;
+		}
+	}
 
 	// write header
 	CDemoHeader Header;
@@ -147,7 +167,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	io_write(DemoFile, SHA256_EXTENSION.m_aData, sizeof(SHA256_EXTENSION.m_aData));
 	io_write(DemoFile, &Sha256, sizeof(SHA256_DIGEST));
 
-	if(m_NoMapData)
+	if(MapSize == 0)
 	{
 	}
 	else if(pMapData)
@@ -348,13 +368,13 @@ int CDemoRecorder::Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilena
 	if(Mode == IDemoRecorder::EStopMode::KEEP_FILE)
 	{
 		// add the demo length to the header
-		io_seek(m_File, gs_LengthOffset, IOSEEK_START);
+		io_seek(m_File, offsetof(CDemoHeader, m_aLength), IOSEEK_START);
 		unsigned char aLength[sizeof(int32_t)];
 		uint_to_bytes_be(aLength, Length());
 		io_write(m_File, aLength, sizeof(aLength));
 
 		// add the timeline markers to the header
-		io_seek(m_File, gs_NumMarkersOffset, IOSEEK_START);
+		io_seek(m_File, sizeof(CDemoHeader) + offsetof(CTimelineMarkers, m_aNumTimelineMarkers), IOSEEK_START);
 		unsigned char aNumMarkers[sizeof(int32_t)];
 		uint_to_bytes_be(aNumMarkers, m_NumTimelineMarkers);
 		io_write(m_File, aNumMarkers, sizeof(aNumMarkers));
@@ -550,7 +570,7 @@ CDemoPlayer::EReadChunkHeaderResult CDemoPlayer::ReadChunkHeader(int *pType, int
 
 bool CDemoPlayer::ScanFile()
 {
-	const long StartPos = io_tell(m_File);
+	const int64_t StartPos = io_tell(m_File);
 	m_vKeyFrames.clear();
 	if(StartPos < 0)
 		return false;
@@ -558,7 +578,7 @@ bool CDemoPlayer::ScanFile()
 	int ChunkTick = -1;
 	while(true)
 	{
-		const long CurrentPos = io_tell(m_File);
+		const int64_t CurrentPos = io_tell(m_File);
 		if(CurrentPos < 0)
 		{
 			m_vKeyFrames.clear();
@@ -846,7 +866,7 @@ unsigned char *CDemoPlayer::GetMapData(class IStorage *pStorage)
 	if(!m_MapInfo.m_Size)
 		return nullptr;
 
-	const long CurSeek = io_tell(m_File);
+	const int64_t CurSeek = io_tell(m_File);
 	if(CurSeek < 0 || io_seek(m_File, m_MapOffset, IOSEEK_START) != 0)
 		return nullptr;
 	unsigned char *pMapData = (unsigned char *)malloc(m_MapInfo.m_Size);
@@ -1165,7 +1185,7 @@ bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char
 			{
 				pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "Demo version incremented, but not by DDNet");
 			}
-			if(io_seek(File, -(int)ExtensionUuidSize, IOSEEK_CUR) != 0)
+			if(io_seek(File, -(int64_t)ExtensionUuidSize, IOSEEK_CUR) != 0)
 			{
 				if(pErrorMessage != nullptr)
 					str_copy(pErrorMessage, "Error rewinding SHA256 extension UUID", ErrorMessageSize);

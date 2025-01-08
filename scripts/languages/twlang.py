@@ -1,3 +1,4 @@
+import functools
 import os
 import re
 from collections import OrderedDict
@@ -58,6 +59,7 @@ def check_file(path):
 	return matches
 
 
+@functools.lru_cache(None)
 def check_folder(path):
 	englishlist = OrderedDict()
 	for path2, dirs, files in os.walk(path):

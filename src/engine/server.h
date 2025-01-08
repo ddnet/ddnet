@@ -251,7 +251,7 @@ public:
 	virtual const char *GetAuthName(int ClientId) const = 0;
 	virtual void Kick(int ClientId, const char *pReason) = 0;
 	virtual void Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason) = 0;
-	virtual void RedirectClient(int ClientId, int Port, bool Verbose = false) = 0;
+	virtual void RedirectClient(int ClientId, int Port) = 0;
 	virtual void ChangeMap(const char *pMap) = 0;
 	virtual void ReloadMap() = 0;
 

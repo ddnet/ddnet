@@ -266,12 +266,22 @@ unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
 	return fread(buffer, 1, size, (FILE *)io);
 }
 
-void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
+bool io_read_all(IOHANDLE io, void **result, unsigned *result_len)
 {
-	long signed_len = io_length(io);
-	unsigned len = signed_len < 0 ? 1024 : (unsigned)signed_len; // use default initial size if we couldn't get the length
+	// Loading files larger than 1 GiB into memory is not supported.
+	constexpr int64_t MAX_FILE_SIZE = (int64_t)1024 * 1024 * 1024;
+
+	int64_t real_len = io_length(io);
+	if(real_len > MAX_FILE_SIZE)
+	{
+		*result = nullptr;
+		*result_len = 0;
+		return false;
+	}
+
+	int64_t len = real_len < 0 ? 1024 : real_len; // use default initial size if we couldn't get the length
 	char *buffer = (char *)malloc(len + 1);
-	unsigned read = io_read(io, buffer, len + 1); // +1 to check if the file size is larger than expected
+	int64_t read = io_read(io, buffer, len + 1); // +1 to check if the file size is larger than expected
 	if(read < len)
 	{
 		buffer = (char *)realloc(buffer, read + 1);
@@ -279,7 +289,14 @@ void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
 	}
 	else if(read > len)
 	{
-		unsigned cap = 2 * read;
+		int64_t cap = 2 * read;
+		if(cap > MAX_FILE_SIZE)
+		{
+			free(buffer);
+			*result = nullptr;
+			*result_len = 0;
+			return false;
+		}
 		len = read;
 		buffer = (char *)realloc(buffer, cap);
 		while((read = io_read(io, buffer + len, cap - len)) != 0)
@@ -288,6 +305,13 @@ void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
 			if(len == cap)
 			{
 				cap *= 2;
+				if(cap > MAX_FILE_SIZE)
+				{
+					free(buffer);
+					*result = nullptr;
+					*result_len = 0;
+					return false;
+				}
 				buffer = (char *)realloc(buffer, cap);
 			}
 		}
@@ -296,13 +320,17 @@ void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
 	buffer[len] = 0;
 	*result = buffer;
 	*result_len = len;
+	return true;
 }
 
 char *io_read_all_str(IOHANDLE io)
 {
 	void *buffer;
 	unsigned len;
-	io_read_all(io, &buffer, &len);
+	if(!io_read_all(io, &buffer, &len))
+	{
+		return nullptr;
+	}
 	if(mem_has_null(buffer, len))
 	{
 		free(buffer);
@@ -311,12 +339,12 @@ char *io_read_all_str(IOHANDLE io)
 	return (char *)buffer;
 }
 
-int io_skip(IOHANDLE io, int size)
+int io_skip(IOHANDLE io, int64_t size)
 {
 	return io_seek(io, size, IOSEEK_CUR);
 }
 
-int io_seek(IOHANDLE io, int offset, int origin)
+int io_seek(IOHANDLE io, int64_t offset, ESeekOrigin origin)
 {
 	int real_origin;
 	switch(origin)
@@ -334,20 +362,33 @@ int io_seek(IOHANDLE io, int offset, int origin)
 		dbg_assert(false, "origin invalid");
 		return -1;
 	}
-	return fseek((FILE *)io, offset, real_origin);
+#if defined(CONF_FAMILY_WINDOWS)
+	return _fseeki64((FILE *)io, offset, real_origin);
+#else
+	return fseeko((FILE *)io, offset, real_origin);
+#endif
 }
 
-long int io_tell(IOHANDLE io)
+int64_t io_tell(IOHANDLE io)
 {
-	return ftell((FILE *)io);
+#if defined(CONF_FAMILY_WINDOWS)
+	return _ftelli64((FILE *)io);
+#else
+	return ftello((FILE *)io);
+#endif
 }
 
-long int io_length(IOHANDLE io)
+int64_t io_length(IOHANDLE io)
 {
-	long int length;
-	io_seek(io, 0, IOSEEK_END);
-	length = io_tell(io);
-	io_seek(io, 0, IOSEEK_START);
+	if(io_seek(io, 0, IOSEEK_END) != 0)
+	{
+		return -1;
+	}
+	const int64_t length = io_tell(io);
+	if(io_seek(io, 0, IOSEEK_START) != 0)
+	{
+		return -1;
+	}
 	return length;
 }
 

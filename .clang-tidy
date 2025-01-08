@@ -110,15 +110,13 @@ CheckOptions:
   - key:             readability-identifier-naming.LocalConstantCase
     value:           CamelCase
   - key:             readability-identifier-naming.ClassMemberCase
-    value:           CamelCase
+    value:           UPPER_CASE
   - key:             readability-identifier-naming.MemberCase
     value:           CamelCase
   - key:             readability-identifier-naming.MemberPrefix
     value:           m_
   - key:             readability-identifier-naming.MemberIgnoredRegexp
     value:           '^(m_ap|m_v|m_p|m_a|ms_p|[a-z]$).*'
-  - key:             readability-identifier-naming.ClassMemberPrefix
-    value:           ms_
   - key:             readability-identifier-naming.StaticVariablePrefix
     value:           s_
   - key:             readability-identifier-naming.ClassMethodCase

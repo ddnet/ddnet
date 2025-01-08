@@ -278,8 +278,13 @@ bool CImageLoader::LoadPng(IOHANDLE File, const char *pFilename, CImageInfo &Ima
 
 	void *pFileData;
 	unsigned FileDataSize;
-	io_read_all(File, &pFileData, &FileDataSize);
+	const bool ReadSuccess = io_read_all(File, &pFileData, &FileDataSize);
 	io_close(File);
+	if(!ReadSuccess)
+	{
+		log_error("png", "failed to read file. filename='%s'", pFilename);
+		return false;
+	}
 
 	CByteBufferReader ImageReader(static_cast<const uint8_t *>(pFileData), FileDataSize);
 

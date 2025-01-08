@@ -2,8 +2,9 @@ package org.ddnet.client;
 
 import java.io.File;
 
-import androidx.core.app.RemoteInput;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.RemoteInput;
+import androidx.core.app.ServiceCompat;
 
 import android.app.*;
 import android.content.*;
@@ -17,11 +18,12 @@ public class ServerService extends Service {
 	private static final String NOTIFICATION_CHANNEL_ID = "LOCAL_SERVER_CHANNEL_ID";
 	private static final int NOTIFICATION_ID = 1;
 
-	public static final int MESSAGE_CODE_EXECUTE_COMMAND = 1;
-	public static final String MESSAGE_EXTRA_COMMAND = "command";
+	private static final int MESSAGE_CODE_EXECUTE_COMMAND = 1;
+	private static final String MESSAGE_EXTRA_COMMAND = "command";
 
-	public static final String INTENT_ACTION_EXECUTE = "execute";
-	public static final String INTENT_EXTRA_COMMAND = "command";
+	private static final String INTENT_ACTION_START = "start";
+	private static final String INTENT_ACTION_EXECUTE = "execute";
+	private static final String INTENT_EXTRA_COMMANDS = "commands";
 	private static final String KEY_EXECUTE_TEXT_REPLY = "execute-command-reply";
 
 	static {
@@ -63,29 +65,25 @@ public class ServerService extends Service {
 
 		createNotificationChannel();
 
-		Notification notification = createRunningNotification();
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-			startForeground(
-				NOTIFICATION_ID,
-				notification,
-				ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
-			);
-		} else {
-			startForeground(
-				NOTIFICATION_ID,
-				notification
-			);
-		}
-
-		thread = new NativeServerThread(this);
-		thread.start();
+		ServiceCompat.startForeground(
+			this,
+			NOTIFICATION_ID,
+			createRunningNotification(),
+			ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
+		);
 	}
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		if(intent != null) {
 			String action = intent.getAction();
-			if(INTENT_ACTION_EXECUTE.equals(action)) {
+			if(INTENT_ACTION_START.equals(action)) {
+				String[] commands = intent.getStringArrayExtra(INTENT_EXTRA_COMMANDS);
+				if(commands != null) {
+					thread = new NativeServerThread(this, commands);
+					thread.start();
+				}
+			} else if(INTENT_ACTION_EXECUTE.equals(action)) {
 				Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
 				if(remoteInput != null) {
 					CharSequence remoteCommand = remoteInput.getCharSequence(KEY_EXECUTE_TEXT_REPLY);
@@ -98,12 +96,17 @@ public class ServerService extends Service {
 						notificationManager.notify(NOTIFICATION_ID, createRunningNotification());
 					}
 				} else {
-					String command = intent.getStringExtra(INTENT_EXTRA_COMMAND);
-					if(command != null) {
-						executeCommand(command);
+					String[] commands = intent.getStringArrayExtra(INTENT_EXTRA_COMMANDS);
+					if(commands != null) {
+						for(String command : commands) {
+							executeCommand(command);
+						}
 					}
 				}
 			}
+		}
+		if(thread == null) {
+			stopSelf();
 		}
 		return START_NOT_STICKY;
 	}
@@ -165,7 +168,7 @@ public class ServerService extends Service {
 
 		Intent stopIntent = new Intent(this, ServerService.class);
 		stopIntent.setAction(INTENT_ACTION_EXECUTE);
-		stopIntent.putExtra(INTENT_EXTRA_COMMAND, "shutdown");
+		stopIntent.putExtra(INTENT_EXTRA_COMMANDS, new String[] {"shutdown"});
 
 		PendingIntent stopActionIntent = PendingIntent.getService(
 			this,
@@ -247,6 +250,19 @@ public class ServerService extends Service {
 		}
 		NativeServer.executeCommand(command);
 	}
+
+	public static Intent createStartIntent(Context context, String[] arguments) {
+		Intent intent = new Intent(context, ServerService.class);
+		intent.setAction(INTENT_ACTION_START);
+		intent.putExtra(INTENT_EXTRA_COMMANDS, arguments);
+		return intent;
+	}
+
+	public static Message createExecuteCommandMessage(String command) {
+		Message message = Message.obtain(null, MESSAGE_CODE_EXECUTE_COMMAND, 0, 0);
+		message.getData().putString(MESSAGE_EXTRA_COMMAND, command);
+		return message;
+	}
 }
 
 /**
@@ -257,9 +273,11 @@ public class ServerService extends Service {
 class NativeServerThread extends Thread {
 
 	private final Context applicationContext;
+	private final String[] arguments;
 
-	public NativeServerThread(Context context) {
+	public NativeServerThread(Context context, String[] arguments) {
 		this.applicationContext = context.getApplicationContext();
+		this.arguments = arguments;
 	}
 
 	@Override
@@ -273,7 +291,7 @@ class NativeServerThread extends Thread {
 			return;
 		}
 
-		int Result = NativeServer.runServer(workingDirectory.getAbsolutePath());
+		int Result = NativeServer.runServer(workingDirectory.getAbsolutePath(), arguments);
 		new Handler(applicationContext.getMainLooper()).post(() -> {
 			if(Result != 0) {
 				Toast.makeText(applicationContext, applicationContext.getString(R.string.server_error_exit_code, Result), Toast.LENGTH_LONG).show();
@@ -303,9 +321,10 @@ class NativeServer {
 	 * exit code on completion.
 	 *
 	 * @param workingDirectory The working directory for the server, which must be the
-	 * external storage directory of the app and already contains all data files.
+	 * external storage directory of the app and already contain all data files.
+	 * @param arguments Arguments to supply to the server when launching it.
 	 */
-	public static native int runServer(String workingDirectory);
+	public static native int runServer(String workingDirectory, String[] arguments);
 
 	/**
 	 * Adds a command to the execution queue of the native server.

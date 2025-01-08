@@ -311,9 +311,12 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 				{
 					pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x] = static_cast<CLayerTele *>(this)->m_pTeleTile[(r.y + y) * m_Width + (r.x + x)];
 					unsigned char TgtIndex = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type;
-					if(IsValidTeleTile(TgtIndex) && IsTeleTileNumberUsedAny(TgtIndex))
+					if(IsValidTeleTile(TgtIndex))
 					{
-						m_pEditor->m_TeleNumbers[TgtIndex] = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
+						if(IsTeleTileNumberUsed(TgtIndex, false))
+							m_pEditor->m_TeleNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
+						else if(IsTeleTileNumberUsed(TgtIndex, true))
+							m_pEditor->m_TeleCheckpointNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
 					}
 				}
 				else
@@ -321,13 +324,14 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 					CTile Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
 					if(IsValidTeleTile(Tile.m_Index) && IsTeleTileNumberUsedAny(Tile.m_Index))
 					{
-						pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number = m_pEditor->m_TeleNumbers[Tile.m_Index];
+						pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number = IsTeleTileCheckpoint(Tile.m_Index) ? m_pEditor->m_TeleCheckpointNumber : m_pEditor->m_TeleNumber;
 					}
 				}
 			}
 		}
 
-		pGrabbed->m_TeleNumbers = m_pEditor->m_TeleNumbers;
+		pGrabbed->m_TeleNum = m_pEditor->m_TeleNumber;
+		pGrabbed->m_TeleCheckpointNum = m_pEditor->m_TeleCheckpointNumber;
 
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}

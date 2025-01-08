@@ -1285,7 +1285,7 @@ Show player speed
 Show player target angle
 == Mostrar el ángulo de la mira del jugador
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres.
 
 Opacity of freeze bars inside freeze
@@ -2056,3 +2056,37 @@ Active: Fire
 
 Active: Hook
 == Activo: Gancho
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" no es compatible con pnglite y no puede ser cargado por versiones de DDNet antiguas:
+
+Loading background map
+== Cargando el mapa de fondo
+
+[Spectating Camera Mode Icon]
+AUTO
+== AUTO
+
+Toggle auto camera
+== Alternar cámara automática
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/wiki/Touch_controls/es
+
+Show client IDs in name plates
+== Mostrar IDs de cliente en los nombres
+
+Hook Strength
+== Fuerza del gancho
+
+Size of hook strength icon and number indicator
+== Tamaño del icono de fuerza del gancho y del indicador numérico
+
+Key Presses
+== Pulsaciones de teclas
+
+Size of key press icons
+== Tamaño de los iconos de las pulsaciones de teclas
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== No se pudo iniciar el servidor. Asegúrate de otorgar el permiso de notificaciones en la configuración de la aplicación para que el servidor pueda ejecutarse en segundo plano.

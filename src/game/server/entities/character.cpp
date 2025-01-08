@@ -1386,7 +1386,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		   Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) &&
 		!m_Core.m_Super && !m_Core.m_Invincible && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCid())))
 	{
-		if(Team() && Teams()->IsPractice(Team()))
+		if(Teams()->IsPractice(Team()))
 		{
 			Freeze();
 			// Rate limit death effects to once per second

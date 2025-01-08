@@ -3,11 +3,14 @@
 #	.ua and Ivan. REWORKED BY SwiatoslaW#2927 (09.12.2021)
 #modified by:
 #	404_not_found		2011-07-30 19:50:58
-#	EGYT5453			(15.05.2024-04.06.2024)
+#	EGYT5453			(15.05.2024-04.01.2025)
 #	veydzh3r			(31.08.2024-01.09.2024)
 ##### /authors #####
 
 ##### translated strings #####
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" не сумісний з pnglite і не може бути завантажений на старих версіях DDNet:
 
 %.2f KiB
 == %.2f КіБ
@@ -130,7 +133,7 @@ Add friends by entering their name below or by clicking their name in the player
 Address
 == Адреса
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Налаштуйте непрозорість сутностей інших команд, як от тії та ніків
 
 AFR
@@ -248,6 +251,10 @@ AUS
 
 Authed name color in scoreboard
 == Колір авторизованих у таблиці
+
+[Spectating Camera Mode Icon]
+AUTO
+== АВТО
 
 Auto
 == Авто
@@ -913,6 +920,9 @@ Hook collision line opacity
 Hook collisions
 == Зіткнення гака
 
+Hook Strength
+== Сила гака
+
 https://ddnet.org/discord
 == https://ddnet.org/discord
 
@@ -921,6 +931,9 @@ https://wiki.ddnet.org/
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 HUD
 == HUD
@@ -983,6 +996,9 @@ Join Tutorial Server
 Jump
 == Стрибок
 
+Key Presses
+== Натискання клавіш
+
 Kick player
 == Вигнати гравця
 
@@ -1018,6 +1034,9 @@ Loading…
 
 Loading assets
 == Завантаження текстур
+
+Loading background map
+== Завантаження мапи-тла
 
 Loading commands…
 == Завантаження команд…
@@ -1523,6 +1542,9 @@ Server address:
 Server best:
 == Рекорд сервера:
 
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== Не вдалося запустити сервер. Переконайтеся, що ви дозволили сповіщення в налаштуваннях програми, щоб сервер міг працювати у фоновому режимі.
+
 Server executable not found, can't run server
 == Виконуваний файл сервера не знайдено, запустити сервер не вдалося
 
@@ -1564,6 +1586,9 @@ Show clan above name plates
 
 Show client IDs (scoreboard, chat, spectator)
 == Показувати ID клієнта (таблиця, чат, глядачі)
+
+Show client IDs in name plates
+== Показувати ID клієнта в ніках
 
 Show DDNet map finishes in server browser
 == Показувати пройдені мапи DDNet у браузері серверів
@@ -1673,6 +1698,12 @@ Show votes window after voting
 Size
 == Розмір
 
+Size of hook strength icon and number indicator
+== Розмір іконки та числового індикатора сили гака
+
+Size of key press icons
+== Розмір іконок натискання клавіш
+
 Skin Database
 == Сховище скінів
 
@@ -1698,10 +1729,10 @@ Some fonts could not be loaded. Check the local console for details.
 == Не вдалося завантажити деякі шрифти. Див. локальну консоль для подробиць.
 
 Some map images could not be loaded. Check the local console for details.
-== Деякі зображення мапи не завантажилися. Див. локальну консоль для подробиць.
+== Не вдалося завантажити деякі зображення мапи. Див. локальну консоль для подробиць.
 
 Some map sounds could not be loaded. Check the local console for details.
-== Деякі звуки мапи не завантажилися. Див. локальну консоль для подробиць.
+== Не вдалося завантажити деякі звуки мапи. Див. локальну консоль для подробиць.
 
 Something hookable
 == чимось, за що можна зачепитися
@@ -1832,6 +1863,9 @@ Time limit
 
 Time limit: %d min
 == Обмеження по часу: %dхв
+
+Toggle auto camera
+== Перемкнути автоматичну камеру
 
 Toggle dummy
 == Перемкнути даммі

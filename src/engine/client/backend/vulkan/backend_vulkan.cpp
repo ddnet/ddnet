@@ -951,7 +951,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	std::vector<std::vector<std::pair<CTexture, CTexture>>> m_vvFrameDelayedTextTexturesCleanup;
 
 	size_t m_ThreadCount = 1;
-	static constexpr size_t ms_MainThreadIndex = 0;
+	static constexpr size_t MAIN_THREAD_INDEX = 0;
 	size_t m_CurCommandInPipe = 0;
 	size_t m_CurRenderCallCountInPipe = 0;
 	size_t m_CommandsInPipe = 0;
@@ -3103,7 +3103,7 @@ protected:
 		else
 		{
 			SDeviceMemoryBlock VertexBufferMemory;
-			if(!CreateStreamVertexBuffer(ms_MainThreadIndex, VertexBuffer, VertexBufferMemory, BufferOffset, pUploadData, BufferDataSize))
+			if(!CreateStreamVertexBuffer(MAIN_THREAD_INDEX, VertexBuffer, VertexBufferMemory, BufferOffset, pUploadData, BufferDataSize))
 				return false;
 		}
 		BufferObject.m_IsStreamedBuffer = IsOneFrameBuffer;

@@ -1215,6 +1215,9 @@ Saving settings to '%s' failed
 Error saving settings
 == 
 
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== 
+
 Preparing demo playback
 == 
 
@@ -1252,6 +1255,9 @@ Restarting. Please wait…
 == 
 
 Loading skin files
+== 
+
+Loading background map
 == 
 
 Searching
@@ -1298,6 +1304,10 @@ Multi-View
 
 [Spectating]
 Following %s
+== 
+
+[Spectating Camera Mode Icon]
+AUTO
 == 
 
 Team %d
@@ -1513,6 +1523,9 @@ Close the demo player
 Toggle keyboard shortcuts
 == 
 
+Toggle auto camera
+== 
+
 Export demo cut
 == 
 
@@ -1578,6 +1591,9 @@ Edit touch controls
 == 
 
 Close
+== 
+
+https://wiki.ddnet.org/wiki/Touch_controls
 == 
 
 Save changes
@@ -1780,6 +1796,12 @@ Show health, shields and ammo
 Show local time always
 == 
 
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
 DDRace HUD
 == 
 
@@ -1825,16 +1847,25 @@ Chat width
 Show friend mark (♥) in name plates
 == 
 
+Show client IDs in name plates
+== 
+
+Hook Strength
+== 
+
 Show hook strength icon indicator
 == 
 
 Show hook strength number indicator
 == 
 
-Authed name color in scoreboard
+Size of hook strength icon and number indicator
 == 
 
-Same clan color in scoreboard
+Key Presses
+== 
+
+Size of key press icons
 == 
 
 Hook collision line
@@ -1927,7 +1958,7 @@ Opacity
 Only save improvements
 == 
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == 
 
 Quads are used for background decoration
@@ -1967,6 +1998,9 @@ Loading assets
 == 
 
 Open the directory to add custom assets
+== 
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 
 
 Loading race demo files

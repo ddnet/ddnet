@@ -1343,7 +1343,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					{
 						pButtonName = "Tele";
 						pfnPopupFunc = PopupTele;
-						Rows = m_TeleNumbers.size() + 1;
+						Rows = 3;
 						ExtraWidth = 50;
 					}
 
@@ -4703,6 +4703,49 @@ bool CEditor::ReplaceSoundCallback(const char *pFileName, int StorageType, void 
 	return static_cast<CEditor *>(pUser)->ReplaceSound(pFileName, StorageType, true);
 }
 
+bool CEditor::IsAssetUsed(int FileType, int Index, void *pUser)
+{
+	CEditor *pEditor = (CEditor *)pUser;
+	for(int g = 0; g < (int)pEditor->m_Map.m_vpGroups.size(); g++)
+	{
+		for(int i = 0; i < (int)pEditor->m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
+		{
+			int LayerType = pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type;
+			if(FileType == FILETYPE_IMG)
+			{
+				if(LayerType == LAYERTYPE_TILES)
+				{
+					std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
+					if(pTiles->m_Image == Index)
+					{
+						return true;
+					}
+				}
+				else if(LayerType == LAYERTYPE_QUADS)
+				{
+					std::shared_ptr<CLayerQuads> pQuads = std::static_pointer_cast<CLayerQuads>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
+					if(pQuads->m_Image == Index)
+					{
+						return true;
+					}
+				}
+			}
+			else if(FileType == FILETYPE_SOUND)
+			{
+				if(LayerType == LAYERTYPE_SOUNDS)
+				{
+					std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(pEditor->m_Map.m_vpGroups[g]->m_vpLayers[i]);
+					if(pSounds->m_Sound == pEditor->m_SelectedImage)
+					{
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
 void CEditor::SelectGameLayer()
 {
 	for(size_t g = 0; g < m_Map.m_vpGroups.size(); g++)
@@ -5158,6 +5201,10 @@ void CEditor::RenderFileDialog()
 		Ui()->DoLabel(&PathBox, aBuf, 10.0f, TEXTALIGN_ML);
 	}
 
+	// filebox
+	static CListBox s_ListBox;
+	s_ListBox.SetActive(!Ui()->IsPopupOpen());
+
 	const auto &&UpdateFileNameInput = [this]() {
 		if(m_FilesSelectedIndex >= 0 && !m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsDir)
 		{
@@ -5168,12 +5215,24 @@ void CEditor::RenderFileDialog()
 		else
 			m_FileDialogFileNameInput.Clear();
 	};
+	const auto &&UpdateSelectedIndex = [&]() {
+		m_FilesSelectedIndex = -1;
+		m_aFilesSelectedName[0] = '\0';
+		// find first valid entry, if it exists
+		for(size_t i = 0; i < m_vpFilteredFileList.size(); i++)
+		{
+			if(str_comp_nocase(m_vpFilteredFileList[i]->m_aName, m_FileDialogFileNameInput.GetString()) == 0)
+			{
+				m_FilesSelectedIndex = i;
+				str_copy(m_aFilesSelectedName, m_vpFilteredFileList[i]->m_aName);
+				break;
+			}
+		}
+		if(m_FilesSelectedIndex >= 0)
+			s_ListBox.ScrollToSelected();
+	};
 
-	// filebox
-	static CListBox s_ListBox;
-	s_ListBox.SetActive(!Ui()->IsPopupOpen());
-
-	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
+	if(m_FileDialogSaveAction)
 	{
 		Ui()->DoLabel(&FileBoxLabel, "Filename:", 10.0f, TEXTALIGN_ML);
 		if(DoEditBox(&m_FileDialogFileNameInput, &FileBox, 10.0f))
@@ -5187,24 +5246,17 @@ void CEditor::RenderFileDialog()
 					--i;
 				}
 			}
-			m_FilesSelectedIndex = -1;
-			m_aFilesSelectedName[0] = '\0';
-			// find first valid entry, if it exists
-			for(size_t i = 0; i < m_vpFilteredFileList.size(); i++)
-			{
-				if(str_comp_nocase(m_vpFilteredFileList[i]->m_aName, m_FileDialogFileNameInput.GetString()) == 0)
-				{
-					m_FilesSelectedIndex = i;
-					str_copy(m_aFilesSelectedName, m_vpFilteredFileList[i]->m_aName);
-					break;
-				}
-			}
-			if(m_FilesSelectedIndex >= 0)
-				s_ListBox.ScrollToSelected();
+			UpdateSelectedIndex();
 		}
 
 		if(m_FileDialogOpening)
+		{
 			Ui()->SetActiveItem(&m_FileDialogFileNameInput);
+			if(!m_FileDialogFileNameInput.IsEmpty())
+			{
+				UpdateSelectedIndex();
+			}
+		}
 	}
 	else
 	{
@@ -5214,6 +5266,10 @@ void CEditor::RenderFileDialog()
 		{
 			Ui()->SetActiveItem(&m_FileDialogFilterInput);
 			m_FileDialogFilterInput.SelectAll();
+		}
+		if(m_FileDialogOpening)
+		{
+			UpdateFileNameInput();
 		}
 		if(Ui()->DoClearableEditBox(&m_FileDialogFilterInput, &FileBox, 10.0f))
 		{
@@ -5487,8 +5543,8 @@ void CEditor::RenderFileDialog()
 			str_format(m_aFileSaveName, sizeof(m_aFileSaveName), "%s/%s", m_pFileDialogPath, m_FileDialogFileNameInput.GetString());
 			if(!str_endswith(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]))
 				str_append(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]);
-			const bool SaveAction = m_FileDialogStorageType == IStorage::TYPE_SAVE;
-			if(SaveAction && Storage()->FileExists(m_aFileSaveName, StorageType))
+
+			if(m_FileDialogSaveAction && Storage()->FileExists(m_aFileSaveName, StorageType))
 			{
 				if(m_pfnFileDialogFunc == &CallbackSaveMap)
 					m_PopupEventType = POPEVENT_SAVE;
@@ -5502,7 +5558,7 @@ void CEditor::RenderFileDialog()
 					dbg_assert(false, "m_pfnFileDialogFunc unhandled for saving");
 				m_PopupEventActivated = true;
 			}
-			else if(m_pfnFileDialogFunc && (SaveAction || m_FilesSelectedIndex >= 0))
+			else if(m_pfnFileDialogFunc && (m_FileDialogSaveAction || m_FilesSelectedIndex >= 0))
 			{
 				m_pfnFileDialogFunc(m_aFileSaveName, StorageType, m_pFileDialogUser);
 			}
@@ -5722,6 +5778,7 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 	{
 		m_FileDialogMultipleStorages = false;
 	}
+	m_FileDialogSaveAction = m_FileDialogStorageType == IStorage::TYPE_SAVE;
 
 	Ui()->ClosePopupMenus();
 	m_pFileDialogTitle = pTitle;
@@ -8152,7 +8209,7 @@ void CEditor::Render()
 				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_Tele;
 			});
 			if(HasTeleTiles)
-				str_copy(m_aTooltip, "Use shift+mousewheel up/down to adjust the tele number. Use ctrl+f to change current tele number to the first unused number.");
+				str_copy(m_aTooltip, "Use shift+mousewheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number.");
 
 			if(Input()->ShiftIsPressed())
 			{
@@ -9105,6 +9162,9 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 		// Only handle tele, switch and tune layers
 		if(pLayerTiles->m_Tele)
 		{
+			int NextFreeTeleNumber = FindNextFreeTeleNumber();
+			int NextFreeCPNumber = FindNextFreeTeleNumber(true);
+
 			std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
 			for(int y = 0; y < pTeleLayer->m_Height; y++)
 			{
@@ -9116,16 +9176,20 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 					if(UseNextFree)
 					{
-						pTeleLayer->m_pTeleTile[i].m_Number = FindNextFreeTeleNumber(pTeleLayer->m_pTiles[i].m_Index);
+						if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
+							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeCPNumber;
+						else if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
+							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeTeleNumber;
 					}
 					else
 						AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number);
 
-					if(IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index) &&
-						m_TeleNumbers[pTeleLayer->m_pTiles[i].m_Index] != pTeleLayer->m_pTeleTile[i].m_Number)
+					if(!UseNextFree && Adjust == 0 && IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
 					{
-						if(!UseNextFree && Adjust == 0)
-							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleNumbers[pTeleLayer->m_pTiles[i].m_Index];
+						if(IsTeleTileCheckpoint(pTeleLayer->m_pTeleTile[i].m_Number))
+							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleCheckpointNumber;
+						else
+							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleNumber;
 					}
 				}
 			}
@@ -9186,12 +9250,12 @@ int CEditor::FindNextFreeSwitchNumber()
 	return Number;
 }
 
-int CEditor::FindNextFreeTeleNumber(int Index)
+int CEditor::FindNextFreeTeleNumber(bool Checkpoint)
 {
 	int Number = -1;
 	for(int i = 1; i <= 255; i++)
 	{
-		if(!m_Map.m_pTeleLayer->ContainsElementWithId(i, Index))
+		if(!m_Map.m_pTeleLayer->ContainsElementWithId(i, Checkpoint))
 		{
 			Number = i;
 			break;

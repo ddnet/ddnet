@@ -9,6 +9,7 @@
 #	CROACH			2022-05-15 21:41:32
 #	Delciak (PKP) & Shkyyl	2024-05-19 17:52:30
 #	KebsCS			2024-09-30 03:33:33
+#	Shkyyl			2025-01-03 15:30:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1156,7 +1157,7 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == Przezroczystość
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Dopasuj przezroczystość obiektów należących do innych drużyn, takich jak duszki i nicki
 
 Quads are used for background decoration
@@ -1937,109 +1938,143 @@ Moved ingame
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
 
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" nie jest kompatybilny z pnglite i nie może być załadowany przez starsze wersje DDNet
+
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Nie można załadować niektórych czcionek. Sprawdź konsolę, aby uzyskać szczegóły.
+
+Loading background map
+== Ładowanie tła mapy
+
+[Spectating Camera Mode Icon]
+AUTO
+== AUTO
 
 Online friends (%d)
-== 
+== Znajomi online (%d)
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 
+== Dodaj znajomych wpisując poniżej nazwę albo poprzez kliknięcie ich nazwy w liście graczy.
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
+== Dodaj członków klanu wpisując poniżej nazwę klanu i pozostawiając pole nazwy puste.
 
 Offline friends and clanmates will appear here.
-== 
+== Niedostępni znajomi i członkowie klanu pojawią się tutaj.
+
+Toggle auto camera
+== Przełącz automatyczną kamerę
 
 Edit touch controls
-== 
+== Edytuj sterowanie dotykowe
 
 Close
-== 
+== Zamknij
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Save changes
-== 
+== Zapisz zmiany
 
 Error saving touch controls
-== 
+== Błąd podczas zapisywania sterowania dotykowego
 
 Could not save touch controls to file. See local console for details.
-== 
+== Nie można zapisać sterowania dotykowego do pliku. Sprawdź konsolę, aby poznać szczegóły.
 
 Unsaved changes
-== 
+== Niezapisane zmiany
 
 Discard changes
-== 
+== Odrzuć zmiany
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 
+== Czy na pewno chcesz odrzucić bieżące zmiany w sterowaniu dotykowym?
 
 Are you sure that you want to reset the touch controls to default?
-== 
+== Czy na pewno chcesz zresetować sterowanie dotykowe do domyślnych ustawień?
 
 Import from clipboard
-== 
+== Importuj ze schowka
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
+== Czy na pewno chcesz zaimportować sterowanie dotykowe ze schowka? Zastąpi to bieżące ustawienia sterowania dotykowego.
 
 Export to clipboard
-== 
+== Eksportuj do schowka
 
 Direct touch input while ingame
-== 
+== Bezpośrednie sterowanie dotykowe podczas gry
 
 [Direct touch input]
 Disabled
-== 
+== Wyłączone
 
 [Direct touch input]
 Active action
-== 
+== Aktywne działanie
 
 [Direct touch input]
 Aim
-== 
+== Celowanie
 
 [Direct touch input]
 Fire
-== 
+== Strzał
 
 [Direct touch input]
 Hook
-== 
+== Hak
 
 Direct touch input while spectating
-== 
+== Bezpośrednie sterowanie dotykowe podczas obserwowania
 
 Error loading touch controls
-== 
+== Błąd podczas ładowania sterowania dotykowego
 
 Could not load touch controls from file. See local console for details.
-== 
+== Nie można załadować sterowania dotykowego z pliku. Sprawdź konsolę, aby poznać szczegóły.
 
 Could not load default touch controls from file. See local console for details.
-== 
+== Nie można załadować domyślnego sterowania dotykowego z pliku. Sprawdź konsolę, aby poznać szczegóły.
 
 Could not load touch controls from clipboard. See local console for details.
-== 
+== Nie można załadować sterowania dotykowego ze schowka. Sprawdź konsolę, aby poznać szczegóły.
+
+Show client IDs in name plates
+== Pokaż identyfikatory graczy w plakietce
+
+Hook Strength
+== Siła haka
+
+Size of hook strength icon and number indicator
+== Rozmiar ikony i numeru siły haka
+
+Key Presses
+== Naciśnięcia klawiszy
+
+Size of key press icons
+== Rozmiar ikon naciśniętych klawiszy
 
 Width of your own hook collision line
-== 
+== Szerokość linii kolizyjnej haka gracza
 
 Width of others' hook collision line
-== 
+== Szerokość linii kolizyjnej haka innych graczy
 
 Preview 'Hook collisions' being pressed
-== 
+== Podgląd wciśnięcia 'Kolizji haka'
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== Nie można uruchomić serwera. Upewnij się, że przyznałeś aplikacji uprawnienia do powiadomień w ustawieniach, aby serwer mógł działać w tle.
 
 Aim
-== 
+== Celowanie
 
 Active: Fire
-== 
+== Aktywny: Strzał
 
 Active: Hook
-== 
+== Aktywny: Hak

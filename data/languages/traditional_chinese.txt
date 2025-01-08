@@ -34,6 +34,7 @@
 # 2024-09-29 Pioooooo
 # 2024-11-01 Pioooooo
 # 2024-12-03 豆腐渣 & Pioooooo & By
+# 2025-01-03 Pioooooo
 ##### /authors #####
 
 ##### translated strings #####
@@ -1206,7 +1207,7 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == 不透明度
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == 調整單人區域或其他隊伍中玩家的不透明度
 
 Quads are used for background decoration
@@ -2072,3 +2073,37 @@ Active: Fire
 
 Active: Hook
 == 當前：鉤鎖
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" 與 pnglite 不兼容，無法被舊版本 DDNet 加載
+
+Loading background map
+== 加載背景地圖
+
+[Spectating Camera Mode Icon]
+AUTO
+== 自動
+
+Toggle auto camera
+== 切換自動視角
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/index.php?title=Touch_controls/zh&variant=zh-hant
+
+Show client IDs in name plates
+== 顯示客戶端 ID
+
+Hook Strength
+== 鉤索強度
+
+Size of hook strength icon and number indicator
+== 鉤索強度圖示與數值的大小
+
+Key Presses
+== 按鍵顯示
+
+Size of key press icons
+== 按鍵顯示圖示大小
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== 伺服器無法啟動。請確保在應用程式設置中授予通知權限，以便伺服器可以在後台運行。

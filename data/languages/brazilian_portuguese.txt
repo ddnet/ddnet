@@ -37,6 +37,7 @@
 # Rafael Fontenelle   2024-09-02 16:02:00
 # Rafael Fontenelle   2024-09-30 07:53:00
 # Rafael Fontenelle   2024-11-01 17:21:00
+# Rafael Fontenelle   2025-01-03 07:05:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1206,7 +1207,7 @@ When you cross the start line, show a ghost tee replicating the movements of you
 Opacity
 == Opacidade
 
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+Adjust the opacity of entities belonging to other teams, such as tees and name plates
 == Ajustar a opacidade das entidades pertencentes a outros times, tais como tees e placas de identificação
 
 Quads are used for background decoration
@@ -2069,3 +2070,37 @@ Active: Fire
 
 Active: Hook
 == Ativo: Gancho
+
+"%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
+== "%s" não é compatível com pnglite e não pode ser carregado por versões antigas do DDNet:
+
+Loading background map
+== Carregando mapa de fundo
+
+[Spectating Camera Mode Icon]
+AUTO
+== AUTO
+
+Toggle auto camera
+== Alternar câmera automática
+
+https://wiki.ddnet.org/wiki/Touch_controls
+== https://wiki.ddnet.org/wiki/Touch_controls
+
+Show client IDs in name plates
+== Mostrar IDs de clientes em placas de identificação
+
+Hook Strength
+== Força do gancho
+
+Size of hook strength icon and number indicator
+== Tamanho do ícone de força do gancho e indicador de número
+
+Key Presses
+== Teclas pressionadas
+
+Size of key press icons
+== Tamanho dos ícones de pressionamento de tecla
+
+Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
+== O servidor não pôde ser iniciado. Certifique-se de conceder a permissão de notificação nas configurações do aplicativo para que o servidor possa ser executado em segundo plano.

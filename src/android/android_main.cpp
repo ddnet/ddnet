@@ -237,12 +237,13 @@ void RestartAndroidApp()
 	SDL_AndroidSendMessage(COMMAND_RESTART_APP, 0);
 }
 
-bool StartAndroidServer()
+bool StartAndroidServer(const char **ppArguments, size_t NumArguments)
 {
 	// We need the notification-permission to show a notification for the foreground service.
 	// We use SDL for this instead of doing it on the Java side because this function blocks
-	// until the user made a choice, which is easier to handle.
-	if(!SDL_AndroidRequestPermission("android.permission.POST_NOTIFICATIONS"))
+	// until the user made a choice, which is easier to handle. Only Android 13 (API 33) and
+	// newer support requesting this permission at runtime.
+	if(SDL_GetAndroidSDKVersion() >= 33 && !SDL_AndroidRequestPermission("android.permission.POST_NOTIFICATIONS"))
 	{
 		return false;
 	}
@@ -251,9 +252,20 @@ bool StartAndroidServer()
 	jobject Activity = (jobject)SDL_AndroidGetActivity();
 	jclass ActivityClass = pEnv->GetObjectClass(Activity);
 
-	jmethodID MethodId = pEnv->GetMethodID(ActivityClass, "startServer", "()V");
-	pEnv->CallVoidMethod(Activity, MethodId);
+	jclass StringClass = pEnv->FindClass("java/lang/String");
+	jobjectArray ArgumentsArray = pEnv->NewObjectArray(NumArguments, StringClass, nullptr);
+	pEnv->DeleteLocalRef(StringClass);
+	for(size_t ArgumentIndex = 0; ArgumentIndex < NumArguments; ArgumentIndex++)
+	{
+		jstring ArgumentString = pEnv->NewStringUTF(ppArguments[ArgumentIndex]);
+		pEnv->SetObjectArrayElement(ArgumentsArray, ArgumentIndex, ArgumentString);
+		pEnv->DeleteLocalRef(ArgumentString);
+	}
 
+	jmethodID MethodId = pEnv->GetMethodID(ActivityClass, "startServer", "([Ljava/lang/String;)V");
+	pEnv->CallVoidMethod(Activity, MethodId, ArgumentsArray);
+
+	pEnv->DeleteLocalRef(ArgumentsArray);
 	pEnv->DeleteLocalRef(Activity);
 	pEnv->DeleteLocalRef(ActivityClass);
 
