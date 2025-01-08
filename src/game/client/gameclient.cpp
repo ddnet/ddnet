@@ -1638,6 +1638,8 @@ void CGameClient::OnNewSnapshot()
 					}
 					else if(m_aStats[pInfo->m_ClientId].IsActive())
 						m_aStats[pInfo->m_ClientId].JoinSpec(Client()->GameTick(g_Config.m_ClDummy));
+
+					UpdateBotSkinDecoration(pInfo->m_ClientId);
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_DDNETPLAYER)
