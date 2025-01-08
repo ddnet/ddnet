@@ -2716,7 +2716,7 @@ void CGameClient::OnPredict()
 
 			m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_ImprovedPredPos;
 			m_aClients[i].m_ImprovedPredPos = ConfidencePos;
-			if(distance(ServerPos, PrevServerPos) > 600.0f || distance(m_aClients[i].m_PrevImprovedPredPos, m_aClients[i].m_ImprovedPredPos) > 600.0f) 
+			if (distance(ServerPos, PrevServerPos) > 600.0f) 
 			{
 				m_aClients[i].m_PrevImprovedPredPos = m_aClients[i].m_ImprovedPredPos;
 			}
