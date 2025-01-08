@@ -3097,6 +3097,8 @@ void CClient::Run()
 
 	GameClient()->OnInit();
 
+	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
+
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "version " GAME_RELEASE_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING, ColorRGBA(0.7f, 0.7f, 1.0f, 1.0f));
 	if(GIT_SHORTREV_HASH)
 	{
@@ -3113,8 +3115,6 @@ void CClient::Run()
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
-
-	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
 
 	InitChecksum();
 	m_pConsole->InitChecksum(ChecksumData());
