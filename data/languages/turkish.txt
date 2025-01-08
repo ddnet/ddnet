@@ -12,15 +12,7 @@
 # h-kaan          2023-08-30 01:52:04
 # h-kaan          2023-09-21 21:04:35
 # eghwand          2024-03-03 13:24:20
-# Gokturk          2024-04-23 01:56:10
-# Gokturk          2024-04-24 03:01:50
-# Gokturk          2024-06-09 12:00:50
-# Gokturk          2024-07-17 02:24:00
-# Gokturk          2024-08-29 23:31:00
-# Gokturk          2024-09-29 19:23:00
-# Gokturk          2024-09-29 19:23:00
-# Gokturk          2024-11-04 11:32:00
-# Gokturk          2024-12-03 16:00:00
+# Gokturk          2024-04-23 01:56:10 / 2025-01-08 14:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -548,7 +540,7 @@ Ghost
 == Hayalet
 
 Loading DDNet Client
-== DDNet Client yükleniyor
+== DDNet İstemcisi Yükleniyor
 
 Reconnect in %d sec
 == %d saniye içinde yeniden bağlanılacak
@@ -629,7 +621,7 @@ Update failed! Check log…
 == Güncelleme sırasında hata oluştu!
 
 DDNet Client updated!
-== DDNet Client güncellendi!
+== DDNet İstemcisi güncellendi!
 
 Update now
 == Güncelle
@@ -1984,7 +1976,7 @@ Discard changes
 == Değişiklikleri iptal et
 
 Are you sure that you want to discard the current changes to the touch controls?
-== Dokunmatik ayarlarındaki değişiklikleri iptal etmek istediğinden emin misin?
+== Dokunmatik ayarlarında ki değişiklikleri iptal etmek istediğinden emin misin?
 
 Are you sure that you want to reset the touch controls to default?
 == Dokunmatik ayarlarını varsayılan ayarlarına döndürmek istediğinden emin misin?
@@ -2043,7 +2035,7 @@ Width of others' hook collision line
 == Başkalarının kancalarının çarpışma çizgisi kalınlığı
 
 Preview 'Hook collisions' being pressed
-== Önizleme 'Kanca çarpışmaları' gösteriliyor
+== Ön izleme 'Kanca çarpışmaları' gösteriliyor
 
 Aim
 == Aim
@@ -2055,35 +2047,35 @@ Active: Hook
 == Aktif: Kanca
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" pnglite ile uyumlu değil ve eski DDnet versiyonları tarafından yüklenemiyor:
 
 Loading background map
-== 
+== Arkaplan haritası yükleniyor
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== OTOMATİK
 
 Toggle auto camera
-== 
+== Otomatik kamerayı değiştir
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Show client IDs in name plates
-== 
+== İstemci ID'sini isim kısmında göster
 
 Hook Strength
-== 
+== Kanca gücü
 
 Size of hook strength icon and number indicator
-== 
+== Kanca gücü simgesi ve sayı göstergesinin boyutu
 
 Key Presses
-== 
+== Tuş Basışları
 
 Size of key press icons
-== 
+== Tuşa basma simgesinin boyutu
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Sunucu başlatılamıyor. Sunucunun arka planda çalışması için ayarlardan bildirim iznini açtığınıza emin olun.
