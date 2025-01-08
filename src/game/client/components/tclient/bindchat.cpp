@@ -282,7 +282,7 @@ bool CBindchat::ChatDoAutocomplete(bool ShiftPressed)
 
 	Chat.m_CompletionUsed = true;
 	int Index = Chat.m_CompletionChosen;
-	for (int i = 0; i < (int)m_vBinds.size(); i++) 
+	for(int i = 0; i < (int)m_vBinds.size(); i++)
 	{
 		int CommandIndex = (Index + i) % m_vBinds.size();
 		if(str_startswith_nocase(m_vBinds.at(CommandIndex).m_aName, Chat.m_aCompletionBuffer))
@@ -291,7 +291,6 @@ bool CBindchat::ChatDoAutocomplete(bool ShiftPressed)
 			Chat.m_CompletionChosen = CommandIndex;
 			break;
 		}
-
 	}
 	//for(const CBind &Bind : m_vBinds)
 	//{
@@ -329,7 +328,7 @@ bool CBindchat::ChatDoAutocomplete(bool ShiftPressed)
 		Chat.m_Input.Set(aBuf);
 		Chat.m_Input.SetCursorOffset(Chat.m_PlaceholderOffset + Chat.m_PlaceholderLength);
 	}
-	else 
+	else
 	{
 		Chat.m_CompletionChosen = InitialCompletionChosen;
 		Chat.m_CompletionUsed = InitialCompletionUsed;

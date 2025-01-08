@@ -24,9 +24,9 @@
 
 #include "players.h"
 
-#include <game/client/components/tclient/rainbow.h>
 #include <base/color.h>
 #include <base/math.h>
+#include <game/client/components/tclient/rainbow.h>
 
 void CPlayers::RenderHand(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
 {

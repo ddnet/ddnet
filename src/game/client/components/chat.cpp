@@ -262,7 +262,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 			m_CommandsNeedSorting = false;
 		}
 
-		if (m_pClient->m_Bindchat.ChatDoBinds(m_Input.GetString()))
+		if(m_pClient->m_Bindchat.ChatDoBinds(m_Input.GetString()))
 			; // Do nothing as bindchat was executed
 		else
 			SendChatQueued(m_Input.GetString());
@@ -315,9 +315,8 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				});
 		}
 
-		if (m_pClient->m_Bindchat.ChatDoAutocomplete(ShiftPressed))
+		if(m_pClient->m_Bindchat.ChatDoAutocomplete(ShiftPressed))
 		{
-
 		}
 		else if(m_aCompletionBuffer[0] == '/' && !m_vCommands.empty())
 		{
@@ -1191,9 +1190,8 @@ void CChat::OnRender()
 
 	float x = 5.0f;
 
-
 	// TClient
-	float y = 300.0f - (20.0f * FontSize() / 6.f + (g_Config.m_ClStatusBar ? g_Config.m_ClStatusBarHeight : 0)); 
+	float y = 300.0f - (20.0f * FontSize() / 6.f + (g_Config.m_ClStatusBar ? g_Config.m_ClStatusBarHeight : 0));
 	// float y = 300.0f - 20.0f * FontSize() / 6.f;
 
 	float ScaledFontSize = FontSize() * (8 / 6.f);

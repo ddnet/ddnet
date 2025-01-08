@@ -57,7 +57,6 @@
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
-#include "components/tooltips.h"
 #include "components/tclient/bindchat.h"
 #include "components/tclient/bindwheel.h"
 #include "components/tclient/outlines.h"
@@ -69,6 +68,7 @@
 #include "components/tclient/trails.h"
 #include "components/tclient/verify.h"
 #include "components/tclient/warlist.h"
+#include "components/tooltips.h"
 #include "components/touch_controls.h"
 #include "components/voting.h"
 
@@ -157,7 +157,7 @@ public:
 	CStatboard m_Statboard;
 	CSounds m_Sounds;
 	CEmoticon m_Emoticon;
-	
+
 	CDamageInd m_DamageInd;
 	CTouchControls m_TouchControls;
 	CVoting m_Voting;

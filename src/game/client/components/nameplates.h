@@ -86,7 +86,7 @@ public:
 		m_Name.Reset();
 		m_Clan.Reset();
 		m_WeakStrongId.Reset();
-		
+
 		// TClient
 		m_SkinName.Reset();
 		m_Reason.Reset();
@@ -98,7 +98,6 @@ public:
 		TextRender.DeleteTextContainer(m_WeakStrongId.m_TextContainerIndex);
 		TextRender.DeleteTextContainer(m_SkinName.m_TextContainerIndex);
 		TextRender.DeleteTextContainer(m_Reason.m_TextContainerIndex);
-
 	}
 	CNamePlateName m_Name;
 	CNamePlateClan m_Clan;
@@ -154,7 +153,6 @@ class CNamePlates : public CComponent
 	// TClient
 	friend class CNamePlate::CNamePlateSkin;
 	friend class CNamePlate::CNamePlateReason;
-
 
 	CNamePlate m_aNamePlates[MAX_CLIENTS];
 

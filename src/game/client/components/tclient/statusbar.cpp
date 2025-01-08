@@ -36,10 +36,7 @@ float CStatusBar::GetDurationWidth(int Duration)
 		s_TextWidth000D = TextRender()->TextWidth(m_FontSize, "000d 00:00:00");
 		s_FontSize = m_FontSize;
 	}
-	return Duration >= 3600 * 24 * 100 ? s_TextWidth000D : Duration >= 3600 * 24 * 10 ? s_TextWidth00D :
-						       Duration >= 3600 * 24              ? s_TextWidth0D :
-						       Duration >= 3600                   ? s_TextWidthH :
-											    s_TextWidthM;
+	return Duration >= 3600 * 24 * 100 ? s_TextWidth000D : Duration >= 3600 * 24 * 10 ? s_TextWidth00D : Duration >= 3600 * 24 ? s_TextWidth0D : Duration >= 3600 ? s_TextWidthH : s_TextWidthM;
 }
 
 float CStatusBar::AngleWidth()

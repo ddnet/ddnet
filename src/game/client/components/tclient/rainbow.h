@@ -16,7 +16,7 @@ public:
 		COLORMODE_RANDOM
 	};
 
-	ColorRGBA m_RainbowColor = ColorRGBA(1,1,1,1);
+	ColorRGBA m_RainbowColor = ColorRGBA(1, 1, 1, 1);
 };
 
 #endif

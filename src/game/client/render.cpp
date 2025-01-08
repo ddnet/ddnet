@@ -536,7 +536,7 @@ void CRenderTools::RenderTee6(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 			float AnimScale, BaseSize;
 			GetRenderTeeAnimScaleAndBaseSize(pInfo, AnimScale, BaseSize);
 
-			if(TinyTee) 
+			if(TinyTee)
 			{
 				BaseSize *= TinyBodyScale;
 				AnimScale *= TinyBodyScale;

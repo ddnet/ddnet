@@ -342,7 +342,6 @@ private:
 	std::vector<FT_Face> m_vFallbackFaces;
 	std::vector<FT_Face> m_vFtFaces;
 
-
 	FT_Face GetFaceByName(const char *pFamilyName)
 	{
 		if(pFamilyName == nullptr || pFamilyName[0] == '\0')
@@ -1187,7 +1186,7 @@ public:
 	// TClient
 	static int LaziestFileCallback(const char *pFilename, int IsDir, int StorageType, void *pUser)
 	{
-		std::vector<std::string> *pVector = static_cast<std::vector<std::string>*>(pUser);
+		std::vector<std::string> *pVector = static_cast<std::vector<std::string> *>(pUser);
 		if(IsDir)
 			return 0;
 		pVector->push_back(std::string(pFilename));
@@ -1223,7 +1222,7 @@ public:
 				m_CustomFontFaces.push_back(face);
 	}
 	// TClient
-	void LoadCustomFonts() 
+	void LoadCustomFonts()
 	{
 		CheckDefaultFaces();
 		std::vector<std::string> vCustomFonts;

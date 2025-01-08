@@ -8,7 +8,6 @@ enum
 	STATUSBAR_TYPE_LETTERS = 4
 };
 
-
 class CStatusItem
 {
 public:
