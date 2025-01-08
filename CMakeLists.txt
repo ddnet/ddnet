@@ -128,6 +128,7 @@ endif()
 
 if(TARGET_OS STREQUAL "android")
     set(DISCORD OFF)
+    set(STEAM OFF)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
