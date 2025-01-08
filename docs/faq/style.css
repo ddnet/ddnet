@@ -1,0 +1,396 @@
+/* Fonts */
+@font-face {
+    font-family: 'Druk Wide Cyr';
+    src: url('../assets/fonts/Druk-Wide-Cyr-Bold.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../assets/fonts/Montserrat-Regular.ttf') format('opentype');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../assets/fonts/Montserrat-Medium.ttf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../assets/fonts/Montserrat-Bold.ttf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+/* Main CSS */
+:root {
+    --primary-color: #9A5D9A;
+    --primary-dark: #613A61;
+    --bg-color: #6A396A;
+    --bg-dark: #202020;
+    --card-bg: #303030;
+    --darker-bg: #101010;
+    --text-color: #ffffff;
+    --text-secondary: #888888;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+    text-decoration: none;
+    user-select: var(--bg-color);
+}
+
+::selection {
+    background: var(--bg-color);
+}
+
+body {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(180deg, var(--bg-color) 0%, var(--bg-dark) 100%);
+    color: var(--text-color);
+    min-height: 100vh;
+    padding: 17px 10px;
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+}
+
+h2 {
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Navigation */
+nav {
+    background: var(--bg-dark);
+    border-radius: 20px;
+    padding: 15px 40px;
+    margin-bottom: 40px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.nav-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-family: 'Druk Wide Cyr';
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(180deg, var(--primary-color), var(--primary-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: all 0.2s ease-out;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-links a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 500;
+    transition: all 0.2s ease-out;
+}
+
+.nav-links a:hover {
+    transform: scale(1.1);
+}
+
+.divider {
+    width: 3px;
+    height: 25px;
+    background: var(--darker-bg);
+    border-radius: 3px;
+}
+
+.donate-icon img {
+    width: 35px;
+    height: 35px;
+}
+
+.discord-icon {
+    width: 25px;
+    height: 25px;
+}
+
+.discord-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+
+.donate-icon {
+    transition: all 0.2s ease-out;
+}
+
+.donate-icon:hover {
+    transform: scale(1.1);
+}
+
+/* FAQ */
+.faq-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.faq-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.faq-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: #FFF;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.faq-header p {
+    color: var(--text-secondary);
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.faq-category {
+    margin-bottom: 40px;
+}
+
+.category-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.faq-item {
+    background: var(--bg-dark);
+    border-radius: 15px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.faq-question {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-question:hover {
+    background: var(--card-bg);
+}
+
+.faq-question h3 {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+    flex: 1;
+}
+
+.faq-toggle {
+    width: 24px;
+    height: 24px;
+    position: relative;
+    margin-left: 20px;
+}
+
+.faq-toggle::before,
+.faq-toggle::after {
+    content: '';
+    position: absolute;
+    background-color: var(--primary-color);
+    transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-toggle::before {
+    width: 2px;
+    height: 16px;
+    top: 4px;
+    left: 11px;
+}
+
+.faq-toggle::after {
+    width: 16px;
+    height: 2px;
+    top: 11px;
+    left: 4px;
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-answer-content {
+    padding: 10px 20px 20px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.faq-answer-content code {
+    background: var(--darker-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.faq-item.active .faq-toggle::before {
+    transform: rotate(90deg);
+}
+
+.faq-item.active .faq-answer {
+    max-height: 500px;
+}
+
+@media (max-width: 768px) {
+    .faq-header h1 {
+        font-size: 28px;
+    }
+    
+    .faq-header p {
+        font-size: 16px;
+    }
+    
+    .category-title {
+        font-size: 20px;
+    }
+    
+    .faq-question h3 {
+        font-size: 16px;
+    }
+}
+
+/* Footer */
+footer {
+    background: var(--bg-dark);
+    border-radius: 20px;
+    padding: 20px 0;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.footer-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    font-size: 14px;
+}
+
+.footer-content p:nth-child(1) a,
+.footer-content p:nth-child(3) a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-content p:nth-child(1) a {
+    color: #9A5D9A;
+}
+
+.footer-content p:nth-child(3) a {
+    color: #AE00C9;
+}
+
+.footer-content p:nth-child(1) a:hover,
+.footer-content p:nth-child(3) a:hover {
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .nav-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .divider {
+        display: none;
+    }
+
+    h2 {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 1040px) {
+    nav {
+        padding: 10px;
+    }
+
+    .nav-content {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .nav-links a {
+        width: 100%;
+        text-align: center;
+        padding: 8px 0;
+    }
+    
+    .discord-link {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+        padding: 8px 0;
+    }
+
+    .divider {
+        display: none;
+    }
+
+    .donate-icon {
+        margin-top: 10px;
+    }
+}

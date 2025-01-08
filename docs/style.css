@@ -43,9 +43,13 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    user-select: none;
     scroll-behavior: smooth;
     text-decoration: none;
+    user-select: var(--bg-color);
+}
+
+::selection {
+    background: var(--bg-color);
 }
 
 body {
@@ -251,7 +255,6 @@ h2 {
 }
 
 /* Latest release */
-
 #latest-release {
     margin-bottom: 80px;
 }

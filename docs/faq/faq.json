@@ -1,0 +1,45 @@
+{
+    "title": "Frequently Asked Questions",
+    "description": "Find answers to common questions about Tater Client.",
+    "categories": [
+      {
+        "title": "Installation",
+        "questions": [
+          {
+            "question": "How do I install Tater Client?",
+            "answer": "Download the client for your operating system, extract it to your DDNet folder, and run it through Steam or directly from the folder. For detailed instructions, check our installation guide on the main page."
+          },
+          {
+            "question": "Will my settings transfer from vanilla DDNet?",
+            "answer": "Yes, Tater Client uses the same configuration folder as DDNet, so all your settings, binds, and configurations will be preserved."
+          }
+        ]
+      },
+      {
+        "title": "Features",
+        "questions": [
+          {
+            "question": "How do I use the Bind Wheel?",
+            "answer": "Access the Bind Wheel settings in the menu under Settings → TClient → BindWheel. Assign a key to open the wheel, then add commands to different wheel segments."
+          },
+          {
+            "question": "How do I customize outlines?",
+            "answer": "Navigate to Settings → TClient and Scroll a little bit. There you can adjust outline colors, width, and which game elements should display outlines."
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "questions": [
+          {
+            "question": "The client won't start after installation",
+            "answer": "Make sure all files are properly extracted to your DDNet folder. Try running the client as administrator. If issues persist, check our Discord for support."
+          },
+          {
+            "question": "How do I report a bug?",
+            "answer": "Report bugs on our GitHub issues page or Discord server. Please include your system specifications and steps to reproduce the issue."
+          }
+        ]
+      }
+    ]
+  }
