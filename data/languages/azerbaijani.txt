@@ -2,12 +2,7 @@
 #originally created by:
 #	    Gokturk, seishiroon and Aykhan [EN07Z]
 #modified by:
-#     Gokturk          2024-06-09 12:00:50
-#     Gokturk          2024-07-17 02:24:00
-#     Gokturk          2024-08-29 23:39:00
-#     Gokturk          2024-09-29 19:24:00
-#     Gokturk          2024-11-04 11:35:00
-#     Gokturk & seishiroon          2024-12-03 16:35:00
+#     Gokturk & seishiroon  2024-06-09 12:00:50 / 2025-01-08 15:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -2041,35 +2036,35 @@ Active: Hook
 == Aktiv: Qarmaq
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" pnglite ilə uyğun gəlmir və köhnə DDnet versiyaları tərəfindən yüklənə bilmir.
 
 Loading background map
-== 
+== Fon xəritəsi yüklənir
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== AVTOMATİK
 
 Toggle auto camera
-== 
+== Avtomatik kameraya keç
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Show client IDs in name plates
-== 
+== Müştəri ID-sini ad bölməsində göstər
 
 Hook Strength
-== 
+== Qarmaq gücü
 
 Size of hook strength icon and number indicator
-== 
+== Qarmaq gücü simvolu və rəqəm göstəricisinin ölçüşü
 
 Key Presses
-== 
+== Klaviş Basışları
 
 Size of key press icons
-== 
+== Klaviş basma simvolunun ölçüsü
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Server başladıla bilmir. Serverin fonda işləməsi üçün parametrlərdə bildiriş icazəsini aktivləşdirdiyinizə əmin olun.
