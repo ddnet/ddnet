@@ -802,7 +802,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		if(LineAuthor.m_Team == TEAM_SPECTATORS)
 			pCurrentLine->m_NameColor = TEAM_SPECTATORS;
 
-		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+		if(m_pClient->IsTeamPlay())
 		{
 			if(LineAuthor.m_Team == TEAM_RED)
 				pCurrentLine->m_NameColor = TEAM_RED;

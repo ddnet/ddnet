@@ -854,12 +854,9 @@ void CPlayers::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
+	// update render info for ninja
 	CTeeRenderInfo aRenderInfo[MAX_CLIENTS];
-
-	// update RenderInfo for ninja
-	bool IsTeamplay = false;
-	if(m_pClient->m_Snap.m_pGameInfoObj)
-		IsTeamplay = (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS) != 0;
+	const bool IsTeamPlay = m_pClient->IsTeamPlay();
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		aRenderInfo[i] = m_pClient->m_aClients[i].m_RenderInfo;
@@ -882,8 +879,8 @@ void CPlayers::OnRender()
 				aRenderInfo[i].m_aSixup[g_Config.m_ClDummy].Reset();
 
 				aRenderInfo[i].Apply(pSkin);
-				aRenderInfo[i].m_CustomColoredSkin = IsTeamplay;
-				if(!IsTeamplay)
+				aRenderInfo[i].m_CustomColoredSkin = IsTeamPlay;
+				if(!IsTeamPlay)
 				{
 					aRenderInfo[i].m_ColorBody = ColorRGBA(1, 1, 1);
 					aRenderInfo[i].m_ColorFeet = ColorRGBA(1, 1, 1);
