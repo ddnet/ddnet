@@ -803,7 +803,8 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 				m_pEditor->m_Map.MakeTeleLayer(pLayer);
 				m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayer);
 
-				vpActions.push_back(std::make_shared<CEditorActionAddLayer>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_Map.m_pGameGroup->m_vpLayers.size() - 1));
+				vpActions.push_back(std::make_shared<CEditorActionAddLayer>(m_pEditor, LAYERTYPE_GAME,
+					m_pEditor->m_Map.m_pGameGroup->m_vpLayers.size() - 1));
 
 				if(m_Width != pGLayer->m_Width || m_Height > pGLayer->m_Height)
 				{
