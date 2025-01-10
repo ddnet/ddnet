@@ -155,6 +155,13 @@ inline vector2_base<float> random_direction()
 	return direction(random_angle());
 }
 
+inline vector2_base<float> snap_to_45(const vector2_base<float> &v)
+{
+	float ang = angle(v);
+	ang = round(ang / (pi / 4)) * (pi / 4);
+	return vector2_base<float>(direction(ang) * length(v));
+}
+
 typedef vector2_base<float> vec2;
 typedef vector2_base<bool> bvec2;
 typedef vector2_base<int> ivec2;

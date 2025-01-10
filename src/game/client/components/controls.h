@@ -17,6 +17,7 @@ public:
 	float GetMaxMouseDistance() const;
 
 	vec2 m_aMousePos[NUM_DUMMIES];
+	vec2 m_aRenderedLocalTeeAngle[NUM_DUMMIES];
 	vec2 m_aMousePosOnAction[NUM_DUMMIES];
 	vec2 m_aTargetPos[NUM_DUMMIES];
 
