@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">DDNet</string>
+	<string name="shortcut_play_vulkan_short">Jogar (Vulkan)</string>
+	<string name="shortcut_play_gles_short">Jogar (OpenGL ES)</string>
+	<string name="server_name">DDNet-Server</string>
+	<string name="server_notification_description_default">DDNet-Server está em execução…</string>
+	<string name="server_notification_description_stopping">DDNet-Server está em encerramento…</string>
+	<string name="server_notification_action_stop">Parar</string>
+	<string name="server_notification_action_run_command">Executar comando</string>
+	<string name="server_notification_channel_description">Notificação para controlar o DDNet-Server local enquanto está em execução.</string>
+	<string name="server_error_external_files_inaccessible">Erro ao iniciar o DDNet-Server: não foi possível acessar o diretório de ficheiros externo.</string>
+	<string name="server_error_exit_code">DDNet-Server parou com o código de erro \'%1$d\'.</string>
+</resources>
