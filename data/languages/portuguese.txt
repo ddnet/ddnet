@@ -45,13 +45,13 @@ All
 == Todos
 
 Are you sure that you want to quit?
-== Queres mesmo sair?
+== Tens a certeza que queres sair?
 
 Automatically record demos
 == Gravar demos automaticamente
 
 Automatically take game over screenshot
-== Tirar screenshots no final do turno autom.
+== Tirar captura de ecrã no fim do jogo automaticamente
 
 Blue team
 == Equipa azul
@@ -63,13 +63,13 @@ Body
 == Corpo
 
 Call vote
-== Votação
+== Votar
 
 Change settings
 == Mudar configurações
 
 Chat
-== Conversa
+== Chat
 
 Clan
 == Clã
@@ -78,10 +78,10 @@ Client
 == Cliente
 
 Connecting to
-== A ligar ao endereço
+== A conectar a
 
 Connection Problems…
-== Problemas na ligação!
+== Problemas na ligação…
 
 Console
 == Console
@@ -120,7 +120,7 @@ Disconnected
 == Desconectado
 
 Downloading map
-== A sacar o mapa…
+== A transferir o mapa
 
 Draw!
 == Empate!
@@ -156,7 +156,7 @@ Force vote
 == Forçar a votação
 
 Free-View
-== Vista Livre
+== Vista livre
 
 Fullscreen
 == Ecrã inteiro
@@ -165,7 +165,7 @@ Game
 == Jogo
 
 Game info
-== Informação sobre o jogo
+== Jogo
 
 Game over
 == Fim de Jogo
@@ -192,7 +192,7 @@ Hammer
 == Martelo
 
 Has people playing
-== Tem gente a jogar
+== Tem pessoas a jogar
 
 High Detail
 == Mais detalhes (HD)
@@ -216,7 +216,7 @@ Kick player
 == Expulsar jogador
 
 Language
-== Língua
+== Idioma
 
 Laser
 == Laser
@@ -231,7 +231,7 @@ Move left
 == Mover para a esquerda
 
 Move player to spectators
-== Juntar jogador aos spectators
+== Mover jogador para espetadores
 
 Move right
 == Mover para a direita
@@ -246,16 +246,16 @@ Name
 == Nome
 
 Next weapon
-== Arma Seguinte
+== Arma seguinte
 
 Nickname
-== Nick
+== Nome
 
 No
 == Não
 
 No password
-== Sem password
+== Sem palavra-passe
 
 No servers found
 == Nenhum servidor encontrado
@@ -270,10 +270,10 @@ Parent Folder
 == Pasta superior
 
 Password
-== Palavra-Passe
+== Palavra-passe
 
 Password incorrect
-== Palavra-Passe errada!
+== Palavra-passe errada
 
 Ping
 == Ping
@@ -282,19 +282,19 @@ Pistol
 == Pistola
 
 Play background music
-== Tocar a música de fundo
+== Reproduzir música de fundo
 
 Player
 == Jogador
 
 Player country:
-== País do jogador
+== País do jogador:
 
 Players
 == Jogadores
 
 Please balance teams!
-== Equilibrem as equipas!
+== Por favor, equilibra as equipas!
 
 Prev. weapon
 == Arma anterior
@@ -318,13 +318,13 @@ Remove
 == Eliminar
 
 Remove friend
-== Apagar amigo
+== Remover amigo
 
 Rename demo
 == Renomear demo
 
 Reset
-== Reset
+== Reiniciar
 
 Reset filter
 == Reiniciar filtro
@@ -333,22 +333,22 @@ Score
 == Pontos
 
 Score limit
-== Pontuação máxima
+== Pontos máximos
 
 Scoreboard
 == Pontuação
 
 Screen
-== Screen
+== Ecrã
 
 Screenshot
-== Screenshot
+== Captura de ecrã
 
 Server address:
 == Endereço do servidor:
 
 Server info
-== Info de servidor
+== Servidor
 
 Server not full
 == Servidor não cheio
@@ -357,34 +357,34 @@ Shotgun
 == Shotgun
 
 Show chat
-== Mostrar chat
+== Mostrar o chat
 
 Show friends only
 == Mostrar apenas amigos
 
 Show ingame HUD
-== Mostrar HUD do jogo
+== Mostrar interface do jogo
 
 Show name plates
-== Mostrar nick's
+== Mostrar nome dos jogadores
 
 Show only chat messages from friends
-== Mostrar apenas mensagens dos amigos no chat
+== Mostrar apenas mensagens de amigos
 
 Sound
 == Som
 
 Sound error
-== Erro no som!
+== Erro de som
 
 Spectate
-== Observar
+== Assistir
 
 Spectate next
-== Observar próximo
+== Assistir próximo
 
 Spectate previous
-== Observar anterior
+== Assistir anterior
 
 Spectator mode
 == Modo de espectador
@@ -402,7 +402,7 @@ Sudden Death
 == Morte súbita
 
 Switch weapon on pickup
-== Mudar de arma ao pegar nela
+== Mudar de arma ao apanhá-la
 
 Team
 == Equipa
@@ -429,13 +429,13 @@ Type
 == Tipo
 
 Unable to rename the demo
-== Impossivel renomear a demo
+== Não foi possível renomear a demo
 
 Use sounds
-== Ligar efeitos sonoros
+== Usar sons
 
 Use team colors for name plates
-== Usar a cor da equipa para os nick's
+== Usar a cor da equipa para os nomes
 
 V-Sync
 == V-Sync
@@ -474,7 +474,7 @@ Internet
 == Internet
 
 Max demos
-== Demos máximas
+== Máximo de demos
 
 News
 == Notícias
@@ -489,13 +489,13 @@ New name:
 == Novo nome:
 
 Sound volume
-== Volume de som
+== Volume do som
 
 Max Screenshots
-== Máximo de Capturas de Ecrã
+== Máximo de capturas de ecrã
 
 Record demo
-== Gravar uma demo
+== Gravar demo
 
 FSAA samples
 == Amostras FSAA
@@ -519,19 +519,19 @@ Hue
 == Matiz
 
 Alpha
-== Alpha
+== Alfa
 
 LAN
 == LAN
 
 Name plates size
-== Tamanho dos nick's
+== Tamanho dos nome
 
 AntiPing
 == Antiping
 
 Map sound volume
-== Volume de som do mapa
+== Volume do som do mapa
 
 Countries
 == Países
@@ -540,7 +540,7 @@ Show kill messages
 == Mostrar mensagens de morte
 
 Show ghost
-== Mostrar ghost
+== Mostrar fantasma
 
 DDNet
 == DDNet
@@ -555,7 +555,7 @@ Show votes window after voting
 == Mostrar janela de voto depois de votar
 
 HUD
-== HUD
+== Visualização
 
 Show names in chat in team colors
 == Mostrar nomes no chat com cores da equipa
@@ -573,7 +573,7 @@ DDNet Client needs to be restarted to complete update!
 == O cliente DDNet precisa de ser reiniciado para completar a atualização!
 
 Show others
-== Mostrar os outros
+== Mostrar outros
 
 Gameplay
 == Jogabilidade
@@ -594,7 +594,7 @@ Team message
 == Mensagem de equipa
 
 Automatically create statboard csv
-== Criar automaticamente csv de statboard
+== Criar statboard csv automaticamente
 
 Save the best demo of each race
 == Guardar a melhor demo de cada corrida
@@ -606,19 +606,19 @@ Types
 == Tipos
 
 Ghost
-== Ghost
+== Fantasma
 
 Remove chat
-== Removar o chat
+== Remover o chat
 
 Check now
-== Verifica agora
+== Verificar agora
 
 AntiPing: predict other players
 == AntiPing: prever os outros jogadores
 
 Automatically take statboard screenshot
-== Tirar automaticamente screenshot da statboard
+== Tirar captura de ecrã do statboard automaticamente
 
 System message
 == Mensagem do sistema
@@ -651,7 +651,7 @@ Show score
 == Mostrar pontuação
 
 Max CSVs
-== CSVs máximos
+== Máximo de CSVs
 
 Best
 == Melhor
@@ -675,10 +675,10 @@ Update now
 == Atualizar agora
 
 Show clan above name plates
-== Mostrar o nome do clã por cima do nick
+== Mostrar o nome do clã por cima dos nomes
 
 Save ghost
-== Guardar ghost
+== Guardar fantasma
 
 Exclude
 == Excluir
@@ -690,13 +690,13 @@ AntiPing: predict weapons
 == AntiPing: prever as armas
 
 DDNet Client updated!
-== O cliente DDNet foi atualizado!
+== Cliente DDNet atualizado!
 
 Highlighted message
 == Mensagem em destaque
 
 Switch weapon when out of ammo
-== Mudar de arma quando ficar sem munição
+== Mudar de arma quando acabar a munição
 
 AntiPing: predict grenade paths
 == Antiping: prever os caminhos da granada
@@ -717,7 +717,7 @@ Are you sure that you want to disconnect your dummy?
 == Tens a certeza que queres desconectar o teu dummy?
 
 Welcome to DDNet
-== Bem-vindo à DDNet
+== Bem-vindo ao DDNet
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == É recomendado que verifiques as definições para ajustá-las a teu gosto antes de te juntares a um servidor.
@@ -726,7 +726,7 @@ Please enter your nickname below.
 == Por favor introduz o teu nome abaixo.
 
 Existing Player
-== Jogador Existente
+== Jogador existente
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
 == O teu nome '%s' já está em uso (%d points). Queres usá-lo mesmo assim?
@@ -795,7 +795,7 @@ Windowed
 == Janela
 
 Windowed borderless
-== Janela s/ bordas
+== Janela sem bordas
 
 Desktop fullscreen
 == Ecrã completo
@@ -810,10 +810,10 @@ Background music volume
 == Volume da música de fundo
 
 Use old chat style
-== Usar o modo antigo de chat
+== Usar o estilo antigo do chat
 
 Friend message
-== Mensagem de amigo/a
+== Mensagem de amigo
 
 Size
 == Tamanho
@@ -834,7 +834,7 @@ Learn
 == Aprender
 
 https://wiki.ddnet.org/
-== https://wiki.ddnet.org/wiki/Main_Page/pt-br
+== https://wiki.ddnet.org/wiki/Main_Page/pt
 
 Website
 == Website
