@@ -702,6 +702,9 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 		Col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorSolid));
 	else if(TileType == TILE_UNFREEZE)
 		Col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorUnfreeze));
+	else if(TileType == TILE_DEATH)
+		Col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOutlineColorKill));
+
 	Graphics()->SetColor(Col.r, Col.g, Col.b, Alpha);
 
 	for(int y = StartY; y < EndY; y++)
@@ -717,14 +720,17 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 			bool IsFreeze = Index == TILE_FREEZE || Index == TILE_DFREEZE;
 			bool IsUnFreeze = Index == TILE_UNFREEZE || Index == TILE_DUNFREEZE;
 			bool IsSolid = Index == TILE_SOLID || Index == TILE_NOHOOK;
+			bool IsKill = Index == TILE_DEATH;
 
-			if(!(IsSolid || IsFreeze || IsUnFreeze)) // Not an tile we care about
+			if(!(IsSolid || IsFreeze || IsUnFreeze || IsKill)) // Not an tile we care about
 				continue;
 			if(IsSolid && !(TileType == TILE_SOLID))
 				continue;
 			if(IsFreeze && !(TileType == TILE_FREEZE))
 				continue;
 			if(IsUnFreeze && !(TileType == TILE_UNFREEZE))
+				continue;
+			if(IsKill && !(TileType == TILE_DEATH))
 				continue;
 
 			IGraphics::CQuadItem Array[8];
@@ -769,6 +775,26 @@ void CRenderTools::RenderGameTileOutlines(CTile *pTiles, int w, int h, float Sca
 				Neighbors[6] = IndexN != TILE_NOHOOK && IndexN != Index;
 				IndexN = pTiles[ClampedIndex(mx + 1, my + 1, w, h)].m_Index;
 				Neighbors[7] = IndexN != TILE_NOHOOK && IndexN != Index;
+			}
+			else if(IsKill && TileType == TILE_DEATH)
+			{
+				int IndexN;
+				IndexN = pTiles[ClampedIndex(mx - 1, my - 1, w, h)].m_Index;
+				Neighbors[0] = IndexN != TILE_DEATH && IndexN != Index;
+				IndexN = pTiles[ClampedIndex(mx - 0, my - 1, w, h)].m_Index;
+				Neighbors[1] = IndexN != TILE_DEATH && IndexN != Index;
+				IndexN = pTiles[ClampedIndex(mx + 1, my - 1, w, h)].m_Index;
+				Neighbors[2] = IndexN != TILE_DEATH && IndexN != Index;
+				IndexN = pTiles[ClampedIndex(mx - 1, my + 0, w, h)].m_Index;
+				Neighbors[3] = IndexN != TILE_DEATH && IndexN != Index;
+				IndexN = pTiles[ClampedIndex(mx + 1, my + 0, w, h)].m_Index;
+				Neighbors[4] = IndexN != TILE_DEATH && IndexN != Index;
+				IndexN = pTiles[ClampedIndex(mx - 1, my + 1, w, h)].m_Index;
+				Neighbors[5] = IndexN != TILE_DEATH && IndexN != Index;
+				IndexN = pTiles[ClampedIndex(mx + 0, my + 1, w, h)].m_Index;
+				Neighbors[6] = IndexN != TILE_DEATH && IndexN != Index;
+				IndexN = pTiles[ClampedIndex(mx + 1, my + 1, w, h)].m_Index;
+				Neighbors[7] = IndexN != TILE_DEATH && IndexN != Index;
 			}
 			else
 			{
