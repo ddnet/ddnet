@@ -1388,7 +1388,7 @@ void CPlayers::OnRender()
 					aRenderInfo[i].m_ColorBody = ColorRGBA(1, 1, 1);
 					aRenderInfo[i].m_ColorFeet = ColorRGBA(1, 1, 1);
 				}
-				if(!IsTeamplay && g_Config.m_ClColorFreeze)
+				if(!IsTeamPlay && g_Config.m_ClColorFreeze)
 				{
 					aRenderInfo[i].m_CustomColoredSkin = m_pClient->m_aClients[i].m_RenderInfo.m_CustomColoredSkin;
 					aRenderInfo[i].m_ColorFeet = g_Config.m_ClColorFreezeFeet ? m_pClient->m_aClients[i].m_RenderInfo.m_ColorFeet : ColorRGBA(1, 1, 1);

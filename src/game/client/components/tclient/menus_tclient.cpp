@@ -676,8 +676,6 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	// A little extra spacing because these are multi line
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-	// Column.HSplitTop(MarginSmall, nullptr, &Column);
-	// DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScaleMouseDistance, Localize("Improve mouse precision by scaling sent max distance to 1000"), &g_Config.m_ClScaleMouseDistance, &Column, LineSize);
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 	// ***** Anti Latency Tools ***** //
