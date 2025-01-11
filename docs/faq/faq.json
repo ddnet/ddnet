@@ -20,7 +20,7 @@
         "questions": [
           {
             "question": "What settings should I use for gores?",
-            "answer": "Enable \"Fast Input\" optinally with \"Fast Input Others\", and \"Remove Prediction & antiping in freeze\" (Amount:100ms, Delay: 500ms). You can try the improved anti ping smoothing and other settings if you want them."
+            "answer": "Enable \"Fast Input\" optionally with \"Fast Input Others\", and \"Remove Prediction & antiping in freeze\" (Amount:100ms, Delay: 500ms). You can try the improved anti ping smoothing and other settings if you want them."
           },
           {
             "question": "What settings should I use for ddrace?",

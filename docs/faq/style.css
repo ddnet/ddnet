@@ -211,7 +211,7 @@ nav {
     align-items: center;
     cursor: pointer;
     user-select: none;
-    transition: background-color 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .faq-question:hover {
@@ -237,7 +237,7 @@ nav {
     content: '';
     position: absolute;
     background-color: var(--primary-color);
-    transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .faq-toggle::before {
@@ -257,7 +257,7 @@ nav {
 .faq-answer {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: max-height 0.0s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .faq-answer-content {
