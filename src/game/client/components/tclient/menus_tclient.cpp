@@ -220,7 +220,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			continue;
 
 		TabBar.VSplitLeft(TabWidth, &Button, &TabBar);
-		const int Corners = Tab == 0 ? IGraphics::CORNER_L : Tab == NUMBER_OF_TCLIENT_TABS - 1 ? IGraphics::CORNER_R : IGraphics::CORNER_NONE;
+		const int Corners = Tab == 0 ? IGraphics::CORNER_L : Tab == NUMBER_OF_TCLIENT_TABS - 1 ? IGraphics::CORNER_R :
+													 IGraphics::CORNER_NONE;
 		if(DoButton_MenuTab(&s_aPageTabs[Tab], apTabNames[Tab], s_CurCustomTab == Tab, &Button, Corners, nullptr, nullptr, nullptr, nullptr, 4.0f))
 			s_CurCustomTab = Tab;
 	}
@@ -675,8 +676,8 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	// A little extra spacing because these are multi line
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-	//Column.HSplitTop(MarginSmall, nullptr, &Column);
-	//DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScaleMouseDistance, Localize("Improve mouse precision by scaling sent max distance to 1000"), &g_Config.m_ClScaleMouseDistance, &Column, LineSize);
+	// Column.HSplitTop(MarginSmall, nullptr, &Column);
+	// DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClScaleMouseDistance, Localize("Improve mouse precision by scaling sent max distance to 1000"), &g_Config.m_ClScaleMouseDistance, &Column, LineSize);
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
 	// ***** Anti Latency Tools ***** //
@@ -1505,6 +1506,7 @@ void CMenus::RenderSettingsInfo(CUIRect MainView)
 		Client()->ViewLink("https://ko-fi.com/Totar");
 
 	LeftView = LowerLeftView;
+	LeftView.HSplitBottom(LineSize * 4.0f + MarginSmall * 2.0f + HeadlineFontSize, nullptr, &LeftView);
 	LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
 	Ui()->DoLabel(&Label, Localize("Config Files"), HeadlineFontSize, TEXTALIGN_ML);
 	LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
@@ -1599,12 +1601,14 @@ void CMenus::RenderSettingsInfo(CUIRect MainView)
 		RenderDevSkin(TeeRect.Center(), 50.0f, "glow_mermyfox", "mermyfox", true, 0, 0, 0, false, ColorRGBA(1.00f, 1.00f, 1.00f, 1.00f), ColorRGBA(1.00f, 0.02f, 0.13f, 1.00f));
 	}
 
+	RightView.HSplitTop(MarginSmall, nullptr, &RightView);
 	RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
 	Ui()->DoLabel(&Label, Localize("Hide Settings Tabs"), HeadlineFontSize, TEXTALIGN_ML);
 	RightView.HSplitTop(MarginSmall, nullptr, &RightView);
 	CUIRect LeftSettings, RightSettings;
 
 	RightView.VSplitMid(&LeftSettings, &RightSettings, MarginSmall);
+	RightView.HSplitTop(LineSize * 3.5f, nullptr, &RightView);
 
 	static int s_ShowSettings = IsFlagSet(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_SETTINGS);
 	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowSettings, Localize("Settings"), &s_ShowSettings, &LeftSettings, LineSize);
@@ -1621,6 +1625,11 @@ void CMenus::RenderSettingsInfo(CUIRect MainView)
 	static int s_ShowStatusBar = IsFlagSet(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_STATUSBAR);
 	DoButton_CheckBoxAutoVMarginAndSet(&s_ShowStatusBar, Localize("Status Bar"), &s_ShowStatusBar, &LeftSettings, LineSize);
 	SetFlag(g_Config.m_ClTClientSettingsTabs, TCLIENT_TAB_STATUSBAR, s_ShowStatusBar);
+
+	RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
+	Ui()->DoLabel(&Label, Localize("Integration"), HeadlineFontSize, TEXTALIGN_ML);
+	RightView.HSplitTop(MarginSmall, nullptr, &RightView);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClDiscordRPC, Localize("Enable Discord Integration"), &g_Config.m_ClDiscordRPC, &RightView, LineSize);
 }
 
 void CMenus::RenderSettingsProfiles(CUIRect MainView)

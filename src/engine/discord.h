@@ -14,6 +14,6 @@ public:
 	virtual void SetGameInfo(const NETADDR &ServerAddr, const char *pMapName, bool AnnounceAddr) = 0;
 };
 
-IDiscord *CreateDiscord();
+IDiscord *CreateDiscord(bool UseStub = false);
 
 #endif // ENGINE_DISCORD_H

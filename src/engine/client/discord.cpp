@@ -3,7 +3,6 @@
 
 #if defined(CONF_DISCORD)
 #include <discord_game_sdk.h>
-
 typedef enum EDiscordResult DISCORD_API (*FDiscordCreate)(DiscordVersion, struct DiscordCreateParams *, struct IDiscordCore **);
 
 #if defined(CONF_DISCORD_DYNAMIC)
@@ -111,10 +110,10 @@ class CDiscordStub : public IDiscord
 	void SetGameInfo(const NETADDR &ServerAddr, const char *pMapName, bool AnnounceAddr) override {}
 };
 
-IDiscord *CreateDiscord()
+IDiscord *CreateDiscord(bool UseStub)
 {
 	IDiscord *pDiscord = CreateDiscordImpl();
-	if(pDiscord)
+	if(pDiscord && !UseStub)
 	{
 		return pDiscord;
 	}
