@@ -112,7 +112,7 @@ public:
 				PartColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 			m_HatSpriteIndex = 0;
-			m_BotColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+			m_BotColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
 		}
 		bool Valid() const
 		{
