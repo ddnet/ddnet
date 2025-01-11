@@ -165,7 +165,7 @@ void CStatboard::RenderGlobalStats()
 	}
 
 	// sort blue players by score after
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+	if(m_pClient->IsTeamPlay())
 	{
 		for(const auto *pInfo : m_pClient->m_Snap.m_apInfoByScore)
 		{
@@ -474,7 +474,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 	}
 
 	// sort blue players by score after
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+	if(m_pClient->IsTeamPlay())
 	{
 		for(const auto *pInfo : m_pClient->m_Snap.m_apInfoByScore)
 		{

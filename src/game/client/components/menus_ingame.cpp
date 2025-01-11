@@ -143,7 +143,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			}
 		}
 
-		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+		if(m_pClient->IsTeamPlay())
 		{
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_RED)
 			{
@@ -184,7 +184,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			}
 		}
 
-		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS && (ShowDDRaceButtons || !(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)))
+		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS && (ShowDDRaceButtons || !m_pClient->IsTeamPlay()))
 		{
 			ButtonBar.VSplitLeft(65.0f, &Button, &ButtonBar);
 			ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
@@ -198,7 +198,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		}
 	}
 
-	if(m_pClient->m_ReceivedDDNetPlayer && m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj && (ShowDDRaceButtons || !(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)))
+	if(m_pClient->m_ReceivedDDNetPlayer && m_pClient->m_Snap.m_pLocalInfo && (ShowDDRaceButtons || !m_pClient->IsTeamPlay()))
 	{
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS || Paused || Spec)
 		{

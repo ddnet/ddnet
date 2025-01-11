@@ -88,6 +88,8 @@ public:
 	IGraphics::CTextureHandle XmasHatTexture() const { return m_XmasHatTexture; }
 	IGraphics::CTextureHandle BotDecorationTexture() const { return m_BotTexture; }
 
+	static bool IsSpecialSkin(const char *pName);
+
 private:
 	int m_ScanningPart;
 	std::chrono::nanoseconds m_LastRefreshTime;
