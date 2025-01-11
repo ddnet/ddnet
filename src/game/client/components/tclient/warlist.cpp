@@ -433,9 +433,10 @@ void CWarList::UpdateWarPlayers()
 	{
 		if(!GameClient()->m_aClients[i].m_Active)
 			continue;
-
+		
 		m_WarPlayers[i].IsWarName = false;
 		m_WarPlayers[i].IsWarClan = false;
+		memset(m_WarPlayers[i].m_aReason, 0, sizeof(m_WarPlayers[i].m_aReason));
 		m_WarPlayers[i].m_NameColor = ColorRGBA(1, 1, 1, 1);
 		m_WarPlayers[i].m_ClanColor = ColorRGBA(1, 1, 1, 1);
 		m_WarPlayers[i].m_WarGroupMatches.clear();
