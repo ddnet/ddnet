@@ -309,38 +309,38 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		str_copy(aGroup1Name, GameClient()->m_WarList.m_WarTypes[1]->m_aWarName);
 		str_copy(aGroup2Name, GameClient()->m_WarList.m_WarTypes[2]->m_aWarName);
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		str_format(aBuf, sizeof(aBuf), "Add %s name:", aGroup1Name);
+		str_format(aBuf, sizeof(aBuf), Localize("Add %s name:"), aGroup1Name);
 		DoBindchat(s_Warlist1, aBuf, ".war", "war_name_index 1");
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		str_format(aBuf, sizeof(aBuf), "Add %s clan:", aGroup1Name);
+		str_format(aBuf, sizeof(aBuf), Localize("Add %s clan:"), aGroup1Name);
 		DoBindchat(s_Warlist2, aBuf, ".warclan", "war_clan_index 1");
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		str_format(aBuf, sizeof(aBuf), "Add %s name:", aGroup2Name);
+		str_format(aBuf, sizeof(aBuf), Localize("Add %s name:"), aGroup2Name);
 		DoBindchat(s_Warlist3, aBuf, ".team", "war_name_index 2");
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		str_format(aBuf, sizeof(aBuf), "Add %s clan:", aGroup2Name);
+		str_format(aBuf, sizeof(aBuf), Localize("Add %s clan:"), aGroup2Name);
 		DoBindchat(s_Warlist4, aBuf, ".teamclan", "war_clan_index 2");
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		str_format(aBuf, sizeof(aBuf), "Remove %s name:", aGroup1Name);
+		str_format(aBuf, sizeof(aBuf), Localize("Remove %s name:"), aGroup1Name);
 		DoBindchat(s_Warlist5, aBuf, ".delwar", "remove_war_name_index 1");
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		str_format(aBuf, sizeof(aBuf), "Remove %s clan:", aGroup1Name);
+		str_format(aBuf, sizeof(aBuf), Localize("Remove %s clan:"), aGroup1Name);
 		DoBindchat(s_Warlist6, aBuf, ".delwarclan", "remove_war_clan_index 1");
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		str_format(aBuf, sizeof(aBuf), "Remove %s name:", aGroup2Name);
+		str_format(aBuf, sizeof(aBuf), Localize("Remove %s name:"), aGroup2Name);
 		DoBindchat(s_Warlist7, aBuf, ".delteam", "remove_war_name_index 2");
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		str_format(aBuf, sizeof(aBuf), "Remove %s clan:", aGroup2Name);
+		str_format(aBuf, sizeof(aBuf), Localize("Remove %s clan:"), aGroup2Name);
 		DoBindchat(s_Warlist8, aBuf, ".delteamclan", "remove_war_clan_index 2");
 
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		DoBindchat(s_Warlist9, "Add [group] [name] [reason]", ".name", "war_name");
+		DoBindchat(s_Warlist9, Localize("Add [group] [name] [reason]"), ".name", "war_name");
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		DoBindchat(s_Warlist10, "Add [group] [clan] [reason]", ".clan", "war_clan");
+		DoBindchat(s_Warlist10, Localize("Add [group] [clan] [reason]"), ".clan", "war_clan");
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		DoBindchat(s_Warlist11, "Remove [group] [name]", ".delname", "remove_war_name");
+		DoBindchat(s_Warlist11, Localize("Remove [group] [name]"), ".delname", "remove_war_name");
 		Column.HSplitTop(MarginSmall, nullptr, &Column);
-		DoBindchat(s_Warlist12, "Remove [group] [clan]", ".delclan", "remove_war_clan");
+		DoBindchat(s_Warlist12, Localize("Remove [group] [clan]"), ".delclan", "remove_war_clan");
 	}
 
 	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)
@@ -430,7 +430,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("Name:"), FontSize, TEXTALIGN_ML);
 		static CLineInput s_NameInput;
 		s_NameInput.SetBuffer(s_aBindName, sizeof(s_aBindName));
-		s_NameInput.SetEmptyText("Name");
+		s_NameInput.SetEmptyText(Localize("Name"));
 		Ui()->DoEditBox(&s_NameInput, &Button, EditBoxFontSize);
 
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
@@ -1196,7 +1196,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	Button.VSplitMid(&ButtonL, &ButtonR, MarginSmall);
 	static CLineInput s_NameInput;
 	s_NameInput.SetBuffer(s_aEntryName, sizeof(s_aEntryName));
-	s_NameInput.SetEmptyText("Name");
+	s_NameInput.SetEmptyText(Localize("Name"));
 	if(s_IsName)
 		Ui()->DoEditBox(&s_NameInput, &ButtonL, 12.0f);
 	else
@@ -1210,7 +1210,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 
 	static CLineInput s_ClanInput;
 	s_ClanInput.SetBuffer(s_aEntryClan, sizeof(s_aEntryClan));
-	s_ClanInput.SetEmptyText("Clan");
+	s_ClanInput.SetEmptyText(Localize("Clan"));
 	if(s_IsClan)
 		Ui()->DoEditBox(&s_ClanInput, &ButtonR, 12.0f);
 	else
@@ -1226,12 +1226,12 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	Column2.HSplitTop(LineSize, &Button, &Column2);
 	Button.VSplitMid(&ButtonL, &ButtonR, MarginSmall);
 	static unsigned char s_NameRadio, s_ClanRadio;
-	if(DoButton_CheckBox_Common(&s_NameRadio, "Name", s_IsName ? "X" : "", &ButtonL))
+	if(DoButton_CheckBox_Common(&s_NameRadio, Localize("Name"), s_IsName ? "X" : "", &ButtonL))
 	{
 		s_IsName = 1;
 		s_IsClan = 0;
 	}
-	if(DoButton_CheckBox_Common(&s_ClanRadio, "Clan", s_IsClan ? "X" : "", &ButtonR))
+	if(DoButton_CheckBox_Common(&s_ClanRadio, Localize("Clan"), s_IsClan ? "X" : "", &ButtonR))
 	{
 		s_IsName = 0;
 		s_IsClan = 1;
@@ -1245,7 +1245,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	Column2.HSplitTop(HeadlineFontSize, &Button, &Column2);
 	static CLineInput s_ReasonInput;
 	s_ReasonInput.SetBuffer(s_aEntryReason, sizeof(s_aEntryReason));
-	s_ReasonInput.SetEmptyText("Reason");
+	s_ReasonInput.SetEmptyText(Localize("Reason"));
 	Ui()->DoEditBox(&s_ReasonInput, &Button, 12.0f);
 
 	static CButtonContainer s_AddButton, s_OverrideButton;

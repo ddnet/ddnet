@@ -2629,20 +2629,35 @@ Override
 TClient
 == 
 
-Open TClient Discord
+Add %s name:
 == 
 
-Failed to open the TClient Discord in your browser
+Add %s clan:
 == 
 
-Aww
+Remove %s name:
 == 
+
+Remove %s clan:
+== 
+
+Add [group] [name] [reason]
+== Добавить игрока [группа] [имя] [причина]
+
+Add [group] [clan] [reason]
+== Добавить клан [группа] [клан] [причина]
+
+Remove [group] [name]
+== Убрать игрока [группа] [имя]
+
+Remove [group] [clan]
+== Убрать клан [группа] [клан]
 
 Command
-== 
+== Команда
 
 Extra tick other tees (increases other tees latency, \nmakes dragging slightly easier when using fast input)
-== 
+== Дополнительный тик других тии (увеличивает задержку других тии,\n немного облегчает перетаскивание при использовании быстрого ввода)
 
 Prediction Margin
 == 
@@ -2651,7 +2666,7 @@ Anti Ping Smoothing
 == 
 
 Use new smoothing algorithm
-== 
+== Использовать новый анти-пинг
 
 Use warlist colors instead of regular colors
 == 
@@ -2668,6 +2683,9 @@ Outline kill
 Kill outline color
 == 
 
+Reason
+== Причина
+
 Are you sure that you want to remove '%s' from your war groups?
 == 
 
@@ -2681,7 +2699,7 @@ Github
 == 
 
 Chatbinds
-== 
+== Бинды для чата
 
 Integration
 == 
@@ -2702,4 +2720,4 @@ After Load
 == 
 
 _ or \' \' = Space
-== 
+== _ or \' \' = Space (Пробел)
