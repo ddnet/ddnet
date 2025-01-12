@@ -136,6 +136,8 @@ public:
 	virtual void ShowInfo();
 	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
+	void TranslateAutoMapReferenceId(int ReferenceId);
+
 	struct SCommonPropState
 	{
 		enum
@@ -176,6 +178,7 @@ public:
 	// DDRace
 
 	int m_AutoMapperConfig;
+	int m_AutoMapperReference;
 	int m_Seed;
 	bool m_AutoAutoMap;
 	int m_Tele;
