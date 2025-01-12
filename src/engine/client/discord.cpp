@@ -65,7 +65,7 @@ public:
 		str_copy(Activity.assets.large_image, "tclient", sizeof(Activity.assets.large_image));
 		str_copy(Activity.assets.large_text, "TClient", sizeof(Activity.assets.large_text));
 		Activity.timestamps.start = time_timestamp();
-		str_copy(Activity.details, "Offline", sizeof(Activity.details));
+		str_copy(Activity.details, "In-Menus", sizeof(Activity.details));
 		m_pActivityManager->update_activity(m_pActivityManager, &Activity, 0, 0);
 	}
 	void SetGameInfo(const NETADDR &ServerAddr, const char *pMapName, bool AnnounceAddr) override
@@ -75,7 +75,7 @@ public:
 		str_copy(Activity.assets.large_image, "tclient", sizeof(Activity.assets.large_image));
 		str_copy(Activity.assets.large_text, "TClient", sizeof(Activity.assets.large_text));
 		Activity.timestamps.start = time_timestamp();
-		str_copy(Activity.details, "Online", sizeof(Activity.details));
+		str_copy(Activity.details, "In-Game", sizeof(Activity.details));
 		str_copy(Activity.state, pMapName, sizeof(Activity.state));
 		m_pActivityManager->update_activity(m_pActivityManager, &Activity, 0, 0);
 	}
