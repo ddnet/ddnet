@@ -508,35 +508,35 @@ const char *CEditor::ExplainFNG(int Tile, int Layer)
 		break;
 	case TILE_FNG_SPIKE_GOLD:
 		if(Layer == LAYER_GAME)
-			return "GOLDEN SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			return "GOLDEN SPIKE: Kills the tee and gives points to the killer. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SPIKE_NORMAL:
 		if(Layer == LAYER_GAME)
-			return "NORMAL SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			return "NORMAL SPIKE: Kills the tee and gives points to the killer. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SPIKE_RED:
 		if(Layer == LAYER_GAME)
-			return "RED SPIKE: Red team spikes. Gives negative points when killer is in blue team (Amount of points given is set inside the server)";
+			return "RED SPIKE: Red team spikes. Gives negative points when killer is in blue team. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SPIKE_BLUE:
 		if(Layer == LAYER_GAME)
-			return "BLUE SPIKE: Blue team spikes. Gives negative points when killer is in red team (Amount of points given is set inside the server)";
+			return "BLUE SPIKE: Blue team spikes. Gives negative points when killer is in red team. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SCORE_RED:
 		if(Layer == LAYER_GAME)
-			return "SCORE: Old tile used for showing red team score using laser text. No longer usable in FNG2";
+			return "SCORE: Old tile used for showing red team score using laser text. No longer usable in FNG2.";
 		break;
 	case TILE_FNG_SCORE_BLUE:
 		if(Layer == LAYER_GAME)
-			return "SCORE: Old tile used for showing blue team score using laser text. No longer usable in FNG2";
+			return "SCORE: Old tile used for showing blue team score using laser text. No longer usable in FNG2.";
 		break;
 	case TILE_FNG_SPIKE_GREEN:
 		if(Layer == LAYER_GAME)
-			return "GREEN SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			return "GREEN SPIKE: Kills the tee and gives points to the killer. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SPIKE_PURPLE:
 		if(Layer == LAYER_GAME)
-			return "PURPLE SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)";
+			return "PURPLE SPIKE: Kills the tee and gives points to the killer. Amount of points given is set inside the server.";
 		break;
 	case TILE_FNG_SPAWN:
 		if(Layer == LAYER_GAME)

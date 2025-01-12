@@ -743,7 +743,6 @@ public:
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
 
-	char m_aMenuBackgroundTooltip[256];
 	bool m_PreviewZoom;
 	float m_MouseWorldScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
 	vec2 m_MouseWorldPos = vec2(0.0f, 0.0f);
