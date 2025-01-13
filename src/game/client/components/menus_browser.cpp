@@ -1385,11 +1385,16 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	m_pRemoveFriend = nullptr;
 	for(auto &vFriends : m_avFriends)
 		vFriends.clear();
-
 	for(int FriendIndex = 0; FriendIndex < m_pClient->Friends()->NumFriends(); ++FriendIndex)
 	{
 		m_avFriends[FRIEND_OFF].emplace_back(m_pClient->Friends()->GetFriend(FriendIndex));
 	}
+	bool HasFriend = std::any_of(m_avFriends[FRIEND_OFF].begin(), m_avFriends[FRIEND_OFF].end(), [&](const auto &Friend) {
+		return Friend.Name()[0] != '\0';
+	}),
+	     HasClan = std::any_of(m_avFriends[FRIEND_OFF].begin(), m_avFriends[FRIEND_OFF].end(), [&](const auto &Friend) {
+		     return Friend.Name()[0] == '\0';
+	     });
 
 	for(int ServerIndex = 0; ServerIndex < ServerBrowser()->NumSortedServers(); ++ServerIndex)
 	{
@@ -1584,24 +1589,13 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 			}
 
 			// Render empty description
-			if(m_avFriends[FriendType].empty())
+			const char *pText = nullptr;
+			if(FriendType == FRIEND_PLAYER_ON && !HasFriend)
+				pText = Localize("Add friends by entering their name below or by clicking their name in the player list.");
+			else if(FriendType == FRIEND_CLAN_ON && !HasClan)
+				pText = Localize("Add clanmates by entering their clan below and leaving the name blank.");
+			if(pText != nullptr)
 			{
-				const char *pText;
-				switch(FriendType)
-				{
-				case FRIEND_PLAYER_ON:
-					pText = Localize("Add friends by entering their name below or by clicking their name in the player list.");
-					break;
-				case FRIEND_CLAN_ON:
-					pText = Localize("Add clanmates by entering their clan below and leaving the name blank.");
-					break;
-				case FRIEND_OFF:
-					pText = Localize("Offline friends and clanmates will appear here.");
-					break;
-				default:
-					dbg_assert(false, "Invalid friend state");
-					dbg_break();
-				}
 				const float DescriptionMargin = 2.0f;
 				const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pText, -1, List.w - 2 * DescriptionMargin);
 				CUIRect EmptyDescription;
