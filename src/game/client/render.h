@@ -18,6 +18,7 @@ class CSwitchTile;
 class CTeleTile;
 class CTile;
 class CTuneTile;
+class CRedirectTile;
 namespace client_data7 {
 struct CDataSprite;
 }
@@ -256,10 +257,12 @@ public:
 	void RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, float Alpha = 1.0f) const;
 	void RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha = 1.0f) const;
 	void RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha = 1.0f) const;
+	void RenderRedirectOverlay(CRedirectTile *pRedirect, int w, int h, float Scale, float Alpha = 1.0f) const;
 	void RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
 	void RenderSpeedupmap(CSpeedupTile *pSpeedup, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
 	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
 	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
+	void RenderRedirectmap(CRedirectTile *pRedirect, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
 };
 
 #endif

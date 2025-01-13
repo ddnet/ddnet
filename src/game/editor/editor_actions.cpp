@@ -45,6 +45,14 @@ CEditorBrushDrawAction::CEditorBrushDrawAction(CEditor *pEditor, int Group) :
 					Map.m_pSpeedupLayer->ClearHistory();
 				}
 			}
+			else if(pLayer == Map.m_pRedirectLayer)
+			{
+				if(!Map.m_pRedirectLayer->m_History.empty())
+				{
+					m_RedirectTileChanges = std::map(Map.m_pRedirectLayer->m_History);
+					Map.m_pRedirectLayer->ClearHistory();
+				}
+			}
 
 			if(!pLayerTiles->m_TilesHistory.empty())
 			{
@@ -105,15 +113,27 @@ void CEditorBrushDrawAction::SetInfos()
 		m_TotalTilesDrawn += TuneChange.second.size();
 	}
 
+	// Process redirect tiles
+	for(auto const &RedirectChange : m_RedirectTileChanges)
+	{
+		m_TotalTilesDrawn += RedirectChange.second.size();
+	}
+
 	m_TotalLayers += !m_SpeedupTileChanges.empty();
 	m_TotalLayers += !m_SwitchTileChanges.empty();
 	m_TotalLayers += !m_TeleTileChanges.empty();
 	m_TotalLayers += !m_TuneTileChanges.empty();
+	m_TotalLayers += !m_RedirectTileChanges.empty();
 }
 
 bool CEditorBrushDrawAction::IsEmpty()
 {
-	return m_vTileChanges.empty() && m_SpeedupTileChanges.empty() && m_SwitchTileChanges.empty() && m_TeleTileChanges.empty() && m_TuneTileChanges.empty();
+	return m_vTileChanges.empty() &&
+	       m_SpeedupTileChanges.empty() &&
+	       m_SwitchTileChanges.empty() &&
+	       m_TeleTileChanges.empty() &&
+	       m_TuneTileChanges.empty() &&
+	       m_RedirectTileChanges.empty();
 }
 
 void CEditorBrushDrawAction::Undo()
@@ -227,6 +247,24 @@ void CEditorBrushDrawAction::Apply(bool Undo)
 			Map.m_pTuneLayer->m_pTuneTile[Index].m_Number = Data.m_Number;
 			Map.m_pTuneLayer->m_pTuneTile[Index].m_Type = Data.m_Type;
 			Map.m_pTuneLayer->m_pTiles[Index].m_Index = Data.m_Index;
+		}
+	}
+
+	// Process redirect tiles
+	for(auto const &RedirectChange : m_RedirectTileChanges)
+	{
+		int y = RedirectChange.first;
+		auto Line = RedirectChange.second;
+		for(auto &Tile : Line)
+		{
+			int x = Tile.first;
+			int Index = (y * Map.m_pRedirectLayer->m_Width) + x;
+			SRedirectTileStateChange State = Tile.second;
+			SRedirectTileStateChange::SData Data = Undo ? State.m_Previous : State.m_Current;
+			Map.m_pRedirectLayer->m_pRedirectTile[Index] = {
+				Data.m_Type,
+				Data.m_Port};
+			Map.m_pRedirectLayer->m_pTiles[Index].m_Index = Data.m_Index;
 		}
 	}
 }
@@ -553,6 +591,8 @@ void CEditorActionAddLayer::Undo()
 			m_pEditor->m_Map.m_pSwitchLayer = nullptr;
 		else if(pLayerTiles->m_Tune)
 			m_pEditor->m_Map.m_pTuneLayer = nullptr;
+		else if(pLayerTiles->m_Redirect)
+			m_pEditor->m_Map.m_pRedirectLayer = nullptr;
 	}
 
 	vLayers.erase(vLayers.begin() + m_LayerIndex);
@@ -582,6 +622,8 @@ void CEditorActionAddLayer::Redo()
 			m_pEditor->m_Map.m_pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(m_pLayer);
 		else if(pLayerTiles->m_Tune)
 			m_pEditor->m_Map.m_pTuneLayer = std::static_pointer_cast<CLayerTune>(m_pLayer);
+		else if(pLayerTiles->m_Redirect)
+			m_pEditor->m_Map.m_pRedirectLayer = std::static_pointer_cast<CLayerRedirect>(m_pLayer);
 	}
 
 	vLayers.insert(vLayers.begin() + m_LayerIndex, m_pLayer);
@@ -615,6 +657,8 @@ void CEditorActionDeleteLayer::Redo()
 			m_pEditor->m_Map.m_pSwitchLayer = nullptr;
 		else if(pLayerTiles->m_Tune)
 			m_pEditor->m_Map.m_pTuneLayer = nullptr;
+		else if(pLayerTiles->m_Redirect)
+			m_pEditor->m_Map.m_pRedirectLayer = nullptr;
 	}
 
 	m_pEditor->m_Map.m_vpGroups[m_GroupIndex]->DeleteLayer(m_LayerIndex);
@@ -644,6 +688,8 @@ void CEditorActionDeleteLayer::Undo()
 			m_pEditor->m_Map.m_pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(m_pLayer);
 		else if(pLayerTiles->m_Tune)
 			m_pEditor->m_Map.m_pTuneLayer = std::static_pointer_cast<CLayerTune>(m_pLayer);
+		else if(pLayerTiles->m_Redirect)
+			m_pEditor->m_Map.m_pRedirectLayer = std::static_pointer_cast<CLayerRedirect>(m_pLayer);
 	}
 
 	vLayers.insert(vLayers.begin() + m_LayerIndex, m_pLayer);
@@ -879,7 +925,13 @@ void CEditorActionEditLayerTilesProp::Undo()
 			pLayerTiles->Resize(m_Previous, pLayerTiles->m_Height);
 
 		RestoreLayer(LAYERTYPE_TILES, pLayerTiles);
-		if(pLayerTiles->m_Game || pLayerTiles->m_Front || pLayerTiles->m_Switch || pLayerTiles->m_Speedup || pLayerTiles->m_Tune)
+		if(
+			pLayerTiles->m_Game ||
+			pLayerTiles->m_Front ||
+			pLayerTiles->m_Switch ||
+			pLayerTiles->m_Speedup ||
+			pLayerTiles->m_Tune ||
+			pLayerTiles->m_Redirect)
 		{
 			if(m_pEditor->m_Map.m_pFrontLayer && !pLayerTiles->m_Front)
 				RestoreLayer(LAYERTYPE_FRONT, m_pEditor->m_Map.m_pFrontLayer);
@@ -891,6 +943,8 @@ void CEditorActionEditLayerTilesProp::Undo()
 				RestoreLayer(LAYERTYPE_SPEEDUP, m_pEditor->m_Map.m_pSpeedupLayer);
 			if(m_pEditor->m_Map.m_pTuneLayer && !pLayerTiles->m_Tune)
 				RestoreLayer(LAYERTYPE_TUNE, m_pEditor->m_Map.m_pTuneLayer);
+			if(m_pEditor->m_Map.m_pRedirectLayer && !pLayerTiles->m_Redirect)
+				RestoreLayer(LAYERTYPE_REDIRECT, m_pEditor->m_Map.m_pRedirectLayer);
 			if(!pLayerTiles->m_Game)
 				RestoreLayer(LAYERTYPE_GAME, m_pEditor->m_Map.m_pGameLayer);
 		}
@@ -971,6 +1025,8 @@ void CEditorActionEditLayerTilesProp::Redo()
 				m_pEditor->m_Map.m_pSpeedupLayer->Resize(pLayerTiles->m_Width, pLayerTiles->m_Height);
 			if(m_pEditor->m_Map.m_pTuneLayer && !pLayerTiles->m_Tune)
 				m_pEditor->m_Map.m_pTuneLayer->Resize(pLayerTiles->m_Width, pLayerTiles->m_Height);
+			if(m_pEditor->m_Map.m_pRedirectLayer && !pLayerTiles->m_Redirect)
+				m_pEditor->m_Map.m_pRedirectLayer->Resize(pLayerTiles->m_Width, pLayerTiles->m_Height);
 			if(!pLayerTiles->m_Game)
 				m_pEditor->m_Map.m_pGameLayer->Resize(pLayerTiles->m_Width, pLayerTiles->m_Height);
 		}
@@ -1058,6 +1114,12 @@ void CEditorActionEditLayerTilesProp::RestoreLayer(int Layer, const std::shared_
 			std::shared_ptr<CLayerTune> pLayerTune = std::static_pointer_cast<CLayerTune>(pLayerTiles);
 			std::shared_ptr<CLayerTune> pSavedLayerTune = std::static_pointer_cast<CLayerTune>(pSavedLayerTiles);
 			mem_copy(pLayerTune->m_pTuneTile, pSavedLayerTune->m_pTuneTile, (size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile));
+		}
+		else if(pLayerTiles->m_Redirect)
+		{
+			std::shared_ptr<CLayerRedirect> pLayerRedirect = std::static_pointer_cast<CLayerRedirect>(pLayerTiles);
+			std::shared_ptr<CLayerRedirect> pSavedLayerRedirect = std::static_pointer_cast<CLayerRedirect>(pSavedLayerTiles);
+			mem_copy(pLayerRedirect->m_pRedirectTile, pSavedLayerRedirect->m_pRedirectTile, (size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CRedirectTile));
 		}
 	}
 }

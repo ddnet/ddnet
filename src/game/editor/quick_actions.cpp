@@ -139,6 +139,17 @@ void CEditor::AddTeleLayer()
 	m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(this, m_SelectedGroup, LayerIndex));
 }
 
+void CEditor::AddRedirectLayer()
+{
+	std::shared_ptr<CLayer> pRedirectLayer = std::make_shared<CLayerRedirect>(this, m_Map.m_pGameLayer->m_Width, m_Map.m_pGameLayer->m_Height);
+	m_Map.MakeRedirectLayer(pRedirectLayer);
+	m_Map.m_vpGroups[m_SelectedGroup]->AddLayer(pRedirectLayer);
+	int LayerIndex = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1;
+	SelectLayer(LayerIndex);
+	m_pBrush->Clear();
+	// TODO: history
+}
+
 bool CEditor::IsNonGameTileLayerSelected() const
 {
 	std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
@@ -152,7 +163,8 @@ bool CEditor::IsNonGameTileLayerSelected() const
 		pLayer == m_Map.m_pSwitchLayer ||
 		pLayer == m_Map.m_pTeleLayer ||
 		pLayer == m_Map.m_pSpeedupLayer ||
-		pLayer == m_Map.m_pTuneLayer)
+		pLayer == m_Map.m_pTuneLayer ||
+		pLayer == m_Map.m_pRedirectLayer)
 		return false;
 
 	return true;
@@ -210,6 +222,8 @@ void CEditor::DeleteSelectedLayer()
 		m_Map.m_pSwitchLayer = nullptr;
 	if(pCurrentLayer == m_Map.m_pTuneLayer)
 		m_Map.m_pTuneLayer = nullptr;
+	if(pCurrentLayer == m_Map.m_pRedirectLayer)
+		m_Map.m_pRedirectLayer = nullptr;
 	m_Map.m_vpGroups[m_SelectedGroup]->DeleteLayer(m_vSelectedLayers[0]);
 
 	SelectPreviousLayer();

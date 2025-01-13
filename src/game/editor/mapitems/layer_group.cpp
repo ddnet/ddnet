@@ -81,7 +81,14 @@ void CLayerGroup::Render()
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
-				if(pTiles->m_Game || pTiles->m_Front || pTiles->m_Tele || pTiles->m_Speedup || pTiles->m_Tune || pTiles->m_Switch)
+				if(
+					pTiles->m_Game ||
+					pTiles->m_Front ||
+					pTiles->m_Tele ||
+					pTiles->m_Speedup ||
+					pTiles->m_Tune ||
+					pTiles->m_Redirect ||
+					pTiles->m_Switch)
 					continue;
 			}
 			if(m_pMap->m_pEditor->m_ShowDetail || !(pLayer->m_Flags & LAYERFLAG_DETAIL))
@@ -94,7 +101,14 @@ void CLayerGroup::Render()
 		if(pLayer->m_Visible && pLayer->m_Type == LAYERTYPE_TILES && !pLayer->IsEntitiesLayer())
 		{
 			std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
-			if(pTiles->m_Game || pTiles->m_Front || pTiles->m_Tele || pTiles->m_Speedup || pTiles->m_Tune || pTiles->m_Switch)
+			if(
+				pTiles->m_Game ||
+				pTiles->m_Front ||
+				pTiles->m_Tele ||
+				pTiles->m_Speedup ||
+				pTiles->m_Tune ||
+				pTiles->m_Switch ||
+				pTiles->m_Redirect)
 			{
 				pLayer->Render();
 			}

@@ -348,6 +348,7 @@ void CMapLayers::OnMapLoad()
 			bool IsTeleLayer = false;
 			bool IsSpeedupLayer = false;
 			bool IsTuneLayer = false;
+			bool IsRedirectLayer = false;
 			bool IsGameLayer = false;
 			bool IsEntityLayer = false;
 
@@ -372,6 +373,9 @@ void CMapLayers::OnMapLoad()
 
 			if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
 				IsEntityLayer = IsTuneLayer = true;
+
+			if(pLayer == (CMapItemLayer *)m_pLayers->RedirectLayer())
+				IsEntityLayer = IsRedirectLayer = true;
 
 			if(m_Type <= TYPE_BACKGROUND_FORCE)
 			{
@@ -419,6 +423,12 @@ void CMapLayers::OnMapLoad()
 				{
 					DataIndex = pTMap->m_Tune;
 					TileSize = sizeof(CTuneTile);
+				}
+				else if(IsRedirectLayer)
+				{
+					DataIndex = pTMap->m_Redirect;
+					TileSize = sizeof(CRedirectTile);
+					OverlayCount = 1;
 				}
 				else
 				{
@@ -540,6 +550,20 @@ void CMapLayers::OnMapLoad()
 									{
 										Index = ((CTuneTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
 										Flags = 0;
+									}
+									if(IsRedirectLayer)
+									{
+										Index = ((CRedirectTile *)pTiles)[(y * pTMap->m_Width) + x].m_Type;
+										Flags = 0;
+										if(CurOverlay == 1)
+										{
+											// TODO: redirect ports are unsigned shorts but the Index is
+											//       an unsigned char so we overflow it and show the wrong number
+											if(IsValidRedirectTile(Index))
+												Index = ((CRedirectTile *)pTiles)[(y * pTMap->m_Width) + x].m_Port;
+											else
+												Index = 0;
+										}
 									}
 								}
 								else
@@ -1400,6 +1424,7 @@ void CMapLayers::OnRender()
 			bool IsTeleLayer = false;
 			bool IsSpeedupLayer = false;
 			bool IsTuneLayer = false;
+			bool IsRedirectLayer = false;
 			bool IsEntityLayer = false;
 
 			if(pLayer == (CMapItemLayer *)m_pLayers->GameLayer())
@@ -1422,6 +1447,9 @@ void CMapLayers::OnRender()
 
 			if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
 				IsEntityLayer = IsTuneLayer = true;
+
+			if(pLayer == (CMapItemLayer *)m_pLayers->RedirectLayer())
+				IsEntityLayer = IsRedirectLayer = true;
 
 			if(m_Type == -1)
 				Render = true;
@@ -1505,6 +1533,12 @@ void CMapLayers::OnRender()
 					TileSize = sizeof(CTuneTile);
 					TileLayerAndOverlayCount = 1;
 				}
+				else if(IsRedirectLayer)
+				{
+					DataIndex = pTMap->m_Redirect;
+					TileSize = sizeof(CRedirectTile);
+					TileLayerAndOverlayCount = 2;
+				}
 				else
 				{
 					DataIndex = pTMap->m_Data;
@@ -1531,7 +1565,7 @@ void CMapLayers::OnRender()
 			if(m_Type == TYPE_FULL_DESIGN)
 				EntityOverlayVal = 0;
 
-			if((Render && EntityOverlayVal < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer) || (EntityOverlayVal && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
+			if((Render && EntityOverlayVal < 100 && !IsGameLayer && !IsFrontLayer && !IsSwitchLayer && !IsTeleLayer && !IsSpeedupLayer && !IsTuneLayer && !IsRedirectLayer) || (EntityOverlayVal && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
 			{
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
@@ -1793,6 +1827,37 @@ void CMapLayers::OnRender()
 					{
 						Graphics()->BlendNormal();
 						RenderTileLayer(TileLayerCounter - 1, Color);
+					}
+				}
+			}
+			else if(Render && EntityOverlayVal && IsRedirectLayer)
+			{
+				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
+
+				CRedirectTile *pRedirectTiles = (CRedirectTile *)m_pLayers->Map()->GetData(pTMap->m_Redirect);
+				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Redirect);
+
+				if(Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CRedirectTile))
+				{
+					const ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, EntityOverlayVal / 100.0f);
+					if(!Graphics()->IsTileBufferingEnabled())
+					{
+						Graphics()->BlendNone();
+						RenderTools()->RenderRedirectmap(pRedirectTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
+						Graphics()->BlendNormal();
+						RenderTools()->RenderRedirectmap(pRedirectTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
+						RenderTools()->RenderRedirectOverlay(pRedirectTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, EntityOverlayVal / 100.0f);
+					}
+					else
+					{
+						Graphics()->BlendNormal();
+						RenderTileLayer(TileLayerCounter - 2, Color);
+						if(g_Config.m_ClTextEntities)
+						{
+							Graphics()->TextureSet(m_pImages->GetOverlayCenter());
+							RenderTileLayer(TileLayerCounter - 1, Color);
+						}
 					}
 				}
 			}

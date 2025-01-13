@@ -94,6 +94,13 @@ void CCollision::Init(class CLayers *pLayers)
 			m_pFront = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->FrontLayer()->m_Front));
 	}
 
+	if(m_pLayers->RedirectLayer())
+	{
+		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->RedirectLayer()->m_Redirect);
+		if(Size >= (size_t)m_Width * m_Height * sizeof(CRedirectTile))
+			m_pRedirect = static_cast<CRedirectTile *>(m_pLayers->Map()->GetData(m_pLayers->RedirectLayer()->m_Redirect));
+	}
+
 	for(int i = 0; i < m_Width * m_Height; i++)
 	{
 		int Index;
@@ -167,6 +174,7 @@ void CCollision::Unload()
 	m_pFront = nullptr;
 	m_pSwitch = nullptr;
 	m_pTune = nullptr;
+	m_pRedirect = nullptr;
 	delete[] m_pDoor;
 	m_pDoor = nullptr;
 }
@@ -741,6 +749,16 @@ int CCollision::IsTune(int Index) const
 	return 0;
 }
 
+int CCollision::IsRedirect(int Index) const
+{
+	if(Index < 0 || !m_pRedirect)
+		return 0;
+
+	if(m_pRedirect[Index].m_Type)
+		return m_pRedirect[Index].m_Port;
+	return 0;
+}
+
 void CCollision::GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) const
 {
 	if(Index < 0 || !m_pSpeedup)
@@ -852,6 +870,8 @@ bool CCollision::TileExists(int Index) const
 	if(m_pSwitch && m_pSwitch[Index].m_Type)
 		return true;
 	if(m_pTune && m_pTune[Index].m_Type)
+		return true;
+	if(m_pRedirect && m_pRedirect[Index].m_Type)
 		return true;
 	return TileExistsNext(Index);
 }
@@ -1066,6 +1086,9 @@ int CCollision::Entity(int x, int y, int Layer) const
 		return m_pSpeedup[Index].m_Type - ENTITY_OFFSET;
 	case LAYER_TUNE:
 		return m_pTune[Index].m_Type - ENTITY_OFFSET;
+	// TODO: does this make sense? what entities does tune/speedup/tele even have?
+	case LAYER_REDIRECT:
+		return m_pRedirect[Index].m_Type - ENTITY_OFFSET;
 	default:
 		dbg_assert(false, "Layer invalid");
 		dbg_break();

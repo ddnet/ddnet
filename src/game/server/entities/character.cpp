@@ -1411,6 +1411,13 @@ void CCharacter::HandleSkippableTiles(int Index)
 	if(Index < 0)
 		return;
 
+	int RedirectPort = GameServer()->Collision()->IsRedirect(Index);
+	if(RedirectPort)
+	{
+		Server()->RedirectClient(GetPlayer()->GetCid(), RedirectPort);
+		return;
+	}
+
 	// handle speedup tiles
 	if(Collision()->IsSpeedup(Index))
 	{

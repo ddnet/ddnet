@@ -105,6 +105,16 @@ void CLayers::Init(IMap *pMap, bool GameOnly)
 					m_pTuneLayer = pTilemap;
 					IsEntities = true;
 				}
+
+				if(pTilemap->m_Flags & TILESLAYERFLAG_REDIRECT)
+				{
+					if(pTilemap->m_Version <= 2)
+					{
+						pTilemap->m_Redirect = *((int *)(pTilemap) + 20);
+					}
+					m_pRedirectLayer = pTilemap;
+					IsEntities = true;
+				}
 			}
 
 			if(IsEntities)
@@ -134,6 +144,7 @@ void CLayers::Unload()
 	m_pFrontLayer = nullptr;
 	m_pSwitchLayer = nullptr;
 	m_pTuneLayer = nullptr;
+	m_pRedirectLayer = nullptr;
 }
 
 void CLayers::InitTilemapSkip()

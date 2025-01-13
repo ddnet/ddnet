@@ -31,6 +31,7 @@ public:
 	CMapItemLayerTilemap *FrontLayer() const { return m_pFrontLayer; }
 	CMapItemLayerTilemap *SwitchLayer() const { return m_pSwitchLayer; }
 	CMapItemLayerTilemap *TuneLayer() const { return m_pTuneLayer; }
+	CMapItemLayerTilemap *RedirectLayer() const { return m_pRedirectLayer; }
 
 private:
 	int m_GroupsNum;
@@ -47,6 +48,7 @@ private:
 	CMapItemLayerTilemap *m_pFrontLayer;
 	CMapItemLayerTilemap *m_pSwitchLayer;
 	CMapItemLayerTilemap *m_pTuneLayer;
+	CMapItemLayerTilemap *m_pRedirectLayer;
 
 	void InitTilemapSkip();
 };

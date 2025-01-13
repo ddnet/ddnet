@@ -16,6 +16,7 @@ class CSpeedupTile;
 class CSwitchTile;
 class CTuneTile;
 class CDoorTile;
+class CRedirectTile;
 
 enum
 {
@@ -93,6 +94,7 @@ public:
 	int IsTeleCheckpoint(int Index) const;
 	int IsSpeedup(int Index) const;
 	int IsTune(int Index) const;
+	int IsRedirect(int Index) const;
 	void GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) const;
 	int GetSwitchType(int Index) const;
 	int GetSwitchNumber(int Index) const;
@@ -117,6 +119,7 @@ public:
 	const CTile *FrontLayer() const { return m_pFront; }
 	const CSwitchTile *SwitchLayer() const { return m_pSwitch; }
 	const CTuneTile *TuneLayer() const { return m_pTune; }
+	const CRedirectTile *RedirectLayer() const { return m_pRedirect; }
 
 	int m_HighestSwitchNumber;
 
@@ -156,6 +159,7 @@ private:
 	CSwitchTile *m_pSwitch;
 	CTuneTile *m_pTune;
 	CDoorTile *m_pDoor;
+	CRedirectTile *m_pRedirect;
 
 	// TILE_TELEIN
 	std::map<int, std::vector<vec2>> m_TeleIns;

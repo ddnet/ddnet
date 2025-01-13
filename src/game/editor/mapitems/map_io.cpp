@@ -197,6 +197,8 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 					Item.m_Flags = TILESLAYERFLAG_SWITCH;
 				else if(pLayerTiles->m_Tune)
 					Item.m_Flags = TILESLAYERFLAG_TUNE;
+				else if(pLayerTiles->m_Redirect)
+					Item.m_Flags = TILESLAYERFLAG_REDIRECT;
 				else
 					Item.m_Flags = pLayerTiles->m_Game ? TILESLAYERFLAG_GAME : 0;
 
@@ -208,6 +210,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Front = -1;
 				Item.m_Switch = -1;
 				Item.m_Tune = -1;
+				Item.m_Redirect = -1;
 
 				if(Item.m_Flags && !(pLayerTiles->m_Game))
 				{
@@ -226,6 +229,8 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 						Item.m_Switch = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSwitchTile), std::static_pointer_cast<CLayerSwitch>(pLayerTiles)->m_pSwitchTile);
 					else if(pLayerTiles->m_Tune)
 						Item.m_Tune = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile), std::static_pointer_cast<CLayerTune>(pLayerTiles)->m_pTuneTile);
+					else if(pLayerTiles->m_Redirect)
+						Item.m_Redirect = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CRedirectTile), std::static_pointer_cast<CLayerRedirect>(pLayerTiles)->m_pRedirectTile);
 				}
 				else
 					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
@@ -734,6 +739,14 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						pTiles = std::make_shared<CLayerTune>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
 						MakeTuneLayer(pTiles);
 					}
+					else if(pTilemapItem->m_Flags & TILESLAYERFLAG_REDIRECT)
+					{
+						if(pTilemapItem->m_Version <= 2)
+							pTilemapItem->m_Redirect = *((const int *)(pTilemapItem) + 19);
+
+						pTiles = std::make_shared<CLayerRedirect>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						MakeRedirectLayer(pTiles);
+					}
 					else
 					{
 						pTiles = std::make_shared<CLayerTiles>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
@@ -847,6 +860,29 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 							}
 						}
 						DataFile.UnloadData(pTilemapItem->m_Tune);
+					}
+					else if(pTiles->m_Redirect)
+					{
+						// TODO: not sure about this
+						void *pRedirectData = DataFile.GetData(pTilemapItem->m_Redirect);
+						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Redirect);
+
+						if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CRedirectTile))
+						{
+							CRedirectTile *pLayerRedirectTiles = std::static_pointer_cast<CLayerRedirect>(pTiles)->m_pRedirectTile;
+							mem_copy(pLayerRedirectTiles, pRedirectData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CRedirectTile));
+
+							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							{
+								// TODO: does Port > 0 make sense? what is the lowest port? should setting port 0 delete the tile??
+								if(IsValidRedirectTile(pLayerRedirectTiles[i].m_Type) && pLayerRedirectTiles[i].m_Port > 0)
+									pTiles->m_pTiles[i].m_Index = pLayerRedirectTiles[i].m_Type;
+								else
+									pTiles->m_pTiles[i].m_Index = 0;
+							}
+						}
+
+						DataFile.UnloadData(pTilemapItem->m_Redirect);
 					}
 					else // regular tile layer or game layer
 					{
@@ -1024,8 +1060,13 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					{
 						std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId]);
 						// only load auto mappers for tile layers (not physics layers)
-						if(!(pTiles->m_Game || pTiles->m_Tele || pTiles->m_Speedup ||
-							   pTiles->m_Front || pTiles->m_Switch || pTiles->m_Tune))
+						if(!(pTiles->m_Game ||
+							   pTiles->m_Tele ||
+							   pTiles->m_Speedup ||
+							   pTiles->m_Front ||
+							   pTiles->m_Switch ||
+							   pTiles->m_Tune ||
+							   pTiles->m_Redirect))
 						{
 							pTiles->m_AutoMapperConfig = pItem->m_AutomapperConfig;
 							pTiles->m_Seed = pItem->m_AutomapperSeed;

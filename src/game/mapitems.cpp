@@ -57,6 +57,11 @@ bool IsValidTeleTile(int Index)
 		Index == TILE_TELECHECKINEVIL);
 }
 
+bool IsValidRedirectTile(int Index)
+{
+	return Index == TILE_REDIRECT;
+}
+
 bool IsTeleTileCheckpoint(int Index)
 {
 	return Index == TILE_TELECHECK || Index == TILE_TELECHECKOUT;

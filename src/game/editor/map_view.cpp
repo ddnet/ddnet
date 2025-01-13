@@ -90,7 +90,8 @@ void CMapView::RenderMap()
 			(Editor()->m_Map.m_pTeleLayer && !Editor()->m_Map.m_pTeleLayer->m_Visible) ||
 			(Editor()->m_Map.m_pSpeedupLayer && !Editor()->m_Map.m_pSpeedupLayer->m_Visible) ||
 			(Editor()->m_Map.m_pTuneLayer && !Editor()->m_Map.m_pTuneLayer->m_Visible) ||
-			(Editor()->m_Map.m_pSwitchLayer && !Editor()->m_Map.m_pSwitchLayer->m_Visible);
+			(Editor()->m_Map.m_pSwitchLayer && !Editor()->m_Map.m_pSwitchLayer->m_Visible) ||
+			(Editor()->m_Map.m_pRedirectLayer && !Editor()->m_Map.m_pRedirectLayer->m_Visible);
 		Editor()->m_Map.m_pGameLayer->m_Visible = AnyHidden;
 		if(Editor()->m_Map.m_pFrontLayer)
 			Editor()->m_Map.m_pFrontLayer->m_Visible = AnyHidden;
@@ -102,6 +103,8 @@ void CMapView::RenderMap()
 			Editor()->m_Map.m_pTuneLayer->m_Visible = AnyHidden;
 		if(Editor()->m_Map.m_pSwitchLayer)
 			Editor()->m_Map.m_pSwitchLayer->m_Visible = AnyHidden;
+		if(Editor()->m_Map.m_pRedirectLayer)
+			Editor()->m_Map.m_pRedirectLayer->m_Visible = AnyHidden;
 	}
 
 	for(auto &pGroup : Editor()->m_Map.m_vpGroups)

@@ -34,6 +34,7 @@ CLayerTiles::CLayerTiles(CEditor *pEditor, int w, int h) :
 	m_Front = 0;
 	m_Switch = 0;
 	m_Tune = 0;
+	m_Redirect = 0;
 	m_AutoMapperConfig = -1;
 	m_Seed = 0;
 	m_AutoAutoMap = false;
@@ -64,6 +65,7 @@ CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
 	m_Front = Other.m_Front;
 	m_Switch = Other.m_Switch;
 	m_Tune = Other.m_Tune;
+	m_Redirect = Other.m_Redirect;
 
 	str_copy(m_aFileName, Other.m_aFileName);
 }
@@ -145,6 +147,8 @@ void CLayerTiles::Render(bool Tileset)
 		Texture = m_pEditor->GetSwitchTexture();
 	else if(m_Tune)
 		Texture = m_pEditor->GetTuneTexture();
+	else if(m_Redirect)
+		Texture = m_pEditor->GetRedirectTexture();
 	Graphics()->TextureSet(Texture);
 
 	ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
@@ -167,6 +171,8 @@ void CLayerTiles::Render(bool Tileset)
 			m_pEditor->RenderTools()->RenderSwitchOverlay(static_cast<CLayerSwitch *>(this)->m_pSwitchTile, m_Width, m_Height, 32.0f);
 		if(m_Tune)
 			m_pEditor->RenderTools()->RenderTuneOverlay(static_cast<CLayerTune *>(this)->m_pTuneTile, m_Width, m_Height, 32.0f);
+		if(m_Redirect)
+			m_pEditor->RenderTools()->RenderRedirectOverlay(static_cast<CLayerRedirect *>(this)->m_pRedirectTile, m_Width, m_Height, 32.0f);
 	}
 }
 
@@ -219,7 +225,13 @@ void CLayerTiles::Clamp(RECTi *pRect) const
 
 bool CLayerTiles::IsEntitiesLayer() const
 {
-	return m_pEditor->m_Map.m_pGameLayer.get() == this || m_pEditor->m_Map.m_pTeleLayer.get() == this || m_pEditor->m_Map.m_pSpeedupLayer.get() == this || m_pEditor->m_Map.m_pFrontLayer.get() == this || m_pEditor->m_Map.m_pSwitchLayer.get() == this || m_pEditor->m_Map.m_pTuneLayer.get() == this;
+	return m_pEditor->m_Map.m_pGameLayer.get() == this ||
+	       m_pEditor->m_Map.m_pTeleLayer.get() == this ||
+	       m_pEditor->m_Map.m_pSpeedupLayer.get() == this ||
+	       m_pEditor->m_Map.m_pFrontLayer.get() == this ||
+	       m_pEditor->m_Map.m_pSwitchLayer.get() == this ||
+	       m_pEditor->m_Map.m_pTuneLayer.get() == this ||
+	       m_pEditor->m_Map.m_pRedirectLayer.get() == this;
 }
 
 bool CLayerTiles::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
@@ -275,6 +287,7 @@ static void InitGrabbedLayer(std::shared_ptr<T> pLayer, CLayerTiles *pThisLayer)
 	pLayer->m_Speedup = pThisLayer->m_Speedup;
 	pLayer->m_Switch = pThisLayer->m_Switch;
 	pLayer->m_Tune = pThisLayer->m_Tune;
+	pLayer->m_Redirect = pThisLayer->m_Redirect;
 	if(pThisLayer->m_pEditor->m_BrushColorEnabled)
 	{
 		pLayer->m_Color = pThisLayer->m_Color;
@@ -393,7 +406,6 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 		pGrabbed->m_SwitchDelay = m_pEditor->m_SwitchDelay;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
-
 	else if(this->m_Tune)
 	{
 		std::shared_ptr<CLayerTune> pGrabbed = std::make_shared<CLayerTune>(m_pEditor, r.w, r.h);
@@ -418,6 +430,32 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 					}
 				}
 		pGrabbed->m_TuningNumber = m_pEditor->m_TuningNum;
+		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
+	}
+	else if(this->m_Redirect)
+	{
+		std::shared_ptr<CLayerRedirect> pGrabbed = std::make_shared<CLayerRedirect>(m_pEditor, r.w, r.h);
+		InitGrabbedLayer(pGrabbed, this);
+
+		pBrush->AddLayer(pGrabbed);
+
+		// copy the tiles
+		for(int y = 0; y < r.h; y++)
+			for(int x = 0; x < r.w; x++)
+				pGrabbed->m_pTiles[(y * pGrabbed->m_Width) + x] = GetTile(r.x + x, r.y + y);
+
+		// copy the tiles
+		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
+			for(int y = 0; y < r.h; y++)
+				for(int x = 0; x < r.w; x++)
+				{
+					pGrabbed->m_pRedirectTile[(y * pGrabbed->m_Width) + x] = static_cast<CLayerRedirect *>(this)->m_pRedirectTile[(r.y + y) * m_Width + (r.x + x)];
+					if(IsValidRedirectTile(pGrabbed->m_pRedirectTile[(y * pGrabbed->m_Width) + x].m_Type))
+					{
+						m_pEditor->m_RedirectPort = pGrabbed->m_pRedirectTile[(y * pGrabbed->m_Width) + x].m_Port;
+					}
+				}
+		pGrabbed->m_RedirectPort = m_pEditor->m_RedirectPort;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 	else if(this->m_Front)
@@ -545,7 +583,7 @@ void CLayerTiles::BrushFlipX()
 {
 	BrushFlipXImpl(m_pTiles);
 
-	if(m_Tele || m_Speedup || m_Tune)
+	if(m_Tele || m_Speedup || m_Tune || m_Redirect)
 		return;
 
 	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
@@ -561,7 +599,7 @@ void CLayerTiles::BrushFlipY()
 {
 	BrushFlipYImpl(m_pTiles);
 
-	if(m_Tele || m_Speedup || m_Tune)
+	if(m_Tele || m_Speedup || m_Tune || m_Redirect)
 		return;
 
 	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
@@ -655,6 +693,10 @@ void CLayerTiles::Resize(int NewW, int NewH)
 	// resize tune layer if available
 	if(m_Game && m_pEditor->m_Map.m_pTuneLayer && (m_pEditor->m_Map.m_pTuneLayer->m_Width != NewW || m_pEditor->m_Map.m_pTuneLayer->m_Height != NewH))
 		m_pEditor->m_Map.m_pTuneLayer->Resize(NewW, NewH);
+
+	// resize redirect layer if available
+	if(m_Game && m_pEditor->m_Map.m_pRedirectLayer && (m_pEditor->m_Map.m_pRedirectLayer->m_Width != NewW || m_pEditor->m_Map.m_pRedirectLayer->m_Height != NewH))
+		m_pEditor->m_Map.m_pRedirectLayer->Resize(NewW, NewH);
 }
 
 void CLayerTiles::Shift(int Direction)
@@ -1140,6 +1182,8 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 							SavedLayers[LAYERTYPE_SPEEDUP] = pEditor->m_Map.m_pSpeedupLayer->Duplicate();
 						if(pEditor->m_Map.m_pTuneLayer && !pLayer->m_Tune)
 							SavedLayers[LAYERTYPE_TUNE] = pEditor->m_Map.m_pTuneLayer->Duplicate();
+						if(pEditor->m_Map.m_pRedirectLayer && !pLayer->m_Redirect)
+							SavedLayers[LAYERTYPE_REDIRECT] = pEditor->m_Map.m_pRedirectLayer->Duplicate();
 						if(!pLayer->m_Game)
 							SavedLayers[LAYERTYPE_GAME] = pEditor->m_Map.m_pGameLayer->Duplicate();
 					}

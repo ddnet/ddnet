@@ -37,6 +37,7 @@ private:
 	EditorTileStateChangeHistory<SSpeedupTileStateChange> m_SpeedupTileChanges;
 	EditorTileStateChangeHistory<SSwitchTileStateChange> m_SwitchTileChanges;
 	EditorTileStateChangeHistory<STuneTileStateChange> m_TuneTileChanges;
+	EditorTileStateChangeHistory<SRedirectTileStateChange> m_RedirectTileChanges;
 
 	int m_TotalTilesDrawn;
 	int m_TotalLayers;

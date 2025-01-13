@@ -1425,6 +1425,7 @@ set(EXPECTED_DATA
   editor/entities_clear/race.png
   editor/entities_clear/vanilla.png
   editor/front.png
+  editor/redirect.png
   editor/speed_arrow.png
   editor/speed_arrow_array.png
   editor/speedup.png
@@ -2489,6 +2490,8 @@ if(CLIENT)
     mapitems/layer_group.h
     mapitems/layer_quads.cpp
     mapitems/layer_quads.h
+    mapitems/layer_redirect.cpp
+    mapitems/layer_redirect.h
     mapitems/layer_sounds.cpp
     mapitems/layer_sounds.h
     mapitems/layer_speedup.cpp

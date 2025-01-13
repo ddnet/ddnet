@@ -19,6 +19,7 @@ enum
 	LAYERTYPE_TUNE,
 	LAYERTYPE_SOUNDS_DEPRECATED, // deprecated! do not use this, this is just for compatibility reasons
 	LAYERTYPE_SOUNDS,
+	LAYERTYPE_REDIRECT,
 
 	MAPITEMTYPE_VERSION = 0,
 	MAPITEMTYPE_INFO,
@@ -132,6 +133,7 @@ enum
 	TILE_TELECHECK,
 	TILE_TELECHECKOUT,
 	TILE_TELECHECKIN,
+	TILE_REDIRECT = 1,
 	TILE_REFILL_JUMPS = 32,
 	TILE_START,
 	TILE_FINISH,
@@ -190,6 +192,7 @@ enum
 	LAYER_SPEEDUP,
 	LAYER_SWITCH,
 	LAYER_TUNE,
+	LAYER_REDIRECT,
 	NUM_LAYERS,
 	//Flags
 	TILEFLAG_XFLIP = 1,
@@ -209,6 +212,7 @@ enum
 	TILESLAYERFLAG_FRONT = 8,
 	TILESLAYERFLAG_SWITCH = 16,
 	TILESLAYERFLAG_TUNE = 32,
+	TILESLAYERFLAG_REDIRECT = 64,
 
 	ENTITY_OFFSET = 255 - 16 * 4,
 };
@@ -348,6 +352,7 @@ struct CMapItemLayerTilemap
 	int m_Front;
 	int m_Switch;
 	int m_Tune;
+	int m_Redirect; // TODO: USE IT
 };
 
 struct CMapItemLayerQuads
@@ -568,9 +573,26 @@ public:
 	unsigned char m_Type;
 };
 
+class CRedirectTile
+{
+public:
+	// TODO: do we need this?
+	unsigned char m_Type;
+
+	unsigned short m_Port;
+
+	// can be used for ipv4/ipv6 flag
+	// and also for port only (current server) redirect flag
+	unsigned char m_Reserved;
+
+	// can store one ipv4 or one ipv6
+	unsigned char m_aReservedForAddress[16];
+};
+
 bool IsValidGameTile(int Index);
 bool IsValidFrontTile(int Index);
 bool IsValidTeleTile(int Index);
+bool IsValidRedirectTile(int Index);
 bool IsTeleTileCheckpoint(int Index); // Assumes that Index is a valid tele tile index
 bool IsTeleTileNumberUsed(int Index, bool Checkpoint); // Assumes that Index is a valid tele tile index
 bool IsTeleTileNumberUsedAny(int Index); // Does not check for checkpoint only

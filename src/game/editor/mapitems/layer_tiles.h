@@ -183,6 +183,7 @@ public:
 	int m_Front;
 	int m_Switch;
 	int m_Tune;
+	int m_Redirect;
 	char m_aFileName[IO_MAX_PATH_LENGTH];
 
 	EditorTileStateChangeHistory<STileStateChange> m_TilesHistory;

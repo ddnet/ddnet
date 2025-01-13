@@ -466,6 +466,8 @@ void CLayerTilesPropTracker::OnStart(ETilesProp Prop)
 				m_SavedLayers[LAYERTYPE_SPEEDUP] = m_pEditor->m_Map.m_pSpeedupLayer->Duplicate();
 			if(m_pEditor->m_Map.m_pTuneLayer && !m_pObject->m_Tune)
 				m_SavedLayers[LAYERTYPE_TUNE] = m_pEditor->m_Map.m_pTuneLayer->Duplicate();
+			if(m_pEditor->m_Map.m_pRedirectLayer && !m_pObject->m_Redirect)
+				m_SavedLayers[LAYERTYPE_REDIRECT] = m_pEditor->m_Map.m_pRedirectLayer->Duplicate();
 			if(!m_pObject->m_Game)
 				m_SavedLayers[LAYERTYPE_GAME] = m_pEditor->m_Map.m_pGameLayer->Duplicate();
 		}
