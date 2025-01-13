@@ -197,6 +197,6 @@ public:
 	void Prompt(char (&aPrompt)[32]);
 
 	void Toggle(int Type);
-	bool IsClosed() { return m_ConsoleState == CONSOLE_CLOSED; }
+	bool IsActive() const { return m_ConsoleState != CONSOLE_CLOSED; }
 };
 #endif

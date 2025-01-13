@@ -2389,7 +2389,7 @@ bool CMenus::CheckHotKey(int Key) const
 {
 	return !Input()->ShiftIsPressed() && !Input()->ModifierIsPressed() && !Input()->AltIsPressed() && // no modifier
 	       Input()->KeyPress(Key) &&
-	       m_pClient->m_GameConsole.IsClosed();
+	       !m_pClient->m_GameConsole.IsActive();
 }
 
 int CMenus::DoButton_CheckBox_Tristate(const void *pId, const char *pText, TRISTATE Checked, const CUIRect *pRect)
