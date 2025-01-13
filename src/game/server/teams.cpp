@@ -804,7 +804,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 
 	bool CallSaveScore = g_Config.m_SvSaveWorseScores;
 	bool NeedToSendNewPersonalRecord = false;
-	if(!pData->m_BestTime || Time < pData->m_BestTime)
+	if(!pData->m_BestTime || Time <= pData->m_BestTime)
 	{
 		// update the score
 		pData->Set(Time, GetCurrentTimeCp(Player));
