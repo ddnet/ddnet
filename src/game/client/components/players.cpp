@@ -194,11 +194,11 @@ void CPlayers::RenderHookCollLine(
 	{
 		// just use the direct input if it's the local player we are rendering
 		vec2 Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
-		const int MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
-		if(MaxDistance > 5) // Only multiply mouse coords if not angle bind
+		if(g_Config.m_ClScaleMouseDistance)
 		{
-			if(g_Config.m_ClScaleMouseDistance && MaxDistance < 1000) // Don't scale if it would reduce precision
-				Pos *= length(Pos) * 1000.0f / (float)MaxDistance;
+			const int MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
+			if(MaxDistance > 5 && MaxDistance < 1000) // Don't scale if angle bind or reduces precision
+				Pos *= 1000.0f / (float)MaxDistance;
 		}
 		Pos.x = (int)Pos.x;
 		Pos.y = (int)Pos.y;
@@ -241,14 +241,6 @@ void CPlayers::RenderHookCollLine(
 #endif
 		if((AlwaysRenderHookColl || RenderHookCollPlayer) && RenderHookCollVideo)
 		{
-			if(Local && !m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-			{
-				ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
-
-				// fix direction if mouse is exactly in the center
-				if(!(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)
-					ExDirection = vec2(1, 0);
-			}
 			Graphics()->TextureClear();
 			vec2 InitPos = Position;
 			vec2 FinishPos = InitPos + ExDirection * (m_pClient->m_aTuning[g_Config.m_ClDummy].m_HookLength - 42.0f);
@@ -526,11 +518,11 @@ void CPlayers::RenderPlayer(
 	{
 		// just use the direct input if it's the local player we are rendering
 		vec2 Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
-		const int MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
-		if(MaxDistance > 5) // Only multiply mouse coords if not angle bind
+		if(g_Config.m_ClScaleMouseDistance)
 		{
-			if(g_Config.m_ClScaleMouseDistance && MaxDistance < 1000) // Don't scale if it would reduce precision
-				Pos *= length(Pos) * 1000.0f / (float)MaxDistance;
+			const int MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
+			if(MaxDistance > 5 && MaxDistance < 1000) // Don't scale if angle bind or reduces precision
+				Pos *= 1000.0f / (float)MaxDistance;
 		}
 		Pos.x = (int)Pos.x;
 		Pos.y = (int)Pos.y;
@@ -973,11 +965,11 @@ void CPlayers::RenderPlayerGhost(
 	{
 		// just use the direct input if it's the local player we are rendering
 		vec2 Pos = m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
-		const int MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
-		if(MaxDistance > 5) // Only multiply mouse coords if not angle bind
+		if(g_Config.m_ClScaleMouseDistance)
 		{
-			if(g_Config.m_ClScaleMouseDistance && MaxDistance < 1000) // Don't scale if it would reduce precision
-				Pos *= length(Pos) * 1000.0f / (float)MaxDistance;
+			const int MaxDistance = g_Config.m_ClDyncam ? g_Config.m_ClDyncamMaxDistance : g_Config.m_ClMouseMaxDistance;
+			if(MaxDistance > 5 && MaxDistance < 1000) // Don't scale if angle bind or reduces precision
+				Pos *= 1000.0f / (float)MaxDistance;
 		}
 		Pos.x = (int)Pos.x;
 		Pos.y = (int)Pos.y;
