@@ -1,4 +1,5 @@
 use arrayvec::ArrayString;
+use std::fmt;
 use std::net::IpAddr;
 use std::path::Path;
 
@@ -8,22 +9,22 @@ pub type Location = ArrayString<[u8; 12]>;
 #[derive(Debug)]
 pub struct LocationsError(String);
 
+#[derive(Default)]
 pub struct Locations {
     inner: Option<libloc::Locations>,
 }
 
-impl Locations {
-    pub fn empty() -> Locations {
-        Locations {
-            inner: None,
-        }
+impl fmt::Display for LocationsError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.fmt(f)
     }
+}
+
+impl Locations {
     pub fn read(filename: &Path) -> Result<Locations, LocationsError> {
         let inner = libloc::Locations::open(filename)
             .map_err(|e| LocationsError(format!("error opening {:?}: {}", filename, e)))?;
-        Ok(Locations {
-            inner: Some(inner),
-        })
+        Ok(Locations { inner: Some(inner) })
     }
     pub fn lookup(&self, addr: IpAddr) -> Option<Location> {
         self.inner.as_ref().and_then(|inner| {

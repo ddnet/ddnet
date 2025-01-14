@@ -9,6 +9,7 @@ license = "Zlib"
 [workspace]
 
 [dependencies]
+arc-swap = "1.7.1"
 arrayvec = { version = "0.5.2", features = ["serde"] }
 base64 = "0.13.0"
 bytes = "1.1.0"
@@ -19,6 +20,7 @@ clap = { version = "2.34.0", default-features = false, features = [
 env_logger = "0.8.3"
 headers = "0.3.7"
 hex = "0.4.3"
+ipnet = "2.9.0"
 libloc = "0.1.0"
 log = "0.4.17"
 mime = "0.3.16"
@@ -30,7 +32,13 @@ serde_json = { version = "1.0.64", features = [
   "raw_value",
 ] }
 sha2 = "0.10.0"
-tokio = { version = "1.6.0", features = ["macros", "rt", "rt-multi-thread"] }
+toml = "0.8.19"
+tokio = { version = "1.6.0", features = [
+  "macros",
+  "rt",
+  "rt-multi-thread",
+  "signal",
+] }
 tokio-stream = { version = "0.1.8", features = ["net"] }
 url = { version = "2.2.2", features = ["serde"] }
 warp = { version = "0.3.1", default-features = false }
