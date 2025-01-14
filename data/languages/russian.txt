@@ -2065,35 +2065,35 @@ Active: Hook
 == 
 
 Loading background map
-== 
+== Загрузить фон карты
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== АВТО
 
 Toggle auto camera
-== 
+== Переключение авто камеры
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Show client IDs in name plates
-== 
+== Показывать IDs клиентов около имён
 
 Hook Strength
-== 
+== Сила крюка
 
 Size of hook strength icon and number indicator
-== 
+== Размер иконки сила крюка и индикатора цифры
 
 Key Presses
-== 
+== Нажатия клавиш
 
 Size of key press icons
-== 
+== Размер иконок нажатия клавиш
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Сервер не удалось запустить. Убедитесь, что в настройках приложения указано разрешение на получение уведомлений, чтобы сервер мог работать в фоновом режиме.
 
 Profiles
 == Профили
@@ -2132,7 +2132,7 @@ Tiny tees others
 == Другие маленькие тии
 
 Render all custom colored feet as white feet skin
-== Все кастомные цветные ноги в белые ноги одного скина
+== Все ноги в белые ноги выбранного скина
 
 Show screen center
 == Показывать центр экрана
@@ -2198,7 +2198,7 @@ Adjust your prediction margin while frozen
 == Отрегулировать предсказания пока вы заморожены
 
 Frozen Margin
-== Margin в заморозке
+== Предел в заморозке
 
 Tile Outlines
 == Обводка тайлов
@@ -2422,6 +2422,9 @@ Use middle mouse select without copy
 Reset position of mouse when opening bindwheel
 == Сбрасывать позицию мыши при открытии
 
+Bind Wheel Key
+== Колесо биндов
+
 Warlist
 == Список войн
 
@@ -2564,7 +2567,7 @@ Add Item
 == Добавить
 
 Remove Item
-== Убрать
+== Удалить
 
 Status Scheme:
 == Схема:
@@ -2600,22 +2603,22 @@ Profiles file
 == Файл с Профилями
 
 Save/Load Skin
-== Сохр./Загруз. Скин
+== Сохр./Загр. Скин
 
 Save/Load Colors
-== Сохр./Загруз. Цвета
+== Сохр./Загр. Цвета
 
 Save/Load Emote
-== Сохр./Загруз. Эмоц. 
+== Сохр./Загр. Эмоц. 
 
 Save/Load Name
-== Сохр./Загруз. Имя
+== Сохр./Загр. Имя
 
 Save/Load Clan
-== Сохр./Загруз. Клан
+== Сохр./Загр. Клан
 
 Save/Load Flag
-== Сохр./Загруз. Флаг
+== Сохр./Загр. Флаг
 
 Enable Deleting
 == Включить удаление
@@ -2627,25 +2630,25 @@ Override
 == Изменить
 
 TClient
-== 
+== TClient
 
 Add %s name:
-== 
+== Добавить %s имя
 
 Add %s clan:
-== 
+== Добавить %s клан
 
 Remove %s name:
-== 
+== Удалить %s имя
 
 Remove %s clan:
-== 
+== Удалить %s клан
 
 Add [group] [name] [reason]
-== Добавить игрока [группа] [имя] [причина]
+== Добавить [группа] [имя] [причина]
 
 Add [group] [clan] [reason]
-== Добавить клан [группа] [клан] [причина]
+== Добавить [группа] [клан] [причина]
 
 Remove [group] [name]
 == Убрать игрока [группа] [имя]
@@ -2654,70 +2657,73 @@ Remove [group] [clan]
 == Убрать клан [группа] [клан]
 
 Command
-== Команда
+== Command
 
 Extra tick other tees (increases other tees latency, \nmakes dragging slightly easier when using fast input)
 == Дополнительный тик других тии (увеличивает задержку других тии,\n немного облегчает перетаскивание при использовании быстрого ввода)
 
 Prediction Margin
-== 
+== Предел предсказания
 
 Anti Ping Smoothing
-== 
+== Плавный Антипинг 
 
 Use new smoothing algorithm
 == Использовать новый анти-пинг
 
 Use warlist colors instead of regular colors
-== 
+== Используйте цвета списка вместо обычных цветов
 
 Show all warlist groups
-== 
+== Показывать все группы
 
 Last!
-== 
+== Последний!
 
 Outline kill
-== 
+== Обводка смерти
 
 Kill outline color
-== 
+== Цвет обводки смерти
 
 Reason
 == Причина
 
 Are you sure that you want to remove '%s' from your war groups?
-== 
+== Вы уверены, что хотите удалить '%s' из своих групп?
 
 Remove War Group
-== 
+== Удалить группу
 
 Color
-== 
+== Цвет
 
 Github
-== 
+== Github
 
 Chatbinds
 == Бинды для чата
 
 Integration
-== 
+== Интеграция
 
 Enable Discord Integration
-== 
+== Включить Интеграцию Discord (Discord RPC)
 
 Name: %s
-== 
+== Имя: %s
 
 Clan: %s
-== 
+== Клан: %s
 
 Skin: %s
-== 
+== Скин: %s
 
 After Load
-== 
+== После загрузки
 
-_ or \' \' = Space
-== _ or \' \' = Space (Пробел)
+_ or ' ' = Space
+== _ или ' ' = Space (Пробел)
+
+Toggle ghosts key
+== Переключить призрака
