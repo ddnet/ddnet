@@ -934,7 +934,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Ui()->SetActiveItem(&m_FilterInput);
 		m_FilterInput.SelectAll();
 	}
-	Ui()->DoEditBox_Search(&m_FilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed());
+	Ui()->DoEditBox_Search(&m_FilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && !m_pClient->m_GameConsole.IsActive());
 
 	// call vote
 	Bottom.VSplitRight(10.0f, &Bottom, 0);

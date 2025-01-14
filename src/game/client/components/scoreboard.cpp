@@ -640,7 +640,7 @@ void CScoreboard::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	if(!Active())
+	if(!IsActive())
 		return;
 
 	// if the score board is active, then we should clear the motd message as well
@@ -790,7 +790,7 @@ void CScoreboard::OnRender()
 	RenderRecordingNotification((Width / 7) * 4 + 20);
 }
 
-bool CScoreboard::Active() const
+bool CScoreboard::IsActive() const
 {
 	// if statboard is active don't show scoreboard
 	if(GameClient()->m_Statboard.IsActive())
