@@ -15,6 +15,7 @@ struct STrailPart
 	bool Flip = false;
 	float Progress = 1.0f;
 	int Tick = -1;
+	bool TooLong = false;
 
 	bool operator==(const STrailPart &Other) const
 	{

@@ -135,7 +135,7 @@ void CTrails::OnRender()
 		// TODO: figure out why this is required
 		if(!PredictPlayer)
 			TrailLength += 2;
-
+		bool TrailFull = false;
 		// Fill trail list with initial positions
 		for(int i = 0; i < TrailLength; i++)
 		{
@@ -146,12 +146,16 @@ void CTrails::OnRender()
 				if(GameClient()->m_aClients[ClientId].m_aPredTick[PosTick % 200] != PosTick)
 					continue;
 				Part.Pos = GameClient()->m_aClients[ClientId].m_aPredPos[PosTick % 200];
+				if(i == TrailLength - 1)
+					TrailFull = true;
 			}
 			else
 			{
 				if(m_PositionTick[ClientId][PosTick % 200] != PosTick)
 					continue;
 				Part.Pos = m_PositionHistory[ClientId][PosTick % 200];
+				if(i == TrailLength - 2 || i == TrailLength - 3)
+					TrailFull = true;
 			}
 			Part.Tick = PosTick;
 			Part.UnMovedPos = Part.Pos;
@@ -175,7 +179,14 @@ void CTrails::OnRender()
 		else
 			Trail.at(0).Pos = mix(PrevServerPos, CurServerPos, Client()->IntraGameTick(g_Config.m_ClDummy));
 
-		Trail.at(Trail.size() - 1).Pos = mix(Trail.at(Trail.size() - 1).Pos, Trail.at(Trail.size() - 2).Pos, std::fmod(IntraTick, 1.0f));
+		for(int i = 0; i < (int)Trail.size() - 1; i++)
+		{
+			if(distance(Trail.at(i).Pos, Trail.at(i + 1).Pos) > 300.0f)
+				Trail.at(i).TooLong = true;
+		}
+
+		if(TrailFull)
+			Trail.at(Trail.size() - 1).Pos = mix(Trail.at(Trail.size() - 1).Pos, Trail.at(Trail.size() - 2).Pos, std::fmod(IntraTick, 1.0f));
 
 		// Set progress
 		for(int i = 0; i < (int)Trail.size(); i++)
@@ -194,7 +205,7 @@ void CTrails::OnRender()
 			if(g_Config.m_ClTeeTrailRainbow)
 			{
 				float Cycle = (1.0f / TrailLength) * 0.5f;
-				float Hue = std::fmod(((StartTick - i + 7247 * ClientId) % 1000000) * Cycle, 1.0f);
+				float Hue = std::fmod(((Part.Tick + 7247 * ClientId) % 1000000) * Cycle, 1.0f);
 				Part.Col = color_cast<ColorRGBA>(ColorHSLA(Hue, 1.0f, 0.5f));
 			}
 			if(g_Config.m_ClTeeTrailSpeed)
@@ -311,7 +322,7 @@ void CTrails::OnRender()
 
 			vec2 Pos = Trail.at(i).Pos;
 			vec2 NextPos = Trail.at(i + 1).Pos;
-			if(distance(Pos, NextPos) > 600.0f)
+			if(Trail.at(i).TooLong)
 				continue;
 			Graphics()->SetColor(FullCol);
 			if(LineMode)
