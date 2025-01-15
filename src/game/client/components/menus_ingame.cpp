@@ -606,55 +606,68 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 void CMenus::RenderServerInfo(CUIRect MainView)
 {
-	if(!m_pClient->m_Snap.m_pLocalInfo)
-		return;
+	const float FontSizeTitle = 32.0f;
+	const float FontSizeBody = 20.0f;
 
-	// fetch server info
 	CServerInfo CurrentServerInfo;
 	Client()->GetServerInfo(&CurrentServerInfo);
 
-	// render background
+	CUIRect ServerInfo, GameInfo, Motd;
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
+	MainView.Margin(10.0f, &MainView);
+	MainView.HSplitMid(&ServerInfo, &Motd, 10.0f);
+	ServerInfo.VSplitMid(&ServerInfo, &GameInfo, 10.0f);
 
-	CUIRect View, ServerInfo, GameInfo, Motd;
+	ServerInfo.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+	ServerInfo.Margin(10.0f, &ServerInfo);
 
-	float x = 0.0f;
-	float y = 0.0f;
+	CUIRect Label;
+	ServerInfo.HSplitTop(FontSizeTitle, &Label, &ServerInfo);
+	ServerInfo.HSplitTop(5.0f, nullptr, &ServerInfo);
+	Ui()->DoLabel(&Label, Localize("Server info"), FontSizeTitle, TEXTALIGN_ML);
 
-	char aBuf[1024];
+	ServerInfo.HSplitTop(FontSizeBody, &Label, &ServerInfo);
+	ServerInfo.HSplitTop(FontSizeBody, nullptr, &ServerInfo);
+	Ui()->DoLabel(&Label, CurrentServerInfo.m_aName, FontSizeBody, TEXTALIGN_ML);
 
-	// set view to use for all sub-modules
-	MainView.Margin(10.0f, &View);
+	ServerInfo.HSplitTop(FontSizeBody, &Label, &ServerInfo);
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Address"), CurrentServerInfo.m_aAddress);
+	Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
 
-	// serverinfo
-	View.HSplitTop(View.h / 2 - 5.0f, &ServerInfo, &Motd);
-	ServerInfo.VSplitLeft(View.w / 2 - 5.0f, &ServerInfo, &GameInfo);
-	ServerInfo.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+	if(m_pClient->m_Snap.m_pLocalInfo)
+	{
+		ServerInfo.HSplitTop(FontSizeBody, &Label, &ServerInfo);
+		str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Ping"), m_pClient->m_Snap.m_pLocalInfo->m_Latency);
+		Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
+	}
 
-	ServerInfo.Margin(5.0f, &ServerInfo);
+	ServerInfo.HSplitTop(FontSizeBody, &Label, &ServerInfo);
+	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Version"), CurrentServerInfo.m_aVersion);
+	Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
 
-	x = 5.0f;
-	y = 0.0f;
+	ServerInfo.HSplitTop(FontSizeBody, &Label, &ServerInfo);
+	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Password"), CurrentServerInfo.m_Flags & SERVER_FLAG_PASSWORD ? Localize("Yes") : Localize("No"));
+	Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
 
-	TextRender()->Text(ServerInfo.x + x, ServerInfo.y + y, 32, Localize("Server info"), -1.0f);
-	y += 32.0f + 5.0f;
+	const CCommunity *pCommunity = ServerBrowser()->Community(CurrentServerInfo.m_aCommunityId);
+	if(pCommunity != nullptr)
+	{
+		ServerInfo.HSplitTop(FontSizeBody, &Label, &ServerInfo);
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Community"));
+		Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
 
-	mem_zero(aBuf, sizeof(aBuf));
-	str_format(
-		aBuf,
-		sizeof(aBuf),
-		"%s\n\n"
-		"%s: %s\n"
-		"%s: %d\n"
-		"%s: %s\n"
-		"%s: %s\n",
-		CurrentServerInfo.m_aName,
-		Localize("Address"), CurrentServerInfo.m_aAddress,
-		Localize("Ping"), m_pClient->m_Snap.m_pLocalInfo->m_Latency,
-		Localize("Version"), CurrentServerInfo.m_aVersion,
-		Localize("Password"), CurrentServerInfo.m_Flags & 1 ? Localize("Yes") : Localize("No"));
-
-	TextRender()->Text(ServerInfo.x + x, ServerInfo.y + y, 20, aBuf, ServerInfo.w - 10.0f);
+		const SCommunityIcon *pIcon = FindCommunityIcon(pCommunity->Id());
+		if(pIcon != nullptr)
+		{
+			Label.VSplitLeft(TextRender()->TextWidth(FontSizeBody, aBuf) + 8.0f, nullptr, &Label);
+			Label.VSplitLeft(2.0f * Label.h, &Label, nullptr);
+			RenderCommunityIcon(pIcon, Label, true);
+			static char s_CommunityTooltipButtonId;
+			Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Label);
+			GameClient()->m_Tooltips.DoToolTip(&s_CommunityTooltipButtonId, &Label, pCommunity->Name());
+		}
+	}
 
 	// copy info button
 	{
@@ -681,51 +694,61 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	// favorite checkbox
 	{
 		CUIRect Button;
-		NETADDR ServerAddr = Client()->ServerAddress();
-		TRISTATE IsFavorite = Favorites()->IsFavorite(&ServerAddr, 1);
+		TRISTATE IsFavorite = Favorites()->IsFavorite(CurrentServerInfo.m_aAddresses, CurrentServerInfo.m_NumAddresses);
 		ServerInfo.HSplitBottom(20.0f, &ServerInfo, &Button);
 		static int s_AddFavButton = 0;
 		if(DoButton_CheckBox(&s_AddFavButton, Localize("Favorite"), IsFavorite != TRISTATE::NONE, &Button))
 		{
 			if(IsFavorite != TRISTATE::NONE)
-				Favorites()->Remove(&ServerAddr, 1);
+				Favorites()->Remove(CurrentServerInfo.m_aAddresses, CurrentServerInfo.m_NumAddresses);
 			else
-				Favorites()->Add(&ServerAddr, 1);
+				Favorites()->Add(CurrentServerInfo.m_aAddresses, CurrentServerInfo.m_NumAddresses);
 		}
 	}
 
-	// gameinfo
-	GameInfo.VSplitLeft(10.0f, 0x0, &GameInfo);
-	GameInfo.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+	GameInfo.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+	GameInfo.Margin(10.0f, &GameInfo);
 
-	GameInfo.Margin(5.0f, &GameInfo);
+	GameInfo.HSplitTop(FontSizeTitle, &Label, &GameInfo);
+	GameInfo.HSplitTop(5.0f, nullptr, &GameInfo);
+	Ui()->DoLabel(&Label, Localize("Game info"), FontSizeTitle, TEXTALIGN_ML);
 
-	x = 5.0f;
-	y = 0.0f;
+	GameInfo.HSplitTop(FontSizeBody, &Label, &GameInfo);
+	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Game type"), CurrentServerInfo.m_aGameType);
+	Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
 
-	TextRender()->Text(GameInfo.x + x, GameInfo.y + y, 32, Localize("Game info"), -1.0f);
-	y += 32.0f + 5.0f;
+	GameInfo.HSplitTop(FontSizeBody, &Label, &GameInfo);
+	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Map"), CurrentServerInfo.m_aMap);
+	Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
 
-	if(m_pClient->m_Snap.m_pGameInfoObj)
+	const auto *pGameInfoObj = m_pClient->m_Snap.m_pGameInfoObj;
+	if(pGameInfoObj)
 	{
-		mem_zero(aBuf, sizeof(aBuf));
-		str_format(
-			aBuf,
-			sizeof(aBuf),
-			"\n\n"
-			"%s: %s\n"
-			"%s: %s\n"
-			"%s: %d\n"
-			"%s: %d\n"
-			"\n"
-			"%s: %d/%d\n",
-			Localize("Game type"), CurrentServerInfo.m_aGameType,
-			Localize("Map"), CurrentServerInfo.m_aMap,
-			Localize("Score limit"), m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit,
-			Localize("Time limit"), m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit,
-			Localize("Players"), m_pClient->m_Snap.m_NumPlayers, CurrentServerInfo.m_MaxClients);
-		TextRender()->Text(GameInfo.x + x, GameInfo.y + y, 20, aBuf, GameInfo.w - 10.0f);
+		if(pGameInfoObj->m_ScoreLimit)
+		{
+			GameInfo.HSplitTop(FontSizeBody, &Label, &GameInfo);
+			str_format(aBuf, sizeof(aBuf), "%s: %d", Localize("Score limit"), pGameInfoObj->m_ScoreLimit);
+			Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
+		}
+
+		if(pGameInfoObj->m_TimeLimit)
+		{
+			GameInfo.HSplitTop(FontSizeBody, &Label, &GameInfo);
+			str_format(aBuf, sizeof(aBuf), Localize("Time limit: %d min"), pGameInfoObj->m_TimeLimit);
+			Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
+		}
+
+		if(pGameInfoObj->m_RoundCurrent && pGameInfoObj->m_RoundNum)
+		{
+			GameInfo.HSplitTop(FontSizeBody, &Label, &GameInfo);
+			str_format(aBuf, sizeof(aBuf), Localize("Round %d/%d"), pGameInfoObj->m_RoundCurrent, pGameInfoObj->m_RoundNum);
+			Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
+		}
 	}
+
+	GameInfo.HSplitTop(FontSizeBody, &Label, &GameInfo);
+	str_format(aBuf, sizeof(aBuf), "%s: %d/%d", Localize("Players"), m_pClient->m_Snap.m_NumPlayers, CurrentServerInfo.m_MaxClients);
+	Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
 
 	RenderServerInfoMotd(Motd);
 }
@@ -733,15 +756,13 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 void CMenus::RenderServerInfoMotd(CUIRect Motd)
 {
 	const float MotdFontSize = 16.0f;
-	Motd.HSplitTop(10.0f, nullptr, &Motd);
-	Motd.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-	Motd.HMargin(5.0f, &Motd);
-	Motd.VMargin(10.0f, &Motd);
+	Motd.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 10.0f);
+	Motd.Margin(10.0f, &Motd);
 
 	CUIRect MotdHeader;
 	Motd.HSplitTop(2.0f * MotdFontSize, &MotdHeader, &Motd);
 	Motd.HSplitTop(5.0f, nullptr, &Motd);
-	TextRender()->Text(MotdHeader.x, MotdHeader.y, 2.0f * MotdFontSize, Localize("MOTD"), -1.0f);
+	Ui()->DoLabel(&MotdHeader, Localize("MOTD"), 2.0f * MotdFontSize, TEXTALIGN_ML);
 
 	if(!m_pClient->m_Motd.ServerMotd()[0])
 		return;
