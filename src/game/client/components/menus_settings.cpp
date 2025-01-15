@@ -2469,6 +2469,24 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &LeftView, LineSize))
 			GameClient()->m_Chat.RebuildChat();
 
+		LeftView.HSplitTop(2.0f, nullptr, &LeftView);
+		// Chat censor selection
+		CUIRect CensorModeDropDown;
+		LeftView.HSplitTop(20.0f, &CensorModeDropDown, &LeftView);
+
+		const char *apCensorModes[] = {Localize("Uncensored"), Localize("Censor profanity (online & local list)"), Localize("Censor profanity (local list)")};
+		static const int s_NumCensorMode = std::size(apCensorModes);
+
+		const int OldCensorMode = g_Config.m_ClCensorChat;
+
+		static CUi::SDropDownState s_CensorModeDropDownState;
+		static CScrollRegion s_CensorModeDropDownScrollRegion;
+		s_CensorModeDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_CensorModeDropDownScrollRegion;
+		const int NewCensorMode = Ui()->DoDropDown(&CensorModeDropDown, OldCensorMode, apCensorModes, s_NumCensorMode, s_CensorModeDropDownState);
+		g_Config.m_ClCensorChat = NewCensorMode;
+
+		LeftView.HSplitTop(2.0f, nullptr, &LeftView);
+
 		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
 		if(Ui()->DoScrollbarOption(&g_Config.m_ClChatFontSize, &g_Config.m_ClChatFontSize, &Button, Localize("Chat font size"), 10, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE))
 		{
