@@ -576,7 +576,6 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 	return false;
 }
 
-#define SAVES_FILE "ddnet-saves.txt"
 const char *SAVES_HEADER[] = {
 	"Time",
 	"Player",
