@@ -15,7 +15,7 @@
 #include <game/client/skin.h>
 #include <game/generated/protocol7.h>
 
-#define SAVES_FILE "ddnet-saves.txt"
+constexpr auto SAVES_FILE = "ddnet-saves.txt";
 
 class CChat : public CComponent
 {
