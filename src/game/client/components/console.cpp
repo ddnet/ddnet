@@ -1131,20 +1131,20 @@ void CGameConsole::OnRender()
 		{
 			pConsole->m_MouseRelease = GetMousePosition();
 		}
-		const float ScaledRowHeight = RowHeight / ScreenSize.y;
-		if(absolute(m_TouchState.m_ScrollAmount.y) >= ScaledRowHeight)
+		const float ScaledLineHeight = LineHeight / ScreenSize.y;
+		if(absolute(m_TouchState.m_ScrollAmount.y) >= ScaledLineHeight)
 		{
 			if(m_TouchState.m_ScrollAmount.y > 0.0f)
 			{
 				pConsole->m_BacklogCurLine += pConsole->GetLinesToScroll(-1, 1);
-				m_TouchState.m_ScrollAmount.y -= ScaledRowHeight;
+				m_TouchState.m_ScrollAmount.y -= ScaledLineHeight;
 			}
 			else
 			{
 				--pConsole->m_BacklogCurLine;
 				if(pConsole->m_BacklogCurLine < 0)
 					pConsole->m_BacklogCurLine = 0;
-				m_TouchState.m_ScrollAmount.y += ScaledRowHeight;
+				m_TouchState.m_ScrollAmount.y += ScaledLineHeight;
 			}
 			pConsole->m_HasSelection = false;
 		}
