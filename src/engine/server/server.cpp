@@ -2850,7 +2850,7 @@ int CServer::Run()
 				{
 					// new map loaded
 
-					// ask the game to for the data it wants to persist past a map change
+					// ask the game for the data it wants to persist past a map change
 					for(int i = 0; i < MAX_CLIENTS; i++)
 					{
 						if(m_aClients[i].m_State == CClient::STATE_INGAME)
