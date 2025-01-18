@@ -134,13 +134,22 @@ TEST(NetAddr, FromStrInvalid)
 	EXPECT_TRUE(net_addr_from_str(&Addr, "[::]:c"));
 }
 
-TEST(NetAddr, StrInvalid)
+TEST(NetAddrDeathTest, StrInvalid1)
 {
-	NETADDR Addr = {0};
-	char aBuf1[NETADDR_MAXSTRSIZE];
-	char aBuf2[NETADDR_MAXSTRSIZE];
-	net_addr_str(&Addr, aBuf1, sizeof(aBuf1), true);
-	EXPECT_STREQ(aBuf1, "unknown type 0");
-	net_addr_str(&Addr, aBuf2, sizeof(aBuf2), false);
-	EXPECT_STREQ(aBuf2, "unknown type 0");
+	ASSERT_DEATH({
+		NETADDR Addr = {0};
+		char aBuf[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Addr, aBuf, sizeof(aBuf), true);
+	},
+		"");
+}
+
+TEST(NetAddrDeathTest, StrInvalid2)
+{
+	ASSERT_DEATH({
+		NETADDR Addr = {0};
+		char aBuf[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Addr, aBuf, sizeof(aBuf), false);
+	},
+		"");
 }

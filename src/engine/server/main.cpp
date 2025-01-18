@@ -120,7 +120,12 @@ int main(int argc, const char **argv)
 	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2 * std::thread::hardware_concurrency() + 2);
 	pKernel->RegisterInterface(pEngine);
 
-	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_SERVER, argc, argv);
+	IStorage *pStorage = CreateStorage(IStorage::EInitializationType::SERVER, argc, argv);
+	if(!pStorage)
+	{
+		log_error("server", "failed to initialize storage");
+		return -1;
+	}
 	pKernel->RegisterInterface(pStorage);
 
 	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
@@ -236,7 +241,7 @@ std::vector<std::string> FetchAndroidServerCommandQueue()
 	return vResult;
 }
 
-JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME, NativeServer, runServer, jint, JNIEnv *pEnv, jobject Object, jstring WorkingDirectory)
+JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME, NativeServer, runServer, jint, JNIEnv *pEnv, jobject Object, jstring WorkingDirectory, jobjectArray ArgumentsArray)
 {
 	// Set working directory to external storage location. This is not possible
 	// in Java so we pass the intended working directory to the native code.
@@ -248,8 +253,27 @@ JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME, NativeServer, runServer, jint, JNIEn
 		return -1001;
 	}
 
-	const char *apArgs[] = {GAME_NAME};
-	return main(std::size(apArgs), apArgs);
+	const jsize NumArguments = pEnv->GetArrayLength(ArgumentsArray);
+
+	std::vector<std::string> vArguments;
+	vArguments.reserve(NumArguments + 1);
+	vArguments.push_back(std::string(pWorkingDirectory) + "/" + GAME_NAME "-Server");
+	for(jsize ArgumentIndex = 0; ArgumentIndex < NumArguments; ArgumentIndex++)
+	{
+		jstring ArgumentString = (jstring)pEnv->GetObjectArrayElement(ArgumentsArray, ArgumentIndex);
+		const char *pArgumentString = pEnv->GetStringUTFChars(ArgumentString, nullptr);
+		vArguments.emplace_back(pArgumentString);
+		pEnv->ReleaseStringUTFChars(ArgumentString, pArgumentString);
+	}
+
+	std::vector<const char *> vpArguments;
+	vpArguments.reserve(vArguments.size());
+	for(const std::string &Argument : vArguments)
+	{
+		vpArguments.emplace_back(Argument.c_str());
+	}
+
+	return main(vpArguments.size(), vpArguments.data());
 }
 
 JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME, NativeServer, executeCommand, void, JNIEnv *pEnv, jobject Object, jstring Command)

@@ -540,8 +540,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	Disconnect();
 	dbg_assert(m_State == IClient::STATE_OFFLINE, "Disconnect must ensure that client is offline");
 
-	char aLastAddr[NETADDR_MAXSTRSIZE];
-	net_addr_str(&ServerAddress(), aLastAddr, sizeof(aLastAddr), true);
+	const NETADDR LastAddr = ServerAddress();
 
 	if(pAddress != m_aConnectAddressStr)
 		str_copy(m_aConnectAddressStr, pAddress);
@@ -579,15 +578,16 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		{
 			NextAddr.port = 8303;
 		}
-		char aNextAddr[NETADDR_MAXSTRSIZE];
 		if(Sixup)
 			NextAddr.type |= NETTYPE_TW7;
 		else
 			OnlySixup = false;
+
+		char aNextAddr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&NextAddr, aNextAddr, sizeof(aNextAddr), true);
 		log_debug("client", "resolved connect address '%s' to %s", aBuffer, aNextAddr);
 
-		if(!str_comp(aNextAddr, aLastAddr))
+		if(NextAddr == LastAddr)
 		{
 			m_SendPassword = true;
 		}
@@ -1761,6 +1761,18 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				SendMsg(Conn, &MsgP, MSGFLAG_VITAL);
 			}
 		}
+		else if(Msg == NETMSG_RECONNECT)
+		{
+			if(Conn == CONN_MAIN)
+			{
+				Connect(m_aConnectAddressStr);
+			}
+			else
+			{
+				DummyDisconnect("reconnect");
+				DummyConnect();
+			}
+		}
 		else if(Msg == NETMSG_REDIRECT)
 		{
 			int RedirectPort = Unpacker.GetInt();
@@ -1768,11 +1780,26 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				return;
 			}
-			char aAddr[NETADDR_MAXSTRSIZE];
-			NETADDR ServerAddr = ServerAddress();
-			ServerAddr.port = RedirectPort;
-			net_addr_str(&ServerAddr, aAddr, sizeof(aAddr), true);
-			Connect(aAddr);
+			if(Conn == CONN_MAIN)
+			{
+				NETADDR ServerAddr = ServerAddress();
+				ServerAddr.port = RedirectPort;
+				char aAddr[NETADDR_MAXSTRSIZE];
+				net_addr_str(&ServerAddr, aAddr, sizeof(aAddr), true);
+				Connect(aAddr);
+			}
+			else
+			{
+				DummyDisconnect("redirect");
+				if(ServerAddress().port != RedirectPort)
+				{
+					// Only allow redirecting to the same port to reconnect. The dummy
+					// should not be connected to a different server than the main, as
+					// the client assumes that main and dummy use the same map.
+					return;
+				}
+				DummyConnect();
+			}
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
 		{
@@ -4067,8 +4094,7 @@ void CClient::Con_BenchmarkQuit(IConsole::IResult *pResult, void *pUserData)
 
 void CClient::BenchmarkQuit(int Seconds, const char *pFilename)
 {
-	char aBuf[IO_MAX_PATH_LENGTH];
-	m_BenchmarkFile = Storage()->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_ABSOLUTE, aBuf, sizeof(aBuf));
+	m_BenchmarkFile = Storage()->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_ABSOLUTE);
 	m_BenchmarkStopTime = time_get() + time_freq() * Seconds;
 }
 
@@ -4708,7 +4734,23 @@ int main(int argc, const char **argv)
 		delete pEngine;
 	});
 
-	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_CLIENT, argc, argv);
+	IStorage *pStorage;
+	{
+		CMemoryLogger MemoryLogger;
+		MemoryLogger.SetParent(log_get_scope_logger());
+		{
+			CLogScope LogScope(&MemoryLogger);
+			pStorage = CreateStorage(IStorage::EInitializationType::CLIENT, argc, argv);
+		}
+		if(!pStorage)
+		{
+			log_error("client", "Failed to initialize the storage location (see details above)");
+			std::string Message = "Failed to initialize the storage location. See details below.\n\n" + MemoryLogger.ConcatenatedLines();
+			pClient->ShowMessageBox("Storage Error", Message.c_str());
+			PerformAllCleanup();
+			return -1;
+		}
+	}
 	pKernel->RegisterInterface(pStorage);
 
 	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));

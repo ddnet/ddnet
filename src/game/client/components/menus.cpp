@@ -909,9 +909,8 @@ void CMenus::OnInit()
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL);
 
 	// setup load amount
-	const int NumMenuImages = 5;
 	m_LoadingState.m_Current = 0;
-	m_LoadingState.m_Total = g_pData->m_NumImages + NumMenuImages + GameClient()->ComponentCount();
+	m_LoadingState.m_Total = g_pData->m_NumImages + GameClient()->ComponentCount();
 	if(!g_Config.m_ClThreadsoundloading)
 		m_LoadingState.m_Total += g_pData->m_NumSounds;
 
@@ -2390,7 +2389,7 @@ bool CMenus::CheckHotKey(int Key) const
 {
 	return !Input()->ShiftIsPressed() && !Input()->ModifierIsPressed() && !Input()->AltIsPressed() && // no modifier
 	       Input()->KeyPress(Key) &&
-	       m_pClient->m_GameConsole.IsClosed();
+	       !m_pClient->m_GameConsole.IsActive();
 }
 
 int CMenus::DoButton_CheckBox_Tristate(const void *pId, const char *pText, TRISTATE Checked, const CUIRect *pRect)
@@ -2445,7 +2444,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 	str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - str_length(pExtension));
 	pSelf->m_vMenuImages.push_back(MenuImage);
 
-	pSelf->RenderLoading(Localize("Loading DDNet Client"), Localize("Loading menu images"), 1);
+	pSelf->RenderLoading(Localize("Loading DDNet Client"), Localize("Loading menu images"), 0);
 
 	return 0;
 }

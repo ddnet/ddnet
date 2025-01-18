@@ -165,7 +165,7 @@ void CStatboard::RenderGlobalStats()
 	}
 
 	// sort blue players by score after
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+	if(m_pClient->IsTeamPlay())
 	{
 		for(const auto *pInfo : m_pClient->m_Snap.m_apInfoByScore)
 		{
@@ -413,7 +413,7 @@ void CStatboard::AutoStatCSV()
 		char aDate[20], aFilename[IO_MAX_PATH_LENGTH];
 		str_timestamp(aDate, sizeof(aDate));
 		str_format(aFilename, sizeof(aFilename), "screenshots/auto/stats_%s.csv", aDate);
-		IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_ALL);
+		IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 
 		if(File)
 		{
@@ -474,7 +474,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 	}
 
 	// sort blue players by score after
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+	if(m_pClient->IsTeamPlay())
 	{
 		for(const auto *pInfo : m_pClient->m_Snap.m_apInfoByScore)
 		{

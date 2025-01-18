@@ -140,7 +140,7 @@ CUi::EPopupMenuFunctionResult CMapGrid::PopupGridSettings(void *pContext, CUIRec
 	View.HSplitBottom(12.0f, &View, &Button);
 
 	static char s_DefaultButton;
-	if(pMapGrid->Editor()->DoButton_Ex(&s_DefaultButton, "Default", 0, &Button, 0, "Normal grid size", IGraphics::CORNER_ALL))
+	if(pMapGrid->Editor()->DoButton_Ex(&s_DefaultButton, "Default", 0, &Button, 0, "Reset to normal grid size.", IGraphics::CORNER_ALL))
 	{
 		pMapGrid->SetFactor(1);
 	}

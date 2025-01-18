@@ -735,7 +735,7 @@ bool CTouchControls::OnTouchState(const std::vector<IInput::CTouchFingerState> &
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return false;
 	if(GameClient()->m_Chat.IsActive() ||
-		!GameClient()->m_GameConsole.IsClosed() ||
+		GameClient()->m_GameConsole.IsActive() ||
 		GameClient()->m_Menus.IsActive() ||
 		GameClient()->m_Emoticon.IsActive() ||
 		GameClient()->m_Spectator.IsActive())

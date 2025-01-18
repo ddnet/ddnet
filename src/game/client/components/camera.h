@@ -57,6 +57,8 @@ private:
 	bool m_IsSpectatingPlayer;
 	bool m_UsingAutoSpecCamera;
 
+	char m_aAutoSpecCameraTooltip[512];
+
 public:
 	static constexpr float ZOOM_STEP = 0.866025f;
 
@@ -77,7 +79,6 @@ public:
 	bool m_AutoSpecCameraZooming;
 	bool m_AutoSpecCamera;
 	float m_UserZoomTarget;
-	float m_SpecZoomTarget;
 
 	vec2 m_DyncamTargetCameraOffset;
 	vec2 m_aDyncamCurrentCameraOffset[NUM_DUMMIES];
@@ -106,6 +107,10 @@ public:
 	void ResetAutoSpecCamera();
 	bool SpectatingPlayer() const { return m_IsSpectatingPlayer; }
 	bool CanUseAutoSpecCamera() const;
+	void ToggleAutoSpecCamera();
+	void UpdateAutoSpecCameraTooltip();
+
+	const char *AutoSpecCameraTooltip() { return m_aAutoSpecCameraTooltip; }
 
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);

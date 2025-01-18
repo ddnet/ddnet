@@ -702,11 +702,7 @@ void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs
 			return;
 		}
 		char aIpAddr[512];
-		if(!net_addr_str(&pAddrs[i], aIpAddr, sizeof(aIpAddr), true))
-		{
-			str_copy(pBuffer, aIpAddr, BufferSize);
-			return;
-		}
+		net_addr_str(&pAddrs[i], aIpAddr, sizeof(aIpAddr), true);
 		if(pAddrs[i].type & NETTYPE_TW7)
 		{
 			str_format(

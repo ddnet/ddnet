@@ -69,8 +69,6 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 {
 	dbg_assert(Team == TEAM_RED || Team == TEAM_BLUE, "Team invalid");
 
-	const CNetObj_GameInfo *pGameInfoObj = GameClient()->m_Snap.m_pGameInfoObj;
-
 	char aScore[128] = "";
 	if(GameClient()->m_GameInfo.m_TimeScore)
 	{
@@ -79,7 +77,7 @@ void CScoreboard::RenderTitle(CUIRect TitleBar, int Team, const char *pTitle)
 			str_time_float(m_ServerRecord, TIME_HOURS, aScore, sizeof(aScore));
 		}
 	}
-	else if(pGameInfoObj && (pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS))
+	else if(GameClient()->IsTeamPlay())
 	{
 		const CNetObj_GameData *pGameDataObj = GameClient()->m_Snap.m_pGameDataObj;
 		if(pGameDataObj)
@@ -513,10 +511,9 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 				Graphics()->BlendNormal();
 				Graphics()->TextureSet(m_DeadTeeTexture);
 				Graphics()->QuadsBegin();
-				if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+				if(m_pClient->IsTeamPlay())
 				{
-					ColorRGBA Color = m_pClient->m_Skins7.GetTeamColor(true, 0, m_pClient->m_aClients[pInfo->m_ClientId].m_Team, protocol7::SKINPART_BODY);
-					Graphics()->SetColor(Color.r, Color.g, Color.b, Color.a);
+					Graphics()->SetColor(m_pClient->m_Skins7.GetTeamColor(true, 0, m_pClient->m_aClients[pInfo->m_ClientId].m_Team, protocol7::SKINPART_BODY));
 				}
 				CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientId].m_RenderInfo;
 				TeeInfo.m_Size *= TeeSizeMod;
@@ -643,7 +640,7 @@ void CScoreboard::OnRender()
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
-	if(!Active())
+	if(!IsActive())
 		return;
 
 	// if the score board is active, then we should clear the motd message as well
@@ -655,7 +652,7 @@ void CScoreboard::OnRender()
 	Graphics()->MapScreen(0, 0, Width, Height);
 
 	const CNetObj_GameInfo *pGameInfoObj = GameClient()->m_Snap.m_pGameInfoObj;
-	const bool Teams = pGameInfoObj && (pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS);
+	const bool Teams = GameClient()->IsTeamPlay();
 	const auto &aTeamSize = GameClient()->m_Snap.m_aTeamSize;
 	const int NumPlayers = Teams ? maximum(aTeamSize[TEAM_RED], aTeamSize[TEAM_BLUE]) : aTeamSize[TEAM_RED];
 
@@ -793,7 +790,7 @@ void CScoreboard::OnRender()
 	RenderRecordingNotification((Width / 7) * 4 + 20);
 }
 
-bool CScoreboard::Active() const
+bool CScoreboard::IsActive() const
 {
 	// if statboard is active don't show scoreboard
 	if(GameClient()->m_Statboard.IsActive())

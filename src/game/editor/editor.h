@@ -608,7 +608,9 @@ public:
 		POPEVENT_PLACE_BORDER_TILES,
 		POPEVENT_PIXELART_BIG_IMAGE,
 		POPEVENT_PIXELART_MANY_COLORS,
-		POPEVENT_PIXELART_TOO_MANY_COLORS
+		POPEVENT_PIXELART_TOO_MANY_COLORS,
+		POPEVENT_REMOVE_USED_IMAGE,
+		POPEVENT_REMOVE_USED_SOUND,
 	};
 
 	int m_PopupEventType;
@@ -741,7 +743,6 @@ public:
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
 
-	char m_aMenuBackgroundTooltip[256];
 	bool m_PreviewZoom;
 	float m_MouseWorldScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
 	vec2 m_MouseWorldPos = vec2(0.0f, 0.0f);
@@ -1009,6 +1010,7 @@ public:
 	static bool ReplaceSoundCallback(const char *pFileName, int StorageType, void *pUser);
 	static bool AddImage(const char *pFilename, int StorageType, void *pUser);
 	static bool AddSound(const char *pFileName, int StorageType, void *pUser);
+	static bool IsAssetUsed(int FileType, int Index, void *pUser);
 
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
 	void RemoveUnusedEnvelopes();

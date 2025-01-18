@@ -802,7 +802,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		if(LineAuthor.m_Team == TEAM_SPECTATORS)
 			pCurrentLine->m_NameColor = TEAM_SPECTATORS;
 
-		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)
+		if(m_pClient->IsTeamPlay())
 		{
 			if(LineAuthor.m_Team == TEAM_RED)
 				pCurrentLine->m_NameColor = TEAM_RED;
@@ -919,7 +919,7 @@ void CChat::OnPrepareLines(float y)
 	float x = 5.0f;
 	float FontSize = this->FontSize();
 
-	const bool IsScoreBoardOpen = m_pClient->m_Scoreboard.Active() && (Graphics()->ScreenAspect() > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
+	const bool IsScoreBoardOpen = m_pClient->m_Scoreboard.IsActive() && (Graphics()->ScreenAspect() > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
 	const bool ShowLargeArea = m_Show || (m_Mode != MODE_NONE && g_Config.m_ClShowChat == 1) || g_Config.m_ClShowChat == 2;
 	const bool ForceRecreate = IsScoreBoardOpen != m_PrevScoreBoardShowed || ShowLargeArea != m_PrevShowChat;
 	m_PrevScoreBoardShowed = IsScoreBoardOpen;
@@ -1247,7 +1247,7 @@ void CChat::OnRender()
 
 	OnPrepareLines(y);
 
-	bool IsScoreBoardOpen = m_pClient->m_Scoreboard.Active() && (Graphics()->ScreenAspect() > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
+	bool IsScoreBoardOpen = m_pClient->m_Scoreboard.IsActive() && (Graphics()->ScreenAspect() > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
 
 	int64_t Now = time();
 	float HeightLimit = IsScoreBoardOpen ? 180.0f : (m_PrevShowChat ? 50.0f : 200.0f);

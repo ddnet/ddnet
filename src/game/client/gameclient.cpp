@@ -1638,6 +1638,8 @@ void CGameClient::OnNewSnapshot()
 					}
 					else if(m_aStats[pInfo->m_ClientId].IsActive())
 						m_aStats[pInfo->m_ClientId].JoinSpec(Client()->GameTick(g_Config.m_ClDummy));
+
+					UpdateBotSkinDecoration(pInfo->m_ClientId);
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_DDNETPLAYER)
@@ -3106,7 +3108,7 @@ void CGameClient::UpdatePrediction()
 		if(m_Snap.m_aCharacters[i].m_Active)
 		{
 			bool IsLocal = (i == m_Snap.m_LocalClientId || (PredictDummy() && i == m_PredictedDummyId));
-			int GameTeam = (m_Snap.m_pGameInfoObj && (m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS)) ? m_aClients[i].m_Team : i;
+			int GameTeam = IsTeamPlay() ? m_aClients[i].m_Team : i;
 			m_GameWorld.NetCharAdd(i, &m_Snap.m_aCharacters[i].m_Cur,
 				m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : 0,
 				GameTeam, IsLocal);
@@ -3121,7 +3123,7 @@ void CGameClient::UpdatePrediction()
 void CGameClient::UpdateSpectatorCursor()
 {
 	int CursorOwnerId = m_Snap.m_LocalClientId;
-	if(m_Snap.m_SpecInfo.m_Active || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(m_Snap.m_SpecInfo.m_Active)
 	{
 		CursorOwnerId = m_Snap.m_SpecInfo.m_SpectatorId;
 	}

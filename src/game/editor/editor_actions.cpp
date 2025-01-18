@@ -905,7 +905,7 @@ void CEditorActionEditLayerTilesProp::Undo()
 	}
 	else if(m_Prop == ETilesProp::PROP_IMAGE)
 	{
-		if(m_Previous == -1)
+		if(m_Previous == -1 || m_pEditor->m_Map.m_vpImages.empty())
 		{
 			pLayerTiles->m_Image = -1;
 		}
@@ -985,7 +985,7 @@ void CEditorActionEditLayerTilesProp::Redo()
 	}
 	else if(m_Prop == ETilesProp::PROP_IMAGE)
 	{
-		if(m_Current == -1)
+		if(m_Current == -1 || m_pEditor->m_Map.m_vpImages.empty())
 		{
 			pLayerTiles->m_Image = -1;
 		}
@@ -1085,7 +1085,7 @@ void CEditorActionEditLayerQuadsProp::Apply(int Value)
 	std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(m_pLayer);
 	if(m_Prop == ELayerQuadsProp::PROP_IMAGE)
 	{
-		if(Value >= 0)
+		if(Value >= 0 && !m_pEditor->m_Map.m_vpImages.empty())
 			pLayerQuads->m_Image = Value % m_pEditor->m_Map.m_vpImages.size();
 		else
 			pLayerQuads->m_Image = -1;
@@ -1730,7 +1730,7 @@ void CEditorActionEditLayerSoundsProp::Apply(int Value)
 	std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(m_pLayer);
 	if(m_Prop == ELayerSoundsProp::PROP_SOUND)
 	{
-		if(Value >= 0)
+		if(Value >= 0 && !m_pEditor->m_Map.m_vpSounds.empty())
 			pLayerSounds->m_Sound = Value % m_pEditor->m_Map.m_vpSounds.size();
 		else
 			pLayerSounds->m_Sound = -1;

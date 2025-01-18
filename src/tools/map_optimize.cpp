@@ -78,7 +78,7 @@ int main(int argc, const char **argv)
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
-	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_BASIC, argc, argv);
+	IStorage *pStorage = CreateStorage(IStorage::EInitializationType::BASIC, argc, argv);
 	if(!pStorage || argc <= 1 || argc > 3)
 	{
 		dbg_msg("map_optimize", "Invalid parameters or other unknown error.");

@@ -283,7 +283,7 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 {
 	vec2 Direction = Dir;
 	vec2 Position = Pos;
-	bool IsBot = false;
+	const bool IsBot = pInfo->m_aSixup[g_Config.m_ClDummy].m_BotTexture.IsValid();
 
 	// first pass we draw the outline
 	// second pass we draw the filling
@@ -299,12 +299,13 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 			{
 				vec2 BodyPos = Position + vec2(pAnim->GetBody()->m_X, pAnim->GetBody()->m_Y) * AnimScale;
 				IGraphics::CQuadItem BodyItem(BodyPos.x, BodyPos.y, BaseSize, BaseSize);
-				IGraphics::CQuadItem BotItem(BodyPos.x + (2.f / 3.f) * AnimScale, BodyPos.y + (-16 + 2.f / 3.f) * AnimScale, BaseSize, BaseSize); // x+0.66, y+0.66 to correct some rendering bug
 				IGraphics::CQuadItem Item;
 
-				// draw bot visuals (background)
 				if(IsBot && !OutLine)
 				{
+					IGraphics::CQuadItem BotItem(BodyPos.x + (2.f / 3.f) * AnimScale, BodyPos.y + (-16 + 2.f / 3.f) * AnimScale, BaseSize, BaseSize); // x+0.66, y+0.66 to correct some rendering bug
+
+					// draw bot visuals (background)
 					Graphics()->TextureSet(pInfo->m_aSixup[g_Config.m_ClDummy].m_BotTexture);
 					Graphics()->QuadsBegin();
 					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
@@ -312,20 +313,15 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 					Item = BotItem;
 					Graphics()->QuadsDraw(&Item, 1);
 					Graphics()->QuadsEnd();
-				}
 
-				// draw bot visuals (foreground)
-				if(IsBot && !OutLine)
-				{
+					// draw bot visuals (foreground)
 					Graphics()->TextureSet(pInfo->m_aSixup[g_Config.m_ClDummy].m_BotTexture);
 					Graphics()->QuadsBegin();
 					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 					SelectSprite7(client_data7::SPRITE_TEE_BOT_FOREGROUND);
 					Item = BotItem;
 					Graphics()->QuadsDraw(&Item, 1);
-					ColorRGBA Color = pInfo->m_aSixup[g_Config.m_ClDummy].m_BotColor;
-					Color.a = Alpha;
-					Graphics()->SetColor(Color);
+					Graphics()->SetColor(pInfo->m_aSixup[g_Config.m_ClDummy].m_BotColor.WithAlpha(Alpha));
 					SelectSprite7(client_data7::SPRITE_TEE_BOT_GLOW);
 					Item = BotItem;
 					Graphics()->QuadsDraw(&Item, 1);
@@ -338,9 +334,7 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 					Graphics()->TextureSet(pInfo->m_aSixup[g_Config.m_ClDummy].m_aTextures[protocol7::SKINPART_DECORATION]);
 					Graphics()->QuadsBegin();
 					Graphics()->QuadsSetRotation(pAnim->GetBody()->m_Angle * pi * 2);
-					ColorRGBA Color = pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_DECORATION];
-					Color.a = Alpha;
-					Graphics()->SetColor(Color);
+					Graphics()->SetColor(pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_DECORATION].WithAlpha(Alpha));
 					SelectSprite7(OutLine ? client_data7::SPRITE_TEE_DECORATION_OUTLINE : client_data7::SPRITE_TEE_DECORATION);
 					Item = BodyItem;
 					Graphics()->QuadsDraw(&Item, 1);
@@ -358,9 +352,7 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 				}
 				else
 				{
-					ColorRGBA Color = pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_BODY];
-					Color.a = Alpha;
-					Graphics()->SetColor(Color);
+					Graphics()->SetColor(pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_BODY].WithAlpha(Alpha));
 					SelectSprite7(client_data7::SPRITE_TEE_BODY);
 				}
 				Item = BodyItem;
@@ -403,16 +395,12 @@ void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pIn
 				Graphics()->QuadsSetRotation(pAnim->GetBody()->m_Angle * pi * 2);
 				if(IsBot)
 				{
-					ColorRGBA Color = pInfo->m_aSixup[g_Config.m_ClDummy].m_BotColor;
-					Color.a = Alpha;
-					Graphics()->SetColor(Color);
+					Graphics()->SetColor(pInfo->m_aSixup[g_Config.m_ClDummy].m_BotColor.WithAlpha(Alpha));
 					Emote = EMOTE_SURPRISE;
 				}
 				else
 				{
-					ColorRGBA Color = pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_EYES];
-					Color.a = Alpha;
-					Graphics()->SetColor(Color);
+					Graphics()->SetColor(pInfo->m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_EYES].WithAlpha(Alpha));
 				}
 				if(Pass == 1)
 				{
