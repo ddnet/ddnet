@@ -39,7 +39,6 @@ public:
 };
 
 //TODO: Those functions should not be here
-double CubicRoot(double x);
 float SolveBezier(float x, float p0, float p1, float p2, float p3);
 
 #endif
