@@ -540,8 +540,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	Disconnect();
 	dbg_assert(m_State == IClient::STATE_OFFLINE, "Disconnect must ensure that client is offline");
 
-	char aLastAddr[NETADDR_MAXSTRSIZE];
-	net_addr_str(&ServerAddress(), aLastAddr, sizeof(aLastAddr), true);
+	const NETADDR LastAddr = ServerAddress();
 
 	if(pAddress != m_aConnectAddressStr)
 		str_copy(m_aConnectAddressStr, pAddress);
@@ -579,15 +578,16 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 		{
 			NextAddr.port = 8303;
 		}
-		char aNextAddr[NETADDR_MAXSTRSIZE];
 		if(Sixup)
 			NextAddr.type |= NETTYPE_TW7;
 		else
 			OnlySixup = false;
+
+		char aNextAddr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&NextAddr, aNextAddr, sizeof(aNextAddr), true);
 		log_debug("client", "resolved connect address '%s' to %s", aBuffer, aNextAddr);
 
-		if(!str_comp(aNextAddr, aLastAddr))
+		if(NextAddr == LastAddr)
 		{
 			m_SendPassword = true;
 		}
