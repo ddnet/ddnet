@@ -231,6 +231,20 @@ void CMenus::RenderGame(CUIRect MainView)
 		GameClient()->m_Tooltips.DoToolTip(&s_AutoCameraButton, &Button, m_pClient->m_Camera.AutoSpecCameraTooltip());
 	}
 
+	if(m_pClient->m_Snap.m_pLocalInfo && (m_pClient->m_Snap.m_pLocalInfo->m_Team == TEAM_SPECTATORS || Paused || Spec))
+	{
+		ButtonBar.VSplitLeft(32.0f, &Button, &ButtonBar);
+		ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
+
+		static CButtonContainer s_SpecCursorButton;
+
+		if(DoButton_FontIcon(&s_SpecCursorButton, FONT_ICON_CROSSHAIR, !g_Config.m_ClSpecCursor, &Button, IGraphics::CORNER_ALL, g_Config.m_ClSpecCursor))
+		{
+			g_Config.m_ClSpecCursor = !g_Config.m_ClSpecCursor;
+		}
+		GameClient()->m_Tooltips.DoToolTip(&s_SpecCursorButton, &Button, Localize("Toggle spectating cursor"));
+	}
+
 	if(g_Config.m_ClTouchControls)
 	{
 		ButtonBar2.VSplitLeft(200.0f, &Button, &ButtonBar2);

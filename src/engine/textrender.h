@@ -151,6 +151,7 @@ MAYBE_UNUSED static const char *FONT_ICON_ARROWS_ROTATE = "\xEF\x80\xA1";
 MAYBE_UNUSED static const char *FONT_ICON_QUESTION = "?";
 
 MAYBE_UNUSED static const char *FONT_ICON_CAMERA = "\xEF\x80\xB0";
+MAYBE_UNUSED static const char *FONT_ICON_CROSSHAIR = "\xEF\x81\x9B";
 } // end namespace FontIcons
 
 enum ETextCursorSelectionMode
