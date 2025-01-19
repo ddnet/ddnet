@@ -3241,6 +3241,10 @@ void CGameClient::UpdateSpectatorCursor()
 	// if we are in auto spec mode, use camera zoom to smooth out cursor transitions
 	const float Zoom = (m_Camera.m_Zooming && m_Camera.m_AutoSpecCameraZooming) ? m_Camera.m_Zoom : m_Snap.m_SpecInfo.m_Zoom;
 	m_CursorInfo.m_WorldTarget = m_CursorInfo.m_Position + (m_CursorInfo.m_Target - TargetCameraOffset) * Zoom + TargetCameraOffset;
+
+	// update the screen target and compensate it for dyncam
+	vec2 DyncamOffsetDelta = TargetCameraOffset - m_Camera.m_aDyncamCurrentCameraOffset[g_Config.m_ClDummy];
+	m_CursorInfo.m_ScreenTarget = m_CursorInfo.m_Position + m_CursorInfo.m_Target - DyncamOffsetDelta + DyncamOffsetDelta / m_Camera.m_Zoom;
 }
 
 void CGameClient::UpdateRenderedCharacters()

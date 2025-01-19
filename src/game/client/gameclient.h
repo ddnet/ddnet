@@ -393,6 +393,7 @@ public:
 		int m_Weapon;
 		vec2 m_Target;
 		vec2 m_WorldTarget;
+		vec2 m_ScreenTarget;
 		vec2 m_Position;
 
 	public:
@@ -400,6 +401,7 @@ public:
 		int Weapon() const { return m_Weapon; }
 		vec2 Target() const { return m_Target; }
 		vec2 WorldTarget() const { return m_WorldTarget; }
+		vec2 ScreenTarget() const { return m_ScreenTarget; }
 		vec2 Position() const { return m_Position; }
 	} m_CursorInfo;
 

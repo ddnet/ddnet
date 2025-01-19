@@ -114,18 +114,16 @@ void CCamera::ResetAutoSpecCamera()
 void CCamera::UpdateCamera()
 {
 	// use hardcoded smooth camera for spectating unless player explictly turn it off
-	bool IsSpectatingPlayer = !GameClient()->m_MultiViewActivated;
+	bool IsSpectatingPlayer;
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		IsSpectatingPlayer = IsSpectatingPlayer && (!m_pClient->m_Snap.m_SpecInfo.m_Active || m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0);
-	}
+		IsSpectatingPlayer = (!m_pClient->m_Snap.m_SpecInfo.m_Active || m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0);
 	else
-	{
-		IsSpectatingPlayer = IsSpectatingPlayer && m_pClient->m_Snap.m_SpecInfo.m_Active &&
-				     m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0 &&
-				     m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != m_pClient->m_aLocalIds[0] &&
-				     (!m_pClient->Client()->DummyConnected() || m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != m_pClient->m_aLocalIds[1]);
-	}
+		IsSpectatingPlayer = m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId >= 0;
+
+	bool IsSelfSpectating = m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == m_pClient->m_aLocalIds[0] ||
+				(m_pClient->Client()->DummyConnected() && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == m_pClient->m_aLocalIds[1]);
+
+	IsSpectatingPlayer = IsSpectatingPlayer && !IsSelfSpectating && !GameClient()->m_MultiViewActivated;
 
 	bool UsingAutoSpecCamera = m_AutoSpecCamera && CanUseAutoSpecCamera();
 	float CurrentZoom = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
@@ -247,12 +245,22 @@ void CCamera::UpdateCamera()
 			CurrentDeadzone = m_pClient->m_Snap.m_SpecInfo.m_Deadzone;
 			CurrentFollowFactor = m_pClient->m_Snap.m_SpecInfo.m_FollowFactor;
 
-			if(!UsingAutoSpecCamera)
+			// consider spec zoom to be contained if current zoom is at least one step further than spec zoom
+			bool SpecZoomContained = m_pClient->m_Snap.m_SpecInfo.m_Zoom * CCamera::ZoomStepsToValue(-1) < m_Zoom + 0.001f;
+
+			if(!UsingAutoSpecCamera && SpecZoomContained)
 			{
-				// turn off dyncam if user zooms when spectating
+				// turn off dyncam if user zooms out when spectating
 				CurrentDeadzone = 0;
 				CurrentFollowFactor = 0;
 			}
+		}
+
+		if(m_pClient->m_Snap.m_SpecInfo.m_Active && IsSelfSpectating)
+		{
+			// turn off dyncam when self spectating
+			CurrentDeadzone = 0;
+			CurrentFollowFactor = 0;
 		}
 
 		float OffsetAmount = maximum(l - CurrentDeadzone, 0.0f) * (CurrentFollowFactor / 100.0f);

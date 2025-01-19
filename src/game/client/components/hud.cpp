@@ -610,19 +610,35 @@ void CHud::RenderCursor()
 		return;
 
 	int CurWeapon = maximum(0, m_pClient->m_CursorInfo.Weapon() % NUM_WEAPONS);
-	vec2 TargetPos = m_pClient->m_CursorInfo.WorldTarget();
 
 	float CenterX = m_pClient->m_Camera.m_Center.x;
 	float CenterY = m_pClient->m_Camera.m_Center.y;
 	float Zoom = m_pClient->m_Camera.m_Zoom;
+	bool AutoSpecCamEnabled = m_pClient->m_Camera.m_AutoSpecCamera && m_pClient->m_Camera.CanUseAutoSpecCamera();
+	bool SpecZoomContained = AutoSpecCamEnabled || m_pClient->m_Snap.m_SpecInfo.m_Zoom < Zoom + 0.001f;
 
+	vec2 TargetPos;
 	float aPoints[4];
-	RenderTools()->MapScreenToWorld(CenterX, CenterY, 100.0f, 100.0f, 100.0f, 0, 0, Graphics()->ScreenAspect(), Zoom, aPoints);
+
+	// cursor position not rendering at the world position is considered mutated
+	// hint user that the cursor is not "real" by making it transparent
+	bool CursorPositionMutated = false;
+
+	if(SpecZoomContained)
+	{
+		TargetPos = m_pClient->m_CursorInfo.WorldTarget();
+		RenderTools()->MapScreenToWorld(CenterX, CenterY, 100.0f, 100.0f, 100.0f, 0, 0, Graphics()->ScreenAspect(), Zoom, aPoints);
+	}
+	else
+	{
+		CursorPositionMutated = true;
+		TargetPos = m_pClient->m_CursorInfo.ScreenTarget();
+		RenderTools()->MapScreenToWorld(CenterX, CenterY, 100.0f, 100.0f, 100.0f, 0, 0, Graphics()->ScreenAspect(), 1.0f, aPoints);
+	}
+
 	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
 
 	vec2 ScreenPos = TargetPos - m_pClient->m_Camera.m_Center;
-
-	bool Clamped = false;
 	float HalfWidth = CenterX - aPoints[0];
 	float HalfHeight = CenterY - aPoints[1];
 
@@ -642,14 +658,16 @@ void CHud::RenderCursor()
 				ClampFactor = t;
 		}
 
-		Clamped = true;
+		CursorPositionMutated = true;
 		TargetPos = ScreenPos * ClampFactor + m_pClient->m_Camera.m_Center;
 	}
 
 	// render spec cursor
-	Graphics()->SetColor(1.f, 1.f, 1.f, Clamped ? .5f : 1.f);
+	Graphics()->SetColor(1.f, 1.f, 1.f, CursorPositionMutated ? .5f : 1.f);
 	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y, Zoom, Zoom);
+
+	float RenderZoom = SpecZoomContained ? Zoom : 1.0f;
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y, RenderZoom, RenderZoom);
 }
 
 void CHud::PrepareAmmoHealthAndArmorQuads()
