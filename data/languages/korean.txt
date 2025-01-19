@@ -15,6 +15,7 @@
 # 2022-10-20 CHaBek
 # 2023-01-08 CHaBek
 # 2023-03-28 CHaBek
+# 2025-01-20 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -116,10 +117,10 @@ Demos
 == 데모
 
 Disconnect
-== 연결 끊기
+== 연결 해제
 
 Disconnected
-== 연결 끊김
+== 연결 해제됨
 
 Downloading map
 == 맵 다운로드 중
@@ -203,10 +204,10 @@ Invalid Demo
 == 잘못된 데모
 
 Join blue
-== 블루팀에 참가
+== 블루팀 참가
 
 Join red
-== 레드팀에 참가
+== 레드팀 참가
 
 Jump
 == 점프
@@ -236,7 +237,7 @@ Movement
 == 이동
 
 Mute when not active
-== 창 비활성 시 음소거
+== 창 비활성화 시 음소거
 
 Name
 == 이름
@@ -251,7 +252,7 @@ No
 == 아니오
 
 No password
-== 비밀번호가 없는 서버
+== 암호가 없는 서버
 
 No servers found
 == 서버를 찾을 수 없음
@@ -266,10 +267,10 @@ Parent Folder
 == 상위 폴더
 
 Password
-== 비밀번호
+== 암호
 
 Password incorrect
-== 잘못된 비밀번호
+== 잘못된 암호
 
 Ping
 == 핑
@@ -377,7 +378,7 @@ Sudden Death
 == 단판 승부
 
 Switch weapon on pickup
-== 획득한 무기로 교체
+== 획득한 무기로 전환
 
 Team
 == 팀
@@ -443,15 +444,15 @@ Yes
 == 예
 
 You must restart the game for all settings to take effect.
-== 설정을 적용하기 위해서 게임을 재시작해야 합니다.
+== 설정을 적용하기 위해 게임을 재시작해야 합니다.
 
 ##### needs translation #####
 
 Game paused
-== 게임 일시정지
+== 게임 일시정지됨
 
 Play background music
-== 배경 음악
+== 배경 음악 재생
 
 Player country:
 == 플레이어 국가:
@@ -496,13 +497,13 @@ Record demo
 == 데모 녹화
 
 Miscellaneous
-== 여러가지
+== 기타
 
 UI Color
 == UI 색상
 
 Your skin
-== 당신의 스킨
+== 내 스킨
 
 Max Screenshots
 == 최대 스크린샷 수
@@ -568,22 +569,22 @@ File already exists, do you want to overwrite it?
 == 파일이 이미 존재합니다. 덮어쓰기하시겠습니까?
 
 Are you sure that you want to disconnect?
-== 연결을 끊으시겠습니까?
+== 연결을 해제하시겠습니까?
 
 Disconnect Dummy
-== 더미 연결 끊기
+== 더미 연결 해제
 
 Are you sure that you want to disconnect your dummy?
-== 더미의 연결을 끊으시겠습니까?
+== 더미 연결을 해제하시겠습니까?
 
 Welcome to DDNet
-== DDNet에 오신 것을 환영합니다
+== DDNet에 오신 것을 환영합니다.
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork는 온라인 협동 게임으로, 당신과 당신의 Tee 동료들이 맵의 결승점에 도달하는 것이 목표입니다. 당신이 초보자라면 가장 쉬운 맵들을 진행하는 Novice 서버에서 시작하는 것을 권장합니다. 핑을 고려하여 당신의 근처에 있는 서버를 선택하십시오.
+== DDraceNetwork는 온라인 협동 게임으로, 당신과 당신의 Tee 동료들이 맵의 결승선에 도달하는 것이 목표입니다. 당신이 초보자라면 가장 난이도가 낮은 맵들로 구성된 Novice 서버에서 시작하는 것을 권장합니다. 핑을 고려해 자신의 근처에 있는 서버를 선택하십시오.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 죽기(재시작) 위해서는 K 키를 눌러야 합니다. Q 키를 눌러 일시정지하여 다른 플레이어를 관전할 수 있습니다. 다른 키 바인드는 설정 창을 참고하십시오.
+== 죽기(재시작) 위해서는 K 키를 눌러야 합니다. Q 키를 눌러 일시정지하면 다른 플레이어를 관전할 수 있습니다. 다른 키 바인드는 설정 창을 참고하십시오.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 서버 접속 전에 설정을 확인하고 여러분의 편의에 따라 조정하는 것을 권장합니다.
@@ -595,13 +596,13 @@ Existing Player
 == 기존 플레이어
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 닉네임 '%s' 은 이미 사용 중입니다 (%d 포인트). 그래도 사용하시겠습니까?
+== 닉네임 '%s'은(는) 이미 사용 중입니다 (%d 포인트). 그래도 사용하시겠습니까?
 
 Checking for existing player with your name
 == 기존 플레이어 목록에서 닉네임 검색 중
 
 Are you sure that you want to disconnect and switch to a different server?
-== 연결을 끊고 다른 서버에 접속하시겠습니까?
+== 연결을 해제하고 다른 서버에 접속하시겠습니까?
 
 Speed
 == 속도
@@ -676,7 +677,7 @@ Date
 == 날짜
 
 Fetch Info
-== 정보
+== 정보 불러오기
 
 Demos directory
 == 데모 폴더
@@ -691,7 +692,7 @@ Kill
 == 죽기
 
 Pause
-== 관전
+== 일시정지
 
 Time
 == 시간
@@ -709,7 +710,7 @@ Smooth Dynamic Camera
 == 부드러운 다이나믹 카메라
 
 Switch weapon when out of ammo
-== 탄약 고갈 시 무기 교체
+== 탄약 고갈 시 무기 전환
 
 Show clan above name plates
 == 이름 위에 클랜 표시
@@ -763,10 +764,10 @@ Hook collisions
 == 갈고리 보조선
 
 Zoom in
-== 시야 확장
+== 시야 축소
 
 Zoom out
-== 시야 축소
+== 시야 확장
 
 Default zoom
 == 기본 시야
@@ -838,10 +839,10 @@ Enable game sounds
 == 게임 소리 활성화
 
 Enable gun sound
-== 총 소리 활성화
+== 권총 소리 활성화
 
 Enable long pain sound (used when shooting in freeze)
-== 동결 상태 비명 활성화
+== 동결 상태 시 비명 활성화
 
 Enable server message sound
 == 서버 메시지 소리 활성화
@@ -853,7 +854,7 @@ Enable team chat sound
 == 팀 채팅 소리 활성화
 
 Enable highlighted chat sound
-== 언급된 채팅 소리 활성화
+== 강조 채팅 소리 활성화
 
 Game sound volume
 == 게임 음량
@@ -889,7 +890,7 @@ Show votes window after voting
 == 투표 후에도 투표 창 표시
 
 Show kill messages
-== 킬 메시지 표시
+== 처치/사망 메시지 표시
 
 Use old chat style
 == 구식 채팅 방식 사용
@@ -901,7 +902,7 @@ System message
 == 시스템 메시지
 
 Highlighted message
-== 언급된 메시지
+== 강조 메시지
 
 Team message
 == 팀 메시지
@@ -994,13 +995,13 @@ DDNet %s is available:
 == DDNet %s 사용 가능:
 
 Update now
-== 지금 업데이트하기
+== 지금 업데이트
 
 Updating…
 == 업데이트 중…
 
 DDNet Client updated!
-== DDNet 클라이언트가 업데이트되었습니다!
+== DDNet 클라이언트가 업데이트됐습니다!
 
 No updates available
 == 현재 업데이트 사항 없음
@@ -1039,13 +1040,13 @@ Settings
 == 설정
 
 Stop server
-== 서버 정지
+== 서버 종료
 
 Run server
 == 서버 시작
 
 Server executable not found, can't run server
-== 서버 실행 파일을 찾을 수 없어, 서버를 구동할 수 없습니다.
+== 서버 실행 파일이 발견되지 않아, 서버를 구동할 수 없습니다.
 
 Editor
 == 맵 편집기
@@ -1055,7 +1056,7 @@ Play
 == 플레이
 
 DDNet %s is out!
-== DDNet %s 이 공개되었습니다!
+== DDNet %s 이(가) 공개됐습니다!
 
 Downloading %s:
 == %s 다운로드 중:
@@ -1100,7 +1101,7 @@ FPM
 == 처치/분
 
 Spree
-== 연속
+== 연속처치
 
 Best
 == 최고
@@ -1184,7 +1185,7 @@ Opacity
 == 불투명도
 
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== Tee와 이름 표시 등 다른 팀에 속한 엔티티의 불투명도를 조정합니다.
+== 다른 팀의 Tee와 이름 표시 등 엔티티의 불투명도를 조정합니다.
 
 Quads are used for background decoration
 == 맵 배경을 표시합니다.
@@ -1345,7 +1346,7 @@ Hook Collisions
 == 갈고리 보조선
 
 Show health, shields and ammo
-== 체력과 방패, 탄약 표시
+== 체력, 방어구, 탄약 표시
 
 DDRace HUD
 == DDRace HUD
@@ -1366,7 +1367,7 @@ Colors of the hook collision line, in case of a possible collision with:
 == 갈고리 보조선 색상:
 
 Your movements are not taken into account when calculating the line colors
-== 움직임은 색상 추정에 고려되지 않습니다.
+== 당신의 움직임은 색상 계산에 고려되지 않습니다.
 
 Nothing hookable
 == 갈고리 불가
@@ -1405,7 +1406,7 @@ Export cut as a separate demo
 == 자른 부분을 다른 이름으로 저장
 
 Toggle keyboard shortcuts
-== 키보드 단축키 사용 선택
+== 키보드 단축키 사용
 
 Weapons
 == 무기
@@ -1476,7 +1477,7 @@ Cancel
 == 취소
 
 File '%s' already exists, do you want to overwrite it?
-== 파일 '%s' 이 이미 존재합니다. 덮어쓰기하시겠습니까?
+== 파일 '%s'이(가) 이미 존재합니다. 덮어쓰기하시겠습니까?
 
 Are you sure that you want to remove the player '%s' from your friends list?
 == '%s' 님을 친구 목록에서 제거하시겠습니까?
@@ -1485,10 +1486,10 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 == '%s' 클랜을 친구 목록에서 제거하시겠습니까?
 
 Go back one tick
-== 1 틱 뒤로 이동
+== 1 틱 앞으로 이동
 
 Go forward one tick
-== 1 틱 앞으로 이동
+== 1 틱 뒤로 이동
 
 Go back one marker
 == 이전 마커로 이동
@@ -1500,10 +1501,10 @@ Open the directory that contains the demo files
 == 데모 파일이 있는 폴더를 엽니다.
 
 Are you sure that you want to delete the demo '%s'?
-== 데모 '%s' 을 삭제하시겠습니까?
+== 데모 '%s'을(를) 삭제하시겠습니까?
 
 Unable to delete the demo '%s'
-== 데모 '%s' 을 삭제할 수 없음
+== 데모 '%s'을(를) 삭제할 수 없음
 
 Save power by lowering refresh rate (higher input latency)
 == 화면 주사율을 낮춰 전력 절약 (입력 지연 증가)
@@ -1582,25 +1583,25 @@ Some fonts could not be loaded. Check the local console for details.
 == 
 
 Quitting. Please wait…
-== 
+== 종료합니다. 잠시만 기다려 주십시오…
 
 Restarting. Please wait…
-== 
+== 재시작합니다. 잠시만 기다려 주십시오…
 
 Loading background map
-== 
+== 배경 맵 로딩 중
 
 Searching
-== 
+== 검색
 
 Enter Username
-== 
+== 이름 입력
 
 Enter Password
-== 
+== 암호 입력
 
 NOT CONNECTED
-== 
+== 연결되지 않음
 
 Match %d of %d
 == 
@@ -1641,7 +1642,7 @@ Loading menu themes
 == 
 
 Press a key…
-== 
+== 아무 키나 누르십시오…
 
 Main menu
 == 
@@ -1656,7 +1657,7 @@ Are you sure that you want to restart?
 == 
 
 Save skin
-== 
+== 스킨 저장
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
 == 
@@ -1692,70 +1693,70 @@ Unable to save the skin with a reserved name
 == 
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 No local servers found (ports %d-%d)
-== 
+== 로컬 서버를 찾을 수 없음 (포트 %d-%d)
 
 Example of usage
-== 
+== 예시
 
 No login required
-== 
+== 로그인 불필요 서버
 
 Communities
-== 
+== 커뮤니티
 
 No server selected
-== 
+== 서버가 선택되지 않음
 
 Online friends (%d)
-== 
+== 온라인 친구 (%d)
 
 Online clanmates (%d)
-== 
+== 온라인 클랜원 (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== 오프라인 (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== 클릭해 서버를 선택하십시오. 더블클릭해 친구가 있는 서버에 입장합니다.
 
 Click to remove this player from your friends list.
-== 
+== 클릭해 해당 플레이어를 친구 목록에서 제거합니다.
 
 Click to remove this clan from your friends list.
-== 
+== 클릭해 해당 클랜을 친구 목록에서 제거합니다.
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 
+== 아래에 이름을 입력하거나 플레이어 목록에서 이름을 클릭해 친구를 추가합니다.
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
+== 아래에 이름을 빈칸으로 두고 클랜명만 입력해 클랜원을 추가합니다.
 
 Offline friends and clanmates will appear here.
-== 
+== 오프라인 상태의 친구 및 클랜원들이 여기에 표시됩니다.
 
 Add Clan
-== 
+== 클랜 추가
 
 Server filter
-== 
+== 서버 필터
 
 Friends
-== 
+== 친구
 
 Go back the specified duration
 == 
 
 [Demo player duration]
 %d min.
-== 
+== %d 분
 
 [Demo player duration]
 %d sec.
-== 
+== %d 초
 
 Change the skip duration
 == 
@@ -1797,7 +1798,7 @@ No demo selected
 == 
 
 Folder Link
-== 
+== 폴더 주소
 
 Created
 == 
@@ -1813,7 +1814,7 @@ Are you sure that you want to delete the folder '%s'?
 == 
 
 Delete folder
-== 
+== 폴더 삭제
 
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
@@ -1822,19 +1823,19 @@ Dummy is not allowed on this server
 == 
 
 Please wait…
-== 
+== 잠시만 기다려 주십시오…
 
 Edit touch controls
 == 
 
 Close
-== 
+== 닫기
 
 https://wiki.ddnet.org/wiki/Touch_controls
 == 
 
 Save changes
-== 
+== 변경 내용 저장
 
 Error saving touch controls
 == 
@@ -1843,10 +1844,10 @@ Could not save touch controls to file. See local console for details.
 == 
 
 Unsaved changes
-== 
+== 변경 내용 저장되지 않음
 
 Discard changes
-== 
+== 변경 내용 버리기
 
 Are you sure that you want to discard the current changes to the touch controls?
 == 
@@ -1902,10 +1903,10 @@ Could not load touch controls from clipboard. See local console for details.
 == 
 
 Loading…
-== 
+== 로딩 중…
 
 Ghosts directory
-== 
+== 고스트 폴더
 
 Activate all
 == 
@@ -1915,7 +1916,7 @@ Deactivate all
 
 [Hertz]
 Hz
-== 
+== Hz
 
 Player info change cooldown
 == 
@@ -1924,94 +1925,94 @@ Axis
 == 
 
 Graphics card
-== 
+== 그래픽 카드
 
 Tee
-== 
+== Tee
 
 Info Messages
-== 
+== 정보 메시지
 
 Show local time always
-== 
+== 항상 현지 시각 표시
 
 Authed name color in scoreboard
-== 
+== 점수판에 인증된 이름 색상 표시
 
 Same clan color in scoreboard
-== 
+== 점수판에 클랜 색상 표시
 
 Show client IDs (scoreboard, chat, spectator)
-== 
+== 점수판, 채팅, 관전창 등에 클라이언트 ID 표시
 
 Always show chat
-== 
+== 항상 채팅 표시
 
 Show only chat messages from team members
-== 
+== 팀원이 보낸 메시지만 표시
 
 Chat font size
-== 
+== 채팅 글꼴 크기
 
 Chat width
-== 
+== 채팅 너비
 
 Show friend mark (♥) in name plates
-== 
+== 이름에 친구 표시 (♥)
 
 Show client IDs in name plates
-== 
+== 이름에 클라이언트 ID 표시
 
 Hook Strength
-== 
+== 갈고리 세기
 
 Show hook strength icon indicator
-== 
+== 갈고리 세기 아이콘 표시
 
 Show hook strength number indicator
-== 
+== 갈고리 세기 정도 표시
 
 Size of hook strength icon and number indicator
-== 
+== 갈고리 세기 아이콘 및 수치 크기
 
 Key Presses
-== 
+== 키 입력
 
 Size of key press icons
-== 
+== 키 입력 아이콘 크기
 
 Show own player's hook collision line
-== 
+== 내 갈고리 보조선 표시
 
 Always show own player's hook collision line
-== 
+== 항상 내 갈고리 보조선 표시
 
 Always show other players' hook collision lines
-== 
+== 항상 다른 플레이어의 갈고리 보조선 표시
 
 Width of your own hook collision line
-== 
+== 내 갈고리 보조선 너비
 
 Width of others' hook collision line
-== 
+== 다른 플레이어의 갈고리 보조선 너비
 
 Preview 'Hook collisions' being pressed
-== 
+== '갈고리 보조선' 키 입력 미리보기
 
 Show finish messages
-== 
+== 완주 메시지 표시
 
 Enable ghost
-== 
+== 고스트 활성화
 
 Only save improvements
-== 
+== 향상된 기록만 저장
 
 Regular background color
-== 
+== 일반 배경 색상
 
 Entities background color
-== 
+== 엔티티 배경 색상
 
 Basic
 == 
@@ -2020,19 +2021,19 @@ Custom
 == 
 
 Are you sure that you want to delete '%s'?
-== 
+== 정말로 '%s'을(를) 삭제하시겠습니까?
 
 Delete skin
-== 
+== 스킨 삭제
 
 Unable to delete skin
-== 
+== 스킨을 삭제할 수 없음
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 
 
 Round %d/%d
-== 
+== %d/%d 라운드
 
 [Spectators]
 %d others…
@@ -2040,14 +2041,14 @@ Round %d/%d
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== 팀 %d (%d/%d)
 
 [skins]
 Body
-== 
+== 몸
 
 [skins]
 Marking
@@ -2055,31 +2056,31 @@ Marking
 
 [skins]
 Decoration
-== 
+== 장식
 
 [skins]
 Hands
-== 
+== 손 
 
 [skins]
 Feet
-== 
+== 발
 
 [skins]
 Eyes
-== 
+== 눈
 
 Aim
-== 
+== 조준
 
 Active: Fire
-== 
+== 발사 활성화
 
 Active: Hook
-== 
+== 갈고리 활성화
 
 Moved ingame
-== 
+== 게임 내에서 이동됨
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/wiki/Mapping/ko
