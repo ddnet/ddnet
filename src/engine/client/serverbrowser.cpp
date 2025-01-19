@@ -17,6 +17,7 @@
 #include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
 #include <engine/shared/network.h>
+#include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/serverinfo.h>
 
@@ -964,13 +965,11 @@ void CServerBrowser::Refresh(int Type, bool Force)
 		CNetChunk Packet;
 
 		/* do the broadcast version */
-		Packet.m_ClientId = -1;
 		mem_zero(&Packet, sizeof(Packet));
 		Packet.m_Address.type = m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST;
 		Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
 		Packet.m_DataSize = sizeof(aBuffer);
 		Packet.m_pData = aBuffer;
-		mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
 
 		int Token = GenerateToken(Packet.m_Address);
 		mem_copy(aBuffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
@@ -981,10 +980,25 @@ void CServerBrowser::Refresh(int Type, bool Force)
 
 		m_BroadcastTime = time_get();
 
+		CPacker Packer;
+		Packer.Reset();
+		Packer.AddRaw(SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
+		Packer.AddInt(Token);
+
+		CNetChunk Packet7;
+		mem_zero(&Packet7, sizeof(Packet7));
+		Packet7.m_Address.type = m_pNetClient->NetType() | NETTYPE_TW7 | NETTYPE_LINK_BROADCAST;
+		Packet7.m_Flags = NETSENDFLAG_CONNLESS;
+		Packet7.m_DataSize = Packer.Size();
+		Packet7.m_pData = Packer.Data();
+
 		for(int Port = LAN_PORT_BEGIN; Port <= LAN_PORT_END; Port++)
 		{
 			Packet.m_Address.port = Port;
 			m_pNetClient->Send(&Packet);
+
+			Packet7.m_Address.port = Port;
+			m_pNetClient->Send(&Packet7);
 		}
 
 		if(g_Config.m_Debug)
@@ -1035,21 +1049,41 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int 
 		*pBasicToken = GetBasicToken(Token);
 	}
 
-	unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO) + 1];
-	mem_copy(aBuffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
-	aBuffer[sizeof(SERVERBROWSE_GETINFO)] = GetBasicToken(Token);
+	if(Addr.type & NETTYPE_TW7)
+	{
+		CPacker Packer;
+		Packer.Reset();
+		Packer.AddRaw(SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
+		Packer.AddInt(Token);
 
-	CNetChunk Packet;
-	Packet.m_ClientId = -1;
-	Packet.m_Address = Addr;
-	Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
-	Packet.m_DataSize = sizeof(aBuffer);
-	Packet.m_pData = aBuffer;
-	mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
-	Packet.m_aExtraData[0] = GetExtraToken(Token) >> 8;
-	Packet.m_aExtraData[1] = GetExtraToken(Token) & 0xff;
+		CNetChunk Packet;
+		Packet.m_ClientId = -1;
+		Packet.m_Address = Addr;
+		Packet.m_Flags = NETSENDFLAG_CONNLESS;
+		Packet.m_DataSize = Packer.Size();
+		Packet.m_pData = Packer.Data();
+		mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
 
-	m_pNetClient->Send(&Packet);
+		m_pNetClient->Send(&Packet);
+	}
+	else
+	{
+		unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO) + 1];
+		mem_copy(aBuffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
+		aBuffer[sizeof(SERVERBROWSE_GETINFO)] = GetBasicToken(Token);
+
+		CNetChunk Packet;
+		Packet.m_ClientId = -1;
+		Packet.m_Address = Addr;
+		Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
+		Packet.m_DataSize = sizeof(aBuffer);
+		Packet.m_pData = aBuffer;
+		mem_zero(&Packet.m_aExtraData, sizeof(Packet.m_aExtraData));
+		Packet.m_aExtraData[0] = GetExtraToken(Token) >> 8;
+		Packet.m_aExtraData[1] = GetExtraToken(Token) & 0xff;
+
+		m_pNetClient->Send(&Packet);
+	}
 
 	if(pEntry)
 		pEntry->m_RequestTime = time_get();
