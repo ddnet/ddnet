@@ -1891,7 +1891,6 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
         config.cpp
         config.h
         config_variables.h
-        config_variables_custom.h
         console.cpp
         console.h
         csv.cpp

@@ -506,6 +506,7 @@ public:
 
 	bool EditorHasUnsavedData() const override { return m_pEditor->HasUnsavedData(); }
 
+	IFriends *Friends() override { return &m_Friends; }
 	IFriends *Foes() override { return &m_Foes; }
 
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) override;
