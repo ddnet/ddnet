@@ -117,6 +117,7 @@ void CGameClient::OnConsoleInit()
 					      &m_CountryFlags,
 					      &m_MapImages,
 					      &m_Effects, // doesn't render anything, just updates effects
+		                              &m_SkinProfiles,
 					      &m_Binds,
 					      &m_Binds.m_SpecialBinds,
 					      &m_Controls,
@@ -178,6 +179,9 @@ void CGameClient::OnConsoleInit()
 
 	// register tune zone command to allow the client prediction to load tunezones from the map
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
+
+	//Pulse
+	Console()->Register("p_copy", "?r[player ID]", CFGFLAG_CLIENT, PulseCopy, this, "Copy player profile by ID");
 
 	for(auto &pComponent : m_vpAll)
 		pComponent->m_pClient = this;
@@ -4086,6 +4090,22 @@ void CGameClient::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 
 	if(List >= 0 && List < NUM_TUNEZONES)
 		pSelf->TuningList()[List].Set(pParamName, NewValue);
+}
+
+void CGameClient::PulseCopy(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const int ClientId = pResult->GetInteger(0);
+	CClientData pClient = pSelf->m_aClients[ClientId];
+
+	pSelf->m_SkinProfiles.AddProfile(pClient.m_ColorBody,
+		pClient.m_ColorFeet,
+		pClient.m_Country,
+		pClient.m_Emoticon,
+		pClient.m_aSkinName,
+		pClient.m_aName,
+		pClient.m_aClan);
+	pSelf->m_SkinProfiles.SaveProfiles();
 }
 
 void CGameClient::ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

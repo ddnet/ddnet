@@ -1935,7 +1935,9 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Sound"),
 		Localize("DDNet"),
 		Localize("Assets"),
-		Localize("Pulse")};
+		Localize("Pulse"),
+		Localize("SkinProfs.")
+	};
 	static CButtonContainer s_aTabButtons[SETTINGS_LENGTH];
 
 	for(int i = 0; i < SETTINGS_LENGTH; i++)
@@ -2003,6 +2005,11 @@ void CMenus::RenderSettings(CUIRect MainView)
 	{
 		GameClient()->m_MenuBackground.ChangePosition(0);
 		RenderSettingsPulse(MainView);
+	}
+	else if(g_Config.m_UiSettingsPage == SETTINGS_PROFS)
+	{
+		GameClient()->m_MenuBackground.ChangePosition(0);
+		RenderSettingsProfs(MainView);
 	}
 	else
 	{

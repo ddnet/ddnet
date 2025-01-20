@@ -727,6 +727,7 @@ public:
 		SETTINGS_DDNET,
 		SETTINGS_ASSETS,
 		SETTINGS_PULSE,
+		SETTINGS_PROFS,
 
 		SETTINGS_LENGTH,
 
@@ -858,6 +859,7 @@ private:
 
 	//pulse
 	void RenderSettingsPulse(CUIRect MainView);
+	void RenderSettingsProfs(CUIRect MainView);
 
 	CServerProcess m_ServerProcess;
 };

@@ -28,6 +28,7 @@
 #include "components/broadcast.h"
 #include "components/camera.h"
 #include "components/chat.h"
+#include "components/comp_pulse/skinprofiles.h"
 #include "components/console.h"
 #include "components/controls.h"
 #include "components/countryflags.h"
@@ -168,6 +169,8 @@ public:
 	CGhost m_Ghost;
 
 	CTooltips m_Tooltips;
+	// Pulse Components
+	CSkinProfiles m_SkinProfiles;
 
 private:
 	std::vector<class CComponent *> m_vpAll;
@@ -234,6 +237,8 @@ private:
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
+	static void PulseCopy(IConsole::IResult *pResult, void *pUserData);
 
 	// only used in OnPredict
 	vec2 m_aLastPos[MAX_CLIENTS];

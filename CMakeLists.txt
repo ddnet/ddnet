@@ -2157,6 +2157,8 @@ if(CLIENT)
           component.cpp
           component.h
           components/comp_pulse/menus_pulse.cpp
+          components/comp_pulse/skinprofiles.cpp
+          components/comp_pulse/skinprofiles.h
           components/background.cpp
           components/background.h
           components/binds.cpp
