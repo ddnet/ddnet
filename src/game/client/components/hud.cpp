@@ -599,7 +599,7 @@ void CHud::RenderCursor()
 		RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
 		Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y, g_Config.m_ClCursorSizeMultiplier / 10.0f, g_Config.m_ClCursorSizeMultiplier / 10.0f);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y);
 		return;
 	}
 
@@ -651,7 +651,7 @@ void CHud::RenderCursor()
 	// render spec cursor
 	Graphics()->SetColor(1.f, 1.f, 1.f, Clamped ? .5f : 1.f);
 	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y, Zoom * (g_Config.m_ClCursorSizeMultiplier / 10.0f), Zoom * (g_Config.m_ClCursorSizeMultiplier / 10.0f));
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y, Zoom, Zoom);
 }
 
 void CHud::PrepareAmmoHealthAndArmorQuads()

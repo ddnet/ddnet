@@ -13,7 +13,7 @@ CFriends::CFriends()
 {
 	mem_zero(m_aFriends, sizeof(m_aFriends));
 	m_NumFriends = 0;
-	m_Type = FRIENDS;
+	m_Foes = false;
 }
 
 void CFriends::ConAddFriend(IConsole::IResult *pResult, void *pUserData)
@@ -34,9 +34,9 @@ void CFriends::ConFriends(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Friends();
 }
 
-void CFriends::Init(EFriendType Type)
+void CFriends::Init(bool Foes)
 {
-	m_Type = Type;
+	m_Foes = Foes;
 
 	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 	if(pConfigManager)
@@ -45,17 +45,11 @@ void CFriends::Init(EFriendType Type)
 	IConsole *pConsole = Kernel()->RequestInterface<IConsole>();
 	if(pConsole)
 	{
-		if(Type == FOES)
+		if(Foes)
 		{
 			pConsole->Register("add_foe", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddFriend, this, "Add a foe");
 			pConsole->Register("remove_foe", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a foe");
 			pConsole->Register("foes", "", CFGFLAG_CLIENT, ConFriends, this, "List foes");
-		}
-		else if(Type == HIDDEN)
-		{
-			pConsole->Register("add_hidden", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConAddFriend, this, "Add a hidden");
-			pConsole->Register("remove_hidden", "s[name] ?s[clan]", CFGFLAG_CLIENT, ConRemoveFriend, this, "Remove a hidden");
-			pConsole->Register("hidden", "", CFGFLAG_CLIENT, ConFriends, this, "List hidden");
 		}
 		else
 		{
@@ -160,7 +154,7 @@ void CFriends::Friends()
 		{
 			str_format(aBuf, sizeof(aBuf), "Name: %s, Clan: %s", m_aFriends[i].m_aName, m_aFriends[i].m_aClan);
 
-			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_Type == FOES ? "foes" : m_Type == FRIENDS ? "friends" : "hidden", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+			pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, m_Foes ? "foes" : "friends", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 		}
 	}
 }
@@ -172,7 +166,7 @@ void CFriends::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserDat
 	const char *pEnd = aBuf + sizeof(aBuf) - 4;
 	for(int i = 0; i < pSelf->m_NumFriends; ++i)
 	{
-		str_copy(aBuf, pSelf->m_Type == FOES ? "add_foe " : pSelf->m_Type == FRIENDS ? "add_friend " : "add_hidden ");
+		str_copy(aBuf, pSelf->m_Foes ? "add_foe " : "add_friend ");
 
 		str_append(aBuf, "\"");
 		char *pDst = aBuf + str_length(aBuf);

@@ -909,7 +909,7 @@ void CPlayers::OnRender()
 	// render everyone else's hook, then our own
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(ClientId == LocalClientId || !m_pClient->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId) || ((g_Config.m_ClHideIgnoredInAnyCondition && m_pClient->m_aClients[ClientId].m_Hidden) || (m_pClient->m_aClients[ClientId].m_Hidden && GameClient()->IsOtherTeam(ClientId))))
+		if(ClientId == LocalClientId || !m_pClient->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId))
 		{
 			continue;
 		}
@@ -922,13 +922,13 @@ void CPlayers::OnRender()
 	}
 
 	// render spectating players
-	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	for(auto &Client : m_pClient->m_aClients)
 	{
-		if(!m_pClient->m_aClients[ClientId].m_SpecCharPresent || ((g_Config.m_ClHideIgnoredInAnyCondition && m_pClient->m_aClients[ClientId].m_Hidden) || (m_pClient->m_aClients[ClientId].m_Hidden && GameClient()->IsOtherTeam(ClientId))))
+		if(!Client.m_SpecCharPresent)
 		{
 			continue;
 		}
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), m_pClient->m_aClients[ClientId].m_SpecChar);
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Client.m_SpecChar);
 	}
 
 	// render everyone else's tee, then either our own or the tee we are spectating.
@@ -936,7 +936,7 @@ void CPlayers::OnRender()
 
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(ClientId == RenderLastId || !m_pClient->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId) || ((g_Config.m_ClHideIgnoredInAnyCondition && m_pClient->m_aClients[ClientId].m_Hidden) || (m_pClient->m_aClients[ClientId].m_Hidden && GameClient()->IsOtherTeam(ClientId))))
+		if(ClientId == RenderLastId || !m_pClient->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId))
 		{
 			continue;
 		}

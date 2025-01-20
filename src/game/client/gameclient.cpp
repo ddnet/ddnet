@@ -105,7 +105,6 @@ void CGameClient::OnConsoleInit()
 	m_pFavorites = Kernel()->RequestInterface<IFavorites>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	m_pFoes = Client()->Foes();
-	m_pHidden = Client()->Hidden();
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
@@ -163,7 +162,6 @@ void CGameClient::OnConsoleInit()
 						  &m_Binds.m_SpecialBinds,
 						  &m_GameConsole,
 						  &m_Chat, // chat has higher prio, due to that you can quit it by pressing esc
-						  &m_Scoreboard,
 						  &m_Motd, // for pressing esc to remove it
 						  &m_Spectator,
 						  &m_Emoticon,
@@ -1561,8 +1559,6 @@ void CGameClient::OnNewSnapshot()
 	CServerInfo ServerInfo;
 	Client()->GetServerInfo(&ServerInfo);
 
-	bool UniqeRaceServer = str_comp(ServerInfo.m_aCommunityId, "unique") == 0 && (str_find(ServerInfo.m_aGameType, "Race") != nullptr || str_find(ServerInfo.m_aGameType, "FastCap") != nullptr);
-
 	bool FoundGameInfoEx = false;
 	bool GotSwitchStateTeam = false;
 	m_aSwitchStateTeam[g_Config.m_ClDummy] = -1;
@@ -1885,11 +1881,6 @@ void CGameClient::OnNewSnapshot()
 					m_aSwitchStateTeam[g_Config.m_ClDummy] = -1;
 				GotSwitchStateTeam = true;
 			}
-
-			if(UniqeRaceServer && (Item.m_Type == NETOBJTYPE_CHARACTER || Item.m_Type == NETOBJTYPE_DDNETCHARACTER))
-			{
-				m_aClients[Item.m_Id].m_Solo = g_Config.m_ClApplySoloOnUnique;
-			}
 		}
 	}
 
@@ -1954,9 +1945,6 @@ void CGameClient::OnNewSnapshot()
 
 		// update foe state
 		m_aClients[i].m_Foe = !(i == m_Snap.m_LocalClientId || !m_Snap.m_apPlayerInfos[i] || !Foes()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
-
-		// update hidden state
-		m_aClients[i].m_Hidden = !(i == m_Snap.m_LocalClientId || !m_Snap.m_apPlayerInfos[i] || !Hidden()->IsFriend(m_aClients[i].m_aName, m_aClients[i].m_aClan, true));
 	}
 
 	// sort player infos by name
@@ -2611,7 +2599,6 @@ void CGameClient::CClientData::Reset()
 	m_EmoticonIgnore = false;
 	m_Friend = false;
 	m_Foe = false;
-	m_Hidden = false;
 
 	m_AuthLevel = AUTHED_NO;
 	m_Afk = false;

@@ -285,7 +285,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 			str_truncate(m_aCompletionBuffer, sizeof(m_aCompletionBuffer), m_Input.GetString() + m_PlaceholderOffset, m_PlaceholderLength);
 		}
 
-		if(!m_CompletionUsed && m_aCompletionBuffer[0] != '/' && !GameClient()->m_Scoreboard.IsActive())
+		if(!m_CompletionUsed && m_aCompletionBuffer[0] != '/')
 		{
 			// Create the completion list of player names through which the player can iterate
 			const char *PlayerName, *FoundInput;
