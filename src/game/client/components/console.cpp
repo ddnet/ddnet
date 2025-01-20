@@ -1014,7 +1014,7 @@ void CGameConsole::OnRender()
 	CUIRect Screen = *Ui()->Screen();
 	CInstance *pConsole = CurrentConsole();
 
-	const float MaxConsoleHeight = Screen.h * 3 / 5.0f;
+	const float MaxConsoleHeight = Screen.h * 3.5 / 5.0f;
 	float Progress = (Client()->GlobalTime() - (m_StateChangeEnd - m_StateChangeDuration)) / m_StateChangeDuration;
 
 	if(Progress >= 1.0f)
@@ -1059,14 +1059,47 @@ void CGameConsole::OnRender()
 
 	Ui()->MapScreen();
 
-	// background
-	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(aBackgroundColors[m_ConsoleType]);
-	Graphics()->QuadsSetSubset(0, 0, Screen.w / 80.0f, ConsoleHeight / 80.0f);
-	IGraphics::CQuadItem QuadItemBackground(0.0f, 0.0f, Screen.w, ConsoleHeight);
-	Graphics()->QuadsDrawTL(&QuadItemBackground, 1);
-	Graphics()->QuadsEnd();
+	if(g_Config.m_ClCustomConsole && Client()->m_ConsoleSkin.m_ConsoleTexture.IsValid() && !Client()->m_ConsoleSkin.m_ConsoleTexture.IsNullTexture())
+	{
+		Graphics()->TextureSet(Client()->m_ConsoleSkin.m_ConsoleTexture);
+		Graphics()->QuadsBegin();
+		// Calculate aspect ratio adjustments
+		float ImageWidth = 1920;
+		float ImageHeight = 750;
+		float ConsoleAspect = Screen.w / ConsoleHeight;
+		float ImageAspect = ImageWidth / ImageHeight;
+
+		// Determine texture coordinates to fit the console height
+		float TextureWidth = 1.0f;
+		float TextureHeight = 1.0f;
+		if (ConsoleAspect > ImageAspect) {
+			// Console is wider than the image, fit by height
+			TextureWidth = ImageAspect / ConsoleAspect;
+		} else {
+			// Console is taller than the image, fit by width
+			TextureHeight = ConsoleAspect / ImageAspect;
+		}
+
+		// Center the image
+		float OffsetX = (1.0f - TextureWidth) / 2.0f;
+		float OffsetY = (1.0f - TextureHeight) / 2.0f;
+
+		Graphics()->QuadsSetSubset(OffsetX, OffsetY, OffsetX + TextureWidth, OffsetY + TextureHeight);
+		IGraphics::CQuadItem QuadItemBackground(0.0f, 0.0f, Screen.w, ConsoleHeight);
+		Graphics()->QuadsDrawTL(&QuadItemBackground, 1);
+		Graphics()->QuadsEnd();
+	}
+	else
+	{
+		// background
+		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id);
+		Graphics()->QuadsBegin();
+		Graphics()->SetColor(aBackgroundColors[m_ConsoleType]);
+		Graphics()->QuadsSetSubset(0, 0, Screen.w / 80.0f, ConsoleHeight / 80.0f);
+		IGraphics::CQuadItem QuadItemBackground(0.0f, 0.0f, Screen.w, ConsoleHeight);
+		Graphics()->QuadsDrawTL(&QuadItemBackground, 1);
+		Graphics()->QuadsEnd();
+	}
 
 	// bottom border
 	Graphics()->TextureClear();

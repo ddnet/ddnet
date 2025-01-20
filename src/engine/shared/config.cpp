@@ -436,6 +436,82 @@ bool CConfigManager::Save()
 	return true;
 }
 
+bool CConfigManager::PSave()
+{
+	if(!m_pStorage || !g_Config.m_ClSaveSettings)
+		return true;
+
+	char aConfigFileTmp[IO_MAX_PATH_LENGTH];
+	m_ConfigFile = m_pStorage->OpenFile(IStorage::FormatTmpPath(aConfigFileTmp, sizeof(aConfigFileTmp), PULSE_CONFIG_FILE), IOFLAG_WRITE, IStorage::TYPE_SAVE);
+
+	if(!m_ConfigFile)
+	{
+		dbg_msg("config", "ERROR: opening %s failed", aConfigFileTmp);
+		return false;
+	}
+
+	m_Failed = false;
+
+	char aLineBuf[1024 * 2];
+	char aEscapeBuf[1024 * 2];
+
+#define MACRO_CONFIG_INT(Name, ScriptName, def, min, max, flags, desc) \
+if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) \
+{ \
+str_format(aLineBuf, sizeof(aLineBuf), "%s %i", #ScriptName, g_Config.m_##Name); \
+WriteLine(aLineBuf); \
+}
+#define MACRO_CONFIG_COL(Name, ScriptName, def, flags, desc) \
+if((flags)&CFGFLAG_SAVE && g_Config.m_##Name != def) \
+{ \
+str_format(aLineBuf, sizeof(aLineBuf), "%s %u", #ScriptName, g_Config.m_##Name); \
+WriteLine(aLineBuf); \
+}
+#define MACRO_CONFIG_STR(Name, ScriptName, len, def, flags, desc) \
+if((flags)&CFGFLAG_SAVE && str_comp(g_Config.m_##Name, def) != 0) \
+{ \
+EscapeParam(aEscapeBuf, g_Config.m_##Name, sizeof(aEscapeBuf)); \
+str_format(aLineBuf, sizeof(aLineBuf), "%s \"%s\"", #ScriptName, aEscapeBuf); \
+WriteLine(aLineBuf); \
+}
+
+#include "config_pulse.h"
+
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+
+	for(const auto &Callback : m_vPCallbacks)
+	{
+		Callback.m_pfnFunc(this, Callback.m_pUserData);
+	}
+
+	if(io_sync(m_ConfigFile) != 0)
+	{
+		m_Failed = true;
+	}
+
+	if(io_close(m_ConfigFile) != 0)
+		m_Failed = true;
+
+	m_ConfigFile = 0;
+
+	if(m_Failed)
+	{
+		dbg_msg("config", "ERROR: writing to %s failed", aConfigFileTmp);
+		return false;
+	}
+
+	if(!m_pStorage->RenameFile(aConfigFileTmp, PULSE_CONFIG_FILE, IStorage::TYPE_SAVE))
+	{
+		dbg_msg("config", "ERROR: renaming %s to " PULSE_CONFIG_FILE " failed", aConfigFileTmp);
+		return false;
+	}
+
+	log_info("config", "saved to " CONFIG_FILE);
+	return true;
+}
+
 void CConfigManager::RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData)
 {
 	m_vCallbacks.emplace_back(pfnFunc, pUserData);

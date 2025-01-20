@@ -87,6 +87,10 @@ public:
 			Success &= CreateFolder("assets/particles", TYPE_SAVE);
 			Success &= CreateFolder("assets/hud", TYPE_SAVE);
 			Success &= CreateFolder("assets/extras", TYPE_SAVE);
+			Success &= CreateFolder("pulse", TYPE_SAVE);
+			Success &= CreateFolder("pulse/assets", TYPE_SAVE);
+			Success &= CreateFolder("pulse/assets/console", TYPE_SAVE);
+
 #if defined(CONF_VIDEORECORDER)
 			Success &= CreateFolder("videos", TYPE_SAVE);
 #endif
@@ -100,6 +104,7 @@ public:
 		Success &= CreateFolder("editor", TYPE_SAVE);
 		Success &= CreateFolder("ghosts", TYPE_SAVE);
 		Success &= CreateFolder("teehistorian", TYPE_SAVE);
+
 
 		if(!Success)
 		{

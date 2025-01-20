@@ -3791,7 +3791,6 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 		else
 			str_format(aPath, sizeof(aPath), "assets/particles/%s.png", pPath);
 	}
-
 	CImageInfo ImgInfo;
 	bool PngLoaded = Graphics()->LoadPng(ImgInfo, aPath, IStorage::TYPE_ALL);
 	if(!PngLoaded && !IsDefault)
