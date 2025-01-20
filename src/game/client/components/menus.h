@@ -52,6 +52,12 @@ public:
 	virtual bool OnInput(const IInput::CEvent &Event) override;
 };
 
+struct SFoldableSection
+{
+	bool m_Opened = false;
+	int m_Height = 0;
+};
+
 struct SCommunityIcon
 {
 	char m_aCommunityId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];
@@ -82,6 +88,10 @@ class CMenus : public CComponent
 	int DoButton_CheckBox(const void *pId, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_CheckBoxAutoVMarginAndSet(const void *pId, const char *pText, int *pValue, CUIRect *pRect, float VMargin);
 	int DoButton_CheckBox_Number(const void *pId, const char *pText, int Checked, const CUIRect *pRect);
+//pulse
+	int DoButton_FoldableSection(SFoldableSection *pSection, const char *pText, float FontSize, const CUIRect *pRect, float CornerRounding = 0.f);
+	int DoFoldableSection(SFoldableSection *pSection, const char *pText, float FontSize, CUIRect *pRect, CUIRect *pRectAfter, float CornerRounding, const std::function<int()> &fnRender);
+
 
 	ColorHSLA DoLine_ColorPicker(CButtonContainer *pResetId, float LineSize, float LabelSize, float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, ColorRGBA DefaultColor, bool CheckBoxSpacing = true, int *pCheckBoxValue = nullptr, bool Alpha = false);
 	ColorHSLA DoButton_ColorPicker(const CUIRect *pRect, unsigned int *pHslaColor, bool Alpha);

@@ -441,6 +441,51 @@ ColorHSLA CMenus::DoButton_ColorPicker(const CUIRect *pRect, unsigned int *pHsla
 	return HslaColor;
 }
 
+int CMenus::DoButton_FoldableSection(SFoldableSection *pSection, const char *pText, float FontSize, const CUIRect *pRect, float CornerRounding)
+{
+	CUIRect Box, Label;
+	pRect->VSplitLeft(pRect->h, &Box, &Label);
+	Label.VSplitLeft(5.0f, nullptr, &Label);
+
+	int Checked = (int)pSection->m_Opened;
+	pRect->Draw(ColorRGBA(0, 0, 0, (Checked ? 0.4f : 0.25f) * Ui()->ButtonColorMul(pSection)), !Checked ? IGraphics::CORNER_ALL : IGraphics::CORNER_TL | IGraphics::CORNER_TR, CornerRounding);
+
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	Ui()->DoLabel(&Box, Checked ? FONT_ICON_CIRCLE_CHEVRON_DOWN : FONT_ICON_CIRCLE_CHEVRON_RIGHT, FontSize, TEXTALIGN_MC);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+
+	TextRender()->SetRenderFlags(0);
+	Ui()->DoLabel(&Label, pText, FontSize, TEXTALIGN_ML);
+
+	if(Ui()->DoButtonLogic(pSection, 0, pRect))
+		pSection->m_Opened = !pSection->m_Opened;
+
+	return pSection->m_Opened;
+}
+
+int CMenus::DoFoldableSection(SFoldableSection *pSection, const char *pText, float FontSize, CUIRect *pRect, CUIRect *pRectAfter, float CornerRounding, const std::function<int()> &fnRender)
+{
+	const float Margin = 10.0f;
+	const float HeaderHeight = FontSize + 5.0f + Margin;
+
+	CUIRect Button;
+
+	pRect->HSplitTop(HeaderHeight, &Button, pRect);
+	pRect->HSplitTop(pSection->m_Height, pRect, pRectAfter);
+
+	if(DoButton_FoldableSection(pSection, pText, FontSize, &Button, CornerRounding))
+	{
+		if(pSection->m_Height > 0)
+			pRect->Draw(ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_BL | IGraphics::CORNER_BR, CornerRounding);
+		pSection->m_Height = fnRender();
+	}
+	else
+		pSection->m_Height = 0;
+
+	return HeaderHeight + pSection->m_Height;
+}
+
 int CMenus::DoButton_CheckBoxAutoVMarginAndSet(const void *pId, const char *pText, int *pValue, CUIRect *pRect, float VMargin)
 {
 	CUIRect CheckBoxRect;
