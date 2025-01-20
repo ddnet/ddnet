@@ -31,7 +31,7 @@ jobs:
         rm -rf twmap
         mkdir release
         cd release
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GTEST=OFF -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GTEST=OFF -DTOOLS=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
         cmake --build . --config Release --target dilate
     - name: Check clang-format
       run: clang-format -version

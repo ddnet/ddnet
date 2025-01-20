@@ -11,7 +11,7 @@ class IConfigManager;
 class CFriends : public IFriends
 {
 	CFriendInfo m_aFriends[MAX_FRIENDS];
-	int m_Foes;
+	EFriendType m_Type;
 	int m_NumFriends;
 
 	static void ConAddFriend(IConsole::IResult *pResult, void *pUserData);
@@ -23,7 +23,7 @@ class CFriends : public IFriends
 public:
 	CFriends();
 
-	void Init(bool Foes = false) override;
+	void Init(EFriendType Type = FRIENDS) override;
 
 	int NumFriends() const override { return m_NumFriends; }
 	const CFriendInfo *GetFriend(int Index) const override;

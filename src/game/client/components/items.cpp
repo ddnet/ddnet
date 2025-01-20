@@ -381,6 +381,8 @@ void CItems::OnRender()
 		{
 			if(!IsSuper && pProj->m_Number > 0 && pProj->m_Number < (int)aSwitchers.size() && !aSwitchers[pProj->m_Number].m_aStatus[SwitcherTeam] && (pProj->m_Explosive ? BlinkingProjEx : BlinkingProj))
 				continue;
+			if((g_Config.m_ClHideIgnoredInAnyCondition && m_pClient->m_aClients[pProj->GetOwner()].m_Hidden) || (m_pClient->m_aClients[pProj->GetOwner()].m_Hidden && GameClient()->IsOtherTeam(pProj->GetOwner())))
+				continue;
 
 			CProjectileData Data = pProj->GetData();
 			RenderProjectile(&Data, pProj->GetId());
@@ -388,7 +390,7 @@ void CItems::OnRender()
 		for(CEntity *pEnt = GameClient()->m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->NextEntity())
 		{
 			auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
-			if(!pLaser || pLaser->GetOwner() < 0 || !GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal)
+			if(!pLaser || pLaser->GetOwner() < 0 || !GameClient()->m_aClients[pLaser->GetOwner()].m_IsPredictedLocal || ((g_Config.m_ClHideIgnoredInAnyCondition && m_pClient->m_aClients[pLaser->GetOwner()].m_Hidden) || (m_pClient->m_aClients[pLaser->GetOwner()].m_Hidden && GameClient()->IsOtherTeam(pLaser->GetOwner()))))
 				continue;
 			CLaserData Data = pLaser->GetData();
 			RenderLaser(&Data, true);
@@ -421,7 +423,7 @@ void CItems::OnRender()
 		{
 			CProjectileData Data = ExtractProjectileInfo(Item.m_Type, pData, &GameClient()->m_GameWorld, pEntEx);
 			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
-			if(Inactive && (Data.m_Explosive ? BlinkingProjEx : BlinkingProj))
+			if(Inactive && (Data.m_Explosive ? BlinkingProjEx : BlinkingProj) || ((g_Config.m_ClHideIgnoredInAnyCondition && m_pClient->m_aClients[Data.m_Owner].m_Hidden) || (m_pClient->m_aClients[Data.m_Owner].m_Hidden && GameClient()->IsOtherTeam(Data.m_Owner))))
 				continue;
 			if(UsePredicted)
 
@@ -470,6 +472,8 @@ void CItems::OnRender()
 			}
 
 			CLaserData Data = ExtractLaserInfo(Item.m_Type, pData, &GameClient()->m_GameWorld, pEntEx);
+			if((g_Config.m_ClHideIgnoredInAnyCondition && m_pClient->m_aClients[Data.m_Owner].m_Hidden) || (m_pClient->m_aClients[Data.m_Owner].m_Hidden && GameClient()->IsOtherTeam(Data.m_Owner)))
+				continue;
 			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
 
 			bool IsEntBlink = false;

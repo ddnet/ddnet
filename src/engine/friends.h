@@ -28,7 +28,14 @@ public:
 		MAX_FRIENDS = 4096,
 	};
 
-	virtual void Init(bool Foes = false) = 0;
+	enum EFriendType
+	{
+		FRIENDS = 0,
+		FOES,
+		HIDDEN
+	};
+
+	virtual void Init(EFriendType Type) = 0;
 
 	virtual int NumFriends() const = 0;
 	virtual const CFriendInfo *GetFriend(int Index) const = 0;

@@ -90,6 +90,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CUpdater m_Updater;
 	CFriends m_Friends;
 	CFriends m_Foes;
+	CFriends m_Hidden;
 
 	char m_aConnectAddressStr[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE] = "";
 
@@ -506,7 +507,9 @@ public:
 
 	bool EditorHasUnsavedData() const override { return m_pEditor->HasUnsavedData(); }
 
+	IFriends *Friends() override { return &m_Friends; }
 	IFriends *Foes() override { return &m_Foes; }
+	IFriends *Hidden() override { return &m_Hidden; }
 
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) override;
 

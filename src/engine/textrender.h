@@ -70,6 +70,7 @@ MAYBE_UNUSED static const char *FONT_ICON_MINUS = "-";
 MAYBE_UNUSED static const char *FONT_ICON_LOCK = "\xEF\x80\xA3";
 MAYBE_UNUSED static const char *FONT_ICON_MAGNIFYING_GLASS = "\xEF\x80\x82";
 MAYBE_UNUSED static const char *FONT_ICON_HEART = "\xEF\x80\x84";
+MAYBE_UNUSED static const char *FONT_ICON_HEART_CRACK = "\xEF\x9E\xA9";
 MAYBE_UNUSED static const char *FONT_ICON_STAR = "\xEF\x80\x85";
 MAYBE_UNUSED static const char *FONT_ICON_XMARK = "\xEF\x80\x8D";
 MAYBE_UNUSED static const char *FONT_ICON_CIRCLE = "\xEF\x84\x91";

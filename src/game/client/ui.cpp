@@ -1498,6 +1498,60 @@ bool CUi::DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect,
 	return false;
 }
 
+bool CUi::DoScaledScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, float Scale, const IScrollbarScale *pScale, unsigned Flags, const char *pPrefix, const char *pSuffix)
+{
+	const bool Infinite = Flags & CUi::SCROLLBAR_OPTION_INFINITE;
+	const bool NoClampValue = Flags & CUi::SCROLLBAR_OPTION_NOCLAMPVALUE;
+	const bool MultiLine = Flags & CUi::SCROLLBAR_OPTION_MULTILINE;
+
+	int Value = *pOption;
+	if(Infinite)
+	{
+		Max += 1;
+		if(Value == 0)
+			Value = Max;
+	}
+
+	char aBuf[256];
+	if(!Infinite || Value != Max)
+		str_format(aBuf, sizeof(aBuf), "%s: %s%.2f%s", pStr, pPrefix, Value * Scale, pSuffix);
+	else
+		str_format(aBuf, sizeof(aBuf), "%s: ∞", pStr);
+
+	if(NoClampValue)
+	{
+		// clamp the value internally for the scrollbar
+		Value = clamp(Value, Min, Max);
+	}
+
+	CUIRect Label, ScrollBar;
+	if(MultiLine)
+		pRect->HSplitMid(&Label, &ScrollBar);
+	else
+		pRect->VSplitMid(&Label, &ScrollBar, minimum(10.0f, pRect->w * 0.05f));
+
+	const float FontSize = Label.h * CUi::ms_FontmodHeight * 0.8f;
+	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_ML);
+
+	Value = pScale->ToAbsolute(DoScrollbarH(pId, &ScrollBar, pScale->ToRelative(Value, Min, Max)), Min, Max);
+	if(NoClampValue && ((Value == Min && *pOption < Min) || (Value == Max && *pOption > Max)))
+	{
+		Value = *pOption; // use previous out of range value instead if the scrollbar is at the edge
+	}
+	else if(Infinite)
+	{
+		if(Value == Max)
+			Value = 0;
+	}
+
+	if(*pOption != Value)
+	{
+		*pOption = Value;
+		return true;
+	}
+	return false;
+}
+
 void CUi::RenderProgressBar(CUIRect ProgressBar, float Progress)
 {
 	const float Rounding = minimum(5.0f, ProgressBar.h / 2.0f);

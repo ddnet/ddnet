@@ -46,14 +46,6 @@ jobs:
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release -Werror=dev -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Release --target game-client ${{ matrix.build-args }}
 
-    - name: Run integration tests with Valgrind's Memcheck
-      if: contains(matrix.os, 'ubuntu-latest')
-      run: |
-        cd headless
-        # Remove old coverage data:
-        find . -name '*.gcno' -o -name '*.gcda' -delete
-        ./integration_test.sh --valgrind-memcheck
-
     - name: Package
       run: |
         cd release

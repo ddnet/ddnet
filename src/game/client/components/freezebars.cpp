@@ -221,7 +221,7 @@ void CFreezeBars::OnRender()
 	// render everyone else's freeze bar, then our own
 	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(ClientId == LocalClientId || !m_pClient->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId))
+		if(ClientId == LocalClientId || !m_pClient->m_Snap.m_aCharacters[ClientId].m_Active || !IsPlayerInfoAvailable(ClientId) || ((g_Config.m_ClHideIgnoredInAnyCondition && m_pClient->m_aClients[ClientId].m_Hidden) || (m_pClient->m_aClients[ClientId].m_Hidden && GameClient()->IsOtherTeam(ClientId))))
 		{
 			continue;
 		}

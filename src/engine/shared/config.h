@@ -15,6 +15,7 @@
 #include <engine/shared/protocol.h>
 
 #define CONFIG_FILE "settings_ddnet.cfg"
+#define CONFIG_FILE_PULSE "settings_pulse.cfg"
 #define AUTOEXEC_FILE "autoexec.cfg"
 #define AUTOEXEC_CLIENT_FILE "autoexec_client.cfg"
 #define AUTOEXEC_SERVER_FILE "autoexec_server.cfg"
@@ -32,6 +33,7 @@ public:
 	static constexpr const char *ms_p##Name = Def; \
 	char m_##Name[Len]; // Flawfinder: ignore
 #include "config_variables.h"
+#include "config_pulse.h"
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
