@@ -22,8 +22,6 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libvulkan-dev glslang-tools spirv-tools libglew-dev -y
-    - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2
     - name: Build with ASan and UBSan
       run: |
         mkdir clang-sanitizer
@@ -51,7 +49,6 @@ jobs:
       run: |
         cd clang-sanitizer
         cmake --build . --config Debug --target run_cxx_tests
-        # Rust tests work locally, but still not in CI, even with the same directory
         if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
         then
           cat ./SAN.*

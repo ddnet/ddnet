@@ -40,7 +40,7 @@ def check_dir(directory):
 	for file in file_list:
 		path = directory + file
 		if os.path.isdir(path):
-			if file not in ("external", "generated", "rust-bridge"):
+			if file not in ("external", "generated"):
 				errors += check_dir(path + "/")
 		elif file.endswith(".h") and file != "keynames.h":
 			errors += check_file(path)

@@ -6,8 +6,8 @@ if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.15)
 endif()
 
 file(STRINGS src/game/version.h VERSION_LINE
-  LIMIT_COUNT 1
-  REGEX "^#define GAME_RELEASE_VERSION "
+        LIMIT_COUNT 1
+        REGEX "^#define GAME_RELEASE_VERSION "
 )
 
 if(VERSION_LINE MATCHES "\"([0-9]+)\\.([0-9]+)\\.([0-9]+)\"")
@@ -41,8 +41,8 @@ else()
 endif()
 
 if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm"
-  OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64"
-  OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "ARM64")
+        OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "aarch64"
+        OR "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "ARM64")
   if(TARGET_BITS STREQUAL "32")
     set(TARGET_CPU_ARCHITECTURE "arm")
   else()
@@ -101,16 +101,16 @@ option(WEBSOCKETS "Enable websockets support" OFF)
 option(MYSQL "Enable mysql support" OFF)
 option(TEST_MYSQL "Test mysql support in unit tests (also sets -DMYSQL=ON)" OFF)
 option(AUTOUPDATE "Enable the autoupdater" OFF)
-option(INFORM_UPDATE "Inform about available updates" ON)
+option(INFORM_UPDATE "Inform about available updates" OFF)
 option(VIDEORECORDER "Enable video recording support via FFmpeg" ON)
 option(UPNP "Enable UPnP support" OFF)
 option(ANTIBOT "Enable support for a dynamic anticheat library (not provided, see src/antibot for interface if you want to implement your own)" OFF)
 option(HEADLESS_CLIENT "Build the client without graphics" OFF)
 option(CLIENT "Compile client" ON)
-option(SERVER "Compile server" ON)
-option(TOOLS "Compile tools" ON)
+option(SERVER "Compile server" OFF)
+option(TOOLS "Compile tools" OFF)
 option(DOWNLOAD_GTEST "Download and compile GTest" ${AUTO_DEPENDENCIES_DEFAULT})
-option(STEAM "Build the Steam release version" OFF)
+option(STEAM "Build the Steam release version" ON)
 option(DISCORD "Enable Discord rich presence support" OFF)
 option(DISCORD_DYNAMIC "Enable discovering Discord rich presence libraries at runtime (Linux only)" OFF)
 option(PREFER_BUNDLED_LIBS "Prefer bundled libraries over system libraries" ${AUTO_DEPENDENCIES_DEFAULT})
@@ -346,7 +346,7 @@ endif()
 
 if(MSVC)
   if(EXCEPTION_HANDLING)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS /DCONF_EXCEPTION_HANDLING)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS /DCONF_EXCEPTION_HANDLING)
   endif()
 endif()
 
@@ -463,7 +463,7 @@ function(set_extra_dirs_include VARIABLE NAME LIBRARY)
   if(IS_BUNDLED)
     set(TMP_TARGET_OS ${TARGET_OS})
     if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-     set(TMP_TARGET_OS webasm)
+      set(TMP_TARGET_OS webasm)
     endif()
     set("HINTS_${VARIABLE}_INCLUDEDIR" "ddnet-libs/${NAME}/include" "ddnet-libs/${NAME}/include/${TMP_TARGET_OS}" PARENT_SCOPE)
   endif()
@@ -528,7 +528,6 @@ find_package(Opus)
 find_package(Opusfile)
 find_package(PNG)
 find_package(Python3)
-find_package(Rust)
 find_package(SDL2)
 find_package(SQLite3)
 if(DISCORD)
@@ -577,7 +576,6 @@ if(TARGET_OS STREQUAL "mac")
 endif()
 message(STATUS ${TARGET})
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
-message(STATUS "Rust version: ${RUST_VERSION_STRING}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 message(STATUS "Dependencies:")
@@ -641,9 +639,6 @@ if(NOT(CURL_FOUND))
 endif()
 if(NOT(Python3_FOUND))
   message(SEND_ERROR "You must install Python to compile ${CMAKE_PROJECT_NAME}")
-endif()
-if(NOT(RUST_FOUND))
-  message(SEND_ERROR "You must install Rust and Cargo to compile ${CMAKE_PROJECT_NAME}")
 endif()
 if(NOT(SQLite3_FOUND))
   message(SEND_ERROR "You must install SQLite3 to compile ${CMAKE_PROJECT_NAME}")
@@ -715,7 +710,6 @@ if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_LIBS)
   list(APPEND PLATFORM_LIBS shlwapi) # PathIsRelativeW
   list(APPEND PLATFORM_LIBS version ws2_32) # Windows sockets
-  list(APPEND PLATFORM_LIBS bcrypt userenv) # for Rust (https://github.com/rust-lang/rust/issues/91974)
   list(APPEND PLATFORM_LIBS ole32) # CoInitialize(Ex)
   list(APPEND PLATFORM_LIBS shell32)
   list(APPEND PLATFORM_LIBS ntdll) # https://github.com/ddnet/ddnet/issues/6725
@@ -725,24 +719,24 @@ elseif(TARGET_OS STREQUAL "mac")
   find_library(OPENGL OpenGL)
   find_library(SECURITY Security)
   set(PLATFORM_CLIENT
-    src/macos/client.mm
-    src/macos/notifications.mm
+          src/macos/client.mm
+          src/macos/notifications.mm
   )
   set(PLATFORM_CLIENT_LIBS ${COCOA} ${OPENGL})
   set(PLATFORM_LIBS ${CARBON} ${SECURITY})
 elseif(TARGET_OS STREQUAL "haiku")
-    set(PLATFORM_CLIENT)
-    find_package(OpenGL)
-    set(PLATFORM_LIBS GL network)
-    set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY})
-    set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
+  set(PLATFORM_CLIENT)
+  find_package(OpenGL)
+  set(PLATFORM_LIBS GL network)
+  set(PLATFORM_CLIENT_LIBS ${OPENGL_gl_LIBRARY})
+  set(PLATFORM_CLIENT_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
 elseif(TARGET_OS STREQUAL "android")
-    set(PLATFORM_CLIENT
-      src/android/android_main.cpp
-    )
-    set(PLATFORM_LIBS ${TW_ANDROID_LIBS})
-    set(PLATFORM_CLIENT_LIBS ${TW_ANDROID_LIBS_CLIENT})
-    set(PLATFORM_CLIENT_INCLUDE_DIRS)
+  set(PLATFORM_CLIENT
+          src/android/android_main.cpp
+  )
+  set(PLATFORM_LIBS ${TW_ANDROID_LIBS})
+  set(PLATFORM_CLIENT_LIBS ${TW_ANDROID_LIBS_CLIENT})
+  set(PLATFORM_CLIENT_INCLUDE_DIRS)
 else()
   find_package(Notify)
   find_package(OpenGL)
@@ -752,7 +746,6 @@ else()
   if(TARGET_OS STREQUAL "linux")
     set(PLATFORM_LIBS)
     list(APPEND PLATFORM_LIBS rt) # clock_gettime for glibc < 2.17
-    list(APPEND PLATFORM_LIBS dl) # for Rust
   else()
     set(PLATFORM_LIBS)
   endif()
@@ -772,16 +765,16 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
   set(DDNET_GTEST_VERSION 3d73dee972d0db344bda9b659836612aba6a3564)
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-    RESULT_VARIABLE result
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/googletest-download
+          RESULT_VARIABLE result
+          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/googletest-download
   )
   if(result)
     message(WARNING "CMake step for googletest failed: ${result}")
     set(DOWNLOAD_GTEST OFF)
   else()
     execute_process(COMMAND ${CMAKE_COMMAND} --build .
-      RESULT_VARIABLE result
-      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/googletest-download
+            RESULT_VARIABLE result
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/googletest-download
     )
     if(result)
       message(WARNING "Build step for googletest failed: ${result}")
@@ -792,9 +785,9 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
 
       # Add googletest directly to our build. This defines the gtest target.
       add_subdirectory(
-        ${PROJECT_BINARY_DIR}/googletest-src
-        ${PROJECT_BINARY_DIR}/googletest-build
-        EXCLUDE_FROM_ALL
+              ${PROJECT_BINARY_DIR}/googletest-src
+              ${PROJECT_BINARY_DIR}/googletest-build
+              EXCLUDE_FROM_ALL
       )
 
       if(MSVC)
@@ -831,1023 +824,861 @@ if(NOT CRYPTO_FOUND)
 endif()
 
 ########################################################################
-# RUST
-########################################################################
-
-set_glob(RUST_BASE GLOB_RECURSE "rs;toml" src/base
-  Cargo.toml
-  color.rs
-  lib.rs
-  rust.rs
-)
-
-set_glob(RUST_ENGINE_INTERFACE GLOB "rs;toml" src/engine
-  Cargo.toml
-  console.rs
-  lib.rs
-)
-
-set_glob(RUST_ENGINE_SHARED GLOB_RECURSE "rs;toml" src/engine/shared
-  Cargo.toml
-  build.rs
-  config.rs
-  lib.rs
-  rust_version.rs
-)
-
-set_src(RUST_BRIDGE_SHARED GLOB_RECURSE src/rust-bridge
-  cpp/console.cpp
-  cpp/console.h
-  engine/shared/rust_version.cpp
-  engine/shared/rust_version.h
-)
-
-set_glob(RUST_MASTERSRV GLOB "rs;toml" src/mastersrv/src
-  addr.rs
-  config.rs
-  locations.rs
-  main.rs
-)
-
-add_library(rust-bridge-shared EXCLUDE_FROM_ALL OBJECT ${RUST_BRIDGE_SHARED})
-list(APPEND TARGETS_OWN rust-bridge-shared)
-
-if(TARGET_OS STREQUAL "android")
-  set(CARGO_BUILD_DIR "${CARGO_NDK_TARGET}/")
-  set(CARGO_BUILD ${CMAKE_COMMAND} -E env CARGO_TARGET_DIR=${PROJECT_BINARY_DIR} DDNET_TEST_NO_LINK=1 ${RUST_CARGO} ndk --manifest-path "${PROJECT_SOURCE_DIR}/Cargo.toml" -t ${CARGO_NDK_TARGET} -p ${CARGO_NDK_API} build)
-  set(CARGO_TEST ${CMAKE_COMMAND} -E env CARGO_TARGET_DIR=${PROJECT_BINARY_DIR} ${RUST_CARGO} ndk -t ${CARGO_NDK_TARGET} -p ${CARGO_NDK_API} test)
-else()
-  set(CARGO_BUILD_DIR "")
-  set(CARGO_BUILD ${CMAKE_COMMAND} -E env CARGO_TARGET_DIR=${PROJECT_BINARY_DIR} DDNET_TEST_NO_LINK=1 ${RUST_CARGO} build --manifest-path "${PROJECT_SOURCE_DIR}/Cargo.toml")
-  set(CARGO_TEST ${CMAKE_COMMAND} -E env CARGO_TARGET_DIR=${PROJECT_BINARY_DIR} ${RUST_CARGO} test)
-endif()
-if(MSVC)
-  list(INSERT CARGO_BUILD 0 ${CMAKE_COMMAND} -E env $<$<CONFIG:Debug>:CFLAGS=/MTd> $<$<CONFIG:Debug>:CXXFLAGS=/MTd>)
-  list(INSERT CARGO_TEST 0 ${CMAKE_COMMAND} -E env RUSTFLAGS=-Ctarget-feature=+crt-static)
-endif()
-if(RUST_NIGHTLY)
-  list(APPEND CARGO_BUILD -Z build-std=std,panic_abort)
-endif()
-if(NOT CMAKE_OSX_ARCHITECTURES AND (DEFINED CMAKE_RUST_COMPILER_TARGET OR RUST_NIGHTLY))
-  if(DEFINED CMAKE_RUST_COMPILER_TARGET)
-    list(APPEND CARGO_TEST --target ${CMAKE_RUST_COMPILER_TARGET})
-    set(RUST_TARGET ${CMAKE_RUST_COMPILER_TARGET})
-  else()
-    set(RUST_TARGET ${RUST_TARGET_HOST})
-  endif()
-  list(APPEND CARGO_BUILD --target ${RUST_TARGET})
-  set(CARGO_BUILD_DIR "${RUST_TARGET}/")
-endif()
-set(CARGO_BUILD_DIR_DEBUG "${CARGO_BUILD_DIR}debug")
-set(CARGO_BUILD_DIR_RELEASE "${CARGO_BUILD_DIR}release")
-if(GENERATOR_IS_MULTI_CONFIG)
-  if(CMAKE_VERSION VERSION_LESS 3.20)
-    message(SEND_ERROR "Multi-config generators only supported from CMake 3.20 and up")
-  else()
-    set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR}$<$<CONFIG:Debug>:debug>$<$<NOT:$<CONFIG:Debug>>:release>")
-  endif()
-else()
-  if(CMAKE_BUILD_TYPE STREQUAL Debug)
-    set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR_DEBUG}")
-  else()
-    set(CARGO_BUILD_DIR "${CARGO_BUILD_DIR_RELEASE}")
-  endif()
-endif()
-list(APPEND CARGO_BUILD $<$<NOT:$<CONFIG:Debug>>:--release>)
-
-if(CMAKE_OSX_ARCHITECTURES)
-  set(RUST_OSX_ARCHITECTURES)
-  foreach(arch ${CMAKE_OSX_ARCHITECTURES})
-    if(${arch} STREQUAL arm64)
-      list(APPEND RUST_OSX_ARCHITECTURES aarch64-apple-darwin)
-    elseif(${arch} STREQUAL x86_64)
-      list(APPEND RUST_OSX_ARCHITECTURES x86_64-apple-darwin)
-    else()
-      message(SEND_ERROR "CMAKE_OSX_ARCHITECTURES' architecture ${arch} unknown, can't build Rust code (known: arm64, x86_64)")
-    endif()
-  endforeach()
-endif()
-
-set(RUST_SRC
-      ${RUST_BASE}
-      ${RUST_ENGINE_INTERFACE}
-      ${RUST_ENGINE_SHARED}
-      Cargo.toml
-      Cargo.lock
-)
-set(RUST_TARGETS engine_shared)
-if(NOT CMAKE_OSX_ARCHITECTURES)
-  set(RUST_OUTPUTS)
-  foreach(rust_target ${RUST_TARGETS})
-    set(LIBRARY_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}ddnet_${rust_target}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-    add_library(rust_${rust_target} STATIC IMPORTED GLOBAL)
-    add_custom_target(rust_${rust_target}_target DEPENDS "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
-    add_dependencies(rust_${rust_target} rust_${rust_target}_target)
-    set_target_properties(rust_${rust_target} PROPERTIES
-      IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_RELEASE}/${LIBRARY_NAME}"
-      IMPORTED_LOCATION_DEBUG "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_DEBUG}/${LIBRARY_NAME}"
-    )
-    list(APPEND RUST_OUTPUTS "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
-  endforeach()
-  add_custom_command(
-    OUTPUT ${RUST_OUTPUTS}
-    COMMAND ${CARGO_BUILD}
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-    USES_TERMINAL
-    DEPENDS ${RUST_SRC}
-  )
-else()
-  foreach(rust_target ${RUST_TARGETS})
-    set(LIBRARY_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}ddnet_${rust_target}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-    add_library(rust_${rust_target} STATIC IMPORTED GLOBAL)
-    set_target_properties(rust_${rust_target} PROPERTIES
-      IMPORTED_LOCATION "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_RELEASE}/${LIBRARY_NAME}"
-      IMPORTED_LOCATION_DEBUG "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR_DEBUG}/${LIBRARY_NAME}"
-    )
-    add_custom_target(rust_${rust_target}_target DEPENDS "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
-    add_dependencies(rust_${rust_target} rust_${rust_target}_target)
-    set(ARCH_LIBRARIES)
-    foreach(arch ${RUST_OSX_ARCHITECTURES})
-      list(APPEND ARCH_LIBRARIES "${PROJECT_BINARY_DIR}/${arch}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
-    endforeach()
-    add_custom_command(
-      OUTPUT "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}"
-      COMMAND lipo ${ARCH_LIBRARIES} -create -output "${PROJECT_BINARY_DIR}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}"
-      DEPENDS ${ARCH_LIBRARIES}
-    )
-  endforeach()
-  foreach(arch ${RUST_OSX_ARCHITECTURES})
-    set(RUST_OUTPUTS)
-    foreach(rust_target ${RUST_TARGETS})
-      set(LIBRARY_NAME "${CMAKE_STATIC_LIBRARY_PREFIX}ddnet_${rust_target}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-      list(APPEND RUST_OUTPUTS "${PROJECT_BINARY_DIR}/${arch}/${CARGO_BUILD_DIR}/${LIBRARY_NAME}")
-    endforeach()
-    add_custom_command(
-      OUTPUT ${RUST_OUTPUTS}
-      COMMAND ${CARGO_BUILD} --target=${arch}
-      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-      USES_TERMINAL
-      DEPENDS ${RUST_SRC}
-    )
-  endforeach()
-endif()
-
-########################################################################
 # DATA
 ########################################################################
 
 set(EXPECTED_DATA
-  announcement.txt
-  arrow.png
-  assets/entities/comfort/ddnet.png
-  assets/entities/license.txt
-  assets/game/game_06.png
-  audio/foley_body_impact-01.wv
-  audio/foley_body_impact-02.wv
-  audio/foley_body_impact-03.wv
-  audio/foley_body_splat-01.wv
-  audio/foley_body_splat-02.wv
-  audio/foley_body_splat-03.wv
-  audio/foley_body_splat-04.wv
-  audio/foley_dbljump-01.wv
-  audio/foley_dbljump-02.wv
-  audio/foley_dbljump-03.wv
-  audio/foley_foot_left-01.wv
-  audio/foley_foot_left-02.wv
-  audio/foley_foot_left-03.wv
-  audio/foley_foot_left-04.wv
-  audio/foley_foot_right-01.wv
-  audio/foley_foot_right-02.wv
-  audio/foley_foot_right-03.wv
-  audio/foley_foot_right-04.wv
-  audio/foley_land-01.wv
-  audio/foley_land-02.wv
-  audio/foley_land-03.wv
-  audio/foley_land-04.wv
-  audio/hook_attach-01.wv
-  audio/hook_attach-02.wv
-  audio/hook_attach-03.wv
-  audio/hook_loop-01.wv
-  audio/hook_loop-02.wv
-  audio/hook_noattach-01.wv
-  audio/hook_noattach-02.wv
-  audio/hook_noattach-03.wv
-  audio/music_menu.wv
-  audio/sfx_ctf_cap_pl.wv
-  audio/sfx_ctf_drop.wv
-  audio/sfx_ctf_grab_en.wv
-  audio/sfx_ctf_grab_pl.wv
-  audio/sfx_ctf_rtn.wv
-  audio/sfx_hit_strong-01.wv
-  audio/sfx_hit_strong-02.wv
-  audio/sfx_hit_weak-01.wv
-  audio/sfx_hit_weak-02.wv
-  audio/sfx_hit_weak-03.wv
-  audio/sfx_msg-client.wv
-  audio/sfx_msg-highlight.wv
-  audio/sfx_msg-server.wv
-  audio/sfx_pickup_arm-01.wv
-  audio/sfx_pickup_arm-02.wv
-  audio/sfx_pickup_arm-03.wv
-  audio/sfx_pickup_arm-04.wv
-  audio/sfx_pickup_gun.wv
-  audio/sfx_pickup_hrt-01.wv
-  audio/sfx_pickup_hrt-02.wv
-  audio/sfx_pickup_launcher.wv
-  audio/sfx_pickup_ninja.wv
-  audio/sfx_pickup_sg.wv
-  audio/sfx_skid-01.wv
-  audio/sfx_skid-02.wv
-  audio/sfx_skid-03.wv
-  audio/sfx_skid-04.wv
-  audio/sfx_spawn_wpn-01.wv
-  audio/sfx_spawn_wpn-02.wv
-  audio/sfx_spawn_wpn-03.wv
-  audio/vo_teefault_cry-01.wv
-  audio/vo_teefault_cry-02.wv
-  audio/vo_teefault_ninja-01.wv
-  audio/vo_teefault_ninja-02.wv
-  audio/vo_teefault_ninja-03.wv
-  audio/vo_teefault_ninja-04.wv
-  audio/vo_teefault_pain_long-01.wv
-  audio/vo_teefault_pain_long-02.wv
-  audio/vo_teefault_pain_short-01.wv
-  audio/vo_teefault_pain_short-02.wv
-  audio/vo_teefault_pain_short-03.wv
-  audio/vo_teefault_pain_short-04.wv
-  audio/vo_teefault_pain_short-05.wv
-  audio/vo_teefault_pain_short-06.wv
-  audio/vo_teefault_pain_short-07.wv
-  audio/vo_teefault_pain_short-08.wv
-  audio/vo_teefault_pain_short-09.wv
-  audio/vo_teefault_pain_short-10.wv
-  audio/vo_teefault_pain_short-11.wv
-  audio/vo_teefault_pain_short-12.wv
-  audio/vo_teefault_sledge-01.wv
-  audio/vo_teefault_sledge-02.wv
-  audio/vo_teefault_sledge-03.wv
-  audio/vo_teefault_spawn-01.wv
-  audio/vo_teefault_spawn-02.wv
-  audio/vo_teefault_spawn-03.wv
-  audio/vo_teefault_spawn-04.wv
-  audio/vo_teefault_spawn-05.wv
-  audio/vo_teefault_spawn-06.wv
-  audio/vo_teefault_spawn-07.wv
-  audio/wp_flump_explo-01.wv
-  audio/wp_flump_explo-02.wv
-  audio/wp_flump_explo-03.wv
-  audio/wp_flump_launch-01.wv
-  audio/wp_flump_launch-02.wv
-  audio/wp_flump_launch-03.wv
-  audio/wp_gun_fire-01.wv
-  audio/wp_gun_fire-02.wv
-  audio/wp_gun_fire-03.wv
-  audio/wp_hammer_hit-01.wv
-  audio/wp_hammer_hit-02.wv
-  audio/wp_hammer_hit-03.wv
-  audio/wp_hammer_swing-01.wv
-  audio/wp_hammer_swing-02.wv
-  audio/wp_hammer_swing-03.wv
-  audio/wp_laser_bnce-01.wv
-  audio/wp_laser_bnce-02.wv
-  audio/wp_laser_bnce-03.wv
-  audio/wp_laser_fire-01.wv
-  audio/wp_laser_fire-02.wv
-  audio/wp_laser_fire-03.wv
-  audio/wp_ninja_attack-01.wv
-  audio/wp_ninja_attack-02.wv
-  audio/wp_ninja_attack-03.wv
-  audio/wp_ninja_attack-04.wv
-  audio/wp_ninja_hit-01.wv
-  audio/wp_ninja_hit-02.wv
-  audio/wp_ninja_hit-03.wv
-  audio/wp_ninja_hit-04.wv
-  audio/wp_noammo-01.wv
-  audio/wp_noammo-02.wv
-  audio/wp_noammo-03.wv
-  audio/wp_noammo-04.wv
-  audio/wp_noammo-05.wv
-  audio/wp_shotty_fire-01.wv
-  audio/wp_shotty_fire-02.wv
-  audio/wp_shotty_fire-03.wv
-  audio/wp_switch-01.wv
-  audio/wp_switch-02.wv
-  audio/wp_switch-03.wv
-  autoexec_server.cfg
-  background_noise.png
-  blob.png
-  censorlist.txt
-  communityicons/none.png
-  countryflags/AD.png
-  countryflags/AE.png
-  countryflags/AF.png
-  countryflags/AG.png
-  countryflags/AI.png
-  countryflags/AL.png
-  countryflags/AM.png
-  countryflags/AO.png
-  countryflags/AQ.png
-  countryflags/AR.png
-  countryflags/AS.png
-  countryflags/AT.png
-  countryflags/AU.png
-  countryflags/AW.png
-  countryflags/AX.png
-  countryflags/AZ.png
-  countryflags/BA.png
-  countryflags/BB.png
-  countryflags/BD.png
-  countryflags/BE.png
-  countryflags/BF.png
-  countryflags/BG.png
-  countryflags/BH.png
-  countryflags/BI.png
-  countryflags/BJ.png
-  countryflags/BL.png
-  countryflags/BM.png
-  countryflags/BN.png
-  countryflags/BO.png
-  countryflags/BR.png
-  countryflags/BS.png
-  countryflags/BT.png
-  countryflags/BW.png
-  countryflags/BY.png
-  countryflags/BZ.png
-  countryflags/CA.png
-  countryflags/CC.png
-  countryflags/CD.png
-  countryflags/CF.png
-  countryflags/CG.png
-  countryflags/CH.png
-  countryflags/CI.png
-  countryflags/CK.png
-  countryflags/CL.png
-  countryflags/CM.png
-  countryflags/CN.png
-  countryflags/CO.png
-  countryflags/CR.png
-  countryflags/CU.png
-  countryflags/CV.png
-  countryflags/CW.png
-  countryflags/CX.png
-  countryflags/CY.png
-  countryflags/CZ.png
-  countryflags/DE.png
-  countryflags/DJ.png
-  countryflags/DK.png
-  countryflags/DM.png
-  countryflags/DO.png
-  countryflags/DZ.png
-  countryflags/EC.png
-  countryflags/EE.png
-  countryflags/EG.png
-  countryflags/EH.png
-  countryflags/ER.png
-  countryflags/ES-CT.png
-  countryflags/ES-GA.png
-  countryflags/ES.png
-  countryflags/ET.png
-  countryflags/EU.png
-  countryflags/FI.png
-  countryflags/FJ.png
-  countryflags/FK.png
-  countryflags/FM.png
-  countryflags/FO.png
-  countryflags/FR.png
-  countryflags/GA.png
-  countryflags/GB-ENG.png
-  countryflags/GB-NIR.png
-  countryflags/GB-SCT.png
-  countryflags/GB-WLS.png
-  countryflags/GB.png
-  countryflags/GD.png
-  countryflags/GE.png
-  countryflags/GF.png
-  countryflags/GG.png
-  countryflags/GH.png
-  countryflags/GI.png
-  countryflags/GL.png
-  countryflags/GM.png
-  countryflags/GN.png
-  countryflags/GP.png
-  countryflags/GQ.png
-  countryflags/GR.png
-  countryflags/GS.png
-  countryflags/GT.png
-  countryflags/GU.png
-  countryflags/GW.png
-  countryflags/GY.png
-  countryflags/HK.png
-  countryflags/HN.png
-  countryflags/HR.png
-  countryflags/HT.png
-  countryflags/HU.png
-  countryflags/ID.png
-  countryflags/IE.png
-  countryflags/IL.png
-  countryflags/IM.png
-  countryflags/IN.png
-  countryflags/IO.png
-  countryflags/IQ.png
-  countryflags/IR.png
-  countryflags/IS.png
-  countryflags/IT.png
-  countryflags/JE.png
-  countryflags/JM.png
-  countryflags/JO.png
-  countryflags/JP.png
-  countryflags/KE.png
-  countryflags/KG.png
-  countryflags/KH.png
-  countryflags/KI.png
-  countryflags/KM.png
-  countryflags/KN.png
-  countryflags/KP.png
-  countryflags/KR.png
-  countryflags/KW.png
-  countryflags/KY.png
-  countryflags/KZ.png
-  countryflags/LA.png
-  countryflags/LB.png
-  countryflags/LC.png
-  countryflags/LI.png
-  countryflags/LK.png
-  countryflags/LR.png
-  countryflags/LS.png
-  countryflags/LT.png
-  countryflags/LU.png
-  countryflags/LV.png
-  countryflags/LY.png
-  countryflags/MA.png
-  countryflags/MC.png
-  countryflags/MD.png
-  countryflags/ME.png
-  countryflags/MF.png
-  countryflags/MG.png
-  countryflags/MH.png
-  countryflags/MK.png
-  countryflags/ML.png
-  countryflags/MM.png
-  countryflags/MN.png
-  countryflags/MO.png
-  countryflags/MP.png
-  countryflags/MQ.png
-  countryflags/MR.png
-  countryflags/MS.png
-  countryflags/MT.png
-  countryflags/MU.png
-  countryflags/MV.png
-  countryflags/MW.png
-  countryflags/MX.png
-  countryflags/MY.png
-  countryflags/MZ.png
-  countryflags/NA.png
-  countryflags/NC.png
-  countryflags/NE.png
-  countryflags/NF.png
-  countryflags/NG.png
-  countryflags/NI.png
-  countryflags/NL.png
-  countryflags/NO.png
-  countryflags/NP.png
-  countryflags/NR.png
-  countryflags/NU.png
-  countryflags/NZ.png
-  countryflags/OM.png
-  countryflags/PA.png
-  countryflags/PE.png
-  countryflags/PF.png
-  countryflags/PG.png
-  countryflags/PH.png
-  countryflags/PK.png
-  countryflags/PL.png
-  countryflags/PM.png
-  countryflags/PN.png
-  countryflags/PR.png
-  countryflags/PS.png
-  countryflags/PT.png
-  countryflags/PW.png
-  countryflags/PY.png
-  countryflags/QA.png
-  countryflags/RE.png
-  countryflags/RO.png
-  countryflags/RS.png
-  countryflags/RU.png
-  countryflags/RW.png
-  countryflags/SA.png
-  countryflags/SB.png
-  countryflags/SC.png
-  countryflags/SD.png
-  countryflags/SE.png
-  countryflags/SG.png
-  countryflags/SH.png
-  countryflags/SI.png
-  countryflags/SK.png
-  countryflags/SL.png
-  countryflags/SM.png
-  countryflags/SN.png
-  countryflags/SO.png
-  countryflags/SR.png
-  countryflags/SS.png
-  countryflags/ST.png
-  countryflags/SV.png
-  countryflags/SX.png
-  countryflags/SY.png
-  countryflags/SZ.png
-  countryflags/TC.png
-  countryflags/TD.png
-  countryflags/TF.png
-  countryflags/TG.png
-  countryflags/TH.png
-  countryflags/TJ.png
-  countryflags/TK.png
-  countryflags/TL.png
-  countryflags/TM.png
-  countryflags/TN.png
-  countryflags/TO.png
-  countryflags/TR.png
-  countryflags/TT.png
-  countryflags/TV.png
-  countryflags/TW.png
-  countryflags/TZ.png
-  countryflags/UA.png
-  countryflags/UG.png
-  countryflags/US.png
-  countryflags/UY.png
-  countryflags/UZ.png
-  countryflags/VA.png
-  countryflags/VC.png
-  countryflags/VE.png
-  countryflags/VG.png
-  countryflags/VI.png
-  countryflags/VN.png
-  countryflags/VU.png
-  countryflags/WF.png
-  countryflags/WS.png
-  countryflags/YE.png
-  countryflags/ZA.png
-  countryflags/ZM.png
-  countryflags/ZW.png
-  countryflags/default.png
-  countryflags/index.txt
-  deadtee.png
-  debug_font.png
-  editor/audio_source.png
-  editor/automap/basic_freeze.rules
-  editor/automap/ddmax_freeze.rules
-  editor/automap/ddnet_grass.rules
-  editor/automap/ddnet_tiles.rules
-  editor/automap/ddnet_walls.rules
-  editor/automap/desert_main.rules
-  editor/automap/fadeout.rules
-  editor/automap/generic_clear.rules
-  editor/automap/generic_unhookable.rules
-  editor/automap/generic_unhookable_0.7.rules
-  editor/automap/grass_main.rules
-  editor/automap/jungle_main.rules
-  editor/automap/jungle_midground.rules
-  editor/automap/round_tiles.rules
-  editor/automap/water.rules
-  editor/automap/winter_main.rules
-  editor/checker.png
-  editor/cursor.png
-  editor/cursor_resize.png
-  editor/entities/DDNet.png
-  editor/entities/F-DDrace.png
-  editor/entities/FNG.png
-  editor/entities/Race.png
-  editor/entities/Vanilla.png
-  editor/entities/blockworlds.png
-  editor/entities_clear/blockworlds.png
-  editor/entities_clear/ddnet.png
-  editor/entities_clear/ddrace.png
-  editor/entities_clear/f-ddrace.png
-  editor/entities_clear/fng.png
-  editor/entities_clear/race.png
-  editor/entities_clear/vanilla.png
-  editor/front.png
-  editor/speed_arrow.png
-  editor/speed_arrow_array.png
-  editor/speedup.png
-  editor/switch.png
-  editor/tele.png
-  editor/tune.png
-  emoticons.png
-  extras.png
-  fonts/DejaVuSans.ttf
-  fonts/Font_Awesome_6_Free-Solid-900.otf
-  fonts/GlowSansJ-Compressed-Book.otf
-  fonts/SourceHanSans.ttc
-  fonts/index.json
-  game.png
-  gui_buttons.png
-  gui_cursor.png
-  gui_icons.png
-  gui_logo.png
-  hud.png
-  languages/arabic.txt
-  languages/azerbaijani.txt
-  languages/belarusian.txt
-  languages/bosnian.txt
-  languages/brazilian_portuguese.txt
-  languages/bulgarian.txt
-  languages/catalan.txt
-  languages/chuvash.txt
-  languages/czech.txt
-  languages/danish.txt
-  languages/dutch.txt
-  languages/esperanto.txt
-  languages/estonian.txt
-  languages/finnish.txt
-  languages/french.txt
-  languages/galician.txt
-  languages/german.txt
-  languages/greek.txt
-  languages/hungarian.txt
-  languages/index.txt
-  languages/italian.txt
-  languages/japanese.txt
-  languages/korean.txt
-  languages/kyrgyz.txt
-  languages/license.txt
-  languages/norwegian.txt
-  languages/persian.txt
-  languages/polish.txt
-  languages/portuguese.txt
-  languages/romanian.txt
-  languages/russian.txt
-  languages/serbian.txt
-  languages/serbian_cyrillic.txt
-  languages/simplified_chinese.txt
-  languages/slovak.txt
-  languages/spanish.txt
-  languages/swedish.txt
-  languages/traditional_chinese.txt
-  languages/turkish.txt
-  languages/ukrainian.txt
-  mapres/basic_freeze.png
-  mapres/bg_cloud1.png
-  mapres/bg_cloud2.png
-  mapres/bg_cloud3.png
-  mapres/ddmax_freeze.png
-  mapres/ddnet_grass.png
-  mapres/ddnet_start.png
-  mapres/ddnet_tiles.png
-  mapres/ddnet_walls.png
-  mapres/desert_background.png
-  mapres/desert_doodads.png
-  mapres/desert_main.png
-  mapres/desert_mountains.png
-  mapres/desert_mountains2.png
-  mapres/desert_mountains_new_background.png
-  mapres/desert_mountains_new_foreground.png
-  mapres/desert_sun.png
-  mapres/entities.png
-  mapres/fadeout.png
-  mapres/font_teeworlds.png
-  mapres/font_teeworlds_alt.png
-  mapres/generic_clear.png
-  mapres/generic_deathtiles.png
-  mapres/generic_lamps.png
-  mapres/generic_unhookable.png
-  mapres/generic_unhookable_0.7.png
-  mapres/grass_doodads.png
-  mapres/grass_doodads_0.7.png
-  mapres/grass_main.png
-  mapres/grass_main_0.7.png
-  mapres/jungle_background.png
-  mapres/jungle_deathtiles.png
-  mapres/jungle_doodads.png
-  mapres/jungle_main.png
-  mapres/jungle_midground.png
-  mapres/jungle_unhookables.png
-  mapres/light.png
-  mapres/mixed_tiles.png
-  mapres/moon.png
-  mapres/mountains.png
-  mapres/round_tiles.png
-  mapres/snow.png
-  mapres/snow_mountain.png
-  mapres/stars.png
-  mapres/sun.png
-  mapres/water.png
-  mapres/winter_doodads.png
-  mapres/winter_main.png
-  mapres/winter_main_0.7.png
-  mapres/winter_mountains.png
-  mapres/winter_mountains2.png
-  mapres/winter_mountains3.png
-  maps/Gold\ Mine.map
-  maps/LearnToPlay.map
-  maps/Sunny\ Side\ Up.map
-  maps/Tsunami.map
-  maps/Tutorial.map
-  maps/coverage.map
-  maps/ctf1.map
-  maps/ctf2.map
-  maps/ctf3.map
-  maps/ctf4.map
-  maps/ctf5.map
-  maps/ctf6.map
-  maps/ctf7.map
-  maps/dm1.map
-  maps/dm2.map
-  maps/dm6.map
-  maps/dm7.map
-  maps/dm8.map
-  maps/dm9.map
-  maps/license.txt
-  maps7/Gold\ Mine.map
-  maps7/LearnToPlay.map
-  maps7/Sunny\ Side\ Up.map
-  maps7/Tsunami.map
-  maps7/Tutorial.map
-  maps7/readme.txt
-  menuimages/demos.png
-  menuimages/editor.png
-  menuimages/local_server.png
-  menuimages/play_game.png
-  menuimages/settings.png
-  particles.png
-  race_flag.png
-  shader/pipeline.frag
-  shader/pipeline.vert
-  shader/prim.frag
-  shader/prim.vert
-  shader/primex.frag
-  shader/primex.vert
-  shader/quad.frag
-  shader/quad.vert
-  shader/spritemulti.frag
-  shader/spritemulti.vert
-  shader/text.frag
-  shader/text.vert
-  shader/tile.frag
-  shader/tile.vert
-  shader/tile_border.frag
-  shader/tile_border.vert
-  shader/vulkan/prim.frag
-  shader/vulkan/prim.vert
-  shader/vulkan/prim3d.frag
-  shader/vulkan/prim3d.vert
-  shader/vulkan/primex.frag
-  shader/vulkan/primex.vert
-  shader/vulkan/quad.frag
-  shader/vulkan/quad.vert
-  shader/vulkan/spritemulti.frag
-  shader/vulkan/spritemulti.vert
-  shader/vulkan/text.frag
-  shader/vulkan/text.vert
-  shader/vulkan/tile.frag
-  shader/vulkan/tile.vert
-  shader/vulkan/tile_border.frag
-  shader/vulkan/tile_border.vert
-  skins/PaladiN.png
-  skins/antiantey.png
-  skins/beast.png
-  skins/blacktee.png
-  skins/bluekitty.png
-  skins/bluestripe.png
-  skins/bomb.png
-  skins/brownbear.png
-  skins/cammo.png
-  skins/cammostripes.png
-  skins/chinese_by_whis.png
-  skins/coala.png
-  skins/coala_bluekitty.png
-  skins/coala_bluestripe.png
-  skins/coala_cammo.png
-  skins/coala_cammostripes.png
-  skins/coala_default.png
-  skins/coala_limekitty.png
-  skins/coala_pinky.png
-  skins/coala_redbopp.png
-  skins/coala_redstripe.png
-  skins/coala_saddo.png
-  skins/coala_toptri.png
-  skins/coala_twinbop.png
-  skins/coala_twintri.png
-  skins/coala_warpaint.png
-  skins/coala_x_ninja.png
-  skins/default.png
-  skins/demonlimekitty.png
-  skins/dino.png
-  skins/dragon.png
-  skins/evil.png
-  skins/evilwolfe.png
-  skins/ghost.png
-  skins/ghostjtj.png
-  skins/giraffe.png
-  skins/greensward.png
-  skins/greyfox.png
-  skins/greyfox_2.png
-  skins/hammie-chew.png
-  skins/hammie-whis.png
-  skins/jeet.png
-  skins/kintaro_2.png
-  skins/kitty_bluestripe.png
-  skins/kitty_brownbear.png
-  skins/kitty_cammo.png
-  skins/kitty_cammostripes.png
-  skins/kitty_coala.png
-  skins/kitty_default.png
-  skins/kitty_pinky.png
-  skins/kitty_redbopp.png
-  skins/kitty_redstripe.png
-  skins/kitty_saddo.png
-  skins/kitty_toptri.png
-  skins/kitty_twinbop.png
-  skins/kitty_twintri.png
-  skins/kitty_warpaint.png
-  skins/kitty_x_ninja.png
-  skins/license.txt
-  skins/limekitty.png
-  skins/mermydon-coala.png
-  skins/mermydon.png
-  skins/mouse.png
-  skins/musmann.png
-  skins/nanami.png
-  skins/nanas.png
-  skins/nersif.png
-  skins/oldman.png
-  skins/oldschool.png
-  skins/penguin.png
-  skins/pinky.png
-  skins/random.png
-  skins/redbopp.png
-  skins/redstripe.png
-  skins/saddo.png
-  skins/santa_bluekitty.png
-  skins/santa_bluestripe.png
-  skins/santa_brownbear.png
-  skins/santa_cammo.png
-  skins/santa_cammostripes.png
-  skins/santa_coala.png
-  skins/santa_default.png
-  skins/santa_limekitty.png
-  skins/santa_pinky.png
-  skins/santa_redbopp.png
-  skins/santa_redstripe.png
-  skins/santa_saddo.png
-  skins/santa_toptri.png
-  skins/santa_twinbop.png
-  skins/santa_twintri.png
-  skins/santa_warpaint.png
-  skins/teerasta.png
-  skins/toptri.png
-  skins/twinbop.png
-  skins/twintri.png
-  skins/veteran.png
-  skins/voodoo_tee.png
-  skins/warpaint.png
-  skins/wartee.png
-  skins/whis.png
-  skins/x_ninja.png
-  skins/x_spec.png
-  skins7/beaver.json
-  skins7/bluekitty.json
-  skins7/bluestripe.json
-  skins7/body/bat.png
-  skins7/body/bear.png
-  skins7/body/beaver.png
-  skins7/body/dog.png
-  skins7/body/force.png
-  skins7/body/fox.png
-  skins7/body/greensward.png
-  skins7/body/hippo.png
-  skins7/body/kitty.png
-  skins7/body/koala.png
-  skins7/body/monkey.png
-  skins7/body/mouse.png
-  skins7/body/piglet.png
-  skins7/body/raccoon.png
-  skins7/body/spiky.png
-  skins7/body/standard.png
-  skins7/body/x_ninja.png
-  skins7/bot.png
-  skins7/brownbear.json
-  skins7/bumbler.json
-  skins7/cammo.json
-  skins7/cammostripes.json
-  skins7/cavebat.json
-  skins7/decoration/hair.png
-  skins7/decoration/twinbopp.png
-  skins7/decoration/twinmello.png
-  skins7/decoration/twinpen.png
-  skins7/decoration/unibop.png
-  skins7/decoration/unimelo.png
-  skins7/decoration/unipento.png
-  skins7/default.json
-  skins7/eyes/colorable.png
-  skins7/eyes/negative.png
-  skins7/eyes/standard.png
-  skins7/eyes/standardreal.png
-  skins7/eyes/x_ninja.png
-  skins7/feet/standard.png
-  skins7/force.json
-  skins7/fox.json
-  skins7/greensward.json
-  skins7/greycoon.json
-  skins7/greyfox.json
-  skins7/hands/standard.png
-  skins7/hippo.json
-  skins7/koala.json
-  skins7/limedog.json
-  skins7/limekitty.json
-  skins7/marking/bear.png
-  skins7/marking/belly1.png
-  skins7/marking/belly2.png
-  skins7/marking/blush.png
-  skins7/marking/bug.png
-  skins7/marking/cammo1.png
-  skins7/marking/cammo2.png
-  skins7/marking/cammostripes.png
-  skins7/marking/coonfluff.png
-  skins7/marking/donny.png
-  skins7/marking/downdony.png
-  skins7/marking/duodonny.png
-  skins7/marking/fox.png
-  skins7/marking/hipbel.png
-  skins7/marking/lowcross.png
-  skins7/marking/lowpaint.png
-  skins7/marking/marksman.png
-  skins7/marking/mice.png
-  skins7/marking/mixture1.png
-  skins7/marking/mixture2.png
-  skins7/marking/monkey.png
-  skins7/marking/panda1.png
-  skins7/marking/panda2.png
-  skins7/marking/purelove.png
-  skins7/marking/saddo.png
-  skins7/marking/setisu.png
-  skins7/marking/sidemarks.png
-  skins7/marking/singu.png
-  skins7/marking/stripe.png
-  skins7/marking/striped.png
-  skins7/marking/stripes.png
-  skins7/marking/stripes2.png
-  skins7/marking/thunder.png
-  skins7/marking/tiger1.png
-  skins7/marking/tiger2.png
-  skins7/marking/toptri.png
-  skins7/marking/triangular.png
-  skins7/marking/tricircular.png
-  skins7/marking/tripledon.png
-  skins7/marking/tritri.png
-  skins7/marking/twinbelly.png
-  skins7/marking/twincross.png
-  skins7/marking/twintri.png
-  skins7/marking/uppy.png
-  skins7/marking/warpaint.png
-  skins7/marking/warstripes.png
-  skins7/marking/whisker.png
-  skins7/marking/wildpaint.png
-  skins7/marking/wildpatch.png
-  skins7/marking/yinyang.png
-  skins7/monkey.json
-  skins7/paintgre.json
-  skins7/pandabear.json
-  skins7/panther.json
-  skins7/pento.json
-  skins7/piggy.json
-  skins7/pinky.json
-  skins7/raccoon.json
-  skins7/redbopp.json
-  skins7/redstripe.json
-  skins7/saddo.json
-  skins7/setisu.json
-  skins7/snowti.json
-  skins7/spiky.json
-  skins7/swardy.json
-  skins7/tiger.json
-  skins7/tooxy.json
-  skins7/toptri.json
-  skins7/twinbop.json
-  skins7/twintri.json
-  skins7/warmouse.json
-  skins7/warpaint.json
-  skins7/x_ninja.json
-  skins7/xmas_hat.png
-  strong_weak.png
-  themes/auto.png
-  themes/autumn.png
-  themes/autumn_day.map
-  themes/autumn_night.map
-  themes/heavens.png
-  themes/heavens_day.map
-  themes/heavens_night.map
-  themes/jungle.png
-  themes/jungle_day.map
-  themes/jungle_night.map
-  themes/newyear.map
-  themes/newyear.png
-  themes/none.png
-  themes/rand.png
-  themes/winter.png
-  themes/winter_day.map
-  themes/winter_night.map
-  touch_controls.json
-  wordlist.txt
+        announcement.txt
+        arrow.png
+        assets/entities/comfort/ddnet.png
+        assets/entities/license.txt
+        assets/game/game_06.png
+        audio/foley_body_impact-01.wv
+        audio/foley_body_impact-02.wv
+        audio/foley_body_impact-03.wv
+        audio/foley_body_splat-01.wv
+        audio/foley_body_splat-02.wv
+        audio/foley_body_splat-03.wv
+        audio/foley_body_splat-04.wv
+        audio/foley_dbljump-01.wv
+        audio/foley_dbljump-02.wv
+        audio/foley_dbljump-03.wv
+        audio/foley_foot_left-01.wv
+        audio/foley_foot_left-02.wv
+        audio/foley_foot_left-03.wv
+        audio/foley_foot_left-04.wv
+        audio/foley_foot_right-01.wv
+        audio/foley_foot_right-02.wv
+        audio/foley_foot_right-03.wv
+        audio/foley_foot_right-04.wv
+        audio/foley_land-01.wv
+        audio/foley_land-02.wv
+        audio/foley_land-03.wv
+        audio/foley_land-04.wv
+        audio/hook_attach-01.wv
+        audio/hook_attach-02.wv
+        audio/hook_attach-03.wv
+        audio/hook_loop-01.wv
+        audio/hook_loop-02.wv
+        audio/hook_noattach-01.wv
+        audio/hook_noattach-02.wv
+        audio/hook_noattach-03.wv
+        audio/music_menu.wv
+        audio/sfx_ctf_cap_pl.wv
+        audio/sfx_ctf_drop.wv
+        audio/sfx_ctf_grab_en.wv
+        audio/sfx_ctf_grab_pl.wv
+        audio/sfx_ctf_rtn.wv
+        audio/sfx_hit_strong-01.wv
+        audio/sfx_hit_strong-02.wv
+        audio/sfx_hit_weak-01.wv
+        audio/sfx_hit_weak-02.wv
+        audio/sfx_hit_weak-03.wv
+        audio/sfx_msg-client.wv
+        audio/sfx_msg-highlight.wv
+        audio/sfx_msg-server.wv
+        audio/sfx_pickup_arm-01.wv
+        audio/sfx_pickup_arm-02.wv
+        audio/sfx_pickup_arm-03.wv
+        audio/sfx_pickup_arm-04.wv
+        audio/sfx_pickup_gun.wv
+        audio/sfx_pickup_hrt-01.wv
+        audio/sfx_pickup_hrt-02.wv
+        audio/sfx_pickup_launcher.wv
+        audio/sfx_pickup_ninja.wv
+        audio/sfx_pickup_sg.wv
+        audio/sfx_skid-01.wv
+        audio/sfx_skid-02.wv
+        audio/sfx_skid-03.wv
+        audio/sfx_skid-04.wv
+        audio/sfx_spawn_wpn-01.wv
+        audio/sfx_spawn_wpn-02.wv
+        audio/sfx_spawn_wpn-03.wv
+        audio/vo_teefault_cry-01.wv
+        audio/vo_teefault_cry-02.wv
+        audio/vo_teefault_ninja-01.wv
+        audio/vo_teefault_ninja-02.wv
+        audio/vo_teefault_ninja-03.wv
+        audio/vo_teefault_ninja-04.wv
+        audio/vo_teefault_pain_long-01.wv
+        audio/vo_teefault_pain_long-02.wv
+        audio/vo_teefault_pain_short-01.wv
+        audio/vo_teefault_pain_short-02.wv
+        audio/vo_teefault_pain_short-03.wv
+        audio/vo_teefault_pain_short-04.wv
+        audio/vo_teefault_pain_short-05.wv
+        audio/vo_teefault_pain_short-06.wv
+        audio/vo_teefault_pain_short-07.wv
+        audio/vo_teefault_pain_short-08.wv
+        audio/vo_teefault_pain_short-09.wv
+        audio/vo_teefault_pain_short-10.wv
+        audio/vo_teefault_pain_short-11.wv
+        audio/vo_teefault_pain_short-12.wv
+        audio/vo_teefault_sledge-01.wv
+        audio/vo_teefault_sledge-02.wv
+        audio/vo_teefault_sledge-03.wv
+        audio/vo_teefault_spawn-01.wv
+        audio/vo_teefault_spawn-02.wv
+        audio/vo_teefault_spawn-03.wv
+        audio/vo_teefault_spawn-04.wv
+        audio/vo_teefault_spawn-05.wv
+        audio/vo_teefault_spawn-06.wv
+        audio/vo_teefault_spawn-07.wv
+        audio/wp_flump_explo-01.wv
+        audio/wp_flump_explo-02.wv
+        audio/wp_flump_explo-03.wv
+        audio/wp_flump_launch-01.wv
+        audio/wp_flump_launch-02.wv
+        audio/wp_flump_launch-03.wv
+        audio/wp_gun_fire-01.wv
+        audio/wp_gun_fire-02.wv
+        audio/wp_gun_fire-03.wv
+        audio/wp_hammer_hit-01.wv
+        audio/wp_hammer_hit-02.wv
+        audio/wp_hammer_hit-03.wv
+        audio/wp_hammer_swing-01.wv
+        audio/wp_hammer_swing-02.wv
+        audio/wp_hammer_swing-03.wv
+        audio/wp_laser_bnce-01.wv
+        audio/wp_laser_bnce-02.wv
+        audio/wp_laser_bnce-03.wv
+        audio/wp_laser_fire-01.wv
+        audio/wp_laser_fire-02.wv
+        audio/wp_laser_fire-03.wv
+        audio/wp_ninja_attack-01.wv
+        audio/wp_ninja_attack-02.wv
+        audio/wp_ninja_attack-03.wv
+        audio/wp_ninja_attack-04.wv
+        audio/wp_ninja_hit-01.wv
+        audio/wp_ninja_hit-02.wv
+        audio/wp_ninja_hit-03.wv
+        audio/wp_ninja_hit-04.wv
+        audio/wp_noammo-01.wv
+        audio/wp_noammo-02.wv
+        audio/wp_noammo-03.wv
+        audio/wp_noammo-04.wv
+        audio/wp_noammo-05.wv
+        audio/wp_shotty_fire-01.wv
+        audio/wp_shotty_fire-02.wv
+        audio/wp_shotty_fire-03.wv
+        audio/wp_switch-01.wv
+        audio/wp_switch-02.wv
+        audio/wp_switch-03.wv
+        autoexec_server.cfg
+        background_noise.png
+        blob.png
+        censorlist.txt
+        communityicons/none.png
+        countryflags/AD.png
+        countryflags/AE.png
+        countryflags/AF.png
+        countryflags/AG.png
+        countryflags/AI.png
+        countryflags/AL.png
+        countryflags/AM.png
+        countryflags/AO.png
+        countryflags/AQ.png
+        countryflags/AR.png
+        countryflags/AS.png
+        countryflags/AT.png
+        countryflags/AU.png
+        countryflags/AW.png
+        countryflags/AX.png
+        countryflags/AZ.png
+        countryflags/BA.png
+        countryflags/BB.png
+        countryflags/BD.png
+        countryflags/BE.png
+        countryflags/BF.png
+        countryflags/BG.png
+        countryflags/BH.png
+        countryflags/BI.png
+        countryflags/BJ.png
+        countryflags/BL.png
+        countryflags/BM.png
+        countryflags/BN.png
+        countryflags/BO.png
+        countryflags/BR.png
+        countryflags/BS.png
+        countryflags/BT.png
+        countryflags/BW.png
+        countryflags/BY.png
+        countryflags/BZ.png
+        countryflags/CA.png
+        countryflags/CC.png
+        countryflags/CD.png
+        countryflags/CF.png
+        countryflags/CG.png
+        countryflags/CH.png
+        countryflags/CI.png
+        countryflags/CK.png
+        countryflags/CL.png
+        countryflags/CM.png
+        countryflags/CN.png
+        countryflags/CO.png
+        countryflags/CR.png
+        countryflags/CU.png
+        countryflags/CV.png
+        countryflags/CW.png
+        countryflags/CX.png
+        countryflags/CY.png
+        countryflags/CZ.png
+        countryflags/DE.png
+        countryflags/DJ.png
+        countryflags/DK.png
+        countryflags/DM.png
+        countryflags/DO.png
+        countryflags/DZ.png
+        countryflags/EC.png
+        countryflags/EE.png
+        countryflags/EG.png
+        countryflags/EH.png
+        countryflags/ER.png
+        countryflags/ES-CT.png
+        countryflags/ES-GA.png
+        countryflags/ES.png
+        countryflags/ET.png
+        countryflags/EU.png
+        countryflags/FI.png
+        countryflags/FJ.png
+        countryflags/FK.png
+        countryflags/FM.png
+        countryflags/FO.png
+        countryflags/FR.png
+        countryflags/GA.png
+        countryflags/GB-ENG.png
+        countryflags/GB-NIR.png
+        countryflags/GB-SCT.png
+        countryflags/GB-WLS.png
+        countryflags/GB.png
+        countryflags/GD.png
+        countryflags/GE.png
+        countryflags/GF.png
+        countryflags/GG.png
+        countryflags/GH.png
+        countryflags/GI.png
+        countryflags/GL.png
+        countryflags/GM.png
+        countryflags/GN.png
+        countryflags/GP.png
+        countryflags/GQ.png
+        countryflags/GR.png
+        countryflags/GS.png
+        countryflags/GT.png
+        countryflags/GU.png
+        countryflags/GW.png
+        countryflags/GY.png
+        countryflags/HK.png
+        countryflags/HN.png
+        countryflags/HR.png
+        countryflags/HT.png
+        countryflags/HU.png
+        countryflags/ID.png
+        countryflags/IE.png
+        countryflags/IL.png
+        countryflags/IM.png
+        countryflags/IN.png
+        countryflags/IO.png
+        countryflags/IQ.png
+        countryflags/IR.png
+        countryflags/IS.png
+        countryflags/IT.png
+        countryflags/JE.png
+        countryflags/JM.png
+        countryflags/JO.png
+        countryflags/JP.png
+        countryflags/KE.png
+        countryflags/KG.png
+        countryflags/KH.png
+        countryflags/KI.png
+        countryflags/KM.png
+        countryflags/KN.png
+        countryflags/KP.png
+        countryflags/KR.png
+        countryflags/KW.png
+        countryflags/KY.png
+        countryflags/KZ.png
+        countryflags/LA.png
+        countryflags/LB.png
+        countryflags/LC.png
+        countryflags/LI.png
+        countryflags/LK.png
+        countryflags/LR.png
+        countryflags/LS.png
+        countryflags/LT.png
+        countryflags/LU.png
+        countryflags/LV.png
+        countryflags/LY.png
+        countryflags/MA.png
+        countryflags/MC.png
+        countryflags/MD.png
+        countryflags/ME.png
+        countryflags/MF.png
+        countryflags/MG.png
+        countryflags/MH.png
+        countryflags/MK.png
+        countryflags/ML.png
+        countryflags/MM.png
+        countryflags/MN.png
+        countryflags/MO.png
+        countryflags/MP.png
+        countryflags/MQ.png
+        countryflags/MR.png
+        countryflags/MS.png
+        countryflags/MT.png
+        countryflags/MU.png
+        countryflags/MV.png
+        countryflags/MW.png
+        countryflags/MX.png
+        countryflags/MY.png
+        countryflags/MZ.png
+        countryflags/NA.png
+        countryflags/NC.png
+        countryflags/NE.png
+        countryflags/NF.png
+        countryflags/NG.png
+        countryflags/NI.png
+        countryflags/NL.png
+        countryflags/NO.png
+        countryflags/NP.png
+        countryflags/NR.png
+        countryflags/NU.png
+        countryflags/NZ.png
+        countryflags/OM.png
+        countryflags/PA.png
+        countryflags/PE.png
+        countryflags/PF.png
+        countryflags/PG.png
+        countryflags/PH.png
+        countryflags/PK.png
+        countryflags/PL.png
+        countryflags/PM.png
+        countryflags/PN.png
+        countryflags/PR.png
+        countryflags/PS.png
+        countryflags/PT.png
+        countryflags/PW.png
+        countryflags/PY.png
+        countryflags/QA.png
+        countryflags/RE.png
+        countryflags/RO.png
+        countryflags/RS.png
+        countryflags/RU.png
+        countryflags/RW.png
+        countryflags/SA.png
+        countryflags/SB.png
+        countryflags/SC.png
+        countryflags/SD.png
+        countryflags/SE.png
+        countryflags/SG.png
+        countryflags/SH.png
+        countryflags/SI.png
+        countryflags/SK.png
+        countryflags/SL.png
+        countryflags/SM.png
+        countryflags/SN.png
+        countryflags/SO.png
+        countryflags/SR.png
+        countryflags/SS.png
+        countryflags/ST.png
+        countryflags/SV.png
+        countryflags/SX.png
+        countryflags/SY.png
+        countryflags/SZ.png
+        countryflags/TC.png
+        countryflags/TD.png
+        countryflags/TF.png
+        countryflags/TG.png
+        countryflags/TH.png
+        countryflags/TJ.png
+        countryflags/TK.png
+        countryflags/TL.png
+        countryflags/TM.png
+        countryflags/TN.png
+        countryflags/TO.png
+        countryflags/TR.png
+        countryflags/TT.png
+        countryflags/TV.png
+        countryflags/TW.png
+        countryflags/TZ.png
+        countryflags/UA.png
+        countryflags/UG.png
+        countryflags/US.png
+        countryflags/UY.png
+        countryflags/UZ.png
+        countryflags/VA.png
+        countryflags/VC.png
+        countryflags/VE.png
+        countryflags/VG.png
+        countryflags/VI.png
+        countryflags/VN.png
+        countryflags/VU.png
+        countryflags/WF.png
+        countryflags/WS.png
+        countryflags/YE.png
+        countryflags/ZA.png
+        countryflags/ZM.png
+        countryflags/ZW.png
+        countryflags/default.png
+        countryflags/index.txt
+        deadtee.png
+        debug_font.png
+        editor/audio_source.png
+        editor/automap/basic_freeze.rules
+        editor/automap/ddmax_freeze.rules
+        editor/automap/ddnet_grass.rules
+        editor/automap/ddnet_tiles.rules
+        editor/automap/ddnet_walls.rules
+        editor/automap/desert_main.rules
+        editor/automap/fadeout.rules
+        editor/automap/generic_clear.rules
+        editor/automap/generic_unhookable.rules
+        editor/automap/generic_unhookable_0.7.rules
+        editor/automap/grass_main.rules
+        editor/automap/jungle_main.rules
+        editor/automap/jungle_midground.rules
+        editor/automap/round_tiles.rules
+        editor/automap/water.rules
+        editor/automap/winter_main.rules
+        editor/checker.png
+        editor/cursor.png
+        editor/cursor_resize.png
+        editor/entities/DDNet.png
+        editor/entities/F-DDrace.png
+        editor/entities/FNG.png
+        editor/entities/Race.png
+        editor/entities/Vanilla.png
+        editor/entities/blockworlds.png
+        editor/entities_clear/blockworlds.png
+        editor/entities_clear/ddnet.png
+        editor/entities_clear/ddrace.png
+        editor/entities_clear/f-ddrace.png
+        editor/entities_clear/fng.png
+        editor/entities_clear/race.png
+        editor/entities_clear/vanilla.png
+        editor/front.png
+        editor/speed_arrow.png
+        editor/speed_arrow_array.png
+        editor/speedup.png
+        editor/switch.png
+        editor/tele.png
+        editor/tune.png
+        emoticons.png
+        extras.png
+        fonts/DejaVuSans.ttf
+        fonts/Font_Awesome_6_Free-Solid-900.otf
+        fonts/GlowSansJ-Compressed-Book.otf
+        fonts/SourceHanSans.ttc
+        fonts/index.json
+        game.png
+        gui_buttons.png
+        gui_cursor.png
+        gui_icons.png
+        gui_logo.png
+        hud.png
+        languages/arabic.txt
+        languages/azerbaijani.txt
+        languages/belarusian.txt
+        languages/bosnian.txt
+        languages/brazilian_portuguese.txt
+        languages/bulgarian.txt
+        languages/catalan.txt
+        languages/chuvash.txt
+        languages/czech.txt
+        languages/danish.txt
+        languages/dutch.txt
+        languages/esperanto.txt
+        languages/estonian.txt
+        languages/finnish.txt
+        languages/french.txt
+        languages/galician.txt
+        languages/german.txt
+        languages/greek.txt
+        languages/hungarian.txt
+        languages/index.txt
+        languages/italian.txt
+        languages/japanese.txt
+        languages/korean.txt
+        languages/kyrgyz.txt
+        languages/license.txt
+        languages/norwegian.txt
+        languages/persian.txt
+        languages/polish.txt
+        languages/portuguese.txt
+        languages/romanian.txt
+        languages/russian.txt
+        languages/serbian.txt
+        languages/serbian_cyrillic.txt
+        languages/simplified_chinese.txt
+        languages/slovak.txt
+        languages/spanish.txt
+        languages/swedish.txt
+        languages/traditional_chinese.txt
+        languages/turkish.txt
+        languages/ukrainian.txt
+        mapres/basic_freeze.png
+        mapres/bg_cloud1.png
+        mapres/bg_cloud2.png
+        mapres/bg_cloud3.png
+        mapres/ddmax_freeze.png
+        mapres/ddnet_grass.png
+        mapres/ddnet_start.png
+        mapres/ddnet_tiles.png
+        mapres/ddnet_walls.png
+        mapres/desert_background.png
+        mapres/desert_doodads.png
+        mapres/desert_main.png
+        mapres/desert_mountains.png
+        mapres/desert_mountains2.png
+        mapres/desert_mountains_new_background.png
+        mapres/desert_mountains_new_foreground.png
+        mapres/desert_sun.png
+        mapres/entities.png
+        mapres/fadeout.png
+        mapres/font_teeworlds.png
+        mapres/font_teeworlds_alt.png
+        mapres/generic_clear.png
+        mapres/generic_deathtiles.png
+        mapres/generic_lamps.png
+        mapres/generic_unhookable.png
+        mapres/generic_unhookable_0.7.png
+        mapres/grass_doodads.png
+        mapres/grass_doodads_0.7.png
+        mapres/grass_main.png
+        mapres/grass_main_0.7.png
+        mapres/jungle_background.png
+        mapres/jungle_deathtiles.png
+        mapres/jungle_doodads.png
+        mapres/jungle_main.png
+        mapres/jungle_midground.png
+        mapres/jungle_unhookables.png
+        mapres/light.png
+        mapres/mixed_tiles.png
+        mapres/moon.png
+        mapres/mountains.png
+        mapres/round_tiles.png
+        mapres/snow.png
+        mapres/snow_mountain.png
+        mapres/stars.png
+        mapres/sun.png
+        mapres/water.png
+        mapres/winter_doodads.png
+        mapres/winter_main.png
+        mapres/winter_main_0.7.png
+        mapres/winter_mountains.png
+        mapres/winter_mountains2.png
+        mapres/winter_mountains3.png
+        maps/Gold\ Mine.map
+        maps/LearnToPlay.map
+        maps/Sunny\ Side\ Up.map
+        maps/Tsunami.map
+        maps/Tutorial.map
+        maps/coverage.map
+        maps/ctf1.map
+        maps/ctf2.map
+        maps/ctf3.map
+        maps/ctf4.map
+        maps/ctf5.map
+        maps/ctf6.map
+        maps/ctf7.map
+        maps/dm1.map
+        maps/dm2.map
+        maps/dm6.map
+        maps/dm7.map
+        maps/dm8.map
+        maps/dm9.map
+        maps/license.txt
+        maps7/Gold\ Mine.map
+        maps7/LearnToPlay.map
+        maps7/Sunny\ Side\ Up.map
+        maps7/Tsunami.map
+        maps7/Tutorial.map
+        maps7/readme.txt
+        menuimages/demos.png
+        menuimages/editor.png
+        menuimages/local_server.png
+        menuimages/play_game.png
+        menuimages/settings.png
+        particles.png
+        race_flag.png
+        shader/pipeline.frag
+        shader/pipeline.vert
+        shader/prim.frag
+        shader/prim.vert
+        shader/primex.frag
+        shader/primex.vert
+        shader/quad.frag
+        shader/quad.vert
+        shader/spritemulti.frag
+        shader/spritemulti.vert
+        shader/text.frag
+        shader/text.vert
+        shader/tile.frag
+        shader/tile.vert
+        shader/tile_border.frag
+        shader/tile_border.vert
+        shader/vulkan/prim.frag
+        shader/vulkan/prim.vert
+        shader/vulkan/prim3d.frag
+        shader/vulkan/prim3d.vert
+        shader/vulkan/primex.frag
+        shader/vulkan/primex.vert
+        shader/vulkan/quad.frag
+        shader/vulkan/quad.vert
+        shader/vulkan/spritemulti.frag
+        shader/vulkan/spritemulti.vert
+        shader/vulkan/text.frag
+        shader/vulkan/text.vert
+        shader/vulkan/tile.frag
+        shader/vulkan/tile.vert
+        shader/vulkan/tile_border.frag
+        shader/vulkan/tile_border.vert
+        skins/PaladiN.png
+        skins/antiantey.png
+        skins/beast.png
+        skins/blacktee.png
+        skins/bluekitty.png
+        skins/bluestripe.png
+        skins/bomb.png
+        skins/brownbear.png
+        skins/cammo.png
+        skins/cammostripes.png
+        skins/chinese_by_whis.png
+        skins/coala.png
+        skins/coala_bluekitty.png
+        skins/coala_bluestripe.png
+        skins/coala_cammo.png
+        skins/coala_cammostripes.png
+        skins/coala_default.png
+        skins/coala_limekitty.png
+        skins/coala_pinky.png
+        skins/coala_redbopp.png
+        skins/coala_redstripe.png
+        skins/coala_saddo.png
+        skins/coala_toptri.png
+        skins/coala_twinbop.png
+        skins/coala_twintri.png
+        skins/coala_warpaint.png
+        skins/coala_x_ninja.png
+        skins/default.png
+        skins/demonlimekitty.png
+        skins/dino.png
+        skins/dragon.png
+        skins/evil.png
+        skins/evilwolfe.png
+        skins/ghost.png
+        skins/ghostjtj.png
+        skins/giraffe.png
+        skins/greensward.png
+        skins/greyfox.png
+        skins/greyfox_2.png
+        skins/hammie-chew.png
+        skins/hammie-whis.png
+        skins/jeet.png
+        skins/kintaro_2.png
+        skins/kitty_bluestripe.png
+        skins/kitty_brownbear.png
+        skins/kitty_cammo.png
+        skins/kitty_cammostripes.png
+        skins/kitty_coala.png
+        skins/kitty_default.png
+        skins/kitty_pinky.png
+        skins/kitty_redbopp.png
+        skins/kitty_redstripe.png
+        skins/kitty_saddo.png
+        skins/kitty_toptri.png
+        skins/kitty_twinbop.png
+        skins/kitty_twintri.png
+        skins/kitty_warpaint.png
+        skins/kitty_x_ninja.png
+        skins/license.txt
+        skins/limekitty.png
+        skins/mermydon-coala.png
+        skins/mermydon.png
+        skins/mouse.png
+        skins/musmann.png
+        skins/nanami.png
+        skins/nanas.png
+        skins/nersif.png
+        skins/oldman.png
+        skins/oldschool.png
+        skins/penguin.png
+        skins/pinky.png
+        skins/random.png
+        skins/redbopp.png
+        skins/redstripe.png
+        skins/saddo.png
+        skins/santa_bluekitty.png
+        skins/santa_bluestripe.png
+        skins/santa_brownbear.png
+        skins/santa_cammo.png
+        skins/santa_cammostripes.png
+        skins/santa_coala.png
+        skins/santa_default.png
+        skins/santa_limekitty.png
+        skins/santa_pinky.png
+        skins/santa_redbopp.png
+        skins/santa_redstripe.png
+        skins/santa_saddo.png
+        skins/santa_toptri.png
+        skins/santa_twinbop.png
+        skins/santa_twintri.png
+        skins/santa_warpaint.png
+        skins/teerasta.png
+        skins/toptri.png
+        skins/twinbop.png
+        skins/twintri.png
+        skins/veteran.png
+        skins/voodoo_tee.png
+        skins/warpaint.png
+        skins/wartee.png
+        skins/whis.png
+        skins/x_ninja.png
+        skins/x_spec.png
+        skins7/beaver.json
+        skins7/bluekitty.json
+        skins7/bluestripe.json
+        skins7/body/bat.png
+        skins7/body/bear.png
+        skins7/body/beaver.png
+        skins7/body/dog.png
+        skins7/body/force.png
+        skins7/body/fox.png
+        skins7/body/greensward.png
+        skins7/body/hippo.png
+        skins7/body/kitty.png
+        skins7/body/koala.png
+        skins7/body/monkey.png
+        skins7/body/mouse.png
+        skins7/body/piglet.png
+        skins7/body/raccoon.png
+        skins7/body/spiky.png
+        skins7/body/standard.png
+        skins7/body/x_ninja.png
+        skins7/bot.png
+        skins7/brownbear.json
+        skins7/bumbler.json
+        skins7/cammo.json
+        skins7/cammostripes.json
+        skins7/cavebat.json
+        skins7/decoration/hair.png
+        skins7/decoration/twinbopp.png
+        skins7/decoration/twinmello.png
+        skins7/decoration/twinpen.png
+        skins7/decoration/unibop.png
+        skins7/decoration/unimelo.png
+        skins7/decoration/unipento.png
+        skins7/default.json
+        skins7/eyes/colorable.png
+        skins7/eyes/negative.png
+        skins7/eyes/standard.png
+        skins7/eyes/standardreal.png
+        skins7/eyes/x_ninja.png
+        skins7/feet/standard.png
+        skins7/force.json
+        skins7/fox.json
+        skins7/greensward.json
+        skins7/greycoon.json
+        skins7/greyfox.json
+        skins7/hands/standard.png
+        skins7/hippo.json
+        skins7/koala.json
+        skins7/limedog.json
+        skins7/limekitty.json
+        skins7/marking/bear.png
+        skins7/marking/belly1.png
+        skins7/marking/belly2.png
+        skins7/marking/blush.png
+        skins7/marking/bug.png
+        skins7/marking/cammo1.png
+        skins7/marking/cammo2.png
+        skins7/marking/cammostripes.png
+        skins7/marking/coonfluff.png
+        skins7/marking/donny.png
+        skins7/marking/downdony.png
+        skins7/marking/duodonny.png
+        skins7/marking/fox.png
+        skins7/marking/hipbel.png
+        skins7/marking/lowcross.png
+        skins7/marking/lowpaint.png
+        skins7/marking/marksman.png
+        skins7/marking/mice.png
+        skins7/marking/mixture1.png
+        skins7/marking/mixture2.png
+        skins7/marking/monkey.png
+        skins7/marking/panda1.png
+        skins7/marking/panda2.png
+        skins7/marking/purelove.png
+        skins7/marking/saddo.png
+        skins7/marking/setisu.png
+        skins7/marking/sidemarks.png
+        skins7/marking/singu.png
+        skins7/marking/stripe.png
+        skins7/marking/striped.png
+        skins7/marking/stripes.png
+        skins7/marking/stripes2.png
+        skins7/marking/thunder.png
+        skins7/marking/tiger1.png
+        skins7/marking/tiger2.png
+        skins7/marking/toptri.png
+        skins7/marking/triangular.png
+        skins7/marking/tricircular.png
+        skins7/marking/tripledon.png
+        skins7/marking/tritri.png
+        skins7/marking/twinbelly.png
+        skins7/marking/twincross.png
+        skins7/marking/twintri.png
+        skins7/marking/uppy.png
+        skins7/marking/warpaint.png
+        skins7/marking/warstripes.png
+        skins7/marking/whisker.png
+        skins7/marking/wildpaint.png
+        skins7/marking/wildpatch.png
+        skins7/marking/yinyang.png
+        skins7/monkey.json
+        skins7/paintgre.json
+        skins7/pandabear.json
+        skins7/panther.json
+        skins7/pento.json
+        skins7/piggy.json
+        skins7/pinky.json
+        skins7/raccoon.json
+        skins7/redbopp.json
+        skins7/redstripe.json
+        skins7/saddo.json
+        skins7/setisu.json
+        skins7/snowti.json
+        skins7/spiky.json
+        skins7/swardy.json
+        skins7/tiger.json
+        skins7/tooxy.json
+        skins7/toptri.json
+        skins7/twinbop.json
+        skins7/twintri.json
+        skins7/warmouse.json
+        skins7/warpaint.json
+        skins7/x_ninja.json
+        skins7/xmas_hat.png
+        strong_weak.png
+        themes/auto.png
+        themes/autumn.png
+        themes/autumn_day.map
+        themes/autumn_night.map
+        themes/heavens.png
+        themes/heavens_day.map
+        themes/heavens_night.map
+        themes/jungle.png
+        themes/jungle_day.map
+        themes/jungle_night.map
+        themes/newyear.map
+        themes/newyear.png
+        themes/none.png
+        themes/rand.png
+        themes/winter.png
+        themes/winter_day.map
+        themes/winter_night.map
+        touch_controls.json
+        wordlist.txt
 )
 
 set_glob(DATA GLOB_RECURSE "cfg;frag;json;map;otf;png;rules;ttc;ttf;txt;vert;wv" data ${EXPECTED_DATA})
@@ -1863,25 +1694,25 @@ foreach(datafile ${DATA})
   file(COPY ${datafile} DESTINATION ${DESTINATION})
 endforeach()
 set(INTEGRATION_TEST_COPY_FILES
-  lsan.supp
-  memcheck.supp
-  ubsan.supp
-  valgrind.supp
-  scripts/integration_test.sh
+        lsan.supp
+        memcheck.supp
+        ubsan.supp
+        valgrind.supp
+        scripts/integration_test.sh
 )
 set(COPY_FILES
-  ${CURL_COPY_FILES}
-  ${FREETYPE_COPY_FILES}
-  ${OPUSFILE_COPY_FILES}
-  ${PNG_COPY_FILES}
-  ${SDL2_COPY_FILES}
-  ${SQLite3_COPY_FILES}
-  ${FFMPEG_COPY_FILES}
-  ${WEBSOCKETS_COPY_FILES}
-  ${DISCORDSDK_COPY_FILES}
-  ${VULKAN_COPY_FILES}
-  ${EXCEPTION_HANDLING_COPY_FILES}
-  ${SSP_COPY_FILES}
+        ${CURL_COPY_FILES}
+        ${FREETYPE_COPY_FILES}
+        ${OPUSFILE_COPY_FILES}
+        ${PNG_COPY_FILES}
+        ${SDL2_COPY_FILES}
+        ${SQLite3_COPY_FILES}
+        ${FFMPEG_COPY_FILES}
+        ${WEBSOCKETS_COPY_FILES}
+        ${DISCORDSDK_COPY_FILES}
+        ${VULKAN_COPY_FILES}
+        ${EXCEPTION_HANDLING_COPY_FILES}
+        ${SSP_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
 # Don't add integration test files to COPY_FILES since we don't want to add
@@ -1897,70 +1728,70 @@ file(COPY ${COPY_DIRS} DESTINATION .)
 
 function(generate_source output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${Python3_EXECUTABLE} datasrc/compile.py ${script_parameter}
-      > "${PROJECT_BINARY_DIR}/${output_file}"
-    DEPENDS
-      datasrc/compile.py
-      datasrc/content.py
-      datasrc/datatypes.py
-      datasrc/network.py
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+          COMMAND ${Python3_EXECUTABLE} datasrc/compile.py ${script_parameter}
+          > "${PROJECT_BINARY_DIR}/${output_file}"
+          DEPENDS
+          datasrc/compile.py
+          datasrc/content.py
+          datasrc/datatypes.py
+          datasrc/network.py
+          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction()
 
 function(generate_source7 output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${Python3_EXECUTABLE} -m datasrc.seven.compile ${script_parameter}
-      > "${PROJECT_BINARY_DIR}/${output_file}"
-    DEPENDS
-      datasrc/seven/compile.py
-      datasrc/seven/content.py
-      datasrc/seven/datatypes.py
-      datasrc/seven/network.py
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+          COMMAND ${Python3_EXECUTABLE} -m datasrc.seven.compile ${script_parameter}
+          > "${PROJECT_BINARY_DIR}/${output_file}"
+          DEPENDS
+          datasrc/seven/compile.py
+          datasrc/seven/content.py
+          datasrc/seven/datatypes.py
+          datasrc/seven/network.py
+          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction()
 
 function(generate_maps output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${Python3_EXECUTABLE} datasrc/crosscompile.py ${script_parameter}
-      > "${PROJECT_BINARY_DIR}/${output_file}"
-    DEPENDS
-      datasrc/crosscompile.py
-      datasrc/compile.py
-      datasrc/content.py
-      datasrc/datatypes.py
-      datasrc/network.py
-      datasrc/seven/compile.py
-      datasrc/seven/content.py
-      datasrc/seven/datatypes.py
-      datasrc/seven/network.py
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+          COMMAND ${Python3_EXECUTABLE} datasrc/crosscompile.py ${script_parameter}
+          > "${PROJECT_BINARY_DIR}/${output_file}"
+          DEPENDS
+          datasrc/crosscompile.py
+          datasrc/compile.py
+          datasrc/content.py
+          datasrc/datatypes.py
+          datasrc/network.py
+          datasrc/seven/compile.py
+          datasrc/seven/content.py
+          datasrc/seven/datatypes.py
+          datasrc/seven/network.py
+          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   )
 endfunction()
 
 file(MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/src/game/generated/")
 execute_process(COMMAND git rev-parse --git-dir
-  ERROR_QUIET
-  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-  OUTPUT_VARIABLE PROJECT_GIT_DIR
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  RESULT_VARIABLE PROJECT_GIT_DIR_ERROR
+        ERROR_QUIET
+        WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+        OUTPUT_VARIABLE PROJECT_GIT_DIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        RESULT_VARIABLE PROJECT_GIT_DIR_ERROR
 )
 if(NOT PROJECT_GIT_DIR_ERROR)
   set(GIT_REVISION_EXTRA_DEPS
-    ${PROJECT_GIT_DIR}/index
-    ${PROJECT_GIT_DIR}/logs/HEAD
+          ${PROJECT_GIT_DIR}/index
+          ${PROJECT_GIT_DIR}/logs/HEAD
   )
 endif()
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
-  COMMAND ${Python3_EXECUTABLE}
-    scripts/git_revision.py
-    > ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  DEPENDS
-    ${GIT_REVISION_EXTRA_DEPS}
-    scripts/git_revision.py
+        COMMAND ${Python3_EXECUTABLE}
+        scripts/git_revision.py
+        > ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        DEPENDS
+        ${GIT_REVISION_EXTRA_DEPS}
+        scripts/git_revision.py
 )
 generate_source("src/game/generated/client_data.cpp" "client_content_source")
 generate_source("src/game/generated/client_data.h" "client_content_header")
@@ -1979,10 +1810,10 @@ generate_maps("src/game/generated/protocolglue.h" "map_header")
 generate_maps("src/game/generated/protocolglue.cpp" "map_source")
 
 add_custom_command(OUTPUT "src/game/generated/wordlist.h"
-  COMMAND ${Python3_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/game/generated/wordlist.h
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  DEPENDS
-    scripts/wordlist.py
+        COMMAND ${Python3_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/game/generated/wordlist.h
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        DEPENDS
+        scripts/wordlist.py
 )
 
 ########################################################################
@@ -1991,203 +1822,202 @@ add_custom_command(OUTPUT "src/game/generated/wordlist.h"
 
 # Sources
 set_src(BASE GLOB_RECURSE src/base
-  bezier.cpp
-  bezier.h
-  color.cpp
-  color.h
-  detect.h
-  dynamic.h
-  hash.cpp
-  hash.h
-  hash_bundled.cpp
-  hash_ctxt.h
-  hash_libtomcrypt.cpp
-  hash_openssl.cpp
-  lock.h
-  log.cpp
-  log.h
-  logger.h
-  math.h
-  rust.h
-  system.cpp
-  system.h
-  tl/threading.h
-  types.h
-  unicode/confusables.cpp
-  unicode/confusables.h
-  unicode/confusables_data.h
-  unicode/tolower.cpp
-  unicode/tolower.h
-  unicode/tolower_data.h
-  vmath.h
+        bezier.cpp
+        bezier.h
+        color.cpp
+        color.h
+        detect.h
+        dynamic.h
+        hash.cpp
+        hash.h
+        hash_bundled.cpp
+        hash_ctxt.h
+        hash_libtomcrypt.cpp
+        hash_openssl.cpp
+        lock.h
+        log.cpp
+        log.h
+        logger.h
+        math.h
+        system.cpp
+        system.h
+        tl/threading.h
+        types.h
+        unicode/confusables.cpp
+        unicode/confusables.h
+        unicode/confusables_data.h
+        unicode/tolower.cpp
+        unicode/tolower.h
+        unicode/tolower_data.h
+        vmath.h
 )
 set_src(ENGINE_INTERFACE GLOB src/engine
-  antibot.h
-  client.h
-  config.h
-  console.h
-  demo.h
-  discord.h
-  editor.h
-  engine.h
-  favorites.h
-  friends.h
-  ghost.h
-  graphics.h
-  http.h
-  image.h
-  input.h
-  kernel.h
-  keys.h
-  map.h
-  message.h
-  notifications.h
-  rust.h
-  server.h
-  serverbrowser.h
-  sound.h
-  sqlite.h
-  steam.h
-  storage.h
-  textrender.h
-  updater.h
-  uuid.h
-  warning.h
+        antibot.h
+        client.h
+        config.h
+        console.h
+        demo.h
+        discord.h
+        editor.h
+        engine.h
+        favorites.h
+        friends.h
+        ghost.h
+        graphics.h
+        http.h
+        image.h
+        input.h
+        kernel.h
+        keys.h
+        map.h
+        message.h
+        notifications.h
+        server.h
+        serverbrowser.h
+        sound.h
+        sqlite.h
+        steam.h
+        storage.h
+        textrender.h
+        updater.h
+        uuid.h
+        warning.h
 )
 set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
-  assertion_logger.cpp
-  assertion_logger.h
-  compression.cpp
-  compression.h
-  config.cpp
-  config.h
-  config_variables.h
-  console.cpp
-  console.h
-  csv.cpp
-  csv.h
-  datafile.cpp
-  datafile.h
-  demo.cpp
-  demo.h
-  econ.cpp
-  econ.h
-  engine.cpp
-  fifo.cpp
-  fifo.h
-  filecollection.cpp
-  filecollection.h
-  global_uuid_manager.cpp
-  host_lookup.cpp
-  host_lookup.h
-  http.cpp
-  http.h
-  huffman.cpp
-  huffman.h
-  jobs.cpp
-  jobs.h
-  json.cpp
-  json.h
-  jsonwriter.cpp
-  jsonwriter.h
-  kernel.cpp
-  linereader.cpp
-  linereader.h
-  localization.h
-  map.cpp
-  map.h
-  masterserver.cpp
-  masterserver.h
-  memheap.cpp
-  memheap.h
-  netban.cpp
-  netban.h
-  network.cpp
-  network.h
-  network_client.cpp
-  network_conn.cpp
-  network_console.cpp
-  network_console_conn.cpp
-  network_server.cpp
-  network_stun.cpp
-  packer.cpp
-  packer.h
-  protocol.h
-  protocol7.h
-  protocol_ex.cpp
-  protocol_ex.h
-  protocol_ex_msgs.h
-  protocolglue.cpp
-  protocolglue.h
-  ringbuffer.cpp
-  ringbuffer.h
-  serverinfo.cpp
-  serverinfo.h
-  sixup_translate_snapshot.cpp
-  snapshot.cpp
-  snapshot.h
-  storage.cpp
-  stun.cpp
-  stun.h
-  teehistorian_ex.cpp
-  teehistorian_ex.h
-  teehistorian_ex_chunks.h
-  translation_context.cpp
-  translation_context.h
-  uuid_manager.cpp
-  uuid_manager.h
-  video.cpp
-  video.h
-  websockets.cpp
-  websockets.h
+        assertion_logger.cpp
+        assertion_logger.h
+        compression.cpp
+        compression.h
+        config.cpp
+        config.h
+        config_variables.h
+        config_variables_custom.h
+        console.cpp
+        console.h
+        csv.cpp
+        csv.h
+        datafile.cpp
+        datafile.h
+        demo.cpp
+        demo.h
+        econ.cpp
+        econ.h
+        engine.cpp
+        fifo.cpp
+        fifo.h
+        filecollection.cpp
+        filecollection.h
+        global_uuid_manager.cpp
+        host_lookup.cpp
+        host_lookup.h
+        http.cpp
+        http.h
+        huffman.cpp
+        huffman.h
+        jobs.cpp
+        jobs.h
+        json.cpp
+        json.h
+        jsonwriter.cpp
+        jsonwriter.h
+        kernel.cpp
+        linereader.cpp
+        linereader.h
+        localization.h
+        map.cpp
+        map.h
+        masterserver.cpp
+        masterserver.h
+        memheap.cpp
+        memheap.h
+        netban.cpp
+        netban.h
+        network.cpp
+        network.h
+        network_client.cpp
+        network_conn.cpp
+        network_console.cpp
+        network_console_conn.cpp
+        network_server.cpp
+        network_stun.cpp
+        packer.cpp
+        packer.h
+        protocol.h
+        protocol7.h
+        protocol_ex.cpp
+        protocol_ex.h
+        protocol_ex_msgs.h
+        protocolglue.cpp
+        protocolglue.h
+        ringbuffer.cpp
+        ringbuffer.h
+        serverinfo.cpp
+        serverinfo.h
+        sixup_translate_snapshot.cpp
+        snapshot.cpp
+        snapshot.h
+        storage.cpp
+        stun.cpp
+        stun.h
+        teehistorian_ex.cpp
+        teehistorian_ex.h
+        teehistorian_ex_chunks.h
+        translation_context.cpp
+        translation_context.h
+        uuid_manager.cpp
+        uuid_manager.h
+        video.cpp
+        video.h
+        websockets.cpp
+        websockets.h
 )
 set_src(ENGINE_GFX GLOB src/engine/gfx
-  image.cpp
-  image_loader.cpp
-  image_loader.h
-  image_manipulation.cpp
-  image_manipulation.h
+        image.cpp
+        image_loader.cpp
+        image_loader.h
+        image_manipulation.cpp
+        image_manipulation.h
 )
 set_src(GAME_SHARED GLOB src/game
-  alloc.h
-  collision.cpp
-  collision.h
-  gamecore.cpp
-  gamecore.h
-  layers.cpp
-  layers.h
-  localization.cpp
-  localization.h
-  mapbugs.cpp
-  mapbugs.h
-  mapbugs_list.h
-  mapitems.cpp
-  mapitems.h
-  mapitems_ex.cpp
-  mapitems_ex.h
-  mapitems_ex_types.h
-  prng.cpp
-  prng.h
-  teamscore.cpp
-  teamscore.h
-  tuning.h
-  version.h
-  voting.h
+        alloc.h
+        collision.cpp
+        collision.h
+        gamecore.cpp
+        gamecore.h
+        layers.cpp
+        layers.h
+        localization.cpp
+        localization.h
+        mapbugs.cpp
+        mapbugs.h
+        mapbugs_list.h
+        mapitems.cpp
+        mapitems.h
+        mapitems_ex.cpp
+        mapitems_ex.h
+        mapitems_ex_types.h
+        prng.cpp
+        prng.h
+        teamscore.cpp
+        teamscore.h
+        tuning.h
+        version.h
+        voting.h
 )
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "src/game/version.h")
 
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
-  src/game/generated/protocolglue.cpp
-  src/game/generated/protocolglue.h
-  src/game/generated/protocol7.cpp
-  src/game/generated/protocol7.h
-  src/game/generated/protocol.cpp
-  src/game/generated/protocol.h
-  src/game/mapitems_ex.cpp
-  src/game/mapitems_ex.h
-  src/game/mapitems_ex_types.h
+        src/game/generated/protocolglue.cpp
+        src/game/generated/protocolglue.h
+        src/game/generated/protocol7.cpp
+        src/game/generated/protocol7.h
+        src/game/generated/protocol.cpp
+        src/game/generated/protocol.h
+        src/game/mapitems_ex.cpp
+        src/game/mapitems_ex.h
+        src/game/mapitems_ex_types.h
 )
 foreach(s ${GAME_SHARED})
   if(s MATCHES "mapitems_(ex.cpp|ex.h|ex_types.h)$")
@@ -2196,25 +2026,25 @@ foreach(s ${GAME_SHARED})
 endforeach()
 list(REMOVE_ITEM GAME_SHARED ${ENGINE_UUID_SHARED})
 set(GAME_GENERATED_SHARED
-  src/game/generated/data_types.h
-  src/game/generated/git_revision.cpp
-  src/game/generated/protocol.h
-  src/game/generated/protocol7.h
-  src/game/generated/protocolglue.h
+        src/game/generated/data_types.h
+        src/game/generated/git_revision.cpp
+        src/game/generated/protocol.h
+        src/game/generated/protocol7.h
+        src/game/generated/protocolglue.h
 )
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
 # Libraries
 set(LIBS
-  ${CRYPTO_LIBRARIES}
-  ${CURL_LIBRARIES}
-  ${SQLite3_LIBRARIES}
-  ${WEBSOCKETS_LIBRARIES}
-  ${ZLIB_LIBRARIES}
-  ${PLATFORM_LIBS}
-  # Add pthreads (on non-Windows) at the end, so that other libraries can depend
-  # on it.
-  ${CMAKE_THREAD_LIBS_INIT}
+        ${CRYPTO_LIBRARIES}
+        ${CURL_LIBRARIES}
+        ${SQLite3_LIBRARIES}
+        ${WEBSOCKETS_LIBRARIES}
+        ${ZLIB_LIBRARIES}
+        ${PLATFORM_LIBS}
+        # Add pthreads (on non-Windows) at the end, so that other libraries can depend
+        # on it.
+        ${CMAKE_THREAD_LIBS_INIT}
 )
 
 # Targets
@@ -2227,8 +2057,8 @@ list(APPEND TARGETS_OWN engine-gfx engine-shared game-shared)
 if(DISCORD AND NOT DISCORD_DYNAMIC)
   add_library(discord-shared SHARED IMPORTED)
   set_target_properties(discord-shared PROPERTIES
-    IMPORTED_LOCATION "${DISCORDSDK_LIBRARIES}"
-    IMPORTED_IMPLIB "${DISCORDSDK_LIBRARIES}"
+          IMPORTED_LOCATION "${DISCORDSDK_LIBRARIES}"
+          IMPORTED_IMPLIB "${DISCORDSDK_LIBRARIES}"
   )
 endif()
 
@@ -2239,8 +2069,8 @@ endif()
 if(CLIENT)
   # Sources
   set_src(STEAMAPI_SRC GLOB_RECURSE src/steam
-    steam_api_flat.h
-    steam_api_stub.cpp
+          steam_api_flat.h
+          steam_api_stub.cpp
   )
 
   if(STEAM OR TARGET_OS STREQUAL "windows" OR TARGET_OS STREQUAL "mac")
@@ -2253,278 +2083,279 @@ if(CLIENT)
   list(APPEND TARGETS_OWN ${TARGET_STEAMAPI})
 
   set_src(ENGINE_CLIENT GLOB_RECURSE src/engine/client
-    backend/backend_base.cpp
-    backend/backend_base.h
-    backend/glsl_shader_compiler.cpp
-    backend/glsl_shader_compiler.h
-    backend/null/backend_null.cpp
-    backend/null/backend_null.h
-    backend/opengl/backend_opengl.cpp
-    backend/opengl/backend_opengl.h
-    backend/opengl/backend_opengl3.cpp
-    backend/opengl/backend_opengl3.h
-    backend/opengl/opengl_sl.cpp
-    backend/opengl/opengl_sl.h
-    backend/opengl/opengl_sl_program.cpp
-    backend/opengl/opengl_sl_program.h
-    backend/opengles/backend_opengles.cpp
-    backend/opengles/backend_opengles3.cpp
-    backend/opengles/backend_opengles3.h
-    backend/opengles/gles_class_defines.h
-    backend/opengles/opengles_sl.cpp
-    backend/opengles/opengles_sl_program.cpp
-    backend/vulkan/backend_vulkan.cpp
-    backend/vulkan/backend_vulkan.h
-    backend_sdl.cpp
-    backend_sdl.h
-    blocklist_driver.cpp
-    blocklist_driver.h
-    checksum.h
-    client.cpp
-    client.h
-    demoedit.cpp
-    demoedit.h
-    discord.cpp
-    enums.h
-    favorites.cpp
-    friends.cpp
-    friends.h
-    ghost.cpp
-    ghost.h
-    graph.cpp
-    graph.h
-    graphics_defines.h
-    graphics_threaded.cpp
-    graphics_threaded.h
-    input.cpp
-    input.h
-    keynames.h
-    notifications.cpp
-    notifications.h
-    serverbrowser.cpp
-    serverbrowser.h
-    serverbrowser_http.cpp
-    serverbrowser_http.h
-    serverbrowser_ping_cache.cpp
-    serverbrowser_ping_cache.h
-    sixup_translate_system.cpp
-    smooth_time.cpp
-    smooth_time.h
-    sound.cpp
-    sound.h
-    sqlite.cpp
-    steam.cpp
-    text.cpp
-    updater.cpp
-    updater.h
-    video.cpp
-    video.h
-    warning.cpp
+          backend/backend_base.cpp
+          backend/backend_base.h
+          backend/glsl_shader_compiler.cpp
+          backend/glsl_shader_compiler.h
+          backend/null/backend_null.cpp
+          backend/null/backend_null.h
+          backend/opengl/backend_opengl.cpp
+          backend/opengl/backend_opengl.h
+          backend/opengl/backend_opengl3.cpp
+          backend/opengl/backend_opengl3.h
+          backend/opengl/opengl_sl.cpp
+          backend/opengl/opengl_sl.h
+          backend/opengl/opengl_sl_program.cpp
+          backend/opengl/opengl_sl_program.h
+          backend/opengles/backend_opengles.cpp
+          backend/opengles/backend_opengles3.cpp
+          backend/opengles/backend_opengles3.h
+          backend/opengles/gles_class_defines.h
+          backend/opengles/opengles_sl.cpp
+          backend/opengles/opengles_sl_program.cpp
+          backend/vulkan/backend_vulkan.cpp
+          backend/vulkan/backend_vulkan.h
+          backend_sdl.cpp
+          backend_sdl.h
+          blocklist_driver.cpp
+          blocklist_driver.h
+          checksum.h
+          client.cpp
+          client.h
+          demoedit.cpp
+          demoedit.h
+          discord.cpp
+          enums.h
+          favorites.cpp
+          friends.cpp
+          friends.h
+          ghost.cpp
+          ghost.h
+          graph.cpp
+          graph.h
+          graphics_defines.h
+          graphics_threaded.cpp
+          graphics_threaded.h
+          input.cpp
+          input.h
+          keynames.h
+          notifications.cpp
+          notifications.h
+          serverbrowser.cpp
+          serverbrowser.h
+          serverbrowser_http.cpp
+          serverbrowser_http.h
+          serverbrowser_ping_cache.cpp
+          serverbrowser_ping_cache.h
+          sixup_translate_system.cpp
+          smooth_time.cpp
+          smooth_time.h
+          sound.cpp
+          sound.h
+          sqlite.cpp
+          steam.cpp
+          text.cpp
+          updater.cpp
+          updater.h
+          video.cpp
+          video.h
+          warning.cpp
   )
   set_src(GAME_CLIENT GLOB_RECURSE src/game/client
-    animstate.cpp
-    animstate.h
-    component.cpp
-    component.h
-    components/background.cpp
-    components/background.h
-    components/binds.cpp
-    components/binds.h
-    components/broadcast.cpp
-    components/broadcast.h
-    components/camera.cpp
-    components/camera.h
-    components/chat.cpp
-    components/chat.h
-    components/console.cpp
-    components/console.h
-    components/controls.cpp
-    components/controls.h
-    components/countryflags.cpp
-    components/countryflags.h
-    components/damageind.cpp
-    components/damageind.h
-    components/debughud.cpp
-    components/debughud.h
-    components/effects.cpp
-    components/effects.h
-    components/emoticon.cpp
-    components/emoticon.h
-    components/flow.cpp
-    components/flow.h
-    components/freezebars.cpp
-    components/freezebars.h
-    components/ghost.cpp
-    components/ghost.h
-    components/hud.cpp
-    components/hud.h
-    components/infomessages.cpp
-    components/infomessages.h
-    components/items.cpp
-    components/items.h
-    components/mapimages.cpp
-    components/mapimages.h
-    components/maplayers.cpp
-    components/maplayers.h
-    components/mapsounds.cpp
-    components/mapsounds.h
-    components/menu_background.cpp
-    components/menu_background.h
-    components/menus.cpp
-    components/menus.h
-    components/menus_browser.cpp
-    components/menus_demo.cpp
-    components/menus_ingame.cpp
-    components/menus_settings.cpp
-    components/menus_settings7.cpp
-    components/menus_settings_assets.cpp
-    components/menus_start.cpp
-    components/motd.cpp
-    components/motd.h
-    components/nameplates.cpp
-    components/nameplates.h
-    components/particles.cpp
-    components/particles.h
-    components/players.cpp
-    components/players.h
-    components/race_demo.cpp
-    components/race_demo.h
-    components/scoreboard.cpp
-    components/scoreboard.h
-    components/skins.cpp
-    components/skins.h
-    components/skins7.cpp
-    components/skins7.h
-    components/sounds.cpp
-    components/sounds.h
-    components/spectator.cpp
-    components/spectator.h
-    components/statboard.cpp
-    components/statboard.h
-    components/tooltips.cpp
-    components/tooltips.h
-    components/touch_controls.cpp
-    components/touch_controls.h
-    components/voting.cpp
-    components/voting.h
-    gameclient.cpp
-    gameclient.h
-    laser_data.cpp
-    laser_data.h
-    lineinput.cpp
-    lineinput.h
-    pickup_data.cpp
-    pickup_data.h
-    prediction/entities/character.cpp
-    prediction/entities/character.h
-    prediction/entities/dragger.cpp
-    prediction/entities/dragger.h
-    prediction/entities/laser.cpp
-    prediction/entities/laser.h
-    prediction/entities/pickup.cpp
-    prediction/entities/pickup.h
-    prediction/entities/projectile.cpp
-    prediction/entities/projectile.h
-    prediction/entity.cpp
-    prediction/entity.h
-    prediction/gameworld.cpp
-    prediction/gameworld.h
-    projectile_data.cpp
-    projectile_data.h
-    race.cpp
-    race.h
-    render.cpp
-    render.h
-    render_map.cpp
-    sixup_translate_connless.cpp
-    sixup_translate_game.cpp
-    sixup_translate_snapshot.cpp
-    skin.h
-    ui.cpp
-    ui.h
-    ui_listbox.cpp
-    ui_listbox.h
-    ui_rect.cpp
-    ui_rect.h
-    ui_scrollregion.cpp
-    ui_scrollregion.h
+          animstate.cpp
+          animstate.h
+          component.cpp
+          component.h
+          components/comp_pulse/menus_pulse.cpp
+          components/background.cpp
+          components/background.h
+          components/binds.cpp
+          components/binds.h
+          components/broadcast.cpp
+          components/broadcast.h
+          components/camera.cpp
+          components/camera.h
+          components/chat.cpp
+          components/chat.h
+          components/console.cpp
+          components/console.h
+          components/controls.cpp
+          components/controls.h
+          components/countryflags.cpp
+          components/countryflags.h
+          components/damageind.cpp
+          components/damageind.h
+          components/debughud.cpp
+          components/debughud.h
+          components/effects.cpp
+          components/effects.h
+          components/emoticon.cpp
+          components/emoticon.h
+          components/flow.cpp
+          components/flow.h
+          components/freezebars.cpp
+          components/freezebars.h
+          components/ghost.cpp
+          components/ghost.h
+          components/hud.cpp
+          components/hud.h
+          components/infomessages.cpp
+          components/infomessages.h
+          components/items.cpp
+          components/items.h
+          components/mapimages.cpp
+          components/mapimages.h
+          components/maplayers.cpp
+          components/maplayers.h
+          components/mapsounds.cpp
+          components/mapsounds.h
+          components/menu_background.cpp
+          components/menu_background.h
+          components/menus.cpp
+          components/menus.h
+          components/menus_browser.cpp
+          components/menus_demo.cpp
+          components/menus_ingame.cpp
+          components/menus_settings.cpp
+          components/menus_settings7.cpp
+          components/menus_settings_assets.cpp
+          components/menus_start.cpp
+          components/motd.cpp
+          components/motd.h
+          components/nameplates.cpp
+          components/nameplates.h
+          components/particles.cpp
+          components/particles.h
+          components/players.cpp
+          components/players.h
+          components/race_demo.cpp
+          components/race_demo.h
+          components/scoreboard.cpp
+          components/scoreboard.h
+          components/skins.cpp
+          components/skins.h
+          components/skins7.cpp
+          components/skins7.h
+          components/sounds.cpp
+          components/sounds.h
+          components/spectator.cpp
+          components/spectator.h
+          components/statboard.cpp
+          components/statboard.h
+          components/tooltips.cpp
+          components/tooltips.h
+          components/touch_controls.cpp
+          components/touch_controls.h
+          components/voting.cpp
+          components/voting.h
+          gameclient.cpp
+          gameclient.h
+          laser_data.cpp
+          laser_data.h
+          lineinput.cpp
+          lineinput.h
+          pickup_data.cpp
+          pickup_data.h
+          prediction/entities/character.cpp
+          prediction/entities/character.h
+          prediction/entities/dragger.cpp
+          prediction/entities/dragger.h
+          prediction/entities/laser.cpp
+          prediction/entities/laser.h
+          prediction/entities/pickup.cpp
+          prediction/entities/pickup.h
+          prediction/entities/projectile.cpp
+          prediction/entities/projectile.h
+          prediction/entity.cpp
+          prediction/entity.h
+          prediction/gameworld.cpp
+          prediction/gameworld.h
+          projectile_data.cpp
+          projectile_data.h
+          race.cpp
+          race.h
+          render.cpp
+          render.h
+          render_map.cpp
+          sixup_translate_game.cpp
+          sixup_translate_connless.cpp
+          sixup_translate_snapshot.cpp
+          skin.h
+          ui.cpp
+          ui.h
+          ui_listbox.cpp
+          ui_listbox.h
+          ui_rect.cpp
+          ui_rect.h
+          ui_scrollregion.cpp
+          ui_scrollregion.h
   )
   set_src(GAME_EDITOR GLOB_RECURSE src/game/editor
-    auto_map.cpp
-    auto_map.h
-    component.cpp
-    component.h
-    editor.cpp
-    editor.h
-    editor_action.h
-    editor_actions.cpp
-    editor_actions.h
-    editor_history.cpp
-    editor_history.h
-    editor_object.cpp
-    editor_object.h
-    editor_props.cpp
-    editor_server_settings.cpp
-    editor_server_settings.h
-    editor_trackers.cpp
-    editor_trackers.h
-    editor_ui.h
-    enums.h
-    explanations.cpp
-    layer_selector.cpp
-    layer_selector.h
-    map_grid.cpp
-    map_grid.h
-    map_view.cpp
-    map_view.h
-    mapitems.h
-    mapitems/envelope.cpp
-    mapitems/envelope.h
-    mapitems/image.cpp
-    mapitems/image.h
-    mapitems/layer.h
-    mapitems/layer_front.cpp
-    mapitems/layer_front.h
-    mapitems/layer_game.cpp
-    mapitems/layer_game.h
-    mapitems/layer_group.cpp
-    mapitems/layer_group.h
-    mapitems/layer_quads.cpp
-    mapitems/layer_quads.h
-    mapitems/layer_sounds.cpp
-    mapitems/layer_sounds.h
-    mapitems/layer_speedup.cpp
-    mapitems/layer_speedup.h
-    mapitems/layer_switch.cpp
-    mapitems/layer_switch.h
-    mapitems/layer_tele.cpp
-    mapitems/layer_tele.h
-    mapitems/layer_tiles.cpp
-    mapitems/layer_tiles.h
-    mapitems/layer_tune.cpp
-    mapitems/layer_tune.h
-    mapitems/map.cpp
-    mapitems/map_io.cpp
-    mapitems/sound.cpp
-    mapitems/sound.h
-    popups.cpp
-    prompt.cpp
-    prompt.h
-    proof_mode.cpp
-    proof_mode.h
-    quick_action.h
-    quick_actions.cpp
-    quick_actions.h
-    smooth_value.cpp
-    smooth_value.h
-    tileart.cpp
+          auto_map.cpp
+          auto_map.h
+          component.cpp
+          component.h
+          editor.cpp
+          editor.h
+          editor_action.h
+          editor_actions.cpp
+          editor_actions.h
+          editor_history.cpp
+          editor_history.h
+          editor_object.cpp
+          editor_object.h
+          editor_props.cpp
+          editor_server_settings.cpp
+          editor_server_settings.h
+          editor_trackers.cpp
+          editor_trackers.h
+          editor_ui.h
+          enums.h
+          explanations.cpp
+          layer_selector.cpp
+          layer_selector.h
+          map_grid.cpp
+          map_grid.h
+          map_view.cpp
+          map_view.h
+          mapitems.h
+          mapitems/envelope.cpp
+          mapitems/envelope.h
+          mapitems/image.cpp
+          mapitems/image.h
+          mapitems/layer.h
+          mapitems/layer_front.cpp
+          mapitems/layer_front.h
+          mapitems/layer_game.cpp
+          mapitems/layer_game.h
+          mapitems/layer_group.cpp
+          mapitems/layer_group.h
+          mapitems/layer_quads.cpp
+          mapitems/layer_quads.h
+          mapitems/layer_sounds.cpp
+          mapitems/layer_sounds.h
+          mapitems/layer_speedup.cpp
+          mapitems/layer_speedup.h
+          mapitems/layer_switch.cpp
+          mapitems/layer_switch.h
+          mapitems/layer_tele.cpp
+          mapitems/layer_tele.h
+          mapitems/layer_tiles.cpp
+          mapitems/layer_tiles.h
+          mapitems/layer_tune.cpp
+          mapitems/layer_tune.h
+          mapitems/map.cpp
+          mapitems/map_io.cpp
+          mapitems/sound.cpp
+          mapitems/sound.h
+          popups.cpp
+          prompt.cpp
+          prompt.h
+          proof_mode.cpp
+          proof_mode.h
+          quick_action.h
+          quick_actions.cpp
+          quick_actions.h
+          smooth_value.cpp
+          smooth_value.h
+          tileart.cpp
   )
   set(GAME_GENERATED_CLIENT
-    src/game/generated/checksum.cpp
-    src/game/generated/client_data.cpp
-    src/game/generated/client_data.h
-    src/game/generated/client_data7.cpp
-    src/game/generated/client_data7.h
+          src/game/generated/checksum.cpp
+          src/game/generated/client_data.cpp
+          src/game/generated/client_data.h
+          src/game/generated/client_data7.cpp
+          src/game/generated/client_data7.h
   )
   set(CLIENT_SRC ${ENGINE_CLIENT} ${PLATFORM_CLIENT} ${GAME_CLIENT} ${GAME_EDITOR} ${GAME_GENERATED_CLIENT})
 
@@ -2532,25 +2363,24 @@ if(CLIENT)
 
   # Libraries
   set(LIBS_CLIENT
-    ${FREETYPE_LIBRARIES}
-    ${GLEW_LIBRARIES}
-    ${PNG_LIBRARIES}
-    ${SDL2_LIBRARIES}
-    ${WAVPACK_LIBRARIES}
-    ${FFMPEG_LIBRARIES}
+          ${FREETYPE_LIBRARIES}
+          ${GLEW_LIBRARIES}
+          ${PNG_LIBRARIES}
+          ${SDL2_LIBRARIES}
+          ${WAVPACK_LIBRARIES}
+          ${FFMPEG_LIBRARIES}
 
-    # Order of these three is important.
-    ${OPUSFILE_LIBRARIES}
-    ${OPUS_LIBRARIES}
-    ${OGG_LIBRARIES}
+          # Order of these three is important.
+          ${OPUSFILE_LIBRARIES}
+          ${OPUS_LIBRARIES}
+          ${OGG_LIBRARIES}
 
-    ${VULKAN_LIBRARIES}
+          ${VULKAN_LIBRARIES}
 
     ${TARGET_STEAMAPI}
-    rust_engine_shared
 
-    ${PLATFORM_CLIENT_LIBS}
-    ${LIBS}
+          ${PLATFORM_CLIENT_LIBS}
+          ${LIBS}
   )
 
   if(DISCORD)
@@ -2585,7 +2415,6 @@ if(CLIENT)
       $<TARGET_OBJECTS:engine-gfx>
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
-      $<TARGET_OBJECTS:rust-bridge-shared>
     )
   else()
     add_executable(game-client WIN32
@@ -2596,11 +2425,10 @@ if(CLIENT)
       $<TARGET_OBJECTS:engine-gfx>
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
-      $<TARGET_OBJECTS:rust-bridge-shared>
     )
   endif()
   set_property(TARGET game-client
-      PROPERTY OUTPUT_NAME ${CLIENT_EXECUTABLE}
+          PROPERTY OUTPUT_NAME ${CLIENT_EXECUTABLE}
   )
   target_link_libraries(game-client ${LIBS_CLIENT})
 
@@ -2609,20 +2437,20 @@ if(CLIENT)
   endif()
 
   target_include_directories(game-client SYSTEM PRIVATE
-    ${FREETYPE_INCLUDE_DIRS}
-    ${GLEW_INCLUDE_DIRS}
-    ${OGG_INCLUDE_DIRS}
-    ${OPUSFILE_INCLUDE_DIRS}
-    ${OPUS_INCLUDE_DIRS}
-    ${PNG_INCLUDE_DIRS}
-    ${SDL2_INCLUDE_DIRS}
-    ${WAVPACK_INCLUDE_DIRS}
-    ${FFMPEG_INCLUDE_DIRS}
-    ${DISCORDSDK_INCLUDE_DIRS}
+          ${FREETYPE_INCLUDE_DIRS}
+          ${GLEW_INCLUDE_DIRS}
+          ${OGG_INCLUDE_DIRS}
+          ${OPUSFILE_INCLUDE_DIRS}
+          ${OPUS_INCLUDE_DIRS}
+          ${PNG_INCLUDE_DIRS}
+          ${SDL2_INCLUDE_DIRS}
+          ${WAVPACK_INCLUDE_DIRS}
+          ${FFMPEG_INCLUDE_DIRS}
+          ${DISCORDSDK_INCLUDE_DIRS}
 
-    ${VULKAN_INCLUDE_DIRS}
+          ${VULKAN_INCLUDE_DIRS}
 
-    ${PLATFORM_CLIENT_INCLUDE_DIRS}
+          ${PLATFORM_CLIENT_INCLUDE_DIRS}
   )
 
   if(STEAMAPI_KIND STREQUAL SHARED OR DISCORD_DYNAMIC)
@@ -2670,94 +2498,94 @@ endif()
 if(SERVER)
   # Sources
   set_src(ANTIBOT_SRC GLOB src/antibot
-    antibot_data.h
-    antibot_interface.h
-    antibot_null.cpp
+          antibot_data.h
+          antibot_interface.h
+          antibot_null.cpp
   )
 
   set_src(ENGINE_SERVER GLOB_RECURSE src/engine/server
-    antibot.cpp
-    antibot.h
-    authmanager.cpp
-    authmanager.h
-    databases/connection.cpp
-    databases/connection.h
-    databases/connection_pool.cpp
-    databases/connection_pool.h
-    databases/mysql.cpp
-    databases/sqlite.cpp
-    main.cpp
-    name_ban.cpp
-    name_ban.h
-    register.cpp
-    register.h
-    server.cpp
-    server.h
-    server_logger.cpp
-    server_logger.h
-    snap_id_pool.cpp
-    snap_id_pool.h
-    sql_string_helpers.cpp
-    sql_string_helpers.h
-    upnp.cpp
-    upnp.h
+          antibot.cpp
+          antibot.h
+          authmanager.cpp
+          authmanager.h
+          databases/connection.cpp
+          databases/connection.h
+          databases/connection_pool.cpp
+          databases/connection_pool.h
+          databases/mysql.cpp
+          databases/sqlite.cpp
+          main.cpp
+          name_ban.cpp
+          name_ban.h
+          register.cpp
+          register.h
+          server.cpp
+          server.h
+          server_logger.cpp
+          server_logger.h
+          snap_id_pool.cpp
+          snap_id_pool.h
+          sql_string_helpers.cpp
+          sql_string_helpers.h
+          upnp.cpp
+          upnp.h
   )
   set_src(GAME_SERVER GLOB_RECURSE src/game/server
-    ddracechat.cpp
-    ddracecommands.cpp
-    entities/character.cpp
-    entities/character.h
-    entities/door.cpp
-    entities/door.h
-    entities/dragger.cpp
-    entities/dragger.h
-    entities/dragger_beam.cpp
-    entities/dragger_beam.h
-    entities/gun.cpp
-    entities/gun.h
-    entities/laser.cpp
-    entities/laser.h
-    entities/light.cpp
-    entities/light.h
-    entities/pickup.cpp
-    entities/pickup.h
-    entities/plasma.cpp
-    entities/plasma.h
-    entities/projectile.cpp
-    entities/projectile.h
-    entity.cpp
-    entity.h
-    eventhandler.cpp
-    eventhandler.h
-    gamecontext.cpp
-    gamecontext.h
-    gamecontroller.cpp
-    gamecontroller.h
-    gamemodes/DDRace.cpp
-    gamemodes/DDRace.h
-    gamemodes/mod.cpp
-    gamemodes/mod.h
-    gameworld.cpp
-    gameworld.h
-    player.cpp
-    player.h
-    save.cpp
-    save.h
-    score.cpp
-    score.h
-    scoreworker.cpp
-    scoreworker.h
-    teams.cpp
-    teams.h
-    teehistorian.cpp
-    teehistorian.h
-    teeinfo.cpp
-    teeinfo.h
+          ddracechat.cpp
+          ddracecommands.cpp
+          entities/character.cpp
+          entities/character.h
+          entities/door.cpp
+          entities/door.h
+          entities/dragger.cpp
+          entities/dragger.h
+          entities/dragger_beam.cpp
+          entities/dragger_beam.h
+          entities/gun.cpp
+          entities/gun.h
+          entities/laser.cpp
+          entities/laser.h
+          entities/light.cpp
+          entities/light.h
+          entities/pickup.cpp
+          entities/pickup.h
+          entities/plasma.cpp
+          entities/plasma.h
+          entities/projectile.cpp
+          entities/projectile.h
+          entity.cpp
+          entity.h
+          eventhandler.cpp
+          eventhandler.h
+          gamecontext.cpp
+          gamecontext.h
+          gamecontroller.cpp
+          gamecontroller.h
+          gamemodes/DDRace.cpp
+          gamemodes/DDRace.h
+          gamemodes/mod.cpp
+          gamemodes/mod.h
+          gameworld.cpp
+          gameworld.h
+          player.cpp
+          player.h
+          save.cpp
+          save.h
+          score.cpp
+          score.h
+          scoreworker.cpp
+          scoreworker.h
+          teams.cpp
+          teams.h
+          teehistorian.cpp
+          teehistorian.h
+          teeinfo.cpp
+          teeinfo.h
   )
   set(GAME_GENERATED_SERVER
-    "src/game/generated/server_data.cpp"
-    "src/game/generated/server_data.h"
-    "src/game/generated/wordlist.h"
+          "src/game/generated/server_data.cpp"
+          "src/game/generated/server_data.h"
+          "src/game/generated/wordlist.h"
   )
   set(SERVER_SRC ${ENGINE_SERVER} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
   if(TARGET_OS STREQUAL "windows")
@@ -2778,9 +2606,8 @@ if(SERVER)
     ${MINIUPNPC_LIBRARIES}
     ${MYSQL_LIBRARIES}
     ${TARGET_ANTIBOT}
-    rust_engine_shared
 
-    ${LIBS}
+          ${LIBS}
   )
 
   # Target
@@ -2791,7 +2618,6 @@ if(SERVER)
       ${SERVER_ICON}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
-      $<TARGET_OBJECTS:rust-bridge-shared>
     )
   else()
     add_executable(game-server
@@ -2800,11 +2626,10 @@ if(SERVER)
       ${SERVER_ICON}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
-      $<TARGET_OBJECTS:rust-bridge-shared>
     )
   endif()
   set_property(TARGET game-server
-      PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
+          PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
   )
   target_link_libraries(game-server ${LIBS_SERVER})
   target_include_directories(game-server PRIVATE ${PNG_INCLUDE_DIRS})
@@ -2815,7 +2640,7 @@ if(SERVER)
     set(SERVER_LAUNCHER_SRC src/macos/server.mm)
     add_executable(game-server-launcher ${SERVER_LAUNCHER_SRC})
     set_property(TARGET game-server-launcher
-        PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}-Launcher
+            PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}-Launcher
     )
     target_link_libraries(game-server-launcher ${COCOA})
     list(APPEND TARGETS_OWN game-server-launcher)
@@ -2843,27 +2668,27 @@ endif()
 if(TOOLS)
   set(TARGETS_TOOLS)
   set_src(TOOLS_SRC GLOB src/tools
-    config_common.h
-    config_retrieve.cpp
-    config_store.cpp
-    crapnet.cpp
-    demo_extract_chat.cpp
-    dilate.cpp
-    dummy_map.cpp
-    map_convert_07.cpp
-    map_create_pixelart.cpp
-    map_diff.cpp
-    map_extract.cpp
-    map_find_env.cpp
-    map_optimize.cpp
-    map_replace_area.cpp
-    map_replace_image.cpp
-    map_resave.cpp
-    packetgen.cpp
-    stun.cpp
-    twping.cpp
-    unicode_confusables.cpp
-    uuid.cpp
+          config_common.h
+          config_retrieve.cpp
+          config_store.cpp
+          crapnet.cpp
+          demo_extract_chat.cpp
+          dilate.cpp
+          dummy_map.cpp
+          map_convert_07.cpp
+          map_create_pixelart.cpp
+          map_diff.cpp
+          map_extract.cpp
+          map_find_env.cpp
+          map_optimize.cpp
+          map_replace_area.cpp
+          map_replace_image.cpp
+          map_resave.cpp
+          packetgen.cpp
+          stun.cpp
+          twping.cpp
+          unicode_confusables.cpp
+          uuid.cpp
   )
   foreach(ABS_T ${TOOLS_SRC})
     file(RELATIVE_PATH T "${PROJECT_SOURCE_DIR}/src/tools/" ${ABS_T})
@@ -2885,11 +2710,11 @@ if(TOOLS)
         set(EXCLUDE_FROM_ALL EXCLUDE_FROM_ALL)
       endif()
       add_executable(${TOOL} ${EXCLUDE_FROM_ALL}
-        ${TOOL_DEPS}
-        src/tools/${TOOL}.cpp
-        ${EXTRA_TOOL_SRC}
-        $<TARGET_OBJECTS:engine-shared>
-        $<TARGET_OBJECTS:game-shared>
+              ${TOOL_DEPS}
+              src/tools/${TOOL}.cpp
+              ${EXTRA_TOOL_SRC}
+              $<TARGET_OBJECTS:engine-shared>
+              $<TARGET_OBJECTS:game-shared>
       )
       target_include_directories(${TOOL} SYSTEM PRIVATE ${TOOL_INCLUDE_DIRS})
       target_link_libraries(${TOOL} ${TOOL_LIBS})
@@ -2913,25 +2738,25 @@ if(DEV)
   set(CHECKSUM_SRC)
 endif()
 list(APPEND CHECKSUM_SRC
-  ${PROJECT_SOURCE_DIR}/CMakeLists.txt
-  ${PROJECT_SOURCE_DIR}/scripts/checksum.py
+        ${PROJECT_SOURCE_DIR}/CMakeLists.txt
+        ${PROJECT_SOURCE_DIR}/scripts/checksum.py
 )
 configure_file(cmake/checksummed_extra.txt checksummed_extra.txt)
 string(REPLACE ";" "\n" CHECKSUM_SRC_FILE "${CHECKSUM_SRC}")
 file(WRITE ${PROJECT_BINARY_DIR}/checksummed_files.txt ${CHECKSUM_SRC_FILE})
 
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
-  COMMAND ${Python3_EXECUTABLE}
-    scripts/checksum.py
-    ${PROJECT_BINARY_DIR}/checksummed_files.txt
-    ${PROJECT_BINARY_DIR}/checksummed_extra.txt
-    > ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  DEPENDS
-    ${CHECKSUM_SRC}
-    ${PROJECT_BINARY_DIR}/checksummed_files.txt
-    ${PROJECT_BINARY_DIR}/checksummed_extra.txt
-    scripts/checksum.py
+        COMMAND ${Python3_EXECUTABLE}
+        scripts/checksum.py
+        ${PROJECT_BINARY_DIR}/checksummed_files.txt
+        ${PROJECT_BINARY_DIR}/checksummed_extra.txt
+        > ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        DEPENDS
+        ${CHECKSUM_SRC}
+        ${PROJECT_BINARY_DIR}/checksummed_files.txt
+        ${PROJECT_BINARY_DIR}/checksummed_extra.txt
+        scripts/checksum.py
 )
 
 ########################################################################
@@ -2940,81 +2765,81 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
 
 if(GTEST_FOUND OR DOWNLOAD_GTEST)
   set_src(TESTS GLOB src/test
-    aio.cpp
-    bezier.cpp
-    blocklist_driver.cpp
-    bytes_be.cpp
-    color.cpp
-    compression.cpp
-    csv.cpp
-    datafile.cpp
-    editor.cpp
-    fs.cpp
-    git_revision.cpp
-    hash.cpp
-    huffman.cpp
-    io.cpp
-    jobs.cpp
-    json.cpp
-    jsonwriter.cpp
-    linereader.cpp
-    mapbugs.cpp
-    math.cpp
-    memory.cpp
-    name_ban.cpp
-    net.cpp
-    netaddr.cpp
-    os.cpp
-    packer.cpp
-    prng.cpp
-    score.cpp
-    secure_random.cpp
-    serverbrowser.cpp
-    serverinfo.cpp
-    snapshot.cpp
-    str.cpp
-    strip_path_and_extension.cpp
-    swap_endian.cpp
-    teehistorian.cpp
-    test.cpp
-    test.h
-    thread.cpp
-    timestamp.cpp
-    unix.cpp
-    uuid.cpp
+          aio.cpp
+          bezier.cpp
+          blocklist_driver.cpp
+          bytes_be.cpp
+          color.cpp
+          compression.cpp
+          csv.cpp
+          datafile.cpp
+          editor.cpp
+          fs.cpp
+          git_revision.cpp
+          hash.cpp
+          huffman.cpp
+          io.cpp
+          jobs.cpp
+          json.cpp
+          jsonwriter.cpp
+          linereader.cpp
+          mapbugs.cpp
+          math.cpp
+          memory.cpp
+          name_ban.cpp
+          net.cpp
+          netaddr.cpp
+          os.cpp
+          packer.cpp
+          prng.cpp
+          score.cpp
+          secure_random.cpp
+          serverbrowser.cpp
+          serverinfo.cpp
+          snapshot.cpp
+          str.cpp
+          strip_path_and_extension.cpp
+          swap_endian.cpp
+          teehistorian.cpp
+          test.cpp
+          test.h
+          thread.cpp
+          timestamp.cpp
+          unix.cpp
+          uuid.cpp
   )
   set(TESTS_EXTRA
-    src/engine/client/blocklist_driver.cpp
-    src/engine/client/blocklist_driver.h
-    src/engine/client/serverbrowser.cpp
-    src/engine/client/serverbrowser.h
-    src/engine/client/serverbrowser_http.cpp
-    src/engine/client/serverbrowser_http.h
-    src/engine/client/serverbrowser_ping_cache.cpp
-    src/engine/client/serverbrowser_ping_cache.h
-    src/engine/client/sqlite.cpp
-    src/engine/server/databases/connection.cpp
-    src/engine/server/databases/connection.h
-    src/engine/server/databases/sqlite.cpp
-    src/engine/server/databases/mysql.cpp
-    src/engine/server/name_ban.cpp
-    src/engine/server/name_ban.h
-    src/engine/server/sql_string_helpers.cpp
-    src/engine/server/sql_string_helpers.h
-    src/game/server/teehistorian.cpp
-    src/game/server/teehistorian.h
-    src/game/server/scoreworker.cpp
-    src/game/server/scoreworker.h
+          src/engine/client/blocklist_driver.cpp
+          src/engine/client/blocklist_driver.h
+          src/engine/client/serverbrowser.cpp
+          src/engine/client/serverbrowser.h
+          src/engine/client/serverbrowser_http.cpp
+          src/engine/client/serverbrowser_http.h
+          src/engine/client/serverbrowser_ping_cache.cpp
+          src/engine/client/serverbrowser_ping_cache.h
+          src/engine/client/sqlite.cpp
+          src/engine/server/databases/connection.cpp
+          src/engine/server/databases/connection.h
+          src/engine/server/databases/sqlite.cpp
+          src/engine/server/databases/mysql.cpp
+          src/engine/server/name_ban.cpp
+          src/engine/server/name_ban.h
+          src/engine/server/sql_string_helpers.cpp
+          src/engine/server/sql_string_helpers.h
+          src/game/server/teehistorian.cpp
+          src/game/server/teehistorian.h
+          src/game/server/scoreworker.cpp
+          src/game/server/scoreworker.h
   )
 
   set(TARGET_TESTRUNNER testrunner)
   add_executable(${TARGET_TESTRUNNER} EXCLUDE_FROM_ALL
-    ${TESTS}
-    ${TESTS_EXTRA}
-    $<TARGET_OBJECTS:engine-gfx>
-    $<TARGET_OBJECTS:engine-shared>
-    $<TARGET_OBJECTS:game-shared>
-    ${DEPS}
+          ${TESTS}
+          ${TESTS_EXTRA}
+          $<TARGET_OBJECTS:engine-gfx>
+          $<TARGET_OBJECTS:engine-shared>
+          $<TARGET_OBJECTS:game-shared>
+          ${DEPS}
   )
   target_link_libraries(${TARGET_TESTRUNNER} ${MYSQL_LIBRARIES} ${PNG_LIBRARIES} ${GTEST_LIBRARIES} ${LIBS})
   target_include_directories(${TARGET_TESTRUNNER} SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
@@ -3023,50 +2848,21 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
   list(APPEND TARGETS_LINK ${TARGET_TESTRUNNER})
 
   add_custom_target(run_cxx_tests
-    COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> ${TESTRUNNER_ARGS}
-    COMMENT Running unit tests
-    DEPENDS ${TARGET_TESTRUNNER}
-    USES_TERMINAL
+          COMMAND $<TARGET_FILE:${TARGET_TESTRUNNER}> ${TESTRUNNER_ARGS}
+          COMMENT Running unit tests
+          DEPENDS ${TARGET_TESTRUNNER}
+          USES_TERMINAL
   )
   add_custom_target(run_tests
-    DEPENDS run_cxx_tests
+          DEPENDS run_cxx_tests
   )
-  if(NOT MSVC OR CMAKE_BUILD_TYPE STREQUAL Release)
-    # On MSVC, Rust tests only work in the release mode because we link our C++
-    # code with the debug C standard library (/MTd) but Rust only supports
-    # linking to the release C standard library (/MT).
-    #
-    # See also https://github.com/rust-lang/rust/issues/39016.
-    add_dependencies(run_tests run_rust_tests)
-  endif()
 endif()
 
-add_library(rust_test STATIC EXCLUDE_FROM_ALL
-  $<TARGET_OBJECTS:engine-gfx>
-  $<TARGET_OBJECTS:engine-shared>
-  $<TARGET_OBJECTS:game-shared>
-  $<TARGET_OBJECTS:rust-bridge-shared>
-  ${DEPS}
-)
-
-list(APPEND TARGETS_OWN rust_test)
-list(APPEND TARGETS_LINK rust_test)
-
-set(RUST_TEST_LIBS ${LIBS} $<TARGET_FILE:rust_test>)
-list(REMOVE_ITEM RUST_TEST_LIBS "-pthread")
-add_custom_target(run_rust_tests
-  COMMAND ${CMAKE_COMMAND} -E env "DDNET_TEST_LIBRARIES=${RUST_TEST_LIBS}" ${CARGO_TEST}
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-  USES_TERMINAL
-  DEPENDS rust_test
-  VERBATIM
-)
-
 add_custom_target(run_integration_tests
-  COMMAND ${PROJECT_BINARY_DIR}/integration_test.sh ${INTEGRATIONTESTRUNNER_ARGS}
-  COMMENT Running integration tests
-  DEPENDS game-client game-server
-  USES_TERMINAL
+        COMMAND ${PROJECT_BINARY_DIR}/integration_test.sh ${INTEGRATIONTESTRUNNER_ARGS}
+        COMMENT Running integration tests
+        DEPENDS game-client game-server
+        USES_TERMINAL
 )
 
 ########################################################################
@@ -3164,9 +2960,9 @@ if(TARGET_OS AND TARGET_BITS)
     # Let compiler tell its arch
     # Both gcc and clang support -dumpmachine
     execute_process(
-      COMMAND ${CMAKE_C_COMPILER} -dumpmachine
-      OUTPUT_VARIABLE ARCHITECTURE_TUPLE
-      OUTPUT_STRIP_TRAILING_WHITESPACE
+            COMMAND ${CMAKE_C_COMPILER} -dumpmachine
+            OUTPUT_VARIABLE ARCHITECTURE_TUPLE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     if(NOT ARCHITECTURE_TUPLE)
       # If you're really using a weird compiler, then assume Intel here.
@@ -3193,26 +2989,26 @@ set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPA
 set(CPACK_ARCHIVE_PORTABLE_FILE_NAME ${CPACK_PACKAGE_FILE_NAME})
 set(CPACK_SOURCE_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-src)
 set(CPACK_SOURCE_FILES
-  CMakeLists.txt
-  README.md
-  cmake/
-  data/
-  datasrc/
-  ddnet-libs/
-  license.txt
-  lsan.supp
-  memcheck.supp
-  other/
-  scripts/
-  src/
-  storage.cfg
-  ubsan.supp
-  valgrind.supp
+        CMakeLists.txt
+        README.md
+        cmake/
+        data/
+        datasrc/
+        ddnet-libs/
+        license.txt
+        lsan.supp
+        memcheck.supp
+        other/
+        scripts/
+        src/
+        storage.cfg
+        ubsan.supp
+        valgrind.supp
 )
 set(CPACK_SOURCE_IGNORE_FILES
-  "\\\\.pyc$"
-  "/\\\\.git"
-  "/__pycache__/"
+        "\\\\.pyc$"
+        "/\\\\.git"
+        "/__pycache__/"
 )
 
 regex_inverted(CPACK_SOURCE_FILES_INVERTED ${CPACK_SOURCE_FILES})
@@ -3227,14 +3023,14 @@ set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME ${PROJECT_NAME})
 
 if(TOOLS)
   set(TARGET_TOOLS
-    config_retrieve
-    config_store
-    demo_extract_chat
-    dilate
-    map_convert_07
-    map_create_pixelart
-    map_diff
-    map_extract
+          config_retrieve
+          config_store
+          demo_extract_chat
+          dilate
+          map_convert_07
+          map_create_pixelart
+          map_diff
+          map_extract
   )
 else()
   set(TARGET_TOOLS)
@@ -3253,17 +3049,17 @@ if(STEAMAPI_KIND STREQUAL SHARED)
   list(APPEND CPACK_TARGETS ${TARGET_STEAMAPI})
 endif()
 set(CPACK_DIRS
-  data
-  ${COPY_DIRS}
+        data
+        ${COPY_DIRS}
 )
 set(CPACK_FILES
-  license.txt
-  storage.cfg
-  ${COPY_FILES}
+        license.txt
+        storage.cfg
+        ${COPY_FILES}
 )
 
 set(CPACK_GEN_FILES
-  ${VULKAN_SHADER_FILE_LIST}
+        ${VULKAN_SHADER_FILE_LIST}
 )
 
 if(TARGET_OS STREQUAL "windows")
@@ -3323,17 +3119,17 @@ if(CLIENT AND DMGBUILD)
 
   set(DMG_TMPDIR pack_${CPACK_PACKAGE_FILE_NAME}_dmg)
   set(DMG_MKDIRS
-    ${CLIENT_EXECUTABLE}.app
-    ${CLIENT_EXECUTABLE}.app/Contents
-    ${CLIENT_EXECUTABLE}.app/Contents/Frameworks
-    ${CLIENT_EXECUTABLE}.app/Contents/MacOS
-    ${CLIENT_EXECUTABLE}.app/Contents/Resources
-    ${SERVER_EXECUTABLE}.app
-    ${SERVER_EXECUTABLE}.app/Contents
-    ${SERVER_EXECUTABLE}.app/Contents/MacOS
-    ${SERVER_EXECUTABLE}.app/Contents/Resources
-    ${SERVER_EXECUTABLE}.app/Contents/Resources/data
-    ${SERVER_EXECUTABLE}.app/Contents/Resources/data/mapres
+          ${CLIENT_EXECUTABLE}.app
+          ${CLIENT_EXECUTABLE}.app/Contents
+          ${CLIENT_EXECUTABLE}.app/Contents/Frameworks
+          ${CLIENT_EXECUTABLE}.app/Contents/MacOS
+          ${CLIENT_EXECUTABLE}.app/Contents/Resources
+          ${SERVER_EXECUTABLE}.app
+          ${SERVER_EXECUTABLE}.app/Contents
+          ${SERVER_EXECUTABLE}.app/Contents/MacOS
+          ${SERVER_EXECUTABLE}.app/Contents/Resources
+          ${SERVER_EXECUTABLE}.app/Contents/Resources/data
+          ${SERVER_EXECUTABLE}.app/Contents/Resources/data/mapres
   )
   set(DMG_MKDIR_COMMANDS)
   foreach(dir ${DMG_MKDIRS})
@@ -3346,52 +3142,52 @@ if(CLIENT AND DMGBUILD)
   endforeach()
 
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.dmg
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${DMG_TMPDIR}
-    ${DMG_MKDIR_COMMANDS}
+          COMMAND ${CMAKE_COMMAND} -E remove_directory ${DMG_TMPDIR}
+          ${DMG_MKDIR_COMMANDS}
 
-    # CLIENT
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Resources/data
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${CLIENT_EXECUTABLE}.icns ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Resources/
-    COMMAND ${CMAKE_COMMAND} -E copy bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-client> ${TARGET_TOOLS_FILES} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/${LIB_DIR}/SDL2.framework ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/SDL2.framework
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/discord/${LIB_DIR}/discord_game_sdk.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/${LIB_DIR}/libfreetype.6.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/png/${LIB_DIR}/libpng16.16.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.61.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavformat.61.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.59.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswresample.5.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswscale.8.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libsteam_api.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
+          # CLIENT
+          COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Resources/data
+          COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${CLIENT_EXECUTABLE}.icns ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Resources/
+          COMMAND ${CMAKE_COMMAND} -E copy bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/
+          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-client> ${TARGET_TOOLS_FILES} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/
+          COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/${LIB_DIR}/SDL2.framework ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/SDL2.framework
+          COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/discord/${LIB_DIR}/discord_game_sdk.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+          COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/${LIB_DIR}/libfreetype.6.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+          COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/png/${LIB_DIR}/libpng16.16.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+          COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.61.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+          COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavformat.61.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+          COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.59.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+          COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswresample.5.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+          COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswscale.8.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+          COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libsteam_api.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+          COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
+          COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
 
-    # SERVER
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/data/maps
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${SERVER_EXECUTABLE}.icns ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/
-    COMMAND ${CMAKE_COMMAND} -E copy bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-server> $<TARGET_FILE:game-server-launcher> ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/
-    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
-    COMMAND ${CMAKE_COMMAND} -E copy ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
+          # SERVER
+          COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/data/maps
+          COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${SERVER_EXECUTABLE}.icns ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/
+          COMMAND ${CMAKE_COMMAND} -E copy bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/
+          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-server> $<TARGET_FILE:game-server-launcher> ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/
+          COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
+          COMMAND ${CMAKE_COMMAND} -E copy ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
 
-    # DMG
-    COMMAND dmgbuild -s ${PROJECT_SOURCE_DIR}/other/dmgsettings.py -D client=${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app -D server=${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app -D background=${PROJECT_SOURCE_DIR}/other/dmgbackground.png "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}" ${CPACK_PACKAGE_FILE_NAME}.dmg
+          # DMG
+          COMMAND dmgbuild -s ${PROJECT_SOURCE_DIR}/other/dmgsettings.py -D client=${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app -D server=${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app -D background=${PROJECT_SOURCE_DIR}/other/dmgbackground.png "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}" ${CPACK_PACKAGE_FILE_NAME}.dmg
 
-    DEPENDS
-      game-client
-      ${TARGET_STEAMAPI}
-      game-server-launcher
-      game-server
-      ${PROJECT_BINARY_DIR}/bundle/client/Info.plist
-      ${PROJECT_BINARY_DIR}/bundle/server/Info.plist
-      data
-      other/bundle/client/PkgInfo
-      other/bundle/server/PkgInfo
-      other/dmgbackground.png
-      other/dmgsettings.py
-      other/icons/${CLIENT_EXECUTABLE}.icns
-      other/icons/${SERVER_EXECUTABLE}.icns
+          DEPENDS
+          game-client
+          ${TARGET_STEAMAPI}
+          game-server-launcher
+          game-server
+          ${PROJECT_BINARY_DIR}/bundle/client/Info.plist
+          ${PROJECT_BINARY_DIR}/bundle/server/Info.plist
+          data
+          other/bundle/client/PkgInfo
+          other/bundle/server/PkgInfo
+          other/dmgbackground.png
+          other/dmgsettings.py
+          other/icons/${CLIENT_EXECUTABLE}.icns
+          other/icons/${SERVER_EXECUTABLE}.icns
   )
   add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
   list(APPEND PACKAGE_TARGETS package_dmg)
@@ -3432,14 +3228,14 @@ foreach(ext zip tar.gz tar.xz)
     set(TAR_MODE cJ)
   endif()
   add_custom_command(OUTPUT ${CPACK_PACKAGE_FILE_NAME}.${ext}
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${TMPDIR}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${TMPDIR}
-    ${COPY_FILE_COMMANDS}
-    ${COPY_DIR_COMMANDS}
-    ${COPY_TARGET_COMMANDS}
-    ${STRIP_TARGET_COMMANDS}
-    COMMAND ${CMAKE_COMMAND} -E chdir pack_${CPACK_PACKAGE_FILE_NAME}_${EXT_SLUG} ${CMAKE_COMMAND} -E tar ${TAR_MODE} ../${CPACK_PACKAGE_FILE_NAME}.${ext} ${TAR_EXTRA_ARGS} -- ${CPACK_PACKAGE_FILE_NAME}/
-    DEPENDS ${CPACK_TARGETS}
+          COMMAND ${CMAKE_COMMAND} -E remove_directory ${TMPDIR}
+          COMMAND ${CMAKE_COMMAND} -E make_directory ${TMPDIR}
+          ${COPY_FILE_COMMANDS}
+          ${COPY_DIR_COMMANDS}
+          ${COPY_TARGET_COMMANDS}
+          ${STRIP_TARGET_COMMANDS}
+          COMMAND ${CMAKE_COMMAND} -E chdir pack_${CPACK_PACKAGE_FILE_NAME}_${EXT_SLUG} ${CMAKE_COMMAND} -E tar ${TAR_MODE} ../${CPACK_PACKAGE_FILE_NAME}.${ext} ${TAR_EXTRA_ARGS} -- ${CPACK_PACKAGE_FILE_NAME}/
+          DEPENDS ${CPACK_TARGETS}
   )
   add_custom_target(package_${EXT_SLUG} DEPENDS ${CPACK_PACKAGE_FILE_NAME}.${ext})
   list(APPEND PACKAGE_TARGETS package_${EXT_SLUG})
@@ -3560,7 +3356,6 @@ foreach(target ${TARGETS_OWN})
   endif()
   target_include_directories(${target} PRIVATE ${PROJECT_BINARY_DIR}/src)
   target_include_directories(${target} PRIVATE src)
-  target_include_directories(${target} PRIVATE src/rust-bridge)
   target_compile_definitions(${target} PRIVATE $<$<CONFIG:Debug>:CONF_DEBUG>)
   target_include_directories(${target} SYSTEM PRIVATE ${CURL_INCLUDE_DIRS} ${SQLite3_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
   target_compile_definitions(${target} PRIVATE GLEW_STATIC)
@@ -3612,7 +3407,7 @@ foreach(target ${TARGETS_OWN})
     target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION="${VERSION}")
   endif()
   if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
-   target_compile_definitions(${target} PRIVATE CONF_WEBASM)
+    target_compile_definitions(${target} PRIVATE CONF_WEBASM)
   endif()
   if(TARGET_OS STREQUAL "android")
     if(ANDROID_PACKAGE_NAME)

@@ -5,7 +5,6 @@ Requirements:
 - clang-tidy
 - lldb
 - cmake
-- rustup (for the rust extension)
 Optional:
 - mold (linker), needs to be in PATH
 - ninja

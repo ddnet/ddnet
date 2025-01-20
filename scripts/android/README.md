@@ -3,7 +3,6 @@ Requirements for building for Android on Linux
 
 -	At least 10-15 GiB of free disk space.
 -	First follow the general instructions for setting up https://github.com/ddnet/ddnet for building on Linux.
--	Note: Use a stable version of Rust. Using the nightly version results in linking errors.
 -	Install the Android NDK (version 26) in the same location
 	where Android Studio would unpack it (`~/Android/Sdk/ndk/`):
 	```shell
@@ -42,14 +41,6 @@ Requirements for building for Android on Linux
 	mv cmdline-tools latest
 	yes | latest/bin/sdkmanager --licenses
 	```
--	Install cargo-ndk and add Android targets to rustup to build Rust with the Android NDK:
-	```shell
-	cargo install cargo-ndk
-	rustup target add armv7-linux-androideabi
-	rustup target add i686-linux-android
-	rustup target add aarch64-linux-android
-	rustup target add x86_64-linux-android
-	```
 -	Install OpenJDK 21:
 	```shell
 	sudo apt install openjdk-21-jdk
@@ -75,14 +66,6 @@ Requirements for building for Android on Windows using MSYS2
 -	At least 50 GiB of free disk space if you start from scratch.
 -	First install MSYS2 (https://www.msys2.org/wiki/MSYS2-installation/) as well as all required packages for building DDNet using MSYS2 on Windows.
 	(There is currently no more detailed guide for this.)
--	Install cargo-ndk and add Android targets to rustup to build Rust with the Android NDK:
-	```shell
-	cargo install cargo-ndk
-	rustup target add armv7-linux-androideabi
-	rustup target add i686-linux-android
-	rustup target add aarch64-linux-android
-	rustup target add x86_64-linux-android
-	```
 -	Install JDK 21, e.g. from https://adoptium.net/temurin/releases/?package=jdk&os=windows&version=21
 -	Install ninja:
 	```shell
