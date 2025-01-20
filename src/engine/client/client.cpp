@@ -42,6 +42,7 @@
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
+#include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
@@ -3783,6 +3784,44 @@ void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SaveReplay(g_Config.m_ClReplayLength);
 }
 
+void CClient::PulseSetAssets(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+
+	pSelf->LoadCustomConsole(g_Config.m_ClAssetConsole);
+}
+
+void CClient::LoadCustomConsole(const char *pPath)
+{
+	if(m_ConsoleSkinLoaded)
+	{
+		Graphics()->UnloadTexture(&m_ConsoleSkin.m_ConsoleTexture);
+		m_ConsoleSkinLoaded = false;
+	}
+
+	char aPath[IO_MAX_PATH_LENGTH];
+	if(str_comp(pPath, "default") == 0)
+	{
+		str_copy(aPath, g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_pFilename);
+	}
+	else
+	{
+		str_format(aPath, sizeof(aPath), "pulse/assets/console/%s.png", pPath);
+	}
+
+	dbg_msg("CustomConsole", "Loading image from path: %s", aPath);
+
+	auto TextureHandle = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL);
+	if(TextureHandle.IsNullTexture() || !TextureHandle.IsValid())
+	{
+		Graphics()->UnloadTexture(&TextureHandle);
+		return;
+	}
+
+	m_ConsoleSkin.m_ConsoleTexture = TextureHandle;
+	m_ConsoleSkinLoaded = true;
+}
+
 void CClient::SaveReplay(const int Length, const char *pFilename)
 {
 	if(!g_Config.m_ClReplays)
@@ -4444,6 +4483,8 @@ void CClient::RegisterCommands()
 
 	m_pConsole->Register("save_replay", "?i[length] ?r[filename]", CFGFLAG_CLIENT, Con_SaveReplay, this, "Save a replay of the last defined amount of seconds");
 	m_pConsole->Register("benchmark_quit", "i[seconds] r[file]", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_BenchmarkQuit, this, "Benchmark frame times for number of seconds to file, then quit");
+
+	m_pConsole->Register("p_console_reload", "", CFGFLAG_CLIENT, PulseSetAssets, this, "Path to .png or dir");
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 	m_pConsole->Chain("cl_replays", ConchainReplays, this);

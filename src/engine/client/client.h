@@ -394,6 +394,8 @@ public:
 
 	void Run();
 
+	void LoadCustomConsole(const char *pPath);
+
 	bool InitNetworkClient(char *pError, size_t ErrorSize);
 	bool CtrlShiftKey(int Key, bool &Last);
 
@@ -447,6 +449,8 @@ public:
 	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceEnd(IConsole::IResult *pResult, void *pUserData);
 	static void Con_SaveReplay(IConsole::IResult *pResult, void *pUserData);
+
+	static void PulseSetAssets(IConsole::IResult *pResult, void *pUserData);
 
 	void RegisterCommands();
 

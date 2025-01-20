@@ -105,6 +105,13 @@ protected:
 	int64_t m_ReconnectTime = 0;
 
 public:
+	struct SClientConsoleSkin
+	{
+		IGraphics::CTextureHandle m_ConsoleTexture;
+	};
+	SClientConsoleSkin m_ConsoleSkin = {};
+	bool m_ConsoleSkinLoaded = false;
+
 	class CSnapItem
 	{
 	public:
