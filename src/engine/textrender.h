@@ -95,6 +95,7 @@ MAYBE_UNUSED static const char *FONT_ICON_LIST_UL = "\xEF\x83\x8A";
 MAYBE_UNUSED static const char *FONT_ICON_INFO = "\xEF\x84\xA9";
 MAYBE_UNUSED static const char *FONT_ICON_TERMINAL = "\xEF\x84\xA0";
 
+MAYBE_UNUSED static const char *FONT_ICON_CIRCLE_CHEVRON_RIGHT = "\xEF\x84\xB8";
 MAYBE_UNUSED static const char *FONT_ICON_SLASH = "\xEF\x9C\x95";
 MAYBE_UNUSED static const char *FONT_ICON_PLAY = "\xEF\x81\x8B";
 MAYBE_UNUSED static const char *FONT_ICON_PAUSE = "\xEF\x81\x8C";

@@ -716,6 +716,7 @@ public:
 		SETTINGS_SOUND,
 		SETTINGS_DDNET,
 		SETTINGS_ASSETS,
+		SETTINGS_PULSE,
 
 		SETTINGS_LENGTH,
 
@@ -844,6 +845,9 @@ private:
 	void RenderSettingsDDNet(CUIRect MainView);
 	void RenderSettingsAppearance(CUIRect MainView);
 	bool RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight);
+
+	//pulse
+	void RenderSettingsPulse(CUIRect MainView);
 
 	CServerProcess m_ServerProcess;
 };
