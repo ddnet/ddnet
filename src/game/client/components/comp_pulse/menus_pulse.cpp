@@ -91,4 +91,6 @@ static CScrollRegion s_ScrollRegion;
 	});
 	s_ScrollRegion.AddRect(DebugGroup);
 	// Конец одной секции
+
+	s_ScrollRegion.End();
 }
