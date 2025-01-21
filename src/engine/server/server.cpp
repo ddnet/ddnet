@@ -71,7 +71,7 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 	if(Server()->m_RconClientId >= 0 && Server()->m_RconClientId < MAX_CLIENTS &&
 		Server()->m_aClients[Server()->m_RconClientId].m_State != CServer::CClient::STATE_EMPTY)
 	{
-		if(NetMatch(pData, Server()->m_NetServer.ClientAddr(Server()->m_RconClientId)))
+		if(NetMatch(pData, Server()->ClientAddr(Server()->m_RconClientId)))
 		{
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (you can't ban yourself)");
 			return -1;
@@ -82,7 +82,7 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 			if(i == Server()->m_RconClientId || Server()->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
 				continue;
 
-			if(Server()->m_aClients[i].m_Authed >= Server()->m_RconAuthLevel && NetMatch(pData, Server()->m_NetServer.ClientAddr(i)))
+			if(Server()->m_aClients[i].m_Authed >= Server()->m_RconAuthLevel && NetMatch(pData, Server()->ClientAddr(i)))
 			{
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (command denied)");
 				return -1;
@@ -96,7 +96,7 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 			if(Server()->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
 				continue;
 
-			if(Server()->m_aClients[i].m_Authed != AUTHED_NO && NetMatch(pData, Server()->m_NetServer.ClientAddr(i)))
+			if(Server()->m_aClients[i].m_Authed != AUTHED_NO && NetMatch(pData, Server()->ClientAddr(i)))
 			{
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (command denied)");
 				return -1;
@@ -115,7 +115,7 @@ int CServerBan::BanExt(T *pBanPool, const typename T::CDataType *pData, int Seco
 		if(Server()->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
 			continue;
 
-		if(NetMatch(&Data, Server()->m_NetServer.ClientAddr(i)))
+		if(NetMatch(&Data, Server()->ClientAddr(i)))
 		{
 			CNetHash NetHash(&Data);
 			char aBuf[256];
@@ -155,7 +155,7 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 		if(ClientId < 0 || ClientId >= MAX_CLIENTS || pThis->Server()->m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
 			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban error (invalid client id)");
 		else
-			pThis->BanAddr(pThis->Server()->m_NetServer.ClientAddr(ClientId), Minutes * 60, pReason, false);
+			pThis->BanAddr(pThis->Server()->ClientAddr(ClientId), Minutes * 60, pReason, false);
 	}
 	else
 		ConBan(pResult, pUser);
@@ -483,9 +483,7 @@ void CServer::Kick(int ClientId, const char *pReason)
 
 void CServer::Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason)
 {
-	NETADDR Addr;
-	GetClientAddr(ClientId, &Addr);
-	m_NetServer.NetBan()->BanAddr(&Addr, Seconds, pReason, VerbatimReason);
+	m_NetServer.NetBan()->BanAddr(ClientAddr(ClientId), Seconds, pReason, VerbatimReason);
 }
 
 void CServer::ReconnectClient(int ClientId)
@@ -633,11 +631,30 @@ void CServer::SetClientDDNetVersion(int ClientId, int DDNetVersion)
 	}
 }
 
-void CServer::GetClientAddr(int ClientId, char *pAddrStr, int Size) const
+const NETADDR *CServer::ClientAddr(int ClientId) const
 {
-	NETADDR Addr;
-	GetClientAddr(ClientId, &Addr);
-	net_addr_str(&Addr, pAddrStr, Size, false);
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
+#ifdef CONF_DEBUG
+	if(m_aClients[ClientId].m_DebugDummy)
+	{
+		return &m_aClients[ClientId].m_DebugDummyAddr;
+	}
+#endif
+	return m_NetServer.ClientAddr(ClientId);
+}
+
+const std::array<char, NETADDR_MAXSTRSIZE> &CServer::ClientAddrStringImpl(int ClientId, bool IncludePort) const
+{
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
+#ifdef CONF_DEBUG
+	if(m_aClients[ClientId].m_DebugDummy)
+	{
+		return IncludePort ? m_aClients[ClientId].m_aDebugDummyAddrString : m_aClients[ClientId].m_aDebugDummyAddrStringNoPort;
+	}
+#endif
+	return m_NetServer.ClientAddrString(ClientId, IncludePort);
 }
 
 const char *CServer::ClientName(int ClientId) const
@@ -706,12 +723,12 @@ int CServer::ClientCount() const
 
 int CServer::DistinctClientCount() const
 {
-	NETADDR aAddresses[MAX_CLIENTS];
+	const NETADDR *apAddresses[MAX_CLIENTS];
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 		{
-			GetClientAddr(i, &aAddresses[i]);
+			apAddresses[i] = ClientAddr(i);
 		}
 	}
 
@@ -724,7 +741,7 @@ int CServer::DistinctClientCount() const
 			ClientCount++;
 			for(int j = 0; j < i; j++)
 			{
-				if(!net_addr_comp_noport(&aAddresses[i], &aAddresses[j]))
+				if(!net_addr_comp_noport(apAddresses[i], apAddresses[j]))
 				{
 					ClientCount--;
 					break;
@@ -1077,7 +1094,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	pThis->SendCapabilities(ClientId);
 	pThis->SendMap(ClientId);
 #if defined(CONF_FAMILY_UNIX)
-	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->m_NetServer.ClientAddr(ClientId));
+	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->ClientAddr(ClientId));
 #endif
 	return 0;
 }
@@ -1110,14 +1127,14 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_Sixup = Sixup;
 
 #if defined(CONF_FAMILY_UNIX)
-	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->m_NetServer.ClientAddr(ClientId));
+	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->ClientAddr(ClientId));
 #endif
 	return 0;
 }
 
 void CServer::InitDnsbl(int ClientId)
 {
-	NETADDR Addr = *m_NetServer.ClientAddr(ClientId);
+	NETADDR Addr = *ClientAddr(ClientId);
 
 	//TODO: support ipv6
 	if(Addr.type != NETTYPE_IPV4)
@@ -1162,12 +1179,14 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 {
 	CServer *pThis = (CServer *)pUser;
 
-	char aAddrStr[NETADDR_MAXSTRSIZE];
-	net_addr_str(pThis->m_NetServer.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
-
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=<{%s}> reason='%s'", ClientId, aAddrStr, pReason);
+	str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=<{%s}> reason='%s'", ClientId, pThis->ClientAddrString(ClientId, true), pReason);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+
+#if defined(CONF_FAMILY_UNIX)
+	// Make copy of address because the client slot will be empty at the end of the function
+	const NETADDR Addr = *pThis->ClientAddr(ClientId);
+#endif
 
 	// notify the mod about the drop
 	if(pThis->m_aClients[ClientId].m_State >= CClient::STATE_READY)
@@ -1194,7 +1213,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->GameServer()->TeehistorianRecordPlayerDrop(ClientId, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientId, pReason);
 #if defined(CONF_FAMILY_UNIX)
-	pThis->SendConnLoggingCommand(CLOSE_SESSION, pThis->m_NetServer.ClientAddr(ClientId));
+	pThis->SendConnLoggingCommand(CLOSE_SESSION, &Addr);
 #endif
 	return 0;
 }
@@ -1610,11 +1629,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientId].m_State == CClient::STATE_CONNECTING))
 			{
-				char aAddrStr[NETADDR_MAXSTRSIZE];
-				net_addr_str(m_NetServer.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
-
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player is ready. ClientId=%d addr=<{%s}> secure=%s", ClientId, aAddrStr, m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
+				str_format(aBuf, sizeof(aBuf), "player is ready. ClientId=%d addr=<{%s}> secure=%s", ClientId, ClientAddrString(ClientId, true), m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
 				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 
 				void *pPersistentData = 0;
@@ -1633,16 +1649,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientId].m_State == CClient::STATE_READY && GameServer()->IsClientReady(ClientId))
 			{
-				char aAddrStr[NETADDR_MAXSTRSIZE];
-				net_addr_str(m_NetServer.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
-
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientId=%d addr=<{%s}> sixup=%d", ClientId, aAddrStr, IsSixup(ClientId));
+				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientId=%d addr=<{%s}> sixup=%d", ClientId, ClientAddrString(ClientId, true), IsSixup(ClientId));
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 				m_aClients[ClientId].m_State = CClient::STATE_INGAME;
 				if(!IsSixup(ClientId))
 				{
-					SendServerInfo(m_NetServer.ClientAddr(ClientId), -1, SERVERINFO_EXTENDED, false);
+					SendServerInfo(ClientAddr(ClientId), -1, SERVERINFO_EXTENDED, false);
 				}
 				else
 				{
@@ -1857,7 +1870,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					if(!Config()->m_SvRconBantime)
 						m_NetServer.Drop(ClientId, "Too many remote console authentication tries");
 					else
-						m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientId), Config()->m_SvRconBantime * 60, "Too many remote console authentication tries", false);
+						m_ServerBan.BanAddr(ClientAddr(ClientId), Config()->m_SvRconBantime * 60, "Too many remote console authentication tries", false);
 				}
 			}
 			else
@@ -2314,14 +2327,21 @@ void CServer::GetServerInfoSixup(CPacker *pPacker, int Token, bool SendClients)
 
 void CServer::FillAntibot(CAntibotRoundData *pData)
 {
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		CAntibotPlayerData *pPlayer = &pData->m_aPlayers[i];
-		// No need for expensive str_copy since we don't truncate and the string is
-		// ASCII anyway
-		static_assert(std::size((CAntibotPlayerData{}).m_aAddress) >= NETADDR_MAXSTRSIZE);
-		static_assert(sizeof(*(CNetServer{}).ClientAddrString(i)) == NETADDR_MAXSTRSIZE);
-		mem_copy(pPlayer->m_aAddress, m_NetServer.ClientAddrString(i), NETADDR_MAXSTRSIZE);
+		CAntibotPlayerData *pPlayer = &pData->m_aPlayers[ClientId];
+		if(m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
+		{
+			pPlayer->m_aAddress[0] = '\0';
+		}
+		else
+		{
+			// No need for expensive str_copy since we don't truncate and the string is
+			// ASCII anyway
+			static_assert(std::size((CAntibotPlayerData{}).m_aAddress) >= NETADDR_MAXSTRSIZE);
+			static_assert(std::is_same_v<decltype(CServer{}.ClientAddrStringImpl(ClientId, true)), const std::array<char, NETADDR_MAXSTRSIZE> &>);
+			mem_copy(pPlayer->m_aAddress, ClientAddrStringImpl(ClientId, true).data(), NETADDR_MAXSTRSIZE);
+		}
 	}
 }
 
@@ -2445,7 +2465,7 @@ void CServer::UpdateServerInfo(bool Resend)
 			if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 			{
 				if(!IsSixup(i))
-					SendServerInfo(m_NetServer.ClientAddr(i), -1, SERVERINFO_INGAME, false);
+					SendServerInfo(ClientAddr(i), -1, SERVERINFO_INGAME, false);
 				else
 				{
 					CMsgPacker Msg(protocol7::NETMSG_SERVERINFO, true, true);
@@ -2675,28 +2695,49 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 	{
 		const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_DbgDummies;
 		const int ClientId = MaxClients() - DummyIndex - 1;
+		CClient &Client = m_aClients[ClientId];
 		if(AddDummy && m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
 		{
 			NewClientCallback(ClientId, this, false);
-			m_aClients[ClientId].m_DebugDummy = true;
+			Client.m_DebugDummy = true;
+
+			// See https://en.wikipedia.org/wiki/Unique_local_address
+			Client.m_DebugDummyAddr.type = NETTYPE_IPV6;
+			Client.m_DebugDummyAddr.ip[0] = 0xfd;
+			// Global ID (40 bits): random
+			secure_random_fill(&Client.m_DebugDummyAddr.ip[1], 5);
+			// Subnet ID (16 bits): constant
+			Client.m_DebugDummyAddr.ip[6] = 0xc0;
+			Client.m_DebugDummyAddr.ip[7] = 0xde;
+			// Interface ID (64 bits): set to client ID
+			Client.m_DebugDummyAddr.ip[8] = 0x00;
+			Client.m_DebugDummyAddr.ip[9] = 0x00;
+			Client.m_DebugDummyAddr.ip[10] = 0x00;
+			Client.m_DebugDummyAddr.ip[11] = 0x00;
+			uint_to_bytes_be(&Client.m_DebugDummyAddr.ip[12], ClientId);
+			// Port: random like normal clients
+			Client.m_DebugDummyAddr.port = (secure_rand() % (65535 - 1024)) + 1024;
+			net_addr_str(&Client.m_DebugDummyAddr, Client.m_aDebugDummyAddrString.data(), Client.m_aDebugDummyAddrString.size(), true);
+			net_addr_str(&Client.m_DebugDummyAddr, Client.m_aDebugDummyAddrStringNoPort.data(), Client.m_aDebugDummyAddrStringNoPort.size(), false);
+
 			GameServer()->OnClientConnected(ClientId, nullptr);
-			m_aClients[ClientId].m_State = CClient::STATE_INGAME;
-			str_format(m_aClients[ClientId].m_aName, sizeof(m_aClients[ClientId].m_aName), "Debug dummy %d", DummyIndex + 1);
+			Client.m_State = CClient::STATE_INGAME;
+			str_format(Client.m_aName, sizeof(Client.m_aName), "Debug dummy %d", DummyIndex + 1);
 			GameServer()->OnClientEnter(ClientId);
 		}
-		else if(!AddDummy && m_aClients[ClientId].m_DebugDummy)
+		else if(!AddDummy && Client.m_DebugDummy)
 		{
 			DelClientCallback(ClientId, "Dropping debug dummy", this);
 		}
 
-		if(AddDummy && m_aClients[ClientId].m_DebugDummy)
+		if(AddDummy && Client.m_DebugDummy)
 		{
 			CNetObj_PlayerInput Input = {0};
 			Input.m_Direction = (ClientId & 1) ? -1 : 1;
-			m_aClients[ClientId].m_aInputs[0].m_GameTick = Tick() + 1;
-			mem_copy(m_aClients[ClientId].m_aInputs[0].m_aData, &Input, minimum(sizeof(Input), sizeof(m_aClients[ClientId].m_aInputs[0].m_aData)));
-			m_aClients[ClientId].m_LatestInput = m_aClients[ClientId].m_aInputs[0];
-			m_aClients[ClientId].m_CurrentInput = 0;
+			Client.m_aInputs[0].m_GameTick = Tick() + 1;
+			mem_copy(Client.m_aInputs[0].m_aData, &Input, minimum(sizeof(Input), sizeof(Client.m_aInputs[0].m_aData)));
+			Client.m_LatestInput = Client.m_aInputs[0];
+			Client.m_CurrentInput = 0;
 		}
 	}
 
@@ -3012,10 +3053,7 @@ int CServer::Run()
 								// entry not found -> whitelisted
 								m_aClients[ClientId].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
 
-								char aAddrStr[NETADDR_MAXSTRSIZE];
-								net_addr_str(m_NetServer.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
-
-								str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s whitelisted", ClientId, aAddrStr, m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
+								str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s whitelisted", ClientId, ClientAddrString(ClientId, true), m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
 								Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
 							}
 							else
@@ -3023,16 +3061,12 @@ int CServer::Run()
 								// entry found -> blacklisted
 								m_aClients[ClientId].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
 
-								// console output
-								char aAddrStr[NETADDR_MAXSTRSIZE];
-								net_addr_str(m_NetServer.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
-
-								str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s blacklisted", ClientId, aAddrStr, m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
+								str_format(aBuf, sizeof(aBuf), "ClientId=%d addr=<{%s}> secure=%s blacklisted", ClientId, ClientAddrString(ClientId, true), m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
 								Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "dnsbl", aBuf);
 
 								if(Config()->m_SvDnsblBan)
 								{
-									m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason, true);
+									m_NetServer.NetBan()->BanAddr(ClientAddr(ClientId), 60, Config()->m_SvDnsblBanReason, true);
 								}
 							}
 						}
@@ -3147,7 +3181,6 @@ void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 {
 	char aBuf[1024];
-	char aAddrStr[NETADDR_MAXSTRSIZE];
 	CServer *pThis = static_cast<CServer *>(pUser);
 	const char *pName = pResult->NumArguments() == 1 ? pResult->GetString(0) : "";
 
@@ -3159,7 +3192,6 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 		if(!str_utf8_find_nocase(pThis->m_aClients[i].m_aName, pName))
 			continue;
 
-		net_addr_str(pThis->m_NetServer.ClientAddr(i), aAddrStr, sizeof(aAddrStr), true);
 		if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
 		{
 			char aDnsblStr[64];
@@ -3190,12 +3222,12 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 				pClientPrefix = "0.7:";
 			}
 			str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> name='%s' client=%s%d secure=%s flags=%d%s%s",
-				i, aAddrStr, pThis->m_aClients[i].m_aName, pClientPrefix, pThis->m_aClients[i].m_DDNetVersion,
+				i, pThis->ClientAddrString(i, true), pThis->m_aClients[i].m_aName, pClientPrefix, pThis->m_aClients[i].m_DDNetVersion,
 				pThis->m_NetServer.HasSecurityToken(i) ? "yes" : "no", pThis->m_aClients[i].m_Flags, aDnsblStr, aAuthStr);
 		}
 		else
 		{
-			str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> connecting", i, aAddrStr);
+			str_format(aBuf, sizeof(aBuf), "id=%d addr=<{%s}> connecting", i, pThis->ClientAddrString(i, true));
 		}
 		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 	}
@@ -3981,13 +4013,6 @@ void CServer::SnapSetStaticsize(int ItemType, int Size)
 CServer *CreateServer() { return new CServer(); }
 
 // DDRace
-
-void CServer::GetClientAddr(int ClientId, NETADDR *pAddr) const
-{
-	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
-	dbg_assert(m_aClients[ClientId].m_State != CServer::CClient::STATE_EMPTY, "Client slot is empty");
-	*pAddr = *m_NetServer.ClientAddr(ClientId);
-}
 
 void CServer::ReadAnnouncementsFile()
 {

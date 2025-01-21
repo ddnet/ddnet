@@ -1095,17 +1095,22 @@ void CGameContext::OnTick()
 			if(m_VoteUpdate)
 			{
 				// count votes
-				char aaBuf[MAX_CLIENTS][NETADDR_MAXSTRSIZE] = {{0}}, *pIp = NULL;
+				const NETADDR *apAddresses[MAX_CLIENTS] = {nullptr};
+				const NETADDR *pFirstAddress = nullptr;
 				bool SinglePlayer = true;
 				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
 					if(m_apPlayers[i])
 					{
-						Server()->GetClientAddr(i, aaBuf[i], NETADDR_MAXSTRSIZE);
-						if(!pIp)
-							pIp = aaBuf[i];
-						else if(SinglePlayer && str_comp(pIp, aaBuf[i]))
+						apAddresses[i] = Server()->ClientAddr(i);
+						if(!pFirstAddress)
+						{
+							pFirstAddress = apAddresses[i];
+						}
+						else if(SinglePlayer && net_addr_comp_noport(pFirstAddress, apAddresses[i]) != 0)
+						{
 							SinglePlayer = false;
+						}
 					}
 				}
 
@@ -1144,7 +1149,7 @@ void CGameContext::OnTick()
 					// check for more players with the same ip (only use the vote of the one who voted first)
 					for(int j = i + 1; j < MAX_CLIENTS; j++)
 					{
-						if(!m_apPlayers[j] || aVoteChecked[j] || str_comp(aaBuf[j], aaBuf[i]) != 0)
+						if(!m_apPlayers[j] || aVoteChecked[j] || net_addr_comp_noport(apAddresses[j], apAddresses[i]) != 0)
 							continue;
 
 						// count the latest vote by this ip
@@ -1170,7 +1175,7 @@ void CGameContext::OnTick()
 						for(int j = i; j < MAX_CLIENTS; j++)
 						{
 							// no need to check ip address of current player
-							if(i != j && (!m_apPlayers[j] || str_comp(aaBuf[j], aaBuf[i]) != 0))
+							if(i != j && (!m_apPlayers[j] || net_addr_comp_noport(apAddresses[j], apAddresses[i]) != 0))
 								continue;
 
 							if(m_apPlayers[j] && !m_apPlayers[j]->IsAfk() && m_apPlayers[j]->GetTeam() != TEAM_SPECTATORS &&
@@ -1648,11 +1653,9 @@ void CGameContext::OnClientEnter(int ClientId)
 	if(g_Config.m_SvChatInitialDelay != 0 && m_apPlayers[ClientId]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed())
 	{
 		char aBuf[128];
-		NETADDR Addr;
-		Server()->GetClientAddr(ClientId, &Addr);
 		str_format(aBuf, sizeof(aBuf), "This server has an initial chat delay, you will need to wait %d seconds before talking.", g_Config.m_SvChatInitialDelay);
 		SendChatTarget(ClientId, aBuf);
-		Mute(&Addr, g_Config.m_SvChatInitialDelay, Server()->ClientName(ClientId), "Initial chat delay", true);
+		Mute(Server()->ClientAddr(ClientId), g_Config.m_SvChatInitialDelay, Server()->ClientName(ClientId), "Initial chat delay", true);
 	}
 
 	LogEvent("Connect", ClientId);
@@ -2330,12 +2333,12 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 
 		if(g_Config.m_SvVoteKickMin && !GetDDRaceTeam(ClientId))
 		{
-			NETADDR aAddresses[MAX_CLIENTS];
+			const NETADDR *apAddresses[MAX_CLIENTS];
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
 				if(m_apPlayers[i])
 				{
-					Server()->GetClientAddr(i, &aAddresses[i]);
+					apAddresses[i] = Server()->ClientAddr(i);
 				}
 			}
 			int NumPlayers = 0;
@@ -2348,7 +2351,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 					{
 						if(m_apPlayers[j] && m_apPlayers[j]->GetTeam() != TEAM_SPECTATORS && !GetDDRaceTeam(j))
 						{
-							if(!net_addr_comp_noport(&aAddresses[i], &aAddresses[j]))
+							if(!net_addr_comp_noport(apAddresses[i], apAddresses[j]))
 							{
 								NumPlayers--;
 								break;
@@ -2410,9 +2413,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 			}
 			else
 			{
-				char aAddrStr[NETADDR_MAXSTRSIZE] = {0};
-				Server()->GetClientAddr(KickId, aAddrStr, sizeof(aAddrStr));
-				str_format(aCmd, sizeof(aCmd), "ban %s %d Banned by vote", aAddrStr, g_Config.m_SvVoteKickBantime);
+				str_format(aCmd, sizeof(aCmd), "ban %s %d Banned by vote", Server()->ClientAddrString(KickId, false), g_Config.m_SvVoteKickBantime);
 				str_format(aDesc, sizeof(aDesc), "Ban '%s'", Server()->ClientName(KickId));
 			}
 		}
@@ -3449,9 +3450,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 		}
 		else
 		{
-			char aAddrStr[NETADDR_MAXSTRSIZE] = {0};
-			pSelf->Server()->GetClientAddr(KickId, aAddrStr, sizeof(aAddrStr));
-			str_format(aBuf, sizeof(aBuf), "ban %s %d %s", aAddrStr, g_Config.m_SvVoteKickBantime, pReason);
+			str_format(aBuf, sizeof(aBuf), "ban %s %d %s", pSelf->Server()->ClientAddrString(KickId, false), g_Config.m_SvVoteKickBantime, pReason);
 			pSelf->Console()->ExecuteLine(aBuf);
 		}
 	}
@@ -4483,9 +4482,8 @@ void CGameContext::OnSetAuthed(int ClientId, int Level)
 {
 	if(m_apPlayers[ClientId] && m_VoteCloseTime && Level != AUTHED_NO)
 	{
-		char aBuf[512], aIp[NETADDR_MAXSTRSIZE];
-		Server()->GetClientAddr(ClientId, aIp, sizeof(aIp));
-		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", aIp, g_Config.m_SvVoteKickBantime);
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", Server()->ClientAddrString(ClientId, false), g_Config.m_SvVoteKickBantime);
 		if(!str_comp_nocase(m_aVoteCommand, aBuf) && (m_VoteCreator == -1 || Level > Server()->GetAuthedState(m_VoteCreator)))
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
@@ -4533,14 +4531,13 @@ bool CGameContext::ProcessSpamProtection(int ClientId, bool RespectChatInitialDe
 	else
 		m_apPlayers[ClientId]->m_LastChat = Server()->Tick();
 
-	NETADDR Addr;
-	Server()->GetClientAddr(ClientId, &Addr);
+	const NETADDR *pAddr = Server()->ClientAddr(ClientId);
 
 	CMute Muted;
 	int Expires = 0;
 	for(int i = 0; i < m_NumMutes && Expires <= 0; i++)
 	{
-		if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
+		if(!net_addr_comp_noport(pAddr, &m_aMutes[i].m_Addr))
 		{
 			if(RespectChatInitialDelay || m_aMutes[i].m_InitialChatDelay)
 			{
@@ -4563,7 +4560,7 @@ bool CGameContext::ProcessSpamProtection(int ClientId, bool RespectChatInitialDe
 
 	if(g_Config.m_SvSpamMuteDuration && (m_apPlayers[ClientId]->m_ChatScore += g_Config.m_SvChatPenalty) > g_Config.m_SvChatThreshold)
 	{
-		Mute(&Addr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientId));
+		Mute(pAddr, g_Config.m_SvSpamMuteDuration, Server()->ClientName(ClientId));
 		m_apPlayers[ClientId]->m_ChatScore = 0;
 		return true;
 	}
@@ -4928,15 +4925,14 @@ bool CGameContext::RateLimitPlayerVote(int ClientId)
 		return true;
 	}
 
-	NETADDR Addr;
-	Server()->GetClientAddr(ClientId, &Addr);
+	const NETADDR *pAddr = Server()->ClientAddr(ClientId);
 	int VoteMuted = 0;
 	for(int i = 0; i < m_NumVoteMutes && !VoteMuted; i++)
-		if(!net_addr_comp_noport(&Addr, &m_aVoteMutes[i].m_Addr))
+		if(!net_addr_comp_noport(pAddr, &m_aVoteMutes[i].m_Addr))
 			VoteMuted = (m_aVoteMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
 	for(int i = 0; i < m_NumMutes && VoteMuted == 0; i++)
 	{
-		if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
+		if(!net_addr_comp_noport(pAddr, &m_aMutes[i].m_Addr))
 			VoteMuted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
 	}
 	if(VoteMuted > 0)
