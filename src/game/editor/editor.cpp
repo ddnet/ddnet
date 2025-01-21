@@ -9181,7 +9181,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 					if(!UseNextFree && Adjust == 0 && IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
 					{
-						if(IsTeleTileCheckpoint(pTeleLayer->m_pTeleTile[i].m_Number))
+						if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
 							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleCheckpointNumber;
 						else
 							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleNumber;
