@@ -436,6 +436,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 	dbg_assert(pFilename[0] != '\0', "Cannot load texture from file with empty filename"); // would cause Valgrind to crash otherwise
 
 	CImageInfo Image;
+
 	if(LoadPng(Image, pFilename, StorageType))
 	{
 		CTextureHandle Id = LoadTextureRawMove(Image, Flags, pFilename);
@@ -446,7 +447,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 			return Id;
 		}
 	}
-
 	return m_NullTexture;
 }
 

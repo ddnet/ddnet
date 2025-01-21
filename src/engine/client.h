@@ -112,6 +112,11 @@ public:
 	SClientConsoleSkin m_ConsoleSkin = {};
 	bool m_ConsoleSkinLoaded = false;
 
+	int m_ConsoleWidth = 0;
+	int m_ConsoleHeight = 0;
+
+	bool m_IsReloadingAssets = false;
+
 	class CSnapItem
 	{
 	public:

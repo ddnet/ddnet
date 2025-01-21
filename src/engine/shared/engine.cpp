@@ -85,6 +85,7 @@ public:
 			return;
 
 		m_pConsole->Register("dbg_lognetwork", "", CFGFLAG_SERVER | CFGFLAG_CLIENT, Con_DbgLognetwork, this, "Log the network");
+
 	}
 
 	void AddJob(std::shared_ptr<IJob> pJob) override

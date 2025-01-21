@@ -22,6 +22,7 @@ public:
 	virtual void AddJob(std::shared_ptr<IJob> pJob) = 0;
 	virtual void ShutdownJobs() = 0;
 	virtual void SetAdditionalLogger(std::shared_ptr<ILogger> &&pLogger) = 0;
+
 };
 
 extern IEngine *CreateEngine(const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs);

@@ -28,6 +28,8 @@
 
 #include "console.h"
 
+#include "engine/client/graphics_threaded.h"
+
 static constexpr float FONT_SIZE = 10.0f;
 static constexpr float LINE_SPACING = 1.0f;
 
@@ -1011,94 +1013,124 @@ void CGameConsole::Prompt(char (&aPrompt)[32])
 
 void CGameConsole::OnRender()
 {
-	CUIRect Screen = *Ui()->Screen();
-	CInstance *pConsole = CurrentConsole();
 
-	const float MaxConsoleHeight = Screen.h * 3.5 / 5.0f;
-	float Progress = (Client()->GlobalTime() - (m_StateChangeEnd - m_StateChangeDuration)) / m_StateChangeDuration;
+	//TODO: comp for updating background
+	static bool IsLoaded = false;
+	if(!IsLoaded)
+		m_pConsole->ExecuteLine("p_console_reload");
+	IsLoaded = true;
 
-	if(Progress >= 1.0f)
+       CUIRect Screen = *Ui()->Screen();
+    CInstance *pConsole = CurrentConsole();
+
+    const float MaxConsoleHeight = Screen.h * 3.5 / 5.0f;
+    float Progress = clamp((Client()->GlobalTime() - (m_StateChangeEnd - m_StateChangeDuration)) / m_StateChangeDuration, 0.0f, 1.0f);
+
+    if (Progress >= 1.0f)
+    {
+        if (m_ConsoleState == CONSOLE_CLOSING)
+        {
+            m_ConsoleState = CONSOLE_CLOSED;
+            pConsole->m_BacklogLastActiveLine = -1;
+        }
+        else if (m_ConsoleState == CONSOLE_OPENING)
+        {
+            m_ConsoleState = CONSOLE_OPEN;
+            pConsole->m_Input.Activate(EInputPriority::CONSOLE);
+        }
+    }
+
+    if (m_ConsoleState == CONSOLE_OPEN && g_Config.m_ClEditor)
+        Toggle(CONSOLETYPE_LOCAL);
+
+    if (m_ConsoleState == CONSOLE_CLOSED)
+        return;
+
+    if (m_ConsoleState == CONSOLE_OPEN)
+        Input()->MouseModeAbsolute();
+
+    float ConsoleHeightScale;
+    if (m_ConsoleState == CONSOLE_OPENING)
+        ConsoleHeightScale = ConsoleScaleFunc(Progress);
+    else if (m_ConsoleState == CONSOLE_CLOSING)
+        ConsoleHeightScale = ConsoleScaleFunc(1.0f - Progress);
+    else // CONSOLE_OPEN
+        ConsoleHeightScale = ConsoleScaleFunc(1.0f);
+
+    const float ConsoleHeight = ConsoleHeightScale * MaxConsoleHeight;
+
+    Ui()->MapScreen();
+
+    const ColorRGBA ShadowColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f);
+    const ColorRGBA TransparentColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+    const ColorRGBA aBackgroundColors[NUM_CONSOLETYPES] = {ColorRGBA(0.2f, 0.2f, 0.2f, 0.9f), ColorRGBA(0.4f, 0.2f, 0.2f, 0.9f)};
+    const ColorRGBA aBorderColors[NUM_CONSOLETYPES] = {ColorRGBA(0.1f, 0.1f, 0.1f, 0.9f), ColorRGBA(0.2f, 0.1f, 0.1f, 0.9f)};
+
+	float FadingFactor = 1.0f - g_Config.m_ClCustomConsoleFading / 100.0f;
+	float AlphaFactor = g_Config.m_ClCustomConsoleAlpha / 100.0f;
+
+	ColorRGBA Fading = ColorRGBA(FadingFactor, FadingFactor, FadingFactor, AlphaFactor);
+
+
+	if (Client()->m_ConsoleHeight < 770 && g_Config.m_ClCustomConsole == 1)
 	{
-		if(m_ConsoleState == CONSOLE_CLOSING)
-		{
-			m_ConsoleState = CONSOLE_CLOSED;
-			pConsole->m_BacklogLastActiveLine = -1;
-		}
-		else if(m_ConsoleState == CONSOLE_OPENING)
-		{
-			m_ConsoleState = CONSOLE_OPEN;
-			pConsole->m_Input.Activate(EInputPriority::CONSOLE);
-		}
+		//dbg_msg("Custom Console", "Calling loading image with wrong resolution. Minimal Height is 770 pixels");
+	    Graphics()->TextureSet(g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id);
+	    Graphics()->QuadsBegin();
+	    Graphics()->SetColor(aBackgroundColors[m_ConsoleType]);
+	    Graphics()->QuadsSetSubset(0, 0, Screen.w / 80.0f, ConsoleHeight / 80.0f);
 
-		Progress = 1.0f;
+	    IGraphics::CQuadItem QuadItemBackground(0.0f, 0.0f, Screen.w, ConsoleHeight);
+	    Graphics()->QuadsDrawTL(&QuadItemBackground, 1);
+	    Graphics()->QuadsEnd();
 	}
-
-	if(m_ConsoleState == CONSOLE_OPEN && g_Config.m_ClEditor)
-		Toggle(CONSOLETYPE_LOCAL);
-
-	if(m_ConsoleState == CONSOLE_CLOSED)
-		return;
-
-	if(m_ConsoleState == CONSOLE_OPEN)
-		Input()->MouseModeAbsolute();
-
-	float ConsoleHeightScale;
-	if(m_ConsoleState == CONSOLE_OPENING)
-		ConsoleHeightScale = ConsoleScaleFunc(Progress);
-	else if(m_ConsoleState == CONSOLE_CLOSING)
-		ConsoleHeightScale = ConsoleScaleFunc(1.0f - Progress);
-	else // CONSOLE_OPEN
-		ConsoleHeightScale = ConsoleScaleFunc(1.0f);
-
-	const float ConsoleHeight = ConsoleHeightScale * MaxConsoleHeight;
-
-	const ColorRGBA ShadowColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f);
-	const ColorRGBA TransparentColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-	const ColorRGBA aBackgroundColors[NUM_CONSOLETYPES] = {ColorRGBA(0.2f, 0.2f, 0.2f, 0.9f), ColorRGBA(0.4f, 0.2f, 0.2f, 0.9f)};
-	const ColorRGBA aBorderColors[NUM_CONSOLETYPES] = {ColorRGBA(0.1f, 0.1f, 0.1f, 0.9f), ColorRGBA(0.2f, 0.1f, 0.1f, 0.9f)};
-
-	Ui()->MapScreen();
-
-	if(g_Config.m_ClCustomConsole && Client()->m_ConsoleSkin.m_ConsoleTexture.IsValid() && !Client()->m_ConsoleSkin.m_ConsoleTexture.IsNullTexture())
+	else if (g_Config.m_ClCustomConsole && Client()->m_ConsoleSkin.m_ConsoleTexture.IsValid() && !Client()->m_ConsoleSkin.m_ConsoleTexture.IsNullTexture())
 	{
-		Graphics()->TextureSet(Client()->m_ConsoleSkin.m_ConsoleTexture);
-		Graphics()->QuadsBegin();
-		// Calculate aspect ratio adjustments
-		float ImageWidth = 1920;
-		float ImageHeight = 750;
-		float ConsoleAspect = Screen.w / ConsoleHeight;
-		float ImageAspect = ImageWidth / ImageHeight;
+	    Graphics()->TextureSet(Client()->m_ConsoleSkin.m_ConsoleTexture);
+	    Graphics()->QuadsBegin();
 
-		// Determine texture coordinates to fit the console height
-		float TextureWidth = 1.0f;
-		float TextureHeight = 1.0f;
-		if (ConsoleAspect > ImageAspect) {
-			// Console is wider than the image, fit by height
-			TextureWidth = ImageAspect / ConsoleAspect;
-		} else {
-			// Console is taller than the image, fit by width
-			TextureHeight = ConsoleAspect / ImageAspect;
-		}
+	    Graphics()->SetColor(Fading.r, Fading.g, Fading.b, Fading.a);
 
-		// Center the image
-		float OffsetX = (1.0f - TextureWidth) / 2.0f;
-		float OffsetY = (1.0f - TextureHeight) / 2.0f;
+	    float ImageWidth = Client()->m_ConsoleWidth;
+	    float ImageHeight = Client()->m_ConsoleHeight;
 
-		Graphics()->QuadsSetSubset(OffsetX, OffsetY, OffsetX + TextureWidth, OffsetY + TextureHeight);
-		IGraphics::CQuadItem QuadItemBackground(0.0f, 0.0f, Screen.w, ConsoleHeight);
-		Graphics()->QuadsDrawTL(&QuadItemBackground, 1);
-		Graphics()->QuadsEnd();
+	   // dbg_msg("system", "%i", Client()->m_ConsoleHeight);
+
+	    float ScaleWidth = Screen.w / ImageWidth;
+	    float ScaleHeight = ScaleWidth;
+
+	    float FinalWidth = ImageWidth * ScaleWidth;
+	    float FinalHeight = ImageHeight * ScaleHeight;
+
+	    if (FinalHeight > ConsoleHeight)
+	    {
+	        float YPosition = -FinalHeight + ConsoleHeight;
+
+	        Graphics()->QuadsSetSubset(0.0f, 0.0f, 1.0f, 1.0f);
+	        IGraphics::CQuadItem QuadItemBackground(0.0f, YPosition, FinalWidth, FinalHeight);
+	        Graphics()->QuadsDrawTL(&QuadItemBackground, 1);
+	    }
+	    else
+	    {
+	        float YPosition = 0.0f;
+	        Graphics()->QuadsSetSubset(0.0f, 0.0f, 1.0f, 1.0f);
+	        IGraphics::CQuadItem QuadItemBackground(0.0f, YPosition, FinalWidth, FinalHeight);
+	        Graphics()->QuadsDrawTL(&QuadItemBackground, 1);
+	    }
+
+	    Graphics()->QuadsEnd();
 	}
 	else
 	{
-		// background
-		Graphics()->TextureSet(g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id);
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(aBackgroundColors[m_ConsoleType]);
-		Graphics()->QuadsSetSubset(0, 0, Screen.w / 80.0f, ConsoleHeight / 80.0f);
-		IGraphics::CQuadItem QuadItemBackground(0.0f, 0.0f, Screen.w, ConsoleHeight);
-		Graphics()->QuadsDrawTL(&QuadItemBackground, 1);
-		Graphics()->QuadsEnd();
+	    // Default rendering if custom console is not enabled or valid
+	    Graphics()->TextureSet(g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_Id);
+	    Graphics()->QuadsBegin();
+	    Graphics()->SetColor(aBackgroundColors[m_ConsoleType]);
+	    Graphics()->QuadsSetSubset(0, 0, Screen.w / 80.0f, ConsoleHeight / 80.0f);
+
+	    IGraphics::CQuadItem QuadItemBackground(0.0f, 0.0f, Screen.w, ConsoleHeight);
+	    Graphics()->QuadsDrawTL(&QuadItemBackground, 1);
+	    Graphics()->QuadsEnd();
 	}
 
 	// bottom border

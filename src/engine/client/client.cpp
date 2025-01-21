@@ -71,6 +71,8 @@
 #undef main
 #endif
 
+#include "engine/shared/console.h"
+
 #include <chrono>
 #include <limits>
 #include <new>
@@ -3787,7 +3789,6 @@ void CClient::Con_SaveReplay(IConsole::IResult *pResult, void *pUserData)
 void CClient::PulseSetAssets(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-
 	pSelf->LoadCustomConsole(g_Config.m_ClAssetConsole);
 }
 
@@ -3802,7 +3803,7 @@ void CClient::LoadCustomConsole(const char *pPath)
 	char aPath[IO_MAX_PATH_LENGTH];
 	if(str_comp(pPath, "default") == 0)
 	{
-		str_copy(aPath, g_pData->m_aImages[IMAGE_BACKGROUND_NOISE].m_pFilename);
+		str_copy(aPath, g_pData->m_aImages[IMAGE_DEFAULTCON].m_pFilename);
 	}
 	else
 	{
@@ -3810,6 +3811,18 @@ void CClient::LoadCustomConsole(const char *pPath)
 	}
 
 	dbg_msg("CustomConsole", "Loading image from path: %s", aPath);
+
+	CImageInfo ImgInfo;
+	bool PngLoaded = Graphics()->LoadPng(ImgInfo, aPath, IStorage::TYPE_ALL);
+
+	if (!PngLoaded || ImgInfo.m_Width == 0 || ImgInfo.m_Height == 0)
+	{
+		dbg_msg("CustomConsole", "Failed to load image info for: %s", aPath);
+		return;
+	}
+
+	m_ConsoleWidth = ImgInfo.m_Width;
+	m_ConsoleHeight = ImgInfo.m_Height;
 
 	auto TextureHandle = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL);
 	if(TextureHandle.IsNullTexture() || !TextureHandle.IsValid())

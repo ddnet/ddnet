@@ -396,6 +396,7 @@ public:
 
 	void LoadCustomConsole(const char *pPath);
 
+
 	bool InitNetworkClient(char *pError, size_t ErrorSize);
 	bool CtrlShiftKey(int Key, bool &Last);
 
