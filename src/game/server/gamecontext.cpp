@@ -117,9 +117,6 @@ void CGameContext::Construct(int Resetting)
 		for(auto &pSavedTee : m_apSavedTees)
 			pSavedTee = nullptr;
 
-		for(auto &pSavedTeleTee : m_apSavedTeleTees)
-			pSavedTeleTee = nullptr;
-
 		for(auto &pSavedTeam : m_apSavedTeams)
 			pSavedTeam = nullptr;
 
@@ -142,9 +139,6 @@ void CGameContext::Destruct(int Resetting)
 	{
 		for(auto &pSavedTee : m_apSavedTees)
 			delete pSavedTee;
-
-		for(auto &pSavedTeleTee : m_apSavedTeleTees)
-			delete pSavedTeleTee;
 
 		for(auto &pSavedTeam : m_apSavedTeams)
 			delete pSavedTeam;
@@ -1734,9 +1728,6 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 	delete m_apSavedTees[ClientId];
 	m_apSavedTees[ClientId] = nullptr;
 
-	delete m_apSavedTeleTees[ClientId];
-	m_apSavedTeleTees[ClientId] = nullptr;
-
 	m_aTeamMapping[ClientId] = -1;
 
 	m_VoteUpdate = true;
@@ -3245,11 +3236,8 @@ void CGameContext::ConHotReload(IConsole::IResult *pResult, void *pUserData)
 		CCharacter *pChar = pSelf->GetPlayerChar(i);
 
 		// Save the tee individually
-		pSelf->m_apSavedTees[i] = new CSaveTee();
+		pSelf->m_apSavedTees[i] = new CSaveHotReloadTee();
 		pSelf->m_apSavedTees[i]->Save(pChar, false);
-
-		if(pSelf->m_apPlayers[i])
-			pSelf->m_apSavedTeleTees[i] = new CSaveTee(pSelf->m_apPlayers[i]->m_LastTeleTee);
 
 		// Save the team state
 		pSelf->m_aTeamMapping[i] = pSelf->GetDDRaceTeam(i);
