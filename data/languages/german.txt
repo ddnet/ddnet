@@ -1,31 +1,3 @@
-##### authors #####
-#originally created by:
-#	Dominik Geyer
-#modified by:
-#	Fujnky			2010-06-03 11:30:05
-#	Fujnky			2010-06-03 17:41:45
-#	Fujnky			2010-06-05 23:36:52
-#	Fujnky			2010-06-07 16:17:40
-#	Fujnky			2010-06-11 09:50:47
-#	Sworddragon		2010-11-21 14:25:00
-#	Fujnky			2011-01-02 19:49:22
-#	heinrich5991	2011-01-23 17:53:42
-#	Sworddragon		2011-02-09 12:54:50
-#	heinrich5991	2011-04-03 23:46:51
-#	ghost91			2011-04-04 20:47:01
-#	andi103			2011-05-02 19:12:27
-#	andi103			2011-05-03 23:25:20
-#	heinrich5991	2011-07-02 09:10:21
-#	Yared Hufkens	2012-02-03 19:57:59
-#	andi103			2012-07-14 11:31:11
-#	timakro			2014-06-30 18:26:59
-#	deen			2020-06-26 18:32:00
-#	bluesky			2022-07-05 21:00:00
-# BlaiZephyr 2024-03-23 20:55:00
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == Noch %ds
 
@@ -2088,3 +2060,7 @@ Server could not be started. Make sure to grant the notification permission in t
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" is nicht mit pnglite kompatibel und kann in alten DDNet-Versionen nicht geladen werden:
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Deutsche Übersetzung von Dominik Geyer, Fujnky, Sworddragon, heinrich5991, ghost91, andi103, Yared Hufkens, timakro, deen, bluesky, BlaiZephyr, Robyt3
