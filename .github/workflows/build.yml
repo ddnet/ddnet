@@ -18,8 +18,8 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-20.04]
         include:
         - os: ubuntu-latest
-          cmake-args: -G Ninja
-          cmake-init-env: CXXFLAGS=-Werror
+          cmake-args: -G Ninja -DCMAKE_BUILD_TYPE=Release -DDISCORD=ON -DDISCORD_DYNAMIC=ON -DWEBSOCKETS=OFF -DPREFER_BUNDLED_LIBS=ON
+          cmake-init-env: CXXFLAGS=-Werror 
           package-file: "*-linux_x86_64.tar.xz"
           fancy: true
         - os: ubuntu-20.04
@@ -30,7 +30,7 @@ jobs:
           package-file: "*-linux_x86_64.tar.xz"
           fancy: false
         - os: macOS-latest
-          cmake-args: -G Ninja
+          cmake-args: -G Ninja -DCMAKE_BUILD_TYPE=Release -DDISCORD=ON -DWEBSOCKETS=OFF -DPREFER_BUNDLED_LIBS=ON
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-macos.dmg"
           fancy: false
