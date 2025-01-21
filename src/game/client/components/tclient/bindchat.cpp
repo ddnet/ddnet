@@ -239,7 +239,7 @@ bool CBindchat::CheckBindChat(const char *pText)
 
 bool CBindchat::ChatDoBinds(const char *pText)
 {
-	if(pText[0] == ' ')
+	if(pText[0] == ' ' || pText[0] == '\0' || pText[1] == '\0')
 		return false;
 
 	CChat &Chat = GameClient()->m_Chat;
@@ -247,7 +247,8 @@ bool CBindchat::ChatDoBinds(const char *pText)
 	size_t SpaceIndex = pSpace ? pSpace - pText : strlen(pText);
 	for(const CBind &Bind : m_vBinds)
 	{
-		if(str_comp_nocase_num(pText, Bind.m_aName, SpaceIndex) == 0)
+		if(str_startswith_nocase(pText, Bind.m_aName) && 
+			str_comp_nocase_num(pText, Bind.m_aName, SpaceIndex) == 0)
 		{
 			ExecuteBind(&Bind - m_vBinds.data(), pSpace ? pSpace + 1 : nullptr);
 			// Add to history (see CChat::SendChatQueued)
