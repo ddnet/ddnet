@@ -492,8 +492,8 @@ protected:
 	void RenderServerInfo(CUIRect MainView);
 	void RenderServerInfoMotd(CUIRect Motd);
 	void RenderServerControl(CUIRect MainView);
-	bool RenderServerControlKick(CUIRect MainView, bool FilterSpectators);
-	bool RenderServerControlServer(CUIRect MainView);
+	bool RenderServerControlKick(CUIRect MainView, bool FilterSpectators, bool UpdateScroll);
+	bool RenderServerControlServer(CUIRect MainView, bool UpdateScroll);
 	void RenderIngameHint();
 
 	// found in menus_browser.cpp
