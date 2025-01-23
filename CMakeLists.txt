@@ -1840,6 +1840,7 @@ set(EXPECTED_DATA
   strong_weak.png
   tclient/fonts/Cabin-Regular.ttf
   tclient/fonts/GoogleSans-Regular.ttf
+  tclient/fonts/FreeSansBold.ttf
   tclient/fonts/Inter_24pt-Regular.ttf
   tclient/fonts/Inter_24pt-SemiBold.ttf
   tclient/fonts/Montserrat-Regular.ttf
