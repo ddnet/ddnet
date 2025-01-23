@@ -7859,7 +7859,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Ex(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuEntitiesId;
-		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 210.0f, 120.0f, this, PopupMenuSettings, PopupProperties);
+		Ui()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 220.0f, 134.0f, this, PopupMenuSettings, PopupProperties);
 	}
 
 	CUIRect ChangedIndicator, Info, Help, Close;
@@ -8404,6 +8404,117 @@ void CEditor::RenderMousePointer()
 		char aLabel[8];
 		str_format(aLabel, sizeof(aLabel), "#%06X", m_PipetteColor.PackAlphaLast(false));
 		Ui()->DoLabel(&Label, aLabel, 10.0f, TEXTALIGN_MC);
+	}
+}
+
+void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
+{
+	const CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
+	const float TileSize = 32.f;
+
+	for(int y = 0; y < pTiles->m_Height; y++)
+	{
+		for(int x = 0; x < pTiles->m_Width; x++)
+		{
+			const unsigned char Index = pTiles->m_pTiles[y * pTiles->m_Width + x].m_Index - ENTITY_OFFSET;
+			if(!((Index >= ENTITY_FLAGSTAND_RED && Index <= ENTITY_WEAPON_LASER) ||
+				   (Index >= ENTITY_ARMOR_SHOTGUN && Index <= ENTITY_ARMOR_LASER)))
+				continue;
+
+			vec2 Pos(x * TileSize, y * TileSize);
+			vec2 Scale;
+			int VisualSize;
+
+			if(Index == ENTITY_FLAGSTAND_RED)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpriteFlagRed);
+				Scale = vec2(42, 84);
+				VisualSize = 1;
+				Pos.y -= (Scale.y / 2.f) * 0.75f;
+			}
+			else if(Index == ENTITY_FLAGSTAND_BLUE)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpriteFlagBlue);
+				Scale = vec2(42, 84);
+				VisualSize = 1;
+				Pos.y -= (Scale.y / 2.f) * 0.75f;
+			}
+			else if(Index == ENTITY_ARMOR_1)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmor);
+				RenderTools()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
+				VisualSize = 64;
+			}
+			else if(Index == ENTITY_HEALTH_1)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupHealth);
+				RenderTools()->GetSpriteScale(SPRITE_PICKUP_HEALTH, Scale.x, Scale.y);
+				VisualSize = 64;
+			}
+			else if(Index == ENTITY_WEAPON_SHOTGUN)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_SHOTGUN]);
+				RenderTools()->GetSpriteScale(SPRITE_PICKUP_SHOTGUN, Scale.x, Scale.y);
+				VisualSize = g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_VisualSize;
+			}
+			else if(Index == ENTITY_WEAPON_GRENADE)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_GRENADE]);
+				RenderTools()->GetSpriteScale(SPRITE_PICKUP_GRENADE, Scale.x, Scale.y);
+				VisualSize = g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_VisualSize;
+			}
+			else if(Index == ENTITY_WEAPON_LASER)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_LASER]);
+				RenderTools()->GetSpriteScale(SPRITE_PICKUP_LASER, Scale.x, Scale.y);
+				VisualSize = g_pData->m_Weapons.m_aId[WEAPON_LASER].m_VisualSize;
+			}
+			else if(Index == ENTITY_POWERUP_NINJA)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_NINJA]);
+				RenderTools()->GetSpriteScale(SPRITE_PICKUP_NINJA, Scale.x, Scale.y);
+				VisualSize = 128;
+				Pos.x -= 10.0f;
+			}
+			else if(Index == ENTITY_ARMOR_SHOTGUN)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorShotgun);
+				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN, Scale.x, Scale.y);
+				VisualSize = 64;
+			}
+			else if(Index == ENTITY_ARMOR_GRENADE)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorGrenade);
+				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_GRENADE, Scale.x, Scale.y);
+				VisualSize = 64;
+			}
+			else if(Index == ENTITY_ARMOR_NINJA)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorNinja);
+				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_NINJA, Scale.x, Scale.y);
+				VisualSize = 64;
+			}
+			else if(Index == ENTITY_ARMOR_LASER)
+			{
+				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorLaser);
+				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_LASER, Scale.x, Scale.y);
+				VisualSize = 64;
+			}
+			else
+				continue;
+
+			if(Index != ENTITY_FLAGSTAND_RED && Index != ENTITY_FLAGSTAND_BLUE)
+			{
+				Pos += direction(Client()->GlobalTime() * 2.0f + x + y) * 2.5f;
+			}
+			Scale *= VisualSize;
+			Pos -= vec2((Scale.x - TileSize) / 2.f, (Scale.y - TileSize) / 2.f);
+
+			Graphics()->QuadsBegin();
+			IGraphics::CQuadItem Quad(Pos.x, Pos.y, Scale.x, Scale.y);
+			Graphics()->QuadsDrawTL(&Quad, 1);
+			Graphics()->QuadsEnd();
+		}
 	}
 }
 

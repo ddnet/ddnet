@@ -410,6 +410,30 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		}
 	}
 
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect No, Yes;
+		Selector.VSplitMid(&No, &Yes);
+
+		pEditor->Ui()->DoLabel(&Label, "Show ingame entities", 10.0f, TEXTALIGN_ML);
+
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_Ex(&s_ButtonNo, "No", !g_Config.m_EdShowIngameEntities, &No, 0, "Do not show how weapons, shields, hearts and flags appear ingame.", IGraphics::CORNER_L))
+		{
+			g_Config.m_EdShowIngameEntities = false;
+		}
+		if(pEditor->DoButton_Ex(&s_ButtonYes, "Yes", g_Config.m_EdShowIngameEntities, &Yes, 0, "Show how weapons, shields, hearts and flags appear ingame.", IGraphics::CORNER_R))
+		{
+			g_Config.m_EdShowIngameEntities = true;
+		}
+	}
+
 	return CUi::POPUP_KEEP_OPEN;
 }
 
