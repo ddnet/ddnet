@@ -154,7 +154,7 @@ void CNamePlates::RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateD
 
 		// TClient
 		if(Data.m_IsGame && Data.m_RealClientId >= 0)
-			if((g_Config.m_ClPingNameCircle || (m_pClient->m_Scoreboard.Active() && !m_pClient->m_Snap.m_apPlayerInfos[Data.m_RealClientId]->m_Local)) && (Client()->State() != IClient::STATE_DEMOPLAYBACK))
+			if((g_Config.m_ClPingNameCircle || (m_pClient->m_Scoreboard.IsActive() && !m_pClient->m_Snap.m_apPlayerInfos[Data.m_RealClientId]->m_Local)) && (Client()->State() != IClient::STATE_DEMOPLAYBACK))
 			{
 				Graphics()->TextureClear();
 				Graphics()->QuadsBegin();
