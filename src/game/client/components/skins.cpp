@@ -493,18 +493,10 @@ void CSkins::CSkinDownloadJob::Run()
 	const CTimeout Timeout{10000, 0, 8192, 10};
 	const size_t MaxResponseSize = 10 * 1024 * 1024; // 10 MiB
 
-	// We assume the file does not exist if we could not get the times
-	time_t FileCreatedTime, FileModifiedTime;
-	const bool GotFileTimes = m_pSkins->Storage()->RetrieveTimes(aPathReal, IStorage::TYPE_SAVE, &FileCreatedTime, &FileModifiedTime);
-
-	std::shared_ptr<CHttpRequest> pGet = HttpGet(aUrl);
+	std::shared_ptr<CHttpRequest> pGet = HttpGetBoth(aUrl, m_pSkins->Storage(), aPathReal, IStorage::TYPE_SAVE);
 	pGet->Timeout(Timeout);
 	pGet->MaxResponseSize(MaxResponseSize);
-	if(GotFileTimes)
-	{
-		pGet->IfModifiedSince(FileModifiedTime);
-		pGet->FailOnErrorStatus(false);
-	}
+	pGet->ValidateBeforeOverwrite(true);
 	pGet->LogProgress(HTTPLOG::NONE);
 	{
 		const CLockScope LockScope(m_Lock);
@@ -513,9 +505,15 @@ void CSkins::CSkinDownloadJob::Run()
 	m_pSkins->Http()->Run(pGet);
 
 	// Load existing file while waiting for the HTTP request
-	if(GotFileTimes)
 	{
-		m_pSkins->Graphics()->LoadPng(m_ImageInfo, aPathReal, IStorage::TYPE_SAVE);
+		void *pPngData;
+		unsigned PngSize;
+		if(m_pSkins->Storage()->ReadFile(aPathReal, IStorage::TYPE_SAVE, &pPngData, &PngSize))
+		{
+			m_pSkins->Graphics()->LoadPng(m_ImageInfo, (uint8_t *)pPngData, PngSize, aPathReal);
+			free(pPngData);
+			pPngData = nullptr;
+		}
 	}
 
 	pGet->Wait();
@@ -529,15 +527,19 @@ void CSkins::CSkinDownloadJob::Run()
 	}
 	if(pGet->StatusCode() == 304) // 304 Not Modified
 	{
-		if(m_ImageInfo.m_pData != nullptr)
+		bool Success = m_ImageInfo.m_pData != nullptr;
+		pGet->OnValidation(Success);
+		if(Success)
 		{
 			return; // Local skin is up-to-date and was loaded successfully
 		}
 
 		log_error("skins", "Failed to load PNG of existing downloaded skin '%s' from '%s', downloading it again", m_aName, aPathReal);
-		pGet = HttpGet(aUrl);
+		pGet = HttpGetBoth(aUrl, m_pSkins->Storage(), aPathReal, IStorage::TYPE_SAVE);
 		pGet->Timeout(Timeout);
 		pGet->MaxResponseSize(MaxResponseSize);
+		pGet->ValidateBeforeOverwrite(true);
+		pGet->SkipByFileTime(false);
 		pGet->LogProgress(HTTPLOG::NONE);
 		{
 			const CLockScope LockScope(m_Lock);
@@ -559,40 +561,12 @@ void CSkins::CSkinDownloadJob::Run()
 	size_t ResultSize;
 	pGet->Result(&pResult, &ResultSize);
 
-	if(!m_pSkins->Graphics()->LoadPng(m_ImageInfo, pResult, ResultSize, aUrl))
+	m_ImageInfo.Free();
+	bool Success = m_pSkins->Graphics()->LoadPng(m_ImageInfo, pResult, ResultSize, aUrl);
+	pGet->OnValidation(Success);
+	if(!Success)
 	{
-		log_error("skins", "Failed to load PNG of skin '%s' downloaded from '%s'", m_aName, aUrl);
-		return;
-	}
-
-	if(State() == IJob::STATE_ABORTED)
-	{
-		return;
-	}
-
-	char aBuf[IO_MAX_PATH_LENGTH];
-	char aPathTemp[IO_MAX_PATH_LENGTH];
-	str_format(aPathTemp, sizeof(aPathTemp), "downloadedskins/%s", IStorage::FormatTmpPath(aBuf, sizeof(aBuf), m_aName));
-
-	IOHANDLE TempFile = m_pSkins->Storage()->OpenFile(aPathTemp, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-	if(!TempFile)
-	{
-		log_error("skins", "Failed to open temporary skin file '%s' for writing", aPathTemp);
-		return;
-	}
-	if(io_write(TempFile, pResult, ResultSize) != ResultSize)
-	{
-		log_error("skins", "Failed to write downloaded skin data to '%s'", aPathTemp);
-		io_close(TempFile);
-		m_pSkins->Storage()->RemoveFile(aPathTemp, IStorage::TYPE_SAVE);
-		return;
-	}
-	io_close(TempFile);
-
-	if(!m_pSkins->Storage()->RenameFile(aPathTemp, aPathReal, IStorage::TYPE_SAVE))
-	{
-		log_error("skins", "Failed to rename temporary skin file '%s' to '%s'", aPathTemp, aPathReal);
-		m_pSkins->Storage()->RemoveFile(aPathTemp, IStorage::TYPE_SAVE);
+		log_error("skins", "Failed to load PNG of skin '%s' downloaded from '%s' (%d)", m_aName, aUrl, (int)ResultSize);
 		return;
 	}
 }
