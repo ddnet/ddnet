@@ -1517,6 +1517,8 @@ inline int CHud::GetDigitsIndex(int Value, int Max)
 
 inline float CHud::GetMovementInformationBoxHeight()
 {
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW)
+		return g_Config.m_ClShowhudPlayerPosition ? 3 * MOVEMENT_INFORMATION_LINE_HEIGHT + 2 : 0;
 	float BoxHeight = 3 * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 2 * MOVEMENT_INFORMATION_LINE_HEIGHT * g_Config.m_ClShowhudPlayerAngle;
 	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
 	{
@@ -1549,9 +1551,10 @@ void CHud::RenderMovementInformationTextContainer(STextContainerIndex &TextConta
 
 void CHud::RenderMovementInformation(const int ClientId)
 {
+	bool Freeview = ClientId == SPEC_FREEVIEW;
 	// Draw the infomations depending on settings: Position, speed and target angle
 	// This display is only to present the available information from the last snapshot, not to interpolate or predict
-	if(!g_Config.m_ClShowhudPlayerPosition && !g_Config.m_ClShowhudPlayerSpeed && !g_Config.m_ClShowhudPlayerAngle)
+	if(!g_Config.m_ClShowhudPlayerPosition && (Freeview || (!g_Config.m_ClShowhudPlayerSpeed && !g_Config.m_ClShowhudPlayerAngle)))
 	{
 		return;
 	}
@@ -1570,40 +1573,50 @@ void CHud::RenderMovementInformation(const int ClientId)
 
 	Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
 
-	const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
-	const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
-	const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
+	vec2 Pos;
+	float DisplaySpeedX{}, DisplaySpeedY{}, DisplayAngle{};
 
-	// To make the player position relative to blocks we need to divide by the block size
-	const vec2 Pos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pCurChar->m_X, pCurChar->m_Y), IntraTick) / 32.0f;
-
-	const vec2 Vel = mix(vec2(pPrevChar->m_VelX, pPrevChar->m_VelY), vec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
-
-	float VelspeedX = Vel.x / 256.0f * Client()->GameTickSpeed();
-	if(Vel.x >= -1 && Vel.x <= 1)
+	if(Freeview)
 	{
-		VelspeedX = 0;
+		Pos = m_pClient->m_Camera.m_Center / 32.f;
 	}
-	float VelspeedY = Vel.y / 256.0f * Client()->GameTickSpeed();
-	if(Vel.y >= -128 && Vel.y <= 128)
+	else
 	{
-		VelspeedY = 0;
-	}
-	// We show the speed in Blocks per Second (Bps) and therefore have to divide by the block size
-	float DisplaySpeedX = VelspeedX / 32;
-	float VelspeedLength = length(vec2(Vel.x, Vel.y) / 256.0f) * Client()->GameTickSpeed();
-	// Todo: Use Velramp tuning of each individual player
-	// Since these tuning parameters are almost never changed, the default values are sufficient in most cases
-	float Ramp = VelocityRamp(VelspeedLength, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
-	DisplaySpeedX *= Ramp;
-	float DisplaySpeedY = VelspeedY / 32;
+		const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
+		const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
+		const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
 
-	float Angle = m_pClient->m_Players.GetPlayerTargetAngle(pPrevChar, pCurChar, ClientId, IntraTick);
-	if(Angle < 0)
-	{
-		Angle += 2.0f * pi;
+		// To make the player position relative to blocks we need to divide by the block size
+		Pos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pCurChar->m_X, pCurChar->m_Y), IntraTick) / 32.0f;
+
+		const vec2 Vel = mix(vec2(pPrevChar->m_VelX, pPrevChar->m_VelY), vec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
+
+		float VelspeedX = Vel.x / 256.0f * Client()->GameTickSpeed();
+		if(Vel.x >= -1 && Vel.x <= 1)
+		{
+			VelspeedX = 0;
+		}
+		float VelspeedY = Vel.y / 256.0f * Client()->GameTickSpeed();
+		if(Vel.y >= -128 && Vel.y <= 128)
+		{
+			VelspeedY = 0;
+		}
+		// We show the speed in Blocks per Second (Bps) and therefore have to divide by the block size
+		DisplaySpeedX = VelspeedX / 32;
+		float VelspeedLength = length(vec2(Vel.x, Vel.y) / 256.0f) * Client()->GameTickSpeed();
+		// Todo: Use Velramp tuning of each individual player
+		// Since these tuning parameters are almost never changed, the default values are sufficient in most cases
+		float Ramp = VelocityRamp(VelspeedLength, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
+		DisplaySpeedX *= Ramp;
+		DisplaySpeedY = VelspeedY / 32;
+
+		float Angle = m_pClient->m_Players.GetPlayerTargetAngle(pPrevChar, pCurChar, ClientId, IntraTick);
+		if(Angle < 0)
+		{
+			Angle += 2.0f * pi;
+		}
+		DisplayAngle = Angle * 180.0f / pi;
 	}
-	float DisplayAngle = Angle * 180.0f / pi;
 
 	float y = StartY + LineSpacer * 2;
 	float xl = StartX + 2;
@@ -1624,6 +1637,9 @@ void CHud::RenderMovementInformation(const int ClientId)
 		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[1], TextRender()->DefaultTextColor(), xr, y);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 	}
+
+	if(Freeview)
+		return;
 
 	if(g_Config.m_ClShowhudPlayerSpeed)
 	{
@@ -1682,7 +1698,7 @@ void CHud::RenderSpectatorHud()
 	TextRender()->Text(m_Width - 174.0f, AdjustedHeight - 15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
 
 	// draw the camera info
-	if(m_pClient->m_Camera.SpectatingPlayer() && m_pClient->m_Camera.CanUseAutoSpecCamera())
+	if(m_pClient->m_Camera.SpectatingPlayer() && m_pClient->m_Camera.CanUseAutoSpecCamera() && g_Config.m_ClSpecAutoSync)
 	{
 		bool AutoSpecCameraEnabled = m_pClient->m_Camera.m_AutoSpecCamera;
 		const char *pLabelText = Localize("AUTO", "Spectating Camera Mode Icon");
@@ -1693,7 +1709,7 @@ void CHud::RenderSpectatorHud()
 		constexpr float Padding = 3.0f;
 		const float TagWidth = IconWidth + TextWidth + Padding * 3.0f;
 		const float TagX = m_Width - RightMargin - TagWidth;
-		Graphics()->DrawRect(TagX, m_Height - 12.0f, TagWidth, 10.0f, ColorRGBA(0.84f, 0.53f, 0.17f, AutoSpecCameraEnabled ? 0.85f : 0.25f), IGraphics::CORNER_ALL, 2.5f);
+		Graphics()->DrawRect(TagX, m_Height - 12.0f, TagWidth, 10.0f, ColorRGBA(1.0f, 1.0f, 1.0f, AutoSpecCameraEnabled ? 0.50f : 0.10f), IGraphics::CORNER_ALL, 2.5f);
 		TextRender()->TextColor(1, 1, 1, AutoSpecCameraEnabled ? 1.0f : 0.65f);
 		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		TextRender()->Text(TagX + Padding, m_Height - 10.0f, 6.0f, FontIcons::FONT_ICON_CAMERA, -1.0f);
@@ -1809,10 +1825,7 @@ void CHud::OnRender()
 			{
 				RenderPlayerState(SpectatorId);
 			}
-			if(SpectatorId != SPEC_FREEVIEW)
-			{
-				RenderMovementInformation(SpectatorId);
-			}
+			RenderMovementInformation(SpectatorId);
 			RenderSpectatorHud();
 		}
 

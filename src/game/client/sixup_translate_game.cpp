@@ -138,6 +138,41 @@ void CGameClient::ApplySkin7InfoFromSnapObj(const protocol7::CNetObj_De_ClientIn
 	ApplySkin7InfoFromGameMsg(&Msg, ClientId, 0);
 }
 
+void CGameClient::UpdateBotSkinDecoration(int ClientId)
+{
+	static const ColorRGBA BOT_COLORS[] = {
+		ColorRGBA(0xff0000),
+		ColorRGBA(0xff6600),
+		ColorRGBA(0x4d9f45),
+		ColorRGBA(0xd59e29),
+		ColorRGBA(0x9fd3a9),
+		ColorRGBA(0xbdd85e),
+		ColorRGBA(0xc07f94),
+		ColorRGBA(0xc3a267),
+		ColorRGBA(0xf8a83b),
+		ColorRGBA(0xcce2bf),
+		ColorRGBA(0xe6b498),
+		ColorRGBA(0x74c7a3),
+	};
+
+	for(auto &Sixup : m_aClients[ClientId].m_SkinInfo.m_aSixup)
+	{
+		if((m_pClient->m_TranslationContext.m_aClients[ClientId].m_PlayerFlags7 & protocol7::PLAYERFLAG_BOT) != 0)
+		{
+			Sixup.m_BotTexture = m_Skins7.BotDecorationTexture();
+			if(!Sixup.m_BotColor.a) // bot color has not been set; pick a random color once
+			{
+				Sixup.m_BotColor = BOT_COLORS[rand() % std::size(BOT_COLORS)];
+			}
+		}
+		else
+		{
+			Sixup.m_BotTexture.Invalidate();
+			Sixup.m_BotColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+		}
+	}
+}
+
 void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 {
 	if(!m_pClient->IsSixup())

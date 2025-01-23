@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">DDNet</string>
+	<string name="shortcut_play_vulkan_short">啟動 (Vulkan)</string>
+	<string name="shortcut_play_gles_short">啟動 (OpenGL ES)</string>
+	<string name="server_name">DDNet-Server</string>
+	<string name="server_notification_description_default">DDNet 伺服器正在運行…</string>
+	<string name="server_notification_description_stopping">DDNet 伺服器正在停止…</string>
+	<string name="server_notification_action_stop">停止</string>
+	<string name="server_notification_action_run_command">執行命令</string>
+	<string name="server_notification_channel_description">本地 DDNet 伺服器控制用通知。</string>
+	<string name="server_error_external_files_inaccessible">啟動 DDNet 伺服器錯誤：無法訪問外部文件目錄。</string>
+	<string name="server_error_exit_code">DDNet 伺服器異常退出，錯誤代碼為 \'%1$d\'。</string>
+</resources>
