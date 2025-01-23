@@ -111,8 +111,8 @@ void CServerBrowser::RegisterCommands()
 	m_pConsole->Register("remove_favorite_community", "s[community_id]", CFGFLAG_CLIENT, Con_RemoveFavoriteCommunity, this, "Remove a community from the favorites");
 	m_pConsole->Register("add_excluded_community", "s[community_id]", CFGFLAG_CLIENT, Con_AddExcludedCommunity, this, "Add a community to the exclusion filter");
 	m_pConsole->Register("remove_excluded_community", "s[community_id]", CFGFLAG_CLIENT, Con_RemoveExcludedCommunity, this, "Remove a community from the exclusion filter");
-	m_pConsole->Register("add_excluded_country", "s[community_id] s[country_code]", CFGFLAG_CLIENT, Con_AddExcludedCountry, this, "Add a country to the exclusion filter for a specific community");
-	m_pConsole->Register("remove_excluded_country", "s[community_id] s[country_code]", CFGFLAG_CLIENT, Con_RemoveExcludedCountry, this, "Remove a country from the exclusion filter for a specific community");
+	m_pConsole->Register("add_excluded_country", "s[community_id] s[country_code]", CFGFLAG_CLIENT, Con_AddExcludedCountry, this, "Add a country to the exclusion filter for a specific community (ISO 3166-1 numeric)");
+	m_pConsole->Register("remove_excluded_country", "s[community_id] s[country_code]", CFGFLAG_CLIENT, Con_RemoveExcludedCountry, this, "Remove a country from the exclusion filter for a specific community (ISO 3166-1 numeric)");
 	m_pConsole->Register("add_excluded_type", "s[community_id] s[type]", CFGFLAG_CLIENT, Con_AddExcludedType, this, "Add a type to the exclusion filter for a specific community");
 	m_pConsole->Register("remove_excluded_type", "s[community_id] s[type]", CFGFLAG_CLIENT, Con_RemoveExcludedType, this, "Remove a type from the exclusion filter for a specific community");
 	m_pConsole->Register("leak_ip_address_to_all_servers", "", CFGFLAG_CLIENT, Con_LeakIpAddress, this, "Leaks your IP address to all servers by pinging each of them, also acquiring the latency in the process");

@@ -2133,7 +2133,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 			q.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
 			q.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 
-			ADD_INT(q, m_aClients[i].m_Country); // client country
+			ADD_INT(q, m_aClients[i].m_Country); // client country (ISO 3166-1 numeric)
 
 			int Score;
 			if(m_aClients[i].m_Score.has_value())
@@ -2232,7 +2232,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 			{
 				Packer.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
 				Packer.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
-				Packer.AddInt(m_aClients[i].m_Country); // client country
+				Packer.AddInt(m_aClients[i].m_Country); // client country (ISO 3166-1 numeric)
 				Packer.AddInt(m_aClients[i].m_Score.value_or(-1)); // client score
 				Packer.AddInt(GameServer()->IsClientPlayer(i) ? 0 : 1); // flag spectator=1, bot=2 (player=0)
 			}
@@ -2403,7 +2403,7 @@ void CServer::UpdateRegisterServerInfo()
 			JsonWriter.WriteStrValue(ClientClan(i));
 
 			JsonWriter.WriteAttribute("country");
-			JsonWriter.WriteIntValue(m_aClients[i].m_Country);
+			JsonWriter.WriteIntValue(m_aClients[i].m_Country); // ISO 3166-1 numeric
 
 			JsonWriter.WriteAttribute("score");
 			JsonWriter.WriteIntValue(m_aClients[i].m_Score.value_or(-9999));
