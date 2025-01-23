@@ -4,6 +4,7 @@
 #	younesdevil		2021-12-07
 #	Player			2023-01-26
 #	ArAsH			2024-10-21
+#	Fàłłéñ			2025-01-13
 ##### /authors #####
 
 ##### translated strings #####
@@ -925,7 +926,7 @@ NA
 == ﯽﻟﺎﻤﺷ ﯼﺎﮑﯾﺮﻣﺁ
 
 SA
-== آمریکای جنوبی
+== ﯽﺑﻮﻨﺟ ىﺎﻜﯾﺮﻣﺁ
 
 CHN
 == ﻦﯿﭼ
@@ -961,7 +962,7 @@ Speed up the demo
 == ﻮﻣﺩ ﺖﻋﺮﺳ ﻥﺩﺮﮐ ﺩﺎﯾﺯ
 
 Export cut as a separate demo
-==  ﻪﻧﺎﮔﺍﺪﺟ ﻮﻣﺩ ﻥﺍﻮﻨﻋ ﻪﺑ ﺵﺮﺑ ﻥﺩﺮﮐ ﺝﺭﺎﺧ
+==  ﻦﻛ ﺭﺩﺎﺻ ﻪﻧﺎﮔﺍﺪﺟ ﻮﻣﺩ ﻚﯾ ﻥﺍﻮﻨﻋﻪﺑ ﺍﺭ ﺵﺮﺑ
 
 Go back one marker
 == ﺩﺮﮔﺮﺑ ﺐﻘﻋ ﻪﺑ ﺮﮕﻧﺎﺸﻧ ﮏﯾ
@@ -1669,7 +1670,7 @@ Online clanmates (%d)
 
 [friends (server browser)]
 Offline (%d)
-== ﻥﺎﺘﺳﻭﺩ] (%d) ﻦﯾﻼﻓﺁ
+== ﻥﺎﺘﺳﻭﺩ (%d) ﻦﯾﻼﻓﺁ
 
 Click to select server. Double click to join your friend.
 == .ﺪﯿﻨﻛ ﻚﯿﻠﻛ ﺭﺎﺑﻭﺩ ﺩﻮﺧ ﺖﺳﻭﺩ ﻪﺑ ﻦﺘﺳﻮﯿﭘ ىﺍﺮﺑ .ﺪﯿﻨﻛ ﻚﯿﻠﻛ ﺭﻭﺮﺳ ﺏﺎﺨﺘﻧﺍ ىﺍﺮﺑ
@@ -1716,7 +1717,7 @@ Close the demo player
 == ﺪﯾﺪﻨﺒﺑ ﺍﺭ ﻮﻣﺩ ﻩﺪﻨﻨﻛ ﺶﺨﭘ
 
 Export demo cut
-== ﻩﺪﺷ ﺵﺮﺑ ﻮﻣﺩ ﻥﺩﺮﻛ ﺭﺩﺎﺻ
+== ﻦﻛ ﺭﺩﺎﺻ ﺍﺭ ﻮﻣﺩ ﺵﺮﺑ
 
 Cut interval
 == ﺵﺮﺑ ﻪﻠﺻﺎﻓ
@@ -1923,150 +1924,149 @@ Grabs
 Moved ingame
 == ﺪﺷ ﻞﻘﺘﻨﻣ ىﺯﺎﺑ
 
-
 https://wiki.ddnet.org/wiki/Mapping
-== https://wiki.ddnet.org/wiki/Mapping
+== 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== ﺖﺳﺍ ﻦﻜﻤﻣ ﻪﻛ ،ﺖﺴﯿﻧ ﺐﺳﺎﻨﺘﻣ %s ﺎﺑ ﻥﺁ ﻉﺎﻔﺗﺭﺍ ﺎﯾ ﺖﺴﯿﻧ ﺐﺳﺎﻨﺘﻣ %d ﺎﺑ %d ﺮﭽﺴﻜﺗ ﺽﺮﻋ .ﺩﻮﺷ ىﺮﺼﺑ ىﺎﻫﮒﺎﺑ ﺩﺎﺠﯾﺍ ﺚﻋﺎﺑ ﺖﺳﺍ
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== ىﺭﺍﺬﮔﺭﺎﺑ ﺖﻧﺪﯾﺩ ﯽﻤﯾﺪﻗ ىﺎﻫﻪﺨﺴﻧ ﻂﺳﻮﺗ ﺪﻧﺍﻮﺗﯽﻤﻧ ﻭ ﺖﺴﯿﻧ ﺭﺎﮔﺯﺎﺳ pnglite ﺎﺑ "%s" .ﺩﻮﺷ
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺪﻧﺪﺸﻧ ىﺭﺍﺬﮔﺭﺎﺑ ﺎﻫﺖﻧﻮﻓ ﯽﺧﺮﺑ
 
 Loading background map
-== 
+== ﻪﻨﯿﻣﺯﺲﭘ ﻪﺸﻘﻧ ىﺭﺍﺬﮔﺭﺎﺑ ﻝﺎﺣ ﺭﺩ
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== ﺭﺎﻛﺩﻮﺧ
 
 Online friends (%d)
-== 
+== (%d) ﻦﯾﻼﻧﺁ ﻥﺎﺘﺳﻭﺩ
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 
+== ﺖﺴﯿﻟ ﺭﺩ ﻥﺎﺸﻣﺎﻧ ىﻭﺭ ﻚﯿﻠﻛ ﺎﯾ ﺮﯾﺯ ﺭﺩﺎﻛ ﺭﺩ ﻥﺎﺸﻣﺎﻧ ﻥﺩﺮﻛ ﺩﺭﺍﻭ ﺎﺑ ﺍﺭ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ .ﺪﯿﻨﻛ ﻪﻓﺎﺿﺍ ﻥﺎﻨﻜﯾﺯﺎﺑ
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
+== ﻡﺎﻧ ﺶﺨﺑ ﻦﺘﺷﺍﺬﮔ ﯽﻟﺎﺧ ﻭ ﺮﯾﺯ ﺭﺩﺎﻛ ﺭﺩ ﻦﻠﻛ ﻡﺎﻧ ﻥﺩﺮﻛ ﺩﺭﺍﻭ ﺎﺑ ﺍﺭ ﺩﻮﺧ ىﺎﻫﯽﻨﻠﻛﻢﻫ .ﺪﯿﻨﻛ ﻪﻓﺎﺿﺍ
 
 Offline friends and clanmates will appear here.
-== 
+== .ﺪﺷ ﺪﻨﻫﺍﻮﺧ ﻩﺩﺍﺩ ﺶﯾﺎﻤﻧ ﺎﺠﻨﯾﺍ ﺭﺩ ﺎﻤﺷ ﻦﯾﻼﻓﺁ ىﺎﻫﯽﻨﻠﻛﻢﻫ ﻭ ﻥﺎﺘﺳﻭﺩ
 
 Toggle auto camera
-== 
+== ﻦﻛ ﻝﺎﻌﻓﺮﯿﻏ/ﻝﺎﻌﻓ ﺍﺭ ﺭﺎﻛﺩﻮﺧ ﻦﯿﺑﺭﻭﺩ
 
 Edit touch controls
-== 
+== ﻦﻛ ﺶﯾﺍﺮﯾﻭ ﺍﺭ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ
 
 Close
-== 
+== ﻦﺘﺴﺑ
 
 https://wiki.ddnet.org/wiki/Touch_controls
 == 
 
 Save changes
-== 
+== ﻦﻛ ﻩﺮﯿﺧﺫ ﺍﺭ ﺕﺍﺮﯿﯿﻐﺗ
 
 Error saving touch controls
-== 
+== ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ىﺯﺎﺳﻩﺮﯿﺧﺫ ﺭﺩ ﺎﻄﺧ
 
 Could not save touch controls to file. See local console for details.
-== 
+== ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺖﺴﯿﻧ ﻞﯾﺎﻓ ﺭﺩ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ﻩﺮﯿﺧﺫ ﻪﺑ ﺭﺩﺎﻗ .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ
 
 Unsaved changes
-== 
+== ﻩﺪﺸﻧﻩﺮﯿﺧﺫ ﺕﺍﺮﯿﯿﻐﺗ
 
 Discard changes
-== 
+== ﺮﯿﮕﺑ ﻩﺪﯾﺩﺎﻧ ﺍﺭ ﺕﺍﺮﯿﯿﻐﺗ
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 
+== ﺍﺭ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ﺭﺩ ﯽﻠﻌﻓ ﺕﺍﺮﯿﯿﻐﺗ ﺪﯿﻫﺍﻮﺧ﯂ﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ ؟ﺪﯾﺮﯿﮕﺑ ﻩﺪﯾﺩﺎﻧ
 
 Are you sure that you want to reset the touch controls to default?
-== 
+== ؟ﯽﻧﺎﺸﻧﺯﺎﺑ ﺽﺮﻓﺶﯿﭘ ﺖﻟﺎﺣ ﻪﺑ ﺍﺭ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ﺪﯿﻫﺍﻮﺧﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ ؟ﺪﯿﻨﻛ
 
 Import from clipboard
-== 
+== ﺩﺭﻮﺑﭗﯿﻠﻛ ﺯﺍ ﻥﺩﺮﻛ ﺩﺭﺍﻭ
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
+== ؟ﺪﯿﻨﻛ ﺩﺭﺍﻭ ﺩﺭﻮﺑﭗﯿﻠﻛ ﺯﺍ ﺍﺭ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ﺪﯿﻫﺍﻮﺧﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ .ﺩﺮﻛ ﺪﻫﺍﻮﺧ ﯽﺴﯾﻮﻧﺯﺎﺑ ﺍﺭ ﺎﻤﺷ ﯽﻠﻌﻓ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ﺭﺎﻛ ﻦﯾﺍ
 
 Export to clipboard
-== 
+== ﺩﺭﻮﺑﭗﯿﻠﻛ ﻪﺑ ﻥﺩﺮﻛ ﺭﺩﺎﺻ
 
 Direct touch input while ingame
-== 
+== ىﺯﺎﺑ ﻦﯿﺣ ﺭﺩ ﻢﯿﻘﺘﺴﻣ ﯽﺴﻤﻟ ىﺩﻭﺭﻭ
 
 [Direct touch input]
 Disabled
-== 
+== ﻝﺎﻌﻓﺮﯿﻏ
 
 [Direct touch input]
 Active action
-== 
+== ﻝﺎﻌﻓ ﻡﺍﺪﻗﺍ
 
 [Direct touch input]
 Aim
-== 
+== ىﺮﯿﮔﻑﺪﻫ
 
 [Direct touch input]
 Fire
-== 
+== ىﺯﺍﺪﻧﺍﺮﯿﺗ
 
 [Direct touch input]
 Hook
-== 
+== ﺏﻼﻗ
 
 Direct touch input while spectating
-== 
+== ىﺯﺎﺑ ىﺎﺷﺎﻤﺗ ﻦﯿﺣ ﺭﺩ ﻢﯿﻘﺘﺴﻣ ﯽﺴﻤﻟ ىﺩﻭﺭﻭ
 
 Error loading touch controls
-== 
+== ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ىﺭﺍﺬﮔﺭﺎﺑ ﺭﺩ ﺎﻄﺧ
 
 Could not load touch controls from file. See local console for details.
-== 
+== ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺖﺴﯿﻧ ﻞﯾﺎﻓ ﺯﺍ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ىﺭﺍﺬﮔﺭﺎﺑ ﻪﺑ ﺭﺩﺎﻗ .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ
 
 Could not load default touch controls from file. See local console for details.
-== 
+== ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺖﺴﯿﻧ ﻞﯾﺎﻓ ﺯﺍ ﺽﺮﻓﺶﯿﭘ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ىﺭﺍﺬﮔﺭﺎﺑ ﻪﺑ ﺭﺩﺎﻗ .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ
 
 Could not load touch controls from clipboard. See local console for details.
-== 
+== ﺕﺎﯿﺋﺰﺟ ىﺍﺮﺑ .ﺖﺴﯿﻧ ﺩﺭﻮﺑﭗﯿﻠﻛ ﺯﺍ ﯽﺴﻤﻟ ىﺎﻫﻝﺮﺘﻨﻛ ىﺭﺍﺬﮔﺭﺎﺑ ﻪﺑ ﺭﺩﺎﻗ .ﺪﯿﻨﻛ ﯽﺳﺭﺮﺑ ﺍﺭ ﯽﻠﺤﻣ ﻝﻮﺴﻨﻛ ،ﺮﺘﺸﯿﺑ
 
 Show client IDs in name plates
-== 
+==  ﻡﺎﻧ کﻼﭘ ﺭﺩ ﺮﺑﺭﺎﻛ ىﺎﻫﻪﺳﺎﻨﺷ ﺶﯾﺎﻤﻧ
 
 Hook Strength
-== 
+== ﺏﻼﻗ ﺕﺭﺪﻗ
 
 Size of hook strength icon and number indicator
-== 
+== ىﺩﺪﻋ ﺮﮕﻧﺎﺸﻧ ﻭ ﺏﻼﻗ ﺕﺭﺪﻗ ﻥﻮﻜﯾﺁ ﻩﺯﺍﺪﻧﺍ
 
 Key Presses
-== 
+== ﺎﻫﻪﻤﻛﺩ ﺭﺎﺸﻓ
 
 Size of key press icons
-== 
+== ﺎﻫﻪﻤﻛﺩ ﺭﺎﺸﻓ ىﺎﻫﻥﻮﻜﯾﺁ ﻩﺯﺍﺪﻧﺍ
 
 Width of your own hook collision line
-== 
+== ﻥﺎﺗﺩﻮﺧ ﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ ﻂﺧ ﺽﺮﻋ
 
 Width of others' hook collision line
-== 
+== ﻥﺍﺮﮕﯾﺩ ﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ ﻂﺧ ﺽﺮﻋ
 
 Preview 'Hook collisions' being pressed
-== 
+== 'ﺎﻫﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ' ﻥﺩﺍﺩ ﺭﺎﺸﻓ ﺶﯾﺎﻤﻧﺶﯿﭘ
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== ﺕﺎﻤﯿﻈﻨﺗ ﺭﺩ ﺍﺭ ﺎﻫﻥﻼﻋﺍ ﻩﺯﺎﺟﺍ ﻪﻛ ﺪﯾﻮﺷ ﻦﺌﻤﻄﻣ .ﺩﻮﺷ ىﺯﺍﺪﻧﺍﻩﺍﺭ ﺖﺴﻧﺍﻮﺘﻧ ﺭﻭﺮﺳ .ﺩﻮﺷ ﺍﺮﺟﺍ ﻪﻨﯿﻣﺯﺲﭘ ﺭﺩ ﺪﻧﺍﻮﺘﺑ ﺭﻭﺮﺳ ﺎﺗ ﺪﯾﺍﻩﺩﺮﻛ ﻝﺎﻌﻓ ﻪﻣﺎﻧﺮﺑ
 
 Aim
-== 
+== ىﺮﯿﮔﻑﺪﻫ
 
 Active: Fire
-== 
+== ىﺯﺍﺪﻧﺍﺮﯿﺗ :ﻝﺎﻌﻓ
 
 Active: Hook
-== 
+== ﺏﻼﻗ :ﻝﺎﻌﻓ
