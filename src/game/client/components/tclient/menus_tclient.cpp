@@ -1290,6 +1290,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarList, Localize("Enable warlist"), &g_Config.m_ClWarList, &Column2, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListChat, Localize("Colors in chat"), &g_Config.m_ClWarListChat, &Column2, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListScoreboard, Localize("Colors in scoreboard"), &g_Config.m_ClWarListScoreboard, &Column2, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListSpectate, Localize("Colors in spectate select"), &g_Config.m_ClWarListSpectate, &Column2, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWarListShowClan, Localize("Show clan if war"), &g_Config.m_ClWarListShowClan, &Column2, LineSize);
 
 	// ======WAR TYPE EDITING======

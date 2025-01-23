@@ -525,6 +525,13 @@ void CSpectator::OnRender()
 			GameClient()->FormatClientId(m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
 			TextRender()->TextEx(&NameCursor, aClientId);
 		}
+
+		// TClient
+		if(g_Config.m_ClWarList && g_Config.m_ClWarListSpectate && GameClient()->m_WarList.GetAnyWar(i)) 
+		{
+			TextRender()->TextColor(GameClient()->m_WarList.GetPriorityColor(i));
+		}
+
 		TextRender()->TextEx(&NameCursor, m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_aName);
 
 		if(GameClient()->m_MultiViewActivated)
