@@ -1144,36 +1144,35 @@ void net_addr_str_v6(const unsigned short ip[8], int port, char *buffer, int buf
 	}
 }
 
-bool net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port)
+void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_port)
 {
 	if(addr->type & NETTYPE_IPV4 || addr->type & NETTYPE_WEBSOCKET_IPV4)
 	{
-		if(add_port != 0)
+		if(add_port)
+		{
 			str_format(string, max_length, "%d.%d.%d.%d:%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3], addr->port);
+		}
 		else
+		{
 			str_format(string, max_length, "%d.%d.%d.%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3]);
+		}
 	}
 	else if(addr->type & NETTYPE_IPV6)
 	{
-		int port = -1;
 		unsigned short ip[8];
-		int i;
-		if(add_port)
-		{
-			port = addr->port;
-		}
-		for(i = 0; i < 8; i++)
+		for(int i = 0; i < 8; i++)
 		{
 			ip[i] = (addr->ip[i * 2] << 8) | (addr->ip[i * 2 + 1]);
 		}
+		int port = add_port ? addr->port : -1;
 		net_addr_str_v6(ip, port, string, max_length);
 	}
 	else
 	{
-		str_format(string, max_length, "unknown type %d", addr->type);
-		return false;
+		char error[64];
+		str_format(error, sizeof(error), "unknown NETADDR type %d", addr->type);
+		dbg_assert(false, error);
 	}
-	return true;
 }
 
 static int priv_net_extract(const char *hostname, char *host, int max_host, int *port)

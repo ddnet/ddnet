@@ -83,7 +83,7 @@ int main(int argc, const char **argv)
 		if(Success)
 		{
 			char aStunAddr[NETADDR_MAXSTRSIZE];
-			net_addr_str(&StunAddr, aStunAddr, sizeof(aStunAddr), 1);
+			net_addr_str(&StunAddr, aStunAddr, sizeof(aStunAddr), true);
 			log_info("stun", "public ip address: %s", aStunAddr);
 			break;
 		}

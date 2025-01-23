@@ -8910,7 +8910,7 @@ void CEditor::LoadCurrentMap()
 {
 	if(Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_SAVE))
 	{
-		m_ValidSaveFilename = true;
+		m_ValidSaveFilename = !str_startswith(m_pClient->GetCurrentMapPath(), "downloadedmaps/");
 	}
 	else
 	{
@@ -9181,7 +9181,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 					if(!UseNextFree && Adjust == 0 && IsTeleTileNumberUsedAny(pTeleLayer->m_pTiles[i].m_Index))
 					{
-						if(IsTeleTileCheckpoint(pTeleLayer->m_pTeleTile[i].m_Number))
+						if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
 							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleCheckpointNumber;
 						else
 							pTeleLayer->m_pTeleTile[i].m_Number = m_TeleNumber;

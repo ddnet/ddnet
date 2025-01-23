@@ -174,7 +174,7 @@ bool CSpectator::OnInput(const IInput::CEvent &Event)
 	if(g_Config.m_ClSpectatorMouseclicks)
 	{
 		if(m_pClient->m_Snap.m_SpecInfo.m_Active && !IsActive() && !GameClient()->m_MultiViewActivated &&
-			!Ui()->IsPopupOpen() && m_pClient->m_GameConsole.IsClosed() && !m_pClient->m_Menus.IsActive())
+			!Ui()->IsPopupOpen() && !m_pClient->m_GameConsole.IsActive() && !m_pClient->m_Menus.IsActive())
 		{
 			if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_1)
 			{

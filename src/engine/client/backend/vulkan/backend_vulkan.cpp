@@ -1361,7 +1361,8 @@ protected:
 			VkSubresourceLayout SubResourceLayout;
 			vkGetImageSubresourceLayout(m_VKDevice, m_GetPresentedImgDataHelperImage, &SubResource, &SubResourceLayout);
 
-			vkMapMemory(m_VKDevice, m_GetPresentedImgDataHelperMem.m_Mem, 0, VK_WHOLE_SIZE, 0, (void **)&m_pGetPresentedImgDataHelperMappedMemory);
+			if(vkMapMemory(m_VKDevice, m_GetPresentedImgDataHelperMem.m_Mem, 0, VK_WHOLE_SIZE, 0, (void **)&m_pGetPresentedImgDataHelperMappedMemory) != VK_SUCCESS)
+				return false;
 			m_GetPresentedImgDataHelperMappedLayoutOffset = SubResourceLayout.offset;
 			m_GetPresentedImgDataHelperMappedLayoutPitch = SubResourceLayout.rowPitch;
 			m_pGetPresentedImgDataHelperMappedMemory += m_GetPresentedImgDataHelperMappedLayoutOffset;
@@ -1694,7 +1695,8 @@ protected:
 			void *pMapData = nullptr;
 			if(RequiresMapping)
 			{
-				vkMapMemory(m_VKDevice, TmpBufferMemory.m_Mem, 0, VK_WHOLE_SIZE, 0, &pMapData);
+				if(vkMapMemory(m_VKDevice, TmpBufferMemory.m_Mem, 0, VK_WHOLE_SIZE, 0, &pMapData) != VK_SUCCESS)
+					return false;
 				mem_copy(pMapData, pBufferData, static_cast<size_t>(RequiredSize));
 			}
 
@@ -6339,7 +6341,8 @@ public:
 				return false;
 
 			void *pMappedData = nullptr;
-			vkMapMemory(m_VKDevice, StreamBufferMemory.m_Mem, 0, VK_WHOLE_SIZE, 0, &pMappedData);
+			if(vkMapMemory(m_VKDevice, StreamBufferMemory.m_Mem, 0, VK_WHOLE_SIZE, 0, &pMappedData) != VK_SUCCESS)
+				return false;
 
 			size_t NewBufferIndex = StreamUniformBuffer.GetBuffers(m_CurImageIndex).size();
 			for(size_t i = 0; i < BufferCreateCount; ++i)
@@ -6360,6 +6363,14 @@ public:
 			NewStreamBuffer.m_UsedSize += DataSize;
 
 			StreamUniformBuffer.IncreaseUsedCount(m_CurImageIndex);
+		}
+
+		// Offset here is the offset in the buffer
+		if(BufferMem.m_Size - Offset < DataSize)
+		{
+			SetError(EGfxErrorType::GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER, "Stream buffers are limited to CCommandBuffer::MAX_VERTICES. Exceeding it is a bug in the high level code.",
+				GetMemoryUsageShort());
+			return false;
 		}
 
 		{

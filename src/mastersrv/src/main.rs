@@ -1,3 +1,4 @@
+use arc_swap::ArcSwap;
 use arrayvec::ArrayString;
 use arrayvec::ArrayVec;
 use clap::value_t_or_exit;
@@ -44,12 +45,15 @@ extern crate log;
 use crate::addr::Addr;
 use crate::addr::Protocol;
 use crate::addr::RegisterAddr;
+use crate::config::Config;
+use crate::config::ConfigLocation;
 use crate::locations::Location;
 use crate::locations::Locations;
 
 // Naming convention: Always use the abbreviation `addr` except in user-facing
 // (e.g. serialized) identifiers.
 mod addr;
+mod config;
 mod locations;
 
 const SERVER_TIMEOUT_SECONDS: u64 = 30;
@@ -306,7 +310,7 @@ impl Challenger {
 
 struct Shared<'a> {
     challenger: &'a Mutex<Challenger>,
-    locations: &'a Locations,
+    config: &'a Config,
     servers: &'a Mutex<Servers>,
     socket: &'a Arc<tokio::net::UdpSocket>,
     timekeeper: Timekeeper,
@@ -587,7 +591,7 @@ async fn handle_periodic_writeout(
             servers.clone()
         };
         if let Some((filename, filename_temp)) = &dump_filename {
-            let json = json::to_string(&Dump::new(now, &servers)).unwrap();
+            let json = json::to_string(&Dump::new(now, &servers)).unwrap() + "\n";
             overwrite_atomically(filename, filename_temp, json.as_bytes())
                 .await
                 .unwrap();
@@ -614,7 +618,7 @@ async fn handle_periodic_writeout(
                 }
                 non_backcompat_addrs.sort_unstable();
                 non_backcompat_addrs.dedup();
-                let json = json::to_string(&non_backcompat_addrs).unwrap();
+                let json = json::to_string(&non_backcompat_addrs).unwrap() + "\n";
                 overwrite_atomically(filename, filename_temp, json.as_bytes())
                     .await
                     .unwrap();
@@ -637,7 +641,7 @@ async fn handle_periodic_writeout(
                     SerializedServer::new(s, location)
                 }));
                 serialized.servers.sort_by_key(|s| s.addresses);
-                json::to_string(&serialized).unwrap()
+                json::to_string(&serialized).unwrap() + "\n"
             };
             overwrite_atomically(&servers_filename, servers_filename_temp, json.as_bytes())
                 .await
@@ -650,6 +654,39 @@ async fn handle_periodic_writeout(
             iteration += 1;
         } else {
             iteration = elapsed.as_secs();
+        }
+    }
+}
+
+async fn handle_config_reread(config_location: ConfigLocation, config: Arc<ArcSwap<Config>>) {
+    #[cfg(not(unix))]
+    {
+        use std::future;
+
+        // Do nothing. Config rereading isn't implemented on non-Unix OSs.
+        future::pending().await
+    }
+
+    #[cfg(unix)]
+    {
+        use tokio::signal::unix::signal;
+        use tokio::signal::unix::SignalKind;
+
+        let mut sighup = signal(SignalKind::hangup()).unwrap();
+        loop {
+            sighup.recv().await.unwrap();
+
+            // This is theoretically blocking, but it should™ be fine.
+            match config_location.read() {
+                Err(e) => {
+                    error!("error re-reading config: {}", e);
+                    continue;
+                }
+                Ok(new_config) => {
+                    config.store(Arc::new(new_config));
+                    info!("successfully reloaded config");
+                }
+            }
         }
     }
 }
@@ -699,18 +736,25 @@ fn handle_register(
     };
 
     let addr = register.address.with_ip(remote_addr);
-    let challenge = shared.challenge_for_addr(&addr);
 
-    let correct_challenge = register
-        .challenge_token
-        .as_ref()
-        .map(|ct| challenge.is_valid(ct))
-        .unwrap_or(false);
-    let should_send_challenge = register
-        .challenge_token
-        .as_ref()
-        .map(|ct| ct != challenge.current())
-        .unwrap_or(true);
+    if let Some(reason) = shared.config.is_banned(addr) {
+        return Err(RegisterError::new(reason.into()));
+    }
+
+    let is_exempt = shared.config.is_exempt_from_port_forward_check(addr);
+    let challenge = shared.challenge_for_addr(&addr);
+    let correct_challenge = is_exempt
+        || register
+            .challenge_token
+            .as_ref()
+            .map(|ct| challenge.is_valid(ct))
+            .unwrap_or(false);
+    let should_send_challenge = !is_exempt
+        && register
+            .challenge_token
+            .as_ref()
+            .map(|ct| ct != challenge.current())
+            .unwrap_or(true);
 
     let result = if correct_challenge {
         let raw_info = register
@@ -728,7 +772,7 @@ fn handle_register(
             AddrInfo {
                 kind: EntryKind::Mastersrv,
                 ping_time: shared.timekeeper.now(),
-                location: shared.locations.lookup(addr.ip),
+                location: shared.config.locations.lookup(addr.ip),
                 secret: register.secret,
             },
             register.info_serial,
@@ -824,7 +868,10 @@ fn register_from_headers(
         challenge_token: parse_opt(headers, "Challenge-Token")?,
         info_serial: parse(headers, "Info-Serial")?,
         info: if !info.is_empty() {
-            match headers.typed_get::<headers::ContentType>().map(mime::Mime::from) {
+            match headers
+                .typed_get::<headers::ContentType>()
+                .map(mime::Mime::from)
+            {
                 Some(mime) if mime.essence_str() == mime::APPLICATION_JSON => {}
                 _ => return Err(RegisterError::unsupported_media_type()),
             }
@@ -900,6 +947,12 @@ async fn main() {
             .long("locations")
             .value_name("LOCATIONS")
             .help("IP to continent locations database filename (libloc format, can be obtained from https://location.ipfire.org/databases/1/location.db.xz).")
+            .conflicts_with("config")
+        )
+        .arg(Arg::with_name("config")
+            .long("config")
+            .value_name("CONFIG")
+            .help("TOML config (can be re-read using SIGHUP signal)")
         )
         .arg(Arg::with_name("write-addresses")
             .long("write-addresses")
@@ -953,17 +1006,17 @@ async fn main() {
         None
     };
     let read_write_dump = matches.value_of("read-write-dump").map(|s| s.to_owned());
+    let config_filename = matches.value_of("config");
 
+    let config_location = match (config_filename, matches.value_of("locations")) {
+        (None, None) => ConfigLocation::None,
+        (None, Some(l)) => ConfigLocation::LocationsFileParameter(l.into()),
+        (Some(f), None) => ConfigLocation::File(f.into()),
+        (Some(_), Some(_)) => unreachable!(),
+    };
+    let config = Arc::new(ArcSwap::from_pointee(config_location.read().unwrap()));
     let timekeeper = Timekeeper::new();
     let challenger = Arc::new(Mutex::new(Challenger::new()));
-    let locations = Arc::new(
-        matches
-            .value_of("locations")
-            .map(|l| Locations::read(Path::new(&l)))
-            .transpose()
-            .unwrap()
-            .unwrap_or_else(Locations::empty),
-    );
     let mut servers = Servers::new();
     match &read_write_dump {
         Some(path) => match read_dump(Path::new(&path), timekeeper).await {
@@ -994,6 +1047,7 @@ async fn main() {
         matches.value_of("out").unwrap().to_owned(),
         timekeeper,
     ));
+    let task_reread = tokio::spawn(handle_config_reread(config_location, config.clone()));
 
     let connecting_addr = move |addr: Option<SocketAddr>,
                                 headers: &warp::http::HeaderMap|
@@ -1044,9 +1098,10 @@ async fn main() {
         .map(
             move |headers: warp::http::HeaderMap, addr: Option<SocketAddr>, info: bytes::Bytes| {
                 build_response(|| {
+                    let config = config.load();
                     let shared = Shared {
                         challenger: &challenger,
-                        locations: &locations,
+                        config: &config,
                         servers: &servers,
                         socket: &socket.0,
                         timekeeper,
@@ -1089,8 +1144,8 @@ async fn main() {
         tokio::spawn(server.run(listen_address))
     };
 
-    match tokio::try_join!(task_reseed, task_writeout, task_server) {
-        Ok(((), (), ())) => unreachable!(),
+    match tokio::try_join!(task_reseed, task_writeout, task_reread, task_server) {
+        Ok(((), (), (), ())) => unreachable!(),
         Err(e) => panic::resume_unwind(e.into_panic()),
     }
 }
