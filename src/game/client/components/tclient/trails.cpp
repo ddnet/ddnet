@@ -181,7 +181,7 @@ void CTrails::OnRender()
 
 		for(int i = 0; i < (int)Trail.size() - 1; i++)
 		{
-			if(distance(Trail.at(i).Pos, Trail.at(i + 1).Pos) > 300.0f)
+			if(distance(Trail.at(i).Pos, Trail.at(i + 1).Pos) > 120.0f)
 				Trail.at(i).TooLong = true;
 		}
 
