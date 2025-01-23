@@ -746,6 +746,44 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		}
 	}
 
+	if(m_pClient->m_GameInfo.m_DDRaceTeam)
+	{
+		const char *pTeamMode = nullptr;
+		switch(Config()->m_SvTeam)
+		{
+		case SV_TEAM_FORBIDDEN:
+			pTeamMode = Localize("forbidden", "Teaming status");
+			break;
+		case SV_TEAM_ALLOWED:
+			if(g_Config.m_SvSoloServer)
+				pTeamMode = Localize("solo", "Teaming status");
+			else
+				pTeamMode = Localize("allowed", "Teaming status");
+			break;
+		case SV_TEAM_MANDATORY:
+			pTeamMode = Localize("required", "Teaming status");
+			break;
+		case SV_TEAM_FORCED_SOLO:
+			pTeamMode = Localize("solo", "Teaming status");
+			break;
+		default:
+			dbg_assert(false, "unknown team mode");
+		}
+		if((Config()->m_SvTeam == SV_TEAM_ALLOWED || Config()->m_SvTeam == SV_TEAM_MANDATORY) && (Config()->m_SvMinTeamSize != CConfig::ms_SvMinTeamSize || Config()->m_SvMaxTeamSize != CConfig::ms_SvMaxTeamSize))
+		{
+			if(Config()->m_SvMinTeamSize != CConfig::ms_SvMinTeamSize && Config()->m_SvMaxTeamSize != CConfig::ms_SvMaxTeamSize)
+				str_format(aBuf, sizeof(aBuf), "%s: %s (%s %d, %s %d)", Localize("Teams"), pTeamMode, Localize("minimum", "Team size"), Config()->m_SvMinTeamSize, Localize("maximum", "Team size"), Config()->m_SvMaxTeamSize);
+			else if(Config()->m_SvMinTeamSize != CConfig::ms_SvMinTeamSize)
+				str_format(aBuf, sizeof(aBuf), "%s: %s (%s %d)", Localize("Teams"), pTeamMode, Localize("minimum", "Team size"), Config()->m_SvMinTeamSize);
+			else
+				str_format(aBuf, sizeof(aBuf), "%s: %s (%s %d)", Localize("Teams"), pTeamMode, Localize("maximum", "Team size"), Config()->m_SvMaxTeamSize);
+		}
+		else
+			str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Teams"), pTeamMode);
+		GameInfo.HSplitTop(FontSizeBody, &Label, &GameInfo);
+		Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);
+	}
+
 	GameInfo.HSplitTop(FontSizeBody, &Label, &GameInfo);
 	str_format(aBuf, sizeof(aBuf), "%s: %d/%d", Localize("Players"), m_pClient->m_Snap.m_NumPlayers, CurrentServerInfo.m_MaxClients);
 	Ui()->DoLabel(&Label, aBuf, FontSizeBody, TEXTALIGN_ML);

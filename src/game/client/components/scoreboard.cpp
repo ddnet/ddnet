@@ -350,7 +350,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 	int &CurrentDDTeamSize = State.m_CurrentDDTeamSize;
 
 	char aBuf[64];
-	int MaxTeamSize = m_pClient->Config()->m_SvMaxTeamSize;
+	int MaxTeamSize = Config()->m_SvMaxTeamSize;
 
 	for(int RenderDead = 0; RenderDead < 2; RenderDead++)
 	{

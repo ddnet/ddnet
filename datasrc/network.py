@@ -26,7 +26,7 @@ GameInfoFlags = [
 ]
 GameInfoFlags2 = [
 	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE", "HUD_HEALTH_ARMOR", "HUD_AMMO",
-	"HUD_DDRACE", "NO_WEAK_HOOK", "NO_SKIN_CHANGE_FOR_FROZEN"
+	"HUD_DDRACE", "NO_WEAK_HOOK", "NO_SKIN_CHANGE_FOR_FROZEN", "DDRACE_TEAM"
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 LegacyProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
@@ -71,7 +71,7 @@ enum
 
 enum
 {
-	GAMEINFO_CURVERSION=9,
+	GAMEINFO_CURVERSION=10,
 };
 '''
 
