@@ -38,9 +38,12 @@ constexpr const char *g_apAutoMapReferenceNames[] = {
 	"Hookable",
 	"Death",
 	"Unhookable",
-	"Hookthrough",
 	"Freeze",
 	"Unfreeze",
+	"Deep Freeze",
+	"Deep Unfreeze",
+	"Live Freeze",
+	"Live Unfreeze",
 };
 
 #endif

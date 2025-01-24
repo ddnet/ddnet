@@ -20,6 +20,7 @@ class CAutoMapper : public CEditorComponent
 		int m_Y;
 		int m_Value;
 		std::vector<CIndexInfo> m_vIndexList;
+		bool m_IsGuide;
 
 		enum
 		{
@@ -29,17 +30,25 @@ class CAutoMapper : public CEditorComponent
 		};
 	};
 
+	struct CModuloRule
+	{
+		int m_ModX;
+		int m_ModY;
+		int m_OffsetX;
+		int m_OffsetY;
+	};
+
 	struct CIndexRule
 	{
 		int m_Id;
 		std::vector<CPosRule> m_vRules;
 		int m_Flag;
 		float m_RandomProbability;
+		std::vector<CModuloRule> m_vModuloRules;
 		bool m_DefaultRule;
 		bool m_SkipEmpty;
 		bool m_SkipFull;
 	};
-
 	struct CRun
 	{
 		std::vector<CIndexRule> m_vIndexRules;

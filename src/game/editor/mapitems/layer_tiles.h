@@ -136,8 +136,6 @@ public:
 	virtual void ShowInfo();
 	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
-	void TranslateAutoMapReferenceId(int ReferenceId);
-
 	struct SCommonPropState
 	{
 		enum
