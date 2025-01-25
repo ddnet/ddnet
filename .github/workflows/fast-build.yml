@@ -13,23 +13,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
         include:
         - os: ubuntu-latest
           cmake-args: -G Ninja -DCMAKE_BUILD_TYPE=Release -DDISCORD=ON -DDISCORD_DYNAMIC=ON -DWEBSOCKETS=OFF -DPREFER_BUNDLED_LIBS=ON
           cmake-init-env: CXXFLAGS= 
           package-file: "*-linux_x86_64.tar.xz"
-          fancy: true
-        - os: macOS-latest
-          cmake-args: -G Ninja -DCMAKE_BUILD_TYPE=Release -DDISCORD=ON -DWEBSOCKETS=OFF -DPREFER_BUNDLED_LIBS=ON -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DCMAKE_FIND_FRAMEWORK=NEVER
-          cmake-init-env: CXXFLAGS= 
-          package-file: "*-macos.dmg"
-          fancy: false
+          osxcross: false
+
         - os: windows-latest
           cmake-args: -A x64 -DDISCORD=ON
           cmake-init-env: CXXFLAGS= LDFLAGS=
           package-file: "*-win64.zip"
-          fancy: false
+          osxcross: false
+
+        - os: ubuntu-latest
+          cmake-args: -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64" -DWEBSOCKETS=OFF -DPREFER_BUNDLED_LIBS=ON -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/toolchains/darwin-arm64.toolchain" -DCMAKE_OSX_SYSROOT=$OSXCROSS_TARGET/SDK/MacOSX12.3.sdk -DCMAKE_PREFIX_PATH="$OSXCROSS_TARGET/macports/pkgs/opt/local"
+          cmake-init-env: CXXFLAGS=
+          package-file: "*-macos.dmg"
+          osxcross: true
     steps:
     - uses: actions/checkout@v4
       with:
@@ -43,23 +44,29 @@ jobs:
         # sudo apt-get upgrade -y
         sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind gcovr libglew-dev -y
 
-    - name: Prepare macOS
-      if: contains(matrix.os, 'macOS')
-      run: |
-        brew update || true
-        brew install pkg-config ninja molten-vk vulkan-headers glslang spirv-tools glew googletest molten-vk opusfile wavpack x264 || true
-        brew upgrade freetype
-        pip3 install --break-system-packages dmgbuild
-        echo /Library/Frameworks/Python.framework/Versions/3.12/bin >> $GITHUB_PATH
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
 
-    - name: Add rust macOS
-      if: contains(matrix.os, 'macOS')
+    - name: Set up MacOS Cross Compiler
+      if: matrix.osxcross
+      uses: Timmmm/setup-osxcross@v2
+      with:
+        osx-version: "12.3"
+
+    - name: Install sqlite3 in cross environment
+      if: matrix.osxcross
+      run: |
+        export MACOSX_DEPLOYMENT_TARGET=10.15
+        export OSXCROSS_OSX_VERSION_MIN=10.9
+        eval "$(osxcross-conf)"
+        echo "1" | osxcross-mp install sqlite3
+
+    - name: osxcross rust targets
+      if: matrix.osxcross
       run: |
         rustup default stable
         rustup update
         rustup target add x86_64-apple-darwin aarch64-apple-darwin
-    - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@v2
 
     - name: Build in release mode
       env:
@@ -76,16 +83,29 @@ jobs:
             ENVFLAGS="CXXFLAGS=-include$VERSION_FILE"
             POST_FLAGS=""
         fi
+
+        SQLITE3_LIB_PATH="$OSXCROSS_TARGET/macports/pkgs/opt/local/lib"
+        SQLITE3_INCLUDE_PATH="$OSXCROSS_TARGET/macports/pkgs/opt/local/include"
+        if [[ "${{ matrix.osxcross }}" == "true" ]]; then
+            export OSXCROSS_OSX_VERSION_MIN=10.9
+            eval "$(osxcross-conf)"
+            POST_FLAGS=" \
+            "-DSQLite3_LIBRARY=${SQLITE3_LIB_PATH}/libsqlite3.dylib" \
+            "-DSQLite3_INCLUDEDIR=${SQLITE3_INCLUDE_PATH}""
+        fi
+
         mkdir release
         cd release
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} $ENVFLAGS ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} $POST_FLAGS -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Release --target everything ${{ matrix.build-args }}
+
     - name: Package
       run: |
         cd release
         ${{ matrix.cmake-path }}cmake --build . --config Release --target package_default ${{ matrix.build-args }}
         mkdir artifacts
         mv ${{ matrix.package-file }} artifacts
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
