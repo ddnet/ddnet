@@ -527,9 +527,7 @@ Messages = [
 
 	NetMessage("Unused2", []),
 
-	NetMessage("Sv_TeamsStateLegacy", [
-		NetArray(NetIntRange("m_aTeams", 0, 64), 64),
-	]),
+	NetMessage("Sv_TeamsStateLegacy", []),
 
 	# deprecated, use showothers@netmsg.ddnet.tw instead
 	NetMessage("Cl_ShowOthersLegacy", [
@@ -556,9 +554,7 @@ Messages = [
 		NetIntAny("m_FollowFactor"),
 	]),
 
-	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.tw", [
-		NetArray(NetIntRange("m_aTeams", 0, 64), 64),
-	]),
+	NetMessageEx("Sv_TeamsState", "teamsstate@netmsg.ddnet.tw", []),
 
 	NetMessageEx("Sv_DDRaceTime", "ddrace-time@netmsg.ddnet.tw", [
 		NetIntAny("m_Time"),
@@ -570,7 +566,7 @@ Messages = [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
 	]),
-
+    
 	NetMessageEx("Sv_KillMsgTeam", "killmsgteam@netmsg.ddnet.tw", [
 		NetIntRange("m_Team", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_First", -1, 'MAX_CLIENTS-1'),
