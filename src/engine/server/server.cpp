@@ -2616,7 +2616,6 @@ int CServer::LoadMap(const char *pMapName)
 
 	if(Config()->m_SvMapsBaseUrl[0])
 	{
-		char aBuf[256];
 		char aEscaped[256];
 		str_format(aBuf, sizeof(aBuf), "%s_%s.map", pMapName, aSha256);
 		EscapeUrl(aEscaped, aBuf);
