@@ -542,6 +542,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 
 						if(Result.HasVictim() && Result.GetVictim() == CResult::VICTIM_ALL)
 						{
+							Result.m_IsAll = true;
 							for(int i = 0; i < MAX_CLIENTS; i++)
 							{
 								Result.SetVictim(i);

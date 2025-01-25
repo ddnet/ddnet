@@ -3134,14 +3134,20 @@ int CServer::Run()
 
 void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 {
+	CServer *pThis = static_cast<CServer *>(pUser);
+	if(pResult->m_IsAll && pResult->GetVictim() == pResult->m_ClientId)
+		return;
+	if(pResult->m_IsAll && !pThis->ClientIngame(pResult->GetVictim()))
+		return;
+
 	if(pResult->NumArguments() > 1)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "Kicked (%s)", pResult->GetString(1));
-		((CServer *)pUser)->Kick(pResult->GetInteger(0), aBuf);
+		pThis->Kick(pResult->GetVictim(), aBuf);
 	}
 	else
-		((CServer *)pUser)->Kick(pResult->GetInteger(0), "Kicked by console");
+		pThis->Kick(pResult->GetVictim(), "Kicked by console");
 }
 
 void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
@@ -3904,7 +3910,7 @@ void CServer::RegisterCommands()
 	Kernel()->RegisterInterface(static_cast<IHttp *>(&m_Http), false);
 
 	// register console commands
-	Console()->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
+	Console()->Register("kick", "v[id] ?r[reason]", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
 	Console()->Register("status", "?r[name]", CFGFLAG_SERVER, ConStatus, this, "List players containing name or all players");
 	Console()->Register("shutdown", "?r[reason]", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");

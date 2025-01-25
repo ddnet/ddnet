@@ -70,6 +70,7 @@ public:
 		// DDRace
 
 		virtual int GetVictim() const = 0;
+		bool m_IsAll = false;
 	};
 
 	class CCommandInfo
