@@ -7,7 +7,6 @@ struct STrailPart
 	vec2 Pos = vec2(0, 0);
 	vec2 UnMovedPos = vec2(0, 0);
 	ColorRGBA Col = {};
-	float Alpha = 1.0f;
 	float Width = 0.0f;
 	vec2 Normal = vec2(0, 0);
 	vec2 Top = vec2(0, 0);

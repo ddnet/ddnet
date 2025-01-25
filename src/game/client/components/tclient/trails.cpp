@@ -123,9 +123,6 @@ void CTrails::OnRender()
 		else if(g_Config.m_ClTeeTrailUseTeeColor)
 			Col = TeeInfo.m_BloodColor;
 
-		ColorRGBA FullCol = Col.WithAlpha(Alpha);
-		Graphics()->SetColor(FullCol);
-
 		int TrailLength = g_Config.m_ClTeeTrailLength;
 		float Width = g_Config.m_ClTeeTrailWidth;
 
@@ -200,8 +197,6 @@ void CTrails::OnRender()
 			else
 				Part.Progress = ((float)(i) + IntraTick - 1.0f) / (Size - 1.0f);
 
-			Part.Col = Col;
-			Part.Alpha = Alpha;
 			if(g_Config.m_ClTeeTrailRainbow)
 			{
 				float Cycle = (1.0f / TrailLength) * 0.5f;
@@ -217,12 +212,13 @@ void CTrails::OnRender()
 					Speed = distance(Part.UnMovedPos, Trail.at(i - 1).UnMovedPos) / std::abs(Part.Tick - Trail.at(i - 1).Tick);
 				Part.Col = color_cast<ColorRGBA>(ColorHSLA(65280 * ((int)(Speed * Speed / 12.5f) + 1)).UnclampLighting(ColorHSLA::DARKEST_LGT));
 			}
+			Part.Col.a = Alpha;
+			if(g_Config.m_ClTeeTrailFade)
+				Part.Col.a *= 1.0 - Part.Progress;
 
 			Part.Width = g_Config.m_ClTeeTrailWidth;
 			if(g_Config.m_ClTeeTrailTaper)
 				Part.Width = g_Config.m_ClTeeTrailWidth * (1.0 - Part.Progress);
-			if(g_Config.m_ClTeeTrailFade)
-				Part.Alpha = Alpha * (1.0 - Part.Progress);
 		}
 
 		auto NewEnd = std::unique(Trail.begin(), Trail.end());
@@ -308,45 +304,38 @@ void CTrails::OnRender()
 		else
 			Graphics()->TrianglesBegin();
 
-		int SegmentCount = (int)Trail.size() - 1;
 		// Draw the trail
-		for(int i = 0; i < SegmentCount; i++)
+		for(int i = 0; i < (int)Trail.size() - 1; i++)
 		{
-			float InverseProgress = 1.0 - Trail.at(i).Progress;
-			if(g_Config.m_ClTeeTrailFade)
-			{
-				float FadeAlpha = Alpha * InverseProgress;
-				FullCol = Col.WithAlpha(FadeAlpha);
-				Graphics()->SetColor(FullCol);
-			}
-
-			vec2 Pos = Trail.at(i).Pos;
-			vec2 NextPos = Trail.at(i + 1).Pos;
-			if(Trail.at(i).TooLong)
+			const STrailPart &Part = Trail.at(i);
+			const STrailPart &NextPart = Trail.at(i + 1);
+			if(Part.TooLong)
 				continue;
-			Graphics()->SetColor(FullCol);
+
 			if(LineMode)
 			{
-				Graphics()->SetColor(Trail.at(i).Col.WithAlpha(Trail.at(i).Alpha));
-				LineItem = IGraphics::CLineItem(Pos.x, Pos.y, NextPos.x, NextPos.y);
+				Graphics()->SetColor(Part.Col);
+				LineItem = IGraphics::CLineItem(Part.Pos.x, Part.Pos.y, NextPart.Pos.x, NextPart.Pos.y);
 				Graphics()->LinesDraw(&LineItem, 1);
 			}
 			else
 			{
-				vec2 Top = Trail.at(i).Top;
-				vec2 Bot = Trail.at(i).Bot;
-
-				vec2 NextTop = Trail.at(i + 1).Top;
-				vec2 NextBot = Trail.at(i + 1).Bot;
-				if(Trail.at(i).Flip)
+				vec2 Top, Bot;
+				if(Part.Flip)
 				{
-					Top = Trail.at(i).Bot;
-					Bot = Trail.at(i).Top;
+					Top = Part.Bot;
+					Bot = Part.Top;
+				}
+				else
+				{
+ 					Top = Part.Top;
+					Bot = Part.Bot;
 				}
 
-				ColorRGBA ColNow = Trail.at(i).Col.WithAlpha(Trail.at(i).Alpha);
-				ColorRGBA ColNext = Trail.at(i + 1).Col.WithAlpha(Trail.at(i + 1).Alpha);
-				Graphics()->SetColor4(ColNext, ColNext, ColNow, ColNow);
+				vec2 NextTop = NextPart.Top;
+				vec2 NextBot = NextPart.Bot;
+
+				Graphics()->SetColor4(NextPart.Col, NextPart.Col, Part.Col, Part.Col);
 				// IGraphics::CFreeformItem FreeformItem(Top.x, Top.y, Bot.x, Bot.y, NextTop.x, NextTop.y, NextBot.x, NextBot.y);
 				IGraphics::CFreeformItem FreeformItem(NextTop.x, NextTop.y, NextBot.x, NextBot.y, Top.x, Top.y, Bot.x, Bot.y);
 
