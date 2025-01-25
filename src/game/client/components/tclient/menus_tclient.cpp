@@ -30,6 +30,7 @@
 #include "../countryflags.h"
 #include "../menus.h"
 #include "../skins.h"
+#include "game/client/components/tclient/trails.h"
 
 #include <array>
 #include <chrono>
@@ -990,10 +991,31 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrail, Localize("Enable tee trails"), &g_Config.m_ClTeeTrail, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailOthers, Localize("Tee trail others"), &g_Config.m_ClTeeTrailOthers, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailRainbow, Localize("Rainbow tee trail"), &g_Config.m_ClTeeTrailRainbow, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailFade, Localize("Fade trail alpha"), &g_Config.m_ClTeeTrailFade, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailTaper, Localize("Taper trail width"), &g_Config.m_ClTeeTrailTaper, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailUseTeeColor, Localize("Use tee color for trail"), &g_Config.m_ClTeeTrailUseTeeColor, &Column, LineSize);
+
+	Column.HSplitTop(LineSize, &Label, &Column);
+	constexpr const char *apColorNames[TRAIL_COLOR_MODES::NUM_COLOR_MODES] = {
+		"Solid",
+		"Tee",
+		"Rainbow",
+		"Speed",
+	};
+	str_format(aBuf, 64, "Color mode: %s", apColorNames[g_Config.m_ClTeeTrailColorMode]);
+	int ColorMode = DoButton_CheckBox_Number(&g_Config.m_ClTeeTrailColorMode, Localize(aBuf), g_Config.m_ClTeeTrailColorMode, &Label);
+	if(ColorMode == 1) // inc
+	{
+		++g_Config.m_ClTeeTrailColorMode;
+		if(g_Config.m_ClTeeTrailColorMode >= TRAIL_COLOR_MODES::NUM_COLOR_MODES)
+			g_Config.m_ClTeeTrailColorMode = 0;
+	}
+	else if(ColorMode == 2) // dec
+	{
+		--g_Config.m_ClTeeTrailColorMode;
+		if(g_Config.m_ClTeeTrailColorMode < 0)
+			g_Config.m_ClTeeTrailColorMode = TRAIL_COLOR_MODES::NUM_COLOR_MODES - 1;
+	}
+
 	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 	Column.HSplitTop(LineSize, &Button, &Column);
 	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailWidth, &g_Config.m_ClTeeTrailWidth, &Button, Localize("Trail width"), 0, 20);
@@ -1002,7 +1024,7 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	Column.HSplitTop(LineSize, &Button, &Column);
 	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailAlpha, &g_Config.m_ClTeeTrailAlpha, &Button, Localize("Trail alpha"), 0, 100);
 	static CButtonContainer s_TeeTrailColor;
-	DoLine_ColorPicker(&s_TeeTrailColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Tee trail color"), &g_Config.m_ClTeeTrailColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+	DoLine_ColorPicker(&s_TeeTrailColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Tee trail solid color"), &g_Config.m_ClTeeTrailColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
