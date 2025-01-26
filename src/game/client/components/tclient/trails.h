@@ -1,19 +1,11 @@
 #ifndef GAME_CLIENT_COMPONENTS_TRAILS_H
 #define GAME_CLIENT_COMPONENTS_TRAILS_H
 #include <game/client/component.h>
-
-enum TRAIL_COLOR_MODES
+class STrailPart
 {
-	MODE_SOLID = 0,
-	MODE_TEE,
-	MODE_RAINBOW,
-	MODE_SPEED,
-	NUM_COLOR_MODES,
-};
-
-struct STrailPart
-{
+public:
 	vec2 Pos = vec2(0, 0);
+	vec2 UnmovedPos = vec2(0, 0);
 	ColorRGBA Col = {};
 	float Width = 0.0f;
 	vec2 Normal = vec2(0, 0);
@@ -21,6 +13,7 @@ struct STrailPart
 	vec2 Bot = vec2(0, 0);
 	bool Flip = false;
 	float Progress = 1.0f;
+	int Tick = -1;
 
 	bool operator==(const STrailPart &Other) const
 	{
@@ -36,15 +29,22 @@ public:
 	void OnRender() override;
 	void OnReset() override;
 
+	enum COLORMODES
+	{
+		COLORMODE_SOLID = 1,
+		COLORMODE_TEE,
+		COLORMODE_RAINBOW,
+		COLORMODE_SPEED,
+	};
+
 private:
 	class CInfo
 	{
 	public:
-		vec2 m_Pos, m_Vel;
+		vec2 m_Pos;
+		int m_Tick;
 	};
-	CInfo m_PositionHistory[MAX_CLIENTS][200];
-	int m_PositionTick[MAX_CLIENTS][200];
-	// TODO add tick to CInfo
+	CInfo m_History[MAX_CLIENTS][200];
 	bool m_HistoryValid[MAX_CLIENTS] = {};
 
 	void ClearAllHistory();

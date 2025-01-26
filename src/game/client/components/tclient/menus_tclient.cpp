@@ -956,19 +956,21 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	Ui()->DoLabel(&Label, Localize("Rainbow"), HeadlineFontSize, TEXTALIGN_ML);
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-	static std::vector<const char *> s_DropDownNames = {Localize("Rainbow"), Localize("Pulse"), Localize("Black"), Localize("Random")};
-	static CUi::SDropDownState s_RainbowDropDownState;
-	static CScrollRegion s_RainbowDropDownScrollRegion;
-	s_RainbowDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_RainbowDropDownScrollRegion;
-	int RainbowSelectedOld = g_Config.m_ClRainbowMode - 1;
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowTees, Localize("Rainbow Tees"), &g_Config.m_ClRainbowTees, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowWeapon, Localize("Rainbow weapons"), &g_Config.m_ClRainbowWeapon, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowHook, Localize("Rainbow hook"), &g_Config.m_ClRainbowHook, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, Localize("Rainbow others"), &g_Config.m_ClRainbowOthers, &Column, LineSize);
+
 	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
-	CUIRect DropDownRect;
-	Column.HSplitTop(LineSize, &DropDownRect, &Column);
-	const int RainbowSelectedNew = Ui()->DoDropDown(&DropDownRect, RainbowSelectedOld, s_DropDownNames.data(), s_DropDownNames.size(), s_RainbowDropDownState);
+	static std::vector<const char *> s_RainbowDropDownNames;
+	s_RainbowDropDownNames = {Localize("Rainbow"), Localize("Pulse"), Localize("Black"), Localize("Random")};
+	static CUi::SDropDownState s_RainbowDropDownState;
+	static CScrollRegion s_RainbowDropDownScrollRegion;
+	s_RainbowDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_RainbowDropDownScrollRegion;
+	int RainbowSelectedOld = g_Config.m_ClRainbowMode - 1;
+	CUIRect RainbowDropDownRect;
+	Column.HSplitTop(LineSize, &RainbowDropDownRect, &Column);
+	const int RainbowSelectedNew = Ui()->DoDropDown(&RainbowDropDownRect, RainbowSelectedOld, s_RainbowDropDownNames.data(), s_RainbowDropDownNames.size(), s_RainbowDropDownState);
 	if(RainbowSelectedOld != RainbowSelectedNew)
 	{
 		g_Config.m_ClRainbowMode = RainbowSelectedNew + 1;
@@ -990,41 +992,39 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrail, Localize("Enable tee trails"), &g_Config.m_ClTeeTrail, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailOthers, Localize("Tee trail others"), &g_Config.m_ClTeeTrailOthers, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailOthers, Localize("Show other tees' trails"), &g_Config.m_ClTeeTrailOthers, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailFade, Localize("Fade trail alpha"), &g_Config.m_ClTeeTrailFade, &Column, LineSize);
 	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailTaper, Localize("Taper trail width"), &g_Config.m_ClTeeTrailTaper, &Column, LineSize);
 
-	Column.HSplitTop(LineSize, &Label, &Column);
-	constexpr const char *apColorNames[TRAIL_COLOR_MODES::NUM_COLOR_MODES] = {
-		"Solid",
-		"Tee",
-		"Rainbow",
-		"Speed",
-	};
-	str_format(aBuf, 64, "Color mode: %s", apColorNames[g_Config.m_ClTeeTrailColorMode]);
-	int ColorMode = DoButton_CheckBox_Number(&g_Config.m_ClTeeTrailColorMode, Localize(aBuf), g_Config.m_ClTeeTrailColorMode, &Label);
-	if(ColorMode == 1) // inc
-	{
-		++g_Config.m_ClTeeTrailColorMode;
-		if(g_Config.m_ClTeeTrailColorMode >= TRAIL_COLOR_MODES::NUM_COLOR_MODES)
-			g_Config.m_ClTeeTrailColorMode = 0;
-	}
-	else if(ColorMode == 2) // dec
-	{
-		--g_Config.m_ClTeeTrailColorMode;
-		if(g_Config.m_ClTeeTrailColorMode < 0)
-			g_Config.m_ClTeeTrailColorMode = TRAIL_COLOR_MODES::NUM_COLOR_MODES - 1;
-	}
-
 	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	std::vector<const char *> s_TrailDropDownNames;
+	s_TrailDropDownNames = {Localize("Solid"), Localize("Tee"), Localize("Rainbow"), Localize("Speed")};
+	static CUi::SDropDownState s_TrailDropDownState;
+	static CScrollRegion s_TrailDropDownScrollRegion;
+	s_TrailDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_TrailDropDownScrollRegion;
+	int TrailSelectedOld = g_Config.m_ClTeeTrailColorMode - 1;
+	CUIRect TrailDropDownRect;
+	Column.HSplitTop(LineSize, &TrailDropDownRect, &Column);
+	const int TrailSelectedNew = Ui()->DoDropDown(&TrailDropDownRect, TrailSelectedOld, s_TrailDropDownNames.data(), s_TrailDropDownNames.size(), s_TrailDropDownState);
+	if(TrailSelectedOld != TrailSelectedNew)
+	{
+		g_Config.m_ClTeeTrailColorMode = TrailSelectedNew + 1;
+		TrailSelectedOld = TrailSelectedNew;
+	}
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	static CButtonContainer s_TeeTrailColor;
+	if(g_Config.m_ClTeeTrailColorMode == CTrails::COLORMODE_SOLID)
+		DoLine_ColorPicker(&s_TeeTrailColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Tee trail color"), &g_Config.m_ClTeeTrailColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+	else
+		Column.HSplitTop(ColorPickerLineSize + ColorPickerLineSpacing, &Button, &Column);
+
 	Column.HSplitTop(LineSize, &Button, &Column);
 	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailWidth, &g_Config.m_ClTeeTrailWidth, &Button, Localize("Trail width"), 0, 20);
 	Column.HSplitTop(LineSize, &Button, &Column);
 	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailLength, &g_Config.m_ClTeeTrailLength, &Button, Localize("Trail length"), 0, 200);
 	Column.HSplitTop(LineSize, &Button, &Column);
 	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailAlpha, &g_Config.m_ClTeeTrailAlpha, &Button, Localize("Trail alpha"), 0, 100);
-	static CButtonContainer s_TeeTrailColor;
-	DoLine_ColorPicker(&s_TeeTrailColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Tee trail solid color"), &g_Config.m_ClTeeTrailColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 	Column.HSplitTop(MarginSmall, nullptr, &Column);

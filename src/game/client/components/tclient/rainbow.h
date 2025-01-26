@@ -8,7 +8,7 @@ public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnRender() override;
 
-	enum COLORMODE
+	enum COLORMODES
 	{
 		COLORMODE_RAINBOW = 1,
 		COLORMODE_PULSE,

@@ -21,22 +21,12 @@ bool CTrails::ShouldPredictPlayer(int ClientId)
 void CTrails::ClearAllHistory()
 {
 	for(int i = 0; i < MAX_CLIENTS; ++i)
-		for(int j = 0; j < 200; ++j)
-			m_PositionTick[i][j] = -1;
-
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-		for(int j = 0; j < 200; ++j)
-			m_PositionHistory[i][j] = {};
-
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-		m_HistoryValid[i] = false;
+		ClearHistory(i);
 }
 void CTrails::ClearHistory(int ClientId)
 {
-	for(int j = 0; j < 200; ++j)
-		m_PositionTick[ClientId][j] = -1;
-	for(int j = 0; j < 200; ++j)
-		m_PositionHistory[ClientId][j] = {};
+	for(int i = 0; i < 200; ++i)
+		m_History[ClientId][i] = {{}, -1};
 	m_HistoryValid[ClientId] = false;
 }
 void CTrails::OnReset()
@@ -107,15 +97,14 @@ void CTrails::OnRender()
 
 		vec2 CurServerPos = vec2(GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur.m_X, GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur.m_Y);
 		vec2 PrevServerPos = vec2(GameClient()->m_Snap.m_aCharacters[ClientId].m_Prev.m_X, GameClient()->m_Snap.m_aCharacters[ClientId].m_Prev.m_Y);
-		m_PositionTick[ClientId][GameTick % 200] = GameTick;
-		m_PositionHistory[ClientId][GameTick % 200] = {
-			mix(PrevServerPos, CurServerPos, Client()->IntraGameTick(g_Config.m_ClDummy)),
-			vec2(GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur.m_VelX, GameClient()->m_Snap.m_aCharacters[ClientId].m_Cur.m_VelY),
+		m_History[ClientId][GameTick % 200] = {
+			mix(PrevServerPos, CurServerPos, IntraTick),
+			GameTick,
 		};
 
-		// NOTE: this is kind of a hack to fix 25tps. This fixes flickering when using the speed mode
-		m_PositionHistory[ClientId][(GameTick + 1) % 200] = m_PositionHistory[ClientId][GameTick % 200];
-		m_PositionHistory[ClientId][(GameTick + 2) % 200] = m_PositionHistory[ClientId][GameTick % 200];
+		// // NOTE: this is kind of a hack to fix 25tps. This fixes flickering when using the speed mode
+		// m_History[ClientId][(GameTick + 1) % 200] = m_History[ClientId][GameTick % 200];
+		// m_History[ClientId][(GameTick + 2) % 200] = m_History[ClientId][GameTick % 200];
 
 		IGraphics::CLineItem LineItem;
 		bool LineMode = g_Config.m_ClTeeTrailWidth == 0;
@@ -152,12 +141,14 @@ void CTrails::OnRender()
 			}
 			else
 			{
-				if(m_PositionTick[ClientId][PosTick % 200] != PosTick)
+				if(m_History[ClientId][PosTick % 200].m_Tick != PosTick)
 					continue;
-				Part.Pos = m_PositionHistory[ClientId][PosTick % 200].m_Pos;
+				Part.Pos = m_History[ClientId][PosTick % 200].m_Pos;
 				if(i == TrailLength - 2 || i == TrailLength - 3)
 					TrailFull = true;
 			}
+			Part.UnmovedPos = Part.Pos;
+			Part.Tick = PosTick;
 			s_Trail.push_back(Part);
 		}
 
@@ -176,7 +167,7 @@ void CTrails::OnRender()
 		if(PredictPlayer)
 			s_Trail.at(0).Pos = GameClient()->m_aClients[ClientId].m_RenderPos;
 		else
-			s_Trail.at(0).Pos = mix(PrevServerPos, CurServerPos, Client()->IntraGameTick(g_Config.m_ClDummy));
+			s_Trail.at(0).Pos = mix(PrevServerPos, CurServerPos, IntraTick);
 
 		if(TrailFull)
 			s_Trail.at(s_Trail.size() - 1).Pos = mix(s_Trail.at(s_Trail.size() - 1).Pos, s_Trail.at(s_Trail.size() - 2).Pos, std::fmod(IntraTick, 1.0f));
@@ -195,25 +186,35 @@ void CTrails::OnRender()
 
 			switch(g_Config.m_ClTeeTrailColorMode)
 			{
-				case TRAIL_COLOR_MODES::MODE_SOLID:
+				case COLORMODE_SOLID:
 					Part.Col = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClTeeTrailColor));
 					break;
-				case TRAIL_COLOR_MODES::MODE_TEE:
+				case COLORMODE_TEE:
 					if(TeeInfo.m_CustomColoredSkin)
 						Part.Col = TeeInfo.m_ColorBody;
 					else
 						Part.Col = TeeInfo.m_BloodColor;
 					break;
-				case TRAIL_COLOR_MODES::MODE_RAINBOW:
+				case COLORMODE_RAINBOW:
 				{
 					float Cycle = (1.0f / TrailLength) * 0.5f;
-					float Hue = std::fmod(((StartTick - i + 6361 * ClientId) % 1000000) * Cycle, 1.0f);
+					float Hue = std::fmod(((Part.Tick + 6361 * ClientId) % 1000000) * Cycle, 1.0f);
 					Part.Col = color_cast<ColorRGBA>(ColorHSLA(Hue, 1.0f, 0.5f));
 					break;
 				}
-				case TRAIL_COLOR_MODES::MODE_SPEED:
-					Part.Col = color_cast<ColorRGBA>(ColorHSLA(65280 * (((int)length(m_PositionHistory[ClientId][(StartTick - i) % 200].m_Vel / 256.f) + 1))).UnclampLighting(ColorHSLA::DARKEST_LGT));
+				case COLORMODE_SPEED:
+				{
+					float Speed = 0.0f;
+					if(s_Trail.size() > 3)
+					{
+						if(i < 2)
+							Speed = distance(s_Trail.at(i + 2).UnmovedPos, Part.UnmovedPos) / std::abs(s_Trail.at(i + 2).Tick - Part.Tick);
+						else
+							Speed = distance(Part.UnmovedPos, s_Trail.at(i - 2).UnmovedPos) / std::abs(Part.Tick - s_Trail.at(i - 2).Tick);
+					}
+					Part.Col = color_cast<ColorRGBA>(ColorHSLA(65280 * ((int)(Speed * Speed / 12.5f) + 1)).UnclampLighting(ColorHSLA::DARKEST_LGT));
 					break;
+				}
 				default:
 					dbg_assert(false, "Invalid value for g_Config.m_ClTeeTrailColorMode");
 					dbg_break();
@@ -228,6 +229,7 @@ void CTrails::OnRender()
 				Part.Width = g_Config.m_ClTeeTrailWidth * (1.0 - Part.Progress);
 		}
 
+		// Remove duplicate elements (those with same Pos)
 		auto NewEnd = std::unique(s_Trail.begin(), s_Trail.end());
 		s_Trail.erase(NewEnd, s_Trail.end());
 

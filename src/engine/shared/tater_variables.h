@@ -185,7 +185,7 @@ MACRO_CONFIG_INT(ClTeeTrailAlpha, tc_tee_trail_alpha, 80, 1, 100, CFGFLAG_CLIENT
 MACRO_CONFIG_COL(ClTeeTrailColor, tc_tee_trail_color, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tee trail color")
 MACRO_CONFIG_INT(ClTeeTrailTaper, tc_tee_trail_taper, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Taper tee trail over length")
 MACRO_CONFIG_INT(ClTeeTrailFade, tc_tee_trail_fade, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Fade trail alpha over length")
-MACRO_CONFIG_INT(ClTeeTrailColorMode, tc_tee_trail_color_mode, 0, 0, 3, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tee trail color mode (0: Solid color, 1: Current Tee color, 2: Rainbow, 3: Color based on Tee speed)")
+MACRO_CONFIG_INT(ClTeeTrailColorMode, tc_tee_trail_color_mode, 1, 1, 5, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Tee trail color mode (1: Solid color, 2: Current Tee color, 3: Rainbow, 4: Color based on Tee speed, 5: Random)")
 
 // Integration
 MACRO_CONFIG_INT(ClDiscordRPC, tc_discord_rpc, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggle discord RPC (requires restart)")
