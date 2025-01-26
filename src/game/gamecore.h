@@ -11,6 +11,7 @@
 
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+#include <game/teamscore.h>
 
 #include "prng.h"
 
@@ -133,11 +134,11 @@ enum
 
 struct SSwitchers
 {
-	bool m_aStatus[MAX_CLIENTS];
+	bool m_aStatus[NUM_DDRACE_TEAMS];
 	bool m_Initial;
-	int m_aEndTick[MAX_CLIENTS];
-	int m_aType[MAX_CLIENTS];
-	int m_aLastUpdateTick[MAX_CLIENTS];
+	int m_aEndTick[NUM_DDRACE_TEAMS];
+	int m_aType[NUM_DDRACE_TEAMS];
+	int m_aLastUpdateTick[NUM_DDRACE_TEAMS];
 };
 
 class CWorldCore
