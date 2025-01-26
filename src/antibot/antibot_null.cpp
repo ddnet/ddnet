@@ -12,9 +12,9 @@ int AntibotAbiVersion()
 {
 	return ANTIBOT_ABI_VERSION;
 }
-void AntibotInit(CAntibotData *pData)
+void AntibotInit(CAntibotData *pCallbackData)
 {
-	g_pData = pData;
+	g_pData = pCallbackData;
 	g_pData->m_pfnLog("null antibot initialized", g_pData->m_pUser);
 }
 void AntibotRoundStart(CAntibotRoundData *pRoundData){};
