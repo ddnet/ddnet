@@ -61,7 +61,6 @@ void COutlines::OnRender()
 						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_SOLID, (float)g_Config.m_ClOutlineAlphaSolid / 100.0f);
 					if(g_Config.m_ClOutlineKill)
 						RenderTools()->RenderGameTileOutlines(pTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, TILE_DEATH, (float)g_Config.m_ClOutlineAlpha / 100.0f);
-
 				}
 			}
 			if(g_Config.m_ClOutline && IsTeleLayer)

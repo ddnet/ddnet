@@ -527,7 +527,7 @@ void CSpectator::OnRender()
 		}
 
 		// TClient
-		if(g_Config.m_ClWarList && g_Config.m_ClWarListSpectate && GameClient()->m_WarList.GetAnyWar(i)) 
+		if(g_Config.m_ClWarList && g_Config.m_ClWarListSpectate && GameClient()->m_WarList.GetAnyWar(i))
 		{
 			TextRender()->TextColor(GameClient()->m_WarList.GetPriorityColor(i));
 		}
