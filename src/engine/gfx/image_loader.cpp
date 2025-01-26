@@ -133,24 +133,24 @@ static int PngliteIncompatibility(png_structp pPngStruct, png_infop pPngInfo)
 
 	return Result;
 }
-static void PngErrorHandler(png_structp png, png_const_charp msg);
-static void PngWarningHandler(png_structp png, png_const_charp msg);
+static void PngErrorHandler(png_structp png, png_const_charp Msg);
+static void PngWarningHandler(png_structp png, png_const_charp Msg);
 const char *pngCategory = "png"; // Category for logging
 // Custom error handler (called on fatal errors)
-static void PngErrorHandler(png_structp png, png_const_charp msg)
+static void PngErrorHandler(png_structp png, png_const_charp Msg)
 {
-	const char *category = static_cast<const char *>(png_get_error_ptr(png));
-	log_error(category, "libpng error: %s", msg);
+	const char *Category = static_cast<const char *>(png_get_error_ptr(png));
+	log_error(Category, "libpng error: %s", Msg);
 
 	// Jump back to the setjmp point - essential for libpng error handling
 	longjmp(png_jmpbuf(png), 1); // Changed from png_longjmp
 }
 
 // Custom warning handler (called on non-fatal warnings)
-static void PngWarningHandler(png_structp png, png_const_charp msg)
+static void PngWarningHandler(png_structp png, png_const_charp Msg)
 {
-	const char *category = static_cast<const char *>(png_get_error_ptr(png));
-	log_error(category, "libpng warning: %s", msg);
+	const char *Category = static_cast<const char *>(png_get_error_ptr(png));
+	log_error(Category, "libpng warning: %s", Msg);
 }
 bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, CImageInfo &Image, int &PngliteIncompatible)
 {
