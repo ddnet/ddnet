@@ -1,0 +1,662 @@
+##### authors #####
+
+##### /authors #####
+
+##### translated strings #####
+
+TClient
+== 
+
+Settings
+== 
+
+Bindwheel
+== 
+
+Warlist
+== 
+
+Chat Binds
+== 
+
+Status Bar
+== 
+
+Info
+== 
+
+Kaomoji
+== 
+
+Shrug:
+== 
+
+Flip:
+== 
+
+Unflip:
+== 
+
+Mute Commands
+== 
+
+Mute:
+== 
+
+Un-Mute:
+== 
+
+Add %s name:
+== 
+
+Add %s clan:
+== 
+
+Remove %s name:
+== 
+
+Remove %s clan:
+== 
+
+Add [group] [name] [reason]
+== 
+
+Add [group] [clan] [reason]
+== 
+
+Remove [group] [name]
+== 
+
+Remove [group] [clan]
+== 
+
+Name:
+== 
+
+Name
+== 
+
+Command:
+== 
+
+Command
+== 
+
+Override Selected
+== 
+
+Add Bind
+== 
+
+Remove Bind
+== 
+
+Use left mouse to select
+== 
+
+Use right mouse to swap with selected
+== 
+
+Use middle mouse select without copy
+== 
+
+Reset position of mouse when opening bindwheel
+== 
+
+Visual
+== 
+
+Custom Font: 
+== 
+
+Update tee skin faster after being frozen
+== 
+
+Show ping colored circle before names
+== 
+
+Hide nameplates in spec
+== 
+
+Show skin names in nameplate
+== 
+
+Freeze stars
+== 
+
+Color frozen tee skins
+== 
+
+Make hammer rotate with cursor
+== 
+
+Tiny tees
+== 
+
+Tiny tees others
+== 
+
+Render all custom colored feet as white feet skin
+== 
+
+Input
+== 
+
+Fast Inputs (-20ms visual delay)
+== 
+
+Extra tick other tees (increases other tees latency, \nmakes dragging slightly easier when using fast input)
+== 
+
+Anti Latency Tools
+== 
+
+Prediction Margin
+== 
+
+Remove prediction & antiping in freeze
+== 
+
+Amount
+== 
+
+Delay
+== 
+
+Dont predict other players if you are frozen
+== 
+
+Adjust your prediction margin while frozen
+== 
+
+Frozen Margin
+== 
+
+Anti Ping Smoothing
+== 
+
+Use new smoothing algorithm
+== 
+
+Optimistic prediction along stable direction
+== 
+
+Negative stability buffer (for Gores)
+== 
+
+Uncertainty duration
+== 
+
+Other
+== 
+
+Run cl_run_on_join as console command
+== 
+
+Auto verify
+== 
+
+Manual Verify
+== 
+
+Player Indicator
+== 
+
+Show any enabled Indicators
+== 
+
+Hide indicator for tees on your screen
+== 
+
+Show only freeze Players
+== 
+
+Only show after joining a team
+== 
+
+Render tiny tees instead of circles
+== 
+
+Use warlist groups for indicator
+== 
+
+Indicator size
+== 
+
+Indicator opacity
+== 
+
+Change indicator offset based on distance to other tees
+== 
+
+Indicator min offset
+== 
+
+Indicator max offset
+== 
+
+Indicator max distance
+== 
+
+Indicator offset
+== 
+
+Use warlist colors instead of regular colors
+== 
+
+Show all warlist groups
+== 
+
+Indicator alive color
+== 
+
+Indicator in freeze color
+== 
+
+Indicator safe color
+== 
+
+HUD
+== 
+
+Show screen center
+== 
+
+Show position and angle (mini debug)
+== 
+
+Show your cursor when in free spectate
+== 
+
+Spectate cursor alpha
+== 
+
+Show when you are the last alive
+== 
+
+Last!
+== 
+
+Frozen Tee Display
+== 
+
+Show frozen tee display
+== 
+
+Use skins instead of ninja tees
+== 
+
+Max Rows
+== 
+
+Tee Size
+== 
+
+Tees left alive text
+== 
+
+Count frozen tees
+== 
+
+Tile Outlines
+== 
+
+Show any enabled outlines
+== 
+
+Only show outlines in entities
+== 
+
+Outline freeze & deep
+== 
+
+Outline walls
+== 
+
+Outline teleporter
+== 
+
+Outline unfreeze & undeep
+== 
+
+Outline kill
+== 
+
+Outline width
+== 
+
+Outline alpha
+== 
+
+Outline Alpha (walls)
+== 
+
+Freeze outline color
+== 
+
+Walls outline color
+== 
+
+Teleporter outline color
+== 
+
+Unfreeze outline color
+== 
+
+Kill outline color
+== 
+
+Ghost Tools
+== 
+
+Show unpredicted ghosts for other players
+== 
+
+Swap ghosts and normal players
+== 
+
+Predicted alpha
+== 
+
+Unpredicted alpha
+== 
+
+Hide ghosts of frozen players
+== 
+
+Render ghosts as circles
+== 
+
+Rainbow
+== 
+
+Pulse
+== 
+
+Black
+== 
+
+Random
+== 
+
+Rainbow Tees
+== 
+
+Rainbow weapons
+== 
+
+Rainbow hook
+== 
+
+Rainbow others
+== 
+
+Rainbow speed
+== 
+
+Tee Trails
+== 
+
+Enable tee trails
+== 
+
+Tee trail others
+== 
+
+Rainbow tee trail
+== 
+
+Fade trail alpha
+== 
+
+Taper trail width
+== 
+
+Use tee color for trail
+== 
+
+Trail width
+== 
+
+Trail length
+== 
+
+Trail alpha
+== 
+
+Tee trail color
+== 
+
+War Entries
+== 
+
+Edit Entry
+== 
+
+Clan
+== 
+
+Reason
+== 
+
+Override Entry
+== 
+
+Add Entry
+== 
+
+Allow Duplicate Entries
+== 
+
+Enable warlist
+== 
+
+Colors in chat
+== 
+
+Colors in scoreboard
+== 
+
+Colors in spectate select
+== 
+
+Show clan if war
+== 
+
+War Groups
+== 
+
+Are you sure that you want to remove '%s' from your war groups?
+== 
+
+Remove War Group
+== 
+
+Yes
+== 
+
+No
+== 
+
+Color
+== 
+
+Override Group
+== 
+
+Add Group
+== 
+
+Online Players
+== 
+
+TClient Links
+== 
+
+Discord
+== 
+
+Website
+== 
+
+Github
+== 
+
+Support ♥
+== 
+
+Config Files
+== 
+
+TClient Settings
+== 
+
+Profiles
+== 
+
+Chatbinds
+== 
+
+TClient Developers
+== 
+
+Hide Settings Tabs
+== 
+
+Integration
+== 
+
+Enable Discord Integration
+== 
+
+Your profile
+== 
+
+Name: %s
+== 
+
+Clan: %s
+== 
+
+Skin: %s
+== 
+
+After Load
+== 
+
+Dummy
+== 
+
+Custom colors
+== 
+
+Save/Load Skin
+== 
+
+Save/Load Colors
+== 
+
+Save/Load Emote
+== 
+
+Save/Load Name
+== 
+
+Save/Load Clan
+== 
+
+Save/Load Flag
+== 
+
+Load
+== 
+
+Save
+== 
+
+Delete
+== 
+
+Override
+== 
+
+Profiles file
+== 
+
+Show status bar
+== 
+
+Show labels on status bar items
+== 
+
+Status bar height
+== 
+
+Local Time
+== 
+
+Use 12 hour clock
+== 
+
+Show seconds on clock
+== 
+
+Colors
+== 
+
+Status bar color
+== 
+
+Text color
+== 
+
+Status bar alpha
+== 
+
+Text alpha
+== 
+
+Status Bar Codes:
+== 
+
+a = Angle
+== 
+
+p = Ping
+== 
+
+d = Prediction
+== 
+
+c = Position
+== 
+
+l = Local Time
+== 
+
+r = Race Time
+== 
+
+f = FPS
+== 
+
+v = Velocity
+== 
+
+z = Zoom
+== 
+
+_ or \' \' = Space
+== 
+
+Apply
+== 
+
+Status Scheme:
+== 
+
+Add Item
+== 
+
+Remove Item
+== 

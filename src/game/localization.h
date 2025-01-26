@@ -64,4 +64,8 @@ extern CLocalizationDatabase g_Localization;
 
 extern const char *Localize(const char *pStr, const char *pContext = "")
 	GNUC_ATTRIBUTE((format_arg(1)));
+
+// TClient
+extern const char *TCLocalize(const char *pStr, const char *pContext = "")
+	GNUC_ATTRIBUTE((format_arg(1)));
 #endif

@@ -510,7 +510,6 @@ protected:
 	void PopupConfirmSwitchServer();
 	void RenderServerbrowserFilters(CUIRect View);
 	void ResetServerbrowserFilters();
-	void OpenTClientDiscord();
 	void RenderServerbrowserDDNetFilter(CUIRect View,
 		IFilterList &Filter,
 		float ItemHeight, int MaxItems, int ItemsPerRow,
