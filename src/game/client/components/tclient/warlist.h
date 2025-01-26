@@ -1,5 +1,5 @@
-#ifndef GAME_CLIENT_COMPONENTS_WARLIST_H
-#define GAME_CLIENT_COMPONENTS_WARLIST_H
+#ifndef GAME_CLIENT_COMPONENTS_TCLIENT_WARLIST_H
+#define GAME_CLIENT_COMPONENTS_TCLIENT_WARLIST_H
 
 #include <engine/console.h>
 #include <engine/shared/protocol.h>

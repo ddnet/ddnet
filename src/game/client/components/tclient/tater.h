@@ -1,5 +1,5 @@
-#ifndef GAME_CLIENT_COMPONENTS_TATER_H
-#define GAME_CLIENT_COMPONENTS_TATER_H
+#ifndef GAME_CLIENT_COMPONENTS_TCLIENT_TATER_H
+#define GAME_CLIENT_COMPONENTS_TCLIENT_TATER_H
 #include <game/client/component.h>
 
 class CTater : public CComponent

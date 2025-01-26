@@ -1,5 +1,5 @@
-#ifndef GAME_CLIENT_COMPONENTS_OUTLINES_H
-#define GAME_CLIENT_COMPONENTS_OUTLINES_H
+#ifndef GAME_CLIENT_COMPONENTS_TCLIENT_OUTLINES_H
+#define GAME_CLIENT_COMPONENTS_TCLIENT_OUTLINES_H
 #include <game/client/component.h>
 
 class COutlines : public CComponent
