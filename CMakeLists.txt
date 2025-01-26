@@ -1840,6 +1840,7 @@ set(EXPECTED_DATA
   skins7/xmas_hat.png
   strong_weak.png
   tclient/fonts/Cabin-Regular.ttf
+  tclient/fonts/FreeSansBold.ttf
   tclient/fonts/GoogleSans-Regular.ttf
   tclient/fonts/FreeSansBold.ttf
   tclient/fonts/Inter_24pt-Regular.ttf
