@@ -199,6 +199,8 @@ void CCharacter::SetInvincible(bool Invincible)
 	m_Core.m_Invincible = Invincible;
 	if(Invincible)
 		UnFreeze();
+
+	SetEndlessJump(Invincible);
 }
 
 void CCharacter::SetLiveFrozen(bool Active)
@@ -2188,9 +2190,9 @@ void CCharacter::DDRacePostCoreTick()
 		m_Core.m_Jumped = 1;
 	}
 
-	if((m_Core.m_Super || m_Core.m_Invincible || m_Core.m_EndlessJump) && m_Core.m_Jumped > 1)
+	if((m_Core.m_Super || m_Core.m_EndlessJump) && m_Core.m_Jumped > 1)
 	{
-		// Super players, invincible players and players with infinite jumps always have light feet
+		// Super players and players with infinite jumps always have light feet
 		m_Core.m_Jumped = 1;
 	}
 
