@@ -254,9 +254,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 
 	if(g_Config.m_Debug)
 	{
-		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
-		dbg_msg("security", "client accepted %s", aAddrStr);
+		dbg_msg("security", "client accepted %s", m_aSlots[Slot].m_Connection.PeerAddressString(true).data());
 	}
 
 	if(VanillaAuth)

@@ -9,6 +9,8 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <array>
+
 class CHuffman;
 class CNetBan;
 class CPacker;
@@ -265,13 +267,16 @@ private:
 	NETSOCKET m_Socket;
 	NETSTATS m_Stats;
 
-	char m_aPeerAddrStr[NETADDR_MAXSTRSIZE];
+	std::array<char, NETADDR_MAXSTRSIZE> m_aPeerAddrStr;
+	std::array<char, NETADDR_MAXSTRSIZE> m_aPeerAddrStrNoPort;
 	// client 0.7
 	static TOKEN GenerateToken7(const NETADDR *pPeerAddr);
 	class CNetBase *m_pNetBase;
 	bool IsSixup() { return m_Sixup; }
 
 	//
+	void SetPeerAddr(const NETADDR *pAddr);
+	void ClearPeerAddr();
 	void ResetStats();
 	void SetError(const char *pString);
 	void AckChunks(int Ack);
@@ -305,7 +310,10 @@ public:
 	void SignalResend();
 	int State() const { return m_State; }
 	const NETADDR *PeerAddress() const { return &m_PeerAddr; }
-	const char (*PeerAddressString() const)[NETADDR_MAXSTRSIZE] { return &m_aPeerAddrStr; }
+	const std::array<char, NETADDR_MAXSTRSIZE> &PeerAddressString(bool IncludePort) const
+	{
+		return IncludePort ? m_aPeerAddrStr : m_aPeerAddrStrNoPort;
+	}
 	void ConnectAddresses(const NETADDR **ppAddrs, int *pNumAddrs) const
 	{
 		*ppAddrs = m_aConnectAddrs;
@@ -455,7 +463,7 @@ public:
 
 	// status requests
 	const NETADDR *ClientAddr(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
-	const char (*ClientAddrString(int ClientID) const)[NETADDR_MAXSTRSIZE] { return m_aSlots[ClientID].m_Connection.PeerAddressString(); }
+	const std::array<char, NETADDR_MAXSTRSIZE> &ClientAddrString(int ClientId, bool IncludePort) const { return m_aSlots[ClientId].m_Connection.PeerAddressString(IncludePort); }
 	bool HasSecurityToken(int ClientId) const { return m_aSlots[ClientId].m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
 	NETADDR Address() const { return m_Address; }
 	NETSOCKET Socket() const { return m_Socket; }
