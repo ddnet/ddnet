@@ -58,6 +58,21 @@ class TimeoutParam(namedtuple("Timeout", "start unmultiplied_duration")):
 		duration = test_env.runner.timeout_multiplier * self.unmultiplied_duration
 		return max((self.start + duration) - time(), 0)
 
+def relpath(path, start=os.curdir):
+	try:
+		return os.path.relpath(path, start)
+	except ValueError:
+		return os.path.realpath(path)
+
+def popen(args, *, cwd, **kwargs):
+	# If cwd is set, we might need to fix up the program path: On Windows, the
+	# executed program is relative to the current process's working directory.
+	if cwd is not None and os.name == "nt":
+		# If relative and contains a path separator.
+		if not os.path.isabs(args[0]) and os.path.dirname(args[0]) != "":
+			args = [relpath(os.path.join(cwd, args[0]))] + args[1:]
+	return subprocess.Popen(args, cwd=cwd, **kwargs)
+
 GREEN="\x1b[32m"
 RED="\x1b[31m"
 RESET="\x1b[m"
@@ -66,6 +81,7 @@ class TestRunner:
 	def __init__(self, ddnet, ddnet_server, repo_dir, dir, valgrind_memcheck, keep_tmpdirs, timeout_multiplier):
 		self.ddnet = ddnet
 		self.ddnet_server = ddnet_server
+		self.repo_dir = repo_dir
 		self.data_dir = os.path.join(repo_dir, "data")
 		self.dir = dir
 		self.extra_env_vars = {}
@@ -75,13 +91,6 @@ class TestRunner:
 		self.valgrind_memcheck = valgrind_memcheck
 		if self.valgrind_memcheck:
 			self.timeout_multiplier *= 10
-			self.run_prefix_args = [
-				"valgrind",
-				"--tool=memcheck",
-				"--gen-suppressions=all",
-				"--suppressions={}".format(os.path.join(repo_dir, "memcheck.supp")),
-				"--track-origins=yes",
-			]
 
 	def run_test(self, test):
 		tmp_dir = TemporaryDirectory(prefix=f"integration_{test.name}_", dir=self.dir, delete=False)
@@ -100,7 +109,7 @@ class TestRunner:
 			if tmp_dir_cleanup:
 				tmp_dir.cleanup()
 				tmp_dir = None
-		return os.path.relpath(tmp_dir.name) if tmp_dir is not None else None, error
+		return relpath(tmp_dir.name) if tmp_dir is not None else None, error
 
 	def run_tests(self, tests):
 		tests = list(tests)
@@ -145,10 +154,19 @@ class TestEnvironment:
 		with open(os.path.join(self.tmp_dir, "storage.cfg"), "w") as f:
 			f.write(f"""\
 add_path .
-add_path {os.path.relpath(self.runner.data_dir, tmp_dir)}
+add_path {relpath(self.runner.data_dir, tmp_dir)}
 """)
 		self.ddnet = os.path.relpath(runner.ddnet, self.tmp_dir)
 		self.ddnet_server = os.path.relpath(runner.ddnet_server, self.tmp_dir)
+		self.run_prefix_args = []
+		if self.runner.valgrind_memcheck:
+			self.run_prefix_args = [
+				"valgrind",
+				"--tool=memcheck",
+				"--gen-suppressions=all",
+				"--suppressions={}".format(relpath(os.path.join(runner.repo_dir, "memcheck.supp"), self.tmp_dir)),
+				"--track-origins=yes",
+			]
 		self.name = name
 		self.num_clients = 0
 		self.num_servers = 0
@@ -252,7 +270,7 @@ class Runnable:
 				", ".join(sorted(intersection))
 			))
 		new_env_vars = {**cur_env_vars, **test_env.runner.extra_env_vars}
-		self.process = subprocess.Popen(
+		self.process = popen(
 			test_env.runner.run_prefix_args + args,
 			text=True,
 			cwd=test_env.tmp_dir,
@@ -567,8 +585,12 @@ def smoke_test(test_env):
 	if not test_env.runner.valgrind_memcheck and ranks != expected_ranks:
 		raise AssertionError(f"unexpected ranks:\n{ranks}\n\n{expected_ranks}")
 
+EXE_SUFFIX = ""
+if os.name == "nt":
+	EXE_SUFFIX = ".exe"
+
 def main():
-	repo_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+	repo_dir = relpath(os.path.join(os.path.dirname(__file__), ".."))
 
 	import argparse
 	parser = argparse.ArgumentParser()
@@ -579,8 +601,8 @@ def main():
 	parser.add_argument("test", metavar="TEST", nargs="?", help="name of test to run")
 	args = parser.parse_args()
 
-	ddnet = os.path.join(args.builddir, "DDNet")
-	ddnet_server = os.path.join(args.builddir, "DDNet-Server")
+	ddnet = os.path.join(args.builddir, f"DDNet{EXE_SUFFIX}")
+	ddnet_server = os.path.join(args.builddir, f"DDNet-Server{EXE_SUFFIX}")
 	if not os.path.exists(ddnet):
 		raise RuntimeError(f"client binary {ddnet!r} not found")
 	if not os.path.exists(ddnet_server):
