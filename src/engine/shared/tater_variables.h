@@ -189,6 +189,13 @@ MACRO_CONFIG_INT(ClTeeTrailFade, tc_tee_trail_fade, 0, 0, 1, CFGFLAG_CLIENT | CF
 MACRO_CONFIG_INT(ClTeeTrailRainbow, tc_tee_trail_rainbow, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Rainbow tee trails")
 MACRO_CONFIG_INT(ClTeeTrailSpeed, tc_tee_trail_speed, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Speed color tee trails")
 
+// Chat Reply
+MACRO_CONFIG_INT(ClAutoReplyMuted, tc_auto_reply_muted, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Auto reply to muted players with a message")
+MACRO_CONFIG_STR(ClAutoReplyMutedMessage, tc_auto_reply_muted_message, 128, "I have muted you", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply to muted players")
+MACRO_CONFIG_INT(ClAutoReplyMinimized, tc_auto_reply_minimized, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Auto reply when your game is minimized")
+MACRO_CONFIG_STR(ClAutoReplyMinimizedMessage, tc_auto_reply_minimized_message, 128, "I am not tabbed in", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Message to reply when your game is minimized")
+
+
 // Integration
 MACRO_CONFIG_INT(ClDiscordRPC, tc_discord_rpc, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toggle discord RPC (requires restart)")
 

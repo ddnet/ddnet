@@ -11,12 +11,19 @@ class CTater : public CComponent
 	static void RandomSkin(void *pUserData);
 	static void RandomFlag(void *pUserData);
 
+	class IEngineGraphics *m_pGraphics = nullptr;
+
+	char m_PreviousOwnMessage[2048] = {};
+
+	bool SendNonDuplicateMessage(int Team, const char *pLine);
+
 public:
 	CTater();
-	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnInit() override;
+	int Sizeof() const override { return sizeof(*this); }
+	void OnInit() override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
+	void OnConsoleInit() override;
 
-	virtual void OnConsoleInit() override;
 };
 
 #endif

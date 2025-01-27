@@ -739,6 +739,40 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
+	// ***** Auto Reply ***** //
+	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
+	s_SectionBoxes.push_back(Column);
+	Column.HSplitTop(HeadlineHeight, &Label, &Column);
+	Ui()->DoLabel(&Label, TCLocalize("Auto Reply"), HeadlineFontSize, TEXTALIGN_ML);
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoReplyMuted, TCLocalize("Auto reply to muted players"), &g_Config.m_ClAutoReplyMuted, &Column, LineSize);
+	CUIRect MutedReply;
+	Column.HSplitTop(LineSize + MarginExtraSmall, &MutedReply, &Column);
+	if(g_Config.m_ClAutoReplyMuted)
+	{
+		MutedReply.HSplitTop(MarginExtraSmall, nullptr, &MutedReply);
+		MutedReply.VSplitMid(&MutedReply, nullptr);
+		static CLineInput s_MutedReply(g_Config.m_ClAutoReplyMutedMessage, sizeof(g_Config.m_ClAutoReplyMutedMessage));
+		s_MutedReply.SetEmptyText("I have muted you");
+		Ui()->DoEditBox(&s_MutedReply, &MutedReply, EditBoxFontSize);
+	}
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoReplyMinimized, TCLocalize("Auto reply when tabbed out"), &g_Config.m_ClAutoReplyMinimized, &Column, LineSize);
+	CUIRect MinimizedReply;
+	Column.HSplitTop(LineSize + MarginExtraSmall, &MinimizedReply, &Column);
+	if(g_Config.m_ClAutoReplyMinimized)
+	{
+		MinimizedReply.HSplitTop(MarginExtraSmall, nullptr, &MinimizedReply);
+		MinimizedReply.VSplitMid(&MinimizedReply, nullptr);
+		static CLineInput s_MinimizedReply(g_Config.m_ClAutoReplyMinimizedMessage, sizeof(g_Config.m_ClAutoReplyMinimizedMessage));
+		s_MinimizedReply.SetEmptyText("I am not tabbed in");
+		Ui()->DoEditBox(&s_MinimizedReply, &MinimizedReply, EditBoxFontSize);
+	}
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
+
 	// ***** Player Indicator ***** //
 	Column.HSplitTop(MarginBetweenSections, nullptr, &Column);
 	s_SectionBoxes.push_back(Column);
