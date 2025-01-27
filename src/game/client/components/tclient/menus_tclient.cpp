@@ -726,16 +726,16 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	{
 		DoSliderWithScaledValue(&g_Config.m_ClRunOnJoinDelay, &g_Config.m_ClRunOnJoinDelay, &Button, TCLocalize("Delay"), 140, 2000, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE, "ms");
 	}
-	CUIRect ButtonVerify, EnableVerifySection;
-	Column.HSplitTop(LineSize, &EnableVerifySection, &Column);
-	EnableVerifySection.VSplitMid(&EnableVerifySection, &ButtonVerify);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoVerify, TCLocalize("Auto verify"), &g_Config.m_ClAutoVerify, &EnableVerifySection, LineSize);
-	static CButtonContainer s_VerifyButton;
-	if(DoButton_Menu(&s_VerifyButton, TCLocalize("Manual Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
-	{
-		if(!Client()->ViewLink("https://ger10.ddnet.org/"))
-			dbg_msg("menus", "couldn't open link");
-	}
+	//CUIRect ButtonVerify, EnableVerifySection;
+	//Column.HSplitTop(LineSize, &EnableVerifySection, &Column);
+	//EnableVerifySection.VSplitMid(&EnableVerifySection, &ButtonVerify);
+	//DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoVerify, TCLocalize("Auto verify"), &g_Config.m_ClAutoVerify, &EnableVerifySection, LineSize);
+	//static CButtonContainer s_VerifyButton;
+	//if(DoButton_Menu(&s_VerifyButton, TCLocalize("Manual Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
+	//{
+	//	if(!Client()->ViewLink("https://ger10.ddnet.org/"))
+	//		dbg_msg("menus", "couldn't open link");
+	//}
 	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 
