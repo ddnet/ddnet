@@ -1052,6 +1052,7 @@ int CServer::ClientRejoinCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
+	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_DDNetVersion = VERSION_NONE;
 	pThis->m_aClients[ClientId].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
@@ -1081,6 +1082,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
+	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_ShowIps = false;
 	pThis->m_aClients[ClientId].m_DebugDummy = false;
 	pThis->m_aClients[ClientId].m_DDNetVersion = VERSION_NONE;
@@ -1111,6 +1113,7 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
+	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_Traffic = 0;
 	pThis->m_aClients[ClientId].m_TrafficSince = 0;
 	pThis->m_aClients[ClientId].m_ShowIps = false;
@@ -1200,6 +1203,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
+	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_Traffic = 0;
 	pThis->m_aClients[ClientId].m_TrafficSince = 0;
 	pThis->m_aClients[ClientId].m_ShowIps = false;
@@ -1388,19 +1392,27 @@ void CServer::SendRconCmdAdd(const IConsole::CCommandInfo *pCommandInfo, int Cli
 void CServer::SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientId)
 {
 	CMsgPacker Msg(NETMSG_RCON_CMD_REM, true);
-	Msg.AddString(pCommandInfo->m_pName, 256);
+	Msg.AddString(pCommandInfo->m_pName, IConsole::TEMPCMD_NAME_LENGTH);
 	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
 
-int CServer::GetConsoleAccessLevel(int ClientId)
+void CServer::SendRconCmdGroupStart(int ClientId)
 {
-	return m_aClients[ClientId].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientId].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER;
+	CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_START, true);
+	Msg.AddInt(NumRconCommands(ClientId));
+	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+}
+
+void CServer::SendRconCmdGroupEnd(int ClientId)
+{
+	CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
+	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
 
 int CServer::NumRconCommands(int ClientId)
 {
 	int Num = 0;
-	int ConsoleAccessLevel = GetConsoleAccessLevel(ClientId);
+	const int ConsoleAccessLevel = m_aClients[ClientId].ConsoleAccessLevel();
 	for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
 		pCmd; pCmd = pCmd->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER))
 	{
@@ -1409,23 +1421,112 @@ int CServer::NumRconCommands(int ClientId)
 	return Num;
 }
 
-void CServer::UpdateClientRconCommands()
+void CServer::UpdateClientRconCommands(int ClientId)
 {
-	int ClientId = Tick() % MAX_CLIENTS;
-
-	if(m_aClients[ClientId].m_State != CClient::STATE_EMPTY && m_aClients[ClientId].m_Authed)
+	CClient &Client = m_aClients[ClientId];
+	if(Client.m_State != CClient::STATE_INGAME ||
+		!Client.m_Authed ||
+		Client.m_pRconCmdToSend == nullptr)
 	{
-		int ConsoleAccessLevel = GetConsoleAccessLevel(ClientId);
-		for(int i = 0; i < MAX_RCONCMD_SEND && m_aClients[ClientId].m_pRconCmdToSend; ++i)
+		return;
+	}
+
+	const int ConsoleAccessLevel = Client.ConsoleAccessLevel();
+	for(int i = 0; i < MAX_RCONCMD_SEND && Client.m_pRconCmdToSend; ++i)
+	{
+		SendRconCmdAdd(Client.m_pRconCmdToSend, ClientId);
+		Client.m_pRconCmdToSend = Client.m_pRconCmdToSend->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
+		if(Client.m_pRconCmdToSend == nullptr)
 		{
-			SendRconCmdAdd(m_aClients[ClientId].m_pRconCmdToSend, ClientId);
-			m_aClients[ClientId].m_pRconCmdToSend = m_aClients[ClientId].m_pRconCmdToSend->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
-			if(m_aClients[ClientId].m_pRconCmdToSend == nullptr)
-			{
-				CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
-				SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
-			}
+			SendRconCmdGroupEnd(ClientId);
 		}
+	}
+}
+
+CServer::CMaplistEntry::CMaplistEntry(const char *pName)
+{
+	str_copy(m_aName, pName);
+}
+
+bool CServer::CMaplistEntry::operator<(const CMaplistEntry &Other) const
+{
+	return str_comp_filenames(m_aName, Other.m_aName) < 0;
+}
+
+void CServer::SendMaplistGroupStart(int ClientId)
+{
+	CMsgPacker Msg(NETMSG_MAPLIST_GROUP_START, true);
+	Msg.AddInt(m_vMaplistEntries.size());
+	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+}
+
+void CServer::SendMaplistGroupEnd(int ClientId)
+{
+	CMsgPacker Msg(NETMSG_MAPLIST_GROUP_END, true);
+	SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+}
+
+void CServer::UpdateClientMaplistEntries(int ClientId)
+{
+	CClient &Client = m_aClients[ClientId];
+	if(Client.m_State != CClient::STATE_INGAME ||
+		!Client.m_Authed ||
+		Client.m_Sixup ||
+		Client.m_pRconCmdToSend != nullptr || // wait for command sending
+		Client.m_MaplistEntryToSend == CClient::MAPLIST_DISABLED ||
+		Client.m_MaplistEntryToSend == CClient::MAPLIST_DONE)
+	{
+		return;
+	}
+
+	if(Client.m_MaplistEntryToSend == CClient::MAPLIST_UNINITIALIZED)
+	{
+		static const char *const MAP_COMMANDS[] = {"sv_map", "change_map"};
+		const int ConsoleAccessLevel = Client.ConsoleAccessLevel();
+		const bool MapCommandAllowed = std::any_of(std::begin(MAP_COMMANDS), std::end(MAP_COMMANDS), [&](const char *pMapCommand) {
+			const IConsole::CCommandInfo *pInfo = Console()->GetCommandInfo(pMapCommand, CFGFLAG_SERVER, false);
+			dbg_assert(pInfo != nullptr, "Map command not found");
+			return ConsoleAccessLevel <= pInfo->GetAccessLevel();
+		});
+		if(MapCommandAllowed)
+		{
+			Client.m_MaplistEntryToSend = 0;
+			SendMaplistGroupStart(ClientId);
+		}
+		else
+		{
+			Client.m_MaplistEntryToSend = CClient::MAPLIST_DISABLED;
+			return;
+		}
+	}
+
+	if((size_t)Client.m_MaplistEntryToSend < m_vMaplistEntries.size())
+	{
+		CMsgPacker Msg(NETMSG_MAPLIST_ADD, true);
+		int Limit = NET_MAX_PAYLOAD - 128;
+		while((size_t)Client.m_MaplistEntryToSend < m_vMaplistEntries.size())
+		{
+			// Space for null termination not included in Limit
+			const int SizeBefore = Msg.Size();
+			Msg.AddString(m_vMaplistEntries[Client.m_MaplistEntryToSend].m_aName, Limit - 1, false);
+			if(Msg.Error())
+			{
+				break;
+			}
+			Limit -= Msg.Size() - SizeBefore;
+			if(Limit <= 1)
+			{
+				break;
+			}
+			++Client.m_MaplistEntryToSend;
+		}
+		SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
+	}
+
+	if((size_t)Client.m_MaplistEntryToSend >= m_vMaplistEntries.size())
+	{
+		SendMaplistGroupEnd(ClientId);
+		Client.m_MaplistEntryToSend = CClient::MAPLIST_DONE;
 	}
 }
 
@@ -1748,7 +1849,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 					m_RconClientId = ClientId;
 					m_RconAuthLevel = m_aClients[ClientId].m_Authed;
-					Console()->SetAccessLevel(m_aClients[ClientId].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : m_aClients[ClientId].m_Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : m_aClients[ClientId].m_Authed == AUTHED_HELPER ? IConsole::ACCESS_LEVEL_HELPER : IConsole::ACCESS_LEVEL_USER);
+					Console()->SetAccessLevel(m_aClients[ClientId].ConsoleAccessLevel());
 					{
 						CRconClientLogger Logger(this, ClientId);
 						CLogScope Scope(&Logger);
@@ -1818,15 +1919,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					int SendRconCmds = IsSixup(ClientId) ? true : Unpacker.GetInt();
 					if(!Unpacker.Error() && SendRconCmds)
 					{
-						// AUTHED_ADMIN - AuthLevel gets the proper IConsole::ACCESS_LEVEL_<x>
-						m_aClients[ClientId].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
-						CMsgPacker MsgStart(NETMSG_RCON_CMD_GROUP_START, true);
-						MsgStart.AddInt(NumRconCommands(ClientId));
-						SendMsg(&MsgStart, MSGFLAG_VITAL, ClientId);
+						m_aClients[ClientId].m_pRconCmdToSend = Console()->FirstCommandInfo(m_aClients[ClientId].ConsoleAccessLevel(), CFGFLAG_SERVER);
+						SendRconCmdGroupStart(ClientId);
 						if(m_aClients[ClientId].m_pRconCmdToSend == nullptr)
 						{
-							CMsgPacker MsgEnd(NETMSG_RCON_CMD_GROUP_END, true);
-							SendMsg(&MsgEnd, MSGFLAG_VITAL, ClientId);
+							SendRconCmdGroupEnd(ClientId);
 						}
 					}
 
@@ -2853,6 +2950,7 @@ int CServer::Run()
 	}
 
 	ReadAnnouncementsFile();
+	InitMaplist();
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
@@ -3012,7 +3110,9 @@ int CServer::Run()
 				if(Config()->m_SvHighBandwidth || (m_CurrentGameTick % 2) == 0)
 					DoSnapshot();
 
-				UpdateClientRconCommands();
+				const int CommandSendingClientId = Tick() % MAX_CLIENTS;
+				UpdateClientRconCommands(CommandSendingClientId);
+				UpdateClientMaplistEntries(CommandSendingClientId);
 
 				m_Fifo.Update();
 
@@ -3702,6 +3802,12 @@ void CServer::ConReloadAnnouncement(IConsole::IResult *pResult, void *pUserData)
 	pThis->ReadAnnouncementsFile();
 }
 
+void CServer::ConReloadMaplist(IConsole::IResult *pResult, void *pUserData)
+{
+	CServer *pThis = static_cast<CServer *>(pUserData);
+	pThis->InitMaplist();
+}
+
 void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3734,9 +3840,11 @@ void CServer::ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUse
 		{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
-				if(pThis->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY ||
-					(pInfo->GetAccessLevel() > AUTHED_ADMIN - pThis->m_aClients[i].m_Authed && AUTHED_ADMIN - pThis->m_aClients[i].m_Authed < OldAccessLevel) ||
-					(pInfo->GetAccessLevel() < AUTHED_ADMIN - pThis->m_aClients[i].m_Authed && AUTHED_ADMIN - pThis->m_aClients[i].m_Authed > OldAccessLevel) ||
+				if(pThis->m_aClients[i].m_State == CServer::CClient::STATE_EMPTY)
+					continue;
+				const int ClientAccessLevel = pThis->m_aClients[i].ConsoleAccessLevel();
+				if((pInfo->GetAccessLevel() > ClientAccessLevel && ClientAccessLevel < OldAccessLevel) ||
+					(pInfo->GetAccessLevel() < ClientAccessLevel && ClientAccessLevel > OldAccessLevel) ||
 					(pThis->m_aClients[i].m_pRconCmdToSend && str_comp(pResult->GetString(0), pThis->m_aClients[i].m_pRconCmdToSend->m_pName) >= 0))
 					continue;
 
@@ -3768,6 +3876,7 @@ void CServer::LogoutClient(int ClientId, const char *pReason)
 
 	m_aClients[ClientId].m_AuthTries = 0;
 	m_aClients[ClientId].m_pRconCmdToSend = nullptr;
+	m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 
 	char aBuf[64];
 	if(*pReason)
@@ -3958,6 +4067,7 @@ void CServer::RegisterCommands()
 	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys");
 
 	Console()->Register("reload_announcement", "", CFGFLAG_SERVER, ConReloadAnnouncement, this, "Reload the announcements");
+	Console()->Register("reload_maplist", "", CFGFLAG_SERVER, ConReloadMaplist, this, "Reload the maplist");
 
 	RustVersionRegister(*Console());
 
@@ -4064,6 +4174,74 @@ const char *CServer::GetAnnouncementLine()
 	}
 
 	return m_vAnnouncements[m_AnnouncementLastLine].c_str();
+}
+
+struct CSubdirCallbackUserdata
+{
+	CServer *m_pServer;
+	char m_aCurrentFolder[IO_MAX_PATH_LENGTH];
+};
+
+int CServer::MaplistEntryCallback(const char *pFilename, int IsDir, int DirType, void *pUser)
+{
+	CSubdirCallbackUserdata *pUserdata = static_cast<CSubdirCallbackUserdata *>(pUser);
+	CServer *pThis = pUserdata->m_pServer;
+
+	if(str_comp(pFilename, ".") == 0 || str_comp(pFilename, "..") == 0)
+		return 0;
+
+	char aFilename[IO_MAX_PATH_LENGTH];
+	if(pUserdata->m_aCurrentFolder[0] != '\0')
+		str_format(aFilename, sizeof(aFilename), "%s/%s", pUserdata->m_aCurrentFolder, pFilename);
+	else
+		str_copy(aFilename, pFilename);
+
+	if(IsDir)
+	{
+		CSubdirCallbackUserdata Userdata;
+		Userdata.m_pServer = pThis;
+		str_copy(Userdata.m_aCurrentFolder, aFilename);
+		char aFindPath[IO_MAX_PATH_LENGTH];
+		str_format(aFindPath, sizeof(aFindPath), "maps/%s/", aFilename);
+		pThis->Storage()->ListDirectory(IStorage::TYPE_ALL, aFindPath, MaplistEntryCallback, &Userdata);
+		return 0;
+	}
+
+	const char *pSuffix = str_endswith(aFilename, ".map");
+	if(!pSuffix) // not ending with .map
+		return 0;
+	const size_t FilenameLength = pSuffix - aFilename;
+	aFilename[FilenameLength] = '\0'; // remove suffix
+	if(FilenameLength >= sizeof(CMaplistEntry().m_aName)) // name too long
+		return 0;
+
+	pThis->m_vMaplistEntries.emplace_back(aFilename);
+	return 0;
+}
+
+void CServer::InitMaplist()
+{
+	m_vMaplistEntries.clear();
+
+	CSubdirCallbackUserdata Userdata;
+	Userdata.m_pServer = this;
+	Userdata.m_aCurrentFolder[0] = '\0';
+	Storage()->ListDirectory(IStorage::TYPE_ALL, "maps/", MaplistEntryCallback, &Userdata);
+
+	std::sort(m_vMaplistEntries.begin(), m_vMaplistEntries.end());
+	log_info("server", "Found %d maps for maplist", (int)m_vMaplistEntries.size());
+
+	for(CClient &Client : m_aClients)
+	{
+		if(Client.m_State != CClient::STATE_INGAME)
+			continue;
+
+		// Resend maplist to clients that already got it or are currently getting it
+		if(Client.m_MaplistEntryToSend == CClient::MAPLIST_DONE || Client.m_MaplistEntryToSend >= 0)
+		{
+			Client.m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
+		}
+	}
 }
 
 int *CServer::GetIdMap(int ClientId)

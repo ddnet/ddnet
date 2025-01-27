@@ -296,12 +296,22 @@ void CClient::Rcon(const char *pCmd)
 
 float CClient::GotRconCommandsPercentage() const
 {
-	if(m_ExpectedRconCommands < 1)
+	if(m_ExpectedRconCommands <= 0)
 		return -1.0f;
 	if(m_GotRconCommands > m_ExpectedRconCommands)
 		return -1.0f;
 
 	return (float)m_GotRconCommands / (float)m_ExpectedRconCommands;
+}
+
+float CClient::GotMaplistPercentage() const
+{
+	if(m_ExpectedMaplistEntries <= 0)
+		return -1.0f;
+	if(m_vMaplistEntries.size() > (size_t)m_ExpectedMaplistEntries)
+		return -1.0f;
+
+	return (float)m_vMaplistEntries.size() / (float)m_ExpectedMaplistEntries;
 }
 
 bool CClient::ConnectionProblems() const
@@ -667,6 +677,8 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_ExpectedRconCommands = -1;
 	m_GotRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
+	m_ExpectedMaplistEntries = -1;
+	m_vMaplistEntries.clear();
 	m_aNetClient[CONN_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
 	m_pMap->Unload();
@@ -1846,6 +1858,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				{
 					m_pConsole->DeregisterTempAll();
 					m_ExpectedRconCommands = -1;
+					m_vMaplistEntries.clear();
+					m_ExpectedMaplistEntries = -1;
 				}
 			}
 		}
@@ -2214,8 +2228,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_GROUP_START)
 		{
-			int ExpectedRconCommands = Unpacker.GetInt();
-			if(Unpacker.Error())
+			const int ExpectedRconCommands = Unpacker.GetInt();
+			if(Unpacker.Error() || ExpectedRconCommands < 0)
 				return;
 
 			m_ExpectedRconCommands = ExpectedRconCommands;
@@ -2224,6 +2238,34 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_GROUP_END)
 		{
 			m_ExpectedRconCommands = -1;
+		}
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAPLIST_ADD)
+		{
+			while(true)
+			{
+				const char *pMapName = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
+				if(Unpacker.Error())
+				{
+					return;
+				}
+				if(pMapName[0] != '\0')
+				{
+					m_vMaplistEntries.emplace_back(pMapName);
+				}
+			}
+		}
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAPLIST_GROUP_START)
+		{
+			const int ExpectedMaplistEntries = Unpacker.GetInt();
+			if(Unpacker.Error() || ExpectedMaplistEntries < 0)
+				return;
+
+			m_vMaplistEntries.clear();
+			m_ExpectedMaplistEntries = ExpectedMaplistEntries;
+		}
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_MAPLIST_GROUP_END)
+		{
+			m_ExpectedMaplistEntries = -1;
 		}
 	}
 	else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)
