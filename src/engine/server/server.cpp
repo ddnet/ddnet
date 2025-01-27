@@ -2734,8 +2734,10 @@ int CServer::LoadMap(const char *pMapName)
 
 	if(Config()->m_SvMapsBaseUrl[0])
 	{
-		str_format(aBuf, sizeof(aBuf), "%s%s_%s.map", Config()->m_SvMapsBaseUrl, pMapName, aSha256);
-		EscapeUrl(m_aMapDownloadUrl, aBuf);
+		char aEscaped[256];
+		str_format(aBuf, sizeof(aBuf), "%s_%s.map", pMapName, aSha256);
+		EscapeUrl(aEscaped, aBuf);
+		str_format(m_aMapDownloadUrl, sizeof(m_aMapDownloadUrl), "%s%s", Config()->m_SvMapsBaseUrl, aEscaped);
 	}
 	else
 	{
