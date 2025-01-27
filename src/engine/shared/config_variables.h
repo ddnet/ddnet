@@ -460,6 +460,7 @@ MACRO_CONFIG_STR(SvDnsblHost, sv_dnsbl_host, 128, "", CFGFLAG_SERVER, "Hostname 
 MACRO_CONFIG_STR(SvDnsblKey, sv_dnsbl_key, 128, "", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, "Optional Authentication Key for the specified DNSBL provider")
 MACRO_CONFIG_INT(SvDnsblVote, sv_dnsbl_vote, 0, 0, 1, CFGFLAG_SERVER, "Block votes by blacklisted addresses")
 MACRO_CONFIG_INT(SvDnsblBan, sv_dnsbl_ban, 0, 0, 1, CFGFLAG_SERVER, "Automatically ban blacklisted addresses")
+MACRO_CONFIG_INT(SvDnsblBanDuration, sv_dnsbl_ban_duration, 60, 0, 31557600, CFGFLAG_SERVER, "Blacklisted addresses automatic ban duration in seconds (0 = permanent)")
 MACRO_CONFIG_STR(SvDnsblBanReason, sv_dnsbl_ban_reason, 128, "VPN detected, try connecting without. Contact admin if mistaken", CFGFLAG_SERVER, "Ban reason for 'sv_dnsbl_ban'")
 MACRO_CONFIG_INT(SvDnsblChat, sv_dnsbl_chat, 0, 0, 1, CFGFLAG_SERVER, "Don't allow chat from blacklisted addresses")
 MACRO_CONFIG_INT(SvRconVote, sv_rcon_vote, 0, 0, 1, CFGFLAG_SERVER, "Only allow authed clients to call votes")
