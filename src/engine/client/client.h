@@ -344,6 +344,7 @@ public:
 
 	int GetPredictionTime() override;
 	CSnapItem SnapGetItem(int SnapId, int Index) const override;
+	int GetPredictionTick() override;
 	const void *SnapFindItem(int SnapId, int Type, int Id) const override;
 	int SnapNumItems(int SnapId) const override;
 	void SnapSetStaticsize(int ItemType, int Size) override;

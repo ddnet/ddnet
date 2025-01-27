@@ -1055,12 +1055,6 @@ void CClient::Render()
 
 	GameClient()->OnRender();
 	DebugRender();
-
-	if(State() == IClient::STATE_ONLINE && g_Config.m_ClAntiPingLimit)
-	{
-		int64_t Now = time_get();
-		g_Config.m_ClAntiPing = (m_PredictedTime.Get(Now) - m_aGameTime[g_Config.m_ClDummy].Get(Now)) * 1000 / (float)time_freq() > g_Config.m_ClAntiPingLimit;
-	}
 }
 
 const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc)
@@ -5101,6 +5095,32 @@ int CClient::GetPredictionTime()
 {
 	int64_t Now = time_get();
 	return (int)((m_PredictedTime.Get(Now) - m_aGameTime[g_Config.m_ClDummy].Get(Now)) * 1000 / (float)time_freq());
+}
+
+int CClient::GetPredictionTick()
+{
+	int PredictionTick = GetPredictionTime() * GameTickSpeed() / 1000.0f;
+
+	int PredictionMin = g_Config.m_ClAntiPingLimit * GameTickSpeed() / 1000.0f;
+
+	if(g_Config.m_ClAntiPingLimit == 0)
+	{
+		float PredictionPercentage = 1 - g_Config.m_ClAntiPingPercent / 100.0f;
+		PredictionMin = std::floor(PredictionTick * PredictionPercentage);
+	}
+
+	if(PredictionMin > PredictionTick - 1)
+	{
+		PredictionMin = PredictionTick - 1;
+	}
+
+	PredictionTick = PredGameTick(g_Config.m_ClDummy) - PredictionMin;
+
+	if(PredictionTick < GameTick(g_Config.m_ClDummy) + 1)
+	{
+		PredictionTick = GameTick(g_Config.m_ClDummy) + 1;
+	}
+	return PredictionTick;
 }
 
 void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount)

@@ -2307,17 +2307,30 @@ void CGameClient::OnPredict()
 	if(PredictDummy())
 		pDummyChar = m_PredictedWorld.GetCharacterById(m_PredictedDummyId);
 
+	int PredictionTick = Client()->GetPredictionTick();
 	// predict
 	for(int Tick = Client()->GameTick(g_Config.m_ClDummy) + 1; Tick <= Client()->PredGameTick(g_Config.m_ClDummy); Tick++)
 	{
 		// fetch the previous characters
-		if(Tick == Client()->PredGameTick(g_Config.m_ClDummy))
+		if(Tick == PredictionTick)
 		{
-			m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
-			m_PredictedPrevChar = pLocalChar->GetCore();
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
 					m_aClients[i].m_PrevPredicted = pChar->GetCore();
+		}
+
+		if(Tick == Client()->PredGameTick(g_Config.m_ClDummy))
+		{
+			m_PredictedPrevChar = pLocalChar->GetCore();
+			m_aClients[m_Snap.m_LocalClientId].m_PrevPredicted = pLocalChar->GetCore();
+
+			if(pDummyChar)
+				m_aClients[m_PredictedDummyId].m_PrevPredicted = pDummyChar->GetCore();
+		}
+
+		if(Tick == PredictionTick)
+		{
+			m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
 		}
 
 		// optionally allow some movement in freeze by not predicting freeze the last one to two ticks
@@ -2343,12 +2356,20 @@ void CGameClient::OnPredict()
 		m_PredictedWorld.Tick();
 
 		// fetch the current characters
-		if(Tick == Client()->PredGameTick(g_Config.m_ClDummy))
+		if(Tick == PredictionTick)
 		{
-			m_PredictedChar = pLocalChar->GetCore();
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
 					m_aClients[i].m_Predicted = pChar->GetCore();
+		}
+
+		if(Tick == Client()->PredGameTick(g_Config.m_ClDummy))
+		{
+			m_PredictedChar = pLocalChar->GetCore();
+			m_aClients[m_Snap.m_LocalClientId].m_Predicted = pLocalChar->GetCore();
+
+			if(pDummyChar)
+				m_aClients[m_PredictedDummyId].m_Predicted = pDummyChar->GetCore();
 		}
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
