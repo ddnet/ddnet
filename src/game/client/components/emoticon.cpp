@@ -167,7 +167,7 @@ void CEmoticon::OnRender()
 	}
 	Graphics()->WrapNormal();
 
-	if(GameClient()->m_GameInfo.m_AllowEyeWheel && g_Config.m_ClEyeWheel)
+	if(GameClient()->m_GameInfo.m_AllowEyeWheel && g_Config.m_ClEyeWheel && m_pClient->m_aLocalIds[g_Config.m_ClDummy] >= 0)
 	{
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
