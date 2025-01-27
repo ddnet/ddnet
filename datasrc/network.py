@@ -259,6 +259,7 @@ Objects = [
 		# New data fields for improved target accuracy
 		NetIntAny("m_TargetX", 0),
 		NetIntAny("m_TargetY", 0),
+		NetIntRange("m_TuneZoneOverride", -1, 'NUM_TUNEZONES-1', -1),
 	], validate_size=False),
 
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
