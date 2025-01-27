@@ -3,6 +3,8 @@
 
 #include <base/system.h>
 
+#if defined(CONF_FAMILY_WINDOWS)
+
 TEST(ArgumentsToWide, SingleArgumentNoQuotes)
 {
 	const char *apArguments[] = {"change_map ctf5"};
@@ -37,3 +39,5 @@ TEST(ArgumentsToWide, MultipleArgumentWithSlashesAndQuotes)
 	std::wstring result = arguments_to_wide(apArguments, std::size(apArguments));
 	EXPECT_EQ(result, LR"("sv_name """te\st"""" "change_map """ctf5"""")");
 }
+
+#endif

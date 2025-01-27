@@ -4193,6 +4193,7 @@ void cmdline_free(int argc, const char **argv)
 std::wstring arguments_to_wide(const char **arguments, const size_t num_arguments)
 {
 	std::wstring wide_arguments = L"";
+#if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring escaped_quotes = L"\"\"\"";
 	for(size_t i = 0; i < num_arguments; ++i)
 	{
@@ -4208,6 +4209,7 @@ std::wstring arguments_to_wide(const char **arguments, const size_t num_argument
 		}
 		wide_arguments += L"\"" + wide_arg + L"\"";
 	}
+#endif
 	return wide_arguments;
 }
 

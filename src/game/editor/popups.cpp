@@ -32,6 +32,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	static int s_OpenButton = 0;
 	static int s_OpenCurrentMapButton = 0;
 	static int s_AppendButton = 0;
+	static int s_TestMapLocallyButton = 0;
 	static int s_ExitButton = 0;
 
 	CUIRect Slot;
@@ -117,6 +118,14 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	if(pEditor->DoButton_MenuItem(&pEditor->m_QuickActionMapDetails, pEditor->m_QuickActionMapDetails.Label(), 0, &Slot, 0, pEditor->m_QuickActionMapDetails.Description()))
 	{
 		pEditor->m_QuickActionMapDetails.Call();
+		return CUi::POPUP_CLOSE_CURRENT;
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_TestMapLocallyButton, pEditor->m_QuickActionTestMapLocally.Label(), 0, &Slot, 0, pEditor->m_QuickActionTestMapLocally.Description()))
+	{
+		pEditor->m_QuickActionTestMapLocally.Call();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -2113,6 +2122,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Remove sound";
 		pMessage = "This sound is used in the map. Removing it will reset all layers that use this sound to their default.\n\nRemove anyway?";
 	}
+	else if(pEditor->m_PopupEventType == POPEVENT_RESTART_SERVER)
+	{
+		pTitle = "Restart server";
+		pMessage = "You have a local server running, but you are not authorized or connected.\n\nDo you want to restart the server and reconnect?";
+	}
 	else
 	{
 		dbg_assert(false, "m_PopupEventType invalid");
@@ -2228,6 +2242,10 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		{
 			pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
 			pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedSound));
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_RESTART_SERVER)
+		{
+			pEditor->TestMapLocally(true);
 		}
 		pEditor->m_PopupEventWasActivated = false;
 		return CUi::POPUP_CLOSE_CURRENT;
