@@ -1320,7 +1320,7 @@ inline int CHud::GetDigitsIndex(int Value, int Max)
 
 inline float CHud::GetMovementInformationBoxHeight()
 {
-	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW)
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active && (m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW || m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId].m_SpecCharPresent))
 		return g_Config.m_ClShowhudPlayerPosition ? 3 * MOVEMENT_INFORMATION_LINE_HEIGHT + 2 : 0;
 	float BoxHeight = 3 * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 2 * MOVEMENT_INFORMATION_LINE_HEIGHT * g_Config.m_ClShowhudPlayerAngle;
 	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
@@ -1352,12 +1352,13 @@ void CHud::RenderMovementInformationTextContainer(STextContainerIndex &TextConta
 	}
 }
 
-void CHud::RenderMovementInformation(const int ClientId)
+void CHud::RenderMovementInformation()
 {
-	bool Freeview = ClientId == SPEC_FREEVIEW;
+	const int ClientId = m_pClient->m_Snap.m_SpecInfo.m_Active ? m_pClient->m_Snap.m_SpecInfo.m_SpectatorId : m_pClient->m_Snap.m_LocalClientId;
+	const bool PosOnly = ClientId == SPEC_FREEVIEW || (m_pClient->m_aClients[ClientId].m_SpecCharPresent);
 	// Draw the infomations depending on settings: Position, speed and target angle
 	// This display is only to present the available information from the last snapshot, not to interpolate or predict
-	if(!g_Config.m_ClShowhudPlayerPosition && (Freeview || (!g_Config.m_ClShowhudPlayerSpeed && !g_Config.m_ClShowhudPlayerAngle)))
+	if(!g_Config.m_ClShowhudPlayerPosition && (PosOnly || (!g_Config.m_ClShowhudPlayerSpeed && !g_Config.m_ClShowhudPlayerAngle)))
 	{
 		return;
 	}
@@ -1379,9 +1380,13 @@ void CHud::RenderMovementInformation(const int ClientId)
 	vec2 Pos;
 	float DisplaySpeedX{}, DisplaySpeedY{}, DisplayAngle{};
 
-	if(Freeview)
+	if(ClientId == SPEC_FREEVIEW)
 	{
 		Pos = m_pClient->m_Camera.m_Center / 32.f;
+	}
+	else if(m_pClient->m_aClients[ClientId].m_SpecCharPresent)
+	{
+		Pos = m_pClient->m_aClients[ClientId].m_SpecChar / 32.f;
 	}
 	else
 	{
@@ -1441,7 +1446,7 @@ void CHud::RenderMovementInformation(const int ClientId)
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 	}
 
-	if(Freeview)
+	if(PosOnly)
 		return;
 
 	if(g_Config.m_ClShowhudPlayerSpeed)
@@ -1607,7 +1612,7 @@ void CHud::OnRender()
 			{
 				RenderPlayerState(m_pClient->m_Snap.m_LocalClientId);
 			}
-			RenderMovementInformation(m_pClient->m_Snap.m_LocalClientId);
+			RenderMovementInformation();
 			RenderDDRaceEffects();
 		}
 		else if(m_pClient->m_Snap.m_SpecInfo.m_Active)
@@ -1625,7 +1630,7 @@ void CHud::OnRender()
 			{
 				RenderPlayerState(SpectatorId);
 			}
-			RenderMovementInformation(SpectatorId);
+			RenderMovementInformation();
 			RenderSpectatorHud();
 		}
 
