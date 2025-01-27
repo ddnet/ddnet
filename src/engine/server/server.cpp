@@ -726,30 +726,27 @@ int CServer::DistinctClientCount() const
 	const NETADDR *apAddresses[MAX_CLIENTS];
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
-		{
-			apAddresses[i] = ClientAddr(i);
-		}
+		// connecting clients with spoofed ips can clog slots without being ingame
+		apAddresses[i] = ClientIngame(i) ? ClientAddr(i) : nullptr;
 	}
 
 	int ClientCount = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		// connecting clients with spoofed ips can clog slots without being ingame
-		if(ClientIngame(i))
+		if(apAddresses[i] == nullptr)
 		{
-			ClientCount++;
-			for(int j = 0; j < i; j++)
+			continue;
+		}
+		ClientCount++;
+		for(int j = 0; j < i; j++)
+		{
+			if(apAddresses[j] != nullptr && !net_addr_comp_noport(apAddresses[i], apAddresses[j]))
 			{
-				if(!net_addr_comp_noport(apAddresses[i], apAddresses[j]))
-				{
-					ClientCount--;
-					break;
-				}
+				ClientCount--;
+				break;
 			}
 		}
 	}
-
 	return ClientCount;
 }
 
