@@ -15,6 +15,8 @@
 #include <game/client/skin.h>
 #include <game/generated/protocol7.h>
 
+constexpr auto SAVES_FILE = "ddnet-saves.txt";
+
 class CChat : public CComponent
 {
 	static constexpr float CHAT_HEIGHT_FULL = 200.0f;
