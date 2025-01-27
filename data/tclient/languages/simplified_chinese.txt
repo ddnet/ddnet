@@ -2,6 +2,7 @@
 
 # 2025-01-16 潘潘NO.1
 # 2025-01-16 EdEnd
+# 2025-01-27 LuoChu
 
 ##### /authors #####
 
@@ -22,14 +23,14 @@ Name
 No
 == 否
 
-HUD
-== HUD
-
 Yes
 == 是
 
 Save
 == 保存
+
+HUD
+== HUD
 
 Website
 == 官网
@@ -37,11 +38,14 @@ Website
 Settings
 == 设置
 
-Discord
-== 加入社区
-
 Dummy
 == 分身
+
+Discord
+== Discord
+
+Profiles
+== 配置文件
 
 Visual
 == 视觉效果
@@ -124,11 +128,11 @@ Input
 Fast Inputs (-20ms visual delay)
 == 更快的输入（-20毫秒视觉延迟）
 
-Extra tick other tees (increases other tees latency, \nmakes dragging slightly easier when using fast input)
-== 对其他tee增加帧（增加其他tee的延迟，使用更快的输入时使钩其他tee稍微容易一些）
+Anti Latency Tools
+== 延迟补偿工具
 
-Profiles
-== 配置文件
+Remove prediction & antiping in freeze
+== 在冻结时移除预测 & 延迟补偿
 
 Amount
 == 预测量
@@ -152,7 +156,7 @@ Show any enabled outlines
 == 显示任何已启用的轮廓
 
 Only show outlines in entities
-== 仅显示实体中的轮廓
+== 仅在实体层中显示轮廓
 
 Outline freeze & deep
 == 冻结 & 深度冻结轮廓
@@ -200,7 +204,7 @@ Other
 == 其他
 
 Run cl_run_on_join as console command
-== 执行控制台命令cl_run_on_join
+== 将cl_run_on_join当作控制台指令执行
 
 Auto verify
 == 自动验证
@@ -212,7 +216,7 @@ Ghost Tools
 == 影子工具
 
 Show unpredicted ghosts for other players
-== 为其他玩家显示未预测的影子
+== 显示其他玩家未预测的影子
 
 Swap ghosts and normal players
 == 交换影子和普通玩家
@@ -345,9 +349,6 @@ Name:
 
 Command:
 == 指令:
-
-Command
-== 指令
 
 Override Selected
 == 覆盖选定项
@@ -571,9 +572,6 @@ Load
 Override
 == 覆盖
 
-TClient
-== TClient
-
 Add %s name:
 == 添加 %s 名称：
 
@@ -600,6 +598,9 @@ Remove [group] [clan]
 
 Command
 == 命令
+
+Extra tick other tees (increases other tees latency, \nmakes dragging slightly easier when using fast input)
+== 对其他tee增加帧（增加其他tee的延迟，\n使用更快的输入时使钩其他tee稍微容易一些）
 
 Prediction Margin
 == 预测量
@@ -629,7 +630,7 @@ Reason
 == 原因
 
 Are you sure that you want to remove '%s' from your war groups?
-== 您确定要从您的战队中删除 '%s' 吗？
+== 您确定要从您的敌对群组中删除 '%s' 吗？
 
 Remove War Group
 == 删除敌对群组
@@ -644,10 +645,10 @@ Chatbinds
 == 聊天快捷绑定
 
 Integration
-== 整合
+== 集成
 
 Enable Discord Integration
-== 启用 Discord 整合
+== 启用 Discord 集成
 
 Name: %s
 == 名称：%s
@@ -661,14 +662,11 @@ Skin: %s
 After Load
 == 加载后
 
-Anti Latency Tools
-== 延迟补偿工具
-
-Remove prediction & antiping in freeze
-== 在冻结时移除预测 & 延迟补偿
+TClient
+== TClient
 
 Colors in spectate select
-== 
+== 旁观选择中的颜色
 
 _ or \' \' = Space
-== 
+== _ 或 \' \' = 置空（占位）
