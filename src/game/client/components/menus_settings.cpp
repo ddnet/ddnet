@@ -2419,6 +2419,9 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			RightView.HSplitTop(LineSize, nullptr, &RightView); // Create empty space for hidden option
 		}
 
+		// Eye with a number of spectators
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudSpectatorNumber, Localize("Show number of spectators"), &g_Config.m_ClShowhudSpectatorNumber, &RightView, LineSize);
+
 		// Switch for dummy actions display
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDummyActions, Localize("Show dummy actions"), &g_Config.m_ClShowhudDummyActions, &RightView, LineSize);
 

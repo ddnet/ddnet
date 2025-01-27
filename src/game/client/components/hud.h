@@ -76,6 +76,7 @@ class CHud : public CComponent
 
 	void PreparePlayerStateQuads();
 	void RenderPlayerState(const int ClientId);
+	void RenderSpectatorsNum();
 	void RenderDummyActions();
 	void RenderMovementInformation(const int ClientId);
 

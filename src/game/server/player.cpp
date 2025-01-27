@@ -383,6 +383,22 @@ void CPlayer::Snap(int SnappingClient)
 		if(Server()->GetAuthedState(m_ClientId) != AUTHED_NO)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 
+		if(SnappingClient != SERVER_DEMO_CLIENT && (m_Team == TEAM_SPECTATORS || m_Paused))
+		{
+			if(SnappingClient == m_SpectatorId)
+			{
+				pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_WATCHING;
+			}
+			else if(m_SpectatorId == SPEC_FREEVIEW && GameServer()->m_apPlayers[SnappingClient]->GetCharacter())
+			{
+				vec2 CheckPos = GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->GetPos();
+				float dx = m_ViewPos.x - CheckPos.x;
+				float dy = m_ViewPos.y - CheckPos.y;
+				if(absolute(dx) < (m_ShowDistance.x / 3.f) && absolute(dy) < (m_ShowDistance.y / 3.f))
+					pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_WATCHING;
+			}
+		}
+
 		// Times are in milliseconds for 0.7
 		pPlayerInfo->m_Score = m_Score.has_value() ? GameServer()->Score()->PlayerData(m_ClientId)->m_BestTime * 1000 : -1;
 		pPlayerInfo->m_Latency = Latency;
@@ -444,6 +460,22 @@ void CPlayer::Snap(int SnappingClient)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;
 	if(m_Paused == PAUSE_PAUSED)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
+
+	if(SnappingClient != SERVER_DEMO_CLIENT && (m_Team == TEAM_SPECTATORS || m_Paused))
+	{
+		if(SnappingClient == m_SpectatorId)
+		{
+			pDDNetPlayer->m_Flags |= EXPLAYERFLAG_WATCHING;
+		}
+		else if(m_SpectatorId == SPEC_FREEVIEW && GameServer()->m_apPlayers[SnappingClient]->GetCharacter())
+		{
+			vec2 CheckPos = GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->GetPos();
+			float dx = m_ViewPos.x - CheckPos.x;
+			float dy = m_ViewPos.y - CheckPos.y;
+			if(absolute(dx) < (m_ShowDistance.x / 3.f) && absolute(dy) < (m_ShowDistance.y / 3.f))
+				pDDNetPlayer->m_Flags |= EXPLAYERFLAG_WATCHING;
+		}
+	}
 
 	if(Server()->IsSixup(SnappingClient) && m_pCharacter && m_pCharacter->m_DDRaceState == DDRACE_STARTED &&
 		GameServer()->m_apPlayers[SnappingClient]->m_TimerType == TIMERTYPE_SIXUP)
