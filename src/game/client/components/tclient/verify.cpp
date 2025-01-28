@@ -11,11 +11,11 @@
 
 #include "verify.h"
 
-static bool verified = false;
-static int tries = 0;
+// static bool verified = false;
+// static int tries = 0;
 void CVerify::OnRender()
 {
-	//if(g_Config.m_ClAutoVerify)
+	// if(g_Config.m_ClAutoVerify)
 	//{
 	//	// check if we are already verified
 	//	if(verified)
