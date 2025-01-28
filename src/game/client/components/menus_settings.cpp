@@ -2867,7 +2867,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		if(DoButton_CheckBox(&s_Dummy, Localize("Preview Dummy's nameplate"), s_Dummy, &Button))
 			s_Dummy = !s_Dummy;
 
-		int Dummy = (s_Dummy != g_Config.m_ClDummy) ? 1 : 0;
+		int Dummy = g_Config.m_ClDummy != (int)s_Dummy ? 1 : 0;
 
 		CTeeRenderInfo TeeRenderInfo;
 		TeeRenderInfo.Apply(m_pClient->m_Skins.Find(Dummy ? g_Config.m_ClDummySkin : g_Config.m_ClPlayerSkin));

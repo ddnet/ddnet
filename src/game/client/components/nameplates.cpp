@@ -686,9 +686,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	Data.m_Alpha = 1.0f;
 
 	Data.m_ShowName = g_Config.m_ClNamePlates;
-	Data.m_pName = Dummy == 0 ? g_Config.m_PlayerName : g_Config.m_ClDummyName;
-	if(!Data.m_pName[0])
-		Data.m_pName = "Player123";
+	Data.m_pName = Dummy == 0 ? Client()->PlayerName() : Client()->DummyName();
 	Data.m_FontSize = FontSize;
 
 	Data.m_ShowFriendMark = g_Config.m_ClNamePlates && g_Config.m_ClNamePlatesFriendMark;
@@ -701,7 +699,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	Data.m_ShowClan = g_Config.m_ClNamePlates && g_Config.m_ClNamePlatesClan;
 	Data.m_pClan = Dummy == 0 ? g_Config.m_PlayerClan : g_Config.m_ClDummyClan;
 	if(!Data.m_pClan[0])
-		Data.m_pClan = "Clan456";
+		Data.m_pClan = "Clan Name";
 	Data.m_FontSizeClan = FontSizeClan;
 
 	Data.m_ShowDirection = g_Config.m_ClShowDirection != 0 ? true : false;
