@@ -4,7 +4,7 @@ from queue import Queue
 from tempfile import TemporaryDirectory
 from threading import Thread
 from time import time
-from uuid import UUID
+from uuid import uuid4, UUID
 import os
 import queue
 import sqlite3
@@ -100,11 +100,14 @@ class TestRunner:
 			try:
 				test(env)
 			except Exception as e:
+				env.kill_all()
 				error = "".join(traceback.format_exception(e))
 				tmp_dir_cleanup = False
 			else:
+				env.kill_all()
 				error = None
-			env.kill_all()
+				if self.valgrind_memcheck:
+					error = env.check_valgrind_memcheck_errors()
 		finally:
 			if tmp_dir_cleanup:
 				tmp_dir.cleanup()
@@ -171,14 +174,17 @@ add_path {relpath(self.runner.data_dir, tmp_dir)}
 		self.num_clients = 0
 		self.num_servers = 0
 		self.processes = []
+		self.run_id = uuid4()
+		self.full_stderrs = []
 		self.test_timeout_queue = Queue()
 		run_test_timeout_thread(f"{self.name}_timeout", self, self.test_timeout_queue, TimeoutParam(timeout))
 
 	def __del__(self):
 		self.kill_all()
 
-	def register_process(self, process):
+	def register_process(self, process, full_stderr):
 		self.processes.append(process)
+		self.full_stderrs.append(full_stderr)
 
 	def register_events_queue(self, queue):
 		self.test_timeout_queue.put(queue)
@@ -196,6 +202,9 @@ add_path {relpath(self.runner.data_dir, tmp_dir)}
 				process.kill()
 		while self.processes:
 			self.processes.pop().wait()
+
+	def check_valgrind_memcheck_errors(self):
+		pass
 
 def run_lines_thread(name, file, output_filename, output_list, output_queue):
 	def thread():
@@ -279,17 +288,19 @@ class Runnable:
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
 		)
-		test_env.register_process(self.process)
 		self.full_stdout = []
 		self.full_stderr = []
+		test_env.register_process(self.process, self.full_stderr)
 		self.events = Queue()
 		test_env.register_events_queue(self.events)
 		self.next_timeout_id = 0
 		self.timeout_queue = Queue()
 		global_name = f"{test_env.name}_{self.name}"
+		stdout_path = os.path.join(test_env.tmp_dir, f"{self.name}.stdout")
+		stderr_path = os.path.join(test_env.tmp_dir, f"{self.name}.stderr")
 		run_timeout_thread(f"{global_name}_timeout", test_env, self.timeout_queue, self.events)
-		run_lines_thread(f"{global_name}_stdout", self.process.stdout, os.path.join(test_env.tmp_dir, f"{self.name}.stdout"), self.full_stdout, self.events)
-		run_lines_thread(f"{global_name}_stderr", self.process.stderr, os.path.join(test_env.tmp_dir, f"{self.name}.stderr"), self.full_stderr, None)
+		run_lines_thread(f"{global_name}_stdout", self.process.stdout, stdout_path, self.full_stdout, self.events)
+		run_lines_thread(f"{global_name}_stderr", self.process.stderr, stderr_path, self.full_stderr, None)
 		run_exit_thread(f"{global_name}_exit", self.process, self.events)
 	def register_timeout(self, timeout):
 		timeout_id = self.next_timeout_id
