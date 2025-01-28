@@ -1,0 +1,196 @@
+##### language indices #####
+# Format for each language entry:
+# 1. filename (in english)
+# 2. name (in native language)
+# 3. country code (ISO 3166-1 numeric)
+# 4. language tags (RFC 3066) (multiple can be separated with semicolon)
+
+arabic
+== ﻲﺑﺮﻋ
+== 682
+== ar
+
+belarusian
+== Беларуская
+== 112
+== be
+
+bosnian
+== Bosanski
+== 70
+== bs-Latn
+
+brazilian_portuguese
+== Português brasileiro
+== 76
+== pt-BR
+
+bulgarian
+== Български
+== 100
+== bg
+
+catalan
+== Català
+== 906
+== ca
+
+chuvash
+== Чăвашла
+== 643
+== cv
+
+czech
+== Česky
+== 203
+== cs
+
+danish
+== Dansk
+== 208
+== da
+
+dutch
+== Nederlands
+== 528
+== nl
+
+esperanto
+== Esperanto
+== -1
+== eo
+
+estonian
+== Eesti
+== 233
+== ee
+
+finnish
+== Suomi
+== 246
+== fi
+
+french
+== Français
+== 250
+== fr
+
+galician
+== Galego
+== 907
+== gl
+
+german
+== Deutsch
+== 276
+== de
+
+greek
+== Ελληνικά
+== 300
+== el
+
+hungarian
+== Magyar
+== 348
+== hu
+
+italian
+== Italiano
+== 380
+== it
+
+japanese
+== 日本語
+== 392
+== ja
+
+korean
+== 한국어
+== 410
+== ko
+
+kyrgyz
+== Кыргызча
+== 417
+== ky
+
+norwegian
+== Norsk
+== 578
+== no;nb
+
+persian
+== Persian
+== 364
+== fa
+
+polish
+== Polski
+== 616
+== pl
+
+portuguese
+== Português
+== 620
+== pt
+
+romanian
+== Română
+== 642
+== ro
+
+russian
+== Русский
+== 643
+== ru
+
+serbian
+== Srpski
+== 688
+== sr-Latn
+
+serbian_cyrillic
+== Српски
+== 688
+== sr-Cyrl
+
+simplified_chinese
+== 简体中文
+== 156
+== zh-Hans;zh-CN;zh-SG
+
+slovak
+== Slovensky
+== 703
+== sk
+
+spanish
+== Español
+== 724
+== es
+
+swedish
+== Svenska
+== 752
+== sv
+
+traditional_chinese
+== 繁體中文
+== -1
+== zh-Hant;zh-HK;zh-MO;zh-TW
+
+turkish
+== Türkçe
+== 792
+== tr
+
+azerbaijani
+== Azərbaycan
+== 31
+== az
+
+ukrainian
+== Українська
+== 804
+== uk

@@ -527,9 +527,9 @@ void CSpectator::OnRender()
 		}
 
 		// TClient
-		if(g_Config.m_ClWarList && g_Config.m_ClWarListSpectate && GameClient()->m_WarList.GetAnyWar(i)) 
+		if(pInfo && pInfo->m_ClientId > 0 && g_Config.m_ClWarList && g_Config.m_ClWarListSpectate && GameClient()->m_WarList.GetAnyWar(pInfo->m_ClientId))
 		{
-			TextRender()->TextColor(GameClient()->m_WarList.GetPriorityColor(i));
+			TextRender()->TextColor(GameClient()->m_WarList.GetPriorityColor(pInfo->m_ClientId));
 		}
 
 		TextRender()->TextEx(&NameCursor, m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_aName);

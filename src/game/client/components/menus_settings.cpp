@@ -1962,7 +1962,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Sound"),
 		Localize("DDNet"),
 		Localize("Assets"),
-		Localize("TClient"),
+		TCLocalize("TClient"),
 		Localize("Profiles")};
 
 	static CButtonContainer s_aTabButtons[SETTINGS_LENGTH];

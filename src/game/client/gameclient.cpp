@@ -286,6 +286,11 @@ void CGameClient::InitializeLanguage()
 	if(g_Config.m_ClShowWelcome)
 		g_Localization.SelectDefaultLanguage(Console(), g_Config.m_ClLanguagefile, sizeof(g_Config.m_ClLanguagefile));
 	g_Localization.Load(g_Config.m_ClLanguagefile, Storage(), Console());
+
+	// TClient
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "tclient/%s", g_Config.m_ClLanguagefile);
+	g_Localization.Load(aBuf, Storage(), Console());
 }
 
 void CGameClient::OnInit()
@@ -1242,6 +1247,12 @@ void CGameClient::HandleLanguageChanged()
 	m_LanguageChanged = false;
 
 	g_Localization.Load(g_Config.m_ClLanguagefile, Storage(), Console());
+
+	// TClient
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "tclient/%s", g_Config.m_ClLanguagefile);
+	g_Localization.Load(aBuf, Storage(), Console());
+
 	TextRender()->SetFontLanguageVariant(g_Config.m_ClLanguagefile);
 
 	// Clear all text containers

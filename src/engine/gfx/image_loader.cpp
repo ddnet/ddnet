@@ -133,12 +133,36 @@ static int PngliteIncompatibility(png_structp pPngStruct, png_infop pPngInfo)
 
 	return Result;
 }
+static void PngErrorHandler(png_structp png, png_const_charp Msg);
+static void PngWarningHandler(png_structp png, png_const_charp Msg);
+const char *pngCategory = "png"; // Category for logging
+// Custom error handler (called on fatal errors)
+static void PngErrorHandler(png_structp png, png_const_charp Msg)
+{
+	const char *Category = static_cast<const char *>(png_get_error_ptr(png));
+	log_error(Category, "libpng error: %s", Msg);
 
+	// Jump back to the setjmp point - essential for libpng error handling
+	longjmp(png_jmpbuf(png), 1); // Changed from png_longjmp
+}
+
+// Custom warning handler (called on non-fatal warnings)
+static void PngWarningHandler(png_structp png, png_const_charp Msg)
+{
+	const char *Category = static_cast<const char *>(png_get_error_ptr(png));
+	log_error(Category, "libpng warning: %s", Msg);
+}
 bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, CImageInfo &Image, int &PngliteIncompatible)
 {
 	CUserErrorStruct UserErrorStruct = {&Reader, pContextName, {}};
 
-	png_structp pPngStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+	// Initialize structures with custom error handlers
+	png_structp pPngStruct = png_create_read_struct(
+		PNG_LIBPNG_VER_STRING,
+		(void *)pngCategory, // Pass category as error_ptr
+		PngErrorHandler,
+		PngWarningHandler);
+
 	if(pPngStruct == nullptr)
 	{
 		log_error("png", "libpng internal failure: png_create_read_struct failed.");

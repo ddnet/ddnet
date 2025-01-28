@@ -1,0 +1,672 @@
+##### authors #####
+
+# 2025-01-16 潘潘NO.1
+# 2025-01-16 EdEnd
+# 2025-01-27 LuoChu
+
+##### /authors #####
+
+##### translated strings #####
+
+Clan
+== 战队
+
+Custom colors
+== 自定义颜色
+
+Delete
+== 删除
+
+Name
+== 名称
+
+No
+== 否
+
+Yes
+== 是
+
+Save
+== 保存
+
+HUD
+== HUD
+
+Website
+== 官网
+
+Settings
+== 设置
+
+Dummy
+== 分身
+
+Discord
+== Discord
+
+Profiles
+== 配置文件
+
+Visual
+== 视觉效果
+
+Custom Font: 
+==   自定义字体: 
+
+Update tee skin faster after being frozen
+== 冻结后更快更新tee外观
+
+Show ping colored circle before names
+== 在玩家昵称前显示延迟状况
+
+Hide nameplates in spec
+== 其他玩家旁观时隐藏玩家昵称
+
+Show skin names in nameplate
+== 在玩家昵称旁显示皮肤名
+
+Freeze stars
+== 显示冻结效果的星星动画
+
+Color frozen tee skins
+== 冻结不再是灰黑色而是自定义的颜色（无自定义默认灰黑色）
+
+Make hammer rotate with cursor
+== 锤子跟随准星旋转
+
+Tiny tees
+== 小tee
+
+Tiny tees others
+== 小tee（其他玩家）
+
+Render all custom colored feet as white feet skin
+== 将所有自定义脚部颜色渲染为白色
+
+Show screen center
+== 显示屏幕中心（十字线）
+
+Show position and angle (mini debug)
+== 显示位置和角度（小型调试工具）
+
+Show your cursor when in free spectate
+== 在自由观战时显示光标
+
+Spectate cursor alpha
+== 观战光标不透明度
+
+Show when you are the last alive
+== 当只剩一名玩家存活时提示
+
+Frozen Tee Display
+== Tee状态栏
+
+Show frozen tee display
+== 显示Tee状态栏
+
+Use skins instead of ninja tees
+== 使用自定义皮肤代替忍者Tee
+
+Only show after joining a team
+== 仅在加入队伍后显示
+
+Max Rows
+== 最大行数
+
+Tee Size
+== Tee尺寸
+
+Tees left alive text
+== 显示剩余存活Tee的数量
+
+Count frozen tees
+== 显示冻结Tee数量
+
+Input
+== 输入
+
+Fast Inputs (-20ms visual delay)
+== 更快的输入（-20毫秒视觉延迟）
+
+Anti Latency Tools
+== 延迟补偿工具
+
+Remove prediction & antiping in freeze
+== 在冻结时移除预测 & 延迟补偿
+
+Amount
+== 预测量
+
+Delay
+== 延迟
+
+Dont predict other players if you are frozen
+== 被冻结时不预测其他玩家
+
+Adjust your prediction margin while frozen
+== 调整冻结时的预测量
+
+Frozen Margin
+== 冻结预测值
+
+Tile Outlines
+== 方块轮廓
+
+Show any enabled outlines
+== 显示任何已启用的轮廓
+
+Only show outlines in entities
+== 仅在实体层中显示轮廓
+
+Outline freeze & deep
+== 冻结 & 深度冻结轮廓
+
+Outline walls
+== 墙体轮廓
+
+Outline teleporter
+== 传送轮廓
+
+Outline unfreeze & undeep
+== 解冻 & 解除深度冻结轮廓
+
+Outline width
+== 轮廓宽度
+
+Outline alpha
+== 轮廓透明度
+
+Outline Alpha (walls)
+== 墙体轮廓透明度
+
+Freeze outline color
+== 冻结轮廓颜色
+
+Walls outline color
+== 墙体轮廓颜色
+
+Teleporter outline color
+== 传送轮廓颜色
+
+Unfreeze outline color
+== 解冻轮廓颜色
+
+Optimistic prediction along stable direction
+== 沿稳定方向更乐观的预测
+
+Negative stability buffer (for Gores)
+== 负稳定性缓冲（用于 Gores）
+
+Uncertainty duration
+== 不确定性持续时间
+
+Other
+== 其他
+
+Run cl_run_on_join as console command
+== 将cl_run_on_join当作控制台指令执行
+
+Auto verify
+== 自动验证
+
+Manual Verify
+== 手动验证
+
+Ghost Tools
+== 影子工具
+
+Show unpredicted ghosts for other players
+== 显示其他玩家未预测的影子
+
+Swap ghosts and normal players
+== 交换影子和普通玩家
+
+Predicted alpha
+== 预测透明度
+
+Unpredicted alpha
+== 未预测透明度
+
+Hide ghosts of frozen players
+== 隐藏被冻结玩家的影子
+
+Render ghosts as circles
+== 将影子显示为圆圈
+
+Player Indicator
+== 玩家指示器
+
+Show any enabled Indicators
+== 开启玩家指示器
+
+Hide indicator for tees on your screen
+== 其他玩家在屏幕内时隐藏指示器
+
+Show only freeze Players
+== 仅显示冻结玩家
+
+Render tiny tees instead of circles
+== 渲染成小Tee而不是圆圈
+
+Use warlist groups for indicator
+== 使用敌对列表作为指示器
+
+Indicator size
+== 显示大小
+
+Indicator opacity
+== 指示器不透明度
+
+Change indicator offset based on distance to other tees
+== 根据与其他Tee的距离更改指示器偏移量
+
+Indicator min offset
+== 指示器最小偏移量
+
+Indicator max offset
+== 指示器最大偏移量
+
+Indicator max distance
+== 指示器最大距离
+
+Indicator offset
+== 指示器偏移
+
+Indicator alive color
+== 指示器存活颜色
+
+Indicator in freeze color
+== 指示器冻结颜色
+
+Indicator safe color
+== 指示器安全颜色
+
+Rainbow
+== 彩虹
+
+Rainbow Tees
+== 彩虹色Tee
+
+Rainbow weapons
+== 彩虹色武器
+
+Rainbow hook
+== 彩虹色钩索
+
+Rainbow others
+== 将彩虹带给每个人！
+
+Rainbow speed
+== 颜色变化速度
+
+Pulse
+== 脉冲
+
+Black
+== 黑色
+
+Random
+== 随机
+
+Tee Trails
+== Tee尾迹
+
+Enable tee trails
+== 启用Tee尾迹
+
+Tee trail others
+== 其他Tee的尾迹
+
+Rainbow tee trail
+== 彩虹色Tee尾迹
+
+Fade trail alpha
+== 淡化尾迹透明度
+
+Taper trail width
+== 锥形尾迹
+
+Use tee color for trail
+== 使用Tee颜色作为尾迹颜色
+
+Trail width
+== 尾迹宽度
+
+Trail length
+== 尾迹长度
+
+Trail alpha
+== 尾迹透明度
+
+Tee trail color
+== Tee尾迹颜色
+
+Bindwheel
+== 快捷绑定轮盘
+
+Name:
+== 名称:
+
+Command:
+== 指令:
+
+Override Selected
+== 覆盖选定项
+
+Remove Bind
+== 移除绑定
+
+Add Bind
+== 添加绑定
+
+Use left mouse to select
+== 使用鼠标左键选择
+
+Use right mouse to swap with selected
+== 使用鼠标右键与所选内容交换
+
+Use middle mouse select without copy
+== 使用鼠标中键选择而不复制
+
+Reset position of mouse when opening bindwheel
+== 打开 快捷绑定轮盘 时重置鼠标位置
+
+Warlist
+== 敌对列表
+
+Name
+== 名称
+
+Clan
+== 战队
+
+War Entries
+== 敌对条目
+
+Edit Entry
+== 编辑条目
+
+Override Entry
+== 覆盖条目
+
+Add Entry
+== 添加条目
+
+Allow Duplicate Entries
+== 允许重复条目
+
+Enable warlist
+== 启用敌对列表
+
+Colors in chat
+== 在聊天栏中的颜色
+
+Colors in scoreboard
+== 在记分板中的颜色
+
+War Groups
+== 敌对群组
+
+Override Group
+== 覆盖群组
+
+Add Group
+== 添加群组
+
+Online Players
+== 在线玩家
+
+Show clan if war
+== 如果有敌对则显示战队
+
+Chat Binds
+== 聊天绑定
+
+Kaomoji
+== 表情符号
+
+Shrug:
+== 耸肩：
+
+Flip:
+== 翻转：
+
+Unflip:
+== 取消翻转：
+
+Mute Commands
+== 静音命令
+
+Mute:
+== 禁言：
+
+Un-Mute:
+== 取消禁言：
+
+Status Bar
+== 状态栏
+
+Show status bar
+== 显示状态栏
+
+Show labels on status bar items
+== 在状态栏上显示条目标签
+
+Status bar height
+== 状态栏高度
+
+Local Time
+== 本地时间
+
+Use 12 hour clock
+== 使用 12 小时制
+
+Show seconds on clock
+== 在时间处显示秒数
+
+Colors
+== 颜色
+
+Status bar color
+== 状态栏颜色
+
+Text color
+== 文字颜色
+
+Status bar alpha
+== 状态栏透明度
+
+Text alpha
+== 文字透明度
+
+Status Bar Codes:
+== 状态栏代码：
+
+a = Angle
+== a = Angle（角度）
+
+p = Ping
+== p = Ping（延迟）
+
+d = Prediction
+== d = Prediction（预测）
+
+c = Position
+== c = Position（位置）
+
+l = Local Time
+== l = Local Time（本地时间）
+
+r = Race Time
+== r = Race Time（比赛时间）
+
+f = FPS
+== f = FPS（每秒帧数）
+
+v = Velocity
+== v = Velocity（速度）
+
+z = Zoom
+== z = Zoom（缩放）
+
+Add Item
+== 添加项
+
+Remove Item
+== 删除项
+
+Status Scheme:
+== 状态方案：
+
+Apply
+== 应用
+
+Info
+== 信息
+
+TClient Links
+== TClient 链接
+
+Support ♥
+== 支持 ♥
+
+TClient Settings
+== TClient 设置
+
+Config Files
+== 配置文件
+
+TClient Developers
+== TClient 开发人员
+
+Hide Settings Tabs
+== 隐藏设置选项卡
+
+Your profile
+== 您的个人资料
+
+Profiles file
+== 配置文件
+
+Save/Load Skin
+== 保存/加载皮肤
+
+Save/Load Colors
+== 保存/加载颜色
+
+Save/Load Emote
+== 保存/加载表情
+
+Save/Load Name
+== 保存/加载名称
+
+Save/Load Clan
+== 保存/加载战队
+
+Save/Load Flag
+== 保存/加载国旗
+
+Load
+== 加载
+
+Override
+== 覆盖
+
+Add %s name:
+== 添加 %s 名称：
+
+Add %s clan:
+== 添加 %s 战队：
+
+Remove %s name:
+== 删除 %s 名称：
+
+Remove %s clan:
+== 移除 %s 战队：
+
+Add [group] [name] [reason]
+== 添加 [组] [名称] [原因]
+
+Add [group] [clan] [reason]
+== 添加 [组] [战队] [原因]
+
+Remove [group] [name]
+== 删除 [组] [名称]
+
+Remove [group] [clan]
+== 删除 [组] [战队]
+
+Command
+== 命令
+
+Extra tick other tees (increases other tees latency, \nmakes dragging slightly easier when using fast input)
+== 对其他tee增加帧（增加其他tee的延迟，\n使用更快的输入时使钩其他tee稍微容易一些）
+
+Prediction Margin
+== 预测量
+
+Anti Ping Smoothing
+== 平滑预测
+
+Use new smoothing algorithm
+== 使用新的平滑算法
+
+Use warlist colors instead of regular colors
+== 使用敌对列表颜色而不是常规颜色
+
+Show all warlist groups
+== 显示所有敌对群组
+
+Last!
+== 最后存活！
+
+Outline kill
+== 显示击杀方块轮廓
+
+Kill outline color
+== 击杀方块轮廓颜色
+
+Reason
+== 原因
+
+Are you sure that you want to remove '%s' from your war groups?
+== 您确定要从您的敌对群组中删除 '%s' 吗？
+
+Remove War Group
+== 删除敌对群组
+
+Color
+== 颜色
+
+Github
+== Github
+
+Chatbinds
+== 聊天快捷绑定
+
+Integration
+== 集成
+
+Enable Discord Integration
+== 启用 Discord 集成
+
+Name: %s
+== 名称：%s
+
+Clan: %s
+== 战队：%s
+
+Skin: %s
+== 皮肤：%s
+
+After Load
+== 加载后
+
+TClient
+== TClient
+
+Colors in spectate select
+== 旁观选择中的颜色
+
+_ or \' \' = Space
+== _ 或 \' \' = 置空（占位）
