@@ -4,7 +4,7 @@
 #if defined(CONF_DISCORD)
 #include <discord_game_sdk.h>
 
-typedef enum EDiscordResult DISCORD_API (*FDiscordCreate)(DiscordVersion, struct DiscordCreateParams *, struct IDiscordCore **);
+typedef enum EDiscordResult(DISCORD_API *FDiscordCreate)(DiscordVersion, struct DiscordCreateParams *, struct IDiscordCore **);
 
 #if defined(CONF_DISCORD_DYNAMIC)
 #include <dlfcn.h>
