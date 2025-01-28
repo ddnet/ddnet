@@ -91,7 +91,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CFriends m_Friends;
 	CFriends m_Foes;
 
-	char m_aConnectAddressStr[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE] = "";
+	char m_aConnectAddressStr[static_cast<int>(MAX_SERVER_ADDRESSES) * static_cast<int>(NETADDR_MAXSTRSIZE)] = "";
 
 	CUuid m_ConnectionId = UUID_ZEROED;
 	bool m_Sixup;

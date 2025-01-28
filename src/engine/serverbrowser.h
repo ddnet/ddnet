@@ -114,7 +114,7 @@ public:
 	int m_MapCrc;
 	int m_MapSize;
 	char m_aVersion[32];
-	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
+	char m_aAddress[static_cast<int>(MAX_SERVER_ADDRESSES) * static_cast<int>(NETADDR_MAXSTRSIZE)];
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
 	int m_NumFilteredPlayers;
 	bool m_RequiresLogin;

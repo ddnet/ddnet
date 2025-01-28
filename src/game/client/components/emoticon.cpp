@@ -133,9 +133,9 @@ void CEmoticon::OnRender()
 	m_SelectedEmote = -1;
 	m_SelectedEyeEmote = -1;
 	if(length(m_SelectorMouse) > 110.0f)
-		m_SelectedEmote = (int)(SelectedAngle / (2 * pi) * NUM_EMOTICONS);
+		m_SelectedEmote = (int)(SelectedAngle / (2 * pi) * static_cast<int>(NUM_EMOTICONS));
 	else if(length(m_SelectorMouse) > 40.0f)
-		m_SelectedEyeEmote = (int)(SelectedAngle / (2 * pi) * NUM_EMOTES);
+		m_SelectedEyeEmote = (int)(SelectedAngle / (2 * pi) * static_cast<int>(NUM_EMOTES));
 
 	const vec2 ScreenCenter = Screen.Center();
 
@@ -152,7 +152,7 @@ void CEmoticon::OnRender()
 	Graphics()->WrapClamp();
 	for(int Emote = 0; Emote < NUM_EMOTICONS; Emote++)
 	{
-		float Angle = 2 * pi * Emote / NUM_EMOTICONS;
+		float Angle = 2 * pi * Emote / static_cast<int>(NUM_EMOTICONS);
 		if(Angle > pi)
 			Angle -= 2 * pi;
 
@@ -179,7 +179,7 @@ void CEmoticon::OnRender()
 
 		for(int Emote = 0; Emote < NUM_EMOTES; Emote++)
 		{
-			float Angle = 2 * pi * Emote / NUM_EMOTES;
+			float Angle = 2 * pi * Emote / static_cast<int>(NUM_EMOTES);
 			if(Angle > pi)
 				Angle -= 2 * pi;
 
