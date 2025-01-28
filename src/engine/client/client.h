@@ -377,7 +377,6 @@ public:
 
 	void RequestDDNetInfo() override;
 	void ResetDDNetInfoTask();
-	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
 	bool IsSixup() const override { return m_Sixup; }

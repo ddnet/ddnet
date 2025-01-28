@@ -84,6 +84,9 @@ class CHttpRequest : public IHttpRequest
 	unsigned char *m_pBody = nullptr;
 	size_t m_BodyLength = 0;
 
+	bool m_ValidateBeforeOverwrite = false;
+	bool m_SkipByFileTime = true;
+
 	CTimeout m_Timeout = CTimeout{0, 0, 0, 0};
 	int64_t m_MaxResponseSize = -1;
 	int64_t m_IfModifiedSince = -1;
@@ -93,16 +96,19 @@ class CHttpRequest : public IHttpRequest
 	SHA256_CTX m_ActualSha256Ctx;
 	SHA256_DIGEST m_ExpectedSha256 = SHA256_ZEROED;
 
+	bool m_WriteToMemory = true;
 	bool m_WriteToFile = false;
 
 	uint64_t m_ResponseLength = 0;
 
-	// If `m_WriteToFile` is false.
+	// If `m_WriteToMemory` is true.
 	size_t m_BufferSize = 0;
 	unsigned char *m_pBuffer = nullptr;
 
 	// If `m_WriteToFile` is true.
 	IOHANDLE m_File = nullptr;
+	int m_StorageType = 0xdeadbeef;
+	char m_aDestAbsoluteTmp[IO_MAX_PATH_LENGTH] = {0};
 	char m_aDestAbsolute[IO_MAX_PATH_LENGTH] = {0};
 	char m_aDest[IO_MAX_PATH_LENGTH] = {0};
 
@@ -125,6 +131,7 @@ class CHttpRequest : public IHttpRequest
 	std::optional<int64_t> m_ResultDate = {};
 	std::optional<int64_t> m_ResultLastModified = {};
 
+	bool ShouldSkipRequest();
 	// Abort the request with an error if `BeforeInit()` returns false.
 	bool BeforeInit();
 	bool ConfigureHandle(void *pHandle); // void * == CURL *
@@ -152,12 +159,25 @@ public:
 	virtual ~CHttpRequest();
 
 	void Timeout(CTimeout Timeout) { m_Timeout = Timeout; }
+	// Skip the download if the local file is newer or as new as the remote file.
+	void SkipByFileTime(bool SkipByFileTime) { m_SkipByFileTime = SkipByFileTime; }
 	void MaxResponseSize(int64_t MaxResponseSize) { m_MaxResponseSize = MaxResponseSize; }
-	void IfModifiedSince(int64_t IfModifiedSince) { m_IfModifiedSince = IfModifiedSince; }
 	void LogProgress(HTTPLOG LogProgress) { m_LogProgress = LogProgress; }
 	void IpResolve(IPRESOLVE IpResolve) { m_IpResolve = IpResolve; }
 	void FailOnErrorStatus(bool FailOnErrorStatus) { m_FailOnErrorStatus = FailOnErrorStatus; }
+	// Download to memory only. Get the result via `Result*`.
+	void WriteToMemory()
+	{
+		m_WriteToMemory = true;
+		m_WriteToFile = false;
+	}
+	// Download to filesystem and memory.
+	void WriteToFileAndMemory(IStorage *pStorage, const char *pDest, int StorageType);
+	// Download to the filesystem only.
 	void WriteToFile(IStorage *pStorage, const char *pDest, int StorageType);
+	// Don't place the file in the specified location until
+	// `OnValidation(true)` has been called.
+	void ValidateBeforeOverwrite(bool ValidateBeforeOverwrite) { m_ValidateBeforeOverwrite = ValidateBeforeOverwrite; }
 	void ExpectSha256(const SHA256_DIGEST &Sha256) { m_ExpectedSha256 = Sha256; }
 	void Head() { m_Type = REQUEST::HEAD; }
 	void Post(const unsigned char *pData, size_t DataLength)
@@ -210,6 +230,13 @@ public:
 		return State != EHttpState::QUEUED && State != EHttpState::RUNNING;
 	}
 	void Abort() { m_Abort = true; }
+	// If `ValidateBeforeOverwrite` is set, this needs to be called after
+	// validating that the downloaded file has the correct format.
+	//
+	// If called with `true`, it'll place the downloaded file at the final
+	// destination, if called with `false`, it'll instead delete the
+	// temporary downloaded file.
+	void OnValidation(bool Success);
 
 	void Wait();
 
@@ -238,6 +265,14 @@ inline std::unique_ptr<CHttpRequest> HttpGetFile(const char *pUrl, IStorage *pSt
 {
 	std::unique_ptr<CHttpRequest> pResult = HttpGet(pUrl);
 	pResult->WriteToFile(pStorage, pOutputFile, StorageType);
+	pResult->Timeout(CTimeout{4000, 0, 500, 5});
+	return pResult;
+}
+
+inline std::unique_ptr<CHttpRequest> HttpGetBoth(const char *pUrl, IStorage *pStorage, const char *pOutputFile, int StorageType)
+{
+	std::unique_ptr<CHttpRequest> pResult = HttpGet(pUrl);
+	pResult->WriteToFileAndMemory(pStorage, pOutputFile, StorageType);
 	pResult->Timeout(CTimeout{4000, 0, 500, 5});
 	return pResult;
 }
