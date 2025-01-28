@@ -172,7 +172,12 @@ Code formatting
 ---------------
 We use clang-format 10 to format the C++ code of this project. Execute `scripts/fix_style.py` after changing the code to ensure code is formatted properly, a GitHub central style checker will do the same and prevent your change from being submitted.
 
-On Arch Linux you can install clang-format 10 using the [clang-format-static-bin AUR package](https://aur.archlinux.org/packages/clang-format-static-bin/). On macOS you can install clang-format 10 using a [homebrew tap](https://github.com/r-lib/homebrew-taps):
+On Arch Linux you can install clang-format 10 using the [clang-format-static-bin AUR package](https://aur.archlinux.org/packages/clang-format-static-bin/) with [yay](https://github.com/Jguer/yay#Binary):
+```bash
+yay -S clang-format-static-bin
+```
+
+Or on macOS you can install clang-format 10 using a [homebrew tap](https://github.com/r-lib/homebrew-taps):
 ```bash
 brew install r-lib/taps/clang-format@10
 sudo ln -s /opt/homebrew/Cellar/clang-format@10/10.0.1/bin/clang-format /opt/homebrew/bin/clang-format-10
