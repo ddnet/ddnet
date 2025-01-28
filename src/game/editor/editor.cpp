@@ -8200,7 +8200,7 @@ void CEditor::Render()
 		}
 		if(!m_pBrush->IsEmpty())
 		{
-			const bool HasTeleTiles = std::any_of(m_pBrush->m_vpLayers.begin(), m_pBrush->m_vpLayers.end(), [](auto pLayer) {
+			const bool HasTeleTiles = std::any_of(m_pBrush->m_vpLayers.begin(), m_pBrush->m_vpLayers.end(), [](const auto &pLayer) {
 				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_Tele;
 			});
 			if(HasTeleTiles)
@@ -9161,13 +9161,13 @@ bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 				dbg_msg("editor", "map already contains image %s but contents of appended image is different. Renaming to %s", (*MatchInCurrentMap)->m_aName, pNewImage->m_aName);
 
 				NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, m_Map.m_vpImages.size()));
-				m_Map.m_vpImages.push_back(pNewImage);
+				m_Map.m_vpImages.emplace_back(pNewImage);
 			}
 		}
 		else
 		{
 			NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, m_Map.m_vpImages.size()));
-			m_Map.m_vpImages.push_back(pNewImage);
+			m_Map.m_vpImages.emplace_back(pNewImage);
 		}
 	}
 	NewMap.m_vpImages.clear();

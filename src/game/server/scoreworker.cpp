@@ -714,6 +714,7 @@ bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGam
 	{
 		// get the names sorted in a tab separated string
 		std::vector<std::string> vNames;
+		vNames.reserve(pData->m_Size);
 		for(unsigned int i = 0; i < pData->m_Size; i++)
 			vNames.emplace_back(pData->m_aaNames[i]);
 

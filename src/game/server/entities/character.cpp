@@ -20,7 +20,7 @@
 #include <game/server/score.h>
 #include <game/server/teams.h>
 
-MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
+MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS) // NOLINT(bugprone-pointer-arithmetic-on-polymorphic-object)
 
 // Character, "physical" player's part
 CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :

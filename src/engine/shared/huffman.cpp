@@ -25,7 +25,7 @@ struct CHuffmanConstructNode
 	int m_Frequency;
 };
 
-bool CompareNodesByFrequencyDesc(const CHuffmanConstructNode *pNode1, const CHuffmanConstructNode *pNode2)
+static bool CompareNodesByFrequencyDesc(const CHuffmanConstructNode *pNode1, const CHuffmanConstructNode *pNode2)
 {
 	return pNode2->m_Frequency < pNode1->m_Frequency;
 }

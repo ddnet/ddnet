@@ -265,7 +265,7 @@ void CLayerTiles::BrushSelecting(CUIRect Rect)
 }
 
 template<typename T>
-static void InitGrabbedLayer(std::shared_ptr<T> pLayer, CLayerTiles *pThisLayer)
+static void InitGrabbedLayer(const std::shared_ptr<T> &pLayer, CLayerTiles *pThisLayer)
 {
 	pLayer->m_pEditor = pThisLayer->m_pEditor;
 	pLayer->m_Image = pThisLayer->m_Image;
