@@ -7,7 +7,7 @@ endif()
 
 file(STRINGS src/game/version.h VERSION_LINE
   LIMIT_COUNT 1
-  REGEX "^#define GAME_RELEASE_VERSION "
+  REGEX "^#define TCLIENT_VERSION "
 )
 
 if(VERSION_LINE MATCHES "\"([0-9]+)\\.([0-9]+)\\.([0-9]+)\"")
@@ -23,9 +23,9 @@ else()
 endif()
 
 if(VERSION_PATCH STREQUAL "0")
-  project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
+  project(TClient VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 else()
-  project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
+  project(TClient VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 endif()
 
 set(ORIGINAL_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
