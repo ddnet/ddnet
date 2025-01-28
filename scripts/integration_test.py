@@ -86,7 +86,6 @@ class TestRunner:
 		self.dir = dir
 		self.extra_env_vars = {}
 		self.keep_tmpdirs = keep_tmpdirs
-		self.run_prefix_args = []
 		self.timeout_multiplier = timeout_multiplier
 		self.valgrind_memcheck = valgrind_memcheck
 		if self.valgrind_memcheck:
@@ -204,7 +203,9 @@ add_path {relpath(self.runner.data_dir, tmp_dir)}
 			self.processes.pop().wait()
 
 	def check_valgrind_memcheck_errors(self):
-		pass
+		if any(any("== ERROR SUMMARY: " in line and not "== ERROR SUMMARY: 0" in line for line in stderr) for stderr in self.full_stderrs):
+			return "\n".join(line for stderr in self.full_stderrs for line in stderr if line.startswith("=="))
+		return None
 
 def run_lines_thread(name, file, output_filename, output_list, output_queue):
 	def thread():
@@ -280,7 +281,7 @@ class Runnable:
 			))
 		new_env_vars = {**cur_env_vars, **test_env.runner.extra_env_vars}
 		self.process = popen(
-			test_env.runner.run_prefix_args + args,
+			test_env.run_prefix_args + args,
 			text=True,
 			cwd=test_env.tmp_dir,
 			env=new_env_vars,
