@@ -22,6 +22,8 @@ Download from https://github.com/sjrc6/TaterClient-ddnet/releases, or build it u
 ![image](https://github.com/user-attachments/assets/9251509a-d852-41ac-bf6b-9a610db08945)
 ![image](https://github.com/user-attachments/assets/47dab977-1311-4963-a11a-81b78005b12b)
 ![image](https://github.com/user-attachments/assets/29bddfd9-fcf1-420c-b7e0-958493051a3c)
+![image](https://github.com/user-attachments/assets/efe3528f-a962-4dc0-aa8c-9ca963c246e5)
+![image](https://github.com/user-attachments/assets/9f15023d-2a27-44ee-8157-e76da53c875a)
 
 ![image](https://user-images.githubusercontent.com/22122579/182528700-4c8238c3-836e-49c3-9996-68025e7f5d58.png)
 
