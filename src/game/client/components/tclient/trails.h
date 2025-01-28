@@ -1,13 +1,12 @@
 #ifndef GAME_CLIENT_COMPONENTS_TCLIENT_TRAILS_H
 #define GAME_CLIENT_COMPONENTS_TCLIENT_TRAILS_H
 #include <game/client/component.h>
-
-struct STrailPart
+class STrailPart
 {
+public:
 	vec2 Pos = vec2(0, 0);
-	vec2 UnMovedPos = vec2(0, 0);
+	vec2 UnmovedPos = vec2(0, 0);
 	ColorRGBA Col = {};
-	float Alpha = 1.0f;
 	float Width = 0.0f;
 	vec2 Normal = vec2(0, 0);
 	vec2 Top = vec2(0, 0);
@@ -15,7 +14,6 @@ struct STrailPart
 	bool Flip = false;
 	float Progress = 1.0f;
 	int Tick = -1;
-	bool TooLong = false;
 
 	bool operator==(const STrailPart &Other) const
 	{
@@ -26,14 +24,27 @@ struct STrailPart
 class CTrails : public CComponent
 {
 public:
-	CTrails();
-	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnRender() override;
-	virtual void OnReset() override;
+	CTrails() = default;
+	int Sizeof() const override { return sizeof(*this); }
+	void OnRender() override;
+	void OnReset() override;
+
+	enum COLORMODES
+	{
+		COLORMODE_SOLID = 1,
+		COLORMODE_TEE,
+		COLORMODE_RAINBOW,
+		COLORMODE_SPEED,
+	};
 
 private:
-	vec2 m_PositionHistory[MAX_CLIENTS][200];
-	int m_PositionTick[MAX_CLIENTS][200];
+	class CInfo
+	{
+	public:
+		vec2 m_Pos;
+		int m_Tick;
+	};
+	CInfo m_History[MAX_CLIENTS][200];
 	bool m_HistoryValid[MAX_CLIENTS] = {};
 
 	void ClearAllHistory();

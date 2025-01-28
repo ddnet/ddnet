@@ -30,6 +30,7 @@
 #include "../countryflags.h"
 #include "../menus.h"
 #include "../skins.h"
+#include "game/client/components/tclient/trails.h"
 
 #include <array>
 #include <chrono>
@@ -982,19 +983,21 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	Ui()->DoLabel(&Label, TCLocalize("Rainbow"), HeadlineFontSize, TEXTALIGN_ML);
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-	static std::vector<const char *> s_DropDownNames = {TCLocalize("Rainbow"), TCLocalize("Pulse"), TCLocalize("Black"), TCLocalize("Random")};
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowTees, Localize("Rainbow Tees"), &g_Config.m_ClRainbowTees, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowWeapon, Localize("Rainbow weapons"), &g_Config.m_ClRainbowWeapon, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowHook, Localize("Rainbow hook"), &g_Config.m_ClRainbowHook, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, Localize("Rainbow others"), &g_Config.m_ClRainbowOthers, &Column, LineSize);
+
+	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	static std::vector<const char *> s_RainbowDropDownNames;
+	s_RainbowDropDownNames = {Localize("Rainbow"), Localize("Pulse"), Localize("Black"), Localize("Random")};
 	static CUi::SDropDownState s_RainbowDropDownState;
 	static CScrollRegion s_RainbowDropDownScrollRegion;
 	s_RainbowDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_RainbowDropDownScrollRegion;
 	int RainbowSelectedOld = g_Config.m_ClRainbowMode - 1;
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowTees, TCLocalize("Rainbow Tees"), &g_Config.m_ClRainbowTees, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowWeapon, TCLocalize("Rainbow weapons"), &g_Config.m_ClRainbowWeapon, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowHook, TCLocalize("Rainbow hook"), &g_Config.m_ClRainbowHook, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, TCLocalize("Rainbow others"), &g_Config.m_ClRainbowOthers, &Column, LineSize);
-	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
-	CUIRect DropDownRect;
-	Column.HSplitTop(LineSize, &DropDownRect, &Column);
-	const int RainbowSelectedNew = Ui()->DoDropDown(&DropDownRect, RainbowSelectedOld, s_DropDownNames.data(), s_DropDownNames.size(), s_RainbowDropDownState);
+	CUIRect RainbowDropDownRect;
+	Column.HSplitTop(LineSize, &RainbowDropDownRect, &Column);
+	const int RainbowSelectedNew = Ui()->DoDropDown(&RainbowDropDownRect, RainbowSelectedOld, s_RainbowDropDownNames.data(), s_RainbowDropDownNames.size(), s_RainbowDropDownState);
 	if(RainbowSelectedOld != RainbowSelectedNew)
 	{
 		g_Config.m_ClRainbowMode = RainbowSelectedNew + 1;
@@ -1015,21 +1018,40 @@ void CMenus::RenderSettingsTClientSettngs(CUIRect MainView)
 	Ui()->DoLabel(&Label, TCLocalize("Tee Trails"), HeadlineFontSize, TEXTALIGN_ML);
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
 
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrail, TCLocalize("Enable tee trails"), &g_Config.m_ClTeeTrail, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailOthers, TCLocalize("Tee trail others"), &g_Config.m_ClTeeTrailOthers, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailRainbow, TCLocalize("Rainbow tee trail"), &g_Config.m_ClTeeTrailRainbow, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailFade, TCLocalize("Fade trail alpha"), &g_Config.m_ClTeeTrailFade, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailTaper, TCLocalize("Taper trail width"), &g_Config.m_ClTeeTrailTaper, &Column, LineSize);
-	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailUseTeeColor, TCLocalize("Use tee color for trail"), &g_Config.m_ClTeeTrailUseTeeColor, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrail, Localize("Enable tee trails"), &g_Config.m_ClTeeTrail, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailOthers, Localize("Show other tees' trails"), &g_Config.m_ClTeeTrailOthers, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailFade, Localize("Fade trail alpha"), &g_Config.m_ClTeeTrailFade, &Column, LineSize);
+	DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClTeeTrailTaper, Localize("Taper trail width"), &g_Config.m_ClTeeTrailTaper, &Column, LineSize);
+
 	Column.HSplitTop(MarginExtraSmall, nullptr, &Column);
+	std::vector<const char *> s_TrailDropDownNames;
+	s_TrailDropDownNames = {Localize("Solid"), Localize("Tee"), Localize("Rainbow"), Localize("Speed")};
+	static CUi::SDropDownState s_TrailDropDownState;
+	static CScrollRegion s_TrailDropDownScrollRegion;
+	s_TrailDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_TrailDropDownScrollRegion;
+	int TrailSelectedOld = g_Config.m_ClTeeTrailColorMode - 1;
+	CUIRect TrailDropDownRect;
+	Column.HSplitTop(LineSize, &TrailDropDownRect, &Column);
+	const int TrailSelectedNew = Ui()->DoDropDown(&TrailDropDownRect, TrailSelectedOld, s_TrailDropDownNames.data(), s_TrailDropDownNames.size(), s_TrailDropDownState);
+	if(TrailSelectedOld != TrailSelectedNew)
+	{
+		g_Config.m_ClTeeTrailColorMode = TrailSelectedNew + 1;
+		TrailSelectedOld = TrailSelectedNew;
+	}
+	Column.HSplitTop(MarginSmall, nullptr, &Column);
+
+	static CButtonContainer s_TeeTrailColor;
+	if(g_Config.m_ClTeeTrailColorMode == CTrails::COLORMODE_SOLID)
+		DoLine_ColorPicker(&s_TeeTrailColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, Localize("Tee trail color"), &g_Config.m_ClTeeTrailColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+	else
+		Column.HSplitTop(ColorPickerLineSize + ColorPickerLineSpacing, &Button, &Column);
+
 	Column.HSplitTop(LineSize, &Button, &Column);
 	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailWidth, &g_Config.m_ClTeeTrailWidth, &Button, TCLocalize("Trail width"), 0, 20);
 	Column.HSplitTop(LineSize, &Button, &Column);
 	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailLength, &g_Config.m_ClTeeTrailLength, &Button, TCLocalize("Trail length"), 0, 200);
 	Column.HSplitTop(LineSize, &Button, &Column);
-	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailAlpha, &g_Config.m_ClTeeTrailAlpha, &Button, TCLocalize("Trail alpha"), 0, 100);
-	static CButtonContainer s_TeeTrailColor;
-	DoLine_ColorPicker(&s_TeeTrailColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Column, TCLocalize("Tee trail color"), &g_Config.m_ClTeeTrailColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
+	Ui()->DoScrollbarOption(&g_Config.m_ClTeeTrailAlpha, &g_Config.m_ClTeeTrailAlpha, &Button, Localize("Trail alpha"), 0, 100);
 
 	s_SectionBoxes.back().h = Column.y - s_SectionBoxes.back().y;
 	Column.HSplitTop(MarginSmall, nullptr, &Column);
