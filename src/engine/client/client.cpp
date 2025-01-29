@@ -1772,6 +1772,35 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				SendMsg(Conn, &MsgP, MSGFLAG_VITAL);
 			}
 		}
+		else if(Msg == NETMSG_TATER_CHECKSUM_REQUEST)
+		{
+#ifndef TATER_CHECKSUM_SALT
+// salt@sjrc6.github.io: 26e65800-d8d9-3e8f-8d53-acdd1461f0a9
+#define TATER_CHECKSUM_SALT \
+	{ \
+		{ \
+			0x26, 0xe6, 0x58, 0x00, 0xd8, 0xd9, 0x3e, 0x8f, \
+				0x8d, 0x53, 0xac, 0xdd, 0x14, 0x61, 0xf0, 0xa9, \
+		} \
+	}
+#endif
+			CUuid *pUuid = (CUuid *)Unpacker.GetRaw(sizeof(*pUuid));
+			if(Unpacker.Error())
+			{
+				return;
+			}
+			SHA256_CTX Sha256Ctxt;
+			sha256_init(&Sha256Ctxt);
+			CUuid Salt = TATER_CHECKSUM_SALT;
+			sha256_update(&Sha256Ctxt, &Salt, sizeof(Salt));
+			sha256_update(&Sha256Ctxt, pUuid, sizeof(*pUuid));
+			SHA256_DIGEST Sha256 = sha256_finish(&Sha256Ctxt);
+
+			CMsgPacker Msg(NETMSG_TATER_CHECKSUM_RESPONSE, true);
+			Msg.AddRaw(pUuid, sizeof(*pUuid));
+			Msg.AddRaw(&Sha256, sizeof(Sha256));
+			SendMsg(Conn, &Msg, MSGFLAG_VITAL);
+		}
 		else if(Msg == NETMSG_RECONNECT)
 		{
 			if(Conn == CONN_MAIN)

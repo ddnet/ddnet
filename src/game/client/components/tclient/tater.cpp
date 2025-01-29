@@ -1,4 +1,4 @@
-#include <engine/graphics.h>
+﻿#include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 
@@ -104,7 +104,7 @@ bool LineShouldHighlight(const char *pLine, const char *pName)
 	return false;
 }
 
-bool CTater::SendNonDuplicateMessage(int Team, const char *pLine) 
+bool CTater::SendNonDuplicateMessage(int Team, const char *pLine)
 {
 	if(str_comp(pLine, m_PreviousOwnMessage) != 0)
 	{
@@ -151,7 +151,7 @@ void CTater::OnMessage(int MsgType, void *pRawMsg)
 		str_copy(aPlayerName, GameClient()->m_aClients[ClientId].m_aName, sizeof(aPlayerName));
 
 		bool PlayerMuted = GameClient()->m_aClients[ClientId].m_Foe || GameClient()->m_aClients[ClientId].m_ChatIgnore;
-		if(g_Config.m_ClAutoReplyMuted && PlayerMuted) 
+		if(g_Config.m_ClAutoReplyMuted && PlayerMuted)
 		{
 			char aBuf[256];
 			if(pMsg->m_Team == TEAM_WHISPER_RECV)
@@ -188,10 +188,56 @@ void CTater::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_VOTESET)
 	{
 		CNetMsg_Sv_VoteSet *pMsg = (CNetMsg_Sv_VoteSet *)pRawMsg;
-		OnReset();
 		if(pMsg->m_Timeout)
 		{
+			char aDescription[VOTE_DESC_LENGTH];
+			char aReason[VOTE_REASON_LENGTH];
+			str_copy(aDescription, pMsg->m_pDescription);
+			str_copy(aReason, pMsg->m_pReason);
+			bool KickVote = str_startswith(aDescription, "Kick ") != 0 ? true : false;
+			bool SpecVote = str_startswith(aDescription, "Pause ") != 0 ? true : false;
+			bool SettingVote = !KickVote && !SpecVote;
+			bool RandomMapVote = SettingVote && str_find_nocase(aDescription, "random");
+			bool MapCoolDown = SettingVote && str_find_nocase(aDescription, "change map") || str_find_nocase(aDescription, "no not change map");
+			bool CategoryVote = SettingVote && str_find_nocase(aDescription, "☐") || str_find_nocase(aDescription, "☒");
+			bool FunVote = SettingVote && str_find_nocase(aDescription, "funvote");
+			bool MapVote = SettingVote && !RandomMapVote && !MapCoolDown && !CategoryVote && !FunVote && str_find_nocase(aDescription, "Map:") || str_find_nocase(aDescription, "★") || str_find_nocase(aDescription, "✰");
 
+			if(g_Config.m_ClAutoVoteWhenFar && (MapVote || RandomMapVote))
+			{
+				int RaceTime = 0;
+				if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME)
+					RaceTime = (Client()->GameTick(g_Config.m_ClDummy) + m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer) / Client()->GameTickSpeed();
+
+				if(RaceTime / 60 >= g_Config.m_ClAutoVoteWhenFarTime)
+				{
+					CGameClient::CClientData *pVoteCaller = nullptr;
+					for(int i = 0; i < MAX_CLIENTS; i++)
+					{
+						if(!m_pClient->m_aStats[i].IsActive())
+							continue;
+
+						char aBuf[MAX_NAME_LENGTH + 4];
+						str_format(aBuf, sizeof(aBuf), "\'%s\'", m_pClient->m_aClients[i].m_aName);
+						if(str_find_nocase(aBuf, pMsg->m_pDescription) == 0)
+						{
+							pVoteCaller = &m_pClient->m_aClients[i];
+						}
+					}
+					if(pVoteCaller)
+					{
+						bool Friend = pVoteCaller->m_Friend;
+						bool SameTeam = m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientId) == pVoteCaller->m_Team && pVoteCaller->m_Team != 0;
+
+						if(!Friend && !SameTeam)
+						{
+							GameClient()->m_Voting.Vote(-1);
+							if(str_comp(g_Config.m_ClAutoVoteWhenFarMessage, "") != 0)
+								SendNonDuplicateMessage(0, g_Config.m_ClAutoVoteWhenFarMessage);
+						}
+					}
+				}
+			}
 		}
 	}
 }
