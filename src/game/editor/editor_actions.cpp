@@ -1,8 +1,6 @@
 #include "editor_actions.h"
 #include <game/editor/mapitems/image.h>
 
-#include <ranges>
-
 CEditorBrushDrawAction::CEditorBrushDrawAction(CEditor *pEditor, int Group) :
 	IEditorAction(pEditor), m_Group(Group)
 {
@@ -453,8 +451,10 @@ void CEditorActionBulk::Undo()
 {
 	if(m_Reverse)
 	{
-		for(auto &pAction : std::ranges::reverse_view(m_vpActions))
+		// Lint disabled here because reverse_view is not supported in gcc 10.
+		for(auto pIt = m_vpActions.rbegin(); pIt != m_vpActions.rend(); pIt++) // NOLINT: modernize-loop-convert
 		{
+			const auto &pAction = *pIt;
 			pAction->Undo();
 		}
 	}

@@ -422,7 +422,7 @@ void CServerBrowserHttp::Refresh()
 		m_State = STATE_WANTREFRESH;
 	Update();
 }
-static bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
+static bool ParseUrl(NETADDR *pOut, const char *pUrl)
 {
 	int Failure = net_addr_from_url(pOut, pUrl, nullptr, 0);
 	if(Failure || pOut->port == 0)
@@ -500,7 +500,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 				continue;
 			}
 			NETADDR ParsedAddr;
-			if(ServerbrowserParseUrl(&ParsedAddr, Addresses[a]))
+			if(ParseUrl(&ParsedAddr, Addresses[a]))
 			{
 				// Skip unknown addresses.
 				continue;

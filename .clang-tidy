@@ -9,7 +9,7 @@
 # clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
 #   TODO: Requires C11 to fix
 # misc-unused-parameters
-#   TODO: Many changes
+#   Occurs very commonly all over
 # misc-use-anonymous-namespace
 #   We don't want to use anonymous namespaces instead of static functions.
 # bugprone-suspicious-realloc-usage
