@@ -1,32 +1,8 @@
 ##### authors #####
-#originally created by:
-#	kaddyd
-#modified by:
-#	carzil		2011-04-05 19:19:06
-#	RaZeR[RT]	2011-04-12 17:57:02
-#	BotanEgg	2011-05-02 19:07:35
-#	Bananbl4	2011-07-07 02:03:04
-#	Arion WT	2011-07-07 09:39:05
-#	Arion WT	2011-08-07 12:16:28
-#	gerdoe		2020-07-01 22:04:21
-#	gerdoe		2020-09-14 20:53:53
-#	gerdoe		2020-09-17 22:49:22
-#	Vy0x2		2021-06-08 15:48:25
-#	Anime.pdf	2021-06-13 13:08:50
-#	banan		2022-06-12 11:36:50
-#	ban			2023-01-05 10:22:50
-#	unban		2023-03-10 21:50:50
-#	eblan		2023-08-07 14:27:00
-#	kaban		2023-09-21 19:00:00
-#	ByFox		2023-11-14 11:24:00
-#	Sedonya		2024-06-20 03:18:10
-#       WTF             2024-11-03 15:57:20
-#	Риксед		2024-12-11 16:34:00
 
-# russian translate for tclient by:
-#	@noxygalaxy github.com/noxygalaxy
-#	@shibastik
-#	@dani_topik
+# noxygalaxy
+# shibastik
+# dani_topik
 
 ##### /authors #####
 

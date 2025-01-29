@@ -169,7 +169,7 @@ void CLocalizationDatabase::SelectDefaultLanguage(IConsole *pConsole, char *pFil
 	}
 }
 
-bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, IConsole *pConsole)
+bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, IConsole *pConsole, bool Clear)
 {
 	// empty string means unload
 	if(pFilename[0] == 0)
@@ -184,9 +184,11 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 		return false;
 
 	log_info("localization", "loaded '%s'", pFilename);
-	m_vStrings.clear();
-	m_StringsHeap.Reset();
-
+	if(Clear)
+	{
+		m_vStrings.clear();
+		m_StringsHeap.Reset();
+	}
 	char aContext[512];
 	char aOrigin[512];
 	int Line = 0;
