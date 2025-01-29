@@ -27,21 +27,21 @@ class Log(namedtuple("Log", "timestamp level line")):
 		pass
 
 class LogParseError(namedtuple("LogParseError", "line")):
-	def raise_on_error(self, timeout_id):
+	def raise_on_error(self, timeout_id): # pylint: disable=unused-argument
 		Log.parse(self.line)
 		# The above should have raised an error.
 		raise RuntimeError("log line shouldn't parse")
 
 class Exit(namedtuple("Exit", "")):
-	def raise_on_error(self, timeout_id):
+	def raise_on_error(self, timeout_id): # pylint: disable=unused-argument
 		pass
 
 class UncleanExit(namedtuple("UncleanExit", "reason")):
-	def raise_on_error(self, timeout_id):
+	def raise_on_error(self, timeout_id): # pylint: disable=unused-argument
 		raise RuntimeError(f"unclean exit: {self.reason}")
 
 class TestTimeout(namedtuple("TestTimeout", "")):
-	def raise_on_error(self, timeout_id):
+	def raise_on_error(self, timeout_id): # pylint: disable=unused-argument
 		raise TimeoutError("test timeout")
 
 class Timeout(namedtuple("Timeout", "id")):
@@ -92,13 +92,14 @@ class TestRunner:
 			self.timeout_multiplier *= 10
 
 	def run_test(self, test):
+		# pylint: disable=consider-using-with
 		tmp_dir = TemporaryDirectory(prefix=f"integration_{test.name}_", dir=self.dir, delete=False)
 		tmp_dir_cleanup = not self.keep_tmpdirs
 		try:
 			env = TestEnvironment(self, test.name, tmp_dir.name, timeout=test.timeout)
 			try:
 				test(env)
-			except Exception as e:
+			except Exception as e: # pylint: disable=broad-exception-caught
 				env.kill_all()
 				error = "".join(traceback.format_exception(e))
 				tmp_dir_cleanup = False
@@ -116,6 +117,7 @@ class TestRunner:
 	def run_tests(self, tests):
 		tests = list(tests)
 		start = time()
+		# pylint: disable=consider-using-f-string
 		print("running {} test{}".format(len(tests), "s" if len(tests) != 1 else ""))
 		failed = []
 		num_passed = 0
@@ -166,6 +168,7 @@ add_path {relpath(self.runner.data_dir, tmp_dir)}
 				"valgrind",
 				"--tool=memcheck",
 				"--gen-suppressions=all",
+				# pylint: disable=consider-using-f-string
 				"--suppressions={}".format(relpath(os.path.join(runner.repo_dir, "memcheck.supp"), self.tmp_dir)),
 				"--track-origins=yes",
 			]
@@ -216,6 +219,7 @@ def run_lines_thread(name, file, output_filename, output_list, output_queue):
 			if not line:
 				break
 			if output_file is None:
+				# pylint: disable=consider-using-with
 				output_file = open(output_filename, "w", buffering=1, encoding="utf-8") # line buffering
 			output_file.write(line)
 			line = line.rstrip("\n")
@@ -276,6 +280,7 @@ class Runnable:
 		cur_env_vars = dict(os.environ)
 		intersection = set(cur_env_vars) & set(test_env.runner.extra_env_vars)
 		if intersection:
+			# pylint: disable=consider-using-f-string
 			raise ValueError("conflicting environment variable(s): {}".format(
 				", ".join(sorted(intersection))
 			))
@@ -404,11 +409,11 @@ class Server(Runnable):
 		event = super().next_event(timeout_id)
 		if isinstance(event, Log):
 			if event.line.startswith("server: using port "):
-				self.port = int(event.line[len("server: using port "):])
+				self.port = int(event.line[len("server: using port "):]) # pylint: disable=attribute-defined-outside-init
 			elif event.line.startswith("server: | rcon password: '"):
-				_, self.rcon_password, _ = event.line.split("'")
+				_, self.rcon_password, _ = event.line.split("'") # pylint: disable=attribute-defined-outside-init
 			elif event.line.startswith("teehistorian: recording to '"):
-				_, self.teehistorian_filename, _ = event.line.split("'")
+				_, self.teehistorian_filename, _ = event.line.split("'") # pylint: disable=attribute-defined-outside-init
 		return event
 	def exit(self):
 		self.command("shutdown")
@@ -604,7 +609,7 @@ if os.name == "nt":
 def main():
 	repo_dir = relpath(os.path.join(os.path.dirname(__file__), ".."))
 
-	import argparse
+	import argparse # pylint: disable=import-outside-toplevel
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--keep-tmpdirs", action="store_true", help="keep temporary directories used for the tests")
 	parser.add_argument("--timeout-multiplier", type=float, default=1, help="multiply all timeouts by this value")
