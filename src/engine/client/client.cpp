@@ -1796,10 +1796,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			sha256_update(&Sha256Ctxt, pUuid, sizeof(*pUuid));
 			SHA256_DIGEST Sha256 = sha256_finish(&Sha256Ctxt);
 
-			CMsgPacker Msg(NETMSG_TATER_CHECKSUM_RESPONSE, true);
-			Msg.AddRaw(pUuid, sizeof(*pUuid));
-			Msg.AddRaw(&Sha256, sizeof(Sha256));
-			SendMsg(Conn, &Msg, MSGFLAG_VITAL);
+			CMsgPacker CSMsg(NETMSG_TATER_CHECKSUM_RESPONSE, true);
+			CSMsg.AddRaw(pUuid, sizeof(*pUuid));
+			CSMsg.AddRaw(&Sha256, sizeof(Sha256));
+			SendMsg(Conn, &CSMsg, MSGFLAG_VITAL);
 		}
 		else if(Msg == NETMSG_RECONNECT)
 		{

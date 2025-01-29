@@ -198,10 +198,10 @@ void CTater::OnMessage(int MsgType, void *pRawMsg)
 			bool SpecVote = str_startswith(aDescription, "Pause ") != 0 ? true : false;
 			bool SettingVote = !KickVote && !SpecVote;
 			bool RandomMapVote = SettingVote && str_find_nocase(aDescription, "random");
-			bool MapCoolDown = SettingVote && str_find_nocase(aDescription, "change map") || str_find_nocase(aDescription, "no not change map");
-			bool CategoryVote = SettingVote && str_find_nocase(aDescription, "☐") || str_find_nocase(aDescription, "☒");
+			bool MapCoolDown = SettingVote && (str_find_nocase(aDescription, "change map") || str_find_nocase(aDescription, "no not change map"));
+			bool CategoryVote = SettingVote && (str_find_nocase(aDescription, "☐") || str_find_nocase(aDescription, "☒"));
 			bool FunVote = SettingVote && str_find_nocase(aDescription, "funvote");
-			bool MapVote = SettingVote && !RandomMapVote && !MapCoolDown && !CategoryVote && !FunVote && str_find_nocase(aDescription, "Map:") || str_find_nocase(aDescription, "★") || str_find_nocase(aDescription, "✰");
+			bool MapVote = SettingVote && !RandomMapVote && !MapCoolDown && !CategoryVote && !FunVote && (str_find_nocase(aDescription, "Map:") || str_find_nocase(aDescription, "★") || str_find_nocase(aDescription, "✰"));
 
 			if(g_Config.m_ClAutoVoteWhenFar && (MapVote || RandomMapVote))
 			{
