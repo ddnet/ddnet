@@ -202,6 +202,7 @@ log_info "Copying project files..."
 cd "${BUILD_FOLDER}" || exit 1
 
 mkdir -p src/main
+mkdir -p gradle/wrapper
 
 function copy_dummy_files() {
 	rm -f ./"$2"
@@ -209,9 +210,11 @@ function copy_dummy_files() {
 }
 
 copy_dummy_files scripts/android/files/build.sh build.sh
-copy_dummy_files scripts/android/files/gradle-wrapper.jar gradle-wrapper.jar
 copy_dummy_files scripts/android/files/build.gradle build.gradle
-copy_dummy_files scripts/android/files/gradle-wrapper.properties gradle-wrapper.properties
+copy_dummy_files scripts/android/files/gradlew gradlew
+copy_dummy_files scripts/android/files/gradlew.bat gradlew.bat
+copy_dummy_files scripts/android/files/gradle/wrapper/gradle-wrapper.jar gradle/wrapper/gradle-wrapper.jar
+copy_dummy_files scripts/android/files/gradle/wrapper/gradle-wrapper.properties gradle/wrapper/gradle-wrapper.properties
 copy_dummy_files scripts/android/files/gradle.properties gradle.properties
 copy_dummy_files scripts/android/files/proguard-rules.pro proguard-rules.pro
 copy_dummy_files scripts/android/files/settings.gradle settings.gradle
@@ -222,6 +225,7 @@ cp -R ../scripts/android/files/res src/main/
 mkdir -p src/main/res/mipmap
 cp ../other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher.png
 cp ../other/icons/DDNet_256x256x32.png src/main/res/mipmap/ic_launcher_round.png
+chmod +x ./gradlew
 
 log_info "Copying libraries..."
 
