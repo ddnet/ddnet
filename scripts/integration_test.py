@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 from collections import namedtuple
 from queue import Queue
-from tempfile import TemporaryDirectory
 from threading import Thread
 from time import time
 from uuid import uuid4, UUID
 import os
 import queue
+import shutil
 import sqlite3
 import subprocess
 import sys
+import tempfile
 import traceback
 
 # TODO: less strict default timeouts?
@@ -92,11 +93,10 @@ class TestRunner:
 			self.timeout_multiplier *= 10
 
 	def run_test(self, test):
-		# pylint: disable=consider-using-with
-		tmp_dir = TemporaryDirectory(prefix=f"integration_{test.name}_", dir=self.dir, delete=False)
+		tmp_dir = tempfile.mkdtemp(prefix=f"integration_{test.name}_", dir=self.dir)
 		tmp_dir_cleanup = not self.keep_tmpdirs
 		try:
-			env = TestEnvironment(self, test.name, tmp_dir.name, timeout=test.timeout)
+			env = TestEnvironment(self, test.name, tmp_dir, timeout=test.timeout)
 			try:
 				test(env)
 			except Exception as e: # pylint: disable=broad-exception-caught
@@ -110,9 +110,9 @@ class TestRunner:
 					error = env.check_valgrind_memcheck_errors()
 		finally:
 			if tmp_dir_cleanup:
-				tmp_dir.cleanup()
+				shutil.rmtree(tmp_dir)
 				tmp_dir = None
-		return relpath(tmp_dir.name) if tmp_dir is not None else None, error
+		return relpath(tmp_dir) if tmp_dir is not None else None, error
 
 	def run_tests(self, tests):
 		tests = list(tests)
