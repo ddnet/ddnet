@@ -47,7 +47,7 @@ class TestTimeout(namedtuple("TestTimeout", "")):
 class Timeout(namedtuple("Timeout", "id")):
 	def raise_on_error(self, timeout_id):
 		if timeout_id == self.id:
-			raise TimeoutError(f"timeout")
+			raise TimeoutError("timeout")
 
 # This class is used to track that each timeout value is multiplied by
 # `timeout_multiplier` exactly once.
@@ -153,7 +153,7 @@ class TestEnvironment:
 	def __init__(self, runner, name, tmp_dir, timeout):
 		self.runner = runner
 		self.tmp_dir = tmp_dir
-		with open(os.path.join(self.tmp_dir, "storage.cfg"), "w") as f:
+		with open(os.path.join(self.tmp_dir, "storage.cfg"), "w", encoding="utf-8") as f:
 			f.write(f"""\
 add_path .
 add_path {relpath(self.runner.data_dir, tmp_dir)}
@@ -216,7 +216,7 @@ def run_lines_thread(name, file, output_filename, output_list, output_queue):
 			if not line:
 				break
 			if output_file is None:
-				output_file = open(output_filename, "w", buffering=1) # line buffering
+				output_file = open(output_filename, "w", buffering=1, encoding="utf-8") # line buffering
 			output_file.write(line)
 			line = line.rstrip("\n")
 			output_list.append(line)
@@ -351,7 +351,7 @@ def open_fifo(name):
 		name_arg = os.open(name, flags=os.O_WRONLY)
 	else:
 		name_arg = fr"\\.\pipe\{name}"
-	return open(name_arg, "w", buffering=1) # line buffering
+	return open(name_arg, "w", buffering=1, encoding="utf-8") # line buffering
 
 class Client(Runnable):
 	def __init__(self, test_env, extra_args=[]):

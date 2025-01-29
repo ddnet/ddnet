@@ -60,7 +60,7 @@ jobs:
     - name: Run integration tests with ASan and UBSan
       run: |
         cd clang-sanitizer
-        make run_integration_tests
+        python ../scripts/integration_test.py .
         if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
         then
           cat SAN.*
