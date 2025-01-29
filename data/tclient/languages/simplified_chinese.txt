@@ -314,20 +314,11 @@ Tee Trails
 Enable tee trails
 == 启用Tee尾迹
 
-Tee trail others
-== 其他Tee的尾迹
-
-Rainbow tee trail
-== 彩虹色Tee尾迹
-
 Fade trail alpha
 == 淡化尾迹透明度
 
 Taper trail width
 == 锥形尾迹
-
-Use tee color for trail
-== 使用Tee颜色作为尾迹颜色
 
 Trail width
 == 尾迹宽度
@@ -670,3 +661,39 @@ Colors in spectate select
 
 _ or \' \' = Space
 == _ 或 \' \' = 置空（占位）
+
+Voting
+== 
+
+Auto vote no to map changes when far
+== 
+
+Minimum Time
+== 
+
+Leave empty to disable
+== 
+
+Message to send in chat:
+== 
+
+Auto Reply
+== 
+
+Auto reply to muted players
+== 
+
+Auto reply when tabbed out
+== 
+
+Show other tees' trails
+== 
+
+Solid
+== 
+
+Tee
+== 
+
+Speed
+== 

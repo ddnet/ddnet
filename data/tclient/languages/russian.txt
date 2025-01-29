@@ -338,20 +338,11 @@ Tee Trails
 Enable tee trails
 == Включить трейлы
 
-Tee trail others
-== Показывать трейлы на других игроках
-
-Rainbow tee trail
-== Радужный трейл
-
 Fade trail alpha
 == Затухание трейла
 
 Taper trail width
 == Сужающаяся ширина трейла
-
-Use tee color for trail
-== Использовать цвет тии для трейла
 
 Trail width
 == Ширина трейла
@@ -687,6 +678,42 @@ After Load
 == После загрузки
 
 TClient
+== 
+
+Voting
+== 
+
+Auto vote no to map changes when far
+== 
+
+Minimum Time
+== 
+
+Leave empty to disable
+== 
+
+Message to send in chat:
+== 
+
+Auto Reply
+== 
+
+Auto reply to muted players
+== 
+
+Auto reply when tabbed out
+== 
+
+Show other tees' trails
+== 
+
+Solid
+== 
+
+Tee
+== 
+
+Speed
 == 
 
 Colors in spectate select

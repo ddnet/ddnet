@@ -199,6 +199,30 @@ Auto verify
 Manual Verify
 == 
 
+Voting
+== 
+
+Auto vote no to map changes when far
+== 
+
+Minimum Time
+== 
+
+Leave empty to disable
+== 
+
+Message to send in chat:
+== 
+
+Auto Reply
+== 
+
+Auto reply to muted players
+== 
+
+Auto reply when tabbed out
+== 
+
 Player Indicator
 == 
 
@@ -370,15 +394,6 @@ Render ghosts as circles
 Rainbow
 == 
 
-Pulse
-== 
-
-Black
-== 
-
-Random
-== 
-
 Rainbow Tees
 == 
 
@@ -391,6 +406,15 @@ Rainbow hook
 Rainbow others
 == 
 
+Pulse
+== 
+
+Black
+== 
+
+Random
+== 
+
 Rainbow speed
 == 
 
@@ -400,10 +424,7 @@ Tee Trails
 Enable tee trails
 == 
 
-Tee trail others
-== 
-
-Rainbow tee trail
+Show other tees' trails
 == 
 
 Fade trail alpha
@@ -412,7 +433,16 @@ Fade trail alpha
 Taper trail width
 == 
 
-Use tee color for trail
+Solid
+== 
+
+Tee
+== 
+
+Speed
+== 
+
+Tee trail color
 == 
 
 Trail width
@@ -422,9 +452,6 @@ Trail length
 == 
 
 Trail alpha
-== 
-
-Tee trail color
 == 
 
 War Entries
