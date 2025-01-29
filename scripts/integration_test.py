@@ -263,7 +263,7 @@ def run_test_timeout_thread(name, test_env, input_queue, param):
 				for output in outputs:
 					try:
 						output.put(TestTimeout())
-					except queue.Shutdown:
+					except queue.ShutDown:
 						pass
 				break
 			else:
@@ -354,7 +354,7 @@ def open_fifo(name):
 	return open(name_arg, "w", buffering=1, encoding="utf-8") # line buffering
 
 class Client(Runnable):
-	def __init__(self, test_env, extra_args=[]):
+	def __init__(self, test_env, extra_args=None):
 		name = f"client{test_env.num_clients}"
 		self.fifo_name = fifo_name(test_env, name)
 		# Delay opening the FIFO until the client has started, because it will
@@ -367,7 +367,7 @@ class Client(Runnable):
 				test_env.ddnet,
 				f"cl_input_fifo {self.fifo_name}",
 				"gfx_fullscreen 0",
-			] + extra_args,
+			] + (extra_args if extra_args is not None else []),
 		)
 		test_env.num_clients += 1
 	def command(self, command):
@@ -380,7 +380,7 @@ class Client(Runnable):
 		self.wait_for_log_prefix("client: version", timeout=timeout)
 
 class Server(Runnable):
-	def __init__(self, test_env, extra_args=[]):
+	def __init__(self, test_env, extra_args=None):
 		name = f"server{test_env.num_servers}"
 		self.fifo_name = fifo_name(test_env, name)
 		# Delay opening the FIFO until the server has started, because it will
@@ -393,7 +393,7 @@ class Server(Runnable):
 				test_env.ddnet_server,
 				f"sv_input_fifo {self.fifo_name}",
 				"sv_register 0",
-			] + extra_args,
+			] + (extra_args if extra_args is not None else []),
 		)
 		test_env.num_servers += 1
 	def command(self, command):
