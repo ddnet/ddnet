@@ -116,7 +116,7 @@ int CAuthManager::KeyLevel(int Slot) const
 const char *CAuthManager::KeyIdent(int Slot) const
 {
 	if(Slot < 0 || Slot >= (int)m_vKeys.size())
-		return NULL;
+		return nullptr;
 	return m_vKeys[Slot].m_aIdent;
 }
 

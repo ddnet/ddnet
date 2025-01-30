@@ -34,7 +34,7 @@ class CCommandBuffer
 		~CBuffer()
 		{
 			delete[] m_pData;
-			m_pData = 0x0;
+			m_pData = nullptr;
 			m_Used = 0;
 			m_Size = 0;
 		}
@@ -51,7 +51,7 @@ class CCommandBuffer
 				Offset = Alignment - Offset;
 
 			if(Requested + Offset + m_Used > m_Size)
-				return 0;
+				return nullptr;
 
 			void *pPtr = &m_pData[m_Used + Offset];
 			m_Used += Requested + Offset;
@@ -734,7 +734,7 @@ public:
 	virtual bool HasQuadContainerBuffering() { return false; }
 	virtual bool Uses2DTextureArrays() { return false; }
 	virtual bool HasTextureArraysSupport() { return false; }
-	virtual const char *GetErrorString() { return NULL; }
+	virtual const char *GetErrorString() { return nullptr; }
 
 	virtual const char *GetVendorString() = 0;
 	virtual const char *GetVersionString() = 0;

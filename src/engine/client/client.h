@@ -150,7 +150,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aMapdownloadFilename[256] = "";
 	char m_aMapdownloadFilenameTemp[256] = "";
 	char m_aMapdownloadName[256] = "";
-	IOHANDLE m_MapdownloadFileTemp = 0;
+	IOHANDLE m_MapdownloadFileTemp = nullptr;
 	int m_MapdownloadChunk = 0;
 	int m_MapdownloadCrc = 0;
 	int m_MapdownloadAmount = -1;
@@ -245,12 +245,12 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CFifo m_Fifo;
 
-	IOHANDLE m_BenchmarkFile = 0;
+	IOHANDLE m_BenchmarkFile = nullptr;
 	int64_t m_BenchmarkStopTime = 0;
 
 	CChecksum m_Checksum;
 	int64_t m_OwnExecutableSize = 0;
-	IOHANDLE m_OwnExecutable = 0;
+	IOHANDLE m_OwnExecutable = nullptr;
 
 	// favorite command handling
 	bool m_FavoritesGroup = false;

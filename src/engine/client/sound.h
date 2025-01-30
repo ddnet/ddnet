@@ -76,7 +76,7 @@ class CSound : public IEngineSound
 	CSample m_aSamples[NUM_SAMPLES] GUARDED_BY(m_SoundLock) = {{0}};
 	int m_FirstFreeSampleIndex GUARDED_BY(m_SoundLock) = 0;
 
-	CVoice m_aVoices[NUM_VOICES] GUARDED_BY(m_SoundLock) = {{0}};
+	CVoice m_aVoices[NUM_VOICES] GUARDED_BY(m_SoundLock) = {{nullptr}};
 	CChannel m_aChannels[NUM_CHANNELS] GUARDED_BY(m_SoundLock) = {{255, 0}};
 	int m_NextVoice GUARDED_BY(m_SoundLock) = 0;
 	uint32_t m_MaxFrames = 0;

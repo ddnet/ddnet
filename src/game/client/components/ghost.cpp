@@ -115,7 +115,7 @@ void CGhost::CGhostPath::Add(const CGhostCharacter &Char)
 CGhostCharacter *CGhost::CGhostPath::Get(int Index)
 {
 	if(Index < 0 || Index >= m_NumItems)
-		return 0;
+		return nullptr;
 
 	int Chunk = Index / m_ChunkSize;
 	int Pos = Index % m_ChunkSize;

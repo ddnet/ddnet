@@ -100,7 +100,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			}
 			else
 			{
-				Client()->DummyDisconnect(0);
+				Client()->DummyDisconnect(nullptr);
 				SetActive(false);
 			}
 		}
@@ -415,7 +415,7 @@ void CMenus::PopupConfirmDisconnect()
 
 void CMenus::PopupConfirmDisconnectDummy()
 {
-	Client()->DummyDisconnect(0);
+	Client()->DummyDisconnect(nullptr);
 	SetActive(false);
 }
 
@@ -997,7 +997,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Call = RenderServerControlKick(MainView, true, Searching);
 
 	// call vote
-	Bottom.VSplitRight(10.0f, &Bottom, 0);
+	Bottom.VSplitRight(10.0f, &Bottom, nullptr);
 	Bottom.VSplitRight(120.0f, &Bottom, &Button);
 
 	static CButtonContainer s_CallVoteButton;
@@ -1035,12 +1035,12 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 	// render kick reason
 	CUIRect Reason;
-	Bottom.VSplitRight(20.0f, &Bottom, 0);
+	Bottom.VSplitRight(20.0f, &Bottom, nullptr);
 	Bottom.VSplitRight(200.0f, &Bottom, &Reason);
 	const char *pLabel = Localize("Reason:");
 	Ui()->DoLabel(&Reason, pLabel, 14.0f, TEXTALIGN_ML);
 	float w = TextRender()->TextWidth(14.0f, pLabel, -1, -1.0f);
-	Reason.VSplitLeft(w + 10.0f, 0, &Reason);
+	Reason.VSplitLeft(w + 10.0f, nullptr, &Reason);
 	if(Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed())
 	{
 		Ui()->SetActiveItem(&m_CallvoteReasonInput);
@@ -1064,12 +1064,12 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	if(Client()->RconAuthed())
 	{
 		// background
-		RconExtension.HSplitTop(10.0f, 0, &RconExtension);
+		RconExtension.HSplitTop(10.0f, nullptr, &RconExtension);
 		RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
-		RconExtension.HSplitTop(5.0f, 0, &RconExtension);
+		RconExtension.HSplitTop(5.0f, nullptr, &RconExtension);
 
 		// force vote
-		Bottom.VSplitLeft(5.0f, 0, &Bottom);
+		Bottom.VSplitLeft(5.0f, nullptr, &Bottom);
 		Bottom.VSplitLeft(120.0f, &Button, &Bottom);
 
 		static CButtonContainer s_ForceVoteButton;
@@ -1103,32 +1103,32 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		if(s_ControlPage == EServerControlTab::SETTINGS)
 		{
 			// remove vote
-			Bottom.VSplitRight(10.0f, &Bottom, 0);
-			Bottom.VSplitRight(120.0f, 0, &Button);
+			Bottom.VSplitRight(10.0f, &Bottom, nullptr);
+			Bottom.VSplitRight(120.0f, nullptr, &Button);
 			static CButtonContainer s_RemoveVoteButton;
 			if(DoButton_Menu(&s_RemoveVoteButton, Localize("Remove"), 0, &Button))
 				m_pClient->m_Voting.RemovevoteOption(m_CallvoteSelectedOption);
 
 			// add vote
 			RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
-			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(5.0f, nullptr, &Bottom);
 			Bottom.VSplitLeft(250.0f, &Button, &Bottom);
 			Ui()->DoLabel(&Button, Localize("Vote description:"), 14.0f, TEXTALIGN_ML);
 
-			Bottom.VSplitLeft(20.0f, 0, &Button);
+			Bottom.VSplitLeft(20.0f, nullptr, &Button);
 			Ui()->DoLabel(&Button, Localize("Vote command:"), 14.0f, TEXTALIGN_ML);
 
 			static CLineInputBuffered<VOTE_DESC_LENGTH> s_VoteDescriptionInput;
 			static CLineInputBuffered<VOTE_CMD_LENGTH> s_VoteCommandInput;
 			RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
-			Bottom.VSplitRight(10.0f, &Bottom, 0);
+			Bottom.VSplitRight(10.0f, &Bottom, nullptr);
 			Bottom.VSplitRight(120.0f, &Bottom, &Button);
 			static CButtonContainer s_AddVoteButton;
 			if(DoButton_Menu(&s_AddVoteButton, Localize("Add"), 0, &Button))
 				if(!s_VoteDescriptionInput.IsEmpty() && !s_VoteCommandInput.IsEmpty())
 					m_pClient->m_Voting.AddvoteOption(s_VoteDescriptionInput.GetString(), s_VoteCommandInput.GetString());
 
-			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(5.0f, nullptr, &Bottom);
 			Bottom.VSplitLeft(250.0f, &Button, &Bottom);
 			Ui()->DoEditBox(&s_VoteDescriptionInput, &Button, 14.0f);
 
@@ -1241,7 +1241,7 @@ void CMenus::GhostlistPopulate()
 	Storage()->ListDirectoryInfo(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
 	SortGhostlist();
 
-	CGhostItem *pOwnGhost = 0;
+	CGhostItem *pOwnGhost = nullptr;
 	for(auto &Ghost : m_vGhosts)
 	{
 		Ghost.m_Failed = false;
@@ -1292,7 +1292,7 @@ void CMenus::UpdateOwnGhost(CGhostItem Item)
 		Item.m_Slot = -1;
 	}
 
-	Item.m_Date = std::time(0);
+	Item.m_Date = std::time(nullptr);
 	Item.m_Failed = false;
 	m_vGhosts.insert(std::lower_bound(m_vGhosts.begin(), m_vGhosts.end(), Item), Item);
 	SortGhostlist();
@@ -1326,10 +1326,10 @@ void CMenus::RenderGhost(CUIRect MainView)
 	// render background
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
-	MainView.HSplitTop(10.0f, 0, &MainView);
-	MainView.HSplitBottom(5.0f, &MainView, 0);
-	MainView.VSplitLeft(5.0f, 0, &MainView);
-	MainView.VSplitRight(5.0f, &MainView, 0);
+	MainView.HSplitTop(10.0f, nullptr, &MainView);
+	MainView.HSplitBottom(5.0f, &MainView, nullptr);
+	MainView.VSplitLeft(5.0f, nullptr, &MainView);
+	MainView.VSplitRight(5.0f, &MainView, nullptr);
 
 	CUIRect Headers, Status;
 	CUIRect View = MainView;
@@ -1339,7 +1339,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	// split of the scrollbar
 	Headers.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 5.0f);
-	Headers.VSplitRight(20.0f, &Headers, 0);
+	Headers.VSplitRight(20.0f, &Headers, nullptr);
 
 	class CColumn
 	{
@@ -1560,7 +1560,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 					pGhost->m_Failed = true;
 			}
 		}
-		Status.VSplitRight(5.0f, &Status, 0);
+		Status.VSplitRight(5.0f, &Status, nullptr);
 	}
 
 	Status.VSplitRight(120.0f, &Status, &Button);
@@ -1573,7 +1573,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 		DeleteGhostItem(s_SelectedIndex);
 	}
 
-	Status.VSplitRight(5.0f, &Status, 0);
+	Status.VSplitRight(5.0f, &Status, nullptr);
 
 	bool Recording = m_pClient->m_Ghost.GhostRecorder()->IsRecording();
 	if(!pGhost->HasFile() && !Recording && pGhost->Active())

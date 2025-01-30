@@ -10,7 +10,7 @@
 unsigned char *CVariableInt::Pack(unsigned char *pDst, int i, int DstSize)
 {
 	if(DstSize <= 0)
-		return 0;
+		return nullptr;
 
 	DstSize--;
 	*pDst = 0;
@@ -25,7 +25,7 @@ unsigned char *CVariableInt::Pack(unsigned char *pDst, int i, int DstSize)
 	while(i)
 	{
 		if(DstSize <= 0)
-			return 0;
+			return nullptr;
 		*pDst |= 0x80; // set extend bit
 		DstSize--;
 		pDst++;
@@ -40,7 +40,7 @@ unsigned char *CVariableInt::Pack(unsigned char *pDst, int i, int DstSize)
 const unsigned char *CVariableInt::Unpack(const unsigned char *pSrc, int *pInOut, int SrcSize)
 {
 	if(SrcSize <= 0)
-		return 0;
+		return nullptr;
 
 	const int Sign = (*pSrc >> 6) & 1;
 	*pInOut = *pSrc & 0x3F;
@@ -54,7 +54,7 @@ const unsigned char *CVariableInt::Unpack(const unsigned char *pSrc, int *pInOut
 		if(!(*pSrc & 0x80))
 			break;
 		if(SrcSize <= 0)
-			return 0;
+			return nullptr;
 		SrcSize--;
 		pSrc++;
 		*pInOut |= (*pSrc & s_aMasks[i]) << s_aShifts[i];

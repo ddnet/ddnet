@@ -665,12 +665,12 @@ void CGameTeams::SetLastTimeCp(CPlayer *Player, int LastTimeCp)
 float *CGameTeams::GetCurrentTimeCp(CPlayer *Player)
 {
 	if(!Player)
-		return NULL;
+		return nullptr;
 
 	CCharacter *pChar = Player->GetCharacter();
 	if(pChar)
 		return pChar->m_aCurrentTimeCp;
-	return NULL;
+	return nullptr;
 }
 
 void CGameTeams::OnTeamFinish(int Team, CPlayer **Players, unsigned int Size, int TimeTicks, const char *pTimestamp)

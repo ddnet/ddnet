@@ -233,7 +233,7 @@ CServer::CServer()
 	m_aDemoRecorder[RECORDER_MANUAL] = CDemoRecorder(&m_SnapshotDelta, false);
 	m_aDemoRecorder[RECORDER_AUTO] = CDemoRecorder(&m_SnapshotDelta, false);
 
-	m_pGameServer = 0;
+	m_pGameServer = nullptr;
 
 	m_CurrentGameTick = MIN_TICK;
 	m_RunServer = UNINITIALIZED;
@@ -242,7 +242,7 @@ CServer::CServer()
 
 	for(int i = 0; i < NUM_MAP_TYPES; i++)
 	{
-		m_apCurrentMapData[i] = 0;
+		m_apCurrentMapData[i] = nullptr;
 		m_aCurrentMapSize[i] = 0;
 	}
 
@@ -1337,14 +1337,14 @@ void CServer::SendRconLogLine(int ClientId, const CLogMessage *pMessage)
 {
 	const char *pLine = pMessage->m_aLine;
 	const char *pStart = str_find(pLine, "<{");
-	const char *pEnd = pStart == NULL ? NULL : str_find(pStart + 2, "}>");
+	const char *pEnd = pStart == nullptr ? nullptr : str_find(pStart + 2, "}>");
 	const char *pLineWithoutIps;
 	char aLine[512];
 	char aLineWithoutIps[512];
 	aLine[0] = '\0';
 	aLineWithoutIps[0] = '\0';
 
-	if(pStart == NULL || pEnd == NULL)
+	if(pStart == nullptr || pEnd == nullptr)
 	{
 		pLineWithoutIps = pLine;
 	}
@@ -1731,7 +1731,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				str_format(aBuf, sizeof(aBuf), "player is ready. ClientId=%d addr=<{%s}> secure=%s", ClientId, ClientAddrString(ClientId, true), m_NetServer.HasSecurityToken(ClientId) ? "yes" : "no");
 				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 
-				void *pPersistentData = 0;
+				void *pPersistentData = nullptr;
 				if(m_aClients[ClientId].m_HasPersistentData)
 				{
 					pPersistentData = m_aClients[ClientId].m_pPersistentData;
@@ -2771,7 +2771,7 @@ int CServer::LoadMap(const char *pMapName)
 	if(!Config()->m_SvSixup)
 	{
 		free(m_apCurrentMapData[MAP_TYPE_SIXUP]);
-		m_apCurrentMapData[MAP_TYPE_SIXUP] = 0;
+		m_apCurrentMapData[MAP_TYPE_SIXUP] = nullptr;
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -3971,7 +3971,7 @@ void CServer::ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, I
 	pfnCallback(pResult, pCallbackUserData);
 	CServer *pThis = static_cast<CServer *>(pUserData);
 	if(pResult->NumArguments() >= 1 && pThis->m_aCurrentMap[0] != '\0')
-		pThis->m_MapReload |= (pThis->m_apCurrentMapData[MAP_TYPE_SIXUP] != 0) != (pResult->GetInteger(0) != 0);
+		pThis->m_MapReload |= (pThis->m_apCurrentMapData[MAP_TYPE_SIXUP] != nullptr) != (pResult->GetInteger(0) != 0);
 }
 
 void CServer::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4111,7 +4111,7 @@ void CServer::SnapFreeId(int Id)
 void *CServer::SnapNewItem(int Type, int Id, int Size)
 {
 	dbg_assert(Id >= -1 && Id <= 0xffff, "incorrect id");
-	return Id < 0 ? 0 : m_SnapshotBuilder.NewItem(Type, Id, Size);
+	return Id < 0 ? nullptr : m_SnapshotBuilder.NewItem(Type, Id, Size);
 }
 
 void CServer::SnapSetStaticsize(int ItemType, int Size)

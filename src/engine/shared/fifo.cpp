@@ -107,7 +107,7 @@ void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
 		8192,
 		8192,
 		NMPWAIT_USE_DEFAULT_WAIT,
-		NULL);
+		nullptr);
 	if(m_pPipe == INVALID_HANDLE_VALUE)
 	{
 		const DWORD LastError = GetLastError();
@@ -133,7 +133,7 @@ void CFifo::Update()
 	if(m_pPipe == INVALID_HANDLE_VALUE)
 		return;
 
-	if(!ConnectNamedPipe(m_pPipe, NULL))
+	if(!ConnectNamedPipe(m_pPipe, nullptr))
 	{
 		const DWORD LastError = GetLastError();
 		if(LastError == ERROR_PIPE_LISTENING) // waiting for clients to connect
@@ -155,7 +155,7 @@ void CFifo::Update()
 	while(true) // read all messages from the pipe
 	{
 		DWORD BytesAvailable;
-		if(!PeekNamedPipe(m_pPipe, NULL, 0, NULL, &BytesAvailable, NULL))
+		if(!PeekNamedPipe(m_pPipe, nullptr, 0, nullptr, &BytesAvailable, nullptr))
 		{
 			const DWORD LastError = GetLastError();
 			if(LastError == ERROR_BROKEN_PIPE)
@@ -176,7 +176,7 @@ void CFifo::Update()
 
 		char *pBuf = static_cast<char *>(malloc(BytesAvailable + 1));
 		DWORD Length;
-		if(!ReadFile(m_pPipe, pBuf, BytesAvailable, &Length, NULL))
+		if(!ReadFile(m_pPipe, pBuf, BytesAvailable, &Length, nullptr))
 		{
 			const DWORD LastError = GetLastError();
 			const std::string ErrorMsg = windows_format_system_message(LastError);

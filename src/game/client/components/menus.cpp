@@ -160,7 +160,7 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 	const bool MouseInside = Ui()->HotItem() == pButtonContainer;
 	CUIRect Rect = *pRect;
 
-	if(pAnimator != NULL)
+	if(pAnimator != nullptr)
 	{
 		auto Time = time_get_nanoseconds();
 
@@ -213,7 +213,7 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 		}
 	}
 
-	if(pAnimator != NULL)
+	if(pAnimator != nullptr)
 	{
 		if(pAnimator->m_RepositionLabel)
 		{
@@ -1466,19 +1466,19 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Box.HSplitBottom(32.f, &Box, &Part);
 		Box.HSplitBottom(24.f, &Box, &Part);
 
-		Part.VSplitLeft(60.0f, 0, &Label);
-		Label.VSplitLeft(100.0f, 0, &TextBox);
-		TextBox.VSplitLeft(20.0f, 0, &TextBox);
-		TextBox.VSplitRight(60.0f, &TextBox, 0);
+		Part.VSplitLeft(60.0f, nullptr, &Label);
+		Label.VSplitLeft(100.0f, nullptr, &TextBox);
+		TextBox.VSplitLeft(20.0f, nullptr, &TextBox);
+		TextBox.VSplitRight(60.0f, &TextBox, nullptr);
 		Ui()->DoLabel(&Label, Localize("Password"), 18.0f, TEXTALIGN_ML);
 		Ui()->DoClearableEditBox(&m_PasswordInput, &TextBox, 12.0f);
 
 		Box.HSplitBottom(32.f, &Box, &Part);
 		Box.HSplitBottom(24.f, &Box, &Part);
 
-		Part.VSplitLeft(60.0f, 0, &AddressLabel);
-		AddressLabel.VSplitLeft(100.0f, 0, &Address);
-		Address.VSplitLeft(20.0f, 0, &Address);
+		Part.VSplitLeft(60.0f, nullptr, &AddressLabel);
+		AddressLabel.VSplitLeft(100.0f, nullptr, &Address);
+		Address.VSplitLeft(20.0f, nullptr, &Address);
 		Ui()->DoLabel(&AddressLabel, Localize("Address"), 18.0f, TEXTALIGN_ML);
 		Ui()->DoLabel(&Address, aAddr, 18.0f, TEXTALIGN_ML);
 
@@ -1488,10 +1488,10 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		const CServerBrowser::CServerEntry *pEntry = ServerBrowser()->Find(Client()->ServerAddress());
 		if(pEntry != nullptr && pEntry->m_GotInfo)
 		{
-			Part.VSplitLeft(60.0f, 0, &Icon);
-			Icon.VSplitLeft(100.0f, 0, &Name);
-			Icon.VSplitLeft(80.0f, &Icon, 0);
-			Name.VSplitLeft(20.0f, 0, &Name);
+			Part.VSplitLeft(60.0f, nullptr, &Icon);
+			Icon.VSplitLeft(100.0f, nullptr, &Name);
+			Icon.VSplitLeft(80.0f, &Icon, nullptr);
+			Name.VSplitLeft(20.0f, nullptr, &Name);
 
 			const SCommunityIcon *pIcon = FindCommunityIcon(pEntry->m_Info.m_aCommunityId);
 			if(pIcon != nullptr)
@@ -1572,10 +1572,10 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Box.HSplitBottom(60.f, &Box, &Part);
 		Box.HSplitBottom(24.f, &Box, &Part);
 
-		Part.VSplitLeft(60.0f, 0, &Label);
-		Label.VSplitLeft(120.0f, 0, &TextBox);
-		TextBox.VSplitLeft(20.0f, 0, &TextBox);
-		TextBox.VSplitRight(60.0f, &TextBox, 0);
+		Part.VSplitLeft(60.0f, nullptr, &Label);
+		Label.VSplitLeft(120.0f, nullptr, &TextBox);
+		TextBox.VSplitLeft(20.0f, nullptr, &TextBox);
+		TextBox.VSplitRight(60.0f, &TextBox, nullptr);
 		Ui()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_ML);
 		Ui()->DoEditBox(&m_DemoRenameInput, &TextBox, 12.0f);
 	}
@@ -1749,7 +1749,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Box.HSplitBottom(20.f, &Box, &Part);
 		Box.HSplitBottom(24.f, &Box, &Part);
 
-		Part.VSplitLeft(30.0f, 0, &Part);
+		Part.VSplitLeft(30.0f, nullptr, &Part);
 		str_format(aBuf, sizeof(aBuf), "%s\n(%s)",
 			Localize("Show DDNet map finishes in server browser"),
 			Localize("transmits your player name to info.ddnet.org"));
@@ -1760,10 +1760,10 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Box.HSplitBottom(20.f, &Box, &Part);
 		Box.HSplitBottom(24.f, &Box, &Part);
 
-		Part.VSplitLeft(60.0f, 0, &Label);
-		Label.VSplitLeft(100.0f, 0, &TextBox);
-		TextBox.VSplitLeft(20.0f, 0, &TextBox);
-		TextBox.VSplitRight(60.0f, &TextBox, 0);
+		Part.VSplitLeft(60.0f, nullptr, &Label);
+		Label.VSplitLeft(100.0f, nullptr, &TextBox);
+		TextBox.VSplitLeft(20.0f, nullptr, &TextBox);
+		TextBox.VSplitRight(60.0f, &TextBox, nullptr);
 		Ui()->DoLabel(&Label, Localize("Nickname"), 16.0f, TEXTALIGN_ML);
 		static CLineInput s_PlayerNameInput(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName));
 		s_PlayerNameInput.SetEmptyText(Client()->PlayerName());
