@@ -1038,6 +1038,8 @@ void CGameContext::OnTick()
 		m_TeeHistorian.BeginPlayers();
 	}
 
+	m_Collision.SetTime(m_pController->GetTime());
+
 	// copy tuning
 	m_World.m_Core.m_aTuning[0] = m_Tuning;
 	m_World.Tick();

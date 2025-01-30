@@ -112,6 +112,74 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	}
 }
 
+void CGameControllerDDRace::HandleCharacterQuad(CCharacter *pChr, CQuad *pQuad)
+{
+	int Index = pQuad->m_ColorEnvOffset;
+	CPlayer *pPlayer = pChr->GetPlayer();
+	const int ClientId = pPlayer->GetCid();
+	const int PlayerDDRaceState = pChr->m_DDRaceState;
+
+	bool IsOnStartTile = (Index == TILE_START);
+	// start
+	if(IsOnStartTile && PlayerDDRaceState != DDRACE_CHEAT)
+	{
+		const int Team = GameServer()->GetDDRaceTeam(ClientId);
+		if(Teams().GetSaving(Team))
+		{
+			GameServer()->SendStartWarning(ClientId, "You can't start while loading/saving of team is in progress");
+			pChr->Die(ClientId, WEAPON_WORLD);
+			return;
+		}
+		if(g_Config.m_SvTeam == SV_TEAM_MANDATORY && (Team == TEAM_FLOCK || Teams().Count(Team) <= 1))
+		{
+			GameServer()->SendStartWarning(ClientId, "You have to be in a team with other tees to start");
+			pChr->Die(ClientId, WEAPON_WORLD);
+			return;
+		}
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team > TEAM_FLOCK && Team < TEAM_SUPER && Teams().Count(Team) < g_Config.m_SvMinTeamSize && !Teams().TeamFlock(Team))
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Your team has fewer than %d players, so your team rank won't count", g_Config.m_SvMinTeamSize);
+			GameServer()->SendStartWarning(ClientId, aBuf);
+		}
+		if(g_Config.m_SvResetPickups)
+		{
+			pChr->ResetPickups();
+		}
+
+		Teams().OnCharacterStart(ClientId);
+		pChr->m_LastTimeCp = -1;
+		pChr->m_LastTimeCpBroadcasted = -1;
+		for(float &CurrentTimeCp : pChr->m_aCurrentTimeCp)
+		{
+			CurrentTimeCp = 0.0f;
+		}
+	}
+
+	// finish
+	if((Index == TILE_FINISH) && PlayerDDRaceState == DDRACE_STARTED)
+		Teams().OnCharacterFinish(ClientId);
+
+	// unlock team
+	else if((Index == TILE_UNLOCK_TEAM) && Teams().TeamLocked(GameServer()->GetDDRaceTeam(ClientId)))
+	{
+		Teams().SetTeamLock(GameServer()->GetDDRaceTeam(ClientId), false);
+		GameServer()->SendChatTeam(GameServer()->GetDDRaceTeam(ClientId), "Your team was unlocked by an unlock team tile");
+	}
+
+	// solo part
+	if((Index == TILE_SOLO_ENABLE) && !Teams().m_Core.GetSolo(ClientId))
+	{
+		GameServer()->SendChatTarget(ClientId, "You are now in a solo part");
+		pChr->SetSolo(true);
+	}
+	else if((Index == TILE_SOLO_DISABLE) && Teams().m_Core.GetSolo(ClientId))
+	{
+		GameServer()->SendChatTarget(ClientId, "You are now out of the solo part");
+		pChr->SetSolo(false);
+	}
+}
+
 void CGameControllerDDRace::SetArmorProgress(CCharacter *pCharacer, int Progress)
 {
 	pCharacer->SetArmor(clamp(10 - (Progress / 15), 0, 10));
