@@ -22,13 +22,13 @@
 CGameWorld::CGameWorld()
 {
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
-		pFirstEntityType = 0;
+		pFirstEntityType = nullptr;
 	for(auto &pCharacter : m_apCharacters)
-		pCharacter = 0;
-	m_pCollision = 0;
+		pCharacter = nullptr;
+	m_pCollision = nullptr;
 	m_GameTick = 0;
-	m_pParent = 0;
-	m_pChild = 0;
+	m_pParent = nullptr;
+	m_pChild = nullptr;
 }
 
 CGameWorld::~CGameWorld()
@@ -37,15 +37,15 @@ CGameWorld::~CGameWorld()
 	if(m_pChild && m_pChild->m_pParent == this)
 	{
 		OnModified();
-		m_pChild->m_pParent = 0;
+		m_pChild->m_pParent = nullptr;
 	}
 	if(m_pParent && m_pParent->m_pChild == this)
-		m_pParent->m_pChild = 0;
+		m_pParent->m_pChild = nullptr;
 }
 
 CEntity *CGameWorld::FindFirst(int Type)
 {
-	return Type < 0 || Type >= NUM_ENTTYPES ? 0 : m_apFirstEntityTypes[Type];
+	return Type < 0 || Type >= NUM_ENTTYPES ? nullptr : m_apFirstEntityTypes[Type];
 }
 
 CEntity *CGameWorld::FindLast(int Type)
@@ -81,8 +81,8 @@ int CGameWorld::FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, 
 void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 {
 	pEnt->m_pGameWorld = this;
-	pEnt->m_pNextTypeEntity = 0x0;
-	pEnt->m_pPrevTypeEntity = 0x0;
+	pEnt->m_pNextTypeEntity = nullptr;
+	pEnt->m_pPrevTypeEntity = nullptr;
 
 	// insert it
 	if(!Last)
@@ -90,7 +90,7 @@ void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 		if(m_apFirstEntityTypes[pEnt->m_ObjType])
 			m_apFirstEntityTypes[pEnt->m_ObjType]->m_pPrevTypeEntity = pEnt;
 		pEnt->m_pNextTypeEntity = m_apFirstEntityTypes[pEnt->m_ObjType];
-		pEnt->m_pPrevTypeEntity = 0x0;
+		pEnt->m_pPrevTypeEntity = nullptr;
 		m_apFirstEntityTypes[pEnt->m_ObjType] = pEnt;
 	}
 	else
@@ -106,7 +106,7 @@ void CGameWorld::InsertEntity(CEntity *pEnt, bool Last)
 		else
 			m_apFirstEntityTypes[pEnt->m_ObjType] = pEnt;
 		pEnt->m_pPrevTypeEntity = pLast;
-		pEnt->m_pNextTypeEntity = 0x0;
+		pEnt->m_pNextTypeEntity = nullptr;
 	}
 
 	if(pEnt->m_ObjType == ENTTYPE_CHARACTER)
@@ -140,8 +140,8 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 	if(m_pNextTraverseEntity == pEnt)
 		m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 
-	pEnt->m_pNextTypeEntity = 0;
-	pEnt->m_pPrevTypeEntity = 0;
+	pEnt->m_pNextTypeEntity = nullptr;
+	pEnt->m_pPrevTypeEntity = nullptr;
 
 	if(pEnt->m_pParent)
 	{
@@ -162,8 +162,8 @@ void CGameWorld::RemoveCharacter(CCharacter *pChar)
 	int Id = pChar->GetCid();
 	if(Id >= 0 && Id < MAX_CLIENTS)
 	{
-		m_apCharacters[Id] = 0;
-		m_Core.m_apCharacters[Id] = 0;
+		m_apCharacters[Id] = nullptr;
+		m_Core.m_apCharacters[Id] = nullptr;
 	}
 }
 
@@ -248,7 +248,7 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 {
 	// Find other players
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
-	CCharacter *pClosest = 0;
+	CCharacter *pClosest = nullptr;
 
 	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);
 	for(; p; p = (CCharacter *)p->TypeNext())
@@ -326,7 +326,7 @@ CEntity *CGameWorld::GetEntity(int Id, int EntityType)
 	for(CEntity *pEnt = m_apFirstEntityTypes[EntityType]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
 		if(pEnt->m_Id == Id)
 			return pEnt;
-	return 0;
+	return nullptr;
 }
 
 void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
@@ -451,7 +451,7 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 				const vec2 NetPos = NetProj.m_Pos - normalize(NetProj.m_Direction) * CCharacterCore::PhysicalSize() * 0.75;
 				const bool Prev = (GameTick() - NetProj.m_StartTick) > 1;
 				float First = 200.0f, Second = 200.0f;
-				CCharacter *pClosest = 0;
+				CCharacter *pClosest = nullptr;
 				for(CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
 				{
 					float Dist = distance(Prev ? pChar->m_PrevPrevPos : pChar->m_PrevPos, NetPos);
@@ -497,7 +497,7 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 		if(Data.m_Type == LASERTYPE_RIFLE || Data.m_Type == LASERTYPE_SHOTGUN || Data.m_Type < 0)
 		{
 			CLaser NetLaser = CLaser(this, ObjId, &Data);
-			CLaser *pMatching = 0;
+			CLaser *pMatching = nullptr;
 			if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjId, ENTTYPE_LASER)))
 				if(NetLaser.Match(pLaser))
 					pMatching = pLaser;
@@ -565,8 +565,8 @@ void CGameWorld::NetObjEnd()
 	// Update character IDs and pointers
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		m_apCharacters[i] = 0;
-		m_Core.m_apCharacters[i] = 0;
+		m_apCharacters[i] = nullptr;
+		m_Core.m_apCharacters[i] = nullptr;
 	}
 	for(CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
 	{
@@ -603,15 +603,15 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	Clear();
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		m_apCharacters[i] = 0;
-		m_Core.m_apCharacters[i] = 0;
+		m_apCharacters[i] = nullptr;
+		m_Core.m_apCharacters[i] = nullptr;
 	}
 	// copy and add the new entities
 	for(int Type = 0; Type < NUM_ENTTYPES; Type++)
 	{
 		for(CEntity *pEnt = pFrom->FindLast(Type); pEnt; pEnt = pEnt->TypePrev())
 		{
-			CEntity *pCopy = 0;
+			CEntity *pCopy = nullptr;
 			if(Type == ENTTYPE_PROJECTILE)
 				pCopy = new CProjectile(*((CProjectile *)pEnt));
 			else if(Type == ENTTYPE_LASER)
@@ -644,7 +644,7 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 		{
 			return pEnt;
 		}
-		return 0;
+		return nullptr;
 	}
 	case NETOBJTYPE_PROJECTILE:
 	case NETOBJTYPE_DDRACEPROJECTILE:
@@ -656,7 +656,7 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 		{
 			return pEnt;
 		}
-		return 0;
+		return nullptr;
 	}
 	case NETOBJTYPE_LASER:
 	case NETOBJTYPE_DDNETLASER:
@@ -678,7 +678,7 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 				return pEnt;
 			}
 		}
-		return 0;
+		return nullptr;
 	}
 	case NETOBJTYPE_PICKUP:
 	case NETOBJTYPE_DDNETPICKUP:
@@ -689,10 +689,10 @@ CEntity *CGameWorld::FindMatch(int ObjId, int ObjType, const void *pObjData)
 		{
 			return pEnt;
 		}
-		return 0;
+		return nullptr;
 	}
 	}
-	return 0;
+	return nullptr;
 }
 
 void CGameWorld::OnModified() const

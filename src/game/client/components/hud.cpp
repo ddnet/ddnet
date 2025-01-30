@@ -304,7 +304,7 @@ void CHud::RenderScoreHud()
 		{
 			int Local = -1;
 			int aPos[2] = {1, 2};
-			const CNetObj_PlayerInfo *apPlayerInfo[2] = {0, 0};
+			const CNetObj_PlayerInfo *apPlayerInfo[2] = {nullptr, nullptr};
 			int i = 0;
 			for(int t = 0; t < 2 && i < MAX_CLIENTS && m_pClient->m_Snap.m_apInfoByScore[i]; ++i)
 			{

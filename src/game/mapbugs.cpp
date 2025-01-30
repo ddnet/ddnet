@@ -58,7 +58,7 @@ CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256)
 			return Result;
 		}
 	}
-	Result.m_pData = 0;
+	Result.m_pData = nullptr;
 	return Result;
 }
 

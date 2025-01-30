@@ -454,12 +454,12 @@ IOHANDLE io_current_exe()
 	// From https://stackoverflow.com/a/1024937.
 #if defined(CONF_FAMILY_WINDOWS)
 	wchar_t wide_path[IO_MAX_PATH_LENGTH];
-	if(GetModuleFileNameW(NULL, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
+	if(GetModuleFileNameW(nullptr, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
 	{
-		return 0;
+		return nullptr;
 	}
 	const std::optional<std::string> path = windows_wide_to_utf8(wide_path);
-	return path.has_value() ? io_open(path.value().c_str(), IOFLAG_READ) : 0;
+	return path.has_value() ? io_open(path.value().c_str(), IOFLAG_READ) : nullptr;
 #elif defined(CONF_PLATFORM_MACOS)
 	char path[IO_MAX_PATH_LENGTH];
 	uint32_t path_size = sizeof(path);
@@ -618,18 +618,18 @@ ASYNCIO *aio_new(IOHANDLE io)
 	ASYNCIO *aio = new ASYNCIO;
 	if(!aio)
 	{
-		return 0;
+		return nullptr;
 	}
 	aio->io = io;
 	sphore_init(&aio->sphore);
-	aio->thread = 0;
+	aio->thread = nullptr;
 
 	aio->buffer = (unsigned char *)malloc(ASYNC_BUFSIZE);
 	if(!aio->buffer)
 	{
 		sphore_destroy(&aio->sphore);
 		delete aio;
-		return 0;
+		return nullptr;
 	}
 	aio->buffer_size = ASYNC_BUFSIZE;
 	aio->read_pos = 0;
@@ -644,7 +644,7 @@ ASYNCIO *aio_new(IOHANDLE io)
 		free(aio->buffer);
 		sphore_destroy(&aio->sphore);
 		delete aio;
-		return 0;
+		return nullptr;
 	}
 	return aio;
 }
@@ -775,7 +775,7 @@ void aio_wait(ASYNCIO *aio)
 	{
 		CLockScope ls(aio->lock);
 		thread = aio->thread;
-		aio->thread = 0;
+		aio->thread = nullptr;
 		if(aio->finish == ASYNCIO_RUNNING)
 		{
 			aio->finish = ASYNCIO_EXIT;
@@ -791,7 +791,7 @@ void aio_free(ASYNCIO *aio)
 	if(aio->thread)
 	{
 		thread_detach(aio->thread);
-		aio->thread = 0;
+		aio->thread = nullptr;
 	}
 	aio_handle_free_and_unlock(aio);
 }
@@ -1212,7 +1212,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 {
 	struct addrinfo hints;
-	struct addrinfo *result = NULL;
+	struct addrinfo *result = nullptr;
 	int e;
 	char host[256];
 	int port = 0;
@@ -1231,7 +1231,7 @@ int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 	else if(types == NETTYPE_IPV6)
 		hints.ai_family = AF_INET6;
 
-	e = getaddrinfo(host, NULL, &hints, &result);
+	e = getaddrinfo(host, nullptr, &hints, &result);
 
 	if(!result)
 		return -1;
@@ -1392,7 +1392,7 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 			int size;
 			sa6.sin6_family = AF_INET6;
 			size = (int)sizeof(sa6);
-			if(WSAStringToAddressA(buf, AF_INET6, NULL, (struct sockaddr *)&sa6, &size) != 0)
+			if(WSAStringToAddressA(buf, AF_INET6, nullptr, (struct sockaddr *)&sa6, &size) != 0)
 				return -1;
 		}
 #else
@@ -1501,7 +1501,7 @@ std::string windows_format_system_message(unsigned long error)
 {
 	WCHAR *wide_message;
 	const DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_MAX_WIDTH_MASK;
-	if(FormatMessageW(flags, NULL, error, 0, (LPWSTR)&wide_message, 0, NULL) == 0)
+	if(FormatMessageW(flags, nullptr, error, 0, (LPWSTR)&wide_message, 0, nullptr) == 0)
 		return "unknown error";
 
 	std::optional<std::string> message = windows_wide_to_utf8(wide_message);
@@ -2353,7 +2353,7 @@ int fs_makedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
-	if(CreateDirectoryW(wide_path.c_str(), NULL) != 0)
+	if(CreateDirectoryW(wide_path.c_str(), nullptr) != 0)
 		return 0;
 	if(GetLastError() == ERROR_ALREADY_EXISTS)
 		return 0;
@@ -2494,7 +2494,7 @@ void fs_split_file_extension(const char *filename, char *name, size_t name_size,
 
 int fs_parent_dir(char *path)
 {
-	char *parent = 0;
+	char *parent = nullptr;
 	for(; *path; ++path)
 	{
 		if(*path == '/' || *path == '\\')
@@ -2621,9 +2621,9 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 
 	/* don't care about writefds and exceptfds */
 	if(time < 0)
-		select(sockid + 1, &readfds, NULL, NULL, NULL);
+		select(sockid + 1, &readfds, nullptr, nullptr, nullptr);
 	else
-		select(sockid + 1, &readfds, NULL, NULL, &tv);
+		select(sockid + 1, &readfds, nullptr, nullptr, &tv);
 
 	if(sock->ipv4sock >= 0 && FD_ISSET(sock->ipv4sock, &readfds))
 		return 1;
@@ -2639,7 +2639,7 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 
 int64_t time_timestamp()
 {
-	return time(0);
+	return time(nullptr);
 }
 
 static struct tm *time_localtime_threadlocal(time_t *time_data)
@@ -3021,7 +3021,7 @@ const char *str_startswith_nocase(const char *str, const char *prefix)
 	}
 	else
 	{
-		return 0;
+		return nullptr;
 	}
 }
 
@@ -3034,7 +3034,7 @@ const char *str_startswith(const char *str, const char *prefix)
 	}
 	else
 	{
-		return 0;
+		return nullptr;
 	}
 }
 
@@ -3045,7 +3045,7 @@ const char *str_endswith_nocase(const char *str, const char *suffix)
 	const char *strsuffix;
 	if(strl < suffixl)
 	{
-		return 0;
+		return nullptr;
 	}
 	strsuffix = str + strl - suffixl;
 	if(str_comp_nocase(strsuffix, suffix) == 0)
@@ -3054,7 +3054,7 @@ const char *str_endswith_nocase(const char *str, const char *suffix)
 	}
 	else
 	{
-		return 0;
+		return nullptr;
 	}
 }
 
@@ -3065,7 +3065,7 @@ const char *str_endswith(const char *str, const char *suffix)
 	const char *strsuffix;
 	if(strl < suffixl)
 	{
-		return 0;
+		return nullptr;
 	}
 	strsuffix = str + strl - suffixl;
 	if(str_comp(strsuffix, suffix) == 0)
@@ -3074,7 +3074,7 @@ const char *str_endswith(const char *str, const char *suffix)
 	}
 	else
 	{
-		return 0;
+		return nullptr;
 	}
 }
 
@@ -3180,7 +3180,7 @@ const char *str_find_nocase(const char *haystack, const char *needle)
 		haystack++;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 const char *str_find(const char *haystack, const char *needle)
@@ -3199,7 +3199,7 @@ const char *str_find(const char *haystack, const char *needle)
 		haystack++;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 bool str_delimiters_around_offset(const char *haystack, const char *delim, int offset, int *start, int *end)
@@ -3808,7 +3808,7 @@ const char *str_utf8_skip_whitespaces(const char *str)
 void str_utf8_trim_right(char *param)
 {
 	const char *str = param;
-	char *end = 0;
+	char *end = nullptr;
 	while(*str)
 	{
 		char *str_old = (char *)str;
@@ -3817,7 +3817,7 @@ void str_utf8_trim_right(char *param)
 		// check if unicode is not empty
 		if(!str_utf8_isspace(code))
 		{
-			end = 0;
+			end = nullptr;
 		}
 		else if(!end)
 		{
@@ -4082,7 +4082,7 @@ static const char *str_token_get(const char *str, const char *delim, int *length
 	else
 		str += len;
 	if(!*str)
-		return NULL;
+		return nullptr;
 
 	*length = strcspn(str, delim);
 	return str;
@@ -4106,10 +4106,10 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 {
 	int len = 0;
 	const char *tok = str_token_get(str, delim, &len);
-	if(len < 0 || tok == NULL)
+	if(len < 0 || tok == nullptr)
 	{
 		buffer[0] = '\0';
-		return NULL;
+		return nullptr;
 	}
 
 	len = buffer_size > len ? len : buffer_size - 1;
@@ -4156,7 +4156,7 @@ void cmdline_fix(int *argc, const char ***argv)
 
 	for(int i = 0; i < wide_argc; i++)
 	{
-		int size = WideCharToMultiByte(CP_UTF8, 0, wide_argv[i], -1, NULL, 0, NULL, NULL);
+		int size = WideCharToMultiByte(CP_UTF8, 0, wide_argv[i], -1, nullptr, 0, nullptr, nullptr);
 		dbg_assert(size != 0, "WideCharToMultiByte failure");
 		total_size += size;
 	}
@@ -4168,7 +4168,7 @@ void cmdline_fix(int *argc, const char ***argv)
 	int remaining_size = total_size;
 	for(int i = 0; i < wide_argc; i++)
 	{
-		int size = WideCharToMultiByte(CP_UTF8, 0, wide_argv[i], -1, new_argv[i], remaining_size, NULL, NULL);
+		int size = WideCharToMultiByte(CP_UTF8, 0, wide_argv[i], -1, new_argv[i], remaining_size, nullptr, nullptr);
 		dbg_assert(size != 0, "WideCharToMultiByte failure");
 
 		remaining_size -= size;
@@ -4176,7 +4176,7 @@ void cmdline_fix(int *argc, const char ***argv)
 	}
 
 	LocalFree(wide_argv);
-	new_argv[wide_argc] = 0;
+	new_argv[wide_argc] = nullptr;
 	*argc = wide_argc;
 	*argv = (const char **)new_argv;
 #endif
@@ -4281,7 +4281,7 @@ int open_link(const char *link)
 	SHELLEXECUTEINFOW info;
 	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
 	info.cbSize = sizeof(SHELLEXECUTEINFOW);
-	info.lpVerb = NULL; // NULL to use the default verb, as "open" may not be available
+	info.lpVerb = nullptr; // NULL to use the default verb, as "open" may not be available
 	info.lpFile = wide_link.c_str();
 	info.nShow = SW_SHOWNORMAL;
 	// The SEE_MASK_NOASYNC flag ensures that the ShellExecuteEx function
@@ -4355,7 +4355,7 @@ int secure_random_init()
 		return 0;
 	}
 #if defined(CONF_FAMILY_WINDOWS)
-	if(CryptAcquireContext(&secure_random_data.provider, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
+	if(CryptAcquireContext(&secure_random_data.provider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
 	{
 		secure_random_data.initialized = 1;
 		return 0;
@@ -4737,7 +4737,7 @@ std::optional<std::string> windows_wide_to_utf8(const wchar_t *wide_str)
 // See https://learn.microsoft.com/en-us/windows/win32/learnwin32/initializing-the-com-library
 CWindowsComLifecycle::CWindowsComLifecycle(bool HasWindow)
 {
-	HRESULT result = CoInitializeEx(NULL, (HasWindow ? COINIT_APARTMENTTHREADED : COINIT_MULTITHREADED) | COINIT_DISABLE_OLE1DDE);
+	HRESULT result = CoInitializeEx(nullptr, (HasWindow ? COINIT_APARTMENTTHREADED : COINIT_MULTITHREADED) | COINIT_DISABLE_OLE1DDE);
 	dbg_assert(result != S_FALSE, "COM library already initialized on this thread");
 	dbg_assert(result == S_OK, "COM library initialization failed");
 }
@@ -4774,7 +4774,7 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
 
 	// Create the protocol key
 	HKEY handle_subkey_protocol;
-	const LRESULT result_subkey_protocol = RegCreateKeyExW(handle_subkey_classes, protocol_name_wide.c_str(), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_protocol, NULL);
+	const LRESULT result_subkey_protocol = RegCreateKeyExW(handle_subkey_classes, protocol_name_wide.c_str(), 0, nullptr, 0, KEY_ALL_ACCESS, nullptr, &handle_subkey_protocol, nullptr);
 	RegCloseKey(handle_subkey_classes);
 	if(result_subkey_protocol != ERROR_SUCCESS)
 	{
@@ -4803,7 +4803,7 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
 
 	// Create the "DefaultIcon" subkey
 	HKEY handle_subkey_icon;
-	const LRESULT result_subkey_icon = RegCreateKeyExW(handle_subkey_protocol, L"DefaultIcon", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_icon, NULL);
+	const LRESULT result_subkey_icon = RegCreateKeyExW(handle_subkey_protocol, L"DefaultIcon", 0, nullptr, 0, KEY_ALL_ACCESS, nullptr, &handle_subkey_icon, nullptr);
 	if(result_subkey_icon != ERROR_SUCCESS)
 	{
 		windows_print_error("shell_register_protocol", "Error creating registry key", result_subkey_icon);
@@ -4824,7 +4824,7 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
 
 	// Create the "shell\open\command" subkeys
 	HKEY handle_subkey_shell_open_command;
-	const LRESULT result_subkey_shell_open_command = RegCreateKeyExW(handle_subkey_protocol, L"shell\\open\\command", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_shell_open_command, NULL);
+	const LRESULT result_subkey_shell_open_command = RegCreateKeyExW(handle_subkey_protocol, L"shell\\open\\command", 0, nullptr, 0, KEY_ALL_ACCESS, nullptr, &handle_subkey_shell_open_command, nullptr);
 	RegCloseKey(handle_subkey_protocol);
 	if(result_subkey_shell_open_command != ERROR_SUCCESS)
 	{
@@ -4835,7 +4835,7 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
 	// Get the previous default value for the key, so we can determine if it changed
 	wchar_t old_value_executable[MAX_PATH + 16];
 	DWORD old_size_executable = sizeof(old_value_executable);
-	const LRESULT result_old_value_executable = RegGetValueW(handle_subkey_shell_open_command, NULL, L"", RRF_RT_REG_SZ, NULL, (BYTE *)old_value_executable, &old_size_executable);
+	const LRESULT result_old_value_executable = RegGetValueW(handle_subkey_shell_open_command, nullptr, L"", RRF_RT_REG_SZ, nullptr, (BYTE *)old_value_executable, &old_size_executable);
 	const std::wstring value_executable = L"\"" + executable_wide + L"\" \"%1\"";
 	if(result_old_value_executable != ERROR_SUCCESS || wcscmp(old_value_executable, value_executable.c_str()) != 0)
 	{
@@ -4877,7 +4877,7 @@ bool shell_register_extension(const char *extension, const char *description, co
 
 	// Create the program ID key
 	HKEY handle_subkey_program_id;
-	const LRESULT result_subkey_program_id = RegCreateKeyExW(handle_subkey_classes, program_id_wide.c_str(), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_program_id, NULL);
+	const LRESULT result_subkey_program_id = RegCreateKeyExW(handle_subkey_classes, program_id_wide.c_str(), 0, nullptr, 0, KEY_ALL_ACCESS, nullptr, &handle_subkey_program_id, nullptr);
 	if(result_subkey_program_id != ERROR_SUCCESS)
 	{
 		windows_print_error("shell_register_extension", "Error creating registry key", result_subkey_program_id);
@@ -4907,7 +4907,7 @@ bool shell_register_extension(const char *extension, const char *description, co
 
 	// Create the "DefaultIcon" subkey
 	HKEY handle_subkey_icon;
-	const LRESULT result_subkey_icon = RegCreateKeyExW(handle_subkey_program_id, L"DefaultIcon", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_icon, NULL);
+	const LRESULT result_subkey_icon = RegCreateKeyExW(handle_subkey_program_id, L"DefaultIcon", 0, nullptr, 0, KEY_ALL_ACCESS, nullptr, &handle_subkey_icon, nullptr);
 	if(result_subkey_icon != ERROR_SUCCESS)
 	{
 		windows_print_error("register_protocol", "Error creating registry key", result_subkey_icon);
@@ -4930,7 +4930,7 @@ bool shell_register_extension(const char *extension, const char *description, co
 
 	// Create the "shell\open\command" subkeys
 	HKEY handle_subkey_shell_open_command;
-	const LRESULT result_subkey_shell_open_command = RegCreateKeyExW(handle_subkey_program_id, L"shell\\open\\command", 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_shell_open_command, NULL);
+	const LRESULT result_subkey_shell_open_command = RegCreateKeyExW(handle_subkey_program_id, L"shell\\open\\command", 0, nullptr, 0, KEY_ALL_ACCESS, nullptr, &handle_subkey_shell_open_command, nullptr);
 	RegCloseKey(handle_subkey_program_id);
 	if(result_subkey_shell_open_command != ERROR_SUCCESS)
 	{
@@ -4942,7 +4942,7 @@ bool shell_register_extension(const char *extension, const char *description, co
 	// Get the previous default value for the key, so we can determine if it changed
 	wchar_t old_value_executable[MAX_PATH + 16];
 	DWORD old_size_executable = sizeof(old_value_executable);
-	const LRESULT result_old_value_executable = RegGetValueW(handle_subkey_shell_open_command, NULL, L"", RRF_RT_REG_SZ, NULL, (BYTE *)old_value_executable, &old_size_executable);
+	const LRESULT result_old_value_executable = RegGetValueW(handle_subkey_shell_open_command, nullptr, L"", RRF_RT_REG_SZ, nullptr, (BYTE *)old_value_executable, &old_size_executable);
 	const std::wstring value_executable = L"\"" + executable_wide + L"\" \"%1\"";
 	if(result_old_value_executable != ERROR_SUCCESS || wcscmp(old_value_executable, value_executable.c_str()) != 0)
 	{
@@ -4961,7 +4961,7 @@ bool shell_register_extension(const char *extension, const char *description, co
 
 	// Create the file extension key
 	HKEY handle_subkey_extension;
-	const LRESULT result_subkey_extension = RegCreateKeyExW(handle_subkey_classes, extension_wide.c_str(), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_extension, NULL);
+	const LRESULT result_subkey_extension = RegCreateKeyExW(handle_subkey_classes, extension_wide.c_str(), 0, nullptr, 0, KEY_ALL_ACCESS, nullptr, &handle_subkey_extension, nullptr);
 	RegCloseKey(handle_subkey_classes);
 	if(result_subkey_extension != ERROR_SUCCESS)
 	{
@@ -4972,7 +4972,7 @@ bool shell_register_extension(const char *extension, const char *description, co
 	// Get the previous default value for the key, so we can determine if it changed
 	wchar_t old_value_application[128];
 	DWORD old_size_application = sizeof(old_value_application);
-	const LRESULT result_old_value_application = RegGetValueW(handle_subkey_extension, NULL, L"", RRF_RT_REG_SZ, NULL, (BYTE *)old_value_application, &old_size_application);
+	const LRESULT result_old_value_application = RegGetValueW(handle_subkey_extension, nullptr, L"", RRF_RT_REG_SZ, nullptr, (BYTE *)old_value_application, &old_size_application);
 	if(result_old_value_application != ERROR_SUCCESS || wcscmp(old_value_application, program_id_wide.c_str()) != 0)
 	{
 		// Set the default value for the key, which associates the file extension with the program ID
@@ -5010,7 +5010,7 @@ bool shell_register_application(const char *name, const char *executable, bool *
 
 	// Create the program key
 	HKEY handle_subkey_program;
-	const LRESULT result_subkey_program = RegCreateKeyExW(handle_subkey_applications, executable_filename.c_str(), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &handle_subkey_program, NULL);
+	const LRESULT result_subkey_program = RegCreateKeyExW(handle_subkey_applications, executable_filename.c_str(), 0, nullptr, 0, KEY_ALL_ACCESS, nullptr, &handle_subkey_program, nullptr);
 	RegCloseKey(handle_subkey_applications);
 	if(result_subkey_program != ERROR_SUCCESS)
 	{
@@ -5021,7 +5021,7 @@ bool shell_register_application(const char *name, const char *executable, bool *
 	// Get the previous default value for the key, so we can determine if it changed
 	wchar_t old_value_executable[MAX_PATH];
 	DWORD old_size_executable = sizeof(old_value_executable);
-	const LRESULT result_old_value_executable = RegGetValueW(handle_subkey_program, NULL, L"FriendlyAppName", RRF_RT_REG_SZ, NULL, (BYTE *)old_value_executable, &old_size_executable);
+	const LRESULT result_old_value_executable = RegGetValueW(handle_subkey_program, nullptr, L"FriendlyAppName", RRF_RT_REG_SZ, nullptr, (BYTE *)old_value_executable, &old_size_executable);
 	if(result_old_value_executable != ERROR_SUCCESS || wcscmp(old_value_executable, name_wide.c_str()) != 0)
 	{
 		// Set the "FriendlyAppName" value, which specifies the displayed name of the application
@@ -5103,7 +5103,7 @@ bool shell_unregister_application(const char *executable, bool *updated)
 
 void shell_update()
 {
-	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nullptr, nullptr);
 }
 #endif
 

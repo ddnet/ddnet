@@ -276,7 +276,7 @@ void CNetConnection::Disconnect(const char *pReason)
 			if(pReason)
 				SendControl(NET_CTRLMSG_CLOSE, pReason, str_length(pReason) + 1);
 			else
-				SendControl(NET_CTRLMSG_CLOSE, 0, 0);
+				SendControl(NET_CTRLMSG_CLOSE, nullptr, 0);
 		}
 
 		if(pReason != m_aErrorString)
@@ -469,7 +469,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 								dbg_msg("security", "token not supported by server");
 						}
 						if(!IsSixup())
-							SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
+							SendControl(NET_CTRLMSG_ACCEPT, nullptr, 0);
 						m_LastRecvTime = Now;
 						m_State = NET_CONNSTATE_ONLINE;
 						if(g_Config.m_Debug)
@@ -557,7 +557,7 @@ int CNetConnection::Update()
 		}
 
 		if(time_get() - m_LastSendTime > time_freq())
-			SendControl(NET_CTRLMSG_KEEPALIVE, 0, 0);
+			SendControl(NET_CTRLMSG_KEEPALIVE, nullptr, 0);
 	}
 	else if(State() == NET_CONNSTATE_CONNECT)
 	{

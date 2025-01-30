@@ -51,7 +51,7 @@ int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, v
 
 void EscapeUrl(char *pBuf, int Size, const char *pStr)
 {
-	char *pEsc = curl_easy_escape(0, pStr, 0);
+	char *pEsc = curl_easy_escape(nullptr, pStr, 0);
 	str_copy(pBuf, pEsc, Size);
 	curl_free(pEsc);
 }

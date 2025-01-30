@@ -279,7 +279,7 @@ public:
 		if(m_aErrorString[0] != '\0')
 			return m_aErrorString;
 
-		return NULL;
+		return nullptr;
 	}
 
 	const char *GetVendorString() override

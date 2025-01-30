@@ -269,12 +269,12 @@ void CPlayers::RenderHookCollLine(
 				}
 
 				int Tele;
-				int Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0, &Tele);
+				int Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, nullptr, &Tele);
 				if(!DoBreak && Hit == TILE_TELEINHOOK)
 				{
 					if(Collision()->TeleOuts(Tele - 1).size() != 1)
 					{
-						Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0);
+						Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, nullptr);
 					}
 					else
 					{

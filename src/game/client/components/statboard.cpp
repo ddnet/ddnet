@@ -152,7 +152,7 @@ void CStatboard::RenderGlobalStats()
 	float StatboardContentWidth = 260.0f;
 	float StatboardContentHeight = 750.0f;
 
-	const CNetObj_PlayerInfo *apPlayers[MAX_CLIENTS] = {0};
+	const CNetObj_PlayerInfo *apPlayers[MAX_CLIENTS] = {nullptr};
 	int NumPlayers = 0;
 
 	// sort red or dm players by score
@@ -461,7 +461,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 	// player stats
 
 	// sort players
-	const CNetObj_PlayerInfo *apPlayers[MAX_CLIENTS] = {0};
+	const CNetObj_PlayerInfo *apPlayers[MAX_CLIENTS] = {nullptr};
 	int NumPlayers = 0;
 
 	// sort red or dm players by score

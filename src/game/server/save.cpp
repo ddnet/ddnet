@@ -744,7 +744,7 @@ int CSaveTeam::FromString(const char *pString)
 	if(m_pSavedTees)
 	{
 		delete[] m_pSavedTees;
-		m_pSavedTees = 0;
+		m_pSavedTees = nullptr;
 	}
 
 	if(m_MembersCount > 64)
@@ -797,7 +797,7 @@ int CSaveTeam::FromString(const char *pString)
 	if(m_pSwitchers)
 	{
 		delete[] m_pSwitchers;
-		m_pSwitchers = 0;
+		m_pSwitchers = nullptr;
 	}
 
 	if(m_HighestSwitchNumber)
