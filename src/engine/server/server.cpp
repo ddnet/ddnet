@@ -661,7 +661,7 @@ const char *CServer::ClientName(int ClientId) const
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS || m_aClients[ClientId].m_State == CServer::CClient::STATE_EMPTY)
 		return "(invalid)";
-	if(m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME)
+	if(m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME || m_aClients[ClientId].m_State == CServer::CClient::STATE_REDIRECTED)
 		return m_aClients[ClientId].m_aName;
 	else
 		return "(connecting)";
@@ -695,6 +695,11 @@ bool CServer::ClientSlotEmpty(int ClientId) const
 bool CServer::ClientIngame(int ClientId) const
 {
 	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME;
+}
+
+bool CServer::ClientRedirected(int ClientId) const
+{
+	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_State == CServer::CClient::STATE_REDIRECTED;
 }
 
 int CServer::Port() const
