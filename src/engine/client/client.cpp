@@ -5079,6 +5079,9 @@ int CClient::GetPredictionTick()
 		PredictionMin = PredictionTick - 1;
 	}
 
+	if(PredictionMin <= 0)
+		return PredGameTick(g_Config.m_ClDummy);
+
 	PredictionTick = PredGameTick(g_Config.m_ClDummy) - PredictionMin;
 
 	if(PredictionTick < GameTick(g_Config.m_ClDummy) + 1)

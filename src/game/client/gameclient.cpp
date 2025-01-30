@@ -2328,11 +2328,6 @@ void CGameClient::OnPredict()
 				m_aClients[m_PredictedDummyId].m_PrevPredicted = pDummyChar->GetCore();
 		}
 
-		if(Tick == PredictionTick)
-		{
-			m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
-		}
-
 		// optionally allow some movement in freeze by not predicting freeze the last one to two ticks
 		if(g_Config.m_ClPredictFreeze == 2 && Client()->PredGameTick(g_Config.m_ClDummy) - 1 - Client()->PredGameTick(g_Config.m_ClDummy) % 2 <= Tick)
 			pLocalChar->m_CanMoveInFreeze = true;
@@ -2358,6 +2353,8 @@ void CGameClient::OnPredict()
 		// fetch the current characters
 		if(Tick == PredictionTick)
 		{
+			m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
+
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
 					m_aClients[i].m_Predicted = pChar->GetCore();
