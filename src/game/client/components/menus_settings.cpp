@@ -3272,6 +3272,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		{
 			g_Config.m_ClAntiPingGrenade ^= 1;
 		}
+		Right.HSplitTop(20.0f, &Button, &Right);
+		Ui()->DoScrollbarOption(&g_Config.m_ClPredictionMargin, &g_Config.m_ClPredictionMargin, &Button, Localize("AntiPing: prediction margin"), 1, 300);
 	}
 
 	CUIRect Background, Miscellaneous;
