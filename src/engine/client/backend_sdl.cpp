@@ -1580,11 +1580,11 @@ bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
 		// in windows make the window windowed mode first, this prevents strange window glitches (other games probably do something similar)
 		SetWindowParams(0, true);
 #endif
-		SDL_DisplayMode *pClosestMode = nullptr;
+		SDL_DisplayMode ClosestMode = {};
 
-		bool Found = SDL_GetClosestFullscreenDisplayMode(g_Config.m_GfxScreen, w, h, RefreshRate, true, pClosestMode);
+		bool Found = SDL_GetClosestFullscreenDisplayMode(g_Config.m_GfxScreen, w, h, RefreshRate, true, &ClosestMode);
 		if(Found)
-			SDL_SetWindowFullscreenMode(m_pWindow, pClosestMode);
+			SDL_SetWindowFullscreenMode(m_pWindow, &ClosestMode);
 #ifdef CONF_FAMILY_WINDOWS
 		// now change it back to fullscreen, this will restore the above set state, bcs SDL saves fullscreen modes apart from other video modes (as of SDL 2.0.16)
 		// see implementation of SDL_SetWindowDisplayMode
