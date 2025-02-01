@@ -500,6 +500,11 @@ void CServer::ReconnectClient(int ClientId)
 	CMsgPacker Msg(NETMSG_RECONNECT, true);
 	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
 
+	if(m_aClients[ClientId].m_State >= CClient::STATE_READY)
+	{
+		GameServer()->OnClientDrop(ClientId, "reconnect");
+	}
+
 	m_aClients[ClientId].m_RedirectDropTime = time_get() + time_freq() * 10;
 	m_aClients[ClientId].m_State = CClient::STATE_REDIRECTED;
 }
@@ -524,6 +529,11 @@ void CServer::RedirectClient(int ClientId, int Port)
 	CMsgPacker Msg(NETMSG_REDIRECT, true);
 	Msg.AddInt(Port);
 	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
+
+	if(m_aClients[ClientId].m_State >= CClient::STATE_READY)
+	{
+		GameServer()->OnClientDrop(ClientId, "redirect");
+	}
 
 	m_aClients[ClientId].m_RedirectDropTime = time_get() + time_freq() * 10;
 	m_aClients[ClientId].m_State = CClient::STATE_REDIRECTED;
@@ -695,11 +705,6 @@ bool CServer::ClientSlotEmpty(int ClientId) const
 bool CServer::ClientIngame(int ClientId) const
 {
 	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME;
-}
-
-bool CServer::ClientRedirected(int ClientId) const
-{
-	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_State == CServer::CClient::STATE_REDIRECTED;
 }
 
 int CServer::Port() const
