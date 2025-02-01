@@ -376,30 +376,32 @@ void CGameTeams::CheckTeamFinished(int Team)
 
 const char *CGameTeams::SetCharacterTeam(int ClientId, int Team)
 {
+	int CurrentTeam = m_Core.Team(ClientId);
+
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return "Invalid client ID";
 	if(Team < 0 || Team >= MAX_CLIENTS + 1)
 		return "Invalid team number";
 	if(Team != TEAM_SUPER && m_aTeamState[Team] > TEAMSTATE_OPEN && !m_aPractice[Team] && !m_aTeamFlock[Team])
 		return "This team started already";
-	if(m_Core.Team(ClientId) == Team)
+	if(CurrentTeam == Team)
 		return "You are in this team already";
 	if(!Character(ClientId))
 		return "Your character is not valid";
 	if(Team == TEAM_SUPER && !Character(ClientId)->IsSuper())
 		return "You can't join super team if you don't have super rights";
-	if(Team != TEAM_SUPER && Character(ClientId)->m_DDRaceState != DDRACE_NONE)
+	if(Team != TEAM_SUPER && Character(ClientId)->m_DDRaceState != DDRACE_NONE && (m_aTeamState[CurrentTeam] < TEAMSTATE_FINISHED || Team != 0))
 		return "You have started racing already";
 	// No cheating through noob filter with practice and then leaving team
-	if(m_aPractice[m_Core.Team(ClientId)])
+	if(m_aPractice[CurrentTeam])
 		return "You have used practice mode already";
 
 	// you can not join a team which is currently in the process of saving,
 	// because the save-process can fail and then the team is reset into the game
 	if(Team != TEAM_SUPER && GetSaving(Team))
-		return "Your team is currently saving";
-	if(m_Core.Team(ClientId) != TEAM_SUPER && GetSaving(m_Core.Team(ClientId)))
 		return "This team is currently saving";
+	if(CurrentTeam != TEAM_SUPER && GetSaving(CurrentTeam))
+		return "Your team is currently saving";
 
 	SetForceCharacterTeam(ClientId, Team);
 	return nullptr;
