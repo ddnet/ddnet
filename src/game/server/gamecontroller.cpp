@@ -518,11 +518,6 @@ void IGameController::DoWarmup(int Seconds)
 		m_Warmup = Seconds * Server()->TickSpeed();
 }
 
-bool IGameController::IsForceBalanced()
-{
-	return false;
-}
-
 bool IGameController::CanBeMovedOnBalance(int ClientId)
 {
 	return true;
