@@ -78,6 +78,6 @@ public:
 
 extern IStorage *CreateStorage(IStorage::EInitializationType InitializationType, int NumArgs, const char **ppArguments);
 extern IStorage *CreateLocalStorage();
-extern IStorage *CreateTempStorage(const char *pDirectory);
+extern IStorage *CreateTempStorage(const char *pDirectory, int NumArgs, const char **ppArguments);
 
 #endif
