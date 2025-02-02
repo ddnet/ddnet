@@ -1441,64 +1441,72 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 	}
 	else if(m_Popup == POPUP_PASSWORD)
 	{
-		CUIRect AddressLabel, Address, Icon, Name, Label, TextBox, TryAgain, Abort;
+		Box.HSplitBottom(20.0f, &Box, nullptr);
+		Box.HSplitBottom(24.0f, &Box, &Part);
+		Part.VMargin(100.0f, &Part);
 
-		Box.HSplitBottom(20.f, &Box, &Part);
-		Box.HSplitBottom(24.f, &Box, &Part);
-		Part.VMargin(80.0f, &Part);
-
-		Part.VSplitMid(&Abort, &TryAgain);
-
-		TryAgain.VMargin(20.0f, &TryAgain);
-		Abort.VMargin(20.0f, &Abort);
+		CUIRect TryAgain, Abort;
+		Part.VSplitMid(&Abort, &TryAgain, 40.0f);
 
 		static CButtonContainer s_ButtonAbort;
-		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) ||
+			Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+		{
 			m_Popup = POPUP_NONE;
+		}
 
 		char aAddr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&Client()->ServerAddress(), aAddr, sizeof(aAddr), true);
 
 		static CButtonContainer s_ButtonTryAgain;
-		if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) || Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER))
+		if(DoButton_Menu(&s_ButtonTryAgain, Localize("Try again"), 0, &TryAgain) ||
+			Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER))
+		{
 			Client()->Connect(aAddr, g_Config.m_Password);
+		}
 
-		Box.HSplitBottom(32.f, &Box, &Part);
-		Box.HSplitBottom(24.f, &Box, &Part);
+		Box.VMargin(60.0f, &Box);
+		Box.HSplitBottom(32.0f, &Box, nullptr);
+		Box.HSplitBottom(24.0f, &Box, &Part);
 
-		Part.VSplitLeft(60.0f, nullptr, &Label);
-		Label.VSplitLeft(100.0f, nullptr, &TextBox);
+		CUIRect Label, TextBox;
+		Part.VSplitLeft(100.0f, &Label, &TextBox);
 		TextBox.VSplitLeft(20.0f, nullptr, &TextBox);
-		TextBox.VSplitRight(60.0f, &TextBox, nullptr);
 		Ui()->DoLabel(&Label, Localize("Password"), 18.0f, TEXTALIGN_ML);
 		Ui()->DoClearableEditBox(&m_PasswordInput, &TextBox, 12.0f);
 
-		Box.HSplitBottom(32.f, &Box, &Part);
-		Box.HSplitBottom(24.f, &Box, &Part);
+		Box.HSplitBottom(32.0f, &Box, nullptr);
+		Box.HSplitBottom(24.0f, &Box, &Part);
 
-		Part.VSplitLeft(60.0f, nullptr, &AddressLabel);
-		AddressLabel.VSplitLeft(100.0f, nullptr, &Address);
+		CUIRect Address;
+		Part.VSplitLeft(100.0f, &Label, &Address);
 		Address.VSplitLeft(20.0f, nullptr, &Address);
-		Ui()->DoLabel(&AddressLabel, Localize("Address"), 18.0f, TEXTALIGN_ML);
+		Ui()->DoLabel(&Label, Localize("Address"), 18.0f, TEXTALIGN_ML);
 		Ui()->DoLabel(&Address, aAddr, 18.0f, TEXTALIGN_ML);
-
-		Box.HSplitBottom(32.f, &Box, &Part);
-		Box.HSplitBottom(24.f, &Box, &Part);
 
 		const CServerBrowser::CServerEntry *pEntry = ServerBrowser()->Find(Client()->ServerAddress());
 		if(pEntry != nullptr && pEntry->m_GotInfo)
 		{
-			Part.VSplitLeft(60.0f, nullptr, &Icon);
-			Icon.VSplitLeft(100.0f, nullptr, &Name);
-			Icon.VSplitLeft(80.0f, &Icon, nullptr);
+			const CCommunity *pCommunity = ServerBrowser()->Community(pEntry->m_Info.m_aCommunityId);
+			const SCommunityIcon *pIcon = pCommunity == nullptr ? nullptr : FindCommunityIcon(pCommunity->Id());
+
+			Box.HSplitBottom(32.0f, &Box, nullptr);
+			Box.HSplitBottom(24.0f, &Box, &Part);
+
+			CUIRect Name;
+			Part.VSplitLeft(100.0f, &Label, &Name);
 			Name.VSplitLeft(20.0f, nullptr, &Name);
-
-			const SCommunityIcon *pIcon = FindCommunityIcon(pEntry->m_Info.m_aCommunityId);
 			if(pIcon != nullptr)
+			{
+				CUIRect Icon;
+				static char s_CommunityTooltipButtonId;
+				Name.VSplitLeft(2.5f * Name.h, &Icon, &Name);
 				RenderCommunityIcon(pIcon, Icon, true);
-			else
-				Ui()->DoLabel(&Icon, Localize("Name"), 18.0f, TEXTALIGN_ML);
+				Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Icon);
+				GameClient()->m_Tooltips.DoToolTip(&s_CommunityTooltipButtonId, &Icon, pCommunity->Name());
+			}
 
+			Ui()->DoLabel(&Label, Localize("Name"), 18.0f, TEXTALIGN_ML);
 			Ui()->DoLabel(&Name, pEntry->m_Info.m_aName, 18.0f, TEXTALIGN_ML);
 		}
 	}
