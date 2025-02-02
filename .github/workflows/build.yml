@@ -15,14 +15,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-20.04]
+        os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-22.04]
         include:
         - os: ubuntu-latest
           cmake-args: -G Ninja
           cmake-init-env: CXXFLAGS=-Werror
           package-file: "*-linux_x86_64.tar.xz"
           fancy: true
-        - os: ubuntu-20.04
+        - os: ubuntu-22.04
           cmake-path: /usr/bin/
           cmake-args: -G Ninja -DTEST_MYSQL=ON
           cmake-init-env: CXXFLAGS=-Werror
