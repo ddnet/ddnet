@@ -1509,7 +1509,6 @@ set(EXPECTED_DATA
   mapres/generic_clear.png
   mapres/generic_deathtiles.png
   mapres/generic_lamps.png
-  mapres/generic_shadows_0.7.png
   mapres/generic_unhookable.png
   mapres/generic_unhookable_0.7.png
   mapres/grass_doodads.png
@@ -2808,6 +2807,7 @@ if(SERVER)
       PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
   )
   target_link_libraries(game-server ${LIBS_SERVER})
+  target_include_directories(game-server PRIVATE ${PNG_INCLUDE_DIRS})
   list(APPEND TARGETS_OWN game-server)
   list(APPEND TARGETS_LINK game-server)
 

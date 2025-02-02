@@ -110,13 +110,13 @@ public:
 	public:
 		enum
 		{
-			STATE_REDIRECTED = -1,
-			STATE_EMPTY,
+			STATE_EMPTY = 0,
 			STATE_PREAUTH,
 			STATE_AUTH,
 			STATE_CONNECTING,
 			STATE_READY,
 			STATE_INGAME,
+			STATE_REDIRECTED,
 
 			SNAPRATE_INIT = 0,
 			SNAPRATE_FULL,
@@ -322,6 +322,7 @@ public:
 	int ClientCountry(int ClientId) const override;
 	bool ClientSlotEmpty(int ClientId) const override;
 	bool ClientIngame(int ClientId) const override;
+	bool ClientRedirected(int ClientId) const override;
 	int Port() const override;
 	int MaxClients() const override;
 	int ClientCount() const override;

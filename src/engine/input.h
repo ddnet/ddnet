@@ -146,7 +146,7 @@ public:
 		vec2 m_Position;
 		/**
 		 * The current delta of the finger. The x- and y-components of the delta are normalized to the
-		 * range `-1.0f`-`1.0f` representing the absolute delta of the finger on the current touch device.
+		 * range `0.0f`-`1.0f` representing the absolute delta of the finger on the current touch device.
 		 *
 		 * @remark This is reset to zero at the end of each frame.
 		 */
