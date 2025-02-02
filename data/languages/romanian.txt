@@ -1,3 +1,19 @@
+##### authors #####
+#originally created by:
+#	kneekoo
+#modified by:
+#	kneekoo		2011-01-18 18:26:02
+#	kneekoo		2011-02-09 12:23:47
+#	kneekoo		2011-04-03 23:00:38
+#	kneekoo		2011-05-25 18:36:32
+#	kneekoo		2011-07-01 18:40:49
+#	kneekoo		2011-07-05 23:34:34
+#	kneekoo		2012-05-01 02:01:47
+#   Sans        2024-12-04 02:19:00
+##### /authors #####
+
+##### translated strings #####
+
 %ds left
 == %ds rămase
 
@@ -2030,39 +2046,35 @@ https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== "%s" nu este compatibilă cu pnglite și nu poate fi încărcată de versiunile vechi DDNet:
+== 
 
 Loading background map
-== Se încarcă harta de fundal
+== 
 
 [Spectating Camera Mode Icon]
 AUTO
-== AUTO
+== 
 
 Toggle auto camera
-== Comutează camera auto
+== 
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== https://wiki.ddnet.org/wiki/Touch_controls
+== 
 
 Show client IDs in name plates
-== Arată ID-urile de client pe etichetele de nume
+== 
 
 Hook Strength
-== Puterea cârligului
+== 
 
 Size of hook strength icon and number indicator
-== Dimensiunea indicatorului de putere al cârligului și indicatorul numeric
+== 
 
 Key Presses
-== Taste apăsate
+== 
 
 Size of key press icons
-== Dimensiune iconițe taste apăsate
+== 
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== Serverul nu a putut fi pornit. Acordă permisiunea pentru notificări în setările aplicației pentru a rula serverul în fundal.
-
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Traduceri în limba română de kneekoo, Sans3108
+== 
