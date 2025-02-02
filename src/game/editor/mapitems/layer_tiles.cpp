@@ -115,7 +115,7 @@ void CLayerTiles::PrepareForSave()
 void CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize) const
 {
 	const size_t DestSize = (size_t)m_Width * m_Height;
-	if(TilemapItemVersion >= CMapItemLayerTilemap::TILE_SKIP_MIN_VERSION)
+	if(TilemapItemVersion >= CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP)
 		CMap::ExtractTiles(m_pTiles, DestSize, pSavedTiles, SavedTilesSize);
 	else if(SavedTilesSize >= DestSize)
 		mem_copy(m_pTiles, pSavedTiles, DestSize * sizeof(CTile));

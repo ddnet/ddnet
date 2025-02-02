@@ -114,7 +114,7 @@ static bool ExtractMap(IStorage *pStorage, const char *pMapName, const char *pPa
 	}
 
 	const CMapItemVersion *pVersion = static_cast<CMapItemVersion *>(Reader.FindItem(MAPITEMTYPE_VERSION, 0));
-	if(pVersion == nullptr || pVersion->m_Version != CMapItemVersion::CURRENT_VERSION)
+	if(pVersion == nullptr || pVersion->m_Version != 1)
 	{
 		log_error("map_extract", "unsupported map version '%s'", pMapName);
 		return false;

@@ -84,7 +84,7 @@ bool CMap::Load(const char *pMapName)
 
 	// Check version
 	const CMapItemVersion *pItem = (CMapItemVersion *)NewDataFile.FindItem(MAPITEMTYPE_VERSION, 0);
-	if(pItem == nullptr || pItem->m_Version != CMapItemVersion::CURRENT_VERSION)
+	if(pItem == nullptr || pItem->m_Version != 1)
 	{
 		log_error("map/load", "Error: map version not supported.");
 		NewDataFile.Close();
@@ -104,7 +104,7 @@ bool CMap::Load(const char *pMapName)
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
-				if(pTilemap->m_Version >= CMapItemLayerTilemap::TILE_SKIP_MIN_VERSION)
+				if(pTilemap->m_Version >= CMapItemLayerTilemap::VERSION_TEEWORLDS_TILESKIP)
 				{
 					const size_t TilemapCount = (size_t)pTilemap->m_Width * pTilemap->m_Height;
 					const size_t TilemapSize = TilemapCount * sizeof(CTile);

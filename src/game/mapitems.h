@@ -257,11 +257,6 @@ struct CMapItemInfoSettings : CMapItemInfo
 
 struct CMapItemImage_v1
 {
-	enum
-	{
-		CURRENT_VERSION = 1,
-	};
-
 	int m_Version;
 	int m_Width;
 	int m_Height;
@@ -272,11 +267,6 @@ struct CMapItemImage_v1
 
 struct CMapItemImage_v2 : public CMapItemImage_v1
 {
-	enum
-	{
-		CURRENT_VERSION = 2,
-	};
-
 	int m_MustBe1;
 };
 
@@ -296,11 +286,6 @@ struct CMapItemGroup_v1
 
 struct CMapItemGroup : public CMapItemGroup_v1
 {
-	enum
-	{
-		CURRENT_VERSION = 3
-	};
-
 	int m_UseClipping;
 	int m_ClipX;
 	int m_ClipY;
@@ -319,11 +304,14 @@ struct CMapItemLayer
 
 struct CMapItemLayerTilemap
 {
-	enum
-	{
-		CURRENT_VERSION = 3,
-		TILE_SKIP_MIN_VERSION = 4, // supported for loading but not saving
-	};
+	/**
+	 * @link CMapItemLayerTilemap @endlink with this version are only written to maps in upstream Teeworlds.
+	 * The tile data of tilemaps using this version must be unpacked by repeating tiles according to the
+	 * @link CTile::m_Skip @endlink values of the packed tile data.
+	 *
+	 * @see CMap::ExtractTiles
+	 */
+	static constexpr int VERSION_TEEWORLDS_TILESKIP = 4;
 
 	CMapItemLayer m_Layer;
 	int m_Version;
@@ -364,11 +352,6 @@ struct CMapItemLayerQuads
 
 struct CMapItemVersion
 {
-	enum
-	{
-		CURRENT_VERSION = 1
-	};
-
 	int m_Version;
 };
 
@@ -416,10 +399,12 @@ struct CEnvPoint_runtime : public CEnvPoint
 
 struct CMapItemEnvelope_v1
 {
-	enum
-	{
-		CURRENT_VERSION = 1,
-	};
+	/**
+	 * @link CMapItemEnvelope @endlink with this version are only written to maps in upstream Teeworlds.
+	 * If at least one of these exists in a map, then the envelope points are represented
+	 * by @link CEnvPointBezier_upstream @endlink instead of @link CEnvPoint @endlink.
+	 */
+	static constexpr int VERSION_TEEWORLDS_BEZIER = 3;
 
 	int m_Version;
 	int m_Channels;
@@ -430,23 +415,7 @@ struct CMapItemEnvelope_v1
 
 struct CMapItemEnvelope_v2 : public CMapItemEnvelope_v1
 {
-	enum
-	{
-		CURRENT_VERSION = 2,
-	};
-
 	int m_Synchronized;
-};
-
-// Only written to maps in upstream Teeworlds.
-// If at least one of these exists in a map, the envelope points
-// are represented by CEnvPointBezier_upstream instead of CEnvPoint.
-struct CMapItemEnvelope_v3 : public CMapItemEnvelope_v2
-{
-	enum
-	{
-		CURRENT_VERSION = 3,
-	};
 };
 
 typedef CMapItemEnvelope_v2 CMapItemEnvelope;
@@ -497,11 +466,6 @@ struct CSoundSource
 
 struct CMapItemLayerSounds
 {
-	enum
-	{
-		CURRENT_VERSION = 2
-	};
-
 	CMapItemLayer m_Layer;
 	int m_Version;
 
