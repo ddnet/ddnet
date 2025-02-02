@@ -123,8 +123,6 @@ public:
 	void EndRound();
 	void ChangeMap(const char *pToMap);
 
-	bool IsForceBalanced();
-
 	/*
 
 	*/
