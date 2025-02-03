@@ -2074,3 +2074,9 @@ Size of key press icons
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == Servern kunde inte startas. Appen måste ha behörighet för notiser för att servern ska kunna köras i bakgrunden.
+
+Show FPS
+== Visa FPS
+
+Renders your frame rate in the top right
+== Rendera din bildfrekvens i det högra hörnet
