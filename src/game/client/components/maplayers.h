@@ -19,9 +19,9 @@ class CCamera;
 class CLayers;
 class CMapImages;
 class ColorRGBA;
-struct CMapItemGroup;
-struct CMapItemLayerTilemap;
-struct CMapItemLayerQuads;
+class CMapItemGroup;
+class CMapItemLayerTilemap;
+class CMapItemLayerQuads;
 
 class CMapLayers : public CComponent
 {
