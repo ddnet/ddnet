@@ -53,7 +53,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 	// save version
 	{
 		CMapItemVersion Item;
-		Item.m_Version = CMapItemVersion::CURRENT_VERSION;
+		Item.m_Version = 1;
 		Writer.AddItem(MAPITEMTYPE_VERSION, 0, sizeof(Item), &Item);
 	}
 
@@ -100,7 +100,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 		pImg->AnalyseTileFlags();
 
 		CMapItemImage Item;
-		Item.m_Version = CMapItemImage::CURRENT_VERSION;
+		Item.m_Version = 1;
 
 		Item.m_Width = pImg->m_Width;
 		Item.m_Height = pImg->m_Height;
@@ -141,7 +141,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 	for(const auto &pGroup : m_vpGroups)
 	{
 		CMapItemGroup GItem;
-		GItem.m_Version = CMapItemGroup::CURRENT_VERSION;
+		GItem.m_Version = 3;
 
 		GItem.m_ParallaxX = pGroup->m_ParallaxX;
 		GItem.m_ParallaxY = pGroup->m_ParallaxY;
@@ -167,7 +167,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				pLayerTiles->PrepareForSave();
 
 				CMapItemLayerTilemap Item;
-				Item.m_Version = CMapItemLayerTilemap::CURRENT_VERSION;
+				Item.m_Version = 3;
 
 				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 				Item.m_Layer.m_Flags = pLayerTiles->m_Flags;
@@ -234,7 +234,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				if(!Item.m_Flags)
 				{
 					CMapItemAutoMapperConfig ItemAutomapper;
-					ItemAutomapper.m_Version = CMapItemAutoMapperConfig::CURRENT_VERSION;
+					ItemAutomapper.m_Version = 1;
 					ItemAutomapper.m_GroupId = GroupCount;
 					ItemAutomapper.m_LayerId = GItem.m_NumLayers;
 					ItemAutomapper.m_AutomapperConfig = pLayerTiles->m_AutoMapperConfig;
@@ -285,7 +285,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving sounds layer");
 				std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
 				CMapItemLayerSounds Item;
-				Item.m_Version = CMapItemLayerSounds::CURRENT_VERSION;
+				Item.m_Version = 2;
 				Item.m_Layer.m_Version = 0; // was previously uninitialized, do not rely on it being 0
 				Item.m_Layer.m_Flags = pLayerSounds->m_Flags;
 				Item.m_Layer.m_Type = pLayerSounds->m_Type;
@@ -327,7 +327,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 	for(size_t e = 0; e < m_vpEnvelopes.size(); e++)
 	{
 		CMapItemEnvelope Item;
-		Item.m_Version = CMapItemEnvelope::CURRENT_VERSION;
+		Item.m_Version = 2;
 		Item.m_Channels = m_vpEnvelopes[e]->GetChannels();
 		Item.m_StartPoint = PointCount;
 		Item.m_NumPoints = m_vpEnvelopes[e]->m_vPoints.size();
@@ -441,7 +441,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 	// check version
 	const CMapItemVersion *pItemVersion = static_cast<CMapItemVersion *>(DataFile.FindItem(MAPITEMTYPE_VERSION, 0));
-	if(pItemVersion == nullptr || pItemVersion->m_Version != CMapItemVersion::CURRENT_VERSION)
+	if(pItemVersion == nullptr || pItemVersion->m_Version != 1)
 	{
 		ErrorHandler("Error: The map has an unsupported version.");
 		return false;
@@ -649,7 +649,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 		{
 			CMapItemGroup *pGItem = (CMapItemGroup *)DataFile.GetItem(Start + g);
 
-			if(pGItem->m_Version < 1 || pGItem->m_Version > CMapItemGroup::CURRENT_VERSION)
+			if(pGItem->m_Version < 1 || pGItem->m_Version > 3)
 				continue;
 
 			std::shared_ptr<CLayerGroup> pGroup = NewGroup();
@@ -877,7 +877,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS)
 				{
 					const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
-					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
+					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 2)
 						continue;
 
 					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
@@ -906,7 +906,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				{
 					// compatibility with old sound layers
 					const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
-					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
+					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > 2)
 						continue;
 
 					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
@@ -987,7 +987,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 			if(pItem->m_aName[0] != -1) // compatibility with old maps
 				IntsToStr(pItem->m_aName, std::size(pItem->m_aName), pEnv->m_aName, std::size(pEnv->m_aName));
 			m_vpEnvelopes.push_back(pEnv);
-			if(pItem->m_Version >= CMapItemEnvelope_v2::CURRENT_VERSION)
+			if(pItem->m_Version >= 2)
 				pEnv->m_Synchronized = pItem->m_Synchronized;
 		}
 	}
@@ -999,7 +999,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 		for(int i = 0; i < AutomapperConfigNum; i++)
 		{
 			CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)DataFile.GetItem(AutomapperConfigStart + i);
-			if(pItem->m_Version == CMapItemAutoMapperConfig::CURRENT_VERSION)
+			if(pItem->m_Version == 1)
 			{
 				if(pItem->m_GroupId >= 0 && (size_t)pItem->m_GroupId < m_vpGroups.size() &&
 					pItem->m_LayerId >= 0 && (size_t)pItem->m_LayerId < m_vpGroups[pItem->m_GroupId]->m_vpLayers.size())
