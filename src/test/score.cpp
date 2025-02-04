@@ -13,6 +13,24 @@
 int DummyMysqlInit = (MysqlInit(), 1);
 #endif
 
+char *CSaveTeam::GetString()
+{
+	// Dummy implementation for testing
+	return nullptr;
+}
+
+int CSaveTeam::FromString(const char *)
+{
+	// Dummy implementation for testing
+	return 1;
+}
+
+bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientId, int NumPlayer, char *pMessage, int MessageLen) const
+{
+	// Dummy implementation for testing
+	return false;
+}
+
 TEST(SQLite, Version)
 {
 	ASSERT_GE(sqlite3_libversion_number(), 3025000) << "SQLite >= 3.25.0 required for Window functions";
