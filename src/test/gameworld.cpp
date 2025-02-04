@@ -4,6 +4,8 @@
 #include <base/logger.h>
 #include <base/system.h>
 #include <engine/engine.h>
+#include <engine/server/databases/connection.h>
+#include <engine/server/databases/connection_pool.h>
 #include <engine/server/register.h>
 #include <engine/server/server.h>
 #include <engine/server/server_logger.h>
@@ -32,6 +34,7 @@ class GameWorld : public ::testing::Test
 {
 public:
 	IGameServer *m_pGameServer = nullptr;
+	CServer *m_pServer = nullptr;
 	IKernel *m_pKernel;
 	std::shared_ptr<CServerLogger> m_pServerLogger = nullptr;
 
@@ -45,6 +48,7 @@ public:
 		std::shared_ptr<CFutureLogger> pFutureConsoleLogger = std::make_shared<CFutureLogger>();
 
 		CServer *pServer = CreateServer();
+		m_pServer = pServer;
 
 		m_pKernel = IKernel::Create();
 		m_pKernel->RegisterInterface(pServer);
@@ -124,7 +128,14 @@ public:
 
 	~GameWorld()
 	{
-		m_pGameServer->OnShutdown(nullptr);
+		m_pServer->m_pRegister->OnShutdown();
+		m_pServer->m_Econ.Shutdown();
+		m_pServer->m_Fifo.Shutdown();
+		m_pServer->Engine()->ShutdownJobs();
+		m_pServer->GameServer()->OnShutdown(nullptr);
+		m_pServer->m_pMap->Unload();
+		m_pServer->DbPool()->OnShutdown();
+		m_pServer->m_NetServer.Close();
 		m_pServerLogger->OnServerDeletion();
 		delete m_pKernel;
 	};
