@@ -1329,6 +1329,48 @@ void CGameContext::OnTick()
 	// Warning: do not put code in this function directly above or below this comment
 }
 
+void CGameContext::GetPreInputClients(int ClientId, bool * pa_Clients)
+{
+	if(!pa_Clients)
+		return;
+	
+	if(!m_apPlayers[ClientId])
+		return;
+	
+	if(m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS)
+		return;
+	
+	if(!m_apPlayers[ClientId]->GetCharacter())
+		return;
+	
+	for(int id = 0; id < MAX_CLIENTS; id++)
+	{
+		pa_Clients[id] = false;
+		CPlayer * pPlayer = m_apPlayers[id];
+		if(!pPlayer)
+			continue;
+		
+		if(Server()->GetClientVersion(id) >= VERSION_DDNET_PREINPUT)
+		
+		if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+			continue;
+		
+		if(!pPlayer->GetCharacter())
+			continue;
+		
+		if(GetDDRaceTeam(ClientId) != GetDDRaceTeam(id))
+			continue;
+
+		if(ClientId == id)
+			continue;
+		
+		if(!pPlayer->GetCharacter()->CanSnapCharacter(ClientId))
+			continue;
+		
+		pa_Clients[id] = true;
+	}
+}
+
 // Server hooks
 void CGameContext::OnClientPrepareInput(int ClientId, void *pInput)
 {

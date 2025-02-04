@@ -1822,6 +1822,41 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				return;
 			}
 
+			bool a_Clients [MAX_CLIENTS];
+
+			GameServer()->GetPreInputClients(ClientId, a_Clients);
+
+			CNetMsg_Sv_PreInput PreInput_Msg;
+			CNetObj_PlayerInput * input = (CNetObj_PlayerInput*)&pInput->m_aData;
+
+			PreInput_Msg.m_Direction = input->m_Direction;
+			
+			PreInput_Msg.m_Jump = input->m_Jump;
+			PreInput_Msg.m_Fire = input->m_Fire;
+			PreInput_Msg.m_Hook = input->m_Hook;
+			PreInput_Msg.m_WantedWeapon = input->m_WantedWeapon;
+			PreInput_Msg.m_NextWeapon = input->m_NextWeapon;
+			PreInput_Msg.m_PrevWeapon = input->m_PrevWeapon;
+
+			if(mem_comp(&m_aClients[ClientId].m_LastPreInput, &PreInput_Msg, sizeof(CNetMsg_Sv_PreInput)) != 0)
+			{
+				m_aClients[ClientId].m_LastPreInput = PreInput_Msg;
+
+				PreInput_Msg.m_Owner = ClientId;
+				PreInput_Msg.m_IntendedTick = IntendedTick;
+
+				PreInput_Msg.m_TargetX = input->m_TargetX;
+				PreInput_Msg.m_TargetY = input->m_TargetY;
+
+				for(int id = 0; id < MAX_CLIENTS; id++)
+				{
+					if(!a_Clients[id])
+						continue;
+					
+					SendPackMsg(&PreInput_Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, id);
+				}
+			}
+
 			GameServer()->OnClientPrepareInput(ClientId, pInput->m_aData);
 			mem_copy(m_aClients[ClientId].m_LatestInput.m_aData, pInput->m_aData, MAX_INPUT_SIZE * sizeof(int));
 

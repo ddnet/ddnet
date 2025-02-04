@@ -608,4 +608,21 @@ Messages = [
 	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),
+    
+	# send inputs ahead of time
+	NetMessageEx("Sv_PreInput", "preinput@netobj.ddnet.tw", [
+        NetIntAny("m_Direction"),
+		NetIntAny("m_TargetX"),
+		NetIntAny("m_TargetY"),
+
+		NetIntAny("m_Jump"),
+		NetIntAny("m_Fire"),
+		NetIntAny("m_Hook"),
+        NetIntAny("m_WantedWeapon"),
+		NetIntAny("m_NextWeapon"),
+		NetIntAny("m_PrevWeapon"),
+        
+		NetIntAny("m_Owner"),
+		NetIntAny("m_IntendedTick"),
+	]),
 ]

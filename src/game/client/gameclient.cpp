@@ -1155,6 +1155,17 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		CNetMsg_Sv_MapSoundGlobal *pMsg = (CNetMsg_Sv_MapSoundGlobal *)pRawMsg;
 		m_MapSounds.Play(CSounds::CHN_GLOBAL, pMsg->m_SoundId);
 	}
+	else if(MsgId == NETMSGTYPE_SV_PREINPUT)
+	{
+		CNetMsg_Sv_PreInput *pMsg = (CNetMsg_Sv_PreInput *)pRawMsg;
+
+		int id = pMsg->m_Owner;
+
+		if(id >= 0 && id < MAX_CLIENTS && pMsg->m_IntendedTick >= 0)
+		{
+			m_aClients[id].m_Inputs[pMsg->m_IntendedTick % 200] = *pMsg;
+		}
+	}
 }
 
 void CGameClient::OnStateChange(int NewState, int OldState)
@@ -2343,11 +2354,83 @@ void CGameClient::OnPredict()
 			pLocalChar->OnDirectInput(pInputData);
 		if(pDummyInputData && !DummyFirst)
 			pDummyChar->OnDirectInput(pDummyInputData);
+		
+		if(g_Config.m_ClAntiPingPreInputs)
+		{
+			// apply inputs and to other players if possible
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
+				{
+					if(pDummyChar == pChar)
+						continue;
+					if(pLocalChar == pChar)
+						continue;
+
+					CNetMsg_Sv_PreInput preInput = m_aClients[i].m_Inputs[Tick%200];
+					if(preInput.m_IntendedTick != Tick)
+						continue;
+
+					//convert preinput to input
+
+					CNetObj_PlayerInput input = {0};
+
+					input.m_Direction = preInput.m_Direction;
+					input.m_TargetX = preInput.m_TargetX;
+					input.m_TargetY = preInput.m_TargetY;
+					input.m_Fire = preInput.m_Fire;
+					input.m_Hook = preInput.m_Hook;
+					input.m_Jump = preInput.m_Jump;
+					input.m_NextWeapon = preInput.m_NextWeapon;
+					input.m_PrevWeapon = preInput.m_PrevWeapon;
+					input.m_WantedWeapon = preInput.m_WantedWeapon;
+
+					pChar->OnDirectInput(&input);
+				}
+			}
+		}
+
 		m_PredictedWorld.m_GameTick = Tick;
 		if(pInputData)
 			pLocalChar->OnPredictedInput(pInputData);
 		if(pDummyInputData)
 			pDummyChar->OnPredictedInput(pDummyInputData);
+		
+		if(g_Config.m_ClAntiPingPreInputs)
+		{
+			// apply inputs and to other players if possible
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
+				{
+					if(pDummyChar == pChar)
+						continue;
+					if(pLocalChar == pChar)
+						continue;
+
+					CNetMsg_Sv_PreInput preInput = m_aClients[i].m_Inputs[Tick%200];
+					if(preInput.m_IntendedTick != Tick)
+						continue;
+
+					//convert preinput to input
+
+					CNetObj_PlayerInput input = {0};
+
+					input.m_Direction = preInput.m_Direction;
+					input.m_TargetX = preInput.m_TargetX;
+					input.m_TargetY = preInput.m_TargetY;
+					input.m_Fire = preInput.m_Fire;
+					input.m_Hook = preInput.m_Hook;
+					input.m_Jump = preInput.m_Jump;
+					input.m_NextWeapon = preInput.m_NextWeapon;
+					input.m_PrevWeapon = preInput.m_PrevWeapon;
+					input.m_WantedWeapon = preInput.m_WantedWeapon;
+
+					pChar->OnPredictedInput(&input);
+				}
+			}
+		}
+
 		m_PredictedWorld.Tick();
 
 		// fetch the current characters
