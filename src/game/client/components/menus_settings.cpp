@@ -1873,56 +1873,16 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	}
 }
 
-bool CMenus::RenderLanguageSelection(CUIRect MainView)
+void CMenus::RenderLanguageSettings(CUIRect MainView)
 {
-	static int s_SelectedLanguage = -2; // -2 = unloaded, -1 = unset
-	static CListBox s_ListBox;
-
-	if(s_SelectedLanguage == -2)
-	{
-		s_SelectedLanguage = -1;
-		for(size_t i = 0; i < g_Localization.Languages().size(); i++)
-		{
-			if(str_comp(g_Localization.Languages()[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
-			{
-				s_SelectedLanguage = i;
-				s_ListBox.ScrollToSelected();
-				break;
-			}
-		}
-	}
-
-	const int OldSelected = s_SelectedLanguage;
 	const float CreditsFontSize = 14.0f;
 	const float CreditsMargin = 10.0f;
 
 	CUIRect List, CreditsScroll;
 	MainView.HSplitBottom(4.0f * CreditsFontSize + 2.0f * CreditsMargin + CScrollRegion::HEIGHT_MAGIC_FIX, &List, &CreditsScroll);
 	List.HSplitBottom(5.0f, &List, nullptr);
-	s_ListBox.DoStart(24.0f, g_Localization.Languages().size(), 1, 3, s_SelectedLanguage, &List);
 
-	for(const auto &Language : g_Localization.Languages())
-	{
-		const CListboxItem Item = s_ListBox.DoNextItem(&Language.m_Name, s_SelectedLanguage != -1 && !str_comp(g_Localization.Languages()[s_SelectedLanguage].m_Name.c_str(), Language.m_Name.c_str()));
-		if(!Item.m_Visible)
-			continue;
-
-		CUIRect FlagRect, Label;
-		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &FlagRect, &Label);
-		FlagRect.VMargin(6.0f, &FlagRect);
-		FlagRect.HMargin(3.0f, &FlagRect);
-		m_pClient->m_CountryFlags.Render(Language.m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
-
-		Ui()->DoLabel(&Label, Language.m_Name.c_str(), 16.0f, TEXTALIGN_ML);
-	}
-
-	s_SelectedLanguage = s_ListBox.DoEnd();
-
-	if(OldSelected != s_SelectedLanguage)
-	{
-		str_copy(g_Config.m_ClLanguagefile, g_Localization.Languages()[s_SelectedLanguage].m_FileName.c_str());
-		GameClient()->OnLanguageChange();
-	}
+	RenderLanguageSelection(List);
 
 	CreditsScroll.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 
@@ -1953,6 +1913,53 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 	}
 
 	s_CreditsScrollRegion.End();
+}
+
+bool CMenus::RenderLanguageSelection(CUIRect MainView)
+{
+	static int s_SelectedLanguage = -2; // -2 = unloaded, -1 = unset
+	static CListBox s_ListBox;
+
+	if(s_SelectedLanguage == -2)
+	{
+		s_SelectedLanguage = -1;
+		for(size_t i = 0; i < g_Localization.Languages().size(); i++)
+		{
+			if(str_comp(g_Localization.Languages()[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
+			{
+				s_SelectedLanguage = i;
+				s_ListBox.ScrollToSelected();
+				break;
+			}
+		}
+	}
+
+	const int OldSelected = s_SelectedLanguage;
+
+	s_ListBox.DoStart(24.0f, g_Localization.Languages().size(), 1, 3, s_SelectedLanguage, &MainView);
+
+	for(const auto &Language : g_Localization.Languages())
+	{
+		const CListboxItem Item = s_ListBox.DoNextItem(&Language.m_Name, s_SelectedLanguage != -1 && !str_comp(g_Localization.Languages()[s_SelectedLanguage].m_Name.c_str(), Language.m_Name.c_str()));
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect FlagRect, Label;
+		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &FlagRect, &Label);
+		FlagRect.VMargin(6.0f, &FlagRect);
+		FlagRect.HMargin(3.0f, &FlagRect);
+		m_pClient->m_CountryFlags.Render(Language.m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+
+		Ui()->DoLabel(&Label, Language.m_Name.c_str(), 16.0f, TEXTALIGN_ML);
+	}
+
+	s_SelectedLanguage = s_ListBox.DoEnd();
+
+	if(OldSelected != s_SelectedLanguage)
+	{
+		str_copy(g_Config.m_ClLanguagefile, g_Localization.Languages()[s_SelectedLanguage].m_FileName.c_str());
+		GameClient()->OnLanguageChange();
+	}
 
 	return s_ListBox.WasItemActivated();
 }
@@ -1999,7 +2006,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	if(g_Config.m_UiSettingsPage == SETTINGS_LANGUAGE)
 	{
 		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_LANGUAGE);
-		RenderLanguageSelection(MainView);
+		RenderLanguageSettings(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_GENERAL)
 	{
