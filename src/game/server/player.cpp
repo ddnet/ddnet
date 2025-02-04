@@ -320,10 +320,10 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pClientInfo)
 		return;
 
-	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientId));
-	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientId));
+	StrToInts(pClientInfo->m_aName, 4, Server()->ClientName(m_ClientId));
+	StrToInts(pClientInfo->m_aClan, 3, Server()->ClientClan(m_ClientId));
 	pClientInfo->m_Country = Server()->ClientCountry(m_ClientId);
-	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_aSkinName);
+	StrToInts(pClientInfo->m_aSkin, 6, m_TeeInfos.m_aSkinName);
 	pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
 	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
 	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
@@ -489,9 +489,9 @@ void CPlayer::FakeSnap()
 	if(!pClientInfo)
 		return;
 
-	StrToInts(&pClientInfo->m_Name0, 4, " ");
-	StrToInts(&pClientInfo->m_Clan0, 3, "");
-	StrToInts(&pClientInfo->m_Skin0, 6, "default");
+	StrToInts(pClientInfo->m_aName, 4, " ");
+	StrToInts(pClientInfo->m_aClan, 3, "");
+	StrToInts(pClientInfo->m_aSkin, 6, "default");
 
 	if(m_Paused != PAUSE_PAUSED)
 		return;
