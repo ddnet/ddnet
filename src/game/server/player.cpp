@@ -73,6 +73,7 @@ void CPlayer::Reset()
 
 	m_DefEmote = EMOTE_NORMAL;
 	m_Afk = true;
+	m_ForceAfkTime = 0;
 	m_LastWhisperTo = -1;
 	m_LastSetSpectatorMode = 0;
 	m_aTimeoutCode[0] = '\0';
@@ -546,6 +547,8 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 {
 	Server()->SetClientFlags(m_ClientId, pNewInput->m_PlayerFlags);
 
+	if(m_ForceAfkTime != 0 && (pNewInput->m_Direction != m_pLastTarget->m_Direction || pNewInput->m_TargetX != m_pLastTarget->m_TargetX || pNewInput->m_TargetY != m_pLastTarget->m_TargetY || pNewInput->m_Jump != m_pLastTarget->m_Jump || pNewInput->m_Fire != m_pLastTarget->m_Fire || pNewInput->m_Hook != m_pLastTarget->m_Hook || pNewInput->m_WantedWeapon != m_pLastTarget->m_WantedWeapon || pNewInput->m_PrevWeapon != m_pLastTarget->m_PrevWeapon || pNewInput->m_NextWeapon != m_pLastTarget->m_NextWeapon))
+		m_ForceAfkTime = 0;
 	AfkTimer();
 
 	if(((pNewInput->m_PlayerFlags & PLAYERFLAG_SPEC_CAM) || GetClientVersion() < VERSION_DDNET_PLAYERFLAG_SPEC_CAM) && ((!m_pCharacter && m_Team == TEAM_SPECTATORS) || m_Paused) && m_SpectatorId == SPEC_FREEVIEW)
@@ -726,7 +729,15 @@ void CPlayer::UpdatePlaytime()
 
 void CPlayer::AfkTimer()
 {
-	SetAfk(g_Config.m_SvMaxAfkTime != 0 && m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime);
+	if(m_ForceAfkTime == 0 || m_ForceAfkTime < time_get())
+	{
+		m_ForceAfkTime = 0;
+		SetAfk(g_Config.m_SvMaxAfkTime != 0 && m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime);
+	}
+	else
+	{
+		m_LastPlaytime = time_get() - time_freq() * g_Config.m_SvMaxAfkTime - 1;
+	}
 }
 
 void CPlayer::SetAfk(bool Afk)
@@ -753,6 +764,12 @@ void CPlayer::SetInitialAfk(bool Afk)
 		m_LastPlaytime = time_get() - time_freq() * g_Config.m_SvMaxAfkTime - 1;
 	else
 		m_LastPlaytime = time_get();
+}
+
+void CPlayer::ForceAfk()
+{
+	m_ForceAfkTime = time_get() + time_freq();
+	SetInitialAfk(true);
 }
 
 int CPlayer::GetDefaultEmote() const
