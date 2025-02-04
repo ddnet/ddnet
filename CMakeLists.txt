@@ -2787,7 +2787,7 @@ if(SERVER)
     ${LIBS}
   )
 
-  add_library(server-without-main
+  add_library(server-without-main OBJECT
       ${DEPS}
       ${SERVER_SRC}
       $<TARGET_OBJECTS:engine-shared>
