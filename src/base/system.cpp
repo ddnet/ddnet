@@ -4190,17 +4190,42 @@ void cmdline_free(int argc, const char **argv)
 #endif
 }
 
+std::wstring arguments_to_wide(const char **arguments, const size_t num_arguments)
+{
+	std::wstring wide_arguments = L"";
+#if defined(CONF_FAMILY_WINDOWS)
+	const std::wstring escaped_quotes = L"\"\"\"";
+	for(size_t i = 0; i < num_arguments; ++i)
+	{
+		if(i > 0)
+			wide_arguments += L" ";
+
+		std::wstring wide_arg = windows_utf8_to_wide(arguments[i]);
+		size_t pos = 0;
+		while((pos = wide_arg.find(L'"', pos)) != std::wstring::npos)
+		{
+			wide_arg.replace(pos, 1, escaped_quotes);
+			pos += escaped_quotes.length();
+		}
+		wide_arguments += L"\"" + wide_arg + L"\"";
+	}
+#endif
+	return wide_arguments;
+}
+
 #if !defined(CONF_PLATFORM_ANDROID)
-PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
+PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, const char **arguments, const size_t num_arguments)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_file = windows_utf8_to_wide(file);
+	std::wstring wide_arguments = arguments_to_wide(arguments, num_arguments);
 
 	SHELLEXECUTEINFOW info;
 	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
 	info.cbSize = sizeof(SHELLEXECUTEINFOW);
 	info.lpVerb = L"open";
 	info.lpFile = wide_file.c_str();
+	info.lpParameters = wide_arguments.c_str();
 	switch(window_state)
 	{
 	case EShellExecuteWindowState::FOREGROUND:
@@ -4222,13 +4247,18 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
 		fesetenv(&floating_point_environment);
 	return info.hProcess;
 #elif defined(CONF_FAMILY_UNIX)
-	char *argv[2];
+	char **argv = (char **)malloc((num_arguments + 2) * sizeof(*argv));
 	pid_t pid;
 	argv[0] = (char *)file;
-	argv[1] = NULL;
+	for(size_t i = 0; i < num_arguments; ++i)
+	{
+		argv[i + 1] = (char *)arguments[i];
+	}
+	argv[num_arguments + 1] = NULL;
 	pid = fork();
 	if(pid == -1)
 	{
+		free(argv);
 		return 0;
 	}
 	if(pid == 0)
@@ -4236,6 +4266,7 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
 		execvp(file, argv);
 		_exit(1);
 	}
+	free(argv);
 	return pid;
 #endif
 }

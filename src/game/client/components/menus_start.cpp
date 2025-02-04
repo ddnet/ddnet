@@ -270,10 +270,10 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	}
 }
 
-void CMenus::RunServer()
+void CMenus::RunServer(const char **ppArguments, const size_t NumArguments)
 {
 #if defined(CONF_PLATFORM_ANDROID)
-	if(StartAndroidServer({}, 0))
+	if(StartAndroidServer(ppArguments, NumArguments))
 	{
 		m_ForceRefreshLanPage = true;
 	}
@@ -287,7 +287,7 @@ void CMenus::RunServer()
 	// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
 	if(str_find(aBuf, "/") == nullptr || fs_is_file(aBuf))
 	{
-		m_ServerProcess.m_Process = shell_execute(aBuf, EShellExecuteWindowState::BACKGROUND);
+		m_ServerProcess.m_Process = shell_execute(aBuf, EShellExecuteWindowState::BACKGROUND, ppArguments, NumArguments);
 		m_ForceRefreshLanPage = true;
 	}
 	else
