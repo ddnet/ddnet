@@ -352,6 +352,11 @@ void CSpectator::OnRender()
 		Graphics()->DrawRect(Width / 2.0f - (ObjWidth - 20.0f) + (ObjWidth * 2.0f / 3.0f), Height / 2.0f - 280.0f, ((ObjWidth * 2.0f) / 3.0f) - 40.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 20.0f);
 	}
 
+	if(GameClient()->m_SpecOthers)
+	{
+		Graphics()->DrawRect(Width / 2.0f - (ObjWidth - 20.0f) + (ObjWidth * 4.0f / 3.0f), Height / 2.0f - 280.0f, ((ObjWidth * 2.0f) / 3.0f) - 40.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 20.0f);
+	}
+
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_LocalClientId >= 0 && m_pClient->m_DemoSpecId == SPEC_FOLLOW)
 	{
 		Graphics()->DrawRect(Width / 2.0f - (ObjWidth - 20.0f) + (ObjWidth * 2.0f * 2.0f / 3.0f), Height / 2.0f - 280.0f, ((ObjWidth * 2.0f) / 3.0f) - 40.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 20.0f);
@@ -384,6 +389,19 @@ void CSpectator::OnRender()
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, MultiViewSelected ? 1.0f : 0.5f);
 	TextRender()->Text(Width / 2.0f - (ObjWidth - 40.0f) + (ObjWidth * 2.0f / 3.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Multi-View"), -1.0f);
+
+	bool SpecOthersSelected = false;
+	if(m_SelectorMouse.x >= -(ObjWidth - 20.0f) + (ObjWidth * 4.0f / 3.0f) && m_SelectorMouse.x <= -(ObjWidth - 20.0f) + ((ObjWidth * 6.0f) / 3.0f) - 40.0f &&
+		m_SelectorMouse.y >= -280.0f && m_SelectorMouse.y <= -220.0f)
+	{
+		SpecOthersSelected = true;
+		if(MousePressed)
+		{
+			GameClient()->m_SpecOthers = !GameClient()->m_SpecOthers;
+		}
+	}
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, SpecOthersSelected ? 1.0f : 0.5f);
+	TextRender()->Text(Width / 2.0f - (ObjWidth - 40.0f) + (ObjWidth * 4.0f / 3.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Spec Others"), -1.0f);
 
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_LocalClientId >= 0)
 	{
