@@ -63,6 +63,7 @@ public:
 
 class CServer : public IServer
 {
+public:
 	friend class CServerLogger;
 
 	class IGameServer *m_pGameServer;
@@ -90,8 +91,10 @@ class CServer : public IServer
 	void UpdateDebugDummies(bool ForceDisconnect);
 #endif
 
-public:
-	class IGameServer *GameServer() { return m_pGameServer; }
+	class IGameServer *GameServer()
+	{
+		return m_pGameServer;
+	}
 	class CConfig *Config() { return m_pConfig; }
 	const CConfig *Config() const { return m_pConfig; }
 	class IConsole *Console() { return m_pConsole; }
