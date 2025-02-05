@@ -140,15 +140,7 @@ void CTouchControls::CTouchButton::UpdateBackgroundCorners()
 	};
 	for(const CTouchButton &OtherButton : m_pTouchControls->m_vTouchButtons)
 	{
-		if(&OtherButton == this || OtherButton.m_Shape != EButtonShape::RECT)
-			continue;
-		// TODO: This does not consider that button visibilities can change independently, also update corners when any visibility changed
-		const bool ExcludingVisibilities = std::any_of(OtherButton.m_vVisibilities.begin(), OtherButton.m_vVisibilities.end(), [&](const CButtonVisibility &OtherVisibility) {
-			return std::any_of(m_vVisibilities.begin(), m_vVisibilities.end(), [&](const CButtonVisibility &OurVisibility) {
-				return OtherVisibility.m_Type == OurVisibility.m_Type && OtherVisibility.m_Parity != OurVisibility.m_Parity;
-			});
-		});
-		if(ExcludingVisibilities)
+		if(&OtherButton == this || OtherButton.m_Shape != EButtonShape::RECT || !OtherButton.IsVisible())
 			continue;
 
 		if((m_BackgroundCorners & IGraphics::CORNER_TL) && PointInOrOnRect(ivec2(m_UnitRect.m_X, m_UnitRect.m_Y), OtherButton.m_UnitRect))
@@ -1098,10 +1090,14 @@ void CTouchControls::RenderButtons()
 	for(CTouchButton &TouchButton : m_vTouchButtons)
 	{
 		TouchButton.UpdateVisibility();
+	}
+	for(CTouchButton &TouchButton : m_vTouchButtons)
+	{
 		if(!TouchButton.IsVisible())
 		{
 			continue;
 		}
+		TouchButton.UpdateBackgroundCorners();
 		TouchButton.Render();
 	}
 }
@@ -1178,7 +1174,6 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 	{
 		TouchButton.UpdatePointers();
 		TouchButton.UpdateScreenFromUnitRect();
-		TouchButton.UpdateBackgroundCorners();
 	}
 
 	json_value_free(pConfiguration);
