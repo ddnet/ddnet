@@ -953,7 +953,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			static int s_AutoMapperButton = 0;
 			if(m_pEditor->DoButton_Editor(&s_AutoMapperButton, "Automap", 0, &Button, 0, "Run the automapper"))
 			{
-				m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.Proceed(this, m_pEditor->m_Map.m_pGameLayer.get(), m_pEditor->m_Map.m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed);
+				m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.Proceed(this, m_pEditor->m_Map.m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed);
 				// record undo
 				m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 				ClearHistory();
@@ -1294,7 +1294,7 @@ void CLayerTiles::FlagModified(int x, int y, int w, int h)
 	m_pEditor->m_Map.OnModify();
 	if(m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap && m_Image >= 0)
 	{
-		m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_pEditor->m_Map.m_pGameLayer.get(), m_pEditor->m_Map.m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed, x, y, w, h);
+		m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_pEditor->m_Map.m_pGameLayer.get(), m_AutoMapperReference, m_AutoMapperConfig, m_Seed, x, y, w, h);
 	}
 }
 

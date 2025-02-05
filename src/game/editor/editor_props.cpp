@@ -228,10 +228,10 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			if(DoButton_Ex(&pIds[i], pName, 0, &Shifter, 0, nullptr, IGraphics::CORNER_ALL))
 				PopupSelectAutoMapReferenceInvoke(pProps[i].m_Value, Ui()->MouseX(), Ui()->MouseY());
 
-			int r = PopupSelectAutoMapReferenceResult();
-			if(r >= -1)
+			const int Result = PopupSelectAutoMapReferenceResult();
+			if(Result >= -1)
 			{
-				*pNewVal = r;
+				*pNewVal = Result;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}

@@ -152,18 +152,14 @@ void CAutoMapper::Load(const char *pTileName)
 				int IndexRuleId = pCurrentRun->m_vIndexRules.size() - 1;
 				pCurrentIndex = &pCurrentRun->m_vIndexRules[IndexRuleId];
 			}
-			else if((str_startswith(pLine, "Pos") || str_startswith(pLine, "Guide")) && pCurrentIndex)
+			else if(str_startswith(pLine, "Pos") && pCurrentIndex)
 			{
 				int x = 0, y = 0;
 				char aValue[128];
 				int Value = CPosRule::NORULE;
 				std::vector<CIndexInfo> vNewIndexList;
-				bool IsGuide = str_startswith(pLine, "Guide");
 
-				if(IsGuide)
-					sscanf(pLine, "Guide %d %d %127s", &x, &y, aValue);
-				else
-					sscanf(pLine, "Pos %d %d %127s", &x, &y, aValue);
+				sscanf(pLine, "Pos %d %d %127s", &x, &y, aValue);
 
 				if(!str_comp(aValue, "EMPTY"))
 				{
@@ -285,7 +281,7 @@ void CAutoMapper::Load(const char *pTileName)
 
 				if(Value != CPosRule::NORULE)
 				{
-					CPosRule NewPosRule = {x, y, Value, vNewIndexList, IsGuide};
+					CPosRule NewPosRule = {x, y, Value, vNewIndexList};
 					pCurrentIndex->m_vRules.push_back(NewPosRule);
 
 					pCurrentConf->m_StartX = minimum(pCurrentConf->m_StartX, NewPosRule.m_X);
@@ -412,7 +408,7 @@ const char *CAutoMapper::GetConfigName(int Index)
 	return m_vConfigs[Index].m_aName;
 }
 
-void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer, CLayerTiles *pGuideLayer, int ReferenceId, int ConfigId, int Seed, int X, int Y, int Width, int Height)
+void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed, int X, int Y, int Width, int Height)
 {
 	if(!m_FileLoaded || pLayer->m_Readonly || ConfigId < 0 || ConfigId >= (int)m_vConfigs.size())
 		return;
@@ -437,7 +433,6 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 
 	CLayerTiles *pUpdateLayer = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
 	CLayerTiles *pUpdateGame = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
-	CLayerTiles *pUpdateGuide = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
 
 	for(int y = UpdateFromY; y < UpdateToY; y++)
 	{
@@ -452,15 +447,10 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 			CTile *pOutGame = &pUpdateGame->m_pTiles[(y - UpdateFromY) * pUpdateGame->m_Width + x - UpdateFromX];
 			pOutGame->m_Index = pInGame->m_Index;
 			pOutGame->m_Flags = pInGame->m_Flags;
-
-			CTile *pInGuide = &pGuideLayer->m_pTiles[y * pGuideLayer->m_Width + x];
-			CTile *pOutGuide = &pUpdateGuide->m_pTiles[(y - UpdateFromY) * pUpdateGuide->m_Width + x - UpdateFromX];
-			pOutGuide->m_Index = pInGuide->m_Index;
-			pOutGuide->m_Flags = pInGuide->m_Flags;
 		}
 	}
 
-	Proceed(pUpdateLayer, pUpdateGame, pUpdateGuide, ReferenceId, ConfigId, Seed, UpdateFromX, UpdateFromY);
+	Proceed(pUpdateLayer, pUpdateGame, ReferenceId, ConfigId, Seed, UpdateFromX, UpdateFromY);
 
 	for(int y = CommitFromY; y < CommitToY; y++)
 	{
@@ -479,22 +469,14 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 			pOutGame->m_Index = pInGame->m_Index;
 			pOutGame->m_Flags = pInGame->m_Flags;
 			pGameLayer->RecordStateChange(x, y, PreviousGame, *pOutGame);
-
-			CTile *pInGuide = &pUpdateGuide->m_pTiles[(y - UpdateFromY) * pUpdateGuide->m_Width + x - UpdateFromX];
-			CTile *pOutGuide = &pGuideLayer->m_pTiles[y * pGuideLayer->m_Width + x];
-			CTile PreviousGuide = *pOutGuide;
-			pOutGuide->m_Index = pInGuide->m_Index;
-			pOutGuide->m_Flags = pInGuide->m_Flags;
-			pGuideLayer->RecordStateChange(x, y, PreviousGuide, *pOutGuide);
 		}
 	}
 
 	delete pUpdateLayer;
 	delete pUpdateGame;
-	delete pUpdateGuide;
 }
 
-void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, CLayerTiles *pGuideLayer, int ReferenceId, int ConfigId, int Seed, int SeedOffsetX, int SeedOffsetY)
+void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed, int SeedOffsetX, int SeedOffsetY)
 {
 	if(!m_FileLoaded || pLayer->m_Readonly || ConfigId < 0 || ConfigId >= (int)m_vConfigs.size())
 		return;
@@ -505,10 +487,10 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, CLayerTi
 	CConfiguration *pConf = &m_vConfigs[ConfigId];
 	pLayer->ClearHistory();
 
-	int LayerWidth = pLayer->m_Width;
-	int LayerHeight = pLayer->m_Height;
+	const int LayerWidth = pLayer->m_Width;
+	const int LayerHeight = pLayer->m_Height;
 
-	static const int s_aTileIndex[6] = {TILE_SOLID, TILE_DEATH, TILE_NOHOOK, TILE_THROUGH_CUT, TILE_FREEZE, TILE_UNFREEZE};
+	static const int s_aTileIndex[9] = {TILE_SOLID, TILE_DEATH, TILE_NOHOOK, TILE_FREEZE, TILE_UNFREEZE, TILE_DFREEZE, TILE_DUNFREEZE, TILE_LFREEZE, TILE_LUNFREEZE};
 
 	// for every run: copy tiles, automap, overwrite tiles
 	for(size_t h = 0; h < pConf->m_vRuns.size(); ++h)
@@ -527,7 +509,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, CLayerTi
 			{
 				for(int x = 0; x < LayerWidth; x++)
 				{
-					CTile *pIn = &pBuffer->m_pTiles[y * LayerWidth + x];
+					const CTile *pIn = &pBuffer->m_pTiles[y * LayerWidth + x];
 					CTile *pOut = &pReadLayer->m_pTiles[y * LayerWidth + x];
 					if(h == 0 && ReferenceId >= 1 && pIn->m_Index != s_aTileIndex[ReferenceId - 1])
 						pOut->m_Index = 0;
@@ -582,16 +564,8 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, CLayerTiles *pGameLayer, CLayerTi
 						if(CheckX >= 0 && CheckX < LayerWidth && CheckY >= 0 && CheckY < LayerHeight)
 						{
 							int CheckTile = CheckY * LayerWidth + CheckX;
-							if(pRule->m_IsGuide)
-							{
-								CheckIndex = pGuideLayer->m_pTiles[CheckTile].m_Index;
-								CheckFlags = pGuideLayer->m_pTiles[CheckTile].m_Flags & (TILEFLAG_ROTATE | TILEFLAG_XFLIP | TILEFLAG_YFLIP);
-							}
-							else
-							{
-								CheckIndex = pReadLayer->m_pTiles[CheckTile].m_Index;
-								CheckFlags = pReadLayer->m_pTiles[CheckTile].m_Flags & (TILEFLAG_ROTATE | TILEFLAG_XFLIP | TILEFLAG_YFLIP);
-							}
+							CheckIndex = pReadLayer->m_pTiles[CheckTile].m_Index;
+							CheckFlags = pReadLayer->m_pTiles[CheckTile].m_Flags & (TILEFLAG_ROTATE | TILEFLAG_XFLIP | TILEFLAG_YFLIP);
 						}
 						else
 						{
