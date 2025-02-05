@@ -1,689 +1,697 @@
 ##### authors #####
 
+# noxygalaxy
+
 ##### /authors #####
 
 ##### translated strings #####
 
-TClient
-== 
-
-Settings
-== 
-
-Bindwheel
-== 
-
-Warlist
-== 
-
-Chat Binds
-== 
-
-Status Bar
-== 
-
-Info
-== 
-
-Kaomoji
-== 
-
-Shrug:
-== 
-
-Flip:
-== 
-
-Unflip:
-== 
-
-Mute Commands
-== 
-
-Mute:
-== 
-
-Un-Mute:
-== 
-
-Add %s name:
-== 
-
-Add %s clan:
-== 
-
-Remove %s name:
-== 
-
-Remove %s clan:
-== 
-
-Add [group] [name] [reason]
-== 
-
-Add [group] [clan] [reason]
-== 
-
-Remove [group] [name]
-== 
-
-Remove [group] [clan]
-== 
-
-Name:
-== 
-
-Name
-== 
-
-Command:
-== 
-
-Command
-== 
-
-Override Selected
-== 
-
-Add Bind
-== 
-
-Remove Bind
-== 
-
-Use left mouse to select
-== 
-
-Use right mouse to swap with selected
-== 
-
-Use middle mouse select without copy
-== 
-
-Reset position of mouse when opening bindwheel
-== 
-
-Visual
-== 
-
-Custom Font: 
-== 
-
-Update tee skin faster after being frozen
-== 
-
-Show ping colored circle before names
-== 
-
-Hide nameplates in spec
-== 
-
-Show skin names in nameplate
-== 
-
-Freeze stars
-== 
-
-Color frozen tee skins
-== 
-
-Make hammer rotate with cursor
-== 
-
-Tiny tees
-== 
-
-Tiny tees others
-== 
-
-Render all custom colored feet as white feet skin
-== 
-
-Input
-== 
-
-Fast Inputs (-20ms visual delay)
-== 
-
-Extra tick other tees (increases other tees latency, \nmakes dragging slightly easier when using fast input)
-== 
-
-Anti Latency Tools
-== 
-
-Prediction Margin
-== 
-
-Remove prediction & antiping in freeze
-== 
-
-Amount
-== 
-
-Delay
-== 
-
-Dont predict other players if you are frozen
-== 
-
-Adjust your prediction margin while frozen
-== 
-
-Frozen Margin
-== 
-
-Anti Ping Smoothing
-== 
-
-Use new smoothing algorithm
-== 
-
-Optimistic prediction along stable direction
-== 
-
-Negative stability buffer (for Gores)
-== 
-
-Uncertainty duration
-== 
-
-Other
-== 
-
-Run cl_run_on_join as console command
-== 
-
-Auto verify
-== 
-
-Manual Verify
-== 
-
-Voting
-== 
-
-Auto vote no to map changes when far
-== 
-
-Minimum Time
-== 
-
-Leave empty to disable
-== 
-
-Message to send in chat:
-== 
-
-Auto Reply
-== 
-
-Auto reply to muted players
-== 
-
-Auto reply when tabbed out
-== 
-
-Player Indicator
-== 
-
-Show any enabled Indicators
-== 
-
-Hide indicator for tees on your screen
-== 
-
-Show only freeze Players
-== 
-
-Only show after joining a team
-== 
-
-Render tiny tees instead of circles
-== 
-
-Use warlist groups for indicator
-== 
-
-Indicator size
-== 
-
-Indicator opacity
-== 
-
-Change indicator offset based on distance to other tees
-== 
-
-Indicator min offset
-== 
-
-Indicator max offset
-== 
-
-Indicator max distance
-== 
-
-Indicator offset
-== 
-
-Use warlist colors instead of regular colors
-== 
-
-Show all warlist groups
-== 
-
-Indicator alive color
-== 
-
-Indicator in freeze color
-== 
-
-Indicator safe color
-== 
-
-HUD
-== 
-
-Show screen center
-== 
-
-Show position and angle (mini debug)
-== 
-
-Show your cursor when in free spectate
-== 
-
-Spectate cursor alpha
-== 
-
-Show when you are the last alive
-== 
-
-Last!
-== 
-
-Frozen Tee Display
-== 
-
-Show frozen tee display
-== 
-
-Use skins instead of ninja tees
-== 
-
-Max Rows
-== 
-
-Tee Size
-== 
-
-Tees left alive text
-== 
-
-Count frozen tees
-== 
-
-Tile Outlines
-== 
-
-Show any enabled outlines
-== 
-
-Only show outlines in entities
-== 
-
-Outline freeze & deep
-== 
-
-Outline walls
-== 
-
-Outline teleporter
-== 
-
-Outline unfreeze & undeep
-== 
-
-Outline kill
-== 
-
-Outline width
-== 
-
-Outline alpha
-== 
-
-Outline Alpha (walls)
-== 
-
-Freeze outline color
-== 
-
-Walls outline color
-== 
-
-Teleporter outline color
-== 
-
-Unfreeze outline color
-== 
-
-Kill outline color
-== 
-
-Ghost Tools
-== 
-
-Show unpredicted ghosts for other players
-== 
-
-Swap ghosts and normal players
-== 
-
-Predicted alpha
-== 
-
-Unpredicted alpha
-== 
-
-Hide ghosts of frozen players
-== 
-
-Render ghosts as circles
-== 
-
-Rainbow
-== 
-
-Rainbow Tees
-== 
-
-Rainbow weapons
-== 
-
-Rainbow hook
-== 
-
-Rainbow others
-== 
-
-Pulse
-== 
-
-Black
-== 
-
-Random
-== 
-
-Rainbow speed
-== 
-
-Tee Trails
-== 
-
-Enable tee trails
-== 
-
-Show other tees' trails
-== 
-
-Fade trail alpha
-== 
-
-Taper trail width
-== 
-
-Solid
-== 
-
-Tee
-== 
-
-Speed
-== 
-
-Tee trail color
-== 
-
-Trail width
-== 
-
-Trail length
-== 
-
-Trail alpha
-== 
-
-War Entries
-== 
-
-Edit Entry
-== 
-
 Clan
-== 
-
-Reason
-== 
-
-Override Entry
-== 
-
-Add Entry
-== 
-
-Allow Duplicate Entries
-== 
-
-Enable warlist
-== 
-
-Colors in chat
-== 
-
-Colors in scoreboard
-== 
-
-Colors in spectate select
-== 
-
-Show clan if war
-== 
-
-War Groups
-== 
-
-Are you sure that you want to remove '%s' from your war groups?
-== 
-
-Remove War Group
-== 
-
-Yes
-== 
-
-No
-== 
-
-Color
-== 
-
-Override Group
-== 
-
-Add Group
-== 
-
-Online Players
-== 
-
-TClient Links
-== 
-
-Discord
-== 
-
-Website
-== 
-
-Github
-== 
-
-Support ♥
-== 
-
-Config Files
-== 
-
-TClient Settings
-== 
-
-Profiles
-== 
-
-Chatbinds
-== 
-
-TClient Developers
-== 
-
-Hide Settings Tabs
-== 
-
-Integration
-== 
-
-Enable Discord Integration
-== 
-
-Your profile
-== 
-
-Name: %s
-== 
-
-Clan: %s
-== 
-
-Skin: %s
-== 
-
-After Load
-== 
-
-Dummy
-== 
+== Клан
 
 Custom colors
-== 
-
-Save/Load Skin
-== 
-
-Save/Load Colors
-== 
-
-Save/Load Emote
-== 
-
-Save/Load Name
-== 
-
-Save/Load Clan
-== 
-
-Save/Load Flag
-== 
-
-Load
-== 
-
-Save
-== 
+== Власні кольори
 
 Delete
-== 
+== Видалити
 
-Override
-== 
+Name
+== Ім'я
 
-Profiles file
-== 
+No
+== Ні
+
+Yes
+== Так
+
+Save
+== Зберегти
+
+HUD
+== HUD
+
+Website
+== Сайт
+
+Settings
+== Налаштування
+
+Dummy
+== Манекен
+
+Discord
+== Дискорд
+
+Profiles
+== Профілі
+
+Visual
+== Вигляд
+
+Custom Font: 
+==     Шрифт: 
+
+Update tee skin faster after being frozen
+== Оновлювати скін тії швидше після заморозки
+
+Show ping colored circle before names
+== Показувати пінг у вигляді кольорового кола біля імені
+
+Hide nameplates in spec
+== Приховувати імена в режимі спостерігача
+
+Show skin names in nameplate
+== Показувати назву скіну біля імені
+
+Freeze stars
+== Зірки при заморозці
+
+Color frozen tee skins
+== Кольорові заморожені скіни
+
+Make hammer rotate with cursor
+== Обертати молот відносно курсору
+
+Tiny tees
+== Маленькі тії
+
+Tiny tees others
+== Інші маленькі тії
+
+Render all custom colored feet as white feet skin
+== Усі ноги в білі ноги вибраного скіну
+
+Show screen center
+== Показувати центр екрана
+
+Show position and angle (mini debug)
+== Показувати позицію та кут прицілу гравця (міні налагодження)
+
+Show your cursor when in free spectate
+== Показувати курсор у режимі спостерігача
+
+Spectate cursor alpha
+== Прозор. курсору
+
+Show when you are the last alive
+== Показувати коли залишився останній вцілілий
+
+Frozen Tee Display
+== Дисплей заморожених тії
+
+Show frozen tee display
+== Показувати дисплей заморожених тії
+
+Use skins instead of ninja tees
+== Використовувати скіни гравців замість скіну ніндзя
+
+Only show after joining a team
+== Показувати тільки в команді
+
+Max Rows
+== Макс. к-сть рядків
+
+Tee Size
+== Розмір тії
+
+Tees left alive text
+== Текст залишених тії
+
+Count frozen tees
+== Рахувати заморожених тії
+
+Input
+== Ввід
+
+Fast Inputs (-20ms visual delay)
+== Швидкий ввід (-20ms візуальної затримки)
+
+Anti Latency Tools
+== Інструменти для усунення затримок
+
+Remove prediction & antiping in freeze
+== Прибрати передбачення & антипінг у заморозці
+
+Amount
+== К-сть
+
+Delay
+== Затрим.
+
+Dont predict other players if you are frozen
+== Не передбачати інших гравців, якщо ви заморожені
+
+Adjust your prediction margin while frozen
+== Відрегулювати передбачення поки ви заморожені
+
+Frozen Margin
+== Межа у заморозці
+
+Tile Outlines
+== Обведення тайлів
+
+Show any enabled outlines
+== Показувати всі включені обведення
+
+Only show outlines in entities
+== Показувати обведення тільки в сутностях
+
+Outline freeze & deep
+== Обведення заморозки і глибокого морозу
+
+Outline walls
+== Обведення стін
+
+Outline teleporter
+== Обведення телепортів
+
+Outline unfreeze & undeep
+== Обведення розморозки і розморозки глибокого морозу
+
+Outline width
+== Товщина обведення
+
+Outline alpha
+== Прозорість обведення
+
+Outline Alpha (walls)
+== Прозорість обведення (для стін)
+
+Freeze outline color
+== Колір обведення заморозки
+
+Walls outline color
+== Колір обведення стін
+
+Teleporter outline color
+== Колір обведення телепортів
+
+Unfreeze outline color
+== Колір обведення розморозки
+
+Optimistic prediction along stable direction
+== Оптимальне передбачення по стабільному напрямку
+
+Negative stability buffer (for Gores)
+== Від'ємний буфер стабільності (для Gores)
+
+Uncertainty duration
+== Тривал. невизнач.
+
+Other
+== Інше
+
+Run cl_run_on_join as console command
+== Запустити cl_run_on_join як консольну команду
+
+Auto verify
+== Автомат. верифікація
+
+Manual Verify
+== Ручна верифікація
+
+Ghost Tools
+== Інструменти привидів
+
+Show unpredicted ghosts for other players
+== Показувати непередбачуваних привидів для інших гравців
+
+Swap ghosts and normal players
+== Поміняти місцями привидів і гравців
+
+Predicted alpha
+== Прозор. передбач.
+
+Unpredicted alpha
+== Прозор. непередбач.
+
+Hide ghosts of frozen players
+== Прибрати привидів заморожених гравців
+
+Render ghosts as circles
+== Показувати привидів як кола
+
+Player Indicator
+== Індикатор гравців
+
+Show any enabled Indicators
+== Показувати індикатори
+
+Hide indicator for tees on your screen
+== Прибрати індикатор якщо гравець на екрані
+
+Show only freeze Players
+== Показувати тільки гравців у заморозці
+
+Render tiny tees instead of circles
+== Показувати маленьких тії замість кіл
+
+Use warlist groups for indicator
+== Використовувати групи зі Списку воїнів для індикатора
+
+Indicator size
+== Розмір індикатора
+
+Indicator opacity
+== Прозор. індикатора
+
+Change indicator offset based on distance to other tees
+== Змін. зміщ. індикатора залежно від відст. до інших тії
+
+Indicator min offset
+== Мін. зміщ. індикатора
+
+Indicator max offset
+== Макс. зміщ. індикатора
+
+Indicator max distance
+== Макс. дист. індикатора
+
+Indicator offset
+== Зміщення індикатора
+
+Indicator alive color
+== Колір гравця не в заморозці
+
+Indicator in freeze color
+== Колір гравця у заморозці
+
+Indicator safe color
+== Колір гравця в безпеці
+
+Rainbow
+== Веселка
+
+Rainbow Tees
+== Веселкові тії
+
+Rainbow weapons
+== Веселкова зброя
+
+Rainbow hook
+== Веселковий гак
+
+Rainbow others
+== Веселкові інші тії
+
+Rainbow speed
+== Швидкість веселки
+
+Pulse
+== Пульс
+
+Black
+== Чорний
+
+Random
+== Випадковий
+
+Tee Trails
+== Трейл тії
+
+Enable tee trails
+== Увімкнути трейли
+
+Fade trail alpha
+== Затухання трейла
+
+Taper trail width
+== Звужена ширина трейла
+
+Trail width
+== Ширина трейла
+
+Trail length
+== Довжина трейла
+
+Trail alpha
+== Прозорість трейла
+
+Tee trail color
+== Колір трейла
+
+Bindwheel
+== Колесо біндів
+
+Name:
+== Назва:
+
+Command:
+== Команда:
+
+Override Selected
+== Змінити виділений
+
+Remove Bind
+== Видалити
+
+Add Bind
+== Додати
+
+Use left mouse to select
+== Щоб вибрати використай ЛКМ
+
+Use right mouse to swap with selected
+== Використай ПКМ щоб замінити виділений
+
+Use middle mouse select without copy
+== Використай коліщатко миші щоб вибрати без копіювання
+
+Reset position of mouse when opening bindwheel
+== Скидати позицію миші при відкритті
+
+Warlist
+== Список воєн
+
+Name
+== Гравець
+
+Clan
+== Клан
+
+War Entries
+== Гравці & Клани
+
+Edit Entry
+== Редагування
+
+Override Entry
+== Змінити гравця
+
+Add Entry
+== Додати гравця
+
+Allow Duplicate Entries
+== Дозволити копії
+
+Enable warlist
+== Увімкнути
+
+Colors in chat
+== Кольори в чаті
+
+Colors in scoreboard
+== Кольори в табі
+
+War Groups
+== Групи
+
+Override Group
+== Змінити групу
+
+Add Group
+== Додати групу
+
+Online Players
+== Гравці на сервері
+
+Show clan if war
+== Показувати клан
+
+Chat Binds
+== Бінди для чату
+
+Kaomoji
+== Каомодзі
+
+Shrug:
+== Знизати плечима:
+
+Flip:
+== Перекинути стіл:
+
+Unflip:
+== Поставити стіл:
+
+Mute Commands
+== Команди для мута
+
+Mute:
+== Мут:
+
+Un-Mute:
+== Розмут:
+
+Status Bar
+== Статус бар 
 
 Show status bar
-== 
+== Показувати статус бар
 
 Show labels on status bar items
-== 
+== Показувати текст на елементах статус бару
 
 Status bar height
-== 
+== Висота статус бару
 
 Local Time
-== 
+== Локальний час
 
 Use 12 hour clock
-== 
+== Використовувати 12-годинну систему
 
 Show seconds on clock
-== 
+== Показувати секунди
 
 Colors
-== 
+== Кольори
 
 Status bar color
-== 
+== Колір статус бару
 
 Text color
-== 
+== Колір тексту
 
 Status bar alpha
-== 
+== Прозорість статус бару
 
 Text alpha
-== 
+== Прозорість тексту
 
 Status Bar Codes:
-== 
+== Коди статус бару
 
 a = Angle
-== 
+== a = Кут
 
 p = Ping
-== 
+== p = Пінг
 
 d = Prediction
-== 
+== d = Передбачення
 
 c = Position
-== 
+== c = Позиція
 
 l = Local Time
-== 
+== l = Локал. час
 
 r = Race Time
-== 
+== r = Час гонки
 
 f = FPS
-== 
+== f = Кадрів за секунду
 
 v = Velocity
-== 
+== v = Швидкість
 
 z = Zoom
-== 
-
-_ or \' \' = Space
-== 
-
-Apply
-== 
-
-Status Scheme:
-== 
+== z = Наближення
 
 Add Item
-== 
+== Додати
 
 Remove Item
-== 
+== Видалити
+
+Status Scheme:
+== Схема:
+
+Apply
+== Застосувати
+
+Info
+== Інформація
+
+TClient Links
+== Посилання TClient
+
+Support ♥
+== Підтримати ♥
+
+TClient Settings
+== Налаштування TClient
+
+Config Files
+== Конфіг файли
+
+TClient Developers
+== Розробники TClient
+
+Hide Settings Tabs
+== Приховати вкладки в налаштуваннях
+
+Your profile
+== Ваш профіль
+
+Profiles file
+== Файл профілів
+
+Save/Load Skin
+== Зберег./Завант. Скін
+
+Save/Load Colors
+== Зберег./Завант. Кольори
+
+Save/Load Emote
+== Зберег./Завант. Емоц.
+
+Save/Load Name
+== Зберег./Завант. Ім'я
+
+Save/Load Clan
+== Зберег./Завант. Клан
+
+Save/Load Flag
+== Зберег./Завант. Прапор
+
+Load
+== Завантажити
+
+Override
+== Змінити
+
+Add %s name:
+== Додати %s ім'я
+
+Add %s clan:
+== Додати %s клан
+
+Remove %s name:
+== Видалити %s ім'я
+
+Remove %s clan:
+== Видалити %s клан
+
+Add [group] [name] [reason]
+== Додати [група] [ім'я] [причина]
+
+Add [group] [clan] [reason]
+== Додати [група] [клан] [причина]
+
+Remove [group] [name]
+== Прибрати гравця [група] [ім'я]
+
+Remove [group] [clan]
+== Прибрати клан [група] [клан]
+
+Command
+== Команда
+
+Extra tick other tees (increases other tees latency, \nmakes dragging slightly easier when using fast input)
+== Додатковий тік інших тії (збільшує затримку інших тії,\n трохи полегшує перетягування при використанні швидкого вводу)
+
+Prediction Margin
+== Межа передбачення
+
+Anti Ping Smoothing
+== Плавний Антипінг 
+
+Use new smoothing algorithm
+== Використовувати новий анти-пінг
+
+Use warlist colors instead of regular colors
+== Використовувати кольори списку замість звичайних
+
+Show all warlist groups
+== Показувати всі групи
+
+Last!
+== Останній!
+
+Outline kill
+== Обведення смерті
+
+Kill outline color
+== Колір обведення смерті
+
+Reason
+== Причина
+
+Are you sure that you want to remove '%s' from your war groups?
+== Ви впевнені, що хочете видалити '%s' з ваших груп?
+
+Remove War Group
+== Видалити групу
+
+Color
+== Колір
+
+Github
+== Github
+
+Chatbinds
+== Бінди для чату
+
+Integration
+== Інтеграція
+
+Enable Discord Integration
+== Увімкнути Інтеграцію Discord (Discord RPC)
+
+Name: %s
+== Ім'я: %s
+
+Clan: %s
+== Клан: %s
+
+Skin: %s
+== Скін: %s
+
+After Load
+== Після завантаження
+
+TClient
+== TClient
+
+Voting
+== Голосування
+
+Auto vote no to map changes when far
+== Авто-голосування за "ні" при зміні карти якщо ви далеко
+
+Minimum Time
+== Мінімальний час
+
+Leave empty to disable
+== Залиште порожнім щоб вимкнути
+
+Message to send in chat:
+== Повідомлення для надсилання в чат
+
+Auto Reply
+== Авто-відповідь
+
+Auto reply to muted players
+== Авто-відповідь гравцям в муті
+
+Auto reply when tabbed out
+== Авто-відповідь коли не в грі
+
+Show other tees' trails
+== Показувати трейл інших тії
+
+Solid
+== Статичний
+
+Tee
+== Тії
+
+Speed
+== Швидкість
+
+Colors in spectate select
+== Вибір кольорів в спостерігачах
+
+_ or \' \' = Space
+== _ або \' \' = Пробіл
