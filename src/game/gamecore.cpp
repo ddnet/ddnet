@@ -195,13 +195,13 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 
 	// get ground state
 	const bool Grounded = m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5) || m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5);
-	vec2 TargetDirection = normalize(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
+	const vec2 TargetDirection = normalize(vec2(m_Input.m_TargetX, m_Input.m_TargetY));
 
 	m_Vel.y += m_Tuning.m_Gravity;
 
-	float MaxSpeed = Grounded ? m_Tuning.m_GroundControlSpeed : m_Tuning.m_AirControlSpeed;
-	float Accel = Grounded ? m_Tuning.m_GroundControlAccel : m_Tuning.m_AirControlAccel;
-	float Friction = Grounded ? m_Tuning.m_GroundFriction : m_Tuning.m_AirFriction;
+	const float MaxSpeed = Grounded ? m_Tuning.m_GroundControlSpeed : m_Tuning.m_AirControlSpeed;
+	const float Accel = Grounded ? m_Tuning.m_GroundControlAccel : m_Tuning.m_AirControlAccel;
+	const float Friction = Grounded ? m_Tuning.m_GroundFriction : m_Tuning.m_AirFriction;
 
 	// handle input
 	if(UseInput)
@@ -209,7 +209,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		m_Direction = m_Input.m_Direction;
 
 		// setup angle
-		float TmpAngle = std::atan2(m_Input.m_TargetY, m_Input.m_TargetX);
+		const float TmpAngle = std::atan2(m_Input.m_TargetY, m_Input.m_TargetX);
 		if(TmpAngle < -(pi / 2.0f))
 		{
 			m_Angle = (int)((TmpAngle + (2.0f * pi)) * 256.0f);
@@ -331,7 +331,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		bool GoingToRetract = false;
 		bool GoingThroughTele = false;
 		int teleNr = 0;
-		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, nullptr, &teleNr);
+		const int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, nullptr, &teleNr);
 
 		if(Hit)
 		{
@@ -391,7 +391,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				SetHookedPlayer(-1);
 
 				m_NewHook = true;
-				int RandomOut = m_pWorld->RandomOr0(m_pCollision->TeleOuts(teleNr - 1).size());
+				const int RandomOut = m_pWorld->RandomOr0(m_pCollision->TeleOuts(teleNr - 1).size());
 				m_HookPos = m_pCollision->TeleOuts(teleNr - 1)[RandomOut] + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				m_HookTeleBase = m_HookPos;
@@ -435,7 +435,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			else
 				HookVel.x *= 0.75f;
 
-			vec2 NewVel = m_Vel + HookVel;
+			const vec2 NewVel = m_Vel + HookVel;
 
 			// check if we are under the legal limit for the hook
 			const float NewVelLength = length(NewVel);
@@ -474,16 +474,16 @@ void CCharacterCore::TickDeferred()
 				continue;
 
 			// handle player <-> player collision
-			float Distance = distance(m_Pos, pCharCore->m_Pos);
+			const float Distance = distance(m_Pos, pCharCore->m_Pos);
 			if(Distance > 0)
 			{
-				vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
+				const vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
 
-				bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_CollisionDisabled && !pCharCore->m_CollisionDisabled && m_Tuning.m_PlayerCollision);
+				const bool CanCollide = (m_Super || pCharCore->m_Super) || (!m_CollisionDisabled && !pCharCore->m_CollisionDisabled && m_Tuning.m_PlayerCollision);
 
 				if(CanCollide && Distance < PhysicalSize() * 1.25f)
 				{
-					float a = (PhysicalSize() * 1.45f - Distance);
+					const float a = (PhysicalSize() * 1.45f - Distance);
 					float Velocity = 0.5f;
 
 					// make sure that we don't add excess force by checking the
@@ -500,8 +500,8 @@ void CCharacterCore::TickDeferred()
 				{
 					if(Distance > PhysicalSize() * 1.50f)
 					{
-						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
-						float DragSpeed = m_Tuning.m_HookDragSpeed;
+						const float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
+						const float DragSpeed = m_Tuning.m_HookDragSpeed;
 
 						vec2 Temp;
 						// add force to the hooked player
@@ -530,13 +530,13 @@ void CCharacterCore::TickDeferred()
 
 void CCharacterCore::Move()
 {
-	float RampValue = VelocityRamp(length(m_Vel) * 50, m_Tuning.m_VelrampStart, m_Tuning.m_VelrampRange, m_Tuning.m_VelrampCurvature);
+	const float RampValue = VelocityRamp(length(m_Vel) * 50, m_Tuning.m_VelrampStart, m_Tuning.m_VelrampRange, m_Tuning.m_VelrampCurvature);
 
 	m_Vel.x = m_Vel.x * RampValue;
 
 	vec2 NewPos = m_Pos;
 
-	vec2 OldVel = m_Vel;
+	const vec2 OldVel = m_Vel;
 	bool Grounded = false;
 	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(),
 		vec2(m_Tuning.m_GroundElasticityX,
@@ -565,15 +565,15 @@ void CCharacterCore::Move()
 	if(m_pWorld && (m_Super || (m_Tuning.m_PlayerCollision && !m_CollisionDisabled && !m_Solo)))
 	{
 		// check player collision
-		float Distance = distance(m_Pos, NewPos);
+		const float Distance = distance(m_Pos, NewPos);
 		if(Distance > 0)
 		{
-			int End = Distance + 1;
+			const int End = Distance + 1;
 			vec2 LastPos = m_Pos;
 			for(int i = 0; i < End; i++)
 			{
-				float a = i / Distance;
-				vec2 Pos = mix(m_Pos, NewPos, a);
+				const float a = i / Distance;
+				const vec2 Pos = mix(m_Pos, NewPos, a);
 				for(int p = 0; p < MAX_CLIENTS; p++)
 				{
 					CCharacterCore *pCharCore = m_pWorld->m_apCharacters[p];
@@ -581,7 +581,7 @@ void CCharacterCore::Move()
 						continue;
 					if((!(pCharCore->m_Super || m_Super) && (m_Solo || pCharCore->m_Solo || pCharCore->m_CollisionDisabled || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, p)))))
 						continue;
-					float D = distance(Pos, pCharCore->m_Pos);
+					const float D = distance(Pos, pCharCore->m_Pos);
 					if(D < PhysicalSize())
 					{
 						if(a > 0.0f)

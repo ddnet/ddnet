@@ -104,7 +104,7 @@ void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, CMapItemImage *pNewIm
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	if(argc < 2 || argc > 3)
@@ -211,7 +211,7 @@ int main(int argc, const char **argv)
 	for(int Index = 0; Index < g_DataReader.NumData(); Index++)
 	{
 		void *pData = g_DataReader.GetData(Index);
-		int Size = g_DataReader.GetDataSize(Index);
+		const int Size = g_DataReader.GetDataSize(Index);
 		g_DataWriter.AddData(Size, pData);
 	}
 

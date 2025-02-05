@@ -129,6 +129,7 @@ public:
 class CFavoriteCommunityFilterList : public IFilterList
 {
 public:
+	virtual ~CFavoriteCommunityFilterList() = default;
 	void Add(const char *pCommunityId) override;
 	void Remove(const char *pCommunityId) override;
 	void Clear() override;
@@ -145,6 +146,7 @@ private:
 class CExcludedCommunityFilterList : public IFilterList
 {
 public:
+	virtual ~CExcludedCommunityFilterList() = default;
 	void Add(const char *pCommunityId) override;
 	void Remove(const char *pCommunityId) override;
 	void Clear() override;
@@ -160,6 +162,7 @@ private:
 class CExcludedCommunityCountryFilterList : public IFilterList
 {
 public:
+	virtual ~CExcludedCommunityCountryFilterList() = default;
 	CExcludedCommunityCountryFilterList(const ICommunityCache *pCommunityCache) :
 		m_pCommunityCache(pCommunityCache)
 	{
@@ -183,6 +186,7 @@ private:
 class CExcludedCommunityTypeFilterList : public IFilterList
 {
 public:
+	virtual ~CExcludedCommunityTypeFilterList() = default;
 	CExcludedCommunityTypeFilterList(const ICommunityCache *pCommunityCache) :
 		m_pCommunityCache(pCommunityCache)
 	{
@@ -217,6 +221,7 @@ class CCommunityCache : public ICommunityCache
 	const char *m_pCountryTypeFilterKey = IServerBrowser::COMMUNITY_ALL;
 
 public:
+	virtual ~CCommunityCache() = default;
 	CCommunityCache(IServerBrowser *pServerBrowser) :
 		m_pServerBrowser(pServerBrowser)
 	{

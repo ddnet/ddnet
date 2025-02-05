@@ -43,7 +43,7 @@ bool StunMessageParse(const unsigned char *pMessage, size_t MessageSize, const C
 	bool Parsed = true;
 	// STUN Success/Error Response Type 1: Binding
 	Parsed = Parsed && pMessage[0] == 0x01 && (pMessage[1] == 0x01 || pMessage[1] == 0x11);
-	uint16_t MessageLength = (pMessage[2] << 8) | pMessage[3];
+	const uint16_t MessageLength = (pMessage[2] << 8) | pMessage[3];
 	Parsed = Parsed && MessageSize >= 20 + (size_t)MessageLength && MessageLength % 4 == 0;
 	// Magic Cookie: 0x2112A442
 	Parsed = Parsed && pMessage[4] == 0x21 && pMessage[5] == 0x12;
@@ -79,8 +79,8 @@ bool StunMessageParse(const unsigned char *pMessage, size_t MessageSize, const C
 		{
 			return true;
 		}
-		uint16_t Type = (pMessage[Offset] << 8) | pMessage[Offset + 1];
-		uint16_t Length = (pMessage[Offset + 2] << 8) | pMessage[Offset + 3];
+		const uint16_t Type = (pMessage[Offset] << 8) | pMessage[Offset + 1];
+		const uint16_t Length = (pMessage[Offset + 2] << 8) | pMessage[Offset + 3];
 		if(MessageSize < Offset + 4 + Length)
 		{
 			return true;
@@ -103,7 +103,7 @@ bool StunMessageParse(const unsigned char *pMessage, size_t MessageSize, const C
 				return true;
 			}
 			// Only use the first found address.
-			uint8_t Family = pMessage[Offset + 4 + 1];
+			const uint8_t Family = pMessage[Offset + 4 + 1];
 			uint16_t Port = (pMessage[Offset + 4 + 2] << 8) | pMessage[Offset + 4 + 3];
 			Port ^= 0x2112;
 			if(Family == 0x01) // IPv4

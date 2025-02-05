@@ -181,7 +181,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		{
 			unsigned char aChunk[1024 * 64];
 			mem_zero(aChunk, sizeof(aChunk));
-			int Bytes = io_read(MapFile, &aChunk, sizeof(aChunk));
+			const int Bytes = io_read(MapFile, &aChunk, sizeof(aChunk));
 			if(Bytes <= 0)
 				break;
 			io_write(DemoFile, &aChunk, Bytes);
@@ -515,7 +515,7 @@ CDemoPlayer::EReadChunkHeaderResult CDemoPlayer::ReadChunkHeader(int *pType, int
 	if(Chunk & CHUNKTYPEFLAG_TICKMARKER)
 	{
 		// decode tick marker
-		int TickdeltaLegacy = Chunk & CHUNKMASK_TICK_LEGACY; // compatibility
+		const int TickdeltaLegacy = Chunk & CHUNKMASK_TICK_LEGACY; // compatibility
 		*pType = Chunk & (CHUNKTYPEFLAG_TICKMARKER | CHUNKTICKFLAG_KEYFRAME);
 
 		int NewTick;
@@ -529,7 +529,7 @@ CDemoPlayer::EReadChunkHeaderResult CDemoPlayer::ReadChunkHeader(int *pType, int
 		{
 			if(*pTick < 0) // initial tick not initialized before a tick delta
 				return CHUNKHEADER_ERROR;
-			int Tickdelta = Chunk & CHUNKMASK_TICK;
+			const int Tickdelta = Chunk & CHUNKMASK_TICK;
 			NewTick = *pTick + Tickdelta;
 		}
 		else
@@ -633,9 +633,9 @@ void CDemoPlayer::DoTick()
 	m_Info.m_Info.m_CurrentTick = m_Info.m_NextTick;
 	int ChunkTick = m_Info.m_Info.m_CurrentTick;
 
-	int64_t Freq = time_freq();
-	int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
-	int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
+	const int64_t Freq = time_freq();
+	const int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
+	const int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
 	m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
 	m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
 	m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
@@ -838,7 +838,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	if(m_Info.m_Header.m_Version > gs_OldVersion)
 	{
 		// get timeline markers
-		int Num = bytes_be_to_uint(m_Info.m_TimelineMarkers.m_aNumTimelineMarkers);
+		const int Num = bytes_be_to_uint(m_Info.m_TimelineMarkers.m_aNumTimelineMarkers);
 		m_Info.m_Info.m_NumTimelineMarkers = clamp<int>(Num, 0, MAX_TIMELINE_MARKERS);
 		for(int i = 0; i < m_Info.m_Info.m_NumTimelineMarkers; i++)
 		{
@@ -957,13 +957,13 @@ int CDemoPlayer::Play()
 
 int CDemoPlayer::SeekPercent(float Percent)
 {
-	int WantedTick = m_Info.m_Info.m_FirstTick + round_truncate((m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick) * Percent);
+	const int WantedTick = m_Info.m_Info.m_FirstTick + round_truncate((m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick) * Percent);
 	return SetPos(WantedTick);
 }
 
 int CDemoPlayer::SeekTime(float Seconds)
 {
-	int WantedTick = m_Info.m_Info.m_CurrentTick + round_truncate(Seconds * (float)SERVER_TICK_SPEED);
+	const int WantedTick = m_Info.m_Info.m_CurrentTick + round_truncate(Seconds * (float)SERVER_TICK_SPEED);
 	return SetPos(WantedTick);
 }
 
@@ -1047,8 +1047,8 @@ void CDemoPlayer::AdjustSpeedIndex(int Offset)
 
 int CDemoPlayer::Update(bool RealTime)
 {
-	int64_t Now = Time();
-	int64_t Deltatime = Now - m_Info.m_LastUpdate;
+	const int64_t Now = Time();
+	const int64_t Deltatime = Now - m_Info.m_LastUpdate;
 	m_Info.m_LastUpdate = Now;
 
 	if(!IsPlaying())
@@ -1061,7 +1061,7 @@ int CDemoPlayer::Update(bool RealTime)
 
 		while(!m_Info.m_Info.m_Paused && IsPlaying())
 		{
-			int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
+			const int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
 
 			// break if we are ready
 			if(RealTime && CurtickStart > m_Info.m_CurrentTime)
@@ -1074,8 +1074,8 @@ int CDemoPlayer::Update(bool RealTime)
 
 	// update intratick
 	{
-		int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
-		int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
+		const int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
+		const int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
 		m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
 		m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
 		m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;

@@ -131,7 +131,7 @@ static bool ExtractMap(IStorage *pStorage, const char *pMapName, const char *pPa
 
 int main(int argc, const char *argv[])
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	IStorage *pStorage = CreateLocalStorage();
@@ -159,6 +159,6 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	int Result = ExtractMap(pStorage, argv[1], pDir) ? 0 : 1;
+	const int Result = ExtractMap(pStorage, argv[1], pDir) ? 0 : 1;
 	return Result;
 }

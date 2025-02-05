@@ -195,7 +195,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 
 		if(pLine[0] == '[') // context
 		{
-			size_t Len = str_length(pLine);
+			const size_t Len = str_length(pLine);
 			if(Len < 1 || pLine[Len - 1] != ']')
 			{
 				log_error("localization", "malformed context '%s' on line %d", pLine, Line);

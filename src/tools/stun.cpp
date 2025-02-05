@@ -4,7 +4,7 @@
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 
 	log_set_global_logger_default();
 	if(secure_random_init() != 0)
@@ -38,7 +38,7 @@ int main(int argc, const char **argv)
 
 	CStunData Stun;
 	unsigned char aRequest[32];
-	int RequestSize = StunMessagePrepare(aRequest, sizeof(aRequest), &Stun);
+	const int RequestSize = StunMessagePrepare(aRequest, sizeof(aRequest), &Stun);
 	if(net_udp_send(Socket, &Addr, aRequest, RequestSize) == -1)
 	{
 		log_error("stun", "failed sending stun request");
@@ -54,7 +54,7 @@ int main(int argc, const char **argv)
 			log_error("stun", "no udp message received from server until timeout");
 			return 3;
 		}
-		int ResponseSize = net_udp_recv(Socket, &ResponseAddr, &pResponse);
+		const int ResponseSize = net_udp_recv(Socket, &ResponseAddr, &pResponse);
 		if(ResponseSize == -1)
 		{
 			log_error("stun", "failed receiving udp message");

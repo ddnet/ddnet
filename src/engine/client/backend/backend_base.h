@@ -78,7 +78,7 @@ struct SGfxWarningContainer
 	std::vector<std::string> m_vWarnings;
 };
 
-class CCommandProcessorFragment_GLBase
+class CCommandProcessorFragmentGlBase
 {
 protected:
 	SGfxErrorContainer m_Error;
@@ -89,7 +89,7 @@ protected:
 	virtual bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) = 0;
 
 public:
-	virtual ~CCommandProcessorFragment_GLBase() = default;
+	virtual ~CCommandProcessorFragmentGlBase() = default;
 	virtual ERunCommandReturnTypes RunCommand(const CCommandBuffer::SCommand *pBaseCommand) = 0;
 
 	virtual void StartCommands(size_t CommandCount, size_t EstimatedRenderCallCount) {}
@@ -108,9 +108,9 @@ public:
 		CMD_POST_SHUTDOWN,
 	};
 
-	struct SCommand_PreInit : public CCommandBuffer::SCommand
+	struct SCommandPreInit : public CCommandBuffer::SCommand
 	{
-		SCommand_PreInit() :
+		SCommandPreInit() :
 			SCommand(CMD_PRE_INIT) {}
 
 		SDL_Window *m_pWindow;
@@ -124,9 +124,9 @@ public:
 		TTwGraphicsGpuList *m_pGpuList;
 	};
 
-	struct SCommand_Init : public CCommandBuffer::SCommand
+	struct SCommandInit : public CCommandBuffer::SCommand
 	{
-		SCommand_Init() :
+		SCommandInit() :
 			SCommand(CMD_INIT) {}
 
 		SDL_Window *m_pWindow;
@@ -163,15 +163,15 @@ public:
 		int m_GlewPatch;
 	};
 
-	struct SCommand_Shutdown : public CCommandBuffer::SCommand
+	struct SCommandShutdown : public CCommandBuffer::SCommand
 	{
-		SCommand_Shutdown() :
+		SCommandShutdown() :
 			SCommand(CMD_SHUTDOWN) {}
 	};
 
-	struct SCommand_PostShutdown : public CCommandBuffer::SCommand
+	struct SCommandPostShutdown : public CCommandBuffer::SCommand
 	{
-		SCommand_PostShutdown() :
+		SCommandPostShutdown() :
 			SCommand(CMD_POST_SHUTDOWN) {}
 	};
 };

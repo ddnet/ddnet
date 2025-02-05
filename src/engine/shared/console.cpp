@@ -48,7 +48,7 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 	const char *pStr = m_apArgs[Index];
 	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr + 1))) // Teeworlds Color (Packed HSL)
 	{
-		unsigned long Value = str_toulong_base(pStr, 10);
+		const unsigned long Value = str_toulong_base(pStr, 10);
 		if(Value == std::numeric_limits<unsigned long>::max())
 			return std::nullopt;
 		return ColorHSLA(Value, true).UnclampLighting(DarkestLighting);
@@ -317,7 +317,7 @@ int IConsole::ToLogLevelFilter(int Level)
 	return Level + 2;
 }
 
-LOG_COLOR ColorToLogColor(ColorRGBA Color)
+static LOG_COLOR ColorToLogColor(ColorRGBA Color)
 {
 	return LOG_COLOR{
 		(uint8_t)(Color.r * 255.0),
@@ -327,7 +327,7 @@ LOG_COLOR ColorToLogColor(ColorRGBA Color)
 
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor) const
 {
-	LEVEL LogLevel = IConsole::ToLogLevel(Level);
+	const LEVEL LogLevel = IConsole::ToLogLevel(Level);
 	// if console colors are not enabled or if the color is pure white, use default terminal color
 	if(g_Config.m_ConsoleEnableColors && PrintColor != gs_ConsoleDefaultColor)
 	{
@@ -361,7 +361,7 @@ void CConsole::InitChecksum(CChecksumData *pData) const
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback;
 			void *pUserData = pCommand->m_pUserData;
 			TraverseChain(&pfnCallback, &pUserData);
-			int CallbackBits = (uintptr_t)pfnCallback & 0xfff;
+			const int CallbackBits = (uintptr_t)pfnCallback & 0xfff;
 			int *pTarget = &pData->m_aCommandsChecksum[pData->m_NumCommands];
 			*pTarget = ((uint8_t)pCommand->m_pName[0]) | ((uint8_t)pCommand->m_pName[1] << 8) | (CallbackBits << 16);
 		}
@@ -509,7 +509,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 						IsColor = pfnCallback == &SColorConfigVariable::CommandCallback;
 					}
 
-					if(int Error = ParseArgs(&Result, pCommand->m_pParams, IsColor))
+					if(const int Error = ParseArgs(&Result, pCommand->m_pParams, IsColor))
 					{
 						char aBuf[CMDLINE_LENGTH + 64];
 						if(Error == PARSEARGS_INVALID_INTEGER)
@@ -623,7 +623,7 @@ void CConsole::ExecuteLine(const char *pStr, int ClientId, bool InterpretSemicol
 
 void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientId, bool InterpretSemicolons)
 {
-	int Temp = m_FlagMask;
+	const int Temp = m_FlagMask;
 	m_FlagMask = FlagMask;
 	ExecuteLine(pStr, ClientId, InterpretSemicolons);
 	m_FlagMask = Temp;
@@ -728,7 +728,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 	{
 		if(pCommand->m_Flags & pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->GetInteger(0), (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER))
 		{
-			int Length = str_length(pCommand->m_pName);
+			const int Length = str_length(pCommand->m_pName);
 			if(Used + Length + 2 < (int)(sizeof(aBuf)))
 			{
 				if(Used > 0)

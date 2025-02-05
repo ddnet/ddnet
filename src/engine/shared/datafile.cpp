@@ -128,7 +128,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 
 		while(true)
 		{
-			unsigned Bytes = io_read(File, aBuffer, BUFFER_SIZE);
+			const unsigned Bytes = io_read(File, aBuffer, BUFFER_SIZE);
 			if(Bytes == 0)
 				break;
 			Crc = crc32(Crc, aBuffer, Bytes);
@@ -198,7 +198,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	mem_zero(pTmpDataFile->m_pDataSizes, Header.m_NumRawData * sizeof(int));
 
 	// read types, offsets, sizes and item data
-	unsigned ReadSize = io_read(File, pTmpDataFile->m_pData, Size);
+	const unsigned ReadSize = io_read(File, pTmpDataFile->m_pData, Size);
 	if(ReadSize != Size)
 	{
 		io_close(pTmpDataFile->m_File);
@@ -323,7 +323,7 @@ void *CDataFileReader::GetDataImpl(int Index, bool Swap)
 			return nullptr;
 
 		// fetch the data size
-		unsigned DataSize = GetFileDataSize(Index);
+		const unsigned DataSize = GetFileDataSize(Index);
 #if defined(CONF_ARCH_ENDIAN_BIG)
 		unsigned SwapSize = DataSize;
 #endif
@@ -460,7 +460,7 @@ int CDataFileReader::GetExternalItemType(int InternalType, CUuid *pUuid)
 			*pUuid = UUID_ZEROED;
 		return InternalType;
 	}
-	int TypeIndex = FindItemIndex(ITEMTYPE_EX, InternalType);
+	const int TypeIndex = FindItemIndex(ITEMTYPE_EX, InternalType);
 	if(TypeIndex < 0 || GetItemSize(TypeIndex) < (int)sizeof(CItemEx))
 	{
 		if(pUuid)
@@ -468,7 +468,7 @@ int CDataFileReader::GetExternalItemType(int InternalType, CUuid *pUuid)
 		return InternalType;
 	}
 	const CItemEx *pItemEx = (const CItemEx *)GetItem(TypeIndex);
-	CUuid Uuid = pItemEx->ToUuid();
+	const CUuid Uuid = pItemEx->ToUuid();
 	if(pUuid)
 		*pUuid = Uuid;
 	// Propagate UUID_UNKNOWN, it doesn't hurt.
@@ -481,7 +481,7 @@ int CDataFileReader::GetInternalItemType(int ExternalType)
 	{
 		return ExternalType;
 	}
-	CUuid Uuid = g_UuidManager.GetUuid(ExternalType);
+	const CUuid Uuid = g_UuidManager.GetUuid(ExternalType);
 	int Start, Num;
 	GetType(ITEMTYPE_EX, &Start, &Num);
 	for(int i = Start; i < Start + Num; i++)
@@ -557,7 +557,7 @@ int CDataFileReader::FindItemIndex(int Type, int Id)
 
 void *CDataFileReader::FindItem(int Type, int Id)
 {
-	int Index = FindItemIndex(Type, Id);
+	const int Index = FindItemIndex(Type, Id);
 	if(Index < 0)
 	{
 		return nullptr;
@@ -606,12 +606,12 @@ CDataFileWriter::~CDataFileWriter()
 		m_File = nullptr;
 	}
 
-	for(CItemInfo &ItemInfo : m_vItems)
+	for(const CItemInfo &ItemInfo : m_vItems)
 	{
 		free(ItemInfo.m_pData);
 	}
 
-	for(CDataInfo &DataInfo : m_vDatas)
+	for(const CDataInfo &DataInfo : m_vDatas)
 	{
 		free(DataInfo.m_pUncompressedData);
 		free(DataInfo.m_pCompressedData);

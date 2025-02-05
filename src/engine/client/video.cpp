@@ -59,7 +59,7 @@ static LEVEL AvLevelToLogLevel(int Level)
 	}
 }
 
-void AvLogCallback(void *pUser, int Level, const char *pFormat, va_list VarArgs)
+static void AvLogCallback(void *pUser, int Level, const char *pFormat, va_list VarArgs)
 	GNUC_ATTRIBUTE((format(printf, 3, 0)));
 
 void AvLogCallback(void *pUser, int Level, const char *pFormat, va_list VarArgs)

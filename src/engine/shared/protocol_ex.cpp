@@ -21,7 +21,7 @@ int UnpackMessageId(int *pId, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CM
 	*pSys = false;
 	mem_zero(pUuid, sizeof(*pUuid));
 
-	int MsgId = pUnpacker->GetInt();
+	const int MsgId = pUnpacker->GetInt();
 
 	if(pUnpacker->Error())
 	{
@@ -55,7 +55,7 @@ int UnpackMessageId(int *pId, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CM
 		case NETMSG_WHATIS:
 		{
 			CUuid Uuid2;
-			int Id2 = g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
+			const int Id2 = g_UuidManager.UnpackUuid(pUnpacker, &Uuid2);
 			if(Id2 == UUID_INVALID)
 			{
 				break;

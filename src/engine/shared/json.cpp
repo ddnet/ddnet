@@ -67,9 +67,9 @@ char *EscapeJson(char *pBuffer, int BufferSize, const char *pString)
 	char *pResult = pBuffer;
 	while(BufferSize && *pString)
 	{
-		char c = *pString;
+		const char c = *pString;
 		pString++;
-		char Escaped = EscapeJsonChar(c);
+		const char Escaped = EscapeJsonChar(c);
 		if(Escaped)
 		{
 			if(BufferSize < 2)

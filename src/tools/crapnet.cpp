@@ -57,21 +57,21 @@ void Run(unsigned short Port, NETADDR Dest)
 	while(true)
 	{
 		static int s_Lastcfg = 0;
-		int n = ((time_get() / time_freq()) / g_ConfigInterval) % g_ConfigNumpingconfs;
-		SPingConfig Ping = g_aConfigPings[n];
+		const int N = ((time_get() / time_freq()) / g_ConfigInterval) % g_ConfigNumpingconfs;
+		const SPingConfig Ping = g_aConfigPings[N];
 
-		if(n != s_Lastcfg)
-			dbg_msg("crapnet", "cfg = %d", n);
-		s_Lastcfg = n;
+		if(N != s_Lastcfg)
+			dbg_msg("crapnet", "cfg = %d", N);
+		s_Lastcfg = N;
 
 		// handle incoming packets
 		while(true)
 		{
 			// fetch data
-			int DataTrash = 0;
+			const int DataTrash = 0;
 			NETADDR From;
 			unsigned char *pData;
-			int Bytes = net_udp_recv(Socket, &From, &pData);
+			const int Bytes = net_udp_recv(Socket, &From, &pData);
 			if(Bytes <= 0)
 				break;
 
@@ -170,10 +170,10 @@ void Run(unsigned short Port, NETADDR Dest)
 				net_udp_send(Socket, &p->m_SendTo, p->m_aData, p->m_DataSize);
 
 				// update lag
-				double Flux = rand() / (double)RAND_MAX;
-				int MsSpike = Ping.m_Spike;
-				int MsFlux = Ping.m_Flux;
-				int MsPing = Ping.m_Base;
+				const double Flux = rand() / (double)RAND_MAX;
+				const int MsSpike = Ping.m_Spike;
+				const int MsFlux = Ping.m_Flux;
+				const int MsPing = Ping.m_Base;
 				g_CurrentLatency = ((time_freq() * MsPing) / 1000) + (int64_t)(((time_freq() * MsFlux) / 1000) * Flux); // 50ms
 
 				if(MsSpike && (p->m_Id % 100) == 0)
@@ -199,9 +199,9 @@ void Run(unsigned short Port, NETADDR Dest)
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
-	NETADDR Addr = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
+	const NETADDR Addr = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
 	Run(8302, Addr);
 	return 0;
 }

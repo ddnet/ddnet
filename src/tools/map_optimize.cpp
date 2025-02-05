@@ -14,7 +14,7 @@ void ClearTransparentPixels(uint8_t *pImg, int Width, int Height)
 	{
 		for(int x = 0; x < Width; ++x)
 		{
-			int Index = y * Width * 4 + x * 4;
+			const int Index = y * Width * 4 + x * 4;
 			if(pImg[Index + 3] == 0)
 			{
 				pImg[Index + 0] = 0;
@@ -31,7 +31,7 @@ void CopyOpaquePixels(uint8_t *pDestImg, uint8_t *pSrcImg, int Width, int Height
 	{
 		for(int x = 0; x < Width; ++x)
 		{
-			int Index = y * Width * 4 + x * 4;
+			const int Index = y * Width * 4 + x * 4;
 			if(pSrcImg[Index + 3] > 0)
 				mem_copy(&pDestImg[Index], &pSrcImg[Index], sizeof(uint8_t) * 4);
 			else
@@ -42,16 +42,16 @@ void CopyOpaquePixels(uint8_t *pDestImg, uint8_t *pSrcImg, int Width, int Height
 
 void ClearPixelsTile(uint8_t *pImg, int Width, int Height, int TileIndex)
 {
-	int WTile = Width / 16;
-	int HTile = Height / 16;
-	int xi = (TileIndex % 16) * WTile;
-	int yi = (TileIndex / 16) * HTile;
+	const int WTile = Width / 16;
+	const int HTile = Height / 16;
+	const int xi = (TileIndex % 16) * WTile;
+	const int yi = (TileIndex / 16) * HTile;
 
 	for(int y = yi; y < yi + HTile; ++y)
 	{
 		for(int x = xi; x < xi + WTile; ++x)
 		{
-			int Index = y * Width * 4 + x * 4;
+			const int Index = y * Width * 4 + x * 4;
 			pImg[Index + 0] = 0;
 			pImg[Index + 1] = 0;
 			pImg[Index + 2] = 0;
@@ -66,7 +66,7 @@ void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char 
 
 	// Clear fully transparent pixels, so the SHA is easier to identify with the original image
 	CopyOpaquePixels(pNewImgBuff, pImgBuff, Width, Height);
-	SHA256_DIGEST SHAStr = sha256(pNewImgBuff, (size_t)ImgSize);
+	const SHA256_DIGEST SHAStr = sha256(pNewImgBuff, (size_t)ImgSize);
 
 	sha256_str(SHAStr, pSHA256Str, SHA256StrSize);
 
@@ -75,7 +75,7 @@ void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char 
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	IStorage *pStorage = CreateStorage(IStorage::EInitializationType::BASIC, argc, argv);
@@ -159,7 +159,7 @@ int main(int argc, const char **argv)
 				{
 					aImageFlags[pTLayer->m_Image] |= 1;
 					// check tiles that are used in this image
-					unsigned int DataSize = Reader.GetDataSize(pTLayer->m_Data);
+					const unsigned int DataSize = Reader.GetDataSize(pTLayer->m_Data);
 					void *pTiles = Reader.GetData(pTLayer->m_Data);
 
 					if(DataSize >= (size_t)pTLayer->m_Width * pTLayer->m_Height * sizeof(CTile))
@@ -168,7 +168,7 @@ int main(int argc, const char **argv)
 						{
 							for(int x = 0; x < pTLayer->m_Width; ++x)
 							{
-								int TileIndex = ((CTile *)pTiles)[y * pTLayer->m_Width + x].m_Index;
+								const int TileIndex = ((CTile *)pTiles)[y * pTLayer->m_Width + x].m_Index;
 								if(TileIndex > 0)
 								{
 									aaImageTiles[pTLayer->m_Image][TileIndex] = true;
@@ -204,7 +204,7 @@ int main(int argc, const char **argv)
 			++i;
 		}
 
-		int Size = Reader.GetItemSize(Index);
+		const int Size = Reader.GetItemSize(Index);
 		Writer.AddItem(Type, Id, Size, pPtr, &Uuid);
 	}
 
@@ -217,10 +217,10 @@ int main(int argc, const char **argv)
 		auto it = std::find_if(vDataFindHelper.begin(), vDataFindHelper.end(), [Index](const SMapOptimizeItem &Other) -> bool { return Other.m_Data == Index || Other.m_Text == Index; });
 		if(it != vDataFindHelper.end())
 		{
-			int Width = it->m_pImage->m_Width;
-			int Height = it->m_pImage->m_Height;
+			const int Width = it->m_pImage->m_Width;
+			const int Height = it->m_pImage->m_Height;
 
-			int ImageIndex = it->m_Index;
+			const int ImageIndex = it->m_Index;
 			if(it->m_Data == Index)
 			{
 				DeletePtr = true;
@@ -272,10 +272,10 @@ int main(int argc, const char **argv)
 					{
 						for(int i = 0; i < 256; ++i)
 						{
-							int ImgTileW = Width / 16;
-							int ImgTileH = Height / 16;
-							int x = (i % 16) * ImgTileW;
-							int y = (i / 16) * ImgTileH;
+							const int ImgTileW = Width / 16;
+							const int ImgTileH = Height / 16;
+							const int x = (i % 16) * ImgTileW;
+							const int y = (i / 16) * ImgTileH;
 							DilateImageSub(pImgBuff, Width, Height, x, y, ImgTileW, ImgTileH);
 						}
 					}
@@ -289,7 +289,7 @@ int main(int argc, const char **argv)
 			{
 				char *pImgName = (char *)pPtr;
 				uint8_t *pImgBuff = (uint8_t *)Reader.GetData(it->m_Data);
-				int ImgSize = Reader.GetDataSize(it->m_Data);
+				const int ImgSize = Reader.GetDataSize(it->m_Data);
 
 				char aSHA256Str[SHA256_MAXSTRSIZE];
 				// This is the important function, that calculates the SHA256 in a special way
@@ -297,7 +297,7 @@ int main(int argc, const char **argv)
 				GetImageSHA256(pImgBuff, ImgSize, Width, Height, aSHA256Str, sizeof(aSHA256Str));
 
 				char aNewName[IO_MAX_PATH_LENGTH];
-				int StrLen = str_format(aNewName, std::size(aNewName), "%s_cut_%s", pImgName, aSHA256Str);
+				const int StrLen = str_format(aNewName, std::size(aNewName), "%s_cut_%s", pImgName, aSHA256Str);
 
 				DeletePtr = true;
 				// make the new name ready

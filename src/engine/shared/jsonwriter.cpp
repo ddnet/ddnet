@@ -111,13 +111,13 @@ void CJsonWriter::WriteInternalEscaped(const char *pStr)
 {
 	WriteInternal("\"");
 	int UnwrittenFrom = 0;
-	int Length = str_length(pStr);
+	const int Length = str_length(pStr);
 	for(int i = 0; i < Length; i++)
 	{
-		char SimpleEscape = EscapeJsonChar(pStr[i]);
+		const char SimpleEscape = EscapeJsonChar(pStr[i]);
 		// Assuming ASCII/UTF-8, exactly everything below 0x20 is a
 		// control character.
-		bool NeedsEscape = SimpleEscape || (unsigned char)pStr[i] < 0x20;
+		const bool NeedsEscape = SimpleEscape || (unsigned char)pStr[i] < 0x20;
 		if(NeedsEscape)
 		{
 			if(i - UnwrittenFrom > 0)
@@ -185,7 +185,7 @@ CJsonWriter::SState *CJsonWriter::TopState()
 CJsonWriter::EJsonStateKind CJsonWriter::PopState()
 {
 	dbg_assert(!m_States.empty(), "json stack is empty");
-	SState TopState = m_States.top();
+	const SState TopState = m_States.top();
 	m_States.pop();
 	if(TopState.m_Kind != STATE_ATTRIBUTE)
 	{
