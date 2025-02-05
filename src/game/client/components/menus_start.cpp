@@ -211,7 +211,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 
 	char aBuf[128];
 	const IUpdater::EUpdaterState State = Updater()->GetCurrentState();
-	const bool NeedUpdate = str_comp(Client()->LatestVersion(), "0");
+	const bool NeedUpdate = GameClient() -> m_Tater.NeedUpdate();
 
 	if(State == IUpdater::CLEAN && NeedUpdate)
 	{
@@ -236,7 +236,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 
 	if(State == IUpdater::CLEAN && NeedUpdate)
 	{
-		str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out!"), Client()->LatestVersion());
+		str_format(aBuf, sizeof(aBuf), Localize("TClient %s is out!"), GameClient()->m_Tater.m_aVersionStr);
 		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 	}
 	else if(State == IUpdater::CLEAN)

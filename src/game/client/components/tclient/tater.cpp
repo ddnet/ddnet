@@ -1,6 +1,8 @@
 ﻿#include <engine/graphics.h>
 #include <engine/shared/config.h>
+#include <engine/shared/json.h>
 #include <game/generated/protocol.h>
+#include <game/version.h>
 
 #include "../chat.h"
 #include "../emoticon.h"
@@ -11,6 +13,8 @@
 
 #include "tater.h"
 #include <game/client/gameclient.h>
+
+static constexpr const char *TCLIENT_INFO_URL = "https://update.tclient.app/info.json";
 
 CTater::CTater()
 {
@@ -90,6 +94,7 @@ void CTater::OnInit()
 {
 	TextRender()->SetCustomFace(g_Config.m_ClCustomFont);
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
+	FetchTClientInfo();
 }
 
 bool LineShouldHighlight(const char *pLine, const char *pName)
@@ -299,4 +304,94 @@ void CTater::RandomFlag(void *pUserData)
 
 	// set the flag code as number
 	g_Config.m_PlayerCountry = pFlag->m_CountryCode;
+}
+
+void CTater::OnRender()
+{
+	if(m_pTClientInfoTask)
+	{
+		if(m_pTClientInfoTask->State() == EHttpState::DONE)
+		{
+			FinishTClientInfo();
+			ResetTClientInfoTask();
+		}
+	}
+}
+
+bool CTater::NeedUpdate()
+{
+	if(str_comp(m_aVersionStr, "0") != 0)
+		return true;
+}
+
+void CTater::ResetTClientInfoTask()
+{
+	if(m_pTClientInfoTask)
+	{
+		m_pTClientInfoTask->Abort();
+		m_pTClientInfoTask = NULL;
+	}
+}
+
+void CTater::FetchTClientInfo()
+{
+	if(m_pTClientInfoTask && !m_pTClientInfoTask->Done())
+		return;
+	char aUrl[256];
+	str_copy(aUrl, TCLIENT_INFO_URL);
+	m_pTClientInfoTask = HttpGet(aUrl);
+	m_pTClientInfoTask->Timeout(CTimeout{10000, 0, 500, 10});
+	m_pTClientInfoTask->IpResolve(IPRESOLVE::V4);
+	Http()->Run(m_pTClientInfoTask);
+}
+
+typedef std::tuple<int, int, int> TVersion;
+static const TVersion gs_InvalidTCVersion = std::make_tuple(-1, -1, -1);
+
+TVersion ToTCVersion(char *pStr)
+{
+	int aVersion[3] = {0, 0, 0};
+	const char *p = strtok(pStr, ".");
+
+	for(int i = 0; i < 3 && p; ++i)
+	{
+		if(!str_isallnum(p))
+			return gs_InvalidTCVersion;
+
+		aVersion[i] = str_toint(p);
+		p = strtok(NULL, ".");
+	}
+
+	if(p)
+		return gs_InvalidTCVersion;
+
+	return std::make_tuple(aVersion[0], aVersion[1], aVersion[2]);
+}
+
+void CTater::FinishTClientInfo()
+{
+	json_value *pJson = m_pTClientInfoTask->ResultJson();
+	if(!pJson)
+		return;
+	const json_value &Json = *pJson;
+	const json_value &CurrentVersion = Json["version"];
+
+	if(CurrentVersion.type == json_string)
+	{
+		char aNewVersionStr[64];
+		str_copy(aNewVersionStr, CurrentVersion);
+		char aCurVersionStr[64];
+		str_copy(aCurVersionStr, TCLIENT_VERSION);
+		if(ToTCVersion(aNewVersionStr) > ToTCVersion(aCurVersionStr))
+		{
+			str_copy(m_aVersionStr, CurrentVersion);
+		}
+		else
+		{
+			m_aVersionStr[0] = '0';
+			m_aVersionStr[1] = '\0';
+		}
+	}
+
+	json_value_free(pJson);
 }
