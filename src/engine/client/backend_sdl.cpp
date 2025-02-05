@@ -45,9 +45,9 @@ class IStorage;
 
 // ------------ CGraphicsBackend_Threaded
 
-void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
+void CGraphicsBackendThreaded::ThreadFunc(void *pUser)
 {
-	auto *pSelf = (CGraphicsBackend_Threaded *)pUser;
+	auto *pSelf = (CGraphicsBackendThreaded *)pUser;
 	std::unique_lock<std::mutex> Lock(pSelf->m_BufferSwapMutex);
 	// notify, that the thread started
 	pSelf->m_Started = true;
@@ -74,7 +74,7 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 	}
 }
 
-CGraphicsBackend_Threaded::CGraphicsBackend_Threaded(TTranslateFunc &&TranslateFunc) :
+CGraphicsBackendThreaded::CGraphicsBackendThreaded(TTranslateFunc &&TranslateFunc) :
 	m_TranslateFunc(std::move(TranslateFunc))
 {
 	m_pBuffer = nullptr;
@@ -83,7 +83,7 @@ CGraphicsBackend_Threaded::CGraphicsBackend_Threaded(TTranslateFunc &&TranslateF
 	m_BufferInProcess.store(false, std::memory_order_relaxed);
 }
 
-void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
+void CGraphicsBackendThreaded::StartProcessor(ICommandProcessor *pProcessor)
 {
 	dbg_assert(m_Shutdown, "Processor was already not shut down.");
 	m_Shutdown = false;
@@ -94,7 +94,7 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 	m_BufferSwapCond.wait(Lock, [this]() -> bool { return m_Started; });
 }
 
-void CGraphicsBackend_Threaded::StopProcessor()
+void CGraphicsBackendThreaded::StopProcessor()
 {
 	dbg_assert(!m_Shutdown, "Processor was already shut down.");
 	m_Shutdown = true;
@@ -106,7 +106,7 @@ void CGraphicsBackend_Threaded::StopProcessor()
 	thread_wait(m_pThread);
 }
 
-void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
+void CGraphicsBackendThreaded::RunBuffer(CCommandBuffer *pBuffer)
 {
 	SGfxErrorContainer Error;
 #ifdef CONF_WEBASM
@@ -137,23 +137,23 @@ void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 	}
 }
 
-void CGraphicsBackend_Threaded::RunBufferSingleThreadedUnsafe(CCommandBuffer *pBuffer)
+void CGraphicsBackendThreaded::RunBufferSingleThreadedUnsafe(CCommandBuffer *pBuffer)
 {
 	m_pProcessor->RunBuffer(pBuffer);
 }
 
-bool CGraphicsBackend_Threaded::IsIdle() const
+bool CGraphicsBackendThreaded::IsIdle() const
 {
 	return !m_BufferInProcess.load(std::memory_order_relaxed);
 }
 
-void CGraphicsBackend_Threaded::WaitForIdle()
+void CGraphicsBackendThreaded::WaitForIdle()
 {
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_BufferSwapCond.wait(Lock, [this]() { return m_pBuffer == nullptr; });
 }
 
-void CGraphicsBackend_Threaded::ProcessError(const SGfxErrorContainer &Error)
+void CGraphicsBackendThreaded::ProcessError(const SGfxErrorContainer &Error)
 {
 	std::string VerboseStr = "Graphics Assertion:";
 	for(const auto &ErrStr : Error.m_vErrors)
@@ -167,7 +167,7 @@ void CGraphicsBackend_Threaded::ProcessError(const SGfxErrorContainer &Error)
 	dbg_assert(false, VerboseStr.c_str());
 }
 
-bool CGraphicsBackend_Threaded::GetWarning(std::vector<std::string> &WarningStrings)
+bool CGraphicsBackendThreaded::GetWarning(std::vector<std::string> &WarningStrings)
 {
 	if(m_Warning.m_WarningType != GFX_WARNING_TYPE_NONE)
 	{
@@ -180,12 +180,12 @@ bool CGraphicsBackend_Threaded::GetWarning(std::vector<std::string> &WarningStri
 
 // ------------ CCommandProcessorFragment_General
 
-void CCommandProcessorFragment_General::Cmd_Signal(const CCommandBuffer::SCommand_Signal *pCommand)
+void CCommandProcessorFragmentGeneral::Cmd_Signal(const CCommandBuffer::SCommand_Signal *pCommand)
 {
 	pCommand->m_pSemaphore->Signal();
 }
 
-bool CCommandProcessorFragment_General::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
+bool CCommandProcessorFragmentGeneral::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {
 	switch(pBaseCommand->m_Cmd)
 	{
@@ -198,7 +198,7 @@ bool CCommandProcessorFragment_General::RunCommand(const CCommandBuffer::SComman
 }
 
 // ------------ CCommandProcessorFragment_SDL
-void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
+void CCommandProcessorFragmentSdl::Cmd_Init(const SCommand_Init *pCommand)
 {
 	m_GLContext = pCommand->m_GLContext;
 	m_pWindow = pCommand->m_pWindow;
@@ -206,25 +206,25 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 		SDL_GL_MakeCurrent(m_pWindow, m_GLContext);
 }
 
-void CCommandProcessorFragment_SDL::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
+void CCommandProcessorFragmentSdl::Cmd_Shutdown(const SCommandShutdown *pCommand)
 {
 	if(m_GLContext)
 		SDL_GL_MakeCurrent(nullptr, nullptr);
 }
 
-void CCommandProcessorFragment_SDL::Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand)
+void CCommandProcessorFragmentSdl::Cmd_Swap(const CCommandBuffer::SCommandSwap *pCommand)
 {
 	if(m_GLContext)
 		SDL_GL_SwapWindow(m_pWindow);
 }
 
-void CCommandProcessorFragment_SDL::Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand)
+void CCommandProcessorFragmentSdl::Cmd_VSync(const CCommandBuffer::SCommandVSync *pCommand)
 {
 	if(m_GLContext)
 		*pCommand->m_pRetOk = SDL_GL_SetSwapInterval(pCommand->m_VSync) == 0;
 }
 
-void CCommandProcessorFragment_SDL::Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)
+void CCommandProcessorFragmentSdl::Cmd_WindowCreateNtf(const CCommandBuffer::SCommandWindowCreateNtf *pCommand)
 {
 	m_pWindow = SDL_GetWindowFromID(pCommand->m_WindowId);
 	// Android destroys windows when they are not visible, so we get the new one and work with that
@@ -236,7 +236,7 @@ void CCommandProcessorFragment_SDL::Cmd_WindowCreateNtf(const CCommandBuffer::SC
 #endif
 }
 
-void CCommandProcessorFragment_SDL::Cmd_WindowDestroyNtf(const CCommandBuffer::SCommand_WindowDestroyNtf *pCommand)
+void CCommandProcessorFragmentSdl::Cmd_WindowDestroyNtf(const CCommandBuffer::SCommandWindowDestroyNtf *pCommand)
 {
 	// Unbind the graphic context from the window, so it does not get destroyed
 #ifdef CONF_PLATFORM_ANDROID
@@ -246,21 +246,21 @@ void CCommandProcessorFragment_SDL::Cmd_WindowDestroyNtf(const CCommandBuffer::S
 #endif
 }
 
-CCommandProcessorFragment_SDL::CCommandProcessorFragment_SDL() = default;
+CCommandProcessorFragmentSdl::CCommandProcessorFragmentSdl() = default;
 
-bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
+bool CCommandProcessorFragmentSdl::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {
 	switch(pBaseCommand->m_Cmd)
 	{
-	case CCommandBuffer::CMD_WINDOW_CREATE_NTF: Cmd_WindowCreateNtf(static_cast<const CCommandBuffer::SCommand_WindowCreateNtf *>(pBaseCommand)); break;
-	case CCommandBuffer::CMD_WINDOW_DESTROY_NTF: Cmd_WindowDestroyNtf(static_cast<const CCommandBuffer::SCommand_WindowDestroyNtf *>(pBaseCommand)); break;
-	case CCommandBuffer::CMD_SWAP: Cmd_Swap(static_cast<const CCommandBuffer::SCommand_Swap *>(pBaseCommand)); break;
-	case CCommandBuffer::CMD_VSYNC: Cmd_VSync(static_cast<const CCommandBuffer::SCommand_VSync *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_WINDOW_CREATE_NTF: Cmd_WindowCreateNtf(static_cast<const CCommandBuffer::SCommandWindowCreateNtf *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_WINDOW_DESTROY_NTF: Cmd_WindowDestroyNtf(static_cast<const CCommandBuffer::SCommandWindowDestroyNtf *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_SWAP: Cmd_Swap(static_cast<const CCommandBuffer::SCommandSwap *>(pBaseCommand)); break;
+	case CCommandBuffer::CMD_VSYNC: Cmd_VSync(static_cast<const CCommandBuffer::SCommandVSync *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_MULTISAMPLING: break;
 	case CMD_INIT: Cmd_Init(static_cast<const SCommand_Init *>(pBaseCommand)); break;
-	case CMD_SHUTDOWN: Cmd_Shutdown(static_cast<const SCommand_Shutdown *>(pBaseCommand)); break;
-	case CCommandProcessorFragment_GLBase::CMD_PRE_INIT: break;
-	case CCommandProcessorFragment_GLBase::CMD_POST_SHUTDOWN: break;
+	case CMD_SHUTDOWN: Cmd_Shutdown(static_cast<const SCommandShutdown *>(pBaseCommand)); break;
+	case CCommandProcessorFragmentGlBase::CMD_PRE_INIT: break;
+	case CCommandProcessorFragmentGlBase::CMD_POST_SHUTDOWN: break;
 	default: return false;
 	}
 
@@ -269,7 +269,7 @@ bool CCommandProcessorFragment_SDL::RunCommand(const CCommandBuffer::SCommand *p
 
 // ------------ CCommandProcessor_SDL_GL
 
-void CCommandProcessor_SDL_GL::HandleError()
+void CCommandProcessorSdlGl::HandleError()
 {
 	switch(m_Error.m_ErrorType)
 	{
@@ -303,7 +303,7 @@ void CCommandProcessor_SDL_GL::HandleError()
 	}
 }
 
-void CCommandProcessor_SDL_GL::HandleWarning()
+void CCommandProcessorSdlGl::HandleWarning()
 {
 	switch(m_Warning.m_WarningType)
 	{
@@ -325,7 +325,7 @@ void CCommandProcessor_SDL_GL::HandleWarning()
 	}
 }
 
-void CCommandProcessor_SDL_GL::RunBuffer(CCommandBuffer *pBuffer)
+void CCommandProcessorSdlGl::RunBuffer(CCommandBuffer *pBuffer)
 {
 	m_pGLBackend->StartCommands(pBuffer->m_CommandCount, pBuffer->m_RenderCallCount);
 
@@ -361,23 +361,23 @@ void CCommandProcessor_SDL_GL::RunBuffer(CCommandBuffer *pBuffer)
 	m_pGLBackend->EndCommands();
 }
 
-CCommandProcessor_SDL_GL::CCommandProcessor_SDL_GL(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch)
+CCommandProcessorSdlGl::CCommandProcessorSdlGl(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch)
 {
 	m_BackendType = BackendType;
 
 #if defined(CONF_HEADLESS_CLIENT)
-	m_pGLBackend = new CCommandProcessorFragment_Null();
+	m_pGLBackend = new CCommandProcessorFragmentNull();
 #else
 	if(BackendType == BACKEND_TYPE_OPENGL_ES)
 	{
 #if defined(CONF_BACKEND_OPENGL_ES) || defined(CONF_BACKEND_OPENGL_ES3)
 		if(GLMajor < 3)
 		{
-			m_pGLBackend = new CCommandProcessorFragment_OpenGLES();
+			m_pGLBackend = new CCommandProcessorFragmentOpenGLES();
 		}
 		else
 		{
-			m_pGLBackend = new CCommandProcessorFragment_OpenGLES3();
+			m_pGLBackend = new CCommandProcessorFragmentOpenGLES3();
 		}
 #endif
 	}
@@ -386,19 +386,19 @@ CCommandProcessor_SDL_GL::CCommandProcessor_SDL_GL(EBackendType BackendType, int
 #if !defined(CONF_BACKEND_OPENGL_ES)
 		if(GLMajor < 2)
 		{
-			m_pGLBackend = new CCommandProcessorFragment_OpenGL();
+			m_pGLBackend = new CCommandProcessorFragmentOpenGl();
 		}
 		if(GLMajor == 2)
 		{
-			m_pGLBackend = new CCommandProcessorFragment_OpenGL2();
+			m_pGLBackend = new CCommandProcessorFragmentOpenGl2();
 		}
 		if(GLMajor == 3 && GLMinor == 0)
 		{
-			m_pGLBackend = new CCommandProcessorFragment_OpenGL3();
+			m_pGLBackend = new CCommandProcessorFragmentOpenGl3();
 		}
 		else if((GLMajor == 3 && GLMinor == 3) || GLMajor >= 4)
 		{
-			m_pGLBackend = new CCommandProcessorFragment_OpenGL3_3();
+			m_pGLBackend = new CCommandProcessorFragmentOpenGl3_3();
 		}
 #endif
 	}
@@ -411,22 +411,22 @@ CCommandProcessor_SDL_GL::CCommandProcessor_SDL_GL(EBackendType BackendType, int
 #endif
 }
 
-CCommandProcessor_SDL_GL::~CCommandProcessor_SDL_GL()
+CCommandProcessorSdlGl::~CCommandProcessorSdlGl()
 {
 	delete m_pGLBackend;
 }
 
-const SGfxErrorContainer &CCommandProcessor_SDL_GL::GetError() const
+const SGfxErrorContainer &CCommandProcessorSdlGl::GetError() const
 {
 	return m_Error;
 }
 
-void CCommandProcessor_SDL_GL::ErroneousCleanup()
+void CCommandProcessorSdlGl::ErroneousCleanup()
 {
 	m_pGLBackend->ErroneousCleanup();
 }
 
-const SGfxWarningContainer &CCommandProcessor_SDL_GL::GetWarning() const
+const SGfxWarningContainer &CCommandProcessorSdlGl::GetWarning() const
 {
 	return m_Warning;
 }
@@ -685,7 +685,7 @@ static int IsVersionSupportedGlew(EBackendType BackendType, int VersionMajor, in
 	return InitError;
 }
 
-EBackendType CGraphicsBackend_SDL_GL::DetectBackend()
+EBackendType CGraphicsBackendSDLGL::DetectBackend()
 {
 	EBackendType RetBackendType = BACKEND_TYPE_OPENGL;
 #if defined(CONF_BACKEND_VULKAN)
@@ -720,7 +720,7 @@ EBackendType CGraphicsBackend_SDL_GL::DetectBackend()
 	return RetBackendType;
 }
 
-void CGraphicsBackend_SDL_GL::ClampDriverVersion(EBackendType BackendType)
+void CGraphicsBackendSDLGL::ClampDriverVersion(EBackendType BackendType)
 {
 	if(BackendType == BACKEND_TYPE_OPENGL)
 	{
@@ -775,7 +775,7 @@ void CGraphicsBackend_SDL_GL::ClampDriverVersion(EBackendType BackendType)
 	}
 }
 
-bool CGraphicsBackend_SDL_GL::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
+bool CGraphicsBackendSDLGL::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
 {
 	if(m_pProcessor != nullptr)
 	{
@@ -792,7 +792,7 @@ bool CGraphicsBackend_SDL_GL::ShowMessageBox(unsigned Type, const char *pTitle, 
 	return SDL_ShowSimpleMessageBox(Type, pTitle, pMsg, nullptr) == 0;
 }
 
-bool CGraphicsBackend_SDL_GL::IsModernAPI(EBackendType BackendType)
+bool CGraphicsBackendSDLGL::IsModernAPI(EBackendType BackendType)
 {
 	if(BackendType == BACKEND_TYPE_OPENGL)
 		return (g_Config.m_GfxGLMajor == 3 && g_Config.m_GfxGLMinor == 3) || g_Config.m_GfxGLMajor >= 4;
@@ -804,7 +804,7 @@ bool CGraphicsBackend_SDL_GL::IsModernAPI(EBackendType BackendType)
 	return false;
 }
 
-bool CGraphicsBackend_SDL_GL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType)
+bool CGraphicsBackendSDLGL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType)
 {
 	if(BackendType == BACKEND_TYPE_AUTO)
 		BackendType = m_BackendType;
@@ -883,7 +883,7 @@ bool CGraphicsBackend_SDL_GL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeT
 	return false;
 }
 
-const char *CGraphicsBackend_SDL_GL::GetScreenName(int Screen) const
+const char *CGraphicsBackendSDLGL::GetScreenName(int Screen) const
 {
 	const char *pName = SDL_GetDisplayName(Screen);
 	return pName == nullptr ? "unknown/error" : pName;
@@ -902,7 +902,7 @@ static void DisplayToVideoMode(CVideoMode *pVMode, SDL_DisplayMode *pMode, int H
 	pVMode->m_Format = pMode->format;
 }
 
-void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId)
+void CGraphicsBackendSDLGL::GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId)
 {
 	SDL_DisplayMode DesktopMode;
 	int MaxModesAvailable = SDL_GetNumDisplayModes(ScreenId);
@@ -966,7 +966,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 	*pNumModes = NumModesInserted;
 }
 
-void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId)
+void CGraphicsBackendSDLGL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId)
 {
 	SDL_DisplayMode DpMode;
 	// if "real" fullscreen, obtain the video mode for that
@@ -995,13 +995,13 @@ void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPI
 	DisplayToVideoMode(&CurMode, &DpMode, HiDPIScale, DpMode.refresh_rate);
 }
 
-CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc) :
-	CGraphicsBackend_Threaded(std::move(TranslateFunc))
+CGraphicsBackendSDLGL::CGraphicsBackendSDLGL(TTranslateFunc &&TranslateFunc) :
+	CGraphicsBackendThreaded(std::move(TranslateFunc))
 {
 	mem_zero(m_aErrorString, std::size(m_aErrorString));
 }
 
-int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
+int CGraphicsBackendSDLGL::Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, IStorage *pStorage)
 {
 #if defined(CONF_HEADLESS_CLIENT)
 	int InitError = 0;
@@ -1062,9 +1062,9 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 	ClampDriverVersion(m_BackendType);
 
-	bool UseModernGL = IsModernAPI(m_BackendType);
+	const bool UseModernGL = IsModernAPI(m_BackendType);
 
-	bool IsOpenGLFamilyBackend = m_BackendType == BACKEND_TYPE_OPENGL || m_BackendType == BACKEND_TYPE_OPENGL_ES;
+	const bool IsOpenGLFamilyBackend = m_BackendType == BACKEND_TYPE_OPENGL || m_BackendType == BACKEND_TYPE_OPENGL_ES;
 
 	if(IsOpenGLFamilyBackend)
 	{
@@ -1272,12 +1272,12 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 	// start the command processor
 	dbg_assert(m_pProcessor == nullptr, "Processor was not cleaned up properly.");
-	m_pProcessor = new CCommandProcessor_SDL_GL(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch);
+	m_pProcessor = new CCommandProcessorSdlGl(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch);
 	StartProcessor(m_pProcessor);
 
 	// issue init commands for OpenGL and SDL
 	CCommandBuffer CmdBuffer(1024, 512);
-	CCommandProcessorFragment_GLBase::SCommand_PreInit CmdPre;
+	CCommandProcessorFragmentGlBase::SCommandPreInit CmdPre;
 	CmdPre.m_pWindow = m_pWindow;
 	CmdPre.m_Width = *pCurrentWidth;
 	CmdPre.m_Height = *pCurrentHeight;
@@ -1290,7 +1290,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	CmdBuffer.Reset();
 
 	// run sdl first to have the context in the thread
-	CCommandProcessorFragment_SDL::SCommand_Init CmdSDL;
+	CCommandProcessorFragmentSdl::SCommand_Init CmdSDL;
 	CmdSDL.m_pWindow = m_pWindow;
 	CmdSDL.m_GLContext = m_GLContext;
 	CmdBuffer.AddCommandUnsafe(CmdSDL);
@@ -1300,7 +1300,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 	if(InitError == 0)
 	{
-		CCommandProcessorFragment_GLBase::SCommand_Init CmdGL;
+		CCommandProcessorFragmentGlBase::SCommandInit CmdGL;
 		CmdGL.m_pWindow = m_pWindow;
 		CmdGL.m_Width = *pCurrentWidth;
 		CmdGL.m_Height = *pCurrentHeight;
@@ -1336,20 +1336,20 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		if(InitError != -2)
 		{
 			// shutdown the context, as it might have been initialized
-			CCommandProcessorFragment_GLBase::SCommand_Shutdown CmdGL;
+			CCommandProcessorFragmentGlBase::SCommandShutdown CmdGL;
 			CmdBuffer.AddCommandUnsafe(CmdGL);
 			RunBuffer(&CmdBuffer);
 			WaitForIdle();
 			CmdBuffer.Reset();
 		}
 
-		CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
+		CCommandProcessorFragmentSdl::SCommandShutdown Cmd;
 		CmdBuffer.AddCommandUnsafe(Cmd);
 		RunBuffer(&CmdBuffer);
 		WaitForIdle();
 		CmdBuffer.Reset();
 
-		CCommandProcessorFragment_GLBase::SCommand_PostShutdown CmdPost;
+		CCommandProcessorFragmentGlBase::SCommandPostShutdown CmdPost;
 		CmdBuffer.AddCommandUnsafe(CmdPost);
 		RunBufferSingleThreadedUnsafe(&CmdBuffer);
 		CmdBuffer.Reset();
@@ -1398,23 +1398,23 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_NONE;
 }
 
-int CGraphicsBackend_SDL_GL::Shutdown()
+int CGraphicsBackendSDLGL::Shutdown()
 {
 	// issue a shutdown command
 	CCommandBuffer CmdBuffer(1024, 512);
-	CCommandProcessorFragment_GLBase::SCommand_Shutdown CmdGL;
+	CCommandProcessorFragmentGlBase::SCommandShutdown CmdGL;
 	CmdBuffer.AddCommandUnsafe(CmdGL);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();
 	CmdBuffer.Reset();
 
-	CCommandProcessorFragment_SDL::SCommand_Shutdown Cmd;
+	CCommandProcessorFragmentSdl::SCommandShutdown Cmd;
 	CmdBuffer.AddCommandUnsafe(Cmd);
 	RunBuffer(&CmdBuffer);
 	WaitForIdle();
 	CmdBuffer.Reset();
 
-	CCommandProcessorFragment_GLBase::SCommand_PostShutdown CmdPost;
+	CCommandProcessorFragmentGlBase::SCommandPostShutdown CmdPost;
 	CmdBuffer.AddCommandUnsafe(CmdPost);
 	RunBufferSingleThreadedUnsafe(&CmdBuffer);
 	CmdBuffer.Reset();
@@ -1433,42 +1433,42 @@ int CGraphicsBackend_SDL_GL::Shutdown()
 	return 0;
 }
 
-uint64_t CGraphicsBackend_SDL_GL::TextureMemoryUsage() const
+uint64_t CGraphicsBackendSDLGL::TextureMemoryUsage() const
 {
 	return m_TextureMemoryUsage;
 }
 
-uint64_t CGraphicsBackend_SDL_GL::BufferMemoryUsage() const
+uint64_t CGraphicsBackendSDLGL::BufferMemoryUsage() const
 {
 	return m_BufferMemoryUsage;
 }
 
-uint64_t CGraphicsBackend_SDL_GL::StreamedMemoryUsage() const
+uint64_t CGraphicsBackendSDLGL::StreamedMemoryUsage() const
 {
 	return m_StreamMemoryUsage;
 }
 
-uint64_t CGraphicsBackend_SDL_GL::StagingMemoryUsage() const
+uint64_t CGraphicsBackendSDLGL::StagingMemoryUsage() const
 {
 	return m_StagingMemoryUsage;
 }
 
-const TTwGraphicsGpuList &CGraphicsBackend_SDL_GL::GetGpus() const
+const TTwGraphicsGpuList &CGraphicsBackendSDLGL::GetGpus() const
 {
 	return m_GpuList;
 }
 
-void CGraphicsBackend_SDL_GL::Minimize()
+void CGraphicsBackendSDLGL::Minimize()
 {
 	SDL_MinimizeWindow(m_pWindow);
 }
 
-void CGraphicsBackend_SDL_GL::Maximize()
+void CGraphicsBackendSDLGL::Maximize()
 {
 	// TODO: SDL
 }
 
-void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderless)
+void CGraphicsBackendSDLGL::SetWindowParams(int FullscreenMode, bool IsBorderless)
 {
 	if(FullscreenMode > 0)
 	{
@@ -1517,7 +1517,7 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 	}
 }
 
-bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index)
+bool CGraphicsBackendSDLGL::SetWindowScreen(int Index)
 {
 	if(Index < 0 || Index >= m_NumScreens)
 	{
@@ -1539,7 +1539,7 @@ bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index)
 	return UpdateDisplayMode(Index);
 }
 
-bool CGraphicsBackend_SDL_GL::UpdateDisplayMode(int Index)
+bool CGraphicsBackendSDLGL::UpdateDisplayMode(int Index)
 {
 	SDL_DisplayMode DisplayMode;
 	if(SDL_GetDesktopDisplayMode(Index, &DisplayMode) < 0)
@@ -1555,27 +1555,27 @@ bool CGraphicsBackend_SDL_GL::UpdateDisplayMode(int Index)
 	return true;
 }
 
-int CGraphicsBackend_SDL_GL::GetWindowScreen()
+int CGraphicsBackendSDLGL::GetWindowScreen()
 {
 	return SDL_GetWindowDisplayIndex(m_pWindow);
 }
 
-int CGraphicsBackend_SDL_GL::WindowActive()
+int CGraphicsBackendSDLGL::WindowActive()
 {
 	return m_pWindow && SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_INPUT_FOCUS;
 }
 
-int CGraphicsBackend_SDL_GL::WindowOpen()
+int CGraphicsBackendSDLGL::WindowOpen()
 {
 	return m_pWindow && SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_SHOWN;
 }
 
-void CGraphicsBackend_SDL_GL::SetWindowGrab(bool Grab)
+void CGraphicsBackendSDLGL::SetWindowGrab(bool Grab)
 {
 	SDL_SetWindowGrab(m_pWindow, Grab ? SDL_TRUE : SDL_FALSE);
 }
 
-bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
+bool CGraphicsBackendSDLGL::ResizeWindow(int w, int h, int RefreshRate)
 {
 	// don't call resize events when the window is at fullscreen desktop
 	if(!m_pWindow || (SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP)
@@ -1613,12 +1613,12 @@ bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
 	return false;
 }
 
-void CGraphicsBackend_SDL_GL::GetViewportSize(int &w, int &h)
+void CGraphicsBackendSDLGL::GetViewportSize(int &w, int &h)
 {
 	SDL_GL_GetDrawableSize(m_pWindow, &w, &h);
 }
 
-void CGraphicsBackend_SDL_GL::NotifyWindow()
+void CGraphicsBackendSDLGL::NotifyWindow()
 {
 	// Minimum version 2.0.16, after version 2.0.22 the naming is changed to 2.24.0 etc.
 #if SDL_MAJOR_VERSION > 2 || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL >= 16) || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION > 0)
@@ -1630,18 +1630,18 @@ void CGraphicsBackend_SDL_GL::NotifyWindow()
 #endif
 }
 
-void CGraphicsBackend_SDL_GL::WindowDestroyNtf(uint32_t WindowId)
+void CGraphicsBackendSDLGL::WindowDestroyNtf(uint32_t WindowId)
 {
 }
 
-void CGraphicsBackend_SDL_GL::WindowCreateNtf(uint32_t WindowId)
+void CGraphicsBackendSDLGL::WindowCreateNtf(uint32_t WindowId)
 {
 	m_pWindow = SDL_GetWindowFromID(WindowId);
 }
 
-TGLBackendReadPresentedImageData &CGraphicsBackend_SDL_GL::GetReadPresentedImageDataFuncUnsafe()
+TGLBackendReadPresentedImageData &CGraphicsBackendSDLGL::GetReadPresentedImageDataFuncUnsafe()
 {
 	return m_ReadPresentedImageDataFunc;
 }
 
-IGraphicsBackend *CreateGraphicsBackend(TTranslateFunc &&TranslateFunc) { return new CGraphicsBackend_SDL_GL(std::move(TranslateFunc)); }
+IGraphicsBackend *CreateGraphicsBackend(TTranslateFunc &&TranslateFunc) { return new CGraphicsBackendSDLGL(std::move(TranslateFunc)); }

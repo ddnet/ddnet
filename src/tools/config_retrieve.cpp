@@ -18,7 +18,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 	{
 		int Id;
 		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Reader.GetItem(i, nullptr, &Id);
-		int ItemSize = Reader.GetItemSize(i);
+		const int ItemSize = Reader.GetItemSize(i);
 		if(!pItem || Id != 0)
 			continue;
 
@@ -36,12 +36,12 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 			return;
 		}
 
-		int Size = Reader.GetDataSize(pItem->m_Settings);
+		const int Size = Reader.GetDataSize(pItem->m_Settings);
 		char *pSettings = (char *)Reader.GetData(pItem->m_Settings);
 		char *pNext = pSettings;
 		while(pNext < pSettings + Size)
 		{
-			int StrSize = str_length(pNext) + 1;
+			const int StrSize = str_length(pNext) + 1;
 			io_write(Config, pNext, StrSize - 1);
 			io_write_newline(Config);
 			pNext += StrSize;

@@ -40,12 +40,12 @@ public:
 	bool operator()(int a, int b) { return (g_Config.m_BrSortOrder ? (m_pThis->*m_pfnSort)(b, a) : (m_pThis->*m_pfnSort)(a, b)); }
 };
 
-bool matchesPart(const char *a, const char *b)
+static bool MatchesPart(const char *a, const char *b)
 {
 	return str_utf8_find_nocase(a, b) != nullptr;
 }
 
-bool matchesExactly(const char *a, const char *b)
+static bool MatchesExactly(const char *a, const char *b)
 {
 	return str_comp(a, &b[1]) == 0;
 }
@@ -492,12 +492,12 @@ void CServerBrowser::Filter()
 					{
 						continue;
 					}
-					auto MatchesFn = matchesPart;
+					auto MatchesFn = MatchesPart;
 					const int FilterLen = str_length(aFilterStrTrimmed);
 					if(aFilterStrTrimmed[0] == '"' && aFilterStrTrimmed[FilterLen - 1] == '"')
 					{
 						aFilterStrTrimmed[FilterLen - 1] = '\0';
-						MatchesFn = matchesExactly;
+						MatchesFn = MatchesExactly;
 					}
 
 					// match against server name
@@ -548,12 +548,12 @@ void CServerBrowser::Filter()
 					{
 						continue;
 					}
-					auto MatchesFn = matchesPart;
+					auto MatchesFn = MatchesPart;
 					const int FilterLen = str_length(aExcludeStrTrimmed);
 					if(aExcludeStrTrimmed[0] == '"' && aExcludeStrTrimmed[FilterLen - 1] == '"')
 					{
 						aExcludeStrTrimmed[FilterLen - 1] = '\0';
-						MatchesFn = matchesExactly;
+						MatchesFn = MatchesExactly;
 					}
 
 					// match against server name
@@ -683,7 +683,7 @@ void CServerBrowser::QueueRequest(CServerEntry *pEntry)
 	m_NumRequests++;
 }
 
-void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs, int NumAddrs)
+static void FormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs, int NumAddrs)
 {
 	for(int i = 0; i < NumAddrs; i++)
 	{
@@ -728,7 +728,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 	pEntry->m_Info.m_FavoriteAllowPing = TmpInfo.m_FavoriteAllowPing;
 	mem_copy(pEntry->m_Info.m_aAddresses, TmpInfo.m_aAddresses, sizeof(pEntry->m_Info.m_aAddresses));
 	pEntry->m_Info.m_NumAddresses = TmpInfo.m_NumAddresses;
-	ServerBrowserFormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
+	FormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
 	str_copy(pEntry->m_Info.m_aCommunityId, TmpInfo.m_aCommunityId);
 	str_copy(pEntry->m_Info.m_aCommunityCountry, TmpInfo.m_aCommunityCountry);
 	str_copy(pEntry->m_Info.m_aCommunityType, TmpInfo.m_aCommunityType);
@@ -842,7 +842,7 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR *pAddrs, int Num
 
 	pEntry->m_Info.m_Latency = 999;
 	pEntry->m_Info.m_HasRank = CServerInfo::RANK_UNAVAILABLE;
-	ServerBrowserFormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
+	FormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
 	UpdateServerCommunity(&pEntry->m_Info);
 	str_copy(pEntry->m_Info.m_aName, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aName));
 
@@ -887,7 +887,7 @@ CServerBrowser::CServerEntry *CServerBrowser::ReplaceEntry(CServerEntry *pEntry,
 
 	pEntry->m_Info.m_Latency = 999;
 	pEntry->m_Info.m_HasRank = CServerInfo::RANK_UNAVAILABLE;
-	ServerBrowserFormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
+	FormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
 	UpdateServerCommunity(&pEntry->m_Info);
 	str_copy(pEntry->m_Info.m_aName, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aName));
 

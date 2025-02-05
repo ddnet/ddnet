@@ -59,7 +59,7 @@ bool IsInexistent(float);
 
 int main(int argc, const char *argv[])
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	if(argc != 10)
@@ -178,14 +178,14 @@ void SaveOutputMap(CDataFileReader &InputMap, CDataFileWriter &OutputMap)
 		if(g_apNewItem[i])
 			pItem = g_apNewItem[i];
 
-		int Size = InputMap.GetItemSize(i);
+		const int Size = InputMap.GetItemSize(i);
 		OutputMap.AddItem(Type, Id, Size, pItem, &Uuid);
 	}
 
 	for(int i = 0; i < InputMap.NumData(); i++)
 	{
 		void *pData = g_apNewData[i] ? g_apNewData[i] : InputMap.GetData(i);
-		int Size = g_aNewDataSize[i] ? g_aNewDataSize[i] : InputMap.GetDataSize(i);
+		const int Size = g_aNewDataSize[i] ? g_aNewDataSize[i] : InputMap.GetDataSize(i);
 		OutputMap.AddData(Size, pData);
 	}
 
@@ -236,7 +236,7 @@ void CompareGroups(const char aaMapNames[3][64], CDataFileReader aInputMaps[2])
 		for(int j = 0; j < 2; j++)
 			apItem[j] = (CMapItemGroup *)aInputMaps[j].GetItem(aStart[j] + i);
 
-		bool SameConfig = apItem[0]->m_ParallaxX == apItem[1]->m_ParallaxX && apItem[0]->m_ParallaxY == apItem[1]->m_ParallaxY && apItem[0]->m_OffsetX == apItem[1]->m_OffsetX && apItem[0]->m_OffsetY == apItem[1]->m_OffsetY && apItem[0]->m_UseClipping == apItem[1]->m_UseClipping && apItem[0]->m_ClipX == apItem[1]->m_ClipX && apItem[0]->m_ClipY == apItem[1]->m_ClipY && apItem[0]->m_ClipW == apItem[1]->m_ClipW && apItem[0]->m_ClipH == apItem[1]->m_ClipH;
+		const bool SameConfig = apItem[0]->m_ParallaxX == apItem[1]->m_ParallaxX && apItem[0]->m_ParallaxY == apItem[1]->m_ParallaxY && apItem[0]->m_OffsetX == apItem[1]->m_OffsetX && apItem[0]->m_OffsetY == apItem[1]->m_OffsetY && apItem[0]->m_UseClipping == apItem[1]->m_UseClipping && apItem[0]->m_ClipX == apItem[1]->m_ClipX && apItem[0]->m_ClipY == apItem[1]->m_ClipY && apItem[0]->m_ClipW == apItem[1]->m_ClipW && apItem[0]->m_ClipH == apItem[1]->m_ClipH;
 
 		if(!SameConfig)
 			dbg_msg("map_replace_area", "WARNING: different configuration on layergroup #%d, this might lead to unexpected results", i);
@@ -399,7 +399,7 @@ bool RemoveDestinationQuads(const float aaGameArea[2][2], const CQuad *pQuads, c
 
 	for(int i = 0; i < NumQuads; i++)
 	{
-		CMapObject Ob = CreateMapObject(pLayerGroup, fx2f(pQuads[i].m_aPoints[4].x), fx2f(pQuads[i].m_aPoints[4].y), 0, 0);
+		const CMapObject Ob = CreateMapObject(pLayerGroup, fx2f(pQuads[i].m_aPoints[4].x), fx2f(pQuads[i].m_aPoints[4].y), 0, 0);
 
 		if(GetVisibleArea(aaGameArea, Ob))
 		{
@@ -566,15 +566,15 @@ bool GetReplaceableArea(const float aaVisibleArea[2][2], const CMapObject &Ob, f
 		for(int j = 0; j < 2; j++)
 		{
 			float aVisibleLine[2], aReplaceableLine[2];
-			int k = Ob.m_aSpeed[i] > 1 ? !j : j;
+			const int K = Ob.m_aSpeed[i] > 1 ? !j : j;
 
-			aVisibleLine[0] = Ob.m_aaBaseArea[i][0] + (aaVisibleArea[i][j] - Ob.m_aaScreenOffset[i][k]) * Ob.m_aSpeed[i];
+			aVisibleLine[0] = Ob.m_aaBaseArea[i][0] + (aaVisibleArea[i][j] - Ob.m_aaScreenOffset[i][K]) * Ob.m_aSpeed[i];
 			aVisibleLine[1] = aVisibleLine[0] + Ob.m_aaBaseArea[i][1] - Ob.m_aaBaseArea[i][0];
 
 			if(GetLineIntersection(aaVisibleArea[i], aVisibleLine, aReplaceableLine))
-				aaReplaceableArea[i][k] = aReplaceableLine[j] - aVisibleLine[0];
+				aaReplaceableArea[i][K] = aReplaceableLine[j] - aVisibleLine[0];
 			else
-				aaReplaceableArea[i][k] = k * (Ob.m_aaBaseArea[i][1] - Ob.m_aaBaseArea[i][0]);
+				aaReplaceableArea[i][K] = K * (Ob.m_aaBaseArea[i][1] - Ob.m_aaBaseArea[i][0]);
 		}
 	}
 
@@ -614,7 +614,7 @@ void GetSignificantScreenPos(const CMapObject &Ob, const float aaVisibleArea[2][
 			continue;
 		}
 
-		float BaseOffset = aaReplaceableArea ? aaReplaceableArea[i][0] : 0;
+		const float BaseOffset = aaReplaceableArea ? aaReplaceableArea[i][0] : 0;
 		aScreen[i] = (aaVisibleArea[i][0] - Ob.m_aaBaseArea[i][0] - BaseOffset) / Ob.m_aSpeed[i];
 	}
 }

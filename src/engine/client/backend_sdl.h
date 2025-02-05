@@ -44,7 +44,7 @@ public:
 #endif
 
 // basic threaded backend, abstract, missing init and shutdown functions
-class CGraphicsBackend_Threaded : public IGraphicsBackend
+class CGraphicsBackendThreaded : public IGraphicsBackend
 {
 private:
 	TTranslateFunc m_TranslateFunc;
@@ -64,7 +64,7 @@ public:
 		virtual const SGfxWarningContainer &GetWarning() const = 0;
 	};
 
-	CGraphicsBackend_Threaded(TTranslateFunc &&TranslateFunc);
+	CGraphicsBackendThreaded(TTranslateFunc &&TranslateFunc);
 
 	void RunBuffer(CCommandBuffer *pBuffer) override;
 	void RunBufferSingleThreadedUnsafe(CCommandBuffer *pBuffer) override;
@@ -77,7 +77,7 @@ protected:
 	void StartProcessor(ICommandProcessor *pProcessor);
 	void StopProcessor();
 
-	bool HasWarning()
+	bool HasWarning() const
 	{
 		return m_Warning.m_WarningType != GFX_WARNING_TYPE_NONE;
 	}
@@ -99,7 +99,7 @@ public:
 };
 
 // takes care of implementation independent operations
-class CCommandProcessorFragment_General
+class CCommandProcessorFragmentGeneral
 {
 	void Cmd_Nop();
 	void Cmd_Signal(const CCommandBuffer::SCommand_Signal *pCommand);
@@ -131,7 +131,7 @@ struct SBackendCapabilites
 };
 
 // takes care of sdl related commands
-class CCommandProcessorFragment_SDL
+class CCommandProcessorFragmentSdl
 {
 	// SDL stuff
 	SDL_Window *m_pWindow = nullptr;
@@ -152,32 +152,32 @@ public:
 		SDL_GLContext m_GLContext;
 	};
 
-	struct SCommand_Shutdown : public CCommandBuffer::SCommand
+	struct SCommandShutdown : public CCommandBuffer::SCommand
 	{
-		SCommand_Shutdown() :
+		SCommandShutdown() :
 			SCommand(CMD_SHUTDOWN) {}
 	};
 
 private:
 	void Cmd_Init(const SCommand_Init *pCommand);
-	void Cmd_Shutdown(const SCommand_Shutdown *pCommand);
-	void Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand);
-	void Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand);
-	void Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand);
-	void Cmd_WindowDestroyNtf(const CCommandBuffer::SCommand_WindowDestroyNtf *pCommand);
+	void Cmd_Shutdown(const SCommandShutdown *pCommand);
+	void Cmd_Swap(const CCommandBuffer::SCommandSwap *pCommand);
+	void Cmd_VSync(const CCommandBuffer::SCommandVSync *pCommand);
+	void Cmd_WindowCreateNtf(const CCommandBuffer::SCommandWindowCreateNtf *pCommand);
+	void Cmd_WindowDestroyNtf(const CCommandBuffer::SCommandWindowDestroyNtf *pCommand);
 
 public:
-	CCommandProcessorFragment_SDL();
+	CCommandProcessorFragmentSdl();
 
 	bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand);
 };
 
 // command processor implementation, uses the fragments to combine into one processor
-class CCommandProcessor_SDL_GL : public CGraphicsBackend_Threaded::ICommandProcessor
+class CCommandProcessorSdlGl : public CGraphicsBackendThreaded::ICommandProcessor
 {
-	CCommandProcessorFragment_GLBase *m_pGLBackend;
-	CCommandProcessorFragment_SDL m_SDL;
-	CCommandProcessorFragment_General m_General;
+	CCommandProcessorFragmentGlBase *m_pGLBackend;
+	CCommandProcessorFragmentSdl m_SDL;
+	CCommandProcessorFragmentGeneral m_General;
 
 	EBackendType m_BackendType;
 
@@ -185,8 +185,8 @@ class CCommandProcessor_SDL_GL : public CGraphicsBackend_Threaded::ICommandProce
 	SGfxWarningContainer m_Warning;
 
 public:
-	CCommandProcessor_SDL_GL(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch);
-	virtual ~CCommandProcessor_SDL_GL();
+	CCommandProcessorSdlGl(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch);
+	virtual ~CCommandProcessorSdlGl();
 	void RunBuffer(CCommandBuffer *pBuffer) override;
 
 	const SGfxErrorContainer &GetError() const override;
@@ -201,7 +201,7 @@ public:
 static constexpr size_t gs_GpuInfoStringSize = 256;
 
 // graphics backend implemented with SDL and the graphics library @see EBackendType
-class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
+class CGraphicsBackendSDLGL : public CGraphicsBackendThreaded
 {
 	SDL_Window *m_pWindow = nullptr;
 	SDL_GLContext m_GLContext = nullptr;
@@ -231,7 +231,7 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 	static void ClampDriverVersion(EBackendType BackendType);
 
 public:
-	CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc);
+	CGraphicsBackendSDLGL(TTranslateFunc &&TranslateFunc);
 	int Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) override;
 	int Shutdown() override;
 

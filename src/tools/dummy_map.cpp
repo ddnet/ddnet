@@ -90,8 +90,8 @@ void CreateEmptyMap(IStorage *pStorage)
 	}
 	unsigned char *pDataChar = static_cast<unsigned char *>(pData);
 
-	unsigned Crc = crc32(0, pDataChar, DataSize);
-	SHA256_DIGEST Sha256 = sha256(pDataChar, DataSize);
+	const unsigned Crc = crc32(0, pDataChar, DataSize);
+	const SHA256_DIGEST Sha256 = sha256(pDataChar, DataSize);
 
 	char aMapSha[SHA256_MAXSTRSIZE];
 	sha256_str(Sha256, aMapSha, sizeof(aMapSha));
@@ -108,7 +108,7 @@ void CreateEmptyMap(IStorage *pStorage)
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	IStorage *pStorage = CreateStorage(IStorage::EInitializationType::SERVER, argc, argv);
 	if(!pStorage)

@@ -45,7 +45,7 @@ unsigned int CPrng::RandomBits()
 	dbg_assert(m_Seeded, "prng needs to be seeded before it can generate random numbers");
 
 	uint64_t x = m_State;
-	unsigned int Count = x >> 59;
+	const unsigned int Count = x >> 59;
 
 	static const uint64_t s_Multiplier = 6364136223846793005u;
 	m_State = x * s_Multiplier + m_Increment;

@@ -43,7 +43,7 @@ public:
 		Builder.Init();
 		CNetObjHandler NetObjHandler;
 
-		int Num = pFrom->NumItems();
+		const int Num = pFrom->NumItems();
 		for(int Index = 0; Index < Num; Index++)
 		{
 			const CSnapshotItem *pFromItem = pFrom->GetItem(Index);
@@ -88,7 +88,7 @@ public:
 
 	void OnNewSnapshot()
 	{
-		int Num = SnapNumItems(IClient::SNAP_CURRENT);
+		const int Num = SnapNumItems(IClient::SNAP_CURRENT);
 		for(int i = 0; i < Num; i++)
 		{
 			const IClient::CSnapItem Item = SnapGetItem(IClient::SNAP_CURRENT, i);
@@ -96,7 +96,7 @@ public:
 			if(Item.m_Type == NETOBJTYPE_CLIENTINFO)
 			{
 				const CNetObj_ClientInfo *pInfo = (const CNetObj_ClientInfo *)Item.m_pData;
-				int ClientId = Item.m_Id;
+				const int ClientId = Item.m_Id;
 				if(ClientId < MAX_CLIENTS)
 				{
 					CClientData *pClient = &m_aClients[ClientId];
@@ -142,7 +142,7 @@ public:
 		bool Sys;
 		CUuid Uuid;
 
-		int Result = UnpackMessageId(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+		const int Result = UnpackMessageId(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
 		if(Result == UNPACKMESSAGE_ERROR)
 			return;
 
@@ -197,7 +197,7 @@ public:
 
 static int ExtractDemoChat(const char *pDemoFilePath, IStorage *pStorage)
 {
-	std::unique_ptr<CSnapshotDelta> pDemoSnapshotDelta = std::make_unique<CSnapshotDelta>();
+	const std::unique_ptr<CSnapshotDelta> pDemoSnapshotDelta = std::make_unique<CSnapshotDelta>();
 	CDemoPlayer DemoPlayer(pDemoSnapshotDelta.get(), false);
 
 	if(DemoPlayer.Load(pStorage, nullptr, pDemoFilePath, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
@@ -233,7 +233,7 @@ int main(int argc, const char *argv[])
 	// Create storage before setting logger to avoid log messages from storage creation
 	IStorage *pStorage = CreateLocalStorage();
 
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	if(!pStorage)

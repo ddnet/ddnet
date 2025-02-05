@@ -60,7 +60,7 @@ int CConsoleNetConnection::Update()
 			return -1;
 		}
 
-		int Bytes = net_tcp_recv(m_Socket, m_aBuffer + m_BufferOffset, (int)(sizeof(m_aBuffer)) - m_BufferOffset);
+		const int Bytes = net_tcp_recv(m_Socket, m_aBuffer + m_BufferOffset, (int)(sizeof(m_aBuffer)) - m_BufferOffset);
 
 		if(Bytes > 0)
 		{
@@ -165,7 +165,7 @@ int CConsoleNetConnection::Send(const char *pLine)
 
 	while(true)
 	{
-		int Send = net_tcp_send(m_Socket, pData, Length);
+		const int Send = net_tcp_send(m_Socket, pData, Length);
 		if(Send < 0)
 		{
 			m_State = NET_CONNSTATE_ERROR;

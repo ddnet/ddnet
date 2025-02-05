@@ -241,7 +241,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		Sixup = (pBuffer[0] & 0x3) == 1;
 		if(Sixup && (pSecurityToken == nullptr || pResponseToken == nullptr))
 			return -1;
-		int Offset = Sixup ? 9 : 6;
+		const int Offset = Sixup ? 9 : 6;
 		if(Size < Offset)
 			return -1;
 
@@ -269,7 +269,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 			Sixup = true;
 		if(Sixup && pSecurityToken == nullptr)
 			return -1;
-		int DataStart = Sixup ? 7 : NET_PACKETHEADERSIZE;
+		const int DataStart = Sixup ? 7 : NET_PACKETHEADERSIZE;
 		if(Size < DataStart)
 			return -1;
 
@@ -394,7 +394,7 @@ unsigned char *CNetChunkHeader::Unpack(unsigned char *pData, int Split)
 
 bool CNetBase::IsSeqInBackroom(int Seq, int Ack)
 {
-	int Bottom = (Ack - NET_MAX_SEQUENCE / 2);
+	const int Bottom = (Ack - NET_MAX_SEQUENCE / 2);
 	if(Bottom < 0)
 	{
 		if(Seq <= Ack)
@@ -473,7 +473,7 @@ void CNetTokenCache::Init(NETSOCKET Socket)
 
 void CNetTokenCache::SendPacketConnless(CNetChunk *pChunk)
 {
-	TOKEN Token = GetToken(&pChunk->m_Address);
+	const TOKEN Token = GetToken(&pChunk->m_Address);
 
 	if(Token != NET_TOKEN_NONE)
 	{

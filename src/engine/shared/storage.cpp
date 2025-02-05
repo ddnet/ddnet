@@ -635,7 +635,7 @@ public:
 		unsigned char aBuffer[64 * 1024];
 		while(true)
 		{
-			unsigned Bytes = io_read(File, aBuffer, sizeof(aBuffer));
+			const unsigned Bytes = io_read(File, aBuffer, sizeof(aBuffer));
 			if(Bytes == 0)
 				break;
 			if(pSha256 != nullptr)
@@ -793,7 +793,7 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_remove(aBuffer);
+		const bool Success = !fs_remove(aBuffer);
 		if(!Success)
 		{
 			log_error("storage", "failed to remove file: %s", aBuffer);
@@ -808,7 +808,7 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_removedir(aBuffer);
+		const bool Success = !fs_removedir(aBuffer);
 		if(!Success)
 		{
 			log_error("storage", "failed to remove folder: %s", aBuffer);
@@ -821,7 +821,7 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetBinaryPath(pFilename, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_remove(aBuffer);
+		const bool Success = !fs_remove(aBuffer);
 		if(!Success)
 		{
 			log_error("storage", "failed to remove binary file: %s", aBuffer);
@@ -838,7 +838,7 @@ public:
 		GetPath(Type, pOldFilename, aOldBuffer, sizeof(aOldBuffer));
 		GetPath(Type, pNewFilename, aNewBuffer, sizeof(aNewBuffer));
 
-		bool Success = !fs_rename(aOldBuffer, aNewBuffer);
+		const bool Success = !fs_rename(aOldBuffer, aNewBuffer);
 		if(!Success)
 		{
 			log_error("storage", "failed to rename file: %s -> %s", aOldBuffer, aNewBuffer);
@@ -859,7 +859,7 @@ public:
 			return false;
 		}
 
-		bool Success = !fs_rename(aOldBuffer, aNewBuffer);
+		const bool Success = !fs_rename(aOldBuffer, aNewBuffer);
 		if(!Success)
 		{
 			log_error("storage", "failed to rename binary file: %s -> %s", aOldBuffer, aNewBuffer);
@@ -874,7 +874,7 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_makedir(aBuffer);
+		const bool Success = !fs_makedir(aBuffer);
 		if(!Success)
 		{
 			log_error("storage", "failed to create folder: %s", aBuffer);
@@ -942,7 +942,7 @@ void IStorage::StripPathAndExtension(const char *pFilename, char *pBuffer, int B
 		}
 	}
 
-	int Length = minimum(BufferSize, (int)(pEnd - pExtractedName + 1));
+	const int Length = minimum(BufferSize, (int)(pEnd - pExtractedName + 1));
 	str_copy(pBuffer, pExtractedName, Length);
 }
 

@@ -20,11 +20,11 @@ class CGLSLTextProgram;
 #define MAX_STREAM_BUFFER_COUNT 10
 
 // takes care of opengl 3.3+ related rendering
-class CCommandProcessorFragment_OpenGL3_3 : public CCommandProcessorFragment_OpenGL3
+class CCommandProcessorFragmentOpenGl3_3 : public CCommandProcessorFragmentOpenGl3 // NOLINT(readability-identifier-naming)
 {
 protected:
 	int m_MaxQuadsAtOnce;
-	static const int ms_MaxQuadsPossible = 256;
+	static const int ms_MaxQuadsPossible = 256; // NOLINT(readability-identifier-naming)
 
 	CGLSLPrimitiveProgram *m_pPrimitiveProgram;
 	CGLSLPrimitiveProgram *m_pPrimitiveProgramTextured;
@@ -80,8 +80,8 @@ protected:
 	void TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, uint8_t *pTexData);
 	void TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, uint8_t *pTexData);
 
-	bool Cmd_Init(const SCommand_Init *pCommand) override;
-	void Cmd_Shutdown(const SCommand_Shutdown *pCommand) override;
+	bool Cmd_Init(const SCommandInit *pCommand) override;
+	void Cmd_Shutdown(const SCommandShutdown *pCommand) override;
 	void Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand) override;
 	void Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand) override;
 	void Cmd_TextTexture_Update(const CCommandBuffer::SCommand_TextTexture_Update *pCommand) override;
@@ -111,7 +111,7 @@ protected:
 	void Cmd_RenderQuadContainerAsSpriteMultiple(const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *pCommand) override;
 
 public:
-	CCommandProcessorFragment_OpenGL3_3() = default;
+	CCommandProcessorFragmentOpenGl3_3() = default;
 };
 
 #endif

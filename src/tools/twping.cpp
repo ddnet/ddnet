@@ -9,7 +9,7 @@
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 
 	log_set_global_logger_default();
 	if(secure_random_init() != 0)
@@ -72,7 +72,7 @@ int main(int argc, const char **argv)
 			// we got ze info
 			CUnpacker Unpacker;
 			Unpacker.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_INFO), Packet.m_DataSize - sizeof(SERVERBROWSE_INFO));
-			int Token = str_toint(Unpacker.GetString());
+			const int Token = str_toint(Unpacker.GetString());
 			if(Token != CurToken)
 				continue;
 

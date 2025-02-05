@@ -83,7 +83,7 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 		{
 			for(int x = 0; x < apTilemap[0]->m_Width; x++)
 			{
-				int Pos = y * apTilemap[0]->m_Width + x;
+				const int Pos = y * apTilemap[0]->m_Width + x;
 				if(apTile[0][Pos].m_Index != apTile[1][Pos].m_Index || apTile[0][Pos].m_Flags != apTile[1][Pos].m_Flags)
 				{
 					dbg_msg("map_compare", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)", aNum[0], aaName[0], x, y, apTile[0][Pos].m_Index, apTile[0][Pos].m_Flags, apTile[1][Pos].m_Index, apTile[0][Pos].m_Flags);
@@ -97,9 +97,9 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 
 int main(int argc, const char *argv[])
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
-	std::shared_ptr<ILogger> pStdoutLogger = std::shared_ptr<ILogger>(log_logger_stdout());
+	const std::shared_ptr<ILogger> pStdoutLogger = std::shared_ptr<ILogger>(log_logger_stdout());
 	if(pStdoutLogger)
 	{
 		vpLoggers.push_back(pStdoutLogger);

@@ -67,7 +67,7 @@ void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pImgName,
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	if(argc != 5)

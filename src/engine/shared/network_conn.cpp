@@ -97,7 +97,7 @@ void CNetConnection::SignalResend()
 
 int CNetConnection::Flush()
 {
-	int NumChunks = m_Construct.m_NumChunks;
+	const int NumChunks = m_Construct.m_NumChunks;
 	if(!NumChunks && !m_Construct.m_Flags)
 		return 0;
 
@@ -299,7 +299,7 @@ void CNetConnection::DirectInit(const NETADDR &Addr, SECURITY_TOKEN SecurityToke
 	SetPeerAddr(&Addr);
 	mem_zero(m_aErrorString, sizeof(m_aErrorString));
 
-	int64_t Now = time_get();
+	const int64_t Now = time_get();
 	m_LastSendTime = Now;
 	m_LastRecvTime = Now;
 	m_LastUpdateTime = Now;
@@ -347,7 +347,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 	}
 	m_PeerAck = pPacket->m_Ack;
 
-	int64_t Now = time_get();
+	const int64_t Now = time_get();
 
 	// check if resend is requested
 	if(pPacket->m_Flags & NET_PACKETFLAG_RESEND)
@@ -356,7 +356,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 	//
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
 	{
-		int CtrlMsg = pPacket->m_aChunkData[0];
+		const int CtrlMsg = pPacket->m_aChunkData[0];
 
 		if(CtrlMsg == NET_CTRLMSG_CLOSE)
 		{
@@ -501,7 +501,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 
 int CNetConnection::Update()
 {
-	int64_t Now = time_get();
+	const int64_t Now = time_get();
 
 	if(State() == NET_CONNSTATE_ERROR && m_TimeoutSituation && (Now - m_LastRecvTime) > time_freq() * g_Config.m_ConnTimeoutProtection)
 	{
@@ -551,7 +551,7 @@ int CNetConnection::Update()
 	{
 		if(time_get() - m_LastSendTime > time_freq() / 2) // flush connection after 500ms if needed
 		{
-			int NumFlushedChunks = Flush();
+			const int NumFlushedChunks = Flush();
 			if(NumFlushedChunks && g_Config.m_Debug)
 				dbg_msg("connection", "flushed connection due to timeout. %d chunks.", NumFlushedChunks);
 		}
@@ -575,7 +575,7 @@ int CNetConnection::Update()
 
 void CNetConnection::SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, CStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer, bool Sixup)
 {
-	int64_t Now = time_get();
+	const int64_t Now = time_get();
 
 	m_Sequence = Sequence;
 	m_Ack = Ack;
