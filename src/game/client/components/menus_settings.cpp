@@ -2811,6 +2811,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// General name plate settings
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlates, Localize("Show name plates"), &g_Config.m_ClNamePlates, &LeftView, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesOwn, Localize("Show own name plate"), &g_Config.m_ClNamePlatesOwn, &LeftView, LineSize);
 		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
 		Ui()->DoScrollbarOption(&g_Config.m_ClNamePlatesSize, &g_Config.m_ClNamePlatesSize, &Button, Localize("Name plates size"), -50, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
 
@@ -2824,12 +2825,18 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesTeamcolors, Localize("Use team colors for name plates"), &g_Config.m_ClNamePlatesTeamcolors, &LeftView, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesFriendMark, Localize("Show friend mark (♥) in name plates"), &g_Config.m_ClNamePlatesFriendMark, &LeftView, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesIds, Localize("Show client IDs in name plates"), &g_Config.m_ClNamePlatesIds, &LeftView, LineSize);
+		if(g_Config.m_ClNamePlatesIds)
+		{
+			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesIdsNewLine, Localize("Show client IDs on a new line"), &g_Config.m_ClNamePlatesIdsNewLine, &LeftView, LineSize);
+			LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
+			if(g_Config.m_ClNamePlatesIdsNewLine)
+				Ui()->DoScrollbarOption(&g_Config.m_ClNamePlatesIdsSize, &g_Config.m_ClNamePlatesIdsSize, &Button, Localize("Client IDs size"), -50, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
+		}
+		else
+			LeftView.HSplitTop(LineSize * 3, nullptr, &LeftView);
 
 		// ***** Hook Strength ***** //
 		LeftView.HSplitTop(MarginBetweenViews, nullptr, &LeftView);
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Hook Strength"), HeadlineFontSize, TEXTALIGN_ML);
-		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
 		if(DoButton_CheckBox(&g_Config.m_ClNamePlatesStrong, Localize("Show hook strength icon indicator"), g_Config.m_ClNamePlatesStrong, &Button))
@@ -2852,9 +2859,6 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Key Presses ***** //
 		LeftView.HSplitTop(MarginBetweenViews, nullptr, &LeftView);
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Key Presses"), HeadlineFontSize, TEXTALIGN_ML);
-		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
 		if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection >= 1 && g_Config.m_ClShowDirection != 3, &Button))
@@ -2880,15 +2884,26 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		Ui()->DoLabel(&Label, Localize("Preview"), HeadlineFontSize, TEXTALIGN_ML);
 		RightView.HSplitTop(2.0f * MarginSmall, nullptr, &RightView);
 
+		// ***** Name Plate Dummy Preview ***** //
+		static bool s_Dummy = false;
+		RightView.HSplitBottom(LineSize, &RightView, &Button);
+		if(DoButton_CheckBox(&s_Dummy, Localize("Preview Dummy's nameplate"), s_Dummy, &Button))
+			s_Dummy = !s_Dummy;
+
+		int Dummy = g_Config.m_ClDummy != (int)s_Dummy ? 1 : 0;
+
 		CTeeRenderInfo TeeRenderInfo;
-		TeeRenderInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClPlayerSkin));
-		TeeRenderInfo.ApplyColors(g_Config.m_ClPlayerUseCustomColor, g_Config.m_ClPlayerColorBody, g_Config.m_ClPlayerColorFeet);
+		TeeRenderInfo.Apply(m_pClient->m_Skins.Find(Dummy ? g_Config.m_ClDummySkin : g_Config.m_ClPlayerSkin));
+		TeeRenderInfo.ApplyColors(
+			Dummy ? g_Config.m_ClDummyUseCustomColor : g_Config.m_ClPlayerUseCustomColor,
+			Dummy ? g_Config.m_ClDummyColorBody : g_Config.m_ClPlayerColorBody,
+			Dummy ? g_Config.m_ClDummyColorFeet : g_Config.m_ClPlayerColorFeet);
 		TeeRenderInfo.m_Size = 64.0f;
 
 		const vec2 Position = RightView.Center();
 		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, 0, vec2(1.0f, 0.0f), Position);
 
-		GameClient()->m_NamePlates.RenderNamePlatePreview(Position);
+		GameClient()->m_NamePlates.RenderNamePlatePreview(Position, Dummy);
 	}
 	else if(s_CurTab == APPEARANCE_TAB_HOOK_COLLISION)
 	{

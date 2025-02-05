@@ -9,137 +9,108 @@
 
 #include <game/client/component.h>
 
-struct CNetObj_Character;
-struct CNetObj_PlayerInfo;
+class CNamePlateRenderData
+{
+public:
+	bool m_InGame;
+	vec2 m_Position;
+	ColorRGBA m_Color;
+	float m_Alpha;
+	bool m_ShowName;
+	const char *m_pName;
+	bool m_ShowFriendMark;
+	bool m_ShowClientId;
+	int m_ClientId;
+	float m_FontSizeClientId;
+	bool m_ClientIdNewLine;
+	float m_FontSize;
+	bool m_ShowClan;
+	const char *m_pClan;
+	float m_FontSizeClan;
+	bool m_ShowDirection;
+	bool m_DirLeft;
+	bool m_DirJump;
+	bool m_DirRight;
+	float m_FontSizeDirection;
+	bool m_ShowHookStrength;
+	enum
+	{
+		NAMEPLATE_HOOKSTRENGTH_WEAK,
+		NAMEPLATE_HOOKSTRENGTH_UNKNOWN,
+		NAMEPLATE_HOOKSTRENGTH_STRONG
+	} m_HookStrength;
+	bool m_ShowHookStrengthId;
+	int m_HookStrengthId;
+	float m_FontSizeHookStrength;
+};
 
-class CNamePlates;
+class CNamePlatePart
+{
+protected:
+	float m_Width = 0.0f;
+	float m_Height = 0.0f;
+	float m_PaddingX = 5.0f;
+	float m_PaddingY = 5.0f;
+	// Offset to rendered X and Y not effecting layout
+	float m_OffsetX = 0.0f;
+	float m_OffsetY = 0.0f;
+	// Whether this part is a new line (doesn't do anything else)
+	bool m_NewLine = false;
+	// Whether this part is visible
+	bool m_Visible = true;
+	// Whether when not visible will still take up space
+	bool m_ShiftOnInvis = false;
+
+public:
+	friend class CGameClient;
+	virtual void Update(CGameClient &This, const CNamePlateRenderData &Data) {}
+	virtual void Reset(CGameClient &This){};
+	virtual void Render(CGameClient &This, float X, float Y){};
+	float Width() const { return m_Width; }
+	float Height() const { return m_Height; }
+	float PaddingX() const { return m_PaddingX; }
+	float PaddingY() const { return m_PaddingY; }
+	float OffsetX() const { return m_OffsetX; }
+	float OffsetY() const { return m_OffsetY; }
+	bool NewLine() const { return m_NewLine; }
+	bool Visible() const { return m_Visible; }
+	bool ShiftOnInvis() const { return m_ShiftOnInvis; }
+	virtual ~CNamePlatePart() = default;
+};
+
+using NamePlatePartsVector = std::vector<std::unique_ptr<CNamePlatePart>>;
 
 class CNamePlate
 {
+private:
+	bool m_Inited = false;
+	NamePlatePartsVector m_vpParts;
+	void RenderLine(CGameClient &This, const CNamePlateRenderData &Data,
+		float X, float Y, float W, float H,
+		NamePlatePartsVector::iterator Start, NamePlatePartsVector::iterator End);
+	template<typename PartType, typename... ArgsType>
+	void AddPart(CGameClient &This, ArgsType &&... Args);
+
 public:
-	class CNamePlateName
-	{
-	public:
-		CNamePlateName()
-		{
-			Reset();
-		}
-		void Reset()
-		{
-			m_TextContainerIndex.Reset();
-			m_Id = -1;
-			m_aName[0] = '\0';
-			m_FriendMark = false;
-			m_FontSize = -INFINITY;
-		}
-		void Update(CNamePlates &This, int Id, const char *pName, bool FriendMark, float FontSize);
-		STextContainerIndex m_TextContainerIndex;
-		char m_aName[MAX_NAME_LENGTH];
-		int m_Id;
-		bool m_FriendMark;
-		float m_FontSize;
-	};
-	class CNamePlateClan
-	{
-	public:
-		CNamePlateClan()
-		{
-			Reset();
-		}
-		void Reset()
-		{
-			m_TextContainerIndex.Reset();
-			m_aClan[0] = '\0';
-			m_FontSize = -INFINITY;
-		}
-		void Update(CNamePlates &This, const char *pClan, float FontSize);
-		STextContainerIndex m_TextContainerIndex;
-		char m_aClan[MAX_CLAN_LENGTH];
-		float m_FontSize;
-	};
-	class CNamePlateHookWeakStrongId
-	{
-	public:
-		CNamePlateHookWeakStrongId()
-		{
-			Reset();
-		}
-		void Reset()
-		{
-			m_TextContainerIndex.Reset();
-			m_Id = -1;
-			m_FontSize = -INFINITY;
-		}
-		void Update(CNamePlates &This, int Id, float FontSize);
-		STextContainerIndex m_TextContainerIndex;
-		int m_Id;
-		float m_FontSize;
-	};
-	CNamePlate()
-	{
-		Reset();
-	}
-	void Reset()
-	{
-		m_Name.Reset();
-		m_Clan.Reset();
-		m_WeakStrongId.Reset();
-	}
-	void DeleteTextContainers(ITextRender &TextRender)
-	{
-		TextRender.DeleteTextContainer(m_Name.m_TextContainerIndex);
-		TextRender.DeleteTextContainer(m_Clan.m_TextContainerIndex);
-		TextRender.DeleteTextContainer(m_WeakStrongId.m_TextContainerIndex);
-	}
-	CNamePlateName m_Name;
-	CNamePlateClan m_Clan;
-	CNamePlateHookWeakStrongId m_WeakStrongId;
+	friend class CGameClient;
+	void Init(CGameClient &This);
+	void Reset(CGameClient &This);
+	void Render(CGameClient &This, const CNamePlateRenderData &Data);
 };
 
 class CNamePlates : public CComponent
 {
-	friend class CNamePlate::CNamePlateName;
-	friend class CNamePlate::CNamePlateClan;
-	friend class CNamePlate::CNamePlateHookWeakStrongId;
-
+private:
 	CNamePlate m_aNamePlates[MAX_CLIENTS];
-
-	void ResetNamePlates();
-
-	int m_DirectionQuadContainerIndex;
-	class CRenderNamePlateData
-	{
-	public:
-		vec2 m_Position;
-		ColorRGBA m_Color;
-		ColorRGBA m_OutlineColor;
-		float m_Alpha;
-		const char *m_pName;
-		bool m_ShowFriendMark;
-		int m_ClientId;
-		float m_FontSize;
-		const char *m_pClan;
-		float m_FontSizeClan;
-		bool m_ShowDirection;
-		bool m_DirLeft;
-		bool m_DirJump;
-		bool m_DirRight;
-		float m_FontSizeDirection;
-		bool m_ShowHookWeakStrong;
-		TRISTATE m_HookWeakStrong;
-		bool m_ShowHookWeakStrongId;
-		int m_HookWeakStrongId;
-		float m_FontSizeHookWeakStrong;
-	};
-	void RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateData &Data);
+	void RenderNamePlate(CNamePlate &NamePlate, const CNamePlateRenderData &Data);
 
 public:
 	void RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha);
-	void RenderNamePlatePreview(vec2 Position);
+	void RenderNamePlatePreview(vec2 Position, int Dummy);
+	void ResetNamePlates();
 	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnWindowResize() override;
-	virtual void OnInit() override;
 	virtual void OnRender() override;
+	virtual void OnWindowResize() override;
 };
 
 #endif
