@@ -51,11 +51,13 @@ jobs:
         sudo apt-get update -y
         # mount: /var/lib/grub/esp: special device /dev/disk/by-id/scsi-... does not exist.
         # sudo apt-get upgrade -y
-        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind gcovr libglew-dev -y
+        sudo apt-get install pkg-config ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind gcovr libglew-dev -y
 
     - name: Prepare Linux (non-fancy)
       if: ${{ contains(matrix.os, 'ubuntu') && !matrix.fancy }}
       run: |
+        curl -LO https://github.com/Kitware/CMake/releases/download/v3.13.4/cmake-3.13.4-Linux-x86_64.tar.gz
+        sudo tar --strip-components 1 -C /usr -xf cmake-3.13.4-Linux-x86_64.tar.gz
         # Our minimum supported Rust version (MSRV)
         rustup default 1.63.0
         sudo rm -rf /var/lib/mysql/ /var/run/mysqld
@@ -74,7 +76,7 @@ jobs:
     - name: Prepare Linux (fancy)
       if: contains(matrix.os, 'ubuntu') && matrix.fancy
       run: |
-        sudo apt-get install libmariadb-dev libwebsockets-dev mariadb-server -y
+        sudo apt-get install cmake libmariadb-dev libwebsockets-dev mariadb-server -y
         sudo systemctl stop mysql
         sudo rm -rf /var/lib/mysql/
         sudo mysql_install_db --user=mysql --datadir=/var/lib/mysql/
@@ -104,6 +106,7 @@ jobs:
       run: |
         mkdir debug
         cd debug
+        ${{ matrix.cmake-path }}cmake --version
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
         ${{ matrix.cmake-path }}cmake --build . --config Debug --target everything ${{ matrix.build-args }}
 
@@ -139,7 +142,6 @@ jobs:
       run: |
         mkdir headless
         cd headless
-        ${{ matrix.cmake-path }}cmake --version
         ${{ matrix.cmake-path }}cmake -E env CXXFLAGS="--coverage -Werror" ${{ matrix.cmake-path }}cmake -E env LDFLAGS="--coverage -Werror" ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
         ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug  ${{ matrix.build-args }}
 
