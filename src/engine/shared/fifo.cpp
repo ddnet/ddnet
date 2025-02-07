@@ -189,16 +189,23 @@ void CFifo::Update()
 		char *pCur = pBuf;
 		for(DWORD i = 0; i < Length; ++i)
 		{
-			if(pBuf[i] != '\n')
+			if(pBuf[i] != '\n' && (pBuf[i] != '\r' || pBuf[i + 1] != '\n'))
+			{
 				continue;
+			}
+			if(pBuf[i] == '\r')
+			{
+				pBuf[i] = '\0';
+				++i;
+			}
 			pBuf[i] = '\0';
-			if(str_utf8_check(pCur))
+			if(pCur[0] != '\0' && str_utf8_check(pCur))
 			{
 				m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
 			}
 			pCur = pBuf + i + 1;
 		}
-		if(pCur < pBuf + Length && str_utf8_check(pCur)) // missed the last line
+		if(pCur < pBuf + Length && pCur[0] != '\0' && str_utf8_check(pCur)) // missed the last line
 		{
 			m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
 		}
