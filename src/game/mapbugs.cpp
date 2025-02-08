@@ -43,7 +43,11 @@ static SHA256_DIGEST s(const char *pSha256)
 
 static CMapBugsInternal MAP_BUGS[] =
 	{
-		{{"Binary", 2022597, s("65b410e197fd2298ec270e89a84b762f6739d1d18089529f8ef6cf2104d3d600")}, BugToFlag(BUG_GRENADE_DOUBLEEXPLOSION)}};
+		{{"Binary", 2022597, s("65b410e197fd2298ec270e89a84b762f6739d1d18089529f8ef6cf2104d3d600")}, BugToFlag(BUG_GRENADE_DOUBLEEXPLOSION)},
+		{{"Broken brain", 301142, s("5b2c4c7839dcc86aa3fad558769fe49f00cc5bd95a53b147dec97fd3f2e5f2ca")}, BugToFlag(BUG_SPEEDTILE_MAXSPEED)},
+		{{"Pharoah", 108835, s("92c542f628caf8ef8997849c9f63b24222b7b1480cb4b82908c4767554ed798a")}, BugToFlag(BUG_SPEEDTILE_MAXSPEED)},
+		{{"Cosyris", 808948, s("45bb08fea1497936c3d566e0b97ac14bbdefcbdfbde80cbaef61eb470e245cd2")}, BugToFlag(BUG_SPEEDTILE_MAXSPEED)}
+	};
 
 CMapBugs GetMapBugs(const char *pName, int Size, SHA256_DIGEST Sha256)
 {

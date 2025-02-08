@@ -1432,7 +1432,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 			{
 				if(Direction.x > 0.0000001f)
 					SpeederAngle = -std::atan(Direction.y / Direction.x);
-				else if(Direction.x < -0.0000001f)
+				else if(Direction.x < -0.0000001f || (GameServer()->EmulateBug(BUG_SPEEDTILE_MAXSPEED) && Direction.x < 0.0000001f))
 					SpeederAngle = std::atan(Direction.y / Direction.x) + 2.0f * std::asin(1.0f);
 				else if(Direction.y > 0.0000001f)
 					SpeederAngle = std::asin(1.0f);
@@ -1444,7 +1444,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 
 				if(TempVel.x > 0.0000001f)
 					TeeAngle = -std::atan(TempVel.y / TempVel.x);
-				else if(TempVel.x < -0.0000001f)
+				else if(TempVel.x < -0.0000001f || (GameServer()->EmulateBug(BUG_SPEEDTILE_MAXSPEED) && TempVel.x < 0.0000001f))
 					TeeAngle = std::atan(TempVel.y / TempVel.x) + 2.0f * std::asin(1.0f);
 				else if(TempVel.y > 0.0000001f)
 					TeeAngle = std::asin(1.0f);
