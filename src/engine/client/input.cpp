@@ -10,11 +10,7 @@
 #include <engine/shared/config.h>
 
 #include "input.h"
-
-// this header is protected so you don't include it from anywhere
-#define KEYS_INCLUDE
 #include "keynames.h"
-#undef KEYS_INCLUDE
 
 // support older SDL version (pre 2.0.6)
 #ifndef SDL_JOYSTICK_AXIS_MIN
