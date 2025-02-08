@@ -7,15 +7,17 @@
 
 class CAutoMapper : public CEditorComponent
 {
-	struct CIndexInfo
+	class CIndexInfo
 	{
+	public:
 		int m_Id;
 		int m_Flag;
 		bool m_TestFlag;
 	};
 
-	struct CPosRule
+	class CPosRule
 	{
+	public:
 		int m_X;
 		int m_Y;
 		int m_Value;
@@ -30,16 +32,18 @@ class CAutoMapper : public CEditorComponent
 		};
 	};
 
-	struct CModuloRule
+	class CModuloRule
 	{
+	public:
 		int m_ModX;
 		int m_ModY;
 		int m_OffsetX;
 		int m_OffsetY;
 	};
 
-	struct CIndexRule
+	class CIndexRule
 	{
+	public:
 		int m_Id;
 		std::vector<CPosRule> m_vRules;
 		int m_Flag;
@@ -49,14 +53,16 @@ class CAutoMapper : public CEditorComponent
 		bool m_SkipEmpty;
 		bool m_SkipFull;
 	};
-	struct CRun
+	class CRun
 	{
+	public:
 		std::vector<CIndexRule> m_vIndexRules;
 		bool m_AutomapCopy;
 	};
 
-	struct CConfiguration
+	class CConfiguration
 	{
+	public:
 		std::vector<CRun> m_vRuns;
 		char m_aName[128];
 		int m_StartX;
@@ -69,6 +75,8 @@ public:
 	explicit CAutoMapper(CEditor *pEditor);
 
 	void Load(const char *pTileName);
+	void Unload();
+	int CheckIndexFlag(int Flag, const char *pFlag, bool CheckNone) const;
 	void ProceedLocalized(class CLayerTiles *pLayer, class CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed = 0, int X = 0, int Y = 0, int Width = -1, int Height = -1);
 	void Proceed(class CLayerTiles *pLayer, class CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed = 0, int SeedOffsetX = 0, int SeedOffsetY = 0);
 	int ConfigNamesNum() const { return m_vConfigs.size(); }

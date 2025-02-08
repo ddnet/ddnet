@@ -974,7 +974,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{"Color Env", m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT, -1000000, 1000000},
 		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
-		{"Reference", m_AutoMapperReference, PROPTYPE_REFERENCE, 0, 0},
+		{"Reference", m_AutoMapperReference, PROPTYPE_AUTOMAPPER_REFERENCE, 0, 0},
 		{"Seed", m_Seed, PROPTYPE_INT, 0, 1000000000},
 		{nullptr},
 	};
@@ -984,10 +984,12 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		aProps[(int)ETilesProp::PROP_IMAGE].m_pName = nullptr;
 		aProps[(int)ETilesProp::PROP_COLOR].m_pName = nullptr;
 		aProps[(int)ETilesProp::PROP_AUTOMAPPER].m_pName = nullptr;
+		aProps[(int)ETilesProp::PROP_AUTOMAPPER_REFERENCE].m_pName = nullptr;
 	}
 	if(m_Image == -1)
 	{
 		aProps[(int)ETilesProp::PROP_AUTOMAPPER].m_pName = nullptr;
+		aProps[(int)ETilesProp::PROP_AUTOMAPPER_REFERENCE].m_pName = nullptr;
 		aProps[(int)ETilesProp::PROP_SEED].m_pName = nullptr;
 	}
 
@@ -1085,7 +1087,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		else
 			m_AutoMapperConfig = -1;
 	}
-	else if(Prop == ETilesProp::PROP_REFERENCE)
+	else if(Prop == ETilesProp::PROP_AUTOMAPPER_REFERENCE)
 	{
 		m_AutoMapperReference = NewVal;
 	}

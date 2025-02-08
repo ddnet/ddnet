@@ -217,7 +217,7 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 				State = EEditState::ONE_GO;
 			}
 		}
-		else if(pProps[i].m_Type == PROPTYPE_REFERENCE)
+		else if(pProps[i].m_Type == PROPTYPE_AUTOMAPPER_REFERENCE)
 		{
 			const char *pName;
 			if(pProps[i].m_Value < 0)
