@@ -1,6 +1,8 @@
 {
 	"direct-touch-ingame": "action",
 	"direct-touch-spectate": "aim",
+	"background-color-inactive": "00000040",
+	"background-color-active": "33333340",
 	"touch-buttons": [
 		{
 			"x": 0,
