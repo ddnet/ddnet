@@ -24,7 +24,6 @@
 using namespace std::chrono_literals;
 
 // TODO: Add user interface to adjust button layout
-// TODO: Add "color" property for touch buttons?
 // TODO: Add combined weapon picker button that shows all currently available weapons
 // TODO: Add "joystick-aim-relative", a virtual joystick that moves the mouse pointer relatively. And add "aim-relative" ingame direct touch input.
 // TODO: Add "choice" predefined behavior which shows a selection popup for 2 or more other behaviors?
@@ -229,7 +228,7 @@ bool CTouchControls::CTouchButton::IsVisible() const
 // TODO: Optimization: Use text and quad containers for rendering
 void CTouchControls::CTouchButton::Render() const
 {
-	const ColorRGBA ButtonColor = m_pBehavior->IsActive() ? ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f) : ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
+	const ColorRGBA ButtonColor = m_pBehavior->IsActive() ? m_pTouchControls->m_BackgroundColorActive : m_pTouchControls->m_BackgroundColorInactive;
 
 	switch(m_Shape)
 	{
@@ -1141,6 +1140,22 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 		return false;
 	}
 
+	std::optional<ColorRGBA> ParsedBackgroundColorInactive =
+		ParseColor(&(*pConfiguration)["background-color-inactive"], "background-color-inactive", ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f));
+	if(!ParsedBackgroundColorInactive.has_value())
+	{
+		json_value_free(pConfiguration);
+		return false;
+	}
+
+	std::optional<ColorRGBA> ParsedBackgroundColorActive =
+		ParseColor(&(*pConfiguration)["background-color-active"], "background-color-active", ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f));
+	if(!ParsedBackgroundColorActive.has_value())
+	{
+		json_value_free(pConfiguration);
+		return false;
+	}
+
 	const json_value &TouchButtons = (*pConfiguration)["touch-buttons"];
 	if(TouchButtons.type != json_array)
 	{
@@ -1167,6 +1182,8 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 	// Parsing successful. Apply parsed configuration.
 	m_DirectTouchIngame = ParsedDirectTouchIngame.value();
 	m_DirectTouchSpectate = ParsedDirectTouchSpectate.value();
+	m_BackgroundColorInactive = ParsedBackgroundColorInactive.value();
+	m_BackgroundColorActive = ParsedBackgroundColorActive.value();
 
 	m_pPrimaryJoystickTouchButtonBehavior = nullptr;
 	m_vTouchButtons = std::move(vParsedTouchButtons);
@@ -1239,6 +1256,27 @@ std::optional<CTouchControls::EDirectTouchSpectateMode> CTouchControls::ParseDir
 		return {};
 	}
 	return ParsedDirectTouchSpectate;
+}
+
+std::optional<ColorRGBA> CTouchControls::ParseColor(const json_value *pColorValue, const char *pAttributeName, std::optional<ColorRGBA> DefaultColor) const
+{
+	const json_value &Color = *pColorValue;
+	if(Color.type == json_none && DefaultColor.has_value())
+	{
+		return DefaultColor;
+	}
+	if(Color.type != json_string)
+	{
+		log_error("touch_controls", "Failed to parse configuration: attribute '%s' must specify a string", pAttributeName);
+		return {};
+	}
+	std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(Color.u.string.ptr);
+	if(!ParsedColor.has_value())
+	{
+		log_error("touch_controls", "Failed to parse configuration: attribute '%s' specifies invalid color value '%s'", pAttributeName, Color.u.string.ptr);
+		return {};
+	}
+	return ParsedColor;
 }
 
 std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const json_value *pButtonObject)
@@ -1550,6 +1588,15 @@ void CTouchControls::WriteConfiguration(CJsonWriter *pWriter)
 
 	pWriter->WriteAttribute("direct-touch-spectate");
 	pWriter->WriteStrValue(DIRECT_TOUCH_SPECTATE_MODE_NAMES[(int)m_DirectTouchSpectate]);
+
+	char aColor[9];
+	str_format(aColor, sizeof(aColor), "%08X", m_BackgroundColorInactive.PackAlphaLast());
+	pWriter->WriteAttribute("background-color-inactive");
+	pWriter->WriteStrValue(aColor);
+
+	str_format(aColor, sizeof(aColor), "%08X", m_BackgroundColorActive.PackAlphaLast());
+	pWriter->WriteAttribute("background-color-active");
+	pWriter->WriteStrValue(aColor);
 
 	pWriter->WriteAttribute("touch-buttons");
 	pWriter->BeginArray();
