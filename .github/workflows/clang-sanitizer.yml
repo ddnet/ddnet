@@ -10,7 +10,7 @@ on:
 
 jobs:
   check-clang-san:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     env:
       CARGO_HTTP_MULTIPLEXING: false
     steps:
