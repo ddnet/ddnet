@@ -190,7 +190,7 @@ public:
 
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientId);
-	bool EmulateBug(int Bug);
+	bool EmulateBug(int Bug) const;
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
 
 	// voting

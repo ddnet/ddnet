@@ -215,7 +215,7 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientId)
 	return m_apPlayers[ClientId]->GetCharacter();
 }
 
-bool CGameContext::EmulateBug(int Bug)
+bool CGameContext::EmulateBug(int Bug) const
 {
 	return m_MapBugs.Contains(Bug);
 }
