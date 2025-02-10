@@ -118,3 +118,16 @@ void CImageInfo::CopyRectFrom(const CImageInfo &SrcImage, size_t SrcX, size_t Sr
 		mem_copy(&m_pData[DestOffset], &SrcImage.m_pData[SrcOffset], CopySize);
 	}
 }
+
+CImageInfo CImageInfo::DeepCopy() const
+{
+	const size_t Size = DataSize();
+
+	CImageInfo Copy;
+	Copy.m_Width = m_Width;
+	Copy.m_Height = m_Height;
+	Copy.m_Format = m_Format;
+	Copy.m_pData = static_cast<uint8_t *>(malloc(Size));
+	mem_copy(Copy.m_pData, m_pData, Size);
+	return Copy;
+}
