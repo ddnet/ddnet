@@ -3093,30 +3093,26 @@ void CGameContext::ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUse
 void CGameContext::ConMapbug(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	const char *pMapBugName = pResult->GetString(0);
 
 	if(pSelf->m_pController)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mapbugs", "can't add map bugs after the game started");
+		log_info("mapbugs", "can't add map bugs after the game started");
 		return;
 	}
 
+	const char *pMapBugName = pResult->GetString(0);
 	switch(pSelf->m_MapBugs.Update(pMapBugName))
 	{
-	case MAPBUGUPDATE_OK:
+	case EMapBugUpdate::OK:
 		break;
-	case MAPBUGUPDATE_OVERRIDDEN:
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mapbugs", "map-internal setting overridden by database");
+	case EMapBugUpdate::OVERRIDDEN:
+		log_info("mapbugs", "map-internal setting overridden by database");
 		break;
-	case MAPBUGUPDATE_NOTFOUND:
-	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "unknown map bug '%s', ignoring", pMapBugName);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mapbugs", aBuf);
-	}
-	break;
+	case EMapBugUpdate::NOTFOUND:
+		log_info("mapbugs", "unknown map bug '%s', ignoring", pMapBugName);
+		break;
 	default:
-		dbg_assert(0, "unreachable");
+		dbg_assert(false, "unreachable");
 	}
 }
 
@@ -3898,7 +3894,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 	SHA256_DIGEST MapSha256;
 	int MapCrc;
 	Server()->GetMapInfo(aMapName, sizeof(aMapName), &MapSize, &MapSha256, &MapCrc);
-	m_MapBugs = GetMapBugs(aMapName, MapSize, MapSha256);
+	m_MapBugs = CMapBugs::Create(aMapName, MapSize, MapSha256);
 
 	// Reset Tunezones
 	CTuningParams TuningParams;
