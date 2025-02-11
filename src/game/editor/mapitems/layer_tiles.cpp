@@ -503,7 +503,11 @@ void CLayerTiles::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 	if(m_Readonly)
 		return;
 
-	//
+	std::shared_ptr<CLayerGroup> pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
+	std::shared_ptr<CLayerTiles> pGLayer = m_pEditor->m_Map.m_pGameLayer;
+	int GameX = pGLayer->ConvertX(WorldPos.x);
+	int GameY = pGLayer->ConvertY(WorldPos.y);
+
 	std::shared_ptr<CLayerTiles> pTileLayer = std::static_pointer_cast<CLayerTiles>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
@@ -536,6 +540,12 @@ void CLayerTiles::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 				continue;
 
 			SetTile(fx, fy, pTileLayer->GetTile(x, y));
+
+			if(m_FillGameTile != -1 && m_LiveGameTiles)
+			{
+				const CTile ResultTile = {(unsigned char)(HasTile ? m_FillGameTile : TILE_AIR)};
+				pGLayer->SetTile(x + GameX, y + GameY, ResultTile);
+			}
 		}
 
 	FlagModified(sx, sy, pTileLayer->m_Width, pTileLayer->m_Height);
@@ -747,6 +757,7 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 	}
 	if(Result > -1)
 	{
+		m_FillGameTile = Result;
 		const int OffsetX = -pGroup->m_OffsetX / 32;
 		const int OffsetY = -pGroup->m_OffsetY / 32;
 
@@ -972,6 +983,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{"Color Env", m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT, -1000000, 1000000},
 		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
+		{"Live Gametiles", m_LiveGameTiles, PROPTYPE_BOOL, 0, 1},
 		{"Seed", m_Seed, PROPTYPE_INT, 0, 1000000000},
 		{nullptr},
 	};
@@ -1081,6 +1093,10 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			m_AutoMapperConfig = NewVal % m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ConfigNamesNum();
 		else
 			m_AutoMapperConfig = -1;
+	}
+	else if(Prop == ETilesProp::PROP_LIVE_GAMETILES)
+	{
+		m_LiveGameTiles = NewVal != 0;
 	}
 
 	s_Tracker.End(Prop, State);
