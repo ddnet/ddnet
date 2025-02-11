@@ -8,12 +8,14 @@
 #include "entities/pickup.h"
 #include "entities/projectile.h"
 #include "entity.h"
-#include <algorithm>
 #include <engine/shared/config.h>
 #include <game/client/laser_data.h>
 #include <game/client/pickup_data.h>
 #include <game/client/projectile_data.h>
+#include <game/mapbugs.h>
 #include <game/mapitems.h>
+
+#include <algorithm>
 #include <utility>
 
 //////////////////////////////////////////////////
@@ -597,6 +599,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 		m_Core.m_aTuning[i] = pFrom->m_Core.m_aTuning[i];
 	}
 	m_pTuningList = pFrom->m_pTuningList;
+	m_pMapBugs = pFrom->m_pMapBugs;
 	m_Teams = pFrom->m_Teams;
 	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
 	// delete the previous entities
@@ -707,4 +710,9 @@ void CGameWorld::Clear()
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)
 			delete pFirstEntityType; // NOLINT(clang-analyzer-cplusplus.NewDelete)
+}
+
+bool CGameWorld::EmulateBug(int Bug) const
+{
+	return m_pMapBugs->Contains(Bug);
 }

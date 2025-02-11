@@ -12,6 +12,7 @@
 class CCollision;
 class CCharacter;
 class CEntity;
+class CMapBugs;
 
 class CGameWorld
 {
@@ -102,6 +103,9 @@ public:
 	CTuningParams *m_pTuningList;
 	CTuningParams *TuningList() { return m_pTuningList; }
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
+
+	const CMapBugs *m_pMapBugs;
+	bool EmulateBug(int Bug) const;
 
 private:
 	void RemoveEntities();

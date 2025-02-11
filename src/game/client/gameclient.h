@@ -14,6 +14,7 @@
 #include <game/collision.h>
 #include <game/gamecore.h>
 #include <game/layers.h>
+#include <game/mapbugs.h>
 #include <game/teamscore.h>
 
 #include <game/client/prediction/gameworld.h>
@@ -233,6 +234,7 @@ private:
 	static void ConchainSpecialDummy(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
+	static void ConMapbug(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
@@ -852,6 +854,7 @@ private:
 	int m_aSwitchStateTeam[NUM_DUMMIES];
 
 	void LoadMapSettings();
+	CMapBugs m_MapBugs;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
 	CTuningParams *TuningList() { return m_aTuningList; }
 
