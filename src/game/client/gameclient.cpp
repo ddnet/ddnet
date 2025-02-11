@@ -174,8 +174,9 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself to restart");
 	Console()->Register("ready_change", "", CFGFLAG_CLIENT, ConReadyChange7, this, "Change ready state (0.7 only)");
 
-	// register tune zone command to allow the client prediction to load tunezones from the map
+	// register game commands to allow the client prediction to load settings from the map
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
+	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 
 	for(auto &pComponent : m_vpAll)
 		pComponent->m_pClient = this;
@@ -395,6 +396,7 @@ void CGameClient::OnInit()
 
 	m_GameWorld.m_pCollision = Collision();
 	m_GameWorld.m_pTuningList = m_aTuningList;
+	m_GameWorld.m_pMapBugs = &m_MapBugs;
 	OnReset();
 
 	// Set free binds to DDRace binds if it's active
@@ -658,7 +660,7 @@ void CGameClient::OnReset()
 	m_CharOrder.Reset();
 	std::fill(std::begin(m_aSwitchStateTeam), std::end(m_aSwitchStateTeam), -1);
 
-	// m_aTuningList is reset in LoadMapSettings
+	// m_MapBugs and m_aTuningList are reset in LoadMapSettings
 
 	m_LastShowDistanceZoom = 0.0f;
 	m_LastZoom = 0.0f;
@@ -4042,6 +4044,10 @@ static bool UnknownMapSettingCallback(const char *pCommand, void *pUser)
 
 void CGameClient::LoadMapSettings()
 {
+	IEngineMap *pMap = Kernel()->RequestInterface<IEngineMap>();
+
+	m_MapBugs = CMapBugs::Create(Client()->GetCurrentMap(), pMap->MapSize(), pMap->Sha256());
+
 	// Reset Tunezones
 	CTuningParams TuningParams;
 	for(int i = 0; i < NUM_TUNEZONES; i++)
@@ -4062,7 +4068,6 @@ void CGameClient::LoadMapSettings()
 	}
 
 	// Load map tunings
-	IMap *pMap = Kernel()->RequestInterface<IMap>();
 	int Start, Num;
 	pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
 	for(int i = Start; i < Start + Num; i++)
@@ -4103,6 +4108,26 @@ void CGameClient::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 
 	if(List >= 0 && List < NUM_TUNEZONES)
 		pSelf->TuningList()[List].Set(pParamName, NewValue);
+}
+
+void CGameClient::ConMapbug(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const char *pMapBugName = pResult->GetString(0);
+
+	switch(pSelf->m_MapBugs.Update(pMapBugName))
+	{
+	case EMapBugUpdate::OK:
+		break;
+	case EMapBugUpdate::OVERRIDDEN:
+		log_debug("mapbugs", "map-internal setting overridden by database");
+		break;
+	case EMapBugUpdate::NOTFOUND:
+		log_debug("mapbugs", "unknown map bug '%s', ignoring", pMapBugName);
+		break;
+	default:
+		dbg_assert(false, "unreachable");
+	}
 }
 
 void CGameClient::ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
