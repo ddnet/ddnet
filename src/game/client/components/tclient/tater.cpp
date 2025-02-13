@@ -320,8 +320,7 @@ void CTater::OnRender()
 
 bool CTater::NeedUpdate()
 {
-	if(str_comp(m_aVersionStr, "0") != 0)
-		return true;
+	return str_comp(m_aVersionStr, "0") != 0;
 }
 
 void CTater::ResetTClientInfoTask()
