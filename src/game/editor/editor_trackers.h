@@ -13,7 +13,7 @@ class CEditor;
 class CLayerTiles;
 class CLayerGroup;
 class CLayerSounds;
-struct CSoundSource;
+class CSoundSource;
 
 class CQuadEditTracker
 {

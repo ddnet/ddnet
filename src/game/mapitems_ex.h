@@ -11,16 +11,18 @@ enum
 	END_MAPITEMTYPES_UUID,
 };
 
-struct CMapItemTest
+class CMapItemTest
 {
+public:
 	int m_Version;
 	int m_aFields[2];
 	int m_Field3;
 	int m_Field4;
 };
 
-struct CMapItemAutoMapperConfig
+class CMapItemAutoMapperConfig
 {
+public:
 	enum
 	{
 		FLAG_AUTOMATIC = 1

@@ -22,11 +22,11 @@ namespace client_data7 {
 struct CDataSprite;
 }
 struct CDataSprite;
-struct CEnvPoint;
-struct CEnvPointBezier;
-struct CEnvPointBezier_upstream;
-struct CMapItemGroup;
-struct CQuad;
+class CEnvPoint;
+class CEnvPointBezier;
+class CEnvPointBezier_upstream;
+class CMapItemGroup;
+class CQuad;
 
 #include <game/generated/protocol.h>
 
