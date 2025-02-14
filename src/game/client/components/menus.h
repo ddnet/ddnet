@@ -670,7 +670,7 @@ public:
 	bool IsActive() const { return m_MenuActive; }
 	void SetActive(bool Active);
 
-	void RunServer();
+	void RunServer(const char **ppArguments = nullptr, const size_t NumArguments = 0);
 	void KillServer();
 	bool IsServerRunning() const;
 

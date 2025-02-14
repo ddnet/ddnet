@@ -12,6 +12,7 @@
 #include <engine/textrender.h>
 #include <limits>
 
+#include <game/client/gameclient.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
@@ -32,6 +33,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	static int s_OpenButton = 0;
 	static int s_OpenCurrentMapButton = 0;
 	static int s_AppendButton = 0;
+	static int s_TestMapLocallyButton = 0;
 	static int s_ExitButton = 0;
 
 	CUIRect Slot;
@@ -117,6 +119,14 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	if(pEditor->DoButton_MenuItem(&pEditor->m_QuickActionMapDetails, pEditor->m_QuickActionMapDetails.Label(), 0, &Slot, 0, pEditor->m_QuickActionMapDetails.Description()))
 	{
 		pEditor->m_QuickActionMapDetails.Call();
+		return CUi::POPUP_CLOSE_CURRENT;
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_TestMapLocallyButton, pEditor->m_QuickActionTestMapLocally.Label(), 0, &Slot, 0, pEditor->m_QuickActionTestMapLocally.Description()))
+	{
+		pEditor->m_QuickActionTestMapLocally.Call();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -2114,6 +2124,23 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Remove sound";
 		pMessage = "This sound is used in the map. Removing it will reset all layers that use this sound to their default.\n\nRemove anyway?";
 	}
+	else if(pEditor->m_PopupEventType == POPEVENT_RESTART_SERVER)
+	{
+		pTitle = "Restart server";
+		pMessage = "You have a local server running, but you are not authorized or connected.\n\nDo you want to restart the server and reconnect?";
+	}
+	else if(pEditor->m_PopupEventType == POPEVENT_RESTARTING_SERVER)
+	{
+		pTitle = "Restarting server";
+		pMessage = "Local server is restarting. Please wait…";
+
+		const CGameClient *pGameClient = (CGameClient *)pEditor->Kernel()->RequestInterface<IGameClient>();
+		if(!pGameClient->m_Menus.IsServerRunning())
+		{
+			pEditor->TestMapLocally();
+			return CUi::POPUP_CLOSE_CURRENT;
+		}
+	}
 	else
 	{
 		dbg_assert(false, "m_PopupEventType invalid");
@@ -2158,6 +2185,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
+
+	if(pEditor->m_PopupEventType == POPEVENT_RESTARTING_SERVER)
+		return CUi::POPUP_KEEP_OPEN;
 
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Button);
 	static int s_ConfirmButton = 0;
@@ -2230,6 +2260,13 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 			pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
 			pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedSound));
 			pEditor->m_ToolbarPreviewSound = -1;
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_RESTART_SERVER)
+		{
+			CGameClient *pGameClient = (CGameClient *)pEditor->Kernel()->RequestInterface<IGameClient>();
+			pGameClient->m_Menus.KillServer();
+			pEditor->m_PopupEventType = CEditor::POPEVENT_RESTARTING_SERVER;
+			pEditor->m_PopupEventActivated = true;
 		}
 		pEditor->m_PopupEventWasActivated = false;
 		return CUi::POPUP_CLOSE_CURRENT;
