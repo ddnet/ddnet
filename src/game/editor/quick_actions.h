@@ -367,6 +367,14 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
 	"[Ctrl+Q] Add a new sound source.")
+REGISTER_QUICK_ACTION(
+	TestMapLocally,
+	"Test map locally",
+	[&]() { TestMapLocally(); },
+	ALWAYS_FALSE,
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Run a local server with the current map and connect you to it.")
 
 #undef ALWAYS_FALSE
 #undef DEFAULT_BTN
