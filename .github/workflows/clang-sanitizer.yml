@@ -14,16 +14,19 @@ jobs:
     env:
       CARGO_HTTP_MULTIPLEXING: false
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
       with:
         submodules: true
 
-    - name: Prepare linux
+    - name: Prepare Linux
       run: |
         sudo apt-get update -y
         sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libvulkan-dev glslang-tools spirv-tools libglew-dev -y
+
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
+
     - name: Build with ASan and UBSan
       run: |
         mkdir clang-sanitizer
@@ -34,6 +37,7 @@ jobs:
         export CFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer"
         cmake -DCMAKE_BUILD_TYPE=Debug -DHEADLESS_CLIENT=ON -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
         make -j"$(nproc)"
+
     - name: Run server and headless client with ASan and UBSan
       run: |
         cd clang-sanitizer
@@ -47,6 +51,7 @@ jobs:
           cat ./SAN.*
           exit 1
         fi
+
     - name: Run unit tests with ASan and UBSan
       run: |
         cd clang-sanitizer
@@ -57,6 +62,7 @@ jobs:
           cat ./SAN.*
           exit 1
         fi
+
     - name: Run integration tests with ASan and UBSan
       run: |
         cd clang-sanitizer
