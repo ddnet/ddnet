@@ -1094,23 +1094,23 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_INFO_REQUEST_FAILED;
 	}
 
-	if(m_NumScreens > 0)
-	{
-		*pScreen = clamp(*pScreen, 0, m_NumScreens - 1);
-		if(!SDL_GetDisplayBounds(*pScreen, &ScreenPos))
-		{
-			dbg_msg("gfx", "unable to retrieve screen information: %s", SDL_GetError());
-			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_INFO_REQUEST_FAILED;
-		}
-	}
-	else
+	
+	if(m_NumScreens <= 0)
 	{
 		dbg_msg("gfx", "unable to retrieve number of screens: %s", SDL_GetError());
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_REQUEST_FAILED;
 	}
 
+	int DisplayId = pDisplayIDs[clamp(*pScreen, 0, m_NumScreens - 1)];
+
+	if(!SDL_GetDisplayBounds(DisplayId, &ScreenPos))
+	{
+		dbg_msg("gfx", "unable to retrieve screen information: %s", SDL_GetError());
+		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_INFO_REQUEST_FAILED;
+	}
+
 	// store desktop resolution for settings reset button
-	const SDL_DisplayMode *pDisplayMode = SDL_GetDesktopDisplayMode(*pScreen);
+	const SDL_DisplayMode *pDisplayMode = SDL_GetDesktopDisplayMode(DisplayId);
 	if(!pDisplayMode)
 	{
 		dbg_msg("gfx", "unable to get desktop resolution: %s", SDL_GetError());
@@ -1128,7 +1128,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	CVideoMode aModes[256];
 	int ModesCount = 0;
 	int IndexOfResolution = -1;
-	GetVideoModes(aModes, std::size(aModes), &ModesCount, 1, *pDesktopWidth, *pDesktopHeight, *pScreen);
+	GetVideoModes(aModes, std::size(aModes), &ModesCount, 1, *pDesktopWidth, *pDesktopHeight, DisplayId);
 
 	for(int i = 0; i < ModesCount; i++)
 	{
