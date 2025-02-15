@@ -247,6 +247,7 @@ enum
 	PROPTYPE_SHIFT,
 	PROPTYPE_SOUND,
 	PROPTYPE_AUTOMAPPER,
+	PROPTYPE_AUTOMAPPER_REFERENCE,
 };
 
 class CDataFileWriterFinishJob : public IJob
@@ -908,6 +909,7 @@ public:
 	static CUi::EPopupMenuFunctionResult PopupSelectSound(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSelectGametileOp(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSelectConfigAutoMap(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSelectAutoMapReference(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupTele(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSpeedup(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSwitch(void *pContext, CUIRect View, bool Active);
@@ -939,6 +941,9 @@ public:
 
 	void PopupSelectSoundInvoke(int Current, float x, float y);
 	int PopupSelectSoundResult();
+
+	void PopupSelectAutoMapReferenceInvoke(int Current, float x, float y);
+	int PopupSelectAutoMapReferenceResult();
 
 	void DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);

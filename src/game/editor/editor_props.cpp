@@ -1,4 +1,5 @@
 #include "editor.h"
+#include "enums.h"
 
 #include <engine/textrender.h>
 
@@ -212,6 +213,25 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			if(r >= -1)
 			{
 				*pNewVal = r;
+				Change = i;
+				State = EEditState::ONE_GO;
+			}
+		}
+		else if(pProps[i].m_Type == PROPTYPE_AUTOMAPPER_REFERENCE)
+		{
+			const char *pName;
+			if(pProps[i].m_Value < 0)
+				pName = "None";
+			else
+				pName = g_apAutoMapReferenceNames[pProps[i].m_Value];
+
+			if(DoButton_Ex(&pIds[i], pName, 0, &Shifter, 0, nullptr, IGraphics::CORNER_ALL))
+				PopupSelectAutoMapReferenceInvoke(pProps[i].m_Value, Ui()->MouseX(), Ui()->MouseY());
+
+			const int Result = PopupSelectAutoMapReferenceResult();
+			if(Result >= -1)
+			{
+				*pNewVal = Result;
 				Change = i;
 				State = EEditState::ONE_GO;
 			}
