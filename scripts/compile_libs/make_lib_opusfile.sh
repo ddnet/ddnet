@@ -1,79 +1,93 @@
 #!/bin/bash
+set -e
 
-ANDROID_HOME=~/Android/Sdk
-ANDROID_NDK="$(find "$ANDROID_HOME/ndk" -maxdepth 1 | sort -n | tail -1)"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+# shellcheck source=scripts/compile_libs/_build_common.sh
+source "${SCRIPT_DIR}/_build_common.sh"
 
-export MAKEFLAGS=-j32
-
-export CXXFLAGS="$3"
-export CFLAGS="$3"
-export CPPFLAGS="$4"
-export LDFLAGS="$4"
-
-export ANDROID_NDK_ROOT="$ANDROID_NDK"
+export TARGET_PLATFORM="${1}"
 
 function make_opusfile() {
-	_EXISTS_PROJECT=0
-	if [ -d "$1" ]; then
-		_EXISTS_PROJECT=1
-	else
-		mkdir "$1"
+	local build_folder="${1}"
+	local build_android_triple="${2}"
+	local build_extra_cflags="${3}"
+
+	local library_path
+	library_path=$(realpath "..")
+	local ogg_include_path="${library_path}/ogg/include"
+	if [ ! -d "${ogg_include_path}" ]; then
+		log_error "ERROR: Download ogg first, include folder expected at ${ogg_include_path}"
+		exit 1
 	fi
+	local opus_include_path="${library_path}/opus/include"
+	if [ ! -d "${opus_include_path}" ]; then
+		log_error "ERROR: Download opus first, include folder expected at ${opus_include_path}"
+		exit 1
+	fi
+	local ogg_include_path_build="${library_path}/ogg/${build_folder}/include"
+	if [ ! -d "${ogg_include_path_build}" ]; then
+		log_error "ERROR: Compile ogg for ${build_android_triple} first, include folder expected at ${ogg_include_path_build}"
+		exit 1
+	fi
+
+	# Remove absolute build paths and compiler identification from binary
+	build_extra_cflags="${build_extra_cflags} -ffile-prefix-map=$(${PATH_WRAPPER} "$(realpath "..")")="
+	build_extra_cflags="${build_extra_cflags} -fno-ident"
+	if [[ "${TARGET_PLATFORM}" == "android" ]]; then
+		build_extra_cflags="${build_extra_cflags} -ffile-prefix-map=${ANDROID_TOOLCHAIN_ROOT}=ANDROID_TOOLCHAIN_ROOT"
+	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
+		build_extra_cflags="${build_extra_cflags} -ffile-prefix-map=${EMSDK}=EMSDK"
+	fi
+
+	log_info "Building to ${build_folder}..."
+	mkdir -p "${build_folder}"
 	(
-		cd "$1" || exit 1
-		if [[ "$_EXISTS_PROJECT" == 0 ]]; then
-			#not nice but doesn't matter
-			cp -R ../../ogg/include .
-			cp -R ../../opus/include .
-			cp -R ../../ogg/"$2"/include/ogg/* include/ogg/
-			cp ../../ogg/"$2"/libogg.a libogg.a
-			cp ../../opus/"$2"/libopus.a libopus.a
+		cd "${build_folder}"
+
+		local cc=""
+		local ar=""
+		if [[ "${TARGET_PLATFORM}" == "android" ]]; then
+			cc="${ANDROID_TOOLCHAIN_ROOT}/bin/${build_android_triple}${ANDROID_API}-clang"
+			ar="${ANDROID_TOOLCHAIN_ROOT}/bin/llvm-ar"
+		elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
+			cc="emcc"
+			ar="emar"
 		fi
 
-		TMP_COMPILER=""
-		TMP_AR=""
-		if [[ "${5}" == "android" ]]; then
-			TMP_COMPILER="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/$3$4-clang"
-			TMP_AR="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar"
-		elif [[ "${5}" == "webasm" ]]; then
-			TMP_COMPILER="emcc"
-			TMP_AR="emar"
+		if [[ ! -f Makefile ]]; then
+			cat > Makefile << EOF
+CC=${cc}
+AR=${ar}
+CFLAGS=${build_extra_cflags}
+INCLUDES=-I${PWD}/../include \
+	-I${ogg_include_path} \
+	-I${opus_include_path} \
+	-I${ogg_include_path_build}
+
+libopusfile.a: opusfile.o info.o stream.o internal.o
+	\$(AR) rvs libopusfile.a opusfile.o info.o stream.o internal.o
+
+opusfile.o info.o stream.o internal.o: %.o: ../src/%.c
+	\$(CC) -c \$(CFLAGS) \$(INCLUDES) \$< -o \$@
+EOF
 		fi
 
-		${TMP_COMPILER} \
-			-c \
-			-fPIC \
-			-I"${PWD}"/../include \
-			-I"${PWD}"/include \
-			../src/opusfile.c \
-			../src/info.c \
-			../src/internal.c
-		${TMP_COMPILER} \
-			-c \
-			-fPIC \
-			-I"${PWD}"/../include \
-			-I"${PWD}"/include \
-			-include stdio.h \
-			../src/stream.c
-		${TMP_AR} \
-			rvs \
-			libopusfile.a \
-			opusfile.o \
-			info.o \
-			stream.o \
-			internal.o
+		make "${BUILD_FLAGS}"
 	)
 }
 
-function compile_all_opusfile() {
-	if [[ "${2}" == "android" ]]; then
-		make_opusfile build_"$2"_arm build_"$2"_arm armv7a-linux-androideabi "$1" "$2"
-		make_opusfile build_"$2"_arm64 build_"$2"_arm64 aarch64-linux-android "$1" "$2"
-		make_opusfile build_"$2"_x86 build_"$2"_x86 i686-linux-android "$1" "$2"
-		make_opusfile build_"$2"_x86_64 build_"$2"_x86_64 x86_64-linux-android "$1" "$2"
-	elif [[ "${2}" == "webasm" ]]; then
-		make_opusfile build_"$2"_wasm build_"$2"_wasm "" "$1" "$2"
+function make_all_opusfile() {
+	if [[ "${TARGET_PLATFORM}" == "android" ]]; then
+		make_opusfile "${ANDROID_ARM_BUILD_FOLDER}" "${ANDROID_ARM_TRIPLE}" "${ANDROID_ARM_CFLAGS} ${ANDROID_EXTRA_RELEASE_CFLAGS}"
+		make_opusfile "${ANDROID_ARM64_BUILD_FOLDER}" "${ANDROID_ARM64_TRIPLE}" "${ANDROID_ARM64_CFLAGS} ${ANDROID_EXTRA_RELEASE_CFLAGS}"
+		make_opusfile "${ANDROID_X86_BUILD_FOLDER}" "${ANDROID_X86_TRIPLE}" "${ANDROID_X86_CFLAGS} ${ANDROID_EXTRA_RELEASE_CFLAGS}"
+		make_opusfile "${ANDROID_X64_BUILD_FOLDER}" "${ANDROID_X64_TRIPLE}" "${ANDROID_X64_CFLAGS} ${ANDROID_EXTRA_RELEASE_CFLAGS}"
+	elif [[ "${TARGET_PLATFORM}" == "webasm" ]]; then
+		make_opusfile "${EMSCRIPTEN_WASM_BUILD_FOLDER}" "" "${EMSCRIPTEN_WASM_CFLAGS} ${EMSCRIPTEN_EXTRA_RELEASE_CFLAGS}"
+	else
+		log_error "ERROR: Unsupported target platform: ${TARGET_PLATFORM}"
+		exit 1
 	fi
 }
 
-compile_all_opusfile "$1" "$2"
+make_all_opusfile
