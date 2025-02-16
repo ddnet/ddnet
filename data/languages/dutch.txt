@@ -52,7 +52,7 @@ Body
 == Lichaam
 
 Call vote
-== Stem oproepen
+== Stemmen
 
 Change settings
 == Verander instellingen
@@ -214,7 +214,7 @@ Move player to spectators
 == Verplaats speler naar toeschouwers
 
 Move right
-== beweeg naar rechts
+== Beweeg naar rechts
 
 Movement
 == Bewegen
@@ -352,10 +352,10 @@ Spectate
 == Toekijken
 
 Spectate next
-== Kijk volgende speler toe
+== Beschouw volgende speler
 
 Spectate previous
-== kijk vorige speler toe
+== Beschouw vorige speler
 
 Spectator mode
 == Toeschouwermode
@@ -463,7 +463,7 @@ Join game
 == Toetreden tot spel
 
 FSAA samples
-== FSAA samples
+== FSAA proeven
 
 Sound volume
 == geluids volume
@@ -682,7 +682,7 @@ Skin prefix
 == Skin prefix
 
 Hook collisions
-== Hookraaklijnen
+== Haakraaklijnen
 
 Pause
 == Pauze
@@ -751,7 +751,7 @@ Enable gun sound
 == Schakel pistool geluid in
 
 Enable long pain sound (used when shooting in freeze)
-== Schakel lang pijn geluid in (wanneer je schiet in freeze)
+== Schakel lang pijn geluid in (wanneer je schiet in bevries)
 
 Enable server message sound
 == Schakel server berichten geluid in
@@ -1114,7 +1114,7 @@ Use current map as background
 == Gebruik de huidige map als achtergrond
 
 Run on join
-== Run bij deelnemen
+== Loop bij deelnemen
 
 Chat command (e.g. showall 1)
 == Chat commando (bijv. showall 1)
@@ -1126,7 +1126,7 @@ Emoticons
 == Emoticons
 
 Particles
-== Particles
+== Deeltjes
 
 Assets directory
 == Assets map
@@ -1690,10 +1690,10 @@ Loading…
 == Laden…
 
 Loading ghost files
-== Ghost-bestanden laden
+== Spook-bestanden laden
 
 Ghosts directory
-== Ghost-map
+== Spook-map
 
 Activate all
 == Alles activeren
@@ -1834,7 +1834,7 @@ Show dummy actions
 == Toon dummy-acties
 
 Show player position
-== Toon dummy-acties
+== Toon speler positie
 
 Show player speed
 == Toon spelersnelheid
@@ -1843,10 +1843,10 @@ Show player target angle
 == Toon spelerdoelhoek
 
 Show freeze bars
-== Toon freeze-balken
+== Toon bevries-balken
 
 Opacity of freeze bars inside freeze
-== Doorzichtigheid van freeze-balken binnen freeze
+== Doorzichtigheid van bevries-balken binnen bevries
 
 Always show chat
 == Toon altijd de chat
@@ -1954,16 +1954,16 @@ Door Laser Inner Color
 == Deur-laser binnenkleur
 
 Freeze Laser Outline Color
-== Freeze-laser omtrekkleur
+== Bevries-laser omtrekkleur
 
 Freeze Laser Inner Color
-== Freeze-laser binnenkleur
+== Bevries-laser binnenkleur
 
 Set all to Rifle
 == Stel alles in op Rifle
 
 Enable ghost
-== Ghost inschakelen
+== Spook inschakelen
 
 Only save improvements
 == Alleen verbeteringen opslaan
