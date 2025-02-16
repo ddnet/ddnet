@@ -1746,6 +1746,9 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 
 	m_aTeamMapping[ClientId] = -1;
 
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && g_Config.m_SvPracticeByDefault && g_Config.m_SvTestingCommands)
+		m_pController->Teams().SetPractice(GetDDRaceTeam(ClientId), true);
+
 	m_VoteUpdate = true;
 	if(m_VoteCreator == ClientId)
 	{
@@ -3780,6 +3783,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("mapinfo", "?r[map]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConMapInfo, this, "Show info about the map with name r gives (current map by default)");
 	Console()->Register("timeout", "?s[code]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTimeout, this, "Set timeout protection code s");
 	Console()->Register("practice", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConPractice, this, "Enable cheats for your current team's run, but you can't earn a rank");
+	Console()->Register("unpractice", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConUnPractice, this, "Kills team and disables practice mode");
 	Console()->Register("practicecmdlist", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConPracticeCmdList, this, "List all commands that are avaliable in practice mode");
 	Console()->Register("swap", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSwap, this, "Request to swap your tee with another team member");
 	Console()->Register("cancelswap", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConCancelSwap, this, "Cancel your swap request");
