@@ -547,6 +547,9 @@ private:
 	static void ConPracticeEndlessHook(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnEndlessHook(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeToggleInvincible(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToggleCollision(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToggleHookCollision(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeToggleHitOthers(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConPracticeAddWeapon(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData);

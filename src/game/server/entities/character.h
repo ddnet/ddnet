@@ -57,6 +57,8 @@ public:
 	void SetSolo(bool Solo);
 	void SetSuper(bool Super);
 	void SetInvincible(bool Invincible);
+	void SetCollisionDisabled(bool CollisionDisabled);
+	void SetHookHitDisabled(bool HookHitDisabled);
 	void SetLiveFrozen(bool Active);
 	void SetDeepFrozen(bool Active);
 	void HandleWeaponSwitch();
@@ -266,6 +268,11 @@ public:
 	bool ShotgunHitDisabled() const { return m_Core.m_ShotgunHitDisabled; }
 	bool LaserHitDisabled() const { return m_Core.m_LaserHitDisabled; }
 	bool GrenadeHitDisabled() const { return m_Core.m_GrenadeHitDisabled; }
+
+	void SetHammerHitDisabled(bool HammerHitDisabled) { m_Core.m_HammerHitDisabled = HammerHitDisabled; }
+	void SetShotgunHitDisabled(bool ShotgunHitDisabled) { m_Core.m_ShotgunHitDisabled = ShotgunHitDisabled; }
+	void SetGrenadeHitDisabled(bool GrenadeHitDisabled) { m_Core.m_GrenadeHitDisabled = GrenadeHitDisabled; }
+	void SetLaserHitDisabled(bool LaserHitDisabled) { m_Core.m_LaserHitDisabled = LaserHitDisabled; }
 
 	bool IsSuper() const { return m_Core.m_Super; }
 
