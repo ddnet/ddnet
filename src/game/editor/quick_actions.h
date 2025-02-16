@@ -375,6 +375,26 @@ REGISTER_QUICK_ACTION(
 	ALWAYS_FALSE,
 	DEFAULT_BTN,
 	"Run a local server with the current map and connect you to it.")
+REGISTER_QUICK_ACTION(
+	AllowUnusedOn,
+	"Allow unused: On",
+	[&]() {
+		m_AllowPlaceUnusedTiles = true;
+	},
+	[&]() -> bool { return m_AllowPlaceUnusedTiles == true; },
+	[&]() -> bool { return m_AllowPlaceUnusedTiles == true; },
+	DEFAULT_BTN,
+	"[Ctrl+U] Allow placing unused tiles.")
+REGISTER_QUICK_ACTION(
+	AllowUnusedOff,
+	"Allow unused: Off",
+	[&]() {
+		m_AllowPlaceUnusedTiles = false;
+	},
+	[&]() -> bool { return m_AllowPlaceUnusedTiles == false; },
+	[&]() -> bool { return m_AllowPlaceUnusedTiles == false; },
+	DEFAULT_BTN,
+	"[Ctrl+U] Disallow placing unused tiles.")
 
 #undef ALWAYS_FALSE
 #undef DEFAULT_BTN

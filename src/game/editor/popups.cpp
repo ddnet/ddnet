@@ -281,11 +281,11 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		{
 			static int s_ButtonNo = 0;
 			static int s_ButtonYes = 0;
-			if(pEditor->DoButton_Ex(&s_ButtonNo, "No", !pEditor->m_AllowPlaceUnusedTiles, &No, 0, "[Ctrl+U] Disallow placing unused tiles.", IGraphics::CORNER_L))
+			if(pEditor->DoButton_Ex(&s_ButtonNo, "No", !pEditor->m_AllowPlaceUnusedTiles, &No, 0, pEditor->m_QuickActionAllowUnusedOff.Description(), IGraphics::CORNER_L))
 			{
 				pEditor->m_AllowPlaceUnusedTiles = false;
 			}
-			if(pEditor->DoButton_Ex(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, "[Ctrl+U] Allow placing unused tiles.", IGraphics::CORNER_R))
+			if(pEditor->DoButton_Ex(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, pEditor->m_QuickActionAllowUnusedOn.Description(), IGraphics::CORNER_R))
 			{
 				pEditor->m_AllowPlaceUnusedTiles = true;
 			}
