@@ -102,6 +102,20 @@ jobs:
     - name: Cache Rust dependencies
       uses: Swatinem/rust-cache@v2
 
+    - name: Build mastersrv
+      if: contains(matrix.os, 'latest')
+      run: |
+        mkdir mastersrv
+        cd mastersrv
+        cargo build --manifest-path=../src/mastersrv/Cargo.toml
+
+    - name: Build masterping
+      if: contains(matrix.os, 'latest')
+      run: |
+        mkdir masterping
+        cd masterping
+        cargo build --manifest-path=../src/masterping/Cargo.toml
+
     - name: Build in debug mode
       run: |
         mkdir debug
