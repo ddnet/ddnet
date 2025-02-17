@@ -180,6 +180,7 @@ void CCharacterCore::Reset()
 	m_FreezeStart = 0;
 	m_FreezeEnd = 0;
 	m_IsInFreeze = false;
+	m_IsInKillTile = false;
 	m_DeepFrozen = false;
 	m_LiveFrozen = false;
 
