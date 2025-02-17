@@ -654,46 +654,46 @@ After Load
 == После загрузки
 
 TClient
-== 
+== TClient
 
 Voting
-== 
+== Голосования
 
 Auto vote no to map changes when far
-== 
+== Авто-голосование за "нет" при смене карты если вы далеко
 
 Minimum Time
-== 
+== Минимальное время
 
 Leave empty to disable
-== 
+== Оставьте пустым чтобы отключить
 
 Message to send in chat:
-== 
+== Сообщение для отправки в чат
 
 Auto Reply
-== 
+== Авто-ответ
 
 Auto reply to muted players
-== 
+== Авто-ответ игрокам в мюте
 
 Auto reply when tabbed out
-== 
+== Авто-ответ когда не в игре
 
 Show other tees' trails
-== 
+== Показывать трейл других тии
 
 Solid
-== 
+== Статический
 
 Tee
-== 
+== Тии
 
 Speed
-== 
+== Скорость
 
 Colors in spectate select
-== 
+== Выбор цветов в наблюдателях
 
 _ or \' \' = Space
-== 
+== _ или \' \' = Пробел
