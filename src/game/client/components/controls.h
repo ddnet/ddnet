@@ -29,6 +29,8 @@ public:
 	int m_aInputDirectionRight[NUM_DUMMIES];
 	int m_aShowHookColl[NUM_DUMMIES];
 
+	CNetObj_PlayerInput m_FastInput;
+
 	CControls();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
@@ -42,5 +44,6 @@ public:
 	int SnapInput(int *pData);
 	void ClampMousePos();
 	void ResetInput(int Dummy);
+	bool CheckNewInput();
 };
 #endif

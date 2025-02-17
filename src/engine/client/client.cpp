@@ -2789,6 +2789,11 @@ void CClient::Update()
 					// send input
 					SendInput();
 				}
+
+				if(g_Config.m_ClFastInp && GameClient()->CheckNewInput())
+				{
+					Repredict = true;
+				}
 			}
 
 			// only do sane predictions
@@ -5114,7 +5119,7 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 	int64_t PredTime = m_PredictedTime.Get(time_get());
 	int64_t SmoothTime = clamp(GameTime + (int64_t)(MixAmount * (PredTime - GameTime)), GameTime, PredTime);
 
-	*pSmoothTick = (int)(SmoothTime * GameTickSpeed() / time_freq()) + 1;
+	*pSmoothTick = (int)(SmoothTime * GameTickSpeed() / time_freq()) + 1 + g_Config.m_ClFastInp;
 	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick - 1) * time_freq() / GameTickSpeed()) / (float)(time_freq() / GameTickSpeed());
 }
 

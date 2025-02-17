@@ -91,7 +91,44 @@ static CScrollRegion s_ScrollRegion;
 		return TotalHeight + Margin;
 	});
 	s_ScrollRegion.AddRect(DebugGroup);
-	// Конец одной секции
+	// Конец одной секци|
+
+	// Начало одной секции
+	static SFoldableSection s_InConsoleGroup;
+	CUIRect ConsoleGroup;
+	MainView.HSplitTop(Margin, nullptr, &ConsoleGroup);
+	DoFoldableSection(&s_InConsoleGroup, Localize("Console"), FontSize, &ConsoleGroup, &MainView, 5.0f, [&]() -> int {
+		ConsoleGroup.VMargin(Margin, &ConsoleGroup);
+		ConsoleGroup.HMargin(Margin, &ConsoleGroup);
+
+		CUIRect Left, Right;
+		CUIRect Button, Label;
+		ConsoleGroup.VSplitMid(&Left, &Right);
+
+		Left.HSplitTop(20.0f, &Button, &Left);
+		if(DoButton_CheckBox(&g_Config.m_ClCustomConsole, Localize("Enable custom console"), g_Config.m_ClCustomConsole, &Button))
+		{
+			g_Config.m_ClCustomConsole ^= 1;
+		}
+
+		if(g_Config.m_ClCustomConsole)
+		{
+			Left.HSplitTop(20.0f, &Button, &Left);
+			if(g_Config.m_ClCustomConsoleFading)
+				Ui()->DoScrollbarOption(&g_Config.m_ClCustomConsoleFading, &g_Config.m_ClCustomConsoleFading, &Button, Localize("Fading"), 1, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE);
+
+			Left.HSplitTop(20.0f, &Button, &Left);
+			if(g_Config.m_ClCustomConsoleAlpha)
+				Ui()->DoScrollbarOption(&g_Config.m_ClCustomConsoleAlpha, &g_Config.m_ClCustomConsoleAlpha, &Button, Localize("Alpha"), 1, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_NOCLAMPVALUE);
+
+
+		}
+
+		int TotalHeight = 40.0f;
+		return TotalHeight + Margin;
+	});
+	s_ScrollRegion.AddRect(DebugGroup);
+	// Конец одной секци|
 
 	s_ScrollRegion.End();
 }
