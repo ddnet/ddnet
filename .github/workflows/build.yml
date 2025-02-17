@@ -103,18 +103,16 @@ jobs:
       uses: Swatinem/rust-cache@v2
 
     - name: Build mastersrv
-      if: contains(matrix.os, 'latest')
+      if: "!contains(matrix.os, 'ubuntu-22.04')"
       run: |
-        mkdir mastersrv
-        cd mastersrv
-        cargo build --manifest-path=../src/mastersrv/Cargo.toml
+        cd src/mastersrv
+        cargo build
 
     - name: Build masterping
-      if: contains(matrix.os, 'latest')
+      if: "!contains(matrix.os, 'ubuntu-22.04')"
       run: |
-        mkdir masterping
-        cd masterping
-        cargo build --manifest-path=../src/masterping/Cargo.toml
+        cd src/masterping
+        cargo build
 
     - name: Build in debug mode
       run: |
