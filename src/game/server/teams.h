@@ -209,7 +209,7 @@ public:
 	{
 		if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
 			return false;
-		if(g_Config.m_SvPracticeByDefault && g_Config.m_SvTestingCommands)
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK && g_Config.m_SvPracticeByDefault && g_Config.m_SvTestingCommands)
 			return true;
 		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
 			return false;

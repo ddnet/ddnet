@@ -727,6 +727,69 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return;
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
+		return;
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientId);
+
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Practice mode can't be disabled for team 0");
+		return;
+	}
+
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Team isn't in practice mode");
+		return;
+	}
+
+	if(Teams.GetSaving(Team))
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Practice mode can't be disabled while team save or load is in progress");
+		return;
+	}
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(Teams.m_Core.Team(i) == Team)
+		{
+			CPlayer *pPlayer2 = pSelf->m_apPlayers[i];
+			if(pPlayer2 && pPlayer2->m_VotedForPractice)
+				pPlayer2->m_VotedForPractice = false;
+		}
+	}
+
+	// send before kill, in case team isn't locked
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "'%s' disabled practice mode for your team", pSelf->Server()->ClientName(pResult->m_ClientId));
+	pSelf->SendChatTeam(Team, aBuf);
+
+	Teams.KillSavedTeam(pResult->m_ClientId, Team);
+	Teams.SetPractice(Team, false);
+}
+
 void CGameContext::ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1155,6 +1218,13 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 		}
 		else
 		{
+			if(g_Config.m_SvPracticeByDefault && g_Config.m_SvTestingCommands)
+			{
+				// joined an empty team
+				if(m_pController->Teams().Count(Team) == 1)
+					m_pController->Teams().SetPractice(Team, true);
+			}
+
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "'%s' joined team %d",
 				Server()->ClientName(pPlayer->GetCid()),
