@@ -380,7 +380,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags = PlayerFlags_SixToSeven(m_PlayerFlags);
 		if(SnappingClientVersion >= VERSION_DDRACE && (m_PlayerFlags & PLAYERFLAG_AIM))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_AIM;
-		if(Server()->GetAuthedState(m_ClientId) != AUTHED_NO)
+		if(Server()->GetAuthedState(m_ClientId) && ((SnappingClient >= 0 && Server()->GetAuthedState(SnappingClient)) || !Server()->HasAuthHidden(m_ClientId)))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 
 		// Times are in milliseconds for 0.7
@@ -436,7 +436,11 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pDDNetPlayer)
 		return;
 
-	pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientId);
+	if((SnappingClient >= 0 && Server()->GetAuthedState(SnappingClient)) || !Server()->HasAuthHidden(m_ClientId))
+		pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientId);
+	else
+		pDDNetPlayer->m_AuthLevel = AUTHED_NO;
+
 	pDDNetPlayer->m_Flags = 0;
 	if(m_Afk)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;

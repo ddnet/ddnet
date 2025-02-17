@@ -604,6 +604,12 @@ const char *CServer::GetAuthName(int ClientId) const
 	return m_AuthManager.KeyIdent(Key);
 }
 
+bool CServer::HasAuthHidden(int ClientId) const
+{
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	return m_aClients[ClientId].m_AuthHidden;
+}
+
 bool CServer::GetClientInfo(int ClientId, CClientInfo *pInfo) const
 {
 	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
@@ -1088,6 +1094,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
+	pThis->m_aClients[ClientId].m_AuthHidden = false;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_ShowIps = false;
@@ -1119,6 +1126,7 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
+	pThis->m_aClients[ClientId].m_AuthHidden = false;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_Traffic = 0;
@@ -1209,6 +1217,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
+	pThis->m_aClients[ClientId].m_AuthHidden = false;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_Traffic = 0;
@@ -3736,6 +3745,26 @@ void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
 	}
 }
 
+void CServer::ConHideAuthStatus(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pServer = (CServer *)pUser;
+
+	if(pServer->m_RconClientId >= 0 && pServer->m_RconClientId < MAX_CLIENTS &&
+		pServer->m_aClients[pServer->m_RconClientId].m_State != CServer::CClient::STATE_EMPTY)
+	{
+		if(pResult->NumArguments())
+		{
+			pServer->m_aClients[pServer->m_RconClientId].m_AuthHidden = pResult->GetInteger(0);
+		}
+		else
+		{
+			char aStr[9];
+			str_format(aStr, sizeof(aStr), "Value: %d", pServer->m_aClients[pServer->m_RconClientId].m_AuthHidden);
+			pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aStr);
+		}
+	}
+}
+
 void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
@@ -4059,6 +4088,7 @@ void CServer::RegisterCommands()
 	Console()->Register("shutdown", "?r[reason]", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");
 	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)");
+	Console()->Register("hide_auth_status", "?i[hide]", CFGFLAG_SERVER, ConHideAuthStatus, this, "Hide auth status to non-authed players (1 = hidden, 0 = shown)");
 
 	Console()->Register("record", "?s[file]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRecord, this, "Record to a file");
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording");
