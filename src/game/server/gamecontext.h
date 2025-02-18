@@ -361,6 +361,8 @@ public:
 	void OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id) override;
 	void ReadCensorList();
 
+	bool PracticeByDefault() const;
+
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
