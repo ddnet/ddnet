@@ -331,7 +331,7 @@ void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 			Tmp->m_aCode,
 			Tmp->m_aGeneratedCode);
 	}
-	pController->Teams().KillSavedTeam(ClientId, Team);
+	pController->Teams().KillCharacterOrTeam(ClientId, Team);
 	GameServer()->SendChatTeam(Team, aBuf);
 	m_pPool->ExecuteWrite(CScoreWorker::SaveTeam, std::move(Tmp), "save team");
 }
