@@ -14,10 +14,12 @@ jobs:
     env:
       CARGO_HTTP_MULTIPLEXING: false
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
       with:
         submodules: true
-    - name: Prepare
+
+    - name: Prepare Linux
       run: |
         sudo apt-get update -y
         sudo apt-get install ddnet-tools shellcheck pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools libglew-dev -y
@@ -29,48 +31,42 @@ jobs:
         chmod +x ~/.local/bin/clang-format
         wget -O ~/.local/bin/shfmt https://github.com/mvdan/sh/releases/download/v3.8.0/shfmt_v3.8.0_linux_amd64
         chmod +x ~/.local/bin/shfmt
-        git clone https://gitlab.com/Patiga/twmap.git/
-        cd twmap/twmap-tools
-        cargo install --locked --path=.
-        cd ../..
-        rm -rf twmap
-        mkdir release
-        cd release
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GTEST=OFF -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
-        cmake --build . --config Release --target dilate
-    - name: Check clang-format
-      run: clang-format -version
-    - name: Check fix_style
-      run: scripts/fix_style.py --dry-run
-    - name: Check header guards
-      run: scripts/check_header_guards.py
-    - name: Validate Languages
-      run: scripts/languages/validate.py
-    - name: Check languages
-      run: scripts/languages/update_all.py
-    - name: Check dilated images
-      run: scripts/check_dilate.py release data
-    - name: Check absolute includes
-      run: "! grep --exclude-dir rust-bridge -rE '^#include \"(antibot|base|engine|game|steam|test)/' src/"
-    - name: Check standard header includes
-      run: scripts/check_standard_headers.sh
-    - name: Check config variables
-      run: scripts/check_config_variables.py
-    # TODO: Enable on release branches
-    #- name: Out-of-date translations
-    #  run: |
-    #    cp -a data/languages data/languages.orig
-    #    scripts/languages/update_all.py
-    #    diff_lang=$(diff data/languages.orig data/languages)
-    #    if [ -n "$diff_lang" ]; then
-    #      echo "Update translations:\n$diff_lang"
-    #      exit 1
-    #    fi
+
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+
+    - name: Check code style (ClangFormat)
+      run: |
+        clang-format -version
+        scripts/fix_style.py --dry-run
+
     - name: Shellcheck
       run: find . -type f -name '*.sh' -print0 | xargs -0 shellcheck
+
     - name: Shell format (shfmt)
       run: find . -type f -name '*.sh' -print0 | xargs -0 shfmt -d
-    - name: Check log error case
+
+    - name: Pylint
+      run: |
+        pylint --version
+        find . -type f -name "*.py" -not -path './ddnet-libs/*' -not -path './googletest-src/*' -print0 | xargs -0 pylint
+
+    - name: Check header guards
+      run: scripts/check_header_guards.py
+
+    - name: Unused header files
+      run: scripts/check_unused_header_files.py
+
+    - name: Check standard header includes
+      run: scripts/check_standard_headers.sh
+
+    - name: Check absolute includes
+      run: "! grep --exclude-dir rust-bridge -rE '^#include \"(antibot|base|engine|game|steam|test)/' src/"
+
+    - name: Check config variables
+      run: scripts/check_config_variables.py
+
+    - name: Check log error format
       run: |
         if grep -Eqr '(msg|Print).*\(.*"[Ee]rror:' src/;
         then
@@ -79,12 +75,31 @@ jobs:
           grep -Er '(msg|Print).*\(.*"[Ee]rror:' src/
           exit 1
         fi
-    - name: Pylint
+
+    - name: Validate languages
+      run: scripts/languages/validate.py
+
+    - name: Check languages
+      run: scripts/languages/update_all.py
+
+    - name: Build dilate tool
       run: |
-        pylint --version
-        find . -type f -name "*.py" -not -path './ddnet-libs/*' -not -path './googletest-src/*' -print0 | xargs -0 pylint
-    - name: Unused header files
-      run: scripts/check_unused_header_files.py
+        mkdir release
+        cd release
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DDOWNLOAD_GTEST=OFF -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
+        cmake --build . --config Release --target dilate
+
+    - name: Check dilated images
+      run: scripts/check_dilate.py release data
+
+    - name: Build twmap tool
+      run: |
+        git clone https://gitlab.com/Patiga/twmap.git/
+        cd twmap/twmap-tools
+        cargo install --locked --path=.
+        cd ../..
+        rm -rf twmap
+
     - name: Check maps
       run: |
         findings=$(find data -type f -name '*.map' ! -wholename 'data/maps/coverage.map' -print0 | xargs -0 ~/.cargo/bin/twmap-check-ddnet 2>&1 | \

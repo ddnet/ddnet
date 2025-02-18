@@ -243,7 +243,7 @@ jobs:
     - name: Validate Gradle Wrapper
       uses: gradle/actions/wrapper-validation@v4
 
-    - name: Prepare
+    - name: Prepare Linux
       run: |
         sudo apt-get update -y
         sudo apt-get install cmake ninja-build openjdk-21-jdk p7zip-full curl glslang-tools openssl
@@ -277,7 +277,10 @@ jobs:
         mv cmdline-tools latest
         yes | latest/bin/sdkmanager --licenses
 
-    - name: Build
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+
+    - name: Build Android app
       env:
         TW_KEY_NAME: /home/runner/DDNet.jks
         TW_KEY_ALIAS: DDNet-Key
