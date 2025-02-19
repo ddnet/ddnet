@@ -2046,7 +2046,7 @@ Hook Strength
 == Puterea cârligului
 
 Size of hook strength icon and number indicator
-== Dimensiunea indicatorului de putere al cârligului și indicatorul numeric
+== Dimensiunea indicatorului de putere al cârligului și a indicatorului numeric
 
 Key Presses
 == Taste apăsate
