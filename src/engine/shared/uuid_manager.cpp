@@ -169,7 +169,7 @@ int CUuidManager::UnpackUuid(CUnpacker *pUnpacker) const
 int CUuidManager::UnpackUuid(CUnpacker *pUnpacker, CUuid *pOut) const
 {
 	const CUuid *pUuid = (const CUuid *)pUnpacker->GetRaw(sizeof(*pUuid));
-	if(pUuid == NULL)
+	if(pUuid == nullptr)
 	{
 		return UUID_INVALID;
 	}

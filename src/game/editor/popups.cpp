@@ -12,6 +12,7 @@
 #include <engine/textrender.h>
 #include <limits>
 
+#include <game/client/gameclient.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
@@ -32,6 +33,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	static int s_OpenButton = 0;
 	static int s_OpenCurrentMapButton = 0;
 	static int s_AppendButton = 0;
+	static int s_TestMapLocallyButton = 0;
 	static int s_ExitButton = 0;
 
 	CUIRect Slot;
@@ -117,6 +119,14 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	if(pEditor->DoButton_MenuItem(&pEditor->m_QuickActionMapDetails, pEditor->m_QuickActionMapDetails.Label(), 0, &Slot, 0, pEditor->m_QuickActionMapDetails.Description()))
 	{
 		pEditor->m_QuickActionMapDetails.Call();
+		return CUi::POPUP_CLOSE_CURRENT;
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_TestMapLocallyButton, pEditor->m_QuickActionTestMapLocally.Label(), 0, &Slot, 0, pEditor->m_QuickActionTestMapLocally.Description()))
+	{
+		pEditor->m_QuickActionTestMapLocally.Call();
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
 
@@ -1872,6 +1882,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 		{
 			pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
 			pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedSound));
+			pEditor->m_ToolbarPreviewSound = -1;
 		}
 		return CUi::POPUP_CLOSE_CURRENT;
 	}
@@ -2113,6 +2124,23 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Remove sound";
 		pMessage = "This sound is used in the map. Removing it will reset all layers that use this sound to their default.\n\nRemove anyway?";
 	}
+	else if(pEditor->m_PopupEventType == POPEVENT_RESTART_SERVER)
+	{
+		pTitle = "Restart server";
+		pMessage = "You have a local server running, but you are not authorized or connected.\n\nDo you want to restart the server and reconnect?";
+	}
+	else if(pEditor->m_PopupEventType == POPEVENT_RESTARTING_SERVER)
+	{
+		pTitle = "Restarting server";
+		pMessage = "Local server is restarting. Please wait…";
+
+		const CGameClient *pGameClient = (CGameClient *)pEditor->Kernel()->RequestInterface<IGameClient>();
+		if(!pGameClient->m_Menus.IsServerRunning())
+		{
+			pEditor->TestMapLocally();
+			return CUi::POPUP_CLOSE_CURRENT;
+		}
+	}
 	else
 	{
 		dbg_assert(false, "m_PopupEventType invalid");
@@ -2157,6 +2185,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
+
+	if(pEditor->m_PopupEventType == POPEVENT_RESTARTING_SERVER)
+		return CUi::POPUP_KEEP_OPEN;
 
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Button);
 	static int s_ConfirmButton = 0;
@@ -2228,6 +2259,14 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		{
 			pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
 			pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedSound));
+			pEditor->m_ToolbarPreviewSound = -1;
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_RESTART_SERVER)
+		{
+			CGameClient *pGameClient = (CGameClient *)pEditor->Kernel()->RequestInterface<IGameClient>();
+			pGameClient->m_Menus.KillServer();
+			pEditor->m_PopupEventType = CEditor::POPEVENT_RESTARTING_SERVER;
+			pEditor->m_PopupEventActivated = true;
 		}
 		pEditor->m_PopupEventWasActivated = false;
 		return CUi::POPUP_CLOSE_CURRENT;
@@ -2485,6 +2524,64 @@ int CEditor::PopupSelectConfigAutoMapResult()
 	s_AutoMapConfigCurrent = s_AutoMapConfigSelected;
 	s_AutoMapConfigSelected = -100;
 	return s_AutoMapConfigCurrent;
+}
+
+static int s_AutoMapReferenceSelected = -1;
+static int s_AutoMapReferenceCurrent = -1;
+
+CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutoMapReference(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(pEditor->GetSelectedLayer(0));
+
+	const float ButtonHeight = 12.0f;
+	const float ButtonMargin = 2.0f;
+
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(ButtonHeight, std::size(g_apAutoMapReferenceNames) + 1, 1, 4, s_AutoMapReferenceCurrent + 1, &View, false);
+	s_ListBox.DoAutoSpacing(ButtonMargin);
+
+	for(int i = 0; i < static_cast<int>(std::size(g_apAutoMapReferenceNames)) + 1; i++)
+	{
+		static int s_NoneButton = 0;
+		CListboxItem Item = s_ListBox.DoNextItem(i == 0 ? (void *)&s_NoneButton : g_apAutoMapReferenceNames[i - 1], (i - 1) == s_AutoMapReferenceCurrent, 3.0f);
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect Label;
+		Item.m_Rect.VMargin(5.0f, &Label);
+
+		SLabelProperties Props;
+		Props.m_MaxWidth = Label.w;
+		Props.m_EllipsisAtEnd = true;
+		pEditor->Ui()->DoLabel(&Label, i == 0 ? "None" : g_apAutoMapReferenceNames[i - 1], EditorFontSizes::MENU, TEXTALIGN_ML, Props);
+	}
+
+	int NewSelected = s_ListBox.DoEnd() - 1;
+	if(NewSelected != s_AutoMapReferenceCurrent)
+		s_AutoMapReferenceSelected = NewSelected;
+
+	return CUi::POPUP_KEEP_OPEN;
+}
+
+void CEditor::PopupSelectAutoMapReferenceInvoke(int Current, float x, float y)
+{
+	static SPopupMenuId s_PopupSelectAutoMapReferenceId;
+	s_AutoMapReferenceSelected = -1;
+	s_AutoMapReferenceCurrent = Current;
+	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(GetSelectedLayer(0));
+	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
+	Ui()->DoPopupMenu(&s_PopupSelectAutoMapReferenceId, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * std::size(g_apAutoMapReferenceNames) + 1, this, PopupSelectAutoMapReference);
+}
+
+int CEditor::PopupSelectAutoMapReferenceResult()
+{
+	if(s_AutoMapReferenceSelected == -100)
+		return -100;
+
+	s_AutoMapReferenceCurrent = s_AutoMapReferenceSelected;
+	s_AutoMapReferenceSelected = -100;
+	return s_AutoMapReferenceCurrent;
 }
 
 // DDRace

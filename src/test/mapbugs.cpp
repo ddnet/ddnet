@@ -10,7 +10,7 @@ static CMapBugs GetMapBugsImpl(const char *pName, int Size, const char *pSha256)
 {
 	SHA256_DIGEST Sha256 = {{0}};
 	dbg_assert(sha256_from_str(&Sha256, pSha256) == 0, "invalid sha256 in tests");
-	return GetMapBugs(pName, Size, Sha256);
+	return CMapBugs::Create(pName, Size, Sha256);
 }
 
 TEST(MapBugs, Contains)
@@ -25,16 +25,16 @@ TEST(MapBugs, Update)
 {
 	{
 		CMapBugs Binary = GetMapBugsImpl("Binary", 2022597, BINARY_SHA256);
-		EXPECT_EQ(Binary.Update("grenade-doubleexplosion@ddnet.tw"), MAPBUGUPDATE_OVERRIDDEN);
-		EXPECT_EQ(Binary.Update("doesntexist@invalid"), MAPBUGUPDATE_NOTFOUND);
+		EXPECT_EQ(Binary.Update("grenade-doubleexplosion@ddnet.tw"), EMapBugUpdate::OVERRIDDEN);
+		EXPECT_EQ(Binary.Update("doesntexist@invalid"), EMapBugUpdate::NOTFOUND);
 		EXPECT_TRUE(Binary.Contains(BUG_GRENADE_DOUBLEEXPLOSION));
 	}
 	{
 		CMapBugs Dm1 = GetMapBugsImpl("dm1", 5805, DM1_SHA256);
 		EXPECT_FALSE(Dm1.Contains(BUG_GRENADE_DOUBLEEXPLOSION));
-		EXPECT_EQ(Dm1.Update("doesntexist@invalid"), MAPBUGUPDATE_NOTFOUND);
+		EXPECT_EQ(Dm1.Update("doesntexist@invalid"), EMapBugUpdate::NOTFOUND);
 		EXPECT_FALSE(Dm1.Contains(BUG_GRENADE_DOUBLEEXPLOSION));
-		EXPECT_EQ(Dm1.Update("grenade-doubleexplosion@ddnet.tw"), MAPBUGUPDATE_OK);
+		EXPECT_EQ(Dm1.Update("grenade-doubleexplosion@ddnet.tw"), EMapBugUpdate::OK);
 		EXPECT_TRUE(Dm1.Contains(BUG_GRENADE_DOUBLEEXPLOSION));
 	}
 }

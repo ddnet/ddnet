@@ -88,8 +88,8 @@ class CConsole : public IConsole
 			IResult(ClientId)
 		{
 			mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
-			m_pArgsStart = 0;
-			m_pCommand = 0;
+			m_pArgsStart = nullptr;
+			m_pCommand = nullptr;
 			mem_zero(m_apArgs, sizeof(m_apArgs));
 		}
 
@@ -119,7 +119,7 @@ class CConsole : public IConsole
 			for(unsigned i = Index; i < m_NumArgs - 1; i++)
 				m_apArgs[i] = m_apArgs[i + 1];
 
-			m_apArgs[m_NumArgs--] = 0;
+			m_apArgs[m_NumArgs--] = nullptr;
 		}
 
 		// DDRace

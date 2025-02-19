@@ -209,7 +209,7 @@ void CCommandProcessorFragment_SDL::Cmd_Init(const SCommand_Init *pCommand)
 void CCommandProcessorFragment_SDL::Cmd_Shutdown(const SCommand_Shutdown *pCommand)
 {
 	if(m_GLContext)
-		SDL_GL_MakeCurrent(NULL, NULL);
+		SDL_GL_MakeCurrent(nullptr, nullptr);
 }
 
 void CCommandProcessorFragment_SDL::Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand)
@@ -909,8 +909,8 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 
 	// Only collect fullscreen modes when requested, that makes sure in windowed mode no refresh rates are shown that aren't supported without
 	// fullscreen anyway(except fullscreen desktop)
-	bool IsFullscreenDestkop = m_pWindow != NULL && (((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP) || g_Config.m_GfxFullscreen == 3);
-	bool CollectFullscreenModes = m_pWindow == NULL || ((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN) != 0 && !IsFullscreenDestkop);
+	bool IsFullscreenDestkop = m_pWindow != nullptr && (((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP) || g_Config.m_GfxFullscreen == 3);
+	bool CollectFullscreenModes = m_pWindow == nullptr || ((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN) != 0 && !IsFullscreenDestkop);
 
 	if(SDL_GetDesktopDisplayMode(ScreenId, &DesktopMode) < 0)
 	{
@@ -1203,7 +1203,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		SdlFlags);
 
 	// set caption
-	if(m_pWindow == NULL)
+	if(m_pWindow == nullptr)
 	{
 		dbg_msg("gfx", "unable to create window: %s", SDL_GetError());
 		if(m_BackendType == BACKEND_TYPE_VULKAN)
@@ -1220,7 +1220,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	{
 		m_GLContext = SDL_GL_CreateContext(m_pWindow);
 
-		if(m_GLContext == NULL)
+		if(m_GLContext == nullptr)
 		{
 			SDL_DestroyWindow(m_pWindow);
 			m_pWindow = nullptr;
@@ -1238,7 +1238,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	}
 
 	int InitError = 0;
-	const char *pErrorStr = NULL;
+	const char *pErrorStr = nullptr;
 
 	InitError = IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, GlewMajor, GlewMinor, GlewPatch);
 
@@ -1251,7 +1251,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	if(IsOpenGLFamilyBackend)
 	{
 		SDL_GL_SetSwapInterval(Flags & IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
-		SDL_GL_MakeCurrent(NULL, NULL);
+		SDL_GL_MakeCurrent(nullptr, nullptr);
 	}
 
 	if(InitError != 0)
@@ -1372,7 +1372,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 			g_Config.m_GfxGLPatch = m_Capabilites.m_ContextPatch;
 		}
 
-		if(pErrorStr != NULL)
+		if(pErrorStr != nullptr)
 		{
 			str_copy(m_aErrorString, pErrorStr);
 		}

@@ -14,8 +14,6 @@ def recursive_file_list(path):
 	return result
 
 IGNORE_FILES = [
-	"src/engine/client/keynames.h",
-	"src/engine/keys.h",
 ]
 IGNORE_DIRS = [
 	"src/game/generated",

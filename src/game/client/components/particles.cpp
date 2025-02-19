@@ -107,7 +107,7 @@ void CParticles::Update(float TimePassed)
 			vec2 Vel = m_aParticles[i].m_Vel * TimePassed;
 			if(m_aParticles[i].m_Collides)
 			{
-				Collision()->MovePoint(&m_aParticles[i].m_Pos, &Vel, random_float(0.1f, 1.0f), NULL);
+				Collision()->MovePoint(&m_aParticles[i].m_Pos, &Vel, random_float(0.1f, 1.0f), nullptr);
 			}
 			else
 			{

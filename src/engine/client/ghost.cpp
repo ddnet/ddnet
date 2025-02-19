@@ -35,7 +35,7 @@ CGhostInfo CGhostHeader::ToGhostInfo() const
 
 CGhostRecorder::CGhostRecorder()
 {
-	m_File = 0;
+	m_File = nullptr;
 	m_aFilename[0] = '\0';
 	ResetBuffer();
 }
@@ -193,7 +193,7 @@ void CGhostRecorder::Stop(int Ticks, int Time)
 	}
 
 	io_close(m_File);
-	m_File = 0;
+	m_File = nullptr;
 
 	if(DiscardFile)
 	{
@@ -206,7 +206,7 @@ void CGhostRecorder::Stop(int Ticks, int Time)
 
 CGhostLoader::CGhostLoader()
 {
-	m_File = 0;
+	m_File = nullptr;
 	m_aFilename[0] = '\0';
 	ResetBuffer();
 }
@@ -476,7 +476,7 @@ void CGhostLoader::Close()
 	}
 
 	io_close(m_File);
-	m_File = 0;
+	m_File = nullptr;
 	m_aFilename[0] = '\0';
 }
 

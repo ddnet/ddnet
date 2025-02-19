@@ -621,7 +621,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerForwardButton, &Button, Localize("Go forward one marker"));
 
 	// slowdown
-	ButtonBar.VSplitLeft(Margins + 10.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SlowDownButton;
 	if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_CHEVRON_DOWN, 0, &Button, IGraphics::CORNER_ALL))
@@ -629,7 +629,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_SlowDownButton, &Button, Localize("Slow down the demo"));
 
 	// fastforward
-	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SpeedUpButton;
 	if(DoButton_FontIcon(&s_SpeedUpButton, FONT_ICON_CHEVRON_UP, 0, &Button, IGraphics::CORNER_ALL))

@@ -132,6 +132,16 @@ public:
 	 * @param DestY The y-offset in the destination image (this).
 	 */
 	void CopyRectFrom(const CImageInfo &SrcImage, size_t SrcX, size_t SrcY, size_t Width, size_t Height, size_t DestX, size_t DestY) const;
+
+	/**
+	 * Creates a complete, independent copy of this image and its data.
+	 *
+	 * @return Copy of this image with copied data.
+	 *
+	 * @remark This image must be valid.
+	 * @remark The copied image must be freed separately.
+	 */
+	CImageInfo DeepCopy() const;
 };
 
 #endif

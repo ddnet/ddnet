@@ -30,7 +30,7 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pRea
 	for(int EnvIndex = 0; EnvIndex < EnvNum; EnvIndex++)
 	{
 		CMapItemEnvelope *pEnvelope = static_cast<CMapItemEnvelope *>(pReader->GetItem(EnvStart + EnvIndex));
-		if(pEnvelope->m_Version >= CMapItemEnvelope_v3::CURRENT_VERSION)
+		if(pEnvelope->m_Version >= CMapItemEnvelope::VERSION_TEEWORLDS_BEZIER)
 		{
 			FoundBezierEnvelope = true;
 			break;

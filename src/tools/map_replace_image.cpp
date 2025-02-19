@@ -126,7 +126,7 @@ int main(int argc, const char **argv)
 			if(!pItem)
 				return -1;
 			Size = sizeof(CMapItemImage);
-			NewImageItem.m_Version = CMapItemImage::CURRENT_VERSION;
+			NewImageItem.m_Version = 1;
 		}
 
 		Writer.AddItem(Type, Id, Size, pItem, &Uuid);

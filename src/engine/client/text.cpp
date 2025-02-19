@@ -1178,7 +1178,7 @@ public:
 		}
 		if(pJsonData->type != json_object)
 		{
-			log_error("textrender", "Font index malformed: root must be an object", pFilename, aError);
+			log_error("textrender", "Font index malformed: root must be an object in file '%s'", pFilename);
 			return false;
 		}
 

@@ -33,4 +33,17 @@ enum class EGameTileOp
 	LIVE_UNFREEZE,
 };
 
+constexpr const char *g_apAutoMapReferenceNames[] = {
+	"Game Layer",
+	"Hookable",
+	"Death",
+	"Unhookable",
+	"Freeze",
+	"Unfreeze",
+	"Deep Freeze",
+	"Deep Unfreeze",
+	"Live Freeze",
+	"Live Unfreeze",
+};
+
 #endif

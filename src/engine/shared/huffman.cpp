@@ -95,7 +95,7 @@ void CHuffman::Init(const unsigned *pFrequencies)
 	// make sure to cleanout every thing
 	mem_zero(m_aNodes, sizeof(m_aNodes));
 	mem_zero(m_apDecodeLut, sizeof(m_apDecodeLut));
-	m_pStartNode = 0x0;
+	m_pStartNode = nullptr;
 	m_NumNodes = 0;
 
 	// construct the tree
@@ -217,7 +217,7 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 	while(true)
 	{
 		// {A} try to load a node now, this will reduce dependency at location {D}
-		const CNode *pNode = 0;
+		const CNode *pNode = nullptr;
 		if(Bitcount >= HUFFMAN_LUTBITS)
 			pNode = m_apDecodeLut[Bits & HUFFMAN_LUTMASK];
 

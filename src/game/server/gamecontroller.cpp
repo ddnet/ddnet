@@ -518,11 +518,6 @@ void IGameController::DoWarmup(int Seconds)
 		m_Warmup = Seconds * Server()->TickSpeed();
 }
 
-bool IGameController::IsForceBalanced()
-{
-	return false;
-}
-
 bool IGameController::CanBeMovedOnBalance(int ClientId)
 {
 	return true;
@@ -589,7 +584,7 @@ void IGameController::Snap(int SnappingClient)
 	pGameInfoObj->m_RoundCurrent = m_RoundCount + 1;
 
 	CCharacter *pChr;
-	CPlayer *pPlayer = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->m_apPlayers[SnappingClient] : 0;
+	CPlayer *pPlayer = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->m_apPlayers[SnappingClient] : nullptr;
 	CPlayer *pPlayer2;
 
 	if(pPlayer && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && pPlayer->GetClientVersion() >= VERSION_DDNET_GAMETICK)

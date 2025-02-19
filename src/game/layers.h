@@ -5,9 +5,9 @@
 
 class IMap;
 
-struct CMapItemGroup;
-struct CMapItemLayer;
-struct CMapItemLayerTilemap;
+class CMapItemGroup;
+class CMapItemLayer;
+class CMapItemLayerTilemap;
 
 class CLayers
 {

@@ -247,6 +247,7 @@ enum
 	PROPTYPE_SHIFT,
 	PROPTYPE_SOUND,
 	PROPTYPE_AUTOMAPPER,
+	PROPTYPE_AUTOMAPPER_REFERENCE,
 };
 
 class CDataFileWriterFinishJob : public IJob
@@ -351,6 +352,7 @@ public:
 	void LayerSelectImage();
 	bool IsNonGameTileLayerSelected() const;
 	void MapDetails();
+	void TestMapLocally();
 #define REGISTER_QUICK_ACTION(name, text, callback, disabled, active, button_color, description) CQuickAction m_QuickAction##name;
 #include <game/editor/quick_actions.h>
 #undef REGISTER_QUICK_ACTION
@@ -612,6 +614,8 @@ public:
 		POPEVENT_PIXELART_TOO_MANY_COLORS,
 		POPEVENT_REMOVE_USED_IMAGE,
 		POPEVENT_REMOVE_USED_SOUND,
+		POPEVENT_RESTART_SERVER,
+		POPEVENT_RESTARTING_SERVER,
 	};
 
 	int m_PopupEventType;
@@ -905,6 +909,7 @@ public:
 	static CUi::EPopupMenuFunctionResult PopupSelectSound(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSelectGametileOp(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSelectConfigAutoMap(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSelectAutoMapReference(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupTele(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSpeedup(void *pContext, CUIRect View, bool Active);
 	static CUi::EPopupMenuFunctionResult PopupSwitch(void *pContext, CUIRect View, bool Active);
@@ -936,6 +941,9 @@ public:
 
 	void PopupSelectSoundInvoke(int Current, float x, float y);
 	int PopupSelectSoundResult();
+
+	void PopupSelectAutoMapReferenceInvoke(int Current, float x, float y);
+	int PopupSelectAutoMapReferenceResult();
 
 	void DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);

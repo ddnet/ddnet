@@ -12,6 +12,9 @@
 #include <game/client/ui_rect.h>
 #include <game/generated/protocol7.h>
 
+#include <functional>
+#include <memory>
+
 class CAnimState;
 class CSpeedupTile;
 class CSwitchTile;
@@ -22,13 +25,45 @@ namespace client_data7 {
 struct CDataSprite;
 }
 struct CDataSprite;
-struct CEnvPoint;
-struct CEnvPointBezier;
-struct CEnvPointBezier_upstream;
-struct CMapItemGroup;
-struct CQuad;
+class CEnvPoint;
+class CEnvPointBezier;
+class CEnvPointBezier_upstream;
+class CMapItemGroup;
+class CQuad;
 
 #include <game/generated/protocol.h>
+
+class CSkinDescriptor
+{
+public:
+	enum
+	{
+		FLAG_SIX = 1,
+		FLAG_SEVEN = 2,
+	};
+	unsigned m_Flags;
+
+	char m_aSkinName[MAX_SKIN_LENGTH];
+
+	class CSixup
+	{
+	public:
+		char m_aaSkinPartNames[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_LENGTH];
+		bool m_BotDecoration;
+		bool m_XmasHat;
+
+		void Reset();
+		bool operator==(const CSixup &Other) const;
+		bool operator!=(const CSixup &Other) const { return !(*this == Other); }
+	};
+	CSixup m_aSixup[NUM_DUMMIES];
+
+	CSkinDescriptor();
+	void Reset();
+	bool IsValid() const;
+	bool operator==(const CSkinDescriptor &Other) const;
+	bool operator!=(const CSkinDescriptor &Other) const { return !(*this == Other); }
+};
 
 class CTeeRenderInfo
 {
@@ -104,33 +139,60 @@ public:
 	public:
 		void Reset()
 		{
-			for(auto &Texture : m_aTextures)
-				Texture = IGraphics::CTextureHandle();
-			m_BotTexture = IGraphics::CTextureHandle();
-			for(ColorRGBA &PartColor : m_aColors)
+			for(auto &Texture : m_aOriginalTextures)
 			{
-				PartColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+				Texture.Invalidate();
 			}
+			for(auto &Texture : m_aColorableTextures)
+			{
+				Texture.Invalidate();
+			}
+			std::fill(std::begin(m_aUseCustomColors), std::end(m_aUseCustomColors), false);
+			std::fill(std::begin(m_aColors), std::end(m_aColors), ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
+			m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+			m_HatTexture.Invalidate();
+			m_BotTexture.Invalidate();
 			m_HatSpriteIndex = 0;
 			m_BotColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
 		}
-		bool Valid() const
-		{
-			for(const auto &Texture : m_aTextures)
-				if(!Texture.IsValid())
-					return false;
-			return true;
-		}
 
-		IGraphics::CTextureHandle m_aTextures[protocol7::NUM_SKINPARTS];
+		IGraphics::CTextureHandle m_aOriginalTextures[protocol7::NUM_SKINPARTS];
+		IGraphics::CTextureHandle m_aColorableTextures[protocol7::NUM_SKINPARTS];
+		bool m_aUseCustomColors[protocol7::NUM_SKINPARTS];
 		ColorRGBA m_aColors[protocol7::NUM_SKINPARTS];
+		ColorRGBA m_BloodColor;
 		IGraphics::CTextureHandle m_HatTexture;
 		IGraphics::CTextureHandle m_BotTexture;
 		int m_HatSpriteIndex;
 		ColorRGBA m_BotColor;
+
+		const IGraphics::CTextureHandle &PartTexture(int Part) const
+		{
+			return (m_aUseCustomColors[Part] ? m_aColorableTextures : m_aOriginalTextures)[Part];
+		}
 	};
 
 	CSixup m_aSixup[NUM_DUMMIES];
+};
+
+class CManagedTeeRenderInfo
+{
+	friend class CGameClient;
+	CTeeRenderInfo m_TeeRenderInfo;
+	CSkinDescriptor m_SkinDescriptor;
+	std::function<void()> m_RefreshCallback = nullptr;
+
+public:
+	CManagedTeeRenderInfo(const CTeeRenderInfo &TeeRenderInfo, const CSkinDescriptor &SkinDescriptor) :
+		m_TeeRenderInfo(TeeRenderInfo),
+		m_SkinDescriptor(SkinDescriptor)
+	{
+	}
+
+	CTeeRenderInfo &TeeRenderInfo() { return m_TeeRenderInfo; }
+	const CTeeRenderInfo &TeeRenderInfo() const { return m_TeeRenderInfo; }
+	const CSkinDescriptor &SkinDescriptor() const { return m_SkinDescriptor; }
+	void SetRefreshCallback(const std::function<void()> &RefreshCallback) { m_RefreshCallback = RefreshCallback; }
 };
 
 // Tee Render Flags

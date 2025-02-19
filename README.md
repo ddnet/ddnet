@@ -69,35 +69,31 @@ Building on Linux and macOS
 
 To compile DDNet yourself, execute the following commands in the source root:
 
-    mkdir build
-    cd build
-    cmake ..
-    make -j$(nproc)
-
-Pass the number of threads for compilation to `make -j`. `$(nproc)` in this case returns the number of processing units.
+    cmake -Bbuild
+    cmake --build build
 
 DDNet requires additional libraries, some of which are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86\_64) for convenience and the official builds. The bundled libraries for official builds are now in the ddnet-libs submodule. Note that when you build and develop locally, you should ideally use your system's package manager to install the dependencies, instead of relying on ddnet-libs submodule, which does not contain all dependencies anyway (e.g. openssl, vulkan). See the previous section for how to get the dependencies. Alternatively see the following build arguments for how to disable some features and their dependencies (`-DVULKAN=OFF` won't require Vulkan for example).
 
 The following is a non-exhaustive list of build arguments that can be passed to the `cmake` command-line tool in order to enable or disable options in build time:
 
 * **-DCMAKE_BUILD_TYPE=[Release|Debug|RelWithDebInfo|MinSizeRel]** <br>
-An optional CMake variable for setting the build type. If not set, defaults to "Release" if `-DDEV=ON` is **not** used, and "Debug" if `-DDEV=ON` is used. See `CMAKE_BUILD_TYPE` in CMake Documentation for more information.
+  An optional CMake variable for setting the build type. If not set, defaults to "Release" if `-DDEV=ON` is **not** used, and "Debug" if `-DDEV=ON` is used. See `CMAKE_BUILD_TYPE` in CMake Documentation for more information.
 
 * **-DPREFER_BUNDLED_LIBS=[ON|OFF]** <br>
-Whether to prefer bundled libraries over system libraries. Setting to ON will make DDNet use third party libraries available in the `ddnet-libs` folder, which is the git-submodule target of the [ddnet-libs](https://github.com/ddnet/ddnet-libs) repository mentioned above -- Useful if you do not have those libraries installed and want to avoid building them. If set to OFF, will only use bundled libraries when system libraries are not found. Default value is OFF.
+  Whether to prefer bundled libraries over system libraries. Setting to ON will make DDNet use third party libraries available in the `ddnet-libs` folder, which is the git-submodule target of the [ddnet-libs](https://github.com/ddnet/ddnet-libs) repository mentioned above -- Useful if you do not have those libraries installed and want to avoid building them. If set to OFF, will only use bundled libraries when system libraries are not found. Default value is OFF.
 
 * **-DWEBSOCKETS=[ON|OFF]** <br>
-Whether to enable WebSocket support for server. Setting to ON requires the `libwebsockets-dev` library installed. Default value is OFF.
+  Whether to enable WebSocket support for server. Setting to ON requires the `libwebsockets-dev` library installed. Default value is OFF.
 
 * **-DMYSQL=[ON|OFF]** <br>
-Whether to enable MySQL/MariaDB support for server. Requires at least MySQL 8.0 or MariaDB 10.2. Setting to ON requires the `libmariadbclient-dev` library installed, which are also provided as bundled libraries for the common platforms. Default value is OFF.
+  Whether to enable MySQL/MariaDB support for server. Requires at least MySQL 8.0 or MariaDB 10.2. Setting to ON requires the `libmariadbclient-dev` library installed, which are also provided as bundled libraries for the common platforms. Default value is OFF.
 
-   Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
+  Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
 
 * **-DTEST_MYSQL=[ON|OFF]** <br>
-Whether to test MySQL/MariaDB support in GTest based tests. Default value is OFF.
+  Whether to test MySQL/MariaDB support in GTest based tests. Default value is OFF.
 
-   Note that this requires a running MySQL/MariaDB database on localhost with this setup:
+  Note that this requires a running MySQL/MariaDB database on localhost with this setup:
 
 ```
 CREATE DATABASE ddnet;
@@ -107,47 +103,47 @@ FLUSH PRIVILEGES;
 ```
 
 * **-DAUTOUPDATE=[ON|OFF]** <br>
-Whether to enable the autoupdater. Packagers may want to disable this for their packages. Default value is ON for Windows and Linux.
+  Whether to enable the autoupdater. Packagers may want to disable this for their packages. Default value is ON for Windows and Linux.
 
 * **-DCLIENT=[ON|OFF]** <br>
-Whether to enable client compilation. If set to OFF, DDNet will not depend on Curl, Freetype, Ogg, Opus, Opusfile, and SDL2. Default value is ON.
+  Whether to enable client compilation. If set to OFF, DDNet will not depend on Curl, Freetype, Ogg, Opus, Opusfile, and SDL2. Default value is ON.
 
 * **-DVIDEORECORDER=[ON|OFF]** <br>
-Whether to add video recording support using FFmpeg to the client. Default value is ON.
+  Whether to add video recording support using FFmpeg to the client. Default value is ON.
 
 * **-DDOWNLOAD_GTEST=[ON|OFF]** <br>
-Whether to download and compile GTest. Useful if GTest is not installed and, for Linux users, there is no suitable package providing it. Default value is OFF.
+  Whether to download and compile GTest. Useful if GTest is not installed and, for Linux users, there is no suitable package providing it. Default value is OFF.
 
 * **-DDEV=[ON|OFF]** <br>
-Whether to optimize for development, speeding up the compilation process a little. If enabled, don't generate stuff necessary for packaging. Setting to ON will set CMAKE\_BUILD\_TYPE to Debug by default. Default value is OFF.
+  Whether to optimize for development, speeding up the compilation process a little. If enabled, don't generate stuff necessary for packaging. Setting to ON will set CMAKE\_BUILD\_TYPE to Debug by default. Default value is OFF.
 
 * **-DUPNP=[ON|OFF]** <br>
-Whether to enable UPnP support for the server.
-You need to install `libminiupnpc-dev` on Debian, `miniupnpc` on Arch Linux.
-Default value is OFF.
+  Whether to enable UPnP support for the server.
+  You need to install `libminiupnpc-dev` on Debian, `miniupnpc` on Arch Linux.
+  Default value is OFF.
 
 * **-DVULKAN=[ON|OFF]** <br>
-Whether to enable the vulkan backend.
-On Windows you need to install the Vulkan SDK and set the `VULKAN_SDK` environment flag accordingly.
-Default value is ON for Windows x86\_64 and Linux, and OFF for Windows x86 and macOS.
+  Whether to enable the vulkan backend.
+  On Windows you need to install the Vulkan SDK and set the `VULKAN_SDK` environment flag accordingly.
+  Default value is ON for Windows x86\_64 and Linux, and OFF for Windows x86 and macOS.
 
 * **-GNinja** <br>
-Use the Ninja build system instead of Make. This automatically parallelizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
+  Use the Ninja build system instead of Make. This automatically parallelizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
 
 * **-DCMAKE_CXX_LINK_FLAGS=[FLAGS]** <br>
-Custom flags to set for compiler when linking.
+  Custom flags to set for compiler when linking.
 
 * **-DEXCEPTION_HANDLING=[ON|OFF]** <br>
-Enable exception handling (only works with Windows as of now, uses DrMingw there). Default value is OFF.
+  Enable exception handling (only works with Windows as of now, uses DrMingw there). Default value is OFF.
 
 * **-DIPO=[ON|OFF]** <br>
-Enable interprocedural optimizations, also known as Link Time Optimization (LTO). Default value is OFF.
+  Enable interprocedural optimizations, also known as Link Time Optimization (LTO). Default value is OFF.
 
 * **-DFUSE_LD=[OFF|LINKER]** <br>
-Linker to use. Default value is OFF to try mold, lld, gold.
+  Linker to use. Default value is OFF to try mold, lld, gold.
 
 * **-DSECURITY_COMPILER_FLAGS=[ON|OFF]** <br>
-Whether to set security-relevant compiler flags like `-D_FORTIFY_SOURCE=2` and `-fstack-protector-all`. Default Value is ON.
+  Whether to set security-relevant compiler flags like `-D_FORTIFY_SOURCE=2` and `-fstack-protector-all`. Default Value is ON.
 
 Running tests (Debian/Ubuntu)
 -----------------------------
@@ -159,7 +155,7 @@ This library isn't compiled, so you have to do it:
 sudo apt install libgtest-dev
 cd /usr/src/gtest
 sudo cmake CMakeLists.txt
-sudo make -j$(nproc)
+sudo make
 
 # copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
 sudo cp lib/*.a /usr/lib
@@ -172,7 +168,12 @@ Code formatting
 ---------------
 We use clang-format 10 to format the C++ code of this project. Execute `scripts/fix_style.py` after changing the code to ensure code is formatted properly, a GitHub central style checker will do the same and prevent your change from being submitted.
 
-On Arch Linux you can install clang-format 10 using the [clang-format-static-bin AUR package](https://aur.archlinux.org/packages/clang-format-static-bin/). On macOS you can install clang-format 10 using a [homebrew tap](https://github.com/r-lib/homebrew-taps):
+On Arch Linux you can install clang-format 10 using the [clang-format-static-bin AUR package](https://aur.archlinux.org/packages/clang-format-static-bin/) with [yay](https://github.com/Jguer/yay#Binary):
+```bash
+yay -S clang-format-static-bin
+```
+
+Or on macOS you can install clang-format 10 using a [homebrew tap](https://github.com/r-lib/homebrew-taps):
 ```bash
 brew install r-lib/taps/clang-format@10
 sudo ln -s /opt/homebrew/Cellar/clang-format@10/10.0.1/bin/clang-format /opt/homebrew/bin/clang-format-10
@@ -307,11 +308,9 @@ sv_use_sql 1
 add_sqlserver r teeworlds record teeworlds "PW2" "localhost" "3306"
 add_sqlserver w teeworlds record teeworlds "PW2" "localhost" "3306"
 
-$ mkdir build
-$ cd build
-$ cmake -DMYSQL=ON ..
-$ make -j$(nproc)
-$ ./DDNet-Server -f mine.cfg
+$ cmake -Bbuild -DMYSQL=ON
+$ cmake --build build --target DDNet-Server
+$ build/DDNet-Server -f mine.cfg
 ```
 
 <a href="https://repology.org/metapackage/ddnet/versions">

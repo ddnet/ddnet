@@ -252,6 +252,7 @@ public:
 	virtual void SetRconCid(int ClientId) = 0;
 	virtual int GetAuthedState(int ClientId) const = 0;
 	virtual const char *GetAuthName(int ClientId) const = 0;
+	virtual bool HasAuthHidden(int ClientId) const = 0;
 	virtual void Kick(int ClientId, const char *pReason) = 0;
 	virtual void Ban(int ClientId, int Seconds, const char *pReason, bool VerbatimReason) = 0;
 	virtual void RedirectClient(int ClientId, int Port) = 0;

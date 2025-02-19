@@ -58,7 +58,7 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 {
 	vec2 IntersectPos;
 	CCharacter *pHitPlayer = GameServer()->m_World.IntersectCharacter(
-		m_Pos, m_Pos + m_Core, 0.0f, IntersectPos, 0, m_ForClientId);
+		m_Pos, m_Pos + m_Core, 0.0f, IntersectPos, nullptr, m_ForClientId);
 	if(!pHitPlayer)
 	{
 		return false;
@@ -85,7 +85,7 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 bool CPlasma::HitObstacle(CCharacter *pTarget)
 {
 	// Check if the plasma bullet is stopped by a solid block or a laser stopper
-	int HasIntersection = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, 0, 0);
+	int HasIntersection = GameServer()->Collision()->IntersectNoLaser(m_Pos, m_Pos + m_Core, nullptr, nullptr);
 	if(HasIntersection)
 	{
 		if(m_Explosive)

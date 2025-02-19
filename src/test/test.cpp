@@ -44,7 +44,10 @@ IStorage *CTestInfo::CreateTestStorage()
 	{
 		return nullptr;
 	}
-	return CreateTempStorage(m_aFilename);
+	char aTestPath[IO_MAX_PATH_LENGTH];
+	str_copy(aTestPath, ::testing::internal::GetArgvs().front().c_str());
+	const char *apArgs[] = {aTestPath};
+	return CreateTempStorage(m_aFilename, 1, apArgs);
 }
 
 class CTestInfoPath

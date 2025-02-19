@@ -117,13 +117,11 @@ public:
 	virtual void OnReset();
 
 	// game
-	void DoWarmup(int Seconds);
+	virtual void DoWarmup(int Seconds);
 
 	void StartRound();
 	void EndRound();
 	void ChangeMap(const char *pToMap);
-
-	bool IsForceBalanced();
 
 	/*
 
@@ -148,7 +146,7 @@ public:
 
 	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 
-	bool IsTeamPlay() { return m_GameFlags & GAMEFLAG_TEAMS; }
+	bool IsTeamPlay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
 	// DDRace
 
 	float m_CurrentRecord;

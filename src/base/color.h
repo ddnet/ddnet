@@ -14,7 +14,7 @@
 	Function: RgbToHue
 		Determines the hue from RGB values
 */
-inline float RgbToHue(float r, float g, float b)
+constexpr inline float RgbToHue(float r, float g, float b)
 {
 	float h_min = minimum(r, g, b);
 	float h_max = maximum(r, g, b);
@@ -56,12 +56,12 @@ public:
 		float w, a;
 	};
 
-	color4_base() :
+	constexpr color4_base() :
 		x(), y(), z(), a()
 	{
 	}
 
-	color4_base(const vec4 &v4)
+	constexpr color4_base(const vec4 &v4)
 	{
 		x = v4.x;
 		y = v4.y;
@@ -69,7 +69,7 @@ public:
 		a = v4.w;
 	}
 
-	color4_base(const vec3 &v3)
+	constexpr color4_base(const vec3 &v3)
 	{
 		x = v3.x;
 		y = v3.y;
@@ -77,7 +77,7 @@ public:
 		a = 1.0f;
 	}
 
-	color4_base(float nx, float ny, float nz, float na)
+	constexpr color4_base(float nx, float ny, float nz, float na)
 	{
 		x = nx;
 		y = ny;
@@ -85,7 +85,7 @@ public:
 		a = na;
 	}
 
-	color4_base(float nx, float ny, float nz)
+	constexpr color4_base(float nx, float ny, float nz)
 	{
 		x = nx;
 		y = ny;
@@ -93,7 +93,7 @@ public:
 		a = 1.0f;
 	}
 
-	color4_base(unsigned col, bool alpha = false)
+	constexpr color4_base(unsigned col, bool alpha = false)
 	{
 		a = alpha ? ((col >> 24) & 0xFF) / 255.0f : 1.0f;
 		x = ((col >> 16) & 0xFF) / 255.0f;
@@ -101,43 +101,43 @@ public:
 		z = ((col >> 0) & 0xFF) / 255.0f;
 	}
 
-	vec4 v4() const { return vec4(x, y, z, a); }
-	operator vec4() const { return vec4(x, y, z, a); }
-	float &operator[](int index)
+	constexpr vec4 v4() const { return vec4(x, y, z, a); }
+	constexpr operator vec4() const { return vec4(x, y, z, a); }
+	constexpr float &operator[](int index)
 	{
 		return ((float *)this)[index];
 	}
 
-	bool operator==(const color4_base &col) const { return x == col.x && y == col.y && z == col.z && a == col.a; }
-	bool operator!=(const color4_base &col) const { return x != col.x || y != col.y || z != col.z || a != col.a; }
+	constexpr bool operator==(const color4_base &col) const { return x == col.x && y == col.y && z == col.z && a == col.a; }
+	constexpr bool operator!=(const color4_base &col) const { return x != col.x || y != col.y || z != col.z || a != col.a; }
 
-	unsigned Pack(bool Alpha = true) const
+	constexpr unsigned Pack(bool Alpha = true) const
 	{
 		return (Alpha ? ((unsigned)round_to_int(a * 255.0f) << 24) : 0) + ((unsigned)round_to_int(x * 255.0f) << 16) + ((unsigned)round_to_int(y * 255.0f) << 8) + (unsigned)round_to_int(z * 255.0f);
 	}
 
-	unsigned PackAlphaLast(bool Alpha = true) const
+	constexpr unsigned PackAlphaLast(bool Alpha = true) const
 	{
 		if(Alpha)
 			return ((unsigned)round_to_int(x * 255.0f) << 24) + ((unsigned)round_to_int(y * 255.0f) << 16) + ((unsigned)round_to_int(z * 255.0f) << 8) + (unsigned)round_to_int(a * 255.0f);
 		return ((unsigned)round_to_int(x * 255.0f) << 16) + ((unsigned)round_to_int(y * 255.0f) << 8) + (unsigned)round_to_int(z * 255.0f);
 	}
 
-	DerivedT WithAlpha(float alpha) const
+	constexpr DerivedT WithAlpha(float alpha) const
 	{
 		DerivedT col(static_cast<const DerivedT &>(*this));
 		col.a = alpha;
 		return col;
 	}
 
-	DerivedT WithMultipliedAlpha(float alpha) const
+	constexpr DerivedT WithMultipliedAlpha(float alpha) const
 	{
 		DerivedT col(static_cast<const DerivedT &>(*this));
 		col.a *= alpha;
 		return col;
 	}
 
-	DerivedT Multiply(const DerivedT &Other) const
+	constexpr DerivedT Multiply(const DerivedT &Other) const
 	{
 		DerivedT Color(static_cast<const DerivedT &>(*this));
 		Color.x *= Other.x;
@@ -148,7 +148,7 @@ public:
 	}
 
 	template<typename UnpackT>
-	static UnpackT UnpackAlphaLast(unsigned Color, bool Alpha = true)
+	constexpr static UnpackT UnpackAlphaLast(unsigned Color, bool Alpha = true)
 	{
 		UnpackT Result;
 		if(Alpha)
@@ -173,24 +173,24 @@ class ColorHSLA : public color4_base<ColorHSLA>
 {
 public:
 	using color4_base::color4_base;
-	ColorHSLA(){};
+	constexpr ColorHSLA(){};
 
 	constexpr static const float DARKEST_LGT = 0.5f;
 	constexpr static const float DARKEST_LGT7 = 61.0f / 255.0f;
 
-	ColorHSLA UnclampLighting(float Darkest) const
+	constexpr ColorHSLA UnclampLighting(float Darkest) const
 	{
 		ColorHSLA col = *this;
 		col.l = Darkest + col.l * (1.0f - Darkest);
 		return col;
 	}
 
-	unsigned Pack(bool Alpha = true) const
+	constexpr unsigned Pack(bool Alpha = true) const
 	{
 		return color4_base::Pack(Alpha);
 	}
 
-	unsigned Pack(float Darkest, bool Alpha = false) const
+	constexpr unsigned Pack(float Darkest, bool Alpha = false) const
 	{
 		ColorHSLA col = *this;
 		col.l = (l - Darkest) / (1 - Darkest);
@@ -203,21 +203,21 @@ class ColorHSVA : public color4_base<ColorHSVA>
 {
 public:
 	using color4_base::color4_base;
-	ColorHSVA(){};
+	constexpr ColorHSVA(){};
 };
 
 class ColorRGBA : public color4_base<ColorRGBA>
 {
 public:
 	using color4_base::color4_base;
-	ColorRGBA(){};
+	constexpr ColorRGBA(){};
 };
 
 template<typename T, typename F>
-T color_cast(const F &) = delete;
+constexpr T color_cast(const F &) = delete;
 
 template<>
-inline ColorHSLA color_cast(const ColorRGBA &rgb)
+constexpr inline ColorHSLA color_cast(const ColorRGBA &rgb)
 {
 	float Min = minimum(rgb.r, rgb.g, rgb.b);
 	float Max = maximum(rgb.r, rgb.g, rgb.b);
@@ -231,7 +231,7 @@ inline ColorHSLA color_cast(const ColorRGBA &rgb)
 }
 
 template<>
-inline ColorRGBA color_cast(const ColorHSLA &hsl)
+constexpr inline ColorRGBA color_cast(const ColorHSLA &hsl)
 {
 	vec3 rgb = vec3(0, 0, 0);
 
@@ -273,39 +273,39 @@ inline ColorRGBA color_cast(const ColorHSLA &hsl)
 }
 
 template<>
-inline ColorHSLA color_cast(const ColorHSVA &hsv)
+constexpr inline ColorHSLA color_cast(const ColorHSVA &hsv)
 {
 	float l = hsv.v * (1 - hsv.s * 0.5f);
 	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l) / minimum(l, 1 - l), l, hsv.a);
 }
 
 template<>
-inline ColorHSVA color_cast(const ColorHSLA &hsl)
+constexpr inline ColorHSVA color_cast(const ColorHSLA &hsl)
 {
 	float v = hsl.l + hsl.s * minimum(hsl.l, 1 - hsl.l);
 	return ColorHSVA(hsl.h, v == 0.0f ? 0 : 2 - (2 * hsl.l / v), v, hsl.a);
 }
 
 template<>
-inline ColorRGBA color_cast(const ColorHSVA &hsv)
+constexpr inline ColorRGBA color_cast(const ColorHSVA &hsv)
 {
 	return color_cast<ColorRGBA>(color_cast<ColorHSLA>(hsv));
 }
 
 template<>
-inline ColorHSVA color_cast(const ColorRGBA &rgb)
+constexpr inline ColorHSVA color_cast(const ColorRGBA &rgb)
 {
 	return color_cast<ColorHSVA>(color_cast<ColorHSLA>(rgb));
 }
 
 template<typename T>
-T color_scale(const T &col, float s)
+constexpr T color_scale(const T &col, float s)
 {
 	return T(col.x * s, col.y * s, col.z * s, col.a * s);
 }
 
 template<typename T>
-T color_invert(const T &col)
+constexpr T color_invert(const T &col)
 {
 	return T(1.0f - col.x, 1.0f - col.y, 1.0f - col.z, 1.0f - col.a);
 }

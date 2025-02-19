@@ -110,13 +110,13 @@ public:
 	public:
 		enum
 		{
-			STATE_EMPTY = 0,
+			STATE_REDIRECTED = -1,
+			STATE_EMPTY,
 			STATE_PREAUTH,
 			STATE_AUTH,
 			STATE_CONNECTING,
 			STATE_READY,
 			STATE_INGAME,
-			STATE_REDIRECTED,
 
 			SNAPRATE_INIT = 0,
 			SNAPRATE_FULL,
@@ -158,6 +158,7 @@ public:
 		int m_Authed;
 		int m_AuthKey;
 		int m_AuthTries;
+		bool m_AuthHidden;
 		int m_NextMapChunk;
 		int m_Flags;
 		bool m_ShowIps;
@@ -312,6 +313,7 @@ public:
 	void SetRconCid(int ClientId) override;
 	int GetAuthedState(int ClientId) const override;
 	const char *GetAuthName(int ClientId) const override;
+	bool HasAuthHidden(int ClientId) const override;
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc) override;
 	bool GetClientInfo(int ClientId, CClientInfo *pInfo) const override;
 	void SetClientDDNetVersion(int ClientId, int DDNetVersion) override;
@@ -432,6 +434,7 @@ public:
 	static void ConMapReload(IConsole::IResult *pResult, void *pUser);
 	static void ConLogout(IConsole::IResult *pResult, void *pUser);
 	static void ConShowIps(IConsole::IResult *pResult, void *pUser);
+	static void ConHideAuthStatus(IConsole::IResult *pResult, void *pUser);
 
 	static void ConAuthAdd(IConsole::IResult *pResult, void *pUser);
 	static void ConAuthAddHashed(IConsole::IResult *pResult, void *pUser);

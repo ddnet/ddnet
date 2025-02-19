@@ -1,4 +1,5 @@
 #include <engine/keys.h>
+#include <game/client/gameclient.h>
 #include <game/mapitems.h>
 
 #include "editor.h"
@@ -213,4 +214,64 @@ void CEditor::DeleteSelectedLayer()
 	m_Map.m_vpGroups[m_SelectedGroup]->DeleteLayer(m_vSelectedLayers[0]);
 
 	SelectPreviousLayer();
+}
+
+void CEditor::TestMapLocally()
+{
+	if(!str_startswith(m_aFileName, "maps/"))
+	{
+		ShowFileDialogError("The map isn't saved in the maps/ folder. It must be saved there to load on the server.");
+		return;
+	}
+
+	char aFileNameNoExt[IO_MAX_PATH_LENGTH];
+	IStorage::StripPathAndExtension(m_aFileName, aFileNameNoExt, sizeof(aFileNameNoExt));
+	char aBuf[IO_MAX_PATH_LENGTH + 64];
+
+	if(Client()->RconAuthed())
+	{
+		NETADDR Addr = Client()->ServerAddress();
+		char aAddrStr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&Client()->ServerAddress(), aAddrStr, sizeof(aAddrStr), true);
+
+		bool IsLocalAddress = false;
+		if(Addr.ip[0] == 127 || Addr.ip[0] == 10 || (Addr.ip[0] == 192 && Addr.ip[1] == 168) || (Addr.ip[0] == 172 && (Addr.ip[1] >= 16 && Addr.ip[1] <= 31)))
+			IsLocalAddress = true;
+
+		if(str_startswith(aAddrStr, "[fe80:") || str_startswith(aAddrStr, "[::1"))
+			IsLocalAddress = true;
+
+		if(IsLocalAddress)
+		{
+			OnClose();
+			g_Config.m_ClEditor = 0;
+			str_format(aBuf, sizeof(aBuf), "change_map %s", aFileNameNoExt);
+			Client()->Rcon(aBuf);
+			return;
+		}
+	}
+
+	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
+	if(pGameClient->m_Menus.IsServerRunning())
+	{
+		m_PopupEventType = CEditor::POPEVENT_RESTART_SERVER;
+		m_PopupEventActivated = true;
+	}
+	else
+	{
+		char aRegister[] = "sv_register 0";
+
+		char aRandomPass[17];
+		secure_random_password(aRandomPass, sizeof(aRandomPass), 16);
+		char aPass[64];
+		str_format(aPass, sizeof(aPass), "sv_rcon_password %s", aRandomPass);
+
+		str_format(aBuf, sizeof(aBuf), "change_map %s", aFileNameNoExt);
+		const char *apArguments[] = {aRegister, aPass, aBuf};
+		pGameClient->m_Menus.RunServer(apArguments, std::size(apArguments));
+		OnClose();
+		g_Config.m_ClEditor = 0;
+		Client()->Connect("localhost");
+		Client()->RconAuth("", aRandomPass, g_Config.m_ClDummy);
+	}
 }

@@ -530,7 +530,7 @@ static const char *DEFAULT_SERVERLIST_URLS[] = {
 IServerBrowserHttp *CreateServerBrowserHttp(IEngine *pEngine, IStorage *pStorage, IHttp *pHttp, const char *pPreviousBestUrl)
 {
 	char aaUrls[CChooseMaster::MAX_URLS][256];
-	const char *apUrls[CChooseMaster::MAX_URLS] = {0};
+	const char *apUrls[CChooseMaster::MAX_URLS] = {nullptr};
 	const char **ppUrls = apUrls;
 	int NumUrls = 0;
 	CLineReader LineReader;

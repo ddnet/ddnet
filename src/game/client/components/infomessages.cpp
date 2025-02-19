@@ -31,8 +31,7 @@ void CInfoMessages::OnReset()
 	m_InfoMsgCurrent = 0;
 	for(auto &InfoMsg : m_aInfoMsgs)
 	{
-		InfoMsg.m_Tick = -100000;
-		DeleteTextContainers(InfoMsg);
+		ResetMessage(InfoMsg);
 	}
 }
 
@@ -42,6 +41,14 @@ void CInfoMessages::DeleteTextContainers(CInfoMsg &InfoMsg)
 	TextRender()->DeleteTextContainer(InfoMsg.m_KillerTextContainerIndex);
 	TextRender()->DeleteTextContainer(InfoMsg.m_DiffTextContainerIndex);
 	TextRender()->DeleteTextContainer(InfoMsg.m_TimeTextContainerIndex);
+}
+
+void CInfoMessages::ResetMessage(CInfoMsg &InfoMsg)
+{
+	InfoMsg.m_Tick = -1;
+	std::fill(std::begin(InfoMsg.m_apVictimManagedTeeRenderInfos), std::end(InfoMsg.m_apVictimManagedTeeRenderInfos), nullptr);
+	InfoMsg.m_pKillerManagedTeeRenderInfo = nullptr;
+	DeleteTextContainers(InfoMsg);
 }
 
 void CInfoMessages::OnInit()
@@ -82,7 +89,7 @@ CInfoMessages::CInfoMsg CInfoMessages::CreateInfoMsg(EType Type)
 	for(int i = 0; i < MAX_KILLMSG_TEAM_MEMBERS; i++)
 	{
 		InfoMsg.m_aVictimIds[i] = -1;
-		InfoMsg.m_aVictimRenderInfo[i].Reset();
+		InfoMsg.m_apVictimManagedTeeRenderInfos[i] = nullptr;
 	}
 	InfoMsg.m_VictimDDTeam = 0;
 	InfoMsg.m_aVictimName[0] = '\0';
@@ -91,7 +98,7 @@ CInfoMessages::CInfoMsg CInfoMessages::CreateInfoMsg(EType Type)
 	InfoMsg.m_KillerId = -1;
 	InfoMsg.m_aKillerName[0] = '\0';
 	InfoMsg.m_KillerTextContainerIndex.Reset();
-	InfoMsg.m_KillerRenderInfo.Reset();
+	InfoMsg.m_pKillerManagedTeeRenderInfo = nullptr;
 
 	InfoMsg.m_Weapon = -1;
 	InfoMsg.m_ModeSpecial = 0;
@@ -109,12 +116,11 @@ CInfoMessages::CInfoMsg CInfoMessages::CreateInfoMsg(EType Type)
 
 void CInfoMessages::AddInfoMsg(const CInfoMsg &InfoMsg)
 {
-	if(InfoMsg.m_KillerId >= 0 && !InfoMsg.m_KillerRenderInfo.Valid())
-		return;
+	dbg_assert(InfoMsg.m_TeamSize >= 0 && InfoMsg.m_TeamSize <= MAX_KILLMSG_TEAM_MEMBERS, "Info message team size invalid");
+	dbg_assert(InfoMsg.m_KillerId < 0 || InfoMsg.m_pKillerManagedTeeRenderInfo != nullptr, "Info message killer invalid");
 	for(int i = 0; i < InfoMsg.m_TeamSize; i++)
 	{
-		if(InfoMsg.m_aVictimIds[i] < 0 || !InfoMsg.m_aVictimRenderInfo[i].Valid())
-			return;
+		dbg_assert(InfoMsg.m_aVictimIds[i] >= 0 && InfoMsg.m_apVictimManagedTeeRenderInfos[i] != nullptr, "Info message victim invalid");
 	}
 
 	const float Height = 1.5f * 400.0f * 3.0f;
@@ -227,10 +233,11 @@ void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 	Kill.m_VictimDDTeam = pMsg->m_Team;
 	for(int i = 0; i < Kill.m_TeamSize; i++)
 	{
-		if(m_pClient->m_aClients[vStrongWeakSorted[i].first].m_Active)
+		const int VictimId = vStrongWeakSorted[i].first;
+		if(m_pClient->m_aClients[VictimId].m_Active)
 		{
-			Kill.m_aVictimIds[i] = vStrongWeakSorted[i].first;
-			Kill.m_aVictimRenderInfo[i] = m_pClient->m_aClients[vStrongWeakSorted[i].first].m_RenderInfo;
+			Kill.m_aVictimIds[i] = VictimId;
+			Kill.m_apVictimManagedTeeRenderInfos[i] = m_pClient->CreateManagedTeeRenderInfo(m_pClient->m_aClients[VictimId]);
 		}
 	}
 	str_format(Kill.m_aVictimName, sizeof(Kill.m_aVictimName), Localize("Team %d"), pMsg->m_Team);
@@ -246,11 +253,11 @@ void CInfoMessages::OnKillMessage(const CNetMsg_Sv_KillMsg *pMsg)
 	Kill.m_aVictimIds[0] = pMsg->m_Victim;
 	Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_aVictimIds[0]);
 	str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_aName);
-	Kill.m_aVictimRenderInfo[0] = m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_RenderInfo;
+	Kill.m_apVictimManagedTeeRenderInfos[0] = m_pClient->CreateManagedTeeRenderInfo(m_pClient->m_aClients[Kill.m_aVictimIds[0]]);
 
 	Kill.m_KillerId = pMsg->m_Killer;
 	str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerId].m_aName);
-	Kill.m_KillerRenderInfo = m_pClient->m_aClients[Kill.m_KillerId].m_RenderInfo;
+	Kill.m_pKillerManagedTeeRenderInfo = m_pClient->CreateManagedTeeRenderInfo(m_pClient->m_aClients[Kill.m_KillerId]);
 
 	Kill.m_Weapon = pMsg->m_Weapon;
 	Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
@@ -267,7 +274,7 @@ void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
 	Finish.m_aVictimIds[0] = pMsg->m_ClientId;
 	Finish.m_VictimDDTeam = m_pClient->m_Teams.Team(Finish.m_aVictimIds[0]);
 	str_copy(Finish.m_aVictimName, m_pClient->m_aClients[Finish.m_aVictimIds[0]].m_aName);
-	Finish.m_aVictimRenderInfo[0] = m_pClient->m_aClients[pMsg->m_ClientId].m_RenderInfo;
+	Finish.m_apVictimManagedTeeRenderInfos[0] = m_pClient->CreateManagedTeeRenderInfo(m_pClient->m_aClients[pMsg->m_ClientId]);
 
 	Finish.m_Diff = pMsg->m_Diff;
 	Finish.m_RecordPersonal = pMsg->m_RecordPersonal || pMsg->m_RecordServer;
@@ -318,13 +325,10 @@ void CInfoMessages::RenderKillMsg(const CInfoMsg &InfoMsg, float x, float y)
 	// render victim tees
 	for(int j = (InfoMsg.m_TeamSize - 1); j >= 0; j--)
 	{
-		if(InfoMsg.m_aVictimIds[j] < 0)
-			continue;
-
 		vec2 OffsetToMid;
-		CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &InfoMsg.m_aVictimRenderInfo[j], OffsetToMid);
+		CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &InfoMsg.m_apVictimManagedTeeRenderInfos[j]->TeeRenderInfo(), OffsetToMid);
 		const vec2 TeeRenderPos = vec2(x, y + ROW_HEIGHT / 2.0f + OffsetToMid.y);
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &InfoMsg.m_aVictimRenderInfo[j], EMOTE_PAIN, vec2(-1, 0), TeeRenderPos);
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &InfoMsg.m_apVictimManagedTeeRenderInfos[j]->TeeRenderInfo(), EMOTE_PAIN, vec2(-1, 0), TeeRenderPos);
 		x -= 44.0f;
 	}
 
@@ -359,12 +363,12 @@ void CInfoMessages::RenderKillMsg(const CInfoMsg &InfoMsg, float x, float y)
 
 		// render killer tee
 		x -= 24.0f;
-		if(InfoMsg.m_KillerId >= 0)
+		if(InfoMsg.m_pKillerManagedTeeRenderInfo != nullptr)
 		{
 			vec2 OffsetToMid;
-			CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &InfoMsg.m_KillerRenderInfo, OffsetToMid);
+			CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &InfoMsg.m_pKillerManagedTeeRenderInfo->TeeRenderInfo(), OffsetToMid);
 			const vec2 TeeRenderPos = vec2(x, y + ROW_HEIGHT / 2.0f + OffsetToMid.y);
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &InfoMsg.m_KillerRenderInfo, EMOTE_ANGRY, vec2(1, 0), TeeRenderPos);
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &InfoMsg.m_pKillerManagedTeeRenderInfo->TeeRenderInfo(), EMOTE_ANGRY, vec2(1, 0), TeeRenderPos);
 		}
 		x -= 32.0f;
 
@@ -413,10 +417,10 @@ void CInfoMessages::RenderFinishMsg(const CInfoMsg &InfoMsg, float x, float y)
 	// render victim tee
 	x -= 24.0f;
 	vec2 OffsetToMid;
-	CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &InfoMsg.m_aVictimRenderInfo[0], OffsetToMid);
+	CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &InfoMsg.m_apVictimManagedTeeRenderInfos[0]->TeeRenderInfo(), OffsetToMid);
 	const vec2 TeeRenderPos = vec2(x, y + ROW_HEIGHT / 2.0f + OffsetToMid.y);
 	const int Emote = InfoMsg.m_RecordPersonal ? EMOTE_HAPPY : EMOTE_NORMAL;
-	RenderTools()->RenderTee(CAnimState::GetIdle(), &InfoMsg.m_aVictimRenderInfo[0], Emote, vec2(-1, 0), TeeRenderPos);
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &InfoMsg.m_apVictimManagedTeeRenderInfos[0]->TeeRenderInfo(), Emote, vec2(-1, 0), TeeRenderPos);
 }
 
 void CInfoMessages::OnRender()
@@ -442,8 +446,15 @@ void CInfoMessages::OnRender()
 	for(int i = 1; i <= MAX_INFOMSGS; i++)
 	{
 		CInfoMsg &InfoMsg = m_aInfoMsgs[(m_InfoMsgCurrent + i) % MAX_INFOMSGS];
-		if(Client()->GameTick(g_Config.m_ClDummy) > InfoMsg.m_Tick + Client()->GameTickSpeed() * 10)
+		if(InfoMsg.m_Tick == -1)
+		{
 			continue;
+		}
+		if(Client()->GameTick(g_Config.m_ClDummy) > InfoMsg.m_Tick + Client()->GameTickSpeed() * 10)
+		{
+			ResetMessage(InfoMsg);
+			continue;
+		}
 
 		CreateTextContainersIfNotCreated(InfoMsg);
 
@@ -456,35 +467,6 @@ void CInfoMessages::OnRender()
 		{
 			RenderFinishMsg(InfoMsg, StartX, y);
 			y += ROW_HEIGHT;
-		}
-	}
-}
-
-void CInfoMessages::OnRefreshSkins()
-{
-	for(auto &InfoMsg : m_aInfoMsgs)
-	{
-		InfoMsg.m_KillerRenderInfo.Reset();
-		if(InfoMsg.m_KillerId >= 0)
-		{
-			const CGameClient::CClientData &Client = GameClient()->m_aClients[InfoMsg.m_KillerId];
-			if(Client.m_Active && Client.m_aSkinName[0] != '\0')
-				InfoMsg.m_KillerRenderInfo = Client.m_RenderInfo;
-			else
-				InfoMsg.m_KillerId = -1;
-		}
-
-		for(int i = 0; i < MAX_KILLMSG_TEAM_MEMBERS; i++)
-		{
-			InfoMsg.m_aVictimRenderInfo[i].Reset();
-			if(InfoMsg.m_aVictimIds[i] >= 0)
-			{
-				const CGameClient::CClientData &Client = GameClient()->m_aClients[InfoMsg.m_aVictimIds[i]];
-				if(Client.m_Active && Client.m_aSkinName[0] != '\0')
-					InfoMsg.m_aVictimRenderInfo[i] = Client.m_RenderInfo;
-				else
-					InfoMsg.m_aVictimIds[i] = -1;
-			}
 		}
 	}
 }

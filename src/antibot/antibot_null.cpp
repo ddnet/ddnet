@@ -1,6 +1,6 @@
 #define ANTIBOTAPI DYNAMIC_EXPORT
 
-#include "antibot_interface.h"
+#include <antibot/antibot_interface.h>
 
 #include <cstring>
 

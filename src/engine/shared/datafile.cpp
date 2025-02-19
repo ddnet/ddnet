@@ -595,7 +595,7 @@ int CDataFileReader::MapSize() const
 
 CDataFileWriter::CDataFileWriter()
 {
-	m_File = 0;
+	m_File = nullptr;
 }
 
 CDataFileWriter::~CDataFileWriter()
@@ -603,7 +603,7 @@ CDataFileWriter::~CDataFileWriter()
 	if(m_File)
 	{
 		io_close(m_File);
-		m_File = 0;
+		m_File = nullptr;
 	}
 
 	for(CItemInfo &ItemInfo : m_vItems)
@@ -622,7 +622,7 @@ bool CDataFileWriter::Open(class IStorage *pStorage, const char *pFilename, int 
 {
 	dbg_assert(!m_File, "File already open");
 	m_File = pStorage->OpenFile(pFilename, IOFLAG_WRITE, StorageType);
-	return m_File != 0;
+	return m_File != nullptr;
 }
 
 int CDataFileWriter::GetTypeFromIndex(int Index) const
@@ -810,7 +810,7 @@ void CDataFileWriter::Finish()
 	const size_t FileSize = SwapSize + DataSize;
 
 	if(DEBUG)
-		dbg_msg("datafile", "NumItemTypes=" PRIzu " TypesSize=%" PRIzu " ItemSize=%" PRIzu " DataSize=%" PRIzu, m_ItemTypes.size(), TypesSize, ItemSize, DataSize);
+		dbg_msg("datafile", "NumItemTypes=%" PRIzu " TypesSize=%" PRIzu " ItemSize=%" PRIzu " DataSize=%" PRIzu, m_ItemTypes.size(), TypesSize, ItemSize, DataSize);
 
 	// This also ensures that SwapSize, ItemSize and DataSize are valid.
 	dbg_assert(FileSize <= (size_t)std::numeric_limits<int>::max(), "File size too large");
@@ -950,5 +950,5 @@ void CDataFileWriter::Finish()
 	}
 
 	io_close(m_File);
-	m_File = 0;
+	m_File = nullptr;
 }

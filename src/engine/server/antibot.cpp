@@ -212,7 +212,7 @@ bool CAntibot::OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int 
 }
 #else
 CAntibot::CAntibot() :
-	m_pServer(0), m_pConsole(0), m_pGameServer(0), m_Initialized(false)
+	m_pServer(nullptr), m_pConsole(nullptr), m_pGameServer(nullptr), m_Initialized(false)
 {
 }
 CAntibot::~CAntibot() = default;
@@ -228,7 +228,7 @@ void CAntibot::RoundStart(IGameServer *pGameServer)
 }
 void CAntibot::RoundEnd()
 {
-	m_pGameServer = 0;
+	m_pGameServer = nullptr;
 }
 void CAntibot::ConsoleCommand(const char *pCommand)
 {

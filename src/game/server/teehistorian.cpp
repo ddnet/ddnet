@@ -49,8 +49,8 @@ enum
 CTeeHistorian::CTeeHistorian()
 {
 	m_State = STATE_START;
-	m_pfnWriteCallback = 0;
-	m_pWriteCallbackUserdata = 0;
+	m_pfnWriteCallback = nullptr;
+	m_pWriteCallbackUserdata = nullptr;
 }
 
 void CTeeHistorian::Reset(const CGameInfo *pGameInfo, WRITE_CALLBACK pfnWriteCallback, void *pUser)

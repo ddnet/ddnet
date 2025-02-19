@@ -172,6 +172,17 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_SettingsButtonId, &SettingsButton, Localize("Open the settings file"));
 
+		CUIRect SavesButton;
+		Left.HSplitBottom(20.0f, &Left, &SavesButton);
+		Left.HSplitBottom(5.0f, &Left, nullptr);
+		static CButtonContainer s_SavesButtonId;
+		if(DoButton_Menu(&s_SavesButtonId, Localize("Saves file"), 0, &SavesButton))
+		{
+			Storage()->GetCompletePath(IStorage::TYPE_SAVE, SAVES_FILE, aBuf, sizeof(aBuf));
+			Client()->ViewFile(aBuf);
+		}
+		GameClient()->m_Tooltips.DoToolTip(&s_SavesButtonId, &SavesButton, Localize("Open the saves file"));
+
 		CUIRect ConfigButton;
 		Left.HSplitBottom(20.0f, &Left, &ConfigButton);
 		Left.HSplitBottom(5.0f, &Left, nullptr);
@@ -525,21 +536,21 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClDownloadSkins, Localize("Download skins"), g_Config.m_ClDownloadSkins, &Button))
 	{
 		g_Config.m_ClDownloadSkins ^= 1;
-		m_pClient->RefreshSkins();
+		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SIX);
 	}
 
 	Checkboxes.HSplitTop(20.0f, &Button, &Checkboxes);
 	if(DoButton_CheckBox(&g_Config.m_ClDownloadCommunitySkins, Localize("Download community skins"), g_Config.m_ClDownloadCommunitySkins, &Button))
 	{
 		g_Config.m_ClDownloadCommunitySkins ^= 1;
-		m_pClient->RefreshSkins();
+		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SIX);
 	}
 
 	Checkboxes.HSplitTop(20.0f, &Button, &Checkboxes);
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla skins only"), g_Config.m_ClVanillaSkinsOnly, &Button))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
-		m_pClient->RefreshSkins();
+		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SIX);
 	}
 
 	Checkboxes.HSplitTop(20.0f, &Button, &Checkboxes);
@@ -854,7 +865,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		m_pClient->RefreshSkins();
+		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SIX);
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
@@ -945,7 +956,7 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 				m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
 		}
 
-		View.HSplitTop(2.0f, 0, &View);
+		View.HSplitTop(2.0f, nullptr, &View);
 	}
 }
 
@@ -1338,7 +1349,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	// misc settings
 	{
 		MiscSettings.HSplitTop(Margin, nullptr, &MiscSettings);
-		MiscSettings.HSplitTop(300.0f, &MiscSettings, 0);
+		MiscSettings.HSplitTop(300.0f, &MiscSettings, nullptr);
 		if(s_ScrollRegion.AddRect(MiscSettings))
 		{
 			MiscSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
@@ -1408,7 +1419,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	CUIRect ModeList, ModeLabel;
 	MainView.VSplitLeft(350.0f, &MainView, &ModeList);
 	ModeList.HSplitTop(24.0f, &ModeLabel, &ModeList);
-	MainView.VSplitLeft(340.0f, &MainView, 0);
+	MainView.VSplitLeft(340.0f, &MainView, nullptr);
 
 	// display mode list
 	static CListBox s_ListBox;
@@ -1563,6 +1574,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_GfxHighDetail, Localize("High Detail"), g_Config.m_GfxHighDetail, &Button))
 		g_Config.m_GfxHighDetail ^= 1;
 	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_GfxHighDetail, &Button, Localize("Allows maps to render with more detail"));
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_ClShowfps, Localize("Show FPS"), g_Config.m_ClShowfps, &Button))
+		g_Config.m_ClShowfps ^= 1;
+	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowfps, &Button, Localize("Renders your frame rate in the top right"));
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_GfxHighdpi, Localize("Use high DPI"), g_Config.m_GfxHighdpi, &Button))
@@ -1857,56 +1873,16 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	}
 }
 
-bool CMenus::RenderLanguageSelection(CUIRect MainView)
+void CMenus::RenderLanguageSettings(CUIRect MainView)
 {
-	static int s_SelectedLanguage = -2; // -2 = unloaded, -1 = unset
-	static CListBox s_ListBox;
-
-	if(s_SelectedLanguage == -2)
-	{
-		s_SelectedLanguage = -1;
-		for(size_t i = 0; i < g_Localization.Languages().size(); i++)
-		{
-			if(str_comp(g_Localization.Languages()[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
-			{
-				s_SelectedLanguage = i;
-				s_ListBox.ScrollToSelected();
-				break;
-			}
-		}
-	}
-
-	const int OldSelected = s_SelectedLanguage;
 	const float CreditsFontSize = 14.0f;
 	const float CreditsMargin = 10.0f;
 
 	CUIRect List, CreditsScroll;
 	MainView.HSplitBottom(4.0f * CreditsFontSize + 2.0f * CreditsMargin + CScrollRegion::HEIGHT_MAGIC_FIX, &List, &CreditsScroll);
 	List.HSplitBottom(5.0f, &List, nullptr);
-	s_ListBox.DoStart(24.0f, g_Localization.Languages().size(), 1, 3, s_SelectedLanguage, &List);
 
-	for(const auto &Language : g_Localization.Languages())
-	{
-		const CListboxItem Item = s_ListBox.DoNextItem(&Language.m_Name, s_SelectedLanguage != -1 && !str_comp(g_Localization.Languages()[s_SelectedLanguage].m_Name.c_str(), Language.m_Name.c_str()));
-		if(!Item.m_Visible)
-			continue;
-
-		CUIRect FlagRect, Label;
-		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &FlagRect, &Label);
-		FlagRect.VMargin(6.0f, &FlagRect);
-		FlagRect.HMargin(3.0f, &FlagRect);
-		m_pClient->m_CountryFlags.Render(Language.m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
-
-		Ui()->DoLabel(&Label, Language.m_Name.c_str(), 16.0f, TEXTALIGN_ML);
-	}
-
-	s_SelectedLanguage = s_ListBox.DoEnd();
-
-	if(OldSelected != s_SelectedLanguage)
-	{
-		str_copy(g_Config.m_ClLanguagefile, g_Localization.Languages()[s_SelectedLanguage].m_FileName.c_str());
-		GameClient()->OnLanguageChange();
-	}
+	RenderLanguageSelection(List);
 
 	CreditsScroll.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 
@@ -1937,6 +1913,53 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 	}
 
 	s_CreditsScrollRegion.End();
+}
+
+bool CMenus::RenderLanguageSelection(CUIRect MainView)
+{
+	static int s_SelectedLanguage = -2; // -2 = unloaded, -1 = unset
+	static CListBox s_ListBox;
+
+	if(s_SelectedLanguage == -2)
+	{
+		s_SelectedLanguage = -1;
+		for(size_t i = 0; i < g_Localization.Languages().size(); i++)
+		{
+			if(str_comp(g_Localization.Languages()[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
+			{
+				s_SelectedLanguage = i;
+				s_ListBox.ScrollToSelected();
+				break;
+			}
+		}
+	}
+
+	const int OldSelected = s_SelectedLanguage;
+
+	s_ListBox.DoStart(24.0f, g_Localization.Languages().size(), 1, 3, s_SelectedLanguage, &MainView);
+
+	for(const auto &Language : g_Localization.Languages())
+	{
+		const CListboxItem Item = s_ListBox.DoNextItem(&Language.m_Name, s_SelectedLanguage != -1 && !str_comp(g_Localization.Languages()[s_SelectedLanguage].m_Name.c_str(), Language.m_Name.c_str()));
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect FlagRect, Label;
+		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &FlagRect, &Label);
+		FlagRect.VMargin(6.0f, &FlagRect);
+		FlagRect.HMargin(3.0f, &FlagRect);
+		m_pClient->m_CountryFlags.Render(Language.m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+
+		Ui()->DoLabel(&Label, Language.m_Name.c_str(), 16.0f, TEXTALIGN_ML);
+	}
+
+	s_SelectedLanguage = s_ListBox.DoEnd();
+
+	if(OldSelected != s_SelectedLanguage)
+	{
+		str_copy(g_Config.m_ClLanguagefile, g_Localization.Languages()[s_SelectedLanguage].m_FileName.c_str());
+		GameClient()->OnLanguageChange();
+	}
 
 	return s_ListBox.WasItemActivated();
 }
@@ -1983,7 +2006,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	if(g_Config.m_UiSettingsPage == SETTINGS_LANGUAGE)
 	{
 		GameClient()->m_MenuBackground.ChangePosition(CMenuBackground::POS_SETTINGS_LANGUAGE);
-		RenderLanguageSelection(MainView);
+		RenderLanguageSettings(MainView);
 	}
 	else if(g_Config.m_UiSettingsPage == SETTINGS_GENERAL)
 	{
@@ -2407,6 +2430,9 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		{
 			RightView.HSplitTop(LineSize, nullptr, &RightView); // Create empty space for hidden option
 		}
+
+		// Eye with a number of spectators
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudSpectatorCount, Localize("Show number of spectators"), &g_Config.m_ClShowhudSpectatorCount, &RightView, LineSize);
 
 		// Switch for dummy actions display
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDummyActions, Localize("Show dummy actions"), &g_Config.m_ClShowhudDummyActions, &RightView, LineSize);

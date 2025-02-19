@@ -183,7 +183,7 @@ const ColorRGBA CGameConsole::ms_SearchSelectedColor = ColorRGBA(1.0f, 1.0f, 0.0
 
 CGameConsole::CInstance::CInstance(int Type)
 {
-	m_pHistoryEntry = 0x0;
+	m_pHistoryEntry = nullptr;
 
 	m_Type = Type;
 
@@ -283,7 +283,7 @@ void CGameConsole::CInstance::PumpBacklogPending()
 void CGameConsole::CInstance::ClearHistory()
 {
 	m_History.Init();
-	m_pHistoryEntry = 0;
+	m_pHistoryEntry = nullptr;
 }
 
 void CGameConsole::CInstance::Reset()

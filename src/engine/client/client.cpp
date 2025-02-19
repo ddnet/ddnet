@@ -396,7 +396,7 @@ int *CClient::GetInput(int Tick, int IsDummy) const
 
 	if(Best != -1)
 		return (int *)m_aInputs[d][Best].m_aData;
-	return 0;
+	return nullptr;
 }
 
 // ------ state handling -----
@@ -695,8 +695,8 @@ void CClient::DisconnectWithReason(const char *pReason)
 	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
 
 	// clear snapshots
-	m_aapSnapshots[0][SNAP_CURRENT] = 0;
-	m_aapSnapshots[0][SNAP_PREV] = 0;
+	m_aapSnapshots[0][SNAP_CURRENT] = nullptr;
+	m_aapSnapshots[0][SNAP_PREV] = nullptr;
 	m_aReceivedSnapshots[0] = 0;
 	m_LastDummy = false;
 
@@ -782,8 +782,8 @@ void CClient::DummyDisconnect(const char *pReason)
 	g_Config.m_ClDummy = 0;
 
 	m_aRconAuthed[1] = 0;
-	m_aapSnapshots[1][SNAP_CURRENT] = 0;
-	m_aapSnapshots[1][SNAP_PREV] = 0;
+	m_aapSnapshots[1][SNAP_CURRENT] = nullptr;
+	m_aapSnapshots[1][SNAP_PREV] = nullptr;
 	m_aReceivedSnapshots[1] = 0;
 	m_DummyConnected = false;
 	m_DummyConnecting = false;
@@ -1018,7 +1018,7 @@ const char *CClient::DummyName()
 	{
 		return g_Config.m_ClDummyName;
 	}
-	const char *pBase = 0;
+	const char *pBase = nullptr;
 	if(g_Config.m_PlayerName[0])
 	{
 		pBase = g_Config.m_PlayerName;
@@ -1106,7 +1106,7 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 	str_copy(m_aCurrentMap, pName);
 	str_copy(m_aCurrentMapPath, pFilename);
 
-	return 0;
+	return nullptr;
 }
 
 static void FormatMapDownloadFilename(const char *pName, const SHA256_DIGEST *pSha256, int Crc, bool Temp, char *pBuffer, int BufferSize)
@@ -1162,7 +1162,7 @@ const char *CClient::LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedS
 	// backward compatibility with old names
 	if(pWantedSha256)
 	{
-		FormatMapDownloadFilename(pMapName, 0, WantedCrc, false, aBuf, sizeof(aBuf));
+		FormatMapDownloadFilename(pMapName, nullptr, WantedCrc, false, aBuf, sizeof(aBuf));
 		pError = LoadMap(pMapName, aBuf, pWantedSha256, WantedCrc);
 		if(!pError)
 			return nullptr;
@@ -1559,7 +1559,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 			if(m_DummyConnected && !m_DummyReconnectOnReload)
 			{
-				DummyDisconnect(0);
+				DummyDisconnect(nullptr);
 			}
 
 			ResetMapDownload(true);
@@ -1657,7 +1657,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				if(m_MapdownloadFileTemp)
 				{
 					io_close(m_MapdownloadFileTemp);
-					m_MapdownloadFileTemp = 0;
+					m_MapdownloadFileTemp = nullptr;
 				}
 				FinishMapDownload();
 			}
@@ -2326,7 +2326,7 @@ void CClient::ResetMapDownload(bool ResetActive)
 	if(m_MapdownloadFileTemp)
 	{
 		io_close(m_MapdownloadFileTemp);
-		m_MapdownloadFileTemp = 0;
+		m_MapdownloadFileTemp = nullptr;
 	}
 
 	if(Storage()->FileExists(m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE))
@@ -2389,53 +2389,8 @@ void CClient::ResetDDNetInfoTask()
 	if(m_pDDNetInfoTask)
 	{
 		m_pDDNetInfoTask->Abort();
-		m_pDDNetInfoTask = NULL;
+		m_pDDNetInfoTask = nullptr;
 	}
-}
-
-void CClient::FinishDDNetInfo()
-{
-	if(m_ServerBrowser.DDNetInfoSha256() == m_pDDNetInfoTask->ResultSha256())
-	{
-		log_debug("client/info", "DDNet info already up-to-date");
-		return;
-	}
-
-	char aTempFilename[IO_MAX_PATH_LENGTH];
-	IStorage::FormatTmpPath(aTempFilename, sizeof(aTempFilename), DDNET_INFO_FILE);
-	IOHANDLE File = Storage()->OpenFile(aTempFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
-	if(!File)
-	{
-		log_error("client/info", "Failed to open temporary DDNet info '%s' for writing", aTempFilename);
-		return;
-	}
-
-	unsigned char *pResult;
-	size_t ResultLength;
-	m_pDDNetInfoTask->Result(&pResult, &ResultLength);
-	bool Error = io_write(File, pResult, ResultLength) != ResultLength;
-	Error |= io_close(File) != 0;
-	if(Error)
-	{
-		log_error("client/info", "Error writing temporary DDNet info to file '%s'", aTempFilename);
-		return;
-	}
-
-	if(Storage()->FileExists(DDNET_INFO_FILE, IStorage::TYPE_SAVE) && !Storage()->RemoveFile(DDNET_INFO_FILE, IStorage::TYPE_SAVE))
-	{
-		log_error("client/info", "Failed to remove old DDNet info '%s'", DDNET_INFO_FILE);
-		Storage()->RemoveFile(aTempFilename, IStorage::TYPE_SAVE);
-		return;
-	}
-	if(!Storage()->RenameFile(aTempFilename, DDNET_INFO_FILE, IStorage::TYPE_SAVE))
-	{
-		log_error("client/info", "Failed to rename temporary DDNet info '%s' to '%s'", aTempFilename, DDNET_INFO_FILE);
-		Storage()->RemoveFile(aTempFilename, IStorage::TYPE_SAVE);
-		return;
-	}
-
-	log_debug("client/info", "Loading new DDNet info");
-	LoadDDNetInfo();
 }
 
 typedef std::tuple<int, int, int> TVersion;
@@ -2452,7 +2407,7 @@ TVersion ToVersion(char *pStr)
 			return gs_InvalidVersion;
 
 		aVersion[i] = str_toint(p);
-		p = strtok(NULL, ".");
+		p = strtok(nullptr, ".");
 	}
 
 	if(p)
@@ -2927,7 +2882,16 @@ void CClient::Update()
 	{
 		if(m_pDDNetInfoTask->State() == EHttpState::DONE)
 		{
-			FinishDDNetInfo();
+			if(m_ServerBrowser.DDNetInfoSha256() == m_pDDNetInfoTask->ResultSha256())
+			{
+				log_debug("client/info", "DDNet info already up-to-date");
+			}
+			else
+			{
+				log_debug("client/info", "Loading new DDNet info");
+				LoadDDNetInfo();
+			}
+
 			ResetDDNetInfoTask();
 		}
 		else if(m_pDDNetInfoTask->State() == EHttpState::ERROR || m_pDDNetInfoTask->State() == EHttpState::ABORTED)
@@ -3309,7 +3273,7 @@ void CClient::Run()
 					if(time_get() > m_BenchmarkStopTime)
 					{
 						io_close(m_BenchmarkFile);
-						m_BenchmarkFile = 0;
+						m_BenchmarkFile = nullptr;
 						Quit();
 					}
 				}
@@ -3603,7 +3567,7 @@ void CClient::AutoCSV_Cleanup()
 void CClient::Con_Screenshot(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
-	pSelf->Graphics()->TakeScreenshot(0);
+	pSelf->Graphics()->TakeScreenshot(nullptr);
 }
 
 #if defined(CONF_VIDEORECORDER)
@@ -3964,7 +3928,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	m_DemoPlayer.Play();
 	GameClient()->OnEnterGame();
 
-	return 0;
+	return nullptr;
 }
 
 #if defined(CONF_VIDEORECORDER)
@@ -4045,7 +4009,7 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 			m_pMap->Crc(),
 			"client",
 			m_pMap->MapSize(),
-			0,
+			nullptr,
 			m_pMap->File(),
 			nullptr,
 			nullptr);
@@ -5049,7 +5013,7 @@ void CClient::RaceRecord_Start(const char *pFilename)
 			m_pMap->Crc(),
 			"client",
 			m_pMap->MapSize(),
-			0,
+			nullptr,
 			m_pMap->File(),
 			nullptr,
 			nullptr);
@@ -5084,9 +5048,10 @@ void CClient::RequestDDNetInfo()
 		str_append(aUrl, aEscaped);
 	}
 
-	// Use ipv4 so we can know the ingame ip addresses of players before they join game servers
-	m_pDDNetInfoTask = HttpGet(aUrl);
+	m_pDDNetInfoTask = HttpGetFile(aUrl, Storage(), DDNET_INFO_FILE, IStorage::TYPE_SAVE);
 	m_pDDNetInfoTask->Timeout(CTimeout{10000, 0, 500, 10});
+	m_pDDNetInfoTask->SkipByFileTime(false); // Always re-download.
+	// Use ipv4 so we can know the ingame ip addresses of players before they join game servers
 	m_pDDNetInfoTask->IpResolve(IPRESOLVE::V4);
 	Http()->Run(m_pDDNetInfoTask);
 }
@@ -5113,6 +5078,9 @@ int CClient::GetPredictionTick()
 	{
 		PredictionMin = PredictionTick - 1;
 	}
+
+	if(PredictionMin <= 0)
+		return PredGameTick(g_Config.m_ClDummy);
 
 	PredictionTick = PredGameTick(g_Config.m_ClDummy) - PredictionMin;
 

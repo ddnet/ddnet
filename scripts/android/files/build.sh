@@ -73,7 +73,7 @@ if [[ "${APK_BUILD_TYPE}" == "Debug" ]]; then
 fi
 
 function build_gradle() {
-	java "-Dorg.gradle.appname=Gradle" -classpath gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain --warning-mode all "$1"
+	./gradlew --warning-mode all "$1"
 }
 
 if [[ "${APK_BUILD_TYPE}" == "Debug" ]]; then

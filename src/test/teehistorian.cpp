@@ -57,7 +57,7 @@ protected:
 
 		m_GameInfo.m_GameUuid = CalculateUuid("test@ddnet.tw");
 		m_GameInfo.m_pServerVersion = "DDNet test";
-		m_GameInfo.m_StartTime = time(0);
+		m_GameInfo.m_StartTime = time(nullptr);
 		m_GameInfo.m_pPrngDescription = "test-prng:02468ace";
 
 		m_GameInfo.m_pServerName = "server name";

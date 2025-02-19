@@ -43,7 +43,7 @@ bool AdaptVisiblePoint(const float[2][2][2], const float[2][2], const CMapObject
 
 CMapObject CreateMapObject(const CMapItemGroup *, int, int, int, int);
 void SetExtendedArea(CMapObject &);
-bool GetVisibleArea(const float[2][2], const CMapObject &, float[2][2] = 0x0);
+bool GetVisibleArea(const float[2][2], const CMapObject &, float[2][2] = nullptr);
 bool GetReplaceableArea(const float[2][2], const CMapObject &, float[2][2]);
 
 void GetGameAreaDistance(const float[2][2][2], const CMapObject[2], const float[2][2][2], float[2]);
@@ -51,7 +51,7 @@ void GetGameAreaDistance(const float[2][2][2], const CMapObject[2], const float[
 void GetSignificantScreenPos(const CMapObject &, const float[2][2], const float[2][2], float[2]);
 void ConvertToTiles(const float[2][2], int[2][2]);
 
-bool GetLineIntersection(const float[2], const float[2], float[2] = 0x0);
+bool GetLineIntersection(const float[2], const float[2], float[2] = nullptr);
 bool GetLineIntersection(const float[2], float);
 void SetInexistent(float *, int);
 bool IsInexistent(const float *, int);
@@ -95,7 +95,7 @@ int main(int argc, const char *argv[])
 	IStorage *pStorage = CreateLocalStorage();
 	for(int i = 0; i < 1024; i++)
 	{
-		g_apNewData[i] = g_apNewItem[i] = 0;
+		g_apNewData[i] = g_apNewItem[i] = nullptr;
 		g_aNewDataSize[i] = 0;
 	}
 
@@ -255,7 +255,7 @@ const CMapItemGroup *GetLayerGroup(CDataFileReader &InputMap, const int LayerNum
 			return pItem;
 	}
 
-	return 0x0;
+	return nullptr;
 }
 
 void ReplaceAreaTiles(CDataFileReader aInputMaps[2], const float aaaGameAreas[][2][2], const CMapItemGroup *apLayerGroups[2], CMapItemLayer *apItem[2])
@@ -451,7 +451,7 @@ bool AdaptVisiblePoint(const float aaaGameAreas[2][2][2], const float aaVisibleA
 {
 	float aDistance[2], aScreenPos[2];
 	GetGameAreaDistance(aaaGameAreas, aObs, aaVisibleArea, aDistance);
-	GetSignificantScreenPos(aObs[0], aaVisibleArea, 0x0, aScreenPos);
+	GetSignificantScreenPos(aObs[0], aaVisibleArea, nullptr, aScreenPos);
 
 	for(int i = 0; i < 2; i++)
 		aPos[i] = aaVisibleArea[i][0] + aDistance[i] + aObs[1].m_aLayerOffset[i] - (aScreenPos[i] + aDistance[i]) * aObs[1].m_aSpeed[i];

@@ -25,8 +25,12 @@ bool CLayerSelector::SelectByTile()
 	int MatchedLayer = -1;
 	int Matches = 0;
 	bool IsFound = false;
-	for(auto HoverTile : Editor()->HoverTiles())
+	for(const auto &HoverTile : Editor()->HoverTiles())
 	{
+		if(!Editor()->m_Map.m_vpGroups[HoverTile.m_Group]->m_Visible ||
+			!Editor()->m_Map.m_vpGroups[HoverTile.m_Group]->m_vpLayers[HoverTile.m_Layer]->m_Visible)
+			continue;
+
 		if(MatchedGroup == -1)
 		{
 			MatchedGroup = HoverTile.m_Group;

@@ -135,7 +135,7 @@ int InsertPixelArtQuads(CQuad *pQuads, int &NumQuads, const CImageInfo &Img, con
 				aForcedPivot[1] = Posy;
 			}
 
-			pQuads[NumQuads] = CreateNewQuad(Posx, Posy, QuadPixelSize * Width, QuadPixelSize * Height, aPixel, aArtOptions[1] ? aForcedPivot : 0x0);
+			pQuads[NumQuads] = CreateNewQuad(Posx, Posy, QuadPixelSize * Width, QuadPixelSize * Height, aPixel, aArtOptions[1] ? aForcedPivot : nullptr);
 			NumQuads++;
 		}
 	delete[] aVisitedPixels;
@@ -260,34 +260,34 @@ CMapItemLayerQuads *GetQuadLayer(CDataFileReader &InputMap, const int aLayerId[2
 	int Start, Num;
 	InputMap.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
 
-	CMapItemGroup *pGroupItem = aLayerId[0] >= Num ? 0x0 : (CMapItemGroup *)InputMap.GetItem(Start + aLayerId[0]);
+	CMapItemGroup *pGroupItem = aLayerId[0] >= Num ? nullptr : (CMapItemGroup *)InputMap.GetItem(Start + aLayerId[0]);
 
 	if(!pGroupItem)
 	{
 		dbg_msg("map_create_pixelart", "ERROR: unable to find layergroup '#%d'", aLayerId[0]);
-		return 0x0;
+		return nullptr;
 	}
 
 	InputMap.GetType(MAPITEMTYPE_LAYER, &Start, &Num);
 	*pItemNumber = Start + pGroupItem->m_StartLayer + aLayerId[1];
 
-	CMapItemLayer *pLayerItem = aLayerId[1] >= pGroupItem->m_NumLayers ? 0x0 : (CMapItemLayer *)InputMap.GetItem(*pItemNumber);
+	CMapItemLayer *pLayerItem = aLayerId[1] >= pGroupItem->m_NumLayers ? nullptr : (CMapItemLayer *)InputMap.GetItem(*pItemNumber);
 	if(!pLayerItem)
 	{
 		dbg_msg("map_create_pixelart", "ERROR: unable to find layer '#%d' in group '#%d'", aLayerId[1], aLayerId[0]);
-		return 0x0;
+		return nullptr;
 	}
 
 	if(pLayerItem->m_Type != LAYERTYPE_QUADS)
 	{
 		dbg_msg("map_create_pixelart", "ERROR: layer '#%d' in group '#%d' is not a quad layer", aLayerId[1], aLayerId[0]);
-		return 0x0;
+		return nullptr;
 	}
 
 	return (CMapItemLayerQuads *)pLayerItem;
 }
 
-CQuad CreateNewQuad(const float PosX, const float PosY, const int Width, const int Height, const uint8_t aColor[4], const int aForcedPivot[2] = 0x0)
+CQuad CreateNewQuad(const float PosX, const float PosY, const int Width, const int Height, const uint8_t aColor[4], const int aForcedPivot[2] = nullptr)
 {
 	CQuad Quad;
 	Quad.m_PosEnv = Quad.m_ColorEnv = -1;

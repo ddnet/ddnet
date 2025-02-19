@@ -7,7 +7,7 @@
 #include <engine/gfx/image_loader.h>
 #include <engine/gfx/image_manipulation.h>
 
-static bool DilateFile(const char *pFilename)
+static bool DilateFile(const char *pFilename, bool DryRun)
 {
 	CImageInfo Image;
 	int PngliteIncompatible;
@@ -21,12 +21,23 @@ static bool DilateFile(const char *pFilename)
 		return false;
 	}
 
-	DilateImage(Image);
-
-	const bool SaveResult = CImageLoader::SavePng(io_open(pFilename, IOFLAG_WRITE), pFilename, Image);
-	Image.Free();
-
-	return SaveResult;
+	if(DryRun)
+	{
+		CImageInfo OldImage = Image.DeepCopy();
+		DilateImage(Image);
+		const bool EqualImages = Image.DataEquals(OldImage);
+		Image.Free();
+		OldImage.Free();
+		log_info("dilate", "'%s' is %sdilated", pFilename, EqualImages ? "" : "NOT ");
+		return EqualImages;
+	}
+	else
+	{
+		DilateImage(Image);
+		const bool SaveResult = CImageLoader::SavePng(io_open(pFilename, IOFLAG_WRITE), pFilename, Image);
+		Image.Free();
+		return SaveResult;
+	}
 }
 
 int main(int argc, const char **argv)
@@ -36,14 +47,21 @@ int main(int argc, const char **argv)
 
 	if(argc == 1)
 	{
-		log_error("dilate", "Usage: %s <image1.png> [<image2.png> ...]", argv[0]);
+		log_error("dilate", "Usage: %s [--dry-run] <image1.png> [<image2.png> ...]", argv[0]);
+		return -1;
+	}
+
+	const bool DryRun = str_comp(argv[1], "--dry-run") == 0;
+	if(DryRun && argc < 3)
+	{
+		log_error("dilate", "Usage: %s [--dry-run] <image1.png> [<image2.png> ...]", argv[0]);
 		return -1;
 	}
 
 	bool Success = true;
-	for(int i = 1; i < argc; i++)
+	for(int i = (DryRun ? 2 : 1); i < argc; i++)
 	{
-		Success &= DilateFile(argv[i]);
+		Success &= DilateFile(argv[i], DryRun);
 	}
 	return Success ? 0 : -1;
 }

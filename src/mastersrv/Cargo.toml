@@ -33,7 +33,7 @@ serde_json = { version = "1.0.64", features = [
 ] }
 sha2 = "0.10.0"
 toml = "0.8.19"
-tokio = { version = "1.6.0", features = [
+tokio = { version = "1.43.0", features = [
   "macros",
   "rt",
   "rt-multi-thread",

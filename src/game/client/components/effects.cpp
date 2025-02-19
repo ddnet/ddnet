@@ -217,11 +217,27 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientId, float Alpha)
 		// m_RenderInfo.m_CustomColoredSkin Defines if in the context of the game the color is being customized,
 		// Using this value if the game is teams (red and blue), this value will be true even if the skin is with the normal color.
 		// And will use the team body color to create player death effect instead of tee color
-		if(m_pClient->m_aClients[ClientId].m_RenderInfo.m_CustomColoredSkin)
-			BloodColor = m_pClient->m_aClients[ClientId].m_RenderInfo.m_ColorBody;
+		if(m_pClient->Client()->IsSixup())
+		{
+			if(m_pClient->m_aClients[ClientId].m_RenderInfo.m_aSixup[g_Config.m_ClDummy].m_aUseCustomColors[protocol7::SKINPART_BODY])
+			{
+				BloodColor = m_pClient->m_aClients[ClientId].m_RenderInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[protocol7::SKINPART_BODY];
+			}
+			else
+			{
+				BloodColor = m_pClient->m_aClients[ClientId].m_RenderInfo.m_aSixup[g_Config.m_ClDummy].m_BloodColor;
+			}
+		}
 		else
 		{
-			BloodColor = m_pClient->m_aClients[ClientId].m_RenderInfo.m_BloodColor;
+			if(m_pClient->m_aClients[ClientId].m_RenderInfo.m_CustomColoredSkin)
+			{
+				BloodColor = m_pClient->m_aClients[ClientId].m_RenderInfo.m_ColorBody;
+			}
+			else
+			{
+				BloodColor = m_pClient->m_aClients[ClientId].m_RenderInfo.m_BloodColor;
+			}
 		}
 	}
 

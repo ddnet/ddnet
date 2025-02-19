@@ -34,7 +34,7 @@ void CListBox::DoHeader(const CUIRect *pRect, const char *pTitle, float HeaderHe
 	CUIRect Header;
 
 	// background
-	View.HSplitTop(HeaderHeight + Spacing, &Header, 0);
+	View.HSplitTop(HeaderHeight + Spacing, &Header, nullptr);
 	Header.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), m_BackgroundCorners & IGraphics::CORNER_T, 5.0f);
 
 	// draw header
@@ -51,7 +51,7 @@ void CListBox::DoHeader(const CUIRect *pRect, const char *pTitle, float HeaderHe
 void CListBox::DoSpacing(float Spacing)
 {
 	CUIRect View = m_ListBoxView;
-	View.HSplitTop(Spacing, 0, &View);
+	View.HSplitTop(Spacing, nullptr, &View);
 	m_ListBoxView = View;
 }
 
@@ -79,7 +79,7 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	{
 		CUIRect Footer;
 		View.HSplitBottom(m_FooterHeight, &View, &Footer);
-		Footer.VSplitLeft(10.0f, 0, &Footer);
+		Footer.VSplitLeft(10.0f, nullptr, &Footer);
 		Ui()->DoLabel(&Footer, m_pBottomText, Footer.h * CUi::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
 	}
 

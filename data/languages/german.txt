@@ -397,9 +397,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Der Server läuft nicht mit Standardeinstellungen.
 
-Time limit
-== Zeitlimit
-
 Time limit: %d min
 == Zeitlimit: %d min
 
@@ -1932,9 +1929,6 @@ Add friends by entering their name below or by clicking their name in the player
 Add clanmates by entering their clan below and leaving the name blank.
 == Clanmitglieder hinzufügen durch Eingabe des Clans und Leerlassen des Namens.
 
-Offline friends and clanmates will appear here.
-== Offline-Freunde und Clanmitglieder erscheinen hier.
-
 Edit touch controls
 == Berührungseingaben bearbeiten
 
@@ -2064,3 +2058,74 @@ Server could not be started. Make sure to grant the notification permission in t
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
 == Deutsche Übersetzung von Dominik Geyer, Fujnky, Sworddragon, heinrich5991, ghost91, andi103, Yared Hufkens, timakro, deen, bluesky, BlaiZephyr, Robyt3
+
+Auto-sync player camera
+== Spieler-Kamera automatisch synchronisieren
+
+[Auto camera]
+Disabled
+== Deaktiviert
+
+[Auto camera]
+Enabled
+== Aktiviert
+
+[Auto camera]
+Unavailable for this player
+== Für diesen Spieler nicht verfügbar
+
+[Auto camera]
+Inactive
+== Inaktiv
+
+[Auto camera]
+Active
+== Aktiv
+
+Loading maps…
+== Karten laden…
+
+Community
+== Community
+
+[Team status]
+forbidden
+== verboten
+
+[Team status]
+solo
+== Solo
+
+[Team status]
+allowed
+== erlaubt
+
+[Team status]
+required
+== nötig
+
+Teams
+== Teams
+
+[Team size]
+minimum
+== Minimum
+
+[Team size]
+maximum
+== Maximum
+
+Saves file
+== Saves-Datei
+
+Open the saves file
+== Saves-Datei öffnen
+
+Show FPS
+== FPS anzeigen
+
+Renders your frame rate in the top right
+== Rendert deine Framerate oben rechts
+
+Show spectator cursor
+== Zuschauer-Markierung anzeigen

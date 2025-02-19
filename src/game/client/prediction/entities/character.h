@@ -113,7 +113,7 @@ public:
 	int GetAttackTick() { return m_AttackTick; }
 	int GetStrongWeakId() { return m_StrongWeakId; }
 
-	CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = 0);
+	CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = nullptr);
 	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
 	void SetCoreWorld(CGameWorld *pGameWorld);
 

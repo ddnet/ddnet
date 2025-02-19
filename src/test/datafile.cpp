@@ -12,7 +12,7 @@ TEST(Datafile, ExtendedType)
 	CTestInfo Info;
 
 	CMapItemTest ItemTest;
-	ItemTest.m_Version = CMapItemTest::CURRENT_VERSION;
+	ItemTest.m_Version = 1;
 	ItemTest.m_aFields[0] = 1234;
 	ItemTest.m_aFields[1] = 5678;
 	ItemTest.m_Field3 = 9876;
