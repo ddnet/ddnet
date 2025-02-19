@@ -4,6 +4,7 @@ from queue import Queue
 from threading import Thread
 from time import time
 from uuid import uuid4, UUID
+import io
 import os
 import queue
 import shutil
@@ -213,16 +214,12 @@ add_path {relpath(self.runner.data_dir, tmp_dir)}
 def run_lines_thread(name, file, output_filename, output_list, output_queue):
 	def thread():
 		output_file = None
-		while True:
-			line = file.readline()
-			# EOF?
-			if not line:
-				break
+		for line in file:
 			if output_file is None:
 				# pylint: disable=consider-using-with
 				output_file = open(output_filename, "w", buffering=1, encoding="utf-8") # line buffering
 			output_file.write(line)
-			line = line.rstrip("\n")
+			line = line.rstrip("\r\n")
 			output_list.append(line)
 			if output_queue is not None:
 				try:
@@ -284,13 +281,14 @@ class Runnable:
 		new_env_vars = {**cur_env_vars, **test_env.runner.extra_env_vars}
 		self.process = popen(
 			test_env.run_prefix_args + args,
-			text=True,
 			cwd=test_env.tmp_dir,
 			env=new_env_vars,
 			stdin=subprocess.DEVNULL,
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE,
 		)
+		stdout_wrapper = io.TextIOWrapper(self.process.stdout, encoding="utf-8", newline="\n")
+		stderr_wrapper = io.TextIOWrapper(self.process.stderr, encoding="utf-8", newline="\n")
 		self.full_stdout = []
 		self.full_stderr = []
 		test_env.register_process(self.process, self.full_stderr)
@@ -302,8 +300,8 @@ class Runnable:
 		stdout_path = os.path.join(test_env.tmp_dir, f"{self.name}.stdout")
 		stderr_path = os.path.join(test_env.tmp_dir, f"{self.name}.stderr")
 		run_timeout_thread(f"{global_name}_timeout", test_env, self.timeout_queue, self.events)
-		run_lines_thread(f"{global_name}_stdout", self.process.stdout, stdout_path, self.full_stdout, self.events)
-		run_lines_thread(f"{global_name}_stderr", self.process.stderr, stderr_path, self.full_stderr, None)
+		run_lines_thread(f"{global_name}_stdout", stdout_wrapper, stdout_path, self.full_stdout, self.events)
+		run_lines_thread(f"{global_name}_stderr", stderr_wrapper, stderr_path, self.full_stderr, None)
 		run_exit_thread(f"{global_name}_exit", self.process, self.events)
 	def register_timeout(self, timeout):
 		timeout_id = self.next_timeout_id
