@@ -15,16 +15,6 @@
 #include <game/localization.h>
 #include <game/mapitems.h>
 
-const char *const gs_apModEntitiesNames[] = {
-	"ddnet",
-	"ddrace",
-	"race",
-	"blockworlds",
-	"fng",
-	"vanilla",
-	"f-ddrace",
-};
-
 CMapImages::CMapImages()
 {
 	m_Count = 0;
