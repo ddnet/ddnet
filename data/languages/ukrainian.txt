@@ -1242,9 +1242,6 @@ Nothing hookable
 Offline (%d)
 == Не в мережі (%d)
 
-Offline friends and clanmates will appear here.
-== Тут з'являться друзі та співклановці не в мережі.
-
 Ok
 == Гаразд
 
@@ -1858,9 +1855,6 @@ There's an unsaved map in the editor, you might want to save it.
 Time
 == Час
 
-Time limit
-== Обмеження по часу
-
 Time limit: %d min
 == Обмеження по часу: %dхв
 
@@ -2071,3 +2065,78 @@ Zoom in
 
 Zoom out
 == Віддалити
+
+Auto-sync player camera
+== 
+
+[Auto camera]
+Disabled
+== 
+
+[Auto camera]
+Enabled
+== 
+
+[Auto camera]
+Unavailable for this player
+== 
+
+[Auto camera]
+Inactive
+== 
+
+[Auto camera]
+Active
+== 
+
+Loading maps…
+== 
+
+Community
+== 
+
+[Team status]
+forbidden
+== 
+
+[Team status]
+solo
+== 
+
+[Team status]
+allowed
+== 
+
+[Team status]
+required
+== 
+
+Teams
+== 
+
+[Team size]
+minimum
+== 
+
+[Team size]
+maximum
+== 
+
+Saves file
+== 
+
+Open the saves file
+== 
+
+Show FPS
+== 
+
+Renders your frame rate in the top right
+== 
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== 
+
+Show spectator cursor
+== 

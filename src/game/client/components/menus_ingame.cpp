@@ -752,19 +752,19 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		switch(Config()->m_SvTeam)
 		{
 		case SV_TEAM_FORBIDDEN:
-			pTeamMode = Localize("forbidden", "Teaming status");
+			pTeamMode = Localize("forbidden", "Team status");
 			break;
 		case SV_TEAM_ALLOWED:
 			if(g_Config.m_SvSoloServer)
-				pTeamMode = Localize("solo", "Teaming status");
+				pTeamMode = Localize("solo", "Team status");
 			else
-				pTeamMode = Localize("allowed", "Teaming status");
+				pTeamMode = Localize("allowed", "Team status");
 			break;
 		case SV_TEAM_MANDATORY:
-			pTeamMode = Localize("required", "Teaming status");
+			pTeamMode = Localize("required", "Team status");
 			break;
 		case SV_TEAM_FORCED_SOLO:
-			pTeamMode = Localize("solo", "Teaming status");
+			pTeamMode = Localize("solo", "Team status");
 			break;
 		default:
 			dbg_assert(false, "unknown team mode");
