@@ -2116,16 +2116,16 @@ Show spectator cursor
 
 [Team status]
 forbidden
-== 
+== förbjudet
 
 [Team status]
 solo
-== 
+== solo
 
 [Team status]
 allowed
-== 
+== tillåtet
 
 [Team status]
 required
-== 
+== krav
