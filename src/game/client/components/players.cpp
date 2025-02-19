@@ -29,7 +29,7 @@
 
 void CPlayers::RenderHand(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
 {
-	if(pInfo->m_aSixup[g_Config.m_ClDummy].m_aTextures[protocol7::SKINPART_BODY].IsValid())
+	if(pInfo->m_aSixup[g_Config.m_ClDummy].PartTexture(protocol7::SKINPART_BODY).IsValid())
 		RenderHand7(pInfo, CenterPos, Dir, AngleOffset, PostRotOffset, Alpha);
 	else
 		RenderHand6(pInfo, CenterPos, Dir, AngleOffset, PostRotOffset, Alpha);
@@ -61,7 +61,7 @@ void CPlayers::RenderHand7(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir
 	IGraphics::CQuadItem QuadOutline(HandPos.x, HandPos.y, 2 * BaseSize, 2 * BaseSize);
 	IGraphics::CQuadItem QuadHand = QuadOutline;
 
-	Graphics()->TextureSet(pInfo->m_aSixup[g_Config.m_ClDummy].m_aTextures[protocol7::SKINPART_HANDS]);
+	Graphics()->TextureSet(pInfo->m_aSixup[g_Config.m_ClDummy].PartTexture(protocol7::SKINPART_HANDS));
 	Graphics()->QuadsBegin();
 	Graphics()->SetColor(Color);
 	Graphics()->QuadsSetRotation(Angle);
@@ -760,8 +760,7 @@ void CPlayers::RenderPlayer(
 				vec2(m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_X, m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_Y),
 				Client()->IntraGameTick(g_Config.m_ClDummy));
 
-		CTeeRenderInfo Shadow = RenderInfo;
-		RenderTools()->RenderTee(&State, &Shadow, Player.m_Emote, Direction, ShadowPosition, 0.5f); // render ghost
+		RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, ShadowPosition, 0.5f); // render ghost
 	}
 
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);

@@ -116,17 +116,8 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	OwnSkinInfo.m_Size = 50.0f;
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false);
-		if(aUCCVars[Part])
-		{
-			OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_ColorTexture;
-			OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(aColorVars[Part], Part == protocol7::SKINPART_MARKING);
-		}
-		else
-		{
-			OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkinPart->m_OrgTexture;
-			OwnSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-		}
+		m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false)->ApplyTo(OwnSkinInfo.m_aSixup[g_Config.m_ClDummy]);
+		m_pClient->m_Skins7.ApplyColorTo(OwnSkinInfo.m_aSixup[g_Config.m_ClDummy], aUCCVars[Part], aColorVars[Part], Part);
 	}
 
 	char aBuf[128 + IO_MAX_PATH_LENGTH];
@@ -163,8 +154,8 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	TeamSkinInfo.m_Size = OwnSkinInfo.m_Size;
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
-		const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false);
-		TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = aUCCVars[Part] ? pSkinPart->m_ColorTexture : pSkinPart->m_OrgTexture;
+		m_pClient->m_Skins7.FindSkinPart(Part, apSkinPartsPtr[Part], false)->ApplyTo(TeamSkinInfo.m_aSixup[g_Config.m_ClDummy]);
+		TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aUseCustomColors[Part] = aUCCVars[Part];
 	}
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
@@ -229,7 +220,7 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		// TODO: m_pClient->RefreshSkins();
+		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SEVEN);
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
@@ -357,16 +348,8 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 		CTeeRenderInfo Info;
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			if(pSkin->m_aUseCustomColors[Part])
-			{
-				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkin->m_apParts[Part]->m_ColorTexture;
-				Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(pSkin->m_aPartColors[Part], Part == protocol7::SKINPART_MARKING);
-			}
-			else
-			{
-				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = pSkin->m_apParts[Part]->m_OrgTexture;
-				Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-			}
+			pSkin->m_apParts[Part]->ApplyTo(Info.m_aSixup[g_Config.m_ClDummy]);
+			m_pClient->m_Skins7.ApplyColorTo(Info.m_aSixup[g_Config.m_ClDummy], pSkin->m_aUseCustomColors[Part], pSkin->m_aPartColors[Part], Part);
 		}
 		Info.m_Size = 50.0f;
 
@@ -442,17 +425,9 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 		CTeeRenderInfo Info;
 		for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 		{
-			const CSkins7::CSkinPart *pSkinPart = m_pClient->m_Skins7.FindSkinPart(Part, CSkins7::ms_apSkinVariables[(int)m_Dummy][Part], false);
-			if(*CSkins7::ms_apUCCVariables[(int)m_Dummy][Part])
-			{
-				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = m_TeePartSelected == Part ? pPart->m_ColorTexture : pSkinPart->m_ColorTexture;
-				Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetColor(*CSkins7::ms_apColorVariables[(int)m_Dummy][Part], Part == protocol7::SKINPART_MARKING);
-			}
-			else
-			{
-				Info.m_aSixup[g_Config.m_ClDummy].m_aTextures[Part] = m_TeePartSelected == Part ? pPart->m_OrgTexture : pSkinPart->m_OrgTexture;
-				Info.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-			}
+			const CSkins7::CSkinPart *pPreviewPart = (m_TeePartSelected == Part ? pPart : m_pClient->m_Skins7.FindSkinPart(Part, CSkins7::ms_apSkinVariables[(int)m_Dummy][Part], false));
+			pPreviewPart->ApplyTo(Info.m_aSixup[g_Config.m_ClDummy]);
+			m_pClient->m_Skins7.ApplyColorTo(Info.m_aSixup[g_Config.m_ClDummy], *CSkins7::ms_apUCCVariables[(int)m_Dummy][Part], *CSkins7::ms_apColorVariables[(int)m_Dummy][Part], Part);
 		}
 		Info.m_Size = 50.0f;
 

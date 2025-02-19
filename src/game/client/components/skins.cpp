@@ -18,6 +18,10 @@
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
+#include <chrono>
+
+using namespace std::chrono_literals;
+
 CSkins::CSkins() :
 	m_PlaceholderSkin("dummy")
 {
@@ -322,6 +326,34 @@ void CSkins::OnShutdown()
 	m_LoadingSkins.clear();
 }
 
+void CSkins::OnRender()
+{
+	const std::chrono::nanoseconds StartTime = time_get_nanoseconds();
+	for(auto &[_, pLoadingSkin] : m_LoadingSkins)
+	{
+		if(!pLoadingSkin->m_pDownloadJob || !pLoadingSkin->m_pDownloadJob->Done())
+		{
+			continue;
+		}
+
+		if(pLoadingSkin->m_pDownloadJob->State() == IJob::STATE_DONE && pLoadingSkin->m_pDownloadJob->ImageInfo().m_pData)
+		{
+			LoadSkin(pLoadingSkin->Name(), pLoadingSkin->m_pDownloadJob->ImageInfo());
+			GameClient()->OnSkinUpdate(pLoadingSkin->Name());
+			pLoadingSkin->m_pDownloadJob = nullptr;
+			if(time_get_nanoseconds() - StartTime >= 250us)
+			{
+				// Avoid using too much frame time for loading skins
+				break;
+			}
+		}
+		else
+		{
+			pLoadingSkin->m_pDownloadJob = nullptr;
+		}
+	}
+}
+
 void CSkins::Refresh(TSkinLoadedCallback &&SkinLoadedCallback)
 {
 	m_LoadingSkins.clear();
@@ -382,29 +414,27 @@ const CSkin *CSkins::FindImpl(const char *pName)
 {
 	auto SkinIt = m_Skins.find(pName);
 	if(SkinIt != m_Skins.end())
+	{
 		return SkinIt->second.get();
-
-	if(str_comp(pName, "default") == 0)
-		return nullptr;
+	}
 
 	if(!g_Config.m_ClDownloadSkins)
+	{
 		return nullptr;
+	}
+
+	if(str_comp(pName, "default") == 0)
+	{
+		return nullptr;
+	}
 
 	if(!CSkin::IsValidName(pName))
-		return nullptr;
-
-	auto ExistingLoadingSkin = m_LoadingSkins.find(pName);
-	if(ExistingLoadingSkin != m_LoadingSkins.end())
 	{
-		std::unique_ptr<CLoadingSkin> &pLoadingSkin = ExistingLoadingSkin->second;
-		if(!pLoadingSkin->m_pDownloadJob || !pLoadingSkin->m_pDownloadJob->Done())
-			return nullptr;
+		return nullptr;
+	}
 
-		if(pLoadingSkin->m_pDownloadJob->State() == IJob::STATE_DONE && pLoadingSkin->m_pDownloadJob->ImageInfo().m_pData)
-		{
-			LoadSkin(pLoadingSkin->Name(), pLoadingSkin->m_pDownloadJob->ImageInfo());
-		}
-		pLoadingSkin->m_pDownloadJob = nullptr;
+	if(m_LoadingSkins.find(pName) != m_LoadingSkins.end())
+	{
 		return nullptr;
 	}
 

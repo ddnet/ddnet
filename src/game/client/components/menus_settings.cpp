@@ -536,21 +536,21 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClDownloadSkins, Localize("Download skins"), g_Config.m_ClDownloadSkins, &Button))
 	{
 		g_Config.m_ClDownloadSkins ^= 1;
-		m_pClient->RefreshSkins();
+		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SIX);
 	}
 
 	Checkboxes.HSplitTop(20.0f, &Button, &Checkboxes);
 	if(DoButton_CheckBox(&g_Config.m_ClDownloadCommunitySkins, Localize("Download community skins"), g_Config.m_ClDownloadCommunitySkins, &Button))
 	{
 		g_Config.m_ClDownloadCommunitySkins ^= 1;
-		m_pClient->RefreshSkins();
+		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SIX);
 	}
 
 	Checkboxes.HSplitTop(20.0f, &Button, &Checkboxes);
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla skins only"), g_Config.m_ClVanillaSkinsOnly, &Button))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
-		m_pClient->RefreshSkins();
+		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SIX);
 	}
 
 	Checkboxes.HSplitTop(20.0f, &Button, &Checkboxes);
@@ -865,7 +865,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		m_pClient->RefreshSkins();
+		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SIX);
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
