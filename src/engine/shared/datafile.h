@@ -22,7 +22,8 @@ enum
 // raw datafile access
 class CDataFileReader
 {
-	class CDatafile *m_pDataFile;
+	class CDatafile *m_pDataFile = nullptr;
+
 	void *GetDataImpl(int Index, bool Swap);
 	int GetFileDataSize(int Index) const;
 
@@ -30,20 +31,12 @@ class CDataFileReader
 	int GetInternalItemType(int ExternalType);
 
 public:
-	CDataFileReader() :
-		m_pDataFile(nullptr) {}
-	~CDataFileReader() { Close(); }
-
-	CDataFileReader &operator=(CDataFileReader &&Other)
-	{
-		m_pDataFile = Other.m_pDataFile;
-		Other.m_pDataFile = nullptr;
-		return *this;
-	}
+	~CDataFileReader();
+	CDataFileReader &operator=(CDataFileReader &&Other);
 
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
 	bool Close();
-	bool IsOpen() const { return m_pDataFile != nullptr; }
+	bool IsOpen() const;
 	IOHANDLE File() const;
 
 	int GetDataSize(int Index) const;

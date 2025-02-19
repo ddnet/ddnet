@@ -106,6 +106,18 @@ public:
 	char *m_pData;
 };
 
+CDataFileReader::~CDataFileReader()
+{
+	Close();
+}
+
+CDataFileReader &CDataFileReader::operator=(CDataFileReader &&Other)
+{
+	m_pDataFile = Other.m_pDataFile;
+	Other.m_pDataFile = nullptr;
+	return *this;
+}
+
 bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int StorageType)
 {
 	dbg_assert(m_pDataFile == nullptr, "File already open");
@@ -260,6 +272,11 @@ bool CDataFileReader::Close()
 	free(m_pDataFile);
 	m_pDataFile = nullptr;
 	return true;
+}
+
+bool CDataFileReader::IsOpen() const
+{
+	return m_pDataFile != nullptr;
 }
 
 IOHANDLE CDataFileReader::File() const
