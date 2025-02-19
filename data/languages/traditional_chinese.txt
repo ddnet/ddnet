@@ -2062,76 +2062,76 @@ Server could not be started. Make sure to grant the notification permission in t
 == 伺服器無法啟動。請確保在應用程式設置中授予通知權限，以便伺服器可以在後台運行。
 
 Auto-sync player camera
-== 
+== 自動同步玩家視角
 
 [Auto camera]
 Disabled
-== 
+== 已禁用
 
 [Auto camera]
 Enabled
-== 
+== 已啟用
 
 [Auto camera]
 Unavailable for this player
-== 
+== 此玩家不可用
 
 [Auto camera]
 Inactive
-== 
+== 未啟用
 
 [Auto camera]
 Active
-== 
+== 已啟用
 
 Loading maps…
-== 
+== 加載地圖中…
 
 Community
-== 
+== 社群
 
 [Team status]
 forbidden
-== 
+== 禁止
 
 [Team status]
 solo
-== 
+== 單人
 
 [Team status]
 allowed
-== 
+== 允許
 
 [Team status]
 required
-== 
+== 強制
 
 Teams
-== 
+== 組隊
 
 [Team size]
 minimum
-== 
+== 最小人數
 
 [Team size]
 maximum
-== 
+== 最大人數
 
 Saves file
-== 
+== 存檔密碼文件
 
 Open the saves file
-== 
+== 打開存檔密碼文件
 
 Show FPS
-== 
+== 顯示 FPS
 
 Renders your frame rate in the top right
-== 
+== 在右上角顯示幀率
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Traditional Chinese translation by SiuFu, TsFreddie, Dan_cao, cheeser0613, By, Pioooooo, 豆腐渣 and By
+== 繁體中文翻譯由以下人員貢獻：SiuFu, TsFreddie, Dan_cao, cheeser0613, By, Pioooooo, 豆腐渣
 
 Show spectator cursor
-== 
+== 顯示旁觀者指標
