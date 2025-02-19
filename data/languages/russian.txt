@@ -2022,110 +2022,110 @@ Active: Hook
 == Активно: Крюк
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" не совместим с pnglite и не может быть загружен старыми версиями DDNet:
 
 Loading background map
-== 
+== Загрузка карты фона
 
 Auto-sync player camera
-== 
+== Автоматически синхронизировать камеру игрока
 
 [Auto camera]
 Disabled
-== 
+== Выключено
 
 [Auto camera]
 Enabled
-== 
+== Включено
 
 [Auto camera]
 Unavailable for this player
-== 
+== Недостуно для этого игрока
 
 [Auto camera]
 Inactive
-== 
+== Неактивно
 
 [Auto camera]
 Active
-== 
+== Активно
 
 Loading maps…
-== 
+== Загрузка карт…
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== АВТО
 
 Toggle auto camera
-== 
+== Включить авто камеру
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Community
-== 
+== Сообщество
 
 [Team status]
 forbidden
-== 
+== запрещены
 
 [Team status]
 solo
-== 
+== соло
 
 [Team status]
 allowed
-== 
+== разрешенны
 
 [Team status]
 required
-== 
+== требуются
 
 Teams
-== 
+== Команды
 
 [Team size]
 minimum
-== 
+== минимум
 
 [Team size]
 maximum
-== 
+== максимум
 
 Saves file
-== 
+== Файл сохранения
 
 Open the saves file
-== 
+== Открыть файл сохранения
 
 Show FPS
-== 
+== Показывать FPS
 
 Renders your frame rate in the top right
-== 
+== Отображает частоту кадров в правом верхнем углу
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Russian translation by kaddyd, carzil, RaZeR[RT], BotanEgg, Bananbl4, Arion WT, gerdoe, Vy0x2, Anime.pdf, ban+eblan, ByFox, Sedonya, WTF and Риксед
+== Русский перевод выполнен: kaddyd, carzil, RaZeR[RT], BotanEgg, Bananbl4, Arion WT, gerdoe, Vy0x2, Anime.pdf, ban+eblan, ByFox, Sedonya, WTF, Риксед и oxyzo
 
 Show spectator cursor
-== 
+== Показывать курсор других при наблюдении
 
 Show client IDs in name plates
-== 
+== Показывать ID клиента в именах
 
 Hook Strength
-== 
+== Сила крюка
 
 Size of hook strength icon and number indicator
-== 
+== Размер иконки силы крюка и индикатора числа
 
 Key Presses
-== 
+== Действия игроков
 
 Size of key press icons
-== 
+== Размер иконок действий игроков
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Не удалось запустить сервер. Убедитесь, что вы предоставили разрешение на уведомления в настройках приложения, чтобы сервер мог работать в фоновом режиме.
