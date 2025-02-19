@@ -2059,75 +2059,75 @@ https://wiki.ddnet.org/wiki/Mapping
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 
+== Nederlandse vertaling door vierkant, Sijmen Schoon, Syntax Error, Yared Hufkens, Ronan, urg
 
 Auto-sync player camera
-== 
+== Auto-sync speler camera
 
 [Auto camera]
 Disabled
-== 
+== Uitgeschakeld
 
 [Auto camera]
 Enabled
-== 
+== Ingeschakeld
 
 [Auto camera]
 Unavailable for this player
-== 
+== Niet beschikbaar voor deze speler
 
 [Auto camera]
 Inactive
-== 
+== Inactief
 
 [Auto camera]
 Active
-== 
+== Actief
 
 Loading maps…
-== 
+== Laden van maps…
 
 Community
-== 
+== Community
 
 [Team status]
 forbidden
-== 
+== Verboden
 
 [Team status]
 solo
-== 
+== Solo
 
 [Team status]
 allowed
-== 
+== Toegestaan
 
 [Team status]
 required
-== 
+== Vereist
 
 Teams
-== 
+== Teams
 
 [Team size]
 minimum
-== 
+== minimum
 
 [Team size]
 maximum
-== 
+== maximum
 
 Saves file
-== 
+== Savesbestand
 
 Open the saves file
-== 
+== Open het Savesbestand
 
 Show FPS
-== 
+== Toon FPS
 
 Renders your frame rate in the top right
-== 
+== Geeft je framerate weer aan de rechterbovenhoek
 
 Show spectator cursor
-== 
+== Toon toeschouwerscursor
