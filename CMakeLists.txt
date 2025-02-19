@@ -2864,6 +2864,7 @@ if(TOOLS)
     map_replace_area.cpp
     map_replace_image.cpp
     map_resave.cpp
+    map_test.cpp
     packetgen.cpp
     stun.cpp
     twping.cpp
@@ -2877,7 +2878,7 @@ if(TOOLS)
       set(TOOL_DEPS ${DEPS})
       set(TOOL_LIBS ${LIBS})
       unset(EXTRA_TOOL_SRC)
-      if(TOOL MATCHES "^(dilate|map_convert_07|map_create_pixelart|map_optimize|map_extract|map_replace_image)$")
+      if(TOOL MATCHES "^(dilate|map_convert_07|map_create_pixelart|map_optimize|map_extract|map_replace_image|map_test)$")
         list(APPEND TOOL_INCLUDE_DIRS ${PNG_INCLUDE_DIRS})
         list(APPEND TOOL_DEPS $<TARGET_OBJECTS:engine-gfx>)
         list(APPEND TOOL_LIBS ${PNG_LIBRARIES})
