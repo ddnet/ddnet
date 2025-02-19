@@ -1636,7 +1636,7 @@ Background music volume
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 
+== Esperanto translation by dannyhpy
 
 Tee
 == 

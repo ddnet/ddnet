@@ -1,14 +1,3 @@
-##### authors #####
-#originally created by:
-#	.ua and Ivan. REWORKED BY SwiatoslaW#2927 (09.12.2021)
-#modified by:
-#	404_not_found		2011-07-30 19:50:58
-#	EGYT5453			(15.05.2024-04.01.2025)
-#	veydzh3r			(31.08.2024-01.09.2024)
-##### /authors #####
-
-##### translated strings #####
-
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" не сумісний з pnglite і не може бути завантажений на старих версіях DDNet:
 
@@ -2136,7 +2125,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 
+== Ukrainian translation by .ua, Ivan., SwiatoslaW, 404_not_found, EGYT5453 and veydzh3r
 
 Show spectator cursor
 == 
