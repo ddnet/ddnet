@@ -1,12 +1,3 @@
-##### authors #####
-#originally created by:
-#	orange
-#modified by:
-# 2021-06-04 Eana Hufwe
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == 残り %d 秒
 
@@ -1834,7 +1825,7 @@ auto
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 
+== Japanese translation by orange and Eana Hufwe
 
 Tee
 == 

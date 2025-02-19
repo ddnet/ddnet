@@ -1,12 +1,3 @@
-##### authors #####
-#originally created by:
-# Veljko Radovanovic (VekiPro) 2020-10-02 18:05:00
-#modified by:
-# Veljko Radovanovic (VekiPro) 2022-08-28 11:56:69
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == %ds је преостало
 
@@ -1945,7 +1936,7 @@ Graphics card
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 
+== Serbian Cyrillic translation by Veljko Radovanovic (VekiPro)
 
 Tee
 == 

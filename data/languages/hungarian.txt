@@ -1,15 +1,4 @@
-﻿##### authors #####
-#originally created by:
-#	Feca
-#modified by:
-#	Boti.
-#	Cellegen
-#	bencie
-##### /authors #####
-
-##### translated strings #####
-
-%ds left
+﻿%ds left
 == %ds van hátra
 
 %i minute left
@@ -1981,7 +1970,7 @@ Graphics card
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 
+== Hungarian translation by Feca, Boti., Cellegen and bencie
 
 Tee
 == 

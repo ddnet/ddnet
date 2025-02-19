@@ -1,14 +1,3 @@
-##### authors #####
-#originally created by:
-#	MertenNor
-#modified by:
-#	MertenNor		2011-07-02 08:46:16
-#	nuborn			2020-08-31 23:00:00
-#	nuborn			2020-11-12 00:00:00
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == %d sekunder igjen
 
@@ -1824,7 +1813,7 @@ auto
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 
+== Norwegian translation by MertenNor and nuborn
 
 Tee
 == 

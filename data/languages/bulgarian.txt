@@ -1,12 +1,3 @@
-##### authors #####
-#originally created by:
-#	Hip-Hop_Blond
-#modified by:
-#	Hip-Hop_Blond		2011-07-15 01:19:13
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == остават %d сек.
 
@@ -1596,7 +1587,7 @@ Background music volume
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 
+== Bulgarian translation by Hip-Hop_Blond
 
 Tee
 == 

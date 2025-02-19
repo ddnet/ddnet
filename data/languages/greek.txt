@@ -1,12 +1,3 @@
-##### authors #####
-#originally created by:
-#	Evropi
-#modified by:
-#
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == %ds ακόμα
 
@@ -1599,7 +1590,7 @@ Background music volume
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 
+== Greek translation by Evropi
 
 Tee
 == 
