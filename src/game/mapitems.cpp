@@ -78,7 +78,7 @@ bool IsTeleTileNumberUsedAny(int Index)
 
 bool IsValidSpeedupTile(int Index)
 {
-	return Index == TILE_BOOST;
+	return Index == TILE_SPEED_BOOST_OLD || Index == TILE_SPEED_BOOST;
 }
 
 bool IsValidSwitchTile(int Index)
