@@ -786,7 +786,7 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 	str_format(aBuf, sizeof(aBuf), "'%s' disabled practice mode for your team", pSelf->Server()->ClientName(pResult->m_ClientId));
 	pSelf->SendChatTeam(Team, aBuf);
 
-	Teams.KillSavedTeam(pResult->m_ClientId, Team);
+	Teams.KillCharacterOrTeam(pResult->m_ClientId, Team);
 	Teams.SetPractice(Team, false);
 }
 
@@ -1218,7 +1218,7 @@ void CGameContext::AttemptJoinTeam(int ClientId, int Team)
 		}
 		else
 		{
-			if(g_Config.m_SvPracticeByDefault && g_Config.m_SvTestingCommands)
+			if(PracticeByDefault())
 			{
 				// joined an empty team
 				if(m_pController->Teams().Count(Team) == 1)

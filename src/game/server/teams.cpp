@@ -35,7 +35,7 @@ void CGameTeams::Reset()
 		m_aTeamFlock[i] = false;
 		m_apSaveTeamResult[i] = nullptr;
 		m_aTeamSentStartWarning[i] = false;
-		if(g_Config.m_SvPracticeByDefault && g_Config.m_SvTestingCommands)
+		if(m_pGameContext->PracticeByDefault())
 			m_aPractice[i] = true;
 		ResetRoundState(i);
 	}
@@ -47,7 +47,7 @@ void CGameTeams::ResetRoundState(int Team)
 	if(Team != TEAM_SUPER)
 		ResetSwitchers(Team);
 
-	if(!g_Config.m_SvPracticeByDefault || !g_Config.m_SvTestingCommands)
+	if(!m_pGameContext->PracticeByDefault())
 		m_aPractice[Team] = false;
 	m_aTeamUnfinishableKillTick[Team] = -1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -394,7 +394,7 @@ const char *CGameTeams::SetCharacterTeam(int ClientId, int Team)
 	if(Team != TEAM_SUPER && Character(ClientId)->m_DDRaceState != DDRACE_NONE)
 		return "You have started racing already";
 	// No cheating through noob filter with practice and then leaving team
-	if(m_aPractice[m_Core.Team(ClientId)] && !(g_Config.m_SvPracticeByDefault && g_Config.m_SvTestingCommands))
+	if(m_aPractice[m_Core.Team(ClientId)] && !m_pGameContext->PracticeByDefault())
 		return "You have used practice mode already";
 
 	// you can not join a team which is currently in the process of saving,
@@ -1158,7 +1158,7 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 		{
 			ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 
-			if(!g_Config.m_SvPracticeByDefault || !g_Config.m_SvTestingCommands)
+			if(!m_pGameContext->PracticeByDefault())
 				m_aPractice[Team] = false;
 
 			if(Count(Team) > 1)
@@ -1227,7 +1227,7 @@ void CGameTeams::SetClientInvited(int Team, int ClientId, bool Invited)
 	}
 }
 
-void CGameTeams::KillSavedTeam(int ClientId, int Team)
+void CGameTeams::KillCharacterOrTeam(int ClientId, int Team)
 {
 	if(g_Config.m_SvSoloServer || !g_Config.m_SvTeam)
 	{
