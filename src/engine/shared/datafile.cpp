@@ -23,8 +23,9 @@ enum
 	OFFSET_UUID_TYPE = 0x8000,
 };
 
-struct CItemEx
+class CItemEx
 {
+public:
 	int m_aUuid[sizeof(CUuid) / sizeof(int32_t)];
 
 	static CItemEx FromUuid(CUuid Uuid)
@@ -44,21 +45,24 @@ struct CItemEx
 	}
 };
 
-struct CDatafileItemType
+class CDatafileItemType
 {
+public:
 	int m_Type;
 	int m_Start;
 	int m_Num;
 };
 
-struct CDatafileItem
+class CDatafileItem
 {
+public:
 	int m_TypeAndId;
 	int m_Size;
 };
 
-struct CDatafileHeader
+class CDatafileHeader
 {
+public:
 	char m_aId[4];
 	int m_Version;
 	int m_Size;
@@ -76,8 +80,9 @@ struct CDatafileHeader
 	}
 };
 
-struct CDatafileInfo
+class CDatafileInfo
 {
+public:
 	CDatafileItemType *m_pItemTypes;
 	int *m_pItemOffsets;
 	int *m_pDataOffsets;
@@ -87,8 +92,9 @@ struct CDatafileInfo
 	char *m_pDataStart;
 };
 
-struct CDatafile
+class CDatafile
 {
+public:
 	IOHANDLE m_File;
 	SHA256_DIGEST m_Sha256;
 	unsigned m_Crc;

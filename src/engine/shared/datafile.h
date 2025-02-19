@@ -22,7 +22,7 @@ enum
 // raw datafile access
 class CDataFileReader
 {
-	struct CDatafile *m_pDataFile;
+	class CDatafile *m_pDataFile;
 	void *GetDataImpl(int Index, bool Swap);
 	int GetFileDataSize(int Index) const;
 
@@ -77,8 +77,9 @@ public:
 	};
 
 private:
-	struct CDataInfo
+	class CDataInfo
 	{
+	public:
 		void *m_pUncompressedData;
 		int m_UncompressedSize;
 		void *m_pCompressedData;
@@ -86,8 +87,9 @@ private:
 		ECompressionLevel m_CompressionLevel;
 	};
 
-	struct CItemInfo
+	class CItemInfo
 	{
+	public:
 		int m_Type;
 		int m_Id;
 		int m_Size;
@@ -96,15 +98,17 @@ private:
 		void *m_pData;
 	};
 
-	struct CItemTypeInfo
+	class CItemTypeInfo
 	{
+	public:
 		int m_Num = 0;
 		int m_First = -1;
 		int m_Last = -1;
 	};
 
-	struct CExtendedItemType
+	class CExtendedItemType
 	{
+	public:
 		int m_Type;
 		CUuid m_Uuid;
 	};
