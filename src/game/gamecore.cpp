@@ -749,7 +749,7 @@ void CWorldCore::InitSwitchers(int HighestSwitchNumber)
 	for(auto &Switcher : m_vSwitchers)
 	{
 		Switcher.m_Initial = true;
-		for(int j = 0; j < MAX_CLIENTS; j++)
+		for(int j = 0; j < NUM_DDRACE_TEAMS; j++)
 		{
 			Switcher.m_aStatus[j] = true;
 			Switcher.m_aEndTick[j] = 0;

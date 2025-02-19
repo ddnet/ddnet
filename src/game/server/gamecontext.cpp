@@ -1009,7 +1009,7 @@ void CGameContext::OnPreTickTeehistorian()
 		else
 			m_TeeHistorian.RecordPlayerTeam(i, 0);
 	}
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < TEAM_SUPER; i++)
 	{
 		m_TeeHistorian.RecordTeamPractice(i, m_pController->Teams().IsPractice(i));
 	}
@@ -1276,7 +1276,7 @@ void CGameContext::OnTick()
 
 	for(auto &Switcher : Switchers())
 	{
-		for(int j = 0; j < MAX_CLIENTS; ++j)
+		for(int j = 0; j < NUM_DDRACE_TEAMS; ++j)
 		{
 			if(Switcher.m_aEndTick[j] <= Server()->Tick() && Switcher.m_aType[j] == TILE_SWITCHTIMEDOPEN)
 			{
