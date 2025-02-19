@@ -8,6 +8,7 @@
 #include <engine/textrender.h>
 
 #include <game/client/component.h>
+#include <game/generated/protocol.h>
 
 class CNamePlateRenderData
 {
@@ -49,17 +50,17 @@ class CNamePlate;
 class CNamePlates : public CComponent
 {
 private:
-	CNamePlate *m_aNamePlates;
+	CNamePlate *m_aNamePlates = nullptr;
 	void RenderNamePlate(CNamePlate &NamePlate, const CNamePlateRenderData &Data);
 
 public:
 	void RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha);
 	void RenderNamePlatePreview(vec2 Position, int Dummy);
 	void ResetNamePlates();
-	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnWindowResize() override;
-	virtual void OnInit() override;
-	virtual void OnRender() override;
+	int Sizeof() const override { return sizeof(*this); }
+	void OnWindowResize() override;
+	void OnInit() override;
+	void OnRender() override;
 	~CNamePlates();
 };
 

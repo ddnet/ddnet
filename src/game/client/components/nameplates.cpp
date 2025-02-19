@@ -5,13 +5,13 @@
 #include <engine/textrender.h>
 
 #include <game/generated/client_data.h>
-#include <game/generated/protocol.h>
 
 #include <game/client/gameclient.h>
 #include <game/client/prediction/entities/character.h>
 
-#include "camera.h"
-#include "controls.h"
+#include <memory>
+#include <vector>
+
 #include "nameplates.h"
 
 // Part Types
@@ -19,31 +19,20 @@
 class CNamePlatePart
 {
 protected:
-	float m_Width = 0.0f;
-	float m_Height = 0.0f;
-	float m_PaddingX = 5.0f;
-	float m_PaddingY = 5.0f;
-	// Offset to rendered X and Y not effecting layout
-	float m_OffsetX = 0.0f;
-	float m_OffsetY = 0.0f;
-	// Whether this part is a new line (doesn't do anything else)
-	bool m_NewLine = false;
-	// Whether this part is visible
-	bool m_Visible = true;
-	// Whether when not visible will still take up space
-	bool m_ShiftOnInvis = false;
+	vec2 m_Size;
+	vec2 m_Padding;
+	vec2 m_Offset; // Offset to rendered X and Y not effecting layout
+	bool m_NewLine = false; // Whether this part is a new line (doesn't do anything else)
+	bool m_Visible = true; // Whether this part is visible
+	bool m_ShiftOnInvis = false; // Whether when not visible will still take up space
 
 public:
-	friend class CGameClient;
 	virtual void Update(CGameClient &This, const CNamePlateRenderData &Data) {}
-	virtual void Reset(CGameClient &This){};
-	virtual void Render(CGameClient &This, float X, float Y){};
-	float Width() const { return m_Width; }
-	float Height() const { return m_Height; }
-	float PaddingX() const { return m_PaddingX; }
-	float PaddingY() const { return m_PaddingY; }
-	float OffsetX() const { return m_OffsetX; }
-	float OffsetY() const { return m_OffsetY; }
+	virtual void Reset(CGameClient &This) {}
+	virtual void Render(CGameClient &This, float X, float Y) const {}
+	vec2 Size() const { return m_Size; }
+	vec2 Padding() const { return m_Padding; }
+	vec2 Offset() const { return m_Offset; }
 	bool NewLine() const { return m_NewLine; }
 	bool Visible() const { return m_Visible; }
 	bool ShiftOnInvis() const { return m_ShiftOnInvis; }
@@ -56,7 +45,7 @@ class CNamePlatePartText : public CNamePlatePart
 {
 protected:
 	STextContainerIndex m_TextContainerIndex;
-	virtual bool UpdateNeeded(CGameClient &This, const CNamePlateRenderData &Data) { return true; };
+	virtual bool UpdateNeeded(CGameClient &This, const CNamePlateRenderData &Data) { return true; }
 	virtual void UpdateText(CGameClient &This, const CNamePlateRenderData &Data) = 0;
 	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 	void Create(CGameClient &This)
@@ -65,7 +54,6 @@ protected:
 	}
 
 public:
-	friend class CGameClient;
 	void Update(CGameClient &This, const CNamePlateRenderData &Data) override
 	{
 		if(!UpdateNeeded(This, Data) && m_TextContainerIndex.Valid())
@@ -73,7 +61,7 @@ public:
 
 		if(Data.m_InGame)
 		{
-			// create namePlates at standard zoom
+			// create name plates at standard zoom
 			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 			This.Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 			This.RenderTools()->MapScreenToInterface(This.m_Camera.m_Center.x, This.m_Camera.m_Center.y);
@@ -87,8 +75,7 @@ public:
 		if(m_TextContainerIndex.Valid())
 		{
 			auto Container = This.TextRender()->GetBoundingBoxTextContainer(m_TextContainerIndex);
-			m_Width = Container.m_W;
-			m_Height = Container.m_H;
+			m_Size = vec2(Container.m_W, Container.m_H);
 		}
 		else
 			m_Visible = false;
@@ -97,17 +84,17 @@ public:
 	{
 		This.TextRender()->DeleteTextContainer(m_TextContainerIndex);
 	}
-	void Render(CGameClient &This, float X, float Y) override
+	void Render(CGameClient &This, float X, float Y) const override
 	{
 		if(!m_TextContainerIndex.Valid())
 			return;
 
-		ColorRGBA OutlineColor = This.TextRender()->DefaultTextOutlineColor();
-		OutlineColor.a *= m_Color.a;
+		ColorRGBA OutlineColor = This.TextRender()->DefaultTextOutlineColor()
+			.WithMultipliedAlpha(m_Color.a);
 
 		This.TextRender()->RenderTextContainer(m_TextContainerIndex,
 			m_Color, OutlineColor,
-			X - Width() / 2.0f, Y - Height() / 2.0f);
+			X - Size().x / 2.0f, Y - Size().y / 2.0f);
 	}
 };
 
@@ -126,13 +113,13 @@ protected:
 	}
 
 public:
-	friend class CGameClient;
-	void Render(CGameClient &This, float X, float Y) override
+	void Render(CGameClient &This, float X, float Y) const override
 	{
 		This.Graphics()->SetColor(m_Color);
 		This.Graphics()->TextureSet(m_Texture);
 		This.Graphics()->QuadsSetRotation(m_Rotation);
-		This.Graphics()->RenderQuadContainerAsSprite(m_QuadContainerIndex, 0, X - Width() / 2.0f, Y - Height() / 2.0f, Width(), Height());
+		This.Graphics()->RenderQuadContainerAsSprite(m_QuadContainerIndex, 0, 
+			X - Size().x / 2.0f, Y - Size().y / 2.0f, Size().x, Size().y);
 		This.Graphics()->QuadsSetRotation(0.0f);
 		This.Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
@@ -142,22 +129,21 @@ class CNamePlatePartSprite : public CNamePlatePart
 {
 protected:
 	IGraphics::CTextureHandle m_Texture;
-	int m_Sprite = 0;
+	int m_Sprite = -1;
 	int m_SpriteFlags = 0;
 	float m_Rotation = 0.0f;
 	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 	void Create(CGameClient &This) {}
 
 public:
-	friend class CGameClient;
-	void Render(CGameClient &This, float X, float Y) override
+	void Render(CGameClient &This, float X, float Y) const override
 	{
 		This.Graphics()->TextureSet(m_Texture);
 		This.Graphics()->QuadsSetRotation(m_Rotation);
 		This.Graphics()->QuadsBegin();
 		This.Graphics()->SetColor(m_Color);
 		This.RenderTools()->SelectSprite(m_Sprite, m_SpriteFlags);
-		This.RenderTools()->DrawSprite(X, Y, Width(), Height());
+		This.RenderTools()->DrawSprite(X, Y, Size().x, Size().y);
 		This.Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		This.Graphics()->QuadsEnd();
 		This.Graphics()->QuadsSetRotation(0.0f);
@@ -176,27 +162,29 @@ public:
 	}
 };
 
+enum Direction { DIRECTION_LEFT, DIRECTION_UP, DIRECTION_RIGHT };
+
 class CNamePlatePartDirection : public CNamePlatePartIcon
 {
 private:
 	int m_Direction;
 
 public:
-	void Create(CGameClient &This, int Direction)
+	void Create(CGameClient &This, Direction Dir)
 	{
 		CNamePlatePartIcon::Create(This);
 		m_Texture = g_pData->m_aImages[IMAGE_ARROW].m_Id;
 		m_ShiftOnInvis = true;
-		m_Direction = Direction;
+		m_Direction = Dir;
 		switch(m_Direction)
 		{
-		case 0:
+		case DIRECTION_LEFT:
 			m_Rotation = pi;
 			break;
-		case 1:
+		case DIRECTION_UP:
 			m_Rotation = pi / -2.0f;
 			break;
-		case 2:
+		case DIRECTION_RIGHT:
 			m_Rotation = 0.0f;
 			break;
 		}
@@ -205,24 +193,24 @@ public:
 	{
 		if(!Data.m_ShowDirection)
 		{
-			m_Width = m_Height = 0;
+			m_Size = vec2();
 			m_Visible = false;
 			return;
 		}
-		m_Width = m_Height = Data.m_FontSizeDirection;
+		m_Size = vec2(Data.m_FontSizeDirection, Data.m_FontSizeDirection);
 		switch(m_Direction)
 		{
-		case 0:
+		case DIRECTION_LEFT:
 			m_Visible = Data.m_DirLeft;
-			m_OffsetY = m_Height / 2.0f;
+			m_Offset.y = m_Size.y / 2.0f;
 			break;
-		case 1:
+		case DIRECTION_UP:
 			m_Visible = Data.m_DirJump;
-			m_OffsetY = m_Height / -2.0f;
+			m_Offset.y = m_Size.y / -2.0f;
 			break;
-		case 2:
+		case DIRECTION_RIGHT:
 			m_Visible = Data.m_DirRight;
-			m_OffsetY = m_Height / 2.0f;
+			m_Offset.y = m_Size.y / 2.0f;
 			break;
 		}
 	}
@@ -273,7 +261,7 @@ public:
 		if(!m_Visible)
 			return;
 		m_Texture = This.m_GameSkin.m_SpriteHealthFull;
-		m_Width = m_Height = Data.m_FontSize;
+		m_Size = vec2(Data.m_FontSize, Data.m_FontSize);
 		m_Color.a = Data.m_Alpha;
 	}
 
@@ -353,7 +341,7 @@ protected:
 		m_Visible = Data.m_ShowHookStrongWeak;
 		if(!m_Visible)
 			return;
-		m_Width = m_Height = Data.m_FontSizeHookStrongWeak * 1.5f;
+		m_Size = vec2(Data.m_FontSizeHookStrongWeak, Data.m_FontSizeHookStrongWeak) * 1.5f;
 		switch(Data.m_HookStrongWeak)
 		{
 		case CNamePlateRenderData::HOOKSTRONGWEAK_STRONG:
@@ -437,23 +425,17 @@ private:
 		PartsVector::iterator Start, PartsVector::iterator End)
 	{
 		X -= W / 2.0f;
-		for(auto Part = Start; Part != End; ++Part)
+		for(auto PartIt = Start; PartIt != End; ++PartIt)
 		{
-			if((*Part)->Visible())
+			const CNamePlatePart &Part = **PartIt;
+			if(Part.Visible())
 			{
-				float PartX = X + ((*Part)->PaddingX() + (*Part)->Width()) / 2.0f + (*Part)->OffsetX();
-				float PartY = Y - std::max(H, (*Part)->PaddingY() + (*Part)->Height()) / 2.0f + (*Part)->OffsetY();
-				(*Part)->Render(This, PartX, PartY);
-				// Debug
-				// This.Graphics()->TextureClear();
-				// This.Graphics()->QuadsBegin();
-				// This.Graphics()->SetColor(1.0f, (*Part)->ShiftOnInvis() ? 1.0f : 0.0f, 0.0f, 0.5f);
-				// This.Graphics()->DrawCircle(PartX, PartY, 3, 10);
-				// This.Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-				// This.Graphics()->QuadsEnd();
+				float PartX = X + (Part.Padding().x + Part.Size().x) / 2.0f + Part.Offset().x;
+				float PartY = Y - std::max(H, Part.Padding().y + Part.Size().y) / 2.0f + Part.Offset().y;
+				Part.Render(This, PartX, PartY);
 			}
-			if((*Part)->Visible() || (*Part)->ShiftOnInvis())
-				X += (*Part)->Width() + (*Part)->PaddingX();
+			if(Part.Visible() || Part.ShiftOnInvis())
+				X += Part.Size().x + Part.Padding().x;
 		}
 	}
 	template<typename PartType, typename... ArgsType>
@@ -469,9 +451,9 @@ private:
 			return;
 		m_Inited = true;
 
-		AddPart<CNamePlatePartDirection>(This, 0);
-		AddPart<CNamePlatePartDirection>(This, 1);
-		AddPart<CNamePlatePartDirection>(This, 2);
+		AddPart<CNamePlatePartDirection>(This, DIRECTION_LEFT);
+		AddPart<CNamePlatePartDirection>(This, DIRECTION_UP);
+		AddPart<CNamePlatePartDirection>(This, DIRECTION_RIGHT);
 		AddPart<CNamePlatePartNewLine>(This);
 		AddPart<CNamePlatePartClientId>(This, false);
 		AddPart<CNamePlatePartFriendMark>(This);
@@ -486,7 +468,6 @@ private:
 	}
 
 public:
-	friend class CGameClient;
 	void Reset(CGameClient &This)
 	{
 		for(auto &Part : m_vpParts)
@@ -505,29 +486,64 @@ public:
 		float H = 0.0f; // Max height of line parts
 		bool Empty = true;
 		auto Start = m_vpParts.begin();
-		for(auto Part = m_vpParts.begin(); Part != m_vpParts.end(); ++Part)
+		for(auto PartIt = m_vpParts.begin(); PartIt != m_vpParts.end(); ++PartIt)
 		{
-			(*Part)->Update(This, Data);
-			if((*Part)->NewLine())
+			CNamePlatePart &Part = **PartIt;
+			Part.Update(This, Data);
+			if(Part.NewLine())
 			{
 				if(!Empty)
 				{
-					RenderLine(This, Data, X, Y, W, H, Start, std::next(Part));
+					RenderLine(This, Data, X, Y, W, H, Start, std::next(PartIt));
 					Y -= H;
 				}
-				Start = std::next(Part);
+				Start = std::next(PartIt);
 				W = 0.0f;
 				H = 0.0f;
 			}
-			else if((*Part)->Visible() || (*Part)->ShiftOnInvis())
+			else if(Part.Visible() || Part.ShiftOnInvis())
 			{
 				Empty = false;
-				W += (*Part)->Width() + (*Part)->PaddingX();
-				H = std::max(H, (*Part)->Height() + (*Part)->PaddingY());
+				W += Part.Size().x + Part.Padding().x;
+				H = std::max(H, Part.Size().y + Part.Padding().y);
 			}
 		}
 		RenderLine(This, Data, X, Y, W, H, Start, m_vpParts.end());
 		This.TextRender()->SetRenderFlags(0);
+	}
+	vec2 Size() {
+		float W = 0.0f; // Total width including padding of line
+		float H = 0.0f; // Max height of line parts
+		float WMax = 0.0f;
+		float HMax = 0.0f;
+		bool Empty = true;
+		for(auto PartIt = m_vpParts.begin(); PartIt != m_vpParts.end(); ++PartIt) // NOLINT(modernize-loop-convert) For consistency with Render
+		{
+			CNamePlatePart &Part = **PartIt;
+			if(Part.NewLine())
+			{
+				if(!Empty)
+				{
+					if(W > WMax)
+						WMax = W;
+					if(H > HMax)
+						HMax = H;
+				}
+				W = 0.0f;
+				H = 0.0f;
+			}
+			else if(Part.Visible() || Part.ShiftOnInvis())
+			{
+				Empty = false;
+				W += Part.Size().x + Part.Padding().x;
+				H = std::max(H, Part.Size().y + Part.Padding().y);
+			}
+		}
+		if(W > WMax)
+			WMax = W;
+		if(H > HMax)
+			HMax = H;
+		return vec2(WMax, HMax);
 	}
 };
 
@@ -748,7 +764,7 @@ void CNamePlates::OnRender()
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 	// expand the edges to prevent popping in/out onscreen
-	// it is assumed that the NamePlate and all its components fit into a 800x800 box placed directly above the tee
+	// it is assumed that the name plate and all its components fit into a 800x800 box placed directly above the tee
 	// this may need to be changed or calculated differently in the future
 	ScreenX0 -= 400;
 	ScreenX1 += 400;

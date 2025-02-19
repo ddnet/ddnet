@@ -2864,21 +2864,12 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		// ***** Name Plate Dummy Preview ***** //
 		static bool s_Dummy = false;
 		RightView.HSplitBottom(LineSize, &RightView, &Button);
-		if(DoButton_CheckBox(&s_Dummy, Localize("Preview Dummy's nameplate"), s_Dummy, &Button))
+		if(DoButton_CheckBox(&s_Dummy, Localize("Preview dummy's name plate"), s_Dummy, &Button))
 			s_Dummy = !s_Dummy;
 
-		int Dummy = g_Config.m_ClDummy != (int)s_Dummy ? 1 : 0;
-
-		CTeeRenderInfo TeeRenderInfo;
-		TeeRenderInfo.Apply(m_pClient->m_Skins.Find(Dummy ? g_Config.m_ClDummySkin : g_Config.m_ClPlayerSkin));
-		TeeRenderInfo.ApplyColors(
-			Dummy ? g_Config.m_ClDummyUseCustomColor : g_Config.m_ClPlayerUseCustomColor,
-			Dummy ? g_Config.m_ClDummyColorBody : g_Config.m_ClPlayerColorBody,
-			Dummy ? g_Config.m_ClDummyColorFeet : g_Config.m_ClPlayerColorFeet);
-		TeeRenderInfo.m_Size = 64.0f;
+		int Dummy = g_Config.m_ClDummy != (s_Dummy ? 1 : 0);
 
 		const vec2 Position = RightView.Center();
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, 0, vec2(1.0f, 0.0f), Position);
 
 		GameClient()->m_NamePlates.RenderNamePlatePreview(Position, Dummy);
 	}
