@@ -8463,6 +8463,10 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 				   (Index >= ENTITY_ARMOR_SHOTGUN && Index <= ENTITY_ARMOR_LASER)))
 				continue;
 
+			const bool DDNetOrCustomEntities = std::find_if(std::begin(gs_apModEntitiesNames), std::end(gs_apModEntitiesNames),
+								   [&](const char *pEntitiesName) { return str_comp_nocase(m_SelectEntitiesImage.c_str(), pEntitiesName) == 0 &&
+													   str_comp_nocase(pEntitiesName, "ddnet") != 0; }) == std::end(gs_apModEntitiesNames);
+
 			vec2 Pos(x * TileSize, y * TileSize);
 			vec2 Scale;
 			int VisualSize;
@@ -8518,29 +8522,34 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 				VisualSize = 128;
 				Pos.x -= 10.0f;
 			}
-			else if(Index == ENTITY_ARMOR_SHOTGUN)
+			else if(DDNetOrCustomEntities)
 			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorShotgun);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN, Scale.x, Scale.y);
-				VisualSize = 64;
-			}
-			else if(Index == ENTITY_ARMOR_GRENADE)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorGrenade);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_GRENADE, Scale.x, Scale.y);
-				VisualSize = 64;
-			}
-			else if(Index == ENTITY_ARMOR_NINJA)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorNinja);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_NINJA, Scale.x, Scale.y);
-				VisualSize = 64;
-			}
-			else if(Index == ENTITY_ARMOR_LASER)
-			{
-				Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorLaser);
-				RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_LASER, Scale.x, Scale.y);
-				VisualSize = 64;
+				if(Index == ENTITY_ARMOR_SHOTGUN)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorShotgun);
+					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_SHOTGUN, Scale.x, Scale.y);
+					VisualSize = 64;
+				}
+				else if(Index == ENTITY_ARMOR_GRENADE)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorGrenade);
+					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_GRENADE, Scale.x, Scale.y);
+					VisualSize = 64;
+				}
+				else if(Index == ENTITY_ARMOR_NINJA)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorNinja);
+					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_NINJA, Scale.x, Scale.y);
+					VisualSize = 64;
+				}
+				else if(Index == ENTITY_ARMOR_LASER)
+				{
+					Graphics()->TextureSet(pGameClient->m_GameSkin.m_SpritePickupArmorLaser);
+					RenderTools()->GetSpriteScale(SPRITE_PICKUP_ARMOR_LASER, Scale.x, Scale.y);
+					VisualSize = 64;
+				}
+				else
+					continue;
 			}
 			else
 				continue;
