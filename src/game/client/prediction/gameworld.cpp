@@ -225,7 +225,7 @@ void CGameWorld::Tick()
 	// update switch state
 	for(auto &Switcher : Switchers())
 	{
-		for(int j = 0; j < MAX_CLIENTS; ++j)
+		for(int j = 0; j < NUM_DDRACE_TEAMS; ++j)
 		{
 			if(Switcher.m_aEndTick[j] <= GameTick() && Switcher.m_aType[j] == TILE_SWITCHTIMEDOPEN)
 			{
