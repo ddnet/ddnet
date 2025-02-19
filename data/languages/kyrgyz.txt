@@ -1,5 +1,3 @@
-##### translated strings #####
-
 %ds left
 == %d сек. калды
 
@@ -1590,7 +1588,7 @@ Background music volume
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 
+== Kyrgyz translation by chingis
 
 Tee
 == 

@@ -1,12 +1,3 @@
-##### authors #####
-# based on Spanish translation (2023-07-05)
-#
-# originally created by:
-# TormentaDeFacha and Mercadona (2023-07-05)
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == %ds restantes
 
@@ -1976,7 +1967,7 @@ Graphics card
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 
+== Galician translation by TormentaDeFacha and Mercadona
 
 Tee
 == 
