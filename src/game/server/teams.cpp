@@ -232,7 +232,7 @@ void CGameTeams::Tick()
 		}
 	}
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < TEAM_SUPER; i++)
 	{
 		if(m_aTeamUnfinishableKillTick[i] == -1 || m_aTeamState[i] != TEAMSTATE_STARTED_UNFINISHABLE)
 		{
@@ -381,7 +381,7 @@ const char *CGameTeams::SetCharacterTeam(int ClientId, int Team)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return "Invalid client ID";
-	if(Team < 0 || Team >= MAX_CLIENTS + 1)
+	if(Team < 0 || Team > NUM_DDRACE_TEAMS)
 		return "Invalid team number";
 	if(Team != TEAM_SUPER && m_aTeamState[Team] > TEAMSTATE_OPEN && !m_aPractice[Team] && !m_aTeamFlock[Team])
 		return "This team started already";
@@ -1260,7 +1260,7 @@ void CGameTeams::ResetSavedTeam(int ClientId, int Team)
 
 int CGameTeams::GetFirstEmptyTeam() const
 {
-	for(int i = 1; i < MAX_CLIENTS; i++)
+	for(int i = 1; i < TEAM_SUPER; i++)
 		if(m_aTeamState[i] == TEAMSTATE_EMPTY)
 			return i;
 	return -1;
