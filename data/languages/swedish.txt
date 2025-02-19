@@ -2090,22 +2090,6 @@ Loading maps…
 Community
 == Community
 
-[Teaming status]
-forbidden
-== Förbjudet
-
-[Teaming status]
-solo
-== Solo
-
-[Teaming status]
-allowed
-== Tillåtet
-
-[Teaming status]
-required
-== Krav
-
 Teams
 == Lag
 
@@ -2129,3 +2113,19 @@ English translation by the DDNet Team
 
 Show spectator cursor
 == Visa åskådare pekare
+
+[Team status]
+forbidden
+== 
+
+[Team status]
+solo
+== 
+
+[Team status]
+allowed
+== 
+
+[Team status]
+required
+== 

@@ -387,9 +387,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == The server draait geen standaard spel type.
 
-Time limit
-== Tijdslimiet
-
 Time limit: %d min
 == Tijdslimiet: %d minuten
 
@@ -1468,9 +1465,6 @@ Add friends by entering their name below or by clicking their name in the player
 Add clanmates by entering their clan below and leaving the name blank.
 == Voeg clanleden toe door hun clannaam hieronder in te voeren en de naam leeg te laten.
 
-Offline friends and clanmates will appear here.
-== Offline vrienden en clanleden verschijnen hier.
-
 Are you sure that you want to remove the player '%s' from your friends list?
 == Weet je zeker dat je de speler '%s' uit je vriendenlijst wilt verwijderen?
 
@@ -2065,4 +2059,75 @@ https://wiki.ddnet.org/wiki/Mapping
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Nederlandse vertaling door vierkant, Sijmen Schoon, Syntax Error, Yared Hufkens, Ronan, urg
+== 
+
+Auto-sync player camera
+== 
+
+[Auto camera]
+Disabled
+== 
+
+[Auto camera]
+Enabled
+== 
+
+[Auto camera]
+Unavailable for this player
+== 
+
+[Auto camera]
+Inactive
+== 
+
+[Auto camera]
+Active
+== 
+
+Loading maps…
+== 
+
+Community
+== 
+
+[Team status]
+forbidden
+== 
+
+[Team status]
+solo
+== 
+
+[Team status]
+allowed
+== 
+
+[Team status]
+required
+== 
+
+Teams
+== 
+
+[Team size]
+minimum
+== 
+
+[Team size]
+maximum
+== 
+
+Saves file
+== 
+
+Open the saves file
+== 
+
+Show FPS
+== 
+
+Renders your frame rate in the top right
+== 
+
+Show spectator cursor
+== 
