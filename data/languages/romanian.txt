@@ -2046,7 +2046,7 @@ Hook Strength
 == Puterea cârligului
 
 Size of hook strength icon and number indicator
-== Dimensiunea indicatorului de putere al cârligului și indicatorul numeric
+== Dimensiunea indicatorului de putere al cârligului și a indicatorului numeric
 
 Key Presses
 == Taste apăsate
@@ -2062,72 +2062,72 @@ English translation by the DDNet Team
 == Traduceri în limba română de kneekoo, Sans3108
 
 Auto-sync player camera
-== 
+== Auto sincronizare cameră jucător
 
 [Auto camera]
 Disabled
-== 
+== Dezactivat
 
 [Auto camera]
 Enabled
-== 
+== Activat
 
 [Auto camera]
 Unavailable for this player
-== 
+== Indisponibil pentru acest jucător
 
 [Auto camera]
 Inactive
-== 
+== Inactivă
 
 [Auto camera]
 Active
-== 
+== Activă
 
 Loading maps…
-== 
+== Se încarcă hărți…
 
 Community
-== 
+== Comunitate
 
 [Team status]
 forbidden
-== 
+== interzise
 
 [Team status]
 solo
-== 
+== solo
 
 [Team status]
 allowed
-== 
+== permise
 
 [Team status]
 required
-== 
+== necesare
 
 Teams
-== 
+== Echipe
 
 [Team size]
 minimum
-== 
+== minim
 
 [Team size]
 maximum
-== 
+== maxim
 
 Saves file
-== 
+== Fișier salvări
 
 Open the saves file
-== 
+== Deschide fișierul de salvări
 
 Show FPS
-== 
+== Afișează FPS
 
 Renders your frame rate in the top right
-== 
+== Afișează rata cadrelor în colțul din dreapta sus
 
 Show spectator cursor
-== 
+== Afișează cursor spectator
