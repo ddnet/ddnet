@@ -2059,7 +2059,7 @@ https://wiki.ddnet.org/wiki/Mapping
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Nederlandse vertaling door vierkant, Sijmen Schoon, Syntax Error, Yared Hufkens, Ronan, urg
+== Nederlandse vertaling door vierkant, Sijmen Schoon, Vijfhoek, Syntax Error, Yared Hufkens, Ronan, urg
 
 Auto-sync player camera
 == Auto-sync speler camera
