@@ -14,6 +14,8 @@
 #   We don't want to use anonymous namespaces instead of static functions.
 # bugprone-suspicious-realloc-usage
 #   We generally don't handle memory allocation failures.
+# misc-use-internal-linkage
+#   Can have false positives with functions that are used to resolve extern declarations.
 
 Checks: >
   -*,
@@ -55,6 +57,7 @@ Checks: >
   -misc-unused-parameters,
   -misc-use-anonymous-namespace,
   -misc-include-cleaner,
+  -misc-use-internal-linkage,
   modernize-avoid-bind,
   modernize-concat-nested-namespaces,
   modernize-deprecated-headers,
@@ -92,6 +95,8 @@ Checks: >
   -readability-uppercase-literal-suffix,
   -readability-use-std-min-max,
   -readability-avoid-nested-conditional-operator,
+  -readability-enum-initial-value,
+  -readability-math-missing-parentheses,
   performance-*,
   -performance-no-int-to-ptr,
   -performance-enum-size,
@@ -140,7 +145,6 @@ CheckOptions:
   - key:             readability-identifier-naming.ClassMemberIgnoredRegexp
     value:           '^(m_a|m_v|m_p|ms_p|ms_a|ms_v|s_1024x1024ImgSize$|s_ImageBufferCacheId$|s_VertexBufferCacheId$|s_StagingBufferImageCacheId$|REPLACEMENT_CHARACTER$|(MAX|MIN)_FONT_SIZE$|MAXIMUM_ATLAS_DIMENSION$|INITIAL_ATLAS_DIMENSION$|MAX_SECTION_DIMENSION_MAPPED$|MIN_SECTION_DIMENSION$|s_StagingBufferCacheId$).*'
   - key:             readability-identifier-naming.LocalConstantIgnoredRegexp
-    value:           '^(p|a|v|s_|MAX_ANIM_SPEED$|DATA_OFFSET$|HEADER_LEN$|MIN_ANIM_SPEED$|[hwdcbqstf]$|[xt][0123]$|result$|sub$|it$|len$|d[xy]$).*'
+    value:           '^(p|a|v|x|y|s_|MAX_ANIM_SPEED$|DATA_OFFSET$|HEADER_LEN$|MIN_ANIM_SPEED$|[hwdcbqstf]$|[xt][0123]$|result$|sub$|it$|len$|d[xy]$).*'
   - key:             readability-identifier-naming.LocalVariableIgnoredRegexp
     value:           '^(p|a|s_|FT_|TB_|s_|ul_|v|[xy]i$|[zijklxyhmrgbacwestnduvqf]$|[dmpwsitcf][xy]$|(ch|skel)[0-2]?$|it$|tw$|dt$|th$|ls$|func$|res$|shader$|len$|maxLength$|length$|offset$|offpos$|result$|bg$|sp$|url$|index$|ctxt$|key$|null$|logger$|LAST_MODIFIED$|teleNr$|target$|id$|hit$|hsl[0-2]?$|rgb[0-2]?$|dir$|tmp$|sub$|ret$|rendered$|size$|isWeaponCollide$|zerochar$|dist$|sound$|match$|best_matches$|matches$|nohook$|btn$|savedLayers$|l[hw]$|evilz$|sec$|min$|to2$|delay$|[xy]Fract$|[xy]Int$|imgg[xy]$|skip$|localPlayer$|fdratio$|[rgbat][0-2]$|[xy][0-3]$|x[rl]$).*'
-

@@ -62,7 +62,7 @@ bool CFileCollection::ParseFilename(const char *pFilename, time_t *pTimestamp)
 
 	if(m_aFileDesc[0] == '\0')
 	{
-		int FilenameLength = str_length(pFilename);
+		const int FilenameLength = str_length(pFilename);
 		if(m_FileExtLength + TIMESTAMP_LENGTH > FilenameLength)
 		{
 			return false;

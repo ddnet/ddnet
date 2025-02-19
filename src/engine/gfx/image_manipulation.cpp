@@ -18,8 +18,8 @@ bool ConvertToRgba(uint8_t *pDest, const CImageInfo &SourceImage)
 		{
 			for(size_t X = 0; X < SourceImage.m_Width; ++X)
 			{
-				size_t ImgOffsetSrc = (Y * SourceImage.m_Width * SrcChannelCount) + (X * SrcChannelCount);
-				size_t ImgOffsetDest = (Y * SourceImage.m_Width * DstChannelCount) + (X * DstChannelCount);
+				const size_t ImgOffsetSrc = (Y * SourceImage.m_Width * SrcChannelCount) + (X * SrcChannelCount);
+				const size_t ImgOffsetDest = (Y * SourceImage.m_Width * DstChannelCount) + (X * DstChannelCount);
 				if(SourceImage.m_Format == CImageInfo::FORMAT_RGB)
 				{
 					mem_copy(&pDest[ImgOffsetDest], &SourceImage.m_pData[ImgOffsetSrc], SrcChannelCount);
@@ -172,9 +172,9 @@ void DilateImageSub(uint8_t *pImageBuff, int w, int h, int x, int y, int SubWidt
 
 	for(int Y = 0; Y < SubHeight; ++Y)
 	{
-		int SrcImgOffset = ((y + Y) * w * DILATE_BPP) + (x * DILATE_BPP);
-		int DstImgOffset = (Y * SubWidth * DILATE_BPP);
-		int CopySize = SubWidth * DILATE_BPP;
+		const int SrcImgOffset = ((y + Y) * w * DILATE_BPP) + (x * DILATE_BPP);
+		const int DstImgOffset = (Y * SubWidth * DILATE_BPP);
+		const int CopySize = SubWidth * DILATE_BPP;
 		mem_copy(&pBufferOriginal[DstImgOffset], &pImageBuff[SrcImgOffset], CopySize);
 	}
 
@@ -193,9 +193,9 @@ void DilateImageSub(uint8_t *pImageBuff, int w, int h, int x, int y, int SubWidt
 
 	for(int Y = 0; Y < SubHeight; ++Y)
 	{
-		int SrcImgOffset = ((y + Y) * w * DILATE_BPP) + (x * DILATE_BPP);
-		int DstImgOffset = (Y * SubWidth * DILATE_BPP);
-		int CopySize = SubWidth * DILATE_BPP;
+		const int SrcImgOffset = ((y + Y) * w * DILATE_BPP) + (x * DILATE_BPP);
+		const int DstImgOffset = (Y * SubWidth * DILATE_BPP);
+		const int CopySize = SubWidth * DILATE_BPP;
 		mem_copy(&pImageBuff[SrcImgOffset], &pBufferOriginal[DstImgOffset], CopySize);
 	}
 
@@ -204,10 +204,10 @@ void DilateImageSub(uint8_t *pImageBuff, int w, int h, int x, int y, int SubWidt
 
 static float CubicHermite(float A, float B, float C, float D, float t)
 {
-	float a = -A / 2.0f + (3.0f * B) / 2.0f - (3.0f * C) / 2.0f + D / 2.0f;
-	float b = A - (5.0f * B) / 2.0f + 2.0f * C - D / 2.0f;
-	float c = -A / 2.0f + C / 2.0f;
-	float d = B;
+	const float a = -A / 2.0f + (3.0f * B) / 2.0f - (3.0f * C) / 2.0f + D / 2.0f;
+	const float b = A - (5.0f * B) / 2.0f + 2.0f * C - D / 2.0f;
+	const float c = -A / 2.0f + C / 2.0f;
+	const float d = B;
 
 	return (a * t * t * t) + (b * t * t) + (c * t) + d;
 }
@@ -222,20 +222,20 @@ static void GetPixelClamped(const uint8_t *pSourceImage, int x, int y, uint32_t 
 
 static void SampleBicubic(const uint8_t *pSourceImage, float u, float v, uint32_t W, uint32_t H, size_t BPP, uint8_t aSample[4])
 {
-	float X = (u * W) - 0.5f;
-	int xInt = (int)X;
-	float xFract = X - std::floor(X);
+	const float X = (u * W) - 0.5f;
+	const int XInt = (int)X;
+	const float XFract = X - std::floor(X);
 
-	float Y = (v * H) - 0.5f;
-	int yInt = (int)Y;
-	float yFract = Y - std::floor(Y);
+	const float Y = (v * H) - 0.5f;
+	const int YInt = (int)Y;
+	const float YFract = Y - std::floor(Y);
 
 	uint8_t aaaSamples[4][4][4];
 	for(int y = 0; y < 4; ++y)
 	{
 		for(int x = 0; x < 4; ++x)
 		{
-			GetPixelClamped(pSourceImage, xInt + x - 1, yInt + y - 1, W, H, BPP, aaaSamples[x][y]);
+			GetPixelClamped(pSourceImage, XInt + x - 1, YInt + y - 1, W, H, BPP, aaaSamples[x][y]);
 		}
 	}
 
@@ -244,9 +244,9 @@ static void SampleBicubic(const uint8_t *pSourceImage, float u, float v, uint32_
 		float aRows[4];
 		for(int y = 0; y < 4; ++y)
 		{
-			aRows[y] = CubicHermite(aaaSamples[0][y][i], aaaSamples[1][y][i], aaaSamples[2][y][i], aaaSamples[3][y][i], xFract);
+			aRows[y] = CubicHermite(aaaSamples[0][y][i], aaaSamples[1][y][i], aaaSamples[2][y][i], aaaSamples[3][y][i], XFract);
 		}
-		aSample[i] = (uint8_t)clamp<float>(CubicHermite(aRows[0], aRows[1], aRows[2], aRows[3], yFract), 0.0f, 255.0f);
+		aSample[i] = (uint8_t)clamp<float>(CubicHermite(aRows[0], aRows[1], aRows[2], aRows[3], YFract), 0.0f, 255.0f);
 	}
 }
 
@@ -254,12 +254,12 @@ static void ResizeImage(const uint8_t *pSourceImage, uint32_t SW, uint32_t SH, u
 {
 	for(int y = 0; y < (int)H; ++y)
 	{
-		float v = (float)y / (float)(H - 1);
+		const float V = (float)y / (float)(H - 1);
 		for(int x = 0; x < (int)W; ++x)
 		{
-			float u = (float)x / (float)(W - 1);
+			const float U = (float)x / (float)(W - 1);
 			uint8_t aSample[4];
-			SampleBicubic(pSourceImage, u, v, SW, SH, BPP, aSample);
+			SampleBicubic(pSourceImage, U, V, SW, SH, BPP, aSample);
 			mem_copy(&pDestinationImage[x * BPP + ((W * BPP) * y)], aSample, BPP);
 		}
 	}

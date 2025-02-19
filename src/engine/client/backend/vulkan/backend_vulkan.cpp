@@ -47,7 +47,7 @@
 
 using namespace std::chrono_literals;
 
-class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
+class CCommandProcessorFragmentVulkan : public CCommandProcessorFragmentGlBase
 {
 	enum EMemoryBlockUsage
 	{
@@ -1291,17 +1291,17 @@ protected:
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_EX)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderQuadContainerEx_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderQuadContainerEx *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderQuadContainerEx(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerEx *>(pBaseCommand), ExecBuffer); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderQuadContainerAsSpriteMultiple_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderQuadContainerAsSpriteMultiple(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *>(pBaseCommand), ExecBuffer); }};
 
-		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_SWAP)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_Swap(static_cast<const CCommandBuffer::SCommand_Swap *>(pBaseCommand)); }};
+		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_SWAP)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_Swap(static_cast<const CCommandBuffer::SCommandSwap *>(pBaseCommand)); }};
 
-		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_VSYNC)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_VSync(static_cast<const CCommandBuffer::SCommand_VSync *>(pBaseCommand)); }};
+		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_VSYNC)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_VSync(static_cast<const CCommandBuffer::SCommandVSync *>(pBaseCommand)); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_MULTISAMPLING)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_MultiSampling(static_cast<const CCommandBuffer::SCommand_MultiSampling *>(pBaseCommand)); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_TRY_SWAP_AND_READ_PIXEL)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_ReadPixel(static_cast<const CCommandBuffer::SCommand_TrySwapAndReadPixel *>(pBaseCommand)); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_TRY_SWAP_AND_SCREENSHOT)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_TrySwapAndScreenshot *>(pBaseCommand)); }};
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_UPDATE_VIEWPORT)] = {false, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_Update_Viewport_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand)); }};
 
-		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_WINDOW_CREATE_NTF)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_WindowCreateNtf(static_cast<const CCommandBuffer::SCommand_WindowCreateNtf *>(pBaseCommand)); }, false};
-		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_WINDOW_DESTROY_NTF)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_WindowDestroyNtf(static_cast<const CCommandBuffer::SCommand_WindowDestroyNtf *>(pBaseCommand)); }, false};
+		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_WINDOW_CREATE_NTF)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_WindowCreateNtf(static_cast<const CCommandBuffer::SCommandWindowCreateNtf *>(pBaseCommand)); }, false};
+		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_WINDOW_DESTROY_NTF)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_WindowDestroyNtf(static_cast<const CCommandBuffer::SCommandWindowDestroyNtf *>(pBaseCommand)); }, false};
 
 		for(auto &Callback : m_aCommandCallbacks)
 		{
@@ -3480,7 +3480,7 @@ protected:
 	}
 
 public:
-	CCommandProcessorFragment_Vulkan()
+	CCommandProcessorFragmentVulkan()
 	{
 		m_vTextures.reserve(CCommandBuffer::MAX_TEXTURES);
 	}
@@ -3767,7 +3767,7 @@ public:
 			int DevApiMinor = (int)VK_API_VERSION_MINOR(DeviceProp.apiVersion);
 			int DevApiPatch = (int)VK_API_VERSION_PATCH(DeviceProp.apiVersion);
 
-			auto IsDenied = CCommandProcessorFragment_Vulkan::IsGpuDenied(DeviceProp.vendorID, DeviceProp.driverVersion, DevApiMajor, DevApiMinor, DevApiPatch);
+			auto IsDenied = CCommandProcessorFragmentVulkan::IsGpuDenied(DeviceProp.vendorID, DeviceProp.driverVersion, DevApiMajor, DevApiMinor, DevApiPatch);
 			if((DevApiMajor > gs_BackendVulkanMajor || (DevApiMajor == gs_BackendVulkanMajor && DevApiMinor >= gs_BackendVulkanMinor)) && !IsDenied)
 			{
 				STWGraphicGpu::STWGraphicGpuItem NewGpu;
@@ -6527,30 +6527,30 @@ public:
 
 		switch(pBaseCommand->m_Cmd)
 		{
-		case CCommandProcessorFragment_GLBase::CMD_INIT:
-			if(!Cmd_Init(static_cast<const SCommand_Init *>(pBaseCommand)))
+		case CCommandProcessorFragmentGlBase::CMD_INIT:
+			if(!Cmd_Init(static_cast<const SCommandInit *>(pBaseCommand)))
 			{
 				SetWarningPreMsg("Could not initialize Vulkan: ");
 				return RUN_COMMAND_COMMAND_WARNING;
 			}
 			break;
-		case CCommandProcessorFragment_GLBase::CMD_SHUTDOWN:
-			if(!Cmd_Shutdown(static_cast<const SCommand_Shutdown *>(pBaseCommand)))
+		case CCommandProcessorFragmentGlBase::CMD_SHUTDOWN:
+			if(!Cmd_Shutdown(static_cast<const SCommandShutdown *>(pBaseCommand)))
 			{
 				SetWarningPreMsg("Could not shutdown Vulkan: ");
 				return RUN_COMMAND_COMMAND_WARNING;
 			}
 			break;
 
-		case CCommandProcessorFragment_GLBase::CMD_PRE_INIT:
-			if(!Cmd_PreInit(static_cast<const CCommandProcessorFragment_GLBase::SCommand_PreInit *>(pBaseCommand)))
+		case CCommandProcessorFragmentGlBase::CMD_PRE_INIT:
+			if(!Cmd_PreInit(static_cast<const CCommandProcessorFragmentGlBase::SCommandPreInit *>(pBaseCommand)))
 			{
 				SetWarningPreMsg("Could not initialize Vulkan: ");
 				return RUN_COMMAND_COMMAND_WARNING;
 			}
 			break;
-		case CCommandProcessorFragment_GLBase::CMD_POST_SHUTDOWN:
-			if(!Cmd_PostShutdown(static_cast<const CCommandProcessorFragment_GLBase::SCommand_PostShutdown *>(pBaseCommand)))
+		case CCommandProcessorFragmentGlBase::CMD_POST_SHUTDOWN:
+			if(!Cmd_PostShutdown(static_cast<const CCommandProcessorFragmentGlBase::SCommandPostShutdown *>(pBaseCommand)))
 			{
 				SetWarningPreMsg("Could not shutdown Vulkan: ");
 				return RUN_COMMAND_COMMAND_WARNING;
@@ -6563,7 +6563,7 @@ public:
 		return ERunCommandReturnTypes::RUN_COMMAND_COMMAND_HANDLED;
 	}
 
-	[[nodiscard]] bool Cmd_Init(const SCommand_Init *pCommand)
+	[[nodiscard]] bool Cmd_Init(const SCommandInit *pCommand)
 	{
 		pCommand->m_pCapabilities->m_TileBuffering = true;
 		pCommand->m_pCapabilities->m_QuadBuffering = true;
@@ -6649,7 +6649,7 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool Cmd_Shutdown(const SCommand_Shutdown *pCommand)
+	[[nodiscard]] bool Cmd_Shutdown(const SCommandShutdown *pCommand)
 	{
 		vkDeviceWaitIdle(m_VKDevice);
 
@@ -6905,7 +6905,7 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand)
+	[[nodiscard]] bool Cmd_VSync(const CCommandBuffer::SCommandVSync *pCommand)
 	{
 		if(IsVerbose())
 		{
@@ -6934,7 +6934,7 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool Cmd_Swap(const CCommandBuffer::SCommand_Swap *pCommand)
+	[[nodiscard]] bool Cmd_Swap(const CCommandBuffer::SCommandSwap *pCommand)
 	{
 		return NextFrame();
 	}
@@ -7500,7 +7500,7 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)
+	[[nodiscard]] bool Cmd_WindowCreateNtf(const CCommandBuffer::SCommandWindowCreateNtf *pCommand)
 	{
 		log_debug("vulkan", "creating new surface.");
 		m_pWindow = SDL_GetWindowFromID(pCommand->m_WindowId);
@@ -7521,7 +7521,7 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool Cmd_WindowDestroyNtf(const CCommandBuffer::SCommand_WindowDestroyNtf *pCommand)
+	[[nodiscard]] bool Cmd_WindowDestroyNtf(const CCommandBuffer::SCommandWindowDestroyNtf *pCommand)
 	{
 		log_debug("vulkan", "surface got destroyed.");
 		if(!m_RenderingPaused)
@@ -7538,7 +7538,7 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool Cmd_PreInit(const CCommandProcessorFragment_GLBase::SCommand_PreInit *pCommand)
+	[[nodiscard]] bool Cmd_PreInit(const CCommandProcessorFragmentGlBase::SCommandPreInit *pCommand)
 	{
 		m_pGpuList = pCommand->m_pGpuList;
 		if(InitVulkanSDL(pCommand->m_pWindow, pCommand->m_Width, pCommand->m_Height, pCommand->m_pRendererString, pCommand->m_pVendorString, pCommand->m_pVersionString) != 0)
@@ -7581,7 +7581,7 @@ public:
 		return true;
 	}
 
-	[[nodiscard]] bool Cmd_PostShutdown(const CCommandProcessorFragment_GLBase::SCommand_PostShutdown *pCommand)
+	[[nodiscard]] bool Cmd_PostShutdown(const CCommandProcessorFragmentGlBase::SCommandPostShutdown *pCommand)
 	{
 		for(size_t i = 0; i < m_ThreadCount - 1; ++i)
 		{
@@ -7674,9 +7674,9 @@ public:
 	}
 };
 
-CCommandProcessorFragment_GLBase *CreateVulkanCommandProcessorFragment()
+CCommandProcessorFragmentGlBase *CreateVulkanCommandProcessorFragment()
 {
-	return new CCommandProcessorFragment_Vulkan();
+	return new CCommandProcessorFragmentVulkan();
 }
 
 #endif

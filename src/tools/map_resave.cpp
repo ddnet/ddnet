@@ -39,7 +39,7 @@ static int ResaveMap(const char *pSourceMap, const char *pDestinationMap, IStora
 			continue;
 		}
 
-		int Size = Reader.GetItemSize(Index);
+		const int Size = Reader.GetItemSize(Index);
 		Writer.AddItem(Type, Id, Size, pPtr, &Uuid);
 	}
 
@@ -47,7 +47,7 @@ static int ResaveMap(const char *pSourceMap, const char *pDestinationMap, IStora
 	for(int Index = 0; Index < Reader.NumData(); Index++)
 	{
 		const void *pPtr = Reader.GetData(Index);
-		int Size = Reader.GetDataSize(Index);
+		const int Size = Reader.GetDataSize(Index);
 		Writer.AddData(Size, pPtr);
 	}
 
@@ -59,7 +59,7 @@ static int ResaveMap(const char *pSourceMap, const char *pDestinationMap, IStora
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	if(argc != 3)

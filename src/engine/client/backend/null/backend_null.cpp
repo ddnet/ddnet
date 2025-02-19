@@ -2,12 +2,12 @@
 
 #include <engine/client/backend_sdl.h>
 
-ERunCommandReturnTypes CCommandProcessorFragment_Null::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
+ERunCommandReturnTypes CCommandProcessorFragmentNull::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {
 	switch(pBaseCommand->m_Cmd)
 	{
-	case CCommandProcessorFragment_Null::CMD_INIT:
-		Cmd_Init(static_cast<const SCommand_Init *>(pBaseCommand));
+	case CCommandProcessorFragmentNull::CMD_INIT:
+		Cmd_Init(static_cast<const SCommandInit *>(pBaseCommand));
 		break;
 	case CCommandBuffer::CMD_TEXTURE_CREATE:
 		Cmd_Texture_Create(static_cast<const CCommandBuffer::SCommand_Texture_Create *>(pBaseCommand));
@@ -22,7 +22,7 @@ ERunCommandReturnTypes CCommandProcessorFragment_Null::RunCommand(const CCommand
 	return ERunCommandReturnTypes::RUN_COMMAND_COMMAND_HANDLED;
 }
 
-bool CCommandProcessorFragment_Null::Cmd_Init(const SCommand_Init *pCommand)
+bool CCommandProcessorFragmentNull::Cmd_Init(const SCommandInit *pCommand)
 {
 	pCommand->m_pCapabilities->m_TileBuffering = false;
 	pCommand->m_pCapabilities->m_QuadBuffering = false;
@@ -44,18 +44,18 @@ bool CCommandProcessorFragment_Null::Cmd_Init(const SCommand_Init *pCommand)
 	return false;
 }
 
-void CCommandProcessorFragment_Null::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
+void CCommandProcessorFragmentNull::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
 {
 	free(pCommand->m_pData);
 }
 
-void CCommandProcessorFragment_Null::Cmd_TextTextures_Create(const CCommandBuffer::SCommand_TextTextures_Create *pCommand)
+void CCommandProcessorFragmentNull::Cmd_TextTextures_Create(const CCommandBuffer::SCommand_TextTextures_Create *pCommand)
 {
 	free(pCommand->m_pTextData);
 	free(pCommand->m_pTextOutlineData);
 }
 
-void CCommandProcessorFragment_Null::Cmd_TextTexture_Update(const CCommandBuffer::SCommand_TextTexture_Update *pCommand)
+void CCommandProcessorFragmentNull::Cmd_TextTexture_Update(const CCommandBuffer::SCommand_TextTexture_Update *pCommand)
 {
 	free(pCommand->m_pData);
 }

@@ -13,7 +13,7 @@ void Run(NETADDR Dest)
 
 	for(auto &Socket : aSockets)
 	{
-		NETADDR BindAddr = {NETTYPE_IPV4, {0}, 0};
+		const NETADDR BindAddr = {NETTYPE_IPV4, {0}, 0};
 		Socket = net_udp_create(BindAddr);
 	}
 
@@ -33,8 +33,8 @@ void Run(NETADDR Dest)
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
-	NETADDR Dest = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
+	const CCmdlineFix CmdlineFix(&argc, &argv);
+	const NETADDR Dest = {NETTYPE_IPV4, {127, 0, 0, 1}, 8303};
 	Run(Dest);
 	return 0;
 }

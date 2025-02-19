@@ -31,7 +31,7 @@ int CSnapshot::GetItemSize(int Index) const
 
 int CSnapshot::GetItemType(int Index) const
 {
-	int InternalType = GetItem(Index)->Type();
+	const int InternalType = GetItem(Index)->Type();
 	return GetExternalItemType(InternalType);
 }
 
@@ -42,7 +42,7 @@ int CSnapshot::GetExternalItemType(int InternalType) const
 		return InternalType;
 	}
 
-	int TypeItemIndex = GetItemIndex(InternalType); // NETOBJTYPE_EX
+	const int TypeItemIndex = GetItemIndex(InternalType); // NETOBJTYPE_EX
 	if(TypeItemIndex == -1 || GetItemSize(TypeItemIndex) < (int)sizeof(CUuid))
 	{
 		return InternalType;
@@ -76,7 +76,7 @@ const void *CSnapshot::FindItem(int Type, int Id) const
 	int InternalType = Type;
 	if(Type >= OFFSET_UUID)
 	{
-		CUuid TypeUuid = g_UuidManager.GetUuid(Type);
+		const CUuid TypeUuid = g_UuidManager.GetUuid(Type);
 		int aTypeUuidItem[sizeof(CUuid) / sizeof(int32_t)];
 		for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
 			aTypeUuidItem[i] = bytes_be_to_uint(&TypeUuid.m_aData[i * sizeof(int32_t)]);
@@ -100,7 +100,7 @@ const void *CSnapshot::FindItem(int Type, int Id) const
 			return nullptr;
 		}
 	}
-	int Index = GetItemIndex((InternalType << 16) | Id);
+	const int Index = GetItemIndex((InternalType << 16) | Id);
 	return Index < 0 ? nullptr : GetItem(Index)->Data();
 }
 
@@ -111,7 +111,7 @@ unsigned CSnapshot::Crc() const
 	for(int i = 0; i < m_NumItems; i++)
 	{
 		const CSnapshotItem *pItem = GetItem(i);
-		int Size = GetItemSize(i);
+		const int Size = GetItemSize(i);
 
 		for(size_t b = 0; b < Size / sizeof(int32_t); b++)
 			Crc += pItem->Data()[b];
@@ -125,7 +125,7 @@ void CSnapshot::DebugDump() const
 	for(int i = 0; i < m_NumItems; i++)
 	{
 		const CSnapshotItem *pItem = GetItem(i);
-		int Size = GetItemSize(i);
+		const int Size = GetItemSize(i);
 		dbg_msg("snapshot", "\ttype=%d id=%d", pItem->Type(), pItem->Id());
 		for(size_t b = 0; b < Size / sizeof(int32_t); b++)
 			dbg_msg("snapshot", "\t\t%3d %12d\t%08x", (int)b, pItem->Data()[b], pItem->Data()[b]);
@@ -190,8 +190,8 @@ static void GenerateHash(CItemList *pHashlist, const CSnapshot *pSnapshot)
 
 	for(int i = 0; i < pSnapshot->NumItems(); i++)
 	{
-		int Key = pSnapshot->GetItem(i)->Key();
-		size_t HashId = CalcHashId(Key);
+		const int Key = pSnapshot->GetItem(i)->Key();
+		const size_t HashId = CalcHashId(Key);
 		if(pHashlist[HashId].m_Num < HASHLIST_BUCKET_SIZE)
 		{
 			pHashlist[HashId].m_aIndex[pHashlist[HashId].m_Num] = i;
@@ -203,7 +203,7 @@ static void GenerateHash(CItemList *pHashlist, const CSnapshot *pSnapshot)
 
 static int GetItemIndexHashed(int Key, const CItemList *pHashlist)
 {
-	size_t HashId = CalcHashId(Key);
+	const size_t HashId = CalcHashId(Key);
 	for(int i = 0; i < pHashlist[HashId].m_Num; i++)
 	{
 		if(pHashlist[HashId].m_aKeys[i] == Key)
@@ -422,8 +422,8 @@ int CSnapshotDelta::DebugDumpDelta(const void *pSrcData, int DataSize)
 	// (all other items should be copied from the last full snap)
 	for(int d = 0; d < pDelta->m_NumDeletedItems; d++)
 	{
-		int Type = pDeleted[d] >> 16;
-		int Id = pDeleted[d] & 0xffff;
+		const int Type = pDeleted[d] >> 16;
+		const int Id = pDeleted[d] & 0xffff;
 		dbg_msg("delta_dump", "  %3d %12d %08x deleted Type=%d Id=%d", DumpIndex++, pDeleted[d], pDeleted[d], Type, Id);
 	}
 
@@ -798,7 +798,7 @@ int CSnapshotBuilder::GetExtendedItemTypeIndex(int TypeId)
 		}
 	}
 	dbg_assert(m_NumExtendedItemTypes < MAX_EXTENDED_ITEM_TYPES, "too many extended item types");
-	int Index = m_NumExtendedItemTypes;
+	const int Index = m_NumExtendedItemTypes;
 	m_NumExtendedItemTypes++;
 	m_aExtendedItemTypes[Index] = TypeId;
 	if(AddExtendedItemType(Index))

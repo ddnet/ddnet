@@ -19,7 +19,7 @@ IJob::EJobState IJob::State() const
 
 bool IJob::Done() const
 {
-	EJobState State = m_State;
+	const EJobState State = m_State;
 	return State != STATE_QUEUED && State != STATE_RUNNING;
 }
 
@@ -158,7 +158,7 @@ void CJobPool::Shutdown()
 		std::shared_ptr<IJob> pPrev = nullptr;
 		while(pJob != nullptr)
 		{
-			std::shared_ptr<IJob> pNext = pJob->m_pNext;
+			const std::shared_ptr<IJob> pNext = pJob->m_pNext;
 			if(pJob->Abort())
 			{
 				// only remove abortable jobs from queue

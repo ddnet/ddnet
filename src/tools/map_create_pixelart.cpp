@@ -28,7 +28,7 @@ void GetOptimizedQuadSize(const CImageInfo &, size_t, const uint8_t[4], size_t, 
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	if(argc < 10 || argc > 12)
@@ -90,11 +90,11 @@ bool CreatePixelArt(const char aFilenames[3][IO_MAX_PATH_LENGTH], const int aLay
 	if(!pQuadLayer)
 		return false;
 
-	size_t MaxNewQuads = std::ceil((Img.m_Width * Img.m_Height) / aPixelSizes[0]);
+	const size_t MaxNewQuads = std::ceil((Img.m_Width * Img.m_Height) / aPixelSizes[0]);
 	CQuad *pQuads = new CQuad[pQuadLayer->m_NumQuads + MaxNewQuads];
 
 	InsertCurrentQuads(InputMap, pQuadLayer, pQuads);
-	int QuadsCounter = InsertPixelArtQuads(pQuads, pQuadLayer->m_NumQuads, Img, aStartingPos, aPixelSizes, aArtOptions);
+	const int QuadsCounter = InsertPixelArtQuads(pQuads, pQuadLayer->m_NumQuads, Img, aStartingPos, aPixelSizes, aArtOptions);
 	SaveOutputMap(InputMap, OutputMap, pQuadLayer, ItemNumber, pQuads, (int)sizeof(CQuad) * pQuadLayer->m_NumQuads);
 	delete[] pQuads;
 
@@ -111,7 +111,7 @@ void InsertCurrentQuads(CDataFileReader &InputMap, CMapItemLayerQuads *pQuadLaye
 
 int InsertPixelArtQuads(CQuad *pQuads, int &NumQuads, const CImageInfo &Img, const int aStartingPos[2], const int aPixelSizes[2], const bool aArtOptions[2])
 {
-	size_t ImgPixelSize = aPixelSizes[0], QuadPixelSize = aPixelSizes[1], OriginalNumQuads = NumQuads;
+	const size_t ImgPixelSize = aPixelSizes[0], QuadPixelSize = aPixelSizes[1], OriginalNumQuads = NumQuads;
 	int aForcedPivot[2] = {std::numeric_limits<int>::max(), std::numeric_limits<int>::max()};
 	bool *aVisitedPixels = new bool[Img.m_Height * Img.m_Width];
 	mem_zero(aVisitedPixels, sizeof(bool) * Img.m_Height * Img.m_Width);
@@ -127,8 +127,8 @@ int InsertPixelArtQuads(CQuad *pQuads, int &NumQuads, const CImageInfo &Img, con
 			if(aArtOptions[0])
 				GetOptimizedQuadSize(Img, ImgPixelSize, aPixel, x, y, Width, Height, aVisitedPixels);
 
-			float Posx = aStartingPos[0] + ((x / (float)ImgPixelSize) + (Width / 2.f)) * QuadPixelSize;
-			float Posy = aStartingPos[1] + ((y / (float)ImgPixelSize) + (Height / 2.f)) * QuadPixelSize;
+			const float Posx = aStartingPos[0] + ((x / (float)ImgPixelSize) + (Width / 2.f)) * QuadPixelSize;
+			const float Posy = aStartingPos[1] + ((y / (float)ImgPixelSize) + (Height / 2.f)) * QuadPixelSize;
 			if(aArtOptions[1] && aForcedPivot[0] == std::numeric_limits<int>::max())
 			{
 				aForcedPivot[0] = Posx;
@@ -179,7 +179,7 @@ size_t GetImagePixelSize(const CImageInfo &Img)
 				continue;
 
 			GetPixelClamped(Img, x, y, aPixel);
-			size_t SuperPixelSize = FindSuperPixelSize(Img, aPixel, x, y, 1, aVisitedPixels);
+			const size_t SuperPixelSize = FindSuperPixelSize(Img, aPixel, x, y, 1, aVisitedPixels);
 			if(SuperPixelSize < ImgPixelSize)
 				ImgPixelSize = SuperPixelSize;
 		}
@@ -292,7 +292,10 @@ CQuad CreateNewQuad(const float PosX, const float PosY, const int Width, const i
 	CQuad Quad;
 	Quad.m_PosEnv = Quad.m_ColorEnv = -1;
 	Quad.m_PosEnvOffset = Quad.m_ColorEnvOffset = 0;
-	float x = f2fx(PosX), y = f2fx(PosY), w = f2fx(Width / 2.f), h = f2fx(Height / 2.f);
+	const float x = f2fx(PosX);
+	const float y = f2fx(PosY);
+	const float w = f2fx(Width / 2.f);
+	const float h = f2fx(Height / 2.f);
 
 	for(int i = 0; i < 2; i++)
 	{
@@ -352,7 +355,7 @@ void SaveOutputMap(CDataFileReader &InputMap, CDataFileWriter &OutputMap, CMapIt
 		if(i == NewItemNumber)
 			pItem = pNewItem;
 
-		int Size = InputMap.GetItemSize(i);
+		const int Size = InputMap.GetItemSize(i);
 		OutputMap.AddItem(Type, Id, Size, pItem, &Uuid);
 	}
 

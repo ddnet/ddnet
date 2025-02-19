@@ -42,7 +42,7 @@ static bool DilateFile(const char *pFilename, bool DryRun)
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	if(argc == 1)

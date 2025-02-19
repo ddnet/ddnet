@@ -62,7 +62,7 @@ void CStun::CProtocol::Refresh()
 
 void CStun::CProtocol::Update()
 {
-	int64_t Now = time_get();
+	const int64_t Now = time_get();
 	if(m_NextTry == -1 || Now < m_NextTry || !m_HaveStunServer)
 	{
 		return;
@@ -70,7 +70,7 @@ void CStun::CProtocol::Update()
 	m_NextTry = Now + RetryWaitSeconds(m_NumUnsuccessfulTries) * time_freq();
 	m_NumUnsuccessfulTries += 1;
 	unsigned char aBuf[32];
-	int Size = StunMessagePrepare(aBuf, sizeof(aBuf), &m_Stun);
+	const int Size = StunMessagePrepare(aBuf, sizeof(aBuf), &m_Stun);
 	if(net_udp_send(m_Socket, &m_StunServer, aBuf, Size) == -1)
 	{
 		log_debug(IndexToSystem(m_Index), "couldn't send stun request");
@@ -114,9 +114,9 @@ CONNECTIVITY CStun::CProtocol::GetConnectivity(NETADDR *pGlobalAddr)
 	{
 		return CONNECTIVITY::UNKNOWN;
 	}
-	int64_t Now = time_get();
-	int64_t Freq = time_freq();
-	bool HaveTriedALittle = m_NumUnsuccessfulTries >= 5 && (m_LastResponse == -1 || Now - m_LastResponse >= 30 * Freq);
+	const int64_t Now = time_get();
+	const int64_t Freq = time_freq();
+	const bool HaveTriedALittle = m_NumUnsuccessfulTries >= 5 && (m_LastResponse == -1 || Now - m_LastResponse >= 30 * Freq);
 	if(m_LastResponse == -1 && !HaveTriedALittle)
 	{
 		return CONNECTIVITY::CHECKING;
@@ -143,7 +143,7 @@ CStun::CStun(NETSOCKET Socket) :
 
 void CStun::FeedStunServer(NETADDR StunServer)
 {
-	int Index = IndexFromNetType(StunServer.type);
+	const int Index = IndexFromNetType(StunServer.type);
 	if(Index < 0)
 	{
 		return;
@@ -169,7 +169,7 @@ void CStun::Update()
 
 bool CStun::OnPacket(NETADDR Addr, unsigned char *pData, int DataSize)
 {
-	int Index = IndexFromNetType(Addr.type);
+	const int Index = IndexFromNetType(Addr.type);
 	if(Index < 0)
 	{
 		return false;
@@ -179,7 +179,7 @@ bool CStun::OnPacket(NETADDR Addr, unsigned char *pData, int DataSize)
 
 CONNECTIVITY CStun::GetConnectivity(int NetType, NETADDR *pGlobalAddr)
 {
-	int Index = IndexFromNetType(NetType);
+	const int Index = IndexFromNetType(NetType);
 	dbg_assert(Index != -1, "invalid nettype");
 	return m_aProtocols[Index].GetConnectivity(pGlobalAddr);
 }

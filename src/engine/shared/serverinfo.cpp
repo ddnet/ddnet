@@ -38,7 +38,7 @@ bool ParseCrc(unsigned int *pResult, const char *pString)
 
 bool CServerInfo2::FromJson(CServerInfo2 *pOut, const json_value *pJson)
 {
-	bool Result = FromJsonRaw(pOut, pJson);
+	const bool Result = FromJsonRaw(pOut, pJson);
 	if(Result)
 	{
 		return Result;

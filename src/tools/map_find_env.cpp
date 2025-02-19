@@ -117,7 +117,7 @@ bool FindEnv(const char aFilename[64], const int EnvId)
 
 int main(int argc, const char **argv)
 {
-	CCmdlineFix CmdlineFix(&argc, &argv);
+	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
 	if(argc < 3)
@@ -131,7 +131,7 @@ int main(int argc, const char **argv)
 
 	char aFilename[64];
 	str_copy(aFilename, argv[1]);
-	int EnvId = str_toint(argv[2]) - 1;
+	const int EnvId = str_toint(argv[2]) - 1;
 	dbg_msg("map_find_env", "input_map='%s'; env_number='#%d';", aFilename, EnvId + 1);
 
 	return FindEnv(aFilename, EnvId);

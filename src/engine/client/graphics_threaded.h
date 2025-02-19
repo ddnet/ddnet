@@ -482,15 +482,15 @@ public:
 		bool *m_pSwapped; // processor may set this to true, must be initialized to false by the caller
 	};
 
-	struct SCommand_Swap : public SCommand
+	struct SCommandSwap : public SCommand
 	{
-		SCommand_Swap() :
+		SCommandSwap() :
 			SCommand(CMD_SWAP) {}
 	};
 
-	struct SCommand_VSync : public SCommand
+	struct SCommandVSync : public SCommand
 	{
-		SCommand_VSync() :
+		SCommandVSync() :
 			SCommand(CMD_VSYNC) {}
 
 		int m_VSync;
@@ -584,17 +584,17 @@ public:
 		uint8_t *m_pData; // will be freed by the command processor
 	};
 
-	struct SCommand_WindowCreateNtf : public CCommandBuffer::SCommand
+	struct SCommandWindowCreateNtf : public CCommandBuffer::SCommand
 	{
-		SCommand_WindowCreateNtf() :
+		SCommandWindowCreateNtf() :
 			SCommand(CMD_WINDOW_CREATE_NTF) {}
 
 		uint32_t m_WindowId;
 	};
 
-	struct SCommand_WindowDestroyNtf : public CCommandBuffer::SCommand
+	struct SCommandWindowDestroyNtf : public CCommandBuffer::SCommand
 	{
-		SCommand_WindowDestroyNtf() :
+		SCommandWindowDestroyNtf() :
 			SCommand(CMD_WINDOW_DESTROY_NTF) {}
 
 		uint32_t m_WindowId;
@@ -635,7 +635,7 @@ public:
 		return true;
 	}
 
-	SCommand *Head()
+	SCommand *Head() const
 	{
 		return m_pCmdBufferHead;
 	}
@@ -749,7 +749,7 @@ public:
 	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;
 };
 
-class CGraphics_Threaded : public IEngineGraphics
+class CGraphicsThreaded : public IEngineGraphics
 {
 	enum
 	{
@@ -863,7 +863,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	void AddVertices(int Count, CCommandBuffer::SVertexTex3DStream *pVertices);
 
 	template<typename TName>
-	void Rotate(const CCommandBuffer::SPoint &rCenter, TName *pPoints, int NumPoints)
+	void Rotate(const CCommandBuffer::SPoint &RotationCenter, TName *pPoints, int NumPoints)
 	{
 		float c = std::cos(m_Rotation);
 		float s = std::sin(m_Rotation);
@@ -873,16 +873,16 @@ class CGraphics_Threaded : public IEngineGraphics
 		TName *pVertices = pPoints;
 		for(i = 0; i < NumPoints; i++)
 		{
-			x = pVertices[i].m_Pos.x - rCenter.x;
-			y = pVertices[i].m_Pos.y - rCenter.y;
-			pVertices[i].m_Pos.x = x * c - y * s + rCenter.x;
-			pVertices[i].m_Pos.y = x * s + y * c + rCenter.y;
+			x = pVertices[i].m_Pos.x - RotationCenter.x;
+			y = pVertices[i].m_Pos.y - RotationCenter.y;
+			pVertices[i].m_Pos.x = x * c - y * s + RotationCenter.x;
+			pVertices[i].m_Pos.y = x * s + y * c + RotationCenter.y;
 		}
 	}
 
 	template<typename TName>
 	void AddCmd(
-		TName &Cmd, std::function<bool()> FailFunc = [] { return true; })
+		TName &Cmd, const std::function<bool()> &FailFunc = [] { return true; })
 	{
 		if(m_pCommandBuffer->AddCommandUnsafe(Cmd))
 			return;
@@ -920,7 +920,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	int InitWindow();
 
 public:
-	CGraphics_Threaded();
+	CGraphicsThreaded();
 
 	void ClipEnable(int x, int y, int w, int h) override;
 	void ClipDisable() override;

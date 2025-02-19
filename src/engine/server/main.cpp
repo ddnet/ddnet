@@ -35,7 +35,7 @@ bool IsInterrupted()
 	return InterruptSignaled;
 }
 
-void HandleSigIntTerm(int Param)
+static void HandleSigIntTerm(int Param)
 {
 	InterruptSignaled = 1;
 

@@ -25,7 +25,7 @@ class CGLSLTileProgram;
 #endif
 
 // takes care of opengl related rendering
-class CCommandProcessorFragment_OpenGL : public CCommandProcessorFragment_GLBase
+class CCommandProcessorFragmentOpenGl : public CCommandProcessorFragmentGlBase
 {
 protected:
 	struct CTexture
@@ -74,7 +74,7 @@ protected:
 
 	bool IsTexturedState(const CCommandBuffer::SState &State);
 
-	bool InitOpenGL(const SCommand_Init *pCommand);
+	bool InitOpenGL(const SCommandInit *pCommand);
 
 	void SetState(const CCommandBuffer::SState &State, bool Use2DArrayTexture = false);
 	virtual bool IsNewApi() { return false; }
@@ -87,8 +87,8 @@ protected:
 	void TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, uint8_t *pTexData);
 	void TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, uint8_t *pTexData);
 
-	virtual bool Cmd_Init(const SCommand_Init *pCommand);
-	virtual void Cmd_Shutdown(const SCommand_Shutdown *pCommand) {}
+	virtual bool Cmd_Init(const SCommandInit *pCommand);
+	virtual void Cmd_Shutdown(const SCommandShutdown *pCommand) {}
 	virtual void Cmd_Texture_Destroy(const CCommandBuffer::SCommand_Texture_Destroy *pCommand);
 	virtual void Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand);
 	virtual void Cmd_TextTexture_Update(const CCommandBuffer::SCommand_TextTexture_Update *pCommand);
@@ -122,13 +122,13 @@ protected:
 	virtual void Cmd_RenderQuadContainerAsSpriteMultiple(const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RenderQuadContainerAsSpriteMultiple"); }
 
 public:
-	CCommandProcessorFragment_OpenGL();
-	virtual ~CCommandProcessorFragment_OpenGL() = default;
+	CCommandProcessorFragmentOpenGl();
+	virtual ~CCommandProcessorFragmentOpenGl() = default;
 
 	ERunCommandReturnTypes RunCommand(const CCommandBuffer::SCommand *pBaseCommand) override;
 };
 
-class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenGL
+class CCommandProcessorFragmentOpenGl2 : public CCommandProcessorFragmentOpenGl
 {
 	struct SBufferContainer
 	{
@@ -166,8 +166,8 @@ protected:
 	void SetState(const CCommandBuffer::SState &State, CGLSLTWProgram *pProgram, bool Use2DArrayTextures = false);
 
 #ifndef BACKEND_GL_MODERN_API
-	bool Cmd_Init(const SCommand_Init *pCommand) override;
-	void Cmd_Shutdown(const SCommand_Shutdown *pCommand) override;
+	bool Cmd_Init(const SCommandInit *pCommand) override;
+	void Cmd_Shutdown(const SCommandShutdown *pCommand) override;
 
 	void Cmd_RenderTex3D(const CCommandBuffer::SCommand_RenderTex3D *pCommand) override;
 
@@ -194,7 +194,7 @@ protected:
 	CGLSLPrimitiveProgram *m_pPrimitive3DProgramTextured;
 };
 
-class CCommandProcessorFragment_OpenGL3 : public CCommandProcessorFragment_OpenGL2
+class CCommandProcessorFragmentOpenGl3 : public CCommandProcessorFragmentOpenGl2
 {
 };
 

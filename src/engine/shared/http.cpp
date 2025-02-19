@@ -41,7 +41,7 @@ int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, v
 	}
 	while(const char *pLineEnd = (const char *)memchr(pData, '\n', DataSize))
 	{
-		int LineLength = pLineEnd - pData;
+		const int LineLength = pLineEnd - pData;
 		log_debug("curl", "%c %.*s", TypeChar, LineLength, pData);
 		pData += LineLength + 1;
 		DataSize -= LineLength + 1;
@@ -93,7 +93,7 @@ static bool CalculateSha256(const char *pAbsoluteFilename, SHA256_DIGEST *pSha25
 	unsigned char aBuffer[64 * 1024];
 	while(true)
 	{
-		unsigned Bytes = io_read(File, aBuffer, sizeof(aBuffer));
+		const unsigned Bytes = io_read(File, aBuffer, sizeof(aBuffer));
 		if(Bytes == 0)
 			break;
 		sha256_update(&Sha256Ctxt, aBuffer, Bytes);
@@ -439,7 +439,7 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 				void *pBuffer;
 				unsigned Length;
 				IOHANDLE File = io_open(m_aDestAbsolute, IOFLAG_READ);
-				bool Success = File && io_read_all(File, &pBuffer, &Length);
+				const bool Success = File && io_read_all(File, &pBuffer, &Length);
 				if(File)
 				{
 					io_close(File);
@@ -472,7 +472,7 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 	// before the result has been initialized/updated in OnCompletion.
 	OnCompletion(State);
 	{
-		std::unique_lock WaitLock(m_WaitMutex);
+		const std::unique_lock WaitLock(m_WaitMutex);
 		m_State = State;
 	}
 	m_WaitCondition.notify_all();
@@ -535,7 +535,7 @@ void CHttpRequest::Wait()
 {
 	std::unique_lock Lock(m_WaitMutex);
 	m_WaitCondition.wait(Lock, [this]() {
-		EHttpState State = m_State.load(std::memory_order_seq_cst);
+		const EHttpState State = m_State.load(std::memory_order_seq_cst);
 		return State != EHttpState::QUEUED && State != EHttpState::RUNNING;
 	});
 }
@@ -710,7 +710,7 @@ void CHttp::RunLoop()
 			{
 				pRequest->OnCompletion(EHttpState::DONE);
 				{
-					std::unique_lock WaitLock(pRequest->m_WaitMutex);
+					const std::unique_lock WaitLock(pRequest->m_WaitMutex);
 					pRequest->m_State = EHttpState::DONE;
 				}
 				pRequest->m_WaitCondition.notify_all();
@@ -741,7 +741,7 @@ void CHttp::RunLoop()
 			}
 
 			{
-				std::unique_lock WaitLock(pRequest->m_WaitMutex);
+				const std::unique_lock WaitLock(pRequest->m_WaitMutex);
 				pRequest->m_State = EHttpState::RUNNING;
 			}
 			m_RunningRequests.emplace(pEH, std::move(pRequest));
@@ -767,7 +767,7 @@ void CHttp::RunLoop()
 	if(!Lock.owns_lock())
 		Lock.lock();
 
-	bool Cleanup = m_State != CHttp::ERROR;
+	const bool Cleanup = m_State != CHttp::ERROR;
 	for(auto &pRequest : m_PendingRequests)
 	{
 		str_copy(pRequest->m_aErr, "Shutting down");
@@ -797,7 +797,7 @@ void CHttp::RunLoop()
 
 void CHttp::Run(std::shared_ptr<IHttpRequest> pRequest)
 {
-	std::shared_ptr<CHttpRequest> pRequestImpl = std::static_pointer_cast<CHttpRequest>(pRequest);
+	const std::shared_ptr<CHttpRequest> pRequestImpl = std::static_pointer_cast<CHttpRequest>(pRequest);
 	std::unique_lock Lock(m_Lock);
 	if(m_Shutdown || m_State == CHttp::ERROR)
 	{
@@ -812,7 +812,7 @@ void CHttp::Run(std::shared_ptr<IHttpRequest> pRequest)
 
 void CHttp::Shutdown()
 {
-	std::unique_lock Lock(m_Lock);
+	const std::unique_lock Lock(m_Lock);
 	if(m_Shutdown || m_State != CHttp::RUNNING)
 		return;
 
