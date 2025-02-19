@@ -495,6 +495,7 @@ protected:
 	bool RenderServerControlKick(CUIRect MainView, bool FilterSpectators, bool UpdateScroll);
 	bool RenderServerControlServer(CUIRect MainView, bool UpdateScroll);
 	void RenderIngameHint();
+	void RenderEntitiesHint();
 
 	// found in menus_browser.cpp
 	int m_SelectedIndex;

@@ -1597,3 +1597,32 @@ void CMenus::RenderIngameHint()
 	TextRender()->Text(5, 280, 5, Localize("Menu opened. Press Esc key again to close menu."), -1.0f);
 	Ui()->MapScreen();
 }
+
+void CMenus::RenderEntitiesHint()
+{
+	if(!g_Config.m_ClOverlayEntitiesHint || g_Config.m_Debug || Client()->State() != IClient::STATE_ONLINE || !GameClient()->CanDisplayWarning())
+		return;
+
+	static bool s_WasEnabled = false;
+
+	if(g_Config.m_ClOverlayEntities)
+	{
+		s_WasEnabled = true;
+
+		const float Height = 300.0f;
+		const float Width = Height * Graphics()->ScreenAspect();
+		Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+
+		const float FontSize = 5.0f;
+		const float Spacing = 5.0f;
+
+		char aBuf[256];
+		char aKey[64];
+		m_pClient->m_Binds.GetKey("toggle cl_overlay_entities 0 100", aKey, sizeof(aKey));
+		str_format(aBuf, sizeof(aBuf), Localize("Entities overlay is enabled. To disable, press %s or enter 'cl_overlay_entities 0' in the console."), aKey);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+		TextRender()->Text(Spacing, Height - FontSize - Spacing, FontSize, aBuf);
+	}
+	else if(s_WasEnabled)
+		g_Config.m_ClOverlayEntitiesHint = 0;
+}
