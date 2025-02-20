@@ -59,7 +59,7 @@ bool CLayerSpeedup::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
-			if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidSpeedupTile(pLayer->GetTile(x, y).m_Index))
+			if(m_pEditor->isAllowPlaceUnusedTiles() || IsValidSpeedupTile(pLayer->GetTile(x, y).m_Index))
 				return false;
 
 	return true;
@@ -102,7 +102,7 @@ void CLayerSpeedup::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 				m_pSpeedupTile[Index].m_Type,
 				m_pTiles[Index].m_Index};
 
-			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidSpeedupTile(pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index)) && pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index != TILE_AIR)
+			if((m_pEditor->isAllowPlaceUnusedTiles() || IsValidSpeedupTile(pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index)) && pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index != TILE_AIR)
 			{
 				if(m_pEditor->m_SpeedupAngle != pSpeedupLayer->m_SpeedupAngle || m_pEditor->m_SpeedupForce != pSpeedupLayer->m_SpeedupForce || m_pEditor->m_SpeedupMaxSpeed != pSpeedupLayer->m_SpeedupMaxSpeed)
 				{
@@ -256,7 +256,7 @@ void CLayerSpeedup::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CU
 				m_pSpeedupTile[TgtIndex].m_Type,
 				m_pTiles[TgtIndex].m_Index};
 
-			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidSpeedupTile((pLt->m_pTiles[SrcIndex]).m_Index))) // no speed up tile chosen: reset
+			if(Empty || (!m_pEditor->isAllowPlaceUnusedTiles() && !IsValidSpeedupTile((pLt->m_pTiles[SrcIndex]).m_Index))) // no speed up tile chosen: reset
 			{
 				m_pTiles[TgtIndex].m_Index = 0;
 				m_pSpeedupTile[TgtIndex].m_Force = 0;

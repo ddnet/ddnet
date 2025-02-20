@@ -235,12 +235,12 @@ bool CLayerTiles::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 			{
 				if(pLayer->m_Game)
 				{
-					if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidGameTile(Index))
+					if(m_pEditor->isAllowPlaceUnusedTiles() || IsValidGameTile(Index))
 						return false;
 				}
 				else if(pLayer->m_Front)
 				{
-					if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidFrontTile(Index))
+					if(m_pEditor->isAllowPlaceUnusedTiles() || IsValidFrontTile(Index))
 						return false;
 				}
 				else
@@ -550,7 +550,7 @@ void CLayerTiles::BrushFlipX()
 	if(m_Tele || m_Speedup || m_Tune)
 		return;
 
-	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
+	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->isAllowPlaceUnusedTiles();
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
@@ -566,7 +566,7 @@ void CLayerTiles::BrushFlipY()
 	if(m_Tele || m_Speedup || m_Tune)
 		return;
 
-	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
+	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->isAllowPlaceUnusedTiles();
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
@@ -587,7 +587,7 @@ void CLayerTiles::BrushRotate(float Amount)
 		CTile *pTempData = new CTile[m_Width * m_Height];
 		mem_copy(pTempData, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 		CTile *pDst = m_pTiles;
-		bool Rotate = !(m_Game || m_Front) || m_pEditor->m_AllowPlaceUnusedTiles;
+		bool Rotate = !(m_Game || m_Front) || m_pEditor->isAllowPlaceUnusedTiles();
 		for(int x = 0; x < m_Width; ++x)
 			for(int y = m_Height - 1; y >= 0; --y, ++pDst)
 			{
