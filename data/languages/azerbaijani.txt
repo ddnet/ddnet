@@ -2125,7 +2125,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Azərbaycanca tərcüməsi seishiroon, Aykhan və Gokturk
+== Azərbaycan dilinə tərcümə: seishiroon, Aykhan [EN07Z] və Gokturk tərəfindən
 
 Show spectator cursor
 == Tamaşaçı kursorunu göstər
