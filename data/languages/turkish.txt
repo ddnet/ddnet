@@ -2056,76 +2056,76 @@ Server could not be started. Make sure to grant the notification permission in t
 == Sunucu başlatılamıyor. Sunucunun arka planda çalışması için ayarlardan bildirim iznini açtığınıza emin olun.
 
 Auto-sync player camera
-== 
+== Oyuncu kamerasını otomatik senkronize et
 
 [Auto camera]
 Disabled
-== 
+== Devre dışı
 
 [Auto camera]
 Enabled
-== 
+== Etkin
 
 [Auto camera]
 Unavailable for this player
-== 
+== Bu oyuncu için kullanılamıyor
 
 [Auto camera]
 Inactive
-== 
+== Aktif değil
 
 [Auto camera]
 Active
-== 
+== Aktif
 
 Loading maps…
-== 
+== Harita yükleniyor…
 
 Community
-== 
+== Topluluk
 
 [Team status]
 forbidden
-== 
+== yasak
 
 [Team status]
 solo
-== 
+== solo
 
 [Team status]
 allowed
-== 
+== izin verildi
 
 [Team status]
 required
-== 
+== gerekli
 
 Teams
-== 
+== Takımlar
 
 [Team size]
 minimum
-== 
+== minimum
 
 [Team size]
 maximum
-== 
+== maksimum
 
 Saves file
-== 
+== Dosyayı kaydet 
 
 Open the saves file
-== 
+== Kayıt dosyasını aç
 
 Show FPS
-== 
+== FPS'i göster
 
 Renders your frame rate in the top right
-== 
+== Kare hızını sağ üstte gösterir
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Turkish translation by Learath2, ardadem, h-kaan, eghwand and Gokturk
+== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand ve Gokturk tarafından yapıldı
 
 Show spectator cursor
-== 
+== İzleyicinin imlecini göster
