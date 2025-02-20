@@ -62,7 +62,7 @@ bool CLayerTele::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
-			if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(pLayer->GetTile(x, y).m_Index))
+			if(m_pEditor->isAllowPlaceUnusedTiles() || IsValidTeleTile(pLayer->GetTile(x, y).m_Index))
 				return false;
 
 	return true;
@@ -100,7 +100,7 @@ void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 				m_pTiles[Index].m_Index};
 
 			unsigned char TgtIndex = pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index;
-			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(TgtIndex)) && TgtIndex != TILE_AIR)
+			if((m_pEditor->isAllowPlaceUnusedTiles() || IsValidTeleTile(TgtIndex)) && TgtIndex != TILE_AIR)
 			{
 				bool IsCheckpoint = IsTeleTileCheckpoint(TgtIndex);
 				if(!IsCheckpoint && !IsTeleTileNumberUsed(TgtIndex, false))
@@ -253,7 +253,7 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 				m_pTeleTile[TgtIndex].m_Type,
 				m_pTiles[TgtIndex].m_Index};
 
-			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidTeleTile((pLt->m_pTiles[SrcIndex]).m_Index)))
+			if(Empty || (!m_pEditor->isAllowPlaceUnusedTiles() && !IsValidTeleTile((pLt->m_pTiles[SrcIndex]).m_Index)))
 			{
 				m_pTiles[TgtIndex].m_Index = 0;
 				m_pTeleTile[TgtIndex].m_Type = 0;

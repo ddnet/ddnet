@@ -61,7 +61,7 @@ bool CLayerSwitch::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
-			if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidSwitchTile(pLayer->GetTile(x, y).m_Index))
+			if(m_pEditor->isAllowPlaceUnusedTiles() || IsValidSwitchTile(pLayer->GetTile(x, y).m_Index))
 				return false;
 
 	return true;
@@ -103,7 +103,7 @@ void CLayerSwitch::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 				m_pSwitchTile[Index].m_Delay,
 				m_pTiles[Index].m_Index};
 
-			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidSwitchTile(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index)) && pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index != TILE_AIR)
+			if((m_pEditor->isAllowPlaceUnusedTiles() || IsValidSwitchTile(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index)) && pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index != TILE_AIR)
 			{
 				if(m_pEditor->m_SwitchNum != pSwitchLayer->m_SwitchNumber || m_pEditor->m_SwitchDelay != pSwitchLayer->m_SwitchDelay)
 				{
@@ -264,7 +264,7 @@ void CLayerSwitch::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUI
 				m_pSwitchTile[TgtIndex].m_Delay,
 				m_pTiles[TgtIndex].m_Index};
 
-			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidSwitchTile((pLt->m_pTiles[SrcIndex]).m_Index)))
+			if(Empty || (!m_pEditor->isAllowPlaceUnusedTiles() && !IsValidSwitchTile((pLt->m_pTiles[SrcIndex]).m_Index)))
 			{
 				m_pTiles[TgtIndex].m_Index = 0;
 				m_pSwitchTile[TgtIndex].m_Type = 0;
