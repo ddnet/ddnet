@@ -2056,76 +2056,76 @@ Server could not be started. Make sure to grant the notification permission in t
 == O servidor não pôde ser iniciado. Certifique-se de conceder a permissão de notificação nas configurações do aplicativo para que o servidor possa ser executado em segundo plano.
 
 Auto-sync player camera
-== 
+== Sincroniza automaticamente a câmera do jogador
 
 [Auto camera]
 Disabled
-== 
+== Desabilitada
 
 [Auto camera]
 Enabled
-== 
+== Habilitada
 
 [Auto camera]
 Unavailable for this player
-== 
+== Não disponível para este jogador
 
 [Auto camera]
 Inactive
-== 
+== Inativa
 
 [Auto camera]
 Active
-== 
+== Ativa
 
 Loading maps…
-== 
+== Carregando mapas…
 
 Community
-== 
+== Comunidade
 
 [Team status]
 forbidden
-== 
+== proibido
 
 [Team status]
 solo
-== 
+== solo
 
 [Team status]
 allowed
-== 
+== permitido
 
 [Team status]
 required
-== 
+== exigido
 
 Teams
-== 
+== Times
 
 [Team size]
 minimum
-== 
+== mínimo
 
 [Team size]
 maximum
-== 
+== máximo
 
 Saves file
-== 
+== Arquivo de salvamentos
 
 Open the saves file
-== 
+== Abre o arquivo de salvamentos
 
 Show FPS
-== 
+== Mostrar FPS
 
 Renders your frame rate in the top right
-== 
+== Renderiza sua taxa de quadros no canto direito superior
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Brazilian Portuguese translation by slinack, yemDX, Isadora, Ryomou Hentai Girl, HeroiAmarelo, Rafael Fontenelle, pv and DrafaKiller
+== Brazilian Portuguese translation by Isadora (slinack), yemDX, Ryomou Hentai Girl, HeroiAmarelo, Rafael Fontenelle, pv and DrafaKiller
 
 Show spectator cursor
-== 
+== Mostrar cursor do observador
