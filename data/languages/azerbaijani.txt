@@ -2056,76 +2056,76 @@ Server could not be started. Make sure to grant the notification permission in t
 == Server başladıla bilmir. Serverin fonda işləməsi üçün parametrlərdə bildiriş icazəsini aktivləşdirdiyinizə əmin olun.
 
 Auto-sync player camera
-== 
+== Avto-sinxron oyunçu kamerası
 
 [Auto camera]
 Disabled
-== 
+== Qeyri-aktiv
 
 [Auto camera]
 Enabled
-== 
+== Aktiv
 
 [Auto camera]
 Unavailable for this player
-== 
+== Bu oyunçu üçün mövcud deyil
 
 [Auto camera]
 Inactive
-== 
+== Qeyri-aktiv
 
 [Auto camera]
 Active
-== 
+== Aktiv
 
 Loading maps…
-== 
+== Xəritələr yüklənir…
 
 Community
-== 
+== İcma
 
 [Team status]
 forbidden
-== 
+== qadağa olunmuş
 
 [Team status]
 solo
-== 
+== tək
 
 [Team status]
 allowed
-== 
+== icazəli
 
 [Team status]
 required
-== 
+== tələb olunur
 
 Teams
-== 
+== Komandalar
 
 [Team size]
 minimum
-== 
+== minimum
 
 [Team size]
 maximum
-== 
+== maksimum
 
 Saves file
-== 
+== Qeydlər faylı
 
 Open the saves file
-== 
+== Qeydlər faylını aç
 
 Show FPS
-== 
+== FPS-i göstər
 
 Renders your frame rate in the top right
-== 
+== Üst sağda FPS-i göstərir
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Azerbaijani translation by Gokturk, seishiroon and Aykhan
+== Azərbaycanca tərcüməsi seishiroon, Aykhan və Gokturk
 
 Show spectator cursor
-== 
+== Tamaşaçı kursorunu göstər
