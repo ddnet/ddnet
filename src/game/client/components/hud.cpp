@@ -80,6 +80,7 @@ void CHud::OnReset()
 	m_aPlayerSpeed[1] = 0;
 	m_aLastPlayerSpeedChange[0] = ESpeedChange::NONE;
 	m_aLastPlayerSpeedChange[1] = ESpeedChange::NONE;
+	m_LastSpectatorCountTick = 0;
 
 	ResetHudContainers();
 }
@@ -1283,6 +1284,13 @@ void CHud::RenderSpectatorCount()
 	}
 
 	if(Count == 0)
+	{
+		m_LastSpectatorCountTick = Client()->GameTick(g_Config.m_ClDummy);
+		return;
+	}
+
+	// 1 second delay
+	if(Client()->GameTick(g_Config.m_ClDummy) < m_LastSpectatorCountTick + Client()->GameTickSpeed())
 		return;
 
 	char aBuf[16];
