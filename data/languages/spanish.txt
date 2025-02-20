@@ -2058,76 +2058,76 @@ Server could not be started. Make sure to grant the notification permission in t
 == No se pudo iniciar el servidor. Asegúrate de otorgar el permiso de notificaciones en la configuración de la aplicación para que el servidor pueda ejecutarse en segundo plano.
 
 Auto-sync player camera
-== 
+== Sincronización automática de la cámara del jugador
 
 [Auto camera]
 Disabled
-== 
+== Desactivado
 
 [Auto camera]
 Enabled
-== 
+== Activado
 
 [Auto camera]
 Unavailable for this player
-== 
+== No disponible para este jugador
 
 [Auto camera]
 Inactive
-== 
+== Inactivo
 
 [Auto camera]
 Active
-== 
+== Activo
 
 Loading maps…
-== 
+== Cargando mapas…
 
 Community
-== 
+== Comunidad
 
 [Team status]
 forbidden
-== 
+== prohibido
 
 [Team status]
 solo
-== 
+== solo
 
 [Team status]
 allowed
-== 
+== permitido
 
 [Team status]
 required
-== 
+== requerido
 
 Teams
-== 
+== Equipos
 
 [Team size]
 minimum
-== 
+== mínimo
 
 [Team size]
 maximum
-== 
+== máximo
 
 Saves file
-== 
+== Archivo de guardados
 
 Open the saves file
-== 
+== Abrir el archivo de guardados
 
 Show FPS
-== 
+== Mostrar FPS
 
 Renders your frame rate in the top right
-== 
+== Muestra tu tasa de fotogramas en la esquina superior derecha
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
 == Spanish translation by ReGnuM, Ninja Style, Alexandre, GaBOr, HeroiAmarelo, Mortcheck, FeaRZ, Ryozuki, Headshot and Deëivid!
 
 Show spectator cursor
-== 
+== Mostrar cursor de espectador
