@@ -2125,7 +2125,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Brazilian Portuguese translation by slinack, yemDX, Isadora, Ryomou Hentai Girl, HeroiAmarelo, Rafael Fontenelle, pv and DrafaKiller
+== Brazilian Portuguese translation by Isadora (slinack), yemDX, Ryomou Hentai Girl, HeroiAmarelo, Rafael Fontenelle, pv and DrafaKiller
 
 Show spectator cursor
 == Mostrar cursor do observador
