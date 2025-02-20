@@ -31,16 +31,20 @@ public:
 	static CItemEx FromUuid(CUuid Uuid)
 	{
 		CItemEx Result;
-		for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
+		for(size_t i = 0; i < std::size(Result.m_aUuid); i++)
+		{
 			Result.m_aUuid[i] = bytes_be_to_uint(&Uuid.m_aData[i * sizeof(int32_t)]);
+		}
 		return Result;
 	}
 
 	CUuid ToUuid() const
 	{
 		CUuid Result;
-		for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
+		for(size_t i = 0; i < std::size(m_aUuid); i++)
+		{
 			uint_to_bytes_be(&Result.m_aData[i * sizeof(int32_t)], m_aUuid[i]);
+		}
 		return Result;
 	}
 };
