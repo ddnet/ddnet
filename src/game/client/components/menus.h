@@ -178,6 +178,8 @@ protected:
 	bool m_ShowStart;
 	bool m_MenuActive;
 
+	bool m_DummyNamePlatePreview = false;
+
 	bool m_JoinTutorial = false;
 	bool m_CreateDefaultFavoriteCommunities = false;
 	bool m_ForceRefreshLanPage = false;

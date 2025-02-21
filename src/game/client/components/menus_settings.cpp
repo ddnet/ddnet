@@ -2888,12 +2888,11 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		RightView.HSplitTop(2.0f * MarginSmall, nullptr, &RightView);
 
 		// ***** Name Plate Dummy Preview ***** //
-		static bool s_Dummy = false;
 		RightView.HSplitBottom(LineSize, &RightView, &Button);
-		if(DoButton_CheckBox(&s_Dummy, Localize("Preview dummy's name plate"), s_Dummy, &Button))
-			s_Dummy = !s_Dummy;
+		if(DoButton_CheckBox(&m_DummyNamePlatePreview, Localize("Preview dummy's name plate"), m_DummyNamePlatePreview, &Button))
+			m_DummyNamePlatePreview = !m_DummyNamePlatePreview;
 
-		int Dummy = g_Config.m_ClDummy != (s_Dummy ? 1 : 0);
+		int Dummy = g_Config.m_ClDummy != (m_DummyNamePlatePreview ? 1 : 0);
 
 		const vec2 Position = RightView.Center();
 
