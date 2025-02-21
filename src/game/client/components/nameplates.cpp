@@ -19,9 +19,9 @@
 class CNamePlatePart
 {
 protected:
-	vec2 m_Size;
-	vec2 m_Padding;
-	vec2 m_Offset; // Offset to rendered X and Y not effecting layout
+	vec2 m_Size = vec2();
+	vec2 m_Padding = vec2();
+	vec2 m_Offset = vec2(); // Offset to rendered X and Y not effecting layout
 	bool m_NewLine = false; // Whether this part is a new line (doesn't do anything else)
 	bool m_Visible = true; // Whether this part is visible
 	bool m_ShiftOnInvis = false; // Whether when not visible will still take up space
