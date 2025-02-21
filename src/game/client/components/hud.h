@@ -127,7 +127,6 @@ private:
 	bool m_ShowFinishTime;
 
 	inline float GetMovementInformationBoxHeight();
-	inline int GetDigitsIndex(int Value, int Max);
 
 	// Quad Offsets
 	int m_aAmmoOffset[NUM_WEAPONS];
