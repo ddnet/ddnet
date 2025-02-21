@@ -3805,7 +3805,7 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 	}
 }
 
-bool CEditor::isAllowPlaceUnusedTiles() const
+bool CEditor::IsAllowPlaceUnusedTiles() const
 {
 	// explicit allow and implicit allow
 	return m_AllowPlaceUnusedTiles != EUnusedEntities::NOT_ALLOWED;

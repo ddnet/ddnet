@@ -631,7 +631,7 @@ public:
 		ALLOWED_EXPLICIT = 1,
 	};
 	EUnusedEntities m_AllowPlaceUnusedTiles;
-	bool isAllowPlaceUnusedTiles() const;
+	bool IsAllowPlaceUnusedTiles() const;
 
 	bool m_BrushDrawDestructive;
 
