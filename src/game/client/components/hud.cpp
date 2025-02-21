@@ -524,7 +524,7 @@ void CHud::RenderTextInfo()
 	if(Showfps)
 	{
 		constexpr float TimeWindow = 5.0f; // Average fps over 5 seconds
-		static std::vector<std::pair<float, float>> s_FrameHistory;
+		static std::deque<std::pair<float, float>> s_FrameHistory;
 		static float s_FrameTimeSum = 0.0f;
 
 		float CurrentTime = time_get() / static_cast<float>(time_freq());
@@ -537,7 +537,7 @@ void CHud::RenderTextInfo()
 		while(!s_FrameHistory.empty() && (CurrentTime - s_FrameHistory.front().first > TimeWindow))
 		{
 			s_FrameTimeSum -= s_FrameHistory.front().second;
-			s_FrameHistory.erase(s_FrameHistory.begin());
+			s_FrameHistory.pop_front();
 		}
 
 		const float AvgFrameTime = s_FrameTimeSum / s_FrameHistory.size();
