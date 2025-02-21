@@ -89,8 +89,7 @@ public:
 		if(!m_TextContainerIndex.Valid())
 			return;
 
-		ColorRGBA OutlineColor = This.TextRender()->DefaultTextOutlineColor()
-			.WithMultipliedAlpha(m_Color.a);
+		ColorRGBA OutlineColor = This.TextRender()->DefaultTextOutlineColor().WithMultipliedAlpha(m_Color.a);
 
 		This.TextRender()->RenderTextContainer(m_TextContainerIndex,
 			m_Color, OutlineColor,
@@ -118,7 +117,7 @@ public:
 		This.Graphics()->SetColor(m_Color);
 		This.Graphics()->TextureSet(m_Texture);
 		This.Graphics()->QuadsSetRotation(m_Rotation);
-		This.Graphics()->RenderQuadContainerAsSprite(m_QuadContainerIndex, 0, 
+		This.Graphics()->RenderQuadContainerAsSprite(m_QuadContainerIndex, 0,
 			X - Size().x / 2.0f, Y - Size().y / 2.0f, Size().x, Size().y);
 		This.Graphics()->QuadsSetRotation(0.0f);
 		This.Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -162,7 +161,12 @@ public:
 	}
 };
 
-enum Direction { DIRECTION_LEFT, DIRECTION_UP, DIRECTION_RIGHT };
+enum Direction
+{
+	DIRECTION_LEFT,
+	DIRECTION_UP,
+	DIRECTION_RIGHT
+};
 
 class CNamePlatePartDirection : public CNamePlatePartIcon
 {
@@ -439,7 +443,7 @@ private:
 		}
 	}
 	template<typename PartType, typename... ArgsType>
-	void AddPart(CGameClient &This, ArgsType &&... Args)
+	void AddPart(CGameClient &This, ArgsType &&...Args)
 	{
 		std::unique_ptr<PartType> Part = std::make_unique<PartType>();
 		Part->Create(This, std::forward<ArgsType>(Args)...);
@@ -511,7 +515,8 @@ public:
 		RenderLine(This, Data, X, Y, W, H, Start, m_vpParts.end());
 		This.TextRender()->SetRenderFlags(0);
 	}
-	vec2 Size() {
+	vec2 Size()
+	{
 		float W = 0.0f; // Total width including padding of line
 		float H = 0.0f; // Max height of line parts
 		float WMax = 0.0f;
