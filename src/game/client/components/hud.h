@@ -43,8 +43,7 @@ struct SScoreInfo
 class CHud : public CComponent
 {
 	float m_Width, m_Height;
-	float m_FrameTimeAvg;
-
+	float m_FpsLastUpdate;
 	int m_HudQuadContainerIndex;
 	SScoreInfo m_aScoreInfo[2];
 	STextContainerIndex m_FPSTextContainerIndex;
@@ -127,7 +126,6 @@ private:
 	bool m_ShowFinishTime;
 
 	inline float GetMovementInformationBoxHeight();
-	inline int GetDigitsIndex(int Value, int Max);
 
 	// Quad Offsets
 	int m_aAmmoOffset[NUM_WEAPONS];
