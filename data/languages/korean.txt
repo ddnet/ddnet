@@ -2110,7 +2110,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 한국어 번역: CHaBek, ksgcln72, Pathos
+== 한국어 번역: ksgcln72, Pathos and CHaBek
 
 Show spectator cursor
 == 관전자 커서 표시
