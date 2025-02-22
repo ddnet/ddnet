@@ -342,7 +342,7 @@ add_sqlserver r teeworlds record teeworlds "PW2" "localhost" "3306"
 add_sqlserver w teeworlds record teeworlds "PW2" "localhost" "3306"
 
 $ cmake -Bbuild -DMYSQL=ON -GNinja
-$ cmake --build build --target DDNet-Server # Add -j to use all cores, don't use this if you have a server running
+$ cmake --build build --target DDNet-Server
 $ build/DDNet-Server -f mine.cfg
 ```
 
