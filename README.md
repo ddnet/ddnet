@@ -102,8 +102,8 @@ If you don't want to use the system libraries, you can pass the `-DPREFER_BUNDLE
 To compile DDNet yourself, execute the following commands in the source root:
 
 ```sh
-cmake -Bbuild
-cmake --build build # Add -j to use all cores, don't use this if you have a server running
+cmake -Bbuild -GNinja
+cmake --build build
 ```
 
 DDNet requires additional libraries, some of which are bundled for the most common platforms (Windows, Mac, Linux, all x86 and x86\_64) for convenience and the official builds. The bundled libraries for official builds are now in the ddnet-libs submodule. Note that when you build and develop locally, you should ideally use your system's package manager to install the dependencies, instead of relying on ddnet-libs submodule, which does not contain all dependencies anyway (e.g. openssl, vulkan). See the previous section for how to get the dependencies. Alternatively see the following build arguments for how to disable some features and their dependencies (`-DVULKAN=OFF` won't require Vulkan for example).
