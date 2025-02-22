@@ -524,7 +524,7 @@ void CHud::RenderTextInfo()
 
 	if(Showfps)
 	{
-		constexpr float TimeWindow = 5.0f; // Average fps over 5 seconds
+		constexpr float TimeWindow = 2.0f; // Average fps over 2s
 
 		float CurrentTime = time_get() / static_cast<float>(time_freq());
 		float RenderFrameTime = Client()->RenderFrameTime();
