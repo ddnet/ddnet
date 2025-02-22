@@ -224,8 +224,8 @@ ASan+UBSan and Memcheck are useful to find code problems more easily. Please use
 For ASan+UBSan compile with:
 
 ```sh
-CC=clang CXX=clang++ CXXFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer" CFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer" cmake -DCMAKE_BUILD_TYPE=Debug -Bbuild
-cmake --build build # Add -j to use all cores, don't use this if you have a server running
+CC=clang CXX=clang++ CXXFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer" CFLAGS="-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer" cmake -DCMAKE_BUILD_TYPE=Debug -Bbuild -GNinja
+cmake --build build
 ```
 
 and run with:
