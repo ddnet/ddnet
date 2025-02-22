@@ -80,7 +80,7 @@ sudo dnf install cargo cmake ffmpeg-devel freetype-devel gcc gcc-c++ git glew-de
 Or on Arch Linux like this:
 
 ```sh
-sudo pacman -S --needed base-devel cmake curl ffmpeg freetype2 git glew glslang gmock libnotify libpng opusfile python rust sdl2 spirv-tools sqlite vulkan-headers vulkan-icd-loader wavpack x264
+sudo pacman -S --needed base-devel cmake curl ffmpeg freetype2 git glew glslang gmock libnotify libpng ninja opusfile python rust sdl2 spirv-tools sqlite vulkan-headers vulkan-icd-loader wavpack x264
 ```
 
 Or on Gentoo like this:
