@@ -95,68 +95,70 @@ void CLayerSwitch::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			int Index = fy * m_Width + fx;
-			SSwitchTileStateChange::SData Previous{
-				m_pSwitchTile[Index].m_Number,
-				m_pSwitchTile[Index].m_Type,
-				m_pSwitchTile[Index].m_Flags,
-				m_pSwitchTile[Index].m_Delay,
-				m_pTiles[Index].m_Index};
+			const int SrcIndex = y * pSwitchLayer->m_Width + x;
+			const int TgtIndex = fy * m_Width + fx;
 
-			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidSwitchTile(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index)) && pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index != TILE_AIR)
+			SSwitchTileStateChange::SData Previous{
+				m_pSwitchTile[TgtIndex].m_Number,
+				m_pSwitchTile[TgtIndex].m_Type,
+				m_pSwitchTile[TgtIndex].m_Flags,
+				m_pSwitchTile[TgtIndex].m_Delay,
+				m_pTiles[TgtIndex].m_Index};
+
+			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidSwitchTile(pSwitchLayer->m_pTiles[SrcIndex].m_Index)) && pSwitchLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 			{
 				if(m_pEditor->m_SwitchNum != pSwitchLayer->m_SwitchNumber || m_pEditor->m_SwitchDelay != pSwitchLayer->m_SwitchDelay)
 				{
-					m_pSwitchTile[Index].m_Number = m_pEditor->m_SwitchNum;
-					m_pSwitchTile[Index].m_Delay = m_pEditor->m_SwitchDelay;
+					m_pSwitchTile[TgtIndex].m_Number = m_pEditor->m_SwitchNum;
+					m_pSwitchTile[TgtIndex].m_Delay = m_pEditor->m_SwitchDelay;
 				}
-				else if(pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Number)
+				else if(pSwitchLayer->m_pSwitchTile[SrcIndex].m_Number)
 				{
-					m_pSwitchTile[Index].m_Number = pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Number;
-					m_pSwitchTile[Index].m_Delay = pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Delay;
+					m_pSwitchTile[TgtIndex].m_Number = pSwitchLayer->m_pSwitchTile[SrcIndex].m_Number;
+					m_pSwitchTile[TgtIndex].m_Delay = pSwitchLayer->m_pSwitchTile[SrcIndex].m_Delay;
 				}
 				else
 				{
-					m_pSwitchTile[Index].m_Number = m_pEditor->m_SwitchNum;
-					m_pSwitchTile[Index].m_Delay = m_pEditor->m_SwitchDelay;
+					m_pSwitchTile[TgtIndex].m_Number = m_pEditor->m_SwitchNum;
+					m_pSwitchTile[TgtIndex].m_Delay = m_pEditor->m_SwitchDelay;
 				}
 
-				m_pSwitchTile[Index].m_Type = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index;
-				m_pSwitchTile[Index].m_Flags = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Flags;
-				m_pTiles[Index].m_Index = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index;
-				m_pTiles[Index].m_Flags = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Flags;
+				m_pSwitchTile[TgtIndex].m_Type = pSwitchLayer->m_pTiles[SrcIndex].m_Index;
+				m_pSwitchTile[TgtIndex].m_Flags = pSwitchLayer->m_pTiles[SrcIndex].m_Flags;
+				m_pTiles[TgtIndex].m_Index = pSwitchLayer->m_pTiles[SrcIndex].m_Index;
+				m_pTiles[TgtIndex].m_Flags = pSwitchLayer->m_pTiles[SrcIndex].m_Flags;
 
-				if(!IsSwitchTileFlagsUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				if(!IsSwitchTileFlagsUsed(pSwitchLayer->m_pTiles[SrcIndex].m_Index))
 				{
-					m_pSwitchTile[Index].m_Flags = 0;
+					m_pSwitchTile[TgtIndex].m_Flags = 0;
 				}
-				if(!IsSwitchTileNumberUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				if(!IsSwitchTileNumberUsed(pSwitchLayer->m_pTiles[SrcIndex].m_Index))
 				{
-					m_pSwitchTile[Index].m_Number = 0;
+					m_pSwitchTile[TgtIndex].m_Number = 0;
 				}
-				if(!IsSwitchTileDelayUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				if(!IsSwitchTileDelayUsed(pSwitchLayer->m_pTiles[SrcIndex].m_Index))
 				{
-					m_pSwitchTile[Index].m_Delay = 0;
+					m_pSwitchTile[TgtIndex].m_Delay = 0;
 				}
 			}
 			else
 			{
-				m_pSwitchTile[Index].m_Number = 0;
-				m_pSwitchTile[Index].m_Type = 0;
-				m_pSwitchTile[Index].m_Flags = 0;
-				m_pSwitchTile[Index].m_Delay = 0;
-				m_pTiles[Index].m_Index = 0;
+				m_pSwitchTile[TgtIndex].m_Number = 0;
+				m_pSwitchTile[TgtIndex].m_Type = 0;
+				m_pSwitchTile[TgtIndex].m_Flags = 0;
+				m_pSwitchTile[TgtIndex].m_Delay = 0;
+				m_pTiles[TgtIndex].m_Index = 0;
 
-				if(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index != TILE_AIR)
+				if(pSwitchLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 					ShowPreventUnusedTilesWarning();
 			}
 
 			SSwitchTileStateChange::SData Current{
-				m_pSwitchTile[Index].m_Number,
-				m_pSwitchTile[Index].m_Type,
-				m_pSwitchTile[Index].m_Flags,
-				m_pSwitchTile[Index].m_Delay,
-				m_pTiles[Index].m_Index};
+				m_pSwitchTile[TgtIndex].m_Number,
+				m_pSwitchTile[TgtIndex].m_Type,
+				m_pSwitchTile[TgtIndex].m_Flags,
+				m_pSwitchTile[TgtIndex].m_Delay,
+				m_pTiles[TgtIndex].m_Index};
 
 			RecordStateChange(fx, fy, Previous, Current);
 		}
