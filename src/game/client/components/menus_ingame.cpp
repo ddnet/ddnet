@@ -192,7 +192,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			static CButtonContainer s_KillButton;
 			if(DoButton_Menu(&s_KillButton, Localize("Kill"), 0, &Button))
 			{
-				m_pClient->SendKill(-1);
+				m_pClient->SendKill();
 				SetActive(false);
 			}
 		}
