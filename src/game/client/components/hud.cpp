@@ -27,7 +27,8 @@
 CHud::CHud()
 {
 	// won't work if zero
-	m_FrameTimeAvg = 0.0f;
+	m_FrameTimeSum = 0.0f;
+	m_FpsMaxTextWidth = 0.0f;
 	m_FPSTextContainerIndex.Reset();
 	m_DDRaceEffectsTextContainerIndex.Reset();
 	m_PlayerAngleTextContainerIndex.Reset();
@@ -524,23 +525,21 @@ void CHud::RenderTextInfo()
 	if(Showfps)
 	{
 		constexpr float TimeWindow = 5.0f; // Average fps over 5 seconds
-		static std::deque<std::pair<float, float>> s_FrameHistory;
-		static float s_FrameTimeSum = 0.0f;
 
 		float CurrentTime = time_get() / static_cast<float>(time_freq());
 		float RenderFrameTime = Client()->RenderFrameTime();
 
-		s_FrameTimeSum += RenderFrameTime;
+		m_FrameTimeSum += RenderFrameTime;
 
-		s_FrameHistory.emplace_back(CurrentTime, RenderFrameTime);
+		m_FrameHistory.emplace_back(CurrentTime, RenderFrameTime);
 
-		while(!s_FrameHistory.empty() && (CurrentTime - s_FrameHistory.front().first > TimeWindow))
+		while(!m_FrameHistory.empty() && (CurrentTime - m_FrameHistory.front().first > TimeWindow))
 		{
-			s_FrameTimeSum -= s_FrameHistory.front().second;
-			s_FrameHistory.pop_front();
+			m_FrameTimeSum -= m_FrameHistory.front().second;
+			m_FrameHistory.pop_front();
 		}
 
-		const float AvgFrameTime = s_FrameTimeSum / s_FrameHistory.size();
+		const float AvgFrameTime = m_FrameTimeSum / m_FrameHistory.size();
 		const int FrameTime = static_cast<int>((1.0f / AvgFrameTime) + 0.5f);
 
 		char aBuf[64];
@@ -564,11 +563,11 @@ void CHud::RenderTextInfo()
 
 	if(g_Config.m_ClShowpred && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		static float s_FpsMaxTextWidth = TextRender()->TextWidth(FontSize, "00000 FPS", -1, -1.0f);
+		m_FpsMaxTextWidth = TextRender()->TextWidth(FontSize, "00000 FPS", -1, -1.0f);
 
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Pred. %d ms", Client()->GetPredictionTime());
-		TextRender()->Text(2.0f + (Showfps ? s_FpsMaxTextWidth + 2.0f : 0.0f), 2.0f, FontSize, aBuf, -1.0f);
+		TextRender()->Text(2.0f + (Showfps ? m_FpsMaxTextWidth + 2.0f : 0.0f), 2.0f, FontSize, aBuf, -1.0f);
 	}
 }
 

@@ -43,7 +43,10 @@ struct SScoreInfo
 class CHud : public CComponent
 {
 	float m_Width, m_Height;
-	float m_FrameTimeAvg;
+
+	std::deque<std::pair<float, float>> m_FrameHistory;
+	float m_FrameTimeSum;
+	float m_FpsMaxTextWidth;
 
 	int m_HudQuadContainerIndex;
 	SScoreInfo m_aScoreInfo[2];
