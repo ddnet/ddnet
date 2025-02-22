@@ -585,8 +585,17 @@ const char *CEditor::ExplainFNG(int Tile, int Layer)
 	case TILE_FNG_SPIKE_OLD1:
 	case TILE_FNG_SPIKE_OLD2:
 	case TILE_FNG_SPIKE_OLD3:
+	case TILE_FNG_SPIKE_RED_OLD:
+	case TILE_FNG_SPIKE_BLUE_OLD:
+	case TILE_FNG_SPIKE_GREEN_OLD:
+	case TILE_FNG_SPIKE_PURPLE_OLD:
 		if(Layer == LAYER_GAME)
 			return "SPIKE: Old FNG spikes. Deprecated.";
+		break;
+	case TILE_FNG_SCORE_RED_OLD:
+	case TILE_FNG_SCORE_BLUE_OLD:
+		if(Layer == LAYER_GAME)
+			return "SCORE: Old FNG scores. Deprecated.";
 		break;
 	}
 	if((Tile >= TILE_PUB_CREDITS1 && Tile <= TILE_PUB_CREDITS8) && Layer == LAYER_GAME)
