@@ -194,7 +194,7 @@ sudo make
 sudo cp lib/*.a /usr/lib
 ```
 
-To run the tests you must target `run_tests` with make:
+To run the tests you can build the target `run_tests` using
 
 ```sh
 make run_tests
