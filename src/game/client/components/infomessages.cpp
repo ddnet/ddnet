@@ -217,12 +217,13 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 {
 	std::vector<std::pair<int, int>> vStrongWeakSorted;
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(m_pClient->m_Teams.Team(i) == pMsg->m_Team)
+		if(m_pClient->m_aClients[ClientId].m_Active &&
+			m_pClient->m_Teams.Team(ClientId) == pMsg->m_Team)
 		{
-			CCharacter *pChr = m_pClient->m_GameWorld.GetCharacterById(i);
-			vStrongWeakSorted.emplace_back(i, pMsg->m_First == i ? MAX_CLIENTS : pChr ? pChr->GetStrongWeakId() : 0);
+			CCharacter *pChr = m_pClient->m_GameWorld.GetCharacterById(ClientId);
+			vStrongWeakSorted.emplace_back(ClientId, pMsg->m_First == ClientId ? MAX_CLIENTS : pChr ? pChr->GetStrongWeakId() : 0);
 		}
 	}
 	std::stable_sort(vStrongWeakSorted.begin(), vStrongWeakSorted.end(), [](auto &Left, auto &Right) { return Left.second > Right.second; });
@@ -234,11 +235,8 @@ void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 	for(int i = 0; i < Kill.m_TeamSize; i++)
 	{
 		const int VictimId = vStrongWeakSorted[i].first;
-		if(m_pClient->m_aClients[VictimId].m_Active)
-		{
-			Kill.m_aVictimIds[i] = VictimId;
-			Kill.m_apVictimManagedTeeRenderInfos[i] = m_pClient->CreateManagedTeeRenderInfo(m_pClient->m_aClients[VictimId]);
-		}
+		Kill.m_aVictimIds[i] = VictimId;
+		Kill.m_apVictimManagedTeeRenderInfos[i] = m_pClient->CreateManagedTeeRenderInfo(m_pClient->m_aClients[VictimId]);
 	}
 	str_format(Kill.m_aVictimName, sizeof(Kill.m_aVictimName), Localize("Team %d"), pMsg->m_Team);
 
@@ -249,25 +247,41 @@ void CInfoMessages::OnKillMessage(const CNetMsg_Sv_KillMsg *pMsg)
 {
 	CInfoMsg Kill = CreateInfoMsg(TYPE_KILL);
 
-	Kill.m_TeamSize = 1;
-	Kill.m_aVictimIds[0] = pMsg->m_Victim;
-	Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_aVictimIds[0]);
-	str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_aName);
-	Kill.m_apVictimManagedTeeRenderInfos[0] = m_pClient->CreateManagedTeeRenderInfo(m_pClient->m_aClients[Kill.m_aVictimIds[0]]);
+	if(m_pClient->m_aClients[pMsg->m_Victim].m_Active)
+	{
+		Kill.m_TeamSize = 1;
+		Kill.m_aVictimIds[0] = pMsg->m_Victim;
+		Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_aVictimIds[0]);
+		str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_aName);
+		Kill.m_apVictimManagedTeeRenderInfos[0] = m_pClient->CreateManagedTeeRenderInfo(m_pClient->m_aClients[Kill.m_aVictimIds[0]]);
+	}
 
-	Kill.m_KillerId = pMsg->m_Killer;
-	str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerId].m_aName);
-	Kill.m_pKillerManagedTeeRenderInfo = m_pClient->CreateManagedTeeRenderInfo(m_pClient->m_aClients[Kill.m_KillerId]);
+	if(m_pClient->m_aClients[pMsg->m_Killer].m_Active)
+	{
+		Kill.m_KillerId = pMsg->m_Killer;
+		str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerId].m_aName);
+		Kill.m_pKillerManagedTeeRenderInfo = m_pClient->CreateManagedTeeRenderInfo(m_pClient->m_aClients[Kill.m_KillerId]);
+	}
 
 	Kill.m_Weapon = pMsg->m_Weapon;
 	Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
 	Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
+
+	if(Kill.m_TeamSize == 0 && Kill.m_KillerId == -1 && Kill.m_Weapon < 0)
+	{
+		return; // message would be empty
+	}
 
 	AddInfoMsg(Kill);
 }
 
 void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
 {
+	if(!m_pClient->m_aClients[pMsg->m_ClientId].m_Active)
+	{
+		return;
+	}
+
 	CInfoMsg Finish = CreateInfoMsg(TYPE_FINISH);
 
 	Finish.m_TeamSize = 1;
