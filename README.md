@@ -197,7 +197,7 @@ sudo cp lib/*.a /usr/lib
 To run the tests you must target `run_tests` with make:
 
 ```sh
-make run_tests
+cmake --build build --target run_tests`
 ```
 
 ## Code formatting
@@ -327,9 +327,9 @@ to unlock the `package_dmg` target that outputs a macOS disk image.
 ## Importing the official DDNet Database
 
 ```sh
-$ wget https://ddnet.org/stats/ddnet-sql.zip
+$ wget https://ddnet.org/stats/ddnet-sql.zip # (~2.5 GiB)
 $ unzip ddnet-sql.zip
-$ yaourt -S mariadb mysql-connector-c++
+$ yay -S mariadb mysql-connector-c++
 $ mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 $ sudo systemctl start mariadb
 $ mysqladmin -u root password 'PW'
@@ -363,7 +363,7 @@ sudo apt-get install ddnet
 MacOS
 
 ```sh
-sudo brew install --cask ddnet
+brew install --cask ddnet
 ```
 
 Fedora
