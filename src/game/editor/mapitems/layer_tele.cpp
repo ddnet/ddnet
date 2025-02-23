@@ -284,6 +284,12 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 					else
 						m_pTeleTile[TgtIndex].m_Number = pLt->m_pTeleTile[SrcIndex].m_Number;
 				}
+				else
+				{
+					m_pTiles[TgtIndex].m_Index = 0;
+					m_pTeleTile[TgtIndex].m_Type = 0;
+					m_pTeleTile[TgtIndex].m_Number = 0;
+				}
 			}
 
 			STeleTileStateChange::SData Current{

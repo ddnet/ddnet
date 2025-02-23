@@ -256,6 +256,12 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 					else
 						m_pTuneTile[TgtIndex].m_Number = pLt->m_pTuneTile[SrcIndex].m_Number;
 				}
+				else
+				{
+					m_pTiles[TgtIndex].m_Index = 0;
+					m_pTuneTile[TgtIndex].m_Type = 0;
+					m_pTuneTile[TgtIndex].m_Number = 0;
+				}
 			}
 
 			STuneTileStateChange::SData Current{

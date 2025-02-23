@@ -301,6 +301,13 @@ void CLayerSwitch::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUI
 					else
 						m_pSwitchTile[TgtIndex].m_Flags = pLt->m_pSwitchTile[SrcIndex].m_Flags;
 				}
+				else
+				{
+					m_pTiles[TgtIndex].m_Index = 0;
+					m_pSwitchTile[TgtIndex].m_Type = 0;
+					m_pSwitchTile[TgtIndex].m_Number = 0;
+					m_pSwitchTile[TgtIndex].m_Delay = 0;
+				}
 			}
 
 			SSwitchTileStateChange::SData Current{
