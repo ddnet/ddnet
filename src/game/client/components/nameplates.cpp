@@ -447,6 +447,7 @@ private:
 				float PartY = Y - std::max(H, Part.Padding().y + Part.Size().y) / 2.0f + Part.Offset().y;
 				Part.Render(This, PartX, PartY);
 				// Debug
+				#warning REMOVE THIS
 				This.Graphics()->TextureClear();
 				This.Graphics()->QuadsBegin();
 				This.Graphics()->SetColor(1.0f, Part.ShiftOnInvis() ? 1.0f : 0.0f, 0.0f, 0.5f);
