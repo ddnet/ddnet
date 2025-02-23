@@ -94,67 +94,69 @@ void CLayerSpeedup::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			int Index = fy * m_Width + fx;
-			SSpeedupTileStateChange::SData Previous{
-				m_pSpeedupTile[Index].m_Force,
-				m_pSpeedupTile[Index].m_Angle,
-				m_pSpeedupTile[Index].m_MaxSpeed,
-				m_pSpeedupTile[Index].m_Type,
-				m_pTiles[Index].m_Index};
+			const int SrcIndex = y * pSpeedupLayer->m_Width + x;
+			const int TgtIndex = fy * m_Width + fx;
 
-			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidSpeedupTile(pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index)) && pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index != TILE_AIR)
+			SSpeedupTileStateChange::SData Previous{
+				m_pSpeedupTile[TgtIndex].m_Force,
+				m_pSpeedupTile[TgtIndex].m_Angle,
+				m_pSpeedupTile[TgtIndex].m_MaxSpeed,
+				m_pSpeedupTile[TgtIndex].m_Type,
+				m_pTiles[TgtIndex].m_Index};
+
+			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidSpeedupTile(pSpeedupLayer->m_pTiles[SrcIndex].m_Index)) && pSpeedupLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 			{
 				if(m_pEditor->m_SpeedupAngle != pSpeedupLayer->m_SpeedupAngle || m_pEditor->m_SpeedupForce != pSpeedupLayer->m_SpeedupForce || m_pEditor->m_SpeedupMaxSpeed != pSpeedupLayer->m_SpeedupMaxSpeed)
 				{
-					m_pSpeedupTile[Index].m_Force = m_pEditor->m_SpeedupForce;
-					m_pSpeedupTile[Index].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
-					m_pSpeedupTile[Index].m_Angle = m_pEditor->m_SpeedupAngle;
-					m_pSpeedupTile[Index].m_Type = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
-					m_pTiles[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
+					m_pSpeedupTile[TgtIndex].m_Force = m_pEditor->m_SpeedupForce;
+					m_pSpeedupTile[TgtIndex].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
+					m_pSpeedupTile[TgtIndex].m_Angle = m_pEditor->m_SpeedupAngle;
+					m_pSpeedupTile[TgtIndex].m_Type = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
+					m_pTiles[TgtIndex].m_Index = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
 				}
-				else if(pSpeedupLayer->m_pSpeedupTile[y * pSpeedupLayer->m_Width + x].m_Force)
+				else if(pSpeedupLayer->m_pSpeedupTile[SrcIndex].m_Force)
 				{
-					m_pSpeedupTile[Index].m_Force = pSpeedupLayer->m_pSpeedupTile[y * pSpeedupLayer->m_Width + x].m_Force;
-					m_pSpeedupTile[Index].m_Angle = pSpeedupLayer->m_pSpeedupTile[y * pSpeedupLayer->m_Width + x].m_Angle;
-					m_pSpeedupTile[Index].m_MaxSpeed = pSpeedupLayer->m_pSpeedupTile[y * pSpeedupLayer->m_Width + x].m_MaxSpeed;
-					m_pSpeedupTile[Index].m_Type = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
-					m_pTiles[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
+					m_pSpeedupTile[TgtIndex].m_Force = pSpeedupLayer->m_pSpeedupTile[SrcIndex].m_Force;
+					m_pSpeedupTile[TgtIndex].m_Angle = pSpeedupLayer->m_pSpeedupTile[SrcIndex].m_Angle;
+					m_pSpeedupTile[TgtIndex].m_MaxSpeed = pSpeedupLayer->m_pSpeedupTile[SrcIndex].m_MaxSpeed;
+					m_pSpeedupTile[TgtIndex].m_Type = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
+					m_pTiles[TgtIndex].m_Index = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
 				}
 				else if(m_pEditor->m_SpeedupForce)
 				{
-					m_pSpeedupTile[Index].m_Force = m_pEditor->m_SpeedupForce;
-					m_pSpeedupTile[Index].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
-					m_pSpeedupTile[Index].m_Angle = m_pEditor->m_SpeedupAngle;
-					m_pSpeedupTile[Index].m_Type = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
-					m_pTiles[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
+					m_pSpeedupTile[TgtIndex].m_Force = m_pEditor->m_SpeedupForce;
+					m_pSpeedupTile[TgtIndex].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
+					m_pSpeedupTile[TgtIndex].m_Angle = m_pEditor->m_SpeedupAngle;
+					m_pSpeedupTile[TgtIndex].m_Type = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
+					m_pTiles[TgtIndex].m_Index = pSpeedupLayer->m_pTiles[SrcIndex].m_Index;
 				}
 				else
 				{
-					m_pSpeedupTile[Index].m_Force = 0;
-					m_pSpeedupTile[Index].m_MaxSpeed = 0;
-					m_pSpeedupTile[Index].m_Angle = 0;
-					m_pSpeedupTile[Index].m_Type = 0;
-					m_pTiles[Index].m_Index = 0;
+					m_pSpeedupTile[TgtIndex].m_Force = 0;
+					m_pSpeedupTile[TgtIndex].m_MaxSpeed = 0;
+					m_pSpeedupTile[TgtIndex].m_Angle = 0;
+					m_pSpeedupTile[TgtIndex].m_Type = 0;
+					m_pTiles[TgtIndex].m_Index = 0;
 				}
 			}
 			else
 			{
-				m_pSpeedupTile[Index].m_Force = 0;
-				m_pSpeedupTile[Index].m_MaxSpeed = 0;
-				m_pSpeedupTile[Index].m_Angle = 0;
-				m_pSpeedupTile[Index].m_Type = 0;
-				m_pTiles[Index].m_Index = 0;
+				m_pSpeedupTile[TgtIndex].m_Force = 0;
+				m_pSpeedupTile[TgtIndex].m_MaxSpeed = 0;
+				m_pSpeedupTile[TgtIndex].m_Angle = 0;
+				m_pSpeedupTile[TgtIndex].m_Type = 0;
+				m_pTiles[TgtIndex].m_Index = 0;
 
-				if(pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index != TILE_AIR)
+				if(pSpeedupLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 					ShowPreventUnusedTilesWarning();
 			}
 
 			SSpeedupTileStateChange::SData Current{
-				m_pSpeedupTile[Index].m_Force,
-				m_pSpeedupTile[Index].m_Angle,
-				m_pSpeedupTile[Index].m_MaxSpeed,
-				m_pSpeedupTile[Index].m_Type,
-				m_pTiles[Index].m_Index};
+				m_pSpeedupTile[TgtIndex].m_Force,
+				m_pSpeedupTile[TgtIndex].m_Angle,
+				m_pSpeedupTile[TgtIndex].m_MaxSpeed,
+				m_pSpeedupTile[TgtIndex].m_Type,
+				m_pTiles[TgtIndex].m_Index};
 
 			RecordStateChange(fx, fy, Previous, Current);
 		}
