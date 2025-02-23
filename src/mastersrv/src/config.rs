@@ -1,7 +1,12 @@
+use arrayvec::ArrayString;
 use crate::Addr;
 use crate::Locations;
 use ipnet::IpNet;
 use serde::Deserialize;
+use serde_json as json;
+use sha2::Digest as _;
+use sha2::Sha256 as Sha256Hasher;
+use std::collections::HashMap;
 use std::error;
 use std::fmt;
 use std::fs;
@@ -9,6 +14,11 @@ use std::net::IpAddr;
 use std::net::SocketAddr;
 use std::path::Path;
 use std::str::FromStr;
+
+const TOKEN_LEN: usize = 30;
+const TOKEN_PLAIN_PREFIX_LEN: usize = 6;
+const TOKEN_CONFIG_LEN: usize = 28;
+type PrefixString = ArrayString<[u8; TOKEN_PLAIN_PREFIX_LEN]>;
 
 pub enum ConfigLocation {
     None,
@@ -18,15 +28,24 @@ pub enum ConfigLocation {
 
 #[derive(Default)]
 pub struct Config {
+    pub communities: Option<Box<json::value::RawValue>>,
+    community_tokens: HashMap<PrefixString, CommunityToken>,
     default_ban_message: Box<str>,
     bans: Box<[Ban]>,
     port_forward_check_exceptions: Box<[ConfigAddr]>,
     pub locations: Locations,
 }
 
+struct CommunityToken {
+    secret_sha256: Sha256,
+    community: ArrayString<[u8; 28]>,
+}
+
 #[derive(Default, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ParsedConfig {
+    #[serde(default)]
+    communities: Option<Communities>,
     #[serde(default)]
     default_ban_message: Option<Box<str>>,
     #[serde(default)]
@@ -35,6 +54,13 @@ struct ParsedConfig {
     port_forward_check_exceptions: Box<[ConfigAddr]>,
     #[serde(default)]
     locations: Option<Box<str>>,
+}
+
+#[derive(Deserialize)]
+struct Communities {
+    json: Box<str>,
+    #[serde(default)]
+    tokens: HashMap<Box<str>, Box<str>>,
 }
 
 #[derive(Deserialize)]
@@ -49,6 +75,8 @@ enum ConfigAddr {
     OnlyIp(IpAddr),
     Range(IpNet),
 }
+
+struct Sha256([u8; 32]);
 
 #[derive(Debug)]
 pub struct Error(String);
@@ -86,6 +114,78 @@ impl Config {
             .iter()
             .any(|e| e.matches(addr))
     }
+    pub fn community_for_token(&self, token: &str) -> Result<Option<&str>, String> {
+        let (plain, secret_sha256) = CommunityToken::split(token)?;
+        Ok(self.community_for_token_impl(plain, secret_sha256))
+    }
+    fn community_for_token_impl(&self, plain: &str, secret_sha256: Sha256) -> Option<&str> {
+        let community_token = self.community_tokens.get(plain)?;
+        (community_token.secret_sha256.constant_time_eq(&secret_sha256))
+            .then_some(&community_token.community)
+    }
+}
+
+impl CommunityToken {
+    fn split(input: &str) -> Result<(&str, Sha256), String> {
+        assert!(TOKEN_PLAIN_PREFIX_LEN <= TOKEN_LEN);
+        if input.len() != TOKEN_LEN || !input.is_char_boundary(TOKEN_PLAIN_PREFIX_LEN) {
+            assert!(TOKEN_CONFIG_LEN != TOKEN_LEN);
+            if input.len() == TOKEN_CONFIG_LEN {
+                return Err(format!("hashed token, not a real token: {:?}", input));
+            }
+            return Err(format!("invalid token {:?}", input));
+        }
+        let (plain, secret) = input.split_at(TOKEN_PLAIN_PREFIX_LEN);
+        Ok((plain, Sha256::hash(secret.as_bytes())))
+    }
+    fn from_config(input: &str, community: &str) -> Result<(PrefixString, CommunityToken), Error> {
+        assert!(TOKEN_PLAIN_PREFIX_LEN <= TOKEN_CONFIG_LEN);
+        if input.len() != TOKEN_CONFIG_LEN || !input.is_char_boundary(TOKEN_PLAIN_PREFIX_LEN) {
+            assert!(TOKEN_CONFIG_LEN != TOKEN_LEN);
+            if input.len() == TOKEN_LEN {
+                return Err(Error(format!("real token, not a hashed token: {:?}", input)));
+            }
+            return Err(Error(format!("invalid hashed token {:?}", input)));
+        }
+        let (plain, secret_sha256_base64) = input.split_at(TOKEN_PLAIN_PREFIX_LEN);
+        let mut secret_sha256 = Sha256([0; 32]);
+        assert_eq!(
+            base64::decode_config_slice(secret_sha256_base64, base64::URL_SAFE_NO_PAD, &mut secret_sha256.0)
+                .map_err(|e| Error(format!("invalid hashed token {:?}: {}", input, e)))?,
+            32,
+        );
+        Ok((
+            PrefixString::from(plain).unwrap(),
+            CommunityToken {
+                secret_sha256,
+                community: ArrayString::from(community)
+                    .map_err(|_| Error(format!("community name {:?} too long", community)))?,
+            },
+        ))
+
+    }
+}
+
+fn read_communities_json(filename: &Path) -> Result<Box<json::value::RawValue>, Error> {
+    let contents = fs::read_to_string(filename)
+        .map_err(|e| Error(format!("error opening communities JSON {:?}: {}", filename, e)))?;
+    let result: json::Value = json::from_str(&contents)
+        .map_err(|e| Error(format!("JSON error in {:?}: {}", filename, e)))?;
+    // Normalize the JSON to strip any spaces etc.
+    Ok(json::value::to_raw_value(&result).unwrap())
+}
+
+fn from_community_tokens_map(tokens: &HashMap<Box<str>, Box<str>>)
+    -> Result<HashMap<PrefixString, CommunityToken>, Error>
+{
+    let mut result = HashMap::new();
+    for (hashed_token, community) in tokens {
+        let (prefix, token) = CommunityToken::from_config(hashed_token, community)?;
+        if result.insert(prefix, token).is_some() {
+            return Err(Error(format!("two tokens with prefix {:?}", prefix)));
+        }
+    }
+    Ok(result)
 }
 
 impl ParsedConfig {
@@ -102,12 +202,15 @@ impl ParsedConfig {
     }
     fn to_config(self) -> Result<Config, Error> {
         let ParsedConfig {
+            communities,
             default_ban_message,
             bans,
             port_forward_check_exceptions,
             locations,
         } = self;
         Ok(Config {
+            communities: communities.as_ref().map(|c| read_communities_json(Path::new(&*c.json))).transpose()?,
+            community_tokens: communities.as_ref().map(|c| from_community_tokens_map(&c.tokens)).transpose()?.unwrap_or_default(),
             default_ban_message: default_ban_message.unwrap_or_else(|| "banned".into()),
             bans,
             port_forward_check_exceptions,
@@ -194,6 +297,15 @@ impl<'de> serde::Deserialize<'de> for ConfigAddr {
         deserializer: D,
     ) -> Result<ConfigAddr, D::Error> {
         deserializer.deserialize_str(ConfigAddrVisitor)
+    }
+}
+
+impl Sha256 {
+    fn hash(input: &[u8]) -> Sha256 {
+        Sha256(Sha256Hasher::digest(input).into())
+    }
+    fn constant_time_eq(&self, other: &Sha256) -> bool {
+        self.0 == other.0
     }
 }
 
