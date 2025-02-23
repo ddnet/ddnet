@@ -27,8 +27,9 @@
 CHud::CHud()
 {
 	// won't work if zero
-	m_FrameTimeSum = 0.0f;
 	m_FpsMaxTextWidth = 0.0f;
+	m_FpsLastUpdate = 0.0f;
+	m_FpsLastValue = 0;
 	m_FPSTextContainerIndex.Reset();
 	m_DDRaceEffectsTextContainerIndex.Reset();
 	m_PlayerAngleTextContainerIndex.Reset();
@@ -524,26 +525,17 @@ void CHud::RenderTextInfo()
 
 	if(Showfps)
 	{
-		constexpr float TimeWindow = 2.0f; // Average fps over 2s
+		const float CurrentTime = time_get() / static_cast<float>(time_freq());
+		const float FrameTime = Client()->RenderFrameTime();
 
-		float CurrentTime = time_get() / static_cast<float>(time_freq());
-		float RenderFrameTime = Client()->RenderFrameTime();
-
-		m_FrameTimeSum += RenderFrameTime;
-
-		m_FrameHistory.emplace_back(CurrentTime, RenderFrameTime);
-
-		while(!m_FrameHistory.empty() && (CurrentTime - m_FrameHistory.front().first > TimeWindow))
+		if(CurrentTime - m_FpsLastUpdate >= 0.15f) // Update counter every 150ms
 		{
-			m_FrameTimeSum -= m_FrameHistory.front().second;
-			m_FrameHistory.pop_front();
+			m_FpsLastValue = static_cast<int>((1.0f / FrameTime) + 0.5f);
+			m_FpsLastUpdate = CurrentTime;
 		}
 
-		const float AvgFrameTime = m_FrameTimeSum / m_FrameHistory.size();
-		const int FrameTime = static_cast<int>((1.0f / AvgFrameTime) + 0.5f);
-
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%d FPS", FrameTime);
+		str_format(aBuf, sizeof(aBuf), "%d FPS", m_FpsLastValue);
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 2.0f, 2.0f, FontSize, TEXTFLAG_RENDER);

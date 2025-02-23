@@ -44,9 +44,9 @@ class CHud : public CComponent
 {
 	float m_Width, m_Height;
 
-	std::deque<std::pair<float, float>> m_FrameHistory;
-	float m_FrameTimeSum;
 	float m_FpsMaxTextWidth;
+	float m_FpsLastUpdate;
+	int m_FpsLastValue;
 
 	int m_HudQuadContainerIndex;
 	SScoreInfo m_aScoreInfo[2];
