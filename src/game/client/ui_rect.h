@@ -80,6 +80,16 @@ public:
 	 * @param pRight The rect that ends up at the right with a width equal to Cut.
 	 */
 	void VSplitRight(float Cut, CUIRect *pLeft, CUIRect *pRight) const;
+	/**
+	 * Splits many CUIRects evenly inside *this* CUIRect.
+	 *
+	 * @param Padding The padding imbetween each rect.
+	 * @param apRects The rects to be split
+	 * @param N The number of rects
+	 */
+	void VSplitN(float Padding, CUIRect **apRects, size_t N) const;
+	template<size_t N>
+	void VSplitN(float Padding, CUIRect *apRects[N]) const;
 
 	/**
 	 * Places pOtherRect inside *this* CUIRect with Cut as the margin.

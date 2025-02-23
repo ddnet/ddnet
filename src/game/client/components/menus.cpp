@@ -372,6 +372,30 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	}
 }
 
+template<typename T, size_t N>
+void CMenus::DoLine_RadioMenu(CUIRect View, const char* pLabel, const char* apLabels[N], const T aValues[N], T &Dest)
+{
+	const float Spacing = 2.0f;
+	const float ButtonHeight = 20.0f;
+	CUIRect Label, Button;
+	View.HSplitTop(Spacing, nullptr, &View);
+	View.HSplitTop(ButtonHeight, &Button, &View);
+	Button.VSplitMid(&Label, &Button, 10.0f);
+	Button.HMargin(2.0f, &Button);
+	Button.VSplitN(&ButtonRelative, &ButtonAbsolute);
+	Ui()->DoLabel(&Label, Localize("Ingame controller mode"), 13.0f, TEXTALIGN_ML);
+	CButtonContainer s_RelativeButton;
+	if(DoButton_Menu(&s_RelativeButton, Localize("Relative", "Ingame controller mode"), g_Config.m_InpControllerAbsolute == 0, &ButtonRelative, nullptr, IGraphics::CORNER_L))
+	{
+		g_Config.m_InpControllerAbsolute = 0;
+	}
+	CButtonContainer s_AbsoluteButton;
+	if(DoButton_Menu(&s_AbsoluteButton, Localize("Absolute", "Ingame controller mode"), g_Config.m_InpControllerAbsolute == 1, &ButtonAbsolute, nullptr, IGraphics::CORNER_R))
+	{
+		g_Config.m_InpControllerAbsolute = 1;
+	}
+}
+
 ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetId, const float LineSize, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing, int *pCheckBoxValue, bool Alpha)
 {
 	CUIRect Section, ColorPickerButton, ResetButton, Label;
