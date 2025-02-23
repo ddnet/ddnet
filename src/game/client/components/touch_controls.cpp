@@ -1490,18 +1490,25 @@ std::unique_ptr<CTouchControls::CBindTouchButtonBehavior> CTouchControls::ParseB
 	}
 
 	const json_value &LabelType = BehaviorObject["label-type"];
-	if(LabelType.type != json_string)
+	if(LabelType.type != json_string && LabelType.type != json_none)
 	{
 		log_error("touch_controls", "Failed to parse touch button behavior of type '%s': attribute 'label-type' must specify a string", CBindTouchButtonBehavior::BEHAVIOR_TYPE);
 		return {};
 	}
 	CButtonLabel::EType ParsedLabelType = CButtonLabel::EType::NUM_TYPES;
-	for(int CurrentType = (int)CButtonLabel::EType::PLAIN; CurrentType < (int)CButtonLabel::EType::NUM_TYPES; ++CurrentType)
+	if(LabelType.type == json_none)
 	{
-		if(str_comp(LabelType.u.string.ptr, LABEL_TYPE_NAMES[CurrentType]) == 0)
+		ParsedLabelType = CButtonLabel::EType::PLAIN;
+	}
+	else
+	{
+		for(int CurrentType = (int)CButtonLabel::EType::PLAIN; CurrentType < (int)CButtonLabel::EType::NUM_TYPES; ++CurrentType)
 		{
-			ParsedLabelType = (CButtonLabel::EType)CurrentType;
-			break;
+			if(str_comp(LabelType.u.string.ptr, LABEL_TYPE_NAMES[CurrentType]) == 0)
+			{
+				ParsedLabelType = (CButtonLabel::EType)CurrentType;
+				break;
+			}
 		}
 	}
 	if(ParsedLabelType == CButtonLabel::EType::NUM_TYPES)
@@ -1548,18 +1555,25 @@ std::unique_ptr<CTouchControls::CBindToggleTouchButtonBehavior> CTouchControls::
 		}
 
 		const json_value &LabelType = CommandObject["label-type"];
-		if(LabelType.type != json_string)
+		if(LabelType.type != json_string && LabelType.type != json_none)
 		{
 			log_error("touch_controls", "Failed to parse touch button behavior of type '%s': failed to parse command at index '%d': attribute 'label-type' must specify a string", CBindToggleTouchButtonBehavior::BEHAVIOR_TYPE, CommandIndex);
 			return {};
 		}
 		CButtonLabel::EType ParsedLabelType = CButtonLabel::EType::NUM_TYPES;
-		for(int CurrentType = (int)CButtonLabel::EType::PLAIN; CurrentType < (int)CButtonLabel::EType::NUM_TYPES; ++CurrentType)
+		if(LabelType.type == json_none)
 		{
-			if(str_comp(LabelType.u.string.ptr, LABEL_TYPE_NAMES[CurrentType]) == 0)
+			ParsedLabelType = CButtonLabel::EType::PLAIN;
+		}
+		else
+		{
+			for(int CurrentType = (int)CButtonLabel::EType::PLAIN; CurrentType < (int)CButtonLabel::EType::NUM_TYPES; ++CurrentType)
 			{
-				ParsedLabelType = (CButtonLabel::EType)CurrentType;
-				break;
+				if(str_comp(LabelType.u.string.ptr, LABEL_TYPE_NAMES[CurrentType]) == 0)
+				{
+					ParsedLabelType = (CButtonLabel::EType)CurrentType;
+					break;
+				}
 			}
 		}
 		if(ParsedLabelType == CButtonLabel::EType::NUM_TYPES)
