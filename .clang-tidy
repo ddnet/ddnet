@@ -76,6 +76,7 @@ Checks: >
   modernize-use-transparent-functors,
   modernize-use-uncaught-exceptions,
   readability-*,
+  -readability-math-missing-parentheses,
   -readability-braces-around-statements,
   -readability-convert-member-functions-to-static,
   -readability-else-after-return,
