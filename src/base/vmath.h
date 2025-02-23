@@ -1,5 +1,5 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.                */
+/* (c) Dennis Felsing. See licence.txt in the root of the distribution for more information. */
+/* If you are missing that file, acquire a complete release at ddnet.org.                    */
 #ifndef BASE_VMATH_H
 #define BASE_VMATH_H
 

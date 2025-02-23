@@ -1,5 +1,5 @@
 /* (c) DDNet developers. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.  */
+/* If you are missing that file, acquire a complete release at ddnet.org.      */
 
 #include <base/logger.h>
 #include <base/system.h>
