@@ -529,7 +529,7 @@ find_package(Opusfile)
 find_package(PNG)
 find_package(Python3)
 find_package(Rust)
-find_package(SDL2)
+find_package(SDL3)
 find_package(SQLite3)
 if(DISCORD)
   find_package(DiscordSdk)
@@ -621,7 +621,7 @@ show_dependency_status("Opus" OPUS)
 show_dependency_status("Opusfile" OPUSFILE)
 show_dependency_status("PNG" PNG)
 show_dependency_status("Python3" Python3)
-show_dependency_status("SDL2" SDL2)
+show_dependency_status("SDL3" SDL3)
 show_dependency_status("SQLite3" SQLite3)
 show_dependency_status("Wavpack" WAVPACK)
 show_dependency_status("Zlib" ZLIB)
@@ -686,8 +686,8 @@ endif()
 if(CLIENT AND NOT(OPUSFILE_FOUND))
   message(SEND_ERROR "You must install Opusfile to compile the ${CMAKE_PROJECT_NAME} client")
 endif()
-if(CLIENT AND NOT(SDL2_FOUND))
-  message(SEND_ERROR "You must install SDL2 to compile the ${CMAKE_PROJECT_NAME} client")
+if(CLIENT AND NOT(SDL3_FOUND))
+  message(SEND_ERROR "You must install SDL3 to compile the ${CMAKE_PROJECT_NAME} client")
 endif()
 if(TARGET_OS STREQUAL "android" AND NOT(CRYPTO_FOUND))
   message(SEND_ERROR "You must install OpenSSL to compile ${CMAKE_PROJECT_NAME}")
@@ -1875,7 +1875,7 @@ set(COPY_FILES
   ${FREETYPE_COPY_FILES}
   ${OPUSFILE_COPY_FILES}
   ${PNG_COPY_FILES}
-  ${SDL2_COPY_FILES}
+  ${SDL3_COPY_FILES}
   ${SQLite3_COPY_FILES}
   ${FFMPEG_COPY_FILES}
   ${WEBSOCKETS_COPY_FILES}
@@ -1889,7 +1889,7 @@ file(COPY ${COPY_FILES} DESTINATION .)
 # them in cpack.
 file(COPY ${INTEGRATION_TEST_COPY_FILES} DESTINATION .)
 
-set(COPY_DIRS ${SDL2_COPY_DIRS})
+set(COPY_DIRS ${SDL3_COPY_DIRS})
 file(COPY ${COPY_DIRS} DESTINATION .)
 
 ########################################################################
@@ -2537,7 +2537,7 @@ if(CLIENT)
     ${FREETYPE_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${PNG_LIBRARIES}
-    ${SDL2_LIBRARIES}
+    ${SDL3_LIBRARIES}
     ${WAVPACK_LIBRARIES}
     ${FFMPEG_LIBRARIES}
 
@@ -2617,7 +2617,7 @@ if(CLIENT)
     ${OPUSFILE_INCLUDE_DIRS}
     ${OPUS_INCLUDE_DIRS}
     ${PNG_INCLUDE_DIRS}
-    ${SDL2_INCLUDE_DIRS}
+    ${SDL3_INCLUDE_DIRS}
     ${WAVPACK_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIRS}
     ${DISCORDSDK_INCLUDE_DIRS}
