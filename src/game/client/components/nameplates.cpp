@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "nameplates.h"
-#include "base/color.h"
 
 // Part Types
 
@@ -20,7 +19,7 @@ class CNamePlatePart
 {
 protected:
 	vec2 m_Size = vec2();
-	vec2 m_Padding = vec2();
+	vec2 m_Padding = vec2(5.0f, 5.0f);
 	vec2 m_Offset = vec2(); // Offset to rendered X and Y not effecting layout
 	bool m_NewLine = false; // Whether this part is a new line (doesn't do anything else)
 	bool m_Visible = true; // Whether this part is visible
@@ -61,7 +60,7 @@ public:
 
 		if(Data.m_InGame)
 		{
-			// create name plates at standard zoom
+			// create text at standard zoom
 			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 			This.Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 			This.RenderTools()->MapScreenToInterface(This.m_Camera.m_Center.x, This.m_Camera.m_Center.y);
@@ -454,6 +453,11 @@ private:
 				This.Graphics()->DrawCircle(PartX, PartY, 3, 10);
 				This.Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 				This.Graphics()->QuadsEnd();
+				vec2 Size;
+				Size = Part.Size();
+				This.Graphics()->DrawRect(PartX - Part.Offset().x - Size.x / 2.0f, PartY - Part.Offset().y - Size.y / 2.0f, Size.x, Size.y, ColorRGBA(0.0f, 1.0f, 1.0f, 0.3f), 0, 0.0f);
+				Size = Part.Size() + Part.Padding();
+				This.Graphics()->DrawRect(PartX - Part.Offset().x - Size.x / 2.0f, PartY - Part.Offset().y - Size.y / 2.0f, Size.x, Size.y, ColorRGBA(0.0f, 1.0f, 0.0f, 0.3f), 0, 0.0f);
 			}
 			if(Part.Visible() || Part.ShiftOnInvis())
 				X += Part.Size().x + Part.Padding().x;
@@ -515,7 +519,6 @@ public:
 		float W = 0.0f; // Total width including padding of line
 		float H = 0.0f; // Max height of line parts
 		bool Empty = true;
-		bool FirstLine = true;
 		auto Start = m_vpParts.begin();
 		for(auto PartIt = m_vpParts.begin(); PartIt != m_vpParts.end(); ++PartIt)
 		{
@@ -526,12 +529,6 @@ public:
 			{
 				if(!Empty)
 				{
-					if(FirstLine)
-					{
-						// anchor nameplate bottom = y
-						FirstLine = false;
-						Y -= H / 2.0f;
-					}
 					RenderLine(This, X, Y, W, H, Start, std::next(PartIt));
 					Y -= H;
 				}
@@ -598,7 +595,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	bool ShowNamePlate = g_Config.m_ClNamePlates && (!pPlayerInfo->m_Local || g_Config.m_ClNamePlatesOwn);
 
 	Data.m_InGame = true;
-	Data.m_Position = Position - vec2(0.0f, 30.0f);
+	Data.m_Position = Position - vec2(0.0f, 50.0f);
 	Data.m_ShowName = ShowNamePlate;
 	Data.m_pName = GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aName;
 	Data.m_ShowFriendMark = ShowNamePlate && g_Config.m_ClNamePlatesFriendMark && GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_Friend;
@@ -783,10 +780,11 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	TeeRenderInfo.m_Size = 64.0f;
 
 	CNamePlate NamePlate;
-	float H = NamePlate.Size(*GameClient(), &Data).y + TeeRenderInfo.m_Size + 30.0f;
-	Data.m_Position = Position + vec2(0.0f, H / 2.0f);
+	// Name plate goes up from origin, tee is centered at origin
+	float H = 50.0f - NamePlate.Size(*GameClient(), &Data).y;
+	Data.m_Position = Position - vec2(0.0f, H / 2.0f);
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, 0, vec2(1.0f, 0.0f), Data.m_Position);
-	Data.m_Position -= vec2(0.0f, 30.0f);
+	Data.m_Position -= vec2(0.0f, 50.0f);
 	NamePlate.Render(*GameClient(), &Data);
 	NamePlate.Reset(*GameClient());
 }
