@@ -1,5 +1,3 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #define GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #include <base/vmath.h>
@@ -16,7 +14,6 @@ public:
 	bool m_InGame;
 	vec2 m_Position;
 	ColorRGBA m_Color;
-	float m_Alpha;
 	bool m_ShowName;
 	const char *m_pName;
 	bool m_ShowFriendMark;
@@ -51,7 +48,6 @@ class CNamePlates : public CComponent
 {
 private:
 	CNamePlate *m_aNamePlates = nullptr;
-	void RenderNamePlate(CNamePlate &NamePlate, const CNamePlateRenderData &Data);
 
 public:
 	void RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha);
