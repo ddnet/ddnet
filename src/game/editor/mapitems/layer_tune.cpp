@@ -92,50 +92,52 @@ void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			int Index = fy * m_Width + fx;
-			STuneTileStateChange::SData Previous{
-				m_pTuneTile[Index].m_Number,
-				m_pTuneTile[Index].m_Type,
-				m_pTiles[Index].m_Index};
+			const int SrcIndex = y * pTuneLayer->m_Width + x;
+			const int TgtIndex = fy * m_Width + fx;
 
-			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidTuneTile(pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index)) && pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index != TILE_AIR)
+			STuneTileStateChange::SData Previous{
+				m_pTuneTile[TgtIndex].m_Number,
+				m_pTuneTile[TgtIndex].m_Type,
+				m_pTiles[TgtIndex].m_Index};
+
+			if((m_pEditor->IsAllowPlaceUnusedTiles() || IsValidTuneTile(pTuneLayer->m_pTiles[SrcIndex].m_Index)) && pTuneLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 			{
 				if(m_pEditor->m_TuningNum != pTuneLayer->m_TuningNumber)
 				{
-					m_pTuneTile[Index].m_Number = m_pEditor->m_TuningNum;
+					m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
 				}
-				else if(pTuneLayer->m_pTuneTile[y * pTuneLayer->m_Width + x].m_Number)
-					m_pTuneTile[Index].m_Number = pTuneLayer->m_pTuneTile[y * pTuneLayer->m_Width + x].m_Number;
+				else if(pTuneLayer->m_pTuneTile[SrcIndex].m_Number)
+					m_pTuneTile[TgtIndex].m_Number = pTuneLayer->m_pTuneTile[SrcIndex].m_Number;
 				else
 				{
 					if(!m_pEditor->m_TuningNum)
 					{
-						m_pTuneTile[Index].m_Number = 0;
-						m_pTuneTile[Index].m_Type = 0;
-						m_pTiles[Index].m_Index = 0;
+						m_pTuneTile[TgtIndex].m_Number = 0;
+						m_pTuneTile[TgtIndex].m_Type = 0;
+						m_pTiles[TgtIndex].m_Index = 0;
 						continue;
 					}
 					else
-						m_pTuneTile[Index].m_Number = m_pEditor->m_TuningNum;
+						m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
 				}
 
-				m_pTuneTile[Index].m_Type = pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index;
-				m_pTiles[Index].m_Index = pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index;
+				m_pTuneTile[TgtIndex].m_Type = pTuneLayer->m_pTiles[SrcIndex].m_Index;
+				m_pTiles[TgtIndex].m_Index = pTuneLayer->m_pTiles[SrcIndex].m_Index;
 			}
 			else
 			{
-				m_pTuneTile[Index].m_Number = 0;
-				m_pTuneTile[Index].m_Type = 0;
-				m_pTiles[Index].m_Index = 0;
+				m_pTuneTile[TgtIndex].m_Number = 0;
+				m_pTuneTile[TgtIndex].m_Type = 0;
+				m_pTiles[TgtIndex].m_Index = 0;
 
-				if(pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index != TILE_AIR)
+				if(pTuneLayer->m_pTiles[SrcIndex].m_Index != TILE_AIR)
 					ShowPreventUnusedTilesWarning();
 			}
 
 			STuneTileStateChange::SData Current{
-				m_pTuneTile[Index].m_Number,
-				m_pTuneTile[Index].m_Type,
-				m_pTiles[Index].m_Index};
+				m_pTuneTile[TgtIndex].m_Number,
+				m_pTuneTile[TgtIndex].m_Type,
+				m_pTiles[TgtIndex].m_Index};
 
 			RecordStateChange(fx, fy, Previous, Current);
 		}
