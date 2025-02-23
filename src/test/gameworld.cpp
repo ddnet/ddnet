@@ -146,3 +146,104 @@ TEST_F(CTestGameWorld, ClosestCharacter)
 	CCharacter *pClosest = GameServer()->m_World.ClosestCharacter(vec2(1, 1), 20, nullptr);
 	EXPECT_EQ(pClosest, pChr1);
 }
+
+TEST_F(CTestGameWorld, IntersectEntity)
+{
+	CNetObj_PlayerInput Input = {};
+	CCharacter *pChrLeft = new(0) CCharacter(&GameServer()->m_World, Input);
+	pChrLeft->m_Pos = vec2(15, 10);
+	GameServer()->m_World.InsertEntity(pChrLeft);
+
+	CCharacter *pChrRight = new(1) CCharacter(&GameServer()->m_World, Input);
+	pChrRight->m_Pos = vec2(16, 10);
+	GameServer()->m_World.InsertEntity(pChrRight);
+
+	float Radius = 5.0f;
+	vec2 IntersectAt;
+	CCharacter *pIntersectedChar;
+
+	// both tees are exactly on the line
+	// if we go intersect left to right we find the left one
+
+	pIntersectedChar = (CCharacter *)GameServer()->m_World.IntersectEntity(
+		vec2(10, 10), // intersect from
+		vec2(20, 10), // intersect to
+		Radius,
+		CGameWorld::ENTTYPE_CHARACTER,
+		IntersectAt,
+		nullptr, // pNotThis
+		-1, // CollideWith
+		nullptr /* pThisOnly */);
+	EXPECT_EQ(pIntersectedChar, pChrLeft);
+
+	// if we intersect right to left we find the right one
+
+	pIntersectedChar = (CCharacter *)GameServer()->m_World.IntersectEntity(
+		vec2(20, 10), // intersect from
+		vec2(10, 10), // intersect to
+		Radius,
+		CGameWorld::ENTTYPE_CHARACTER,
+		IntersectAt,
+		nullptr, // pNotThis
+		-1, // CollideWith
+		nullptr /* pThisOnly */);
+	EXPECT_EQ(pIntersectedChar, pChrRight);
+
+	// but not if we ignore the right one
+
+	pIntersectedChar = (CCharacter *)GameServer()->m_World.IntersectEntity(
+		vec2(20, 10), // intersect from
+		vec2(10, 10), // intersect to
+		Radius,
+		CGameWorld::ENTTYPE_CHARACTER,
+		IntersectAt,
+		pChrRight, // pNotThis
+		-1, // CollideWith
+		nullptr /* pThisOnly */);
+	EXPECT_EQ(pIntersectedChar, pChrLeft);
+
+	// or we force find the left one
+
+	pIntersectedChar = (CCharacter *)GameServer()->m_World.IntersectEntity(
+		vec2(20, 10), // intersect from
+		vec2(10, 10), // intersect to
+		Radius,
+		CGameWorld::ENTTYPE_CHARACTER,
+		IntersectAt,
+		nullptr, // pNotThis
+		-1, // CollideWith
+		pChrLeft /* pThisOnly */);
+	EXPECT_EQ(pIntersectedChar, pChrLeft);
+
+	// pNotThis == pThisOnly => nullptr
+
+	pIntersectedChar = (CCharacter *)GameServer()->m_World.IntersectEntity(
+		vec2(20, 10), // intersect from
+		vec2(10, 10), // intersect to
+		Radius,
+		CGameWorld::ENTTYPE_CHARACTER,
+		IntersectAt,
+		pChrLeft, // pNotThis
+		-1, // CollideWith
+		pChrLeft /* pThisOnly */);
+	EXPECT_EQ(pIntersectedChar, nullptr);
+
+	// the tee closer to the start of the intersection line
+	// will not be matched if it is further than Radius away
+	// from the line
+
+	vec2 CloserToFromButTooFarFromLine = vec2(11, 11 + Radius + pChrLeft->GetProximityRadius());
+	pChrLeft->SetPosition(CloserToFromButTooFarFromLine);
+	pChrLeft->m_Pos = CloserToFromButTooFarFromLine;
+
+	pIntersectedChar = (CCharacter *)GameServer()->m_World.IntersectEntity(
+		vec2(10, 10), // intersect from
+		vec2(20, 10), // intersect to
+		Radius,
+		CGameWorld::ENTTYPE_CHARACTER,
+		IntersectAt,
+		nullptr, // pNotThis
+		-1, // CollideWith
+		nullptr /* pThisOnly */);
+	EXPECT_EQ(pIntersectedChar, pChrRight);
+}
