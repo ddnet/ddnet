@@ -1386,9 +1386,10 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	bool Vanilla;
 	bool Plus;
 	bool FDDrace;
+
+	const char *pGameType = pFallbackServerInfo->m_aGameType;
 	if(Version < 1)
 	{
-		const char *pGameType = pFallbackServerInfo->m_aGameType;
 		Race = str_find_nocase(pGameType, "race") || str_find_nocase(pGameType, "fastcap");
 		FastCap = str_find_nocase(pGameType, "fastcap");
 		FNG = str_find_nocase(pGameType, "fng");
@@ -1453,6 +1454,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	Info.m_NoWeakHookAndBounce = false;
 	Info.m_NoSkinChangeForFrozen = false;
 	Info.m_DDRaceTeam = false;
+	Info.m_SpecAfterDeath = str_find_nocase(pGameType, "catch") || str_find_nocase(pGameType, "bomb") || str_find_nocase(pGameType, "teeware") || str_find_nocase(pGameType, "cotd");
 
 	if(Version >= 0)
 	{
