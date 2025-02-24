@@ -141,7 +141,6 @@ void CPlayer::Reset()
 		m_FirstVoteTick = Now;
 
 	m_NotEligibleForFinish = false;
-	m_EligibleForFinishCheck = 0;
 	m_VotedForPractice = false;
 	m_SwapTargetsClientId = -1;
 	m_BirthdayAnnounced = false;
