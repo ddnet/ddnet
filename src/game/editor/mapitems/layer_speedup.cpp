@@ -289,6 +289,12 @@ void CLayerSpeedup::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CU
 					else
 						m_pSpeedupTile[TgtIndex].m_MaxSpeed = pLt->m_pSpeedupTile[SrcIndex].m_MaxSpeed;
 				}
+				else
+				{
+					m_pTiles[TgtIndex].m_Index = 0;
+					m_pSpeedupTile[TgtIndex].m_Force = 0;
+					m_pSpeedupTile[TgtIndex].m_Angle = 0;
+				}
 			}
 
 			SSpeedupTileStateChange::SData Current{
