@@ -796,41 +796,55 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	}
 	else
 	{
-		auto &LineAuthor = m_pClient->m_aClients[pCurrentLine->m_ClientId];
+		const auto &LineAuthor = m_pClient->m_aClients[pCurrentLine->m_ClientId];
 
-		if(LineAuthor.m_Team == TEAM_SPECTATORS)
-			pCurrentLine->m_NameColor = TEAM_SPECTATORS;
-
-		if(m_pClient->IsTeamPlay())
+		if(LineAuthor.m_Active)
 		{
-			if(LineAuthor.m_Team == TEAM_RED)
-				pCurrentLine->m_NameColor = TEAM_RED;
-			else if(LineAuthor.m_Team == TEAM_BLUE)
-				pCurrentLine->m_NameColor = TEAM_BLUE;
+			if(LineAuthor.m_Team == TEAM_SPECTATORS)
+				pCurrentLine->m_NameColor = TEAM_SPECTATORS;
+
+			if(m_pClient->IsTeamPlay())
+			{
+				if(LineAuthor.m_Team == TEAM_RED)
+					pCurrentLine->m_NameColor = TEAM_RED;
+				else if(LineAuthor.m_Team == TEAM_BLUE)
+					pCurrentLine->m_NameColor = TEAM_BLUE;
+			}
 		}
 
 		if(Team == TEAM_WHISPER_SEND)
 		{
-			str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "→ %s", LineAuthor.m_aName);
+			str_copy(pCurrentLine->m_aName, "→");
+			if(LineAuthor.m_Active)
+			{
+				str_append(pCurrentLine->m_aName, " ");
+				str_append(pCurrentLine->m_aName, LineAuthor.m_aName);
+			}
 			pCurrentLine->m_NameColor = TEAM_BLUE;
 			pCurrentLine->m_Highlighted = false;
 			Highlighted = false;
 		}
 		else if(Team == TEAM_WHISPER_RECV)
 		{
-			str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s", LineAuthor.m_aName);
+			str_copy(pCurrentLine->m_aName, "←");
+			if(LineAuthor.m_Active)
+			{
+				str_append(pCurrentLine->m_aName, " ");
+				str_append(pCurrentLine->m_aName, LineAuthor.m_aName);
+			}
 			pCurrentLine->m_NameColor = TEAM_RED;
 			pCurrentLine->m_Highlighted = true;
 			Highlighted = true;
 		}
 		else
-			str_copy(pCurrentLine->m_aName, LineAuthor.m_aName);
-
-		str_copy(pCurrentLine->m_aText, pLine);
-		pCurrentLine->m_Friend = LineAuthor.m_Friend;
-
-		if(pCurrentLine->m_aName[0] != '\0')
 		{
+			str_copy(pCurrentLine->m_aName, LineAuthor.m_aName);
+		}
+		str_copy(pCurrentLine->m_aText, pLine);
+
+		if(LineAuthor.m_Active)
+		{
+			pCurrentLine->m_Friend = LineAuthor.m_Friend;
 			pCurrentLine->m_pManagedTeeRenderInfo = GameClient()->CreateManagedTeeRenderInfo(LineAuthor);
 		}
 	}
