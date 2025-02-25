@@ -564,6 +564,7 @@ void CTouchControls::CJoystickTouchButtonBehavior::OnUpdate()
 		vec2 WorldScreenSize;
 		m_pTouchControls->RenderTools()->CalcScreenParams(m_pTouchControls->Graphics()->ScreenAspect(), m_pTouchControls->GameClient()->m_Camera.m_Zoom, &WorldScreenSize.x, &WorldScreenSize.y);
 		Controls.m_aMousePos[g_Config.m_ClDummy] += -m_AccumulatedDelta * WorldScreenSize;
+		Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_RELATIVE;
 		Controls.m_aMousePos[g_Config.m_ClDummy].x = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].x, -201.0f * 32, (m_pTouchControls->Collision()->GetWidth() + 201.0f) * 32.0f);
 		Controls.m_aMousePos[g_Config.m_ClDummy].y = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].y, -201.0f * 32, (m_pTouchControls->Collision()->GetHeight() + 201.0f) * 32.0f);
 		m_AccumulatedDelta = vec2(0.0f, 0.0f);
@@ -572,6 +573,7 @@ void CTouchControls::CJoystickTouchButtonBehavior::OnUpdate()
 	{
 		const vec2 AbsolutePosition = (m_ActivePosition - vec2(0.5f, 0.5f)) * 2.0f;
 		Controls.m_aMousePos[g_Config.m_ClDummy] = AbsolutePosition * (Controls.GetMaxMouseDistance() - Controls.GetMinMouseDistance()) + normalize(AbsolutePosition) * Controls.GetMinMouseDistance();
+		Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_ABSOLUTE;
 		if(length(Controls.m_aMousePos[g_Config.m_ClDummy]) < 0.001f)
 		{
 			Controls.m_aMousePos[g_Config.m_ClDummy].x = 0.001f;
@@ -1096,12 +1098,14 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 		if(GameClient()->m_Snap.m_SpecInfo.m_Active)
 		{
 			Controls.m_aMousePos[g_Config.m_ClDummy] += -DirectFingerState.m_Delta * WorldScreenSize;
+			Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_RELATIVE;
 			Controls.m_aMousePos[g_Config.m_ClDummy].x = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].x, -201.0f * 32, (Collision()->GetWidth() + 201.0f) * 32.0f);
 			Controls.m_aMousePos[g_Config.m_ClDummy].y = std::clamp(Controls.m_aMousePos[g_Config.m_ClDummy].y, -201.0f * 32, (Collision()->GetHeight() + 201.0f) * 32.0f);
 		}
 		else
 		{
 			Controls.m_aMousePos[g_Config.m_ClDummy] = (DirectFingerState.m_Position - vec2(0.5f, 0.5f)) * WorldScreenSize;
+			Controls.m_aInputType[g_Config.m_ClDummy] = CControls::INPUT_TYPE_ABSOLUTE;
 		}
 	}
 
