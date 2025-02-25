@@ -487,6 +487,11 @@ void CGameClient::OnUpdate()
 		m_Controls.m_aMousePosOnAction[g_Config.m_ClDummy] = m_Controls.m_aMousePos[g_Config.m_ClDummy];
 		m_Binds.m_MouseOnAction = false;
 	}
+
+	for(auto &pComponent : m_vpAll)
+	{
+		pComponent->OnUpdate();
+	}
 }
 
 void CGameClient::OnDummySwap()
