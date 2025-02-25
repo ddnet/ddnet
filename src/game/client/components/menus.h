@@ -563,6 +563,7 @@ protected:
 	class CCommunityIconLoadJob : public IJob, public CAbstractCommunityIconJob
 	{
 		CImageInfo m_ImageInfo;
+		CImageInfo m_ImageInfoGrayscale;
 
 	protected:
 		void Run() override;
@@ -572,6 +573,7 @@ protected:
 		~CCommunityIconLoadJob();
 
 		CImageInfo &ImageInfo() { return m_ImageInfo; }
+		CImageInfo &ImageInfoGrayscale() { return m_ImageInfoGrayscale; }
 	};
 
 	class CCommunityIconDownloadJob : public CHttpRequest, public CAbstractCommunityIconJob
@@ -586,8 +588,8 @@ protected:
 	SHA256_DIGEST m_CommunityIconsInfoSha256 = SHA256_ZEROED;
 	static int CommunityIconScan(const char *pName, int IsDir, int DirType, void *pUser);
 	const SCommunityIcon *FindCommunityIcon(const char *pCommunityId);
-	bool LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, SHA256_DIGEST &Sha256);
-	void LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info, const SHA256_DIGEST &Sha256);
+	bool LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, CImageInfo &InfoGrayscale, SHA256_DIGEST &Sha256);
+	void LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info, CImageInfo &InfoGrayscale, const SHA256_DIGEST &Sha256);
 	void RenderCommunityIcon(const SCommunityIcon *pIcon, CUIRect Rect, bool Active);
 	void UpdateCommunityIcons();
 

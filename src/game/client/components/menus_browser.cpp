@@ -1934,7 +1934,7 @@ CMenus::CCommunityIconDownloadJob::CCommunityIconDownloadJob(CMenus *pMenus, con
 
 void CMenus::CCommunityIconLoadJob::Run()
 {
-	m_Success = m_pMenus->LoadCommunityIconFile(m_aPath, m_StorageType, m_ImageInfo, m_Sha256);
+	m_Success = m_pMenus->LoadCommunityIconFile(m_aPath, m_StorageType, m_ImageInfo, m_ImageInfoGrayscale, m_Sha256);
 }
 
 CMenus::CCommunityIconLoadJob::CCommunityIconLoadJob(CMenus *pMenus, const char *pCommunityId, int StorageType) :
@@ -1946,6 +1946,7 @@ CMenus::CCommunityIconLoadJob::CCommunityIconLoadJob(CMenus *pMenus, const char 
 CMenus::CCommunityIconLoadJob::~CCommunityIconLoadJob()
 {
 	m_ImageInfo.Free();
+	m_ImageInfoGrayscale.Free();
 }
 
 int CMenus::CommunityIconScan(const char *pName, int IsDir, int DirType, void *pUser)
@@ -1972,7 +1973,7 @@ const SCommunityIcon *CMenus::FindCommunityIcon(const char *pCommunityId)
 	return Icon == m_vCommunityIcons.end() ? nullptr : &(*Icon);
 }
 
-bool CMenus::LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, SHA256_DIGEST &Sha256)
+bool CMenus::LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, CImageInfo &InfoGrayscale, SHA256_DIGEST &Sha256)
 {
 	char aError[IO_MAX_PATH_LENGTH + 128];
 	if(!Graphics()->LoadPng(Info, pPath, DirType))
@@ -1995,18 +1996,18 @@ bool CMenus::LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &I
 		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus/browser", aError);
 		return false;
 	}
+	InfoGrayscale = Info.DeepCopy();
+	ConvertToGrayscale(InfoGrayscale);
 	return true;
 }
 
-void CMenus::LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info, const SHA256_DIGEST &Sha256)
+void CMenus::LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info, CImageInfo &InfoGrayscale, const SHA256_DIGEST &Sha256)
 {
 	SCommunityIcon CommunityIcon;
 	str_copy(CommunityIcon.m_aCommunityId, pCommunityId);
 	CommunityIcon.m_Sha256 = Sha256;
-	CommunityIcon.m_OrgTexture = Graphics()->LoadTextureRaw(Info, 0, pCommunityId);
-
-	ConvertToGrayscale(Info);
-	CommunityIcon.m_GreyTexture = Graphics()->LoadTextureRawMove(Info, 0, pCommunityId);
+	CommunityIcon.m_OrgTexture = Graphics()->LoadTextureRawMove(Info, 0, pCommunityId);
+	CommunityIcon.m_GreyTexture = Graphics()->LoadTextureRawMove(InfoGrayscale, 0, pCommunityId);
 
 	auto ExistingIcon = std::find_if(m_vCommunityIcons.begin(), m_vCommunityIcons.end(), [pCommunityId](const SCommunityIcon &Element) {
 		return str_comp(Element.m_aCommunityId, pCommunityId) == 0;
@@ -2048,7 +2049,9 @@ void CMenus::UpdateCommunityIcons()
 		if(pJob->Done())
 		{
 			if(pJob->Success())
-				LoadCommunityIconFinish(pJob->CommunityId(), pJob->ImageInfo(), pJob->Sha256());
+			{
+				LoadCommunityIconFinish(pJob->CommunityId(), pJob->ImageInfo(), pJob->ImageInfoGrayscale(), pJob->Sha256());
+			}
 			m_CommunityIconLoadJobs.pop_front();
 		}
 
