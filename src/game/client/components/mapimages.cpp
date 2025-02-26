@@ -20,6 +20,7 @@ CMapImages::CMapImages()
 	m_Count = 0;
 	mem_zero(m_aEntitiesIsLoaded, sizeof(m_aEntitiesIsLoaded));
 	m_SpeedupArrowIsLoaded = false;
+	m_SpeedupSlideIsLoaded = false;
 
 	str_copy(m_aEntitiesPath, "editor/entities_clear");
 
@@ -210,7 +211,7 @@ static bool IsValidTile(int LayerType, bool EntitiesAreMasked, EMapImageModType 
 
 	if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || EntitiesModType == MAP_IMAGE_MOD_TYPE_DDRACE)
 	{
-		if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_SPEED_BOOST_OLD || TileIndex != TILE_SPEED_BOOST)
+		if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_SPEED_BOOST_OLD || TileIndex != TILE_SPEED_BOOST || TileIndex != TILE_SPEED_SLIDE)
 		{
 			if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH &&
 				!IsValidGameTile(TileIndex) &&
@@ -329,6 +330,17 @@ IGraphics::CTextureHandle CMapImages::GetSpeedupArrow()
 		m_SpeedupArrowIsLoaded = true;
 	}
 	return m_SpeedupArrowTexture;
+}
+
+IGraphics::CTextureHandle CMapImages::GetSpeedupSlide()
+{
+	if(!m_SpeedupSlideIsLoaded)
+	{
+		int TextureLoadFlag = (Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
+		m_SpeedupSlideTexture = Graphics()->LoadTexture("editor/speed_slide_array.png", IStorage::TYPE_ALL, TextureLoadFlag);
+		m_SpeedupSlideIsLoaded = true;
+	}
+	return m_SpeedupSlideTexture;
 }
 
 IGraphics::CTextureHandle CMapImages::GetOverlayBottom()

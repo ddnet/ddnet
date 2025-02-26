@@ -151,9 +151,11 @@ const char *CEditor::ExplainDDNet(int Tile, int Layer)
 		if(Layer == LAYER_TELE)
 			return "CHECKPOINT TELEPORT TO: Tees will appear here after touching TELEPORT CHECKPOINT with the same number and falling into CFROM TELEPORT.";
 		break;
-	case TILE_TELECHECKIN:
+	case TILE_TELECHECKIN: // also TILE_SPEED_SLIDE
 		if(Layer == LAYER_TELE)
 			return "BLUE CHECKPOINT TELEPORT: Sends tees to CTO with the same number as the last touched TELEPORT CHECKPOINT. Speed and hook are kept.";
+		if(Layer == LAYER_SPEEDUP)
+			return "SLIDE: Allows the Tee to slide, can be angled.";
 		break;
 	case TILE_REFILL_JUMPS:
 		if(Layer == LAYER_GAME || Layer == LAYER_FRONT)
