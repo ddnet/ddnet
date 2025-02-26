@@ -3392,6 +3392,12 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 	const char *pLevel = pResult->GetString(1);
 	const char *pPw = pResult->GetString(2);
 
+	if(!pManager->IsValidIdent(pIdent))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident is invalid");
+		return;
+	}
+
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
 	{
@@ -3419,6 +3425,12 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 	const char *pLevel = pResult->GetString(1);
 	const char *pPw = pResult->GetString(2);
 	const char *pSalt = pResult->GetString(3);
+
+	if(!pManager->IsValidIdent(pIdent))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident is invalid");
+		return;
+	}
 
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
