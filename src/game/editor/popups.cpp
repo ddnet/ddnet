@@ -2526,8 +2526,8 @@ int CEditor::PopupSelectConfigAutoMapResult()
 	return s_AutoMapConfigCurrent;
 }
 
-static int s_AutoMapReferenceSelected = -1;
-static int s_AutoMapReferenceCurrent = -1;
+static int s_AutoMapReferenceSelected = -100;
+static int s_AutoMapReferenceCurrent = -100;
 
 CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutoMapReference(void *pContext, CUIRect View, bool Active)
 {
@@ -2567,7 +2567,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectAutoMapReference(void *pContex
 void CEditor::PopupSelectAutoMapReferenceInvoke(int Current, float x, float y)
 {
 	static SPopupMenuId s_PopupSelectAutoMapReferenceId;
-	s_AutoMapReferenceSelected = -1;
+	s_AutoMapReferenceSelected = -100;
 	s_AutoMapReferenceCurrent = Current;
 	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(GetSelectedLayer(0));
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
