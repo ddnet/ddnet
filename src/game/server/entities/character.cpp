@@ -203,6 +203,24 @@ void CCharacter::SetInvincible(bool Invincible)
 	SetEndlessJump(Invincible);
 }
 
+void CCharacter::SetCollision(bool Collision)
+{
+	m_Core.m_CollisionDisabled = Collision;
+}
+
+void CCharacter::SetHookCollision(bool Collision)
+{
+	m_Core.m_HookHitDisabled = Collision;
+}
+
+void CCharacter::SetHitOthers(bool Active)
+{
+	m_Core.m_HammerHitDisabled = Active;
+	m_Core.m_ShotgunHitDisabled = Active;
+	m_Core.m_GrenadeHitDisabled = Active;
+	m_Core.m_LaserHitDisabled = Active;
+}
+
 void CCharacter::SetLiveFrozen(bool Active)
 {
 	m_Core.m_LiveFrozen = Active;
