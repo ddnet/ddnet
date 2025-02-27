@@ -2469,6 +2469,7 @@ CClientMask CCharacter::TeamMask()
 void CCharacter::SetPosition(const vec2 &Position)
 {
 	m_Core.m_Pos = Position;
+	m_Pos = Position;
 }
 
 void CCharacter::Move(vec2 RelPos)
