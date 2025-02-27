@@ -216,6 +216,16 @@ struct SLabelProperties
 	std::vector<STextColorSplit> m_vColorSplits = {};
 };
 
+enum EButtonFlags : unsigned
+{
+	BUTTONFLAG_NONE = 0,
+	BUTTONFLAG_LEFT = 1 << 0,
+	BUTTONFLAG_RIGHT = 1 << 1,
+	BUTTONFLAG_MIDDLE = 1 << 2,
+
+	BUTTONFLAG_ALL = BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT | BUTTONFLAG_MIDDLE,
+};
+
 struct SMenuButtonProperties
 {
 	int m_Checked = 0;
@@ -227,6 +237,7 @@ struct SMenuButtonProperties
 	float m_Rounding = 5.0f;
 	float m_FontFactor = 0.0f;
 	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f);
+	unsigned m_Flags = BUTTONFLAG_LEFT;
 };
 
 class CUIElementBase
@@ -557,7 +568,7 @@ public:
 	const CUIRect *ClipArea() const;
 	inline bool IsClipped() const { return !m_vClips.empty(); }
 
-	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect);
+	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect, const unsigned Flags);
 	int DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
 	bool DoDoubleClickLogic(const void *pId);
 	EEditState DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, float *pY);

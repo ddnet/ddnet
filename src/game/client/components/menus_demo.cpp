@@ -28,7 +28,7 @@
 using namespace FontIcons;
 using namespace std::chrono_literals;
 
-int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, bool Enabled)
+int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned Flags, int Corners, bool Enabled)
 {
 	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * Ui()->ButtonColorMul(pButtonContainer)), Corners, 5.0f);
 
@@ -52,7 +52,7 @@ int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pT
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
-	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect);
+	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect, Flags);
 }
 
 bool CMenus::DemoFilterChat(const void *pData, int Size, void *pUser)
@@ -506,7 +506,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// combined play and pause button
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_PlayPauseButton;
-	if(DoButton_FontIcon(&s_PlayPauseButton, pInfo->m_Paused ? FONT_ICON_PLAY : FONT_ICON_PAUSE, false, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_PlayPauseButton, pInfo->m_Paused ? FONT_ICON_PLAY : FONT_ICON_PAUSE, false, &Button, BUTTONFLAG_LEFT))
 	{
 		if(pInfo->m_Paused)
 		{
@@ -524,7 +524,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_ResetButton;
-	if(DoButton_FontIcon(&s_ResetButton, FONT_ICON_STOP, false, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_ResetButton, FONT_ICON_STOP, false, &Button, BUTTONFLAG_LEFT))
 	{
 		DemoPlayer()->Pause();
 		PositionToSeek = 0.0f;
@@ -535,7 +535,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_TimeBackButton;
-	if(DoButton_FontIcon(&s_TimeBackButton, FONT_ICON_BACKWARD, 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_TimeBackButton, FONT_ICON_BACKWARD, 0, &Button, BUTTONFLAG_LEFT))
 	{
 		TimeToSeek = -s_aSkipDurationsSeconds[s_SkipDurationIndex];
 	}
@@ -574,7 +574,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_TimeForwardButton;
-	if(DoButton_FontIcon(&s_TimeForwardButton, FONT_ICON_FORWARD, 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_TimeForwardButton, FONT_ICON_FORWARD, 0, &Button, BUTTONFLAG_LEFT))
 	{
 		TimeToSeek = s_aSkipDurationsSeconds[s_SkipDurationIndex];
 	}
@@ -584,7 +584,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_OneTickBackButton;
-	if(DoButton_FontIcon(&s_OneTickBackButton, FONT_ICON_BACKWARD_STEP, 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_OneTickBackButton, FONT_ICON_BACKWARD_STEP, 0, &Button, BUTTONFLAG_LEFT))
 	{
 		DemoSeekTick(IDemoPlayer::TICK_PREVIOUS);
 	}
@@ -594,7 +594,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_OneTickForwardButton;
-	if(DoButton_FontIcon(&s_OneTickForwardButton, FONT_ICON_FORWARD_STEP, 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_OneTickForwardButton, FONT_ICON_FORWARD_STEP, 0, &Button, BUTTONFLAG_LEFT))
 	{
 		DemoSeekTick(IDemoPlayer::TICK_NEXT);
 	}
@@ -604,7 +604,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_OneMarkerBackButton;
-	if(DoButton_FontIcon(&s_OneMarkerBackButton, FONT_ICON_BACKWARD_FAST, 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_OneMarkerBackButton, FONT_ICON_BACKWARD_FAST, 0, &Button, BUTTONFLAG_LEFT))
 	{
 		PositionToSeek = FindPreviousMarkerPosition();
 	}
@@ -614,7 +614,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_OneMarkerForwardButton;
-	if(DoButton_FontIcon(&s_OneMarkerForwardButton, FONT_ICON_FORWARD_FAST, 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_OneMarkerForwardButton, FONT_ICON_FORWARD_FAST, 0, &Button, BUTTONFLAG_LEFT))
 	{
 		PositionToSeek = FindNextMarkerPosition();
 	}
@@ -624,7 +624,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SlowDownButton;
-	if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_CHEVRON_DOWN, 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_CHEVRON_DOWN, 0, &Button, BUTTONFLAG_LEFT))
 		DecreaseDemoSpeed = true;
 	GameClient()->m_Tooltips.DoToolTip(&s_SlowDownButton, &Button, Localize("Slow down the demo"));
 
@@ -632,7 +632,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SpeedUpButton;
-	if(DoButton_FontIcon(&s_SpeedUpButton, FONT_ICON_CHEVRON_UP, 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_SpeedUpButton, FONT_ICON_CHEVRON_UP, 0, &Button, BUTTONFLAG_LEFT))
 		IncreaseDemoSpeed = true;
 	GameClient()->m_Tooltips.DoToolTip(&s_SpeedUpButton, &Button, Localize("Speed up the demo"));
 
@@ -645,7 +645,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// slice begin button
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceBeginButton;
-	const int SliceBeginButtonResult = DoButton_FontIcon(&s_SliceBeginButton, FONT_ICON_RIGHT_FROM_BRACKET, 0, &Button, IGraphics::CORNER_ALL);
+	const int SliceBeginButtonResult = DoButton_FontIcon(&s_SliceBeginButton, FONT_ICON_RIGHT_FROM_BRACKET, 0, &Button, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
 	if(SliceBeginButtonResult == 1)
 	{
 		Client()->DemoSliceBegin();
@@ -662,7 +662,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceEndButton;
-	const int SliceEndButtonResult = DoButton_FontIcon(&s_SliceEndButton, FONT_ICON_RIGHT_TO_BRACKET, 0, &Button, IGraphics::CORNER_ALL);
+	const int SliceEndButtonResult = DoButton_FontIcon(&s_SliceEndButton, FONT_ICON_RIGHT_TO_BRACKET, 0, &Button, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
 	if(SliceEndButtonResult == 1)
 	{
 		Client()->DemoSliceEnd();
@@ -684,7 +684,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceSaveButton;
-	if(DoButton_FontIcon(&s_SliceSaveButton, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL, SliceEnabled) && SliceEnabled)
+	if(DoButton_FontIcon(&s_SliceSaveButton, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, BUTTONFLAG_LEFT, IGraphics::CORNER_ALL, SliceEnabled) && SliceEnabled)
 	{
 		char aDemoName[IO_MAX_PATH_LENGTH];
 		DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
@@ -697,7 +697,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
 	static CButtonContainer s_ExitButton;
-	if(DoButton_FontIcon(&s_ExitButton, FONT_ICON_XMARK, 0, &Button) || (Input()->KeyPress(KEY_C) && !m_pClient->m_GameConsole.IsActive() && m_DemoPlayerState == DEMOPLAYER_NONE))
+	if(DoButton_FontIcon(&s_ExitButton, FONT_ICON_XMARK, 0, &Button, BUTTONFLAG_LEFT) || (Input()->KeyPress(KEY_C) && !m_pClient->m_GameConsole.IsActive() && m_DemoPlayerState == DEMOPLAYER_NONE))
 	{
 		Client()->Disconnect();
 		DemolistOnUpdate(false);
@@ -708,7 +708,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.VSplitRight(Margins, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
 	static CButtonContainer s_KeyboardShortcutsButton;
-	if(DoButton_FontIcon(&s_KeyboardShortcutsButton, FONT_ICON_KEYBOARD, 0, &Button, IGraphics::CORNER_ALL, g_Config.m_ClDemoKeyboardShortcuts != 0))
+	if(DoButton_FontIcon(&s_KeyboardShortcutsButton, FONT_ICON_KEYBOARD, 0, &Button, BUTTONFLAG_LEFT, IGraphics::CORNER_ALL, g_Config.m_ClDemoKeyboardShortcuts != 0))
 	{
 		g_Config.m_ClDemoKeyboardShortcuts ^= 1;
 	}
@@ -720,7 +720,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		ButtonBar.VSplitRight(Margins, &ButtonBar, nullptr);
 		ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
 		static CButtonContainer s_AutoCameraButton;
-		if(DoButton_FontIcon(&s_AutoCameraButton, FONT_ICON_CAMERA, 0, &Button, IGraphics::CORNER_ALL, m_pClient->m_Camera.m_AutoSpecCamera))
+		if(DoButton_FontIcon(&s_AutoCameraButton, FONT_ICON_CAMERA, 0, &Button, BUTTONFLAG_LEFT, IGraphics::CORNER_ALL, m_pClient->m_Camera.m_AutoSpecCamera))
 		{
 			m_pClient->m_Camera.m_AutoSpecCamera = !m_pClient->m_Camera.m_AutoSpecCamera;
 		}
