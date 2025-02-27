@@ -75,7 +75,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 	ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 	static int s_DeleteButton = 0;
-	if(DoButton_FontIcon(&s_DeleteButton, FONT_ICON_TRASH, GotSelection ? 0 : -1, &Button, 0, "[Delete] Delete the selected command from the command list.", IGraphics::CORNER_ALL, 9.0f) == 1 || (GotSelection && CLineInput::GetActiveInput() == nullptr && m_Dialog == DIALOG_NONE && Ui()->ConsumeHotkey(CUi::HOTKEY_DELETE)))
+	if(DoButton_FontIcon(&s_DeleteButton, FONT_ICON_TRASH, GotSelection ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Delete] Delete the selected command from the command list.", IGraphics::CORNER_ALL, 9.0f) || (GotSelection && CLineInput::GetActiveInput() == nullptr && m_Dialog == DIALOG_NONE && Ui()->ConsumeHotkey(CUi::HOTKEY_DELETE)))
 	{
 		m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(this, CEditorCommandAction::EType::DELETE, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand));
 
@@ -95,7 +95,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 	const bool CanMoveDown = GotSelection && s_CommandSelectedIndex < (int)m_Map.m_vSettings.size() - 1;
 	static int s_DownButton = 0;
-	if(DoButton_FontIcon(&s_DownButton, FONT_ICON_SORT_DOWN, CanMoveDown ? 0 : -1, &Button, 0, "[Alt+Down] Move the selected command down.", IGraphics::CORNER_R, 11.0f) == 1 || (CanMoveDown && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_DOWN)))
+	if(DoButton_FontIcon(&s_DownButton, FONT_ICON_SORT_DOWN, CanMoveDown ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Alt+Down] Move the selected command down.", IGraphics::CORNER_R, 11.0f) || (CanMoveDown && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_DOWN)))
 	{
 		m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(this, CEditorCommandAction::EType::MOVE_DOWN, &s_CommandSelectedIndex, s_CommandSelectedIndex));
 
@@ -110,7 +110,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 	const bool CanMoveUp = GotSelection && s_CommandSelectedIndex > 0;
 	static int s_UpButton = 0;
-	if(DoButton_FontIcon(&s_UpButton, FONT_ICON_SORT_UP, CanMoveUp ? 0 : -1, &Button, 0, "[Alt+Up] Move the selected command up.", IGraphics::CORNER_L, 11.0f) == 1 || (CanMoveUp && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_UP)))
+	if(DoButton_FontIcon(&s_UpButton, FONT_ICON_SORT_UP, CanMoveUp ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Alt+Up] Move the selected command up.", IGraphics::CORNER_L, 11.0f) || (CanMoveUp && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_UP)))
 	{
 		m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(this, CEditorCommandAction::EType::MOVE_UP, &s_CommandSelectedIndex, s_CommandSelectedIndex));
 
@@ -123,7 +123,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	// redo button
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 	static int s_RedoButton = 0;
-	if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_ServerSettingsHistory.CanRedo() ? 0 : -1, &Button, 0, "[Ctrl+Y] Redo the last command edit.", IGraphics::CORNER_R, 11.0f) == 1 || (CanMoveDown && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_DOWN)))
+	if(DoButton_FontIcon(&s_RedoButton, FONT_ICON_REDO, m_ServerSettingsHistory.CanRedo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Y] Redo the last command edit.", IGraphics::CORNER_R, 11.0f) || (CanMoveDown && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_DOWN)))
 	{
 		m_ServerSettingsHistory.Redo();
 	}
@@ -132,7 +132,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
 	ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 	static int s_UndoButton = 0;
-	if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_ServerSettingsHistory.CanUndo() ? 0 : -1, &Button, 0, "[Ctrl+Z] Undo the last command edit.", IGraphics::CORNER_L, 11.0f) == 1 || (CanMoveUp && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_UP)))
+	if(DoButton_FontIcon(&s_UndoButton, FONT_ICON_UNDO, m_ServerSettingsHistory.CanUndo() ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Ctrl+Z] Undo the last command edit.", IGraphics::CORNER_L, 11.0f) || (CanMoveUp && Input()->AltIsPressed() && Ui()->ConsumeHotkey(CUi::HOTKEY_UP)))
 	{
 		m_ServerSettingsHistory.Undo();
 	}
@@ -152,7 +152,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	const bool CanUpdate = GotSelection && CurrentInputValid && str_comp(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, m_SettingsCommandInput.GetString()) != 0;
 
 	static int s_UpdateButton = 0;
-	if(DoButton_FontIcon(&s_UpdateButton, FONT_ICON_PENCIL, CanUpdate ? 0 : -1, &Button, 0, "[Alt+Enter] Update the selected command based on the entered value.", IGraphics::CORNER_R, 9.0f) == 1 || (CanUpdate && Input()->AltIsPressed() && m_Dialog == DIALOG_NONE && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+	if(DoButton_FontIcon(&s_UpdateButton, FONT_ICON_PENCIL, CanUpdate ? 0 : -1, &Button, BUTTONFLAG_LEFT, "[Alt+Enter] Update the selected command based on the entered value.", IGraphics::CORNER_R, 9.0f) || (CanUpdate && Input()->AltIsPressed() && m_Dialog == DIALOG_NONE && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		if(CollidingCommandIndex == -1)
 		{
@@ -219,7 +219,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	ToolBar.VSplitRight(100.0f, &ToolBar, nullptr);
 
 	static int s_AddButton = 0;
-	if(DoButton_FontIcon(&s_AddButton, CanReplace ? FONT_ICON_ARROWS_ROTATE : FONT_ICON_PLUS, CanAdd || CanReplace ? 0 : -1, &Button, 0, CanReplace ? "[Enter] Replace the corresponding command in the command list." : "[Enter] Add a command to the command list.", IGraphics::CORNER_L) == 1 || ((CanAdd || CanReplace) && !Input()->AltIsPressed() && m_Dialog == DIALOG_NONE && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+	if(DoButton_FontIcon(&s_AddButton, CanReplace ? FONT_ICON_ARROWS_ROTATE : FONT_ICON_PLUS, CanAdd || CanReplace ? 0 : -1, &Button, BUTTONFLAG_LEFT, CanReplace ? "[Enter] Replace the corresponding command in the command list." : "[Enter] Add a command to the command list.", IGraphics::CORNER_L) || ((CanAdd || CanReplace) && !Input()->AltIsPressed() && m_Dialog == DIALOG_NONE && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		if(CanReplace)
 		{
@@ -328,7 +328,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 	ToolBar.VSplitRight(ToolBar.h, &ToolBar, &Button);
 
 	// Do the unknown command toggle button
-	if(DoButton_FontIcon(&Context.m_AllowUnknownCommands, FONT_ICON_QUESTION, Context.m_AllowUnknownCommands, &Button, 0, "Disallow/allow unknown or invalid commands.", IGraphics::CORNER_R))
+	if(DoButton_FontIcon(&Context.m_AllowUnknownCommands, FONT_ICON_QUESTION, Context.m_AllowUnknownCommands, &Button, BUTTONFLAG_LEFT, "Disallow/allow unknown or invalid commands.", IGraphics::CORNER_R))
 	{
 		Context.m_AllowUnknownCommands = !Context.m_AllowUnknownCommands;
 		Context.Update();
@@ -648,11 +648,11 @@ void CEditor::RenderMapSettingsErrorDialog()
 						FixBtn.HMargin(1.0f, &FixBtn);
 
 						// Delete button
-						if(DoButton_FontIcon(&pInvalidSetting->m_Context.m_Deleted, FONT_ICON_TRASH, pInvalidSetting->m_Context.m_Deleted, &DelBtn, 0, "Delete this command.", IGraphics::CORNER_ALL, 10.0f))
+						if(DoButton_FontIcon(&pInvalidSetting->m_Context.m_Deleted, FONT_ICON_TRASH, pInvalidSetting->m_Context.m_Deleted, &DelBtn, BUTTONFLAG_LEFT, "Delete this command.", IGraphics::CORNER_ALL, 10.0f))
 							pInvalidSetting->m_Context.m_Deleted = !pInvalidSetting->m_Context.m_Deleted;
 
 						// Fix button
-						if(DoButton_Editor(&pInvalidSetting->m_Context.m_Fixed, "Fix", !pInvalidSetting->m_Context.m_Deleted ? (s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1)) : -1, &FixBtn, 0, "Fix this command."))
+						if(DoButton_Editor(&pInvalidSetting->m_Context.m_Fixed, "Fix", !pInvalidSetting->m_Context.m_Deleted ? (s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1)) : -1, &FixBtn, BUTTONFLAG_LEFT, "Fix this command."))
 						{
 							s_FixingCommandIndex = i;
 							SetInput(pInvalidSetting->m_aSetting);
@@ -672,7 +672,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 
 						// Buttons
 						static int s_Cancel = 0, s_Ok = 0;
-						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, 0, "Cancel fixing this command.") || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, BUTTONFLAG_LEFT, "Cancel fixing this command.") || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 						{
 							s_FixingCommandIndex = -1;
 							s_Input.Clear();
@@ -685,7 +685,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						s_Context.CheckCollision(vSettingsValid, Res);
 						bool Valid = s_Context.Valid() && Res == ECollisionCheckResult::ADD;
 
-						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm editing of this command.") || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, BUTTONFLAG_LEFT, "Confirm editing of this command.") || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 						{
 							// Mark the setting is being fixed
 							pInvalidSetting->m_Context.m_Fixed = true;
@@ -771,7 +771,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 					Label.VSplitRight(50.0f, &Label, &ChooseBtn);
 					Label.VSplitRight(5.0f, &Label, nullptr);
 					ChooseBtn.HMargin(1.0f, &ChooseBtn);
-					if(DoButton_Editor(&vDuplicates, "Choose", Chosen == -1, &ChooseBtn, 0, "Choose this command."))
+					if(DoButton_Editor(&vDuplicates, "Choose", Chosen == -1, &ChooseBtn, BUTTONFLAG_LEFT, "Choose this command."))
 					{
 						if(Chosen != -1)
 							vSettingsInvalid[vDuplicates[Chosen]].m_Context.m_Chosen = false;
@@ -806,7 +806,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						SubSlot.VSplitRight(50.0f, &SubSlot, &ChooseBtn);
 						SubSlot.VSplitRight(5.0f, &SubSlot, nullptr);
 						ChooseBtn.HMargin(1.0f, &ChooseBtn);
-						if(DoButton_Editor(&Duplicate.m_Context.m_Chosen, "Choose", IsInvalid && !Duplicate.m_Context.m_Fixed ? -1 : Duplicate.m_Context.m_Chosen, &ChooseBtn, 0, "Override with this command."))
+						if(DoButton_Editor(&Duplicate.m_Context.m_Chosen, "Choose", IsInvalid && !Duplicate.m_Context.m_Fixed ? -1 : Duplicate.m_Context.m_Chosen, &ChooseBtn, BUTTONFLAG_LEFT, "Override with this command."))
 						{
 							Duplicate.m_Context.m_Chosen = !Duplicate.m_Context.m_Chosen;
 							if(Chosen != -1 && Chosen != DuplicateIndex)
@@ -823,7 +823,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 								SubSlot.VSplitRight(30.0f, &SubSlot, &FixBtn);
 								SubSlot.VSplitRight(10.0f, &SubSlot, nullptr);
 								FixBtn.HMargin(1.0f, &FixBtn);
-								if(DoButton_Editor(&Duplicate.m_Context.m_Fixed, "Fix", s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1), &FixBtn, 0, "Fix this command (needed before it can be chosen)."))
+								if(DoButton_Editor(&Duplicate.m_Context.m_Fixed, "Fix", s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1), &FixBtn, BUTTONFLAG_LEFT, "Fix this command (needed before it can be chosen)."))
 								{
 									s_FixingCommandIndex = Duplicate.m_Index;
 									SetInput(Duplicate.m_aSetting);
@@ -848,7 +848,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						OkBtn.HMargin(1.0f, &OkBtn);
 
 						static int s_Cancel = 0, s_Ok = 0;
-						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, 0, "Cancel fixing this command.") || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, BUTTONFLAG_LEFT, "Cancel fixing this command.") || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 						{
 							s_FixingCommandIndex = -1;
 							s_Input.Clear();
@@ -865,7 +865,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						s_Context.CheckCollision({m_Map.m_vSettings[i]}, Res);
 						bool Valid = s_Context.Valid() && Res == ECollisionCheckResult::REPLACE;
 
-						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm editing of this command.") || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, BUTTONFLAG_LEFT, "Confirm editing of this command.") || (s_Input.IsActive() && Valid && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 						{
 							if(Valid) // Just to make sure
 							{
@@ -999,20 +999,20 @@ void CEditor::RenderMapSettingsErrorDialog()
 	};
 
 	// Fix all unknown settings
-	if(DoButton_Editor(&s_FixAllButton, "Allow all unknown settings", CanFixAllUnknown ? 0 : -1, &FixAllUnknownButton, 0, nullptr))
+	if(DoButton_Editor(&s_FixAllButton, "Allow all unknown settings", CanFixAllUnknown ? 0 : -1, &FixAllUnknownButton, BUTTONFLAG_LEFT, nullptr))
 	{
 		FixAllUnknown();
 	}
 
 	// Confirm - execute the fixes
-	if(DoButton_Editor(&s_ConfirmButton, "Confirm", CanConfirm ? 0 : -1, &ConfimButton, 0, nullptr) || (CanConfirm && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
+	if(DoButton_Editor(&s_ConfirmButton, "Confirm", CanConfirm ? 0 : -1, &ConfimButton, BUTTONFLAG_LEFT, nullptr) || (CanConfirm && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
 		Execute();
 		m_Dialog = DIALOG_NONE;
 	}
 
 	// Cancel - we load a new empty map
-	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &CancelButton, 0, nullptr) || (Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE)))
+	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &CancelButton, BUTTONFLAG_LEFT, nullptr) || (Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE)))
 	{
 		Reset();
 		m_aFileName[0] = 0;

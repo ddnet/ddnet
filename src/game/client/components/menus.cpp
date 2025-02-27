@@ -98,7 +98,7 @@ CMenus::CMenus()
 	m_PasswordInput.SetHidden(true);
 }
 
-int CMenus::DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, bool Active)
+int CMenus::DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, bool Active, const unsigned Flags)
 {
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIBUTTONS].m_Id);
 	Graphics()->QuadsBegin();
@@ -115,10 +115,10 @@ int CMenus::DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, 
 	}
 	Graphics()->QuadsEnd();
 
-	return Active ? Ui()->DoButtonLogic(pId, Checked, pRect) : 0;
+	return Active ? Ui()->DoButtonLogic(pId, Checked, pRect, Flags) : 0;
 }
 
-int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float Rounding, float FontFactor, ColorRGBA Color)
+int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned Flags, const char *pImageName, int Corners, float Rounding, float FontFactor, ColorRGBA Color)
 {
 	CUIRect Text = *pRect;
 
@@ -152,7 +152,7 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 	Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
 	Ui()->DoLabel(&Text, pText, Text.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
 
-	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect);
+	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect, Flags);
 }
 
 int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, const SCommunityIcon *pCommunityIcon)
@@ -241,7 +241,7 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 		Ui()->DoLabel(&Label, pText, Label.h * CUi::ms_FontmodHeight, TEXTALIGN_MC);
 	}
 
-	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect);
+	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect, BUTTONFLAG_LEFT);
 }
 
 int CMenus::DoButton_GridHeader(const void *pId, const char *pText, int Checked, const CUIRect *pRect)
@@ -254,7 +254,7 @@ int CMenus::DoButton_GridHeader(const void *pId, const char *pText, int Checked,
 	CUIRect Temp;
 	pRect->VSplitLeft(5.0f, nullptr, &Temp);
 	Ui()->DoLabel(&Temp, pText, pRect->h * CUi::ms_FontmodHeight, TEXTALIGN_ML);
-	return Ui()->DoButtonLogic(pId, Checked, pRect);
+	return Ui()->DoButtonLogic(pId, Checked, pRect, BUTTONFLAG_LEFT);
 }
 
 int CMenus::DoButton_Favorite(const void *pButtonId, const void *pParentId, bool Checked, const CUIRect *pRect)
@@ -272,10 +272,10 @@ int CMenus::DoButton_Favorite(const void *pButtonId, const void *pParentId, bool
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 	}
-	return Ui()->DoButtonLogic(pButtonId, 0, pRect);
+	return Ui()->DoButtonLogic(pButtonId, 0, pRect, BUTTONFLAG_LEFT);
 }
 
-int CMenus::DoButton_CheckBox_Common(const void *pId, const char *pText, const char *pBoxText, const CUIRect *pRect)
+int CMenus::DoButton_CheckBox_Common(const void *pId, const char *pText, const char *pBoxText, const CUIRect *pRect, const unsigned Flags)
 {
 	CUIRect Box, Label;
 	pRect->VSplitLeft(pRect->h, &Box, &Label);
@@ -298,7 +298,7 @@ int CMenus::DoButton_CheckBox_Common(const void *pId, const char *pText, const c
 	TextRender()->SetRenderFlags(0);
 	Ui()->DoLabel(&Label, pText, Box.h * CUi::ms_FontmodHeight, TEXTALIGN_ML);
 
-	return Ui()->DoButtonLogic(pId, 0, pRect);
+	return Ui()->DoButtonLogic(pId, 0, pRect, BUTTONFLAG_LEFT);
 }
 
 void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineColor, const ColorHSLA LaserInnerColor, const int LaserType)
@@ -402,7 +402,7 @@ ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetId, const float Lin
 	const ColorHSLA PickedColor = DoButton_ColorPicker(&ColorPickerButton, pColorValue, Alpha);
 
 	ResetButton.HMargin(2.0f, &ResetButton);
-	if(DoButton_Menu(pResetId, Localize("Reset"), 0, &ResetButton, nullptr, IGraphics::CORNER_ALL, 4.0f, 0.1f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f)))
+	if(DoButton_Menu(pResetId, Localize("Reset"), 0, &ResetButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 4.0f, 0.1f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f)))
 	{
 		*pColorValue = color_cast<ColorHSLA>(DefaultColor).Pack(Alpha);
 	}
@@ -424,7 +424,7 @@ ColorHSLA CMenus::DoButton_ColorPicker(const CUIRect *pRect, unsigned int *pHsla
 	Rect.Draw(color_cast<ColorRGBA>(HslaColor), IGraphics::CORNER_ALL, 4.0f);
 
 	static CUi::SColorPickerPopupContext s_ColorPickerPopupContext;
-	if(Ui()->DoButtonLogic(pHslaColor, 0, pRect))
+	if(Ui()->DoButtonLogic(pHslaColor, 0, pRect, BUTTONFLAG_LEFT))
 	{
 		s_ColorPickerPopupContext.m_pHslaColor = pHslaColor;
 		s_ColorPickerPopupContext.m_HslaColor = HslaColor;
@@ -446,7 +446,7 @@ int CMenus::DoButton_CheckBoxAutoVMarginAndSet(const void *pId, const char *pTex
 	CUIRect CheckBoxRect;
 	pRect->HSplitTop(VMargin, &CheckBoxRect, pRect);
 
-	int Logic = DoButton_CheckBox_Common(pId, pText, *pValue ? "X" : "", &CheckBoxRect);
+	int Logic = DoButton_CheckBox_Common(pId, pText, *pValue ? "X" : "", &CheckBoxRect, BUTTONFLAG_LEFT);
 
 	if(Logic)
 		*pValue ^= 1;
@@ -456,14 +456,14 @@ int CMenus::DoButton_CheckBoxAutoVMarginAndSet(const void *pId, const char *pTex
 
 int CMenus::DoButton_CheckBox(const void *pId, const char *pText, int Checked, const CUIRect *pRect)
 {
-	return DoButton_CheckBox_Common(pId, pText, Checked ? "X" : "", pRect);
+	return DoButton_CheckBox_Common(pId, pText, Checked ? "X" : "", pRect, BUTTONFLAG_LEFT);
 }
 
 int CMenus::DoButton_CheckBox_Number(const void *pId, const char *pText, int Checked, const CUIRect *pRect)
 {
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d", Checked);
-	return DoButton_CheckBox_Common(pId, pText, aBuf, pRect);
+	return DoButton_CheckBox_Common(pId, pText, aBuf, pRect, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
 }
 
 int CMenus::DoKeyReader(const void *pId, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
@@ -471,7 +471,7 @@ int CMenus::DoKeyReader(const void *pId, const CUIRect *pRect, int Key, int Modi
 	int NewKey = Key;
 	*pNewModifierCombination = ModifierCombination;
 
-	const int ButtonResult = Ui()->DoButtonLogic(pId, 0, pRect);
+	const int ButtonResult = Ui()->DoButtonLogic(pId, 0, pRect, BUTTONFLAG_LEFT | BUTTONFLAG_RIGHT);
 	if(ButtonResult == 1)
 	{
 		m_Binder.m_pKeyReaderId = pId;
@@ -1502,7 +1502,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 				static char s_CommunityTooltipButtonId;
 				Name.VSplitLeft(2.5f * Name.h, &Icon, &Name);
 				RenderCommunityIcon(pIcon, Icon, true);
-				Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Icon);
+				Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Icon, BUTTONFLAG_NONE);
 				GameClient()->m_Tooltips.DoToolTip(&s_CommunityTooltipButtonId, &Icon, pCommunity->Name());
 			}
 
@@ -1653,7 +1653,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Row.VSplitLeft(20.0f, &SlowDownButton, &Row);
 		Row.VSplitLeft(5.0f, nullptr, &Row);
 		static CButtonContainer s_SlowDownButton;
-		if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_BACKWARD, 0, &SlowDownButton, IGraphics::CORNER_ALL))
+		if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_BACKWARD, 0, &SlowDownButton, BUTTONFLAG_LEFT))
 			m_Speed = clamp(m_Speed - 1, 0, (int)(g_DemoSpeeds - 1));
 
 		// paused
@@ -1661,7 +1661,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Row.VSplitLeft(20.0f, &PausedButton, &Row);
 		Row.VSplitLeft(5.0f, nullptr, &Row);
 		static CButtonContainer s_PausedButton;
-		if(DoButton_FontIcon(&s_PausedButton, FONT_ICON_PAUSE, 0, &PausedButton, IGraphics::CORNER_ALL))
+		if(DoButton_FontIcon(&s_PausedButton, FONT_ICON_PAUSE, 0, &PausedButton, BUTTONFLAG_LEFT))
 			m_StartPaused ^= 1;
 
 		// fastforward
@@ -1669,7 +1669,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Row.VSplitLeft(20.0f, &FastForwardButton, &Row);
 		Row.VSplitLeft(8.0f, nullptr, &Row);
 		static CButtonContainer s_FastForwardButton;
-		if(DoButton_FontIcon(&s_FastForwardButton, FONT_ICON_FORWARD, 0, &FastForwardButton, IGraphics::CORNER_ALL))
+		if(DoButton_FontIcon(&s_FastForwardButton, FONT_ICON_FORWARD, 0, &FastForwardButton, BUTTONFLAG_LEFT))
 			m_Speed = clamp(m_Speed + 1, 0, (int)(g_DemoSpeeds - 1));
 
 		// speed meter
@@ -2405,11 +2405,11 @@ int CMenus::DoButton_CheckBox_Tristate(const void *pId, const char *pText, TRIST
 	switch(Checked)
 	{
 	case TRISTATE::NONE:
-		return DoButton_CheckBox_Common(pId, pText, "", pRect);
+		return DoButton_CheckBox_Common(pId, pText, "", pRect, BUTTONFLAG_LEFT);
 	case TRISTATE::SOME:
-		return DoButton_CheckBox_Common(pId, pText, "O", pRect);
+		return DoButton_CheckBox_Common(pId, pText, "O", pRect, BUTTONFLAG_LEFT);
 	case TRISTATE::ALL:
-		return DoButton_CheckBox_Common(pId, pText, "X", pRect);
+		return DoButton_CheckBox_Common(pId, pText, "X", pRect, BUTTONFLAG_LEFT);
 	default:
 		dbg_assert(false, "invalid tristate");
 	}
