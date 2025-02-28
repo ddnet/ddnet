@@ -3859,7 +3859,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 {
 	// Don't disconnect unless the file exists (only for play command)
 	if(!Storage()->FileExists(pFilename, StorageType))
-		return "No demo with this filename exists";
+		return Localize("No demo with this filename exists");
 
 	Disconnect();
 	m_aNetClient[CONN_MAIN].ResetErrorString();
