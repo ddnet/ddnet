@@ -35,7 +35,7 @@ public:
 	CDataFileReader &operator=(CDataFileReader &&Other);
 
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
-	bool Close();
+	void Close();
 	bool IsOpen() const;
 	IOHANDLE File() const;
 

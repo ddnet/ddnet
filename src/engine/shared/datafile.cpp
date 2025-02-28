@@ -255,23 +255,21 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	return true;
 }
 
-bool CDataFileReader::Close()
+void CDataFileReader::Close()
 {
 	if(!m_pDataFile)
-		return true;
+	{
+		return;
+	}
 
-	// free the data that is loaded
 	for(int i = 0; i < m_pDataFile->m_Header.m_NumRawData; i++)
 	{
 		free(m_pDataFile->m_ppDataPtrs[i]);
-		m_pDataFile->m_ppDataPtrs[i] = nullptr;
-		m_pDataFile->m_pDataSizes[i] = 0;
 	}
 
 	io_close(m_pDataFile->m_File);
 	free(m_pDataFile);
 	m_pDataFile = nullptr;
-	return true;
 }
 
 bool CDataFileReader::IsOpen() const
