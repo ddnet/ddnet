@@ -44,6 +44,11 @@ MACRO_CONFIG_INT(ClNamePlatesStrongSize, cl_nameplates_strong_size, 30, -50, 100
 MACRO_CONFIG_INT(ClAfkEmote, cl_afk_emote, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show zzz emote next to afk players")
 MACRO_CONFIG_INT(ClTextEntities, cl_text_entities, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render textual entity data")
 MACRO_CONFIG_INT(ClTextEntitiesSize, cl_text_entities_size, 100, 1, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Size of textual entity data from 1 to 100%")
+MACRO_CONFIG_INT(ClTextEntitiesSpeedBoost, cl_text_entities_speed_boost, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render textual speedup data (0 - off, 1 - Speedup force and max speed")
+MACRO_CONFIG_INT(ClTextEntitiesTeleport, cl_text_entities_teleport, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render textual teleport data (0 - off, 1 - Teleporter numbers)")
+MACRO_CONFIG_INT(ClTextEntitiesSwitch, cl_text_entities_switch, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render textual switch data (0 - off, 1 - Switch numbers)")
+MACRO_CONFIG_INT(ClTextEntitiesTune, cl_text_entities_tune, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render textual tune data (0 - off, 1 - Tune zone numbers)")
+MACRO_CONFIG_INT(ClTextEntitiesEditor, cl_text_entities_editor, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render textual entity data in editor")
 MACRO_CONFIG_INT(ClStreamerMode, cl_streamer_mode, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Censor sensitive information such as /save password")
 
 MACRO_CONFIG_COL(ClAuthedPlayerColor, cl_authed_player_color, 5898211, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Color of name of authenticated player in scoreboard")

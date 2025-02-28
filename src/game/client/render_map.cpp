@@ -724,9 +724,9 @@ void CRenderTools::RenderTile(int x, int y, unsigned char Index, float Scale, Co
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, float Alpha) const
+void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
 {
-	if(!g_Config.m_ClTextEntities)
+	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -779,7 +779,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, float Alpha) const
+void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -829,15 +829,13 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 				Graphics()->QuadsEnd();
 
 				// draw force and max speed
-				if(g_Config.m_ClTextEntities)
+				if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
 				{
 					str_format(aBuf, sizeof(aBuf), "%d", Force);
 					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
-					if(MaxSpeed)
-					{
-						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
-						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
-					}
+
+					str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
+					TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
 				}
 			}
 		}
@@ -846,9 +844,9 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, float Alpha) const
+void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
 {
-	if(!g_Config.m_ClTextEntities)
+	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -904,9 +902,9 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, float Alpha) const
+void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale, int OverlayRenderFlag, float Alpha) const
 {
-	if(!g_Config.m_ClTextEntities)
+	if(!(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT))
 		return;
 
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;

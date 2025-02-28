@@ -419,6 +419,7 @@ void CMapLayers::OnMapLoad()
 				{
 					DataIndex = pTMap->m_Tune;
 					TileSize = sizeof(CTuneTile);
+					OverlayCount = 2;
 				}
 				else
 				{
@@ -540,6 +541,8 @@ void CMapLayers::OnMapLoad()
 									{
 										Index = ((CTuneTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
 										Flags = 0;
+										if(CurOverlay == 1)
+											Index = ((CTuneTile *)pTiles)[y * pTMap->m_Width + x].m_Number;
 									}
 								}
 								else
@@ -1503,7 +1506,7 @@ void CMapLayers::OnRender()
 				{
 					DataIndex = pTMap->m_Tune;
 					TileSize = sizeof(CTuneTile);
-					TileLayerAndOverlayCount = 1;
+					TileLayerAndOverlayCount = 2;
 				}
 				else
 				{
@@ -1685,13 +1688,16 @@ void CMapLayers::OnRender()
 						RenderTools()->RenderSwitchmap(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
 						Graphics()->BlendNormal();
 						RenderTools()->RenderSwitchmap(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-						RenderTools()->RenderSwitchOverlay(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, EntityOverlayVal / 100.0f);
+						if(g_Config.m_ClTextEntities && g_Config.m_ClTextEntitiesSwitch)
+						{
+							RenderTools()->RenderSwitchOverlay(pSwitchTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClTextEntitiesSwitch, EntityOverlayVal / 100.0f);
+						}
 					}
 					else
 					{
 						Graphics()->BlendNormal();
 						RenderTileLayer(TileLayerCounter - 3, Color);
-						if(g_Config.m_ClTextEntities)
+						if(g_Config.m_ClTextEntities && g_Config.m_ClTextEntitiesSwitch)
 						{
 							Graphics()->TextureSet(m_pImages->GetOverlayTop());
 							RenderTileLayer(TileLayerCounter - 2, Color);
@@ -1718,13 +1724,16 @@ void CMapLayers::OnRender()
 						RenderTools()->RenderTelemap(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
 						Graphics()->BlendNormal();
 						RenderTools()->RenderTelemap(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-						RenderTools()->RenderTeleOverlay(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, EntityOverlayVal / 100.0f);
+						if(g_Config.m_ClTextEntities && g_Config.m_ClTextEntitiesTeleport)
+						{
+							RenderTools()->RenderTeleOverlay(pTeleTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClTextEntitiesTeleport, EntityOverlayVal / 100.0f);
+						}
 					}
 					else
 					{
 						Graphics()->BlendNormal();
 						RenderTileLayer(TileLayerCounter - 2, Color);
-						if(g_Config.m_ClTextEntities)
+						if(g_Config.m_ClTextEntities && g_Config.m_ClTextEntitiesTeleport)
 						{
 							Graphics()->TextureSet(m_pImages->GetOverlayCenter());
 							RenderTileLayer(TileLayerCounter - 1, Color);
@@ -1749,7 +1758,8 @@ void CMapLayers::OnRender()
 						RenderTools()->RenderSpeedupmap(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
 						Graphics()->BlendNormal();
 						RenderTools()->RenderSpeedupmap(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-						RenderTools()->RenderSpeedupOverlay(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, EntityOverlayVal / 100.0f);
+						bool RenderSpeedupText = g_Config.m_ClTextEntities && g_Config.m_ClTextEntitiesSpeedBoost; // overlay still renders textless arrows
+						RenderTools()->RenderSpeedupOverlay(pSpeedupTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, RenderSpeedupText, EntityOverlayVal / 100.0f);
 					}
 					else
 					{
@@ -1761,10 +1771,11 @@ void CMapLayers::OnRender()
 						RenderTileLayer(TileLayerCounter - 3, Color);
 						Graphics()->WrapNormal();
 
-						if(g_Config.m_ClTextEntities)
+						if(g_Config.m_ClTextEntities && g_Config.m_ClTextEntitiesSpeedBoost)
 						{
 							Graphics()->TextureSet(m_pImages->GetOverlayBottom());
 							RenderTileLayer(TileLayerCounter - 2, Color);
+
 							Graphics()->TextureSet(m_pImages->GetOverlayTop());
 							RenderTileLayer(TileLayerCounter - 1, Color);
 						}
@@ -1788,11 +1799,20 @@ void CMapLayers::OnRender()
 						RenderTools()->RenderTunemap(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
 						Graphics()->BlendNormal();
 						RenderTools()->RenderTunemap(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
+						if(g_Config.m_ClTextEntities && g_Config.m_ClTextEntitiesTune)
+						{
+							RenderTools()->RenderTuneOverlay(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, g_Config.m_ClTextEntitiesTune, EntityOverlayVal / 100.0f);
+						}
 					}
 					else
 					{
 						Graphics()->BlendNormal();
-						RenderTileLayer(TileLayerCounter - 1, Color);
+						RenderTileLayer(TileLayerCounter - 2, Color);
+						if(g_Config.m_ClTextEntities && g_Config.m_ClTextEntitiesTune)
+						{
+							Graphics()->TextureSet(m_pImages->GetOverlayCenter());
+							RenderTileLayer(TileLayerCounter - 1, Color);
+						}
 					}
 				}
 			}
