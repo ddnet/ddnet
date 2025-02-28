@@ -62,3 +62,5 @@ MACRO_TUNING_PARAM(HammerHitFireDelay, hammer_hit_fire_delay, 320, "Delay of ham
 
 MACRO_TUNING_PARAM(GroundElasticityX, ground_elasticity_x, 0, "Wall elasticity")
 MACRO_TUNING_PARAM(GroundElasticityY, ground_elasticity_y, 0, "Ground/ceiling elasticity")
+
+MACRO_TUNING_PARAM(SpeedBoostMaxSpeed, speed_boost_max_speed, 118, "Max speed a speedtile can give you, 0 = unlimited (Does not apply to old speed boosts)")

@@ -700,15 +700,21 @@ void CCharacter::HandleSkippableTiles(int Index)
 		}
 		else if(Type == TILE_SPEED_BOOST)
 		{
+			constexpr float MaxSpeedScale = 5.0f;
+			if(GetTuning(GetOverriddenTuneZone())->m_SpeedBoostMaxSpeed > 0 && MaxSpeed == 0)
+			{
+				MaxSpeed = GetTuning(GetOverriddenTuneZone())->m_SpeedBoostMaxSpeed * MaxSpeedScale;
+			}
+
 			if(MaxSpeed == 0)
 			{
 				TempVel += Direction * Force;
 			}
 			else
 			{
-				// hardest to understand
+				// (signed) length of projection
 				float CurrentDirectionalSpeed = dot(Direction, m_Core.m_Vel);
-				float TempMaxSpeed = MaxSpeed / 5.0f;
+				float TempMaxSpeed = MaxSpeed / MaxSpeedScale;
 				if(CurrentDirectionalSpeed + Force > TempMaxSpeed)
 					TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
 				else
