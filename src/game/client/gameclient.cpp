@@ -983,6 +983,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		// unpack the new tuning
 		CTuningParams NewTuning;
 		int *pParams = (int *)&NewTuning;
+
+		// No jetpack on DDNet incompatible servers,
+		// jetpack strength will be received by tune params
+		NewTuning.m_JetpackStrength = 0;
+
 		for(unsigned i = 0; i < sizeof(CTuningParams) / sizeof(int); i++)
 		{
 			// 31 is the magic number index of laser_damage
