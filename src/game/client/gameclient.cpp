@@ -760,6 +760,9 @@ void CGameClient::UpdatePositions()
 
 void CGameClient::OnRender()
 {
+	const ColorRGBA ClearColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOverlayEntities ? g_Config.m_ClBackgroundEntitiesColor : g_Config.m_ClBackgroundColor));
+	Graphics()->Clear(ClearColor.r, ClearColor.g, ClearColor.b);
+
 	// check if multi view got activated
 	if(!m_MultiView.m_IsInit && m_MultiViewActivated)
 	{
