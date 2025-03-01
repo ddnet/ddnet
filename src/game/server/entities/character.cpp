@@ -1310,6 +1310,9 @@ void CCharacter::Snap(int SnappingClient)
 	}
 	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
 	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
+
+	// -1 is the default value, SnapNewItem zeroes the object, so it would incorrectly become 0
+	pDDNetCharacter->m_TuneZoneOverride = -1;
 }
 
 void CCharacter::PostSnap()
