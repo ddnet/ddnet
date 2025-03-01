@@ -718,6 +718,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 	std::shared_ptr<CLayerGroup> pCurrentGroup = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
 	std::shared_ptr<CLayer> pCurrentLayer = pEditor->GetSelectedLayer(0);
 
+	if(!pCurrentLayer || !pCurrentGroup)
+		return CUi::POPUP_CLOSE_CURRENT;
+
 	if(pPopup->m_vpLayers.size() > 1)
 	{
 		return CLayerTiles::RenderCommonProperties(pPopup->m_CommonPropState, pEditor, &View, pPopup->m_vpLayers, pPopup->m_vLayerIndices);
@@ -2590,6 +2593,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
+	if(!pEditor->m_Map.m_pTeleLayer)
+		return CUi::POPUP_CLOSE_CURRENT;
+
 	static int s_PreviousTeleNumber;
 	static int s_PreviousCheckpointNumber;
 	static int s_PreviousViewTeleNumber;
@@ -2756,6 +2762,9 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSpeedup(void *pContext, CUIRect View
 CUi::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View, bool Active)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	if(!pEditor->m_Map.m_pSwitchLayer)
+		return CUi::POPUP_CLOSE_CURRENT;
 
 	CUIRect NumberPicker, FindEmptySlot, ViewEmptySlot;
 
