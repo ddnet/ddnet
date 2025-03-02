@@ -215,8 +215,6 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 
 	TGLBackendReadPresentedImageData m_ReadPresentedImageDataFunc;
 
-	int m_NumScreens;
-
 	SBackendCapabilites m_Capabilites;
 
 	char m_aVendorString[gs_GpuInfoStringSize] = {};
@@ -242,17 +240,19 @@ public:
 
 	const TTwGraphicsGpuList &GetGpus() const override;
 
-	int GetNumScreens() const override { return m_NumScreens; }
+	void GetScreens(int *&pIds, int &Num) override {
+		pIds = (int *)SDL_GetDisplays(&Num);
+	}
 	const char *GetScreenName(int Screen) const override;
 
-	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
-	void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
+	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) override;
+	void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) override;
 
 	void Minimize() override;
 	void Maximize() override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
-	bool SetWindowScreen(int Index) override;
-	bool UpdateDisplayMode(int Index) override;
+	bool SetWindowScreen(int Screen) override;
+	bool UpdateDisplayMode(int Screen) override;
 	int GetWindowScreen() override;
 	int WindowActive() override;
 	int WindowOpen() override;

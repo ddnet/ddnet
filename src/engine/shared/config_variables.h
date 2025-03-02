@@ -423,6 +423,7 @@ MACRO_CONFIG_INT(InpIgnoredModifiers, inp_ignored_modifiers, 0, 0, 65536, CFGFLA
 MACRO_CONFIG_INT(InpImeNativeUi, inp_ime_native_ui, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use native UI for IME (may cause IME to not work in fullscreen mode) (changing requires restart)")
 #else
 // Linux (xorg and wayland) and MacOS no longer have exclusive fullscreen mode which would block native UI
+// NOTE: SDL3 doesn't support candidate lists except for windows so this does nothing
 MACRO_CONFIG_INT(InpImeNativeUi, inp_ime_native_ui, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use native UI for IME (may cause IME to not work in fullscreen mode) (changing requires restart)")
 #endif
 

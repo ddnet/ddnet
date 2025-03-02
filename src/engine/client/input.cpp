@@ -708,11 +708,6 @@ int CInput::Update()
 			m_CandidatesCount = Event.edit_candidates.num_candidates;
 			m_CandidateSelectedIndex = Event.edit_candidates.selected_candidate;
 			// TODO: support Event.edit_candidates.horizontal == false
-			// print
-			for (int i = 0; i < m_CandidatesCount; i++)
-			{
-				dbg_msg("input", "candidate %d: %s", i, m_ppCandidates[i]);
-			}
 			break;
 
 		// handle keys

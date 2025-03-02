@@ -2464,9 +2464,9 @@ void CGraphics_Threaded::Shutdown()
 		delete pCommandBuffer;
 }
 
-int CGraphics_Threaded::GetNumScreens() const
+void CGraphics_Threaded::GetScreens(int *&pIds, int &Num) const
 {
-	return m_pBackend->GetNumScreens();
+	m_pBackend->GetScreens(pIds, Num);
 }
 
 const char *CGraphics_Threaded::GetScreenName(int Screen) const
@@ -2507,12 +2507,10 @@ void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
 		PropChangedListener();
 }
 
-bool CGraphics_Threaded::SetWindowScreen(int Index)
+bool CGraphics_Threaded::SetWindowScreen(int Screen)
 {
-	if(!m_pBackend->SetWindowScreen(Index))
-	{
+	if(!m_pBackend->SetWindowScreen(Screen))
 		return false;
-	}
 
 	// send a got resized event so that the current canvas size is requested
 	GotResized(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);

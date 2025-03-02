@@ -1495,29 +1495,30 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			Client()->SetWindowParams(1, false);
 	}
 
-	if(Graphics()->GetNumScreens() > 1)
+	int ScreenNum;
+	int *ScreenIds;
+	Graphics()->GetScreens(ScreenIds, ScreenNum);
+
+	if(ScreenNum > 1)
 	{
 		CUIRect ScreenDropDown;
 		MainView.HSplitTop(2.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &ScreenDropDown, &MainView);
+		
+		static std::vector<char *> s_vpScreenNames;
+		s_vpScreenNames.resize(ScreenNum);
 
-		const int NumScreens = Graphics()->GetNumScreens();
-		static std::vector<std::string> s_vScreenNames;
-		static std::vector<const char *> s_vpScreenNames;
-		s_vScreenNames.resize(NumScreens);
-		s_vpScreenNames.resize(NumScreens);
-
-		for(int i = 0; i < NumScreens; ++i)
+		for(int i = 0; i < ScreenNum; ++i)
 		{
-			str_format(aBuf, sizeof(aBuf), "%s %d: %s", Localize("Screen"), i, Graphics()->GetScreenName(i));
-			s_vScreenNames[i] = aBuf;
-			s_vpScreenNames[i] = s_vScreenNames[i].c_str();
+			if(!s_vpScreenNames[i])
+				s_vpScreenNames[i] = new char[128];
+			str_format(s_vpScreenNames[i], 128, "%s %d: %s", Localize("Screen"), i, Graphics()->GetScreenName(ScreenIds[i]));
 		}
 
 		static CUi::SDropDownState s_ScreenDropDownState;
 		static CScrollRegion s_ScreenDropDownScrollRegion;
 		s_ScreenDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ScreenDropDownScrollRegion;
-		const int NewScreen = Ui()->DoDropDown(&ScreenDropDown, g_Config.m_GfxScreen, s_vpScreenNames.data(), s_vpScreenNames.size(), s_ScreenDropDownState);
+		const int NewScreen = Ui()->DoDropDown(&ScreenDropDown, g_Config.m_GfxScreen, (const char **)s_vpScreenNames.data(), s_vpScreenNames.size(), s_ScreenDropDownState);
 		if(NewScreen != g_Config.m_GfxScreen)
 			Client()->SwitchWindowScreen(NewScreen);
 	}
