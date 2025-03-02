@@ -365,7 +365,7 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 		float a;
 		if(Type == LASERTYPE_RIFLE || Type == LASERTYPE_SHOTGUN)
 		{
-			int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
+			int TuneZone = (Client()->State() == IClient::STATE_ONLINE && GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones) ? Collision()->IsTuneZoneTile(Collision()->GetMapIndex(From)) : 0;
 			a = Ms / GameClient()->GetTuning(TuneZone)->m_LaserBounceDelay;
 		}
 		else
