@@ -273,6 +273,10 @@ Install MinGW cross-compilers of the form `i686-w64-mingw32-gcc` (32 bit) or
 Then add `-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw64.toolchain` to the
 **initial** CMake command line.
 
+## Cross-compiling on Linux/Windows to Android
+
+Cross-compilation to Android is explained in a [separate guide](scripts/android/README.md).
+
 ## Cross-compiling on Linux to WebAssembly via Emscripten
 
 Install Emscripten cross-compilers (e.g. `sudo apt install emscripten`) on a modern linux distro.
