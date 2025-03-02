@@ -1340,7 +1340,7 @@ Show jumps indicator
 == 显示可跳跃次数
 
 Show number of spectators
-== 显示观众人数
+== 显示旁观者人数
 
 Hook collision line
 == 钩索辅助线
