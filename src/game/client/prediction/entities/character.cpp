@@ -1015,8 +1015,27 @@ void CCharacter::HandleTiles(int Index)
 
 void CCharacter::HandleTuneLayer()
 {
-	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
-	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(CurrentIndex) : 0);
+	if(!GameWorld()->m_WorldConfig.m_UseTuneZones)
+	{
+		SetTuneZone(0);
+	}
+	else
+	{
+		int CurrentIndex = Collision()->GetMapIndex(m_Pos);
+		int Type = Collision()->GetTuneType(CurrentIndex);
+		int Number = Collision()->GetTuneNumber(CurrentIndex);
+
+		SetTuneZone(m_TuneZoneOverride == TUNEZONE_OVERRIDE_NONE ? Collision()->IsTuneZoneTile(CurrentIndex) : 0);
+
+		if(Type == TILE_TUNE_LOCK_ENABLE)
+		{
+			m_TuneZoneOverride = Number;
+		}
+		else if(Type == TILE_TUNE_LOCK_DISABLE)
+		{
+			m_TuneZoneOverride = TUNEZONE_OVERRIDE_NONE;
+		}
+	}
 	m_Core.m_Tuning = *GetTuning(GetOverriddenTuneZone());
 }
 
@@ -1410,7 +1429,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			UnFreeze();
 		}
 
-		m_TuneZoneOverride = -1;
+		m_TuneZoneOverride = TUNEZONE_OVERRIDE_NONE;
 	}
 
 	vec2 PosBefore = m_Pos;
@@ -1427,7 +1446,15 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	m_AttackTick = pChar->m_AttackTick;
 	m_LastSnapWeapon = pChar->m_Weapon;
 
-	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(m_Pos)) : 0);
+	if(GameWorld()->m_WorldConfig.m_UseTuneZones)
+	{
+		if(m_TuneZoneOverride == TUNEZONE_OVERRIDE_NONE)
+			SetTuneZone(Collision()->IsTuneZoneTile(Collision()->GetMapIndex(m_Pos)));
+	}
+	else
+	{
+		SetTuneZone(0);
+	}
 
 	// set the current weapon
 	if(pChar->m_Weapon >= 0 && pChar->m_Weapon != WEAPON_NINJA)
@@ -1504,7 +1531,7 @@ void CCharacter::SetTuneZone(int Zone)
 
 int CCharacter::GetOverriddenTuneZone() const
 {
-	return m_TuneZoneOverride < 0 ? m_TuneZone : m_TuneZoneOverride;
+	return m_TuneZoneOverride == TUNEZONE_OVERRIDE_NONE ? m_TuneZone : m_TuneZoneOverride;
 }
 
 int CCharacter::GetPureTuneZone() const
