@@ -107,6 +107,7 @@ private:
 	int m_CollisionEnabled;
 	int m_TuneZone;
 	int m_TuneZoneOld;
+	int m_TuneZoneOverride;
 	int m_HookHitEnabled;
 	int m_Time;
 	vec2 m_Pos;
