@@ -1339,6 +1339,9 @@ Show DDRace HUD
 Show jumps indicator
 == 显示可跳跃次数
 
+Show number of spectators
+== 显示旁观者人数
+
 Hook collision line
 == 钩索辅助线
 
@@ -2131,7 +2134,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 简体中文翻译由以下人员贡献：MK124, CarolVlCznYu, MC_TYH, Yangfl, Eki, Night_L, TsFreddie, Dan_cao, Momo, cheeser0613, RemakePower, By, Bamcane, Pioooooo, 豆腐渣
+== 简体中文翻译由以下人员贡献：MK124, CarolVlCznYu, MC_TYH, Yangfl, Eki, Night_L, TsFreddie, Dan_cao, Momo, cheeser0613, RemakePower, By, Bamcane, Pioooooo, 豆腐渣, XCWQW1
 
 Show spectator cursor
 == 显示旁观者光标
