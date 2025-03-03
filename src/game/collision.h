@@ -92,6 +92,8 @@ public:
 	int IsTeleportHook(int Index) const;
 	int IsTeleCheckpoint(int Index) const;
 	int IsSpeedup(int Index) const;
+	int GetTuneNumber(int Index) const;
+	int GetTuneType(int Index) const;
 	int IsTune(int Index) const;
 	void GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed, int *pType) const;
 	int GetSwitchType(int Index) const;

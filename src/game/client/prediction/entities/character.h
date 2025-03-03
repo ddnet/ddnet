@@ -127,6 +127,7 @@ public:
 	void ResetPrediction();
 	void SetTuneZone(int Zone);
 	int GetOverriddenTuneZone() const;
+	int GetPureOverriddenTuneZone() const;
 	int GetPureTuneZone() const;
 
 	bool HammerHitDisabled() { return m_Core.m_HammerHitDisabled; }
