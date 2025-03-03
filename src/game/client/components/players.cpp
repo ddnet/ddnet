@@ -921,13 +921,24 @@ void CPlayers::OnRender()
 	}
 
 	// render spectating players
-	for(auto &Client : m_pClient->m_aClients)
+	for(const auto &Client : m_pClient->m_aClients)
 	{
 		if(!Client.m_SpecCharPresent)
 		{
 			continue;
 		}
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Client.m_SpecChar);
+		// don't render offscreen
+		if(!in_range(Client.m_RenderPos.x, ScreenX0, ScreenX1) || !in_range(Client.m_RenderPos.y, ScreenY0, ScreenY1))
+		{
+			continue;
+		}
+		const int ClientId = Client.ClientId();
+		float Alpha = (m_pClient->IsOtherTeam(ClientId) || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.f : 1.f;
+		if(ClientId == -2) // ghost
+		{
+			Alpha = g_Config.m_ClRaceGhostAlpha / 100.f;
+		}
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &RenderInfoSpec, EMOTE_BLINK, vec2(1, 0), Client.m_SpecChar, Alpha);
 	}
 
 	// render everyone else's tee, then either our own or the tee we are spectating.
@@ -942,9 +953,7 @@ void CPlayers::OnRender()
 
 		RenderHookCollLine(&m_pClient->m_aClients[ClientId].m_RenderPrev, &m_pClient->m_aClients[ClientId].m_RenderCur, ClientId);
 
-		// don't render offscreen
-		vec2 *pRenderPos = &m_pClient->m_aClients[ClientId].m_RenderPos;
-		if(pRenderPos->x < ScreenX0 || pRenderPos->x > ScreenX1 || pRenderPos->y < ScreenY0 || pRenderPos->y > ScreenY1)
+		if(!in_range(m_pClient->m_aClients[ClientId].m_RenderPos.x, ScreenX0, ScreenX1) || !in_range(m_pClient->m_aClients[ClientId].m_RenderPos.y, ScreenY0, ScreenY1))
 		{
 			continue;
 		}
