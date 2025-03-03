@@ -219,26 +219,26 @@ float CInput::CJoystick::GetAxisValue(int Axis)
 	return (SDL_JoystickGetAxis(m_pDelegate, Axis) - SDL_JOYSTICK_AXIS_MIN) / (float)(SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN) * 2.0f - 1.0f;
 }
 
-void CInput::CJoystick::GetJoystickHatKeys(int Hat, int HatValue, int (&HatKeys)[2])
+void CInput::CJoystick::GetJoystickHatKeys(int Hat, int HatValue, int (&aHatKeys)[2])
 {
 	if(HatValue & SDL_HAT_UP)
-		HatKeys[0] = KEY_JOY_HAT0_UP + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+		aHatKeys[0] = KEY_JOY_HAT0_UP + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
 	else if(HatValue & SDL_HAT_DOWN)
-		HatKeys[0] = KEY_JOY_HAT0_DOWN + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+		aHatKeys[0] = KEY_JOY_HAT0_DOWN + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
 	else
-		HatKeys[0] = KEY_UNKNOWN;
+		aHatKeys[0] = KEY_UNKNOWN;
 
 	if(HatValue & SDL_HAT_LEFT)
-		HatKeys[1] = KEY_JOY_HAT0_LEFT + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+		aHatKeys[1] = KEY_JOY_HAT0_LEFT + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
 	else if(HatValue & SDL_HAT_RIGHT)
-		HatKeys[1] = KEY_JOY_HAT0_RIGHT + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+		aHatKeys[1] = KEY_JOY_HAT0_RIGHT + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
 	else
-		HatKeys[1] = KEY_UNKNOWN;
+		aHatKeys[1] = KEY_UNKNOWN;
 }
 
-void CInput::CJoystick::GetHatValue(int Hat, int (&HatKeys)[2])
+void CInput::CJoystick::GetHatValue(int Hat, int (&aHatKeys)[2])
 {
-	GetJoystickHatKeys(Hat, SDL_JoystickGetHat(m_pDelegate, Hat), HatKeys);
+	GetJoystickHatKeys(Hat, SDL_JoystickGetHat(m_pDelegate, Hat), aHatKeys);
 }
 
 bool CInput::CJoystick::Relative(float *pX, float *pY)
@@ -487,18 +487,18 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 	if(Event.hat >= NUM_JOYSTICK_HATS)
 		return;
 
-	int HatKeys[2];
-	CJoystick::GetJoystickHatKeys(Event.hat, Event.value, HatKeys);
+	int aHatKeys[2];
+	CJoystick::GetJoystickHatKeys(Event.hat, Event.value, aHatKeys);
 
-	for(int Key = KEY_JOY_HAT0_UP + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_DOWN + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
+	for(int Key = KEY_JOY_HAT0_UP + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_RIGHT + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
 	{
-		if(Key != HatKeys[0] && Key != HatKeys[1] && m_aCurrentKeyStates[Key])
+		if(Key != aHatKeys[0] && Key != aHatKeys[1] && m_aCurrentKeyStates[Key])
 		{
 			AddKeyEvent(Key, IInput::FLAG_RELEASE);
 		}
 	}
 
-	for(int CurrentKey : HatKeys)
+	for(int CurrentKey : aHatKeys)
 	{
 		if(CurrentKey != KEY_UNKNOWN && !m_aCurrentKeyStates[CurrentKey])
 		{
