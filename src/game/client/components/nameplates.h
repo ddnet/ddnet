@@ -134,7 +134,7 @@ class CNamePlates : public CComponent
 	void RenderNamePlate(CNamePlate &NamePlate, const CRenderNamePlateData &Data);
 
 public:
-	void RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha, bool ForceAlpha);
+	void RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha);
 	void RenderNamePlatePreview(vec2 Position);
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;
