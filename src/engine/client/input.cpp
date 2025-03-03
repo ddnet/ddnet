@@ -490,7 +490,7 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 	int aHatKeys[2];
 	CJoystick::GetJoystickHatKeys(Event.hat, Event.value, aHatKeys);
 
-	for(int Key = KEY_JOY_HAT0_UP + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_DOWN + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
+	for(int Key = KEY_JOY_HAT0_UP + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_RIGHT + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
 	{
 		if(Key != aHatKeys[0] && Key != aHatKeys[1] && m_aCurrentKeyStates[Key])
 		{
