@@ -396,8 +396,13 @@ bool CControls::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 		}
 	}
 
-	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId < 0)
-		Factor *= m_pClient->m_Camera.m_Zoom;
+	if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+	{
+		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId < 0)
+			Factor *= m_pClient->m_Camera.m_Zoom;
+		else
+			return true;
+	}
 
 	m_aMousePos[g_Config.m_ClDummy] += vec2(x, y) * Factor;
 	ClampMousePos();
