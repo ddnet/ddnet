@@ -372,6 +372,39 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	}
 }
 
+bool CMenus::DoLine_RadioMenu(CUIRect &View, const char *pLabel, std::vector<CButtonContainer> &vButtonContainers, const std::vector<const char *> &vLabels, const std::vector<int> &vValues, int &Value)
+{
+	dbg_assert(vButtonContainers.size() == vValues.size(), "vButtonContainers and vValues must have the same size");
+	dbg_assert(vButtonContainers.size() == vLabels.size(), "vButtonContainers and vLabels must have the same size");
+	const int N = vButtonContainers.size();
+	const float Spacing = 2.0f;
+	const float ButtonHeight = 20.0f;
+	CUIRect Label, Buttons;
+	View.HSplitTop(Spacing, nullptr, &View);
+	View.HSplitTop(ButtonHeight, &Buttons, &View);
+	Buttons.VSplitMid(&Label, &Buttons, 10.0f);
+	Buttons.HMargin(2.0f, &Buttons);
+	Ui()->DoLabel(&Label, pLabel, 13.0f, TEXTALIGN_ML);
+	const float W = Buttons.w / N;
+	bool Pressed = false;
+	for(int i = 0; i < N; ++i)
+	{
+		CUIRect Button;
+		Buttons.VSplitLeft(W, &Button, &Buttons);
+		int Corner = IGraphics::CORNER_NONE;
+		if(i == 0)
+			Corner = IGraphics::CORNER_L;
+		if(i == N - 1)
+			Corner = IGraphics::CORNER_R;
+		if(DoButton_Menu(&vButtonContainers[i], vLabels[i], vValues[i] == Value, &Button, BUTTONFLAG_LEFT, nullptr, Corner))
+		{
+			Pressed = true;
+			Value = vValues[i];
+		}
+	}
+	return Pressed;
+}
+
 ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetId, const float LineSize, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing, int *pCheckBoxValue, bool Alpha)
 {
 	CUIRect Section, ColorPickerButton, ResetButton, Label;
