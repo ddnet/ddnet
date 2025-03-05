@@ -45,6 +45,8 @@ CProjectile::CProjectile(
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
+	m_DDRaceTeam = m_Owner == -1 ? 0 : GameServer()->GetDDRaceTeam(m_Owner);
+	m_IsSolo = pOwnerChar && pOwnerChar->GetCore().m_Solo;
 
 	GameWorld()->InsertEntity(this);
 }
@@ -367,6 +369,15 @@ void CProjectile::SwapClients(int Client1, int Client2)
 }
 
 // DDRace
+
+bool CProjectile::CanCollide(int ClientId)
+{
+	if(m_DDRaceTeam != GameServer()->GetDDRaceTeam(ClientId))
+		return false;
+	if(m_IsSolo)
+		return m_Owner == ClientId;
+	return true;
+}
 
 void CProjectile::SetBouncing(int Value)
 {
