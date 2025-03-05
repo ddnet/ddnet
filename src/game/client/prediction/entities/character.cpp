@@ -461,7 +461,7 @@ void CCharacter::FireWeapon()
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
-		GetTuning(GetOverriddenTuneZone())->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+		GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 
 		m_ReloadTimer = FireDelay * GameWorld()->GameTickSpeed() / 1000;
 	}
@@ -1419,7 +1419,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		if(maximum(m_LastTuneZoneTick, m_LastWeaponSwitchTick) + GameWorld()->GameTickSpeed() < GameWorld()->GameTick())
 		{
 			float FireDelay;
-			GetTuning(GetOverriddenTuneZone())->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+			GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 			const int FireDelayTicks = FireDelay * GameWorld()->GameTickSpeed() / 1000;
 			m_ReloadTimer = maximum(0, m_AttackTick + FireDelayTicks - GameWorld()->GameTick());
 		}
