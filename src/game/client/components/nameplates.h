@@ -47,7 +47,7 @@ class CNamePlate;
 class CNamePlates : public CComponent
 {
 private:
-	CNamePlate *m_aNamePlates = nullptr;
+	CNamePlate *m_pNamePlates;
 
 public:
 	void RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha);
@@ -55,8 +55,8 @@ public:
 	void ResetNamePlates();
 	int Sizeof() const override { return sizeof(*this); }
 	void OnWindowResize() override;
-	void OnInit() override;
 	void OnRender() override;
+	CNamePlates();
 	~CNamePlates();
 };
 
