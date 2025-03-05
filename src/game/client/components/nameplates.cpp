@@ -702,7 +702,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 		}
 	}
 
-	m_aNamePlates[pPlayerInfo->m_ClientId].Render(*GameClient(), &Data);
+	m_pNamePlates[pPlayerInfo->m_ClientId].Render(*GameClient(), &Data);
 }
 
 void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
@@ -785,7 +785,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 void CNamePlates::ResetNamePlates()
 {
 	for(int i = 0; i < MAX_CLIENTS; ++i)
-		m_aNamePlates[i].Reset(*GameClient());
+		m_pNamePlates[i].Reset(*GameClient());
 }
 
 void CNamePlates::OnRender()
@@ -842,12 +842,12 @@ void CNamePlates::OnWindowResize()
 	ResetNamePlates();
 }
 
-void CNamePlates::OnInit()
+CNamePlates::CNamePlates()
 {
-	m_aNamePlates = new CNamePlate[MAX_CLIENTS];
+	m_pNamePlates = new CNamePlate[MAX_CLIENTS];
 }
 
 CNamePlates::~CNamePlates()
 {
-	delete[] m_aNamePlates;
+	delete[] m_pNamePlates;
 }
