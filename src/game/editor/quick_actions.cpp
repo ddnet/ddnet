@@ -261,17 +261,24 @@ void CEditor::TestMapLocally()
 	{
 		char aRegister[] = "sv_register 0";
 
+		char aServerPassCmd[64];
+		char aServerPass[32];
 		char aRandomPass[17];
+		char aUser[] = "editor-local-server";
+		char aAuthLevel[] = "admin";
 		secure_random_password(aRandomPass, sizeof(aRandomPass), 16);
 		char aPass[64];
-		str_format(aPass, sizeof(aPass), "sv_rcon_password %s", aRandomPass);
+		str_format(aPass, sizeof(aPass), "auth_add %s %s %s", aUser, aAuthLevel, aRandomPass);
+
+		str_format(aServerPass, sizeof(aServerPass), "%s:%s", aUser, aRandomPass);
+		str_format(aServerPassCmd, sizeof(aServerPassCmd), "password %s", aServerPass);
 
 		str_format(aBuf, sizeof(aBuf), "change_map %s", aFileNameNoExt);
-		const char *apArguments[] = {aRegister, aPass, aBuf};
+		const char *apArguments[] = {aRegister, aPass, aBuf, aServerPassCmd};
 		pGameClient->m_Menus.RunServer(apArguments, std::size(apArguments));
 		OnClose();
 		g_Config.m_ClEditor = 0;
-		Client()->Connect("localhost");
-		Client()->RconAuth("", aRandomPass, g_Config.m_ClDummy);
+		Client()->Connect("localhost", aServerPass);
+		Client()->RconAuth(aUser, aRandomPass, g_Config.m_ClDummy);
 	}
 }
