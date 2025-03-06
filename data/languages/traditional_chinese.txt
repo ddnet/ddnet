@@ -367,6 +367,15 @@ Show ingame HUD
 Show name plates
 == 顯示暱稱
 
+None
+== 禁用
+
+Own
+== 自身
+
+Others
+== 其他
+
 Show only chat messages from friends
 == 只顯示好友聊天訊息
 
@@ -441,6 +450,9 @@ Use sounds
 
 Use team colors for name plates
 == 用隊伍顏色顯示暱稱
+
+Show friend icon in name plates
+== 在暱稱中顯示好友圖示
 
 V-Sync
 == 垂直同步
@@ -549,6 +561,9 @@ LAN
 
 Name plates size
 == 暱稱大小
+
+Name plates offset
+== 暱稱距離
 
 Show score
 == 顯示比分
@@ -2049,6 +2064,12 @@ https://wiki.ddnet.org/wiki/Touch_controls
 Show client IDs in name plates
 == 顯示客戶端 ID
 
+Show client IDs on a seperate line
+== 客户端 ID 換行顯示
+
+Client IDs size
+== 客户端 ID 大小
+
 Hook Strength
 == 鉤索強度
 
@@ -2058,8 +2079,14 @@ Size of hook strength icon and number indicator
 Key Presses
 == 按鍵顯示
 
+Show players' key presses
+== 顯示按鍵
+
 Size of key press icons
 == 按鍵顯示圖示大小
+
+Preview dummy's name plate
+== 預覽分身暱稱
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 伺服器無法啟動。請確保在應用程式設置中授予通知權限，以便伺服器可以在後台運行。
