@@ -28,6 +28,7 @@ public:
 	int m_aInputDirectionLeft[NUM_DUMMIES];
 	int m_aInputDirectionRight[NUM_DUMMIES];
 	int m_aShowHookColl[NUM_DUMMIES];
+	bool m_NullMovement;
 
 	CControls();
 	virtual int Sizeof() const override { return sizeof(*this); }
