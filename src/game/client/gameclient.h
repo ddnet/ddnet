@@ -110,6 +110,8 @@ public:
 	bool m_NoSkinChangeForFrozen;
 
 	bool m_DDRaceTeam;
+
+	bool m_SpecAfterDeath;
 };
 
 class CSnapEntities
