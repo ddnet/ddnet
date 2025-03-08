@@ -108,9 +108,9 @@ public:
 	void Render(CGameClient &This, float X, float Y) const override
 	{
 		IGraphics::CQuadItem QuadItem(X - Size().x / 2.0f, Y - Size().y / 2.0f, Size().x, Size().y);
-		This.Graphics()->SetColor(m_Color);
 		This.Graphics()->TextureSet(m_Texture);
 		This.Graphics()->QuadsBegin();
+		This.Graphics()->SetColor(m_Color);
 		This.Graphics()->QuadsSetRotation(m_Rotation);
 		This.Graphics()->QuadsDrawTL(&QuadItem, 1);
 		This.Graphics()->QuadsEnd();
@@ -211,6 +211,7 @@ public:
 			m_Offset.y = m_Size.y / 4.0f;
 			break;
 		}
+		m_Color.a = Data.m_Color.a;
 	}
 };
 
@@ -464,6 +465,11 @@ private:
 			return;
 		m_Inited = true;
 
+		AddPart<CNamePlatePartDirection>(This, DIRECTION_LEFT);
+		AddPart<CNamePlatePartDirection>(This, DIRECTION_UP);
+		AddPart<CNamePlatePartDirection>(This, DIRECTION_RIGHT);
+		AddPart<CNamePlatePartNewLine>(This);
+
 		AddPart<CNamePlatePartClientId>(This, false);
 		AddPart<CNamePlatePartFriendMark>(This);
 		AddPart<CNamePlatePartName>(This);
@@ -477,11 +483,6 @@ private:
 
 		AddPart<CNamePlatePartHookStrongWeak>(This);
 		AddPart<CNamePlatePartHookStrongWeakId>(This);
-		AddPart<CNamePlatePartNewLine>(This);
-
-		AddPart<CNamePlatePartDirection>(This, DIRECTION_LEFT);
-		AddPart<CNamePlatePartDirection>(This, DIRECTION_UP);
-		AddPart<CNamePlatePartDirection>(This, DIRECTION_RIGHT);
 	}
 	void Update(CGameClient &This, const CNamePlateRenderData *pData)
 	{
