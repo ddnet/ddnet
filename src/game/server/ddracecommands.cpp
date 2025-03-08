@@ -70,6 +70,21 @@ void CGameContext::ConMoveRaw(IConsole::IResult *pResult, void *pUserData)
 		pResult->GetInteger(1), true);
 }
 
+void CGameContext::ConConfetti(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Victim = pResult->NumArguments() == 1 ? pResult->GetVictim() : pResult->m_ClientId;
+
+	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
+	if(!pChr)
+		return;
+
+	if(pSelf->m_apPlayers[Victim])
+	{
+		pSelf->CreateBirthdayEffect(pChr->m_Pos, pChr->TeamMask());
+	}
+}
+
 void CGameContext::MoveCharacter(int ClientId, int X, int Y, bool Raw)
 {
 	CCharacter *pChr = GetPlayerChar(ClientId);
