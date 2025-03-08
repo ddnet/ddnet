@@ -897,6 +897,15 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
 int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t host_buf_size);
 
 /**
+ * Checks if an address is local.
+ *
+ * @param addr Address to check.
+ *
+ * @return `true` if the address is local, `false` otherwise.
+ */
+bool net_addr_is_local(const NETADDR *addr);
+
+/**
  * Turns string into a network address.
  *
  * @param addr Address to fill in.
