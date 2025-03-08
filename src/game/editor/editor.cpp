@@ -1351,7 +1351,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					{
 						pButtonName = "Tune";
 						pfnPopupFunc = PopupTune;
-						Rows = 1;
+						Rows = 2;
 					}
 					else if(pS == m_Map.m_pTeleLayer)
 					{
@@ -9423,6 +9423,20 @@ int CEditor::FindNextFreeTeleNumber(bool Checkpoint)
 	for(int i = 1; i <= 255; i++)
 	{
 		if(!m_Map.m_pTeleLayer->ContainsElementWithId(i, Checkpoint))
+		{
+			Number = i;
+			break;
+		}
+	}
+	return Number;
+}
+
+int CEditor::FindNextFreeTuneNumber()
+{
+	int Number = -1;
+	for(int i = 1; i <= 255; i++)
+	{
+		if(!m_Map.m_pTuneLayer->ContainsElementWithId(i))
 		{
 			Number = i;
 			break;
