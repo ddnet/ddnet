@@ -33,6 +33,7 @@ void CControls::OnReset()
 		AmmoCount = 0;
 
 	m_LastSendTime = 0;
+	m_NullMovement = false;
 }
 
 void CControls::ResetInput(int Dummy)
@@ -241,6 +242,26 @@ int CControls::SnapInput(int *pData)
 			m_aInputData[g_Config.m_ClDummy].m_Direction = -1;
 		if(!m_aInputDirectionLeft[g_Config.m_ClDummy] && m_aInputDirectionRight[g_Config.m_ClDummy])
 			m_aInputData[g_Config.m_ClDummy].m_Direction = 1;
+
+		if(g_Config.m_ClNullMovement)
+		{
+			if(m_aInputDirectionLeft[g_Config.m_ClDummy] && m_aInputDirectionRight[g_Config.m_ClDummy])
+			{
+				if(m_aLastData[g_Config.m_ClDummy].m_Direction != 0 && !m_NullMovement)
+				{
+					m_NullMovement = true;
+					m_aInputData[g_Config.m_ClDummy].m_Direction = m_aLastData[g_Config.m_ClDummy].m_Direction * -1;
+				}
+				else if(m_NullMovement)
+				{
+					m_aInputData[g_Config.m_ClDummy].m_Direction = m_aLastData[g_Config.m_ClDummy].m_Direction;
+				}
+			}
+			else
+			{
+				m_NullMovement = false;
+			}
+		}
 
 		// dummy copy moves
 		if(g_Config.m_ClDummyCopyMoves)
