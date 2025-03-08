@@ -411,8 +411,8 @@ bool CNetBase::IsSeqInBackroom(int Seq, int Ack)
 	return false;
 }
 
-IOHANDLE CNetBase::ms_DataLogSent = 0;
-IOHANDLE CNetBase::ms_DataLogRecv = 0;
+IOHANDLE CNetBase::ms_DataLogSent = nullptr;
+IOHANDLE CNetBase::ms_DataLogRecv = nullptr;
 CHuffman CNetBase::ms_Huffman;
 
 void CNetBase::OpenLog(IOHANDLE DataLogSent, IOHANDLE DataLogRecv)
@@ -440,14 +440,14 @@ void CNetBase::CloseLog()
 	{
 		dbg_msg("network", "stopped logging sent packages");
 		io_close(ms_DataLogSent);
-		ms_DataLogSent = 0;
+		ms_DataLogSent = nullptr;
 	}
 
 	if(ms_DataLogRecv)
 	{
 		dbg_msg("network", "stopped logging recv packages");
 		io_close(ms_DataLogRecv);
-		ms_DataLogRecv = 0;
+		ms_DataLogRecv = nullptr;
 	}
 }
 

@@ -1,31 +1,3 @@
-##### authors #####
-#originally created by:
-#	kaddyd
-#modified by:
-#	carzil		2011-04-05 19:19:06
-#	RaZeR[RT]	2011-04-12 17:57:02
-#	BotanEgg	2011-05-02 19:07:35
-#	Bananbl4	2011-07-07 02:03:04
-#	Arion WT	2011-07-07 09:39:05
-#	Arion WT	2011-08-07 12:16:28
-#	gerdoe		2020-07-01 22:04:21
-#	gerdoe		2020-09-14 20:53:53
-#	gerdoe		2020-09-17 22:49:22
-#	Vy0x2		2021-06-08 15:48:25
-#	Anime.pdf	2021-06-13 13:08:50
-#	banan		2022-06-12 11:36:50
-#	ban			2023-01-05 10:22:50
-#	unban		2023-03-10 21:50:50
-#	eblan		2023-08-07 14:27:00
-#	kaban		2023-09-21 19:00:00
-#	ByFox		2023-11-14 11:24:00
-#	Sedonya		2024-06-20 03:18:10
-#       WTF             2024-11-03 15:57:20
-#	Риксед		2024-12-11 16:34:00
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == осталось %d сек
 
@@ -424,9 +396,6 @@ The audio device couldn't be initialised.
 
 The server is running a non-standard tuning on a pure game type.
 == Сервер запущен с нестандартными настройками на стандартном типе игры.
-
-Time limit
-== Лимит времени
 
 Time limit: %d min
 == Лимит времени: %d
@@ -1960,9 +1929,6 @@ Add friends by entering their name below or by clicking their name in the player
 Add clanmates by entering their clan below and leaving the name blank.
 == Чтобы добавить соклановцев, впишите их клан и оставьте имя пустым.
 
-Offline friends and clanmates will appear here.
-== Друзья не в сети и соклановцы появятся здесь.
-
 Edit touch controls
 == Изменить сенсорное управление
 
@@ -2056,35 +2022,110 @@ Active: Hook
 == Активно: Крюк
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" не совместим с pnglite и не может быть загружен старыми версиями DDNet:
 
 Loading background map
-== 
+== Загрузка карты фона
+
+Auto-sync player camera
+== Автоматически синхронизировать камеру игрока
+
+[Auto camera]
+Disabled
+== Выключено
+
+[Auto camera]
+Enabled
+== Включено
+
+[Auto camera]
+Unavailable for this player
+== Недостуно для этого игрока
+
+[Auto camera]
+Inactive
+== Неактивно
+
+[Auto camera]
+Active
+== Активно
+
+Loading maps…
+== Загрузка карт…
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== АВТО
 
 Toggle auto camera
-== 
+== Включить авто камеру
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
+
+Community
+== Сообщество
+
+[Team status]
+forbidden
+== запрещены
+
+[Team status]
+solo
+== соло
+
+[Team status]
+allowed
+== разрешенны
+
+[Team status]
+required
+== требуются
+
+Teams
+== Команды
+
+[Team size]
+minimum
+== минимум
+
+[Team size]
+maximum
+== максимум
+
+Saves file
+== Файл сохранения
+
+Open the saves file
+== Открыть файл сохранения
+
+Show FPS
+== Показывать FPS
+
+Renders your frame rate in the top right
+== Отображает частоту кадров в правом верхнем углу
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Русский перевод выполнен: kaddyd, carzil, RaZeR[RT], BotanEgg, Bananbl4, Arion WT, gerdoe, Vy0x2, Anime.pdf, ban+eblan, ByFox, Sedonya, WTF, Риксед и oxyzo
+
+Show spectator cursor
+== Показывать курсор других при наблюдении
 
 Show client IDs in name plates
-== 
+== Показывать ID клиента в именах
 
 Hook Strength
-== 
+== Сила крюка
 
 Size of hook strength icon and number indicator
-== 
+== Размер иконки силы крюка и индикатора числа
 
 Key Presses
-== 
+== Действия игроков
 
 Size of key press icons
-== 
+== Размер иконок действий игроков
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Не удалось запустить сервер. Убедитесь, что вы предоставили разрешение на уведомления в настройках приложения, чтобы сервер мог работать в фоновом режиме.

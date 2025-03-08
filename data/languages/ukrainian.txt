@@ -1,14 +1,3 @@
-##### authors #####
-#originally created by:
-#	.ua and Ivan. REWORKED BY SwiatoslaW#2927 (09.12.2021)
-#modified by:
-#	404_not_found		2011-07-30 19:50:58
-#	EGYT5453			(15.05.2024-04.01.2025)
-#	veydzh3r			(31.08.2024-01.09.2024)
-##### /authors #####
-
-##### translated strings #####
-
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == "%s" не сумісний з pnglite і не може бути завантажений на старих версіях DDNet:
 
@@ -1242,9 +1231,6 @@ Nothing hookable
 Offline (%d)
 == Не в мережі (%d)
 
-Offline friends and clanmates will appear here.
-== Тут з'являться друзі та співклановці не в мережі.
-
 Ok
 == Гаразд
 
@@ -1858,9 +1844,6 @@ There's an unsaved map in the editor, you might want to save it.
 Time
 == Час
 
-Time limit
-== Обмеження по часу
-
 Time limit: %d min
 == Обмеження по часу: %dхв
 
@@ -2071,3 +2054,78 @@ Zoom in
 
 Zoom out
 == Віддалити
+
+Auto-sync player camera
+== Авто. синхронізовувати камеру гравця
+
+[Auto camera]
+Disabled
+== Вимкнено
+
+[Auto camera]
+Enabled
+== Увімкнено
+
+[Auto camera]
+Unavailable for this player
+== Недоступно для цього гравця
+
+[Auto camera]
+Inactive
+== Неактивно
+
+[Auto camera]
+Active
+== Активно
+
+Loading maps…
+== Завантаження мап…
+
+Community
+== Спільнота
+
+[Team status]
+forbidden
+== заборонено
+
+[Team status]
+solo
+== наодинці
+
+[Team status]
+allowed
+== дозволено
+
+[Team status]
+required
+== необхідно
+
+Teams
+== Команди
+
+[Team size]
+minimum
+== мін.
+
+[Team size]
+maximum
+== макс.
+
+Saves file
+== Файл збережень
+
+Open the saves file
+== Відкрити файл збережень
+
+Show FPS
+== Показувати кадри/с
+
+Renders your frame rate in the top right
+== Виводить частоту кадрів у верхньому правому куті
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Український переклад від .ua, Ivan., SwiatoslaW, 404_not_found, EGYT5453 та veydzh3r
+
+Show spectator cursor
+== Показувати вказівник глядача

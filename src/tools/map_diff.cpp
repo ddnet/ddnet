@@ -18,7 +18,7 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 		}
 
 		const CMapItemVersion *pVersion = static_cast<CMapItemVersion *>(aMaps[i].FindItem(MAPITEMTYPE_VERSION, 0));
-		if(pVersion == nullptr || pVersion->m_Version != CMapItemVersion::CURRENT_VERSION)
+		if(pVersion == nullptr || pVersion->m_Version != 1)
 		{
 			dbg_msg("map_compare", "unsupported map version '%s'", pMapNames[i]);
 			return false;

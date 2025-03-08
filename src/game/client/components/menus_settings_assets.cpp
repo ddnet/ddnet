@@ -243,7 +243,7 @@ static const CMenus::SCustomItem *GetCustomItem(int CurTab, size_t Index)
 	else if(CurTab == ASSETS_TAB_EXTRAS)
 		return gs_vpSearchExtrasList[Index];
 
-	return NULL;
+	return nullptr;
 }
 
 template<typename TName>
@@ -416,7 +416,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		InitAssetList(m_vExtrasList, "assets/extras", "extras", ExtrasScan, Graphics(), Storage(), &User);
 	}
 
-	MainView.HSplitTop(10.0f, 0, &MainView);
+	MainView.HSplitTop(10.0f, nullptr, &MainView);
 
 	// skin selector
 	MainView.HSplitTop(MainView.h - 10.0f - ms_ButtonHeight, &CustomList, &MainView);
@@ -500,7 +500,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	for(size_t i = 0; i < SearchListSize; ++i)
 	{
 		const SCustomItem *pItem = GetCustomItem(s_CurCustomTab, i);
-		if(pItem == NULL)
+		if(pItem == nullptr)
 			continue;
 
 		if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
@@ -542,7 +542,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 
 		CUIRect TextureRect;
 		ItemRect.HSplitTop(15, &ItemRect, &TextureRect);
-		TextureRect.HSplitTop(10, NULL, &TextureRect);
+		TextureRect.HSplitTop(10, nullptr, &TextureRect);
 		Ui()->DoLabel(&ItemRect, pItem->m_aName, ItemRect.h - 2, TEXTALIGN_MC);
 		if(pItem->m_RenderTexture.IsValid())
 		{
@@ -604,10 +604,10 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		gs_aInitCustomList[s_CurCustomTab] = true;
 	}
 
-	DirectoryButton.HSplitTop(5.0f, 0, &DirectoryButton);
-	DirectoryButton.VSplitRight(175.0f, 0, &DirectoryButton);
+	DirectoryButton.HSplitTop(5.0f, nullptr, &DirectoryButton);
+	DirectoryButton.VSplitRight(175.0f, nullptr, &DirectoryButton);
 	DirectoryButton.VSplitRight(25.0f, &DirectoryButton, &ReloadButton);
-	DirectoryButton.VSplitRight(10.0f, &DirectoryButton, 0);
+	DirectoryButton.VSplitRight(10.0f, &DirectoryButton, nullptr);
 	static CButtonContainer s_AssetsDirId;
 	if(DoButton_Menu(&s_AssetsDirId, Localize("Assets directory"), 0, &DirectoryButton))
 	{

@@ -17,14 +17,14 @@
 //////////////////////////////////////////////////
 CGameWorld::CGameWorld()
 {
-	m_pGameServer = 0x0;
-	m_pConfig = 0x0;
-	m_pServer = 0x0;
+	m_pGameServer = nullptr;
+	m_pConfig = nullptr;
+	m_pServer = nullptr;
 
 	m_Paused = false;
 	m_ResetRequested = false;
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
-		pFirstEntityType = 0;
+		pFirstEntityType = nullptr;
 }
 
 CGameWorld::~CGameWorld()
@@ -44,7 +44,7 @@ void CGameWorld::SetGameServer(CGameContext *pGameServer)
 
 CEntity *CGameWorld::FindFirst(int Type)
 {
-	return Type < 0 || Type >= NUM_ENTTYPES ? 0 : m_apFirstEntityTypes[Type];
+	return Type < 0 || Type >= NUM_ENTTYPES ? nullptr : m_apFirstEntityTypes[Type];
 }
 
 int CGameWorld::FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Type)
@@ -79,7 +79,7 @@ void CGameWorld::InsertEntity(CEntity *pEnt)
 	if(m_apFirstEntityTypes[pEnt->m_ObjType])
 		m_apFirstEntityTypes[pEnt->m_ObjType]->m_pPrevTypeEntity = pEnt;
 	pEnt->m_pNextTypeEntity = m_apFirstEntityTypes[pEnt->m_ObjType];
-	pEnt->m_pPrevTypeEntity = 0x0;
+	pEnt->m_pPrevTypeEntity = nullptr;
 	m_apFirstEntityTypes[pEnt->m_ObjType] = pEnt;
 }
 
@@ -101,8 +101,8 @@ void CGameWorld::RemoveEntity(CEntity *pEnt)
 	if(m_pNextTraverseEntity == pEnt)
 		m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 
-	pEnt->m_pNextTypeEntity = 0;
-	pEnt->m_pPrevTypeEntity = 0;
+	pEnt->m_pNextTypeEntity = nullptr;
+	pEnt->m_pPrevTypeEntity = nullptr;
 }
 
 //
@@ -211,9 +211,6 @@ void CGameWorld::Tick()
 
 	if(!m_Paused)
 	{
-		if(GameServer()->m_pController->IsForceBalanced())
-			GameServer()->SendChat(-1, TEAM_ALL, "Teams have been balanced");
-
 		// update all objects
 		for(int i = 0; i < NUM_ENTTYPES; i++)
 		{
@@ -297,37 +294,40 @@ void CGameWorld::SwapClients(int Client1, int Client2)
 		}
 }
 
-// TODO: should be more general
 CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly)
 {
-	// Find other players
+	return (CCharacter *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_CHARACTER, NewPos, pNotThis, CollideWith, pThisOnly);
+}
+
+CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
+{
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
-	CCharacter *pClosest = 0;
+	CEntity *pClosest = nullptr;
 
-	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);
-	for(; p; p = (CCharacter *)p->TypeNext())
+	CEntity *pEntity = FindFirst(Type);
+	for(; pEntity; pEntity = pEntity->TypeNext())
 	{
-		if(p == pNotThis)
+		if(pEntity == pNotThis)
 			continue;
 
-		if(pThisOnly && p != pThisOnly)
+		if(pThisOnly && pEntity != pThisOnly)
 			continue;
 
-		if(CollideWith != -1 && !p->CanCollide(CollideWith))
+		if(CollideWith != -1 && !pEntity->CanCollide(CollideWith))
 			continue;
 
 		vec2 IntersectPos;
-		if(closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
+		if(closest_point_on_line(Pos0, Pos1, pEntity->m_Pos, IntersectPos))
 		{
-			float Len = distance(p->m_Pos, IntersectPos);
-			if(Len < p->m_ProximityRadius + Radius)
+			float Len = distance(pEntity->m_Pos, IntersectPos);
+			if(Len < pEntity->m_ProximityRadius + Radius)
 			{
 				Len = distance(Pos0, IntersectPos);
 				if(Len < ClosestLen)
 				{
 					NewPos = IntersectPos;
 					ClosestLen = Len;
-					pClosest = p;
+					pClosest = pEntity;
 				}
 			}
 		}
@@ -340,9 +340,9 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, const CEntity *
 {
 	// Find other players
 	float ClosestRange = Radius * 2;
-	CCharacter *pClosest = 0;
+	CCharacter *pClosest = nullptr;
 
-	CCharacter *p = (CCharacter *)GameServer()->m_World.FindFirst(ENTTYPE_CHARACTER);
+	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);
 	for(; p; p = (CCharacter *)p->TypeNext())
 	{
 		if(p == pNotThis)
@@ -386,7 +386,7 @@ std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1
 
 void CGameWorld::ReleaseHooked(int ClientId)
 {
-	CCharacter *pChr = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+	CCharacter *pChr = (CCharacter *)FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
 		if(pChr->Core()->HookedPlayer() == ClientId && !pChr->IsSuper())

@@ -107,7 +107,7 @@ void CChat::ClearLines()
 		Line.m_aName[0] = 0;
 		Line.m_Friend = false;
 		Line.m_TimesRepeated = 0;
-		Line.m_HasRenderTee = false;
+		Line.m_pManagedTeeRenderInfo = nullptr;
 	}
 	m_PrevScoreBoardShowed = false;
 	m_PrevShowChat = false;
@@ -128,7 +128,7 @@ void CChat::Reset()
 	m_aCompletionBuffer[0] = 0;
 	m_PlaceholderOffset = 0;
 	m_PlaceholderLength = 0;
-	m_pHistoryEntry = 0x0;
+	m_pHistoryEntry = nullptr;
 	m_PendingChatCounter = 0;
 	m_LastChatSend = 0;
 	m_CurrentLine = 0;
@@ -297,7 +297,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				{
 					PlayerName = m_pClient->m_aClients[PlayerInfo->m_ClientId].m_aName;
 					FoundInput = str_utf8_find_nocase(PlayerName, m_aCompletionBuffer);
-					if(FoundInput != 0)
+					if(FoundInput != nullptr)
 					{
 						m_aPlayerCompletionList[m_PlayerCompletionListLength].ClientId = PlayerInfo->m_ClientId;
 						// The score for suggesting a player name is determined by the distance of the search input to the beginning of the player name
@@ -314,7 +314,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 
 		if(m_aCompletionBuffer[0] == '/' && !m_vCommands.empty())
 		{
-			CCommand *pCompletionCommand = 0;
+			CCommand *pCompletionCommand = nullptr;
 
 			const size_t NumCommands = m_vCommands.size();
 
@@ -379,7 +379,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 		else
 		{
 			// find next possible name
-			const char *pCompletionString = 0;
+			const char *pCompletionString = nullptr;
 			if(m_PlayerCompletionListLength > 0)
 			{
 				// We do this in a loop, if a player left the game during the repeated pressing of Tab, they are skipped
@@ -659,7 +659,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	// trim right and set maximum length to 256 utf8-characters
 	int Length = 0;
 	const char *pStr = pLine;
-	const char *pEnd = 0;
+	const char *pEnd = nullptr;
 	while(*pStr)
 	{
 		const char *pStrOld = pStr;
@@ -668,9 +668,9 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		// check if unicode is not empty
 		if(!str_utf8_isspace(Code))
 		{
-			pEnd = 0;
+			pEnd = nullptr;
 		}
-		else if(pEnd == 0)
+		else if(pEnd == nullptr)
 			pEnd = pStrOld;
 
 		if(++Length >= MAX_LINE_LENGTH)
@@ -679,7 +679,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 			break;
 		}
 	}
-	if(pEnd != 0)
+	if(pEnd != nullptr)
 		*(const_cast<char *>(pEnd)) = 0;
 
 	if(*pLine == 0)
@@ -768,8 +768,8 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	pCurrentLine->m_Whisper = Team >= 2;
 	pCurrentLine->m_NameColor = -2;
 	pCurrentLine->m_Friend = false;
-	pCurrentLine->m_HasRenderTee = false;
 	pCurrentLine->m_CustomColor = CustomColor;
+	pCurrentLine->m_pManagedTeeRenderInfo = nullptr;
 
 	TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
 	Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
@@ -806,47 +806,56 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	}
 	else
 	{
-		auto &LineAuthor = m_pClient->m_aClients[pCurrentLine->m_ClientId];
+		const auto &LineAuthor = m_pClient->m_aClients[pCurrentLine->m_ClientId];
 
-		if(LineAuthor.m_Team == TEAM_SPECTATORS)
-			pCurrentLine->m_NameColor = TEAM_SPECTATORS;
-
-		if(m_pClient->IsTeamPlay())
+		if(LineAuthor.m_Active)
 		{
-			if(LineAuthor.m_Team == TEAM_RED)
-				pCurrentLine->m_NameColor = TEAM_RED;
-			else if(LineAuthor.m_Team == TEAM_BLUE)
-				pCurrentLine->m_NameColor = TEAM_BLUE;
+			if(LineAuthor.m_Team == TEAM_SPECTATORS)
+				pCurrentLine->m_NameColor = TEAM_SPECTATORS;
+
+			if(m_pClient->IsTeamPlay())
+			{
+				if(LineAuthor.m_Team == TEAM_RED)
+					pCurrentLine->m_NameColor = TEAM_RED;
+				else if(LineAuthor.m_Team == TEAM_BLUE)
+					pCurrentLine->m_NameColor = TEAM_BLUE;
+			}
 		}
 
 		if(Team == TEAM_WHISPER_SEND)
 		{
-			str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "→ %s", LineAuthor.m_aName);
+			str_copy(pCurrentLine->m_aName, "→");
+			if(LineAuthor.m_Active)
+			{
+				str_append(pCurrentLine->m_aName, " ");
+				str_append(pCurrentLine->m_aName, LineAuthor.m_aName);
+			}
 			pCurrentLine->m_NameColor = TEAM_BLUE;
 			pCurrentLine->m_Highlighted = false;
 			Highlighted = false;
 		}
 		else if(Team == TEAM_WHISPER_RECV)
 		{
-			str_format(pCurrentLine->m_aName, sizeof(pCurrentLine->m_aName), "← %s", LineAuthor.m_aName);
+			str_copy(pCurrentLine->m_aName, "←");
+			if(LineAuthor.m_Active)
+			{
+				str_append(pCurrentLine->m_aName, " ");
+				str_append(pCurrentLine->m_aName, LineAuthor.m_aName);
+			}
 			pCurrentLine->m_NameColor = TEAM_RED;
 			pCurrentLine->m_Highlighted = true;
 			Highlighted = true;
 		}
 		else
-			str_copy(pCurrentLine->m_aName, LineAuthor.m_aName);
-
-		str_copy(pCurrentLine->m_aText, pLine);
-		pCurrentLine->m_Friend = LineAuthor.m_Friend;
-
-		if(pCurrentLine->m_aName[0] != '\0')
 		{
-			if(!g_Config.m_ClChatOld)
-			{
-				str_copy(pCurrentLine->m_aSkinName, LineAuthor.m_aSkinName);
-				pCurrentLine->m_TeeRenderInfo = LineAuthor.m_RenderInfo;
-				pCurrentLine->m_HasRenderTee = true;
-			}
+			str_copy(pCurrentLine->m_aName, LineAuthor.m_aName);
+		}
+		str_copy(pCurrentLine->m_aText, pLine);
+
+		if(LineAuthor.m_Active)
+		{
+			pCurrentLine->m_Friend = LineAuthor.m_Friend;
+			pCurrentLine->m_pManagedTeeRenderInfo = GameClient()->CreateManagedTeeRenderInfo(LineAuthor);
 		}
 	}
 
@@ -904,21 +913,6 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_CLIENT, 1.0f);
 				m_aLastSoundPlayed[CHAT_CLIENT] = Now;
 			}
-		}
-	}
-}
-
-void CChat::OnRefreshSkins()
-{
-	for(auto &Line : m_aLines)
-	{
-		if(Line.m_HasRenderTee)
-		{
-			Line.m_TeeRenderInfo.Apply(m_pClient->m_Skins.Find(Line.m_aSkinName));
-		}
-		else
-		{
-			Line.m_TeeRenderInfo.Reset();
 		}
 	}
 }
@@ -995,11 +989,6 @@ void CChat::OnPrepareLines(float y)
 			{
 				pText = "Team successfully saved by ***. Use '/load ***' to continue";
 			}
-		}
-
-		if(g_Config.m_ClChatOld)
-		{
-			Line.m_HasRenderTee = false;
 		}
 
 		// get the y offset (calculate it if we haven't done that yet)
@@ -1298,10 +1287,11 @@ void CChat::OnRender()
 
 		if(Line.m_TextContainerIndex.Valid())
 		{
-			if(!g_Config.m_ClChatOld && Line.m_HasRenderTee)
+			if(!g_Config.m_ClChatOld && Line.m_pManagedTeeRenderInfo != nullptr)
 			{
+				CTeeRenderInfo &TeeRenderInfo = Line.m_pManagedTeeRenderInfo->TeeRenderInfo();
 				const int TeeSize = MessageTeeSize();
-				Line.m_TeeRenderInfo.m_Size = TeeSize;
+				TeeRenderInfo.m_Size = TeeSize;
 
 				float RowHeight = FontSize() + RealMsgPaddingY;
 				float OffsetTeeY = TeeSize / 2.0f;
@@ -1309,9 +1299,9 @@ void CChat::OnRender()
 
 				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
-				CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &Line.m_TeeRenderInfo, OffsetToMid);
+				CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeRenderInfo, OffsetToMid);
 				vec2 TeeRenderPos(x + (RealMsgPaddingX + TeeSize) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y);
-				RenderTools()->RenderTee(pIdleState, &Line.m_TeeRenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
+				RenderTools()->RenderTee(pIdleState, &TeeRenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
 			}
 
 			const ColorRGBA TextColor = TextRender()->DefaultTextColor().WithMultipliedAlpha(Blend);

@@ -52,3 +52,10 @@ void CEditorImage::AnalyseTileFlags()
 			}
 	}
 }
+
+void CEditorImage::Free()
+{
+	Graphics()->UnloadTexture(&m_Texture);
+	m_AutoMapper.Unload();
+	CImageInfo::Free();
+}

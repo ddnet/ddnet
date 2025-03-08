@@ -170,13 +170,22 @@ void CGameClient::OnConsoleInit()
 						  &m_TouchControls,
 						  &m_Binds});
 
+	// initialize client data
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+	{
+		CClientData &Client = m_aClients[ClientId];
+		Client.m_pGameClient = this;
+		Client.m_ClientId = ClientId;
+	}
+
 	// add basic console commands
 	Console()->Register("team", "i[team-id]", CFGFLAG_CLIENT, ConTeam, this, "Switch team");
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself to restart");
 	Console()->Register("ready_change", "", CFGFLAG_CLIENT, ConReadyChange7, this, "Change ready state (0.7 only)");
 
-	// register tune zone command to allow the client prediction to load tunezones from the map
+	// register game commands to allow the client prediction to load settings from the map
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
+	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 
 	for(auto &pComponent : m_vpAll)
 		pComponent->m_pClient = this;
@@ -396,6 +405,7 @@ void CGameClient::OnInit()
 
 	m_GameWorld.m_pCollision = Collision();
 	m_GameWorld.m_pTuningList = m_aTuningList;
+	m_GameWorld.m_pMapBugs = &m_MapBugs;
 	OnReset();
 
 	// Set free binds to DDRace binds if it's active
@@ -659,7 +669,7 @@ void CGameClient::OnReset()
 	m_CharOrder.Reset();
 	std::fill(std::begin(m_aSwitchStateTeam), std::end(m_aSwitchStateTeam), -1);
 
-	// m_aTuningList is reset in LoadMapSettings
+	// m_MapBugs and m_aTuningList are reset in LoadMapSettings
 
 	m_LastShowDistanceZoom = 0.0f;
 	m_LastZoom = 0.0f;
@@ -751,6 +761,9 @@ void CGameClient::UpdatePositions()
 
 void CGameClient::OnRender()
 {
+	const ColorRGBA ClearColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClOverlayEntities ? g_Config.m_ClBackgroundEntitiesColor : g_Config.m_ClBackgroundColor));
+	Graphics()->Clear(ClearColor.r, ClearColor.g, ClearColor.b);
+
 	// check if multi view got activated
 	if(!m_MultiView.m_IsInit && m_MultiViewActivated)
 	{
@@ -875,6 +888,8 @@ void CGameClient::OnRender()
 			}
 		}
 	}
+
+	UpdateManagedTeeRenderInfos();
 }
 
 void CGameClient::OnDummyDisconnect()
@@ -969,6 +984,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		// unpack the new tuning
 		CTuningParams NewTuning;
 		int *pParams = (int *)&NewTuning;
+
+		// No jetpack on DDNet incompatible servers,
+		// jetpack strength will be received by tune params
+		NewTuning.m_JetpackStrength = 0;
+
 		for(unsigned i = 0; i < sizeof(CTuningParams) / sizeof(int); i++)
 		{
 			// 31 is the magic number index of laser_damage
@@ -1607,11 +1627,6 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_UseCustomColor = pInfo->m_UseCustomColor;
 					pClient->m_ColorBody = pInfo->m_ColorBody;
 					pClient->m_ColorFeet = pInfo->m_ColorFeet;
-
-					pClient->m_SkinInfo.m_Size = 64;
-					pClient->m_SkinInfo.Apply(m_Skins.Find(pClient->m_aSkinName));
-					pClient->m_SkinInfo.ApplyColors(pClient->m_UseCustomColor, pClient->m_ColorBody, pClient->m_ColorFeet);
-					pClient->UpdateRenderInfo(IsTeamPlay());
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_PLAYERINFO)
@@ -1647,8 +1662,6 @@ void CGameClient::OnNewSnapshot()
 					}
 					else if(m_aStats[pInfo->m_ClientId].IsActive())
 						m_aStats[pInfo->m_ClientId].JoinSpec(Client()->GameTick(g_Config.m_ClDummy));
-
-					UpdateBotSkinDecoration(pInfo->m_ClientId);
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_DDNETPLAYER)
@@ -1782,6 +1795,7 @@ void CGameClient::OnNewSnapshot()
 				m_Snap.m_SpecInfo.m_Zoom = pDDNetSpecInfo->m_Zoom / 1000.0f;
 				m_Snap.m_SpecInfo.m_Deadzone = pDDNetSpecInfo->m_Deadzone;
 				m_Snap.m_SpecInfo.m_FollowFactor = pDDNetSpecInfo->m_FollowFactor;
+				m_Snap.m_SpecInfo.m_SpectatorCount = pDDNetSpecInfo->m_SpectatorCount;
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEINFO)
 			{
@@ -1891,7 +1905,12 @@ void CGameClient::OnNewSnapshot()
 
 	if(!FoundGameInfoEx)
 	{
-		m_GameInfo = GetGameInfo(0, 0, &ServerInfo);
+		m_GameInfo = GetGameInfo(nullptr, 0, &ServerInfo);
+	}
+
+	for(CClientData &Client : m_aClients)
+	{
+		Client.UpdateSkinInfo();
 	}
 
 	// setup local pointers
@@ -2291,7 +2310,7 @@ void CGameClient::OnPredict()
 			if((!m_Snap.m_aCharacters[i].m_Active && pChar->m_SnapTicks > 10) || IsOtherTeam(i))
 				pChar->Destroy();
 
-	CProjectile *pProjNext = 0;
+	CProjectile *pProjNext = nullptr;
 	for(CProjectile *pProj = (CProjectile *)m_PredictedWorld.FindFirst(CGameWorld::ENTTYPE_PROJECTILE); pProj; pProj = pProjNext)
 	{
 		pProjNext = (CProjectile *)pProj->TypeNext();
@@ -2304,7 +2323,7 @@ void CGameClient::OnPredict()
 	CCharacter *pLocalChar = m_PredictedWorld.GetCharacterById(m_Snap.m_LocalClientId);
 	if(!pLocalChar)
 		return;
-	CCharacter *pDummyChar = 0;
+	CCharacter *pDummyChar = nullptr;
 	if(PredictDummy())
 		pDummyChar = m_PredictedWorld.GetCharacterById(m_PredictedDummyId);
 
@@ -2329,18 +2348,13 @@ void CGameClient::OnPredict()
 				m_aClients[m_PredictedDummyId].m_PrevPredicted = pDummyChar->GetCore();
 		}
 
-		if(Tick == PredictionTick)
-		{
-			m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
-		}
-
 		// optionally allow some movement in freeze by not predicting freeze the last one to two ticks
 		if(g_Config.m_ClPredictFreeze == 2 && Client()->PredGameTick(g_Config.m_ClDummy) - 1 - Client()->PredGameTick(g_Config.m_ClDummy) % 2 <= Tick)
 			pLocalChar->m_CanMoveInFreeze = true;
 
 		// apply inputs and tick
 		CNetObj_PlayerInput *pInputData = (CNetObj_PlayerInput *)Client()->GetInput(Tick, m_IsDummySwapping);
-		CNetObj_PlayerInput *pDummyInputData = !pDummyChar ? 0 : (CNetObj_PlayerInput *)Client()->GetInput(Tick, m_IsDummySwapping ^ 1);
+		CNetObj_PlayerInput *pDummyInputData = !pDummyChar ? nullptr : (CNetObj_PlayerInput *)Client()->GetInput(Tick, m_IsDummySwapping ^ 1);
 		bool DummyFirst = pInputData && pDummyInputData && pDummyChar->GetCid() < pLocalChar->GetCid();
 
 		if(DummyFirst)
@@ -2359,6 +2373,8 @@ void CGameClient::OnPredict()
 		// fetch the current characters
 		if(Tick == PredictionTick)
 		{
+			m_PrevPredictedWorld.CopyWorld(&m_PredictedWorld);
+
 			for(int i = 0; i < MAX_CLIENTS; i++)
 				if(CCharacter *pChar = m_PredictedWorld.GetCharacterById(i))
 					m_aClients[i].m_Predicted = pChar->GetCore();
@@ -2536,17 +2552,73 @@ void CGameClient::CClientStats::Reset()
 	m_FlagCaptures = 0;
 }
 
-void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay)
+void CGameClient::CClientData::UpdateSkinInfo()
 {
-	m_RenderInfo = m_SkinInfo;
+	const CSkinDescriptor SkinDescriptor = ToSkinDescriptor();
+	if(SkinDescriptor.m_Flags == 0)
+	{
+		return;
+	}
+
+	const auto &&ApplySkinProperties = [&]() {
+		if(SkinDescriptor.m_Flags & CSkinDescriptor::FLAG_SIX)
+		{
+			m_pSkinInfo->TeeRenderInfo().ApplyColors(m_UseCustomColor, m_ColorBody, m_ColorFeet);
+		}
+		if(SkinDescriptor.m_Flags & CSkinDescriptor::FLAG_SEVEN)
+		{
+			for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+			{
+				const CClientData::CSixup &SixupData = m_aSixup[Dummy];
+				CTeeRenderInfo::CSixup &SixupSkinInfo = m_pSkinInfo->TeeRenderInfo().m_aSixup[Dummy];
+				for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+				{
+					m_pGameClient->m_Skins7.ApplyColorTo(SixupSkinInfo, SixupData.m_aUseCustomColors[Part], SixupData.m_aSkinPartColors[Part], Part);
+				}
+				UpdateSkin7HatSprite(Dummy);
+				UpdateSkin7BotDecoration(Dummy);
+			}
+		}
+		m_pSkinInfo->TeeRenderInfo().m_Size = 64.0f;
+	};
+
+	if(m_pSkinInfo == nullptr)
+	{
+		CTeeRenderInfo TeeRenderInfo;
+		m_pSkinInfo = m_pGameClient->CreateManagedTeeRenderInfo(TeeRenderInfo, SkinDescriptor);
+		m_pSkinInfo->SetRefreshCallback([&]() { UpdateRenderInfo(); });
+		ApplySkinProperties();
+		m_pSkinInfo->m_RefreshCallback();
+	}
+	else if(m_pSkinInfo->SkinDescriptor() != SkinDescriptor)
+	{
+		m_pSkinInfo->m_SkinDescriptor = SkinDescriptor;
+		m_pGameClient->RefreshSkin(m_pSkinInfo);
+		ApplySkinProperties();
+	}
+	else
+	{
+		ApplySkinProperties();
+		m_pSkinInfo->m_RefreshCallback();
+	}
+}
+
+void CGameClient::CClientData::UpdateRenderInfo()
+{
+	m_RenderInfo = m_pSkinInfo->TeeRenderInfo();
 
 	// force team colors
-	if(IsTeamPlay)
+	if(m_pGameClient->IsTeamPlay())
 	{
 		m_RenderInfo.m_CustomColoredSkin = true;
-		const int aTeamColors[2] = {65461, 10223541};
+		for(auto &Sixup : m_RenderInfo.m_aSixup)
+		{
+			std::fill(std::begin(Sixup.m_aUseCustomColors), std::end(Sixup.m_aUseCustomColors), true);
+		}
+
 		if(m_Team >= TEAM_RED && m_Team <= TEAM_BLUE)
 		{
+			const int aTeamColors[2] = {65461, 10223541};
 			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(aTeamColors[m_Team]));
 			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(aTeamColors[m_Team]));
 
@@ -2561,9 +2633,13 @@ void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay)
 					ColorRGBA(0.345f, 0.514f, 0.824f, 1.0f)};
 				float MarkingAlpha = Sixup.m_aColors[protocol7::SKINPART_MARKING].a;
 				for(auto &Color : Sixup.m_aColors)
+				{
 					Color = aTeamColorsSixup[m_Team];
+				}
 				if(MarkingAlpha > 0.1f)
+				{
 					Sixup.m_aColors[protocol7::SKINPART_MARKING] = aMarkingColorsSixup[m_Team];
+				}
 			}
 		}
 		else
@@ -2571,8 +2647,12 @@ void CGameClient::CClientData::UpdateRenderInfo(bool IsTeamPlay)
 			m_RenderInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(12829350));
 			m_RenderInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(12829350));
 			for(auto &Sixup : m_RenderInfo.m_aSixup)
+			{
 				for(auto &Color : Sixup.m_aColors)
+				{
 					Color = color_cast<ColorRGBA>(ColorHSLA(12829350));
+				}
+			}
 		}
 	}
 }
@@ -2616,7 +2696,7 @@ void CGameClient::CClientData::Reset()
 	m_Predicted.Reset();
 	m_PrevPredicted.Reset();
 
-	m_SkinInfo.Reset();
+	m_pSkinInfo = nullptr;
 	m_RenderInfo.Reset();
 
 	m_Angle = 0.0f;
@@ -2650,6 +2730,34 @@ void CGameClient::CClientData::Reset()
 
 	for(auto &Info : m_aSixup)
 		Info.Reset();
+}
+
+CSkinDescriptor CGameClient::CClientData::ToSkinDescriptor() const
+{
+	CSkinDescriptor SkinDescriptor;
+
+	if(m_Active)
+	{
+		SkinDescriptor.m_Flags |= CSkinDescriptor::FLAG_SIX;
+		str_copy(SkinDescriptor.m_aSkinName, m_aSkinName);
+	}
+
+	CTranslationContext::CClientData &TranslatedClient = m_pGameClient->m_pClient->m_TranslationContext.m_aClients[ClientId()];
+	if(TranslatedClient.m_Active)
+	{
+		SkinDescriptor.m_Flags |= CSkinDescriptor::FLAG_SEVEN;
+		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+		{
+			for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+			{
+				str_copy(SkinDescriptor.m_aSixup[Dummy].m_aaSkinPartNames[Part], m_aSixup[Dummy].m_aaSkinPartNames[Part]);
+			}
+			SkinDescriptor.m_aSixup[Dummy].m_XmasHat = time_season() == SEASON_XMAS;
+			SkinDescriptor.m_aSixup[Dummy].m_BotDecoration = (TranslatedClient.m_PlayerFlags7 & protocol7::PLAYERFLAG_BOT) != 0;
+		}
+	}
+
+	return SkinDescriptor;
 }
 
 void CGameClient::CClientData::CSixup::Reset()
@@ -2828,7 +2936,7 @@ void CGameClient::SendDummyInfo(bool Start)
 	}
 }
 
-void CGameClient::SendKill(int ClientId) const
+void CGameClient::SendKill() const
 {
 	CNetMsg_Cl_Kill Msg;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
@@ -2858,7 +2966,7 @@ void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
 
 void CGameClient::ConKill(IConsole::IResult *pResult, void *pUserData)
 {
-	((CGameClient *)pUserData)->SendKill(-1);
+	((CGameClient *)pUserData)->SendKill();
 }
 
 void CGameClient::ConReadyChange7(IConsole::IResult *pResult, void *pUserData)
@@ -3052,7 +3160,7 @@ void CGameClient::UpdatePrediction()
 	}
 
 	CCharacter *pLocalChar = m_GameWorld.GetCharacterById(m_Snap.m_LocalClientId);
-	CCharacter *pDummyChar = 0;
+	CCharacter *pDummyChar = nullptr;
 	if(PredictDummy())
 		pDummyChar = m_GameWorld.GetCharacterById(m_PredictedDummyId);
 
@@ -3092,7 +3200,7 @@ void CGameClient::UpdatePrediction()
 		for(int Tick = m_GameWorld.GameTick() + 1; Tick <= Client()->GameTick(g_Config.m_ClDummy); Tick++)
 		{
 			CNetObj_PlayerInput *pInput = (CNetObj_PlayerInput *)Client()->GetInput(Tick);
-			CNetObj_PlayerInput *pDummyInput = 0;
+			CNetObj_PlayerInput *pDummyInput = nullptr;
 			if(pDummyChar)
 				pDummyInput = (CNetObj_PlayerInput *)Client()->GetInput(Tick, 1);
 			if(pInput)
@@ -3142,7 +3250,7 @@ void CGameClient::UpdatePrediction()
 			bool IsLocal = (i == m_Snap.m_LocalClientId || (PredictDummy() && i == m_PredictedDummyId));
 			int GameTeam = IsTeamPlay() ? m_aClients[i].m_Team : i;
 			m_GameWorld.NetCharAdd(i, &m_Snap.m_aCharacters[i].m_Cur,
-				m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : 0,
+				m_Snap.m_aCharacters[i].m_HasExtendedData ? &m_Snap.m_aCharacters[i].m_ExtendedData : nullptr,
 				GameTeam, IsLocal);
 		}
 
@@ -3176,7 +3284,7 @@ void CGameClient::UpdateSpectatorCursor()
 	}
 
 	const CSnapState::CCharacterInfo CharInfo = m_Snap.m_aCharacters[CursorOwnerId];
-	if(!CharInfo.m_HasExtendedData || !m_aClients[CursorOwnerId].m_Active || (!g_Config.m_Debug && m_aClients[CursorOwnerId].m_Paused))
+	if(!CharInfo.m_HasExtendedDisplayInfo || !m_aClients[CursorOwnerId].m_Active || (!g_Config.m_Debug && m_aClients[CursorOwnerId].m_Paused))
 	{
 		// hide cursor when the spectating player is paused
 		m_CursorInfo.m_Available = false;
@@ -4008,25 +4116,121 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 	ImgInfo.Free();
 }
 
-void CGameClient::RefreshSkins()
+void CGameClient::RefreshSkin(const std::shared_ptr<CManagedTeeRenderInfo> &pManagedTeeRenderInfo)
 {
+	CTeeRenderInfo &TeeInfo = pManagedTeeRenderInfo->TeeRenderInfo();
+	const CSkinDescriptor &SkinDescriptor = pManagedTeeRenderInfo->SkinDescriptor();
+
+	if(SkinDescriptor.m_Flags & CSkinDescriptor::FLAG_SIX)
+	{
+		TeeInfo.Apply(m_Skins.Find(SkinDescriptor.m_aSkinName));
+	}
+
+	if(SkinDescriptor.m_Flags & CSkinDescriptor::FLAG_SEVEN)
+	{
+		for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+		{
+			for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+			{
+				m_Skins7.FindSkinPart(Part, SkinDescriptor.m_aSixup[Dummy].m_aaSkinPartNames[Part], true)->ApplyTo(TeeInfo.m_aSixup[Dummy]);
+
+				if(SkinDescriptor.m_aSixup[Dummy].m_XmasHat)
+				{
+					TeeInfo.m_aSixup[Dummy].m_HatTexture = m_Skins7.XmasHatTexture();
+				}
+				else
+				{
+					TeeInfo.m_aSixup[Dummy].m_HatTexture.Invalidate();
+				}
+
+				if(SkinDescriptor.m_aSixup[Dummy].m_BotDecoration)
+				{
+					TeeInfo.m_aSixup[Dummy].m_BotTexture = m_Skins7.BotDecorationTexture();
+				}
+				else
+				{
+					TeeInfo.m_aSixup[Dummy].m_BotTexture.Invalidate();
+				}
+			}
+		}
+	}
+
+	if(SkinDescriptor.m_Flags != 0 && pManagedTeeRenderInfo->m_RefreshCallback)
+	{
+		pManagedTeeRenderInfo->m_RefreshCallback();
+	}
+}
+
+void CGameClient::RefreshSkins(int SkinDescriptorFlags)
+{
+	dbg_assert(SkinDescriptorFlags != 0, "SkinDescriptorFlags invalid");
+
 	const auto SkinStartLoadTime = time_get_nanoseconds();
-	m_Skins.Refresh([&]() {
+	const auto &&ProgressCallback = [&]() {
 		// if skin refreshing takes to long, swap to a loading screen
 		if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
 		{
 			m_Menus.RenderLoading(Localize("Loading skin files"), "", 0);
 		}
-	});
-
-	for(auto &Client : m_aClients)
+	};
+	if(SkinDescriptorFlags & CSkinDescriptor::FLAG_SIX)
 	{
-		Client.m_SkinInfo.Apply(m_Skins.Find(Client.m_aSkinName));
-		Client.UpdateRenderInfo(IsTeamPlay());
+		m_Skins.Refresh(ProgressCallback);
+	}
+	if(SkinDescriptorFlags & CSkinDescriptor::FLAG_SEVEN)
+	{
+		m_Skins7.Refresh(ProgressCallback);
 	}
 
-	for(auto &pComponent : m_vpAll)
-		pComponent->OnRefreshSkins();
+	for(std::shared_ptr<CManagedTeeRenderInfo> &pManagedTeeRenderInfo : m_vpManagedTeeRenderInfos)
+	{
+		if(!(pManagedTeeRenderInfo->SkinDescriptor().m_Flags & SkinDescriptorFlags))
+		{
+			continue;
+		}
+		RefreshSkin(pManagedTeeRenderInfo);
+	}
+}
+
+void CGameClient::OnSkinUpdate(const char *pSkinName)
+{
+	for(std::shared_ptr<CManagedTeeRenderInfo> &pManagedTeeRenderInfo : m_vpManagedTeeRenderInfos)
+	{
+		if(!(pManagedTeeRenderInfo->SkinDescriptor().m_Flags & CSkinDescriptor::FLAG_SIX) ||
+			str_comp(pManagedTeeRenderInfo->SkinDescriptor().m_aSkinName, pSkinName) != 0)
+		{
+			continue;
+		}
+		RefreshSkin(pManagedTeeRenderInfo);
+	}
+}
+
+std::shared_ptr<CManagedTeeRenderInfo> CGameClient::CreateManagedTeeRenderInfo(const CTeeRenderInfo &TeeRenderInfo, const CSkinDescriptor &SkinDescriptor)
+{
+	std::shared_ptr<CManagedTeeRenderInfo> pManagedTeeRenderInfo = std::make_shared<CManagedTeeRenderInfo>(TeeRenderInfo, SkinDescriptor);
+	RefreshSkin(pManagedTeeRenderInfo);
+	m_vpManagedTeeRenderInfos.emplace_back(pManagedTeeRenderInfo);
+	return pManagedTeeRenderInfo;
+}
+
+std::shared_ptr<CManagedTeeRenderInfo> CGameClient::CreateManagedTeeRenderInfo(const CClientData &Client)
+{
+	return CreateManagedTeeRenderInfo(Client.m_RenderInfo, Client.ToSkinDescriptor());
+}
+
+void CGameClient::UpdateManagedTeeRenderInfos()
+{
+	while(!m_vpManagedTeeRenderInfos.empty())
+	{
+		auto UnusedInfo = std::find_if(m_vpManagedTeeRenderInfos.begin(), m_vpManagedTeeRenderInfos.end(), [&](const auto &pItem) {
+			return pItem.use_count() <= 1;
+		});
+		if(UnusedInfo == m_vpManagedTeeRenderInfos.end())
+		{
+			break;
+		}
+		m_vpManagedTeeRenderInfos.erase(UnusedInfo);
+	}
 }
 
 void CGameClient::ConchainRefreshSkins(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4035,7 +4239,7 @@ void CGameClient::ConchainRefreshSkins(IConsole::IResult *pResult, void *pUserDa
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments() && pThis->m_Menus.IsInit())
 	{
-		pThis->RefreshSkins();
+		pThis->RefreshSkins(CSkinDescriptor::FLAG_SIX);
 	}
 }
 
@@ -4046,6 +4250,10 @@ static bool UnknownMapSettingCallback(const char *pCommand, void *pUser)
 
 void CGameClient::LoadMapSettings()
 {
+	IEngineMap *pMap = Kernel()->RequestInterface<IEngineMap>();
+
+	m_MapBugs = CMapBugs::Create(Client()->GetCurrentMap(), pMap->MapSize(), pMap->Sha256());
+
 	// Reset Tunezones
 	CTuningParams TuningParams;
 	for(int i = 0; i < NUM_TUNEZONES; i++)
@@ -4066,7 +4274,6 @@ void CGameClient::LoadMapSettings()
 	}
 
 	// Load map tunings
-	IMap *pMap = Kernel()->RequestInterface<IMap>();
 	int Start, Num;
 	pMap->GetType(MAPITEMTYPE_INFO, &Start, &Num);
 	for(int i = Start; i < Start + Num; i++)
@@ -4107,6 +4314,26 @@ void CGameClient::ConTuneZone(IConsole::IResult *pResult, void *pUserData)
 
 	if(List >= 0 && List < NUM_TUNEZONES)
 		pSelf->TuningList()[List].Set(pParamName, NewValue);
+}
+
+void CGameClient::ConMapbug(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const char *pMapBugName = pResult->GetString(0);
+
+	switch(pSelf->m_MapBugs.Update(pMapBugName))
+	{
+	case EMapBugUpdate::OK:
+		break;
+	case EMapBugUpdate::OVERRIDDEN:
+		log_debug("mapbugs", "map-internal setting overridden by database");
+		break;
+	case EMapBugUpdate::NOTFOUND:
+		log_debug("mapbugs", "unknown map bug '%s', ignoring", pMapBugName);
+		break;
+	default:
+		dbg_assert(false, "unreachable");
+	}
 }
 
 void CGameClient::ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

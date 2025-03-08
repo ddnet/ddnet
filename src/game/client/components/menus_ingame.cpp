@@ -100,7 +100,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			}
 			else
 			{
-				Client()->DummyDisconnect(0);
+				Client()->DummyDisconnect(nullptr);
 				SetActive(false);
 			}
 		}
@@ -192,7 +192,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			static CButtonContainer s_KillButton;
 			if(DoButton_Menu(&s_KillButton, Localize("Kill"), 0, &Button))
 			{
-				m_pClient->SendKill(-1);
+				m_pClient->SendKill();
 				SetActive(false);
 			}
 		}
@@ -223,7 +223,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 		bool Active = m_pClient->m_Camera.m_AutoSpecCamera && m_pClient->m_Camera.SpectatingPlayer() && m_pClient->m_Camera.CanUseAutoSpecCamera();
 		bool Enabled = g_Config.m_ClSpecAutoSync;
-		if(DoButton_FontIcon(&s_AutoCameraButton, FONT_ICON_CAMERA, !Active, &Button, IGraphics::CORNER_ALL, Enabled))
+		if(DoButton_FontIcon(&s_AutoCameraButton, FONT_ICON_CAMERA, !Active, &Button, BUTTONFLAG_LEFT, IGraphics::CORNER_ALL, Enabled))
 		{
 			m_pClient->m_Camera.ToggleAutoSpecCamera();
 		}
@@ -287,7 +287,7 @@ void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 	Ui()->DoLabel(&Label, Localize("Edit touch controls"), 20.0f, TEXTALIGN_MC);
 
 	static CButtonContainer s_OpenHelpButton;
-	if(DoButton_FontIcon(&s_OpenHelpButton, FONT_ICON_QUESTION, 0, &Button))
+	if(DoButton_FontIcon(&s_OpenHelpButton, FONT_ICON_QUESTION, 0, &Button, BUTTONFLAG_LEFT))
 	{
 		Client()->ViewLink(Localize("https://wiki.ddnet.org/wiki/Touch_controls"));
 	}
@@ -415,7 +415,7 @@ void CMenus::PopupConfirmDisconnect()
 
 void CMenus::PopupConfirmDisconnectDummy()
 {
-	Client()->DummyDisconnect(0);
+	Client()->DummyDisconnect(nullptr);
 	SetActive(false);
 }
 
@@ -552,7 +552,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 		vec2 TeeRenderPos(Button.x + Button.h / 2, Button.y + Button.h / 2 + OffsetToMid.y);
 		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
-		Ui()->DoButtonLogic(&s_aPlayerIds[Index][3], 0, &Button);
+		Ui()->DoButtonLogic(&s_aPlayerIds[Index][3], 0, &Button, BUTTONFLAG_NONE);
 		GameClient()->m_Tooltips.DoToolTip(&s_aPlayerIds[Index][3], &Button, CurrentClient.m_aSkinName);
 
 		Player.HSplitTop(1.5f, nullptr, &Player);
@@ -664,7 +664,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 			Label.VSplitLeft(2.0f * Label.h, &Label, nullptr);
 			RenderCommunityIcon(pIcon, Label, true);
 			static char s_CommunityTooltipButtonId;
-			Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Label);
+			Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Label, BUTTONFLAG_NONE);
 			GameClient()->m_Tooltips.DoToolTip(&s_CommunityTooltipButtonId, &Label, pCommunity->Name());
 		}
 	}
@@ -752,19 +752,19 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		switch(Config()->m_SvTeam)
 		{
 		case SV_TEAM_FORBIDDEN:
-			pTeamMode = Localize("forbidden", "Teaming status");
+			pTeamMode = Localize("forbidden", "Team status");
 			break;
 		case SV_TEAM_ALLOWED:
 			if(g_Config.m_SvSoloServer)
-				pTeamMode = Localize("solo", "Teaming status");
+				pTeamMode = Localize("solo", "Team status");
 			else
-				pTeamMode = Localize("allowed", "Teaming status");
+				pTeamMode = Localize("allowed", "Team status");
 			break;
 		case SV_TEAM_MANDATORY:
-			pTeamMode = Localize("required", "Teaming status");
+			pTeamMode = Localize("required", "Team status");
 			break;
 		case SV_TEAM_FORCED_SOLO:
-			pTeamMode = Localize("solo", "Teaming status");
+			pTeamMode = Localize("solo", "Team status");
 			break;
 		default:
 			dbg_assert(false, "unknown team mode");
@@ -997,7 +997,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Call = RenderServerControlKick(MainView, true, Searching);
 
 	// call vote
-	Bottom.VSplitRight(10.0f, &Bottom, 0);
+	Bottom.VSplitRight(10.0f, &Bottom, nullptr);
 	Bottom.VSplitRight(120.0f, &Bottom, &Button);
 
 	static CButtonContainer s_CallVoteButton;
@@ -1035,12 +1035,12 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 	// render kick reason
 	CUIRect Reason;
-	Bottom.VSplitRight(20.0f, &Bottom, 0);
+	Bottom.VSplitRight(20.0f, &Bottom, nullptr);
 	Bottom.VSplitRight(200.0f, &Bottom, &Reason);
 	const char *pLabel = Localize("Reason:");
 	Ui()->DoLabel(&Reason, pLabel, 14.0f, TEXTALIGN_ML);
 	float w = TextRender()->TextWidth(14.0f, pLabel, -1, -1.0f);
-	Reason.VSplitLeft(w + 10.0f, 0, &Reason);
+	Reason.VSplitLeft(w + 10.0f, nullptr, &Reason);
 	if(Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed())
 	{
 		Ui()->SetActiveItem(&m_CallvoteReasonInput);
@@ -1064,12 +1064,12 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	if(Client()->RconAuthed())
 	{
 		// background
-		RconExtension.HSplitTop(10.0f, 0, &RconExtension);
+		RconExtension.HSplitTop(10.0f, nullptr, &RconExtension);
 		RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
-		RconExtension.HSplitTop(5.0f, 0, &RconExtension);
+		RconExtension.HSplitTop(5.0f, nullptr, &RconExtension);
 
 		// force vote
-		Bottom.VSplitLeft(5.0f, 0, &Bottom);
+		Bottom.VSplitLeft(5.0f, nullptr, &Bottom);
 		Bottom.VSplitLeft(120.0f, &Button, &Bottom);
 
 		static CButtonContainer s_ForceVoteButton;
@@ -1103,32 +1103,32 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		if(s_ControlPage == EServerControlTab::SETTINGS)
 		{
 			// remove vote
-			Bottom.VSplitRight(10.0f, &Bottom, 0);
-			Bottom.VSplitRight(120.0f, 0, &Button);
+			Bottom.VSplitRight(10.0f, &Bottom, nullptr);
+			Bottom.VSplitRight(120.0f, nullptr, &Button);
 			static CButtonContainer s_RemoveVoteButton;
 			if(DoButton_Menu(&s_RemoveVoteButton, Localize("Remove"), 0, &Button))
 				m_pClient->m_Voting.RemovevoteOption(m_CallvoteSelectedOption);
 
 			// add vote
 			RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
-			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(5.0f, nullptr, &Bottom);
 			Bottom.VSplitLeft(250.0f, &Button, &Bottom);
 			Ui()->DoLabel(&Button, Localize("Vote description:"), 14.0f, TEXTALIGN_ML);
 
-			Bottom.VSplitLeft(20.0f, 0, &Button);
+			Bottom.VSplitLeft(20.0f, nullptr, &Button);
 			Ui()->DoLabel(&Button, Localize("Vote command:"), 14.0f, TEXTALIGN_ML);
 
 			static CLineInputBuffered<VOTE_DESC_LENGTH> s_VoteDescriptionInput;
 			static CLineInputBuffered<VOTE_CMD_LENGTH> s_VoteCommandInput;
 			RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
-			Bottom.VSplitRight(10.0f, &Bottom, 0);
+			Bottom.VSplitRight(10.0f, &Bottom, nullptr);
 			Bottom.VSplitRight(120.0f, &Bottom, &Button);
 			static CButtonContainer s_AddVoteButton;
 			if(DoButton_Menu(&s_AddVoteButton, Localize("Add"), 0, &Button))
 				if(!s_VoteDescriptionInput.IsEmpty() && !s_VoteCommandInput.IsEmpty())
 					m_pClient->m_Voting.AddvoteOption(s_VoteDescriptionInput.GetString(), s_VoteCommandInput.GetString());
 
-			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(5.0f, nullptr, &Bottom);
 			Bottom.VSplitLeft(250.0f, &Button, &Bottom);
 			Ui()->DoEditBox(&s_VoteDescriptionInput, &Button, 14.0f);
 
@@ -1241,7 +1241,7 @@ void CMenus::GhostlistPopulate()
 	Storage()->ListDirectoryInfo(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
 	SortGhostlist();
 
-	CGhostItem *pOwnGhost = 0;
+	CGhostItem *pOwnGhost = nullptr;
 	for(auto &Ghost : m_vGhosts)
 	{
 		Ghost.m_Failed = false;
@@ -1292,7 +1292,7 @@ void CMenus::UpdateOwnGhost(CGhostItem Item)
 		Item.m_Slot = -1;
 	}
 
-	Item.m_Date = std::time(0);
+	Item.m_Date = std::time(nullptr);
 	Item.m_Failed = false;
 	m_vGhosts.insert(std::lower_bound(m_vGhosts.begin(), m_vGhosts.end(), Item), Item);
 	SortGhostlist();
@@ -1326,10 +1326,10 @@ void CMenus::RenderGhost(CUIRect MainView)
 	// render background
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
-	MainView.HSplitTop(10.0f, 0, &MainView);
-	MainView.HSplitBottom(5.0f, &MainView, 0);
-	MainView.VSplitLeft(5.0f, 0, &MainView);
-	MainView.VSplitRight(5.0f, &MainView, 0);
+	MainView.HSplitTop(10.0f, nullptr, &MainView);
+	MainView.HSplitBottom(5.0f, &MainView, nullptr);
+	MainView.VSplitLeft(5.0f, nullptr, &MainView);
+	MainView.VSplitRight(5.0f, &MainView, nullptr);
 
 	CUIRect Headers, Status;
 	CUIRect View = MainView;
@@ -1339,7 +1339,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	// split of the scrollbar
 	Headers.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 5.0f);
-	Headers.VSplitRight(20.0f, &Headers, 0);
+	Headers.VSplitRight(20.0f, &Headers, nullptr);
 
 	class CColumn
 	{
@@ -1484,7 +1484,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	static CButtonContainer s_DirectoryButton;
 	static CButtonContainer s_ActivateAll;
 
-	if(DoButton_FontIcon(&s_ReloadButton, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &Button) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
+	if(DoButton_FontIcon(&s_ReloadButton, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &Button, BUTTONFLAG_LEFT) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 	{
 		m_pClient->m_Ghost.UnloadAll();
 		GhostlistPopulate();
@@ -1560,7 +1560,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 					pGhost->m_Failed = true;
 			}
 		}
-		Status.VSplitRight(5.0f, &Status, 0);
+		Status.VSplitRight(5.0f, &Status, nullptr);
 	}
 
 	Status.VSplitRight(120.0f, &Status, &Button);
@@ -1573,7 +1573,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 		DeleteGhostItem(s_SelectedIndex);
 	}
 
-	Status.VSplitRight(5.0f, &Status, 0);
+	Status.VSplitRight(5.0f, &Status, nullptr);
 
 	bool Recording = m_pClient->m_Ghost.GhostRecorder()->IsRecording();
 	if(!pGhost->HasFile() && !Recording && pGhost->Active())

@@ -73,7 +73,7 @@ class CGameConsole : public CComponent
 		int m_CompletionCommandStart = 0;
 		int m_CompletionCommandEnd = 0;
 
-		char m_aUser[32];
+		char m_aUser[64];
 		bool m_UserGot;
 		bool m_UsernameReq;
 

@@ -12,6 +12,7 @@
 class CCollision;
 class CCharacter;
 class CEntity;
+class CMapBugs;
 
 class CGameWorld
 {
@@ -41,6 +42,7 @@ public:
 	CEntity *FindLast(int Type);
 	int FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Type);
 	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis = nullptr, int CollideWith = -1, const CCharacter *pThisOnly = nullptr);
+	CEntity *IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis = nullptr, int CollideWith = -1, const CEntity *pThisOnly = nullptr);
 	void InsertEntity(CEntity *pEntity, bool Last = false);
 	void RemoveEntity(CEntity *pEntity);
 	void RemoveCharacter(CCharacter *pChar);
@@ -102,6 +104,9 @@ public:
 	CTuningParams *m_pTuningList;
 	CTuningParams *TuningList() { return m_pTuningList; }
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
+
+	const CMapBugs *m_pMapBugs;
+	bool EmulateBug(int Bug) const;
 
 private:
 	void RemoveEntities();

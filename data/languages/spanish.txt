@@ -1,31 +1,3 @@
-##### authors #####
-#originally created by:
-#	ReGnuM
-#modified by:
-#	Ninja Style		2011-04-06 23:22:06
-#	Alexandre		2011-07-11 11:30:00
-#	GaBOr			2011-07-15 01:23:39
-#	HeroiAmarelo	2012-08-01 15:52:45
-#	Mortcheck		2012-11-03 22:58:43
-#	FeaRZ		2020-07-07 12:09:00
-#	Ryozuki         2020-07-09 12:06:00
-# Headshot        2020-11-07 12:40:00
-# Headshot        2021-05-30 17:00:00
-# Deëivid!        2021-10-27 00:49:00
-# Deëivid!        2022-02-05 21:53:00
-# Deëivid!        2022-03-27 18:40:00
-# Deëivid!        2022-05-13 18:44:00
-# Deëivid!        2022-06-22 19:26:00
-# Deëivid!        2022-07-05 22:30:00
-# Deëivid!        2022-10-08 19:20:00
-# Deëivid!        2023-01-05 21:05:00
-# Deëivid!        2023-02-26 00:35:00
-# Deëivid!        2023-05-22 19:54:00
-# Deëivid!        2023-07-01 22:52:00
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == %ds restantes
 
@@ -418,9 +390,6 @@ The audio device couldn't be initialised.
 
 The server is running a non-standard tuning on a pure game type.
 == El servidor está ejecutando una configuración no estándar en un tipo de juego puro.
-
-Time limit
-== Tiempo límite
 
 Time limit: %d min
 == Tiempo límite: %d minutos
@@ -1962,9 +1931,6 @@ Add friends by entering their name below or by clicking their name in the player
 Add clanmates by entering their clan below and leaving the name blank.
 == Agrega compañeros de clan ingresando el nombre del clan aquí abajo y dejando el campo del nombre en blanco.
 
-Offline friends and clanmates will appear here.
-== Tus amigos y compañeros de clan que estén desconectados aparecerán aquí.
-
 Edit touch controls
 == Editar controles táctiles
 
@@ -2090,3 +2056,78 @@ Size of key press icons
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == No se pudo iniciar el servidor. Asegúrate de otorgar el permiso de notificaciones en la configuración de la aplicación para que el servidor pueda ejecutarse en segundo plano.
+
+Auto-sync player camera
+== Sincronización automática de la cámara del jugador
+
+[Auto camera]
+Disabled
+== Desactivado
+
+[Auto camera]
+Enabled
+== Activado
+
+[Auto camera]
+Unavailable for this player
+== No disponible para este jugador
+
+[Auto camera]
+Inactive
+== Inactivo
+
+[Auto camera]
+Active
+== Activo
+
+Loading maps…
+== Cargando mapas…
+
+Community
+== Comunidad
+
+[Team status]
+forbidden
+== prohibido
+
+[Team status]
+solo
+== solo
+
+[Team status]
+allowed
+== permitido
+
+[Team status]
+required
+== requerido
+
+Teams
+== Equipos
+
+[Team size]
+minimum
+== mínimo
+
+[Team size]
+maximum
+== máximo
+
+Saves file
+== Archivo de guardados
+
+Open the saves file
+== Abrir el archivo de guardados
+
+Show FPS
+== Mostrar FPS
+
+Renders your frame rate in the top right
+== Muestra tu tasa de fotogramas en la esquina superior derecha
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Spanish translation by ReGnuM, Ninja Style, Alexandre, GaBOr, HeroiAmarelo, Mortcheck, FeaRZ, Ryozuki, Headshot and Deëivid!
+
+Show spectator cursor
+== Mostrar cursor de espectador

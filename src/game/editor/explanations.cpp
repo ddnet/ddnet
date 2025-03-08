@@ -137,13 +137,15 @@ const char *CEditor::ExplainDDNet(int Tile, int Layer)
 		if(Layer == LAYER_TELE)
 			return "TELEPORT TO: Destination tile for FROMs, WEAPON & HOOK TELEPORTs with the same numbers.";
 		break;
-	case TILE_BOOST:
+	case TILE_SPEED_BOOST_OLD:
 		if(Layer == LAYER_SPEEDUP)
-			return "SPEEDUP: Gives tee defined speed. Arrow shows direction and angle.";
+			return "OLD SPEEDUP: Gives tee defined speed. Arrow shows direction and angle. Deprecated.";
 		break;
-	case TILE_TELECHECK:
+	case TILE_TELECHECK: // also TILE_SPEED_BOOST
 		if(Layer == LAYER_TELE)
 			return "CHECKPOINT TELEPORT: After having touched this tile, any CFRM will teleport you to CTO with the same number.";
+		if(Layer == LAYER_SPEEDUP)
+			return "SPEEDUP: Gives tee defined speed. Arrow shows direction and angle.";
 		break;
 	case TILE_TELECHECKOUT:
 		if(Layer == LAYER_TELE)

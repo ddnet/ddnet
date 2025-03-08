@@ -643,6 +643,29 @@ Loading skin files
 Loading background map
 == 
 
+Auto-sync player camera
+== 
+
+[Auto camera]
+Disabled
+== 
+
+[Auto camera]
+Enabled
+== 
+
+[Auto camera]
+Unavailable for this player
+== 
+
+[Auto camera]
+Inactive
+== 
+
+[Auto camera]
+Active
+== 
+
 Searching
 == 
 
@@ -671,6 +694,9 @@ Following
 == 
 
 Loading commands…
+== 
+
+Loading maps…
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -914,9 +940,6 @@ Add friends by entering their name below or by clicking their name in the player
 == 
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
-
-Offline friends and clanmates will appear here.
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?
@@ -1194,10 +1217,43 @@ Could not load default touch controls from file. See local console for details.
 Could not load touch controls from clipboard. See local console for details.
 == 
 
+Community
+== 
+
 Score limit
 == 
 
-Time limit
+Time limit: %d min
+== 
+
+Round %d/%d
+== 
+
+[Team status]
+forbidden
+== 
+
+[Team status]
+solo
+== 
+
+[Team status]
+allowed
+== 
+
+[Team status]
+required
+== 
+
+Teams
+== 
+
+[Team size]
+minimum
+== 
+
+[Team size]
+maximum
 == 
 
 Loading…
@@ -1262,6 +1318,12 @@ Settings file
 == 
 
 Open the settings file
+== 
+
+Saves file
+== 
+
+Open the saves file
 == 
 
 Config directory
@@ -1509,6 +1571,12 @@ High Detail
 Allows maps to render with more detail
 == 
 
+Show FPS
+== 
+
+Renders your frame rate in the top right
+== 
+
 Use high DPI
 == 
 
@@ -1566,6 +1634,10 @@ Map sound volume
 Background music volume
 == 
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Esperanto translation by dannyhpy
+
 Tee
 == 
 
@@ -1603,6 +1675,9 @@ Show score
 == 
 
 Show local time always
+== 
+
+Show spectator cursor
 == 
 
 Show votes window after voting
@@ -1945,12 +2020,6 @@ Server executable not found, can't run server
 == 
 
 Loading race demo files
-== 
-
-Time limit: %d min
-== 
-
-Round %d/%d
 == 
 
 [Spectators]

@@ -70,7 +70,7 @@ public:
 	bool UnFreeze();
 	void GiveAllWeapons();
 	int Team();
-	bool CanCollide(int ClientId);
+	bool CanCollide(int ClientId) override;
 	bool SameTeam(int ClientId);
 	bool m_NinjaJetpack;
 	int m_FreezeTime;
@@ -113,7 +113,7 @@ public:
 	int GetAttackTick() { return m_AttackTick; }
 	int GetStrongWeakId() { return m_StrongWeakId; }
 
-	CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = 0);
+	CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended = nullptr);
 	void Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal);
 	void SetCoreWorld(CGameWorld *pGameWorld);
 

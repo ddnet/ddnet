@@ -7,7 +7,7 @@
 
 CFlow::CFlow()
 {
-	m_pCells = 0;
+	m_pCells = nullptr;
 	m_Height = 0;
 	m_Width = 0;
 	m_Spacing = 16;
@@ -43,7 +43,7 @@ void CFlow::DbgRender()
 void CFlow::Init()
 {
 	free(m_pCells);
-	m_pCells = 0;
+	m_pCells = nullptr;
 
 	CMapItemLayerTilemap *pTilemap = Layers()->GameLayer();
 	m_Width = pTilemap->m_Width * 32 / m_Spacing;

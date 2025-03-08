@@ -19,7 +19,7 @@ void CLayerFront::SetTile(int x, int y, CTile Tile)
 		CTile air = {TILE_AIR};
 		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, air); // NOLINT(bugprone-parent-virtual-call)
 	}
-	if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidFrontTile(Tile.m_Index))
+	if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidFrontTile(Tile.m_Index))
 	{
 		CLayerTiles::SetTile(x, y, Tile);
 	}

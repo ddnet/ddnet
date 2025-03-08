@@ -30,7 +30,7 @@ CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 
 bool CLight::HitCharacter()
 {
-	std::vector<CCharacter *> vpHitCharacters = GameServer()->m_World.IntersectedCharacters(m_Pos, m_To, 0.0f, 0);
+	std::vector<CCharacter *> vpHitCharacters = GameServer()->m_World.IntersectedCharacters(m_Pos, m_To, 0.0f, nullptr);
 	if(vpHitCharacters.empty())
 		return false;
 	for(auto *pChar : vpHitCharacters)
@@ -74,7 +74,7 @@ void CLight::Step()
 	Move();
 	vec2 dir(std::sin(m_Rotation), std::cos(m_Rotation));
 	vec2 to2 = m_Pos + normalize(dir) * m_CurveLength;
-	GameServer()->Collision()->IntersectNoLaser(m_Pos, to2, &m_To, 0);
+	GameServer()->Collision()->IntersectNoLaser(m_Pos, to2, &m_To, nullptr);
 }
 
 void CLight::Reset()

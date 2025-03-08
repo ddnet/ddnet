@@ -1,55 +1,3 @@
-##### authors #####
-#originally created by:
-#	MK124
-#modified by:
-# 2016-02-05 CarolVlCznYu
-# 2017-07-31 MC_TYH
-# 2018-10-07 Yangfl
-# 2019-12-16 Eki
-# 2020-06-25 Night_L
-# 2020-08-14 Night_L
-# 2020-08-19 TsFreddie
-# 2020-08-20 Dan_cao
-# 2020-11-12 TsFreddie
-# 2021-05-27 Momo
-# 2021-06-01 TsFreddie
-# 2021-11-19 cheeser0613
-# 2021-12-21 cheeser0613
-# 2022-02-07 cheeser0613
-# 2022-03-19 cheeser0613
-# 2022-03-22 cheeser0613
-# 2022-03-24 cheeser0613
-# 2022-03-29 Dan_cao
-# 2022-04-01 Dan_cao
-# 2022-05-14 Dan_cao
-# 2022-05-14 cheeser0613
-# 2022-06-16 cheeser0613
-# 2022-06-27 cheeser0613
-# 2022-07-04 cheeser0613
-# 2022-08-08 cheeser0613
-# 2022-09-17 cheeser0613
-# 2022-10-24 cheeser0613
-# 2022-12-11 cheeser0613
-# 2023-01-11 cheeser0613
-# 2023-04-01 cheeser0613
-# 2023-05-21 RemakePower
-# 2023-07-20 By
-# 2023-08-11 By
-# 2023-11-25 By
-# 2024-01-15 By
-# 2024-03-03 Bamcane
-# 2024-04-21 By
-# 2024-06-10 By
-# 2024-07-21 By
-# 2024-08-29 Pioooooo
-# 2024-09-29 Pioooooo
-# 2024-11-01 Pioooooo
-# 2024-12-03 豆腐渣 & Pioooooo
-# 2025-01-03 Pioooooo
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == 还剩 %d 秒
 
@@ -419,6 +367,15 @@ Show ingame HUD
 Show name plates
 == 显示昵称
 
+None
+== 禁用
+
+Own
+== 自身
+
+Others
+== 其他
+
 Show only chat messages from friends
 == 只显示好友聊天消息
 
@@ -476,9 +433,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == 此服务器运行着经过调整的非标准游戏模式。
 
-Time limit
-== 规定时限
-
 Time limit: %d min
 == 规定时限：%d 分钟
 
@@ -496,6 +450,9 @@ Use sounds
 
 Use team colors for name plates
 == 用队伍颜色显示昵称
+
+Show friend icon in name plates
+== 在昵称中显示好友图标
 
 V-Sync
 == 垂直同步
@@ -604,6 +561,9 @@ LAN
 
 Name plates size
 == 昵称大小
+
+Name plates offset
+== 昵称距离
 
 Show score
 == 显示分数
@@ -1394,6 +1354,9 @@ Show DDRace HUD
 Show jumps indicator
 == 显示可跳跃次数
 
+Show number of spectators
+== 显示旁观者人数
+
 Hook collision line
 == 钩索辅助线
 
@@ -1990,9 +1953,6 @@ Add friends by entering their name below or by clicking their name in the player
 Add clanmates by entering their clan below and leaving the name blank.
 == 在下方输入战队并留空名称即可添加战队
 
-Offline friends and clanmates will appear here.
-== 离线好友和战队会显示在这里
-
 Edit touch controls
 == 编辑触控设置
 
@@ -2104,6 +2064,12 @@ https://wiki.ddnet.org/wiki/Touch_controls
 Show client IDs in name plates
 == 显示客户端 ID
 
+Show client IDs on a seperate line
+== 客户端 ID 换行显示
+
+Client IDs size
+== 客户端 ID 大小
+
 Hook Strength
 == 钩索强度
 
@@ -2113,8 +2079,89 @@ Size of hook strength icon and number indicator
 Key Presses
 == 按键显示
 
+Show players' key presses
+== 显示按键
+
 Size of key press icons
 == 按键显示图标大小
 
+Preview dummy's name plate
+== 预览分身昵称
+
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 服务器无法启动。请确保在应用程序设置中授予通知权限，以便服务器可以在后台运行。
+
+Auto-sync player camera
+== 自动同步玩家视角
+
+[Auto camera]
+Disabled
+== 已禁用
+
+[Auto camera]
+Enabled
+== 已启用
+
+[Auto camera]
+Unavailable for this player
+== 此玩家不可用
+
+[Auto camera]
+Inactive
+== 未激活
+
+[Auto camera]
+Active
+== 已激活
+
+Loading maps…
+== 加载地图中…
+
+Community
+== 社区
+
+[Team status]
+forbidden
+== 禁止
+
+[Team status]
+solo
+== 单人
+
+[Team status]
+allowed
+== 允许
+
+[Team status]
+required
+== 强制
+
+Teams
+== 组队
+
+[Team size]
+minimum
+== 最小人数
+
+[Team size]
+maximum
+== 最大人数
+
+Saves file
+== 存档密码文件
+
+Open the saves file
+== 打开存档密码文件
+
+Show FPS
+== 显示 FPS
+
+Renders your frame rate in the top right
+== 在右上角显示帧率
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== 简体中文翻译由以下人员贡献：MK124, CarolVlCznYu, MC_TYH, Yangfl, Eki, Night_L, TsFreddie, Dan_cao, Momo, cheeser0613, RemakePower, By, Bamcane, Pioooooo, 豆腐渣, XCWQW1
+
+Show spectator cursor
+== 显示旁观者光标

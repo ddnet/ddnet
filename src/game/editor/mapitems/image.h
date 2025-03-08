@@ -14,6 +14,7 @@ public:
 
 	void OnInit(CEditor *pEditor) override;
 	void AnalyseTileFlags();
+	void Free();
 
 	IGraphics::CTextureHandle m_Texture;
 	int m_External = 0;

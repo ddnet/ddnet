@@ -48,7 +48,7 @@ void CScore::ExecPlayerThread(
 bool CScore::RateLimitPlayer(int ClientId)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
-	if(pPlayer == 0)
+	if(pPlayer == nullptr)
 		return true;
 	if(pPlayer->m_LastSqlQuery + (int64_t)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
 		return true;
@@ -331,7 +331,7 @@ void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 			Tmp->m_aCode,
 			Tmp->m_aGeneratedCode);
 	}
-	pController->Teams().KillSavedTeam(ClientId, Team);
+	pController->Teams().KillCharacterOrTeam(ClientId, Team);
 	GameServer()->SendChatTeam(Team, aBuf);
 	m_pPool->ExecuteWrite(CScoreWorker::SaveTeam, std::move(Tmp), "save team");
 }

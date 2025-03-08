@@ -30,7 +30,15 @@ enum EMapImageModType
 	MAP_IMAGE_MOD_TYPE_COUNT,
 };
 
-extern const char *const gs_apModEntitiesNames[];
+constexpr const char *const gs_apModEntitiesNames[] = {
+	"ddnet",
+	"ddrace",
+	"race",
+	"blockworlds",
+	"fng",
+	"vanilla",
+	"f-ddrace",
+};
 
 class CMapImages : public CComponent
 {
