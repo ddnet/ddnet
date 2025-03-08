@@ -38,7 +38,6 @@ static void ReplaceWords(char *pBuffer, const std::vector<std::string> &vWords, 
 CCensor::CCensor()
 {
 	m_vCensoredWords = {};
-	m_vLocalCensoredWords = {};
 }
 
 void CCensor::OnInit()
@@ -49,10 +48,6 @@ void CCensor::OnInit()
 void CCensor::Reset()
 {
 	m_vCensoredWords.clear();
-	m_vLocalCensoredWords.clear();
-	auto vWords = LoadCensorList("censored_words.json");
-	if(vWords)
-		m_vLocalCensoredWords = std::move(*vWords);
 	m_pBlackListDownloadJob = std::make_shared<CBlacklistDownloadJob>(this, g_Config.m_ClCensorUrl, "censored_words_online.json");
 	Engine()->AddJob(m_pBlackListDownloadJob);
 }
@@ -69,17 +64,12 @@ void CCensor::OnRender()
 
 void CCensor::CensorMessage(char *pMessage) const
 {
-	if(g_Config.m_ClCensorChat == 0)
+	if(!g_Config.m_ClCensorChat)
 		return;
 
-	if(g_Config.m_ClCensorChat == 1)
-	{
-		if(!*pMessage)
-			return;
-		ReplaceWords(pMessage, m_vCensoredWords, '*');
-	}
-
-	ReplaceWords(pMessage, m_vLocalCensoredWords, '*');
+	if(!*pMessage)
+		return;
+	ReplaceWords(pMessage, m_vCensoredWords, '*');
 }
 
 std::optional<std::vector<std::string>> CCensor::LoadCensorList(const char *pFilePath) const

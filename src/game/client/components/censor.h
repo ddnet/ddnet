@@ -17,7 +17,6 @@
 class CCensor : public CComponent
 {
 private:
-	std::vector<std::string> m_vLocalCensoredWords;
 	std::vector<std::string> m_vCensoredWords;
 
 	class CBlacklistDownloadJob : public IJob

@@ -542,7 +542,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 
-		if(g_Config.m_ClCensorChat != 0)
+		if(g_Config.m_ClCensorChat)
 		{
 			char aMessage[MAX_LINE_LENGTH];
 			str_copy(aMessage, pMsg->m_pMessage);
