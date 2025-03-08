@@ -63,10 +63,16 @@ jobs:
           exit 1
         fi
 
+    - name: Build mastersrv
+      run: |
+        cd src/mastersrv
+        cargo build
+        cp target/debug/mastersrv ../../clang-sanitizer
+
     - name: Run integration tests with ASan and UBSan
       run: |
         cd clang-sanitizer
-        python ../scripts/integration_test.py .
+        python ../scripts/integration_test.py --test-mastersrv .
         if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
         then
           cat SAN.*

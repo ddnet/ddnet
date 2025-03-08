@@ -194,7 +194,8 @@ jobs:
       run: |
         # Remove old coverage data:
         find headless -name '*.gcno' -o -name '*.gcda' -delete
-        python scripts/integration_test.py --valgrind-memcheck headless
+        cp src/mastersrv/target/debug/mastersrv headless
+        python scripts/integration_test.py --test-mastersrv --valgrind-memcheck headless
 
     - name: Upload Codecov report (integration tests)
       if: contains(matrix.os, 'ubuntu-latest')
