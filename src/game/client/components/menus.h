@@ -297,6 +297,7 @@ protected:
 		bool m_IsLink;
 		int m_StorageType;
 		time_t m_Date;
+		int64_t m_Size;
 
 		bool m_InfosLoaded;
 		bool m_Valid;
@@ -314,7 +315,7 @@ protected:
 			return bytes_be_to_uint(m_Info.m_aLength);
 		}
 
-		unsigned Size() const
+		unsigned MapSize() const
 		{
 			return bytes_be_to_uint(m_Info.m_aMapSize);
 		}
