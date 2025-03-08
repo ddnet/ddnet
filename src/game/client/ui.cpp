@@ -886,6 +886,14 @@ void CUi::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 	}
 }
 
+void CUi::DoLabel_AutoLineSize(const char *pText, float FontSize, int Align, CUIRect *pRect, float LineSize, const SLabelProperties &LabelProps) const
+{
+	CUIRect LabelRect;
+	pRect->HSplitTop(LineSize, &LabelRect, pRect);
+
+	this->DoLabel(&LabelRect, pText, FontSize, Align);
+}
+
 bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners, const std::vector<STextColorSplit> &vColorSplits)
 {
 	const bool Inside = MouseHovered(pRect);
