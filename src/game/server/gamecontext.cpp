@@ -3732,6 +3732,7 @@ void CGameContext::RegisterDDRaceCommands()
 	Console()->Register("right", "?i[tiles]", CFGFLAG_SERVER | CMDFLAG_TEST, ConGoRight, this, "Makes you move 1 tile right");
 	Console()->Register("up", "?i[tiles]", CFGFLAG_SERVER | CMDFLAG_TEST, ConGoUp, this, "Makes you move 1 tile up");
 	Console()->Register("down", "?i[tiles]", CFGFLAG_SERVER | CMDFLAG_TEST, ConGoDown, this, "Makes you move 1 tile down");
+	Console()->Register("confetti", "?v[id]", CFGFLAG_SERVER, ConConfetti, this, "Spawn birthday confetti effect on yourself or another player");
 
 	Console()->Register("move", "i[x] i[y]", CFGFLAG_SERVER | CMDFLAG_TEST, ConMove, this, "Moves to the tile with x/y-number ii");
 	Console()->Register("move_raw", "i[x] i[y]", CFGFLAG_SERVER | CMDFLAG_TEST, ConMoveRaw, this, "Moves to the point with x/y-coordinates ii");
