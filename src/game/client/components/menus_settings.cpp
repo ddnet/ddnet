@@ -2374,7 +2374,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** HUD ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("HUD"), HeadlineFontSize,
-		TEXTALIGN_ML, &LeftView, HeadlineHeight);
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// Switch of the entire HUD
@@ -2392,7 +2392,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		// ***** Scoreboard ***** //
 		LeftView.HSplitTop(MarginBetweenViews, nullptr, &LeftView);
 		Ui()->DoLabel_AutoLineSize(Localize("Scoreboard"), HeadlineFontSize,
-		TEXTALIGN_ML, &LeftView, HeadlineHeight);
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		ColorRGBA GreenDefault(0.78f, 1.0f, 0.8f, 1.0f);
@@ -2486,7 +2486,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Messages ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("Messages"), HeadlineFontSize,
-		TEXTALIGN_ML, &RightView, HeadlineHeight);
+			TEXTALIGN_ML, &RightView, HeadlineHeight);
 		RightView.HSplitTop(MarginSmall, nullptr, &RightView);
 
 		// Message Colors and extra settings
@@ -2507,7 +2507,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Chat Preview ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("Preview"), HeadlineFontSize,
-		TEXTALIGN_ML, &PreviewView, HeadlineHeight);
+			TEXTALIGN_ML, &PreviewView, HeadlineHeight);
 		PreviewView.HSplitTop(MarginSmall, nullptr, &PreviewView);
 
 		// Use the rest of the view for preview
@@ -2795,7 +2795,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Name Plate ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("Name Plate"), HeadlineFontSize,
-		TEXTALIGN_ML, &LeftView, HeadlineHeight);
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// General name plate settings
@@ -2836,7 +2836,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		// ***** Hook Strength ***** //
 		LeftView.HSplitTop(MarginBetweenViews, nullptr, &LeftView);
 		Ui()->DoLabel_AutoLineSize(Localize("Hook Strength"), HeadlineFontSize,
-		TEXTALIGN_ML, &LeftView, HeadlineHeight);
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
@@ -2861,7 +2861,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		// ***** Key Presses ***** //
 		LeftView.HSplitTop(MarginBetweenViews, nullptr, &LeftView);
 		Ui()->DoLabel_AutoLineSize(Localize("Key Presses"), HeadlineFontSize,
-		TEXTALIGN_ML, &LeftView, HeadlineHeight);
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		DoLine_RadioMenu(LeftView, Localize("Show players' key presses"),
@@ -2876,7 +2876,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Name Plate Preview ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("Preview"), HeadlineFontSize,
-		TEXTALIGN_ML, &RightView, HeadlineHeight);
+			TEXTALIGN_ML, &RightView, HeadlineHeight);
 		RightView.HSplitTop(2.0f * MarginSmall, nullptr, &RightView);
 
 		// ***** Name Plate Dummy Preview ***** //
@@ -2896,7 +2896,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Hookline ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("Hook collision line"), HeadlineFontSize,
-		TEXTALIGN_ML, &LeftView, HeadlineHeight);
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// General hookline settings
@@ -2939,7 +2939,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		static int s_HookCollToolTip;
 
 		Ui()->DoLabel_AutoLineSize(Localize("Colors of the hook collision line, in case of a possible collision with:"), 13.0f,
-		TEXTALIGN_ML, &LeftView, HeadlineHeight);
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 
 		Ui()->DoButtonLogic(&s_HookCollToolTip, 0, &LeftView, BUTTONFLAG_NONE); // Just for the tooltip, result ignored
 		GameClient()->m_Tooltips.DoToolTip(&s_HookCollToolTip, &LeftView, Localize("Your movements are not taken into account when calculating the line colors"));
@@ -2949,7 +2949,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Hook collisions preview ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("Preview"), HeadlineFontSize,
-		TEXTALIGN_ML, &RightView, HeadlineHeight);
+			TEXTALIGN_ML, &RightView, HeadlineHeight);
 		RightView.HSplitTop(2 * MarginSmall, nullptr, &RightView);
 
 		auto DoHookCollision = [this](const vec2 &Pos, const float &Length, const int &Size, const ColorRGBA &Color, const bool &Invert) {
@@ -3067,7 +3067,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Info Messages ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("Info Messages"), HeadlineFontSize,
-		TEXTALIGN_ML, &LeftView, HeadlineHeight);
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// General info messages settings
@@ -3093,7 +3093,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Weapons ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("Weapons"), HeadlineFontSize,
-		TEXTALIGN_ML, &LeftView, HeadlineHeight);
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// General weapon laser settings
@@ -3107,7 +3107,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		// ***** Entities ***** //
 		LeftView.HSplitTop(10.0f, nullptr, &LeftView);
 		Ui()->DoLabel_AutoLineSize(Localize("Entities"), HeadlineFontSize,
-		TEXTALIGN_ML, &LeftView, HeadlineHeight);
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// General entity laser settings
@@ -3149,7 +3149,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Laser Preview ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("Preview"), HeadlineFontSize,
-		TEXTALIGN_ML, &RightView, HeadlineHeight);
+			TEXTALIGN_ML, &RightView, HeadlineHeight);
 		RightView.HSplitTop(MarginSmall, nullptr, &RightView);
 
 		const float LaserPreviewHeight = 50.0f;
