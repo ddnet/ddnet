@@ -33,6 +33,8 @@ public:
 
 	bool IsGrounded();
 
+	int ReloadTimer() const;
+	void SetReloadTimer(int Delay);
 	void SetWeapon(int W);
 	void SetSolo(bool Solo);
 	void SetSuper(bool Super);
