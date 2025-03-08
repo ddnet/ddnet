@@ -135,6 +135,16 @@ void CCharacter::Destroy()
 	SetSolo(false);
 }
 
+int CCharacter::ReloadTimer() const
+{
+	return m_ReloadTimer;
+}
+
+void CCharacter::SetReloadTimer(int Delay)
+{
+	m_ReloadTimer = Delay;
+}
+
 void CCharacter::SetWeapon(int W)
 {
 	if(W == m_Core.m_ActiveWeapon)
@@ -365,7 +375,7 @@ void CCharacter::HandleNinja()
 void CCharacter::DoWeaponSwitch()
 {
 	// make sure we can switch
-	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || !m_Core.m_aWeapons[m_QueuedWeapon].m_Got)
+	if(ReloadTimer() != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || !m_Core.m_aWeapons[m_QueuedWeapon].m_Got)
 		return;
 
 	// switch Weapon
@@ -421,7 +431,7 @@ void CCharacter::HandleWeaponSwitch()
 
 void CCharacter::FireWeapon()
 {
-	if(m_ReloadTimer != 0)
+	if(ReloadTimer() != 0)
 	{
 		if(m_LatestInput.m_Fire & 1)
 		{
@@ -535,7 +545,7 @@ void CCharacter::FireWeapon()
 		if(Hits)
 		{
 			float FireDelay = GetTuning(m_TuneZone)->m_HammerHitFireDelay;
-			m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+			SetReloadTimer(FireDelay * Server()->TickSpeed() / 1000);
 		}
 	}
 	break;
@@ -619,11 +629,11 @@ void CCharacter::FireWeapon()
 
 	m_AttackTick = Server()->Tick();
 
-	if(!m_ReloadTimer)
+	if(!ReloadTimer())
 	{
 		float FireDelay;
 		GetTuning(m_TuneZone)->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
-		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+		SetReloadTimer(FireDelay * Server()->TickSpeed() / 1000);
 	}
 }
 
@@ -637,9 +647,9 @@ void CCharacter::HandleWeapons()
 		m_PainSoundTimer--;
 
 	// check reload timer
-	if(m_ReloadTimer)
+	if(ReloadTimer())
 	{
-		m_ReloadTimer--;
+		SetReloadTimer(ReloadTimer() - 1);
 		return;
 	}
 

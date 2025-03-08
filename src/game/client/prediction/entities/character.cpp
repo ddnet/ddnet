@@ -11,6 +11,16 @@
 
 // Character, "physical" player's part
 
+int CCharacter::ReloadTimer() const
+{
+	return m_ReloadTimer;
+}
+
+void CCharacter::SetReloadTimer(int Delay)
+{
+	m_ReloadTimer = Delay;
+}
+
 void CCharacter::SetWeapon(int W)
 {
 	if(W == m_Core.m_ActiveWeapon)
@@ -190,7 +200,7 @@ void CCharacter::HandleNinja()
 void CCharacter::DoWeaponSwitch()
 {
 	// make sure we can switch
-	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || !m_Core.m_aWeapons[m_QueuedWeapon].m_Got)
+	if(ReloadTimer() != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || !m_Core.m_aWeapons[m_QueuedWeapon].m_Got)
 		return;
 
 	// switch Weapon
@@ -255,7 +265,7 @@ void CCharacter::FireWeapon()
 	if(!GameWorld()->m_WorldConfig.m_PredictWeapons)
 		return;
 
-	if(m_ReloadTimer != 0)
+	if(ReloadTimer() != 0)
 		return;
 
 	DoWeaponSwitch();
@@ -357,7 +367,7 @@ void CCharacter::FireWeapon()
 		if(Hits)
 		{
 			float FireDelay = GetTuning(GetOverriddenTuneZone())->m_HammerHitFireDelay;
-			m_ReloadTimer = FireDelay * GameWorld()->GameTickSpeed() / 1000;
+			SetReloadTimer(FireDelay * GameWorld()->GameTickSpeed() / 1000);
 		}
 	}
 	break;
@@ -458,12 +468,12 @@ void CCharacter::FireWeapon()
 
 	m_AttackTick = GameWorld()->GameTick(); // NOLINT(clang-analyzer-unix.Malloc)
 
-	if(!m_ReloadTimer)
+	if(!ReloadTimer())
 	{
 		float FireDelay;
 		GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 
-		m_ReloadTimer = FireDelay * GameWorld()->GameTickSpeed() / 1000;
+		SetReloadTimer(FireDelay * GameWorld()->GameTickSpeed() / 1000);
 	}
 }
 
@@ -474,9 +484,9 @@ void CCharacter::HandleWeapons()
 	HandleJetpack();
 
 	// check reload timer
-	if(m_ReloadTimer)
+	if(ReloadTimer())
 	{
-		m_ReloadTimer--;
+		SetReloadTimer(ReloadTimer() - 1);
 		return;
 	}
 
@@ -1195,7 +1205,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_Core.m_Id = Id;
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	m_Core.m_LeftWall = true;
-	m_ReloadTimer = 0;
+	SetReloadTimer(0);
 	m_NumObjectsHit = 0;
 	m_LastRefillJumps = false;
 	m_LastJetpackStrength = 400.0f;
@@ -1421,7 +1431,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			float FireDelay;
 			GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 			const int FireDelayTicks = FireDelay * GameWorld()->GameTickSpeed() / 1000;
-			m_ReloadTimer = maximum(0, m_AttackTick + FireDelayTicks - GameWorld()->GameTick());
+			SetReloadTimer(maximum(0, m_AttackTick + FireDelayTicks - GameWorld()->GameTick()));
 		}
 	}
 }

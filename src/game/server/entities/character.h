@@ -48,6 +48,8 @@ public:
 
 	bool IsGrounded();
 
+	int ReloadTimer() const;
+	void SetReloadTimer(int Delay);
 	void SetWeapon(int W);
 	void SetJetpack(bool Active);
 	void SetEndlessJump(bool Active);
