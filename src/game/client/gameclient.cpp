@@ -7,6 +7,7 @@
 #include <engine/client/checksum.h>
 #include <engine/client/enums.h>
 #include <engine/demo.h>
+#include <engine/discord.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/favorites.h>
@@ -643,6 +644,8 @@ void CGameClient::OnReset()
 
 	for(auto &Stats : m_aStats)
 		Stats.Reset();
+
+	m_PlayerCount = 0;
 
 	m_NextChangeInfo = 0;
 	std::fill(std::begin(m_aLocalIds), std::end(m_aLocalIds), -1);
@@ -1954,6 +1957,7 @@ void CGameClient::OnNewSnapshot()
 		}
 	}
 
+	int PlayerCount = 0;
 	// clear out unneeded client data
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -1962,6 +1966,16 @@ void CGameClient::OnNewSnapshot()
 			m_aClients[i].Reset();
 			m_aStats[i].Reset();
 		}
+
+		if(m_Snap.m_apPlayerInfos[i])
+			PlayerCount++;
+	}
+
+	if(PlayerCount != m_PlayerCount && Client()->State() == IClient::STATE_ONLINE)
+	{
+		m_PlayerCount = PlayerCount;
+		IDiscord *pDiscord = Kernel()->RequestInterface<IDiscord>();
+		pDiscord->UpdatePlayerCount(PlayerCount);
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
