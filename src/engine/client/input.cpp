@@ -568,7 +568,8 @@ void CInput::HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event)
 
 void CInput::HandleTextEditingEvent(const char *pText, int Start, int Length)
 {
-	if(pText[0] != '\0')
+	// For whatever reason SDL can throw an event with nullptr
+	if(pText && pText[0] != '\0')
 	{
 		m_CompositionString = pText;
 		m_CompositionCursor = 0;
