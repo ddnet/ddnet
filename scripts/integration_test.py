@@ -624,7 +624,7 @@ def main():
 	if args.test is not None:
 		tests = [test for test in tests if args.test in test.name]
 
-	TestRunner(
+	return TestRunner(
 		ddnet=ddnet,
 		ddnet_server=ddnet_server,
 		repo_dir=repo_dir,
