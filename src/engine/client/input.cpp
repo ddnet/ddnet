@@ -808,6 +808,7 @@ int CInput::Update()
 				IgnoreKeys = true;
 				break;
 			case SDL_WINDOWEVENT_FOCUS_LOST:
+				std::fill(std::begin(m_aCurrentKeyStates), std::end(m_aCurrentKeyStates), false);
 				m_MouseFocus = false;
 				IgnoreKeys = true;
 				if(m_InputGrabbed)
