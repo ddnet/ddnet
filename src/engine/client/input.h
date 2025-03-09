@@ -83,8 +83,9 @@ private:
 	// IME support
 	std::string m_CompositionString;
 	int m_CompositionCursor;
-	std::vector<std::string> m_vCandidates;
-	int m_CandidateSelectedIndex;
+	const char * const *m_ppCandidates = nullptr;
+	int m_CandidatesCount = 0;
+	int m_CandidateSelectedIndex = -1;
 
 	// events
 	std::vector<CEvent> m_vInputEvents;
@@ -153,8 +154,8 @@ public:
 	bool HasComposition() const override { return !m_CompositionString.empty(); }
 	int GetCompositionCursor() const override { return m_CompositionCursor; }
 	int GetCompositionLength() const override { return m_CompositionString.length(); }
-	const char *GetCandidate(int Index) const override { return m_vCandidates[Index].c_str(); }
-	int GetCandidateCount() const override { return m_vCandidates.size(); }
+	const char *GetCandidate(int Index) const override { return m_ppCandidates[Index]; }
+	int GetCandidateCount() const override { return m_CandidatesCount; }
 	int GetCandidateSelectedIndex() const override { return m_CandidateSelectedIndex; }
 	void SetCompositionWindowPosition(float X, float Y, float H) override;
 

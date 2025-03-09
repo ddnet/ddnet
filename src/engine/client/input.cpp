@@ -22,12 +22,6 @@
 #define SDL_JOYSTICK_AXIS_MAX 32767
 #endif
 
-#if defined(CONF_FAMILY_WINDOWS)
-#include <windows.h>
-// windows.h must be included before imm.h, but clang-format requires includes to be sorted alphabetically, hence this comment.
-#include <imm.h>
-#endif
-
 static void AssertKeyValid(int Key)
 {
 	if(Key < KEY_FIRST || Key >= KEY_LAST)
@@ -346,7 +340,9 @@ void CInput::StopTextInput()
 	SDL_StopTextInput(m_pWindow);
 	m_CompositionString = "";
 	m_CompositionCursor = 0;
-	m_vCandidates.clear();
+	m_ppCandidates = nullptr;
+	m_CandidateSelectedIndex = -1;
+	m_CandidatesCount = 0;
 }
 
 void CInput::ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const
@@ -565,7 +561,7 @@ void CInput::HandleTextEditingEvent(const char *pText, int Start, int Length)
 		{
 			m_CompositionCursor = str_utf8_forward(m_CompositionString.c_str(), m_CompositionCursor);
 		}
-		// Length is currently unused on Windows and will always be 0, so we don't support selecting composition text
+		// TODO: support selection
 		AddTextEvent("");
 	}
 	else
@@ -609,13 +605,11 @@ static int TranslateKeyEventKey(const SDL_KeyboardEvent &KeyEvent)
 	SDL_Keymod modstate; // TODO: unused?
 	int Key = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(KeyEvent.key, &modstate) : KeyEvent.scancode;
 
-#if defined(CONF_PLATFORM_ANDROID)
-	// Translate the Android back-button to the escape-key so it can be used to open/close the menu, close popups etc.
+	// Translate AC Back (used in Android) to escape so it can be used to open/close the menu, close popups etc.
 	if(Key == KEY_AC_BACK)
 	{
 		Key = KEY_ESCAPE;
 	}
-#endif
 
 	return Key;
 }
@@ -698,21 +692,26 @@ int CInput::Update()
 	{
 		switch(Event.type)
 		{
-		case SDL_EVENT_TEXT_EDITING:
-			HandleTextEditingEvent(Event.edit.text, Event.edit.start, Event.edit.length);
-			break;
-
-#if 0 // TODO: Not implemented yet?
-		case SDL_EVENT_TEXT_EDITING_EXT:
-			HandleTextEditingEvent(Event.editExt.text, Event.editExt.start, Event.editExt.length);
-			SDL_free(Event.editExt.text);
-			break;
-#endif
-
 		case SDL_EVENT_TEXT_INPUT:
 			m_CompositionString = "";
 			m_CompositionCursor = 0;
 			AddTextEvent(Event.text.text);
+			break;
+
+		case SDL_EVENT_TEXT_EDITING:
+			HandleTextEditingEvent(Event.edit.text, Event.edit.start, Event.edit.length);
+			break;
+
+		case SDL_EVENT_TEXT_EDITING_CANDIDATES:
+			m_ppCandidates = Event.edit_candidates.candidates;
+			m_CandidatesCount = Event.edit_candidates.num_candidates;
+			m_CandidateSelectedIndex = Event.edit_candidates.selected_candidate;
+			// TODO: support Event.edit_candidates.horizontal == false
+			// print
+			for (int i = 0; i < m_CandidatesCount; i++)
+			{
+				dbg_msg("input", "candidate %d: %s", i, m_ppCandidates[i]);
+			}
 			break;
 
 		// handle keys
