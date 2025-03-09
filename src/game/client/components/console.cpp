@@ -132,6 +132,9 @@ static std::pair<EArgumentCompletionType, int> ArgumentCompletion(const char *pS
 			{
 				pArgStart = pIt;
 				pIt = str_skip_to_whitespace_const(pIt); // Skip argument value
+				pIt = str_skip_to_whitespace_const(pIt); // Skip argument value
+				pIt = str_skip_to_whitespace_const(pIt); // Skip argument value
+				pIt = str_skip_to_whitespace_const(pIt); // Skip argument value
 				pArgEnd = pIt;
 
 				if(!pIt[0] || pArgStart == pIt) // Check that argument is not empty

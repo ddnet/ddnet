@@ -1,3 +1,6 @@
+If this PR is a new feature there is a linked issue with a discussion approving it: pr link here
+
+
 <!-- What is the motivation for the changes of this pull request? -->
 
 <!-- Note that builds and other checks will be run for your change. Don't feel intimidated by failures in some of the checks. If you can't resolve them yourself, experienced devs can also resolve them before merging your pull request. -->
