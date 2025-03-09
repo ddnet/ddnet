@@ -147,7 +147,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_RED)
 			{
-				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+				ButtonBar.VSplitLeft(100.0f, &Button, &ButtonBar);
 				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				static CButtonContainer s_JoinRedButton;
 				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinRedButton, Localize("Join red"), 0, &Button))
@@ -159,7 +159,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_BLUE)
 			{
-				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+				ButtonBar.VSplitLeft(100.0f, &Button, &ButtonBar);
 				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				static CButtonContainer s_JoinBlueButton;
 				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinBlueButton, Localize("Join blue"), 0, &Button))
@@ -192,7 +192,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			static CButtonContainer s_KillButton;
 			if(DoButton_Menu(&s_KillButton, Localize("Kill"), 0, &Button))
 			{
-				m_pClient->SendKill(-1);
+				m_pClient->SendKill();
 				SetActive(false);
 			}
 		}
@@ -223,7 +223,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 		bool Active = m_pClient->m_Camera.m_AutoSpecCamera && m_pClient->m_Camera.SpectatingPlayer() && m_pClient->m_Camera.CanUseAutoSpecCamera();
 		bool Enabled = g_Config.m_ClSpecAutoSync;
-		if(DoButton_FontIcon(&s_AutoCameraButton, FONT_ICON_CAMERA, !Active, &Button, IGraphics::CORNER_ALL, Enabled))
+		if(DoButton_FontIcon(&s_AutoCameraButton, FONT_ICON_CAMERA, !Active, &Button, BUTTONFLAG_LEFT, IGraphics::CORNER_ALL, Enabled))
 		{
 			m_pClient->m_Camera.ToggleAutoSpecCamera();
 		}
@@ -287,7 +287,7 @@ void CMenus::RenderTouchControlsEditor(CUIRect MainView)
 	Ui()->DoLabel(&Label, Localize("Edit touch controls"), 20.0f, TEXTALIGN_MC);
 
 	static CButtonContainer s_OpenHelpButton;
-	if(DoButton_FontIcon(&s_OpenHelpButton, FONT_ICON_QUESTION, 0, &Button))
+	if(DoButton_FontIcon(&s_OpenHelpButton, FONT_ICON_QUESTION, 0, &Button, BUTTONFLAG_LEFT))
 	{
 		Client()->ViewLink(Localize("https://wiki.ddnet.org/wiki/Touch_controls"));
 	}
@@ -552,7 +552,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 		vec2 TeeRenderPos(Button.x + Button.h / 2, Button.y + Button.h / 2 + OffsetToMid.y);
 		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
-		Ui()->DoButtonLogic(&s_aPlayerIds[Index][3], 0, &Button);
+		Ui()->DoButtonLogic(&s_aPlayerIds[Index][3], 0, &Button, BUTTONFLAG_NONE);
 		GameClient()->m_Tooltips.DoToolTip(&s_aPlayerIds[Index][3], &Button, CurrentClient.m_aSkinName);
 
 		Player.HSplitTop(1.5f, nullptr, &Player);
@@ -664,7 +664,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 			Label.VSplitLeft(2.0f * Label.h, &Label, nullptr);
 			RenderCommunityIcon(pIcon, Label, true);
 			static char s_CommunityTooltipButtonId;
-			Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Label);
+			Ui()->DoButtonLogic(&s_CommunityTooltipButtonId, 0, &Label, BUTTONFLAG_NONE);
 			GameClient()->m_Tooltips.DoToolTip(&s_CommunityTooltipButtonId, &Label, pCommunity->Name());
 		}
 	}
@@ -752,19 +752,19 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		switch(Config()->m_SvTeam)
 		{
 		case SV_TEAM_FORBIDDEN:
-			pTeamMode = Localize("forbidden", "Teaming status");
+			pTeamMode = Localize("forbidden", "Team status");
 			break;
 		case SV_TEAM_ALLOWED:
 			if(g_Config.m_SvSoloServer)
-				pTeamMode = Localize("solo", "Teaming status");
+				pTeamMode = Localize("solo", "Team status");
 			else
-				pTeamMode = Localize("allowed", "Teaming status");
+				pTeamMode = Localize("allowed", "Team status");
 			break;
 		case SV_TEAM_MANDATORY:
-			pTeamMode = Localize("required", "Teaming status");
+			pTeamMode = Localize("required", "Team status");
 			break;
 		case SV_TEAM_FORCED_SOLO:
-			pTeamMode = Localize("solo", "Teaming status");
+			pTeamMode = Localize("solo", "Team status");
 			break;
 		default:
 			dbg_assert(false, "unknown team mode");
@@ -1148,7 +1148,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	int NewPage = g_Config.m_UiPage;
 
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 	TabBar.VSplitLeft(75.0f, &Button, &TabBar);
 	static CButtonContainer s_InternetButton;
@@ -1484,7 +1484,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 	static CButtonContainer s_DirectoryButton;
 	static CButtonContainer s_ActivateAll;
 
-	if(DoButton_FontIcon(&s_ReloadButton, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &Button) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
+	if(DoButton_FontIcon(&s_ReloadButton, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &Button, BUTTONFLAG_LEFT) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 	{
 		m_pClient->m_Ghost.UnloadAll();
 		GhostlistPopulate();

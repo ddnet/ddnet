@@ -215,7 +215,7 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientId)
 	return m_apPlayers[ClientId]->GetCharacter();
 }
 
-bool CGameContext::EmulateBug(int Bug)
+bool CGameContext::EmulateBug(int Bug) const
 {
 	return m_MapBugs.Contains(Bug);
 }
@@ -977,7 +977,7 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 				Msg.AddInt(0);
 			}
 			else if((i == 33) // jetpack
-				&& !(m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK))
+				&& m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK)
 			{
 				Msg.AddInt(0);
 			}
@@ -1009,7 +1009,7 @@ void CGameContext::OnPreTickTeehistorian()
 		else
 			m_TeeHistorian.RecordPlayerTeam(i, 0);
 	}
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < TEAM_SUPER; i++)
 	{
 		m_TeeHistorian.RecordTeamPractice(i, m_pController->Teams().IsPractice(i));
 	}
@@ -1276,7 +1276,7 @@ void CGameContext::OnTick()
 
 	for(auto &Switcher : Switchers())
 	{
-		for(int j = 0; j < MAX_CLIENTS; ++j)
+		for(int j = 0; j < NUM_DDRACE_TEAMS; ++j)
 		{
 			if(Switcher.m_aEndTick[j] <= Server()->Tick() && Switcher.m_aType[j] == TILE_SWITCHTIMEDOPEN)
 			{
@@ -1745,6 +1745,9 @@ void CGameContext::OnClientDrop(int ClientId, const char *pReason)
 	m_apSavedTees[ClientId] = nullptr;
 
 	m_aTeamMapping[ClientId] = -1;
+
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && PracticeByDefault())
+		m_pController->Teams().SetPractice(GetDDRaceTeam(ClientId), true);
 
 	m_VoteUpdate = true;
 	if(m_VoteCreator == ClientId)
@@ -3093,30 +3096,26 @@ void CGameContext::ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUse
 void CGameContext::ConMapbug(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	const char *pMapBugName = pResult->GetString(0);
 
 	if(pSelf->m_pController)
 	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mapbugs", "can't add map bugs after the game started");
+		log_info("mapbugs", "can't add map bugs after the game started");
 		return;
 	}
 
+	const char *pMapBugName = pResult->GetString(0);
 	switch(pSelf->m_MapBugs.Update(pMapBugName))
 	{
-	case MAPBUGUPDATE_OK:
+	case EMapBugUpdate::OK:
 		break;
-	case MAPBUGUPDATE_OVERRIDDEN:
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mapbugs", "map-internal setting overridden by database");
+	case EMapBugUpdate::OVERRIDDEN:
+		log_info("mapbugs", "map-internal setting overridden by database");
 		break;
-	case MAPBUGUPDATE_NOTFOUND:
-	{
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "unknown map bug '%s', ignoring", pMapBugName);
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "mapbugs", aBuf);
-	}
-	break;
+	case EMapBugUpdate::NOTFOUND:
+		log_info("mapbugs", "unknown map bug '%s', ignoring", pMapBugName);
+		break;
 	default:
-		dbg_assert(0, "unreachable");
+		dbg_assert(false, "unreachable");
 	}
 }
 
@@ -3784,6 +3783,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("mapinfo", "?r[map]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConMapInfo, this, "Show info about the map with name r gives (current map by default)");
 	Console()->Register("timeout", "?s[code]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTimeout, this, "Set timeout protection code s");
 	Console()->Register("practice", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER, ConPractice, this, "Enable cheats for your current team's run, but you can't earn a rank");
+	Console()->Register("unpractice", "", CFGFLAG_CHAT | CFGFLAG_SERVER | CMDFLAG_PRACTICE, ConUnPractice, this, "Kills team and disables practice mode");
 	Console()->Register("practicecmdlist", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConPracticeCmdList, this, "List all commands that are avaliable in practice mode");
 	Console()->Register("swap", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConSwap, this, "Request to swap your tee with another team member");
 	Console()->Register("cancelswap", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConCancelSwap, this, "Cancel your swap request");
@@ -3898,7 +3898,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 	SHA256_DIGEST MapSha256;
 	int MapCrc;
 	Server()->GetMapInfo(aMapName, sizeof(aMapName), &MapSize, &MapSha256, &MapCrc);
-	m_MapBugs = GetMapBugs(aMapName, MapSize, MapSha256);
+	m_MapBugs = CMapBugs::Create(aMapName, MapSize, MapSha256);
 
 	// Reset Tunezones
 	CTuningParams TuningParams;
@@ -5033,4 +5033,9 @@ void CGameContext::ReadCensorList()
 	{
 		dbg_msg("censorlist", "failed to open '%s'", pCensorFilename);
 	}
+}
+
+bool CGameContext::PracticeByDefault() const
+{
+	return g_Config.m_SvPracticeByDefault && g_Config.m_SvTestingCommands;
 }

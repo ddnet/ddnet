@@ -8,12 +8,14 @@
 #include "entities/pickup.h"
 #include "entities/projectile.h"
 #include "entity.h"
-#include <algorithm>
 #include <engine/shared/config.h>
 #include <game/client/laser_data.h>
 #include <game/client/pickup_data.h>
 #include <game/client/projectile_data.h>
+#include <game/mapbugs.h>
 #include <game/mapitems.h>
+
+#include <algorithm>
 #include <utility>
 
 //////////////////////////////////////////////////
@@ -223,7 +225,7 @@ void CGameWorld::Tick()
 	// update switch state
 	for(auto &Switcher : Switchers())
 	{
-		for(int j = 0; j < MAX_CLIENTS; ++j)
+		for(int j = 0; j < NUM_DDRACE_TEAMS; ++j)
 		{
 			if(Switcher.m_aEndTick[j] <= GameTick() && Switcher.m_aType[j] == TILE_SWITCHTIMEDOPEN)
 			{
@@ -243,37 +245,40 @@ void CGameWorld::Tick()
 	OnModified();
 }
 
-// TODO: should be more general
 CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly)
 {
-	// Find other players
+	return (CCharacter *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_CHARACTER, NewPos, pNotThis, CollideWith, pThisOnly);
+}
+
+CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
+{
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
-	CCharacter *pClosest = nullptr;
+	CEntity *pClosest = nullptr;
 
-	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);
-	for(; p; p = (CCharacter *)p->TypeNext())
+	CEntity *pEntity = FindFirst(Type);
+	for(; pEntity; pEntity = pEntity->TypeNext())
 	{
-		if(p == pNotThis)
+		if(pEntity == pNotThis)
 			continue;
 
-		if(pThisOnly && p != pThisOnly)
+		if(pThisOnly && pEntity != pThisOnly)
 			continue;
 
-		if(CollideWith != -1 && !p->CanCollide(CollideWith))
+		if(CollideWith != -1 && !pEntity->CanCollide(CollideWith))
 			continue;
 
 		vec2 IntersectPos;
-		if(closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
+		if(closest_point_on_line(Pos0, Pos1, pEntity->m_Pos, IntersectPos))
 		{
-			float Len = distance(p->m_Pos, IntersectPos);
-			if(Len < p->m_ProximityRadius + Radius)
+			float Len = distance(pEntity->m_Pos, IntersectPos);
+			if(Len < pEntity->m_ProximityRadius + Radius)
 			{
 				Len = distance(Pos0, IntersectPos);
 				if(Len < ClosestLen)
 				{
 					NewPos = IntersectPos;
 					ClosestLen = Len;
-					pClosest = p;
+					pClosest = pEntity;
 				}
 			}
 		}
@@ -597,6 +602,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 		m_Core.m_aTuning[i] = pFrom->m_Core.m_aTuning[i];
 	}
 	m_pTuningList = pFrom->m_pTuningList;
+	m_pMapBugs = pFrom->m_pMapBugs;
 	m_Teams = pFrom->m_Teams;
 	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
 	// delete the previous entities
@@ -707,4 +713,9 @@ void CGameWorld::Clear()
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)
 			delete pFirstEntityType; // NOLINT(clang-analyzer-cplusplus.NewDelete)
+}
+
+bool CGameWorld::EmulateBug(int Bug) const
+{
+	return m_pMapBugs->Contains(Bug);
 }

@@ -1,19 +1,3 @@
-##### authors #####
-#originally created by:
-#
-#modified by:
-#	Lanta		2010-05-30 16:26:04
-#	Lanta		2010-05-31 22:05:45
-#	Carmine	2011-01-23 17:54:06
-#	Otacon	2011-05-02 18:21:08
-#	Apmox		2011-07-15 01:09:59
-# NeXus   2020-09-19 02:43:00
-# kio     2023-08-12 18:44:00
-# kio     2023-08-14 11:30:00
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == %ds sec.
 
@@ -400,9 +384,6 @@ The audio device couldn't be initialised.
 
 The server is running a non-standard tuning on a pure game type.
 == Il server presenta impostazioni non standard in un tipo di gioco normale.
-
-Time limit
-== Limite di tempo
 
 Time limit: %d min
 == Limite di tempo: %d min
@@ -1444,6 +1425,29 @@ Loading skin files
 Loading background map
 == 
 
+Auto-sync player camera
+== 
+
+[Auto camera]
+Disabled
+== 
+
+[Auto camera]
+Enabled
+== 
+
+[Auto camera]
+Unavailable for this player
+== 
+
+[Auto camera]
+Inactive
+== 
+
+[Auto camera]
+Active
+== 
+
 Searching
 == 
 
@@ -1472,6 +1476,9 @@ Following
 == 
 
 Loading commands…
+== 
+
+Loading maps…
 == 
 
 [Spectating]
@@ -1583,9 +1590,6 @@ Add friends by entering their name below or by clicking their name in the player
 == 
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
-
-Offline friends and clanmates will appear here.
 == 
 
 Server filter
@@ -1797,6 +1801,39 @@ Could not load default touch controls from file. See local console for details.
 Could not load touch controls from clipboard. See local console for details.
 == 
 
+Community
+== 
+
+Round %d/%d
+== 
+
+[Team status]
+forbidden
+== 
+
+[Team status]
+solo
+== 
+
+[Team status]
+allowed
+== 
+
+[Team status]
+required
+== 
+
+Teams
+== 
+
+[Team size]
+minimum
+== 
+
+[Team size]
+maximum
+== 
+
 Loading…
 == 
 
@@ -1826,6 +1863,12 @@ Settings file
 == 
 
 Open the settings file
+== 
+
+Saves file
+== 
+
+Open the saves file
 == 
 
 Config directory
@@ -1874,6 +1917,12 @@ Mouse
 Allows maps to render with more detail
 == 
 
+Show FPS
+== 
+
+Renders your frame rate in the top right
+== 
+
 Renderer
 == 
 
@@ -1885,6 +1934,10 @@ custom
 
 auto
 == 
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Italian translation by Lanta, Carmine, Otacon, Apmox, NeXus and kio
 
 Tee
 == 
@@ -1899,6 +1952,9 @@ Info Messages
 == 
 
 Show local time always
+== 
+
+Show spectator cursor
 == 
 
 Authed name color in scoreboard
@@ -2049,9 +2105,6 @@ Tutorial
 == 
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
-
-Round %d/%d
 == 
 
 [Spectators]

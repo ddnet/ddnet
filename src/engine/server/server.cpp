@@ -500,6 +500,11 @@ void CServer::ReconnectClient(int ClientId)
 	CMsgPacker Msg(NETMSG_RECONNECT, true);
 	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
 
+	if(m_aClients[ClientId].m_State >= CClient::STATE_READY)
+	{
+		GameServer()->OnClientDrop(ClientId, "reconnect");
+	}
+
 	m_aClients[ClientId].m_RedirectDropTime = time_get() + time_freq() * 10;
 	m_aClients[ClientId].m_State = CClient::STATE_REDIRECTED;
 }
@@ -524,6 +529,11 @@ void CServer::RedirectClient(int ClientId, int Port)
 	CMsgPacker Msg(NETMSG_REDIRECT, true);
 	Msg.AddInt(Port);
 	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientId);
+
+	if(m_aClients[ClientId].m_State >= CClient::STATE_READY)
+	{
+		GameServer()->OnClientDrop(ClientId, "redirect");
+	}
 
 	m_aClients[ClientId].m_RedirectDropTime = time_get() + time_freq() * 10;
 	m_aClients[ClientId].m_State = CClient::STATE_REDIRECTED;
@@ -592,6 +602,12 @@ const char *CServer::GetAuthName(int ClientId) const
 	int Key = m_aClients[ClientId].m_AuthKey;
 	dbg_assert(Key != -1, "Client not authed");
 	return m_AuthManager.KeyIdent(Key);
+}
+
+bool CServer::HasAuthHidden(int ClientId) const
+{
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	return m_aClients[ClientId].m_AuthHidden;
 }
 
 bool CServer::GetClientInfo(int ClientId, CClientInfo *pInfo) const
@@ -695,11 +711,6 @@ bool CServer::ClientSlotEmpty(int ClientId) const
 bool CServer::ClientIngame(int ClientId) const
 {
 	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_State == CServer::CClient::STATE_INGAME;
-}
-
-bool CServer::ClientRedirected(int ClientId) const
-{
-	return ClientId >= 0 && ClientId < MAX_CLIENTS && m_aClients[ClientId].m_State == CServer::CClient::STATE_REDIRECTED;
 }
 
 int CServer::Port() const
@@ -1083,6 +1094,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
+	pThis->m_aClients[ClientId].m_AuthHidden = false;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_ShowIps = false;
@@ -1114,6 +1126,7 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
+	pThis->m_aClients[ClientId].m_AuthHidden = false;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_Traffic = 0;
@@ -1204,6 +1217,7 @@ int CServer::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientId].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
+	pThis->m_aClients[ClientId].m_AuthHidden = false;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_Traffic = 0;
@@ -3378,6 +3392,12 @@ void CServer::ConAuthAdd(IConsole::IResult *pResult, void *pUser)
 	const char *pLevel = pResult->GetString(1);
 	const char *pPw = pResult->GetString(2);
 
+	if(!pManager->IsValidIdent(pIdent))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident is invalid");
+		return;
+	}
+
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
 	{
@@ -3405,6 +3425,12 @@ void CServer::ConAuthAddHashed(IConsole::IResult *pResult, void *pUser)
 	const char *pLevel = pResult->GetString(1);
 	const char *pPw = pResult->GetString(2);
 	const char *pSalt = pResult->GetString(3);
+
+	if(!pManager->IsValidIdent(pIdent))
+	{
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "auth", "ident is invalid");
+		return;
+	}
 
 	int Level = GetAuthLevel(pLevel);
 	if(Level == -1)
@@ -3726,6 +3752,26 @@ void CServer::ConShowIps(IConsole::IResult *pResult, void *pUser)
 		{
 			char aStr[9];
 			str_format(aStr, sizeof(aStr), "Value: %d", pServer->m_aClients[pServer->m_RconClientId].m_ShowIps);
+			pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aStr);
+		}
+	}
+}
+
+void CServer::ConHideAuthStatus(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pServer = (CServer *)pUser;
+
+	if(pServer->m_RconClientId >= 0 && pServer->m_RconClientId < MAX_CLIENTS &&
+		pServer->m_aClients[pServer->m_RconClientId].m_State != CServer::CClient::STATE_EMPTY)
+	{
+		if(pResult->NumArguments())
+		{
+			pServer->m_aClients[pServer->m_RconClientId].m_AuthHidden = pResult->GetInteger(0);
+		}
+		else
+		{
+			char aStr[9];
+			str_format(aStr, sizeof(aStr), "Value: %d", pServer->m_aClients[pServer->m_RconClientId].m_AuthHidden);
 			pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aStr);
 		}
 	}
@@ -4054,6 +4100,7 @@ void CServer::RegisterCommands()
 	Console()->Register("shutdown", "?r[reason]", CFGFLAG_SERVER, ConShutdown, this, "Shut down");
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");
 	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)");
+	Console()->Register("hide_auth_status", "?i[hide]", CFGFLAG_SERVER, ConHideAuthStatus, this, "Opt out of spectator count and hide auth status to non-authed players (1 = hidden, 0 = shown)");
 
 	Console()->Register("record", "?s[file]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRecord, this, "Record to a file");
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording");

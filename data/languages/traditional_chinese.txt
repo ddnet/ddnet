@@ -1,44 +1,3 @@
-##### authors #####
-#originally created by:
-#	SiuFu
-#modified by:
-# 2020-08-19 TsFreddie
-# 2020-08-20 Dan_cao
-# 2020-11-12 TsFreddie
-# 2021-06-01 TsFreddie
-# 2021-11-19 cheeser0613
-# 2021-12-21 cheeser0613
-# 2022-02-07 cheeser0613
-# 2022-03-19 cheeser0613
-# 2022-03-22 cheeser0613
-# 2022-03-24 cheeser0613
-# 2022-05-14 cheeser0613
-# 2022-06-16 cheeser0613
-# 2022-06-27 cheeser0613
-# 2022-08-08 cheeser0613
-# 2022-09-17 cheeser0613
-# 2022-10-24 cheeser0613
-# 2022-12-11 cheeser0613
-# 2023-01-11 cheeser0613
-# 2023-04-01 cheeser0613
-# 2023-05-25 cheeser0613
-# 2023-07-20 By
-# 2023-08-11 By
-# 2023-11-25 By
-# 2024-01-15 By
-# 2024-03-05 By
-# 2024-04-21 By
-# 2024-06-10 By
-# 2024-07-21 By
-# 2024-08-29 Pioooooo
-# 2024-09-29 Pioooooo
-# 2024-11-01 Pioooooo
-# 2024-12-03 豆腐渣 & Pioooooo & By
-# 2025-01-03 Pioooooo
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == 還剩%d秒
 
@@ -408,6 +367,15 @@ Show ingame HUD
 Show name plates
 == 顯示暱稱
 
+None
+== 禁用
+
+Own
+== 自身
+
+Others
+== 其他
+
 Show only chat messages from friends
 == 只顯示好友聊天訊息
 
@@ -465,9 +433,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == 此伺服器執行著經過調整的非標準遊戲模式。
 
-Time limit
-== 規定時限
-
 Time limit: %d min
 == 規定時限：%d 分鐘
 
@@ -485,6 +450,9 @@ Use sounds
 
 Use team colors for name plates
 == 用隊伍顏色顯示暱稱
+
+Show friend icon in name plates
+== 在暱稱中顯示好友圖示
 
 V-Sync
 == 垂直同步
@@ -593,6 +561,9 @@ LAN
 
 Name plates size
 == 暱稱大小
+
+Name plates offset
+== 暱稱距離
 
 Show score
 == 顯示比分
@@ -1383,6 +1354,9 @@ Show DDRace HUD
 Show jumps indicator
 == 顯示跳躍次數
 
+Show number of spectators
+== 顯示旁觀者人數
+
 Hook collision line
 == 鉤索輔助線
 
@@ -1979,9 +1953,6 @@ Add friends by entering their name below or by clicking their name in the player
 Add clanmates by entering their clan below and leaving the name blank.
 == 在下方輸入戰隊名並留空名稱即可添加戰隊
 
-Offline friends and clanmates will appear here.
-== 離線好友和戰隊會顯示在這裡
-
 Edit touch controls
 == 編輯觸控設置
 
@@ -2093,6 +2064,12 @@ https://wiki.ddnet.org/wiki/Touch_controls
 Show client IDs in name plates
 == 顯示客戶端 ID
 
+Show client IDs on a seperate line
+== 客户端 ID 換行顯示
+
+Client IDs size
+== 客户端 ID 大小
+
 Hook Strength
 == 鉤索強度
 
@@ -2102,8 +2079,89 @@ Size of hook strength icon and number indicator
 Key Presses
 == 按鍵顯示
 
+Show players' key presses
+== 顯示按鍵
+
 Size of key press icons
 == 按鍵顯示圖示大小
 
+Preview dummy's name plate
+== 預覽分身暱稱
+
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 伺服器無法啟動。請確保在應用程式設置中授予通知權限，以便伺服器可以在後台運行。
+
+Auto-sync player camera
+== 自動同步玩家視角
+
+[Auto camera]
+Disabled
+== 已禁用
+
+[Auto camera]
+Enabled
+== 已啟用
+
+[Auto camera]
+Unavailable for this player
+== 此玩家不可用
+
+[Auto camera]
+Inactive
+== 未啟用
+
+[Auto camera]
+Active
+== 已啟用
+
+Loading maps…
+== 加載地圖中…
+
+Community
+== 社群
+
+[Team status]
+forbidden
+== 禁止
+
+[Team status]
+solo
+== 單人
+
+[Team status]
+allowed
+== 允許
+
+[Team status]
+required
+== 強制
+
+Teams
+== 組隊
+
+[Team size]
+minimum
+== 最小人數
+
+[Team size]
+maximum
+== 最大人數
+
+Saves file
+== 存檔密碼文件
+
+Open the saves file
+== 打開存檔密碼文件
+
+Show FPS
+== 顯示 FPS
+
+Renders your frame rate in the top right
+== 在右上角顯示幀率
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== 繁體中文翻譯由以下人員貢獻：SiuFu, TsFreddie, Dan_cao, cheeser0613, By, Pioooooo, 豆腐渣, XCWQW1
+
+Show spectator cursor
+== 顯示旁觀者指標

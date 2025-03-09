@@ -80,6 +80,7 @@ void CHud::OnReset()
 	m_aPlayerSpeed[1] = 0;
 	m_aLastPlayerSpeedChange[0] = ESpeedChange::NONE;
 	m_aLastPlayerSpeedChange[1] = ESpeedChange::NONE;
+	m_LastSpectatorCountTick = 0;
 
 	ResetHudContainers();
 }
@@ -1256,6 +1257,78 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float Width, const fl
 	Graphics()->WrapNormal();
 }
 
+void CHud::RenderSpectatorCount()
+{
+	if(!g_Config.m_ClShowhudSpectatorCount)
+	{
+		return;
+	}
+
+	int Count = 0;
+	if(Client()->IsSixup())
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(i == m_pClient->m_aLocalIds[0] || (m_pClient->Client()->DummyConnected() && i == m_pClient->m_aLocalIds[1]))
+				continue;
+
+			if(Client()->m_TranslationContext.m_aClients[i].m_PlayerFlags7 & protocol7::PLAYERFLAG_WATCHING)
+			{
+				Count++;
+			}
+		}
+	}
+	else
+	{
+		Count = m_pClient->m_Snap.m_SpecInfo.m_SpectatorCount;
+	}
+
+	if(Count == 0)
+	{
+		m_LastSpectatorCountTick = Client()->GameTick(g_Config.m_ClDummy);
+		return;
+	}
+
+	// 1 second delay
+	if(Client()->GameTick(g_Config.m_ClDummy) < m_LastSpectatorCountTick + Client()->GameTickSpeed())
+		return;
+
+	char aBuf[16];
+	str_format(aBuf, sizeof(aBuf), "%d", Count);
+
+	const float Fontsize = 6.0f;
+	const float BoxHeight = 14.f;
+	const float BoxWidth = 13.f + TextRender()->TextWidth(Fontsize, aBuf);
+
+	float StartX = m_Width - BoxWidth;
+	float StartY = 285.0f - BoxHeight - 4; // 4 units distance to the next display;
+	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
+	{
+		StartY -= 4;
+	}
+	StartY -= GetMovementInformationBoxHeight();
+
+	if(g_Config.m_ClShowhudScore)
+	{
+		StartY -= 56;
+	}
+
+	if(g_Config.m_ClShowhudDummyActions && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) && Client()->DummyConnected())
+	{
+		StartY = StartY - 29.0f - 4; // dummy actions height and padding
+	}
+
+	Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
+
+	float y = StartY + BoxHeight / 3;
+	float x = StartX + 2;
+
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->Text(x, y, Fontsize, FontIcons::FONT_ICON_EYE, -1.0f);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+	TextRender()->Text(x + Fontsize + 3.f, y, Fontsize, aBuf, -1.0f);
+}
+
 void CHud::RenderDummyActions()
 {
 	if(!g_Config.m_ClShowhudDummyActions || (m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) || !Client()->DummyConnected())
@@ -1612,6 +1685,7 @@ void CHud::OnRender()
 			{
 				RenderPlayerState(m_pClient->m_Snap.m_LocalClientId);
 			}
+			RenderSpectatorCount();
 			RenderMovementInformation();
 			RenderDDRaceEffects();
 		}

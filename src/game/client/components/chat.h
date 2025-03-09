@@ -48,9 +48,7 @@ class CChat : public CComponent
 		STextContainerIndex m_TextContainerIndex;
 		int m_QuadContainerIndex;
 
-		char m_aSkinName[std::size(g_Config.m_ClPlayerSkin)];
-		bool m_HasRenderTee;
-		CTeeRenderInfo m_TeeRenderInfo;
+		std::shared_ptr<CManagedTeeRenderInfo> m_pManagedTeeRenderInfo;
 
 		float m_TextYOffset;
 
@@ -164,7 +162,6 @@ public:
 	void OnWindowResize() override;
 	void OnConsoleInit() override;
 	void OnStateChange(int NewState, int OldState) override;
-	void OnRefreshSkins() override;
 	void OnRender() override;
 	void OnPrepareLines(float y);
 	void Reset();

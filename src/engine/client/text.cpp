@@ -1580,7 +1580,7 @@ public:
 		const unsigned RenderFlags = TextContainer.m_RenderFlags;
 
 		float DrawX = 0.0f, DrawY = 0.0f;
-		if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) != 0)
+		if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT) != 0)
 		{
 			DrawX = pCursor->m_X;
 			DrawY = pCursor->m_Y;
@@ -1653,7 +1653,7 @@ public:
 
 			DrawX = pCursor->m_StartX;
 			DrawY += pCursor->m_AlignedFontSize + pCursor->m_AlignedLineSpacing;
-			if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
+			if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT) == 0)
 			{
 				DrawX = round_to_int(DrawX * FakeToScreen.x) / FakeToScreen.x; // realign
 				DrawY = round_to_int(DrawY * FakeToScreen.y) / FakeToScreen.y;
@@ -2225,7 +2225,7 @@ public:
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-		if((TextContainer.m_RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
+		if((TextContainer.m_RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT) == 0)
 		{
 			const vec2 FakeToScreen = vec2(Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0), Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
 			const float AlignedX = round_to_int((TextContainer.m_X + X) * FakeToScreen.x) / FakeToScreen.x;

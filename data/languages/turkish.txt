@@ -1,22 +1,3 @@
-##### authors #####
-#originally created by:
-#	Learath2
-#modified by:
-#	Learath2		2011-06-27 18:54:08
-#	Learath2		2011-08-21 00:12:50
-#	Learath2		2011-09-07 15:59:20
-#	Learath2		2012-01-01 22:54:29
-#	ardadem			2020-08-20 00:00:00
-#	ardadem			2020-08-22 00:00:00
-# h-kaan          2023-08-23 15:57:36
-# h-kaan          2023-08-30 01:52:04
-# h-kaan          2023-09-21 21:04:35
-# eghwand          2024-03-03 13:24:20
-# Gokturk          2024-04-23 01:56:10 / 2025-01-08 14:00:00
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == %ds kaldı
 
@@ -400,9 +381,6 @@ The audio device couldn't be initialised.
 
 The server is running a non-standard tuning on a pure game type.
 == Bu sunucu standart olmayan bir ayarı saf bir oyun türünde kullanıyor.
-
-Time limit
-== Süre limiti
 
 Time limit: %d min
 == Süre limiti: %d dakika
@@ -1951,9 +1929,6 @@ Add friends by entering their name below or by clicking their name in the player
 Add clanmates by entering their clan below and leaving the name blank.
 == Klan arkadaşlarınızı klanlarını aşağıya girerek ve isimlerini boş bırakarak ekleyin.
 
-Offline friends and clanmates will appear here.
-== Çevrim dışı arkadaşlar ve klan arkadaşları burada görünecek.
-
 Edit touch controls
 == Dokunmatik ayarlarını düzelt
 
@@ -2079,3 +2054,78 @@ Size of key press icons
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == Sunucu başlatılamıyor. Sunucunun arka planda çalışması için ayarlardan bildirim iznini açtığınıza emin olun.
+
+Auto-sync player camera
+== Oyuncu kamerasını otomatik senkronize et
+
+[Auto camera]
+Disabled
+== Devre dışı
+
+[Auto camera]
+Enabled
+== Etkin
+
+[Auto camera]
+Unavailable for this player
+== Bu oyuncu için kullanılamıyor
+
+[Auto camera]
+Inactive
+== Aktif değil
+
+[Auto camera]
+Active
+== Aktif
+
+Loading maps…
+== Harita yükleniyor…
+
+Community
+== Topluluk
+
+[Team status]
+forbidden
+== yasak
+
+[Team status]
+solo
+== solo
+
+[Team status]
+allowed
+== izin verildi
+
+[Team status]
+required
+== gerekli
+
+Teams
+== Takımlar
+
+[Team size]
+minimum
+== minimum
+
+[Team size]
+maximum
+== maksimum
+
+Saves file
+== Dosyayı kaydet 
+
+Open the saves file
+== Kayıt dosyasını aç
+
+Show FPS
+== FPS'i göster
+
+Renders your frame rate in the top right
+== Kare hızını sağ üstte gösterir
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand ve Gokturk tarafından yapıldı
+
+Show spectator cursor
+== İzleyicinin imlecini göster

@@ -211,9 +211,6 @@ void CGameWorld::Tick()
 
 	if(!m_Paused)
 	{
-		if(GameServer()->m_pController->IsForceBalanced())
-			GameServer()->SendChat(-1, TEAM_ALL, "Teams have been balanced");
-
 		// update all objects
 		for(int i = 0; i < NUM_ENTTYPES; i++)
 		{
@@ -297,37 +294,40 @@ void CGameWorld::SwapClients(int Client1, int Client2)
 		}
 }
 
-// TODO: should be more general
 CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly)
 {
-	// Find other players
+	return (CCharacter *)IntersectEntity(Pos0, Pos1, Radius, ENTTYPE_CHARACTER, NewPos, pNotThis, CollideWith, pThisOnly);
+}
+
+CEntity *CGameWorld::IntersectEntity(vec2 Pos0, vec2 Pos1, float Radius, int Type, vec2 &NewPos, const CEntity *pNotThis, int CollideWith, const CEntity *pThisOnly)
+{
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
-	CCharacter *pClosest = nullptr;
+	CEntity *pClosest = nullptr;
 
-	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);
-	for(; p; p = (CCharacter *)p->TypeNext())
+	CEntity *pEntity = FindFirst(Type);
+	for(; pEntity; pEntity = pEntity->TypeNext())
 	{
-		if(p == pNotThis)
+		if(pEntity == pNotThis)
 			continue;
 
-		if(pThisOnly && p != pThisOnly)
+		if(pThisOnly && pEntity != pThisOnly)
 			continue;
 
-		if(CollideWith != -1 && !p->CanCollide(CollideWith))
+		if(CollideWith != -1 && !pEntity->CanCollide(CollideWith))
 			continue;
 
 		vec2 IntersectPos;
-		if(closest_point_on_line(Pos0, Pos1, p->m_Pos, IntersectPos))
+		if(closest_point_on_line(Pos0, Pos1, pEntity->m_Pos, IntersectPos))
 		{
-			float Len = distance(p->m_Pos, IntersectPos);
-			if(Len < p->m_ProximityRadius + Radius)
+			float Len = distance(pEntity->m_Pos, IntersectPos);
+			if(Len < pEntity->m_ProximityRadius + Radius)
 			{
 				Len = distance(Pos0, IntersectPos);
 				if(Len < ClosestLen)
 				{
 					NewPos = IntersectPos;
 					ClosestLen = Len;
-					pClosest = p;
+					pClosest = pEntity;
 				}
 			}
 		}
@@ -342,7 +342,7 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, const CEntity *
 	float ClosestRange = Radius * 2;
 	CCharacter *pClosest = nullptr;
 
-	CCharacter *p = (CCharacter *)GameServer()->m_World.FindFirst(ENTTYPE_CHARACTER);
+	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);
 	for(; p; p = (CCharacter *)p->TypeNext())
 	{
 		if(p == pNotThis)
@@ -386,7 +386,7 @@ std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1
 
 void CGameWorld::ReleaseHooked(int ClientId)
 {
-	CCharacter *pChr = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+	CCharacter *pChr = (CCharacter *)FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
 		if(pChr->Core()->HookedPlayer() == ClientId && !pChr->IsSuper())

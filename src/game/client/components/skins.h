@@ -26,6 +26,7 @@ public:
 	int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;
 	void OnShutdown() override;
+	void OnRender() override;
 
 	void Refresh(TSkinLoadedCallback &&SkinLoadedCallback);
 	std::chrono::nanoseconds LastRefreshTime() const { return m_LastRefreshTime; }
@@ -39,12 +40,12 @@ public:
 	static bool IsVanillaSkin(const char *pName);
 	static bool IsSpecialSkin(const char *pName);
 
+private:
 	constexpr static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
 		"cammo", "cammostripes", "coala", "default", "limekitty",
 		"pinky", "redbopp", "redstripe", "saddo", "toptri",
 		"twinbop", "twintri", "warpaint", "x_ninja", "x_spec"};
 
-private:
 	class CSkinDownloadJob : public IJob
 	{
 	public:

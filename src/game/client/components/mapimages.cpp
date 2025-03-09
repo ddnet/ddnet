@@ -15,16 +15,6 @@
 #include <game/localization.h>
 #include <game/mapitems.h>
 
-const char *const gs_apModEntitiesNames[] = {
-	"ddnet",
-	"ddrace",
-	"race",
-	"blockworlds",
-	"fng",
-	"vanilla",
-	"f-ddrace",
-};
-
 CMapImages::CMapImages()
 {
 	m_Count = 0;
@@ -220,7 +210,7 @@ static bool IsValidTile(int LayerType, bool EntitiesAreMasked, EMapImageModType 
 
 	if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || EntitiesModType == MAP_IMAGE_MOD_TYPE_DDRACE)
 	{
-		if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_BOOST)
+		if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || TileIndex != TILE_SPEED_BOOST_OLD || TileIndex != TILE_SPEED_BOOST)
 		{
 			if(LayerType == MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH &&
 				!IsValidGameTile(TileIndex) &&

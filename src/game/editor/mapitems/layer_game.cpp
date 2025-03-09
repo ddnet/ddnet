@@ -48,7 +48,7 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 			CTile air = {TILE_AIR};
 			m_pEditor->m_Map.m_pFrontLayer->CLayerTiles::SetTile(x, y, air); // NOLINT(bugprone-parent-virtual-call)
 		}
-		if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidGameTile(Tile.m_Index))
+		if(m_pEditor->IsAllowPlaceUnusedTiles() || IsValidGameTile(Tile.m_Index))
 		{
 			CLayerTiles::SetTile(x, y, Tile);
 		}

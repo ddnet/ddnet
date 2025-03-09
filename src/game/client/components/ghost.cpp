@@ -18,9 +18,9 @@ const char *CGhost::ms_pGhostDir = "ghosts";
 
 static const LOG_COLOR LOG_COLOR_GHOST{165, 153, 153};
 
-void CGhost::GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
+void CGhost::SetGhostSkinData(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
 {
-	StrToInts(&pSkin->m_Skin0, 6, pSkinName);
+	StrToInts(pSkin->m_aSkin, std::size(pSkin->m_aSkin), pSkinName);
 	pSkin->m_UseCustomColor = UseCustomColor;
 	pSkin->m_ColorBody = ColorBody;
 	pSkin->m_ColorFeet = ColorFeet;
@@ -346,7 +346,7 @@ void CGhost::OnRender()
 
 		Player.m_AttackTick += Client()->GameTick(g_Config.m_ClDummy) - GhostTick;
 
-		CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
+		const CTeeRenderInfo *pRenderInfo = &Ghost.m_pManagedTeeRenderInfo->TeeRenderInfo();
 		CTeeRenderInfo GhostNinjaRenderInfo;
 		if(Player.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
 		{
@@ -354,7 +354,7 @@ void CGhost::OnRender()
 			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");
 			if(pSkin != nullptr)
 			{
-				GhostNinjaRenderInfo = Ghost.m_RenderInfo;
+				GhostNinjaRenderInfo = Ghost.m_pManagedTeeRenderInfo->TeeRenderInfo();
 				GhostNinjaRenderInfo.Apply(pSkin);
 				GhostNinjaRenderInfo.m_CustomColoredSkin = m_pClient->IsTeamPlay();
 				if(!GhostNinjaRenderInfo.m_CustomColoredSkin)
@@ -372,14 +372,17 @@ void CGhost::OnRender()
 	}
 }
 
-void CGhost::InitRenderInfos(CGhostItem *pGhost)
+void CGhost::UpdateTeeRenderInfo(CGhostItem &Ghost)
 {
-	char aSkinName[MAX_SKIN_LENGTH];
-	IntsToStr(&pGhost->m_Skin.m_Skin0, 6, aSkinName, std::size(aSkinName));
-	CTeeRenderInfo *pRenderInfo = &pGhost->m_RenderInfo;
-	pRenderInfo->Apply(m_pClient->m_Skins.Find(aSkinName));
-	pRenderInfo->ApplyColors(pGhost->m_Skin.m_UseCustomColor, pGhost->m_Skin.m_ColorBody, pGhost->m_Skin.m_ColorFeet);
-	pRenderInfo->m_Size = 64;
+	CSkinDescriptor SkinDescriptor;
+	SkinDescriptor.m_Flags = CSkinDescriptor::FLAG_SIX;
+	IntsToStr(Ghost.m_Skin.m_aSkin, std::size(Ghost.m_Skin.m_aSkin), SkinDescriptor.m_aSkinName, std::size(SkinDescriptor.m_aSkinName));
+
+	CTeeRenderInfo TeeRenderInfo;
+	TeeRenderInfo.ApplyColors(Ghost.m_Skin.m_UseCustomColor, Ghost.m_Skin.m_ColorBody, Ghost.m_Skin.m_ColorFeet);
+	TeeRenderInfo.m_Size = 64.0f;
+
+	Ghost.m_pManagedTeeRenderInfo = GameClient()->CreateManagedTeeRenderInfo(TeeRenderInfo, SkinDescriptor);
 }
 
 void CGhost::StartRecord(int Tick)
@@ -390,8 +393,8 @@ void CGhost::StartRecord(int Tick)
 
 	const CGameClient::CClientData *pData = &m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId];
 	str_copy(m_CurGhost.m_aPlayer, Client()->PlayerName());
-	GetGhostSkin(&m_CurGhost.m_Skin, pData->m_aSkinName, pData->m_UseCustomColor, pData->m_ColorBody, pData->m_ColorFeet);
-	InitRenderInfos(&m_CurGhost);
+	SetGhostSkinData(&m_CurGhost.m_Skin, pData->m_aSkinName, pData->m_UseCustomColor, pData->m_ColorBody, pData->m_ColorFeet);
+	UpdateTeeRenderInfo(m_CurGhost);
 }
 
 void CGhost::StopRecord(int Time)
@@ -528,8 +531,10 @@ int CGhost::Load(const char *pFilename)
 		pGhost->m_StartTick = pGhost->m_Path.Get(0)->m_Tick;
 
 	if(!FoundSkin)
-		GetGhostSkin(&pGhost->m_Skin, "default", 0, 0, 0);
-	InitRenderInfos(pGhost);
+	{
+		SetGhostSkinData(&pGhost->m_Skin, "default", 0, 0, 0);
+	}
+	UpdateTeeRenderInfo(*pGhost);
 
 	return Slot;
 }
@@ -641,21 +646,4 @@ void CGhost::OnMapLoad()
 	UnloadAll();
 	m_pClient->m_Menus.GhostlistPopulate();
 	m_AllowRestart = false;
-}
-
-void CGhost::OnRefreshSkins()
-{
-	const auto &&RefindSkin = [&](auto &Ghost) {
-		if(Ghost.Empty())
-			return;
-		char aSkinName[MAX_SKIN_LENGTH];
-		IntsToStr(&Ghost.m_Skin.m_Skin0, 6, aSkinName, std::size(aSkinName));
-		Ghost.m_RenderInfo.Apply(m_pClient->m_Skins.Find(aSkinName));
-	};
-
-	for(auto &Ghost : m_aActiveGhosts)
-	{
-		RefindSkin(Ghost);
-	}
-	RefindSkin(m_CurGhost);
 }

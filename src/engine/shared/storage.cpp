@@ -969,10 +969,13 @@ IStorage *CreateLocalStorage()
 	return pStorage;
 }
 
-IStorage *CreateTempStorage(const char *pDirectory)
+IStorage *CreateTempStorage(const char *pDirectory, int NumArgs, const char **ppArguments)
 {
 	CStorage *pStorage = new CStorage();
-	if(!pStorage->AddPath(pDirectory))
+	dbg_assert(NumArgs > 0, "Expected at least one argument");
+	pStorage->FindDataDirectory(ppArguments[0]);
+	pStorage->FindCurrentDirectory();
+	if(!pStorage->AddPath(pDirectory) || !pStorage->AddPath("$DATADIR") || !pStorage->AddPath("$CURRENTDIR"))
 	{
 		delete pStorage;
 		return nullptr;

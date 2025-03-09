@@ -741,12 +741,13 @@ int CCollision::IsTune(int Index) const
 	return 0;
 }
 
-void CCollision::GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) const
+void CCollision::GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed, int *pType) const
 {
 	if(Index < 0 || !m_pSpeedup)
 		return;
 	float Angle = m_pSpeedup[Index].m_Angle * (pi / 180.0f);
 	*pForce = m_pSpeedup[Index].m_Force;
+	*pType = m_pSpeedup[Index].m_Type;
 	*pDir = direction(Angle);
 	if(pMaxSpeed)
 		*pMaxSpeed = m_pSpeedup[Index].m_MaxSpeed;

@@ -73,15 +73,17 @@ class CMenus : public CComponent
 	static ColorRGBA ms_ColorTabbarActive;
 	static ColorRGBA ms_ColorTabbarHover;
 
-	int DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners = IGraphics::CORNER_ALL, bool Enabled = true);
-	int DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, bool Active);
-	int DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName = nullptr, int Corners = IGraphics::CORNER_ALL, float Rounding = 5.0f, float FontFactor = 0.0f, ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f));
+	int DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned Flags, int Corners = IGraphics::CORNER_ALL, bool Enabled = true);
+	int DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, bool Active, const unsigned Flags = BUTTONFLAG_LEFT);
+	int DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned Flags = BUTTONFLAG_LEFT, const char *pImageName = nullptr, int Corners = IGraphics::CORNER_ALL, float Rounding = 5.0f, float FontFactor = 0.0f, ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f));
 	int DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator = nullptr, const ColorRGBA *pDefaultColor = nullptr, const ColorRGBA *pActiveColor = nullptr, const ColorRGBA *pHoverColor = nullptr, float EdgeRounding = 10.0f, const SCommunityIcon *pCommunityIcon = nullptr);
 
-	int DoButton_CheckBox_Common(const void *pId, const char *pText, const char *pBoxText, const CUIRect *pRect);
+	int DoButton_CheckBox_Common(const void *pId, const char *pText, const char *pBoxText, const CUIRect *pRect, const unsigned Flags);
 	int DoButton_CheckBox(const void *pId, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_CheckBoxAutoVMarginAndSet(const void *pId, const char *pText, int *pValue, CUIRect *pRect, float VMargin);
 	int DoButton_CheckBox_Number(const void *pId, const char *pText, int Checked, const CUIRect *pRect);
+
+	bool DoLine_RadioMenu(CUIRect &View, const char *pLabel, std::vector<CButtonContainer> &vButtonContainers, const std::vector<const char *> &vLabels, const std::vector<int> &vValues, int &Value);
 
 	ColorHSLA DoLine_ColorPicker(CButtonContainer *pResetId, float LineSize, float LabelSize, float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, ColorRGBA DefaultColor, bool CheckBoxSpacing = true, int *pCheckBoxValue = nullptr, bool Alpha = false);
 	ColorHSLA DoButton_ColorPicker(const CUIRect *pRect, unsigned int *pHslaColor, bool Alpha);
@@ -177,6 +179,8 @@ protected:
 	int m_Popup;
 	bool m_ShowStart;
 	bool m_MenuActive;
+
+	bool m_DummyNamePlatePreview = false;
 
 	bool m_JoinTutorial = false;
 	bool m_CreateDefaultFavoriteCommunities = false;
@@ -293,6 +297,7 @@ protected:
 		bool m_IsLink;
 		int m_StorageType;
 		time_t m_Date;
+		int64_t m_Size;
 
 		bool m_InfosLoaded;
 		bool m_Valid;
@@ -310,7 +315,7 @@ protected:
 			return bytes_be_to_uint(m_Info.m_aLength);
 		}
 
-		unsigned Size() const
+		unsigned MapSize() const
 		{
 			return bytes_be_to_uint(m_Info.m_aMapSize);
 		}
@@ -563,6 +568,7 @@ protected:
 	class CCommunityIconLoadJob : public IJob, public CAbstractCommunityIconJob
 	{
 		CImageInfo m_ImageInfo;
+		CImageInfo m_ImageInfoGrayscale;
 
 	protected:
 		void Run() override;
@@ -572,6 +578,7 @@ protected:
 		~CCommunityIconLoadJob();
 
 		CImageInfo &ImageInfo() { return m_ImageInfo; }
+		CImageInfo &ImageInfoGrayscale() { return m_ImageInfoGrayscale; }
 	};
 
 	class CCommunityIconDownloadJob : public CHttpRequest, public CAbstractCommunityIconJob
@@ -586,8 +593,8 @@ protected:
 	SHA256_DIGEST m_CommunityIconsInfoSha256 = SHA256_ZEROED;
 	static int CommunityIconScan(const char *pName, int IsDir, int DirType, void *pUser);
 	const SCommunityIcon *FindCommunityIcon(const char *pCommunityId);
-	bool LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, SHA256_DIGEST &Sha256);
-	void LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info, const SHA256_DIGEST &Sha256);
+	bool LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, CImageInfo &InfoGrayscale, SHA256_DIGEST &Sha256);
+	void LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info, CImageInfo &InfoGrayscale, const SHA256_DIGEST &Sha256);
 	void RenderCommunityIcon(const SCommunityIcon *pIcon, CUIRect Rect, bool Active);
 	void UpdateCommunityIcons();
 
@@ -599,6 +606,7 @@ protected:
 	void OnConfigSave(IConfigManager *pConfigManager);
 
 	// found in menus_settings.cpp
+	void RenderLanguageSettings(CUIRect MainView);
 	bool RenderLanguageSelection(CUIRect MainView);
 	void RenderThemeSelection(CUIRect MainView);
 	void RenderSettingsGeneral(CUIRect MainView);
@@ -615,6 +623,10 @@ protected:
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
 	void RenderSettingsCustom(CUIRect MainView);
+
+	std::vector<CButtonContainer> vButtonsContainersJoystickAbsolute = {{}, {}};
+	std::vector<CButtonContainer> vButtonsContainersNamePlateShow = {{}, {}, {}, {}};
+	std::vector<CButtonContainer> vButtonsContainersNamePlateKeyPresses = {{}, {}, {}, {}};
 
 	class CMapListItem
 	{
@@ -669,7 +681,7 @@ public:
 	bool IsActive() const { return m_MenuActive; }
 	void SetActive(bool Active);
 
-	void RunServer();
+	void RunServer(const char **ppArguments = nullptr, const size_t NumArguments = 0);
 	void KillServer();
 	bool IsServerRunning() const;
 

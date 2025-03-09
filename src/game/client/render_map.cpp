@@ -30,7 +30,7 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pRea
 	for(int EnvIndex = 0; EnvIndex < EnvNum; EnvIndex++)
 	{
 		CMapItemEnvelope *pEnvelope = static_cast<CMapItemEnvelope *>(pReader->GetItem(EnvStart + EnvIndex));
-		if(pEnvelope->m_Version >= CMapItemEnvelope_v3::CURRENT_VERSION)
+		if(pEnvelope->m_Version >= CMapItemEnvelope::VERSION_TEEWORLDS_BEZIER)
 		{
 			FoundBezierEnvelope = true;
 			break;
@@ -920,7 +920,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 	if(EndX - StartX > Graphics()->ScreenWidth() / g_Config.m_GfxTextOverlay || EndY - StartY > Graphics()->ScreenHeight() / g_Config.m_GfxTextOverlay)
 		return; // its useless to render text at this distance
 
-	float Size = g_Config.m_ClTextEntitiesSize / 100.f;
+	float Size = g_Config.m_ClTextEntitiesSize / 200.f;
 	char aBuf[16];
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
@@ -946,7 +946,12 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 			if(Index)
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
-				TextRender()->Text(mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf); // numbers shouldn't be too big and in the center of the tile
+				// Auto-resize text to fit inside the tile
+				float ScaledWidth = TextRender()->TextWidth(Size * Scale, aBuf, -1);
+				float Factor = clamp(Scale / ScaledWidth, 0.0f, 1.0f);
+				float LocalSize = Size * Factor;
+				float ToCenterOffset = (1 - LocalSize) / 2.f;
+				TextRender()->Text((mx + 0.5f) * Scale - (ScaledWidth * Factor) / 2.0f, (my + ToCenterOffset) * Scale, LocalSize * Scale, aBuf);
 			}
 		}
 	}

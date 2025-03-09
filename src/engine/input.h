@@ -95,7 +95,7 @@ public:
 		virtual int GetNumBalls() const = 0;
 		virtual int GetNumHats() const = 0;
 		virtual float GetAxisValue(int Axis) = 0;
-		virtual void GetHatValue(int Hat, int (&HatKeys)[2]) = 0;
+		virtual void GetHatValue(int Hat, int (&aHatKeys)[2]) = 0;
 		virtual bool Relative(float *pX, float *pY) = 0;
 		virtual bool Absolute(float *pX, float *pY) = 0;
 	};
@@ -146,7 +146,7 @@ public:
 		vec2 m_Position;
 		/**
 		 * The current delta of the finger. The x- and y-components of the delta are normalized to the
-		 * range `0.0f`-`1.0f` representing the absolute delta of the finger on the current touch device.
+		 * range `-1.0f`-`1.0f` representing the absolute delta of the finger on the current touch device.
 		 *
 		 * @remark This is reset to zero at the end of each frame.
 		 */

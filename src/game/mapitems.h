@@ -128,8 +128,9 @@ enum
 	TILE_SWITCHCLOSE,
 	TILE_TELEIN,
 	TILE_TELEOUT,
-	TILE_BOOST,
-	TILE_TELECHECK,
+	TILE_SPEED_BOOST_OLD = 28,
+	TILE_SPEED_BOOST,
+	TILE_TELECHECK = 29,
 	TILE_TELECHECKOUT,
 	TILE_TELECHECKIN,
 	TILE_REFILL_JUMPS = 32,
@@ -219,8 +220,9 @@ static constexpr size_t MAX_MAPSOUNDS = 64;
 typedef ivec2 CPoint; // 22.10 fixed point
 typedef ivec4 CColor;
 
-struct CQuad
+class CQuad
 {
+public:
 	CPoint m_aPoints[5];
 	CColor m_aColors[4];
 	CPoint m_aTexcoords[4];
@@ -241,8 +243,9 @@ public:
 	unsigned char m_Reserved;
 };
 
-struct CMapItemInfo
+class CMapItemInfo
 {
+public:
 	int m_Version;
 	int m_Author;
 	int m_MapVersion;
@@ -250,18 +253,15 @@ struct CMapItemInfo
 	int m_License;
 };
 
-struct CMapItemInfoSettings : CMapItemInfo
+class CMapItemInfoSettings : public CMapItemInfo
 {
+public:
 	int m_Settings;
 };
 
-struct CMapItemImage_v1
+class CMapItemImage_v1
 {
-	enum
-	{
-		CURRENT_VERSION = 1,
-	};
-
+public:
 	int m_Version;
 	int m_Width;
 	int m_Height;
@@ -270,20 +270,17 @@ struct CMapItemImage_v1
 	int m_ImageData;
 };
 
-struct CMapItemImage_v2 : public CMapItemImage_v1
+class CMapItemImage_v2 : public CMapItemImage_v1
 {
-	enum
-	{
-		CURRENT_VERSION = 2,
-	};
-
+public:
 	int m_MustBe1;
 };
 
 typedef CMapItemImage_v1 CMapItemImage;
 
-struct CMapItemGroup_v1
+class CMapItemGroup_v1
 {
+public:
 	int m_Version;
 	int m_OffsetX;
 	int m_OffsetY;
@@ -294,13 +291,9 @@ struct CMapItemGroup_v1
 	int m_NumLayers;
 };
 
-struct CMapItemGroup : public CMapItemGroup_v1
+class CMapItemGroup : public CMapItemGroup_v1
 {
-	enum
-	{
-		CURRENT_VERSION = 3
-	};
-
+public:
 	int m_UseClipping;
 	int m_ClipX;
 	int m_ClipY;
@@ -310,20 +303,25 @@ struct CMapItemGroup : public CMapItemGroup_v1
 	int m_aName[3];
 };
 
-struct CMapItemLayer
+class CMapItemLayer
 {
+public:
 	int m_Version;
 	int m_Type;
 	int m_Flags;
 };
 
-struct CMapItemLayerTilemap
+class CMapItemLayerTilemap
 {
-	enum
-	{
-		CURRENT_VERSION = 3,
-		TILE_SKIP_MIN_VERSION = 4, // supported for loading but not saving
-	};
+public:
+	/**
+	 * @link CMapItemLayerTilemap @endlink with this version are only written to maps in upstream Teeworlds.
+	 * The tile data of tilemaps using this version must be unpacked by repeating tiles according to the
+	 * @link CTile::m_Skip @endlink values of the packed tile data.
+	 *
+	 * @see CMap::ExtractTiles
+	 */
+	static constexpr int VERSION_TEEWORLDS_TILESKIP = 4;
 
 	CMapItemLayer m_Layer;
 	int m_Version;
@@ -350,8 +348,9 @@ struct CMapItemLayerTilemap
 	int m_Tune;
 };
 
-struct CMapItemLayerQuads
+class CMapItemLayerQuads
 {
+public:
 	CMapItemLayer m_Layer;
 	int m_Version;
 
@@ -362,20 +361,17 @@ struct CMapItemLayerQuads
 	int m_aName[3];
 };
 
-struct CMapItemVersion
+class CMapItemVersion
 {
-	enum
-	{
-		CURRENT_VERSION = 1
-	};
-
+public:
 	int m_Version;
 };
 
 // Represents basic information about envelope points.
 // In upstream Teeworlds, this is only used if all CMapItemEnvelope are version 1 or 2.
-struct CEnvPoint
+class CEnvPoint
 {
+public:
 	enum
 	{
 		MAX_CHANNELS = 4,
@@ -391,8 +387,9 @@ struct CEnvPoint
 // Represents additional envelope point information for CURVETYPE_BEZIER.
 // In DDNet, these are stored separately in an UUID-based map item.
 // In upstream Teeworlds, CEnvPointBezier_upstream is used instead.
-struct CEnvPointBezier
+class CEnvPointBezier
 {
+public:
 	// DeltaX in ms and DeltaY as 22.10 fxp
 	int m_aInTangentDeltaX[CEnvPoint::MAX_CHANNELS];
 	int m_aInTangentDeltaY[CEnvPoint::MAX_CHANNELS];
@@ -402,24 +399,29 @@ struct CEnvPointBezier
 
 // Written to maps on upstream Teeworlds for envelope points including bezier information instead of the basic
 // CEnvPoint items, if at least one CMapItemEnvelope with version 3 or higher exists in the map.
-struct CEnvPointBezier_upstream : public CEnvPoint
+class CEnvPointBezier_upstream : public CEnvPoint
 {
+public:
 	CEnvPointBezier m_Bezier;
 };
 
 // Used to represent all envelope point information at runtime in editor.
 // (Can eventually be different than CEnvPointBezier_upstream)
-struct CEnvPoint_runtime : public CEnvPoint
+class CEnvPoint_runtime : public CEnvPoint
 {
+public:
 	CEnvPointBezier m_Bezier;
 };
 
-struct CMapItemEnvelope_v1
+class CMapItemEnvelope_v1
 {
-	enum
-	{
-		CURRENT_VERSION = 1,
-	};
+public:
+	/**
+	 * @link CMapItemEnvelope @endlink with this version are only written to maps in upstream Teeworlds.
+	 * If at least one of these exists in a map, then the envelope points are represented
+	 * by @link CEnvPointBezier_upstream @endlink instead of @link CEnvPoint @endlink.
+	 */
+	static constexpr int VERSION_TEEWORLDS_BEZIER = 3;
 
 	int m_Version;
 	int m_Channels;
@@ -428,31 +430,17 @@ struct CMapItemEnvelope_v1
 	int m_aName[8];
 };
 
-struct CMapItemEnvelope_v2 : public CMapItemEnvelope_v1
+class CMapItemEnvelope_v2 : public CMapItemEnvelope_v1
 {
-	enum
-	{
-		CURRENT_VERSION = 2,
-	};
-
+public:
 	int m_Synchronized;
-};
-
-// Only written to maps in upstream Teeworlds.
-// If at least one of these exists in a map, the envelope points
-// are represented by CEnvPointBezier_upstream instead of CEnvPoint.
-struct CMapItemEnvelope_v3 : public CMapItemEnvelope_v2
-{
-	enum
-	{
-		CURRENT_VERSION = 3,
-	};
 };
 
 typedef CMapItemEnvelope_v2 CMapItemEnvelope;
 
-struct CSoundShape
+class CSoundShape
 {
+public:
 	enum
 	{
 		SHAPE_RECTANGLE = 0,
@@ -460,13 +448,15 @@ struct CSoundShape
 		NUM_SHAPES,
 	};
 
-	struct CRectangle
+	class CRectangle
 	{
+	public:
 		int m_Width, m_Height; // fxp 22.10
 	};
 
-	struct CCircle
+	class CCircle
 	{
+	public:
 		int m_Radius;
 	};
 
@@ -479,8 +469,9 @@ struct CSoundShape
 	};
 };
 
-struct CSoundSource
+class CSoundSource
 {
+public:
 	CPoint m_Position;
 	int m_Loop;
 	int m_Pan; // 0 - no panning, 1 - panning
@@ -495,13 +486,9 @@ struct CSoundSource
 	CSoundShape m_Shape;
 };
 
-struct CMapItemLayerSounds
+class CMapItemLayerSounds
 {
-	enum
-	{
-		CURRENT_VERSION = 2
-	};
-
+public:
 	CMapItemLayer m_Layer;
 	int m_Version;
 
@@ -512,8 +499,9 @@ struct CMapItemLayerSounds
 	int m_aName[3];
 };
 
-struct CMapItemSound
+class CMapItemSound
 {
+public:
 	int m_Version;
 
 	int m_External;

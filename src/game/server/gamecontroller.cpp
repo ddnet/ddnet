@@ -37,9 +37,6 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 	m_GameFlags = 0;
 	m_aMapWish[0] = 0;
 
-	m_UnbalancedTick = -1;
-	m_ForceBalanced = false;
-
 	m_CurrentRecord = 0;
 }
 
@@ -424,7 +421,7 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 {
 	pPlayer->OnDisconnect();
 	int ClientId = pPlayer->GetCid();
-	if(Server()->ClientIngame(ClientId) || Server()->ClientRedirected(ClientId))
+	if(Server()->ClientIngame(ClientId))
 	{
 		char aBuf[512];
 		if(pReason && *pReason)
@@ -468,7 +465,6 @@ void IGameController::StartRound()
 	m_SuddenDeath = 0;
 	m_GameOverTick = -1;
 	GameServer()->m_World.m_Paused = false;
-	m_ForceBalanced = false;
 	Server()->DemoRecorder_HandleAutoStart();
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "start round type='%s' teamplay='%d'", m_pGameType, m_GameFlags & GAMEFLAG_TEAMS);
@@ -516,16 +512,6 @@ void IGameController::DoWarmup(int Seconds)
 		m_Warmup = 0;
 	else
 		m_Warmup = Seconds * Server()->TickSpeed();
-}
-
-bool IGameController::IsForceBalanced()
-{
-	return false;
-}
-
-bool IGameController::CanBeMovedOnBalance(int ClientId)
-{
-	return true;
 }
 
 void IGameController::Tick()

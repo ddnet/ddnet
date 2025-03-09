@@ -116,7 +116,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aAckGameTick[NUM_DUMMIES] = {-1, -1};
 	int m_aCurrentRecvTick[NUM_DUMMIES] = {0, 0};
 	int m_aRconAuthed[NUM_DUMMIES] = {0, 0};
-	char m_aRconUsername[32] = "";
+	char m_aRconUsername[64] = "";
 	char m_aRconPassword[sizeof(g_Config.m_SvRconPassword)] = "";
 	int m_UseTempRconCommands = 0;
 	int m_ExpectedRconCommands = -1;
@@ -351,7 +351,8 @@ public:
 	void SnapSetStaticsize7(int ItemType, int Size) override;
 
 	void Render();
-	void DebugRender();
+	void RenderDebug();
+	void RenderGraphs();
 
 	void Restart() override;
 	void Quit() override;

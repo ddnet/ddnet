@@ -4190,17 +4190,72 @@ void cmdline_free(int argc, const char **argv)
 #endif
 }
 
-#if !defined(CONF_PLATFORM_ANDROID)
-PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
-{
 #if defined(CONF_FAMILY_WINDOWS)
+std::wstring windows_args_to_wide(const char **arguments, const size_t num_arguments)
+{
+	std::wstring wide_arguments;
+
+	for(size_t i = 0; i < num_arguments; ++i)
+	{
+		if(i > 0)
+		{
+			wide_arguments += L' ';
+		}
+
+		const std::wstring wide_arg = windows_utf8_to_wide(arguments[i]);
+		wide_arguments += L'"';
+
+		size_t backslashes = 0;
+		for(const wchar_t c : wide_arg)
+		{
+			if(c == L'\\')
+			{
+				backslashes++;
+			}
+			else
+			{
+				if(c == L'"')
+				{
+					// Add n+1 backslashes to total 2n+1 before internal '"'
+					for(size_t j = 0; j <= backslashes; ++j)
+					{
+						wide_arguments += L'\\';
+					}
+				}
+				backslashes = 0;
+			}
+			wide_arguments += c;
+		}
+
+		// Add n backslashes to total 2n before ending '"'
+		for(size_t j = 0; j < backslashes; ++j)
+		{
+			wide_arguments += L'\\';
+		}
+		wide_arguments += L'"';
+	}
+
+	return wide_arguments;
+}
+#endif
+
+#if !defined(CONF_PLATFORM_ANDROID)
+PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, const char **arguments, const size_t num_arguments)
+{
+	dbg_assert((arguments == nullptr) == (num_arguments == 0), "Invalid number of arguments");
+#if defined(CONF_FAMILY_WINDOWS)
+	dbg_assert(str_endswith_nocase(file, ".bat") == nullptr && str_endswith_nocase(file, ".cmd") == nullptr, "Running batch files not allowed");
+	dbg_assert(str_endswith(file, ".exe") != nullptr || num_arguments == 0, "Arguments only allowed with .exe files");
+
 	const std::wstring wide_file = windows_utf8_to_wide(file);
+	std::wstring wide_arguments = windows_args_to_wide(arguments, num_arguments);
 
 	SHELLEXECUTEINFOW info;
 	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
 	info.cbSize = sizeof(SHELLEXECUTEINFOW);
 	info.lpVerb = L"open";
 	info.lpFile = wide_file.c_str();
+	info.lpParameters = num_arguments > 0 ? wide_arguments.c_str() : nullptr;
 	switch(window_state)
 	{
 	case EShellExecuteWindowState::FOREGROUND:
@@ -4222,13 +4277,18 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
 		fesetenv(&floating_point_environment);
 	return info.hProcess;
 #elif defined(CONF_FAMILY_UNIX)
-	char *argv[2];
+	char **argv = (char **)malloc((num_arguments + 2) * sizeof(*argv));
 	pid_t pid;
 	argv[0] = (char *)file;
-	argv[1] = NULL;
+	for(size_t i = 0; i < num_arguments; ++i)
+	{
+		argv[i + 1] = (char *)arguments[i];
+	}
+	argv[num_arguments + 1] = NULL;
 	pid = fork();
 	if(pid == -1)
 	{
+		free(argv);
 		return 0;
 	}
 	if(pid == 0)
@@ -4236,6 +4296,7 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
 		execvp(file, argv);
 		_exit(1);
 	}
+	free(argv);
 	return pid;
 #endif
 }

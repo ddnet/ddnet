@@ -35,6 +35,8 @@ void CGameTeams::Reset()
 		m_aTeamFlock[i] = false;
 		m_apSaveTeamResult[i] = nullptr;
 		m_aTeamSentStartWarning[i] = false;
+		if(m_pGameContext->PracticeByDefault())
+			m_aPractice[i] = true;
 		ResetRoundState(i);
 	}
 }
@@ -45,7 +47,8 @@ void CGameTeams::ResetRoundState(int Team)
 	if(Team != TEAM_SUPER)
 		ResetSwitchers(Team);
 
-	m_aPractice[Team] = false;
+	if(!m_pGameContext->PracticeByDefault())
+		m_aPractice[Team] = false;
 	m_aTeamUnfinishableKillTick[Team] = -1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -229,7 +232,7 @@ void CGameTeams::Tick()
 		}
 	}
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < TEAM_SUPER; i++)
 	{
 		if(m_aTeamUnfinishableKillTick[i] == -1 || m_aTeamState[i] != TEAMSTATE_STARTED_UNFINISHABLE)
 		{
@@ -378,7 +381,7 @@ const char *CGameTeams::SetCharacterTeam(int ClientId, int Team)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return "Invalid client ID";
-	if(Team < 0 || Team >= MAX_CLIENTS + 1)
+	if(Team < 0 || Team > NUM_DDRACE_TEAMS)
 		return "Invalid team number";
 	if(Team != TEAM_SUPER && m_aTeamState[Team] > TEAMSTATE_OPEN && !m_aPractice[Team] && !m_aTeamFlock[Team])
 		return "This team started already";
@@ -391,7 +394,7 @@ const char *CGameTeams::SetCharacterTeam(int ClientId, int Team)
 	if(Team != TEAM_SUPER && Character(ClientId)->m_DDRaceState != DDRACE_NONE)
 		return "You have started racing already";
 	// No cheating through noob filter with practice and then leaving team
-	if(m_aPractice[m_Core.Team(ClientId)])
+	if(m_aPractice[m_Core.Team(ClientId)] && !m_pGameContext->PracticeByDefault())
 		return "You have used practice mode already";
 
 	// you can not join a team which is currently in the process of saving,
@@ -1155,7 +1158,8 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 		{
 			ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 
-			m_aPractice[Team] = false;
+			if(!m_pGameContext->PracticeByDefault())
+				m_aPractice[Team] = false;
 
 			if(Count(Team) > 1)
 			{
@@ -1223,7 +1227,7 @@ void CGameTeams::SetClientInvited(int Team, int ClientId, bool Invited)
 	}
 }
 
-void CGameTeams::KillSavedTeam(int ClientId, int Team)
+void CGameTeams::KillCharacterOrTeam(int ClientId, int Team)
 {
 	if(g_Config.m_SvSoloServer || !g_Config.m_SvTeam)
 	{
@@ -1256,7 +1260,7 @@ void CGameTeams::ResetSavedTeam(int ClientId, int Team)
 
 int CGameTeams::GetFirstEmptyTeam() const
 {
-	for(int i = 1; i < MAX_CLIENTS; i++)
+	for(int i = 1; i < TEAM_SUPER; i++)
 		if(m_aTeamState[i] == TEAMSTATE_EMPTY)
 			return i;
 	return -1;

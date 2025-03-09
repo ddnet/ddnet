@@ -1,39 +1,19 @@
-##### authors #####
-#originally created by:
-#
-#modified by:
-#	vierkant		2010-06-03 19:06:34
-#	vierkant		2010-06-04 13:20:25
-#	vierkant		2010-06-09 14:40:12
-#	Sijmen Schoon	        2010-11-21 16:08:46
-#	vierkant		2010-11-21 18:19:48
-#	vierkant		2010-12-16 19:44:49
-#	vierkant		2011-01-03 12:22:05
-#	vierkant		2011-01-29 18:40:28
-#	vierkant		2011-04-02 22:19:30
-#	Vijfhoek		2011-05-02 18:09:31
-#	Syntax Error	        2011-07-02 20:09:24
-#	Yared Hufkens	        2012-02-03 19:57:59
-#	Yared Hufkens	        2012-12-08 10:51:30
-#       Ronan                   2022-05-17 22:22:22
-##### /authors #####
-
 ##### translated strings #####
 
 %ds left
 == %ds over
 
 %i minute left
-== nog %i minuut
+== nog %i minuut over
 
 %i minutes left
-== nog %i minuten
+== nog %i minuten over
 
 %i second left
-== nog %i seconde
+== nog %i seconde over
 
 %i seconds left
-== nog %i seconden
+== nog %i seconden over
 
 %s wins!
 == %s wint!
@@ -72,7 +52,7 @@ Body
 == Lichaam
 
 Call vote
-== Stem
+== Stemmen
 
 Change settings
 == Verander instellingen
@@ -120,10 +100,10 @@ Demos
 == Demo's
 
 Disconnect
-== Stoppen
+== loskoppelen
 
 Disconnected
-== Verbinding verbroken
+== losgekoppeld
 
 Downloading map
 == Kaart aan het downloaden
@@ -234,7 +214,7 @@ Move player to spectators
 == Verplaats speler naar toeschouwers
 
 Move right
-== Naar rechts
+== Beweeg naar rechts
 
 Movement
 == Bewegen
@@ -360,7 +340,7 @@ Show ingame HUD
 == Laat ingame HUD zien
 
 Show name plates
-== Laat naamplaat zien
+== Laat naamplaten zien
 
 Sound
 == Geluid
@@ -372,10 +352,10 @@ Spectate
 == Toekijken
 
 Spectate next
-== Volg volgende speler
+== Beschouw volgende speler
 
 Spectate previous
-== Volg vorige speler
+== Beschouw vorige speler
 
 Spectator mode
 == Toeschouwermode
@@ -406,9 +386,6 @@ The audio device couldn't be initialised.
 
 The server is running a non-standard tuning on a pure game type.
 == The server draait geen standaard spel type.
-
-Time limit
-== Tijdslimiet
 
 Time limit: %d min
 == Tijdslimiet: %d minuten
@@ -461,8 +438,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Je moet het spel herstarten voordat de veranderingen effect hebben.
 
-##### needs translation #####
-
 New name:
 == Nieuwe naam:
 
@@ -482,13 +457,13 @@ News
 == Nieuws
 
 Join game
-== Binnenkomen
+== Toetreden tot spel
 
 FSAA samples
-== FSAA samples
+== FSAA proeven
 
 Sound volume
-== Volume
+== geluids volume
 
 Max Screenshots
 == Maximaal aantal schermafbeeldingen
@@ -521,7 +496,7 @@ LAN
 == LAN
 
 Name plates size
-== Grootte naamplaat
+== Naamplaat grootte
 
 Successfully saved the replay!
 == De replay is succesvol opgeslagen!
@@ -533,7 +508,7 @@ Game paused
 == Spel gepauzeerd
 
 Server best:
-== Servers record:
+== Server record:
 
 Personal best:
 == Persoonlijk record:
@@ -575,7 +550,7 @@ Welcome to DDNet
 == Welkom bij DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork is een coöperatief online spel waar het doel is om met jezelf en je medespelers de finish van de map te behalen. Als een nieuwkomer kun je het best starten op een Novice server, waar je de makkelijkste maps zult vinden. Neem je ping in overweging bij het kiezen van een server.
+== DDraceNetwork is een coöperatief online spel waar het doel is om met jezelf en je medespelers de finish van de map te berijken. Als een nieuwkomer kun je het best starten op een Novice server, waar je de makkelijkste maps zult vinden. Neem je ping in overweging bij het kiezen van een server.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Het wordt aangeraden dat je de instellingen bekijkt en ze aanpast naar jouw wensen voordat je met een server verbindt.
@@ -611,10 +586,10 @@ Countries
 == Landen
 
 Types
-== Types
+== Typen
 
 DDNet %s is out!
-== DDNet %s is beschikbaar!
+== DDNet %s is uit!
 
 Downloading %s:
 == Downloaden %s:
@@ -648,6 +623,7 @@ Markers
 
 Length
 == Lengte
+
 Date
 == Datum
 
@@ -703,13 +679,13 @@ Skin prefix
 == Skin prefix
 
 Hook collisions
-== Hookraaklijnen
+== Haakraaklijnen
 
 Pause
 == Pauze
 
 Kill
-== Zelfmoord
+== Doden
 
 Zoom in
 == Inzoomen
@@ -736,7 +712,7 @@ Toggle ghost
 == Spook in/uit
 
 Dummy copy
-== Dummy copy
+== Dummy kopiëren
 
 Hammerfly dummy
 == Hamervlieg dummy
@@ -748,7 +724,7 @@ Statboard
 == Statistiekbord
 
 Lock team
-== Team versleutelen
+== Team vergrendelen
 
 Show entities
 == Laat entities zien
@@ -772,7 +748,7 @@ Enable gun sound
 == Schakel pistool geluid in
 
 Enable long pain sound (used when shooting in freeze)
-== Schakel lang pijn geluid in (wanneer je schiet in freeze)
+== Schakel lang pijn geluid in (wanneer je schiet in bevries)
 
 Enable server message sound
 == Schakel server berichten geluid in
@@ -805,7 +781,7 @@ Show names in chat in team colors
 == Laat namen in chat in de kleuren van het team zien
 
 Show kill messages
-== Laat sterfberichten zien
+== Laat doodsberichten zien
 
 Show votes window after voting
 == Laat stemscherm zien na het stemmen
@@ -880,7 +856,7 @@ Show other players' hook collision lines
 == Laat de hookraaklijn van andere spelers zien
 
 Show other players' key presses
-== Laat toetsaanslagen van andere spelers zien
+== Laat toets drukken van andere spelers zien
 
 Show tiles layers from BG map
 == Laat tegellagen van achtergrondmap zien
@@ -889,7 +865,7 @@ DDNet %s is available:
 == DDNet %s is beschikbaar
 
 Updating…
-== Aan het updaten
+== Updaten…
 
 No updates available
 == Geen updates beschikbaar
@@ -907,7 +883,7 @@ Follow
 == Volg
 
 Frags
-== Liquidaties
+== Frags
 
 Deaths
 == Doodgegaan
@@ -937,7 +913,7 @@ Grabs
 == 9+ nieuwe berichten
 
 Manual
-== Manual
+== Manueel
 
 Race
 == Race
@@ -949,10 +925,10 @@ Replay
 == Herhaling
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== De wijdte van de texture %s is niet te delen door %d, of de hoogte is niet te delen door %d wat visuele bugs kan veroorzaken.
+== De breedte van texture %s is niet te delen door %d, of de hoogte is niet te delen door %d wat visuele bugs kan veroorzaken.
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== Het format van de texture %s is niet RGBA, hetgeen zal visuele bugs veroorzaken.
+== Het formaat van de texture %s is niet RGBA, wat visuele bugs zal veroorzaken.
 
 Warning
 == Waarschuwing
@@ -961,16 +937,16 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Debug mode is geactiveerd. Gebruik Ctrl+Shift+D om debug mode te deactiveren.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Gebruik de k toets om jezelf te doden (herstarten), q om te pauzeren en andere spelers te bekijken. Zie instellingen voor andere toetsenbindingen.
+== Gebruik de k toets om te doden (herstarten), q om te pauzeren en andere spelers te bekijken. Zie instellingen voor andere toetsenbindingen.
 
 Existing Player
 == Bestaande speler
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Jouw gebruikersnaam '%s' is al in gebruik (%d points). Wil je deze naam alsnog gebruiken?
+== Jouw gebruikersnaam '%s' is al in gebruik (%d punten). Wil je deze naam alsnog gebruiken?
 
 Checking for existing player with your name
-== Aan het zoeken naar bestaande spelers met jouw naam
+== Aan het zoeken naar bestaande speler met jouw naam
 
 Are you sure that you want to disconnect and switch to a different server?
 == Weet je zeker dat je de verbinding wilt verbreken en wilt verbinden met een andere server?
@@ -1057,7 +1033,7 @@ Skins directory
 == Skins map
 
 Chat command
-== Chat command
+== Chat commando
 
 Dummy
 == Dummy
@@ -1075,7 +1051,7 @@ Desktop fullscreen
 == Bureaublad volledigscherm
 
 Allows maps to render with more detail
-== Maakt het mogelijk om kaarten met meer detail te renderen
+== Laat kaarten toe om met meer detail te renderen
 
 Renderer
 == Renderer
@@ -1087,43 +1063,43 @@ custom
 == custom
 
 auto
-== Automatisch
+== automatisch
 
 Game sound volume
-== Game geluid volume
+== Spel geluid volume
 
 Chat sound volume
 == Chat geluid volume
 
 Background music volume
-== Achtergrond geluid volume
+== Achtergrond muziek volume
 
 Assets
 == Assets
 
 Use old chat style
-== Oude chatstijl gebruiken
+== Gebruik oude chatstijl
 
 Client message
 == Clientbericht
 
 Preview
-== Voorbeeld
+== Voorbeschouwing
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == Wanneer je over de startlijn gaat, laat een spook tee zien die jouw beste tijd repliceert
 
 Opacity
-== Ondoorzichtigheid
+== Opaciteit
 
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== Pas de ondoorzichtigheid van entities die tot andere teams behoren aan, zoals de tee's en de naamplaten
+== Pas de opaciteit van entities die tot andere teams behoren aan, zoals de tee's en de naamplaten
 
 Quads are used for background decoration
 == Quads worden gebruikt voor achtergronddecoratie
 
 Tries to predict other entities to give a feel of low latency
-== Probeert andere entities te voorspellen om een gevoel van "low latency" te geven
+== Probeert andere entities te voorspellen om een gevoel van "lage latency" te geven
 
 Show local player's key presses
 == Laat lokale spelers hun toetsaanslagen zien
@@ -1135,10 +1111,10 @@ Use current map as background
 == Gebruik de huidige map als achtergrond
 
 Run on join
-== Run bij deelnemen
+== Loop bij deelnemen
 
 Chat command (e.g. showall 1)
-== Chat command (bijv. showall 1)
+== Chat commando (bijv. showall 1)
 
 Entities
 == Entities
@@ -1147,7 +1123,7 @@ Emoticons
 == Emoticons
 
 Particles
-== Particles
+== Deeltjes
 
 Assets directory
 == Assets map
@@ -1177,7 +1153,7 @@ Stop server
 == Stop server
 
 Run server
-== Laad server
+== Loop server
 
 Server executable not found, can't run server
 == Server executable niet gevonden, de server kon niet worden gestart
@@ -1203,883 +1179,955 @@ FPM
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Mislukt tijdens initialisatie. Probeer gfx_backend te wijzigen naar OpenGL of Vulkan in settings_ddnet.cfg in de configuratiemap en probeer het opnieuw.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Geen VRAM meer. Probeer aangepaste assets (skins, entities, etc.) te verwijderen, vooral die met een hoge resolutie.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Er is een fout opgetreden tijdens het opnemen van commando’s. Probeer je GPU-stuurprogramma's bij te werken.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Een rendercommando is mislukt. Probeer je GPU-stuurprogramma's bij te werken.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Het verzenden van de rendercommando’s is mislukt. Probeer je GPU-stuurprogramma's bij te werken.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Het wisselen van framebuffers is mislukt. Probeer je GPU-stuurprogramma's bij te werken.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Onbekende fout. Probeer gfx_backend te wijzigen naar OpenGL of Vulkan in settings_ddnet.cfg in de configuratiemap en probeer het opnieuw.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Kan de opgegeven grafische backend niet initialiseren, standaard backend wordt nu hersteld.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Kan de opgegeven grafische backend niet initialiseren, dit komt waarschijnlijk doordat je het stuurprogramma van de geïntegreerde grafische kaart niet hebt geïnstalleerd.
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== Kon verbindingsadres '%s' niet oplossen. Zie de lokale console voor details.
 
 Connect address error
-== 
+== Verbindingsadresfout
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Kon de gedownloade map niet opslaan. Probeer dit bestand handmatig te verwijderen: %s
 
 Could not connect dummy
-== 
+== Kon dummy niet verbinden
 
 Error playing demo
-== 
+== Fout bij het afspelen van de demo
 
 Failed saving the replay!
-== 
+== Opslaan van de replay is mislukt!
 
 Saving settings to '%s' failed
-== 
+== Opslaan van instellingen naar '%s' is mislukt
 
 Error saving settings
-== 
+== Fout bij het opslaan van instellingen
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" is niet compatibel met pnglite en kan niet worden geladen door oude DDNet-versies:
 
 Preparing demo playback
-== 
+== Demo afspelen voorbereiden
 
 Connected
-== 
+== Verbonden
 
 Loading map file from storage
-== 
+== Mapbestand laden vanuit opslag
 
 Loading demo file from storage
-== 
+== Demobestand laden vanuit opslag
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Sommige lettertypen konden niet worden geladen. Controleer de lokale console voor details.
 
 Initializing components
-== 
+== Componenten initialiseren
 
 Why are you slowmo replaying to read this?
-== 
+== Waarom ben je aant het slowmo replayen om dit te lezen?
 
 Initializing assets
-== 
+== Assets initialiseren
 
 Initializing map logic
-== 
+== Maplogica initialiseren
 
 Sending initial client info
-== 
+== Eerste clientinformatie verzenden
 
 Quitting. Please wait…
-== 
+== Afsluiten. Even geduld…
 
 Restarting. Please wait…
-== 
+== Opnieuw opstarten. Even geduld…
 
 Loading skin files
-== 
+== Skin-bestanden laden
 
 Loading background map
-== 
+== Achtergrondmap laden
 
 Searching
-== 
+== Zoeken
 
 Enter Username
-== 
+== Voer gebruikersnaam in
 
 Enter Password
-== 
+== Voer wachtwoord in
 
 NOT CONNECTED
-== 
+== NIET VERBONDEN
 
 Match %d of %d
-== 
+== Wedstrijd %d van %d
 
 No results
-== 
+== Geen resultaten
 
 Lines %d - %d (%s)
-== 
+== Regels %d - %d (%s)
 
 Locked
-== 
+== Vergrendeld
 
 Following
-== 
+== Volgend
 
 Loading commands…
-== 
+== Commando’s laden…
 
 Position:
-== 
+== Positie:
 
 Speed:
-== 
+== Snelheid:
 
 Angle:
-== 
+== Hoek:
 
 Multi-View
-== 
+== Multi-View
 
 [Spectating]
 Following %s
-== 
+== Volgt %s
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== AUTO
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Sommige kaartafbeeldingen konden niet worden geladen. Controleer de lokale console voor details.
 
 Uploading map data to GPU
-== 
+== Kaartgegevens uploaden naar GPU
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Sommige kaartgeluiden konden niet worden geladen. Controleer de lokale console voor details.
 
 Loading menu themes
-== 
+== Menu-thema’s laden
 
 Press a key…
-== 
+== Druk een toets…
 
 Main menu
-== 
+== hoofdmenu
 
 Rename folder
-== 
+== Hernoem map
 
 Render complete
-== 
+== Render compleet
 
 Are you sure that you want to restart?
-== 
+== Ben je zeker dat je opnieuw wilt opstarten?
 
 Save skin
-== 
+== Skin opslaan
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Weet je zeker dat je je skin wilt opslaan? Als er al een skin met deze naam bestaat, wordt deze vervangen.
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== Er is een niet-opgeslagen kaart in de editor, misschien wil je deze opslaan.
 
 Continue anyway?
-== 
+== Toch doorgaan?
 
 A demo with this name already exists
-== 
+== Er bestaat al een demo met deze naam
 
 A folder with this name already exists
-== 
+== Er bestaat al een map met deze naam
 
 Unable to rename the folder
-== 
+== Kan de map niet hernoemen
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== Bestand '%s' bestaat al, wil je het overschrijven?
 
 (paused)
-== 
+== (Gepauzeerd)
 
 Videos directory
-== 
+== Video's map
 
 Video was saved to '%s'
-== 
+== Video is opgeslagen naar '%s'
 
 Unable to save the skin
-== 
+== Kan de skin niet opslaan
 
 Unable to save the skin with a reserved name
-== 
+== Kan de skin niet opslaan met een gereserveerde naam
 
 Trying to determine UDP connectivity…
-== 
+== Bezig met het bepalen van UDP-connectiviteit…
 
 UDP seems to be filtered.
-== 
+== UDP lijkt gefilterd te zijn.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== UDP- en TCP-IP-adressen lijken verschillend te zijn. Probeer VPN, proxy of netwerkversnellers uit te schakelen.
 
 No answer from server yet.
-== 
+== Nog geen antwoord van de server.
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 Getting game info
-== 
+== Spelinformatie ophalen
 
 Requesting to join the game
-== 
+== Verzoek om deel te nemen aan het spel
 
 Loading menu images
-== 
+== Menu-afbeeldingen laden
 
 No local servers found (ports %d-%d)
-== 
+== Geen lokale servers gevonden (poorten %d-%d)
 
 Example of usage
-== 
+== Voorbeeld van gebruik
 
 No login required
-== 
+== Geen login vereist
 
 Communities
-== 
+== Gemeenschappen
 
 Copy info
-== 
+== Kopieer info
 
 No server selected
-== 
+== Geen server geselecteerd
 
 Online friends (%d)
-== 
+== Online vrienden (%d)
 
 Online clanmates (%d)
-== 
+== Online clanleden (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Offline (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Klik om een server te selecteren. Dubbelklik om je vriend te joinen.
 
 Click to remove this player from your friends list.
-== 
+== Klik om deze speler uit je vriendenlijst te verwijderen.
 
 Click to remove this clan from your friends list.
-== 
+== Klik om deze clan uit je vriendenlijst te verwijderen.
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 
+== Voeg vrienden toe door hun naam hieronder in te voeren of door op hun naam in de spelerslijst te klikken.
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
-
-Offline friends and clanmates will appear here.
-== 
+== Voeg clanleden toe door hun clannaam hieronder in te voeren en de naam leeg te laten.
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Weet je zeker dat je de speler '%s' uit je vriendenlijst wilt verwijderen?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Weet je zeker dat je de clan '%s' uit je vriendenlijst wilt verwijderen?
 
 Add Clan
-== 
+== Clan toevoegen
 
 Server filter
-== 
+== Serverfilter
 
 Friends
-== 
+== Vrienden
 
 Play the current demo
-== 
+== Huidige demo afspelen
 
 Pause the current demo
-== 
+== Huidige demo pauzeren
 
 Stop the current demo
-== 
+== Huidige demo stoppen
 
 Go back the specified duration
-== 
+== Ga terug met de opgegeven duur
 
 [Demo player duration]
 %d min.
-== 
+== %d min.
 
 [Demo player duration]
 %d sec.
-== 
+== %d sec.
 
 Change the skip duration
-== 
+== Wijzig de skipduur
 
 Go forward the specified duration
-== 
+== Ga vooruit met de opgegeven duur
 
 Go back one tick
-== 
+== Ga één tick terug
 
 Go forward one tick
-== 
+== Ga één tick vooruit
 
 Go back one marker
-== 
+== Ga terug naar vorige marker
 
 Go forward one marker
-== 
+== Ga naar volgende marker
 
 Slow down the demo
-== 
+== Vertraag de demo
 
 Speed up the demo
-== 
+== Versnel de demo
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Markeer het begin van een knip (rechterklik om te resetten)
 
 Mark the end of a cut (right click to reset)
-== 
+== Markeer het einde van een knip (rechterklik om te resetten)
 
 Export cut as a separate demo
-== 
+== Exporteer knip als een aparte demo
 
 Close the demo player
-== 
+== Sluit de demospeler
 
 Toggle keyboard shortcuts
-== 
+== Schakel sneltoetsen in/uit
 
 Toggle auto camera
-== 
+== Schakel automatische camera in/uit
 
 Export demo cut
-== 
+== Exporteer demoknip
 
 Cut interval
-== 
+== Knipinterval
 
 Cut length
-== 
+== Kniplengte
 
 Render cut to video
-== 
+== Render knip naar video
 
 Please use a different filename
-== 
+== Gebruik alstublieft een andere bestandsnaam
 
 Loading demo files
-== 
+== Demobestanden laden
 
 All combined
-== 
+== Alles gecombineerd
 
 No demo selected
-== 
+== Geen demo geselecteerd
 
 Folder Link
-== 
+== Maplink
 
 Created
-== 
+== Gemaakt
 
 Netversion
-== 
+== Netversie
 
 [Demo details]
 map not included
-== 
+== kaart niet inbegrepen
 
 Open the directory that contains the demo files
-== 
+== Open de map die de demobestanden bevat
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Weet je zeker dat je de map '%s' wilt verwijderen?
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Weet je zeker dat je de demo '%s' wilt verwijderen?
 
 Delete folder
-== 
+== Map verwijderen
 
 Unable to delete the demo '%s'
-== 
+== Kan de demo '%s' niet verwijderen
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Kan de map '%s' niet verwijderen. Zorg ervoor dat deze eerst leeg is.
 
 Dummy is not allowed on this server
-== 
+== Dummy is niet toegestaan op deze server
 
 Please wait…
-== 
+== Even geduld…
 
 Edit touch controls
-== 
+== Touch-bediening bewerken
 
 Close
-== 
+== Sluiten
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Save changes
-== 
+== Wijzigingen opslaan
 
 Error saving touch controls
-== 
+== Fout bij opslaan van touch-bediening
 
 Could not save touch controls to file. See local console for details.
-== 
+== Kon touch-bediening niet opslaan naar bestand. Zie lokale console voor details.
 
 Unsaved changes
-== 
+== Niet-opgeslagen wijzigingen
 
 Discard changes
-== 
+== Wijzigingen negeren
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 
+== Weet je zeker dat je de huidige wijzigingen aan de touch-bediening wilt verwijderen?
 
 Are you sure that you want to reset the touch controls to default?
-== 
+== Weet je zeker dat je de touch-bediening wilt resetten naar standaard?
 
 Import from clipboard
-== 
+== Importeren vanaf klembord
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
+== Weet je zeker dat je de touch-bediening vanaf het klembord wilt importeren? Dit overschrijft je huidige touch-bediening.
 
 Export to clipboard
-== 
+== Exporteren naar klembord
 
 Direct touch input while ingame
-== 
+== Directe touch-invoer tijdens het spel
 
 [Direct touch input]
 Disabled
-== 
+== Uitgeschakeld
 
 [Direct touch input]
 Active action
-== 
+== Actieve actie
 
 [Direct touch input]
 Aim
-== 
+== Richten
 
 [Direct touch input]
 Fire
-== 
+== Schieten
 
 [Direct touch input]
 Hook
-== 
+== Haak
 
 Direct touch input while spectating
-== 
+== Directe touch-invoer tijdens toeschouwen
 
 Error loading touch controls
-== 
+== Fout bij laden van touch-bediening
 
 Could not load touch controls from file. See local console for details.
-== 
+== Kon touch-bediening niet laden vanuit bestand. Zie lokale console voor details.
 
 Could not load default touch controls from file. See local console for details.
-== 
+== Kon standaard touch-bediening niet laden vanuit bestand. Zie lokale console voor details.
 
 Could not load touch controls from clipboard. See local console for details.
-== 
+== Kon touch-bediening niet laden vanaf klembord. Zie lokale console voor details.
 
 Loading…
-== 
+== Laden…
 
 Loading ghost files
-== 
+== Spook-bestanden laden
 
 Ghosts directory
-== 
+== Spook-map
 
 Activate all
-== 
+== Alles activeren
 
 Deactivate all
-== 
+== Alles deactiveren
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Menu geopend. Druk opnieuw op de Esc-toets om het menu te sluiten.
 
 [Hertz]
 Hz
-== 
+== Hz
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Bespaar energie door de vernieuwingsfrequentie te verlagen (hogere invoerlatentie)
 
 Open the settings file
-== 
+== Open het instellingenbestand
 
 Open the directory that contains the configuration and user files
-== 
+== Open de map die de configuratie- en gebruikersbestanden bevat
 
 Open the directory to add custom themes
-== 
+== Open de map om aangepaste thema's toe te voegen
 
 Player info change cooldown
-== 
+== Cooldown voor het wijzigen van spelerinformatie
 
 Download community skins
-== 
+== Community-skins downloaden
 
 Create a random skin
-== 
+== Maak een willekeurige skin
 
 Open the directory to add custom skins
-== 
+== Open de map om aangepaste skins toe te voegen
 
 Enable controller
-== 
+== Controller inschakelen
 
 Controller
-== 
+== Controller
 
 Ingame controller mode
-== 
+== Ingame-controller modus
 
 [Ingame controller mode]
 Relative
-== 
+== Relatief
 
 [Ingame controller mode]
 Absolute
-== 
+== Absoluut
 
 Ingame controller sens.
-== 
+== Ingame-controller gevoeligheid
 
 UI controller sens.
-== 
+== UI-controller gevoeligheid
 
 Controller jitter tolerance
-== 
+== Controller jitter-tolerantie
 
 No controller found. Plug in a controller.
-== 
+== Geen controller gevonden. Sluit een controller aan.
 
 Axis
-== 
+== As
 
 Status
-== 
+== Status
 
 Aim bind
-== 
+== Richt-bind
 
 Mouse
-== 
+== Muis
 
 Ingame mouse sens.
-== 
+== Ingame-muisgevoeligheid
 
 UI mouse sens.
-== 
+== UI-muisgevoeligheid
 
 Reset controls
-== 
+== Besturing resetten
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Weet je zeker dat je de besturing wilt resetten naar de standaardinstellingen?
 
 Cancel
-== 
+== Annuleren
 
 Graphics card
-== 
+== Grafische kaart
 
 Tee
-== 
+== Tee
 
 Appearance
-== 
+== Uiterlijk
 
 Name Plate
-== 
+== Naamplaat
 
 Hook Collisions
-== 
+== Hook-botsingen
 
 Info Messages
-== 
+== Infoberichten
 
 Show health, shields and ammo
-== 
+== Toon levens, schild en munitie
 
 Show local time always
-== 
+== Toon altijd de lokale tijd
 
 Authed name color in scoreboard
-== 
+== Geautoriseerde naamkleur in het scorebord
 
 Same clan color in scoreboard
-== 
+== Zelfde clankleur in het scorebord
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Show client IDs (scoreboard, chat, spectator)
-== 
+== Toon client-ID's (scorebord, chat, toeschouwer)
 
 Show DDRace HUD
-== 
+== Toon DDRace HUD
 
 Show jumps indicator
-== 
+== Toon sprong-indicator
 
 Show dummy actions
-== 
+== Toon dummy-acties
 
 Show player position
-== 
+== Toon speler positie
 
 Show player speed
-== 
+== Toon spelersnelheid
 
 Show player target angle
-== 
+== Toon spelerdoelhoek
 
 Show freeze bars
-== 
+== Toon bevries-balken
 
 Opacity of freeze bars inside freeze
-== 
+== Doorzichtigheid van bevries-balken binnen bevries
 
 Always show chat
-== 
+== Toon altijd de chat
 
 Show only chat messages from team members
-== 
+== Toon alleen chatberichten van teamleden
 
 Chat font size
-== 
+== Chat lettergrootte
 
 Chat width
-== 
+== Chat breedte
 
 Show friend mark (♥) in name plates
-== 
+== Toon vriend-markering (♥) in naamplaten
 
 Show client IDs in name plates
-== 
+== Toon client-ID's in naamplaten
 
 Hook Strength
-== 
+== Haak-kracht
 
 Show hook strength icon indicator
-== 
+== Toon haakk-kracht icoon-indicator
 
 Show hook strength number indicator
-== 
+== Toon haak-kracht nummer-indicator
 
 Size of hook strength icon and number indicator
-== 
+== Grootte van haak-kracht icoon en nummer-indicator
 
 Key Presses
-== 
+== Toetsaanslagen
 
 Size of key press icons
-== 
+== Grootte van toetsaanslag-iconen
 
 Hook collision line
-== 
+== Haak-botsingslijn
 
 Show own player's hook collision line
-== 
+== Toon de hook-botsingslijn van je eigen speler
 
 Always show own player's hook collision line
-== 
+== Toon altijd de hook-botsingslijn van je eigen speler
 
 Always show other players' hook collision lines
-== 
+== Toon altijd de hook-botsingslijnen van andere spelers
 
 Width of your own hook collision line
-== 
+== Breedte van je eigen hook-botsingslijn
 
 Width of others' hook collision line
-== 
+== Breedte van anderen hook-botsingslijn
 
 Hook collision line opacity
-== 
+== Doorzichtigheid van de hook-botsingslijn
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Kleuren van de hook-botsingslijn, bij een mogelijke botsing met:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Je bewegingen worden niet meegerekend bij het berekenen van de lijnkleuren
 
 Nothing hookable
-== 
+== Niets haakbaar
 
 Something hookable
-== 
+== Iets haakbaar
 
 A Tee
-== 
+== Een Tee
 
 Preview 'Hook collisions' being pressed
-== 
+== Voorbeeld van 'Hook-botsingen' indrukken
 
 Show finish messages
-== 
+== Toon finish-berichten
 
 Normal Color
-== 
+== Normale kleur
 
 Highlight Color
-== 
+== Highlight-kleur
 
 Weapons
-== 
+== Wapens
 
 Rifle Laser Outline Color
-== 
+== Rifle-laser omtrekkleur
 
 Rifle Laser Inner Color
-== 
+== Rifle-laser binnenkleur
 
 Shotgun Laser Outline Color
-== 
+== Shotgun-laser omtrekkleur
 
 Shotgun Laser Inner Color
-== 
+== Shotgun-laser binnenkleur
 
 Door Laser Outline Color
-== 
+== Deur-laser omtrekkleur
 
 Door Laser Inner Color
-== 
+== Deur-laser binnenkleur
 
 Freeze Laser Outline Color
-== 
+== Bevries-laser omtrekkleur
 
 Freeze Laser Inner Color
-== 
+== Bevries-laser binnenkleur
 
 Set all to Rifle
-== 
+== Stel alles in op Rifle
 
 Enable ghost
-== 
+== Spook inschakelen
 
 Only save improvements
-== 
+== Alleen verbeteringen opslaan
 
 Regular background color
-== 
+== Normale achtergrondkleur
 
 Entities background color
-== 
+== Entities-achtergrondkleur
 
 Unregister protocol and file extensions
-== 
+== Deregistreer protocol- en bestandsextensies
 
 Basic
-== 
+== Basis
 
 Custom
-== 
+== Aangepast
 
 Are you sure that you want to delete '%s'?
-== 
+== Weet je zeker dat je '%s' wilt verwijderen?
 
 Delete skin
-== 
+== Skin verwijderen
 
 Unable to delete skin
-== 
+== Kan de skin niet verwijderen
 
 Extras
-== 
+== Extra's
 
 Loading assets
-== 
+== Laden van assets
 
 Open the directory to add custom assets
-== 
+== Open de map om aangepaste assets toe te voegen
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Server kon niet worden gestart. Zorg ervoor dat de meldingsmachtiging is verleend in de app-instellingen, zodat de server op de achtergrond kan draaien.
 
 Loading race demo files
-== 
+== Race-demobestanden laden
 
 Round %d/%d
-== 
+== Ronde %d/%d
 
 [Spectators]
 %d others…
-== 
+== %d anderen…
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== Team %d (%d/%d)
 
 [skins]
 Body
-== 
+== Lichaam
 
 [skins]
 Marking
-== 
+== Markering
 
 [skins]
 Decoration
-== 
+== Decoratie
 
 [skins]
 Hands
-== 
+== Handen
 
 [skins]
 Feet
-== 
+== Voeten
 
 [skins]
 Eyes
-== 
+== Ogen
 
 Loading sound files
-== 
+== Geluidsbestanden laden
 
 Aim
-== 
+== Richten
 
 Active: Fire
-== 
+== Actief: Schieten
 
 Active: Hook
-== 
+== Actief: Hook
 
 Moved ingame
-== 
+== Verplaatst ingame
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/wiki/Mapping
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Nederlandse vertaling door vierkant, Sijmen Schoon, Vijfhoek, Syntax Error, Yared Hufkens, Ronan, urg
+
+Auto-sync player camera
+== Auto-sync speler camera
+
+[Auto camera]
+Disabled
+== Uitgeschakeld
+
+[Auto camera]
+Enabled
+== Ingeschakeld
+
+[Auto camera]
+Unavailable for this player
+== Niet beschikbaar voor deze speler
+
+[Auto camera]
+Inactive
+== Inactief
+
+[Auto camera]
+Active
+== Actief
+
+Loading maps…
+== Laden van maps…
+
+Community
+== Community
+
+[Team status]
+forbidden
+== Verboden
+
+[Team status]
+solo
+== Solo
+
+[Team status]
+allowed
+== Toegestaan
+
+[Team status]
+required
+== Vereist
+
+Teams
+== Teams
+
+[Team size]
+minimum
+== minimum
+
+[Team size]
+maximum
+== maximum
+
+Saves file
+== Savesbestand
+
+Open the saves file
+== Open het Savesbestand
+
+Show FPS
+== Toon FPS
+
+Renders your frame rate in the top right
+== Geeft je framerate weer aan de rechterbovenhoek
+
+Show spectator cursor
+== Toon toeschouwerscursor
