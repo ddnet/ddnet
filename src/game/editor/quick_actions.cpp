@@ -231,18 +231,7 @@ void CEditor::TestMapLocally()
 
 	if(Client()->RconAuthed())
 	{
-		NETADDR Addr = Client()->ServerAddress();
-		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&Client()->ServerAddress(), aAddrStr, sizeof(aAddrStr), true);
-
-		bool IsLocalAddress = false;
-		if(Addr.ip[0] == 127 || Addr.ip[0] == 10 || (Addr.ip[0] == 192 && Addr.ip[1] == 168) || (Addr.ip[0] == 172 && (Addr.ip[1] >= 16 && Addr.ip[1] <= 31)))
-			IsLocalAddress = true;
-
-		if(str_startswith(aAddrStr, "[fe80:") || str_startswith(aAddrStr, "[::1"))
-			IsLocalAddress = true;
-
-		if(IsLocalAddress)
+		if(net_addr_is_local(&Client()->ServerAddress()))
 		{
 			OnClose();
 			g_Config.m_ClEditor = 0;
