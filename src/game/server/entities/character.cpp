@@ -1403,8 +1403,10 @@ void CCharacter::HandleSkippableTiles(int Index)
 			}
 		}
 		else
+		{
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
-		return;
+			return;
+		}
 	}
 
 	if(GameLayerClipped(m_Pos))
