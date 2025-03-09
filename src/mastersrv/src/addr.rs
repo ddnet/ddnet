@@ -8,6 +8,7 @@ use url::Url;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Protocol {
+    Ddnet18,
     V5,
     V6,
     V7,
@@ -41,7 +42,7 @@ pub struct UnknownProtocol;
 
 impl fmt::Display for UnknownProtocol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        "protocol must be one of tw-0.5+udp, tw-0.6+udp or tw-0.7+udp".fmt(f)
+        "protocol must be one of ddnet-18+quic, tw-0.5+udp, tw-0.6+udp or tw-0.7+udp".fmt(f)
     }
 }
 
@@ -50,6 +51,7 @@ impl FromStr for Protocol {
     fn from_str(s: &str) -> Result<Protocol, UnknownProtocol> {
         use self::Protocol::*;
         Ok(match s {
+            "ddnet-18+quic" => Ddnet18,
             "tw-0.5+udp" => V5,
             "tw-0.6+udp" => V6,
             "tw-0.7+udp" => V7,
@@ -73,7 +75,7 @@ impl<'de> serde::de::Visitor<'de> for ProtocolVisitor {
     type Value = Protocol;
 
     fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str("one of \"tw-0.5+udp\", \"tw-0.6+udp\" and \"tw-0.7+udp\"")
+        f.write_str("one of \"ddnet-18+quic\", \"tw-0.5+udp\", \"tw-0.6+udp\" and \"tw-0.7+udp\"")
     }
     fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Protocol, E> {
         let invalid_value = || E::invalid_value(serde::de::Unexpected::Str(v), &self);
@@ -94,6 +96,7 @@ impl Protocol {
     fn as_str(self) -> &'static str {
         use self::Protocol::*;
         match self {
+            Ddnet18 => "ddnet-18+quic",
             V5 => "tw-0.5+udp",
             V6 => "tw-0.6+udp",
             V7 => "tw-0.7+udp",

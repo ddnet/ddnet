@@ -158,12 +158,14 @@ impl Peer {
     }
 }
 
+#[non_exhaustive]
 #[derive(Clone, Copy)]
 pub enum Event {
     /// `Connect(pid, peer_addr)`
     Connect(PeerIndex, Addr),
     /// `Chunk(pid, size, unreliable)`
     Chunk(PeerIndex, usize, bool),
+    // TODO: maybe say whether the disconnect happened without a prior `Connect` event?
     // TODO: distinguish disconnect from error?
     /// `Disconnect(pid, reason_size, remote)`
     Disconnect(PeerIndex, usize, bool),
@@ -689,7 +691,7 @@ impl Net {
                         }
                         ConnectionEvent::ConnlessChunk(peer_addr, size) => return Ok(Some(Event::ConnlessChunk(peer_addr, size))),
                         ConnectionEvent::Disconnect(reason_size, remote) => {
-                            assert!(peer.high_level); // TODO: check that `Disconnect` cannot be emitted before `Connect`
+                            assert!(peer.high_level); // TODO: make sure that `Disconnect` cannot be emitted before `Connect`. this currently isn't the case when manually disconnecting before a `Connect` event
                             peer.high_level = false;
                             for &addr in &peer.addrs {
                                 self.peer_buckets.get_mut(&Bucket::from(addr)).unwrap().high_level -= 1;

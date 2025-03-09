@@ -21,7 +21,9 @@ class CRegister : public IRegister
 		STATUS_NEEDCHALLENGE,
 		STATUS_NEEDINFO,
 
-		PROTOCOL_TW6_IPV6 = 0,
+		PROTOCOL_DDNET18_IPV6 = 0,
+		PROTOCOL_DDNET18_IPV4,
+		PROTOCOL_TW6_IPV6,
 		PROTOCOL_TW6_IPV4,
 		PROTOCOL_TW7_IPV6,
 		PROTOCOL_TW7_IPV4,
@@ -172,6 +174,9 @@ const char *CRegister::ProtocolToScheme(int Protocol)
 {
 	switch(Protocol)
 	{
+	// TODO: keep -18 in the name?
+	case PROTOCOL_DDNET18_IPV6: return "ddnet-18+quic://";
+	case PROTOCOL_DDNET18_IPV4: return "ddnet-18+quic://";
 	case PROTOCOL_TW6_IPV6: return "tw-0.6+udp://";
 	case PROTOCOL_TW6_IPV4: return "tw-0.6+udp://";
 	case PROTOCOL_TW7_IPV6: return "tw-0.7+udp://";
@@ -185,6 +190,8 @@ const char *CRegister::ProtocolToString(int Protocol)
 {
 	switch(Protocol)
 	{
+	case PROTOCOL_DDNET18_IPV6: return "ddnet18/ipv6";
+	case PROTOCOL_DDNET18_IPV4: return "ddnet18/ipv4";
 	case PROTOCOL_TW6_IPV6: return "tw0.6/ipv6";
 	case PROTOCOL_TW6_IPV4: return "tw0.6/ipv4";
 	case PROTOCOL_TW7_IPV6: return "tw0.7/ipv6";
@@ -196,7 +203,15 @@ const char *CRegister::ProtocolToString(int Protocol)
 
 bool CRegister::ProtocolFromString(int *pResult, const char *pString)
 {
-	if(str_comp(pString, "tw0.6/ipv6") == 0)
+	if(str_comp(pString, "ddnet18/ipv6") == 0)
+	{
+		*pResult = PROTOCOL_DDNET18_IPV6;
+	}
+	else if(str_comp(pString, "ddnet18/ipv4") == 0)
+	{
+		*pResult = PROTOCOL_DDNET18_IPV4;
+	}
+	else if(str_comp(pString, "tw0.6/ipv6") == 0)
 	{
 		*pResult = PROTOCOL_TW6_IPV6;
 	}
@@ -224,6 +239,8 @@ const char *CRegister::ProtocolToSystem(int Protocol)
 {
 	switch(Protocol)
 	{
+	case PROTOCOL_DDNET18_IPV6: return "register/d/ipv6";
+	case PROTOCOL_DDNET18_IPV4: return "register/d/ipv4";
 	case PROTOCOL_TW6_IPV6: return "register/6/ipv6";
 	case PROTOCOL_TW6_IPV4: return "register/6/ipv4";
 	case PROTOCOL_TW7_IPV6: return "register/7/ipv6";
@@ -237,6 +254,8 @@ IPRESOLVE CRegister::ProtocolToIpresolve(int Protocol)
 {
 	switch(Protocol)
 	{
+	case PROTOCOL_DDNET18_IPV6: return IPRESOLVE::V6;
+	case PROTOCOL_DDNET18_IPV4: return IPRESOLVE::V4;
 	case PROTOCOL_TW6_IPV6: return IPRESOLVE::V6;
 	case PROTOCOL_TW6_IPV4: return IPRESOLVE::V4;
 	case PROTOCOL_TW7_IPV6: return IPRESOLVE::V6;
@@ -290,6 +309,10 @@ void CRegister::CProtocol::SendRegister()
 	}
 	pRegister->HeaderString("Address", aAddress);
 	pRegister->HeaderString("Secret", aSecret);
+	if(m_Protocol == PROTOCOL_DDNET18_IPV6 || m_Protocol == PROTOCOL_DDNET18_IPV4)
+	{
+		pRegister->HeaderString("Challenge-Private-Key", "fca628e59382f4aebc1450273cf73682f8a3544e8eabd2c0e4e3686a0db771f4");
+	}
 	if(m_Protocol == PROTOCOL_TW7_IPV6 || m_Protocol == PROTOCOL_TW7_IPV4)
 	{
 		pRegister->HeaderString("Connless-Token", m_pParent->m_aConnlessTokenHex);
@@ -486,6 +509,8 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int
 	m_pEngine(pEngine),
 	m_ServerPort(ServerPort),
 	m_aProtocols{
+		CProtocol(this, PROTOCOL_DDNET18_IPV6),
+		CProtocol(this, PROTOCOL_DDNET18_IPV4),
 		CProtocol(this, PROTOCOL_TW6_IPV6),
 		CProtocol(this, PROTOCOL_TW6_IPV4),
 		CProtocol(this, PROTOCOL_TW7_IPV6),
@@ -510,8 +535,8 @@ void CRegister::Update()
 {
 	if(!m_GotFirstUpdateCall)
 	{
-		bool Ipv6 = m_aProtocolEnabled[PROTOCOL_TW6_IPV6] || m_aProtocolEnabled[PROTOCOL_TW7_IPV6];
-		bool Ipv4 = m_aProtocolEnabled[PROTOCOL_TW6_IPV4] || m_aProtocolEnabled[PROTOCOL_TW7_IPV4];
+		bool Ipv6 = m_aProtocolEnabled[PROTOCOL_DDNET18_IPV6] || m_aProtocolEnabled[PROTOCOL_TW6_IPV6] || m_aProtocolEnabled[PROTOCOL_TW7_IPV6];
+		bool Ipv4 = m_aProtocolEnabled[PROTOCOL_DDNET18_IPV4] || m_aProtocolEnabled[PROTOCOL_TW6_IPV4] || m_aProtocolEnabled[PROTOCOL_TW7_IPV4];
 		if(Ipv6 && Ipv4)
 		{
 			dbg_assert(!HttpHasIpresolveBug(), "curl version < 7.77.0 does not support registering via both IPv4 and IPv6, set `sv_register ipv6` or `sv_register ipv4`");
@@ -566,13 +591,20 @@ void CRegister::OnConfigChange()
 			int Protocol;
 			if(str_comp(aBuf, "ipv6") == 0)
 			{
+				m_aProtocolEnabled[PROTOCOL_DDNET18_IPV6] = true;
 				m_aProtocolEnabled[PROTOCOL_TW6_IPV6] = true;
 				m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = true;
 			}
 			else if(str_comp(aBuf, "ipv4") == 0)
 			{
+				m_aProtocolEnabled[PROTOCOL_DDNET18_IPV4] = true;
 				m_aProtocolEnabled[PROTOCOL_TW6_IPV4] = true;
 				m_aProtocolEnabled[PROTOCOL_TW7_IPV4] = true;
+			}
+			else if(str_comp(aBuf, "ddnet18") == 0)
+			{
+				m_aProtocolEnabled[PROTOCOL_DDNET18_IPV6] = true;
+				m_aProtocolEnabled[PROTOCOL_DDNET18_IPV4] = true;
 			}
 			else if(str_comp(aBuf, "tw0.6") == 0)
 			{

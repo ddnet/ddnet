@@ -14,6 +14,8 @@ use std::borrow::Cow;
 use std::collections::hash_map;
 use std::collections::BTreeMap;
 use std::collections::HashMap;
+use std::convert::TryFrom as _;
+use std::convert::TryInto as _;
 use std::ffi::OsStr;
 use std::fmt;
 use std::io;
@@ -21,11 +23,13 @@ use std::io::Write;
 use std::mem;
 use std::net::IpAddr;
 use std::net::SocketAddr;
+use std::net::UdpSocket;
 use std::panic;
 use std::panic::UnwindSafe;
 use std::path::Path;
 use std::process;
 use std::str;
+use std::str::FromStr as _;
 use std::sync;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -35,6 +39,8 @@ use std::time::SystemTime;
 use tokio::fs;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
+use tokio::sync::mpsc;
+use tokio::sync::mpsc::error::TrySendError;
 use tokio::time;
 use warp::Filter;
 
@@ -51,6 +57,7 @@ use crate::locations::Locations;
 // (e.g. serialized) identifiers.
 mod addr;
 mod locations;
+mod quic;
 
 const SERVER_TIMEOUT_SECONDS: u64 = 30;
 
@@ -60,6 +67,7 @@ type ShortString = ArrayString<[u8; 64]>;
 struct Register {
     address: RegisterAddr,
     secret: ShortString,
+    challenge_private_key: Option<ShortString>,
     connless_request_token: Option<ShortString>,
     challenge_secret: ShortString,
     challenge_token: Option<ShortString>,
@@ -256,12 +264,30 @@ struct AddrInfo {
     secret: ShortString,
 }
 
+enum ChallengeKind {
+    V56,
+    V7 {
+        connless_request_token: [u8; 4],
+    },
+    Ddnet18 {
+        private_key: [u8; 32],
+        server_public_key: [u8; 32],
+    },
+}
+
 struct Challenge {
+    kind: ChallengeKind,
+    target: SocketAddr,
+    challenge_secret: ShortString,
+    challenge: ShortString,
+}
+
+struct ChallengeTokens {
     current: ShortString,
     prev: ShortString,
 }
 
-impl Challenge {
+impl ChallengeTokens {
     fn is_valid(&self, challenge: &str) -> bool {
         challenge == &self.current || challenge == &self.prev
     }
@@ -285,7 +311,7 @@ impl Challenger {
     fn reseed(&mut self) {
         self.prev_seed = mem::replace(&mut self.seed, random());
     }
-    fn for_addr(&self, addr: &Addr) -> Challenge {
+    fn for_addr(&self, addr: &Addr) -> ChallengeTokens {
         fn hash(seed: &[u8], addr: &[u8]) -> ShortString {
             let mut hash = SecureHash::new();
             hash.update(addr);
@@ -297,7 +323,7 @@ impl Challenger {
         }
         let mut buf: ArrayVec<[u8; 128]> = ArrayVec::new();
         write!(&mut buf, "{}", addr).unwrap();
-        Challenge {
+        ChallengeTokens {
             current: hash(&self.seed, &buf),
             prev: hash(&self.prev_seed, &buf),
         }
@@ -308,12 +334,12 @@ struct Shared<'a> {
     challenger: &'a Mutex<Challenger>,
     locations: &'a Locations,
     servers: &'a Mutex<Servers>,
-    socket: &'a Arc<tokio::net::UdpSocket>,
+    challenges: &'a AssertUnwindSafe<mpsc::Sender<Challenge>>,
     timekeeper: Timekeeper,
 }
 
 impl<'a> Shared<'a> {
-    fn challenge_for_addr(&self, addr: &Addr) -> Challenge {
+    fn challenge_for_addr(&self, addr: &Addr) -> ChallengeTokens {
         self.challenger
             .lock()
             .unwrap_or_else(|poison| poison.into_inner())
@@ -408,7 +434,7 @@ impl Servers {
                 });
             }
             hash_map::Entry::Occupied(mut o) => {
-                let mut server = &mut o.get_mut();
+                let server = &mut o.get_mut();
                 if insert_addr {
                     server.addresses.push(addr);
                     server.addresses.sort_unstable();
@@ -654,26 +680,92 @@ async fn handle_periodic_writeout(
     }
 }
 
-async fn send_challenge(
-    connless_request_token_7: Option<[u8; 4]>,
-    socket: Arc<tokio::net::UdpSocket>,
-    target: SocketAddr,
-    challenge_secret: ShortString,
-    challenge: ShortString,
-) {
-    let mut packet = Vec::with_capacity(128);
-    if let Some(t) = connless_request_token_7 {
-        packet.extend_from_slice(b"\x21");
-        packet.extend_from_slice(&t);
-        packet.extend_from_slice(b"\xff\xff\xff\xff\xff\xff\xff\xffchal");
-    } else {
-        packet.extend_from_slice(b"\xff\xff\xff\xff\xff\xff\xff\xff\xff\xffchal");
+fn socket() -> UdpSocket {
+    let socket = socket2::Socket::new(socket2::Domain::IPV6, socket2::Type::DGRAM, Some(socket2::Protocol::UDP)).unwrap();
+    socket.set_only_v6(false).unwrap();
+    socket.bind(&SocketAddr::from_str("[::]:0").unwrap().into()).unwrap();
+    socket.into()
+}
+
+async fn handle_challenges(mut challenges: mpsc::Receiver<Challenge>) {
+    let udp = tokio::net::UdpSocket::from_std(socket()).unwrap();
+    let quic = {
+        let mut config = quinn::EndpointConfig::default();
+        config.grease_quic_bit(false);
+        let mut quic = quinn::Endpoint::new(
+            config,
+            None,
+            socket().into(),
+            Arc::new(quinn::TokioRuntime),
+        ).unwrap();
+        let mut client_crypto = quinn::rustls::ClientConfig::builder()
+            .dangerous()
+            .with_custom_certificate_verifier(Arc::new(quic::Verifier::default()))
+            .with_no_client_auth();
+        client_crypto.alpn_protocols = vec![b"ddnet-15".into()];
+        client_crypto.key_log = Arc::new(quinn::rustls::KeyLogFile::new());
+        quic.set_default_client_config(quinn::ClientConfig::new(Arc::new(quinn::crypto::rustls::QuicClientConfig::try_from(client_crypto).unwrap())));
+        quic
+    };
+
+    loop {
+        let Challenge {
+            kind,
+            target,
+            challenge_secret,
+            challenge,
+        } = challenges.recv().await.expect("challenge channel must never be closed");
+
+        match kind {
+            ChallengeKind::V56 => {
+                let mut packet = Vec::with_capacity(128);
+                packet.extend_from_slice(
+                    b"\xff\xff\xff\xff\xff\xff\xff\xff\xff\xffchal",
+                );
+                packet.extend_from_slice(challenge_secret.as_bytes());
+                packet.push(0);
+                packet.extend_from_slice(challenge.as_bytes());
+                packet.push(0);
+                udp.send_to(&packet, target).await.unwrap();
+            }
+            ChallengeKind::V7 { connless_request_token } => {
+                let mut packet = Vec::with_capacity(128);
+                packet.extend_from_slice(b"\x21");
+                packet.extend_from_slice(&connless_request_token);
+                packet.extend_from_slice(b"\xff\xff\xff\xff\xff\xff\xff\xffchal");
+                packet.extend_from_slice(challenge_secret.as_bytes());
+                packet.push(0);
+                packet.extend_from_slice(challenge.as_bytes());
+                packet.push(0);
+                udp.send_to(&packet, target).await.unwrap();
+            }
+            ChallengeKind::Ddnet18 { private_key, server_public_key } => {
+                let mut packet = Vec::with_capacity(128);
+                // leave space for packet size
+                packet.push(0x40);
+                packet.push(0);
+                // NETMSG_EX=0, system flag
+                packet.push(1);
+                packet.extend_from_slice(&0xe18fc8b8_9d02_3228_b468_c550fc24a906_u128.to_be_bytes()); // mastersrv-portforward-challenge@ddnet.org
+                packet.extend_from_slice(challenge_secret.as_bytes());
+                packet.push(0);
+                packet.extend_from_slice(challenge.as_bytes());
+                packet.push(0);
+                assert!(64 <= packet.len() && packet.len() < 256); // TODO: remove assert
+                packet[1] = packet.len().try_into().unwrap();
+
+                let connecting = quic.connect(target, "todo").unwrap();
+                tokio::spawn(async move {
+                    let connection = connecting.await.unwrap(); // TODO: remove unwrap
+                    let (mut send_stream, _) = connection.open_bi().await.unwrap();
+                    // mastersrv-portforward-challenge@ddnet.org
+                    send_stream.write_all(b"foobar").await.unwrap();
+                    send_stream.finish().unwrap();
+                    send_stream.stopped().await.unwrap();
+                });
+            }
+        }
     }
-    packet.extend_from_slice(challenge_secret.as_bytes());
-    packet.push(0);
-    packet.extend_from_slice(challenge.as_bytes());
-    packet.push(0);
-    socket.send_to(&packet, target).await.unwrap();
 }
 
 fn handle_register(
@@ -681,9 +773,9 @@ fn handle_register(
     remote_addr: IpAddr,
     register: Register,
 ) -> Result<RegisterResponse, RegisterError> {
-    let connless_request_token_7 = match register.address.protocol {
-        Protocol::V5 => None,
-        Protocol::V6 => None,
+    let challenge_kind = match register.address.protocol {
+        Protocol::V5 => ChallengeKind::V56,
+        Protocol::V6 => ChallengeKind::V56,
         Protocol::V7 => {
             let token_hex = register
                 .connless_request_token
@@ -691,9 +783,27 @@ fn handle_register(
                 .ok_or_else(|| "registering with tw-0.7+udp:// requires header Connless-Token")?;
             let mut token = [0; 4];
             hex::decode_to_slice(token_hex.as_bytes(), &mut token).map_err(|e| {
-                RegisterError::new(format!("invalid hex in Connless-Request-Token: {}", e))
+                RegisterError::new(format!("invalid hex in Connless-Token: {}", e))
             })?;
-            Some(token)
+            ChallengeKind::V7 {
+                connless_request_token: token,
+            }
+        }
+        Protocol::Ddnet18 => {
+            let private_key_hex = register
+                .challenge_private_key
+                .as_ref()
+                .ok_or_else(|| "registering with ddnet-18+quic:// requires header Challenge-Private-Key")?;
+            let mut private_key = [0; 32];
+            hex::decode_to_slice(private_key_hex.as_bytes(), &mut private_key).map_err(|e| {
+                RegisterError::new(format!("invalid hex in Challenge-Private-Key: {}", e))
+            })?;
+            let mut server_public_key = [0; 32];
+            hex::decode_to_slice(b"0026a0d653cd5f38d1002bf166167933f2f7910f26d6dd619b2b3fe769e057ee", &mut server_public_key).unwrap();
+            ChallengeKind::Ddnet18 {
+                private_key,
+                server_public_key,
+            }
         }
     };
 
@@ -755,18 +865,24 @@ fn handle_register(
     };
 
     if should_send_challenge {
-        if let RegisterResponse::Success = result {
-            trace!("re-sending challenge to {}", addr);
-        } else {
-            trace!("sending challenge to {}", addr);
+        match shared.challenges.0.try_send(Challenge {
+            kind: challenge_kind,
+            target: addr.to_socket_addr(),
+            challenge_secret: register.challenge_secret,
+            challenge: challenge.current,
+        }) {
+            Ok(()) => {
+                if let RegisterResponse::Success = result {
+                    trace!("re-sending challenge to {}", addr);
+                } else {
+                    trace!("sending challenge to {}", addr);
+                }
+            }
+            Err(TrySendError::Closed(_)) => panic!("challenge task dead"),
+            Err(TrySendError::Full(_)) => {
+                trace!("challenge task can't keep up for challenge to {}", addr);
+            }
         }
-        tokio::spawn(send_challenge(
-            connless_request_token_7,
-            shared.socket.clone(),
-            addr.to_socket_addr(),
-            register.challenge_secret,
-            challenge.current,
-        ));
     }
 
     Ok(result)
@@ -819,6 +935,7 @@ fn register_from_headers(
     Ok(Register {
         address: parse(headers, "Address")?,
         secret: parse(headers, "Secret")?,
+        challenge_private_key: parse_opt(headers, "Challenge-Private-Key")?,
         connless_request_token: parse_opt(headers, "Connless-Token")?,
         challenge_secret: parse(headers, "Challenge-Secret")?,
         challenge_token: parse_opt(headers, "Challenge-Token")?,
@@ -978,9 +1095,10 @@ async fn main() {
         None => {}
     }
     let servers = Arc::new(Mutex::new(servers));
-    let socket = Arc::new(tokio::net::UdpSocket::bind("[::]:0").await.unwrap());
-    let socket = AssertUnwindSafe(socket);
+    let (challenge_sender, challenge_receiver) = mpsc::channel(32);
+    let challenge_sender = AssertUnwindSafe(challenge_sender); // TODO: https://github.com/tokio-rs/tokio/issues/4657
 
+    let task_challenges = tokio::spawn(handle_challenges(challenge_receiver));
     let task_reseed = tokio::spawn(handle_periodic_reseed(challenger.clone()));
     let task_writeout = tokio::spawn(handle_periodic_writeout(
         servers.clone(),
@@ -1031,6 +1149,7 @@ async fn main() {
                 RegisterResponse::Error("unexpected panic".into()),
             ),
         };
+        println!("{}", json::to_string(&body).unwrap());
         warp::http::Response::builder()
             .status(http_status)
             .header(warp::http::header::CONTENT_TYPE, "application/json")
@@ -1050,7 +1169,7 @@ async fn main() {
                         challenger: &challenger,
                         locations: &locations,
                         servers: &servers,
-                        socket: &socket.0,
+                        challenges: &challenge_sender,
                         timekeeper,
                     };
                     let addr = connecting_addr(addr, &headers)?;
@@ -1091,8 +1210,8 @@ async fn main() {
         tokio::spawn(server.run(listen_address))
     };
 
-    match tokio::try_join!(task_reseed, task_writeout, task_server) {
-        Ok(((), (), ())) => unreachable!(),
+    match tokio::try_join!(task_challenges, task_reseed, task_writeout, task_server) {
+        Ok(((), (), (), ())) => unreachable!(),
         Err(e) => panic::resume_unwind(e.into_panic()),
     }
 }

@@ -22,7 +22,9 @@ headers = "0.3.7"
 hex = "0.4.3"
 ipnet = { version = "2.5.0", features = ["serde"] }
 log = "0.4.17"
+quinn = "0.11.3"
 rand = "0.8.4"
+rustls-webpki = "0.102.6" # TODO: remove me somehow?
 serde = { version = "1.0.126", features = ["derive"] }
 serde_json = { version = "1.0.64", features = [
   "float_roundtrip",
@@ -30,6 +32,7 @@ serde_json = { version = "1.0.64", features = [
   "raw_value",
 ] }
 sha2 = "0.10.0"
+socket2 = "0.5.7"
 tokio = { version = "1.6.0", features = ["macros", "rt", "rt-multi-thread"] }
 tokio-stream = { version = "0.1.8", features = ["net"] }
 url = { version = "2.2.2", features = ["serde"] }
