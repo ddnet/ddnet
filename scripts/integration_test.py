@@ -25,7 +25,10 @@ import traceback
 class Log(namedtuple("Log", "timestamp level line")):
 	@classmethod
 	def parse(cls, line):
-		if not line.startswith("["):
+		if line.startswith("=="):
+			pid, line = line[2:].split("== ", 1)
+			return cls(None, "valgrind", f"{pid}: {line}")
+		elif not line.startswith("["):
 			# DDNet log
 			date, time, level, line = line.split(" ", 3)
 			return cls(f"{date} {time}", level, line)
