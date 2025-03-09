@@ -26,6 +26,8 @@ class CSpectator : public CComponent
 
 	float m_MultiViewActivateDelay;
 
+	int m_LastAliveTick;
+
 	bool CanChangeSpectatorId();
 	void SpectateNext(bool Reverse);
 
