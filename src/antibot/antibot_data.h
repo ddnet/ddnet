@@ -5,7 +5,7 @@
 
 enum
 {
-	ANTIBOT_ABI_VERSION = 10,
+	ANTIBOT_ABI_VERSION = 11,
 
 	ANTIBOT_MSGFLAG_NONVITAL = 1,
 	ANTIBOT_MSGFLAG_FLUSH = 2,
@@ -29,6 +29,7 @@ struct CAntibotInputData
 {
 	int m_TargetX;
 	int m_TargetY;
+	bool m_Absolute;
 };
 
 // Defined by the network protocol, unlikely to change.

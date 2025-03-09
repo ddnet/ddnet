@@ -1346,10 +1346,13 @@ void CCharacter::FillAntibot(CAntibotCharacterData *pData)
 	pData->m_WeaponChangeTick = m_WeaponChangeTick;
 	pData->m_aLatestInputs[0].m_TargetX = m_LatestInput.m_TargetX;
 	pData->m_aLatestInputs[0].m_TargetY = m_LatestInput.m_TargetY;
+	pData->m_aLatestInputs[0].m_Absolute = m_LatestInput.m_PlayerFlags & PLAYERFLAG_INPUT_ABSOLUTE;
 	pData->m_aLatestInputs[1].m_TargetX = m_LatestPrevInput.m_TargetX;
 	pData->m_aLatestInputs[1].m_TargetY = m_LatestPrevInput.m_TargetY;
+	pData->m_aLatestInputs[1].m_Absolute = m_LatestInput.m_PlayerFlags & PLAYERFLAG_INPUT_ABSOLUTE;
 	pData->m_aLatestInputs[2].m_TargetX = m_LatestPrevPrevInput.m_TargetX;
 	pData->m_aLatestInputs[2].m_TargetY = m_LatestPrevPrevInput.m_TargetY;
+	pData->m_aLatestInputs[2].m_Absolute = m_LatestInput.m_PlayerFlags & PLAYERFLAG_INPUT_ABSOLUTE;
 }
 
 void CCharacter::HandleBroadcast()
