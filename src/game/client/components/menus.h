@@ -31,6 +31,8 @@
 
 #include <game/client/components/skins7.h>
 
+static constexpr const char *DEFAULT_SAVED_RCON_USER = "local-server";
+
 struct CServerProcess
 {
 #if !defined(CONF_PLATFORM_ANDROID)

@@ -585,8 +585,14 @@ void CGameClient::OnConnected()
 	ConfigManager()->ResetGameSettings();
 	LoadMapSettings();
 
-	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && g_Config.m_ClAutoDemoOnConnect)
-		Client()->DemoRecorder_HandleAutoStart();
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		if(g_Config.m_ClAutoDemoOnConnect)
+			Client()->DemoRecorder_HandleAutoStart();
+
+		if(m_Menus.IsServerRunning() && m_aSavedLocalRconPassword[0] != '\0' && net_addr_is_local(&Client()->ServerAddress()))
+			Client()->RconAuth(DEFAULT_SAVED_RCON_USER, m_aSavedLocalRconPassword, g_Config.m_ClDummy);
+	}
 }
 
 void CGameClient::OnReset()

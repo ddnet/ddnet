@@ -1371,6 +1371,20 @@ int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t 
 	return failure;
 }
 
+bool net_addr_is_local(const NETADDR *addr)
+{
+	char addr_str[NETADDR_MAXSTRSIZE];
+	net_addr_str(addr, addr_str, sizeof(addr_str), true);
+
+	if(addr->ip[0] == 127 || addr->ip[0] == 10 || (addr->ip[0] == 192 && addr->ip[1] == 168) || (addr->ip[0] == 172 && (addr->ip[1] >= 16 && addr->ip[1] <= 31)))
+		return true;
+
+	if(str_startswith(addr_str, "[fe80:") || str_startswith(addr_str, "[::1"))
+		return true;
+
+	return false;
+}
+
 int net_addr_from_str(NETADDR *addr, const char *string)
 {
 	const char *str = string;
