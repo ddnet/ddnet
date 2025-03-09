@@ -1412,6 +1412,7 @@ set(EXPECTED_DATA
   editor/checker.png
   editor/cursor.png
   editor/cursor_resize.png
+  editor/cursor_text.png
   editor/entities/DDNet.png
   editor/entities/F-DDrace.png
   editor/entities/FNG.png
@@ -2473,6 +2474,8 @@ if(CLIENT)
     editor_ui.h
     enums.h
     explanations.cpp
+    font_typer.cpp
+    font_typer.h
     layer_selector.cpp
     layer_selector.h
     map_grid.cpp
