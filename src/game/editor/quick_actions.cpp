@@ -254,7 +254,8 @@ void CEditor::TestMapLocally()
 		char aRandomPass[17];
 		secure_random_password(aRandomPass, sizeof(aRandomPass), 16);
 		char aPass[64];
-		str_format(aPass, sizeof(aPass), "sv_rcon_password %s", aRandomPass);
+		str_format(aPass, sizeof(aPass), "auth_add %s admin %s", DEFAULT_SAVED_RCON_USER, aRandomPass);
+		str_copy(pGameClient->m_aSavedLocalRconPassword, aRandomPass);
 
 		str_format(aBuf, sizeof(aBuf), "change_map %s", aFileNameNoExt);
 		const char *apArguments[] = {aRegister, aPass, aBuf};
@@ -262,6 +263,5 @@ void CEditor::TestMapLocally()
 		OnClose();
 		g_Config.m_ClEditor = 0;
 		Client()->Connect("localhost");
-		Client()->RconAuth("", aRandomPass, g_Config.m_ClDummy);
 	}
 }
