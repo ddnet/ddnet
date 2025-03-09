@@ -675,7 +675,8 @@ def server_can_register(test_env):
 	server.wait_for_log(lambda l: l.line.endswith("successfully registered"), timeout=5)
 	server.wait_for_log(lambda l: l.line.endswith("successfully registered"), timeout=5)
 	servers_json = mastersrv.servers_json()
-	if len(servers_json["servers"]) != 1 or servers_json["servers"][0]["info"]["map"]["name"] != "Tutorial":
+	if len(servers_json["servers"]) != 1 or servers_json["servers"][0]["info"]["map"]["name"] != "Tutorial" \
+			or len(servers_json["servers"][0]["addresses"]) != 2:
 		raise AssertionError(f"unexpected servers.json\n{servers_json}")
 	server.exit()
 	mastersrv.wait_for_log_prefix("mastersrv: successfully removed", timeout=5)
@@ -685,6 +686,37 @@ def server_can_register(test_env):
 		raise AssertionError(f"unexpected servers.json\n{servers_json}")
 	mastersrv.exit()
 	mastersrv.wait_for_exit()
+
+def server_can_register_protocol(test_env, protocol_config, protocol_log, protocol_scheme):
+	mastersrv = test_env.mastersrv()
+	wait_for_startup([mastersrv])
+	server = test_env.server([
+		"http_allow_insecure 1",
+		f"sv_register {protocol_config}",
+		f"sv_register_url http://[::1]:{mastersrv.port}/ddnet/15/register",
+	])
+	wait_for_startup([server])
+	server.wait_for_log_exact(f"register/{protocol_log}: successfully registered", timeout=5)
+	servers_json = mastersrv.servers_json()
+	if len(servers_json["servers"]) != 1 or servers_json["servers"][0]["info"]["map"]["name"] != "Tutorial" \
+			or len(servers_json["servers"][0]["addresses"]) != 1 \
+			or not servers_json["servers"][0]["addresses"][0].startswith(f"{protocol_scheme}://[::1]:"):
+		raise AssertionError(f"unexpected servers.json\n{servers_json}")
+	server.exit()
+	mastersrv.wait_for_log_prefix(f"mastersrv: successfully removed {protocol_scheme}://[::1]:", timeout=5)
+	servers_json = mastersrv.servers_json()
+	if len(servers_json["servers"]) != 0:
+		raise AssertionError(f"unexpected servers.json\n{servers_json}")
+	mastersrv.exit()
+	mastersrv.wait_for_exit()
+
+@test(requires_mastersrv=True)
+def server_can_register_tw_0_6(test_env):
+	server_can_register_protocol(test_env, "tw0.6/ipv6", "6/ipv6", "tw-0.6+udp")
+
+@test(requires_mastersrv=True)
+def server_can_register_tw_0_7(test_env):
+	server_can_register_protocol(test_env, "tw0.7/ipv6", "7/ipv6", "tw-0.7+udp")
 
 EXE_SUFFIX = ""
 if os.name == "nt":
