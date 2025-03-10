@@ -344,15 +344,15 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 
 		pBrush->AddLayer(pGrabbed);
 
-		// copy the tiles
 		for(int y = 0; y < r.h; y++)
+		{
 			for(int x = 0; x < r.w; x++)
+			{
+				// copy the tiles
 				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
 
-		// copy the speedup data
-		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
-			for(int y = 0; y < r.h; y++)
-				for(int x = 0; x < r.w; x++)
+				// copy the speedup data
+				if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
 				{
 					pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x] = static_cast<CLayerSpeedup *>(this)->m_pSpeedupTile[(r.y + y) * m_Width + (r.x + x)];
 					if(IsValidSpeedupTile(pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type))
@@ -362,6 +362,19 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 						m_pEditor->m_SpeedupMaxSpeed = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_MaxSpeed;
 					}
 				}
+				else
+				{
+					CTile Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
+					if(IsValidSpeedupTile(Tile.m_Index))
+					{
+						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Angle = m_pEditor->m_SpeedupAngle;
+						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Force = m_pEditor->m_SpeedupForce;
+						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
+					}
+				}
+			}
+		}
+
 		pGrabbed->m_SpeedupForce = m_pEditor->m_SpeedupForce;
 		pGrabbed->m_SpeedupMaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
 		pGrabbed->m_SpeedupAngle = m_pEditor->m_SpeedupAngle;
@@ -374,15 +387,15 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 
 		pBrush->AddLayer(pGrabbed);
 
-		// copy the tiles
 		for(int y = 0; y < r.h; y++)
+		{
 			for(int x = 0; x < r.w; x++)
+			{
+				// copy the tiles
 				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
 
-		// copy the switch data
-		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
-			for(int y = 0; y < r.h; y++)
-				for(int x = 0; x < r.w; x++)
+				// copy the switch data
+				if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
 				{
 					pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x] = static_cast<CLayerSwitch *>(this)->m_pSwitchTile[(r.y + y) * m_Width + (r.x + x)];
 					if(IsValidSwitchTile(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type))
@@ -391,6 +404,18 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 						m_pEditor->m_SwitchDelay = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Delay;
 					}
 				}
+				else
+				{
+					CTile Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
+					if(IsValidSwitchTile(Tile.m_Index))
+					{
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number = m_pEditor->m_SwitchNum;
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Delay = m_pEditor->m_SwitchDelay;
+					}
+				}
+			}
+		}
+
 		pGrabbed->m_SwitchNumber = m_pEditor->m_SwitchNum;
 		pGrabbed->m_SwitchDelay = m_pEditor->m_SwitchDelay;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
