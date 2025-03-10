@@ -1428,6 +1428,8 @@ set(EXPECTED_DATA
   editor/front.png
   editor/speed_arrow.png
   editor/speed_arrow_array.png
+  editor/speed_slide.png
+  editor/speed_slide_array.png
   editor/speedup.png
   editor/switch.png
   editor/tele.png

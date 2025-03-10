@@ -1496,6 +1496,20 @@ void CCharacter::HandleSkippableTiles(int Index)
 
 			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}
+		else if(Type == TILE_SPEED_SLIDE)
+		{
+			TempVel = ClampVel(m_MoveRestrictions, TempVel);
+			if(IsGrounded()) // prevent sliding on the ground
+			{
+				TempVel.y -= (float)GetTuning(m_TuneZone)->m_Gravity;
+			}
+			float CurrentDirectionalSpeed = dot(Direction, TempVel);
+			if(CurrentDirectionalSpeed > 0)
+			{
+				TempVel += Direction * -CurrentDirectionalSpeed;
+			}
+			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
+		}
 	}
 }
 
