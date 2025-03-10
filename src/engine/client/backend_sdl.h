@@ -215,6 +215,7 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 
 	TGLBackendReadPresentedImageData m_ReadPresentedImageDataFunc;
 
+	SDL_DisplayID *m_pDisplayIds;
 	int m_NumScreens;
 
 	SBackendCapabilites m_Capabilites;
@@ -251,8 +252,8 @@ public:
 	void Minimize() override;
 	void Maximize() override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
-	bool SetWindowScreen(int Index) override;
-	bool UpdateDisplayMode(int Index) override;
+	bool SetWindowScreen(int Index) override; // TODO: Use ScreenId instead
+	bool UpdateDisplayMode(int Index) override; // TODO: Use ScreenId instead
 	int GetWindowScreen() override;
 	int WindowActive() override;
 	int WindowOpen() override;

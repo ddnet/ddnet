@@ -1047,11 +1047,12 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		*pFsaaSamples = std::clamp(*pFsaaSamples, 0, 8);
 	}
 
-	// set screen
-	SDL_Rect ScreenPos;
-	SDL_DisplayID *pDisplayIDs = SDL_GetDisplays(&m_NumScreens);
+	// TODO: support hot plugging displays
 
-	if(!pDisplayIDs)
+	SDL_Rect ScreenPos;
+	m_pDisplayIds = SDL_GetDisplays(&m_NumScreens);
+
+	if(!m_pDisplayIds)
 	{
 		dbg_msg("gfx", "unable to retrieve displays: %s", SDL_GetError());
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_INFO_REQUEST_FAILED;
@@ -1063,7 +1064,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_REQUEST_FAILED;
 	}
 
-	int DisplayId = pDisplayIDs[clamp(*pScreen, 0, m_NumScreens - 1)];
+	int DisplayId = m_pDisplayIds[clamp(*pScreen, 0, m_NumScreens - 1)];
 
 	if(!SDL_GetDisplayBounds(DisplayId, &ScreenPos))
 	{
@@ -1475,8 +1476,10 @@ bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index)
 
 bool CGraphicsBackend_SDL_GL::UpdateDisplayMode(int Index)
 {
-	#warning TODO: replace with m_Screens[clamp(Index, 0, NumScreens() - 1)]
-	const SDL_DisplayMode *pDisplayMode = SDL_GetDesktopDisplayMode(Index);
+	if(Index < 0 || Index >= m_NumScreens)
+		return false;
+
+	const SDL_DisplayMode *pDisplayMode = SDL_GetDesktopDisplayMode(m_pScreenIds[Index]);
 	if(!pDisplayMode)
 	{
 		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
