@@ -513,6 +513,7 @@ public:
 		CSixup m_aSixup[NUM_DUMMIES];
 	};
 
+	int m_PlayerCount;
 	CClientData m_aClients[MAX_CLIENTS];
 
 	class CClientStats
