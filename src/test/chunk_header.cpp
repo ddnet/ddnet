@@ -4,6 +4,21 @@
 #include <base/system.h>
 #include <engine/shared/network.h>
 
+template<size_t PackedSize>
+static void AssertHeader(const CNetChunkHeader &Header, unsigned char aPacked[PackedSize])
+{
+	unsigned char aData[8];
+	unsigned char *pData = &aData[0];
+	const int BytesWritten = Header.Pack(pData) - pData;
+	EXPECT_EQ(BytesWritten, PackedSize);
+	EXPECT_EQ(pData[0], aPacked[0]);
+	EXPECT_EQ(pData[1], aPacked[1]);
+	if(PackedSize > 2)
+	{
+		EXPECT_EQ(pData[2], aPacked[2]);
+	}
+}
+
 TEST(ChunkHeader, Seq255)
 {
 	CNetChunkHeader Header;
@@ -11,13 +26,11 @@ TEST(ChunkHeader, Seq255)
 	Header.m_Size = 0;
 	Header.m_Sequence = 255;
 
-	unsigned char aData[8];
-	unsigned char *pData = &aData[0];
-	const int BytesWritten = Header.Pack(pData) - pData;
-	EXPECT_EQ(BytesWritten, 3);
-	EXPECT_EQ(pData[0], 0x40);
-	EXPECT_EQ(pData[1], 0x30); // this is weird
-	EXPECT_EQ(pData[2], 0xff);
+	unsigned char aExpected[3] = {
+		0x40,
+		0x30, // this is weird
+		0xff};
+	AssertHeader<3>(Header, aExpected);
 }
 
 TEST(ChunkHeader, Seq126)
@@ -27,13 +40,8 @@ TEST(ChunkHeader, Seq126)
 	Header.m_Size = 0;
 	Header.m_Sequence = 126;
 
-	unsigned char aData[8];
-	unsigned char *pData = &aData[0];
-	const int BytesWritten = Header.Pack(pData) - pData;
-	EXPECT_EQ(BytesWritten, 3);
-	EXPECT_EQ(pData[0], 0x40);
-	EXPECT_EQ(pData[1], 0x10);
-	EXPECT_EQ(pData[2], 0x7e);
+	unsigned char aExpected[3] = {0x40, 0x10, 0x7e};
+	AssertHeader<3>(Header, aExpected);
 }
 
 TEST(ChunkHeader, Seq63)
@@ -43,13 +51,8 @@ TEST(ChunkHeader, Seq63)
 	Header.m_Size = 0;
 	Header.m_Sequence = 63;
 
-	unsigned char aData[8];
-	unsigned char *pData = &aData[0];
-	const int BytesWritten = Header.Pack(pData) - pData;
-	EXPECT_EQ(BytesWritten, 3);
-	EXPECT_EQ(pData[0], 0x40);
-	EXPECT_EQ(pData[1], 0x00);
-	EXPECT_EQ(pData[2], 0x3f);
+	unsigned char aExpected[3] = {0x40, 0x00, 0x3f};
+	AssertHeader<3>(Header, aExpected);
 }
 
 TEST(ChunkHeader, Seq64)
@@ -59,13 +62,8 @@ TEST(ChunkHeader, Seq64)
 	Header.m_Size = 0;
 	Header.m_Sequence = 64;
 
-	unsigned char aData[8];
-	unsigned char *pData = &aData[0];
-	const int BytesWritten = Header.Pack(pData) - pData;
-	EXPECT_EQ(BytesWritten, 3);
-	EXPECT_EQ(pData[0], 0x40);
-	EXPECT_EQ(pData[1], 0x10);
-	EXPECT_EQ(pData[2], 0x40);
+	unsigned char aExpected[3] = {0x40, 0x10, 0x40};
+	AssertHeader<3>(Header, aExpected);
 }
 
 TEST(ChunkHeader, Seq5)
@@ -75,11 +73,6 @@ TEST(ChunkHeader, Seq5)
 	Header.m_Size = 0;
 	Header.m_Sequence = 5;
 
-	unsigned char aData[8];
-	unsigned char *pData = &aData[0];
-	const int BytesWritten = Header.Pack(pData) - pData;
-	EXPECT_EQ(BytesWritten, 3);
-	EXPECT_EQ(pData[0], 0x40);
-	EXPECT_EQ(pData[1], 0x00);
-	EXPECT_EQ(pData[2], 0x05);
+	unsigned char aExpected[3] = {0x40, 0x00, 0x05};
+	AssertHeader<3>(Header, aExpected);
 }
