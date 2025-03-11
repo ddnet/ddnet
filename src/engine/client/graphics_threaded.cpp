@@ -2596,7 +2596,17 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	g_Config.m_GfxScreenWidth = w;
 	g_Config.m_GfxScreenHeight = h;
 	g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
+
+	auto OldDpi = m_ScreenHiDPIScale;
 	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+
+	// A DPI change must notify the listeners, since e.g. video modes
+	// currently depend on it.
+	if(OldDpi != m_ScreenHiDPIScale)
+	{
+		for(auto &PropChangedListener : m_vPropChangeListeners)
+			PropChangedListener();
+	}
 
 	UpdateViewport(0, 0, m_ScreenWidth, m_ScreenHeight, true);
 
