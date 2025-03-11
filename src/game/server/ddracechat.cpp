@@ -774,8 +774,14 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 		if(Teams.m_Core.Team(i) == Team)
 		{
 			CPlayer *pPlayer2 = pSelf->m_apPlayers[i];
-			if(pPlayer2 && pPlayer2->m_VotedForPractice)
-				pPlayer2->m_VotedForPractice = false;
+			if(pPlayer2)
+			{
+				if(pPlayer2->m_VotedForPractice)
+					pPlayer2->m_VotedForPractice = false;
+
+				if(!g_Config.m_SvPauseable && pPlayer2->IsPaused() == -1 * CPlayer::PAUSE_SPEC)
+					pPlayer2->Pause(CPlayer::PAUSE_PAUSED, true);
+			}
 		}
 	}
 
