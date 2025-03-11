@@ -2959,6 +2959,9 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
 ########################################################################
 
 if(GTEST_FOUND OR DOWNLOAD_GTEST)
+  set_src(TESTS_SERVER GLOB src/test/server
+    gameworld.cpp
+  )
   set_src(TESTS GLOB src/test
     aio.cpp
     bezier.cpp
@@ -2971,7 +2974,6 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     datafile.cpp
     editor.cpp
     fs.cpp
-    gameworld.cpp
     git_revision.cpp
     hash.cpp
     huffman.cpp
@@ -3018,17 +3020,23 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     src/engine/client/sqlite.cpp
   )
 
-  set(TARGET_TESTRUNNER testrunner)
-  add_executable(${TARGET_TESTRUNNER} EXCLUDE_FROM_ALL
+  set(TEST_DEPS
     ${TESTS}
     ${TESTS_EXTRA}
-    $<TARGET_OBJECTS:server-without-main>
     $<TARGET_OBJECTS:engine-gfx>
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
     $<TARGET_OBJECTS:rust-bridge-shared>
     ${DEPS}
   )
+  if(SERVER)
+    list(APPEND TEST_DEPS ${TESTS_SERVER})
+    list(APPEND TEST_DEPS $<TARGET_OBJECTS:server-without-main>)
+  endif()
+
+
+  set(TARGET_TESTRUNNER testrunner)
+  add_executable(${TARGET_TESTRUNNER} EXCLUDE_FROM_ALL ${TEST_DEPS})
   target_link_libraries(${TARGET_TESTRUNNER} ${PNG_LIBRARIES} ${GTEST_LIBRARIES} ${LIBS_SERVER})
   target_include_directories(${TARGET_TESTRUNNER} SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
 
