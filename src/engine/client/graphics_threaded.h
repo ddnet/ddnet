@@ -890,19 +890,8 @@ class CGraphics_Threaded : public IEngineGraphics
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		if(!FailFunc())
-		{
-			char aError[256];
-			str_format(aError, sizeof(aError), "graphics: failed to run fail handler for command '%s'", typeid(TName).name());
-			dbg_assert(false, aError);
-		}
-
-		if(!m_pCommandBuffer->AddCommandUnsafe(Cmd))
-		{
-			char aError[256];
-			str_format(aError, sizeof(aError), "graphics: failed to add command '%s' to command buffer", typeid(TName).name());
-			dbg_assert(false, aError);
-		}
+		dbg_assert(FailFunc(), "graphics: failed to run fail handler for command '%s'", typeid(TName).name());
+		dbg_assert(m_pCommandBuffer->AddCommandUnsafe(Cmd), "graphics: failed to add command '%s' to command buffer", typeid(TName).name());
 	}
 
 	void KickCommandBuffer();

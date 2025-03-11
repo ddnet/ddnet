@@ -1893,12 +1893,7 @@ void *CGraphics_Threaded::AllocCommandBufferData(size_t AllocSize)
 		KickCommandBuffer();
 
 		pData = m_pCommandBuffer->AllocData(AllocSize);
-		if(pData == nullptr)
-		{
-			char aError[256];
-			str_format(aError, sizeof(aError), "graphics: failed to allocate data (size %" PRIzu ") for command buffer", AllocSize);
-			dbg_assert(false, aError);
-		}
+		dbg_assert(pData, "graphics: failed to allocate data (size %" PRIzu ") for command buffer", AllocSize);
 	}
 	return pData;
 }

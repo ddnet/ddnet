@@ -127,24 +127,26 @@ bool dbg_assert_has_failed()
 	return dbg_assert_failing.load(std::memory_order_acquire);
 }
 
-void dbg_assert_imp(const char *filename, int line, bool test, const char *msg)
+void dbg_assert_imp(const char *filename, int line, const char *fmt, ...)
 {
-	if(!test)
+	const bool already_failing = dbg_assert_has_failed();
+	dbg_assert_failing.store(true, std::memory_order_release);
+	char msg[512];
+	va_list args;
+	va_start(args, fmt);
+	str_format_v(msg, sizeof(msg), fmt, args);
+	char error[512];
+	str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
+	va_end(args);
+	log_error("assert", "%s", error);
+	if(!already_failing)
 	{
-		const bool already_failing = dbg_assert_has_failed();
-		dbg_assert_failing.store(true, std::memory_order_release);
-		char error[512];
-		str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
-		dbg_msg("assert", "%s", error);
-		if(!already_failing)
-		{
-			DBG_ASSERT_HANDLER handler = dbg_assert_handler;
-			if(handler)
-				handler(error);
-		}
-		log_global_logger_finish();
-		dbg_break();
+		DBG_ASSERT_HANDLER handler = dbg_assert_handler;
+		if(handler)
+			handler(error);
 	}
+	log_global_logger_finish();
+	dbg_break();
 }
 
 void dbg_break()
@@ -911,12 +913,7 @@ void sphore_init(SEMAPHORE *sem)
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "/%d.%p", pid(), (void *)sem);
 	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
-	if(*sem == SEM_FAILED)
-	{
-		char aError[128];
-		str_format(aError, sizeof(aError), "sem_open failure, errno=%d, name='%s'", errno, aBuf);
-		dbg_assert(false, aError);
-	}
+	dbg_assert(*sem != SEM_FAILED, "sem_open failure, errno=%d, name='%s'", errno, aBuf);
 }
 void sphore_wait(SEMAPHORE *sem)
 {
