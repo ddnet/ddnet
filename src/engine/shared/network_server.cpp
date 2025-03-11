@@ -732,8 +732,10 @@ int CNetServer::Send(CNetChunk *pChunk)
 	else
 	{
 		int Flags = 0;
-		dbg_assert(pChunk->m_ClientId >= 0, "erroneous client id");
-		dbg_assert(pChunk->m_ClientId < MaxClients(), "erroneous client id");
+		dbg_assert(
+			pChunk->m_ClientId >= 0 && pChunk->m_ClientId < MaxClients(),
+			"erroneous client id %d",
+			pChunk->m_ClientId);
 
 		if(pChunk->m_Flags & NETSENDFLAG_VITAL)
 			Flags = NET_CHUNKFLAG_VITAL;

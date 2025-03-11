@@ -781,12 +781,7 @@ void CDataFileWriter::Finish()
 		DataInfo.m_CompressedSize = CompressedSize;
 		free(DataInfo.m_pUncompressedData);
 		DataInfo.m_pUncompressedData = nullptr;
-		if(Result != Z_OK)
-		{
-			char aError[32];
-			str_format(aError, sizeof(aError), "zlib compression error %d", Result);
-			dbg_assert(false, aError);
-		}
+		dbg_assert(Result == Z_OK, "zlib compression error %d", Result);
 	}
 
 	// Calculate total size of items

@@ -32,19 +32,9 @@
 #undef KeyPress // Undo pollution from X11/Xlib.h included by SDL_syswm.h on Linux
 #endif
 
-static void AssertKeyValid(int Key)
-{
-	if(Key < KEY_FIRST || Key >= KEY_LAST)
-	{
-		char aError[32];
-		str_format(aError, sizeof(aError), "Key invalid: %d", Key);
-		dbg_assert(false, aError);
-	}
-}
-
 void CInput::AddKeyEvent(int Key, int Flags)
 {
-	AssertKeyValid(Key);
+	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
 	dbg_assert((Flags & (FLAG_PRESS | FLAG_RELEASE)) != 0 && (Flags & ~(FLAG_PRESS | FLAG_RELEASE)) == 0, "Flags invalid");
 
 	CEvent Event;
@@ -386,19 +376,19 @@ float CInput::GetUpdateTime() const
 
 bool CInput::KeyIsPressed(int Key) const
 {
-	AssertKeyValid(Key);
+	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
 	return m_aCurrentKeyStates[Key];
 }
 
 bool CInput::KeyPress(int Key) const
 {
-	AssertKeyValid(Key);
+	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
 	return m_aFrameKeyStates[Key];
 }
 
 const char *CInput::KeyName(int Key) const
 {
-	AssertKeyValid(Key);
+	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
 	return g_aaKeyStrings[Key];
 }
 
