@@ -235,6 +235,7 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 		{
 			LatestInput.m_TargetX = -1;
 			LatestInput.m_TargetY = -1;
+			LatestInput.m_Absolute = false;
 		}
 		pChar->m_Alive = false;
 		pChar->m_Pause = false;
