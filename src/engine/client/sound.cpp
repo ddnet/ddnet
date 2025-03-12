@@ -286,7 +286,7 @@ CSample *CSound::AllocSample()
 
 	CSample *pSample = &m_aSamples[m_FirstFreeSampleIndex];
 	dbg_assert(
-		pSample->m_pData && pSample->m_NextFreeSampleIndex != SAMPLE_INDEX_USED,
+		pSample->m_pData == nullptr && pSample->m_NextFreeSampleIndex != SAMPLE_INDEX_USED,
 		"Sample was not unloaded (index=%d, next=%d, duration=%f, data=%p)",
 		pSample->m_Index, pSample->m_NextFreeSampleIndex, pSample->TotalTime(), pSample->m_pData);
 	m_FirstFreeSampleIndex = pSample->m_NextFreeSampleIndex;
