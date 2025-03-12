@@ -42,3 +42,5 @@ tokio = { version = "1.43.0", features = [
 tokio-stream = { version = "0.1.8", features = ["net"] }
 url = { version = "2.2.2", features = ["serde"] }
 warp = { version = "0.3.1", default-features = false }
+quinn = "0.11.6"
+rustls = "0.23.23"

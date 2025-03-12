@@ -12,6 +12,7 @@ pub enum Protocol {
     V6,
     V7,
     Ddper6,
+    V6Quic,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -42,7 +43,8 @@ pub struct UnknownProtocol;
 
 impl fmt::Display for UnknownProtocol {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        "protocol must be one of tw-0.5+udp, tw-0.6+udp, tw-0.7+udp or ddper-0.6+udp".fmt(f)
+        "protocol must be one of tw-0.5+udp, tw-0.6+udp, tw-0.7+udp, tw-0.6+quic or ddper-0.6+udp"
+            .fmt(f)
     }
 }
 
@@ -55,6 +57,7 @@ impl FromStr for Protocol {
             "tw-0.6+udp" => V6,
             "tw-0.7+udp" => V7,
             "ddper-0.6+udp" => Ddper6,
+            "tw-0.6+quic" => V6Quic,
             _ => return Err(UnknownProtocol),
         })
     }
@@ -100,6 +103,7 @@ impl Protocol {
             V6 => "tw-0.6+udp",
             V7 => "tw-0.7+udp",
             Ddper6 => "ddper-0.6+udp",
+            V6Quic => "tw-0.6+quic",
         }
     }
 }
