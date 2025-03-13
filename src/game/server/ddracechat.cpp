@@ -728,66 +728,6 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!CheckClientId(pResult->m_ClientId))
-		return;
-
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
-	if(!pPlayer)
-		return;
-
-	if(pSelf->ProcessSpamProtection(pResult->m_ClientId, false))
-		return;
-
-	CGameTeams &Teams = pSelf->m_pController->Teams();
-
-	int Team = Teams.m_Core.Team(pResult->m_ClientId);
-
-	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
-	{
-		log_info("chatresp", "Practice mode can't be disabled for team 0");
-		return;
-	}
-
-	if(!Teams.IsPractice(Team))
-	{
-		log_info("chatresp", "Team isn't in practice mode");
-		return;
-	}
-
-	if(Teams.GetSaving(Team))
-	{
-		log_info("chatresp", "Practice mode can't be disabled while team save or load is in progress");
-		return;
-	}
-
-	if(Teams.Count(Team) > g_Config.m_SvMaxTeamSize && pSelf->m_pController->Teams().TeamLocked(Team))
-	{
-		log_info("chatresp", "Can't disable practice. This team exceeds the maximum allowed size of %d players for regular team", g_Config.m_SvMaxTeamSize);
-		return;
-	}
-
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(Teams.m_Core.Team(i) == Team)
-		{
-			CPlayer *pPlayer2 = pSelf->m_apPlayers[i];
-			if(pPlayer2 && pPlayer2->m_VotedForPractice)
-				pPlayer2->m_VotedForPractice = false;
-		}
-	}
-
-	// send before kill, in case team isn't locked
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "'%s' disabled practice mode for your team", pSelf->Server()->ClientName(pResult->m_ClientId));
-	pSelf->SendChatTeam(Team, aBuf);
-
-	Teams.KillCharacterOrTeam(pResult->m_ClientId, Team);
-	Teams.SetPractice(Team, false);
-}
-
 void CGameContext::ConPracticeCmdList(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
