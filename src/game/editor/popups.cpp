@@ -1223,7 +1223,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 			{nullptr},
 		};
 
-		static int s_aCircleIds[(int)ECircleShapeProp::NUM_CIRCLE_PROPS] = {0};
+		static int s_aCircleIds[(int)ECircleShapeProp::NUM_PROPS] = {0};
 		NewVal = 0;
 		auto [LocalState, LocalProp] = pEditor->DoPropertiesWithState<ECircleShapeProp>(&View, aCircleProps, s_aCircleIds, &NewVal);
 		if(LocalProp != ECircleShapeProp::PROP_NONE && (LocalState == EEditState::END || LocalState == EEditState::ONE_GO))
@@ -1251,7 +1251,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 			{nullptr},
 		};
 
-		static int s_aRectangleIds[(int)ERectangleShapeProp::NUM_RECTANGLE_PROPS] = {0};
+		static int s_aRectangleIds[(int)ERectangleShapeProp::NUM_PROPS] = {0};
 		NewVal = 0;
 		auto [LocalState, LocalProp] = pEditor->DoPropertiesWithState<ERectangleShapeProp>(&View, aRectangleProps, s_aRectangleIds, &NewVal);
 		if(LocalProp != ERectangleShapeProp::PROP_NONE && (LocalState == EEditState::END || LocalState == EEditState::ONE_GO))
