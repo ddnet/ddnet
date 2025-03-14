@@ -430,9 +430,12 @@ void CClient::SetState(EClientState State)
 
 	if(State == IClient::STATE_ONLINE)
 	{
-		const bool AnnounceAddr = m_ServerBrowser.IsRegistered(ServerAddress());
-		Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
-		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
+		const bool Registered = m_ServerBrowser.IsRegistered(ServerAddress());
+		CServerInfo CurrentServerInfo;
+		GetServerInfo(&CurrentServerInfo);
+
+		Discord()->SetGameInfo(CurrentServerInfo, m_aCurrentMap, Registered);
+		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, Registered);
 	}
 	else if(OldState == IClient::STATE_ONLINE)
 	{
@@ -1380,6 +1383,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			{
 				m_CurrentServerInfo = Info;
 				m_CurrentServerInfoRequestTime = -1;
+				Discord()->UpdateServerInfo(Info, m_aCurrentMap);
 			}
 
 			bool ValidPong = false;
