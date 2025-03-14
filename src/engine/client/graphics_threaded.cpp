@@ -2172,8 +2172,6 @@ int CGraphics_Threaded::IssueInit()
 		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 	if(g_Config.m_GfxVsync)
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
-	if(g_Config.m_GfxHighdpi)
-		Flags |= IGraphicsBackend::INITFLAG_HIGHDPI;
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, &g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	AddBackEndWarningIfExists();
@@ -2591,7 +2589,17 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	g_Config.m_GfxScreenWidth = w;
 	g_Config.m_GfxScreenHeight = h;
 	g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
+
+	auto OldDpi = m_ScreenHiDPIScale;
 	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+
+	// A DPI change must notify the listeners, since e.g. video modes
+	// currently depend on it.
+	if(OldDpi != m_ScreenHiDPIScale)
+	{
+		for(auto &PropChangedListener : m_vPropChangeListeners)
+			PropChangedListener();
+	}
 
 	UpdateViewport(0, 0, m_ScreenWidth, m_ScreenHeight, true);
 
