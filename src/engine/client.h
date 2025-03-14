@@ -18,6 +18,9 @@
 #include <functional>
 #include <optional>
 
+#define CONNECTLINK_DOUBLE_SLASH "ddnet://"
+#define CONNECTLINK_NO_SLASH "ddnet:"
+
 struct SWarning;
 
 enum
