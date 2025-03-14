@@ -174,7 +174,7 @@ void CGameContext::Clear()
 	CVoteOptionServer *pVoteOptionFirst = m_pVoteOptionFirst;
 	CVoteOptionServer *pVoteOptionLast = m_pVoteOptionLast;
 	int NumVoteOptions = m_NumVoteOptions;
-	CTuningParams Tuning = m_Tuning;
+	CTuningParams Tuning = m_aTuningList[0];
 
 	m_Resetting = true;
 	this->~CGameContext();
@@ -184,7 +184,7 @@ void CGameContext::Clear()
 	m_pVoteOptionFirst = pVoteOptionFirst;
 	m_pVoteOptionLast = pVoteOptionLast;
 	m_NumVoteOptions = NumVoteOptions;
-	m_Tuning = Tuning;
+	m_aTuningList[0] = Tuning;
 }
 
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
@@ -913,10 +913,10 @@ void CGameContext::CheckPureTuning()
 		str_comp(m_pController->m_pGameType, "CTF") == 0)
 	{
 		CTuningParams p;
-		if(mem_comp(&p, &m_Tuning, sizeof(p)) != 0)
+		if(mem_comp(&p, &m_aTuningList[0], sizeof(p)) != 0)
 		{
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "resetting tuning due to pure server");
-			m_Tuning = p;
+			m_aTuningList[0] = p;
 		}
 	}
 }
@@ -946,13 +946,9 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 	CheckPureTuning();
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
-	int *pParams = nullptr;
-	if(Zone == 0)
-		pParams = (int *)&m_Tuning;
-	else
-		pParams = (int *)&(m_aTuningList[Zone]);
+	int *pParams = (int *)&(m_aTuningList[Zone]);
 
-	for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
+	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
 		if(m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetCharacter())
 		{
@@ -1039,7 +1035,7 @@ void CGameContext::OnTick()
 	}
 
 	// copy tuning
-	m_World.m_Core.m_aTuning[0] = m_Tuning;
+	m_World.m_pTuningList[0] = m_aTuningList[0];
 	m_World.Tick();
 
 	UpdatePlayerMaps();
@@ -4095,7 +4091,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				}
 				else if(GameIndex == TILE_NPC)
 				{
-					m_Tuning.Set("player_collision", 0);
+					Tuning()->Set("player_collision", 0);
 					dbg_msg("game_layer", "found no collision tile");
 				}
 				else if(GameIndex == TILE_EHOOK)
@@ -4110,7 +4106,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				}
 				else if(GameIndex == TILE_NPH)
 				{
-					m_Tuning.Set("player_hooking", 0);
+					Tuning()->Set("player_hooking", 0);
 					dbg_msg("game_layer", "found no player hooking tile");
 				}
 				else if(GameIndex >= ENTITY_OFFSET)
@@ -4129,7 +4125,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				}
 				else if(FrontIndex == TILE_NPC)
 				{
-					m_Tuning.Set("player_collision", 0);
+					Tuning()->Set("player_collision", 0);
 					dbg_msg("front_layer", "found no collision tile");
 				}
 				else if(FrontIndex == TILE_EHOOK)
@@ -4144,7 +4140,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				}
 				else if(FrontIndex == TILE_NPH)
 				{
-					m_Tuning.Set("player_hooking", 0);
+					Tuning()->Set("player_hooking", 0);
 					dbg_msg("front_layer", "found no player hooking tile");
 				}
 				else if(FrontIndex >= ENTITY_OFFSET)
@@ -4370,11 +4366,11 @@ void CGameContext::OnSnap(int ClientId)
 {
 	// add tuning to demo
 	CTuningParams StandardTuning;
-	if(Server()->IsRecording(ClientId > -1 ? ClientId : MAX_CLIENTS) && mem_comp(&StandardTuning, &m_Tuning, sizeof(CTuningParams)) != 0)
+	if(Server()->IsRecording(ClientId > -1 ? ClientId : MAX_CLIENTS) && mem_comp(&StandardTuning, &m_aTuningList[0], sizeof(CTuningParams)) != 0)
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
-		int *pParams = (int *)&m_Tuning;
-		for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
+		int *pParams = (int *)&m_aTuningList[0];
+		for(int i = 0; i < CTuningParams::Num(); i++)
 			Msg.AddInt(pParams[i]);
 		Server()->SendMsg(&Msg, MSGFLAG_RECORD | MSGFLAG_NOSEND, ClientId);
 	}
@@ -4576,7 +4572,7 @@ int CGameContext::GetDDRaceTeam(int ClientId) const
 void CGameContext::ResetTuning()
 {
 	CTuningParams TuningParams;
-	m_Tuning = TuningParams;
+	m_aTuningList[0] = TuningParams;
 	Tuning()->Set("gun_speed", 1400);
 	Tuning()->Set("gun_curvature", 0);
 	Tuning()->Set("shotgun_speed", 500);
