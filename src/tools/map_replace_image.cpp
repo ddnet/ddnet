@@ -79,10 +79,10 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	IStorage *pStorage = CreateStorage(IStorage::EInitializationType::BASIC, argc, argv);
+	std::unique_ptr<IStorage> pStorage = std::unique_ptr<IStorage>(CreateStorage(IStorage::EInitializationType::BASIC, argc, argv));
 	if(!pStorage)
 	{
-		dbg_msg("map_replace_image", "error loading storage");
+		log_error("map_replace_image", "Error creating basic storage");
 		return -1;
 	}
 
@@ -91,14 +91,14 @@ int main(int argc, const char **argv)
 	const char *pImageName = argv[3];
 	const char *pImageFile = argv[4];
 
-	if(!g_DataReader.Open(pStorage, pSourceFileName, IStorage::TYPE_ALL))
+	if(!g_DataReader.Open(pStorage.get(), pSourceFileName, IStorage::TYPE_ALL))
 	{
 		dbg_msg("map_replace_image", "failed to open source map. filename='%s'", pSourceFileName);
 		return -1;
 	}
 
 	CDataFileWriter Writer;
-	if(!Writer.Open(pStorage, pDestFileName))
+	if(!Writer.Open(pStorage.get(), pDestFileName))
 	{
 		dbg_msg("map_replace_image", "failed to open destination map. filename='%s'", pDestFileName);
 		return -1;

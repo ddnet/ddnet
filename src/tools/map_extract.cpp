@@ -134,9 +134,12 @@ int main(int argc, const char *argv[])
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
-	IStorage *pStorage = CreateLocalStorage();
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
 	if(!pStorage)
+	{
+		log_error("map_extract", "Error creating local storage");
 		return -1;
+	}
 
 	const char *pDir;
 	if(argc == 2)
@@ -159,6 +162,5 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	int Result = ExtractMap(pStorage, argv[1], pDir) ? 0 : 1;
-	return Result;
+	return ExtractMap(pStorage.get(), argv[1], pDir) ? 0 : 1;
 }

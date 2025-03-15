@@ -92,14 +92,20 @@ int main(int argc, const char *argv[])
 		aaMapNames[0], aaMapNames[1], aaaGameAreas[0][0][0], aaaGameAreas[0][1][0], aaaGameAreas[1][0][0], aaaGameAreas[1][1][0],
 		aaaGameAreas[0][0][1] - aaaGameAreas[0][0][0], aaaGameAreas[0][1][1] - aaaGameAreas[0][1][0], aaMapNames[2]);
 
-	IStorage *pStorage = CreateLocalStorage();
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
+	if(!pStorage)
+	{
+		log_error("map_replace_area", "Error creating local storage");
+		return -1;
+	}
+
 	for(int i = 0; i < 1024; i++)
 	{
 		g_apNewData[i] = g_apNewItem[i] = nullptr;
 		g_aNewDataSize[i] = 0;
 	}
 
-	return ReplaceArea(pStorage, aaMapNames, aaaGameAreas) ? 0 : 1;
+	return ReplaceArea(pStorage.get(), aaMapNames, aaaGameAreas) ? 0 : 1;
 }
 
 bool ReplaceArea(IStorage *pStorage, const char aaMapNames[3][64], const float aaaGameAreas[][2][2])

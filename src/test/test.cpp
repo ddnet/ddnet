@@ -36,7 +36,7 @@ void CTestInfo::Filename(char *pBuffer, size_t BufferLength, const char *pSuffix
 	str_format(pBuffer, BufferLength, "%s%s", m_aFilenamePrefix, pSuffix);
 }
 
-IStorage *CTestInfo::CreateTestStorage()
+std::unique_ptr<IStorage> CTestInfo::CreateTestStorage()
 {
 	bool Error = fs_makedir(m_aFilename);
 	EXPECT_FALSE(Error);
@@ -47,7 +47,7 @@ IStorage *CTestInfo::CreateTestStorage()
 	char aTestPath[IO_MAX_PATH_LENGTH];
 	str_copy(aTestPath, ::testing::internal::GetArgvs().front().c_str());
 	const char *apArgs[] = {aTestPath};
-	return CreateTempStorage(m_aFilename, 1, apArgs);
+	return CreateTempStorage(m_aFilename, std::size(apArgs), apArgs);
 }
 
 class CTestInfoPath

@@ -318,15 +318,20 @@ CQuad CreateNewQuad(const float PosX, const float PosY, const int Width, const i
 
 bool OpenMaps(const char pMapNames[2][IO_MAX_PATH_LENGTH], CDataFileReader &InputMap, CDataFileWriter &OutputMap)
 {
-	IStorage *pStorage = CreateLocalStorage();
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
+	if(!pStorage)
+	{
+		log_error("map_create_pixelart", "Error creating local storage");
+		return false;
+	}
 
-	if(!InputMap.Open(pStorage, pMapNames[0], IStorage::TYPE_ABSOLUTE))
+	if(!InputMap.Open(pStorage.get(), pMapNames[0], IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("map_create_pixelart", "ERROR: unable to open map '%s'", pMapNames[0]);
 		return false;
 	}
 
-	if(!OutputMap.Open(pStorage, pMapNames[1], IStorage::TYPE_ABSOLUTE))
+	if(!OutputMap.Open(pStorage.get(), pMapNames[1], IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("map_create_pixelart", "ERROR: unable to open map '%s'", pMapNames[1]);
 		return false;
