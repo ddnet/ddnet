@@ -815,16 +815,29 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 
 			int c = mx + my * w;
 
+			int Index = (int)pSpeedup[c].m_Type;
 			int Force = (int)pSpeedup[c].m_Force;
 			int MaxSpeed = (int)pSpeedup[c].m_MaxSpeed;
-			if(Force)
+			short Angle = pSpeedup[c].m_Angle;
+			if(Index == TILE_SPEED_SLIDE)
+			{
+				// draw slide
+				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_SLIDE].m_Id);
+				Graphics()->QuadsBegin();
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+				SelectSprite(SPRITE_SPEEDUP_SLIDE);
+				Graphics()->QuadsSetRotation(Angle * (pi / 180.0f));
+				DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
+				Graphics()->QuadsEnd();
+			}
+			else if(Force)
 			{
 				// draw arrow
 				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
 				Graphics()->QuadsBegin();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 				SelectSprite(SPRITE_SPEEDUP_ARROW);
-				Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
+				Graphics()->QuadsSetRotation(Angle * (pi / 180.0f));
 				DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
 				Graphics()->QuadsEnd();
 

@@ -389,7 +389,7 @@ void CCharacter::FireWeapon()
 		if(GameWorld()->m_WorldConfig.m_IsVanilla)
 		{
 			int ShotSpread = 2;
-			for(int i = -ShotSpread; i <= ShotSpread; ++i)
+			for(int i = -ShotSpread; i <= ShotSpread; ++i) // NOLINT(clang-analyzer-unix.Malloc)
 			{
 				const float aSpreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
 				float a = angle(Direction);
@@ -714,6 +714,20 @@ void CCharacter::HandleSkippableTiles(int Index)
 				TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
 			else
 				TempVel += Direction * Force;
+			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
+		}
+		else if(Type == TILE_SPEED_SLIDE)
+		{
+			TempVel = ClampVel(m_MoveRestrictions, TempVel);
+			if(IsGrounded()) // prevent sliding on the ground
+			{
+				TempVel.y -= (float)GetTuning(GetOverriddenTuneZone())->m_Gravity;
+			}
+			float CurrentDirectionalSpeed = dot(Direction, TempVel);
+			if(CurrentDirectionalSpeed > 0)
+			{
+				TempVel += Direction * -CurrentDirectionalSpeed;
+			}
 			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}
 	}
