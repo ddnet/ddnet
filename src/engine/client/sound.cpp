@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_audio.h>
 
+#include <SDL3/SDL_audio.h>
 #include <base/math.h>
 #include <base/system.h>
 

@@ -977,7 +977,7 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 				Msg.AddInt(0);
 			}
 			else if((i == 33) // jetpack
-				&& !(m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK))
+				&& m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_JETPACK)
 			{
 				Msg.AddInt(0);
 			}

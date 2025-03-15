@@ -83,6 +83,8 @@ class CMenus : public CComponent
 	int DoButton_CheckBoxAutoVMarginAndSet(const void *pId, const char *pText, int *pValue, CUIRect *pRect, float VMargin);
 	int DoButton_CheckBox_Number(const void *pId, const char *pText, int Checked, const CUIRect *pRect);
 
+	bool DoLine_RadioMenu(CUIRect &View, const char *pLabel, std::vector<CButtonContainer> &vButtonContainers, const std::vector<const char *> &vLabels, const std::vector<int> &vValues, int &Value);
+
 	ColorHSLA DoLine_ColorPicker(CButtonContainer *pResetId, float LineSize, float LabelSize, float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, ColorRGBA DefaultColor, bool CheckBoxSpacing = true, int *pCheckBoxValue = nullptr, bool Alpha = false);
 	ColorHSLA DoButton_ColorPicker(const CUIRect *pRect, unsigned int *pHslaColor, bool Alpha);
 	void DoLaserPreview(const CUIRect *pRect, ColorHSLA OutlineColor, ColorHSLA InnerColor, const int LaserType);
@@ -177,6 +179,8 @@ protected:
 	int m_Popup;
 	bool m_ShowStart;
 	bool m_MenuActive;
+
+	bool m_DummyNamePlatePreview = false;
 
 	bool m_JoinTutorial = false;
 	bool m_CreateDefaultFavoriteCommunities = false;
@@ -293,6 +297,7 @@ protected:
 		bool m_IsLink;
 		int m_StorageType;
 		time_t m_Date;
+		int64_t m_Size;
 
 		bool m_InfosLoaded;
 		bool m_Valid;
@@ -310,7 +315,7 @@ protected:
 			return bytes_be_to_uint(m_Info.m_aLength);
 		}
 
-		unsigned Size() const
+		unsigned MapSize() const
 		{
 			return bytes_be_to_uint(m_Info.m_aMapSize);
 		}
@@ -618,6 +623,10 @@ protected:
 	void RenderSettingsSound(CUIRect MainView);
 	void RenderSettings(CUIRect MainView);
 	void RenderSettingsCustom(CUIRect MainView);
+
+	std::vector<CButtonContainer> vButtonsContainersJoystickAbsolute = {{}, {}};
+	std::vector<CButtonContainer> vButtonsContainersNamePlateShow = {{}, {}, {}, {}};
+	std::vector<CButtonContainer> vButtonsContainersNamePlateKeyPresses = {{}, {}, {}, {}};
 
 	class CMapListItem
 	{

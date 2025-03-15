@@ -2866,25 +2866,94 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTune(void *pContext, CUIRect View, b
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
+	if(!pEditor->m_Map.m_pTuneLayer)
+		return CUi::POPUP_CLOSE_CURRENT;
+
+	CUIRect NumberPicker, FindEmptySlot, ViewEmptySlot;
+
+	View.VSplitRight(15.0f, &NumberPicker, &FindEmptySlot);
+	NumberPicker.VSplitRight(2.0f, &NumberPicker, nullptr);
+
+	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, &ViewEmptySlot);
+	FindEmptySlot.HMargin(1.0f, &FindEmptySlot);
+	ViewEmptySlot.HMargin(1.0f, &ViewEmptySlot);
+
+	auto ViewTune = [pEditor]() -> bool {
+		if(!pEditor->m_ViewTuning)
+			return false;
+		ivec2 TunePos;
+		pEditor->m_Map.m_pTuneLayer->GetPos(pEditor->m_ViewTuning, -1, TunePos);
+
+		if(TunePos != ivec2(-1, -1))
+		{
+			pEditor->MapView()->SetWorldOffset({32.0f * TunePos.x + 0.5f, 32.0f * TunePos.y + 0.5f});
+			return true;
+		}
+		return false;
+	};
+
+	static std::vector<ColorRGBA> s_vColors = {
+		ColorRGBA(1, 1, 1, 0.5f),
+		ColorRGBA(1, 0.5f, 0.5f, 0.5f),
+	};
+
 	enum
 	{
-		PROP_TUNE = 0,
+		PROP_TUNE_NUMBER = 0,
+		PROP_TUNE_VIEW = 1,
 		NUM_PROPS,
 	};
 
-	CProperty aProps[] = {
-		{"Zone", pEditor->m_TuningNum, PROPTYPE_INT, 1, 255},
-		{nullptr},
-	};
-
-	static int s_aIds[NUM_PROPS] = {0};
-	int NewVal = 0;
-	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
-
-	if(Prop == PROP_TUNE)
+	// find empty number button
 	{
-		pEditor->m_TuningNum = (NewVal - 1 + 255) % 255 + 1;
+		static int s_EmptySlotPid = 0;
+		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, BUTTONFLAG_LEFT, "[Ctrl+F] Find unused zone.") ||
+			(Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
+		{
+			int Number = pEditor->FindNextFreeTuneNumber();
+			if(Number != -1)
+				pEditor->m_TuningNum = Number;
+		}
+
+		static int s_NextViewPid = 0;
+		if(pEditor->DoButton_Editor(&s_NextViewPid, "N", 0, &ViewEmptySlot, BUTTONFLAG_LEFT, "[N] Show next tune tile with this number.") ||
+			(Active && pEditor->Input()->KeyPress(KEY_N)))
+		{
+			s_vColors[PROP_TUNE_VIEW] = ViewTune() ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
+		}
 	}
+
+	// number picker
+	static int s_PreviousNumber = -1;
+	static int s_PreviousView = -1;
+	{
+		CProperty aProps[] = {
+			{"Zone", pEditor->m_TuningNum, PROPTYPE_INT, 1, 255},
+			{"View", pEditor->m_ViewTuning, PROPTYPE_INT, 1, 255},
+			{nullptr},
+		};
+
+		static int s_aIds[NUM_PROPS] = {0};
+		int NewVal = 0;
+		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_vColors);
+
+		if(Prop == PROP_TUNE_NUMBER)
+		{
+			pEditor->m_TuningNum = (NewVal - 1 + 255) % 255 + 1;
+		}
+		else if(Prop == PROP_TUNE_VIEW)
+		{
+			pEditor->m_ViewTuning = (NewVal - 1 + 255) % 255 + 1;
+		}
+
+		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_TuningNum)
+			s_vColors[PROP_TUNE_NUMBER] = pEditor->m_Map.m_pTuneLayer->ContainsElementWithId(pEditor->m_TuningNum) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+		if(s_PreviousView != pEditor->m_ViewTuning)
+			s_vColors[PROP_TUNE_VIEW] = ViewTune() ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
+	}
+
+	s_PreviousNumber = pEditor->m_TuningNum;
+	s_PreviousView = pEditor->m_ViewTuning;
 
 	return CUi::POPUP_KEEP_OPEN;
 }

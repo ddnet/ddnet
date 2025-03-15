@@ -622,7 +622,7 @@ void CCharacter::FireWeapon()
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
-		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+		GetTuning(m_TuneZone)->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
 }
@@ -1310,6 +1310,9 @@ void CCharacter::Snap(int SnappingClient)
 	}
 	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
 	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
+
+	// -1 is the default value, SnapNewItem zeroes the object, so it would incorrectly become 0
+	pDDNetCharacter->m_TuneZoneOverride = -1;
 }
 
 void CCharacter::PostSnap()
@@ -1476,20 +1479,21 @@ void CCharacter::HandleSkippableTiles(int Index)
 		}
 		else if(Type == TILE_SPEED_BOOST)
 		{
+			constexpr float MaxSpeedScale = 5.0f;
 			if(MaxSpeed == 0)
 			{
-				TempVel += Direction * Force;
+				float MaxRampSpeed = GetTuning(m_TuneZone)->m_VelrampRange / (50 * log(maximum((float)GetTuning(m_TuneZone)->m_VelrampCurvature, 1.01f)));
+				MaxSpeed = maximum(MaxRampSpeed, GetTuning(m_TuneZone)->m_VelrampStart / 50) * MaxSpeedScale;
 			}
+
+			// (signed) length of projection
+			float CurrentDirectionalSpeed = dot(Direction, m_Core.m_Vel);
+			float TempMaxSpeed = MaxSpeed / MaxSpeedScale;
+			if(CurrentDirectionalSpeed + Force > TempMaxSpeed)
+				TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
 			else
-			{
-				// hardest to understand
-				float CurrentDirectionalSpeed = dot(Direction, m_Core.m_Vel);
-				float TempMaxSpeed = MaxSpeed / 5.0f;
-				if(CurrentDirectionalSpeed + Force > TempMaxSpeed)
-					TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
-				else
-					TempVel += Direction * Force;
-			}
+				TempVel += Direction * Force;
+
 			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}
 	}

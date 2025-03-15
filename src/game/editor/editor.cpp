@@ -1351,7 +1351,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					{
 						pButtonName = "Tune";
 						pfnPopupFunc = PopupTune;
-						Rows = 1;
+						Rows = 2;
 					}
 					else if(pS == m_Map.m_pTeleLayer)
 					{
@@ -1998,7 +1998,7 @@ void CEditor::ApplyAlignments(const std::vector<SAlignmentInfo> &vAlignments, in
 	if(vAlignments.empty())
 		return;
 
-	// Find X and Y aligment
+	// Find X and Y alignment
 	const int *pAlignedX = nullptr;
 	const int *pAlignedY = nullptr;
 
@@ -2186,7 +2186,7 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 			}
 		}
 
-		// Draw axis and aligments when moving
+		// Draw axis and alignments when moving
 		if(s_Operation == OP_MOVE_PIVOT || s_Operation == OP_MOVE_ALL)
 		{
 			EAxis Axis = GetDragAxis(s_LastOffset.x, s_LastOffset.y);
@@ -7927,7 +7927,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(m_Map.m_Modified)
 	{
 		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 		Ui()->DoLabel(&ChangedIndicator, FONT_ICON_CIRCLE, 8.0f, TEXTALIGN_MC);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
@@ -9423,6 +9423,20 @@ int CEditor::FindNextFreeTeleNumber(bool Checkpoint)
 	for(int i = 1; i <= 255; i++)
 	{
 		if(!m_Map.m_pTeleLayer->ContainsElementWithId(i, Checkpoint))
+		{
+			Number = i;
+			break;
+		}
+	}
+	return Number;
+}
+
+int CEditor::FindNextFreeTuneNumber()
+{
+	int Number = -1;
+	for(int i = 1; i <= 255; i++)
+	{
+		if(!m_Map.m_pTuneLayer->ContainsElementWithId(i))
 		{
 			Number = i;
 			break;

@@ -1054,8 +1054,15 @@ bool CMenus::FetchHeader(CDemoItem &Item)
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_aCurrentDemoFolder, Item.m_aFilename);
-		Item.m_Valid = DemoPlayer()->GetDemoInfo(Storage(), nullptr, aBuffer, Item.m_StorageType, &Item.m_Info, &Item.m_TimelineMarkers, &Item.m_MapInfo);
+		IOHANDLE File;
+		Item.m_Valid = DemoPlayer()->GetDemoInfo(Storage(), nullptr, aBuffer, Item.m_StorageType, &Item.m_Info, &Item.m_TimelineMarkers, &Item.m_MapInfo, &File);
 		Item.m_InfosLoaded = true;
+
+		if(Item.m_Valid && File)
+		{
+			Item.m_Size = io_length(File);
+			io_close(File);
+		}
 	}
 	return Item.m_Valid;
 }
@@ -1305,32 +1312,43 @@ void CMenus::RenderDemoBrowserDetails(CUIRect DetailsView)
 	CUIRect Left, Right;
 
 	Contents.HSplitTop(18.0f, &Left, &Contents);
+	Left.VSplitLeft(Contents.w / 2.f + 30.f, &Left, &Right);
 	Ui()->DoLabel(&Left, Localize("Created"), FontSize, TEXTALIGN_ML);
+	if(pItem->m_Valid)
+		Ui()->DoLabel(&Right, Localize("Size"), FontSize, TEXTALIGN_ML);
 	str_timestamp_ex(pItem->m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
 	Contents.HSplitTop(18.0f, &Left, &Contents);
+	Left.VSplitLeft(Contents.w / 2.f + 30.f, &Left, &Right);
 	Ui()->DoLabel(&Left, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
-	Contents.HSplitTop(4.0f, nullptr, &Contents);
 
 	if(!pItem->m_Valid)
 		return;
 
+	const float DemoSize = pItem->m_Size / 1024.0f;
+	if(DemoSize > 1024)
+		str_format(aBuf, sizeof(aBuf), Localize("%.2f MiB"), DemoSize / 1024.0f);
+	else
+		str_format(aBuf, sizeof(aBuf), Localize("%.2f KiB"), DemoSize);
+	Ui()->DoLabel(&Right, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
+	Contents.HSplitTop(4.0f, nullptr, &Contents);
+
 	Contents.HSplitTop(18.0f, &Left, &Contents);
-	Left.VSplitMid(&Left, &Right, 4.0f);
+	Left.VSplitLeft(Contents.w / 2.f + 30.f, &Left, &Right);
 	Ui()->DoLabel(&Left, Localize("Type"), FontSize, TEXTALIGN_ML);
 	Ui()->DoLabel(&Right, Localize("Version"), FontSize, TEXTALIGN_ML);
 	Contents.HSplitTop(18.0f, &Left, &Contents);
-	Left.VSplitMid(&Left, &Right, 4.0f);
+	Left.VSplitLeft(Contents.w / 2.f + 30.f, &Left, &Right);
 	Ui()->DoLabel(&Left, pItem->m_Info.m_aType, FontSize - 1.0f, TEXTALIGN_ML);
 	str_format(aBuf, sizeof(aBuf), "%d", pItem->m_Info.m_Version);
 	Ui()->DoLabel(&Right, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
 	Contents.HSplitTop(4.0f, nullptr, &Contents);
 
 	Contents.HSplitTop(18.0f, &Left, &Contents);
-	Left.VSplitMid(&Left, &Right, 4.0f);
+	Left.VSplitLeft(Contents.w / 2.f + 30.f, &Left, &Right);
 	Ui()->DoLabel(&Left, Localize("Length"), FontSize, TEXTALIGN_ML);
 	Ui()->DoLabel(&Right, Localize("Markers"), FontSize, TEXTALIGN_ML);
 	Contents.HSplitTop(18.0f, &Left, &Contents);
-	Left.VSplitMid(&Left, &Right, 4.0f);
+	Left.VSplitLeft(Contents.w / 2.f + 30.f, &Left, &Right);
 	str_time((int64_t)pItem->Length() * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 	Ui()->DoLabel(&Left, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
 	str_format(aBuf, sizeof(aBuf), "%d", pItem->NumMarkers());
@@ -1350,15 +1368,15 @@ void CMenus::RenderDemoBrowserDetails(CUIRect DetailsView)
 	Contents.HSplitTop(4.0f, nullptr, &Contents);
 
 	Contents.HSplitTop(18.0f, &Left, &Contents);
-	Ui()->DoLabel(&Left, Localize("Size"), FontSize, TEXTALIGN_ML);
+	Ui()->DoLabel(&Left, Localize("Map size"), FontSize, TEXTALIGN_ML);
 	Contents.HSplitTop(18.0f, &Left, &Contents);
-	const float Size = pItem->Size() / 1024.0f;
-	if(Size == 0.0f)
+	const float MapSize = pItem->MapSize() / 1024.0f;
+	if(MapSize == 0.0f)
 		str_copy(aBuf, Localize("map not included", "Demo details"));
-	else if(Size > 1024)
-		str_format(aBuf, sizeof(aBuf), Localize("%.2f MiB"), Size / 1024.0f);
+	else if(MapSize > 1024)
+		str_format(aBuf, sizeof(aBuf), Localize("%.2f MiB"), MapSize / 1024.0f);
 	else
-		str_format(aBuf, sizeof(aBuf), Localize("%.2f KiB"), Size);
+		str_format(aBuf, sizeof(aBuf), Localize("%.2f KiB"), MapSize);
 	Ui()->DoLabel(&Left, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
 	Contents.HSplitTop(4.0f, nullptr, &Contents);
 
@@ -1391,7 +1409,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 		if(Enable)
 		{
 			TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 		}
 		else
 		{

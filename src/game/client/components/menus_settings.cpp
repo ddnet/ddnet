@@ -4,6 +4,7 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <cstring>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
@@ -627,7 +628,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static const char *s_apDice[] = {FONT_ICON_DICE_ONE, FONT_ICON_DICE_TWO, FONT_ICON_DICE_THREE, FONT_ICON_DICE_FOUR, FONT_ICON_DICE_FIVE, FONT_ICON_DICE_SIX};
 	static int s_CurrentDie = rand() % std::size(s_apDice);
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	if(DoButton_Menu(&s_RandomSkinButton, s_apDice[s_CurrentDie], 0, &RandomSkinButton, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_ALL, 5.0f, -0.2f))
 	{
 		GameClient()->m_Skins.RandomizeSkin(m_Dummy);
@@ -858,7 +859,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButton, &DirectoryButton, Localize("Open the directory to add custom skins"));
 
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static CButtonContainer s_SkinRefreshButton;
 	if(DoButton_Menu(&s_SkinRefreshButton, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &RefreshButton) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 	{
@@ -1033,25 +1034,11 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 				}
 			}
 
-			{
-				View.HSplitTop(Spacing, nullptr, &View);
-				View.HSplitTop(ButtonHeight, &Button, &View);
-				CUIRect Label, ButtonRelative, ButtonAbsolute;
-				Button.VSplitMid(&Label, &Button, 10.0f);
-				Button.HMargin(2.0f, &Button);
-				Button.VSplitMid(&ButtonRelative, &ButtonAbsolute);
-				Ui()->DoLabel(&Label, Localize("Ingame controller mode"), 13.0f, TEXTALIGN_ML);
-				CButtonContainer s_RelativeButton;
-				if(DoButton_Menu(&s_RelativeButton, Localize("Relative", "Ingame controller mode"), g_Config.m_InpControllerAbsolute == 0, &ButtonRelative, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_L))
-				{
-					g_Config.m_InpControllerAbsolute = 0;
-				}
-				CButtonContainer s_AbsoluteButton;
-				if(DoButton_Menu(&s_AbsoluteButton, Localize("Absolute", "Ingame controller mode"), g_Config.m_InpControllerAbsolute == 1, &ButtonAbsolute, BUTTONFLAG_LEFT, nullptr, IGraphics::CORNER_R))
-				{
-					g_Config.m_InpControllerAbsolute = 1;
-				}
-			}
+			DoLine_RadioMenu(View, Localize("Ingame controller mode"),
+				vButtonsContainersJoystickAbsolute,
+				{Localize("Relative", "Ingame controller mode"), Localize("Absolute", "Ingame controller mode")},
+				{0, 1},
+				g_Config.m_InpControllerAbsolute);
 
 			if(!g_Config.m_InpControllerAbsolute)
 			{
@@ -1429,7 +1416,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	{
 		int G = std::gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
-		str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), (int)(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), (int)(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
+		str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), (int)(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), (int)(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()),
+			g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth,
+			g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
 		Ui()->DoLabel(&ModeLabel, aBuf, sc_FontSizeResListHeader, TEXTALIGN_MC);
 	}
 
@@ -1475,10 +1464,10 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	CUIRect WindowModeDropDown;
 	MainView.HSplitTop(20.0f, &WindowModeDropDown, &MainView);
 
-	const char *apWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
+	const char *apWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Fullscreen")};
 	static const int s_NumWindowMode = std::size(apWindowModes);
 
-	const int OldWindowMode = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 4 : (g_Config.m_GfxFullscreen == 2 ? 3 : 2)) : (g_Config.m_GfxBorderless ? 1 : 0));
+	const int OldWindowMode = g_Config.m_GfxFullscreen == 0 ? g_Config.m_GfxBorderless : (g_Config.m_GfxFullscreen == 3 ? 2 : 3);
 
 	static CUi::SDropDownState s_WindowModeDropDownState;
 	static CScrollRegion s_WindowModeDropDownScrollRegion;
@@ -1493,8 +1482,6 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		else if(NewWindowMode == 2)
 			Client()->SetWindowParams(3, false);
 		else if(NewWindowMode == 3)
-			Client()->SetWindowParams(2, false);
-		else if(NewWindowMode == 4)
 			Client()->SetWindowParams(1, false);
 	}
 
@@ -2351,7 +2338,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	char aBuf[128];
 	static int s_CurTab = 0;
 
-	CUIRect TabBar, LeftView, RightView, Button, Label;
+	CUIRect TabBar, LeftView, RightView, Button;
 
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
 	const float TabWidth = TabBar.w / NUMBER_OF_APPEARANCE_TABS;
@@ -2391,8 +2378,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
 
 		// ***** HUD ***** //
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("HUD"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("HUD"), HeadlineFontSize,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// Switch of the entire HUD
@@ -2409,8 +2396,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Scoreboard ***** //
 		LeftView.HSplitTop(MarginBetweenViews, nullptr, &LeftView);
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Scoreboard"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Scoreboard"), HeadlineFontSize,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		ColorRGBA GreenDefault(0.78f, 1.0f, 0.8f, 1.0f);
@@ -2419,8 +2406,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoLine_ColorPicker(&s_SameClanColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Same clan color in scoreboard"), &g_Config.m_ClSameClanColor, GreenDefault, false);
 
 		// ***** DDRace HUD ***** //
-		RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
-		Ui()->DoLabel(&Label, Localize("DDRace HUD"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("DDRace HUD"), HeadlineFontSize,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		RightView.HSplitTop(MarginSmall, nullptr, &RightView);
 
 		// Switches of various DDRace HUD elements
@@ -2448,7 +2435,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// Freeze bar settings
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &RightView, LineSize);
-		RightView.HSplitTop(2 * LineSize, &Button, &RightView);
+		RightView.HSplitTop(LineSize * 2.0f, &Button, &RightView);
 		if(g_Config.m_ClShowFreezeBars)
 		{
 			Ui()->DoScrollbarOption(&g_Config.m_ClFreezeBarsAlphaInsideFreeze, &g_Config.m_ClFreezeBarsAlphaInsideFreeze, &Button, Localize("Opacity of freeze bars inside freeze"), 0, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
@@ -2463,8 +2450,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		TopView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
 
 		// ***** Chat ***** //
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Chat"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Chat"), HeadlineFontSize,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// General chat settings
@@ -2488,14 +2475,14 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &LeftView, LineSize))
 			GameClient()->m_Chat.RebuildChat();
 
-		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
+		LeftView.HSplitTop(LineSize * 2.0f, &Button, &LeftView);
 		if(Ui()->DoScrollbarOption(&g_Config.m_ClChatFontSize, &g_Config.m_ClChatFontSize, &Button, Localize("Chat font size"), 10, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE))
 		{
 			Chat.EnsureCoherentWidth();
 			Chat.RebuildChat();
 		}
 
-		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
+		LeftView.HSplitTop(LineSize * 2.0f, &Button, &LeftView);
 		if(Ui()->DoScrollbarOption(&g_Config.m_ClChatWidth, &g_Config.m_ClChatWidth, &Button, Localize("Chat width"), 120, 400, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE))
 		{
 			Chat.EnsureCoherentFontSize();
@@ -2503,8 +2490,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		}
 
 		// ***** Messages ***** //
-		RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
-		Ui()->DoLabel(&Label, Localize("Messages"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Messages"), HeadlineFontSize,
+			TEXTALIGN_ML, &RightView, HeadlineHeight);
 		RightView.HSplitTop(MarginSmall, nullptr, &RightView);
 
 		// Message Colors and extra settings
@@ -2524,8 +2511,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoLine_ColorPicker(&s_ClientMessageColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &RightView, aBuf, &g_Config.m_ClMessageClientColor, ColorRGBA(0.5f, 0.78f, 1.0f));
 
 		// ***** Chat Preview ***** //
-		PreviewView.HSplitTop(HeadlineHeight, &Label, &PreviewView);
-		Ui()->DoLabel(&Label, Localize("Preview"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Preview"), HeadlineFontSize,
+			TEXTALIGN_ML, &PreviewView, HeadlineHeight);
 		PreviewView.HSplitTop(MarginSmall, nullptr, &PreviewView);
 
 		// Use the rest of the view for preview
@@ -2812,30 +2799,49 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
 
 		// ***** Name Plate ***** //
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Name Plate"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Name Plate"), HeadlineFontSize,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// General name plate settings
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlates, Localize("Show name plates"), &g_Config.m_ClNamePlates, &LeftView, LineSize);
-		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
-		Ui()->DoScrollbarOption(&g_Config.m_ClNamePlatesSize, &g_Config.m_ClNamePlatesSize, &Button, Localize("Name plates size"), -50, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
+		{
+			int Pressed = (g_Config.m_ClNamePlates ? 2 : 0) + (g_Config.m_ClNamePlatesOwn ? 1 : 0);
+			if(DoLine_RadioMenu(LeftView, Localize("Show name plates"),
+				   vButtonsContainersNamePlateShow,
+				   {Localize("None", "Show name plates"), Localize("Own", "Show name plates"), Localize("Others", "Show name plates"), Localize("All", "Show name plates")},
+				   {0, 1, 2, 3},
+				   Pressed))
+			{
+				g_Config.m_ClNamePlates = Pressed & 2 ? 1 : 0;
+				g_Config.m_ClNamePlatesOwn = Pressed & 1 ? 1 : 0;
+			}
+		}
+		LeftView.HSplitTop(LineSize, &Button, &LeftView);
+		Ui()->DoScrollbarOption(&g_Config.m_ClNamePlatesSize, &g_Config.m_ClNamePlatesSize, &Button, Localize("Name plates size"), -50, 100);
+		LeftView.HSplitTop(LineSize, &Button, &LeftView);
+		Ui()->DoScrollbarOption(&g_Config.m_ClNamePlatesOffset, &g_Config.m_ClNamePlatesOffset, &Button, Localize("Name plates offset"), 10, 100);
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesClan, Localize("Show clan above name plates"), &g_Config.m_ClNamePlatesClan, &LeftView, LineSize);
-		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
+		LeftView.HSplitTop(LineSize, &Button, &LeftView);
 		if(g_Config.m_ClNamePlatesClan)
-		{
-			Ui()->DoScrollbarOption(&g_Config.m_ClNamePlatesClanSize, &g_Config.m_ClNamePlatesClanSize, &Button, Localize("Clan plates size"), -50, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
-		}
+			Ui()->DoScrollbarOption(&g_Config.m_ClNamePlatesClanSize, &g_Config.m_ClNamePlatesClanSize, &Button, Localize("Clan plates size"), -50, 100);
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesTeamcolors, Localize("Use team colors for name plates"), &g_Config.m_ClNamePlatesTeamcolors, &LeftView, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesFriendMark, Localize("Show friend mark (♥) in name plates"), &g_Config.m_ClNamePlatesFriendMark, &LeftView, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesFriendMark, Localize("Show friend icon in name plates"), &g_Config.m_ClNamePlatesFriendMark, &LeftView, LineSize);
+
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesIds, Localize("Show client IDs in name plates"), &g_Config.m_ClNamePlatesIds, &LeftView, LineSize);
+		if(g_Config.m_ClNamePlatesIds > 0)
+			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNamePlatesIdsSeperateLine, Localize("Show client IDs on a seperate line"), &g_Config.m_ClNamePlatesIdsSeperateLine, &LeftView, LineSize);
+		else
+			LeftView.HSplitTop(LineSize, nullptr, &LeftView);
+		LeftView.HSplitTop(LineSize, &Button, &LeftView);
+		if(g_Config.m_ClNamePlatesIds > 0 && g_Config.m_ClNamePlatesIdsSeperateLine > 0)
+			Ui()->DoScrollbarOption(&g_Config.m_ClNamePlatesIdsSize, &g_Config.m_ClNamePlatesIdsSize, &Button, Localize("Client IDs size"), -50, 100);
 
 		// ***** Hook Strength ***** //
 		LeftView.HSplitTop(MarginBetweenViews, nullptr, &LeftView);
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Hook Strength"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Hook Strength"), HeadlineFontSize,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
@@ -2851,7 +2857,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 				g_Config.m_ClNamePlatesStrong = g_Config.m_ClNamePlatesStrong != 2 ? 2 : 1;
 		}
 
-		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
+		LeftView.HSplitTop(LineSize * 2.0f, &Button, &LeftView);
 		if(g_Config.m_ClNamePlatesStrong)
 		{
 			Ui()->DoScrollbarOption(&g_Config.m_ClNamePlatesStrongSize, &g_Config.m_ClNamePlatesStrongSize, &Button, Localize("Size of hook strength icon and number indicator"), -50, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
@@ -2859,51 +2865,43 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Key Presses ***** //
 		LeftView.HSplitTop(MarginBetweenViews, nullptr, &LeftView);
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Key Presses"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Key Presses"), HeadlineFontSize,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
-		LeftView.HSplitTop(LineSize, &Button, &LeftView);
-		if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection >= 1 && g_Config.m_ClShowDirection != 3, &Button))
-		{
-			g_Config.m_ClShowDirection = g_Config.m_ClShowDirection ^ 1;
-		}
+		DoLine_RadioMenu(LeftView, Localize("Show players' key presses"),
+			vButtonsContainersNamePlateKeyPresses,
+			{Localize("None", "Show players' key presses"), Localize("Own", "Show players' key presses"), Localize("Others", "Show players' key presses"), Localize("All", "Show players' key presses")},
+			{0, 3, 1, 2},
+			g_Config.m_ClShowDirection);
 
 		LeftView.HSplitTop(LineSize, &Button, &LeftView);
-		static int s_ShowLocalPlayer = 0;
-		if(DoButton_CheckBox(&s_ShowLocalPlayer, Localize("Show local player's key presses"), g_Config.m_ClShowDirection >= 2, &Button))
-		{
-			g_Config.m_ClShowDirection = g_Config.m_ClShowDirection ^ 3;
-		}
-
-		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
 		if(g_Config.m_ClShowDirection > 0)
-		{
-			Ui()->DoScrollbarOption(&g_Config.m_ClDirectionSize, &g_Config.m_ClDirectionSize, &Button, Localize("Size of key press icons"), -50, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
-		}
+			Ui()->DoScrollbarOption(&g_Config.m_ClDirectionSize, &g_Config.m_ClDirectionSize, &Button, Localize("Size of key press icons"), -50, 100);
 
 		// ***** Name Plate Preview ***** //
-		RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
-		Ui()->DoLabel(&Label, Localize("Preview"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Preview"), HeadlineFontSize,
+			TEXTALIGN_ML, &RightView, HeadlineHeight);
 		RightView.HSplitTop(2.0f * MarginSmall, nullptr, &RightView);
 
-		CTeeRenderInfo TeeRenderInfo;
-		TeeRenderInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClPlayerSkin));
-		TeeRenderInfo.ApplyColors(g_Config.m_ClPlayerUseCustomColor, g_Config.m_ClPlayerColorBody, g_Config.m_ClPlayerColorFeet);
-		TeeRenderInfo.m_Size = 64.0f;
+		// ***** Name Plate Dummy Preview ***** //
+		RightView.HSplitBottom(LineSize, &RightView, &Button);
+		if(DoButton_CheckBox(&m_DummyNamePlatePreview, Localize("Preview dummy's name plate"), m_DummyNamePlatePreview, &Button))
+			m_DummyNamePlatePreview = !m_DummyNamePlatePreview;
+
+		int Dummy = g_Config.m_ClDummy != (m_DummyNamePlatePreview ? 1 : 0);
 
 		const vec2 Position = RightView.Center();
-		RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, 0, vec2(1.0f, 0.0f), Position);
 
-		GameClient()->m_NamePlates.RenderNamePlatePreview(Position);
+		GameClient()->m_NamePlates.RenderNamePlatePreview(Position, Dummy);
 	}
 	else if(s_CurTab == APPEARANCE_TAB_HOOK_COLLISION)
 	{
 		MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
 
 		// ***** Hookline ***** //
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Hook collision line"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Hook collision line"), HeadlineFontSize,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// General hookline settings
@@ -2933,30 +2931,30 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 				g_Config.m_ClShowHookCollOther = g_Config.m_ClShowHookCollOther != 2 ? 2 : 1;
 		}
 
-		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
+		LeftView.HSplitTop(LineSize * 2.0f, &Button, &LeftView);
 		Ui()->DoScrollbarOption(&g_Config.m_ClHookCollSize, &g_Config.m_ClHookCollSize, &Button, Localize("Width of your own hook collision line"), 0, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
 
-		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
+		LeftView.HSplitTop(LineSize * 2.0f, &Button, &LeftView);
 		Ui()->DoScrollbarOption(&g_Config.m_ClHookCollSizeOther, &g_Config.m_ClHookCollSizeOther, &Button, Localize("Width of others' hook collision line"), 0, 20, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE);
 
-		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
+		LeftView.HSplitTop(LineSize * 2.0f, &Button, &LeftView);
 		Ui()->DoScrollbarOption(&g_Config.m_ClHookCollAlpha, &g_Config.m_ClHookCollAlpha, &Button, Localize("Hook collision line opacity"), 0, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
 
 		static CButtonContainer s_HookCollNoCollResetId, s_HookCollHookableCollResetId, s_HookCollTeeCollResetId;
 		static int s_HookCollToolTip;
 
-		LeftView.HSplitTop(LineSize, &Label, &LeftView);
-		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Colors of the hook collision line, in case of a possible collision with:"), 13.0f, TEXTALIGN_ML);
-		Ui()->DoButtonLogic(&s_HookCollToolTip, 0, &Label, BUTTONFLAG_NONE); // Just for the tooltip, result ignored
-		GameClient()->m_Tooltips.DoToolTip(&s_HookCollToolTip, &Label, Localize("Your movements are not taken into account when calculating the line colors"));
+		Ui()->DoLabel_AutoLineSize(Localize("Colors of the hook collision line, in case of a possible collision with:"), 13.0f,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
+
+		Ui()->DoButtonLogic(&s_HookCollToolTip, 0, &LeftView, BUTTONFLAG_NONE); // Just for the tooltip, result ignored
+		GameClient()->m_Tooltips.DoToolTip(&s_HookCollToolTip, &LeftView, Localize("Your movements are not taken into account when calculating the line colors"));
 		DoLine_ColorPicker(&s_HookCollNoCollResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Nothing hookable"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollHookableCollResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Something hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollTeeCollResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("A Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
 
 		// ***** Hook collisions preview ***** //
-		RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
-		Ui()->DoLabel(&Label, Localize("Preview"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Preview"), HeadlineFontSize,
+			TEXTALIGN_ML, &RightView, HeadlineHeight);
 		RightView.HSplitTop(2 * MarginSmall, nullptr, &RightView);
 
 		auto DoHookCollision = [this](const vec2 &Pos, const float &Length, const int &Size, const ColorRGBA &Color, const bool &Invert) {
@@ -3073,8 +3071,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
 
 		// ***** Info Messages ***** //
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Info Messages"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Info Messages"), HeadlineFontSize,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// General info messages settings
@@ -3099,8 +3097,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		MainView.VSplitMid(&LeftView, &RightView, MarginBetweenViews);
 
 		// ***** Weapons ***** //
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Weapons"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Weapons"), HeadlineFontSize,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// General weapon laser settings
@@ -3113,8 +3111,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Entities ***** //
 		LeftView.HSplitTop(10.0f, nullptr, &LeftView);
-		LeftView.HSplitTop(HeadlineHeight, &Label, &LeftView);
-		Ui()->DoLabel(&Label, Localize("Entities"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Entities"), HeadlineFontSize,
+			TEXTALIGN_ML, &LeftView, HeadlineHeight);
 		LeftView.HSplitTop(MarginSmall, nullptr, &LeftView);
 
 		// General entity laser settings
@@ -3155,8 +3153,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		}
 
 		// ***** Laser Preview ***** //
-		RightView.HSplitTop(HeadlineHeight, &Label, &RightView);
-		Ui()->DoLabel(&Label, Localize("Preview"), HeadlineFontSize, TEXTALIGN_ML);
+		Ui()->DoLabel_AutoLineSize(Localize("Preview"), HeadlineFontSize,
+			TEXTALIGN_ML, &RightView, HeadlineHeight);
 		RightView.HSplitTop(MarginSmall, nullptr, &RightView);
 
 		const float LaserPreviewHeight = 50.0f;

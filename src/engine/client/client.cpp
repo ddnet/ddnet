@@ -67,6 +67,7 @@
 #endif
 
 #include "SDL3/SDL.h"
+
 #ifdef main
 #undef main
 #endif

@@ -147,7 +147,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_RED)
 			{
-				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+				ButtonBar.VSplitLeft(100.0f, &Button, &ButtonBar);
 				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				static CButtonContainer s_JoinRedButton;
 				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinRedButton, Localize("Join red"), 0, &Button))
@@ -159,7 +159,7 @@ void CMenus::RenderGame(CUIRect MainView)
 
 			if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_BLUE)
 			{
-				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+				ButtonBar.VSplitLeft(100.0f, &Button, &ButtonBar);
 				ButtonBar.VSplitLeft(5.0f, nullptr, &ButtonBar);
 				static CButtonContainer s_JoinBlueButton;
 				if(!Client()->DummyConnecting() && DoButton_Menu(&s_JoinBlueButton, Localize("Join blue"), 0, &Button))
@@ -1148,7 +1148,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	int NewPage = g_Config.m_UiPage;
 
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 	TabBar.VSplitLeft(75.0f, &Button, &TabBar);
 	static CButtonContainer s_InternetButton;

@@ -70,7 +70,7 @@ public:
 	bool UnFreeze();
 	void GiveAllWeapons();
 	int Team();
-	bool CanCollide(int ClientId);
+	bool CanCollide(int ClientId) override;
 	bool SameTeam(int ClientId);
 	bool m_NinjaJetpack;
 	int m_FreezeTime;
