@@ -2642,13 +2642,7 @@ void CServer::PumpNetwork(bool PacketWaiting)
 						CPacker Packer;
 						GetServerInfoSixup(&Packer, SrvBrwsToken, RateLimitServerInfoConnless());
 
-						CNetChunk Response;
-						Response.m_ClientId = -1;
-						Response.m_Address = Packet.m_Address;
-						Response.m_Flags = NETSENDFLAG_CONNLESS;
-						Response.m_pData = Packer.Data();
-						Response.m_DataSize = Packer.Size();
-						m_NetServer.SendConnlessSixup(&Response, ResponseToken);
+						CNetBase::SendPacketConnlessWithToken7(m_NetServer.Socket(), &Packet.m_Address, Packer.Data(), Packer.Size(), ResponseToken, m_NetServer.GetToken(Packet.m_Address));
 					}
 					else if(Type != -1)
 					{
