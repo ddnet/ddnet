@@ -463,7 +463,6 @@ public:
 	int MaxClients() const { return m_MaxClients; }
 
 	void SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token);
-	int SendConnlessSixup(CNetChunk *pChunk, SECURITY_TOKEN ResponseToken);
 
 	//
 	void SetMaxClientsPerIp(int Max);
