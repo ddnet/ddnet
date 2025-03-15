@@ -8,7 +8,9 @@
 
 TEST(Datafile, ExtendedType)
 {
-	auto pStorage = std::unique_ptr<IStorage>(CreateLocalStorage());
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
+	ASSERT_NE(pStorage, nullptr) << "Error creating local storage";
+
 	CTestInfo Info;
 
 	CMapItemTest ItemTest;
@@ -63,7 +65,9 @@ TEST(Datafile, ExtendedType)
 
 TEST(Datafile, StringData)
 {
-	auto pStorage = std::unique_ptr<IStorage>(CreateLocalStorage());
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
+	ASSERT_NE(pStorage, nullptr) << "Error creating local storage";
+
 	CTestInfo Info;
 
 	{

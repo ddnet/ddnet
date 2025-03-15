@@ -8,6 +8,7 @@
 
 #include "kernel.h"
 
+#include <memory>
 #include <set>
 #include <string>
 
@@ -77,7 +78,7 @@ public:
 };
 
 extern IStorage *CreateStorage(IStorage::EInitializationType InitializationType, int NumArgs, const char **ppArguments);
-extern IStorage *CreateLocalStorage();
-extern IStorage *CreateTempStorage(const char *pDirectory, int NumArgs, const char **ppArguments);
+extern std::unique_ptr<IStorage> CreateLocalStorage();
+extern std::unique_ptr<IStorage> CreateTempStorage(const char *pDirectory, int NumArgs, const char **ppArguments);
 
 #endif
