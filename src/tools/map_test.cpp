@@ -83,7 +83,7 @@ int main(int argc, const char **argv)
 	const CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
-	const char *pMap = nullptr;
+	const char *pMap;
 	bool CalcHashes;
 	if(argc == 2)
 	{
