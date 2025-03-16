@@ -126,7 +126,8 @@ static bool ExtractMap(IStorage *pStorage, const char *pMapName, const char *pPa
 	ExtractMapImages(Reader, pPathSave);
 	ExtractMapSounds(Reader, pPathSave);
 
-	return Reader.Close();
+	Reader.Close();
+	return true;
 }
 
 int main(int argc, const char *argv[])
