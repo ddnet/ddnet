@@ -800,7 +800,7 @@ void CDataFileWriter::Finish()
 	}
 
 	// Calculate total size of items
-	size_t ItemSize = 0;
+	int64_t ItemSize = 0;
 	for(const CItemInfo &ItemInfo : m_vItems)
 	{
 		ItemSize += ItemInfo.m_Size;
@@ -808,19 +808,21 @@ void CDataFileWriter::Finish()
 	}
 
 	// Calculate total size of data
-	size_t DataSize = 0;
+	int64_t DataSize = 0;
 	for(const CDataInfo &DataInfo : m_vDatas)
+	{
 		DataSize += DataInfo.m_CompressedSize;
+	}
 
 	// Calculate complete file size
-	const size_t TypesSize = m_ItemTypes.size() * sizeof(CDatafileItemType);
-	const size_t HeaderSize = sizeof(CDatafileHeader);
-	const size_t OffsetSize = (m_vItems.size() + m_vDatas.size() * 2) * sizeof(int); // ItemOffsets, DataOffsets, DataUncompressedSizes
-	const size_t SwapSize = HeaderSize + TypesSize + OffsetSize + ItemSize;
-	const size_t FileSize = SwapSize + DataSize;
+	const int64_t TypesSize = m_ItemTypes.size() * sizeof(CDatafileItemType);
+	const int64_t HeaderSize = sizeof(CDatafileHeader);
+	const int64_t OffsetSize = (m_vItems.size() + m_vDatas.size() * 2) * sizeof(int); // ItemOffsets, DataOffsets, DataUncompressedSizes
+	const int64_t SwapSize = HeaderSize + TypesSize + OffsetSize + ItemSize;
+	const int64_t FileSize = SwapSize + DataSize;
 
 	// This also ensures that SwapSize, ItemSize and DataSize are valid.
-	dbg_assert(FileSize <= (size_t)std::numeric_limits<int>::max(), "File size too large");
+	dbg_assert(FileSize <= (int64_t)std::numeric_limits<int>::max(), "File size too large");
 
 	// Construct and write header
 	{
