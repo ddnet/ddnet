@@ -32,19 +32,9 @@
 #undef KeyPress // Undo pollution from X11/Xlib.h included by SDL_syswm.h on Linux
 #endif
 
-static void AssertKeyValid(int Key)
-{
-	if(Key < KEY_FIRST || Key >= KEY_LAST)
-	{
-		char aError[32];
-		str_format(aError, sizeof(aError), "Key invalid: %d", Key);
-		dbg_assert(false, aError);
-	}
-}
-
 void CInput::AddKeyEvent(int Key, int Flags)
 {
-	AssertKeyValid(Key);
+	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
 	dbg_assert((Flags & (FLAG_PRESS | FLAG_RELEASE)) != 0 && (Flags & ~(FLAG_PRESS | FLAG_RELEASE)) == 0, "Flags invalid");
 
 	CEvent Event;
@@ -219,26 +209,26 @@ float CInput::CJoystick::GetAxisValue(int Axis)
 	return (SDL_JoystickGetAxis(m_pDelegate, Axis) - SDL_JOYSTICK_AXIS_MIN) / (float)(SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN) * 2.0f - 1.0f;
 }
 
-void CInput::CJoystick::GetJoystickHatKeys(int Hat, int HatValue, int (&HatKeys)[2])
+void CInput::CJoystick::GetJoystickHatKeys(int Hat, int HatValue, int (&aHatKeys)[2])
 {
 	if(HatValue & SDL_HAT_UP)
-		HatKeys[0] = KEY_JOY_HAT0_UP + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+		aHatKeys[0] = KEY_JOY_HAT0_UP + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
 	else if(HatValue & SDL_HAT_DOWN)
-		HatKeys[0] = KEY_JOY_HAT0_DOWN + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+		aHatKeys[0] = KEY_JOY_HAT0_DOWN + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
 	else
-		HatKeys[0] = KEY_UNKNOWN;
+		aHatKeys[0] = KEY_UNKNOWN;
 
 	if(HatValue & SDL_HAT_LEFT)
-		HatKeys[1] = KEY_JOY_HAT0_LEFT + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+		aHatKeys[1] = KEY_JOY_HAT0_LEFT + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
 	else if(HatValue & SDL_HAT_RIGHT)
-		HatKeys[1] = KEY_JOY_HAT0_RIGHT + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+		aHatKeys[1] = KEY_JOY_HAT0_RIGHT + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
 	else
-		HatKeys[1] = KEY_UNKNOWN;
+		aHatKeys[1] = KEY_UNKNOWN;
 }
 
-void CInput::CJoystick::GetHatValue(int Hat, int (&HatKeys)[2])
+void CInput::CJoystick::GetHatValue(int Hat, int (&aHatKeys)[2])
 {
-	GetJoystickHatKeys(Hat, SDL_JoystickGetHat(m_pDelegate, Hat), HatKeys);
+	GetJoystickHatKeys(Hat, SDL_JoystickGetHat(m_pDelegate, Hat), aHatKeys);
 }
 
 bool CInput::CJoystick::Relative(float *pX, float *pY)
@@ -386,19 +376,19 @@ float CInput::GetUpdateTime() const
 
 bool CInput::KeyIsPressed(int Key) const
 {
-	AssertKeyValid(Key);
+	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
 	return m_aCurrentKeyStates[Key];
 }
 
 bool CInput::KeyPress(int Key) const
 {
-	AssertKeyValid(Key);
+	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
 	return m_aFrameKeyStates[Key];
 }
 
 const char *CInput::KeyName(int Key) const
 {
-	AssertKeyValid(Key);
+	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
 	return g_aaKeyStrings[Key];
 }
 
@@ -487,18 +477,18 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 	if(Event.hat >= NUM_JOYSTICK_HATS)
 		return;
 
-	int HatKeys[2];
-	CJoystick::GetJoystickHatKeys(Event.hat, Event.value, HatKeys);
+	int aHatKeys[2];
+	CJoystick::GetJoystickHatKeys(Event.hat, Event.value, aHatKeys);
 
-	for(int Key = KEY_JOY_HAT0_UP + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_DOWN + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
+	for(int Key = KEY_JOY_HAT0_UP + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_RIGHT + Event.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
 	{
-		if(Key != HatKeys[0] && Key != HatKeys[1] && m_aCurrentKeyStates[Key])
+		if(Key != aHatKeys[0] && Key != aHatKeys[1] && m_aCurrentKeyStates[Key])
 		{
 			AddKeyEvent(Key, IInput::FLAG_RELEASE);
 		}
 	}
 
-	for(int CurrentKey : HatKeys)
+	for(int CurrentKey : aHatKeys)
 	{
 		if(CurrentKey != KEY_UNKNOWN && !m_aCurrentKeyStates[CurrentKey])
 		{
@@ -808,6 +798,7 @@ int CInput::Update()
 				IgnoreKeys = true;
 				break;
 			case SDL_WINDOWEVENT_FOCUS_LOST:
+				std::fill(std::begin(m_aCurrentKeyStates), std::end(m_aCurrentKeyStates), false);
 				m_MouseFocus = false;
 				IgnoreKeys = true;
 				if(m_InputGrabbed)

@@ -127,24 +127,26 @@ bool dbg_assert_has_failed()
 	return dbg_assert_failing.load(std::memory_order_acquire);
 }
 
-void dbg_assert_imp(const char *filename, int line, bool test, const char *msg)
+void dbg_assert_imp(const char *filename, int line, const char *fmt, ...)
 {
-	if(!test)
+	const bool already_failing = dbg_assert_has_failed();
+	dbg_assert_failing.store(true, std::memory_order_release);
+	char msg[512];
+	va_list args;
+	va_start(args, fmt);
+	str_format_v(msg, sizeof(msg), fmt, args);
+	char error[512];
+	str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
+	va_end(args);
+	log_error("assert", "%s", error);
+	if(!already_failing)
 	{
-		const bool already_failing = dbg_assert_has_failed();
-		dbg_assert_failing.store(true, std::memory_order_release);
-		char error[512];
-		str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
-		dbg_msg("assert", "%s", error);
-		if(!already_failing)
-		{
-			DBG_ASSERT_HANDLER handler = dbg_assert_handler;
-			if(handler)
-				handler(error);
-		}
-		log_global_logger_finish();
-		dbg_break();
+		DBG_ASSERT_HANDLER handler = dbg_assert_handler;
+		if(handler)
+			handler(error);
 	}
+	log_global_logger_finish();
+	dbg_break();
 }
 
 void dbg_break()
@@ -911,12 +913,7 @@ void sphore_init(SEMAPHORE *sem)
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "/%d.%p", pid(), (void *)sem);
 	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
-	if(*sem == SEM_FAILED)
-	{
-		char aError[128];
-		str_format(aError, sizeof(aError), "sem_open failure, errno=%d, name='%s'", errno, aBuf);
-		dbg_assert(false, aError);
-	}
+	dbg_assert(*sem != SEM_FAILED, "sem_open failure, errno=%d, name='%s'", errno, aBuf);
 }
 void sphore_wait(SEMAPHORE *sem)
 {
@@ -1369,6 +1366,20 @@ int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t 
 		addr->type |= NETTYPE_TW7;
 
 	return failure;
+}
+
+bool net_addr_is_local(const NETADDR *addr)
+{
+	char addr_str[NETADDR_MAXSTRSIZE];
+	net_addr_str(addr, addr_str, sizeof(addr_str), true);
+
+	if(addr->ip[0] == 127 || addr->ip[0] == 10 || (addr->ip[0] == 192 && addr->ip[1] == 168) || (addr->ip[0] == 172 && (addr->ip[1] >= 16 && addr->ip[1] <= 31)))
+		return true;
+
+	if(str_startswith(addr_str, "[fe80:") || str_startswith(addr_str, "[::1"))
+		return true;
+
+	return false;
 }
 
 int net_addr_from_str(NETADDR *addr, const char *string)

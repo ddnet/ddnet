@@ -15,9 +15,14 @@ public:
 
 bool OpenMap(const char pMapName[64], CDataFileReader &InputMap)
 {
-	IStorage *pStorage = CreateLocalStorage();
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
+	if(!pStorage)
+	{
+		log_error("map_find_env", "Error creating local storage");
+		return false;
+	}
 
-	if(!InputMap.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE))
+	if(!InputMap.Open(pStorage.get(), pMapName, IStorage::TYPE_ABSOLUTE))
 	{
 		dbg_msg("map_find_env", "ERROR: unable to open map '%s'", pMapName);
 		return false;

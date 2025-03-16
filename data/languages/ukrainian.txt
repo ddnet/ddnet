@@ -2056,76 +2056,76 @@ Zoom out
 == Віддалити
 
 Auto-sync player camera
-== 
+== Авто. синхронізовувати камеру гравця
 
 [Auto camera]
 Disabled
-== 
+== Вимкнено
 
 [Auto camera]
 Enabled
-== 
+== Увімкнено
 
 [Auto camera]
 Unavailable for this player
-== 
+== Недоступно для цього гравця
 
 [Auto camera]
 Inactive
-== 
+== Неактивно
 
 [Auto camera]
 Active
-== 
+== Активно
 
 Loading maps…
-== 
+== Завантаження мап…
 
 Community
-== 
+== Спільнота
 
 [Team status]
 forbidden
-== 
+== заборонено
 
 [Team status]
 solo
-== 
+== наодинці
 
 [Team status]
 allowed
-== 
+== дозволено
 
 [Team status]
 required
-== 
+== необхідно
 
 Teams
-== 
+== Команди
 
 [Team size]
 minimum
-== 
+== мін.
 
 [Team size]
 maximum
-== 
+== макс.
 
 Saves file
-== 
+== Файл збережень
 
 Open the saves file
-== 
+== Відкрити файл збережень
 
 Show FPS
-== 
+== Показувати кадри/с
 
 Renders your frame rate in the top right
-== 
+== Виводить частоту кадрів у верхньому правому куті
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Ukrainian translation by .ua, Ivan., SwiatoslaW, 404_not_found, EGYT5453 and veydzh3r
+== Український переклад від .ua, Ivan., SwiatoslaW, 404_not_found, EGYT5453 та veydzh3r
 
 Show spectator cursor
-== 
+== Показувати вказівник глядача

@@ -231,7 +231,7 @@ static int ExtractDemoChat(const char *pDemoFilePath, IStorage *pStorage)
 int main(int argc, const char *argv[])
 {
 	// Create storage before setting logger to avoid log messages from storage creation
-	IStorage *pStorage = CreateLocalStorage();
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
 
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
@@ -248,5 +248,5 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	return ExtractDemoChat(argv[1], pStorage);
+	return ExtractDemoChat(argv[1], pStorage.get());
 }

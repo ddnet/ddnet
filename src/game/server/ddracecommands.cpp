@@ -78,6 +78,7 @@ void CGameContext::MoveCharacter(int ClientId, int X, int Y, bool Raw)
 		return;
 
 	pChr->Move(vec2((Raw ? 1 : 32) * X, (Raw ? 1 : 32) * Y));
+	pChr->ResetVelocity();
 	pChr->m_DDRaceState = DDRACE_CHEAT;
 }
 

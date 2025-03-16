@@ -153,3 +153,25 @@ TEST(NetAddrDeathTest, StrInvalid2)
 	},
 		"");
 }
+
+TEST(NetAddr, IsLocal)
+{
+	NETADDR Addr;
+	net_addr_from_str(&Addr, "127.0.0.1");
+	EXPECT_TRUE(net_addr_is_local(&Addr));
+
+	net_addr_from_str(&Addr, "[::1]");
+	EXPECT_TRUE(net_addr_is_local(&Addr));
+
+	net_addr_from_str(&Addr, "192.168.1.1");
+	EXPECT_TRUE(net_addr_is_local(&Addr));
+
+	net_addr_from_str(&Addr, "10.0.0.1");
+	EXPECT_TRUE(net_addr_is_local(&Addr));
+
+	net_addr_from_str(&Addr, "8.8.8.8");
+	EXPECT_FALSE(net_addr_is_local(&Addr));
+
+	net_addr_from_str(&Addr, "[2001:db8::1]");
+	EXPECT_FALSE(net_addr_is_local(&Addr));
+}
