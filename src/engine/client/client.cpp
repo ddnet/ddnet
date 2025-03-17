@@ -4619,10 +4619,6 @@ int main(int argc, const char **argv)
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
 
-#if defined(CONF_EXCEPTION_HANDLING)
-	init_exception_handler();
-#endif
-
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
 	std::shared_ptr<ILogger> pStdoutLogger = nullptr;
 #if defined(CONF_PLATFORM_ANDROID)
@@ -4769,15 +4765,15 @@ int main(int argc, const char **argv)
 
 	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
 
-#if defined(CONF_EXCEPTION_HANDLING)
-	char aBufPath[IO_MAX_PATH_LENGTH];
-	char aBufName[IO_MAX_PATH_LENGTH];
-	char aDate[64];
-	str_timestamp(aDate, sizeof(aDate));
-	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
-	pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
-	set_exception_handler_log_file(aBufPath);
-#endif
+	{
+		char aBufPath[IO_MAX_PATH_LENGTH];
+		char aBufName[IO_MAX_PATH_LENGTH];
+		char aDate[64];
+		str_timestamp(aDate, sizeof(aDate));
+		str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
+		pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
+		crashdump_init_if_available(aBufPath);
+	}
 
 	if(RandInitFailed)
 	{

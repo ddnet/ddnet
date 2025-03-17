@@ -4717,58 +4717,6 @@ void os_locale_str(char *locale, size_t length)
 		str_copy(locale, "en-US", length);
 }
 
-#if defined(CONF_EXCEPTION_HANDLING)
-#if defined(CONF_FAMILY_WINDOWS)
-static HMODULE exception_handling_module = nullptr;
-#endif
-
-void init_exception_handler()
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	const char *module_name = "exchndl.dll";
-	exception_handling_module = LoadLibraryA(module_name);
-	if(exception_handling_module == nullptr)
-	{
-		const DWORD LastError = GetLastError();
-		const std::string ErrorMsg = windows_format_system_message(LastError);
-		dbg_msg("exception_handling", "failed to load exception handling library '%s' (error %ld %s)", module_name, LastError, ErrorMsg.c_str());
-	}
-#else
-#error exception handling not implemented
-#endif
-}
-
-void set_exception_handler_log_file(const char *log_file_path)
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	if(exception_handling_module != nullptr)
-	{
-		const std::wstring wide_log_file_path = windows_utf8_to_wide(log_file_path);
-		// Intentional
-#ifdef __MINGW32__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-		const char *function_name = "ExcHndlSetLogFileNameW";
-		auto exception_log_file_path_func = (BOOL(APIENTRY *)(const WCHAR *))(GetProcAddress(exception_handling_module, function_name));
-#ifdef __MINGW32__
-#pragma GCC diagnostic pop
-#endif
-		if(exception_log_file_path_func == nullptr)
-		{
-			const DWORD LastError = GetLastError();
-			const std::string ErrorMsg = windows_format_system_message(LastError);
-			dbg_msg("exception_handling", "could not find function '%s' in exception handling library (error %ld %s)", function_name, LastError, ErrorMsg.c_str());
-		}
-		else
-			exception_log_file_path_func(wide_log_file_path.c_str());
-	}
-#else
-#error exception handling not implemented
-#endif
-}
-#endif
-
 std::chrono::nanoseconds time_get_nanoseconds()
 {
 	return std::chrono::nanoseconds(time_get_impl());
