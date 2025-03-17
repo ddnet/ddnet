@@ -4050,6 +4050,17 @@ void CServer::ConchainAnnouncementFileName(IConsole::IResult *pResult, void *pUs
 	}
 }
 
+void CServer::ConchainInputFifo(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CServer *pSelf = (CServer *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pSelf->m_Fifo.IsInit())
+	{
+		pSelf->m_Fifo.Shutdown();
+		pSelf->m_Fifo.Init(pSelf->Console(), pSelf->Config()->m_SvInputFifo, CFGFLAG_SERVER);
+	}
+}
+
 #if defined(CONF_FAMILY_UNIX)
 void CServer::ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
@@ -4133,6 +4144,8 @@ void CServer::RegisterCommands()
 	Console()->Chain("stdout_output_level", ConchainStdoutOutputLevel, this);
 
 	Console()->Chain("sv_announcement_filename", ConchainAnnouncementFileName, this);
+
+	Console()->Chain("sv_input_fifo", ConchainInputFifo, this);
 
 #if defined(CONF_FAMILY_UNIX)
 	Console()->Chain("sv_conn_logging_server", ConchainConnLoggingServerChange, this);

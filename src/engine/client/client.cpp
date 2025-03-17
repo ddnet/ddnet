@@ -4384,6 +4384,17 @@ void CClient::ConchainReplays(IConsole::IResult *pResult, void *pUserData, ICons
 	}
 }
 
+void CClient::ConchainInputFifo(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pSelf->m_Fifo.IsInit())
+	{
+		pSelf->m_Fifo.Shutdown();
+		pSelf->m_Fifo.Init(pSelf->m_pConsole, pSelf->Config()->m_ClInputFifo, CFGFLAG_CLIENT);
+	}
+}
+
 void CClient::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -4449,6 +4460,7 @@ void CClient::RegisterCommands()
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 	m_pConsole->Chain("cl_replays", ConchainReplays, this);
+	m_pConsole->Chain("cl_input_fifo", ConchainInputFifo, this);
 
 	m_pConsole->Chain("password", ConchainPassword, this);
 
