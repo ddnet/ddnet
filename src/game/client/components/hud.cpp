@@ -832,6 +832,10 @@ void CHud::PreparePlayerStateQuads()
 	// Quads for displaying dummy actions
 	m_DummyHammerOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_DummyCopyOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_DummyControlOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_DummyHookOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_DummyHitOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_DummyArrowOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 
 	// Quads for displaying team modes
 	m_PracticeModeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
@@ -1315,7 +1319,12 @@ void CHud::RenderSpectatorCount()
 
 	if(g_Config.m_ClShowhudDummyActions && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) && Client()->DummyConnected())
 	{
-		StartY = StartY - 29.0f - 4; // dummy actions height and padding
+		StartY = StartY - 43.5f - 4; // dummy actions height and padding
+	}
+
+	if (g_Config.m_ClShowhudDummyStatus && Client()->DummyConnected())
+	{
+		StartY = StartY - 25.0f - 4;
 	}
 
 	Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
@@ -1336,7 +1345,7 @@ void CHud::RenderDummyActions()
 		return;
 	}
 	// render small dummy actions hud
-	const float BoxHeight = 29.0f;
+	const float BoxHeight = 43.5f;
 	const float BoxWidth = 16.0f;
 
 	float StartX = m_Width - BoxWidth;
@@ -1371,6 +1380,98 @@ void CHud::RenderDummyActions()
 	}
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyCopy);
 	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyCopyOffset, x, y);
+	y += 13;
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+	if(g_Config.m_ClDummyControl)
+	{
+	 Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+ }
+	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyControl);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyControlOffset, x, y);
+}
+
+void CHud::RenderDummyStatus()
+{
+	const float BoxHeight = 25.0f;
+	const float BoxWidth = 25.0f;
+
+	float StartX = m_Width - BoxWidth;
+	float StartY = 285.0f - BoxHeight - 4;			// 4 units distance to the next display
+
+	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
+	{
+		StartY -= 4;
+	}
+	StartY -= GetMovementInformationBoxHeight();
+
+	if(g_Config.m_ClShowhudScore)
+	{
+		StartY -= 56;
+	}
+
+	if(g_Config.m_ClShowhudDummyActions && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) && Client()->DummyConnected())
+	{
+		StartY = StartY - 43.5f - 4;                              // dummy actions height and padding
+	}
+
+	if (g_Config.m_ClShowhudDummyStatus && Client()->DummyConnected())
+	{
+		Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
+
+		// draw tee
+		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[DummyId].m_RenderInfo;
+		TeeInfo.m_Size = 16;
+		CCharacterCore *pCharacter = &m_pClient->m_aClients[DummyId].m_Predicted;
+		float Alpha;
+
+		const CAnimState *pIdleState = CAnimState::GetIdle();
+		vec2 OffsetToMid;
+		CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+		vec2 TeeRenderPos(m_Width - BoxWidth / 2 + 2.0f, StartY + BoxHeight / 2.0f + OffsetToMid.y + 2.5f);
+		if (pCharacter->m_IsInFreeze || !(pCharacter->m_FreezeEnd <= 0 && pCharacter->m_FreezeStart == 0))
+			Alpha = 0.6f;
+		else
+			Alpha = 1.0f;
+		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos, Alpha);
+
+		const auto &InputData = GameClient()->m_Controls.m_aInputData[!g_Config.m_ClDummy];
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.0f);
+		if(g_Config.m_ClDummyHammer || (InputData.m_Fire == 1) || ((m_pClient->m_DummyInput.m_Fire & 1) != 0))
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		else
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.0f);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyHit);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyHitOffset, StartX + 1, StartY + BoxHeight / 2 + 5);
+
+		if ((InputData.m_Hook == 1) || (m_pClient->m_DummyInput.m_Hook == 1))
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		else
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.0f);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyHook);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyHookOffset, StartX + 1, StartY + 5);
+
+		float PositionForMovesArrowX = (m_Width - BoxWidth / 2 + 2.0f - BoxWidth / 5);
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+		if ((m_pClient->m_DummyInput.m_Direction == -1) || (InputData.m_Direction == -1))
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->QuadsSetRotation(pi / 2 * -1);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyArrow);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyArrowOffset, PositionForMovesArrowX - 4, StartY);
+
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+		if ((m_pClient->m_DummyInput.m_Jump == 1) || (InputData.m_Jump == 1))
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->QuadsSetRotation(0);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyArrow);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyArrowOffset, PositionForMovesArrowX, StartY);
+
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+		if ((m_pClient->m_DummyInput.m_Direction == 1) || (InputData.m_Direction == 1))
+		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		Graphics()->QuadsSetRotation(pi / 2);
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyArrow);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyArrowOffset, PositionForMovesArrowX + 4, StartY);
+	}
 }
 
 inline int CHud::GetDigitsIndex(int Value, int Max)
@@ -1396,7 +1497,11 @@ inline float CHud::GetMovementInformationBoxHeight()
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && (m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW || m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId].m_SpecCharPresent))
 		return g_Config.m_ClShowhudPlayerPosition ? 3 * MOVEMENT_INFORMATION_LINE_HEIGHT + 2 : 0;
 	float BoxHeight = 3 * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 2 * MOVEMENT_INFORMATION_LINE_HEIGHT * g_Config.m_ClShowhudPlayerAngle;
-	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
+	if (g_Config.m_ClShowhudDummyPosition && Client()->DummyConnected())
+	{
+		BoxHeight += 3 * MOVEMENT_INFORMATION_LINE_HEIGHT;
+	}
+	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle || g_Config.m_ClShowhudDummyPosition)
 	{
 		BoxHeight += 2;
 	}
@@ -1447,10 +1552,19 @@ void CHud::RenderMovementInformation()
 	{
 		StartY -= 56;
 	}
+                         //m_pClient->m_Snap.m_LocalClientId;
+	/*if (m_pClient->DummySwap != LastDummySwap)
+	{
+		DummyId = LastClientId;
+	}
+	LastDummySwap = m_pClient->DummySwap;
+	LastClientId = ClientId;*/
+	DummyId = GameClient()->m_aLocalIds[!g_Config.m_ClDummy];
 
 	Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
 
 	vec2 Pos;
+	vec2 DummyPos;
 	float DisplaySpeedX{}, DisplaySpeedY{}, DisplayAngle{};
 
 	if(ClientId == SPEC_FREEVIEW)
@@ -1465,10 +1579,13 @@ void CHud::RenderMovementInformation()
 	{
 		const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
 		const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
+		const CNetObj_Character *pDummyPrevChar = &m_pClient->m_Snap.m_aCharacters[DummyId].m_Prev;
+		const CNetObj_Character *pDummyCurChar = &m_pClient->m_Snap.m_aCharacters[DummyId].m_Cur;
 		const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
 
 		// To make the player position relative to blocks we need to divide by the block size
 		Pos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pCurChar->m_X, pCurChar->m_Y), IntraTick) / 32.0f;
+		DummyPos = mix(vec2(pDummyPrevChar->m_X, pDummyPrevChar->m_Y), vec2(pDummyCurChar->m_X, pDummyCurChar->m_Y), IntraTick) / 32.0f;
 
 		const vec2 Vel = mix(vec2(pPrevChar->m_VelX, pPrevChar->m_VelY), vec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
 
@@ -1515,6 +1632,26 @@ void CHud::RenderMovementInformation()
 
 		TextRender()->Text(xl, y, Fontsize, "Y:", -1.0f);
 		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[1], Fontsize, Pos.y, m_aaPlayerPositionText[1], sizeof(m_aaPlayerPositionText[1]));
+		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[1], TextRender()->DefaultTextColor(), xr, y);
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
+	}
+	if (g_Config.m_ClShowhudDummyPosition && Client()->DummyConnected())
+	{
+		TextRender()->Text(xl, y, Fontsize, Localize("Dummy Position:"), -1.0f);
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
+
+		ColorRGBA Color(1, 1, 1, 1);
+		if (DummyPos.x ==  Pos.x)
+			Color = ColorRGBA(0, 1, 0, 1);
+		else
+			Color = ColorRGBA(1, 1, 1, 1);
+		TextRender()->Text(xl, y, Fontsize, "X:", -1.0f);
+		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[0], Fontsize, DummyPos.x, m_aaPlayerPositionText[0], sizeof(m_aaPlayerPositionText[0]));
+		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[0], Color, xr, y);
+		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
+
+		TextRender()->Text(xl, y, Fontsize, "Y:", -1.0f);
+		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[1], Fontsize, DummyPos.y, m_aaPlayerPositionText[1], sizeof(m_aaPlayerPositionText[1]));
 		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[1], TextRender()->DefaultTextColor(), xr, y);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 	}
@@ -1715,6 +1852,7 @@ void CHud::OnRender()
 		if(g_Config.m_ClShowhudScore)
 			RenderScoreHud();
 		RenderDummyActions();
+		RenderDummyStatus();
 		RenderWarmupTimer();
 		RenderTextInfo();
 		RenderLocalTime((m_Width / 7) * 3);

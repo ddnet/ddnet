@@ -822,6 +822,10 @@ public:
 		IGraphics::CTextureHandle m_SpriteHudTeam0Mode;
 		IGraphics::CTextureHandle m_SpriteHudDummyHammer;
 		IGraphics::CTextureHandle m_SpriteHudDummyCopy;
+		IGraphics::CTextureHandle m_SpriteHudDummyControl;
+		IGraphics::CTextureHandle m_SpriteHudDummyHit;
+		IGraphics::CTextureHandle m_SpriteHudDummyHook;
+		IGraphics::CTextureHandle m_SpriteHudDummyArrow;
 	};
 
 	SClientHudSkin m_HudSkin;
@@ -849,6 +853,10 @@ public:
 	int FindFirstMultiViewId();
 	void CleanMultiViewId(int ClientId);
 
+	bool DummySwap;
+	bool DummyReset;
+	int m_IsDummySwapping;
+
 private:
 	std::vector<CSnapEntities> m_vSnapEntities;
 	void SnapCollectEntities();
@@ -869,7 +877,6 @@ private:
 	vec2 GetSmoothPos(int ClientId);
 
 	int m_PredictedDummyId;
-	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
 	int m_aSwitchStateTeam[NUM_DUMMIES];
 

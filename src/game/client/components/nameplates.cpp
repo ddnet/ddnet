@@ -661,6 +661,9 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 			Data.m_DirLeft = InputData.m_Direction == -1;
 			Data.m_DirJump = InputData.m_Jump == 1;
 			Data.m_DirRight = InputData.m_Direction == 1;
+			Data.m_DirLeft = m_pClient->m_DummyInput.m_Direction == -1;
+			Data.m_DirRight = m_pClient->m_DummyInput.m_Direction == 1;
+
 		}
 		else if(Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_Local) // always render local input when not in demo playback
 		{

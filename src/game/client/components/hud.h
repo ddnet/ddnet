@@ -80,6 +80,7 @@ class CHud : public CComponent
 	int m_LastSpectatorCountTick;
 	void RenderSpectatorCount();
 	void RenderDummyActions();
+	void RenderDummyStatus();
 	void RenderMovementInformation();
 
 	void UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, char *pPrevValue, size_t Size);
@@ -113,6 +114,10 @@ public:
 
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 	void RenderNinjaBarPos(float x, const float y, const float Width, const float Height, float Progress, float Alpha = 1.0f);
+
+	int DummyId;
+	int LastDummySwap;
+	int LastClientId;
 
 private:
 	void RenderRecord();
@@ -158,6 +163,10 @@ private:
 	int m_LiveFrozenOffset;
 	int m_DummyHammerOffset;
 	int m_DummyCopyOffset;
+	int m_DummyControlOffset;
+	int m_DummyHitOffset;
+	int m_DummyHookOffset;
+	int m_DummyArrowOffset;
 	int m_PracticeModeOffset;
 	int m_Team0ModeOffset;
 	int m_LockModeOffset;

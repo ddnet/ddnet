@@ -263,10 +263,10 @@ int CControls::SnapInput(int *pData)
 			m_aInputData[!g_Config.m_ClDummy] = *pDummyInput;
 		}
 
+		m_pClient->m_DummyInput.m_Jump = g_Config.m_ClDummyJump;
 		if(g_Config.m_ClDummyControl)
 		{
 			CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
-			pDummyInput->m_Jump = g_Config.m_ClDummyJump;
 
 			if(g_Config.m_ClDummyFire)
 				pDummyInput->m_Fire = g_Config.m_ClDummyFire;
@@ -275,6 +275,58 @@ int CControls::SnapInput(int *pData)
 
 			pDummyInput->m_Hook = g_Config.m_ClDummyHook;
 		}
+	 // dummy direction
+	 // g_Config.m_ClDummy == 1 -> Dummy | g_Config.m_ClDummy == 0 -> main
+	 // Dummy - 0|Swap - 0 -> dummy 0    |main 1
+	 // Dummy - 1|Swap - 0 -> dummy 1    |main 0
+	 // Dummy - 0|Swap - 1 -> dummy 1    |main 0
+	 // Dummy - 1|Swap - 1 -> dummy 0    |main 1
+
+	if (g_Config.m_ClDummyDirection != LastClDummyDirection )
+	{
+		move = &g_Config.m_ClDummyDirection;
+		dummy = m_pClient->DummySwap;
+
+		if (move != 0)
+		{
+			tmp = g_Config.m_ClDummyDirection;
+			move = 0;
+		}
+
+		if (g_Config.m_ClDummyDirection == 0)
+		{
+			tmp = 0;
+			m_pClient->m_DummyInput.m_Direction = 0;
+			m_aInputData[g_Config.m_ClDummy].m_Direction = 0;
+		}
+
+	}
+	LastClDummyDirection = g_Config.m_ClDummyDirection;
+
+	if (m_pClient->DummyReset)
+	{
+		tmp = 0;
+		g_Config.m_ClDummyDirection = 0;
+		m_pClient->DummyReset = 0;
+	}
+
+
+	if (tmp != 0)
+	{
+		if (dummy == m_pClient->DummySwap)
+		{
+			m_pClient->m_DummyInput.m_Direction = tmp;
+		}
+		else if ((dummy != m_pClient->DummySwap) && !(m_aInputDirectionLeft[g_Config.m_ClDummy] || m_aInputDirectionRight[g_Config.m_ClDummy]))
+		{
+			m_aInputData[g_Config.m_ClDummy].m_Direction = tmp;
+		}
+		else
+		{
+			tmp = 0;
+			g_Config.m_ClDummyDirection = 0;
+		}
+	}
 
 		// stress testing
 #ifdef CONF_DEBUG
