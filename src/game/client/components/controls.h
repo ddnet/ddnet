@@ -13,10 +13,6 @@
 class CControls : public CComponent
 {
 public:
-	int tmp;
-	bool dummy;
-	int *move = &g_Config.m_ClDummyDirection;
-	int LastClDummyDirection;
 	float GetMinMouseDistance() const;
 	float GetMaxMouseDistance() const;
 

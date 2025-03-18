@@ -11,9 +11,6 @@
 #endif
 
 // client
-// dummy dorection commands
-MACRO_CONFIG_INT(ClDummyDirection, cl_dummy_direction, 0, -1, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Dummy direction (-1 - left|1 - right)")
-
 //Hud dummy moventer
 MACRO_CONFIG_INT(ClShowhudDummyPosition, cl_showhud_dummy_position, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Dummy position x|y)")
 //Hud dummy status

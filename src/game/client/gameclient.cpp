@@ -498,10 +498,6 @@ void CGameClient::OnDummySwap()
 	int tmp = m_DummyInput.m_Fire;
 	m_DummyInput = m_Controls.m_aInputData[!g_Config.m_ClDummy];
 	m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = tmp;
-	if (DummySwap)
-	DummySwap = 0;
-	else
-	DummySwap = 1;
 	m_IsDummySwapping = 1;
 }
 
@@ -4378,7 +4374,6 @@ void CGameClient::DummyResetInput()
 	m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Fire = m_DummyInput.m_Fire;
 
 	m_DummyInput = m_Controls.m_aInputData[!g_Config.m_ClDummy];
-	 DummyReset = 1;
 }
 
 bool CGameClient::CanDisplayWarning() const
