@@ -361,9 +361,7 @@ void CConfigManager::SetReadOnly(const char *pScriptName, bool ReadOnly)
 			return;
 		}
 	}
-	char aBuf[IConsole::CMDLINE_LENGTH + 32];
-	str_format(aBuf, sizeof(aBuf), "Invalid command for SetReadOnly: '%s'", pScriptName);
-	dbg_assert(false, aBuf);
+	dbg_assert(false, "Invalid command for SetReadOnly: '%s'", pScriptName);
 }
 
 bool CConfigManager::Save()

@@ -10,6 +10,9 @@ CLayerTune::CLayerTune(CEditor *pEditor, int w, int h) :
 
 	m_pTuneTile = new CTuneTile[w * h];
 	mem_zero(m_pTuneTile, (size_t)w * h * sizeof(CTuneTile));
+
+	m_GotoTuneOffset = 0;
+	m_GotoTuneLastPos = ivec2(-1, -1);
 }
 
 CLayerTune::CLayerTune(const CLayerTune &Other) :
@@ -274,6 +277,74 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 	}
 
 	FlagModified(sx, sy, w, h);
+}
+
+bool CLayerTune::ContainsElementWithId(int Id)
+{
+	for(int y = 0; y < m_Height; ++y)
+	{
+		for(int x = 0; x < m_Width; ++x)
+		{
+			if(IsValidTuneTile(m_pTuneTile[y * m_Width + x].m_Type) && m_pTuneTile[y * m_Width + x].m_Number == Id)
+			{
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+void CLayerTune::GetPos(int Number, int Offset, ivec2 &Pos)
+{
+	int Match = -1;
+	ivec2 MatchPos = ivec2(-1, -1);
+	Pos = ivec2(-1, -1);
+
+	auto FindTile = [this, &Match, &MatchPos, &Number, &Offset]() {
+		for(int x = 0; x < m_Width; x++)
+		{
+			for(int y = 0; y < m_Height; y++)
+			{
+				int i = y * m_Width + x;
+				int Tune = m_pTuneTile[i].m_Number;
+				if(Number == Tune)
+				{
+					Match++;
+					if(Offset != -1)
+					{
+						if(Match == Offset)
+						{
+							MatchPos = ivec2(x, y);
+							m_GotoTuneOffset = Match;
+							return;
+						}
+						continue;
+					}
+					MatchPos = ivec2(x, y);
+					if(m_GotoTuneLastPos != ivec2(-1, -1))
+					{
+						if(distance(m_GotoTuneLastPos, MatchPos) < 10.0f)
+						{
+							m_GotoTuneOffset++;
+							continue;
+						}
+					}
+					m_GotoTuneLastPos = MatchPos;
+					if(Match == m_GotoTuneOffset)
+						return;
+				}
+			}
+		}
+	};
+	FindTile();
+
+	if(MatchPos == ivec2(-1, -1))
+		return;
+	if(Match < m_GotoTuneOffset)
+		m_GotoTuneOffset = -1;
+	Pos = MatchPos;
+	m_GotoTuneOffset++;
 }
 
 std::shared_ptr<CLayer> CLayerTune::Duplicate() const

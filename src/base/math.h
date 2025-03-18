@@ -11,24 +11,24 @@ using std::clamp;
 
 constexpr float pi = 3.1415926535897932384626433f;
 
-constexpr inline int round_to_int(float f)
+constexpr int round_to_int(float f)
 {
 	return f > 0 ? (int)(f + 0.5f) : (int)(f - 0.5f);
 }
 
-constexpr inline int round_truncate(float f)
+constexpr int round_truncate(float f)
 {
 	return (int)f;
 }
 
 template<typename T, typename TB>
-constexpr inline T mix(const T a, const T b, TB amount)
+constexpr T mix(const T a, const T b, TB amount)
 {
 	return a + (b - a) * amount;
 }
 
 template<typename T, typename TB>
-inline T bezier(const T p0, const T p1, const T p2, const T p3, TB amount)
+constexpr T bezier(const T p0, const T p1, const T p2, const T p3, TB amount)
 {
 	// De-Casteljau Algorithm
 	const T c10 = mix(p0, p1, amount);
@@ -42,7 +42,7 @@ inline T bezier(const T p0, const T p1, const T p2, const T p3, TB amount)
 }
 
 template<typename T, typename TB>
-inline T mix_polynomial(const TB time[], const T data[], int samples, TB amount, T init)
+constexpr T mix_polynomial(const TB time[], const T data[], int samples, TB amount, T init)
 {
 	T result = init;
 	for(int i = 0; i < samples; i++)
@@ -79,21 +79,21 @@ inline float random_angle()
 constexpr int fxpscale = 1 << 10;
 
 // float to fixed
-constexpr inline int f2fx(float v)
+constexpr int f2fx(float v)
 {
 	return round_to_int(v * fxpscale);
 }
-constexpr inline float fx2f(int v)
+constexpr float fx2f(int v)
 {
 	return v / (float)fxpscale;
 }
 
 // int to fixed
-constexpr inline int i2fx(int v)
+constexpr int i2fx(int v)
 {
 	return v * fxpscale;
 }
-constexpr inline int fx2i(int v)
+constexpr int fx2i(int v)
 {
 	return v / fxpscale;
 }
@@ -132,38 +132,38 @@ public:
 };
 
 template<typename T>
-constexpr inline T minimum(T a, T b)
+constexpr T minimum(T a, T b)
 {
 	return std::min(a, b);
 }
 template<typename T>
-constexpr inline T minimum(T a, T b, T c)
+constexpr T minimum(T a, T b, T c)
 {
 	return std::min(std::min(a, b), c);
 }
 template<typename T>
-constexpr inline T maximum(T a, T b)
+constexpr T maximum(T a, T b)
 {
 	return std::max(a, b);
 }
 template<typename T>
-constexpr inline T maximum(T a, T b, T c)
+constexpr T maximum(T a, T b, T c)
 {
 	return std::max(std::max(a, b), c);
 }
 template<typename T>
-constexpr inline T absolute(T a)
+constexpr T absolute(T a)
 {
 	return a < T(0) ? -a : a;
 }
 
 template<typename T>
-constexpr inline T in_range(T a, T lower, T upper)
+constexpr bool in_range(T a, T lower, T upper)
 {
 	return lower <= a && a <= upper;
 }
 template<typename T>
-constexpr inline T in_range(T a, T upper)
+constexpr bool in_range(T a, T upper)
 {
 	return in_range(a, 0, upper);
 }

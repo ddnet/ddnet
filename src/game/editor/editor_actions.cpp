@@ -350,6 +350,7 @@ CEditorActionEditQuadProp::CEditorActionEditQuadProp(CEditor *pEditor, int Group
 		"pos env offset",
 		"color env",
 		"color env offset"};
+	static_assert(std::size(s_apNames) == (size_t)EQuadProp::NUM_PROPS);
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit quad %s property in layer %d of group %d", s_apNames[(int)m_Prop], m_LayerIndex, m_GroupIndex);
 }
 
@@ -386,6 +387,7 @@ CEditorActionEditQuadPointProp::CEditorActionEditQuadPointProp(CEditor *pEditor,
 		"color",
 		"tex U",
 		"tex V"};
+	static_assert(std::size(s_apNames) == (size_t)EQuadPointProp::NUM_PROPS);
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit quad point %s property in layer %d of group %d", s_apNames[(int)m_Prop], m_LayerIndex, m_GroupIndex);
 }
 
@@ -714,6 +716,7 @@ CEditorActionEditGroupProp::CEditorActionEditGroupProp(CEditor *pEditor, int Gro
 		"clip Y",
 		"clip W",
 		"clip H"};
+	static_assert(std::size(s_apNames) == (size_t)EGroupProp::NUM_PROPS);
 
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit group %d %s property", m_GroupIndex, s_apNames[(int)Prop]);
 }
@@ -793,6 +796,7 @@ CEditorActionEditLayerProp::CEditorActionEditLayerProp(CEditor *pEditor, int Gro
 		"group",
 		"order",
 		"HQ"};
+	static_assert(std::size(s_apNames) == (size_t)ELayerProp::NUM_PROPS);
 
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit layer %d in group %d %s property", m_LayerIndex, m_GroupIndex, s_apNames[(int)m_Prop]);
 }
@@ -856,7 +860,9 @@ CEditorActionEditLayerTilesProp::CEditorActionEditLayerTilesProp(CEditor *pEdito
 		"color env",
 		"color env offset",
 		"automapper",
+		"automapper reference",
 		"seed"};
+	static_assert(std::size(s_apNames) == (size_t)ETilesProp::NUM_PROPS);
 
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit tiles layer %d in group %d %s property", m_LayerIndex, m_GroupIndex, s_apNames[(int)Prop]);
 }
@@ -1067,6 +1073,7 @@ CEditorActionEditLayerQuadsProp::CEditorActionEditLayerQuadsProp(CEditor *pEdito
 {
 	static const char *s_apNames[] = {
 		"image"};
+	static_assert(std::size(s_apNames) == (size_t)ELayerQuadsProp::NUM_PROPS);
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit quads layer %d in group %d %s property", m_LayerIndex, m_GroupIndex, s_apNames[(int)m_Prop]);
 }
 
@@ -1712,6 +1719,7 @@ CEditorActionEditLayerSoundsProp::CEditorActionEditLayerSoundsProp(CEditor *pEdi
 {
 	static const char *s_apNames[] = {
 		"sound"};
+	static_assert(std::size(s_apNames) == (size_t)ELayerSoundsProp::NUM_PROPS);
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit sounds layer %d in group %d %s property", m_LayerIndex, m_GroupIndex, s_apNames[(int)m_Prop]);
 }
 
@@ -1889,6 +1897,7 @@ CEditorActionEditSoundSourceProp::CEditorActionEditSoundSourceProp(CEditor *pEdi
 		"pos env offset",
 		"sound env",
 		"sound env offset"};
+	static_assert(std::size(s_apNames) == (size_t)ESoundProp::NUM_PROPS);
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit sound source %d in layer %d of group %d %s property", SourceIndex, LayerIndex, GroupIndex, s_apNames[(int)Prop]);
 }
 
@@ -1957,6 +1966,7 @@ CEditorActionEditRectSoundSourceShapeProp::CEditorActionEditRectSoundSourceShape
 	static const char *s_apNames[] = {
 		"width",
 		"height"};
+	static_assert(std::size(s_apNames) == (size_t)ERectangleShapeProp::NUM_PROPS);
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit sound source %d in layer %d of group %d sound shape %s property", m_SourceIndex, m_LayerIndex, m_GroupIndex, s_apNames[(int)Prop]);
 }
 
@@ -1992,6 +2002,7 @@ CEditorActionEditCircleSoundSourceShapeProp::CEditorActionEditCircleSoundSourceS
 {
 	static const char *s_apNames[] = {
 		"radius"};
+	static_assert(std::size(s_apNames) == (size_t)ECircleShapeProp::NUM_PROPS);
 	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Edit sound source %d in layer %d of group %d sound shape %s property", m_SourceIndex, m_LayerIndex, m_GroupIndex, s_apNames[(int)Prop]);
 }
 

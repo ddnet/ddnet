@@ -1,5 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
+#include <base/log.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
 #include <game/mapitems.h>
@@ -746,28 +747,25 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 
 	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK)
 	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"Practice mode can't be disabled for team 0");
+		log_info("chatresp", "Practice mode can't be disabled for team 0");
 		return;
 	}
 
 	if(!Teams.IsPractice(Team))
 	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"Team isn't in practice mode");
+		log_info("chatresp", "Team isn't in practice mode");
 		return;
 	}
 
 	if(Teams.GetSaving(Team))
 	{
-		pSelf->Console()->Print(
-			IConsole::OUTPUT_LEVEL_STANDARD,
-			"chatresp",
-			"Practice mode can't be disabled while team save or load is in progress");
+		log_info("chatresp", "Practice mode can't be disabled while team save or load is in progress");
+		return;
+	}
+
+	if(Teams.Count(Team) > g_Config.m_SvMaxTeamSize && pSelf->m_pController->Teams().TeamLocked(Team))
+	{
+		log_info("chatresp", "Can't disable practice. This team exceeds the maximum allowed size of %d players for regular team", g_Config.m_SvMaxTeamSize);
 		return;
 	}
 
@@ -776,8 +774,14 @@ void CGameContext::ConUnPractice(IConsole::IResult *pResult, void *pUserData)
 		if(Teams.m_Core.Team(i) == Team)
 		{
 			CPlayer *pPlayer2 = pSelf->m_apPlayers[i];
-			if(pPlayer2 && pPlayer2->m_VotedForPractice)
-				pPlayer2->m_VotedForPractice = false;
+			if(pPlayer2)
+			{
+				if(pPlayer2->m_VotedForPractice)
+					pPlayer2->m_VotedForPractice = false;
+
+				if(!g_Config.m_SvPauseable && pPlayer2->IsPaused() == -1 * CPlayer::PAUSE_SPEC)
+					pPlayer2->Pause(CPlayer::PAUSE_PAUSED, true);
+			}
 		}
 	}
 

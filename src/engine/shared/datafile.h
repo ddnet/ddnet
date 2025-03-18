@@ -22,7 +22,8 @@ enum
 // raw datafile access
 class CDataFileReader
 {
-	struct CDatafile *m_pDataFile;
+	class CDatafile *m_pDataFile = nullptr;
+
 	void *GetDataImpl(int Index, bool Swap);
 	int GetFileDataSize(int Index) const;
 
@@ -30,20 +31,12 @@ class CDataFileReader
 	int GetInternalItemType(int ExternalType);
 
 public:
-	CDataFileReader() :
-		m_pDataFile(nullptr) {}
-	~CDataFileReader() { Close(); }
-
-	CDataFileReader &operator=(CDataFileReader &&Other)
-	{
-		m_pDataFile = Other.m_pDataFile;
-		Other.m_pDataFile = nullptr;
-		return *this;
-	}
+	~CDataFileReader();
+	CDataFileReader &operator=(CDataFileReader &&Other);
 
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
-	bool Close();
-	bool IsOpen() const { return m_pDataFile != nullptr; }
+	void Close();
+	bool IsOpen() const;
 	IOHANDLE File() const;
 
 	int GetDataSize(int Index) const;
@@ -77,8 +70,9 @@ public:
 	};
 
 private:
-	struct CDataInfo
+	class CDataInfo
 	{
+	public:
 		void *m_pUncompressedData;
 		int m_UncompressedSize;
 		void *m_pCompressedData;
@@ -86,8 +80,9 @@ private:
 		ECompressionLevel m_CompressionLevel;
 	};
 
-	struct CItemInfo
+	class CItemInfo
 	{
+	public:
 		int m_Type;
 		int m_Id;
 		int m_Size;
@@ -96,15 +91,17 @@ private:
 		void *m_pData;
 	};
 
-	struct CItemTypeInfo
+	class CItemTypeInfo
 	{
+	public:
 		int m_Num = 0;
 		int m_First = -1;
 		int m_Last = -1;
 	};
 
-	struct CExtendedItemType
+	class CExtendedItemType
 	{
+	public:
 		int m_Type;
 		CUuid m_Uuid;
 	};

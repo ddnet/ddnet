@@ -854,7 +854,7 @@ void CClient::SnapSetStaticsize7(int ItemType, int Size)
 	m_SnapshotDelta.SetStaticsize7(ItemType, Size);
 }
 
-void CClient::DebugRender()
+void CClient::RenderDebug()
 {
 	if(!g_Config.m_Debug)
 		return;
@@ -971,22 +971,25 @@ void CClient::DebugRender()
 	str_format(aBuffer, sizeof(aBuffer), "pred: %d ms", GetPredictionTime());
 	Graphics()->QuadsText(2, 70, 16, aBuffer);
 	Graphics()->QuadsEnd();
+}
 
-	// render graphs
-	if(g_Config.m_DbgGraphs)
-	{
-		float w = Graphics()->ScreenWidth() / 4.0f;
-		float h = Graphics()->ScreenHeight() / 6.0f;
-		float sp = Graphics()->ScreenWidth() / 100.0f;
-		float x = Graphics()->ScreenWidth() - w - sp;
+void CClient::RenderGraphs()
+{
+	if(!g_Config.m_DbgGraphs)
+		return;
 
-		m_FpsGraph.Scale(time_freq());
-		m_FpsGraph.Render(Graphics(), TextRender(), x, sp * 5, w, h, "FPS");
-		m_InputtimeMarginGraph.Scale(5 * time_freq());
-		m_InputtimeMarginGraph.Render(Graphics(), TextRender(), x, sp * 6 + h, w, h, "Prediction Margin");
-		m_aGametimeMarginGraphs[g_Config.m_ClDummy].Scale(5 * time_freq());
-		m_aGametimeMarginGraphs[g_Config.m_ClDummy].Render(Graphics(), TextRender(), x, sp * 7 + h * 2, w, h, "Gametime Margin");
-	}
+	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
+	float w = Graphics()->ScreenWidth() / 4.0f;
+	float h = Graphics()->ScreenHeight() / 6.0f;
+	float sp = Graphics()->ScreenWidth() / 100.0f;
+	float x = Graphics()->ScreenWidth() - w - sp;
+
+	m_FpsGraph.Scale(time_freq());
+	m_FpsGraph.Render(Graphics(), TextRender(), x, sp * 5, w, h, "FPS");
+	m_InputtimeMarginGraph.Scale(5 * time_freq());
+	m_InputtimeMarginGraph.Render(Graphics(), TextRender(), x, sp * 6 + h, w, h, "Prediction Margin");
+	m_aGametimeMarginGraphs[g_Config.m_ClDummy].Scale(5 * time_freq());
+	m_aGametimeMarginGraphs[g_Config.m_ClDummy].Render(Graphics(), TextRender(), x, sp * 7 + h * 2, w, h, "Gametime Margin");
 }
 
 void CClient::Restart()
@@ -1042,19 +1045,17 @@ const char *CClient::ErrorString() const
 
 void CClient::Render()
 {
-	if(g_Config.m_ClOverlayEntities)
+	if(m_EditorActive)
 	{
-		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundEntitiesColor));
-		Graphics()->Clear(bg.r, bg.g, bg.b);
+		m_pEditor->OnRender();
 	}
 	else
 	{
-		ColorRGBA bg = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClBackgroundColor));
-		Graphics()->Clear(bg.r, bg.g, bg.b);
+		GameClient()->OnRender();
 	}
 
-	GameClient()->OnRender();
-	DebugRender();
+	RenderDebug();
+	RenderGraphs();
 }
 
 const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc)
@@ -3288,13 +3289,7 @@ void CClient::Run()
 				LastRenderTime = Now - AdditionalTime;
 				m_LastRenderTime = Now;
 
-				if(!m_EditorActive)
-					Render();
-				else
-				{
-					m_pEditor->OnRender();
-					DebugRender();
-				}
+				Render();
 				m_pGraphics->Swap();
 			}
 			else if(!IsRenderActive)
@@ -3859,7 +3854,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 {
 	// Don't disconnect unless the file exists (only for play command)
 	if(!Storage()->FileExists(pFilename, StorageType))
-		return "No demo with this filename exists";
+		return Localize("No demo with this filename exists");
 
 	Disconnect();
 	m_aNetClient[CONN_MAIN].ResetErrorString();
@@ -4389,6 +4384,17 @@ void CClient::ConchainReplays(IConsole::IResult *pResult, void *pUserData, ICons
 	}
 }
 
+void CClient::ConchainInputFifo(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pSelf->m_Fifo.IsInit())
+	{
+		pSelf->m_Fifo.Shutdown();
+		pSelf->m_Fifo.Init(pSelf->m_pConsole, pSelf->Config()->m_ClInputFifo, CFGFLAG_CLIENT);
+	}
+}
+
 void CClient::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -4454,6 +4460,7 @@ void CClient::RegisterCommands()
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 	m_pConsole->Chain("cl_replays", ConchainReplays, this);
+	m_pConsole->Chain("cl_input_fifo", ConchainInputFifo, this);
 
 	m_pConsole->Chain("password", ConchainPassword, this);
 

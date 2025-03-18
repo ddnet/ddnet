@@ -2958,12 +2958,13 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
 # TESTS
 ########################################################################
 
-if(GTEST_FOUND OR DOWNLOAD_GTEST)
+if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
   set_src(TESTS GLOB src/test
     aio.cpp
     bezier.cpp
     blocklist_driver.cpp
     bytes_be.cpp
+    chunk_header.cpp
     color.cpp
     compression.cpp
     csv.cpp

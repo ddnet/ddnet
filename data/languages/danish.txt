@@ -38,7 +38,7 @@ Automatically record demos
 == Optag automatisk demoer
 
 Automatically take game over screenshot
-== Tag  automatisk et game over screenshot
+== Tag automatisk et game over screenshot
 
 Blue team
 == Blå hold
@@ -140,7 +140,7 @@ Force vote
 == Tving afstemning
 
 Free-View
-== Free-View
+== Frithåndsvisning
 
 Fullscreen
 == Fuldskærm
@@ -179,7 +179,7 @@ High Detail
 == Extra detaljer
 
 Hook
-== Krog
+== Hook
 
 Invalid Demo
 == Ugyldig demo
@@ -203,7 +203,7 @@ MOTD
 == MOTD
 
 Map
-== Kort
+== Bane
 
 Move left
 == Gå til venstre
@@ -332,7 +332,7 @@ Show chat
 == Vis chat
 
 Show friends only
-== Vis venner
+== Vis kun venner
 
 Show ingame HUD
 == Vis HUD i spillet
@@ -514,10 +514,10 @@ Game paused
 == Spillet sat på pause
 
 Server best:
-== Server bedst:
+== Server rekord:
 
 Personal best:
-== Personlig bedst:
+== Personlig rekord:
 
 Browser
 == Browser
@@ -553,7 +553,7 @@ Welcome to DDNet
 == Velkommen til DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork er et samarbejdsvilligt onlinespil, hvor målet er, at du og din gruppe tees når målstregen på kortet. Som nybegynder skal du starte på Novice-servere, som er vært for de nemmeste kort. Overvej ping for at vælge en server tæt på dig.
+== DDraceNetwork er et samarbejdsvilligt onlinespil, hvor målet er, at du og din gruppe tees når målstregen på banen. Som nybegynder burde du starte på Novice-servere, som har de nemmeste maps. Overvej ping for at vælge en server tæt på dig.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Brug k tasten til at dræbe (genstart), q for at sætte pause og se andre spillere. Se indstillinger for andre tastebindinger.
@@ -568,7 +568,7 @@ Existing Player
 == Eksisterende Spiller
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Your nickname '%s' is already in use (%d points). Do you still want to use it?
+== Dit kaldenavn '%s' er allerede i brug (%d points). Vil du stadig bruge det?
 
 Checking for existing player with your name
 == Kontrollerer for eksisterende spiller med dit navn
@@ -580,7 +580,7 @@ Video name:
 == Video navn:
 
 Show DDNet map finishes in server browser
-== Vis DDNet kort færdig i serverbrowseren
+== Vis gennemførte DDNet baner i serverbrowseren
 
 transmits your player name to info.ddnet.org
 == sender dit spillernavn til info.ddnet.org
@@ -610,10 +610,10 @@ Filter connecting players
 == Filtrer forbindende spillere
 
 Indicate map finish
-== Angiv, om kortet er færdigt
+== Angiv, om banen er færdigt
 
 Unfinished map
-== Ufærdigt kort
+== Ufærdig bane
 
 Countries
 == Lande
@@ -673,7 +673,7 @@ Smooth Dynamic Camera
 == Glat Dynamisk Kamera
 
 Switch weapon when out of ammo
-== Skift våben, når du er ude af ammunition
+== Skift våben, når du er løbet tør for ammunition
 
 Show only chat messages from friends
 == Vis kun chatbeskeder fra venner
@@ -703,25 +703,25 @@ Max CSVs
 == Maks CSVs
 
 Download skins
-== Download skind
+== Download skin
 
 Vanilla skins only
-== Kun vaniljeskind
+== Kun vanillaskins
 
 Fat skins (DDFat)
-== Fed skind (DDFat)
+== Tykke skins (DDFat)
 
 Skin prefix
-== Hudpræfiks
+== Skinpræfiks
 
 Skin Database
-== Huddatabase
+== Skindatabase
 
 Skins directory
-== Skind vejviser
+== Skin vejviser
 
 Hook collisions
-== Krogkollisioner
+== Hook kollisioner
 
 Zoom in
 == Zoome ind
@@ -784,7 +784,7 @@ Enable gun sound
 == Aktivér pistollyd
 
 Enable long pain sound (used when shooting in freeze)
-== Aktivér lyd med lang smerte (bruges når du falder i frysepunkt)
+== Aktivér lyd med lang smerte (bruges når du falder i freeze)
 
 Enable server message sound
 == Aktivér serverbeskedlyd
@@ -805,7 +805,7 @@ Chat sound volume
 == Chatlydstyrke
 
 Map sound volume
-== Kortlydstyrke
+== Banelydstyrke
 
 Background music volume
 == Baggrundsmusikvolumen
@@ -832,7 +832,7 @@ Show names in chat in team colors
 == Vis navne i chat i teamfarver
 
 Show kill messages
-== Vis dræb beskeder
+== Vis død beskeder
 
 Show votes window after voting
 == Vis vinduet med stemmer efter afstemning
@@ -850,7 +850,7 @@ Highlighted message
 == Fremhævet besked
 
 Team message
-== Team besked
+== Hold besked
 
 Friend message
 == Ven besked
@@ -862,7 +862,7 @@ Client message
 == Klient besked
 
 Save the best demo of each race
-== Gem den bedste demo af hvert løb
+== Gem den bedste demo af hvert ræs
 
 Default length
 == Standardlængde
@@ -880,13 +880,13 @@ Gameplay
 == Gameplay
 
 Overlay entities
-== Dække entities
+== Dække enheder
 
 Size
 == Størrelse
 
 Show text entities
-== Vis tekst entities
+== Vis tekst enheder
 
 Show others (own team only)
 == Vis andre (kun eget hold)
@@ -904,25 +904,25 @@ AntiPing: predict weapons
 == AntiPing: forudsige våben
 
 AntiPing: predict grenade paths
-== AbtiPing: forudsige granatstier
+== AntiPing: forudsige granatstier
 
 Show other players' hook collision lines
-== Vis andre spillers kroge kollisionslinjer
+== Vis andre spillers hook kollisionslinjer
 
 Show other players' key presses
 == Vis andre spillers tastetryk
 
 Use current map as background
-== Brug det aktuelle kort som baggrund
+== Brug den aktuelle bane som baggrund
 
 Show tiles layers from BG map
-== Vis fliselag fra baggrundskortet
+== Vis fliselag fra baggrundsbanen
 
 DDNet %s is available:
 == DDNet %s er tilgængelig:
 
 Update now
-== Opdatere nu
+== Opdater nu
 
 Updating…
 == Opdaterer…
@@ -940,7 +940,7 @@ New random timeout code
 == Ny tilfældig timeout kode
 
 Entities
-== Entities
+== Enheder
 
 Emoticons
 == Humørikoner
@@ -998,7 +998,7 @@ Manual
 == Manual
 
 Race
-== Race
+== Ræs
 
 Auto
 == Auto
@@ -1010,10 +1010,10 @@ Follow
 == Følge med
 
 Frags
-== Frags
+== Drab
 
 Deaths
-== Dødsfalder
+== Dødsfald
 
 Suicides
 == Selvmord
@@ -1037,1097 +1037,1097 @@ Grabs
 == Tager fat
 
 1 new mention
-== 1 ny nævne
+== 1 ny omtale
 
 %d new mentions
-== %d ny nævner
+== %d ny omtaler
 
 9+ new mentions
-== 9+ ny nævner
+== 9+ ny omtaler
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Mislykkedes under initialisering. Prøv at ændre gfx_backend til OpenGL eller Vulkan i settings_ddnet.cfg i config-mappen og prøv igen.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Ude af VRAM. Prøv at fjerne tilpassede aktiver (skins, enheder osv.), især dem med høj opløsning.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Der opstod en fejl under kommandooptagelse. Prøv at opdatere dine GPU-drivere.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== En gengivelseskommando mislykkedes. Prøv at opdatere dine GPU-drivere.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Indsendelse af gengivelseskommandoer mislykkedes. Prøv at opdatere dine GPU-drivere.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Kunne ikke udskifte framebuffers. Prøv at opdatere dine GPU-drivere.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Ukendt fejl. Prøv at ændre gfx_backend til OpenGL eller Vulkan i settings_ddnet.cfg i config-mappen og prøv igen.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Kunne ikke initialisere den givne grafik-backend, vender tilbage til standard-backend nu.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Kunne ikke initialisere den givne grafik-backend, det er sandsynligvis fordi du ikke har installeret driveren til det integrerede grafikkort.
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== Kunne ikke løse forbindelsesadressen '%s'. Se den lokale konsol for detaljer.
 
 Connect address error
-== 
+== Tilslutningsadressefejl
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Den downloadede bane kunne ikke gemmes. Prøv at slette denne fil manuelt: %s
 
 Could not connect dummy
-== 
+== Kunne ikke forbinde dummy
 
 Error playing demo
-== 
+== Fejl ved afspilning af demo
 
 Failed saving the replay!
-== 
+== Replayet kunne ikke gemmes!
 
 Saving settings to '%s' failed
-== 
+== Det lykkedes ikke at gemme indstillinger til '%s'
 
 Error saving settings
-== 
+== Fejl under lagring af indstillinger
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Bredden af ​​tekstur %s er ikke delelig med %d, eller højden er ikke delelig med %d, hvilket kan forårsage visuelle fejl.
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" er ikke kompatibel med pnglite og kan ikke indlæses af gamle DDNet-versioner:
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Formatet på tekstur %s er ikke RGBA, hvilket vil forårsage visuelle fejl.
 
 Preparing demo playback
-== 
+== Forbereder demo-afspilning
 
 Connected
-== 
+== Forbundet
 
 Loading map file from storage
-== 
+== Indlæser kortfil fra lager
 
 Loading demo file from storage
-== 
+== Indlæser demofil fra lager
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Nogle skrifttyper kunne ikke indlæses. Tjek den lokale konsol for detaljer.
 
 Initializing components
-== 
+== Initialisering af komponenter
 
 Why are you slowmo replaying to read this?
-== 
+== Hvorfor afspiller du i slowmo for at læse dette?
 
 Initializing assets
-== 
+== Initialisering af assets
 
 Initializing map logic
-== 
+== Initialisering af banelogik
 
 Sending initial client info
-== 
+== Sender indledende kundeoplysninger
 
 Quitting. Please wait…
-== 
+== Afslutter. Vent venligst…
 
 Restarting. Please wait…
-== 
+== Genstarter. Vent venligst…
 
 Loading skin files
-== 
+== Indlæser skinfiler
 
 Loading background map
-== 
+== Indlæser baggrundsbane
 
 Auto-sync player camera
-== 
+== Auto-sync spiller kamera
 
 [Auto camera]
 Disabled
-== 
+== Slået fra
 
 [Auto camera]
 Enabled
-== 
+== Slået til
 
 [Auto camera]
 Unavailable for this player
-== 
+== Ikke tilgængelig for denne spiller
 
 [Auto camera]
 Inactive
-== 
+== Inaktiv
 
 [Auto camera]
 Active
-== 
+== Aktiv
 
 Searching
-== 
+== Søger
 
 Enter Username
-== 
+== Skriver brugernavn
 
 Enter Password
-== 
+== Skrive kodeord
 
 NOT CONNECTED
-== 
+== IKKE TILSLUTTET
 
 Match %d of %d
-== 
+== Kamp %d af %d
 
 No results
-== 
+== Intet resultat
 
 Lines %d - %d (%s)
-== 
+== Linje %d - %d (%s)
 
 Locked
-== 
+== Låst
 
 Following
-== 
+== Følger
 
 Loading commands…
-== 
+== Indlæser kommandoer…
 
 Loading maps…
-== 
+== Indlæser baner…
 
 Position:
-== 
+== Position:
 
 Speed:
-== 
+== Hastighed:
 
 Angle:
-== 
+== Vinkel:
 
 Multi-View
-== 
+== Multi-visning
 
 [Spectating]
 Following %s
-== 
+== Følger %s
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== AUTO
 
 Team %d
-== 
+== Hold %d
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Nogle banebilleder kunne ikke indlæses. Tjek den lokale konsol for detaljer.
 
 Uploading map data to GPU
-== 
+== Uploader banedata til GPU
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Nogle banelyde kunne ikke indlæses. Tjek den lokale konsol for detaljer.
 
 Loading menu themes
-== 
+== Indlæser menutemaer
 
 Press a key…
-== 
+== Tryk på en knap…
 
 Main menu
-== 
+== Hovedmenu
 
 Rename folder
-== 
+== Omdøb folder
 
 Render complete
-== 
+== Gengivelse komplet
 
 Are you sure that you want to restart?
-== 
+== Er du sikker på, at du vil genstarte?
 
 Save skin
-== 
+== Gem skin
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Er du sikker på, at du vil gemme dit skin? Hvis et skin med dette navn allerede findes, vil det blive erstattet.
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== Der er en ikke-gemt bane i editoren, du burde måske gemme det.
 
 Continue anyway?
-== 
+== Forsæt alligevel?
 
 A demo with this name already exists
-== 
+== Der findes allerede en demo med dette navn
 
 A folder with this name already exists
-== 
+== Der findes allerede en mappe med dette navn
 
 Unable to rename the folder
-== 
+== Kan ikke omdøbe mappen
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== Filen '%s' findes allerede, vil du overskrive den?
 
 (paused)
-== 
+== (pause)
 
 Videos directory
-== 
+== Video bibliotek
 
 Video was saved to '%s'
-== 
+== Video blev gemt i '%s'
 
 Join Tutorial Server
-== 
+== Tilslut Tutorial Server
 
 Skip Tutorial
-== 
+== Spring Tutorial over
 
 Unable to save the skin
-== 
+== Kan ikke gemme skin
 
 Unable to save the skin with a reserved name
-== 
+== Kan ikke gemme skin med et reserveret navn
 
 Trying to determine UDP connectivity…
-== 
+== Forsøger at bestemme UDP-forbindelse…
 
 UDP seems to be filtered.
-== 
+== UDP ser ud til at være filtreret
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== UDP og TCP IP adresser ser ud til at være forskellige. Prøv at deaktivere VPN, proxy eller netværksacceeleratorer
 
 No answer from server yet.
-== 
+== Intet svar fra serveren endnu.
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 Getting game info
-== 
+== Henter spiloplysninger
 
 Requesting to join the game
-== 
+== Anmoder om at deltage i spillet
 
 Loading menu images
-== 
+== Indlæser menubilleder
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Henter serverliste fra masterserver
 
 No local servers found (ports %d-%d)
-== 
+== Ingen lokale servere fundet (ports %d-%d)
 
 Example of usage
-== 
+== Eksempel på brug
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Er du sikker på, at du vil afbryde forbindelsen og skifte til en anden server?
 
 No login required
-== 
+== Ingen login påkrævet
 
 Communities
-== 
+== Fællesskaber
 
 Copy info
-== 
+== Kopiér info
 
 Leak IP
-== 
+== Læk IP
 
 No server selected
-== 
+== Ingen server valgt
 
 Online friends (%d)
-== 
+== Online venner (%d)
 
 Online clanmates (%d)
-== 
+== Online klankammerater (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Offline (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Klik for at vælge server. Dobbeltklik for at slutte sig til din ven.
 
 Click to remove this player from your friends list.
-== 
+== Klik for at fjerne denne spiller fra din venneliste.
 
 Click to remove this clan from your friends list.
-== 
+== Klik for at fjerne denne klan fra din venneliste.
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 
+== Tilføj venner ved at indtaste deres navn nedenfor eller ved at klikke på deres navn på spillerlisten.
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
+== Tilføj klankammerater ved at indtaste deres klan nedenfor og lade navnet stå tomt.
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Er du sikker på, at du vil fjerne afspilleren '%s' fra din venneliste?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Er du sikker på, at du vil fjerne klanen '%s' fra din venneliste?
 
 Add Clan
-== 
+== Tilføj klan
 
 Server filter
-== 
+== Server filter
 
 Friends
-== 
+== Venner
 
 Play the current demo
-== 
+== Afspil den aktuelle demo
 
 Pause the current demo
-== 
+== Sæt den aktuelle demo på pause
 
 Stop the current demo
-== 
+== Stop den aktuelle demo
 
 Go back the specified duration
-== 
+== Gå tilbage til den angivne varighed
 
 [Demo player duration]
 %d min.
-== 
+== %d min.
 
 [Demo player duration]
 %d sec.
-== 
+== %d sec.
 
 Change the skip duration
-== 
+== Skift overspringstiden
 
 Go forward the specified duration
-== 
+== Gå fremad med den angivne varighed
 
 Go back one tick
-== 
+== Gå et tick tilbage
 
 Go forward one tick
-== 
+== Gå et tick frem
 
 Go back one marker
-== 
+== Gå en markør tilbage
 
 Go forward one marker
-== 
+== Gå en markør frem
 
 Slow down the demo
-== 
+== Sæt farten for demoen ned
 
 Speed up the demo
-== 
+== Søt farten for demoen op
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Marker begyndelsen af ​​et klip (højreklik for at nulstille)
 
 Mark the end of a cut (right click to reset)
-== 
+== Marker slutningen af ​​et klip (højreklik for at nulstille)
 
 Export cut as a separate demo
-== 
+== Eksportér klip som en separat demo
 
 Close the demo player
-== 
+== Luk demo-afspilleren
 
 Toggle keyboard shortcuts
-== 
+== Skift tastaturgenveje
 
 Toggle auto camera
-== 
+== Skift autokamera
 
 Export demo cut
-== 
+== Eksporter demo klip
 
 Cut interval
-== 
+== Klip interval
 
 Cut length
-== 
+== Klip længde
 
 Render cut to video
-== 
+== Overfør klip til video
 
 Please use a different filename
-== 
+== Brug venligst et andet filnavn
 
 Loading demo files
-== 
+== Indlæser demofiler
 
 All combined
-== 
+== Alt kombineret
 
 No demo selected
-== 
+== Ingen demo valgt
 
 Folder Link
-== 
+== Mappe link
 
 Created
-== 
+== Oprettet
 
 Netversion
-== 
+== Netversion
 
 [Demo details]
 map not included
-== 
+== Bane ikke inkluderet
 
 Open the directory that contains the demo files
-== 
+== Åbn den mappe, der indeholder demofilerne
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Er du sikker på, at du vil slette mappen '%s'?
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Er du sikker på, at du vil slette demoen '%s'?
 
 Delete folder
-== 
+== Slet mappe
 
 Unable to delete the demo '%s'
-== 
+== Kan ikke slette demoen '%s'
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Kan ikke slette mappen '%s'. Sørg for, at den er tom først.
 
 Dummy is not allowed on this server
-== 
+== Dummy er ikke tilladt på denne server
 
 Please wait…
-== 
+== Vent venligst…
 
 Edit touch controls
-== 
+== Rediger berøringsindstillinger
 
 Close
-== 
+== Luk
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Save changes
-== 
+== Gem ændringer
 
 Error saving touch controls
-== 
+== Fejl ved gemning af berøringsindstillinger
 
 Could not save touch controls to file. See local console for details.
-== 
+== Berøringsindstillinger kunne ikke gemmes i filen. Se den lokale konsol for detaljer
 
 Unsaved changes
-== 
+== Ikke-gemte ændringer
 
 Discard changes
-== 
+== Kassér ændringer
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 
+== Er du sikker på, at du vil kassere de aktuelle ændringer af berøringsindstillingerne?
 
 Are you sure that you want to reset the touch controls to default?
-== 
+== Er du sikker på at du vil nulstille berøringsindstillingerne til standard?
 
 Import from clipboard
-== 
+== Importer fra udklipsholder
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
+== Er du sikker på, at du vil importere berøringsindstillingerne fra udklipsholderen? Dette vil overskrive dine aktuelle berøringsindstillinger.
 
 Export to clipboard
-== 
+== Eksporter til udklipsholder
 
 Direct touch input while ingame
-== 
+== Direkte berøringsinput, mens du er i et spil
 
 [Direct touch input]
 Disabled
-== 
+== Slået fra
 
 [Direct touch input]
 Active action
-== 
+== Aktiver handling
 
 [Direct touch input]
 Aim
-== 
+== Sigt
 
 [Direct touch input]
 Fire
-== 
+== Skyd
 
 [Direct touch input]
 Hook
-== 
+== hook
 
 Direct touch input while spectating
-== 
+== Direkte berøringsinput når du ser på
 
 Error loading touch controls
-== 
+== Fejl ved indlæsning af berøringsindstillinger
 
 Could not load touch controls from file. See local console for details.
-== 
+== Kunne ikke indlæse berøringsindstillinger fra filen. Se den lokale konsol for detaljer.
 
 Could not load default touch controls from file. See local console for details.
-== 
+== Kunne ikke indlæse standard berøringsindstillinger fra filen. Se den lokale konsol for detaljer.
 
 Could not load touch controls from clipboard. See local console for details.
-== 
+== Kunne ikke indlæse standard berøringsindstillinger fra udklipsholderen. Se den lokale konsol for detaljer.
 
 Community
-== 
+== Fællesskab
 
 Round %d/%d
-== 
+== Runde %d/%d
 
 [Team status]
 forbidden
-== 
+== forbudt
 
 [Team status]
 solo
-== 
+== solo
 
 [Team status]
 allowed
-== 
+== tilladt
 
 [Team status]
 required
-== 
+== påkrævet
 
 Teams
-== 
+== hold
 
 [Team size]
 minimum
-== 
+== minimum
 
 [Team size]
 maximum
-== 
+== maximum
 
 Loading…
-== 
+== Indlæser…
 
 Loading ghost files
-== 
+== Indlæser spøgelsesfiler
 
 Ghosts directory
-== 
+== Spøgelses bibliotek
 
 Activate all
-== 
+== Aktiver alle
 
 Deactivate all
-== 
+== Deaktiver alle
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Menu åbnet. Tryk på Esc-tasten igen for at lukke menuen.
 
 [Hertz]
 Hz
-== 
+== Hz
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Spar strøm ved at sænke opdateringshastigheden (højere input latency)
 
 Settings file
-== 
+== Indstillingsfil
 
 Open the settings file
-== 
+== Åbn indstillingsfilen
 
 Saves file
-== 
+== Gemmer fil
 
 Open the saves file
-== 
+== Åbn den gemte fil
 
 Config directory
-== 
+== Konfigurationsmappe
 
 Open the directory that contains the configuration and user files
-== 
+== Åbn den mappe, der indeholder konfigurations- og brugerfilerne
 
 Open the directory to add custom themes
-== 
+== Åbn biblioteket for at tilføje brugerdefinerede temaer
 
 Dummy
-== 
+== Dummy
 
 Player info change cooldown
-== 
+== Afkøling af spillerinfoændring
 
 Download community skins
-== 
+== Download fællesskab skins
 
 Create a random skin
-== 
+== Opret et tilfældigt skin
 
 Choose default eyes when joining a server
-== 
+== Vælg standardøjne, når du tilmelder dig en server
 
 Open the directory to add custom skins
-== 
+== Åbn mappen for at tilføje brugerdefinerede skins
 
 Chat command
-== 
+== Chat kommando
 
 Enable controller
-== 
+== Aktiver controller
 
 Controller
-== 
+== Controller
 
 Ingame controller mode
-== 
+== Ingame controller-tilstand
 
 [Ingame controller mode]
 Relative
-== 
+== Dertilhørende
 
 [Ingame controller mode]
 Absolute
-== 
+== Absolut
 
 Ingame controller sens.
-== 
+== Ingame controller sens.
 
 UI controller sens.
-== 
+== UI controller sens.
 
 Controller jitter tolerance
-== 
+== Controller jitter tolerance
 
 No controller found. Plug in a controller.
-== 
+== Ingen controller fundet. Tilslut en controller
 
 Axis
-== 
+== Akse
 
 Status
-== 
+== Status
 
 Aim bind
-== 
+== Sigte bind
 
 Mouse
-== 
+== Mus
 
 Ingame mouse sens.
-== 
+== Ingame mus sens.
 
 UI mouse sens.
-== 
+== UI mus sens.
 
 Reset controls
-== 
+== Nulstil indstillinger
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Er du sikker på, at du vil nulstille indstillinger til deres standardindstillinger?
 
 Cancel
-== 
+== Afbryd
 
 Windowed
-== 
+== Vindueskærm
 
 Windowed borderless
-== 
+== Vindueskærm uden kant
 
 Windowed fullscreen
-== 
+== Vindueskræm fuldskærm
 
 Desktop fullscreen
-== 
+== Desktop fuldskærm
 
 Allows maps to render with more detail
-== 
+== Tillad baner at indlæse med flere detaljer
 
 Show FPS
-== 
+== Vis FPS
 
 Renders your frame rate in the top right
-== 
+== Gengiver din billedhastighed øverst til højre
 
 Renderer
-== 
+== Renderer
 
 default
-== 
+== standard
 
 custom
-== 
+== brugerdefineret
 
 Graphics card
-== 
+== Grafikkort
 
 auto
-== 
+== auto
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Danish translation by SnOrKilll, matiasmunk and Fin (b3z)
+== Danske oversættelser af SnOrKilll, matiasmunk, Fin (b3z), z0rba og Anthony (danishgoat29)
 
 Tee
-== 
+== Tee
 
 Appearance
-== 
+== Udseende
 
 Name Plate
-== 
+== Navneskilt
 
 Hook Collisions
-== 
+== Hook kollisioner
 
 Info Messages
-== 
+== Info beskeder
 
 Show health, shields and ammo
-== 
+== Vis liv, skjolde og ammunition
 
 Show local time always
-== 
+== Vis altid lokal tid
 
 Show spectator cursor
-== 
+== Vis tilskuermarkøren
 
 Authed name color in scoreboard
-== 
+== Godkendt navnefarve i resultattavlen
 
 Same clan color in scoreboard
-== 
+== Samme klanfarve i resultattavlen
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Show client IDs (scoreboard, chat, spectator)
-== 
+== Vis klient-ID’er (resultattavle, chat, tilskuer)
 
 Show DDRace HUD
-== 
+== Vis DDRace HUD
 
 Show jumps indicator
-== 
+== Vis hoppe indikator
 
 Show dummy actions
-== 
+== Vis dummy-handlinger
 
 Show player position
-== 
+== Vis spillerposition
 
 Show player speed
-== 
+== Vis spiller hastighed
 
 Show player target angle
-== 
+== Vis spillerens målvinkel
 
 Show freeze bars
-== 
+== Vis freeze barer
 
 Opacity of freeze bars inside freeze
-== 
+== Opacitet af freeze barer inde i freeze
 
 Always show chat
-== 
+== Altid vis chat
 
 Show only chat messages from team members
-== 
+== Vis kun chatbeskeder fra holdmedlemmer
 
 Chat font size
-== 
+== Chat font størrelse
 
 Chat width
-== 
+== Chat bredde
 
 Preview
-== 
+== Forhåndsvisning
 
 Show friend mark (♥) in name plates
-== 
+== Vis vennemærke (♥) i navneskilte
 
 Show client IDs in name plates
-== 
+== Vis klient-ID'er på navneskilte
 
 Hook Strength
-== 
+== Hookstyrke
 
 Show hook strength icon indicator
-== 
+== Vis hookstyrke ikonindikator
 
 Show hook strength number indicator
-== 
+== Vis hookstyrke talindikator
 
 Size of hook strength icon and number indicator
-== 
+== Størrelse af hookstyrke ikon- og talindikator
 
 Key Presses
-== 
+== Tastetryk
 
 Show local player's key presses
-== 
+== Vis lokale spilleres tastetryk
 
 Size of key press icons
-== 
+== Størrelse af tastetrykikoner
 
 Hook collision line
-== 
+== Hook kollisionslinje
 
 Show own player's hook collision line
-== 
+== Vis spillerens egen hook kollisionslinje
 
 Always show own player's hook collision line
-== 
+== Vis altid spillerens egen hook kollisionslinje
 
 Always show other players' hook collision lines
-== 
+== Vis altid andre spilleres hook kollisionslinjer
 
 Width of your own hook collision line
-== 
+== Bredde af din egen hook kollisionslinje
 
 Width of others' hook collision line
-== 
+== Bredde af andres hook kollisionslinje
 
 Hook collision line opacity
-== 
+== Hook kollisionslinje opacitet
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Farver på hook kollisionslinje, i tilfælde af mulig kollision med:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Dine bevægelser tages ikke i betragtning ved beregning af linjefarverne
 
 Nothing hookable
-== 
+== Intet hookable
 
 Something hookable
-== 
+== Noget hookable
 
 A Tee
-== 
+== En Tee
 
 Preview 'Hook collisions' being pressed
-== 
+== Forhåndsvisning ‘Hookkolissioner’ bliver trykket ned
 
 Show finish messages
-== 
+== Vis afslutsbeskeder
 
 Normal Color
-== 
+== Normal farve
 
 Highlight Color
-== 
+== Fremhæv farve
 
 Weapons
-== 
+== Våben
 
 Rifle Laser Outline Color
-== 
+== Riffel Laser Omridsfarve
 
 Rifle Laser Inner Color
-== 
+== Riffel laser Indre Farve
 
 Shotgun Laser Outline Color
-== 
+== Haglgevær Laser Omridsfarve
 
 Shotgun Laser Inner Color
-== 
+== Haglgevær Laser Indre Farve
 
 Door Laser Outline Color
-== 
+== Dør Laser Omrids Farve
 
 Door Laser Inner Color
-== 
+== Dør Laser Indre Farve
 
 Freeze Laser Outline Color
-== 
+== Freeze Laser Omrids Farve
 
 Freeze Laser Inner Color
-== 
+== Freeze Laser Indre Farve
 
 Set all to Rifle
-== 
+== Indstil alt til Riffel
 
 Enable ghost
-== 
+== Aktiver spøgelse
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Når du krydser startlinjen, vis en spøgelses tee, der gentager bevægelserne fra din bedste tid
 
 Opacity
-== 
+== Opacitet
 
 Only save improvements
-== 
+== Gem kun forbedringer
 
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== 
+== Juster opaciteten af ​​enheder, der tilhører andre hold, såsom tees og navneskilte
 
 Quads are used for background decoration
-== 
+== Quads bruges til baggrundsdekoration
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Forsøger at forudsige andre entiteter for at give en følelse af lav latency
 
 Background
-== 
+== Baggrund
 
 Regular background color
-== 
+== Normal baggrundsfarve
 
 Entities background color
-== 
+== Enheders baggrundsfarve
 
 Run on join
-== 
+== Kør på start
 
 Chat command (e.g. showall 1)
-== 
+== Chatkommando (e.g. showall 1)
 
 Unregister protocol and file extensions
-== 
+== Afregistrer protokol og filtype
 
 Basic
-== 
+== Grundlæggende
 
 Custom
-== 
+== Brugerdefineret
 
 Are you sure that you want to delete '%s'?
-== 
+== Er du sikker på, at du vil slette '%s'?
 
 Delete skin
-== 
+== Slet skin
 
 Unable to delete skin
-== 
+== Fejl ved sletning af skin
 
 Extras
-== 
+== Ekstra
 
 Loading assets
-== 
+== Loader assets
 
 Open the directory to add custom assets
-== 
+== Åbn biblioteket for at tilføje brugerdefinerede assets
 
 Discord
-== 
+== Discord
 
 https://ddnet.org/discord
-== 
+== https://ddnet.org/discord
 
 Tutorial
-== 
+== Tutorial
 
 Can't find a Tutorial server
-== 
+== Kan ikke finde en Tutorial server
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Serveren kunne ikke startes. Sørg for at give tilladelse i app-indstillingerne, så serveren kan køre i baggrunden.
 
 Loading race demo files
-== 
+== Indlæser race demo filer
 
 [Spectators]
 %d others…
-== 
+== %d andre…
 
 Super
-== 
+== Super
 
 [Team and size]
 %d\n(%d/%d)
-== 
+== %d\n(%d/%d)
 
 Team %d (%d/%d)
-== 
+== Team %d (%d/%d)
 
 [skins]
 Body
-== 
+== Krop
 
 [skins]
 Marking
-== 
+== Markering
 
 [skins]
 Decoration
-== 
+== Dekorationer
 
 [skins]
 Hands
-== 
+== Hænder
 
 [skins]
 Feet
-== 
+== Fødder
 
 [skins]
 Eyes
-== 
+== Øjne
 
 Loading sound files
-== 
+== Indlæser lydfiler
 
 Aim
-== 
+== Sigt
 
 Active: Fire
-== 
+== Aktivt: Skyd
 
 Active: Hook
-== 
+== Aktivt: Hook
 
 Moved ingame
-== 
+== Bevægede dig ingame
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/wiki/Mapping

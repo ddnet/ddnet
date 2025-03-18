@@ -177,6 +177,7 @@ public: // TODO: Maybe make protected
 	bool NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos) const;
 
 	bool GameLayerClipped(vec2 CheckPos);
+	virtual bool CanCollide(int ClientId) { return true; };
 
 	// DDRace
 

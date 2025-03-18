@@ -367,6 +367,15 @@ Show ingame HUD
 Show name plates
 == 显示昵称
 
+None
+== 禁用
+
+Own
+== 自身
+
+Others
+== 其他
+
 Show only chat messages from friends
 == 只显示好友聊天消息
 
@@ -441,6 +450,9 @@ Use sounds
 
 Use team colors for name plates
 == 用队伍颜色显示昵称
+
+Show friend icon in name plates
+== 在昵称中显示好友图标
 
 V-Sync
 == 垂直同步
@@ -549,6 +561,9 @@ LAN
 
 Name plates size
 == 昵称大小
+
+Name plates offset
+== 昵称距离
 
 Show score
 == 显示分数
@@ -1339,6 +1354,9 @@ Show DDRace HUD
 Show jumps indicator
 == 显示可跳跃次数
 
+Show number of spectators
+== 显示旁观者人数
+
 Hook collision line
 == 钩索辅助线
 
@@ -2046,6 +2064,12 @@ https://wiki.ddnet.org/wiki/Touch_controls
 Show client IDs in name plates
 == 显示客户端 ID
 
+Show client IDs on a seperate line
+== 客户端 ID 换行显示
+
+Client IDs size
+== 客户端 ID 大小
+
 Hook Strength
 == 钩索强度
 
@@ -2055,8 +2079,14 @@ Size of hook strength icon and number indicator
 Key Presses
 == 按键显示
 
+Show players' key presses
+== 显示按键
+
 Size of key press icons
 == 按键显示图标大小
+
+Preview dummy's name plate
+== 预览分身昵称
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == 服务器无法启动。请确保在应用程序设置中授予通知权限，以便服务器可以在后台运行。
@@ -2131,7 +2161,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 简体中文翻译由以下人员贡献：MK124, CarolVlCznYu, MC_TYH, Yangfl, Eki, Night_L, TsFreddie, Dan_cao, Momo, cheeser0613, RemakePower, By, Bamcane, Pioooooo, 豆腐渣
+== 简体中文翻译由以下人员贡献：MK124, CarolVlCznYu, MC_TYH, Yangfl, Eki, Night_L, TsFreddie, Dan_cao, Momo, cheeser0613, RemakePower, By, Bamcane, Pioooooo, 豆腐渣, XCWQW1
 
 Show spectator cursor
 == 显示旁观者光标

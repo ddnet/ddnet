@@ -461,7 +461,7 @@ void CCharacter::FireWeapon()
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
-		GetTuning(GetOverriddenTuneZone())->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+		GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 
 		m_ReloadTimer = FireDelay * GameWorld()->GameTickSpeed() / 1000;
 	}
@@ -700,20 +700,20 @@ void CCharacter::HandleSkippableTiles(int Index)
 		}
 		else if(Type == TILE_SPEED_BOOST)
 		{
+			constexpr float MaxSpeedScale = 5.0f;
 			if(MaxSpeed == 0)
 			{
-				TempVel += Direction * Force;
+				float MaxRampSpeed = GetTuning(m_TuneZone)->m_VelrampRange / (50 * log(maximum((float)GetTuning(m_TuneZone)->m_VelrampCurvature, 1.01f)));
+				MaxSpeed = maximum(MaxRampSpeed, GetTuning(m_TuneZone)->m_VelrampStart / 50) * MaxSpeedScale;
 			}
+
+			// (signed) length of projection
+			float CurrentDirectionalSpeed = dot(Direction, m_Core.m_Vel);
+			float TempMaxSpeed = MaxSpeed / MaxSpeedScale;
+			if(CurrentDirectionalSpeed + Force > TempMaxSpeed)
+				TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
 			else
-			{
-				// hardest to understand
-				float CurrentDirectionalSpeed = dot(Direction, m_Core.m_Vel);
-				float TempMaxSpeed = MaxSpeed / 5.0f;
-				if(CurrentDirectionalSpeed + Force > TempMaxSpeed)
-					TempVel += Direction * (TempMaxSpeed - CurrentDirectionalSpeed);
-				else
-					TempVel += Direction * Force;
-			}
+				TempVel += Direction * Force;
 			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}
 	}
@@ -1419,7 +1419,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		if(maximum(m_LastTuneZoneTick, m_LastWeaponSwitchTick) + GameWorld()->GameTickSpeed() < GameWorld()->GameTick())
 		{
 			float FireDelay;
-			GetTuning(GetOverriddenTuneZone())->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+			GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 			const int FireDelayTicks = FireDelay * GameWorld()->GameTickSpeed() / 1000;
 			m_ReloadTimer = maximum(0, m_AttackTick + FireDelayTicks - GameWorld()->GameTick());
 		}

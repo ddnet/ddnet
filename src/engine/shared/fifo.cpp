@@ -14,6 +14,7 @@ void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
 	m_File = -1;
 
 	m_pConsole = pConsole;
+	m_IsInit = true;
 	if(pFifoFile[0] == '\0')
 		return;
 
@@ -89,6 +90,7 @@ void CFifo::Update()
 void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
 {
 	m_pConsole = pConsole;
+	m_IsInit = true;
 	if(pFifoFile[0] == '\0')
 	{
 		m_pPipe = INVALID_HANDLE_VALUE;

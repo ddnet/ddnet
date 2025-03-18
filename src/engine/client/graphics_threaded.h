@@ -680,8 +680,7 @@ public:
 		INITFLAG_VSYNC = 1 << 1,
 		INITFLAG_RESIZABLE = 1 << 2,
 		INITFLAG_BORDERLESS = 1 << 3,
-		INITFLAG_HIGHDPI = 1 << 4,
-		INITFLAG_DESKTOP_FULLSCREEN = 1 << 5,
+		INITFLAG_DESKTOP_FULLSCREEN = 1 << 4,
 	};
 
 	virtual ~IGraphicsBackend() = default;
@@ -696,8 +695,8 @@ public:
 
 	virtual const TTwGraphicsGpuList &GetGpus() const = 0;
 
-	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
-	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
+	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
+	virtual void GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
 
 	virtual int GetNumScreens() const = 0;
 	virtual const char *GetScreenName(int Screen) const = 0;
@@ -890,19 +889,8 @@ class CGraphics_Threaded : public IEngineGraphics
 		// kick command buffer and try again
 		KickCommandBuffer();
 
-		if(!FailFunc())
-		{
-			char aError[256];
-			str_format(aError, sizeof(aError), "graphics: failed to run fail handler for command '%s'", typeid(TName).name());
-			dbg_assert(false, aError);
-		}
-
-		if(!m_pCommandBuffer->AddCommandUnsafe(Cmd))
-		{
-			char aError[256];
-			str_format(aError, sizeof(aError), "graphics: failed to add command '%s' to command buffer", typeid(TName).name());
-			dbg_assert(false, aError);
-		}
+		dbg_assert(FailFunc(), "graphics: failed to run fail handler for command '%s'", typeid(TName).name());
+		dbg_assert(m_pCommandBuffer->AddCommandUnsafe(Cmd), "graphics: failed to add command '%s' to command buffer", typeid(TName).name());
 	}
 
 	void KickCommandBuffer();

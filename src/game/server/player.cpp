@@ -436,6 +436,7 @@ void CPlayer::Snap(int SnappingClient)
 				for(auto &pPlayer : GameServer()->m_apPlayers)
 				{
 					if(!pPlayer || pPlayer->m_ClientId == id || pPlayer->m_Afk ||
+						(Server()->GetAuthedState(pPlayer->m_ClientId) && Server()->HasAuthHidden(pPlayer->m_ClientId)) ||
 						!(pPlayer->m_Paused || pPlayer->m_Team == TEAM_SPECTATORS))
 					{
 						continue;
@@ -814,7 +815,7 @@ void CPlayer::ProcessPause()
 	if(m_ForcePauseTime && m_ForcePauseTime < Server()->Tick())
 	{
 		m_ForcePauseTime = 0;
-		Pause(PAUSE_NONE, true);
+		GameServer()->SendChatTarget(m_ClientId, "The force pause timer is now over, you can exit with /spec");
 	}
 
 	if(m_Paused == PAUSE_SPEC && !m_pCharacter->IsPaused() && CanSpec())
