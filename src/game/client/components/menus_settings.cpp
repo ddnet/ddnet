@@ -2872,7 +2872,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Name Plate Dummy Preview ***** //
 		RightView.HSplitBottom(LineSize, &RightView, &Button);
-		if(DoButton_CheckBox(&m_DummyNamePlatePreview, Localize("Preview dummy's name plate"), m_DummyNamePlatePreview, &Button))
+		if(DoButton_CheckBox(&m_DummyNamePlatePreview, g_Config.m_ClDummy ? Localize("Preview player's name plate") : Localize("Preview dummy's name plate"), m_DummyNamePlatePreview, &Button))
 			m_DummyNamePlatePreview = !m_DummyNamePlatePreview;
 
 		int Dummy = g_Config.m_ClDummy != (m_DummyNamePlatePreview ? 1 : 0);
