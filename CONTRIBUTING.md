@@ -190,6 +190,41 @@ Default arguments tend to break quickly, if you have multiple you have to specif
 
 Try finding descriptive names instead.
 
+### Global/static variables should be avoided
+
+Use member variables or pass state by parameter instead of using global or static variables since static variables share the same value across instances of a class.
+
+Avoid static variables ❌: 
+
+```C++
+int CMyClass::Foo()
+{
+    static int s_Count = 0;
+    s_Count++;
+    return s_Count;
+}
+```
+
+Use member variables instead ✅:
+
+```C++
+class CMyClass
+{
+    int m_Count = 0;
+};
+int CMyClass::Foo()
+{
+    m_Count++;
+    return m_Count;
+}
+```
+
+Constants can be static ✅:
+
+```C++
+static constexpr int ANSWER = 42;
+```
+
 ### Getters should not have a Get prefix
 
 While the code base already has a lot of methods that start with a ``Get`` prefix. If new getters are added they should not contain a prefix.
