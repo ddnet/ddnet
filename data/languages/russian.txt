@@ -1225,8 +1225,14 @@ Allows maps to render with more detail
 Show dummy actions
 == Показывать действия дамми
 
+Show dummy status
+== Показывать состояния дамми
+
 Show player position
 == Показывать позицию игрока
+
+Show dummy position
+== Показывать позицию дамми
 
 Show player speed
 == Показывать скорость игрока
