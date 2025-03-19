@@ -2419,6 +2419,10 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerSpeed, Localize("Show player speed"), &g_Config.m_ClShowhudPlayerSpeed, &RightView, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerAngle, Localize("Show player target angle"), &g_Config.m_ClShowhudPlayerAngle, &RightView, LineSize);
 
+		// Scale mouse cursor
+		RightView.HSplitTop(LineSize * 2.0f, &Button, &RightView);
+		Ui()->DoScrollbarOption(&g_Config.m_ClCursorScale, &g_Config.m_ClCursorScale, &Button, Localize("Scale the in game cursor"), 20, 500, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE, "%");
+
 		// Freeze bar settings
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &RightView, LineSize);
 		RightView.HSplitTop(LineSize * 2.0f, &Button, &RightView);

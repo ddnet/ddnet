@@ -591,6 +591,10 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::RenderCursor()
 {
+	const float Scale = (float)g_Config.m_ClCursorScale / 100.0f;
+	if(Scale <= 0.0f)
+		return;
+
 	int CurWeapon = 0;
 	vec2 TargetPos;
 	float Alpha = 1.0f;
@@ -633,7 +637,7 @@ void CHud::RenderCursor()
 
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y, Scale, Scale);
 }
 
 void CHud::PrepareAmmoHealthAndArmorQuads()
