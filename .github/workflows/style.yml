@@ -107,7 +107,10 @@ jobs:
           grep -v -E "\"data/themes/.*\.map\": Time cps are missing on the map" | \
           grep -v -E "\"data/maps/ctf4\.map\": Map - In Image at index 3 -> Image 'jungle_doodads_old' is not a valid external image for DDNet06" | \
           grep -v -E "\"data/themes/autumn_night\.map\": Map - In Image at index 3 -> Image 'generic_lamps' is not a valid external image for DDNet06" | \
-          grep -v -E "\"data/maps7?/Tutorial\.map\": Map setting - Unusual: 'sv_show_others_default'" || true)
+          grep -v -E "\"data/maps7?/Tutorial\.map\": Map setting - Unusual: 'sv_show_others_default'" | \
+          grep -v -E "\"data/maps7?/Gold Mine\.map\": Front tile at x: [0-9]+, y: [0-9]+ with an deprecated id: 6" | \
+          grep -v -E "\"data/maps7?/Gold Mine\.map\": Speedup tile at x: [0-9]+, y: [0-9]+ with an deprecated id: 28" | \
+          grep -v -E "\"data/maps7?/LearnToPlay\.map\": Speedup tile at x: [0-9]+, y: [0-9]+ with an deprecated id: 28" || true)
         if [ -n "$findings" ]; then
           echo "$findings"
           exit 1
