@@ -2423,8 +2423,22 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		// Switch for dummy actions display
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDummyActions, Localize("Show dummy actions"), &g_Config.m_ClShowhudDummyActions, &RightView, LineSize);
 
+		// Switch for dummy status display
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDummyStatus, Localize("Show dummy status"), &g_Config.m_ClShowhudDummyStatus, &RightView, LineSize);
+
+
+
 		// Player movement information display settings
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerPosition, Localize("Show player position"), &g_Config.m_ClShowhudPlayerPosition, &RightView, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerPosition, Localize("Show player position"), &g_Config.m_ClShowhudPlayerPosition, 	&RightView, LineSize);
+		if (g_Config.m_ClShowhudPlayerPosition == 1)
+		{
+			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudDummyPosition, Localize("Show dummy position"), &g_Config.m_ClShowhudDummyPosition, &RightView, LineSize);
+		}
+		else
+		{
+			RightView.HSplitTop(LineSize, nullptr, &RightView);      // Create empty space for hidden option
+		}
+
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerSpeed, Localize("Show player speed"), &g_Config.m_ClShowhudPlayerSpeed, &RightView, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerAngle, Localize("Show player target angle"), &g_Config.m_ClShowhudPlayerAngle, &RightView, LineSize);
 

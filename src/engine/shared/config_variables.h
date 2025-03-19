@@ -15,9 +15,9 @@
 MACRO_CONFIG_INT(ClDummyDirection, cl_dummy_direction, 0, -1, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Dummy direction (-1 - left|1 - right)")
 
 //Hud dummy moventer
-MACRO_CONFIG_INT(ClShowhudDummyPosition, cl_showhud_dummy_position, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Dummy position x|y)")
+MACRO_CONFIG_INT(ClShowhudDummyPosition, cl_showhud_dummy_position, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Dummy position x|y)")
 //Hud dummy status
-MACRO_CONFIG_INT(ClShowhudDummyStatus, cl_showhud_dummy_status, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Dummy status for example freeze or no")
+MACRO_CONFIG_INT(ClShowhudDummyStatus, cl_showhud_dummy_status, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Dummy status for example freeze or no")
 
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict client movements")
 MACRO_CONFIG_INT(ClPredictDummy, cl_predict_dummy, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict dummy movements")
