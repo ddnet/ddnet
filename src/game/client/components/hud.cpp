@@ -591,68 +591,49 @@ void CHud::RenderTeambalanceWarning()
 
 void CHud::RenderCursor()
 {
-	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_pLocalCharacter)
-	{
-		// render local cursor
-		int CurWeapon = maximum(0, m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
-		vec2 TargetPos = m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy];
+	int CurWeapon = 0;
+	vec2 TargetPos;
+	float Alpha = 1.0f;
 
-		RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
-		Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y);
-		return;
-	}
-
-	if(!g_Config.m_ClSpecCursor || !m_pClient->m_CursorInfo.IsAvailable())
-		return;
-
-	bool RenderSpecCursor = (m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW) || Client()->State() == IClient::STATE_DEMOPLAYBACK;
-
-	if(!RenderSpecCursor)
-		return;
-
-	int CurWeapon = maximum(0, m_pClient->m_CursorInfo.Weapon() % NUM_WEAPONS);
-	vec2 TargetPos = m_pClient->m_CursorInfo.WorldTarget();
-
-	float CenterX = m_pClient->m_Camera.m_Center.x;
-	float CenterY = m_pClient->m_Camera.m_Center.y;
-	float Zoom = m_pClient->m_Camera.m_Zoom;
-
+	const vec2 Center = m_pClient->m_Camera.m_Center;
 	float aPoints[4];
-	RenderTools()->MapScreenToWorld(CenterX, CenterY, 100.0f, 100.0f, 100.0f, 0, 0, Graphics()->ScreenAspect(), Zoom, aPoints);
+	RenderTools()->MapScreenToWorld(Center.x, Center.y, 100.0f, 100.0f, 100.0f, 0, 0, Graphics()->ScreenAspect(), 1.0f, aPoints);
 	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
 
-	vec2 ScreenPos = TargetPos - m_pClient->m_Camera.m_Center;
-
-	bool Clamped = false;
-	float HalfWidth = CenterX - aPoints[0];
-	float HalfHeight = CenterY - aPoints[1];
-
-	// specialized lineseg-rect intersection
-	// https://gist.github.com/ChickenProp/3194723
-	if(ScreenPos.x < -HalfWidth || ScreenPos.x > HalfWidth || ScreenPos.y < -HalfHeight || ScreenPos.y > HalfHeight)
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_pLocalCharacter)
 	{
-		float aDeltas[] = {ScreenPos.x, ScreenPos.y};
-		float aBounds[] = {HalfWidth, HalfHeight};
-		float ClampFactor = INFINITY;
+		// Render local cursor
+		CurWeapon = maximum(0, m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
+		TargetPos = m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy];
+	}
+	else
+	{
+		// Render spec cursor
+		if(!g_Config.m_ClSpecCursor || !m_pClient->m_CursorInfo.IsAvailable())
+			return;
 
-		static_assert(std::size(aDeltas) == std::size(aBounds), "delta and bounds arrays must have the same size");
-		for(std::size_t i = 0; i < std::size(aDeltas); i++)
-		{
-			float t = absolute(aBounds[i] / aDeltas[i]);
-			if(ClampFactor > t)
-				ClampFactor = t;
-		}
+		bool RenderSpecCursor = (m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW) || Client()->State() == IClient::STATE_DEMOPLAYBACK;
 
-		Clamped = true;
-		TargetPos = ScreenPos * ClampFactor + m_pClient->m_Camera.m_Center;
+		if(!RenderSpecCursor)
+			return;
+
+		// Calculate factor to keep cursor on screen
+		const vec2 HalfSize = vec2(Center.x - aPoints[0], Center.y - aPoints[1]);
+		const vec2 ScreenPos = (m_pClient->m_CursorInfo.WorldTarget() - Center) / m_pClient->m_Camera.m_Zoom;
+		const float ClampFactor = maximum(
+			1.0f,
+			absolute(ScreenPos.x / HalfSize.x),
+			absolute(ScreenPos.y / HalfSize.y));
+
+		CurWeapon = maximum(0, m_pClient->m_CursorInfo.Weapon() % NUM_WEAPONS);
+		TargetPos = ScreenPos / ClampFactor + Center;
+		if(ClampFactor != 1.0f)
+			Alpha /= 2.0f;
 	}
 
-	// render spec cursor
-	Graphics()->SetColor(1.f, 1.f, 1.f, Clamped ? .5f : 1.f);
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 	Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponCursors[CurWeapon]);
-	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y, Zoom, Zoom);
+	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aCursorOffset[CurWeapon], TargetPos.x, TargetPos.y);
 }
 
 void CHud::PrepareAmmoHealthAndArmorQuads()
