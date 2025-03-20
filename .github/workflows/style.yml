@@ -94,11 +94,7 @@ jobs:
 
     - name: Build twmap tool
       run: |
-        git clone https://gitlab.com/Patiga/twmap.git/
-        cd twmap/twmap-tools
-        cargo install --locked --path=.
-        cd ../..
-        rm -rf twmap
+        cargo install twmap-tools --git https://gitlab.com/Patiga/twmap.git/ --rev 1f192def57429a1f64ddb3ac8580744476cfdf1c --locked
 
     - name: Check maps
       run: |
