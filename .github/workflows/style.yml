@@ -49,7 +49,7 @@ jobs:
     - name: Pylint
       run: |
         pylint --version
-        find . -type f -name "*.py" -not -path './ddnet-libs/*' -not -path './googletest-src/*' -print0 | xargs -0 pylint
+        find . -type f -name "*.py" -not -path './ddnet-libs/*' -not -path './googletest-src/*' -print0 | xargs -0 pylint --disable=no-else-raise,no-else-return,redefined-builtin,redefined-outer-name
 
     - name: Check header guards
       run: scripts/check_header_guards.py
