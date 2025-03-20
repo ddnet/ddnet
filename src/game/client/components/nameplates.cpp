@@ -400,7 +400,7 @@ protected:
 	void UpdateText(CGameClient &This, const CNamePlateRenderData &Data) override
 	{
 		m_FontSize = Data.m_FontSizeHookStrongWeak;
-		m_StrongWeakId = Data.m_ClientId;
+		m_StrongWeakId = Data.m_HookStrongWeakId;
 		switch(Data.m_HookStrongWeak)
 		{
 		case CNamePlateRenderData::HOOKSTRONGWEAK_STRONG:
