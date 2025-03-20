@@ -2393,7 +2393,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** DDRace HUD ***** //
 		Ui()->DoLabel_AutoLineSize(Localize("DDRace HUD"), HeadlineFontSize,
-			TEXTALIGN_ML, &LeftView, HeadlineHeight);
+			TEXTALIGN_ML, &RightView, HeadlineHeight);
 		RightView.HSplitTop(MarginSmall, nullptr, &RightView);
 
 		// Switches of various DDRace HUD elements
