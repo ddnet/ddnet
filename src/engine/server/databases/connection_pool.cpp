@@ -448,7 +448,7 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 		return false;
 	}
 	char aError[256] = "unknown error";
-	if(pConnection->Connect(aError, sizeof(aError)))
+	if(!pConnection->Connect(aError, sizeof(aError)))
 	{
 		dbg_msg("sql", "failed connecting to db: %s", aError);
 		return false;
@@ -457,10 +457,10 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 	switch(pData->m_Mode)
 	{
 	case CSqlExecData::READ_ACCESS:
-		Success = !pData->m_Ptr.m_pReadFunc(pConnection, pData->m_pThreadData.get(), aError, sizeof(aError));
+		Success = pData->m_Ptr.m_pReadFunc(pConnection, pData->m_pThreadData.get(), aError, sizeof(aError));
 		break;
 	case CSqlExecData::WRITE_ACCESS:
-		Success = !pData->m_Ptr.m_pWriteFunc(pConnection, pData->m_pThreadData.get(), w, aError, sizeof(aError));
+		Success = pData->m_Ptr.m_pWriteFunc(pConnection, pData->m_pThreadData.get(), w, aError, sizeof(aError));
 		break;
 	default:
 		dbg_assert(false, "unreachable");
