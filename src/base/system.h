@@ -2854,28 +2854,19 @@ bool os_version_str(char *version, size_t length);
  */
 void os_locale_str(char *locale, size_t length);
 
-#if defined(CONF_EXCEPTION_HANDLING)
 /**
- * @defgroup Exception-Handling
- * Exception handling (crash logging).
+ * @defgroup Crash-dumping
  */
 
 /**
- * Initializes the exception handling module.
+ * Initializes the crash dumper and sets the filename to write the crash dump
+ * to, if support for crash logging was compiled in. Otherwise does nothing.
  *
- * @ingroup Exception-Handling
- */
-void init_exception_handler();
-
-/**
- * Sets the filename for writing the crash log.
- *
- * @ingroup Exception-Handling
+ * @ingroup Crash-dumping
  *
  * @param log_file_path Absolute path to which crash log file should be written.
  */
-void set_exception_handler_log_file(const char *log_file_path);
-#endif
+void crashdump_init_if_available(const char *log_file_path);
 
 /**
  * Fetches a sample from a high resolution timer and converts it in nanoseconds.
