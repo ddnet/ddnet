@@ -5,7 +5,12 @@ use clap::value_t_or_exit;
 use clap::App;
 use clap::Arg;
 use headers::HeaderMapExt as _;
+use quinn::crypto::rustls::QuicClientConfig;
 use rand::random;
+use rustls::pki_types::pem::PemObject;
+use rustls::pki_types::CertificateDer;
+use rustls::pki_types::PrivateKeyDer;
+use rustls::RootCertStore;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json as json;
@@ -17,6 +22,7 @@ use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fmt;
+use std::fs::read_to_string;
 use std::io;
 use std::io::Write;
 use std::mem;
@@ -314,6 +320,8 @@ struct Shared<'a> {
     servers: &'a Mutex<Servers>,
     socket: &'a Arc<tokio::net::UdpSocket>,
     timekeeper: Timekeeper,
+    quic_cert: Option<Arc<CertificateDer<'static>>>,
+    quic_privkey: Option<Arc<PrivateKeyDer<'static>>>,
 }
 
 impl<'a> Shared<'a> {
@@ -713,6 +721,37 @@ async fn send_challenge(
     socket.send_to(&packet, target).await.unwrap();
 }
 
+async fn send_challenge_quic(
+    target: SocketAddr,
+    challenge_secret: ShortString,
+    challenge: ShortString,
+    quic_cert: CertificateDer<'static>,
+    quic_privkey: PrivateKeyDer<'static>,
+) {
+    let mut client_crypto = rustls::ClientConfig::builder()
+        .with_root_certificates(RootCertStore::empty())
+        .with_client_auth_cert(vec![quic_cert], quic_privkey)
+        .unwrap();
+    client_crypto.alpn_protocols.push(b"ddnet-15".to_vec());
+
+    let client_config =
+        quinn::ClientConfig::new(Arc::new(QuicClientConfig::try_from(client_crypto).unwrap()));
+    let mut endpoint = quinn::Endpoint::client(SocketAddr::new([0, 0, 0, 0].into(), 0)).unwrap();
+    endpoint.set_default_client_config(client_config);
+    let conn = endpoint.connect(target, "").unwrap().await.unwrap();
+    let mut send = conn.open_uni().await.unwrap();
+
+    {
+        let mut packet = Vec::with_capacity(128);
+        packet.extend_from_slice(b"\xff\xff\xff\xff\xff\xff\xff\xff\xff\xffchal");
+        packet.extend_from_slice(challenge_secret.as_bytes());
+        packet.push(0);
+        packet.extend_from_slice(challenge.as_bytes());
+        packet.push(0);
+        send.write_all(&packet).await.unwrap();
+    }
+}
+
 fn handle_register(
     shared: Shared,
     remote_addr: IpAddr,
@@ -733,6 +772,7 @@ fn handle_register(
             Some(token)
         }
         Protocol::Ddper6 => None,
+        Protocol::V6Quic => None,
     };
 
     let addr = register.address.with_ip(remote_addr);
@@ -804,13 +844,27 @@ fn handle_register(
         } else {
             trace!("sending challenge to {}", addr);
         }
-        tokio::spawn(send_challenge(
-            connless_request_token_7,
-            shared.socket.clone(),
-            addr.to_socket_addr(),
-            register.challenge_secret,
-            challenge.current,
-        ));
+        if matches!(register.address.protocol, Protocol::V6Quic) {
+            if let (Some(cert), Some(privkey)) = (&shared.quic_cert, &shared.quic_privkey) {
+                tokio::spawn(send_challenge_quic(
+                    addr.to_socket_addr(),
+                    register.challenge_secret,
+                    challenge.current,
+                    (**cert).clone(),
+                    privkey.clone_key(),
+                ));
+            } else {
+                warn!("quic register attempted but no certificates to send challenge provided.");
+            }
+        } else {
+            tokio::spawn(send_challenge(
+                connless_request_token_7,
+                shared.socket.clone(),
+                addr.to_socket_addr(),
+                register.challenge_secret,
+                challenge.current,
+            ));
+        }
     }
 
     Ok(result)
@@ -976,6 +1030,16 @@ async fn main() {
             .value_name("DUMP_DIR")
             .help("Read dumps from other mastersrv instances from the specified directory (looking only at *.json files).")
         )
+        .arg(Arg::with_name("quic-cert")
+            .long("quic-cert")
+            .value_name("CERT")
+            .help("")
+        )
+        .arg(Arg::with_name("quic-privkey")
+            .long("quic-privkey")
+            .value_name("PRIVKEY")
+            .help("")
+        )
         .arg(Arg::with_name("out")
             .long("out")
             .value_name("OUT")
@@ -995,6 +1059,13 @@ async fn main() {
     }
 
     let matches = command.get_matches();
+
+    let quic_cert = matches.value_of("quic-cert").map(|path| {
+        Arc::new(CertificateDer::from_pem_slice(read_to_string(path).unwrap().as_bytes()).unwrap())
+    });
+    let quic_privkey = matches.value_of("quic-privkey").map(|path| {
+        Arc::new(PrivateKeyDer::from_pem_slice(read_to_string(path).unwrap().as_bytes()).unwrap())
+    });
 
     let listen_address = value_t_or_exit!(matches.value_of("listen"), SocketAddr);
     let connecting_ip_header = matches
@@ -1105,6 +1176,8 @@ async fn main() {
                         servers: &servers,
                         socket: &socket.0,
                         timekeeper,
+                        quic_privkey: quic_privkey.clone(),
+                        quic_cert: quic_cert.clone(),
                     };
                     let addr = connecting_addr(addr, &headers)?;
                     match headers.get("Action").map(warp::http::HeaderValue::as_bytes) {
