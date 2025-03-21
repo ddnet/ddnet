@@ -22,6 +22,7 @@ use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fmt;
+use std::fs::read_to_string;
 use std::io;
 use std::io::Write;
 use std::mem;
@@ -39,7 +40,6 @@ use std::time::Duration;
 use std::time::Instant;
 use std::time::SystemTime;
 use tokio::fs;
-use tokio::fs::read_to_string;
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 use tokio::time;
@@ -320,8 +320,8 @@ struct Shared<'a> {
     servers: &'a Mutex<Servers>,
     socket: &'a Arc<tokio::net::UdpSocket>,
     timekeeper: Timekeeper,
-    quic_cert: Arc<CertificateDer<'static>>,
-    quic_privkey: Arc<PrivateKeyDer<'static>>,
+    quic_cert: Option<Arc<CertificateDer<'static>>>,
+    quic_privkey: Option<Arc<PrivateKeyDer<'static>>>,
 }
 
 impl<'a> Shared<'a> {
@@ -741,9 +741,6 @@ async fn send_challenge_quic(
     let conn = endpoint.connect(target, "").unwrap().await.unwrap();
     let mut send = conn.open_uni().await.unwrap();
 
-    eprintln!("{:?}", conn.stats());
-    // let k = conn.peer_identity().unwrap().downcast::<>();
-
     {
         let mut packet = Vec::with_capacity(128);
         packet.extend_from_slice(b"\xff\xff\xff\xff\xff\xff\xff\xff\xff\xffchal");
@@ -848,13 +845,17 @@ fn handle_register(
             trace!("sending challenge to {}", addr);
         }
         if matches!(register.address.protocol, Protocol::V6Quic) {
-            tokio::spawn(send_challenge_quic(
-                addr.to_socket_addr(),
-                register.challenge_secret,
-                challenge.current,
-                (*shared.quic_cert).clone(),
-                shared.quic_privkey.clone_key(),
-            ));
+            if let (Some(cert), Some(privkey)) = (&shared.quic_cert, &shared.quic_privkey) {
+                tokio::spawn(send_challenge_quic(
+                    addr.to_socket_addr(),
+                    register.challenge_secret,
+                    challenge.current,
+                    (**cert).clone(),
+                    privkey.clone_key(),
+                ));
+            } else {
+                warn!("quic register attempted but no certificates to send challenge provided.");
+            }
         } else {
             tokio::spawn(send_challenge(
                 connless_request_token_7,
@@ -1059,20 +1060,12 @@ async fn main() {
 
     let matches = command.get_matches();
 
-    let quic_cert = if let Some(path) = matches.value_of("quic-cert") {
-        Arc::new(
-            CertificateDer::from_pem_slice(read_to_string(path).await.unwrap().as_bytes()).unwrap(),
-        )
-    } else {
-        todo!()
-    };
-    let quic_privkey = if let Some(path) = matches.value_of("quic-privkey") {
-        Arc::new(
-            PrivateKeyDer::from_pem_slice(read_to_string(path).await.unwrap().as_bytes()).unwrap(),
-        )
-    } else {
-        todo!()
-    };
+    let quic_cert = matches.value_of("quic-cert").map(|path| {
+        Arc::new(CertificateDer::from_pem_slice(read_to_string(path).unwrap().as_bytes()).unwrap())
+    });
+    let quic_privkey = matches.value_of("quic-privkey").map(|path| {
+        Arc::new(PrivateKeyDer::from_pem_slice(read_to_string(path).unwrap().as_bytes()).unwrap())
+    });
 
     let listen_address = value_t_or_exit!(matches.value_of("listen"), SocketAddr);
     let connecting_ip_header = matches
