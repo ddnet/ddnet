@@ -3159,7 +3159,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		RightView.HSplitTop(LaserPreviewHeight, &LaserPreview, &RightView);
 		RightView.HSplitTop(2 * MarginSmall, nullptr, &RightView);
-		DoLaserPreview(&LaserPreview, LaserFreezeOutlineColor, LaserFreezeInnerColor, LASERTYPE_DOOR);
+		DoLaserPreview(&LaserPreview, LaserFreezeOutlineColor, LaserFreezeInnerColor, LASERTYPE_FREEZE);
 	}
 }
 

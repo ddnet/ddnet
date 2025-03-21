@@ -301,10 +301,10 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	else
 		Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
 
-	RenderLaser(pCurrent->m_From, pCurrent->m_To, OuterColor, InnerColor, Ticks);
+	RenderLaser(pCurrent->m_From, pCurrent->m_To, OuterColor, InnerColor, Ticks, Type);
 }
 
-void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float Ticks)
+void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float Ticks, int Type)
 {
 	int TuneZone = GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
 	float Len = distance(Pos, From);
@@ -347,6 +347,7 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 	}
 
 	// render head
+	if(Type != LASERTYPE_DOOR)
 	{
 		int CurParticle = (Client()->GameTick(g_Config.m_ClDummy) % 3);
 		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_aSpriteParticleSplat[CurParticle]);
@@ -355,6 +356,24 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y);
 		Graphics()->SetColor(InnerColor);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y, 20.f / 24.f, 20.f / 24.f);
+	}
+	else
+	{
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+
+		// do outline
+		Graphics()->SetColor(OuterColor);
+		float Width = 8.0f;
+		IGraphics::CQuadItem OuterRect(Pos.x, Pos.y, 2 * Width, 2 * Width);
+		Graphics()->QuadsDraw(&OuterRect, 1);
+
+		// do inner
+		Graphics()->SetColor(InnerColor);
+		Width = 6.0f;
+		IGraphics::CQuadItem InnerRect(Pos.x, Pos.y, 2 * Width, 2 * Width);
+		Graphics()->QuadsDraw(&InnerRect, 1);
+		Graphics()->QuadsEnd();
 	}
 }
 
