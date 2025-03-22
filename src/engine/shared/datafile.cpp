@@ -589,21 +589,31 @@ int CDataFileReader::NumItems() const
 
 SHA256_DIGEST CDataFileReader::Sha256() const
 {
-	dbg_assert(m_pDataFile != nullptr, "File not open");
+	if(!m_pDataFile)
+	{
+		static const SHA256_DIGEST s_EmptySha256 = {{0}};
+		return s_EmptySha256;
+	}
 
 	return m_pDataFile->m_Sha256;
 }
 
 unsigned CDataFileReader::Crc() const
 {
-	dbg_assert(m_pDataFile != nullptr, "File not open");
+	if(!m_pDataFile)
+	{
+		return 0;
+	}
 
 	return m_pDataFile->m_Crc;
 }
 
 int CDataFileReader::MapSize() const
 {
-	dbg_assert(m_pDataFile != nullptr, "File not open");
+	if(!m_pDataFile)
+	{
+		return 0;
+	}
 
 	return m_pDataFile->m_Header.m_Size + m_pDataFile->m_Header.SizeOffset();
 }

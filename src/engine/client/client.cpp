@@ -1073,25 +1073,55 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 		return s_aErrorMsg;
 	}
 
-	if(pWantedSha256 && m_pMap->Sha256() != *pWantedSha256)
+	// After loading, verify the map is still loaded (could be unloaded by system on resource-constrained devices)
+	if(!m_pMap->IsLoaded())
 	{
-		char aWanted[SHA256_MAXSTRSIZE];
-		char aGot[SHA256_MAXSTRSIZE];
-		sha256_str(*pWantedSha256, aWanted, sizeof(aWanted));
-		sha256_str(m_pMap->Sha256(), aGot, sizeof(aWanted));
-		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %s != %s", aGot, aWanted);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
-		m_pMap->Unload();
+		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map '%s' was unloaded by system", pFilename);
 		return s_aErrorMsg;
 	}
 
-	// Only check CRC if we don't have the secure SHA256.
-	if(!pWantedSha256 && m_pMap->Crc() != WantedCrc)
+	if(pWantedSha256)
 	{
-		str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %08x != %08x", m_pMap->Crc(), WantedCrc);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
-		m_pMap->Unload();
-		return s_aErrorMsg;
+		SHA256_DIGEST MapSha256 = m_pMap->Sha256();
+
+		// Check if map is still loaded after getting SHA256
+		if(!m_pMap->IsLoaded())
+		{
+			str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map '%s' was unloaded by system", pFilename);
+			return s_aErrorMsg;
+		}
+
+		if(MapSha256 != *pWantedSha256)
+		{
+			char aWanted[SHA256_MAXSTRSIZE];
+			char aGot[SHA256_MAXSTRSIZE];
+			sha256_str(*pWantedSha256, aWanted, sizeof(aWanted));
+			sha256_str(MapSha256, aGot, sizeof(aWanted));
+			str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %s != %s", aGot, aWanted);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
+			m_pMap->Unload();
+			return s_aErrorMsg;
+		}
+	}
+	// Only check CRC if we don't have the secure SHA256
+	else
+	{
+		unsigned MapCrc = m_pMap->Crc();
+
+		// Check if map is still loaded after getting CRC
+		if(!m_pMap->IsLoaded())
+		{
+			str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map '%s' was unloaded by system", pFilename);
+			return s_aErrorMsg;
+		}
+
+		if(MapCrc != WantedCrc)
+		{
+			str_format(s_aErrorMsg, sizeof(s_aErrorMsg), "map differs from the server. %08x != %08x", MapCrc, WantedCrc);
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", s_aErrorMsg);
+			m_pMap->Unload();
+			return s_aErrorMsg;
+		}
 	}
 
 	// stop demo recording if we loaded a new map
@@ -3980,6 +4010,13 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
 		}
 	}
+	else if(!m_pMap->IsLoaded())
+	{
+		if(Verbose)
+		{
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "map is not loaded");
+		}
+	}
 	else
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
@@ -4997,11 +5034,20 @@ const char *CClient::GetCurrentMapPath() const
 
 SHA256_DIGEST CClient::GetCurrentMapSha256() const
 {
+	if(!m_pMap->IsLoaded())
+	{
+		static const SHA256_DIGEST s_EmptySha256 = {{0}};
+		return s_EmptySha256;
+	}
 	return m_pMap->Sha256();
 }
 
 unsigned CClient::GetCurrentMapCrc() const
 {
+	if(!m_pMap->IsLoaded())
+	{
+		return 0;
+	}
 	return m_pMap->Crc();
 }
 
@@ -5009,6 +5055,8 @@ void CClient::RaceRecord_Start(const char *pFilename)
 {
 	if(State() != IClient::STATE_ONLINE)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
+	else if(!m_pMap->IsLoaded())
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "map is not loaded");
 	else
 		m_aDemoRecorder[RECORDER_RACE].Start(
 			Storage(),
