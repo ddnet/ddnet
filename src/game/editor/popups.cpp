@@ -2754,6 +2754,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSpeedup(void *pContext, CUIRect View
 	else if(Prop == PROP_ANGLE)
 	{
 		pEditor->m_SpeedupAngle = clamp(NewVal, 0, 359);
+		pEditor->AdjustBrushSpecialTiles(false);
 	}
 
 	return CUi::POPUP_KEEP_OPEN;

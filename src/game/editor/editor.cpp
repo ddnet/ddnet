@@ -9307,7 +9307,8 @@ void CEditor::RedoLastAction()
 
 void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 {
-	// Adjust m_Number field of tune, switch and tele tiles by `Adjust` if `UseNextFree` is false
+	// Adjust m_Angle of speedup or m_Number field of tune, switch and tele tiles by `Adjust` if `UseNextFree` is false
+	// If `Adjust` is 0 and `UseNextFree` is false, then update numbers of brush tiles to global values
 	// If true, then use the next free number instead
 
 	auto &&AdjustNumber = [Adjust](auto &Number, short Limit = 255) {
@@ -9393,18 +9394,29 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 				}
 			}
 		}
-		else if(pLayerTiles->m_Speedup && !UseNextFree && Adjust != 0)
+		else if(pLayerTiles->m_Speedup)
 		{
-			std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
-			for(int y = 0; y < pSpeedupLayer->m_Height; y++)
+			if(!UseNextFree)
 			{
-				for(int x = 0; x < pSpeedupLayer->m_Width; x++)
+				std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
+				for(int y = 0; y < pSpeedupLayer->m_Height; y++)
 				{
-					int i = y * pSpeedupLayer->m_Width + x;
-					if(!IsValidSpeedupTile(pSpeedupLayer->m_pTiles[i].m_Index))
-						continue;
+					for(int x = 0; x < pSpeedupLayer->m_Width; x++)
+					{
+						int i = y * pSpeedupLayer->m_Width + x;
+						if(!IsValidSpeedupTile(pSpeedupLayer->m_pTiles[i].m_Index))
+							continue;
 
-					AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 359);
+						if(Adjust != 0)
+						{
+							AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 359);
+						}
+						else
+						{
+							pSpeedupLayer->m_pSpeedupTile[i].m_Angle = m_SpeedupAngle;
+							pSpeedupLayer->m_SpeedupAngle = m_SpeedupAngle;
+						}
+					}
 				}
 			}
 		}

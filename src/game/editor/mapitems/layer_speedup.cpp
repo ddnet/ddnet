@@ -175,12 +175,28 @@ void CLayerSpeedup::BrushFlipX()
 {
 	CLayerTiles::BrushFlipX();
 	BrushFlipXImpl(m_pSpeedupTile);
+
+	auto &&AngleFlipX = [](auto &Number) {
+		Number = (180 - Number % 360 + 360) % 360;
+	};
+
+	for(int y = 0; y < m_Height; y++)
+		for(int x = 0; x < m_Width; x++)
+			AngleFlipX(m_pSpeedupTile[y * m_Width + x].m_Angle);
 }
 
 void CLayerSpeedup::BrushFlipY()
 {
 	CLayerTiles::BrushFlipY();
 	BrushFlipYImpl(m_pSpeedupTile);
+
+	auto &&AngleFlipY = [](auto &Number) {
+		Number = (360 - Number % 360 + 360) % 360;
+	};
+
+	for(int y = 0; y < m_Height; y++)
+		for(int x = 0; x < m_Width; x++)
+			AngleFlipY(m_pSpeedupTile[y * m_Width + x].m_Angle);
 }
 
 void CLayerSpeedup::BrushRotate(float Amount)
@@ -188,6 +204,12 @@ void CLayerSpeedup::BrushRotate(float Amount)
 	int Rotation = (round_to_int(360.0f * Amount / (pi * 2)) / 90) % 4; // 0=0°, 1=90°, 2=180°, 3=270°
 	if(Rotation < 0)
 		Rotation += 4;
+
+	// 1 and 3 are both adjusted by 90, because for 3 the brush is also flipped
+	int Adjust = (Rotation == 0) ? 0 : (Rotation == 2) ? 180 : 90;
+	auto &&AdjustAngle = [Adjust](auto &Number) {
+		Number = (Number + Adjust % 360 + 360) % 360;
+	};
 
 	if(Rotation == 1 || Rotation == 3)
 	{
@@ -201,6 +223,7 @@ void CLayerSpeedup::BrushRotate(float Amount)
 		for(int x = 0; x < m_Width; ++x)
 			for(int y = m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
 			{
+				AdjustAngle(pTempData1[y * m_Width + x].m_Angle);
 				*pDst1 = pTempData1[y * m_Width + x];
 				*pDst2 = pTempData2[y * m_Width + x];
 			}
