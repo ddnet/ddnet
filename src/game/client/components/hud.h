@@ -72,7 +72,7 @@ class CHud : public CComponent
 	void RenderTeambalanceWarning();
 
 	void PrepareAmmoHealthAndArmorQuads();
-	void RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter);
+	void RenderAmmoHealthAndArmor(int ClientId);
 
 	void PreparePlayerStateQuads();
 	void RenderPlayerState(int ClientId);
