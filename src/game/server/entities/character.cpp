@@ -269,14 +269,14 @@ void CCharacter::HandleNinja()
 	if(m_Core.m_ActiveWeapon != WEAPON_NINJA)
 		return;
 
-	if((Server()->Tick() - m_Core.m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000))
+	if((Server()->Tick() - m_Core.m_Ninja.m_ActivationTick) > (GetTuning(m_TuneZone)->m_NinjaDuration * Server()->TickSpeed() / 1000))
 	{
 		// time's up, return
 		RemoveNinja();
 		return;
 	}
 
-	int NinjaTime = m_Core.m_Ninja.m_ActivationTick + (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000) - Server()->Tick();
+	int NinjaTime = m_Core.m_Ninja.m_ActivationTick + (GetTuning(m_TuneZone)->m_NinjaDuration * Server()->TickSpeed() / 1000) - Server()->Tick();
 
 	if(NinjaTime % Server()->TickSpeed() == 0 && NinjaTime / Server()->TickSpeed() <= 5)
 	{
@@ -299,7 +299,7 @@ void CCharacter::HandleNinja()
 	if(m_Core.m_Ninja.m_CurrentMoveTime > 0)
 	{
 		// Set velocity
-		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
+		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * GetTuning(m_TuneZone)->m_NinjaVelocity;
 		vec2 OldPos = m_Pos;
 		vec2 GroundElasticity = vec2(
 			GetTuning(m_TuneZone)->m_GroundElasticityX,
@@ -609,7 +609,7 @@ void CCharacter::FireWeapon()
 		m_NumObjectsHit = 0;
 
 		m_Core.m_Ninja.m_ActivationDir = Direction;
-		m_Core.m_Ninja.m_CurrentMoveTime = g_pData->m_Weapons.m_Ninja.m_Movetime * Server()->TickSpeed() / 1000;
+		m_Core.m_Ninja.m_CurrentMoveTime = GetTuning(m_TuneZone)->m_NinjaMovetime * Server()->TickSpeed() / 1000;
 		m_Core.m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
 
 		GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
@@ -1158,7 +1158,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		if(m_FreezeTime > 0 || m_Core.m_DeepFrozen)
 			pCharacter->m_AmmoCount = m_Core.m_FreezeStart + g_Config.m_SvFreezeDelay * Server()->TickSpeed();
 		else if(Weapon == WEAPON_NINJA)
-			pCharacter->m_AmmoCount = m_Core.m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000;
+			pCharacter->m_AmmoCount = m_Core.m_Ninja.m_ActivationTick + GetTuning(m_TuneZone)->m_NinjaDuration * Server()->TickSpeed() / 1000;
 
 		pCharacter->m_Health = Health;
 		pCharacter->m_Armor = Armor;

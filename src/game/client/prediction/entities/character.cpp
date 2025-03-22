@@ -106,7 +106,7 @@ void CCharacter::HandleNinja()
 	if(m_Core.m_ActiveWeapon != WEAPON_NINJA)
 		return;
 
-	if((GameWorld()->GameTick() - m_Core.m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * GameWorld()->GameTickSpeed() / 1000))
+	if((GameWorld()->GameTick() - m_Core.m_Ninja.m_ActivationTick) > (GetTuning(GetOverriddenTuneZone())->m_NinjaDuration * GameWorld()->GameTickSpeed() / 1000))
 	{
 		// time's up, return
 		RemoveNinja();
@@ -127,7 +127,7 @@ void CCharacter::HandleNinja()
 	if(m_Core.m_Ninja.m_CurrentMoveTime > 0)
 	{
 		// Set velocity
-		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
+		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * GetTuning(GetOverriddenTuneZone())->m_NinjaVelocity;
 		vec2 OldPos = m_Pos;
 		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(m_ProximityRadius, m_ProximityRadius), vec2(GetTuning(GetOverriddenTuneZone())->m_GroundElasticityX, GetTuning(GetOverriddenTuneZone())->m_GroundElasticityY));
 
@@ -450,7 +450,7 @@ void CCharacter::FireWeapon()
 		m_NumObjectsHit = 0;
 
 		m_Core.m_Ninja.m_ActivationDir = Direction;
-		m_Core.m_Ninja.m_CurrentMoveTime = g_pData->m_Weapons.m_Ninja.m_Movetime * GameWorld()->GameTickSpeed() / 1000;
+		m_Core.m_Ninja.m_CurrentMoveTime = GetTuning(GetOverriddenTuneZone())->m_NinjaMovetime * GameWorld()->GameTickSpeed() / 1000;
 		m_Core.m_Ninja.m_OldVelAmount = length(m_Core.m_Vel);
 	}
 	break;
