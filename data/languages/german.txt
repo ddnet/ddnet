@@ -601,9 +601,6 @@ DDNet Client updated!
 AntiPing: predict other players
 == Anti-Ping: Andere Spieler vorberechnen
 
-Show other players' key presses
-== Tastendrücke von anderen Spielern anzeigen
-
 System message
 == Server-Nachricht
 
@@ -925,9 +922,6 @@ Please enter your nickname below.
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Es wird empfohlen die Einstellungen nach deinem Geschmack anzupassen bevor du einem Server beitrittst.
 
-Use high DPI
-== Hohe DPI nutzen
-
 Learn
 == Lernen
 
@@ -1135,9 +1129,6 @@ A Tee
 
 Are you sure that you want to disconnect and switch to a different server?
 == Bist du sicher, dass du die Verbindung trennen und zu einem anderen Server wechseln möchtest?
-
-Show local player's key presses
-== Tastendrücke des eigenen Spielers anzeigen
 
 Settings file
 == Einstellungen-Datei
@@ -1790,9 +1781,6 @@ Player info change cooldown
 Always show chat
 == Immer Chat anzeigen
 
-Show friend mark (♥) in name plates
-== Freund-Zeichen (♥) im Namen anzeigen
-
 Show hook strength icon indicator
 == Hakenstärke Icon anzeigen
 
@@ -2129,3 +2117,65 @@ Renders your frame rate in the top right
 
 Show spectator cursor
 == Zuschauer-Markierung anzeigen
+
+No demo with this filename exists
+== Keine Demo mit diesem Dateinamen existiert
+
+Map size
+== Kartengröße
+
+Show number of spectators
+== Anzahl der Zuschauer zeigen
+
+[Show name plates]
+None
+== Keine
+
+[Show name plates]
+Own
+== Eigene
+
+[Show name plates]
+Others
+== Andere
+
+[Show name plates]
+All
+== Alle
+
+Name plates offset
+== Spielername-Abstand
+
+Show friend icon in name plates
+== Freund-Icon in Spielername zeigen
+
+Show client IDs on a seperate line
+== Client-IDs in eigener Linie zeigen
+
+Client IDs size
+== Client-ID-Größe
+
+Show players' key presses
+== Tastendruck-Symbole von Spielern zeigen
+
+[Show players' key presses]
+None
+== Keine
+
+[Show players' key presses]
+Own
+== Eigene
+
+[Show players' key presses]
+Others
+== Ander
+
+[Show players' key presses]
+All
+== Alle
+
+Preview dummy's name plate
+== Dummy-Spielernamen vorher zeigen
+
+AntiPing: prediction margin
+== Anti-Ping: Vorhersagespanne

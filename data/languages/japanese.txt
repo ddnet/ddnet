@@ -801,9 +801,6 @@ may cause delay
 Screen
 == 画面
 
-Use high DPI
-== 高 DPI 対応モード
-
 Enable game sounds
 == 音声
 
@@ -935,9 +932,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == 他のプレーヤーのフックラインを表示
-
-Show other players' key presses
-== 他のプレーヤーの押したキーを表示
 
 Background
 == 背景
@@ -1081,6 +1075,10 @@ Grabs
 9+ new mentions
 == 9+ 件の新しいメンション
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Japanese translation by orange and Eana Hufwe
+
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
@@ -1139,6 +1137,9 @@ Saving settings to '%s' failed
 == 
 
 Error saving settings
+== 
+
+No demo with this filename exists
 == 
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
@@ -1541,6 +1542,9 @@ Created
 Netversion
 == 
 
+Map size
+== 
+
 [Demo details]
 map not included
 == 
@@ -1823,10 +1827,6 @@ Graphics card
 auto
 == 
 
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Japanese translation by orange and Eana Hufwe
-
 Tee
 == 
 
@@ -1869,6 +1869,9 @@ Show DDRace HUD
 Show jumps indicator
 == 
 
+Show number of spectators
+== 
+
 Show dummy actions
 == 
 
@@ -1899,10 +1902,35 @@ Chat font size
 Chat width
 == 
 
-Show friend mark (♥) in name plates
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
 == 
 
 Show client IDs in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
 == 
 
 Hook Strength
@@ -1920,10 +1948,29 @@ Size of hook strength icon and number indicator
 Key Presses
 == 
 
-Show local player's key presses
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
 == 
 
 Size of key press icons
+== 
+
+Preview dummy's name plate
 == 
 
 Hook collision line
@@ -2023,6 +2070,9 @@ Quads are used for background decoration
 == 
 
 Tries to predict other entities to give a feel of low latency
+== 
+
+AntiPing: prediction margin
 == 
 
 Regular background color
