@@ -1167,6 +1167,32 @@ void CChat::OnRender()
 		TextRender()->SetCursor(&Cursor, x, y, ScaledFontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = Width - 190.0f;
 
+		bool Autocompletion = false;
+		CChat::CCommand *pCompCommand = nullptr;
+		// Autocompletion hint and help text
+		if(m_Input.GetString()[0] == '/' && m_Input.GetString()[1] != '\0' && !m_vCommands.empty())
+		{
+			// Find full command
+			const char *pCommandStr = m_Input.GetString() + 1;
+			int StrSize = str_skip_to_whitespace_const(pCommandStr) - pCommandStr;
+			for(auto &Command : m_vCommands)
+			{
+				if(str_startswith_nocase(Command.m_aName, m_Input.GetString() + 1))
+				{
+					Autocompletion = true;
+					pCompCommand = &Command;
+					break;
+				}
+				if(str_comp_nocase_num(Command.m_aName, pCommandStr, StrSize) == 0)
+				{
+					pCompCommand = &Command;
+					break;
+				}
+			}
+		}
+
+		Cursor.m_X = x;
+		Cursor.m_Y = Cursor.m_Y;
 		if(m_Mode == MODE_ALL)
 			TextRender()->TextEx(&Cursor, Localize("All"));
 		else if(m_Mode == MODE_TEAM)
@@ -1206,21 +1232,33 @@ void CChat::OnRender()
 		m_Input.SetScrollOffset(ScrollOffset);
 		m_Input.SetScrollOffsetChange(ScrollOffsetChange);
 
-		// Autocompletion hint
-		if(m_Input.GetString()[0] == '/' && m_Input.GetString()[1] != '\0' && !m_vCommands.empty())
+		if(pCompCommand)
 		{
-			for(const auto &Command : m_vCommands)
+			if(Autocompletion)
 			{
-				if(str_startswith_nocase(Command.m_aName, m_Input.GetString() + 1))
-				{
-					Cursor.m_X = Cursor.m_X + TextRender()->TextWidth(Cursor.m_FontSize, m_Input.GetString(), -1, Cursor.m_LineWidth);
-					Cursor.m_Y = m_Input.GetCaretPosition().y;
-					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.5f);
-					TextRender()->TextEx(&Cursor, Command.m_aName + str_length(m_Input.GetString() + 1));
-					TextRender()->TextColor(TextRender()->DefaultTextColor());
-					break;
-				}
+				Cursor.m_X = Cursor.m_X + TextRender()->TextWidth(Cursor.m_FontSize, m_Input.GetString(), -1, Cursor.m_LineWidth);
+				Cursor.m_Y = m_Input.GetCaretPosition().y;
+				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.5f);
+				TextRender()->TextEx(&Cursor, pCompCommand->m_aName + str_length(m_Input.GetString() + 1));
+				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
+
+			Cursor.m_LineWidth = Width - 260.0f;
+
+			float TextHeight = 0.f;
+			STextSizeProperties TextSizeProps{};
+			TextSizeProps.m_pHeight = &TextHeight;
+			TextRender()->TextWidth(Cursor.m_FontSize, pCompCommand->m_aHelpText, -1, Cursor.m_LineWidth, 0, TextSizeProps);
+
+			Cursor.m_X = x;
+			Cursor.m_Y = m_Input.GetCaretPosition().y - TextHeight;
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.5f);
+			TextRender()->TextEx(&Cursor, Localize("Help"));
+			TextRender()->TextEx(&Cursor, ": ");
+			TextRender()->TextEx(&Cursor, pCompCommand->m_aHelpText);
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+			y -= TextHeight;
 		}
 	}
 
