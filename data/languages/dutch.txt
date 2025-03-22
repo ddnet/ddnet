@@ -738,9 +738,6 @@ may cause delay
 Screen
 == Scherm
 
-Use high DPI
-== Gebruik hoge DPI
-
 Enable game sounds
 == Schakel spelgeluid in
 
@@ -854,9 +851,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == Laat de hookraaklijn van andere spelers zien
-
-Show other players' key presses
-== Laat toets drukken van andere spelers zien
 
 Show tiles layers from BG map
 == Laat tegellagen van achtergrondmap zien
@@ -1100,9 +1094,6 @@ Quads are used for background decoration
 
 Tries to predict other entities to give a feel of low latency
 == Probeert andere entities te voorspellen om een gevoel van "lage latency" te geven
-
-Show local player's key presses
-== Laat lokale spelers hun toetsaanslagen zien
 
 Background
 == Achtergrond
@@ -1854,9 +1845,6 @@ Chat font size
 Chat width
 == Chat breedte
 
-Show friend mark (♥) in name plates
-== Toon vriend-markering (♥) in naamplaten
-
 Show client IDs in name plates
 == Toon client-ID's in naamplaten
 
@@ -2131,3 +2119,65 @@ Renders your frame rate in the top right
 
 Show spectator cursor
 == Toon toeschouwerscursor
+
+No demo with this filename exists
+== 
+
+Map size
+== 
+
+Show number of spectators
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
+== 
+
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+Preview dummy's name plate
+== 
+
+AntiPing: prediction margin
+== 

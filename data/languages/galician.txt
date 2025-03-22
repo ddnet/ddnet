@@ -736,9 +736,6 @@ may cause delay
 Screen
 == Pantalla
 
-Use high DPI
-== Usar DPI alto
-
 Enable game sounds
 == Habilitar sons do xogo
 
@@ -849,9 +846,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == Mostrar as liñas de colisión de gancho doutros xogadores
-
-Show other players' key presses
-== Mostrar as pulsacións de teclas doutros xogadores
 
 Show tiles layers from BG map
 == Mostrar capas de tiles do mapa de fondo
@@ -1099,9 +1093,6 @@ https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == Seguro que queres desconectarche e cambiar de servidor?
-
-Show local player's key presses
-== Mostrar as teclas presionadas polo xogador local
 
 Settings file
 == Arquivo de configuraciones
@@ -1541,6 +1532,10 @@ Relative
 Absolute
 == Absoluto
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Galician translation by TormentaDeFacha and Mercadona
+
 Could not resolve connect address '%s'. See local console for details.
 == 
 
@@ -1560,6 +1555,9 @@ Saving settings to '%s' failed
 == 
 
 Error saving settings
+== 
+
+No demo with this filename exists
 == 
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
@@ -1799,6 +1797,9 @@ Created
 Netversion
 == 
 
+Map size
+== 
+
 [Demo details]
 map not included
 == 
@@ -1965,10 +1966,6 @@ Renders your frame rate in the top right
 Graphics card
 == 
 
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Galician translation by TormentaDeFacha and Mercadona
-
 Tee
 == 
 
@@ -1990,6 +1987,9 @@ Same clan color in scoreboard
 Show client IDs (scoreboard, chat, spectator)
 == 
 
+Show number of spectators
+== 
+
 Always show chat
 == 
 
@@ -2002,10 +2002,35 @@ Chat font size
 Chat width
 == 
 
-Show friend mark (♥) in name plates
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
 == 
 
 Show client IDs in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
 == 
 
 Hook Strength
@@ -2023,7 +2048,29 @@ Size of hook strength icon and number indicator
 Key Presses
 == 
 
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
 Size of key press icons
+== 
+
+Preview dummy's name plate
 == 
 
 Show own player's hook collision line
@@ -2054,6 +2101,9 @@ Enable ghost
 == 
 
 Only save improvements
+== 
+
+AntiPing: prediction margin
 == 
 
 Regular background color

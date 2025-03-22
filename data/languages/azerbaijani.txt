@@ -739,9 +739,6 @@ may cause delay
 Screen
 == Ekran
 
-Use high DPI
-== Yüksək DPI istifadə et 
-
 Enable game sounds
 == Oyun səsini aktivləşdirin
 
@@ -858,9 +855,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == Show other players' hook collision lines
-
-Show other players' key presses
-== Show other players' key presses
 
 Show tiles layers from BG map
 == Show tiles layers from BG map
@@ -1456,9 +1450,6 @@ Use old chat style
 Preview
 == Önizləmə
 
-Show local player's key presses
-== Yerli oyunçunun düymə basmalarını göstərin
-
 Hook collision line
 == Qarmaq izi
 
@@ -1785,9 +1776,6 @@ Player info change cooldown
 
 Always show chat
 == Həmişə söhbəti göstərin
-
-Show friend mark (♥) in name plates
-== İstifadəçi adlarında dostluq simvolunu (♥️) göstər
 
 Show hook strength icon indicator
 == Qarmaq gücü işarəsi göstəricisini göstər
@@ -2129,3 +2117,65 @@ English translation by the DDNet Team
 
 Show spectator cursor
 == Tamaşaçı kursorunu göstər
+
+No demo with this filename exists
+== 
+
+Map size
+== 
+
+Show number of spectators
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
+== 
+
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+Preview dummy's name plate
+== 
+
+AntiPing: prediction margin
+== 

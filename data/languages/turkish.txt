@@ -739,9 +739,6 @@ may cause delay
 Screen
 == Ekran
 
-Use high DPI
-== Yüksek DPI kullan
-
 Enable game sounds
 == Oyun sesini etkinleştir
 
@@ -858,9 +855,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == Diğer oyuncuların kanca çizgisini göster
-
-Show other players' key presses
-== Diğer oyuncuların tuş basışlarını göster
 
 Show tiles layers from BG map
 == Yapı katmanlarını göster
@@ -1456,9 +1450,6 @@ Use old chat style
 Preview
 == Ön izleme
 
-Show local player's key presses
-== Yerel oyuncunun tuş basışlarını göster
-
 Hook collision line
 == Kanca çizgisi
 
@@ -1785,9 +1776,6 @@ Player info change cooldown
 
 Always show chat
 == Sohbeti her zaman göster
-
-Show friend mark (♥) in name plates
-== İsim etiketlerinde arkadaşlık simgesini (♥) göster
 
 Show hook strength icon indicator
 == Kancanın güç göstergesini göster
@@ -2129,3 +2117,65 @@ English translation by the DDNet Team
 
 Show spectator cursor
 == İzleyicinin imlecini göster
+
+No demo with this filename exists
+== 
+
+Map size
+== 
+
+Show number of spectators
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
+== 
+
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+Preview dummy's name plate
+== 
+
+AntiPing: prediction margin
+== 

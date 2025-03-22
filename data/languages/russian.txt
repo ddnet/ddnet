@@ -802,9 +802,6 @@ may cause delay
 Screen
 == Экран
 
-Use high DPI
-== Использовать высокий DPI
-
 Enable long pain sound (used when shooting in freeze)
 == Включить звук продолжительной боли (при стрельбе во фризе)
 
@@ -855,9 +852,6 @@ AntiPing: predict weapons
 
 AntiPing: predict grenade paths
 == Предсказывать траекторию гранат
-
-Show other players' key presses
-== Показывать действия игроков
 
 Show tiles layers from BG map
 == Показывать тайловые слои фона
@@ -1105,9 +1099,6 @@ Desktop fullscreen
 
 Are you sure that you want to disconnect and switch to a different server?
 == Вы уверены, что хотите отключиться и перейти на другой сервер?
-
-Show local player's key presses
-== Показывать нажатия клавиш игрока
 
 The format of texture %s is not RGBA which will cause visual bugs.
 == Формат текстуры %s не соотвествует RGBA, что может повлечь артефакты.
@@ -1799,9 +1790,6 @@ Always show chat
 Show only chat messages from team members
 == Показывать сообщения только от команды
 
-Show friend mark (♥) in name plates
-== Показывать знак дружбы (♥) в имени друга
-
 Show hook strength icon indicator
 == Показывать иконку индикатора силы крюка
 
@@ -2129,3 +2117,65 @@ Size of key press icons
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
 == Не удалось запустить сервер. Убедитесь, что вы предоставили разрешение на уведомления в настройках приложения, чтобы сервер мог работать в фоновом режиме.
+
+No demo with this filename exists
+== 
+
+Map size
+== 
+
+Show number of spectators
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
+== 
+
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+Preview dummy's name plate
+== 
+
+AntiPing: prediction margin
+== 
