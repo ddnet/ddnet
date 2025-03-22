@@ -229,6 +229,13 @@ int CControls::SnapInput(int *pData)
 			m_aMousePosOnAction[g_Config.m_ClDummy] = vec2(0.0f, 0.0f);
 		}
 
+		if(g_Config.m_ClSnapAimTo45)
+		{
+			vec2 SnappedVec = snap_to_45(vec2(m_aInputData[g_Config.m_ClDummy].m_TargetX, m_aInputData[g_Config.m_ClDummy].m_TargetY));
+			m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)SnappedVec.x;
+			m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)SnappedVec.y;
+		}
+
 		if(!m_aInputData[g_Config.m_ClDummy].m_TargetX && !m_aInputData[g_Config.m_ClDummy].m_TargetY)
 		{
 			m_aInputData[g_Config.m_ClDummy].m_TargetX = 1;
@@ -340,6 +347,20 @@ void CControls::OnRender()
 			}
 			if(Weapon != m_pClient->m_Snap.m_pLocalCharacter->m_Weapon)
 				m_aInputData[g_Config.m_ClDummy].m_WantedWeapon = Weapon + 1;
+		}
+	}
+
+	m_aRenderedLocalTeeAngle[g_Config.m_ClDummy] = m_aMousePos[g_Config.m_ClDummy];
+
+	// render local player to snapped angles even if it doesn't align with mouse
+	if(g_Config.m_ClSnapAimTo45)
+	{
+		vec2 SnappedVec = snap_to_45(m_aMousePos[g_Config.m_ClDummy]);
+		m_aRenderedLocalTeeAngle[g_Config.m_ClDummy] = SnappedVec;
+		// update actual mouse position if action taken
+		if(m_aInputData[g_Config.m_ClDummy].m_Fire % 2 != 0 || m_aInputData[g_Config.m_ClDummy].m_Hook)
+		{
+			m_aMousePos[g_Config.m_ClDummy] = SnappedVec;
 		}
 	}
 
