@@ -183,6 +183,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("ready_change", "", CFGFLAG_CLIENT, ConReadyChange7, this, "Change ready state (0.7 only)");
 
 	// register game commands to allow the client prediction to load settings from the map
+	Console()->Register("tune", "s[tuning] ?f[value]", CFGFLAG_GAME, ConTuneParam, this, "Tune variable to value");
 	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
 	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 
@@ -4264,14 +4265,14 @@ void CGameClient::LoadMapSettings()
 
 	// Reset Tunezones
 	CTuningParams TuningParams;
-	for(int i = 0; i < NUM_TUNEZONES; i++)
+	for(int TuneZone = 0; TuneZone < NUM_TUNEZONES; TuneZone++)
 	{
-		TuningList()[i] = TuningParams;
-		TuningList()[i].Set("gun_curvature", 0);
-		TuningList()[i].Set("gun_speed", 1400);
-		TuningList()[i].Set("shotgun_curvature", 0);
-		TuningList()[i].Set("shotgun_speed", 500);
-		TuningList()[i].Set("shotgun_speeddiff", 0);
+		TuningList()[TuneZone] = TuningParams;
+		TuningList()[TuneZone].Set("gun_curvature", 0);
+		TuningList()[TuneZone].Set("gun_speed", 1400);
+		TuningList()[TuneZone].Set("shotgun_curvature", 0);
+		TuningList()[TuneZone].Set("shotgun_speed", 500);
+		TuningList()[TuneZone].Set("shotgun_speeddiff", 0);
 	}
 
 	// Load map tunings
@@ -4303,6 +4304,17 @@ void CGameClient::LoadMapSettings()
 		Console()->SetUnknownCommandCallback(IConsole::EmptyUnknownCommandCallback, nullptr);
 		pMap->UnloadData(pItem->m_Settings);
 		break;
+	}
+}
+
+void CGameClient::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameClient *pSelf = (CGameClient *)pUserData;
+	const char *pParamName = pResult->GetString(0);
+	if(pResult->NumArguments() == 2)
+	{
+		float NewValue = pResult->GetFloat(1);
+		pSelf->TuningList()[0].Set(pParamName, NewValue);
 	}
 }
 
