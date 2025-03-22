@@ -397,62 +397,6 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	Ui()->DoEditBox_Search(&s_FlagFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && !m_pClient->m_GameConsole.IsActive());
 }
 
-struct CUISkin
-{
-	const CSkin *m_pSkin;
-
-	CUISkin() :
-		m_pSkin(nullptr) {}
-	CUISkin(const CSkin *pSkin) :
-		m_pSkin(pSkin) {}
-
-	bool operator<(const CUISkin &Other) const { return str_comp_nocase(m_pSkin->GetName(), Other.m_pSkin->GetName()) < 0; }
-
-	bool operator<(const char *pOther) const { return str_comp_nocase(m_pSkin->GetName(), pOther) < 0; }
-	bool operator==(const char *pOther) const { return !str_comp_nocase(m_pSkin->GetName(), pOther); }
-};
-
-void CMenus::Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
-{
-	auto *pSelf = (CMenus *)pUserData;
-	const char *pStr = pResult->GetString(0);
-	if(!CSkin::IsValidName(pStr))
-	{
-		log_error("menus/settings", "Favorite skin name '%s' is not valid", pStr);
-		log_error("menus/settings", "%s", CSkin::m_aSkinNameRestrictions);
-		return;
-	}
-	pSelf->m_SkinFavorites.emplace(pStr);
-	pSelf->m_SkinListLastRefreshTime = std::nullopt;
-}
-
-void CMenus::Con_RemFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
-{
-	auto *pSelf = (CMenus *)pUserData;
-	const auto it = pSelf->m_SkinFavorites.find(pResult->GetString(0));
-	if(it != pSelf->m_SkinFavorites.end())
-	{
-		pSelf->m_SkinFavorites.erase(it);
-		pSelf->m_SkinListLastRefreshTime = std::nullopt;
-	}
-}
-
-void CMenus::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
-{
-	auto *pSelf = (CMenus *)pUserData;
-	pSelf->OnConfigSave(pConfigManager);
-}
-
-void CMenus::OnConfigSave(IConfigManager *pConfigManager)
-{
-	for(const auto &Entry : m_SkinFavorites)
-	{
-		char aBuffer[256];
-		str_format(aBuffer, std::size(aBuffer), "add_favorite_skin \"%s\"", Entry.c_str());
-		pConfigManager->WriteLine(aBuffer);
-	}
-}
-
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
 	CUIRect TabBar, PlayerTab, DummyTab, ChangeInfo;
@@ -714,60 +658,15 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	DirectoryButton.VSplitRight(10.0f, &DirectoryButton, nullptr);
 
 	// Skin selector
-	static std::vector<CUISkin> s_vSkinList;
-	static std::vector<CUISkin> s_vSkinListHelper;
-	static std::vector<CUISkin> s_vFavoriteSkinListHelper;
 	static CListBox s_ListBox;
-
-	// be nice to the CPU
-	if(!m_SkinListLastRefreshTime.has_value() || m_SkinListLastRefreshTime.value() != m_pClient->m_Skins.LastRefreshTime())
-	{
-		m_SkinListLastRefreshTime = m_pClient->m_Skins.LastRefreshTime();
-		s_vSkinList.clear();
-		s_vSkinListHelper.clear();
-		s_vFavoriteSkinListHelper.clear();
-
-		auto &&SkinNotFiltered = [&](const CSkin *pSkinToBeSelected) {
-			// filter quick search
-			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pSkinToBeSelected->GetName(), g_Config.m_ClSkinFilterString))
-				return false;
-
-			// no special skins
-			if(CSkins::IsSpecialSkin(pSkinToBeSelected->GetName()))
-				return false;
-
-			return true;
-		};
-
-		for(const auto &it : m_SkinFavorites)
-		{
-			const CSkin *pSkinToBeSelected = m_pClient->m_Skins.FindOrNullptr(it.c_str(), true);
-
-			if(pSkinToBeSelected == nullptr || !SkinNotFiltered(pSkinToBeSelected))
-				continue;
-
-			s_vFavoriteSkinListHelper.emplace_back(pSkinToBeSelected);
-		}
-		for(const auto &SkinIt : m_pClient->m_Skins.GetSkinsUnsafe())
-		{
-			const auto &pSkinToBeSelected = SkinIt.second;
-			if(!SkinNotFiltered(pSkinToBeSelected.get()))
-				continue;
-
-			if(std::find(m_SkinFavorites.begin(), m_SkinFavorites.end(), pSkinToBeSelected->GetName()) == m_SkinFavorites.end())
-				s_vSkinListHelper.emplace_back(pSkinToBeSelected.get());
-		}
-		std::sort(s_vSkinListHelper.begin(), s_vSkinListHelper.end());
-		std::sort(s_vFavoriteSkinListHelper.begin(), s_vFavoriteSkinListHelper.end());
-		s_vSkinList = s_vFavoriteSkinListHelper;
-		s_vSkinList.insert(s_vSkinList.end(), s_vSkinListHelper.begin(), s_vSkinListHelper.end());
-	}
+	const std::vector<CSkins::CSkinListEntry> &vSkinList = GameClient()->m_Skins.SkinList();
 
 	int OldSelected = -1;
-	s_ListBox.DoStart(50.0f, s_vSkinList.size(), 4, 1, OldSelected, &MainView);
-	for(size_t i = 0; i < s_vSkinList.size(); ++i)
+	s_ListBox.DoStart(50.0f, vSkinList.size(), 4, 1, OldSelected, &MainView);
+	for(size_t i = 0; i < vSkinList.size(); ++i)
 	{
-		const CSkin *pSkinToBeDraw = s_vSkinList[i].m_pSkin;
+		const CSkins::CSkinListEntry &SkinListEntry = vSkinList[i];
+		const CSkin *pSkinToBeDraw = SkinListEntry.m_pSkin;
 		if(str_comp(pSkinToBeDraw->GetName(), pSkinName) == 0)
 		{
 			OldSelected = i;
@@ -778,7 +677,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			}
 		}
 
-		const CListboxItem Item = s_ListBox.DoNextItem(pSkinToBeDraw, OldSelected >= 0 && (size_t)OldSelected == i);
+		const CListboxItem Item = s_ListBox.DoNextItem(SkinListEntry.ListItemId(), OldSelected >= 0 && (size_t)OldSelected == i);
 		if(!Item.m_Visible)
 			continue;
 
@@ -798,10 +697,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 		if(g_Config.m_Debug)
 		{
-			const ColorRGBA BloodColor = *pUseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT)) : pSkinToBeDraw->m_BloodColor;
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
-			Graphics()->SetColor(BloodColor.r, BloodColor.g, BloodColor.b, 1.0f);
+			Graphics()->SetColor(*pUseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting(ColorHSLA::DARKEST_LGT)) : pSkinToBeDraw->m_BloodColor);
 			IGraphics::CQuadItem QuadItem(Label.x, Label.y, 12.0f, 12.0f);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
@@ -809,22 +707,19 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 		// render skin favorite icon
 		{
-			const auto SkinItFav = m_SkinFavorites.find(pSkinToBeDraw->GetName());
-			const bool IsFav = SkinItFav != m_SkinFavorites.end();
 			CUIRect FavIcon;
 			Item.m_Rect.HSplitTop(20.0f, &FavIcon, nullptr);
 			FavIcon.VSplitRight(20.0f, nullptr, &FavIcon);
-			if(DoButton_Favorite(&pSkinToBeDraw->m_Metrics.m_Body, pSkinToBeDraw, IsFav, &FavIcon))
+			if(DoButton_Favorite(SkinListEntry.FavoriteButtonId(), SkinListEntry.ListItemId(), SkinListEntry.m_Favorite, &FavIcon))
 			{
-				if(IsFav)
+				if(SkinListEntry.m_Favorite)
 				{
-					m_SkinFavorites.erase(SkinItFav);
+					GameClient()->m_Skins.RemoveFavorite(pSkinToBeDraw->GetName());
 				}
 				else
 				{
-					m_SkinFavorites.emplace(pSkinToBeDraw->GetName());
+					GameClient()->m_Skins.AddFavorite(pSkinToBeDraw->GetName());
 				}
-				m_SkinListLastRefreshTime = std::nullopt;
 			}
 		}
 	}
@@ -832,14 +727,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const int NewSelected = s_ListBox.DoEnd();
 	if(OldSelected != NewSelected)
 	{
-		str_copy(pSkinName, s_vSkinList[NewSelected].m_pSkin->GetName(), SkinNameSize);
+		str_copy(pSkinName, vSkinList[NewSelected].m_pSkin->GetName(), SkinNameSize);
 		SetNeedSendInfo();
 	}
 
 	static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
 	if(Ui()->DoEditBox_Search(&s_SkinFilterInput, &QuickSearch, 14.0f, !Ui()->IsPopupOpen() && !m_pClient->m_GameConsole.IsActive()))
 	{
-		m_SkinListLastRefreshTime = std::nullopt;
+		GameClient()->m_Skins.ForceRefreshSkinList();
 	}
 
 	static CButtonContainer s_SkinDatabaseButton;
@@ -860,15 +755,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static CButtonContainer s_SkinRefreshButton;
-	if(DoButton_Menu(&s_SkinRefreshButton, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &RefreshButton) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
-	{
-		// reset render flags for possible loading screen
-		TextRender()->SetRenderFlags(0);
-		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SIX);
-	}
+	const bool ShouldRefresh = DoButton_Menu(&s_SkinRefreshButton, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &RefreshButton) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed());
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+
+	if(ShouldRefresh)
+	{
+		m_pClient->RefreshSkins(CSkinDescriptor::FLAG_SIX);
+	}
 }
 
 typedef struct

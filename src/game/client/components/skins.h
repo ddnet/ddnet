@@ -5,25 +5,48 @@
 
 #include <base/lock.h>
 
+#include <engine/shared/config.h>
 #include <engine/shared/jobs.h>
 
 #include <game/client/component.h>
 #include <game/client/skin.h>
 
 #include <chrono>
+#include <optional>
 #include <string_view>
 #include <unordered_map>
+#include <unordered_set>
 
 class CHttpRequest;
 
 class CSkins : public CComponent
 {
 public:
+	class CSkinListEntry
+	{
+	public:
+		const CSkin *m_pSkin;
+		bool m_Favorite;
+
+		CSkinListEntry() :
+			m_pSkin(nullptr),
+			m_Favorite(false) {}
+		CSkinListEntry(const CSkin *pSkin, bool Favorite) :
+			m_pSkin(pSkin),
+			m_Favorite(Favorite) {}
+
+		bool operator<(const CSkinListEntry &Other) const;
+
+		const void *ListItemId() const { return &m_pSkin; }
+		const void *FavoriteButtonId() const { return &m_Favorite; }
+	};
+
 	CSkins();
 
 	typedef std::function<void()> TSkinLoadedCallback;
 
 	int Sizeof() const override { return sizeof(*this); }
+	void OnConsoleInit() override;
 	void OnInit() override;
 	void OnShutdown() override;
 	void OnRender() override;
@@ -31,9 +54,15 @@ public:
 	void Refresh(TSkinLoadedCallback &&SkinLoadedCallback);
 	std::chrono::nanoseconds LastRefreshTime() const { return m_LastRefreshTime; }
 
-	const std::unordered_map<std::string_view, std::unique_ptr<CSkin>> &GetSkinsUnsafe() const { return m_Skins; }
+	const std::vector<CSkinListEntry> &SkinList();
+	void ForceRefreshSkinList();
+
 	const CSkin *FindOrNullptr(const char *pName, bool IgnorePrefix = false);
 	const CSkin *Find(const char *pName);
+
+	void AddFavorite(const char *pName);
+	void RemoveFavorite(const char *pName);
+	bool IsFavorite(const char *pName) const;
 
 	void RandomizeSkin(int Dummy);
 
@@ -93,6 +122,11 @@ private:
 	std::unordered_map<std::string_view, std::unique_ptr<CLoadingSkin>> m_LoadingSkins;
 	std::chrono::nanoseconds m_LastRefreshTime;
 
+	std::vector<CSkinListEntry> m_vSkinList;
+	std::optional<std::chrono::nanoseconds> m_SkinListLastRefreshTime;
+
+	std::unordered_set<std::string> m_Favorites;
+
 	CSkin m_PlaceholderSkin;
 	char m_aEventSkinPrefix[MAX_SKIN_LENGTH];
 
@@ -100,5 +134,10 @@ private:
 	const CSkin *LoadSkin(const char *pName, CImageInfo &Info);
 	const CSkin *FindImpl(const char *pName);
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
+
+	static void ConAddFavoriteSkin(IConsole::IResult *pResult, void *pUserData);
+	static void ConRemFavoriteSkin(IConsole::IResult *pResult, void *pUserData);
+	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
+	void OnConfigSave(IConfigManager *pConfigManager);
 };
 #endif

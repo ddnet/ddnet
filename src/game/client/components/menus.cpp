@@ -963,13 +963,6 @@ void CMenus::OnInit()
 	Graphics()->QuadContainerUpload(m_DirectionQuadContainerIndex);
 }
 
-void CMenus::OnConsoleInit()
-{
-	ConfigManager()->RegisterCallback(CMenus::ConfigSaveCallback, this);
-	Console()->Register("add_favorite_skin", "s[skin_name]", CFGFLAG_CLIENT, Con_AddFavoriteSkin, this, "Add a skin as a favorite");
-	Console()->Register("remove_favorite_skin", "s[skin_name]", CFGFLAG_CLIENT, Con_RemFavoriteSkin, this, "Remove a skin from the favorites");
-}
-
 void CMenus::ConchainBackgroundEntities(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
