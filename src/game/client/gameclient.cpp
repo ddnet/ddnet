@@ -7,6 +7,7 @@
 #include <engine/client/checksum.h>
 #include <engine/client/enums.h>
 #include <engine/demo.h>
+#include <engine/discord.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/favorites.h>
@@ -105,6 +106,7 @@ void CGameClient::OnConsoleInit()
 	m_pFavorites = Kernel()->RequestInterface<IFavorites>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	m_pFoes = Client()->Foes();
+	m_pDiscord = Kernel()->RequestInterface<IDiscord>();
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
@@ -1968,6 +1970,11 @@ void CGameClient::OnNewSnapshot()
 			m_aClients[i].Reset();
 			m_aStats[i].Reset();
 		}
+	}
+
+	if(Client()->State() == IClient::STATE_ONLINE)
+	{
+		m_pDiscord->UpdatePlayerCount(m_Snap.m_NumPlayers);
 	}
 
 	for(int i = 0; i < MAX_CLIENTS; ++i)
