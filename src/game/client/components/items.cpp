@@ -243,12 +243,6 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 {
 	int Type = clamp(pCurrent->m_Type, -1, NUM_LASERTYPES - 1);
-
-	ColorRGBA RGB;
-	vec2 Pos = pCurrent->m_To;
-	vec2 From = pCurrent->m_From;
-	float Len = distance(Pos, From);
-
 	int ColorIn, ColorOut;
 	switch(Type)
 	{
@@ -287,45 +281,49 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 		ColorIn = g_Config.m_ClLaserRifleInnerColor;
 	}
 
-	RGB = color_cast<ColorRGBA>(ColorHSLA(ColorOut));
-	ColorRGBA OuterColor(RGB.r, RGB.g, RGB.b, 1.0f);
-	RGB = color_cast<ColorRGBA>(ColorHSLA(ColorIn));
-	ColorRGBA InnerColor(RGB.r, RGB.g, RGB.b, 1.0f);
-
-	int TuneZone = GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
 	bool IsOtherTeam = (pCurrent->m_ExtraInfo && pCurrent->m_Owner >= 0 && m_pClient->IsOtherTeam(pCurrent->m_Owner));
 
-	float Alpha = 1.f;
-	if(IsOtherTeam)
-	{
-		Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
-	}
+	float Alpha = IsOtherTeam ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.f;
 
-	vec2 Dir;
+	const ColorRGBA OuterColor = color_cast<ColorRGBA>(ColorHSLA(ColorOut).WithAlpha(Alpha));
+	const ColorRGBA InnerColor = color_cast<ColorRGBA>(ColorHSLA(ColorIn).WithAlpha(Alpha));
+
+	float Ticks;
+	if(Type == LASERTYPE_DOOR)
+	{
+		Ticks = 1.0f;
+	}
+	else if(IsPredicted)
+	{
+		int PredictionTick = Client()->GetPredictionTick();
+		Ticks = (float)(PredictionTick - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy);
+	}
+	else
+		Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
+
+	RenderLaser(pCurrent->m_From, pCurrent->m_To, OuterColor, InnerColor, Ticks, Type);
+}
+
+void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float Ticks, int Type)
+{
+	int TuneZone = GameClient()->m_GameWorld.m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(Collision()->GetMapIndex(From)) : 0;
+	float Len = distance(Pos, From);
+
 	if(Len > 0)
 	{
-		Dir = normalize_pre_length(Pos - From, Len);
+		vec2 Dir = normalize_pre_length(Pos - From, Len);
 
-		int PredictionTick = Client()->GetPredictionTick();
-
-		float Ticks;
-		if(IsPredicted)
-			Ticks = (float)(PredictionTick - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy);
-		else
-			Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
-		float Ms = (Ticks / Client()->GameTickSpeed()) * 1000.0f;
+		float Ms = Ticks * 1000.0f / Client()->GameTickSpeed();
 		float a = Ms / m_pClient->GetTuning(TuneZone)->m_LaserBounceDelay;
 		a = clamp(a, 0.0f, 1.0f);
 		float Ia = 1 - a;
-
-		vec2 Out;
 
 		Graphics()->TextureClear();
 		Graphics()->QuadsBegin();
 
 		// do outline
-		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, Alpha);
-		Out = vec2(Dir.y, -Dir.x) * (7.0f * Ia);
+		Graphics()->SetColor(OuterColor);
+		vec2 Out = vec2(Dir.y, -Dir.x) * (7.0f * Ia);
 
 		IGraphics::CFreeformItem Freeform(
 			From.x - Out.x, From.y - Out.y,
@@ -336,7 +334,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 
 		// do inner
 		Out = vec2(Dir.y, -Dir.x) * (5.0f * Ia);
-		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, Alpha); // center
+		Graphics()->SetColor(InnerColor); // center
 
 		Freeform = IGraphics::CFreeformItem(
 			From.x - Out.x, From.y - Out.y,
@@ -349,14 +347,33 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	}
 
 	// render head
+	if(Type != LASERTYPE_DOOR)
 	{
 		int CurParticle = (Client()->GameTick(g_Config.m_ClDummy) % 3);
 		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_aSpriteParticleSplat[CurParticle]);
 		Graphics()->QuadsSetRotation(Client()->GameTick(g_Config.m_ClDummy));
-		Graphics()->SetColor(OuterColor.r, OuterColor.g, OuterColor.b, Alpha);
+		Graphics()->SetColor(OuterColor);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y);
-		Graphics()->SetColor(InnerColor.r, InnerColor.g, InnerColor.b, Alpha);
+		Graphics()->SetColor(InnerColor);
 		Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, m_aParticleSplatOffset[CurParticle], Pos.x, Pos.y, 20.f / 24.f, 20.f / 24.f);
+	}
+	else
+	{
+		Graphics()->TextureClear();
+		Graphics()->QuadsBegin();
+
+		// do outline
+		Graphics()->SetColor(OuterColor);
+		float Width = 8.0f;
+		IGraphics::CQuadItem OuterRect(Pos.x, Pos.y, 2 * Width, 2 * Width);
+		Graphics()->QuadsDraw(&OuterRect, 1);
+
+		// do inner
+		Graphics()->SetColor(InnerColor);
+		Width = 6.0f;
+		IGraphics::CQuadItem InnerRect(Pos.x, Pos.y, 2 * Width, 2 * Width);
+		Graphics()->QuadsDraw(&InnerRect, 1);
+		Graphics()->QuadsEnd();
 	}
 }
 
