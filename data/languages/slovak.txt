@@ -1308,9 +1308,6 @@ may cause delay
 Allows maps to render with more detail
 == Umožňuje vykresľovať mapy s väčšími detailmi
 
-Use high DPI
-== Použiť vysoké DPI
-
 Renderer
 == Renderer
 
@@ -1466,12 +1463,6 @@ Show clan above name plates
 
 Clan plates size
 == Veľkosť menoviek klanu
-
-Show other players' key presses
-== Zobraziť stlačenie klávesov ostatných hráčov
-
-Show local player's key presses
-== Zobraziť stlačenie kláves miestnych hráčov
 
 Authed name color in scoreboard
 == Farba overeného hráča vo výsledkovej tabuľke
@@ -1792,9 +1783,6 @@ Player info change cooldown
 Always show chat
 == Vždy zobraziť chat
 
-Show friend mark (♥) in name plates
-== Zobraziť značku priateľa (♥) v menovkách
-
 Show hook strength icon indicator
 == Zobraziť silu háku pomocou ikony
 
@@ -1919,6 +1907,13 @@ Feet
 Eyes
 == Oči
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Slovak translation by LimiT, Petr and dobrykafe
+
+No demo with this filename exists
+== 
+
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == 
 
@@ -1968,6 +1963,9 @@ Add clanmates by entering their clan below and leaving the name blank.
 == 
 
 Toggle auto camera
+== 
+
+Map size
 == 
 
 Edit touch controls
@@ -2089,14 +2087,41 @@ Show FPS
 Renders your frame rate in the top right
 == 
 
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Slovak translation by LimiT, Petr and dobrykafe
-
 Show spectator cursor
 == 
 
+Show number of spectators
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
 Show client IDs in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
 == 
 
 Hook Strength
@@ -2108,7 +2133,29 @@ Size of hook strength icon and number indicator
 Key Presses
 == 
 
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
 Size of key press icons
+== 
+
+Preview dummy's name plate
 == 
 
 Width of your own hook collision line
@@ -2118,6 +2165,9 @@ Width of others' hook collision line
 == 
 
 Preview 'Hook collisions' being pressed
+== 
+
+AntiPing: prediction margin
 == 
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.

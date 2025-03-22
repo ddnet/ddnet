@@ -586,9 +586,6 @@ DDNet Client updated!
 AntiPing: predict other players
 == AntiPing: ﻦﻳﺮﺧﻵﺍ ﻦﻴﺒﻋﻼﻟ ﻖﺒﺴﻣ ﺏﺎﺴﺣ
 
-Show other players' key presses
-== ﻦﻳﺮﺧﻻﺍ ﻦﻴﺒﻋﻼﻟﺍ ﺎﻬﻄﻐﻀﺑ ﻡﺎﻗ ﻲﺘﻟﺍ ﺢﻴﺗﺎﻔﻤﻟﺍ ﺭﺎﻬﻇﺍ
-
 System message
 == ﻡﺎﻈﻨﻟﺍ ﻞﺋﺎﺳﺭ
 
@@ -898,9 +895,6 @@ Please enter your nickname below.
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == .ﺮﻓﺮﻴﺴﻟﺍ ﻰﻟﺇ ﻡﺎﻤﻀﻧﻻﺍ ﻞﺒﻗ ﻚﺘﺒﻏﺭ ﺐﺴﺣ ﺎﻬﻄﺒﻀﻟ ﺕﺍﺩﺍﺪﻋﻹﺍ ﻦﻣ ﻖﻘﺤﺘﻟﺎﺑ ﻰﺻﻮﻳ
 
-Use high DPI
-== ﻲﻟﺎﻋ IPD ﻡﺍﺪﺨﺘﺳﺍ
-
 Learn
 == ﻢﻠﻌﺗ
 
@@ -1037,6 +1031,10 @@ Replay
 Smooth Dynamic Camera
 == ﺔﻤﻋﺎﻧ ﺍﺮﻴﻣﺎﻛ ﻚﻴﻣﺎﻨﻳﺩ
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Arabic translation by Relax, .Yukki, Reko and vMarshu
+
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
@@ -1095,6 +1093,9 @@ Saving settings to '%s' failed
 == 
 
 Error saving settings
+== 
+
+No demo with this filename exists
 == 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
@@ -1509,6 +1510,9 @@ Created
 Netversion
 == 
 
+Map size
+== 
+
 [Demo details]
 map not included
 == 
@@ -1806,10 +1810,6 @@ Graphics card
 auto
 == 
 
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Arabic translation by Relax, .Yukki, Reko and vMarshu
-
 Tee
 == 
 
@@ -1852,6 +1852,9 @@ Show DDRace HUD
 Show jumps indicator
 == 
 
+Show number of spectators
+== 
+
 Show dummy actions
 == 
 
@@ -1885,10 +1888,35 @@ Chat width
 Preview
 == 
 
-Show friend mark (♥) in name plates
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
 == 
 
 Show client IDs in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
 == 
 
 Hook Strength
@@ -1906,10 +1934,29 @@ Size of hook strength icon and number indicator
 Key Presses
 == 
 
-Show local player's key presses
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
 == 
 
 Size of key press icons
+== 
+
+Preview dummy's name plate
 == 
 
 Hook collision line
@@ -2009,6 +2056,9 @@ Quads are used for background decoration
 == 
 
 Tries to predict other entities to give a feel of low latency
+== 
+
+AntiPing: prediction margin
 == 
 
 Background

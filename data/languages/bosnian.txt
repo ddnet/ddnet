@@ -732,9 +732,6 @@ may cause delay
 Screen
 == Ekran
 
-Use high DPI
-== Koristi visoki DPI
-
 Enable game sounds
 == Omogući zvukove igre
 
@@ -840,9 +837,6 @@ AntiPing: predict grenade paths
 Show other players' hook collision lines
 == Prikaži linije sudaranja lanca od ostalih igrača
 
-Show other players' key presses
-== Prikaži tipke koje ostali igrači pritiskaju
-
 Show tiles layers from BG map
 == Prikaži slojeve od pozadinske mape
 
@@ -893,6 +887,10 @@ Best
 
 9+ new mentions
 == 9+ novih označenja
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Bosnian translation by *** and MikiGamer
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -952,6 +950,9 @@ Saving settings to '%s' failed
 == 
 
 Error saving settings
+== 
+
+No demo with this filename exists
 == 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
@@ -1399,17 +1400,20 @@ Folder Link
 Created
 == 
 
-Netversion
-== 
-
-[Demo details]
-map not included
-== 
-
 %.2f MiB
 == 
 
 %.2f KiB
+== 
+
+Netversion
+== 
+
+Map size
+== 
+
+[Demo details]
+map not included
 == 
 
 Demos directory
@@ -1738,10 +1742,6 @@ Chat sound volume
 Background music volume
 == 
 
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Bosnian translation by *** and MikiGamer
-
 Tee
 == 
 
@@ -1793,6 +1793,9 @@ Show DDRace HUD
 Show jumps indicator
 == 
 
+Show number of spectators
+== 
+
 Show dummy actions
 == 
 
@@ -1829,10 +1832,35 @@ Chat width
 Preview
 == 
 
-Show friend mark (♥) in name plates
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
 == 
 
 Show client IDs in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
 == 
 
 Hook Strength
@@ -1850,10 +1878,29 @@ Size of hook strength icon and number indicator
 Key Presses
 == 
 
-Show local player's key presses
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
 == 
 
 Size of key press icons
+== 
+
+Preview dummy's name plate
 == 
 
 Hook collision line
@@ -1962,6 +2009,9 @@ AntiPing
 == 
 
 Tries to predict other entities to give a feel of low latency
+== 
+
+AntiPing: prediction margin
 == 
 
 Background
