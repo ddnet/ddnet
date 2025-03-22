@@ -793,9 +793,6 @@ may cause delay
 Screen
 == Näyttö
 
-Use high DPI
-== Käytä korkeaa DPI:tä
-
 Enable game sounds
 == Ota pelin äänet käyttöön
 
@@ -912,9 +909,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == Näytä muiden pelaajien koukkujen törmaysviivat
-
-Show other players' key presses
-== Näytä muiden pelaajien näppäinpainallukset
 
 Background
 == Tausta
@@ -1473,9 +1467,6 @@ Player info change cooldown
 Always show chat
 == Aina näytä chatti
 
-Show friend mark (♥) in name plates
-== Näytä ystävämerkki (♥) nimilaatoissa
-
 Show hook strength icon indicator
 == Näytä koukun voiman ikoniindikaattori
 
@@ -1637,9 +1628,6 @@ Chat font size
 Chat width
 == Chatin leveys
 
-Show local player's key presses
-== Näytä paikallisen pelaajan näppäimistönpainallukset
-
 Authed name color in scoreboard
 == Autentifikoidun käyttäjän nimen väri pistetaulukossa
 
@@ -1799,6 +1787,10 @@ Loading sound files
 Moved ingame
 == Liikui pelissä
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Finnish translation by ziltoide, Misse, Igrekyll and ƤØŢĀŤ0Co
+
 Could not resolve connect address '%s'. See local console for details.
 == 
 
@@ -1806,6 +1798,9 @@ Connect address error
 == 
 
 Could not connect dummy
+== 
+
+No demo with this filename exists
 == 
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
@@ -1882,6 +1877,9 @@ Add clanmates by entering their clan below and leaving the name blank.
 == 
 
 Toggle auto camera
+== 
+
+Map size
 == 
 
 Dummy is not allowed on this server
@@ -2019,10 +2017,6 @@ Show FPS
 Renders your frame rate in the top right
 == 
 
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Finnish translation by ziltoide, Misse, Igrekyll and ƤØŢĀŤ0Co
-
 Tee
 == 
 
@@ -2032,10 +2026,41 @@ Show spectator cursor
 Show client IDs (scoreboard, chat, spectator)
 == 
 
+Show number of spectators
+== 
+
 Show only chat messages from team members
 == 
 
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
 Show client IDs in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
 == 
 
 Hook Strength
@@ -2047,7 +2072,29 @@ Size of hook strength icon and number indicator
 Key Presses
 == 
 
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
 Size of key press icons
+== 
+
+Preview dummy's name plate
 == 
 
 Width of your own hook collision line
@@ -2057,6 +2104,9 @@ Width of others' hook collision line
 == 
 
 Preview 'Hook collisions' being pressed
+== 
+
+AntiPing: prediction margin
 == 
 
 Basic

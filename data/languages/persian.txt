@@ -1132,9 +1132,6 @@ FSAA samples
 Allows maps to render with more detail
 == ﺪﻧﻮﺷ ﺭﺪﻧﺭ ﺮﺘﺸﯿﺑ ﺕﺎﯿﺋﺰﺟ ﺎﺑ ﺎﺗ ﺪﻫﺩ ﯽﻣ ﻩﺯﺎﺟﺍ ﺎﻫ ﻪﺸﻘﻧ ﻪﺑ
 
-Use high DPI
-==  ﻻﺎﺑ DPI ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
-
 Renderer
 == ﻩﺪﻨﻨﮐ ﺭﺪﻧﺭ
 
@@ -1260,12 +1257,6 @@ Clan plates size
 
 Use team colors for name plates
 ==  ﻡﺎﻧ کﻼﭘ ﯼﺍﺮﺑ ﯽﻤﯿﺗ ﯼﺎﻫ ﮓﻧﺭ ﺯﺍ ﻩﺩﺎﻔﺘﺳﺍ
-
-Show other players' key presses
-== ﺮﮕﯾﺩ ﻥﺎﻨﮑﯾﺯﺎﺑ ﺪﯿﻠﮐ ﺭﺎﺸﻓ ﺶﯾﺎﻤﻧ
-
-Show local player's key presses
-== ﯽﻠﺤﻣ ﻥﺎﻨﮑﯾﺯﺎﺑ ﺪﯿﻠﮐ ﺭﺎﺸﻓ ﺶﯾﺎﻤﻧ
 
 Hook collision line
 == ﺏﻼﻗ ﺩﺭﻮﺧﺮﺑ ﻂﺧ
@@ -1803,9 +1794,6 @@ Chat font size
 Chat width
 ==   ﺖﭼ ﺽﺮﻋ
 
-Show friend mark (♥) in name plates
-== ﻥﺎﻨﻜﯾﺯﺎﺑ ﻢﺳﺍ ﺭﺎﻨﻛ ﺭﺩ (♥) ﺖﺳﻭﺩ ﺖﻣﻼﻋ ﺶﯾﺎﻤﻧ
-
 Show hook strength icon indicator
 == کﻮﻫ ﺕﺭﺪﻗ ﺩﺪﻋ ﺮﮕﻧﺎﺸﻧ ﺶﯾﺎﻤﻧ
 
@@ -2048,6 +2036,13 @@ Active: Fire
 Active: Hook
 == ﺏﻼﻗ :ﻝﺎﻌﻓ
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Persian translation by OneShadow, Quick, younesdevil, Player, ArAsH and Fàłłéñ
+
+No demo with this filename exists
+== 
+
 Auto-sync player camera
 == 
 
@@ -2072,6 +2067,9 @@ Active
 == 
 
 Loading maps…
+== 
+
+Map size
 == 
 
 https://wiki.ddnet.org/wiki/Touch_controls
@@ -2119,11 +2117,63 @@ Show FPS
 Renders your frame rate in the top right
 == 
 
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Persian translation by OneShadow, Quick, younesdevil, Player, ArAsH and Fàłłéñ
-
 Show spectator cursor
+== 
+
+Show number of spectators
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
+== 
+
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+Preview dummy's name plate
+== 
+
+AntiPing: prediction margin
 == 
 
 https://wiki.ddnet.org/wiki/Mapping

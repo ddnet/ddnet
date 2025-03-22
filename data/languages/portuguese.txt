@@ -1620,9 +1620,6 @@ may cause delay
 Allows maps to render with more detail
 == Permite que os mapas sejam renderizados com mais detalhes
 
-Use high DPI
-== Usar DPI alto
-
 Renderer
 == Renderizador
 
@@ -1719,9 +1716,6 @@ Client message
 Preview
 == Pré-visualização
 
-Show friend mark (♥) in name plates
-== Mostrar marca de amigo (♥) nas placas de nome
-
 Show client IDs in name plates
 == Mostrar IDs de cliente nas placas de nome
 
@@ -1739,12 +1733,6 @@ Size of hook strength icon and number indicator
 
 Key Presses
 == Teclas Pressionadas
-
-Show other players' key presses
-== Mostrar teclas pressionadas de outros jogadores
-
-Show local player's key presses
-== Mostrar teclas pressionadas do jogador local
 
 Size of key press icons
 == Tamanho dos ícones de teclas pressionadas
@@ -2049,6 +2037,13 @@ Active: Hook
 Moved ingame
 == Movido no jogo
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Portuguese translation by HeroiAmarelo, rockuS and DrafaKiller
+
+No demo with this filename exists
+== 
+
 Auto-sync player camera
 == 
 
@@ -2073,6 +2068,9 @@ Active
 == 
 
 Loading maps…
+== 
+
+Map size
 == 
 
 https://wiki.ddnet.org/wiki/Touch_controls
@@ -2120,11 +2118,63 @@ Show FPS
 Renders your frame rate in the top right
 == 
 
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Portuguese translation by HeroiAmarelo, rockuS and DrafaKiller
-
 Show spectator cursor
+== 
+
+Show number of spectators
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
+== 
+
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+Preview dummy's name plate
+== 
+
+AntiPing: prediction margin
 == 
 
 https://wiki.ddnet.org/wiki/Mapping

@@ -367,15 +367,6 @@ Show ingame HUD
 Show name plates
 == 顯示暱稱
 
-None
-== 禁用
-
-Own
-== 自身
-
-Others
-== 其他
-
 Show only chat messages from friends
 == 只顯示好友聊天訊息
 
@@ -633,9 +624,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == 顯示其他玩家的鉤索輔助線
-
-Show other players' key presses
-== 顯示其他玩家的按鍵
 
 Show tiles layers from BG map
 == 顯示實體層背景地圖的圖塊層
@@ -916,9 +904,6 @@ Server best:
 Learn
 == 教程Wiki
 
-Use high DPI
-== 使用高 DPI
-
 Personal best:
 == 個人最佳
 
@@ -1123,9 +1108,6 @@ https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == 確定要中斷此伺服器并嘗試加入其他伺服器嗎？
-
-Show local player's key presses
-== 顯示周圍玩家的按鍵輸入
 
 Settings file
 == 設定檔案
@@ -1814,9 +1796,6 @@ Player info change cooldown
 Always show chat
 == 始終顯示聊天框
 
-Show friend mark (♥) in name plates
-== 在暱稱上顯示好友標記 (♥)
-
 Show hook strength icon indicator
 == 顯示鉤索強度圖示
 
@@ -2165,3 +2144,44 @@ English translation by the DDNet Team
 
 Show spectator cursor
 == 顯示旁觀者指標
+
+No demo with this filename exists
+== 
+
+Map size
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+AntiPing: prediction margin
+== 
