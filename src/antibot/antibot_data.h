@@ -1,11 +1,12 @@
 #ifndef ANTIBOT_ANTIBOT_DATA_H
 #define ANTIBOT_ANTIBOT_DATA_H
 
+#include <base/log.h>
 #include <base/vmath.h>
 
 enum
 {
-	ANTIBOT_ABI_VERSION = 10,
+	ANTIBOT_ABI_VERSION = 11,
 
 	ANTIBOT_MSGFLAG_NONVITAL = 1,
 	ANTIBOT_MSGFLAG_FLUSH = 2,
@@ -88,7 +89,7 @@ struct CAntibotData
 	int64_t m_Now;
 	int64_t m_Freq;
 	void (*m_pfnKick)(int ClientId, const char *pMessage, void *pUser);
-	void (*m_pfnLog)(const char *pMessage, void *pUser);
+	void (*m_pfnLog)(LEVEL Level, const char *pMessage);
 	void (*m_pfnReport)(int ClientId, const char *pMessage, void *pUser);
 	void (*m_pfnSend)(int ClientId, const void *pData, int DataSize, int Flags, void *pUser);
 	void (*m_pfnTeehistorian)(const void *pData, int DataSize, void *pUser);

@@ -2,6 +2,7 @@
 #define ENGINE_SERVER_ANTIBOT_H
 
 #include <antibot/antibot_data.h>
+#include <base/log.h>
 #include <engine/antibot.h>
 
 class CAntibot : public IEngineAntibot
@@ -20,7 +21,7 @@ class CAntibot : public IEngineAntibot
 
 	void Update();
 	static void Kick(int ClientId, const char *pMessage, void *pUser);
-	static void Log(const char *pMessage, void *pUser);
+	static void Log(LEVEL Level, const char *pMessage);
 	static void Report(int ClientId, const char *pMessage, void *pUser);
 	static void Send(int ClientId, const void *pData, int Size, int Flags, void *pUser);
 	static void Teehistorian(const void *pData, int Size, void *pUser);

@@ -2,6 +2,7 @@
 
 #include <antibot/antibot_interface.h>
 
+#include <base/log.h>
 #include <base/system.h>
 
 #include <engine/console.h>
@@ -28,16 +29,15 @@ void CAntibot::Kick(int ClientId, const char *pMessage, void *pUser)
 	CAntibot *pAntibot = (CAntibot *)pUser;
 	pAntibot->Server()->Kick(ClientId, pMessage);
 }
-void CAntibot::Log(const char *pMessage, void *pUser)
+void CAntibot::Log(LEVEL Level, const char *pMessage)
 {
-	CAntibot *pAntibot = (CAntibot *)pUser;
-	pAntibot->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", pMessage);
+	log_log(Level, "antibot", pMessage);
 }
 void CAntibot::Report(int ClientId, const char *pMessage, void *pUser)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientId, pMessage);
-	Log(aBuf, pUser);
+	Log(LEVEL_INFO, aBuf);
 }
 void CAntibot::Send(int ClientId, const void *pData, int Size, int Flags, void *pUser)
 {
