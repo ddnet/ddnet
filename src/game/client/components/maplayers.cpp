@@ -413,7 +413,7 @@ void CMapLayers::OnMapLoad()
 				{
 					DataIndex = pTMap->m_Speedup;
 					TileSize = sizeof(CSpeedupTile);
-					OverlayCount = 2;
+					OverlayCount = 3; // speedup-arrow + speedup-slide + text
 				}
 				else if(IsTuneLayer)
 				{
@@ -529,12 +529,14 @@ void CMapLayers::OnMapLoad()
 										Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
 										Flags = 0;
 										AngleRotate = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Angle;
-										if(((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Force == 0)
+										if(CurOverlay < 3 && (((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Force == 0 || Index == TILE_SPEED_SLIDE))
 											Index = 0;
 										else if(CurOverlay == 1)
 											Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Force;
 										else if(CurOverlay == 2)
 											Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_MaxSpeed;
+										else if(CurOverlay == 3 && Index != TILE_SPEED_SLIDE)
+											Index = 0;
 									}
 									if(IsTuneLayer)
 									{
@@ -553,7 +555,7 @@ void CMapLayers::OnMapLoad()
 								Visuals.m_pTilesOfLayer[y * pTMap->m_Width + x].SetIndexBufferByteOffset((offset_ptr32)(TilesHandledCount));
 
 								bool AddAsSpeedup = false;
-								if(IsSpeedupLayer && CurOverlay == 0)
+								if(IsSpeedupLayer && (CurOverlay == 0 || CurOverlay == 3))
 									AddAsSpeedup = true;
 
 								if(AddTile(vtmpTiles, vtmpTileTexCoords, Index, Flags, x, y, DoTextureCoords, AddAsSpeedup, AngleRotate))
@@ -1309,7 +1311,7 @@ void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, 
 			{
 				DataIndex = pTMap->m_Speedup;
 				TileSize = sizeof(CSpeedupTile);
-				TileLayerAndOverlayCount = 3;
+				TileLayerAndOverlayCount = 4;
 			}
 			else if(IsTuneLayer)
 			{
@@ -1497,7 +1499,7 @@ void CMapLayers::OnRender()
 				{
 					DataIndex = pTMap->m_Speedup;
 					TileSize = sizeof(CSpeedupTile);
-					TileLayerAndOverlayCount = 3;
+					TileLayerAndOverlayCount = 4;
 				}
 				else if(IsTuneLayer)
 				{
@@ -1752,15 +1754,17 @@ void CMapLayers::OnRender()
 						// draw arrow -- clamp to the edge of the arrow image
 						Graphics()->WrapClamp();
 						Graphics()->TextureSet(m_pImages->GetSpeedupArrow());
-						RenderTileLayer(TileLayerCounter - 3, Color);
+						RenderTileLayer(TileLayerCounter - 4, Color);
+						Graphics()->TextureSet(m_pImages->GetSpeedupSlide());
+						RenderTileLayer(TileLayerCounter - 1, Color);
 						Graphics()->WrapNormal();
 
 						if(g_Config.m_ClTextEntities)
 						{
 							Graphics()->TextureSet(m_pImages->GetOverlayBottom());
-							RenderTileLayer(TileLayerCounter - 2, Color);
+							RenderTileLayer(TileLayerCounter - 3, Color);
 							Graphics()->TextureSet(m_pImages->GetOverlayTop());
-							RenderTileLayer(TileLayerCounter - 1, Color);
+							RenderTileLayer(TileLayerCounter - 2, Color);
 						}
 					}
 				}
