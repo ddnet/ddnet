@@ -2140,48 +2140,48 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 繁體中文翻譯由以下人員貢獻：SiuFu, TsFreddie, Dan_cao, cheeser0613, By, Pioooooo, 豆腐渣, XCWQW1
+== 繁體中文翻譯由以下人員貢獻：SiuFu, TsFreddie, Dan_cao, cheeser0613, By, Pioooooo, 豆腐渣, XCWQW1, Bamcane
 
 Show spectator cursor
 == 顯示旁觀者指標
 
 No demo with this filename exists
-== 
+== 此回放檔案不存在
 
 Map size
-== 
+== 地圖佔用空間
 
 [Show name plates]
 None
-== 
+== 禁用
 
 [Show name plates]
 Own
-== 
+== 自身
 
 [Show name plates]
 Others
-== 
+== 他人
 
 [Show name plates]
 All
-== 
+== 全部
 
 [Show players' key presses]
 None
-== 
+== 禁用
 
 [Show players' key presses]
 Own
-== 
+== 自身
 
 [Show players' key presses]
 Others
-== 
+== 他人
 
 [Show players' key presses]
 All
-== 
+== 全部
 
 AntiPing: prediction margin
-== 
+== AntiPing：預測容差
