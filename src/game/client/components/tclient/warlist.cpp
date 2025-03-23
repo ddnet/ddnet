@@ -414,7 +414,7 @@ void CWarList::GetReason(char *pReason, int ClientId)
 	str_copy(pReason, m_WarPlayers[ClientId].m_aReason, sizeof(m_WarPlayers[ClientId].m_aReason));
 }
 
-CWarDataCache CWarList::GetWarData(int ClientId)
+CWarDataCache &CWarList::GetWarData(int ClientId)
 {
 	return m_WarPlayers[ClientId];
 }
