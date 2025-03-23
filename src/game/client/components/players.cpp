@@ -647,30 +647,72 @@ void CPlayers::RenderPlayer(
 
 			if(Player.m_Weapon == WEAPON_HAMMER)
 			{
-				// static position for hammer
-				WeaponPosition = Position + vec2(State.GetAttach()->m_X, State.GetAttach()->m_Y);
-				WeaponPosition.y += g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsety;
-				if(Direction.x < 0.0f)
-					WeaponPosition.x -= g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsetx;
-				if(IsSit)
-					WeaponPosition.y += 3.0f;
+				switch (g_Config.m_ClHammerRotatesWithCursor) {
+				case 0:
+					{
+						// static position for hammer
+						WeaponPosition = Position + vec2(State.GetAttach()->m_X, State.GetAttach()->m_Y);
+						WeaponPosition.y += g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsety;
+						if(Direction.x < 0)
+							WeaponPosition.x -= g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsetx;
+						if(IsSit)
+							WeaponPosition.y += 3.0f;
 
-				// set rotation
-				float QuadsRotation = -pi / 2.0f;
-				QuadsRotation += State.GetAttach()->m_Angle * (Direction.x < 0 ? -1 : 1) * pi * 2;
-				if(g_Config.m_ClHammerRotatesWithCursor)
-				{
-					QuadsRotation += Angle;
-					if(Direction.x < 0.0f)
-						QuadsRotation += pi;
-				}
-				else if(Inactive && LastAttackTime > m_pClient->m_aTuning[g_Config.m_ClDummy].GetWeaponFireDelay(Player.m_Weapon))
-				{
-					QuadsRotation = Direction.x < 0 ? 100.0f : 500.0f;
-				}
-				Graphics()->QuadsSetRotation(QuadsRotation);
+						// if active and attack is under way, bash stuffs
+						if(!Inactive || LastAttackTime < m_pClient->m_aTuning[g_Config.m_ClDummy].GetWeaponFireDelay(Player.m_Weapon))
+						{
+							if(Direction.x < 0)
+								Graphics()->QuadsSetRotation(-pi / 2 - State.GetAttach()->m_Angle * pi * 2);
+							else
+								Graphics()->QuadsSetRotation(-pi / 2 + State.GetAttach()->m_Angle * pi * 2);
+						}
+						else
+							Graphics()->QuadsSetRotation(Direction.x < 0 ? 100.0f : 500.0f);
 
-				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
+						Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
+						break;
+					}
+				case 1:
+					{
+						WeaponPosition = Position + vec2(State.GetAttach()->m_X, State.GetAttach()->m_Y);
+						WeaponPosition.y += g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsety;
+						if(Direction.x < 0.0f)
+							WeaponPosition.x -= g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsetx;
+						if(IsSit)
+							WeaponPosition.y += 3.0f;
+
+						// set rotation
+						float QuadsRotation = -pi / 2.0f;
+						QuadsRotation += State.GetAttach()->m_Angle * (Direction.x < 0 ? -1 : 1) * pi * 2;
+						QuadsRotation += Angle;
+						if(Direction.x < 0.0f)
+							QuadsRotation += pi;
+					
+						Graphics()->QuadsSetRotation(QuadsRotation);
+						Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
+						break;
+					}
+				case 2:
+					{
+						// TODO: should be an animation
+						Recoil = 0;
+						float a = AttackTicksPassed / 5.0f;
+						if(a < 1)
+							Recoil = std::sin(a * pi);
+						WeaponPosition = Position - Dir * (Recoil * 10.0f - 5.0f);
+						if(IsSit)
+							WeaponPosition.y += 3.0f;
+
+						Graphics()->QuadsSetRotation(Angle + 2 * pi);
+						Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
+						RenderHand(&RenderInfo,
+							Position + Dir * g_pData->m_Weapons.m_aId[WEAPON_GUN].m_Offsetx - Dir * Recoil * 10.0f + vec2(0.0f, g_pData->m_Weapons.m_aId[WEAPON_GUN].m_Offsety),
+							Direction, -3 * pi / 4, vec2(-15, 4), Alpha
+						);
+						break;
+					}
+					break;
+				}
 			}
 			else if(Player.m_Weapon == WEAPON_NINJA)
 			{
