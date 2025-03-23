@@ -12,7 +12,6 @@
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
-#include <game/client/skin.h>
 #include <game/generated/protocol7.h>
 
 constexpr auto SAVES_FILE = "ddnet-saves.txt";

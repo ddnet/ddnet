@@ -2431,6 +2431,7 @@ if(CLIENT)
     sixup_translate_connless.cpp
     sixup_translate_game.cpp
     sixup_translate_snapshot.cpp
+    skin.cpp
     skin.h
     ui.cpp
     ui.h
