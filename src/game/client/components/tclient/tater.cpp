@@ -217,6 +217,7 @@ void CTater::OnMessage(int MsgType, void *pRawMsg)
 				if(RaceTime / 60 >= g_Config.m_ClAutoVoteWhenFarTime)
 				{
 					CGameClient::CClientData *pVoteCaller = nullptr;
+					int m_CallerId = -1;
 					for(int i = 0; i < MAX_CLIENTS; i++)
 					{
 						if(!m_pClient->m_aStats[i].IsActive())
@@ -227,14 +228,16 @@ void CTater::OnMessage(int MsgType, void *pRawMsg)
 						if(str_find_nocase(aBuf, pMsg->m_pDescription) == 0)
 						{
 							pVoteCaller = &m_pClient->m_aClients[i];
+							m_CallerId = i;
 						}
 					}
 					if(pVoteCaller)
 					{
 						bool Friend = pVoteCaller->m_Friend;
 						bool SameTeam = m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientId) == pVoteCaller->m_Team && pVoteCaller->m_Team != 0;
+						bool MySelf = m_CallerId == m_pClient->m_Snap.m_LocalClientId;
 
-						if(!Friend && !SameTeam)
+						if(!Friend && !SameTeam && !MySelf)
 						{
 							GameClient()->m_Voting.Vote(-1);
 							if(str_comp(g_Config.m_ClAutoVoteWhenFarMessage, "") != 0)
