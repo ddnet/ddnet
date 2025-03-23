@@ -1007,6 +1007,75 @@ TEST(Str, SanitizeFilename)
 	TestInplace<str_sanitize_filename>("\\/|:*?<>\"", "         ");
 }
 
+TEST(Str, ValidFilename)
+{
+	EXPECT_TRUE(str_valid_filename("a"));
+	EXPECT_TRUE(str_valid_filename("abc"));
+	EXPECT_TRUE(str_valid_filename("abc abc"));
+	EXPECT_TRUE(str_valid_filename("aa bb ccc dddd eeeee"));
+	EXPECT_TRUE(str_valid_filename("öüä"));
+	EXPECT_TRUE(str_valid_filename("привет Наташа"));
+	EXPECT_TRUE(str_valid_filename("ąçęįǫų"));
+	EXPECT_TRUE(str_valid_filename("DDNet最好了"));
+	EXPECT_TRUE(str_valid_filename("aβい🐘"));
+	EXPECT_TRUE(str_valid_filename("foo.bar"));
+	EXPECT_TRUE(str_valid_filename("foo.bar.baz"));
+	EXPECT_TRUE(str_valid_filename(".a..b...c....d"));
+
+	EXPECT_FALSE(str_valid_filename(""));
+	EXPECT_FALSE(str_valid_filename("aa\nbb"));
+	EXPECT_FALSE(str_valid_filename("aa\rbb"));
+	EXPECT_FALSE(str_valid_filename("aa\tbb"));
+	EXPECT_FALSE(str_valid_filename("aa\u001Cbb"));
+	EXPECT_FALSE(str_valid_filename("aa\u001Dbb"));
+	EXPECT_FALSE(str_valid_filename("aa\u001Ebb"));
+	EXPECT_FALSE(str_valid_filename("aa\u001Fbb"));
+	EXPECT_FALSE(str_valid_filename("aa\u007Fbb"));
+	EXPECT_FALSE(str_valid_filename("aa\\bb"));
+	EXPECT_FALSE(str_valid_filename("aa/bb"));
+	EXPECT_FALSE(str_valid_filename("aa|bb"));
+	EXPECT_FALSE(str_valid_filename("aa:bb"));
+	EXPECT_FALSE(str_valid_filename("aa*bb"));
+	EXPECT_FALSE(str_valid_filename("aa?bb"));
+	EXPECT_FALSE(str_valid_filename("aa<bb"));
+	EXPECT_FALSE(str_valid_filename("aa>bb"));
+	EXPECT_FALSE(str_valid_filename("aa\"bb"));
+	EXPECT_FALSE(str_valid_filename("\\/|:*?<>\""));
+	EXPECT_FALSE(str_valid_filename("aa bb")); // EM QUAD
+	EXPECT_FALSE(str_valid_filename("aa​bb")); // ZERO WIDTH SPACE
+	EXPECT_FALSE(str_valid_filename(" abc"));
+	EXPECT_FALSE(str_valid_filename("   abc"));
+	EXPECT_FALSE(str_valid_filename("abc "));
+	EXPECT_FALSE(str_valid_filename("abc   "));
+	EXPECT_FALSE(str_valid_filename("abc   abc"));
+	EXPECT_FALSE(str_valid_filename(" abc abc "));
+	EXPECT_FALSE(str_valid_filename("   abc   abc   "));
+	EXPECT_FALSE(str_valid_filename("abc."));
+	EXPECT_FALSE(str_valid_filename("abc..."));
+	EXPECT_FALSE(str_valid_filename("abc... "));
+	EXPECT_FALSE(str_valid_filename("abc ..."));
+
+	// reserved names
+	EXPECT_FALSE(str_valid_filename("con"));
+	EXPECT_FALSE(str_valid_filename("CON"));
+	EXPECT_FALSE(str_valid_filename("cOn"));
+	EXPECT_FALSE(str_valid_filename("con.txt"));
+	EXPECT_FALSE(str_valid_filename("con.tar.gz"));
+	EXPECT_FALSE(str_valid_filename("CON.TAR.GZ"));
+	EXPECT_FALSE(str_valid_filename("PRN"));
+	EXPECT_FALSE(str_valid_filename("AUX"));
+	EXPECT_FALSE(str_valid_filename("NUL"));
+	EXPECT_FALSE(str_valid_filename("COM4"));
+	EXPECT_FALSE(str_valid_filename("lpt²"));
+	// reserved names allowed as prefix if not separated by period
+	EXPECT_TRUE(str_valid_filename("console"));
+	EXPECT_TRUE(str_valid_filename("console.log"));
+	EXPECT_TRUE(str_valid_filename("console.tar.gz"));
+	EXPECT_TRUE(str_valid_filename("Auxiliary"));
+	EXPECT_TRUE(str_valid_filename("Null"));
+	EXPECT_TRUE(str_valid_filename("Null.txt"));
+}
+
 TEST(Str, CleanWhitespaces)
 {
 	TestInplace<str_clean_whitespaces>("aa bb ccc dddd eeeee", "aa bb ccc dddd eeeee");
