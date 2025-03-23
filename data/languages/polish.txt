@@ -401,7 +401,7 @@ Use sounds
 == Włącz dźwięki
 
 Use team colors for name plates
-== Użyj koloru drużyn dla wyświetlania nicków
+== Użyj koloru drużyn do wyświetlania plakietek
 
 V-Sync
 == V-Sync
@@ -1082,7 +1082,7 @@ Leak IP
 == Ujawnij adres IP
 
 Settings file
-== Plik ustawień
+== Plik z ustawieniami
 
 Config directory
 == Folder z ustawieniami
@@ -1513,7 +1513,7 @@ Save power by lowering refresh rate (higher input latency)
 == Oszczędzaj energię, obniżając częstotliwość odświeżania (większe opóźnienie)
 
 Open the settings file
-== Otwórz plik ustawień
+== Otwórz plik z ustawieniami
 
 Open the directory that contains the configuration and user files
 == Otwórz folder który zawiera konfiguracje i pliki użytkownika
@@ -1868,7 +1868,7 @@ Round %d/%d
 
 [Spectators]
 %d others…
-== %d innych…
+== %d pozostałych…
 
 [Team and size]
 %d\n(%d/%d)
@@ -1908,7 +1908,7 @@ https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== "%s" nie jest kompatybilny z pnglite i nie może być załadowany przez starsze wersje DDNet
+== "%s" nie jest kompatybilny z pnglite i nie może być załadowany przez starsze wersje DDNet:
 
 Some fonts could not be loaded. Check the local console for details.
 == Nie można załadować niektórych czcionek. Sprawdź konsolę, aby uzyskać szczegóły.
@@ -1924,10 +1924,10 @@ Online friends (%d)
 == Znajomi online (%d)
 
 Add friends by entering their name below or by clicking their name in the player list.
-== Dodaj znajomych wpisując poniżej nazwę albo poprzez kliknięcie ich nazwy w liście graczy.
+== Dodaj znajomych, wpisując poniżej ich nazwę lub klikając ich nazwę na liście graczy.
 
 Add clanmates by entering their clan below and leaving the name blank.
-== Dodaj członków klanu wpisując poniżej nazwę klanu i pozostawiając pole nazwy puste.
+== Dodaj członków klanu, wpisując poniżej nazwę klanu i pozostawiając pole nazwy puste.
 
 Toggle auto camera
 == Przełącz automatyczną kamerę
@@ -2010,7 +2010,7 @@ Could not load touch controls from clipboard. See local console for details.
 == Nie można załadować sterowania dotykowego ze schowka. Sprawdź konsolę, aby poznać szczegóły.
 
 Show client IDs in name plates
-== Pokaż identyfikatory graczy w plakietce
+== Pokazuj ID graczy w plakietce
 
 Hook Strength
 == Siła haka
@@ -2047,137 +2047,137 @@ Active: Hook
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Polish translation by Łukasz D, Martin Pola, Tsin, Shymwo, CROACH, Delciak (PKP), Shkyyl and KebsCS
+== Przetłumaczone przez: Łukasz D, Martin Pola, Tsin, Shymwo, CROACH, Delciak (PKP), Shkyyl i KebsCS
 
 No demo with this filename exists
-== 
+== Demo z tą nazwą nie istnieje
 
 Auto-sync player camera
-== 
+== Synchronizacja z kamerą gracza
 
 [Auto camera]
 Disabled
-== 
+== Wyłączona
 
 [Auto camera]
 Enabled
-== 
+== Włączona
 
 [Auto camera]
 Unavailable for this player
-== 
+== Niedostępna dla tego gracza
 
 [Auto camera]
 Inactive
-== 
+== Nieaktywna
 
 [Auto camera]
 Active
-== 
+== Aktywna
 
 Loading maps…
-== 
+== Ładowanie map…
 
 Map size
-== 
+== Rozmiar mapy
 
 Community
-== 
+== Społeczność
 
 [Team status]
 forbidden
-== 
+== niedozwolone
 
 [Team status]
 solo
-== 
+== solo
 
 [Team status]
 allowed
-== 
+== dozwolone
 
 [Team status]
 required
-== 
+== wymagane
 
 Teams
-== 
+== Drużyny
 
 [Team size]
 minimum
-== 
+== minimalnie
 
 [Team size]
 maximum
-== 
+== maksymalnie
 
 Saves file
-== 
+== Plik z zapisami
 
 Open the saves file
-== 
+== Otwórz plik z zapisami
 
 Show FPS
-== 
+== Pokazuj FPS
 
 Renders your frame rate in the top right
-== 
+== Pokazuje klatki na sekundę w górnym prawym rogu
 
 Show spectator cursor
-== 
+== Pokazuj kursor gracza podczas obserwowania
 
 Show number of spectators
-== 
+== Pokazuj liczbę obserwujących
 
 [Show name plates]
 None
-== 
+== Nigdy
 
 [Show name plates]
 Own
-== 
+== Własny
 
 [Show name plates]
 Others
-== 
+== Innych
 
 [Show name plates]
 All
-== 
+== Wszystkich
 
 Name plates offset
-== 
+== Przerwa pomiędzy plakietką
 
 Show friend icon in name plates
-== 
+== Pokazuj ikonkę znajomym
 
 Show client IDs on a seperate line
-== 
+== Pokazuj ID graczy w osobnej linii
 
 Client IDs size
-== 
+== Wielkość ID graczy
 
 Show players' key presses
-== 
+== Pokazuj wciśnięte klawisze graczy
 
 [Show players' key presses]
 None
-== 
+== Nigdy
 
 [Show players' key presses]
 Own
-== 
+== Własny
 
 [Show players' key presses]
 Others
-== 
+== Innych
 
 [Show players' key presses]
 All
-== 
+== Wszystkich
 
 Preview dummy's name plate
-== 
+== Podgląd plakietki kukły
 
 AntiPing: prediction margin
-== 
+== AntyPing: Margines przewidywania
