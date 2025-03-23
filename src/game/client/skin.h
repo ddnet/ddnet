@@ -11,14 +11,14 @@
 #include <limits>
 
 // do this better and nicer
-struct CSkin
+class CSkin
 {
-private:
 	char m_aName[MAX_SKIN_LENGTH];
 
 public:
-	struct SSkinTextures
+	class CSkinTextures
 	{
+	public:
 		IGraphics::CTextureHandle m_Body;
 		IGraphics::CTextureHandle m_BodyOutline;
 
@@ -55,16 +55,17 @@ public:
 		}
 	};
 
-	SSkinTextures m_OriginalSkin;
-	SSkinTextures m_ColorableSkin;
+	CSkinTextures m_OriginalSkin;
+	CSkinTextures m_ColorableSkin;
 	ColorRGBA m_BloodColor;
 
 	template<bool IsSizeType>
-	struct SSkinMetricVariableInt
+	class CSkinMetricVariableInt
 	{
+	public:
 		int m_Value;
 		operator int() const { return m_Value; }
-		SSkinMetricVariableInt &operator=(int NewVal)
+		CSkinMetricVariableInt &operator=(int NewVal)
 		{
 			if(IsSizeType)
 				m_Value = maximum(m_Value, NewVal);
@@ -73,7 +74,7 @@ public:
 			return *this;
 		}
 
-		SSkinMetricVariableInt()
+		CSkinMetricVariableInt()
 		{
 			Reset();
 		}
@@ -87,16 +88,17 @@ public:
 		}
 	};
 
-	struct SSkinMetricVariable
+	class CSkinMetricVariable
 	{
-		SSkinMetricVariableInt<true> m_Width;
-		SSkinMetricVariableInt<true> m_Height;
-		SSkinMetricVariableInt<false> m_OffsetX;
-		SSkinMetricVariableInt<false> m_OffsetY;
+	public:
+		CSkinMetricVariableInt<true> m_Width;
+		CSkinMetricVariableInt<true> m_Height;
+		CSkinMetricVariableInt<false> m_OffsetX;
+		CSkinMetricVariableInt<false> m_OffsetY;
 
 		// these can be used to normalize the metrics
-		SSkinMetricVariableInt<true> m_MaxWidth;
-		SSkinMetricVariableInt<true> m_MaxHeight;
+		CSkinMetricVariableInt<true> m_MaxWidth;
+		CSkinMetricVariableInt<true> m_MaxHeight;
 
 		float WidthNormalized() const
 		{
@@ -129,10 +131,11 @@ public:
 		}
 	};
 
-	struct SSkinMetrics
+	class CSkinMetrics
 	{
-		SSkinMetricVariable m_Body;
-		SSkinMetricVariable m_Feet;
+	public:
+		CSkinMetricVariable m_Body;
+		CSkinMetricVariable m_Feet;
 
 		void Reset()
 		{
@@ -140,12 +143,12 @@ public:
 			m_Feet.Reset();
 		}
 
-		SSkinMetrics()
+		CSkinMetrics()
 		{
 			Reset();
 		}
 	};
-	SSkinMetrics m_Metrics;
+	CSkinMetrics m_Metrics;
 
 	bool operator<(const CSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
 	bool operator==(const CSkin &Other) const { return !str_comp(m_aName, Other.m_aName); }

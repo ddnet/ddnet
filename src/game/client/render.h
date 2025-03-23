@@ -114,10 +114,10 @@ public:
 		}
 	}
 
-	CSkin::SSkinTextures m_OriginalRenderSkin;
-	CSkin::SSkinTextures m_ColorableRenderSkin;
+	CSkin::CSkinTextures m_OriginalRenderSkin;
+	CSkin::CSkinTextures m_ColorableRenderSkin;
 
-	CSkin::SSkinMetrics m_SkinMetrics;
+	CSkin::CSkinMetrics m_SkinMetrics;
 
 	bool m_CustomColoredSkin;
 	ColorRGBA m_BloodColor;
