@@ -801,8 +801,8 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId -= 11;
 			else
 			{
-				dbg_msg("net", "DROP send sys %d", MsgId);
-				return true;
+				log_error("net", "DROP send sys %d", MsgId);
+				return false;
 			}
 		}
 		else
@@ -811,7 +811,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId = Msg_SixToSeven(MsgId);
 
 			if(MsgId < 0)
-				return true;
+				return false;
 		}
 	}
 
@@ -826,7 +826,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 	}
 	Packer.AddRaw(pMsg->Data(), pMsg->Size());
 
-	return false;
+	return true;
 }
 
 int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
@@ -841,9 +841,9 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 	if(ClientId < 0)
 	{
 		CPacker Pack6, Pack7;
-		if(RepackMsg(pMsg, Pack6, false))
+		if(!RepackMsg(pMsg, Pack6, false))
 			return -1;
-		if(RepackMsg(pMsg, Pack7, true))
+		if(!RepackMsg(pMsg, Pack7, true))
 			return -1;
 
 		// write message to demo recorders
@@ -876,7 +876,7 @@ int CServer::SendMsg(CMsgPacker *pMsg, int Flags, int ClientId)
 	else
 	{
 		CPacker Pack;
-		if(RepackMsg(pMsg, Pack, m_aClients[ClientId].m_Sixup))
+		if(!RepackMsg(pMsg, Pack, m_aClients[ClientId].m_Sixup))
 			return -1;
 
 		Packet.m_ClientId = ClientId;

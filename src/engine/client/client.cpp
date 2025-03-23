@@ -139,8 +139,8 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId = protocol7::NETMSG_PING;
 			else
 			{
-				dbg_msg("net", "0.7 DROP send sys %d", MsgId);
-				return true;
+				log_error("net", "0.7 DROP send sys %d", MsgId);
+				return false;
 			}
 		}
 		else
@@ -149,7 +149,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId = Msg_SixToSeven(MsgId);
 
 			if(MsgId < 0)
-				return true;
+				return false;
 		}
 	}
 
@@ -164,7 +164,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 	}
 	Packer.AddRaw(pMsg->Data(), pMsg->Size());
 
-	return false;
+	return true;
 }
 
 int CClient::SendMsg(int Conn, CMsgPacker *pMsg, int Flags)
@@ -176,7 +176,7 @@ int CClient::SendMsg(int Conn, CMsgPacker *pMsg, int Flags)
 
 	// repack message (inefficient)
 	CPacker Pack;
-	if(RepackMsg(pMsg, Pack, IsSixup()))
+	if(!RepackMsg(pMsg, Pack, IsSixup()))
 		return 0;
 
 	mem_zero(&Packet, sizeof(CNetChunk));
