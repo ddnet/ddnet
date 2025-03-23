@@ -2896,8 +2896,11 @@ void str_sanitize_filename(char *str_in)
 	unsigned char *str = (unsigned char *)str_in;
 	while(*str)
 	{
-		if(*str < 32 || *str == '\\' || *str == '/' || *str == '|' || *str == ':' || *str == '*' || *str == '?' || *str == '<' || *str == '>' || *str == '"')
+		if(*str <= 0x1F || *str == 0x7F || *str == '\\' || *str == '/' || *str == '|' || *str == ':' ||
+			*str == '*' || *str == '?' || *str == '<' || *str == '>' || *str == '"')
+		{
 			*str = ' ';
+		}
 		str++;
 	}
 }

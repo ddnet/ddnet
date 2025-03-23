@@ -971,6 +971,42 @@ TEST(Str, Sanitize)
 	TestInplace<str_sanitize>("\x1F", " ");
 }
 
+TEST(Str, SanitizeFilename)
+{
+	TestInplace<str_sanitize_filename>("", "");
+	TestInplace<str_sanitize_filename>("a", "a");
+	TestInplace<str_sanitize_filename>("Merhaba dünya!", "Merhaba dünya!");
+	TestInplace<str_sanitize_filename>("привет Наташа", "привет Наташа");
+	TestInplace<str_sanitize_filename>("ąçęįǫų", "ąçęįǫų");
+	TestInplace<str_sanitize_filename>("DDNet最好了", "DDNet最好了");
+	TestInplace<str_sanitize_filename>("aβい🐘", "aβい🐘");
+	TestInplace<str_sanitize_filename>("foo.bar", "foo.bar");
+	TestInplace<str_sanitize_filename>("foo.bar.baz", "foo.bar.baz");
+	TestInplace<str_sanitize_filename>(".a..b...c....d", ".a..b...c....d");
+	TestInplace<str_sanitize_filename>("\n", " ");
+	TestInplace<str_sanitize_filename>("\r", " ");
+	TestInplace<str_sanitize_filename>("\t", " ");
+	TestInplace<str_sanitize_filename>("a\n", "a ");
+	TestInplace<str_sanitize_filename>("a\rb", "a b");
+	TestInplace<str_sanitize_filename>("\tb", " b");
+	TestInplace<str_sanitize_filename>("\n\n", "  ");
+	TestInplace<str_sanitize_filename>("\x1C", " ");
+	TestInplace<str_sanitize_filename>("\x1D", " ");
+	TestInplace<str_sanitize_filename>("\x1E", " ");
+	TestInplace<str_sanitize_filename>("\x1F", " ");
+	TestInplace<str_sanitize_filename>("\u007F", " ");
+	TestInplace<str_sanitize_filename>("\\", " ");
+	TestInplace<str_sanitize_filename>("/", " ");
+	TestInplace<str_sanitize_filename>("|", " ");
+	TestInplace<str_sanitize_filename>(":", " ");
+	TestInplace<str_sanitize_filename>("*", " ");
+	TestInplace<str_sanitize_filename>("?", " ");
+	TestInplace<str_sanitize_filename>("<", " ");
+	TestInplace<str_sanitize_filename>(">", " ");
+	TestInplace<str_sanitize_filename>("\"", " ");
+	TestInplace<str_sanitize_filename>("\\/|:*?<>\"", "         ");
+}
+
 TEST(Str, CleanWhitespaces)
 {
 	TestInplace<str_clean_whitespaces>("aa bb ccc dddd eeeee", "aa bb ccc dddd eeeee");
