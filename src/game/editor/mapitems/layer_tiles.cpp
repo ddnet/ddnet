@@ -3,6 +3,7 @@
 #include "layer_tiles.h"
 
 #include <engine/keys.h>
+#include <engine/shared/config.h>
 #include <engine/shared/map.h>
 #include <game/editor/editor.h>
 #include <game/editor/editor_actions.h>
@@ -161,14 +162,15 @@ void CLayerTiles::Render(bool Tileset)
 	// Render DDRace Layers
 	if(!Tileset)
 	{
+		int OverlayRenderFlags = g_Config.m_ClTextEntitiesEditor ? OVERLAYRENDERFLAG_TEXT : 0;
 		if(m_Tele)
-			m_pEditor->RenderTools()->RenderTeleOverlay(static_cast<CLayerTele *>(this)->m_pTeleTile, m_Width, m_Height, 32.0f);
+			m_pEditor->RenderTools()->RenderTeleOverlay(static_cast<CLayerTele *>(this)->m_pTeleTile, m_Width, m_Height, 32.0f, OverlayRenderFlags);
 		if(m_Speedup)
-			m_pEditor->RenderTools()->RenderSpeedupOverlay(static_cast<CLayerSpeedup *>(this)->m_pSpeedupTile, m_Width, m_Height, 32.0f);
+			m_pEditor->RenderTools()->RenderSpeedupOverlay(static_cast<CLayerSpeedup *>(this)->m_pSpeedupTile, m_Width, m_Height, 32.0f, OverlayRenderFlags);
 		if(m_Switch)
-			m_pEditor->RenderTools()->RenderSwitchOverlay(static_cast<CLayerSwitch *>(this)->m_pSwitchTile, m_Width, m_Height, 32.0f);
+			m_pEditor->RenderTools()->RenderSwitchOverlay(static_cast<CLayerSwitch *>(this)->m_pSwitchTile, m_Width, m_Height, 32.0f, OverlayRenderFlags);
 		if(m_Tune)
-			m_pEditor->RenderTools()->RenderTuneOverlay(static_cast<CLayerTune *>(this)->m_pTuneTile, m_Width, m_Height, 32.0f);
+			m_pEditor->RenderTools()->RenderTuneOverlay(static_cast<CLayerTune *>(this)->m_pTuneTile, m_Width, m_Height, 32.0f, OverlayRenderFlags);
 	}
 }
 
