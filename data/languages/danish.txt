@@ -774,9 +774,6 @@ may cause delay
 Screen
 == Skærm
 
-Use high DPI
-== Brug højt DPI
-
 Enable game sounds
 == Aktivér spillyde
 
@@ -908,9 +905,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == Vis andre spillers hook kollisionslinjer
-
-Show other players' key presses
-== Vis andre spillers tastetryk
 
 Use current map as background
 == Brug den aktuelle bane som baggrund
@@ -1890,9 +1884,6 @@ Chat width
 Preview
 == Forhåndsvisning
 
-Show friend mark (♥) in name plates
-== Vis vennemærke (♥) i navneskilte
-
 Show client IDs in name plates
 == Vis klient-ID'er på navneskilte
 
@@ -1910,9 +1901,6 @@ Size of hook strength icon and number indicator
 
 Key Presses
 == Tastetryk
-
-Show local player's key presses
-== Vis lokale spilleres tastetryk
 
 Size of key press icons
 == Størrelse af tastetrykikoner
@@ -2131,3 +2119,65 @@ Moved ingame
 
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
+
+No demo with this filename exists
+== 
+
+Map size
+== 
+
+Show number of spectators
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
+== 
+
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+Preview dummy's name plate
+== 
+
+AntiPing: prediction margin
+== 

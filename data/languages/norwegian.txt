@@ -738,9 +738,6 @@ may cause delay
 Screen
 == Skjerm
 
-Use high DPI
-== Bruk høy DPI
-
 Enable game sounds
 == Aktiver spillyd
 
@@ -854,9 +851,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == Vis andre spilleres krok-siktelinje
-
-Show other players' key presses
-== Vis andre spilleres tastetrykk
 
 Show tiles layers from BG map
 == Vis tile-lag fra BG-bane
@@ -1045,6 +1039,10 @@ Editor
 Play
 == Spill
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Norwegian translation by MertenNor and nuborn
+
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
@@ -1103,6 +1101,9 @@ Saving settings to '%s' failed
 == 
 
 Error saving settings
+== 
+
+No demo with this filename exists
 == 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
@@ -1514,6 +1515,9 @@ Created
 Netversion
 == 
 
+Map size
+== 
+
 [Demo details]
 map not included
 == 
@@ -1811,10 +1815,6 @@ Graphics card
 auto
 == 
 
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Norwegian translation by MertenNor and nuborn
-
 Tee
 == 
 
@@ -1857,6 +1857,9 @@ Show DDRace HUD
 Show jumps indicator
 == 
 
+Show number of spectators
+== 
+
 Show dummy actions
 == 
 
@@ -1890,10 +1893,35 @@ Chat width
 Preview
 == 
 
-Show friend mark (♥) in name plates
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
 == 
 
 Show client IDs in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
 == 
 
 Hook Strength
@@ -1911,10 +1939,29 @@ Size of hook strength icon and number indicator
 Key Presses
 == 
 
-Show local player's key presses
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
 == 
 
 Size of key press icons
+== 
+
+Preview dummy's name plate
 == 
 
 Hook collision line
@@ -2014,6 +2061,9 @@ Quads are used for background decoration
 == 
 
 Tries to predict other entities to give a feel of low latency
+== 
+
+AntiPing: prediction margin
 == 
 
 Background

@@ -636,9 +636,6 @@ Replay feature is disabled!
 Updating…
 == Mise à jour en cours…
 
-Use high DPI
-== Utiliser un DPI élevé
-
 Default zoom
 == Zoom par défaut
 
@@ -737,9 +734,6 @@ Downloading %s:
 
 Toggle dyncam
 == Activer la dyncam
-
-Show other players' key presses
-== Montrer les touches que les autres joueurs appuient
 
 Toggle ghost
 == Activer le fantôme
@@ -1104,9 +1098,6 @@ https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == Êtes-vous sûr de vouloir vous déconnecter et changer de serveur ?
-
-Show local player's key presses
-== Montrer les touches appuyées des autres joueurs
 
 Settings file
 == Fichier des paramètres
@@ -1777,9 +1768,6 @@ Chat font size
 Chat width
 == Largeur du chat
 
-Show friend mark (♥) in name plates
-== Montrez l'icone d'ami (♥) dans les pseudonymes
-
 Show hook strength icon indicator
 == Afficher l'indicateur de force du grappin
 
@@ -2023,6 +2011,13 @@ Active: Hook
 https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== French translation by lordskelethom, Ubu, Choupom, clecle226, SunnyPistache, Pipou, Chairn, T tee, NRK, Nouaa, Sucre, archimede67, Sukya, Emilcha and Yubel
+
+No demo with this filename exists
+== 
+
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
 == 
 
@@ -2060,6 +2055,9 @@ AUTO
 == 
 
 Toggle auto camera
+== 
+
+Map size
 == 
 
 https://wiki.ddnet.org/wiki/Touch_controls
@@ -2107,14 +2105,41 @@ Show FPS
 Renders your frame rate in the top right
 == 
 
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== French translation by lordskelethom, Ubu, Choupom, clecle226, SunnyPistache, Pipou, Chairn, T tee, NRK, Nouaa, Sucre, archimede67, Sukya, Emilcha and Yubel
-
 Show spectator cursor
 == 
 
+Show number of spectators
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
 Show client IDs in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
 == 
 
 Hook Strength
@@ -2126,7 +2151,32 @@ Size of hook strength icon and number indicator
 Key Presses
 == 
 
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
 Size of key press icons
+== 
+
+Preview dummy's name plate
+== 
+
+AntiPing: prediction margin
 == 
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
