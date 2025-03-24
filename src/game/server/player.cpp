@@ -436,7 +436,6 @@ void CPlayer::Snap(int SnappingClient)
 				for(auto &pPlayer : GameServer()->m_apPlayers)
 				{
 					if(!pPlayer || pPlayer->m_ClientId == TranslatedId || pPlayer->m_Afk ||
-						(Server()->IsRconAuthed(pPlayer->m_ClientId) && Server()->HasAuthHidden(pPlayer->m_ClientId)) ||
 						!(pPlayer->m_Paused || pPlayer->m_Team == TEAM_SPECTATORS))
 					{
 						continue;
