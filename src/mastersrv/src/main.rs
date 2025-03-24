@@ -562,6 +562,43 @@ async fn overwrite_atomically(
     Ok(())
 }
 
+fn servers_json(now: Timestamp, mut servers: Servers) -> String {
+    let mut serialized = SerializedServers::new();
+    servers.prune_before(now.minus_seconds(SERVER_TIMEOUT_SECONDS), false);
+    serialized.servers.extend(servers.servers.values().map(|s| {
+        // Get the location of the first registered address. Since
+        // the addresses are kept sorted, this is stable.
+        let location = s
+            .addresses
+            .iter()
+            .filter_map(|addr| servers.addresses[addr].location)
+            .next();
+        SerializedServer::new(s, location)
+    }));
+    serialized.servers.sort_by_key(|s| s.addresses);
+    json::to_string(&serialized).unwrap() + "\n"
+}
+
+async fn handle_test_servers_json(
+    servers: Arc<Mutex<Servers>>,
+    dumps_dir: Option<String>,
+    timekeeper: Timekeeper,
+) -> String {
+    let now = timekeeper.now();
+    let mut servers = servers
+        .lock()
+        .unwrap_or_else(|poison| poison.into_inner())
+        .clone();
+    let other_dumps = match &dumps_dir {
+        Some(dir) => read_dump_dir(Path::new(dir), timekeeper).await,
+        None => Vec::new(),
+    };
+    for other_dump in &other_dumps {
+        servers.merge(other_dump);
+    }
+    servers_json(now, servers)
+}
+
 async fn handle_periodic_writeout(
     servers: Arc<Mutex<Servers>>,
     dumps_dir: Option<String>,
@@ -627,22 +664,7 @@ async fn handle_periodic_writeout(
                 servers.merge(other_dump);
             }
             drop(other_dumps);
-            let json = {
-                let mut serialized = SerializedServers::new();
-                servers.prune_before(now.minus_seconds(SERVER_TIMEOUT_SECONDS), false);
-                serialized.servers.extend(servers.servers.values().map(|s| {
-                    // Get the location of the first registered address. Since
-                    // the addresses are kept sorted, this is stable.
-                    let location = s
-                        .addresses
-                        .iter()
-                        .filter_map(|addr| servers.addresses[addr].location)
-                        .next();
-                    SerializedServer::new(s, location)
-                }));
-                serialized.servers.sort_by_key(|s| s.addresses);
-                json::to_string(&serialized).unwrap() + "\n"
-            };
+            let json = servers_json(now, servers);
             overwrite_atomically(&servers_filename, servers_filename_temp, json.as_bytes())
                 .await
                 .unwrap();
@@ -976,6 +998,10 @@ async fn main() {
             .value_name("DUMP_DIR")
             .help("Read dumps from other mastersrv instances from the specified directory (looking only at *.json files).")
         )
+        .arg(Arg::with_name("test-servers-route")
+            .long("test-servers-route")
+            .help("Enable /ddnet/15/test-servers.json route for testing")
+        )
         .arg(Arg::with_name("out")
             .long("out")
             .value_name("OUT")
@@ -1005,7 +1031,9 @@ async fn main() {
     } else {
         None
     };
+    let read_dump_dir = matches.value_of("read-dump-dir").map(|s| s.to_owned());
     let read_write_dump = matches.value_of("read-write-dump").map(|s| s.to_owned());
+    let test_servers_route = matches.is_present("test-servers-route");
     let config_filename = matches.value_of("config");
 
     let config_location = match (config_filename, matches.value_of("locations")) {
@@ -1038,7 +1066,7 @@ async fn main() {
     let task_reseed = tokio::spawn(handle_periodic_reseed(challenger.clone()));
     let task_writeout = tokio::spawn(handle_periodic_writeout(
         servers.clone(),
-        matches.value_of("read-dump-dir").map(|s| s.to_owned()),
+        read_dump_dir.clone(),
         matches
             .value_of("write-dump")
             .map(|s| s.to_owned())
@@ -1095,7 +1123,8 @@ async fn main() {
         .and(warp::addr::remote())
         .and(warp::body::content_length_limit(32 * 1024)) // limit body size to 32 KiB
         .and(warp::body::bytes())
-        .map(
+        .map({
+            let servers = servers.clone();
             move |headers: warp::http::HeaderMap, addr: Option<SocketAddr>, info: bytes::Bytes| {
                 build_response(|| {
                     let config = config.load();
@@ -1121,10 +1150,22 @@ async fn main() {
                         }
                     }
                 })
-            },
-        )
-        .recover(recover);
-    let server = warp::serve(register);
+            }
+        });
+    let test_servers = warp::path!("ddnet" / "15" / "test-servers.json")
+        .and(warp::get())
+        .and_then(move || {
+            let servers = servers.clone();
+            let read_dump_dir = read_dump_dir.clone();
+            async move {
+                if test_servers_route {
+                    Ok(handle_test_servers_json(servers, read_dump_dir, timekeeper).await)
+                } else {
+                    Err(warp::reject())
+                }
+            }
+        });
+    let server = warp::serve(register.or(test_servers).recover(recover));
 
     let task_server = if let Some(path) = listen_unix {
         #[cfg(unix)]
