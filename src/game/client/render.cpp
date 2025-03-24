@@ -9,6 +9,8 @@
 
 #include <engine/graphics.h>
 #include <engine/map.h>
+#include <game/client/gameclient.h>
+
 #include <engine/shared/config.h>
 #include <game/generated/client_data.h>
 #include <game/generated/client_data7.h>

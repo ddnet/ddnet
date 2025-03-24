@@ -172,7 +172,7 @@ int CMenus::DoButtonLineSize_Menu(CButtonContainer *pButtonContainer, const char
 	if(Fake)
 		return 0;
 
-	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect);
+	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect, BUTTONFLAG_LEFT);
 }
 
 void CMenus::RenderSettingsTClient(CUIRect MainView)
@@ -1297,12 +1297,12 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 	Column2.HSplitTop(LineSize, &Button, &Column2);
 	Button.VSplitMid(&ButtonL, &ButtonR, MarginSmall);
 	static unsigned char s_NameRadio, s_ClanRadio;
-	if(DoButton_CheckBox_Common(&s_NameRadio, TCLocalize("Name"), s_IsName ? "X" : "", &ButtonL))
+	if(DoButton_CheckBox_Common(&s_NameRadio, TCLocalize("Name"), s_IsName ? "X" : "", &ButtonL, BUTTONFLAG_LEFT))
 	{
 		s_IsName = 1;
 		s_IsClan = 0;
 	}
-	if(DoButton_CheckBox_Common(&s_ClanRadio, TCLocalize("Clan"), s_IsClan ? "X" : "", &ButtonR))
+	if(DoButton_CheckBox_Common(&s_ClanRadio, TCLocalize("Clan"), s_IsClan ? "X" : "", &ButtonR, BUTTONFLAG_LEFT))
 	{
 		s_IsName = 0;
 		s_IsClan = 1;
@@ -1510,7 +1510,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 											(Ui()->HotItem() == &s_vNameButtons[i] ? ColorRGBA(1, 1, 1, 0.33f) : ColorRGBA(1, 1, 1, 0.0f));
 		PlayerRect.Draw(NameButtonColor, IGraphics::CORNER_L, 5.0f);
 		Ui()->DoLabel(&NameRect, GameClient()->m_aClients[i].m_aName, StandardFontSize, TEXTALIGN_ML);
-		if(Ui()->DoButtonLogic(&s_vNameButtons[i], false, &PlayerRect))
+		if(Ui()->DoButtonLogic(&s_vNameButtons[i], false, &PlayerRect, BUTTONFLAG_LEFT))
 		{
 			s_IsName = 1;
 			s_IsClan = 0;
@@ -1522,7 +1522,7 @@ void CMenus::RenderSettingsWarList(CUIRect MainView)
 											(Ui()->HotItem() == &s_vClanButtons[i] ? ColorRGBA(1, 1, 1, 0.33f) : ColorRGBA(1, 1, 1, 0.0f));
 		ClanRect.Draw(ClanButtonColor, IGraphics::CORNER_R, 5.0f);
 		Ui()->DoLabel(&ClanRect, GameClient()->m_aClients[i].m_aClan, StandardFontSize, TEXTALIGN_ML);
-		if(Ui()->DoButtonLogic(&s_vClanButtons[i], false, &ClanRect))
+		if(Ui()->DoButtonLogic(&s_vClanButtons[i], false, &ClanRect, BUTTONFLAG_LEFT))
 		{
 			s_IsName = 0;
 			s_IsClan = 1;
@@ -2404,5 +2404,5 @@ int CMenus::DoButtonNoRect_FontIcon(CButtonContainer *pButtonContainer, const ch
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
-	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect);
+	return Ui()->DoButtonLogic(pButtonContainer, Checked, pRect, BUTTONFLAG_LEFT);
 }
