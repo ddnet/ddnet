@@ -2064,7 +2064,7 @@ solo
 
 [Team status]
 allowed
-== разрешенны
+== разрешены
 
 [Team status]
 required
@@ -2119,63 +2119,63 @@ Server could not be started. Make sure to grant the notification permission in t
 == Не удалось запустить сервер. Убедитесь, что вы предоставили разрешение на уведомления в настройках приложения, чтобы сервер мог работать в фоновом режиме.
 
 No demo with this filename exists
-== 
+== Демо с таким именем не существует
 
 Map size
-== 
+== Размер карты
 
 Show number of spectators
-== 
+== Показывать количество наблюдателей
 
 [Show name plates]
 None
-== 
+== Нет
 
 [Show name plates]
 Own
-== 
+== Свои
 
 [Show name plates]
 Others
-== 
+== Других
 
 [Show name plates]
 All
-== 
+== Всех
 
 Name plates offset
-== 
+== Смещение имён
 
 Show friend icon in name plates
-== 
+== Показывать иконку друга в именах
 
 Show client IDs on a seperate line
-== 
+== Показывать ID клиента на отдельной линее
 
 Client IDs size
-== 
+== Размер ID клиента
 
 Show players' key presses
-== 
+== Показывать действия игроков
 
 [Show players' key presses]
 None
-== 
+== Нет
 
 [Show players' key presses]
 Own
-== 
+== Свои
 
 [Show players' key presses]
 Others
-== 
+== Других
 
 [Show players' key presses]
 All
-== 
+== Всех
 
 Preview dummy's name plate
-== 
+== Просмотр дамми
 
 AntiPing: prediction margin
-== 
+== Антипинг: Предел предсказаний
