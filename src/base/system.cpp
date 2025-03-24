@@ -2896,10 +2896,80 @@ void str_sanitize_filename(char *str_in)
 	unsigned char *str = (unsigned char *)str_in;
 	while(*str)
 	{
-		if(*str < 32 || *str == '\\' || *str == '/' || *str == '|' || *str == ':' || *str == '*' || *str == '?' || *str == '<' || *str == '>' || *str == '"')
+		if(*str <= 0x1F || *str == 0x7F || *str == '\\' || *str == '/' || *str == '|' || *str == ':' ||
+			*str == '*' || *str == '?' || *str == '<' || *str == '>' || *str == '"')
+		{
 			*str = ' ';
+		}
 		str++;
 	}
+}
+
+bool str_valid_filename(const char *str)
+{
+	// References:
+	// - https://en.wikipedia.org/wiki/Filename#Comparison_of_filename_limitations
+	// - https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
+	if(str[0] == '\0')
+	{
+		return false; // empty name not allowed
+	}
+
+	bool prev_space = false;
+	bool prev_period = false;
+	bool first_space_checked = false;
+	const char *iterator = str;
+	while(*iterator)
+	{
+		const int code = str_utf8_decode(&iterator);
+		if(code <= 0x1F || code == 0x7F || code == '\\' || code == '/' || code == '|' || code == ':' ||
+			code == '*' || code == '?' || code == '<' || code == '>' || code == '"')
+		{
+			return false; // disallowed characters, mostly for Windows
+		}
+		else if(str_utf8_isspace(code) && code != ' ')
+		{
+			return false; // we only allow regular space characters
+		}
+		if(code == ' ')
+		{
+			if(!first_space_checked)
+			{
+				return false; // leading spaces not allowed
+			}
+			if(prev_space)
+			{
+				return false; // multiple consecutive spaces not allowed
+			}
+			prev_space = true;
+			prev_period = false;
+		}
+		else
+		{
+			prev_space = false;
+			prev_period = code == '.';
+			first_space_checked = true;
+		}
+	}
+	if(prev_space || prev_period)
+	{
+		return false; // trailing spaces and periods not allowed
+	}
+
+	static constexpr const char *RESERVED_NAMES[] = {
+		"CON", "PRN", "AUX", "NUL",
+		"COM0", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "COM¹", "COM²", "COM³",
+		"LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "LPT¹", "LPT²", "LPT³"};
+	for(const char *reserved_name : RESERVED_NAMES)
+	{
+		const char *prefix = str_startswith_nocase(str, reserved_name);
+		if(prefix != nullptr && (prefix[0] == '\0' || prefix[0] == '.'))
+		{
+			return false; // reserved name not allowed when it makes up the entire filename or when followed by period
+		}
+	}
+
+	return true;
 }
 
 /* removes leading and trailing spaces and limits the use of multiple spaces */

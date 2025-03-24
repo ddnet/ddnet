@@ -1397,6 +1397,17 @@ void str_sanitize(char *str);
 void str_sanitize_filename(char *str);
 
 /**
+ * Checks if a string is a valid filename on all supported platforms.
+ *
+ * @param str Filename to check.
+ *
+ * @return `true` if the string is a valid filename, `false` otherwise.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
+bool str_valid_filename(const char *str);
+
+/**
  * Removes leading and trailing spaces and limits the use of multiple spaces.
  *
  * @ingroup Strings
