@@ -368,7 +368,6 @@ public:
 			float m_Zoom;
 			int m_Deadzone;
 			int m_FollowFactor;
-			int m_SpectatorCount;
 		};
 		CSpectateInfo m_SpecInfo;
 

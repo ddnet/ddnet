@@ -325,7 +325,6 @@ Objects = [
 		NetIntRange("m_Zoom", 0, 'max_int'),
 		NetIntRange("m_Deadzone", 0, 'max_int'),
 		NetIntRange("m_FollowFactor", 0, 'max_int'),
-		NetIntRange("m_SpectatorCount", 0, 'MAX_CLIENTS-1'),
 	]),
 
 	## Events

@@ -429,32 +429,6 @@ void CPlayer::Snap(int SnappingClient)
 			pDDNetSpectatorInfo->m_Zoom = pSpecPlayer->m_CameraInfo.m_Zoom * 1000.0f;
 			pDDNetSpectatorInfo->m_Deadzone = pSpecPlayer->m_CameraInfo.m_Deadzone;
 			pDDNetSpectatorInfo->m_FollowFactor = pSpecPlayer->m_CameraInfo.m_FollowFactor;
-
-			if(SpectatingClient == TranslatedId && SnappingClient != SERVER_DEMO_CLIENT && m_Team != TEAM_SPECTATORS && !m_Paused)
-			{
-				int SpectatorCount = 0;
-				for(auto &pPlayer : GameServer()->m_apPlayers)
-				{
-					if(!pPlayer || pPlayer->m_ClientId == TranslatedId ||
-						!(pPlayer->m_Paused || pPlayer->m_Team == TEAM_SPECTATORS))
-					{
-						continue;
-
-					if(pPlayer->m_SpectatorId == TranslatedId)
-					{
-						SpectatorCount++;
-					}
-					else if(GameServer()->m_apPlayers[TranslatedId]->GetCharacter())
-					{
-						vec2 CheckPos = GameServer()->m_apPlayers[TranslatedId]->GetCharacter()->GetPos();
-						float dx = pPlayer->m_ViewPos.x - CheckPos.x;
-						float dy = pPlayer->m_ViewPos.y - CheckPos.y;
-						if(absolute(dx) < (pPlayer->m_ShowDistance.x / 2.5f) && absolute(dy) < (pPlayer->m_ShowDistance.y / 2.3f))
-							SpectatorCount++;
-					}
-				}
-				pDDNetSpectatorInfo->m_SpectatorCount = SpectatorCount;
-			}
 		}
 	}
 
