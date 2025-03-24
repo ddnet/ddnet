@@ -435,11 +435,10 @@ void CPlayer::Snap(int SnappingClient)
 				int SpectatorCount = 0;
 				for(auto &pPlayer : GameServer()->m_apPlayers)
 				{
-					if(!pPlayer || pPlayer->m_ClientId == TranslatedId || pPlayer->m_Afk ||
+					if(!pPlayer || pPlayer->m_ClientId == TranslatedId ||
 						!(pPlayer->m_Paused || pPlayer->m_Team == TEAM_SPECTATORS))
 					{
 						continue;
-					}
 
 					if(pPlayer->m_SpectatorId == TranslatedId)
 					{
