@@ -116,8 +116,13 @@ int CAuthManager::KeyLevel(int Slot) const
 const char *CAuthManager::KeyIdent(int Slot) const
 {
 	if(Slot < 0 || Slot >= (int)m_vKeys.size())
-		return NULL;
+		return nullptr;
 	return m_vKeys[Slot].m_aIdent;
+}
+
+bool CAuthManager::IsValidIdent(const char *pIdent) const
+{
+	return str_length(pIdent) < (int)sizeof(CKey().m_aIdent);
 }
 
 void CAuthManager::UpdateKeyHash(int Slot, MD5_DIGEST Hash, const unsigned char *pSalt, int AuthLevel)

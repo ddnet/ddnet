@@ -30,7 +30,7 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pRea
 	for(int EnvIndex = 0; EnvIndex < EnvNum; EnvIndex++)
 	{
 		CMapItemEnvelope *pEnvelope = static_cast<CMapItemEnvelope *>(pReader->GetItem(EnvStart + EnvIndex));
-		if(pEnvelope->m_Version >= CMapItemEnvelope_v3::CURRENT_VERSION)
+		if(pEnvelope->m_Version >= CMapItemEnvelope::VERSION_TEEWORLDS_BEZIER)
 		{
 			FoundBezierEnvelope = true;
 			break;
@@ -1268,7 +1268,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 	if(EndX - StartX > Graphics()->ScreenWidth() / g_Config.m_GfxTextOverlay || EndY - StartY > Graphics()->ScreenHeight() / g_Config.m_GfxTextOverlay)
 		return; // its useless to render text at this distance
 
-	float Size = g_Config.m_ClTextEntitiesSize / 100.f;
+	float Size = g_Config.m_ClTextEntitiesSize / 200.f;
 	char aBuf[16];
 
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
@@ -1294,7 +1294,12 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 			if(Index)
 			{
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
-				TextRender()->Text(mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf); // numbers shouldn't be too big and in the center of the tile
+				// Auto-resize text to fit inside the tile
+				float ScaledWidth = TextRender()->TextWidth(Size * Scale, aBuf, -1);
+				float Factor = clamp(Scale / ScaledWidth, 0.0f, 1.0f);
+				float LocalSize = Size * Factor;
+				float ToCenterOffset = (1 - LocalSize) / 2.f;
+				TextRender()->Text((mx + 0.5f) * Scale - (ScaledWidth * Factor) / 2.0f, (my + ToCenterOffset) * Scale, LocalSize * Scale, aBuf);
 			}
 		}
 	}
@@ -1360,123 +1365,6 @@ void CRenderTools::RenderTelemap(CTeleTile *pTele, int w, int h, float Scale, Co
 			int c = mx + my * w;
 
 			unsigned char Index = pTele[c].m_Type;
-			if(Index)
-			{
-				bool Render = false;
-				if(RenderFlags & LAYERRENDERFLAG_TRANSPARENT)
-					Render = true;
-
-				if(Render)
-				{
-					int tx = Index % 16;
-					int ty = Index / 16;
-					int Px0 = tx * (1024 / 16);
-					int Py0 = ty * (1024 / 16);
-					int Px1 = Px0 + (1024 / 16) - 1;
-					int Py1 = Py0 + (1024 / 16) - 1;
-
-					float x0 = Nudge + Px0 / TexSize + Frac;
-					float y0 = Nudge + Py0 / TexSize + Frac;
-					float x1 = Nudge + Px1 / TexSize - Frac;
-					float y1 = Nudge + Py0 / TexSize + Frac;
-					float x2 = Nudge + Px1 / TexSize - Frac;
-					float y2 = Nudge + Py1 / TexSize - Frac;
-					float x3 = Nudge + Px0 / TexSize + Frac;
-					float y3 = Nudge + Py1 / TexSize - Frac;
-
-					if(Graphics()->HasTextureArraysSupport())
-					{
-						x0 = 0;
-						y0 = 0;
-						x1 = x0 + 1;
-						y1 = y0;
-						x2 = x0 + 1;
-						y2 = y0 + 1;
-						x3 = x0;
-						y3 = y0 + 1;
-					}
-
-					if(Graphics()->HasTextureArraysSupport())
-					{
-						Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3, Index);
-						IGraphics::CQuadItem QuadItem(x * Scale, y * Scale, Scale, Scale);
-						Graphics()->QuadsTex3DDrawTL(&QuadItem, 1);
-					}
-					else
-					{
-						Graphics()->QuadsSetSubsetFree(x0, y0, x1, y1, x2, y2, x3, y3);
-						IGraphics::CQuadItem QuadItem(x * Scale, y * Scale, Scale, Scale);
-						Graphics()->QuadsDrawTL(&QuadItem, 1);
-					}
-				}
-			}
-		}
-
-	if(Graphics()->HasTextureArraysSupport())
-		Graphics()->QuadsTex3DEnd();
-	else
-		Graphics()->QuadsEnd();
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
-}
-
-void CRenderTools::RenderSpeedupmap(CSpeedupTile *pSpeedupTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
-{
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-
-	// calculate the final pixelsize for the tiles
-	float TilePixelSize = 1024 / 32.0f;
-	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * Graphics()->ScreenWidth();
-	float FinalTilesetScale = FinalTileSize / TilePixelSize;
-
-	if(Graphics()->HasTextureArraysSupport())
-		Graphics()->QuadsTex3DBegin();
-	else
-		Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color);
-
-	int StartY = (int)(ScreenY0 / Scale) - 1;
-	int StartX = (int)(ScreenX0 / Scale) - 1;
-	int EndY = (int)(ScreenY1 / Scale) + 1;
-	int EndX = (int)(ScreenX1 / Scale) + 1;
-
-	// adjust the texture shift according to mipmap level
-	float TexSize = 1024.0f;
-	float Frac = (1.25f / TexSize) * (1 / FinalTilesetScale);
-	float Nudge = (0.5f / TexSize) * (1 / FinalTilesetScale);
-
-	for(int y = StartY; y < EndY; y++)
-		for(int x = StartX; x < EndX; x++)
-		{
-			int mx = x;
-			int my = y;
-
-			if(RenderFlags & TILERENDERFLAG_EXTEND)
-			{
-				if(mx < 0)
-					mx = 0;
-				if(mx >= w)
-					mx = w - 1;
-				if(my < 0)
-					my = 0;
-				if(my >= h)
-					my = h - 1;
-			}
-			else
-			{
-				if(mx < 0)
-					continue; // mx = 0;
-				if(mx >= w)
-					continue; // mx = w-1;
-				if(my < 0)
-					continue; // my = 0;
-				if(my >= h)
-					continue; // my = h-1;
-			}
-
-			int c = mx + my * w;
-
-			unsigned char Index = pSpeedupTile[c].m_Type;
 			if(Index)
 			{
 				bool Render = false;

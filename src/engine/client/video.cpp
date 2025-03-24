@@ -253,7 +253,7 @@ bool CVideo::Start()
 				m_VideoStream.m_vpSwsContexts[i],
 				m_VideoStream.m_pCodecContext->width, m_VideoStream.m_pCodecContext->height, AV_PIX_FMT_RGBA,
 				m_VideoStream.m_pCodecContext->width, m_VideoStream.m_pCodecContext->height, AV_PIX_FMT_YUV420P,
-				0, 0, 0, 0);
+				0, nullptr, nullptr, nullptr);
 		}
 	}
 
@@ -991,7 +991,7 @@ void CVideo::WriteFrame(COutputStream *pStream, size_t ThreadIndex)
 		return;
 	}
 
-	pPacket->data = 0;
+	pPacket->data = nullptr;
 	pPacket->size = 0;
 
 	avcodec_send_frame(pStream->m_pCodecContext, pStream->m_vpFrames[ThreadIndex]);
@@ -1039,10 +1039,10 @@ void CVideo::FinishFrames(COutputStream *pStream)
 		return;
 	}
 
-	pPacket->data = 0;
+	pPacket->data = nullptr;
 	pPacket->size = 0;
 
-	avcodec_send_frame(pStream->m_pCodecContext, 0);
+	avcodec_send_frame(pStream->m_pCodecContext, nullptr);
 	int RecvResult = 0;
 	do
 	{

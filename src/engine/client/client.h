@@ -116,13 +116,16 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aAckGameTick[NUM_DUMMIES] = {-1, -1};
 	int m_aCurrentRecvTick[NUM_DUMMIES] = {0, 0};
 	int m_aRconAuthed[NUM_DUMMIES] = {0, 0};
-	char m_aRconUsername[32] = "";
+	char m_aRconUsername[64] = "";
 	char m_aRconPassword[sizeof(g_Config.m_SvRconPassword)] = "";
 	int m_UseTempRconCommands = 0;
 	int m_ExpectedRconCommands = -1;
 	int m_GotRconCommands = 0;
 	char m_aPassword[sizeof(g_Config.m_Password)] = "";
 	bool m_SendPassword = false;
+
+	int m_ExpectedMaplistEntries = -1;
+	std::vector<std::string> m_vMaplistEntries;
 
 	// version-checking
 	char m_aVersionStr[10] = "0";
@@ -148,7 +151,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aMapdownloadFilename[256] = "";
 	char m_aMapdownloadFilenameTemp[256] = "";
 	char m_aMapdownloadName[256] = "";
-	IOHANDLE m_MapdownloadFileTemp = 0;
+	IOHANDLE m_MapdownloadFileTemp = nullptr;
 	int m_MapdownloadChunk = 0;
 	int m_MapdownloadCrc = 0;
 	int m_MapdownloadAmount = -1;
@@ -243,12 +246,12 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CFifo m_Fifo;
 
-	IOHANDLE m_BenchmarkFile = 0;
+	IOHANDLE m_BenchmarkFile = nullptr;
 	int64_t m_BenchmarkStopTime = 0;
 
 	CChecksum m_Checksum;
 	int64_t m_OwnExecutableSize = 0;
-	IOHANDLE m_OwnExecutable = 0;
+	IOHANDLE m_OwnExecutable = nullptr;
 
 	// favorite command handling
 	bool m_FavoritesGroup = false;
@@ -301,6 +304,9 @@ public:
 	void Rcon(const char *pCmd) override;
 	bool ReceivingRconCommands() const override { return m_ExpectedRconCommands > 0; }
 	float GotRconCommandsPercentage() const override;
+	bool ReceivingMaplist() const override { return m_ExpectedMaplistEntries > 0; }
+	float GotMaplistPercentage() const override;
+	const std::vector<std::string> &MaplistEntries() const override { return m_vMaplistEntries; }
 
 	bool ConnectionProblems() const override;
 
@@ -340,13 +346,15 @@ public:
 
 	int GetPredictionTime() override;
 	CSnapItem SnapGetItem(int SnapId, int Index) const override;
+	int GetPredictionTick() override;
 	const void *SnapFindItem(int SnapId, int Type, int Id) const override;
 	int SnapNumItems(int SnapId) const override;
 	void SnapSetStaticsize(int ItemType, int Size) override;
 	void SnapSetStaticsize7(int ItemType, int Size) override;
 
 	void Render();
-	void DebugRender();
+	void RenderDebug();
+	void RenderGraphs();
 
 	void Restart() override;
 	void Quit() override;
@@ -372,7 +380,6 @@ public:
 
 	void RequestDDNetInfo() override;
 	void ResetDDNetInfoTask();
-	void FinishDDNetInfo();
 	void LoadDDNetInfo();
 
 	bool IsSixup() const override { return m_Sixup; }
@@ -442,6 +449,7 @@ public:
 	static void ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainReplays(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainInputFifo(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 

@@ -957,25 +957,28 @@ IStorage *CreateStorage(IStorage::EInitializationType InitializationType, int Nu
 	return CStorage::Create(InitializationType, NumArgs, ppArguments);
 }
 
-IStorage *CreateLocalStorage()
+std::unique_ptr<IStorage> CreateLocalStorage()
 {
-	CStorage *pStorage = new CStorage();
+	std::unique_ptr<CStorage> pStorage = std::make_unique<CStorage>();
 	if(!pStorage->FindCurrentDirectory() ||
 		!pStorage->AddPath("$CURRENTDIR"))
 	{
-		delete pStorage;
-		return nullptr;
+		return std::unique_ptr<IStorage>(nullptr);
 	}
 	return pStorage;
 }
 
-IStorage *CreateTempStorage(const char *pDirectory)
+std::unique_ptr<IStorage> CreateTempStorage(const char *pDirectory, int NumArgs, const char **ppArguments)
 {
-	CStorage *pStorage = new CStorage();
-	if(!pStorage->AddPath(pDirectory))
+	dbg_assert(NumArgs > 0, "Expected at least one argument");
+	std::unique_ptr<CStorage> pStorage = std::make_unique<CStorage>();
+	pStorage->FindDataDirectory(ppArguments[0]);
+	if(!pStorage->FindCurrentDirectory() ||
+		!pStorage->AddPath(pDirectory) ||
+		!pStorage->AddPath("$DATADIR") ||
+		!pStorage->AddPath("$CURRENTDIR"))
 	{
-		delete pStorage;
-		return nullptr;
+		return std::unique_ptr<IStorage>(nullptr);
 	}
 	return pStorage;
 }

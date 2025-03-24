@@ -156,13 +156,12 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 {
 	CUserErrorStruct UserErrorStruct = {&Reader, pContextName, {}};
 
-	// Initialize structures with custom error handlers
-	png_structp pPngStruct = png_create_read_struct(
-		PNG_LIBPNG_VER_STRING,
-		(void *)pngCategory, // Pass category as error_ptr
-		PngErrorHandler,
-		PngWarningHandler);
+	if(setjmp(UserErrorStruct.m_JmpBuf))
+	{
+		return false;
+	}
 
+	png_structp pPngStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, &UserErrorStruct, PngErrorCallback, PngWarningCallback);
 	if(pPngStruct == nullptr)
 	{
 		log_error("png", "libpng internal failure: png_create_read_struct failed.");
@@ -192,7 +191,6 @@ bool CImageLoader::LoadPng(CByteBufferReader &Reader, const char *pContextName, 
 		Cleanup();
 		return false;
 	}
-	png_set_error_fn(pPngStruct, &UserErrorStruct, PngErrorCallback, PngWarningCallback);
 
 	pPngInfo = png_create_info_struct(pPngStruct);
 	if(pPngInfo == nullptr)

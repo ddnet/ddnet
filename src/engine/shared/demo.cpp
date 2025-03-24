@@ -41,7 +41,7 @@ bool CDemoHeader::Valid() const
 
 CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData)
 {
-	m_File = 0;
+	m_File = nullptr;
 	m_aCurrentFilename[0] = '\0';
 	m_pfnFilter = nullptr;
 	m_pUser = nullptr;
@@ -387,7 +387,7 @@ int CDemoRecorder::Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilena
 	}
 
 	io_close(m_File);
-	m_File = 0;
+	m_File = nullptr;
 
 	if(Mode == IDemoRecorder::EStopMode::REMOVE_FILE)
 	{
@@ -486,7 +486,7 @@ CDemoPlayer::~CDemoPlayer()
 
 void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 {
-	m_File = 0;
+	m_File = nullptr;
 	m_SpeedIndex = 4;
 
 	m_pSnapshotDelta = pSnapshotDelta;
@@ -1107,7 +1107,7 @@ void CDemoPlayer::Stop(const char *pErrorMessage)
 	}
 
 	io_close(m_File);
-	m_File = 0;
+	m_File = nullptr;
 	m_vKeyFrames.clear();
 	str_copy(m_aFilename, "");
 	str_copy(m_aErrorMessage, pErrorMessage);

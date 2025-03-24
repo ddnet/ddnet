@@ -76,8 +76,11 @@ class CHud : public CComponent
 
 	void PreparePlayerStateQuads();
 	void RenderPlayerState(const int ClientId);
+
+	int m_LastSpectatorCountTick;
+	void RenderSpectatorCount();
 	void RenderDummyActions();
-	void RenderMovementInformation(const int ClientId);
+	void RenderMovementInformation();
 
 	void UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, char *pPrevValue, size_t Size);
 	void RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, const ColorRGBA &Color, float X, float Y);

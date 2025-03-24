@@ -1,8 +1,3 @@
-##### authors #####
-#translated to catalan by:
-#	Ryozuki
-##### translated strings #####
-
 %ds left
 == %ds restants
 
@@ -394,9 +389,6 @@ The audio device couldn't be initialised.
 
 The server is running a non-standard tuning on a pure game type.
 == El servidor està utilitzant una modificació en un mode de joc estàndard
-
-Time limit
-== Temps límit
 
 Time limit: %d min
 == Temps límit: %d minuts
@@ -1260,6 +1252,29 @@ Loading skin files
 Loading background map
 == 
 
+Auto-sync player camera
+== 
+
+[Auto camera]
+Disabled
+== 
+
+[Auto camera]
+Enabled
+== 
+
+[Auto camera]
+Unavailable for this player
+== 
+
+[Auto camera]
+Inactive
+== 
+
+[Auto camera]
+Active
+== 
+
 Searching
 == 
 
@@ -1288,6 +1303,9 @@ Following
 == 
 
 Loading commands…
+== 
+
+Loading maps…
 == 
 
 Position:
@@ -1444,9 +1462,6 @@ Add friends by entering their name below or by clicking their name in the player
 == 
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
-
-Offline friends and clanmates will appear here.
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?
@@ -1664,6 +1679,39 @@ Could not load default touch controls from file. See local console for details.
 Could not load touch controls from clipboard. See local console for details.
 == 
 
+Community
+== 
+
+Round %d/%d
+== 
+
+[Team status]
+forbidden
+== 
+
+[Team status]
+solo
+== 
+
+[Team status]
+allowed
+== 
+
+[Team status]
+required
+== 
+
+Teams
+== 
+
+[Team size]
+minimum
+== 
+
+[Team size]
+maximum
+== 
+
 Loading…
 == 
 
@@ -1690,6 +1738,12 @@ Save power by lowering refresh rate (higher input latency)
 == 
 
 Open the settings file
+== 
+
+Saves file
+== 
+
+Open the saves file
 == 
 
 Open the directory that contains the configuration and user files
@@ -1772,8 +1826,18 @@ Cancel
 Allows maps to render with more detail
 == 
 
+Show FPS
+== 
+
+Renders your frame rate in the top right
+== 
+
 Graphics card
 == 
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Catalan translation by Ryozuki
 
 Tee
 == 
@@ -1794,6 +1858,9 @@ Show health, shields and ammo
 == 
 
 Show local time always
+== 
+
+Show spectator cursor
 == 
 
 Authed name color in scoreboard
@@ -2004,9 +2071,6 @@ Server could not be started. Make sure to grant the notification permission in t
 == 
 
 Loading race demo files
-== 
-
-Round %d/%d
 == 
 
 [Spectators]

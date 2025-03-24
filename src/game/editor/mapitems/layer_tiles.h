@@ -176,6 +176,7 @@ public:
 	// DDRace
 
 	int m_AutoMapperConfig;
+	int m_AutoMapperReference;
 	int m_Seed;
 	bool m_AutoAutoMap;
 	int m_Tele;

@@ -254,9 +254,7 @@ int CNetServer::TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, boo
 
 	if(g_Config.m_Debug)
 	{
-		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
-		dbg_msg("security", "client accepted %s", aAddrStr);
+		dbg_msg("security", "client accepted %s", m_aSlots[Slot].m_Connection.PeerAddressString(true).data());
 	}
 
 	if(VanillaAuth)
@@ -346,7 +344,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 			}
 
 			// simulate accept
-			SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, NULL, 0, NET_SECURITY_TOKEN_UNSUPPORTED);
+			SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, nullptr, 0, NET_SECURITY_TOKEN_UNSUPPORTED);
 
 			// Begin vanilla compatible token handshake
 			// The idea is to pack a security token in the gametick
@@ -422,7 +420,7 @@ void CNetServer::OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet)
 		else
 		{
 			// accept client directly
-			SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, NULL, 0, NET_SECURITY_TOKEN_UNSUPPORTED);
+			SendControl(Addr, NET_CTRLMSG_CONNECTACCEPT, nullptr, 0, NET_SECURITY_TOKEN_UNSUPPORTED);
 
 			TryAcceptClient(Addr, NET_SECURITY_TOKEN_UNSUPPORTED);
 		}
@@ -734,8 +732,10 @@ int CNetServer::Send(CNetChunk *pChunk)
 	else
 	{
 		int Flags = 0;
-		dbg_assert(pChunk->m_ClientId >= 0, "erroneous client id");
-		dbg_assert(pChunk->m_ClientId < MaxClients(), "erroneous client id");
+		dbg_assert(
+			pChunk->m_ClientId >= 0 && pChunk->m_ClientId < MaxClients(),
+			"erroneous client id %d",
+			pChunk->m_ClientId);
 
 		if(pChunk->m_Flags & NETSENDFLAG_VITAL)
 			Flags = NET_CHUNKFLAG_VITAL;
@@ -760,22 +760,6 @@ void CNetServer::SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token)
 	WriteSecurityToken(aBuf, MyToken);
 	int Size = (Token == NET_SECURITY_TOKEN_UNKNOWN) ? 512 : 4;
 	CNetBase::SendControlMsg(m_Socket, &Addr, 0, 5, aBuf, Size, Token, true);
-}
-
-int CNetServer::SendConnlessSixup(CNetChunk *pChunk, SECURITY_TOKEN ResponseToken)
-{
-	if(pChunk->m_DataSize > NET_MAX_PACKETSIZE - 9)
-		return -1;
-
-	unsigned char aBuffer[NET_MAX_PACKETSIZE];
-	aBuffer[0] = NET_PACKETFLAG_CONNLESS << 2 | 1;
-	SECURITY_TOKEN Token = GetToken(pChunk->m_Address);
-	WriteSecurityToken(aBuffer + 1, ResponseToken);
-	WriteSecurityToken(aBuffer + 5, Token);
-	mem_copy(aBuffer + 9, pChunk->m_pData, pChunk->m_DataSize);
-	net_udp_send(m_Socket, &pChunk->m_Address, aBuffer, pChunk->m_DataSize + 9);
-
-	return 0;
 }
 
 void CNetServer::SetMaxClientsPerIp(int Max)

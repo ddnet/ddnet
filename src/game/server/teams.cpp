@@ -35,6 +35,8 @@ void CGameTeams::Reset()
 		m_aTeamFlock[i] = false;
 		m_apSaveTeamResult[i] = nullptr;
 		m_aTeamSentStartWarning[i] = false;
+		if(m_pGameContext->PracticeByDefault())
+			m_aPractice[i] = true;
 		ResetRoundState(i);
 	}
 }
@@ -45,7 +47,8 @@ void CGameTeams::ResetRoundState(int Team)
 	if(Team != TEAM_SUPER)
 		ResetSwitchers(Team);
 
-	m_aPractice[Team] = false;
+	if(!m_pGameContext->PracticeByDefault())
+		m_aPractice[Team] = false;
 	m_aTeamUnfinishableKillTick[Team] = -1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -229,7 +232,7 @@ void CGameTeams::Tick()
 		}
 	}
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int i = 0; i < TEAM_SUPER; i++)
 	{
 		if(m_aTeamUnfinishableKillTick[i] == -1 || m_aTeamState[i] != TEAMSTATE_STARTED_UNFINISHABLE)
 		{
@@ -378,7 +381,7 @@ const char *CGameTeams::SetCharacterTeam(int ClientId, int Team)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return "Invalid client ID";
-	if(Team < 0 || Team >= MAX_CLIENTS + 1)
+	if(Team < 0 || Team > NUM_DDRACE_TEAMS)
 		return "Invalid team number";
 	if(Team != TEAM_SUPER && m_aTeamState[Team] > TEAMSTATE_OPEN && !m_aPractice[Team] && !m_aTeamFlock[Team])
 		return "This team started already";
@@ -391,7 +394,7 @@ const char *CGameTeams::SetCharacterTeam(int ClientId, int Team)
 	if(Team != TEAM_SUPER && Character(ClientId)->m_DDRaceState != DDRACE_NONE)
 		return "You have started racing already";
 	// No cheating through noob filter with practice and then leaving team
-	if(m_aPractice[m_Core.Team(ClientId)])
+	if(m_aPractice[m_Core.Team(ClientId)] && !m_pGameContext->PracticeByDefault())
 		return "You have used practice mode already";
 
 	// you can not join a team which is currently in the process of saving,
@@ -665,12 +668,12 @@ void CGameTeams::SetLastTimeCp(CPlayer *Player, int LastTimeCp)
 float *CGameTeams::GetCurrentTimeCp(CPlayer *Player)
 {
 	if(!Player)
-		return NULL;
+		return nullptr;
 
 	CCharacter *pChar = Player->GetCharacter();
 	if(pChar)
 		return pChar->m_aCurrentTimeCp;
-	return NULL;
+	return nullptr;
 }
 
 void CGameTeams::OnTeamFinish(int Team, CPlayer **Players, unsigned int Size, int TimeTicks, const char *pTimestamp)
@@ -877,7 +880,7 @@ void CGameTeams::RequestTeamSwap(CPlayer *pPlayer, CPlayer *pTargetPlayer, int T
 
 	// Notification for the swap initiator
 	str_format(aBuf, sizeof(aBuf),
-		"You have requested to swap with %s.",
+		"You have requested to swap with %s. Use /cancelswap to cancel the request.",
 		Server()->ClientName(pTargetPlayer->GetCid()));
 	GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
 
@@ -976,6 +979,44 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPla
 		Server()->ClientName(pPrimaryPlayer->GetCid()), Server()->ClientName(pTargetPlayer->GetCid()));
 
 	GameServer()->SendChatTeam(Team, aBuf);
+}
+
+void CGameTeams::CancelTeamSwap(CPlayer *pPlayer, int Team)
+{
+	if(!pPlayer)
+		return;
+
+	char aBuf[128];
+
+	// Notification for the swap initiator
+	str_format(aBuf, sizeof(aBuf),
+		"You have canceled swap with %s.",
+		Server()->ClientName(pPlayer->m_SwapTargetsClientId));
+	GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
+
+	// Notification to the target swap player
+	str_format(aBuf, sizeof(aBuf),
+		"%s has canceled swap with you.",
+		Server()->ClientName(pPlayer->GetCid()));
+	GameServer()->SendChatTarget(pPlayer->m_SwapTargetsClientId, aBuf);
+
+	// Notification for the remaining team
+	str_format(aBuf, sizeof(aBuf),
+		"%s has canceled swap with %s.",
+		Server()->ClientName(pPlayer->GetCid()), Server()->ClientName(pPlayer->m_SwapTargetsClientId));
+	// Do not send the team notification for team 0
+	if(Team != 0)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_Core.Team(i) == Team && i != pPlayer->m_SwapTargetsClientId && i != pPlayer->GetCid())
+			{
+				GameServer()->SendChatTarget(i, aBuf);
+			}
+		}
+	}
+
+	pPlayer->m_SwapTargetsClientId = -1;
 }
 
 void CGameTeams::ProcessSaveTeam()
@@ -1117,7 +1158,8 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 		{
 			ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 
-			m_aPractice[Team] = false;
+			if(!m_pGameContext->PracticeByDefault())
+				m_aPractice[Team] = false;
 
 			if(Count(Team) > 1)
 			{
@@ -1185,7 +1227,7 @@ void CGameTeams::SetClientInvited(int Team, int ClientId, bool Invited)
 	}
 }
 
-void CGameTeams::KillSavedTeam(int ClientId, int Team)
+void CGameTeams::KillCharacterOrTeam(int ClientId, int Team)
 {
 	if(g_Config.m_SvSoloServer || !g_Config.m_SvTeam)
 	{
@@ -1218,7 +1260,7 @@ void CGameTeams::ResetSavedTeam(int ClientId, int Team)
 
 int CGameTeams::GetFirstEmptyTeam() const
 {
-	for(int i = 1; i < MAX_CLIENTS; i++)
+	for(int i = 1; i < TEAM_SUPER; i++)
 		if(m_aTeamState[i] == TEAMSTATE_EMPTY)
 			return i;
 	return -1;

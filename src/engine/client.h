@@ -214,12 +214,16 @@ public:
 	virtual void Rcon(const char *pLine) = 0;
 	virtual bool ReceivingRconCommands() const = 0;
 	virtual float GotRconCommandsPercentage() const = 0;
+	virtual bool ReceivingMaplist() const = 0;
+	virtual float GotMaplistPercentage() const = 0;
+	virtual const std::vector<std::string> &MaplistEntries() const = 0;
 
 	// server info
 	virtual void GetServerInfo(class CServerInfo *pServerInfo) const = 0;
 	virtual bool ServerCapAnyPlayerFlag() const = 0;
 
 	virtual int GetPredictionTime() = 0;
+	virtual int GetPredictionTick() = 0;
 
 	// snapshot interface
 

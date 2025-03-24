@@ -190,7 +190,7 @@ void CCharacterCore::Reset()
 
 void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
-	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos);
+	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : nullptr, this, m_Pos);
 	m_TriggeredEvents = 0;
 
 	// get ground state
@@ -331,7 +331,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		bool GoingToRetract = false;
 		bool GoingThroughTele = false;
 		int teleNr = 0;
-		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr);
+		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, nullptr, &teleNr);
 
 		if(Hit)
 		{
@@ -749,7 +749,7 @@ void CWorldCore::InitSwitchers(int HighestSwitchNumber)
 	for(auto &Switcher : m_vSwitchers)
 	{
 		Switcher.m_Initial = true;
-		for(int j = 0; j < MAX_CLIENTS; j++)
+		for(int j = 0; j < NUM_DDRACE_TEAMS; j++)
 		{
 			Switcher.m_aStatus[j] = true;
 			Switcher.m_aEndTick[j] = 0;

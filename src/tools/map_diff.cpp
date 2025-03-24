@@ -18,7 +18,7 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 		}
 
 		const CMapItemVersion *pVersion = static_cast<CMapItemVersion *>(aMaps[i].FindItem(MAPITEMTYPE_VERSION, 0));
-		if(pVersion == nullptr || pVersion->m_Version != CMapItemVersion::CURRENT_VERSION)
+		if(pVersion == nullptr || pVersion->m_Version != 1)
 		{
 			dbg_msg("map_compare", "unsupported map version '%s'", pMapNames[i]);
 			return false;
@@ -117,9 +117,12 @@ int main(int argc, const char *argv[])
 		return -1;
 	}
 
-	IStorage *pStorage = CreateLocalStorage();
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
 	if(!pStorage)
+	{
+		log_error("map_diff", "Error creating local storage");
 		return -1;
+	}
 
-	return Process(pStorage, &argv[1]) ? 0 : 1;
+	return Process(pStorage.get(), &argv[1]) ? 0 : 1;
 }

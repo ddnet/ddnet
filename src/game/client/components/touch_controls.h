@@ -1,6 +1,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_TOUCH_CONTROLS_H
 #define GAME_CLIENT_COMPONENTS_TOUCH_CONTROLS_H
 
+#include <base/color.h>
 #include <base/vmath.h>
 
 #include <engine/input.h>
@@ -474,6 +475,20 @@ private:
 	EDirectTouchSpectateMode m_DirectTouchSpectate = EDirectTouchSpectateMode::AIM;
 
 	/**
+	 * Background color of inactive touch buttons.
+	 *
+	 * Saved to the touch controls configuration.
+	 */
+	ColorRGBA m_BackgroundColorInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
+
+	/**
+	 * Background color of active touch buttons.
+	 *
+	 * Saved to the touch controls configuration.
+	 */
+	ColorRGBA m_BackgroundColorActive = ColorRGBA(0.2f, 0.2f, 0.2f, 0.25f);
+
+	/**
 	 * All touch buttons.
 	 *
 	 * Saved to the touch controls configuration.
@@ -536,6 +551,7 @@ private:
 	bool ParseConfiguration(const void *pFileData, unsigned FileLength);
 	std::optional<EDirectTouchIngameMode> ParseDirectTouchIngameMode(const json_value *pModeValue);
 	std::optional<EDirectTouchSpectateMode> ParseDirectTouchSpectateMode(const json_value *pModeValue);
+	std::optional<ColorRGBA> ParseColor(const json_value *pColorValue, const char *pAttributeName, std::optional<ColorRGBA> DefaultColor) const;
 	std::optional<CTouchButton> ParseButton(const json_value *pButtonObject);
 	std::unique_ptr<CTouchButtonBehavior> ParseBehavior(const json_value *pBehaviorObject);
 	std::unique_ptr<CPredefinedTouchButtonBehavior> ParsePredefinedBehavior(const json_value *pBehaviorObject);

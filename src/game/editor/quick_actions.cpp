@@ -1,4 +1,5 @@
 #include <engine/keys.h>
+#include <game/client/gameclient.h>
 #include <game/mapitems.h>
 
 #include "editor.h"
@@ -213,4 +214,54 @@ void CEditor::DeleteSelectedLayer()
 	m_Map.m_vpGroups[m_SelectedGroup]->DeleteLayer(m_vSelectedLayers[0]);
 
 	SelectPreviousLayer();
+}
+
+void CEditor::TestMapLocally()
+{
+	const char *pFileNameNoMaps = str_startswith(m_aFileName, "maps/");
+	if(!pFileNameNoMaps)
+	{
+		ShowFileDialogError("The map isn't saved in the maps/ folder. It must be saved there to load on the server.");
+		return;
+	}
+
+	char aFileNameNoExt[IO_MAX_PATH_LENGTH];
+	fs_split_file_extension(pFileNameNoMaps, aFileNameNoExt, sizeof(aFileNameNoExt));
+	char aBuf[IO_MAX_PATH_LENGTH + 64];
+
+	if(Client()->RconAuthed())
+	{
+		if(net_addr_is_local(&Client()->ServerAddress()))
+		{
+			OnClose();
+			g_Config.m_ClEditor = 0;
+			str_format(aBuf, sizeof(aBuf), "change_map %s", aFileNameNoExt);
+			Client()->Rcon(aBuf);
+			return;
+		}
+	}
+
+	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
+	if(pGameClient->m_Menus.IsServerRunning())
+	{
+		m_PopupEventType = CEditor::POPEVENT_RESTART_SERVER;
+		m_PopupEventActivated = true;
+	}
+	else
+	{
+		char aRegister[] = "sv_register 0";
+
+		char aRandomPass[17];
+		secure_random_password(aRandomPass, sizeof(aRandomPass), 16);
+		char aPass[64];
+		str_format(aPass, sizeof(aPass), "auth_add %s admin %s", DEFAULT_SAVED_RCON_USER, aRandomPass);
+		str_copy(pGameClient->m_aSavedLocalRconPassword, aRandomPass);
+
+		str_format(aBuf, sizeof(aBuf), "change_map %s", aFileNameNoExt);
+		const char *apArguments[] = {aRegister, aPass, aBuf};
+		pGameClient->m_Menus.RunServer(apArguments, std::size(apArguments));
+		OnClose();
+		g_Config.m_ClEditor = 0;
+		Client()->Connect("localhost");
+	}
 }

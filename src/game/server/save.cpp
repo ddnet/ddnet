@@ -494,7 +494,7 @@ bool CSaveHotReloadTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 {
 	bool Result = m_SaveTee.Load(pChr, Team, IsSwap);
 	pChr->SetSuper(m_Super);
-	pChr->SetInvincible(m_Invincible);
+	pChr->m_Core.m_Invincible = m_Invincible;
 	pChr->GetPlayer()->m_LastTeleTee = m_SavedTeleTee;
 
 	return Result;
@@ -744,7 +744,7 @@ int CSaveTeam::FromString(const char *pString)
 	if(m_pSavedTees)
 	{
 		delete[] m_pSavedTees;
-		m_pSavedTees = 0;
+		m_pSavedTees = nullptr;
 	}
 
 	if(m_MembersCount > 64)
@@ -797,7 +797,7 @@ int CSaveTeam::FromString(const char *pString)
 	if(m_pSwitchers)
 	{
 		delete[] m_pSwitchers;
-		m_pSwitchers = 0;
+		m_pSwitchers = nullptr;
 	}
 
 	if(m_HighestSwitchNumber)

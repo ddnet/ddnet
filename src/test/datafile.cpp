@@ -8,11 +8,13 @@
 
 TEST(Datafile, ExtendedType)
 {
-	auto pStorage = std::unique_ptr<IStorage>(CreateLocalStorage());
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
+	ASSERT_NE(pStorage, nullptr) << "Error creating local storage";
+
 	CTestInfo Info;
 
 	CMapItemTest ItemTest;
-	ItemTest.m_Version = CMapItemTest::CURRENT_VERSION;
+	ItemTest.m_Version = 1;
 	ItemTest.m_aFields[0] = 1234;
 	ItemTest.m_aFields[1] = 5678;
 	ItemTest.m_Field3 = 9876;
@@ -63,7 +65,9 @@ TEST(Datafile, ExtendedType)
 
 TEST(Datafile, StringData)
 {
-	auto pStorage = std::unique_ptr<IStorage>(CreateLocalStorage());
+	std::unique_ptr<IStorage> pStorage = CreateLocalStorage();
+	ASSERT_NE(pStorage, nullptr) << "Error creating local storage";
+
 	CTestInfo Info;
 
 	{

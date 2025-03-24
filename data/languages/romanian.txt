@@ -1,19 +1,3 @@
-##### authors #####
-#originally created by:
-#	kneekoo
-#modified by:
-#	kneekoo		2011-01-18 18:26:02
-#	kneekoo		2011-02-09 12:23:47
-#	kneekoo		2011-04-03 23:00:38
-#	kneekoo		2011-05-25 18:36:32
-#	kneekoo		2011-07-01 18:40:49
-#	kneekoo		2011-07-05 23:34:34
-#	kneekoo		2012-05-01 02:01:47
-#   Sans        2024-12-04 02:19:00
-##### /authors #####
-
-##### translated strings #####
-
 %ds left
 == %ds rămase
 
@@ -406,9 +390,6 @@ The audio device couldn't be initialised.
 
 The server is running a non-standard tuning on a pure game type.
 == Serverul folosește parametri non-standard într-un joc standard.
-
-Time limit
-== Timp limită
 
 Time limit: %d min
 == Timp limită : %d min
@@ -965,9 +946,6 @@ Add friends by entering their name below or by clicking their name in the player
 
 Add clanmates by entering their clan below and leaving the name blank.
 == Adaugă membri de clan introducând numele clanului mai jos și lăsând numele gol.
-
-Offline friends and clanmates will appear here.
-== Prietenii și membrii de clan offline vor apărea aici.
 
 Are you sure that you want to remove the player '%s' from your friends list?
 == Ești sigur că vrei să elimini jucătorul '%s' din lista de prieteni?
@@ -2046,35 +2024,110 @@ https://wiki.ddnet.org/wiki/Mapping
 == https://wiki.ddnet.org/wiki/Mapping
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" nu este compatibilă cu pnglite și nu poate fi încărcată de versiunile vechi DDNet:
 
 Loading background map
-== 
+== Se încarcă harta de fundal
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== AUTO
 
 Toggle auto camera
-== 
+== Comutează camera auto
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Show client IDs in name plates
-== 
+== Arată ID-urile de client pe etichetele de nume
 
 Hook Strength
-== 
+== Puterea cârligului
 
 Size of hook strength icon and number indicator
-== 
+== Dimensiunea indicatorului de putere al cârligului și a indicatorului numeric
 
 Key Presses
-== 
+== Taste apăsate
 
 Size of key press icons
-== 
+== Dimensiune iconițe taste apăsate
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Serverul nu a putut fi pornit. Acordă permisiunea pentru notificări în setările aplicației pentru a rula serverul în fundal.
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Traduceri în limba română de kneekoo, Sans3108
+
+Auto-sync player camera
+== Auto sincronizare cameră jucător
+
+[Auto camera]
+Disabled
+== Dezactivat
+
+[Auto camera]
+Enabled
+== Activat
+
+[Auto camera]
+Unavailable for this player
+== Indisponibil pentru acest jucător
+
+[Auto camera]
+Inactive
+== Inactivă
+
+[Auto camera]
+Active
+== Activă
+
+Loading maps…
+== Se încarcă hărți…
+
+Community
+== Comunitate
+
+[Team status]
+forbidden
+== interzise
+
+[Team status]
+solo
+== solo
+
+[Team status]
+allowed
+== permise
+
+[Team status]
+required
+== necesare
+
+Teams
+== Echipe
+
+[Team size]
+minimum
+== minim
+
+[Team size]
+maximum
+== maxim
+
+Saves file
+== Fișier salvări
+
+Open the saves file
+== Deschide fișierul de salvări
+
+Show FPS
+== Afișează FPS
+
+Renders your frame rate in the top right
+== Afișează rata cadrelor în colțul din dreapta sus
+
+Show spectator cursor
+== Afișează cursor spectator

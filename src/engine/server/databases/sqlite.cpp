@@ -198,7 +198,7 @@ bool CSqliteConnection::PrepareStatement(const char *pStmt, char *pError, int Er
 		pStmt,
 		-1, // pStmt can be any length
 		&m_pStmt,
-		NULL);
+		nullptr);
 	if(FormatError(Result, pError, ErrorSize))
 	{
 		return true;
@@ -209,14 +209,14 @@ bool CSqliteConnection::PrepareStatement(const char *pStmt, char *pError, int Er
 
 void CSqliteConnection::BindString(int Idx, const char *pString)
 {
-	int Result = sqlite3_bind_text(m_pStmt, Idx, pString, -1, NULL);
+	int Result = sqlite3_bind_text(m_pStmt, Idx, pString, -1, nullptr);
 	AssertNoError(Result);
 	m_Done = false;
 }
 
 void CSqliteConnection::BindBlob(int Idx, unsigned char *pBlob, int Size)
 {
-	int Result = sqlite3_bind_blob(m_pStmt, Idx, pBlob, Size, NULL);
+	int Result = sqlite3_bind_blob(m_pStmt, Idx, pBlob, Size, nullptr);
 	AssertNoError(Result);
 	m_Done = false;
 }
@@ -363,7 +363,7 @@ const char *CSqliteConnection::MedianMapTime(char *pBuffer, int BufferSize) cons
 bool CSqliteConnection::Execute(const char *pQuery, char *pError, int ErrorSize)
 {
 	char *pErrorMsg;
-	int Result = sqlite3_exec(m_pDb, pQuery, NULL, NULL, &pErrorMsg);
+	int Result = sqlite3_exec(m_pDb, pQuery, nullptr, nullptr, &pErrorMsg);
 	if(Result != SQLITE_OK)
 	{
 		str_format(pError, ErrorSize, "error executing query: '%s'", pErrorMsg);

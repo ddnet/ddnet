@@ -14,13 +14,13 @@ CDemoEdit::CDemoEdit(const char *pNetVersion, class CSnapshotDelta *pSnapshotDel
 	m_EndTick = EndTick;
 
 	// Init the demoeditor
-	m_DemoEditor.Init(&m_SnapshotDelta, NULL, pStorage);
+	m_DemoEditor.Init(&m_SnapshotDelta, nullptr, pStorage);
 }
 
 void CDemoEdit::Run()
 {
 	// Slice the current demo
-	m_Success = m_DemoEditor.Slice(m_aDemo, m_aDst, m_StartTick, m_EndTick, NULL, 0);
+	m_Success = m_DemoEditor.Slice(m_aDemo, m_aDst, m_StartTick, m_EndTick, nullptr, nullptr);
 	// We remove the temporary demo file if slicing is successful
 	if(m_Success)
 		m_pStorage->RemoveFile(m_aDemo, IStorage::TYPE_SAVE);

@@ -78,6 +78,7 @@ void CGameContext::MoveCharacter(int ClientId, int X, int Y, bool Raw)
 		return;
 
 	pChr->Move(vec2((Raw ? 1 : 32) * X, (Raw ? 1 : 32) * Y));
+	pChr->ResetVelocity();
 	pChr->m_DDRaceState = DDRACE_CHEAT;
 }
 
@@ -610,12 +611,11 @@ void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	NETADDR Addr;
-	pSelf->Server()->GetClientAddr(Victim, &Addr);
+	const NETADDR *pAddr = pSelf->Server()->ClientAddr(Victim);
 
 	int Seconds = clamp(pResult->GetInteger(1), 1, 86400);
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
-	pSelf->VoteMute(&Addr, Seconds, pReason, pSelf->Server()->ClientName(Victim), pResult->m_ClientId);
+	pSelf->VoteMute(pAddr, Seconds, pReason, pSelf->Server()->ClientName(Victim), pResult->m_ClientId);
 }
 
 void CGameContext::ConVoteUnmute(IConsole::IResult *pResult, void *pUserData)
@@ -629,10 +629,9 @@ void CGameContext::ConVoteUnmute(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	NETADDR Addr;
-	pSelf->Server()->GetClientAddr(Victim, &Addr);
+	const NETADDR *pAddr = pSelf->Server()->ClientAddr(Victim);
 
-	bool Found = pSelf->VoteUnmute(&Addr, pSelf->Server()->ClientName(Victim), pResult->m_ClientId);
+	bool Found = pSelf->VoteUnmute(pAddr, pSelf->Server()->ClientName(Victim), pResult->m_ClientId);
 	if(Found)
 	{
 		char aBuf[128];
@@ -655,7 +654,7 @@ void CGameContext::ConVoteMutes(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	char aIpBuf[64];
+	char aIpBuf[NETADDR_MAXSTRSIZE];
 	char aBuf[128];
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemutes",
 		"Active vote mutes:");
@@ -689,12 +688,11 @@ void CGameContext::ConMuteId(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	NETADDR Addr;
-	pSelf->Server()->GetClientAddr(Victim, &Addr);
+	const NETADDR *pAddr = pSelf->Server()->ClientAddr(Victim);
 
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
 
-	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400),
+	pSelf->Mute(pAddr, clamp(pResult->GetInteger(1), 1, 86400),
 		pSelf->Server()->ClientName(Victim), pReason);
 }
 
@@ -709,7 +707,7 @@ void CGameContext::ConMuteIp(IConsole::IResult *pResult, void *pUserData)
 			"Invalid network address to mute");
 	}
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
-	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400), NULL, pReason);
+	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400), nullptr, pReason);
 }
 
 // unmute by mute list index
@@ -721,7 +719,7 @@ void CGameContext::ConUnmute(IConsole::IResult *pResult, void *pUserData)
 	if(Index < 0 || Index >= pSelf->m_NumMutes)
 		return;
 
-	char aIpBuf[64];
+	char aIpBuf[NETADDR_MAXSTRSIZE];
 	char aBuf[64];
 	net_addr_str(&pSelf->m_aMutes[Index].m_Addr, aIpBuf, sizeof(aIpBuf), false);
 	str_format(aBuf, sizeof(aBuf), "Unmuted %s", aIpBuf);
@@ -740,14 +738,13 @@ void CGameContext::ConUnmuteId(IConsole::IResult *pResult, void *pUserData)
 	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
 		return;
 
-	NETADDR Addr;
-	pSelf->Server()->GetClientAddr(Victim, &Addr);
+	const NETADDR *pAddr = pSelf->Server()->ClientAddr(Victim);
 
 	for(int i = 0; i < pSelf->m_NumMutes; i++)
 	{
-		if(net_addr_comp_noport(&pSelf->m_aMutes[i].m_Addr, &Addr) == 0)
+		if(net_addr_comp_noport(&pSelf->m_aMutes[i].m_Addr, pAddr) == 0)
 		{
-			char aIpBuf[64];
+			char aIpBuf[NETADDR_MAXSTRSIZE];
 			char aBuf[64];
 			net_addr_str(&pSelf->m_aMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
 			str_format(aBuf, sizeof(aBuf), "Unmuted %s", aIpBuf);
@@ -975,7 +972,7 @@ void CGameContext::LogEvent(const char *Description, int ClientId)
 	if(!pNewEntry->m_FromServer)
 	{
 		pNewEntry->m_ClientVersion = Server()->GetClientVersion(ClientId);
-		Server()->GetClientAddr(ClientId, pNewEntry->m_aClientAddrStr, sizeof(pNewEntry->m_aClientAddrStr));
+		str_copy(pNewEntry->m_aClientAddrStr, Server()->ClientAddrString(ClientId, false));
 		str_copy(pNewEntry->m_aClientName, Server()->ClientName(ClientId));
 	}
 }

@@ -15,6 +15,21 @@ A non-exhaustive list of things that usually get rejected:
     + Existing maps should not break.
     + New gameplay should not make runs easier on already completed maps.
 
+## Programming languages
+
+We currently use the following languages to develop DDNet.
+
+- C++
+- very marginally Rust
+- Python for code generation and supporting tools
+- CMake for building
+
+Adding code in another programming language is not possible.
+
+For platform support, we also use other programming languages like Java on
+Android or Objective-C++ on macOS, but this is confined to platform-specific
+code.
+
 ## Code style
 
 There are a few style rules. Some of them are enforced by CI and some of them are manually checked by reviewers.
@@ -174,6 +189,41 @@ Default arguments tend to break quickly, if you have multiple you have to specif
 ### Method overloading should be avoided
 
 Try finding descriptive names instead.
+
+### Global/static variables should be avoided
+
+Use member variables or pass state by parameter instead of using global or static variables since static variables share the same value across instances of a class.
+
+Avoid static variables ❌: 
+
+```C++
+int CMyClass::Foo()
+{
+    static int s_Count = 0;
+    s_Count++;
+    return s_Count;
+}
+```
+
+Use member variables instead ✅:
+
+```C++
+class CMyClass
+{
+    int m_Count = 0;
+};
+int CMyClass::Foo()
+{
+    m_Count++;
+    return m_Count;
+}
+```
+
+Constants can be static ✅:
+
+```C++
+static constexpr int ANSWER = 42;
+```
 
 ### Getters should not have a Get prefix
 

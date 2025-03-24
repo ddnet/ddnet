@@ -120,9 +120,9 @@ CGraphics_Threaded::CGraphics_Threaded()
 	m_State.m_WrapMode = CCommandBuffer::WRAP_REPEAT;
 
 	m_CurrentCommandBuffer = 0;
-	m_pCommandBuffer = 0x0;
-	m_apCommandBuffers[0] = 0x0;
-	m_apCommandBuffers[1] = 0x0;
+	m_pCommandBuffer = nullptr;
+	m_apCommandBuffers[0] = nullptr;
+	m_apCommandBuffers[1] = nullptr;
 
 	m_NumVertices = 0;
 
@@ -1343,13 +1343,13 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, const ColorRG
 	Cmd.m_Color = Color;
 
 	void *pData = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
-	if(pData == 0x0)
+	if(pData == nullptr)
 	{
 		// kick command buffer and try again
 		KickCommandBuffer();
 
 		pData = m_pCommandBuffer->AllocData((sizeof(char *) + sizeof(unsigned int)) * NumIndicesOffset);
-		if(pData == 0x0)
+		if(pData == nullptr)
 		{
 			dbg_msg("graphics", "failed to allocate data for vertices");
 			return;
@@ -1491,7 +1491,7 @@ void CGraphics_Threaded::QuadContainerUpload(int ContainerIndex)
 				pAttr->m_DataTypeCount = 2;
 				pAttr->m_FuncType = 0;
 				pAttr->m_Normalized = false;
-				pAttr->m_pOffset = 0;
+				pAttr->m_pOffset = nullptr;
 				pAttr->m_Type = GRAPHICS_TYPE_FLOAT;
 				Info.m_vAttributes.emplace_back();
 				pAttr = &Info.m_vAttributes.back();
@@ -1850,13 +1850,13 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 		Cmd.m_Center.y = Quad.m_aVertices[0].m_Pos.y + (Quad.m_aVertices[2].m_Pos.y - Quad.m_aVertices[0].m_Pos.y) / 2.f;
 
 		Cmd.m_pRenderInfo = (IGraphics::SRenderSpriteInfo *)m_pCommandBuffer->AllocData(sizeof(IGraphics::SRenderSpriteInfo) * DrawCount);
-		if(Cmd.m_pRenderInfo == 0x0)
+		if(Cmd.m_pRenderInfo == nullptr)
 		{
 			// kick command buffer and try again
 			KickCommandBuffer();
 
 			Cmd.m_pRenderInfo = (IGraphics::SRenderSpriteInfo *)m_pCommandBuffer->AllocData(sizeof(IGraphics::SRenderSpriteInfo) * DrawCount);
-			if(Cmd.m_pRenderInfo == 0x0)
+			if(Cmd.m_pRenderInfo == nullptr)
 			{
 				dbg_msg("graphics", "failed to allocate data for render info");
 				return;
@@ -1893,12 +1893,7 @@ void *CGraphics_Threaded::AllocCommandBufferData(size_t AllocSize)
 		KickCommandBuffer();
 
 		pData = m_pCommandBuffer->AllocData(AllocSize);
-		if(pData == nullptr)
-		{
-			char aError[256];
-			str_format(aError, sizeof(aError), "graphics: failed to allocate data (size %" PRIzu ") for command buffer", AllocSize);
-			dbg_assert(false, aError);
-		}
+		dbg_assert(pData, "graphics: failed to allocate data (size %" PRIzu ") for command buffer", AllocSize);
 	}
 	return pData;
 }
@@ -2177,8 +2172,6 @@ int CGraphics_Threaded::IssueInit()
 		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
 	if(g_Config.m_GfxVsync)
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
-	if(g_Config.m_GfxHighdpi)
-		Flags |= IGraphicsBackend::INITFLAG_HIGHDPI;
 
 	int r = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, &g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	AddBackEndWarningIfExists();
@@ -2457,7 +2450,7 @@ void CGraphics_Threaded::Shutdown()
 	// shutdown the backend
 	m_pBackend->Shutdown();
 	delete m_pBackend;
-	m_pBackend = 0x0;
+	m_pBackend = nullptr;
 
 	// delete the command buffers
 	for(auto &pCommandBuffer : m_apCommandBuffers)
@@ -2596,7 +2589,17 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	g_Config.m_GfxScreenWidth = w;
 	g_Config.m_GfxScreenHeight = h;
 	g_Config.m_GfxScreenRefreshRate = m_ScreenRefreshRate;
+
+	auto OldDpi = m_ScreenHiDPIScale;
 	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+
+	// A DPI change must notify the listeners, since e.g. video modes
+	// currently depend on it.
+	if(OldDpi != m_ScreenHiDPIScale)
+	{
+		for(auto &PropChangedListener : m_vPropChangeListeners)
+			PropChangedListener();
+	}
 
 	UpdateViewport(0, 0, m_ScreenWidth, m_ScreenHeight, true);
 

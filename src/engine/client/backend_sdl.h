@@ -245,8 +245,8 @@ public:
 	int GetNumScreens() const override { return m_NumScreens; }
 	const char *GetScreenName(int Screen) const override;
 
-	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
-	void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
+	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
+	void GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId) override;
 
 	void Minimize() override;
 	void Maximize() override;
@@ -279,7 +279,7 @@ public:
 		if(m_aErrorString[0] != '\0')
 			return m_aErrorString;
 
-		return NULL;
+		return nullptr;
 	}
 
 	const char *GetVendorString() override

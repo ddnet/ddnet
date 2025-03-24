@@ -44,6 +44,7 @@ CCamera::CCamera()
 
 	m_AutoSpecCamera = true;
 	m_AutoSpecCameraZooming = false;
+	m_IsSpectatingPlayer = false;
 	m_UsingAutoSpecCamera = false;
 
 	mem_zero(m_aAutoSpecCameraTooltip, sizeof(m_aAutoSpecCameraTooltip));

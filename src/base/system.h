@@ -55,6 +55,12 @@
 #define MAYBE_UNUSED
 #endif
 
+#ifdef __GNUC__
+#define GNUC_ATTRIBUTE(x) __attribute__(x)
+#else
+#define GNUC_ATTRIBUTE(x)
+#endif
+
 /**
  * @defgroup Debug
  *
@@ -73,19 +79,31 @@
  *
  * @see dbg_break
  */
-#define dbg_assert(test, msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
-void dbg_assert_imp(const char *filename, int line, bool test, const char *msg);
+#define dbg_assert(test, fmt, ...) \
+	do \
+	{ \
+		if(!(test)) \
+		{ \
+			dbg_assert_imp(__FILE__, __LINE__, fmt, ##__VA_ARGS__); \
+		} \
+	} while(false)
+
+/**
+ * Use dbg_assert instead!
+ *
+ * @ingroup Debug
+ */
+#if defined(__cplusplus)
+[[noreturn]]
+#endif
+void
+dbg_assert_imp(const char *filename, int line, const char *fmt, ...)
+	GNUC_ATTRIBUTE((format(printf, 3, 4)));
 
 #ifdef __clang_analyzer__
 #include <cassert>
 #undef dbg_assert
-#define dbg_assert(test, msg) assert(test)
-#endif
-
-#ifdef __GNUC__
-#define GNUC_ATTRIBUTE(x) __attribute__(x)
-#else
-#define GNUC_ATTRIBUTE(x)
+#define dbg_assert(test, fmt, ...) assert(test)
 #endif
 
 /**
@@ -895,6 +913,15 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
  *         negative if the input is a valid DDNet URL but the host part was not a valid IPv4/IPv6 address
  */
 int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t host_buf_size);
+
+/**
+ * Checks if an address is local.
+ *
+ * @param addr Address to check.
+ *
+ * @return `true` if the address is local, `false` otherwise.
+ */
+bool net_addr_is_local(const NETADDR *addr);
 
 /**
  * Turns string into a network address.
@@ -2636,6 +2663,20 @@ enum class EShellExecuteWindowState
 	BACKGROUND,
 };
 
+#if defined(CONF_FAMILY_WINDOWS)
+/**
+ * Converts an array of arguments into a wide string with proper escaping for Windows command-line usage.
+ *
+ * @ingroup Shell
+ *
+ * @param arguments Array of arguments.
+ * @param num_arguments The number of arguments.
+ *
+ * @return Wide string of arguments with escaped quotes.
+ */
+std::wstring windows_args_to_wide(const char **arguments, const size_t num_arguments);
+#endif
+
 /**
  * Executes a given file.
  *
@@ -2643,10 +2684,12 @@ enum class EShellExecuteWindowState
  *
  * @param file The file to execute.
  * @param window_state The window state how the process window should be shown.
+ * @param arguments Optional array of arguments to pass to the process.
+ * @param num_arguments The number of arguments.
  *
  * @return Handle of the new process, or @link INVALID_PROCESS @endlink on error.
  */
-PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state);
+PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, const char **arguments = nullptr, const size_t num_arguments = 0);
 
 /**
  * Sends kill signal to a process.
