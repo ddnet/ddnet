@@ -2908,8 +2908,8 @@ void str_sanitize_filename(char *str_in)
 bool str_valid_filename(const char *str)
 {
 	// References:
-	// - https://en.wikipedia.org/wiki/Filename#Comparison_of_filename_limitations
-	// - https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
+	// - https://en.wikipedia.org/w/index.php?title=Filename&oldid=1281340521#Comparison_of_filename_limitations
+	// - https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file (last update 2024-08-28)
 	if(str[0] == '\0')
 	{
 		return false; // empty name not allowed
