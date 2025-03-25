@@ -103,13 +103,13 @@ jobs:
       uses: Swatinem/rust-cache@v2
 
     - name: Build mastersrv
-      if: "!contains(matrix.os, 'ubuntu-22.04')"
+      if: matrix.os != 'ubuntu-22.04'
       run: |
         cd src/mastersrv
         cargo build
 
     - name: Build masterping
-      if: "!contains(matrix.os, 'ubuntu-22.04')"
+      if: matrix.os != 'ubuntu-22.04'
       run: |
         cd src/masterping
         cargo build
@@ -150,7 +150,7 @@ jobs:
         ./DDNet-Server shutdown
 
     - name: Build headless client
-      if: contains(matrix.os, 'ubuntu-latest')
+      if: matrix.os == 'ubuntu-latest'
       run: |
         mkdir headless
         cd headless
@@ -158,13 +158,13 @@ jobs:
         ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug  ${{ matrix.build-args }}
 
     - name: Test headless client (unit tests)
-      if: contains(matrix.os, 'ubuntu-latest')
+      if: matrix.os == 'ubuntu-latest'
       run: |
         cd headless
         ${{ matrix.cmake-path }}cmake -E env RUSTFLAGS="-Clink-arg=--coverage" RUSTDOCFLAGS="-Clink-arg=--coverage" ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
 
     - name: Upload Codecov report (unit tests)
-      if: contains(matrix.os, 'ubuntu-latest')
+      if: matrix.os == 'ubuntu-latest'
       uses: codecov/codecov-action@v4
       with:
         flags: unittests
@@ -190,7 +190,7 @@ jobs:
         ./DDNet-Server shutdown
 
     - name: Run integration tests with Valgrind's Memcheck
-      if: contains(matrix.os, 'ubuntu-latest')
+      if: matrix.os == 'ubuntu-latest'
       run: |
         # Remove old coverage data:
         find headless -name '*.gcno' -o -name '*.gcda' -delete
@@ -198,7 +198,7 @@ jobs:
         python scripts/integration_test.py --test-mastersrv --valgrind-memcheck headless
 
     - name: Upload Codecov report (integration tests)
-      if: contains(matrix.os, 'ubuntu-latest')
+      if: matrix.os == 'ubuntu-latest'
       uses: codecov/codecov-action@v4
       with:
         flags: integrationtests
