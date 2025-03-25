@@ -6,7 +6,7 @@ CLayerSwitch::CLayerSwitch(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Switch");
-	m_Switch = 1;
+	m_HasSwitch = true;
 
 	m_pSwitchTile = new CSwitchTile[w * h];
 	mem_zero(m_pSwitchTile, (size_t)w * h * sizeof(CSwitchTile));
@@ -18,7 +18,7 @@ CLayerSwitch::CLayerSwitch(const CLayerSwitch &Other) :
 	CLayerTiles(Other)
 {
 	str_copy(m_aName, "Switch copy");
-	m_Switch = 1;
+	m_HasSwitch = true;
 
 	m_pSwitchTile = new CSwitchTile[m_Width * m_Height];
 	mem_copy(m_pSwitchTile, Other.m_pSwitchTile, (size_t)m_Width * m_Height * sizeof(CSwitchTile));
@@ -280,7 +280,7 @@ void CLayerSwitch::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUI
 			{
 				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
 				m_pSwitchTile[TgtIndex].m_Type = m_pTiles[TgtIndex].m_Index;
-				if(pLt->m_Switch && m_pTiles[TgtIndex].m_Index > 0)
+				if(pLt->m_HasSwitch && m_pTiles[TgtIndex].m_Index > 0)
 				{
 					if(!IsSwitchTileNumberUsed(m_pSwitchTile[TgtIndex].m_Type))
 						m_pSwitchTile[TgtIndex].m_Number = 0;
