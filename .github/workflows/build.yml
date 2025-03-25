@@ -35,7 +35,7 @@ jobs:
           package-file: "*-macos.dmg"
           fancy: false
         - os: windows-latest
-          cmake-args: -A x64
+          cmake-args: -A x64 -DEXCEPTION_HANDLING=ON
           cmake-init-env: CXXFLAGS=/WX LDFLAGS=/WX
           package-file: "*-win64.zip"
           fancy: false
@@ -169,21 +169,6 @@ jobs:
       with:
         flags: unittests
 
-    - name: Test headless client (start & connect)
-      if: contains(matrix.os, 'ubuntu-latest')
-      run: |
-        cd headless
-        # Remove old coverage data:
-        find . -name '*.gcno' -o -name '*.gcda' -delete
-        ./DDNet-Server &
-        ./DDNet "cl_download_skins 0;connect localhost:8303;quit"
-
-    - name: Upload Codecov report (start & connect)
-      if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v4
-      with:
-        flags: startconnect
-
     - name: Build in release mode with debug info and all features on
       if: matrix.fancy
       run: |
@@ -207,10 +192,10 @@ jobs:
     - name: Run integration tests with Valgrind's Memcheck
       if: contains(matrix.os, 'ubuntu-latest')
       run: |
-        cd headless
         # Remove old coverage data:
-        find . -name '*.gcno' -o -name '*.gcda' -delete
-        ./integration_test.sh --valgrind-memcheck
+        find headless -name '*.gcno' -o -name '*.gcda' -delete
+        cp src/mastersrv/target/debug/mastersrv headless
+        python scripts/integration_test.py --test-mastersrv --valgrind-memcheck headless
 
     - name: Upload Codecov report (integration tests)
       if: contains(matrix.os, 'ubuntu-latest')

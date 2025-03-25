@@ -757,7 +757,7 @@ public:
 		const char m_ColorPickerId = 0;
 		const char m_aValueSelectorIds[5] = {0};
 		CButtonContainer m_aModeButtons[(int)MODE_HSLA + 1];
-		EEditState m_State;
+		EEditState m_State = EEditState::NONE;
 	};
 	void ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pContext);
 

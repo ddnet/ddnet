@@ -367,15 +367,6 @@ Show ingame HUD
 Show name plates
 == 显示昵称
 
-None
-== 禁用
-
-Own
-== 自身
-
-Others
-== 其他
-
 Show only chat messages from friends
 == 只显示好友聊天消息
 
@@ -633,9 +624,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == 显示其他玩家的钩索辅助线
-
-Show other players' key presses
-== 显示其他玩家的按键
 
 Show tiles layers from BG map
 == 显示实体层背景地图的图块层
@@ -916,9 +904,6 @@ Server best:
 Learn
 == 教程 Wiki
 
-Use high DPI
-== 使用高 DPI
-
 Personal best:
 == 个人最佳
 
@@ -1123,9 +1108,6 @@ Desktop fullscreen
 
 Are you sure that you want to disconnect and switch to a different server?
 == 确定要断开此服务器连接并进入其他服务器吗？
-
-Show local player's key presses
-== 显示自己的按键
 
 Settings file
 == 设置文件
@@ -1814,9 +1796,6 @@ Player info change cooldown
 Always show chat
 == 始终显示聊天框
 
-Show friend mark (♥) in name plates
-== 在昵称上显示好友标记 (♥)
-
 Show hook strength icon indicator
 == 显示钩索强度图标
 
@@ -2161,7 +2140,48 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== 简体中文翻译由以下人员贡献：MK124, CarolVlCznYu, MC_TYH, Yangfl, Eki, Night_L, TsFreddie, Dan_cao, Momo, cheeser0613, RemakePower, By, Bamcane, Pioooooo, 豆腐渣, XCWQW1
+== 简体中文翻译由以下人员贡献：MK124, CarolVlCznYu, MC_TYH, Yangfl, Eki, Night_L, TsFreddie, Dan_cao, Momo, cheeser0613, By, Bamcane, Pioooooo, 豆腐渣, XCWQW1
 
 Show spectator cursor
 == 显示旁观者光标
+
+No demo with this filename exists
+== 此回放文件不存在
+
+Map size
+== 地图占用空间
+
+[Show name plates]
+None
+== 禁用
+
+[Show name plates]
+Own
+== 自身
+
+[Show name plates]
+Others
+== 他人
+
+[Show name plates]
+All
+== 全体
+
+[Show players' key presses]
+None
+== 禁用
+
+[Show players' key presses]
+Own
+== 自身
+
+[Show players' key presses]
+Others
+== 他人
+
+[Show players' key presses]
+All
+== 全体
+
+AntiPing: prediction margin
+== 延迟补偿：预测容差

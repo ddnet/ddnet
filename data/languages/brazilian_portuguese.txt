@@ -601,9 +601,6 @@ Frags
 AntiPing: predict other players
 == AntiPing: prever outros jogadores
 
-Show other players' key presses
-== Mostrar teclas pressionadas de outros jogadores
-
 Automatically take statboard screenshot
 == Automaticamente capturar imagem do statboard
 
@@ -913,9 +910,6 @@ Video name:
 Connect Dummy
 == Conectar dummy
 
-Use high DPI
-== Usar DPI alta
-
 Client message
 == Mensagem do cliente
 
@@ -1102,9 +1096,6 @@ https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == Tem certeza que deseja desconectar e trocar para um servidor diferente?
-
-Show local player's key presses
-== Mostrar pressionamento de teclas de jogadores locais
 
 The format of texture %s is not RGBA which will cause visual bugs.
 == O formato da textura %s não é RGBA, o que vai causar falhas visuais.
@@ -1790,9 +1781,6 @@ Player info change cooldown
 Always show chat
 == Sempre mostrar o chat
 
-Show friend mark (♥) in name plates
-== Mostrar marca de amigo (♥) em apelidos
-
 Show hook strength icon indicator
 == Mostrar indicador de ícone de força do gancho
 
@@ -2129,3 +2117,65 @@ English translation by the DDNet Team
 
 Show spectator cursor
 == Mostrar cursor do observador
+
+No demo with this filename exists
+== Não existe nnhuma demo com esse nome
+
+Map size
+== Tamanho do mapa
+
+Show number of spectators
+== Mostrar número de observadores
+
+[Show name plates]
+None
+== Nenhum
+
+[Show name plates]
+Own
+== Próprio
+
+[Show name plates]
+Others
+== Outros
+
+[Show name plates]
+All
+== Todos
+
+Name plates offset
+== Posição de placas de nome
+
+Show friend icon in name plates
+== Mostrar ícone de amigo em placas de nome
+
+Show client IDs on a seperate line
+== Mostrar IDs de clientes em uma linha separada
+
+Client IDs size
+== Tamanho de IDs de cliente
+
+Show players' key presses
+== Mostrar pressionamentos de teclas dos jogadores
+
+[Show players' key presses]
+None
+== Nenhum
+
+[Show players' key presses]
+Own
+== Próprio
+
+[Show players' key presses]
+Others
+== Outros
+
+[Show players' key presses]
+All
+== Todos
+
+Preview dummy's name plate
+== Pré-visualizar placas de nome do dummy
+
+AntiPing: prediction margin
+== AntiPing: margem de previsão

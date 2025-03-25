@@ -127,24 +127,26 @@ bool dbg_assert_has_failed()
 	return dbg_assert_failing.load(std::memory_order_acquire);
 }
 
-void dbg_assert_imp(const char *filename, int line, bool test, const char *msg)
+void dbg_assert_imp(const char *filename, int line, const char *fmt, ...)
 {
-	if(!test)
+	const bool already_failing = dbg_assert_has_failed();
+	dbg_assert_failing.store(true, std::memory_order_release);
+	char msg[512];
+	va_list args;
+	va_start(args, fmt);
+	str_format_v(msg, sizeof(msg), fmt, args);
+	char error[512];
+	str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
+	va_end(args);
+	log_error("assert", "%s", error);
+	if(!already_failing)
 	{
-		const bool already_failing = dbg_assert_has_failed();
-		dbg_assert_failing.store(true, std::memory_order_release);
-		char error[512];
-		str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
-		dbg_msg("assert", "%s", error);
-		if(!already_failing)
-		{
-			DBG_ASSERT_HANDLER handler = dbg_assert_handler;
-			if(handler)
-				handler(error);
-		}
-		log_global_logger_finish();
-		dbg_break();
+		DBG_ASSERT_HANDLER handler = dbg_assert_handler;
+		if(handler)
+			handler(error);
 	}
+	log_global_logger_finish();
+	dbg_break();
 }
 
 void dbg_break()
@@ -911,12 +913,7 @@ void sphore_init(SEMAPHORE *sem)
 	char aBuf[64];
 	str_format(aBuf, sizeof(aBuf), "/%d.%p", pid(), (void *)sem);
 	*sem = sem_open(aBuf, O_CREAT | O_EXCL, S_IRWXU | S_IRWXG, 0);
-	if(*sem == SEM_FAILED)
-	{
-		char aError[128];
-		str_format(aError, sizeof(aError), "sem_open failure, errno=%d, name='%s'", errno, aBuf);
-		dbg_assert(false, aError);
-	}
+	dbg_assert(*sem != SEM_FAILED, "sem_open failure, errno=%d, name='%s'", errno, aBuf);
 }
 void sphore_wait(SEMAPHORE *sem)
 {
@@ -1369,6 +1366,20 @@ int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t 
 		addr->type |= NETTYPE_TW7;
 
 	return failure;
+}
+
+bool net_addr_is_local(const NETADDR *addr)
+{
+	char addr_str[NETADDR_MAXSTRSIZE];
+	net_addr_str(addr, addr_str, sizeof(addr_str), true);
+
+	if(addr->ip[0] == 127 || addr->ip[0] == 10 || (addr->ip[0] == 192 && addr->ip[1] == 168) || (addr->ip[0] == 172 && (addr->ip[1] >= 16 && addr->ip[1] <= 31)))
+		return true;
+
+	if(str_startswith(addr_str, "[fe80:") || str_startswith(addr_str, "[::1"))
+		return true;
+
+	return false;
 }
 
 int net_addr_from_str(NETADDR *addr, const char *string)
@@ -2885,10 +2896,80 @@ void str_sanitize_filename(char *str_in)
 	unsigned char *str = (unsigned char *)str_in;
 	while(*str)
 	{
-		if(*str < 32 || *str == '\\' || *str == '/' || *str == '|' || *str == ':' || *str == '*' || *str == '?' || *str == '<' || *str == '>' || *str == '"')
+		if(*str <= 0x1F || *str == 0x7F || *str == '\\' || *str == '/' || *str == '|' || *str == ':' ||
+			*str == '*' || *str == '?' || *str == '<' || *str == '>' || *str == '"')
+		{
 			*str = ' ';
+		}
 		str++;
 	}
+}
+
+bool str_valid_filename(const char *str)
+{
+	// References:
+	// - https://en.wikipedia.org/w/index.php?title=Filename&oldid=1281340521#Comparison_of_filename_limitations
+	// - https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file (last update 2024-08-28)
+	if(str[0] == '\0')
+	{
+		return false; // empty name not allowed
+	}
+
+	bool prev_space = false;
+	bool prev_period = false;
+	bool first_space_checked = false;
+	const char *iterator = str;
+	while(*iterator)
+	{
+		const int code = str_utf8_decode(&iterator);
+		if(code <= 0x1F || code == 0x7F || code == '\\' || code == '/' || code == '|' || code == ':' ||
+			code == '*' || code == '?' || code == '<' || code == '>' || code == '"')
+		{
+			return false; // disallowed characters, mostly for Windows
+		}
+		else if(str_utf8_isspace(code) && code != ' ')
+		{
+			return false; // we only allow regular space characters
+		}
+		if(code == ' ')
+		{
+			if(!first_space_checked)
+			{
+				return false; // leading spaces not allowed
+			}
+			if(prev_space)
+			{
+				return false; // multiple consecutive spaces not allowed
+			}
+			prev_space = true;
+			prev_period = false;
+		}
+		else
+		{
+			prev_space = false;
+			prev_period = code == '.';
+			first_space_checked = true;
+		}
+	}
+	if(prev_space || prev_period)
+	{
+		return false; // trailing spaces and periods not allowed
+	}
+
+	static constexpr const char *RESERVED_NAMES[] = {
+		"CON", "PRN", "AUX", "NUL",
+		"COM0", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "COM¹", "COM²", "COM³",
+		"LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "LPT¹", "LPT²", "LPT³"};
+	for(const char *reserved_name : RESERVED_NAMES)
+	{
+		const char *prefix = str_startswith_nocase(str, reserved_name);
+		if(prefix != nullptr && (prefix[0] == '\0' || prefix[0] == '.'))
+		{
+			return false; // reserved name not allowed when it makes up the entire filename or when followed by period
+		}
+	}
+
+	return true;
 }
 
 /* removes leading and trailing spaces and limits the use of multiple spaces */
@@ -4705,58 +4786,6 @@ void os_locale_str(char *locale, size_t length)
 	if(locale[0] == '\0' || str_comp(locale, "C") == 0 || str_comp(locale, "POSIX") == 0)
 		str_copy(locale, "en-US", length);
 }
-
-#if defined(CONF_EXCEPTION_HANDLING)
-#if defined(CONF_FAMILY_WINDOWS)
-static HMODULE exception_handling_module = nullptr;
-#endif
-
-void init_exception_handler()
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	const char *module_name = "exchndl.dll";
-	exception_handling_module = LoadLibraryA(module_name);
-	if(exception_handling_module == nullptr)
-	{
-		const DWORD LastError = GetLastError();
-		const std::string ErrorMsg = windows_format_system_message(LastError);
-		dbg_msg("exception_handling", "failed to load exception handling library '%s' (error %ld %s)", module_name, LastError, ErrorMsg.c_str());
-	}
-#else
-#error exception handling not implemented
-#endif
-}
-
-void set_exception_handler_log_file(const char *log_file_path)
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	if(exception_handling_module != nullptr)
-	{
-		const std::wstring wide_log_file_path = windows_utf8_to_wide(log_file_path);
-		// Intentional
-#ifdef __MINGW32__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
-#endif
-		const char *function_name = "ExcHndlSetLogFileNameW";
-		auto exception_log_file_path_func = (BOOL(APIENTRY *)(const WCHAR *))(GetProcAddress(exception_handling_module, function_name));
-#ifdef __MINGW32__
-#pragma GCC diagnostic pop
-#endif
-		if(exception_log_file_path_func == nullptr)
-		{
-			const DWORD LastError = GetLastError();
-			const std::string ErrorMsg = windows_format_system_message(LastError);
-			dbg_msg("exception_handling", "could not find function '%s' in exception handling library (error %ld %s)", function_name, LastError, ErrorMsg.c_str());
-		}
-		else
-			exception_log_file_path_func(wide_log_file_path.c_str());
-	}
-#else
-#error exception handling not implemented
-#endif
-}
-#endif
 
 std::chrono::nanoseconds time_get_nanoseconds()
 {

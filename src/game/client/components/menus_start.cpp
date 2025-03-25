@@ -142,10 +142,17 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		if(IsServerRunning())
 		{
 			KillServer();
+			GameClient()->m_aSavedLocalRconPassword[0] = '\0';
 		}
 		else
 		{
-			RunServer();
+			char aRandomPass[17];
+			secure_random_password(aRandomPass, sizeof(aRandomPass), 16);
+			char aPass[64];
+			str_format(aPass, sizeof(aPass), "auth_add %s admin %s", DEFAULT_SAVED_RCON_USER, aRandomPass);
+			const char *apArguments[] = {aPass};
+			RunServer(apArguments, std::size(apArguments));
+			str_copy(GameClient()->m_aSavedLocalRconPassword, aRandomPass);
 		}
 	}
 

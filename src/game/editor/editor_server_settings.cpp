@@ -2191,7 +2191,7 @@ void CMapSettingsBackend::OnMapLoad()
 		if(Result == ECollisionCheckResult::REPLACE)
 			Type |= SInvalidSetting::TYPE_DUPLICATE;
 
-		m_LoadedMapSettings.m_vSettingsInvalid.emplace_back(Index, Setting.m_aCommand, Type, RealCollidingLineIndex, !LocalContext.CommandIsValid());
+		m_LoadedMapSettings.m_vSettingsInvalid.emplace_back(Index, Setting.m_aCommand, Type, RealCollidingLineIndex, !Valid || !LocalContext.CommandIsValid());
 		if(Type & SInvalidSetting::TYPE_DUPLICATE)
 			m_LoadedMapSettings.m_SettingsDuplicate[RealCollidingLineIndex].emplace_back(m_LoadedMapSettings.m_vSettingsInvalid.size() - 1);
 

@@ -604,9 +604,6 @@ Frags
 AntiPing: predict other players
 == Antiping: játékosok előre kiszámolása
 
-Show other players' key presses
-== Mutassa a játékosok mozgását nyilakkal
-
 Automatically take statboard screenshot
 == Automatikusan készítsen pontszám fényképet
 
@@ -846,9 +843,6 @@ Statboard
 
 Converse
 == Fordítás
-
-Use high DPI
-== Magas DPI használata
 
 Update failed! Check log…
 == Frissítés sikertelen! nézd meg a log-ot…
@@ -1090,9 +1084,6 @@ SA
 
 CHN
 == KíNA
-
-Show local player's key presses
-== Saját mozgásod nyilakkal mutatása
 
 Discord
 == Discord
@@ -1522,6 +1513,10 @@ Unregister protocol and file extensions
 Open the directory to add custom assets
 == Megnyitni az egyedi Képek helyét
 
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Hungarian translation by Feca, Boti., Cellegen and bencie
+
 Could not resolve connect address '%s'. See local console for details.
 == 
 
@@ -1541,6 +1536,9 @@ Saving settings to '%s' failed
 == 
 
 Error saving settings
+== 
+
+No demo with this filename exists
 == 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
@@ -1802,6 +1800,9 @@ Created
 Netversion
 == 
 
+Map size
+== 
+
 [Demo details]
 map not included
 == 
@@ -1968,10 +1969,6 @@ Renders your frame rate in the top right
 Graphics card
 == 
 
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Hungarian translation by Feca, Boti., Cellegen and bencie
-
 Tee
 == 
 
@@ -1993,6 +1990,9 @@ Same clan color in scoreboard
 Show client IDs (scoreboard, chat, spectator)
 == 
 
+Show number of spectators
+== 
+
 Always show chat
 == 
 
@@ -2005,10 +2005,35 @@ Chat font size
 Chat width
 == 
 
-Show friend mark (♥) in name plates
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
 == 
 
 Show client IDs in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
 == 
 
 Hook Strength
@@ -2026,7 +2051,29 @@ Size of hook strength icon and number indicator
 Key Presses
 == 
 
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
 Size of key press icons
+== 
+
+Preview dummy's name plate
 == 
 
 Show own player's hook collision line
@@ -2054,6 +2101,9 @@ Enable ghost
 == 
 
 Only save improvements
+== 
+
+AntiPing: prediction margin
 == 
 
 Regular background color

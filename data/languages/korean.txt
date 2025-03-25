@@ -807,9 +807,6 @@ may cause delay
 Screen
 == 화면
 
-Use high DPI
-== 높은 DPI 사용
-
 Enable game sounds
 == 게임 소리 활성화
 
@@ -941,12 +938,6 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == 다른 플레이어의 갈고리 보조선 표시
-
-Show other players' key presses
-== 다른 플레이어의 키 입력 표시
-
-Show local player's key presses
-== 주변 플레이어의 키 입력 표시
 
 Background
 == 배경
@@ -1675,9 +1666,6 @@ Chat font size
 Chat width
 == 채팅 너비
 
-Show friend mark (♥) in name plates
-== 이름에 친구 기호(♥) 표시
-
 Show client IDs in name plates
 == 이름에 클라이언트 ID 표시
 
@@ -2134,3 +2122,62 @@ Marking
 
 Show number of spectators
 == 관전자 수 표시
+
+No demo with this filename exists
+== 
+
+Map size
+== 
+
+[Show name plates]
+None
+== 
+
+[Show name plates]
+Own
+== 
+
+[Show name plates]
+Others
+== 
+
+[Show name plates]
+All
+== 
+
+Name plates offset
+== 
+
+Show friend icon in name plates
+== 
+
+Show client IDs on a seperate line
+== 
+
+Client IDs size
+== 
+
+Show players' key presses
+== 
+
+[Show players' key presses]
+None
+== 
+
+[Show players' key presses]
+Own
+== 
+
+[Show players' key presses]
+Others
+== 
+
+[Show players' key presses]
+All
+== 
+
+Preview dummy's name plate
+== 
+
+AntiPing: prediction margin
+== 

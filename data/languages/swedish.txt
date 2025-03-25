@@ -637,9 +637,6 @@ Deactivate
 Welcome to DDNet
 == Välkommen till DDNet
 
-Use high DPI
-== Använd hög DPI
-
 may cause delay
 == kan orsaka fördröjning
 
@@ -865,9 +862,6 @@ Automatically create statboard csv
 Enable regular chat sound
 == Aktivera vanligt chatt ljud
 
-Show other players' key presses
-== Visa andra spelares tangent tryck
-
 Gameplay
 == Spelet
 
@@ -1087,9 +1081,6 @@ Use old chat style
 
 Preview
 == Förhandsvisning
-
-Show local player's key presses
-== Visa egna tangent tryck
 
 Background
 == Bakgrund
@@ -1790,9 +1781,6 @@ Player info change cooldown
 Always show chat
 == Visa alltid chatt
 
-Show friend mark (♥) in name plates
-== Visa kompis markering (♥) i namnskyltar
-
 Show hook strength icon indicator
 == Visa hook styrka med en ikon
 
@@ -2129,3 +2117,65 @@ allowed
 [Team status]
 required
 == krav
+
+No demo with this filename exists
+== Ingen demo med detta filnamn finns
+
+Map size
+== Map storlek
+
+Show number of spectators
+== Visa antalet åskådare
+
+[Show name plates]
+None
+== Ingen
+
+[Show name plates]
+Own
+== Egen
+
+[Show name plates]
+Others
+== Andra
+
+[Show name plates]
+All
+== Alla
+
+Name plates offset
+== Namnskylts offset
+
+Show friend icon in name plates
+== Visa kompis ikon i namnskyltar
+
+Show client IDs on a seperate line
+== Visa klient IDs på en seperat rad
+
+Client IDs size
+== Klient IDs storlek
+
+Show players' key presses
+== Visa andra spelares Knapptryckningar
+
+[Show players' key presses]
+None
+== Ingen
+
+[Show players' key presses]
+Own
+== Egen
+
+[Show players' key presses]
+Others
+== Andra
+
+[Show players' key presses]
+All
+== Alla
+
+Preview dummy's name plate
+== Förhandsvisning av namnskylt för dummy 
+
+AntiPing: prediction margin
+== AntiPing: prediction marginal

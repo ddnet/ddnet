@@ -245,21 +245,21 @@ Objects = [
 	]),
 
 	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
-		NetIntAny("m_Flags", 0),
-		NetTick("m_FreezeEnd", 0),
-		NetIntRange("m_Jumps", -1, 255, 2),
-		NetIntAny("m_TeleCheckpoint", -1),
-		NetIntRange("m_StrongWeakId", 0, 'MAX_CLIENTS-1', 0),
+		NetIntAny("m_Flags", default=0),
+		NetTick("m_FreezeEnd", default=0),
+		NetIntRange("m_Jumps", -1, 255, default=2),
+		NetIntAny("m_TeleCheckpoint", default=-1),
+		NetIntRange("m_StrongWeakId", 0, 'MAX_CLIENTS-1', default=0),
 
 		# New data fields for jump display, freeze bar and ninja bar
 		# Default values indicate that these values should not be used
-		NetIntRange("m_JumpedTotal", -1, 255, -1),
-		NetTick("m_NinjaActivationTick", -1),
-		NetTick("m_FreezeStart", -1),
+		NetIntRange("m_JumpedTotal", -1, 255, default=-1),
+		NetTick("m_NinjaActivationTick", default=-1),
+		NetTick("m_FreezeStart", default=-1),
 		# New data fields for improved target accuracy
-		NetIntAny("m_TargetX", 0),
-		NetIntAny("m_TargetY", 0),
-		NetIntRange("m_TuneZoneOverride", -1, 'NUM_TUNEZONES-1', -1),
+		NetIntAny("m_TargetX", default=0),
+		NetIntAny("m_TargetY", default=0),
+		NetIntRange("m_TuneZoneOverride", -1, 'NUM_TUNEZONES-1', default=-1),
 	], validate_size=False),
 
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
@@ -268,9 +268,9 @@ Objects = [
 	]),
 
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
-		NetIntAny("m_Flags", 0),
-		NetIntAny("m_Version", 0),
-		NetIntAny("m_Flags2", 0),
+		NetIntAny("m_Flags", default=0),
+		NetIntAny("m_Version", default=0),
+		NetIntAny("m_Flags2", default=0),
 	], validate_size=False),
 
 	# The code assumes that this has the same in-memory representation as
@@ -292,9 +292,9 @@ Objects = [
 		NetTick("m_StartTick"),
 		NetIntRange("m_Owner", -1, 'MAX_CLIENTS-1'),
 		NetIntAny("m_Type"),
-		NetIntAny("m_SwitchNumber", -1),
-		NetIntAny("m_Subtype", -1),
-		NetIntAny("m_Flags", 0),
+		NetIntAny("m_SwitchNumber", default=-1),
+		NetIntAny("m_Subtype", default=-1),
+		NetIntAny("m_Flags", default=0),
 	]),
 
 	NetObjectEx("DDNetProjectile", "ddnet-projectile@netobj.ddnet.tw", [
@@ -323,7 +323,7 @@ Objects = [
 		NetIntRange("m_Zoom", 0, 'max_int'),
 		NetIntRange("m_Deadzone", 0, 'max_int'),
 		NetIntRange("m_FollowFactor", 0, 'max_int'),
-		NetIntRange("m_SpectatorCount", 0, 'MAX_CLIENTS-1', 0),
+		NetIntRange("m_SpectatorCount", 0, 'MAX_CLIENTS-1', default=0),
 	]),
 
 	## Events
@@ -370,12 +370,12 @@ Objects = [
 
 	# Switch state for a player team.
 	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.tw", [
-		NetIntAny("m_HighestSwitchNumber", 0),
+		NetIntAny("m_HighestSwitchNumber", default=0),
 		# 256 switches / 32 bits = 8 int32
-		NetArray(NetIntAny("m_aStatus", 0), 8),
+		NetArray(NetIntAny("m_aStatus", default=0), 8),
 		# send the endtick of up to 4 timed switchers
-		NetArray(NetIntAny("m_aSwitchNumbers", 0), 4),
-		NetArray(NetIntAny("m_aEndTicks", 0), 4),
+		NetArray(NetIntAny("m_aSwitchNumbers", default=0), 4),
+		NetArray(NetIntAny("m_aEndTicks", default=0), 4),
 	], validate_size=False),
 
 	# Switch info for map items

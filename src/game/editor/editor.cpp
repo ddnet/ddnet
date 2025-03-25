@@ -3675,7 +3675,8 @@ void CEditor::DoMapEditor(CUIRect View)
 		Graphics()->LinesEnd();
 	}
 
-	MapView()->ProofMode()->RenderScreenSizes();
+	if(!m_ShowPicker)
+		MapView()->ProofMode()->RenderScreenSizes();
 
 	if(!m_ShowPicker && m_ShowTileInfo != SHOW_TILE_OFF && m_ShowEnvelopePreview != SHOWENV_NONE && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_QUADS)
 	{
@@ -4240,6 +4241,13 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 
 						if(m_vSelectedLayers.size() > 1)
 						{
+							// move right clicked layer to first index to render correct popup
+							if(m_vSelectedLayers[0] != i)
+							{
+								auto Position = std::find(m_vSelectedLayers.begin(), m_vSelectedLayers.end(), i);
+								std::swap(m_vSelectedLayers[0], *Position);
+							}
+
 							bool AllTile = true;
 							for(size_t j = 0; AllTile && j < m_vSelectedLayers.size(); j++)
 							{
@@ -8945,19 +8953,7 @@ void CEditor::HandleWriterFinishJobs()
 		CServerInfo CurrentServerInfo;
 		Client()->GetServerInfo(&CurrentServerInfo);
 
-		NETADDR pAddr = Client()->ServerAddress();
-		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&Client()->ServerAddress(), aAddrStr, sizeof(aAddrStr), true);
-
-		// and if we're on a local address
-		bool IsLocalAddress = false;
-		if(pAddr.ip[0] == 127 || pAddr.ip[0] == 10 || (pAddr.ip[0] == 192 && pAddr.ip[1] == 168) || (pAddr.ip[0] == 172 && (pAddr.ip[1] >= 16 && pAddr.ip[1] <= 31)))
-			IsLocalAddress = true;
-
-		if(str_startswith(aAddrStr, "[fe80:") || str_startswith(aAddrStr, "[::1"))
-			IsLocalAddress = true;
-
-		if(IsLocalAddress)
+		if(net_addr_is_local(&Client()->ServerAddress()))
 		{
 			char aMapName[128];
 			IStorage::StripPathAndExtension(pJob->GetRealFileName(), aMapName, sizeof(aMapName));
@@ -9312,11 +9308,12 @@ void CEditor::RedoLastAction()
 
 void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 {
-	// Adjust m_Number field of tune, switch and tele tiles by `Adjust` if `UseNextFree` is false
+	// Adjust m_Angle of speedup or m_Number field of tune, switch and tele tiles by `Adjust` if `UseNextFree` is false
+	// If `Adjust` is 0 and `UseNextFree` is false, then update numbers of brush tiles to global values
 	// If true, then use the next free number instead
 
-	auto &&AdjustNumber = [Adjust](unsigned char &Number) {
-		Number = ((Number + Adjust) - 1 + 255) % 255 + 1;
+	auto &&AdjustNumber = [Adjust](auto &Number, short Limit = 255) {
+		Number = ((Number + Adjust) - 1 + Limit) % Limit + 1;
 	};
 
 	for(auto &pLayer : m_pBrush->m_vpLayers)
@@ -9326,7 +9323,6 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 		std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 
-		// Only handle tele, switch and tune layers
 		if(pLayerTiles->m_Tele)
 		{
 			int NextFreeTeleNumber = FindNextFreeTeleNumber();
@@ -9396,6 +9392,32 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 						pSwitchLayer->m_pSwitchTile[i].m_Number = NextFreeNumber;
 					else
 						AdjustNumber(pSwitchLayer->m_pSwitchTile[i].m_Number);
+				}
+			}
+		}
+		else if(pLayerTiles->m_Speedup)
+		{
+			if(!UseNextFree)
+			{
+				std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
+				for(int y = 0; y < pSpeedupLayer->m_Height; y++)
+				{
+					for(int x = 0; x < pSpeedupLayer->m_Width; x++)
+					{
+						int i = y * pSpeedupLayer->m_Width + x;
+						if(!IsValidSpeedupTile(pSpeedupLayer->m_pTiles[i].m_Index))
+							continue;
+
+						if(Adjust != 0)
+						{
+							AdjustNumber(pSpeedupLayer->m_pSpeedupTile[i].m_Angle, 359);
+						}
+						else
+						{
+							pSpeedupLayer->m_pSpeedupTile[i].m_Angle = m_SpeedupAngle;
+							pSpeedupLayer->m_SpeedupAngle = m_SpeedupAngle;
+						}
+					}
 				}
 			}
 		}

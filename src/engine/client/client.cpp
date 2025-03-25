@@ -140,8 +140,8 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId = protocol7::NETMSG_PING;
 			else
 			{
-				dbg_msg("net", "0.7 DROP send sys %d", MsgId);
-				return true;
+				log_error("net", "0.7 DROP send sys %d", MsgId);
+				return false;
 			}
 		}
 		else
@@ -150,7 +150,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId = Msg_SixToSeven(MsgId);
 
 			if(MsgId < 0)
-				return true;
+				return false;
 		}
 	}
 
@@ -165,7 +165,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 	}
 	Packer.AddRaw(pMsg->Data(), pMsg->Size());
 
-	return false;
+	return true;
 }
 
 int CClient::SendMsg(int Conn, CMsgPacker *pMsg, int Flags)
@@ -177,7 +177,7 @@ int CClient::SendMsg(int Conn, CMsgPacker *pMsg, int Flags)
 
 	// repack message (inefficient)
 	CPacker Pack;
-	if(RepackMsg(pMsg, Pack, IsSixup()))
+	if(!RepackMsg(pMsg, Pack, IsSixup()))
 		return 0;
 
 	mem_zero(&Packet, sizeof(CNetChunk));
@@ -431,9 +431,12 @@ void CClient::SetState(EClientState State)
 
 	if(State == IClient::STATE_ONLINE)
 	{
-		const bool AnnounceAddr = m_ServerBrowser.IsRegistered(ServerAddress());
-		Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
-		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
+		const bool Registered = m_ServerBrowser.IsRegistered(ServerAddress());
+		CServerInfo CurrentServerInfo;
+		GetServerInfo(&CurrentServerInfo);
+
+		Discord()->SetGameInfo(CurrentServerInfo, m_aCurrentMap, Registered);
+		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, Registered);
 	}
 	else if(OldState == IClient::STATE_ONLINE)
 	{
@@ -1381,6 +1384,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 			{
 				m_CurrentServerInfo = Info;
 				m_CurrentServerInfoRequestTime = -1;
+				Discord()->UpdateServerInfo(Info, m_aCurrentMap);
 			}
 
 			bool ValidPong = false;
@@ -1550,13 +1554,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				return;
 			}
 
-			for(int i = 0; pMap[i]; i++) // protect the player from nasty map names
+			if(!str_valid_filename(pMap))
 			{
-				if(pMap[i] == '/' || pMap[i] == '\\')
-				{
-					DisconnectWithReason("strange character in map name");
-					return;
-				}
+				DisconnectWithReason("map name is not a valid filename");
+				return;
 			}
 
 			if(m_DummyConnected && !m_DummyReconnectOnReload)
@@ -3099,6 +3100,8 @@ void CClient::Run()
 
 	GameClient()->OnInit();
 
+	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
+
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "version " GAME_RELEASE_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING, ColorRGBA(0.7f, 0.7f, 1.0f, 1.0f));
 	if(GIT_SHORTREV_HASH)
 	{
@@ -3115,8 +3118,6 @@ void CClient::Run()
 
 	// process pending commands
 	m_pConsole->StoreCommands(false);
-
-	m_Fifo.Init(m_pConsole, g_Config.m_ClInputFifo, CFGFLAG_CLIENT);
 
 	InitChecksum();
 	m_pConsole->InitChecksum(ChecksumData());
@@ -4383,6 +4384,17 @@ void CClient::ConchainReplays(IConsole::IResult *pResult, void *pUserData, ICons
 	}
 }
 
+void CClient::ConchainInputFifo(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pSelf->m_Fifo.IsInit())
+	{
+		pSelf->m_Fifo.Shutdown();
+		pSelf->m_Fifo.Init(pSelf->m_pConsole, pSelf->Config()->m_ClInputFifo, CFGFLAG_CLIENT);
+	}
+}
+
 void CClient::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -4448,6 +4460,7 @@ void CClient::RegisterCommands()
 
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 	m_pConsole->Chain("cl_replays", ConchainReplays, this);
+	m_pConsole->Chain("cl_input_fifo", ConchainInputFifo, this);
 
 	m_pConsole->Chain("password", ConchainPassword, this);
 
@@ -4606,10 +4619,6 @@ int main(int argc, const char **argv)
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
 
-#if defined(CONF_EXCEPTION_HANDLING)
-	init_exception_handler();
-#endif
-
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
 	std::shared_ptr<ILogger> pStdoutLogger = nullptr;
 #if defined(CONF_PLATFORM_ANDROID)
@@ -4756,15 +4765,15 @@ int main(int argc, const char **argv)
 
 	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
 
-#if defined(CONF_EXCEPTION_HANDLING)
-	char aBufPath[IO_MAX_PATH_LENGTH];
-	char aBufName[IO_MAX_PATH_LENGTH];
-	char aDate[64];
-	str_timestamp(aDate, sizeof(aDate));
-	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
-	pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
-	set_exception_handler_log_file(aBufPath);
-#endif
+	{
+		char aBufPath[IO_MAX_PATH_LENGTH];
+		char aBufName[IO_MAX_PATH_LENGTH];
+		char aDate[64];
+		str_timestamp(aDate, sizeof(aDate));
+		str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
+		pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
+		crashdump_init_if_available(aBufPath);
+	}
 
 	if(RandInitFailed)
 	{

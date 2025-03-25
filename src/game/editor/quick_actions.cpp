@@ -231,18 +231,7 @@ void CEditor::TestMapLocally()
 
 	if(Client()->RconAuthed())
 	{
-		NETADDR Addr = Client()->ServerAddress();
-		char aAddrStr[NETADDR_MAXSTRSIZE];
-		net_addr_str(&Client()->ServerAddress(), aAddrStr, sizeof(aAddrStr), true);
-
-		bool IsLocalAddress = false;
-		if(Addr.ip[0] == 127 || Addr.ip[0] == 10 || (Addr.ip[0] == 192 && Addr.ip[1] == 168) || (Addr.ip[0] == 172 && (Addr.ip[1] >= 16 && Addr.ip[1] <= 31)))
-			IsLocalAddress = true;
-
-		if(str_startswith(aAddrStr, "[fe80:") || str_startswith(aAddrStr, "[::1"))
-			IsLocalAddress = true;
-
-		if(IsLocalAddress)
+		if(net_addr_is_local(&Client()->ServerAddress()))
 		{
 			OnClose();
 			g_Config.m_ClEditor = 0;
@@ -265,7 +254,8 @@ void CEditor::TestMapLocally()
 		char aRandomPass[17];
 		secure_random_password(aRandomPass, sizeof(aRandomPass), 16);
 		char aPass[64];
-		str_format(aPass, sizeof(aPass), "sv_rcon_password %s", aRandomPass);
+		str_format(aPass, sizeof(aPass), "auth_add %s admin %s", DEFAULT_SAVED_RCON_USER, aRandomPass);
+		str_copy(pGameClient->m_aSavedLocalRconPassword, aRandomPass);
 
 		str_format(aBuf, sizeof(aBuf), "change_map %s", aFileNameNoExt);
 		const char *apArguments[] = {aRegister, aPass, aBuf};
@@ -273,6 +263,5 @@ void CEditor::TestMapLocally()
 		OnClose();
 		g_Config.m_ClEditor = 0;
 		Client()->Connect("localhost");
-		Client()->RconAuth("", aRandomPass, g_Config.m_ClDummy);
 	}
 }

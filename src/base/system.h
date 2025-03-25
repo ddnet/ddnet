@@ -55,6 +55,12 @@
 #define MAYBE_UNUSED
 #endif
 
+#ifdef __GNUC__
+#define GNUC_ATTRIBUTE(x) __attribute__(x)
+#else
+#define GNUC_ATTRIBUTE(x)
+#endif
+
 /**
  * @defgroup Debug
  *
@@ -73,19 +79,31 @@
  *
  * @see dbg_break
  */
-#define dbg_assert(test, msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
-void dbg_assert_imp(const char *filename, int line, bool test, const char *msg);
+#define dbg_assert(test, fmt, ...) \
+	do \
+	{ \
+		if(!(test)) \
+		{ \
+			dbg_assert_imp(__FILE__, __LINE__, fmt, ##__VA_ARGS__); \
+		} \
+	} while(false)
+
+/**
+ * Use dbg_assert instead!
+ *
+ * @ingroup Debug
+ */
+#if defined(__cplusplus)
+[[noreturn]]
+#endif
+void
+dbg_assert_imp(const char *filename, int line, const char *fmt, ...)
+	GNUC_ATTRIBUTE((format(printf, 3, 4)));
 
 #ifdef __clang_analyzer__
 #include <cassert>
 #undef dbg_assert
-#define dbg_assert(test, msg) assert(test)
-#endif
-
-#ifdef __GNUC__
-#define GNUC_ATTRIBUTE(x) __attribute__(x)
-#else
-#define GNUC_ATTRIBUTE(x)
+#define dbg_assert(test, fmt, ...) assert(test)
 #endif
 
 /**
@@ -897,6 +915,15 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
 int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t host_buf_size);
 
 /**
+ * Checks if an address is local.
+ *
+ * @param addr Address to check.
+ *
+ * @return `true` if the address is local, `false` otherwise.
+ */
+bool net_addr_is_local(const NETADDR *addr);
+
+/**
  * Turns string into a network address.
  *
  * @param addr Address to fill in.
@@ -1368,6 +1395,17 @@ void str_sanitize(char *str);
  * @remark The strings are treated as zero-terminated strings.
  */
 void str_sanitize_filename(char *str);
+
+/**
+ * Checks if a string is a valid filename on all supported platforms.
+ *
+ * @param str Filename to check.
+ *
+ * @return `true` if the string is a valid filename, `false` otherwise.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
+bool str_valid_filename(const char *str);
 
 /**
  * Removes leading and trailing spaces and limits the use of multiple spaces.
@@ -2827,28 +2865,19 @@ bool os_version_str(char *version, size_t length);
  */
 void os_locale_str(char *locale, size_t length);
 
-#if defined(CONF_EXCEPTION_HANDLING)
 /**
- * @defgroup Exception-Handling
- * Exception handling (crash logging).
+ * @defgroup Crash-dumping
  */
 
 /**
- * Initializes the exception handling module.
+ * Initializes the crash dumper and sets the filename to write the crash dump
+ * to, if support for crash logging was compiled in. Otherwise does nothing.
  *
- * @ingroup Exception-Handling
- */
-void init_exception_handler();
-
-/**
- * Sets the filename for writing the crash log.
- *
- * @ingroup Exception-Handling
+ * @ingroup Crash-dumping
  *
  * @param log_file_path Absolute path to which crash log file should be written.
  */
-void set_exception_handler_log_file(const char *log_file_path);
-#endif
+void crashdump_init_if_available(const char *log_file_path);
 
 /**
  * Fetches a sample from a high resolution timer and converts it in nanoseconds.

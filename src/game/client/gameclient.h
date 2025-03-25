@@ -196,6 +196,7 @@ private:
 	class IEditor *m_pEditor;
 	class IFriends *m_pFriends;
 	class IFriends *m_pFoes;
+	class IDiscord *m_pDiscord;
 #if defined(CONF_AUTOUPDATE)
 	class IUpdater *m_pUpdater;
 #endif
@@ -304,6 +305,8 @@ public:
 	};
 	int m_ServerMode;
 	CGameInfo m_GameInfo;
+
+	char m_aSavedLocalRconPassword[sizeof(g_Config.m_SvRconPassword)] = "";
 
 	int m_DemoSpecId;
 

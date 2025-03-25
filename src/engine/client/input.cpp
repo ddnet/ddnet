@@ -22,14 +22,15 @@
 #define SDL_JOYSTICK_AXIS_MAX 32767
 #endif
 
+#if defined(CONF_FAMILY_WINDOWS)
+#include <windows.h>
+// windows.h must be included before imm.h, but clang-format requires includes to be sorted alphabetically, hence this comment.
+#include <imm.h>
+#endif
+
 static void AssertKeyValid(int Key)
 {
-	if(Key < KEY_FIRST || Key >= KEY_LAST)
-	{
-		char aError[32];
-		str_format(aError, sizeof(aError), "Key invalid: %d", Key);
-		dbg_assert(false, aError);
-	}
+	dbg_assert(Key >= KEY_FIRST && Key < KEY_LAST, "Key invalid: %d", Key);
 }
 
 void CInput::AddKeyEvent(int Key, int Flags)
@@ -718,7 +719,7 @@ int CInput::Update()
 			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_RELEASE);
 			break;
 
-		// handle the joystick events
+		// Handle the joystick events
 		case SDL_EVENT_JOYSTICK_AXIS_MOTION:
 			HandleJoystickAxisMotionEvent(Event.jaxis);
 			break;
@@ -740,7 +741,7 @@ int CInput::Update()
 			HandleJoystickRemovedEvent(Event.jdevice);
 			break;
 
-		// handle mouse buttons
+		// Handle mouse buttons
 		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			AddKeyEventChecked(TranslateMouseButtonEventKey(Event.button), IInput::FLAG_PRESS);
 			break;
@@ -769,7 +770,7 @@ int CInput::Update()
 		case SDL_EVENT_WINDOW_MOVED:
 			Graphics()->Move(Event.window.data1, Event.window.data2);
 			break;
-		// listen to size changes, this includes our manual changes and the ones by the window manager
+		// Listen to size changes, this includes our manual changes and the ones by the window manager
 		case SDL_EVENT_WINDOW_RESIZED:
 		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
 			Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);
