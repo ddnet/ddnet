@@ -195,13 +195,16 @@ TEST(Str, Utf8ToSkeleton)
 	EXPECT_EQ(aBuf[5], 'u');
 }
 
-TEST(Str, Utf8ToLower)
+TEST(Str, Utf8ToLowerCodepoint)
 {
-	EXPECT_TRUE(str_utf8_tolower('A') == 'a');
-	EXPECT_TRUE(str_utf8_tolower('z') == 'z');
-	EXPECT_TRUE(str_utf8_tolower(192) == 224); // À -> à
-	EXPECT_TRUE(str_utf8_tolower(7882) == 7883); // Ị -> ị
+	EXPECT_TRUE(str_utf8_tolower_codepoint('A') == 'a');
+	EXPECT_TRUE(str_utf8_tolower_codepoint('z') == 'z');
+	EXPECT_TRUE(str_utf8_tolower_codepoint(192) == 224); // À -> à
+	EXPECT_TRUE(str_utf8_tolower_codepoint(7882) == 7883); // Ị -> ị
+}
 
+TEST(Str, Utf8CompNocase)
+{
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölü") == 0);
 	EXPECT_TRUE(str_utf8_comp_nocase("ÜlÖ", "ölü") > 0); // ü > ö
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölüa") < 0); // NULL < a
