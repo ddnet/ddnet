@@ -3786,6 +3786,24 @@ bool str_tofloat(const char *str, float *out)
 	return true;
 }
 
+void str_utf8_tolower(const char *input, char *output, size_t size)
+{
+	size_t out_pos = 0;
+	while(*input)
+	{
+		const int code = str_utf8_tolower_codepoint(str_utf8_decode(&input));
+		char encoded_code[4];
+		const int code_size = str_utf8_encode(encoded_code, code);
+		if(out_pos + code_size + 1 > size) // +1 for null termination
+		{
+			break;
+		}
+		mem_copy(&output[out_pos], encoded_code, code_size);
+		out_pos += code_size;
+	}
+	output[out_pos] = '\0';
+}
+
 int str_utf8_comp_nocase(const char *a, const char *b)
 {
 	int code_a;
