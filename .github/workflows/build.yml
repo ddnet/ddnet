@@ -144,6 +144,10 @@ jobs:
         cd release
         ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests ${{ matrix.build-args }}
 
+    - name: Run integration tests on release
+      run: |
+        python scripts/integration_test.py release
+
     - name: Run release server
       run: |
         cd release
