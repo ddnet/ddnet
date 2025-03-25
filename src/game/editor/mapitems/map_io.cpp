@@ -182,18 +182,18 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Height = pLayerTiles->m_Height;
 				// Item.m_Flags = pLayerTiles->m_Game ? TILESLAYERFLAG_GAME : 0;
 
-				if(pLayerTiles->m_Tele)
+				if(pLayerTiles->m_HasTele)
 					Item.m_Flags = TILESLAYERFLAG_TELE;
-				else if(pLayerTiles->m_Speedup)
+				else if(pLayerTiles->m_HasSpeedup)
 					Item.m_Flags = TILESLAYERFLAG_SPEEDUP;
-				else if(pLayerTiles->m_Front)
+				else if(pLayerTiles->m_HasFront)
 					Item.m_Flags = TILESLAYERFLAG_FRONT;
-				else if(pLayerTiles->m_Switch)
+				else if(pLayerTiles->m_HasSwitch)
 					Item.m_Flags = TILESLAYERFLAG_SWITCH;
-				else if(pLayerTiles->m_Tune)
+				else if(pLayerTiles->m_HasTune)
 					Item.m_Flags = TILESLAYERFLAG_TUNE;
 				else
-					Item.m_Flags = pLayerTiles->m_Game ? TILESLAYERFLAG_GAME : 0;
+					Item.m_Flags = pLayerTiles->m_HasGame ? TILESLAYERFLAG_GAME : 0;
 
 				Item.m_Image = pLayerTiles->m_Image;
 
@@ -204,22 +204,22 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Switch = -1;
 				Item.m_Tune = -1;
 
-				if(Item.m_Flags && !(pLayerTiles->m_Game))
+				if(Item.m_Flags && !(pLayerTiles->m_HasGame))
 				{
 					CTile *pEmptyTiles = (CTile *)calloc((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height, sizeof(CTile));
 					mem_zero(pEmptyTiles, (size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile));
 					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pEmptyTiles);
 					free(pEmptyTiles);
 
-					if(pLayerTiles->m_Tele)
+					if(pLayerTiles->m_HasTele)
 						Item.m_Tele = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTeleTile), std::static_pointer_cast<CLayerTele>(pLayerTiles)->m_pTeleTile);
-					else if(pLayerTiles->m_Speedup)
+					else if(pLayerTiles->m_HasSpeedup)
 						Item.m_Speedup = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSpeedupTile), std::static_pointer_cast<CLayerSpeedup>(pLayerTiles)->m_pSpeedupTile);
-					else if(pLayerTiles->m_Front)
+					else if(pLayerTiles->m_HasFront)
 						Item.m_Front = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
-					else if(pLayerTiles->m_Switch)
+					else if(pLayerTiles->m_HasSwitch)
 						Item.m_Switch = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSwitchTile), std::static_pointer_cast<CLayerSwitch>(pLayerTiles)->m_pSwitchTile);
-					else if(pLayerTiles->m_Tune)
+					else if(pLayerTiles->m_HasTune)
 						Item.m_Tune = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile), std::static_pointer_cast<CLayerTune>(pLayerTiles)->m_pTuneTile);
 				}
 				else
@@ -742,13 +742,13 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 					pGroup->AddLayer(pTiles);
 					pTiles->m_Image = pTilemapItem->m_Image;
-					pTiles->m_Game = pTilemapItem->m_Flags & TILESLAYERFLAG_GAME;
+					pTiles->m_HasGame = pTilemapItem->m_Flags & TILESLAYERFLAG_GAME;
 
 					// load layer name
 					if(pTilemapItem->m_Version >= 3)
 						IntsToStr(pTilemapItem->m_aName, std::size(pTilemapItem->m_aName), pTiles->m_aName, std::size(pTiles->m_aName));
 
-					if(pTiles->m_Tele)
+					if(pTiles->m_HasTele)
 					{
 						void *pTeleData = DataFile.GetData(pTilemapItem->m_Tele);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tele);
@@ -767,7 +767,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						}
 						DataFile.UnloadData(pTilemapItem->m_Tele);
 					}
-					else if(pTiles->m_Speedup)
+					else if(pTiles->m_HasSpeedup)
 					{
 						void *pSpeedupData = DataFile.GetData(pTilemapItem->m_Speedup);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Speedup);
@@ -788,14 +788,14 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 						DataFile.UnloadData(pTilemapItem->m_Speedup);
 					}
-					else if(pTiles->m_Front)
+					else if(pTiles->m_HasFront)
 					{
 						void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Front);
 						pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pFrontData, Size);
 						DataFile.UnloadData(pTilemapItem->m_Front);
 					}
-					else if(pTiles->m_Switch)
+					else if(pTiles->m_HasSwitch)
 					{
 						void *pSwitchData = DataFile.GetData(pTilemapItem->m_Switch);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Switch);
@@ -824,7 +824,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						}
 						DataFile.UnloadData(pTilemapItem->m_Switch);
 					}
-					else if(pTiles->m_Tune)
+					else if(pTiles->m_HasTune)
 					{
 						void *pTuneData = DataFile.GetData(pTilemapItem->m_Tune);
 						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tune);
@@ -1010,8 +1010,8 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					{
 						std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId]);
 						// only load auto mappers for tile layers (not physics layers)
-						if(!(pTiles->m_Game || pTiles->m_Tele || pTiles->m_Speedup ||
-							   pTiles->m_Front || pTiles->m_Switch || pTiles->m_Tune))
+						if(!(pTiles->m_HasGame || pTiles->m_HasTele || pTiles->m_HasSpeedup ||
+							   pTiles->m_HasFront || pTiles->m_HasSwitch || pTiles->m_HasTune))
 						{
 							pTiles->m_AutoMapperConfig = pItem->m_AutomapperConfig;
 							pTiles->m_Seed = pItem->m_AutomapperSeed;

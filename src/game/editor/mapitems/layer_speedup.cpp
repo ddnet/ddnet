@@ -6,7 +6,7 @@ CLayerSpeedup::CLayerSpeedup(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Speedup");
-	m_Speedup = 1;
+	m_HasSpeedup = true;
 
 	m_pSpeedupTile = new CSpeedupTile[w * h];
 	mem_zero(m_pSpeedupTile, (size_t)w * h * sizeof(CSpeedupTile));
@@ -16,7 +16,7 @@ CLayerSpeedup::CLayerSpeedup(const CLayerSpeedup &Other) :
 	CLayerTiles(Other)
 {
 	str_copy(m_aName, "Speedup copy");
-	m_Speedup = 1;
+	m_HasSpeedup = true;
 
 	m_pSpeedupTile = new CSpeedupTile[m_Width * m_Height];
 	mem_copy(m_pSpeedupTile, Other.m_pSpeedupTile, (size_t)m_Width * m_Height * sizeof(CSpeedupTile));
@@ -293,7 +293,7 @@ void CLayerSpeedup::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CU
 			else
 			{
 				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
-				if(pLt->m_Speedup && m_pTiles[TgtIndex].m_Index > 0)
+				if(pLt->m_HasSpeedup && m_pTiles[TgtIndex].m_Index > 0)
 				{
 					m_pSpeedupTile[TgtIndex].m_Type = m_pTiles[TgtIndex].m_Index;
 

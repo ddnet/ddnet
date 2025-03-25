@@ -3140,12 +3140,12 @@ void CEditor::DoMapEditor(CUIRect View)
 				m_pTilesetPicker->m_Color = {255, 255, 255, 255};
 			}
 
-			m_pTilesetPicker->m_Game = pTileLayer->m_Game;
-			m_pTilesetPicker->m_Tele = pTileLayer->m_Tele;
-			m_pTilesetPicker->m_Speedup = pTileLayer->m_Speedup;
-			m_pTilesetPicker->m_Front = pTileLayer->m_Front;
-			m_pTilesetPicker->m_Switch = pTileLayer->m_Switch;
-			m_pTilesetPicker->m_Tune = pTileLayer->m_Tune;
+			m_pTilesetPicker->m_HasGame = pTileLayer->m_HasGame;
+			m_pTilesetPicker->m_HasTele = pTileLayer->m_HasTele;
+			m_pTilesetPicker->m_HasSpeedup = pTileLayer->m_HasSpeedup;
+			m_pTilesetPicker->m_HasFront = pTileLayer->m_HasFront;
+			m_pTilesetPicker->m_HasSwitch = pTileLayer->m_HasSwitch;
+			m_pTilesetPicker->m_HasTune = pTileLayer->m_HasTune;
 
 			m_pTilesetPicker->Render(true);
 
@@ -3343,7 +3343,7 @@ void CEditor::DoMapEditor(CUIRect View)
 									std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(apEditLayers[k].second);
 									std::shared_ptr<CLayerTiles> pBrushLayer = std::static_pointer_cast<CLayerTiles>(m_pBrush->m_vpLayers[BrushIndex]);
 
-									if(pLayer->m_Tele <= pBrushLayer->m_Tele && pLayer->m_Speedup <= pBrushLayer->m_Speedup && pLayer->m_Front <= pBrushLayer->m_Front && pLayer->m_Game <= pBrushLayer->m_Game && pLayer->m_Switch <= pBrushLayer->m_Switch && pLayer->m_Tune <= pBrushLayer->m_Tune)
+									if((!pLayer->m_HasTele || pBrushLayer->m_HasTele) && (!pLayer->m_HasSpeedup || pBrushLayer->m_HasSpeedup) && (!pLayer->m_HasFront || pBrushLayer->m_HasFront) && (!pLayer->m_HasGame || pBrushLayer->m_HasGame) && (!pLayer->m_HasSwitch || pBrushLayer->m_HasSwitch) && (!pLayer->m_HasTune || pBrushLayer->m_HasTune))
 										pLayer->BrushDraw(pBrushLayer, vec2(wx, wy));
 								}
 								else
@@ -8266,7 +8266,7 @@ void CEditor::Render()
 		if(!m_pBrush->IsEmpty())
 		{
 			const bool HasTeleTiles = std::any_of(m_pBrush->m_vpLayers.begin(), m_pBrush->m_vpLayers.end(), [](auto pLayer) {
-				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_Tele;
+				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_HasTele;
 			});
 			if(HasTeleTiles)
 				str_copy(m_aTooltip, "Use shift+mouse wheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number.");
@@ -8598,7 +8598,7 @@ void CEditor::RenderSwitchEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 	const float TileSize = 32.f;
 
 	std::function<unsigned char(int, int, unsigned char &)> GetIndex;
-	if(pTiles->m_Switch)
+	if(pTiles->m_HasSwitch)
 	{
 		CLayerSwitch *pSwitchLayer = ((CLayerSwitch *)(pTiles.get()));
 		GetIndex = [pSwitchLayer](int y, int x, unsigned char &Number) -> unsigned char {
@@ -9388,7 +9388,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 		std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 
-		if(pLayerTiles->m_Tele)
+		if(pLayerTiles->m_HasTele)
 		{
 			int NextFreeTeleNumber = FindNextFreeTeleNumber();
 			int NextFreeCPNumber = FindNextFreeTeleNumber(true);
@@ -9422,7 +9422,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 				}
 			}
 		}
-		else if(pLayerTiles->m_Tune)
+		else if(pLayerTiles->m_HasTune)
 		{
 			if(!UseNextFree)
 			{
@@ -9440,7 +9440,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 				}
 			}
 		}
-		else if(pLayerTiles->m_Switch)
+		else if(pLayerTiles->m_HasSwitch)
 		{
 			int NextFreeNumber = FindNextFreeSwitchNumber();
 
@@ -9460,7 +9460,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 				}
 			}
 		}
-		else if(pLayerTiles->m_Speedup)
+		else if(pLayerTiles->m_HasSpeedup)
 		{
 			if(!UseNextFree)
 			{
