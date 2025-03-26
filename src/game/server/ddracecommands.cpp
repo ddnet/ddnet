@@ -840,41 +840,6 @@ void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
 	pController->Teams().SetClientInvited(pResult->GetInteger(1), pResult->GetVictim(), false);
 }
 
-void CGameContext::ConFreezeHammer(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
-
-	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
-
-	if(!pChr)
-		return;
-
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "'%s' got freeze hammer!",
-		pSelf->Server()->ClientName(Victim));
-	pSelf->SendChat(-1, TEAM_ALL, aBuf);
-
-	pChr->m_FreezeHammer = true;
-}
-
-void CGameContext::ConUnFreezeHammer(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	int Victim = pResult->GetVictim();
-
-	CCharacter *pChr = pSelf->GetPlayerChar(Victim);
-
-	if(!pChr)
-		return;
-
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "'%s' lost freeze hammer!",
-		pSelf->Server()->ClientName(Victim));
-	pSelf->SendChat(-1, TEAM_ALL, aBuf);
-
-	pChr->m_FreezeHammer = false;
-}
 void CGameContext::ConVoteNo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
