@@ -4726,6 +4726,11 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 
 	std::shared_ptr<CEditorSound> pSound = m_Map.m_vpSounds[m_SelectedSound];
 
+	if(m_ToolbarPreviewSound == pSound->m_SoundId)
+	{
+		m_ToolbarPreviewSound = SoundId;
+	}
+
 	// unload sample
 	Sound()->UnloadSample(pSound->m_SoundId);
 	free(pSound->m_pData);
