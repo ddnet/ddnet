@@ -781,6 +781,7 @@ static CKeyInfo gs_aKeys[] =
 		{Localizable("Fire"), "+fire", 0, 0},
 		{Localizable("Hook"), "+hook", 0, 0},
 		{Localizable("Hook collisions"), "+showhookcoll", 0, 0},
+		{Localizable("Snap Aim"), "+toggle cl_snap_aim_to_45 1 0", 0, 0},
 		{Localizable("Pause"), "say /pause", 0, 0},
 		{Localizable("Kill"), "kill", 0, 0},
 		{Localizable("Zoom in"), "zoom+", 0, 0},
