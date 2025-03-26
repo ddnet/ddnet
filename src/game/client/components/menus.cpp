@@ -1897,7 +1897,7 @@ void CMenus::RenderPopupConnecting(CUIRect Screen)
 			pConnectivityLabel = Localize("Trying to determine UDP connectivity…");
 			break;
 		case IClient::CONNECTIVITY_UNREACHABLE:
-			pConnectivityLabel = Localize("UDP seems to be filtered.");
+			pConnectivityLabel = Localize("Server is not responding. The server may be overloaded, or UDP might be filtered.");
 			break;
 		case IClient::CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES:
 			pConnectivityLabel = Localize("UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.");
