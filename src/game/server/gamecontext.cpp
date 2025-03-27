@@ -233,8 +233,16 @@ void CGameContext::FillAntibot(CAntibotRoundData *pData)
 		CAntibotCharacterData *pChar = &pData->m_aCharacters[i];
 		for(auto &LatestInput : pChar->m_aLatestInputs)
 		{
+			LatestInput.m_Direction = 0;
 			LatestInput.m_TargetX = -1;
 			LatestInput.m_TargetY = -1;
+			LatestInput.m_Jump = -1;
+			LatestInput.m_Fire = -1;
+			LatestInput.m_Hook = -1;
+			LatestInput.m_PlayerFlags = -1;
+			LatestInput.m_WantedWeapon = -1;
+			LatestInput.m_NextWeapon = -1;
+			LatestInput.m_PrevWeapon = -1;
 		}
 		pChar->m_Alive = false;
 		pChar->m_Pause = false;
