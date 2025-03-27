@@ -3902,6 +3902,9 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 	m_CurrentServerInfo.m_MapCrc = pMapInfo->m_Crc;
 	m_CurrentServerInfo.m_MapSize = pMapInfo->m_Size;
 
+	// enter demo playback state
+	SetState(IClient::STATE_DEMOPLAYBACK);
+
 	GameClient()->OnConnected();
 
 	// setup buffers
@@ -3916,9 +3919,6 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 		m_aapSnapshots[0][SnapshotType]->m_AltSnapSize = 0;
 		m_aapSnapshots[0][SnapshotType]->m_Tick = -1;
 	}
-
-	// enter demo playback state
-	SetState(IClient::STATE_DEMOPLAYBACK);
 
 	m_DemoPlayer.Play();
 	GameClient()->OnEnterGame();
