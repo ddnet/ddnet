@@ -5,6 +5,12 @@
 #if defined(CONF_DISCORD)
 #include <discord_game_sdk.h>
 
+#if defined(CONF_FAMILY_WINDOWS)
+#define DISCORD_CALLBACK __stdcall
+#else
+#define DISCORD_CALLBACK
+#endif
+
 typedef enum EDiscordResult(DISCORD_API *FDiscordCreate)(DiscordVersion, struct DiscordCreateParams *, struct IDiscordCore **);
 
 #if defined(CONF_DISCORD_DYNAMIC)
@@ -178,7 +184,7 @@ public:
 		}
 	}
 
-	static void OnActivityJoin(void *pEventData, const char *pSecret)
+	static void DISCORD_CALLBACK OnActivityJoin(void *pEventData, const char *pSecret)
 	{
 		CDiscord *pSelf = static_cast<CDiscord *>(pEventData);
 		IClient *m_pClient = pSelf->Kernel()->RequestInterface<IClient>();
