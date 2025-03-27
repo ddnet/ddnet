@@ -166,10 +166,10 @@ void CAntibot::OnEngineTick()
 	Update();
 	AntibotOnEngineTick();
 }
-void CAntibot::OnEngineClientJoin(int ClientId, bool Sixup)
+void CAntibot::OnEngineClientJoin(int ClientId)
 {
 	Update();
-	AntibotOnEngineClientJoin(ClientId, Sixup);
+	AntibotOnEngineClientJoin(ClientId);
 }
 void CAntibot::OnEngineClientDrop(int ClientId, const char *pReason)
 {
@@ -256,7 +256,7 @@ void CAntibot::OnCharacterTick(int ClientId) {}
 void CAntibot::OnHookAttach(int ClientId, bool Player) {}
 
 void CAntibot::OnEngineTick() {}
-void CAntibot::OnEngineClientJoin(int ClientId, bool Sixup) {}
+void CAntibot::OnEngineClientJoin(int ClientId) {}
 void CAntibot::OnEngineClientDrop(int ClientId, const char *pReason) {}
 bool CAntibot::OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags) { return false; }
 bool CAntibot::OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags) { return false; }
