@@ -36,6 +36,7 @@ private:
 	int m_aProjectileOffset[NUM_WEAPONS];
 	int m_aParticleSplatOffset[3];
 	int m_DoorHeadOffset;
+	int m_PulleyHeadOffset;
 };
 
 #endif

@@ -453,7 +453,7 @@ container.sprites.Add(Sprite("hud_team0_mode", set_hud, 12,6,2,2))
 
 container.sprites.Add(Sprite("part_snowflake", set_extras, 0,0,2,2))
 container.sprites.Add(Sprite("part_sparkle", set_extras, 2,0,2,2))
-
+container.sprites.Add(Sprite("part_pulley", set_extras, 4,0,1,1))
 
 anim = Animation("base")
 anim.body.frames.Add(AnimKeyframe(0, 0, -4, 0))
