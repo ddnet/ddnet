@@ -609,4 +609,9 @@ Messages = [
 	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),
+
+	NetMessageEx("Sv_Points", "points@netmsg.ddnet.org", [
+		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
+		NetIntAny("m_Points"),
+	]),
 ]

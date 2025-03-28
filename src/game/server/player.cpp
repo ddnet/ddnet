@@ -28,6 +28,16 @@ CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientI
 	m_NumInputs = 0;
 	Reset();
 	GameServer()->Antibot()->OnPlayerInit(m_ClientId);
+
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(!GameServer()->m_apPlayers[i] || ClientId == i)
+			continue;
+		CNetMsg_Sv_Points Msg;
+		Msg.m_ClientId = i;
+		Msg.m_Points = GameServer()->m_apPlayers[i]->m_Points;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+	}
 }
 
 CPlayer::~CPlayer()
@@ -121,6 +131,7 @@ void CPlayer::Reset()
 
 	m_LastPause = 0;
 	m_Score.reset();
+	m_Points = -1;
 
 	// Variable initialized:
 	m_Last_Team = 0;
@@ -975,6 +986,17 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 				GameServer()->Score()->PlayerData(m_ClientId)->Set(Result.m_Data.m_Info.m_Time.value(), Result.m_Data.m_Info.m_aTimeCp);
 				m_Score = Result.m_Data.m_Info.m_Time;
 			}
+
+			if(m_Points != Result.m_Data.m_Info.m_Points)
+			{
+				m_Points = Result.m_Data.m_Info.m_Points;
+
+				CNetMsg_Sv_Points Msg;
+				Msg.m_ClientId = m_ClientId;
+				Msg.m_Points = m_Points;
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
+			}
+
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
 			if(Birthday != 0 && !m_BirthdayAnnounced && GetCharacter())

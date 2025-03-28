@@ -472,7 +472,25 @@ void CMenus::PopupConfirmImportTouchControlsClipboard()
 
 void CMenus::RenderPlayers(CUIRect MainView)
 {
-	CUIRect Button, Button2, ButtonBar, PlayerList, Player;
+	bool ShowPoints = false;
+	int TotalPlayers = 0;
+	for(const auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
+	{
+		if(!pInfoByName)
+			continue;
+
+		int Index = pInfoByName->m_ClientId;
+
+		if(!ShowPoints)
+		{
+			if(m_pClient->m_aClients[Index].m_Points != -1)
+				ShowPoints = true;
+		}
+
+		TotalPlayers++;
+	}
+
+	CUIRect Button, Button2, ButtonBar, PlayerList, Player, FlagRect, PointsRect;
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
 	// list background color
@@ -484,6 +502,15 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	PlayerList.HSplitTop(34.0f, &ButtonBar, &PlayerList);
 	ButtonBar.VSplitRight(231.0f, &Player, &ButtonBar);
 	Ui()->DoLabel(&Player, Localize("Player"), 24.0f, TEXTALIGN_ML);
+
+	if(ShowPoints)
+	{
+		Player.VSplitLeft(28.0f, &Button, &Player);
+		Player.VSplitMid(&Player, &Button);
+		Button.VSplitMid(&Button, &FlagRect);
+		FlagRect.VSplitMid(&FlagRect, &PointsRect);
+		Ui()->DoLabel(&PointsRect, Localize("Points"), 18.f, TEXTALIGN_ML);
+	}
 
 	ButtonBar.HMargin(1.0f, &ButtonBar);
 	float Width = ButtonBar.h * 2.0f;
@@ -498,18 +525,18 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
 	RenderTools()->RenderIcon(IMAGE_GUIICONS, SPRITE_GUIICON_FRIEND, &Button);
 
-	int TotalPlayers = 0;
-	for(const auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
+	const CNetObj_PlayerInfo *apClientsSorted[MAX_CLIENTS];
+	mem_copy(apClientsSorted, m_pClient->m_Snap.m_apInfoByName, sizeof(apClientsSorted));
+	if(ShowPoints)
 	{
-		if(!pInfoByName)
-			continue;
-
-		int Index = pInfoByName->m_ClientId;
-
-		if(Index == m_pClient->m_Snap.m_LocalClientId)
-			continue;
-
-		TotalPlayers++;
+		std::stable_sort(apClientsSorted, apClientsSorted + MAX_CLIENTS,
+			[this](const CNetObj_PlayerInfo *p1, const CNetObj_PlayerInfo *p2) -> bool {
+				if(!p2)
+					return static_cast<bool>(p1);
+				if(!p1)
+					return false;
+				return m_pClient->m_aClients[p1->m_ClientId].m_Points > m_pClient->m_aClients[p2->m_ClientId].m_Points;
+			});
 	}
 
 	static CListBox s_ListBox;
@@ -520,12 +547,10 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(!m_pClient->m_Snap.m_apInfoByName[i])
+		if(!apClientsSorted[i])
 			continue;
 
-		int Index = m_pClient->m_Snap.m_apInfoByName[i]->m_ClientId;
-		if(Index == m_pClient->m_Snap.m_LocalClientId)
-			continue;
+		int Index = apClientsSorted[i]->m_ClientId;
 
 		CGameClient::CClientData &CurrentClient = m_pClient->m_aClients[Index];
 		const CListboxItem Item = s_ListBox.DoNextItem(&CurrentClient);
@@ -539,7 +564,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		if(Count % 2 == 1)
 			Row.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 		Row.VSplitRight(s_ListBox.ScrollbarWidthMax() - s_ListBox.ScrollbarWidth(), &Row, nullptr);
-		Row.VSplitRight(300.0f, &Player, &Row);
+		Row.VSplitRight(ShowPoints ? 210.f : 300.f, &Player, &Row);
 
 		// player info
 		Player.VSplitLeft(28.0f, &Button, &Player);
@@ -562,8 +587,20 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Ui()->DoLabel(&Player, CurrentClient.m_aName, 14.0f, TEXTALIGN_ML);
 		Ui()->DoLabel(&Button, CurrentClient.m_aClan, 14.0f, TEXTALIGN_ML);
 
-		m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
-			Button2.x, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
+		if(ShowPoints)
+		{
+			Button.VSplitMid(&Button, &FlagRect);
+			FlagRect.VSplitMid(&FlagRect, &PointsRect);
+
+			Ui()->DoLabel(&PointsRect, std::to_string(CurrentClient.m_Points).c_str(), 14.0f, TEXTALIGN_ML);
+			m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
+				FlagRect.x + 15.f, FlagRect.y + FlagRect.h / 2.0f - 0.75f * FlagRect.h / 2.0f, 1.5f * FlagRect.h, 0.75f * FlagRect.h);
+		}
+		else
+		{
+			m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
+				Button2.x, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
+		}
 
 		// ignore chat button
 		Row.HMargin(2.0f, &Row);

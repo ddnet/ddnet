@@ -2677,6 +2677,7 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 		// reload scores
 		Score()->PlayerData(ClientId)->Reset();
 		m_apPlayers[ClientId]->m_Score.reset();
+		m_apPlayers[ClientId]->m_Points = -1;
 		Score()->LoadPlayerData(ClientId);
 
 		SixupNeedsUpdate = true;
