@@ -6,7 +6,7 @@ CLayerTele::CLayerTele(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Tele");
-	m_Tele = 1;
+	m_HasTele = true;
 
 	m_pTeleTile = new CTeleTile[w * h];
 	mem_zero(m_pTeleTile, (size_t)w * h * sizeof(CTeleTile));
@@ -19,7 +19,7 @@ CLayerTele::CLayerTele(const CLayerTele &Other) :
 	CLayerTiles(Other)
 {
 	str_copy(m_aName, "Tele copy");
-	m_Tele = 1;
+	m_HasTele = true;
 
 	m_pTeleTile = new CTeleTile[m_Width * m_Height];
 	mem_copy(m_pTeleTile, Other.m_pTeleTile, (size_t)m_Width * m_Height * sizeof(CTeleTile));
@@ -266,7 +266,7 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 			else
 			{
 				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
-				if(pLt->m_Tele && m_pTiles[TgtIndex].m_Index > 0)
+				if(pLt->m_HasTele && m_pTiles[TgtIndex].m_Index > 0)
 				{
 					m_pTeleTile[TgtIndex].m_Type = m_pTiles[TgtIndex].m_Index;
 					bool IsCheckpoint = IsTeleTileCheckpoint(m_pTiles[TgtIndex].m_Index);

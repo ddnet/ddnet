@@ -6,7 +6,7 @@ CLayerTune::CLayerTune(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Tune");
-	m_Tune = 1;
+	m_HasTune = true;
 
 	m_pTuneTile = new CTuneTile[w * h];
 	mem_zero(m_pTuneTile, (size_t)w * h * sizeof(CTuneTile));
@@ -19,7 +19,7 @@ CLayerTune::CLayerTune(const CLayerTune &Other) :
 	CLayerTiles(Other)
 {
 	str_copy(m_aName, "Tune copy");
-	m_Tune = 1;
+	m_HasTune = true;
 
 	m_pTuneTile = new CTuneTile[m_Width * m_Height];
 	mem_copy(m_pTuneTile, Other.m_pTuneTile, (size_t)m_Width * m_Height * sizeof(CTuneTile));
@@ -250,7 +250,7 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 			else
 			{
 				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
-				if(pLt->m_Tune && m_pTiles[TgtIndex].m_Index > 0)
+				if(pLt->m_HasTune && m_pTiles[TgtIndex].m_Index > 0)
 				{
 					m_pTuneTile[TgtIndex].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
 
