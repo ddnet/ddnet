@@ -27,7 +27,7 @@
 CHud::CHud()
 {
 	// won't work if zero
-	m_FrameTimeAvg = 0.0f;
+	m_FpsLastUpdate = 0.0f;
 	m_FPSTextContainerIndex.Reset();
 	m_DDRaceEffectsTextContainerIndex.Reset();
 	m_PlayerAngleTextContainerIndex.Reset();
@@ -519,43 +519,42 @@ void CHud::RenderTextInfo()
 	if(IVideo::Current())
 		Showfps = 0;
 #endif
+	constexpr float FontSize = 5.0f;
+
 	if(Showfps)
 	{
-		// calculate avg. fps
-		m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;
-		char aBuf[64];
-		int FrameTime = (int)(1.0f / m_FrameTimeAvg + 0.5f);
-		str_format(aBuf, sizeof(aBuf), "%d", FrameTime);
+		const float FrameTime = Client()->RenderFrameTime();
 
-		static float s_TextWidth0 = TextRender()->TextWidth(12.f, "0", -1, -1.0f);
-		static float s_TextWidth00 = TextRender()->TextWidth(12.f, "00", -1, -1.0f);
-		static float s_TextWidth000 = TextRender()->TextWidth(12.f, "000", -1, -1.0f);
-		static float s_TextWidth0000 = TextRender()->TextWidth(12.f, "0000", -1, -1.0f);
-		static float s_TextWidth00000 = TextRender()->TextWidth(12.f, "00000", -1, -1.0f);
-		static const float s_aTextWidth[5] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000};
+		if(Client()->GlobalTime() - m_FpsLastUpdate >= 0.15f) // Update counter every 150ms
+		{
+			const int FpsValue = round_to_int(1.0f / FrameTime);
+			m_FpsLastUpdate = Client()->GlobalTime();
 
-		int DigitIndex = GetDigitsIndex(FrameTime, 4);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), Localize("%d FPS"), FpsValue);
 
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_aTextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = -1;
-		auto OldFlags = TextRender()->GetRenderFlags();
-		TextRender()->SetRenderFlags(OldFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
-		if(m_FPSTextContainerIndex.Valid())
-			TextRender()->RecreateTextContainerSoft(m_FPSTextContainerIndex, &Cursor, aBuf);
-		else
-			TextRender()->CreateTextContainer(m_FPSTextContainerIndex, &Cursor, "0");
-		TextRender()->SetRenderFlags(OldFlags);
+			CTextCursor Cursor;
+			TextRender()->SetCursor(&Cursor, 2.0f, 2.0f, FontSize, TEXTFLAG_RENDER);
+			Cursor.m_LineWidth = -1;
+			TextRender()->RecreateTextContainer(m_FPSTextContainerIndex, &Cursor, aBuf);
+		}
+
 		if(m_FPSTextContainerIndex.Valid())
 		{
 			TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor());
 		}
 	}
+
 	if(g_Config.m_ClShowpred && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
+		float PredOffset = 0.0f;
+
+		if(Showfps)
+			PredOffset = TextRender()->TextWidth(FontSize, "00000 FPS") + 2.0f;
+
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%d", Client()->GetPredictionTime());
-		TextRender()->Text(m_Width - 10 - TextRender()->TextWidth(12, aBuf, -1, -1.0f), Showfps ? 20 : 5, 12, aBuf, -1.0f);
+		str_format(aBuf, sizeof(aBuf), Localize("Pred. %d ms", "Prediction time"), Client()->GetPredictionTime());
+		TextRender()->Text(2.0f + PredOffset, 2.0f, FontSize, aBuf, -1.0f);
 	}
 }
 
@@ -1352,24 +1351,6 @@ void CHud::RenderDummyActions()
 	}
 	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudDummyCopy);
 	Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_DummyCopyOffset, x, y);
-}
-
-inline int CHud::GetDigitsIndex(int Value, int Max)
-{
-	if(Value < 0)
-	{
-		Value *= -1;
-	}
-	int DigitsIndex = std::log10((Value ? Value : 1));
-	if(DigitsIndex > Max)
-	{
-		DigitsIndex = Max;
-	}
-	if(DigitsIndex < 0)
-	{
-		DigitsIndex = 0;
-	}
-	return DigitsIndex;
 }
 
 inline float CHud::GetMovementInformationBoxHeight()
