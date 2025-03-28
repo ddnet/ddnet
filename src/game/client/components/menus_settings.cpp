@@ -4,6 +4,7 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <cstring>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
@@ -1308,7 +1309,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	{
 		int G = std::gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
-		str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), (int)(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), (int)(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
+		str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), (int)(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), (int)(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()),
+			g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth,
+			g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
 		Ui()->DoLabel(&ModeLabel, aBuf, sc_FontSizeResListHeader, TEXTALIGN_MC);
 	}
 
@@ -1331,8 +1334,11 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		if(!Item.m_Visible)
 			continue;
 
-		int G = std::gcd(s_aModes[i].m_WindowWidth, s_aModes[i].m_WindowHeight);
-		str_format(aBuf, sizeof(aBuf), " %dx%d @%dhz %d bit (%d:%d)", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, s_aModes[i].m_RefreshRate, Depth, s_aModes[i].m_WindowWidth / G, s_aModes[i].m_WindowHeight / G);
+		int G = std::gcd(s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight);
+		if(G == 0)
+			str_format(aBuf, sizeof(aBuf), " %dx%d @%dhz %d bit", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, s_aModes[i].m_RefreshRate, Depth);
+		else
+			str_format(aBuf, sizeof(aBuf), " %dx%d @%dhz %d bit (%d:%d)", s_aModes[i].m_CanvasWidth, s_aModes[i].m_CanvasHeight, s_aModes[i].m_RefreshRate, Depth, s_aModes[i].m_CanvasWidth / G, s_aModes[i].m_CanvasHeight / G);
 		Ui()->DoLabel(&Item.m_Rect, aBuf, sc_FontSizeResList, TEXTALIGN_ML);
 	}
 
@@ -1351,10 +1357,10 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	CUIRect WindowModeDropDown;
 	MainView.HSplitTop(20.0f, &WindowModeDropDown, &MainView);
 
-	const char *apWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
+	const char *apWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Fullscreen")};
 	static const int s_NumWindowMode = std::size(apWindowModes);
 
-	const int OldWindowMode = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 4 : (g_Config.m_GfxFullscreen == 2 ? 3 : 2)) : (g_Config.m_GfxBorderless ? 1 : 0));
+	const int OldWindowMode = g_Config.m_GfxFullscreen == 0 ? g_Config.m_GfxBorderless : (g_Config.m_GfxFullscreen == 3 ? 2 : 3);
 
 	static CUi::SDropDownState s_WindowModeDropDownState;
 	static CScrollRegion s_WindowModeDropDownScrollRegion;
@@ -1369,34 +1375,33 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		else if(NewWindowMode == 2)
 			Client()->SetWindowParams(3, false);
 		else if(NewWindowMode == 3)
-			Client()->SetWindowParams(2, false);
-		else if(NewWindowMode == 4)
 			Client()->SetWindowParams(1, false);
 	}
 
-	if(Graphics()->GetNumScreens() > 1)
+	int ScreenNum;
+	int *ScreenIds;
+	Graphics()->GetScreens(ScreenIds, ScreenNum);
+
+	if(ScreenNum > 1)
 	{
 		CUIRect ScreenDropDown;
 		MainView.HSplitTop(2.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &ScreenDropDown, &MainView);
+		
+		static std::vector<char *> s_vpScreenNames;
+		s_vpScreenNames.resize(ScreenNum);
 
-		const int NumScreens = Graphics()->GetNumScreens();
-		static std::vector<std::string> s_vScreenNames;
-		static std::vector<const char *> s_vpScreenNames;
-		s_vScreenNames.resize(NumScreens);
-		s_vpScreenNames.resize(NumScreens);
-
-		for(int i = 0; i < NumScreens; ++i)
+		for(int i = 0; i < ScreenNum; ++i)
 		{
-			str_format(aBuf, sizeof(aBuf), "%s %d: %s", Localize("Screen"), i, Graphics()->GetScreenName(i));
-			s_vScreenNames[i] = aBuf;
-			s_vpScreenNames[i] = s_vScreenNames[i].c_str();
+			if(!s_vpScreenNames[i])
+				s_vpScreenNames[i] = new char[128];
+			str_format(s_vpScreenNames[i], 128, "%s %d: %s", Localize("Screen"), i, Graphics()->GetScreenName(ScreenIds[i]));
 		}
 
 		static CUi::SDropDownState s_ScreenDropDownState;
 		static CScrollRegion s_ScreenDropDownScrollRegion;
 		s_ScreenDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ScreenDropDownScrollRegion;
-		const int NewScreen = Ui()->DoDropDown(&ScreenDropDown, g_Config.m_GfxScreen, s_vpScreenNames.data(), s_vpScreenNames.size(), s_ScreenDropDownState);
+		const int NewScreen = Ui()->DoDropDown(&ScreenDropDown, g_Config.m_GfxScreen, (const char **)s_vpScreenNames.data(), s_vpScreenNames.size(), s_ScreenDropDownState);
 		if(NewScreen != g_Config.m_GfxScreen)
 			Client()->SwitchWindowScreen(NewScreen);
 	}

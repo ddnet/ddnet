@@ -698,7 +698,7 @@ public:
 	virtual void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
 	virtual void GetCurrentVideoMode(CVideoMode &CurMode, float HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
 
-	virtual int GetNumScreens() const = 0;
+	virtual void GetScreens(int *&pIds, int &Num) = 0;
 	virtual const char *GetScreenName(int Screen) const = 0;
 
 	virtual void Minimize() = 0;
@@ -1186,7 +1186,7 @@ public:
 	void UpdateBufferContainerInternal(int ContainerIndex, SBufferContainerInfo *pContainerInfo);
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 
-	int GetNumScreens() const override;
+	void GetScreens(int *&pIds, int &Num) const override;
 	const char *GetScreenName(int Screen) const override;
 
 	void Minimize() override;

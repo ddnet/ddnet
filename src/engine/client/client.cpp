@@ -66,7 +66,8 @@
 #include <android/android_main.h>
 #endif
 
-#include "SDL.h"
+#include "SDL3/SDL.h"
+
 #ifdef main
 #undef main
 #endif
@@ -4244,21 +4245,19 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 	return 0;
 }
 
-void CClient::SwitchWindowScreen(int Index)
+void CClient::SwitchWindowScreen(int Screen)
 {
-	//Tested on windows 11 64 bit (gtx 1660 super, intel UHD 630 opengl 1.2.0, 3.3.0 and vulkan 1.1.0)
+	// Tested on windows 11 64 bit (gtx 1660 super, intel UHD 630 opengl 1.2.0, 3.3.0 and vulkan 1.1.0)
 	int IsFullscreen = g_Config.m_GfxFullscreen;
 	int IsBorderless = g_Config.m_GfxBorderless;
 
-	if(!Graphics()->SetWindowScreen(Index))
-	{
+	if(!Graphics()->SetWindowScreen(Screen))
 		return;
-	}
 
 	SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
 
 	CVideoMode CurMode;
-	Graphics()->GetCurrentVideoMode(CurMode, Index);
+	Graphics()->GetCurrentVideoMode(CurMode, Screen);
 
 	const int Depth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
 	g_Config.m_GfxColorDepth = Depth;
@@ -4905,36 +4904,28 @@ int main(int argc, const char **argv)
 #endif
 
 	// Do not automatically translate touch events to mouse events and vice versa.
-	SDL_SetHint("SDL_TOUCH_MOUSE_EVENTS", "0");
-	SDL_SetHint("SDL_MOUSE_TOUCH_EVENTS", "0");
-
-	// Support longer IME composition strings (enables SDL_TEXTEDITING_EXT).
-#if SDL_VERSION_ATLEAST(2, 0, 22)
-	SDL_SetHint(SDL_HINT_IME_SUPPORT_EXTENDED_TEXT, "1");
-#endif
+	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
+	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
 
 #if defined(CONF_PLATFORM_MACOS)
 	// Hints will not be set if there is an existing override hint or environment variable that takes precedence.
 	// So this respects cli environment overrides.
-	SDL_SetHint("SDL_MAC_OPENGL_ASYNC_DISPATCH", "1");
+	SDL_SetHint(SDL_HINT_MAC_OPENGL_ASYNC_DISPATCH, "1");
 #endif
 
-#if defined(CONF_FAMILY_WINDOWS)
-	SDL_SetHint("SDL_IME_SHOW_UI", g_Config.m_InpImeNativeUi ? "1" : "0");
-#else
-	SDL_SetHint("SDL_IME_SHOW_UI", "1");
-#endif
+	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, g_Config.m_InpImeNativeUi ? "composition" : "candidates,composition");
 
 #if defined(CONF_PLATFORM_ANDROID)
 	// Trap the Android back button so it can be handled in our code reliably
 	// instead of letting the system handle it.
-	SDL_SetHint("SDL_ANDROID_TRAP_BACK_BUTTON", "1");
-	// Force landscape screen orientation.
-	SDL_SetHint("SDL_IOS_ORIENTATIONS", "LandscapeLeft LandscapeRight");
+	SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
 #endif
 
+	// Force landscape screen orientation
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
+
 	// init SDL
-	if(SDL_Init(0) < 0)
+	if(!SDL_Init(0))
 	{
 		char aError[256];
 		str_format(aError, sizeof(aError), "Unable to initialize SDL base: %s", SDL_GetError());

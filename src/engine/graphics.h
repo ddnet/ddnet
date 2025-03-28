@@ -450,11 +450,11 @@ public:
 	virtual void ReadPixel(ivec2 Position, ColorRGBA *pColor) = 0;
 	virtual void TakeScreenshot(const char *pFilename) = 0;
 	virtual void TakeCustomScreenshot(const char *pFilename) = 0;
-	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) = 0;
-	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int Screen) = 0;
+	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes, int ScreenId) = 0;
+	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int ScreenId) = 0;
 	virtual void Swap() = 0;
-	virtual int GetNumScreens() const = 0;
-	virtual const char *GetScreenName(int Screen) const = 0;
+	virtual void GetScreens(int *&pIds, int &Num) const = 0;
+	virtual const char *GetScreenName(int ScreenId) const = 0;
 
 	// synchronization
 	virtual void InsertSignal(class CSemaphore *pSemaphore) = 0;
