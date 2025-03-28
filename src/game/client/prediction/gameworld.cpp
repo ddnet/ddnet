@@ -321,11 +321,6 @@ void CGameWorld::ReleaseHooked(int ClientId)
 	}
 }
 
-CTuningParams *CGameWorld::Tuning()
-{
-	return &m_Core.m_aTuning[g_Config.m_ClDummy];
-}
-
 CEntity *CGameWorld::GetEntity(int Id, int EntityType)
 {
 	for(CEntity *pEnt = m_apFirstEntityTypes[EntityType]; pEnt; pEnt = pEnt->m_pNextTypeEntity)
@@ -355,9 +350,9 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
 		float Strength;
 		if(Owner == -1 || !GetCharacterById(Owner))
-			Strength = Tuning()->m_ExplosionStrength;
+			Strength = GlobalTuning()->m_ExplosionStrength;
 		else
-			Strength = GetCharacterById(Owner)->Tuning()->m_ExplosionStrength;
+			Strength = GetCharacterById(Owner)->GetTuning(GetCharacterById(Owner)->GetOverriddenTuneZone())->m_ExplosionStrength;
 
 		float Dmg = Strength * l;
 		if((int)Dmg)
@@ -597,10 +592,6 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_GameTick = pFrom->m_GameTick;
 	m_pCollision = pFrom->m_pCollision;
 	m_WorldConfig = pFrom->m_WorldConfig;
-	for(int i = 0; i < 2; i++)
-	{
-		m_Core.m_aTuning[i] = pFrom->m_Core.m_aTuning[i];
-	}
 	m_pTuningList = pFrom->m_pTuningList;
 	m_pMapBugs = pFrom->m_pMapBugs;
 	m_Teams = pFrom->m_Teams;
