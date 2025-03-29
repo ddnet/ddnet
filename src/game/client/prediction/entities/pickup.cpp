@@ -29,7 +29,9 @@ void CPickup::Tick()
 			switch(m_Type)
 			{
 			case POWERUP_HEALTH:
-				//pChr->Freeze();
+				if(!GameWorld()->m_WorldConfig.m_PredictDDRace)
+					continue;
+				pChr->Freeze();
 				break;
 
 			case POWERUP_ARMOR:
