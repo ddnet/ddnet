@@ -1166,9 +1166,7 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
 	}
 	else
 	{
-		char error[64];
-		str_format(error, sizeof(error), "unknown NETADDR type %d", addr->type);
-		dbg_assert(false, error);
+		dbg_assert(false, "unknown NETADDR type %d", addr->type);
 	}
 }
 
