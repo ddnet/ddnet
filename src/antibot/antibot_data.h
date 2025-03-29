@@ -5,12 +5,18 @@
 
 enum
 {
-	ANTIBOT_ABI_VERSION = 11,
+	ANTIBOT_ABI_VERSION = 12,
 
 	ANTIBOT_MSGFLAG_NONVITAL = 1,
 	ANTIBOT_MSGFLAG_FLUSH = 2,
 
 	ANTIBOT_MAX_CLIENTS = 128,
+
+	ANTIBOT_AUTHED_NO = 0,
+	ANTIBOT_AUTHED_HELPER = 1,
+	ANTIBOT_AUTHED_MOD = 2,
+	ANTIBOT_AUTHED_ADMIN = 3,
+	ANTIBOT_NUM_AUTHEDS = 4,
 };
 
 struct CAntibotMapData
@@ -27,7 +33,7 @@ struct CAntibotPlayerData
 	bool m_DnsblNone;
 	bool m_DnsblPending;
 	bool m_DnsblBlacklisted;
-	bool m_Authed;
+	int m_AuthLevel;
 };
 
 struct CAntibotInputData
