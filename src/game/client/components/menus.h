@@ -5,10 +5,12 @@
 
 #include <base/types.h>
 #include <base/vmath.h>
+#include <game/client/components/touch_controls.h>
 
 #include <chrono>
 #include <deque>
 #include <optional>
+#include <unordered_set>
 #include <vector>
 
 #include <engine/console.h>
@@ -100,6 +102,7 @@ class CMenus : public CComponent
 	void DoJoystickAxisPicker(CUIRect View);
 	void DoJoystickBar(const CUIRect *pRect, float Current, float Tolerance, bool Active);
 
+	std::optional<std::chrono::nanoseconds> m_SkinListLastRefreshTime;
 	bool m_SkinListScrollToSelected = false;
 	std::optional<std::chrono::nanoseconds> m_SkinList7LastRefreshTime;
 	std::optional<std::chrono::nanoseconds> m_SkinPartsList7LastRefreshTime;
@@ -557,7 +560,7 @@ protected:
 		SHA256_DIGEST m_Sha256;
 
 		CAbstractCommunityIconJob(CMenus *pMenus, const char *pCommunityId, int StorageType);
-		virtual ~CAbstractCommunityIconJob(){};
+		virtual ~CAbstractCommunityIconJob() {};
 
 	public:
 		const char *CommunityId() const { return m_aCommunityId; }
@@ -597,6 +600,13 @@ protected:
 	void LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &Info, CImageInfo &InfoGrayscale, const SHA256_DIGEST &Sha256);
 	void RenderCommunityIcon(const SCommunityIcon *pIcon, CUIRect Rect, bool Active);
 	void UpdateCommunityIcons();
+
+	// skin favorite list
+	std::unordered_set<std::string> m_SkinFavorites;
+	static void Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData);
+	static void Con_RemFavoriteSkin(IConsole::IResult *pResult, void *pUserData);
+	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
+	void OnConfigSave(IConfigManager *pConfigManager);
 
 	// found in menus_settings.cpp
 	void RenderLanguageSettings(CUIRect MainView);
@@ -850,5 +860,54 @@ private:
 	bool RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight);
 
 	CServerProcess m_ServerProcess;
+
+	// found in menus_ingame_touch_controls.cpp
+	int m_EditBehaviorType = 0; // Default = bind. 1 = bind-toggle, 2 = predefined.
+	int m_PredefinedBehaviorType = 0; // Default = extra menu
+	int m_EditCommandNumber = 0;
+	bool m_CloseMenu = false; // Decide if closing menu after the popup confirm.
+	std::array<int, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aButtonVisibilityIds = {};
+	std::array<int, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aVisibilityIds = {};
+	std::vector<CTouchControls::CBindToggleTouchButtonBehavior::CCommand> m_vCachedCommands;
+
+	std::string m_Error;
+
+public:
+	bool m_UnsavedChanges = false;
+	CTouchControls::EButtonShape m_CachedShape;
+	CTouchControls::CTouchButton *m_OldSelectedButton = nullptr;
+	CTouchControls::CTouchButton *m_NewSelectedButton = nullptr;
+
+	// The biggest value's length is shorter than 7
+	CLineInputBuffered<7> m_InputX;
+	CLineInputBuffered<7> m_InputY;
+	CLineInputBuffered<7> m_InputW;
+	CLineInputBuffered<7> m_InputH;
+	CLineInputBuffered<1024> m_InputCommand;
+	CLineInputBuffered<1024> m_InputLabel;
+	std::array<int, (size_t)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aCachedVisibilities; // 0:-, 1:+, 2:No existing.
+
+	void ChangeSelectedButtonWhileHavingUnsavedChanges(CTouchControls::CTouchButton *OldSelectedButton, CTouchControls::CTouchButton *NewSelectedButton);
+	void CacheAllSettingsFromTarget(CTouchControls::CTouchButton *TargetButton);
+	void SaveCachedSettingsToTarget(CTouchControls::CTouchButton *TargetButton);
+	void SelectedButtonNotVisible();
+	void NoSpaceForOverlappingButton();
+
+private:
+	void InputPosFunction(CLineInputBuffered<7> *Input); // Used for input button's X,Y,W,H.
+	void RenderTouchButtonEditor(CUIRect MainView);
+	void RenderVirtualVisibilityEditor(CUIRect MainView);
+	void RenderTinyButtonTab(CUIRect MainView);
+	bool CheckCachedSettings();
+	void ResetCachedSettings(); // You can use CacheAllSettingsFromTarget(nullptr) to call this.
+	// Confirm, Cancel only decide if saving changes.
+	void PopupConfirm_ChangeSelectedButton();
+	void PopupCancel_ChangeSelectedButton();
+	void PopupConfirm_NewButton();
+	void PopupCancel_NewButton();
+	void PopupConfirm_SaveSettings() { SaveCachedSettingsToTarget(m_OldSelectedButton); }
+	void PopupConfirm_SelectedNotVisible();
+	void PopupConfirm_DeselectButton();
+	void PopupCancel_DeselectButton();
 };
 #endif
