@@ -2449,6 +2449,70 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConUnkill(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!g_Config.m_SvUnkill)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Unkill-function is disabled on this server");
+		return;
+	}
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+
+	int Team = Teams.m_Core.Team(pResult->m_ClientId);
+
+	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER || (g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "You have to be in a team (from 1-63)");
+		return;
+	}
+	if(!Teams.IsUnkillAvailable(Team))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Team's last death can't be undone");
+		return;
+	}
+	if(Teams.GetSaving(Team))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Team load already in progress");
+		return;
+	}
+	if(Teams.GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Team can't be unkilled while racing");
+		return;
+	}
+	if(Teams.TeamFlock(Team))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Team can't be unkilled while in team 0 mode");
+		return;
+	}
+	if(Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Team can't be unkilled while practice is enabled");
+		return;
+	}
+
+	int Since = (pSelf->Server()->Tick() - Teams.GetUnkillSaveCreated(Team)) / pSelf->Server()->TickSpeed();
+	if(Since < g_Config.m_SvSaveSwapGamesDelay)
+	{
+		char aBuf[128];
+
+		str_format(aBuf, sizeof(aBuf),
+			"You have to wait %d seconds until you can unkill team",
+			g_Config.m_SvSaveSwapGamesDelay - Since);
+
+		pSelf->SendChatTarget(pResult->m_ClientId, aBuf);
+
+		return;
+	}
+
+	Teams.SetUnkillRequest(Team, pResult->m_ClientId);
+}
+
 void CGameContext::ConPoints(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

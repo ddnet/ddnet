@@ -28,7 +28,14 @@ class CGameTeams
 	bool m_aTeamFlock[NUM_DDRACE_TEAMS];
 	CClientMask m_aInvited[NUM_DDRACE_TEAMS];
 	bool m_aPractice[NUM_DDRACE_TEAMS];
+
+	// m_apSaveTeamResult should not be set when m_aUnkillRequestedClientId is set, and vice versa
 	std::shared_ptr<CScoreSaveResult> m_apSaveTeamResult[NUM_DDRACE_TEAMS];
+	int m_aUnkillRequestedClientId[NUM_DDRACE_TEAMS];
+
+	std::unique_ptr<CSaveTeam> m_apUnkillSavedTeam[NUM_DDRACE_TEAMS];
+	uint64_t m_aUnkillSaveCreated[NUM_DDRACE_TEAMS];
+
 	uint64_t m_aLastSwap[MAX_CLIENTS]; // index is id of player who initiated swap
 	bool m_aTeamSentStartWarning[NUM_DDRACE_TEAMS];
 	// `m_aTeamUnfinishableKillTick` is -1 by default and gets set when a
@@ -107,6 +114,10 @@ public:
 	void Reset();
 	void ResetRoundState(int Team);
 	void ResetSwitchers(int Team);
+	void ResetUnkill(int Team);
+
+	// if death was saved (for unkill cmd) returns true
+	bool TrySaveDyingTeam(int ClientId, int Weapon);
 
 	void SendTeamsState(int ClientId);
 	void SetTeamLock(int Team, bool Lock);
@@ -183,6 +194,13 @@ public:
 	void SetSaving(int TeamId, std::shared_ptr<CScoreSaveResult> &SaveResult)
 	{
 		m_apSaveTeamResult[TeamId] = SaveResult;
+		m_aUnkillRequestedClientId[TeamId] = -1;
+	}
+
+	void SetUnkillRequest(int TeamId, int ClientId)
+	{
+		m_apSaveTeamResult[TeamId] = nullptr;
+		m_aUnkillRequestedClientId[TeamId] = ClientId;
 	}
 
 	bool GetSaving(int TeamId)
@@ -192,7 +210,25 @@ public:
 		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && TeamId == TEAM_FLOCK)
 			return false;
 
+		if(m_aUnkillRequestedClientId[TeamId] != -1)
+			return true;
+
 		return m_apSaveTeamResult[TeamId] != nullptr;
+	}
+
+	bool IsUnkillAvailable(int TeamId)
+	{
+		if(TeamId < TEAM_FLOCK || TeamId >= TEAM_SUPER)
+			return false;
+		if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && TeamId == TEAM_FLOCK)
+			return false;
+
+		return m_apUnkillSavedTeam[TeamId] != nullptr;
+	}
+
+	uint64_t GetUnkillSaveCreated(int Team)
+	{
+		return m_aUnkillSaveCreated[Team];
 	}
 
 	void SetPractice(int Team, bool Enabled)

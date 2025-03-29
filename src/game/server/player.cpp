@@ -549,7 +549,14 @@ void CPlayer::FakeSnap()
 
 void CPlayer::OnDisconnect()
 {
+	int Team = -1;
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+		Team = GameServer()->m_pController->Teams().m_Core.Team(GetCid());
+
 	KillCharacter();
+
+	if(Team != -1)
+		GameServer()->m_pController->Teams().ResetUnkill(Team);
 
 	m_Moderating = false;
 }

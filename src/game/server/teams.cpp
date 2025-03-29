@@ -34,6 +34,8 @@ void CGameTeams::Reset()
 		m_aTeamLocked[i] = false;
 		m_aTeamFlock[i] = false;
 		m_apSaveTeamResult[i] = nullptr;
+		m_aUnkillRequestedClientId[i] = -1;
+		ResetUnkill(i);
 		m_aTeamSentStartWarning[i] = false;
 		if(m_pGameContext->PracticeByDefault())
 			m_aPractice[i] = true;
@@ -46,6 +48,9 @@ void CGameTeams::ResetRoundState(int Team)
 	ResetInvited(Team);
 	if(Team != TEAM_SUPER)
 		ResetSwitchers(Team);
+
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO) // in SV_TEAM_FORCED_SOLO unkill is reset in CPlayer::OnDisconnect
+		ResetUnkill(Team);
 
 	if(!m_pGameContext->PracticeByDefault())
 		m_aPractice[Team] = false;
@@ -69,6 +74,15 @@ void CGameTeams::ResetSwitchers(int Team)
 		Switcher.m_aEndTick[Team] = 0;
 		Switcher.m_aType[Team] = TILE_SWITCHOPEN;
 	}
+}
+
+void CGameTeams::ResetUnkill(int Team)
+{
+	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
+		return;
+
+	m_apUnkillSavedTeam[Team] = nullptr;
+	m_aUnkillSaveCreated[Team] = 0;
 }
 
 void CGameTeams::OnCharacterStart(int ClientId)
@@ -1023,83 +1037,140 @@ void CGameTeams::ProcessSaveTeam()
 {
 	for(int Team = 0; Team < NUM_DDRACE_TEAMS; Team++)
 	{
-		if(m_apSaveTeamResult[Team] == nullptr || !m_apSaveTeamResult[Team]->m_Completed)
-			continue;
-		if(m_apSaveTeamResult[Team]->m_aBroadcast[0] != '\0')
-			GameServer()->SendBroadcast(m_apSaveTeamResult[Team]->m_aBroadcast, -1);
-		if(m_apSaveTeamResult[Team]->m_aMessage[0] != '\0' && m_apSaveTeamResult[Team]->m_Status != CScoreSaveResult::LOAD_FAILED)
-			GameServer()->SendChatTeam(Team, m_apSaveTeamResult[Team]->m_aMessage);
-		switch(m_apSaveTeamResult[Team]->m_Status)
+		dbg_assert(!(m_apSaveTeamResult[Team] != nullptr && m_aUnkillRequestedClientId[Team] != -1), "Invalid save team state");
+		if(m_aUnkillRequestedClientId[Team] != -1)
 		{
-		case CScoreSaveResult::SAVE_SUCCESS:
-		{
-			if(GameServer()->TeeHistorianActive())
+			int ClientId = m_aUnkillRequestedClientId[Team];
+
+			if(m_Core.Team(ClientId) == Team && m_apUnkillSavedTeam[Team])
 			{
-				GameServer()->TeeHistorian()->RecordTeamSaveSuccess(
-					Team,
-					m_apSaveTeamResult[Team]->m_SaveId,
-					m_apSaveTeamResult[Team]->m_SavedTeam.GetString());
-			}
-			for(int i = 0; i < m_apSaveTeamResult[Team]->m_SavedTeam.GetMembersCount(); i++)
-			{
-				if(m_apSaveTeamResult[Team]->m_SavedTeam.m_pSavedTees->IsHooking())
+				char aNames[MAX_CLIENTS][MAX_NAME_LENGTH];
+				int aClientIds[MAX_CLIENTS];
+				int NumPlayers = 0;
+
+				for(int i = 0; i < MAX_CLIENTS; i++)
 				{
-					int ClientId = m_apSaveTeamResult[Team]->m_SavedTeam.m_pSavedTees->GetClientId();
-					if(GameServer()->m_apPlayers[ClientId] != nullptr)
-						GameServer()->SendChatTarget(ClientId, "Start holding the hook before loading the savegame to keep the hook");
+					if(m_Core.Team(i) == Team)
+					{
+						str_copy(aNames[NumPlayers], Server()->ClientName(i), sizeof(aNames[NumPlayers]));
+						aClientIds[NumPlayers] = i;
+						NumPlayers++;
+					}
+				}
+
+				char aMessage[512];
+
+				bool CanLoad = m_apUnkillSavedTeam[Team]->MatchPlayers(aNames, aClientIds, NumPlayers, aMessage, sizeof(aMessage));
+
+				if(!CanLoad)
+				{
+					if(aMessage[0] != '\0')
+						GameServer()->SendChatTarget(ClientId, aMessage);
+				}
+				else
+				{
+					bool TeamValid = false;
+					if(Count(Team) > 0)
+					{
+						TeamValid = m_apUnkillSavedTeam[Team]->Load(GameServer(), Team, false);
+					}
+
+					if(!TeamValid)
+					{
+						GameServer()->SendChatTeam(Team, "Your team has been killed because it contains an invalid tee state");
+						KillTeam(Team, -1, -1);
+					}
+					else
+					{
+						dbg_msg("save", "Unkill successful");
+					}
+
+					ResetUnkill(Team);
 				}
 			}
-			ResetSavedTeam(m_apSaveTeamResult[Team]->m_RequestingPlayer, Team);
-			char aSaveId[UUID_MAXSTRSIZE];
-			FormatUuid(m_apSaveTeamResult[Team]->m_SaveId, aSaveId, UUID_MAXSTRSIZE);
-			dbg_msg("save", "Save successful: %s", aSaveId);
-			break;
+
+			m_aUnkillRequestedClientId[Team] = -1;
 		}
-		case CScoreSaveResult::SAVE_FAILED:
-			if(GameServer()->TeeHistorianActive())
-				GameServer()->TeeHistorian()->RecordTeamSaveFailure(Team);
-			if(Count(Team) > 0)
-			{
-				// load weak/strong order to prevent switching weak/strong while saving
-				m_apSaveTeamResult[Team]->m_SavedTeam.Load(GameServer(), Team, false);
-			}
-			break;
-		case CScoreSaveResult::LOAD_SUCCESS:
+		else
 		{
-			if(GameServer()->TeeHistorianActive())
+			if(m_apSaveTeamResult[Team] == nullptr || !m_apSaveTeamResult[Team]->m_Completed)
+				continue;
+			if(m_apSaveTeamResult[Team]->m_aBroadcast[0] != '\0')
+				GameServer()->SendBroadcast(m_apSaveTeamResult[Team]->m_aBroadcast, -1);
+			if(m_apSaveTeamResult[Team]->m_aMessage[0] != '\0' && m_apSaveTeamResult[Team]->m_Status != CScoreSaveResult::LOAD_FAILED)
+				GameServer()->SendChatTeam(Team, m_apSaveTeamResult[Team]->m_aMessage);
+			switch(m_apSaveTeamResult[Team]->m_Status)
 			{
-				GameServer()->TeeHistorian()->RecordTeamLoadSuccess(
-					Team,
-					m_apSaveTeamResult[Team]->m_SaveId,
-					m_apSaveTeamResult[Team]->m_SavedTeam.GetString());
-			}
-
-			bool TeamValid = false;
-			if(Count(Team) > 0)
+			case CScoreSaveResult::SAVE_SUCCESS:
 			{
-				// keep current weak/strong order as on some maps there is no other way of switching
-				TeamValid = m_apSaveTeamResult[Team]->m_SavedTeam.Load(GameServer(), Team, true);
+				if(GameServer()->TeeHistorianActive())
+				{
+					GameServer()->TeeHistorian()->RecordTeamSaveSuccess(
+						Team,
+						m_apSaveTeamResult[Team]->m_SaveId,
+						m_apSaveTeamResult[Team]->m_SavedTeam.GetString());
+				}
+				for(int i = 0; i < m_apSaveTeamResult[Team]->m_SavedTeam.GetMembersCount(); i++)
+				{
+					if(m_apSaveTeamResult[Team]->m_SavedTeam.m_pSavedTees->IsHooking())
+					{
+						int ClientId = m_apSaveTeamResult[Team]->m_SavedTeam.m_pSavedTees->GetClientId();
+						if(GameServer()->m_apPlayers[ClientId] != nullptr)
+							GameServer()->SendChatTarget(ClientId, "Start holding the hook before loading the savegame to keep the hook");
+					}
+				}
+				ResetSavedTeam(m_apSaveTeamResult[Team]->m_RequestingPlayer, Team);
+				char aSaveId[UUID_MAXSTRSIZE];
+				FormatUuid(m_apSaveTeamResult[Team]->m_SaveId, aSaveId, UUID_MAXSTRSIZE);
+				dbg_msg("save", "Save successful: %s", aSaveId);
+				break;
 			}
-
-			if(!TeamValid)
+			case CScoreSaveResult::SAVE_FAILED:
+				if(GameServer()->TeeHistorianActive())
+					GameServer()->TeeHistorian()->RecordTeamSaveFailure(Team);
+				if(Count(Team) > 0)
+				{
+					// load weak/strong order to prevent switching weak/strong while saving
+					m_apSaveTeamResult[Team]->m_SavedTeam.Load(GameServer(), Team, false);
+				}
+				break;
+			case CScoreSaveResult::LOAD_SUCCESS:
 			{
-				GameServer()->SendChatTeam(Team, "Your team has been killed because it contains an invalid tee state");
-				KillTeam(Team, -1, -1);
-			}
+				if(GameServer()->TeeHistorianActive())
+				{
+					GameServer()->TeeHistorian()->RecordTeamLoadSuccess(
+						Team,
+						m_apSaveTeamResult[Team]->m_SaveId,
+						m_apSaveTeamResult[Team]->m_SavedTeam.GetString());
+				}
 
-			char aSaveId[UUID_MAXSTRSIZE];
-			FormatUuid(m_apSaveTeamResult[Team]->m_SaveId, aSaveId, UUID_MAXSTRSIZE);
-			dbg_msg("save", "Load successful: %s", aSaveId);
-			break;
+				bool TeamValid = false;
+				if(Count(Team) > 0)
+				{
+					// keep current weak/strong order as on some maps there is no other way of switching
+					TeamValid = m_apSaveTeamResult[Team]->m_SavedTeam.Load(GameServer(), Team, true);
+				}
+
+				if(!TeamValid)
+				{
+					GameServer()->SendChatTeam(Team, "Your team has been killed because it contains an invalid tee state");
+					KillTeam(Team, -1, -1);
+				}
+
+				char aSaveId[UUID_MAXSTRSIZE];
+				FormatUuid(m_apSaveTeamResult[Team]->m_SaveId, aSaveId, UUID_MAXSTRSIZE);
+				dbg_msg("save", "Load successful: %s", aSaveId);
+				break;
+			}
+			case CScoreSaveResult::LOAD_FAILED:
+				if(GameServer()->TeeHistorianActive())
+					GameServer()->TeeHistorian()->RecordTeamLoadFailure(Team);
+				if(m_apSaveTeamResult[Team]->m_aMessage[0] != '\0')
+					GameServer()->SendChatTarget(m_apSaveTeamResult[Team]->m_RequestingPlayer, m_apSaveTeamResult[Team]->m_aMessage);
+				break;
+			}
+			m_apSaveTeamResult[Team] = nullptr;
 		}
-		case CScoreSaveResult::LOAD_FAILED:
-			if(GameServer()->TeeHistorianActive())
-				GameServer()->TeeHistorian()->RecordTeamLoadFailure(Team);
-			if(m_apSaveTeamResult[Team]->m_aMessage[0] != '\0')
-				GameServer()->SendChatTarget(m_apSaveTeamResult[Team]->m_RequestingPlayer, m_apSaveTeamResult[Team]->m_aMessage);
-			break;
-		}
-		m_apSaveTeamResult[Team] = nullptr;
 	}
 }
 
@@ -1197,6 +1268,78 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 		if(!m_aTeamFlock[m_Core.Team(ClientId)])
 			CheckTeamFinished(Team);
 	}
+}
+
+bool CGameTeams::TrySaveDyingTeam(int ClientId, int Weapon)
+{
+	if(!g_Config.m_SvUnkill)
+		return false;
+
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return false;
+
+	if(!(Weapon == WEAPON_WORLD || Weapon == WEAPON_SELF))
+		return false;
+
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && Weapon == WEAPON_WORLD)
+		return false;
+
+	int Team = m_Core.Team(ClientId);
+
+	if(Team < TEAM_FLOCK || Team >= TEAM_SUPER)
+		return false;
+
+	if(Team == TEAM_FLOCK && g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO)
+		return false;
+
+	if(!((TeamLocked(Team) || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO) && GetTeamState(Team) == TEAMSTATE_STARTED && !TeamFlock(Team) && !IsPractice(Team)))
+		return false;
+
+	if(GetSaving(Team))
+		return false;
+
+	CCharacter *pCharacter = GameServer()->GetPlayerChar(ClientId);
+	if(!pCharacter)
+		return false;
+
+	int CurrTime = (Server()->Tick() - pCharacter->m_StartTime) / Server()->TickSpeed();
+
+	if(g_Config.m_SvUnkill == 1) // only teams with kill protection
+	{
+		if(g_Config.m_SvKillProtection == 0)
+			return false;
+
+		if(CurrTime < (60 * g_Config.m_SvKillProtection))
+			return false;
+	}
+
+	if(CurrTime < g_Config.m_SvUnkillMinTime)
+		return false;
+
+	if(Weapon == WEAPON_WORLD)
+		m_Core.Team(ClientId, TEAM_FLOCK); // temporarily remove player from the team so he is not counted in team saving
+
+	if(Count(Team) > g_Config.m_SvMaxTeamSize)
+	{
+		if(Weapon == WEAPON_WORLD)
+			m_Core.Team(ClientId, Team);
+		return false;
+	}
+
+	std::unique_ptr<CSaveTeam> SaveTeam = std::make_unique<CSaveTeam>();
+	ESaveResult Result = SaveTeam->Save(GameServer(), Team, true);
+
+	if(Weapon == WEAPON_WORLD)
+		m_Core.Team(ClientId, Team);
+
+	if(Result == ESaveResult::SUCCESS)
+	{
+		m_apUnkillSavedTeam[Team] = std::move(SaveTeam);
+		m_aUnkillSaveCreated[Team] = Server()->Tick();
+		return true;
+	}
+
+	return false;
 }
 
 void CGameTeams::SetTeamLock(int Team, bool Lock)

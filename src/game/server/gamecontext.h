@@ -509,6 +509,7 @@ private:
 	static void ConPracticeRemoveWeapon(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnkill(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
 	static void ConVoteUnmute(IConsole::IResult *pResult, void *pUserData);
