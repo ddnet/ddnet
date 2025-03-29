@@ -8596,14 +8596,27 @@ void CEditor::RenderSwitchEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 {
 	const CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
 	const float TileSize = 32.f;
-	CSwitchTile *pSwitchTiles = (CSwitchTile *)pTiles->m_pTiles;
 
-	auto GetIndex = [pSwitchTiles, pTiles](int y, int x, unsigned char &Number) -> unsigned char {
-		if(x < 0 || y < 0 || x >= pTiles->m_Width || y >= pTiles->m_Height)
-			return 0;
-		Number = pSwitchTiles[y * pTiles->m_Width + x].m_Type;
-		return pSwitchTiles[y * pTiles->m_Width + x].m_Number - ENTITY_OFFSET;
-	};
+	std::function<unsigned char(int, int, unsigned char &)> GetIndex;
+	if(pTiles->m_Switch)
+	{
+		CLayerSwitch *pSwitchLayer = ((CLayerSwitch *)(pTiles.get()));
+		GetIndex = [pSwitchLayer](int y, int x, unsigned char &Number) -> unsigned char {
+			if(x < 0 || y < 0 || x >= pSwitchLayer->m_Width || y >= pSwitchLayer->m_Height)
+				return 0;
+			Number = pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Number;
+			return pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Type - ENTITY_OFFSET;
+		};
+	}
+	else
+	{
+		GetIndex = [pTiles](int y, int x, unsigned char &Number) -> unsigned char {
+			if(x < 0 || y < 0 || x >= pTiles->m_Width || y >= pTiles->m_Height)
+				return 0;
+			Number = 0;
+			return pTiles->m_pTiles[y * pTiles->m_Width + x].m_Index - ENTITY_OFFSET;
+		};
+	}
 
 	ivec2 aOffsets[] = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
 
@@ -8624,7 +8637,7 @@ void CEditor::RenderSwitchEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 				{
 					unsigned char NumberDoorLength = 0;
 					unsigned char IndexDoorLength = GetIndex(y + aOffsets[i].y, x + aOffsets[i].x, NumberDoorLength);
-					if(IndexDoorLength >= ENTITY_LASER_SHORT && IndexDoorLength <= ENTITY_LASER_LONG && NumberDoorLength == Number)
+					if(IndexDoorLength >= ENTITY_LASER_SHORT && IndexDoorLength <= ENTITY_LASER_LONG)
 					{
 						float XOff = std::cos(i * pi / 4.0f);
 						float YOff = std::sin(i * pi / 4.0f);
