@@ -41,6 +41,7 @@ void AntibotOnHammerHit(int /*ClientId*/, int /*TargetId*/) {}
 void AntibotOnDirectInput(int /*ClientId*/) {}
 void AntibotOnCharacterTick(int /*ClientId*/) {}
 void AntibotOnHookAttach(int /*ClientId*/, bool /*Player*/) {}
+void AntibotOnSetAuthed(int /*ClientId*/, int /*Level*/){};
 void AntibotOnEngineTick(void) {}
 void AntibotOnEngineClientJoin(int /*ClientId*/, bool /*Sixup*/) {}
 void AntibotOnEngineClientDrop(int /*ClientId*/, const char * /*pReason*/) {}

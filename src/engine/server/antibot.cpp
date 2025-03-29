@@ -1,12 +1,12 @@
-#include "antibot.h"
-
+#include <antibot/antibot_data.h>
 #include <antibot/antibot_interface.h>
-
 #include <base/system.h>
-
 #include <engine/console.h>
 #include <engine/kernel.h>
 #include <engine/server.h>
+#include <game/generated/protocol.h>
+
+#include "antibot.h"
 
 class IEngineAntibot;
 
@@ -160,6 +160,23 @@ void CAntibot::OnHookAttach(int ClientId, bool Player)
 	Update();
 	AntibotOnHookAttach(ClientId, Player);
 }
+void CAntibot::OnSetAuthed(int ClientId, int Level)
+{
+	int ApiLevel = Level;
+	if(Level == AUTHED_NO)
+		ApiLevel = ANTIBOT_AUTHED_NO;
+	else if(Level == AUTHED_HELPER)
+		ApiLevel = ANTIBOT_AUTHED_HELPER;
+	else if(Level == AUTHED_MOD)
+		ApiLevel = ANTIBOT_AUTHED_MOD;
+	else if(Level == AUTHED_ADMIN)
+		ApiLevel = ANTIBOT_AUTHED_ADMIN;
+	else
+		dbg_assert(false, "level %d is not supported by antibot api", Level);
+
+	Update();
+	AntibotOnSetAuthed(ClientId, ApiLevel);
+}
 
 void CAntibot::OnEngineTick()
 {
@@ -254,6 +271,7 @@ void CAntibot::OnHammerHit(int ClientId, int TargetId) {}
 void CAntibot::OnDirectInput(int ClientId) {}
 void CAntibot::OnCharacterTick(int ClientId) {}
 void CAntibot::OnHookAttach(int ClientId, bool Player) {}
+void CAntibot::OnSetAuthed(int ClientId, int Level) {}
 
 void CAntibot::OnEngineTick() {}
 void CAntibot::OnEngineClientJoin(int ClientId, bool Sixup) {}

@@ -26,6 +26,7 @@ ANTIBOTAPI void AntibotOnHammerHit(int ClientId, int TargetId);
 ANTIBOTAPI void AntibotOnDirectInput(int ClientId);
 ANTIBOTAPI void AntibotOnCharacterTick(int ClientId);
 ANTIBOTAPI void AntibotOnHookAttach(int ClientId, bool Player);
+ANTIBOTAPI void AntibotOnSetAuthed(int ClientId, int Level);
 ANTIBOTAPI void AntibotOnEngineTick(void);
 ANTIBOTAPI void AntibotOnEngineClientJoin(int ClientId, bool Sixup);
 ANTIBOTAPI void AntibotOnEngineClientDrop(int ClientId, const char *pReason);

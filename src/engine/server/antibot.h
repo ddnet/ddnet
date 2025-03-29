@@ -52,6 +52,7 @@ public:
 	void OnDirectInput(int ClientId) override;
 	void OnCharacterTick(int ClientId) override;
 	void OnHookAttach(int ClientId, bool Player) override;
+	void OnSetAuthed(int ClientId, int Level) override;
 
 	void ConsoleCommand(const char *pCommand) override;
 };

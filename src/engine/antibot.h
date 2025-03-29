@@ -20,6 +20,7 @@ public:
 	virtual void OnDirectInput(int ClientId) = 0;
 	virtual void OnCharacterTick(int ClientId) = 0;
 	virtual void OnHookAttach(int ClientId, bool Player) = 0;
+	virtual void OnSetAuthed(int ClientId, int Level) = 0;
 
 	// Commands
 	virtual void ConsoleCommand(const char *pCommand) = 0;

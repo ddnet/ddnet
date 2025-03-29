@@ -4502,6 +4502,7 @@ void CGameContext::OnSetAuthed(int ClientId, int Level)
 			m_TeeHistorian.RecordAuthLogout(ClientId);
 		}
 	}
+	Antibot()->OnSetAuthed(ClientId, Level);
 }
 
 void CGameContext::SendRecord(int ClientId)
