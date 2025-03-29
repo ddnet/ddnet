@@ -2773,25 +2773,25 @@ if(SERVER)
     ${LIBS}
   )
 
-  add_library(server-without-main OBJECT
+  add_library(game-server-without-main OBJECT
       ${DEPS}
       ${SERVER_SRC}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
   )
-  set_property(TARGET server-without-main
+  set_property(TARGET game-server-without-main
       PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
   )
-  target_link_libraries(server-without-main ${LIBS_SERVER})
-  list(APPEND TARGETS_OWN server-without-main)
-  list(APPEND TARGETS_LINK server-without-main)
+  target_link_libraries(game-server-without-main ${LIBS_SERVER})
+  list(APPEND TARGETS_OWN game-server-without-main)
+  list(APPEND TARGETS_LINK game-server-without-main)
 
   # Target
   if(TARGET_OS STREQUAL "android")
     add_library(game-server SHARED
       ${DEPS}
-      $<TARGET_OBJECTS:server-without-main>
+      $<TARGET_OBJECTS:game-server-without-main>
       "${PROJECT_SOURCE_DIR}/src/engine/server/main.cpp"
       ${SERVER_ICON}
       $<TARGET_OBJECTS:engine-shared>
@@ -2803,7 +2803,7 @@ if(SERVER)
       ${DEPS}
       "${PROJECT_SOURCE_DIR}/src/engine/server/main.cpp"
       ${SERVER_ICON}
-      $<TARGET_OBJECTS:server-without-main>
+      $<TARGET_OBJECTS:game-server-without-main>
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
@@ -3007,7 +3007,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
   add_executable(${TARGET_TESTRUNNER} EXCLUDE_FROM_ALL
     ${TESTS}
     ${TESTS_EXTRA}
-    $<TARGET_OBJECTS:server-without-main>
+    $<TARGET_OBJECTS:game-server-without-main>
     $<TARGET_OBJECTS:engine-gfx>
     $<TARGET_OBJECTS:engine-shared>
     $<TARGET_OBJECTS:game-shared>
