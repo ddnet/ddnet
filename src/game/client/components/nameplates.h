@@ -8,7 +8,7 @@
 #include <game/client/component.h>
 #include <game/generated/protocol.h>
 
-class CNamePlateRenderData
+class CNamePlateData
 {
 public:
 	bool m_InGame;
@@ -42,12 +42,11 @@ public:
 	float m_FontSizeHookStrongWeak;
 };
 
-class CNamePlate;
-
 class CNamePlates : public CComponent
 {
 private:
-	CNamePlate *m_pNamePlates;
+	class CNamePlatesData;
+	CNamePlatesData *m_pData;
 
 public:
 	void RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha);
