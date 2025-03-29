@@ -99,7 +99,7 @@ protected:
 	float m_LocalTime = 0.0f;
 	float m_GlobalTime = 0.0f;
 	float m_RenderFrameTime = 0.0001f;
-	float m_FrameTimeAvg = 0.0001f;
+	float m_FrameTimeAverage = 0.0001f;
 
 	TLoadingCallback m_LoadingCallback = nullptr;
 
@@ -158,7 +158,7 @@ public:
 	inline float RenderFrameTime() const { return m_RenderFrameTime; }
 	inline float LocalTime() const { return m_LocalTime; }
 	inline float GlobalTime() const { return m_GlobalTime; }
-	inline float FrameTimeAvg() const { return m_FrameTimeAvg; }
+	inline float FrameTimeAverage() const { return m_FrameTimeAverage; }
 
 	// actions
 	virtual void Connect(const char *pAddress, const char *pPassword = nullptr) = 0;
