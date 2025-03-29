@@ -337,7 +337,7 @@ void CTrails::OnRender()
 				}
 				else
 				{
- 					Top = Part.Top;
+					Top = Part.Top;
 					Bot = Part.Bot;
 				}
 
