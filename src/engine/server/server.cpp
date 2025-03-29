@@ -35,6 +35,8 @@
 #include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
 
+#include <antibot/antibot_data.h>
+#include <game/generated/protocol.h>
 #include <game/version.h>
 
 // DDRace
@@ -2458,7 +2460,24 @@ void CServer::FillAntibot(CAntibotRoundData *pData)
 			pPlayer->m_DnsblNone = m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_NONE;
 			pPlayer->m_DnsblPending = m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_PENDING;
 			pPlayer->m_DnsblBlacklisted = m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED;
-			pPlayer->m_Authed = m_aClients[ClientId].m_Authed > AUTHED_NO;
+			switch(m_aClients[ClientId].m_Authed)
+			{
+			case AUTHED_NO:
+				pPlayer->m_AuthLevel = ANTIBOT_AUTHED_NO;
+				break;
+			case AUTHED_HELPER:
+				pPlayer->m_AuthLevel = ANTIBOT_AUTHED_HELPER;
+				break;
+			case AUTHED_MOD:
+				pPlayer->m_AuthLevel = ANTIBOT_AUTHED_MOD;
+				break;
+			case AUTHED_ADMIN:
+				pPlayer->m_AuthLevel = ANTIBOT_AUTHED_ADMIN;
+				break;
+			default:
+				dbg_assert(false, "auth level %d not supported by antibot", m_aClients[ClientId].m_Authed);
+				break;
+			}
 		}
 	}
 }
