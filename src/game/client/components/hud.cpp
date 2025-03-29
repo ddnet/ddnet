@@ -26,8 +26,6 @@
 
 CHud::CHud()
 {
-	// won't work if zero
-	m_FrameTimeAvg = 0.0f;
 	m_FPSTextContainerIndex.Reset();
 	m_DDRaceEffectsTextContainerIndex.Reset();
 	m_PlayerAngleTextContainerIndex.Reset();
@@ -521,11 +519,9 @@ void CHud::RenderTextInfo()
 #endif
 	if(Showfps)
 	{
-		// calculate avg. fps
-		m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;
-		char aBuf[64];
-		int FrameTime = (int)(1.0f / m_FrameTimeAvg + 0.5f);
-		str_format(aBuf, sizeof(aBuf), "%d", FrameTime);
+		char aBuf[16];
+		const int FramesPerSecond = round_to_int(1.0f / Client()->FrameTimeAverage());
+		str_format(aBuf, sizeof(aBuf), "%d", FramesPerSecond);
 
 		static float s_TextWidth0 = TextRender()->TextWidth(12.f, "0", -1, -1.0f);
 		static float s_TextWidth00 = TextRender()->TextWidth(12.f, "00", -1, -1.0f);
@@ -534,7 +530,7 @@ void CHud::RenderTextInfo()
 		static float s_TextWidth00000 = TextRender()->TextWidth(12.f, "00000", -1, -1.0f);
 		static const float s_aTextWidth[5] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000};
 
-		int DigitIndex = GetDigitsIndex(FrameTime, 4);
+		int DigitIndex = GetDigitsIndex(FramesPerSecond, 4);
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_aTextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);

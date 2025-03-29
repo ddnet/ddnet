@@ -1,6 +1,7 @@
 #ifndef BASE_TYPES_H
 #define BASE_TYPES_H
 
+#include <cstdint>
 #include <ctime>
 
 enum class TRISTATE
@@ -72,4 +73,16 @@ typedef struct NETADDR
 	bool operator==(const NETADDR &other) const;
 	bool operator!=(const NETADDR &other) const { return !(*this == other); }
 } NETADDR;
+
+/**
+ * @ingroup Network-General
+ */
+typedef struct NETSTATS
+{
+	uint64_t sent_packets;
+	uint64_t sent_bytes;
+	uint64_t recv_packets;
+	uint64_t recv_bytes;
+} NETSTATS;
+
 #endif // BASE_TYPES_H

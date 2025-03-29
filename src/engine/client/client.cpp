@@ -860,64 +860,74 @@ void CClient::SnapSetStaticsize7(int ItemType, int Size)
 void CClient::RenderDebug()
 {
 	if(!g_Config.m_Debug)
+	{
 		return;
+	}
 
-	static NETSTATS s_Prev, s_Current;
-	static int64_t s_LastSnapTime = 0;
-	static float s_FrameTimeAvg = 0;
+	const std::chrono::nanoseconds Now = time_get_nanoseconds();
+	if(Now - m_NetstatsLastUpdate > 1s)
+	{
+		m_NetstatsLastUpdate = Now;
+		m_NetstatsPrev = m_NetstatsCurrent;
+		net_stats(&m_NetstatsCurrent);
+	}
+
 	char aBuffer[512];
+	const float FontSize = 16.0f;
 
 	Graphics()->TextureSet(m_DebugFont);
 	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
 	Graphics()->QuadsBegin();
 
-	if(time_get() - s_LastSnapTime > time_freq())
+	str_format(aBuffer, sizeof(aBuffer), "Game/predicted tick: %d/%d", m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy]);
+	Graphics()->QuadsText(2, 2, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "Prediction time: %d ms", GetPredictionTime());
+	Graphics()->QuadsText(2, 2 + FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "FPS: %3d", round_to_int(1.0f / m_FrameTimeAverage));
+	Graphics()->QuadsText(20.0f * FontSize, 2, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "Frametime: %4d us", round_to_int(m_FrameTimeAverage * 1000000.0f));
+	Graphics()->QuadsText(20.0f * FontSize, 2 + FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Texture memory", Graphics()->TextureMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Buffer memory", Graphics()->BufferMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2 + FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Streamed memory", Graphics()->StreamedMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2 + 2 * FontSize, FontSize, aBuffer);
+
+	str_format(aBuffer, sizeof(aBuffer), "%16s: %" PRIu64 " KiB", "Staging memory", Graphics()->StagingMemoryUsage() / 1024);
+	Graphics()->QuadsText(32.0f * FontSize, 2 + 3 * FontSize, FontSize, aBuffer);
+
+	// Network
 	{
-		s_LastSnapTime = time_get();
-		s_Prev = s_Current;
-		net_stats(&s_Current);
+		const uint64_t OverheadSize = 14 + 20 + 8; // ETH + IP + UDP
+		const uint64_t SendPackets = m_NetstatsCurrent.sent_packets - m_NetstatsPrev.sent_packets;
+		const uint64_t SendBytes = m_NetstatsCurrent.sent_bytes - m_NetstatsPrev.sent_bytes;
+		const uint64_t SendTotal = SendBytes + SendPackets * OverheadSize;
+		const uint64_t RecvPackets = m_NetstatsCurrent.recv_packets - m_NetstatsPrev.recv_packets;
+		const uint64_t RecvBytes = m_NetstatsCurrent.recv_bytes - m_NetstatsPrev.recv_bytes;
+		const uint64_t RecvTotal = RecvBytes + RecvPackets * OverheadSize;
+
+		str_format(aBuffer, sizeof(aBuffer), "Send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) average: %5" PRIu64,
+			SendPackets, SendBytes, SendPackets * OverheadSize, SendTotal, (SendTotal * 8) / 1024, SendPackets == 0 ? 0 : SendBytes / SendPackets);
+		Graphics()->QuadsText(2, 2 + 3 * FontSize, FontSize, aBuffer);
+		str_format(aBuffer, sizeof(aBuffer), "Recv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) average: %5" PRIu64,
+			RecvPackets, RecvBytes, RecvPackets * OverheadSize, RecvTotal, (RecvTotal * 8) / 1024, RecvPackets == 0 ? 0 : RecvBytes / RecvPackets);
+		Graphics()->QuadsText(2, 2 + 4 * FontSize, FontSize, aBuffer);
 	}
 
-	/*
-		eth = 14
-		ip = 20
-		udp = 8
-		total = 42
-	*/
-	s_FrameTimeAvg = s_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
-	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB/%" PRIu64 " KiB) fps: %3d",
-		m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy],
-		(Graphics()->TextureMemoryUsage() / 1024),
-		(Graphics()->BufferMemoryUsage() / 1024),
-		(Graphics()->StreamedMemoryUsage() / 1024),
-		(Graphics()->StagingMemoryUsage() / 1024),
-		(int)(1.0f / s_FrameTimeAvg + 0.5f));
-	Graphics()->QuadsText(2, 2, 16, aBuffer);
-
+	// Snapshots
 	{
-		uint64_t SendPackets = (s_Current.sent_packets - s_Prev.sent_packets);
-		uint64_t SendBytes = (s_Current.sent_bytes - s_Prev.sent_bytes);
-		uint64_t SendTotal = SendBytes + SendPackets * 42;
-		uint64_t RecvPackets = (s_Current.recv_packets - s_Prev.recv_packets);
-		uint64_t RecvBytes = (s_Current.recv_bytes - s_Prev.recv_bytes);
-		uint64_t RecvTotal = RecvBytes + RecvPackets * 42;
-
-		if(!SendPackets)
-			SendPackets++;
-		if(!RecvPackets)
-			RecvPackets++;
-		str_format(aBuffer, sizeof(aBuffer), "send: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64 "\nrecv: %3" PRIu64 " %5" PRIu64 "+%4" PRIu64 "=%5" PRIu64 " (%3" PRIu64 " Kibit/s) avg: %5" PRIu64,
-			SendPackets, SendBytes, SendPackets * 42, SendTotal, (SendTotal * 8) / 1024, SendBytes / SendPackets,
-			RecvPackets, RecvBytes, RecvPackets * 42, RecvTotal, (RecvTotal * 8) / 1024, RecvBytes / RecvPackets);
-		Graphics()->QuadsText(2, 14, 16, aBuffer);
-	}
-
-	// render rates
-	{
-		int y = 0;
+		const float OffsetY = 2 + 6 * FontSize;
+		int Row = 0;
 		str_format(aBuffer, sizeof(aBuffer), "%5s %20s: %8s %8s %8s", "ID", "Name", "Rate", "Updates", "R/U");
-		Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-		y++;
+		Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+		Row++;
 		for(int i = 0; i < NUM_NETOBJTYPES; i++)
 		{
 			if(m_SnapshotDelta.GetDataRate(i))
@@ -930,15 +940,15 @@ void CClient::RenderDebug()
 					GameClient()->GetItemName(i),
 					m_SnapshotDelta.GetDataRate(i) / 8, m_SnapshotDelta.GetDataUpdates(i),
 					(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
-				Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-				y++;
+				Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+				Row++;
 			}
 		}
 		for(int i = CSnapshot::MAX_TYPE; i > (CSnapshot::MAX_TYPE - 64); i--)
 		{
 			if(m_SnapshotDelta.GetDataRate(i) && m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT])
 			{
-				int Type = m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT]->m_pAltSnap->GetExternalItemType(i);
+				const int Type = m_aapSnapshots[g_Config.m_ClDummy][IClient::SNAP_CURRENT]->m_pAltSnap->GetExternalItemType(i);
 				if(Type == UUID_INVALID)
 				{
 					str_format(
@@ -950,8 +960,8 @@ void CClient::RenderDebug()
 						m_SnapshotDelta.GetDataRate(i) / 8,
 						m_SnapshotDelta.GetDataUpdates(i),
 						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
-					Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-					y++;
+					Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+					Row++;
 				}
 				else if(Type != i)
 				{
@@ -964,15 +974,13 @@ void CClient::RenderDebug()
 						m_SnapshotDelta.GetDataRate(i) / 8,
 						m_SnapshotDelta.GetDataUpdates(i),
 						(m_SnapshotDelta.GetDataRate(i) / m_SnapshotDelta.GetDataUpdates(i)) / 8);
-					Graphics()->QuadsText(2, 100 + y * 12, 16, aBuffer);
-					y++;
+					Graphics()->QuadsText(2, OffsetY + Row * 12, FontSize, aBuffer);
+					Row++;
 				}
 			}
 		}
 	}
 
-	str_format(aBuffer, sizeof(aBuffer), "pred: %d ms", GetPredictionTime());
-	Graphics()->QuadsText(2, 70, 16, aBuffer);
 	Graphics()->QuadsEnd();
 }
 
@@ -3280,7 +3288,7 @@ void CClient::Run()
 					}
 				}
 
-				m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
+				m_FrameTimeAverage = m_FrameTimeAverage * 0.9f + m_RenderFrameTime * 0.1f;
 
 				// keep the overflow time - it's used to make sure the gfx refreshrate is reached
 				int64_t AdditionalTime = g_Config.m_GfxRefreshRate ? ((Now - LastRenderTime) - (time_freq() / (int64_t)g_Config.m_GfxRefreshRate)) : 0;
