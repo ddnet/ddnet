@@ -2121,63 +2121,63 @@ Show spectator cursor
 == Afișează cursor spectator
 
 No demo with this filename exists
-== 
+== Nu există niciun demo cu acest nume de fișier
 
 Map size
-== 
+== Dimensiunea hărții
 
 Show number of spectators
-== 
+== Afișează numărul de spectatori
 
 [Show name plates]
 None
-== 
+== Niciuna
 
 [Show name plates]
 Own
-== 
+== Proprie
 
 [Show name plates]
 Others
-== 
+== Altele
 
 [Show name plates]
 All
-== 
+== Toate
 
 Name plates offset
-== 
+== Offset plăcuțe de nume
 
 Show friend icon in name plates
-== 
+== Afișați indicatorul de prieten în plăcuțele de nume
 
 Show client IDs on a seperate line
-== 
+== Arată ID-urile de client pe o linie separată
 
 Client IDs size
-== 
+== Dimensiunea ID-urilor de client
 
 Show players' key presses
-== 
+== Afișați tastele apăsate de jucători
 
 [Show players' key presses]
 None
-== 
+== Niciuna
 
 [Show players' key presses]
 Own
-== 
+== Proprie
 
 [Show players' key presses]
 Others
-== 
+== Altele
 
 [Show players' key presses]
 All
-== 
+== Toate
 
 Preview dummy's name plate
-== 
+== Previzualizați plăcuța de nume a manechinului
 
 AntiPing: prediction margin
-== 
+== AntiPing: marja de predicție
