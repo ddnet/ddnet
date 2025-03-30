@@ -52,13 +52,13 @@ public:
 		str_copy(m_aAppName, pAppname);
 		if(!Test)
 		{
-			dbg_msg("engine", "running on %s-%s-%s", CONF_FAMILY_STRING, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
-			dbg_msg("engine", "arch is %s", CONF_ARCH_ENDIAN_STRING);
+			log_info("engine", "running on %s-%s-%s", CONF_FAMILY_STRING, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
+			log_info("engine", "arch is %s", CONF_ARCH_ENDIAN_STRING);
 
 			char aVersionStr[128];
 			if(os_version_str(aVersionStr, sizeof(aVersionStr)))
 			{
-				dbg_msg("engine", "operating system version: %s", aVersionStr);
+				log_info("engine", "operating system version: %s", aVersionStr);
 			}
 
 			// init the network
@@ -89,8 +89,6 @@ public:
 
 	void AddJob(std::shared_ptr<IJob> pJob) override
 	{
-		if(g_Config.m_Debug)
-			dbg_msg("engine", "job added");
 		m_JobPool.Add(std::move(pJob));
 	}
 
