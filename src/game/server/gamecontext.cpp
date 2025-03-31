@@ -1338,6 +1338,8 @@ void CGameContext::OnTick()
 }
 
 // Server hooks
+
+// Called on all incoming NETMSG_INPUT, reformats player flags for sixup compatibility
 void CGameContext::OnClientPrepareInput(int ClientId, void *pInput)
 {
 	auto *pPlayerInput = (CNetObj_PlayerInput *)pInput;
@@ -1345,10 +1347,11 @@ void CGameContext::OnClientPrepareInput(int ClientId, void *pInput)
 		pPlayerInput->m_PlayerFlags = PlayerFlags_SevenToSix(pPlayerInput->m_PlayerFlags);
 }
 
-void CGameContext::OnClientDirectInput(int ClientId, void *pInput)
+// Called on all incoming NETMSG_INPUT, only sets player flags and tracks afk status
+void CGameContext::OnClientFreshInput(int ClientId, void *pInput)
 {
 	if(!m_World.m_Paused)
-		m_apPlayers[ClientId]->OnDirectInput((CNetObj_PlayerInput *)pInput);
+		m_apPlayers[ClientId]->OnPlayerFreshInput((CNetObj_PlayerInput *)pInput);
 
 	int Flags = ((CNetObj_PlayerInput *)pInput)->m_PlayerFlags;
 	if((Flags & 256) || (Flags & 512))
@@ -1357,26 +1360,11 @@ void CGameContext::OnClientDirectInput(int ClientId, void *pInput)
 	}
 }
 
+// Called once per input that happens on this tick.
+// pInput is nullptr if the client did not send any fresh input this tick.
 void CGameContext::OnClientPredictedInput(int ClientId, void *pInput)
 {
-	// early return if no input at all has been sent by a player
-	if(pInput == nullptr && !m_aPlayerHasInput[ClientId])
-		return;
-
-	// set to last sent input when no new input has been sent
-	CNetObj_PlayerInput *pApplyInput = (CNetObj_PlayerInput *)pInput;
-	if(pApplyInput == nullptr)
-	{
-		pApplyInput = &m_aLastPlayerInput[ClientId];
-	}
-
-	if(!m_World.m_Paused)
-		m_apPlayers[ClientId]->OnPredictedInput(pApplyInput);
-}
-
-void CGameContext::OnClientPredictedEarlyInput(int ClientId, void *pInput)
-{
-	// early return if no input at all has been sent by a player
+	// early return if no input has ever been sent by the player
 	if(pInput == nullptr && !m_aPlayerHasInput[ClientId])
 		return;
 
@@ -1388,16 +1376,12 @@ void CGameContext::OnClientPredictedEarlyInput(int ClientId, void *pInput)
 	}
 	else
 	{
-		// Store input in this function and not in `OnClientPredictedInput`,
-		// because this function is called on all inputs, while
-		// `OnClientPredictedInput` is only called on the first input of each
-		// tick.
 		mem_copy(&m_aLastPlayerInput[ClientId], pApplyInput, sizeof(m_aLastPlayerInput[ClientId]));
 		m_aPlayerHasInput[ClientId] = true;
 	}
 
 	if(!m_World.m_Paused)
-		m_apPlayers[ClientId]->OnPredictedEarlyInput(pApplyInput);
+		m_apPlayers[ClientId]->OnPlayerInput(pApplyInput);
 
 	if(m_TeeHistorianActive)
 	{
