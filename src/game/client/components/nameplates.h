@@ -34,7 +34,7 @@ public:
 	enum
 	{
 		HOOKSTRONGWEAK_WEAK,
-		HOOKSTRONGWEAK_UNKNOWN,
+		HOOKSTRONGWEAK_NEUTRAL,
 		HOOKSTRONGWEAK_STRONG
 	} m_HookStrongWeak;
 	bool m_ShowHookStrongWeakId;
