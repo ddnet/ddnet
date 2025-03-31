@@ -93,54 +93,32 @@ More examples can be found [here](https://github.com/ddnet/ddnet/pull/8288#issue
 
 DDNet inherited the hungarian notation like prefixes from [Teeworlds](https://www.teeworlds.com/?page=docs&wiki=nomenclature)
 
-`m_`
-
-Class member
-
-`g_`
-
-Global variable
-
-`s_`
-
-Static variable
-
-`p`
-
-Pointer
-
-`a`
-
-Fixed array
-
-Combine them appropriately.
-Class Prefixes
-
-`C`
-
-Class, CMyClass, This goes for structures as well.
-
-`I`
-
-Interface, IMyClass
-
 Only use those prefixes. The ddnet code base does **NOT** follow the whole hungarian notation strictly.
+
 Do **NOT** use `c` for constants or `b` for booleans or `i` for integers.
 
-Examples:
+C-Style function pointers are pointers, but `std::function` are not.
 
-```C++
-class CFoo
-{
-    int m_Foo = 0;
-    const char *m_pText = "";
+#### For variables
 
-    void Func(int Argument, int *pPointer)
-    {
-        int LocalVariable = 0;
-    };
-};
-```
+| Prefix | Usage | Example |
+| --- | --- | --- |
+| `m_` | Class member | `int m_Mode`, `CLine m_aLines[]` |
+| `g_` | Global member | `CConfig g_Config` |
+| `s_` | Static variable | `static EHistoryType s_HistoryType`, `static char *ms_apSkinNameVariables[NUM_DUMMIES]` |
+| `p` | Both raw and smart pointers | `char *pName`, `void **ppUserData`, `std::unique_ptr<IStorage> pStorage` |
+| `a` | Fixed sized arrays and `std::array`s | `float aWeaponInitialOffset[NUM_WEAPONS]`, `std::array<char, 12> aOriginalData` |
+| `v` | Vectors (`std::vector`) | `std::vector<CLanguage> m_vLanguages` |
+
+Combine these appropriately
+
+#### For classes
+
+| Prefix | Usage | Example |
+| --- | --- | --- |
+| `C` | Classes | `class CTextCursor` |
+| `I` | Interfaces | `class IFavorites` |
+| `S` | ~~Structs (Use classes instead)~~ | ~~`struct STextContainerUsages`~~ |
 
 ### The usage of `goto` is not encouraged
 
