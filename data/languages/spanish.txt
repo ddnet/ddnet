@@ -341,7 +341,7 @@ Show ingame HUD
 == Mostrar HUD durante el juego
 
 Show name plates
-== Mostrar apodos
+== Mostrar nombres
 
 Show only chat messages from friends
 == Recibir mensajes solo de amigos
@@ -407,7 +407,7 @@ Use sounds
 == Usar sonidos
 
 Use team colors for name plates
-== Usar el color de equipo en los apodos
+== Usar el color de equipo en los nombres
 
 V-Sync
 == V-Sync
@@ -502,7 +502,7 @@ LAN
 == LAN
 
 Name plates size
-== Tamaño de la fuente de los apodos
+== Tamaño de la fuente de los nombres
 
 Successfully saved the replay!
 == ¡Repetición guardada con éxito!
@@ -2115,69 +2115,69 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Spanish translation by ReGnuM, Ninja Style, Alexandre, GaBOr, HeroiAmarelo, Mortcheck, FeaRZ, Ryozuki, Headshot and Deëivid!
+== Traducción al español por ReGnuM, Ninja Style, Alexandre, GaBOr, HeroiAmarelo, Mortcheck, FeaRZ, Ryozuki, Headshot y Deëivid!
 
 Show spectator cursor
 == Mostrar cursor de espectador
 
 No demo with this filename exists
-== 
+== No existe una demo con este nombre
 
 Map size
-== 
+== Tamaño del mapa
 
 Show number of spectators
-== 
+== Mostrar el número de espectadores
 
 [Show name plates]
 None
-== 
+== Ninguno
 
 [Show name plates]
 Own
-== 
+== El propio
 
 [Show name plates]
 Others
-== 
+== De otros
 
 [Show name plates]
 All
-== 
+== De todos
 
 Name plates offset
-== 
+== Desplazamiento del nombre
 
 Show friend icon in name plates
-== 
+== Mostrar icono de amigo en los nombres
 
 Show client IDs on a seperate line
-== 
+== Mostrar las IDs de cliente en una línea separada
 
 Client IDs size
-== 
+== Tamaño de las IDs de cliente
 
 Show players' key presses
-== 
+== Mostrar las teclas presionadas por los jugadores
 
 [Show players' key presses]
 None
-== 
+== Ninguna
 
 [Show players' key presses]
 Own
-== 
+== Las propias
 
 [Show players' key presses]
 Others
-== 
+== De otros
 
 [Show players' key presses]
 All
-== 
+== De todos
 
 Preview dummy's name plate
-== 
+== Previsualizar el nombre del dummy
 
 AntiPing: prediction margin
-== 
+== AntiPing: margen de predicción
