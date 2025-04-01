@@ -3,6 +3,10 @@
 <!-- Note that builds and other checks will be run for your change. Don't feel intimidated by failures in some of the checks. If you can't resolve them yourself, experienced devs can also resolve them before merging your pull request. -->
 
 ## Checklist
+<!-- Make sure to read CONTRIBUTING.md before creating a pull request -->
+
+If this is a new feature or tile, this is
+the issue discussing and approving the implementation: <!-- # replace issue here -->
 
 - [ ] Tested the change ingame
 - [ ] Provided screenshots if it is a visual change
