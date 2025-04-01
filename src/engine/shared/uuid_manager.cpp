@@ -118,7 +118,7 @@ static int GetId(int Index)
 
 void CUuidManager::RegisterName(int Id, const char *pName)
 {
-	dbg_assert(GetIndex(Id) == (int)m_vNames.size(), "names must be registered with increasing ID");
+	dbg_assert(GetIndex(Id) == (int)m_vNames.size(), "names must be registered with increasing ID (got=%d want=%d)", GetIndex(Id), (int)m_vNames.size());
 	CName Name;
 	Name.m_pName = pName;
 	Name.m_Uuid = CalculateUuid(pName);
