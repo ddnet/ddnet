@@ -2214,14 +2214,6 @@ int net_socket_read_wait(NETSOCKET sock, int time);
  */
 void swap_endian(void *data, unsigned elem_size, unsigned num);
 
-typedef struct
-{
-	uint64_t sent_packets;
-	uint64_t sent_bytes;
-	uint64_t recv_packets;
-	uint64_t recv_bytes;
-} NETSTATS;
-
 void net_stats(NETSTATS *stats);
 
 int str_toint(const char *str);

@@ -43,7 +43,6 @@ struct SScoreInfo
 class CHud : public CComponent
 {
 	float m_Width, m_Height;
-	float m_FrameTimeAvg;
 
 	int m_HudQuadContainerIndex;
 	SScoreInfo m_aScoreInfo[2];
