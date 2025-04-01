@@ -4,7 +4,7 @@ CLayerFront::CLayerFront(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Front");
-	m_Front = 1;
+	m_HasFront = true;
 }
 
 void CLayerFront::SetTile(int x, int y, CTile Tile)

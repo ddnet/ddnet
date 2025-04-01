@@ -9,7 +9,7 @@ CLayerGame::CLayerGame(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Game");
-	m_Game = 1;
+	m_HasGame = true;
 }
 
 CLayerGame::~CLayerGame() = default;

@@ -164,7 +164,7 @@ public:
 
 	void FlagModified(int x, int y, int w, int h);
 
-	int m_Game;
+	bool m_HasGame;
 	int m_Image;
 	int m_Width;
 	int m_Height;
@@ -179,11 +179,11 @@ public:
 	int m_AutoMapperReference;
 	int m_Seed;
 	bool m_AutoAutoMap;
-	int m_Tele;
-	int m_Speedup;
-	int m_Front;
-	int m_Switch;
-	int m_Tune;
+	bool m_HasTele;
+	bool m_HasSpeedup;
+	bool m_HasFront;
+	bool m_HasSwitch;
+	bool m_HasTune;
 	char m_aFileName[IO_MAX_PATH_LENGTH];
 
 	EditorTileStateChangeHistory<STileStateChange> m_TilesHistory;
