@@ -523,9 +523,6 @@ void CCharacter::FireWeapon()
 				m_pPlayer->GetCid(), m_Core.m_ActiveWeapon);
 			pTarget->UnFreeze();
 
-			if(m_FreezeHammer)
-				pTarget->Freeze();
-
 			Antibot()->OnHammerHit(m_pPlayer->GetCid(), pTarget->GetPlayer()->GetCid());
 
 			Hits++;
@@ -1344,12 +1341,42 @@ void CCharacter::FillAntibot(CAntibotCharacterData *pData)
 	pData->m_HookedPlayer = m_Core.HookedPlayer();
 	pData->m_SpawnTick = m_SpawnTick;
 	pData->m_WeaponChangeTick = m_WeaponChangeTick;
+
+	// 0
+	pData->m_aLatestInputs[0].m_Direction = m_LatestInput.m_Direction;
 	pData->m_aLatestInputs[0].m_TargetX = m_LatestInput.m_TargetX;
 	pData->m_aLatestInputs[0].m_TargetY = m_LatestInput.m_TargetY;
+	pData->m_aLatestInputs[0].m_Jump = m_LatestInput.m_Jump;
+	pData->m_aLatestInputs[0].m_Fire = m_LatestInput.m_Fire;
+	pData->m_aLatestInputs[0].m_Hook = m_LatestInput.m_Hook;
+	pData->m_aLatestInputs[0].m_PlayerFlags = m_LatestInput.m_PlayerFlags;
+	pData->m_aLatestInputs[0].m_WantedWeapon = m_LatestInput.m_WantedWeapon;
+	pData->m_aLatestInputs[0].m_NextWeapon = m_LatestInput.m_NextWeapon;
+	pData->m_aLatestInputs[0].m_PrevWeapon = m_LatestInput.m_PrevWeapon;
+
+	// 1
+	pData->m_aLatestInputs[1].m_Direction = m_LatestPrevInput.m_Direction;
 	pData->m_aLatestInputs[1].m_TargetX = m_LatestPrevInput.m_TargetX;
 	pData->m_aLatestInputs[1].m_TargetY = m_LatestPrevInput.m_TargetY;
+	pData->m_aLatestInputs[1].m_Jump = m_LatestPrevInput.m_Jump;
+	pData->m_aLatestInputs[1].m_Fire = m_LatestPrevInput.m_Fire;
+	pData->m_aLatestInputs[1].m_Hook = m_LatestPrevInput.m_Hook;
+	pData->m_aLatestInputs[1].m_PlayerFlags = m_LatestPrevInput.m_PlayerFlags;
+	pData->m_aLatestInputs[1].m_WantedWeapon = m_LatestPrevInput.m_WantedWeapon;
+	pData->m_aLatestInputs[1].m_NextWeapon = m_LatestPrevInput.m_NextWeapon;
+	pData->m_aLatestInputs[1].m_PrevWeapon = m_LatestPrevInput.m_PrevWeapon;
+
+	// 2
+	pData->m_aLatestInputs[2].m_Direction = m_LatestPrevPrevInput.m_Direction;
 	pData->m_aLatestInputs[2].m_TargetX = m_LatestPrevPrevInput.m_TargetX;
 	pData->m_aLatestInputs[2].m_TargetY = m_LatestPrevPrevInput.m_TargetY;
+	pData->m_aLatestInputs[2].m_Jump = m_LatestPrevPrevInput.m_Jump;
+	pData->m_aLatestInputs[2].m_Fire = m_LatestPrevPrevInput.m_Fire;
+	pData->m_aLatestInputs[2].m_Hook = m_LatestPrevPrevInput.m_Hook;
+	pData->m_aLatestInputs[2].m_PlayerFlags = m_LatestPrevPrevInput.m_PlayerFlags;
+	pData->m_aLatestInputs[2].m_WantedWeapon = m_LatestPrevPrevInput.m_WantedWeapon;
+	pData->m_aLatestInputs[2].m_NextWeapon = m_LatestPrevPrevInput.m_NextWeapon;
+	pData->m_aLatestInputs[2].m_PrevWeapon = m_LatestPrevPrevInput.m_PrevWeapon;
 }
 
 void CCharacter::HandleBroadcast()
@@ -2408,7 +2435,6 @@ void CCharacter::DDRaceInit()
 		m_Core.m_LaserHitDisabled = true;
 	}
 	m_Core.m_Jumps = 2;
-	m_FreezeHammer = false;
 
 	int Team = Teams()->m_Core.Team(m_Core.m_Id);
 

@@ -539,6 +539,7 @@ public:
 	void UpdateColorPipette();
 	void RenderMousePointer();
 	void RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles);
+	void RenderSwitchEntities(const std::shared_ptr<CLayerTiles> &pTiles);
 
 	std::vector<CQuad *> GetSelectedQuads();
 	std::shared_ptr<CLayer> GetSelectedLayerType(int Index, int Type) const;

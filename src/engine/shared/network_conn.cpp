@@ -20,7 +20,7 @@ void CNetConnection::ClearPeerAddr()
 
 void CNetConnection::ResetStats()
 {
-	mem_zero(&m_Stats, sizeof(m_Stats));
+	m_Stats = {};
 	ClearPeerAddr();
 	m_LastUpdateTime = 0;
 }

@@ -165,7 +165,7 @@ void CGraphicsBackend_Threaded::ProcessError(const SGfxErrorContainer &Error)
 		else
 			VerboseStr.append(ErrStr.m_Err);
 	}
-	dbg_assert(false, VerboseStr.c_str());
+	dbg_assert(false, "%s", VerboseStr.c_str());
 }
 
 bool CGraphicsBackend_Threaded::GetWarning(std::vector<std::string> &WarningStrings)

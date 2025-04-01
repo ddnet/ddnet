@@ -2682,7 +2682,6 @@ void CGameClient::CClientData::Reset()
 	m_aClan[0] = '\0';
 	m_Country = -1;
 	m_aSkinName[0] = '\0';
-	m_SkinColor = 0;
 
 	m_Team = 0;
 	m_Emoticon = 0;
@@ -2711,7 +2710,12 @@ void CGameClient::CClientData::Reset()
 	m_Predicted.Reset();
 	m_PrevPredicted.Reset();
 
-	m_pSkinInfo = nullptr;
+	if(m_pSkinInfo != nullptr)
+	{
+		// Make sure other `shared_ptr`s to this skin info will not use the refresh callback that refers to this reset client data
+		m_pSkinInfo->SetRefreshCallback(nullptr);
+		m_pSkinInfo = nullptr;
+	}
 	m_RenderInfo.Reset();
 
 	m_Angle = 0.0f;

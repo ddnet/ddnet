@@ -4726,6 +4726,11 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 
 	std::shared_ptr<CEditorSound> pSound = m_Map.m_vpSounds[m_SelectedSound];
 
+	if(m_ToolbarPreviewSound == pSound->m_SoundId)
+	{
+		m_ToolbarPreviewSound = SoundId;
+	}
+
 	// unload sample
 	Sound()->UnloadSample(pSound->m_SoundId);
 	free(pSound->m_pData);
@@ -8583,6 +8588,66 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 			IGraphics::CQuadItem Quad(Pos.x, Pos.y, Scale.x, Scale.y);
 			Graphics()->QuadsDrawTL(&Quad, 1);
 			Graphics()->QuadsEnd();
+		}
+	}
+}
+
+void CEditor::RenderSwitchEntities(const std::shared_ptr<CLayerTiles> &pTiles)
+{
+	const CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
+	const float TileSize = 32.f;
+
+	std::function<unsigned char(int, int, unsigned char &)> GetIndex;
+	if(pTiles->m_Switch)
+	{
+		CLayerSwitch *pSwitchLayer = ((CLayerSwitch *)(pTiles.get()));
+		GetIndex = [pSwitchLayer](int y, int x, unsigned char &Number) -> unsigned char {
+			if(x < 0 || y < 0 || x >= pSwitchLayer->m_Width || y >= pSwitchLayer->m_Height)
+				return 0;
+			Number = pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Number;
+			return pSwitchLayer->m_pSwitchTile[y * pSwitchLayer->m_Width + x].m_Type - ENTITY_OFFSET;
+		};
+	}
+	else
+	{
+		GetIndex = [pTiles](int y, int x, unsigned char &Number) -> unsigned char {
+			if(x < 0 || y < 0 || x >= pTiles->m_Width || y >= pTiles->m_Height)
+				return 0;
+			Number = 0;
+			return pTiles->m_pTiles[y * pTiles->m_Width + x].m_Index - ENTITY_OFFSET;
+		};
+	}
+
+	ivec2 aOffsets[] = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
+
+	const ColorRGBA OuterColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserDoorOutlineColor));
+	const ColorRGBA InnerColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClLaserDoorInnerColor));
+	const float TicksHead = Client()->GlobalTime() * Client()->GameTickSpeed();
+
+	for(int y = 0; y < pTiles->m_Height; y++)
+	{
+		for(int x = 0; x < pTiles->m_Width; x++)
+		{
+			unsigned char Number = 0;
+			const unsigned char Index = GetIndex(y, x, Number);
+
+			if(Index == ENTITY_DOOR)
+			{
+				for(size_t i = 0; i < sizeof(aOffsets) / sizeof(ivec2); ++i)
+				{
+					unsigned char NumberDoorLength = 0;
+					unsigned char IndexDoorLength = GetIndex(y + aOffsets[i].y, x + aOffsets[i].x, NumberDoorLength);
+					if(IndexDoorLength >= ENTITY_LASER_SHORT && IndexDoorLength <= ENTITY_LASER_LONG)
+					{
+						float XOff = std::cos(i * pi / 4.0f);
+						float YOff = std::sin(i * pi / 4.0f);
+						int Length = (IndexDoorLength - ENTITY_LASER_SHORT + 1) * 3;
+						vec2 Pos(x + 0.5f, y + 0.5f);
+						vec2 To(x + XOff * Length + 0.5f, y + YOff * Length + 0.5f);
+						pGameClient->m_Items.RenderLaser(To * TileSize, Pos * TileSize, OuterColor, InnerColor, 1.0f, TicksHead, (int)LASERTYPE_DOOR);
+					}
+				}
+			}
 		}
 	}
 }

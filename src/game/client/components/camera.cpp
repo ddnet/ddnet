@@ -257,7 +257,13 @@ void CCamera::UpdateCamera()
 		}
 
 		float OffsetAmount = maximum(l - CurrentDeadzone, 0.0f) * (CurrentFollowFactor / 100.0f);
-		m_DyncamTargetCameraOffset = normalize(TargetPos) * OffsetAmount;
+
+		if(IsSpectatingPlayer)
+		{
+			OffsetAmount = minimum(OffsetAmount, 350.0f * m_Zoom);
+		}
+
+		m_DyncamTargetCameraOffset = normalize_pre_length(TargetPos, l) * OffsetAmount;
 	}
 
 	m_LastTargetPos = TargetPos;
