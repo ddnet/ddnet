@@ -644,7 +644,7 @@ void CCharacter::HandleSkippableTiles(int Index)
 		int Force, Type, MaxSpeed = 0;
 		Collision()->GetSpeedup(Index, &Direction, &Force, &MaxSpeed, &Type);
 
-		if(Type == TILE_SPEED_BOOST_OLD) // old buggy shitty spaghetti behavior
+		if(Type == TILE_SPEED_BOOST_OLD)
 		{
 			float TeeAngle, SpeederAngle, DiffAngle, SpeedLeft, TeeSpeed;
 			if(Force == 255 && MaxSpeed)
