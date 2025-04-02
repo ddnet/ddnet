@@ -351,6 +351,16 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 	}
 
 	// render head
+	if(Type == LASERTYPE_DOOR)
+	{
+		Graphics()->TextureClear();
+		Graphics()->QuadsSetRotation(0);
+		Graphics()->SetColor(OuterColor);
+		Graphics()->RenderQuadContainerEx(m_ItemsQuadContainerIndex, m_DoorHeadOffset, 1, Pos.x - 8.0f, Pos.y - 8.0f);
+		Graphics()->SetColor(InnerColor);
+		Graphics()->RenderQuadContainerEx(m_ItemsQuadContainerIndex, m_DoorHeadOffset, 1, Pos.x - 6.0f, Pos.y - 6.0f, 6.f / 8.f, 6.f / 8.f);
+	}
+	else
 	{
 		int CurParticle = (int)TicksHead % 3;
 		Graphics()->TextureSet(GameClient()->m_ParticlesSkin.m_aSpriteParticleSplat[CurParticle]);
@@ -595,6 +605,9 @@ void CItems::OnInit()
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
 		ParticleSplatOffset = RenderTools()->QuadContainerAddSprite(m_ItemsQuadContainerIndex, 24.f);
 	}
+
+	IGraphics::CQuadItem Brick(0, 0, 16.0f, 16.0f);
+	m_DoorHeadOffset = Graphics()->QuadContainerAddQuads(m_ItemsQuadContainerIndex, &Brick, 1);
 
 	Graphics()->QuadContainerUpload(m_ItemsQuadContainerIndex);
 }
