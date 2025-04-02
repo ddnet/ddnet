@@ -19,6 +19,8 @@
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
+#include <sstream>
+#include <string>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
@@ -2065,34 +2067,26 @@ void CCharacter::SendZoneMsgs()
 {
 	// send zone leave msg
 	// (m_TuneZoneOld >= 0: avoid zone leave msgs on spawn)
-	if(m_TuneZoneOld >= 0 && GameServer()->m_aaZoneLeaveMsg[m_TuneZoneOld][0])
+	if(m_TuneZoneOld >= 0 && static_cast<size_t>(m_TuneZoneOld) < GameServer()->m_vZoneEnterMsg.size() && !GameServer()->m_vZoneLeaveMsg[m_TuneZoneOld].empty())
 	{
-		const char *pCur = GameServer()->m_aaZoneLeaveMsg[m_TuneZoneOld];
-		const char *pPos;
-		while((pPos = str_find(pCur, "\\n")))
+		std::istringstream Stream(GameServer()->m_vZoneLeaveMsg[m_TuneZoneOld]);
+		std::string Line;
+
+		while(std::getline(Stream, Line))
 		{
-			char aBuf[256];
-			str_copy(aBuf, pCur, pPos - pCur + 1);
-			aBuf[pPos - pCur + 1] = '\0';
-			pCur = pPos + 2;
-			GameServer()->SendChatTarget(m_pPlayer->GetCid(), aBuf);
+			GameServer()->SendChatTarget(m_pPlayer->GetCid(), Line.c_str());
 		}
-		GameServer()->SendChatTarget(m_pPlayer->GetCid(), pCur);
 	}
 	// send zone enter msg
-	if(GameServer()->m_aaZoneEnterMsg[m_TuneZone][0])
+	if(static_cast<size_t>(m_TuneZone) < GameServer()->m_vZoneEnterMsg.size() && !GameServer()->m_vZoneEnterMsg[m_TuneZone].empty())
 	{
-		const char *pCur = GameServer()->m_aaZoneEnterMsg[m_TuneZone];
-		const char *pPos;
-		while((pPos = str_find(pCur, "\\n")))
+		std::istringstream Stream(GameServer()->m_vZoneEnterMsg[m_TuneZone]);
+		std::string Line;
+
+		while(std::getline(Stream, Line))
 		{
-			char aBuf[256];
-			str_copy(aBuf, pCur, pPos - pCur + 1);
-			aBuf[pPos - pCur + 1] = '\0';
-			pCur = pPos + 2;
-			GameServer()->SendChatTarget(m_pPlayer->GetCid(), aBuf);
+			GameServer()->SendChatTarget(m_pPlayer->GetCid(), Line.c_str());
 		}
-		GameServer()->SendChatTarget(m_pPlayer->GetCid(), pCur);
 	}
 }
 

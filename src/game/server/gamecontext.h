@@ -3,9 +3,11 @@
 #ifndef GAME_SERVER_GAMECONTEXT_H
 #define GAME_SERVER_GAMECONTEXT_H
 
+#include <array>
 #include <engine/console.h>
 #include <engine/server.h>
 
+#include <engine/shared/protocol.h>
 #include <game/collision.h>
 #include <game/generated/protocol.h>
 #include <game/layers.h>
@@ -18,6 +20,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 /*
 	Tick
@@ -211,8 +214,8 @@ public:
 	char m_aVoteReason[VOTE_REASON_LENGTH];
 	int m_NumVoteOptions;
 	int m_VoteEnforce;
-	char m_aaZoneEnterMsg[NUM_TUNEZONES][256]; // 0 is used for switching from or to area without tunings
-	char m_aaZoneLeaveMsg[NUM_TUNEZONES][256];
+	std::array<std::string, NUM_TUNEZONES> m_vZoneEnterMsg; // 0 is used for switching from or to area without tunings
+	std::array<std::string, NUM_TUNEZONES> m_vZoneLeaveMsg;
 
 	void CreateAllEntities(bool Initial);
 

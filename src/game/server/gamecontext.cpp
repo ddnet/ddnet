@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "gamecontext.h"
 
+#include <string>
 #include <vector>
 
 #include "teeinfo.h"
@@ -3083,7 +3084,7 @@ void CGameContext::ConTuneSetZoneMsgEnter(IConsole::IResult *pResult, void *pUse
 		int List = pResult->GetInteger(0);
 		if(List >= 0 && List < NUM_TUNEZONES)
 		{
-			str_copy(pSelf->m_aaZoneEnterMsg[List], pResult->GetString(1), sizeof(pSelf->m_aaZoneEnterMsg[List]));
+			pSelf->m_vZoneEnterMsg[List] = std::string(pResult->GetString(1));
 		}
 	}
 }
@@ -3096,7 +3097,7 @@ void CGameContext::ConTuneSetZoneMsgLeave(IConsole::IResult *pResult, void *pUse
 		int List = pResult->GetInteger(0);
 		if(List >= 0 && List < NUM_TUNEZONES)
 		{
-			str_copy(pSelf->m_aaZoneLeaveMsg[List], pResult->GetString(1), sizeof(pSelf->m_aaZoneLeaveMsg[List]));
+			pSelf->m_vZoneLeaveMsg[List] = std::string(pResult->GetString(1));
 		}
 	}
 }
@@ -3917,12 +3918,11 @@ void CGameContext::OnInit(const void *pPersistentData)
 		TuningList()[i].Set("shotgun_speeddiff", 0);
 	}
 
-	for(int i = 0; i < NUM_TUNEZONES; i++)
-	{
-		// Send no text by default when changing tune zones.
-		m_aaZoneEnterMsg[i][0] = 0;
-		m_aaZoneLeaveMsg[i][0] = 0;
-	}
+	for(auto &Msg : m_vZoneEnterMsg)
+		Msg.clear();
+	for(auto &Msg : m_vZoneLeaveMsg)
+		Msg.clear();
+
 	// Reset Tuning
 	if(g_Config.m_SvTuneReset)
 	{
