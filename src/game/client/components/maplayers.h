@@ -20,6 +20,7 @@ class CLayers;
 class CMapImages;
 class ColorRGBA;
 class CMapItemGroup;
+class CMapItemLayer;
 class CMapItemLayerTilemap;
 class CMapItemLayerQuads;
 
@@ -154,6 +155,8 @@ private:
 	void RenderTileBorder(int LayerIndex, const ColorRGBA &Color, int BorderX0, int BorderY0, int BorderX1, int BorderY1);
 	void RenderKillTileBorder(int LayerIndex, const ColorRGBA &Color);
 	void RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer, bool ForceRender = false);
+
+	int GetLayerType(const CMapItemLayer *pLayer) const;
 };
 
 #endif
