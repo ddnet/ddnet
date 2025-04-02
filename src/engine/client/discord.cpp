@@ -5,12 +5,6 @@
 #if defined(CONF_DISCORD)
 #include <discord_game_sdk.h>
 
-#if defined(CONF_FAMILY_WINDOWS)
-#define DISCORD_CALLBACK __stdcall
-#else
-#define DISCORD_CALLBACK
-#endif
-
 typedef enum EDiscordResult(DISCORD_API *FDiscordCreate)(DiscordVersion, struct DiscordCreateParams *, struct IDiscordCore **);
 
 #if defined(CONF_DISCORD_DYNAMIC)
@@ -132,7 +126,7 @@ public:
 		m_UpdateActivity = true;
 	}
 
-	void UpdateServerInfo(const CServerInfo &ServerInfo, const char *pMapName)
+	void UpdateServerInfo(const CServerInfo &ServerInfo, const char *pMapName) override
 	{
 		if(!m_Activity.instance)
 			return;
@@ -145,7 +139,7 @@ public:
 		m_UpdateActivity = true;
 	}
 
-	void UpdatePlayerCount(int Count)
+	void UpdatePlayerCount(int Count) override
 	{
 		if(!m_Activity.instance)
 			return;
