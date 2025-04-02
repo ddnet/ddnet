@@ -13,9 +13,9 @@
 
 #include <chrono>
 #include <optional>
+#include <set>
 #include <string_view>
 #include <unordered_map>
-#include <unordered_set>
 
 class CHttpRequest;
 
@@ -125,7 +125,7 @@ private:
 	std::vector<CSkinListEntry> m_vSkinList;
 	std::optional<std::chrono::nanoseconds> m_SkinListLastRefreshTime;
 
-	std::unordered_set<std::string> m_Favorites;
+	std::set<std::string> m_Favorites;
 
 	CSkin m_PlaceholderSkin;
 	char m_aEventSkinPrefix[MAX_SKIN_LENGTH];
