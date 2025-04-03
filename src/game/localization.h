@@ -62,6 +62,5 @@ public:
 
 extern CLocalizationDatabase g_Localization;
 
-extern const char *Localize(const char *pStr, const char *pContext = "")
-	GNUC_ATTRIBUTE((format_arg(1)));
+FORMAT_ARG(1) extern const char *Localize(const char *pStr, const char *pContext = "");
 #endif
