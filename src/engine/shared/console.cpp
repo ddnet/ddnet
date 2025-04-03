@@ -30,14 +30,14 @@ int CConsole::CResult::GetInteger(unsigned Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0;
-	return str_toint(m_apArgs[Index]);
+	return str_to_int(m_apArgs[Index]);
 }
 
 float CConsole::CResult::GetFloat(unsigned Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0.0f;
-	return str_tofloat(m_apArgs[Index]);
+	return str_to_float(m_apArgs[Index]);
 }
 
 std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float DarkestLighting) const
@@ -46,9 +46,9 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 		return std::nullopt;
 
 	const char *pStr = m_apArgs[Index];
-	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr + 1))) // Teeworlds Color (Packed HSL)
+	if(str_is_all_num(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_is_all_num(pStr + 1))) // Teeworlds Color (Packed HSL)
 	{
-		unsigned long Value = str_toulong_base(pStr, 10);
+		unsigned long Value = str_to_ulong_base(pStr, 10);
 		if(Value == std::numeric_limits<unsigned long>::max())
 			return std::nullopt;
 		return ColorHSLA(Value, true).UnclampLighting(DarkestLighting);
@@ -235,7 +235,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat, bool IsColor)
 					if(!IsColor)
 					{
 						int Value;
-						if(!str_toint(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
+						if(!str_to_int(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
 							Value == std::numeric_limits<int>::max() || Value == std::numeric_limits<int>::min())
 						{
 							Error = PARSEARGS_INVALID_INTEGER;
@@ -246,7 +246,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat, bool IsColor)
 				else if(Command == 'f')
 				{
 					float Value;
-					if(!str_tofloat(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
+					if(!str_to_float(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
 						Value == std::numeric_limits<float>::max() || Value == std::numeric_limits<float>::min())
 					{
 						Error = PARSEARGS_INVALID_FLOAT;
@@ -1083,5 +1083,5 @@ void CConsole::CResult::SetVictim(const char *pVictim)
 	else if(!str_comp(pVictim, "all"))
 		m_Victim = VICTIM_ALL;
 	else
-		m_Victim = clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
+		m_Victim = clamp<int>(str_to_int(pVictim), 0, MAX_CLIENTS - 1);
 }

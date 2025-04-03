@@ -74,7 +74,7 @@ const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVe
 		if(pVersionStrStart == nullptr)
 			return nullptr;
 
-		VersionPart = str_toint(aVersionStrHelper);
+		VersionPart = str_to_int(aVersionStrHelper);
 	}
 
 	for(const auto &BlockListItem : gs_aBlockList)

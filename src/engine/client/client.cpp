@@ -2413,10 +2413,10 @@ TVersion ToVersion(char *pStr)
 
 	for(int i = 0; i < 3 && p; ++i)
 	{
-		if(!str_isallnum(p))
+		if(!str_is_all_num(p))
 			return gs_InvalidVersion;
 
-		aVersion[i] = str_toint(p);
+		aVersion[i] = str_to_int(p);
 		p = strtok(nullptr, ".");
 	}
 

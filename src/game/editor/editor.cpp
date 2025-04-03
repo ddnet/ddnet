@@ -3754,7 +3754,7 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 			std::string Clipboard = Input()->GetClipboardText();
 			if(Clipboard[0] == '#' || Clipboard[0] == '$') // ignore leading # (web color format) and $ (console color format)
 				Clipboard = Clipboard.substr(1);
-			if(str_isallnum_hex(Clipboard.c_str()))
+			if(str_is_all_num_hex(Clipboard.c_str()))
 			{
 				std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(Clipboard.c_str());
 				if(ParsedColor)

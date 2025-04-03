@@ -49,7 +49,7 @@ struct std::hash<CCommunityId>
 {
 	size_t operator()(const CCommunityId &Elem) const noexcept
 	{
-		return str_quickhash(Elem.Id());
+		return str_quick_hash(Elem.Id());
 	}
 };
 
@@ -76,7 +76,7 @@ struct std::hash<CCommunityCountryName>
 {
 	size_t operator()(const CCommunityCountryName &Elem) const noexcept
 	{
-		return str_quickhash(Elem.Name());
+		return str_quick_hash(Elem.Name());
 	}
 };
 
@@ -103,7 +103,7 @@ struct std::hash<CCommunityTypeName>
 {
 	size_t operator()(const CCommunityTypeName &Elem) const noexcept
 	{
-		return str_quickhash(Elem.Name());
+		return str_quick_hash(Elem.Name());
 	}
 };
 

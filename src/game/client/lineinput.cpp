@@ -688,7 +688,7 @@ void CLineInputNumber::SetInteger(int Number, int Base, int HexPrefix)
 
 int CLineInputNumber::GetInteger(int Base) const
 {
-	return str_toint_base(GetString(), Base);
+	return str_to_int_base(GetString(), Base);
 }
 
 void CLineInputNumber::SetInteger64(int64_t Number, int Base, int HexPrefix)
@@ -712,7 +712,7 @@ void CLineInputNumber::SetInteger64(int64_t Number, int Base, int HexPrefix)
 
 int64_t CLineInputNumber::GetInteger64(int Base) const
 {
-	return str_toint64_base(GetString(), Base);
+	return str_to_int64_base(GetString(), Base);
 }
 
 void CLineInputNumber::SetFloat(float Number)
@@ -725,5 +725,5 @@ void CLineInputNumber::SetFloat(float Number)
 
 float CLineInputNumber::GetFloat() const
 {
-	return str_tofloat(GetString());
+	return str_to_float(GetString());
 }

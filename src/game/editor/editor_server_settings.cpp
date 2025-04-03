@@ -1418,13 +1418,13 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 			else if(Arg.m_Type == 'i')
 			{
 				// Validate int
-				if(!str_toint(NewArg.m_aValue, nullptr))
+				if(!str_to_int(NewArg.m_aValue, nullptr))
 					Error = SCommandParseError::ERROR_INVALID_VALUE;
 			}
 			else if(Arg.m_Type == 'f')
 			{
 				// Validate float
-				if(!str_tofloat(NewArg.m_aValue, nullptr))
+				if(!str_to_float(NewArg.m_aValue, nullptr))
 					Error = SCommandParseError::ERROR_INVALID_VALUE;
 			}
 			else if(Arg.m_Type == 's')
@@ -1618,7 +1618,7 @@ EValidationResult CMapSettingsBackend::CContext::ValidateArg(int Index, const ch
 			return EValidationResult::ERROR;
 
 		int Value;
-		if(!str_toint(pArg, &Value)) // Try parse the integer
+		if(!str_to_int(pArg, &Value)) // Try parse the integer
 			return EValidationResult::ERROR;
 
 		return Value >= pSetting->m_Min && Value <= pSetting->m_Max ? EValidationResult::VALID : EValidationResult::OUT_OF_RANGE;

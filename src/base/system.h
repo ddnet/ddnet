@@ -2241,13 +2241,13 @@ void swap_endian(void *data, unsigned elem_size, unsigned num);
 
 void net_stats(NETSTATS *stats);
 
-int str_toint(const char *str);
-bool str_toint(const char *str, int *out);
-int str_toint_base(const char *str, int base);
-unsigned long str_toulong_base(const char *str, int base);
-int64_t str_toint64_base(const char *str, int base = 10);
-float str_tofloat(const char *str);
-bool str_tofloat(const char *str, float *out);
+int str_to_int(const char *str);
+bool str_to_int(const char *str, int *out);
+int str_to_int_base(const char *str, int base);
+unsigned long str_to_ulong_base(const char *str, int base);
+int64_t str_to_int64_base(const char *str, int base = 10);
+float str_to_float(const char *str);
+bool str_to_float(const char *str, float *out);
 
 /**
  * Determines whether a character is whitespace.
@@ -2260,17 +2260,17 @@ bool str_tofloat(const char *str, float *out);
  *
  * @remark The following characters are considered whitespace: ' ', '\n', '\r', '\t'
  */
-int str_isspace(char c);
+int str_is_space(char c);
 
 char str_uppercase(char c);
 
-bool str_isnum(char c);
+bool str_is_num(char c);
 
-int str_isallnum(const char *str);
+int str_is_all_num(const char *str);
 
-int str_isallnum_hex(const char *str);
+int str_is_all_num_hex(const char *str);
 
-unsigned str_quickhash(const char *str);
+unsigned str_quick_hash(const char *str);
 
 int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 

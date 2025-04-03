@@ -630,7 +630,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 					if(Entry.m_Type != CompletionType)
 						continue;
 					const int Len = str_length(Entry.m_pCommandName);
-					if(str_comp_nocase_num(pInputStr, Entry.m_pCommandName, Len) == 0 && str_isspace(pInputStr[Len]))
+					if(str_comp_nocase_num(pInputStr, Entry.m_pCommandName, Len) == 0 && str_is_space(pInputStr[Len]))
 					{
 						m_CompletionChosenArgument = -1;
 						str_copy(m_aCompletionBufferArgument, &pInputStr[CompletionPos]);

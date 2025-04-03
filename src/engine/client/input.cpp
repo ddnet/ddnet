@@ -397,7 +397,7 @@ int CInput::FindKeyByName(const char *pKeyName) const
 	// check for numeric
 	if(pKeyName[0] == '&')
 	{
-		int Key = str_toint(pKeyName + 1);
+		int Key = str_to_int(pKeyName + 1);
 		if(Key > KEY_FIRST && Key < KEY_LAST)
 			return Key; // numeric
 	}

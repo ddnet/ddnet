@@ -68,8 +68,8 @@ const CFriendInfo *CFriends::GetFriend(int Index) const
 int CFriends::GetFriendState(const char *pName, const char *pClan) const
 {
 	int Result = FRIEND_NO;
-	unsigned NameHash = str_quickhash(pName);
-	unsigned ClanHash = str_quickhash(pClan);
+	unsigned NameHash = str_quick_hash(pName);
+	unsigned ClanHash = str_quick_hash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
 		if((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan)))
@@ -88,8 +88,8 @@ int CFriends::GetFriendState(const char *pName, const char *pClan) const
 
 bool CFriends::IsFriend(const char *pName, const char *pClan, bool PlayersOnly) const
 {
-	unsigned NameHash = str_quickhash(pName);
-	unsigned ClanHash = str_quickhash(pClan);
+	unsigned NameHash = str_quick_hash(pName);
+	unsigned ClanHash = str_quick_hash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
 		if(((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan))) &&
@@ -105,8 +105,8 @@ void CFriends::AddFriend(const char *pName, const char *pClan)
 		return;
 
 	// make sure we don't have the friend already
-	unsigned NameHash = str_quickhash(pName);
-	unsigned ClanHash = str_quickhash(pClan);
+	unsigned NameHash = str_quick_hash(pName);
+	unsigned ClanHash = str_quick_hash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
 		if((m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName)) && ((g_Config.m_ClFriendsIgnoreClan && m_aFriends[i].m_aName[0]) || (m_aFriends[i].m_ClanHash == ClanHash && !str_comp(m_aFriends[i].m_aClan, pClan))))
@@ -122,8 +122,8 @@ void CFriends::AddFriend(const char *pName, const char *pClan)
 
 void CFriends::RemoveFriend(const char *pName, const char *pClan)
 {
-	unsigned NameHash = str_quickhash(pName);
-	unsigned ClanHash = str_quickhash(pClan);
+	unsigned NameHash = str_quick_hash(pName);
+	unsigned ClanHash = str_quick_hash(pClan);
 	for(int i = 0; i < m_NumFriends; ++i)
 	{
 		if((m_aFriends[i].m_NameHash == NameHash && !str_comp(m_aFriends[i].m_aName, pName)) &&

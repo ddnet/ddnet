@@ -1188,7 +1188,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 
 		i++;
 		if(hostname[i] == ':')
-			*port = str_toint(hostname + i + 1);
+			*port = str_to_int(hostname + i + 1);
 	}
 	else
 	{
@@ -1198,7 +1198,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 		host[i] = 0;
 
 		if(hostname[i] == ':')
-			*port = str_toint(hostname + i + 1);
+			*port = str_to_int(hostname + i + 1);
 	}
 
 	return 0;
@@ -1266,7 +1266,7 @@ static int parse_int(int *out, const char **str)
 {
 	int i = 0;
 	*out = 0;
-	if(!str_isnum(**str))
+	if(!str_is_num(**str))
 		return -1;
 
 	i = **str - '0';
@@ -1274,7 +1274,7 @@ static int parse_int(int *out, const char **str)
 
 	while(true)
 	{
-		if(!str_isnum(**str))
+		if(!str_is_num(**str))
 		{
 			*out = i;
 			return 0;
@@ -2840,11 +2840,11 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
 
 const char *str_trim_words(const char *str, int words)
 {
-	while(*str && str_isspace(*str))
+	while(*str && str_is_space(*str))
 		str++;
 	while(words && *str)
 	{
-		if(str_isspace(*str) && !str_isspace(*(str + 1)))
+		if(str_is_space(*str) && !str_is_space(*(str + 1)))
 			words--;
 		str++;
 	}
@@ -3004,28 +3004,28 @@ void str_clean_whitespaces(char *str_in)
 
 char *str_skip_to_whitespace(char *str)
 {
-	while(*str && !str_isspace(*str))
+	while(*str && !str_is_space(*str))
 		str++;
 	return str;
 }
 
 const char *str_skip_to_whitespace_const(const char *str)
 {
-	while(*str && !str_isspace(*str))
+	while(*str && !str_is_space(*str))
 		str++;
 	return str;
 }
 
 char *str_skip_whitespaces(char *str)
 {
-	while(*str && str_isspace(*str))
+	while(*str && str_is_space(*str))
 		str++;
 	return str;
 }
 
 const char *str_skip_whitespaces_const(const char *str)
 {
-	while(*str && str_isspace(*str))
+	while(*str && str_is_space(*str))
 		str++;
 	return str;
 }
@@ -3065,7 +3065,7 @@ int str_comp_filenames(const char *a, const char *b)
 
 	for(; *a && *b; ++a, ++b)
 	{
-		if(str_isnum(*a) && str_isnum(*b))
+		if(str_is_num(*a) && str_is_num(*b))
 		{
 			result = 0;
 			do
@@ -3074,11 +3074,11 @@ int str_comp_filenames(const char *a, const char *b)
 					result = *a - *b;
 				++a;
 				++b;
-			} while(str_isnum(*a) && str_isnum(*b));
+			} while(str_is_num(*a) && str_is_num(*b));
 
-			if(str_isnum(*a))
+			if(str_is_num(*a))
 				return 1;
-			else if(str_isnum(*b))
+			else if(str_is_num(*b))
 				return -1;
 			else if(result || *a == '\0' || *b == '\0')
 				return result;
@@ -3698,7 +3698,7 @@ void net_stats(NETSTATS *stats_inout)
 	*stats_inout = network_stats;
 }
 
-int str_isspace(char c)
+int str_is_space(char c)
 {
 	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
 }
@@ -3710,39 +3710,39 @@ char str_uppercase(char c)
 	return c;
 }
 
-bool str_isnum(char c)
+bool str_is_num(char c)
 {
 	return c >= '0' && c <= '9';
 }
 
-int str_isallnum(const char *str)
+int str_is_all_num(const char *str)
 {
 	while(*str)
 	{
-		if(!str_isnum(*str))
+		if(!str_is_num(*str))
 			return 0;
 		str++;
 	}
 	return 1;
 }
 
-int str_isallnum_hex(const char *str)
+int str_is_all_num_hex(const char *str)
 {
 	while(*str)
 	{
-		if(!str_isnum(*str) && !(*str >= 'a' && *str <= 'f') && !(*str >= 'A' && *str <= 'F'))
+		if(!str_is_num(*str) && !(*str >= 'a' && *str <= 'f') && !(*str >= 'A' && *str <= 'F'))
 			return 0;
 		str++;
 	}
 	return 1;
 }
 
-int str_toint(const char *str)
+int str_to_int(const char *str)
 {
-	return str_toint_base(str, 10);
+	return str_to_int_base(str, 10);
 }
 
-bool str_toint(const char *str, int *out)
+bool str_to_int(const char *str, int *out)
 {
 	// returns true if conversion was successful
 	char *end;
@@ -3754,27 +3754,27 @@ bool str_toint(const char *str, int *out)
 	return true;
 }
 
-int str_toint_base(const char *str, int base)
+int str_to_int_base(const char *str, int base)
 {
 	return strtol(str, nullptr, base);
 }
 
-unsigned long str_toulong_base(const char *str, int base)
+unsigned long str_to_ulong_base(const char *str, int base)
 {
 	return strtoul(str, nullptr, base);
 }
 
-int64_t str_toint64_base(const char *str, int base)
+int64_t str_to_int64_base(const char *str, int base)
 {
 	return strtoll(str, nullptr, base);
 }
 
-float str_tofloat(const char *str)
+float str_to_float(const char *str)
 {
 	return strtod(str, nullptr);
 }
 
-bool str_tofloat(const char *str, float *out)
+bool str_to_float(const char *str, float *out)
 {
 	// returns true if conversion was successful
 	char *end;
@@ -4145,7 +4145,7 @@ size_t str_utf8_offset_chars_to_bytes(const char *str, size_t char_offset)
 	return byte_offset;
 }
 
-unsigned str_quickhash(const char *str)
+unsigned str_quick_hash(const char *str)
 {
 	unsigned hash = 5381;
 	for(; *str; str++)
@@ -4772,7 +4772,7 @@ void os_locale_str(char *locale, size_t length)
 		{
 			locale[i] = '-';
 		}
-		else if(locale[i] != '-' && !(locale[i] >= 'a' && locale[i] <= 'z') && !(locale[i] >= 'A' && locale[i] <= 'Z') && !(str_isnum(locale[i])))
+		else if(locale[i] != '-' && !(locale[i] >= 'a' && locale[i] <= 'z') && !(locale[i] >= 'A' && locale[i] <= 'Z') && !(str_is_num(locale[i])))
 		{
 			locale[i] = '\0';
 			break;

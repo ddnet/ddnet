@@ -198,7 +198,7 @@ public:
 	{
 		size_t operator()(const CCommunityMap &Map) const
 		{
-			return str_quickhash(Map.Name());
+			return str_quick_hash(Map.Name());
 		}
 	};
 };

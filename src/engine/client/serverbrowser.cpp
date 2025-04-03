@@ -1817,7 +1817,7 @@ unsigned CServerBrowser::CurrentCommunitiesHash() const
 	unsigned Hash = 5381;
 	for(const CCommunity *pCommunity : CurrentCommunities())
 	{
-		Hash = (Hash << 5) + Hash + str_quickhash(pCommunity->Id());
+		Hash = (Hash << 5) + Hash + str_quick_hash(pCommunity->Id());
 	}
 	return Hash;
 }
