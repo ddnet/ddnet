@@ -236,10 +236,10 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	ConvertToGrayscale(Info);
 
 	int aFreq[256] = {0};
-	int OrgWeight = 0;
+	int OrgWeight = 1;
 	int NewWeight = 192;
 
-	// find most common frequency
+	// find most common non-zero frequency
 	for(size_t y = 0; y < BodyHeight; y++)
 	{
 		for(size_t x = 0; x < BodyWidth; x++)
@@ -261,29 +261,19 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	}
 
 	// reorder
-	int InvOrgWeight = 255 - OrgWeight;
-	int InvNewWeight = 255 - NewWeight;
 	for(size_t y = 0; y < BodyHeight; y++)
 	{
 		for(size_t x = 0; x < BodyWidth; x++)
 		{
 			const size_t Offset = y * Pitch + x * PixelStep;
 			int v = Info.m_pData[Offset];
-			if(v <= OrgWeight && OrgWeight == 0)
+			if(v <= OrgWeight)
 			{
-				v = 0;
+				v = (int)((v / (float)OrgWeight) * NewWeight);
 			}
-			else if(v <= OrgWeight)
+			else if(OrgWeight < 255)
 			{
-				v = (int)(((v / (float)OrgWeight) * NewWeight));
-			}
-			else if(InvOrgWeight == 0)
-			{
-				v = NewWeight;
-			}
-			else
-			{
-				v = (int)(((v - OrgWeight) / (float)InvOrgWeight) * InvNewWeight + NewWeight);
+				v = (int)(((v - OrgWeight) / (float)(255 - OrgWeight)) * (255 - NewWeight) + NewWeight);
 			}
 			Info.m_pData[Offset] = v;
 			Info.m_pData[Offset + 1] = v;
