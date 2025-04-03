@@ -136,7 +136,7 @@ int main(int argc, const char **argv)
 
 	char aFilename[64];
 	str_copy(aFilename, argv[1]);
-	int EnvId = str_toint(argv[2]) - 1;
+	int EnvId = str_to_int(argv[2]) - 1;
 	dbg_msg("map_find_env", "input_map='%s'; env_number='#%d';", aFilename, EnvId + 1);
 
 	return FindEnv(aFilename, EnvId);
