@@ -33,7 +33,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-/* unix net includes */
+// Unix net includes
 #include <arpa/inet.h>
 #include <cerrno>
 #include <netdb.h>
@@ -45,7 +45,7 @@
 #include <dirent.h>
 
 #if defined(CONF_PLATFORM_MACOS)
-// some lock and pthread functions are already defined in headers
+// Some lock and pthread functions are already defined in headers
 // included from Carbon.h
 // this prevents having duplicate definitions of those
 #define _lock_set_user_
@@ -82,6 +82,10 @@
 
 #if defined(CONF_PLATFORM_SOLARIS)
 #include <sys/filio.h>
+#endif
+
+#if !defined(IPTOS_LOWDELAY)
+#define IPTOS_LOWDELAY 0x10 // See <netinet/ip.h>
 #endif
 
 static NETSTATS network_stats = {0};
@@ -171,7 +175,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
 	va_end(args);
 }
 
-/* */
+// Memory
 
 void mem_copy(void *dest, const void *source, size_t size)
 {
@@ -319,7 +323,7 @@ bool io_read_all(IOHANDLE io, void **result, unsigned *result_len)
 		}
 		buffer = (char *)realloc(buffer, len + 1);
 	}
-	buffer[len] = 0;
+	buffer[len] = '\0';
 	*result = buffer;
 	*result_len = len;
 	return true;
@@ -966,7 +970,7 @@ void set_new_tick()
 	new_tick = 1;
 }
 
-/* -----  time ----- */
+// Time
 static_assert(std::chrono::steady_clock::is_steady, "Compiler does not support steady clocks, it might be out of date.");
 static_assert(std::chrono::steady_clock::period::den / std::chrono::steady_clock::period::num >= 1000000000, "Compiler has a bad timer precision and might be out of date.");
 static const std::chrono::time_point<std::chrono::steady_clock> tw_start_time = std::chrono::steady_clock::now();
@@ -994,7 +998,7 @@ int64_t time_freq()
 	return std::chrono::nanoseconds(1s).count();
 }
 
-/* -----  network ----- */
+// Network
 
 const NETADDR NETADDR_ZEROED = {NETTYPE_INVALID, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, 0};
 
@@ -1146,13 +1150,9 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
 	if(addr->type & NETTYPE_IPV4 || addr->type & NETTYPE_WEBSOCKET_IPV4)
 	{
 		if(add_port)
-		{
 			str_format(string, max_length, "%d.%d.%d.%d:%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3], addr->port);
-		}
 		else
-		{
 			str_format(string, max_length, "%d.%d.%d.%d", addr->ip[0], addr->ip[1], addr->ip[2], addr->ip[3]);
-		}
 	}
 	else if(addr->type & NETTYPE_IPV6)
 	{
@@ -1174,15 +1174,15 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 {
 	int i;
 
-	*port = 0;
-	host[0] = 0;
+	*port = '\0';
+	host[0] = '\0';
 
 	if(hostname[0] == '[')
 	{
 		// ipv6 mode
 		for(i = 1; i < max_host && hostname[i] && hostname[i] != ']'; i++)
 			host[i - 1] = hostname[i];
-		host[i - 1] = 0;
+		host[i - 1] = '\0';
 		if(hostname[i] != ']') // malformatted
 			return -1;
 
@@ -1192,10 +1192,10 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 	}
 	else
 	{
-		// generic mode (ipv4, hostname etc)
+		// Generic mode (ipv4, hostname etc)
 		for(i = 0; i < max_host - 1 && hostname[i] && hostname[i] != ':'; i++)
 			host[i] = hostname[i];
-		host[i] = 0;
+		host[i] = '\0';
 
 		if(hostname[i] == ':')
 			*port = str_to_int(hostname + i + 1);
@@ -1265,7 +1265,7 @@ int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 static int parse_int(int *out, const char **str)
 {
 	int i = 0;
-	*out = 0;
+	*out = '\0';
 	if(!str_is_num(**str))
 		return -1;
 
@@ -1387,14 +1387,14 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 
 	if(str[0] == '[')
 	{
-		/* ipv6 */
+		// ipv6
 		struct sockaddr_in6 sa6;
 		char buf[128];
 		int i;
 		str++;
 		for(i = 0; i < 127 && str[i] && str[i] != ']'; i++)
 			buf[i] = str[i];
-		buf[i] = 0;
+		buf[i] = '\0';
 		str += i;
 #if defined(CONF_FAMILY_WINDOWS)
 		{
@@ -1433,7 +1433,7 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 	}
 	else
 	{
-		/* ipv4 */
+		// ipv4
 		if(parse_uint8(&addr->ip[0], &str))
 			return -1;
 		if(parse_char('.', &str))
@@ -1466,16 +1466,24 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 static void priv_net_close_socket(int sock)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	closesocket(sock);
+	if(closesocket(sock) != 0)
+	{
+		dbg_msg("socket", "close failed: %d", net_errno()); // TODO: Get message as string
+		// return false;
+	}
 #else
 	if(close(sock) != 0)
-		dbg_msg("socket", "close failed: %d", errno);
+	{
+		dbg_msg("socket", "close failed: %s (%d)", strerror(net_errno()), net_errno());
+		// return false;
+	}
 #endif
+	// return true;
 }
 
 static int priv_net_close_all_sockets(NETSOCKET sock)
 {
-	/* close down ipv4 */
+	// Close down ipv4
 	if(sock->ipv4sock >= 0)
 	{
 		priv_net_close_socket(sock->ipv4sock);
@@ -1483,8 +1491,16 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 		sock->type &= ~NETTYPE_IPV4;
 	}
 
+	// Close down ipv6
+	if(sock->ipv6sock >= 0)
+	{
+		priv_net_close_socket(sock->ipv6sock);
+		sock->ipv6sock = -1;
+		sock->type &= ~NETTYPE_IPV6;
+	}
+
 #if defined(CONF_WEBSOCKETS)
-	/* close down websocket_ipv4 */
+	// Close down websocket_ipv4
 	if(sock->web_ipv4sock >= 0)
 	{
 		websocket_destroy(sock->web_ipv4sock);
@@ -1492,14 +1508,6 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 		sock->type &= ~NETTYPE_WEBSOCKET_IPV4;
 	}
 #endif
-
-	/* close down ipv6 */
-	if(sock->ipv6sock >= 0)
-	{
-		priv_net_close_socket(sock->ipv6sock);
-		sock->ipv6sock = -1;
-		sock->type &= ~NETTYPE_IPV6;
-	}
 
 	free(sock);
 	return 0;
@@ -1521,9 +1529,9 @@ std::string windows_format_system_message(unsigned long error)
 
 static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, int sockaddrlen)
 {
-	int sock, e;
+	int sock;
 
-	/* create socket */
+	// Create socket
 	sock = socket(domain, type, 0);
 	if(sock < 0)
 	{
@@ -1538,8 +1546,7 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	}
 
 #if defined(CONF_FAMILY_UNIX)
-	/* on tcp sockets set SO_REUSEADDR
-		to fix port rebind on restart */
+	// Set SO_REUSEADDR to fix port rebind on server restart
 	if(domain == AF_INET && type == SOCK_STREAM)
 	{
 		int option = 1;
@@ -1548,8 +1555,8 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	}
 #endif
 
-	/* set to IPv6 only if that's what we are creating */
-#if defined(IPV6_V6ONLY) /* windows sdk 6.1 and higher */
+	// Set to IPv6 only if that's what we are creating
+#if defined(IPV6_V6ONLY) // Windows SDK 6.1 and higher
 	if(domain == AF_INET6)
 	{
 		int ipv6only = 1;
@@ -1558,9 +1565,8 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	}
 #endif
 
-	/* bind the socket */
-	e = bind(sock, addr, sockaddrlen);
-	if(e != 0)
+	// Bind the socket
+	if(bind(sock, addr, sockaddrlen) != 0)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
 		int error = WSAGetLastError();
@@ -1573,7 +1579,6 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 		return -1;
 	}
 
-	/* return the newly created socket */
 	return sock;
 }
 
@@ -1599,7 +1604,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock->type |= NETTYPE_IPV4;
 			sock->ipv4sock = socket;
 
-			/* set broadcast */
+			// Set broadcast
 			int broadcast = 1;
 			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
 			{
@@ -1607,8 +1612,8 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			}
 
 			{
-				/* set DSCP/TOS */
-				int iptos = 0x10 /* IPTOS_LOWDELAY */;
+				// Set DSCP/TOS
+				int iptos = IPTOS_LOWDELAY;
 				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char *)&iptos, sizeof(iptos)) != 0)
 				{
 					dbg_msg("socket", "Setting TOS on ipv4 failed: %d", net_errno());
@@ -1645,18 +1650,18 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock->type |= NETTYPE_IPV6;
 			sock->ipv6sock = socket;
 
-			/* set broadcast */
+			// Set broadcast
 			int broadcast = 1;
 			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
 			{
 				dbg_msg("socket", "Setting BROADCAST on ipv6 failed: %d", net_errno());
 			}
 
-			// TODO: setting IP_TOS on ipv6 with setsockopt is not supported on Windows, see https://github.com/ddnet/ddnet/issues/7605
+			// TODO: Setting IP_TOS on ipv6 with setsockopt is not supported on Windows, see https://github.com/ddnet/ddnet/issues/7605
 #if !defined(CONF_FAMILY_WINDOWS)
 			{
-				/* set DSCP/TOS */
-				int iptos = 0x10 /* IPTOS_LOWDELAY */;
+				// Set DSCP/TOS
+				int iptos = IPTOS_LOWDELAY;
 				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char *)&iptos, sizeof(iptos)) != 0)
 				{
 					dbg_msg("socket", "Setting TOS on ipv6 failed: %d", net_errno());
@@ -1730,9 +1735,9 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 				mem_zero(&sa, sizeof(sa));
 				sa.sin6_port = htons(addr->port);
 				sa.sin6_family = AF_INET6;
-				sa.sin6_addr.s6_addr[0] = 0xff; /* multicast */
-				sa.sin6_addr.s6_addr[1] = 0x02; /* link local scope */
-				sa.sin6_addr.s6_addr[15] = 1; /* all nodes */
+				sa.sin6_addr.s6_addr[0] = 0xff; // Multicast
+				sa.sin6_addr.s6_addr[1] = 0x02; // Link local scope
+				sa.sin6_addr.s6_addr[15] = 1; // All nodes
 			}
 			else
 				netaddr_to_sockaddr_in6(addr, &sa);
@@ -1742,12 +1747,12 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 		else
 			dbg_msg("net", "can't send ipv6 traffic to this socket");
 	}
-	/*
+#if 0
 	else
 		dbg_msg("net", "can't send to network of type %d", addr->type);
-		*/
-
-	/*if(d < 0)
+#endif
+#if 0
+	if(d < 0)
 	{
 		char addrstr[256];
 		net_addr_str(addr, addrstr, sizeof(addrstr));
@@ -1757,7 +1762,8 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 		dbg_msg("net", "\tsize = %d %x", size, size);
 		dbg_msg("net", "\taddr = %s", addrstr);
 
-	}*/
+	}
+#endif
 	network_stats.sent_bytes += size;
 	network_stats.sent_packets++;
 	return d;
@@ -1880,7 +1886,7 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 	}
 	else if(bytes == 0)
 		return 0;
-	return -1; /* error */
+	return -1; // Error
 }
 
 int net_udp_close(NETSOCKET sock)
@@ -2512,7 +2518,7 @@ int fs_parent_dir(char *path)
 
 	if(parent)
 	{
-		*parent = 0;
+		*parent = '\0';
 		return 0;
 	}
 	return 1;
@@ -2628,7 +2634,7 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	}
 #endif
 
-	/* don't care about writefds and exceptfds */
+	// Don't care about writefds and exceptfds
 	if(time < 0)
 		select(sockid + 1, &readfds, nullptr, nullptr, nullptr);
 	else
@@ -2674,7 +2680,7 @@ int time_houroftheday()
 
 static bool time_iseasterday(time_t time_data, struct tm *time_info)
 {
-	// compute Easter day (Sunday) using https://en.wikipedia.org/w/index.php?title=Computus&oldid=890710285#Anonymous_Gregorian_algorithm
+	// Compute Easter day (Sunday) using https://en.wikipedia.org/w/index.php?title=Computus&oldid=890710285#Anonymous_Gregorian_algorithm
 	int Y = time_info->tm_year + 1900;
 	int a = Y % 19;
 	int b = Y / 100;
@@ -2756,13 +2762,13 @@ void str_append(char *dst, const char *src, int dst_size)
 	while(s < dst_size)
 	{
 		dst[s] = src[i];
-		if(!src[i]) /* check for null termination */
+		if(src[i] == '\0') // Check for null termination
 			break;
 		s++;
 		i++;
 	}
 
-	dst[dst_size - 1] = 0; /* assure null termination */
+	dst[dst_size - 1] = '\0'; // Assure null termination
 	str_utf8_fix_truncation(dst);
 }
 
@@ -2809,10 +2815,10 @@ int str_format_v(char *buffer, int buffer_size, const char *format, va_list args
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	_vsprintf_p(buffer, buffer_size, format, args);
-	buffer[buffer_size - 1] = 0; /* assure null termination */
+	buffer[buffer_size - 1] = '\0'; // Assure null termination
 #else
 	vsnprintf(buffer, buffer_size, format, args);
-	/* null termination is assured by definition of vsnprintf */
+	// Null termination is assured by definition of vsnprintf
 #endif
 	return str_utf8_fix_truncation(buffer);
 }
@@ -2865,7 +2871,6 @@ bool str_has_cc(const char *str)
 	return false;
 }
 
-/* makes sure that the string only contains the characters between 32 and 255 */
 void str_sanitize_cc(char *str_in)
 {
 	unsigned char *str = (unsigned char *)str_in;
@@ -2877,7 +2882,6 @@ void str_sanitize_cc(char *str_in)
 	}
 }
 
-/* makes sure that the string only contains the characters between 32 and 255 + \r\n\t */
 void str_sanitize(char *str_in)
 {
 	unsigned char *str = (unsigned char *)str_in;
@@ -2909,9 +2913,7 @@ bool str_valid_filename(const char *str)
 	// - https://en.wikipedia.org/w/index.php?title=Filename&oldid=1281340521#Comparison_of_filename_limitations
 	// - https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file (last update 2024-08-28)
 	if(str[0] == '\0')
-	{
-		return false; // empty name not allowed
-	}
+		return false; // Empty name not allowed
 
 	bool prev_space = false;
 	bool prev_period = false;
@@ -2922,23 +2924,15 @@ bool str_valid_filename(const char *str)
 		const int code = str_utf8_decode(&iterator);
 		if(code <= 0x1F || code == 0x7F || code == '\\' || code == '/' || code == '|' || code == ':' ||
 			code == '*' || code == '?' || code == '<' || code == '>' || code == '"')
-		{
-			return false; // disallowed characters, mostly for Windows
-		}
+			return false; // Disallowed characters, mostly for Windows
 		else if(str_utf8_isspace(code) && code != ' ')
-		{
-			return false; // we only allow regular space characters
-		}
+			return false; // We only allow regular space characters
 		if(code == ' ')
 		{
 			if(!first_space_checked)
-			{
-				return false; // leading spaces not allowed
-			}
+				return false; // Leading spaces not allowed
 			if(prev_space)
-			{
-				return false; // multiple consecutive spaces not allowed
-			}
+				return false; // Multiple consecutive spaces not allowed
 			prev_space = true;
 			prev_period = false;
 		}
@@ -2950,9 +2944,7 @@ bool str_valid_filename(const char *str)
 		}
 	}
 	if(prev_space || prev_period)
-	{
-		return false; // trailing spaces and periods not allowed
-	}
+		return false; // Trailing spaces and periods not allowed
 
 	static constexpr const char *RESERVED_NAMES[] = {
 		"CON", "PRN", "AUX", "NUL",
@@ -2962,32 +2954,29 @@ bool str_valid_filename(const char *str)
 	{
 		const char *prefix = str_starts_with_nocase(str, reserved_name);
 		if(prefix != nullptr && (prefix[0] == '\0' || prefix[0] == '.'))
-		{
-			return false; // reserved name not allowed when it makes up the entire filename or when followed by period
-		}
+			return false; // Reserved name not allowed when it makes up the entire filename or when followed by period
 	}
 
 	return true;
 }
 
-/* removes leading and trailing spaces and limits the use of multiple spaces */
 void str_clean_whitespaces(char *str_in)
 {
 	char *read = str_in;
 	char *write = str_in;
 
-	/* skip initial whitespace */
+	// Skip initial whitespace
 	while(*read == ' ')
 		read++;
 
-	/* end of read string is detected in the loop */
+	// End of read string is detected in the loop
 	while(true)
 	{
-		/* skip whitespace */
-		int found_whitespace = 0;
-		for(; *read == ' '; read++)
+		// Skip whitespace
+		int found_whitespace;
+		for(found_whitespace = 0; *read == ' '; read++)
 			found_whitespace = 1;
-		/* if not at the end of the string, put a found whitespace here */
+		// If not at the end of the string, put a found whitespace here
 		if(*read)
 		{
 			if(found_whitespace)
@@ -2996,7 +2985,7 @@ void str_clean_whitespaces(char *str_in)
 		}
 		else
 		{
-			*write = 0;
+			*write = '\0';
 			break;
 		}
 	}
@@ -3030,7 +3019,6 @@ const char *str_skip_whitespaces_const(const char *str)
 	return str;
 }
 
-/* case */
 int str_comp_nocase(const char *a, const char *b)
 {
 #if defined(CONF_FAMILY_WINDOWS)
@@ -3095,26 +3083,18 @@ const char *str_starts_with_nocase(const char *str, const char *prefix)
 {
 	int prefixl = str_length(prefix);
 	if(str_comp_nocase_num(str, prefix, prefixl) == 0)
-	{
 		return str + prefixl;
-	}
 	else
-	{
 		return nullptr;
-	}
 }
 
 const char *str_starts_with(const char *str, const char *prefix)
 {
 	int prefixl = str_length(prefix);
 	if(str_comp_num(str, prefix, prefixl) == 0)
-	{
 		return str + prefixl;
-	}
 	else
-	{
 		return nullptr;
-	}
 }
 
 const char *str_ends_with_nocase(const char *str, const char *suffix)
@@ -3123,18 +3103,12 @@ const char *str_ends_with_nocase(const char *str, const char *suffix)
 	int suffixl = str_length(suffix);
 	const char *strsuffix;
 	if(strl < suffixl)
-	{
 		return nullptr;
-	}
 	strsuffix = str + strl - suffixl;
 	if(str_comp_nocase(strsuffix, suffix) == 0)
-	{
 		return strsuffix;
-	}
 	else
-	{
 		return nullptr;
-	}
 }
 
 const char *str_ends_with(const char *str, const char *suffix)
@@ -3143,18 +3117,12 @@ const char *str_ends_with(const char *str, const char *suffix)
 	int suffixl = str_length(suffix);
 	const char *strsuffix;
 	if(strl < suffixl)
-	{
 		return nullptr;
-	}
 	strsuffix = str + strl - suffixl;
 	if(str_comp(strsuffix, suffix) == 0)
-	{
 		return strsuffix;
-	}
 	else
-	{
 		return nullptr;
-	}
 }
 
 static int min3(int a, int b, int c)
@@ -3245,7 +3213,7 @@ int str_utf8_dist_buffer(const char *a_utf8, const char *b_utf8, int *buf, int b
 
 const char *str_find_nocase(const char *haystack, const char *needle)
 {
-	while(*haystack) /* native implementation */
+	while(*haystack)
 	{
 		const char *a = haystack;
 		const char *b = needle;
@@ -3264,7 +3232,7 @@ const char *str_find_nocase(const char *haystack, const char *needle)
 
 const char *str_find(const char *haystack, const char *needle)
 {
-	while(*haystack) /* native implementation */
+	while(*haystack)
 	{
 		const char *a = haystack;
 		const char *b = needle;
@@ -3286,7 +3254,7 @@ bool str_delimiters_around_offset(const char *haystack, const char *delim, int o
 	bool found = true;
 	const char *search = haystack;
 	const int delim_len = str_length(delim);
-	*start = 0;
+	*start = '\0';
 	while(str_find(search, delim))
 	{
 		const char *test = str_find(search, delim) + delim_len;
@@ -3392,17 +3360,17 @@ static int hexval(char x)
 	case '7': return 7;
 	case '8': return 8;
 	case '9': return 9;
-	case 'a':
+	case 'a': FALL_THROUGH;
 	case 'A': return 10;
-	case 'b':
+	case 'b': FALL_THROUGH;
 	case 'B': return 11;
-	case 'c':
+	case 'c': FALL_THROUGH;
 	case 'C': return 12;
-	case 'd':
+	case 'd': FALL_THROUGH;
 	case 'D': return 13;
-	case 'e':
+	case 'e': FALL_THROUGH;
 	case 'E': return 14;
-	case 'f':
+	case 'f': FALL_THROUGH;
 	case 'F': return 15;
 	default: return -1;
 	}
@@ -3448,7 +3416,7 @@ void str_base64(char *dst, int dst_size, const void *data_raw, int data_size)
 	int o = 0;
 
 	dst_size -= 1;
-	dst[dst_size] = 0;
+	dst[dst_size] = '\0';
 	while(true)
 	{
 		if(num_bits < 6 && i < data_size)
@@ -3465,13 +3433,9 @@ void str_base64(char *dst, int dst_size, const void *data_raw, int data_size)
 		{
 			unsigned padded;
 			if(num_bits >= 6)
-			{
 				padded = (value >> (num_bits - 6)) & 0x3f;
-			}
 			else
-			{
 				padded = (value << (6 - num_bits)) & 0x3f;
-			}
 			dst[o] = DIGITS[padded];
 			num_bits -= 6;
 			o += 1;
@@ -3483,7 +3447,7 @@ void str_base64(char *dst, int dst_size, const void *data_raw, int data_size)
 		}
 		else
 		{
-			dst[o] = 0;
+			dst[o] = '\0';
 			return;
 		}
 	}
@@ -3492,25 +3456,15 @@ void str_base64(char *dst, int dst_size, const void *data_raw, int data_size)
 static int base64_digit_value(char digit)
 {
 	if('A' <= digit && digit <= 'Z')
-	{
 		return digit - 'A';
-	}
 	else if('a' <= digit && digit <= 'z')
-	{
 		return digit - 'a' + 26;
-	}
 	else if('0' <= digit && digit <= '9')
-	{
 		return digit - '0' + 52;
-	}
 	else if(digit == '+')
-	{
 		return 62;
-	}
 	else if(digit == '/')
-	{
 		return 63;
-	}
 	return -1;
 }
 
@@ -3523,14 +3477,11 @@ int str_base64_decode(void *dst_raw, int dst_size, const char *data)
 	int o = 0;
 
 	if(data_len % 4 != 0)
-	{
 		return -3;
-	}
-	if(data_len / 4 * 3 > dst_size)
-	{
 		// Output buffer too small.
+	if(data_len / 4 * 3 > dst_size)
+		
 		return -2;
-	}
 	for(i = 0; i < data_len; i += 4)
 	{
 		int num_output_bytes = 3;
@@ -3571,12 +3522,10 @@ int str_base64_decode(void *dst_raw, int dst_size, const char *data)
 				o += 1;
 			}
 			else
-			{
-				if(byte_value != 0)
 				{
 					// Padding not zeroed.
+				if(byte_value != 0)
 					return -2;
-				}
 			}
 		}
 	}
@@ -3591,7 +3540,7 @@ void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const cha
 {
 	struct tm *time_info = time_localtime_threadlocal(&time_data);
 	strftime(buffer, buffer_size, format, time_info);
-	buffer[buffer_size - 1] = 0; /* assure null termination */
+	buffer[buffer_size - 1] = '\0'; // assure null termination
 }
 
 void str_timestamp_format(char *buffer, int buffer_size, const char *format)
@@ -3627,6 +3576,8 @@ bool timestamp_from_str(const char *string, const char *format, time_t *timestam
 
 int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 {
+	dbg_assert(centisecs >= 0, "time parameter must be positive");
+
 	const int sec = 100;
 	const int min = 60 * sec;
 	const int hour = 60 * min;
@@ -3638,7 +3589,7 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 	if(centisecs < 0)
 		centisecs = 0;
 
-	buffer[0] = 0;
+	buffer[0] = '\0';
 
 	switch(format)
 	{
@@ -3646,12 +3597,12 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 		if(centisecs >= day)
 			return str_format(buffer, buffer_size, "%" PRId64 "d %02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / day,
 				(centisecs % day) / hour, (centisecs % hour) / min, (centisecs % min) / sec);
-		[[fallthrough]];
+		FALL_THROUGH;
 	case TIME_HOURS:
 		if(centisecs >= hour)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec);
-		[[fallthrough]];
+		FALL_THROUGH;
 	case TIME_MINS:
 		return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64, centisecs / min,
 			(centisecs % min) / sec);
@@ -3659,12 +3610,12 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 		if(centisecs >= hour)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / hour,
 				(centisecs % hour) / min, (centisecs % min) / sec, centisecs % sec);
-		[[fallthrough]];
+		FALL_THROUGH;
 	case TIME_MINS_CENTISECS:
 		if(centisecs >= min)
 			return str_format(buffer, buffer_size, "%02" PRId64 ":%02" PRId64 ".%02" PRId64, centisecs / min,
 				(centisecs % min) / sec, centisecs % sec);
-		[[fallthrough]];
+		FALL_THROUGH;
 	case TIME_SECS_CENTISECS:
 		return str_format(buffer, buffer_size, "%02" PRId64 ".%02" PRId64, (centisecs % min) / sec, centisecs % sec);
 	}
@@ -3674,7 +3625,7 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 
 int str_time_float(float secs, int format, char *buffer, int buffer_size)
 {
-	return str_time(llroundf(secs * 1000) / 10, format, buffer, buffer_size);
+	return str_time(llroundf(secs * 1000.0f) / 10, format, buffer, buffer_size);
 }
 
 void str_escape(char **dst, const char *src, const char *end)
@@ -3690,7 +3641,7 @@ void str_escape(char **dst, const char *src, const char *end)
 		}
 		*(*dst)++ = *src++;
 	}
-	**dst = 0;
+	**dst = '\0';
 }
 
 void net_stats(NETSTATS *stats_inout)
@@ -3744,7 +3695,6 @@ int str_to_int(const char *str)
 
 bool str_to_int(const char *str, int *out)
 {
-	// returns true if conversion was successful
 	char *end;
 	int value = strtol(str, &end, 10);
 	if(*end != '\0')
@@ -3776,7 +3726,6 @@ float str_to_float(const char *str)
 
 bool str_to_float(const char *str, float *out)
 {
-	// returns true if conversion was successful
 	char *end;
 	float value = strtod(str, &end);
 	if(*end != '\0')
@@ -3828,7 +3777,7 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num)
 
 const char *str_utf8_find_nocase(const char *haystack, const char *needle, const char **end)
 {
-	while(*haystack) /* native implementation */
+	while(*haystack)
 	{
 		const char *a = haystack;
 		const char *b = needle;
@@ -3874,11 +3823,9 @@ const char *str_utf8_skip_whitespaces(const char *str)
 		str_old = str;
 		code = str_utf8_decode(&str);
 
-		// check if unicode is not empty
+		// Check if unicode is not empty
 		if(!str_utf8_isspace(code))
-		{
 			return str_old;
-		}
 	}
 
 	return str;
@@ -3893,27 +3840,21 @@ void str_utf8_trim_right(char *param)
 		char *str_old = (char *)str;
 		int code = str_utf8_decode(&str);
 
-		// check if unicode is not empty
+		// Check if unicode is not empty
 		if(!str_utf8_isspace(code))
-		{
 			end = nullptr;
-		}
 		else if(!end)
-		{
 			end = str_old;
-		}
 	}
 	if(end)
-	{
-		*end = 0;
-	}
+		*end = '\0';
 }
 
 int str_utf8_isstart(char c)
 {
-	if((c & 0xC0) == 0x80) /* 10xxxxxx */
-		return 0;
-	return 1;
+	if((c & 0xC0) == 0x80) // 10xxxxxx
+		return false;
+	return true;
 }
 
 int str_utf8_rewind(const char *str, int cursor)
@@ -3937,7 +3878,7 @@ int str_utf8_fix_truncation(char *str)
 		// Fix truncated UTF-8.
 		if(str_utf8_decode(&last_char) == -1)
 		{
-			str[last_char_index] = 0;
+			str[last_char_index] = '\0';
 			return last_char_index;
 		}
 	}
@@ -3956,7 +3897,7 @@ int str_utf8_forward(const char *str, int cursor)
 
 int str_utf8_encode(char *ptr, int chr)
 {
-	/* encode */
+	// Encode
 	if(chr <= 0x7F)
 	{
 		ptr[0] = (char)chr;
@@ -4072,9 +4013,7 @@ int str_utf8_check(const char *str)
 	while((codepoint = str_utf8_decode(&str)))
 	{
 		if(codepoint == -1)
-		{
 			return 0;
-		}
 	}
 	return 1;
 }
@@ -4105,13 +4044,9 @@ void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *
 	while(*size < max_size && *count < max_count)
 	{
 		if(str_utf8_decode(&cursor) == 0)
-		{
 			break;
-		}
 		if((size_t)(cursor - str) >= max_size)
-		{
 			break;
-		}
 		*size = cursor - str;
 		++(*count);
 	}
@@ -4149,7 +4084,7 @@ unsigned str_quick_hash(const char *str)
 {
 	unsigned hash = 5381;
 	for(; *str; str++)
-		hash = ((hash << 5) + hash) + (*str); /* hash * 33 + c */
+		hash = ((hash << 5) + hash) + (*str); // hash * 33 + c
 	return hash;
 }
 
@@ -4421,7 +4356,7 @@ int open_link(const char *link)
 	SHELLEXECUTEINFOW info;
 	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
 	info.cbSize = sizeof(SHELLEXECUTEINFOW);
-	info.lpVerb = nullptr; // NULL to use the default verb, as "open" may not be available
+	info.lpVerb = nullptr; // nullptr to use the default verb, as "open" may not be available
 	info.lpFile = wide_link.c_str();
 	info.nShow = SW_SHOWNORMAL;
 	// The SEE_MASK_NOASYNC flag ensures that the ShellExecuteEx function
@@ -4474,7 +4409,7 @@ int open_file(const char *path)
 	return open_link(buf);
 #endif
 }
-#endif // !defined(CONF_PLATFORM_ANDROID)
+#endif
 
 struct SECURE_RANDOM_DATA
 {
@@ -4491,73 +4426,44 @@ static struct SECURE_RANDOM_DATA secure_random_data = {0};
 int secure_random_init()
 {
 	if(secure_random_data.initialized)
-	{
 		return 0;
-	}
 #if defined(CONF_FAMILY_WINDOWS)
-	if(CryptAcquireContext(&secure_random_data.provider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
-	{
-		secure_random_data.initialized = 1;
-		return 0;
-	}
-	else
-	{
+	if(!CryptAcquireContext(&secure_random_data.provider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
 		return 1;
-	}
 #else
 	secure_random_data.urandom = io_open("/dev/urandom", IOFLAG_READ);
-	if(secure_random_data.urandom)
-	{
-		secure_random_data.initialized = 1;
-		return 0;
-	}
-	else
-	{
+	if(!secure_random_data.urandom)
 		return 1;
-	}
 #endif
+	secure_random_data.initialized = 1;
+	return 0;
 }
 
 int secure_random_uninit()
 {
 	if(!secure_random_data.initialized)
-	{
 		return 0;
-	}
 #if defined(CONF_FAMILY_WINDOWS)
-	if(CryptReleaseContext(secure_random_data.provider, 0))
-	{
-		secure_random_data.initialized = 0;
-		return 0;
-	}
-	else
-	{
+	if(!CryptReleaseContext(secure_random_data.provider, 0))
 		return 1;
-	}
 #else
 	if(!io_close(secure_random_data.urandom))
-	{
-		secure_random_data.initialized = 0;
-		return 0;
-	}
-	else
-	{
 		return 1;
-	}
 #endif
+	secure_random_data.initialized = 0;
+	return true;
 }
 
 void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length)
 {
 	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";
 	static const size_t NUM_VALUES = sizeof(VALUES) - 1; // Disregard the '\0'.
-	unsigned i;
 	dbg_assert(length >= random_length * 2 + 1, "too small buffer");
 	dbg_assert(NUM_VALUES * NUM_VALUES >= 2048, "need at least 2048 possibilities for 2-character sequences");
 
-	buffer[random_length * 2] = 0;
+	buffer[random_length * 2] = '\0';
 
-	for(i = 0; i < random_length; i++)
+	for(unsigned int i = 0; i < random_length; i++)
 	{
 		unsigned short random_number = random[i] % 2048;
 		buffer[2 * i + 0] = VALUES[random_number / NUM_VALUES];
@@ -4679,7 +4585,7 @@ bool os_version_str(char *version, size_t length)
 		return false;
 	}
 	char extra[128];
-	extra[0] = 0;
+	extra[0] = '\0';
 
 	do
 	{
@@ -4711,7 +4617,7 @@ bool os_version_str(char *version, size_t length)
 		newline = (char *)str_find(buf + offset, "\n");
 		if(newline)
 		{
-			*newline = 0;
+			*newline = '\0';
 		}
 		str_format(extra, sizeof(extra), "; %s", buf + offset + 12);
 	} while(false);
