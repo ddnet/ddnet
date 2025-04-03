@@ -2272,9 +2272,9 @@ char str_uppercase(char c);
 
 bool str_is_num(char c);
 
-int str_is_all_num(const char *str);
+bool str_is_all_num(const char *str);
 
-int str_is_all_num_hex(const char *str);
+bool str_is_all_num_hex(const char *str);
 
 unsigned int str_quick_hash(const char *str);
 
@@ -2288,9 +2288,11 @@ int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
  * @param str1 String to compare.
  * @param str2 String to compare.
  *
- * @return 0 if the strings are confusables
+ * @return Whether the two strings are equal, where confusables are also equal
+ *
+ * @remark The strings are treated as null terminated strings.
  */
-int str_utf8_comp_confusable(const char *str1, const char *str2);
+bool str_utf8_comp_no_confusables(const char *str1, const char *str2);
 
 /**
  * Converts the given Unicode codepoint to lowercase (locale insensitive).
@@ -2300,7 +2302,7 @@ int str_utf8_comp_confusable(const char *str1, const char *str2);
  * @param code Unicode codepoint to convert.
  *
  * @return Lowercase codepoint
-*/
+ */
 int str_utf8_to_lower(int code);
 
 /**
@@ -2314,7 +2316,9 @@ int str_utf8_to_lower(int code);
  * @return `< 0` - String a is less than string b
  * @return `0` - String a is equal to string b
  * @return `> 0` - String a is greater than string b
-*/
+ *
+ * @remark The strings are treated as null terminated strings.
+ */
 int str_utf8_comp_nocase(const char *a, const char *b);
 
 /**
@@ -2329,7 +2333,9 @@ int str_utf8_comp_nocase(const char *a, const char *b);
  * @return `< 0` - String a is less than string b
  * @return `0` - String a is equal to string b
  * @return `> 0` - String a is greater than string b
-*/
+ *
+ * @remark The strings are treated as null terminated strings.
+ */
 int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
 
 /**
@@ -2346,7 +2352,7 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
  * @return A pointer into haystack where the needle was found.
  * @return Returns nullptr if needle could not be found.
  *
- * @remark - The strings are treated as null terminated strings.
+ * @remark The strings are treated as null terminated strings.
 */
 const char *str_utf8_find_nocase(const char *haystack, const char *needle, const char **end = nullptr);
 
@@ -2359,7 +2365,7 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle, const
  *
  * @return Whether the codepoint is a space
  */
-int str_utf8_is_space(int code);
+bool str_utf8_is_space(int code);
 
 /**
  * Checks whether a given byte is the start of a UTF-8 character.
@@ -2370,7 +2376,7 @@ int str_utf8_is_space(int code);
  *
  * @return Whether the char starts a UTF-8 character
  */
-int str_utf8_is_start(char c);
+bool str_utf8_is_start(char c);
 
 /**
  * Skips leading characters that render as spaces.
@@ -2468,11 +2474,11 @@ int str_utf8_encode(char *ptr, int chr);
  *
  * @param str Pointer to a possible UTF-8 string.
  *
- * @return 0 if invalid characters were found, 1 if only valid characters were found
+ * @return Whether the string is valid.
  *
  * @remark The string is treated as null terminated UTF-8 string.
 */
-int str_utf8_check(const char *str);
+bool str_utf8_check(const char *str);
 
 /**
  * Copies a number of UTF-8 characters from one string to another.
@@ -2558,10 +2564,9 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
  * @param delim List delimiter.
  * @param needle Item that is being looked for.
  *
- * @return `1` - Item is in list.
- * @return `0` - Item isn't in list.
+ * @return Whether the item was in the list.
  */
-int str_in_list(const char *list, const char *delim, const char *needle);
+bool str_in_list(const char *list, const char *delim, const char *needle);
 
 /**
  * Packs 4 big endian bytes into an unsigned.

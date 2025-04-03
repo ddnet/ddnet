@@ -308,7 +308,7 @@ bool CServer::IsClientNameAvailable(int ClientId, const char *pNameRequest)
 	{
 		if(i != ClientId && m_aClients[i].m_State >= CClient::STATE_READY)
 		{
-			if(str_utf8_comp_confusable(pNameRequest, m_aClients[i].m_aName) == 0)
+			if(str_utf8_comp_no_confusables(pNameRequest, m_aClients[i].m_aName) == 0)
 				return false;
 		}
 	}

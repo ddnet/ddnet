@@ -3630,7 +3630,7 @@ void net_stats(NETSTATS *stats_inout)
 	*stats_inout = network_stats;
 }
 
-int str_is_space(char c)
+bool str_is_space(char c)
 {
 	return c == ' ' || c == '\n' || c == '\r' || c == '\t';
 }
@@ -3647,26 +3647,26 @@ bool str_is_num(char c)
 	return c >= '0' && c <= '9';
 }
 
-int str_is_all_num(const char *str)
+bool str_is_all_num(const char *str)
 {
 	while(*str)
 	{
 		if(!str_is_num(*str))
-			return 0;
+			return false;
 		str++;
 	}
-	return 1;
+	return true;
 }
 
-int str_is_all_num_hex(const char *str)
+bool str_is_all_num_hex(const char *str)
 {
 	while(*str)
 	{
 		if(!str_is_num(*str) && !(*str >= 'a' && *str <= 'f') && !(*str >= 'A' && *str <= 'F'))
-			return 0;
+			return false;
 		str++;
 	}
-	return 1;
+	return true;
 }
 
 int str_to_int(const char *str)
@@ -3783,7 +3783,7 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle, const
 	return nullptr;
 }
 
-int str_utf8_is_space(int code)
+bool str_utf8_is_space(int code)
 {
 	return code <= 0x0020 || code == 0x0085 || code == 0x00A0 || code == 0x034F ||
 	       code == 0x115F || code == 0x1160 || code == 0x1680 || code == 0x180E ||
@@ -3831,7 +3831,7 @@ void str_utf8_trim_right(char *param)
 		*end = '\0';
 }
 
-int str_utf8_is_start(char c)
+bool str_utf8_is_start(char c)
 {
 	if((c & 0xC0) == 0x80) // 10xxxxxx
 		return false;
@@ -3980,23 +3980,21 @@ int str_utf8_decode(const char **ptr)
 		utf8_bytes_seen += 1;
 		utf8_code_point = utf8_code_point + ((byte_value - 0x80) << (6 * (utf8_bytes_needed - utf8_bytes_seen)));
 		if(utf8_bytes_seen != utf8_bytes_needed)
-		{
 			continue;
-		}
 		// Resetting variables not necessary, see above.
 		return utf8_code_point;
 	}
 }
 
-int str_utf8_check(const char *str)
+bool str_utf8_check(const char *str)
 {
 	int codepoint;
 	while((codepoint = str_utf8_decode(&str)))
 	{
 		if(codepoint == -1)
-			return 0;
+			return false;
 	}
-	return 1;
+	return true;
 }
 
 void str_utf8_copy_num(char *dst, const char *src, int dst_size, int num)
@@ -4083,18 +4081,19 @@ static const char *str_token_get(const char *str, const char *delim, int *length
 	return str;
 }
 
-int str_in_list(const char *list, const char *delim, const char *needle)
+bool str_in_list(const char *list, const char *delim, const char *needle)
 {
 	const char *tok = list;
-	int len = 0, notfound = 1, needlelen = str_length(needle);
+	int len = 0, needlelen = str_length(needle);
 
-	while(notfound && (tok = str_token_get(tok, delim, &len)))
+	while((tok = str_token_get(tok, delim, &len)))
 	{
-		notfound = needlelen != len || str_comp_num(tok, needle, len);
+		if(needlelen == len || str_comp_num(tok, needle, len) == 0);
+			return true;
 		tok = tok + len;
 	}
 
-	return !notfound;
+	return false;
 }
 
 const char *str_next_token(const char *str, const char *delim, char *buffer, int buffer_size)
