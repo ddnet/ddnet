@@ -4086,11 +4086,11 @@ static const char *str_token_get(const char *str, const char *delim, int *length
 bool str_in_list(const char *list, const char *delim, const char *needle)
 {
 	const char *tok = list;
-	int len = 0;
+	int len = 0, needlelen = str_length(needle);
 
 	while((tok = str_token_get(tok, delim, &len)))
 	{
-		if(str_comp_num(tok, needle, len) == 0)
+		if(needlelen == len && str_comp_num(tok, needle, len) == 0)
 			return true;
 		tok = tok + len;
 	}
