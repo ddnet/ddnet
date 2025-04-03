@@ -4295,7 +4295,7 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, c
 #endif
 }
 
-int kill_process(PROCESS process)
+bool kill_process(PROCESS process)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	BOOL success = TerminateProcess(process, 0);
@@ -4328,7 +4328,7 @@ bool is_process_alive(PROCESS process)
 #endif
 }
 
-int open_link(const char *link)
+bool open_link(const char *link)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_link = windows_utf8_to_wide(link);
@@ -4351,7 +4351,7 @@ int open_link(const char *link)
 	// Save and restore the FPU control word because ShellExecute might change it
 	fenv_t floating_point_environment;
 	int fegetenv_result = fegetenv(&floating_point_environment);
-	BOOL success = ShellExecuteExW(&info);
+	bool success = (bool)ShellExecuteExW(&info);
 	if(fegetenv_result == 0)
 		fesetenv(&floating_point_environment);
 	return success;
@@ -4368,23 +4368,25 @@ int open_link(const char *link)
 #endif
 }
 
-int open_file(const char *path)
+bool open_file(const char *path)
 {
 #if defined(CONF_PLATFORM_MACOS)
 	return open_link(path);
 #else
-	// Create a file link so the path can contain forward and
-	// backward slashes. But the file link must be absolute.
+	// Create a file link so the path can contain forward and backward slashes.
+	// But the file link must be absolute.
 	char buf[512];
 	char workingDir[IO_MAX_PATH_LENGTH];
 	if(fs_is_relative_path(path))
 	{
 		if(!fs_getcwd(workingDir, sizeof(workingDir)))
-			return 0;
+			return false;
 		str_append(workingDir, "/");
 	}
 	else
+	{
 		workingDir[0] = '\0';
+	}
 	str_format(buf, sizeof(buf), "file://%s%s", workingDir, path);
 	return open_link(buf);
 #endif

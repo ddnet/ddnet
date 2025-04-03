@@ -2262,11 +2262,11 @@ bool str_to_float(const char *str, float *out);
  *
  * @param c the character to check
  *
- * @return 1 if the character is whitespace, 0 otherwise.
+ * @return Whether the character was a space
  *
  * @remark The following characters are considered whitespace: ' ', '\n', '\r', '\t'
  */
-int str_is_space(char c);
+bool str_is_space(char c);
 
 char str_uppercase(char c);
 
@@ -2716,9 +2716,9 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, c
  *
  * @param process Handle of the process to kill.
  *
- * @return `1` on success, `0` on error.
+ * @return Whether the operation succeeded
  */
-int kill_process(PROCESS process);
+bool kill_process(PROCESS process);
 
 /**
  * Checks if a process is alive.
@@ -2738,11 +2738,11 @@ bool is_process_alive(PROCESS process);
  *
  * @param link The link to open in a browser, must be null terminated.
  *
- * @return `1` on success, `0` on failure.
+ * @return Whether the operation succeeded.
  *
  * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
  */
-int open_link(const char *link);
+bool open_link(const char *link);
 
 /**
  * Opens a file or directory with the default program.
@@ -2751,11 +2751,11 @@ int open_link(const char *link);
  *
  * @param path The file or folder to open with the default program, must be null terminated.
  *
- * @return `1` on success, `0` on failure.
+ * @return Whether the operation succeeded.
  *
  * @remark This may not be called with untrusted input or it'll result in arbitrary code execution, especially on Windows.
  */
-int open_file(const char *path);
+bool open_file(const char *path);
 #endif // !defined(CONF_PLATFORM_ANDROID)
 
 /**
