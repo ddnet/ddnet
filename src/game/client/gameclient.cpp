@@ -669,6 +669,7 @@ void CGameClient::OnReset()
 
 	std::fill(std::begin(m_aDDRaceMsgSent), std::end(m_aDDRaceMsgSent), false);
 	std::fill(std::begin(m_aShowOthers), std::end(m_aShowOthers), SHOW_OTHERS_NOT_SET);
+	std::fill(std::begin(m_aKillProtection), std::end(m_aKillProtection), KILL_PROTECTION_NOT_SET);
 	std::fill(std::begin(m_aLastUpdateTick), std::end(m_aLastUpdateTick), 0);
 
 	m_PredictedDummyId = -1;
@@ -904,6 +905,7 @@ void CGameClient::OnDummyDisconnect()
 	m_aLocalIds[1] = -1;
 	m_aDDRaceMsgSent[1] = false;
 	m_aShowOthers[1] = SHOW_OTHERS_NOT_SET;
+	m_aKillProtection[1] = KILL_PROTECTION_NOT_SET;
 	m_aLastNewPredictedTick[1] = -1;
 	m_PredictedDummyId = -1;
 }
@@ -2109,6 +2111,15 @@ void CGameClient::OnNewSnapshot()
 
 		// update state
 		m_aShowOthers[g_Config.m_ClDummy] = g_Config.m_ClShowOthers;
+	}
+
+	if(m_aKillProtection[g_Config.m_ClDummy] == KILL_PROTECTION_NOT_SET || m_aKillProtection[g_Config.m_ClDummy] != g_Config.m_ClKillProtection)
+	{
+		CNetMsg_Cl_KillProtection Msg;
+		Msg.m_Time = g_Config.m_ClKillProtection;
+		Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
+
+		m_aKillProtection[g_Config.m_ClDummy] = g_Config.m_ClKillProtection;
 	}
 
 	float ShowDistanceZoom = m_Camera.m_Zoom;

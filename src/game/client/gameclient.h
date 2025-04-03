@@ -857,6 +857,7 @@ private:
 
 	bool m_aDDRaceMsgSent[NUM_DUMMIES];
 	int m_aShowOthers[NUM_DUMMIES];
+	int m_aKillProtection[NUM_DUMMIES];
 
 	std::vector<std::shared_ptr<CManagedTeeRenderInfo>> m_vpManagedTeeRenderInfos;
 	void UpdateManagedTeeRenderInfos();

@@ -111,6 +111,7 @@ void CPlayer::Reset()
 	m_Last_Team = 0;
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
+	m_KillProtection = g_Config.m_SvKillProtection;
 	m_ShowDistance = vec2(1200, 800);
 	m_SpecTeam = false;
 	m_NinjaJetpack = false;

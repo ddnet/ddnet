@@ -2129,6 +2129,8 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 		case NETMSGTYPE_CL_KILL:
 			OnKillNetMessage(static_cast<CNetMsg_Cl_Kill *>(pRawMsg), ClientId);
 			break;
+		case NETMSGTYPE_CL_KILLPROTECTION:
+			OnKillProtectionNetMessage(static_cast<CNetMsg_Cl_KillProtection *>(pRawMsg), ClientId);
 		default:
 			break;
 		}
@@ -2544,7 +2546,7 @@ void CGameContext::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int Clien
 	if(pChr)
 	{
 		int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
-		if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
+		if(pPlayer->m_KillProtection != 0 && CurrTime >= (60 * pPlayer->m_KillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
 		{
 			SendChatTarget(ClientId, "Kill Protection enabled. If you really want to join the spectators, first type /kill");
 			return;
@@ -2851,7 +2853,7 @@ void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId)
 
 	// Kill Protection
 	int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
-	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
+	if(pPlayer->m_KillProtection != 0 && CurrTime >= (60 * pPlayer->m_KillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
 	{
 		SendChatTarget(ClientId, "Kill Protection enabled. If you really want to kill, type /kill");
 		return;
@@ -2860,6 +2862,15 @@ void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId)
 	pPlayer->m_LastKill = Server()->Tick();
 	pPlayer->KillCharacter(WEAPON_SELF);
 	pPlayer->Respawn();
+}
+
+void CGameContext::OnKillProtectionNetMessage(const CNetMsg_Cl_KillProtection *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientId];
+	if(pMsg->m_Time < 0)
+		pPlayer->m_KillProtection = g_Config.m_SvKillProtection;
+	else if(pMsg->m_Time <= 9999)
+		pPlayer->m_KillProtection = pMsg->m_Time;
 }
 
 void CGameContext::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int ClientId)
