@@ -16,9 +16,18 @@ public:
 	float GetMinMouseDistance() const;
 	float GetMaxMouseDistance() const;
 
+	enum EInputType
+	{
+		INPUT_TYPE_ABSOLUTE,
+		INPUT_TYPE_RELATIVE,
+		INPUT_TYPE_AUTOMATED,
+	};
+
 	vec2 m_aMousePos[NUM_DUMMIES];
 	vec2 m_aMousePosOnAction[NUM_DUMMIES];
 	vec2 m_aTargetPos[NUM_DUMMIES];
+
+	EInputType m_aInputType[NUM_DUMMIES];
 
 	int m_aAmmoCount[NUM_WEAPONS];
 
