@@ -2018,16 +2018,14 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
  *
  * @ingroup Filesystem
  *
- * @param path Directory to create.
+ * @param path Directory to create, must be null terminated.
  *
  * @return Whether the operation succeeded.
  *
  * @remark Does not create several directories if needed. "a/b/c" will
- * result in a failure if b or a does not exist.
- *
- * @remark The strings are treated as null terminated strings.
+ *         result in a failure if b or a does not exist.
  */
-bool fs_makedir(const char *path);
+bool fs_make_dir(const char *path);
 
 /**
  * Removes a directory.
@@ -2036,33 +2034,30 @@ bool fs_makedir(const char *path);
  *
  * @param path Directory to remove.
  *
- * @return Whether the operation succeeded.
+ * @return Whether the operation succeeded, must be null terminated.
  *
  * @remark Cannot remove a non-empty directory.
- * @remark The strings are treated as null terminated strings.
  */
-bool fs_removedir(const char *path);
+bool fs_remove_dir(const char *path);
 
 /**
  * Recursively creates parent directories for a file or directory.
  *
  * @ingroup Filesystem
  *
- * @param path File or directory for which to create parent directories.
+ * @param path File or directory for which to create parent directories, must be null terminated.
  *
  * @return Whether the operation succeeded.
- *
- * @remark The strings are treated as null terminated strings.
  */
-bool fs_makedir_rec_for(const char *path);
+bool fs_make_dir_recursive(const char *path);
 
 /**
  * Fetches per user configuration directory.
  *
  * @ingroup Filesystem
  *
- * @param appname Name of the application.
- * @param path Buffer that will receive the storage path.
+ * @param appname Name of the application, must be null terminated.
+ * @param path Buffer that will receive the storage path, must be null terminated.
  * @param max Size of the buffer.
  *
  * @return 0 on success. Negative value on failure.
@@ -2070,7 +2065,6 @@ bool fs_makedir_rec_for(const char *path);
  * @remark Returns ~/.appname on UNIX based systems.
  * @remark Returns ~/Library/Applications Support/appname on macOS.
  * @remark Returns %APPDATA%/Appname on Windows based systems.
- * @remark The strings are treated as null terminated strings.
  */
 int fs_storage_path(const char *appname, char *path, int max);
 
@@ -2079,11 +2073,9 @@ int fs_storage_path(const char *appname, char *path, int max);
  *
  * @ingroup Filesystem
  *
- * @param path the path to check.
+ * @param path the path to check, must be null terminated.
  *
- * @return Whether the path is a file
- *
- * @remark The strings are treated as null terminated strings.
+ * @return Whether the path is a file.
  */
 bool fs_is_file(const char *path);
 
@@ -2092,11 +2084,9 @@ bool fs_is_file(const char *path);
  *
  * @ingroup Filesystem
  *
- * @param path the path to check.
+ * @param path the path to check, must be null terminated.
  *
- * @return Whether the path is a directory
- *
- * @remark The strings are treated as null terminated strings.
+ * @return Whether the path is a directory.
  */
 bool fs_is_dir(const char *path);
 
@@ -2105,11 +2095,9 @@ bool fs_is_dir(const char *path);
  *
  * @ingroup Filesystem
  *
- * @param path Path to check.
+ * @param path Path to check, must be null terminated.
  *
- * @return Whether the path is relative
- *
- * @remark The strings are treated as null terminated strings.
+ * @return Whether the path is relative.
  */
 bool fs_is_relative_path(const char *path);
 
@@ -2118,13 +2106,11 @@ bool fs_is_relative_path(const char *path);
  *
  * @ingroup Filesystem
  *
- * @param path New working directory path.
+ * @param path New working directory path, must be null terminated.
  *
  * @return Whether the operation succeeded.
- *
- * @remark The strings are treated as null terminated strings.
  */
-bool fs_chdir(const char *path);
+bool fs_change_cwd(const char *path);
 
 /**
  * Gets the current working directory.
@@ -2135,10 +2121,8 @@ bool fs_chdir(const char *path);
  * @param buffer_size Size of the buffer.
  *
  * @return Pointer to the buffer on success, nullptr on failure.
- *
- * @remark The strings are treated as null terminated strings.
  */
-char *fs_getcwd(char *buffer, int buffer_size);
+char *fs_cwd(char *buffer, int buffer_size);
 
 /**
  * Gets the name of a file or folder specified by a path,
@@ -2146,13 +2130,12 @@ char *fs_getcwd(char *buffer, int buffer_size);
  *
  * @ingroup Filesystem
  *
- * @param path Path from which to retrieve the filename.
+ * @param path Path from which to retrieve the filename, must be null terminated.
  *
  * @return Filename of the path.
  *
  * @remark Supports forward and backward slashes as path segment separator.
  * @remark No distinction between files and folders is being made.
- * @remark The strings are treated as null terminated strings.
  */
 const char *fs_filename(const char *path);
 
@@ -2161,7 +2144,7 @@ const char *fs_filename(const char *path);
  *
  * @ingroup Filesystem
  *
- * @param filename The filename to split.
+ * @param filename The filename to split, must be null terminated.
  * @param name Buffer that will receive the name without extension, may be nullptr.
  * @param name_size Size of the name buffer (ignored if name is nullptr).
  * @param extension Buffer that will receive the extension, may be nullptr.
@@ -2169,7 +2152,6 @@ const char *fs_filename(const char *path);
  *
  * @remark Does NOT handle forward and backward slashes.
  * @remark No distinction between files and folders is being made.
- * @remark The strings are treated as null terminated strings.
  */
 void fs_split_file_extension(const char *filename, char *name, size_t name_size, char *extension = nullptr, size_t extension_size = 0);
 
@@ -2178,11 +2160,9 @@ void fs_split_file_extension(const char *filename, char *name, size_t name_size,
  *
  * @ingroup Filesystem
  *
- * @param path Path of the directory. The parent will be stored in this buffer as well.
+ * @param path Path of the directory, must be null terminated. The parent will be stored in this buffer as well.
  *
  * @return Whether the operation succeeded.
- *
- * @remark The strings are treated as null terminated strings.
  */
 bool fs_parent_dir(char *path);
 
@@ -2191,11 +2171,10 @@ bool fs_parent_dir(char *path);
  *
  * @ingroup Filesystem
  *
- * @param filename Path of the file to delete.
+ * @param filename Path of the file to delete, must be null terminated.
  *
  * @return Whether the operation succeeded.
  *
- * @remark The strings are treated as null terminated strings.
  * @remark Returns an error if the path specifies a directory name.
  */
 bool fs_remove(const char *filename);
@@ -2205,12 +2184,10 @@ bool fs_remove(const char *filename);
  *
  * @ingroup Filesystem
  *
- * @param oldname The current path of a file or directory.
- * @param newname The new path for the file or directory.
+ * @param oldname The current path of a file or directory, must be null terminated.
+ * @param newname The new path for the file or directory, must be null terminated.
  *
  * @return Whether the operation succeeded.
- *
- * @remark The strings are treated as null terminated strings.
  */
 bool fs_rename(const char *oldname, const char *newname);
 
@@ -2219,13 +2196,12 @@ bool fs_rename(const char *oldname, const char *newname);
  *
  * @ingroup Filesystem
  *
- * @param name Path of a file or directory.
+ * @param name Path of a file or directory, must be null terminated.
  * @param created Pointer where the creation time will be stored.
  * @param modified Pointer where the modification time will be stored.
  *
  * @return Whether the operation succeeded
  *
- * @remark The strings are treated as null terminated strings.
  * @remark Returned time is in seconds since UNIX Epoch.
  */
 bool fs_file_time(const char *name, time_t *created, time_t *modified);
@@ -2468,11 +2444,9 @@ int str_utf8_encode(char *ptr, int chr);
  *
  * @ingroup Strings
  *
- * @param str Pointer to a possible UTF-8 string.
+ * @param str Pointer to a possible UTF-8 string, must be null terminated.
  *
  * @return Whether the string is valid.
- *
- * @remark The string is treated as null terminated UTF-8 string.
 */
 bool str_utf8_check(const char *str);
 

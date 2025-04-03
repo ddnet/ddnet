@@ -128,7 +128,7 @@ bool CHttpRequest::BeforeInit()
 				m_IfModifiedSince = FileModifiedTime;
 		}
 
-		if(!fs_makedir_rec_for(m_aDestAbsoluteTmp))
+		if(!fs_make_dir_recursive(m_aDestAbsoluteTmp))
 		{
 			log_error("http", "i/o error, cannot create folder for: %s", m_aDest);
 			return false;

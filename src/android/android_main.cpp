@@ -167,11 +167,11 @@ const char *InitAndroid()
 	const char *pPath = SDL_AndroidGetExternalStoragePath();
 	if(pPath == nullptr)
 		return "The external storage is not available.";
-	if(fs_chdir(pPath))
+	if(fs_change_cwd(pPath))
 		return "Failed to change current directory to external storage.";
 	log_info("android", "Changed current directory to '%s'", pPath);
 
-	if(fs_makedir("data") || fs_makedir("user"))
+	if(fs_make_dir("data") || fs_make_dir("user"))
 		return "Failed to create 'data' and 'user' directories in external storage.";
 
 	if(EqualIntegrityFiles(INTEGRITY_INDEX, INTEGRITY_INDEX_SAVE))
@@ -198,7 +198,7 @@ const char *InitAndroid()
 		if(IntegritySaveLine != vIntegritySaveLines.end() && IntegritySaveLine->m_Sha256 == IntegrityLine.m_Sha256)
 			continue;
 
-		if(!fs_makedir_rec_for(IntegrityLine.m_aFilename) || !UnpackAsset(IntegrityLine.m_aFilename))
+		if(!fs_make_dir_recursive(IntegrityLine.m_aFilename) || !UnpackAsset(IntegrityLine.m_aFilename))
 			return "Failed to unpack game assets, consider reinstalling the app.";
 	}
 

@@ -5217,7 +5217,7 @@ bool CClient::ViewFile(const char *pFilename)
 	char aWorkingDir[IO_MAX_PATH_LENGTH];
 	if(fs_is_relative_path(pFilename))
 	{
-		if(!fs_getcwd(aWorkingDir, sizeof(aWorkingDir)))
+		if(!fs_cwd(aWorkingDir, sizeof(aWorkingDir)))
 		{
 			log_error("client", "Failed to open file '%s' (failed to get working directory)", pFilename);
 			return false;

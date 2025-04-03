@@ -38,7 +38,7 @@ void CTestInfo::Filename(char *pBuffer, size_t BufferLength, const char *pSuffix
 
 std::unique_ptr<IStorage> CTestInfo::CreateTestStorage()
 {
-	bool Success = fs_makedir(m_aFilename);
+	bool Success = fs_make_dir(m_aFilename);
 	EXPECT_TRUE(Success);
 	if(!Success)
 		return nullptr;
@@ -115,7 +115,7 @@ void TestDeleteTestStorageFiles(const char *pPath)
 	for(auto &Entry : vEntries)
 	{
 		if(Entry.m_IsDirectory)
-			ASSERT_TRUE(fs_removedir(Entry.m_aData));
+			ASSERT_TRUE(fs_remove_dir(Entry.m_aData));
 		else
 			ASSERT_TRUE(fs_remove(Entry.m_aData));
 	}

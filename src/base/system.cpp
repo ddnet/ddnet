@@ -2351,7 +2351,7 @@ int fs_storage_path(const char *appname, char *path, int max)
 #endif
 }
 
-bool fs_makedir_rec_for(const char *path)
+bool fs_make_dir_recursive(const char *path)
 {
 	char buffer[IO_MAX_PATH_LENGTH];
 	str_copy(buffer, path);
@@ -2362,7 +2362,7 @@ bool fs_makedir_rec_for(const char *path)
 		if((buffer[index] == '/' || buffer[index] == '\\') && buffer[index + 1] != '\0' && buffer[index - 1] != ':')
 		{
 			buffer[index] = '\0';
-			if(!fs_makedir(buffer))
+			if(!fs_make_dir(buffer))
 				return false;
 			buffer[index] = '/';
 		}
@@ -2370,7 +2370,7 @@ bool fs_makedir_rec_for(const char *path)
 	return true;
 }
 
-bool fs_makedir(const char *path)
+bool fs_make_dir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
@@ -2392,7 +2392,7 @@ bool fs_makedir(const char *path)
 	return false;
 }
 
-bool fs_removedir(const char *path)
+bool fs_remove_dir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
@@ -2443,7 +2443,7 @@ bool fs_is_relative_path(const char *path)
 #endif
 }
 
-bool fs_chdir(const char *path)
+bool fs_change_cwd(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
@@ -2453,7 +2453,7 @@ bool fs_chdir(const char *path)
 #endif
 }
 
-char *fs_getcwd(char *buffer, int buffer_size)
+char *fs_cwd(char *buffer, int buffer_size)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const DWORD size_needed = GetCurrentDirectoryW(0, nullptr);
@@ -4381,7 +4381,7 @@ bool open_file(const char *path)
 	char workingDir[IO_MAX_PATH_LENGTH];
 	if(fs_is_relative_path(path))
 	{
-		if(!fs_getcwd(workingDir, sizeof(workingDir)))
+		if(!fs_cwd(workingDir, sizeof(workingDir)))
 			return false;
 		str_append(workingDir, "/");
 	}

@@ -95,11 +95,11 @@ int main(int argc, const char **argv)
 	{
 		str_format(aFileName, sizeof(aFileName), "out/%s", argv[2]);
 
-		fs_makedir_rec_for(aFileName);
+		fs_make_dir_recursive(aFileName);
 	}
 	else
 	{
-		fs_makedir("out");
+		fs_make_dir("out");
 		char aBuff[IO_MAX_PATH_LENGTH];
 		IStorage::StripPathAndExtension(argv[1], aBuff, sizeof(aBuff));
 		str_format(aFileName, sizeof(aFileName), "out/%s.map", aBuff);

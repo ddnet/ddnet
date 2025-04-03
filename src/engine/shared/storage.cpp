@@ -57,8 +57,8 @@ public:
 
 		if(m_aaStoragePaths[TYPE_SAVE][0] != '\0')
 		{
-			if(!fs_makedir_rec_for(m_aaStoragePaths[TYPE_SAVE]) ||
-				fs_makedir(m_aaStoragePaths[TYPE_SAVE]))
+			if(!fs_make_dir_recursive(m_aaStoragePaths[TYPE_SAVE]) ||
+				fs_make_dir(m_aaStoragePaths[TYPE_SAVE]))
 			{
 				log_error("storage", "failed to create the user directory");
 				return false;
@@ -336,7 +336,7 @@ public:
 
 	bool FindCurrentDirectory()
 	{
-		if(!fs_getcwd(m_aCurrentdir, sizeof(m_aCurrentdir)))
+		if(!fs_cwd(m_aCurrentdir, sizeof(m_aCurrentdir)))
 		{
 			log_error("storage", "could not determine current directory");
 			return false;
@@ -806,7 +806,7 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
 
-		bool Success = fs_removedir(aBuffer);
+		bool Success = fs_remove_dir(aBuffer);
 		if(!Success)
 			log_error("storage", "failed to remove folder: %s", aBuffer);
 		return Success;
@@ -845,7 +845,7 @@ public:
 		GetBinaryPath(pOldFilename, aOldBuffer, sizeof(aOldBuffer));
 		GetBinaryPath(pNewFilename, aNewBuffer, sizeof(aNewBuffer));
 
-		if(!fs_makedir_rec_for(aNewBuffer))
+		if(!fs_make_dir_recursive(aNewBuffer))
 		{
 			log_error("storage", "failed to create folders for: %s", aNewBuffer);
 			return false;
@@ -864,7 +864,7 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer));
 
-		bool Success = fs_makedir(aBuffer);
+		bool Success = fs_make_dir(aBuffer);
 		if(!Success)
 			log_error("storage", "failed to create folder: %s", aBuffer);
 		return true;
@@ -889,7 +889,7 @@ public:
 		GetBinaryPath(PLAT_CLIENT_EXEC, aBinaryPath, sizeof(aBinaryPath));
 		if(fs_is_relative_path(aBinaryPath))
 		{
-			if(fs_getcwd(pBuffer, BufferSize))
+			if(fs_cwd(pBuffer, BufferSize))
 			{
 				str_append(pBuffer, "/", BufferSize);
 				str_append(pBuffer, aBinaryPath, BufferSize);
