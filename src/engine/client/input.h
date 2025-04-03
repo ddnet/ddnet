@@ -3,8 +3,8 @@
 #ifndef ENGINE_CLIENT_INPUT_H
 #define ENGINE_CLIENT_INPUT_H
 
-#include <SDL_events.h>
-#include <SDL_joystick.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_joystick.h>
 #include <engine/console.h>
 
 #include <engine/input.h>
@@ -24,10 +24,9 @@ public:
 		friend class CInput;
 
 		CInput *m_pInput;
-		int m_Index;
+		SDL_JoystickID m_Id;
 		char m_aName[64];
 		char m_aGUID[34];
-		SDL_JoystickID m_InstanceId;
 		int m_NumAxes;
 		int m_NumButtons;
 		int m_NumBalls;
@@ -38,13 +37,13 @@ public:
 
 	public:
 		CJoystick() {}
-		CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate);
+		CJoystick(CInput *pInput, SDL_JoystickID Id, SDL_Joystick *pDelegate);
 		virtual ~CJoystick() = default;
 
-		int GetIndex() const override { return m_Index; }
+		int GetIndex() const override { return m_Id; }
 		const char *GetName() const override { return m_aName; }
 		const char *GetGUID() const { return m_aGUID; }
-		SDL_JoystickID GetInstanceId() const { return m_InstanceId; }
+		SDL_JoystickID GetId() const { return m_Id; }
 		int GetNumAxes() const override { return m_NumAxes; }
 		int GetNumButtons() const override { return m_NumButtons; }
 		int GetNumBalls() const override { return m_NumBalls; }
@@ -58,6 +57,8 @@ public:
 	};
 
 private:
+	SDL_Window *m_pWindow;
+
 	IEngineGraphics *m_pGraphics;
 	IConsole *m_pConsole;
 	IConfigManager *m_pConfigManager;
@@ -69,7 +70,7 @@ private:
 	std::vector<CJoystick> m_vJoysticks;
 	CJoystick *m_pActiveJoystick = nullptr;
 	void InitJoysticks();
-	bool OpenJoystick(int JoystickIndex);
+	bool OpenJoystick(SDL_JoystickID JoystickId);
 	void CloseJoysticks();
 	void UpdateActiveJoystick();
 	static void ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -82,8 +83,9 @@ private:
 	// IME support
 	std::string m_CompositionString;
 	int m_CompositionCursor;
-	std::vector<std::string> m_vCandidates;
-	int m_CandidateSelectedIndex;
+	const char * const *m_ppCandidates = nullptr;
+	int m_CandidatesCount = 0;
+	int m_CandidateSelectedIndex = -1;
 
 	// events
 	std::vector<CEvent> m_vInputEvents;
@@ -109,8 +111,6 @@ private:
 	void HandleTextEditingEvent(const char *pText, int Start, int Length);
 
 	char m_aDropFile[IO_MAX_PATH_LENGTH];
-
-	void ProcessSystemMessage(SDL_SysWMmsg *pMsg);
 
 public:
 	CInput();
@@ -154,8 +154,8 @@ public:
 	bool HasComposition() const override { return !m_CompositionString.empty(); }
 	int GetCompositionCursor() const override { return m_CompositionCursor; }
 	int GetCompositionLength() const override { return m_CompositionString.length(); }
-	const char *GetCandidate(int Index) const override { return m_vCandidates[Index].c_str(); }
-	int GetCandidateCount() const override { return m_vCandidates.size(); }
+	const char *GetCandidate(int Index) const override { return m_ppCandidates[Index]; }
+	int GetCandidateCount() const override { return m_CandidatesCount; }
 	int GetCandidateSelectedIndex() const override { return m_CandidateSelectedIndex; }
 	void SetCompositionWindowPosition(float X, float Y, float H) override;
 
