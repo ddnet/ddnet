@@ -2264,7 +2264,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 
 		CFsFileInfo info;
 		info.m_pName = entry->d_name;
-		
+
 		if(fs_file_time(buffer, &created, &modified))
 		{
 			info.m_TimeCreated = created;
