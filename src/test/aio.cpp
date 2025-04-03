@@ -23,9 +23,7 @@ protected:
 	~Async()
 	{
 		if(Delete)
-		{
 			fs_remove(m_Info.m_aFilename);
-		}
 	}
 
 	void Write(const char *pText)

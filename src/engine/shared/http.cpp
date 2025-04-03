@@ -124,13 +124,11 @@ bool CHttpRequest::BeforeInit()
 		if(m_SkipByFileTime)
 		{
 			time_t FileCreatedTime, FileModifiedTime;
-			if(fs_file_time(m_aDestAbsolute, &FileCreatedTime, &FileModifiedTime) == 0)
-			{
+			if(fs_file_time(m_aDestAbsolute, &FileCreatedTime, &FileModifiedTime))
 				m_IfModifiedSince = FileModifiedTime;
-			}
 		}
 
-		if(fs_makedir_rec_for(m_aDestAbsoluteTmp) < 0)
+		if(!fs_makedir_rec_for(m_aDestAbsoluteTmp))
 		{
 			log_error("http", "i/o error, cannot create folder for: %s", m_aDest);
 			return false;
@@ -458,7 +456,7 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 		}
 		else if(!m_ValidateBeforeOverwrite)
 		{
-			if(fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
+			if(!fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
 			{
 				log_error("http", "i/o error, cannot move file: %s", m_aDest);
 				State = EHttpState::ERROR;
@@ -489,7 +487,7 @@ void CHttpRequest::OnValidation(bool Success)
 			fs_remove(m_aDestAbsoluteTmp);
 			return;
 		}
-		if(fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
+		if(!fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
 		{
 			log_error("http", "i/o error, cannot move file: %s", m_aDest);
 			m_State = EHttpState::ERROR;

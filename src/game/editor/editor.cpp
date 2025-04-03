@@ -5542,7 +5542,7 @@ void CEditor::RenderFileDialog()
 			{
 				str_copy(m_aFilesSelectedName, fs_filename(m_pFileDialogPath));
 				str_append(m_aFilesSelectedName, "/");
-				if(fs_parent_dir(m_pFileDialogPath))
+				if(!fs_parent_dir(m_pFileDialogPath))
 				{
 					if(str_comp(m_pFileDialogPath, m_aFileDialogCurrentFolder) == 0)
 					{

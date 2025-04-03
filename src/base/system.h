@@ -2020,14 +2020,14 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
  *
  * @param path Directory to create.
  *
- * @return 0 on success. Negative value on failure.
+ * @return Whether the operation succeeded.
  *
  * @remark Does not create several directories if needed. "a/b/c" will
  * result in a failure if b or a does not exist.
  *
  * @remark The strings are treated as null terminated strings.
  */
-int fs_makedir(const char *path);
+bool fs_makedir(const char *path);
 
 /**
  * Removes a directory.
@@ -2036,13 +2036,12 @@ int fs_makedir(const char *path);
  *
  * @param path Directory to remove.
  *
- * @return 0 on success. Negative value on failure.
+ * @return Whether the operation succeeded.
  *
  * @remark Cannot remove a non-empty directory.
- *
  * @remark The strings are treated as null terminated strings.
  */
-int fs_removedir(const char *path);
+bool fs_removedir(const char *path);
 
 /**
  * Recursively creates parent directories for a file or directory.
@@ -2051,11 +2050,11 @@ int fs_removedir(const char *path);
  *
  * @param path File or directory for which to create parent directories.
  *
- * @return 0 on success. Negative value on failure.
+ * @return Whether the operation succeeded.
  *
  * @remark The strings are treated as null terminated strings.
  */
-int fs_makedir_rec_for(const char *path);
+bool fs_makedir_rec_for(const char *path);
 
 /**
  * Fetches per user configuration directory.
@@ -2071,7 +2070,6 @@ int fs_makedir_rec_for(const char *path);
  * @remark Returns ~/.appname on UNIX based systems.
  * @remark Returns ~/Library/Applications Support/appname on macOS.
  * @remark Returns %APPDATA%/Appname on Windows based systems.
- *
  * @remark The strings are treated as null terminated strings.
  */
 int fs_storage_path(const char *appname, char *path, int max);
@@ -2083,12 +2081,11 @@ int fs_storage_path(const char *appname, char *path, int max);
  *
  * @param path the path to check.
  *
- * @return 1 if a file with the given path exists,
- * 0 on failure or if the file does not exist.
+ * @return Whether the path is a file
  *
  * @remark The strings are treated as null terminated strings.
  */
-int fs_is_file(const char *path);
+bool fs_is_file(const char *path);
 
 /**
  * Checks if a folder exists.
@@ -2097,12 +2094,11 @@ int fs_is_file(const char *path);
  *
  * @param path the path to check.
  *
- * @return 1 if a folder with the given path exists,
- * 0 on failure or if the folder does not exist.
+ * @return Whether the path is a directory
  *
  * @remark The strings are treated as null terminated strings.
  */
-int fs_is_dir(const char *path);
+bool fs_is_dir(const char *path);
 
 /**
  * Checks whether a given path is relative or absolute.
@@ -2111,11 +2107,11 @@ int fs_is_dir(const char *path);
  *
  * @param path Path to check.
  *
- * @return 1 if relative, 0 if absolute.
+ * @return Whether the path is relative
  *
  * @remark The strings are treated as null terminated strings.
  */
-int fs_is_relative_path(const char *path);
+bool fs_is_relative_path(const char *path);
 
 /**
  * Changes the current working directory.
@@ -2124,11 +2120,11 @@ int fs_is_relative_path(const char *path);
  *
  * @param path New working directory path.
  *
- * @return 0 on success, 1 on failure.
+ * @return Whether the operation succeeded.
  *
  * @remark The strings are treated as null terminated strings.
  */
-int fs_chdir(const char *path);
+bool fs_chdir(const char *path);
 
 /**
  * Gets the current working directory.
@@ -2182,13 +2178,13 @@ void fs_split_file_extension(const char *filename, char *name, size_t name_size,
  *
  * @ingroup Filesystem
  *
- * @param path Path of the directory. The parent will be store in this buffer as well.
+ * @param path Path of the directory. The parent will be stored in this buffer as well.
  *
- * @return 0 on success, 1 on failure.
+ * @return Whether the operation succeeded.
  *
  * @remark The strings are treated as null terminated strings.
  */
-int fs_parent_dir(char *path);
+bool fs_parent_dir(char *path);
 
 /**
  * Deletes a file.
@@ -2197,12 +2193,12 @@ int fs_parent_dir(char *path);
  *
  * @param filename Path of the file to delete.
  *
- * @return 0 on success, 1 on failure.
+ * @return Whether the operation succeeded.
  *
  * @remark The strings are treated as null terminated strings.
  * @remark Returns an error if the path specifies a directory name.
  */
-int fs_remove(const char *filename);
+bool fs_remove(const char *filename);
 
 /**
  * Renames the file or directory. If the paths differ the file will be moved.
@@ -2212,11 +2208,11 @@ int fs_remove(const char *filename);
  * @param oldname The current path of a file or directory.
  * @param newname The new path for the file or directory.
  *
- * @return 0 on success, 1 on failure.
+ * @return Whether the operation succeeded.
  *
  * @remark The strings are treated as null terminated strings.
  */
-int fs_rename(const char *oldname, const char *newname);
+bool fs_rename(const char *oldname, const char *newname);
 
 /**
  * Gets the creation and the last modification date of a file or directory.
@@ -2227,12 +2223,12 @@ int fs_rename(const char *oldname, const char *newname);
  * @param created Pointer where the creation time will be stored.
  * @param modified Pointer where the modification time will be stored.
  *
- * @return 0 on success, non-zero on failure.
+ * @return Whether the operation succeeded
  *
  * @remark The strings are treated as null terminated strings.
  * @remark Returned time is in seconds since UNIX Epoch.
  */
-int fs_file_time(const char *name, time_t *created, time_t *modified);
+bool fs_file_time(const char *name, time_t *created, time_t *modified);
 
 /**
  * Swaps the endianness of data. Each element is swapped individually by reversing its bytes.

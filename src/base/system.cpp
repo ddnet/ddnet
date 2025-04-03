@@ -2261,12 +2261,20 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 		}
 		str_copy(buffer + length, entry->d_name, sizeof(buffer) - length);
 		time_t created = -1, modified = -1;
-		fs_file_time(buffer, &created, &modified);
 
 		CFsFileInfo info;
 		info.m_pName = entry->d_name;
-		info.m_TimeCreated = created;
-		info.m_TimeModified = modified;
+		
+		if(fs_file_time(buffer, &created, &modified))
+		{
+			info.m_TimeCreated = created;
+			info.m_TimeModified = modified;
+		}
+		else
+		{
+			info.m_TimeCreated = 0;
+			info.m_TimeModified = 0;
+		}
 
 		if(cb(&info, fs_is_dir(buffer), type, user))
 			break;
@@ -2343,109 +2351,105 @@ int fs_storage_path(const char *appname, char *path, int max)
 #endif
 }
 
-int fs_makedir_rec_for(const char *path)
+bool fs_makedir_rec_for(const char *path)
 {
 	char buffer[IO_MAX_PATH_LENGTH];
 	str_copy(buffer, path);
 	for(int index = 1; buffer[index] != '\0'; ++index)
 	{
-		// Do not try to create folder for drive letters on Windows,
-		// as this is not necessary and may fail for system drives.
+		// Do not try to create folder for drive letters on Windows
+		// This is not necessary and may fail for system drives
 		if((buffer[index] == '/' || buffer[index] == '\\') && buffer[index + 1] != '\0' && buffer[index - 1] != ':')
 		{
 			buffer[index] = '\0';
-			if(fs_makedir(buffer) < 0)
-			{
-				return -1;
-			}
+			if(!fs_makedir(buffer))
+				return false;
 			buffer[index] = '/';
 		}
 	}
-	return 0;
+	return true;
 }
 
-int fs_makedir(const char *path)
+bool fs_makedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
 	if(CreateDirectoryW(wide_path.c_str(), nullptr) != 0)
-		return 0;
+		return true;
 	if(GetLastError() == ERROR_ALREADY_EXISTS)
-		return 0;
-	return -1;
+		return true;
 #else
 #ifdef CONF_PLATFORM_HAIKU
 	struct stat st;
 	if(stat(path, &st) == 0)
-		return 0;
+		return true;
 #endif
 	if(mkdir(path, 0755) == 0)
-		return 0;
+		return true;
 	if(errno == EEXIST)
-		return 0;
-	return -1;
+		return true;
 #endif
+	return false;
 }
 
-int fs_removedir(const char *path)
+bool fs_removedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
 	if(RemoveDirectoryW(wide_path.c_str()) != 0)
-		return 0;
-	return -1;
+		return true;
 #else
 	if(rmdir(path) == 0)
-		return 0;
-	return -1;
+		return true;
 #endif
+	return false;
 }
 
-int fs_is_file(const char *path)
+bool fs_is_file(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
 	DWORD attributes = GetFileAttributesW(wide_path.c_str());
-	return attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
+	return attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY);
 #else
 	struct stat sb;
 	if(stat(path, &sb) == -1)
-		return 0;
-	return S_ISREG(sb.st_mode) ? 1 : 0;
+		return false;
+	return S_ISREG(sb.st_mode);
 #endif
 }
 
-int fs_is_dir(const char *path)
+bool fs_is_dir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
 	DWORD attributes = GetFileAttributesW(wide_path.c_str());
-	return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
+	return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY);
 #else
 	struct stat sb;
 	if(stat(path, &sb) == -1)
-		return 0;
-	return S_ISDIR(sb.st_mode) ? 1 : 0;
+		return false;
+	return S_ISDIR(sb.st_mode);
 #endif
 }
 
-int fs_is_relative_path(const char *path)
+bool fs_is_relative_path(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
-	return PathIsRelativeW(wide_path.c_str()) ? 1 : 0;
+	return PathIsRelativeW(wide_path.c_str());
 #else
-	return path[0] == '/' ? 0 : 1; // yes, it's that simple
+	return path[0] != '/'; // Yes, it's that simple
 #endif
 }
 
-int fs_chdir(const char *path)
+bool fs_chdir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
-	return SetCurrentDirectoryW(wide_path.c_str()) != 0 ? 0 : 1;
+	return SetCurrentDirectoryW(wide_path.c_str()) == 0;
 #else
-	return chdir(path) ? 1 : 0;
+	return chdir(path) == 0;
 #endif
 }
 
@@ -2507,7 +2511,7 @@ void fs_split_file_extension(const char *filename, char *name, size_t name_size,
 	}
 }
 
-int fs_parent_dir(char *path)
+bool fs_parent_dir(char *path)
 {
 	char *parent = nullptr;
 	for(; *path; ++path)
@@ -2515,47 +2519,46 @@ int fs_parent_dir(char *path)
 		if(*path == '/' || *path == '\\')
 			parent = path;
 	}
-
 	if(parent)
 	{
 		*parent = '\0';
-		return 0;
+		return true;
 	}
-	return 1;
+	return false;
 }
 
-int fs_remove(const char *filename)
+bool fs_remove(const char *filename)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_filename = windows_utf8_to_wide(filename);
-	return DeleteFileW(wide_filename.c_str()) == 0;
+	return DeleteFileW(wide_filename.c_str()) != 0;
 #else
-	return unlink(filename) != 0;
+	return unlink(filename) == 0;
 #endif
 }
 
-int fs_rename(const char *oldname, const char *newname)
+bool fs_rename(const char *oldname, const char *newname)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_oldname = windows_utf8_to_wide(oldname);
 	const std::wstring wide_newname = windows_utf8_to_wide(newname);
 	if(MoveFileExW(wide_oldname.c_str(), wide_newname.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED | MOVEFILE_WRITE_THROUGH) == 0)
-		return 1;
+		return false;
 #else
 	if(rename(oldname, newname) != 0)
-		return 1;
+		return false;
 #endif
-	return 0;
+	return true;
 }
 
-int fs_file_time(const char *name, time_t *created, time_t *modified)
+bool fs_file_time(const char *name, time_t *created, time_t *modified)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WIN32_FIND_DATAW finddata;
 	const std::wstring wide_name = windows_utf8_to_wide(name);
 	HANDLE handle = FindFirstFileW(wide_name.c_str(), &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
-		return 1;
+		return false;
 
 	*created = filetime_to_unixtime(&finddata.ftCreationTime);
 	*modified = filetime_to_unixtime(&finddata.ftLastWriteTime);
@@ -2563,15 +2566,14 @@ int fs_file_time(const char *name, time_t *created, time_t *modified)
 #elif defined(CONF_FAMILY_UNIX)
 	struct stat sb;
 	if(stat(name, &sb))
-		return 1;
+		return false;
 
 	*created = sb.st_ctime;
 	*modified = sb.st_mtime;
 #else
 #error not implemented
 #endif
-
-	return 0;
+	return true;
 }
 
 void swap_endian(void *data, unsigned int elem_size, unsigned int num)

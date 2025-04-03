@@ -166,35 +166,23 @@ const char *InitAndroid()
 	// Change current working directory to our external storage location
 	const char *pPath = SDL_AndroidGetExternalStoragePath();
 	if(pPath == nullptr)
-	{
 		return "The external storage is not available.";
-	}
-	if(fs_chdir(pPath) != 0)
-	{
+	if(fs_chdir(pPath))
 		return "Failed to change current directory to external storage.";
-	}
 	log_info("android", "Changed current directory to '%s'", pPath);
 
-	if(fs_makedir("data") != 0 || fs_makedir("user") != 0)
-	{
+	if(fs_makedir("data") || fs_makedir("user"))
 		return "Failed to create 'data' and 'user' directories in external storage.";
-	}
 
 	if(EqualIntegrityFiles(INTEGRITY_INDEX, INTEGRITY_INDEX_SAVE))
-	{
 		return nullptr;
-	}
 
 	if(!UnpackAsset(INTEGRITY_INDEX))
-	{
 		return "Failed to unpack the integrity index file. Consider reinstalling the app.";
-	}
 
 	std::vector<CIntegrityFileLine> vIntegrityLines = ReadIntegrityFile(INTEGRITY_INDEX);
 	if(vIntegrityLines.empty())
-	{
 		return "Failed to load the integrity index file. Consider reinstalling the app.";
-	}
 
 	std::vector<CIntegrityFileLine> vIntegritySaveLines = ReadIntegrityFile(INTEGRITY_INDEX_SAVE);
 
@@ -208,22 +196,16 @@ const char *InitAndroid()
 			return str_comp(Line.m_aFilename, IntegrityLine.m_aFilename) == 0;
 		});
 		if(IntegritySaveLine != vIntegritySaveLines.end() && IntegritySaveLine->m_Sha256 == IntegrityLine.m_Sha256)
-		{
 			continue;
-		}
 
-		if(fs_makedir_rec_for(IntegrityLine.m_aFilename) != 0 || !UnpackAsset(IntegrityLine.m_aFilename))
-		{
+		if(!fs_makedir_rec_for(IntegrityLine.m_aFilename) || !UnpackAsset(IntegrityLine.m_aFilename))
 			return "Failed to unpack game assets, consider reinstalling the app.";
-		}
 	}
 
 	// The integrity file will be unpacked every time when launching,
 	// so we can simply rename it to update the saved integrity file.
-	if((fs_is_file(INTEGRITY_INDEX_SAVE) && fs_remove(INTEGRITY_INDEX_SAVE) != 0) || fs_rename(INTEGRITY_INDEX, INTEGRITY_INDEX_SAVE) != 0)
-	{
+	if((fs_is_file(INTEGRITY_INDEX_SAVE) && fs_remove(INTEGRITY_INDEX_SAVE)) || fs_rename(INTEGRITY_INDEX, INTEGRITY_INDEX_SAVE))
 		return "Failed to update the saved integrity index file.";
-	}
 
 	return nullptr;
 }
@@ -244,9 +226,7 @@ bool StartAndroidServer(const char **ppArguments, size_t NumArguments)
 	// until the user made a choice, which is easier to handle. Only Android 13 (API 33) and
 	// newer support requesting this permission at runtime.
 	if(SDL_GetAndroidSDKVersion() >= 33 && !SDL_AndroidRequestPermission("android.permission.POST_NOTIFICATIONS"))
-	{
 		return false;
-	}
 
 	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_AndroidGetJNIEnv());
 	jobject Activity = (jobject)SDL_AndroidGetActivity();

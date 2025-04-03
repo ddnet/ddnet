@@ -133,13 +133,13 @@ int main(int argc, const char **argv)
 		char aBuf[IO_MAX_PATH_LENGTH];
 		IStorage::StripPathAndExtension(pSourceFileName, aBuf, sizeof(aBuf));
 		str_format(aDestFileName, sizeof(aDestFileName), "data/maps7/%s.map", aBuf);
-		if(fs_makedir("data") != 0)
+		if(fs_makedir("data"))
 		{
 			dbg_msg("map_convert_07", "failed to create data directory");
 			return -1;
 		}
 
-		if(fs_makedir("data/maps7") != 0)
+		if(fs_makedir("data/maps7"))
 		{
 			dbg_msg("map_convert_07", "failed to create data/maps7 directory");
 			return -1;

@@ -1498,7 +1498,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 				{
 					str_copy(m_aCurrentDemoSelectionName, fs_filename(m_aCurrentDemoFolder));
 					str_append(m_aCurrentDemoSelectionName, "/");
-					if(fs_parent_dir(m_aCurrentDemoFolder))
+					if(!fs_parent_dir(m_aCurrentDemoFolder))
 					{
 						m_aCurrentDemoFolder[0] = '\0';
 						if(m_DemolistStorageType == IStorage::TYPE_ALL)

@@ -57,8 +57,8 @@ public:
 
 		if(m_aaStoragePaths[TYPE_SAVE][0] != '\0')
 		{
-			if(fs_makedir_rec_for(m_aaStoragePaths[TYPE_SAVE]) != 0 ||
-				fs_makedir(m_aaStoragePaths[TYPE_SAVE]) != 0)
+			if(!fs_makedir_rec_for(m_aaStoragePaths[TYPE_SAVE]) ||
+				fs_makedir(m_aaStoragePaths[TYPE_SAVE]))
 			{
 				log_error("storage", "failed to create the user directory");
 				return false;
@@ -616,7 +616,7 @@ public:
 		dbg_assert(Type == TYPE_ABSOLUTE || (Type >= TYPE_SAVE && Type < m_NumPaths), "Type invalid");
 
 		char aBuffer[IO_MAX_PATH_LENGTH];
-		return fs_file_time(GetPath(Type, pFilename, aBuffer, sizeof(aBuffer)), pCreated, pModified) == 0;
+		return fs_file_time(GetPath(Type, pFilename, aBuffer, sizeof(aBuffer)), pCreated, pModified);
 	}
 
 	bool CalculateHashes(const char *pFilename, int Type, SHA256_DIGEST *pSha256, unsigned int *pCrc) override
@@ -793,11 +793,9 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_remove(aBuffer);
+		bool Success = fs_remove(aBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to remove file: %s", aBuffer);
-		}
 		return Success;
 	}
 
@@ -808,11 +806,9 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_removedir(aBuffer);
+		bool Success = fs_removedir(aBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to remove folder: %s", aBuffer);
-		}
 		return Success;
 	}
 
@@ -821,11 +817,9 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetBinaryPath(pFilename, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_remove(aBuffer);
+		bool Success = fs_remove(aBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to remove binary file: %s", aBuffer);
-		}
 		return Success;
 	}
 
@@ -838,11 +832,9 @@ public:
 		GetPath(Type, pOldFilename, aOldBuffer, sizeof(aOldBuffer));
 		GetPath(Type, pNewFilename, aNewBuffer, sizeof(aNewBuffer));
 
-		bool Success = !fs_rename(aOldBuffer, aNewBuffer);
+		bool Success = fs_rename(aOldBuffer, aNewBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to rename file: %s -> %s", aOldBuffer, aNewBuffer);
-		}
 		return Success;
 	}
 
@@ -853,17 +845,15 @@ public:
 		GetBinaryPath(pOldFilename, aOldBuffer, sizeof(aOldBuffer));
 		GetBinaryPath(pNewFilename, aNewBuffer, sizeof(aNewBuffer));
 
-		if(fs_makedir_rec_for(aNewBuffer) < 0)
+		if(!fs_makedir_rec_for(aNewBuffer))
 		{
 			log_error("storage", "failed to create folders for: %s", aNewBuffer);
 			return false;
 		}
 
-		bool Success = !fs_rename(aOldBuffer, aNewBuffer);
+		bool Success = fs_rename(aOldBuffer, aNewBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to rename binary file: %s -> %s", aOldBuffer, aNewBuffer);
-		}
 		return Success;
 	}
 
@@ -874,12 +864,10 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_makedir(aBuffer);
+		bool Success = fs_makedir(aBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to create folder: %s", aBuffer);
-		}
-		return Success;
+		return true;
 	}
 
 	void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned int BufferSize) override
