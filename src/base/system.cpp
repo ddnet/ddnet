@@ -3346,45 +3346,28 @@ void str_hex_cstyle(char *dst, int dst_size, const void *data, int data_size, in
 		dst[dst_index - 2] = '\0';
 }
 
-static int hexval(char x)
-{
-	switch(x)
-	{
-	case '0': return 0;
-	case '1': return 1;
-	case '2': return 2;
-	case '3': return 3;
-	case '4': return 4;
-	case '5': return 5;
-	case '6': return 6;
-	case '7': return 7;
-	case '8': return 8;
-	case '9': return 9;
-	case 'a': FALL_THROUGH;
-	case 'A': return 10;
-	case 'b': FALL_THROUGH;
-	case 'B': return 11;
-	case 'c': FALL_THROUGH;
-	case 'C': return 12;
-	case 'd': FALL_THROUGH;
-	case 'D': return 13;
-	case 'e': FALL_THROUGH;
-	case 'E': return 14;
-	case 'f': FALL_THROUGH;
-	case 'F': return 15;
-	default: return -1;
-	}
-}
+constexpr auto hex_char_to_dec_map = []{
+	std::array<int, 256> table = {};
+	for (int &v : table)
+		v = -1;
+	for (char i = '0'; i <= '9'; ++i)
+		table[i] = i - '0';
+	for (char i = 'a'; i <= 'f'; ++i)
+		table[i] = i - 'a' + 10;
+	for (char i = 'A'; i <= 'F'; ++i)
+		table[i] = i - 'A' + 10;
+	return table;
+}();
 
-static int byteval(const char *hex, unsigned char *dst)
+static inline int str_hex_pair_decode(const char *hex, unsigned char *dst)
 {
-	int v1 = hexval(hex[0]);
-	int v2 = hexval(hex[1]);
+	int v1 = hex_char_to_dec_map[static_cast<unsigned char>(hex[0])];
+	int v2 = hex_char_to_dec_map[static_cast<unsigned char>(hex[1])];
 
 	if(v1 < 0 || v2 < 0)
 		return 1;
 
-	*dst = v1 * 16 + v2;
+	*dst = (v1 << 4) | v2; // v1 * 16 + v2
 	return 0;
 }
 
@@ -3399,7 +3382,7 @@ int str_hex_decode(void *dst, int dst_size, const char *src)
 
 	for(i = 0; i < len && dst_size; i++, dst_size--)
 	{
-		if(byteval(src + i * 2, cdst++))
+		if(str_hex_pair_decode(src + i * 2, cdst++))
 			return 1;
 	}
 	return 0;
@@ -3805,12 +3788,12 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle, const
 int str_utf8_isspace(int code)
 {
 	return code <= 0x0020 || code == 0x0085 || code == 0x00A0 || code == 0x034F ||
-	       code == 0x115F || code == 0x1160 || code == 0x1680 || code == 0x180E ||
-	       (code >= 0x2000 && code <= 0x200F) || (code >= 0x2028 && code <= 0x202F) ||
-	       (code >= 0x205F && code <= 0x2064) || (code >= 0x206A && code <= 0x206F) ||
-	       code == 0x2800 || code == 0x3000 || code == 0x3164 ||
-	       (code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF || code == 0xFFA0 ||
-	       (code >= 0xFFF9 && code <= 0xFFFC);
+		   code == 0x115F || code == 0x1160 || code == 0x1680 || code == 0x180E ||
+		   (code >= 0x2000 && code <= 0x200F) || (code >= 0x2028 && code <= 0x202F) ||
+		   (code >= 0x205F && code <= 0x2064) || (code >= 0x206A && code <= 0x206F) ||
+		   code == 0x2800 || code == 0x3000 || code == 0x3164 ||
+		   (code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF || code == 0xFFA0 ||
+		   (code >= 0xFFF9 && code <= 0xFFFC);
 }
 
 const char *str_utf8_skip_whitespaces(const char *str)
