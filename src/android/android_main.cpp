@@ -131,7 +131,7 @@ static std::vector<CIntegrityFileLine> ReadIntegrityFile(const char *pFilename)
 	std::vector<CIntegrityFileLine> vLines;
 	while(const char *pReadLine = LineReader.Get())
 	{
-		const char *pSpaceInLine = str_rchr(pReadLine, ' ');
+		const char *pSpaceInLine = str_find_last(pReadLine, ' ');
 		CIntegrityFileLine Line;
 		char aSha256[SHA256_MAXSTRSIZE];
 		if(pSpaceInLine == nullptr)

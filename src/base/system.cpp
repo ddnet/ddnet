@@ -2490,7 +2490,7 @@ void fs_split_file_extension(const char *filename, char *name, size_t name_size,
 	dbg_assert(name == nullptr || name_size > 0, "name_size invalid");
 	dbg_assert(extension == nullptr || extension_size > 0, "extension_size invalid");
 
-	const char *last_dot = str_rchr(filename, '.');
+	const char *last_dot = str_find_last(filename, '.');
 	if(last_dot == nullptr || last_dot == filename)
 	{
 		if(extension != nullptr)
@@ -3281,12 +3281,12 @@ bool str_delimiters_around_offset(const char *haystack, const char *delim, int o
 	return found;
 }
 
-const char *str_rchr(const char *haystack, char needle)
+const char *str_find_last(const char *haystack, char needle)
 {
 	return strrchr(haystack, needle);
 }
 
-int str_countchr(const char *haystack, char needle)
+int str_count_chr(const char *haystack, char needle)
 {
 	int count = 0;
 	while(*haystack)

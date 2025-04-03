@@ -1188,27 +1188,27 @@ TEST(Str, CompFilename)
 TEST(Str, RightChar)
 {
 	const char *pStr = "a bb ccc dddd       eeeee";
-	EXPECT_EQ(str_rchr(pStr, 'a'), pStr);
-	EXPECT_EQ(str_rchr(pStr, 'b'), pStr + 3);
-	EXPECT_EQ(str_rchr(pStr, 'c'), pStr + 7);
-	EXPECT_EQ(str_rchr(pStr, 'd'), pStr + 12);
-	EXPECT_EQ(str_rchr(pStr, ' '), pStr + 19);
-	EXPECT_EQ(str_rchr(pStr, 'e'), pStr + 24);
-	EXPECT_EQ(str_rchr(pStr, '\0'), pStr + str_length(pStr));
-	EXPECT_EQ(str_rchr(pStr, 'y'), nullptr);
+	EXPECT_EQ(str_find_last(pStr, 'a'), pStr);
+	EXPECT_EQ(str_find_last(pStr, 'b'), pStr + 3);
+	EXPECT_EQ(str_find_last(pStr, 'c'), pStr + 7);
+	EXPECT_EQ(str_find_last(pStr, 'd'), pStr + 12);
+	EXPECT_EQ(str_find_last(pStr, ' '), pStr + 19);
+	EXPECT_EQ(str_find_last(pStr, 'e'), pStr + 24);
+	EXPECT_EQ(str_find_last(pStr, '\0'), pStr + str_length(pStr));
+	EXPECT_EQ(str_find_last(pStr, 'y'), nullptr);
 }
 
 TEST(Str, CountChar)
 {
 	const char *pStr = "a bb ccc dddd       eeeee";
-	EXPECT_EQ(str_countchr(pStr, 'a'), 1);
-	EXPECT_EQ(str_countchr(pStr, 'b'), 2);
-	EXPECT_EQ(str_countchr(pStr, 'c'), 3);
-	EXPECT_EQ(str_countchr(pStr, 'd'), 4);
-	EXPECT_EQ(str_countchr(pStr, 'e'), 5);
-	EXPECT_EQ(str_countchr(pStr, ' '), 10);
-	EXPECT_EQ(str_countchr(pStr, '\0'), 0);
-	EXPECT_EQ(str_countchr(pStr, 'y'), 0);
+	EXPECT_EQ(str_count_chr(pStr, 'a'), 1);
+	EXPECT_EQ(str_count_chr(pStr, 'b'), 2);
+	EXPECT_EQ(str_count_chr(pStr, 'c'), 3);
+	EXPECT_EQ(str_count_chr(pStr, 'd'), 4);
+	EXPECT_EQ(str_count_chr(pStr, 'e'), 5);
+	EXPECT_EQ(str_count_chr(pStr, ' '), 10);
+	EXPECT_EQ(str_count_chr(pStr, '\0'), 0);
+	EXPECT_EQ(str_count_chr(pStr, 'y'), 0);
 }
 
 TEST(Str, StrToInts)

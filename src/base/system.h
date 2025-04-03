@@ -1795,7 +1795,7 @@ bool str_delimiters_around_offset(const char *haystay, const char *delim, int of
  * @remark The strings are treated as null terminated strings.
  * @remark The zero-terminator character can also be found with this function.
  */
-const char *str_rchr(const char *haystack, char needle);
+const char *str_find_last(const char *haystack, char needle);
 
 /**
  * Counts the number of occurrences of a character in a string.
@@ -1811,7 +1811,7 @@ const char *str_rchr(const char *haystack, char needle);
  * @remark The strings are treated as null terminated strings.
  * @remark The number of zero-terminator characters cannot be counted.
  */
-int str_countchr(const char *haystack, char needle);
+int str_count_chr(const char *haystack, char needle);
 
 /**
  * Takes a datablock and generates a hex string of it, with spaces between bytes.
