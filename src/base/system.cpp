@@ -4076,7 +4076,7 @@ static const char *str_token_get(const char *str, const char *delim, int *length
 		str++;
 	else
 		str += len;
-	if(!*str)
+	if(!(*str))
 		return nullptr;
 
 	*length = strcspn(str, delim);
@@ -4086,11 +4086,11 @@ static const char *str_token_get(const char *str, const char *delim, int *length
 bool str_in_list(const char *list, const char *delim, const char *needle)
 {
 	const char *tok = list;
-	int len = 0, needlelen = str_length(needle);
+	int len = 0;
 
 	while((tok = str_token_get(tok, delim, &len)))
 	{
-		if(needlelen == len || str_comp_num(tok, needle, len) == 0)
+		if(str_comp_num(tok, needle, len) == 0)
 			return true;
 		tok = tok + len;
 	}
