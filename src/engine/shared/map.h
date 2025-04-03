@@ -37,7 +37,7 @@ public:
 	IOHANDLE File() const override;
 
 	SHA256_DIGEST Sha256() const override;
-	unsigned Crc() const override;
+	unsigned int Crc() const override;
 	int MapSize() const override;
 
 	static void ExtractTiles(class CTile *pDest, size_t DestSize, const class CTile *pSrc, size_t SrcSize);

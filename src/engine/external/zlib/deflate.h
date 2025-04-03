@@ -95,7 +95,7 @@ typedef struct tree_desc_s {
 
 typedef ush Pos;
 typedef Pos FAR Posf;
-typedef unsigned IPos;
+typedef unsigned int IPos;
 
 /* A Pos is an index in the character window. We use short instead of int to
  * save space in the various tables. IPos is used only for parameter passing.
@@ -155,7 +155,7 @@ typedef struct internal_state {
      *   hash_shift * MIN_MATCH >= hash_bits
      */
 
-    long block_start;
+    long int block_start;
     /* Window position at the beginning of the current output block. Gets
      * negative when the window is moved backwards.
      */
@@ -303,7 +303,7 @@ typedef struct internal_state {
 
         /* in trees.c */
 void ZLIB_INTERNAL _tr_init(deflate_state *s);
-int ZLIB_INTERNAL _tr_tally(deflate_state *s, unsigned dist, unsigned lc);
+int ZLIB_INTERNAL _tr_tally(deflate_state *s, unsigned int dist, unsigned int lc);
 void ZLIB_INTERNAL _tr_flush_block(deflate_state *s, charf *buf,
                                    ulg stored_len, int last);
 void ZLIB_INTERNAL _tr_flush_bits(deflate_state *s);

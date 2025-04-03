@@ -96,8 +96,8 @@ class CSound : public IEngineSound
 	CSample *AllocSample() REQUIRES(!m_SoundLock);
 	void RateConvert(CSample &Sample) const;
 
-	bool DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) const;
-	bool DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) const;
+	bool DecodeOpus(CSample &Sample, const void *pData, unsigned int DataSize) const;
+	bool DecodeWV(CSample &Sample, const void *pData, unsigned int DataSize) const;
 
 	void UpdateVolume();
 
@@ -110,8 +110,8 @@ public:
 
 	int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override REQUIRES(!m_SoundLock);
 	int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override REQUIRES(!m_SoundLock);
-	int LoadOpusFromMem(const void *pData, unsigned DataSize, bool ForceLoad) override REQUIRES(!m_SoundLock);
-	int LoadWVFromMem(const void *pData, unsigned DataSize, bool ForceLoad) override REQUIRES(!m_SoundLock);
+	int LoadOpusFromMem(const void *pData, unsigned int DataSize, bool ForceLoad) override REQUIRES(!m_SoundLock);
+	int LoadWVFromMem(const void *pData, unsigned int DataSize, bool ForceLoad) override REQUIRES(!m_SoundLock);
 	void UnloadSample(int SampleId) override REQUIRES(!m_SoundLock);
 
 	float GetSampleTotalTime(int SampleId) override REQUIRES(!m_SoundLock); // in s
@@ -139,7 +139,7 @@ public:
 	bool IsPlaying(int SampleId) override REQUIRES(!m_SoundLock);
 
 	int MixingRate() const override { return m_MixingRate; }
-	void Mix(short *pFinalOut, unsigned Frames) override REQUIRES(!m_SoundLock);
+	void Mix(short *pFinalOut, unsigned int Frames) override REQUIRES(!m_SoundLock);
 
 	void PauseAudioDevice() override;
 	void UnpauseAudioDevice() override;

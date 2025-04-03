@@ -13,12 +13,12 @@
 /* This header file contains all the definitions required by WavPack. */
 
 #ifdef __BORLANDC__
-typedef unsigned long uint32_t;
+typedef unsigned long int uint32_t;
 typedef long int32_t;
 #elif defined(_WIN32) && !defined(__MINGW32__)
 #include <stdlib.h>
-typedef unsigned __int64 uint64_t;
-typedef unsigned __int32 uint32_t;
+typedef unsigned int __int64 uint64_t;
+typedef unsigned int __int32 uint32_t;
 typedef __int64 int64_t;
 typedef __int32 int32_t;
 #else

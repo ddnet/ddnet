@@ -27,7 +27,7 @@ const char *const CSkins7::ms_apColorComponents[NUM_COLOR_COMPONENTS] = {"hue", 
 char *CSkins7::ms_apSkinNameVariables[NUM_DUMMIES] = {nullptr};
 char *CSkins7::ms_apSkinVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{nullptr}};
 int *CSkins7::ms_apUCCVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{nullptr}};
-int unsigned *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{nullptr}};
+unsigned int *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{nullptr}};
 
 #define SKINS_DIR "skins7"
 
@@ -189,7 +189,7 @@ bool CSkins7::LoadSkin(const char *pName, int DirType)
 	char aFilename[IO_MAX_PATH_LENGTH];
 	str_format(aFilename, sizeof(aFilename), SKINS_DIR "/%s", pName);
 	void *pFileData;
-	unsigned JsonFileSize;
+	unsigned int JsonFileSize;
 	if(!Storage()->ReadFile(aFilename, DirType, &pFileData, &JsonFileSize))
 	{
 		log_error("skins7", "Failed to read skin json file '%s'", aFilename);

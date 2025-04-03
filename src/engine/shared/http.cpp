@@ -93,7 +93,7 @@ static bool CalculateSha256(const char *pAbsoluteFilename, SHA256_DIGEST *pSha25
 	unsigned char aBuffer[64 * 1024];
 	while(true)
 	{
-		unsigned Bytes = io_read(File, aBuffer, sizeof(aBuffer));
+		unsigned int Bytes = io_read(File, aBuffer, sizeof(aBuffer));
 		if(Bytes == 0)
 			break;
 		sha256_update(&Sha256Ctxt, aBuffer, Bytes);
@@ -159,7 +159,7 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 		curl_easy_setopt(pH, CURLOPT_VERBOSE, 1L);
 		curl_easy_setopt(pH, CURLOPT_DEBUGFUNCTION, CurlDebug);
 	}
-	long Protocols = CURLPROTO_HTTPS;
+	long int Protocols = CURLPROTO_HTTPS;
 	if(g_Config.m_HttpAllowInsecure)
 	{
 		Protocols |= CURLPROTO_HTTP;
@@ -374,7 +374,7 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 	if(pHandle)
 	{
 		CURL *pH = (CURL *)pHandle;
-		long StatusCode;
+		long int StatusCode;
 		curl_easy_getinfo(pH, CURLINFO_RESPONSE_CODE, &StatusCode);
 		m_StatusCode = StatusCode;
 	}
@@ -437,7 +437,7 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 				m_pBuffer = nullptr;
 				m_ResponseLength = 0;
 				void *pBuffer;
-				unsigned Length;
+				unsigned int Length;
 				IOHANDLE File = io_open(m_aDestAbsolute, IOFLAG_READ);
 				bool Success = File && io_read_all(File, &pBuffer, &Length);
 				if(File)

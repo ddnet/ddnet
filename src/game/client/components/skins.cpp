@@ -548,8 +548,8 @@ void CSkins::RandomizeSkin(int Dummy)
 		Feet.l = random_float();
 		Feet.s = clamp(GoalSat * GoalSat / (1.0f - Feet.l), 0.0f, 1.0f);
 
-		unsigned *pColorBody = Dummy ? &g_Config.m_ClDummyColorBody : &g_Config.m_ClPlayerColorBody;
-		unsigned *pColorFeet = Dummy ? &g_Config.m_ClDummyColorFeet : &g_Config.m_ClPlayerColorFeet;
+		unsigned int *pColorBody = Dummy ? &g_Config.m_ClDummyColorBody : &g_Config.m_ClPlayerColorBody;
+		unsigned int *pColorFeet = Dummy ? &g_Config.m_ClDummyColorFeet : &g_Config.m_ClPlayerColorFeet;
 
 		*pColorBody = Body.Pack(false);
 		*pColorFeet = Feet.Pack(false);
@@ -635,7 +635,7 @@ void CSkins::CSkinDownloadJob::Run()
 	// Load existing file while waiting for the HTTP request
 	{
 		void *pPngData;
-		unsigned PngSize;
+		unsigned int PngSize;
 		if(m_pSkins->Storage()->ReadFile(aPathReal, IStorage::TYPE_SAVE, &pPngData, &PngSize))
 		{
 			m_pSkins->Graphics()->LoadPng(m_ImageInfo, (uint8_t *)pPngData, PngSize, aPathReal);

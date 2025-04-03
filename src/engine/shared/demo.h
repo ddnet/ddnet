@@ -45,7 +45,7 @@ public:
 	CDemoRecorder() {}
 	~CDemoRecorder() override;
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned int MapCrc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser);
 	int Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilename = "") override;
 
 	void AddDemoMarker();

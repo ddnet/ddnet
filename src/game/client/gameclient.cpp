@@ -996,7 +996,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		// jetpack strength will be received by tune params
 		NewTuning.m_JetpackStrength = 0;
 
-		for(unsigned i = 0; i < sizeof(CTuningParams) / sizeof(int); i++)
+		for(unsigned int i = 0; i < sizeof(CTuningParams) / sizeof(int); i++)
 		{
 			// 31 is the magic number index of laser_damage
 			// which was removed in 0.7
@@ -2068,7 +2068,7 @@ void CGameClient::OnNewSnapshot()
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 		int *pParams = (int *)&m_aTuning[g_Config.m_ClDummy];
-		for(unsigned i = 0; i < sizeof(m_aTuning[0]) / sizeof(int); i++)
+		for(unsigned int i = 0; i < sizeof(m_aTuning[0]) / sizeof(int); i++)
 			Msg.AddInt(pParams[i]);
 		Client()->SendMsgActive(&Msg, MSGFLAG_RECORD | MSGFLAG_NOSEND);
 	}
@@ -2523,7 +2523,7 @@ void CGameClient::OnPredict()
 		if(mem_comp(&Before, &Now, sizeof(CNetObj_CharacterCore)) != 0)
 		{
 			Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", "prediction error");
-			for(unsigned i = 0; i < sizeof(CNetObj_CharacterCore) / sizeof(int); i++)
+			for(unsigned int i = 0; i < sizeof(CNetObj_CharacterCore) / sizeof(int); i++)
 				if(((int *)&Before)[i] != ((int *)&Now)[i])
 				{
 					char aBuf[256];

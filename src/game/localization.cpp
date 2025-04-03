@@ -242,7 +242,7 @@ void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, 
 	m_vStrings.emplace_back(str_quick_hash(pOrgStr), str_quick_hash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
 }
 
-const char *CLocalizationDatabase::FindString(unsigned Hash, unsigned ContextHash) const
+const char *CLocalizationDatabase::FindString(unsigned int Hash, unsigned int ContextHash) const
 {
 	CString String;
 	String.m_Hash = Hash;
@@ -252,7 +252,7 @@ const char *CLocalizationDatabase::FindString(unsigned Hash, unsigned ContextHas
 	if(std::distance(Range1.first, Range1.second) == 1)
 		return Range1.first->m_pReplacement;
 
-	const unsigned DefaultHash = str_quick_hash("");
+	const unsigned int DefaultHash = str_quick_hash("");
 	if(ContextHash != DefaultHash)
 	{
 		// Do another lookup with the default context hash

@@ -128,7 +128,7 @@ void CTooltips::OnRender()
 		Cursor.m_LineWidth = Tooltip.m_WidthHint;
 
 		STextContainerIndex TextContainerIndex;
-		const unsigned OldRenderFlags = TextRender()->GetRenderFlags();
+		const unsigned int OldRenderFlags = TextRender()->GetRenderFlags();
 		TextRender()->SetRenderFlags(OldRenderFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
 		TextRender()->CreateTextContainer(TextContainerIndex, &Cursor, Tooltip.m_pText);
 		TextRender()->SetRenderFlags(OldRenderFlags);

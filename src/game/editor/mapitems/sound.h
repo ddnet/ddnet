@@ -14,7 +14,7 @@ public:
 	char m_aName[IO_MAX_PATH_LENGTH] = "";
 
 	void *m_pData = nullptr;
-	unsigned m_DataSize = 0;
+	unsigned int m_DataSize = 0;
 };
 
 #endif

@@ -24,7 +24,7 @@ extern "C" {
 static constexpr int SAMPLE_INDEX_USED = -2;
 static constexpr int SAMPLE_INDEX_FULL = -1;
 
-void CSound::Mix(short *pFinalOut, unsigned Frames)
+void CSound::Mix(short *pFinalOut, unsigned int Frames)
 {
 	Frames = minimum(Frames, m_MaxFrames);
 	mem_zero(m_pMixBuffer, Frames * 2 * sizeof(int));
@@ -46,7 +46,7 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 		short *pInL = &Voice.m_pSample->m_pData[Voice.m_Tick * Step];
 		short *pInR = &Voice.m_pSample->m_pData[Voice.m_Tick * Step + 1];
 
-		unsigned End = Voice.m_pSample->m_NumFrames - Voice.m_Tick;
+		unsigned int End = Voice.m_pSample->m_NumFrames - Voice.m_Tick;
 
 		int VolumeR = round_truncate(Voice.m_pChannel->m_Vol * (Voice.m_Vol / 255.0f));
 		int VolumeL = VolumeR;
@@ -132,7 +132,7 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 		}
 
 		// process all frames
-		for(unsigned s = 0; s < End; s++)
+		for(unsigned int s = 0; s < End; s++)
 		{
 			*pOut++ += (*pInL) * VolumeL;
 			*pOut++ += (*pInR) * VolumeR;
@@ -157,7 +157,7 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 	m_SoundLock.unlock();
 
 	// clamp accumulated values
-	for(unsigned i = 0; i < Frames * 2; i++)
+	for(unsigned int i = 0; i < Frames * 2; i++)
 		pFinalOut[i] = clamp<int>(((m_pMixBuffer[i] * MasterVol) / 101) >> 8, std::numeric_limits<short>::min(), std::numeric_limits<short>::max());
 
 #if defined(CONF_ARCH_ENDIAN_BIG)
@@ -330,7 +330,7 @@ void CSound::RateConvert(CSample &Sample) const
 	Sample.m_Rate = m_MixingRate;
 }
 
-bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) const
+bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned int DataSize) const
 {
 	int OpusError = 0;
 	OggOpusFile *pOpusFile = op_open_memory((const unsigned char *)pData, DataSize, &OpusError);
@@ -434,7 +434,7 @@ static int PushBackByte(void *pId, int Char)
 }
 #endif
 
-bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) const
+bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned int DataSize) const
 {
 	char aError[100];
 
@@ -529,7 +529,7 @@ int CSound::LoadOpus(const char *pFilename, int StorageType)
 	}
 
 	void *pData;
-	unsigned DataSize;
+	unsigned int DataSize;
 	if(!m_pStorage->ReadFile(pFilename, StorageType, &pData, &DataSize))
 	{
 		UnloadSample(pSample->m_Index);
@@ -566,7 +566,7 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 	}
 
 	void *pData;
-	unsigned DataSize;
+	unsigned int DataSize;
 	if(!m_pStorage->ReadFile(pFilename, StorageType, &pData, &DataSize))
 	{
 		UnloadSample(pSample->m_Index);
@@ -589,7 +589,7 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 	return pSample->m_Index;
 }
 
-int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool ForceLoad = false)
+int CSound::LoadOpusFromMem(const void *pData, unsigned int DataSize, bool ForceLoad = false)
 {
 	// no need to load sound when we are running with no sound
 	if(!m_SoundEnabled && !ForceLoad)
@@ -609,7 +609,7 @@ int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool ForceLoad
 	return pSample->m_Index;
 }
 
-int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool ForceLoad = false)
+int CSound::LoadWVFromMem(const void *pData, unsigned int DataSize, bool ForceLoad = false)
 {
 	// no need to load sound when we are running with no sound
 	if(!m_SoundEnabled && !ForceLoad)

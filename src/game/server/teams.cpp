@@ -599,7 +599,7 @@ void CGameTeams::SendTeamsState(int ClientId)
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
 	CMsgPacker MsgLegacy(NETMSGTYPE_SV_TEAMSSTATELEGACY);
 
-	for(unsigned i = 0; i < MAX_CLIENTS; i++)
+	for(unsigned int i = 0; i < MAX_CLIENTS; i++)
 	{
 		Msg.AddInt(m_Core.Team(i));
 		MsgLegacy.AddInt(m_Core.Team(i));

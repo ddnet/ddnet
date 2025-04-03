@@ -121,7 +121,7 @@ private:
 	union UParameterExtra
 	{
 		int i;
-		unsigned long ul;
+		unsigned long int ul;
 		float f;
 	};
 
@@ -328,7 +328,7 @@ bool CMysqlConnection::PrepareStatement(const char *pStmt, char *pError, int Err
 		return true;
 	}
 	m_NewQuery = true;
-	unsigned NumParameters = mysql_stmt_param_count(m_pStmt.get());
+	unsigned int NumParameters = mysql_stmt_param_count(m_pStmt.get());
 	m_vStmtParameters.resize(NumParameters);
 	m_vStmtParameterExtras.resize(NumParameters);
 	if(NumParameters)
@@ -613,7 +613,7 @@ void CMysqlConnection::GetString(int Col, char *pBuffer, int BufferSize)
 	}
 
 	MYSQL_BIND Bind;
-	unsigned long Length;
+	unsigned long int Length;
 	my_bool IsNull;
 	my_bool Error;
 	mem_zero(&Bind, sizeof(Bind));
@@ -646,7 +646,7 @@ int CMysqlConnection::GetBlob(int Col, unsigned char *pBuffer, int BufferSize)
 	Col -= 1;
 
 	MYSQL_BIND Bind;
-	unsigned long Length;
+	unsigned long int Length;
 	my_bool IsNull;
 	my_bool Error;
 	mem_zero(&Bind, sizeof(Bind));

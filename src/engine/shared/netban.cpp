@@ -369,7 +369,7 @@ int CNetBan::UnbanByIndex(int Index)
 	return Result;
 }
 
-bool CNetBan::IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned BufferSize) const
+bool CNetBan::IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned int BufferSize) const
 {
 	NETADDR Addr;
 	const NETADDR *pAddr = pOrigAddr;

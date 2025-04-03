@@ -61,7 +61,7 @@ public:
 	int GetExternalItemType(int InternalType) const;
 	const void *FindItem(int Type, int Id) const;
 
-	unsigned Crc() const;
+	unsigned int Crc() const;
 	void DebugDump() const;
 	bool IsValid(size_t ActualSize) const;
 

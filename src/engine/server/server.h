@@ -259,7 +259,7 @@ public:
 	char m_aCurrentMap[IO_MAX_PATH_LENGTH];
 	const char *m_pCurrentMapName;
 	SHA256_DIGEST m_aCurrentMapSha256[NUM_MAP_TYPES];
-	unsigned m_aCurrentMapCrc[NUM_MAP_TYPES];
+	unsigned int m_aCurrentMapCrc[NUM_MAP_TYPES];
 	unsigned char *m_apCurrentMapData[NUM_MAP_TYPES];
 	unsigned int m_aCurrentMapSize[NUM_MAP_TYPES];
 	char m_aMapDownloadUrl[256];

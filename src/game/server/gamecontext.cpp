@@ -960,7 +960,7 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 	else
 		pParams = (int *)&(m_aTuningList[Zone]);
 
-	for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
+	for(unsigned int i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
 	{
 		if(m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetCharacter())
 		{
@@ -1176,7 +1176,7 @@ void CGameContext::OnTick()
 					else if(CurVote < 0)
 						No++;
 
-					// veto right for players who have been active on server for long and who're not afk
+					// veto right for players who have been active on server for long int and who're not afk
 					if(!IsKickVote() && !IsSpecVote() && g_Config.m_SvVoteVetoTime)
 					{
 						// look through all players with same IP again, including the current player
@@ -3863,7 +3863,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("endless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeEndlessHook, this, "Gives you endless hook");
 	Console()->Register("unendless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnEndlessHook, this, "Removes endless hook from you");
 	Console()->Register("invincible", "?i['0'|'1']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleInvincible, this, "Toggles invincible mode");
-	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
+	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long int game (use f1, kill for regular kill)");
 }
 
 void CGameContext::OnInit(const void *pPersistentData)
@@ -4379,7 +4379,7 @@ void CGameContext::OnSnap(int ClientId)
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 		int *pParams = (int *)&m_Tuning;
-		for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
+		for(unsigned int i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
 			Msg.AddInt(pParams[i]);
 		Server()->SendMsg(&Msg, MSGFLAG_RECORD | MSGFLAG_NOSEND, ClientId);
 	}

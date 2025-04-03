@@ -4,7 +4,7 @@
 #include <base/system.h>
 #include <engine/shared/linereader.h>
 
-void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess, bool WriteBom)
+void TestFileLineReaderRaw(const char *pWritten, unsigned int WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess, bool WriteBom)
 {
 	CTestInfo Info;
 	IOHANDLE File = io_open(Info.m_aFilename, IOFLAG_WRITE);
@@ -34,7 +34,7 @@ void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::in
 	fs_remove(Info.m_aFilename);
 }
 
-void TestFileLineReaderRaw(const char *pWritten, unsigned WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess)
+void TestFileLineReaderRaw(const char *pWritten, unsigned int WrittenLength, std::initializer_list<const char *> pReads, bool ExpectSuccess)
 {
 	TestFileLineReaderRaw(pWritten, WrittenLength, pReads, ExpectSuccess, false);
 	TestFileLineReaderRaw(pWritten, WrittenLength, pReads, ExpectSuccess, true);

@@ -19,28 +19,28 @@
 
 // todo: rework this
 
-const char *CConsole::CResult::GetString(unsigned Index) const
+const char *CConsole::CResult::GetString(unsigned int Index) const
 {
 	if(Index >= m_NumArgs)
 		return "";
 	return m_apArgs[Index];
 }
 
-int CConsole::CResult::GetInteger(unsigned Index) const
+int CConsole::CResult::GetInteger(unsigned int Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0;
 	return str_to_int(m_apArgs[Index]);
 }
 
-float CConsole::CResult::GetFloat(unsigned Index) const
+float CConsole::CResult::GetFloat(unsigned int Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0.0f;
 	return str_to_float(m_apArgs[Index]);
 }
 
-std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float DarkestLighting) const
+std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned int Index, float DarkestLighting) const
 {
 	if(Index >= m_NumArgs)
 		return std::nullopt;
@@ -48,7 +48,7 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 	const char *pStr = m_apArgs[Index];
 	if(str_is_all_num(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_is_all_num(pStr + 1))) // Teeworlds Color (Packed HSL)
 	{
-		unsigned long Value = str_to_ulong_base(pStr, 10);
+		unsigned long int Value = str_to_ulong_base(pStr, 10);
 		if(Value == std::numeric_limits<unsigned long>::max())
 			return std::nullopt;
 		return ColorHSLA(Value, true).UnclampLighting(DarkestLighting);

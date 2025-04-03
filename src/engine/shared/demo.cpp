@@ -56,7 +56,7 @@ CDemoRecorder::~CDemoRecorder()
 }
 
 // Record
-int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned Crc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
+int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned int Crc, const char *pType, unsigned int MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
 	dbg_assert(m_File == 0, "Demo recorder already recording");
 
@@ -1165,7 +1165,7 @@ bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char
 	if(pDemoHeader->m_Version >= gs_Sha256Version)
 	{
 		CUuid ExtensionUuid = {};
-		const unsigned ExtensionUuidSize = io_read(File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
+		const unsigned int ExtensionUuidSize = io_read(File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
 		if(ExtensionUuidSize == sizeof(ExtensionUuid.m_aData) && ExtensionUuid == SHA256_EXTENSION)
 		{
 			if(io_read(File, &Sha256, sizeof(SHA256_DIGEST)) != sizeof(SHA256_DIGEST))

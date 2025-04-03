@@ -53,7 +53,7 @@ const char *CLineReader::Get()
 		return nullptr;
 	}
 
-	unsigned LineStart = m_BufferPos;
+	unsigned int LineStart = m_BufferPos;
 	while(true)
 	{
 		if(m_pBuffer[m_BufferPos] == '\0' || m_pBuffer[m_BufferPos] == '\n' || (m_pBuffer[m_BufferPos] == '\r' && m_pBuffer[m_BufferPos + 1] == '\n'))

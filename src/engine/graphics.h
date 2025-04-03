@@ -471,7 +471,7 @@ public:
 	virtual std::optional<SWarning> CurrentWarning() = 0;
 
 	// returns true if the error msg was shown
-	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;
+	virtual bool ShowMessageBox(unsigned int Type, const char *pTitle, const char *pMsg) = 0;
 	virtual bool IsBackendInitialized() = 0;
 
 protected:

@@ -285,7 +285,7 @@ typedef signed char GLbyte;
 typedef short GLshort;
 typedef unsigned char GLubyte;
 typedef unsigned short GLushort;
-typedef unsigned long GLulong;
+typedef unsigned long int GLulong;
 typedef float GLfloat;
 typedef float GLclampf;
 typedef double GLdouble;
@@ -293,10 +293,10 @@ typedef double GLclampd;
 typedef void GLvoid;
 #if defined(_MSC_VER) && _MSC_VER < 1400
 typedef __int64 GLint64EXT;
-typedef unsigned __int64 GLuint64EXT;
+typedef unsigned int __int64 GLuint64EXT;
 #elif defined(_MSC_VER) || defined(__BORLANDC__)
-typedef signed long long GLint64EXT;
-typedef unsigned long long GLuint64EXT;
+typedef signed long long int GLint64EXT;
+typedef unsigned long long int GLuint64EXT;
 #else
 #  if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <inttypes.h>

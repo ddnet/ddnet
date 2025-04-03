@@ -1374,7 +1374,7 @@ bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		{
 			if(Stamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s%s, don't know how long ago", aServerFormatted, aBuf);
+					"%s%s, don't know how long int ago", aServerFormatted, aBuf);
 			else
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
 					"%s%s ago, %s", aServerFormatted, aAgoString, aBuf);

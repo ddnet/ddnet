@@ -267,12 +267,12 @@ IOHANDLE io_open(const char *filename, int flags)
 #endif
 }
 
-unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
+unsigned int io_read(IOHANDLE io, void *buffer, unsigned int size)
 {
 	return fread(buffer, 1, size, (FILE *)io);
 }
 
-bool io_read_all(IOHANDLE io, void **result, unsigned *result_len)
+bool io_read_all(IOHANDLE io, void **result, unsigned int *result_len)
 {
 	// Loading files larger than 1 GiB into memory is not supported.
 	constexpr int64_t MAX_FILE_SIZE = (int64_t)1024 * 1024 * 1024;
@@ -332,7 +332,7 @@ bool io_read_all(IOHANDLE io, void **result, unsigned *result_len)
 char *io_read_all_str(IOHANDLE io)
 {
 	void *buffer;
-	unsigned len;
+	unsigned int len;
 	if(!io_read_all(io, &buffer, &len))
 	{
 		return nullptr;
@@ -398,7 +398,7 @@ int64_t io_length(IOHANDLE io)
 	return length;
 }
 
-unsigned io_write(IOHANDLE io, const void *buffer, unsigned size)
+unsigned int io_write(IOHANDLE io, const void *buffer, unsigned int size)
 {
 	return fwrite(buffer, 1, size, (FILE *)io);
 }
@@ -687,7 +687,7 @@ void aio_unlock(ASYNCIO *aio) RELEASE(aio->lock)
 	sphore_signal(&aio->sphore);
 }
 
-void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size)
+void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned int size)
 {
 	unsigned int remaining;
 	remaining = aio->buffer_size - buffer_len(aio);
@@ -737,7 +737,7 @@ void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size)
 	}
 }
 
-void aio_write(ASYNCIO *aio, const void *buffer, unsigned size)
+void aio_write(ASYNCIO *aio, const void *buffer, unsigned int size)
 {
 	aio_lock(aio);
 	aio_write_unlocked(aio, buffer, size);
@@ -811,7 +811,7 @@ struct THREAD_RUN
 #if defined(CONF_FAMILY_UNIX)
 static void *thread_run(void *user)
 #elif defined(CONF_FAMILY_WINDOWS)
-static unsigned long __stdcall thread_run(void *user)
+static unsigned long int __stdcall thread_run(void *user)
 #else
 #error not implemented
 #endif
@@ -1514,7 +1514,7 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-std::string windows_format_system_message(unsigned long error)
+std::string windows_format_system_message(unsigned long int error)
 {
 	WCHAR *wide_message;
 	const DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_MAX_WIDTH_MASK;
@@ -1938,7 +1938,7 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 
 static int net_set_blocking_impl(NETSOCKET sock, bool blocking)
 {
-	unsigned long mode = blocking ? 0 : 1;
+	unsigned long int mode = blocking ? 0 : 1;
 	const char *mode_str = blocking ? "blocking" : "non-blocking";
 	int sockets[] = {sock->ipv4sock, sock->ipv6sock};
 	const char *socket_str[] = {"ipv4", "ipv6"};
@@ -1948,11 +1948,11 @@ static int net_set_blocking_impl(NETSOCKET sock, bool blocking)
 		if(sockets[i] >= 0)
 		{
 #if defined(CONF_FAMILY_WINDOWS)
-			int result = ioctlsocket(sockets[i], FIONBIO, (unsigned long *)&mode);
+			int result = ioctlsocket(sockets[i], FIONBIO, (unsigned long int *)&mode);
 			if(result != NO_ERROR)
 				dbg_msg("socket", "setting %s %s failed: %d", socket_str[i], mode_str, result);
 #else
-			if(ioctl(sockets[i], FIONBIO, (unsigned long *)&mode) == -1)
+			if(ioctl(sockets[i], FIONBIO, (unsigned long int *)&mode) == -1)
 				dbg_msg("socket", "setting %s %s failed: %d", socket_str[i], mode_str, errno);
 #endif
 		}
@@ -2574,14 +2574,14 @@ int fs_file_time(const char *name, time_t *created, time_t *modified)
 	return 0;
 }
 
-void swap_endian(void *data, unsigned elem_size, unsigned num)
+void swap_endian(void *data, unsigned int elem_size, unsigned int num)
 {
 	char *src = (char *)data;
 	char *dst = src + (elem_size - 1);
 
 	while(num)
 	{
-		unsigned n = elem_size >> 1;
+		unsigned int n = elem_size >> 1;
 		char tmp;
 		while(n)
 		{
@@ -3393,7 +3393,7 @@ void str_base64(char *dst, int dst_size, const void *data_raw, int data_size)
 	static const char DIGITS[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 	const unsigned char *data = (const unsigned char *)data_raw;
-	unsigned value = 0;
+	unsigned int value = 0;
 	int num_bits = 0;
 	int i = 0;
 	int o = 0;
@@ -3414,7 +3414,7 @@ void str_base64(char *dst, int dst_size, const void *data_raw, int data_size)
 		}
 		if(num_bits > 0)
 		{
-			unsigned padded;
+			unsigned int padded;
 			if(num_bits >= 6)
 				padded = (value >> (num_bits - 6)) & 0x3f;
 			else
@@ -3692,7 +3692,7 @@ int str_to_int_base(const char *str, int base)
 	return strtol(str, nullptr, base);
 }
 
-unsigned long str_to_ulong_base(const char *str, int base)
+unsigned long int str_to_ulong_base(const char *str, int base)
 {
 	return strtoul(str, nullptr, base);
 }
@@ -4063,9 +4063,9 @@ size_t str_utf8_offset_chars_to_bytes(const char *str, size_t char_offset)
 	return byte_offset;
 }
 
-unsigned str_quick_hash(const char *str)
+unsigned int str_quick_hash(const char *str)
 {
-	unsigned hash = 5381;
+	unsigned int hash = 5381;
 	for(; *str; str++)
 		hash = ((hash << 5) + hash) + (*str); // hash * 33 + c
 	return hash;
@@ -4116,15 +4116,15 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 	return tok + len;
 }
 
-static_assert(sizeof(unsigned) == 4, "unsigned must be 4 bytes in size");
-static_assert(sizeof(unsigned) == sizeof(int), "unsigned and int must have the same size");
+static_assert(sizeof(unsigned) == 4, "unsigned int must be 4 bytes in size");
+static_assert(sizeof(unsigned) == sizeof(int), "unsigned int and int must have the same size");
 
-unsigned bytes_be_to_uint(const unsigned char *bytes)
+unsigned int bytes_be_to_uint(const unsigned char *bytes)
 {
 	return ((bytes[0] & 0xffu) << 24u) | ((bytes[1] & 0xffu) << 16u) | ((bytes[2] & 0xffu) << 8u) | (bytes[3] & 0xffu);
 }
 
-void uint_to_bytes_be(unsigned char *bytes, unsigned value)
+void uint_to_bytes_be(unsigned char *bytes, unsigned int value)
 {
 	bytes[0] = (value >> 24u) & 0xffu;
 	bytes[1] = (value >> 16u) & 0xffu;
@@ -4437,7 +4437,7 @@ bool secure_random_deinit()
 	return true;
 }
 
-void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length)
+void generate_password(char *buffer, unsigned int length, const unsigned short *random, unsigned int random_length)
 {
 	static const char VALUES[] = "ABCDEFGHKLMNPRSTUVWXYZabcdefghjkmnopqt23456789";
 	static const size_t NUM_VALUES = sizeof(VALUES) - 1; // Disregard the '\0'.
@@ -4456,7 +4456,7 @@ void generate_password(char *buffer, unsigned length, const unsigned short *rand
 
 #define MAX_PASSWORD_LENGTH 128
 
-void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
+void secure_random_password(char *buffer, unsigned int length, unsigned int pw_length)
 {
 	unsigned short random[MAX_PASSWORD_LENGTH / 2];
 	// With 6 characters, we get a password entropy of log(2048) * 6/2 = 33bit.
@@ -4472,7 +4472,7 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length)
 
 #undef MAX_PASSWORD_LENGTH
 
-void secure_random_fill(void *bytes, unsigned length)
+void secure_random_fill(void *bytes, unsigned int length)
 {
 	if(!secure_random_data.initialized)
 	{

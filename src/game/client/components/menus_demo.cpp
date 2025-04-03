@@ -28,7 +28,7 @@
 using namespace FontIcons;
 using namespace std::chrono_literals;
 
-int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned Flags, int Corners, bool Enabled)
+int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned int Flags, int Corners, bool Enabled)
 {
 	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * Ui()->ButtonColorMul(pButtonContainer)), Corners, 5.0f);
 
@@ -219,7 +219,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		// seek to 0-90%
 		const int aSeekPercentKeys[] = {KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9};
-		for(unsigned i = 0; i < std::size(aSeekPercentKeys); i++)
+		for(unsigned int i = 0; i < std::size(aSeekPercentKeys); i++)
 		{
 			if(Input()->KeyPress(aSeekPercentKeys[i]))
 			{

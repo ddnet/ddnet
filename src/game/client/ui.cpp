@@ -179,7 +179,7 @@ void CUi::Update(vec2 MouseWorldPos)
 	const vec2 WindowSize = vec2(Graphics()->WindowWidth(), Graphics()->WindowHeight());
 	const CUIRect *pScreen = Screen();
 
-	unsigned UpdatedMouseButtonsNext = 0;
+	unsigned int UpdatedMouseButtonsNext = 0;
 	if(Enabled())
 	{
 		// Update mouse buttons based on mouse keys
@@ -300,7 +300,7 @@ void CUi::UpdateTouchState(CTouchState &State) const
 {
 	const std::vector<IInput::CTouchFingerState> &vTouchFingerStates = Input()->TouchFingerStates();
 
-	// Updated touch position as long as any finger is beinged pressed.
+	// Updated touch position as long int as any finger is beinged pressed.
 	const bool WasAnyPressed = State.m_AnyPressed;
 	State.m_AnyPressed = !vTouchFingerStates.empty();
 	if(State.m_AnyPressed)
@@ -395,7 +395,7 @@ bool CUi::OnInput(const IInput::CEvent &Event)
 
 	if(Event.m_Flags & IInput::FLAG_PRESS)
 	{
-		unsigned LastHotkeysPressed = m_HotkeysPressed;
+		unsigned int LastHotkeysPressed = m_HotkeysPressed;
 		if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
 			m_HotkeysPressed |= HOTKEY_ENTER;
 		else if(Event.m_Key == KEY_ESCAPE)
@@ -503,7 +503,7 @@ void CUi::UpdateClipping()
 	}
 }
 
-int CUi::DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect, const unsigned Flags)
+int CUi::DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect, const unsigned int Flags)
 {
 	int ReturnValue = 0;
 	const bool Inside = MouseHovered(pRect);
@@ -1454,7 +1454,7 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 	return ReturnValue;
 }
 
-bool CUi::DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, unsigned Flags, const char *pSuffix)
+bool CUi::DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, unsigned int Flags, const char *pSuffix)
 {
 	const bool Infinite = Flags & CUi::SCROLLBAR_OPTION_INFINITE;
 	const bool NoClampValue = Flags & CUi::SCROLLBAR_OPTION_NOCLAMPVALUE;
@@ -1989,7 +1989,7 @@ CUi::EPopupMenuFunctionResult CUi::PopupColorPicker(void *pContext, CUIRect View
 		HuePartialArea.Draw4(TL, TL, BL, BL, IGraphics::CORNER_NONE, 0.0f);
 	}
 
-	const auto &&RenderAlphaSelector = [&](unsigned OldA) -> SEditResult<int64_t> {
+	const auto &&RenderAlphaSelector = [&](unsigned int OldA) -> SEditResult<int64_t> {
 		if(pColorPicker->m_Alpha)
 		{
 			return pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[3], &AlphaRect, "A:", OldA, 0, 255);
@@ -2007,10 +2007,10 @@ CUi::EPopupMenuFunctionResult CUi::PopupColorPicker(void *pContext, CUIRect View
 	// Editboxes Area
 	if(pColorPicker->m_ColorMode == SColorPickerPopupContext::MODE_HSVA)
 	{
-		const unsigned OldH = round_to_int(PickerColorHSV.h * 255.0f);
-		const unsigned OldS = round_to_int(PickerColorHSV.s * 255.0f);
-		const unsigned OldV = round_to_int(PickerColorHSV.v * 255.0f);
-		const unsigned OldA = round_to_int(PickerColorHSV.a * 255.0f);
+		const unsigned int OldH = round_to_int(PickerColorHSV.h * 255.0f);
+		const unsigned int OldS = round_to_int(PickerColorHSV.s * 255.0f);
+		const unsigned int OldV = round_to_int(PickerColorHSV.v * 255.0f);
+		const unsigned int OldA = round_to_int(PickerColorHSV.a * 255.0f);
 
 		const auto [StateH, H] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", OldH, 0, 255);
 		const auto [StateS, S] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", OldS, 0, 255);
@@ -2035,10 +2035,10 @@ CUi::EPopupMenuFunctionResult CUi::PopupColorPicker(void *pContext, CUIRect View
 	}
 	else if(pColorPicker->m_ColorMode == SColorPickerPopupContext::MODE_RGBA)
 	{
-		const unsigned OldR = round_to_int(PickerColorRGB.r * 255.0f);
-		const unsigned OldG = round_to_int(PickerColorRGB.g * 255.0f);
-		const unsigned OldB = round_to_int(PickerColorRGB.b * 255.0f);
-		const unsigned OldA = round_to_int(PickerColorRGB.a * 255.0f);
+		const unsigned int OldR = round_to_int(PickerColorRGB.r * 255.0f);
+		const unsigned int OldG = round_to_int(PickerColorRGB.g * 255.0f);
+		const unsigned int OldB = round_to_int(PickerColorRGB.b * 255.0f);
+		const unsigned int OldA = round_to_int(PickerColorRGB.a * 255.0f);
 
 		const auto [StateR, R] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "R:", OldR, 0, 255);
 		const auto [StateG, G] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "G:", OldG, 0, 255);
@@ -2063,10 +2063,10 @@ CUi::EPopupMenuFunctionResult CUi::PopupColorPicker(void *pContext, CUIRect View
 	}
 	else if(pColorPicker->m_ColorMode == SColorPickerPopupContext::MODE_HSLA)
 	{
-		const unsigned OldH = round_to_int(PickerColorHSL.h * 255.0f);
-		const unsigned OldS = round_to_int(PickerColorHSL.s * 255.0f);
-		const unsigned OldL = round_to_int(PickerColorHSL.l * 255.0f);
-		const unsigned OldA = round_to_int(PickerColorHSL.a * 255.0f);
+		const unsigned int OldH = round_to_int(PickerColorHSL.h * 255.0f);
+		const unsigned int OldS = round_to_int(PickerColorHSL.s * 255.0f);
+		const unsigned int OldL = round_to_int(PickerColorHSL.l * 255.0f);
+		const unsigned int OldA = round_to_int(PickerColorHSL.a * 255.0f);
 
 		const auto [StateH, H] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", OldH, 0, 255);
 		const auto [StateS, S] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", OldS, 0, 255);
@@ -2098,7 +2098,7 @@ CUi::EPopupMenuFunctionResult CUi::PopupColorPicker(void *pContext, CUIRect View
 	Props.m_UseScroll = false;
 	Props.m_IsHex = true;
 	Props.m_HexPrefix = pColorPicker->m_Alpha ? 8 : 6;
-	const unsigned OldHex = PickerColorRGB.PackAlphaLast(pColorPicker->m_Alpha);
+	const unsigned int OldHex = PickerColorRGB.PackAlphaLast(pColorPicker->m_Alpha);
 	auto [HexState, Hex] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[4], &HexRect, "Hex:", OldHex, 0, pColorPicker->m_Alpha ? 0xFFFFFFFFll : 0xFFFFFFll, Props);
 	if(OldHex != Hex)
 	{

@@ -90,9 +90,9 @@ class CGhostLoader : public IGhostLoader
 	CGhostItem m_LastItem;
 
 	void ResetBuffer();
-	IOHANDLE ReadHeader(CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc, bool LogMapMismatch) const;
+	IOHANDLE ReadHeader(CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned int MapCrc, bool LogMapMismatch) const;
 	bool ValidateHeader(const CGhostHeader &Header, const char *pFilename) const;
-	bool CheckHeaderMap(const CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc, bool LogMapMismatch) const;
+	bool CheckHeaderMap(const CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned int MapCrc, bool LogMapMismatch) const;
 	bool ReadChunk(int *pType);
 
 public:
@@ -100,13 +100,13 @@ public:
 
 	void Init();
 
-	bool Load(const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc) override;
+	bool Load(const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned int MapCrc) override;
 	void Close() override;
 	const CGhostInfo *GetInfo() const override { return &m_Info; }
 
 	bool ReadNextType(int *pType) override;
 	bool ReadData(int Type, void *pData, size_t Size) override;
 
-	bool GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc) override;
+	bool GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned int MapCrc) override;
 };
 #endif

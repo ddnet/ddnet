@@ -111,7 +111,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 
 	pOut->m_NumClients = 0;
 	pOut->m_NumPlayers = 0;
-	for(unsigned i = 0; i < Clients.u.array.length; i++)
+	for(unsigned int i = 0; i < Clients.u.array.length; i++)
 	{
 		const json_value &Client = Clients[i];
 		const json_value &ClientName = Client["name"];

@@ -237,7 +237,7 @@ void CUpdater::ParseUpdate()
 {
 	char aPath[IO_MAX_PATH_LENGTH];
 	void *pBuf;
-	unsigned Length;
+	unsigned int Length;
 	if(!m_pStorage->ReadFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof(aPath)), IStorage::TYPE_ABSOLUTE, &pBuf, &Length))
 		return;
 

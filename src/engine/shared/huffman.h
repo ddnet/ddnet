@@ -20,8 +20,8 @@ class CHuffman
 	struct CNode
 	{
 		// symbol
-		unsigned m_Bits;
-		unsigned m_NumBits;
+		unsigned int m_Bits;
+		unsigned int m_NumBits;
 
 		// don't use pointers for this. shorts are smaller so we can fit more data into the cache
 		unsigned short m_aLeafs[2];
@@ -30,15 +30,15 @@ class CHuffman
 		unsigned char m_Symbol;
 	};
 
-	static const unsigned ms_aFreqTable[HUFFMAN_MAX_SYMBOLS];
+	static const unsigned int ms_aFreqTable[HUFFMAN_MAX_SYMBOLS];
 
 	CNode m_aNodes[HUFFMAN_MAX_NODES];
 	CNode *m_apDecodeLut[HUFFMAN_LUTSIZE];
 	CNode *m_pStartNode;
 	int m_NumNodes;
 
-	void Setbits_r(CNode *pNode, int Bits, unsigned Depth);
-	void ConstructTree(const unsigned *pFrequencies);
+	void Setbits_r(CNode *pNode, int Bits, unsigned int Depth);
+	void ConstructTree(const unsigned int *pFrequencies);
 
 public:
 	/*
@@ -52,7 +52,7 @@ public:
 			- Does no allocation whatsoever.
 			- You don't have to call any cleanup functions when you are done with it.
 	*/
-	void Init(const unsigned *pFrequencies = ms_aFreqTable);
+	void Init(const unsigned int *pFrequencies = ms_aFreqTable);
 
 	/*
 		Function: Compress

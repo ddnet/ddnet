@@ -135,7 +135,7 @@ class CRegister : public IRegister
 	char m_aServerInfo[16384];
 
 public:
-	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);
+	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned int SixupSecurityToken);
 	void Update() override;
 	void OnConfigChange() override;
 	bool OnPacket(const CNetChunk *pPacket) override;
@@ -507,7 +507,7 @@ void CRegister::CProtocol::CJob::Run()
 	}
 }
 
-CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken) :
+CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned int SixupSecurityToken) :
 	m_pConfig(pConfig),
 	m_pConsole(pConsole),
 	m_pEngine(pEngine),
@@ -784,7 +784,7 @@ void CRegister::OnShutdown()
 	}
 }
 
-IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken)
+IRegister *CreateRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned int SixupSecurityToken)
 {
 	return new CRegister(pConfig, pConsole, pEngine, pHttp, ServerPort, SixupSecurityToken);
 }

@@ -99,7 +99,7 @@ CMenus::CMenus()
 	m_PasswordInput.SetHidden(true);
 }
 
-int CMenus::DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, bool Active, const unsigned Flags)
+int CMenus::DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, bool Active, const unsigned int Flags)
 {
 	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_GUIBUTTONS].m_Id);
 	Graphics()->QuadsBegin();
@@ -119,7 +119,7 @@ int CMenus::DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, 
 	return Active ? Ui()->DoButtonLogic(pId, Checked, pRect, Flags) : 0;
 }
 
-int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned Flags, const char *pImageName, int Corners, float Rounding, float FontFactor, ColorRGBA Color)
+int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned int Flags, const char *pImageName, int Corners, float Rounding, float FontFactor, ColorRGBA Color)
 {
 	CUIRect Text = *pRect;
 
@@ -276,7 +276,7 @@ int CMenus::DoButton_Favorite(const void *pButtonId, const void *pParentId, bool
 	return Ui()->DoButtonLogic(pButtonId, 0, pRect, BUTTONFLAG_LEFT);
 }
 
-int CMenus::DoButton_CheckBox_Common(const void *pId, const char *pText, const char *pBoxText, const CUIRect *pRect, const unsigned Flags)
+int CMenus::DoButton_CheckBox_Common(const void *pId, const char *pText, const char *pBoxText, const CUIRect *pRect, const unsigned int Flags)
 {
 	CUIRect Box, Label;
 	pRect->VSplitLeft(pRect->h, &Box, &Label);

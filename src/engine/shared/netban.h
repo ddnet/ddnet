@@ -42,7 +42,7 @@ protected:
 		return NetMatch(pRange, pAddr, 0, pRange->m_LB.type == NETTYPE_IPV4 ? 4 : 16);
 	}
 
-	const char *NetToString(const NETADDR *pData, char *pBuffer, unsigned BufferSize) const
+	const char *NetToString(const NETADDR *pData, char *pBuffer, unsigned int BufferSize) const
 	{
 		char aAddrStr[NETADDR_MAXSTRSIZE];
 		net_addr_str(pData, aAddrStr, sizeof(aAddrStr), false);
@@ -50,7 +50,7 @@ protected:
 		return pBuffer;
 	}
 
-	const char *NetToString(const CNetRange *pData, char *pBuffer, unsigned BufferSize) const
+	const char *NetToString(const CNetRange *pData, char *pBuffer, unsigned int BufferSize) const
 	{
 		char aAddrStr1[NETADDR_MAXSTRSIZE], aAddrStr2[NETADDR_MAXSTRSIZE];
 		net_addr_str(&pData->m_LB, aAddrStr1, sizeof(aAddrStr1), false);
@@ -149,7 +149,7 @@ protected:
 	typedef CBan<CNetRange> CBanRange;
 
 	template<class T>
-	void MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, int Type) const;
+	void MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned int BuffSize, int Type) const;
 	template<class T>
 	int Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason, bool VerbatimReason);
 	template<class T>
@@ -183,7 +183,7 @@ public:
 	int UnbanByRange(const CNetRange *pRange);
 	int UnbanByIndex(int Index);
 	void UnbanAll();
-	bool IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned BufferSize) const;
+	bool IsBanned(const NETADDR *pOrigAddr, char *pBuf, unsigned int BufferSize) const;
 
 	static void ConBan(class IConsole::IResult *pResult, void *pUser);
 	static void ConBanRange(class IConsole::IResult *pResult, void *pUser);
@@ -196,7 +196,7 @@ public:
 };
 
 template<class T>
-void CNetBan::MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned BuffSize, int Type) const
+void CNetBan::MakeBanInfo(const CBan<T> *pBan, char *pBuf, unsigned int BuffSize, int Type) const
 {
 	if(pBan == nullptr || pBuf == nullptr)
 	{

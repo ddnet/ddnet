@@ -149,7 +149,7 @@ float CPlayers::GetPlayerTargetAngle(
 	{
 		// If the player moves their weapon through top, then change
 		// the end angle by 2*Pi, so that the mix function will use the
-		// short path and not the long one.
+		// short path and not the long int one.
 		if(pPlayerChar->m_Angle > (256.0f * pi) && pPrevChar->m_Angle < 0)
 		{
 			return mix((float)pPrevChar->m_Angle, (float)(pPlayerChar->m_Angle - 256.0f * 2 * pi), AngleIntraTick) / 256.0f;

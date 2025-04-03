@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <base/system.h>
 
-const unsigned CHuffman::ms_aFreqTable[HUFFMAN_MAX_SYMBOLS] = {
+const unsigned int CHuffman::ms_aFreqTable[HUFFMAN_MAX_SYMBOLS] = {
 	1 << 30, 4545, 2657, 431, 1950, 919, 444, 482, 2244, 617, 838, 542, 715, 1814, 304, 240, 754, 212, 647, 186,
 	283, 131, 146, 166, 543, 164, 167, 136, 179, 859, 363, 113, 157, 154, 204, 108, 137, 180, 202, 176,
 	872, 404, 168, 134, 151, 111, 113, 109, 120, 126, 129, 100, 41, 20, 16, 22, 18, 18, 17, 19,
@@ -30,7 +30,7 @@ bool CompareNodesByFrequencyDesc(const CHuffmanConstructNode *pNode1, const CHuf
 	return pNode2->m_Frequency < pNode1->m_Frequency;
 }
 
-void CHuffman::Setbits_r(CNode *pNode, int Bits, unsigned Depth)
+void CHuffman::Setbits_r(CNode *pNode, int Bits, unsigned int Depth)
 {
 	if(pNode->m_aLeafs[1] != 0xffff)
 		Setbits_r(&m_aNodes[pNode->m_aLeafs[1]], Bits | (1 << Depth), Depth + 1);
@@ -44,7 +44,7 @@ void CHuffman::Setbits_r(CNode *pNode, int Bits, unsigned Depth)
 	}
 }
 
-void CHuffman::ConstructTree(const unsigned *pFrequencies)
+void CHuffman::ConstructTree(const unsigned int *pFrequencies)
 {
 	CHuffmanConstructNode aNodesLeftStorage[HUFFMAN_MAX_SYMBOLS];
 	CHuffmanConstructNode *apNodesLeft[HUFFMAN_MAX_SYMBOLS];
@@ -90,7 +90,7 @@ void CHuffman::ConstructTree(const unsigned *pFrequencies)
 	Setbits_r(m_pStartNode, 0, 0);
 }
 
-void CHuffman::Init(const unsigned *pFrequencies)
+void CHuffman::Init(const unsigned int *pFrequencies)
 {
 	// make sure to cleanout every thing
 	mem_zero(m_aNodes, sizeof(m_aNodes));
@@ -104,7 +104,7 @@ void CHuffman::Init(const unsigned *pFrequencies)
 	// build decode LUT
 	for(int i = 0; i < HUFFMAN_LUTSIZE; i++)
 	{
-		unsigned Bits = i;
+		unsigned int Bits = i;
 		int k;
 		CNode *pNode = m_pStartNode;
 		for(k = 0; k < HUFFMAN_LUTBITS; k++)
@@ -159,8 +159,8 @@ int CHuffman::Compress(const void *pInput, int InputSize, void *pOutput, int Out
 	unsigned char *pDstEnd = pDst + OutputSize;
 
 	// symbol variables
-	unsigned Bits = 0;
-	unsigned Bitcount = 0;
+	unsigned int Bits = 0;
+	unsigned int Bitcount = 0;
 
 	// make sure that we have data that we want to compress
 	if(InputSize)
@@ -209,8 +209,8 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 	unsigned char *pDstEnd = pDst + OutputSize;
 	unsigned char *pSrcEnd = pSrc + InputSize;
 
-	unsigned Bits = 0;
-	unsigned Bitcount = 0;
+	unsigned int Bits = 0;
+	unsigned int Bitcount = 0;
 
 	const CNode *pEof = &m_aNodes[HUFFMAN_EOF_SYMBOL];
 

@@ -299,7 +299,7 @@ public:
 
 	TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() override;
 
-	bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) override;
+	bool ShowMessageBox(unsigned int Type, const char *pTitle, const char *pMsg) override;
 
 	static bool IsModernAPI(EBackendType BackendType);
 };

@@ -4227,7 +4227,7 @@ const char *CServer::GetAnnouncementLine()
 	}
 	else
 	{
-		unsigned Rand;
+		unsigned int Rand;
 		do
 		{
 			Rand = rand() % m_vAnnouncements.size();

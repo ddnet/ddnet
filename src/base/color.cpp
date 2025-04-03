@@ -7,7 +7,7 @@ std::optional<T> color_parse(const char *pStr)
 	if(!str_is_all_num_hex(pStr))
 		return {};
 
-	const unsigned Num = str_to_ulong_base(pStr, 16);
+	const unsigned int Num = str_to_ulong_base(pStr, 16);
 
 	T Color;
 	switch(str_length(pStr))

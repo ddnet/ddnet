@@ -195,7 +195,7 @@ struct STextBoundingBox
 struct STextColorSplit
 {
 	int m_CharIndex; // Which index within the text should the split occur
-	int m_Length; // How long is the split
+	int m_Length; // How long int is the split
 	ColorRGBA m_Color; // The color the text should be starting from m_CharIndex
 
 	STextColorSplit(int CharIndex, int Length, const ColorRGBA &Color) :
@@ -322,8 +322,8 @@ public:
 	virtual void SetFontPreset(EFontPreset FontPreset) = 0;
 	virtual void SetFontLanguageVariant(const char *pLanguageFile) = 0;
 
-	virtual void SetRenderFlags(unsigned Flags) = 0;
-	virtual unsigned GetRenderFlags() const = 0;
+	virtual void SetRenderFlags(unsigned int Flags) = 0;
+	virtual unsigned int GetRenderFlags() const = 0;
 
 	ColorRGBA DefaultTextColor() const { return ColorRGBA(1, 1, 1, 1); }
 	ColorRGBA DefaultTextOutlineColor() const { return ColorRGBA(0, 0, 0, 0.3f); }

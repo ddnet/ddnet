@@ -82,7 +82,7 @@ void CreateEmptyMap(IStorage *pStorage)
 	dbg_msg("dummy_map", "dummy map written to '%s'", pMapName);
 
 	void *pData;
-	unsigned DataSize;
+	unsigned int DataSize;
 	if(!pStorage->ReadFile(pMapName, IStorage::TYPE_ALL, &pData, &DataSize))
 	{
 		dbg_msg("dummy_map", "couldn't open map file '%s' for reading", pMapName);
@@ -90,14 +90,14 @@ void CreateEmptyMap(IStorage *pStorage)
 	}
 	unsigned char *pDataChar = static_cast<unsigned char *>(pData);
 
-	unsigned Crc = crc32(0, pDataChar, DataSize);
+	unsigned int Crc = crc32(0, pDataChar, DataSize);
 	SHA256_DIGEST Sha256 = sha256(pDataChar, DataSize);
 
 	char aMapSha[SHA256_MAXSTRSIZE];
 	sha256_str(Sha256, aMapSha, sizeof(aMapSha));
 	dbg_msg("dummy_map", "crc32 %08X, sha256 %s", Crc, aMapSha);
 
-	const unsigned HexSize = 6 * DataSize + 1;
+	const unsigned int HexSize = 6 * DataSize + 1;
 	char *pHex = static_cast<char *>(malloc(HexSize));
 	str_hex_cstyle(pHex, HexSize, pDataChar, DataSize);
 	dbg_msg("dummy_map", "data %s", pHex);

@@ -43,10 +43,10 @@ enum class IPRESOLVE
 
 struct CTimeout
 {
-	long ConnectTimeoutMs;
-	long TimeoutMs;
-	long LowSpeedLimit;
-	long LowSpeedTime;
+	long int ConnectTimeoutMs;
+	long int TimeoutMs;
+	long int LowSpeedLimit;
+	long int LowSpeedTime;
 };
 
 class CHttpRequest : public IHttpRequest

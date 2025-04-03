@@ -30,12 +30,12 @@ class CLocalizationDatabase
 	class CString
 	{
 	public:
-		unsigned m_Hash;
-		unsigned m_ContextHash;
+		unsigned int m_Hash;
+		unsigned int m_ContextHash;
 		const char *m_pReplacement;
 
 		CString() {}
-		CString(unsigned Hash, unsigned ContextHash, const char *pReplacement) :
+		CString(unsigned int Hash, unsigned int ContextHash, const char *pReplacement) :
 			m_Hash(Hash), m_ContextHash(ContextHash), m_pReplacement(pReplacement)
 		{
 		}
@@ -57,7 +57,7 @@ public:
 	bool Load(const char *pFilename, class IStorage *pStorage, class IConsole *pConsole);
 
 	void AddString(const char *pOrgStr, const char *pNewStr, const char *pContext);
-	const char *FindString(unsigned Hash, unsigned ContextHash) const;
+	const char *FindString(unsigned int Hash, unsigned int ContextHash) const;
 };
 
 extern CLocalizationDatabase g_Localization;

@@ -66,7 +66,7 @@ TEST_F(Async, Simple)
 TEST_F(Async, Long)
 {
 	char aText[BUF_SIZE + 1];
-	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
+	for(unsigned int i = 0; i < sizeof(aText) - 1; i++)
 	{
 		aText[i] = 'a';
 	}
@@ -78,12 +78,12 @@ TEST_F(Async, Long)
 TEST_F(Async, Pieces)
 {
 	char aText[BUF_SIZE + 1];
-	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
+	for(unsigned int i = 0; i < sizeof(aText) - 1; i++)
 	{
 		aText[i] = 'a';
 	}
 	aText[sizeof(aText) - 1] = 0;
-	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
+	for(unsigned int i = 0; i < sizeof(aText) - 1; i++)
 	{
 		Write("a");
 	}
@@ -93,12 +93,12 @@ TEST_F(Async, Pieces)
 TEST_F(Async, Mixed)
 {
 	char aText[BUF_SIZE + 1];
-	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
+	for(unsigned int i = 0; i < sizeof(aText) - 1; i++)
 	{
 		aText[i] = 'a' + i % 26;
 	}
 	aText[sizeof(aText) - 1] = 0;
-	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
+	for(unsigned int i = 0; i < sizeof(aText) - 1; i++)
 	{
 		char w = 'a' + i % 26;
 		aio_write(m_pAio, &w, 1);
@@ -111,12 +111,12 @@ TEST_F(Async, NonDivisor)
 	static const int NUM_LETTERS = 13;
 	static const int SIZE = BUF_SIZE / NUM_LETTERS * NUM_LETTERS;
 	char aText[SIZE + 1];
-	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
+	for(unsigned int i = 0; i < sizeof(aText) - 1; i++)
 	{
 		aText[i] = 'a' + i % NUM_LETTERS;
 	}
 	aText[sizeof(aText) - 1] = 0;
-	for(unsigned i = 0; i < (sizeof(aText) - 1) / NUM_LETTERS; i++)
+	for(unsigned int i = 0; i < (sizeof(aText) - 1) / NUM_LETTERS; i++)
 	{
 		Write("abcdefghijklm");
 	}
@@ -128,12 +128,12 @@ TEST_F(Async, Transaction)
 	static const int NUM_LETTERS = 13;
 	static const int SIZE = BUF_SIZE / NUM_LETTERS * NUM_LETTERS;
 	char aText[SIZE + 1];
-	for(unsigned i = 0; i < sizeof(aText) - 1; i++)
+	for(unsigned int i = 0; i < sizeof(aText) - 1; i++)
 	{
 		aText[i] = 'a' + i % NUM_LETTERS;
 	}
 	aText[sizeof(aText) - 1] = 0;
-	for(unsigned i = 0; i < (sizeof(aText) - 1) / NUM_LETTERS; i++)
+	for(unsigned int i = 0; i < (sizeof(aText) - 1) / NUM_LETTERS; i++)
 	{
 		aio_lock(m_pAio);
 		for(char c = 'a'; c < 'a' + NUM_LETTERS; c++)

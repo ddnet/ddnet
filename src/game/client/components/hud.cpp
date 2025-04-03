@@ -1092,7 +1092,7 @@ void CHud::RenderNinjaBarPos(const float x, float y, const float Width, const fl
 	const float RestPct = 0.5f;
 	const float ProgPct = 0.5f;
 
-	const float EndHeight = Width; // to keep the correct scale - the width of the sprite is as long as the height
+	const float EndHeight = Width; // to keep the correct scale - the width of the sprite is as long int as the height
 	const float BarWidth = Width;
 	const float WholeBarHeight = Height;
 	const float MiddleBarHeight = WholeBarHeight - (EndHeight * 2.0f);

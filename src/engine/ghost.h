@@ -34,7 +34,7 @@ class IGhostLoader : public IInterface
 public:
 	virtual ~IGhostLoader() {}
 
-	virtual bool Load(const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc) = 0;
+	virtual bool Load(const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned int MapCrc) = 0;
 	virtual void Close() = 0;
 
 	virtual const CGhostInfo *GetInfo() const = 0;
@@ -42,7 +42,7 @@ public:
 	virtual bool ReadNextType(int *pType) = 0;
 	virtual bool ReadData(int Type, void *pData, size_t Size) = 0;
 
-	virtual bool GetGhostInfo(const char *pFilename, CGhostInfo *pInfo, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc) = 0;
+	virtual bool GetGhostInfo(const char *pFilename, CGhostInfo *pInfo, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned int MapCrc) = 0;
 };
 
 #endif

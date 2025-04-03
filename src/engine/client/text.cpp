@@ -513,8 +513,8 @@ private:
 			return false;
 		}
 
-		const unsigned RealWidth = pBitmap->width;
-		const unsigned RealHeight = pBitmap->rows;
+		const unsigned int RealWidth = pBitmap->width;
+		const unsigned int RealHeight = pBitmap->rows;
 
 		// adjust spacing
 		int OutlineThickness = 0;
@@ -527,8 +527,8 @@ private:
 			y += (OutlineThickness + 1);
 		}
 
-		const unsigned Width = RealWidth + x * 2;
-		const unsigned Height = RealHeight + y * 2;
+		const unsigned int Width = RealWidth + x * 2;
+		const unsigned int Height = RealHeight + y * 2;
 
 		int X = 0;
 		int Y = 0;
@@ -550,7 +550,7 @@ private:
 			uint8_t *pGlyphDataFill = static_cast<uint8_t *>(malloc(GlyphDataSize));
 			uint8_t *pGlyphDataOutline = static_cast<uint8_t *>(malloc(GlyphDataSize));
 			mem_zero(pGlyphDataFill, GlyphDataSize);
-			for(unsigned py = 0; py < pBitmap->rows; ++py)
+			for(unsigned int py = 0; py < pBitmap->rows; ++py)
 			{
 				mem_copy(&pGlyphDataFill[(py + y) * Width + x], &pBitmap->buffer[py * pBitmap->width], pBitmap->width);
 			}
@@ -800,9 +800,9 @@ public:
 					continue;
 				}
 
-				for(unsigned OffY = 0; OffY < pBitmap->rows; ++OffY)
+				for(unsigned int OffY = 0; OffY < pBitmap->rows; ++OffY)
 				{
-					for(unsigned OffX = 0; OffX < pBitmap->width; ++OffX)
+					for(unsigned int OffX = 0; OffX < pBitmap->width; ++OffX)
 					{
 						const int ImgOffX = clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
 						const int ImgOffY = clamp(y + OffY, y, (y + TexSubHeight) - 1);
@@ -882,7 +882,7 @@ struct STextContainer
 	int m_MaxLines;
 	float m_LineWidth;
 
-	unsigned m_RenderFlags;
+	unsigned int m_RenderFlags;
 
 	bool m_HasCursor;
 	bool m_ForceCursorRendering;
@@ -943,7 +943,7 @@ class CTextRender : public IEngineTextRender
 
 	std::vector<SFontLanguageVariant> m_vVariants;
 
-	unsigned m_RenderFlags;
+	unsigned int m_RenderFlags;
 
 	ColorRGBA m_Color;
 	ColorRGBA m_OutlineColor;
@@ -1057,12 +1057,12 @@ class CTextRender : public IEngineTextRender
 		return true;
 	}
 
-	void SetRenderFlags(unsigned Flags) override
+	void SetRenderFlags(unsigned int Flags) override
 	{
 		m_RenderFlags = Flags;
 	}
 
-	unsigned GetRenderFlags() const override
+	unsigned int GetRenderFlags() const override
 	{
 		return m_RenderFlags;
 	}
@@ -1159,7 +1159,7 @@ public:
 		// read file data into buffer
 		const char *pFilename = "fonts/index.json";
 		void *pFileData;
-		unsigned JsonFileSize;
+		unsigned int JsonFileSize;
 		if(!Storage()->ReadFile(pFilename, IStorage::TYPE_ALL, &pFileData, &JsonFileSize))
 		{
 			log_error("textrender", "Failed to open/read font index file '%s'", pFilename);
@@ -1188,7 +1188,7 @@ public:
 		const json_value &FontFiles = (*pJsonData)["font files"];
 		if(FontFiles.type == json_array)
 		{
-			for(unsigned FontFileIndex = 0; FontFileIndex < FontFiles.u.array.length; ++FontFileIndex)
+			for(unsigned int FontFileIndex = 0; FontFileIndex < FontFiles.u.array.length; ++FontFileIndex)
 			{
 				if(FontFiles[FontFileIndex].type != json_string)
 				{
@@ -1200,7 +1200,7 @@ public:
 				char aFontName[IO_MAX_PATH_LENGTH];
 				str_format(aFontName, sizeof(aFontName), "fonts/%s", FontFiles[FontFileIndex].u.string.ptr);
 				void *pFontData;
-				unsigned FontDataSize;
+				unsigned int FontDataSize;
 				if(Storage()->ReadFile(aFontName, IStorage::TYPE_ALL, &pFontData, &FontDataSize))
 				{
 					if(LoadFontCollection(aFontName, static_cast<FT_Byte *>(pFontData), (FT_Long)FontDataSize))
@@ -1271,7 +1271,7 @@ public:
 		const json_value &FallbackFaces = (*pJsonData)["fallbacks"];
 		if(FallbackFaces.type == json_array)
 		{
-			for(unsigned i = 0; i < FallbackFaces.u.array.length; ++i)
+			for(unsigned int i = 0; i < FallbackFaces.u.array.length; ++i)
 			{
 				if(FallbackFaces[i].type != json_string)
 				{
@@ -1468,7 +1468,7 @@ public:
 
 	void TextEx(CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
-		const unsigned OldRenderFlags = m_RenderFlags;
+		const unsigned int OldRenderFlags = m_RenderFlags;
 		m_RenderFlags |= TEXT_RENDER_FLAG_ONE_TIME_USE;
 		STextContainerIndex TextCont;
 		CreateTextContainer(TextCont, pCursor, pText, Length);
@@ -1577,7 +1577,7 @@ public:
 			}
 		}
 
-		const unsigned RenderFlags = TextContainer.m_RenderFlags;
+		const unsigned int RenderFlags = TextContainer.m_RenderFlags;
 
 		float DrawX = 0.0f, DrawY = 0.0f;
 		if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT) != 0)

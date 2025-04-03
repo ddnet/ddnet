@@ -488,7 +488,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 			if(!(pItem->m_Settings > -1))
 				break;
 
-			const unsigned Size = DataFile.GetDataSize(pItem->m_Settings);
+			const unsigned int Size = DataFile.GetDataSize(pItem->m_Settings);
 			char *pSettings = (char *)DataFile.GetData(pItem->m_Settings);
 			char *pNext = pSettings;
 			while(pNext < pSettings + Size)

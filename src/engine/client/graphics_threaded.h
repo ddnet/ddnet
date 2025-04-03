@@ -20,11 +20,11 @@ class CCommandBuffer
 	class CBuffer
 	{
 		unsigned char *m_pData;
-		unsigned m_Size;
-		unsigned m_Used;
+		unsigned int m_Size;
+		unsigned int m_Used;
 
 	public:
-		CBuffer(unsigned BufferSize)
+		CBuffer(unsigned int BufferSize)
 		{
 			m_Size = BufferSize;
 			m_pData = new unsigned char[m_Size];
@@ -44,7 +44,7 @@ class CCommandBuffer
 			m_Used = 0;
 		}
 
-		void *Alloc(unsigned Requested, unsigned Alignment = alignof(std::max_align_t))
+		void *Alloc(unsigned int Requested, unsigned int Alignment = alignof(std::max_align_t))
 		{
 			size_t Offset = reinterpret_cast<uintptr_t>(m_pData + m_Used) % Alignment;
 			if(Offset)
@@ -59,8 +59,8 @@ class CCommandBuffer
 		}
 
 		unsigned char *DataPtr() { return m_pData; }
-		unsigned DataSize() const { return m_Size; }
-		unsigned DataUsed() const { return m_Used; }
+		unsigned int DataSize() const { return m_Size; }
+		unsigned int DataUsed() const { return m_Used; }
 	};
 
 public:
@@ -187,9 +187,9 @@ public:
 	struct SCommand
 	{
 	public:
-		SCommand(unsigned Cmd) :
+		SCommand(unsigned int Cmd) :
 			m_Cmd(Cmd), m_pNext(nullptr) {}
-		unsigned m_Cmd;
+		unsigned int m_Cmd;
 		SCommand *m_pNext;
 	};
 	SCommand *m_pCmdBufferHead;
@@ -238,8 +238,8 @@ public:
 		SCommand_Render() :
 			SCommand(CMD_RENDER) {}
 		SState m_State;
-		unsigned m_PrimType;
-		unsigned m_PrimCount;
+		unsigned int m_PrimType;
+		unsigned int m_PrimCount;
 		SVertex *m_pVertices; // you should use the command buffer data to allocate vertices for this command
 	};
 
@@ -248,8 +248,8 @@ public:
 		SCommand_RenderTex3D() :
 			SCommand(CMD_RENDER_TEX3D) {}
 		SState m_State;
-		unsigned m_PrimType;
-		unsigned m_PrimCount;
+		unsigned int m_PrimType;
+		unsigned int m_PrimCount;
 		SVertexTex3DStream *m_pVertices; // you should use the command buffer data to allocate vertices for this command
 	};
 
@@ -601,12 +601,12 @@ public:
 	};
 
 	//
-	CCommandBuffer(unsigned CmdBufferSize, unsigned DataBufferSize) :
+	CCommandBuffer(unsigned int CmdBufferSize, unsigned int DataBufferSize) :
 		m_CmdBuffer(CmdBufferSize), m_DataBuffer(DataBufferSize), m_pCmdBufferHead(nullptr), m_pCmdBufferTail(nullptr)
 	{
 	}
 
-	void *AllocData(unsigned WantedSize)
+	void *AllocData(unsigned int WantedSize)
 	{
 		return m_DataBuffer.Alloc(WantedSize);
 	}
@@ -745,7 +745,7 @@ public:
 	virtual bool GetWarning(std::vector<std::string> &WarningStrings) = 0;
 
 	// returns true if the error msg was shown
-	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;
+	virtual bool ShowMessageBox(unsigned int Type, const char *pTitle, const char *pMsg) = 0;
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -771,7 +771,7 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	CCommandBuffer *m_apCommandBuffers[NUM_CMDBUFFERS];
 	CCommandBuffer *m_pCommandBuffer;
-	unsigned m_CurrentCommandBuffer;
+	unsigned int m_CurrentCommandBuffer;
 
 	//
 	class IStorage *m_pStorage;
@@ -1236,7 +1236,7 @@ public:
 	void AddWarning(const SWarning &Warning);
 	std::optional<SWarning> CurrentWarning() override;
 
-	bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) override;
+	bool ShowMessageBox(unsigned int Type, const char *pTitle, const char *pMsg) override;
 	bool IsBackendInitialized() override;
 
 	bool GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType) override { return m_pBackend->GetDriverVersion(DriverAgeType, Major, Minor, Patch, pName, BackendType); }

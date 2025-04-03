@@ -502,7 +502,7 @@ void CClient::EnterGame(int Conn)
 	m_CurrentServerNextPingTime = time_get() + time_freq() / 2;
 }
 
-void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
+void GenerateTimeoutCode(char *pBuffer, unsigned int Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
 {
 	MD5_CTX Md5;
 	md5_init(&Md5);
@@ -1069,7 +1069,7 @@ void CClient::Render()
 	RenderGraphs();
 }
 
-const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc)
+const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned int WantedCrc)
 {
 	static char s_aErrorMsg[128];
 
@@ -2672,7 +2672,7 @@ void CClient::Update()
 			if(IVideo::Current())
 			{
 				IVideo::Current()->NextVideoFrame();
-				IVideo::Current()->NextAudioFrameTimeline([this](short *pFinalOut, unsigned Frames) {
+				IVideo::Current()->NextAudioFrameTimeline([this](short *pFinalOut, unsigned int Frames) {
 					Sound()->Mix(pFinalOut, Frames);
 				});
 			}
@@ -3411,7 +3411,7 @@ bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
 			PortRef = 0;
 		}
 		BindAddr.port = PortRef;
-		unsigned RemainingAttempts = 25;
+		unsigned int RemainingAttempts = 25;
 		while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
 		{
 			if(BindAddr.port != 0)
@@ -3841,7 +3841,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
 
-		// Create a job to do this slicing in background because it can be a bit long depending on the file size
+		// Create a job to do this slicing in background because it can be a bit long int depending on the file size
 		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 		Engine()->AddJob(pDemoEditTask);
 		m_EditJobs.push_back(pDemoEditTask);
@@ -5005,7 +5005,7 @@ SHA256_DIGEST CClient::GetCurrentMapSha256() const
 	return m_pMap->Sha256();
 }
 
-unsigned CClient::GetCurrentMapCrc() const
+unsigned int CClient::GetCurrentMapCrc() const
 {
 	return m_pMap->Crc();
 }

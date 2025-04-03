@@ -4443,7 +4443,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	LayersBox.HSplitTop(RowHeight + 1.0f, &CollapseAllButton, &LayersBox);
 	if(s_ScrollRegion.AddRect(CollapseAllButton))
 	{
-		unsigned long TotalCollapsed = 0;
+		unsigned long int TotalCollapsed = 0;
 		for(const auto &pGroup : m_Map.m_vpGroups)
 		{
 			if(pGroup->m_Collapse)
@@ -4650,7 +4650,7 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 
 	// load external
 	void *pData;
-	unsigned DataSize;
+	unsigned int DataSize;
 	if(!pEditor->Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
 	{
 		pEditor->ShowFileDialogError("Failed to open sound file '%s'.", pFileName);
@@ -4708,7 +4708,7 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 
 	// load external
 	void *pData;
-	unsigned DataSize;
+	unsigned int DataSize;
 	if(!Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
 	{
 		ShowFileDialogError("Failed to open sound file '%s'.", pFileName);

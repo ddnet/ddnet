@@ -286,7 +286,7 @@ TEST(Str, Utf8FixTruncation)
 		"привет Наташа",
 		"до свидания\xffОлег",
 	};
-	for(unsigned i = 0; i < std::size(aaBuf); i++)
+	for(unsigned int i = 0; i < std::size(aaBuf); i++)
 	{
 		EXPECT_EQ(str_utf8_fix_truncation(aaBuf[i]), str_length(apExpected[i]));
 		EXPECT_STREQ(aaBuf[i], apExpected[i]);
@@ -1249,7 +1249,7 @@ TEST(Str, StrToInts)
 	EXPECT_EQ(aInts[1], 0x0104701F);
 	EXPECT_EQ(aInts[2], 0x10188000);
 
-	// long padding
+	// long int padding
 	StrToInts(aInts, 4, "abc");
 	EXPECT_EQ(aInts[0], 0xE1E2E380);
 	EXPECT_EQ(aInts[1], 0x80808080);
@@ -1305,7 +1305,7 @@ TEST(Str, IntsToStr)
 	EXPECT_TRUE(IntsToStr(aInts, 3, aStr, std::size(aStr)));
 	EXPECT_STREQ(aStr, "aβい🐘");
 
-	// long padding
+	// long int padding
 	aInts[0] = 0xE1E2E380;
 	aInts[1] = 0x80808080;
 	aInts[2] = 0x80808080;

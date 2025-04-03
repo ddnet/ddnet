@@ -52,8 +52,8 @@ struct CMapInfo
 {
 	char m_aName[MAX_MAP_LENGTH];
 	SHA256_DIGEST m_Sha256;
-	unsigned m_Crc;
-	unsigned m_Size;
+	unsigned int m_Crc;
+	unsigned int m_Size;
 };
 
 class IDemoPlayer : public IInterface

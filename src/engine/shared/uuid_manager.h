@@ -27,7 +27,7 @@ extern const CUuid UUID_ZEROED;
 CUuid RandomUuid();
 CUuid CalculateUuid(const char *pName);
 // The buffer length should be at least UUID_MAXSTRSIZE.
-void FormatUuid(CUuid Uuid, char *pBuffer, unsigned BufferLength);
+void FormatUuid(CUuid Uuid, char *pBuffer, unsigned int BufferLength);
 // Returns nonzero on failure.
 int ParseUuid(CUuid *pUuid, const char *pBuffer);
 

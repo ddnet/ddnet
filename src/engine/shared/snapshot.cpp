@@ -104,7 +104,7 @@ const void *CSnapshot::FindItem(int Type, int Id) const
 	return Index < 0 ? nullptr : GetItem(Index)->Data();
 }
 
-unsigned CSnapshot::Crc() const
+unsigned int CSnapshot::Crc() const
 {
 	unsigned int Crc = 0;
 
@@ -177,8 +177,8 @@ struct CItemList
 inline size_t CalcHashId(int Key)
 {
 	// djb2 (http://www.cse.yorku.ca/~oz/hash.html)
-	unsigned Hash = 5381;
-	for(unsigned Shift = 0; Shift < sizeof(int); Shift++)
+	unsigned int Hash = 5381;
+	for(unsigned int Shift = 0; Shift < sizeof(int); Shift++)
 		Hash = ((Hash << 5) + Hash) + ((Key >> (Shift * 8)) & 0xFF);
 	return Hash % HASHLIST_SIZE;
 }

@@ -776,7 +776,7 @@ void CGraphicsBackend_SDL_GL::ClampDriverVersion(EBackendType BackendType)
 	}
 }
 
-bool CGraphicsBackend_SDL_GL::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
+bool CGraphicsBackend_SDL_GL::ShowMessageBox(unsigned int Type, const char *pTitle, const char *pMsg)
 {
 	if(m_pProcessor != nullptr)
 	{

@@ -342,7 +342,7 @@ public:
 	virtual std::vector<const CCommunity *> SelectedCommunities() const = 0;
 	virtual std::vector<const CCommunity *> FavoriteCommunities() const = 0;
 	virtual std::vector<const CCommunity *> CurrentCommunities() const = 0;
-	virtual unsigned CurrentCommunitiesHash() const = 0;
+	virtual unsigned int CurrentCommunitiesHash() const = 0;
 
 	virtual bool DDNetInfoAvailable() const = 0;
 	virtual SHA256_DIGEST DDNetInfoSha256() const = 0;

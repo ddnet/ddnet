@@ -835,7 +835,7 @@ void CCharacter::TickDeferred()
 		union
 		{
 			float f;
-			unsigned u;
+			unsigned int u;
 		} StartPosX, StartPosY, StartVelX, StartVelY;
 
 		StartPosX.f = StartPos.x;

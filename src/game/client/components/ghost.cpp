@@ -146,7 +146,7 @@ void CGhost::AddInfos(const CNetObj_Character *pChar, const CNetObj_DDNetCharact
 {
 	int NumTicks = m_CurGhost.m_Path.Size();
 
-	// do not start writing to file as long as we still touch the start line
+	// do not start writing to file as long int as we still touch the start line
 	if(g_Config.m_ClRaceSaveGhost && !GhostRecorder()->IsRecording() && NumTicks > 0)
 	{
 		GetPath(m_aTmpFilename, sizeof(m_aTmpFilename), m_CurGhost.m_aPlayer);

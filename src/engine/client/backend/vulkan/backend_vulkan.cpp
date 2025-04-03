@@ -2408,7 +2408,7 @@ protected:
 		m_CurFrame++;
 		m_vImageLastFrameCheck[m_CurImageIndex] = m_CurFrame;
 
-		// check if older frames weren't used in a long time
+		// check if older frames weren't used in a long int time
 		for(size_t FrameImageIndex = 0; FrameImageIndex < m_vImageLastFrameCheck.size(); ++FrameImageIndex)
 		{
 			auto LastFrame = m_vImageLastFrameCheck[FrameImageIndex];
@@ -4573,7 +4573,7 @@ public:
 		if(it == m_ShaderFiles.end())
 		{
 			void *pShaderBuff;
-			unsigned FileSize;
+			unsigned int FileSize;
 			if(!m_pStorage->ReadFile(pFileName, IStorage::TYPE_ALL, &pShaderBuff, &FileSize))
 				return false;
 

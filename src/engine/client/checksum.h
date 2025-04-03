@@ -22,7 +22,7 @@ struct CChecksumData
 	int m_aComponentsChecksum[64];
 	int m_NumFiles;
 	int m_NumExtra;
-	unsigned m_aFiles[1024];
+	unsigned int m_aFiles[1024];
 
 	void InitFiles();
 };

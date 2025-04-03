@@ -584,7 +584,7 @@ void aio_unlock(ASYNCIO *aio);
  * @param buffer Pointer to the data that should be written.
  * @param size Number of bytes to write.
  */
-void aio_write(ASYNCIO *aio, const void *buffer, unsigned size);
+void aio_write(ASYNCIO *aio, const void *buffer, unsigned int size);
 
 /**
  * Queues a newline for writing.
@@ -605,7 +605,7 @@ void aio_write_newline(ASYNCIO *aio);
  * @param buffer Pointer to the data that should be written.
  * @param size Number of bytes to write.
  */
-void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned size);
+void aio_write_unlocked(ASYNCIO *aio, const void *buffer, unsigned int size);
 
 /**
  * Queues a newline for writing. The `ASYNCIO` struct must be locked
@@ -1253,7 +1253,7 @@ void net_unix_close(UNIXSOCKET sock);
  *
  * @return A new std::string representing the error code.
  */
-std::string windows_format_system_message(unsigned long error);
+std::string windows_format_system_message(unsigned long int error);
 
 #endif
 
@@ -1709,7 +1709,7 @@ int str_utf8_dist(const char *a, const char *b);
  * @param a First string for the edit distance, must be null terminated.
  * @param b Second string for the edit distance, must be null terminated.
  * @param buf Buffer for the function.
- * @param buf_len Length of the buffer, must be at least as long as
+ * @param buf_len Length of the buffer, must be at least as long int as
  *                twice the length of both strings combined plus two.
  *
  * @return The edit distance between the both strings.
@@ -1728,7 +1728,7 @@ int str_utf8_dist_buffer(const char *a, const char *b, int *buf, int buf_len);
  * @param b Second string for the edit distance.
  * @param b_len Length of the second string.
  * @param buf Buffer for the function.
- * @param buf_len Length of the buffer, must be at least as long as.
+ * @param buf_len Length of the buffer, must be at least as long int as.
  * @param the length of both strings combined plus two.
  *
  * @return The edit distance between the both strings.
@@ -2243,14 +2243,14 @@ int fs_file_time(const char *name, time_t *created, time_t *modified);
  *
  * @remark The caller must ensure that the data is at least `elem_size * num` bytes in size.
  */
-void swap_endian(void *data, unsigned elem_size, unsigned num);
+void swap_endian(void *data, unsigned int elem_size, unsigned int num);
 
 void net_stats(NETSTATS *stats);
 
 int str_to_int(const char *str);
 bool str_to_int(const char *str, int *out);
 int str_to_int_base(const char *str, int base);
-unsigned long str_to_ulong_base(const char *str, int base);
+unsigned long int str_to_ulong_base(const char *str, int base);
 int64_t str_to_int64_base(const char *str, int base = 10);
 float str_to_float(const char *str);
 bool str_to_float(const char *str, float *out);
@@ -2276,7 +2276,7 @@ int str_is_all_num(const char *str);
 
 int str_is_all_num_hex(const char *str);
 
-unsigned str_quick_hash(const char *str);
+unsigned int str_quick_hash(const char *str);
 
 int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 
@@ -2571,11 +2571,11 @@ int str_in_list(const char *list, const char *delim, const char *needle);
  * @return The packed unsigned.
  *
  * @remark Assumes the passed array is least 4 bytes in size.
- * @remark Assumes unsigned is 4 bytes in size.
+ * @remark Assumes unsigned int is 4 bytes in size.
  *
  * @see uint_to_bytes_be
  */
-unsigned bytes_be_to_uint(const unsigned char *bytes);
+unsigned int bytes_be_to_uint(const unsigned char *bytes);
 
 /**
  * Packs an unsigned into 4 big endian bytes.
@@ -2584,11 +2584,11 @@ unsigned bytes_be_to_uint(const unsigned char *bytes);
  * @param value The values that will be packed into the array.
  *
  * @remark Assumes the passed array is least 4 bytes in size.
- * @remark Assumes unsigned is 4 bytes in size.
+ * @remark Assumes unsigned int is 4 bytes in size.
  *
  * @see bytes_be_to_uint
  */
-void uint_to_bytes_be(unsigned char *bytes, unsigned value);
+void uint_to_bytes_be(unsigned char *bytes, unsigned int value);
 
 /**
  * Shell, process management, OS specific functionality.
@@ -2769,7 +2769,7 @@ int open_file(const char *path);
  * @param random Pointer to a randomly-initialized array of shorts.
  * @param random_length Length of the short array.
  */
-void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length);
+void generate_password(char *buffer, unsigned int length, const unsigned short *random, unsigned int random_length);
 
 /**
  * Initializes the secure random module.
@@ -2798,7 +2798,7 @@ bool secure_random_deinit();
  * @remark The desired password length must be greater or equal to 6,
  *         even and smaller or equal to 128.
  */
-void secure_random_password(char *buffer, unsigned length, unsigned pw_length);
+void secure_random_password(char *buffer, unsigned int length, unsigned int pw_length);
 
 /**
  * Fills the buffer with the specified amount of random bytes.
@@ -2808,7 +2808,7 @@ void secure_random_password(char *buffer, unsigned length, unsigned pw_length);
  * @param buffer Pointer to the start of the buffer.
  * @param length Length of the buffer.
  */
-void secure_random_fill(void *bytes, unsigned length);
+void secure_random_fill(void *bytes, unsigned int length);
 
 /**
  * Returns random `int`.

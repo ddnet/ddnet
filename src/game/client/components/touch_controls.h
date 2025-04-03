@@ -548,7 +548,7 @@ private:
 	void RenderButtons();
 	vec2 CalculateScreenSize() const;
 
-	bool ParseConfiguration(const void *pFileData, unsigned FileLength);
+	bool ParseConfiguration(const void *pFileData, unsigned int FileLength);
 	std::optional<EDirectTouchIngameMode> ParseDirectTouchIngameMode(const json_value *pModeValue);
 	std::optional<EDirectTouchSpectateMode> ParseDirectTouchSpectateMode(const json_value *pModeValue);
 	std::optional<ColorRGBA> ParseColor(const json_value *pColorValue, const char *pAttributeName, std::optional<ColorRGBA> DefaultColor) const;

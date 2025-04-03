@@ -208,7 +208,7 @@ class CCommunityCache : public ICommunityCache
 	IServerBrowser *m_pServerBrowser;
 	SHA256_DIGEST m_InfoSha256 = SHA256_ZEROED;
 	int m_LastType = IServerBrowser::NUM_TYPES; // initial value does not appear normally, marking uninitialized cache
-	unsigned m_SelectedCommunitiesHash = 0;
+	unsigned int m_SelectedCommunitiesHash = 0;
 	std::vector<const CCommunity *> m_vpSelectedCommunities;
 	std::vector<const CCommunityCountry *> m_vpSelectableCountries;
 	std::vector<const CCommunityType *> m_vpSelectableTypes;
@@ -266,7 +266,7 @@ public:
 	std::vector<const CCommunity *> SelectedCommunities() const override;
 	std::vector<const CCommunity *> FavoriteCommunities() const override;
 	std::vector<const CCommunity *> CurrentCommunities() const override;
-	unsigned CurrentCommunitiesHash() const override;
+	unsigned int CurrentCommunitiesHash() const override;
 
 	bool DDNetInfoAvailable() const override { return m_pDDNetInfo != nullptr; }
 	SHA256_DIGEST DDNetInfoSha256() const override { return m_DDNetInfoSha256; }

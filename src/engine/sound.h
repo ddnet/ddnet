@@ -67,8 +67,8 @@ public:
 
 	virtual int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
 	virtual int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
-	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool ForceLoad = false) = 0;
-	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool ForceLoad = false) = 0;
+	virtual int LoadOpusFromMem(const void *pData, unsigned int DataSize, bool ForceLoad = false) = 0;
+	virtual int LoadWVFromMem(const void *pData, unsigned int DataSize, bool ForceLoad = false) = 0;
 	virtual void UnloadSample(int SampleId) = 0;
 
 	virtual float GetSampleTotalTime(int SampleId) = 0; // in s
@@ -95,7 +95,7 @@ public:
 	virtual bool IsPlaying(int SampleId) = 0;
 
 	virtual int MixingRate() const = 0;
-	virtual void Mix(short *pFinalOut, unsigned Frames) = 0;
+	virtual void Mix(short *pFinalOut, unsigned int Frames) = 0;
 
 	// useful for thread synchronization
 	virtual void PauseAudioDevice() = 0;

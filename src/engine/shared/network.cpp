@@ -185,7 +185,7 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 
 	if(Sixup)
 	{
-		unsigned Flags = 0;
+		unsigned int Flags = 0;
 		if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
 			Flags |= 1;
 		if(pPacket->m_Flags & NET_PACKETFLAG_RESEND)
@@ -279,7 +279,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 		if(Sixup)
 		{
-			unsigned Flags = 0;
+			unsigned int Flags = 0;
 			if(pPacket->m_Flags & 1)
 				Flags |= NET_PACKETFLAG_CONTROL;
 			if(pPacket->m_Flags & 2)

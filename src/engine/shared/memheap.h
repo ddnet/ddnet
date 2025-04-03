@@ -27,13 +27,13 @@ class CHeap
 
 	void Clear();
 	void NewChunk(size_t ChunkSize);
-	void *AllocateFromChunk(unsigned int Size, unsigned Alignment);
+	void *AllocateFromChunk(unsigned int Size, unsigned int Alignment);
 
 public:
 	CHeap();
 	~CHeap();
 	void Reset();
-	void *Allocate(unsigned Size, unsigned Alignment = alignof(std::max_align_t));
+	void *Allocate(unsigned int Size, unsigned int Alignment = alignof(std::max_align_t));
 	const char *StoreString(const char *pSrc);
 
 	template<typename T, typename... TArgs>

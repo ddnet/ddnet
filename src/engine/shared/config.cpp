@@ -120,7 +120,7 @@ void SColorConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pUs
 		const auto Color = pResult->GetColor(0, pData->m_DarkestLighting);
 		if(Color)
 		{
-			const unsigned Value = Color->Pack(pData->m_DarkestLighting, pData->m_Alpha);
+			const unsigned int Value = Color->Pack(pData->m_DarkestLighting, pData->m_Alpha);
 
 			*pData->m_pVariable = Value;
 			if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
@@ -163,7 +163,7 @@ bool SColorConfigVariable::IsDefault() const
 	return *m_pVariable == m_Default;
 }
 
-void SColorConfigVariable::Serialize(char *pOut, size_t Size, unsigned Value) const
+void SColorConfigVariable::Serialize(char *pOut, size_t Size, unsigned int Value) const
 {
 	str_format(pOut, Size, "%s %u", m_pScriptName, Value);
 }
@@ -173,7 +173,7 @@ void SColorConfigVariable::Serialize(char *pOut, size_t Size) const
 	Serialize(pOut, Size, *m_pVariable);
 }
 
-void SColorConfigVariable::SetValue(unsigned Value)
+void SColorConfigVariable::SetValue(unsigned int Value)
 {
 	if(CheckReadOnly())
 		return;

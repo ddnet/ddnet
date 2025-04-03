@@ -774,7 +774,7 @@ ZEXTERN uLong ZEXPORT deflateBound(z_streamp strm,
 */
 
 ZEXTERN int ZEXPORT deflatePending(z_streamp strm,
-                                   unsigned *pending,
+                                   unsigned int *pending,
                                    int *bits);
 /*
      deflatePending() returns the number of bytes and bits of output that have
@@ -1004,7 +1004,7 @@ ZEXTERN int ZEXPORT inflatePrime(z_streamp strm,
    stream state was inconsistent.
 */
 
-ZEXTERN long ZEXPORT inflateMark(z_streamp strm);
+ZEXTERN long int ZEXPORT inflateMark(z_streamp strm);
 /*
      This function returns two values, one in the lower 16 bits of the return
    value, and the other in the remaining upper bits, obtained by shifting the
@@ -1094,7 +1094,7 @@ ZEXTERN int ZEXPORT inflateBackInit(z_streamp strm, int windowBits,
    the version of the header file.
 */
 
-typedef unsigned (*in_func)(void FAR *,
+typedef unsigned int (*in_func)(void FAR *,
                             z_const unsigned char FAR * FAR *);
 typedef int (*out_func)(void FAR *, unsigned char FAR *, unsigned);
 
@@ -1365,7 +1365,7 @@ ZEXTERN gzFile ZEXPORT gzdopen(int fd, const char *mode);
    will not detect if fd is invalid (unless fd is -1).
 */
 
-ZEXTERN int ZEXPORT gzbuffer(gzFile file, unsigned size);
+ZEXTERN int ZEXPORT gzbuffer(gzFile file, unsigned int size);
 /*
      Set the internal buffer size used by this library's functions for file to
    size.  The default buffer size is 8192 bytes.  This function must be called
@@ -1392,7 +1392,7 @@ ZEXTERN int ZEXPORT gzsetparams(gzFile file, int level, int strategy);
    or Z_MEM_ERROR if there is a memory allocation error.
 */
 
-ZEXTERN int ZEXPORT gzread(gzFile file, voidp buf, unsigned len);
+ZEXTERN int ZEXPORT gzread(gzFile file, voidp buf, unsigned int len);
 /*
      Read and decompress up to len uncompressed bytes from file into buf.  If
    the input file is not in gzip format, gzread copies the given number of
@@ -1448,7 +1448,7 @@ ZEXTERN z_size_t ZEXPORT gzfread(voidp buf, z_size_t size, z_size_t nitems,
    file, resetting and retrying on end-of-file, when size is not 1.
 */
 
-ZEXTERN int ZEXPORT gzwrite(gzFile file, voidpc buf, unsigned len);
+ZEXTERN int ZEXPORT gzwrite(gzFile file, voidpc buf, unsigned int len);
 /*
      Compress and write the len uncompressed bytes at buf to file. gzwrite
    returns the number of uncompressed bytes written or 0 in case of error.
@@ -1835,7 +1835,7 @@ ZEXTERN int ZEXPORT inflateBackInit_(z_streamp strm, int windowBits,
  * only be used by the gzgetc() macro.  You have been warned.
  */
 struct gzFile_s {
-    unsigned have;
+    unsigned int have;
     unsigned char *next;
     z_off64_t pos;
 };
@@ -1916,7 +1916,7 @@ ZEXTERN int            ZEXPORT inflateSyncPoint(z_streamp);
 ZEXTERN const z_crc_t FAR * ZEXPORT get_crc_table(void);
 ZEXTERN int            ZEXPORT inflateUndermine(z_streamp, int);
 ZEXTERN int            ZEXPORT inflateValidate(z_streamp, int);
-ZEXTERN unsigned long  ZEXPORT inflateCodesUsed(z_streamp);
+ZEXTERN unsigned long int  ZEXPORT inflateCodesUsed(z_streamp);
 ZEXTERN int            ZEXPORT inflateResetKeep(z_streamp);
 ZEXTERN int            ZEXPORT deflateResetKeep(z_streamp);
 #if defined(_WIN32) && !defined(Z_SOLO)
