@@ -24,7 +24,8 @@ class CRegister : public IRegister
 		STATUS_ERROR,
 	};
 
-	enum {
+	enum
+	{
 		PROTOCOL_TW6_IPV6 = 0,
 		PROTOCOL_TW6_IPV4,
 		PROTOCOL_TW7_IPV6,
