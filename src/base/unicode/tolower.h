@@ -1,14 +1,18 @@
 #include <cstdint>
 
-struct UPPER_LOWER
+#if defined(__attribute__)
+#define PACK __attribute__((packed))
+#else
+#define PACK
+#endif
+
+class PACK CUpperToLower
 {
-	int32_t upper;
-	int32_t lower;
+public:
+	int32_t m_Upper;
+	int32_t m_Lower;
 };
 
-enum
-{
-	NUM_TOLOWER = 1433,
-};
+extern const unsigned int ToLowerNum;
 
-extern const struct UPPER_LOWER tolowermap[];
+extern const CUpperToLower ToLowerMap[];

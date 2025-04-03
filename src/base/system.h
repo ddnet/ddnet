@@ -2295,7 +2295,7 @@ int str_utf8_comp_confusable(const char *str1, const char *str2);
  *
  * @return Lowercase codepoint
 */
-int str_utf8_tolower(int code);
+int str_utf8_to_lower(int code);
 
 /**
  * Compares two UTF-8 strings case insensitively.

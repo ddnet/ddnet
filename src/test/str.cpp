@@ -197,10 +197,10 @@ TEST(Str, Utf8ToSkeleton)
 
 TEST(Str, Utf8ToLower)
 {
-	EXPECT_TRUE(str_utf8_tolower('A') == 'a');
-	EXPECT_TRUE(str_utf8_tolower('z') == 'z');
-	EXPECT_TRUE(str_utf8_tolower(192) == 224); // À -> à
-	EXPECT_TRUE(str_utf8_tolower(7882) == 7883); // Ị -> ị
+	EXPECT_TRUE(str_utf8_to_lower('A') == 'a');
+	EXPECT_TRUE(str_utf8_to_lower('z') == 'z');
+	EXPECT_TRUE(str_utf8_to_lower(192) == 224); // À -> à
+	EXPECT_TRUE(str_utf8_to_lower(7882) == 7883); // Ị -> ị
 
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölü") == 0);
 	EXPECT_TRUE(str_utf8_comp_nocase("ÜlÖ", "ölü") > 0); // ü > ö
