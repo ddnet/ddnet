@@ -10,6 +10,6 @@ int main(int argc, const char **argv)
 		dbg_msg("usage", "%s STR1 STR2", argv[0] ? argv[0] : "unicode_confusables");
 		return -1;
 	}
-	dbg_msg("conf", "not_confusable=%d", str_utf8_comp_no_confusables(argv[1], argv[2]));
+	dbg_msg("conf", "not_confusable=%s", str_utf8_comp_no_confusables(argv[1], argv[2]) ? "true" : "false");
 	return 0;
 }
