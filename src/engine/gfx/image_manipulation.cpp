@@ -76,10 +76,10 @@ void ConvertToGrayscale(const CImageInfo &Image)
 	const size_t Step = Image.PixelSize();
 	for(size_t i = 0; i < Image.m_Width * Image.m_Height; ++i)
 	{
-		const int r = Image.m_pData[i * Step];
-		const int g = Image.m_pData[i * Step + 1];
-		const int b = Image.m_pData[i * Step + 2];
-		const int Luma = (int)(0.2126f * r + 0.7152f * g + 0.0722f * b);
+		const int R = Image.m_pData[i * Step];
+		const int G = Image.m_pData[i * Step + 1];
+		const int B = Image.m_pData[i * Step + 2];
+		const int Luma = (int)(0.2126f * R + 0.7152f * G + 0.0722f * B);
 
 		Image.m_pData[i * Step] = Luma;
 		Image.m_pData[i * Step + 1] = Luma;
