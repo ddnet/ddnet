@@ -104,8 +104,15 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos, int DDTeam)
 
 void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 {
+	const bool PlayerCollision = GameServer()->m_World.m_Core.m_aTuning[0].m_PlayerCollision;
+
+	// make sure players keep spawning at the same tile
+	// on race maps no matter what
+	if(!PlayerCollision && pEval->m_Got)
+		return;
+
 	// j == 0: Find an empty slot, j == 1: Take any slot if no empty one found
-	for(int j = 0; j < 2 && !pEval->m_Got; j++)
+	for(int j = 0; j < 2; j++)
 	{
 		// get spawn point
 		for(const vec2 &SpawnPoint : m_avSpawnPoints[Type])
@@ -121,7 +128,7 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 				for(int Index = 0; Index < 5 && Result == -1; ++Index)
 				{
 					Result = Index;
-					if(!GameServer()->m_World.m_Core.m_aTuning[0].m_PlayerCollision)
+					if(!PlayerCollision)
 						break;
 					for(int c = 0; c < Num; ++c)
 					{
