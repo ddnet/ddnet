@@ -343,35 +343,9 @@ void CMapLayers::OnMapLoad()
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
 			CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer + l);
-			bool IsFrontLayer = false;
-			bool IsSwitchLayer = false;
-			bool IsTeleLayer = false;
-			bool IsSpeedupLayer = false;
-			bool IsTuneLayer = false;
-			bool IsGameLayer = false;
-			bool IsEntityLayer = false;
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->GameLayer())
-			{
-				IsGameLayer = true;
-				IsEntityLayer = true;
-				PassedGameLayer = true;
-			}
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->FrontLayer())
-				IsEntityLayer = IsFrontLayer = true;
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->SwitchLayer())
-				IsEntityLayer = IsSwitchLayer = true;
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->TeleLayer())
-				IsEntityLayer = IsTeleLayer = true;
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->SpeedupLayer())
-				IsEntityLayer = IsSpeedupLayer = true;
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
-				IsEntityLayer = IsTuneLayer = true;
+			int LayerType = GetLayerType(pLayer);
+			PassedGameLayer |= LayerType == LAYER_GAME;
+			bool IsEntityLayer = LayerType != -1;
 
 			if(m_Type <= TYPE_BACKGROUND_FORCE)
 			{
@@ -392,39 +366,44 @@ void CMapLayers::OnMapLoad()
 				int DataIndex = 0;
 				unsigned int TileSize = 0;
 				int OverlayCount = 0;
-				if(IsFrontLayer)
+				if(!IsEntityLayer || LayerType == LAYER_GAME)
+				{
+					DataIndex = pTMap->m_Data;
+					TileSize = sizeof(CTile);
+				}
+				else if(LayerType == LAYER_FRONT)
 				{
 					DataIndex = pTMap->m_Front;
 					TileSize = sizeof(CTile);
 				}
-				else if(IsSwitchLayer)
+				else if(LayerType == LAYER_SWITCH)
 				{
 					DataIndex = pTMap->m_Switch;
 					TileSize = sizeof(CSwitchTile);
 					OverlayCount = 2;
 				}
-				else if(IsTeleLayer)
+				else if(LayerType == LAYER_TELE)
 				{
 					DataIndex = pTMap->m_Tele;
 					TileSize = sizeof(CTeleTile);
 					OverlayCount = 1;
 				}
-				else if(IsSpeedupLayer)
+				else if(LayerType == LAYER_SPEEDUP)
 				{
 					DataIndex = pTMap->m_Speedup;
 					TileSize = sizeof(CSpeedupTile);
 					OverlayCount = 2;
 				}
-				else if(IsTuneLayer)
+				else if(LayerType == LAYER_TUNE)
 				{
 					DataIndex = pTMap->m_Tune;
 					TileSize = sizeof(CTuneTile);
 				}
 				else
 				{
-					DataIndex = pTMap->m_Data;
-					TileSize = sizeof(CTile);
+					dbg_assert(false, "Unknown LayerType %d", LayerType);
 				}
+
 				unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
 				void *pTiles = m_pLayers->Map()->GetData(DataIndex);
 
@@ -485,67 +464,55 @@ void CMapLayers::OnMapLoad()
 								unsigned char Index = 0;
 								unsigned char Flags = 0;
 								int AngleRotate = -1;
-								if(IsEntityLayer)
-								{
-									if(IsGameLayer)
-									{
-										Index = ((CTile *)pTiles)[y * pTMap->m_Width + x].m_Index;
-										Flags = ((CTile *)pTiles)[y * pTMap->m_Width + x].m_Flags;
-									}
-									if(IsFrontLayer)
-									{
-										Index = ((CTile *)pTiles)[y * pTMap->m_Width + x].m_Index;
-										Flags = ((CTile *)pTiles)[y * pTMap->m_Width + x].m_Flags;
-									}
-									if(IsSwitchLayer)
-									{
-										Flags = 0;
-										Index = ((CSwitchTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
-										if(CurOverlay == 0)
-										{
-											Flags = ((CSwitchTile *)pTiles)[y * pTMap->m_Width + x].m_Flags;
-											if(Index == TILE_SWITCHTIMEDOPEN)
-												Index = 8;
-										}
-										else if(CurOverlay == 1)
-											Index = ((CSwitchTile *)pTiles)[y * pTMap->m_Width + x].m_Number;
-										else if(CurOverlay == 2)
-											Index = ((CSwitchTile *)pTiles)[y * pTMap->m_Width + x].m_Delay;
-									}
-									if(IsTeleLayer)
-									{
-										Index = ((CTeleTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
-										Flags = 0;
-										if(CurOverlay == 1)
-										{
-											if(IsTeleTileNumberUsedAny(Index))
-												Index = ((CTeleTile *)pTiles)[y * pTMap->m_Width + x].m_Number;
-											else
-												Index = 0;
-										}
-									}
-									if(IsSpeedupLayer)
-									{
-										Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
-										Flags = 0;
-										AngleRotate = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Angle;
-										if(((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Force == 0)
-											Index = 0;
-										else if(CurOverlay == 1)
-											Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Force;
-										else if(CurOverlay == 2)
-											Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_MaxSpeed;
-									}
-									if(IsTuneLayer)
-									{
-										Index = ((CTuneTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
-										Flags = 0;
-									}
-								}
-								else
+
+								if(!IsEntityLayer || LayerType == LAYER_GAME || LayerType == LAYER_FRONT)
 								{
 									Index = ((CTile *)pTiles)[y * pTMap->m_Width + x].m_Index;
 									Flags = ((CTile *)pTiles)[y * pTMap->m_Width + x].m_Flags;
+								}
+								else if(LayerType == LAYER_SWITCH)
+								{
+									Flags = 0;
+									Index = ((CSwitchTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
+									if(CurOverlay == 0)
+									{
+										Flags = ((CSwitchTile *)pTiles)[y * pTMap->m_Width + x].m_Flags;
+										if(Index == TILE_SWITCHTIMEDOPEN)
+											Index = 8;
+									}
+									else if(CurOverlay == 1)
+										Index = ((CSwitchTile *)pTiles)[y * pTMap->m_Width + x].m_Number;
+									else if(CurOverlay == 2)
+										Index = ((CSwitchTile *)pTiles)[y * pTMap->m_Width + x].m_Delay;
+								}
+								else if(LayerType == LAYER_TELE)
+								{
+									Index = ((CTeleTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
+									Flags = 0;
+									if(CurOverlay == 1)
+									{
+										if(IsTeleTileNumberUsedAny(Index))
+											Index = ((CTeleTile *)pTiles)[y * pTMap->m_Width + x].m_Number;
+										else
+											Index = 0;
+									}
+								}
+								else if(LayerType == LAYER_SPEEDUP)
+								{
+									Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
+									Flags = 0;
+									AngleRotate = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Angle;
+									if(((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Force == 0)
+										Index = 0;
+									else if(CurOverlay == 1)
+										Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Force;
+									else if(CurOverlay == 2)
+										Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_MaxSpeed;
+								}
+								else if(LayerType == LAYER_TUNE)
+								{
+									Index = ((CTuneTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
+									Flags = 0;
 								}
 
 								//the amount of tiles handled before this tile
@@ -553,7 +520,7 @@ void CMapLayers::OnMapLoad()
 								Visuals.m_pTilesOfLayer[y * pTMap->m_Width + x].SetIndexBufferByteOffset((offset_ptr32)(TilesHandledCount));
 
 								bool AddAsSpeedup = false;
-								if(IsSpeedupLayer && CurOverlay == 0)
+								if(LayerType == LAYER_SPEEDUP && CurOverlay == 0)
 									AddAsSpeedup = true;
 
 								if(AddTile(vtmpTiles, vtmpTileTexCoords, Index, Flags, x, y, DoTextureCoords, AddAsSpeedup, AngleRotate))
@@ -612,7 +579,7 @@ void CMapLayers::OnMapLoad()
 						}
 
 						//append one kill tile to the gamelayer
-						if(IsGameLayer)
+						if(LayerType == LAYER_GAME)
 						{
 							Visuals.m_BorderKillTile.SetIndexBufferByteOffset((offset_ptr32)(vtmpTiles.size()));
 							if(AddTile(vtmpTiles, vtmpTileTexCoords, TILE_DEATH, 0, 0, 0, DoTextureCoords))
@@ -1244,31 +1211,9 @@ void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, 
 	for(int l = 0; l < pGroup->m_NumLayers; l++)
 	{
 		CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer + l);
-		bool IsFrontLayer = false;
-		bool IsSwitchLayer = false;
-		bool IsTeleLayer = false;
-		bool IsSpeedupLayer = false;
-		bool IsTuneLayer = false;
-
-		if(pLayer == (CMapItemLayer *)m_pLayers->GameLayer())
-		{
-			PassedGameLayer = true;
-		}
-
-		if(pLayer == (CMapItemLayer *)m_pLayers->FrontLayer())
-			IsFrontLayer = true;
-
-		if(pLayer == (CMapItemLayer *)m_pLayers->SwitchLayer())
-			IsSwitchLayer = true;
-
-		if(pLayer == (CMapItemLayer *)m_pLayers->TeleLayer())
-			IsTeleLayer = true;
-
-		if(pLayer == (CMapItemLayer *)m_pLayers->SpeedupLayer())
-			IsSpeedupLayer = true;
-
-		if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
-			IsTuneLayer = true;
+		int LayerType = GetLayerType(pLayer);
+		PassedGameLayer |= LayerType == LAYER_GAME;
+		bool IsEntityLayer = LayerType != -1;
 
 		if(m_Type <= TYPE_BACKGROUND_FORCE)
 		{
@@ -1287,31 +1232,38 @@ void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, 
 			int DataIndex = 0;
 			unsigned int TileSize = 0;
 			int TileLayerAndOverlayCount = 0;
-			if(IsFrontLayer)
+
+			if(!IsEntityLayer || LayerType == LAYER_GAME)
+			{
+				DataIndex = pTMap->m_Data;
+				TileSize = sizeof(CTile);
+				TileLayerAndOverlayCount = 1;
+			}
+			else if(LayerType == LAYER_FRONT)
 			{
 				DataIndex = pTMap->m_Front;
 				TileSize = sizeof(CTile);
 				TileLayerAndOverlayCount = 1;
 			}
-			else if(IsSwitchLayer)
+			else if(LayerType == LAYER_SWITCH)
 			{
 				DataIndex = pTMap->m_Switch;
 				TileSize = sizeof(CSwitchTile);
 				TileLayerAndOverlayCount = 3;
 			}
-			else if(IsTeleLayer)
+			else if(LayerType == LAYER_TELE)
 			{
 				DataIndex = pTMap->m_Tele;
 				TileSize = sizeof(CTeleTile);
 				TileLayerAndOverlayCount = 2;
 			}
-			else if(IsSpeedupLayer)
+			else if(LayerType == LAYER_SPEEDUP)
 			{
 				DataIndex = pTMap->m_Speedup;
 				TileSize = sizeof(CSpeedupTile);
 				TileLayerAndOverlayCount = 3;
 			}
-			else if(IsTuneLayer)
+			else if(LayerType == LAYER_TUNE)
 			{
 				DataIndex = pTMap->m_Tune;
 				TileSize = sizeof(CTuneTile);
@@ -1319,9 +1271,7 @@ void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, 
 			}
 			else
 			{
-				DataIndex = pTMap->m_Data;
-				TileSize = sizeof(CTile);
-				TileLayerAndOverlayCount = 1;
+				dbg_assert(false, "Unknown LayerType %d", LayerType);
 			}
 
 			unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
@@ -1393,35 +1343,10 @@ void CMapLayers::OnRender()
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
 			CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer + l);
+			int LayerType = GetLayerType(pLayer);
+			PassedGameLayer |= LayerType == LAYER_GAME;
+			bool IsEntityLayer = LayerType != -1;
 			bool Render = false;
-			bool IsGameLayer = false;
-			bool IsFrontLayer = false;
-			bool IsSwitchLayer = false;
-			bool IsTeleLayer = false;
-			bool IsSpeedupLayer = false;
-			bool IsTuneLayer = false;
-			bool IsEntityLayer = false;
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->GameLayer())
-			{
-				IsEntityLayer = IsGameLayer = true;
-				PassedGameLayer = true;
-			}
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->FrontLayer())
-				IsEntityLayer = IsFrontLayer = true;
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->SwitchLayer())
-				IsEntityLayer = IsSwitchLayer = true;
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->TeleLayer())
-				IsEntityLayer = IsTeleLayer = true;
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->SpeedupLayer())
-				IsEntityLayer = IsSpeedupLayer = true;
-
-			if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
-				IsEntityLayer = IsTuneLayer = true;
 
 			if(m_Type == -1)
 				Render = true;
@@ -1439,12 +1364,12 @@ void CMapLayers::OnRender()
 			}
 			else if(m_Type == TYPE_FOREGROUND)
 			{
-				if(PassedGameLayer && !IsGameLayer)
+				if(PassedGameLayer && LayerType != LAYER_GAME)
 					Render = true;
 			}
 			else if(m_Type == TYPE_FULL_DESIGN)
 			{
-				if(!IsGameLayer)
+				if(LayerType != LAYER_GAME)
 					Render = true;
 			}
 
@@ -1469,37 +1394,43 @@ void CMapLayers::OnRender()
 				}
 			}
 
-			if((Render || IsGameLayer) && pLayer->m_Type == LAYERTYPE_TILES)
+			if((Render || LayerType == LAYER_GAME) && pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				int DataIndex = 0;
 				unsigned int TileSize = 0;
 				int TileLayerAndOverlayCount = 0;
-				if(IsFrontLayer)
+				if(!IsEntityLayer || LayerType == LAYER_GAME)
+				{
+					DataIndex = pTMap->m_Data;
+					TileSize = sizeof(CTile);
+					TileLayerAndOverlayCount = 1;
+				}
+				else if(LayerType == LAYER_FRONT)
 				{
 					DataIndex = pTMap->m_Front;
 					TileSize = sizeof(CTile);
 					TileLayerAndOverlayCount = 1;
 				}
-				else if(IsSwitchLayer)
+				else if(LayerType == LAYER_SWITCH)
 				{
 					DataIndex = pTMap->m_Switch;
 					TileSize = sizeof(CSwitchTile);
 					TileLayerAndOverlayCount = 3;
 				}
-				else if(IsTeleLayer)
+				else if(LayerType == LAYER_TELE)
 				{
 					DataIndex = pTMap->m_Tele;
 					TileSize = sizeof(CTeleTile);
 					TileLayerAndOverlayCount = 2;
 				}
-				else if(IsSpeedupLayer)
+				else if(LayerType == LAYER_SPEEDUP)
 				{
 					DataIndex = pTMap->m_Speedup;
 					TileSize = sizeof(CSpeedupTile);
 					TileLayerAndOverlayCount = 3;
 				}
-				else if(IsTuneLayer)
+				else if(LayerType == LAYER_TUNE)
 				{
 					DataIndex = pTMap->m_Tune;
 					TileSize = sizeof(CTuneTile);
@@ -1507,9 +1438,7 @@ void CMapLayers::OnRender()
 				}
 				else
 				{
-					DataIndex = pTMap->m_Data;
-					TileSize = sizeof(CTile);
-					TileLayerAndOverlayCount = 1;
+					dbg_assert(false, "Unknown LayerType %d", LayerType);
 				}
 
 				unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
@@ -1524,7 +1453,7 @@ void CMapLayers::OnRender()
 			}
 
 			// skip rendering if detail layers if not wanted, or is entity layer and we are a background map
-			if((pLayer->m_Flags & LAYERFLAG_DETAIL && (!g_Config.m_GfxHighDetail && !(m_Type == TYPE_FULL_DESIGN)) && !IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE && IsEntityLayer) || (m_Type == TYPE_FULL_DESIGN && IsEntityLayer))
+			if((pLayer->m_Flags & LAYERFLAG_DETAIL && (!g_Config.m_GfxHighDetail && !(m_Type == TYPE_FULL_DESIGN)) && LayerType != LAYER_GAME) || (m_Type == TYPE_BACKGROUND_FORCE && IsEntityLayer) || (m_Type == TYPE_FULL_DESIGN && IsEntityLayer))
 				continue;
 
 			int EntityOverlayVal = g_Config.m_ClOverlayEntities;
@@ -1532,12 +1461,12 @@ void CMapLayers::OnRender()
 				EntityOverlayVal = 0;
 
 			int OverlayRenderFlags = g_Config.m_ClTextEntities ? OVERLAYRENDERFLAG_TEXT : 0;
-			if((Render && EntityOverlayVal < 100 && !IsEntityLayer) || (EntityOverlayVal && IsGameLayer) || (m_Type == TYPE_BACKGROUND_FORCE))
+			if((Render && EntityOverlayVal < 100 && !IsEntityLayer) || (EntityOverlayVal && LayerType == LAYER_GAME) || (m_Type == TYPE_BACKGROUND_FORCE))
 			{
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
 					CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-					if(IsGameLayer)
+					if(LayerType == LAYER_GAME)
 					{
 						Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
 					}
@@ -1555,13 +1484,13 @@ void CMapLayers::OnRender()
 
 					if(Size >= (size_t)pTMap->m_Width * pTMap->m_Height * sizeof(CTile))
 					{
-						ColorRGBA Color = IsGameLayer ? ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f) : ColorRGBA(pTMap->m_Color.r / 255.0f, pTMap->m_Color.g / 255.0f, pTMap->m_Color.b / 255.0f, pTMap->m_Color.a / 255.0f);
-						if(IsGameLayer && EntityOverlayVal)
+						ColorRGBA Color = LayerType == LAYER_GAME ? ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f) : ColorRGBA(pTMap->m_Color.r / 255.0f, pTMap->m_Color.g / 255.0f, pTMap->m_Color.b / 255.0f, pTMap->m_Color.a / 255.0f);
+						if(LayerType == LAYER_GAME && EntityOverlayVal)
 							Color.a *= EntityOverlayVal / 100.0f;
-						else if(!IsGameLayer && EntityOverlayVal && m_Type != TYPE_BACKGROUND_FORCE)
+						else if(LayerType != LAYER_GAME && EntityOverlayVal && m_Type != TYPE_BACKGROUND_FORCE)
 							Color.a *= (100 - EntityOverlayVal) / 100.0f;
 
-						if(!IsGameLayer)
+						if(LayerType != LAYER_GAME)
 						{
 							ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 							EnvelopeEval(pTMap->m_ColorEnvOffset, pTMap->m_ColorEnv, ColorEnv, 4, this);
@@ -1575,7 +1504,7 @@ void CMapLayers::OnRender()
 							Graphics()->BlendNormal();
 
 							// draw kill tiles outside the entity clipping rectangle
-							if(IsGameLayer)
+							if(LayerType == LAYER_GAME)
 							{
 								// slow blinking to hint that it's not a part of the map
 								double Seconds = time_get() / (double)time_freq();
@@ -1591,7 +1520,7 @@ void CMapLayers::OnRender()
 						{
 							Graphics()->BlendNormal();
 							// draw kill tiles outside the entity clipping rectangle
-							if(IsGameLayer)
+							if(LayerType == LAYER_GAME)
 							{
 								// slow blinking to hint that it's not a part of the map
 								double Seconds = time_get() / (double)time_freq();
@@ -1644,7 +1573,7 @@ void CMapLayers::OnRender()
 					}
 				}
 			}
-			else if(Render && EntityOverlayVal && IsFrontLayer)
+			else if(Render && EntityOverlayVal && LayerType == LAYER_FRONT)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
@@ -1669,7 +1598,7 @@ void CMapLayers::OnRender()
 					}
 				}
 			}
-			else if(Render && EntityOverlayVal && IsSwitchLayer)
+			else if(Render && EntityOverlayVal && LayerType == LAYER_SWITCH)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH));
@@ -1702,7 +1631,7 @@ void CMapLayers::OnRender()
 					}
 				}
 			}
-			else if(Render && EntityOverlayVal && IsTeleLayer)
+			else if(Render && EntityOverlayVal && LayerType == LAYER_TELE)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
@@ -1733,7 +1662,7 @@ void CMapLayers::OnRender()
 					}
 				}
 			}
-			else if(Render && EntityOverlayVal && IsSpeedupLayer)
+			else if(Render && EntityOverlayVal && LayerType == LAYER_SPEEDUP)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				CSpeedupTile *pSpeedupTiles = (CSpeedupTile *)m_pLayers->Map()->GetData(pTMap->m_Speedup);
@@ -1767,7 +1696,7 @@ void CMapLayers::OnRender()
 					}
 				}
 			}
-			else if(Render && EntityOverlayVal && IsTuneLayer)
+			else if(Render && EntityOverlayVal && LayerType == LAYER_TUNE)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
@@ -1802,4 +1731,21 @@ void CMapLayers::OnRender()
 
 	// reset the screen like it was before
 	Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
+}
+
+int CMapLayers::GetLayerType(const CMapItemLayer *pLayer) const
+{
+	if(pLayer == (CMapItemLayer *)m_pLayers->GameLayer())
+		return LAYER_GAME;
+	else if(pLayer == (CMapItemLayer *)m_pLayers->FrontLayer())
+		return LAYER_FRONT;
+	else if(pLayer == (CMapItemLayer *)m_pLayers->SwitchLayer())
+		return LAYER_SWITCH;
+	else if(pLayer == (CMapItemLayer *)m_pLayers->TeleLayer())
+		return LAYER_TELE;
+	else if(pLayer == (CMapItemLayer *)m_pLayers->SpeedupLayer())
+		return LAYER_SPEEDUP;
+	else if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
+		return LAYER_TUNE;
+	return -1;
 }
