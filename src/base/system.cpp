@@ -4396,7 +4396,7 @@ int open_file(const char *path)
 
 struct SECURE_RANDOM_DATA
 {
-	int initialized;
+	bool initialized = false;
 #if defined(CONF_FAMILY_WINDOWS)
 	HCRYPTPROV provider;
 #else
@@ -4404,34 +4404,34 @@ struct SECURE_RANDOM_DATA
 #endif
 };
 
-static struct SECURE_RANDOM_DATA secure_random_data = {0};
+static struct SECURE_RANDOM_DATA secure_random_data = {};
 
-int secure_random_init()
+bool secure_random_init()
 {
 	if(secure_random_data.initialized)
-		return 0;
+		return true;
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!CryptAcquireContext(&secure_random_data.provider, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
-		return 1;
+		return false;
 #else
 	secure_random_data.urandom = io_open("/dev/urandom", IOFLAG_READ);
 	if(!secure_random_data.urandom)
-		return 1;
+		return false;
 #endif
-	secure_random_data.initialized = 1;
-	return 0;
+	secure_random_data.initialized = true;
+	return true;
 }
 
-int secure_random_uninit()
+bool secure_random_deinit()
 {
 	if(!secure_random_data.initialized)
-		return 0;
+		return true;
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!CryptReleaseContext(secure_random_data.provider, 0))
-		return 1;
+		return false;
 #else
 	if(!io_close(secure_random_data.urandom))
-		return 1;
+		return false;
 #endif
 	secure_random_data.initialized = 0;
 	return true;

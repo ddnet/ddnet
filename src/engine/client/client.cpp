@@ -4698,9 +4698,9 @@ int main(int argc, const char **argv)
 		PerformFinalCleanup();
 	};
 
-	const bool RandInitFailed = secure_random_init() != 0;
+	const bool RandInitFailed = !secure_random_init();
 	if(!RandInitFailed)
-		CleanerFunctions.emplace([]() { secure_random_uninit(); });
+		CleanerFunctions.emplace([]() { secure_random_deinit(); });
 
 	// Register SDL for cleanup before creating the kernel and client,
 	// so SDL is shutdown after kernel and client. Otherwise the client

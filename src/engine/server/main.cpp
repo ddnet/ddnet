@@ -92,7 +92,7 @@ int main(int argc, const char **argv)
 	vpLoggers.push_back(pFutureAssertionLogger);
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
-	if(secure_random_init() != 0)
+	if(!secure_random_init())
 	{
 		log_error("secure", "could not initialize secure RNG");
 		return -1;
@@ -211,7 +211,7 @@ int main(int argc, const char **argv)
 	delete pKernel;
 
 	MysqlUninit();
-	secure_random_uninit();
+	secure_random_deinit();
 
 	return Ret;
 }

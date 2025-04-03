@@ -2769,19 +2769,15 @@ void generate_password(char *buffer, unsigned length, const unsigned short *rand
  * Initializes the secure random module.
  *
  * @ingroup Secure-Random
- *
- * @return `0` on success.
  */
-NO_DISCARD("You must check the return value of this function") int secure_random_init();
+NO_DISCARD("You must check the return value of this function") bool secure_random_init();
 
 /**
  * Uninitializes the secure random module.
  *
  * @ingroup Secure-Random
- *
- * @return `0` on success.
  */
-int secure_random_uninit();
+bool secure_random_deinit();
 
 /**
  * Fills the buffer with the specified amount of random password characters.
