@@ -202,67 +202,67 @@ TEST(Str, Utf8ToLower)
 	EXPECT_TRUE(str_utf8_to_lower(192) == 224); // À -> à
 	EXPECT_TRUE(str_utf8_to_lower(7882) == 7883); // Ị -> ị
 
-	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölü") == 0);
-	EXPECT_TRUE(str_utf8_comp_nocase("ÜlÖ", "ölü") > 0); // ü > ö
-	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölüa") < 0); // NULL < a
-	EXPECT_TRUE(str_utf8_comp_nocase("ölüa", "ÖlÜ") > 0); // a < NULL
+	EXPECT_TRUE(str_utf8_comp_no_case("ÖlÜ", "ölü") == 0);
+	EXPECT_TRUE(str_utf8_comp_no_case("ÜlÖ", "ölü") > 0); // ü > ö
+	EXPECT_TRUE(str_utf8_comp_no_case("ÖlÜ", "ölüa") < 0); // NULL < a
+	EXPECT_TRUE(str_utf8_comp_no_case("ölüa", "ÖlÜ") > 0); // a < NULL
 
 #if(CHAR_MIN < 0)
 	const char a[2] = {CHAR_MIN, 0};
 	const char b[2] = {0, 0};
-	EXPECT_TRUE(str_utf8_comp_nocase(a, b) > 0);
-	EXPECT_TRUE(str_utf8_comp_nocase(b, a) < 0);
+	EXPECT_TRUE(str_utf8_comp_no_case(a, b) > 0);
+	EXPECT_TRUE(str_utf8_comp_no_case(b, a) < 0);
 #endif
 
-	EXPECT_TRUE(str_utf8_comp_nocase_num("ÖlÜ", "ölüa", 5) == 0);
-	EXPECT_TRUE(str_utf8_comp_nocase_num("ÖlÜ", "ölüa", 6) != 0);
-	EXPECT_TRUE(str_utf8_comp_nocase_num("a", "z", 0) == 0);
-	EXPECT_TRUE(str_utf8_comp_nocase_num("a", "z", 1) != 0);
+	EXPECT_TRUE(str_utf8_comp_no_case_num("ÖlÜ", "ölüa", 5) == 0);
+	EXPECT_TRUE(str_utf8_comp_no_case_num("ÖlÜ", "ölüa", 6) != 0);
+	EXPECT_TRUE(str_utf8_comp_no_case_num("a", "z", 0) == 0);
+	EXPECT_TRUE(str_utf8_comp_no_case_num("a", "z", 1) != 0);
 }
 
-TEST(Str, Utf8FindNocase)
+TEST(Str, Utf8Findno_case)
 {
 	const char *pStr = "abc";
 	const char *pEnd;
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "a", &pEnd), pStr);
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "a", &pEnd), pStr);
 	EXPECT_EQ(pEnd, pStr + str_length("a"));
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "b", &pEnd), pStr + str_length("a"));
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "b", &pEnd), pStr + str_length("a"));
 	EXPECT_EQ(pEnd, pStr + str_length("ab"));
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "c", &pEnd), pStr + str_length("ab"));
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "c", &pEnd), pStr + str_length("ab"));
 	EXPECT_EQ(pEnd, pStr + str_length("abc"));
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "d", &pEnd), nullptr);
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "d", &pEnd), nullptr);
 	EXPECT_EQ(pEnd, nullptr);
 
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "A", &pEnd), pStr);
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "A", &pEnd), pStr);
 	EXPECT_EQ(pEnd, pStr + str_length("a"));
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "B", &pEnd), pStr + str_length("a"));
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "B", &pEnd), pStr + str_length("a"));
 	EXPECT_EQ(pEnd, pStr + str_length("ab"));
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "C", &pEnd), pStr + str_length("ab"));
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "C", &pEnd), pStr + str_length("ab"));
 	EXPECT_EQ(pEnd, pStr + str_length("abc"));
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "D", &pEnd), nullptr);
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "D", &pEnd), nullptr);
 	EXPECT_EQ(pEnd, nullptr);
 
 	pStr = "ÄÖÜ";
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "ä", &pEnd), pStr);
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "ä", &pEnd), pStr);
 	EXPECT_EQ(pEnd, pStr + str_length("Ä"));
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "ö", &pEnd), pStr + str_length("Ä"));
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "ö", &pEnd), pStr + str_length("Ä"));
 	EXPECT_EQ(pEnd, pStr + str_length("ÄÖ"));
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "ü", &pEnd), pStr + str_length("ÄÖ"));
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "ü", &pEnd), pStr + str_length("ÄÖ"));
 	EXPECT_EQ(pEnd, pStr + str_length("ÄÖÜ"));
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "z", &pEnd), nullptr);
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "z", &pEnd), nullptr);
 	EXPECT_EQ(pEnd, nullptr);
 
 	// Both 'I' and 'İ' map to 'i'
 	pStr = "antimatter";
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "I", &pEnd), pStr + str_length("ant"));
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "I", &pEnd), pStr + str_length("ant"));
 	EXPECT_EQ(pEnd, pStr + str_length("anti"));
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "İ", &pEnd), pStr + str_length("ant"));
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "İ", &pEnd), pStr + str_length("ant"));
 	EXPECT_EQ(pEnd, pStr + str_length("anti"));
 	pStr = "ANTIMATTER";
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "i", &pEnd), pStr + str_length("ANT"));
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "i", &pEnd), pStr + str_length("ANT"));
 	EXPECT_EQ(pEnd, pStr + str_length("ANTI"));
 	pStr = "ANTİMATTER";
-	EXPECT_EQ(str_utf8_find_nocase(pStr, "i", &pEnd), pStr + str_length("ANT"));
+	EXPECT_EQ(str_utf8_find_no_case(pStr, "i", &pEnd), pStr + str_length("ANT"));
 	EXPECT_EQ(pEnd, pStr + str_length("ANTİ"));
 }
 
@@ -312,23 +312,23 @@ TEST(Str, Startswith)
 	EXPECT_EQ(str_starts_with(ABCDEFG, ABC) - ABCDEFG, str_length(ABC));
 }
 
-TEST(Str, StartswithNocase)
+TEST(Str, Startswithno_case)
 {
-	EXPECT_TRUE(str_starts_with_nocase("Abcdef", "abc"));
-	EXPECT_FALSE(str_starts_with_nocase("aBc", "abcdef"));
+	EXPECT_TRUE(str_starts_with_no_case("Abcdef", "abc"));
+	EXPECT_FALSE(str_starts_with_no_case("aBc", "abcdef"));
 
-	EXPECT_TRUE(str_starts_with_nocase("xYz", ""));
-	EXPECT_FALSE(str_starts_with_nocase("", "xYz"));
+	EXPECT_TRUE(str_starts_with_no_case("xYz", ""));
+	EXPECT_FALSE(str_starts_with_no_case("", "xYz"));
 
-	EXPECT_FALSE(str_starts_with_nocase("house", "home"));
-	EXPECT_FALSE(str_starts_with_nocase("Blackboard", "board"));
+	EXPECT_FALSE(str_starts_with_no_case("house", "home"));
+	EXPECT_FALSE(str_starts_with_no_case("Blackboard", "board"));
 
-	EXPECT_TRUE(str_starts_with_nocase("поплавать", "по"));
-	EXPECT_FALSE(str_starts_with_nocase("плавать", "по"));
+	EXPECT_TRUE(str_starts_with_no_case("поплавать", "по"));
+	EXPECT_FALSE(str_starts_with_no_case("плавать", "по"));
 
 	static const char ABCDEFG[] = "aBcdefg";
 	static const char ABC[] = "abc";
-	EXPECT_EQ(str_starts_with_nocase(ABCDEFG, ABC) - ABCDEFG, str_length(ABC));
+	EXPECT_EQ(str_starts_with_no_case(ABCDEFG, ABC) - ABCDEFG, str_length(ABC));
 }
 
 TEST(Str, Endswith)
@@ -372,23 +372,23 @@ TEST(StrFormat, Positional)
 	EXPECT_STREQ(aBuf, "str str 1 str 1");
 }
 
-TEST(Str, EndswithNocase)
+TEST(Str, Endswithno_case)
 {
-	EXPECT_TRUE(str_ends_with_nocase("abcdef", "deF"));
-	EXPECT_FALSE(str_ends_with_nocase("def", "abcdef"));
+	EXPECT_TRUE(str_ends_with_no_case("abcdef", "deF"));
+	EXPECT_FALSE(str_ends_with_no_case("def", "abcdef"));
 
-	EXPECT_TRUE(str_ends_with_nocase("xyz", ""));
-	EXPECT_FALSE(str_ends_with_nocase("", "xyz"));
+	EXPECT_TRUE(str_ends_with_no_case("xyz", ""));
+	EXPECT_FALSE(str_ends_with_no_case("", "xyz"));
 
-	EXPECT_FALSE(str_ends_with_nocase("rhyme", "minE"));
-	EXPECT_FALSE(str_ends_with_nocase("blackboard", "black"));
+	EXPECT_FALSE(str_ends_with_no_case("rhyme", "minE"));
+	EXPECT_FALSE(str_ends_with_no_case("blackboard", "black"));
 
-	EXPECT_TRUE(str_ends_with_nocase("люди", "юди"));
-	EXPECT_FALSE(str_ends_with_nocase("люди", "любовь"));
+	EXPECT_TRUE(str_ends_with_no_case("люди", "юди"));
+	EXPECT_FALSE(str_ends_with_no_case("люди", "любовь"));
 
 	static const char ABCDEFG[] = "abcdefG";
 	static const char DEFG[] = "defg";
-	EXPECT_EQ(str_ends_with_nocase(ABCDEFG, DEFG) - ABCDEFG,
+	EXPECT_EQ(str_ends_with_no_case(ABCDEFG, DEFG) - ABCDEFG,
 		str_length(ABCDEFG) - str_length(DEFG));
 }
 

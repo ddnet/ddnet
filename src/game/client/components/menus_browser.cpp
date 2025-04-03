@@ -72,30 +72,30 @@ static ColorRGBA GetGametypeTextColor(const char *pGametype)
 	ColorHSLA HslaColor;
 	if(str_comp(pGametype, "DM") == 0 || str_comp(pGametype, "TDM") == 0 || str_comp(pGametype, "CTF") == 0 || str_comp(pGametype, "LMS") == 0 || str_comp(pGametype, "LTS") == 0)
 		HslaColor = ColorHSLA(0.33f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "catch"))
+	else if(str_find_no_case(pGametype, "catch"))
 		HslaColor = ColorHSLA(0.17f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "dm") || str_find_nocase(pGametype, "tdm") || str_find_nocase(pGametype, "ctf") || str_find_nocase(pGametype, "lms") || str_find_nocase(pGametype, "lts"))
+	else if(str_find_no_case(pGametype, "dm") || str_find_no_case(pGametype, "tdm") || str_find_no_case(pGametype, "ctf") || str_find_no_case(pGametype, "lms") || str_find_no_case(pGametype, "lts"))
 	{
 		if(pGametype[0] == 'i' || pGametype[0] == 'g')
 			HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
 		else
 			HslaColor = ColorHSLA(0.40f, 1.0f, 0.75f);
 	}
-	else if(str_find_nocase(pGametype, "f-ddrace") || str_find_nocase(pGametype, "freeze"))
+	else if(str_find_no_case(pGametype, "f-ddrace") || str_find_no_case(pGametype, "freeze"))
 		HslaColor = ColorHSLA(0.0f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "fng"))
+	else if(str_find_no_case(pGametype, "fng"))
 		HslaColor = ColorHSLA(0.83f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "gores"))
+	else if(str_find_no_case(pGametype, "gores"))
 		HslaColor = ColorHSLA(0.525f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "BW"))
+	else if(str_find_no_case(pGametype, "BW"))
 		HslaColor = ColorHSLA(0.05f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "ddracenet") || str_find_nocase(pGametype, "ddnet") || str_find_nocase(pGametype, "0xf"))
+	else if(str_find_no_case(pGametype, "ddracenet") || str_find_no_case(pGametype, "ddnet") || str_find_no_case(pGametype, "0xf"))
 		HslaColor = ColorHSLA(0.58f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "ddrace") || str_find_nocase(pGametype, "mkrace"))
+	else if(str_find_no_case(pGametype, "ddrace") || str_find_no_case(pGametype, "mkrace"))
 		HslaColor = ColorHSLA(0.75f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "race") || str_find_nocase(pGametype, "fastcap"))
+	else if(str_find_no_case(pGametype, "race") || str_find_no_case(pGametype, "fastcap"))
 		HslaColor = ColorHSLA(0.46f, 1.0f, 0.75f);
-	else if(str_find_nocase(pGametype, "s-ddr"))
+	else if(str_find_no_case(pGametype, "s-ddr"))
 		HslaColor = ColorHSLA(1.0f, 1.0f, 0.7f);
 	else
 		HslaColor = ColorHSLA(1.0f, 1.0f, 1.0f);
@@ -1830,7 +1830,7 @@ bool CMenus::PrintHighlighted(const char *pName, F &&PrintFn)
 		else
 		{
 			const char *pFilteredStrEnd;
-			pFilteredStr = str_utf8_find_nocase(pName, aFilterStrTrimmed, &pFilteredStrEnd);
+			pFilteredStr = str_utf8_find_no_case(pName, aFilterStrTrimmed, &pFilteredStrEnd);
 			if(pFilteredStr != nullptr && pFilteredStrEnd != nullptr)
 				FilterLen = pFilteredStrEnd - pFilteredStr;
 		}

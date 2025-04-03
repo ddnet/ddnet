@@ -37,7 +37,7 @@ bool CTuningParams::Get(int Index, float *pValue) const
 bool CTuningParams::Set(const char *pName, float Value)
 {
 	for(int i = 0; i < Num(); i++)
-		if(str_comp_nocase(pName, Name(i)) == 0)
+		if(str_comp_no_case(pName, Name(i)) == 0)
 			return Set(i, Value);
 	return false;
 }
@@ -45,7 +45,7 @@ bool CTuningParams::Set(const char *pName, float Value)
 bool CTuningParams::Get(const char *pName, float *pValue) const
 {
 	for(int i = 0; i < Num(); i++)
-		if(str_comp_nocase(pName, Name(i)) == 0)
+		if(str_comp_no_case(pName, Name(i)) == 0)
 			return Get(i, pValue);
 
 	return false;

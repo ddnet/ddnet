@@ -2952,7 +2952,7 @@ bool str_valid_filename(const char *str)
 		"LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "LPT¹", "LPT²", "LPT³"};
 	for(const char *reserved_name : RESERVED_NAMES)
 	{
-		const char *prefix = str_starts_with_nocase(str, reserved_name);
+		const char *prefix = str_starts_with_no_case(str, reserved_name);
 		if(prefix != nullptr && (prefix[0] == '\0' || prefix[0] == '.'))
 			return false; // Reserved name not allowed when it makes up the entire filename or when followed by period
 	}
@@ -3019,7 +3019,7 @@ const char *str_skip_whitespaces_const(const char *str)
 	return str;
 }
 
-int str_comp_nocase(const char *a, const char *b)
+int str_comp_no_case(const char *a, const char *b)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	return _stricmp(a, b);
@@ -3028,7 +3028,7 @@ int str_comp_nocase(const char *a, const char *b)
 #endif
 }
 
-int str_comp_nocase_num(const char *a, const char *b, int num)
+int str_comp_no_case_num(const char *a, const char *b, int num)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	return _strnicmp(a, b, num);
@@ -3079,10 +3079,10 @@ int str_comp_filenames(const char *a, const char *b)
 	return *a - *b;
 }
 
-const char *str_starts_with_nocase(const char *str, const char *prefix)
+const char *str_starts_with_no_case(const char *str, const char *prefix)
 {
 	int prefixl = str_length(prefix);
-	if(str_comp_nocase_num(str, prefix, prefixl) == 0)
+	if(str_comp_no_case_num(str, prefix, prefixl) == 0)
 		return str + prefixl;
 	else
 		return nullptr;
@@ -3097,7 +3097,7 @@ const char *str_starts_with(const char *str, const char *prefix)
 		return nullptr;
 }
 
-const char *str_ends_with_nocase(const char *str, const char *suffix)
+const char *str_ends_with_no_case(const char *str, const char *suffix)
 {
 	int strl = str_length(str);
 	int suffixl = str_length(suffix);
@@ -3105,7 +3105,7 @@ const char *str_ends_with_nocase(const char *str, const char *suffix)
 	if(strl < suffixl)
 		return nullptr;
 	strsuffix = str + strl - suffixl;
-	if(str_comp_nocase(strsuffix, suffix) == 0)
+	if(str_comp_no_case(strsuffix, suffix) == 0)
 		return strsuffix;
 	else
 		return nullptr;
@@ -3211,7 +3211,7 @@ int str_utf8_dist_buffer(const char *a_utf8, const char *b_utf8, int *buf, int b
 	return str_utf32_dist_buffer(a, a_len, b, b_len, buf, buf_len - b_len - a_len);
 }
 
-const char *str_find_nocase(const char *haystack, const char *needle)
+const char *str_find_no_case(const char *haystack, const char *needle)
 {
 	while(*haystack)
 	{
@@ -3535,7 +3535,7 @@ void str_timestamp_format(char *buffer, int buffer_size, const char *format)
 
 void str_timestamp(char *buffer, int buffer_size)
 {
-	str_timestamp_format(buffer, buffer_size, FORMAT_NOSPACE);
+	str_timestamp_format(buffer, buffer_size, FORMAT_NO_SPACE);
 }
 
 bool timestamp_from_str(const char *string, const char *format, time_t *timestamp)
@@ -3716,7 +3716,7 @@ bool str_to_float(const char *str, float *out)
 	return true;
 }
 
-int str_utf8_comp_nocase(const char *a, const char *b)
+int str_utf8_comp_no_case(const char *a, const char *b)
 {
 	int code_a;
 	int code_b;
@@ -3732,7 +3732,7 @@ int str_utf8_comp_nocase(const char *a, const char *b)
 	return (unsigned char)*a - (unsigned char)*b;
 }
 
-int str_utf8_comp_nocase_num(const char *a, const char *b, int num)
+int str_utf8_comp_no_case_num(const char *a, const char *b, int num)
 {
 	int code_a;
 	int code_b;
@@ -3756,7 +3756,7 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num)
 	return (unsigned char)*a - (unsigned char)*b;
 }
 
-const char *str_utf8_find_nocase(const char *haystack, const char *needle, const char **end)
+const char *str_utf8_find_no_case(const char *haystack, const char *needle, const char **end)
 {
 	while(*haystack)
 	{
@@ -4088,7 +4088,7 @@ bool str_in_list(const char *list, const char *delim, const char *needle)
 
 	while((tok = str_token_get(tok, delim, &len)))
 	{
-		if(needlelen == len || str_comp_num(tok, needle, len) == 0);
+		if(needlelen == len || str_comp_num(tok, needle, len) == 0)
 			return true;
 		tok = tok + len;
 	}
@@ -4238,7 +4238,7 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, c
 {
 	dbg_assert((arguments == nullptr) == (num_arguments == 0), "Invalid number of arguments");
 #if defined(CONF_FAMILY_WINDOWS)
-	dbg_assert(str_ends_with_nocase(file, ".bat") == nullptr && str_ends_with_nocase(file, ".cmd") == nullptr, "Running batch files not allowed");
+	dbg_assert(str_ends_with_no_case(file, ".bat") == nullptr && str_ends_with_no_case(file, ".cmd") == nullptr, "Running batch files not allowed");
 	dbg_assert(str_ends_with(file, ".exe") != nullptr || num_arguments == 0, "Arguments only allowed with .exe files");
 
 	const std::wstring wide_file = windows_utf8_to_wide(file);

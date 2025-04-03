@@ -422,9 +422,9 @@ void CClient::SetState(EClientState State)
 
 	if(State == IClient::STATE_OFFLINE && m_ReconnectTime == 0)
 	{
-		if(g_Config.m_ClReconnectFull > 0 && (str_find_nocase(ErrorString(), "full") || str_find_nocase(ErrorString(), "reserved")))
+		if(g_Config.m_ClReconnectFull > 0 && (str_find_no_case(ErrorString(), "full") || str_find_no_case(ErrorString(), "reserved")))
 			m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectFull;
-		else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_nocase(ErrorString(), "Timeout") || str_find_nocase(ErrorString(), "Too weak connection")))
+		else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_no_case(ErrorString(), "Timeout") || str_find_no_case(ErrorString(), "Too weak connection")))
 			m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectTimeout;
 	}
 

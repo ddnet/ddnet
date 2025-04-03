@@ -42,7 +42,7 @@ public:
 
 bool matchesPart(const char *a, const char *b)
 {
-	return str_utf8_find_nocase(a, b) != nullptr;
+	return str_utf8_find_no_case(a, b) != nullptr;
 }
 
 bool matchesExactly(const char *a, const char *b)
@@ -436,11 +436,11 @@ void CServerBrowser::Filter()
 			Filtered = true;
 		else if(g_Config.m_BrFilterPw && Info.m_Flags & SERVER_FLAG_PASSWORD)
 			Filtered = true;
-		else if(g_Config.m_BrFilterServerAddress[0] && !str_find_nocase(Info.m_aAddress, g_Config.m_BrFilterServerAddress))
+		else if(g_Config.m_BrFilterServerAddress[0] && !str_find_no_case(Info.m_aAddress, g_Config.m_BrFilterServerAddress))
 			Filtered = true;
-		else if(g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && str_comp_nocase(Info.m_aGameType, g_Config.m_BrFilterGametype))
+		else if(g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && str_comp_no_case(Info.m_aGameType, g_Config.m_BrFilterGametype))
 			Filtered = true;
-		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_utf8_find_nocase(Info.m_aGameType, g_Config.m_BrFilterGametype))
+		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_utf8_find_no_case(Info.m_aGameType, g_Config.m_BrFilterGametype))
 			Filtered = true;
 		else if(g_Config.m_BrFilterUnfinishedMap && Info.m_HasRank == CServerInfo::RANK_RANKED)
 			Filtered = true;
@@ -736,7 +736,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 
 	if(pEntry->m_Info.m_ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED)
 	{
-		if(str_find_nocase(pEntry->m_Info.m_aGameType, "race") || str_find_nocase(pEntry->m_Info.m_aGameType, "fastcap"))
+		if(str_find_no_case(pEntry->m_Info.m_aGameType, "race") || str_find_no_case(pEntry->m_Info.m_aGameType, "fastcap"))
 		{
 			pEntry->m_Info.m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT;
 		}
@@ -785,7 +785,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 					return Score0 > Score1;
 			}
 
-			return str_comp_nocase(p0.m_aName, p1.m_aName) < 0;
+			return str_comp_no_case(p0.m_aName, p1.m_aName) < 0;
 		}
 	};
 

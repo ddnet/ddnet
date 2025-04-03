@@ -405,7 +405,7 @@ int CInput::FindKeyByName(const char *pKeyName) const
 	// search for key
 	for(int Key = KEY_FIRST; Key < KEY_LAST; Key++)
 	{
-		if(str_comp_nocase(pKeyName, KeyName(Key)) == 0)
+		if(str_comp_no_case(pKeyName, KeyName(Key)) == 0)
 			return Key;
 	}
 

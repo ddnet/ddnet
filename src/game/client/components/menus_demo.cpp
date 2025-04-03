@@ -1004,7 +1004,7 @@ void CMenus::RefreshFilteredDemos()
 	m_vpFilteredDemos.clear();
 	for(auto &Demo : m_vDemos)
 	{
-		if(str_find_nocase(Demo.m_aFilename, m_DemoSearchInput.GetString()))
+		if(str_find_no_case(Demo.m_aFilename, m_DemoSearchInput.GetString()))
 		{
 			m_vpFilteredDemos.push_back(&Demo);
 		}

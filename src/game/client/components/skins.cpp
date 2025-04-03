@@ -32,7 +32,7 @@ bool CSkins::CSkinListEntry::operator<(const CSkins::CSkinListEntry &Other) cons
 	{
 		return false;
 	}
-	return str_comp_nocase(m_pSkin->GetName(), Other.m_pSkin->GetName()) < 0;
+	return str_comp_no_case(m_pSkin->GetName(), Other.m_pSkin->GetName()) < 0;
 }
 
 CSkins::CSkins() :
@@ -403,7 +403,7 @@ const std::vector<CSkins::CSkinListEntry> &CSkins::SkinList()
 	m_vSkinList.clear();
 	for(const auto &[_, pSkin] : m_Skins)
 	{
-		if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pSkin->GetName(), g_Config.m_ClSkinFilterString))
+		if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_no_case(pSkin->GetName(), g_Config.m_ClSkinFilterString))
 		{
 			continue;
 		}

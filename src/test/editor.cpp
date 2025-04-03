@@ -53,11 +53,11 @@ bool IsValidEditorTooltip(const char *pTooltip, char *pErrorMsg, int ErrorMsgSiz
 	const char *pParenthesis = str_find(pTooltip, "(");
 	if(pParenthesis)
 	{
-		const char *pHotkey = str_find_nocase(pParenthesis, "ctrl");
+		const char *pHotkey = str_find_no_case(pParenthesis, "ctrl");
 		if(!pHotkey)
-			pHotkey = str_find_nocase(pParenthesis, "shift");
+			pHotkey = str_find_no_case(pParenthesis, "shift");
 		if(!pHotkey)
-			pHotkey = str_find_nocase(pParenthesis, "home");
+			pHotkey = str_find_no_case(pParenthesis, "home");
 
 		if(pHotkey)
 		{

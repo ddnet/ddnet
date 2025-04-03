@@ -1408,13 +1408,13 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 		// `if`. Game type sniffing should be avoided and ideally not
 		// extended. Mods should set the relevant game flags instead.
 		const char *pGameType = pFallbackServerInfo->m_aGameType;
-		Race = str_find_nocase(pGameType, "race") || str_find_nocase(pGameType, "fastcap");
-		FastCap = str_find_nocase(pGameType, "fastcap");
-		FNG = str_find_nocase(pGameType, "fng");
-		DDRace = str_find_nocase(pGameType, "ddrace") || str_find_nocase(pGameType, "mkrace");
-		DDNet = str_find_nocase(pGameType, "ddracenet") || str_find_nocase(pGameType, "ddnet");
-		BlockWorlds = str_starts_with(pGameType, "bw  ") || str_comp_nocase(pGameType, "bw") == 0;
-		City = str_find_nocase(pGameType, "city");
+		Race = str_find_no_case(pGameType, "race") || str_find_no_case(pGameType, "fastcap");
+		FastCap = str_find_no_case(pGameType, "fastcap");
+		FNG = str_find_no_case(pGameType, "fng");
+		DDRace = str_find_no_case(pGameType, "ddrace") || str_find_no_case(pGameType, "mkrace");
+		DDNet = str_find_no_case(pGameType, "ddracenet") || str_find_no_case(pGameType, "ddnet");
+		BlockWorlds = str_starts_with(pGameType, "bw  ") || str_comp_no_case(pGameType, "bw") == 0;
+		City = str_find_no_case(pGameType, "city");
 		Vanilla = str_comp(pGameType, "DM") == 0 || str_comp(pGameType, "TDM") == 0 || str_comp(pGameType, "CTF") == 0;
 		Plus = str_find(pGameType, "+");
 		FDDrace = false;
@@ -1994,7 +1994,7 @@ void CGameClient::OnNewSnapshot()
 				return static_cast<bool>(p1);
 			if(!p1)
 				return false;
-			return str_comp_nocase(m_aClients[p1->m_ClientId].m_aName, m_aClients[p2->m_ClientId].m_aName) < 0;
+			return str_comp_no_case(m_aClients[p1->m_ClientId].m_aName, m_aClients[p2->m_ClientId].m_aName) < 0;
 		});
 
 	bool TimeScore = m_GameInfo.m_TimeScore;

@@ -284,7 +284,7 @@ size_t CHttpRequest::OnHeader(char *pHeader, size_t HeaderSize)
 	static const char LAST_MODIFIED[] = "Last-Modified: ";
 
 	// Trailing newline and null termination evens out.
-	if(HeaderSize - 1 >= sizeof(DATE) - 1 && str_starts_with_nocase(pHeader, DATE))
+	if(HeaderSize - 1 >= sizeof(DATE) - 1 && str_starts_with_no_case(pHeader, DATE))
 	{
 		char aValue[128];
 		str_truncate(aValue, sizeof(aValue), pHeader + (sizeof(DATE) - 1), HeaderSize - (sizeof(DATE) - 1) - 1);
@@ -294,7 +294,7 @@ size_t CHttpRequest::OnHeader(char *pHeader, size_t HeaderSize)
 			m_ResultDate = Value;
 		}
 	}
-	if(HeaderSize - 1 >= sizeof(LAST_MODIFIED) - 1 && str_starts_with_nocase(pHeader, LAST_MODIFIED))
+	if(HeaderSize - 1 >= sizeof(LAST_MODIFIED) - 1 && str_starts_with_no_case(pHeader, LAST_MODIFIED))
 	{
 		char aValue[128];
 		str_truncate(aValue, sizeof(aValue), pHeader + (sizeof(LAST_MODIFIED) - 1), HeaderSize - (sizeof(LAST_MODIFIED) - 1) - 1);

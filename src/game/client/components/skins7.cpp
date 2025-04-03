@@ -46,12 +46,12 @@ void CSkins7::CSkinPart::ApplyTo(CTeeRenderInfo::CSixup &SixupRenderInfo) const
 
 bool CSkins7::CSkinPart::operator<(const CSkinPart &Other) const
 {
-	return str_comp_nocase(m_aName, Other.m_aName) < 0;
+	return str_comp_no_case(m_aName, Other.m_aName) < 0;
 }
 
 bool CSkins7::CSkin::operator<(const CSkin &Other) const
 {
-	return str_comp_nocase(m_aName, Other.m_aName) < 0;
+	return str_comp_no_case(m_aName, Other.m_aName) < 0;
 }
 
 bool CSkins7::CSkin::operator==(const CSkin &Other) const

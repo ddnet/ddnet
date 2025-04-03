@@ -295,7 +295,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				if(PlayerInfo)
 				{
 					PlayerName = m_pClient->m_aClients[PlayerInfo->m_ClientId].m_aName;
-					FoundInput = str_utf8_find_nocase(PlayerName, m_aCompletionBuffer);
+					FoundInput = str_utf8_find_no_case(PlayerName, m_aCompletionBuffer);
 					if(FoundInput != nullptr)
 					{
 						m_aPlayerCompletionList[m_PlayerCompletionListLength].ClientId = PlayerInfo->m_ClientId;
@@ -344,7 +344,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 
 				auto &Command = m_vCommands[Index];
 
-				if(str_starts_with_nocase(Command.m_aName, pCommandStart))
+				if(str_starts_with_no_case(Command.m_aName, pCommandStart))
 				{
 					pCompletionCommand = &Command;
 					m_CompletionChosen = Index + SearchType * NumCommands;
@@ -561,7 +561,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 {
-	const char *pHit = str_utf8_find_nocase(pLine, pName);
+	const char *pHit = str_utf8_find_no_case(pLine, pName);
 
 	while(pHit)
 	{
@@ -570,7 +570,7 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 		if(Length > 0 && (pLine == pHit || pHit[-1] == ' ') && (pHit[Length] == 0 || pHit[Length] == ' ' || pHit[Length] == '.' || pHit[Length] == '!' || pHit[Length] == ',' || pHit[Length] == '?' || pHit[Length] == ':'))
 			return true;
 
-		pHit = str_utf8_find_nocase(pHit + 1, pName);
+		pHit = str_utf8_find_no_case(pHit + 1, pName);
 	}
 
 	return false;
@@ -1211,7 +1211,7 @@ void CChat::OnRender()
 		{
 			for(const auto &Command : m_vCommands)
 			{
-				if(str_starts_with_nocase(Command.m_aName, m_Input.GetString() + 1))
+				if(str_starts_with_no_case(Command.m_aName, m_Input.GetString() + 1))
 				{
 					Cursor.m_X = Cursor.m_X + TextRender()->TextWidth(Cursor.m_FontSize, m_Input.GetString(), -1, Cursor.m_LineWidth);
 					Cursor.m_Y = m_Input.GetCaretPosition().y;

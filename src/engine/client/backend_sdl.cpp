@@ -691,21 +691,21 @@ EBackendType CGraphicsBackend_SDL_GL::DetectBackend()
 	EBackendType RetBackendType = BACKEND_TYPE_OPENGL;
 #if defined(CONF_BACKEND_VULKAN)
 	const char *pEnvDriver = SDL_getenv("DDNET_DRIVER");
-	if(pEnvDriver && str_comp_nocase(pEnvDriver, "GLES") == 0)
+	if(pEnvDriver && str_comp_no_case(pEnvDriver, "GLES") == 0)
 		RetBackendType = BACKEND_TYPE_OPENGL_ES;
-	else if(pEnvDriver && str_comp_nocase(pEnvDriver, "Vulkan") == 0)
+	else if(pEnvDriver && str_comp_no_case(pEnvDriver, "Vulkan") == 0)
 		RetBackendType = BACKEND_TYPE_VULKAN;
-	else if(pEnvDriver && str_comp_nocase(pEnvDriver, "OpenGL") == 0)
+	else if(pEnvDriver && str_comp_no_case(pEnvDriver, "OpenGL") == 0)
 		RetBackendType = BACKEND_TYPE_OPENGL;
 	else if(pEnvDriver == nullptr)
 	{
 		// load the config backend
 		const char *pConfBackend = g_Config.m_GfxBackend;
-		if(str_comp_nocase(pConfBackend, "GLES") == 0)
+		if(str_comp_no_case(pConfBackend, "GLES") == 0)
 			RetBackendType = BACKEND_TYPE_OPENGL_ES;
-		else if(str_comp_nocase(pConfBackend, "Vulkan") == 0)
+		else if(str_comp_no_case(pConfBackend, "Vulkan") == 0)
 			RetBackendType = BACKEND_TYPE_VULKAN;
-		else if(str_comp_nocase(pConfBackend, "OpenGL") == 0)
+		else if(str_comp_no_case(pConfBackend, "OpenGL") == 0)
 			RetBackendType = BACKEND_TYPE_OPENGL;
 	}
 #else

@@ -55,10 +55,10 @@ static SBackEndDriverBlockList gs_aBlockList[] = {
 
 const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVersionStr, int &BlocklistMajor, int &BlocklistMinor, int &BlocklistPatch, bool &RequiresWarning)
 {
-	if(str_find_nocase(pVendorStr, "Intel") == nullptr)
+	if(str_find_no_case(pVendorStr, "Intel") == nullptr)
 		return nullptr;
 
-	const char *pVersionStrStart = str_find_nocase(pVersionStr, "Build ");
+	const char *pVersionStrStart = str_find_no_case(pVersionStr, "Build ");
 	if(pVersionStrStart == nullptr)
 		return nullptr;
 
@@ -84,7 +84,7 @@ const char *ParseBlocklistDriverVersions(const char *pVendorStr, const char *pVe
 			bool DriverBlocked = false;
 			if(BlockListItem.m_BlockListType == BACKEND_DRIVER_BLOCKLIST_TYPE_VENDOR)
 			{
-				if(str_find_nocase(pVendorStr, BlockListItem.m_pVendorName) != nullptr)
+				if(str_find_no_case(pVendorStr, BlockListItem.m_pVendorName) != nullptr)
 				{
 					DriverBlocked = true;
 				}

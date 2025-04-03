@@ -1566,7 +1566,7 @@ const char *str_skip_whitespaces_const(const char *str);
  * @remark Only guaranteed to work with a-z/A-Z.
  * @remark The strings are treated as null terminated strings.
  */
-int str_comp_nocase(const char *a, const char *b);
+int str_comp_no_case(const char *a, const char *b);
 
 /**
  * Compares up to num characters of two strings case insensitively.
@@ -1582,10 +1582,10 @@ int str_comp_nocase(const char *a, const char *b);
  * @return `> 0` - String a is greater than string b
  *
  * @remark Only guaranteed to work with a-z/A-Z.
- * @remark Use str_utf8_comp_nocase_num for unicode support.
+ * @remark Use str_utf8_comp_no_case_num for unicode support.
  * @remark The strings are treated as null terminated strings.
  */
-int str_comp_nocase_num(const char *a, const char *b, int num);
+int str_comp_no_case_num(const char *a, const char *b, int num);
 
 /**
  * Compares two strings case sensitive.
@@ -1649,7 +1649,7 @@ int str_comp_filenames(const char *a, const char *b);
  *
  * @remark The strings are treated as null terminated strings.
 */
-const char *str_starts_with_nocase(const char *str, const char *prefix);
+const char *str_starts_with_no_case(const char *str, const char *prefix);
 
 /**
  * Checks case sensitive whether the string begins with a certain prefix.
@@ -1677,7 +1677,7 @@ const char *str_starts_with(const char *str, const char *prefix);
  * @return A pointer to the beginning of the suffix in the string str, or
  * @return 0 if the string suffix isn't a suffix of the string str.
 */
-const char *str_ends_with_nocase(const char *str, const char *suffix);
+const char *str_ends_with_no_case(const char *str, const char *suffix);
 
 /**
  * Checks case sensitive whether the string ends with a certain suffix.
@@ -1749,10 +1749,10 @@ int str_utf32_dist_buffer(const int *a, int a_len, const int *b, int b_len, int 
  * @return Returns nullptr if needle could not be found.
  *
  * @remark Only guaranteed to work with a-z/A-Z.
- * @remark (use str_utf8_find_nocase for unicode support).
+ * @remark (use str_utf8_find_no_case for unicode support).
  * @remark The strings are treated as null terminated strings.
 */
-const char *str_find_nocase(const char *haystack, const char *needle);
+const char *str_find_no_case(const char *haystack, const char *needle);
 
 /**
  * Finds a string inside another string case sensitive.
@@ -1918,7 +1918,7 @@ void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *fo
  * @ingroup Timestamp
  *
  * @param string Pointer to the string to parse
- * @param format The time format to use (for example FORMAT_NOSPACE below)
+ * @param format The time format to use (for example FORMAT_NO_SPACE below)
  * @param timestamp Pointer to the timestamp result
  *
  * @return true on success, false if the string could not be parsed with the specified format
@@ -1928,7 +1928,7 @@ bool timestamp_from_str(const char *string, const char *format, time_t *timestam
 
 #define FORMAT_TIME "%H:%M:%S"
 #define FORMAT_SPACE "%Y-%m-%d %H:%M:%S"
-#define FORMAT_NOSPACE "%Y-%m-%d_%H-%M-%S"
+#define FORMAT_NO_SPACE "%Y-%m-%d_%H-%M-%S"
 
 enum
 {
@@ -2319,7 +2319,7 @@ int str_utf8_to_lower(int code);
  *
  * @remark The strings are treated as null terminated strings.
  */
-int str_utf8_comp_nocase(const char *a, const char *b);
+int str_utf8_comp_no_case(const char *a, const char *b);
 
 /**
  * Compares up to num bytes of two UTF-8 strings case insensitively.
@@ -2336,7 +2336,7 @@ int str_utf8_comp_nocase(const char *a, const char *b);
  *
  * @remark The strings are treated as null terminated strings.
  */
-int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
+int str_utf8_comp_no_case_num(const char *a, const char *b, int num);
 
 /**
  * Finds a UTF-8 string inside another UTF-8 string case insensitively.
@@ -2354,7 +2354,7 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
  *
  * @remark The strings are treated as null terminated strings.
 */
-const char *str_utf8_find_nocase(const char *haystack, const char *needle, const char **end = nullptr);
+const char *str_utf8_find_no_case(const char *haystack, const char *needle, const char **end = nullptr);
 
 /**
  * Checks whether the given Unicode codepoint renders as space.

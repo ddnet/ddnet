@@ -5269,7 +5269,7 @@ void CEditor::RenderFileDialog()
 		// find first valid entry, if it exists
 		for(size_t i = 0; i < m_vpFilteredFileList.size(); i++)
 		{
-			if(str_comp_nocase(m_vpFilteredFileList[i]->m_aName, m_FileDialogFileNameInput.GetString()) == 0)
+			if(str_comp_no_case(m_vpFilteredFileList[i]->m_aName, m_FileDialogFileNameInput.GetString()) == 0)
 			{
 				m_FilesSelectedIndex = i;
 				str_copy(m_aFilesSelectedName, m_vpFilteredFileList[i]->m_aName);
@@ -5326,13 +5326,13 @@ void CEditor::RenderFileDialog()
 			{
 				m_FilesSelectedIndex = -1;
 			}
-			else if(m_FilesSelectedIndex == -1 || (!m_FileDialogFilterInput.IsEmpty() && !str_find_nocase(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aName, m_FileDialogFilterInput.GetString())))
+			else if(m_FilesSelectedIndex == -1 || (!m_FileDialogFilterInput.IsEmpty() && !str_find_no_case(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aName, m_FileDialogFilterInput.GetString())))
 			{
 				// we need to refresh selection
 				m_FilesSelectedIndex = -1;
 				for(size_t i = 0; i < m_vpFilteredFileList.size(); i++)
 				{
-					if(str_find_nocase(m_vpFilteredFileList[i]->m_aName, m_FileDialogFilterInput.GetString()))
+					if(str_find_no_case(m_vpFilteredFileList[i]->m_aName, m_FileDialogFilterInput.GetString()))
 					{
 						m_FilesSelectedIndex = i;
 						break;
@@ -5699,7 +5699,7 @@ void CEditor::RefreshFilteredFileList()
 	m_vpFilteredFileList.clear();
 	for(const CFilelistItem &Item : m_vCompleteFileList)
 	{
-		if(m_FileDialogFilterInput.IsEmpty() || str_find_nocase(Item.m_aName, m_FileDialogFilterInput.GetString()))
+		if(m_FileDialogFilterInput.IsEmpty() || str_find_no_case(Item.m_aName, m_FileDialogFilterInput.GetString()))
 		{
 			m_vpFilteredFileList.push_back(&Item);
 		}
@@ -8487,8 +8487,8 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 				continue;
 
 			const bool DDNetOrCustomEntities = std::find_if(std::begin(gs_apModEntitiesNames), std::end(gs_apModEntitiesNames),
-								   [&](const char *pEntitiesName) { return str_comp_nocase(m_SelectEntitiesImage.c_str(), pEntitiesName) == 0 &&
-													   str_comp_nocase(pEntitiesName, "ddnet") != 0; }) == std::end(gs_apModEntitiesNames);
+								   [&](const char *pEntitiesName) { return str_comp_no_case(m_SelectEntitiesImage.c_str(), pEntitiesName) == 0 &&
+													   str_comp_no_case(pEntitiesName, "ddnet") != 0; }) == std::end(gs_apModEntitiesNames);
 
 			vec2 Pos(x * TileSize, y * TileSize);
 			vec2 Scale;

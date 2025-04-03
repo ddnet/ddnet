@@ -124,7 +124,7 @@ static std::pair<EArgumentCompletionType, int> ArgumentCompletion(const char *pS
 	for(const auto &Entry : gs_aArgumentCompletionEntries)
 	{
 		int Length = maximum(str_length(Entry.m_pCommandName), CommandLength);
-		if(str_comp_nocase_num(Entry.m_pCommandName, pCommandStart, Length) == 0)
+		if(str_comp_no_case_num(Entry.m_pCommandName, pCommandStart, Length) == 0)
 		{
 			int CurrentArg = 0;
 			const char *pArgStart = nullptr, *pArgEnd = nullptr;
@@ -153,7 +153,7 @@ static int PossibleTunings(const char *pStr, IConsole::FPossibleCallback pfnCall
 	int Index = 0;
 	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
-		if(str_find_nocase(CTuningParams::Name(i), pStr))
+		if(str_find_no_case(CTuningParams::Name(i), pStr))
 		{
 			pfnCallback(Index, CTuningParams::Name(i), pUser);
 			Index++;
@@ -169,7 +169,7 @@ static int PossibleKeys(const char *pStr, IInput *pInput, IConsole::FPossibleCal
 	{
 		// Ignore unnamed keys starting with '&'
 		const char *pKeyName = pInput->KeyName(Key);
-		if(pKeyName[0] != '&' && str_find_nocase(pKeyName, pStr))
+		if(pKeyName[0] != '&' && str_find_no_case(pKeyName, pStr))
 		{
 			pfnCallback(Index, pKeyName, pUser);
 			Index++;
@@ -630,7 +630,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 					if(Entry.m_Type != CompletionType)
 						continue;
 					const int Len = str_length(Entry.m_pCommandName);
-					if(str_comp_nocase_num(pInputStr, Entry.m_pCommandName, Len) == 0 && str_is_space(pInputStr[Len]))
+					if(str_comp_no_case_num(pInputStr, Entry.m_pCommandName, Len) == 0 && str_is_space(pInputStr[Len]))
 					{
 						m_CompletionChosenArgument = -1;
 						str_copy(m_aCompletionBufferArgument, &pInputStr[CompletionPos]);
@@ -766,7 +766,7 @@ void CGameConsole::CInstance::UpdateSearch()
 		return;
 
 	const char *pSearchText = m_Input.GetString();
-	bool SearchChanged = str_utf8_comp_nocase(pSearchText, m_aCurrentSearchString) != 0;
+	bool SearchChanged = str_utf8_comp_no_case(pSearchText, m_aCurrentSearchString) != 0;
 
 	int SearchLength = m_Input.GetLength();
 	str_copy(m_aCurrentSearchString, pSearchText);
@@ -792,7 +792,7 @@ void CGameConsole::CInstance::UpdateSearch()
 
 	for(; pEntry; EntryLine += pEntry->m_LineCount, pEntry = m_Backlog.Prev(pEntry))
 	{
-		const char *pSearchPos = str_utf8_find_nocase(pEntry->m_aText, pSearchText);
+		const char *pSearchPos = str_utf8_find_no_case(pEntry->m_aText, pSearchText);
 		if(!pSearchPos)
 			continue;
 
@@ -843,7 +843,7 @@ void CGameConsole::CInstance::UpdateSearch()
 				m_vSearchMatches.emplace_back(Pos, MatchStartLine, MatchEndLine, EntryLine);
 			}
 
-			pSearchPos = str_utf8_find_nocase(pEntry->m_aText + Pos + SearchLength, pSearchText);
+			pSearchPos = str_utf8_find_no_case(pEntry->m_aText + Pos + SearchLength, pSearchText);
 		}
 	}
 
@@ -928,7 +928,7 @@ int CGameConsole::PossibleMaps(const char *pStr, IConsole::FPossibleCallback pfn
 	int Index = 0;
 	for(const std::string &Entry : Client()->MaplistEntries())
 	{
-		if(str_find_nocase(Entry.c_str(), pStr))
+		if(str_find_no_case(Entry.c_str(), pStr))
 		{
 			pfnCallback(Index, Entry.c_str(), pUser);
 			Index++;
@@ -984,7 +984,7 @@ void CGameConsole::PossibleCommandsRenderCallback(int Index, const char *pStr, v
 		TextColor = ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f);
 	}
 
-	const char *pMatchStart = str_find_nocase(pStr, pInfo->m_pCurrentCmd);
+	const char *pMatchStart = str_find_no_case(pStr, pInfo->m_pCurrentCmd);
 	if(pMatchStart)
 	{
 		pInfo->m_pSelf->TextRender()->TextColor(TextColor);

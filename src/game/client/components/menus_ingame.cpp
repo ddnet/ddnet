@@ -845,7 +845,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView, bool UpdateScroll)
 	int i = 0;
 	for(CVoteOptionClient *pOption = m_pClient->m_Voting.m_pFirst; pOption; pOption = pOption->m_pNext, i++)
 	{
-		if(!m_FilterInput.IsEmpty() && !str_utf8_find_nocase(pOption->m_aDescription, m_FilterInput.GetString()))
+		if(!m_FilterInput.IsEmpty() && !str_utf8_find_no_case(pOption->m_aDescription, m_FilterInput.GetString()))
 			continue;
 		if(i == m_CallvoteSelectedOption)
 			Selected = TotalShown;
@@ -858,7 +858,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView, bool UpdateScroll)
 	i = 0;
 	for(CVoteOptionClient *pOption = m_pClient->m_Voting.m_pFirst; pOption; pOption = pOption->m_pNext, i++)
 	{
-		if(!m_FilterInput.IsEmpty() && !str_utf8_find_nocase(pOption->m_aDescription, m_FilterInput.GetString()))
+		if(!m_FilterInput.IsEmpty() && !str_utf8_find_no_case(pOption->m_aDescription, m_FilterInput.GetString()))
 			continue;
 		aIndices[NumVoteOptions] = i;
 		NumVoteOptions++;
@@ -893,7 +893,7 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators, bo
 		if(Index == m_pClient->m_Snap.m_LocalClientId || (FilterSpectators && pInfoByName->m_Team == TEAM_SPECTATORS))
 			continue;
 
-		if(!str_utf8_find_nocase(m_pClient->m_aClients[Index].m_aName, m_FilterInput.GetString()))
+		if(!str_utf8_find_no_case(m_pClient->m_aClients[Index].m_aName, m_FilterInput.GetString()))
 			continue;
 
 		if(m_CallvoteSelectedPlayer == Index)

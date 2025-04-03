@@ -100,7 +100,7 @@ const CNameBan *CNameBans::IsBanned(const char *pName) const
 	for(const CNameBan &Ban : m_vNameBans)
 	{
 		int Distance = str_utf32_dist_buffer(aSkeleton, SkeletonLength, Ban.m_aSkeleton, Ban.m_SkeletonLength, aBuffer, std::size(aBuffer));
-		if(Distance <= Ban.m_Distance || (Ban.m_IsSubstring && str_utf8_find_nocase(pName, Ban.m_aName)))
+		if(Distance <= Ban.m_Distance || (Ban.m_IsSubstring && str_utf8_find_no_case(pName, Ban.m_aName)))
 			pResult = &Ban;
 	}
 	return pResult;

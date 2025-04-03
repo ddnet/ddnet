@@ -460,7 +460,7 @@ void CConfigManager::PossibleConfigVariables(const char *pStr, int FlagMask, POS
 	{
 		if(pVariable->m_Flags & FlagMask)
 		{
-			if(str_find_nocase(pVariable->m_pScriptName, pStr))
+			if(str_find_no_case(pVariable->m_pScriptName, pStr))
 			{
 				pfnCallback(pVariable, pUserData);
 			}

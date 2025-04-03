@@ -420,13 +420,13 @@ CBinds::CBindSlot CBinds::GetBindSlot(const char *pBindString) const
 	const char *pKey = str_next_token(pBindString, "+", aMod, sizeof(aMod));
 	while(aMod[0] && *(pKey))
 	{
-		if(!str_comp_nocase(aMod, "shift"))
+		if(!str_comp_no_case(aMod, "shift"))
 			ModifierMask |= (1 << MODIFIER_SHIFT);
-		else if(!str_comp_nocase(aMod, "ctrl"))
+		else if(!str_comp_no_case(aMod, "ctrl"))
 			ModifierMask |= (1 << MODIFIER_CTRL);
-		else if(!str_comp_nocase(aMod, "alt"))
+		else if(!str_comp_no_case(aMod, "alt"))
 			ModifierMask |= (1 << MODIFIER_ALT);
-		else if(!str_comp_nocase(aMod, "gui"))
+		else if(!str_comp_no_case(aMod, "gui"))
 			ModifierMask |= (1 << MODIFIER_GUI);
 		else
 			return {KEY_UNKNOWN, MODIFIER_NONE};

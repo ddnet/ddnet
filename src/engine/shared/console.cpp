@@ -61,23 +61,23 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned int Index, float D
 		else
 			return std::nullopt;
 	}
-	else if(!str_comp_nocase(pStr, "red"))
+	else if(!str_comp_no_case(pStr, "red"))
 		return ColorHSLA(0.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "yellow"))
+	else if(!str_comp_no_case(pStr, "yellow"))
 		return ColorHSLA(1.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "green"))
+	else if(!str_comp_no_case(pStr, "green"))
 		return ColorHSLA(2.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "cyan"))
+	else if(!str_comp_no_case(pStr, "cyan"))
 		return ColorHSLA(3.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "blue"))
+	else if(!str_comp_no_case(pStr, "blue"))
 		return ColorHSLA(4.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "magenta"))
+	else if(!str_comp_no_case(pStr, "magenta"))
 		return ColorHSLA(5.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "white"))
+	else if(!str_comp_no_case(pStr, "white"))
 		return ColorHSLA(0, 0, 1);
-	else if(!str_comp_nocase(pStr, "gray"))
+	else if(!str_comp_no_case(pStr, "gray"))
 		return ColorHSLA(0, 0, .5f);
-	else if(!str_comp_nocase(pStr, "black"))
+	else if(!str_comp_no_case(pStr, "black"))
 		return ColorHSLA(0, 0, 0);
 
 	return std::nullopt;
@@ -591,7 +591,7 @@ int CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossi
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->m_Temp == Temp)
 		{
-			if(str_find_nocase(pCommand->m_pName, pStr))
+			if(str_find_no_case(pCommand->m_pName, pStr))
 			{
 				pfnCallback(Index, pCommand->m_pName, pUser);
 				Index++;
@@ -607,7 +607,7 @@ CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 	{
 		if(pCommand->m_Flags & FlagMask)
 		{
-			if(str_comp_nocase(pCommand->m_pName, pName) == 0)
+			if(str_comp_no_case(pCommand->m_pName, pName) == 0)
 				return pCommand;
 		}
 	}
@@ -1046,7 +1046,7 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->m_Temp == Temp)
 		{
-			if(str_comp_nocase(pCommand->m_pName, pName) == 0)
+			if(str_comp_no_case(pCommand->m_pName, pName) == 0)
 				return pCommand;
 		}
 	}

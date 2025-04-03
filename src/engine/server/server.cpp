@@ -164,7 +164,7 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 void CServerBan::ConBanRegion(IConsole::IResult *pResult, void *pUser)
 {
 	const char *pRegion = pResult->GetString(0);
-	if(str_comp_nocase(pRegion, g_Config.m_SvRegionName))
+	if(str_comp_no_case(pRegion, g_Config.m_SvRegionName))
 		return;
 
 	pResult->RemoveArgument(0);
@@ -176,7 +176,7 @@ void CServerBan::ConBanRegionRange(IConsole::IResult *pResult, void *pUser)
 	CServerBan *pServerBan = static_cast<CServerBan *>(pUser);
 
 	const char *pRegion = pResult->GetString(0);
-	if(str_comp_nocase(pRegion, g_Config.m_SvRegionName))
+	if(str_comp_no_case(pRegion, g_Config.m_SvRegionName))
 		return;
 
 	pResult->RemoveArgument(0);
@@ -3306,7 +3306,7 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 		if(pThis->m_aClients[i].m_State == CClient::STATE_EMPTY)
 			continue;
 
-		if(!str_utf8_find_nocase(pThis->m_aClients[i].m_aName, pName))
+		if(!str_utf8_find_no_case(pThis->m_aClients[i].m_aName, pName))
 			continue;
 
 		if(pThis->m_aClients[i].m_State == CClient::STATE_INGAME)
@@ -3353,11 +3353,11 @@ void CServer::ConStatus(IConsole::IResult *pResult, void *pUser)
 static int GetAuthLevel(const char *pLevel)
 {
 	int Level = -1;
-	if(!str_comp_nocase(pLevel, "admin"))
+	if(!str_comp_no_case(pLevel, "admin"))
 		Level = AUTHED_ADMIN;
 	else if(str_starts_with(pLevel, "mod"))
 		Level = AUTHED_MOD;
-	else if(!str_comp_nocase(pLevel, "helper"))
+	else if(!str_comp_no_case(pLevel, "helper"))
 		Level = AUTHED_HELPER;
 
 	return Level;
@@ -3797,9 +3797,9 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 
 	CMysqlConfig Config;
 	bool Write;
-	if(str_comp_nocase(pResult->GetString(0), "w") == 0)
+	if(str_comp_no_case(pResult->GetString(0), "w") == 0)
 		Write = false;
-	else if(str_comp_nocase(pResult->GetString(0), "r") == 0)
+	else if(str_comp_no_case(pResult->GetString(0), "r") == 0)
 		Write = true;
 	else
 	{
@@ -3829,12 +3829,12 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
 
-	if(str_comp_nocase(pResult->GetString(0), "w") == 0)
+	if(str_comp_no_case(pResult->GetString(0), "w") == 0)
 	{
 		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::WRITE);
 		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::WRITE_BACKUP);
 	}
-	else if(str_comp_nocase(pResult->GetString(0), "r") == 0)
+	else if(str_comp_no_case(pResult->GetString(0), "r") == 0)
 	{
 		pSelf->DbPool()->Print(pSelf->Console(), CDbConnectionPool::READ);
 	}

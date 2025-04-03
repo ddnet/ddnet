@@ -972,7 +972,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 			{
 				m_Map.m_vSettings.erase(
 					std::remove_if(m_Map.m_vSettings.begin(), m_Map.m_vSettings.end(), [&](const CEditorMapSetting &MapSetting) {
-						return str_comp_nocase(MapSetting.m_aCommand, DeletedSetting.m_aSetting) == 0;
+						return str_comp_no_case(MapSetting.m_aCommand, DeletedSetting.m_aSetting) == 0;
 					}),
 					m_Map.m_vSettings.end());
 			}
@@ -983,7 +983,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 		{
 			m_Map.m_vSettings.erase(
 				std::remove_if(m_Map.m_vSettings.begin(), m_Map.m_vSettings.end(), [&](const CEditorMapSetting &MapSetting) {
-					return str_comp_nocase(MapSetting.m_aCommand, Setting.m_aCommand) == 0;
+					return str_comp_no_case(MapSetting.m_aCommand, Setting.m_aCommand) == 0;
 				}),
 				m_Map.m_vSettings.end());
 		}
@@ -1278,7 +1278,7 @@ void CMapSettingsBackend::CContext::UpdateFromString(const char *pStr)
 	// Get the command if it is a recognized one
 	for(auto &pSetting : m_pBackend->m_vpMapSettings)
 	{
-		if(str_comp_nocase(m_aCommand, pSetting->m_pName) == 0)
+		if(str_comp_no_case(m_aCommand, pSetting->m_pName) == 0)
 		{
 			m_pCurrentSetting = pSetting;
 			break;
@@ -1636,14 +1636,14 @@ EValidationResult CMapSettingsBackend::CContext::ValidateArg(int Index, const ch
 				{
 					// This means that we have possible values for this argument for this setting
 					// In order to validate such arg, we have to check if it maches any of the possible values
-					const bool EqualsAny = std::any_of(ValuesIt->second.begin(), ValuesIt->second.end(), [pArg](auto *pValue) { return str_comp_nocase(pArg, pValue) == 0; });
+					const bool EqualsAny = std::any_of(ValuesIt->second.begin(), ValuesIt->second.end(), [pArg](auto *pValue) { return str_comp_no_case(pArg, pValue) == 0; });
 
 					// If equals, then argument is valid
 					if(EqualsAny)
 						return EValidationResult::VALID;
 
 					// Here we check if argument is incomplete
-					const bool StartsAny = std::any_of(ValuesIt->second.begin(), ValuesIt->second.end(), [pArg](auto *pValue) { return str_starts_with_nocase(pValue, pArg) != nullptr; });
+					const bool StartsAny = std::any_of(ValuesIt->second.begin(), ValuesIt->second.end(), [pArg](auto *pValue) { return str_starts_with_no_case(pValue, pArg) != nullptr; });
 					if(StartsAny)
 						return EValidationResult::INCOMPLETE;
 
@@ -1687,7 +1687,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 		// Iterate through available map settings and find those which the beginning matches with the command/setting name we are writing
 		for(auto &pSetting : m_pBackend->m_vpMapSettings)
 		{
-			if(str_starts_with_nocase(pSetting->m_pName, aSubString))
+			if(str_starts_with_no_case(pSetting->m_pName, aSubString))
 			{
 				m_vPossibleMatches.emplace_back(SPossibleValueMatch{
 					pSetting->m_pName,
@@ -1745,7 +1745,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 
 						for(auto &pValue : ValuesIt->second)
 						{
-							if(str_starts_with_nocase(pValue, aSubString))
+							if(str_starts_with_no_case(pValue, aSubString))
 							{
 								m_vPossibleMatches.emplace_back(SPossibleValueMatch{
 									pValue,
@@ -1918,7 +1918,7 @@ int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, cons
 		// If it does, then we found a collision, and the result is REPLACE.
 		for(int i = 0; i < (int)vSettings.size(); i++)
 		{
-			if(str_comp_nocase(vSettings[i].m_aCommand, pInputString) == 0)
+			if(str_comp_no_case(vSettings[i].m_aCommand, pInputString) == 0)
 			{
 				Result = ECollisionCheckResult::REPLACE;
 				return i;
@@ -1953,7 +1953,7 @@ int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, cons
 		auto It = std::find_if(vSettings.begin(), vSettings.end(), [&](const CEditorMapSetting &Setting) {
 			const char *pLineSettingValue = Setting.m_aCommand; // Get the map setting command
 			pLineSettingValue = str_next_token(pLineSettingValue, " ", aBuffer, sizeof(aBuffer)); // Get the first token before the first space
-			return str_comp_nocase(aBuffer, pSetting->m_pName) == 0; // Check if that equals our current command
+			return str_comp_no_case(aBuffer, pSetting->m_pName) == 0; // Check if that equals our current command
 		});
 
 		if(It == vSettings.end())
@@ -1990,7 +1990,7 @@ int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, cons
 			// Split this setting into its arguments
 			std::vector<SArgument> vArgs = SplitSetting(Setting.m_aCommand);
 			// Only keep settings that match with the current input setting name
-			if(!vArgs.empty() && str_comp_nocase(vArgs[0].m_aValue, pSettingCommand->m_pName) == 0)
+			if(!vArgs.empty() && str_comp_no_case(vArgs[0].m_aValue, pSettingCommand->m_pName) == 0)
 			{
 				// When that's the case, we save them
 				vArgs.erase(vArgs.begin());
@@ -2011,7 +2011,7 @@ int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, cons
 			for(auto &Line : vLineArgs)
 			{
 				// Check first colliding line
-				if(str_comp_nocase(pValue, Line.m_vArgs[ArgIndex].m_aValue) == 0)
+				if(str_comp_no_case(pValue, Line.m_vArgs[ArgIndex].m_aValue) == 0)
 				{
 					Collide = true;
 					CollidingLineIndex = Line.m_Index;
@@ -2029,7 +2029,7 @@ int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, cons
 			// Otherwise, remove non-colliding args from the list
 			vLineArgs.erase(
 				std::remove_if(vLineArgs.begin(), vLineArgs.end(), [&](const SLineArgs &Line) {
-					return str_comp_nocase(pValue, Line.m_vArgs[ArgIndex].m_aValue) != 0;
+					return str_comp_no_case(pValue, Line.m_vArgs[ArgIndex].m_aValue) != 0;
 				}),
 				vLineArgs.end());
 		}
@@ -2182,7 +2182,7 @@ void CMapSettingsBackend::OnMapLoad()
 
 		if(CollidingLineIndex != -1)
 			RealCollidingLineIndex = std::find_if(vLoadedMapSettings.begin(), vLoadedMapSettings.end(), [&](const CEditorMapSetting &MapSetting) {
-				return str_comp_nocase(MapSetting.m_aCommand, m_LoadedMapSettings.m_vSettingsValid.at(CollidingLineIndex).m_aCommand) == 0;
+				return str_comp_no_case(MapSetting.m_aCommand, m_LoadedMapSettings.m_vSettingsValid.at(CollidingLineIndex).m_aCommand) == 0;
 			}) - vLoadedMapSettings.begin();
 
 		int Type = 0;

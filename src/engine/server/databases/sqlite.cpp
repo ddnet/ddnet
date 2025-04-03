@@ -17,7 +17,7 @@ public:
 	const char *BinaryCollate() const override { return "BINARY"; }
 	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
 	const char *InsertTimestampAsUtc() const override { return "DATETIME(?, 'utc')"; }
-	const char *CollateNocase() const override { return "? COLLATE NOCASE"; }
+	const char *CollateNoCase() const override { return "? COLLATE no_case"; }
 	const char *InsertIgnore() const override { return "INSERT OR IGNORE"; }
 	const char *Random() const override { return "RANDOM()"; }
 	const char *MedianMapTime(char *pBuffer, int BufferSize) const override;

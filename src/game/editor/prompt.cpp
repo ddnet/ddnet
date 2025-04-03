@@ -18,7 +18,7 @@ bool FuzzyMatch(const char *pHaystack, const char *pNeedle)
 		if(!pHit)
 			return false;
 		aBuf[0] = pNeedle[i];
-		pHit = str_find_nocase(pHit, aBuf);
+		pHit = str_find_no_case(pHit, aBuf);
 		if(pHit)
 			pHit++;
 	}

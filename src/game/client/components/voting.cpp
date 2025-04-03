@@ -23,9 +23,9 @@ void CVoting::ConCallvote(IConsole::IResult *pResult, void *pUserData)
 void CVoting::ConVote(IConsole::IResult *pResult, void *pUserData)
 {
 	CVoting *pSelf = (CVoting *)pUserData;
-	if(str_comp_nocase(pResult->GetString(0), "yes") == 0)
+	if(str_comp_no_case(pResult->GetString(0), "yes") == 0)
 		pSelf->Vote(1);
-	else if(str_comp_nocase(pResult->GetString(0), "no") == 0)
+	else if(str_comp_no_case(pResult->GetString(0), "no") == 0)
 		pSelf->Vote(-1);
 }
 

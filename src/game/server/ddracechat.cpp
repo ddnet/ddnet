@@ -159,7 +159,7 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 		float HookTemp;
 		pSelf->m_Tuning.Get("player_collision", &ColTemp);
 		pSelf->m_Tuning.Get("player_hooking", &HookTemp);
-		if(str_comp_nocase(pArg, "teams") == 0)
+		if(str_comp_no_case(pArg, "teams") == 0)
 		{
 			str_format(aBuf, sizeof(aBuf), "%s %s",
 				g_Config.m_SvTeam == SV_TEAM_ALLOWED ?
@@ -170,61 +170,61 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 				"and all of your team will die if the team is locked");
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 		}
-		else if(str_comp_nocase(pArg, "cheats") == 0)
+		else if(str_comp_no_case(pArg, "cheats") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvTestingCommands ?
 					"Cheats are enabled on this server" :
 					"Cheats are disabled on this server");
 		}
-		else if(str_comp_nocase(pArg, "collision") == 0)
+		else if(str_comp_no_case(pArg, "collision") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				ColTemp ?
 					"Players can collide on this server" :
 					"Players can't collide on this server");
 		}
-		else if(str_comp_nocase(pArg, "hooking") == 0)
+		else if(str_comp_no_case(pArg, "hooking") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				HookTemp ?
 					"Players can hook each other on this server" :
 					"Players can't hook each other on this server");
 		}
-		else if(str_comp_nocase(pArg, "endlesshooking") == 0)
+		else if(str_comp_no_case(pArg, "endlesshooking") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvEndlessDrag ?
 					"Players hook time is unlimited" :
 					"Players hook time is limited");
 		}
-		else if(str_comp_nocase(pArg, "hitting") == 0)
+		else if(str_comp_no_case(pArg, "hitting") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvHit ?
 					"Players weapons affect others" :
 					"Players weapons has no affect on others");
 		}
-		else if(str_comp_nocase(pArg, "oldlaser") == 0)
+		else if(str_comp_no_case(pArg, "oldlaser") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvOldLaser ?
 					"Lasers can hit you if you shot them and they pull you towards the bounce origin (Like DDRace Beta)" :
 					"Lasers can't hit you if you shot them, and they pull others towards the shooter");
 		}
-		else if(str_comp_nocase(pArg, "me") == 0)
+		else if(str_comp_no_case(pArg, "me") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvSlashMe ?
 					"Players can use /me commands the famous IRC Command" :
 					"Players can't use the /me command");
 		}
-		else if(str_comp_nocase(pArg, "timeout") == 0)
+		else if(str_comp_no_case(pArg, "timeout") == 0)
 		{
 			str_format(aBuf, sizeof(aBuf), "The Server Timeout is currently set to %d seconds", g_Config.m_ConnTimeout);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 		}
-		else if(str_comp_nocase(pArg, "votes") == 0)
+		else if(str_comp_no_case(pArg, "votes") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvVoteKick ?
@@ -241,14 +241,14 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 						"Players are just kicked and not banned if they get voted off");
 			}
 		}
-		else if(str_comp_nocase(pArg, "pause") == 0)
+		else if(str_comp_no_case(pArg, "pause") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvPauseable ?
 					"/spec will pause you and your tee will vanish" :
 					"/spec will pause you but your tee will not vanish");
 		}
-		else if(str_comp_nocase(pArg, "scores") == 0)
+		else if(str_comp_no_case(pArg, "scores") == 0)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				g_Config.m_SvHideScore ?
@@ -439,7 +439,7 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 		}
 		else
 		{
-			const char *pRequestedName = (str_comp_nocase(pResult->GetString(0), "me") == 0) ?
+			const char *pRequestedName = (str_comp_no_case(pResult->GetString(0), "me") == 0) ?
 							     pSelf->Server()->ClientName(pResult->m_ClientId) :
 							     pResult->GetString(0);
 			pSelf->Score()->ShowPlayerTeamTop5(pResult->m_ClientId, pRequestedName, 0);
@@ -447,7 +447,7 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 	}
 	else if(pResult->NumArguments() == 2 && pResult->GetInteger(1) != 0)
 	{
-		const char *pRequestedName = (str_comp_nocase(pResult->GetString(0), "me") == 0) ?
+		const char *pRequestedName = (str_comp_no_case(pResult->GetString(0), "me") == 0) ?
 						     pSelf->Server()->ClientName(pResult->m_ClientId) :
 						     pResult->GetString(0);
 		pSelf->Score()->ShowPlayerTeamTop5(pResult->m_ClientId, pRequestedName, pResult->GetInteger(1));
@@ -497,7 +497,7 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 		}
 		else
 		{
-			const char *pRequestedName = (str_comp_nocase(pResult->GetString(0), "me") == 0) ?
+			const char *pRequestedName = (str_comp_no_case(pResult->GetString(0), "me") == 0) ?
 							     pSelf->Server()->ClientName(pResult->m_ClientId) :
 							     pResult->GetString(0);
 			pSelf->Score()->ShowTimes(pResult->m_ClientId, pRequestedName, pResult->GetInteger(1));
@@ -505,7 +505,7 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 	}
 	else if(pResult->NumArguments() == 2 && pResult->GetInteger(1) != 0)
 	{
-		const char *pRequestedName = (str_comp_nocase(pResult->GetString(0), "me") == 0) ?
+		const char *pRequestedName = (str_comp_no_case(pResult->GetString(0), "me") == 0) ?
 						     pSelf->Server()->ClientName(pResult->m_ClientId) :
 						     pResult->GetString(0);
 		pSelf->Score()->ShowTimes(pResult->m_ClientId, pRequestedName, pResult->GetInteger(1));
@@ -1512,11 +1512,11 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 				"You don't have any eye emotes, remember to bind some.");
 		return;
 	}
-	else if(str_comp_nocase(pResult->GetString(0), "on") == 0)
+	else if(str_comp_no_case(pResult->GetString(0), "on") == 0)
 		pPlayer->m_EyeEmoteEnabled = true;
-	else if(str_comp_nocase(pResult->GetString(0), "off") == 0)
+	else if(str_comp_no_case(pResult->GetString(0), "off") == 0)
 		pPlayer->m_EyeEmoteEnabled = false;
-	else if(str_comp_nocase(pResult->GetString(0), "toggle") == 0)
+	else if(str_comp_no_case(pResult->GetString(0), "toggle") == 0)
 		pPlayer->m_EyeEmoteEnabled = !pPlayer->m_EyeEmoteEnabled;
 	pSelf->Console()->Print(
 		IConsole::OUTPUT_LEVEL_STANDARD,
@@ -1560,19 +1560,19 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 			return;
 
 		int EmoteType = 0;
-		if(!str_comp_nocase(pResult->GetString(0), "angry"))
+		if(!str_comp_no_case(pResult->GetString(0), "angry"))
 			EmoteType = EMOTE_ANGRY;
-		else if(!str_comp_nocase(pResult->GetString(0), "blink"))
+		else if(!str_comp_no_case(pResult->GetString(0), "blink"))
 			EmoteType = EMOTE_BLINK;
-		else if(!str_comp_nocase(pResult->GetString(0), "close"))
+		else if(!str_comp_no_case(pResult->GetString(0), "close"))
 			EmoteType = EMOTE_BLINK;
-		else if(!str_comp_nocase(pResult->GetString(0), "happy"))
+		else if(!str_comp_no_case(pResult->GetString(0), "happy"))
 			EmoteType = EMOTE_HAPPY;
-		else if(!str_comp_nocase(pResult->GetString(0), "pain"))
+		else if(!str_comp_no_case(pResult->GetString(0), "pain"))
 			EmoteType = EMOTE_PAIN;
-		else if(!str_comp_nocase(pResult->GetString(0), "surprise"))
+		else if(!str_comp_no_case(pResult->GetString(0), "surprise"))
 			EmoteType = EMOTE_SURPRISE;
-		else if(!str_comp_nocase(pResult->GetString(0), "normal"))
+		else if(!str_comp_no_case(pResult->GetString(0), "normal"))
 			EmoteType = EMOTE_NORMAL;
 		else
 		{
@@ -1784,15 +1784,15 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 		int OldType = pPlayer->m_TimerType;
 		bool Result = false;
 
-		if(str_comp_nocase(pResult->GetString(0), "default") == 0)
+		if(str_comp_no_case(pResult->GetString(0), "default") == 0)
 			Result = pPlayer->SetTimerType(CPlayer::TIMERTYPE_DEFAULT);
-		else if(str_comp_nocase(pResult->GetString(0), "gametimer") == 0)
+		else if(str_comp_no_case(pResult->GetString(0), "gametimer") == 0)
 			Result = pPlayer->SetTimerType(CPlayer::TIMERTYPE_GAMETIMER);
-		else if(str_comp_nocase(pResult->GetString(0), "broadcast") == 0)
+		else if(str_comp_no_case(pResult->GetString(0), "broadcast") == 0)
 			Result = pPlayer->SetTimerType(CPlayer::TIMERTYPE_BROADCAST);
-		else if(str_comp_nocase(pResult->GetString(0), "both") == 0)
+		else if(str_comp_no_case(pResult->GetString(0), "both") == 0)
 			Result = pPlayer->SetTimerType(CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST);
-		else if(str_comp_nocase(pResult->GetString(0), "none") == 0)
+		else if(str_comp_no_case(pResult->GetString(0), "none") == 0)
 			Result = pPlayer->SetTimerType(CPlayer::TIMERTYPE_NONE);
 		else
 		{
@@ -1870,7 +1870,7 @@ void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(str_comp_nocase(pResult->GetString(0), "auto") == 0)
+	if(str_comp_no_case(pResult->GetString(0), "auto") == 0)
 	{
 		if(pPlayer->m_RescueMode != RESCUEMODE_AUTO)
 		{
@@ -1882,7 +1882,7 @@ void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(str_comp_nocase(pResult->GetString(0), "manual") == 0)
+	if(str_comp_no_case(pResult->GetString(0), "manual") == 0)
 	{
 		if(pPlayer->m_RescueMode != RESCUEMODE_MANUAL)
 		{
@@ -1894,11 +1894,11 @@ void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(str_comp_nocase(pResult->GetString(0), "list") == 0)
+	if(str_comp_no_case(pResult->GetString(0), "list") == 0)
 	{
 		pSelf->SendChatTarget(pPlayer->GetCid(), "Available rescue modes: auto, manual");
 	}
-	else if(str_comp_nocase(pResult->GetString(0), "") == 0)
+	else if(str_comp_no_case(pResult->GetString(0), "") == 0)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Current rescue mode: %s.", pPlayer->m_RescueMode == RESCUEMODE_MANUAL ? "manual" : "auto");
