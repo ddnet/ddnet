@@ -1945,8 +1945,8 @@ enum
  *
  * @ingroup Timestamp
  *
- * @param centisecs Time in centiseconds, must be positive
- * @param format Format of the time string, see enum above, for example TIME_DAYS
+ * @param centisecs Time in centiseconds.
+ * @param format Format of the time string, see enum above, for example TIME_DAYS.
  * @param buffer Pointer to a buffer that shall receive the time stamp string.
  * @param buffer_size Size of the buffer.
  *
@@ -1959,14 +1959,14 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size);
  *
  * @ingroup Timestamp
  *
- * @param secs Time in seconds, must be positive
- * @param format Format of the time string, see enum above, for example TIME_DAYS
+ * @param secs Time in seconds.
+ * @param format Format of the time string, see enum above, for example TIME_DAYS.
  * @param buffer Pointer to a buffer that shall receive the time stamp string.
  * @param buffer_size Size of the buffer.
  *
- * @remark The time is rounded to the nearest centisecond
+ * @remark The time is rounded to the nearest centisecond.
  *
- * @return Number of bytes written, -1 on invalid format or buffer_size <= 0
+ * @return Number of bytes written, `-1` on invalid format or `buffer_size <= 0`.
  */
 int str_time_float(float secs, int format, char *buffer, int buffer_size);
 
@@ -1974,8 +1974,8 @@ int str_time_float(float secs, int format, char *buffer, int buffer_size);
  * Escapes \ and " characters in a string.
  *
  * @param dst Destination array pointer, gets increased, will point to the terminating null.
- * @param src Source array
- * @param end End of destination array
+ * @param src Source array.
+ * @param end End of destination array.
 */
 void str_escape(char **dst, const char *src, const char *end);
 

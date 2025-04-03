@@ -3559,8 +3559,6 @@ bool timestamp_from_str(const char *string, const char *format, time_t *timestam
 
 int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 {
-	dbg_assert(centisecs >= 0, "time parameter must be positive");
-
 	const int sec = 100;
 	const int min = 60 * sec;
 	const int hour = 60 * min;
