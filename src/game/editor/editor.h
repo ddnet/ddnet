@@ -522,7 +522,8 @@ public:
 		}
 	};
 	std::map<const char *, CUi::SMessagePopupContext *, SStringKeyComparator> m_PopupMessageContexts;
-	FORMAT(printf, 2, 3) void ShowFileDialogError(const char *pFormat, ...);
+	FORMAT(printf, 2, 3)
+	void ShowFileDialogError(const char *pFormat, ...);
 
 	void Reset(bool CreateDefault = true);
 	bool Save(const char *pFilename) override;

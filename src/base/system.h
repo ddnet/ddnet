@@ -178,7 +178,8 @@ void dbg_assert_set_handler(DBG_ASSERT_HANDLER handler);
  *
  * @see dbg_assert
  */
-FORMAT(printf, 2, 3) void dbg_msg(const char *sys, const char *fmt, ...);
+FORMAT(printf, 2, 3)
+void dbg_msg(const char *sys, const char *fmt, ...);
 
 /**
  * Memory management utilities.
@@ -1384,7 +1385,8 @@ int str_length(const char *str);
  * @remark The strings are treated as null terminated strings.
  * @remark Guarantees that buffer string will contain zero-termination.
  */
-FORMAT(printf, 3, 0) int str_format_v(char *buffer, int buffer_size, const char *format, va_list args);
+FORMAT(printf, 3, 0)
+int str_format_v(char *buffer, int buffer_size, const char *format, va_list args);
 
 /**
  * Performs printf formatting into a buffer.
@@ -1402,7 +1404,8 @@ FORMAT(printf, 3, 0) int str_format_v(char *buffer, int buffer_size, const char 
  * @remark The strings are treated as null terminated strings.
  * @remark Guarantees that buffer string will contain zero-termination.
  */
-FORMAT(printf, 3, 4) int str_format(char *buffer, int buffer_size, const char *format, ...);
+FORMAT(printf, 3, 4)
+int str_format(char *buffer, int buffer_size, const char *format, ...);
 
 #if !defined(CONF_DEBUG)
 int str_format_int(char *buffer, size_t buffer_size, int value);
@@ -1904,8 +1907,10 @@ int str_base64_decode(void *dst, int dst_size, const char *data);
  * @remark Guarantees that buffer string will contain zero-termination.
 */
 void str_timestamp(char *buffer, int buffer_size);
-FORMAT(strftime, 3, 0) void str_timestamp_format(char *buffer, int buffer_size, const char *format);
-FORMAT(strftime, 4, 0) void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format);
+FORMAT(strftime, 3, 0)
+void str_timestamp_format(char *buffer, int buffer_size, const char *format);
+FORMAT(strftime, 4, 0)
+void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format);
 
 /**
  * Parses a string into a timestamp following a specified format.
@@ -1918,7 +1923,8 @@ FORMAT(strftime, 4, 0) void str_timestamp_ex(time_t time, char *buffer, int buff
  *
  * @return true on success, false if the string could not be parsed with the specified format
  */
-FORMAT(strftime, 2, 0) bool timestamp_from_str(const char *string, const char *format, time_t *timestamp);
+FORMAT(strftime, 2, 0)
+bool timestamp_from_str(const char *string, const char *format, time_t *timestamp);
 
 #define FORMAT_TIME "%H:%M:%S"
 #define FORMAT_SPACE "%Y-%m-%d %H:%M:%S"
@@ -2770,7 +2776,8 @@ void generate_password(char *buffer, unsigned length, const unsigned short *rand
  *
  * @ingroup Secure-Random
  */
-NO_DISCARD("You must check the return value of this function") bool secure_random_init();
+NO_DISCARD("You must check the return value of this function")
+bool secure_random_init();
 
 /**
  * Uninitializes the secure random module.

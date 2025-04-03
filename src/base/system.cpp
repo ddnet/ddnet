@@ -3346,15 +3346,15 @@ void str_hex_cstyle(char *dst, int dst_size, const void *data, int data_size, in
 		dst[dst_index - 2] = '\0';
 }
 
-constexpr auto hex_char_to_dec_map = []{
+constexpr auto hex_char_to_dec_map = [] {
 	std::array<int, 256> table = {};
-	for (int &v : table)
+	for(int &v : table)
 		v = -1;
-	for (char i = '0'; i <= '9'; ++i)
+	for(char i = '0'; i <= '9'; ++i)
 		table[i] = i - '0';
-	for (char i = 'a'; i <= 'f'; ++i)
+	for(char i = 'a'; i <= 'f'; ++i)
 		table[i] = i - 'a' + 10;
-	for (char i = 'A'; i <= 'F'; ++i)
+	for(char i = 'A'; i <= 'F'; ++i)
 		table[i] = i - 'A' + 10;
 	return table;
 }();
@@ -3461,9 +3461,9 @@ int str_base64_decode(void *dst_raw, int dst_size, const char *data)
 
 	if(data_len % 4 != 0)
 		return -3;
-		// Output buffer too small.
+	// Output buffer too small.
 	if(data_len / 4 * 3 > dst_size)
-		
+
 		return -2;
 	for(i = 0; i < data_len; i += 4)
 	{
@@ -3505,8 +3505,8 @@ int str_base64_decode(void *dst_raw, int dst_size, const char *data)
 				o += 1;
 			}
 			else
-				{
-					// Padding not zeroed.
+			{
+				// Padding not zeroed.
 				if(byte_value != 0)
 					return -2;
 			}
@@ -3788,12 +3788,12 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle, const
 int str_utf8_isspace(int code)
 {
 	return code <= 0x0020 || code == 0x0085 || code == 0x00A0 || code == 0x034F ||
-		   code == 0x115F || code == 0x1160 || code == 0x1680 || code == 0x180E ||
-		   (code >= 0x2000 && code <= 0x200F) || (code >= 0x2028 && code <= 0x202F) ||
-		   (code >= 0x205F && code <= 0x2064) || (code >= 0x206A && code <= 0x206F) ||
-		   code == 0x2800 || code == 0x3000 || code == 0x3164 ||
-		   (code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF || code == 0xFFA0 ||
-		   (code >= 0xFFF9 && code <= 0xFFFC);
+	       code == 0x115F || code == 0x1160 || code == 0x1680 || code == 0x180E ||
+	       (code >= 0x2000 && code <= 0x200F) || (code >= 0x2028 && code <= 0x202F) ||
+	       (code >= 0x205F && code <= 0x2064) || (code >= 0x206A && code <= 0x206F) ||
+	       code == 0x2800 || code == 0x3000 || code == 0x3164 ||
+	       (code >= 0xFE00 && code <= 0xFE0F) || code == 0xFEFF || code == 0xFFA0 ||
+	       (code >= 0xFFF9 && code <= 0xFFFC);
 }
 
 const char *str_utf8_skip_whitespaces(const char *str)
