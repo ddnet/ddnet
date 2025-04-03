@@ -61,7 +61,7 @@ bool CSkins7::CSkin::operator==(const CSkin &Other) const
 
 bool CSkins7::IsSpecialSkin(const char *pName)
 {
-	return str_startswith(pName, "x_") != nullptr;
+	return str_starts_with(pName, "x_") != nullptr;
 }
 
 class CSkinPartScanData
@@ -74,7 +74,7 @@ public:
 
 int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	if(IsDir || !str_endswith(pName, ".png"))
+	if(IsDir || !str_ends_with(pName, ".png"))
 		return 0;
 
 	CSkinPartScanData *pScanData = static_cast<CSkinPartScanData *>(pUser);
@@ -175,7 +175,7 @@ public:
 
 int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	if(IsDir || !str_endswith(pName, ".json"))
+	if(IsDir || !str_ends_with(pName, ".json"))
 		return 0;
 
 	CSkinScanData *pScanData = static_cast<CSkinScanData *>(pUser);

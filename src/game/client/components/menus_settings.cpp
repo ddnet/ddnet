@@ -3445,7 +3445,7 @@ void CMenus::CPopupMapPickerContext::MapListPopulate()
 int CMenus::CPopupMapPickerContext::MapListFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)
 {
 	CPopupMapPickerContext *pRealUser = (CPopupMapPickerContext *)pUser;
-	if((!IsDir && !str_endswith(pInfo->m_pName, ".map")) || !str_comp(pInfo->m_pName, ".") || (!str_comp(pInfo->m_pName, "..") && (!str_comp(pRealUser->m_aCurrentMapFolder, ""))))
+	if((!IsDir && !str_ends_with(pInfo->m_pName, ".map")) || !str_comp(pInfo->m_pName, ".") || (!str_comp(pInfo->m_pName, "..") && (!str_comp(pRealUser->m_aCurrentMapFolder, ""))))
 		return 0;
 
 	CMapListItem Item;

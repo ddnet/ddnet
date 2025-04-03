@@ -1568,7 +1568,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 			str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
 			char aBufNew[IO_MAX_PATH_LENGTH];
 			str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_DemoRenameInput.GetString());
-			if(!m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir && !str_endswith(aBufNew, ".demo"))
+			if(!m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir && !str_ends_with(aBufNew, ".demo"))
 				str_append(aBufNew, ".demo");
 
 			if(Storage()->FileExists(aBufNew, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType))
@@ -1628,7 +1628,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 			// render video
 			char aVideoPath[IO_MAX_PATH_LENGTH];
 			str_format(aVideoPath, sizeof(aVideoPath), "videos/%s", m_DemoRenderInput.GetString());
-			if(!str_endswith(aVideoPath, ".mp4"))
+			if(!str_ends_with(aVideoPath, ".mp4"))
 				str_append(aVideoPath, ".mp4");
 			if(Storage()->FolderExists(aVideoPath, IStorage::TYPE_SAVE))
 			{
@@ -2437,7 +2437,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 	const char *pExtension = ".png";
 	CMenuImage MenuImage;
 	CMenus *pSelf = static_cast<CMenus *>(pUser);
-	if(IsDir || !str_endswith(pName, pExtension) || str_length(pName) - str_length(pExtension) >= (int)sizeof(MenuImage.m_aName))
+	if(IsDir || !str_ends_with(pName, pExtension) || str_length(pName) - str_length(pExtension) >= (int)sizeof(MenuImage.m_aName))
 		return 0;
 
 	char aPath[IO_MAX_PATH_LENGTH];

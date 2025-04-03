@@ -816,7 +816,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	}
 
 	if(CallSaveScore)
-		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientId), "nameless tee"))
+		if(g_Config.m_SvNamelessScore || !str_starts_with(Server()->ClientName(ClientId), "nameless tee"))
 			GameServer()->Score()->SaveScore(ClientId, TimeTicks, pTimestamp,
 				GetCurrentTimeCp(Player), Player->m_NotEligibleForFinish);
 
@@ -829,7 +829,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	else if(Time < GameServer()->m_pController->m_CurrentRecord)
 	{
 		// check for nameless
-		if(g_Config.m_SvNamelessScore || !str_startswith(Server()->ClientName(ClientId), "nameless tee"))
+		if(g_Config.m_SvNamelessScore || !str_starts_with(Server()->ClientName(ClientId), "nameless tee"))
 		{
 			GameServer()->m_pController->m_CurrentRecord = Time;
 			NeedToSendNewServerRecord = true;

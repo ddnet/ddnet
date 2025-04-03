@@ -55,7 +55,7 @@ bool CFileCollection::ExtractTimestamp(const char *pTimestring, time_t *pTimesta
 bool CFileCollection::ParseFilename(const char *pFilename, time_t *pTimestamp)
 {
 	// Check if filename is valid
-	if(!str_endswith(pFilename, m_aFileExt))
+	if(!str_ends_with(pFilename, m_aFileExt))
 		return false;
 
 	const char *pTimestring = pFilename;
@@ -73,7 +73,7 @@ bool CFileCollection::ParseFilename(const char *pFilename, time_t *pTimestamp)
 	else
 	{
 		if(str_length(pFilename) != m_FileDescLength + TIMESTAMP_LENGTH + m_FileExtLength ||
-			!str_startswith(pFilename, m_aFileDesc))
+			!str_starts_with(pFilename, m_aFileDesc))
 			return false;
 
 		pTimestring += m_FileDescLength + 1;

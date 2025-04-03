@@ -905,8 +905,8 @@ void CGameContext::SendVoteStatus(int ClientId, int Total, int Yes, int No)
 
 void CGameContext::AbortVoteKickOnDisconnect(int ClientId)
 {
-	if(m_VoteCloseTime && ((str_startswith(m_aVoteCommand, "kick ") && str_to_int(&m_aVoteCommand[5]) == ClientId) ||
-				      (str_startswith(m_aVoteCommand, "set_team ") && str_to_int(&m_aVoteCommand[9]) == ClientId)))
+	if(m_VoteCloseTime && ((str_starts_with(m_aVoteCommand, "kick ") && str_to_int(&m_aVoteCommand[5]) == ClientId) ||
+				      (str_starts_with(m_aVoteCommand, "set_team ") && str_to_int(&m_aVoteCommand[9]) == ClientId)))
 		m_VoteEnforce = VOTE_ENFORCE_ABORT;
 }
 
@@ -2195,25 +2195,25 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 	if(pMsg->m_pMessage[0] == '/')
 	{
 		const char *pWhisper;
-		if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "w ")))
+		if((pWhisper = str_starts_with_nocase(pMsg->m_pMessage + 1, "w ")))
 		{
 			Whisper(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
-		else if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "whisper ")))
+		else if((pWhisper = str_starts_with_nocase(pMsg->m_pMessage + 1, "whisper ")))
 		{
 			Whisper(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
-		else if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "c ")))
+		else if((pWhisper = str_starts_with_nocase(pMsg->m_pMessage + 1, "c ")))
 		{
 			Converse(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
-		else if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "converse ")))
+		else if((pWhisper = str_starts_with_nocase(pMsg->m_pMessage + 1, "converse ")))
 		{
 			Converse(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
 		else
 		{
-			if(g_Config.m_SvSpamprotection && !str_startswith(pMsg->m_pMessage + 1, "timeout ") && pPlayer->m_aLastCommands[0] && pPlayer->m_aLastCommands[0] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[1] && pPlayer->m_aLastCommands[1] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[2] && pPlayer->m_aLastCommands[2] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[3] && pPlayer->m_aLastCommands[3] + Server()->TickSpeed() > Server()->Tick())
+			if(g_Config.m_SvSpamprotection && !str_starts_with(pMsg->m_pMessage + 1, "timeout ") && pPlayer->m_aLastCommands[0] && pPlayer->m_aLastCommands[0] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[1] && pPlayer->m_aLastCommands[1] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[2] && pPlayer->m_aLastCommands[2] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[3] && pPlayer->m_aLastCommands[3] + Server()->TickSpeed() > Server()->Tick())
 				return;
 
 			int64_t Now = Server()->Tick();
@@ -2291,7 +2291,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 					pOption->m_aDescription, aReason);
 				str_copy(aDesc, pOption->m_aDescription);
 
-				if((str_endswith(pOption->m_aCommand, "random_map") || str_endswith(pOption->m_aCommand, "random_unfinished_map")) && str_length(aReason) == 1 && aReason[0] >= '0' && aReason[0] <= '5')
+				if((str_ends_with(pOption->m_aCommand, "random_map") || str_ends_with(pOption->m_aCommand, "random_unfinished_map")) && str_length(aReason) == 1 && aReason[0] >= '0' && aReason[0] <= '5')
 				{
 					int Stars = aReason[0] - '0';
 					str_format(aCmd, sizeof(aCmd), "%s %d", pOption->m_aCommand, Stars);
@@ -3569,7 +3569,7 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 
 int CGameContext::MapScan(const char *pName, int IsDir, int DirType, void *pUserData)
 {
-	if((!IsDir && !str_endswith(pName, ".map")) || !str_comp(pName, "."))
+	if((!IsDir && !str_ends_with(pName, ".map")) || !str_comp(pName, "."))
 		return 0;
 
 	CMapNameItem Item;

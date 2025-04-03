@@ -1643,7 +1643,7 @@ EValidationResult CMapSettingsBackend::CContext::ValidateArg(int Index, const ch
 						return EValidationResult::VALID;
 
 					// Here we check if argument is incomplete
-					const bool StartsAny = std::any_of(ValuesIt->second.begin(), ValuesIt->second.end(), [pArg](auto *pValue) { return str_startswith_nocase(pValue, pArg) != nullptr; });
+					const bool StartsAny = std::any_of(ValuesIt->second.begin(), ValuesIt->second.end(), [pArg](auto *pValue) { return str_starts_with_nocase(pValue, pArg) != nullptr; });
 					if(StartsAny)
 						return EValidationResult::INCOMPLETE;
 
@@ -1687,7 +1687,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 		// Iterate through available map settings and find those which the beginning matches with the command/setting name we are writing
 		for(auto &pSetting : m_pBackend->m_vpMapSettings)
 		{
-			if(str_startswith_nocase(pSetting->m_pName, aSubString))
+			if(str_starts_with_nocase(pSetting->m_pName, aSubString))
 			{
 				m_vPossibleMatches.emplace_back(SPossibleValueMatch{
 					pSetting->m_pName,
@@ -1745,7 +1745,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 
 						for(auto &pValue : ValuesIt->second)
 						{
-							if(str_startswith_nocase(pValue, aSubString))
+							if(str_starts_with_nocase(pValue, aSubString))
 							{
 								m_vPossibleMatches.emplace_back(SPossibleValueMatch{
 									pValue,

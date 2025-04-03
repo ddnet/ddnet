@@ -3355,7 +3355,7 @@ static int GetAuthLevel(const char *pLevel)
 	int Level = -1;
 	if(!str_comp_nocase(pLevel, "admin"))
 		Level = AUTHED_ADMIN;
-	else if(str_startswith(pLevel, "mod"))
+	else if(str_starts_with(pLevel, "mod"))
 		Level = AUTHED_MOD;
 	else if(!str_comp_nocase(pLevel, "helper"))
 		Level = AUTHED_HELPER;
@@ -4270,7 +4270,7 @@ int CServer::MaplistEntryCallback(const char *pFilename, int IsDir, int DirType,
 		return 0;
 	}
 
-	const char *pSuffix = str_endswith(aFilename, ".map");
+	const char *pSuffix = str_ends_with(aFilename, ".map");
 	if(!pSuffix) // not ending with .map
 		return 0;
 	const size_t FilenameLength = pSuffix - aFilename;

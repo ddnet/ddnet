@@ -1646,7 +1646,7 @@ int str_comp_filenames(const char *a, const char *b);
  *
  * @remark The strings are treated as null terminated strings.
 */
-const char *str_startswith_nocase(const char *str, const char *prefix);
+const char *str_starts_with_nocase(const char *str, const char *prefix);
 
 /**
  * Checks case sensitive whether the string begins with a certain prefix.
@@ -1661,7 +1661,7 @@ const char *str_startswith_nocase(const char *str, const char *prefix);
  *
  * @remark The strings are treated as null terminated strings.
  */
-const char *str_startswith(const char *str, const char *prefix);
+const char *str_starts_with(const char *str, const char *prefix);
 
 /**
  * Checks case insensitive whether the string ends with a certain suffix.
@@ -1674,7 +1674,7 @@ const char *str_startswith(const char *str, const char *prefix);
  * @return A pointer to the beginning of the suffix in the string str, or
  * @return 0 if the string suffix isn't a suffix of the string str.
 */
-const char *str_endswith_nocase(const char *str, const char *suffix);
+const char *str_ends_with_nocase(const char *str, const char *suffix);
 
 /**
  * Checks case sensitive whether the string ends with a certain suffix.
@@ -1685,7 +1685,7 @@ const char *str_endswith_nocase(const char *str, const char *suffix);
  * @return A pointer to the beginning of the suffix in the string str
  * @return `nullptr` if the string suffix isn't a suffix of the string str.
 */
-const char *str_endswith(const char *str, const char *suffix);
+const char *str_ends_with(const char *str, const char *suffix);
 
 /**
  * Computes the edit distance between two strings.

@@ -831,7 +831,7 @@ bool CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 	char aBuf[IO_MAX_PATH_LENGTH];
 	// add map extension
-	if(!str_endswith(pFileName, ".map"))
+	if(!str_ends_with(pFileName, ".map"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.map", pFileName);
 		pFileName = aBuf;
@@ -869,7 +869,7 @@ bool CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 	char aBuf[IO_MAX_PATH_LENGTH];
 	// add map extension
-	if(!str_endswith(pFileName, ".map"))
+	if(!str_ends_with(pFileName, ".map"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.map", pFileName);
 		pFileName = aBuf;
@@ -895,7 +895,7 @@ bool CEditor::CallbackSaveImage(const char *pFileName, int StorageType, void *pU
 	char aBuf[IO_MAX_PATH_LENGTH];
 
 	// add file extension
-	if(!str_endswith(pFileName, ".png"))
+	if(!str_ends_with(pFileName, ".png"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.png", pFileName);
 		pFileName = aBuf;
@@ -923,7 +923,7 @@ bool CEditor::CallbackSaveSound(const char *pFileName, int StorageType, void *pU
 	char aBuf[IO_MAX_PATH_LENGTH];
 
 	// add file extension
-	if(!str_endswith(pFileName, ".opus"))
+	if(!str_ends_with(pFileName, ".opus"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.opus", pFileName);
 		pFileName = aBuf;
@@ -5112,9 +5112,9 @@ static int EditorListdirCallback(const CFsFileInfo *pInfo, int IsDir, int Storag
 	CEditor *pEditor = (CEditor *)pUser;
 	if((pInfo->m_pName[0] == '.' && (pInfo->m_pName[1] == 0 ||
 						(pInfo->m_pName[1] == '.' && pInfo->m_pName[2] == 0 && (pEditor->m_FileDialogShowingRoot || (!pEditor->m_FileDialogMultipleStorages && (!str_comp(pEditor->m_pFileDialogPath, "maps") || !str_comp(pEditor->m_pFileDialogPath, "mapres"))))))) ||
-		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && !str_endswith(pInfo->m_pName, ".map")) ||
-				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && !str_endswith(pInfo->m_pName, ".png")) ||
-				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && !str_endswith(pInfo->m_pName, ".opus")))))
+		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && !str_ends_with(pInfo->m_pName, ".map")) ||
+				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && !str_ends_with(pInfo->m_pName, ".png")) ||
+				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && !str_ends_with(pInfo->m_pName, ".opus")))))
 		return 0;
 
 	CEditor::CFilelistItem Item;
@@ -5360,7 +5360,7 @@ void CEditor::RenderFileDialog()
 	{
 		if(m_FilePreviewState == PREVIEW_UNLOADED)
 		{
-			if(m_FileDialogFileType == CEditor::FILETYPE_IMG && str_endswith(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, ".png"))
+			if(m_FileDialogFileType == CEditor::FILETYPE_IMG && str_ends_with(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, ".png"))
 			{
 				char aBuffer[IO_MAX_PATH_LENGTH];
 				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
@@ -5378,7 +5378,7 @@ void CEditor::RenderFileDialog()
 					m_FilePreviewState = PREVIEW_ERROR;
 				}
 			}
-			else if(m_FileDialogFileType == CEditor::FILETYPE_SOUND && str_endswith(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, ".opus"))
+			else if(m_FileDialogFileType == CEditor::FILETYPE_SOUND && str_ends_with(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, ".opus"))
 			{
 				char aBuffer[IO_MAX_PATH_LENGTH];
 				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
@@ -5589,7 +5589,7 @@ void CEditor::RenderFileDialog()
 		{
 			const int StorageType = m_FilesSelectedIndex >= 0 ? m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType : m_FileDialogStorageType;
 			str_format(m_aFileSaveName, sizeof(m_aFileSaveName), "%s/%s", m_pFileDialogPath, m_FileDialogFileNameInput.GetString());
-			if(!str_endswith(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]))
+			if(!str_ends_with(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]))
 				str_append(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]);
 
 			if(m_FileDialogSaveAction && Storage()->FileExists(m_aFileSaveName, StorageType))
@@ -9143,7 +9143,7 @@ void CEditor::LoadCurrentMap()
 {
 	if(Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_SAVE))
 	{
-		m_ValidSaveFilename = !str_startswith(m_pClient->GetCurrentMapPath(), "downloadedmaps/");
+		m_ValidSaveFilename = !str_starts_with(m_pClient->GetCurrentMapPath(), "downloadedmaps/");
 	}
 	else
 	{

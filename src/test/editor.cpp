@@ -67,7 +67,7 @@ bool IsValidEditorTooltip(const char *pTooltip, char *pErrorMsg, int ErrorMsgSiz
 		}
 	}
 
-	if(!str_endswith(pTooltip, "."))
+	if(!str_ends_with(pTooltip, "."))
 	{
 		str_copy(pErrorMsg, "tooltip has to end with a dot", ErrorMsgSize);
 		return false;

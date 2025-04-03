@@ -250,7 +250,7 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			else if(m_Map.m_vpEnvelopes[CurValue - 1]->m_aName[0])
 			{
 				str_format(aBuf, sizeof(aBuf), "%s:", m_Map.m_vpEnvelopes[CurValue - 1]->m_aName);
-				if(!str_endswith(aBuf, ":"))
+				if(!str_ends_with(aBuf, ":"))
 				{
 					aBuf[sizeof(aBuf) - 2] = ':';
 					aBuf[sizeof(aBuf) - 1] = '\0';

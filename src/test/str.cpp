@@ -295,59 +295,59 @@ TEST(Str, Utf8FixTruncation)
 
 TEST(Str, Startswith)
 {
-	EXPECT_TRUE(str_startswith("abcdef", "abc"));
-	EXPECT_FALSE(str_startswith("abc", "abcdef"));
+	EXPECT_TRUE(str_starts_with("abcdef", "abc"));
+	EXPECT_FALSE(str_starts_with("abc", "abcdef"));
 
-	EXPECT_TRUE(str_startswith("xyz", ""));
-	EXPECT_FALSE(str_startswith("", "xyz"));
+	EXPECT_TRUE(str_starts_with("xyz", ""));
+	EXPECT_FALSE(str_starts_with("", "xyz"));
 
-	EXPECT_FALSE(str_startswith("house", "home"));
-	EXPECT_FALSE(str_startswith("blackboard", "board"));
+	EXPECT_FALSE(str_starts_with("house", "home"));
+	EXPECT_FALSE(str_starts_with("blackboard", "board"));
 
-	EXPECT_TRUE(str_startswith("поплавать", "по"));
-	EXPECT_FALSE(str_startswith("плавать", "по"));
+	EXPECT_TRUE(str_starts_with("поплавать", "по"));
+	EXPECT_FALSE(str_starts_with("плавать", "по"));
 
 	static const char ABCDEFG[] = "abcdefg";
 	static const char ABC[] = "abc";
-	EXPECT_EQ(str_startswith(ABCDEFG, ABC) - ABCDEFG, str_length(ABC));
+	EXPECT_EQ(str_starts_with(ABCDEFG, ABC) - ABCDEFG, str_length(ABC));
 }
 
 TEST(Str, StartswithNocase)
 {
-	EXPECT_TRUE(str_startswith_nocase("Abcdef", "abc"));
-	EXPECT_FALSE(str_startswith_nocase("aBc", "abcdef"));
+	EXPECT_TRUE(str_starts_with_nocase("Abcdef", "abc"));
+	EXPECT_FALSE(str_starts_with_nocase("aBc", "abcdef"));
 
-	EXPECT_TRUE(str_startswith_nocase("xYz", ""));
-	EXPECT_FALSE(str_startswith_nocase("", "xYz"));
+	EXPECT_TRUE(str_starts_with_nocase("xYz", ""));
+	EXPECT_FALSE(str_starts_with_nocase("", "xYz"));
 
-	EXPECT_FALSE(str_startswith_nocase("house", "home"));
-	EXPECT_FALSE(str_startswith_nocase("Blackboard", "board"));
+	EXPECT_FALSE(str_starts_with_nocase("house", "home"));
+	EXPECT_FALSE(str_starts_with_nocase("Blackboard", "board"));
 
-	EXPECT_TRUE(str_startswith_nocase("поплавать", "по"));
-	EXPECT_FALSE(str_startswith_nocase("плавать", "по"));
+	EXPECT_TRUE(str_starts_with_nocase("поплавать", "по"));
+	EXPECT_FALSE(str_starts_with_nocase("плавать", "по"));
 
 	static const char ABCDEFG[] = "aBcdefg";
 	static const char ABC[] = "abc";
-	EXPECT_EQ(str_startswith_nocase(ABCDEFG, ABC) - ABCDEFG, str_length(ABC));
+	EXPECT_EQ(str_starts_with_nocase(ABCDEFG, ABC) - ABCDEFG, str_length(ABC));
 }
 
 TEST(Str, Endswith)
 {
-	EXPECT_TRUE(str_endswith("abcdef", "def"));
-	EXPECT_FALSE(str_endswith("def", "abcdef"));
+	EXPECT_TRUE(str_ends_with("abcdef", "def"));
+	EXPECT_FALSE(str_ends_with("def", "abcdef"));
 
-	EXPECT_TRUE(str_endswith("xyz", ""));
-	EXPECT_FALSE(str_endswith("", "xyz"));
+	EXPECT_TRUE(str_ends_with("xyz", ""));
+	EXPECT_FALSE(str_ends_with("", "xyz"));
 
-	EXPECT_FALSE(str_endswith("rhyme", "mine"));
-	EXPECT_FALSE(str_endswith("blackboard", "black"));
+	EXPECT_FALSE(str_ends_with("rhyme", "mine"));
+	EXPECT_FALSE(str_ends_with("blackboard", "black"));
 
-	EXPECT_TRUE(str_endswith("люди", "юди"));
-	EXPECT_FALSE(str_endswith("люди", "любовь"));
+	EXPECT_TRUE(str_ends_with("люди", "юди"));
+	EXPECT_FALSE(str_ends_with("люди", "любовь"));
 
 	static const char ABCDEFG[] = "abcdefg";
 	static const char DEFG[] = "defg";
-	EXPECT_EQ(str_endswith(ABCDEFG, DEFG) - ABCDEFG,
+	EXPECT_EQ(str_ends_with(ABCDEFG, DEFG) - ABCDEFG,
 		str_length(ABCDEFG) - str_length(DEFG));
 }
 
@@ -374,21 +374,21 @@ TEST(StrFormat, Positional)
 
 TEST(Str, EndswithNocase)
 {
-	EXPECT_TRUE(str_endswith_nocase("abcdef", "deF"));
-	EXPECT_FALSE(str_endswith_nocase("def", "abcdef"));
+	EXPECT_TRUE(str_ends_with_nocase("abcdef", "deF"));
+	EXPECT_FALSE(str_ends_with_nocase("def", "abcdef"));
 
-	EXPECT_TRUE(str_endswith_nocase("xyz", ""));
-	EXPECT_FALSE(str_endswith_nocase("", "xyz"));
+	EXPECT_TRUE(str_ends_with_nocase("xyz", ""));
+	EXPECT_FALSE(str_ends_with_nocase("", "xyz"));
 
-	EXPECT_FALSE(str_endswith_nocase("rhyme", "minE"));
-	EXPECT_FALSE(str_endswith_nocase("blackboard", "black"));
+	EXPECT_FALSE(str_ends_with_nocase("rhyme", "minE"));
+	EXPECT_FALSE(str_ends_with_nocase("blackboard", "black"));
 
-	EXPECT_TRUE(str_endswith_nocase("люди", "юди"));
-	EXPECT_FALSE(str_endswith_nocase("люди", "любовь"));
+	EXPECT_TRUE(str_ends_with_nocase("люди", "юди"));
+	EXPECT_FALSE(str_ends_with_nocase("люди", "любовь"));
 
 	static const char ABCDEFG[] = "abcdefG";
 	static const char DEFG[] = "defg";
-	EXPECT_EQ(str_endswith_nocase(ABCDEFG, DEFG) - ABCDEFG,
+	EXPECT_EQ(str_ends_with_nocase(ABCDEFG, DEFG) - ABCDEFG,
 		str_length(ABCDEFG) - str_length(DEFG));
 }
 

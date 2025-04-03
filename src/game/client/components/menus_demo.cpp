@@ -840,7 +840,7 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	static CButtonContainer s_ButtonOk;
 	if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &OkButton) || (!Ui()->IsPopupOpen() && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
-		if(str_endswith(m_DemoSliceInput.GetString(), ".demo"))
+		if(str_ends_with(m_DemoSliceInput.GetString(), ".demo"))
 		{
 			char aNameWithoutExt[IO_MAX_PATH_LENGTH];
 			fs_split_file_extension(m_DemoSliceInput.GetString(), aNameWithoutExt, sizeof(aNameWithoutExt));
@@ -877,7 +877,7 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 		char aPath[IO_MAX_PATH_LENGTH];
 		str_format(aPath, sizeof(aPath), "%s/%s.demo", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
 		str_copy(m_aCurrentDemoSelectionName, m_DemoSliceInput.GetString());
-		if(str_endswith(m_aCurrentDemoSelectionName, ".demo"))
+		if(str_ends_with(m_aCurrentDemoSelectionName, ".demo"))
 			m_aCurrentDemoSelectionName[str_length(m_aCurrentDemoSelectionName) - str_length(".demo")] = '\0';
 
 		Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
@@ -907,7 +907,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 	CMenus *pSelf = (CMenus *)pUser;
 	if(str_comp(pInfo->m_pName, ".") == 0 ||
 		(str_comp(pInfo->m_pName, "..") == 0 && (pSelf->m_aCurrentDemoFolder[0] == '\0' || (!pSelf->m_DemolistMultipleStorages && str_comp(pSelf->m_aCurrentDemoFolder, "demos") == 0))) ||
-		(!IsDir && !str_endswith(pInfo->m_pName, ".demo")))
+		(!IsDir && !str_ends_with(pInfo->m_pName, ".demo")))
 	{
 		return 0;
 	}

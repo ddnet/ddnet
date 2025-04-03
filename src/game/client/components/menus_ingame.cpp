@@ -1208,7 +1208,7 @@ int CMenus::GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stor
 {
 	CMenus *pSelf = (CMenus *)pUser;
 	const char *pMap = pSelf->Client()->GetCurrentMap();
-	if(IsDir || !str_endswith(pInfo->m_pName, ".gho") || !str_startswith(pInfo->m_pName, pMap))
+	if(IsDir || !str_ends_with(pInfo->m_pName, ".gho") || !str_starts_with(pInfo->m_pName, pMap))
 		return 0;
 
 	char aFilename[IO_MAX_PATH_LENGTH];

@@ -2411,7 +2411,7 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 	};
 	for(int i = std::size(s_apLocations) - 1; i >= 0; i--)
 	{
-		if(str_startswith(pString, s_apLocations[i]))
+		if(str_starts_with(pString, s_apLocations[i]))
 		{
 			*pResult = i;
 			return false;

@@ -214,7 +214,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	if(!IsDir && str_endswith(pName, ".png"))
+	if(!IsDir && str_ends_with(pName, ".png"))
 	{
 		std::string Name = pName;
 		pEditor->m_vSelectEntitiesFiles.push_back(Name.substr(0, Name.length() - 4));

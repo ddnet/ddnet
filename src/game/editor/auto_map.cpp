@@ -90,7 +90,7 @@ void CAutoMapper::Load(const char *pTileName)
 				int RunId = pCurrentConf->m_vRuns.size() - 1;
 				pCurrentRun = &pCurrentConf->m_vRuns[RunId];
 			}
-			else if(str_startswith(pLine, "NewRun") && pCurrentConf)
+			else if(str_starts_with(pLine, "NewRun") && pCurrentConf)
 			{
 				// add new run
 				CRun NewRun;
@@ -99,7 +99,7 @@ void CAutoMapper::Load(const char *pTileName)
 				int RunId = pCurrentConf->m_vRuns.size() - 1;
 				pCurrentRun = &pCurrentConf->m_vRuns[RunId];
 			}
-			else if(str_startswith(pLine, "Index") && pCurrentRun)
+			else if(str_starts_with(pLine, "Index") && pCurrentRun)
 			{
 				// new index
 				CIndexRule NewIndexRule;
@@ -130,7 +130,7 @@ void CAutoMapper::Load(const char *pTileName)
 				int IndexRuleId = pCurrentRun->m_vIndexRules.size() - 1;
 				pCurrentIndex = &pCurrentRun->m_vIndexRules[IndexRuleId];
 			}
-			else if(str_startswith(pLine, "Pos") && pCurrentIndex)
+			else if(str_starts_with(pLine, "Pos") && pCurrentIndex)
 			{
 				int x = 0, y = 0;
 				char aValue[128];
@@ -267,7 +267,7 @@ void CAutoMapper::Load(const char *pTileName)
 					}
 				}
 			}
-			else if(str_startswith(pLine, "Random") && pCurrentIndex)
+			else if(str_starts_with(pLine, "Random") && pCurrentIndex)
 			{
 				float Value;
 				char Specifier = ' ';
@@ -281,7 +281,7 @@ void CAutoMapper::Load(const char *pTileName)
 					pCurrentIndex->m_RandomProbability = 1.0f / Value;
 				}
 			}
-			else if(str_startswith(pLine, "Modulo") && pCurrentIndex)
+			else if(str_starts_with(pLine, "Modulo") && pCurrentIndex)
 			{
 				CModuloRule NewModuloRule;
 				sscanf(pLine, "Modulo %d %d %d %d", &NewModuloRule.m_ModX, &NewModuloRule.m_ModY, &NewModuloRule.m_OffsetX, &NewModuloRule.m_OffsetY);
@@ -291,11 +291,11 @@ void CAutoMapper::Load(const char *pTileName)
 					NewModuloRule.m_ModY = 1;
 				pCurrentIndex->m_vModuloRules.push_back(NewModuloRule);
 			}
-			else if(str_startswith(pLine, "NoDefaultRule") && pCurrentIndex)
+			else if(str_starts_with(pLine, "NoDefaultRule") && pCurrentIndex)
 			{
 				pCurrentIndex->m_DefaultRule = false;
 			}
-			else if(str_startswith(pLine, "NoLayerCopy") && pCurrentRun)
+			else if(str_starts_with(pLine, "NoLayerCopy") && pCurrentRun)
 			{
 				pCurrentRun->m_AutomapCopy = false;
 			}

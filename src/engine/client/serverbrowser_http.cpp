@@ -482,7 +482,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 			{
 				return true;
 			}
-			if(str_startswith(Addresses[a], "tw-0.6+udp://"))
+			if(str_starts_with(Addresses[a], "tw-0.6+udp://"))
 			{
 				GotVersion6 = true;
 				break;
@@ -495,7 +495,7 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 			{
 				return true;
 			}
-			if(GotVersion6 && str_startswith(Addresses[a], "tw-0.7+udp://"))
+			if(GotVersion6 && str_starts_with(Addresses[a], "tw-0.7+udp://"))
 			{
 				continue;
 			}

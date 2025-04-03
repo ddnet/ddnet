@@ -62,7 +62,7 @@ bool CSkins::IsVanillaSkin(const char *pName)
 
 bool CSkins::IsSpecialSkin(const char *pName)
 {
-	return str_startswith(pName, "x_") != nullptr;
+	return str_starts_with(pName, "x_") != nullptr;
 }
 
 class CSkinScanUser
@@ -80,7 +80,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	if(IsDir)
 		return 0;
 
-	const char *pSuffix = str_endswith(pName, ".png");
+	const char *pSuffix = str_ends_with(pName, ".png");
 	if(pSuffix == nullptr)
 		return 0;
 

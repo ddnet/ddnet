@@ -419,7 +419,7 @@ bool CConsole::LineIsValid(const char *pStr)
 
 void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bool InterpretSemicolons)
 {
-	const char *pWithoutPrefix = str_startswith(pStr, "mc;");
+	const char *pWithoutPrefix = str_starts_with(pStr, "mc;");
 	if(pWithoutPrefix)
 	{
 		InterpretSemicolons = true;

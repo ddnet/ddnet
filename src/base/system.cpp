@@ -1245,7 +1245,7 @@ int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 
 int net_host_lookup(const char *hostname, NETADDR *addr, int types)
 {
-	const char *ws_hostname = str_startswith(hostname, "ws://");
+	const char *ws_hostname = str_starts_with(hostname, "ws://");
 	if(ws_hostname)
 	{
 		if((types & NETTYPE_WEBSOCKET_IPV4) == 0)
@@ -1321,8 +1321,8 @@ int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t 
 {
 	bool sixup = false;
 	mem_zero(addr, sizeof(*addr));
-	const char *str = str_startswith(string, "tw-0.6+udp://");
-	if(!str && (str = str_startswith(string, "tw-0.7+udp://")))
+	const char *str = str_starts_with(string, "tw-0.6+udp://");
+	if(!str && (str = str_starts_with(string, "tw-0.7+udp://")))
 	{
 		addr->type |= NETTYPE_TW7;
 		sixup = true;
@@ -1374,7 +1374,7 @@ bool net_addr_is_local(const NETADDR *addr)
 	if(addr->ip[0] == 127 || addr->ip[0] == 10 || (addr->ip[0] == 192 && addr->ip[1] == 168) || (addr->ip[0] == 172 && (addr->ip[1] >= 16 && addr->ip[1] <= 31)))
 		return true;
 
-	if(str_startswith(addr_str, "[fe80:") || str_startswith(addr_str, "[::1"))
+	if(str_starts_with(addr_str, "[fe80:") || str_starts_with(addr_str, "[::1"))
 		return true;
 
 	return false;
@@ -2960,7 +2960,7 @@ bool str_valid_filename(const char *str)
 		"LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "LPT¹", "LPT²", "LPT³"};
 	for(const char *reserved_name : RESERVED_NAMES)
 	{
-		const char *prefix = str_startswith_nocase(str, reserved_name);
+		const char *prefix = str_starts_with_nocase(str, reserved_name);
 		if(prefix != nullptr && (prefix[0] == '\0' || prefix[0] == '.'))
 		{
 			return false; // reserved name not allowed when it makes up the entire filename or when followed by period
@@ -3091,7 +3091,7 @@ int str_comp_filenames(const char *a, const char *b)
 	return *a - *b;
 }
 
-const char *str_startswith_nocase(const char *str, const char *prefix)
+const char *str_starts_with_nocase(const char *str, const char *prefix)
 {
 	int prefixl = str_length(prefix);
 	if(str_comp_nocase_num(str, prefix, prefixl) == 0)
@@ -3104,7 +3104,7 @@ const char *str_startswith_nocase(const char *str, const char *prefix)
 	}
 }
 
-const char *str_startswith(const char *str, const char *prefix)
+const char *str_starts_with(const char *str, const char *prefix)
 {
 	int prefixl = str_length(prefix);
 	if(str_comp_num(str, prefix, prefixl) == 0)
@@ -3117,7 +3117,7 @@ const char *str_startswith(const char *str, const char *prefix)
 	}
 }
 
-const char *str_endswith_nocase(const char *str, const char *suffix)
+const char *str_ends_with_nocase(const char *str, const char *suffix)
 {
 	int strl = str_length(str);
 	int suffixl = str_length(suffix);
@@ -3137,7 +3137,7 @@ const char *str_endswith_nocase(const char *str, const char *suffix)
 	}
 }
 
-const char *str_endswith(const char *str, const char *suffix)
+const char *str_ends_with(const char *str, const char *suffix)
 {
 	int strl = str_length(str);
 	int suffixl = str_length(suffix);
@@ -4323,8 +4323,8 @@ PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state, c
 {
 	dbg_assert((arguments == nullptr) == (num_arguments == 0), "Invalid number of arguments");
 #if defined(CONF_FAMILY_WINDOWS)
-	dbg_assert(str_endswith_nocase(file, ".bat") == nullptr && str_endswith_nocase(file, ".cmd") == nullptr, "Running batch files not allowed");
-	dbg_assert(str_endswith(file, ".exe") != nullptr || num_arguments == 0, "Arguments only allowed with .exe files");
+	dbg_assert(str_ends_with_nocase(file, ".bat") == nullptr && str_ends_with_nocase(file, ".cmd") == nullptr, "Running batch files not allowed");
+	dbg_assert(str_ends_with(file, ".exe") != nullptr || num_arguments == 0, "Arguments only allowed with .exe files");
 
 	const std::wstring wide_file = windows_utf8_to_wide(file);
 	std::wstring wide_arguments = windows_args_to_wide(arguments, num_arguments);
@@ -4695,7 +4695,7 @@ bool os_version_str(char *version, size_t length)
 		read = io_read(os_release, buf, sizeof(buf) - 1);
 		io_close(os_release);
 		buf[read] = 0;
-		if(str_startswith(buf, "PRETTY_NAME="))
+		if(str_starts_with(buf, "PRETTY_NAME="))
 		{
 			offset = 0;
 		}

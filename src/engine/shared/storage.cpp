@@ -137,7 +137,7 @@ public:
 		}
 		while(const char *pLine = LineReader.Get())
 		{
-			const char *pLineWithoutPrefix = str_startswith(pLine, "add_path ");
+			const char *pLineWithoutPrefix = str_starts_with(pLine, "add_path ");
 			if(pLineWithoutPrefix)
 			{
 				if(!AddPath(pLineWithoutPrefix) && !m_NumPaths)
@@ -505,7 +505,7 @@ public:
 			return io_open(GetPath(TYPE_ABSOLUTE, pFilename, pBuffer, BufferSize), Flags);
 		}
 
-		if(str_startswith(pFilename, "mapres/../skins/"))
+		if(str_starts_with(pFilename, "mapres/../skins/"))
 		{
 			pFilename = pFilename + 10; // just start from skins/
 		}

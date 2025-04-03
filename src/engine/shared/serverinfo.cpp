@@ -90,11 +90,11 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	pOut->m_MaxClients = json_int_get(&MaxClients);
 	pOut->m_MaxPlayers = json_int_get(&MaxPlayers);
 	pOut->m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED;
-	if(ClientScoreKind.type == json_string && str_startswith(ClientScoreKind, "points"))
+	if(ClientScoreKind.type == json_string && str_starts_with(ClientScoreKind, "points"))
 	{
 		pOut->m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_POINTS;
 	}
-	else if(ClientScoreKind.type == json_string && str_startswith(ClientScoreKind, "time"))
+	else if(ClientScoreKind.type == json_string && str_starts_with(ClientScoreKind, "time"))
 	{
 		pOut->m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_TIME;
 	}

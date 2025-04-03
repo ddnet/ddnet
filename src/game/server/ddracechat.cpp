@@ -2010,7 +2010,7 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 			// mode 0 = abs, 1 = sub, 2 = add
 
 			// Relative?
-			const char *pStrDelta = str_startswith(pInString, "~");
+			const char *pStrDelta = str_starts_with(pInString, "~");
 
 			float d;
 			if(!str_to_float(pStrDelta ? pStrDelta : pInString, &d))

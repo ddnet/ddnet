@@ -1249,7 +1249,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	Up.Reset(pData, DataSize);
 
 #define GET_STRING(array) str_copy(array, Up.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES), sizeof(array))
-#define GET_INT(integer) (integer) = str_toint(Up.GetString())
+#define GET_INT(integer) (integer) = str_to_int(Up.GetString())
 
 	int Token;
 	int PacketNo = 0; // Only used if SavedType == SERVERINFO_EXTENDED
@@ -3204,11 +3204,11 @@ void CClient::Run()
 		char aFile[IO_MAX_PATH_LENGTH];
 		if(Input()->GetDropFile(aFile, sizeof(aFile)))
 		{
-			if(str_startswith(aFile, CONNECTLINK_NO_SLASH))
+			if(str_starts_with(aFile, CONNECTLINK_NO_SLASH))
 				HandleConnectLink(aFile);
-			else if(str_endswith(aFile, ".demo"))
+			else if(str_ends_with(aFile, ".demo"))
 				HandleDemoPath(aFile);
-			else if(str_endswith(aFile, ".map"))
+			else if(str_ends_with(aFile, ".map"))
 				HandleMapPath(aFile);
 		}
 
@@ -4519,9 +4519,9 @@ void CClient::HandleConnectLink(const char *pLink)
 {
 	// Chrome works fine with ddnet:// but not with ddnet:
 	// Check ddnet:// before ddnet: because we don't want the // as part of connect command
-	if(str_startswith(pLink, CONNECTLINK_DOUBLE_SLASH))
+	if(str_starts_with(pLink, CONNECTLINK_DOUBLE_SLASH))
 		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_DOUBLE_SLASH) - 1);
-	else if(str_startswith(pLink, CONNECTLINK_NO_SLASH))
+	else if(str_starts_with(pLink, CONNECTLINK_NO_SLASH))
 		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_NO_SLASH) - 1);
 	else
 		str_copy(m_aCmdConnect, pLink);
@@ -4544,17 +4544,17 @@ void CClient::HandleMapPath(const char *pPath)
 static bool UnknownArgumentCallback(const char *pCommand, void *pUser)
 {
 	CClient *pClient = static_cast<CClient *>(pUser);
-	if(str_startswith(pCommand, CONNECTLINK_NO_SLASH))
+	if(str_starts_with(pCommand, CONNECTLINK_NO_SLASH))
 	{
 		pClient->HandleConnectLink(pCommand);
 		return true;
 	}
-	else if(str_endswith(pCommand, ".demo"))
+	else if(str_ends_with(pCommand, ".demo"))
 	{
 		pClient->HandleDemoPath(pCommand);
 		return true;
 	}
-	else if(str_endswith(pCommand, ".map"))
+	else if(str_ends_with(pCommand, ".map"))
 	{
 		pClient->HandleMapPath(pCommand);
 		return true;

@@ -1953,7 +1953,7 @@ int CMenus::CommunityIconScan(const char *pName, int IsDir, int DirType, void *p
 {
 	const char *pExtension = ".png";
 	CMenus *pSelf = static_cast<CMenus *>(pUser);
-	if(IsDir || !str_endswith(pName, pExtension) || str_length(pName) - str_length(pExtension) >= (int)CServerInfo::MAX_COMMUNITY_ID_LENGTH)
+	if(IsDir || !str_ends_with(pName, pExtension) || str_length(pName) - str_length(pExtension) >= (int)CServerInfo::MAX_COMMUNITY_ID_LENGTH)
 		return 0;
 
 	char aCommunityId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];

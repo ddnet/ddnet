@@ -44,7 +44,7 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 			log_error("localization", "Unexpected end of index file after language '%s'", aEnglishName);
 			break;
 		}
-		if(!str_startswith(pLine, "== "))
+		if(!str_starts_with(pLine, "== "))
 		{
 			log_error("localization", "Missing native name for language '%s'", aEnglishName);
 			(void)LineReader.Get();
@@ -60,7 +60,7 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 			log_error("localization", "Unexpected end of index file after language '%s'", aEnglishName);
 			break;
 		}
-		if(!str_startswith(pLine, "== "))
+		if(!str_starts_with(pLine, "== "))
 		{
 			log_error("localization", "Missing country code for language '%s'", aEnglishName);
 			(void)LineReader.Get();
@@ -75,7 +75,7 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 			log_error("localization", "Unexpected end of index file after language '%s'", aEnglishName);
 			break;
 		}
-		if(!str_startswith(pLine, "== "))
+		if(!str_starts_with(pLine, "== "))
 		{
 			log_error("localization", "Missing language codes for language '%s'", aEnglishName);
 			continue;
