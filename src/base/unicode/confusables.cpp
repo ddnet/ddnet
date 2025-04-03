@@ -80,7 +80,7 @@ int str_utf8_to_skeleton(const char *str, int *buf, int buf_len)
 	return i;
 }
 
-int str_utf8_comp_no_confusables(const char *str1, const char *str2)
+bool str_utf8_comp_no_confusables(const char *str1, const char *str2)
 {
 	struct SKELETON skel1;
 	struct SKELETON skel2;
