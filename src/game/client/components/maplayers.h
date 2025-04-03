@@ -157,6 +157,7 @@ private:
 	void RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer, bool ForceRender = false);
 
 	int GetLayerType(const CMapItemLayer *pLayer) const;
+	int GetTileLayerAndOverlayCount(const CMapItemLayerTilemap *pLayerTilemap, int LayerType, void **ppTiles = nullptr) const;
 };
 
 #endif

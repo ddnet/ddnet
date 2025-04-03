@@ -363,54 +363,13 @@ void CMapLayers::OnMapLoad()
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				const bool DoTextureCoords = IsEntityLayer || (pTMap->m_Image >= 0 && pTMap->m_Image < m_pImages->Num());
 
-				int DataIndex = 0;
-				unsigned int TileSize = 0;
-				int OverlayCount = 0;
-				if(!IsEntityLayer || LayerType == LAYER_GAME)
-				{
-					DataIndex = pTMap->m_Data;
-					TileSize = sizeof(CTile);
-				}
-				else if(LayerType == LAYER_FRONT)
-				{
-					DataIndex = pTMap->m_Front;
-					TileSize = sizeof(CTile);
-				}
-				else if(LayerType == LAYER_SWITCH)
-				{
-					DataIndex = pTMap->m_Switch;
-					TileSize = sizeof(CSwitchTile);
-					OverlayCount = 2;
-				}
-				else if(LayerType == LAYER_TELE)
-				{
-					DataIndex = pTMap->m_Tele;
-					TileSize = sizeof(CTeleTile);
-					OverlayCount = 1;
-				}
-				else if(LayerType == LAYER_SPEEDUP)
-				{
-					DataIndex = pTMap->m_Speedup;
-					TileSize = sizeof(CSpeedupTile);
-					OverlayCount = 2;
-				}
-				else if(LayerType == LAYER_TUNE)
-				{
-					DataIndex = pTMap->m_Tune;
-					TileSize = sizeof(CTuneTile);
-				}
-				else
-				{
-					dbg_assert(false, "Unknown LayerType %d", LayerType);
-				}
+				void *pTiles;
+				int TileLayerAndOverlayCount = GetTileLayerAndOverlayCount(pTMap, LayerType, &pTiles);
 
-				unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
-				void *pTiles = m_pLayers->Map()->GetData(DataIndex);
-
-				if(Size >= pTMap->m_Width * pTMap->m_Height * TileSize)
+				if(TileLayerAndOverlayCount)
 				{
 					int CurOverlay = 0;
-					while(CurOverlay < OverlayCount + 1)
+					while(CurOverlay < TileLayerAndOverlayCount)
 					{
 						// We can later just count the tile layers to get the idx in the vector
 						m_vpTileLayerVisuals.push_back(new STileLayerVisuals());
@@ -1213,7 +1172,6 @@ void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, 
 		CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer + l);
 		int LayerType = GetLayerType(pLayer);
 		PassedGameLayer |= LayerType == LAYER_GAME;
-		bool IsEntityLayer = LayerType != -1;
 
 		if(m_Type <= TYPE_BACKGROUND_FORCE)
 		{
@@ -1228,57 +1186,7 @@ void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, 
 
 		if(pLayer->m_Type == LAYERTYPE_TILES)
 		{
-			CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-			int DataIndex = 0;
-			unsigned int TileSize = 0;
-			int TileLayerAndOverlayCount = 0;
-
-			if(!IsEntityLayer || LayerType == LAYER_GAME)
-			{
-				DataIndex = pTMap->m_Data;
-				TileSize = sizeof(CTile);
-				TileLayerAndOverlayCount = 1;
-			}
-			else if(LayerType == LAYER_FRONT)
-			{
-				DataIndex = pTMap->m_Front;
-				TileSize = sizeof(CTile);
-				TileLayerAndOverlayCount = 1;
-			}
-			else if(LayerType == LAYER_SWITCH)
-			{
-				DataIndex = pTMap->m_Switch;
-				TileSize = sizeof(CSwitchTile);
-				TileLayerAndOverlayCount = 3;
-			}
-			else if(LayerType == LAYER_TELE)
-			{
-				DataIndex = pTMap->m_Tele;
-				TileSize = sizeof(CTeleTile);
-				TileLayerAndOverlayCount = 2;
-			}
-			else if(LayerType == LAYER_SPEEDUP)
-			{
-				DataIndex = pTMap->m_Speedup;
-				TileSize = sizeof(CSpeedupTile);
-				TileLayerAndOverlayCount = 3;
-			}
-			else if(LayerType == LAYER_TUNE)
-			{
-				DataIndex = pTMap->m_Tune;
-				TileSize = sizeof(CTuneTile);
-				TileLayerAndOverlayCount = 1;
-			}
-			else
-			{
-				dbg_assert(false, "Unknown LayerType %d", LayerType);
-			}
-
-			unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
-			if(Size >= pTMap->m_Width * pTMap->m_Height * TileSize)
-			{
-				TileLayerCounter += TileLayerAndOverlayCount;
-			}
+			TileLayerCounter += GetTileLayerAndOverlayCount((CMapItemLayerTilemap *)pLayer, LayerType);
 		}
 		else if(pLayer->m_Type == LAYERTYPE_QUADS)
 		{
@@ -1396,56 +1304,7 @@ void CMapLayers::OnRender()
 
 			if((Render || LayerType == LAYER_GAME) && pLayer->m_Type == LAYERTYPE_TILES)
 			{
-				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				int DataIndex = 0;
-				unsigned int TileSize = 0;
-				int TileLayerAndOverlayCount = 0;
-				if(!IsEntityLayer || LayerType == LAYER_GAME)
-				{
-					DataIndex = pTMap->m_Data;
-					TileSize = sizeof(CTile);
-					TileLayerAndOverlayCount = 1;
-				}
-				else if(LayerType == LAYER_FRONT)
-				{
-					DataIndex = pTMap->m_Front;
-					TileSize = sizeof(CTile);
-					TileLayerAndOverlayCount = 1;
-				}
-				else if(LayerType == LAYER_SWITCH)
-				{
-					DataIndex = pTMap->m_Switch;
-					TileSize = sizeof(CSwitchTile);
-					TileLayerAndOverlayCount = 3;
-				}
-				else if(LayerType == LAYER_TELE)
-				{
-					DataIndex = pTMap->m_Tele;
-					TileSize = sizeof(CTeleTile);
-					TileLayerAndOverlayCount = 2;
-				}
-				else if(LayerType == LAYER_SPEEDUP)
-				{
-					DataIndex = pTMap->m_Speedup;
-					TileSize = sizeof(CSpeedupTile);
-					TileLayerAndOverlayCount = 3;
-				}
-				else if(LayerType == LAYER_TUNE)
-				{
-					DataIndex = pTMap->m_Tune;
-					TileSize = sizeof(CTuneTile);
-					TileLayerAndOverlayCount = 1;
-				}
-				else
-				{
-					dbg_assert(false, "Unknown LayerType %d", LayerType);
-				}
-
-				unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
-				if(Size >= pTMap->m_Width * pTMap->m_Height * TileSize)
-				{
-					TileLayerCounter += TileLayerAndOverlayCount;
-				}
+				TileLayerCounter += GetTileLayerAndOverlayCount((CMapItemLayerTilemap *)pLayer, LayerType);
 			}
 			else if(Render && pLayer->m_Type == LAYERTYPE_QUADS)
 			{
@@ -1748,4 +1607,56 @@ int CMapLayers::GetLayerType(const CMapItemLayer *pLayer) const
 	else if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
 		return LAYER_TUNE;
 	return -1;
+}
+
+int CMapLayers::GetTileLayerAndOverlayCount(const CMapItemLayerTilemap *pLayerTilemap, int LayerType, void **ppTiles) const
+{
+	int DataIndex;
+	unsigned int TileSize;
+	int OverlayCount;
+	switch(LayerType)
+	{
+	case LAYER_FRONT:
+		DataIndex = pLayerTilemap->m_Front;
+		TileSize = sizeof(CTile);
+		OverlayCount = 0;
+		break;
+	case LAYER_SWITCH:
+		DataIndex = pLayerTilemap->m_Switch;
+		TileSize = sizeof(CSwitchTile);
+		OverlayCount = 2;
+		break;
+	case LAYER_TELE:
+		DataIndex = pLayerTilemap->m_Tele;
+		TileSize = sizeof(CTeleTile);
+		OverlayCount = 1;
+		break;
+	case LAYER_SPEEDUP:
+		DataIndex = pLayerTilemap->m_Speedup;
+		TileSize = sizeof(CSpeedupTile);
+		OverlayCount = 2;
+		break;
+	case LAYER_TUNE:
+		DataIndex = pLayerTilemap->m_Tune;
+		TileSize = sizeof(CTuneTile);
+		OverlayCount = 0;
+		break;
+	case LAYER_GAME:
+	default:
+		DataIndex = pLayerTilemap->m_Data;
+		TileSize = sizeof(CTile);
+		OverlayCount = 0;
+		break;
+	}
+
+	void *pTiles = m_pLayers->Map()->GetData(DataIndex);
+	int Size = m_pLayers->Map()->GetDataSize(DataIndex);
+
+	if(!pTiles || Size < pLayerTilemap->m_Width * pLayerTilemap->m_Height * (int)TileSize)
+		return 0;
+
+	if(ppTiles)
+		*ppTiles = pTiles;
+
+	return OverlayCount + 1; // always add 1 tilelayer
 }
