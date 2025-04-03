@@ -41,7 +41,7 @@ public:
 		FLAG_SIX = 1,
 		FLAG_SEVEN = 2,
 	};
-	unsigned m_Flags;
+	unsigned int m_Flags;
 
 	char m_aSkinName[MAX_SKIN_LENGTH];
 

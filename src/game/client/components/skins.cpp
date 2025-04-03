@@ -32,7 +32,7 @@ bool CSkins::CSkinListEntry::operator<(const CSkins::CSkinListEntry &Other) cons
 	{
 		return false;
 	}
-	return str_comp_nocase(m_pSkin->GetName(), Other.m_pSkin->GetName()) < 0;
+	return str_comp_no_case(m_pSkin->GetName(), Other.m_pSkin->GetName()) < 0;
 }
 
 CSkins::CSkins() :
@@ -62,7 +62,7 @@ bool CSkins::IsVanillaSkin(const char *pName)
 
 bool CSkins::IsSpecialSkin(const char *pName)
 {
-	return str_startswith(pName, "x_") != nullptr;
+	return str_starts_with(pName, "x_") != nullptr;
 }
 
 class CSkinScanUser
@@ -80,7 +80,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	if(IsDir)
 		return 0;
 
-	const char *pSuffix = str_endswith(pName, ".png");
+	const char *pSuffix = str_ends_with(pName, ".png");
 	if(pSuffix == nullptr)
 		return 0;
 
@@ -403,7 +403,7 @@ const std::vector<CSkins::CSkinListEntry> &CSkins::SkinList()
 	m_vSkinList.clear();
 	for(const auto &[_, pSkin] : m_Skins)
 	{
-		if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pSkin->GetName(), g_Config.m_ClSkinFilterString))
+		if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_no_case(pSkin->GetName(), g_Config.m_ClSkinFilterString))
 		{
 			continue;
 		}
@@ -548,8 +548,8 @@ void CSkins::RandomizeSkin(int Dummy)
 		Feet.l = random_float();
 		Feet.s = clamp(GoalSat * GoalSat / (1.0f - Feet.l), 0.0f, 1.0f);
 
-		unsigned *pColorBody = Dummy ? &g_Config.m_ClDummyColorBody : &g_Config.m_ClPlayerColorBody;
-		unsigned *pColorFeet = Dummy ? &g_Config.m_ClDummyColorFeet : &g_Config.m_ClPlayerColorFeet;
+		unsigned int *pColorBody = Dummy ? &g_Config.m_ClDummyColorBody : &g_Config.m_ClPlayerColorBody;
+		unsigned int *pColorFeet = Dummy ? &g_Config.m_ClDummyColorFeet : &g_Config.m_ClPlayerColorFeet;
 
 		*pColorBody = Body.Pack(false);
 		*pColorFeet = Feet.Pack(false);
@@ -635,7 +635,7 @@ void CSkins::CSkinDownloadJob::Run()
 	// Load existing file while waiting for the HTTP request
 	{
 		void *pPngData;
-		unsigned PngSize;
+		unsigned int PngSize;
 		if(m_pSkins->Storage()->ReadFile(aPathReal, IStorage::TYPE_SAVE, &pPngData, &PngSize))
 		{
 			m_pSkins->Graphics()->LoadPng(m_ImageInfo, (uint8_t *)pPngData, PngSize, aPathReal);

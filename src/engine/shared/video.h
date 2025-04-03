@@ -5,7 +5,7 @@
 
 #include <functional>
 
-typedef std::function<void(short *pFinalOut, unsigned Frames)> ISoundMixFunc;
+typedef std::function<void(short *pFinalOut, unsigned int Frames)> ISoundMixFunc;
 
 class IVideo
 {

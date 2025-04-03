@@ -93,7 +93,7 @@ static bool CalculateSha256(const char *pAbsoluteFilename, SHA256_DIGEST *pSha25
 	unsigned char aBuffer[64 * 1024];
 	while(true)
 	{
-		unsigned Bytes = io_read(File, aBuffer, sizeof(aBuffer));
+		unsigned int Bytes = io_read(File, aBuffer, sizeof(aBuffer));
 		if(Bytes == 0)
 			break;
 		sha256_update(&Sha256Ctxt, aBuffer, Bytes);
@@ -124,13 +124,11 @@ bool CHttpRequest::BeforeInit()
 		if(m_SkipByFileTime)
 		{
 			time_t FileCreatedTime, FileModifiedTime;
-			if(fs_file_time(m_aDestAbsolute, &FileCreatedTime, &FileModifiedTime) == 0)
-			{
+			if(fs_file_time(m_aDestAbsolute, &FileCreatedTime, &FileModifiedTime))
 				m_IfModifiedSince = FileModifiedTime;
-			}
 		}
 
-		if(fs_makedir_rec_for(m_aDestAbsoluteTmp) < 0)
+		if(!fs_make_dir_recursive(m_aDestAbsoluteTmp))
 		{
 			log_error("http", "i/o error, cannot create folder for: %s", m_aDest);
 			return false;
@@ -159,7 +157,7 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 		curl_easy_setopt(pH, CURLOPT_VERBOSE, 1L);
 		curl_easy_setopt(pH, CURLOPT_DEBUGFUNCTION, CurlDebug);
 	}
-	long Protocols = CURLPROTO_HTTPS;
+	long int Protocols = CURLPROTO_HTTPS;
 	if(g_Config.m_HttpAllowInsecure)
 	{
 		Protocols |= CURLPROTO_HTTP;
@@ -284,7 +282,7 @@ size_t CHttpRequest::OnHeader(char *pHeader, size_t HeaderSize)
 	static const char LAST_MODIFIED[] = "Last-Modified: ";
 
 	// Trailing newline and null termination evens out.
-	if(HeaderSize - 1 >= sizeof(DATE) - 1 && str_startswith_nocase(pHeader, DATE))
+	if(HeaderSize - 1 >= sizeof(DATE) - 1 && str_starts_with_no_case(pHeader, DATE))
 	{
 		char aValue[128];
 		str_truncate(aValue, sizeof(aValue), pHeader + (sizeof(DATE) - 1), HeaderSize - (sizeof(DATE) - 1) - 1);
@@ -294,7 +292,7 @@ size_t CHttpRequest::OnHeader(char *pHeader, size_t HeaderSize)
 			m_ResultDate = Value;
 		}
 	}
-	if(HeaderSize - 1 >= sizeof(LAST_MODIFIED) - 1 && str_startswith_nocase(pHeader, LAST_MODIFIED))
+	if(HeaderSize - 1 >= sizeof(LAST_MODIFIED) - 1 && str_starts_with_no_case(pHeader, LAST_MODIFIED))
 	{
 		char aValue[128];
 		str_truncate(aValue, sizeof(aValue), pHeader + (sizeof(LAST_MODIFIED) - 1), HeaderSize - (sizeof(LAST_MODIFIED) - 1) - 1);
@@ -374,7 +372,7 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 	if(pHandle)
 	{
 		CURL *pH = (CURL *)pHandle;
-		long StatusCode;
+		long int StatusCode;
 		curl_easy_getinfo(pH, CURLINFO_RESPONSE_CODE, &StatusCode);
 		m_StatusCode = StatusCode;
 	}
@@ -437,7 +435,7 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 				m_pBuffer = nullptr;
 				m_ResponseLength = 0;
 				void *pBuffer;
-				unsigned Length;
+				unsigned int Length;
 				IOHANDLE File = io_open(m_aDestAbsolute, IOFLAG_READ);
 				bool Success = File && io_read_all(File, &pBuffer, &Length);
 				if(File)
@@ -458,7 +456,7 @@ void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 		}
 		else if(!m_ValidateBeforeOverwrite)
 		{
-			if(fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
+			if(!fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
 			{
 				log_error("http", "i/o error, cannot move file: %s", m_aDest);
 				State = EHttpState::ERROR;
@@ -489,7 +487,7 @@ void CHttpRequest::OnValidation(bool Success)
 			fs_remove(m_aDestAbsoluteTmp);
 			return;
 		}
-		if(fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
+		if(!fs_rename(m_aDestAbsoluteTmp, m_aDestAbsolute))
 		{
 			log_error("http", "i/o error, cannot move file: %s", m_aDest);
 			m_State = EHttpState::ERROR;

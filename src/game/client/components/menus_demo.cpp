@@ -28,7 +28,7 @@
 using namespace FontIcons;
 using namespace std::chrono_literals;
 
-int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned Flags, int Corners, bool Enabled)
+int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned int Flags, int Corners, bool Enabled)
 {
 	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * Ui()->ButtonColorMul(pButtonContainer)), Corners, 5.0f);
 
@@ -219,7 +219,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		// seek to 0-90%
 		const int aSeekPercentKeys[] = {KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9};
-		for(unsigned i = 0; i < std::size(aSeekPercentKeys); i++)
+		for(unsigned int i = 0; i < std::size(aSeekPercentKeys); i++)
 		{
 			if(Input()->KeyPress(aSeekPercentKeys[i]))
 			{
@@ -840,7 +840,7 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	static CButtonContainer s_ButtonOk;
 	if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &OkButton) || (!Ui()->IsPopupOpen() && Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
-		if(str_endswith(m_DemoSliceInput.GetString(), ".demo"))
+		if(str_ends_with(m_DemoSliceInput.GetString(), ".demo"))
 		{
 			char aNameWithoutExt[IO_MAX_PATH_LENGTH];
 			fs_split_file_extension(m_DemoSliceInput.GetString(), aNameWithoutExt, sizeof(aNameWithoutExt));
@@ -877,7 +877,7 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 		char aPath[IO_MAX_PATH_LENGTH];
 		str_format(aPath, sizeof(aPath), "%s/%s.demo", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
 		str_copy(m_aCurrentDemoSelectionName, m_DemoSliceInput.GetString());
-		if(str_endswith(m_aCurrentDemoSelectionName, ".demo"))
+		if(str_ends_with(m_aCurrentDemoSelectionName, ".demo"))
 			m_aCurrentDemoSelectionName[str_length(m_aCurrentDemoSelectionName) - str_length(".demo")] = '\0';
 
 		Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
@@ -907,7 +907,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 	CMenus *pSelf = (CMenus *)pUser;
 	if(str_comp(pInfo->m_pName, ".") == 0 ||
 		(str_comp(pInfo->m_pName, "..") == 0 && (pSelf->m_aCurrentDemoFolder[0] == '\0' || (!pSelf->m_DemolistMultipleStorages && str_comp(pSelf->m_aCurrentDemoFolder, "demos") == 0))) ||
-		(!IsDir && !str_endswith(pInfo->m_pName, ".demo")))
+		(!IsDir && !str_ends_with(pInfo->m_pName, ".demo")))
 	{
 		return 0;
 	}
@@ -1004,7 +1004,7 @@ void CMenus::RefreshFilteredDemos()
 	m_vpFilteredDemos.clear();
 	for(auto &Demo : m_vDemos)
 	{
-		if(str_find_nocase(Demo.m_aFilename, m_DemoSearchInput.GetString()))
+		if(str_find_no_case(Demo.m_aFilename, m_DemoSearchInput.GetString()))
 		{
 			m_vpFilteredDemos.push_back(&Demo);
 		}
@@ -1498,7 +1498,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 				{
 					str_copy(m_aCurrentDemoSelectionName, fs_filename(m_aCurrentDemoFolder));
 					str_append(m_aCurrentDemoSelectionName, "/");
-					if(fs_parent_dir(m_aCurrentDemoFolder))
+					if(!fs_parent_dir(m_aCurrentDemoFolder))
 					{
 						m_aCurrentDemoFolder[0] = '\0';
 						if(m_DemolistStorageType == IStorage::TYPE_ALL)

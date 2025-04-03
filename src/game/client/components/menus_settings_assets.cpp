@@ -88,7 +88,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 	}
 	else
 	{
-		if(str_endswith(pName, ".png"))
+		if(str_ends_with(pName, ".png"))
 		{
 			char aName[IO_MAX_PATH_LENGTH];
 			str_truncate(aName, sizeof(aName), pName, str_length(pName) - 4);
@@ -149,7 +149,7 @@ static int AssetScan(const char *pName, int IsDir, int DirType, std::vector<TNam
 	}
 	else
 	{
-		if(str_endswith(pName, ".png"))
+		if(str_ends_with(pName, ".png"))
 		{
 			char aName[IO_MAX_PATH_LENGTH];
 			str_truncate(aName, sizeof(aName), pName, str_length(pName) - 4);
@@ -338,7 +338,7 @@ int InitSearchList(std::vector<const TName *> &vpSearchList, std::vector<TName> 
 		const TName *pAsset = &vAssetList[i];
 
 		// filter quick search
-		if(!s_aFilterInputs[s_CurCustomTab].IsEmpty() && !str_utf8_find_nocase(pAsset->m_aName, s_aFilterInputs[s_CurCustomTab].GetString()))
+		if(!s_aFilterInputs[s_CurCustomTab].IsEmpty() && !str_utf8_find_no_case(pAsset->m_aName, s_aFilterInputs[s_CurCustomTab].GetString()))
 			continue;
 
 		vpSearchList.push_back(pAsset);
@@ -432,7 +432,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 				const SCustomEntities *pEntity = &m_vEntitiesList[i];
 
 				// filter quick search
-				if(!s_aFilterInputs[s_CurCustomTab].IsEmpty() && !str_utf8_find_nocase(pEntity->m_aName, s_aFilterInputs[s_CurCustomTab].GetString()))
+				if(!s_aFilterInputs[s_CurCustomTab].IsEmpty() && !str_utf8_find_no_case(pEntity->m_aName, s_aFilterInputs[s_CurCustomTab].GetString()))
 					continue;
 
 				gs_vpSearchEntitiesList.push_back(pEntity);

@@ -26,8 +26,8 @@ public:
 	static constexpr int ms_##Name = Def; \
 	int m_##Name;
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
-	static constexpr unsigned ms_##Name = Def; \
-	unsigned m_##Name;
+	static constexpr unsigned int ms_##Name = Def; \
+	unsigned int m_##Name;
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
 	static constexpr const char *ms_p##Name = Def; \
 	char m_##Name[Len]; // Flawfinder: ignore
@@ -132,13 +132,13 @@ struct SIntConfigVariable : public SConfigVariable
 
 struct SColorConfigVariable : public SConfigVariable
 {
-	unsigned *m_pVariable;
-	unsigned m_Default;
+	unsigned int *m_pVariable;
+	unsigned int m_Default;
 	float m_DarkestLighting;
 	bool m_Alpha;
-	unsigned m_OldValue;
+	unsigned int m_OldValue;
 
-	SColorConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, unsigned *pVariable, unsigned Default) :
+	SColorConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, unsigned int *pVariable, unsigned int Default) :
 		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
 		m_pVariable(pVariable),
 		m_Default(Default),
@@ -165,9 +165,9 @@ struct SColorConfigVariable : public SConfigVariable
 	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
 	void Register() override;
 	bool IsDefault() const override;
-	void Serialize(char *pOut, size_t Size, unsigned Value) const;
+	void Serialize(char *pOut, size_t Size, unsigned int Value) const;
 	void Serialize(char *pOut, size_t Size) const override;
-	void SetValue(unsigned Value);
+	void SetValue(unsigned int Value);
 	void ResetToDefault() override;
 	void ResetToOld() override;
 };

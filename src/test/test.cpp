@@ -38,12 +38,10 @@ void CTestInfo::Filename(char *pBuffer, size_t BufferLength, const char *pSuffix
 
 std::unique_ptr<IStorage> CTestInfo::CreateTestStorage()
 {
-	bool Error = fs_makedir(m_aFilename);
-	EXPECT_FALSE(Error);
-	if(Error)
-	{
+	bool Success = fs_make_dir(m_aFilename);
+	EXPECT_TRUE(Success);
+	if(!Success)
 		return nullptr;
-	}
 	char aTestPath[IO_MAX_PATH_LENGTH];
 	str_copy(aTestPath, ::testing::internal::GetArgvs().front().c_str());
 	const char *apArgs[] = {aTestPath};
@@ -117,22 +115,16 @@ void TestDeleteTestStorageFiles(const char *pPath)
 	for(auto &Entry : vEntries)
 	{
 		if(Entry.m_IsDirectory)
-		{
-			ASSERT_FALSE(fs_removedir(Entry.m_aData));
-		}
+			ASSERT_TRUE(fs_remove_dir(Entry.m_aData));
 		else
-		{
-			ASSERT_FALSE(fs_remove(Entry.m_aData));
-		}
+			ASSERT_TRUE(fs_remove(Entry.m_aData));
 	}
 }
 
 CTestInfo::~CTestInfo()
 {
 	if(!::testing::Test::HasFailure() && m_DeleteTestStorageFilesOnSuccess)
-	{
 		TestDeleteTestStorageFiles(m_aFilename);
-	}
 }
 
 int main(int argc, const char **argv)
@@ -141,12 +133,12 @@ int main(int argc, const char **argv)
 	log_set_global_logger_default();
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
 	net_init();
-	if(secure_random_init())
+	if(!secure_random_init())
 	{
 		fprintf(stderr, "random init failed\n");
 		return 1;
 	}
 	int Result = RUN_ALL_TESTS();
-	secure_random_uninit();
+	secure_random_deinit();
 	return Result;
 }

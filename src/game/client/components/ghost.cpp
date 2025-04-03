@@ -134,7 +134,7 @@ void CGhost::GetPath(char *pBuf, int Size, const char *pPlayerName, int Time) co
 	str_sanitize_filename(aPlayerName);
 
 	char aTimestamp[32];
-	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_NOSPACE);
+	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_NO_SPACE);
 
 	if(Time < 0)
 		str_format(pBuf, Size, "%s/%s_%s_%s_tmp_%d.gho", ms_pGhostDir, pMap, aPlayerName, aSha256, pid());
@@ -146,7 +146,7 @@ void CGhost::AddInfos(const CNetObj_Character *pChar, const CNetObj_DDNetCharact
 {
 	int NumTicks = m_CurGhost.m_Path.Size();
 
-	// do not start writing to file as long as we still touch the start line
+	// do not start writing to file as long int as we still touch the start line
 	if(g_Config.m_ClRaceSaveGhost && !GhostRecorder()->IsRecording() && NumTicks > 0)
 	{
 		GetPath(m_aTmpFilename, sizeof(m_aTmpFilename), m_CurGhost.m_aPlayer);

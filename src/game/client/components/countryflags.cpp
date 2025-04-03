@@ -47,7 +47,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 			continue;
 		}
 
-		int CountryCode = str_toint(pReplacement + 3);
+		int CountryCode = str_to_int(pReplacement + 3);
 		if(CountryCode < CODE_LB || CountryCode > CODE_UB)
 		{
 			char aBuf[128];

@@ -11,7 +11,7 @@
 
 const char *Localize(const char *pStr, const char *pContext)
 {
-	const char *pNewStr = g_Localization.FindString(str_quickhash(pStr), str_quickhash(pContext));
+	const char *pNewStr = g_Localization.FindString(str_quick_hash(pStr), str_quick_hash(pContext));
 	return pNewStr ? pNewStr : pStr;
 }
 
@@ -44,7 +44,7 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 			log_error("localization", "Unexpected end of index file after language '%s'", aEnglishName);
 			break;
 		}
-		if(!str_startswith(pLine, "== "))
+		if(!str_starts_with(pLine, "== "))
 		{
 			log_error("localization", "Missing native name for language '%s'", aEnglishName);
 			(void)LineReader.Get();
@@ -60,7 +60,7 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 			log_error("localization", "Unexpected end of index file after language '%s'", aEnglishName);
 			break;
 		}
-		if(!str_startswith(pLine, "== "))
+		if(!str_starts_with(pLine, "== "))
 		{
 			log_error("localization", "Missing country code for language '%s'", aEnglishName);
 			(void)LineReader.Get();
@@ -75,7 +75,7 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 			log_error("localization", "Unexpected end of index file after language '%s'", aEnglishName);
 			break;
 		}
-		if(!str_startswith(pLine, "== "))
+		if(!str_starts_with(pLine, "== "))
 		{
 			log_error("localization", "Missing language codes for language '%s'", aEnglishName);
 			continue;
@@ -98,7 +98,7 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 
 		char aFileName[IO_MAX_PATH_LENGTH];
 		str_format(aFileName, sizeof(aFileName), "languages/%s.txt", aEnglishName);
-		m_vLanguages.emplace_back(aNativeName, aFileName, str_toint(aCountryCode), vLanguageCodes);
+		m_vLanguages.emplace_back(aNativeName, aFileName, str_to_int(aCountryCode), vLanguageCodes);
 	}
 
 	std::sort(m_vLanguages.begin(), m_vLanguages.end());
@@ -239,10 +239,10 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 
 void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, const char *pContext)
 {
-	m_vStrings.emplace_back(str_quickhash(pOrgStr), str_quickhash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
+	m_vStrings.emplace_back(str_quick_hash(pOrgStr), str_quick_hash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
 }
 
-const char *CLocalizationDatabase::FindString(unsigned Hash, unsigned ContextHash) const
+const char *CLocalizationDatabase::FindString(unsigned int Hash, unsigned int ContextHash) const
 {
 	CString String;
 	String.m_Hash = Hash;
@@ -252,7 +252,7 @@ const char *CLocalizationDatabase::FindString(unsigned Hash, unsigned ContextHas
 	if(std::distance(Range1.first, Range1.second) == 1)
 		return Range1.first->m_pReplacement;
 
-	const unsigned DefaultHash = str_quickhash("");
+	const unsigned int DefaultHash = str_quick_hash("");
 	if(ContextHash != DefaultHash)
 	{
 		// Do another lookup with the default context hash

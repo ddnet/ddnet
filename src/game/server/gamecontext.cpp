@@ -905,8 +905,8 @@ void CGameContext::SendVoteStatus(int ClientId, int Total, int Yes, int No)
 
 void CGameContext::AbortVoteKickOnDisconnect(int ClientId)
 {
-	if(m_VoteCloseTime && ((str_startswith(m_aVoteCommand, "kick ") && str_toint(&m_aVoteCommand[5]) == ClientId) ||
-				      (str_startswith(m_aVoteCommand, "set_team ") && str_toint(&m_aVoteCommand[9]) == ClientId)))
+	if(m_VoteCloseTime && ((str_starts_with(m_aVoteCommand, "kick ") && str_to_int(&m_aVoteCommand[5]) == ClientId) ||
+				      (str_starts_with(m_aVoteCommand, "set_team ") && str_to_int(&m_aVoteCommand[9]) == ClientId)))
 		m_VoteEnforce = VOTE_ENFORCE_ABORT;
 }
 
@@ -960,7 +960,7 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 	else
 		pParams = (int *)&(m_aTuningList[Zone]);
 
-	for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
+	for(unsigned int i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
 	{
 		if(m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetCharacter())
 		{
@@ -1176,7 +1176,7 @@ void CGameContext::OnTick()
 					else if(CurVote < 0)
 						No++;
 
-					// veto right for players who have been active on server for long and who're not afk
+					// veto right for players who have been active on server for long int and who're not afk
 					if(!IsKickVote() && !IsSpecVote() && g_Config.m_SvVoteVetoTime)
 					{
 						// look through all players with same IP again, including the current player
@@ -1523,10 +1523,10 @@ void CGameContext::OnClientEnter(int ClientId)
 
 		if(Server()->IsSixup(ClientId))
 		{
-			if(!str_comp_nocase(pName, "w") || !str_comp_nocase(pName, "whisper"))
+			if(!str_comp_no_case(pName, "w") || !str_comp_no_case(pName, "whisper"))
 				continue;
 
-			if(!str_comp_nocase(pName, "r"))
+			if(!str_comp_no_case(pName, "r"))
 				pName = "rescue";
 
 			protocol7::CNetMsg_Sv_CommandInfo Msg;
@@ -2058,7 +2058,7 @@ void CGameContext::CensorMessage(char *pCensoredMessage, const char *pMessage, i
 		char *pCurLoc = pCensoredMessage;
 		do
 		{
-			pCurLoc = (char *)str_utf8_find_nocase(pCurLoc, Item.c_str());
+			pCurLoc = (char *)str_utf8_find_no_case(pCurLoc, Item.c_str());
 			if(pCurLoc)
 			{
 				for(int i = 0; i < (int)Item.length(); i++)
@@ -2166,7 +2166,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 		int Code = str_utf8_decode(&p);
 
 		// check if unicode is not empty
-		if(!str_utf8_isspace(Code))
+		if(!str_utf8_is_space(Code))
 		{
 			pEnd = nullptr;
 		}
@@ -2195,25 +2195,25 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 	if(pMsg->m_pMessage[0] == '/')
 	{
 		const char *pWhisper;
-		if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "w ")))
+		if((pWhisper = str_starts_with_no_case(pMsg->m_pMessage + 1, "w ")))
 		{
 			Whisper(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
-		else if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "whisper ")))
+		else if((pWhisper = str_starts_with_no_case(pMsg->m_pMessage + 1, "whisper ")))
 		{
 			Whisper(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
-		else if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "c ")))
+		else if((pWhisper = str_starts_with_no_case(pMsg->m_pMessage + 1, "c ")))
 		{
 			Converse(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
-		else if((pWhisper = str_startswith_nocase(pMsg->m_pMessage + 1, "converse ")))
+		else if((pWhisper = str_starts_with_no_case(pMsg->m_pMessage + 1, "converse ")))
 		{
 			Converse(pPlayer->GetCid(), const_cast<char *>(pWhisper));
 		}
 		else
 		{
-			if(g_Config.m_SvSpamprotection && !str_startswith(pMsg->m_pMessage + 1, "timeout ") && pPlayer->m_aLastCommands[0] && pPlayer->m_aLastCommands[0] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[1] && pPlayer->m_aLastCommands[1] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[2] && pPlayer->m_aLastCommands[2] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[3] && pPlayer->m_aLastCommands[3] + Server()->TickSpeed() > Server()->Tick())
+			if(g_Config.m_SvSpamprotection && !str_starts_with(pMsg->m_pMessage + 1, "timeout ") && pPlayer->m_aLastCommands[0] && pPlayer->m_aLastCommands[0] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[1] && pPlayer->m_aLastCommands[1] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[2] && pPlayer->m_aLastCommands[2] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[3] && pPlayer->m_aLastCommands[3] + Server()->TickSpeed() > Server()->Tick())
 				return;
 
 			int64_t Now = Server()->Tick();
@@ -2270,12 +2270,12 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 	}
 	int Authed = Server()->GetAuthedState(ClientId);
 
-	if(str_comp_nocase(pMsg->m_pType, "option") == 0)
+	if(str_comp_no_case(pMsg->m_pType, "option") == 0)
 	{
 		CVoteOptionServer *pOption = m_pVoteOptionFirst;
 		while(pOption)
 		{
-			if(str_comp_nocase(pMsg->m_pValue, pOption->m_aDescription) == 0)
+			if(str_comp_no_case(pMsg->m_pValue, pOption->m_aDescription) == 0)
 			{
 				if(!Console()->LineIsValid(pOption->m_aCommand))
 				{
@@ -2291,7 +2291,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 					pOption->m_aDescription, aReason);
 				str_copy(aDesc, pOption->m_aDescription);
 
-				if((str_endswith(pOption->m_aCommand, "random_map") || str_endswith(pOption->m_aCommand, "random_unfinished_map")) && str_length(aReason) == 1 && aReason[0] >= '0' && aReason[0] <= '5')
+				if((str_ends_with(pOption->m_aCommand, "random_map") || str_ends_with(pOption->m_aCommand, "random_unfinished_map")) && str_length(aReason) == 1 && aReason[0] >= '0' && aReason[0] <= '5')
 				{
 					int Stars = aReason[0] - '0';
 					str_format(aCmd, sizeof(aCmd), "%s %d", pOption->m_aCommand, Stars);
@@ -2326,7 +2326,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 
 		m_VoteType = VOTE_TYPE_OPTION;
 	}
-	else if(str_comp_nocase(pMsg->m_pType, "kick") == 0)
+	else if(str_comp_no_case(pMsg->m_pType, "kick") == 0)
 	{
 		if(!g_Config.m_SvVoteKick && !Authed) // allow admins to call kick votes even if they are forbidden
 		{
@@ -2380,7 +2380,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 			}
 		}
 
-		int KickId = str_toint(pMsg->m_pValue);
+		int KickId = str_to_int(pMsg->m_pValue);
 
 		if(KickId < 0 || KickId >= MAX_CLIENTS || !m_apPlayers[KickId])
 		{
@@ -2437,7 +2437,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 		m_VoteType = VOTE_TYPE_KICK;
 		m_VoteVictim = KickId;
 	}
-	else if(str_comp_nocase(pMsg->m_pType, "spectate") == 0)
+	else if(str_comp_no_case(pMsg->m_pType, "spectate") == 0)
 	{
 		if(!g_Config.m_SvVoteSpectate)
 		{
@@ -2445,7 +2445,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 			return;
 		}
 
-		int SpectateId = str_toint(pMsg->m_pValue);
+		int SpectateId = str_to_int(pMsg->m_pValue);
 
 		if(SpectateId < 0 || SpectateId >= MAX_CLIENTS || !m_apPlayers[SpectateId] || m_apPlayers[SpectateId]->GetTeam() == TEAM_SPECTATORS)
 		{
@@ -2494,7 +2494,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 		m_VoteVictim = SpectateId;
 	}
 
-	if(aCmd[0] && str_comp_nocase(aCmd, "info") != 0)
+	if(aCmd[0] && str_comp_no_case(aCmd, "info") != 0)
 		CallVote(ClientId, aDesc, aCmd, aReason, aChatmsg, aSixupDesc[0] ? aSixupDesc : nullptr);
 }
 
@@ -3313,7 +3313,7 @@ void CGameContext::AddVote(const char *pDescription, const char *pCommand)
 	CVoteOptionServer *pOption = m_pVoteOptionFirst;
 	while(pOption)
 	{
-		if(str_comp_nocase(pDescription, pOption->m_aDescription) == 0)
+		if(str_comp_no_case(pDescription, pOption->m_aDescription) == 0)
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "option '%s' already exists", pDescription);
@@ -3349,7 +3349,7 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
 	CVoteOptionServer *pOption = pSelf->m_pVoteOptionFirst;
 	while(pOption)
 	{
-		if(str_comp_nocase(pDescription, pOption->m_aDescription) == 0)
+		if(str_comp_no_case(pDescription, pOption->m_aDescription) == 0)
 			break;
 		pOption = pOption->m_pNext;
 	}
@@ -3417,12 +3417,12 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 	const char *pReason = pResult->NumArguments() > 2 && pResult->GetString(2)[0] ? pResult->GetString(2) : "No reason given";
 	char aBuf[128] = {0};
 
-	if(str_comp_nocase(pType, "option") == 0)
+	if(str_comp_no_case(pType, "option") == 0)
 	{
 		CVoteOptionServer *pOption = pSelf->m_pVoteOptionFirst;
 		while(pOption)
 		{
-			if(str_comp_nocase(pValue, pOption->m_aDescription) == 0)
+			if(str_comp_no_case(pValue, pOption->m_aDescription) == 0)
 			{
 				str_format(aBuf, sizeof(aBuf), "authorized player forced server option '%s' (%s)", pValue, pReason);
 				pSelf->SendChatTarget(-1, aBuf, FLAG_SIX);
@@ -3441,9 +3441,9 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 	}
-	else if(str_comp_nocase(pType, "kick") == 0)
+	else if(str_comp_no_case(pType, "kick") == 0)
 	{
-		int KickId = str_toint(pValue);
+		int KickId = str_to_int(pValue);
 		if(KickId < 0 || KickId >= MAX_CLIENTS || !pSelf->m_apPlayers[KickId])
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to kick");
@@ -3461,9 +3461,9 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 			pSelf->Console()->ExecuteLine(aBuf);
 		}
 	}
-	else if(str_comp_nocase(pType, "spectate") == 0)
+	else if(str_comp_no_case(pType, "spectate") == 0)
 	{
-		int SpectateId = str_toint(pValue);
+		int SpectateId = str_to_int(pValue);
 		if(SpectateId < 0 || SpectateId >= MAX_CLIENTS || !pSelf->m_apPlayers[SpectateId] || pSelf->m_apPlayers[SpectateId]->GetTeam() == TEAM_SPECTATORS)
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "Invalid client id to move");
@@ -3521,7 +3521,7 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 	const char *pDirectory = pResult->GetString(0);
 
 	// Don't allow moving to parent directories
-	if(str_find_nocase(pDirectory, ".."))
+	if(str_find_no_case(pDirectory, ".."))
 		return;
 
 	char aPath[IO_MAX_PATH_LENGTH] = "maps/";
@@ -3569,7 +3569,7 @@ void CGameContext::ConAddMapVotes(IConsole::IResult *pResult, void *pUserData)
 
 int CGameContext::MapScan(const char *pName, int IsDir, int DirType, void *pUserData)
 {
-	if((!IsDir && !str_endswith(pName, ".map")) || !str_comp(pName, "."))
+	if((!IsDir && !str_ends_with(pName, ".map")) || !str_comp(pName, "."))
 		return 0;
 
 	CMapNameItem Item;
@@ -3587,9 +3587,9 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	if(str_comp_nocase(pResult->GetString(0), "yes") == 0)
+	if(str_comp_no_case(pResult->GetString(0), "yes") == 0)
 		pSelf->ForceVote(pResult->m_ClientId, true);
-	else if(str_comp_nocase(pResult->GetString(0), "no") == 0)
+	else if(str_comp_no_case(pResult->GetString(0), "no") == 0)
 		pSelf->ForceVote(pResult->m_ClientId, false);
 }
 
@@ -3863,7 +3863,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("endless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeEndlessHook, this, "Gives you endless hook");
 	Console()->Register("unendless", "", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeUnEndlessHook, this, "Removes endless hook from you");
 	Console()->Register("invincible", "?i['0'|'1']", CFGFLAG_CHAT | CMDFLAG_PRACTICE, ConPracticeToggleInvincible, this, "Toggles invincible mode");
-	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
+	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long int game (use f1, kill for regular kill)");
 }
 
 void CGameContext::OnInit(const void *pPersistentData)
@@ -4379,7 +4379,7 @@ void CGameContext::OnSnap(int ClientId)
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 		int *pParams = (int *)&m_Tuning;
-		for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
+		for(unsigned int i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
 			Msg.AddInt(pParams[i]);
 		Server()->SendMsg(&Msg, MSGFLAG_RECORD | MSGFLAG_NOSEND, ClientId);
 	}
@@ -4489,7 +4489,7 @@ void CGameContext::OnSetAuthed(int ClientId, int Level)
 	{
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "ban %s %d Banned by vote", Server()->ClientAddrString(ClientId, false), g_Config.m_SvVoteKickBantime);
-		if(!str_comp_nocase(m_aVoteCommand, aBuf) && (m_VoteCreator == -1 || Level > Server()->GetAuthedState(m_VoteCreator)))
+		if(!str_comp_no_case(m_aVoteCommand, aBuf) && (m_VoteCreator == -1 || Level > Server()->GetAuthedState(m_VoteCreator)))
 		{
 			m_VoteEnforce = CGameContext::VOTE_ENFORCE_NO_ADMIN;
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", "Vote aborted by authorized login.");
@@ -4814,7 +4814,7 @@ void CGameContext::List(int ClientId, const char *pFilter)
 		{
 			Total++;
 			const char *pName = Server()->ClientName(i);
-			if(str_utf8_find_nocase(pName, pFilter) == nullptr)
+			if(str_utf8_find_no_case(pName, pFilter) == nullptr)
 				continue;
 			if(Bufcnt + str_length(pName) + 4 > 256)
 			{

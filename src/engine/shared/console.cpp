@@ -19,36 +19,36 @@
 
 // todo: rework this
 
-const char *CConsole::CResult::GetString(unsigned Index) const
+const char *CConsole::CResult::GetString(unsigned int Index) const
 {
 	if(Index >= m_NumArgs)
 		return "";
 	return m_apArgs[Index];
 }
 
-int CConsole::CResult::GetInteger(unsigned Index) const
+int CConsole::CResult::GetInteger(unsigned int Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0;
-	return str_toint(m_apArgs[Index]);
+	return str_to_int(m_apArgs[Index]);
 }
 
-float CConsole::CResult::GetFloat(unsigned Index) const
+float CConsole::CResult::GetFloat(unsigned int Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0.0f;
-	return str_tofloat(m_apArgs[Index]);
+	return str_to_float(m_apArgs[Index]);
 }
 
-std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float DarkestLighting) const
+std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned int Index, float DarkestLighting) const
 {
 	if(Index >= m_NumArgs)
 		return std::nullopt;
 
 	const char *pStr = m_apArgs[Index];
-	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr + 1))) // Teeworlds Color (Packed HSL)
+	if(str_is_all_num(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_is_all_num(pStr + 1))) // Teeworlds Color (Packed HSL)
 	{
-		unsigned long Value = str_toulong_base(pStr, 10);
+		unsigned long int Value = str_to_ulong_base(pStr, 10);
 		if(Value == std::numeric_limits<unsigned long>::max())
 			return std::nullopt;
 		return ColorHSLA(Value, true).UnclampLighting(DarkestLighting);
@@ -61,23 +61,23 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 		else
 			return std::nullopt;
 	}
-	else if(!str_comp_nocase(pStr, "red"))
+	else if(!str_comp_no_case(pStr, "red"))
 		return ColorHSLA(0.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "yellow"))
+	else if(!str_comp_no_case(pStr, "yellow"))
 		return ColorHSLA(1.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "green"))
+	else if(!str_comp_no_case(pStr, "green"))
 		return ColorHSLA(2.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "cyan"))
+	else if(!str_comp_no_case(pStr, "cyan"))
 		return ColorHSLA(3.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "blue"))
+	else if(!str_comp_no_case(pStr, "blue"))
 		return ColorHSLA(4.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "magenta"))
+	else if(!str_comp_no_case(pStr, "magenta"))
 		return ColorHSLA(5.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "white"))
+	else if(!str_comp_no_case(pStr, "white"))
 		return ColorHSLA(0, 0, 1);
-	else if(!str_comp_nocase(pStr, "gray"))
+	else if(!str_comp_no_case(pStr, "gray"))
 		return ColorHSLA(0, 0, .5f);
-	else if(!str_comp_nocase(pStr, "black"))
+	else if(!str_comp_no_case(pStr, "black"))
 		return ColorHSLA(0, 0, 0);
 
 	return std::nullopt;
@@ -235,7 +235,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat, bool IsColor)
 					if(!IsColor)
 					{
 						int Value;
-						if(!str_toint(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
+						if(!str_to_int(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
 							Value == std::numeric_limits<int>::max() || Value == std::numeric_limits<int>::min())
 						{
 							Error = PARSEARGS_INVALID_INTEGER;
@@ -246,7 +246,7 @@ int CConsole::ParseArgs(CResult *pResult, const char *pFormat, bool IsColor)
 				else if(Command == 'f')
 				{
 					float Value;
-					if(!str_tofloat(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
+					if(!str_to_float(pResult->GetString(pResult->NumArguments() - 1), &Value) ||
 						Value == std::numeric_limits<float>::max() || Value == std::numeric_limits<float>::min())
 					{
 						Error = PARSEARGS_INVALID_FLOAT;
@@ -419,7 +419,7 @@ bool CConsole::LineIsValid(const char *pStr)
 
 void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bool InterpretSemicolons)
 {
-	const char *pWithoutPrefix = str_startswith(pStr, "mc;");
+	const char *pWithoutPrefix = str_starts_with(pStr, "mc;");
 	if(pWithoutPrefix)
 	{
 		InterpretSemicolons = true;
@@ -591,7 +591,7 @@ int CConsole::PossibleCommands(const char *pStr, int FlagMask, bool Temp, FPossi
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->m_Temp == Temp)
 		{
-			if(str_find_nocase(pCommand->m_pName, pStr))
+			if(str_find_no_case(pCommand->m_pName, pStr))
 			{
 				pfnCallback(Index, pCommand->m_pName, pUser);
 				Index++;
@@ -607,7 +607,7 @@ CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 	{
 		if(pCommand->m_Flags & FlagMask)
 		{
-			if(str_comp_nocase(pCommand->m_pName, pName) == 0)
+			if(str_comp_no_case(pCommand->m_pName, pName) == 0)
 				return pCommand;
 		}
 	}
@@ -1046,7 +1046,7 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 	{
 		if(pCommand->m_Flags & FlagMask && pCommand->m_Temp == Temp)
 		{
-			if(str_comp_nocase(pCommand->m_pName, pName) == 0)
+			if(str_comp_no_case(pCommand->m_pName, pName) == 0)
 				return pCommand;
 		}
 	}
@@ -1083,5 +1083,5 @@ void CConsole::CResult::SetVictim(const char *pVictim)
 	else if(!str_comp(pVictim, "all"))
 		m_Victim = VICTIM_ALL;
 	else
-		m_Victim = clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
+		m_Victim = clamp<int>(str_to_int(pVictim), 0, MAX_CLIENTS - 1);
 }

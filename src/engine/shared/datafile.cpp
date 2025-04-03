@@ -99,7 +99,7 @@ class CDatafile
 public:
 	IOHANDLE m_File;
 	SHA256_DIGEST m_Sha256;
-	unsigned m_Crc;
+	unsigned int m_Crc;
 	CDatafileInfo m_Info;
 	CDatafileHeader m_Header;
 	int m_DataStartOffset;
@@ -134,7 +134,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	}
 
 	// take the CRC of the file and store it
-	unsigned Crc = 0;
+	unsigned int Crc = 0;
 	SHA256_DIGEST Sha256;
 	{
 		enum
@@ -148,7 +148,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 
 		while(true)
 		{
-			unsigned Bytes = io_read(File, aBuffer, BUFFER_SIZE);
+			unsigned int Bytes = io_read(File, aBuffer, BUFFER_SIZE);
 			if(Bytes == 0)
 				break;
 			Crc = crc32(Crc, aBuffer, Bytes);
@@ -185,14 +185,14 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	}
 
 	// read in the rest except the data
-	unsigned Size = 0;
+	unsigned int Size = 0;
 	Size += Header.m_NumItemTypes * sizeof(CDatafileItemType);
 	Size += (Header.m_NumItems + Header.m_NumRawData) * sizeof(int);
 	if(Header.m_Version == 4)
 		Size += Header.m_NumRawData * sizeof(int); // v4 has uncompressed data sizes as well
 	Size += Header.m_ItemSize;
 
-	unsigned AllocSize = Size;
+	unsigned int AllocSize = Size;
 	AllocSize += sizeof(CDatafile); // add space for info structure
 	AllocSize += Header.m_NumRawData * sizeof(void *); // add space for data pointers
 	AllocSize += Header.m_NumRawData * sizeof(int); // add space for data sizes
@@ -218,7 +218,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	mem_zero(pTmpDataFile->m_pDataSizes, Header.m_NumRawData * sizeof(int));
 
 	// read types, offsets, sizes and item data
-	unsigned ReadSize = io_read(File, pTmpDataFile->m_pData, Size);
+	unsigned int ReadSize = io_read(File, pTmpDataFile->m_pData, Size);
 	if(ReadSize != Size)
 	{
 		io_close(pTmpDataFile->m_File);
@@ -338,22 +338,22 @@ void *CDataFileReader::GetDataImpl(int Index, bool Swap)
 			return nullptr;
 
 		// fetch the data size
-		unsigned DataSize = GetFileDataSize(Index);
+		unsigned int DataSize = GetFileDataSize(Index);
 #if defined(CONF_ARCH_ENDIAN_BIG)
-		unsigned SwapSize = DataSize;
+		unsigned int SwapSize = DataSize;
 #endif
 
 		if(m_pDataFile->m_Header.m_Version == 4)
 		{
 			// v4 has compressed data
-			const unsigned OriginalUncompressedSize = m_pDataFile->m_Info.m_pDataSizes[Index];
-			unsigned long UncompressedSize = OriginalUncompressedSize;
+			const unsigned int OriginalUncompressedSize = m_pDataFile->m_Info.m_pDataSizes[Index];
+			unsigned long int UncompressedSize = OriginalUncompressedSize;
 
 			log_trace("datafile", "loading data. index=%d size=%u uncompressed=%u", Index, DataSize, OriginalUncompressedSize);
 
 			// read the compressed data
 			void *pCompressedData = malloc(DataSize);
-			unsigned ActualDataSize = 0;
+			unsigned int ActualDataSize = 0;
 			if(io_seek(m_pDataFile->m_File, m_pDataFile->m_DataStartOffset + m_pDataFile->m_Info.m_pDataOffsets[Index], IOSEEK_START) == 0)
 				ActualDataSize = io_read(m_pDataFile->m_File, pCompressedData, DataSize);
 			if(DataSize != ActualDataSize)
@@ -389,7 +389,7 @@ void *CDataFileReader::GetDataImpl(int Index, bool Swap)
 			log_trace("datafile", "loading data. index=%d size=%d", Index, DataSize);
 			m_pDataFile->m_ppDataPtrs[Index] = static_cast<char *>(malloc(DataSize));
 			m_pDataFile->m_pDataSizes[Index] = DataSize;
-			unsigned ActualDataSize = 0;
+			unsigned int ActualDataSize = 0;
 			if(io_seek(m_pDataFile->m_File, m_pDataFile->m_DataStartOffset + m_pDataFile->m_Info.m_pDataOffsets[Index], IOSEEK_START) == 0)
 				ActualDataSize = io_read(m_pDataFile->m_File, m_pDataFile->m_ppDataPtrs[Index], DataSize);
 			if(DataSize != ActualDataSize)
@@ -594,7 +594,7 @@ SHA256_DIGEST CDataFileReader::Sha256() const
 	return m_pDataFile->m_Sha256;
 }
 
-unsigned CDataFileReader::Crc() const
+unsigned int CDataFileReader::Crc() const
 {
 	dbg_assert(m_pDataFile != nullptr, "File not open");
 
@@ -790,7 +790,7 @@ void CDataFileWriter::Finish()
 	// so it's delayed until the end so it can be off-loaded to another thread.
 	for(CDataInfo &DataInfo : m_vDatas)
 	{
-		unsigned long CompressedSize = compressBound(DataInfo.m_UncompressedSize);
+		unsigned long int CompressedSize = compressBound(DataInfo.m_UncompressedSize);
 		DataInfo.m_pCompressedData = malloc(CompressedSize);
 		const int Result = compress2((Bytef *)DataInfo.m_pCompressedData, &CompressedSize, (Bytef *)DataInfo.m_pUncompressedData, DataInfo.m_UncompressedSize, CompressionLevelToZlib(DataInfo.m_CompressionLevel));
 		DataInfo.m_CompressedSize = CompressedSize;

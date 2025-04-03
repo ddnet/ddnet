@@ -133,7 +133,7 @@ void CLineInput::MoveCursor(EMoveDirection Direction, bool MoveWord, const char 
 	// When rewinding, check character to the left of the cursor position (rewind first).
 	size_t PeekCursorPos = Direction == FORWARD ? *pCursorPos : str_utf8_rewind(pStr, *pCursorPos);
 	const char *pTemp = pStr + PeekCursorPos;
-	bool AnySpace = str_utf8_isspace(str_utf8_decode(&pTemp));
+	bool AnySpace = str_utf8_is_space(str_utf8_decode(&pTemp));
 	bool AnyWord = !AnySpace;
 	while(true)
 	{
@@ -145,7 +145,7 @@ void CLineInput::MoveCursor(EMoveDirection Direction, bool MoveWord, const char 
 			break;
 		PeekCursorPos = Direction == FORWARD ? *pCursorPos : str_utf8_rewind(pStr, *pCursorPos);
 		pTemp = pStr + PeekCursorPos;
-		const bool CurrentSpace = str_utf8_isspace(str_utf8_decode(&pTemp));
+		const bool CurrentSpace = str_utf8_is_space(str_utf8_decode(&pTemp));
 		const bool CurrentWord = !CurrentSpace;
 		if(Direction == FORWARD && AnySpace && !CurrentSpace)
 			break; // Forward: Stop when next (right) character is non-space after seeing at least one space character.
@@ -688,7 +688,7 @@ void CLineInputNumber::SetInteger(int Number, int Base, int HexPrefix)
 
 int CLineInputNumber::GetInteger(int Base) const
 {
-	return str_toint_base(GetString(), Base);
+	return str_to_int_base(GetString(), Base);
 }
 
 void CLineInputNumber::SetInteger64(int64_t Number, int Base, int HexPrefix)
@@ -712,7 +712,7 @@ void CLineInputNumber::SetInteger64(int64_t Number, int Base, int HexPrefix)
 
 int64_t CLineInputNumber::GetInteger64(int Base) const
 {
-	return str_toint64_base(GetString(), Base);
+	return str_to_int64_base(GetString(), Base);
 }
 
 void CLineInputNumber::SetFloat(float Number)
@@ -725,5 +725,5 @@ void CLineInputNumber::SetFloat(float Number)
 
 float CLineInputNumber::GetFloat() const
 {
-	return str_tofloat(GetString());
+	return str_to_float(GetString());
 }

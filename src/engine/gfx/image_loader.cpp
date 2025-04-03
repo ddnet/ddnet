@@ -281,7 +281,7 @@ bool CImageLoader::LoadPng(IOHANDLE File, const char *pFilename, CImageInfo &Ima
 	}
 
 	void *pFileData;
-	unsigned FileDataSize;
+	unsigned int FileDataSize;
 	const bool ReadSuccess = io_read_all(File, &pFileData, &FileDataSize);
 	io_close(File);
 	if(!ReadSuccess)

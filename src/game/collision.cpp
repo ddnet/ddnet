@@ -911,7 +911,7 @@ int CCollision::GetMapIndex(vec2 Pos) const
 		return -1;
 }
 
-std::vector<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices) const
+std::vector<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned int MaxIndices) const
 {
 	std::vector<int> vIndices;
 	float d = distance(PrevPos, Pos);

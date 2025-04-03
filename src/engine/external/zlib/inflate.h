@@ -88,39 +88,39 @@ struct inflate_state {
     int havedict;               /* true if dictionary provided */
     int flags;                  /* gzip header method and flags, 0 if zlib, or
                                    -1 if raw or no header yet */
-    unsigned dmax;              /* zlib header max distance (INFLATE_STRICT) */
-    unsigned long check;        /* protected copy of check value */
-    unsigned long total;        /* protected copy of output count */
+    unsigned int dmax;              /* zlib header max distance (INFLATE_STRICT) */
+    unsigned long int check;        /* protected copy of check value */
+    unsigned long int total;        /* protected copy of output count */
     gz_headerp head;            /* where to save gzip header information */
         /* sliding window */
-    unsigned wbits;             /* log base 2 of requested window size */
-    unsigned wsize;             /* window size or zero if not using window */
-    unsigned whave;             /* valid bytes in the window */
-    unsigned wnext;             /* window write index */
+    unsigned int wbits;             /* log base 2 of requested window size */
+    unsigned int wsize;             /* window size or zero if not using window */
+    unsigned int whave;             /* valid bytes in the window */
+    unsigned int wnext;             /* window write index */
     unsigned char FAR *window;  /* allocated sliding window, if needed */
         /* bit accumulator */
-    unsigned long hold;         /* input bit accumulator */
-    unsigned bits;              /* number of bits in "in" */
+    unsigned long int hold;         /* input bit accumulator */
+    unsigned int bits;              /* number of bits in "in" */
         /* for string and stored block copying */
-    unsigned length;            /* literal or length of data to copy */
-    unsigned offset;            /* distance back to copy string from */
+    unsigned int length;            /* literal or length of data to copy */
+    unsigned int offset;            /* distance back to copy string from */
         /* for table and code decoding */
-    unsigned extra;             /* extra bits needed */
+    unsigned int extra;             /* extra bits needed */
         /* fixed and dynamic code tables */
     code const FAR *lencode;    /* starting table for length/literal codes */
     code const FAR *distcode;   /* starting table for distance codes */
-    unsigned lenbits;           /* index bits for lencode */
-    unsigned distbits;          /* index bits for distcode */
+    unsigned int lenbits;           /* index bits for lencode */
+    unsigned int distbits;          /* index bits for distcode */
         /* dynamic table building */
-    unsigned ncode;             /* number of code length code lengths */
-    unsigned nlen;              /* number of length code lengths */
-    unsigned ndist;             /* number of distance code lengths */
-    unsigned have;              /* number of code lengths in lens[] */
+    unsigned int ncode;             /* number of code length code lengths */
+    unsigned int nlen;              /* number of length code lengths */
+    unsigned int ndist;             /* number of distance code lengths */
+    unsigned int have;              /* number of code lengths in lens[] */
     code FAR *next;             /* next available space in codes[] */
     unsigned short lens[320];   /* temporary storage for code lengths */
     unsigned short work[288];   /* work area for code table building */
     code codes[ENOUGH];         /* space for code tables */
     int sane;                   /* if false, allow invalid distance too far */
     int back;                   /* bits back of last unprocessed length/lit */
-    unsigned was;               /* initial length of match */
+    unsigned int was;               /* initial length of match */
 };

@@ -8,6 +8,13 @@
 #include <game/client/component.h>
 #include <game/generated/protocol.h>
 
+enum class EHookStrongWeak
+{
+	WEAK,
+	NEUTRAL,
+	STRONG
+};
+
 class CNamePlateData
 {
 public:
@@ -31,12 +38,7 @@ public:
 	bool m_DirRight;
 	float m_FontSizeDirection;
 	bool m_ShowHookStrongWeak;
-	enum
-	{
-		HOOKSTRONGWEAK_WEAK,
-		HOOKSTRONGWEAK_NEUTRAL,
-		HOOKSTRONGWEAK_STRONG
-	} m_HookStrongWeak;
+	EHookStrongWeak m_HookStrongWeak;
 	bool m_ShowHookStrongWeakId;
 	int m_HookStrongWeakId;
 	float m_FontSizeHookStrongWeak;

@@ -35,7 +35,7 @@ void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pF
 		else
 		{
 			char aTimestring[TIMESTAMP_LENGTH];
-			str_timestamp_ex(FileEntry.m_Timestamp, aTimestring, sizeof(aBuf), FORMAT_NOSPACE);
+			str_timestamp_ex(FileEntry.m_Timestamp, aTimestring, sizeof(aBuf), FORMAT_NO_SPACE);
 			str_format(aBuf, sizeof(aBuf), "%s/%s_%s%s", m_aPath, m_aFileDesc, aTimestring, m_aFileExt);
 		}
 
@@ -49,13 +49,13 @@ bool CFileCollection::ExtractTimestamp(const char *pTimestring, time_t *pTimesta
 	// Discard anything after timestamp length from pTimestring (most likely the extension)
 	char aStrippedTimestring[TIMESTAMP_LENGTH];
 	str_copy(aStrippedTimestring, pTimestring);
-	return timestamp_from_str(aStrippedTimestring, FORMAT_NOSPACE, pTimestamp);
+	return timestamp_from_str(aStrippedTimestring, FORMAT_NO_SPACE, pTimestamp);
 }
 
 bool CFileCollection::ParseFilename(const char *pFilename, time_t *pTimestamp)
 {
 	// Check if filename is valid
-	if(!str_endswith(pFilename, m_aFileExt))
+	if(!str_ends_with(pFilename, m_aFileExt))
 		return false;
 
 	const char *pTimestring = pFilename;
@@ -73,7 +73,7 @@ bool CFileCollection::ParseFilename(const char *pFilename, time_t *pTimestamp)
 	else
 	{
 		if(str_length(pFilename) != m_FileDescLength + TIMESTAMP_LENGTH + m_FileExtLength ||
-			!str_startswith(pFilename, m_aFileDesc))
+			!str_starts_with(pFilename, m_aFileDesc))
 			return false;
 
 		pTimestring += m_FileDescLength + 1;

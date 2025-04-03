@@ -49,7 +49,7 @@ const unsigned char *CVariableInt::Unpack(const unsigned char *pSrc, int *pInOut
 	static const int s_aMasks[] = {0x7F, 0x7F, 0x7F, 0x0F};
 	static const int s_aShifts[] = {6, 6 + 7, 6 + 7 + 7, 6 + 7 + 7 + 7};
 
-	for(unsigned i = 0; i < std::size(s_aMasks); i++)
+	for(unsigned int i = 0; i < std::size(s_aMasks); i++)
 	{
 		if(!(*pSrc & 0x80))
 			break;
@@ -65,7 +65,7 @@ const unsigned char *CVariableInt::Unpack(const unsigned char *pSrc, int *pInOut
 	return pSrc;
 }
 
-long CVariableInt::Decompress(const void *pSrc_, int SrcSize, void *pDst_, int DstSize)
+long int CVariableInt::Decompress(const void *pSrc_, int SrcSize, void *pDst_, int DstSize)
 {
 	dbg_assert(DstSize % sizeof(int) == 0, "invalid bounds");
 
@@ -85,7 +85,7 @@ long CVariableInt::Decompress(const void *pSrc_, int SrcSize, void *pDst_, int D
 	return (long)((unsigned char *)pDst - (unsigned char *)pDst_);
 }
 
-long CVariableInt::Compress(const void *pSrc_, int SrcSize, void *pDst_, int DstSize)
+long int CVariableInt::Compress(const void *pSrc_, int SrcSize, void *pDst_, int DstSize)
 {
 	dbg_assert(SrcSize % sizeof(int) == 0, "invalid bounds");
 

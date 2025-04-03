@@ -92,7 +92,7 @@ int main(int argc, const char **argv)
 	vpLoggers.push_back(pFutureAssertionLogger);
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
-	if(secure_random_init() != 0)
+	if(!secure_random_init())
 	{
 		log_error("secure", "could not initialize secure RNG");
 		return -1;
@@ -211,7 +211,7 @@ int main(int argc, const char **argv)
 	delete pKernel;
 
 	MysqlUninit();
-	secure_random_uninit();
+	secure_random_deinit();
 
 	return Ret;
 }
@@ -244,12 +244,10 @@ JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME, NativeServer, runServer, jint, JNIEn
 	// Set working directory to external storage location. This is not possible
 	// in Java so we pass the intended working directory to the native code.
 	const char *pWorkingDirectory = pEnv->GetStringUTFChars(WorkingDirectory, nullptr);
-	const bool WorkingDirectoryError = fs_chdir(pWorkingDirectory) != 0;
+	const bool WorkingDirectoryError = !fs_change_cwd(pWorkingDirectory);
 	pEnv->ReleaseStringUTFChars(WorkingDirectory, pWorkingDirectory);
 	if(WorkingDirectoryError)
-	{
 		return -1001;
-	}
 
 	const jsize NumArguments = pEnv->GetArrayLength(ArgumentsArray);
 

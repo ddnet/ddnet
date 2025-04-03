@@ -113,7 +113,7 @@ void CMenuBackground::LoadThemeIcon(CTheme &Theme)
 int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	CMenuBackground *pSelf = (CMenuBackground *)pUser;
-	const char *pSuffix = str_endswith(pName, ".map");
+	const char *pSuffix = str_ends_with(pName, ".map");
 	if(IsDir || !pSuffix)
 		return 0;
 	char aFullName[128];
@@ -122,12 +122,12 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 
 	bool IsDay = false;
 	bool IsNight = false;
-	if((pSuffix = str_endswith(aFullName, "_day")))
+	if((pSuffix = str_ends_with(aFullName, "_day")))
 	{
 		str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - aFullName);
 		IsDay = true;
 	}
-	else if((pSuffix = str_endswith(aFullName, "_night")))
+	else if((pSuffix = str_ends_with(aFullName, "_night")))
 	{
 		str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - aFullName);
 		IsNight = true;

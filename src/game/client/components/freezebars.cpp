@@ -45,7 +45,7 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float Width, 
 	const float RestPct = 0.5f;
 	const float ProgPct = 0.5f;
 
-	const float EndWidth = Height; // to keep the correct scale - the height of the sprite is as long as the width
+	const float EndWidth = Height; // to keep the correct scale - the height of the sprite is as long int as the width
 	const float BarHeight = Height;
 	const float WholeBarWidth = Width;
 	const float MiddleBarWidth = WholeBarWidth - (EndWidth * 2.0f);

@@ -326,7 +326,7 @@ bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		"  CASE WHEN Map LIKE ? THEN 0 ELSE 1 END, "
 		"  LENGTH(Map), Map "
 		"LIMIT 1",
-		pSqlServer->GetPrefix(), pSqlServer->CollateNocase());
+		pSqlServer->GetPrefix(), pSqlServer->CollateNoCase());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;
@@ -405,7 +405,7 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 		pSqlServer->MedianMapTime(aMedianMapTime, sizeof(aMedianMapTime)),
 		aTimestamp, aCurrentTimestamp, aTimestamp,
 		pSqlServer->GetPrefix(), pSqlServer->GetPrefix(),
-		pSqlServer->CollateNocase());
+		pSqlServer->CollateNoCase());
 	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 	{
 		return true;
@@ -895,7 +895,7 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 		{
 			pResult->m_MessageKind = CScorePlayerResult::ALL;
 
-			if(str_comp_nocase(pData->m_aRequestingPlayer, pData->m_aName) == 0)
+			if(str_comp_no_case(pData->m_aRequestingPlayer, pData->m_aName) == 0)
 			{
 				str_format(pResult->m_Data.m_aaMessages[0], sizeof(pResult->m_Data.m_aaMessages[0]),
 					"%s - %s - better than %d%%",
@@ -1374,7 +1374,7 @@ bool CScoreWorker::ShowTimes(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		{
 			if(Stamp == 0) // stamp is 00:00:00 cause it's an old entry from old times where there where no stamps yet
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
-					"%s%s, don't know how long ago", aServerFormatted, aBuf);
+					"%s%s, don't know how long int ago", aServerFormatted, aBuf);
 			else
 				str_format(paMessages[Line], sizeof(paMessages[Line]),
 					"%s%s ago, %s", aServerFormatted, aAgoString, aBuf);

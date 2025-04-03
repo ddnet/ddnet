@@ -54,13 +54,13 @@ TEST(CVariableInt, RoundtripCompressDecompress)
 {
 	unsigned char aCompressed[NUM * CVariableInt::MAX_BYTES_PACKED];
 	int aDecompressed[NUM];
-	long ExpectedCompressedSize = 0;
+	long int ExpectedCompressedSize = 0;
 	for(auto Size : SIZES)
 		ExpectedCompressedSize += Size;
 
-	long CompressedSize = CVariableInt::Compress(DATA, sizeof(DATA), aCompressed, sizeof(aCompressed));
+	long int CompressedSize = CVariableInt::Compress(DATA, sizeof(DATA), aCompressed, sizeof(aCompressed));
 	ASSERT_EQ(CompressedSize, ExpectedCompressedSize);
-	long DecompressedSize = CVariableInt::Decompress(aCompressed, ExpectedCompressedSize, aDecompressed, sizeof(aDecompressed));
+	long int DecompressedSize = CVariableInt::Decompress(aCompressed, ExpectedCompressedSize, aDecompressed, sizeof(aDecompressed));
 	ASSERT_EQ(DecompressedSize, sizeof(DATA));
 	for(int i = 0; i < NUM; i++)
 	{
@@ -71,7 +71,7 @@ TEST(CVariableInt, RoundtripCompressDecompress)
 TEST(CVariableInt, CompressBufferTooSmall)
 {
 	unsigned char aCompressed[NUM]; // too small
-	long CompressedSize = CVariableInt::Compress(DATA, sizeof(DATA), aCompressed, sizeof(aCompressed));
+	long int CompressedSize = CVariableInt::Compress(DATA, sizeof(DATA), aCompressed, sizeof(aCompressed));
 	ASSERT_EQ(CompressedSize, -1);
 }
 
@@ -79,6 +79,6 @@ TEST(CVariableInt, DecompressBufferTooSmall)
 {
 	unsigned char aCompressed[] = {0x00, 0x01, 0x40, 0x20, 0x80, 0x01, 0x80, 0x04, 0xFF, 0x07, 0xB9, 0xC0, 0x01};
 	int aUncompressed[4]; // too small
-	long CompressedSize = CVariableInt::Decompress(aCompressed, sizeof(aCompressed), aUncompressed, sizeof(aUncompressed));
+	long int CompressedSize = CVariableInt::Decompress(aCompressed, sizeof(aCompressed), aUncompressed, sizeof(aUncompressed));
 	ASSERT_EQ(CompressedSize, -1);
 }

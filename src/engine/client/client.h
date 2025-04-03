@@ -365,7 +365,7 @@ public:
 	const char *DummyName() override;
 	const char *ErrorString() const override;
 
-	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc);
+	const char *LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned int WantedCrc);
 	const char *LoadMapSearch(const char *pMapName, SHA256_DIGEST *pWantedSha256, int WantedCrc);
 
 	int TranslateSysMsg(int *pMsgId, bool System, CUnpacker *pUnpacker, CPacker *pPacker, CNetChunk *pPacket, bool *pIsExMsg);
@@ -505,7 +505,7 @@ public:
 	const char *GetCurrentMap() const override;
 	const char *GetCurrentMapPath() const override;
 	SHA256_DIGEST GetCurrentMapSha256() const override;
-	unsigned GetCurrentMapCrc() const override;
+	unsigned int GetCurrentMapCrc() const override;
 
 	void RaceRecord_Start(const char *pFilename) override;
 	void RaceRecord_Stop() override;

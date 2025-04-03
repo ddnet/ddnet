@@ -2,23 +2,23 @@
 
 #include "tolower.h"
 
-static int compul(const void *a, const void *b)
+static int CompUl(const void *pA, const void *pB)
 {
-	struct UPPER_LOWER *ul_a = (struct UPPER_LOWER *)a;
-	struct UPPER_LOWER *ul_b = (struct UPPER_LOWER *)b;
-	return ul_a->upper - ul_b->upper;
+	CUpperToLower *ul_a = (CUpperToLower *)pA;
+	CUpperToLower *ul_b = (CUpperToLower *)pB;
+	return ul_a->m_Upper - ul_b->m_Upper;
 }
 
-int str_utf8_tolower(int code)
+int str_utf8_to_lower(int code)
 {
-	struct UPPER_LOWER key;
-	struct UPPER_LOWER *res;
-	key.upper = code;
-	res = (UPPER_LOWER *)bsearch(&key, tolowermap, NUM_TOLOWER, sizeof(struct UPPER_LOWER), compul);
+	CUpperToLower Key;
+	CUpperToLower *pRes;
+	Key.m_Upper = code;
+	pRes = (CUpperToLower *)bsearch(&Key, ToLowerMap, ToLowerNum, sizeof(CUpperToLower), CompUl);
 
-	if(res == nullptr)
+	if(pRes == nullptr)
 		return code;
-	return res->lower;
+	return pRes->m_Lower;
 }
 
 #define TOLOWER_DATA

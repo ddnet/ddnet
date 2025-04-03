@@ -42,7 +42,7 @@ public:
 
 bool matchesPart(const char *a, const char *b)
 {
-	return str_utf8_find_nocase(a, b) != nullptr;
+	return str_utf8_find_no_case(a, b) != nullptr;
 }
 
 bool matchesExactly(const char *a, const char *b)
@@ -436,11 +436,11 @@ void CServerBrowser::Filter()
 			Filtered = true;
 		else if(g_Config.m_BrFilterPw && Info.m_Flags & SERVER_FLAG_PASSWORD)
 			Filtered = true;
-		else if(g_Config.m_BrFilterServerAddress[0] && !str_find_nocase(Info.m_aAddress, g_Config.m_BrFilterServerAddress))
+		else if(g_Config.m_BrFilterServerAddress[0] && !str_find_no_case(Info.m_aAddress, g_Config.m_BrFilterServerAddress))
 			Filtered = true;
-		else if(g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && str_comp_nocase(Info.m_aGameType, g_Config.m_BrFilterGametype))
+		else if(g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && str_comp_no_case(Info.m_aGameType, g_Config.m_BrFilterGametype))
 			Filtered = true;
-		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_utf8_find_nocase(Info.m_aGameType, g_Config.m_BrFilterGametype))
+		else if(!g_Config.m_BrFilterGametypeStrict && g_Config.m_BrFilterGametype[0] && !str_utf8_find_no_case(Info.m_aGameType, g_Config.m_BrFilterGametype))
 			Filtered = true;
 		else if(g_Config.m_BrFilterUnfinishedMap && Info.m_HasRank == CServerInfo::RANK_RANKED)
 			Filtered = true;
@@ -736,7 +736,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 
 	if(pEntry->m_Info.m_ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED)
 	{
-		if(str_find_nocase(pEntry->m_Info.m_aGameType, "race") || str_find_nocase(pEntry->m_Info.m_aGameType, "fastcap"))
+		if(str_find_no_case(pEntry->m_Info.m_aGameType, "race") || str_find_no_case(pEntry->m_Info.m_aGameType, "fastcap"))
 		{
 			pEntry->m_Info.m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT;
 		}
@@ -785,7 +785,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) cons
 					return Score0 > Score1;
 			}
 
-			return str_comp_nocase(p0.m_aName, p1.m_aName) < 0;
+			return str_comp_no_case(p0.m_aName, p1.m_aName) < 0;
 		}
 	};
 
@@ -1383,7 +1383,7 @@ const json_value *CServerBrowser::LoadDDNetInfo()
 void CServerBrowser::LoadDDNetInfoJson()
 {
 	void *pBuf;
-	unsigned Length;
+	unsigned int Length;
 	if(!m_pStorage->ReadFile(DDNET_INFO_FILE, IStorage::TYPE_SAVE, &pBuf, &Length))
 	{
 		m_DDNetInfoSha256 = SHA256_ZEROED;
@@ -1425,7 +1425,7 @@ void CServerBrowser::LoadDDNetLocation()
 
 bool CServerBrowser::ParseCommunityServers(CCommunity *pCommunity, const json_value &Servers)
 {
-	for(unsigned ServerIndex = 0; ServerIndex < Servers.u.array.length; ++ServerIndex)
+	for(unsigned int ServerIndex = 0; ServerIndex < Servers.u.array.length; ++ServerIndex)
 	{
 		// pServer - { name, flagId, servers }
 		const json_value &Server = Servers[ServerIndex];
@@ -1449,7 +1449,7 @@ bool CServerBrowser::ParseCommunityServers(CCommunity *pCommunity, const json_va
 		pCommunity->m_vCountries.emplace_back(Name.u.string.ptr, FlagId.u.integer);
 		CCommunityCountry *pCountry = &pCommunity->m_vCountries.back();
 
-		for(unsigned TypeIndex = 0; TypeIndex < Types.u.object.length; ++TypeIndex)
+		for(unsigned int TypeIndex = 0; TypeIndex < Types.u.object.length; ++TypeIndex)
 		{
 			const json_value &Addresses = *Types.u.object.values[TypeIndex].value;
 			if(Addresses.type != json_array)
@@ -1472,7 +1472,7 @@ bool CServerBrowser::ParseCommunityServers(CCommunity *pCommunity, const json_va
 			}
 
 			// add addresses
-			for(unsigned AddressIndex = 0; AddressIndex < Addresses.u.array.length; ++AddressIndex)
+			for(unsigned int AddressIndex = 0; AddressIndex < Addresses.u.array.length; ++AddressIndex)
 			{
 				const json_value &Address = Addresses[AddressIndex];
 				if(Address.type != json_string)
@@ -1495,7 +1495,7 @@ bool CServerBrowser::ParseCommunityServers(CCommunity *pCommunity, const json_va
 
 bool CServerBrowser::ParseCommunityFinishes(CCommunity *pCommunity, const json_value &Finishes)
 {
-	for(unsigned FinishIndex = 0; FinishIndex < Finishes.u.array.length; ++FinishIndex)
+	for(unsigned int FinishIndex = 0; FinishIndex < Finishes.u.array.length; ++FinishIndex)
 	{
 		const json_value &Finish = Finishes[FinishIndex];
 		if(Finish.type != json_string)
@@ -1525,7 +1525,7 @@ void CServerBrowser::LoadDDNetServers()
 		return;
 	}
 
-	for(unsigned CommunityIndex = 0; CommunityIndex < Communities.u.array.length; ++CommunityIndex)
+	for(unsigned int CommunityIndex = 0; CommunityIndex < Communities.u.array.length; ++CommunityIndex)
 	{
 		const json_value &Community = Communities[CommunityIndex];
 		if(Community.type != json_object)
@@ -1811,20 +1811,20 @@ std::vector<const CCommunity *> CServerBrowser::CurrentCommunities() const
 	}
 }
 
-unsigned CServerBrowser::CurrentCommunitiesHash() const
+unsigned int CServerBrowser::CurrentCommunitiesHash() const
 {
 	std::vector<const CCommunity *> vpCommunities = CurrentCommunities();
-	unsigned Hash = 5381;
+	unsigned int Hash = 5381;
 	for(const CCommunity *pCommunity : CurrentCommunities())
 	{
-		Hash = (Hash << 5) + Hash + str_quickhash(pCommunity->Id());
+		Hash = (Hash << 5) + Hash + str_quick_hash(pCommunity->Id());
 	}
 	return Hash;
 }
 
 void CCommunityCache::Update(bool Force)
 {
-	const unsigned CommunitiesHash = m_pServerBrowser->CurrentCommunitiesHash();
+	const unsigned int CommunitiesHash = m_pServerBrowser->CurrentCommunitiesHash();
 	const bool TypeChanged = m_LastType != m_pServerBrowser->GetCurrentType();
 	const bool CurrentCommunitiesChanged = m_LastType == m_pServerBrowser->GetCurrentType() && m_SelectedCommunitiesHash != CommunitiesHash;
 	if(CurrentCommunitiesChanged && m_pServerBrowser->GetCurrentType() >= IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 && m_pServerBrowser->GetCurrentType() <= IServerBrowser::TYPE_FAVORITE_COMMUNITY_5)
@@ -2411,7 +2411,7 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 	};
 	for(int i = std::size(s_apLocations) - 1; i >= 0; i--)
 	{
-		if(str_startswith(pString, s_apLocations[i]))
+		if(str_starts_with(pString, s_apLocations[i]))
 		{
 			*pResult = i;
 			return false;

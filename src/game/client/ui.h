@@ -237,7 +237,7 @@ struct SMenuButtonProperties
 	float m_Rounding = 5.0f;
 	float m_FontFactor = 0.0f;
 	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f);
-	unsigned m_Flags = BUTTONFLAG_LEFT;
+	unsigned int m_Flags = BUTTONFLAG_LEFT;
 };
 
 class CUIElementBase
@@ -391,15 +391,15 @@ private:
 	vec2 m_MousePos = vec2(0.0f, 0.0f); // in gui space
 	vec2 m_MouseDelta = vec2(0.0f, 0.0f); // in gui space
 	vec2 m_MouseWorldPos = vec2(-1.0f, -1.0f); // in world space
-	unsigned m_UpdatedMouseButtons = 0;
-	unsigned m_MouseButtons = 0;
-	unsigned m_LastMouseButtons = 0;
+	unsigned int m_UpdatedMouseButtons = 0;
+	unsigned int m_MouseButtons = 0;
+	unsigned int m_LastMouseButtons = 0;
 	CTouchState m_TouchState;
 	bool m_MouseSlow = false;
 	bool m_MouseLock = false;
 	const void *m_pMouseLockId = nullptr;
 
-	unsigned m_HotkeysPressed = 0;
+	unsigned int m_HotkeysPressed = 0;
 
 	CUIRect m_Screen;
 
@@ -568,7 +568,7 @@ public:
 	const CUIRect *ClipArea() const;
 	inline bool IsClipped() const { return !m_vClips.empty(); }
 
-	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect, const unsigned Flags);
+	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect, const unsigned int Flags);
 	int DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
 	bool DoDoubleClickLogic(const void *pId);
 	EEditState DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, float *pY);
@@ -652,7 +652,7 @@ public:
 	};
 	float DoScrollbarV(const void *pId, const CUIRect *pRect, float Current);
 	float DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
-	bool DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u, const char *pSuffix = "");
+	bool DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned int Flags = 0u, const char *pSuffix = "");
 
 	// progress bar
 	void RenderProgressBar(CUIRect ProgressBar, float Progress);

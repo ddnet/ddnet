@@ -80,7 +80,7 @@ int str_utf8_to_skeleton(const char *str, int *buf, int buf_len)
 	return i;
 }
 
-int str_utf8_comp_confusable(const char *str1, const char *str2)
+bool str_utf8_comp_no_confusables(const char *str1, const char *str2)
 {
 	struct SKELETON skel1;
 	struct SKELETON skel2;
@@ -94,10 +94,10 @@ int str_utf8_comp_confusable(const char *str1, const char *str2)
 		int ch2 = str_utf8_skeleton_next(&skel2);
 
 		if(ch1 == 0 || ch2 == 0)
-			return ch1 != ch2;
+			return ch1 == ch2;
 
 		if(ch1 != ch2)
-			return 1;
+			return false;
 	}
 }
 

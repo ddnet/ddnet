@@ -41,7 +41,7 @@ int CRaceHelper::TimeFromSecondsStr(const char *pStr)
 		pStr++;
 	if(!isdigit(*pStr))
 		return -1;
-	int Time = str_toint(pStr) * 1000;
+	int Time = str_to_int(pStr) * 1000;
 	while(isdigit(*pStr))
 		pStr++;
 	if(*pStr == '.' || *pStr == ',')
@@ -71,7 +71,7 @@ int CRaceHelper::TimeFromStr(const char *pStr)
 		int SecondsTime = TimeFromSecondsStr(pMinutes + str_length(s_pMinutesStr));
 		if(SecondsTime == -1 || !isdigit(*pStr))
 			return -1;
-		return str_toint(pStr) * 60 * 1000 + SecondsTime;
+		return str_to_int(pStr) * 60 * 1000 + SecondsTime;
 	}
 	else
 		return TimeFromSecondsStr(pStr);

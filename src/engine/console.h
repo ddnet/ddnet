@@ -46,7 +46,7 @@ public:
 	class IResult
 	{
 	protected:
-		unsigned m_NumArgs;
+		unsigned int m_NumArgs;
 
 	public:
 		IResult(int ClientId) :
@@ -57,12 +57,12 @@ public:
 			m_ClientId(Other.m_ClientId) {}
 		virtual ~IResult() {}
 
-		virtual int GetInteger(unsigned Index) const = 0;
-		virtual float GetFloat(unsigned Index) const = 0;
-		virtual const char *GetString(unsigned Index) const = 0;
-		virtual std::optional<ColorHSLA> GetColor(unsigned Index, float DarkestLighting) const = 0;
+		virtual int GetInteger(unsigned int Index) const = 0;
+		virtual float GetFloat(unsigned int Index) const = 0;
+		virtual const char *GetString(unsigned int Index) const = 0;
+		virtual std::optional<ColorHSLA> GetColor(unsigned int Index, float DarkestLighting) const = 0;
 
-		virtual void RemoveArgument(unsigned Index) = 0;
+		virtual void RemoveArgument(unsigned int Index) = 0;
 
 		int NumArguments() const { return m_NumArgs; }
 		int m_ClientId;

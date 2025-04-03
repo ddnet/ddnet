@@ -2812,7 +2812,7 @@ std::optional<SWarning> CGraphics_Threaded::CurrentWarning()
 	}
 }
 
-bool CGraphics_Threaded::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
+bool CGraphics_Threaded::ShowMessageBox(unsigned int Type, const char *pTitle, const char *pMsg)
 {
 	if(m_pBackend == nullptr)
 		return false;

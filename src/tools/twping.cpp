@@ -69,10 +69,10 @@ int main(int argc, const char **argv)
 	{
 		if(Packet.m_DataSize >= (int)sizeof(SERVERBROWSE_INFO) && mem_comp(Packet.m_pData, SERVERBROWSE_INFO, sizeof(SERVERBROWSE_INFO)) == 0)
 		{
-			// we got ze info
+			// we got ze info 🤌🤌
 			CUnpacker Unpacker;
 			Unpacker.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_INFO), Packet.m_DataSize - sizeof(SERVERBROWSE_INFO));
-			int Token = str_toint(Unpacker.GetString());
+			int Token = str_to_int(Unpacker.GetString());
 			if(Token != CurToken)
 				continue;
 

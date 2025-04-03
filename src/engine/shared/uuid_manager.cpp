@@ -41,7 +41,7 @@ CUuid CalculateUuid(const char *pName)
 	MD5_DIGEST Digest = md5_finish(&Md5);
 
 	CUuid Result;
-	for(unsigned i = 0; i < sizeof(Result.m_aData); i++)
+	for(unsigned int i = 0; i < sizeof(Result.m_aData); i++)
 	{
 		Result.m_aData[i] = Digest.data[i];
 	}
@@ -57,7 +57,7 @@ CUuid CalculateUuid(const char *pName)
 	return Result;
 }
 
-void FormatUuid(CUuid Uuid, char *pBuffer, unsigned BufferLength)
+void FormatUuid(CUuid Uuid, char *pBuffer, unsigned int BufferLength)
 {
 	unsigned char *p = Uuid.m_aData;
 	str_format(pBuffer, BufferLength,

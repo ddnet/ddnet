@@ -831,7 +831,7 @@ bool CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 	char aBuf[IO_MAX_PATH_LENGTH];
 	// add map extension
-	if(!str_endswith(pFileName, ".map"))
+	if(!str_ends_with(pFileName, ".map"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.map", pFileName);
 		pFileName = aBuf;
@@ -869,7 +869,7 @@ bool CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 	char aBuf[IO_MAX_PATH_LENGTH];
 	// add map extension
-	if(!str_endswith(pFileName, ".map"))
+	if(!str_ends_with(pFileName, ".map"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.map", pFileName);
 		pFileName = aBuf;
@@ -895,7 +895,7 @@ bool CEditor::CallbackSaveImage(const char *pFileName, int StorageType, void *pU
 	char aBuf[IO_MAX_PATH_LENGTH];
 
 	// add file extension
-	if(!str_endswith(pFileName, ".png"))
+	if(!str_ends_with(pFileName, ".png"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.png", pFileName);
 		pFileName = aBuf;
@@ -923,7 +923,7 @@ bool CEditor::CallbackSaveSound(const char *pFileName, int StorageType, void *pU
 	char aBuf[IO_MAX_PATH_LENGTH];
 
 	// add file extension
-	if(!str_endswith(pFileName, ".opus"))
+	if(!str_ends_with(pFileName, ".opus"))
 	{
 		str_format(aBuf, sizeof(aBuf), "%s.opus", pFileName);
 		pFileName = aBuf;
@@ -3754,7 +3754,7 @@ void CEditor::DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRG
 			std::string Clipboard = Input()->GetClipboardText();
 			if(Clipboard[0] == '#' || Clipboard[0] == '$') // ignore leading # (web color format) and $ (console color format)
 				Clipboard = Clipboard.substr(1);
-			if(str_isallnum_hex(Clipboard.c_str()))
+			if(str_is_all_num_hex(Clipboard.c_str()))
 			{
 				std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(Clipboard.c_str());
 				if(ParsedColor)
@@ -4443,7 +4443,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	LayersBox.HSplitTop(RowHeight + 1.0f, &CollapseAllButton, &LayersBox);
 	if(s_ScrollRegion.AddRect(CollapseAllButton))
 	{
-		unsigned long TotalCollapsed = 0;
+		unsigned long int TotalCollapsed = 0;
 		for(const auto &pGroup : m_Map.m_vpGroups)
 		{
 			if(pGroup->m_Collapse)
@@ -4650,7 +4650,7 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 
 	// load external
 	void *pData;
-	unsigned DataSize;
+	unsigned int DataSize;
 	if(!pEditor->Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
 	{
 		pEditor->ShowFileDialogError("Failed to open sound file '%s'.", pFileName);
@@ -4708,7 +4708,7 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 
 	// load external
 	void *pData;
-	unsigned DataSize;
+	unsigned int DataSize;
 	if(!Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
 	{
 		ShowFileDialogError("Failed to open sound file '%s'.", pFileName);
@@ -5112,9 +5112,9 @@ static int EditorListdirCallback(const CFsFileInfo *pInfo, int IsDir, int Storag
 	CEditor *pEditor = (CEditor *)pUser;
 	if((pInfo->m_pName[0] == '.' && (pInfo->m_pName[1] == 0 ||
 						(pInfo->m_pName[1] == '.' && pInfo->m_pName[2] == 0 && (pEditor->m_FileDialogShowingRoot || (!pEditor->m_FileDialogMultipleStorages && (!str_comp(pEditor->m_pFileDialogPath, "maps") || !str_comp(pEditor->m_pFileDialogPath, "mapres"))))))) ||
-		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && !str_endswith(pInfo->m_pName, ".map")) ||
-				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && !str_endswith(pInfo->m_pName, ".png")) ||
-				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && !str_endswith(pInfo->m_pName, ".opus")))))
+		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && !str_ends_with(pInfo->m_pName, ".map")) ||
+				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && !str_ends_with(pInfo->m_pName, ".png")) ||
+				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && !str_ends_with(pInfo->m_pName, ".opus")))))
 		return 0;
 
 	CEditor::CFilelistItem Item;
@@ -5269,7 +5269,7 @@ void CEditor::RenderFileDialog()
 		// find first valid entry, if it exists
 		for(size_t i = 0; i < m_vpFilteredFileList.size(); i++)
 		{
-			if(str_comp_nocase(m_vpFilteredFileList[i]->m_aName, m_FileDialogFileNameInput.GetString()) == 0)
+			if(str_comp_no_case(m_vpFilteredFileList[i]->m_aName, m_FileDialogFileNameInput.GetString()) == 0)
 			{
 				m_FilesSelectedIndex = i;
 				str_copy(m_aFilesSelectedName, m_vpFilteredFileList[i]->m_aName);
@@ -5326,13 +5326,13 @@ void CEditor::RenderFileDialog()
 			{
 				m_FilesSelectedIndex = -1;
 			}
-			else if(m_FilesSelectedIndex == -1 || (!m_FileDialogFilterInput.IsEmpty() && !str_find_nocase(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aName, m_FileDialogFilterInput.GetString())))
+			else if(m_FilesSelectedIndex == -1 || (!m_FileDialogFilterInput.IsEmpty() && !str_find_no_case(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aName, m_FileDialogFilterInput.GetString())))
 			{
 				// we need to refresh selection
 				m_FilesSelectedIndex = -1;
 				for(size_t i = 0; i < m_vpFilteredFileList.size(); i++)
 				{
-					if(str_find_nocase(m_vpFilteredFileList[i]->m_aName, m_FileDialogFilterInput.GetString()))
+					if(str_find_no_case(m_vpFilteredFileList[i]->m_aName, m_FileDialogFilterInput.GetString()))
 					{
 						m_FilesSelectedIndex = i;
 						break;
@@ -5360,7 +5360,7 @@ void CEditor::RenderFileDialog()
 	{
 		if(m_FilePreviewState == PREVIEW_UNLOADED)
 		{
-			if(m_FileDialogFileType == CEditor::FILETYPE_IMG && str_endswith(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, ".png"))
+			if(m_FileDialogFileType == CEditor::FILETYPE_IMG && str_ends_with(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, ".png"))
 			{
 				char aBuffer[IO_MAX_PATH_LENGTH];
 				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
@@ -5378,7 +5378,7 @@ void CEditor::RenderFileDialog()
 					m_FilePreviewState = PREVIEW_ERROR;
 				}
 			}
-			else if(m_FileDialogFileType == CEditor::FILETYPE_SOUND && str_endswith(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, ".opus"))
+			else if(m_FileDialogFileType == CEditor::FILETYPE_SOUND && str_ends_with(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, ".opus"))
 			{
 				char aBuffer[IO_MAX_PATH_LENGTH];
 				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
@@ -5542,7 +5542,7 @@ void CEditor::RenderFileDialog()
 			{
 				str_copy(m_aFilesSelectedName, fs_filename(m_pFileDialogPath));
 				str_append(m_aFilesSelectedName, "/");
-				if(fs_parent_dir(m_pFileDialogPath))
+				if(!fs_parent_dir(m_pFileDialogPath))
 				{
 					if(str_comp(m_pFileDialogPath, m_aFileDialogCurrentFolder) == 0)
 					{
@@ -5589,7 +5589,7 @@ void CEditor::RenderFileDialog()
 		{
 			const int StorageType = m_FilesSelectedIndex >= 0 ? m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType : m_FileDialogStorageType;
 			str_format(m_aFileSaveName, sizeof(m_aFileSaveName), "%s/%s", m_pFileDialogPath, m_FileDialogFileNameInput.GetString());
-			if(!str_endswith(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]))
+			if(!str_ends_with(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]))
 				str_append(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]);
 
 			if(m_FileDialogSaveAction && Storage()->FileExists(m_aFileSaveName, StorageType))
@@ -5699,7 +5699,7 @@ void CEditor::RefreshFilteredFileList()
 	m_vpFilteredFileList.clear();
 	for(const CFilelistItem &Item : m_vCompleteFileList)
 	{
-		if(m_FileDialogFilterInput.IsEmpty() || str_find_nocase(Item.m_aName, m_FileDialogFilterInput.GetString()))
+		if(m_FileDialogFilterInput.IsEmpty() || str_find_no_case(Item.m_aName, m_FileDialogFilterInput.GetString()))
 		{
 			m_vpFilteredFileList.push_back(&Item);
 		}
@@ -8487,8 +8487,8 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 				continue;
 
 			const bool DDNetOrCustomEntities = std::find_if(std::begin(gs_apModEntitiesNames), std::end(gs_apModEntitiesNames),
-								   [&](const char *pEntitiesName) { return str_comp_nocase(m_SelectEntitiesImage.c_str(), pEntitiesName) == 0 &&
-													   str_comp_nocase(pEntitiesName, "ddnet") != 0; }) == std::end(gs_apModEntitiesNames);
+								   [&](const char *pEntitiesName) { return str_comp_no_case(m_SelectEntitiesImage.c_str(), pEntitiesName) == 0 &&
+													   str_comp_no_case(pEntitiesName, "ddnet") != 0; }) == std::end(gs_apModEntitiesNames);
 
 			vec2 Pos(x * TileSize, y * TileSize);
 			vec2 Scale;
@@ -9143,7 +9143,7 @@ void CEditor::LoadCurrentMap()
 {
 	if(Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_SAVE))
 	{
-		m_ValidSaveFilename = !str_startswith(m_pClient->GetCurrentMapPath(), "downloadedmaps/");
+		m_ValidSaveFilename = !str_starts_with(m_pClient->GetCurrentMapPath(), "downloadedmaps/");
 	}
 	else
 	{

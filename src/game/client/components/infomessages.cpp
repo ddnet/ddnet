@@ -141,7 +141,7 @@ void CInfoMessages::AddInfoMsg(const CInfoMsg &InfoMsg)
 void CInfoMessages::CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg)
 {
 	const auto &&NameColor = [&](int ClientId) -> ColorRGBA {
-		unsigned Color;
+		unsigned int Color;
 		if(ClientId == m_pClient->m_Snap.m_LocalClientId)
 		{
 			Color = g_Config.m_ClKillMessageHighlightColor;

@@ -347,7 +347,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
 	{
 		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
-		if(!str_find_nocase(pEntry->m_aCountryCodeString, s_FlagFilterInput.GetString()))
+		if(!str_find_no_case(pEntry->m_aCountryCodeString, s_FlagFilterInput.GetString()))
 			continue;
 		vpFilteredFlags.push_back(pEntry);
 	}
@@ -430,8 +430,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	char *pSkinName;
 	size_t SkinNameSize;
 	int *pUseCustomColor;
-	unsigned *pColorBody;
-	unsigned *pColorFeet;
+	unsigned int *pColorBody;
+	unsigned int *pColorFeet;
 	int *pEmote;
 	if(!m_Dummy)
 	{
@@ -631,7 +631,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		CUIRect aRects[2];
 		CustomColors.VSplitMid(&aRects[0], &aRects[1], 20.0f);
 
-		unsigned *apColors[] = {pColorBody, pColorFeet};
+		unsigned int *apColors[] = {pColorBody, pColorFeet};
 		const char *apParts[] = {Localize("Body"), Localize("Feet")};
 
 		for(int i = 0; i < 2; i++)
@@ -1519,7 +1519,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		char aTmpBackendName[256];
 
 		auto IsInfoDefault = [](const SMenuBackendInfo &CheckInfo) {
-			return str_comp_nocase(CheckInfo.m_pBackendName, CConfig::ms_pGfxBackend) == 0 && CheckInfo.m_Major == CConfig::ms_GfxGLMajor && CheckInfo.m_Minor == CConfig::ms_GfxGLMinor && CheckInfo.m_Patch == CConfig::ms_GfxGLPatch;
+			return str_comp_no_case(CheckInfo.m_pBackendName, CConfig::ms_pGfxBackend) == 0 && CheckInfo.m_Major == CConfig::ms_GfxGLMajor && CheckInfo.m_Minor == CConfig::ms_GfxGLMinor && CheckInfo.m_Patch == CConfig::ms_GfxGLPatch;
 		};
 
 		int OldSelectedBackend = -1;
@@ -1535,7 +1535,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 					str_format(aTmpBackendName, sizeof(aTmpBackendName), "%s (%d.%d.%d)%s%s", Info.m_pBackendName, Info.m_Major, Info.m_Minor, Info.m_Patch, IsDefault ? " - " : "", IsDefault ? Localize("default") : "");
 					s_vBackendIdNames[CurCounter] = aTmpBackendName;
 					s_vpBackendIdNamesCStr[CurCounter] = s_vBackendIdNames[CurCounter].c_str();
-					if(str_comp_nocase(Info.m_pBackendName, g_Config.m_GfxBackend) == 0 && g_Config.m_GfxGLMajor == Info.m_Major && g_Config.m_GfxGLMinor == Info.m_Minor && g_Config.m_GfxGLPatch == Info.m_Patch)
+					if(str_comp_no_case(Info.m_pBackendName, g_Config.m_GfxBackend) == 0 && g_Config.m_GfxGLMajor == Info.m_Major && g_Config.m_GfxGLMinor == Info.m_Minor && g_Config.m_GfxGLPatch == Info.m_Patch)
 					{
 						OldSelectedBackend = CurCounter;
 					}
@@ -1689,7 +1689,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		g_Config.m_SndGun ^= 1;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_SndLongPain, Localize("Enable long pain sound (used when shooting in freeze)"), g_Config.m_SndLongPain, &Button))
+	if(DoButton_CheckBox(&g_Config.m_SndLongPain, Localize("Enable long int pain sound (used when shooting in freeze)"), g_Config.m_SndLongPain, &Button))
 		g_Config.m_SndLongPain ^= 1;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -1768,7 +1768,7 @@ void CMenus::RenderLanguageSettings(CUIRect MainView)
 	TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, CreditsFontSize, TEXTFLAG_RENDER);
 	Cursor.m_LineWidth = CreditsScroll.w - 2.0f * CreditsMargin;
 
-	const unsigned OldRenderFlags = TextRender()->GetRenderFlags();
+	const unsigned int OldRenderFlags = TextRender()->GetRenderFlags();
 	TextRender()->SetRenderFlags(OldRenderFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
 	STextContainerIndex CreditsTextContainer;
 	TextRender()->CreateTextContainer(CreditsTextContainer, &Cursor, Localize("English translation by the DDNet Team", "Translation credits: Add your own name here when you update translations"));
@@ -1965,7 +1965,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 
 bool CMenus::RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight)
 {
-	const unsigned PrevPackedColor = *pColor;
+	const unsigned int PrevPackedColor = *pColor;
 	ColorHSLA Color(*pColor, Alpha);
 	const ColorHSLA OriginalColor = Color;
 	const char *apLabels[] = {Localize("Hue"), Localize("Sat."), Localize("Lht."), Localize("Alpha")};
@@ -3445,7 +3445,7 @@ void CMenus::CPopupMapPickerContext::MapListPopulate()
 int CMenus::CPopupMapPickerContext::MapListFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)
 {
 	CPopupMapPickerContext *pRealUser = (CPopupMapPickerContext *)pUser;
-	if((!IsDir && !str_endswith(pInfo->m_pName, ".map")) || !str_comp(pInfo->m_pName, ".") || (!str_comp(pInfo->m_pName, "..") && (!str_comp(pRealUser->m_aCurrentMapFolder, ""))))
+	if((!IsDir && !str_ends_with(pInfo->m_pName, ".map")) || !str_comp(pInfo->m_pName, ".") || (!str_comp(pInfo->m_pName, "..") && (!str_comp(pRealUser->m_aCurrentMapFolder, ""))))
 		return 0;
 
 	CMapListItem Item;

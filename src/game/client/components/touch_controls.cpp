@@ -761,7 +761,7 @@ void CTouchControls::OnRender()
 bool CTouchControls::LoadConfigurationFromFile(int StorageType)
 {
 	void *pFileData;
-	unsigned FileLength;
+	unsigned int FileLength;
 	if(!Storage()->ReadFile(CONFIGURATION_FILENAME, StorageType, &pFileData, &FileLength))
 	{
 		log_error("touch_controls", "Failed to read configuration from '%s'", CONFIGURATION_FILENAME);
@@ -1108,7 +1108,7 @@ vec2 CTouchControls::CalculateScreenSize() const
 	return vec2(ScreenWidth, ScreenHeight);
 }
 
-bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLength)
+bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned int FileLength)
 {
 	json_settings JsonSettings{};
 	char aError[256];
@@ -1166,7 +1166,7 @@ bool CTouchControls::ParseConfiguration(const void *pFileData, unsigned FileLeng
 
 	std::vector<CTouchButton> vParsedTouchButtons;
 	vParsedTouchButtons.reserve(TouchButtons.u.array.length);
-	for(unsigned ButtonIndex = 0; ButtonIndex < TouchButtons.u.array.length; ++ButtonIndex)
+	for(unsigned int ButtonIndex = 0; ButtonIndex < TouchButtons.u.array.length; ++ButtonIndex)
 	{
 		std::optional<CTouchButton> ParsedButton = ParseButton(&TouchButtons[ButtonIndex]);
 		if(!ParsedButton.has_value())
@@ -1338,7 +1338,7 @@ std::optional<CTouchControls::CTouchButton> CTouchControls::ParseButton(const js
 		return {};
 	}
 	std::vector<CButtonVisibility> vParsedVisibilities;
-	for(unsigned VisibilityIndex = 0; VisibilityIndex < Visibilities.u.array.length; ++VisibilityIndex)
+	for(unsigned int VisibilityIndex = 0; VisibilityIndex < Visibilities.u.array.length; ++VisibilityIndex)
 	{
 		const json_value &Visibility = Visibilities[VisibilityIndex];
 		if(Visibility.type != json_string)
@@ -1538,7 +1538,7 @@ std::unique_ptr<CTouchControls::CBindToggleTouchButtonBehavior> CTouchControls::
 
 	std::vector<CTouchControls::CBindToggleTouchButtonBehavior::CCommand> vCommands;
 	vCommands.reserve(CommandsObject.u.array.length);
-	for(unsigned CommandIndex = 0; CommandIndex < CommandsObject.u.array.length; ++CommandIndex)
+	for(unsigned int CommandIndex = 0; CommandIndex < CommandsObject.u.array.length; ++CommandIndex)
 	{
 		const json_value &CommandObject = CommandsObject[CommandIndex];
 		if(CommandObject.type != json_object)

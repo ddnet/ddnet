@@ -232,7 +232,7 @@ private:
 	unsigned short m_Sequence;
 	unsigned short m_Ack;
 	unsigned short m_PeerAck;
-	unsigned m_State;
+	unsigned int m_State;
 
 public:
 	SECURITY_TOKEN m_SecurityToken;

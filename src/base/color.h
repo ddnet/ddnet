@@ -93,7 +93,7 @@ public:
 		a = 1.0f;
 	}
 
-	constexpr color4_base(unsigned col, bool alpha = false)
+	constexpr color4_base(unsigned int col, bool alpha = false)
 	{
 		a = alpha ? ((col >> 24) & 0xFF) / 255.0f : 1.0f;
 		x = ((col >> 16) & 0xFF) / 255.0f;
@@ -111,12 +111,12 @@ public:
 	constexpr bool operator==(const color4_base &col) const { return x == col.x && y == col.y && z == col.z && a == col.a; }
 	constexpr bool operator!=(const color4_base &col) const { return x != col.x || y != col.y || z != col.z || a != col.a; }
 
-	constexpr unsigned Pack(bool Alpha = true) const
+	constexpr unsigned int Pack(bool Alpha = true) const
 	{
 		return (Alpha ? ((unsigned)round_to_int(a * 255.0f) << 24) : 0) + ((unsigned)round_to_int(x * 255.0f) << 16) + ((unsigned)round_to_int(y * 255.0f) << 8) + (unsigned)round_to_int(z * 255.0f);
 	}
 
-	constexpr unsigned PackAlphaLast(bool Alpha = true) const
+	constexpr unsigned int PackAlphaLast(bool Alpha = true) const
 	{
 		if(Alpha)
 			return ((unsigned)round_to_int(x * 255.0f) << 24) + ((unsigned)round_to_int(y * 255.0f) << 16) + ((unsigned)round_to_int(z * 255.0f) << 8) + (unsigned)round_to_int(a * 255.0f);
@@ -148,7 +148,7 @@ public:
 	}
 
 	template<typename UnpackT>
-	constexpr static UnpackT UnpackAlphaLast(unsigned Color, bool Alpha = true)
+	constexpr static UnpackT UnpackAlphaLast(unsigned int Color, bool Alpha = true)
 	{
 		UnpackT Result;
 		if(Alpha)
@@ -185,12 +185,12 @@ public:
 		return col;
 	}
 
-	constexpr unsigned Pack(bool Alpha = true) const
+	constexpr unsigned int Pack(bool Alpha = true) const
 	{
 		return color4_base::Pack(Alpha);
 	}
 
-	constexpr unsigned Pack(float Darkest, bool Alpha = false) const
+	constexpr unsigned int Pack(float Darkest, bool Alpha = false) const
 	{
 		ColorHSLA col = *this;
 		col.l = (l - Darkest) / (1 - Darkest);

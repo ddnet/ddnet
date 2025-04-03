@@ -99,7 +99,7 @@ class CConsole : public IConsole
 			mem_copy(m_aStringStorage, Other.m_aStringStorage, sizeof(m_aStringStorage));
 			m_pArgsStart = m_aStringStorage + (Other.m_pArgsStart - Other.m_aStringStorage);
 			m_pCommand = m_aStringStorage + (Other.m_pCommand - Other.m_aStringStorage);
-			for(unsigned i = 0; i < Other.m_NumArgs; ++i)
+			for(unsigned int i = 0; i < Other.m_NumArgs; ++i)
 				m_apArgs[i] = m_aStringStorage + (Other.m_apArgs[i] - Other.m_aStringStorage);
 		}
 
@@ -108,15 +108,15 @@ class CConsole : public IConsole
 			m_apArgs[m_NumArgs++] = pArg;
 		}
 
-		const char *GetString(unsigned Index) const override;
-		int GetInteger(unsigned Index) const override;
-		float GetFloat(unsigned Index) const override;
-		std::optional<ColorHSLA> GetColor(unsigned Index, float DarkestLighting) const override;
+		const char *GetString(unsigned int Index) const override;
+		int GetInteger(unsigned int Index) const override;
+		float GetFloat(unsigned int Index) const override;
+		std::optional<ColorHSLA> GetColor(unsigned int Index, float DarkestLighting) const override;
 
-		void RemoveArgument(unsigned Index) override
+		void RemoveArgument(unsigned int Index) override
 		{
 			dbg_assert(Index < m_NumArgs, "invalid argument index");
-			for(unsigned i = Index; i < m_NumArgs - 1; i++)
+			for(unsigned int i = Index; i < m_NumArgs - 1; i++)
 				m_apArgs[i] = m_apArgs[i + 1];
 
 			m_apArgs[m_NumArgs--] = nullptr;

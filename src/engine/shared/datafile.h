@@ -55,7 +55,7 @@ public:
 	int NumItems() const;
 
 	SHA256_DIGEST Sha256() const;
-	unsigned Crc() const;
+	unsigned int Crc() const;
 	int MapSize() const;
 };
 

@@ -38,27 +38,21 @@ public:
 		FindBinaryDirectory(pExecutablePath);
 
 		if(!LoadPathsFromFile(pExecutablePath))
-		{
 			return false;
-		}
 
 		if(!m_NumPaths)
 		{
 			if(!AddDefaultPaths())
-			{
 				return false;
-			}
 		}
 
 		if(InitializationType == EInitializationType::BASIC)
-		{
 			return true;
-		}
 
 		if(m_aaStoragePaths[TYPE_SAVE][0] != '\0')
 		{
-			if(fs_makedir_rec_for(m_aaStoragePaths[TYPE_SAVE]) != 0 ||
-				fs_makedir(m_aaStoragePaths[TYPE_SAVE]) != 0)
+			if(!fs_make_dir_recursive(m_aaStoragePaths[TYPE_SAVE]) ||
+				!fs_make_dir(m_aaStoragePaths[TYPE_SAVE]))
 			{
 				log_error("storage", "failed to create the user directory");
 				return false;
@@ -117,7 +111,7 @@ public:
 		{
 			// check usable path in argv[0]
 			unsigned int Pos = ~0U;
-			for(unsigned i = 0; pArgv0[i]; i++)
+			for(unsigned int i = 0; pArgv0[i]; i++)
 				if(pArgv0[i] == '/' || pArgv0[i] == '\\')
 					Pos = i;
 			if(Pos < IO_MAX_PATH_LENGTH)
@@ -137,7 +131,7 @@ public:
 		}
 		while(const char *pLine = LineReader.Get())
 		{
-			const char *pLineWithoutPrefix = str_startswith(pLine, "add_path ");
+			const char *pLineWithoutPrefix = str_starts_with(pLine, "add_path ");
 			if(pLineWithoutPrefix)
 			{
 				if(!AddPath(pLineWithoutPrefix) && !m_NumPaths)
@@ -285,7 +279,7 @@ public:
 			pArgv0 = realpath(pArgv0, NULL);
 #endif
 			unsigned int Pos = ~0U;
-			for(unsigned i = 0; pArgv0[i]; i++)
+			for(unsigned int i = 0; pArgv0[i]; i++)
 				if(pArgv0[i] == '/' || pArgv0[i] == '\\')
 					Pos = i;
 
@@ -336,7 +330,7 @@ public:
 
 	bool FindCurrentDirectory()
 	{
-		if(!fs_getcwd(m_aCurrentdir, sizeof(m_aCurrentdir)))
+		if(!fs_cwd(m_aCurrentdir, sizeof(m_aCurrentdir)))
 		{
 			log_error("storage", "could not determine current directory");
 			return false;
@@ -354,7 +348,7 @@ public:
 		// check for usable path in argv[0]
 		{
 			unsigned int Pos = ~0U;
-			for(unsigned i = 0; pArgv0[i]; i++)
+			for(unsigned int i = 0; pArgv0[i]; i++)
 				if(pArgv0[i] == '/' || pArgv0[i] == '\\')
 					Pos = i;
 
@@ -465,7 +459,7 @@ public:
 		}
 	}
 
-	const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
+	const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned int BufferSize)
 	{
 		if(Type == TYPE_ABSOLUTE)
 		{
@@ -505,7 +499,7 @@ public:
 			return io_open(GetPath(TYPE_ABSOLUTE, pFilename, pBuffer, BufferSize), Flags);
 		}
 
-		if(str_startswith(pFilename, "mapres/../skins/"))
+		if(str_starts_with(pFilename, "mapres/../skins/"))
 		{
 			pFilename = pFilename + 10; // just start from skins/
 		}
@@ -581,7 +575,7 @@ public:
 		return GenericExists(pFilename, Type, fs_is_dir);
 	}
 
-	bool ReadFile(const char *pFilename, int Type, void **ppResult, unsigned *pResultLen) override
+	bool ReadFile(const char *pFilename, int Type, void **ppResult, unsigned int *pResultLen) override
 	{
 		IOHANDLE File = OpenFile(pFilename, IOFLAG_READ, Type);
 		if(!File)
@@ -616,10 +610,10 @@ public:
 		dbg_assert(Type == TYPE_ABSOLUTE || (Type >= TYPE_SAVE && Type < m_NumPaths), "Type invalid");
 
 		char aBuffer[IO_MAX_PATH_LENGTH];
-		return fs_file_time(GetPath(Type, pFilename, aBuffer, sizeof(aBuffer)), pCreated, pModified) == 0;
+		return fs_file_time(GetPath(Type, pFilename, aBuffer, sizeof(aBuffer)), pCreated, pModified);
 	}
 
-	bool CalculateHashes(const char *pFilename, int Type, SHA256_DIGEST *pSha256, unsigned *pCrc) override
+	bool CalculateHashes(const char *pFilename, int Type, SHA256_DIGEST *pSha256, unsigned int *pCrc) override
 	{
 		dbg_assert(pSha256 != nullptr || pCrc != nullptr, "At least one output argument required");
 
@@ -635,7 +629,7 @@ public:
 		unsigned char aBuffer[64 * 1024];
 		while(true)
 		{
-			unsigned Bytes = io_read(File, aBuffer, sizeof(aBuffer));
+			unsigned int Bytes = io_read(File, aBuffer, sizeof(aBuffer));
 			if(Bytes == 0)
 				break;
 			if(pSha256 != nullptr)
@@ -793,11 +787,9 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_remove(aBuffer);
+		bool Success = fs_remove(aBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to remove file: %s", aBuffer);
-		}
 		return Success;
 	}
 
@@ -808,11 +800,9 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_removedir(aBuffer);
+		bool Success = fs_remove_dir(aBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to remove folder: %s", aBuffer);
-		}
 		return Success;
 	}
 
@@ -821,11 +811,9 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetBinaryPath(pFilename, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_remove(aBuffer);
+		bool Success = fs_remove(aBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to remove binary file: %s", aBuffer);
-		}
 		return Success;
 	}
 
@@ -838,11 +826,9 @@ public:
 		GetPath(Type, pOldFilename, aOldBuffer, sizeof(aOldBuffer));
 		GetPath(Type, pNewFilename, aNewBuffer, sizeof(aNewBuffer));
 
-		bool Success = !fs_rename(aOldBuffer, aNewBuffer);
+		bool Success = fs_rename(aOldBuffer, aNewBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to rename file: %s -> %s", aOldBuffer, aNewBuffer);
-		}
 		return Success;
 	}
 
@@ -853,17 +839,15 @@ public:
 		GetBinaryPath(pOldFilename, aOldBuffer, sizeof(aOldBuffer));
 		GetBinaryPath(pNewFilename, aNewBuffer, sizeof(aNewBuffer));
 
-		if(fs_makedir_rec_for(aNewBuffer) < 0)
+		if(!fs_make_dir_recursive(aNewBuffer))
 		{
 			log_error("storage", "failed to create folders for: %s", aNewBuffer);
 			return false;
 		}
 
-		bool Success = !fs_rename(aOldBuffer, aNewBuffer);
+		bool Success = fs_rename(aOldBuffer, aNewBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to rename binary file: %s -> %s", aOldBuffer, aNewBuffer);
-		}
 		return Success;
 	}
 
@@ -874,34 +858,32 @@ public:
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer));
 
-		bool Success = !fs_makedir(aBuffer);
+		bool Success = fs_make_dir(aBuffer);
 		if(!Success)
-		{
 			log_error("storage", "failed to create folder: %s", aBuffer);
-		}
-		return Success;
+		return true;
 	}
 
-	void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) override
+	void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned int BufferSize) override
 	{
 		TranslateType(Type, pDir);
 		dbg_assert(Type >= TYPE_SAVE && Type < m_NumPaths, "Type invalid");
 		GetPath(Type, pDir, pBuffer, BufferSize);
 	}
 
-	const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize) override
+	const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned int BufferSize) override
 	{
 		str_format(pBuffer, BufferSize, "%s%s%s", m_aBinarydir, !m_aBinarydir[0] ? "" : "/", pFilename);
 		return pBuffer;
 	}
 
-	const char *GetBinaryPathAbsolute(const char *pFilename, char *pBuffer, unsigned BufferSize) override
+	const char *GetBinaryPathAbsolute(const char *pFilename, char *pBuffer, unsigned int BufferSize) override
 	{
 		char aBinaryPath[IO_MAX_PATH_LENGTH];
 		GetBinaryPath(PLAT_CLIENT_EXEC, aBinaryPath, sizeof(aBinaryPath));
 		if(fs_is_relative_path(aBinaryPath))
 		{
-			if(fs_getcwd(pBuffer, BufferSize))
+			if(fs_cwd(pBuffer, BufferSize))
 			{
 				str_append(pBuffer, "/", BufferSize);
 				str_append(pBuffer, aBinaryPath, BufferSize);
@@ -946,7 +928,7 @@ void IStorage::StripPathAndExtension(const char *pFilename, char *pBuffer, int B
 	str_copy(pBuffer, pExtractedName, Length);
 }
 
-const char *IStorage::FormatTmpPath(char *aBuf, unsigned BufSize, const char *pPath)
+const char *IStorage::FormatTmpPath(char *aBuf, unsigned int BufSize, const char *pPath)
 {
 	str_format(aBuf, BufSize, "%s.%d.tmp", pPath, pid());
 	return aBuf;

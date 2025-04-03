@@ -18,7 +18,7 @@ struct CScrollRegionParams
 	ColorRGBA m_SliderColor;
 	ColorRGBA m_SliderColorHover;
 	ColorRGBA m_SliderColorGrabbed;
-	unsigned m_Flags;
+	unsigned int m_Flags;
 
 	enum
 	{

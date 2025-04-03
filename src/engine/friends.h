@@ -11,8 +11,8 @@ struct CFriendInfo
 {
 	char m_aName[MAX_NAME_LENGTH];
 	char m_aClan[MAX_CLAN_LENGTH];
-	unsigned m_NameHash;
-	unsigned m_ClanHash;
+	unsigned int m_NameHash;
+	unsigned int m_ClanHash;
 };
 
 class IFriends : public IInterface

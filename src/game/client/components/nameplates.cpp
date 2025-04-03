@@ -374,15 +374,15 @@ protected:
 		m_Size = vec2(Data.m_FontSizeHookStrongWeak, Data.m_FontSizeHookStrongWeak) * 1.5f;
 		switch(Data.m_HookStrongWeak)
 		{
-		case CNamePlateData::HOOKSTRONGWEAK_STRONG:
+		case EHookStrongWeak::STRONG:
 			m_Sprite = SPRITE_HOOK_STRONG;
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(6401973));
 			break;
-		case CNamePlateData::HOOKSTRONGWEAK_NEUTRAL:
+		case EHookStrongWeak::NEUTRAL:
 			m_Sprite = SPRITE_HOOK_ICON;
 			m_Color = ColorRGBA(1.0f, 1.0f, 1.0f);
 			break;
-		case CNamePlateData::HOOKSTRONGWEAK_WEAK:
+		case EHookStrongWeak::WEAK:
 			m_Sprite = SPRITE_HOOK_WEAK;
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(41131));
 			break;
@@ -414,13 +414,13 @@ protected:
 			return false;
 		switch(Data.m_HookStrongWeak)
 		{
-		case CNamePlateData::HOOKSTRONGWEAK_STRONG:
+		case EHookStrongWeak::STRONG:
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(6401973));
 			break;
-		case CNamePlateData::HOOKSTRONGWEAK_NEUTRAL:
+		case EHookStrongWeak::NEUTRAL:
 			m_Color = ColorRGBA(1.0f, 1.0f, 1.0f);
 			break;
-		case CNamePlateData::HOOKSTRONGWEAK_WEAK:
+		case EHookStrongWeak::WEAK:
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(41131));
 			break;
 		}
@@ -703,7 +703,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	}
 
 	Data.m_ShowHookStrongWeak = false;
-	Data.m_HookStrongWeak = CNamePlateData::HOOKSTRONGWEAK_NEUTRAL;
+	Data.m_HookStrongWeak = EHookStrongWeak::NEUTRAL;
 	Data.m_ShowHookStrongWeakId = false;
 	Data.m_HookStrongWeakId = 0;
 
@@ -721,7 +721,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 				Data.m_ShowHookStrongWeak = Data.m_ShowHookStrongWeakId;
 			else
 			{
-				Data.m_HookStrongWeak = Selected.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId ? CNamePlateData::HOOKSTRONGWEAK_STRONG : CNamePlateData::HOOKSTRONGWEAK_WEAK;
+				Data.m_HookStrongWeak = Selected.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId ? EHookStrongWeak::STRONG : EHookStrongWeak::WEAK;
 				Data.m_ShowHookStrongWeak = g_Config.m_Debug || g_Config.m_ClNamePlatesStrong > 0;
 			}
 		}
@@ -778,12 +778,12 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	Data.m_ShowHookStrongWeakId = g_Config.m_ClNamePlatesStrong == 2;
 	if(Dummy == g_Config.m_ClDummy)
 	{
-		Data.m_HookStrongWeak = CNamePlateData::HOOKSTRONGWEAK_NEUTRAL;
+		Data.m_HookStrongWeak = EHookStrongWeak::NEUTRAL;
 		Data.m_ShowHookStrongWeak = Data.m_ShowHookStrongWeakId;
 	}
 	else
 	{
-		Data.m_HookStrongWeak = Data.m_HookStrongWeakId == 2 ? CNamePlateData::HOOKSTRONGWEAK_STRONG : CNamePlateData::HOOKSTRONGWEAK_WEAK;
+		Data.m_HookStrongWeak = Data.m_HookStrongWeakId == 2 ? EHookStrongWeak::STRONG : EHookStrongWeak::WEAK;
 		Data.m_ShowHookStrongWeak = g_Config.m_ClNamePlatesStrong > 0;
 	}
 

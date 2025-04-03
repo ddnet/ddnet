@@ -20,7 +20,7 @@ static void TestFileRead(const char *pWritten)
 	EXPECT_EQ(io_read(File, aBuf, sizeof(aBuf)), WrittenLength);
 	EXPECT_EQ(mem_comp(aBuf, pWritten, WrittenLength), 0);
 	EXPECT_FALSE(io_close(File));
-	EXPECT_FALSE(fs_remove(Info.m_aFilename));
+	EXPECT_TRUE(fs_remove(Info.m_aFilename));
 }
 
 TEST(Io, Read1)
@@ -55,7 +55,7 @@ static void TestFileLength(const char *pWritten)
 	ASSERT_TRUE(File);
 	EXPECT_EQ(io_length(File), WrittenLength);
 	EXPECT_FALSE(io_close(File));
-	EXPECT_FALSE(fs_remove(Info.m_aFilename));
+	EXPECT_TRUE(fs_remove(Info.m_aFilename));
 }
 
 TEST(Io, Length1)
@@ -123,7 +123,7 @@ TEST(Io, SeekTellSkip)
 	EXPECT_EQ(io_read(File, aBuf, WrittenLength5), WrittenLength5);
 	EXPECT_EQ(mem_comp(aBuf, pWritten5, WrittenLength5), 0);
 	EXPECT_FALSE(io_close(File));
-	EXPECT_FALSE(fs_remove(Info.m_aFilename));
+	EXPECT_TRUE(fs_remove(Info.m_aFilename));
 }
 
 TEST(Io, CurrentExe)
@@ -142,7 +142,7 @@ TEST(Io, SyncWorks)
 	EXPECT_EQ(io_write(File, "abc\n", 4), 4);
 	EXPECT_FALSE(io_sync(File));
 	EXPECT_FALSE(io_close(File));
-	EXPECT_FALSE(fs_remove(Info.m_aFilename));
+	EXPECT_TRUE(fs_remove(Info.m_aFilename));
 }
 
 TEST(Io, WriteTruncatesFile)
@@ -165,5 +165,5 @@ TEST(Io, WriteTruncatesFile)
 	EXPECT_TRUE(mem_comp(aBuf, "ABCDE", 5) == 0);
 	EXPECT_FALSE(io_close(File));
 
-	EXPECT_FALSE(fs_remove(Info.m_aFilename));
+	EXPECT_TRUE(fs_remove(Info.m_aFilename));
 }

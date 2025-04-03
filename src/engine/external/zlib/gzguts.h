@@ -151,7 +151,7 @@
 #endif
 
 /* default i/o buffer size -- double this for output when reading (this and
-   twice this must be able to fit in an unsigned type) */
+   twice this must be able to fit in an unsigned int type) */
 #define GZBUFSIZE 8192
 
 /* gzip modes, also provide a little integrity check on the passed structure */
@@ -176,8 +176,8 @@ typedef struct {
     int mode;               /* see gzip modes above */
     int fd;                 /* file descriptor */
     char *path;             /* path or fd for error messages */
-    unsigned size;          /* buffer size, zero if not allocated yet */
-    unsigned want;          /* requested buffer size, default is GZBUFSIZE */
+    unsigned int size;          /* buffer size, zero if not allocated yet */
+    unsigned int want;          /* requested buffer size, default is GZBUFSIZE */
     unsigned char *in;      /* input buffer (double-sized when writing) */
     unsigned char *out;     /* output buffer (double-sized when reading) */
     int direct;             /* 0 if processing gzip, 1 if transparent */
@@ -207,8 +207,8 @@ void ZLIB_INTERNAL gz_error(gz_statep, int, const char *);
 char ZLIB_INTERNAL *gz_strwinerror(DWORD error);
 #endif
 
-/* GT_OFF(x), where x is an unsigned value, is true if x > maximum z_off64_t
-   value -- needed when comparing unsigned to z_off64_t, which is signed
-   (possible z_off64_t types off_t, off64_t, and long are all signed) */
-unsigned ZLIB_INTERNAL gz_intmax(void);
+/* GT_OFF(x), where x is an unsigned int value, is true if x > maximum z_off64_t
+   value -- needed when comparing unsigned int to z_off64_t, which is signed
+   (possible z_off64_t types off_t, off64_t, and long int are all signed) */
+unsigned int ZLIB_INTERNAL gz_intmax(void);
 #define GT_OFF(x) (sizeof(int) == sizeof(z_off64_t) && (x) > gz_intmax())

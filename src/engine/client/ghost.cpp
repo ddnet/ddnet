@@ -225,7 +225,7 @@ void CGhostLoader::ResetBuffer()
 	m_BufferPrevItem = -1;
 }
 
-IOHANDLE CGhostLoader::ReadHeader(CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc, bool LogMapMismatch) const
+IOHANDLE CGhostLoader::ReadHeader(CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned int MapCrc, bool LogMapMismatch) const
 {
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, IStorage::TYPE_SAVE);
 	if(!File)
@@ -294,7 +294,7 @@ bool CGhostLoader::ValidateHeader(const CGhostHeader &Header, const char *pFilen
 	return true;
 }
 
-bool CGhostLoader::CheckHeaderMap(const CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc, bool LogMapMismatch) const
+bool CGhostLoader::CheckHeaderMap(const CGhostHeader &Header, const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned int MapCrc, bool LogMapMismatch) const
 {
 	if(str_comp(Header.m_aMap, pMap) != 0)
 	{
@@ -322,7 +322,7 @@ bool CGhostLoader::CheckHeaderMap(const CGhostHeader &Header, const char *pFilen
 	}
 	else
 	{
-		const unsigned GhostMapCrc = bytes_be_to_uint(Header.m_aZeroes);
+		const unsigned int GhostMapCrc = bytes_be_to_uint(Header.m_aZeroes);
 		if(GhostMapCrc != MapCrc && g_Config.m_ClRaceGhostStrictMap)
 		{
 			if(LogMapMismatch)
@@ -336,7 +336,7 @@ bool CGhostLoader::CheckHeaderMap(const CGhostHeader &Header, const char *pFilen
 	return true;
 }
 
-bool CGhostLoader::Load(const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc)
+bool CGhostLoader::Load(const char *pFilename, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned int MapCrc)
 {
 	dbg_assert(!m_File, "File already open");
 
@@ -480,7 +480,7 @@ void CGhostLoader::Close()
 	m_aFilename[0] = '\0';
 }
 
-bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned MapCrc)
+bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, const char *pMap, const SHA256_DIGEST &MapSha256, unsigned int MapCrc)
 {
 	CGhostHeader Header;
 	IOHANDLE File = ReadHeader(Header, pFilename, pMap, MapSha256, MapCrc, false);

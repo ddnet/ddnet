@@ -2,7 +2,7 @@
 #error "This file must only be included in `tolower.cpp`"
 #endif
 
-const struct UPPER_LOWER tolowermap[] = {
+const CUpperToLower ToLowerMap[] = {
 	{65, 97},
 	{66, 98},
 	{67, 99},
@@ -1437,3 +1437,5 @@ const struct UPPER_LOWER tolowermap[] = {
 	{125216, 125250},
 	{125217, 125251},
 };
+
+const unsigned int ToLowerNum = sizeof(ToLowerMap) / sizeof(ToLowerMap[0]);

@@ -27,7 +27,7 @@ const char *const CSkins7::ms_apColorComponents[NUM_COLOR_COMPONENTS] = {"hue", 
 char *CSkins7::ms_apSkinNameVariables[NUM_DUMMIES] = {nullptr};
 char *CSkins7::ms_apSkinVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{nullptr}};
 int *CSkins7::ms_apUCCVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{nullptr}};
-int unsigned *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{nullptr}};
+unsigned int *CSkins7::ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS] = {{nullptr}};
 
 #define SKINS_DIR "skins7"
 
@@ -46,12 +46,12 @@ void CSkins7::CSkinPart::ApplyTo(CTeeRenderInfo::CSixup &SixupRenderInfo) const
 
 bool CSkins7::CSkinPart::operator<(const CSkinPart &Other) const
 {
-	return str_comp_nocase(m_aName, Other.m_aName) < 0;
+	return str_comp_no_case(m_aName, Other.m_aName) < 0;
 }
 
 bool CSkins7::CSkin::operator<(const CSkin &Other) const
 {
-	return str_comp_nocase(m_aName, Other.m_aName) < 0;
+	return str_comp_no_case(m_aName, Other.m_aName) < 0;
 }
 
 bool CSkins7::CSkin::operator==(const CSkin &Other) const
@@ -61,7 +61,7 @@ bool CSkins7::CSkin::operator==(const CSkin &Other) const
 
 bool CSkins7::IsSpecialSkin(const char *pName)
 {
-	return str_startswith(pName, "x_") != nullptr;
+	return str_starts_with(pName, "x_") != nullptr;
 }
 
 class CSkinPartScanData
@@ -74,7 +74,7 @@ public:
 
 int CSkins7::SkinPartScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	if(IsDir || !str_endswith(pName, ".png"))
+	if(IsDir || !str_ends_with(pName, ".png"))
 		return 0;
 
 	CSkinPartScanData *pScanData = static_cast<CSkinPartScanData *>(pUser);
@@ -175,7 +175,7 @@ public:
 
 int CSkins7::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	if(IsDir || !str_endswith(pName, ".json"))
+	if(IsDir || !str_ends_with(pName, ".json"))
 		return 0;
 
 	CSkinScanData *pScanData = static_cast<CSkinScanData *>(pUser);
@@ -189,7 +189,7 @@ bool CSkins7::LoadSkin(const char *pName, int DirType)
 	char aFilename[IO_MAX_PATH_LENGTH];
 	str_format(aFilename, sizeof(aFilename), SKINS_DIR "/%s", pName);
 	void *pFileData;
-	unsigned JsonFileSize;
+	unsigned int JsonFileSize;
 	if(!Storage()->ReadFile(aFilename, DirType, &pFileData, &JsonFileSize))
 	{
 		log_error("skins7", "Failed to read skin json file '%s'", aFilename);

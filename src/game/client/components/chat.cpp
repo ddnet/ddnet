@@ -39,12 +39,12 @@ CChat::CChat()
 		m_IsInputCensored = false;
 		if(
 			g_Config.m_ClStreamerMode &&
-			(str_startswith(pStr, "/login ") ||
-				str_startswith(pStr, "/register ") ||
-				str_startswith(pStr, "/code ") ||
-				str_startswith(pStr, "/timeout ") ||
-				str_startswith(pStr, "/save ") ||
-				str_startswith(pStr, "/load ")))
+			(str_starts_with(pStr, "/login ") ||
+				str_starts_with(pStr, "/register ") ||
+				str_starts_with(pStr, "/code ") ||
+				str_starts_with(pStr, "/timeout ") ||
+				str_starts_with(pStr, "/save ") ||
+				str_starts_with(pStr, "/load ")))
 		{
 			bool Censor = false;
 			const size_t NumLetters = minimum(NumChars, sizeof(ms_aDisplayText) - 1);
@@ -295,7 +295,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				if(PlayerInfo)
 				{
 					PlayerName = m_pClient->m_aClients[PlayerInfo->m_ClientId].m_aName;
-					FoundInput = str_utf8_find_nocase(PlayerName, m_aCompletionBuffer);
+					FoundInput = str_utf8_find_no_case(PlayerName, m_aCompletionBuffer);
 					if(FoundInput != nullptr)
 					{
 						m_aPlayerCompletionList[m_PlayerCompletionListLength].ClientId = PlayerInfo->m_ClientId;
@@ -344,7 +344,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 
 				auto &Command = m_vCommands[Index];
 
-				if(str_startswith_nocase(Command.m_aName, pCommandStart))
+				if(str_starts_with_no_case(Command.m_aName, pCommandStart))
 				{
 					pCompletionCommand = &Command;
 					m_CompletionChosen = Index + SearchType * NumCommands;
@@ -561,7 +561,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 
 bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 {
-	const char *pHit = str_utf8_find_nocase(pLine, pName);
+	const char *pHit = str_utf8_find_no_case(pLine, pName);
 
 	while(pHit)
 	{
@@ -570,7 +570,7 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 		if(Length > 0 && (pLine == pHit || pHit[-1] == ' ') && (pHit[Length] == 0 || pHit[Length] == ' ' || pHit[Length] == '.' || pHit[Length] == '!' || pHit[Length] == ',' || pHit[Length] == '?' || pHit[Length] == ':'))
 			return true;
 
-		pHit = str_utf8_find_nocase(pHit + 1, pName);
+		pHit = str_utf8_find_no_case(pHit + 1, pName);
 	}
 
 	return false;
@@ -656,7 +656,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		int Code = str_utf8_decode(&pStr);
 
 		// check if unicode is not empty
-		if(!str_utf8_isspace(Code))
+		if(!str_utf8_is_space(Code))
 		{
 			pEnd = nullptr;
 		}
@@ -967,15 +967,15 @@ void CChat::OnPrepareLines(float y)
 		const char *pText = Line.m_aText;
 		if(Config()->m_ClStreamerMode && Line.m_ClientId == SERVER_MSG)
 		{
-			if(str_startswith(Line.m_aText, "Team save in progress. You'll be able to load with '/load ") && str_endswith(Line.m_aText, "'"))
+			if(str_starts_with(Line.m_aText, "Team save in progress. You'll be able to load with '/load ") && str_ends_with(Line.m_aText, "'"))
 			{
 				pText = "Team save in progress. You'll be able to load with '/load ***'";
 			}
-			else if(str_startswith(Line.m_aText, "Team save in progress. You'll be able to load with '/load") && str_endswith(Line.m_aText, "if it fails"))
+			else if(str_starts_with(Line.m_aText, "Team save in progress. You'll be able to load with '/load") && str_ends_with(Line.m_aText, "if it fails"))
 			{
 				pText = "Team save in progress. You'll be able to load with '/load ***' if save is successful or with '/load *** *** ***' if it fails";
 			}
-			else if(str_startswith(Line.m_aText, "Team successfully saved by ") && str_endswith(Line.m_aText, " to continue"))
+			else if(str_starts_with(Line.m_aText, "Team successfully saved by ") && str_ends_with(Line.m_aText, " to continue"))
 			{
 				pText = "Team successfully saved by ***. Use '/load ***' to continue";
 			}
@@ -1211,7 +1211,7 @@ void CChat::OnRender()
 		{
 			for(const auto &Command : m_vCommands)
 			{
-				if(str_startswith_nocase(Command.m_aName, m_Input.GetString() + 1))
+				if(str_starts_with_no_case(Command.m_aName, m_Input.GetString() + 1))
 				{
 					Cursor.m_X = Cursor.m_X + TextRender()->TextWidth(Cursor.m_FontSize, m_Input.GetString(), -1, Cursor.m_LineWidth);
 					Cursor.m_Y = m_Input.GetCaretPosition().y;

@@ -26,7 +26,7 @@ void CHeap::NewChunk(size_t ChunkSize)
 }
 
 //****************
-void *CHeap::AllocateFromChunk(unsigned int Size, unsigned Alignment)
+void *CHeap::AllocateFromChunk(unsigned int Size, unsigned int Alignment)
 {
 	size_t Offset = reinterpret_cast<uintptr_t>(m_pCurrent->m_pCurrent) % Alignment;
 	if(Offset)
@@ -72,7 +72,7 @@ void CHeap::Clear()
 }
 
 //
-void *CHeap::Allocate(unsigned Size, unsigned Alignment)
+void *CHeap::Allocate(unsigned int Size, unsigned int Alignment)
 {
 	// try to allocate from current chunk
 	void *pMem = AllocateFromChunk(Size, Alignment);

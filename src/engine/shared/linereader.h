@@ -8,7 +8,7 @@
 class CLineReader
 {
 	char *m_pBuffer;
-	unsigned m_BufferPos;
+	unsigned int m_BufferPos;
 	bool m_ReadLastLine;
 
 public:

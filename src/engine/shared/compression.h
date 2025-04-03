@@ -15,8 +15,8 @@ public:
 	static unsigned char *Pack(unsigned char *pDst, int i, int DstSize);
 	static const unsigned char *Unpack(const unsigned char *pSrc, int *pInOut, int SrcSize);
 
-	static long Compress(const void *pSrc, int SrcSize, void *pDst, int DstSize);
-	static long Decompress(const void *pSrc, int SrcSize, void *pDst, int DstSize);
+	static long int Compress(const void *pSrc, int SrcSize, void *pDst, int DstSize);
+	static long int Decompress(const void *pSrc, int SrcSize, void *pDst, int DstSize);
 };
 
 #endif

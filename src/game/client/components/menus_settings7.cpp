@@ -316,7 +316,7 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 		{
 			if((Skin.m_Flags & CSkins7::SKINFLAG_SPECIAL) != 0)
 				continue;
-			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(Skin.m_aName, g_Config.m_ClSkinFilterString))
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_no_case(Skin.m_aName, g_Config.m_ClSkinFilterString))
 				continue;
 
 			s_vpSkinList.emplace_back(&Skin);
@@ -394,7 +394,7 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 				if((SkinPart.m_Flags & CSkins7::SKINFLAG_SPECIAL) != 0)
 					continue;
 
-				if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(SkinPart.m_aName, g_Config.m_ClSkinFilterString))
+				if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_no_case(SkinPart.m_aName, g_Config.m_ClSkinFilterString))
 					continue;
 
 				s_paList[Part].emplace_back(&SkinPart);

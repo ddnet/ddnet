@@ -422,9 +422,9 @@ void CClient::SetState(EClientState State)
 
 	if(State == IClient::STATE_OFFLINE && m_ReconnectTime == 0)
 	{
-		if(g_Config.m_ClReconnectFull > 0 && (str_find_nocase(ErrorString(), "full") || str_find_nocase(ErrorString(), "reserved")))
+		if(g_Config.m_ClReconnectFull > 0 && (str_find_no_case(ErrorString(), "full") || str_find_no_case(ErrorString(), "reserved")))
 			m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectFull;
-		else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_nocase(ErrorString(), "Timeout") || str_find_nocase(ErrorString(), "Too weak connection")))
+		else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_no_case(ErrorString(), "Timeout") || str_find_no_case(ErrorString(), "Too weak connection")))
 			m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectTimeout;
 	}
 
@@ -502,7 +502,7 @@ void CClient::EnterGame(int Conn)
 	m_CurrentServerNextPingTime = time_get() + time_freq() / 2;
 }
 
-void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
+void GenerateTimeoutCode(char *pBuffer, unsigned int Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
 {
 	MD5_CTX Md5;
 	md5_init(&Md5);
@@ -1069,7 +1069,7 @@ void CClient::Render()
 	RenderGraphs();
 }
 
-const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned WantedCrc)
+const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DIGEST *pWantedSha256, unsigned int WantedCrc)
 {
 	static char s_aErrorMsg[128];
 
@@ -1249,7 +1249,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 	Up.Reset(pData, DataSize);
 
 #define GET_STRING(array) str_copy(array, Up.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES), sizeof(array))
-#define GET_INT(integer) (integer) = str_toint(Up.GetString())
+#define GET_INT(integer) (integer) = str_to_int(Up.GetString())
 
 	int Token;
 	int PacketNo = 0; // Only used if SavedType == SERVERINFO_EXTENDED
@@ -2413,10 +2413,10 @@ TVersion ToVersion(char *pStr)
 
 	for(int i = 0; i < 3 && p; ++i)
 	{
-		if(!str_isallnum(p))
+		if(!str_is_all_num(p))
 			return gs_InvalidVersion;
 
-		aVersion[i] = str_toint(p);
+		aVersion[i] = str_to_int(p);
 		p = strtok(nullptr, ".");
 	}
 
@@ -2672,7 +2672,7 @@ void CClient::Update()
 			if(IVideo::Current())
 			{
 				IVideo::Current()->NextVideoFrame();
-				IVideo::Current()->NextAudioFrameTimeline([this](short *pFinalOut, unsigned Frames) {
+				IVideo::Current()->NextAudioFrameTimeline([this](short *pFinalOut, unsigned int Frames) {
 					Sound()->Mix(pFinalOut, Frames);
 				});
 			}
@@ -3204,11 +3204,11 @@ void CClient::Run()
 		char aFile[IO_MAX_PATH_LENGTH];
 		if(Input()->GetDropFile(aFile, sizeof(aFile)))
 		{
-			if(str_startswith(aFile, CONNECTLINK_NO_SLASH))
+			if(str_starts_with(aFile, CONNECTLINK_NO_SLASH))
 				HandleConnectLink(aFile);
-			else if(str_endswith(aFile, ".demo"))
+			else if(str_ends_with(aFile, ".demo"))
 				HandleDemoPath(aFile);
-			else if(str_endswith(aFile, ".map"))
+			else if(str_ends_with(aFile, ".map"))
 				HandleMapPath(aFile);
 		}
 
@@ -3411,7 +3411,7 @@ bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
 			PortRef = 0;
 		}
 		BindAddr.port = PortRef;
-		unsigned RemainingAttempts = 25;
+		unsigned int RemainingAttempts = 25;
 		while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
 		{
 			if(BindAddr.port != 0)
@@ -3841,7 +3841,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
 
-		// Create a job to do this slicing in background because it can be a bit long depending on the file size
+		// Create a job to do this slicing in background because it can be a bit long int depending on the file size
 		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 		Engine()->AddJob(pDemoEditTask);
 		m_EditJobs.push_back(pDemoEditTask);
@@ -4519,9 +4519,9 @@ void CClient::HandleConnectLink(const char *pLink)
 {
 	// Chrome works fine with ddnet:// but not with ddnet:
 	// Check ddnet:// before ddnet: because we don't want the // as part of connect command
-	if(str_startswith(pLink, CONNECTLINK_DOUBLE_SLASH))
+	if(str_starts_with(pLink, CONNECTLINK_DOUBLE_SLASH))
 		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_DOUBLE_SLASH) - 1);
-	else if(str_startswith(pLink, CONNECTLINK_NO_SLASH))
+	else if(str_starts_with(pLink, CONNECTLINK_NO_SLASH))
 		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_NO_SLASH) - 1);
 	else
 		str_copy(m_aCmdConnect, pLink);
@@ -4544,17 +4544,17 @@ void CClient::HandleMapPath(const char *pPath)
 static bool UnknownArgumentCallback(const char *pCommand, void *pUser)
 {
 	CClient *pClient = static_cast<CClient *>(pUser);
-	if(str_startswith(pCommand, CONNECTLINK_NO_SLASH))
+	if(str_starts_with(pCommand, CONNECTLINK_NO_SLASH))
 	{
 		pClient->HandleConnectLink(pCommand);
 		return true;
 	}
-	else if(str_endswith(pCommand, ".demo"))
+	else if(str_ends_with(pCommand, ".demo"))
 	{
 		pClient->HandleDemoPath(pCommand);
 		return true;
 	}
-	else if(str_endswith(pCommand, ".map"))
+	else if(str_ends_with(pCommand, ".map"))
 	{
 		pClient->HandleMapPath(pCommand);
 		return true;
@@ -4698,9 +4698,9 @@ int main(int argc, const char **argv)
 		PerformFinalCleanup();
 	};
 
-	const bool RandInitFailed = secure_random_init() != 0;
+	const bool RandInitFailed = !secure_random_init();
 	if(!RandInitFailed)
-		CleanerFunctions.emplace([]() { secure_random_uninit(); });
+		CleanerFunctions.emplace([]() { secure_random_deinit(); });
 
 	// Register SDL for cleanup before creating the kernel and client,
 	// so SDL is shutdown after kernel and client. Otherwise the client
@@ -5005,7 +5005,7 @@ SHA256_DIGEST CClient::GetCurrentMapSha256() const
 	return m_pMap->Sha256();
 }
 
-unsigned CClient::GetCurrentMapCrc() const
+unsigned int CClient::GetCurrentMapCrc() const
 {
 	return m_pMap->Crc();
 }
@@ -5217,7 +5217,7 @@ bool CClient::ViewFile(const char *pFilename)
 	char aWorkingDir[IO_MAX_PATH_LENGTH];
 	if(fs_is_relative_path(pFilename))
 	{
-		if(!fs_getcwd(aWorkingDir, sizeof(aWorkingDir)))
+		if(!fs_cwd(aWorkingDir, sizeof(aWorkingDir)))
 		{
 			log_error("client", "Failed to open file '%s' (failed to get working directory)", pFilename);
 			return false;

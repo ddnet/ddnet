@@ -98,7 +98,7 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 			{
 				char aName[MAX_NAME_LENGTH];
 				p += str_length(pLookFor);
-				t = str_rchr(p, '\'');
+				t = str_find_last(p, '\'');
 
 				if(t <= p)
 					return;

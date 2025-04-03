@@ -43,13 +43,13 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 		size_t TmpStrSize = 0;
 		while(*pBuff)
 		{
-			while(*pBuff && str_isspace(*pBuff))
+			while(*pBuff && str_is_space(*pBuff))
 			{
 				Line.append(1, *pBuff);
 				++pBuff;
 			}
 
-			while(*pBuff && !str_isspace(*pBuff) && *pBuff != '(' && *pBuff != '.')
+			while(*pBuff && !str_is_space(*pBuff) && *pBuff != '(' && *pBuff != '.')
 			{
 				aTmpStr[TmpStrSize++] = *pBuff;
 				++pBuff;
@@ -162,13 +162,13 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 			size_t TmpStrSize = 0;
 			while(*pBuff)
 			{
-				while(*pBuff && str_isspace(*pBuff))
+				while(*pBuff && str_is_space(*pBuff))
 				{
 					Line.append(1, *pBuff);
 					++pBuff;
 				}
 
-				while(*pBuff && !str_isspace(*pBuff) && *pBuff != '(' && *pBuff != '.')
+				while(*pBuff && !str_is_space(*pBuff) && *pBuff != '(' && *pBuff != '.')
 				{
 					aTmpStr[TmpStrSize++] = *pBuff;
 					++pBuff;

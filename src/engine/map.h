@@ -41,7 +41,7 @@ public:
 	virtual IOHANDLE File() const = 0;
 
 	virtual SHA256_DIGEST Sha256() const = 0;
-	virtual unsigned Crc() const = 0;
+	virtual unsigned int Crc() const = 0;
 	virtual int MapSize() const = 0;
 };
 

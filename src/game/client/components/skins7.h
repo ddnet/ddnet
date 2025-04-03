@@ -55,7 +55,7 @@ public:
 		char m_aName[24];
 		const CSkinPart *m_apParts[protocol7::NUM_SKINPARTS];
 		int m_aUseCustomColors[protocol7::NUM_SKINPARTS];
-		unsigned m_aPartColors[protocol7::NUM_SKINPARTS];
+		unsigned int m_aPartColors[protocol7::NUM_SKINPARTS];
 
 		bool operator<(const CSkin &Other) const;
 		bool operator==(const CSkin &Other) const;
@@ -68,7 +68,7 @@ public:
 	static char *ms_apSkinNameVariables[NUM_DUMMIES];
 	static char *ms_apSkinVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS];
 	static int *ms_apUCCVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS]; // use custom color
-	static unsigned *ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS];
+	static unsigned int *ms_apColorVariables[NUM_DUMMIES][protocol7::NUM_SKINPARTS];
 
 	int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;

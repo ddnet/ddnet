@@ -40,7 +40,7 @@ typedef unsigned char  uch;
 typedef uch FAR uchf;
 typedef unsigned short ush;
 typedef ush FAR ushf;
-typedef unsigned long  ulg;
+typedef unsigned long int  ulg;
 
 #if !defined(Z_U8) && !defined(Z_SOLO) && defined(STDC)
 #  include <limits.h>
@@ -96,7 +96,7 @@ extern z_const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 #      if (__STDC__ == 1) && (defined(__LARGE__) || defined(__COMPACT__))
          /* Allow compilation with ANSI keywords only enabled */
          void _Cdecl farfree( void *block );
-         void *_Cdecl farmalloc( unsigned long nbytes );
+         void *_Cdecl farmalloc( unsigned long int nbytes );
 #      else
 #        include <alloc.h>
 #      endif
@@ -237,8 +237,8 @@ extern z_const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
 #endif
 
 #ifndef Z_SOLO
-   voidpf ZLIB_INTERNAL zcalloc(voidpf opaque, unsigned items,
-                                unsigned size);
+   voidpf ZLIB_INTERNAL zcalloc(voidpf opaque, unsigned int items,
+                                unsigned int size);
    void ZLIB_INTERNAL zcfree(voidpf opaque, voidpf ptr);
 #endif
 
