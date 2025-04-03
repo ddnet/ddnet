@@ -38,27 +38,21 @@ public:
 		FindBinaryDirectory(pExecutablePath);
 
 		if(!LoadPathsFromFile(pExecutablePath))
-		{
 			return false;
-		}
 
 		if(!m_NumPaths)
 		{
 			if(!AddDefaultPaths())
-			{
 				return false;
-			}
 		}
 
 		if(InitializationType == EInitializationType::BASIC)
-		{
 			return true;
-		}
 
 		if(m_aaStoragePaths[TYPE_SAVE][0] != '\0')
 		{
 			if(!fs_make_dir_recursive(m_aaStoragePaths[TYPE_SAVE]) ||
-				fs_make_dir(m_aaStoragePaths[TYPE_SAVE]))
+				!fs_make_dir(m_aaStoragePaths[TYPE_SAVE]))
 			{
 				log_error("storage", "failed to create the user directory");
 				return false;
