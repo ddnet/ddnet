@@ -244,7 +244,7 @@ JNI_EXPORTED_FUNCTION(ANDROID_PACKAGE_NAME, NativeServer, runServer, jint, JNIEn
 	// Set working directory to external storage location. This is not possible
 	// in Java so we pass the intended working directory to the native code.
 	const char *pWorkingDirectory = pEnv->GetStringUTFChars(WorkingDirectory, nullptr);
-	const bool WorkingDirectoryError = !fs_chdir(pWorkingDirectory);
+	const bool WorkingDirectoryError = !fs_change_cwd(pWorkingDirectory);
 	pEnv->ReleaseStringUTFChars(WorkingDirectory, pWorkingDirectory);
 	if(WorkingDirectoryError)
 		return -1001;
