@@ -2166,7 +2166,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 		int Code = str_utf8_decode(&p);
 
 		// check if unicode is not empty
-		if(!str_utf8_isspace(Code))
+		if(!str_utf8_is_space(Code))
 		{
 			pEnd = nullptr;
 		}

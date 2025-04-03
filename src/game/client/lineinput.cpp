@@ -133,7 +133,7 @@ void CLineInput::MoveCursor(EMoveDirection Direction, bool MoveWord, const char 
 	// When rewinding, check character to the left of the cursor position (rewind first).
 	size_t PeekCursorPos = Direction == FORWARD ? *pCursorPos : str_utf8_rewind(pStr, *pCursorPos);
 	const char *pTemp = pStr + PeekCursorPos;
-	bool AnySpace = str_utf8_isspace(str_utf8_decode(&pTemp));
+	bool AnySpace = str_utf8_is_space(str_utf8_decode(&pTemp));
 	bool AnyWord = !AnySpace;
 	while(true)
 	{
@@ -145,7 +145,7 @@ void CLineInput::MoveCursor(EMoveDirection Direction, bool MoveWord, const char 
 			break;
 		PeekCursorPos = Direction == FORWARD ? *pCursorPos : str_utf8_rewind(pStr, *pCursorPos);
 		pTemp = pStr + PeekCursorPos;
-		const bool CurrentSpace = str_utf8_isspace(str_utf8_decode(&pTemp));
+		const bool CurrentSpace = str_utf8_is_space(str_utf8_decode(&pTemp));
 		const bool CurrentWord = !CurrentSpace;
 		if(Direction == FORWARD && AnySpace && !CurrentSpace)
 			break; // Forward: Stop when next (right) character is non-space after seeing at least one space character.

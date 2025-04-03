@@ -2359,7 +2359,7 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle, const
  *
  * @return Whether the codepoint is a space
  */
-int str_utf8_isspace(int code);
+int str_utf8_is_space(int code);
 
 /**
  * Checks whether a given byte is the start of a UTF-8 character.
@@ -2370,7 +2370,7 @@ int str_utf8_isspace(int code);
  *
  * @return Whether the char starts a UTF-8 character
  */
-int str_utf8_isstart(char c);
+int str_utf8_is_start(char c);
 
 /**
  * Skips leading characters that render as spaces.

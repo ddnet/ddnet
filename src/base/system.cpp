@@ -2925,7 +2925,7 @@ bool str_valid_filename(const char *str)
 		if(code <= 0x1F || code == 0x7F || code == '\\' || code == '/' || code == '|' || code == ':' ||
 			code == '*' || code == '?' || code == '<' || code == '>' || code == '"')
 			return false; // Disallowed characters, mostly for Windows
-		else if(str_utf8_isspace(code) && code != ' ')
+		else if(str_utf8_is_space(code) && code != ' ')
 			return false; // We only allow regular space characters
 		if(code == ' ')
 		{
@@ -3783,7 +3783,7 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle, const
 	return nullptr;
 }
 
-int str_utf8_isspace(int code)
+int str_utf8_is_space(int code)
 {
 	return code <= 0x0020 || code == 0x0085 || code == 0x00A0 || code == 0x034F ||
 	       code == 0x115F || code == 0x1160 || code == 0x1680 || code == 0x180E ||
@@ -3805,7 +3805,7 @@ const char *str_utf8_skip_whitespaces(const char *str)
 		code = str_utf8_decode(&str);
 
 		// Check if unicode is not empty
-		if(!str_utf8_isspace(code))
+		if(!str_utf8_is_space(code))
 			return str_old;
 	}
 
@@ -3822,7 +3822,7 @@ void str_utf8_trim_right(char *param)
 		int code = str_utf8_decode(&str);
 
 		// Check if unicode is not empty
-		if(!str_utf8_isspace(code))
+		if(!str_utf8_is_space(code))
 			end = nullptr;
 		else if(!end)
 			end = str_old;
@@ -3831,7 +3831,7 @@ void str_utf8_trim_right(char *param)
 		*end = '\0';
 }
 
-int str_utf8_isstart(char c)
+int str_utf8_is_start(char c)
 {
 	if((c & 0xC0) == 0x80) // 10xxxxxx
 		return false;
@@ -3843,7 +3843,7 @@ int str_utf8_rewind(const char *str, int cursor)
 	while(cursor)
 	{
 		cursor--;
-		if(str_utf8_isstart(*(str + cursor)))
+		if(str_utf8_is_start(*(str + cursor)))
 			break;
 	}
 	return cursor;

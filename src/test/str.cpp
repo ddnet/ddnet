@@ -114,13 +114,13 @@ TEST(Str, Dist)
 
 TEST(Str, Utf8Isspace)
 {
-	EXPECT_TRUE(str_utf8_isspace(0x200b)); // Zero-width space
-	EXPECT_TRUE(str_utf8_isspace(' '));
-	EXPECT_FALSE(str_utf8_isspace('a'));
+	EXPECT_TRUE(str_utf8_is_space(0x200b)); // Zero-width space
+	EXPECT_TRUE(str_utf8_is_space(' '));
+	EXPECT_FALSE(str_utf8_is_space('a'));
 	// Control characters.
 	for(char c = 0; c < 0x20; c++)
 	{
-		EXPECT_TRUE(str_utf8_isspace(c));
+		EXPECT_TRUE(str_utf8_is_space(c));
 	}
 }
 

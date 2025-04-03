@@ -14,7 +14,7 @@ void sqlstr::FuzzyString(char *pString, int Size)
 			break;
 
 		pNewString[OutPos++] = pString[i];
-		if(pString[i] != '\\' && str_utf8_isstart(pString[i + 1]))
+		if(pString[i] != '\\' && str_utf8_is_start(pString[i + 1]))
 			pNewString[OutPos++] = '%';
 	}
 
