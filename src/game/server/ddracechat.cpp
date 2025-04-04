@@ -157,8 +157,8 @@ void CGameContext::ConSettings(IConsole::IResult *pResult, void *pUserData)
 		char aBuf[256];
 		float ColTemp;
 		float HookTemp;
-		pSelf->m_Tuning.Get("player_collision", &ColTemp);
-		pSelf->m_Tuning.Get("player_hooking", &HookTemp);
+		pSelf->GlobalTuning()->Get("player_collision", &ColTemp);
+		pSelf->GlobalTuning()->Get("player_hooking", &HookTemp);
 		if(str_comp_nocase(pArg, "teams") == 0)
 		{
 			str_format(aBuf, sizeof(aBuf), "%s %s",

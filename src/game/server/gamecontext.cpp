@@ -174,7 +174,7 @@ void CGameContext::Clear()
 	CVoteOptionServer *pVoteOptionFirst = m_pVoteOptionFirst;
 	CVoteOptionServer *pVoteOptionLast = m_pVoteOptionLast;
 	int NumVoteOptions = m_NumVoteOptions;
-	CTuningParams Tuning = m_Tuning;
+	CTuningParams Tuning = m_aTuningList[0];
 
 	m_Resetting = true;
 	this->~CGameContext();
@@ -184,7 +184,7 @@ void CGameContext::Clear()
 	m_pVoteOptionFirst = pVoteOptionFirst;
 	m_pVoteOptionLast = pVoteOptionLast;
 	m_NumVoteOptions = NumVoteOptions;
-	m_Tuning = Tuning;
+	m_aTuningList[0] = Tuning;
 }
 
 void CGameContext::TeeHistorianWrite(const void *pData, int DataSize, void *pUser)
@@ -326,7 +326,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
 		float Strength;
 		if(Owner == -1 || !m_apPlayers[Owner] || !m_apPlayers[Owner]->m_TuneZone)
-			Strength = Tuning()->m_ExplosionStrength;
+			Strength = GlobalTuning()->m_ExplosionStrength;
 		else
 			Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
 
@@ -921,10 +921,10 @@ void CGameContext::CheckPureTuning()
 		str_comp(m_pController->m_pGameType, "CTF") == 0)
 	{
 		CTuningParams p;
-		if(mem_comp(&p, &m_Tuning, sizeof(p)) != 0)
+		if(mem_comp(&p, &m_aTuningList[0], sizeof(p)) != 0)
 		{
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "resetting tuning due to pure server");
-			m_Tuning = p;
+			m_aTuningList[0] = p;
 		}
 	}
 }
@@ -954,13 +954,9 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 	CheckPureTuning();
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
-	int *pParams = nullptr;
-	if(Zone == 0)
-		pParams = (int *)&m_Tuning;
-	else
-		pParams = (int *)&(m_aTuningList[Zone]);
+	int *pParams = (int *)&(m_aTuningList[Zone]);
 
-	for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
+	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
 		if(m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetCharacter())
 		{
@@ -1047,7 +1043,7 @@ void CGameContext::OnTick()
 	}
 
 	// copy tuning
-	m_World.m_Core.m_aTuning[0] = m_Tuning;
+	m_World.m_pTuningList[0] = m_aTuningList[0];
 	m_World.Tick();
 
 	UpdatePlayerMaps();
@@ -2919,7 +2915,7 @@ void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() == 2)
 	{
 		float NewValue = pResult->GetFloat(1);
-		if(pSelf->Tuning()->Set(pParamName, NewValue) && pSelf->Tuning()->Get(pParamName, &NewValue))
+		if(pSelf->GlobalTuning()->Set(pParamName, NewValue) && pSelf->GlobalTuning()->Get(pParamName, &NewValue))
 		{
 			str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
 			pSelf->SendTuningParams(-1);
@@ -2932,7 +2928,7 @@ void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
 	else
 	{
 		float Value;
-		if(pSelf->Tuning()->Get(pParamName, &Value))
+		if(pSelf->GlobalTuning()->Get(pParamName, &Value))
 		{
 			str_format(aBuf, sizeof(aBuf), "%s %.2f", pParamName, Value);
 		}
@@ -2951,7 +2947,7 @@ void CGameContext::ConToggleTuneParam(IConsole::IResult *pResult, void *pUserDat
 	float OldValue;
 
 	char aBuf[256];
-	if(!pSelf->Tuning()->Get(pParamName, &OldValue))
+	if(!pSelf->GlobalTuning()->Get(pParamName, &OldValue))
 	{
 		str_format(aBuf, sizeof(aBuf), "No such tuning parameter: %s", pParamName);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
@@ -2960,8 +2956,8 @@ void CGameContext::ConToggleTuneParam(IConsole::IResult *pResult, void *pUserDat
 
 	float NewValue = absolute(OldValue - pResult->GetFloat(1)) < 0.0001f ? pResult->GetFloat(2) : pResult->GetFloat(1);
 
-	pSelf->Tuning()->Set(pParamName, NewValue);
-	pSelf->Tuning()->Get(pParamName, &NewValue);
+	pSelf->GlobalTuning()->Set(pParamName, NewValue);
+	pSelf->GlobalTuning()->Get(pParamName, &NewValue);
 
 	str_format(aBuf, sizeof(aBuf), "%s changed to %.2f", pParamName, NewValue);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
@@ -2977,7 +2973,7 @@ void CGameContext::ConTuneReset(IConsole::IResult *pResult, void *pUserData)
 		float DefaultValue = 0.0f;
 		char aBuf[256];
 		CTuningParams TuningParams;
-		if(TuningParams.Get(pParamName, &DefaultValue) && pSelf->Tuning()->Set(pParamName, DefaultValue) && pSelf->Tuning()->Get(pParamName, &DefaultValue))
+		if(TuningParams.Get(pParamName, &DefaultValue) && pSelf->GlobalTuning()->Set(pParamName, DefaultValue) && pSelf->GlobalTuning()->Get(pParamName, &DefaultValue))
 		{
 			str_format(aBuf, sizeof(aBuf), "%s reset to %.2f", pParamName, DefaultValue);
 			pSelf->SendTuningParams(-1);
@@ -3002,7 +2998,7 @@ void CGameContext::ConTunes(IConsole::IResult *pResult, void *pUserData)
 	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
 		float Value;
-		pSelf->Tuning()->Get(i, &Value);
+		pSelf->GlobalTuning()->Get(i, &Value);
 		str_format(aBuf, sizeof(aBuf), "%s %.2f", CTuningParams::Name(i), Value);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 	}
@@ -3930,11 +3926,11 @@ void CGameContext::OnInit(const void *pPersistentData)
 	}
 	else
 	{
-		Tuning()->Set("gun_speed", 1400);
-		Tuning()->Set("gun_curvature", 0);
-		Tuning()->Set("shotgun_speed", 500);
-		Tuning()->Set("shotgun_speeddiff", 0);
-		Tuning()->Set("shotgun_curvature", 0);
+		GlobalTuning()->Set("gun_speed", 1400);
+		GlobalTuning()->Set("gun_curvature", 0);
+		GlobalTuning()->Set("shotgun_speed", 500);
+		GlobalTuning()->Set("shotgun_speeddiff", 0);
+		GlobalTuning()->Set("shotgun_curvature", 0);
 	}
 
 	if(g_Config.m_SvDDRaceTuneReset)
@@ -3963,8 +3959,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		g_Config.m_SvTeam = SV_TEAM_FORCED_SOLO;
 		g_Config.m_SvShowOthersDefault = SHOW_OTHERS_ON;
 
-		Tuning()->Set("player_collision", 0);
-		Tuning()->Set("player_hooking", 0);
+		GlobalTuning()->Set("player_collision", 0);
+		GlobalTuning()->Set("player_hooking", 0);
 
 		for(int i = 0; i < NUM_TUNEZONES; i++)
 		{
@@ -4022,7 +4018,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 		GameInfo.m_pGameType = m_pController->m_pGameType;
 
 		GameInfo.m_pConfig = &g_Config;
-		GameInfo.m_pTuning = Tuning();
+		GameInfo.m_pTuning = GlobalTuning();
 		GameInfo.m_pUuids = &g_UuidManager;
 
 		GameInfo.m_pMapName = aMapName;
@@ -4100,7 +4096,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				}
 				else if(GameIndex == TILE_NPC)
 				{
-					m_Tuning.Set("player_collision", 0);
+					GlobalTuning()->Set("player_collision", 0);
 					dbg_msg("game_layer", "found no collision tile");
 				}
 				else if(GameIndex == TILE_EHOOK)
@@ -4115,7 +4111,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				}
 				else if(GameIndex == TILE_NPH)
 				{
-					m_Tuning.Set("player_hooking", 0);
+					GlobalTuning()->Set("player_hooking", 0);
 					dbg_msg("game_layer", "found no player hooking tile");
 				}
 				else if(GameIndex >= ENTITY_OFFSET)
@@ -4134,7 +4130,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				}
 				else if(FrontIndex == TILE_NPC)
 				{
-					m_Tuning.Set("player_collision", 0);
+					GlobalTuning()->Set("player_collision", 0);
 					dbg_msg("front_layer", "found no collision tile");
 				}
 				else if(FrontIndex == TILE_EHOOK)
@@ -4149,7 +4145,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 				}
 				else if(FrontIndex == TILE_NPH)
 				{
-					m_Tuning.Set("player_hooking", 0);
+					GlobalTuning()->Set("player_hooking", 0);
 					dbg_msg("front_layer", "found no player hooking tile");
 				}
 				else if(FrontIndex >= ENTITY_OFFSET)
@@ -4375,11 +4371,11 @@ void CGameContext::OnSnap(int ClientId)
 {
 	// add tuning to demo
 	CTuningParams StandardTuning;
-	if(Server()->IsRecording(ClientId > -1 ? ClientId : MAX_CLIENTS) && mem_comp(&StandardTuning, &m_Tuning, sizeof(CTuningParams)) != 0)
+	if(Server()->IsRecording(ClientId > -1 ? ClientId : MAX_CLIENTS) && mem_comp(&StandardTuning, &m_aTuningList[0], sizeof(CTuningParams)) != 0)
 	{
 		CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
-		int *pParams = (int *)&m_Tuning;
-		for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
+		int *pParams = (int *)&m_aTuningList[0];
+		for(int i = 0; i < CTuningParams::Num(); i++)
 			Msg.AddInt(pParams[i]);
 		Server()->SendMsg(&Msg, MSGFLAG_RECORD | MSGFLAG_NOSEND, ClientId);
 	}
@@ -4581,12 +4577,12 @@ int CGameContext::GetDDRaceTeam(int ClientId) const
 void CGameContext::ResetTuning()
 {
 	CTuningParams TuningParams;
-	m_Tuning = TuningParams;
-	Tuning()->Set("gun_speed", 1400);
-	Tuning()->Set("gun_curvature", 0);
-	Tuning()->Set("shotgun_speed", 500);
-	Tuning()->Set("shotgun_speeddiff", 0);
-	Tuning()->Set("shotgun_curvature", 0);
+	m_aTuningList[0] = TuningParams;
+	GlobalTuning()->Set("gun_speed", 1400);
+	GlobalTuning()->Set("gun_curvature", 0);
+	GlobalTuning()->Set("shotgun_speed", 500);
+	GlobalTuning()->Set("shotgun_speeddiff", 0);
+	GlobalTuning()->Set("shotgun_curvature", 0);
 	SendTuningParams(-1);
 }
 

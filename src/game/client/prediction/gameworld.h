@@ -61,7 +61,6 @@ public:
 	CCollision *Collision() { return m_pCollision; }
 	CTeamsCore *Teams() { return &m_Teams; }
 	std::vector<SSwitchers> &Switchers() { return m_Core.m_vSwitchers; }
-	CTuningParams *Tuning();
 	CEntity *GetEntity(int Id, int EntityType);
 	CCharacter *GetCharacterById(int Id) { return (Id >= 0 && Id < MAX_CLIENTS) ? m_apCharacters[Id] : nullptr; }
 
@@ -103,6 +102,7 @@ public:
 
 	CTuningParams *m_pTuningList;
 	CTuningParams *TuningList() { return m_pTuningList; }
+	CTuningParams *GlobalTuning() { return &TuningList()[0]; }
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
 
 	const CMapBugs *m_pMapBugs;
