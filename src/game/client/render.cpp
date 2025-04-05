@@ -89,9 +89,6 @@ bool CSkinDescriptor::CSixup::operator==(const CSixup &Other) const
 	       m_XmasHat == Other.m_XmasHat;
 }
 
-static float gs_SpriteWScale;
-static float gs_SpriteHScale;
-
 void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender)
 {
 	m_pGraphics = pGraphics;
@@ -130,7 +127,7 @@ void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender)
 	Graphics()->QuadContainerUpload(m_TeeQuadContainerIndex);
 }
 
-void CRenderTools::SelectSprite(const CDataSprite *pSprite, int Flags) const
+void CRenderTools::SelectSprite(const CDataSprite *pSprite, int Flags)
 {
 	int x = pSprite->m_X;
 	int y = pSprite->m_Y;
@@ -139,7 +136,7 @@ void CRenderTools::SelectSprite(const CDataSprite *pSprite, int Flags) const
 	int cx = pSprite->m_pSet->m_Gridx;
 	int cy = pSprite->m_pSet->m_Gridy;
 
-	GetSpriteScaleImpl(w, h, gs_SpriteWScale, gs_SpriteHScale);
+	GetSpriteScaleImpl(w, h, m_SpriteScale.x, m_SpriteScale.y);
 
 	float x1 = x / (float)cx + 0.5f / (float)(cx * 32);
 	float x2 = (x + w) / (float)cx - 0.5f / (float)(cx * 32);
@@ -155,13 +152,13 @@ void CRenderTools::SelectSprite(const CDataSprite *pSprite, int Flags) const
 	Graphics()->QuadsSetSubset(x1, y1, x2, y2);
 }
 
-void CRenderTools::SelectSprite(int Id, int Flags) const
+void CRenderTools::SelectSprite(int Id, int Flags)
 {
 	dbg_assert(Id >= 0 && Id < g_pData->m_NumSprites, "Id invalid");
 	SelectSprite(&g_pData->m_aSprites[Id], Flags);
 }
 
-void CRenderTools::SelectSprite7(int Id, int Flags) const
+void CRenderTools::SelectSprite7(int Id, int Flags)
 {
 	dbg_assert(Id >= 0 && Id < client_data7::g_pData->m_NumSprites, "Id invalid");
 	SelectSprite(&client_data7::g_pData->m_aSprites[Id], Flags);
@@ -188,7 +185,7 @@ void CRenderTools::GetSpriteScaleImpl(int Width, int Height, float &ScaleX, floa
 
 void CRenderTools::DrawSprite(float x, float y, float Size) const
 {
-	IGraphics::CQuadItem QuadItem(x, y, Size * gs_SpriteWScale, Size * gs_SpriteHScale);
+	IGraphics::CQuadItem QuadItem(x, y, Size * m_SpriteScale.x, Size * m_SpriteScale.y);
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
@@ -210,7 +207,7 @@ void CRenderTools::RenderCursor(vec2 Center, float Size) const
 	Graphics()->WrapNormal();
 }
 
-void CRenderTools::RenderIcon(int ImageId, int SpriteId, const CUIRect *pRect, const ColorRGBA *pColor) const
+void CRenderTools::RenderIcon(int ImageId, int SpriteId, const CUIRect *pRect, const ColorRGBA *pColor)
 {
 	Graphics()->TextureSet(g_pData->m_aImages[ImageId].m_Id);
 	Graphics()->QuadsBegin();
@@ -340,7 +337,7 @@ void CRenderTools::GetRenderTeeOffsetToRenderedTee(const CAnimState *pAnim, cons
 	TeeOffsetToMid.y = -MidOfRendered;
 }
 
-void CRenderTools::RenderTee(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha) const
+void CRenderTools::RenderTee(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha)
 {
 	if(pInfo->m_aSixup[g_Config.m_ClDummy].PartTexture(protocol7::SKINPART_BODY).IsValid())
 		RenderTee7(pAnim, pInfo, Emote, Dir, Pos, Alpha);
@@ -351,7 +348,7 @@ void CRenderTools::RenderTee(const CAnimState *pAnim, const CTeeRenderInfo *pInf
 	Graphics()->QuadsSetRotation(0);
 }
 
-void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha) const
+void CRenderTools::RenderTee7(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha)
 {
 	vec2 Direction = Dir;
 	vec2 Position = Pos;
