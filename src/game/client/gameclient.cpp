@@ -3577,7 +3577,7 @@ bool CGameClient::IsOtherTeam(int ClientId) const
 
 	if(m_Snap.m_LocalClientId < 0)
 		return false;
-	else if((m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW) || ClientId < 0)
+	else if((m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW && m_SpecOthers) || ClientId < 0)
 		return false;
 	else if(m_Snap.m_SpecInfo.m_Active && m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
 	{
