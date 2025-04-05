@@ -10,13 +10,13 @@ class CLaser : public CEntity
 public:
 	CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type);
 
-	virtual void Reset() override;
-	virtual void Tick() override;
-	virtual void TickPaused() override;
-	virtual void Snap(int SnappingClient) override;
-	virtual void SwapClients(int Client1, int Client2) override;
+	void Reset() override;
+	void Tick() override;
+	void TickPaused() override;
+	void Snap(int SnappingClient) override;
+	void SwapClients(int Client1, int Client2) override;
 
-	virtual int GetOwnerId() const override { return m_Owner; }
+	int GetOwnerId() const override { return m_Owner; }
 
 protected:
 	bool HitCharacter(vec2 From, vec2 To);

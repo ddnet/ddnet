@@ -15,9 +15,9 @@ class CEffects : public CComponent
 
 public:
 	CEffects();
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
-	virtual void OnRender() override;
+	void OnRender() override;
 
 	void BulletTrail(vec2 Pos, float Alpha = 1.f, float TimePassed = 0.f);
 	void SmokeTrail(vec2 Pos, vec2 Vel, float Alpha = 1.f, float TimePassed = 0.f);

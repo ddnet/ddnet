@@ -30,13 +30,13 @@ public:
 	int m_aShowHookColl[NUM_DUMMIES];
 
 	CControls();
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
-	virtual void OnReset() override;
-	virtual void OnRender() override;
-	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
-	virtual void OnConsoleInit() override;
+	void OnReset() override;
+	void OnRender() override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
+	bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
+	void OnConsoleInit() override;
 	virtual void OnPlayerDeath();
 
 	int SnapInput(int *pData);

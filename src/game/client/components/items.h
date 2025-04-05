@@ -18,9 +18,9 @@ class CItems : public CComponent
 	int m_ItemsQuadContainerIndex;
 
 public:
-	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnRender() override;
-	virtual void OnInit() override;
+	int Sizeof() const override { return sizeof(*this); }
+	void OnRender() override;
+	void OnInit() override;
 
 	void ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick);
 	void RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float TicksBody, float TicksHead, int Type) const;
