@@ -11,9 +11,9 @@ A non-exhaustive list of things that usually get rejected:
   https://github.com/ddnet/ddnet/pull/5443#issuecomment-1158437505
 - Breaking backwards compatibility in the network protocol or file formats such as skins and demos.
 - Breaking backwards compatibility in gameplay:
-    + Existing ranks should not be made impossible.
-    + Existing maps should not break.
-    + New gameplay should not make runs easier on already completed maps.
+	- Existing ranks should not be made impossible.
+	- Existing maps should not break.
+	- New gameplay should not make runs easier on already completed maps.
 
 ## Programming languages
 
@@ -62,13 +62,13 @@ For multiple words:
 ```C++
 for(int i = 0; i < MAX_CLIENTS; i++)
 {
-    for(int k = 0; k < NUM_DUMMIES; k++)
-    {
-        if(k == 0)
-            continue;
+	for(int k = 0; k < NUM_DUMMIES; k++)
+	{
+		if(k == 0)
+			continue;
 
-        m_aClients[i].Foo();
-    }
+		m_aClients[i].Foo();
+	}
 }
 ```
 
@@ -77,13 +77,13 @@ for(int i = 0; i < MAX_CLIENTS; i++)
 ```C++
 for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 {
-    for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
-    {
-        if(Dummy == 0)
-            continue;
+	for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+	{
+		if(Dummy == 0)
+			continue;
 
-        m_aClients[ClientId].Foo();
-    }
+		m_aClients[ClientId].Foo();
+	}
 }
 ```
 
@@ -177,9 +177,9 @@ Avoid static variables ❌:
 ```C++
 int CMyClass::Foo()
 {
-    static int s_Count = 0;
-    s_Count++;
-    return s_Count;
+	static int s_Count = 0;
+	s_Count++;
+	return s_Count;
 }
 ```
 
@@ -188,12 +188,12 @@ Use member variables instead ✅:
 ```C++
 class CMyClass
 {
-    int m_Count = 0;
+	int m_Count = 0;
 };
 int CMyClass::Foo()
 {
-    m_Count++;
-    return m_Count;
+	m_Count++;
+	return m_Count;
 }
 ```
 
@@ -226,7 +226,7 @@ Instead of doing this ❌:
 ```C++
 class CFoo
 {
-    int m_Foo;
+	int m_Foo;
 };
 ```
 
@@ -235,7 +235,7 @@ Do this instead if possible ✅:
 ```C++
 class CFoo
 {
-    int m_Foo = 0;
+	int m_Foo = 0;
 };
 ```
 
