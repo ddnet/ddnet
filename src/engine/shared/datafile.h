@@ -16,16 +16,13 @@
 
 enum
 {
-	ITEMTYPE_EX = 0xffff,
+	ITEMTYPE_EX = 0xFFFF,
 };
 
 // raw datafile access
 class CDataFileReader
 {
 	class CDatafile *m_pDataFile = nullptr;
-
-	void *GetDataImpl(int Index, bool Swap);
-	int GetFileDataSize(int Index) const;
 
 	int GetExternalItemType(int InternalType, CUuid *pUuid);
 	int GetInternalItemType(int ExternalType);
@@ -104,11 +101,6 @@ private:
 	public:
 		int m_Type;
 		CUuid m_Uuid;
-	};
-
-	enum
-	{
-		MAX_ITEM_TYPES = 0x10000,
 	};
 
 	IOHANDLE m_File;
