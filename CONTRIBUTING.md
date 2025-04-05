@@ -120,6 +120,34 @@ Combine these appropriately
 | `I` | Interfaces | `class IFavorites` |
 | `S` | ~~Structs (Use classes instead)~~ | ~~`struct STextContainerUsages`~~ |
 
+### Enumerations
+
+Both unscoped enums (`enum`) and scoped enums (`enum class`) should start with `E` and be CamelCase. The literals should use SCREAMING_SNAKE_CASE.
+
+All new code should use scoped enums where the names of the literals should not contain the enum name.
+
+❌ Avoid:
+
+```C++
+enum STATUS
+{
+	STATUS_PENDING,
+	STATUS_OKAY,
+	STATUS_ERROR,
+};
+```
+
+✅ Instead do:
+
+```C++
+enum class EStatus
+{
+	PENDING,
+	OKAY,
+	ERROR,
+};
+```
+
 ### The usage of `goto` is not encouraged
 
 Do not use the `goto` keyword in new code, there are better control flow constructs in C++.
