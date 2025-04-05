@@ -154,7 +154,8 @@ void CCamera::UpdateCamera()
 	else if(!IsSpectatingPlayer && CurrentZoom != m_UserZoomTarget)
 	{
 		// stop spectating player
-		ChangeZoom(m_UserZoomTarget, GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime, false);
+		if(!GameClient()->m_MultiViewActivated)
+			ChangeZoom(m_UserZoomTarget, g_Config.m_ClSmoothZoomTime, false);
 		m_AutoSpecCameraZooming = false;
 
 		ZoomChanged = true;
