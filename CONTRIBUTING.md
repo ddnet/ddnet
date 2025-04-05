@@ -89,15 +89,15 @@ for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 
 More examples can be found [here](https://github.com/ddnet/ddnet/pull/8288#issuecomment-2094097306)
 
-### Teeworlds interpretation of the hungarian notation
+### Our interpretation of the hungarian notation
 
 DDNet inherited the hungarian notation like prefixes from [Teeworlds](https://www.teeworlds.com/?page=docs&wiki=nomenclature)
 
-Only use those prefixes. The ddnet code base does **NOT** follow the whole hungarian notation strictly.
+Only use the prefixes listed below. The ddnet code base does **NOT** follow the whole hungarian notation strictly.
 
 Do **NOT** use `c` for constants or `b` for booleans or `i` for integers.
 
-C-Style function pointers are pointers, but `std::function` are not.
+C-style function pointers are pointers, but `std::function` are not.
 
 #### For variables
 
