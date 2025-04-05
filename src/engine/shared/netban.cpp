@@ -68,7 +68,7 @@ void CNetBan::CBanPool<T, HashCount>::InsertUsed(CBan<T> *pBan)
 				// last entry
 				p->m_pNext = pBan;
 				pBan->m_pPrev = p;
-				pBan->m_pNext = 0;
+				pBan->m_pNext = nullptr;
 				break;
 			}
 		}
@@ -76,7 +76,7 @@ void CNetBan::CBanPool<T, HashCount>::InsertUsed(CBan<T> *pBan)
 	else
 	{
 		m_pFirstUsed = pBan;
-		pBan->m_pNext = pBan->m_pPrev = 0;
+		pBan->m_pNext = pBan->m_pPrev = nullptr;
 	}
 }
 
@@ -101,7 +101,7 @@ typename CNetBan::CBan<T> *CNetBan::CBanPool<T, HashCount>::Add(const T *pData, 
 	// add it to the hash list
 	if(m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash])
 		m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash]->m_pHashPrev = pBan;
-	pBan->m_pHashPrev = 0;
+	pBan->m_pHashPrev = nullptr;
 	pBan->m_pHashNext = m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash];
 	m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash] = pBan;
 
@@ -127,7 +127,7 @@ int CNetBan::CBanPool<T, HashCount>::Remove(CBan<T> *pBan)
 		pBan->m_pHashPrev->m_pHashNext = pBan->m_pHashNext;
 	else
 		m_aapHashList[pBan->m_NetHash.m_HashIndex][pBan->m_NetHash.m_Hash] = pBan->m_pHashNext;
-	pBan->m_pHashNext = pBan->m_pHashPrev = 0;
+	pBan->m_pHashNext = pBan->m_pHashPrev = nullptr;
 
 	// remove from used list
 	if(pBan->m_pNext)
@@ -140,7 +140,7 @@ int CNetBan::CBanPool<T, HashCount>::Remove(CBan<T> *pBan)
 	// add to recycle list
 	if(m_pFirstFree)
 		m_pFirstFree->m_pPrev = pBan;
-	pBan->m_pPrev = 0;
+	pBan->m_pPrev = nullptr;
 	pBan->m_pNext = m_pFirstFree;
 	m_pFirstFree = pBan;
 
@@ -178,7 +178,7 @@ void CNetBan::CBanPool<T, HashCount>::Reset()
 {
 	mem_zero(m_aapHashList, sizeof(m_aapHashList));
 	mem_zero(m_aBans, sizeof(m_aBans));
-	m_pFirstUsed = 0;
+	m_pFirstUsed = nullptr;
 	m_CountUsed = 0;
 
 	for(int i = 1; i < MAX_BANS - 1; ++i)
