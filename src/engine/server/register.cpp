@@ -1,5 +1,7 @@
 #include "register.h"
 
+#include <base/enum_iterator.h>
+#include <base/enum_map.h>
 #include <base/lock.h>
 #include <base/log.h>
 
@@ -15,27 +17,30 @@
 
 class CRegister : public IRegister
 {
-	enum
+	enum class EStatus
 	{
-		STATUS_NONE = 0,
-		STATUS_OK,
-		STATUS_NEEDCHALLENGE,
-		STATUS_NEEDINFO,
-		STATUS_ERROR,
-
-		PROTOCOL_TW6_IPV6 = 0,
-		PROTOCOL_TW6_IPV4,
-		PROTOCOL_TW7_IPV6,
-		PROTOCOL_TW7_IPV4,
-		NUM_PROTOCOLS,
+		NONE,
+		OK,
+		NEED_CHALLENGE,
+		NEED_INFO,
+		ERROR
 	};
 
-	static bool StatusFromString(int *pResult, const char *pString);
-	static const char *ProtocolToScheme(int Protocol);
-	static const char *ProtocolToString(int Protocol);
-	static bool ProtocolFromString(int *pResult, const char *pString);
-	static const char *ProtocolToSystem(int Protocol);
-	static IPRESOLVE ProtocolToIpresolve(int Protocol);
+	enum class EProtocol
+	{
+		TW6_IPV6,
+		TW6_IPV4,
+		TW7_IPV6,
+		TW7_IPV4,
+		NUM
+	};
+
+	[[nodiscard]] static bool StatusFromString(EStatus *pResult, const char *pString);
+	static const char *ProtocolToScheme(EProtocol Protocol);
+	static const char *ProtocolToString(EProtocol Protocol);
+	[[nodiscard]] static bool ProtocolFromString(EProtocol *pResult, const char *pString);
+	static const char *ProtocolToSystem(EProtocol Protocol);
+	static IPRESOLVE ProtocolToIpresolve(EProtocol Protocol);
 
 	static void ConchainOnConfigChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
@@ -60,13 +65,13 @@ class CRegister : public IRegister
 			std::shared_ptr<CGlobal> m_pGlobal;
 			CLock m_Lock;
 			int m_NumTotalRequests GUARDED_BY(m_Lock) = 0;
-			int m_LatestResponseStatus GUARDED_BY(m_Lock) = STATUS_NONE;
+			EStatus m_LatestResponseStatus GUARDED_BY(m_Lock) = EStatus::NONE;
 			int m_LatestResponseIndex GUARDED_BY(m_Lock) = -1;
 		};
 
 		class CJob : public IJob
 		{
-			int m_Protocol;
+			EProtocol m_Protocol;
 			int m_ServerPort;
 			int m_Index;
 			int m_InfoSerial;
@@ -76,7 +81,7 @@ class CRegister : public IRegister
 			void Run() override;
 
 		public:
-			CJob(int Protocol, int ServerPort, int Index, int InfoSerial, std::shared_ptr<CShared> pShared, std::shared_ptr<CHttpRequest> &&pRegister, IHttp *pHttp) :
+			CJob(EProtocol Protocol, int ServerPort, int Index, int InfoSerial, std::shared_ptr<CShared> pShared, std::shared_ptr<CHttpRequest> &&pRegister, IHttp *pHttp) :
 				m_Protocol(Protocol),
 				m_ServerPort(ServerPort),
 				m_Index(Index),
@@ -90,7 +95,7 @@ class CRegister : public IRegister
 		};
 
 		CRegister *m_pParent;
-		int m_Protocol;
+		EProtocol m_Protocol;
 
 		std::shared_ptr<CShared> m_pShared;
 		bool m_NewChallengeToken = false;
@@ -103,7 +108,7 @@ class CRegister : public IRegister
 		int64_t m_PrevRegister = -1;
 		int64_t m_NextRegister = -1;
 
-		CProtocol(CRegister *pParent, int Protocol);
+		CProtocol(CRegister *pParent, EProtocol Protocol);
 		void OnToken(const char *pToken);
 		void SendRegister();
 		void SendDeleteIfRegistered(bool Shutdown);
@@ -115,15 +120,14 @@ class CRegister : public IRegister
 	IEngine *m_pEngine;
 	IHttp *m_pHttp;
 
-	// Don't start sending registers before the server has initialized
-	// completely.
+	// Don't start sending registers before the server has initialized completely.
 	bool m_GotFirstUpdateCall = false;
 	int m_ServerPort;
 	char m_aConnlessTokenHex[16];
 
 	std::shared_ptr<CGlobal> m_pGlobal = std::make_shared<CGlobal>();
-	bool m_aProtocolEnabled[NUM_PROTOCOLS] = {true, true, true, true};
-	CProtocol m_aProtocols[NUM_PROTOCOLS];
+	CEnumMap<EProtocol, bool> m_aProtocolEnabled;
+	CEnumMap<EProtocol, CProtocol> m_aProtocols;
 
 	int m_NumExtraHeaders = 0;
 	char m_aaExtraHeaders[8][128];
@@ -143,108 +147,110 @@ public:
 	void OnShutdown() override;
 };
 
-bool CRegister::StatusFromString(int *pResult, const char *pString)
+bool CRegister::StatusFromString(EStatus *pResult, const char *pString)
 {
 	if(str_comp(pString, "success") == 0)
 	{
-		*pResult = STATUS_OK;
+		*pResult = EStatus::OK;
 	}
 	else if(str_comp(pString, "need_challenge") == 0)
 	{
-		*pResult = STATUS_NEEDCHALLENGE;
+		*pResult = EStatus::NEED_CHALLENGE;
 	}
 	else if(str_comp(pString, "need_info") == 0)
 	{
-		*pResult = STATUS_NEEDINFO;
+		*pResult = EStatus::NEED_INFO;
 	}
 	else if(str_comp(pString, "error") == 0)
 	{
-		*pResult = STATUS_ERROR;
+		*pResult = EStatus::ERROR;
 	}
 	else
 	{
-		*pResult = -1;
 		return true;
 	}
 	return false;
 }
 
-const char *CRegister::ProtocolToScheme(int Protocol)
+const char *CRegister::ProtocolToScheme(EProtocol Protocol)
 {
 	switch(Protocol)
 	{
-	case PROTOCOL_TW6_IPV6: return "tw-0.6+udp://";
-	case PROTOCOL_TW6_IPV4: return "tw-0.6+udp://";
-	case PROTOCOL_TW7_IPV6: return "tw-0.7+udp://";
-	case PROTOCOL_TW7_IPV4: return "tw-0.7+udp://";
+	case EProtocol::TW6_IPV6: return "tw-0.6+udp://";
+	case EProtocol::TW6_IPV4: return "tw-0.6+udp://";
+	case EProtocol::TW7_IPV6: return "tw-0.7+udp://";
+	case EProtocol::TW7_IPV4: return "tw-0.7+udp://";
+	default:
+		dbg_assert(false, "Protocol is not a valid value");
+		dbg_break();
 	}
-	dbg_assert(false, "invalid protocol");
-	dbg_break();
 }
 
-const char *CRegister::ProtocolToString(int Protocol)
+const char *CRegister::ProtocolToString(EProtocol Protocol)
 {
 	switch(Protocol)
 	{
-	case PROTOCOL_TW6_IPV6: return "tw0.6/ipv6";
-	case PROTOCOL_TW6_IPV4: return "tw0.6/ipv4";
-	case PROTOCOL_TW7_IPV6: return "tw0.7/ipv6";
-	case PROTOCOL_TW7_IPV4: return "tw0.7/ipv4";
+	case EProtocol::TW6_IPV6: return "tw0.6/ipv6";
+	case EProtocol::TW6_IPV4: return "tw0.6/ipv4";
+	case EProtocol::TW7_IPV6: return "tw0.7/ipv6";
+	case EProtocol::TW7_IPV4: return "tw0.7/ipv4";
+	default:
+		dbg_assert(false, "Protocol is not a valid value");
+		dbg_break();
 	}
-	dbg_assert(false, "invalid protocol");
-	dbg_break();
 }
 
-bool CRegister::ProtocolFromString(int *pResult, const char *pString)
+bool CRegister::ProtocolFromString(EProtocol *pResult, const char *pString)
 {
 	if(str_comp(pString, "tw0.6/ipv6") == 0)
 	{
-		*pResult = PROTOCOL_TW6_IPV6;
+		*pResult = EProtocol::TW6_IPV6;
 	}
 	else if(str_comp(pString, "tw0.6/ipv4") == 0)
 	{
-		*pResult = PROTOCOL_TW6_IPV4;
+		*pResult = EProtocol::TW6_IPV4;
 	}
 	else if(str_comp(pString, "tw0.7/ipv6") == 0)
 	{
-		*pResult = PROTOCOL_TW7_IPV6;
+		*pResult = EProtocol::TW7_IPV6;
 	}
 	else if(str_comp(pString, "tw0.7/ipv4") == 0)
 	{
-		*pResult = PROTOCOL_TW7_IPV4;
+		*pResult = EProtocol::TW7_IPV4;
 	}
 	else
 	{
-		*pResult = -1;
 		return true;
 	}
 	return false;
 }
 
-const char *CRegister::ProtocolToSystem(int Protocol)
+const char *CRegister::ProtocolToSystem(EProtocol Protocol)
 {
 	switch(Protocol)
 	{
-	case PROTOCOL_TW6_IPV6: return "register/6/ipv6";
-	case PROTOCOL_TW6_IPV4: return "register/6/ipv4";
-	case PROTOCOL_TW7_IPV6: return "register/7/ipv6";
-	case PROTOCOL_TW7_IPV4: return "register/7/ipv4";
+	case EProtocol::TW6_IPV6: return "register/6/ipv6";
+	case EProtocol::TW6_IPV4: return "register/6/ipv4";
+	case EProtocol::TW7_IPV6: return "register/7/ipv6";
+	case EProtocol::TW7_IPV4: return "register/7/ipv4";
+	default:
+		dbg_assert(false, "Protocol is not a valid value");
+		dbg_break();
 	}
-	dbg_assert(false, "invalid protocol");
-	dbg_break();
 }
 
-IPRESOLVE CRegister::ProtocolToIpresolve(int Protocol)
+IPRESOLVE CRegister::ProtocolToIpresolve(EProtocol Protocol)
 {
 	switch(Protocol)
 	{
-	case PROTOCOL_TW6_IPV6: return IPRESOLVE::V6;
-	case PROTOCOL_TW6_IPV4: return IPRESOLVE::V4;
-	case PROTOCOL_TW7_IPV6: return IPRESOLVE::V6;
-	case PROTOCOL_TW7_IPV4: return IPRESOLVE::V4;
+	case EProtocol::TW6_IPV6: return IPRESOLVE::V6;
+	case EProtocol::TW6_IPV4: return IPRESOLVE::V4;
+	case EProtocol::TW7_IPV6: return IPRESOLVE::V6;
+	case EProtocol::TW7_IPV4: return IPRESOLVE::V4;
+	default:
+		dbg_assert(false, "Protocol is not a valid value");
+		dbg_break();
 	}
-	dbg_assert(false, "invalid protocol");
-	dbg_break();
 }
 
 void CRegister::ConchainOnConfigChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -291,7 +297,7 @@ void CRegister::CProtocol::SendRegister()
 	}
 	pRegister->HeaderString("Address", aAddress);
 	pRegister->HeaderString("Secret", aSecret);
-	if(m_Protocol == PROTOCOL_TW7_IPV6 || m_Protocol == PROTOCOL_TW7_IPV4)
+	if(m_Protocol == EProtocol::TW7_IPV6 || m_Protocol == EProtocol::TW7_IPV4)
 	{
 		pRegister->HeaderString("Connless-Token", m_pParent->m_aConnlessTokenHex);
 	}
@@ -312,7 +318,7 @@ void CRegister::CProtocol::SendRegister()
 	int RequestIndex;
 	{
 		CLockScope ls(m_pShared->m_Lock);
-		if(m_pShared->m_LatestResponseStatus != STATUS_OK)
+		if(m_pShared->m_LatestResponseStatus != EStatus::OK)
 		{
 			log_info(ProtocolToSystem(m_Protocol), "registering...");
 		}
@@ -330,8 +336,8 @@ void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
 {
 	{
 		const CLockScope LockScope(m_pShared->m_Lock);
-		const bool ShouldSendDelete = m_pShared->m_LatestResponseStatus == STATUS_OK;
-		m_pShared->m_LatestResponseStatus = STATUS_NONE;
+		const bool ShouldSendDelete = m_pShared->m_LatestResponseStatus == EStatus::OK;
+		m_pShared->m_LatestResponseStatus = EStatus::NONE;
 		if(!ShouldSendDelete)
 			return;
 	}
@@ -361,7 +367,7 @@ void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
 	m_pParent->m_pHttp->Run(pDelete);
 }
 
-CRegister::CProtocol::CProtocol(CRegister *pParent, int Protocol) :
+CRegister::CProtocol::CProtocol(CRegister *pParent, EProtocol Protocol) :
 	m_pParent(pParent),
 	m_Protocol(Protocol),
 	m_pShared(std::make_shared<CShared>(pParent->m_pGlobal))
@@ -376,16 +382,18 @@ void CRegister::CProtocol::CheckChallengeStatus()
 	{
 		switch(m_pShared->m_LatestResponseStatus)
 		{
-		case STATUS_NEEDCHALLENGE:
+		case EStatus::NEED_CHALLENGE:
 			if(m_NewChallengeToken)
 			{
 				// Immediately resend if we got the token.
 				m_NextRegister = time_get();
 			}
 			break;
-		case STATUS_NEEDINFO:
+		case EStatus::NEED_INFO:
 			// Act immediately if the master requests more info.
 			m_NextRegister = time_get();
+			break;
+		default:
 			break;
 		}
 	}
@@ -437,14 +445,14 @@ void CRegister::CProtocol::CJob::Run()
 		log_error(ProtocolToSystem(m_Protocol), "invalid JSON response from master");
 		return;
 	}
-	int Status;
+	EStatus Status;
 	if(StatusFromString(&Status, StatusString))
 	{
 		log_error(ProtocolToSystem(m_Protocol), "invalid status from master: %s", (const char *)StatusString);
 		json_value_free(pJson);
 		return;
 	}
-	if(Status == STATUS_ERROR)
+	if(Status == EStatus::ERROR)
 	{
 		const json_value &Message = Json["message"];
 		if(Message.type != json_string)
@@ -467,7 +475,7 @@ void CRegister::CProtocol::CJob::Run()
 		CLockScope ls(m_pShared->m_Lock);
 		if(Status != m_pShared->m_LatestResponseStatus)
 		{
-			if(Status != STATUS_OK)
+			if(Status != EStatus::OK)
 			{
 				log_debug(ProtocolToSystem(m_Protocol), "status: %s", (const char *)StatusString);
 			}
@@ -476,7 +484,7 @@ void CRegister::CProtocol::CJob::Run()
 				log_info(ProtocolToSystem(m_Protocol), "successfully registered");
 			}
 		}
-		if(Status == m_pShared->m_LatestResponseStatus && Status == STATUS_NEEDCHALLENGE)
+		if(Status == m_pShared->m_LatestResponseStatus && Status == EStatus::NEED_CHALLENGE)
 		{
 			log_error(ProtocolToSystem(m_Protocol), "ERROR: the master server reports that clients can not connect to this server.");
 			log_error(ProtocolToSystem(m_Protocol), "ERROR: configure your firewall/nat to let through udp on port %d.", m_ServerPort);
@@ -488,7 +496,7 @@ void CRegister::CProtocol::CJob::Run()
 			m_pShared->m_LatestResponseStatus = Status;
 		}
 	}
-	if(Status == STATUS_OK)
+	if(Status == EStatus::OK)
 	{
 		CLockScope ls(m_pShared->m_pGlobal->m_Lock);
 		if(m_InfoSerial > m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial)
@@ -496,7 +504,7 @@ void CRegister::CProtocol::CJob::Run()
 			m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial = m_InfoSerial;
 		}
 	}
-	else if(Status == STATUS_NEEDINFO)
+	else if(Status == EStatus::NEED_INFO)
 	{
 		CLockScope ls(m_pShared->m_pGlobal->m_Lock);
 		if(m_InfoSerial == m_pShared->m_pGlobal->m_LatestSuccessfulInfoSerial)
@@ -513,13 +521,13 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHt
 	m_pEngine(pEngine),
 	m_pHttp(pHttp),
 	m_ServerPort(ServerPort),
-	m_aProtocols{
-		CProtocol(this, PROTOCOL_TW6_IPV6),
-		CProtocol(this, PROTOCOL_TW6_IPV4),
-		CProtocol(this, PROTOCOL_TW7_IPV6),
-		CProtocol(this, PROTOCOL_TW7_IPV4),
-	}
+	m_aProtocols(std::array<CProtocol, 4>({CProtocol(this, EProtocol::TW6_IPV6),
+		CProtocol(this, EProtocol::TW6_IPV4),
+		CProtocol(this, EProtocol::TW7_IPV6),
+		CProtocol(this, EProtocol::TW7_IPV4)}))
 {
+	m_aProtocolEnabled.fill(true);
+
 	const int HEADER_LEN = sizeof(SERVERBROWSE_CHALLENGE);
 	mem_copy(m_aVerifyPacketPrefix, SERVERBROWSE_CHALLENGE, HEADER_LEN);
 	FormatUuid(m_ChallengeSecret, m_aVerifyPacketPrefix + HEADER_LEN, sizeof(m_aVerifyPacketPrefix) - HEADER_LEN);
@@ -539,8 +547,8 @@ void CRegister::Update()
 {
 	if(!m_GotFirstUpdateCall)
 	{
-		bool Ipv6 = m_aProtocolEnabled[PROTOCOL_TW6_IPV6] || m_aProtocolEnabled[PROTOCOL_TW7_IPV6];
-		bool Ipv4 = m_aProtocolEnabled[PROTOCOL_TW6_IPV4] || m_aProtocolEnabled[PROTOCOL_TW7_IPV4];
+		bool Ipv6 = m_aProtocolEnabled[EProtocol::TW6_IPV6] || m_aProtocolEnabled[EProtocol::TW7_IPV6];
+		bool Ipv4 = m_aProtocolEnabled[EProtocol::TW6_IPV4] || m_aProtocolEnabled[EProtocol::TW7_IPV4];
 		if(Ipv6 && Ipv4)
 		{
 			dbg_assert(!HttpHasIpresolveBug(), "curl version < 7.77.0 does not support registering via both IPv4 and IPv6, set `sv_register ipv6` or `sv_register ipv4`");
@@ -551,67 +559,54 @@ void CRegister::Update()
 	{
 		return;
 	}
-	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	for(EProtocol Protocol : CEnumIterator<EProtocol>())
 	{
-		if(!m_aProtocolEnabled[i])
+		if(!m_aProtocolEnabled[Protocol])
 		{
 			continue;
 		}
-		m_aProtocols[i].Update();
+		m_aProtocols[Protocol].Update();
 	}
 }
 
 void CRegister::OnConfigChange()
 {
-	bool aOldProtocolEnabled[NUM_PROTOCOLS];
-	for(int i = 0; i < NUM_PROTOCOLS; i++)
-	{
-		aOldProtocolEnabled[i] = m_aProtocolEnabled[i];
-	}
+	CEnumMap<EProtocol, bool> aOldProtocolEnabled = m_aProtocolEnabled;
 	const char *pProtocols = m_pConfig->m_SvRegister;
 	if(str_comp(pProtocols, "1") == 0)
 	{
-		for(auto &Enabled : m_aProtocolEnabled)
-		{
-			Enabled = true;
-		}
+		m_aProtocolEnabled.fill(true);
 	}
 	else if(str_comp(pProtocols, "0") == 0)
 	{
-		for(auto &Enabled : m_aProtocolEnabled)
-		{
-			Enabled = false;
-		}
+		m_aProtocolEnabled.fill(false);
 	}
 	else
 	{
-		for(auto &Enabled : m_aProtocolEnabled)
-		{
-			Enabled = false;
-		}
+		m_aProtocolEnabled.fill(false);
 		char aBuf[16];
 		while((pProtocols = str_next_token(pProtocols, ",", aBuf, sizeof(aBuf))))
 		{
-			int Protocol;
+			EProtocol Protocol;
 			if(str_comp(aBuf, "ipv6") == 0)
 			{
-				m_aProtocolEnabled[PROTOCOL_TW6_IPV6] = true;
-				m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = true;
+				m_aProtocolEnabled[EProtocol::TW6_IPV6] = true;
+				m_aProtocolEnabled[EProtocol::TW7_IPV6] = true;
 			}
 			else if(str_comp(aBuf, "ipv4") == 0)
 			{
-				m_aProtocolEnabled[PROTOCOL_TW6_IPV4] = true;
-				m_aProtocolEnabled[PROTOCOL_TW7_IPV4] = true;
+				m_aProtocolEnabled[EProtocol::TW6_IPV4] = true;
+				m_aProtocolEnabled[EProtocol::TW7_IPV4] = true;
 			}
 			else if(str_comp(aBuf, "tw0.6") == 0)
 			{
-				m_aProtocolEnabled[PROTOCOL_TW6_IPV6] = true;
-				m_aProtocolEnabled[PROTOCOL_TW6_IPV4] = true;
+				m_aProtocolEnabled[EProtocol::TW6_IPV6] = true;
+				m_aProtocolEnabled[EProtocol::TW6_IPV4] = true;
 			}
 			else if(str_comp(aBuf, "tw0.7") == 0)
 			{
-				m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = true;
-				m_aProtocolEnabled[PROTOCOL_TW7_IPV4] = true;
+				m_aProtocolEnabled[EProtocol::TW7_IPV6] = true;
+				m_aProtocolEnabled[EProtocol::TW7_IPV4] = true;
 			}
 			else if(!ProtocolFromString(&Protocol, aBuf))
 			{
@@ -626,13 +621,13 @@ void CRegister::OnConfigChange()
 	}
 	if(!m_pConfig->m_SvSixup)
 	{
-		m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = false;
-		m_aProtocolEnabled[PROTOCOL_TW7_IPV4] = false;
+		m_aProtocolEnabled[EProtocol::TW7_IPV6] = false;
+		m_aProtocolEnabled[EProtocol::TW7_IPV4] = false;
 	}
 	if(m_pConfig->m_SvIpv4Only)
 	{
-		m_aProtocolEnabled[PROTOCOL_TW6_IPV6] = false;
-		m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = false;
+		m_aProtocolEnabled[EProtocol::TW6_IPV6] = false;
+		m_aProtocolEnabled[EProtocol::TW7_IPV6] = false;
 	}
 	m_NumExtraHeaders = 0;
 	const char *pRegisterExtra = m_pConfig->m_SvRegisterExtra;
@@ -657,19 +652,19 @@ void CRegister::OnConfigChange()
 	{
 		return;
 	}
-	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	for(EProtocol Protocol : CEnumIterator<EProtocol>())
 	{
-		if(aOldProtocolEnabled[i] == m_aProtocolEnabled[i])
+		if(aOldProtocolEnabled[Protocol] == m_aProtocolEnabled[Protocol])
 		{
 			continue;
 		}
-		if(m_aProtocolEnabled[i])
+		if(m_aProtocolEnabled[Protocol])
 		{
-			m_aProtocols[i].SendRegister();
+			m_aProtocols[Protocol].SendRegister();
 		}
 		else
 		{
-			m_aProtocols[i].SendDeleteIfRegistered(false);
+			m_aProtocols[Protocol].SendDeleteIfRegistered(false);
 		}
 	}
 }
@@ -695,7 +690,7 @@ bool CRegister::OnPacket(const CNetChunk *pPacket)
 		}
 
 		log_debug("register", "got challenge token, protocol='%s' token='%s'", pProtocol, pToken);
-		int Protocol;
+		EProtocol Protocol;
 		if(ProtocolFromString(&Protocol, pProtocol))
 		{
 			log_error("register", "got challenge packet with unknown protocol");
@@ -733,54 +728,54 @@ void CRegister::OnNewInfo(const char *pInfo)
 	int64_t Freq = time_freq();
 	int64_t MaximumPrevRegister = -1;
 	int64_t MinimumNextRegister = -1;
-	int MinimumNextRegisterProtocol = -1;
-	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	std::optional<EProtocol> MinimumNextRegisterProtocol = std::nullopt;
+	for(EProtocol Protocol : CEnumIterator<EProtocol>())
 	{
-		if(!m_aProtocolEnabled[i])
+		if(!m_aProtocolEnabled[Protocol])
 		{
 			continue;
 		}
-		if(m_aProtocols[i].m_NextRegister == -1)
+		if(m_aProtocols[Protocol].m_NextRegister == -1)
 		{
-			m_aProtocols[i].m_NextRegister = Now;
+			m_aProtocols[Protocol].m_NextRegister = Now;
 			continue;
 		}
-		if(m_aProtocols[i].m_PrevRegister > MaximumPrevRegister)
+		if(m_aProtocols[Protocol].m_PrevRegister > MaximumPrevRegister)
 		{
-			MaximumPrevRegister = m_aProtocols[i].m_PrevRegister;
+			MaximumPrevRegister = m_aProtocols[Protocol].m_PrevRegister;
 		}
-		if(MinimumNextRegisterProtocol == -1 || m_aProtocols[i].m_NextRegister < MinimumNextRegister)
+		if(!MinimumNextRegisterProtocol.has_value() || m_aProtocols[Protocol].m_NextRegister < MinimumNextRegister)
 		{
-			MinimumNextRegisterProtocol = i;
-			MinimumNextRegister = m_aProtocols[i].m_NextRegister;
+			MinimumNextRegisterProtocol = Protocol;
+			MinimumNextRegister = m_aProtocols[Protocol].m_NextRegister;
 		}
 	}
-	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	for(EProtocol Protocol : CEnumIterator<EProtocol>())
 	{
-		if(!m_aProtocolEnabled[i])
+		if(!m_aProtocolEnabled[Protocol])
 		{
 			continue;
 		}
-		if(i == MinimumNextRegisterProtocol)
+		if(Protocol == MinimumNextRegisterProtocol)
 		{
-			m_aProtocols[i].m_NextRegister = std::min(m_aProtocols[i].m_NextRegister, MaximumPrevRegister + Freq);
+			m_aProtocols[Protocol].m_NextRegister = std::min(m_aProtocols[Protocol].m_NextRegister, MaximumPrevRegister + Freq);
 		}
-		if(Now >= m_aProtocols[i].m_NextRegister)
+		if(Now >= m_aProtocols[Protocol].m_NextRegister)
 		{
-			m_aProtocols[i].SendRegister();
+			m_aProtocols[Protocol].SendRegister();
 		}
 	}
 }
 
 void CRegister::OnShutdown()
 {
-	for(int i = 0; i < NUM_PROTOCOLS; i++)
+	for(EProtocol Protocol : CEnumIterator<EProtocol>())
 	{
-		if(!m_aProtocolEnabled[i])
+		if(!m_aProtocolEnabled[Protocol])
 		{
 			continue;
 		}
-		m_aProtocols[i].SendDeleteIfRegistered(true);
+		m_aProtocols[Protocol].SendDeleteIfRegistered(true);
 	}
 }
 
