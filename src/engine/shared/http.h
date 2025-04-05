@@ -335,7 +335,7 @@ public:
 	bool Init(std::chrono::milliseconds ShutdownDelay);
 
 	// User
-	virtual void Run(std::shared_ptr<IHttpRequest> pRequest) override;
+	void Run(std::shared_ptr<IHttpRequest> pRequest) override;
 	void Shutdown() override;
 	~CHttp();
 };

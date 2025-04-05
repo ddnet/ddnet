@@ -143,15 +143,15 @@ private:
 public:
 	bool m_AllowRestart;
 
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
-	virtual void OnRender() override;
-	virtual void OnConsoleInit() override;
-	virtual void OnReset() override;
-	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual void OnMapLoad() override;
-	virtual void OnShutdown() override;
-	virtual void OnNewSnapshot() override;
+	void OnRender() override;
+	void OnConsoleInit() override;
+	void OnReset() override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
+	void OnMapLoad() override;
+	void OnShutdown() override;
+	void OnNewSnapshot() override;
 
 	void OnNewPredictedSnapshot();
 
