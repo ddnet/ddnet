@@ -44,7 +44,7 @@ public:
 		const CNetObj_Character *pPrevChar,
 		const CNetObj_Character *pPlayerChar,
 		int ClientId,
-		float Intra = 0.f);
+		float Intra = 0.0f);
 
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnInit() override;
