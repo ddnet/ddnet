@@ -59,7 +59,7 @@ For multiple words:
 
 ❌ Avoid:
 
-```C++
+```cpp
 for(int i = 0; i < MAX_CLIENTS; i++)
 {
 	for(int k = 0; k < NUM_DUMMIES; k++)
@@ -74,7 +74,7 @@ for(int i = 0; i < MAX_CLIENTS; i++)
 
 ✅ Instead do:
 
-```C++
+```cpp
 for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 {
 	for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
@@ -128,7 +128,7 @@ All new code should use scoped enums where the names of the literals should not 
 
 ❌ Avoid:
 
-```C++
+```cpp
 enum STATUS
 {
 	STATUS_PENDING,
@@ -139,7 +139,7 @@ enum STATUS
 
 ✅ Instead do:
 
-```C++
+```cpp
 enum class EStatus
 {
 	PENDING,
@@ -158,14 +158,14 @@ Do not set variables in if statements.
 
 ❌
 
-```C++
+```cpp
 int Foo;
 if((Foo = 2)) { .. }
 ```
 
 ✅
 
-```C++
+```cpp
 int Foo = 2;
 if(Foo) { .. }
 ```
@@ -176,14 +176,14 @@ Unless the alternative code is more complex and harder to read.
 
 ❌
 
-```C++
+```cpp
 int Foo = 0;
 if(!Foo) { .. }
 ```
 
 ✅
 
-```C++
+```cpp
 int Foo = 0;
 if(Foo != 0) { .. }
 ```
@@ -202,7 +202,7 @@ Use member variables or pass state by parameter instead of using global or stati
 
 Avoid static variables ❌: 
 
-```C++
+```cpp
 int CMyClass::Foo()
 {
 	static int s_Count = 0;
@@ -213,7 +213,7 @@ int CMyClass::Foo()
 
 Use member variables instead ✅:
 
-```C++
+```cpp
 class CMyClass
 {
 	int m_Count = 0;
@@ -227,7 +227,7 @@ int CMyClass::Foo()
 
 Constants can be static ✅:
 
-```C++
+```cpp
 static constexpr int ANSWER = 42;
 ```
 
@@ -237,13 +237,13 @@ While the code base already has a lot of methods that start with a ``Get`` prefi
 
 ❌
 
-```C++
+```cpp
 int GetMyVariable() { return m_MyVariable; }
 ```
 
 ✅
 
-```C++
+```cpp
 int MyVariable() { return m_MyVariable; }
 ```
 
@@ -251,7 +251,7 @@ int MyVariable() { return m_MyVariable; }
 
 Instead of doing this ❌:
 
-```C++
+```cpp
 class CFoo
 {
 	int m_Foo;
@@ -260,7 +260,7 @@ class CFoo
 
 Do this instead if possible ✅:
 
-```C++
+```cpp
 class CFoo
 {
 	int m_Foo = 0;
@@ -291,13 +291,13 @@ Code file names should be all lowercase and words should be separated with under
 
 ❌
 
-```C++
+```cpp
 src/game/FooBar.cpp
 ```
 
 ✅
 
-```C++
+```cpp
 src/game/foo_bar.cpp
 ```
 
