@@ -107,17 +107,6 @@ void CPlayers::RenderHand6(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir
 	}
 }
 
-inline float AngularMixDirection(float Src, float Dst) { return std::sin(Dst - Src) > 0 ? 1 : -1; }
-
-inline float AngularApproach(float Src, float Dst, float Amount)
-{
-	float d = AngularMixDirection(Src, Dst);
-	float n = Src + Amount * d;
-	if(AngularMixDirection(n, Dst) != d)
-		return Dst;
-	return n;
-}
-
 float CPlayers::GetPlayerTargetAngle(
 	const CNetObj_Character *pPrevChar,
 	const CNetObj_Character *pPlayerChar,
