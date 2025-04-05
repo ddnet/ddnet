@@ -26,6 +26,7 @@
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
+#include "game/client/ui_rect.h"
 #include "menus.h"
 #include "motd.h"
 #include "voting.h"
@@ -237,7 +238,25 @@ void CMenus::RenderGame(CUIRect MainView)
 		static char s_TouchControlsEditCheckbox;
 		if(DoButton_CheckBox(&s_TouchControlsEditCheckbox, Localize("Edit touch controls"), GameClient()->m_TouchControls.IsEditingActive(), &Button))
 		{
-			GameClient()->m_TouchControls.SetEditingActive(!GameClient()->m_TouchControls.IsEditingActive());
+			if(GameClient()->m_TouchControls.IsEditingActive() && UnsavedChanges())
+			{
+				m_OldSelectedButton = GameClient()->m_TouchControls.SelectedButton();
+				m_NewSelectedButton = nullptr;
+				PopupConfirm("Unsaved Changes", "Save all changes before turning off the editor?", "Save", "Discard", &CMenus::PopupConfirm_TurnOffEditor, POPUP_NONE, &CMenus::PopupCancel_TurnOffEditor);
+			}
+			else
+			{
+				GameClient()->m_TouchControls.SetEditingActive(!GameClient()->m_TouchControls.IsEditingActive());
+				if(GameClient()->m_TouchControls.IsEditingActive())
+				{
+					GameClient()->m_TouchControls.ResetVirtualVisibilities();
+					m_EditElement = 0;
+				}
+				else
+				{
+					ResetButtonPointers();
+				}
+			}
 		}
 
 		ButtonBar2.VSplitRight(80.0f, &ButtonBar2, &Button);
@@ -262,13 +281,62 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			Console()->ExecuteLine("toggle_local_console");
 		}
-
 		if(GameClient()->m_TouchControls.IsEditingActive())
 		{
-			CUIRect TouchControlsEditor;
-			MainView.VMargin((MainView.w - 505.0f) / 2.0f, &TouchControlsEditor);
-			TouchControlsEditor.HMargin((TouchControlsEditor.h - 230.0f) / 2.0f, &TouchControlsEditor);
+			// Resolve issues if needed before rendering, so the elements could have a correct value on this frame.
+			// Issues need to be resolved before popup. So CheckCachedSettings could not be bad.
+			ResolveIssues();
+			// Do Popups if needed.
+			CTouchControls::CPopupParam PopupParam = GameClient()->m_TouchControls.RequiredPopup();
+			if(PopupParam.m_PopupType != CTouchControls::EPopupType::NUM_POPUPS)
+			{
+				DoPopupType(PopupParam);
+				// No need for continue rendering.
+				return;
+			}
+			// Their width is all 505.0f, height is adjustable, you can directly change its h value, so no need for changing where tab is.
+			CUIRect SelectingTab;
+			MainView.HSplitTop(10.0f, nullptr, &MainView);
+			MainView.HMargin((MainView.h - 275.0f) / 2.0f, &MainView);
+			MainView.VMargin((MainView.w - 505.0f) / 2.0f, &MainView);
+			MainView.y -= 60.0f;
+			MainView.HSplitTop(35.0f, &SelectingTab, &MainView);
+
+			// Select tab.
+			RenderSelectingTab(SelectingTab);
+
+			switch(m_CurrentSelect)
+			{
+			case 0: RenderTouchControlsEditor(MainView); break;
+			case 1: RenderTouchButtonEditor(MainView); break;
+			case 2: RenderVirtualVisibilityEditor(MainView); break;
+			default: dbg_assert(false, "Unknown Selected tab value.");
+			}
+			// Gap between two tab is 40.0f, width of the tab is 115.0f, the total of everything is 505.0f.
+
+			/*if(GameClient()->m_TouchControls.IsButtonEditing())
+			{
+				// Only render this when a real button is selected or a virtual button is created.
+				MainView.HSplitTop(10.0f, nullptr, &MainView);
+				MainView.HSplitBottom(230.0f, &TouchButtonEditor, &TouchControlsEditor);
+				TouchButtonEditor.Draw(ms_ColorTabbarActive, IGraphics::CORNER_T, 10.0f);
+				RenderTouchButtonEditor(TouchButtonEditor);
+				TouchControlsEditor.VSplitLeft(505.0f, &TouchControlsEditor, &VirtualVisibilityEditor);
+				VirtualVisibilityEditor.Draw(ms_ColorTabbarActive, IGraphics::CORNER_BR, 10.0f);
+			}
+			else
+			{
+				// No button editing
+				MainView.HMargin((MainView.h - 275.0f) / 2.0f, &TouchControlsEditor);
+				TouchControlsEditor.HSplitBottom(45.0f, &TouchControlsEditor, &TinyButtonTab);
+				TouchControlsEditor.VSplitLeft(505.0f, &TouchControlsEditor, &VirtualVisibilityEditor);
+				VirtualVisibilityEditor.Draw(ms_ColorTabbarActive, IGraphics::CORNER_TR, 10.0f);
+				TinyButtonTab.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
+			}
+			VirtualVisibilityEditor.VMargin(20.0f, &VirtualVisibilityEditor);
+			RenderVirtualVisibilityEditor(VirtualVisibilityEditor);
 			RenderTouchControlsEditor(TouchControlsEditor);
+			RenderTinyButtonTab(TinyButtonTab);*/
 		}
 	}
 }
