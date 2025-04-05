@@ -48,7 +48,7 @@ class CNamePlatePartText : public CNamePlatePart
 {
 protected:
 	STextContainerIndex m_TextContainerIndex;
-	virtual bool UpdateNeeded(CGameClient &This, const CNamePlateData &Data) { return true; }
+	virtual bool UpdateNeeded(CGameClient &This, const CNamePlateData &Data) = 0;
 	virtual void UpdateText(CGameClient &This, const CNamePlateData &Data) = 0;
 	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 	CNamePlatePartText(CGameClient &This) :
@@ -372,17 +372,17 @@ protected:
 		if(!m_Visible)
 			return;
 		m_Size = vec2(Data.m_FontSizeHookStrongWeak, Data.m_FontSizeHookStrongWeak) * 1.5f;
-		switch(Data.m_HookStrongWeak)
+		switch(Data.m_HookStrongWeakState)
 		{
-		case CNamePlateData::HOOKSTRONGWEAK_STRONG:
+		case EHookStrongWeakState::STRONG:
 			m_Sprite = SPRITE_HOOK_STRONG;
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(6401973));
 			break;
-		case CNamePlateData::HOOKSTRONGWEAK_NEUTRAL:
+		case EHookStrongWeakState::NEUTRAL:
 			m_Sprite = SPRITE_HOOK_ICON;
 			m_Color = ColorRGBA(1.0f, 1.0f, 1.0f);
 			break;
-		case CNamePlateData::HOOKSTRONGWEAK_WEAK:
+		case EHookStrongWeakState::WEAK:
 			m_Sprite = SPRITE_HOOK_WEAK;
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(41131));
 			break;
@@ -412,15 +412,15 @@ protected:
 		m_Visible = Data.m_ShowHookStrongWeakId;
 		if(!m_Visible)
 			return false;
-		switch(Data.m_HookStrongWeak)
+		switch(Data.m_HookStrongWeakState)
 		{
-		case CNamePlateData::HOOKSTRONGWEAK_STRONG:
+		case EHookStrongWeakState::STRONG:
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(6401973));
 			break;
-		case CNamePlateData::HOOKSTRONGWEAK_NEUTRAL:
+		case EHookStrongWeakState::NEUTRAL:
 			m_Color = ColorRGBA(1.0f, 1.0f, 1.0f);
 			break;
-		case CNamePlateData::HOOKSTRONGWEAK_WEAK:
+		case EHookStrongWeakState::WEAK:
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(41131));
 			break;
 		}
@@ -450,6 +450,7 @@ private:
 	bool m_Inited = false;
 	bool m_InGame = false;
 	vec2 m_Position = vec2(0.0f, 0.0f);
+	vec2 m_Size = vec2(0.0f, 0.0f);
 	PartsVector m_vpParts;
 	void RenderLine(CGameClient &This,
 		vec2 Pos, vec2 Size,
@@ -502,11 +503,10 @@ private:
 	void Update(CGameClient &This, const CNamePlateData *pData)
 	{
 		Init(This);
-		if(pData)
-		{
-			m_InGame = pData->m_InGame;
-			m_Position = pData->m_Position;
-		}
+		if(!pData)
+			return;
+		m_InGame = pData->m_InGame;
+		m_Position = pData->m_Position;
 	}
 
 public:
@@ -520,7 +520,7 @@ public:
 		Update(This, pData);
 		vec2 Pos = m_Position;
 		// X: Total width including padding of line, Y: Max height of line parts
-		vec2 Size = vec2(0.0f, 0.0f);
+		vec2 LineSize = vec2(0.0f, 0.0f);
 		bool Empty = true;
 		auto Start = m_vpParts.begin();
 		for(auto PartIt = m_vpParts.begin(); PartIt != m_vpParts.end(); ++PartIt)
@@ -532,27 +532,29 @@ public:
 			{
 				if(!Empty)
 				{
-					RenderLine(This, Pos, Size, Start, std::next(PartIt));
-					Pos.y -= Size.y;
+					RenderLine(This, Pos, LineSize, Start, std::next(PartIt));
+					Pos.y -= LineSize.y;
 				}
 				Start = std::next(PartIt);
-				Size = vec2(0.0f, 0.0f);
+				LineSize = vec2(0.0f, 0.0f);
 			}
 			else if(Part.Visible() || Part.ShiftOnInvis())
 			{
 				Empty = false;
-				Size.x += Part.Size().x + Part.Padding().x;
-				Size.y = std::max(Size.y, Part.Size().y + Part.Padding().y);
+				LineSize.x += Part.Size().x + Part.Padding().x;
+				LineSize.y = std::max(LineSize.y, Part.Size().y + Part.Padding().y);
 			}
 		}
-		RenderLine(This, Pos, Size, Start, m_vpParts.end());
+		RenderLine(This, Pos, LineSize, Start, m_vpParts.end());
 		This.Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	vec2 Size(CGameClient &This, const CNamePlateData *pData)
 	{
+		if(!pData)
+			return m_Size; // Used cached size calculation
 		Update(This, pData);
 		// X: Total width including padding of line, Y: Max height of line parts
-		vec2 Size = vec2(0.0f, 0.0f);
+		vec2 LineSize = vec2(0.0f, 0.0f);
 		float WMax = 0.0f;
 		float HTotal = 0.0f;
 		bool Empty = true;
@@ -565,23 +567,24 @@ public:
 			{
 				if(!Empty)
 				{
-					if(Size.x > WMax)
-						WMax = Size.x;
-					HTotal += Size.y;
+					if(LineSize.x > WMax)
+						WMax = LineSize.x;
+					HTotal += LineSize.y;
 				}
-				Size = vec2(0.0f, 0.0f);
+				LineSize = vec2(0.0f, 0.0f);
 			}
 			else if(Part.Visible() || Part.ShiftOnInvis())
 			{
 				Empty = false;
-				Size.x += Part.Size().x + Part.Padding().x;
-				Size.y = std::max(Size.y, Part.Size().y + Part.Padding().y);
+				LineSize.x += Part.Size().x + Part.Padding().x;
+				LineSize.y = std::max(LineSize.y, Part.Size().y + Part.Padding().y);
 			}
 		}
-		if(Size.x > WMax)
-			WMax = Size.x;
-		HTotal += Size.y;
-		return vec2(WMax, HTotal);
+		if(LineSize.x > WMax)
+			WMax = LineSize.x;
+		HTotal += LineSize.y;
+		m_Size = vec2(WMax, HTotal);
+		return m_Size;
 	}
 };
 
@@ -703,7 +706,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	}
 
 	Data.m_ShowHookStrongWeak = false;
-	Data.m_HookStrongWeak = CNamePlateData::HOOKSTRONGWEAK_NEUTRAL;
+	Data.m_HookStrongWeakState = EHookStrongWeakState::NEUTRAL;
 	Data.m_ShowHookStrongWeakId = false;
 	Data.m_HookStrongWeakId = 0;
 
@@ -721,7 +724,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 				Data.m_ShowHookStrongWeak = Data.m_ShowHookStrongWeakId;
 			else
 			{
-				Data.m_HookStrongWeak = Selected.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId ? CNamePlateData::HOOKSTRONGWEAK_STRONG : CNamePlateData::HOOKSTRONGWEAK_WEAK;
+				Data.m_HookStrongWeakState = Selected.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId ? EHookStrongWeakState::STRONG : EHookStrongWeakState::WEAK;
 				Data.m_ShowHookStrongWeak = g_Config.m_Debug || g_Config.m_ClNamePlatesStrong > 0;
 			}
 		}
@@ -778,12 +781,12 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	Data.m_ShowHookStrongWeakId = g_Config.m_ClNamePlatesStrong == 2;
 	if(Dummy == g_Config.m_ClDummy)
 	{
-		Data.m_HookStrongWeak = CNamePlateData::HOOKSTRONGWEAK_NEUTRAL;
+		Data.m_HookStrongWeakState = EHookStrongWeakState::NEUTRAL;
 		Data.m_ShowHookStrongWeak = Data.m_ShowHookStrongWeakId;
 	}
 	else
 	{
-		Data.m_HookStrongWeak = Data.m_HookStrongWeakId == 2 ? CNamePlateData::HOOKSTRONGWEAK_STRONG : CNamePlateData::HOOKSTRONGWEAK_WEAK;
+		Data.m_HookStrongWeakState = Data.m_HookStrongWeakId == 2 ? EHookStrongWeakState::STRONG : EHookStrongWeakState::WEAK;
 		Data.m_ShowHookStrongWeak = g_Config.m_ClNamePlatesStrong > 0;
 	}
 
@@ -811,7 +814,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 		Dir /= Length;
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, 0, Dir, Data.m_Position);
 	Data.m_Position.y -= (float)g_Config.m_ClNamePlatesOffset;
-	NamePlate.Render(*GameClient(), &Data);
+	NamePlate.Render(*GameClient(), nullptr);
 	NamePlate.Reset(*GameClient());
 }
 
@@ -847,7 +850,7 @@ void CNamePlates::OnRender()
 			RenderNamePlateGame(RenderPos, pInfo, 0.4f);
 		}
 		// Only render name plates for active characters
-		if(GameClient()->m_Snap.m_aCharacters[i].m_Active)
+		else if(GameClient()->m_Snap.m_aCharacters[i].m_Active)
 		{
 			const vec2 RenderPos = GameClient()->m_aClients[i].m_RenderPos;
 			RenderNamePlateGame(RenderPos, pInfo, 1.0f);

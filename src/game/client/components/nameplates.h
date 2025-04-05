@@ -1,12 +1,18 @@
 #ifndef GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #define GAME_CLIENT_COMPONENTS_NAMEPLATES_H
+#include <base/color.h>
 #include <base/vmath.h>
 
 #include <engine/shared/protocol.h>
-#include <engine/textrender.h>
 
 #include <game/client/component.h>
-#include <game/generated/protocol.h>
+
+enum class EHookStrongWeakState
+{
+	WEAK,
+	NEUTRAL,
+	STRONG
+};
 
 class CNamePlateData
 {
@@ -31,12 +37,7 @@ public:
 	bool m_DirRight;
 	float m_FontSizeDirection;
 	bool m_ShowHookStrongWeak;
-	enum
-	{
-		HOOKSTRONGWEAK_WEAK,
-		HOOKSTRONGWEAK_NEUTRAL,
-		HOOKSTRONGWEAK_STRONG
-	} m_HookStrongWeak;
+	EHookStrongWeakState m_HookStrongWeakState;
 	bool m_ShowHookStrongWeakId;
 	int m_HookStrongWeakId;
 	float m_FontSizeHookStrongWeak;
