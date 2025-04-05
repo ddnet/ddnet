@@ -177,6 +177,7 @@ public:
 	int64_t m_Last_Team;
 	int m_ShowOthers;
 	bool m_ShowAll;
+	int m_KillProtection;
 	vec2 m_ShowDistance;
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
