@@ -271,8 +271,8 @@ def main():
 
 		lines += ['void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)']
 		lines += ['{']
-		lines += ['\tm_pMsgFailedOn = 0;']
-		lines += ['\tm_pObjFailedOn = 0;']
+		lines += ['\tm_pMsgFailedOn = nullptr;']
+		lines += ['\tm_pObjFailedOn = nullptr;']
 		lines += ['\tswitch(Type)']
 		lines += ['\t{']
 
@@ -295,7 +295,7 @@ def main():
 		lines += ['\t\t\tm_pMsgFailedOn = "";']
 		lines += ['\t\tif(!m_pObjFailedOn)']
 		lines += ['\t\t\tm_pObjFailedOn = "";']
-		lines += ['\t\treturn 0;']
+		lines += ['\t\treturn nullptr;']
 		lines += ['\t}']
 		lines += ['\tm_pMsgFailedOn = "";']
 		lines += ['\tm_pObjFailedOn = "";']
