@@ -1,7 +1,8 @@
 # pylint: skip-file
 # See https://github.com/ddnet/ddnet/issues/3507
 
-from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
+from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetEventEx, NetIntAny, NetTwIntString, NetIntRange
+from datatypes import NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM", "SPEC_CAM"]
@@ -216,17 +217,15 @@ Objects = [
 
 	NetObject("ClientInfo", [
 		# 4*4 = 16 characters
-		NetIntAny("m_Name0"), NetIntAny("m_Name1"), NetIntAny("m_Name2"),
-		NetIntAny("m_Name3"),
+		NetArray(NetTwIntString("m_aName"), 4),
 
 		# 4*3 = 12 characters
-		NetIntAny("m_Clan0"), NetIntAny("m_Clan1"), NetIntAny("m_Clan2"),
+		NetArray(NetTwIntString("m_aClan"), 3),
 
 		NetIntAny("m_Country"),
 
 		# 4*6 = 24 characters
-		NetIntAny("m_Skin0"), NetIntAny("m_Skin1"), NetIntAny("m_Skin2"),
-		NetIntAny("m_Skin3"), NetIntAny("m_Skin4"), NetIntAny("m_Skin5"),
+		NetArray(NetTwIntString("m_aSkin"), 6),
 
 		NetIntRange("m_UseCustomColor", 0, 1),
 
@@ -568,7 +567,7 @@ Messages = [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
 	]),
-    
+
 	NetMessageEx("Sv_KillMsgTeam", "killmsgteam@netmsg.ddnet.tw", [
 		NetIntRange("m_Team", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_First", -1, 'MAX_CLIENTS-1'),

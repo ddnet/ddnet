@@ -1620,14 +1620,14 @@ void CGameClient::OnNewSnapshot()
 				{
 					CClientData *pClient = &m_aClients[ClientId];
 
-					if(!IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName, std::size(pClient->m_aName)))
+					if(!IntsToStr(pInfo->m_aName, 4, pClient->m_aName, std::size(pClient->m_aName)))
 					{
 						str_copy(pClient->m_aName, "nameless tee");
 					}
-					IntsToStr(&pInfo->m_Clan0, 3, pClient->m_aClan, std::size(pClient->m_aClan));
+					IntsToStr(pInfo->m_aClan, 3, pClient->m_aClan, std::size(pClient->m_aClan));
 					pClient->m_Country = pInfo->m_Country;
 
-					IntsToStr(&pInfo->m_Skin0, 6, pClient->m_aSkinName, std::size(pClient->m_aSkinName));
+					IntsToStr(pInfo->m_aSkin, 6, pClient->m_aSkinName, std::size(pClient->m_aSkinName));
 					if(pClient->m_aSkinName[0] == '\0' ||
 						(!m_GameInfo.m_AllowXSkins && CSkins::IsSpecialSkin(pClient->m_aSkinName)))
 					{

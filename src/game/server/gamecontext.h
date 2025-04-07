@@ -165,6 +165,8 @@ public:
 	IAntibot *Antibot() { return m_pAntibot; }
 	CTeeHistorian *TeeHistorian() { return &m_TeeHistorian; }
 	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
+	CNetObjHandler *GetNetObjHandler() override { return &m_NetObjHandler; }
+	protocol7::CNetObjHandler *GetNetObjHandler7() override { return &m_NetObjHandler7; }
 
 	CGameContext();
 	CGameContext(int Reset);
