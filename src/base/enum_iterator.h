@@ -7,7 +7,7 @@
 template<typename Enum, std::size_t Size = static_cast<std::size_t>(Enum::NUM)>
 class CEnumIterator
 {
-	static_assert(std::is_enum_v<Enum>, "EnumMap requires an enum type");
+	static_assert(std::is_enum_v<Enum>, "EnumIterator requires an enum type");
 
 	class CIterator
 	{
