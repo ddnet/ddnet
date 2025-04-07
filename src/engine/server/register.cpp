@@ -23,7 +23,7 @@ class CRegister : public IRegister
 		OK,
 		NEED_CHALLENGE,
 		NEED_INFO,
-		ERROR
+		ERROR,
 	};
 
 	enum class EProtocol
