@@ -110,7 +110,7 @@ void CGraphicsBackend_Threaded::StopProcessor()
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 {
 	SGfxErrorContainer Error;
-#ifdef CONF_WEBASM
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
 	// run everything single threaded for now, context binding in a thread seems to not work as of now
 	Error = m_pProcessor->GetError();
 	if(Error.m_ErrorType == GFX_ERROR_TYPE_NONE)

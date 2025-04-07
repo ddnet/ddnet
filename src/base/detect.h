@@ -46,24 +46,25 @@
 #define PLATFORM_STRING "openbsd"
 #endif
 
-#if(defined(__LINUX__) || defined(__linux__) || defined(CONF_WEBASM)) && !defined(__ANDROID__)
-#define CONF_FAMILY_UNIX 1
-#define CONF_FAMILY_STRING "unix"
-#define CONF_PLATFORM_LINUX 1
-#define PLATFORM_STRING "linux"
-#define CONF_BACKEND_OPENGL_ES3 1
-#ifdef CONF_WEBASM
-// GLES only
-#define CONF_BACKEND_OPENGL_ES 1
-#endif
-#endif
-
 #if defined(__ANDROID__)
 #define CONF_FAMILY_UNIX 1
 #define CONF_FAMILY_STRING "unix"
 #define CONF_PLATFORM_ANDROID 1
 #define PLATFORM_STRING "android"
 #define CONF_BACKEND_OPENGL_ES 1
+#define CONF_BACKEND_OPENGL_ES3 1
+#elif defined(__EMSCRIPTEN__)
+#define CONF_FAMILY_UNIX 1
+#define CONF_FAMILY_STRING "unix"
+#define CONF_PLATFORM_EMSCRIPTEN 1
+#define PLATFORM_STRING "emscripten"
+#define CONF_BACKEND_OPENGL_ES3 1
+#define CONF_BACKEND_OPENGL_ES 1
+#elif defined(__LINUX__) || defined(__linux__)
+#define CONF_FAMILY_UNIX 1
+#define CONF_FAMILY_STRING "unix"
+#define CONF_PLATFORM_LINUX 1
+#define PLATFORM_STRING "linux"
 #define CONF_BACKEND_OPENGL_ES3 1
 #endif
 
@@ -175,6 +176,11 @@
 #else
 #define CONF_ARCH_ENDIAN_LITTLE 1
 #endif
+#endif
+
+#if defined(__EMSCRIPTEN__)
+#define CONF_ARCH_WASM 1
+#define CONF_ARCH_STRING "wasm32"
 #endif
 
 #ifndef CONF_FAMILY_STRING

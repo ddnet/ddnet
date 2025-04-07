@@ -146,7 +146,7 @@ bool CVideo::Start()
 
 	m_pFormat = m_pFormatContext->oformat;
 
-#if defined(CONF_ARCH_IA32) || defined(CONF_ARCH_ARM)
+#if defined(CONF_ARCH_IA32) || defined(CONF_ARCH_ARM) || defined(CONF_ARCH_WASM)
 	// use only the minimum of 2 threads on 32-bit to save memory
 	m_VideoThreads = 2;
 	m_AudioThreads = 2;
@@ -885,7 +885,7 @@ bool CVideo::AddStream(COutputStream *pStream, AVFormatContext *pFormatContext, 
 	}
 	pStream->m_pCodecContext = pContext;
 
-#if defined(CONF_ARCH_IA32) || defined(CONF_ARCH_ARM)
+#if defined(CONF_ARCH_IA32) || defined(CONF_ARCH_ARM) || defined(CONF_ARCH_WASM)
 	// use only 1 ffmpeg thread on 32-bit to save memory
 	pContext->thread_count = 1;
 #endif
