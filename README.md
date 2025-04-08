@@ -239,23 +239,25 @@ Then add `-DCMAKE_TOOLCHAIN_FILE=../cmake/toolchains/mingw64.toolchain` to the
 Cross-compiling on Linux to WebAssembly via Emscripten
 --------------------------------------------------------
 
-Install Emscripten cross-compilers (e.g. `sudo apt install emscripten`) on a modern linux distro.
+Install Emscripten cross-compilers on a modern linux distro. Follow the [instructions to install the emsdk](https://emscripten.org/docs/getting_started/downloads.html). Installing Emscripten from the package manager (e.g. with `sudo apt install emscripten`) may not work, as building some libraries requires a more recent version of Emscripten than available via package manager.
 
 If you need to compile the ddnet-libs for WebAssembly, simply call
 
 ```bash
 # <directory to build in> should be a directory outside of the project's source directory
-scripts/compile_libs/gen_libs.sh <directory to build in> webasm
+scripts/compile_libs/gen_libs.sh "<directory to build in>" webasm
 ```
 
-from the project's source directory. It will automatically create a directory called `ddnet-libs`.
+from the project's source directory. It will automatically create a directory called `ddnet-libs` in your build directory.
 You can then manually merge this directory with the one in the ddnet source directory.
 
-Then run `emcmake cmake .. -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON` in your build directory.
+Run `rustup target add wasm32-unknown-emscripten` to install the WASM target for compiling Rust.
+
+Then run `emcmake cmake .. -G "Ninja" -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON` in your build directory to configure followed by `cmake --build . -j8` to build.
 
 To test the compiled code locally, just use `emrun --browser firefox DDNet.html`
 
-To host the compiled .html file copy all `.data`, `.html`, `.js`, `.wasm` files to the web server. (see /other/emscripten/minimal.html for a minimal html example)
+To host the compiled .html file copy all `.data`, `.html`, `.js`, `.wasm` files to the web server. See `other/emscripten/minimal.html` for a minimal HTML example. You can also run `other/emscripten/server.py` to host a minimal server for testing using Python without needing to install Emscripten.
 
 Then enable cross origin policies. Example for apache2 on debian based distros:
 ```bash

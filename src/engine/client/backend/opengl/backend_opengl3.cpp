@@ -19,7 +19,7 @@
 
 #include <engine/client/backend/glsl_shader_compiler.h>
 
-#ifdef CONF_WEBASM
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
 // WebGL2 defines the type of a buffer at the first bind to a buffer target
 // this is different to GLES 3 (https://www.khronos.org/registry/webgl/specs/latest/2.0/#5.1)
 static constexpr GLenum BUFFER_INIT_INDEX_TARGET = GL_ELEMENT_ARRAY_BUFFER;
