@@ -689,34 +689,15 @@ void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs
 	{
 		if(i != 0)
 		{
-			if(BufferSize <= 1)
-			{
-				return;
-			}
-			pBuffer[0] = ',';
-			pBuffer[1] = '\0';
-			pBuffer += 1;
-			BufferSize -= 1;
+			str_append(pBuffer, ",", BufferSize);
 		}
-		if(BufferSize <= 1)
-		{
-			return;
-		}
-		char aIpAddr[512];
-		net_addr_str(&pAddrs[i], aIpAddr, sizeof(aIpAddr), true);
 		if(pAddrs[i].type & NETTYPE_TW7)
 		{
-			str_format(
-				pBuffer,
-				BufferSize,
-				"tw-0.7+udp://%s",
-				aIpAddr);
-			return;
+			str_append(pBuffer, "tw-0.7+udp://", BufferSize);
 		}
-		str_copy(pBuffer, aIpAddr, BufferSize);
-		int Length = str_length(pBuffer);
-		pBuffer += Length;
-		BufferSize -= Length;
+		char aIpAddr[NETADDR_MAXSTRSIZE];
+		net_addr_str(&pAddrs[i], aIpAddr, sizeof(aIpAddr), true);
+		str_append(pBuffer, aIpAddr, BufferSize);
 	}
 }
 
