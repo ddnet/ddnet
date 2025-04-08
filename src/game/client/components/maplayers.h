@@ -158,6 +158,10 @@ private:
 
 	int GetLayerType(const CMapItemLayer *pLayer) const;
 	int GetTileLayerAndOverlayCount(const CMapItemLayerTilemap *pLayerTilemap, int LayerType, void **ppTiles = nullptr) const;
+
+	void RenderTilelayerNoTileBuffer(int TextureId, int LayerType, void *pTilesData, CMapItemLayerTilemap *pLayerTilemap, const ColorRGBA &Color);
+	void RenderTilelayerWithTileBuffer(int TextureId, int LayerType, int TileLayerCounter, const ColorRGBA &Color);
+	ColorRGBA GetDeathBorderColor() const;
 };
 
 #endif
