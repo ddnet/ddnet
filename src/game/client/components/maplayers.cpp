@@ -773,50 +773,21 @@ void CMapLayers::RenderTileLayer(int LayerIndex, const ColorRGBA &Color)
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-	int BorderX0, BorderY0, BorderX1, BorderY1;
-	bool DrawBorder = false;
+	int ScreenRectY0 = std::floor(ScreenY0 / 32);
+	int ScreenRectX0 = std::floor(ScreenX0 / 32);
+	int ScreenRectY1 = std::ceil(ScreenY1 / 32);
+	int ScreenRectX1 = std::ceil(ScreenX1 / 32);
 
-	int Y0 = BorderY0 = std::floor(ScreenY0 / 32);
-	int X0 = BorderX0 = std::floor(ScreenX0 / 32);
-	int Y1 = BorderY1 = std::ceil(ScreenY1 / 32);
-	int X1 = BorderX1 = std::ceil(ScreenX1 / 32);
-
-	if(X0 < 0)
+	if(ScreenRectX1 > 0 && ScreenRectY1 > 0 && ScreenRectX0 < (int)Visuals.m_Width && ScreenRectY0 < (int)Visuals.m_Height)
 	{
-		X0 = 0;
-		DrawBorder = true;
-	}
-	if(Y0 < 0)
-	{
-		Y0 = 0;
-		DrawBorder = true;
-	}
-	if(X1 > (int)Visuals.m_Width)
-	{
-		X1 = Visuals.m_Width;
-		DrawBorder = true;
-	}
-	if(Y1 > (int)Visuals.m_Height)
-	{
-		Y1 = Visuals.m_Height;
-		DrawBorder = true;
-	}
-
-	bool DrawLayer = true;
-	if(X1 <= 0)
-		DrawLayer = false;
-	if(Y1 <= 0)
-		DrawLayer = false;
-	if(X0 >= (int)Visuals.m_Width)
-		DrawLayer = false;
-	if(Y0 >= (int)Visuals.m_Height)
-		DrawLayer = false;
-
-	if(DrawLayer)
-	{
-		//create the indice buffers we want to draw -- reuse them
+		// create the indice buffers we want to draw -- reuse them
 		static std::vector<char *> s_vpIndexOffsets;
 		static std::vector<unsigned int> s_vDrawCounts;
+
+		int X0 = std::max(ScreenRectX0, 0);
+		int Y0 = std::max(ScreenRectY0, 0);
+		int X1 = std::min(ScreenRectX1, (int)Visuals.m_Width);
+		int Y1 = std::min(ScreenRectY1, (int)Visuals.m_Height);
 
 		s_vpIndexOffsets.clear();
 		s_vDrawCounts.clear();
@@ -849,160 +820,109 @@ void CMapLayers::RenderTileLayer(int LayerIndex, const ColorRGBA &Color)
 		}
 	}
 
-	if(DrawBorder)
-		RenderTileBorder(LayerIndex, Color, BorderX0, BorderY0, BorderX1, BorderY1);
+	if(ScreenRectX1 > (int)Visuals.m_Width || ScreenRectY1 > (int)Visuals.m_Height || ScreenRectX0 < 0 || ScreenRectY0 < 0)
+	{
+		RenderTileBorder(LayerIndex, Color, ScreenRectX0, ScreenRectY0, ScreenRectX1, ScreenRectY1);
+	}
 }
 
 void CMapLayers::RenderTileBorder(int LayerIndex, const ColorRGBA &Color, int BorderX0, int BorderY0, int BorderX1, int BorderY1)
 {
 	STileLayerVisuals &Visuals = *m_vpTileLayerVisuals[LayerIndex];
 
-	int Y0 = BorderY0;
-	int X0 = BorderX0;
-	int Y1 = BorderY1;
-	int X1 = BorderX1;
-
-	if(X0 < 0)
-		X0 = 0;
-	if(Y0 < 0)
-		Y0 = 0;
-	if(X1 > (int)Visuals.m_Width)
-		X1 = (int)Visuals.m_Width;
-	if(Y1 > (int)Visuals.m_Height)
-		Y1 = (int)Visuals.m_Height;
+	int Y0 = std::max(0, BorderY0);
+	int X0 = std::max(0, BorderX0);
+	int Y1 = std::min((int)Visuals.m_Height, BorderY1);
+	int X1 = std::min((int)Visuals.m_Width, BorderX1);
 
 	// corners
+	auto DrawCorner = [this, &Visuals, Color](vec2 Offset, vec2 Scale, STileLayerVisuals::STileVisual &Visual) {
+		Offset *= 32.0f;
+		Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, (offset_ptr_size)Visual.IndexBufferByteOffset(), Offset, Scale, 1);
+	};
+
 	if(BorderX0 < 0)
 	{
 		// Draw corners on left side
-		if(BorderY0 < 0)
+		if(BorderY0 < 0 && Visuals.m_BorderTopLeft.DoDraw())
 		{
-			if(Visuals.m_BorderTopLeft.DoDraw())
-			{
-				vec2 Offset;
-				Offset.x = 0;
-				Offset.y = 0;
-				vec2 Scale;
-				Scale.x = absolute(BorderX0);
-				Scale.y = absolute(BorderY0);
-
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, (offset_ptr_size)Visuals.m_BorderTopLeft.IndexBufferByteOffset(), Offset, Scale, 1);
-			}
+			DrawCorner(
+				vec2(0, 0),
+				vec2(std::abs(BorderX0), std::abs(BorderY0)),
+				Visuals.m_BorderTopLeft);
 		}
-		if(BorderY1 > (int)Visuals.m_Height)
+		if(BorderY1 > (int)Visuals.m_Height && Visuals.m_BorderBottomLeft.DoDraw())
 		{
-			if(Visuals.m_BorderBottomLeft.DoDraw())
-			{
-				vec2 Offset;
-				Offset.x = 0;
-				Offset.y = Visuals.m_Height * 32.0f;
-				vec2 Scale;
-				Scale.x = absolute(BorderX0);
-				Scale.y = BorderY1 - Visuals.m_Height;
-
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, (offset_ptr_size)Visuals.m_BorderBottomLeft.IndexBufferByteOffset(), Offset, Scale, 1);
-			}
+			DrawCorner(
+				vec2(0, Visuals.m_Height),
+				vec2(std::abs(BorderX0), BorderY1 - Visuals.m_Height),
+				Visuals.m_BorderBottomLeft);
 		}
 	}
 	if(BorderX1 > (int)Visuals.m_Width)
 	{
 		// Draw corners on right side
+		if(BorderY0 < 0 && Visuals.m_BorderTopRight.DoDraw())
+		{
+			DrawCorner(
+				vec2(Visuals.m_Width, 0),
+				vec2(BorderX1 - Visuals.m_Width, std::abs(BorderY0)),
+				Visuals.m_BorderTopRight);
+		}
+		if(BorderY1 > (int)Visuals.m_Height && Visuals.m_BorderBottomRight.DoDraw())
+		{
+			DrawCorner(
+				vec2(Visuals.m_Width, Visuals.m_Height),
+				vec2(BorderX1 - Visuals.m_Width, BorderY1 - Visuals.m_Height),
+				Visuals.m_BorderBottomRight);
+		}
+	}
+
+	// borders
+	auto DrawBorder = [this, &Visuals, Color](vec2 Offset, vec2 Scale, STileLayerVisuals::STileVisual &StartVisual, STileLayerVisuals::STileVisual &EndVisual) {
+		unsigned int DrawNum = ((EndVisual.IndexBufferByteOffset() - StartVisual.IndexBufferByteOffset()) / (sizeof(unsigned int) * 6)) + (EndVisual.DoDraw() ? 1lu : 0lu);
+		offset_ptr_size pOffset = (offset_ptr_size)StartVisual.IndexBufferByteOffset();
+		Offset *= 32.0f;
+		Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, pOffset, Offset, Scale, DrawNum);
+	};
+
+	if(Y0 < (int)Visuals.m_Height && Y1 > 0)
+	{
+		if(BorderX1 > (int)Visuals.m_Width)
+		{
+			// Draw right border
+			DrawBorder(
+				vec2(Visuals.m_Width, 0),
+				vec2(BorderX1 - Visuals.m_Width, 1.f),
+				Visuals.m_vBorderRight[Y0], Visuals.m_vBorderRight[Y1 - 1]);
+		}
+		if(BorderX0 < 0)
+		{
+			// Draw left border
+			DrawBorder(
+				vec2(0, 0),
+				vec2(std::abs(BorderX0), 1),
+				Visuals.m_vBorderLeft[Y0], Visuals.m_vBorderLeft[Y1 - 1]);
+		}
+	}
+
+	if(X0 < (int)Visuals.m_Width && X1 > 0)
+	{
 		if(BorderY0 < 0)
 		{
-			if(Visuals.m_BorderTopRight.DoDraw())
-			{
-				vec2 Offset;
-				Offset.x = Visuals.m_Width * 32.0f;
-				Offset.y = 0;
-				vec2 Scale;
-				Scale.x = BorderX1 - Visuals.m_Width;
-				Scale.y = absolute(BorderY0);
-
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, (offset_ptr_size)Visuals.m_BorderTopRight.IndexBufferByteOffset(), Offset, Scale, 1);
-			}
+			// Draw top border
+			DrawBorder(
+				vec2(0, 0),
+				vec2(1, std::abs(BorderY0)),
+				Visuals.m_vBorderTop[X0], Visuals.m_vBorderTop[X1 - 1]);
 		}
 		if(BorderY1 > (int)Visuals.m_Height)
 		{
-			if(Visuals.m_BorderBottomRight.DoDraw())
-			{
-				vec2 Offset;
-				Offset.x = Visuals.m_Width * 32.0f;
-				Offset.y = Visuals.m_Height * 32.0f;
-				vec2 Scale;
-				Scale.x = BorderX1 - Visuals.m_Width;
-				Scale.y = BorderY1 - Visuals.m_Height;
-
-				Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, (offset_ptr_size)Visuals.m_BorderBottomRight.IndexBufferByteOffset(), Offset, Scale, 1);
-			}
-		}
-	}
-
-	if(BorderX1 > (int)Visuals.m_Width)
-	{
-		// Draw right border
-		if(Y0 < (int)Visuals.m_Height && Y1 > 0)
-		{
-			int YB = Y1 - 1;
-			unsigned int DrawNum = ((Visuals.m_vBorderRight[YB].IndexBufferByteOffset() - Visuals.m_vBorderRight[Y0].IndexBufferByteOffset()) / (sizeof(unsigned int) * 6)) + (Visuals.m_vBorderRight[YB].DoDraw() ? 1lu : 0lu);
-			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_vBorderRight[Y0].IndexBufferByteOffset();
-			vec2 Offset;
-			Offset.x = 32.f * Visuals.m_Width;
-			Offset.y = 0.f;
-			vec2 Scale;
-			Scale.x = BorderX1 - Visuals.m_Width;
-			Scale.y = 1.f;
-			Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, pOffset, Offset, Scale, DrawNum);
-		}
-	}
-	if(BorderX0 < 0)
-	{
-		// Draw left border
-		if(Y0 < (int)Visuals.m_Height && Y1 > 0)
-		{
-			int YB = Y1 - 1;
-			unsigned int DrawNum = ((Visuals.m_vBorderLeft[YB].IndexBufferByteOffset() - Visuals.m_vBorderLeft[Y0].IndexBufferByteOffset()) / (sizeof(unsigned int) * 6)) + (Visuals.m_vBorderLeft[YB].DoDraw() ? 1lu : 0lu);
-			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_vBorderLeft[Y0].IndexBufferByteOffset();
-			vec2 Offset;
-			Offset.x = 0;
-			Offset.y = 0;
-			vec2 Scale;
-			Scale.x = absolute(BorderX0);
-			Scale.y = 1;
-			Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, pOffset, Offset, Scale, DrawNum);
-		}
-	}
-	if(BorderY0 < 0)
-	{
-		// Draw top border
-		if(X0 < (int)Visuals.m_Width && X1 > 0)
-		{
-			int XR = X1 - 1;
-			unsigned int DrawNum = ((Visuals.m_vBorderTop[XR].IndexBufferByteOffset() - Visuals.m_vBorderTop[X0].IndexBufferByteOffset()) / (sizeof(unsigned int) * 6)) + (Visuals.m_vBorderTop[XR].DoDraw() ? 1lu : 0lu);
-			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_vBorderTop[X0].IndexBufferByteOffset();
-			vec2 Offset;
-			Offset.x = 0.f;
-			Offset.y = 0;
-			vec2 Scale;
-			Scale.x = 1;
-			Scale.y = absolute(BorderY0);
-			Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, pOffset, Offset, Scale, DrawNum);
-		}
-	}
-	if(BorderY1 > (int)Visuals.m_Height)
-	{
-		// Draw bottom border
-		if(X0 < (int)Visuals.m_Width && X1 > 0)
-		{
-			int XR = X1 - 1;
-			unsigned int DrawNum = ((Visuals.m_vBorderBottom[XR].IndexBufferByteOffset() - Visuals.m_vBorderBottom[X0].IndexBufferByteOffset()) / (sizeof(unsigned int) * 6)) + (Visuals.m_vBorderBottom[XR].DoDraw() ? 1lu : 0lu);
-			offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_vBorderBottom[X0].IndexBufferByteOffset();
-			vec2 Offset;
-			Offset.x = 0.f;
-			Offset.y = 32.f * Visuals.m_Height;
-			vec2 Scale;
-			Scale.x = 1;
-			Scale.y = BorderY1 - Visuals.m_Height;
-			Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, pOffset, Offset, Scale, DrawNum);
+			// Draw bottom border
+			DrawBorder(
+				vec2(0, Visuals.m_Height),
+				vec2(1, BorderY1 - Visuals.m_Height),
+				Visuals.m_vBorderBottom[X0], Visuals.m_vBorderBottom[X1 - 1]);
 		}
 	}
 }
@@ -1016,96 +936,56 @@ void CMapLayers::RenderKillTileBorder(int LayerIndex, const ColorRGBA &Color)
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-	bool DrawBorder = false;
-
 	int BorderY0 = std::floor(ScreenY0 / 32);
 	int BorderX0 = std::floor(ScreenX0 / 32);
 	int BorderY1 = std::ceil(ScreenY1 / 32);
 	int BorderX1 = std::ceil(ScreenX1 / 32);
 
-	if(BorderX0 < -201)
-		DrawBorder = true;
-	if(BorderY0 < -201)
-		DrawBorder = true;
-	if(BorderX1 > (int)Visuals.m_Width + 201)
-		DrawBorder = true;
-	if(BorderY1 > (int)Visuals.m_Height + 201)
-		DrawBorder = true;
+	const int BorderDist = 201;
 
-	if(!DrawBorder)
+	if(BorderX0 >= -BorderDist && BorderY0 >= -BorderDist && BorderX1 <= (int)Visuals.m_Width + BorderDist && BorderY1 <= (int)Visuals.m_Height + BorderDist)
 		return;
 	if(!Visuals.m_BorderKillTile.DoDraw())
 		return;
 
-	if(BorderX0 < -300)
-		BorderX0 = -300;
-	if(BorderY0 < -300)
-		BorderY0 = -300;
-	if(BorderX1 >= (int)Visuals.m_Width + 300)
-		BorderX1 = (int)Visuals.m_Width + 299;
-	if(BorderY1 >= (int)Visuals.m_Height + 300)
-		BorderY1 = (int)Visuals.m_Height + 299;
+	BorderX0 = clamp(BorderX0, -300, (int)Visuals.m_Width + 299);
+	BorderY0 = clamp(BorderY0, -300, (int)Visuals.m_Height + 299);
+	BorderX1 = clamp(BorderX1, -300, (int)Visuals.m_Width + 299);
+	BorderY1 = clamp(BorderY1, -300, (int)Visuals.m_Height + 299);
 
-	if(BorderX1 < -300)
-		BorderX1 = -300;
-	if(BorderY1 < -300)
-		BorderY1 = -300;
-	if(BorderX0 >= (int)Visuals.m_Width + 300)
-		BorderX0 = (int)Visuals.m_Width + 299;
-	if(BorderY0 >= (int)Visuals.m_Height + 300)
-		BorderY0 = (int)Visuals.m_Height + 299;
+	auto DrawKillBorder = [Color, this, LayerIndex](vec2 Offset, vec2 Scale) {
+		offset_ptr_size pOffset = (offset_ptr_size)m_vpTileLayerVisuals[LayerIndex]->m_BorderKillTile.IndexBufferByteOffset();
+		Offset *= 32.0f;
+		Graphics()->RenderBorderTiles(m_vpTileLayerVisuals[LayerIndex]->m_BufferContainerIndex, Color, pOffset, Offset, Scale, 1);
+	};
 
 	// Draw left kill tile border
-	if(BorderX0 < -201)
+	if(BorderX0 < -BorderDist)
 	{
-		unsigned int DrawNum = 1;
-		offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderKillTile.IndexBufferByteOffset();
-		vec2 Offset;
-		Offset.x = 32.f * BorderX0;
-		Offset.y = 32.f * BorderY0;
-		vec2 Scale;
-		Scale.x = -201 - BorderX0;
-		Scale.y = BorderY1 - BorderY0;
-		Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, pOffset, Offset, Scale, DrawNum);
+		DrawKillBorder(
+			vec2(BorderX0, BorderY0),
+			vec2(-BorderDist - BorderX0, BorderY1 - BorderY0));
 	}
 	// Draw top kill tile border
-	if(BorderY0 < -201)
+	if(BorderY0 < -BorderDist)
 	{
-		unsigned int DrawNum = 1;
-		offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderKillTile.IndexBufferByteOffset();
-		vec2 Offset;
-		Offset.x = maximum(BorderX0, -201) * 32.0f;
-		Offset.y = 32.f * BorderY0;
-		vec2 Scale;
-		Scale.x = minimum(BorderX1, (int)Visuals.m_Width + 201) - maximum(BorderX0, -201);
-		Scale.y = -201 - BorderY0;
-		Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, pOffset, Offset, Scale, DrawNum);
+		DrawKillBorder(
+			vec2(std::max(BorderX0, -BorderDist), BorderY0),
+			vec2(std::min(BorderX1, (int)Visuals.m_Width + BorderDist) - std::max(BorderX0, -BorderDist), -BorderDist - BorderY0));
 	}
 	// Draw right kill tile border
-	if(BorderX1 > (int)Visuals.m_Width + 201)
+	if(BorderX1 > (int)Visuals.m_Width + BorderDist)
 	{
-		unsigned int DrawNum = 1;
-		offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderKillTile.IndexBufferByteOffset();
-		vec2 Offset;
-		Offset.x = 32.0f * (Visuals.m_Width + 201);
-		Offset.y = 32.0f * BorderY0;
-		vec2 Scale;
-		Scale.x = BorderX1 - (Visuals.m_Width + 201);
-		Scale.y = BorderY1 - BorderY0;
-		Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, pOffset, Offset, Scale, DrawNum);
+		DrawKillBorder(
+			vec2(Visuals.m_Width + BorderDist, BorderY0),
+			vec2(BorderX1 - (Visuals.m_Width + BorderDist), BorderY1 - BorderY0));
 	}
 	// Draw bottom kill tile border
-	if(BorderY1 > (int)Visuals.m_Height + 201)
+	if(BorderY1 > (int)Visuals.m_Height + BorderDist)
 	{
-		unsigned int DrawNum = 1;
-		offset_ptr_size pOffset = (offset_ptr_size)Visuals.m_BorderKillTile.IndexBufferByteOffset();
-		vec2 Offset;
-		Offset.x = maximum(BorderX0, -201) * 32.0f;
-		Offset.y = 32.0f * (Visuals.m_Height + 201);
-		vec2 Scale;
-		Scale.x = minimum(BorderX1, (int)Visuals.m_Width + 201) - maximum(BorderX0, -201);
-		Scale.y = BorderY1 - (Visuals.m_Height + 201);
-		Graphics()->RenderBorderTiles(Visuals.m_BufferContainerIndex, Color, pOffset, Offset, Scale, DrawNum);
+		DrawKillBorder(
+			vec2(std::max(BorderX0, -BorderDist), Visuals.m_Height + BorderDist),
+			vec2(std::min(BorderX1, (int)Visuals.m_Width + BorderDist) - std::max(BorderX0, -BorderDist), BorderY1 - (Visuals.m_Height + BorderDist)));
 	}
 }
 
