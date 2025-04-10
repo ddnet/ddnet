@@ -759,7 +759,20 @@ void CPlayers::RenderPlayer(
 	vec2 BodyPos = Position + vec2(State.GetBody()->m_X, State.GetBody()->m_Y) * TeeAnimScale;
 	if(RenderInfo.m_TeeRenderFlags & TEE_EFFECT_FROZEN)
 	{
-		GameClient()->m_Effects.FreezingFlakes(BodyPos, vec2(32, 32), Alpha);
+		CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientId].m_Predicted;
+		int FreezeSeconds = (pCharacter->m_FreezeEnd - Client()->GameTick(g_Config.m_ClDummy)) / Client()->GameTickSpeed();
+		if(FreezeSeconds > 3 || FreezeSeconds < 0 || pCharacter->m_IsInFreeze)
+		{
+			GameClient()->m_Effects.FreezingFlakes(BodyPos, vec2(32, 32), Alpha, false);
+		}
+		else if(FreezeSeconds != m_aLastRenderFreezeSeconds[ClientId])
+		{
+			for(int i = 0; i <= FreezeSeconds; i++)
+			{
+				GameClient()->m_Effects.FreezingFlakes(BodyPos, vec2(32, 32), Alpha, true);
+			}
+		}
+		m_aLastRenderFreezeSeconds[ClientId] = FreezeSeconds;
 	}
 	if(RenderInfo.m_TeeRenderFlags & TEE_EFFECT_SPARKLE)
 	{
@@ -1023,4 +1036,7 @@ void CPlayers::OnInit()
 
 	Graphics()->QuadsSetSubset(0.f, 0.f, 1.f, 1.f);
 	Graphics()->QuadsSetRotation(0.f);
+
+	for(auto &FreezeSeconds : m_aLastRenderFreezeSeconds)
+		FreezeSeconds = -1;
 }
