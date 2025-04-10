@@ -3185,13 +3185,7 @@ int CServer::Run()
 					m_ServerInfoFirstRequest = 0;
 					Kernel()->ReregisterInterface(GameServer());
 					Console()->StoreCommands(true);
-					GameServer()->OnInit(m_pPersistentData);
-					Console()->StoreCommands(false);
-					if(ErrorShutdown())
-					{
-						break;
-					}
-					UpdateServerInfo(true);
+
 					for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 					{
 						if(m_aClients[ClientId].m_State < CClient::STATE_PREAUTH)
@@ -3202,6 +3196,14 @@ int CServer::Run()
 						// Record PlayerJoin events here to record the Sixup version and player join event.
 						GameServer()->TeehistorianRecordPlayerJoin(ClientId, m_aClients[ClientId].m_Sixup);
 					}
+
+					GameServer()->OnInit(m_pPersistentData);
+					Console()->StoreCommands(false);
+					if(ErrorShutdown())
+					{
+						break;
+					}
+					UpdateServerInfo(true);
 				}
 				else
 				{
