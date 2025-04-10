@@ -3194,7 +3194,7 @@ int CServer::Run()
 					UpdateServerInfo(true);
 					for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 					{
-						if(m_aClients[ClientId].m_State != CClient::STATE_CONNECTING)
+						if(m_aClients[ClientId].m_State < CClient::STATE_PREAUTH)
 							continue;
 
 						// When doing a map change, a new Teehistorian file is created. For players that are already
