@@ -683,8 +683,9 @@ void CServerBrowser::QueueRequest(CServerEntry *pEntry)
 	m_NumRequests++;
 }
 
-void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs, int NumAddrs)
+static void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs, int NumAddrs)
 {
+	pBuffer[0] = '\0';
 	for(int i = 0; i < NumAddrs; i++)
 	{
 		if(i != 0)
