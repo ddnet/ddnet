@@ -62,3 +62,7 @@ MACRO_TUNING_PARAM(HammerHitFireDelay, hammer_hit_fire_delay, 320, "Delay of ham
 
 MACRO_TUNING_PARAM(GroundElasticityX, ground_elasticity_x, 0, "Wall elasticity")
 MACRO_TUNING_PARAM(GroundElasticityY, ground_elasticity_y, 0, "Ground/ceiling elasticity")
+
+MACRO_TUNING_PARAM(NinjaDuration, ninja_duration, 15000, "Ninja duration in milliseconds")
+MACRO_TUNING_PARAM(NinjaMovetime, ninja_movetime, 200, "How long the dash lasts")
+MACRO_TUNING_PARAM(NinjaVelocity, ninja_velocity, 50, "Velocity of the dash")
