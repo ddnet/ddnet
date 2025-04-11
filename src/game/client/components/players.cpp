@@ -178,7 +178,7 @@ void CPlayers::RenderHookCollLine(
 	if(Local && !m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
+		Angle = angle(m_pClient->m_Controls.m_aRenderedLocalTeeAngle[g_Config.m_ClDummy]);
 	}
 	else
 	{
@@ -221,8 +221,7 @@ void CPlayers::RenderHookCollLine(
 
 			if(Local && !m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			{
-				ExDirection = normalize(vec2((int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x, (int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y));
-
+				ExDirection = normalize(m_pClient->m_Controls.m_aRenderedLocalTeeAngle[g_Config.m_ClDummy]);
 				// fix direction if mouse is exactly in the center
 				if(!(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].x && !(int)m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy].y)
 					ExDirection = vec2(1, 0);
@@ -474,7 +473,7 @@ void CPlayers::RenderPlayer(
 	if(Local && !m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		// just use the direct input if it's the local player we are rendering
-		Angle = angle(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
+		Angle = angle(m_pClient->m_Controls.m_aRenderedLocalTeeAngle[g_Config.m_ClDummy]);
 	}
 	else
 	{
