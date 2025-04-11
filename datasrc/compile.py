@@ -258,13 +258,13 @@ const char *CNetObjHandler::GetMsgName(int Type) const
 	lines += ["""\
 void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)
 {
-	m_pObjFailedOn = 0;
+	m_pObjFailedOn = nullptr;
 	switch(Type)
 	{
 	case NETOBJTYPE_EX:
 	{
 		const unsigned char *pPtr = pUnpacker->GetRaw(sizeof(CUuid));
-		if(pPtr != 0)
+		if(pPtr != nullptr)
 		{
 			mem_copy(m_aUnpackedData, pPtr, sizeof(CUuid));
 		}
@@ -287,7 +287,7 @@ void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)
 		m_pObjFailedOn = "(unpack error)";
 	
 	if(m_pObjFailedOn)
-		return 0;
+		return nullptr;
 	m_pObjFailedOn = "";
 	return m_aUnpackedData;
 }
@@ -300,7 +300,7 @@ void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)
 	lines += ["""\
 void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
 {
-	m_pMsgFailedOn = 0;
+	m_pMsgFailedOn = nullptr;
 	switch(Type)
 	{
 	"""]
@@ -320,7 +320,7 @@ void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
 		m_pMsgFailedOn = "(unpack error)";
 	
 	if(m_pMsgFailedOn)
-		return 0;
+		return nullptr;
 	m_pMsgFailedOn = "";
 	return m_aUnpackedData;
 }

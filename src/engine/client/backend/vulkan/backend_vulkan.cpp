@@ -177,7 +177,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 			};
 		};
 
-		typedef std::multiset<SMemoryHeapQueueElement, std::greater<>> TMemoryHeapQueue;
+		using TMemoryHeapQueue = std::multiset<SMemoryHeapQueueElement, std::greater<>>;
 
 		struct SMemoryHeapElement
 		{
@@ -521,9 +521,9 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	template<typename TName>
 	struct SStreamMemory
 	{
-		typedef std::vector<std::vector<TName>> TBufferObjectsOfFrame;
-		typedef std::vector<std::vector<VkMappedMemoryRange>> TMemoryMapRangesOfFrame;
-		typedef std::vector<size_t> TStreamUseCount;
+		using TBufferObjectsOfFrame = std::vector<std::vector<TName>>;
+		using TMemoryMapRangesOfFrame = std::vector<std::vector<VkMappedMemoryRange>>;
+		using TStreamUseCount = std::vector<size_t>;
 		TBufferObjectsOfFrame m_vvBufferObjectsOfFrame;
 		TMemoryMapRangesOfFrame m_vvBufferObjectsOfFrameRangeData;
 		TStreamUseCount m_vCurrentUsedCount;
@@ -565,7 +565,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 			m_vCurrentUsedCount.resize(FrameImageCount);
 		}
 
-		typedef std::function<void(size_t, TName &)> TDestroyBufferFunc;
+		using TDestroyBufferFunc = std::function<void(size_t, TName &)>;
 
 		void Destroy(TDestroyBufferFunc &&DestroyBuffer)
 		{
@@ -722,7 +722,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		float m_TextureSize;
 	};
 
-	typedef vec3 SUniformTextGFragmentOffset;
+	using SUniformTextGFragmentOffset = vec3;
 
 	struct SUniformTextGFragmentConstants
 	{
@@ -746,7 +746,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		vec2 m_Scale;
 	};
 
-	typedef ColorRGBA SUniformTileGVertColor;
+	using SUniformTileGVertColor = ColorRGBA;
 
 	struct SUniformTileGVertColorAlign
 	{
@@ -764,7 +764,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		float m_Rotation;
 	};
 
-	typedef ColorRGBA SUniformPrimExGVertColor;
+	using SUniformPrimExGVertColor = ColorRGBA;
 
 	struct SUniformPrimExGVertColorAlign
 	{
@@ -777,7 +777,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		vec2 m_Center;
 	};
 
-	typedef ColorRGBA SUniformSpriteMultiGVertColor;
+	using SUniformSpriteMultiGVertColor = ColorRGBA;
 
 	struct SUniformSpriteMultiGVertColorAlign
 	{
@@ -796,7 +796,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		vec4 m_aPSR[1];
 	};
 
-	typedef ColorRGBA SUniformSpriteMultiPushGVertColor;
+	using SUniformSpriteMultiPushGVertColor = ColorRGBA;
 
 	struct SUniformQuadGPosBase
 	{
@@ -1084,14 +1084,14 @@ private:
 		VkRect2D m_Scissor;
 	};
 
-	typedef std::vector<SRenderCommandExecuteBuffer> TCommandList;
-	typedef std::vector<TCommandList> TThreadCommandList;
+	using TCommandList = std::vector<SRenderCommandExecuteBuffer>;
+	using TThreadCommandList = std::vector<TCommandList>;
 
 	TThreadCommandList m_vvThreadCommandLists;
 	std::vector<bool> m_vThreadHelperHadCommands;
 
-	typedef std::function<bool(const CCommandBuffer::SCommand *, SRenderCommandExecuteBuffer &)> TCommandBufferCommandCallback;
-	typedef std::function<void(SRenderCommandExecuteBuffer &, const CCommandBuffer::SCommand *)> TCommandBufferFillExecuteBufferFunc;
+	using TCommandBufferCommandCallback = std::function<bool(const CCommandBuffer::SCommand *, SRenderCommandExecuteBuffer &)>;
+	using TCommandBufferFillExecuteBufferFunc = std::function<void(SRenderCommandExecuteBuffer &, const CCommandBuffer::SCommand *)>;
 
 	struct SCommandCallback
 	{
@@ -3547,7 +3547,7 @@ public:
 	[[nodiscard]] bool GetVulkanLayers(std::vector<std::string> &vVKLayers)
 	{
 		uint32_t LayerCount = 0;
-		VkResult Res = vkEnumerateInstanceLayerProperties(&LayerCount, NULL);
+		VkResult Res = vkEnumerateInstanceLayerProperties(&LayerCount, nullptr);
 		if(Res != VK_SUCCESS)
 		{
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Could not get vulkan layers.");
@@ -3614,7 +3614,7 @@ public:
 
 		VkApplicationInfo VKAppInfo = {};
 		VKAppInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		VKAppInfo.pNext = NULL;
+		VKAppInfo.pNext = nullptr;
 		VKAppInfo.pApplicationName = "DDNet";
 		VKAppInfo.applicationVersion = 1;
 		VKAppInfo.pEngineName = "DDNet-Vulkan";
@@ -3647,7 +3647,7 @@ public:
 
 		bool TryAgain = false;
 
-		VkResult Res = vkCreateInstance(&VKInstanceInfo, NULL, &m_VKInstance);
+		VkResult Res = vkCreateInstance(&VKInstanceInfo, nullptr, &m_VKInstance);
 		const char *pCritErrorMsg = CheckVulkanCriticalError(Res);
 		if(pCritErrorMsg != nullptr)
 		{
@@ -3812,7 +3812,7 @@ public:
 			int DevApiPatch = (int)VK_API_VERSION_PATCH(DeviceProp.apiVersion);
 
 			str_copy(pRendererName, DeviceProp.deviceName, gs_GpuInfoStringSize);
-			const char *pVendorNameStr = NULL;
+			const char *pVendorNameStr = nullptr;
 			switch(DeviceProp.vendorID)
 			{
 			case 0x1002:
@@ -3910,14 +3910,14 @@ public:
 			vLayerCNames.emplace_back(Layer.c_str());
 
 		uint32_t DevPropCount = 0;
-		if(vkEnumerateDeviceExtensionProperties(m_VKGPU, NULL, &DevPropCount, NULL) != VK_SUCCESS)
+		if(vkEnumerateDeviceExtensionProperties(m_VKGPU, nullptr, &DevPropCount, nullptr) != VK_SUCCESS)
 		{
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Querying logical device extension properties failed.");
 			return false;
 		}
 
 		std::vector<VkExtensionProperties> vDevPropList(DevPropCount);
-		if(vkEnumerateDeviceExtensionProperties(m_VKGPU, NULL, &DevPropCount, vDevPropList.data()) != VK_SUCCESS)
+		if(vkEnumerateDeviceExtensionProperties(m_VKGPU, nullptr, &DevPropCount, vDevPropList.data()) != VK_SUCCESS)
 		{
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "Querying logical device extension properties failed.");
 			return false;
@@ -3941,7 +3941,7 @@ public:
 		VKQueueCreateInfo.queueCount = 1;
 		float QueuePrio = 1.0f;
 		VKQueueCreateInfo.pQueuePriorities = &QueuePrio;
-		VKQueueCreateInfo.pNext = NULL;
+		VKQueueCreateInfo.pNext = nullptr;
 		VKQueueCreateInfo.flags = 0;
 
 		VkDeviceCreateInfo VKCreateInfo;
@@ -3952,8 +3952,8 @@ public:
 		VKCreateInfo.enabledLayerCount = static_cast<uint32_t>(vLayerCNames.size());
 		VKCreateInfo.ppEnabledExtensionNames = vDevPropCNames.data();
 		VKCreateInfo.enabledExtensionCount = static_cast<uint32_t>(vDevPropCNames.size());
-		VKCreateInfo.pNext = NULL;
-		VKCreateInfo.pEnabledFeatures = NULL;
+		VKCreateInfo.pNext = nullptr;
+		VKCreateInfo.pEnabledFeatures = nullptr;
 		VKCreateInfo.flags = 0;
 
 		VkResult res = vkCreateDevice(m_VKGPU, &VKCreateInfo, nullptr, &m_VKDevice);
@@ -3994,7 +3994,7 @@ public:
 	[[nodiscard]] bool GetPresentationMode(VkPresentModeKHR &VKIOMode)
 	{
 		uint32_t PresentModeCount = 0;
-		if(vkGetPhysicalDeviceSurfacePresentModesKHR(m_VKGPU, m_VKPresentSurface, &PresentModeCount, NULL) != VK_SUCCESS)
+		if(vkGetPhysicalDeviceSurfacePresentModesKHR(m_VKGPU, m_VKPresentSurface, &PresentModeCount, nullptr) != VK_SUCCESS)
 		{
 			SetError(EGfxErrorType::GFX_ERROR_TYPE_INIT, "The device surface presentation modes could not be fetched.");
 			return false;
@@ -6298,7 +6298,7 @@ public:
 	* STREAM BUFFERS SETUP
 	************************/
 
-	typedef std::function<bool(SFrameBuffers &, VkBuffer, VkDeviceSize)> TNewMemFunc;
+	using TNewMemFunc = std::function<bool(SFrameBuffers &, VkBuffer, VkDeviceSize)>;
 
 	// returns true, if the stream memory was just allocated
 	template<typename TStreamMemName, typename TInstanceTypeName, size_t InstanceTypeCount, size_t BufferCreateCount, bool UsesCurrentCountOffset>
