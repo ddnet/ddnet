@@ -1399,7 +1399,8 @@ void CGameContext::OnClientPredictedEarlyInput(int ClientId, void *pInput)
 	if(!m_World.m_Paused)
 		m_apPlayers[ClientId]->OnPredictedEarlyInput(pApplyInput);
 
-	if(m_TeeHistorianActive)
+	// For Teehistorian, only record new inputs sent by the client.
+	if(m_TeeHistorianActive && pInput != nullptr)
 	{
 		m_TeeHistorian.RecordPlayerInput(ClientId, m_apPlayers[ClientId]->GetUniqueCid(), pApplyInput);
 	}
