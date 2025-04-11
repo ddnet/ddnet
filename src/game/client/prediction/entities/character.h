@@ -117,7 +117,6 @@ public:
 	void SetCoreWorld(CGameWorld *pGameWorld);
 
 	int m_LastSnapWeapon;
-	int m_LastJetpackStrength;
 	bool m_KeepHooked;
 	int m_GameTeam;
 	bool m_CanMoveInFreeze;

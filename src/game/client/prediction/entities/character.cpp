@@ -84,8 +84,7 @@ void CCharacter::HandleJetpack()
 	{
 		if(m_Core.m_Jetpack)
 		{
-			int TuneZone = GetOverriddenTuneZone();
-			float Strength = TuneZone ? GetTuning(TuneZone)->m_JetpackStrength : m_LastJetpackStrength;
+			float Strength = GetTuning(GetOverriddenTuneZone())->m_JetpackStrength;
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCid(), m_Core.m_ActiveWeapon);
 		}
 	}
@@ -1198,7 +1197,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_ReloadTimer = 0;
 	m_NumObjectsHit = 0;
 	m_LastRefillJumps = false;
-	m_LastJetpackStrength = 400.0f;
 	m_CanMoveInFreeze = false;
 	m_TeleCheckpoint = 0;
 	m_StrongWeakId = 0;
@@ -1316,10 +1314,9 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		if(pChar->m_Weapon != WEAPON_NINJA)
 			m_Core.m_aWeapons[pChar->m_Weapon].m_Got = true;
 
-		// jetpack
-		if(GameWorld()->m_WorldConfig.m_PredictWeapons && Tuning()->m_JetpackStrength > 0)
+		// without ddnetcharacter we don't know if we have jetpack, so try to predict jetpack if strength isn't 0, on vanilla it's always 0
+		if(GameWorld()->m_WorldConfig.m_PredictWeapons && Tuning()->m_JetpackStrength != 0)
 		{
-			m_LastJetpackStrength = Tuning()->m_JetpackStrength;
 			m_Core.m_Jetpack = true;
 			m_Core.m_aWeapons[WEAPON_GUN].m_Got = true;
 			m_Core.m_aWeapons[WEAPON_GUN].m_Ammo = -1;
