@@ -37,11 +37,11 @@ protected:
 public:
 	CBackground(int MapType = CMapLayers::TYPE_BACKGROUND_FORCE, bool OnlineOnly = true);
 	virtual ~CBackground();
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
-	virtual void OnInit() override;
-	virtual void OnMapLoad() override;
-	virtual void OnRender() override;
+	void OnInit() override;
+	void OnMapLoad() override;
+	void OnRender() override;
 
 	void LoadBackground();
 	const char *MapName() const { return m_aMapName; }

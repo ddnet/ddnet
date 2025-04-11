@@ -20,11 +20,11 @@ class CBroadcast : public CComponent
 	void OnBroadcastMessage(const CNetMsg_Sv_Broadcast *pMsg);
 
 public:
-	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnReset() override;
-	virtual void OnWindowResize() override;
-	virtual void OnRender() override;
-	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	int Sizeof() const override { return sizeof(*this); }
+	void OnReset() override;
+	void OnWindowResize() override;
+	void OnRender() override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
 
 	void DoBroadcast(const char *pText);
 };
