@@ -49,10 +49,15 @@ class CHud : public CComponent
 	STextContainerIndex m_FPSTextContainerIndex;
 	STextContainerIndex m_DDRaceEffectsTextContainerIndex;
 	STextContainerIndex m_PlayerAngleTextContainerIndex;
+	STextContainerIndex m_DummyAngleTextContainerIndex;
 	char m_aPlayerAngleText[128];
+	char m_aDummyAngleText[128];
 	STextContainerIndex m_aPlayerSpeedTextContainers[2];
+	STextContainerIndex m_aDummySpeedTextContainers[2];
 	char m_aaPlayerSpeedText[2][128];
-	int m_aPlayerSpeed[2];
+	char m_aaDummySpeedText[2][128];
+	float m_aPlayerSpeed[2];
+	float m_aDummySpeed[2];
 	enum class ESpeedChange
 	{
 		NONE,
@@ -60,8 +65,11 @@ class CHud : public CComponent
 		DECREASE
 	};
 	ESpeedChange m_aLastPlayerSpeedChange[2];
+	ESpeedChange m_aLastDummySpeedChange[2];
 	STextContainerIndex m_aPlayerPositionContainers[2];
+	STextContainerIndex m_aDummyPositionContainers[2];
 	char m_aaPlayerPositionText[2][128];
+	char m_aaDummyPositionText[2][128];
 
 	void RenderCursor();
 
