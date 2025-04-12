@@ -253,7 +253,7 @@ You can then manually merge this directory with the one in the ddnet source dire
 
 Run `rustup target add wasm32-unknown-emscripten` to install the WASM target for compiling Rust.
 
-Then run `emcmake cmake .. -G "Ninja" -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON` in your build directory to configure followed by `cmake --build . -j8` to build.
+Then run `emcmake cmake .. -G "Unix Makefiles" -DVIDEORECORDER=OFF -DVULKAN=OFF -DSERVER=OFF -DTOOLS=OFF -DPREFER_BUNDLED_LIBS=ON` in your build directory to configure followed by `cmake --build . -j8` to build. Note that using the Ninja build system with Emscripten is not currently possible due to [CMake issue 16395](https://gitlab.kitware.com/cmake/cmake/-/issues/16395).
 
 To test the compiled code locally, just use `emrun --browser firefox DDNet.html`
 
