@@ -171,7 +171,7 @@ bool CNetServer::Connlimit(NETADDR Addr)
 
 	for(int i = 0; i < NET_CONNLIMIT_IPS; ++i)
 	{
-		if(!net_addr_comp(&m_aSpamConns[i].m_Addr, &Addr))
+		if(!net_addr_comp_noport(&m_aSpamConns[i].m_Addr, &Addr))
 		{
 			if(m_aSpamConns[i].m_Time > Now - time_freq() * g_Config.m_SvConnlimitTime)
 			{
