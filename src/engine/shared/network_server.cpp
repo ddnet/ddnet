@@ -729,14 +729,15 @@ void CNetServer::SetMaxClientsPerIp(int Max)
 	m_MaxClientsPerIp = std::clamp<int>(Max, 1, NET_MAX_CLIENTS);
 }
 
-bool CNetServer::SetTimedOut(int ClientId, int OrigId)
+bool CNetServer::CanSetTimedOut(int ClientId, int OrigId)
 {
-	if(m_aSlots[ClientId].m_Connection.State() != CNetConnection::EState::ERROR)
-		return false;
+	return m_aSlots[ClientId].m_Connection.State() == CNetConnection::EState::ERROR;
+}
 
+void CNetServer::SetTimedOut(int ClientId, int OrigId)
+{
 	m_aSlots[ClientId].m_Connection.SetTimedOut(ClientAddr(OrigId), m_aSlots[OrigId].m_Connection.SeqSequence(), m_aSlots[OrigId].m_Connection.AckSequence(), m_aSlots[OrigId].m_Connection.SecurityToken(), m_aSlots[OrigId].m_Connection.ResendBuffer(), m_aSlots[OrigId].m_Connection.m_Sixup);
 	m_aSlots[OrigId].m_Connection.Reset();
-	return true;
 }
 
 void CNetServer::SetTimeoutProtected(int ClientId)
