@@ -40,23 +40,6 @@ float CConsole::CResult::GetFloat(unsigned Index) const
 	return str_tofloat(m_apArgs[Index]);
 }
 
-const std::unordered_map<std::string, ColorHSLA> s_NamedColors = {
-	{"red", ColorHSLA(0.0f / 6.0f, 1.0f, 0.5f)},
-	{"orange", ColorHSLA(0.5f / 6.0f, 1.0f, 0.5f)},
-	{"yellow", ColorHSLA(1.0f / 6.0f, 1.0f, 0.5f)},
-	{"lime", ColorHSLA(1.5f / 6.0f, 1.0f, 0.5f)},
-	{"green", ColorHSLA(2.0f / 6.0f, 1.0f, 0.5f)},
-	{"cyan", ColorHSLA(3.0f / 6.0f, 1.0f, 0.5f)},
-	{"teal", ColorHSLA(3.5f / 6.0f, 1.0f, 0.5f)},
-	{"blue", ColorHSLA(4.0f / 6.0f, 1.0f, 0.5f)},
-	{"purple", ColorHSLA(4.5f / 6.0f, 1.0f, 0.5f)},
-	{"magenta", ColorHSLA(5.0f / 6.0f, 1.0f, 0.5f)},
-	{"pink", ColorHSLA(5.5f / 6.0f, 1.0f, 0.5f)},
-	{"white", ColorHSLA(0.0f, 0.0f, 1.0f)},
-	{"gray", ColorHSLA(0.0f, 0.0f, 0.5f)},
-	{"black", ColorHSLA(0.0f, 0.0f, 0.0f)},
-};
-
 std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float DarkestLighting) const
 {
 	if(Index >= m_NumArgs)
@@ -70,7 +53,7 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 			return std::nullopt;
 		return ColorHSLA(Value, true).UnclampLighting(DarkestLighting);
 	}
-	if(*pStr == '$') // Hex RGB/RGBA
+	else if(*pStr == '$') // Hex RGB/RGBA
 	{
 		auto ParsedColor = color_parse<ColorRGBA>(pStr + 1);
 		if(ParsedColor)
@@ -78,11 +61,25 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 		else
 			return std::nullopt;
 	}
-	const auto It = s_NamedColors.find(std::string(pStr));
-	if(It != s_NamedColors.end())
-	{
-		return It->second;
-	}
+	else if(!str_comp_nocase(pStr, "red"))
+		return ColorHSLA(0.0f / 6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "yellow"))
+		return ColorHSLA(1.0f / 6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "green"))
+		return ColorHSLA(2.0f / 6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "cyan"))
+		return ColorHSLA(3.0f / 6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "blue"))
+		return ColorHSLA(4.0f / 6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "magenta"))
+		return ColorHSLA(5.0f / 6.0f, 1, .5f);
+	else if(!str_comp_nocase(pStr, "white"))
+		return ColorHSLA(0, 0, 1);
+	else if(!str_comp_nocase(pStr, "gray"))
+		return ColorHSLA(0, 0, .5f);
+	else if(!str_comp_nocase(pStr, "black"))
+		return ColorHSLA(0, 0, 0);
+
 	return std::nullopt;
 }
 
