@@ -1415,7 +1415,7 @@ void CHud::RenderMovementInformation()
 	const float Fontsize = 6.0f;
 
 	float BoxHeight = GetMovementInformationBoxHeight();
-	const float BoxWidth = 65.0f;
+	const float BoxWidth = 70.0f;
 
 	float StartX = m_Width - BoxWidth;
 	float StartY = 285.0f - BoxHeight - 4; // 4 units distance to the next display;
@@ -1476,7 +1476,7 @@ void CHud::RenderMovementInformation()
 	// calculate dummy pos,speed and angle
 	if(Client()->DummyConnected())
 	{
-		const int DummyClientId = m_pClient->m_aLocalIds[g_Config.m_ClDummy == 1 ? 0 : 1]; // if im controlling dummy then set dummy client id to 0 else 1
+		const int DummyClientId = m_pClient->m_aLocalIds[!g_Config.m_ClDummy];
 		const CNetObj_Character *pDummyPrevChar = &m_pClient->m_Snap.m_aCharacters[DummyClientId].m_Prev;
 		const CNetObj_Character *pDummyCurChar = &m_pClient->m_Snap.m_aCharacters[DummyClientId].m_Cur;
 		const float DummyIntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
@@ -1517,14 +1517,14 @@ void CHud::RenderMovementInformation()
 		TextRender()->Text(xl, y, Fontsize, Localize("Position:"), -1.0f);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
-		float fMaxDummyWidth = 0.0f;
-		if(g_Config.m_ClShowhudDummyPosition && Client()->DummyConnected())
+		float MaxDummyWidth = 0.0f;
+		if(g_Config.m_ClShowhudDummyPosition && Client()->DummyConnected() && !PosOnly)
 		{
 			for(int i = 0; i < 2; i++)
 			{
 				if(m_aDummyPositionContainers[i].Valid())
 				{
-					fMaxDummyWidth = maximum(fMaxDummyWidth,
+					MaxDummyWidth = maximum(MaxDummyWidth,
 						TextRender()->GetBoundingBoxTextContainer(m_aDummyPositionContainers[i]).m_W);
 				}
 			}
@@ -1543,7 +1543,7 @@ void CHud::RenderMovementInformation()
 				m_aaPlayerPositionText[i],
 				sizeof(m_aaPlayerPositionText[i]));
 
-			if(g_Config.m_ClShowhudDummyPosition && Client()->DummyConnected())
+			if(g_Config.m_ClShowhudDummyPosition && Client()->DummyConnected() && !PosOnly)
 			{
 				float dummyPosValue = (i == 0) ? DummyPos.x : DummyPos.y;
 				char aDummyPosition[128];
@@ -1558,7 +1558,7 @@ void CHud::RenderMovementInformation()
 				}
 			}
 
-			if(g_Config.m_ClShowhudDummyPosition && Client()->DummyConnected())
+			if(g_Config.m_ClShowhudDummyPosition && Client()->DummyConnected() && !PosOnly)
 			{
 				RenderMovementInformationTextContainer(
 					m_aDummyPositionContainers[i],
@@ -1569,7 +1569,7 @@ void CHud::RenderMovementInformation()
 				RenderMovementInformationTextContainer(
 					m_aPlayerPositionContainers[i],
 					TextRender()->DefaultTextColor(),
-					xr - fMaxDummyWidth - 5.0f,
+					xr - MaxDummyWidth - 5.0f,
 					y);
 			}
 			else
@@ -1796,7 +1796,7 @@ void CHud::OnNewSnapshot()
 
 	if(Client()->DummyConnected())
 	{
-		aClientIds[1] = m_pClient->m_aLocalIds[g_Config.m_ClDummy ? 0 : 1];
+		aClientIds[1] = m_pClient->m_aLocalIds[!g_Config.m_ClDummy];
 		NumClients = 2;
 	}
 
