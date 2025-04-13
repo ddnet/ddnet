@@ -131,8 +131,8 @@ void CNetBase::SendPacketConnlessWithToken7(NETSOCKET Socket, NETADDR *pAddr, co
 
 	WriteSecurityToken(aBuffer + 1, Token);
 	WriteSecurityToken(aBuffer + 5, ResponseToken);
-	mem_copy(aBuffer + DATA_OFFSET, pData, DataSize);
-	net_udp_send(Socket, pAddr, aBuffer, DataSize + DATA_OFFSET);
+	mem_copy(aBuffer + DATA_OFFSET, pData, std::min(DataSize, static_cast<int>(sizeof(aBuffer) - DATA_OFFSET)));
+	net_udp_send(Socket, pAddr, aBuffer, std::min(DataSize, static_cast<int>(sizeof(aBuffer) - DATA_OFFSET) + DATA_OFFSET));
 }
 
 void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct *pPacket, SECURITY_TOKEN SecurityToken, bool Sixup, bool NoCompress)
