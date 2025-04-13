@@ -402,7 +402,7 @@ public:
 
 	void ExpireServerInfo() override;
 	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
-	void CacheServerInfoSixup(CCache *pCache, bool SendClients);
+	void CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxConsideredClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
 	void GetServerInfoSixup(CPacker *pPacker, int Token, bool SendClients);
 	bool RateLimitServerInfoConnless();
