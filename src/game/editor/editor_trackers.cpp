@@ -491,6 +491,7 @@ int CLayerTilesPropTracker::PropToValue(ETilesProp Prop)
 	switch(Prop)
 	{
 	case ETilesProp::PROP_AUTOMAPPER: return m_pObject->m_AutoMapperConfig;
+	case ETilesProp::PROP_LIVE_GAMETILES: return m_pObject->m_LiveGameTiles;
 	case ETilesProp::PROP_COLOR: return PackColor(m_pObject->m_Color);
 	case ETilesProp::PROP_COLOR_ENV: return m_pObject->m_ColorEnv;
 	case ETilesProp::PROP_COLOR_ENV_OFFSET: return m_pObject->m_ColorEnvOffset;

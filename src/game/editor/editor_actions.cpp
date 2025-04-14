@@ -861,6 +861,7 @@ CEditorActionEditLayerTilesProp::CEditorActionEditLayerTilesProp(CEditor *pEdito
 		"color env offset",
 		"automapper",
 		"automapper reference",
+		"live gametiles",
 		"seed"};
 	static_assert(std::size(s_apNames) == (size_t)ETilesProp::NUM_PROPS);
 
@@ -946,6 +947,10 @@ void CEditorActionEditLayerTilesProp::Undo()
 	{
 		pLayerTiles->m_AutoMapperConfig = m_Previous;
 	}
+	else if(m_Prop == ETilesProp::PROP_LIVE_GAMETILES)
+	{
+		pLayerTiles->m_LiveGameTiles = m_Previous;
+	}
 	else if(m_Prop == ETilesProp::PROP_SEED)
 	{
 		pLayerTiles->m_Seed = m_Previous;
@@ -1025,6 +1030,10 @@ void CEditorActionEditLayerTilesProp::Redo()
 	else if(m_Prop == ETilesProp::PROP_AUTOMAPPER)
 	{
 		pLayerTiles->m_AutoMapperConfig = m_Current;
+	}
+	else if(m_Prop == ETilesProp::PROP_LIVE_GAMETILES)
+	{
+		pLayerTiles->m_LiveGameTiles = m_Current;
 	}
 	else if(m_Prop == ETilesProp::PROP_SEED)
 	{
