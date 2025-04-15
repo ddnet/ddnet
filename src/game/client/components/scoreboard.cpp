@@ -975,7 +975,7 @@ void CScoreboard::RenderQuickActions(CUIRect *pBase)
 void CScoreboard::RenderGeneralActions(CUIRect *pBase)
 {
 	CUIRect Button;
-
+	vec2 MousePos = m_Mouse.m_Position;
 	const char *pPlayerName = GameClient()->m_aClients[m_Popup.m_PlayerId].m_aName;
 
 	CServerInfo ServerInfo;
@@ -994,7 +994,11 @@ void CScoreboard::RenderGeneralActions(CUIRect *pBase)
 	pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
 	Button.Draw(Hovered(&Button) ? SPopupProperties::GeneralActiveButtonColor() : SPopupProperties::GeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 	Ui()->DoLabel(&Button, Localize("Profile"), SPopupProperties::ms_FontSize, TEXTALIGN_MC);
-
+	if(Hovered(&Button))
+	{
+		m_Tooltip.m_pText = "Open player profile in your web browser";
+		m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
+	}
 	if(DoButtonLogic(&Button))
 	{
 		Client()->ViewLink(aCommunityLink);
@@ -1003,6 +1007,11 @@ void CScoreboard::RenderGeneralActions(CUIRect *pBase)
 	pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
 	Button.Draw(Hovered(&Button) ? SPopupProperties::GeneralActiveButtonColor() : SPopupProperties::GeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 	Ui()->DoLabel(&Button, Localize("Whisper"), SPopupProperties::ms_FontSize, TEXTALIGN_MC);
+	if(Hovered(&Button))
+	{
+		m_Tooltip.m_pText = "Opens chat with a whisper with this player";
+		m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
+	}
 	if(DoButtonLogic(&Button))
 	{
 		char aWhisperBuf[512];
@@ -1014,8 +1023,14 @@ void CScoreboard::RenderGeneralActions(CUIRect *pBase)
 	pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
 	Button.Draw(Hovered(&Button) ? SPopupProperties::GeneralActiveButtonColor() : SPopupProperties::GeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 	Ui()->DoLabel(&Button, Localize("Copy Name"), SPopupProperties::ms_FontSize, TEXTALIGN_MC);
+	if(Hovered(&Button))
+	{
+		m_Tooltip.m_pText = "Copy player name to clipboard";
+		m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
+	}
 	if(DoButtonLogic(&Button))
 	{
+		m_Tooltip.m_pText = "Copied";
 		Input()->SetClipboardText(pPlayerName);
 	}
 
@@ -1023,6 +1038,11 @@ void CScoreboard::RenderGeneralActions(CUIRect *pBase)
 	pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
 	Button.Draw(Hovered(&Button) ? SPopupProperties::GeneralActiveButtonColor() : SPopupProperties::GeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 	Ui()->DoLabel(&Button, Localize("Vote Kick"), SPopupProperties::ms_FontSize, TEXTALIGN_MC);
+	if(Hovered(&Button))
+	{
+		m_Tooltip.m_pText = "Initiates a vote kick to this player";
+		m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
+	}
 	if(DoButtonLogic(&Button))
 	{
 		GameClient()->m_Voting.CallvoteKick(m_Popup.m_PlayerId, "");
@@ -1032,7 +1052,7 @@ void CScoreboard::RenderGeneralActions(CUIRect *pBase)
 void CScoreboard::RenderTeamActions(CUIRect *pBase)
 {
 	CUIRect Button;
-
+	vec2 MousePos = m_Mouse.m_Position;
 	bool LocalIsTarget = GameClient()->m_aLocalIds[g_Config.m_ClDummy] == m_Popup.m_PlayerId;
 	int LocalTeam = GameClient()->m_Teams.Team(GameClient()->m_aLocalIds[g_Config.m_ClDummy]);
 	int TargetTeam = GameClient()->m_Teams.Team(m_Popup.m_PlayerId);
@@ -1048,6 +1068,11 @@ void CScoreboard::RenderTeamActions(CUIRect *pBase)
 		pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
 		Button.Draw(Hovered(&Button) ? SPopupProperties::TeamsActiveButtonColor() : SPopupProperties::TeamsGeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 		Ui()->DoLabel(&Button, Localize("Exit"), SPopupProperties::ms_FontSize, TEXTALIGN_MC);
+		if(Hovered(&Button))
+		{
+			m_Tooltip.m_pText = "Leaves your team";
+			m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
+		}
 		if(DoButtonLogic(&Button))
 		{
 			Console()->ExecuteLine("say /team 0");
@@ -1059,6 +1084,11 @@ void CScoreboard::RenderTeamActions(CUIRect *pBase)
 		pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
 		Button.Draw(Hovered(&Button) ? SPopupProperties::TeamsActiveButtonColor() : SPopupProperties::TeamsGeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 		Ui()->DoLabel(&Button, Localize("Join"), SPopupProperties::ms_FontSize, TEXTALIGN_MC);
+		if(Hovered(&Button))
+		{
+			m_Tooltip.m_pText = "Joins the player's team";
+			m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
+		}
 		if(DoButtonLogic(&Button))
 		{
 			char aCmdBuf[128];
@@ -1073,6 +1103,11 @@ void CScoreboard::RenderTeamActions(CUIRect *pBase)
 		pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
 		Button.Draw(Hovered(&Button) ? SPopupProperties::TeamsActiveButtonColor() : SPopupProperties::TeamsGeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 		Ui()->DoLabel(&Button, Localize("Invite"), SPopupProperties::ms_FontSize, TEXTALIGN_MC);
+		if(Hovered(&Button))
+		{
+			m_Tooltip.m_pText = "Invites the player to your team";
+			m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
+		}
 		if(DoButtonLogic(&Button))
 		{
 			char aCmdBuf[128];
@@ -1086,6 +1121,11 @@ void CScoreboard::RenderTeamActions(CUIRect *pBase)
 		pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
 		Button.Draw(Hovered(&Button) ? SPopupProperties::TeamsActiveButtonColor() : SPopupProperties::TeamsGeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 		Ui()->DoLabel(&Button, Localize("Kick"), SPopupProperties::ms_FontSize, TEXTALIGN_MC);
+		if(Hovered(&Button))
+		{
+			m_Tooltip.m_pText = "Initiate a vote kick to remove the player from your team";
+			m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
+		}
 		if(DoButtonLogic(&Button))
 		{
 			GameClient()->m_Voting.CallvoteKick(m_Popup.m_PlayerId, "");
@@ -1098,6 +1138,11 @@ void CScoreboard::RenderTeamActions(CUIRect *pBase)
 		pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
 		Button.Draw(Hovered(&Button) ? SPopupProperties::TeamsActiveButtonColor() : SPopupProperties::TeamsGeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 		Ui()->DoLabel(&Button, Localize("Lock"), SPopupProperties::ms_FontSize, TEXTALIGN_MC);
+		if(Hovered(&Button))
+		{
+			m_Tooltip.m_pText = "Locks your team";
+			m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
+		}
 		if(DoButtonLogic(&Button))
 		{
 			Console()->ExecuteLine("say /lock");
