@@ -59,7 +59,7 @@ class CScoreboard : public CComponent
 	void RenderTitle(CUIRect TitleBar, int Team, const char *pTitle);
 	void RenderGoals(CUIRect Goals);
 	void RenderSpectators(CUIRect Spectators);
-	bool RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State, bool playerHovered = false);
+	bool RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart, int CountEnd, CScoreboardRenderState &State, bool PlayerHovered = false);
 	void RenderRecordingNotification(float x);
 	void RenderTooltip(const char *pText, float x, float y);
 	// popup
