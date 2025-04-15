@@ -8,8 +8,6 @@
 
 using namespace FontIcons;
 
-const ColorRGBA CEditor::ms_DefaultPropColor = ColorRGBA(1, 1, 1, 0.5f);
-
 int CEditor::DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIds, int *pNewVal, const std::vector<ColorRGBA> &vColors)
 {
 	auto Res = DoPropertiesWithState<int>(pToolbox, pProps, pIds, pNewVal, vColors);

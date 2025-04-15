@@ -225,11 +225,11 @@ public: // Backend methods
 public: // CContext
 	class CContext
 	{
-		static const ColorRGBA ms_ArgumentStringColor;
-		static const ColorRGBA ms_ArgumentNumberColor;
-		static const ColorRGBA ms_ArgumentUnknownColor;
-		static const ColorRGBA ms_CommentColor;
-		static const ColorRGBA ms_ErrorColor;
+		static inline constexpr ColorRGBA ms_ArgumentStringColor = ColorRGBA(84.0f / 255.0f, 1.0f, 1.0f, 1.0f);
+		static inline constexpr ColorRGBA ms_ArgumentNumberColor = ColorRGBA(0.1f, 0.9f, 0.05f, 1.0f);
+		static inline constexpr ColorRGBA ms_ArgumentUnknownColor = ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f);
+		static inline constexpr ColorRGBA ms_CommentColor = ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f);
+		static inline constexpr ColorRGBA ms_ErrorColor = ColorRGBA(240.0f / 255.0f, 70.0f / 255.0f, 70.0f / 255.0f, 1.0f);
 
 		friend class CMapSettingsBackend;
 
