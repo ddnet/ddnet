@@ -14,6 +14,38 @@
 class CGameClient;
 class CScoreboard : public CComponent
 {
+
+	struct SPopupProperties
+	{
+		static constexpr float ms_Width = 220.0f;
+
+		static constexpr float ms_HeadlineFontSize = 24.0f;
+		static constexpr float ms_FontSize = 24.0f;
+		static constexpr float ms_IconFontSize = 33.0f;
+		static constexpr float ms_Padding = 20.0f;
+		static constexpr float ms_Rounding = 10.0f;
+
+		static constexpr float ms_ItemSpacing = 5.0f;
+		static constexpr float ms_GroupSpacing = 15.0f;
+
+		static constexpr float ms_QuickActionsHeight = 50.0f;
+		static constexpr float ms_ButtonHeight = 35.0f;
+
+		static ColorRGBA WindowColor() { return ColorRGBA(0.451f, 0.451f, 0.451f, 0.9f); };
+		static ColorRGBA GeneralButtonColor() { return ColorRGBA(0.541f, 0.561f, 0.48f, 0.8f); };
+		static ColorRGBA GeneralActiveButtonColor() { return ColorRGBA(0.53f, 0.78f, 0.53f, 0.8f); };
+
+		static ColorRGBA ActionGeneralButtonColor() { return ColorRGBA(0.541f, 0.561f, 0.48f, 0.8f); };
+		static ColorRGBA ActionActiveButtonColor() { return ColorRGBA(0.53f, 0.78f, 0.53f, 0.8f); };
+		static ColorRGBA ActionAltActiveButtonColor() { return ColorRGBA(1.0f, 0.42f, 0.42f, 0.8f); };
+
+		static ColorRGBA TeamsGeneralButtonColor() { return ColorRGBA(0.32f, 0.32f, 0.72f, 0.8f); };
+		static ColorRGBA TeamsActiveButtonColor() { return ColorRGBA(0.31f, 0.52f, 0.78f, 0.8f); };
+
+		static ColorRGBA ActionSpecButtonColor() { return ColorRGBA(0.2f, 1.0f, 0.2f, 0.8f); }; // Bright green color for spec
+
+	};
+
 	struct CScoreboardRenderState
 	{
 		float m_TeamStartX;
@@ -71,7 +103,7 @@ class CScoreboard : public CComponent
 		void reset()
 		{
 			m_Unlocked = false;
-			m_Clicked = false;;
+			m_Clicked = false;
 			m_LastMouseInput = false;
 			m_MouseInput = false;
 			m_IsDragging = false;

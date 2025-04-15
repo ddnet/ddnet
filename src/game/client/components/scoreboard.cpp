@@ -20,36 +20,6 @@
 #include <game/generated/client_data7.h>
 #include <game/localization.h>
 
-struct SPopupProperties
-{
-	static constexpr float ms_Width = 220.0f;
-
-	static constexpr float ms_HeadlineFontSize = 24.0f;
-	static constexpr float ms_FontSize = 24.0f;
-	static constexpr float ms_IconFontSize = 33.0f;
-	static constexpr float ms_Padding = 20.0f;
-	static constexpr float ms_Rounding = 10.0f;
-
-	static constexpr float ms_ItemSpacing = 5.0f;
-	static constexpr float ms_GroupSpacing = 15.0f;
-
-	static constexpr float ms_QuickActionsHeight = 50.0f;
-	static constexpr float ms_ButtonHeight = 35.0f;
-
-	static ColorRGBA WindowColor() { return ColorRGBA(0.451f, 0.451f, 0.451f, 0.9f); };
-	static ColorRGBA GeneralButtonColor() { return ColorRGBA(0.541f, 0.561f, 0.48f, 0.8f); };
-	static ColorRGBA GeneralActiveButtonColor() { return ColorRGBA(0.53f, 0.78f, 0.53f, 0.8f); };
-
-	static ColorRGBA ActionGeneralButtonColor() { return ColorRGBA(0.541f, 0.561f, 0.48f, 0.8f); };
-	static ColorRGBA ActionActiveButtonColor() { return ColorRGBA(0.53f, 0.78f, 0.53f, 0.8f); };
-	static ColorRGBA ActionAltActiveButtonColor() { return ColorRGBA(1.0f, 0.42f, 0.42f, 0.8f); };
-
-	static ColorRGBA TeamsGeneralButtonColor() { return ColorRGBA(0.32f, 0.32f, 0.72f, 0.8f); };
-	static ColorRGBA TeamsActiveButtonColor() { return ColorRGBA(0.31f, 0.52f, 0.78f, 0.8f); };
-
-	static ColorRGBA ActionSpecButtonColor() { return ColorRGBA(0.2f, 1.0f, 0.2f, 0.8f); }; // Bright green color for spec
-
-};
 
 void CScoreboard::DoIconLabeledButton(CUIRect *pRect, const char *pTitle, const char *pIcon, float TextSize, float Height, ColorRGBA IconColor) const
 {
@@ -924,10 +894,12 @@ void CScoreboard::RenderQuickActions(CUIRect *pBase)
 	const bool IsFoe = Client()->Foes()->IsFriend(pPlayerName, pPlayerClan, true);
 	Action.Draw(IsFoe ? SPopupProperties::ActionAltActiveButtonColor() : SPopupProperties::GeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
 	if(Hovered(&Action))
+	{
 		m_Tooltip.m_pText = IsFoe ? "Remove Foe" : "Add Foe";
 		m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
 		Action.Draw(IsFoe ? SPopupProperties::ActionActiveButtonColor() : SPopupProperties::ActionAltActiveButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-	DoIconButton(&Action, FontIcons::FONT_ICON_BAN, SPopupProperties::ms_IconFontSize, TextRender()->DefaultTextColor());
+		DoIconButton(&Action, FontIcons::FONT_ICON_BAN, SPopupProperties::ms_IconFontSize, TextRender()->DefaultTextColor());
+	}
 	if(DoButtonLogic(&Action))
 	{
 		if(IsFoe)
