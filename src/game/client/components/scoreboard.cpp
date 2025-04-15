@@ -778,33 +778,6 @@ float CScoreboard::CalculatePopupHeight()
 	return Height;
 }
 
-static std::string encodeUTF8(const std::string &Input)
-{
-	std::ostringstream Encoded;
-	const char *ptr = Input.c_str();
-
-	while(*ptr != '\0')
-	{
-		int CodePoint = str_utf8_decode(&ptr);
-		if(CodePoint < 0)
-		{
-			Encoded << "-ERROR-";
-			break;
-		}
-
-		if(CodePoint <= 127 && std::isalnum(static_cast<unsigned char>(CodePoint)))
-		{
-			Encoded << static_cast<char>(CodePoint);
-		}
-		else
-		{
-			Encoded << '-' << CodePoint << '-';
-		}
-	}
-
-	return Encoded.str();
-}
-
 void CScoreboard::RenderPlayerPopUp()
 {
 	const char *pPlayerName = GameClient()->m_aClients[m_Popup.m_PlayerId].m_aName;
@@ -959,7 +932,7 @@ void CScoreboard::RenderGeneralActions(CUIRect *pBase)
 	Client()->GetServerInfo(&ServerInfo);
 
 	char aCommunityLink[512];
-	str_format(aCommunityLink, sizeof(aCommunityLink), "https://ddnet.org/players/%s", encodeUTF8(pPlayerName).c_str());
+	str_format(aCommunityLink, sizeof(aCommunityLink), "https://ddnet.org/players/%s", pPlayerName);
 	if(str_comp(ServerInfo.m_aCommunityId, "ddnet") == 0)
 	{
 		pBase->HSplitTop(SPopupProperties::ms_ItemSpacing, nullptr, pBase);
