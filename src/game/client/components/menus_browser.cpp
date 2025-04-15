@@ -24,7 +24,7 @@
 
 using namespace FontIcons;
 
-static const ColorRGBA gs_HighlightedTextColor = ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f);
+static constexpr ColorRGBA gs_HighlightedTextColor = ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f);
 
 static ColorRGBA PlayerBackgroundColor(bool Friend, bool Clan, bool Afk, bool Inside)
 {

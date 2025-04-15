@@ -9,7 +9,7 @@
 
 #include <memory>
 
-static const ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
+static constexpr ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
 
 enum LEVEL : char;
 struct CChecksumData;

@@ -9,7 +9,7 @@
 #include <game/client/components/console.h>
 #include <game/client/gameclient.h>
 
-static const ColorRGBA gs_BindPrintColor{1.0f, 1.0f, 0.8f, 1.0f};
+static constexpr ColorRGBA gs_BindPrintColor{1.0f, 1.0f, 0.8f, 1.0f};
 
 bool CBinds::CBindsSpecial::OnInput(const IInput::CEvent &Event)
 {

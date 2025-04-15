@@ -178,9 +178,6 @@ static int PossibleKeys(const char *pStr, IInput *pInput, IConsole::FPossibleCal
 	return Index;
 }
 
-const ColorRGBA CGameConsole::ms_SearchHighlightColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
-const ColorRGBA CGameConsole::ms_SearchSelectedColor = ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f);
-
 CGameConsole::CInstance::CInstance(int Type)
 {
 	m_pHistoryEntry = nullptr;

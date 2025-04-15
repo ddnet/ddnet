@@ -61,36 +61,24 @@ public:
 	{
 	}
 
-	constexpr color4_base(const vec4 &v4)
+	constexpr color4_base(const vec4 &v4) :
+		x(v4.x), y(v4.y), z(v4.z), a(v4.w)
 	{
-		x = v4.x;
-		y = v4.y;
-		z = v4.z;
-		a = v4.w;
 	}
 
-	constexpr color4_base(const vec3 &v3)
+	constexpr color4_base(const vec3 &v3) :
+		x(v3.x), y(v3.y), z(v3.z), a(1.0f)
 	{
-		x = v3.x;
-		y = v3.y;
-		z = v3.z;
-		a = 1.0f;
 	}
 
-	constexpr color4_base(float nx, float ny, float nz, float na)
+	constexpr color4_base(float nx, float ny, float nz, float na) :
+		x(nx), y(ny), z(nz), a(na)
 	{
-		x = nx;
-		y = ny;
-		z = nz;
-		a = na;
 	}
 
-	constexpr color4_base(float nx, float ny, float nz)
+	constexpr color4_base(float nx, float ny, float nz) :
+		x(nx), y(ny), z(nz), a(1.0f)
 	{
-		x = nx;
-		y = ny;
-		z = nz;
-		a = 1.0f;
 	}
 
 	constexpr color4_base(unsigned col, bool alpha = false)
