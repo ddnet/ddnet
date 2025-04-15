@@ -40,6 +40,42 @@ float CConsole::CResult::GetFloat(unsigned Index) const
 	return str_tofloat(m_apArgs[Index]);
 }
 
+class CCStrHashNoCase
+{
+public:
+	size_t operator()(const char *pStr) const
+	{
+		unsigned Hash = 5381;
+		for(; *pStr; pStr++)
+			Hash = ((Hash << 5) + Hash) + tolower((unsigned char)*pStr); /* hash * 33 + c */
+		return (size_t)Hash;
+	}
+};
+class CCStrEqualNoCase
+{
+public:
+	bool operator()(const char *pA, const char *pB) const
+	{
+		return str_comp_nocase(pA, pB) == 0;
+	}
+};
+static const std::unordered_map<const char *, const ColorHSLA, CCStrHashNoCase, CCStrEqualNoCase> NAMED_COLORS = {
+	{"red", ColorHSLA(0.0f / 6.0f, 1.0f, 0.5f)},
+	{"orange", ColorHSLA(0.5f / 6.0f, 1.0f, 0.5f)},
+	{"yellow", ColorHSLA(1.0f / 6.0f, 1.0f, 0.5f)},
+	{"lime", ColorHSLA(1.5f / 6.0f, 1.0f, 0.5f)},
+	{"green", ColorHSLA(2.0f / 6.0f, 1.0f, 0.5f)},
+	{"cyan", ColorHSLA(3.0f / 6.0f, 1.0f, 0.5f)},
+	{"teal", ColorHSLA(3.5f / 6.0f, 1.0f, 0.5f)},
+	{"blue", ColorHSLA(4.0f / 6.0f, 1.0f, 0.5f)},
+	{"purple", ColorHSLA(4.5f / 6.0f, 1.0f, 0.5f)},
+	{"magenta", ColorHSLA(5.0f / 6.0f, 1.0f, 0.5f)},
+	{"fuchsia", ColorHSLA(5.5f / 6.0f, 1.0f, 0.5f)},
+	{"white", ColorHSLA(0.0f, 0.0f, 1.0f)},
+	{"gray", ColorHSLA(0.0f, 0.0f, 0.5f)},
+	{"black", ColorHSLA(0.0f, 0.0f, 0.0f)},
+};
+
 std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float DarkestLighting) const
 {
 	if(Index >= m_NumArgs)
@@ -53,7 +89,7 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 			return std::nullopt;
 		return ColorHSLA(Value, true).UnclampLighting(DarkestLighting);
 	}
-	else if(*pStr == '$') // Hex RGB/RGBA
+	if(*pStr == '$') // Hex RGB/RGBA
 	{
 		auto ParsedColor = color_parse<ColorRGBA>(pStr + 1);
 		if(ParsedColor)
@@ -61,25 +97,11 @@ std::optional<ColorHSLA> CConsole::CResult::GetColor(unsigned Index, float Darke
 		else
 			return std::nullopt;
 	}
-	else if(!str_comp_nocase(pStr, "red"))
-		return ColorHSLA(0.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "yellow"))
-		return ColorHSLA(1.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "green"))
-		return ColorHSLA(2.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "cyan"))
-		return ColorHSLA(3.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "blue"))
-		return ColorHSLA(4.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "magenta"))
-		return ColorHSLA(5.0f / 6.0f, 1, .5f);
-	else if(!str_comp_nocase(pStr, "white"))
-		return ColorHSLA(0, 0, 1);
-	else if(!str_comp_nocase(pStr, "gray"))
-		return ColorHSLA(0, 0, .5f);
-	else if(!str_comp_nocase(pStr, "black"))
-		return ColorHSLA(0, 0, 0);
-
+	const auto It = NAMED_COLORS.find(pStr);
+	if(It != NAMED_COLORS.end())
+	{
+		return It->second;
+	}
 	return std::nullopt;
 }
 
