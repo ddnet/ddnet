@@ -65,7 +65,7 @@ class CScoreboard : public CComponent
 	// popup
 	float CalculatePopupHeight();
 	void RenderPlayerPopUp();
-	void RenderQuickActions(CUIRect *pBase);
+	void RenderPlayerActions(CUIRect *pBase);
 	void RenderGeneralActions(CUIRect *pBase);
 	void RenderTeamActions(CUIRect *pBase);
 

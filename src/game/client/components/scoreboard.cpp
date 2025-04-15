@@ -741,7 +741,7 @@ void CScoreboard::RenderRecordingNotification(float x)
 }
 float CScoreboard::CalculatePopupHeight()
 {
-	int GeneralButtons = 4;
+	int GeneralButtons = 3;
 	int TeamButtons = 0;
 	{
 		bool LocalIsTarget = GameClient()->m_aLocalIds[g_Config.m_ClDummy] == m_Popup.m_PlayerId;
@@ -750,6 +750,11 @@ float CScoreboard::CalculatePopupHeight()
 
 		bool LocalInTeam = LocalTeam != TEAM_FLOCK && LocalTeam != TEAM_SUPER;
 		bool TargetInTeam = TargetTeam != TEAM_FLOCK && TargetTeam != TEAM_SUPER;
+
+		CServerInfo ServerInfo;
+		Client()->GetServerInfo(&ServerInfo);
+		if(str_comp(ServerInfo.m_aCommunityId, "ddnet") == 0)
+			GeneralButtons++;
 
 		if(LocalInTeam && LocalTeam == TargetTeam)
 			TeamButtons++;
@@ -831,7 +836,7 @@ void CScoreboard::RenderPlayerPopUp()
 	Base.HSplitTop(SPopupProperties::ms_HeadlineFontSize, &Label, &Base);
 	Ui()->DoLabel(&Label, pPlayerName, SPopupProperties::ms_HeadlineFontSize, TEXTALIGN_ML);
 
-	RenderQuickActions(&Base);
+	RenderPlayerActions(&Base);
 	RenderGeneralActions(&Base);
 	RenderTeamActions(&Base);
 	if(m_Tooltip.m_pText)
@@ -851,7 +856,7 @@ void CScoreboard::RenderTooltip(const char *pText, float x, float y)
 	TextRender()->Text(TooltipRect.x + 5.0f, TooltipRect.y + 4.0f, FontSize, pText);
 }
 
-void CScoreboard::RenderQuickActions(CUIRect *pBase)
+void CScoreboard::RenderPlayerActions(CUIRect *pBase)
 {
 	CUIRect Container, Action;
 	const char *pPlayerName = GameClient()->m_aClients[m_Popup.m_PlayerId].m_aName;
@@ -897,9 +902,9 @@ void CScoreboard::RenderQuickActions(CUIRect *pBase)
 	{
 		m_Tooltip.m_pText = IsFoe ? "Remove Foe" : "Add Foe";
 		m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
-		Action.Draw(IsFoe ? SPopupProperties::ActionActiveButtonColor() : SPopupProperties::ActionAltActiveButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-		DoIconButton(&Action, FontIcons::FONT_ICON_BAN, SPopupProperties::ms_IconFontSize, TextRender()->DefaultTextColor());
 	}
+	Action.Draw(IsFoe ? SPopupProperties::ActionActiveButtonColor() : SPopupProperties::ActionAltActiveButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
+	DoIconButton(&Action, FontIcons::FONT_ICON_BAN, SPopupProperties::ms_IconFontSize, TextRender()->DefaultTextColor());
 	if(DoButtonLogic(&Action))
 	{
 		if(IsFoe)
@@ -952,28 +957,27 @@ void CScoreboard::RenderGeneralActions(CUIRect *pBase)
 
 	CServerInfo ServerInfo;
 	Client()->GetServerInfo(&ServerInfo);
-	int Community = (str_comp(ServerInfo.m_aCommunityId, "kog") == 0) ? 1 : (str_comp(ServerInfo.m_aCommunityId, "unique") == 0) ? 2 : 0;
-	char aCommunityLink[512];
-	if(Community == 1)
-		str_format(aCommunityLink, sizeof(aCommunityLink), "https://kog.tw/#p=players&player=%s", pPlayerName);
-	else if(Community == 2)
-		str_format(aCommunityLink, sizeof(aCommunityLink), "https://uniqueclan.net/ranks/player/%s", pPlayerName);
-	else
-		str_format(aCommunityLink, sizeof(aCommunityLink), "https://ddnet.org/players/%s", encodeUTF8(pPlayerName).c_str());
 
-	pBase->HSplitTop(SPopupProperties::ms_ItemSpacing, nullptr, pBase);
-	pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
-	Button.Draw(Hovered(&Button) ? SPopupProperties::GeneralActiveButtonColor() : SPopupProperties::GeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
-	Ui()->DoLabel(&Button, Localize("Profile"), SPopupProperties::ms_FontSize, TEXTALIGN_MC);
-	if(Hovered(&Button))
+	char aCommunityLink[512];
+	str_format(aCommunityLink, sizeof(aCommunityLink), "https://ddnet.org/players/%s", encodeUTF8(pPlayerName).c_str());
+	if(str_comp(ServerInfo.m_aCommunityId, "ddnet") == 0)
 	{
-		m_Tooltip.m_pText = "Open player profile in your web browser";
-		m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
+		pBase->HSplitTop(SPopupProperties::ms_ItemSpacing, nullptr, pBase);
+		pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
+		Button.Draw(Hovered(&Button) ? SPopupProperties::GeneralActiveButtonColor() : SPopupProperties::GeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
+		Ui()->DoLabel(&Button, Localize("Profile"), SPopupProperties::ms_FontSize, TEXTALIGN_MC);
+
+		if(Hovered(&Button))
+		{
+			m_Tooltip.m_pText = "Open player profile in your web browser";
+			m_Tooltip.m_Pos = MousePos - vec2(-10.0f, 10.0f);
+		}
+		if(DoButtonLogic(&Button))
+		{
+			Client()->ViewLink(aCommunityLink);
+		}
 	}
-	if(DoButtonLogic(&Button))
-	{
-		Client()->ViewLink(aCommunityLink);
-	}
+
 	pBase->HSplitTop(SPopupProperties::ms_ItemSpacing, nullptr, pBase);
 	pBase->HSplitTop(SPopupProperties::ms_ButtonHeight, &Button, pBase);
 	Button.Draw(Hovered(&Button) ? SPopupProperties::GeneralActiveButtonColor() : SPopupProperties::GeneralButtonColor(), IGraphics::CORNER_ALL, SPopupProperties::ms_Rounding);
@@ -1001,7 +1005,6 @@ void CScoreboard::RenderGeneralActions(CUIRect *pBase)
 	}
 	if(DoButtonLogic(&Button))
 	{
-		m_Tooltip.m_pText = "Copied";
 		Input()->SetClipboardText(pPlayerName);
 	}
 
