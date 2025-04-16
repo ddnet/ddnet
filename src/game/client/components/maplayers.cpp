@@ -1161,10 +1161,6 @@ void CMapLayers::OnRender()
 			if(m_Type == TYPE_FULL_DESIGN && IsEntityLayer)
 				continue;
 
-			// skip rendering anything but entities if we only want to render entities
-			if(!IsEntityLayer && OnlyShowEntities && m_Type != TYPE_BACKGROUND_FORCE)
-				continue;
-
 			int CurrentTileLayerCount = 0;
 			void *pTilesData = nullptr;
 			if(pLayer->m_Type == LAYERTYPE_TILES)
@@ -1179,6 +1175,10 @@ void CMapLayers::OnRender()
 			{
 				++QuadLayerCounter;
 			}
+
+			// skip rendering anything but entities if we only want to render entities
+			if(!IsEntityLayer && OnlyShowEntities && m_Type != TYPE_BACKGROUND_FORCE)
+				continue;
 
 			// skip rendering of entities if don't want them
 			if(IsEntityLayer && !EntityOverlayVal)
