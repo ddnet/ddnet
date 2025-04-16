@@ -8,13 +8,12 @@
 #include <SDL_messagebox.h>
 #include <SDL_vulkan.h>
 
+#include <base/log.h>
 #include <base/math.h>
-#include <cstdlib>
+#include <base/tl/threading.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/localization.h>
-
-#include <base/tl/threading.h>
 
 #if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>
@@ -41,6 +40,8 @@
 #include "graphics_threaded.h"
 
 #include <engine/graphics.h>
+
+#include <cstdlib>
 
 class IStorage;
 
@@ -233,7 +234,6 @@ void CCommandProcessorFragment_SDL::Cmd_WindowCreateNtf(const CCommandBuffer::SC
 #ifdef CONF_PLATFORM_ANDROID
 	if(m_GLContext)
 		SDL_GL_MakeCurrent(m_pWindow, m_GLContext);
-	dbg_msg("gfx", "render surface created.");
 #endif
 }
 
@@ -241,7 +241,6 @@ void CCommandProcessorFragment_SDL::Cmd_WindowDestroyNtf(const CCommandBuffer::S
 {
 	// Unbind the graphic context from the window, so it does not get destroyed
 #ifdef CONF_PLATFORM_ANDROID
-	dbg_msg("gfx", "render surface destroyed.");
 	if(m_GLContext)
 		SDL_GL_MakeCurrent(NULL, NULL);
 #endif
@@ -321,8 +320,8 @@ void CCommandProcessor_SDL_GL::HandleWarning()
 		// ignore this warning for now
 		return;
 	default:
-		dbg_msg("gfx", "unhandled warning %d", (int)m_Warning.m_WarningType);
-		break;
+		dbg_assert(false, "Unhandled graphics warning type %d", (int)m_Warning.m_WarningType);
+		dbg_break();
 	}
 }
 
@@ -356,7 +355,8 @@ void CCommandProcessor_SDL_GL::RunBuffer(CCommandBuffer *pBuffer)
 		if(m_General.RunCommand(pCommand))
 			continue;
 
-		dbg_msg("gfx", "unknown command %d", pCommand->m_Cmd);
+		dbg_assert(false, "Unknown graphics command %d", pCommand->m_Cmd);
+		dbg_break();
 	}
 
 	m_pGLBackend->EndCommands();
@@ -915,7 +915,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 
 	if(SDL_GetDesktopDisplayMode(ScreenId, &DesktopMode) < 0)
 	{
-		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+		log_error("gfx", "Unable to get desktop display mode of screen %d: %s", ScreenId, SDL_GetError());
 	}
 
 	constexpr int ModeCount = 256;
@@ -926,7 +926,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 		SDL_DisplayMode Mode;
 		if(SDL_GetDisplayMode(ScreenId, i, &Mode) < 0)
 		{
-			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+			log_error("gfx", "Unable to get display mode %d of screen %d: %s", i, ScreenId, SDL_GetError());
 			continue;
 		}
 
@@ -975,14 +975,14 @@ void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, float HiD
 	{
 		if(SDL_GetCurrentDisplayMode(ScreenId, &DpMode))
 		{
-			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+			log_error("gfx", "Unable to get current display mode of screen %d: %s", ScreenId, SDL_GetError());
 		}
 	}
 	else
 	{
 		if(SDL_GetDesktopDisplayMode(ScreenId, &DpMode) < 0)
 		{
-			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+			log_error("gfx", "Unable to get desktop display mode of screen %d: %s", ScreenId, SDL_GetError());
 		}
 		else
 		{
@@ -1024,7 +1024,8 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 		SDL_VERSION(&Compiled);
 		SDL_GetVersion(&Linked);
-		dbg_msg("sdl", "SDL version %d.%d.%d (compiled = %d.%d.%d)", Linked.major, Linked.minor, Linked.patch,
+		log_info("sdl", "SDL version %d.%d.%d (compiled = %d.%d.%d)",
+			Linked.major, Linked.minor, Linked.patch,
 			Compiled.major, Compiled.minor, Compiled.patch);
 
 #if CONF_PLATFORM_LINUX && SDL_VERSION_ATLEAST(2, 0, 22)
@@ -1039,7 +1040,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	{
 		if(SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
 		{
-			dbg_msg("gfx", "unable to init SDL video: %s", SDL_GetError());
+			log_error("gfx", "Unable to initialize SDL video: %s", SDL_GetError());
 			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_INIT_FAILED;
 		}
 	}
@@ -1077,7 +1078,23 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, g_Config.m_GfxGLMinor);
 	}
 
-	dbg_msg("gfx", "Created %s %d.%d context.", ((m_BackendType == BACKEND_TYPE_VULKAN) ? "Vulkan" : "OpenGL"), g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor);
+	const char *pBackendName;
+	switch(m_BackendType)
+	{
+	case BACKEND_TYPE_OPENGL:
+		pBackendName = "OpenGL";
+		break;
+	case BACKEND_TYPE_OPENGL_ES:
+		pBackendName = "OpenGL ES";
+		break;
+	case BACKEND_TYPE_VULKAN:
+		pBackendName = "Vulkan";
+		break;
+	default:
+		dbg_assert(false, "Invalid m_BackendType: %d", m_BackendType);
+		dbg_break();
+	}
+	log_info("gfx", "Created %s %d.%d context", pBackendName, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor);
 
 	if(m_BackendType == BACKEND_TYPE_OPENGL)
 	{
@@ -1101,20 +1118,20 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	}
 
 	// set screen
-	SDL_Rect ScreenPos;
 	m_NumScreens = SDL_GetNumVideoDisplays();
 	if(m_NumScreens > 0)
 	{
+		SDL_Rect ScreenPos;
 		*pScreen = clamp(*pScreen, 0, m_NumScreens - 1);
 		if(SDL_GetDisplayBounds(*pScreen, &ScreenPos) != 0)
 		{
-			dbg_msg("gfx", "unable to retrieve screen information: %s", SDL_GetError());
+			log_error("gfx", "Unable to get display bounds of screen %d: %s", *pScreen, SDL_GetError());
 			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_INFO_REQUEST_FAILED;
 		}
 	}
 	else
 	{
-		dbg_msg("gfx", "unable to retrieve number of screens: %s", SDL_GetError());
+		log_error("gfx", "Unable to get number of screens: %s", SDL_GetError());
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_REQUEST_FAILED;
 	}
 
@@ -1122,7 +1139,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	SDL_DisplayMode DisplayMode;
 	if(SDL_GetDesktopDisplayMode(*pScreen, &DisplayMode))
 	{
-		dbg_msg("gfx", "unable to get desktop resolution: %s", SDL_GetError());
+		log_error("gfx", "Unable to get desktop display mode of screen %d: %s", *pScreen, SDL_GetError());
 		return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_SDL_SCREEN_RESOLUTION_REQUEST_FAILED;
 	}
 
@@ -1208,7 +1225,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	// set caption
 	if(m_pWindow == nullptr)
 	{
-		dbg_msg("gfx", "unable to create window: %s", SDL_GetError());
+		log_error("gfx", "Unable to create window: %s", SDL_GetError());
 		if(m_BackendType == BACKEND_TYPE_VULKAN)
 			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GL_CONTEXT_FAILED;
 		else
@@ -1225,9 +1242,9 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 		if(m_GLContext == nullptr)
 		{
+			log_error("gfx", "Unable to create graphics context: %s", SDL_GetError());
 			SDL_DestroyWindow(m_pWindow);
 			m_pWindow = nullptr;
-			dbg_msg("gfx", "unable to create graphic context: %s", SDL_GetError());
 			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GL_CONTEXT_FAILED;
 		}
 
@@ -1509,7 +1526,7 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 			SDL_DisplayMode DpMode;
 			if(SDL_GetDesktopDisplayMode(g_Config.m_GfxScreen, &DpMode) < 0)
 			{
-				dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+				log_error("gfx", "Unable to get desktop display mode of screen %d: %s", g_Config.m_GfxScreen, SDL_GetError());
 			}
 			else
 			{
@@ -1553,14 +1570,13 @@ bool CGraphicsBackend_SDL_GL::UpdateDisplayMode(int Index)
 	SDL_DisplayMode DisplayMode;
 	if(SDL_GetDesktopDisplayMode(Index, &DisplayMode) < 0)
 	{
-		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
+		log_error("gfx", "Unable to get desktop display mode of screen %d: %s", Index, SDL_GetError());
 		return false;
 	}
 
 	g_Config.m_GfxScreen = Index;
 	g_Config.m_GfxDesktopWidth = DisplayMode.w;
 	g_Config.m_GfxDesktopHeight = DisplayMode.h;
-
 	return true;
 }
 
