@@ -224,6 +224,7 @@ public:
 	virtual int NumPoints() const = 0;
 	virtual const CEnvPoint *GetPoint(int Index) const = 0;
 	virtual const CEnvPointBezier *GetBezier(int Index) const = 0;
+	virtual int FindPointIndex(double TimeMillis) const = 0;
 };
 
 class CMapBasedEnvelopePointAccess : public IEnvelopePointAccess
@@ -244,6 +245,7 @@ public:
 	int NumPointsMax() const;
 	const CEnvPoint *GetPoint(int Index) const override;
 	const CEnvPointBezier *GetBezier(int Index) const override;
+	int FindPointIndex(double TimeMillis) const override;
 };
 
 typedef void (*ENVELOPE_EVAL)(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser);

@@ -42,6 +42,7 @@ private:
 		int NumPoints() const override;
 		const CEnvPoint *GetPoint(int Index) const override;
 		const CEnvPointBezier *GetBezier(int Index) const override;
+		int FindPointIndex(double TimeMillis) const override;
 	};
 	CEnvelopePointAccess m_PointsAccess;
 };
