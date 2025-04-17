@@ -281,7 +281,33 @@ CMapLayers::~CMapLayers()
 void CMapLayers::OnMapLoad()
 {
 	if(!Graphics()->IsTileBufferingEnabled() && !Graphics()->IsQuadBufferingEnabled())
+	{
+		// Find game group
+		for(int g = 0; g < m_pLayers->NumGroups(); g++)
+		{
+			CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
+			if(!pGroup)
+			{
+				dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, m_pLayers->NumGroups());
+				dbg_msg("maplayers", "this is here to prevent a crash but the source of this is unknown, please report this for it to get fixed");
+				dbg_msg("maplayers", "we need mapname and crc and the map that caused this if possible, and anymore info you think is relevant");
+				continue;
+			}
+
+			for(int l = 0; l < pGroup->m_NumLayers; l++)
+			{
+				CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer + l);
+				int LayerType = GetLayerType(pLayer);
+				if(LayerType == LAYER_GAME)
+				{
+					m_GameGroup = g;
+					return;
+				}
+			}
+		}
+		dbg_msg("maplayers", "failed to find game group, total groups = %d", m_pLayers->NumGroups());
 		return;
+	}
 
 	const char *pLoadingTitle = LoadingTitle();
 	const char *pLoadingMessage = Localize("Uploading map data to GPU");
@@ -331,6 +357,12 @@ void CMapLayers::OnMapLoad()
 	std::vector<STmpQuad> vtmpQuads;
 	std::vector<STmpQuadTextured> vtmpQuadsTextured;
 
+	m_vvLayerCount.clear();
+	m_vvLayerCount.resize(m_pLayers->NumGroups());
+
+	int TileLayerCounter = 0;
+	int QuadLayerCounter = 0;
+
 	for(int g = 0; g < m_pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
@@ -342,17 +374,24 @@ void CMapLayers::OnMapLoad()
 			continue;
 		}
 
+		std::vector<int> vLayerCounter(pGroup->m_NumLayers, 0);
+
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
 			CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer + l);
 			int LayerType = GetLayerType(pLayer);
 			PassedGameLayer |= LayerType == LAYER_GAME;
 			bool IsEntityLayer = LayerType != LAYER_DEFAULT_TILESET;
+			if(LayerType == LAYER_GAME)
+				m_GameGroup = g;
 
 			if(m_Type <= TYPE_BACKGROUND_FORCE)
 			{
 				if(PassedGameLayer)
+				{
+					m_vvLayerCount[g] = vLayerCounter;
 					return;
+				}
 			}
 			else if(m_Type == TYPE_FOREGROUND)
 			{
@@ -370,6 +409,9 @@ void CMapLayers::OnMapLoad()
 
 				if(TileLayerAndOverlayCount)
 				{
+					TileLayerCounter += TileLayerAndOverlayCount;
+					vLayerCounter[l] = TileLayerCounter;
+
 					int CurOverlay = 0;
 					while(CurOverlay < TileLayerAndOverlayCount)
 					{
@@ -656,6 +698,9 @@ void CMapLayers::OnMapLoad()
 			}
 			else if(pLayer->m_Type == LAYERTYPE_QUADS && Graphics()->IsQuadBufferingEnabled())
 			{
+				++QuadLayerCounter;
+				vLayerCounter[l] = QuadLayerCounter;
+
 				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
 
 				m_vpQuadLayerVisuals.push_back(new SQuadLayerVisuals());
@@ -763,6 +808,7 @@ void CMapLayers::OnMapLoad()
 				}
 			}
 		}
+		m_vvLayerCount[g] = vLayerCounter;
 	}
 }
 
@@ -787,38 +833,39 @@ void CMapLayers::RenderTileLayer(int LayerIndex, const ColorRGBA &Color)
 		static std::vector<unsigned int> s_vDrawCounts;
 
 		int X0 = std::max(ScreenRectX0, 0);
-		int Y0 = std::max(ScreenRectY0, 0);
 		int X1 = std::min(ScreenRectX1, (int)Visuals.m_Width);
-		int Y1 = std::min(ScreenRectY1, (int)Visuals.m_Height);
-
-		s_vpIndexOffsets.clear();
-		s_vDrawCounts.clear();
-
-		unsigned long long Reserve = absolute(Y1 - Y0) + 1;
-		s_vpIndexOffsets.reserve(Reserve);
-		s_vDrawCounts.reserve(Reserve);
-
-		for(int y = Y0; y < Y1; ++y)
+		if(X0 <= X1)
 		{
-			if(X0 > X1)
-				continue;
-			int XR = X1 - 1;
+			int Y0 = std::max(ScreenRectY0, 0);
+			int Y1 = std::min(ScreenRectY1, (int)Visuals.m_Height);
 
-			dbg_assert(Visuals.m_pTilesOfLayer[y * Visuals.m_Width + XR].IndexBufferByteOffset() >= Visuals.m_pTilesOfLayer[y * Visuals.m_Width + X0].IndexBufferByteOffset(), "Tile count wrong.");
+			s_vpIndexOffsets.clear();
+			s_vDrawCounts.clear();
 
-			unsigned int NumVertices = ((Visuals.m_pTilesOfLayer[y * Visuals.m_Width + XR].IndexBufferByteOffset() - Visuals.m_pTilesOfLayer[y * Visuals.m_Width + X0].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_pTilesOfLayer[y * Visuals.m_Width + XR].DoDraw() ? 6lu : 0lu);
+			unsigned long long Reserve = absolute(Y1 - Y0) + 1;
+			s_vpIndexOffsets.reserve(Reserve);
+			s_vDrawCounts.reserve(Reserve);
 
-			if(NumVertices)
+			for(int y = Y0; y < Y1; ++y)
 			{
-				s_vpIndexOffsets.push_back((offset_ptr_size)Visuals.m_pTilesOfLayer[y * Visuals.m_Width + X0].IndexBufferByteOffset());
-				s_vDrawCounts.push_back(NumVertices);
-			}
-		}
+				int XR = X1 - 1;
 
-		int DrawCount = s_vpIndexOffsets.size();
-		if(DrawCount != 0)
-		{
-			Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, s_vpIndexOffsets.data(), s_vDrawCounts.data(), DrawCount);
+				dbg_assert(Visuals.m_pTilesOfLayer[y * Visuals.m_Width + XR].IndexBufferByteOffset() >= Visuals.m_pTilesOfLayer[y * Visuals.m_Width + X0].IndexBufferByteOffset(), "Tile count wrong.");
+
+				unsigned int NumVertices = ((Visuals.m_pTilesOfLayer[y * Visuals.m_Width + XR].IndexBufferByteOffset() - Visuals.m_pTilesOfLayer[y * Visuals.m_Width + X0].IndexBufferByteOffset()) / sizeof(unsigned int)) + (Visuals.m_pTilesOfLayer[y * Visuals.m_Width + XR].DoDraw() ? 6lu : 0lu);
+
+				if(NumVertices)
+				{
+					s_vpIndexOffsets.push_back((offset_ptr_size)Visuals.m_pTilesOfLayer[y * Visuals.m_Width + X0].IndexBufferByteOffset());
+					s_vDrawCounts.push_back(NumVertices);
+				}
+			}
+
+			int DrawCount = s_vpIndexOffsets.size();
+			if(DrawCount != 0)
+			{
+				Graphics()->RenderTileLayer(Visuals.m_BufferContainerIndex, Color, s_vpIndexOffsets.data(), s_vDrawCounts.data(), DrawCount);
+			}
 		}
 	}
 
@@ -1045,41 +1092,6 @@ void CMapLayers::RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer,
 	Graphics()->RenderQuadLayer(Visuals.m_BufferContainerIndex, s_vQuadRenderInfo.data(), QuadsRenderCount, CurQuadOffset);
 }
 
-void CMapLayers::LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, int &QuadLayerCount, bool &PassedGameLayer)
-{
-	int TileLayerCounter = 0;
-	int QuadLayerCounter = 0;
-	for(int l = 0; l < pGroup->m_NumLayers; l++)
-	{
-		CMapItemLayer *pLayer = m_pLayers->GetLayer(pGroup->m_StartLayer + l);
-		int LayerType = GetLayerType(pLayer);
-		PassedGameLayer |= LayerType == LAYER_GAME;
-
-		if(m_Type <= TYPE_BACKGROUND_FORCE)
-		{
-			if(PassedGameLayer)
-				break;
-		}
-		else if(m_Type == TYPE_FOREGROUND)
-		{
-			if(!PassedGameLayer)
-				continue;
-		}
-
-		if(pLayer->m_Type == LAYERTYPE_TILES)
-		{
-			TileLayerCounter += GetTileLayerAndOverlayCount((CMapItemLayerTilemap *)pLayer, LayerType);
-		}
-		else if(pLayer->m_Type == LAYERTYPE_QUADS)
-		{
-			++QuadLayerCounter;
-		}
-	}
-
-	TileLayerCount += TileLayerCounter;
-	QuadLayerCount += QuadLayerCounter;
-}
-
 void CMapLayers::OnRender()
 {
 	if(m_OnlineOnly && Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -1095,10 +1107,10 @@ void CMapLayers::OnRender()
 	bool OnlyShowEntities = EntityOverlayVal == 100;
 
 	bool PassedGameLayer = false;
-	int TileLayerCounter = 0;
-	int QuadLayerCounter = 0;
+	int StartGroup = m_Type == TYPE_FOREGROUND ? m_GameGroup : 0;
+	int EndGroup = (m_Type == TYPE_BACKGROUND || m_Type == TYPE_BACKGROUND_FORCE) ? std::min(m_GameGroup + 1, m_pLayers->NumGroups()) : m_pLayers->NumGroups();
 
-	for(int g = 0; g < m_pLayers->NumGroups(); g++)
+	for(int g = StartGroup; g < EndGroup; g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
 
@@ -1122,11 +1134,7 @@ void CMapLayers::OnRender()
 			float y1 = ((pGroup->m_ClipY + pGroup->m_ClipH) - aPoints[1]) / (aPoints[3] - aPoints[1]);
 
 			if(x1 < 0.0f || x0 > 1.0f || y1 < 0.0f || y0 > 1.0f)
-			{
-				// check tile layer count of this group
-				LayersOfGroupCount(pGroup, TileLayerCounter, QuadLayerCounter, PassedGameLayer);
 				continue;
-			}
 
 			Graphics()->ClipEnable((int)(x0 * Graphics()->ScreenWidth()), (int)(y0 * Graphics()->ScreenHeight()),
 				(int)((x1 - x0) * Graphics()->ScreenWidth()), (int)((y1 - y0) * Graphics()->ScreenHeight()));
@@ -1160,21 +1168,6 @@ void CMapLayers::OnRender()
 			// skip rendering entities if we want to render everything in it's full glory
 			if(m_Type == TYPE_FULL_DESIGN && IsEntityLayer)
 				continue;
-
-			int CurrentTileLayerCount = 0;
-			void *pTilesData = nullptr;
-			if(pLayer->m_Type == LAYERTYPE_TILES)
-			{
-				CurrentTileLayerCount = GetTileLayerAndOverlayCount((CMapItemLayerTilemap *)pLayer, LayerType, &pTilesData);
-				// skip rendering, if we encounter invalid data
-				if(!CurrentTileLayerCount)
-					continue;
-				TileLayerCounter += CurrentTileLayerCount;
-			}
-			else if(pLayer->m_Type == LAYERTYPE_QUADS)
-			{
-				++QuadLayerCounter;
-			}
 
 			// skip rendering anything but entities if we only want to render entities
 			if(!IsEntityLayer && OnlyShowEntities && m_Type != TYPE_BACKGROUND_FORCE)
@@ -1212,9 +1205,15 @@ void CMapLayers::OnRender()
 				}
 
 				if(!Graphics()->IsTileBufferingEnabled())
+				{
+					void *pTilesData = nullptr;
+					GetTileLayerAndOverlayCount(pLayerTilemap, LayerType, &pTilesData);
 					RenderTilelayerNoTileBuffer(TextureId, LayerType, pTilesData, pLayerTilemap, Color);
+				}
 				else
-					RenderTilelayerWithTileBuffer(TextureId, LayerType, TileLayerCounter, Color);
+				{
+					RenderTilelayerWithTileBuffer(TextureId, LayerType, m_vvLayerCount[g][l], Color);
+				}
 			}
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
@@ -1236,7 +1235,7 @@ void CMapLayers::OnRender()
 						}
 						else
 						{
-							RenderQuadLayer(QuadLayerCounter - 1, pLayerQuads, true);
+							RenderQuadLayer(m_vvLayerCount[g][l] - 1, pLayerQuads, true);
 						}
 					}
 				}
@@ -1249,7 +1248,7 @@ void CMapLayers::OnRender()
 					}
 					else
 					{
-						RenderQuadLayer(QuadLayerCounter - 1, pLayerQuads, false);
+						RenderQuadLayer(m_vvLayerCount[g][l] - 1, pLayerQuads, false);
 					}
 				}
 			}
