@@ -5592,7 +5592,13 @@ void CEditor::RenderFileDialog()
 			if(!str_endswith(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]))
 				str_append(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]);
 
-			if(m_FileDialogSaveAction && Storage()->FileExists(m_aFileSaveName, StorageType))
+			char aFilename[IO_MAX_PATH_LENGTH];
+			fs_split_file_extension(fs_filename(m_aFileSaveName), aFilename, sizeof(aFilename));
+			if(m_FileDialogSaveAction && !str_valid_filename(aFilename))
+			{
+				ShowFileDialogError("This name cannot be used for files and folders");
+			}
+			else if(m_FileDialogSaveAction && Storage()->FileExists(m_aFileSaveName, StorageType))
 			{
 				if(m_pfnFileDialogFunc == &CallbackSaveMap)
 					m_PopupEventType = POPEVENT_SAVE;

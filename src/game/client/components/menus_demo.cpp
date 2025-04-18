@@ -847,13 +847,19 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 			m_DemoSliceInput.Set(aNameWithoutExt);
 		}
 
+		static CUi::SMessagePopupContext s_MessagePopupContext;
 		char aDemoName[IO_MAX_PATH_LENGTH];
 		DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
 		if(str_comp(aDemoName, m_DemoSliceInput.GetString()) == 0)
 		{
-			static CUi::SMessagePopupContext s_MessagePopupContext;
 			s_MessagePopupContext.ErrorColor();
 			str_copy(s_MessagePopupContext.m_aMessage, Localize("Please use a different filename"));
+			Ui()->ShowPopupMessage(Ui()->MouseX(), OkButton.y + OkButton.h + 5.0f, &s_MessagePopupContext);
+		}
+		else if(!str_valid_filename(m_DemoSliceInput.GetString()))
+		{
+			s_MessagePopupContext.ErrorColor();
+			str_copy(s_MessagePopupContext.m_aMessage, Localize("This name cannot be used for files and folders"));
 			Ui()->ShowPopupMessage(Ui()->MouseX(), OkButton.y + OkButton.h + 5.0f, &s_MessagePopupContext);
 		}
 		else
