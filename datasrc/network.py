@@ -609,4 +609,8 @@ Messages = [
 	NetMessageEx("Sv_MapSoundGlobal", "map-sound-global@netmsg.ddnet.org", [
 		NetIntAny("m_SoundId"),
 	]),
+
+	NetMessageEx("Cl_KillProtection", "killprotection@netmsg.ddnet.org", [
+		NetIntRange("m_Time", -1, 9999),
+	]),
 ]

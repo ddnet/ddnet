@@ -2443,7 +2443,7 @@ void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	int CurrTime = (pSelf->Server()->Tick() - pChr->m_StartTime) / pSelf->Server()->TickSpeed();
-	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
+	if(pPlayer->m_KillProtection != 0 && CurrTime >= (60 * pPlayer->m_KillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
 	{
 		pPlayer->KillCharacter(WEAPON_SELF);
 	}

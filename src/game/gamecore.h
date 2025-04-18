@@ -132,6 +132,11 @@ enum
 	SHOW_OTHERS_ONLY_TEAM = 2 // show players that are in solo and are in the same team
 };
 
+enum
+{
+	KILL_PROTECTION_NOT_SET = -2
+};
+
 struct SSwitchers
 {
 	bool m_aStatus[NUM_DDRACE_TEAMS];
