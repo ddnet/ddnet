@@ -1938,20 +1938,20 @@ CUi::EPopupMenuFunctionResult CEditor::PopupNewFolder(void *pContext, CUIRect Vi
 	static int s_CreateButton = 0;
 	if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Button, BUTTONFLAG_LEFT, nullptr) || (Active && pEditor->Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER)))
 	{
-		// create the folder
-		if(!pEditor->m_FileDialogNewFolderNameInput.IsEmpty())
+		char aFolderPath[IO_MAX_PATH_LENGTH];
+		str_format(aFolderPath, sizeof(aFolderPath), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_FileDialogNewFolderNameInput.GetString());
+		if(!str_valid_filename(pEditor->m_FileDialogNewFolderNameInput.GetString()))
 		{
-			char aBuf[IO_MAX_PATH_LENGTH];
-			str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_FileDialogNewFolderNameInput.GetString());
-			if(pEditor->Storage()->CreateFolder(aBuf, IStorage::TYPE_SAVE))
-			{
-				pEditor->FilelistPopulate(IStorage::TYPE_SAVE);
-				return CUi::POPUP_CLOSE_CURRENT;
-			}
-			else
-			{
-				pEditor->ShowFileDialogError("Failed to create the folder '%s'.", aBuf);
-			}
+			pEditor->ShowFileDialogError("This name cannot be used for files and folders");
+		}
+		else if(!pEditor->Storage()->CreateFolder(aFolderPath, IStorage::TYPE_SAVE))
+		{
+			pEditor->ShowFileDialogError("Failed to create the folder '%s'.", aFolderPath);
+		}
+		else
+		{
+			pEditor->FilelistPopulate(IStorage::TYPE_SAVE);
+			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
 
