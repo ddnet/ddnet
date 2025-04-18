@@ -466,7 +466,8 @@ public:
 
 	//
 	void SetMaxClientsPerIp(int Max);
-	bool SetTimedOut(int ClientId, int OrigId);
+	bool CanSetTimedOut(int ClientId, int OrigId);
+	void SetTimedOut(int ClientId, int OrigId);
 	void SetTimeoutProtected(int ClientId);
 
 	int ResetErrorString(int ClientId);
