@@ -11,6 +11,8 @@
 #include <engine/shared/network.h>
 #include <engine/storage.h>
 
+#include <thread>
+
 class CEngine : public IEngine
 {
 	IConsole *m_pConsole;
@@ -46,7 +48,7 @@ class CEngine : public IEngine
 	}
 
 public:
-	CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs) :
+	CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger) :
 		m_pFutureLogger(std::move(pFutureLogger))
 	{
 		str_copy(m_aAppName, pAppname);
@@ -66,7 +68,7 @@ public:
 			CNetBase::Init();
 		}
 
-		m_JobPool.Init(Jobs);
+		m_JobPool.Init(std::max(4, (int)std::thread::hardware_concurrency()) - 2);
 
 		m_Logging = false;
 	}
@@ -103,5 +105,5 @@ public:
 	}
 };
 
-IEngine *CreateEngine(const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs) { return new CEngine(false, pAppname, std::move(pFutureLogger), Jobs); }
-IEngine *CreateTestEngine(const char *pAppname, int Jobs) { return new CEngine(true, pAppname, nullptr, Jobs); }
+IEngine *CreateEngine(const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger) { return new CEngine(false, pAppname, std::move(pFutureLogger)); }
+IEngine *CreateTestEngine(const char *pAppname) { return new CEngine(true, pAppname, nullptr); }

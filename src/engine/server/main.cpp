@@ -113,7 +113,7 @@ int main(int argc, const char **argv)
 	pKernel->RegisterInterface(pServer);
 
 	// create the components
-	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2 * std::thread::hardware_concurrency() + 2);
+	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger);
 	pKernel->RegisterInterface(pEngine);
 
 	IStorage *pStorage = CreateStorage(IStorage::EInitializationType::SERVER, argc, argv);
