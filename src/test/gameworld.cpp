@@ -55,7 +55,7 @@ public:
 		m_pKernel = std::unique_ptr<IKernel>(IKernel::Create());
 		m_pKernel->RegisterInterface(m_pServer);
 
-		IEngine *pEngine = CreateTestEngine(GAME_NAME, 1);
+		IEngine *pEngine = CreateTestEngine(GAME_NAME);
 		m_pKernel->RegisterInterface(pEngine);
 
 		m_TestInfo.m_DeleteTestStorageFilesOnSuccess = true;

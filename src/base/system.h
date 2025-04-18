@@ -2263,17 +2263,31 @@ int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 */
 int str_utf8_comp_confusable(const char *str1, const char *str2);
 
-/*
-	Function: str_utf8_tolower
-		Converts the given Unicode codepoint to lowercase (locale insensitive).
+/**
+ * Converts the given Unicode codepoint to lowercase (locale insensitive).
+ *
+ * @ingroup Strings
+ *
+ * @param code Unicode codepoint to convert.
+ *
+ * @return Lowercase codepoint.
+ */
+int str_utf8_tolower_codepoint(int code);
 
-	Parameters:
-		code - Unicode codepoint to convert.
-
-	Returns:
-		Lowercase codepoint
-*/
-int str_utf8_tolower(int code);
+/**
+ * Converts the given UTF-8 string to lowercase (locale insensitive).
+ *
+ * @ingroup Strings
+ *
+ * @param str String to convert to lowercase.
+ * @param output Buffer that will receive the lowercase string.
+ * @param size Size of the output buffer.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark This function does not work in-place as converting a UTF-8 string to
+ *         lowercase may increase its length.
+ */
+void str_utf8_tolower(const char *input, char *output, size_t size);
 
 /*
 	Function: str_utf8_comp_nocase

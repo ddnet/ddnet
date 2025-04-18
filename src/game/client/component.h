@@ -170,6 +170,12 @@ public:
 	 */
 	virtual void OnWindowResize() {}
 	/**
+	 * Called when the component should get updated.
+	 *
+	 * The update order depends on the component insertion order.
+	 */
+	virtual void OnUpdate(){};
+	/**
 	 * Called when the component should get rendered.
 	 *
 	 * The render order depends on the component insertion order.

@@ -82,6 +82,7 @@ MAYBE_UNUSED static const char *FONT_ICON_SQUARE_MINUS = "\xEF\x85\x86";
 MAYBE_UNUSED static const char *FONT_ICON_SQUARE_PLUS = "\xEF\x83\xBE";
 MAYBE_UNUSED static const char *FONT_ICON_SORT_UP = "\xEF\x83\x9E";
 MAYBE_UNUSED static const char *FONT_ICON_SORT_DOWN = "\xEF\x83\x9D";
+MAYBE_UNUSED static const char *FONT_ICON_TRIANGLE_EXCLAMATION = "\xEF\x81\xB1";
 
 MAYBE_UNUSED static const char *FONT_ICON_HOUSE = "\xEF\x80\x95";
 MAYBE_UNUSED static const char *FONT_ICON_NEWSPAPER = "\xEF\x87\xAA";

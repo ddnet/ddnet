@@ -195,13 +195,61 @@ TEST(Str, Utf8ToSkeleton)
 	EXPECT_EQ(aBuf[5], 'u');
 }
 
+TEST(Str, Utf8ToLowerCodepoint)
+{
+	EXPECT_TRUE(str_utf8_tolower_codepoint('A') == 'a');
+	EXPECT_TRUE(str_utf8_tolower_codepoint('z') == 'z');
+	EXPECT_TRUE(str_utf8_tolower_codepoint(192) == 224); // À -> à
+	EXPECT_TRUE(str_utf8_tolower_codepoint(7882) == 7883); // Ị -> ị
+}
+
+template<size_t BufferSize = 128>
+static void TestStrUtf8ToLower(const char *pInput, const char *pOutput)
+{
+	char aBuf[BufferSize];
+	str_utf8_tolower(pInput, aBuf, sizeof(aBuf));
+	EXPECT_STREQ(aBuf, pOutput);
+}
+
 TEST(Str, Utf8ToLower)
 {
-	EXPECT_TRUE(str_utf8_tolower('A') == 'a');
-	EXPECT_TRUE(str_utf8_tolower('z') == 'z');
-	EXPECT_TRUE(str_utf8_tolower(192) == 224); // À -> à
-	EXPECT_TRUE(str_utf8_tolower(7882) == 7883); // Ị -> ị
+	// See https://stackoverflow.com/a/18689585
+	TestStrUtf8ToLower<>("", "");
+	TestStrUtf8ToLower<>("a", "a");
+	TestStrUtf8ToLower<>("A", "a");
+	TestStrUtf8ToLower<>("z", "z");
+	TestStrUtf8ToLower<>("Z", "z");
+	TestStrUtf8ToLower<>("ABC", "abc");
+	TestStrUtf8ToLower<>("ÖÜÄẞ", "öüäß");
+	TestStrUtf8ToLower<>("Iİ", "ii");
+	TestStrUtf8ToLower<>("Ϊ", "ϊ");
+	TestStrUtf8ToLower<>("Į", "į");
+	TestStrUtf8ToLower<>("Җ", "җ");
+	TestStrUtf8ToLower<>("Ѹ", "ѹ");
+	TestStrUtf8ToLower<>("Ǆ", "ǆ");
+	TestStrUtf8ToLower<>("ⒹⒹＮＥＴ", "ⓓⓓｎｅｔ");
+	TestStrUtf8ToLower<>("Ⱥ", "ⱥ"); // lower case uses more bytes than upper case
 
+	TestStrUtf8ToLower<1>("ABC", "");
+	TestStrUtf8ToLower<2>("ABC", "a");
+	TestStrUtf8ToLower<3>("ABC", "ab");
+	TestStrUtf8ToLower<4>("ABC", "abc");
+
+	TestStrUtf8ToLower<1>("ȺȺȺ", "");
+	TestStrUtf8ToLower<2>("ȺȺȺ", "");
+	TestStrUtf8ToLower<3>("ȺȺȺ", "");
+	TestStrUtf8ToLower<4>("ȺȺȺ", "ⱥ");
+	TestStrUtf8ToLower<5>("ȺȺȺ", "ⱥ");
+	TestStrUtf8ToLower<6>("ȺȺȺ", "ⱥ");
+	TestStrUtf8ToLower<7>("ȺȺȺ", "ⱥⱥ");
+	TestStrUtf8ToLower<8>("ȺȺȺ", "ⱥⱥ");
+	TestStrUtf8ToLower<9>("ȺȺȺ", "ⱥⱥ");
+	TestStrUtf8ToLower<10>("ȺȺȺ", "ⱥⱥⱥ");
+	TestStrUtf8ToLower<11>("ȺȺȺ", "ⱥⱥⱥ");
+}
+
+TEST(Str, Utf8CompNocase)
+{
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölü") == 0);
 	EXPECT_TRUE(str_utf8_comp_nocase("ÜlÖ", "ölü") > 0); // ü > ö
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölüa") < 0); // NULL < a

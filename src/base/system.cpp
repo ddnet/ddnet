@@ -3786,6 +3786,24 @@ bool str_tofloat(const char *str, float *out)
 	return true;
 }
 
+void str_utf8_tolower(const char *input, char *output, size_t size)
+{
+	size_t out_pos = 0;
+	while(*input)
+	{
+		const int code = str_utf8_tolower_codepoint(str_utf8_decode(&input));
+		char encoded_code[4];
+		const int code_size = str_utf8_encode(encoded_code, code);
+		if(out_pos + code_size + 1 > size) // +1 for null termination
+		{
+			break;
+		}
+		mem_copy(&output[out_pos], encoded_code, code_size);
+		out_pos += code_size;
+	}
+	output[out_pos] = '\0';
+}
+
 int str_utf8_comp_nocase(const char *a, const char *b)
 {
 	int code_a;
@@ -3793,8 +3811,8 @@ int str_utf8_comp_nocase(const char *a, const char *b)
 
 	while(*a && *b)
 	{
-		code_a = str_utf8_tolower(str_utf8_decode(&a));
-		code_b = str_utf8_tolower(str_utf8_decode(&b));
+		code_a = str_utf8_tolower_codepoint(str_utf8_decode(&a));
+		code_b = str_utf8_tolower_codepoint(str_utf8_decode(&b));
 
 		if(code_a != code_b)
 			return code_a - code_b;
@@ -3813,8 +3831,8 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num)
 
 	while(*a && *b)
 	{
-		code_a = str_utf8_tolower(str_utf8_decode(&a));
-		code_b = str_utf8_tolower(str_utf8_decode(&b));
+		code_a = str_utf8_tolower_codepoint(str_utf8_decode(&a));
+		code_b = str_utf8_tolower_codepoint(str_utf8_decode(&b));
 
 		if(code_a != code_b)
 			return code_a - code_b;
@@ -3834,7 +3852,7 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle, const
 		const char *b = needle;
 		const char *a_next = a;
 		const char *b_next = b;
-		while(*a && *b && str_utf8_tolower(str_utf8_decode(&a_next)) == str_utf8_tolower(str_utf8_decode(&b_next)))
+		while(*a && *b && str_utf8_tolower_codepoint(str_utf8_decode(&a_next)) == str_utf8_tolower_codepoint(str_utf8_decode(&b_next)))
 		{
 			a = a_next;
 			b = b_next;
