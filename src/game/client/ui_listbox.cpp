@@ -209,7 +209,10 @@ int CListBox::DoEnd()
 	m_ScrollbarShown = m_ScrollRegion.ScrollbarShown();
 	if(m_ListBoxNewSelOffset != 0 && m_ListBoxNumItems > 0 && m_ListBoxSelectedIndex == m_ListBoxNewSelected)
 	{
-		m_ListBoxNewSelected = clamp((m_ListBoxNewSelected == -1 ? 0 : m_ListBoxNewSelected) + m_ListBoxNewSelOffset, 0, m_ListBoxNumItems - 1);
+		if(m_ListBoxNewSelected == -1)
+			m_ListBoxNewSelected = 0;
+		else
+			m_ListBoxNewSelected = clamp(m_ListBoxNewSelected + m_ListBoxNewSelOffset, 0, m_ListBoxNumItems - 1);
 		ScrollToSelected();
 	}
 	return m_ListBoxNewSelected;
