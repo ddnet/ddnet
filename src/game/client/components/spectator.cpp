@@ -592,6 +592,13 @@ void CSpectator::OnReset()
 	m_SelectedSpectatorId = NO_SELECTION;
 }
 
+void CSpectator::StopSpectating()
+{
+	m_Active = false;
+	m_SelectedSpectatorId = NO_SELECTION;
+}
+
+
 void CSpectator::Spectate(int SpectatorId)
 {
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)

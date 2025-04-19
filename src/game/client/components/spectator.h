@@ -48,6 +48,7 @@ public:
 	virtual void OnReset() override;
 
 	void Spectate(int SpectatorId);
+	void StopSpectating();
 	void SpectateClosest();
 
 	bool IsActive() const { return m_Active; }
