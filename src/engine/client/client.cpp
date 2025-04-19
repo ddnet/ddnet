@@ -131,10 +131,6 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId = protocol7::NETMSG_INPUT;
 			else if(MsgId == NETMSG_RCON_AUTH)
 				MsgId = protocol7::NETMSG_RCON_AUTH;
-			else if(MsgId == NETMSGTYPE_CL_SETTEAM)
-				MsgId = protocol7::NETMSGTYPE_CL_SETTEAM;
-			else if(MsgId == NETMSGTYPE_CL_VOTE)
-				MsgId = protocol7::NETMSGTYPE_CL_VOTE;
 			else if(MsgId == NETMSG_PING)
 				MsgId = protocol7::NETMSG_PING;
 			else
