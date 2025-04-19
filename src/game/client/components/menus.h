@@ -23,6 +23,7 @@
 
 #include <game/client/component.h>
 #include <game/client/components/mapimages.h>
+#include <game/client/components/touch_controls.h>
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
@@ -850,5 +851,143 @@ private:
 	bool RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight);
 
 	CServerProcess m_ServerProcess;
+
+	// found in menus_ingame_touch_controls.cpp
+	enum class EBehaviorType
+	{
+		BIND = 0,
+		BIND_TOGGLE,
+		PREDEFINED,
+		NUM_BEHAVIORS
+	};
+
+	enum class EPredefinedType
+	{
+		EXTRA_MENU = 0,
+		JOYSTICK_HOOK,
+		JOYSTICK_FIRE,
+		JOYSTICK_AIM,
+		JOYSTICK_ACTION,
+		USE_ACTION,
+		SWAP_ACTION,
+		SPECTATE,
+		EMOTICON,
+		INGAME_MENU,
+		NUM_PREDEFINEDS
+	};
+
+	// Which menu is selected.
+	enum class EMenuType
+	{
+		MENU_FILE = 0,
+		MENU_BUTTONS,
+		MENU_SETTINGS,
+		NUM_MENUS
+	};
+	EMenuType m_CurrentMenu = EMenuType::MENU_FILE;
+
+	// In setting menu.
+	enum class ESettingType
+	{
+		PREVIEW_VISIBILITY = 0,
+		COLOR,
+		DIRECT_INPUT,
+		NUM_SETTING_TYPES
+	};
+	ESettingType m_CurrentSetting = ESettingType::PREVIEW_VISIBILITY;
+	const char *m_apSettings[(int)ESettingType::NUM_SETTING_TYPES] = {"Preview Visibility", "Color", "Direct Input"};
+
+	// Mainly for passing values in popups.
+	CTouchControls::CTouchButton *m_OldSelectedButton = nullptr;
+	CTouchControls::CTouchButton *m_NewSelectedButton = nullptr;
+
+	// Storing everything you are editing.
+	int m_EditBehaviorType = (int)EBehaviorType::BIND;
+	int m_PredefinedBehaviorType = (int)EPredefinedType::EXTRA_MENU;
+	int m_EditCommandNumber = 0;
+	int m_EditElement = 0; // 0 for shape&size, 1 for visibility, 2 for behavior.
+	bool m_CloseMenu = false; // Decide if closing menu after the popup confirm.
+
+	// Used for passing unique ids.
+	std::array<int, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aButtonVisibilityIds = {};
+	std::array<int, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aVisibilityIds = {};
+	std::array<CButtonContainer, 3> m_aEditElementIds = {};
+	std::array<int, 3> m_aSelectingTabIds = {};
+	std::array<int, 2> m_aSettingTabIds = {};
+
+	std::vector<CTouchControls::CBindToggleTouchButtonBehavior::CCommand> m_vCachedCommands;
+	unsigned int m_ColorActive = 0;
+	unsigned int m_ColorInactive = 0;
+	bool m_FirstEnter = true;
+
+	static const constexpr float LINEGAP = 10.0f;
+
+public:
+	CTouchControls::EButtonShape m_CachedShape;
+
+	// The biggest value's length is shorter than 7
+	CLineInputNumber m_InputX;
+	CLineInputNumber m_InputY;
+	CLineInputNumber m_InputW;
+	CLineInputNumber m_InputH;
+	CLineInputBuffered<1024> m_InputCommand;
+	CLineInputBuffered<1024> m_InputLabel;
+	std::string m_ParsedString;
+	std::array<int, (size_t)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aCachedVisibilities; // 0:-, 1:+, 2:Ignored.
+	int m_CachedNumber = 0;
+
+	void CacheAllSettingsFromTarget(CTouchControls::CTouchButton *TargetButton);
+	void SaveCachedSettingsToTarget(CTouchControls::CTouchButton *TargetButton);
+
+private:
+	void InputPosFunction(CLineInputNumber *Input); // Used for input button's X,Y,W,H.
+	void RenderTouchButtonEditor(CUIRect MainView);
+	void RenderTouchButtonEditorWhileNothingSelected(CUIRect MainView);
+	void RenderTinyButtonTab(CUIRect MainView);
+	void RenderSelectingTab(CUIRect SelectingTab);
+	void RenderButtonSettings(CUIRect MainView);
+	void RenderVirtualVisibilityEditor(CUIRect MainView);
+	void RenderColorSettings(CUIRect MainView);
+	void RenderDirectTouchEditor(CUIRect MainView);
+	// Return true if Changed.
+	bool RenderPosSettingBlock(CUIRect Block);
+	bool RenderVisibilitySettingBlock(CUIRect Block);
+	bool RenderBehaviorSettingBlock(CUIRect Block);
+	bool CheckCachedSettings();
+	void ResetCachedSettings(); // You can use CacheAllSettingsFromTarget(nullptr) to call this.
+	void ResetButtonPointers();
+	void SetPosInputs(CTouchControls::CUnitRect MyRect);
+	void DoPopupType(CTouchControls::CPopupParam PopupParam);
+	void NoSpaceForOverlappingButton();
+	// Confirm, Cancel only decide if saving cached settings.
+	void ChangeSelectedButtonWhileHavingUnsavedChanges();
+	void PopupConfirm_ChangeSelectedButton();
+	void PopupCancel_ChangeSelectedButton();
+
+	void PopupConfirm_NewButton();
+	void PopupCancel_NewButton();
+
+	void PopupConfirm_SaveSettings();
+
+	void SelectedButtonNotVisible();
+	void PopupConfirm_SelectedNotVisible();
+
+	void PopupConfirm_DeselectButton();
+	void PopupCancel_DeselectButton();
+
+	void PopupConfirm_TurnOffEditor();
+	void PopupCancel_TurnOffEditor();
+
+	void PopupConfirm_DeleteButton();
+
+	// Getter and setters.
+	bool UnsavedChanges();
+	void SetUnsavedChanges(bool UnsavedChanges);
+
+	// Convenient functions.
+	void UpdateTmpButton();
+	void ResolveIssues();
+	void DoRedLabel(const char *pLabel, CUIRect Block, const int &Size);
+	void ParseLabel(const char *pLabel);
 };
 #endif
