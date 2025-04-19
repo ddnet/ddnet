@@ -46,9 +46,9 @@ public:
 		int ClientId,
 		float Intra = 0.0f);
 
-	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual void OnInit() override;
-	virtual void OnRender() override;
+	int Sizeof() const override { return sizeof(*this); }
+	void OnInit() override;
+	void OnRender() override;
 };
 
 #endif

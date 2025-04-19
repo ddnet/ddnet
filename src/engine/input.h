@@ -205,7 +205,7 @@ class IEngineInput : public IInput
 	MACRO_INTERFACE("engineinput")
 public:
 	virtual void Init() = 0;
-	virtual void Shutdown() override = 0;
+	void Shutdown() override = 0;
 	virtual int Update() = 0;
 };
 

@@ -8,7 +8,7 @@ class INotifications : public IInterface
 	MACRO_INTERFACE("notifications")
 public:
 	virtual void Init(const char *pAppname) = 0;
-	virtual void Shutdown() override = 0;
+	void Shutdown() override = 0;
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
 };
 

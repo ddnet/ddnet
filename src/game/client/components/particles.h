@@ -76,13 +76,13 @@ public:
 	};
 
 	CParticles();
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
 	void Add(int Group, CParticle *pPart, float TimePassed = 0.f);
 
-	virtual void OnReset() override;
-	virtual void OnRender() override;
-	virtual void OnInit() override;
+	void OnReset() override;
+	void OnRender() override;
+	void OnInit() override;
 
 private:
 	int m_ParticleQuadContainerIndex;
@@ -108,8 +108,8 @@ private:
 	{
 	public:
 		CParticles *m_pParts;
-		virtual int Sizeof() const override { return sizeof(*this); }
-		virtual void OnRender() override { m_pParts->RenderGroup(TGROUP); }
+		int Sizeof() const override { return sizeof(*this); }
+		void OnRender() override { m_pParts->RenderGroup(TGROUP); }
 	};
 
 	// behind players
