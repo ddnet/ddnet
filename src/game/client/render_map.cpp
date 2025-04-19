@@ -124,6 +124,23 @@ const CEnvPointBezier *CMapBasedEnvelopePointAccess::GetBezier(int Index) const
 	return nullptr;
 }
 
+int CMapBasedEnvelopePointAccess::FindPointIndex(double TimeMillis) const
+{
+	const auto &Begin = m_pPoints != nullptr ? &m_pPoints[m_StartPoint] :
+						   m_pPointsBezierUpstream != nullptr ? &m_pPointsBezierUpstream[m_StartPoint] : nullptr;
+	const auto &End = m_pPoints != nullptr ? &m_pPoints[m_StartPoint + m_NumPoints] :
+						 m_pPointsBezierUpstream != nullptr ? &m_pPointsBezierUpstream[m_StartPoint + m_NumPoints] : nullptr;
+	auto *pIt = std::upper_bound(Begin, End, TimeMillis,
+		[](double Time, const auto &Point) {
+			return Point.m_Time > Time;
+		});
+
+	if(pIt == End)
+		return -1;
+
+	return (pIt - Begin) - 1;
+}
+
 static float SolveBezier(float x, float p0, float p1, float p2, float p3)
 {
 	const double x3 = -p0 + 3.0 * p1 - 3.0 * p2 + p3;
@@ -241,84 +258,83 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::
 		TimeNanos = decltype(TimeNanos)::zero();
 
 	const double TimeMillis = TimeNanos.count() / (double)std::chrono::nanoseconds(1ms).count();
-	for(int i = 0; i < NumPoints - 1; i++)
+	int FoundIndex = pPoints->FindPointIndex(TimeMillis);
+
+	if(FoundIndex == -1)
 	{
-		const CEnvPoint *pCurrentPoint = pPoints->GetPoint(i);
-		const CEnvPoint *pNextPoint = pPoints->GetPoint(i + 1);
-		if(TimeMillis >= pCurrentPoint->m_Time && TimeMillis < pNextPoint->m_Time)
+		for(size_t c = 0; c < Channels; c++)
 		{
-			const float Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
-			float a = (float)(TimeMillis - pCurrentPoint->m_Time) / Delta;
-
-			switch(pCurrentPoint->m_Curvetype)
-			{
-			case CURVETYPE_STEP:
-				a = 0.0f;
-				break;
-
-			case CURVETYPE_SLOW:
-				a = a * a * a;
-				break;
-
-			case CURVETYPE_FAST:
-				a = 1.0f - a;
-				a = 1.0f - a * a * a;
-				break;
-
-			case CURVETYPE_SMOOTH:
-				a = -2.0f * a * a * a + 3.0f * a * a; // second hermite basis
-				break;
-
-			case CURVETYPE_BEZIER:
-			{
-				const CEnvPointBezier *pCurrentPointBezier = pPoints->GetBezier(i);
-				const CEnvPointBezier *pNextPointBezier = pPoints->GetBezier(i + 1);
-				if(pCurrentPointBezier == nullptr || pNextPointBezier == nullptr)
-					break; // fallback to linear
-				for(size_t c = 0; c < Channels; c++)
-				{
-					// monotonic 2d cubic bezier curve
-					const vec2 p0 = vec2(pCurrentPoint->m_Time, fx2f(pCurrentPoint->m_aValues[c]));
-					const vec2 p3 = vec2(pNextPoint->m_Time, fx2f(pNextPoint->m_aValues[c]));
-
-					const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c], fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
-					const vec2 InTang = vec2(pNextPointBezier->m_aInTangentDeltaX[c], fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
-
-					vec2 p1 = p0 + OutTang;
-					vec2 p2 = p3 + InTang;
-
-					// validate bezier curve
-					p1.x = clamp(p1.x, p0.x, p3.x);
-					p2.x = clamp(p2.x, p0.x, p3.x);
-
-					// solve x(a) = time for a
-					a = clamp(SolveBezier(TimeMillis, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
-
-					// value = y(t)
-					Result[c] = bezier(p0.y, p1.y, p2.y, p3.y, a);
-				}
-				return;
-			}
-
-			case CURVETYPE_LINEAR: [[fallthrough]];
-			default:
-				break;
-			}
-
-			for(size_t c = 0; c < Channels; c++)
-			{
-				const float v0 = fx2f(pCurrentPoint->m_aValues[c]);
-				const float v1 = fx2f(pNextPoint->m_aValues[c]);
-				Result[c] = v0 + (v1 - v0) * a;
-			}
-
-			return;
+			Result[c] = fx2f(pLastPoint->m_aValues[c]);
 		}
+		return;
+	}
+
+	const CEnvPoint *pCurrentPoint = pPoints->GetPoint(FoundIndex);
+	const CEnvPoint *pNextPoint = pPoints->GetPoint(FoundIndex + 1);
+
+	const float Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
+	float a = (float)(TimeMillis - pCurrentPoint->m_Time) / Delta;
+
+	switch(pCurrentPoint->m_Curvetype)
+	{
+	case CURVETYPE_STEP:
+		a = 0.0f;
+		break;
+
+	case CURVETYPE_SLOW:
+		a = a * a * a;
+		break;
+
+	case CURVETYPE_FAST:
+		a = 1.0f - a;
+		a = 1.0f - a * a * a;
+		break;
+
+	case CURVETYPE_SMOOTH:
+		a = -2.0f * a * a * a + 3.0f * a * a; // second hermite basis
+		break;
+
+	case CURVETYPE_BEZIER:
+	{
+		const CEnvPointBezier *pCurrentPointBezier = pPoints->GetBezier(FoundIndex);
+		const CEnvPointBezier *pNextPointBezier = pPoints->GetBezier(FoundIndex + 1);
+		if(pCurrentPointBezier == nullptr || pNextPointBezier == nullptr)
+			break; // fallback to linear
+		for(size_t c = 0; c < Channels; c++)
+		{
+			// monotonic 2d cubic bezier curve
+			const vec2 p0 = vec2(pCurrentPoint->m_Time, fx2f(pCurrentPoint->m_aValues[c]));
+			const vec2 p3 = vec2(pNextPoint->m_Time, fx2f(pNextPoint->m_aValues[c]));
+
+			const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c], fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
+			const vec2 InTang = vec2(pNextPointBezier->m_aInTangentDeltaX[c], fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
+
+			vec2 p1 = p0 + OutTang;
+			vec2 p2 = p3 + InTang;
+
+			// validate bezier curve
+			p1.x = clamp(p1.x, p0.x, p3.x);
+			p2.x = clamp(p2.x, p0.x, p3.x);
+
+			// solve x(a) = time for a
+			a = clamp(SolveBezier(TimeMillis, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
+
+			// value = y(t)
+			Result[c] = bezier(p0.y, p1.y, p2.y, p3.y, a);
+		}
+		return;
+	}
+
+	case CURVETYPE_LINEAR: [[fallthrough]];
+	default:
+		break;
 	}
 
 	for(size_t c = 0; c < Channels; c++)
 	{
-		Result[c] = fx2f(pLastPoint->m_aValues[c]);
+		const float v0 = fx2f(pCurrentPoint->m_aValues[c]);
+		const float v1 = fx2f(pNextPoint->m_aValues[c]);
+		Result[c] = v0 + (v1 - v0) * a;
 	}
 }
 

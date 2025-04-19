@@ -30,6 +30,19 @@ const CEnvPointBezier *CEnvelope::CEnvelopePointAccess::GetBezier(int Index) con
 	return &m_pvPoints->at(Index).m_Bezier;
 }
 
+int CEnvelope::CEnvelopePointAccess::FindPointIndex(double TimeMillis) const
+{
+	auto It = std::upper_bound(m_pvPoints->begin(), m_pvPoints->end(), TimeMillis,
+		[](double Time, const auto &Point) {
+			return Point.m_Time > Time;
+		});
+
+	if(It == m_pvPoints->end())
+		return -1;
+
+	return (It - m_pvPoints->begin()) - 1;
+}
+
 CEnvelope::CEnvelope(EType Type) :
 	m_Type(Type), m_PointsAccess(&m_vPoints) {}
 
