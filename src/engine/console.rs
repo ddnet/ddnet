@@ -148,8 +148,8 @@ mod ffi {
         /// - `$XXXXXX` (RGB, e.g. `$ffa500` for DDNet's logo color)
         /// - `$XXXXXXXX` (RGBA, e.g. `$ffa500ff` for DDNet's logo color with maximum opacity)
         /// - base 10 integers (24/32 bit HSL in base 10, e.g. `0` for black)
-        /// - the following color names: `red`, `yellow`, `green`, `cyan`,
-        /// `blue`, `magenta`, `white`, `gray`, `black`.
+        /// - the following color names: `red`, `orange`, `yellow`, `lime`, `green`, `cyan`,
+        /// `teal`, `blue`, `magenta`, `fuschia`, `white`, `gray`, `black`.
         ///
         /// The `Light` parameter influences the interpretation of base 10
         /// integers, if it is set, the lightness channel is divided by 2 and
@@ -172,10 +172,10 @@ mod ffi {
         /// # let mut console = CreateConsole(CFGFLAG_SERVER);
         /// # let mut executed = false;
         /// # console.pin_mut().Register(s!("command"), s!("ssssssss"), CFGFLAG_SERVER, IConsole_FCommandCallback(callback), UserPtr::from(&mut executed), s!(""));
-        /// # console.pin_mut().ExecuteLine(s!(r#"command "$f00" $ffa500 $12345 shiny cyan -16777216 $f008 $00ffff80"#), -1, true);
+        /// # console.pin_mut().ExecuteLine(s!(r#"command "$f00" $ffa500 $12345 shiny cyan -16777216 $f008 $00ffff80 FuChSiA"#), -1, true);
         /// # extern "C" fn callback(result_param: &IConsole_IResult, mut user: UserPtr) {
         /// # unsafe { *user.cast_mut::<bool>() = true; }
-        /// let result: &IConsole_IResult /* = `command "$f00" $ffa500 $12345 shiny cyan -16777216 $f008 $00ffff80` */;
+        /// let result: &IConsole_IResult /* = `command "$f00" $ffa500 $12345 shiny cyan -16777216 $f008 $00ffff80 FuChSiA` */;
         /// # result = result_param;
         /// assert_eq!(result.GetColor(0, 0.0), ColorHSLA { h: 0.0, s: 1.0, l: 0.5, a: 1.0 }); // red
         /// assert_eq!(result.GetColor(1, 0.0), ColorHSLA { h: 0.10784314, s: 1.0, l: 0.5, a: 1.0 }); // DDNet logo color
@@ -185,7 +185,8 @@ mod ffi {
         /// assert_eq!(result.GetColor(5, 0.0), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // black
         /// assert_eq!(result.GetColor(6, 0.0), ColorHSLA { h: 0.0, s: 1.0, l: 0.5, a: 0.53333336 }); // red with alpha specified
         /// assert_eq!(result.GetColor(7, 0.0), ColorHSLA { h: 0.5, s: 1.0, l: 0.5, a: 0.5019608 }); // cyan with alpha specified
-        /// assert_eq!(result.GetColor(8, 0.0), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // out of range => black
+        /// assert_eq!(result.GetColor(8, 0.0), ColorHSLA { h: 0.916667, s: 1.0, l: 0.5, a: 1.0 }); // FuChSiA (case insensative)
+        /// assert_eq!(result.GetColor(50, 0.0), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // out of range => black
         ///
         /// assert_eq!(result.GetColor(0, 0.5), result.GetColor(0, 0.0));
         /// assert_eq!(result.GetColor(1, 0.5), result.GetColor(1, 0.0));
@@ -196,6 +197,7 @@ mod ffi {
         /// assert_eq!(result.GetColor(6, 0.5), result.GetColor(6, 0.0));
         /// assert_eq!(result.GetColor(7, 0.5), result.GetColor(7, 0.0));
         /// assert_eq!(result.GetColor(8, 0.5), result.GetColor(8, 0.0));
+        /// assert_eq!(result.GetColor(50, 0.5), result.GetColor(50, 0.0));
         /// # }
         /// # assert!(executed);
         /// ```
