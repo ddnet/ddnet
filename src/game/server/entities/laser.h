@@ -42,6 +42,9 @@ private:
 	bool m_TeleportCancelled;
 	bool m_IsBlueTeleport;
 	bool m_BelongsToPracticeTeam;
+
+public:
+	void SetEvalTick(int Tick);
 };
 
 #endif
