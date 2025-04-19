@@ -33,8 +33,6 @@
 #include "skins.h"
 
 #include <array>
-#include <chrono>
-#include <memory>
 #include <numeric>
 #include <string>
 #include <vector>
@@ -865,13 +863,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 }
 
-typedef struct
+struct CKeyInfo
 {
 	const char *m_pName;
 	const char *m_pCommand;
 	int m_KeyId;
 	int m_ModifierCombination;
-} CKeyInfo;
+};
 
 static CKeyInfo gs_aKeys[] =
 	{

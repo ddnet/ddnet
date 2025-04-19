@@ -46,7 +46,7 @@ static int ClassifyAge(int AgeSeconds)
 class CChooseMaster
 {
 public:
-	typedef bool (*VALIDATOR)(json_value *pJson);
+	using VALIDATOR = bool (*)(json_value *);
 
 	enum
 	{
@@ -422,7 +422,7 @@ void CServerBrowserHttp::Refresh()
 		m_State = STATE_WANTREFRESH;
 	Update();
 }
-bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
+static bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 {
 	int Failure = net_addr_from_url(pOut, pUrl, nullptr, 0);
 	if(Failure || pOut->port == 0)

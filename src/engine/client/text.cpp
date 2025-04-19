@@ -832,7 +832,7 @@ public:
 	}
 };
 
-typedef vector4_base<unsigned char> STextCharQuadVertexColor;
+using STextCharQuadVertexColor = vector4_base<unsigned char>;
 
 struct STextCharQuadVertex
 {
