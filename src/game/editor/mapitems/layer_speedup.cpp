@@ -286,6 +286,8 @@ void CLayerSpeedup::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CU
 				m_pTiles[TgtIndex].m_Index = 0;
 				m_pSpeedupTile[TgtIndex].m_Force = 0;
 				m_pSpeedupTile[TgtIndex].m_Angle = 0;
+				m_pSpeedupTile[TgtIndex].m_MaxSpeed = 0;
+				m_pSpeedupTile[TgtIndex].m_Type = 0;
 
 				if(!Empty)
 					ShowPreventUnusedTilesWarning();
@@ -317,6 +319,8 @@ void CLayerSpeedup::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CU
 					m_pTiles[TgtIndex].m_Index = 0;
 					m_pSpeedupTile[TgtIndex].m_Force = 0;
 					m_pSpeedupTile[TgtIndex].m_Angle = 0;
+					m_pSpeedupTile[TgtIndex].m_MaxSpeed = 0;
+					m_pSpeedupTile[TgtIndex].m_Type = 0;
 				}
 			}
 
