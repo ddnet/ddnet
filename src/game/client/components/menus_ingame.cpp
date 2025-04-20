@@ -43,11 +43,11 @@ void CMenus::RenderGame(CUIRect MainView)
 {
 	CUIRect Button, ButtonBars, ButtonBar, ButtonBar2;
 	bool ShowDDRaceButtons = MainView.w > 855.0f;
-	MainView.HSplitTop(45.0f + (g_Config.m_ClTouchControls ? 35.0f : 0.0f), &ButtonBars, &MainView);
+	MainView.HSplitTop(45.0f + (GameClient()->m_TouchControls.IsActive() ? 35.0f : 0.0f), &ButtonBars, &MainView);
 	ButtonBars.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	ButtonBars.Margin(10.0f, &ButtonBars);
 	ButtonBars.HSplitTop(25.0f, &ButtonBar, &ButtonBars);
-	if(g_Config.m_ClTouchControls)
+	if(GameClient()->m_TouchControls.IsActive())
 	{
 		ButtonBars.HSplitTop(10.0f, nullptr, &ButtonBars);
 		ButtonBars.HSplitTop(25.0f, &ButtonBar2, &ButtonBars);
@@ -231,7 +231,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		GameClient()->m_Tooltips.DoToolTip(&s_AutoCameraButton, &Button, m_pClient->m_Camera.AutoSpecCameraTooltip());
 	}
 
-	if(g_Config.m_ClTouchControls)
+	if(GameClient()->m_TouchControls.IsActive())
 	{
 		ButtonBar2.VSplitLeft(200.0f, &Button, &ButtonBar2);
 		static char s_TouchControlsEditCheckbox;
@@ -1588,7 +1588,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 void CMenus::RenderIngameHint()
 {
 	// With touch controls enabled there is a Close button in the menu and usually no Escape key available.
-	if(g_Config.m_ClTouchControls)
+	if(GameClient()->m_TouchControls.IsActive())
 		return;
 
 	float Width = 300 * Graphics()->ScreenAspect();

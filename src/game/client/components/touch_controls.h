@@ -44,6 +44,7 @@ public:
 	void OnWindowResize() override;
 	bool OnTouchState(const std::vector<IInput::CTouchFingerState> &vTouchFingerStates) override;
 	void OnRender() override;
+	bool IsActive() const;
 
 	bool LoadConfigurationFromFile(int StorageType);
 	bool LoadConfigurationFromClipboard();
