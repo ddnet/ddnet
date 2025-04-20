@@ -503,14 +503,16 @@ void CMapLayers::OnMapLoad()
 								else if(LayerType == LAYER_SPEEDUP)
 								{
 									Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Type;
+									unsigned char Force = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Force;
+									unsigned char MaxSpeed = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_MaxSpeed;
 									Flags = 0;
 									AngleRotate = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Angle;
-									if(((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Force == 0)
+									if((Force == 0 && Index == TILE_SPEED_BOOST_OLD) || (Force == 0 && MaxSpeed == 0 && Index == TILE_SPEED_BOOST))
 										Index = 0;
 									else if(CurOverlay == 1)
-										Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Force;
+										Index = Force;
 									else if(CurOverlay == 2)
-										Index = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_MaxSpeed;
+										Index = MaxSpeed;
 								}
 								else if(LayerType == LAYER_TUNE)
 								{

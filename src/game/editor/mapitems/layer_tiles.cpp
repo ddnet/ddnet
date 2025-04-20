@@ -170,7 +170,7 @@ void CLayerTiles::Render(bool Tileset)
 	// Render DDRace Layers
 	if(!Tileset)
 	{
-		int OverlayRenderFlags = g_Config.m_ClTextEntitiesEditor ? OVERLAYRENDERFLAG_TEXT : 0;
+		int OverlayRenderFlags = (g_Config.m_ClTextEntitiesEditor ? OVERLAYRENDERFLAG_TEXT : 0) | OVERLAYRENDERFLAG_EDITOR;
 		if(m_HasTele)
 			m_pEditor->RenderTools()->RenderTeleOverlay(static_cast<CLayerTele *>(this)->m_pTeleTile, m_Width, m_Height, 32.0f, OverlayRenderFlags);
 		if(m_HasSpeedup)
