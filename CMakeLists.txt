@@ -2556,8 +2556,12 @@ if(CLIENT)
   endif()
 
   if(TARGET_OS STREQUAL "windows")
+    set(VERSION_EXECUTABLE "${CLIENT_EXECUTABLE}")
+    set(VERSION_COMPANY "${CLIENT_EXECUTABLE} Team")
+    configure_file("other/versioninfo/versioninfo.rc.in" "client.versioninfo.rc")
     configure_file("other/manifest/client.manifest.in" "client.manifest")
     set(CLIENT_ICON "other/icons/DDNet.rc")
+    set(CLIENT_VERSIONINFO "${CMAKE_CURRENT_BINARY_DIR}/client.versioninfo.rc")
     if(NOT MINGW)
       set(CLIENT_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/client.manifest")
     else()
@@ -2566,6 +2570,7 @@ if(CLIENT)
     endif()
   else()
     set(CLIENT_ICON)
+    set(CLIENT_VERSIONINFO)
     set(CLIENT_MANIFEST)
   endif()
 
@@ -2574,6 +2579,7 @@ if(CLIENT)
     add_library(game-client SHARED
       ${CLIENT_SRC}
       ${CLIENT_ICON}
+      ${CLIENT_VERSIONINFO}
       ${CLIENT_MANIFEST}
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-gfx>
@@ -2585,6 +2591,7 @@ if(CLIENT)
     add_executable(game-client WIN32
       ${CLIENT_SRC}
       ${CLIENT_ICON}
+      ${CLIENT_VERSIONINFO}
       ${CLIENT_MANIFEST}
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-gfx>
@@ -2758,9 +2765,14 @@ if(SERVER)
   )
   set(SERVER_SRC ${ENGINE_SERVER_WITHOUT_MAIN} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
   if(TARGET_OS STREQUAL "windows")
+    set(VERSION_EXECUTABLE "${SERVER_EXECUTABLE}")
+    set(VERSION_COMPANY "${CLIENT_EXECUTABLE} Team")
+    configure_file("other/versioninfo/versioninfo.rc.in" "server.versioninfo.rc")
     set(SERVER_ICON "other/icons/DDNet-Server.rc")
+    set(SERVER_VERSIONINFO "${CMAKE_CURRENT_BINARY_DIR}/server.versioninfo.rc")
   else()
     set(SERVER_ICON)
+    set(SERVER_VERSIONINFO)
   endif()
 
   # Antibot
@@ -2801,6 +2813,7 @@ if(SERVER)
       $<TARGET_OBJECTS:game-server-without-main>
       "${PROJECT_SOURCE_DIR}/src/engine/server/main.cpp"
       ${SERVER_ICON}
+      ${SERVER_VERSIONINFO}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
@@ -2810,6 +2823,7 @@ if(SERVER)
       ${DEPS}
       "${PROJECT_SOURCE_DIR}/src/engine/server/main.cpp"
       ${SERVER_ICON}
+      ${SERVER_VERSIONINFO}
       $<TARGET_OBJECTS:game-server-without-main>
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
