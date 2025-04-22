@@ -688,7 +688,7 @@ int CInput::Update()
 	bool IgnoreKeys = false;
 
 	const auto &&AddKeyEventChecked = [&](int Key, int Flags) {
-		if(Key != KEY_UNKNOWN && !IgnoreKeys && !HasComposition())
+		if(Key != KEY_UNKNOWN && !IgnoreKeys && (!(Flags & IInput::FLAG_PRESS) || !HasComposition()))
 		{
 			AddKeyEvent(Key, Flags);
 		}
