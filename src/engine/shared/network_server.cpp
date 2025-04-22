@@ -636,11 +636,15 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 			continue;
 		}
 
+		// early unpack flags, to later unpack packet only once
+		if(CNetBase::UnpackFlagsRaw(pData, Bytes, &m_RecvUnpacker.m_Data))
+			continue;
+
 		SECURITY_TOKEN Token;
 		bool Sixup = false;
-		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token, pResponseToken) == 0)
+		if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
 		{
-			if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
+			if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token, pResponseToken) == 0)
 			{
 				if(Sixup && Token != GetToken(Addr) && Token != GetGlobalToken())
 					continue;
@@ -657,23 +661,24 @@ int CNetServer::Recv(CNetChunk *pChunk, SECURITY_TOKEN *pResponseToken)
 				}
 				return 1;
 			}
-			else
+		}
+		else
+		{
+			// drop invalid ctrl packets
+			if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONTROL && m_RecvUnpacker.m_Data.m_DataSize == 0)
+				continue;
+
+			// normal packet, find matching slot
+			int Slot = GetClientSlot(Addr);
+
+			// Determine version and unpack packet once
+			if(Slot != -1)
 			{
-				// drop invalid ctrl packets
-				if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONTROL &&
-					m_RecvUnpacker.m_Data.m_DataSize == 0)
-					continue;
+				Sixup = m_aSlots[Slot].m_Connection.m_Sixup;
+			}
 
-				// normal packet, find matching slot
-				int Slot = GetClientSlot(Addr);
-
-				if(!Sixup && Slot != -1 && m_aSlots[Slot].m_Connection.m_Sixup)
-				{
-					Sixup = true;
-					if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token))
-						continue;
-				}
-
+			if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup, &Token, pResponseToken) == 0)
+			{
 				if(Slot != -1)
 				{
 					// found

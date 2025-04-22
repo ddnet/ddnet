@@ -216,13 +216,29 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 	}
 }
 
+int CNetBase::UnpackFlagsRaw(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket)
+{
+	// check the size
+	if(Size - NET_PACKETHEADERSIZE > NET_MAX_PAYLOAD)
+	{
+		if(g_Config.m_Debug)
+			dbg_msg("network", "packet payload too big, size=%d", Size);
+		return -1;
+	}
+	if(Size < NET_PACKETHEADERSIZE)
+	{
+		if(g_Config.m_Debug)
+			dbg_msg("net", "packet too small, size=%d", Size);
+		return -1;
+	}
+
+	pPacket->m_Flags = (pBuffer[0] & 0xfc) >> 2;
+	return 0;
+}
+
 // TODO: rename this function
 int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct *pPacket, bool &Sixup, SECURITY_TOKEN *pSecurityToken, SECURITY_TOKEN *pResponseToken)
 {
-	// check the size
-	if(Size < NET_PACKETHEADERSIZE || Size > NET_MAX_PACKETSIZE)
-		return -1;
-
 	// log the data
 	if(ms_DataLogRecv)
 	{
@@ -234,7 +250,8 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	}
 
 	// read the packet
-	pPacket->m_Flags = pBuffer[0] >> 2;
+	if(UnpackFlagsRaw(pBuffer, Size, pPacket))
+		return -1;
 
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONNLESS)
 	{
