@@ -739,6 +739,13 @@ CSkins::CSkinList &CSkins::SkinList()
 
 	m_SkinList.m_vSkins.clear();
 	m_SkinList.m_UnfilteredCount = 0;
+
+	// Ensure all favorite skins are present as skin containers so they are included in the next loop.
+	for(const auto &FavoriteSkin : m_Favorites)
+	{
+		FindContainerOrNullptr(FavoriteSkin.c_str());
+	}
+
 	for(const auto &[_, pSkinContainer] : m_Skins)
 	{
 		if(pSkinContainer->IsSpecial())
