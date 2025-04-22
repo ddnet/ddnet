@@ -801,25 +801,30 @@ int CCollision::MoverSpeed(int x, int y, vec2 *pSpeed) const
 	switch(m_pTiles[Ny * m_Width + Nx].m_Flags)
 	{
 	case ROTATION_0:
-		Target.x = 0.0f;
-		Target.y = -4.0f;
+	case TILEFLAG_YFLIP ^ ROTATION_180:
+		Target = vec2(0.0f, -4.0f);
 		break;
+
 	case ROTATION_90:
-		Target.x = 4.0f;
-		Target.y = 0.0f;
+	case TILEFLAG_YFLIP ^ ROTATION_270:
+		Target = vec2(4.0f, 0.0f);
 		break;
+
 	case ROTATION_180:
-		Target.x = 0.0f;
-		Target.y = 4.0f;
+	case TILEFLAG_YFLIP ^ ROTATION_0:
+		Target = vec2(0.0f, 4.0f);
 		break;
+
 	case ROTATION_270:
-		Target.x = -4.0f;
-		Target.y = 0.0f;
+	case TILEFLAG_YFLIP ^ ROTATION_90:
+		Target = vec2(-4.0f, 0.0f);
 		break;
+
 	default:
 		Target = vec2(0.0f, 0.0f);
 		break;
 	}
+
 	if(Index == TILE_CP_F)
 	{
 		Target *= 4.0f;
