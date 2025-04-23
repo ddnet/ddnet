@@ -319,6 +319,12 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 		}
 		else
 			mem_copy(pPacket->m_aChunkData, &pBuffer[DataStart], pPacket->m_DataSize);
+
+		// drop invalid ctrl packets
+		if(pPacket->m_Flags & NET_PACKETFLAG_CONTROL && pPacket->m_DataSize == 0)
+		{
+			return -1;
+		}
 	}
 
 	// check for errors
