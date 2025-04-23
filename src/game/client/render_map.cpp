@@ -843,23 +843,23 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 
 			int c = mx + my * w;
 
-			int Type = (int)pSpeedup[c].m_Type;
-			if(!IsValidSpeedupTile(Type))
-				continue;
-
 			int Force = (int)pSpeedup[c].m_Force;
 			int MaxSpeed = (int)pSpeedup[c].m_MaxSpeed;
+			int Type = (int)pSpeedup[c].m_Type;
 			int Angle = (int)pSpeedup[c].m_Angle;
 			if((Force && Type == TILE_SPEED_BOOST_OLD) || ((Force || MaxSpeed) && Type == TILE_SPEED_BOOST) || (OverlayRenderFlag & OVERLAYRENDERFLAG_EDITOR && (Type || Force || MaxSpeed || Angle)))
 			{
-				// draw arrow
-				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
-				Graphics()->QuadsBegin();
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-				SelectSprite(SPRITE_SPEEDUP_ARROW);
-				Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
-				DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
-				Graphics()->QuadsEnd();
+				if(IsValidSpeedupTile(Type))
+				{
+					// draw arrow
+					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
+					Graphics()->QuadsBegin();
+					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+					SelectSprite(SPRITE_SPEEDUP_ARROW);
+					Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
+					DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
+					Graphics()->QuadsEnd();
+				}
 
 				// draw force and max speed
 				if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
