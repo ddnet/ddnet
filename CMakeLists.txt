@@ -3529,6 +3529,10 @@ foreach(target ${TARGETS})
   if(ENABLE_IPO)
     set_property(TARGET ${target} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
   endif()
+  if(TARGET_OS STREQUAL "emscripten")
+    # Preload data directory into the filesystem
+    target_link_options(${target} PRIVATE --preload-file data)
+  endif()
 endforeach()
 
 foreach(target ${TARGETS_LINK})
