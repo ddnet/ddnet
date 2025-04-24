@@ -171,7 +171,7 @@ bool CSpectator::OnInput(const IInput::CEvent &Event)
 		return true;
 	}
 
-	if(g_Config.m_ClSpectatorMouseclicks)
+	if(g_Config.m_ClSpectatorMouseclicks && m_pClient->m_GameInfo.m_BugDDRaceInput)
 	{
 		if(m_pClient->m_Snap.m_SpecInfo.m_Active && !IsActive() && !GameClient()->m_MultiViewActivated &&
 			!Ui()->IsPopupOpen() && !m_pClient->m_GameConsole.IsActive() && !m_pClient->m_Menus.IsActive())
