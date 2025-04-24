@@ -380,7 +380,6 @@ void CGhost::UpdateTeeRenderInfo(CGhostItem &Ghost)
 
 	CTeeRenderInfo TeeRenderInfo;
 	TeeRenderInfo.ApplyColors(Ghost.m_Skin.m_UseCustomColor, Ghost.m_Skin.m_ColorBody, Ghost.m_Skin.m_ColorFeet);
-	TeeRenderInfo.m_Size = 64.0f;
 
 	Ghost.m_pManagedTeeRenderInfo = GameClient()->CreateManagedTeeRenderInfo(TeeRenderInfo, SkinDescriptor);
 }
