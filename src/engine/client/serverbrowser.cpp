@@ -40,12 +40,12 @@ public:
 	bool operator()(int a, int b) { return (g_Config.m_BrSortOrder ? (m_pThis->*m_pfnSort)(b, a) : (m_pThis->*m_pfnSort)(a, b)); }
 };
 
-bool matchesPart(const char *a, const char *b)
+static bool matchesPart(const char *a, const char *b)
 {
 	return str_utf8_find_nocase(a, b) != nullptr;
 }
 
-bool matchesExactly(const char *a, const char *b)
+static bool matchesExactly(const char *a, const char *b)
 {
 	return str_comp(a, &b[1]) == 0;
 }

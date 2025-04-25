@@ -498,7 +498,7 @@ void CClient::EnterGame(int Conn)
 	m_CurrentServerNextPingTime = time_get() + time_freq() / 2;
 }
 
-void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
+static void GenerateTimeoutCode(char *pBuffer, unsigned Size, char *pSeed, const NETADDR *pAddrs, int NumAddrs, bool Dummy)
 {
 	MD5_CTX Md5;
 	md5_init(&Md5);
@@ -2402,7 +2402,7 @@ void CClient::ResetDDNetInfoTask()
 typedef std::tuple<int, int, int> TVersion;
 static const TVersion gs_InvalidVersion = std::make_tuple(-1, -1, -1);
 
-TVersion ToVersion(char *pStr)
+static TVersion ToVersion(char *pStr)
 {
 	int aVersion[3] = {0, 0, 0};
 	const char *p = strtok(pStr, ".");
