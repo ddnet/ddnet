@@ -19,7 +19,7 @@ class IDbConnection
 {
 public:
 	IDbConnection(const char *pPrefix);
-	virtual ~IDbConnection() {}
+	virtual ~IDbConnection() = default;
 	IDbConnection &operator=(const IDbConnection &) = delete;
 	virtual void Print(IConsole *pConsole, const char *pMode) = 0;
 

@@ -70,7 +70,7 @@ protected:
 	CLogFilter m_Filter;
 
 public:
-	virtual ~ILogger() {}
+	virtual ~ILogger() = default;
 
 	/**
 	 * Set a new filter. It's up to the logger implementation to actually

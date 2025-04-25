@@ -10,7 +10,7 @@ class IHttp;
 class IServerBrowserHttp
 {
 public:
-	virtual ~IServerBrowserHttp() {}
+	virtual ~IServerBrowserHttp() = default;
 
 	virtual void Update() = 0;
 

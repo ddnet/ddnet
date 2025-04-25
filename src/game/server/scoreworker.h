@@ -133,7 +133,7 @@ struct CSqlScoreData : ISqlData
 	{
 	}
 
-	virtual ~CSqlScoreData(){};
+	virtual ~CSqlScoreData() = default;
 
 	char m_aMap[MAX_MAP_LENGTH];
 	char m_aGameUuid[UUID_MAXSTRSIZE];
@@ -194,7 +194,7 @@ struct CSqlTeamSaveData : ISqlData
 		ISqlData(std::move(pResult))
 	{
 	}
-	virtual ~CSqlTeamSaveData(){};
+	virtual ~CSqlTeamSaveData() = default;
 
 	char m_aClientName[MAX_NAME_LENGTH];
 	char m_aMap[MAX_MAP_LENGTH];
@@ -209,7 +209,7 @@ struct CSqlTeamLoadRequest : ISqlData
 		ISqlData(std::move(pResult))
 	{
 	}
-	virtual ~CSqlTeamLoadRequest(){};
+	virtual ~CSqlTeamLoadRequest() = default;
 
 	char m_aCode[128];
 	char m_aMap[MAX_MAP_LENGTH];
@@ -227,7 +227,7 @@ public:
 	{
 		Reset();
 	}
-	~CPlayerData() {}
+	~CPlayerData() = default;
 
 	void Reset()
 	{

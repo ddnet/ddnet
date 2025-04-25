@@ -10,7 +10,7 @@ struct CNetChunk;
 class IRegister
 {
 public:
-	virtual ~IRegister() {}
+	virtual ~IRegister() = default;
 
 	virtual void Update() = 0;
 	// Call `OnConfigChange` if you change relevant config variables

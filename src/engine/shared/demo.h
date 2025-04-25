@@ -66,7 +66,7 @@ public:
 	class IListener
 	{
 	public:
-		virtual ~IListener() {}
+		virtual ~IListener() = default;
 		virtual void OnDemoPlayerSnapshot(void *pData, int Size) = 0;
 		virtual void OnDemoPlayerMessage(void *pData, int Size) = 0;
 	};

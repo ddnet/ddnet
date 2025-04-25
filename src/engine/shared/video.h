@@ -10,7 +10,7 @@ typedef std::function<void(short *pFinalOut, unsigned Frames)> ISoundMixFunc;
 class IVideo
 {
 public:
-	virtual ~IVideo(){};
+	virtual ~IVideo() = default;
 
 	virtual bool Start() = 0;
 	virtual void Stop() = 0;
