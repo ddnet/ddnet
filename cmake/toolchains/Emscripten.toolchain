@@ -3,8 +3,6 @@ set(WASM_ENGINE_FLAGS "")
 set(WASM_ENGINE_FLAGS "-s LLD_REPORT_UNDEFINED -s USE_PTHREADS=1")
 # needed for loading files in a c-like style
 set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} -s FILESYSTEM=1 -s FORCE_FILESYSTEM=1")
-# load data directory to the filesystem
-set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} --preload-file data")
 # remove some annoyance for now, TODO
 set(WASM_ENGINE_FLAGS "${WASM_ENGINE_FLAGS} --allow-multiple-definition -Wl,--shared-memory,--no-check-features")
 # TODO
