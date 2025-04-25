@@ -52,13 +52,13 @@ CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapDat
 
 CDemoRecorder::~CDemoRecorder()
 {
-	dbg_assert(m_File == 0, "Demo recorder was not stopped");
+	dbg_assert(m_File == nullptr, "Demo recorder was not stopped");
 }
 
 // Record
 int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned Crc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
-	dbg_assert(m_File == 0, "Demo recorder already recording");
+	dbg_assert(m_File == nullptr, "Demo recorder already recording");
 
 	m_pConsole = pConsole;
 	m_pStorage = pStorage;
@@ -481,7 +481,7 @@ CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 
 CDemoPlayer::~CDemoPlayer()
 {
-	dbg_assert(m_File == 0, "Demo player not stopped");
+	dbg_assert(m_File == nullptr, "Demo player not stopped");
 }
 
 void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta, bool UseVideo)
@@ -796,7 +796,7 @@ void CDemoPlayer::Unpause()
 
 int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType)
 {
-	dbg_assert(m_File == 0, "Demo player already playing");
+	dbg_assert(m_File == nullptr, "Demo player already playing");
 
 	m_pConsole = pConsole;
 	str_copy(m_aFilename, pFilename);
