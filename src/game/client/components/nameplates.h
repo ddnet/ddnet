@@ -18,7 +18,6 @@ class CNamePlateData
 {
 public:
 	bool m_InGame;
-	vec2 m_Position;
 	ColorRGBA m_Color;
 	bool m_ShowName;
 	const char *m_pName;

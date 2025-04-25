@@ -13,14 +13,15 @@
 
 #include "nameplates.h"
 
+static constexpr float DEFAULT_PADDING = 5.0f;
+
 // Part Types
 
 class CNamePlatePart
 {
 protected:
 	vec2 m_Size = vec2(0.0f, 0.0f);
-	vec2 m_Padding = vec2(5.0f, 5.0f);
-	vec2 m_Offset = vec2(0.0f, 0.0f); // Offset to rendered X and Y not effecting layout
+	vec2 m_Padding = vec2(DEFAULT_PADDING, DEFAULT_PADDING);
 	bool m_NewLine = false; // Whether this part is a new line (doesn't do anything else)
 	bool m_Visible = true; // Whether this part is visible
 	bool m_ShiftOnInvis = false; // Whether when not visible will still take up space
@@ -32,7 +33,6 @@ public:
 	virtual void Render(CGameClient &This, vec2 Pos) const {}
 	vec2 Size() const { return m_Size; }
 	vec2 Padding() const { return m_Padding; }
-	vec2 Offset() const { return m_Offset; }
 	bool NewLine() const { return m_NewLine; }
 	bool Visible() const { return m_Visible; }
 	bool ShiftOnInvis() const { return m_ShiftOnInvis; }
@@ -219,15 +219,12 @@ public:
 		{
 		case DIRECTION_LEFT:
 			m_Visible = Data.m_DirLeft;
-			m_Offset.y = m_Size.y / 4.0f;
 			break;
 		case DIRECTION_UP:
 			m_Visible = Data.m_DirJump;
-			m_Offset.y = m_Size.y / -4.0f;
 			break;
 		case DIRECTION_RIGHT:
 			m_Visible = Data.m_DirRight;
-			m_Offset.y = m_Size.y / 4.0f;
 			break;
 		}
 		m_Color.a = Data.m_Color.a;
@@ -371,7 +368,7 @@ protected:
 		m_Visible = Data.m_ShowHookStrongWeak;
 		if(!m_Visible)
 			return;
-		m_Size = vec2(Data.m_FontSizeHookStrongWeak, Data.m_FontSizeHookStrongWeak) * 1.5f;
+		m_Size = vec2(Data.m_FontSizeHookStrongWeak + DEFAULT_PADDING, Data.m_FontSizeHookStrongWeak + DEFAULT_PADDING);
 		switch(Data.m_HookStrongWeakState)
 		{
 		case EHookStrongWeakState::STRONG:
@@ -395,6 +392,7 @@ public:
 		CNamePlatePartSprite(This)
 	{
 		m_Texture = g_pData->m_aImages[IMAGE_STRONGWEAK].m_Id;
+		m_Padding = vec2(0.0f, 0.0f);
 	}
 };
 
@@ -449,8 +447,6 @@ class CNamePlate
 private:
 	bool m_Inited = false;
 	bool m_InGame = false;
-	vec2 m_Position = vec2(0.0f, 0.0f);
-	vec2 m_Size = vec2(0.0f, 0.0f);
 	PartsVector m_vpParts;
 	void RenderLine(CGameClient &This,
 		vec2 Pos, vec2 Size,
@@ -463,8 +459,8 @@ private:
 			if(Part.Visible())
 			{
 				Part.Render(This, vec2(
-							  Pos.x + (Part.Padding().x + Part.Size().x) / 2.0f + Part.Offset().x,
-							  Pos.y - std::max(Size.y, Part.Padding().y + Part.Size().y) / 2.0f + Part.Offset().y));
+							  Pos.x + (Part.Padding().x + Part.Size().x) / 2.0f,
+							  Pos.y - std::max(Size.y, Part.Padding().y + Part.Size().y) / 2.0f));
 			}
 			if(Part.Visible() || Part.ShiftOnInvis())
 				Pos.x += Part.Size().x + Part.Padding().x;
@@ -500,25 +496,30 @@ private:
 		AddPart<CNamePlatePartHookStrongWeak>(This);
 		AddPart<CNamePlatePartHookStrongWeakId>(This);
 	}
-	void Update(CGameClient &This, const CNamePlateData *pData)
-	{
-		Init(This);
-		if(!pData)
-			return;
-		m_InGame = pData->m_InGame;
-		m_Position = pData->m_Position;
-	}
 
 public:
+	CNamePlate() = default;
+	CNamePlate(CGameClient &This, const CNamePlateData &Data)
+	{
+		// Convenience constructor
+		Update(This, Data);
+	}
 	void Reset(CGameClient &This)
 	{
 		for(auto &Part : m_vpParts)
 			Part->Reset(This);
 	}
-	void Render(CGameClient &This, const CNamePlateData *pData)
+	void Update(CGameClient &This, const CNamePlateData &Data)
 	{
-		Update(This, pData);
-		vec2 Pos = m_Position;
+		Init(This);
+		m_InGame = Data.m_InGame;
+		for(auto &Part : m_vpParts)
+			Part->Update(This, Data);
+	}
+	void Render(CGameClient &This, const vec2 &PositionBottomMiddle)
+	{
+		dbg_assert(m_Inited, "Tried to render uninited nameplate");
+		vec2 Position = PositionBottomMiddle;
 		// X: Total width including padding of line, Y: Max height of line parts
 		vec2 LineSize = vec2(0.0f, 0.0f);
 		bool Empty = true;
@@ -526,14 +527,12 @@ public:
 		for(auto PartIt = m_vpParts.begin(); PartIt != m_vpParts.end(); ++PartIt)
 		{
 			CNamePlatePart &Part = **PartIt;
-			if(pData)
-				Part.Update(This, *pData);
 			if(Part.NewLine())
 			{
 				if(!Empty)
 				{
-					RenderLine(This, Pos, LineSize, Start, std::next(PartIt));
-					Pos.y -= LineSize.y;
+					RenderLine(This, Position, LineSize, Start, std::next(PartIt));
+					Position.y -= LineSize.y;
 				}
 				Start = std::next(PartIt);
 				LineSize = vec2(0.0f, 0.0f);
@@ -545,14 +544,12 @@ public:
 				LineSize.y = std::max(LineSize.y, Part.Size().y + Part.Padding().y);
 			}
 		}
-		RenderLine(This, Pos, LineSize, Start, m_vpParts.end());
+		RenderLine(This, Position, LineSize, Start, m_vpParts.end());
 		This.Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-	vec2 Size(CGameClient &This, const CNamePlateData *pData)
+	vec2 Size() const
 	{
-		if(!pData)
-			return m_Size; // Used cached size calculation
-		Update(This, pData);
+		dbg_assert(m_Inited, "Tried to get size of uninited nameplate");
 		// X: Total width including padding of line, Y: Max height of line parts
 		vec2 LineSize = vec2(0.0f, 0.0f);
 		float WMax = 0.0f;
@@ -561,8 +558,6 @@ public:
 		for(auto PartIt = m_vpParts.begin(); PartIt != m_vpParts.end(); ++PartIt) // NOLINT(modernize-loop-convert) For consistency with Render
 		{
 			CNamePlatePart &Part = **PartIt;
-			if(pData)
-				Part.Update(This, *pData);
 			if(Part.NewLine())
 			{
 				if(!Empty)
@@ -583,8 +578,7 @@ public:
 		if(LineSize.x > WMax)
 			WMax = LineSize.x;
 		HTotal += LineSize.y;
-		m_Size = vec2(WMax, HTotal);
-		return m_Size;
+		return vec2(WMax, HTotal);
 	}
 };
 
@@ -613,7 +607,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	const bool OtherTeam = GameClient()->IsOtherTeam(pPlayerInfo->m_ClientId);
 
 	Data.m_InGame = true;
-	Data.m_Position = Position - vec2(0.0f, (float)g_Config.m_ClNamePlatesOffset);
+
 	Data.m_ShowName = pPlayerInfo->m_Local ? g_Config.m_ClNamePlatesOwn : g_Config.m_ClNamePlates;
 	Data.m_pName = GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aName;
 	Data.m_ShowFriendMark = Data.m_ShowName && g_Config.m_ClNamePlatesFriendMark && GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_Friend;
@@ -731,14 +725,9 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	}
 
 	// Check if the nameplate is actually on screen
-	vec2 NamePlateSize = m_pData->m_aNamePlates[pPlayerInfo->m_ClientId].Size(*GameClient(), &Data);
-	ScreenX0 -= NamePlateSize.x / 2.0f;
-	ScreenX1 += NamePlateSize.x / 2.0f;
-	ScreenY1 += NamePlateSize.y;
-	if(!(in_range(Position.x, ScreenX0, ScreenX1) && in_range(Position.y, ScreenY0, ScreenY1)))
-		return;
-
-	m_pData->m_aNamePlates[pPlayerInfo->m_ClientId].Render(*GameClient(), nullptr); // Give no Data, as to not update twice
+	CNamePlate &NamePlate = m_pData->m_aNamePlates[pPlayerInfo->m_ClientId];
+	NamePlate.Update(*GameClient(), Data);
+	NamePlate.Render(*GameClient(), Position - vec2(0.0f, (float)g_Config.m_ClNamePlatesOffset));
 }
 
 void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
@@ -803,18 +792,17 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	}
 	TeeRenderInfo.m_Size = 64.0f;
 
-	CNamePlate NamePlate;
-	Data.m_Position = Position;
-	Data.m_Position.y += NamePlate.Size(*GameClient(), &Data).y / 3.0f; // Slight bias so the tee doesn't look too low
-	Data.m_Position.y += (float)g_Config.m_ClNamePlatesOffset / 2.0f;
-	vec2 Dir = (Ui()->MousePos() - Data.m_Position);
+	CNamePlate NamePlate(*GameClient(), Data);
+	Position.y += NamePlate.Size().y / 2.0f;
+	Position.y += (float)g_Config.m_ClNamePlatesOffset / 2.0f;
+	vec2 Dir = Ui()->MousePos() - Position;
 	Dir /= TeeRenderInfo.m_Size;
 	const float Length = length(Dir);
 	if(Length > 1.0f)
 		Dir /= Length;
-	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, 0, Dir, Data.m_Position);
-	Data.m_Position.y -= (float)g_Config.m_ClNamePlatesOffset;
-	NamePlate.Render(*GameClient(), nullptr);
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, 0, Dir, Position);
+	Position.y -= (float)g_Config.m_ClNamePlatesOffset;
+	NamePlate.Render(*GameClient(), Position - vec2(0.0f, (float)g_Config.m_ClNamePlatesOffset));
 	NamePlate.Reset(*GameClient());
 }
 
