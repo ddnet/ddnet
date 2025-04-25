@@ -1301,6 +1301,35 @@ void CEditorActionTileArt::Redo()
 	m_pEditor->AddTileart(true);
 }
 
+// ---------------------------
+
+CEditorActionQuadArt::CEditorActionQuadArt(CEditor *pEditor, CQuadArtParameters Parameters) :
+	IEditorAction(pEditor), m_Parameters(Parameters)
+{
+	str_copy(m_aDisplayText, "Create Quadart");
+}
+
+void CEditorActionQuadArt::Undo()
+{
+	auto &Map = m_pEditor->m_Map;
+
+	// Delete added group
+	Map.m_vpGroups.pop_back();
+}
+
+void CEditorActionQuadArt::Redo()
+{
+	m_pEditor->m_QuadArtParameters = m_Parameters;
+	str_copy(m_pEditor->m_QuadArtParameters.m_aFilename, m_Parameters.m_aFilename, sizeof(m_pEditor->m_QuadArtParameters.m_aFilename));
+
+	if(!m_pEditor->Graphics()->LoadPng(m_pEditor->m_QuadArtImageInfo, m_pEditor->m_QuadArtParameters.m_aFilename, IStorage::TYPE_ALL))
+	{
+		m_pEditor->ShowFileDialogError("Failed to load image from file '%s'.", m_pEditor->m_QuadArtParameters.m_aFilename);
+		return;
+	}
+	m_pEditor->AddQuadArt(true);
+}
+
 // ---------------------------------
 
 CEditorCommandAction::CEditorCommandAction(CEditor *pEditor, EType Type, int *pSelectedCommandIndex, int CommandIndex, const char *pPreviousCommand, const char *pCurrentCommand) :

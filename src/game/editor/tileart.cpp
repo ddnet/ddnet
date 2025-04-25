@@ -176,13 +176,13 @@ void CEditor::TileartCheckColors()
 	int NumColorGroups = std::ceil(vUniqueColors.size() / 255.0f);
 	if(m_Map.m_vpImages.size() + NumColorGroups >= 64)
 	{
-		m_PopupEventType = CEditor::POPEVENT_PIXELART_TOO_MANY_COLORS;
+		m_PopupEventType = CEditor::POPEVENT_TILEART_TOO_MANY_COLORS;
 		m_PopupEventActivated = true;
 		m_TileartImageInfo.Free();
 	}
 	else if(NumColorGroups > 1)
 	{
-		m_PopupEventType = CEditor::POPEVENT_PIXELART_MANY_COLORS;
+		m_PopupEventType = CEditor::POPEVENT_TILEART_MANY_COLORS;
 		m_PopupEventActivated = true;
 	}
 	else
@@ -202,7 +202,7 @@ bool CEditor::CallbackAddTileart(const char *pFilepath, int StorageType, void *p
 	str_copy(pEditor->m_aTileartFilename, pFilepath);
 	if(pEditor->m_TileartImageInfo.m_Width * pEditor->m_TileartImageInfo.m_Height > 10'000)
 	{
-		pEditor->m_PopupEventType = CEditor::POPEVENT_PIXELART_BIG_IMAGE;
+		pEditor->m_PopupEventType = CEditor::POPEVENT_TILEART_BIG_IMAGE;
 		pEditor->m_PopupEventActivated = true;
 		return false;
 	}
