@@ -859,17 +859,32 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 					Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
 					DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
 					Graphics()->QuadsEnd();
-				}
 
-				// draw force and max speed
-				if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
-				{
-					str_format(aBuf, sizeof(aBuf), "%d", Force);
-					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
-					if(MaxSpeed)
+					// draw force and max speed
+					if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
 					{
+						str_format(aBuf, sizeof(aBuf), "%d", Force);
+						TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						if(MaxSpeed)
+						{
+							str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
+							TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						}
+					}
+				}
+				else
+				{
+					// draw all three values
+					if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
+					{
+						float LineSpacing = Size * Scale / 3.f;
+						float BaseY = (my + ToCenterOffset) * Scale;
+						str_format(aBuf, sizeof(aBuf), "%d", Force);
+						TextRender()->Text(mx * Scale, BaseY, LineSpacing, aBuf);
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
-						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						TextRender()->Text(mx * Scale, BaseY + LineSpacing, LineSpacing, aBuf);
+						str_format(aBuf, sizeof(aBuf), "%d", Angle);
+						TextRender()->Text(mx * Scale, BaseY + 2 * LineSpacing, LineSpacing, aBuf);
 					}
 				}
 			}
