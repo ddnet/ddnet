@@ -64,7 +64,7 @@ void CAntibot::Init()
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	dbg_assert(m_pServer && m_pConsole, "antibot requires server and console");
-	dbg_assert(AntibotAbiVersion() == ANTIBOT_ABI_VERSION, "antibot abi version mismatch");
+	dbg_assert(AntibotAbiVersion() == ANTIBOT_ABI_VERSION, "antibot abi version mismatch (antibot=%d server=%d)", AntibotAbiVersion(), ANTIBOT_ABI_VERSION);
 
 	mem_zero(&m_Data, sizeof(m_Data));
 	CAntibotVersion Version = ANTIBOT_VERSION;
