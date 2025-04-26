@@ -19,6 +19,7 @@ class CAntibot : public IEngineAntibot
 	bool m_Initialized;
 
 	void Update();
+	static void ExecuteLine(const char *pLine, void *pUser);
 	static void Kick(int ClientId, const char *pMessage, void *pUser);
 	static void Log(const char *pMessage, void *pUser);
 	static void Report(int ClientId, const char *pMessage, void *pUser);

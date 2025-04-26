@@ -23,6 +23,11 @@ CAntibot::~CAntibot()
 	if(m_Initialized)
 		AntibotDestroy();
 }
+void CAntibot::ExecuteLine(const char *pLine, void *pUser)
+{
+	CAntibot *pAntibot = (CAntibot *)pUser;
+	pAntibot->Console()->ExecuteLine(pLine);
+}
 void CAntibot::Kick(int ClientId, const char *pMessage, void *pUser)
 {
 	CAntibot *pAntibot = (CAntibot *)pUser;
@@ -72,6 +77,7 @@ void CAntibot::Init()
 
 	m_Data.m_Now = time_get();
 	m_Data.m_Freq = time_freq();
+	m_Data.m_pfnExecuteLine = ExecuteLine;
 	m_Data.m_pfnKick = Kick;
 	m_Data.m_pfnLog = Log;
 	m_Data.m_pfnReport = Report;
