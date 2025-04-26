@@ -124,9 +124,11 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s:", Localize("Your skin"));
 	Ui()->DoLabel(&SkinPreview, aBuf, 14.0f, TEXTALIGN_ML);
 
+	vec2 OffsetToMid;
+	CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &OwnSkinInfo, OffsetToMid);
 	{
 		// interactive tee: tee looking towards cursor, and it is happy when you touch it
-		const vec2 TeePosition = NormalSkinPreview.Center() + vec2(0.0f, 6.0f);
+		const vec2 TeePosition = NormalSkinPreview.Center() + OffsetToMid;
 		const vec2 DeltaPosition = Ui()->MousePos() - TeePosition;
 		const float Distance = length(DeltaPosition);
 		const float InteractionDistance = 20.0f;
@@ -162,13 +164,13 @@ void CMenus::RenderSettingsTee7(CUIRect MainView)
 	{
 		TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_RED, Part);
 	}
-	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(1, 0), RedTeamSkinPreview.Center() + vec2(0.0f, 6.0f));
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(1, 0), RedTeamSkinPreview.Center() + OffsetToMid);
 
 	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
 	{
 		TeamSkinInfo.m_aSixup[g_Config.m_ClDummy].m_aColors[Part] = m_pClient->m_Skins7.GetTeamColor(aUCCVars[Part], aColorVars[Part], TEAM_BLUE, Part);
 	}
-	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(-1, 0), BlueTeamSkinPreview.Center() + vec2(0.0f, 6.0f));
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeamSkinInfo, 0, vec2(-1, 0), BlueTeamSkinPreview.Center() + OffsetToMid);
 
 	if(m_CustomSkinMenu)
 		RenderSettingsTeeCustom7(MainView);
@@ -356,7 +358,9 @@ void CMenus::RenderSkinSelection7(CUIRect MainView)
 		{
 			// interactive tee: tee is happy to be selected
 			int TeeEmote = (Item.m_Selected && s_LastSelectionTime + 0.75f > Client()->GlobalTime()) ? EMOTE_HAPPY : EMOTE_NORMAL;
-			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, TeeEmote, vec2(1.0f, 0.0f), TeePreview.Center() + vec2(0.0f, 6.0f));
+			vec2 OffsetToMid;
+			CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &Info, OffsetToMid);
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &Info, TeeEmote, vec2(1.0f, 0.0f), TeePreview.Center() + OffsetToMid);
 		}
 
 		SLabelProperties Props;
@@ -431,7 +435,9 @@ void CMenus::RenderSkinPartSelection7(CUIRect MainView)
 		}
 		Info.m_Size = 50.0f;
 
-		const vec2 TeePos = Item.m_Rect.Center() + vec2(0.0f, 6.0f);
+		vec2 OffsetToMid;
+		CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &Info, OffsetToMid);
+		const vec2 TeePos = Item.m_Rect.Center() + OffsetToMid;
 		if(m_TeePartSelected == protocol7::SKINPART_HANDS)
 		{
 			// RenderTools()->RenderTeeHand(&Info, TeePos, vec2(1.0f, 0.0f), -pi*0.5f, vec2(18, 0));
