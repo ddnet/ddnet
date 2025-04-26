@@ -721,7 +721,7 @@ public:
 			return true;
 		if(str_comp(pRhs->m_aFilename, "..") == 0)
 			return false;
-		if(pLhs->m_IsLink || pRhs->m_IsLink)
+		if(pLhs->m_IsLink != pRhs->m_IsLink)
 			return pLhs->m_IsLink;
 		if(pLhs->m_IsDir != pRhs->m_IsDir)
 			return pLhs->m_IsDir;
@@ -734,7 +734,7 @@ public:
 			return true;
 		if(str_comp(pRhs->m_aFilename, "..") == 0)
 			return false;
-		if(pLhs->m_IsLink || pRhs->m_IsLink)
+		if(pLhs->m_IsLink != pRhs->m_IsLink)
 			return pLhs->m_IsLink;
 		if(pLhs->m_IsDir != pRhs->m_IsDir)
 			return pLhs->m_IsDir;
