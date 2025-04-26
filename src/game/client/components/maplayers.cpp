@@ -507,7 +507,7 @@ void CMapLayers::OnMapLoad()
 									unsigned char MaxSpeed = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_MaxSpeed;
 									Flags = 0;
 									AngleRotate = ((CSpeedupTile *)pTiles)[y * pTMap->m_Width + x].m_Angle;
-									if((Force == 0 && Index == TILE_SPEED_BOOST_OLD) || (Force == 0 && MaxSpeed == 0 && Index == TILE_SPEED_BOOST))
+									if((Force == 0 && Index == TILE_SPEED_BOOST_OLD) || (Force == 0 && MaxSpeed == 0 && Index == TILE_SPEED_BOOST) || !IsValidSpeedupTile(Index))
 										Index = 0;
 									else if(CurOverlay == 1)
 										Index = Force;

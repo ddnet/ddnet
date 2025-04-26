@@ -849,24 +849,42 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 			int Angle = (int)pSpeedup[c].m_Angle;
 			if((Force && Type == TILE_SPEED_BOOST_OLD) || ((Force || MaxSpeed) && Type == TILE_SPEED_BOOST) || (OverlayRenderFlag & OVERLAYRENDERFLAG_EDITOR && (Type || Force || MaxSpeed || Angle)))
 			{
-				// draw arrow
-				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
-				Graphics()->QuadsBegin();
-				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
-				SelectSprite(SPRITE_SPEEDUP_ARROW);
-				Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
-				DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
-				Graphics()->QuadsEnd();
-
-				// draw force and max speed
-				if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
+				if(IsValidSpeedupTile(Type))
 				{
-					str_format(aBuf, sizeof(aBuf), "%d", Force);
-					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
-					if(MaxSpeed)
+					// draw arrow
+					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
+					Graphics()->QuadsBegin();
+					Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+					SelectSprite(SPRITE_SPEEDUP_ARROW);
+					Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
+					DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
+					Graphics()->QuadsEnd();
+
+					// draw force and max speed
+					if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
 					{
+						str_format(aBuf, sizeof(aBuf), "%d", Force);
+						TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						if(MaxSpeed)
+						{
+							str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
+							TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						}
+					}
+				}
+				else
+				{
+					// draw all three values
+					if(OverlayRenderFlag & OVERLAYRENDERFLAG_TEXT)
+					{
+						float LineSpacing = Size * Scale / 3.f;
+						float BaseY = (my + ToCenterOffset) * Scale;
+						str_format(aBuf, sizeof(aBuf), "%d", Force);
+						TextRender()->Text(mx * Scale, BaseY, LineSpacing, aBuf);
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
-						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						TextRender()->Text(mx * Scale, BaseY + LineSpacing, LineSpacing, aBuf);
+						str_format(aBuf, sizeof(aBuf), "%d", Angle);
+						TextRender()->Text(mx * Scale, BaseY + 2 * LineSpacing, LineSpacing, aBuf);
 					}
 				}
 			}
