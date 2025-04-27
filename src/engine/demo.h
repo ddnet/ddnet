@@ -65,6 +65,8 @@ public:
 	{
 	public:
 		bool m_Paused;
+		bool m_LiveDemo;
+		bool m_LivePlayback;
 		float m_Speed;
 
 		int m_FirstTick;
