@@ -17,7 +17,6 @@
 #include "network.h"
 #include "snapshot.h"
 
-const double g_aSpeeds[g_DemoSpeeds] = {0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0, 40.0, 48.0, 56.0, 64.0};
 const CUuid SHA256_EXTENSION =
 	{{0x6b, 0xe6, 0xda, 0x4a, 0xce, 0xbd, 0x38, 0x0c,
 		0x9b, 0x5b, 0x12, 0x89, 0xc8, 0x42, 0xd7, 0x80}};
@@ -487,7 +486,7 @@ CDemoPlayer::~CDemoPlayer()
 void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 {
 	m_File = nullptr;
-	m_SpeedIndex = 4;
+	m_SpeedIndex = DEMO_SPEED_INDEX_DEFAULT;
 
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_LastSnapshotDataSize = -1;
@@ -811,7 +810,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	m_Info.m_Info.m_CurrentTick = -1;
 	m_Info.m_PreviousTick = -1;
 	m_Info.m_Info.m_Speed = 1;
-	m_SpeedIndex = 4;
+	m_SpeedIndex = DEMO_SPEED_INDEX_DEFAULT;
 	m_LastSnapshotDataSize = -1;
 
 	if(!GetDemoInfo(pStorage, m_pConsole, pFilename, StorageType, &m_Info.m_Header, &m_Info.m_TimelineMarkers, &m_MapInfo, &m_File, m_aErrorMessage, sizeof(m_aErrorMessage)))
@@ -1040,14 +1039,14 @@ void CDemoPlayer::SetSpeed(float Speed)
 
 void CDemoPlayer::SetSpeedIndex(int SpeedIndex)
 {
-	dbg_assert(SpeedIndex >= 0 && SpeedIndex < g_DemoSpeeds, "invalid SpeedIndex");
+	dbg_assert(SpeedIndex >= 0 && SpeedIndex < (int)std::size(DEMO_SPEEDS), "invalid SpeedIndex");
 	m_SpeedIndex = SpeedIndex;
-	SetSpeed(g_aSpeeds[m_SpeedIndex]);
+	SetSpeed(DEMO_SPEEDS[m_SpeedIndex]);
 }
 
 void CDemoPlayer::AdjustSpeedIndex(int Offset)
 {
-	SetSpeedIndex(clamp(m_SpeedIndex + Offset, 0, (int)(std::size(g_aSpeeds) - 1)));
+	SetSpeedIndex(clamp(m_SpeedIndex + Offset, 0, (int)(std::size(DEMO_SPEEDS) - 1)));
 }
 
 int CDemoPlayer::Update(bool RealTime)

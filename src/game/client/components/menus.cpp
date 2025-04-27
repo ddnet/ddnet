@@ -1679,7 +1679,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Row.VSplitLeft(5.0f, nullptr, &Row);
 		static CButtonContainer s_SlowDownButton;
 		if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_BACKWARD, 0, &SlowDownButton, BUTTONFLAG_LEFT))
-			m_Speed = clamp(m_Speed - 1, 0, (int)(g_DemoSpeeds - 1));
+			m_Speed = clamp(m_Speed - 1, 0, (int)(std::size(DEMO_SPEEDS) - 1));
 
 		// paused
 		CUIRect PausedButton;
@@ -1695,12 +1695,12 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Row.VSplitLeft(8.0f, nullptr, &Row);
 		static CButtonContainer s_FastForwardButton;
 		if(DoButton_FontIcon(&s_FastForwardButton, FONT_ICON_FORWARD, 0, &FastForwardButton, BUTTONFLAG_LEFT))
-			m_Speed = clamp(m_Speed + 1, 0, (int)(g_DemoSpeeds - 1));
+			m_Speed = clamp(m_Speed + 1, 0, (int)(std::size(DEMO_SPEEDS) - 1));
 
 		// speed meter
 		char aBuffer[128];
 		const char *pPaused = m_StartPaused ? Localize("(paused)") : "";
-		str_format(aBuffer, sizeof(aBuffer), "%s: ×%g %s", Localize("Speed"), g_aSpeeds[m_Speed], pPaused);
+		str_format(aBuffer, sizeof(aBuffer), "%s: ×%g %s", Localize("Speed"), DEMO_SPEEDS[m_Speed], pPaused);
 		Ui()->DoLabel(&Row, aBuffer, 12.8f, TEXTALIGN_ML);
 		Box.HSplitBottom(16.0f, &Box, nullptr);
 		Box.HSplitBottom(24.0f, &Box, &Row);
@@ -2093,7 +2093,7 @@ void CMenus::PopupConfirmDemoReplaceVideo()
 	char aVideoName[IO_MAX_PATH_LENGTH];
 	str_copy(aVideoName, m_DemoRenderInput.GetString());
 	const char *pError = Client()->DemoPlayer_Render(aBuf, m_DemolistStorageType, aVideoName, m_Speed, m_StartPaused);
-	m_Speed = 4;
+	m_Speed = DEMO_SPEED_INDEX_DEFAULT;
 	m_StartPaused = false;
 	m_LastPauseChange = -1.0f;
 	m_LastSpeedChange = -1.0f;
