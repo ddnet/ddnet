@@ -2,6 +2,8 @@
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
 
+#include <engine/shared/protocol7.h>
+
 #include <game/generated/client_data.h>
 
 #include <game/client/animstate.h>
@@ -308,7 +310,7 @@ public:
 class CNamePlatePartName : public CNamePlatePartText
 {
 private:
-	char m_aText[MAX_NAME_LENGTH] = "";
+	char m_aText[protocol7::MAX_NAME_ARRAY_SIZE] = "";
 	float m_FontSize = -INFINITY;
 
 protected:
@@ -337,7 +339,7 @@ public:
 class CNamePlatePartClan : public CNamePlatePartText
 {
 private:
-	char m_aText[MAX_CLAN_LENGTH] = "";
+	char m_aText[protocol7::MAX_CLAN_ARRAY_SIZE] = "";
 	float m_FontSize = -INFINITY;
 
 protected:
