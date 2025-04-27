@@ -3244,7 +3244,6 @@ int CServer::Run()
 				}
 			}
 
-			// wait for incoming data
 			if(NonActive)
 			{
 				if(Config()->m_SvReloadWhenEmpty == 1)
@@ -3257,7 +3256,17 @@ int CServer::Run()
 					m_MapReload = true;
 					m_ReloadedWhenEmpty = true;
 				}
+			}
+			else
+			{
+				m_ReloadedWhenEmpty = false;
+			}
 
+			// wait for incoming data
+			if(NonActive &&
+				!m_aDemoRecorder[RECORDER_MANUAL].IsRecording() &&
+				!m_aDemoRecorder[RECORDER_AUTO].IsRecording())
+			{
 				if(Config()->m_SvShutdownWhenEmpty)
 					m_RunServer = STOPPING;
 				else
@@ -3265,8 +3274,6 @@ int CServer::Run()
 			}
 			else
 			{
-				m_ReloadedWhenEmpty = false;
-
 				set_new_tick();
 				t = time_get();
 				int x = (TickStartTime(m_CurrentGameTick + 1) - t) * 1000000 / time_freq() + 1;
