@@ -298,16 +298,16 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 					FoundInput = str_utf8_find_nocase(PlayerName, m_aCompletionBuffer);
 					if(FoundInput != nullptr)
 					{
-						m_aPlayerCompletionList[m_PlayerCompletionListLength].ClientId = PlayerInfo->m_ClientId;
+						m_aPlayerCompletionList[m_PlayerCompletionListLength].m_ClientId = PlayerInfo->m_ClientId;
 						// The score for suggesting a player name is determined by the distance of the search input to the beginning of the player name
-						m_aPlayerCompletionList[m_PlayerCompletionListLength].Score = (int)(FoundInput - PlayerName);
+						m_aPlayerCompletionList[m_PlayerCompletionListLength].m_Score = (int)(FoundInput - PlayerName);
 						m_PlayerCompletionListLength++;
 					}
 				}
 			}
 			std::stable_sort(m_aPlayerCompletionList, m_aPlayerCompletionList + m_PlayerCompletionListLength,
 				[](const CRateablePlayer &p1, const CRateablePlayer &p2) -> bool {
-					return p1.Score < p2.Score;
+					return p1.m_Score < p2.m_Score;
 				});
 		}
 
@@ -400,7 +400,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 					m_CompletionChosen %= m_PlayerCompletionListLength;
 					m_CompletionUsed = true;
 
-					pCompletionClientData = &m_pClient->m_aClients[m_aPlayerCompletionList[m_CompletionChosen].ClientId];
+					pCompletionClientData = &m_pClient->m_aClients[m_aPlayerCompletionList[m_CompletionChosen].m_ClientId];
 					if(!pCompletionClientData->m_Active)
 					{
 						continue;
