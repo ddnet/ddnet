@@ -70,17 +70,17 @@ CChat::CChat()
 void CChat::RegisterCommand(const char *pName, const char *pParams, const char *pHelpText)
 {
 	// Don't allow duplicate commands.
-	for(const auto &Command : m_vCommands)
+	for(const auto &Command : m_vServerCommands)
 		if(str_comp(Command.m_aName, pName) == 0)
 			return;
 
-	m_vCommands.emplace_back(pName, pParams, pHelpText);
-	m_CommandsNeedSorting = true;
+	m_vServerCommands.emplace_back(pName, pParams, pHelpText);
+	m_ServerCommandsNeedSorting = true;
 }
 
 void CChat::UnregisterCommand(const char *pName)
 {
-	m_vCommands.erase(std::remove_if(m_vCommands.begin(), m_vCommands.end(), [pName](const CCommand &Command) { return str_comp(Command.m_aName, pName) == 0; }), m_vCommands.end());
+	m_vServerCommands.erase(std::remove_if(m_vServerCommands.begin(), m_vServerCommands.end(), [pName](const CCommand &Command) { return str_comp(Command.m_aName, pName) == 0; }), m_vServerCommands.end());
 }
 
 void CChat::RebuildChat()
@@ -134,10 +134,10 @@ void CChat::Reset()
 	m_IsInputCensored = false;
 	m_EditingNewLine = true;
 	m_ServerSupportsCommandInfo = false;
-	m_CommandsNeedSorting = false;
+	m_ServerCommandsNeedSorting = false;
 	mem_zero(m_aCurrentInputText, sizeof(m_aCurrentInputText));
 	DisableMode();
-	m_vCommands.clear();
+	m_vServerCommands.clear();
 
 	for(int64_t &LastSoundPlayed : m_aLastSoundPlayed)
 		LastSoundPlayed = 0;
@@ -255,10 +255,10 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 	}
 	else if(Event.m_Flags & IInput::FLAG_PRESS && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
 	{
-		if(m_CommandsNeedSorting)
+		if(m_ServerCommandsNeedSorting)
 		{
-			std::sort(m_vCommands.begin(), m_vCommands.end());
-			m_CommandsNeedSorting = false;
+			std::sort(m_vServerCommands.begin(), m_vServerCommands.end());
+			m_ServerCommandsNeedSorting = false;
 		}
 
 		SendChatQueued(m_Input.GetString());
@@ -298,24 +298,24 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 					FoundInput = str_utf8_find_nocase(PlayerName, m_aCompletionBuffer);
 					if(FoundInput != nullptr)
 					{
-						m_aPlayerCompletionList[m_PlayerCompletionListLength].ClientId = PlayerInfo->m_ClientId;
+						m_aPlayerCompletionList[m_PlayerCompletionListLength].m_ClientId = PlayerInfo->m_ClientId;
 						// The score for suggesting a player name is determined by the distance of the search input to the beginning of the player name
-						m_aPlayerCompletionList[m_PlayerCompletionListLength].Score = (int)(FoundInput - PlayerName);
+						m_aPlayerCompletionList[m_PlayerCompletionListLength].m_Score = (int)(FoundInput - PlayerName);
 						m_PlayerCompletionListLength++;
 					}
 				}
 			}
 			std::stable_sort(m_aPlayerCompletionList, m_aPlayerCompletionList + m_PlayerCompletionListLength,
 				[](const CRateablePlayer &p1, const CRateablePlayer &p2) -> bool {
-					return p1.Score < p2.Score;
+					return p1.m_Score < p2.m_Score;
 				});
 		}
 
-		if(m_aCompletionBuffer[0] == '/' && !m_vCommands.empty())
+		if(m_aCompletionBuffer[0] == '/' && !m_vServerCommands.empty())
 		{
 			CCommand *pCompletionCommand = nullptr;
 
-			const size_t NumCommands = m_vCommands.size();
+			const size_t NumCommands = m_vServerCommands.size();
 
 			if(ShiftPressed && m_CompletionUsed)
 				m_CompletionChosen--;
@@ -342,7 +342,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 					Index = (m_CompletionChosen + i) % NumCommands;
 				}
 
-				auto &Command = m_vCommands[Index];
+				auto &Command = m_vServerCommands[Index];
 
 				if(str_startswith_nocase(Command.m_aName, pCommandStart))
 				{
@@ -400,7 +400,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 					m_CompletionChosen %= m_PlayerCompletionListLength;
 					m_CompletionUsed = true;
 
-					pCompletionClientData = &m_pClient->m_aClients[m_aPlayerCompletionList[m_CompletionChosen].ClientId];
+					pCompletionClientData = &m_pClient->m_aClients[m_aPlayerCompletionList[m_CompletionChosen].m_ClientId];
 					if(!pCompletionClientData->m_Active)
 					{
 						continue;
@@ -547,7 +547,7 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_CommandInfo *pMsg = (CNetMsg_Sv_CommandInfo *)pRawMsg;
 		if(!m_ServerSupportsCommandInfo)
 		{
-			m_vCommands.clear();
+			m_vServerCommands.clear();
 			m_ServerSupportsCommandInfo = true;
 		}
 		RegisterCommand(pMsg->m_pName, pMsg->m_pArgsFormat, pMsg->m_pHelpText);
@@ -1207,9 +1207,9 @@ void CChat::OnRender()
 		m_Input.SetScrollOffsetChange(ScrollOffsetChange);
 
 		// Autocompletion hint
-		if(m_Input.GetString()[0] == '/' && m_Input.GetString()[1] != '\0' && !m_vCommands.empty())
+		if(m_Input.GetString()[0] == '/' && m_Input.GetString()[1] != '\0' && !m_vServerCommands.empty())
 		{
-			for(const auto &Command : m_vCommands)
+			for(const auto &Command : m_vServerCommands)
 			{
 				if(str_startswith_nocase(Command.m_aName, m_Input.GetString() + 1))
 				{

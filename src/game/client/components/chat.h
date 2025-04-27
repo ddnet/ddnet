@@ -84,10 +84,11 @@ class CChat : public CComponent
 	int m_PlaceholderOffset;
 	int m_PlaceholderLength;
 	static char ms_aDisplayText[MAX_LINE_LENGTH];
-	struct CRateablePlayer
+	class CRateablePlayer
 	{
-		int ClientId;
-		int Score;
+	public:
+		int m_ClientId;
+		int m_Score;
 	};
 	CRateablePlayer m_aPlayerCompletionList[MAX_CLIENTS];
 	int m_PlayerCompletionListLength;
@@ -111,8 +112,8 @@ class CChat : public CComponent
 		bool operator==(const CCommand &Other) const { return str_comp(m_aName, Other.m_aName) == 0; }
 	};
 
-	std::vector<CCommand> m_vCommands;
-	bool m_CommandsNeedSorting;
+	std::vector<CCommand> m_vServerCommands;
+	bool m_ServerCommandsNeedSorting;
 
 	struct CHistoryEntry
 	{
