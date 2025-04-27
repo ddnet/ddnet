@@ -162,7 +162,7 @@ public:
 	int Load(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType);
 	unsigned char *GetMapData(class IStorage *pStorage);
 	bool ExtractMap(class IStorage *pStorage);
-	int Play();
+	void Play();
 	void Pause() override;
 	void Unpause() override;
 	void Stop(const char *pErrorMessage = "");

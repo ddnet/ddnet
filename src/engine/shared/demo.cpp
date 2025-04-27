@@ -937,16 +937,27 @@ int64_t CDemoPlayer::Time()
 #endif
 }
 
-int CDemoPlayer::Play()
+void CDemoPlayer::Play()
 {
-	// fill in previous and next tick
-	while(m_Info.m_PreviousTick == -1 && IsPlaying())
+	// Fill in previous and next tick
+	while(m_Info.m_PreviousTick == -1)
+	{
 		DoTick();
+		if(!IsPlaying())
+		{
+			// Empty demo or error playing tick
+			return;
+		}
+	}
 
-	// set start info
+	// Initialize playback time. Using `set_new_tick` is essential so that `Time`
+	// returns the updated time, otherwise the delta between `m_LastUpdate` and
+	// the value that `Time` returns when called in the `Update` function can be
+	// very large depending on the time required to load the demo, which causes
+	// demo playback to start later. This ensures it always starts at 00:00.
+	set_new_tick();
 	m_Info.m_CurrentTime = m_Info.m_PreviousTick * time_freq() / SERVER_TICK_SPEED;
 	m_Info.m_LastUpdate = Time();
-	return 0;
 }
 
 int CDemoPlayer::SeekPercent(float Percent)
