@@ -623,7 +623,8 @@ bool CDemoPlayer::ScanFile()
 		m_vKeyFrames.clear();
 		return false;
 	}
-	return true;
+	// Cannot start playback without at least one keyframe
+	return !m_vKeyFrames.empty();
 }
 
 void CDemoPlayer::DoTick()
