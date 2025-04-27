@@ -633,14 +633,7 @@ void CDemoPlayer::DoTick()
 	m_Info.m_Info.m_CurrentTick = m_Info.m_NextTick;
 	int ChunkTick = m_Info.m_Info.m_CurrentTick;
 
-	int64_t Freq = time_freq();
-	int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
-	int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
-	m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
-	m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
-	m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
-	if(m_UpdateIntraTimesFunc)
-		m_UpdateIntraTimesFunc();
+	UpdateTimes();
 
 	bool GotSnapshot = false;
 	while(true)
@@ -1072,18 +1065,24 @@ int CDemoPlayer::Update(bool RealTime)
 		}
 	}
 
-	// update intratick
-	{
-		int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
-		int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
-		m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
-		m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
-		m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
-		if(m_UpdateIntraTimesFunc)
-			m_UpdateIntraTimesFunc();
-	}
+	UpdateTimes();
 
 	return 0;
+}
+
+void CDemoPlayer::UpdateTimes()
+{
+	const int64_t Freq = time_freq();
+	const int64_t CurrentTickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
+	const int64_t PreviousTickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
+	m_Info.m_IntraTick = (m_Info.m_CurrentTime - PreviousTickStart) / (float)(CurrentTickStart - PreviousTickStart);
+	m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PreviousTickStart) / (float)(Freq / SERVER_TICK_SPEED);
+	m_Info.m_TickTime = (m_Info.m_CurrentTime - PreviousTickStart) / (float)Freq;
+
+	if(m_UpdateIntraTimesFunc)
+	{
+		m_UpdateIntraTimesFunc();
+	}
 }
 
 void CDemoPlayer::Stop(const char *pErrorMessage)

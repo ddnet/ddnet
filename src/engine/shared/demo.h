@@ -143,6 +143,7 @@ private:
 	EReadChunkHeaderResult ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
 	bool ScanFile();
+	void UpdateTimes();
 
 	int64_t Time();
 	bool m_Sixup;
