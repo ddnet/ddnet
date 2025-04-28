@@ -22,7 +22,7 @@
 #undef ERROR
 #endif
 
-int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
+static int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
 {
 	char TypeChar;
 	switch(Type)
