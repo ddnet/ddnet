@@ -41,12 +41,13 @@ enum class IPRESOLVE
 	V6,
 };
 
-struct CTimeout
+class CTimeout
 {
-	long ConnectTimeoutMs;
-	long TimeoutMs;
-	long LowSpeedLimit;
-	long LowSpeedTime;
+public:
+	long m_ConnectTimeoutMs;
+	long m_TimeoutMs;
+	long m_LowSpeedLimit;
+	long m_LowSpeedTime;
 };
 
 class CHttpRequest : public IHttpRequest
