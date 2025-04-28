@@ -6,7 +6,8 @@
 #include "serverbrowser_ping_cache.h"
 
 #include <algorithm>
-#include <unordered_set>
+#include <map>
+#include <set>
 #include <vector>
 
 #include <base/hash_ctxt.h>
@@ -1946,7 +1947,7 @@ const std::vector<CCommunityId> &CFavoriteCommunityFilterList::Entries() const
 }
 
 template<typename TNamedElement, typename TElementName>
-static bool IsSubsetEquals(const std::vector<const TNamedElement *> &vpLeft, const std::unordered_set<TElementName> &Right)
+static bool IsSubsetEquals(const std::vector<const TNamedElement *> &vpLeft, const std::set<TElementName> &Right)
 {
 	return vpLeft.size() <= Right.size() && std::all_of(vpLeft.begin(), vpLeft.end(), [&](const TNamedElement *pElem) {
 		return Right.count(TElementName(pElem->Name())) > 0;
@@ -2140,7 +2141,7 @@ void CExcludedCommunityCountryFilterList::Clean(const std::vector<CCommunity> &v
 			}
 		}
 		// Prevent filter that would exclude all allowed countries
-		std::unordered_set<CCommunityCountryName> UniqueCountries;
+		std::set<CCommunityCountryName> UniqueCountries;
 		for(const CCommunity &AllowedCommunity : vAllowedCommunities)
 		{
 			for(const CCommunityCountry &Country : AllowedCommunity.Countries())
