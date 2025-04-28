@@ -576,7 +576,7 @@ bool CChat::LineShouldHighlight(const char *pLine, const char *pName)
 	return false;
 }
 
-const char *SAVES_HEADER[] = {
+static constexpr const char *SAVES_HEADER[] = {
 	"Time",
 	"Player",
 	"Map",
