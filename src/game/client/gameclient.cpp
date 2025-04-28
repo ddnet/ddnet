@@ -4471,78 +4471,82 @@ void CGameClient::HandleMultiView()
 {
 	bool IsTeamZero = IsMultiViewIdSet();
 	bool Init = false;
+	vec2 MinPos, MaxPos;
+	float SumVel = 0.0f;
 	int AmountPlayers = 0;
-	vec2 Minpos, Maxpos;
-	float TmpVel = 0.0f;
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
 		// look at players who are vanished
-		if(m_MultiView.m_aVanish[i])
+		if(m_MultiView.m_aVanish[ClientId])
 		{
 			// not in freeze anymore and the delay is over
-			if(m_MultiView.m_aLastFreeze[i] + 6.0f <= Client()->LocalTime() && m_aClients[i].m_FreezeEnd == 0)
+			if(m_MultiView.m_aLastFreeze[ClientId] + 6.0f <= Client()->LocalTime() && m_aClients[ClientId].m_FreezeEnd == 0)
 			{
-				m_MultiView.m_aVanish[i] = false;
-				m_MultiView.m_aLastFreeze[i] = 0.0f;
+				m_MultiView.m_aVanish[ClientId] = false;
+				m_MultiView.m_aLastFreeze[ClientId] = 0.0f;
 			}
 		}
 
 		// we look at team 0 and the player is not in the spec list
-		if(IsTeamZero && !m_aMultiViewId[i])
+		if(IsTeamZero && !m_aMultiViewId[ClientId])
 			continue;
 
 		// player is vanished
-		if(m_MultiView.m_aVanish[i])
+		if(m_MultiView.m_aVanish[ClientId])
 			continue;
 
 		// the player is not in the team we are spectating
-		if(m_Teams.Team(i) != m_MultiViewTeam)
+		if(m_Teams.Team(ClientId) != m_MultiViewTeam)
 			continue;
 
 		vec2 PlayerPos;
-		if(m_Snap.m_aCharacters[i].m_Active)
-			PlayerPos = vec2(m_aClients[i].m_RenderPos.x, m_aClients[i].m_RenderPos.y);
-		else if(m_aClients[i].m_Spec) // tee is in spec
-			PlayerPos = m_aClients[i].m_SpecChar;
+		if(m_Snap.m_aCharacters[ClientId].m_Active)
+			PlayerPos = m_aClients[ClientId].m_RenderPos;
+		else if(m_aClients[ClientId].m_Spec) // tee is in spec
+			PlayerPos = m_aClients[ClientId].m_SpecChar;
 		else
 			continue;
 
 		// player is far away and frozen
-		if(distance(m_MultiView.m_OldPos, PlayerPos) > 1100 && m_aClients[i].m_FreezeEnd != 0)
+		if(distance(m_MultiView.m_OldPos, PlayerPos) > 1100 && m_aClients[ClientId].m_FreezeEnd != 0)
 		{
 			// check if the player is frozen for more than 3 seconds, if so vanish him
-			if(m_MultiView.m_aLastFreeze[i] == 0.0f)
-				m_MultiView.m_aLastFreeze[i] = Client()->LocalTime();
-			else if(m_MultiView.m_aLastFreeze[i] + 3.0f <= Client()->LocalTime())
+			if(m_MultiView.m_aLastFreeze[ClientId] == 0.0f)
 			{
-				m_MultiView.m_aVanish[i] = true;
+				m_MultiView.m_aLastFreeze[ClientId] = Client()->LocalTime();
+			}
+			else if(m_MultiView.m_aLastFreeze[ClientId] + 3.0f <= Client()->LocalTime())
+			{
+				m_MultiView.m_aVanish[ClientId] = true;
 				// player we want to be vanished is our "main" tee, so lets switch the tee
-				if(i == m_Snap.m_SpecInfo.m_SpectatorId)
+				if(ClientId == m_Snap.m_SpecInfo.m_SpectatorId)
 					m_Spectator.Spectate(FindFirstMultiViewId());
 			}
 		}
-		else if(m_MultiView.m_aLastFreeze[i] != 0)
-			m_MultiView.m_aLastFreeze[i] = 0;
+		else if(m_MultiView.m_aLastFreeze[ClientId] != 0)
+		{
+			m_MultiView.m_aLastFreeze[ClientId] = 0;
+		}
 
 		// set the minimum and maximum position
 		if(!Init)
 		{
-			Minpos = PlayerPos;
-			Maxpos = PlayerPos;
+			MinPos = PlayerPos;
+			MaxPos = PlayerPos;
 			Init = true;
 		}
 		else
 		{
-			Minpos.x = std::min(Minpos.x, PlayerPos.x);
-			Maxpos.x = std::max(Maxpos.x, PlayerPos.x);
-			Minpos.y = std::min(Minpos.y, PlayerPos.y);
-			Maxpos.y = std::max(Maxpos.y, PlayerPos.y);
+			MinPos.x = std::min(MinPos.x, PlayerPos.x);
+			MaxPos.x = std::max(MaxPos.x, PlayerPos.x);
+			MinPos.y = std::min(MinPos.y, PlayerPos.y);
+			MaxPos.y = std::max(MaxPos.y, PlayerPos.y);
 		}
 
 		// sum up the velocity of all players we are spectating
-		const CNetObj_Character &CurrentCharacter = m_Snap.m_aCharacters[i].m_Cur;
-		TmpVel += (length(vec2(CurrentCharacter.m_VelX / 256.0f, CurrentCharacter.m_VelY / 256.0f)) * 50) / 32.0f;
+		const CNetObj_Character &CurrentCharacter = m_Snap.m_aCharacters[ClientId].m_Cur;
+		SumVel += length(vec2(CurrentCharacter.m_VelX / 256.0f, CurrentCharacter.m_VelY / 256.0f)) * 50.0f / 32.0f;
 		AmountPlayers++;
 	}
 
@@ -4550,7 +4554,9 @@ void CGameClient::HandleMultiView()
 	if(AmountPlayers == 0)
 	{
 		if(m_MultiView.m_SecondChance == 0.0f)
+		{
 			m_MultiView.m_SecondChance = Client()->LocalTime() + 0.3f;
+		}
 		else if(m_MultiView.m_SecondChance < Client()->LocalTime())
 		{
 			ResetMultiView();
@@ -4559,21 +4565,23 @@ void CGameClient::HandleMultiView()
 		return;
 	}
 	else if(m_MultiView.m_SecondChance != 0.0f)
+	{
 		m_MultiView.m_SecondChance = 0.0f;
+	}
 
 	// if we only have one tee that's in the list, we activate solo-mode
 	m_MultiView.m_Solo = std::count(std::begin(m_aMultiViewId), std::end(m_aMultiViewId), true) == 1;
 
-	vec2 TargetPos = vec2((Minpos.x + Maxpos.x) / 2.0f, (Minpos.y + Maxpos.y) / 2.0f);
+	vec2 TargetPos = vec2((MinPos.x + MaxPos.x) / 2.0f, (MinPos.y + MaxPos.y) / 2.0f);
 	// dont hide the position hud if its only one player
 	m_MultiViewShowHud = AmountPlayers == 1;
 	// get the average velocity
-	float AvgVel = clamp(TmpVel / AmountPlayers ? TmpVel / (float)AmountPlayers : 0.0f, 0.0f, 1000.0f);
+	float AvgVel = clamp(SumVel / AmountPlayers ? SumVel / (float)AmountPlayers : 0.0f, 0.0f, 1000.0f);
 
 	if(m_MultiView.m_OldPersonalZoom == m_MultiViewPersonalZoom)
-		m_Camera.SetZoom(CalculateMultiViewZoom(Minpos, Maxpos, AvgVel), g_Config.m_ClMultiViewZoomSmoothness, false);
+		m_Camera.SetZoom(CalculateMultiViewZoom(MinPos, MaxPos, AvgVel), g_Config.m_ClMultiViewZoomSmoothness, false);
 	else
-		m_Camera.SetZoom(CalculateMultiViewZoom(Minpos, Maxpos, AvgVel), 50, false);
+		m_Camera.SetZoom(CalculateMultiViewZoom(MinPos, MaxPos, AvgVel), 50, false);
 
 	m_Snap.m_SpecInfo.m_Position = m_MultiView.m_OldPos + ((TargetPos - m_MultiView.m_OldPos) * CalculateMultiViewMultiplier(TargetPos));
 	m_MultiView.m_OldPos = m_Snap.m_SpecInfo.m_Position;
@@ -4588,14 +4596,14 @@ bool CGameClient::InitMultiView(int Team)
 
 	// get the current view coordinates
 	RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), m_Camera.m_Zoom, &Width, &Height);
-	vec2 AxisX = vec2(m_Camera.m_Center.x - (Width / 2), m_Camera.m_Center.x + (Width / 2));
-	vec2 AxisY = vec2(m_Camera.m_Center.y - (Height / 2), m_Camera.m_Center.y + (Height / 2));
+	vec2 AxisX = vec2(m_Camera.m_Center.x - (Width / 2.0f), m_Camera.m_Center.x + (Width / 2.0f));
+	vec2 AxisY = vec2(m_Camera.m_Center.y - (Height / 2.0f), m_Camera.m_Center.y + (Height / 2.0f));
 
 	if(Team > 0)
 	{
 		m_MultiViewTeam = Team;
-		for(int i = 0; i < MAX_CLIENTS; i++)
-			m_aMultiViewId[i] = m_Teams.Team(i) == Team;
+		for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
+			m_aMultiViewId[ClientId] = m_Teams.Team(ClientId) == Team;
 	}
 	else
 	{
@@ -4604,15 +4612,15 @@ bool CGameClient::InitMultiView(int Team)
 		m_MultiViewTeam = -1;
 
 		int Count = 0;
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 		{
 			vec2 PlayerPos;
 
 			// get the position of the player
-			if(m_Snap.m_aCharacters[i].m_Active)
-				PlayerPos = vec2(m_Snap.m_aCharacters[i].m_Cur.m_X, m_Snap.m_aCharacters[i].m_Cur.m_Y);
-			else if(m_aClients[i].m_Spec)
-				PlayerPos = m_aClients[i].m_SpecChar;
+			if(m_Snap.m_aCharacters[ClientId].m_Active)
+				PlayerPos = vec2(m_Snap.m_aCharacters[ClientId].m_Cur.m_X, m_Snap.m_aCharacters[ClientId].m_Cur.m_Y);
+			else if(m_aClients[ClientId].m_Spec)
+				PlayerPos = m_aClients[ClientId].m_SpecChar;
 			else
 				continue;
 
@@ -4626,16 +4634,16 @@ bool CGameClient::InitMultiView(int Team)
 			if(m_MultiViewTeam == -1)
 			{
 				// use the current player's team for now, but it might switch to team 0 if any other team is found
-				m_MultiViewTeam = m_Teams.Team(i);
+				m_MultiViewTeam = m_Teams.Team(ClientId);
 			}
-			else if(m_MultiViewTeam != 0 && m_Teams.Team(i) != m_MultiViewTeam)
+			else if(m_MultiViewTeam != 0 && m_Teams.Team(ClientId) != m_MultiViewTeam)
 			{
 				// mismatched teams; remove all previously added players again and switch to team 0 instead
-				std::fill_n(m_aMultiViewId, i, false);
+				std::fill_n(m_aMultiViewId, ClientId, false);
 				m_MultiViewTeam = 0;
 			}
 
-			m_aMultiViewId[i] = true;
+			m_aMultiViewId[ClientId] = true;
 			Count++;
 		}
 
@@ -4661,23 +4669,23 @@ bool CGameClient::InitMultiView(int Team)
 		}
 
 		int ClosestDistance = std::numeric_limits<int>::max();
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 		{
-			if(!m_Snap.m_apPlayerInfos[i] || m_Snap.m_apPlayerInfos[i]->m_Team == TEAM_SPECTATORS || m_Teams.Team(i) != m_MultiViewTeam)
+			if(!m_Snap.m_apPlayerInfos[ClientId] || m_Snap.m_apPlayerInfos[ClientId]->m_Team == TEAM_SPECTATORS || m_Teams.Team(ClientId) != m_MultiViewTeam)
 				continue;
 
 			vec2 PlayerPos;
-			if(m_Snap.m_aCharacters[i].m_Active)
-				PlayerPos = vec2(m_aClients[i].m_RenderPos.x, m_aClients[i].m_RenderPos.y);
-			else if(m_aClients[i].m_Spec) // tee is in spec
-				PlayerPos = m_aClients[i].m_SpecChar;
+			if(m_Snap.m_aCharacters[ClientId].m_Active)
+				PlayerPos = vec2(m_aClients[ClientId].m_RenderPos.x, m_aClients[ClientId].m_RenderPos.y);
+			else if(m_aClients[ClientId].m_Spec) // tee is in spec
+				PlayerPos = m_aClients[ClientId].m_SpecChar;
 			else
 				continue;
 
 			int Distance = distance(CurPosition, PlayerPos);
 			if(NewSpectatorId == -1 || Distance < ClosestDistance)
 			{
-				NewSpectatorId = i;
+				NewSpectatorId = ClientId;
 				ClosestDistance = Distance;
 			}
 		}
@@ -4698,11 +4706,11 @@ float CGameClient::CalculateMultiViewMultiplier(vec2 TargetPos)
 	float CurrentCameraDistance = distance(m_MultiView.m_OldPos, TargetPos);
 	float UpperLimit = 1.0f;
 
-	if(m_MultiView.m_Teleported && CurrentCameraDistance <= 100)
+	if(m_MultiView.m_Teleported && CurrentCameraDistance <= 100.0f)
 		m_MultiView.m_Teleported = false;
 
 	// somebody got teleported very likely
-	if((m_MultiView.m_Teleported || CurrentCameraDistance - m_MultiView.m_OldCameraDistance > 100) && m_MultiView.m_OldCameraDistance != 0.0f)
+	if((m_MultiView.m_Teleported || CurrentCameraDistance - m_MultiView.m_OldCameraDistance > 100.0f) && m_MultiView.m_OldCameraDistance != 0.0f)
 	{
 		UpperLimit = 0.1f; // dont try to compensate it by flickering
 		m_MultiView.m_Teleported = true;
@@ -4719,7 +4727,7 @@ float CGameClient::CalculateMultiViewZoom(vec2 MinPos, vec2 MaxPos, float Vel)
 
 	// only calc two axis if the aspect ratio is not 1:1
 	if(Ratio != 1.0f)
-		ZoomX = (0.001309f - 0.000328 * Ratio) * (MaxPos.x - MinPos.x) + (0.741413f - 0.032959 * Ratio);
+		ZoomX = (0.001309f - 0.000328f * Ratio) * (MaxPos.x - MinPos.x) + (0.741413f - 0.032959f * Ratio);
 
 	// calculate the according zoom with linear function
 	ZoomY = 0.001309f * (MaxPos.y - MinPos.y) + 0.741413f;
@@ -4732,7 +4740,7 @@ float CGameClient::CalculateMultiViewZoom(vec2 MinPos, vec2 MaxPos, float Vel)
 	// dont go below default zoom
 	Zoom = std::max(CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10), Zoom);
 	// add the user preference
-	Zoom -= (Zoom * 0.1f) * m_MultiViewPersonalZoom;
+	Zoom -= Zoom * 0.1f * m_MultiViewPersonalZoom;
 	m_MultiView.m_OldPersonalZoom = m_MultiViewPersonalZoom;
 
 	return Zoom;
