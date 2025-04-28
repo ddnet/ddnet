@@ -22,7 +22,7 @@
 #undef ERROR
 #endif
 
-int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
+static int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
 {
 	char TypeChar;
 	switch(Type)
@@ -167,10 +167,10 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 
 	curl_easy_setopt(pH, CURLOPT_ERRORBUFFER, m_aErr);
 
-	curl_easy_setopt(pH, CURLOPT_CONNECTTIMEOUT_MS, m_Timeout.ConnectTimeoutMs);
-	curl_easy_setopt(pH, CURLOPT_TIMEOUT_MS, m_Timeout.TimeoutMs);
-	curl_easy_setopt(pH, CURLOPT_LOW_SPEED_LIMIT, m_Timeout.LowSpeedLimit);
-	curl_easy_setopt(pH, CURLOPT_LOW_SPEED_TIME, m_Timeout.LowSpeedTime);
+	curl_easy_setopt(pH, CURLOPT_CONNECTTIMEOUT_MS, m_Timeout.m_ConnectTimeoutMs);
+	curl_easy_setopt(pH, CURLOPT_TIMEOUT_MS, m_Timeout.m_TimeoutMs);
+	curl_easy_setopt(pH, CURLOPT_LOW_SPEED_LIMIT, m_Timeout.m_LowSpeedLimit);
+	curl_easy_setopt(pH, CURLOPT_LOW_SPEED_TIME, m_Timeout.m_LowSpeedTime);
 	if(m_MaxResponseSize >= 0)
 	{
 		curl_easy_setopt(pH, CURLOPT_MAXFILESIZE_LARGE, (curl_off_t)m_MaxResponseSize);
