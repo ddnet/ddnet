@@ -195,7 +195,7 @@ void CMapSounds::OnRender()
 			continue;
 
 		ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-		CMapLayers::EnvelopeEval(Source.m_pSource->m_PosEnvOffset, Source.m_pSource->m_PosEnv, Position, 2, &m_pClient->m_MapLayersBackground);
+		GameClient()->m_MapLayersBackground.EnvelopeEval(Source.m_pSource->m_PosEnvOffset, Source.m_pSource->m_PosEnv, Position, 2);
 
 		float x = fx2f(Source.m_pSource->m_Position.x) + Position.r;
 		float y = fx2f(Source.m_pSource->m_Position.y) + Position.g;
@@ -209,7 +209,7 @@ void CMapSounds::OnRender()
 		Sound()->SetVoicePosition(Source.m_Voice, vec2(x, y));
 
 		ColorRGBA Volume = ColorRGBA(1.0f, 0.0f, 0.0f, 0.0f);
-		CMapLayers::EnvelopeEval(Source.m_pSource->m_SoundEnvOffset, Source.m_pSource->m_SoundEnv, Volume, 1, &m_pClient->m_MapLayersBackground);
+		GameClient()->m_MapLayersBackground.EnvelopeEval(Source.m_pSource->m_SoundEnvOffset, Source.m_pSource->m_SoundEnv, Volume, 1);
 		if(Volume.r < 1.0f)
 		{
 			Sound()->SetVoiceVolume(Source.m_Voice, Volume.r);
