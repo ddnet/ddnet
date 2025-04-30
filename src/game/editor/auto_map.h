@@ -80,7 +80,7 @@ public:
 	void ProceedLocalized(class CLayerTiles *pLayer, class CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed = 0, int X = 0, int Y = 0, int Width = -1, int Height = -1);
 	void Proceed(class CLayerTiles *pLayer, class CLayerTiles *pGameLayer, int ReferenceId, int ConfigId, int Seed = 0, int SeedOffsetX = 0, int SeedOffsetY = 0);
 	int ConfigNamesNum() const { return m_vConfigs.size(); }
-	const char *GetConfigName(int Index);
+	const char *GetConfigName(int Index) const;
 
 	bool IsLoaded() const { return m_FileLoaded; }
 
