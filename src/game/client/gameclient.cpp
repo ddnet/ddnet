@@ -580,21 +580,21 @@ void CGameClient::OnConnected()
 		pComponent->OnReset();
 	}
 
-	Client()->SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_GETTING_READY);
-	m_Menus.RenderLoading(pConnectCaption, Localize("Sending initial client info"), 0);
-
-	// send the initial info
-	SendInfo(true);
-	// we should keep this in for now, because otherwise you can't spectate
-	// people at start as the other info 64 packet is only sent after the first
-	// snap
-	Client()->Rcon("crashmeplx");
-
 	ConfigManager()->ResetGameSettings();
 	LoadMapSettings();
 
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
+		Client()->SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_GETTING_READY);
+		m_Menus.RenderLoading(pConnectCaption, Localize("Sending initial client info"), 0);
+
+		// send the initial info
+		SendInfo(true);
+		// we should keep this in for now, because otherwise you can't spectate
+		// people at start as the other info 64 packet is only sent after the first
+		// snap
+		Client()->Rcon("crashmeplx");
+
 		if(g_Config.m_ClAutoDemoOnConnect)
 			Client()->DemoRecorder_HandleAutoStart();
 
