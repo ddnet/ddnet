@@ -764,7 +764,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, bool Self)
 	Data.m_FontSizeClan = FontSizeClan;
 
 	Data.m_ShowDirection = !Self || g_Config.m_ClShowDirection >= 2;
-	Data.m_DirLeft = Data.m_DirJump = Data.m_DirRight = !Self || g_Config.m_ClShowDirection >= 2;
+	Data.m_DirLeft = Data.m_DirJump = Data.m_DirRight = true;
 	Data.m_FontSizeDirection = FontSizeDirection;
 
 	Data.m_FontSizeHookStrongWeak = FontSizeHookStrongWeak;
