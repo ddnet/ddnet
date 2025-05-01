@@ -1,3 +1,5 @@
+#include <base/system.h>
+
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/textrender.h>
@@ -730,7 +732,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	NamePlate.Render(*GameClient(), Position - vec2(0.0f, (float)g_Config.m_ClNamePlatesOffset));
 }
 
-void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
+void CNamePlates::RenderNamePlatePreview(vec2 Position, bool Self)
 {
 	const float FontSize = 18.0f + 20.0f * g_Config.m_ClNamePlatesSize / 100.0f;
 	const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNamePlatesClanSize / 100.0f;
@@ -745,63 +747,54 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	Data.m_Color.a = 1.0f;
 
 	Data.m_ShowName = g_Config.m_ClNamePlates || g_Config.m_ClNamePlatesOwn;
-	Data.m_pName = Dummy == 0 ? Client()->PlayerName() : Client()->DummyName();
+	Data.m_pName = Self ? Client()->PlayerName() : "OtherTee";
 	Data.m_FontSize = FontSize;
 
 	Data.m_ShowFriendMark = Data.m_ShowName && g_Config.m_ClNamePlatesFriendMark;
 
 	Data.m_ShowClientId = Data.m_ShowName && (g_Config.m_Debug || g_Config.m_ClNamePlatesIds);
-	Data.m_ClientId = Dummy + 1;
+	Data.m_ClientId = Self ? 1 : 2;
 	Data.m_ClientIdSeperateLine = g_Config.m_ClNamePlatesIdsSeperateLine;
 	Data.m_FontSizeClientId = Data.m_ClientIdSeperateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
-	Data.m_pClan = Dummy == 0 ? g_Config.m_PlayerClan : g_Config.m_ClDummyClan;
+	Data.m_pClan = Self ? g_Config.m_PlayerClan : "OtherClan";
 	if(!Data.m_pClan[0])
 		Data.m_pClan = "Clan Name";
 	Data.m_FontSizeClan = FontSizeClan;
 
-	Data.m_ShowDirection = g_Config.m_ClShowDirection != 0 ? true : false;
-	Data.m_DirLeft = Data.m_DirJump = Data.m_DirRight = true;
+	Data.m_ShowDirection = !Self || g_Config.m_ClShowDirection >= 2;
+	Data.m_DirLeft = Data.m_DirJump = Data.m_DirRight = !Self || g_Config.m_ClShowDirection >= 2;
 	Data.m_FontSizeDirection = FontSizeDirection;
 
 	Data.m_FontSizeHookStrongWeak = FontSizeHookStrongWeak;
 	Data.m_HookStrongWeakId = Data.m_ClientId;
 	Data.m_ShowHookStrongWeakId = g_Config.m_ClNamePlatesStrong == 2;
-	if(Dummy == g_Config.m_ClDummy)
-	{
-		Data.m_HookStrongWeakState = EHookStrongWeakState::NEUTRAL;
-		Data.m_ShowHookStrongWeak = Data.m_ShowHookStrongWeakId;
-	}
-	else
-	{
-		Data.m_HookStrongWeakState = Data.m_HookStrongWeakId == 2 ? EHookStrongWeakState::STRONG : EHookStrongWeakState::WEAK;
-		Data.m_ShowHookStrongWeak = g_Config.m_ClNamePlatesStrong > 0;
-	}
+	Data.m_ShowHookStrongWeak = g_Config.m_ClNamePlatesStrong > 0;
+
+	auto Now = time_get() / (3 * time_freq());
+	EHookStrongWeakState State = static_cast<EHookStrongWeakState>(Now % 3);
+	Data.m_HookStrongWeakState = State;
 
 	CTeeRenderInfo TeeRenderInfo;
-	if(Dummy == 0)
+	if(Self)
 	{
 		TeeRenderInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClPlayerSkin));
 		TeeRenderInfo.ApplyColors(g_Config.m_ClPlayerUseCustomColor, g_Config.m_ClPlayerColorBody, g_Config.m_ClPlayerColorFeet);
 	}
 	else
 	{
-		TeeRenderInfo.Apply(m_pClient->m_Skins.Find(g_Config.m_ClDummySkin));
-		TeeRenderInfo.ApplyColors(g_Config.m_ClDummyUseCustomColor, g_Config.m_ClDummyColorBody, g_Config.m_ClDummyColorFeet);
+		TeeRenderInfo.Apply(m_pClient->m_Skins.Find("bluekitty"));
 	}
 	TeeRenderInfo.m_Size = 64.0f;
 
 	CNamePlate NamePlate(*GameClient(), Data);
-	Position.y += NamePlate.Size().y / 2.0f;
-	Position.y += (float)g_Config.m_ClNamePlatesOffset / 2.0f;
 	vec2 Dir = Ui()->MousePos() - Position;
 	Dir /= TeeRenderInfo.m_Size;
 	const float Length = length(Dir);
 	if(Length > 1.0f)
 		Dir /= Length;
 	RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeRenderInfo, 0, Dir, Position);
-	Position.y -= (float)g_Config.m_ClNamePlatesOffset;
 	NamePlate.Render(*GameClient(), Position - vec2(0.0f, (float)g_Config.m_ClNamePlatesOffset));
 	NamePlate.Reset(*GameClient());
 }

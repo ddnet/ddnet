@@ -2866,14 +2866,12 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// ***** Name Plate Dummy Preview ***** //
 		RightView.HSplitBottom(LineSize, &RightView, &Button);
-		if(DoButton_CheckBox(&m_DummyNamePlatePreview, g_Config.m_ClDummy ? Localize("Preview player's name plate") : Localize("Preview dummy's name plate"), m_DummyNamePlatePreview, &Button))
-			m_DummyNamePlatePreview = !m_DummyNamePlatePreview;
-
-		int Dummy = g_Config.m_ClDummy != (m_DummyNamePlatePreview ? 1 : 0);
+		if(DoButton_CheckBox(&m_OtherNamePlatePreview, Localize("Preview other players name plate"), m_OtherNamePlatePreview, &Button))
+			m_OtherNamePlatePreview = !m_OtherNamePlatePreview;
 
 		const vec2 Position = RightView.Center();
 
-		GameClient()->m_NamePlates.RenderNamePlatePreview(Position, Dummy);
+		GameClient()->m_NamePlates.RenderNamePlatePreview(Position, !m_OtherNamePlatePreview);
 	}
 	else if(s_CurTab == APPEARANCE_TAB_HOOK_COLLISION)
 	{
