@@ -17,7 +17,7 @@ EInputPriority CLineInput::ms_ActiveInputPriority = EInputPriority::NONE;
 vec2 CLineInput::ms_CompositionWindowPosition = vec2(0.0f, 0.0f);
 float CLineInput::ms_CompositionLineHeight = 0.0f;
 
-char CLineInput::ms_aStars[128] = {'\0'};
+char CLineInput::ms_aStars[128] = "";
 
 void CLineInput::SetBuffer(char *pStr, size_t MaxSize, size_t MaxChars)
 {

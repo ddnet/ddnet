@@ -20,7 +20,7 @@
 
 #include "chat.h"
 
-char CChat::ms_aDisplayText[MAX_LINE_LENGTH] = {'\0'};
+char CChat::ms_aDisplayText[MAX_LINE_LENGTH] = "";
 
 CChat::CChat()
 {
