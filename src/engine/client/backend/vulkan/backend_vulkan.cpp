@@ -3800,7 +3800,7 @@ public:
 
 		if(m_pGpuList->m_vGpus.empty())
 		{
-			dbg_msg("vulkan", "no devices with required vulkan version found.");
+			SetWarning(EGfxWarningType::GFX_WARNING_TYPE_INIT_FAILED_NO_DEVICE_WITH_REQUIRED_VERSION, "No devices with required vulkan version found.");
 			return false;
 		}
 

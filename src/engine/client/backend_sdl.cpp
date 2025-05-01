@@ -319,6 +319,14 @@ void CCommandProcessor_SDL_GL::HandleWarning()
 	case GFX_WARNING_LOW_ON_MEMORY:
 		// ignore this warning for now
 		return;
+	case GFX_WARNING_TYPE_INIT_FAILED_NO_DEVICE_WITH_REQUIRED_VERSION:
+	{
+		// Ignore this warning for now completely.
+		// A console message was already printed by the backend
+		m_Warning.m_WarningType = GFX_WARNING_TYPE_NONE;
+		m_Warning.m_vWarnings.clear();
+		return;
+	}
 	default:
 		dbg_assert(false, "Unhandled graphics warning type %d", (int)m_Warning.m_WarningType);
 		dbg_break();
