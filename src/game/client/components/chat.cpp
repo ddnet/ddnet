@@ -22,15 +22,26 @@
 
 char CChat::ms_aDisplayText[MAX_LINE_LENGTH] = "";
 
+CChat::CLine::CLine()
+{
+	m_TextContainerIndex.Reset();
+	m_QuadContainerIndex = -1;
+}
+
+void CChat::CLine::Reset(CChat &This)
+{
+	This.TextRender()->DeleteTextContainer(m_TextContainerIndex);
+	This.Graphics()->DeleteQuadContainer(m_QuadContainerIndex);
+	m_Time = 0;
+	m_aText[0] = '\0';
+	m_aName[0] = '\0';
+	m_Friend = false;
+	m_TimesRepeated = 0;
+	m_pManagedTeeRenderInfo = nullptr;
+}
+
 CChat::CChat()
 {
-	for(auto &Line : m_aLines)
-	{
-		// reset the container indices, so the text containers can be deleted on reset
-		Line.m_TextContainerIndex.Reset();
-		Line.m_QuadContainerIndex = -1;
-	}
-
 	m_Mode = MODE_NONE;
 
 	m_Input.SetClipboardLineCallback([this](const char *pStr) { SendChatQueued(pStr); });
@@ -98,16 +109,7 @@ void CChat::RebuildChat()
 void CChat::ClearLines()
 {
 	for(auto &Line : m_aLines)
-	{
-		TextRender()->DeleteTextContainer(Line.m_TextContainerIndex);
-		Graphics()->DeleteQuadContainer(Line.m_QuadContainerIndex);
-		Line.m_Time = 0;
-		Line.m_aText[0] = 0;
-		Line.m_aName[0] = 0;
-		Line.m_Friend = false;
-		Line.m_TimesRepeated = 0;
-		Line.m_pManagedTeeRenderInfo = nullptr;
-	}
+		Line.Reset(*this);
 	m_PrevScoreBoardShowed = false;
 	m_PrevShowChat = false;
 }
@@ -746,9 +748,9 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	}
 
 	m_CurrentLine = (m_CurrentLine + 1) % MAX_LINES;
-
 	pCurrentLine = &m_aLines[m_CurrentLine];
-	pCurrentLine->m_TimesRepeated = 0;
+	pCurrentLine->Reset(*this);
+
 	pCurrentLine->m_Time = time();
 	pCurrentLine->m_aYOffset[0] = -1.0f;
 	pCurrentLine->m_aYOffset[1] = -1.0f;
@@ -757,12 +759,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	pCurrentLine->m_Team = Team == 1;
 	pCurrentLine->m_Whisper = Team >= 2;
 	pCurrentLine->m_NameColor = -2;
-	pCurrentLine->m_Friend = false;
 	pCurrentLine->m_CustomColor = CustomColor;
-	pCurrentLine->m_pManagedTeeRenderInfo = nullptr;
-
-	TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
-	Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
 
 	// check for highlighted name
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
