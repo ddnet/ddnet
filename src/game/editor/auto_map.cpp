@@ -377,11 +377,12 @@ int CAutoMapper::CheckIndexFlag(int Flag, const char *pFlag, bool CheckNone) con
 	return Flag;
 }
 
-const char *CAutoMapper::GetConfigName(int Index)
+const char *CAutoMapper::GetConfigName(int Index) const
 {
 	if(Index < 0 || Index >= (int)m_vConfigs.size())
-		return "";
-
+	{
+		return "(unknown)";
+	}
 	return m_vConfigs[Index].m_aName;
 }
 
