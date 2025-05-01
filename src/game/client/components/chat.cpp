@@ -679,43 +679,43 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 
 	bool Highlighted = false;
 
-	auto &&FChatMsgCheckAndPrint = [this](CLine *pLine_) {
-		if(pLine_->m_ClientId < 0) // server or client message
+	auto &&FChatMsgCheckAndPrint = [this](const CLine &Line) {
+		if(Line.m_ClientId < 0) // server or client message
 		{
 			if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
-				StoreSave(pLine_->m_aText);
+				StoreSave(Line.m_aText);
 		}
 
 		char aBuf[1024];
-		str_format(aBuf, sizeof(aBuf), "%s%s%s", pLine_->m_aName, pLine_->m_ClientId >= 0 ? ": " : "", pLine_->m_aText);
+		str_format(aBuf, sizeof(aBuf), "%s%s%s", Line.m_aName, Line.m_ClientId >= 0 ? ": " : "", Line.m_aText);
 
 		ColorRGBA ChatLogColor{1, 1, 1, 1};
-		if(pLine_->m_Highlighted)
+		if(Line.m_Highlighted)
 		{
 			ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor));
 		}
 		else
 		{
-			if(pLine_->m_Friend && g_Config.m_ClMessageFriend)
+			if(Line.m_Friend && g_Config.m_ClMessageFriend)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
-			else if(pLine_->m_Team)
+			else if(Line.m_Team)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageTeamColor));
-			else if(pLine_->m_ClientId == SERVER_MSG)
+			else if(Line.m_ClientId == SERVER_MSG)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageSystemColor));
-			else if(pLine_->m_ClientId == CLIENT_MSG)
+			else if(Line.m_ClientId == CLIENT_MSG)
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
 			else // regular message
 				ChatLogColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageColor));
 		}
 
 		const char *pFrom;
-		if(pLine_->m_Whisper)
+		if(Line.m_Whisper)
 			pFrom = "chat/whisper";
-		else if(pLine_->m_Team)
+		else if(Line.m_Team)
 			pFrom = "chat/team";
-		else if(pLine_->m_ClientId == SERVER_MSG)
+		else if(Line.m_ClientId == SERVER_MSG)
 			pFrom = "chat/server";
-		else if(pLine_->m_ClientId == CLIENT_MSG)
+		else if(Line.m_ClientId == CLIENT_MSG)
 			pFrom = "chat/client";
 		else
 			pFrom = "chat/all";
@@ -743,7 +743,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		pCurrentLine->m_aYOffset[0] = -1.0f;
 		pCurrentLine->m_aYOffset[1] = -1.0f;
 
-		FChatMsgCheckAndPrint(pCurrentLine);
+		FChatMsgCheckAndPrint(*pCurrentLine);
 		return;
 	}
 
@@ -846,7 +846,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		}
 	}
 
-	FChatMsgCheckAndPrint(pCurrentLine);
+	FChatMsgCheckAndPrint(*pCurrentLine);
 
 	// play sound
 	int64_t Now = time();
