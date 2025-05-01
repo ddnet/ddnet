@@ -728,38 +728,38 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	if(ClientId == CLIENT_MSG)
 		CustomColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
 
-	CLine *pCurrentLine = &m_aLines[m_CurrentLine];
+	CLine &CurrentLine = m_aLines[m_CurrentLine];
 
 	// Team Number:
 	// 0 = global; 1 = team; 2 = sending whisper; 3 = receiving whisper
 
 	// If it's a client message, m_aText will have ": " prepended so we have to work around it.
-	if(pCurrentLine->m_TeamNumber == Team && pCurrentLine->m_ClientId == ClientId && str_comp(pCurrentLine->m_aText, pLine) == 0 && pCurrentLine->m_CustomColor == CustomColor)
+	if(CurrentLine.m_TeamNumber == Team && CurrentLine.m_ClientId == ClientId && str_comp(CurrentLine.m_aText, pLine) == 0 && CurrentLine.m_CustomColor == CustomColor)
 	{
-		pCurrentLine->m_TimesRepeated++;
-		TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
-		Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
-		pCurrentLine->m_Time = time();
-		pCurrentLine->m_aYOffset[0] = -1.0f;
-		pCurrentLine->m_aYOffset[1] = -1.0f;
+		CurrentLine.m_TimesRepeated++;
+		TextRender()->DeleteTextContainer(CurrentLine.m_TextContainerIndex);
+		Graphics()->DeleteQuadContainer(CurrentLine.m_QuadContainerIndex);
+		CurrentLine.m_Time = time();
+		CurrentLine.m_aYOffset[0] = -1.0f;
+		CurrentLine.m_aYOffset[1] = -1.0f;
 
-		FChatMsgCheckAndPrint(*pCurrentLine);
+		FChatMsgCheckAndPrint(CurrentLine);
 		return;
 	}
 
 	m_CurrentLine = (m_CurrentLine + 1) % MAX_LINES;
-	pCurrentLine = &m_aLines[m_CurrentLine];
-	pCurrentLine->Reset(*this);
+	CurrentLine = m_aLines[m_CurrentLine];
+	CurrentLine.Reset(*this);
 
-	pCurrentLine->m_Time = time();
-	pCurrentLine->m_aYOffset[0] = -1.0f;
-	pCurrentLine->m_aYOffset[1] = -1.0f;
-	pCurrentLine->m_ClientId = ClientId;
-	pCurrentLine->m_TeamNumber = Team;
-	pCurrentLine->m_Team = Team == 1;
-	pCurrentLine->m_Whisper = Team >= 2;
-	pCurrentLine->m_NameColor = -2;
-	pCurrentLine->m_CustomColor = CustomColor;
+	CurrentLine.m_Time = time();
+	CurrentLine.m_aYOffset[0] = -1.0f;
+	CurrentLine.m_aYOffset[1] = -1.0f;
+	CurrentLine.m_ClientId = ClientId;
+	CurrentLine.m_TeamNumber = Team;
+	CurrentLine.m_Team = Team == 1;
+	CurrentLine.m_Whisper = Team >= 2;
+	CurrentLine.m_NameColor = -2;
+	CurrentLine.m_CustomColor = CustomColor;
 
 	// check for highlighted name
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -779,74 +779,74 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		Highlighted |= m_pClient->m_Snap.m_LocalClientId >= 0 && LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_aName);
 	}
 
-	pCurrentLine->m_Highlighted = Highlighted;
+	CurrentLine.m_Highlighted = Highlighted;
 
-	if(pCurrentLine->m_ClientId == SERVER_MSG)
+	if(CurrentLine.m_ClientId == SERVER_MSG)
 	{
-		str_copy(pCurrentLine->m_aName, "*** ");
-		str_copy(pCurrentLine->m_aText, pLine);
+		str_copy(CurrentLine.m_aName, "*** ");
+		str_copy(CurrentLine.m_aText, pLine);
 	}
-	else if(pCurrentLine->m_ClientId == CLIENT_MSG)
+	else if(CurrentLine.m_ClientId == CLIENT_MSG)
 	{
-		str_copy(pCurrentLine->m_aName, "— ");
-		str_copy(pCurrentLine->m_aText, pLine);
+		str_copy(CurrentLine.m_aName, "— ");
+		str_copy(CurrentLine.m_aText, pLine);
 	}
 	else
 	{
-		const auto &LineAuthor = m_pClient->m_aClients[pCurrentLine->m_ClientId];
+		const auto &LineAuthor = m_pClient->m_aClients[CurrentLine.m_ClientId];
 
 		if(LineAuthor.m_Active)
 		{
 			if(LineAuthor.m_Team == TEAM_SPECTATORS)
-				pCurrentLine->m_NameColor = TEAM_SPECTATORS;
+				CurrentLine.m_NameColor = TEAM_SPECTATORS;
 
 			if(m_pClient->IsTeamPlay())
 			{
 				if(LineAuthor.m_Team == TEAM_RED)
-					pCurrentLine->m_NameColor = TEAM_RED;
+					CurrentLine.m_NameColor = TEAM_RED;
 				else if(LineAuthor.m_Team == TEAM_BLUE)
-					pCurrentLine->m_NameColor = TEAM_BLUE;
+					CurrentLine.m_NameColor = TEAM_BLUE;
 			}
 		}
 
 		if(Team == TEAM_WHISPER_SEND)
 		{
-			str_copy(pCurrentLine->m_aName, "→");
+			str_copy(CurrentLine.m_aName, "→");
 			if(LineAuthor.m_Active)
 			{
-				str_append(pCurrentLine->m_aName, " ");
-				str_append(pCurrentLine->m_aName, LineAuthor.m_aName);
+				str_append(CurrentLine.m_aName, " ");
+				str_append(CurrentLine.m_aName, LineAuthor.m_aName);
 			}
-			pCurrentLine->m_NameColor = TEAM_BLUE;
-			pCurrentLine->m_Highlighted = false;
+			CurrentLine.m_NameColor = TEAM_BLUE;
+			CurrentLine.m_Highlighted = false;
 			Highlighted = false;
 		}
 		else if(Team == TEAM_WHISPER_RECV)
 		{
-			str_copy(pCurrentLine->m_aName, "←");
+			str_copy(CurrentLine.m_aName, "←");
 			if(LineAuthor.m_Active)
 			{
-				str_append(pCurrentLine->m_aName, " ");
-				str_append(pCurrentLine->m_aName, LineAuthor.m_aName);
+				str_append(CurrentLine.m_aName, " ");
+				str_append(CurrentLine.m_aName, LineAuthor.m_aName);
 			}
-			pCurrentLine->m_NameColor = TEAM_RED;
-			pCurrentLine->m_Highlighted = true;
+			CurrentLine.m_NameColor = TEAM_RED;
+			CurrentLine.m_Highlighted = true;
 			Highlighted = true;
 		}
 		else
 		{
-			str_copy(pCurrentLine->m_aName, LineAuthor.m_aName);
+			str_copy(CurrentLine.m_aName, LineAuthor.m_aName);
 		}
-		str_copy(pCurrentLine->m_aText, pLine);
+		str_copy(CurrentLine.m_aText, pLine);
 
 		if(LineAuthor.m_Active)
 		{
-			pCurrentLine->m_Friend = LineAuthor.m_Friend;
-			pCurrentLine->m_pManagedTeeRenderInfo = GameClient()->CreateManagedTeeRenderInfo(LineAuthor);
+			CurrentLine.m_Friend = LineAuthor.m_Friend;
+			CurrentLine.m_pManagedTeeRenderInfo = GameClient()->CreateManagedTeeRenderInfo(LineAuthor);
 		}
 	}
 
-	FChatMsgCheckAndPrint(*pCurrentLine);
+	FChatMsgCheckAndPrint(CurrentLine);
 
 	// play sound
 	int64_t Now = time();
