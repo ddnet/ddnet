@@ -101,8 +101,8 @@ void CChat::RebuildChat()
 		TextRender()->DeleteTextContainer(Line.m_TextContainerIndex);
 		Graphics()->DeleteQuadContainer(Line.m_QuadContainerIndex);
 		// recalculate sizes
-		Line.m_aYOffset[0] = -1.f;
-		Line.m_aYOffset[1] = -1.f;
+		Line.m_aYOffset[0] = -1.0f;
+		Line.m_aYOffset[1] = -1.0f;
 	}
 }
 
@@ -740,8 +740,8 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
 		Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
 		pCurrentLine->m_Time = time();
-		pCurrentLine->m_aYOffset[0] = -1.f;
-		pCurrentLine->m_aYOffset[1] = -1.f;
+		pCurrentLine->m_aYOffset[0] = -1.0f;
+		pCurrentLine->m_aYOffset[1] = -1.0f;
 
 		FChatMsgCheckAndPrint(pCurrentLine);
 		return;
@@ -928,7 +928,7 @@ void CChat::OnPrepareLines(float y)
 	}
 
 	int64_t Now = time();
-	float LineWidth = (IsScoreBoardOpen ? maximum(85.f, (FontSize * 85.0f / 6.f)) : g_Config.m_ClChatWidth) - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
+	float LineWidth = (IsScoreBoardOpen ? maximum(85.0f, (FontSize * 85.0f / 6.0f)) : g_Config.m_ClChatWidth) - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
 
 	float HeightLimit = IsScoreBoardOpen ? 180.0f : (m_PrevShowChat ? 50.0f : 200.0f);
 	float Begin = x;
@@ -1024,7 +1024,7 @@ void CChat::OnPrepareLines(float y)
 			break;
 
 		// the position the text was created
-		Line.m_TextYOffset = y + RealMsgPaddingY / 2.f;
+		Line.m_TextYOffset = y + RealMsgPaddingY / 2.0f;
 
 		int CurRenderFlags = TextRender()->GetRenderFlags();
 		TextRender()->SetRenderFlags(CurRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_AUTOMATIC_QUAD_UPLOAD);
@@ -1040,7 +1040,7 @@ void CChat::OnPrepareLines(float y)
 
 			if(Line.m_Friend && g_Config.m_ClMessageFriend)
 			{
-				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor)).WithAlpha(1.f));
+				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor)).WithAlpha(1.0f));
 				TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, "♥ ");
 			}
 		}
@@ -1056,15 +1056,15 @@ void CChat::OnPrepareLines(float y)
 		else if(Line.m_Team)
 			NameColor = CalculateNameColor(ColorHSLA(g_Config.m_ClMessageTeamColor));
 		else if(Line.m_NameColor == TEAM_RED)
-			NameColor = ColorRGBA(1.0f, 0.5f, 0.5f, 1.f);
+			NameColor = ColorRGBA(1.0f, 0.5f, 0.5f, 1.0f);
 		else if(Line.m_NameColor == TEAM_BLUE)
-			NameColor = ColorRGBA(0.7f, 0.7f, 1.0f, 1.f);
+			NameColor = ColorRGBA(0.7f, 0.7f, 1.0f, 1.0f);
 		else if(Line.m_NameColor == TEAM_SPECTATORS)
-			NameColor = ColorRGBA(0.75f, 0.5f, 0.75f, 1.f);
+			NameColor = ColorRGBA(0.75f, 0.5f, 0.75f, 1.0f);
 		else if(Line.m_ClientId >= 0 && g_Config.m_ClChatTeamColors && m_pClient->m_Teams.Team(Line.m_ClientId))
 			NameColor = m_pClient->GetDDTeamColor(m_pClient->m_Teams.Team(Line.m_ClientId), 0.75f);
 		else
-			NameColor = ColorRGBA(0.8f, 0.8f, 0.8f, 1.f);
+			NameColor = ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
 
 		TextRender()->TextColor(NameColor);
 		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &Cursor, aClientId);
@@ -1155,8 +1155,8 @@ void CChat::OnRender()
 	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
 
 	float x = 5.0f;
-	float y = 300.0f - 20.0f * FontSize() / 6.f;
-	float ScaledFontSize = FontSize() * (8 / 6.f);
+	float y = 300.0f - 20.0f * FontSize() / 6.0f;
+	float ScaledFontSize = FontSize() * (8.0f / 6.0f);
 	if(m_Mode != MODE_NONE)
 	{
 		// render chat input
