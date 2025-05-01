@@ -291,6 +291,12 @@ void CRenderTools::GetRenderTeeFeetSize(const CAnimState *pAnim, const CTeeRende
 
 void CRenderTools::GetRenderTeeOffsetToRenderedTee(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, vec2 &TeeOffsetToMid)
 {
+	if(pInfo->m_aSixup[g_Config.m_ClDummy].PartTexture(protocol7::SKINPART_BODY).IsValid())
+	{
+		TeeOffsetToMid = vec2(0.0f, pInfo->m_Size * 0.12f);
+		return;
+	}
+
 	float AnimScale, BaseSize;
 	GetRenderTeeAnimScaleAndBaseSize(pInfo, AnimScale, BaseSize);
 	vec2 BodyPos = vec2(pAnim->GetBody()->m_X, pAnim->GetBody()->m_Y) * AnimScale;
