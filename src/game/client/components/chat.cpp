@@ -728,27 +728,28 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	if(ClientId == CLIENT_MSG)
 		CustomColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageClientColor));
 
-	CLine &CurrentLine = m_aLines[m_CurrentLine];
+	CLine &PreviousLine = m_aLines[m_CurrentLine];
 
 	// Team Number:
 	// 0 = global; 1 = team; 2 = sending whisper; 3 = receiving whisper
 
 	// If it's a client message, m_aText will have ": " prepended so we have to work around it.
-	if(CurrentLine.m_TeamNumber == Team && CurrentLine.m_ClientId == ClientId && str_comp(CurrentLine.m_aText, pLine) == 0 && CurrentLine.m_CustomColor == CustomColor)
+	if(PreviousLine.m_TeamNumber == Team && PreviousLine.m_ClientId == ClientId && str_comp(PreviousLine.m_aText, pLine) == 0 && PreviousLine.m_CustomColor == CustomColor)
 	{
-		CurrentLine.m_TimesRepeated++;
-		TextRender()->DeleteTextContainer(CurrentLine.m_TextContainerIndex);
-		Graphics()->DeleteQuadContainer(CurrentLine.m_QuadContainerIndex);
-		CurrentLine.m_Time = time();
-		CurrentLine.m_aYOffset[0] = -1.0f;
-		CurrentLine.m_aYOffset[1] = -1.0f;
+		PreviousLine.m_TimesRepeated++;
+		TextRender()->DeleteTextContainer(PreviousLine.m_TextContainerIndex);
+		Graphics()->DeleteQuadContainer(PreviousLine.m_QuadContainerIndex);
+		PreviousLine.m_Time = time();
+		PreviousLine.m_aYOffset[0] = -1.0f;
+		PreviousLine.m_aYOffset[1] = -1.0f;
 
-		FChatMsgCheckAndPrint(CurrentLine);
+		FChatMsgCheckAndPrint(PreviousLine);
 		return;
 	}
 
 	m_CurrentLine = (m_CurrentLine + 1) % MAX_LINES;
-	CurrentLine = m_aLines[m_CurrentLine];
+
+	CLine &CurrentLine = m_aLines[m_CurrentLine];
 	CurrentLine.Reset(*this);
 
 	CurrentLine.m_Time = time();
@@ -778,7 +779,6 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		// since m_aLocalIds isn't valid there
 		Highlighted |= m_pClient->m_Snap.m_LocalClientId >= 0 && LineShouldHighlight(pLine, m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientId].m_aName);
 	}
-
 	CurrentLine.m_Highlighted = Highlighted;
 
 	if(CurrentLine.m_ClientId == SERVER_MSG)
@@ -888,7 +888,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	{
 		if(Now - m_aLastSoundPlayed[CHAT_CLIENT] >= time_freq() * 3 / 10)
 		{
-			bool PlaySound = m_aLines[m_CurrentLine].m_Team ? g_Config.m_SndTeamChat : g_Config.m_SndChat;
+			bool PlaySound = CurrentLine.m_Team ? g_Config.m_SndTeamChat : g_Config.m_SndChat;
 #if defined(CONF_VIDEORECORDER)
 			if(IVideo::Current())
 			{
