@@ -11,10 +11,6 @@
 #include "detect.h"
 #include "types.h"
 
-#ifndef __USE_GNU
-#define __USE_GNU
-#endif
-
 #include <chrono>
 #include <cinttypes>
 #include <cstdarg>
