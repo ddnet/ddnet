@@ -2869,7 +2869,9 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		if(DoButton_CheckBox(&m_OtherNamePlatePreview, Localize("Preview other players name plate"), m_OtherNamePlatePreview, &Button))
 			m_OtherNamePlatePreview = !m_OtherNamePlatePreview;
 
-		const vec2 Position = RightView.Center();
+		// Center the tee at the center, 3/4ths of the way down
+		vec2 Position = RightView.Center();
+		Position.y += RightView.h * 0.25;
 
 		GameClient()->m_NamePlates.RenderNamePlatePreview(Position, !m_OtherNamePlatePreview);
 	}
