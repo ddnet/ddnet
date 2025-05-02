@@ -218,6 +218,25 @@ const char *InitAndroid()
 		}
 	}
 
+	for(size_t i = 1; i < vIntegritySaveLines.size(); ++i)
+	{
+		const CIntegrityFileLine &IntegritySaveLine = vIntegritySaveLines[i];
+
+		// Check if the asset was deleted since the last unpacking
+		const bool LineFound = std::any_of(vIntegrityLines.begin(), vIntegrityLines.end(), [&](const CIntegrityFileLine &Line) {
+			return str_comp(Line.m_aFilename, IntegritySaveLine.m_aFilename) == 0;
+		});
+		if(LineFound)
+		{
+			continue;
+		}
+
+		if(fs_remove(IntegritySaveLine.m_aFilename) != 0)
+		{
+			log_warn("android", "Failed to delete unused asset '%s'", IntegritySaveLine.m_aFilename);
+		}
+	}
+
 	// The integrity file will be unpacked every time when launching,
 	// so we can simply rename it to update the saved integrity file.
 	if((fs_is_file(INTEGRITY_INDEX_SAVE) && fs_remove(INTEGRITY_INDEX_SAVE) != 0) || fs_rename(INTEGRITY_INDEX, INTEGRITY_INDEX_SAVE) != 0)
