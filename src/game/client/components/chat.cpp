@@ -781,15 +781,15 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 	}
 	CurrentLine.m_Highlighted = Highlighted;
 
+	str_copy(CurrentLine.m_aText, pLine);
+
 	if(CurrentLine.m_ClientId == SERVER_MSG)
 	{
 		str_copy(CurrentLine.m_aName, "*** ");
-		str_copy(CurrentLine.m_aText, pLine);
 	}
 	else if(CurrentLine.m_ClientId == CLIENT_MSG)
 	{
 		str_copy(CurrentLine.m_aName, "— ");
-		str_copy(CurrentLine.m_aText, pLine);
 	}
 	else
 	{
@@ -837,7 +837,6 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		{
 			str_copy(CurrentLine.m_aName, LineAuthor.m_aName);
 		}
-		str_copy(CurrentLine.m_aText, pLine);
 
 		if(LineAuthor.m_Active)
 		{
