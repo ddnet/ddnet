@@ -667,12 +667,12 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 
 		if(++Length >= MAX_LINE_LENGTH)
 		{
-			*(const_cast<char *>(pStr)) = 0;
+			*(const_cast<char *>(pStr)) = '\0';
 			break;
 		}
 	}
 	if(pEnd != nullptr)
-		*(const_cast<char *>(pEnd)) = 0;
+		*(const_cast<char *>(pEnd)) = '\0';
 
 	if(*pLine == 0)
 		return;
