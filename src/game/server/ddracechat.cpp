@@ -280,7 +280,7 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-void ToggleSpecPause(IConsole::IResult *pResult, void *pUserData, int PauseType)
+static void ToggleSpecPause(IConsole::IResult *pResult, void *pUserData, int PauseType)
 {
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
@@ -320,7 +320,7 @@ void ToggleSpecPause(IConsole::IResult *pResult, void *pUserData, int PauseType)
 	}
 }
 
-void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int PauseType)
+static void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int PauseType)
 {
 	if(!CheckClientId(pResult->m_ClientId))
 		return;
