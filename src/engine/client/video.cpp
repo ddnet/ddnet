@@ -53,7 +53,7 @@ static LEVEL AvLevelToLogLevel(int Level)
 	case AV_LOG_TRACE:
 		return LEVEL_TRACE;
 	default:
-		dbg_assert(false, "invalid log level");
+		dbg_assert(false, "invalid log level: %d", Level);
 		dbg_break();
 	}
 }
@@ -625,8 +625,8 @@ void CVideo::UpdateVideoBufferFromGraphics(size_t ThreadIndex)
 	uint32_t Height;
 	CImageInfo::EImageFormat Format;
 	m_pGraphics->GetReadPresentedImageDataFuncUnsafe()(Width, Height, Format, m_vVideoBuffers[ThreadIndex].m_vBuffer);
-	dbg_assert((int)Width == m_Width && (int)Height == m_Height, "Size mismatch between video and graphics");
-	dbg_assert(Format == CImageInfo::FORMAT_RGBA, "Unexpected image format");
+	dbg_assert((int)Width == m_Width && (int)Height == m_Height, "Size mismatch between video (%d x %d) and graphics (%d x %d)", m_Width, m_Height, Width, Height);
+	dbg_assert(Format == CImageInfo::FORMAT_RGBA, "Unexpected image format %d", (int)Format);
 }
 
 AVFrame *CVideo::AllocPicture(enum AVPixelFormat PixFmt, int Width, int Height)
@@ -966,7 +966,7 @@ bool CVideo::AddStream(COutputStream *pStream, AVFormatContext *pFormatContext, 
 		if(CodecId == AV_CODEC_ID_H264)
 		{
 			static const char *s_apPresets[10] = {"ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow", "slower", "veryslow", "placebo"};
-			dbg_assert(g_Config.m_ClVideoX264Preset < (int)std::size(s_apPresets), "preset index invalid");
+			dbg_assert(g_Config.m_ClVideoX264Preset < (int)std::size(s_apPresets), "preset index invalid: %d", g_Config.m_ClVideoX264Preset);
 			dbg_assert(av_opt_set(pContext->priv_data, "preset", s_apPresets[g_Config.m_ClVideoX264Preset], 0) == 0, "invalid option");
 			dbg_assert(av_opt_set_int(pContext->priv_data, "crf", g_Config.m_ClVideoX264Crf, 0) == 0, "invalid option");
 		}
