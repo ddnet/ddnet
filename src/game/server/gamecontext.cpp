@@ -1726,10 +1726,10 @@ void CGameContext::OnClientConnected(int ClientId, void *pData)
 
 	if(m_apPlayers[ClientId])
 		delete m_apPlayers[ClientId];
-	m_apPlayers[ClientId] = new(ClientId) CPlayer(this, NextUniqueClientId, ClientId, StartTeam);
+	m_apPlayers[ClientId] = new(ClientId) CPlayer(this, m_NextUniqueClientId, ClientId, StartTeam);
 	m_apPlayers[ClientId]->SetInitialAfk(Afk);
 	m_apPlayers[ClientId]->m_LastWhisperTo = LastWhisperTo;
-	NextUniqueClientId += 1;
+	m_NextUniqueClientId += 1;
 
 	SendMotd(ClientId);
 	SendSettings(ClientId);
