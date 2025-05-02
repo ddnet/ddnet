@@ -767,7 +767,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 		pData->m_RecordFinishTime = Time;
 	}
 
-	if(!Server()->IsSixup(ClientId))
+	if(!Server()->IsSixup(ClientId) && VERSION_DDRACE <= Player->GetClientVersion())
 	{
 		CNetMsg_Sv_DDRaceTime Msg;
 		CNetMsg_Sv_DDRaceTimeLegacy MsgLegacy;
@@ -780,16 +780,13 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 			float Diff100 = (Time - pData->m_BestTime) * 100;
 			MsgLegacy.m_Check = Msg.m_Check = (int)Diff100;
 		}
-		if(VERSION_DDRACE <= Player->GetClientVersion())
+		if(Player->GetClientVersion() < VERSION_DDNET_MSG_LEGACY)
 		{
-			if(Player->GetClientVersion() < VERSION_DDNET_MSG_LEGACY)
-			{
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
-			}
-			else
-			{
-				Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientId);
-			}
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
+		}
+		else
+		{
+			Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientId);
 		}
 	}
 
