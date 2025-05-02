@@ -25,16 +25,6 @@ using namespace std::chrono_literals;
 
 // This code is mostly stolen from https://github.com/FFmpeg/FFmpeg/blob/master/doc/examples/muxing.c
 
-#define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
-
-#if LIBAVCODEC_VERSION_MAJOR >= 60
-#define FRAME_NUM frame_num
-#else
-#define FRAME_NUM frame_number
-#endif
-
-const size_t FORMAT_GL_NCHANNELS = 4;
-
 static LEVEL AvLevelToLogLevel(int Level)
 {
 	switch(Level)
@@ -160,11 +150,11 @@ bool CVideo::Start()
 	m_CurVideoThreadIndex = 0;
 	m_CurAudioThreadIndex = 0;
 
-	size_t GLNVals = FORMAT_GL_NCHANNELS * m_Width * m_Height;
+	const size_t VideoBufferSize = (size_t)4 * m_Width * m_Height * sizeof(uint8_t);
 	m_vVideoBuffers.resize(m_VideoThreads);
 	for(size_t i = 0; i < m_VideoThreads; ++i)
 	{
-		m_vVideoBuffers[i].m_vBuffer.resize(GLNVals * sizeof(uint8_t));
+		m_vVideoBuffers[i].m_vBuffer.resize(VideoBufferSize);
 	}
 
 	m_vAudioBuffers.resize(m_AudioThreads);
@@ -596,7 +586,11 @@ void CVideo::RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex)
 				std::unique_lock<std::mutex> LockVideo(pThreadData->m_VideoFillMutex);
 				{
 					CLockScope ls(m_WriteLock);
-					m_VideoStream.m_vpFrames[ThreadIndex]->pts = (int64_t)m_VideoStream.m_pCodecContext->FRAME_NUM;
+#if LIBAVCODEC_VERSION_MAJOR >= 60
+					m_VideoStream.m_vpFrames[ThreadIndex]->pts = m_VideoStream.m_pCodecContext->frame_num;
+#else
+					m_VideoStream.m_vpFrames[ThreadIndex]->pts = m_VideoStream.m_pCodecContext->frame_number;
+#endif
 					WriteFrame(&m_VideoStream, ThreadIndex);
 				}
 
@@ -950,7 +944,7 @@ bool CVideo::AddStream(COutputStream *pStream, AVFormatContext *pFormatContext, 
 		pContext->time_base = pStream->m_pStream->time_base;
 
 		pContext->gop_size = 12; /* emit one intra frame every twelve frames at most */
-		pContext->pix_fmt = STREAM_PIX_FMT;
+		pContext->pix_fmt = AV_PIX_FMT_YUV420P;
 		if(pContext->codec_id == AV_CODEC_ID_MPEG2VIDEO)
 		{
 			/* just for testing, we also add B-frames */
