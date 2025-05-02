@@ -56,19 +56,19 @@ int CRaceHelper::TimeFromSecondsStr(const char *pStr)
 
 int CRaceHelper::TimeFromStr(const char *pStr)
 {
-	static const char *const s_pMinutesStr = " minute(s) ";
-	static const char *const s_pSecondsStr = " second(s)";
+	static constexpr const char *MINUTES_STR = " minute(s) ";
+	static constexpr const char *SECONDS_STR = " second(s)";
 
-	const char *pSeconds = str_find(pStr, s_pSecondsStr);
+	const char *pSeconds = str_find(pStr, SECONDS_STR);
 	if(!pSeconds)
 		return -1;
 
-	const char *pMinutes = str_find(pStr, s_pMinutesStr);
+	const char *pMinutes = str_find(pStr, MINUTES_STR);
 	if(pMinutes)
 	{
 		while(*pStr == ' ') // skip leading spaces
 			pStr++;
-		int SecondsTime = TimeFromSecondsStr(pMinutes + str_length(s_pMinutesStr));
+		int SecondsTime = TimeFromSecondsStr(pMinutes + str_length(MINUTES_STR));
 		if(SecondsTime == -1 || !isdigit(*pStr))
 			return -1;
 		return str_toint(pStr) * 60 * 1000 + SecondsTime;
