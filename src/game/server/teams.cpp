@@ -358,10 +358,8 @@ void CGameTeams::CheckTeamFinished(int Team)
 					min, sec);
 				GameServer()->SendChatTeam(Team, aBuf);
 
-				for(unsigned int i = 0; i < PlayersCount; ++i)
-				{
-					SetDDRaceState(apTeamPlayers[i], DDRACE_FINISHED);
-				}
+				for(auto *pPlayer : apTeamPlayers)
+					SetDDRaceState(pPlayer, DDRACE_FINISHED);
 
 				return;
 			}
@@ -369,8 +367,8 @@ void CGameTeams::CheckTeamFinished(int Team)
 			char aTimestamp[TIMESTAMP_STR_LENGTH];
 			str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
 
-			for(unsigned int i = 0; i < PlayersCount; ++i)
-				OnFinish(apTeamPlayers[i], TimeTicks, aTimestamp);
+			for(auto *pPlayer : apTeamPlayers)
+				OnFinish(pPlayer, TimeTicks, aTimestamp);
 			ChangeTeamState(Team, TEAMSTATE_FINISHED); // TODO: Make it better
 			OnTeamFinish(Team, apTeamPlayers, PlayersCount, TimeTicks, aTimestamp);
 		}
