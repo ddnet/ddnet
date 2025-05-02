@@ -600,4 +600,9 @@ public:
 	void ResetTuning();
 };
 
+static inline bool CheckClientId(int ClientId)
+{
+	return ClientId >= 0 && ClientId < MAX_CLIENTS;
+}
+
 #endif

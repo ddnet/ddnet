@@ -12,8 +12,6 @@
 #include "player.h"
 #include "score.h"
 
-bool CheckClientId(int ClientId);
-
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -1648,11 +1646,6 @@ void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
 		pPlayer->m_SpecTeam = pResult->GetInteger(0);
 	else
 		pPlayer->m_SpecTeam = !pPlayer->m_SpecTeam;
-}
-
-bool CheckClientId(int ClientId)
-{
-	return ClientId >= 0 && ClientId < MAX_CLIENTS;
 }
 
 void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
