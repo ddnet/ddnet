@@ -870,7 +870,7 @@ void CChat::AddLine(int ClientId, int Team, const char *pLine)
 		if(Now - m_aLastSoundPlayed[CHAT_HIGHLIGHT] >= time_freq() * 3 / 10)
 		{
 			char aBuf[1024];
-			str_format(aBuf, sizeof(aBuf), "%s: %s", m_aLines[m_CurrentLine].m_aName, m_aLines[m_CurrentLine].m_aText);
+			str_format(aBuf, sizeof(aBuf), "%s: %s", CurrentLine.m_aName, CurrentLine.m_aText);
 			Client()->Notify("DDNet Chat", aBuf);
 			if(g_Config.m_SndHighlight)
 			{
