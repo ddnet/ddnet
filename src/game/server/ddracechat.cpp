@@ -12,8 +12,6 @@
 #include "player.h"
 #include "score.h"
 
-#include <optional>
-
 bool CheckClientId(int ClientId);
 
 void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
