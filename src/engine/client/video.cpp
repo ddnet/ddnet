@@ -67,7 +67,9 @@ void AvLogCallback(void *pUser, int Level, const char *pFormat, va_list VarArgs)
 	const LEVEL LogLevel = AvLevelToLogLevel(Level);
 	if(LogLevel <= LEVEL_INFO)
 	{
-		log_log_v(LogLevel, "videorecorder/libav", pFormat, VarArgs);
+		char aFormat[4096]; // Longest log line length
+		str_truncate(aFormat, sizeof(aFormat), pFormat, str_length(pFormat) - 1); // Truncate duplicate newline
+		log_log_v(LogLevel, "videorecorder/libav", aFormat, VarArgs);
 	}
 }
 
