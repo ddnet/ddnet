@@ -662,10 +662,10 @@ class CScreenshotSaveJob : public IJob
 	}
 
 public:
-	CScreenshotSaveJob(IStorage *pStorage, IConsole *pConsole, const char *pName, CImageInfo Image) :
+	CScreenshotSaveJob(IStorage *pStorage, IConsole *pConsole, const char *pName, CImageInfo &&Image) :
 		m_pStorage(pStorage),
 		m_pConsole(pConsole),
-		m_Image(Image)
+		m_Image(std::move(Image))
 	{
 		str_copy(m_aName, pName);
 	}
@@ -696,7 +696,7 @@ void CGraphics_Threaded::ScreenshotDirect(bool *pSwapped)
 
 	if(Image.m_pData)
 	{
-		m_pEngine->AddJob(std::make_shared<CScreenshotSaveJob>(m_pStorage, m_pConsole, m_aScreenshotName, Image));
+		m_pEngine->AddJob(std::make_shared<CScreenshotSaveJob>(m_pStorage, m_pConsole, m_aScreenshotName, std::move(Image)));
 	}
 }
 

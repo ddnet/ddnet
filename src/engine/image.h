@@ -23,6 +23,18 @@ public:
 		FORMAT_RA = 3,
 	};
 
+	CImageInfo() = default;
+
+	/**
+	 * Move assignment.
+	 */
+	CImageInfo &operator=(CImageInfo &&Other);
+
+	/**
+	 * Move constructor.
+	 */
+	CImageInfo(CImageInfo &&Other);
+
 	/**
 	 * Width of the image.
 	 */
