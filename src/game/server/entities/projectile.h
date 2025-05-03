@@ -52,6 +52,7 @@ private:
 	vec2 m_InitDir;
 
 public:
+	void SetStartTick(int Tick);
 	void SetBouncing(int Value);
 	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj);
 	void FillExtraInfo(CNetObj_DDNetProjectile *pProj);
