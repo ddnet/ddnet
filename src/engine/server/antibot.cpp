@@ -1,7 +1,9 @@
 #include "antibot.h"
 
+#include <antibot/antibot_data.h>
 #include <antibot/antibot_interface.h>
 
+#include <base/log.h>
 #include <base/system.h>
 
 #include <engine/console.h>
@@ -23,21 +25,37 @@ CAntibot::~CAntibot()
 	if(m_Initialized)
 		AntibotDestroy();
 }
+LEVEL CAntibot::AntibotToServerLevel(int Level)
+{
+	switch(Level)
+	{
+	case ANTIBOT_LOG_LEVEL_ERROR:
+		return LEVEL_ERROR;
+	case ANTIBOT_LOG_LEVEL_WARN:
+		return LEVEL_WARN;
+	case ANTIBOT_LOG_LEVEL_INFO:
+		return LEVEL_INFO;
+	case ANTIBOT_LOG_LEVEL_DEBUG:
+		return LEVEL_DEBUG;
+	case ANTIBOT_LOG_LEVEL_TRACE:
+		return LEVEL_TRACE;
+	}
+	return LEVEL_INFO;
+}
 void CAntibot::Kick(int ClientId, const char *pMessage, void *pUser)
 {
 	CAntibot *pAntibot = (CAntibot *)pUser;
 	pAntibot->Server()->Kick(ClientId, pMessage);
 }
-void CAntibot::Log(const char *pMessage, void *pUser)
+void CAntibot::Log(int Level, const char *pMessage, void *pUser)
 {
-	CAntibot *pAntibot = (CAntibot *)pUser;
-	pAntibot->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", pMessage);
+	log_log(AntibotToServerLevel(Level), "antibot", pMessage);
 }
 void CAntibot::Report(int ClientId, const char *pMessage, void *pUser)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientId, pMessage);
-	Log(aBuf, pUser);
+	Log(ANTIBOT_LOG_LEVEL_INFO, aBuf, pUser);
 }
 void CAntibot::Send(int ClientId, const void *pData, int Size, int Flags, void *pUser)
 {

@@ -1,5 +1,6 @@
 #define ANTIBOTAPI DYNAMIC_EXPORT
 
+#include <antibot/antibot_data.h>
 #include <antibot/antibot_interface.h>
 
 #include <cstring>
@@ -15,7 +16,7 @@ int AntibotAbiVersion()
 void AntibotInit(CAntibotData *pCallbackData)
 {
 	g_pData = pCallbackData;
-	g_pData->m_pfnLog("null antibot initialized", g_pData->m_pUser);
+	g_pData->m_pfnLog(ANTIBOT_LOG_LEVEL_INFO, "null antibot initialized", g_pData->m_pUser);
 }
 void AntibotRoundStart(CAntibotRoundData *pRoundData){};
 void AntibotRoundEnd(void){};
@@ -25,11 +26,11 @@ void AntibotConsoleCommand(const char *pCommand)
 {
 	if(strcmp(pCommand, "dump") == 0)
 	{
-		g_pData->m_pfnLog("null antibot", g_pData->m_pUser);
+		g_pData->m_pfnLog(ANTIBOT_LOG_LEVEL_INFO, "null antibot", g_pData->m_pUser);
 	}
 	else
 	{
-		g_pData->m_pfnLog("unknown command", g_pData->m_pUser);
+		g_pData->m_pfnLog(ANTIBOT_LOG_LEVEL_INFO, "unknown command", g_pData->m_pUser);
 	}
 }
 void AntibotOnPlayerInit(int /*ClientId*/) {}

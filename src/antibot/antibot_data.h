@@ -5,12 +5,18 @@
 
 enum
 {
-	ANTIBOT_ABI_VERSION = 11,
+	ANTIBOT_ABI_VERSION = 12,
 
 	ANTIBOT_MSGFLAG_NONVITAL = 1,
 	ANTIBOT_MSGFLAG_FLUSH = 2,
 
 	ANTIBOT_MAX_CLIENTS = 128,
+
+	ANTIBOT_LOG_LEVEL_ERROR = 0,
+	ANTIBOT_LOG_LEVEL_WARN = 1,
+	ANTIBOT_LOG_LEVEL_INFO = 2,
+	ANTIBOT_LOG_LEVEL_DEBUG = 3,
+	ANTIBOT_LOG_LEVEL_TRACE = 4,
 };
 
 struct CAntibotMapData
@@ -101,7 +107,7 @@ struct CAntibotData
 	int64_t m_Now;
 	int64_t m_Freq;
 	void (*m_pfnKick)(int ClientId, const char *pMessage, void *pUser);
-	void (*m_pfnLog)(const char *pMessage, void *pUser);
+	void (*m_pfnLog)(int Level, const char *pMessage, void *pUser);
 	void (*m_pfnReport)(int ClientId, const char *pMessage, void *pUser);
 	void (*m_pfnSend)(int ClientId, const void *pData, int DataSize, int Flags, void *pUser);
 	void (*m_pfnTeehistorian)(const void *pData, int DataSize, void *pUser);
