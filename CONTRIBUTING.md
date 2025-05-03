@@ -172,7 +172,7 @@ Try finding descriptive names instead.
 
 Use member variables or pass state by parameter instead of using global or static variables since static variables share the same value across instances of a class.
 
-Avoid static variables ❌: 
+Avoid static variables ❌:
 
 ```C++
 int CMyClass::Foo()
