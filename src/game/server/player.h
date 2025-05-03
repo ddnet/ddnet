@@ -227,7 +227,6 @@ public:
 	std::shared_ptr<CScorePlayerResult> m_ScoreQueryResult;
 	std::shared_ptr<CScorePlayerResult> m_ScoreFinishResult;
 	bool m_NotEligibleForFinish;
-	int64_t m_EligibleForFinishCheck;
 	bool m_VotedForPractice;
 	int m_SwapTargetsClientId; //Client ID of the swap target for the given player
 	bool m_BirthdayAnnounced;
