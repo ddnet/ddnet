@@ -76,9 +76,9 @@ void CEffects::PowerupShine(vec2 Pos, vec2 Size, float Alpha)
 	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 }
 
-void CEffects::FreezingFlakes(vec2 Pos, vec2 Size, float Alpha)
+void CEffects::FreezingFlakes(vec2 Pos, vec2 Size, float Alpha, bool Force)
 {
-	if(!m_Add5hz)
+	if(!Force && !m_Add5hz)
 		return;
 
 	CParticle p;
