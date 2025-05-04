@@ -2109,7 +2109,7 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand ve Gokturk tarafından yapıldı
+== Türkçe çeviri Learath2, ardadem, h-kaan, eghwand, Gokturk ve WarHammer tarafından yapıldı
 
 Show spectator cursor
 == İzleyicinin imlecini göster
