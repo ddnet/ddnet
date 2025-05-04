@@ -2184,28 +2184,28 @@ AntiPing: prediction margin
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== 显存不足。请尝试将 'cl_skins_loaded_max' 设置为较低的值或移除自定义资源（皮肤、实体等），尤其是高分辨率的资源。
 
 This name cannot be used for files and folders
-== 
+== 此名称不能用于文件和文件夹
 
 This skin name cannot be used.
-== 
+== 此皮肤名称不能使用。
 
 Skin could not be loaded due to an error. Check the local console for details.
-== 
+== 加载皮肤时出错。检查本地控制台以获取详细信息。
 
 Skin could not be found.
-== 
+== 未找到皮肤。
 
 No skins match your filter criteria
-== 
+== 没有皮肤满足设置的筛选条件
 
 Preview player's name plate
-== 
+== 预览本体昵称
 
 Dragger Outline Color
-== 
+== 光索外框颜色
 
 Dragger Inner Color
-== 
+== 光索实心颜色
