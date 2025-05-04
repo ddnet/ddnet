@@ -1030,10 +1030,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Epäonnistui alustuksen aikana. Yritä muuttaa gfx_backend arvoksi OpenGL tai Vulkan asetushakemistossa settings_ddnet.cfg ja yritä uudelleen.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== VRAM loppu. Yritä poistaa mukautettuja resursseja (skinit, entiteetit, jne.), erityisesti korkearesoluutioiset.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Komennon tallennuksen aikana tapahtui virhe. Yritä päivittää GPU-ajurit.
 
@@ -1791,6 +1787,10 @@ Moved ingame
 English translation by the DDNet Team
 == Finnish translation by ziltoide, Misse, Igrekyll and ƤØŢĀŤ0Co
 
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
 Could not resolve connect address '%s'. See local console for details.
 == 
 
@@ -1852,10 +1852,13 @@ Save skin
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
 == 
 
-Unable to save the skin
+This name cannot be used for files and folders
 == 
 
 Unable to save the skin with a reserved name
+== 
+
+Unable to save the skin
 == 
 
 %d/%d KiB (%.1f KiB/s)
@@ -2008,6 +2011,18 @@ Saves file
 Open the saves file
 == 
 
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
 Converse
 == 
 
@@ -2094,6 +2109,9 @@ All
 Size of key press icons
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
 == 
 
@@ -2104,6 +2122,12 @@ Width of others' hook collision line
 == 
 
 Preview 'Hook collisions' being pressed
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 AntiPing: prediction margin

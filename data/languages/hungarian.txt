@@ -1353,10 +1353,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Probléma derült fel inicializálás közben. Változtasson a "gfx_backend" parancson "OpenGL"-re vagy "Vulkan"-ra a "settings_ddnet.cfg" fájlon és próbálja meg újra.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Probléma derült fel Virtuális Memóriával. Nincs elég Virtuális Memória Textúrák vagy képek betöltésére (Karakterek, Entitások, stb.), főként a nagy minőségű képekre vonatkozva.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Probléma derült fel felvétel közben. Próbálja felújítani a Videókártyája driver-ét.
 
@@ -1517,6 +1513,10 @@ Open the directory to add custom assets
 English translation by the DDNet Team
 == Hungarian translation by Feca, Boti., Cellegen and bencie
 
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
 Could not resolve connect address '%s'. See local console for details.
 == 
 
@@ -1665,6 +1665,9 @@ There's an unsaved map in the editor, you might want to save it.
 Continue anyway?
 == 
 
+This name cannot be used for files and folders
+== 
+
 A demo with this name already exists
 == 
 
@@ -1683,10 +1686,10 @@ Videos directory
 Video was saved to '%s'
 == 
 
-Unable to save the skin
+Unable to save the skin with a reserved name
 == 
 
-Unable to save the skin with a reserved name
+Unable to save the skin
 == 
 
 %d/%d KiB (%.1f KiB/s)
@@ -1957,6 +1960,18 @@ Open the saves file
 Player info change cooldown
 == 
 
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
 Axis
 == 
 
@@ -2073,6 +2088,9 @@ All
 Size of key press icons
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
 == 
 
@@ -2095,6 +2113,12 @@ Preview 'Hook collisions' being pressed
 == 
 
 Show finish messages
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 Enable ghost

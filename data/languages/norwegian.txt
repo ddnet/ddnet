@@ -1048,7 +1048,7 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == 
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == 
 
 [Graphics error]
@@ -1275,6 +1275,9 @@ There's an unsaved map in the editor, you might want to save it.
 Continue anyway?
 == 
 
+This name cannot be used for files and folders
+== 
+
 A demo with this name already exists
 == 
 
@@ -1302,10 +1305,10 @@ Join Tutorial Server
 Skip Tutorial
 == 
 
-Unable to save the skin
+Unable to save the skin with a reserved name
 == 
 
-Unable to save the skin with a reserved name
+Unable to save the skin
 == 
 
 Trying to determine UDP connectivity…
@@ -1711,10 +1714,22 @@ Player info change cooldown
 Download community skins
 == 
 
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
 Create a random skin
 == 
 
 Choose default eyes when joining a server
+== 
+
+No skins match your filter criteria
 == 
 
 Open the directory to add custom skins
@@ -1961,6 +1976,9 @@ All
 Size of key press icons
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
 == 
 
@@ -2037,6 +2055,12 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 Set all to Rifle

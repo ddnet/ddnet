@@ -1449,10 +1449,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Fehler während der Initialisierung. Versuch gfx_backend zu OpenGL oder Vulkan zu ändern in settings_ddnet.cfg im Konfigurations-Ordner und versuche es erneut.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Kein VRAM mehr verfügbar. Versuch eigene Assets (Skins, Entitäten, usw.) zu löschen, insbesondere solche mit hoher Auflösung.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Ein Fehler ist währen dem Aufnahme-Befehl aufgetreten. Versuch deinen Grafiktreiber zu aktualisieren.
 
@@ -2179,3 +2175,31 @@ Preview dummy's name plate
 
 AntiPing: prediction margin
 == Anti-Ping: Vorhersagespanne
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== VRAM ausgegangen. Versuch 'cl_skins_loaded_max' auf einen niedrigeren Wert zu setzen oder entferne eigene Assets (Skins, Entitäten, usw.), insbesondere solche mit hoher Auflösung.
+
+This name cannot be used for files and folders
+== Dieser Name kann nicht für Dateien und Ordner genutzt werden
+
+This skin name cannot be used.
+== Dieser Skin-Name kann nicht genutzt werden.
+
+Skin could not be loaded due to an error. Check the local console for details.
+== Skin konnte wegen einem Fehler nicht geladen werden. Prüfe die lokale Konsole für Details.
+
+Skin could not be found.
+== Skin konnte nicht gefunden werden.
+
+No skins match your filter criteria
+== Keine Skins entsprechen deinen Filterkriterien.
+
+Preview player's name plate
+== Vorschau von Spielernamen
+
+Dragger Outline Color
+== Dragger-Außenfarbe
+
+Dragger Inner Color
+== Dragger-Innenfarbe

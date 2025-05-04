@@ -1388,10 +1388,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Échec lors de l'initialisation. Essayez de changer gfx_backend à OpenGL ou Vulkan dans le fichier settings_ddnet.cfg dans le dossier de configuration et réessayez.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Mémoire graphique insuffisante. Essayez de retirer des ressources personnalisées (skins, entités, etc.), en particulier celles de haute résolution.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Une erreur est survenue pendant l'enregistrement des commandes. Essayez de mettre à jour vos pilotes GPU.
 
@@ -2015,6 +2011,10 @@ https://wiki.ddnet.org/wiki/Mapping
 English translation by the DDNet Team
 == French translation by lordskelethom, Ubu, Choupom, clecle226, SunnyPistache, Pipou, Chairn, T tee, NRK, Nouaa, Sucre, archimede67, Sukya, Emilcha and Yubel
 
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
 No demo with this filename exists
 == 
 
@@ -2052,6 +2052,9 @@ Loading maps…
 
 [Spectating Camera Mode Icon]
 AUTO
+== 
+
+This name cannot be used for files and folders
 == 
 
 Toggle auto camera
@@ -2097,6 +2100,18 @@ Saves file
 == 
 
 Open the saves file
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
 == 
 
 Show FPS
@@ -2173,7 +2188,16 @@ All
 Size of key press icons
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 AntiPing: prediction margin

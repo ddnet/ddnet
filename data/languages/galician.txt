@@ -1438,10 +1438,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Erro durante a iniciación. Tenta cambiar gfx_backend a OpenGL ou Vulkan desde settings_ddnet.cfg no cartafol de configuracións e téntao outra vez.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== A VRAM encheuse. Tenta quitar recursos personalizados (skins, entidades etc.)/ etc.), especialmente os de resolución alta.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Ocorreu un erro durante a gravación de comandos. Tenta actualizar os controladores do teu GPU.
 
@@ -1535,6 +1531,10 @@ Absolute
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
 == Galician translation by TormentaDeFacha and Mercadona
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
 
 Could not resolve connect address '%s'. See local console for details.
 == 
@@ -1681,6 +1681,9 @@ There's an unsaved map in the editor, you might want to save it.
 Continue anyway?
 == 
 
+This name cannot be used for files and folders
+== 
+
 A demo with this name already exists
 == 
 
@@ -1699,10 +1702,10 @@ Videos directory
 Video was saved to '%s'
 == 
 
-Unable to save the skin
+Unable to save the skin with a reserved name
 == 
 
-Unable to save the skin with a reserved name
+Unable to save the skin
 == 
 
 %d/%d KiB (%.1f KiB/s)
@@ -1954,6 +1957,18 @@ Open the saves file
 Player info change cooldown
 == 
 
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
 Axis
 == 
 
@@ -2070,6 +2085,9 @@ All
 Size of key press icons
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
 == 
 
@@ -2092,6 +2110,12 @@ Preview 'Hook collisions' being pressed
 == 
 
 Show finish messages
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 Default length
