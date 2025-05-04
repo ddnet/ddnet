@@ -2198,8 +2198,8 @@ No skins match your filter criteria
 Preview player's name plate
 == Vorschau von Spielernamen
 
-Grabber Outline Color
-== Greifer-Außenfarbe
+Dragger Outline Color
+== Dragger-Außenfarbe
 
-Grabber Inner Color
-== Greifer-Innenfarbe
+Dragger Inner Color
+== Dragger-Innenfarbe

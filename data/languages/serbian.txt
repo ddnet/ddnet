@@ -2120,10 +2120,10 @@ Preview 'Hook collisions' being pressed
 Show finish messages
 == 
 
-Grabber Outline Color
+Dragger Outline Color
 == 
 
-Grabber Inner Color
+Dragger Inner Color
 == 
 
 Enable ghost

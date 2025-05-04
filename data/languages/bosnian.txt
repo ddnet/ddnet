@@ -1999,10 +1999,10 @@ Freeze Laser Outline Color
 Freeze Laser Inner Color
 == 
 
-Grabber Outline Color
+Dragger Outline Color
 == 
 
-Grabber Inner Color
+Dragger Inner Color
 == 
 
 Set all to Rifle

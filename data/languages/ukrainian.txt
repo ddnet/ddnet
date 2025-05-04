@@ -2195,10 +2195,10 @@ Preview player's name plate
 Preview dummy's name plate
 == 
 
-Grabber Outline Color
+Dragger Outline Color
 == 
 
-Grabber Inner Color
+Dragger Inner Color
 == 
 
 AntiPing: prediction margin

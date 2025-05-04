@@ -2198,8 +2198,8 @@ No skins match your filter criteria
 Preview player's name plate
 == 
 
-Grabber Outline Color
+Dragger Outline Color
 == 
 
-Grabber Inner Color
+Dragger Inner Color
 == 

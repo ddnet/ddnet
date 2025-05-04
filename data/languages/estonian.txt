@@ -2141,10 +2141,10 @@ Width of others' hook collision line
 Preview 'Hook collisions' being pressed
 == 
 
-Grabber Outline Color
+Dragger Outline Color
 == 
 
-Grabber Inner Color
+Dragger Inner Color
 == 
 
 AntiPing: prediction margin
