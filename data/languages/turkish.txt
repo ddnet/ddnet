@@ -2116,90 +2116,90 @@ Show spectator cursor
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== VRAM bitmiş. 'cl_skins_loaded_max' değerini daha düşük bir değere ayarlamayı veya özel varlıkları (kaplamalar, varlıklar vb.), özellikle de yüksek çözünürlüklü olanları kaldırmayı deneyin.
 
 No demo with this filename exists
-== 
+== Bu isimle bir demo bulunmuyor
 
 This name cannot be used for files and folders
-== 
+== Bu isim dosya ve klasörler için kullanılamıyor
 
 Map size
-== 
+== Harita boyutu
 
 This skin name cannot be used.
-== 
+== Bu skin adı kullanılamıyor
 
 Skin could not be loaded due to an error. Check the local console for details.
-== 
+== Skin bir sebepten dolayı yüklenemiyor. Detay için yerel konsolu kontrol et
 
 Skin could not be found.
-== 
+== Skin bulunamadı
 
 No skins match your filter criteria
-== 
+== Kriterlerine uygun skinler bulunamadı
 
 Show number of spectators
-== 
+== İzleyici sayısını göster
 
 [Show name plates]
 None
-== 
+== Hiçbiri
 
 [Show name plates]
 Own
-== 
+== Kendi
 
 [Show name plates]
 Others
-== 
+== Diğer
 
 [Show name plates]
 All
-== 
+== Hepsi
 
 Name plates offset
-== 
+== Oyuncu isimleri çıkıntısı
 
 Show friend icon in name plates
-== 
+== Arkadaş ikonunu oyuncu isimlerinde göster
 
 Show client IDs on a seperate line
-== 
+== İstemci ID'lerini ayrı satırda göster
 
 Client IDs size
-== 
+== İstemci ID boyutu
 
 Show players' key presses
-== 
+== Oyuncu tuş basımlarını göster
 
 [Show players' key presses]
 None
-== 
+== Hiçbiri
 
 [Show players' key presses]
 Own
-== 
+== Kendi
 
 [Show players' key presses]
 Others
-== 
+== Diğer
 
 [Show players' key presses]
 All
-== 
+== Hepsi
 
 Preview player's name plate
-== 
+== Oyuncu ismini önizle
 
 Preview dummy's name plate
-== 
+== Dummy ismini önizle
 
 Dragger Outline Color
-== 
+== Dragger Anahat Rengi
 
 Dragger Inner Color
-== 
+== Dragger İç Rengi
 
 AntiPing: prediction margin
-== 
+== AntiPing: tahmin marjı
