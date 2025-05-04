@@ -263,8 +263,8 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 		ColorIn = g_Config.m_ClLaserFreezeInnerColor;
 		break;
 	case LASERTYPE_DRAGGER:
-		ColorOut = g_Config.m_ClLaserGrabberOutlineColor;
-		ColorIn = g_Config.m_ClLaserGrabberInnerColor;
+		ColorOut = g_Config.m_ClLaserDraggerOutlineColor;
+		ColorIn = g_Config.m_ClLaserDraggerInnerColor;
 		break;
 	case LASERTYPE_GUN:
 	case LASERTYPE_PLASMA:
