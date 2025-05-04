@@ -3103,7 +3103,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		ColorHSLA LaserFreezeOutlineColor = DoLine_ColorPicker(&s_LaserFreezeOutResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Freeze Laser Outline Color"), &g_Config.m_ClLaserFreezeOutlineColor, ColorRGBA(0.131372f, 0.123529f, 0.182352f, 1.0f), false);
 		ColorHSLA LaserFreezeInnerColor = DoLine_ColorPicker(&s_LaserFreezeInResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Freeze Laser Inner Color"), &g_Config.m_ClLaserFreezeInnerColor, ColorRGBA(0.482352f, 0.443137f, 0.564705f, 1.0f), false);
 		ColorHSLA LaserDraggerOutlineColor = DoLine_ColorPicker(&s_LaserDraggerOutResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Dragger Outline Color"), &g_Config.m_ClLaserDraggerOutlineColor, ColorRGBA(0.1640625f, 0.015625f, 0.015625f, 1.0f), false);
-		ColorHSLA LaserDraggerInnerColor = DoLine_ColorPicker(&s_LaserDraggerInResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Dragger Inner Color"), &g_Config.m_ClLaserDraggerInnerColor, ColorRGBA(1.f, 0.23046875f, 0.23046875f, 1.0f), false);
+		ColorHSLA LaserDraggerInnerColor = DoLine_ColorPicker(&s_LaserDraggerInResetId, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &LeftView, Localize("Dragger Inner Color"), &g_Config.m_ClLaserDraggerInnerColor, ColorRGBA(.8666666f, .3725490f, .3725490f, 1.0f), false);
 
 		static CButtonContainer s_AllToRifleResetId, s_AllToDefaultResetId;
 
@@ -3134,8 +3134,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			g_Config.m_ClLaserDoorInnerColor = 7701379;
 			g_Config.m_ClLaserFreezeOutlineColor = 11613223;
 			g_Config.m_ClLaserFreezeInnerColor = 12001153;
-			g_Config.m_ClLaserDraggerOutlineColor = 54807;
-			g_Config.m_ClLaserDraggerInnerColor = 65437;
+			g_Config.m_ClLaserDraggerOutlineColor = 57618;
+			g_Config.m_ClLaserDraggerInnerColor = 42398;
 		}
 
 		// ***** Laser Preview ***** //
