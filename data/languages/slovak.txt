@@ -503,10 +503,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Inicializácia zlyhala. Skúste zmeniť gfx_backend na OpenGL alebo Vulkan v settings_ddnet.cfg v adresári s konfiguráciou a skúste to znova.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Nedostatok VRAM. Skúste odstrániť vlastné aktíva (skins, entity, atď.), najmä tie s vysokým rozlíšením.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Pri nahrávaní príkazu došlo k chybe. Skúste aktualizovať ovládače GPU.
 
@@ -1911,6 +1907,10 @@ Eyes
 English translation by the DDNet Team
 == Slovak translation by LimiT, Petr and dobrykafe
 
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
 No demo with this filename exists
 == 
 
@@ -1951,6 +1951,9 @@ Loading maps…
 
 [Spectating Camera Mode Icon]
 AUTO
+== 
+
+This name cannot be used for files and folders
 == 
 
 Online friends (%d)
@@ -2081,6 +2084,18 @@ Saves file
 Open the saves file
 == 
 
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
 Show FPS
 == 
 
@@ -2155,6 +2170,9 @@ All
 Size of key press icons
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
 == 
 
@@ -2165,6 +2183,12 @@ Width of others' hook collision line
 == 
 
 Preview 'Hook collisions' being pressed
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 AntiPing: prediction margin

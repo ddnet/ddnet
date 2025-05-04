@@ -1451,10 +1451,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Error durante la iniciación. Intenta cambiar gfx_backend a OpenGL o Vulkan desde settings_ddnet.cfg en la carpeta de configuraciones e inténtalo otra vez.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== La VRAM se ha llenado. Intenta quitar recursos personalizados (skins, entidades, etc.), especialmente los de resolución alta.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Ocurrió un error durante la grabación de comandos. Intenta actualizar los controladores de tu GPU.
 
@@ -2181,3 +2177,31 @@ Preview dummy's name plate
 
 AntiPing: prediction margin
 == AntiPing: margen de predicción
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+This name cannot be used for files and folders
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
+Preview player's name plate
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
+== 

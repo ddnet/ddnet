@@ -1117,10 +1117,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Misslyckades under uppstart. Testa att ändra gfx_backend till OpenGL eller Vulkan i settings_ddnet.cfg i konfig nappen och försök igen.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Slut på VRAM. Testa att ta bort assets (skins, entities, etc.), speciellt dem i hög upplösning.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Ett fel uppstod under "command recording". Testa att uppdatera ditt grafikkorts drivrutiner.
 
@@ -2179,3 +2175,31 @@ Preview dummy's name plate
 
 AntiPing: prediction margin
 == AntiPing: prediction marginal
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+This name cannot be used for files and folders
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
+Preview player's name plate
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
+== 

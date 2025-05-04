@@ -1412,10 +1412,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == 초기화에 실패했습니다. 구성 폴더의 settings_ddnet.cfg에서 gfx_backend를 OpenGL 또는 Vulkan으로 변경 후 재시도하십시오.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== VRAM이 부족합니다. 사용자 정의 에셋(스킨, 엔티티 등), 특히 고해상도 에셋을 제거해 보십시오.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == 명령 기록 중 오류가 발생했습니다. GPU 드라이버를 업데이트해 보십시오.
 
@@ -2123,10 +2119,29 @@ Marking
 Show number of spectators
 == 관전자 수 표시
 
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
 No demo with this filename exists
 == 
 
+This name cannot be used for files and folders
+== 
+
 Map size
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
 == 
 
 [Show name plates]
@@ -2176,7 +2191,16 @@ Others
 All
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 AntiPing: prediction margin

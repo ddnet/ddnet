@@ -1464,10 +1464,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == 初始化失败。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将 “gfx_backend” 设置为 “gfx_backend OpenGL” 或 “gfx_backend Vulkan” 再重试。
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 显存不足。请尝试移除自定义资源（如皮肤，实体层等等），尤其高分辨率的自定义资源。
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == 指令记录期间检测到错误。请尝试更新显卡驱动程序。
 
@@ -2185,3 +2181,31 @@ All
 
 AntiPing: prediction margin
 == 延迟补偿：预测容差
+
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+This name cannot be used for files and folders
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
+Preview player's name plate
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
+== 

@@ -1355,10 +1355,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Неуспешно за време иницијализације. Покушајте променити gfx_backend у OpenGL или Vulkan у settings_ddnet.cfg у директоријуму конфигурације и покушајте поново.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Недостаток ВРАМ-а. Покушајте уклонити прилагођене ресурсе (скинове, објекте итд.), особито оне са високом резолуцијом.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Дошло је до грешке при записивању команде. Покушајте ажурирати драјвере за вашу графичку картицу.
 
@@ -1595,6 +1591,10 @@ English translation by the DDNet Team
 == Serbian translation by DNR, EliteTee, Kingston and Veljko Radovanovic (VekiPro)
 
 [Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
 == 
 
@@ -1743,16 +1743,19 @@ There's an unsaved map in the editor, you might want to save it.
 Continue anyway?
 == 
 
+This name cannot be used for files and folders
+== 
+
 Videos directory
 == 
 
 Video was saved to '%s'
 == 
 
-Unable to save the skin
+Unable to save the skin with a reserved name
 == 
 
-Unable to save the skin with a reserved name
+Unable to save the skin
 == 
 
 %d/%d KiB (%.1f KiB/s)
@@ -1968,6 +1971,18 @@ Open the saves file
 Player info change cooldown
 == 
 
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
 Show FPS
 == 
 
@@ -2078,6 +2093,9 @@ All
 Size of key press icons
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
 == 
 
@@ -2100,6 +2118,12 @@ Preview 'Hook collisions' being pressed
 == 
 
 Show finish messages
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 Enable ghost

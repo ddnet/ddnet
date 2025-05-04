@@ -783,10 +783,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == .ﺪﯿﻨﮐ ﺵﻼﺗ ﻩﺭﺎﺑﻭﺩ ﻭ ﺪﯿﻫﺩ ﺮﯿﯿﻐﺗ Vulkan ﺎﯾ OpenGL ﻪﺑ ﺍﺭ gfx_backend ، settings_ddnet.cfg ﺭﺩ ،ﮓﯿﻔﻧﺎﮐ ﻪﺷﻮﭘ ﺭﺩ ﺪﯿﻨﮐ ﯽﻌﺳ. ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ ﻡﺎﮕﻨﻫ ﺭﺩ ﺎﻄﺧ
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== .ﺪﻧﺭﺍﺩ ﯽﯾﻻﺎﺑ ﺡﻮﺿﻭ ﻪﮐ ﯽﯾﺎﻬﻧﺁ ﺹﻮﺼﺧ ﻪﺑ ،ﺪﯿﻨﮐ ﻑﺬﺣ ﺍﺭ (ﻩﺮﯿﻏ ﻭ ﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ ،ﺎﻫ ﻦﯿﮑﺳﺍ) ﯽﺷﺭﺎﻔﺳ ﯼﺎﻫ ﯽﯾﺍﺭﺍﺩ ﺪﯿﻨﮐ ﯽﻌﺳ . ﮏﯿﻓﺍﺮﮔ ﻢﺠﺣ ﺩﻮﺒﻤﮐ
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == .ﺪﯿﻨﮐ ﺖﯾﺪﭘﺁ ﺍﺭ ﮏﯿﻓﺍﺮﮔ ﯼﺎﻫ ﺭﻮﯾﺍﺭﺩ .ﻥﺎﻣﺮﻓ ﺩﺭﻮﮐﺭ ﻡﺎﮕﻨﻫ ﺭﺩ ﺎﻄﺧ
 
@@ -2040,6 +2036,10 @@ Active: Hook
 English translation by the DDNet Team
 == Persian translation by OneShadow, Quick, younesdevil, Player, ArAsH and Fàłłéñ
 
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
 No demo with this filename exists
 == 
 
@@ -2067,6 +2067,9 @@ Active
 == 
 
 Loading maps…
+== 
+
+This name cannot be used for files and folders
 == 
 
 Map size
@@ -2109,6 +2112,18 @@ Saves file
 == 
 
 Open the saves file
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
 == 
 
 Show FPS
@@ -2170,7 +2185,16 @@ Others
 All
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 AntiPing: prediction margin
