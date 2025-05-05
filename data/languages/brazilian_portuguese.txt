@@ -1382,7 +1382,7 @@ Rifle Laser Outline Color
 == Cor de contorno do laser do rifle
 
 Rifle Laser Inner Color
-== Cor de interna do laser do rifle
+== Cor interna do laser do rifle
 
 Shotgun Laser Outline Color
 == Cor contorno do laser da espingarda
@@ -2178,28 +2178,28 @@ AntiPing: prediction margin
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Sem VRAM. Tente definir 'cl_skins_loaded_max' para um valor menor ou remova recursos personalizados (skins, entidades, etc.), especialmente aqueles com alta resolução.
 
 This name cannot be used for files and folders
-== 
+== Este nome não pode ser usado para arquivos e pastas
 
 This skin name cannot be used.
-== 
+== Este nome de skin não pode ser usado.
 
 Skin could not be loaded due to an error. Check the local console for details.
-== 
+== Não foi possível carregar a skin devido a um erro. Verifique o console local para detalhes.
 
 Skin could not be found.
-== 
+== Não foi possível encontrar a skin.
 
 No skins match your filter criteria
-== 
+== Nenhuma skin corresponde aos seus critérios de filtro
 
 Preview player's name plate
-== 
+== Pré-visualizar placa de identificação do jogador
 
 Dragger Outline Color
-== 
+== Cor de contorno do dragger
 
 Dragger Inner Color
-== 
+== Cor interna do dragger
