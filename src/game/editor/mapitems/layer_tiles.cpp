@@ -377,6 +377,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 					CTile Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
 					if(IsValidSpeedupTile(Tile.m_Index))
 					{
+						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
 						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Angle = m_pEditor->m_SpeedupAngle;
 						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Force = m_pEditor->m_SpeedupForce;
 						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
