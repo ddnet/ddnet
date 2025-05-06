@@ -609,8 +609,8 @@ MACRO_CONFIG_COL(ClLaserFreezeOutlineColor, cl_laser_freeze_outline_color, 11613
 MACRO_CONFIG_COL(ClLaserDraggerInnerColor, cl_laser_dragger_inner_color, 42398, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser inner color for draggers")
 MACRO_CONFIG_COL(ClLaserDraggerOutlineColor, cl_laser_dragger_outline_color, 57618, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Laser outline color for draggers")
 
-MACRO_CONFIG_COL(ClKillMessageNormalColor, cl_kill_message_normal_color, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLALPHA, "Kill message normal color")
-MACRO_CONFIG_COL(ClKillMessageHighlightColor, cl_kill_message_highlight_color, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_COLALPHA, "Kill message highlight color")
+MACRO_CONFIG_COL(ClKillMessageNormalColor, cl_kill_message_normal_color, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Kill message normal color")
+MACRO_CONFIG_COL(ClKillMessageHighlightColor, cl_kill_message_highlight_color, 255, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Kill message highlight color")
 
 MACRO_CONFIG_INT(ClMessageFriend, cl_message_friend, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable coloring and the heart for friends")
 MACRO_CONFIG_COL(ClMessageFriendColor, cl_message_friend_color, 65425, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Friend message color")
