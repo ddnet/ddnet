@@ -4,6 +4,12 @@
 #include <cstdint>
 #include <ctime>
 
+#ifdef __GNUC__
+#define GNUC_ATTRIBUTE(x) __attribute__(x)
+#else
+#define GNUC_ATTRIBUTE(x)
+#endif
+
 enum class TRISTATE
 {
 	NONE,
