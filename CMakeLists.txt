@@ -2001,6 +2001,8 @@ set_src(BASE GLOB_RECURSE src/base
   rust.h
   system.cpp
   system.h
+  system/str.cpp
+  system/str.h
   tl/threading.h
   types.h
   unicode/confusables.cpp
