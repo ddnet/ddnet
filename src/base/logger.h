@@ -297,4 +297,9 @@ public:
 		log_set_scope_logger(old_scope_logger);
 	}
 };
+
+extern std::atomic<ILogger *> global_logger;
+extern thread_local ILogger *scope_logger;
+extern thread_local bool in_logger;
+
 #endif // BASE_LOGGER_H

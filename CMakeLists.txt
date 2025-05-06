@@ -1996,6 +1996,7 @@ set_src(BASE GLOB_RECURSE src/base
   lock.h
   log.cpp
   log.h
+  logger.cpp
   logger.h
   math.h
   rust.h
