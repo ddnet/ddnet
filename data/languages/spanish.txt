@@ -2180,28 +2180,28 @@ AntiPing: prediction margin
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Memoria de video agotada. Intenta reducir el valor de 'cl_skins_loaded_max' o elimina recursos personalizados (skins, entidades, etc.), especialmente aquellos con alta resolución.
 
 This name cannot be used for files and folders
-== 
+== Este nombre no se puede usar para archivos y carpetas
 
 This skin name cannot be used.
-== 
+== No se puede utilizar este nombre de skin.
 
 Skin could not be loaded due to an error. Check the local console for details.
-== 
+== No se pudo cargar la skin debido a un error. Revisa la consola local para más detalles.
 
 Skin could not be found.
-== 
+== No se pudo encontrar la skin.
 
 No skins match your filter criteria
-== 
+== Ninguna skin coincide con tus criterios de filtro.
 
 Preview player's name plate
-== 
+== Previsualizar el nombre del jugador
 
 Dragger Outline Color
-== 
+== Color externo del arrastrador
 
 Dragger Inner Color
-== 
+== Color interno del arrastrador
