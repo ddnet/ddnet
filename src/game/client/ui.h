@@ -568,7 +568,7 @@ public:
 	const CUIRect *ClipArea() const;
 	inline bool IsClipped() const { return !m_vClips.empty(); }
 
-	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect, const unsigned Flags);
+	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect, unsigned Flags);
 	int DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
 	bool DoDoubleClickLogic(const void *pId);
 	EEditState DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, float *pY);
