@@ -559,12 +559,12 @@ protected:
 		SHA256_DIGEST m_Sha256;
 
 		CAbstractCommunityIconJob(CMenus *pMenus, const char *pCommunityId, int StorageType);
-		virtual ~CAbstractCommunityIconJob(){};
 
 	public:
 		const char *CommunityId() const { return m_aCommunityId; }
 		bool Success() const { return m_Success; }
 		const SHA256_DIGEST &Sha256() const { return m_Sha256; }
+		virtual ~CAbstractCommunityIconJob() = default;
 	};
 
 	class CCommunityIconLoadJob : public IJob, public CAbstractCommunityIconJob
