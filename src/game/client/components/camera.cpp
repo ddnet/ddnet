@@ -501,7 +501,7 @@ void CCamera::SetView(ivec2 Pos, bool Relative)
 
 	m_ForceFreeviewPos = vec2(
 		clamp(UntestedViewPos.x, 200.0f, Collision()->GetWidth() * 32 - 200.0f),
-		clamp(UntestedViewPos.y, 200.0f, Collision()->GetWidth() * 32 - 200.0f));
+		clamp(UntestedViewPos.y, 200.0f, Collision()->GetHeight() * 32 - 200.0f));
 }
 
 void CCamera::GotoSwitch(int Number, int Offset)
@@ -589,10 +589,7 @@ void CCamera::GotoTele(int Number, int Offset)
 					MatchPos = m_GotoTeleLastPos;
 					break;
 				}
-				else
-				{
-					FullRound = true;
-				}
+				FullRound = true;
 			}
 		} while(distance(m_GotoTeleLastPos, MatchPos) < 10.0f);
 	}
