@@ -671,7 +671,7 @@ public:
 	void RenderLoading(const char *pCaption, const char *pContent, int IncreaseCounter);
 	void FinishLoading();
 
-	bool IsInit() { return m_IsInit; }
+	bool IsInit() const { return m_IsInit; }
 
 	bool IsActive() const { return m_MenuActive; }
 	void SetActive(bool Active);
