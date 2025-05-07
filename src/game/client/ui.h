@@ -10,7 +10,6 @@
 #include <engine/textrender.h>
 
 #include <chrono>
-#include <set>
 #include <string>
 #include <vector>
 
