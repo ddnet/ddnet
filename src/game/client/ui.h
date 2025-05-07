@@ -245,16 +245,16 @@ struct SMenuButtonProperties
 class CUIElementBase
 {
 private:
-	static CUi *s_pUI;
+	static CUi *ms_pUi;
 
 public:
-	static void Init(CUi *pUI) { s_pUI = pUI; }
+	static void Init(CUi *pUI) { ms_pUi = pUI; }
 
 	IClient *Client() const;
 	IGraphics *Graphics() const;
 	IInput *Input() const;
 	ITextRender *TextRender() const;
-	CUi *Ui() const { return s_pUI; }
+	CUi *Ui() const { return ms_pUi; }
 };
 
 class CButtonContainer
