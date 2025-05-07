@@ -1992,6 +1992,38 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
 void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int type, void *user);
 
 /**
+ * Fetches per user configuration directory.
+ *
+ * @ingroup Filesystem
+ *
+ * @param appname Name of the application.
+ * @param path Buffer that will receive the storage path.
+ * @param max Size of the buffer.
+ *
+ * @return `0` on success. Negative value on failure.
+ *
+ * @remark Returns ~/.appname on UNIX based systems.
+ * @remark Returns ~/Library/Applications Support/appname on macOS.
+ * @remark Returns %APPDATA%/Appname on Windows based systems.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ */
+int fs_storage_path(const char *appname, char *path, int max);
+
+/**
+ * Recursively creates parent directories for a file or directory.
+ *
+ * @ingroup Filesystem
+ *
+ * @param path File or directory for which to create parent directories.
+ *
+ * @return `0` on success. Negative value on failure.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ */
+int fs_makedir_rec_for(const char *path);
+
+/**
  * Creates a directory.
  *
  * @ingroup Filesystem
@@ -2021,38 +2053,6 @@ int fs_makedir(const char *path);
  * @remark The strings are treated as null-terminated strings.
  */
 int fs_removedir(const char *path);
-
-/**
- * Recursively creates parent directories for a file or directory.
- *
- * @ingroup Filesystem
- *
- * @param path File or directory for which to create parent directories.
- *
- * @return `0` on success. Negative value on failure.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-int fs_makedir_rec_for(const char *path);
-
-/**
- * Fetches per user configuration directory.
- *
- * @ingroup Filesystem
- *
- * @param appname Name of the application.
- * @param path Buffer that will receive the storage path.
- * @param max Size of the buffer.
- *
- * @return `0` on success. Negative value on failure.
- *
- * @remark Returns ~/.appname on UNIX based systems.
- * @remark Returns ~/Library/Applications Support/appname on macOS.
- * @remark Returns %APPDATA%/Appname on Windows based systems.
- *
- * @remark The strings are treated as null-terminated strings.
- */
-int fs_storage_path(const char *appname, char *path, int max);
 
 /**
  * Checks if a file exists.
