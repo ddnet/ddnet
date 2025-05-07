@@ -898,7 +898,7 @@ public:
 	const char *GetBinaryPathAbsolute(const char *pFilename, char *pBuffer, unsigned BufferSize) override
 	{
 		char aBinaryPath[IO_MAX_PATH_LENGTH];
-		GetBinaryPath(PLAT_CLIENT_EXEC, aBinaryPath, sizeof(aBinaryPath));
+		GetBinaryPath(pFilename, aBinaryPath, sizeof(aBinaryPath));
 		if(fs_is_relative_path(aBinaryPath))
 		{
 			if(fs_getcwd(pBuffer, BufferSize))
