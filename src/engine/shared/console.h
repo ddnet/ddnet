@@ -66,6 +66,9 @@ class CConsole : public IConsole
 	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback;
 	void *m_pTeeHistorianCommandUserdata;
 
+	FIsInViewCallback m_pfnIsInViewCallback;
+	void *m_pIsInViewUserdata;
+
 	FUnknownCommandCallback m_pfnUnknownCommandCallback = EmptyUnknownCommandCallback;
 	void *m_pUnknownCommandUserdata = nullptr;
 
@@ -126,7 +129,8 @@ class CConsole : public IConsole
 
 		enum
 		{
-			VICTIM_NONE = -3,
+			VICTIM_NONE = -4,
+			VICTIM_VIEW = -3,
 			VICTIM_ME = -2,
 			VICTIM_ALL = -1,
 		};
@@ -200,6 +204,7 @@ public:
 	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const override;
 	void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) override;
 	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
+	void SetIsInViewCallback(FIsInViewCallback pfnCallback, void *pUser) override;
 	void InitChecksum(CChecksumData *pData) const override;
 
 	void SetAccessLevel(int AccessLevel) override { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
