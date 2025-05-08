@@ -2109,97 +2109,97 @@ Renders your frame rate in the top right
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Український переклад від .ua, Ivan., SwiatoslaW, 404_not_found, EGYT5453 та veydzh3r
+== Український переклад від .ua, Ivan., SwiatoslaW, 404_not_found, EGYT5453, veydzh3r та Animeuz
 
 Show spectator cursor
 == Показувати вказівник глядача
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Недостатньо відеопам’яті (VRAM). Спробуйте зменшити значення параметра 'cl_skins_loaded_max' або видаліть користувацькі ресурси (скіни, сутності тощо), особливо ті, що мають високу роздільну здатність.
 
 No demo with this filename exists
-== 
+== Демо з такою назвою не існує
 
 This name cannot be used for files and folders
-== 
+== Це ім’я недопустиме для файлів і папок
 
 Map size
-== 
+== Розмір мапи
 
 This skin name cannot be used.
-== 
+== Таке ім’я скіна недопустиме.
 
 Skin could not be loaded due to an error. Check the local console for details.
-== 
+== Не вдалося завантажити скін через помилку. Перевірте локальну консоль для деталей.
 
 Skin could not be found.
-== 
+== Не вдалося знайти скін.
 
 No skins match your filter criteria
-== 
+== Немає скінів, які відповідають вашому фільтру
 
 Show number of spectators
-== 
+== Показувати кількість глядачів за мною
 
 [Show name plates]
 None
-== 
+== Жоден
 
 [Show name plates]
 Own
-== 
+== Свій
 
 [Show name plates]
 Others
-== 
+== Інших
 
 [Show name plates]
 All
-== 
+== Всіх
 
 Name plates offset
-== 
+== Зміщення імені
 
 Show friend icon in name plates
-== 
+== Показувати іконку друга в імені
 
 Show client IDs on a seperate line
-== 
+== Показувати клієнтські ID на окремій лінії
 
 Client IDs size
-== 
+== Розмір клієнтських ID
 
 Show players' key presses
-== 
+== Показувати натискання клавіш гравців
 
 [Show players' key presses]
 None
-== 
+== Жоден
 
 [Show players' key presses]
 Own
-== 
+== Свій
 
 [Show players' key presses]
 Others
-== 
+== Інших
 
 [Show players' key presses]
 All
-== 
+== Всіх
 
 Preview player's name plate
-== 
+== Попередній перегляд відображення імені гравця
 
 Preview dummy's name plate
-== 
+== Попередній перегляд відображення імені даммі
 
 Dragger Outline Color
-== 
+== Колір контуру драггера
 
 Dragger Inner Color
-== 
+== Колір драггера
 
 AntiPing: prediction margin
-== 
+== AntiPing: допуск передбачення
