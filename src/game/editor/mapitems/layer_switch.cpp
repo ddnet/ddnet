@@ -323,7 +323,7 @@ void CLayerSwitch::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUI
 	FlagModified(sx, sy, w, h);
 }
 
-bool CLayerSwitch::ContainsElementWithId(int Id)
+bool CLayerSwitch::ContainsElementWithId(int Id) const
 {
 	for(int y = 0; y < m_Height; ++y)
 	{

@@ -279,7 +279,7 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 	FlagModified(sx, sy, w, h);
 }
 
-bool CLayerTune::ContainsElementWithId(int Id)
+bool CLayerTune::ContainsElementWithId(int Id) const
 {
 	for(int y = 0; y < m_Height; ++y)
 	{

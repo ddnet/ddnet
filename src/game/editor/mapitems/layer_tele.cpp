@@ -303,7 +303,7 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 	FlagModified(sx, sy, w, h);
 }
 
-bool CLayerTele::ContainsElementWithId(int Id, bool Checkpoint)
+bool CLayerTele::ContainsElementWithId(int Id, bool Checkpoint) const
 {
 	for(int y = 0; y < m_Height; ++y)
 	{
