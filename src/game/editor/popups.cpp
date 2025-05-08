@@ -2669,7 +2669,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 		if(pEditor->DoButton_Editor(&s_NextFreeTelePid, "F", 0, &FindFreeTeleSlot, BUTTONFLAG_LEFT, "[Ctrl+F] Find next free tele number.") ||
 			(Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
-			int TeleNumber = pEditor->FindNextFreeTeleNumber();
+			int TeleNumber = pEditor->m_Map.m_pTeleLayer->FindNextFreeNumber(false);
 			if(TeleNumber != -1)
 			{
 				pEditor->m_TeleNumber = TeleNumber;
@@ -2681,7 +2681,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 		if(pEditor->DoButton_Editor(&s_NextFreeCheckpointPid, "F", 0, &FindFreeCheckpointSlot, BUTTONFLAG_LEFT, "[Ctrl+F] Find next free checkpoint number.") ||
 			(Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
-			int CheckpointNumber = pEditor->FindNextFreeTeleNumber(true);
+			int CheckpointNumber = pEditor->m_Map.m_pTeleLayer->FindNextFreeNumber(true);
 			if(CheckpointNumber != -1)
 			{
 				pEditor->m_TeleCheckpointNumber = CheckpointNumber;
@@ -2831,7 +2831,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, BUTTONFLAG_LEFT, "[Ctrl+F] Find empty slot.") ||
 			(Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
-			int Number = pEditor->FindNextFreeSwitchNumber();
+			int Number = pEditor->m_Map.m_pSwitchLayer->FindNextFreeNumber();
 			if(Number != -1)
 				pEditor->m_SwitchNum = Number;
 		}
@@ -2931,7 +2931,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupTune(void *pContext, CUIRect View, b
 		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, BUTTONFLAG_LEFT, "[Ctrl+F] Find unused zone.") ||
 			(Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
-			int Number = pEditor->FindNextFreeTuneNumber();
+			int Number = pEditor->m_Map.m_pTuneLayer->FindNextFreeNumber();
 			if(Number != -1)
 				pEditor->m_TuningNum = Number;
 		}

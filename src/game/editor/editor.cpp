@@ -9396,10 +9396,10 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 
 		if(pLayerTiles->m_HasTele)
 		{
-			int NextFreeTeleNumber = FindNextFreeTeleNumber();
-			int NextFreeCPNumber = FindNextFreeTeleNumber(true);
-
+			int NextFreeTeleNumber = m_Map.m_pTeleLayer->FindNextFreeNumber(false);
+			int NextFreeCPNumber = m_Map.m_pTeleLayer->FindNextFreeNumber(true);
 			std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
+
 			for(int y = 0; y < pTeleLayer->m_Height; y++)
 			{
 				for(int x = 0; x < pTeleLayer->m_Width; x++)
@@ -9448,9 +9448,9 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 		}
 		else if(pLayerTiles->m_HasSwitch)
 		{
-			int NextFreeNumber = FindNextFreeSwitchNumber();
-
+			int NextFreeNumber = m_Map.m_pSwitchLayer->FindNextFreeNumber();
 			std::shared_ptr<CLayerSwitch> pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pLayer);
+
 			for(int y = 0; y < pSwitchLayer->m_Height; y++)
 			{
 				for(int x = 0; x < pSwitchLayer->m_Width; x++)
@@ -9493,49 +9493,6 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 			}
 		}
 	}
-}
-
-int CEditor::FindNextFreeSwitchNumber()
-{
-	int Number = -1;
-
-	for(int i = 1; i <= 255; i++)
-	{
-		if(!m_Map.m_pSwitchLayer->ContainsElementWithId(i))
-		{
-			Number = i;
-			break;
-		}
-	}
-	return Number;
-}
-
-int CEditor::FindNextFreeTeleNumber(bool Checkpoint)
-{
-	int Number = -1;
-	for(int i = 1; i <= 255; i++)
-	{
-		if(!m_Map.m_pTeleLayer->ContainsElementWithId(i, Checkpoint))
-		{
-			Number = i;
-			break;
-		}
-	}
-	return Number;
-}
-
-int CEditor::FindNextFreeTuneNumber()
-{
-	int Number = -1;
-	for(int i = 1; i <= 255; i++)
-	{
-		if(!m_Map.m_pTuneLayer->ContainsElementWithId(i))
-		{
-			Number = i;
-			break;
-		}
-	}
-	return Number;
 }
 
 IEditor *CreateEditor() { return new CEditor; }

@@ -1201,9 +1201,6 @@ public:
 	unsigned char m_ViewSwitch;
 
 	void AdjustBrushSpecialTiles(bool UseNextFree, int Adjust = 0);
-	int FindNextFreeSwitchNumber();
-	int FindNextFreeTeleNumber(bool Checkpoint = false);
-	int FindNextFreeTuneNumber();
 
 	// Undo/Redo
 	CEditorHistory m_EditorHistory;
