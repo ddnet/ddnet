@@ -1614,7 +1614,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Box.VMargin(60.0f, &Box);
 		Box.HMargin(20.0f, &Box);
 		Box.HSplitBottom(24.0f, &Box, &Row);
-		Box.HSplitBottom(40.0f, &Box, nullptr);
+		Box.HSplitBottom(30.0f, &Box, nullptr);
 		Row.VMargin(40.0f, &Row);
 		Row.VSplitMid(&Abort, &Ok, 40.0f);
 
@@ -1655,20 +1655,24 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 			}
 		}
 
-		CUIRect ShowChatCheckbox, UseSoundsCheckbox;
+		CUIRect ShowTouchControlsCheckbox, UseSoundsCheckbox, ShowChatCheckbox, ShowHudButton;
 		Box.HSplitBottom(20.0f, &Box, &Row);
 		Box.HSplitBottom(10.0f, &Box, nullptr);
-		Row.VSplitMid(&ShowChatCheckbox, &UseSoundsCheckbox, 20.0f);
+		Row.VSplitMid(nullptr, &ShowTouchControlsCheckbox, 20.0f);
+		Box.HSplitBottom(20.0f, &Box, &Row);
+		Box.HSplitBottom(10.0f, &Box, nullptr);
+		Row.VSplitMid(&UseSoundsCheckbox, &ShowChatCheckbox, 20.0f);
+		Box.HSplitBottom(20.0f, &Box, &Row);
+		Row.VSplitMid(&Row, &ShowHudButton, 20.0f);
 
-		if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &ShowChatCheckbox))
-			g_Config.m_ClVideoShowChat ^= 1;
+		if(DoButton_CheckBox(&g_Config.m_ClVideoTouchControls, Localize("Show touch controls"), g_Config.m_ClVideoTouchControls, &ShowTouchControlsCheckbox))
+			g_Config.m_ClVideoTouchControls ^= 1;
 
 		if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &UseSoundsCheckbox))
 			g_Config.m_ClVideoSndEnable ^= 1;
 
-		CUIRect ShowHudButton;
-		Box.HSplitBottom(20.0f, &Box, &Row);
-		Row.VSplitMid(&Row, &ShowHudButton, 20.0f);
+		if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &ShowChatCheckbox))
+			g_Config.m_ClVideoShowChat ^= 1;
 
 		if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &ShowHudButton))
 			g_Config.m_ClVideoShowhud ^= 1;
