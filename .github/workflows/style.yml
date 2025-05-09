@@ -22,7 +22,7 @@ jobs:
     - name: Prepare Linux
       run: |
         sudo apt-get update -y
-        sudo apt-get install ddnet-tools shellcheck pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools libglew-dev -y
+        sudo apt-get install ddnet-tools shellcheck tidy pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools libglew-dev -y
         rustup default stable
         pip3 install pylint
         wget https://github.com/muttleyxd/clang-tools-static-binaries/releases/download/master-46b8640/clang-format-10_linux-amd64
@@ -65,6 +65,13 @@ jobs:
 
     - name: Check config variables
       run: scripts/check_config_variables.py
+
+    - name: Check commands & settings export
+      run: |
+        echo "<!DOCTYPE html><html><head><title></title></head><body>" > settingscommands.html
+        scripts/export_settings_commands_table.py >> settingscommands.html
+        echo "</body></html>" >> settingscommands.html
+        tidy -errors --drop-empty-elements false settingscommands.html
 
     - name: Check log error format
       run: |
