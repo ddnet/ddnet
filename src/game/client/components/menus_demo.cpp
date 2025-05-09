@@ -90,8 +90,13 @@ void CMenus::HandleDemoSeeking(float PositionToSeek, float TimeToSeek)
 		else
 			DemoPlayer()->SeekPercent(PositionToSeek);
 		m_pClient->m_SuppressEvents = false;
-		if(!DemoPlayer()->BaseInfo()->m_Paused && PositionToSeek == 1.0f)
+
+		if(!DemoPlayer()->BaseInfo()->m_Paused &&
+			!DemoPlayer()->BaseInfo()->m_Live &&
+			PositionToSeek == 1.0f)
+		{
 			DemoPlayer()->Pause();
+		}
 	}
 }
 
@@ -370,6 +375,35 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				m_DemoControlsPositionOffset.y = clamp(m_DemoControlsPositionOffset.y, -DemoControlsOriginal.y, MainView.h - DemoControlsDragRect.h - DemoControlsOriginal.y);
 			}
 		}
+	}
+
+	// Live button
+	if(pInfo->m_Live)
+	{
+		const bool PlayingLive = pInfo->m_LastTick - pInfo->m_CurrentTick <= 3 * Client()->GameTickSpeed();
+		CUIRect LiveButton;
+		SeekBar.VSplitRight(SeekBar.h, &SeekBar, &LiveButton);
+		SeekBar.VSplitRight(2.0f, &SeekBar, nullptr);
+		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		TextRender()->TextColor(PlayingLive ? ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f) : ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f));
+		Ui()->DoLabel(&LiveButton, FONT_ICON_CIRCLE, 24.0f, TEXTALIGN_MC);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+		TextRender()->SetRenderFlags(0);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+		static char s_LiveButtonId;
+		if(Ui()->HotItem() == &s_LiveButtonId)
+		{
+			LiveButton.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 3.0f);
+		}
+		if(Ui()->DoButtonLogic(&s_LiveButtonId, 0, &LiveButton, BUTTONFLAG_LEFT))
+		{
+			PositionToSeek = 1.0f;
+			DemoPlayer()->SetSpeedIndex(DEMO_SPEED_INDEX_DEFAULT);
+			UpdateLastSpeedChange();
+		}
+		GameClient()->m_Tooltips.DoToolTip(&s_LiveButtonId, &LiveButton,
+			PlayingLive ? Localize("Live", "Demo playback") : Localize("Go to Live", "Demo playback"));
 	}
 
 	// do seekbar
