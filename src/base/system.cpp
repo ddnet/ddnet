@@ -1172,14 +1172,13 @@ void net_addr_str(const NETADDR *addr, char *string, int max_length, bool add_po
 
 static int priv_net_extract(const char *hostname, char *host, int max_host, int *port)
 {
-	int i;
-
 	*port = 0;
 	host[0] = 0;
 
 	if(hostname[0] == '[')
 	{
 		// ipv6 mode
+		int i;
 		for(i = 1; i < max_host && hostname[i] && hostname[i] != ']'; i++)
 			host[i - 1] = hostname[i];
 		host[i - 1] = 0;
@@ -1193,6 +1192,7 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 	else
 	{
 		// generic mode (ipv4, hostname etc)
+		int i;
 		for(i = 0; i < max_host - 1 && hostname[i] && hostname[i] != ':'; i++)
 			host[i] = hostname[i];
 		host[i] = 0;
@@ -1204,30 +1204,27 @@ static int priv_net_extract(const char *hostname, char *host, int max_host, int 
 	return 0;
 }
 
-int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
+static int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 {
-	struct addrinfo hints;
-	struct addrinfo *result = nullptr;
-	int e;
 	char host[256];
 	int port = 0;
-
 	if(priv_net_extract(hostname, host, sizeof(host), &port))
 		return -1;
 
 	dbg_msg("host_lookup", "host='%s' port=%d %d", host, port, types);
 
+	struct addrinfo hints;
 	mem_zero(&hints, sizeof(hints));
-
-	hints.ai_family = AF_UNSPEC;
 
 	if(types == NETTYPE_IPV4)
 		hints.ai_family = AF_INET;
 	else if(types == NETTYPE_IPV6)
 		hints.ai_family = AF_INET6;
+	else
+		hints.ai_family = AF_UNSPEC;
 
-	e = getaddrinfo(host, nullptr, &hints, &result);
-
+	struct addrinfo *result = nullptr;
+	int e = getaddrinfo(host, nullptr, &hints, &result);
 	if(!result)
 		return -1;
 
@@ -1521,10 +1518,7 @@ std::string windows_format_system_message(unsigned long error)
 
 static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, int sockaddrlen)
 {
-	int sock, e;
-
-	/* create socket */
-	sock = socket(domain, type, 0);
+	int sock = socket(domain, type, 0);
 	if(sock < 0)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
@@ -1558,9 +1552,7 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	}
 #endif
 
-	/* bind the socket */
-	e = bind(sock, addr, sockaddrlen);
-	if(e != 0)
+	if(bind(sock, addr, sockaddrlen) != 0)
 	{
 #if defined(CONF_FAMILY_WINDOWS)
 		int error = WSAGetLastError();
@@ -1573,7 +1565,6 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 		return -1;
 	}
 
-	/* return the newly created socket */
 	return sock;
 }
 
@@ -1742,22 +1733,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 		else
 			dbg_msg("net", "can't send ipv6 traffic to this socket");
 	}
-	/*
-	else
-		dbg_msg("net", "can't send to network of type %d", addr->type);
-		*/
 
-	/*if(d < 0)
-	{
-		char addrstr[256];
-		net_addr_str(addr, addrstr, sizeof(addrstr));
-
-		dbg_msg("net", "sendto error (%d '%s')", errno, strerror(errno));
-		dbg_msg("net", "\tsock = %d %x", sock, sock);
-		dbg_msg("net", "\tsize = %d %x", size, size);
-		dbg_msg("net", "\taddr = %s", addrstr);
-
-	}*/
 	network_stats.sent_bytes += size;
 	network_stats.sent_packets++;
 	return d;
@@ -1766,13 +1742,12 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 void net_buffer_init(NETSOCKET_BUFFER *buffer)
 {
 #if defined(CONF_PLATFORM_LINUX)
-	int i;
 	buffer->pos = 0;
 	buffer->size = 0;
 	mem_zero(buffer->msgs, sizeof(buffer->msgs));
 	mem_zero(buffer->iovecs, sizeof(buffer->iovecs));
 	mem_zero(buffer->sockaddrs, sizeof(buffer->sockaddrs));
-	for(i = 0; i < VLEN; ++i)
+	for(int i = 0; i < VLEN; ++i)
 	{
 		buffer->iovecs[i].iov_base = buffer->bufs[i];
 		buffer->iovecs[i].iov_len = PACKETSIZE;
@@ -1977,18 +1952,14 @@ int net_tcp_listen(NETSOCKET sock, int backlog)
 
 int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *a)
 {
-	int s;
-	socklen_t sockaddr_len;
-
 	*new_sock = nullptr;
 
 	if(sock->ipv4sock >= 0)
 	{
 		struct sockaddr_in addr;
-		sockaddr_len = sizeof(addr);
+		socklen_t sockaddr_len = sizeof(addr);
 
-		s = accept(sock->ipv4sock, (struct sockaddr *)&addr, &sockaddr_len);
-
+		int s = accept(sock->ipv4sock, (struct sockaddr *)&addr, &sockaddr_len);
 		if(s != -1)
 		{
 			sockaddr_to_netaddr((const struct sockaddr *)&addr, a);
@@ -2004,10 +1975,9 @@ int net_tcp_accept(NETSOCKET sock, NETSOCKET *new_sock, NETADDR *a)
 	if(sock->ipv6sock >= 0)
 	{
 		struct sockaddr_in6 addr;
-		sockaddr_len = sizeof(addr);
+		socklen_t sockaddr_len = sizeof(addr);
 
-		s = accept(sock->ipv6sock, (struct sockaddr *)&addr, &sockaddr_len);
-
+		int s = accept(sock->ipv6sock, (struct sockaddr *)&addr, &sockaddr_len);
 		if(s != -1)
 		{
 			*new_sock = (NETSOCKET_INTERNAL *)malloc(sizeof(**new_sock));
@@ -2026,19 +1996,19 @@ int net_tcp_connect(NETSOCKET sock, const NETADDR *a)
 {
 	if(a->type & NETTYPE_IPV4)
 	{
-		struct sockaddr_in addr;
-		netaddr_to_sockaddr_in(a, &addr);
 		if(sock->ipv4sock < 0)
 			return -2;
+		struct sockaddr_in addr;
+		netaddr_to_sockaddr_in(a, &addr);
 		return connect(sock->ipv4sock, (struct sockaddr *)&addr, sizeof(addr));
 	}
 
 	if(a->type & NETTYPE_IPV6)
 	{
-		struct sockaddr_in6 addr;
-		netaddr_to_sockaddr_in6(a, &addr);
 		if(sock->ipv6sock < 0)
 			return -2;
+		struct sockaddr_in6 addr;
+		netaddr_to_sockaddr_in6(a, &addr);
 		return connect(sock->ipv6sock, (struct sockaddr *)&addr, sizeof(addr));
 	}
 
@@ -2047,12 +2017,9 @@ int net_tcp_connect(NETSOCKET sock, const NETADDR *a)
 
 int net_tcp_connect_non_blocking(NETSOCKET sock, NETADDR bindaddr)
 {
-	int res = 0;
-
 	net_set_non_blocking(sock);
-	res = net_tcp_connect(sock, &bindaddr);
+	int res = net_tcp_connect(sock, &bindaddr);
 	net_set_blocking(sock);
-
 	return res;
 }
 
@@ -2596,15 +2563,9 @@ void swap_endian(void *data, unsigned elem_size, unsigned num)
 
 int net_socket_read_wait(NETSOCKET sock, int time)
 {
-	struct timeval tv;
 	fd_set readfds;
-	int sockid;
-
-	tv.tv_sec = time / 1000000;
-	tv.tv_usec = time % 1000000;
-	sockid = 0;
-
 	FD_ZERO(&readfds);
+	int sockid = 0;
 	if(sock->ipv4sock >= 0)
 	{
 		FD_SET(sock->ipv4sock, &readfds);
@@ -2630,9 +2591,16 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 
 	/* don't care about writefds and exceptfds */
 	if(time < 0)
+	{
 		select(sockid + 1, &readfds, nullptr, nullptr, nullptr);
+	}
 	else
+	{
+		struct timeval tv;
+		tv.tv_sec = time / 1000000;
+		tv.tv_usec = time % 1000000;
 		select(sockid + 1, &readfds, nullptr, nullptr, &tv);
+	}
 
 	if(sock->ipv4sock >= 0 && FD_ISSET(sock->ipv4sock, &readfds))
 		return 1;
