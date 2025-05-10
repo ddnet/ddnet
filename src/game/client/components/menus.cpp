@@ -446,19 +446,18 @@ ColorHSLA CMenus::DoButton_ColorPicker(const CUIRect *pRect, unsigned int *pHsla
 	pRect->Draw(Outline, IGraphics::CORNER_ALL, 4.0f);
 	Rect.Draw(color_cast<ColorRGBA>(HslaColor), IGraphics::CORNER_ALL, 4.0f);
 
-	static CUi::SColorPickerPopupContext s_ColorPickerPopupContext;
 	if(Ui()->DoButtonLogic(pHslaColor, 0, pRect, BUTTONFLAG_LEFT))
 	{
-		s_ColorPickerPopupContext.m_pHslaColor = pHslaColor;
-		s_ColorPickerPopupContext.m_HslaColor = HslaColor;
-		s_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(HslaColor);
-		s_ColorPickerPopupContext.m_RgbaColor = color_cast<ColorRGBA>(s_ColorPickerPopupContext.m_HsvaColor);
-		s_ColorPickerPopupContext.m_Alpha = Alpha;
-		Ui()->ShowPopupColorPicker(Ui()->MouseX(), Ui()->MouseY(), &s_ColorPickerPopupContext);
+		m_ColorPickerPopupContext.m_pHslaColor = pHslaColor;
+		m_ColorPickerPopupContext.m_HslaColor = HslaColor;
+		m_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(HslaColor);
+		m_ColorPickerPopupContext.m_RgbaColor = color_cast<ColorRGBA>(m_ColorPickerPopupContext.m_HsvaColor);
+		m_ColorPickerPopupContext.m_Alpha = Alpha;
+		Ui()->ShowPopupColorPicker(Ui()->MouseX(), Ui()->MouseY(), &m_ColorPickerPopupContext);
 	}
-	else if(Ui()->IsPopupOpen(&s_ColorPickerPopupContext) && s_ColorPickerPopupContext.m_pHslaColor == pHslaColor)
+	else if(Ui()->IsPopupOpen(&m_ColorPickerPopupContext) && m_ColorPickerPopupContext.m_pHslaColor == pHslaColor)
 	{
-		HslaColor = color_cast<ColorHSLA>(s_ColorPickerPopupContext.m_HsvaColor);
+		HslaColor = color_cast<ColorHSLA>(m_ColorPickerPopupContext.m_HsvaColor);
 	}
 
 	return HslaColor;
