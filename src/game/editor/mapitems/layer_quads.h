@@ -32,6 +32,8 @@ public:
 
 	int m_Image;
 	std::vector<CQuad> m_vQuads;
+
+	static void RandomizeQuadOffsets(CEditor *pEditor, CQuad *pQuads, size_t NumQuads, bool Position, bool Color);
 };
 
 #endif
