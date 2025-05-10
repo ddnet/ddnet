@@ -32,8 +32,6 @@ protected:
 
 	virtual CBackgroundEngineMap *CreateBGMap();
 
-	const char *LoadingTitle() const override;
-
 public:
 	CBackground(int MapType = CMapLayers::TYPE_BACKGROUND_FORCE, bool OnlineOnly = true);
 	virtual ~CBackground();
