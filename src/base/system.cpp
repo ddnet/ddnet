@@ -1000,13 +1000,8 @@ const NETADDR NETADDR_ZEROED = {NETTYPE_INVALID, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 
 static void netaddr_to_sockaddr_in(const NETADDR *src, struct sockaddr_in *dest)
 {
+	dbg_assert((src->type & (NETTYPE_IPV4 | NETTYPE_WEBSOCKET_IPV4)) != 0, "Invalid address type '%d' for netaddr_to_sockaddr_in", src->type);
 	mem_zero(dest, sizeof(struct sockaddr_in));
-	if(!(src->type & NETTYPE_IPV4) && !(src->type & NETTYPE_WEBSOCKET_IPV4))
-	{
-		dbg_msg("system", "couldn't convert NETADDR of type %d to ipv4", src->type);
-		return;
-	}
-
 	dest->sin_family = AF_INET;
 	dest->sin_port = htons(src->port);
 	mem_copy(&dest->sin_addr.s_addr, src->ip, 4);
@@ -1014,13 +1009,8 @@ static void netaddr_to_sockaddr_in(const NETADDR *src, struct sockaddr_in *dest)
 
 static void netaddr_to_sockaddr_in6(const NETADDR *src, struct sockaddr_in6 *dest)
 {
+	dbg_assert((src->type & NETTYPE_IPV6) != 0, "Invalid address type '%d' for netaddr_to_sockaddr_in6", src->type);
 	mem_zero(dest, sizeof(struct sockaddr_in6));
-	if(!(src->type & NETTYPE_IPV6))
-	{
-		dbg_msg("system", "couldn't convert NETADDR of type %d to ipv6", src->type);
-		return;
-	}
-
 	dest->sin6_family = AF_INET6;
 	dest->sin6_port = htons(src->port);
 	mem_copy(&dest->sin6_addr.s6_addr, src->ip, 16);
@@ -1052,7 +1042,7 @@ static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 	else
 	{
 		mem_zero(dst, sizeof(struct sockaddr));
-		dbg_msg("system", "couldn't convert sockaddr of family %d", src->sa_family);
+		log_warn("net", "Cannot convert sockaddr of family %d", src->sa_family);
 	}
 }
 
@@ -1211,7 +1201,7 @@ static int net_host_lookup_impl(const char *hostname, NETADDR *addr, int types)
 	if(priv_net_extract(hostname, host, sizeof(host), &port))
 		return -1;
 
-	dbg_msg("host_lookup", "host='%s' port=%d %d", host, port, types);
+	log_trace("host_lookup", "host='%s' port='%d' types='%d'", host, port, types);
 
 	struct addrinfo hints;
 	mem_zero(&hints, sizeof(hints));
@@ -1463,10 +1453,9 @@ int net_addr_from_str(NETADDR *addr, const char *string)
 static void priv_net_close_socket(int sock)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	closesocket(sock);
+	dbg_assert(closesocket(sock) == 0, "closesocket failure (%s)", net_error_message().c_str());
 #else
-	if(close(sock) != 0)
-		dbg_msg("socket", "close failed: %d", errno);
+	dbg_assert(close(sock) == 0, "close failure (%s)", net_error_message().c_str());
 #endif
 }
 
@@ -1521,46 +1510,47 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	int sock = socket(domain, type, 0);
 	if(sock < 0)
 	{
-#if defined(CONF_FAMILY_WINDOWS)
-		int error = WSAGetLastError();
-		const std::string message = windows_format_system_message(error);
-		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, error, message.c_str());
-#else
-		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
-#endif
+		log_error("net", "Failed to create socket with domain %d and type %d (%s)", domain, type, net_error_message().c_str());
 		return -1;
 	}
 
 #if defined(CONF_FAMILY_UNIX)
-	/* on tcp sockets set SO_REUSEADDR
-		to fix port rebind on restart */
+	// On TCP sockets set SO_REUSEADDR to fix port rebind on restart
 	if(domain == AF_INET && type == SOCK_STREAM)
 	{
-		int option = 1;
-		if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option)) != 0)
-			dbg_msg("socket", "Setting SO_REUSEADDR failed: %d", errno);
+		int reuse_addr = 1;
+		if(setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char *)&reuse_addr, sizeof(reuse_addr)) != 0)
+		{
+			log_error("net", "Setting SO_REUSEADDR failed with domain %d and type %d (%s)", domain, type, net_error_message().c_str());
+		}
+	}
+#elif defined(CONF_FAMILY_WINDOWS)
+	{
+		// Ensure exclusive use of address, otherwise it's possible on Windows to bind to the same address and port with another socket.
+		// See https://learn.microsoft.com/en-us/windows/win32/winsock/using-so-reuseaddr-and-so-exclusiveaddruse (last update 06/14/2022)
+		int exclusive_addr_use = 1;
+		if(setsockopt(sock, SOL_SOCKET, SO_EXCLUSIVEADDRUSE, (const char *)&exclusive_addr_use, sizeof(exclusive_addr_use)) != 0)
+		{
+			log_error("net", "Setting SO_EXCLUSIVEADDRUSE failed with domain %d and type %d (%s)", domain, type, net_error_message().c_str());
+		}
 	}
 #endif
 
-	/* set to IPv6 only if that's what we are creating */
-#if defined(IPV6_V6ONLY) /* windows sdk 6.1 and higher */
+	// Set to IPv6-only if that's what we are creating, to ensure that dual-stack does not block the same IPv4 port.
+#if defined(IPV6_V6ONLY)
 	if(domain == AF_INET6)
 	{
 		int ipv6only = 1;
 		if(setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char *)&ipv6only, sizeof(ipv6only)) != 0)
-			dbg_msg("socket", "Setting V6ONLY failed: %d", errno);
+		{
+			log_error("net", "Setting IPV6_V6ONLY failed with domain %d and type %d (%s)", domain, type, net_error_message().c_str());
+		}
 	}
 #endif
 
 	if(bind(sock, addr, sockaddrlen) != 0)
 	{
-#if defined(CONF_FAMILY_WINDOWS)
-		int error = WSAGetLastError();
-		const std::string message = windows_format_system_message(error);
-		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, message.c_str());
-#else
-		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
-#endif
+		log_error("net", "Failed to bind socket with domain %d and type %d (%s)", domain, type, net_error_message().c_str());
 		priv_net_close_socket(sock);
 		return -1;
 	}
@@ -1590,19 +1580,21 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock->type |= NETTYPE_IPV4;
 			sock->ipv4sock = socket;
 
-			/* set broadcast */
-			int broadcast = 1;
-			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
+			// Set broadcast
 			{
-				dbg_msg("socket", "Setting BROADCAST on ipv4 failed: %d", net_errno());
+				int broadcast = 1;
+				if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
+				{
+					log_error("net", "Setting SO_BROADCAST on IPv4 failed (%s)", net_error_message().c_str());
+				}
 			}
 
+			// Set DSCP/TOS
 			{
-				/* set DSCP/TOS */
-				int iptos = 0x10 /* IPTOS_LOWDELAY */;
-				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char *)&iptos, sizeof(iptos)) != 0)
+				int iptos = 0x10; // IPTOS_LOWDELAY
+				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (const char *)&iptos, sizeof(iptos)) != 0)
 				{
-					dbg_msg("socket", "Setting TOS on ipv4 failed: %d", net_errno());
+					log_error("net", "Setting IP_TOS on IPv4 failed (%s)", net_error_message().c_str());
 				}
 			}
 		}
@@ -1636,21 +1628,23 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 			sock->type |= NETTYPE_IPV6;
 			sock->ipv6sock = socket;
 
-			/* set broadcast */
-			int broadcast = 1;
-			if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
+			// Set broadcast
 			{
-				dbg_msg("socket", "Setting BROADCAST on ipv6 failed: %d", net_errno());
+				int broadcast = 1;
+				if(setsockopt(socket, SOL_SOCKET, SO_BROADCAST, (const char *)&broadcast, sizeof(broadcast)) != 0)
+				{
+					log_error("net", "Setting SO_BROADCAST on IPv6 failed (%s)", net_error_message().c_str());
+				}
 			}
 
+			// Set DSCP/TOS
 			// TODO: setting IP_TOS on ipv6 with setsockopt is not supported on Windows, see https://github.com/ddnet/ddnet/issues/7605
 #if !defined(CONF_FAMILY_WINDOWS)
 			{
-				/* set DSCP/TOS */
-				int iptos = 0x10 /* IPTOS_LOWDELAY */;
-				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (char *)&iptos, sizeof(iptos)) != 0)
+				int iptos = 0x10; // IPTOS_LOWDELAY
+				if(setsockopt(socket, IPPROTO_IP, IP_TOS, (const char *)&iptos, sizeof(iptos)) != 0)
 				{
-					dbg_msg("socket", "Setting TOS on ipv6 failed: %d", net_errno());
+					log_error("net", "Setting IP_TOS on IPv6 failed (%s)", net_error_message().c_str());
 				}
 			}
 #endif
@@ -1693,7 +1687,9 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			d = sendto((int)sock->ipv4sock, (const char *)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
 		}
 		else
-			dbg_msg("net", "can't send ipv4 traffic to this socket");
+		{
+			log_error("net", "Cannot send IPv4 traffic to this socket");
+		}
 	}
 
 #if defined(CONF_WEBSOCKETS)
@@ -1707,7 +1703,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 		}
 
 		else
-			dbg_msg("net", "can't send websocket_ipv4 traffic to this socket");
+			log_error("net", "Cannot send Websocket IPv4 traffic to this socket");
 	}
 #endif
 
@@ -1731,7 +1727,7 @@ int net_udp_send(NETSOCKET sock, const NETADDR *addr, const void *data, int size
 			d = sendto((int)sock->ipv6sock, (const char *)data, size, 0, (struct sockaddr *)&sa, sizeof(sa));
 		}
 		else
-			dbg_msg("net", "can't send ipv6 traffic to this socket");
+			log_error("net", "Cannot send IPv6 traffic to this socket");
 	}
 
 	network_stats.sent_bytes += size;
@@ -1910,19 +1906,22 @@ static int net_set_blocking_impl(NETSOCKET sock, bool blocking)
 	unsigned long mode = blocking ? 0 : 1;
 	const char *mode_str = blocking ? "blocking" : "non-blocking";
 	int sockets[] = {sock->ipv4sock, sock->ipv6sock};
-	const char *socket_str[] = {"ipv4", "ipv6"};
+	const char *socket_str[] = {"IPv4", "IPv6"};
 
 	for(size_t i = 0; i < std::size(sockets); ++i)
 	{
 		if(sockets[i] >= 0)
 		{
 #if defined(CONF_FAMILY_WINDOWS)
-			int result = ioctlsocket(sockets[i], FIONBIO, (unsigned long *)&mode);
-			if(result != NO_ERROR)
-				dbg_msg("socket", "setting %s %s failed: %d", socket_str[i], mode_str, result);
+			if(ioctlsocket(sockets[i], FIONBIO, (unsigned long *)&mode) != NO_ERROR)
+			{
+				log_error("net", "Setting %s mode for %s socket failed (%s)", socket_str[i], mode_str, net_error_message().c_str());
+			}
 #else
 			if(ioctl(sockets[i], FIONBIO, (unsigned long *)&mode) == -1)
-				dbg_msg("socket", "setting %s %s failed: %d", socket_str[i], mode_str, errno);
+			{
+				log_error("net", "Setting %s mode for %s socket failed (%s)", socket_str[i], mode_str, net_error_message().c_str());
+			}
 #endif
 		}
 	}
@@ -2061,6 +2060,17 @@ int net_errno()
 #endif
 }
 
+std::string net_error_message()
+{
+	const int error = net_errno();
+#if defined(CONF_FAMILY_WINDOWS)
+	const std::string message = windows_format_system_message(error);
+	return std::to_string(error) + " '" + message + "'";
+#else
+	return std::to_string(error) + " '" + strerror(error) + "'";
+#endif
+}
+
 int net_would_block()
 {
 #if defined(CONF_FAMILY_WINDOWS)
@@ -2074,7 +2084,7 @@ void net_init()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WSADATA wsa_data;
-	dbg_assert(WSAStartup(MAKEWORD(1, 1), &wsa_data) == 0, "network initialization failed.");
+	dbg_assert(WSAStartup(MAKEWORD(1, 1), &wsa_data) == 0, "WSAStartup failure");
 #endif
 }
 

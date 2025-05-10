@@ -971,6 +971,15 @@ int net_set_blocking(NETSOCKET sock);
 int net_errno();
 
 /**
+ * If a network operation failed, the platform-specific error code and string.
+ *
+ * @ingroup Network-General
+ *
+ * @returns The error code and string combined into one string.
+ */
+std::string net_error_message();
+
+/**
  * Determines whether a network operation would block.
  *
  * @ingroup Network-General
