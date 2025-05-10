@@ -960,6 +960,10 @@ bool CUi::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 		if(!MouseButton(0))
 		{
 			pMouseSelection->m_Selecting = false;
+			if(Active)
+			{
+				Input()->EnsureScreenKeyboardShown();
+			}
 		}
 	}
 	if(ScrollOffset != pMouseSelection->m_Offset.x)

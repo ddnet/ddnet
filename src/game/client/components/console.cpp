@@ -1175,6 +1175,10 @@ void CGameConsole::OnRender()
 			if(pConsole->m_MousePress.y >= pConsole->m_BoundingBox.m_Y && pConsole->m_MousePress.y < pConsole->m_BoundingBox.m_Y + pConsole->m_BoundingBox.m_H)
 			{
 				CLineInput::SMouseSelection *pMouseSelection = pConsole->m_Input.GetMouseSelection();
+				if(pMouseSelection->m_Selecting && !pConsole->m_MouseIsPress && pConsole->m_Input.IsActive())
+				{
+					Input()->EnsureScreenKeyboardShown();
+				}
 				pMouseSelection->m_Selecting = pConsole->m_MouseIsPress;
 				pMouseSelection->m_PressMouse = pConsole->m_MousePress;
 				pMouseSelection->m_ReleaseMouse = pConsole->m_MouseRelease;

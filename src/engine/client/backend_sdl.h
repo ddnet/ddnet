@@ -260,6 +260,7 @@ public:
 	bool ResizeWindow(int w, int h, int RefreshRate) override;
 	void GetViewportSize(int &w, int &h) override;
 	void NotifyWindow() override;
+	bool IsScreenKeyboardShown() override;
 
 	void WindowDestroyNtf(uint32_t WindowId) override;
 	void WindowCreateNtf(uint32_t WindowId) override;

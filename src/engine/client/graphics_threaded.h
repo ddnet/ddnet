@@ -714,6 +714,7 @@ public:
 	virtual bool ResizeWindow(int w, int h, int RefreshRate) = 0;
 	virtual void GetViewportSize(int &w, int &h) = 0;
 	virtual void NotifyWindow() = 0;
+	virtual bool IsScreenKeyboardShown() = 0;
 
 	virtual void WindowDestroyNtf(uint32_t WindowId) = 0;
 	virtual void WindowCreateNtf(uint32_t WindowId) = 0;
@@ -1199,6 +1200,8 @@ public:
 	void ResizeToScreen() override;
 	void GotResized(int w, int h, int RefreshRate) override;
 	void UpdateViewport(int X, int Y, int W, int H, bool ByResize) override;
+	bool IsScreenKeyboardShown() override;
+
 	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc) override;
 	void AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc) override;
 	int GetWindowScreen() override;
