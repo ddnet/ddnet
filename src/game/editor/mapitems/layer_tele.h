@@ -33,8 +33,9 @@ public:
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
 	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
-	virtual bool ContainsElementWithId(int Id, bool Checkpoint);
-	virtual void GetPos(int Number, int Offset, int &TeleX, int &TeleY);
+	int FindNextFreeNumber(bool Checkpoint) const;
+	bool ContainsElementWithId(int Id, bool Checkpoint) const;
+	void GetPos(int Number, int Offset, int &TeleX, int &TeleY);
 
 	int m_GotoTeleOffset;
 	ivec2 m_GotoTeleLastPos;
