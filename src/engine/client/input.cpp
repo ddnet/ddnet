@@ -350,6 +350,17 @@ void CInput::StopTextInput()
 	m_vCandidates.clear();
 }
 
+void CInput::EnsureScreenKeyboardShown()
+{
+	if(!SDL_HasScreenKeyboardSupport() ||
+		Graphics()->IsScreenKeyboardShown())
+	{
+		return;
+	}
+	SDL_StopTextInput();
+	SDL_StartTextInput();
+}
+
 void CInput::ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const
 {
 	for(const CEvent &Event : m_vInputEvents)

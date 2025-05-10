@@ -1666,6 +1666,11 @@ void CGraphicsBackend_SDL_GL::NotifyWindow()
 #endif
 }
 
+bool CGraphicsBackend_SDL_GL::IsScreenKeyboardShown()
+{
+	return SDL_IsScreenKeyboardShown(m_pWindow);
+}
+
 void CGraphicsBackend_SDL_GL::WindowDestroyNtf(uint32_t WindowId)
 {
 }

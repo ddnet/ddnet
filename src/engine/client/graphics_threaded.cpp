@@ -2614,6 +2614,11 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	}
 }
 
+bool CGraphics_Threaded::IsScreenKeyboardShown()
+{
+	return m_pBackend->IsScreenKeyboardShown();
+}
+
 void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc)
 {
 	m_vResizeListeners.emplace_back(pFunc);
