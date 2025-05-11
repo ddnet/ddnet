@@ -92,6 +92,8 @@ protected:
 	virtual bool UpdateNeeded(CGameClient &This, const CNamePlateData &Data) = 0;
 	virtual void UpdateText(CGameClient &This, const CNamePlateData &Data) = 0;
 	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	bool m_IsTag = false; // Use color as background, add some extra padding
+	int m_QuadContainer = -1; // For tag background
 	CNamePlatePartText(CGameClient &This) :
 		CNamePlatePart(This)
 	{
@@ -101,56 +103,149 @@ protected:
 public:
 	void Update(CGameClient &This, const CNamePlateData &Data) override
 	{
-		if(!UpdateNeeded(This, Data) && m_TextContainerIndex.Valid())
-			return;
-
-		// Set flags
-		unsigned int Flags = ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE;
-		if(Data.m_InGame)
-			Flags |= ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT; // Prevent jittering from rounding
-		This.TextRender()->SetRenderFlags(Flags);
-
-		if(Data.m_InGame)
+		bool UpdateQuad = false;
+		// Update text if invalid or text should change
+		// UpdateNeeded must be called as it could update Color as well
+		if(UpdateNeeded(This, Data) || !m_TextContainerIndex.Valid())
 		{
-			// Create text at standard zoom
-			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-			This.Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-			This.Graphics()->MapScreenToInterface(This.m_Camera.m_Center.x, This.m_Camera.m_Center.y);
+			// Set flags
+			unsigned Flags = ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE;
+			if(Data.m_InGame)
+				Flags |= ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT; // Prevent jittering from rounding
+			This.TextRender()->SetRenderFlags(Flags);
+
 			This.TextRender()->DeleteTextContainer(m_TextContainerIndex);
-			UpdateText(This, Data);
-			This.Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+			if(Data.m_InGame)
+			{
+				// Create text at standard zoom when in game
+				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+				This.Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+				This.Graphics()->MapScreenToInterface(This.m_Camera.m_Center.x, This.m_Camera.m_Center.y);
+				UpdateText(This, Data);
+				This.Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+			}
+			else
+			{
+				UpdateText(This, Data);
+			}
+			This.TextRender()->SetRenderFlags(0);
+
+			// Calculate size
+			if(m_TextContainerIndex.Valid())
+			{
+				const STextBoundingBox Bounding = This.TextRender()->GetBoundingBoxTextContainer(m_TextContainerIndex);
+				m_Size = vec2(Bounding.m_W, Bounding.m_H);
+				if(m_IsTag)
+					m_Size += vec2(m_Size.y * 0.8f, 0.0f); // Extra padding
+			}
+			else
+			{
+				m_Size = vec2(0.0f, 0.0f);
+			}
+			if(m_IsTag)
+				UpdateQuad = true; // Need to update quad even if invalid
 		}
-		else
+		// If a tag and there's not a quad, create one and visa versa
+		if(m_IsTag && m_QuadContainer == -1)
 		{
-			UpdateText(This, Data);
+			m_QuadContainer = This.Graphics()->CreateQuadContainer();
 		}
-
-		This.TextRender()->SetRenderFlags(0);
-
-		if(!m_TextContainerIndex.Valid())
+		else if(!m_IsTag && m_QuadContainer != -1)
 		{
-			m_Visible = false;
-			return;
+			This.Graphics()->DeleteQuadContainer(m_QuadContainer);
+			UpdateQuad = true;
 		}
+		// Update quad, just reset it if it would be empty
+		if(UpdateQuad)
+		{
+			This.Graphics()->QuadContainerReset(m_QuadContainer);
+		}
+		if(UpdateQuad && m_Size != vec2(0.0f, 0.0f))
+		{
+			This.Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+			const float x = 0.0f; // NOLINT(readability-identifier-naming)
+			const float y = -1.0f; // NOLINT(readability-identifier-naming)
+			const float r = m_Size.y / 4.0f; // NOLINT(readability-identifier-naming)
+			const float w = m_Size.x;
+			const float h = m_Size.y + 2.0f;
+			// TODO: Move this to graphics/rendertools
+			const int NumSegments = 8;
+			const float SegmentsAngle = pi / 2 / NumSegments;
 
-		const STextBoundingBox Container = This.TextRender()->GetBoundingBoxTextContainer(m_TextContainerIndex);
-		m_Size = vec2(Container.m_W, Container.m_H);
+			for(int i = 0; i < NumSegments; i += 2)
+			{
+				float a1 = i * SegmentsAngle;
+				float a2 = (i + 1) * SegmentsAngle;
+				float a3 = (i + 2) * SegmentsAngle;
+				float Ca1 = std::cos(a1);
+				float Ca2 = std::cos(a2);
+				float Ca3 = std::cos(a3);
+				float Sa1 = std::sin(a1);
+				float Sa2 = std::sin(a2);
+				float Sa3 = std::sin(a3);
+
+				IGraphics::CFreeformItem aFreeformItems[4] = {
+					{x + r, y + r,
+						x + (1 - Ca1) * r, y + (1 - Sa1) * r,
+						x + (1 - Ca3) * r, y + (1 - Sa3) * r,
+						x + (1 - Ca2) * r, y + (1 - Sa2) * r},
+					{x + w - r, y + r,
+						x + w - r + Ca1 * r, y + (1 - Sa1) * r,
+						x + w - r + Ca3 * r, y + (1 - Sa3) * r,
+						x + w - r + Ca2 * r, y + (1 - Sa2) * r},
+					{x + r, y + h - r,
+						x + (1 - Ca1) * r, y + h - r + Sa1 * r,
+						x + (1 - Ca3) * r, y + h - r + Sa3 * r,
+						x + (1 - Ca2) * r, y + h - r + Sa2 * r},
+					{x + w - r, y + h - r,
+						x + w - r + Ca1 * r, y + h - r + Sa1 * r,
+						x + w - r + Ca3 * r, y + h - r + Sa3 * r,
+						x + w - r + Ca2 * r, y + h - r + Sa2 * r},
+				};
+				This.Graphics()->QuadContainerAddQuads(m_QuadContainer, aFreeformItems, 4);
+			}
+			IGraphics::CQuadItem aQuads[5] = {
+				{x + r, y + r, w - r * 2, h - r * 2}, // center
+				{x + r, y, w - r * 2, r}, // top
+				{x + r, y + h - r, w - r * 2, r}, // bottom
+				{x, y + r, r, h - r * 2}, // left
+				{x + w - r, y + r, r, h - r * 2}, // right
+			};
+			This.Graphics()->QuadContainerAddQuads(m_QuadContainer, aQuads, 5);
+		}
 	}
 	void Reset(CGameClient &This) override
 	{
 		This.TextRender()->DeleteTextContainer(m_TextContainerIndex);
+		This.Graphics()->DeleteQuadContainer(m_QuadContainer);
 	}
 	void Render(CGameClient &This, vec2 Pos) const override
 	{
 		if(!m_TextContainerIndex.Valid())
 			return;
 
-		ColorRGBA OutlineColor, Color;
-		Color = m_Color;
-		OutlineColor = OUTLINE_COLOR.WithMultipliedAlpha(m_Color.a);
-		This.TextRender()->RenderTextContainer(m_TextContainerIndex,
-			Color, OutlineColor,
-			Pos.x - Size().x / 2.0f, Pos.y - Size().y / 2.0f);
+		if(m_IsTag)
+		{
+			ColorRGBA BackgroundColor = m_Color.WithMultipliedAlpha(0.75f);
+			This.Graphics()->SetColor(BackgroundColor);
+			This.Graphics()->TextureClear();
+			This.Graphics()->RenderQuadContainerEx(m_QuadContainer, 0, -1,
+				Pos.x - Size().x / 2.0f, Pos.y - Size().y / 2.0f);
+
+			ColorRGBA Color = ColorRGBA(0.0f, 0.0f, 0.0f, m_Color.a);
+			ColorRGBA OutlineColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+			This.TextRender()->RenderTextContainer(m_TextContainerIndex,
+				Color, OutlineColor,
+				Pos.x - Size().x / 2.0f + Size().y * 0.4f, Pos.y - Size().y / 2.0f);
+		}
+		else
+		{
+			ColorRGBA Color = m_Color;
+			ColorRGBA OutlineColor = OUTLINE_COLOR.WithMultipliedAlpha(m_Color.a);
+			This.TextRender()->RenderTextContainer(m_TextContainerIndex,
+				Color, OutlineColor,
+				Pos.x - Size().x / 2.0f, Pos.y - Size().y / 2.0f);
+		}
 	}
 };
 
