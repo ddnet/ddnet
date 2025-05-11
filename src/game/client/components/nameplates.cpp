@@ -51,6 +51,11 @@ public:
 
 // Part Types
 
+static float ConfigToFontSize(int Value)
+{
+	return 18.0f + 20.0f * static_cast<float>(Value) / 100.0f;
+}
+
 static constexpr float DEFAULT_PADDING = 5.0f;
 
 class CNamePlatePart
@@ -648,18 +653,18 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	str_copy(Data.m_aName, GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aName);
 	Data.m_ShowFriendMark = Data.m_ShowName && g_Config.m_ClNamePlatesFriendMark && GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_Friend;
 	Data.m_ShowClientId = Data.m_ShowName && (g_Config.m_Debug || g_Config.m_ClNamePlatesIds);
-	Data.m_FontSize = 18.0f + 20.0f * g_Config.m_ClNamePlatesSize / 100.0f;
+	Data.m_FontSize = ConfigToFontSize(g_Config.m_ClNamePlatesSize);
 
 	Data.m_ClientId = pPlayerInfo->m_ClientId;
 	Data.m_ClientIdSeparateLine = g_Config.m_ClNamePlatesIdsSeparateLine;
-	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
+	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? ConfigToFontSize(g_Config.m_ClNamePlatesIdsSize) : Data.m_FontSize;
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
 	str_copy(Data.m_aClan, GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aClan);
-	Data.m_FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNamePlatesClanSize / 100.0f;
+	Data.m_FontSizeClan = ConfigToFontSize(g_Config.m_ClNamePlatesClanSize);
 
-	Data.m_FontSizeHookStrongWeak = 18.0f + 20.0f * g_Config.m_ClNamePlatesStrongSize / 100.0f;
-	Data.m_FontSizeDirection = 18.0f + 20.0f * g_Config.m_ClDirectionSize / 100.0f;
+	Data.m_FontSizeHookStrongWeak = ConfigToFontSize(g_Config.m_ClNamePlatesStrongSize);
+	Data.m_FontSizeDirection = ConfigToFontSize(g_Config.m_ClDirectionSize);
 
 	if(g_Config.m_ClNamePlatesAlways == 0)
 		Alpha *= std::clamp(1.0f - std::pow(distance(GameClient()->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
@@ -769,11 +774,11 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 
 void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 {
-	const float FontSize = 18.0f + 20.0f * g_Config.m_ClNamePlatesSize / 100.0f;
-	const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNamePlatesClanSize / 100.0f;
+	const float FontSize = ConfigToFontSize(g_Config.m_ClNamePlatesSize);
+	const float FontSizeClan = ConfigToFontSize(g_Config.m_ClNamePlatesClanSize);
 
-	const float FontSizeDirection = 18.0f + 20.0f * g_Config.m_ClDirectionSize / 100.0f;
-	const float FontSizeHookStrongWeak = 18.0f + 20.0f * g_Config.m_ClNamePlatesStrongSize / 100.0f;
+	const float FontSizeDirection = ConfigToFontSize(g_Config.m_ClDirectionSize);
+	const float FontSizeHookStrongWeak = ConfigToFontSize(g_Config.m_ClNamePlatesStrongSize);
 
 	CNamePlateData Data;
 
@@ -792,7 +797,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	Data.m_ShowClientId = Data.m_ShowName && (g_Config.m_Debug || g_Config.m_ClNamePlatesIds);
 	Data.m_ClientId = Dummy;
 	Data.m_ClientIdSeparateLine = g_Config.m_ClNamePlatesIdsSeparateLine;
-	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
+	Data.m_FontSizeClientId = Data.m_ClientIdSeparateLine ? ConfigToFontSize(g_Config.m_ClNamePlatesIdsSize) : Data.m_FontSize;
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
 	const char *pClan = Dummy == 0 ? g_Config.m_PlayerClan : g_Config.m_ClDummyClan;
