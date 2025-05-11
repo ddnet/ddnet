@@ -83,6 +83,15 @@ class CHud : public CComponent
 	void UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, char *pPrevValue, size_t Size);
 	void RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, const ColorRGBA &Color, float X, float Y);
 
+	class CMovementInformation
+	{
+	public:
+		vec2 m_Pos;
+		vec2 m_Speed;
+		float m_Angle = 0.0f;
+	};
+	class CMovementInformation GetMovementInformation(int ClientId) const;
+
 	void RenderGameTimer();
 	void RenderPauseNotification();
 	void RenderSuddenDeath();
