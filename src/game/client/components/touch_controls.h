@@ -524,6 +524,12 @@ private:
 	CActionState m_aDirectTouchActionStates[NUM_ACTIONS];
 
 	/**
+	 * These fingers were activating buttons that became invisible and were therefore deactivated. The fingers
+	 * are stored until they are released so they do not activate direct touch input or touch buttons anymore.
+	 */
+	std::vector<IInput::CTouchFinger> m_vStaleFingers;
+
+	/**
 	 * A pointer to the action joystick, if any exists in the current configuration, or `nullptr` if none.
 	 * This is set by @link CJoystickActionTouchButtonBehavior @endlink when it is initialized and always
 	 * cleared before loading a new touch button configuration.
