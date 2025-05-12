@@ -377,6 +377,10 @@ void CGhost::UpdateTeeRenderInfo(CGhostItem &Ghost)
 	CSkinDescriptor SkinDescriptor;
 	SkinDescriptor.m_Flags = CSkinDescriptor::FLAG_SIX;
 	IntsToStr(Ghost.m_Skin.m_aSkin, std::size(Ghost.m_Skin.m_aSkin), SkinDescriptor.m_aSkinName, std::size(SkinDescriptor.m_aSkinName));
+	if(!CSkin::IsValidName(SkinDescriptor.m_aSkinName))
+	{
+		str_copy(SkinDescriptor.m_aSkinName, "default");
+	}
 
 	CTeeRenderInfo TeeRenderInfo;
 	TeeRenderInfo.ApplyColors(Ghost.m_Skin.m_UseCustomColor, Ghost.m_Skin.m_ColorBody, Ghost.m_Skin.m_ColorFeet);
