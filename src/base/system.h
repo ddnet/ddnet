@@ -971,6 +971,15 @@ int net_set_blocking(NETSOCKET sock);
 int net_errno();
 
 /**
+ * If a network operation failed, the platform-specific error code and string.
+ *
+ * @ingroup Network-General
+ *
+ * @returns The error code and string combined into one string.
+ */
+std::string net_error_message();
+
+/**
  * Determines whether a network operation would block.
  *
  * @ingroup Network-General
@@ -999,7 +1008,8 @@ int net_socket_read_wait(NETSOCKET sock, int time);
  *
  * @param sock Socket whose type should be determined.
  *
- * @return The socket type, a bitset of `NETTYPE_IPV4`, `NETTYPE_IPV6` and `NETTYPE_WEBSOCKET_IPV4`.
+ * @return The socket type, a bitset of `NETTYPE_IPV4`, `NETTYPE_IPV6` and `NETTYPE_WEBSOCKET_IPV4`,
+ *         or `NETTYPE_INVALID` if the socket is invalid.
  */
 int net_socket_type(NETSOCKET sock);
 
@@ -1083,13 +1093,13 @@ NETSOCKET net_tcp_create(NETADDR bindaddr);
 int net_tcp_listen(NETSOCKET sock, int backlog);
 
 /**
- * Polls a listning socket for a new connection.
+ * Polls a listening socket for a new connection.
  *
  * @ingroup Network-TCP
  *
- * @param sock - Listning socket to poll.
- * @param new_sock - Pointer to a socket to fill in with the new socket.
- * @param addr - Pointer to an address that will be filled in the remote address, can be `nullptr`.
+ * @param sock Listening socket to poll.
+ * @param new_sock Pointer to a socket to fill in with the new socket.
+ * @param addr Pointer to an address that will be filled in the remote address, can be `nullptr`.
  *
  * @return A non-negative integer on success. Negative integer on failure.
  */
