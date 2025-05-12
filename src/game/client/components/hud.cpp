@@ -1371,11 +1371,11 @@ inline int CHud::GetDigitsIndex(int Value, int Max)
 inline float CHud::GetMovementInformationBoxHeight()
 {
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && (m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW || m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId].m_SpecCharPresent))
-		return g_Config.m_ClShowhudPlayerPosition ? 3 * MOVEMENT_INFORMATION_LINE_HEIGHT + 2 : 0;
-	float BoxHeight = 3 * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 2 * MOVEMENT_INFORMATION_LINE_HEIGHT * g_Config.m_ClShowhudPlayerAngle;
+		return g_Config.m_ClShowhudPlayerPosition ? 3.0f * MOVEMENT_INFORMATION_LINE_HEIGHT + 2.0f : 0.0f;
+	float BoxHeight = 3.0f * MOVEMENT_INFORMATION_LINE_HEIGHT * (g_Config.m_ClShowhudPlayerPosition + g_Config.m_ClShowhudPlayerSpeed) + 2.0f * MOVEMENT_INFORMATION_LINE_HEIGHT * g_Config.m_ClShowhudPlayerAngle;
 	if(g_Config.m_ClShowhudPlayerPosition || g_Config.m_ClShowhudPlayerSpeed || g_Config.m_ClShowhudPlayerAngle)
 	{
-		BoxHeight += 2;
+		BoxHeight += 2.0f;
 	}
 	return BoxHeight;
 }
@@ -1402,6 +1402,57 @@ void CHud::RenderMovementInformationTextContainer(STextContainerIndex &TextConta
 	}
 }
 
+CHud::CMovementInformation CHud::GetMovementInformation(int ClientId) const
+{
+	CMovementInformation Out;
+	if(ClientId == SPEC_FREEVIEW)
+	{
+		Out.m_Pos = m_pClient->m_Camera.m_Center / 32.0f;
+	}
+	else if(m_pClient->m_aClients[ClientId].m_SpecCharPresent)
+	{
+		Out.m_Pos = m_pClient->m_aClients[ClientId].m_SpecChar / 32.0f;
+	}
+	else
+	{
+		const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
+		const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
+		const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
+
+		// To make the player position relative to blocks we need to divide by the block size
+		Out.m_Pos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pCurChar->m_X, pCurChar->m_Y), IntraTick) / 32.0f;
+
+		const vec2 Vel = mix(vec2(pPrevChar->m_VelX, pPrevChar->m_VelY), vec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
+
+		float VelspeedX = Vel.x / 256.0f * Client()->GameTickSpeed();
+		if(Vel.x >= -1.0f && Vel.x <= 1.0f)
+		{
+			VelspeedX = 0.0f;
+		}
+		float VelspeedY = Vel.y / 256.0f * Client()->GameTickSpeed();
+		if(Vel.y >= -128.0f && Vel.y <= 128.0f)
+		{
+			VelspeedY = 0.0f;
+		}
+		// We show the speed in Blocks per Second (Bps) and therefore have to divide by the block size
+		Out.m_Speed.x = VelspeedX / 32.0f;
+		float VelspeedLength = length(vec2(Vel.x, Vel.y) / 256.0f) * Client()->GameTickSpeed();
+		// Todo: Use Velramp tuning of each individual player
+		// Since these tuning parameters are almost never changed, the default values are sufficient in most cases
+		float Ramp = VelocityRamp(VelspeedLength, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
+		Out.m_Speed.x *= Ramp;
+		Out.m_Speed.y = VelspeedY / 32.0f;
+
+		float Angle = m_pClient->m_Players.GetPlayerTargetAngle(pPrevChar, pCurChar, ClientId, IntraTick);
+		if(Angle < 0.0f)
+		{
+			Angle += 2.0f * pi;
+		}
+		Out.m_Angle = Angle * 180.0f / pi;
+	}
+	return Out;
+}
+
 void CHud::RenderMovementInformation()
 {
 	const int ClientId = m_pClient->m_Snap.m_SpecInfo.m_Active ? m_pClient->m_Snap.m_SpecInfo.m_SpectatorId : m_pClient->m_Snap.m_LocalClientId;
@@ -1419,66 +1470,19 @@ void CHud::RenderMovementInformation()
 	const float BoxWidth = 62.0f;
 
 	float StartX = m_Width - BoxWidth;
-	float StartY = 285.0f - BoxHeight - 4; // 4 units distance to the next display;
+	float StartY = 285.0f - BoxHeight - 4.0f; // 4 units distance to the next display;
 	if(g_Config.m_ClShowhudScore)
 	{
-		StartY -= 56;
+		StartY -= 56.0f;
 	}
 
 	Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
 
-	vec2 Pos;
-	float DisplaySpeedX{}, DisplaySpeedY{}, DisplayAngle{};
+	const CMovementInformation Info = GetMovementInformation(ClientId);
 
-	if(ClientId == SPEC_FREEVIEW)
-	{
-		Pos = m_pClient->m_Camera.m_Center / 32.f;
-	}
-	else if(m_pClient->m_aClients[ClientId].m_SpecCharPresent)
-	{
-		Pos = m_pClient->m_aClients[ClientId].m_SpecChar / 32.f;
-	}
-	else
-	{
-		const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
-		const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
-		const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
-
-		// To make the player position relative to blocks we need to divide by the block size
-		Pos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pCurChar->m_X, pCurChar->m_Y), IntraTick) / 32.0f;
-
-		const vec2 Vel = mix(vec2(pPrevChar->m_VelX, pPrevChar->m_VelY), vec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
-
-		float VelspeedX = Vel.x / 256.0f * Client()->GameTickSpeed();
-		if(Vel.x >= -1 && Vel.x <= 1)
-		{
-			VelspeedX = 0;
-		}
-		float VelspeedY = Vel.y / 256.0f * Client()->GameTickSpeed();
-		if(Vel.y >= -128 && Vel.y <= 128)
-		{
-			VelspeedY = 0;
-		}
-		// We show the speed in Blocks per Second (Bps) and therefore have to divide by the block size
-		DisplaySpeedX = VelspeedX / 32;
-		float VelspeedLength = length(vec2(Vel.x, Vel.y) / 256.0f) * Client()->GameTickSpeed();
-		// Todo: Use Velramp tuning of each individual player
-		// Since these tuning parameters are almost never changed, the default values are sufficient in most cases
-		float Ramp = VelocityRamp(VelspeedLength, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
-		DisplaySpeedX *= Ramp;
-		DisplaySpeedY = VelspeedY / 32;
-
-		float Angle = m_pClient->m_Players.GetPlayerTargetAngle(pPrevChar, pCurChar, ClientId, IntraTick);
-		if(Angle < 0)
-		{
-			Angle += 2.0f * pi;
-		}
-		DisplayAngle = Angle * 180.0f / pi;
-	}
-
-	float y = StartY + LineSpacer * 2;
-	float xl = StartX + 2;
-	float xr = m_Width - 2;
+	float y = StartY + LineSpacer * 2.0f;
+	float xl = StartX + 2.0f;
+	float xr = m_Width - 2.0f;
 
 	if(g_Config.m_ClShowhudPlayerPosition)
 	{
@@ -1486,12 +1490,12 @@ void CHud::RenderMovementInformation()
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		TextRender()->Text(xl, y, Fontsize, "X:", -1.0f);
-		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[0], Fontsize, Pos.x, m_aaPlayerPositionText[0], sizeof(m_aaPlayerPositionText[0]));
+		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[0], Fontsize, Info.m_Pos.x, m_aaPlayerPositionText[0], sizeof(m_aaPlayerPositionText[0]));
 		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[0], TextRender()->DefaultTextColor(), xr, y);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		TextRender()->Text(xl, y, Fontsize, "Y:", -1.0f);
-		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[1], Fontsize, Pos.y, m_aaPlayerPositionText[1], sizeof(m_aaPlayerPositionText[1]));
+		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[1], Fontsize, Info.m_Pos.y, m_aaPlayerPositionText[1], sizeof(m_aaPlayerPositionText[1]));
 		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[1], TextRender()->DefaultTextColor(), xr, y);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 	}
@@ -1507,18 +1511,18 @@ void CHud::RenderMovementInformation()
 		const char aaCoordinates[][4] = {"X:", "Y:"};
 		for(int i = 0; i < 2; i++)
 		{
-			ColorRGBA Color(1, 1, 1, 1);
+			ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
 			if(m_aLastPlayerSpeedChange[i] == ESpeedChange::INCREASE)
-				Color = ColorRGBA(0, 1, 0, 1);
+				Color = ColorRGBA(0.0f, 1.0f, 0.0f, 1.0f);
 			if(m_aLastPlayerSpeedChange[i] == ESpeedChange::DECREASE)
-				Color = ColorRGBA(1, 0.5f, 0.5f, 1);
+				Color = ColorRGBA(1.0f, 0.5f, 0.5f, 1.0f);
 			TextRender()->Text(xl, y, Fontsize, aaCoordinates[i], -1.0f);
-			UpdateMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], Fontsize, i == 0 ? DisplaySpeedX : DisplaySpeedY, m_aaPlayerSpeedText[i], sizeof(m_aaPlayerSpeedText[i]));
+			UpdateMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], Fontsize, i == 0 ? Info.m_Speed.x : Info.m_Speed.y, m_aaPlayerSpeedText[i], sizeof(m_aaPlayerSpeedText[i]));
 			RenderMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], Color, xr, y);
 			y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 		}
 
-		TextRender()->TextColor(1, 1, 1, 1);
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	if(g_Config.m_ClShowhudPlayerAngle)
@@ -1526,7 +1530,7 @@ void CHud::RenderMovementInformation()
 		TextRender()->Text(xl, y, Fontsize, Localize("Angle:"), -1.0f);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
-		UpdateMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, Fontsize, DisplayAngle, m_aPlayerAngleText, sizeof(m_aPlayerAngleText));
+		UpdateMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, Fontsize, Info.m_Angle, m_aPlayerAngleText, sizeof(m_aPlayerAngleText));
 		RenderMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, TextRender()->DefaultTextColor(), xr, y);
 	}
 }
