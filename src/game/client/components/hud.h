@@ -90,7 +90,7 @@ class CHud : public CComponent
 		vec2 m_Speed;
 		float m_Angle = 0.0f;
 	};
-	class CMovementInformation GetMovementInformation(int ClientId) const;
+	class CMovementInformation GetMovementInformation(int ClientId, int Conn) const;
 
 	void RenderGameTimer();
 	void RenderPauseNotification();

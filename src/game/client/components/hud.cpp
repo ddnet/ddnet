@@ -1409,7 +1409,7 @@ void CHud::RenderMovementInformationTextContainer(STextContainerIndex &TextConta
 	}
 }
 
-CHud::CMovementInformation CHud::GetMovementInformation(int ClientId) const
+CHud::CMovementInformation CHud::GetMovementInformation(int ClientId, int Conn) const
 {
 	CMovementInformation Out;
 	if(ClientId == SPEC_FREEVIEW)
@@ -1424,7 +1424,7 @@ CHud::CMovementInformation CHud::GetMovementInformation(int ClientId) const
 	{
 		const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev;
 		const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur;
-		const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
+		const float IntraTick = Client()->IntraGameTick(Conn);
 
 		// To make the player position relative to blocks we need to divide by the block size
 		Out.m_Pos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pCurChar->m_X, pCurChar->m_Y), IntraTick) / 32.0f;
@@ -1446,7 +1446,7 @@ CHud::CMovementInformation CHud::GetMovementInformation(int ClientId) const
 		float VelspeedLength = length(vec2(Vel.x, Vel.y) / 256.0f) * Client()->GameTickSpeed();
 		// Todo: Use Velramp tuning of each individual player
 		// Since these tuning parameters are almost never changed, the default values are sufficient in most cases
-		float Ramp = VelocityRamp(VelspeedLength, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
+		float Ramp = VelocityRamp(VelspeedLength, m_pClient->m_aTuning[Conn].m_VelrampStart, m_pClient->m_aTuning[Conn].m_VelrampRange, m_pClient->m_aTuning[Conn].m_VelrampCurvature);
 		Out.m_Speed.x *= Ramp;
 		Out.m_Speed.y = VelspeedY / 32.0f;
 
@@ -1485,7 +1485,7 @@ void CHud::RenderMovementInformation()
 
 	Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
 
-	const CMovementInformation Info = GetMovementInformation(ClientId);
+	const CMovementInformation Info = GetMovementInformation(ClientId, g_Config.m_ClDummy);
 
 	float y = StartY + LineSpacer * 2.0f;
 	float xl = StartX + 2.0f;
