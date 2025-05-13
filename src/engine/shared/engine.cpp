@@ -68,7 +68,14 @@ public:
 			CNetBase::Init();
 		}
 
-		m_JobPool.Init(std::max(4, (int)std::thread::hardware_concurrency()) - 2);
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+		// Make sure we don't use more threads than allowed in total (see PTHREAD_POOL_SIZE in Emscripten.toolchain)
+		// otherwise starting more threads may lead to deadlocks as the threads will simply not start.
+		const size_t ThreadCount = 4;
+#else
+		const size_t ThreadCount = std::max(4, (int)std::thread::hardware_concurrency()) - 2;
+#endif
+		m_JobPool.Init(ThreadCount);
 
 		m_Logging = false;
 	}
