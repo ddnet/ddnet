@@ -29,11 +29,14 @@ CHud::CHud()
 	m_FPSTextContainerIndex.Reset();
 	m_DDRaceEffectsTextContainerIndex.Reset();
 	m_PlayerAngleTextContainerIndex.Reset();
+	m_PlayerPrevAngle = -INFINITY;
 
 	for(int i = 0; i < 2; i++)
 	{
 		m_aPlayerSpeedTextContainers[i].Reset();
+		m_aPlayerPrevSpeed[i] = -INFINITY;
 		m_aPlayerPositionContainers[i].Reset();
+		m_aPlayerPrevPosition[i] = -INFINITY;
 	}
 }
 
@@ -52,10 +55,13 @@ void CHud::ResetHudContainers()
 	TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
 	TextRender()->DeleteTextContainer(m_DDRaceEffectsTextContainerIndex);
 	TextRender()->DeleteTextContainer(m_PlayerAngleTextContainerIndex);
+	m_PlayerPrevAngle = -INFINITY;
 	for(int i = 0; i < 2; i++)
 	{
 		TextRender()->DeleteTextContainer(m_aPlayerSpeedTextContainers[i]);
+		m_aPlayerPrevSpeed[i] = -INFINITY;
 		TextRender()->DeleteTextContainer(m_aPlayerPositionContainers[i]);
+		m_aPlayerPrevPosition[i] = -INFINITY;
 	}
 }
 
@@ -1380,18 +1386,19 @@ inline float CHud::GetMovementInformationBoxHeight()
 	return BoxHeight;
 }
 
-void CHud::UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, char *pPrevValue, size_t Size)
+void CHud::UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, float &PrevValue)
 {
+	Value = std::round(Value * 100.0f) / 100.0f; // Round to 2dp
+	if(TextContainer.Valid() && PrevValue == Value)
+		return;
+	PrevValue = Value;
+
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%.2f", Value);
 
-	if(!TextContainer.Valid() || str_comp(pPrevValue, aBuf) != 0)
-	{
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
-		TextRender()->RecreateTextContainer(TextContainer, &Cursor, aBuf);
-		str_copy(pPrevValue, aBuf, Size);
-	}
+	CTextCursor Cursor;
+	TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, TEXTFLAG_RENDER);
+	TextRender()->RecreateTextContainer(TextContainer, &Cursor, aBuf);
 }
 
 void CHud::RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, const ColorRGBA &Color, float X, float Y)
@@ -1490,12 +1497,12 @@ void CHud::RenderMovementInformation()
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		TextRender()->Text(xl, y, Fontsize, "X:", -1.0f);
-		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[0], Fontsize, Info.m_Pos.x, m_aaPlayerPositionText[0], sizeof(m_aaPlayerPositionText[0]));
+		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[0], Fontsize, Info.m_Pos.x, m_aPlayerPrevPosition[0]);
 		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[0], TextRender()->DefaultTextColor(), xr, y);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		TextRender()->Text(xl, y, Fontsize, "Y:", -1.0f);
-		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[1], Fontsize, Info.m_Pos.y, m_aaPlayerPositionText[1], sizeof(m_aaPlayerPositionText[1]));
+		UpdateMovementInformationTextContainer(m_aPlayerPositionContainers[1], Fontsize, Info.m_Pos.y, m_aPlayerPrevPosition[1]);
 		RenderMovementInformationTextContainer(m_aPlayerPositionContainers[1], TextRender()->DefaultTextColor(), xr, y);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 	}
@@ -1517,7 +1524,7 @@ void CHud::RenderMovementInformation()
 			if(m_aLastPlayerSpeedChange[i] == ESpeedChange::DECREASE)
 				Color = ColorRGBA(1.0f, 0.5f, 0.5f, 1.0f);
 			TextRender()->Text(xl, y, Fontsize, aaCoordinates[i], -1.0f);
-			UpdateMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], Fontsize, i == 0 ? Info.m_Speed.x : Info.m_Speed.y, m_aaPlayerSpeedText[i], sizeof(m_aaPlayerSpeedText[i]));
+			UpdateMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], Fontsize, i == 0 ? Info.m_Speed.x : Info.m_Speed.y, m_aPlayerPrevSpeed[i]);
 			RenderMovementInformationTextContainer(m_aPlayerSpeedTextContainers[i], Color, xr, y);
 			y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 		}
@@ -1530,7 +1537,7 @@ void CHud::RenderMovementInformation()
 		TextRender()->Text(xl, y, Fontsize, Localize("Angle:"), -1.0f);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
-		UpdateMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, Fontsize, Info.m_Angle, m_aPlayerAngleText, sizeof(m_aPlayerAngleText));
+		UpdateMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, Fontsize, Info.m_Angle, m_PlayerPrevAngle);
 		RenderMovementInformationTextContainer(m_PlayerAngleTextContainerIndex, TextRender()->DefaultTextColor(), xr, y);
 	}
 }
