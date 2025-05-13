@@ -91,12 +91,12 @@ const CLightButtonColorFunction CUi::ms_LightButtonColorFunction;
 const CScrollBarColorFunction CUi::ms_ScrollBarColorFunction;
 const float CUi::ms_FontmodHeight = 0.8f;
 
-CUi *CUIElementBase::s_pUI = nullptr;
+CUi *CUIElementBase::ms_pUi = nullptr;
 
-IClient *CUIElementBase::Client() const { return s_pUI->Client(); }
-IGraphics *CUIElementBase::Graphics() const { return s_pUI->Graphics(); }
-IInput *CUIElementBase::Input() const { return s_pUI->Input(); }
-ITextRender *CUIElementBase::TextRender() const { return s_pUI->TextRender(); }
+IClient *CUIElementBase::Client() const { return ms_pUi->Client(); }
+IGraphics *CUIElementBase::Graphics() const { return ms_pUi->Graphics(); }
+IInput *CUIElementBase::Input() const { return ms_pUi->Input(); }
+ITextRender *CUIElementBase::TextRender() const { return ms_pUi->TextRender(); }
 
 void CUi::Init(IKernel *pKernel)
 {
