@@ -589,11 +589,8 @@ void CCamera::GotoTele(int Number, int Offset)
 					MatchPos = m_GotoTeleLastPos;
 					break;
 				}
-				else
-				{
 					FullRound = true;
 				}
-			}
 		} while(distance(m_GotoTeleLastPos, MatchPos) < 10.0f);
 	}
 
