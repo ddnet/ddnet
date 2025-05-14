@@ -244,7 +244,16 @@ void CCommandProcessorFragment_SDL::Cmd_Swap(const CCommandBuffer::SCommand_Swap
 void CCommandProcessorFragment_SDL::Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand)
 {
 	if(m_GLContext)
+	{
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+		// SDL_GL_SetSwapInterval is not supported with Emscripten as this is only a wrapper for the
+		// emscripten_set_main_loop_timing function which does not work because we do not use the
+		// emscripten_set_main_loop function before.
+		*pCommand->m_pRetOk = !pCommand->m_VSync;
+#else
 		*pCommand->m_pRetOk = SDL_GL_SetSwapInterval(pCommand->m_VSync) == 0;
+#endif
+	}
 }
 
 void CCommandProcessorFragment_SDL::Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)
@@ -1305,7 +1314,12 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 	if(IsOpenGLFamilyBackend)
 	{
+#if !defined(CONF_PLATFORM_EMSCRIPTEN)
+		// SDL_GL_SetSwapInterval is not supported with Emscripten as this is only a wrapper for the
+		// emscripten_set_main_loop_timing function which does not work because we do not use the
+		// emscripten_set_main_loop function before.
 		SDL_GL_SetSwapInterval(Flags & IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
+#endif
 		SDL_GL_MakeCurrent(nullptr, nullptr);
 	}
 
