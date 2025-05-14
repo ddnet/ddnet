@@ -84,6 +84,10 @@
 #include <sys/filio.h>
 #endif
 
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+#include <emscripten/emscripten.h>
+#endif
+
 static NETSTATS network_stats = {0};
 
 #define VLEN 128
@@ -837,6 +841,11 @@ void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 #endif
 		pthread_t id;
 		dbg_assert(pthread_create(&id, &attr, thread_run, data) == 0, "pthread_create failure");
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+		// Return control to the browser's main thread to allow the pthread to be started,
+		// otherwise we deadlock when waiting for a thread immediately after starting it.
+		emscripten_sleep(0);
+#endif
 		return (void *)id;
 	}
 #elif defined(CONF_FAMILY_WINDOWS)
