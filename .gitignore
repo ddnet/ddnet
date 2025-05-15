@@ -15,6 +15,7 @@ CACHEDIR.TAG
 CMakeCache.txt
 CMakeFiles
 CMakeSettings*
+CMakeUserPresets.json
 CPackConfig.cmake
 CPackSourceConfig.cmake
 CTestTestfile.cmake
