@@ -5,9 +5,9 @@ layout (location = 2) in vec4 inVertexColor;
 uniform mat4x2 gPos;
 
 #ifndef TW_ROTATIONLESS
+uniform vec2 gCenter;
 uniform float gRotation;
 #endif
-uniform vec2 gCenter;
 
 noperspective out vec2 texCoord;
 noperspective out vec4 vertColor;
