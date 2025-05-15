@@ -86,14 +86,17 @@ int CNetServer::SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_N
 	return 0;
 }
 
-int CNetServer::Close()
+void CNetServer::Close()
 {
 	if(!m_Socket)
-		return 0;
-	return net_udp_close(m_Socket);
+	{
+		return;
+	}
+	net_udp_close(m_Socket);
+	m_Socket = nullptr;
 }
 
-int CNetServer::Drop(int ClientId, const char *pReason)
+void CNetServer::Drop(int ClientId, const char *pReason)
 {
 	// TODO: insert lots of checks here
 
@@ -101,11 +104,9 @@ int CNetServer::Drop(int ClientId, const char *pReason)
 		m_pfnDelClient(ClientId, pReason, m_pUser);
 
 	m_aSlots[ClientId].m_Connection.Disconnect(pReason);
-
-	return 0;
 }
 
-int CNetServer::Update()
+void CNetServer::Update()
 {
 	for(int i = 0; i < MaxClients(); i++)
 	{
@@ -117,8 +118,6 @@ int CNetServer::Update()
 			Drop(i, m_aSlots[i].m_Connection.ErrorString());
 		}
 	}
-
-	return 0;
 }
 
 SECURITY_TOKEN CNetServer::GetGlobalToken()
@@ -795,10 +794,9 @@ void CNetServer::SetTimeoutProtected(int ClientId)
 	m_aSlots[ClientId].m_Connection.m_TimeoutProtected = true;
 }
 
-int CNetServer::ResetErrorString(int ClientId)
+void CNetServer::ResetErrorString(int ClientId)
 {
 	m_aSlots[ClientId].m_Connection.ResetErrorString();
-	return 0;
 }
 
 const char *CNetServer::ErrorString(int ClientId)

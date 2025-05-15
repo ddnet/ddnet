@@ -32,24 +32,26 @@ void CNetConsole::SetCallbacks(NETFUNC_NEWCLIENT_CON pfnNewClient, NETFUNC_DELCL
 	m_pUser = pUser;
 }
 
-int CNetConsole::Close()
+void CNetConsole::Close()
 {
+	if(!m_Socket)
+	{
+		return;
+	}
 	for(auto &Slot : m_aSlots)
+	{
 		Slot.m_Connection.Disconnect("closing console");
-
+	}
 	net_tcp_close(m_Socket);
-
-	return 0;
+	m_Socket = nullptr;
 }
 
-int CNetConsole::Drop(int ClientId, const char *pReason)
+void CNetConsole::Drop(int ClientId, const char *pReason)
 {
 	if(m_pfnDelClient)
 		m_pfnDelClient(ClientId, pReason, m_pUser);
 
 	m_aSlots[ClientId].m_Connection.Disconnect(pReason);
-
-	return 0;
 }
 
 int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
@@ -91,7 +93,7 @@ int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 	return -1;
 }
 
-int CNetConsole::Update()
+void CNetConsole::Update()
 {
 	NETSOCKET Socket;
 	NETADDR Addr;
@@ -117,8 +119,6 @@ int CNetConsole::Update()
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
 			Drop(i, m_aSlots[i].m_Connection.ErrorString());
 	}
-
-	return 0;
 }
 
 int CNetConsole::Recv(char *pLine, int MaxLength, int *pClientId)

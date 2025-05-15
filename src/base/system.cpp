@@ -1483,7 +1483,7 @@ static void priv_net_close_socket(int sock)
 #endif
 }
 
-static int priv_net_close_all_sockets(NETSOCKET sock)
+static void priv_net_close_all_sockets(NETSOCKET sock)
 {
 	/* close down ipv4 */
 	if(sock->ipv4sock >= 0)
@@ -1512,7 +1512,6 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 	}
 
 	free(sock);
-	return 0;
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
@@ -1878,9 +1877,9 @@ int net_udp_recv(NETSOCKET sock, NETADDR *addr, unsigned char **data)
 	return -1; /* error */
 }
 
-int net_udp_close(NETSOCKET sock)
+void net_udp_close(NETSOCKET sock)
 {
-	return priv_net_close_all_sockets(sock);
+	priv_net_close_all_sockets(sock);
 }
 
 NETSOCKET net_tcp_create(NETADDR bindaddr)
@@ -2070,9 +2069,9 @@ int net_tcp_recv(NETSOCKET sock, void *data, int maxsize)
 	return bytes;
 }
 
-int net_tcp_close(NETSOCKET sock)
+void net_tcp_close(NETSOCKET sock)
 {
-	return priv_net_close_all_sockets(sock);
+	priv_net_close_all_sockets(sock);
 }
 
 int net_errno()
