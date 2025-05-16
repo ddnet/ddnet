@@ -2407,31 +2407,49 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 		}
 
 		// Don't allow kicking if a player has no character
-		if(!GetPlayerChar(ClientId) || !GetPlayerChar(KickId) || GetDDRaceTeam(ClientId) != GetDDRaceTeam(KickId))
+		if(!GetPlayerChar(ClientId) || !GetPlayerChar(KickId))
 		{
 			SendChatTarget(ClientId, "You can kick only your team member");
 			return;
 		}
 
-		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called for vote to kick '%s' (%s)", Server()->ClientName(ClientId), Server()->ClientName(KickId), aReason);
-		str_format(aSixupDesc, sizeof(aSixupDesc), "%2d: %s", KickId, Server()->ClientName(KickId));
-		if(!GetDDRaceTeam(ClientId))
+		if(GetDDRaceTeam(ClientId) != GetDDRaceTeam(KickId))
 		{
-			if(!g_Config.m_SvVoteKickBantime)
+			if(!g_Config.m_SvVoteKickMuteTime)
 			{
-				str_format(aCmd, sizeof(aCmd), "kick %d Kicked by vote", KickId);
-				str_format(aDesc, sizeof(aDesc), "Kick '%s'", Server()->ClientName(KickId));
+				str_format(aChatmsg, sizeof(aChatmsg), "'%s' called for vote to mute '%s' (%s)", Server()->ClientName(ClientId), Server()->ClientName(KickId), aReason);
+				str_format(aSixupDesc, sizeof(aSixupDesc), "%2d: %s", KickId, Server()->ClientName(KickId));
+				str_format(aCmd, sizeof(aCmd), "muteid %d %d Muted by vote", KickId, g_Config.m_SvVoteKickMuteTime);
+				str_format(aDesc, sizeof(aDesc), "Mute '%s'", Server()->ClientName(KickId));
 			}
 			else
 			{
-				str_format(aCmd, sizeof(aCmd), "ban %s %d Banned by vote", Server()->ClientAddrString(KickId, false), g_Config.m_SvVoteKickBantime);
-				str_format(aDesc, sizeof(aDesc), "Ban '%s'", Server()->ClientName(KickId));
+				SendChatTarget(ClientId, "You can kick only your team member");
+				return;
 			}
 		}
 		else
 		{
-			str_format(aCmd, sizeof(aCmd), "uninvite %d %d; set_team_ddr %d 0", KickId, GetDDRaceTeam(KickId), KickId);
-			str_format(aDesc, sizeof(aDesc), "Move '%s' to team 0", Server()->ClientName(KickId));
+			str_format(aChatmsg, sizeof(aChatmsg), "'%s' called for vote to kick '%s' (%s)", Server()->ClientName(ClientId), Server()->ClientName(KickId), aReason);
+			str_format(aSixupDesc, sizeof(aSixupDesc), "%2d: %s", KickId, Server()->ClientName(KickId));
+			if(!GetDDRaceTeam(ClientId))
+			{
+				if(!g_Config.m_SvVoteKickBantime)
+				{
+					str_format(aCmd, sizeof(aCmd), "kick %d Kicked by vote", KickId);
+					str_format(aDesc, sizeof(aDesc), "Kick '%s'", Server()->ClientName(KickId));
+				}
+				else
+				{
+					str_format(aCmd, sizeof(aCmd), "ban %s %d Banned by vote", Server()->ClientAddrString(KickId, false), g_Config.m_SvVoteKickBantime);
+					str_format(aDesc, sizeof(aDesc), "Ban '%s'", Server()->ClientName(KickId));
+				}
+			}
+			else
+			{
+				str_format(aCmd, sizeof(aCmd), "uninvite %d %d; set_team_ddr %d 0", KickId, GetDDRaceTeam(KickId), KickId);
+				str_format(aDesc, sizeof(aDesc), "Move '%s' to team 0", Server()->ClientName(KickId));
+			}
 		}
 		m_apPlayers[ClientId]->m_Last_KickVote = time_get();
 		m_VoteType = VOTE_TYPE_KICK;
