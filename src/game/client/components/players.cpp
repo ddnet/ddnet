@@ -366,8 +366,6 @@ void CPlayers::RenderHook(
 	if(ClientId == -2) // ghost
 		Alpha = g_Config.m_ClRaceGhostAlpha / 100.0f;
 
-	RenderInfo.m_Size = 64.0f;
-
 	vec2 Position;
 	if(in_range(ClientId, MAX_CLIENTS - 1))
 		Position = m_pClient->m_aClients[ClientId].m_RenderPos;
@@ -428,11 +426,8 @@ void CPlayers::RenderPlayer(
 	int ClientId,
 	float Intra)
 {
-	CNetObj_Character Prev;
-	CNetObj_Character Player;
-	Prev = *pPrevChar;
-	Player = *pPlayerChar;
-
+	const CNetObj_Character &Prev = *pPrevChar;
+	const CNetObj_Character &Player = *pPlayerChar;
 	CTeeRenderInfo RenderInfo = *pRenderInfo;
 
 	bool Local = m_pClient->m_Snap.m_LocalClientId == ClientId;
@@ -440,9 +435,6 @@ void CPlayers::RenderPlayer(
 	float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 	if(ClientId == -2) // ghost
 		Alpha = g_Config.m_ClRaceGhostAlpha / 100.0f;
-
-	// set size
-	RenderInfo.m_Size = 64.0f;
 
 	float IntraTick = Intra;
 	if(ClientId >= 0)
@@ -866,7 +858,6 @@ void CPlayers::OnRender()
 	}
 	CTeeRenderInfo RenderInfoSpec;
 	RenderInfoSpec.Apply(m_pClient->m_Skins.Find("x_spec"));
-	RenderInfoSpec.m_Size = 64.0f;
 	const int LocalClientId = m_pClient->m_Snap.m_LocalClientId;
 
 	// get screen edges to avoid rendering offscreen

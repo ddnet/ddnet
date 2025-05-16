@@ -70,22 +70,9 @@ class CTeeRenderInfo
 public:
 	CTeeRenderInfo()
 	{
-		Reset();
-	}
-
-	void Reset()
-	{
 		m_OriginalRenderSkin.Reset();
 		m_ColorableRenderSkin.Reset();
 		m_SkinMetrics.Reset();
-		m_CustomColoredSkin = false;
-		m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-		m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-		m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
-		m_Size = 1.0f;
-		m_GotAirJump = true;
-		m_TeeRenderFlags = 0;
-		m_FeetFlipped = false;
 
 		for(auto &Sixup : m_aSixup)
 			Sixup.Reset();
@@ -119,15 +106,14 @@ public:
 
 	CSkin::CSkinMetrics m_SkinMetrics;
 
-	bool m_CustomColoredSkin;
-	ColorRGBA m_BloodColor;
-
-	ColorRGBA m_ColorBody;
-	ColorRGBA m_ColorFeet;
-	float m_Size;
-	bool m_GotAirJump;
-	int m_TeeRenderFlags;
-	bool m_FeetFlipped;
+	bool m_CustomColoredSkin = false;
+	ColorRGBA m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	ColorRGBA m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	ColorRGBA m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	float m_Size = 64.0f;
+	bool m_GotAirJump = true;
+	int m_TeeRenderFlags = 0;
+	bool m_FeetFlipped = false;
 
 	bool Valid() const
 	{
