@@ -469,6 +469,7 @@ protected:
 	vec2 m_DemoControlsPositionOffset = vec2(0.0f, 0.0f);
 	float m_LastPauseChange = -1.0f;
 	float m_LastSpeedChange = -1.0f;
+	int m_SkipDurationIndex = 1;
 	static bool DemoFilterChat(const void *pData, int Size, void *pUser);
 	bool FetchHeader(CDemoItem &Item);
 	void FetchAllHeaders();

@@ -150,7 +150,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		return 1.0f;
 	};
 
-	static int s_SkipDurationIndex = 1;
 	static const int s_aSkipDurationsSeconds[] = {1, 5, 10, 30, 60, 5 * 60, 10 * 60};
 	const int DemoLengthSeconds = TotalTicks / Client()->GameTickSpeed();
 	int NumDurationLabels = 0;
@@ -160,8 +159,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			break;
 		NumDurationLabels = i + 1;
 	}
-	if(NumDurationLabels > 0 && s_SkipDurationIndex >= NumDurationLabels)
-		s_SkipDurationIndex = maximum(0, NumDurationLabels - 1);
+	if(NumDurationLabels > 0 && m_SkipDurationIndex >= NumDurationLabels)
+		m_SkipDurationIndex = maximum(0, NumDurationLabels - 1);
 
 	// handle keyboard shortcuts independent of active menu
 	float PositionToSeek = -1.0f;
@@ -203,18 +202,18 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			if(Input()->ModifierIsPressed())
 				PositionToSeek = FindPreviousMarkerPosition();
 			else if(Input()->ShiftIsPressed())
-				s_SkipDurationIndex = maximum(s_SkipDurationIndex - 1, 0);
+				m_SkipDurationIndex = maximum(m_SkipDurationIndex - 1, 0);
 			else
-				TimeToSeek = -s_aSkipDurationsSeconds[s_SkipDurationIndex];
+				TimeToSeek = -s_aSkipDurationsSeconds[m_SkipDurationIndex];
 		}
 		else if(Input()->KeyPress(KEY_RIGHT) || Input()->KeyPress(KEY_L))
 		{
 			if(Input()->ModifierIsPressed())
 				PositionToSeek = FindNextMarkerPosition();
 			else if(Input()->ShiftIsPressed())
-				s_SkipDurationIndex = minimum(s_SkipDurationIndex + 1, NumDurationLabels - 1);
+				m_SkipDurationIndex = minimum(m_SkipDurationIndex + 1, NumDurationLabels - 1);
 			else
-				TimeToSeek = s_aSkipDurationsSeconds[s_SkipDurationIndex];
+				TimeToSeek = s_aSkipDurationsSeconds[m_SkipDurationIndex];
 		}
 
 		// seek to 0-90%
@@ -534,7 +533,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_TimeBackButton;
 	if(DoButton_FontIcon(&s_TimeBackButton, FONT_ICON_BACKWARD, 0, &Button, BUTTONFLAG_LEFT))
 	{
-		TimeToSeek = -s_aSkipDurationsSeconds[s_SkipDurationIndex];
+		TimeToSeek = -s_aSkipDurationsSeconds[m_SkipDurationIndex];
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_TimeBackButton, &Button, Localize("Go back the specified duration"));
 
@@ -563,7 +562,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		static CUi::SDropDownState s_SkipDurationDropDownState;
 		static CScrollRegion s_SkipDurationDropDownScrollRegion;
 		s_SkipDurationDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_SkipDurationDropDownScrollRegion;
-		s_SkipDurationIndex = Ui()->DoDropDown(&Button, s_SkipDurationIndex, s_vpDurationNames.data(), NumDurationLabels, s_SkipDurationDropDownState);
+		m_SkipDurationIndex = Ui()->DoDropDown(&Button, m_SkipDurationIndex, s_vpDurationNames.data(), NumDurationLabels, s_SkipDurationDropDownState);
 		GameClient()->m_Tooltips.DoToolTip(&s_SkipDurationDropDownState.m_ButtonContainer, &Button, Localize("Change the skip duration"));
 	}
 
@@ -573,7 +572,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	static CButtonContainer s_TimeForwardButton;
 	if(DoButton_FontIcon(&s_TimeForwardButton, FONT_ICON_FORWARD, 0, &Button, BUTTONFLAG_LEFT))
 	{
-		TimeToSeek = s_aSkipDurationsSeconds[s_SkipDurationIndex];
+		TimeToSeek = s_aSkipDurationsSeconds[m_SkipDurationIndex];
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_TimeForwardButton, &Button, Localize("Go forward the specified duration"));
 
