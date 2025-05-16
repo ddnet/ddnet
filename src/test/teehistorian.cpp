@@ -105,7 +105,7 @@ protected:
 	void Expect(const unsigned char *pOutput, size_t OutputSize)
 	{
 		static CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
-		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"9\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
+		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"10\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
 		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\",\"map_crc\":\"eceaf25c\",\"prng_description\":\"test-prng:02468ace\",\"config\":{},\"tuning\":{},\"uuids\":[";
 		static const char PREFIX3[] = "]}";
 
@@ -484,7 +484,12 @@ TEST_F(TeeHistorian, Input)
 		0x45,
 		0x00, // ClientId 0
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
-		// same unique id, same input -> nothing
+		// same unique id, same input -> InputDiff (diff is zero)
+		// this signals new but unchaged input
+		// Note! previously these inputs were filtered.
+		0x44,
+		0x00, // ClientId 0
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		// same unique id, different input -> InputDiff
 		0x44,
 		0x00, // ClientId 0
@@ -500,7 +505,7 @@ TEST_F(TeeHistorian, Input)
 
 	// new player -> InputNew
 	m_TH.RecordPlayerInput(0, 1, &Input);
-	// same unique id, same input -> nothing
+	// same unique id, same input -> InputDiff (zeroed)
 	m_TH.RecordPlayerInput(0, 1, &Input);
 
 	Input.m_Direction = 0;
