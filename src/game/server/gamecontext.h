@@ -367,7 +367,7 @@ public:
 
 private:
 	// starting 1 to make 0 the special value "no client id"
-	uint32_t NextUniqueClientId = 1;
+	uint32_t m_NextUniqueClientId = 1;
 	bool m_VoteWillPass;
 	CScore *m_pScore;
 
