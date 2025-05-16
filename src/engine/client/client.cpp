@@ -3034,7 +3034,6 @@ void CClient::Run()
 		g_UuidManager.DebugDump();
 	}
 
-#if !defined(CONF_PLATFORM_EMSCRIPTEN)
 	char aNetworkError[256];
 	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
 	{
@@ -3042,7 +3041,6 @@ void CClient::Run()
 		ShowMessageBox("Network Error", aNetworkError);
 		return;
 	}
-#endif
 
 	if(!m_Http.Init(std::chrono::seconds{1}))
 	{
