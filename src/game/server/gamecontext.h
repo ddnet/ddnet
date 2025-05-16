@@ -472,6 +472,7 @@ private:
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescueMode(IConsole::IResult *pResult, void *pUserData);
+	static void ConBack(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleTo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleXY(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleCursor(IConsole::IResult *pResult, void *pUserData);
