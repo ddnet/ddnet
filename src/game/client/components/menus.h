@@ -23,9 +23,11 @@
 
 #include <game/client/component.h>
 #include <game/client/components/mapimages.h>
+#include <game/client/components/touch_controls.h>
 #include <game/client/lineinput.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/client/ui_scrollregion.h>
 #include <game/voting.h>
 
 #include <game/client/components/skins7.h>
@@ -489,7 +491,6 @@ protected:
 	// found in menus_ingame.cpp
 	STextContainerIndex m_MotdTextContainerIndex;
 	void RenderGame(CUIRect MainView);
-	void RenderTouchControlsEditor(CUIRect MainView);
 	void PopupConfirmDisconnect();
 	void PopupConfirmDisconnectDummy();
 	void PopupConfirmDiscardTouchControlsChanges();
@@ -852,5 +853,165 @@ private:
 	bool RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight);
 
 	CServerProcess m_ServerProcess;
+
+	// found in menus_ingame_touch_controls.cpp
+
+	// This specifies button editor's total width.
+	static constexpr const float BUTTON_EDITOR_WIDTH = 700.0f;
+	enum class EBehaviorType
+	{
+		BIND = 0,
+		BIND_TOGGLE,
+		PREDEFINED,
+		NUM_BEHAVIORS
+	};
+
+	enum class EPredefinedType
+	{
+		EXTRA_MENU = 0,
+		JOYSTICK_HOOK,
+		JOYSTICK_FIRE,
+		JOYSTICK_AIM,
+		JOYSTICK_ACTION,
+		USE_ACTION,
+		SWAP_ACTION,
+		SPECTATE,
+		EMOTICON,
+		INGAME_MENU,
+		NUM_PREDEFINEDS
+	};
+
+	// Which menu is selected.
+	enum class EMenuType
+	{
+		MENU_FILE = 0,
+		MENU_BUTTONS,
+		MENU_SETTINGS,
+		MENU_PREVIEW,
+		NUM_MENUS
+	};
+	EMenuType m_CurrentMenu = EMenuType::MENU_FILE;
+
+	enum class ESortType
+	{
+		LABEL = 0,
+		X,
+		Y,
+		W,
+		H,
+		NUM_SORTS
+	};
+	ESortType m_SortType = ESortType::LABEL;
+
+	std::array<std::function<bool(CTouchControls::CTouchButton *, CTouchControls::CTouchButton *)>, (unsigned)ESortType::NUM_SORTS> m_SortFunctions = {
+		[](CTouchControls::CTouchButton *ButtonA, CTouchControls::CTouchButton *ButtonB) { return str_comp(ButtonA->m_pBehavior->GetLabel().m_pLabel, ButtonB->m_pBehavior->GetLabel().m_pLabel) < 0; },
+		[](CTouchControls::CTouchButton *ButtonA, CTouchControls::CTouchButton *ButtonB) { return ButtonA->m_UnitRect.m_X < ButtonB->m_UnitRect.m_X; },
+		[](CTouchControls::CTouchButton *ButtonA, CTouchControls::CTouchButton *ButtonB) { return ButtonA->m_UnitRect.m_Y < ButtonB->m_UnitRect.m_Y; },
+		[](CTouchControls::CTouchButton *ButtonA, CTouchControls::CTouchButton *ButtonB) { return ButtonA->m_UnitRect.m_W < ButtonB->m_UnitRect.m_W; },
+		[](CTouchControls::CTouchButton *ButtonA, CTouchControls::CTouchButton *ButtonB) { return ButtonA->m_UnitRect.m_H < ButtonB->m_UnitRect.m_H; }};
+
+	// Mainly for passing values in popups.
+	CTouchControls::CTouchButton *m_OldSelectedButton = nullptr;
+	CTouchControls::CTouchButton *m_NewSelectedButton = nullptr;
+
+	// Storing everything you are editing.
+	CLineInputNumber m_InputX;
+	CLineInputNumber m_InputY;
+	CLineInputNumber m_InputW;
+	CLineInputNumber m_InputH;
+	CTouchControls::EButtonShape m_CachedShape;
+
+	int m_EditBehaviorType = (int)EBehaviorType::BIND;
+	int m_PredefinedBehaviorType = (int)EPredefinedType::EXTRA_MENU;
+	int m_EditCommandNumber = 0;
+	int m_EditElement = 0; // 0 for shape&size, 1 for visibility, 2 for behavior.
+	int m_CachedNumber = 0;
+	std::vector<std::unique_ptr<CLineInputBuffered<1024>>> m_vInputCommands;
+	std::vector<std::unique_ptr<CLineInputBuffered<1024>>> m_vInputLabels;
+	std::vector<CTouchControls::CBindToggleTouchButtonBehavior::CCommand> m_vCachedCommands;
+	std::array<int, (size_t)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aCachedVisibilities; // 0:-, 1:+, 2:Ignored.
+
+	unsigned m_ColorActive = 0;
+	unsigned m_ColorInactive = 0;
+
+	// Used for creating ui elements.
+	std::array<CButtonContainer, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aButtonVisibilityIds = {};
+	std::array<CButtonContainer, (unsigned)CTouchControls::EButtonVisibility::NUM_VISIBILITIES> m_aVisibilityIds = {};
+	std::array<CButtonContainer, (unsigned)ESortType::NUM_SORTS> m_aSortHeaderIds = {};
+	std::array<CButtonContainer, 3> m_aEditElementIds = {};
+	std::array<CButtonContainer, 3> m_aSelectingTabIds = {};
+	std::array<CButtonContainer, 2> m_aSettingTabIds = {};
+	std::vector<CButtonContainer> m_vBindToggleAddButtons;
+	std::vector<CButtonContainer> m_vBindToggleDeleteButtons;
+	std::vector<std::array<CButtonContainer, 3>> m_vLabelTypeRadios;
+
+	// Functional variables.
+	bool m_FirstEnter = true; // Execute something when first opening the editor.
+	bool m_CloseMenu = false; // Decide if closing menu after the popup confirm.
+	bool m_NeedUpdatePreview = true; // Update previews only upon entering this page, because the update is kinda slow.
+	bool m_NeedSort = true;
+	bool m_NeedFilter = false;
+	bool m_BindTogglePreviewExtension = false;
+	std::vector<CTouchControls::CTouchButton *> m_vVisibleButtons;
+	std::vector<CTouchControls::CTouchButton *> m_vInvisibleButtons;
+	std::vector<CTouchControls::CTouchButton *> m_vSortedButtons;
+	CLineInputBuffered<1024> m_SearchInput;
+	unsigned m_SelectedPreviewButton = -1;
+	std::string m_ParsedString;
+
+	void RenderTouchButtonEditor(CUIRect MainView);
+	bool RenderLayoutSettingBlock(CUIRect Block);
+	bool RenderBehaviorSettingBlock(CUIRect Block);
+	bool RenderVisibilitySettingBlock(CUIRect Block);
+	void RenderTouchButtonEditorWhileNothingSelected(CUIRect MainView);
+	void RenderPreviewButton(CUIRect MainView);
+
+	void RenderSelectingTab(CUIRect SelectingTab);
+	void RenderConfigSettings(CUIRect MainView);
+	void RenderPreviewSettings(CUIRect MainView);
+	void RenderTouchControlsEditor(CUIRect MainView);
+
+	// Confirm, Cancel only decide if saving cached settings.
+	void DoPopupType(CTouchControls::CPopupParam PopupParam);
+	void ChangeSelectedButtonWhileHavingUnsavedChanges();
+	void PopupConfirm_ChangeSelectedButton();
+	void PopupCancel_ChangeSelectedButton();
+	void NoSpaceForOverlappingButton();
+	void SelectedButtonNotVisible();
+	void PopupConfirm_SelectedNotVisible();
+
+	void PopupConfirm_NewButton();
+	void PopupCancel_NewButton();
+
+	void PopupConfirm_SaveSettings();
+
+	void PopupCancel_DeselectButton();
+
+	void PopupConfirm_TurnOffEditor();
+	void PopupCancel_TurnOffEditor();
+
+	void PopupConfirm_DeleteButton();
+
+	// Getter and setters.
+	bool UnsavedChanges();
+	void SetUnsavedChanges(bool UnsavedChanges);
+
+	// Convenient functions.
+	bool CheckCachedSettings();
+	void ResetCachedSettings();
+	void CacheAllSettingsFromTarget(CTouchControls::CTouchButton *TargetButton);
+	void SaveCachedSettingsToTarget(CTouchControls::CTouchButton *TargetButton);
+	void SetPosInputs(CTouchControls::CUnitRect MyRect);
+	void InputPosFunction(CLineInputNumber *Input);
+	void UpdateTmpButton();
+	void ResetButtonPointers();
+	void DoRedLabel(const char *pLabel, CUIRect &Block, const int &Size);
+	void ParseLabel(const char *pLabel);
+	void ResolveIssues();
+	int CalculateBehaviorType(const char *Type);
+	int CalculatePredefinedType(const char *Type);
+	void LimitStringLength(std::string &Target, unsigned MaxLength);
+	void InitLineInputs();
+	std::string GetCommand(CTouchControls::CTouchButton *Button);
 };
 #endif
