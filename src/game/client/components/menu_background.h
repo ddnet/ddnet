@@ -113,7 +113,6 @@ public:
 	bool IsLoading() const { return m_Loading; }
 
 	class CCamera *GetCurCamera() override;
-	const char *LoadingTitle() const override;
 
 	void ChangePosition(int PositionNumber);
 
