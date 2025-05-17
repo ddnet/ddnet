@@ -302,10 +302,10 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	int *pCountry;
 	if(!m_Dummy)
 	{
-		pCountry = &g_Config.m_PlayerCountry;
-		s_NameInput.SetBuffer(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName));
+		pCountry = &g_Config.m_ClPlayerCountry;
+		s_NameInput.SetBuffer(g_Config.m_ClPlayerName, sizeof(g_Config.m_ClPlayerName));
 		s_NameInput.SetEmptyText(Client()->PlayerName());
-		s_ClanInput.SetBuffer(g_Config.m_PlayerClan, sizeof(g_Config.m_PlayerClan));
+		s_ClanInput.SetBuffer(g_Config.m_ClPlayerClan, sizeof(g_Config.m_ClPlayerClan));
 	}
 	else
 	{

@@ -1011,9 +1011,9 @@ void CClient::Quit()
 
 const char *CClient::PlayerName() const
 {
-	if(g_Config.m_PlayerName[0])
+	if(g_Config.m_ClPlayerName[0])
 	{
-		return g_Config.m_PlayerName;
+		return g_Config.m_ClPlayerName;
 	}
 	if(g_Config.m_SteamName[0])
 	{
@@ -1029,9 +1029,9 @@ const char *CClient::DummyName()
 		return g_Config.m_ClDummyName;
 	}
 	const char *pBase = nullptr;
-	if(g_Config.m_PlayerName[0])
+	if(g_Config.m_ClPlayerName[0])
 	{
-		pBase = g_Config.m_PlayerName;
+		pBase = g_Config.m_ClPlayerName;
 	}
 	else if(g_Config.m_SteamName[0])
 	{

@@ -1797,7 +1797,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		TextBox.VSplitLeft(20.0f, nullptr, &TextBox);
 		TextBox.VSplitRight(60.0f, &TextBox, nullptr);
 		Ui()->DoLabel(&Label, Localize("Nickname"), 16.0f, TEXTALIGN_ML);
-		static CLineInput s_PlayerNameInput(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName));
+		static CLineInput s_PlayerNameInput(g_Config.m_ClPlayerName, sizeof(g_Config.m_ClPlayerName));
 		s_PlayerNameInput.SetEmptyText(Client()->PlayerName());
 		Ui()->DoEditBox(&s_PlayerNameInput, &TextBox, 12.0f);
 	}
