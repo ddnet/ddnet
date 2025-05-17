@@ -10,8 +10,6 @@
 #include <game/server/save.h>
 #include <game/server/teams.h>
 
-bool CheckClientId(int ClientId);
-
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
