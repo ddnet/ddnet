@@ -344,6 +344,8 @@ void CLayerTele::GetPos(int Number, int Offset, int &TeleX, int &TeleY)
 			for(int y = 0; y < m_Height; y++)
 			{
 				int i = y * m_Width + x;
+				if(!IsTeleTileNumberUsedAny(m_pTeleTile[i].m_Type))
+					continue;
 				int Tele = m_pTeleTile[i].m_Number;
 				if(Number == Tele)
 				{
