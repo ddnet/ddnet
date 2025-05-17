@@ -140,11 +140,10 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 	}
 }
 
-void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted)
+void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted, int Flags)
 {
 	int CurWeapon = clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS - 1);
 	int QuadOffset = 2;
-	float Angle = 0.0f;
 	float IntraTick = IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 	vec2 Pos = mix(vec2(pPrev->m_X, pPrev->m_Y), vec2(pCurrent->m_X, pCurrent->m_Y), IntraTick);
 	if(pCurrent->m_Type == POWERUP_HEALTH)
@@ -165,8 +164,11 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	else if(pCurrent->m_Type == POWERUP_NINJA)
 	{
 		QuadOffset = m_PickupNinjaOffset;
-		m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18), 1.0f);
-		Pos.x -= 10.0f;
+		if(Flags & TILEFLAG_ROTATE)
+			m_pClient->m_Effects.PowerupShine(Pos, vec2(18, 96), 1.0f);
+		else
+			m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18), 1.0f);
+
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupNinja);
 	}
 	else if(pCurrent->m_Type >= POWERUP_ARMOR_SHOTGUN && pCurrent->m_Type <= POWERUP_ARMOR_LASER)
@@ -176,7 +178,37 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	}
 	Graphics()->QuadsSetRotation(0);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->QuadsSetRotation(Angle);
+
+	vec2 Scale = vec2(1, 1);
+	if(Flags & TILEFLAG_XFLIP)
+		Scale.x = -Scale.x;
+
+	if(Flags & TILEFLAG_YFLIP)
+		Scale.y = -Scale.y;
+
+	if(Flags & TILEFLAG_ROTATE)
+	{
+		Graphics()->QuadsSetRotation(90.f * (pi / 180));
+		std::swap(Scale.x, Scale.y);
+
+		if(pCurrent->m_Type == POWERUP_NINJA)
+		{
+			if(Flags & TILEFLAG_XFLIP)
+				Pos.y += 10.0f;
+			else
+				Pos.y -= 10.0f;
+		}
+	}
+	else
+	{
+		if(pCurrent->m_Type == POWERUP_NINJA)
+		{
+			if(Flags & TILEFLAG_XFLIP)
+				Pos.x += 10.0f;
+			else
+				Pos.x -= 10.0f;
+		}
+	}
 
 	static float s_Time = 0.0f;
 	static float s_LastLocalTime = LocalTime();
@@ -195,7 +227,8 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	Pos += direction(s_Time * 2.0f + Offset) * 2.5f;
 	s_LastLocalTime = LocalTime();
 
-	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
+	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y, Scale.x, Scale.y);
+	Graphics()->QuadsSetRotation(0);
 }
 
 void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent, const CNetObj_GameData *pPrevGameData, const CNetObj_GameData *pCurGameData)
@@ -459,7 +492,7 @@ void CItems::OnRender()
 					CNetObj_Pickup Data, Prev;
 					pPickup->FillInfo(&Data);
 					pPrev->FillInfo(&Prev);
-					RenderPickup(&Prev, &Data, true);
+					RenderPickup(&Prev, &Data, true, pPickup->Flags());
 				}
 			}
 		}
@@ -512,7 +545,7 @@ void CItems::OnRender()
 			}
 			const void *pPrev = Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_Id);
 			if(pPrev)
-				RenderPickup((const CNetObj_Pickup *)pPrev, (const CNetObj_Pickup *)pData);
+				RenderPickup((const CNetObj_Pickup *)pPrev, (const CNetObj_Pickup *)pData, false, Data.m_Flags);
 		}
 		else if(Item.m_Type == NETOBJTYPE_LASER || Item.m_Type == NETOBJTYPE_DDNETLASER)
 		{
