@@ -47,6 +47,9 @@ class IStorage;
 
 // ------------ CGraphicsBackend_Threaded
 
+// Run everything single threaded when compiling for Emscripten, as context binding does not work outside of the main thread with SDL2.
+// TODO SDL3: Check if SDL3 supports threaded graphics and PROXY_TO_PTHREAD, OFFSCREENCANVAS_SUPPORT and OFFSCREEN_FRAMEBUFFER correctly.
+#if !defined(CONF_PLATFORM_EMSCRIPTEN)
 void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 {
 	auto *pSelf = (CGraphicsBackend_Threaded *)pUser;
@@ -75,14 +78,17 @@ void CGraphicsBackend_Threaded::ThreadFunc(void *pUser)
 		}
 	}
 }
+#endif
 
 CGraphicsBackend_Threaded::CGraphicsBackend_Threaded(TTranslateFunc &&TranslateFunc) :
 	m_TranslateFunc(std::move(TranslateFunc))
 {
-	m_pBuffer = nullptr;
 	m_pProcessor = nullptr;
 	m_Shutdown = true;
+#if !defined(CONF_PLATFORM_EMSCRIPTEN)
+	m_pBuffer = nullptr;
 	m_BufferInProcess.store(false, std::memory_order_relaxed);
+#endif
 }
 
 void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
@@ -90,33 +96,42 @@ void CGraphicsBackend_Threaded::StartProcessor(ICommandProcessor *pProcessor)
 	dbg_assert(m_Shutdown, "Processor was already not shut down.");
 	m_Shutdown = false;
 	m_pProcessor = pProcessor;
+#if !defined(CONF_PLATFORM_EMSCRIPTEN)
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_pThread = thread_init(ThreadFunc, this, "Graphics thread");
 	// wait for the thread to start
 	m_BufferSwapCond.wait(Lock, [this]() -> bool { return m_Started; });
+#endif
 }
 
 void CGraphicsBackend_Threaded::StopProcessor()
 {
 	dbg_assert(!m_Shutdown, "Processor was already shut down.");
 	m_Shutdown = true;
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	m_Warning = m_pProcessor->GetWarning();
+#else
 	{
 		std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 		m_Warning = m_pProcessor->GetWarning();
 		m_BufferSwapCond.notify_all();
 	}
 	thread_wait(m_pThread);
+#endif
 }
 
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 {
 	SGfxErrorContainer Error;
 #if defined(CONF_PLATFORM_EMSCRIPTEN)
-	// run everything single threaded for now, context binding in a thread seems to not work as of now
 	Error = m_pProcessor->GetError();
 	if(Error.m_ErrorType == GFX_ERROR_TYPE_NONE)
 	{
 		RunBufferSingleThreadedUnsafe(pBuffer);
+#if defined(CONF_VIDEORECORDER)
+		if(IVideo::Current())
+			IVideo::Current()->NextVideoFrameThread();
+#endif
 	}
 #else
 	WaitForIdle();
@@ -146,13 +161,19 @@ void CGraphicsBackend_Threaded::RunBufferSingleThreadedUnsafe(CCommandBuffer *pB
 
 bool CGraphicsBackend_Threaded::IsIdle() const
 {
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+	return true;
+#else
 	return !m_BufferInProcess.load(std::memory_order_relaxed);
+#endif
 }
 
 void CGraphicsBackend_Threaded::WaitForIdle()
 {
+#if !defined(CONF_PLATFORM_EMSCRIPTEN)
 	std::unique_lock<std::mutex> Lock(m_BufferSwapMutex);
 	m_BufferSwapCond.wait(Lock, [this]() { return m_pBuffer == nullptr; });
+#endif
 }
 
 void CGraphicsBackend_Threaded::ProcessError(const SGfxErrorContainer &Error)
@@ -223,7 +244,16 @@ void CCommandProcessorFragment_SDL::Cmd_Swap(const CCommandBuffer::SCommand_Swap
 void CCommandProcessorFragment_SDL::Cmd_VSync(const CCommandBuffer::SCommand_VSync *pCommand)
 {
 	if(m_GLContext)
+	{
+#if defined(CONF_PLATFORM_EMSCRIPTEN)
+		// SDL_GL_SetSwapInterval is not supported with Emscripten as this is only a wrapper for the
+		// emscripten_set_main_loop_timing function which does not work because we do not use the
+		// emscripten_set_main_loop function before.
+		*pCommand->m_pRetOk = !pCommand->m_VSync;
+#else
 		*pCommand->m_pRetOk = SDL_GL_SetSwapInterval(pCommand->m_VSync) == 0;
+#endif
+	}
 }
 
 void CCommandProcessorFragment_SDL::Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)
@@ -1284,7 +1314,12 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 	if(IsOpenGLFamilyBackend)
 	{
+#if !defined(CONF_PLATFORM_EMSCRIPTEN)
+		// SDL_GL_SetSwapInterval is not supported with Emscripten as this is only a wrapper for the
+		// emscripten_set_main_loop_timing function which does not work because we do not use the
+		// emscripten_set_main_loop function before.
 		SDL_GL_SetSwapInterval(Flags & IGraphicsBackend::INITFLAG_VSYNC ? 1 : 0);
+#endif
 		SDL_GL_MakeCurrent(nullptr, nullptr);
 	}
 

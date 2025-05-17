@@ -84,15 +84,16 @@ protected:
 
 private:
 	ICommandProcessor *m_pProcessor;
+	std::atomic_bool m_Shutdown;
+#if !defined(CONF_PLATFORM_EMSCRIPTEN)
 	std::mutex m_BufferSwapMutex;
 	std::condition_variable m_BufferSwapCond;
 	CCommandBuffer *m_pBuffer;
-	std::atomic_bool m_Shutdown;
 	bool m_Started = false;
 	std::atomic_bool m_BufferInProcess;
 	void *m_pThread;
-
 	static void ThreadFunc(void *pUser);
+#endif
 
 public:
 	bool GetWarning(std::vector<std::string> &WarningStrings) override;

@@ -65,9 +65,12 @@ void CCommandProcessorFragment_OpenGL3_3::InitPrimExProgram(CGLSLPrimitiveExProg
 	pProgram->m_LocCenter = pProgram->GetUniformLoc("gCenter");
 	pProgram->m_LocVertciesColor = pProgram->GetUniformLoc("gVerticesColor");
 
-	pProgram->SetUniform(pProgram->m_LocRotation, 0.0f);
-	float aCenter[2] = {0.f, 0.f};
-	pProgram->SetUniformVec2(pProgram->m_LocCenter, 1, aCenter);
+	if(!Rotationless)
+	{
+		pProgram->SetUniform(pProgram->m_LocRotation, 0.0f);
+		float aCenter[2] = {0.f, 0.f};
+		pProgram->SetUniformVec2(pProgram->m_LocCenter, 1, aCenter);
+	}
 }
 
 bool CCommandProcessorFragment_OpenGL3_3::Cmd_Init(const SCommand_Init *pCommand)
