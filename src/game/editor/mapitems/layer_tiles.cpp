@@ -333,9 +333,10 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 				}
 				else
 				{
-					CTile Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
+					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
 					if(IsValidTeleTile(Tile.m_Index) && IsTeleTileNumberUsedAny(Tile.m_Index))
 					{
+						pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
 						pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number = IsTeleTileCheckpoint(Tile.m_Index) ? m_pEditor->m_TeleCheckpointNumber : m_pEditor->m_TeleNumber;
 					}
 				}
@@ -374,9 +375,10 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 				}
 				else
 				{
-					CTile Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
+					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
 					if(IsValidSpeedupTile(Tile.m_Index))
 					{
+						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
 						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Angle = m_pEditor->m_SpeedupAngle;
 						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Force = m_pEditor->m_SpeedupForce;
 						pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
@@ -416,11 +418,13 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 				}
 				else
 				{
-					CTile Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
+					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
 					if(IsValidSwitchTile(Tile.m_Index))
 					{
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
 						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number = m_pEditor->m_SwitchNum;
 						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Delay = m_pEditor->m_SwitchDelay;
+						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Flags = Tile.m_Flags;
 					}
 				}
 			}
@@ -455,9 +459,10 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 				}
 				else
 				{
-					CTile Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
+					const CTile &Tile = pGrabbed->m_pTiles[y * pGrabbed->m_Width + x];
 					if(IsValidTuneTile(Tile.m_Index))
 					{
+						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type = Tile.m_Index;
 						pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number = m_pEditor->m_TuningNum;
 					}
 				}
