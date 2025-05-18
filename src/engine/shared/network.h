@@ -410,8 +410,6 @@ class CNetServer
 	NETFUNC_CLIENTREJOIN m_pfnClientRejoin;
 	void *m_pUser;
 
-	int m_NumConAttempts; // log flooding attacks
-	int64_t m_TimeNumConAttempts;
 	unsigned char m_aSecurityTokenSeed[16];
 
 	// vanilla connect flood detection
