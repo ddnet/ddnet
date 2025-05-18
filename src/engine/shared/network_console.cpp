@@ -11,16 +11,23 @@ bool CNetConsole::Open(NETADDR BindAddr, CNetBan *pNetBan)
 	*this = CNetConsole{};
 	m_pNetBan = pNetBan;
 
-	// open socket
 	m_Socket = net_tcp_create(BindAddr);
 	if(!m_Socket)
+	{
 		return false;
-	if(net_tcp_listen(m_Socket, NET_MAX_CONSOLE_CLIENTS))
+	}
+	if(net_tcp_listen(m_Socket, NET_MAX_CONSOLE_CLIENTS) != 0 ||
+		net_set_non_blocking(m_Socket) != 0)
+	{
+		net_tcp_close(m_Socket);
+		m_Socket = nullptr;
 		return false;
-	net_set_non_blocking(m_Socket);
+	}
 
 	for(auto &Slot : m_aSlots)
+	{
 		Slot.m_Connection.Reset();
+	}
 
 	return true;
 }
