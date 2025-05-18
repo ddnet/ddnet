@@ -18,11 +18,12 @@ class CGameClient;
 */
 class CComponent
 {
-protected:
 	friend class CGameClient;
-
+	friend class CBackground; // TODO: improve support for sub-components
+	friend class CMenuBackground; // TODO: improve support for sub-components
 	CGameClient *m_pClient;
 
+protected:
 	// perhaps propagate pointers for these as well
 
 	/**

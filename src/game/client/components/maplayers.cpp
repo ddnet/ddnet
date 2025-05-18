@@ -56,7 +56,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 
 void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels)
 {
-	EnvelopeEval(TimeOffsetMillis, Env, Result, Channels, this->m_pLayers->Map(), this->m_pEnvelopePoints.get(), this->Client(), this->m_pClient, this->m_OnlineOnly);
+	EnvelopeEval(TimeOffsetMillis, Env, Result, Channels, this->m_pLayers->Map(), this->m_pEnvelopePoints.get(), this->Client(), this->GameClient(), this->m_OnlineOnly);
 }
 
 CMapLayers::CMapLayers(int Type, bool OnlineOnly)
@@ -68,12 +68,12 @@ CMapLayers::CMapLayers(int Type, bool OnlineOnly)
 void CMapLayers::OnInit()
 {
 	m_pLayers = Layers();
-	m_pImages = &m_pClient->m_MapImages;
+	m_pImages = &GameClient()->m_MapImages;
 }
 
 CCamera *CMapLayers::GetCurCamera()
 {
-	return &m_pClient->m_Camera;
+	return &GameClient()->m_Camera;
 }
 
 void CMapLayers::OnMapLoad()
@@ -84,13 +84,13 @@ void CMapLayers::OnMapLoad()
 
 	const char *pLoadingTitle = Localize("Loading map");
 	const char *pLoadingMessage = Localize("Uploading map data to GPU");
-	m_pClient->m_Menus.RenderLoading(pLoadingTitle, pLoadingMessage, 0);
+	GameClient()->m_Menus.RenderLoading(pLoadingTitle, pLoadingMessage, 0);
 
 	for(int g = 0; g < m_pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
 		std::unique_ptr<CRenderLayer> pRenderLayerGroup = std::make_unique<CRenderLayerGroup>(g, pGroup);
-		pRenderLayerGroup->OnInit(Graphics(), m_pLayers->Map(), RenderTools(), m_pImages, m_pEnvelopePoints, Client(), m_pClient, m_OnlineOnly);
+		pRenderLayerGroup->OnInit(Graphics(), m_pLayers->Map(), RenderTools(), m_pImages, m_pEnvelopePoints, Client(), GameClient(), m_OnlineOnly);
 		if(!pRenderLayerGroup->IsValid())
 		{
 			dbg_msg("maplayers", "error group was null, group number = %d, total groups = %d", g, m_pLayers->NumGroups());
@@ -194,7 +194,7 @@ void CMapLayers::OnMapLoad()
 			// just ignore invalid layers from rendering
 			if(pRenderLayer)
 			{
-				pRenderLayer->OnInit(Graphics(), m_pLayers->Map(), RenderTools(), m_pImages, m_pEnvelopePoints, Client(), m_pClient, m_OnlineOnly);
+				pRenderLayer->OnInit(Graphics(), m_pLayers->Map(), RenderTools(), m_pImages, m_pEnvelopePoints, Client(), GameClient(), m_OnlineOnly);
 				if(pRenderLayer->IsValid())
 				{
 					pRenderLayer->Init();

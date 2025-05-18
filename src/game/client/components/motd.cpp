@@ -116,14 +116,14 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 			if(g_Config.m_ClPrintMotd && m_aServerMotd[k] == '\n')
 			{
 				m_aServerMotd[k] = '\0';
-				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+				GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 				m_aServerMotd[k] = '\n';
 				pLast = m_aServerMotd + k + 1;
 			}
 		}
 		m_aServerMotd[sizeof(m_aServerMotd) - 1] = '\0';
 		if(g_Config.m_ClPrintMotd && *pLast != '\0')
-			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+			GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 
 		m_ServerMotdUpdateTime = time();
 		if(m_aServerMotd[0] && g_Config.m_ClMotdTime)
