@@ -350,7 +350,7 @@ private:
 	char m_aLineEnding[3];
 
 public:
-	void Init(NETSOCKET Socket, const NETADDR *pAddr);
+	int Init(NETSOCKET Socket, const NETADDR *pAddr);
 	void Disconnect(const char *pReason);
 
 	int State() const { return m_State; }

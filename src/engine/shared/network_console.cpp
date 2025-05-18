@@ -84,10 +84,18 @@ int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 	// accept client
 	if(!aError[0] && FreeSlot != -1)
 	{
-		m_aSlots[FreeSlot].m_Connection.Init(Socket, pAddr);
-		if(m_pfnNewClient)
-			m_pfnNewClient(FreeSlot, m_pUser);
-		return 0;
+		if(m_aSlots[FreeSlot].m_Connection.Init(Socket, pAddr) == 0)
+		{
+			if(m_pfnNewClient)
+			{
+				m_pfnNewClient(FreeSlot, m_pUser);
+			}
+			return 0;
+		}
+		else
+		{
+			str_copy(aError, "failed to initialize client connection");
+		}
 	}
 
 	// reject client
