@@ -190,7 +190,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("mapbug", "s[mapbug]", CFGFLAG_GAME, ConMapbug, this, "Enable map compatibility mode using the specified bug (example: grenade-doubleexplosion@ddnet.tw)");
 
 	for(auto &pComponent : m_vpAll)
-		pComponent->m_pClient = this;
+		pComponent->OnInterfacesInit(this);
 
 	// let all the other components register their console commands
 	for(auto &pComponent : m_vpAll)

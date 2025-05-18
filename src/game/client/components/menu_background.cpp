@@ -74,6 +74,13 @@ CBackgroundEngineMap *CMenuBackground::CreateBGMap()
 	return new CMenuMap;
 }
 
+void CMenuBackground::OnInterfacesInit(CGameClient *pClient)
+{
+	CComponentInterfaces::OnInterfacesInit(pClient);
+	m_pImages->OnInterfacesInit(pClient);
+	m_Camera.OnInterfacesInit(pClient);
+}
+
 void CMenuBackground::OnInit()
 {
 	m_pBackgroundMap = CreateBGMap();
@@ -81,12 +88,10 @@ void CMenuBackground::OnInit()
 
 	m_IsInit = true;
 
-	m_pImages->m_pClient = GameClient();
 	Kernel()->RegisterInterface<CMenuMap>((CMenuMap *)m_pBackgroundMap);
 	if(g_Config.m_ClMenuMap[0] != '\0')
 		LoadMenuBackground();
 
-	m_Camera.m_pClient = GameClient();
 	m_Camera.m_ZoomSet = false;
 	m_Camera.m_ZoomSmoothingTarget = 0;
 }
