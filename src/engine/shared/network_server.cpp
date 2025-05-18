@@ -746,13 +746,7 @@ void CNetServer::SendTokenSixup(NETADDR &Addr, SECURITY_TOKEN Token)
 
 void CNetServer::SetMaxClientsPerIp(int Max)
 {
-	// clamp
-	if(Max < 1)
-		Max = 1;
-	else if(Max > NET_MAX_CLIENTS)
-		Max = NET_MAX_CLIENTS;
-
-	m_MaxClientsPerIp = Max;
+	m_MaxClientsPerIp = std::clamp<int>(Max, 1, NET_MAX_CLIENTS);
 }
 
 bool CNetServer::SetTimedOut(int ClientId, int OrigId)
