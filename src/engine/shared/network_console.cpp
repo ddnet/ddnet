@@ -63,68 +63,63 @@ void CNetConsole::Drop(int ClientId, const char *pReason)
 
 int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 {
-	char aError[256] = {0};
-	int FreeSlot = -1;
+	const auto &DropClient = [&](const char *pError) {
+		net_tcp_send(Socket, pError, str_length(pError));
+		net_tcp_close(Socket);
+	};
 
-	// look for free slot or multiple client
+	// check if address is banned
+	char aBanMessage[256];
+	if(NetBan() && NetBan()->IsBanned(pAddr, aBanMessage, sizeof(aBanMessage)))
+	{
+		DropClient(aBanMessage);
+		return -1;
+	}
+
+	// look for free slot or multiple clients with same address
+	int FreeSlot = -1;
 	for(int i = 0; i < NET_MAX_CONSOLE_CLIENTS; i++)
 	{
-		if(FreeSlot == -1 && m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
-			FreeSlot = i;
-		if(m_aSlots[i].m_Connection.State() != NET_CONNSTATE_OFFLINE)
+		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_OFFLINE)
 		{
-			if(net_addr_comp(pAddr, m_aSlots[i].m_Connection.PeerAddress()) == 0)
+			if(FreeSlot == -1)
 			{
-				str_copy(aError, "only one client per IP allowed");
-				break;
+				FreeSlot = i;
 			}
 		}
+		else if(net_addr_comp(pAddr, m_aSlots[i].m_Connection.PeerAddress()) == 0)
+		{
+			DropClient("only one client per IP allowed");
+			return -1;
+		}
+	}
+
+	if(FreeSlot == -1)
+	{
+		DropClient("no free slot available");
+		return -1;
 	}
 
 	// accept client
-	if(!aError[0] && FreeSlot != -1)
+	if(m_aSlots[FreeSlot].m_Connection.Init(Socket, pAddr) != 0)
 	{
-		if(m_aSlots[FreeSlot].m_Connection.Init(Socket, pAddr) == 0)
-		{
-			if(m_pfnNewClient)
-			{
-				m_pfnNewClient(FreeSlot, m_pUser);
-			}
-			return 0;
-		}
-		else
-		{
-			str_copy(aError, "failed to initialize client connection");
-		}
+		DropClient("failed to initialize client connection");
+		return -1;
 	}
-
-	// reject client
-	if(!aError[0])
-		str_copy(aError, "no free slot available");
-
-	net_tcp_send(Socket, aError, str_length(aError));
-	net_tcp_close(Socket);
-
-	return -1;
+	if(m_pfnNewClient)
+	{
+		m_pfnNewClient(FreeSlot, m_pUser);
+	}
+	return 0;
 }
 
 void CNetConsole::Update()
 {
 	NETSOCKET Socket;
 	NETADDR Addr;
-
 	if(net_tcp_accept(m_Socket, &Socket, &Addr) > 0)
 	{
-		// check if we just should drop the packet
-		char aBuf[128];
-		if(NetBan() && NetBan()->IsBanned(&Addr, aBuf, sizeof(aBuf)))
-		{
-			// banned, reply with a message and drop
-			net_tcp_send(Socket, aBuf, str_length(aBuf));
-			net_tcp_close(Socket);
-		}
-		else
-			AcceptClient(Socket, &Addr);
+		AcceptClient(Socket, &Addr);
 	}
 
 	for(int i = 0; i < NET_MAX_CONSOLE_CLIENTS; i++)
