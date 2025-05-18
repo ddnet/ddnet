@@ -269,7 +269,7 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 				char aBuf[512];
 				str_format(aBuf, sizeof(aBuf), "%s (%s)", m_aDescription, m_aReason);
 				Client()->Notify("DDNet Vote", aBuf);
-				m_pClient->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 1.0f);
+				GameClient()->m_Sounds.Play(CSounds::CHN_GUI, SOUND_CHAT_HIGHLIGHT, 1.0f);
 			}
 		}
 	}
@@ -338,7 +338,7 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 
 void CVoting::Render()
 {
-	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.IsActive() && TakenChoice()) || !IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if((!g_Config.m_ClShowVotesAfterVoting && !GameClient()->m_Scoreboard.IsActive() && TakenChoice()) || !IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
 	const int Seconds = SecondsLeft();
 	if(Seconds < 0)
@@ -388,12 +388,12 @@ void CVoting::Render()
 	Row.VSplitMid(&LeftColumn, &RightColumn, 4.0f);
 
 	char aKey[64];
-	m_pClient->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
+	GameClient()->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
 	TextRender()->TextColor(TakenChoice() == 1 ? ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f) : TextRender()->DefaultTextColor());
 	Ui()->DoLabel(&LeftColumn, aBuf, 6.0f, TEXTALIGN_ML);
 
-	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
+	GameClient()->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
 	TextRender()->TextColor(TakenChoice() == -1 ? ColorRGBA(0.95f, 0.25f, 0.25f, 0.85f) : TextRender()->DefaultTextColor());
 	Ui()->DoLabel(&RightColumn, aBuf, 6.0f, TEXTALIGN_MR);
