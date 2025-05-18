@@ -733,7 +733,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		const float OldWidth = Flag.w;
 		Flag.w = Flag.h * 2.0f;
 		Flag.x += (OldWidth - Flag.w) / 2.0f;
-		m_pClient->m_CountryFlags.Render(g_Config.m_BrFilterCountryIndex, ColorRGBA(1.0f, 1.0f, 1.0f, Ui()->HotItem() == &g_Config.m_BrFilterCountryIndex ? 1.0f : g_Config.m_BrFilterCountry ? 0.9f : 0.5f), Flag.x, Flag.y, Flag.w, Flag.h);
+		GameClient()->m_CountryFlags.Render(g_Config.m_BrFilterCountryIndex, ColorRGBA(1.0f, 1.0f, 1.0f, Ui()->HotItem() == &g_Config.m_BrFilterCountryIndex ? 1.0f : g_Config.m_BrFilterCountry ? 0.9f : 0.5f), Flag.x, Flag.y, Flag.w, Flag.h);
 
 		if(Ui()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, 0, &Flag, BUTTONFLAG_LEFT))
 		{
@@ -1056,7 +1056,7 @@ void CMenus::RenderServerbrowserCountriesFilter(CUIRect View)
 		const float OldWidth = Item.w;
 		Item.w = Item.h * 2.0f;
 		Item.x += (OldWidth - Item.w) / 2.0f;
-		m_pClient->m_CountryFlags.Render(ServerBrowser()->CommunityCache().SelectableCountries()[ItemIndex]->FlagId(), ColorRGBA(1.0f, 1.0f, 1.0f, (Active ? 0.9f : 0.2f) + (Ui()->HotItem() == pItemId ? 0.1f : 0.0f)), Item.x, Item.y, Item.w, Item.h);
+		GameClient()->m_CountryFlags.Render(ServerBrowser()->CommunityCache().SelectableCountries()[ItemIndex]->FlagId(), ColorRGBA(1.0f, 1.0f, 1.0f, (Active ? 0.9f : 0.2f) + (Ui()->HotItem() == pItemId ? 0.1f : 0.0f)), Item.x, Item.y, Item.w, Item.h);
 	};
 
 	RenderServerbrowserDDNetFilter(View, ServerBrowser()->CountriesFilter(), ItemHeight + 2.0f * Spacing, MaxEntries, EntriesPerRow, s_ScrollRegion, s_vItemIds, false, GetItemName, RenderItem);
@@ -1093,7 +1093,7 @@ CUi::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIR
 
 	static CListBox s_ListBox;
 	s_ListBox.SetActive(Active);
-	s_ListBox.DoStart(50.0f, pMenus->m_pClient->m_CountryFlags.Num(), 8, 1, -1, &View, false);
+	s_ListBox.DoStart(50.0f, pMenus->GameClient()->m_CountryFlags.Num(), 8, 1, -1, &View, false);
 
 	if(pPopupContext->m_New)
 	{
@@ -1101,9 +1101,9 @@ CUi::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIR
 		s_ListBox.ScrollToSelected();
 	}
 
-	for(size_t i = 0; i < pMenus->m_pClient->m_CountryFlags.Num(); ++i)
+	for(size_t i = 0; i < pMenus->GameClient()->m_CountryFlags.Num(); ++i)
 	{
-		const CCountryFlags::CCountryFlag *pEntry = pMenus->m_pClient->m_CountryFlags.GetByIndex(i);
+		const CCountryFlags::CCountryFlag *pEntry = pMenus->GameClient()->m_CountryFlags.GetByIndex(i);
 
 		const CListboxItem Item = s_ListBox.DoNextItem(pEntry, pEntry->m_CountryCode == pPopupContext->m_Selection);
 		if(!Item.m_Visible)
@@ -1116,13 +1116,13 @@ CUi::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIR
 		const float OldWidth = FlagRect.w;
 		FlagRect.w = FlagRect.h * 2.0f;
 		FlagRect.x += (OldWidth - FlagRect.w) / 2.0f;
-		pMenus->m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+		pMenus->GameClient()->m_CountryFlags.Render(pEntry->m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
 
 		pMenus->Ui()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, TEXTALIGN_MC);
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
-	pPopupContext->m_Selection = NewSelected >= 0 ? pMenus->m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode : -1;
+	pPopupContext->m_Selection = NewSelected >= 0 ? pMenus->GameClient()->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode : -1;
 	if(s_ListBox.WasItemSelected() || s_ListBox.WasItemActivated())
 	{
 		g_Config.m_BrFilterCountry = 1;
@@ -1353,7 +1353,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 			TextRender()->TextEx(&Cursor, pClan, -1);
 
 		// flag
-		m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), Flag.x, Flag.y, Flag.w, Flag.h);
+		GameClient()->m_CountryFlags.Render(CurrentClient.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), Flag.x, Flag.y, Flag.w, Flag.h);
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
@@ -1361,9 +1361,9 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 	{
 		const CServerInfo::CClient &SelectedClient = pSelectedServer->m_aClients[NewSelected];
 		if(SelectedClient.m_FriendState == IFriends::FRIEND_PLAYER)
-			m_pClient->Friends()->RemoveFriend(SelectedClient.m_aName, SelectedClient.m_aClan);
+			GameClient()->Friends()->RemoveFriend(SelectedClient.m_aName, SelectedClient.m_aClan);
 		else
-			m_pClient->Friends()->AddFriend(SelectedClient.m_aName, SelectedClient.m_aClan);
+			GameClient()->Friends()->AddFriend(SelectedClient.m_aName, SelectedClient.m_aClan);
 		FriendlistOnUpdate();
 		Client()->ServerBrowserUpdate();
 	}
@@ -1385,9 +1385,9 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	m_pRemoveFriend = nullptr;
 	for(auto &vFriends : m_avFriends)
 		vFriends.clear();
-	for(int FriendIndex = 0; FriendIndex < m_pClient->Friends()->NumFriends(); ++FriendIndex)
+	for(int FriendIndex = 0; FriendIndex < GameClient()->Friends()->NumFriends(); ++FriendIndex)
 	{
-		m_avFriends[FRIEND_OFF].emplace_back(m_pClient->Friends()->GetFriend(FriendIndex));
+		m_avFriends[FRIEND_OFF].emplace_back(GameClient()->Friends()->GetFriend(FriendIndex));
 	}
 	bool HasFriend = std::any_of(m_avFriends[FRIEND_OFF].begin(), m_avFriends[FRIEND_OFF].end(), [&](const auto &Friend) {
 		return Friend.Name()[0] != '\0';
@@ -1627,7 +1627,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	}
 
 	// add friend
-	if(m_pClient->Friends()->NumFriends() < IFriends::MAX_FRIENDS)
+	if(GameClient()->Friends()->NumFriends() < IFriends::MAX_FRIENDS)
 	{
 		CUIRect Button;
 		ServerFriends.Margin(5.0f, &ServerFriends);
@@ -1652,7 +1652,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		static CButtonContainer s_AddButton;
 		if(DoButton_Menu(&s_AddButton, s_NameInput.IsEmpty() && !s_ClanInput.IsEmpty() ? Localize("Add Clan") : Localize("Add Friend"), 0, &Button))
 		{
-			m_pClient->Friends()->AddFriend(s_NameInput.GetString(), s_ClanInput.GetString());
+			GameClient()->Friends()->AddFriend(s_NameInput.GetString(), s_ClanInput.GetString());
 			s_NameInput.Clear();
 			s_ClanInput.Clear();
 			FriendlistOnUpdate();
@@ -1668,7 +1668,7 @@ void CMenus::FriendlistOnUpdate()
 
 void CMenus::PopupConfirmRemoveFriend()
 {
-	m_pClient->Friends()->RemoveFriend(m_pRemoveFriend->FriendState() == IFriends::FRIEND_PLAYER ? m_pRemoveFriend->Name() : "", m_pRemoveFriend->Clan());
+	GameClient()->Friends()->RemoveFriend(m_pRemoveFriend->FriendState() == IFriends::FRIEND_PLAYER ? m_pRemoveFriend->Name() : "", m_pRemoveFriend->Clan());
 	FriendlistOnUpdate();
 	Client()->ServerBrowserUpdate();
 	m_pRemoveFriend = nullptr;
@@ -1846,7 +1846,7 @@ bool CMenus::PrintHighlighted(const char *pName, F &&PrintFn)
 CTeeRenderInfo CMenus::GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool CustomSkinColors, int CustomSkinColorBody, int CustomSkinColorFeet) const
 {
 	CTeeRenderInfo TeeInfo;
-	TeeInfo.Apply(m_pClient->m_Skins.Find(pSkinName));
+	TeeInfo.Apply(GameClient()->m_Skins.Find(pSkinName));
 	TeeInfo.ApplyColors(CustomSkinColors, CustomSkinColorBody, CustomSkinColorFeet);
 	TeeInfo.m_Size = minimum(Size.x, Size.y);
 	return TeeInfo;

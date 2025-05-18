@@ -21,11 +21,11 @@
 bool CSpectator::CanChangeSpectatorId()
 {
 	// don't change SpectatorId when not spectating
-	if(!m_pClient->m_Snap.m_SpecInfo.m_Active)
+	if(!GameClient()->m_Snap.m_SpecInfo.m_Active)
 		return false;
 
 	// stop follow mode from changing SpectatorId
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecId == SPEC_FOLLOW)
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && GameClient()->m_DemoSpecId == SPEC_FOLLOW)
 		return false;
 
 	return true;
@@ -34,14 +34,14 @@ bool CSpectator::CanChangeSpectatorId()
 void CSpectator::SpectateNext(bool Reverse)
 {
 	int CurIndex = -1;
-	const CNetObj_PlayerInfo **paPlayerInfos = m_pClient->m_Snap.m_apInfoByDDTeamName;
+	const CNetObj_PlayerInfo **paPlayerInfos = GameClient()->m_Snap.m_apInfoByDDTeamName;
 
 	// m_SpectatorId may be uninitialized if m_Active is false
-	if(m_pClient->m_Snap.m_SpecInfo.m_Active)
+	if(GameClient()->m_Snap.m_SpecInfo.m_Active)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(paPlayerInfos[i] && paPlayerInfos[i]->m_ClientId == m_pClient->m_Snap.m_SpecInfo.m_SpectatorId)
+			if(paPlayerInfos[i] && paPlayerInfos[i]->m_ClientId == GameClient()->m_Snap.m_SpecInfo.m_SpectatorId)
 			{
 				CurIndex = i;
 				break;
@@ -87,7 +87,7 @@ void CSpectator::ConKeySpectator(IConsole::IResult *pResult, void *pUserData)
 {
 	CSpectator *pSelf = (CSpectator *)pUserData;
 
-	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(pSelf->GameClient()->m_Snap.m_SpecInfo.m_Active || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		pSelf->m_Active = pResult->GetInteger(0) != 0;
 	else
 		pSelf->m_Active = false;
@@ -173,12 +173,12 @@ bool CSpectator::OnInput(const IInput::CEvent &Event)
 
 	if(g_Config.m_ClSpectatorMouseclicks)
 	{
-		if(m_pClient->m_Snap.m_SpecInfo.m_Active && !IsActive() && !GameClient()->m_MultiViewActivated &&
-			!Ui()->IsPopupOpen() && !m_pClient->m_GameConsole.IsActive() && !m_pClient->m_Menus.IsActive())
+		if(GameClient()->m_Snap.m_SpecInfo.m_Active && !IsActive() && !GameClient()->m_MultiViewActivated &&
+			!Ui()->IsPopupOpen() && !GameClient()->m_GameConsole.IsActive() && !GameClient()->m_Menus.IsActive())
 		{
 			if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_1)
 			{
-				if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
+				if(GameClient()->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
 					Spectate(SPEC_FREEVIEW);
 				else
 					SpectateClosest();
@@ -187,11 +187,11 @@ bool CSpectator::OnInput(const IInput::CEvent &Event)
 		}
 	}
 
-	if(m_pClient->m_Camera.SpectatingPlayer() && m_pClient->m_Camera.CanUseAutoSpecCamera())
+	if(GameClient()->m_Camera.SpectatingPlayer() && GameClient()->m_Camera.CanUseAutoSpecCamera())
 	{
 		if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_2)
 		{
-			m_pClient->m_Camera.ResetAutoSpecCamera();
+			GameClient()->m_Camera.ResetAutoSpecCamera();
 			return true;
 		}
 	}
@@ -233,7 +233,7 @@ void CSpectator::OnRender()
 				if(!GameClient()->m_MultiViewActivated)
 					Spectate(m_SelectedSpectatorId);
 
-				if(GameClient()->m_MultiViewActivated && m_SelectedSpectatorId != MULTI_VIEW && m_pClient->m_Teams.Team(m_SelectedSpectatorId) != GameClient()->m_MultiViewTeam)
+				if(GameClient()->m_MultiViewActivated && m_SelectedSpectatorId != MULTI_VIEW && GameClient()->m_Teams.Team(m_SelectedSpectatorId) != GameClient()->m_MultiViewTeam)
 				{
 					GameClient()->ResetMultiView();
 					Spectate(m_SelectedSpectatorId);
@@ -245,7 +245,7 @@ void CSpectator::OnRender()
 		return;
 	}
 
-	if(!m_pClient->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(!GameClient()->m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		m_Active = false;
 		m_WasActive = false;
@@ -271,7 +271,7 @@ void CSpectator::OnRender()
 	float BoxMove = -10.0f;
 	float BoxOffset = 0.0f;
 
-	for(const auto &pInfo : m_pClient->m_Snap.m_apInfoByDDTeamName)
+	for(const auto &pInfo : GameClient()->m_Snap.m_apInfoByDDTeamName)
 	{
 		if(!pInfo || pInfo->m_Team == TEAM_SPECTATORS)
 			continue;
@@ -341,8 +341,8 @@ void CSpectator::OnRender()
 	const bool MousePressed = Input()->KeyPress(KEY_MOUSE_1) || m_TouchState.m_PrimaryPressed;
 
 	// draw selections
-	if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecId == SPEC_FREEVIEW) ||
-		(Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW))
+	if((Client()->State() == IClient::STATE_DEMOPLAYBACK && GameClient()->m_DemoSpecId == SPEC_FREEVIEW) ||
+		(Client()->State() != IClient::STATE_DEMOPLAYBACK && GameClient()->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW))
 	{
 		Graphics()->DrawRect(Width / 2.0f - (ObjWidth - 20.0f), Height / 2.0f - 280.0f, ((ObjWidth * 2.0f) / 3.0f) - 40.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 20.0f);
 	}
@@ -352,7 +352,7 @@ void CSpectator::OnRender()
 		Graphics()->DrawRect(Width / 2.0f - (ObjWidth - 20.0f) + (ObjWidth * 2.0f / 3.0f), Height / 2.0f - 280.0f, ((ObjWidth * 2.0f) / 3.0f) - 40.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 20.0f);
 	}
 
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_LocalClientId >= 0 && m_pClient->m_DemoSpecId == SPEC_FOLLOW)
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && GameClient()->m_Snap.m_LocalClientId >= 0 && GameClient()->m_DemoSpecId == SPEC_FOLLOW)
 	{
 		Graphics()->DrawRect(Width / 2.0f - (ObjWidth - 20.0f) + (ObjWidth * 2.0f * 2.0f / 3.0f), Height / 2.0f - 280.0f, ((ObjWidth * 2.0f) / 3.0f) - 40.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 20.0f);
 	}
@@ -385,7 +385,7 @@ void CSpectator::OnRender()
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, MultiViewSelected ? 1.0f : 0.5f);
 	TextRender()->Text(Width / 2.0f - (ObjWidth - 40.0f) + (ObjWidth * 2.0f / 3.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Multi-View"), -1.0f);
 
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_LocalClientId >= 0)
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && GameClient()->m_Snap.m_LocalClientId >= 0)
 	{
 		bool FollowSelected = false;
 		if(m_SelectorMouse.x >= -(ObjWidth - 20.0f) + (ObjWidth * 2.0f * 2.0f / 3.0f) && m_SelectorMouse.x <= -(ObjWidth - 20.0f) + (ObjWidth * 2.0f * 2.0f / 3.0f) + ((ObjWidth * 2.0f) / 3.0f) - 40.0f &&
@@ -409,7 +409,7 @@ void CSpectator::OnRender()
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(!m_pClient->m_Snap.m_apInfoByDDTeamName[i] || m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
+		if(!GameClient()->m_Snap.m_apInfoByDDTeamName[i] || GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_Team == TEAM_SPECTATORS)
 			continue;
 
 		++Count;
@@ -420,18 +420,18 @@ void CSpectator::OnRender()
 			y = StartY;
 		}
 
-		const CNetObj_PlayerInfo *pInfo = m_pClient->m_Snap.m_apInfoByDDTeamName[i];
-		int DDTeam = m_pClient->m_Teams.Team(pInfo->m_ClientId);
+		const CNetObj_PlayerInfo *pInfo = GameClient()->m_Snap.m_apInfoByDDTeamName[i];
+		int DDTeam = GameClient()->m_Teams.Team(pInfo->m_ClientId);
 		int NextDDTeam = 0;
 
 		for(int j = i + 1; j < MAX_CLIENTS; j++)
 		{
-			const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_apInfoByDDTeamName[j];
+			const CNetObj_PlayerInfo *pInfo2 = GameClient()->m_Snap.m_apInfoByDDTeamName[j];
 
 			if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
 				continue;
 
-			NextDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientId);
+			NextDDTeam = GameClient()->m_Teams.Team(pInfo2->m_ClientId);
 			break;
 		}
 
@@ -439,19 +439,19 @@ void CSpectator::OnRender()
 		{
 			for(int j = i - 1; j >= 0; j--)
 			{
-				const CNetObj_PlayerInfo *pInfo2 = m_pClient->m_Snap.m_apInfoByDDTeamName[j];
+				const CNetObj_PlayerInfo *pInfo2 = GameClient()->m_Snap.m_apInfoByDDTeamName[j];
 
 				if(!pInfo2 || pInfo2->m_Team == TEAM_SPECTATORS)
 					continue;
 
-				OldDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientId);
+				OldDDTeam = GameClient()->m_Teams.Team(pInfo2->m_ClientId);
 				break;
 			}
 		}
 
 		if(DDTeam != TEAM_FLOCK)
 		{
-			const ColorRGBA Color = m_pClient->GetDDTeamColor(DDTeam).WithAlpha(0.5f);
+			const ColorRGBA Color = GameClient()->GetDDTeamColor(DDTeam).WithAlpha(0.5f);
 			int Corners = 0;
 			if(OldDDTeam != DDTeam)
 				Corners |= IGraphics::CORNER_TL | IGraphics::CORNER_TR;
@@ -462,7 +462,7 @@ void CSpectator::OnRender()
 
 		OldDDTeam = DDTeam;
 
-		if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecId == m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId) || (Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId))
+		if((Client()->State() == IClient::STATE_DEMOPLAYBACK && GameClient()->m_DemoSpecId == GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId) || (Client()->State() != IClient::STATE_DEMOPLAYBACK && GameClient()->m_Snap.m_SpecInfo.m_SpectatorId == GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId))
 		{
 			Graphics()->DrawRect(Width / 2.0f + x - 10.0f + BoxOffset, Height / 2.0f + y + BoxMove, 270.0f - BoxOffset, LineHeight, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, RoundRadius);
 		}
@@ -471,7 +471,7 @@ void CSpectator::OnRender()
 		if(m_SelectorMouse.x >= x - 10.0f && m_SelectorMouse.x < x + 260.0f &&
 			m_SelectorMouse.y >= y - (LineHeight / 6.0f) && m_SelectorMouse.y < y + (LineHeight * 5.0f / 6.0f))
 		{
-			m_SelectedSpectatorId = m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId;
+			m_SelectedSpectatorId = GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId;
 			PlayerSelected = true;
 			if(MousePressed)
 			{
@@ -480,7 +480,7 @@ void CSpectator::OnRender()
 					if(GameClient()->m_MultiViewTeam == DDTeam)
 					{
 						GameClient()->m_aMultiViewId[m_SelectedSpectatorId] = !GameClient()->m_aMultiViewId[m_SelectedSpectatorId];
-						if(!GameClient()->m_aMultiViewId[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId])
+						if(!GameClient()->m_aMultiViewId[GameClient()->m_Snap.m_SpecInfo.m_SpectatorId])
 						{
 							int NewClientId = GameClient()->FindFirstMultiViewId();
 							if(NewClientId < MAX_CLIENTS && NewClientId >= 0)
@@ -506,7 +506,7 @@ void CSpectator::OnRender()
 		}
 		float TeeAlpha;
 		if(Client()->State() == IClient::STATE_DEMOPLAYBACK &&
-			!m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Active)
+			!GameClient()->m_Snap.m_aCharacters[GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Active)
 		{
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.25f);
 			TeeAlpha = 0.5f;
@@ -522,14 +522,14 @@ void CSpectator::OnRender()
 		if(g_Config.m_ClShowIds)
 		{
 			char aClientId[16];
-			GameClient()->FormatClientId(m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
+			GameClient()->FormatClientId(GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId, aClientId, EClientIdFormat::INDENT_AUTO);
 			TextRender()->TextEx(&NameCursor, aClientId);
 		}
-		TextRender()->TextEx(&NameCursor, m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_aName);
+		TextRender()->TextEx(&NameCursor, GameClient()->m_aClients[GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_aName);
 
 		if(GameClient()->m_MultiViewActivated)
 		{
-			if(GameClient()->m_aMultiViewId[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId])
+			if(GameClient()->m_aMultiViewId[GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId])
 			{
 				TextRender()->TextColor(0.1f, 1.0f, 0.1f, PlayerSelected ? 1.0f : 0.5f);
 				TextRender()->Text(Width / 2.0f + x + 50.0f + 180.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize - 3, "⬤", 220.0f);
@@ -542,11 +542,11 @@ void CSpectator::OnRender()
 		}
 
 		// flag
-		if(m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) &&
-			m_pClient->m_Snap.m_pGameDataObj && (m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierRed == m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId || m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId))
+		if(GameClient()->m_Snap.m_pGameInfoObj && (GameClient()->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) &&
+			GameClient()->m_Snap.m_pGameDataObj && (GameClient()->m_Snap.m_pGameDataObj->m_FlagCarrierRed == GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId || GameClient()->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId))
 		{
 			Graphics()->BlendNormal();
-			if(m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId)
+			if(GameClient()->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId)
 				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
 			else
 				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
@@ -560,7 +560,7 @@ void CSpectator::OnRender()
 			Graphics()->QuadsEnd();
 		}
 
-		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_RenderInfo;
+		CTeeRenderInfo TeeInfo = GameClient()->m_aClients[GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
 
 		const CAnimState *pIdleState = CAnimState::GetIdle();
@@ -570,7 +570,7 @@ void CSpectator::OnRender()
 
 		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos, TeeAlpha);
 
-		if(m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Friend)
+		if(GameClient()->m_aClients[GameClient()->m_Snap.m_apInfoByDDTeamName[i]->m_ClientId].m_Friend)
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
 			TextRender()->TextColor(rgb.WithAlpha(1.f));
@@ -596,14 +596,14 @@ void CSpectator::Spectate(int SpectatorId)
 {
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		m_pClient->m_DemoSpecId = std::clamp(SpectatorId, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
+		GameClient()->m_DemoSpecId = std::clamp(SpectatorId, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
 		// The tick must be rendered for the spectator mode to be updated, so we do it manually when demo playback is paused
 		if(DemoPlayer()->BaseInfo()->m_Paused)
 			GameClient()->m_Menus.DemoSeekTick(IDemoPlayer::TICK_CURRENT);
 		return;
 	}
 
-	if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SpectatorId)
+	if(GameClient()->m_Snap.m_SpecInfo.m_SpectatorId == SpectatorId)
 		return;
 
 	if(Client()->IsSixup())
@@ -632,12 +632,12 @@ void CSpectator::SpectateClosest()
 	if(!CanChangeSpectatorId())
 		return;
 
-	const CGameClient::CSnapState &Snap = m_pClient->m_Snap;
+	const CGameClient::CSnapState &Snap = GameClient()->m_Snap;
 	int SpectatorId = Snap.m_SpecInfo.m_SpectatorId;
 
 	int NewSpectatorId = -1;
 
-	vec2 CurPosition = m_pClient->m_Camera.m_Center;
+	vec2 CurPosition = GameClient()->m_Camera.m_Center;
 	if(SpectatorId != SPEC_FREEVIEW)
 	{
 		const CNetObj_Character &CurCharacter = Snap.m_aCharacters[SpectatorId].m_Cur;
