@@ -61,7 +61,7 @@ struct CInputState
 	int *m_apVariables[NUM_DUMMIES];
 };
 
-static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
+void CControls::ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
 {
 	CInputState *pState = (CInputState *)pUserData;
 
@@ -71,7 +71,7 @@ static void ConKeyInputState(IConsole::IResult *pResult, void *pUserData)
 	*pState->m_apVariables[g_Config.m_ClDummy] = pResult->GetInteger(0);
 }
 
-static void ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData)
+void CControls::ConKeyInputCounter(IConsole::IResult *pResult, void *pUserData)
 {
 	CInputState *pState = (CInputState *)pUserData;
 
@@ -91,7 +91,7 @@ struct CInputSet
 	int m_Value;
 };
 
-static void ConKeyInputSet(IConsole::IResult *pResult, void *pUserData)
+void CControls::ConKeyInputSet(IConsole::IResult *pResult, void *pUserData)
 {
 	CInputSet *pSet = (CInputSet *)pUserData;
 	if(pResult->GetInteger(0))
@@ -100,7 +100,7 @@ static void ConKeyInputSet(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
-static void ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserData)
+void CControls::ConKeyInputNextPrevWeapon(IConsole::IResult *pResult, void *pUserData)
 {
 	CInputSet *pSet = (CInputSet *)pUserData;
 	ConKeyInputCounter(pResult, pSet);

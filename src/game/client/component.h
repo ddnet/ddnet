@@ -26,9 +26,20 @@ protected:
 	// perhaps propagate pointers for these as well
 
 	/**
+	 * Get a pointer to the game client.
+	 */
+	class CGameClient *GameClient() const { return m_pClient; }
+	/**
+	 * Get the client interface.
+	 */
+	class IClient *Client() const;
+	/**
 	 * Get the kernel interface.
 	 */
 	class IKernel *Kernel() const;
+	/**
+	 * Get the engine interface.
+	 */
 	class IEngine *Engine() const;
 	/**
 	 * Get the graphics interface.
@@ -84,6 +95,9 @@ protected:
 	 * @see RECORDER_REPLAYS
 	 */
 	class IDemoRecorder *DemoRecorder(int Recorder) const;
+	/**
+	 * Get the favorites interface.
+	 */
 	class IFavorites *Favorites() const;
 	/**
 	 * Get the server browser interface.
@@ -129,15 +143,6 @@ public:
 	 * Gets the size of the non-abstract component.
 	 */
 	virtual int Sizeof() const = 0;
-	/**
-	 * Get a pointer to the game client.
-	 */
-	class CGameClient *GameClient() const { return m_pClient; }
-	/**
-	 * Get the client interface.
-	 */
-	class IClient *Client() const;
-
 	/**
 	 * This method is called when the client changes state, e.g from offline to online.
 	 * @see IClient::STATE_CONNECTING
