@@ -36,7 +36,7 @@ void CBroadcast::OnRender()
 
 void CBroadcast::RenderServerBroadcast()
 {
-	if(m_pClient->m_Scoreboard.IsActive() || m_pClient->m_Motd.IsActive() || !g_Config.m_ClShowBroadcasts)
+	if(GameClient()->m_Scoreboard.IsActive() || GameClient()->m_Motd.IsActive() || !g_Config.m_ClShowBroadcasts)
 		return;
 	const float SecondsRemaining = (m_BroadcastTick - Client()->GameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
 	if(SecondsRemaining <= 0.0f)
@@ -93,7 +93,7 @@ void CBroadcast::DoBroadcast(const char *pText)
 		{
 			if(aLine[0] != '\0')
 			{
-				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aLine, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+				GameClient()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aLine, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 			}
 		}
 	}
