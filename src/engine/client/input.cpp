@@ -783,56 +783,53 @@ int CInput::Update()
 			HandleTouchMotionEvent(Event.tfinger);
 			break;
 
-		case SDL_WINDOWEVENT:
-			// Ignore keys following a focus gain as they may be part of global
-			// shortcuts
-			switch(Event.window.event)
-			{
-			case SDL_EVENT_WINDOW_MOVED:
-				Graphics()->Move(Event.window.data1, Event.window.data2);
-				break;
-			// listen to size changes, this includes our manual changes and the ones by the window manager
-			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
-				Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);
-				break;
-			case SDL_EVENT_WINDOW_FOCUS_GAINED:
-				if(m_InputGrabbed)
-				{
-					MouseModeRelative();
-					// Clear pending relative mouse motion
-					SDL_GetRelativeMouseState(nullptr, nullptr);
-				}
-				m_MouseFocus = true;
-				IgnoreKeys = true;
-				break;
-			case SDL_EVENT_WINDOW_FOCUS_LOST:
-				std::fill(std::begin(m_aCurrentKeyStates), std::end(m_aCurrentKeyStates), false);
-				m_MouseFocus = false;
-				IgnoreKeys = true;
-				if(m_InputGrabbed)
-				{
-					MouseModeAbsolute();
-					// Remember that we had relative mouse
-					m_InputGrabbed = true;
-				}
-				break;
-			case SDL_EVENT_WINDOW_MINIMIZED:
-#if defined(CONF_PLATFORM_ANDROID) // Save the config when minimized on Android.
-				m_pConfigManager->Save();
-#endif
-				Graphics()->WindowDestroyNtf(Event.window.windowID);
-				break;
+		case SDL_EVENT_WINDOW_MOVED:
+			Graphics()->Move(Event.window.data1, Event.window.data2);
+			break;
 
-			case SDL_EVENT_WINDOW_MAXIMIZED:
-#if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL
-				MouseModeAbsolute();
+		// listen to size changes, this includes our manual changes and the ones by the window manager
+		case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+			Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);
+			break;
+
+		case SDL_EVENT_WINDOW_FOCUS_GAINED:
+			if(m_InputGrabbed)
+			{
 				MouseModeRelative();
-#endif
-				[[fallthrough]];
-			case SDL_EVENT_WINDOW_RESTORED:
-				Graphics()->WindowCreateNtf(Event.window.windowID);
-				break;
+				// Clear pending relative mouse motion
+				SDL_GetRelativeMouseState(nullptr, nullptr);
 			}
+			m_MouseFocus = true;
+			IgnoreKeys = true;
+			break;
+
+		case SDL_EVENT_WINDOW_FOCUS_LOST:
+			std::fill(std::begin(m_aCurrentKeyStates), std::end(m_aCurrentKeyStates), false);
+			m_MouseFocus = false;
+			IgnoreKeys = true;
+			if(m_InputGrabbed)
+			{
+				MouseModeAbsolute();
+				// Remember that we had relative mouse
+				m_InputGrabbed = true;
+			}
+			break;
+
+		case SDL_EVENT_WINDOW_MINIMIZED:
+#if defined(CONF_PLATFORM_ANDROID) // Save the config when minimized on Android.
+			m_pConfigManager->Save();
+#endif
+			Graphics()->WindowDestroyNtf(Event.window.windowID);
+			break;
+
+		case SDL_EVENT_WINDOW_MAXIMIZED:
+#if defined(CONF_PLATFORM_MACOS) // TODOSDL: remove this when fixed in SDL
+			MouseModeAbsolute();
+			MouseModeRelative();
+#endif
+			[[fallthrough]];
+		case SDL_EVENT_WINDOW_RESTORED:
+			Graphics()->WindowCreateNtf(Event.window.windowID);
 			break;
 
 		// other messages
@@ -840,8 +837,8 @@ int CInput::Update()
 			return 1;
 
 		case SDL_EVENT_DROP_FILE:
-			str_copy(m_aDropFile, Event.drop.file);
-			SDL_free(Event.drop.file);
+			if(Event.drop.source)
+				str_copy(m_aDropFile, Event.drop.source);
 			break;
 		}
 	}
