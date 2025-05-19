@@ -4952,7 +4952,7 @@ int main(int argc, const char **argv)
 #endif
 
 	// init SDL
-	if(SDL_Init(0) < 0)
+	if(!SDL_Init(0))
 	{
 		char aError[256];
 		str_format(aError, sizeof(aError), "Unable to initialize SDL base: %s", SDL_GetError());
