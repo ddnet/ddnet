@@ -535,8 +535,8 @@ void CInput::HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event)
 void CInput::HandleTouchDownEvent(const SDL_TouchFingerEvent &Event)
 {
 	CTouchFingerState TouchFingerState;
-	TouchFingerState.m_Finger.m_DeviceId = Event.touchId;
-	TouchFingerState.m_Finger.m_FingerId = Event.fingerId;
+	TouchFingerState.m_Finger.m_DeviceId = Event.touchID;
+	TouchFingerState.m_Finger.m_FingerId = Event.fingerID;
 	TouchFingerState.m_Position = vec2(Event.x, Event.y);
 	TouchFingerState.m_Delta = vec2(Event.dx, Event.dy);
 	TouchFingerState.m_PressTime = time_get_nanoseconds();
@@ -546,7 +546,7 @@ void CInput::HandleTouchDownEvent(const SDL_TouchFingerEvent &Event)
 void CInput::HandleTouchUpEvent(const SDL_TouchFingerEvent &Event)
 {
 	auto FoundState = std::find_if(m_vTouchFingerStates.begin(), m_vTouchFingerStates.end(), [Event](const CTouchFingerState &State) {
-		return State.m_Finger.m_DeviceId == Event.touchId && State.m_Finger.m_FingerId == Event.fingerId;
+		return State.m_Finger.m_DeviceId == Event.touchID && State.m_Finger.m_FingerId == Event.fingerID;
 	});
 	if(FoundState != m_vTouchFingerStates.end())
 	{
@@ -557,7 +557,7 @@ void CInput::HandleTouchUpEvent(const SDL_TouchFingerEvent &Event)
 void CInput::HandleTouchMotionEvent(const SDL_TouchFingerEvent &Event)
 {
 	auto FoundState = std::find_if(m_vTouchFingerStates.begin(), m_vTouchFingerStates.end(), [Event](const CTouchFingerState &State) {
-		return State.m_Finger.m_DeviceId == Event.touchId && State.m_Finger.m_FingerId == Event.fingerId;
+		return State.m_Finger.m_DeviceId == Event.touchID && State.m_Finger.m_FingerId == Event.fingerID;
 	});
 	if(FoundState != m_vTouchFingerStates.end())
 	{
