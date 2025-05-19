@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <SDL3/SDL.h>
 
+#include <SDL_video.h>
 #include <base/system.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
@@ -87,14 +88,16 @@ CInput::CInput()
 
 void CInput::Init()
 {
-	StopTextInput();
-
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 
-	MouseModeRelative();
+	// SDLTODO: you can do better
+	m_pWindow = SDL_GetWindows(nullptr)[0];
+	dbg_assert(m_pWindow, "SDL Window not found");
 
+	StopTextInput();
+	MouseModeRelative();
 	InitJoysticks();
 }
 
