@@ -70,7 +70,7 @@ class CSound : public IEngineSound
 	};
 
 	bool m_SoundEnabled = false;
-	SDL_AudioDeviceID m_Device = 0;
+	SDL_AudioStream *m_pDevice = nullptr;
 	CLock m_SoundLock;
 
 	CSample m_aSamples[NUM_SAMPLES] GUARDED_BY(m_SoundLock) = {{0}};
