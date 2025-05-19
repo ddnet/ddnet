@@ -271,26 +271,21 @@ bool CInput::MouseRelative(float *pX, float *pY)
 {
 	if(!m_MouseFocus || !m_InputGrabbed)
 		return false;
-
-	ivec2 Relative;
-	SDL_GetRelativeMouseState(&Relative.x, &Relative.y);
-
-	*pX = Relative.x;
-	*pY = Relative.y;
+	SDL_GetRelativeMouseState(pX, pY);
 	return *pX != 0.0f || *pY != 0.0f;
 }
 
 void CInput::MouseModeAbsolute()
 {
 	m_InputGrabbed = false;
-	SDL_SetRelativeMouseMode(false);
+	SDL_SetWindowRelativeMouseMode(m_pWindow, false);
 	Graphics()->SetWindowGrab(false);
 }
 
 void CInput::MouseModeRelative()
 {
 	m_InputGrabbed = true;
-	SDL_SetRelativeMouseMode(true);
+	SDL_SetWindowRelativeMouseMode(m_pWindow, true);
 	Graphics()->SetWindowGrab(true);
 	// Clear pending relative mouse motion
 	SDL_GetRelativeMouseState(nullptr, nullptr);
@@ -298,9 +293,9 @@ void CInput::MouseModeRelative()
 
 vec2 CInput::NativeMousePos() const
 {
-	ivec2 Position;
+	vec2 Position;
 	SDL_GetMouseState(&Position.x, &Position.y);
-	return vec2(Position.x, Position.y);
+	return Position;
 }
 
 bool CInput::NativeMousePressed(int Index) const
