@@ -4,9 +4,9 @@
 #include <GL/glew.h>
 #endif
 
-#include <SDL.h>
-#include <SDL_messagebox.h>
-#include <SDL_vulkan.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_messagebox.h>
+#include <SDL3/SDL_vulkan.h>
 
 #include <base/log.h>
 #include <base/math.h>

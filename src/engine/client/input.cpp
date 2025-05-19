@@ -1,6 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #include <base/system.h>
 #include <engine/console.h>
@@ -27,7 +27,7 @@
 #endif
 
 // for platform specific features that aren't available or are broken in SDL
-#include <SDL_syswm.h>
+#include <SDL3/SDL_syswm.h>
 #ifdef KeyPress
 #undef KeyPress // Undo pollution from X11/Xlib.h included by SDL_syswm.h on Linux
 #endif

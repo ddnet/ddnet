@@ -1,7 +1,7 @@
 #ifndef ENGINE_CLIENT_BACKEND_SDL_H
 #define ENGINE_CLIENT_BACKEND_SDL_H
 
-#include <SDL_video.h>
+#include <SDL3/SDL_video.h>
 
 #include <base/detect.h>
 

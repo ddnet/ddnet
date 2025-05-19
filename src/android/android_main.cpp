@@ -11,7 +11,7 @@
 
 #include <jni.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 static bool UnpackAsset(const char *pFilename)
 {
