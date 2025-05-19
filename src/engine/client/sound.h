@@ -7,7 +7,7 @@
 
 #include <engine/sound.h>
 
-#include <SDL_audio.h>
+#include <SDL3/SDL_audio.h>
 
 #include <atomic>
 

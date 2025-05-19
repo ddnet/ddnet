@@ -16,8 +16,8 @@
 #include <engine/shared/localization.h>
 #include <engine/storage.h>
 
-#include <SDL_video.h>
-#include <SDL_vulkan.h>
+#include <SDL3/SDL_video.h>
+#include <SDL3/SDL_vulkan.h>
 #include <vulkan/vk_platform.h>
 #include <vulkan/vulkan_core.h>
 

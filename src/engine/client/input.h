@@ -7,8 +7,8 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 
-#include <SDL_events.h>
-#include <SDL_joystick.h>
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_joystick.h>
 
 #include <string>
 #include <vector>

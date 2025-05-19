@@ -8,7 +8,7 @@
 
 #include <engine/shared/linereader.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <jni.h>
 
 #include <algorithm>

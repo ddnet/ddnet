@@ -16,7 +16,7 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 // support older SDL version (pre 2.0.6)
 #ifndef SDL_JOYSTICK_AXIS_MIN
@@ -33,7 +33,7 @@
 #endif
 
 // for platform specific features that aren't available or are broken in SDL
-#include <SDL_syswm.h>
+#include <SDL3/SDL_syswm.h>
 #ifdef KeyPress
 #undef KeyPress // Undo pollution from X11/Xlib.h included by SDL_syswm.h on Linux
 #endif

@@ -13,7 +13,7 @@
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>
