@@ -15,6 +15,7 @@
 #include <engine/storage.h>
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_audio.h>
 
 #if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>
@@ -177,22 +178,27 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 #endif
 }
 
-static void SdlCallback(void *pUser, Uint8 *pStream, int Len)
+static void SdlCallback(void *pUser, SDL_AudioStream *pStream, int AdditionalAmount, int TotalAmount)
 {
 	CSound *pSound = static_cast<CSound *>(pUser);
 
+	if(AdditionalAmount > 0)
+	{
+		Uint8 *pData = SDL_stack_alloc(Uint8, AdditionalAmount);
+		if(pData)
+		{
 #if defined(CONF_VIDEORECORDER)
-	if(!(IVideo::Current() && g_Config.m_ClVideoSndEnable))
-	{
-		pSound->Mix((short *)pStream, Len / sizeof(short) / 2);
-	}
-	else
-	{
-		mem_zero(pStream, Len);
-	}
+			if(!(IVideo::Current() && g_Config.m_ClVideoSndEnable))
+			{
+				pSound->Mix((short *)pData, AdditionalAmount / sizeof(short) / 2);
+			}
 #else
-	pSound->Mix((short *)pStream, Len / sizeof(short) / 2);
+			pSound->Mix((short *)pData, AdditionalAmount / sizeof(short) / 2);
 #endif
+			SDL_PutAudioStreamData(pStream, pData, AdditionalAmount);
+			SDL_stack_free(pData);
+		}
+	}
 }
 
 int CSound::Init()
@@ -217,21 +223,25 @@ int CSound::Init()
 	if(!g_Config.m_SndEnable)
 		return 0;
 
-	if(SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
+	if(!SDL_InitSubSystem(SDL_INIT_AUDIO))
 	{
 		log_error("sound", "Unable to init SDL audio: %s", SDL_GetError());
 		return -1;
 	}
 
 	m_AudioSpec.freq = g_Config.m_SndRate;
-	m_AudioSpec.format = SDL_AUDIO_S16LE;
+	m_AudioSpec.format = SDL_AUDIO_S16;
 	m_AudioSpec.channels = 2;
-	m_AudioSpec.samples = g_Config.m_SndBufferSize;
-	m_AudioSpec.callback = SdlCallback;
-	m_AudioSpec.userdata = this;
 
 	m_MixingRate = m_AudioSpec.freq;
-	m_MaxFrames = m_AudioSpec.samples * 2;
+
+	[[maybe_unused]] SDL_AudioSpec FormatDevice;
+	int DeviceSampleFrames;
+	if(!SDL_GetAudioDeviceFormat(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &FormatDevice, &DeviceSampleFrames))
+	{
+		DeviceSampleFrames = 1024 * 2;
+	}
+	m_MaxFrames = DeviceSampleFrames;
 #if defined(CONF_VIDEORECORDER)
 	m_MaxFrames = std::max(m_MaxFrames, 1024u * 2u); // make the buffer bigger just in case
 #endif
@@ -241,7 +251,7 @@ int CSound::Init()
 	UpdateVolume();
 
 	SDL_AddEventWatch(HandleAudioDeviceEvent, this);
-	if(OpenDevice(true))
+	if(OpenDevice())
 	{
 		log_info("sound", "Sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
 	}
@@ -252,65 +262,56 @@ int CSound::Init()
 	return 0;
 }
 
-int SDLCALL CSound::HandleAudioDeviceEvent(void *pUser, SDL_Event *pEvent)
+bool SDLCALL CSound::HandleAudioDeviceEvent(void *pUser, SDL_Event *pEvent)
 {
-	if((pEvent->type == SDL_EVENT_AUDIO_DEVICE_ADDED || pEvent->type == SDL_EVENT_AUDIO_DEVICE_REMOVED) && !pEvent->adevice.iscapture)
+	if((pEvent->type == SDL_EVENT_AUDIO_DEVICE_ADDED || pEvent->type == SDL_EVENT_AUDIO_DEVICE_REMOVED) && !pEvent->adevice.recording)
 	{
 		static_cast<CSound *>(pUser)->m_DeviceChanged.store(true, std::memory_order_relaxed);
 	}
-	return 0;
+	return true;
 }
 
-bool CSound::OpenDevice(bool AllowFrequencyChange)
+bool CSound::OpenDevice()
 {
-	dbg_assert(m_Device == 0, "Audio device already open");
+	dbg_assert(m_pDevice == nullptr, "Audio device already open");
 
-	SDL_AudioSpec FormatOut;
-	m_Device = SDL_OpenAudioDevice(nullptr, 0, &m_AudioSpec, &FormatOut, AllowFrequencyChange ? SDL_AUDIO_ALLOW_FREQUENCY_CHANGE : 0);
-	if(m_Device == 0)
+	// The stream is opened paused, so the callback cannot run before the buffers exist
+	m_pDevice = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &m_AudioSpec, SdlCallback, this);
+	if(m_pDevice == nullptr)
 		return false;
 
-	if(AllowFrequencyChange)
-	{
-		// Samples are converted to this rate when they are loaded, so later devices are asked for it
-		m_MixingRate = FormatOut.freq;
-		m_AudioSpec.freq = m_MixingRate;
-	}
-	SDL_PauseAudioDevice(m_Device, m_DevicePaused ? 1 : 0);
+	if(!m_DevicePaused)
+		SDL_ResumeAudioStreamDevice(m_pDevice);
 	return true;
 }
 
 void CSound::CloseDevice()
 {
-	if(m_Device == 0)
+	if(m_pDevice == nullptr)
 		return;
 
-	SDL_CloseAudioDevice(m_Device);
-	m_Device = 0;
+	SDL_DestroyAudioStream(m_pDevice);
+	m_pDevice = nullptr;
 }
 
 void CSound::UpdateDevice()
 {
-	if(!m_SoundEnabled)
+	// SDL keeps the stream running and moves it to the new device on its own when the
+	// default device changes, so it only has to be opened once one becomes available
+	if(!m_SoundEnabled || m_pDevice != nullptr)
 		return;
-
-	if(m_Device != 0)
-	{
-		if(SDL_GetAudioDeviceStatus(m_Device) != SDL_AUDIO_STOPPED)
-			return;
-		log_info("sound", "Audio device was disconnected");
-		CloseDevice();
-	}
 
 	// Opening the device when the system has none blocks for up to eight seconds
 	// in SDL's WASAPI backend, which would stall the main loop
-	if(SDL_GetNumAudioDevices(0) <= 0)
+	int NumDevices = 0;
+	SDL_free(SDL_GetAudioPlaybackDevices(&NumDevices));
+	if(NumDevices <= 0)
 		return;
 
 	if(!m_DeviceChanged.exchange(false, std::memory_order_relaxed))
 		return;
 
-	if(OpenDevice(false))
+	if(OpenDevice())
 	{
 		log_info("sound", "Audio device connected, using audio driver '%s'", SDL_GetCurrentAudioDriver());
 	}
@@ -322,7 +323,7 @@ bool CSound::HasAudioOutput() const
 	if(IVideo::Current() && g_Config.m_ClVideoSndEnable)
 		return true;
 #endif
-	return m_Device != 0;
+	return m_pDevice != nullptr;
 }
 
 int CSound::Update()
@@ -1149,18 +1150,18 @@ bool CSound::IsPlaying(int SampleId)
 void CSound::PauseAudioDevice()
 {
 	m_DevicePaused = true;
-	if(m_Device != 0)
+	if(m_pDevice != nullptr)
 	{
-		SDL_PauseAudioDevice(m_Device, 1);
+		SDL_PauseAudioStreamDevice(m_pDevice);
 	}
 }
 
 void CSound::UnpauseAudioDevice()
 {
 	m_DevicePaused = false;
-	if(m_Device != 0)
+	if(m_pDevice != nullptr)
 	{
-		SDL_PauseAudioDevice(m_Device, 0);
+		SDL_ResumeAudioStreamDevice(m_pDevice);
 	}
 }
 

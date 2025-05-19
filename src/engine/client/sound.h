@@ -71,7 +71,7 @@ class CSound : public IEngineSound
 
 	bool m_SoundEnabled = false;
 	SDL_AudioSpec m_AudioSpec = {};
-	SDL_AudioDeviceID m_Device = 0;
+	SDL_AudioStream *m_pDevice = nullptr;
 	bool m_DevicePaused = false;
 	std::atomic<bool> m_DeviceChanged = false;
 	CLock m_SoundLock;
@@ -100,8 +100,8 @@ class CSound : public IEngineSound
 	CSample *AllocSample() REQUIRES(!m_SoundLock);
 	void RateConvert(CSample &Sample) const;
 
-	static int SDLCALL HandleAudioDeviceEvent(void *pUser, SDL_Event *pEvent);
-	bool OpenDevice(bool AllowFrequencyChange);
+	static bool SDLCALL HandleAudioDeviceEvent(void *pUser, SDL_Event *pEvent);
+	bool OpenDevice();
 	void CloseDevice();
 	void UpdateDevice() REQUIRES(!m_SoundLock);
 	bool HasAudioOutput() const;
