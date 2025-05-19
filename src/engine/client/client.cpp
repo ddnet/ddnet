@@ -4922,6 +4922,9 @@ int main(int argc, const char **argv)
 	pClient->ShellRegister();
 #endif
 
+	// Set meta data
+	SDL_SetAppMetadata(GAME_NAME, GAME_RELEASE_VERSION, nullptr);
+
 	// Do not automatically translate touch events to mouse events and vice versa.
 	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
 	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
