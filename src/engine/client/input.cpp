@@ -105,30 +105,29 @@ void CInput::Shutdown()
 
 void CInput::InitJoysticks()
 {
-	if(!SDL_WasInit(SDL_INIT_JOYSTICK))
+	if(!SDL_WasInit(SDL_INIT_JOYSTICK) || !SDL_InitSubSystem(SDL_INIT_JOYSTICK))
 	{
-		if(SDL_InitSubSystem(SDL_INIT_JOYSTICK) < 0)
-		{
-			dbg_msg("joystick", "Unable to init SDL joystick system: %s", SDL_GetError());
-			return;
-		}
+		dbg_msg("joystick", "Unable to init SDL joystick system: %s", SDL_GetError());
+		return;
 	}
 
-	const int NumJoysticks = SDL_NumJoysticks();
+	int NumJoysticks;
+	SDL_JoystickID *JoystickIds = SDL_GetJoysticks(&NumJoysticks);
+
 	dbg_msg("joystick", "%d joystick(s) found", NumJoysticks);
 	for(int i = 0; i < NumJoysticks; i++)
-		OpenJoystick(i);
+		OpenJoystick(JoystickIds[i]);
 	UpdateActiveJoystick();
 
 	Console()->Chain("inp_controller_guid", ConchainJoystickGuidChanged, this);
 }
 
-bool CInput::OpenJoystick(int JoystickIndex)
+bool CInput::OpenJoystick(int JoystickId)
 {
-	SDL_Joystick *pJoystick = SDL_OpenJoystick(JoystickIndex);
+	SDL_Joystick *pJoystick = SDL_OpenJoystick(JoystickId);
 	if(!pJoystick)
 	{
-		dbg_msg("joystick", "Could not open joystick %d: '%s'", JoystickIndex, SDL_GetError());
+		dbg_msg("joystick", "Could not open joystick %d: '%s'", JoystickId, SDL_GetError());
 		return false;
 	}
 	if(std::find_if(m_vJoysticks.begin(), m_vJoysticks.end(), [pJoystick](const CJoystick &Joystick) -> bool { return Joystick.m_pDelegate == pJoystick; }) != m_vJoysticks.end())
@@ -138,7 +137,7 @@ bool CInput::OpenJoystick(int JoystickIndex)
 	}
 	m_vJoysticks.emplace_back(this, m_vJoysticks.size(), pJoystick);
 	const CJoystick &Joystick = m_vJoysticks[m_vJoysticks.size() - 1];
-	dbg_msg("joystick", "Opened joystick %d '%s' (%d axes, %d buttons, %d balls, %d hats)", JoystickIndex, Joystick.GetName(),
+	dbg_msg("joystick", "Opened joystick %d '%s' (%d axes, %d buttons, %d balls, %d hats)", JoystickId, Joystick.GetName(),
 		Joystick.GetNumAxes(), Joystick.GetNumButtons(), Joystick.GetNumBalls(), Joystick.GetNumHats());
 	return true;
 }
@@ -185,7 +184,7 @@ CInput::CJoystick::CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate)
 	m_NumBalls = SDL_GetNumJoystickBalls(pDelegate);
 	m_NumHats = SDL_GetNumJoystickHats(pDelegate);
 	str_copy(m_aName, SDL_GetJoystickName(pDelegate));
-	SDL_JoystickGetGUIDString(SDL_GetJoystickGUID(pDelegate), m_aGUID, sizeof(m_aGUID));
+	SDL_GUIDToString(SDL_GetJoystickGUID(pDelegate), m_aGUID, sizeof(m_aGUID));
 	m_InstanceId = SDL_GetJoystickID(pDelegate);
 }
 
