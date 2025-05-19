@@ -1667,12 +1667,12 @@ Go back the specified duration
 == ﺪﯿﻧﺍﺩﺮﮔﺮﺑ ﺐﻘﻋ ﻪﺑ ﺍﺭ ﻩﺪﺷ ﺺﺨﺸﻣ ﻥﺎﻣﺯ ﺕﺪﻣ
 
 [Demo player duration]
-%d min.
-== ﻪﻘﯿﻗﺩ %d
+%s min.
+== ﻪﻘﯿﻗﺩ %s
 
 [Demo player duration]
-%d sec.
-== ﻪﯿﻧﺎﺛ %d
+%s sec.
+== ﻪﯿﻧﺎﺛ %s
 
 Change the skip duration
 == ﻩﺪﺷ ﭗﯿﻜﺳﺍ ﻥﺎﻣﺯ ﺕﺪﻣ ﺮﯿﯿﻐﺗ

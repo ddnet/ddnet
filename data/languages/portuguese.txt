@@ -1225,12 +1225,12 @@ Go back the specified duration
 == Retroceder a duração especificada
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d seg.
+%s sec.
+== %s seg.
 
 Change the skip duration
 == Mudar a duração de salto

@@ -1640,12 +1640,12 @@ Go back the specified duration
 == 快退指定时长
 
 [Demo player duration]
-%d min.
-== %d 分
+%s min.
+== %s 分
 
 [Demo player duration]
-%d sec.
-== %d 秒
+%s sec.
+== %s 秒
 
 Change the skip duration
 == 变更指定时长
