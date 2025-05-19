@@ -224,7 +224,7 @@ int CSound::Init()
 	}
 
 	m_AudioSpec.freq = g_Config.m_SndRate;
-	m_AudioSpec.format = AUDIO_S16;
+	m_AudioSpec.format = SDL_AUDIO_S16LE;
 	m_AudioSpec.channels = 2;
 	m_AudioSpec.samples = g_Config.m_SndBufferSize;
 	m_AudioSpec.callback = SdlCallback;
@@ -254,7 +254,7 @@ int CSound::Init()
 
 int SDLCALL CSound::HandleAudioDeviceEvent(void *pUser, SDL_Event *pEvent)
 {
-	if((pEvent->type == SDL_AUDIODEVICEADDED || pEvent->type == SDL_AUDIODEVICEREMOVED) && !pEvent->adevice.iscapture)
+	if((pEvent->type == SDL_EVENT_AUDIO_DEVICE_ADDED || pEvent->type == SDL_EVENT_AUDIO_DEVICE_REMOVED) && !pEvent->adevice.iscapture)
 	{
 		static_cast<CSound *>(pUser)->m_DeviceChanged.store(true, std::memory_order_relaxed);
 	}
@@ -386,7 +386,7 @@ void CSound::Shutdown()
 	StopAll();
 
 	// Stop sound callback before freeing sample data
-	SDL_DelEventWatch(HandleAudioDeviceEvent, this);
+	SDL_RemoveEventWatch(HandleAudioDeviceEvent, this);
 	CloseDevice();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 
