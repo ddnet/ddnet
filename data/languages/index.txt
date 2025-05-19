@@ -146,14 +146,14 @@ russian
 == ru
 
 serbian
-== Srpski
-== 688
-== sr-Latn
-
-serbian_cyrillic
-== Српски
+== Cрпски
 == 688
 == sr-Cyrl
+
+serbian_latin
+== Srpski
+== 688
+== sr-Latin
 
 simplified_chinese
 == 简体中文
