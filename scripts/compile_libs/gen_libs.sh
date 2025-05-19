@@ -120,7 +120,7 @@ build_cmake_lib freetype https://gitlab.freedesktop.org/freetype/freetype "branc
 
 # SDL
 log_info_header "Building SDL..."
-build_cmake_lib sdl https://github.com/libsdl-org/SDL "branch" "release-2.32.10"
+build_cmake_lib sdl https://github.com/libsdl-org/SDL "branch" "release-3.2.x"
 
 # ogg, opus, opusfile
 log_info_header "Building ogg..."
@@ -208,12 +208,12 @@ function _copy_sdl() {
 	local target_include_folder="ddnet-libs/sdl/include/$TARGET_PLATFORM"
 	mkdir -p "$target_libs_folder"
 	mkdir -p "$target_include_folder"
-	cp compile_libs/sdl/"$1"/libSDL2.a "$target_libs_folder"/libSDL2.a
+	cp compile_libs/sdl/"$1"/libSDL3.a "$target_libs_folder"/libSDL3.a
 	cp -R compile_libs/sdl/include/* "$target_include_folder"
 }
 copy_libs_for_arches _copy_sdl
 
-# Copy Java code from SDL2 Android project template
+# Copy Java code from SDL3 Android project template
 if [[ "$TARGET_PLATFORM" == "android" ]]; then
 	target_java_folder="ddnet-libs/sdl/java"
 	rm -rf "$target_java_folder"
@@ -285,7 +285,7 @@ if [[ "$TARGET_PLATFORM" == "ios" ]]; then
 	_create_ios_xcframework "ddnet-libs/opus" "libopus.a"
 	_create_ios_xcframework "ddnet-libs/opus" "libopusfile.a"
 	_create_ios_xcframework "ddnet-libs/png" "libpng16.a"
-	_create_ios_xcframework "ddnet-libs/sdl" "libSDL2.a"
+	_create_ios_xcframework "ddnet-libs/sdl" "libSDL3.a"
 	_create_ios_xcframework "ddnet-libs/sqlite3" "libsqlite3.a"
 
 	function _cleanup_ios_library() {
