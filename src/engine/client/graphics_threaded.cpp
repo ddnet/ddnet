@@ -2508,9 +2508,9 @@ int CGraphics_Threaded::GetNumScreens() const
 	return m_pBackend->GetNumScreens();
 }
 
-const char *CGraphics_Threaded::GetScreenName(int Screen) const
+const char *CGraphics_Threaded::GetScreenName(int Index) const
 {
-	return m_pBackend->GetScreenName(Screen);
+	return m_pBackend->GetScreenName(Index);
 }
 
 void CGraphics_Threaded::Minimize()
@@ -2523,7 +2523,6 @@ void CGraphics_Threaded::Minimize()
 
 void CGraphics_Threaded::Maximize()
 {
-	// TODO: SDL
 	m_pBackend->Maximize();
 
 	for(auto &PropChangedListener : m_vPropChangeListeners)
@@ -2933,7 +2932,7 @@ TGLBackendReadPresentedImageData &CGraphics_Threaded::GetReadPresentedImageDataF
 	return m_pBackend->GetReadPresentedImageDataFuncUnsafe();
 }
 
-int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen)
+int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Index)
 {
 	if(g_Config.m_GfxDisplayAllVideoModes)
 	{
@@ -2943,13 +2942,13 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 	}
 
 	int NumModes = 0;
-	m_pBackend->GetVideoModes(pModes, MaxModes, &NumModes, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Screen);
+	m_pBackend->GetVideoModes(pModes, MaxModes, &NumModes, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Index);
 	return NumModes;
 }
 
-void CGraphics_Threaded::GetCurrentVideoMode(CVideoMode &CurMode, int Screen)
+void CGraphics_Threaded::GetCurrentVideoMode(CVideoMode &CurMode, int Index)
 {
-	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Screen);
+	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Index);
 }
 
 extern IEngineGraphics *CreateEngineGraphicsThreaded()
