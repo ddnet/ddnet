@@ -125,7 +125,7 @@ void CInput::InitJoysticks()
 
 bool CInput::OpenJoystick(int JoystickIndex)
 {
-	SDL_Joystick *pJoystick = SDL_JoystickOpen(JoystickIndex);
+	SDL_Joystick *pJoystick = SDL_OpenJoystick(JoystickIndex);
 	if(!pJoystick)
 	{
 		dbg_msg("joystick", "Could not open joystick %d: '%s'", JoystickIndex, SDL_GetError());
@@ -180,13 +180,13 @@ CInput::CJoystick::CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate)
 	m_pInput = pInput;
 	m_Index = Index;
 	m_pDelegate = pDelegate;
-	m_NumAxes = SDL_JoystickNumAxes(pDelegate);
-	m_NumButtons = SDL_JoystickNumButtons(pDelegate);
-	m_NumBalls = SDL_JoystickNumBalls(pDelegate);
-	m_NumHats = SDL_JoystickNumHats(pDelegate);
-	str_copy(m_aName, SDL_JoystickName(pDelegate));
-	SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(pDelegate), m_aGUID, sizeof(m_aGUID));
-	m_InstanceId = SDL_JoystickInstanceID(pDelegate);
+	m_NumAxes = SDL_GetNumJoystickAxes(pDelegate);
+	m_NumButtons = SDL_GetNumJoystickButtons(pDelegate);
+	m_NumBalls = SDL_GetNumJoystickBalls(pDelegate);
+	m_NumHats = SDL_GetNumJoystickHats(pDelegate);
+	str_copy(m_aName, SDL_GetJoystickName(pDelegate));
+	SDL_JoystickGetGUIDString(SDL_GetJoystickGUID(pDelegate), m_aGUID, sizeof(m_aGUID));
+	m_InstanceId = SDL_GetJoystickID(pDelegate);
 }
 
 void CInput::CloseJoysticks()
@@ -206,7 +206,7 @@ void CInput::SetActiveJoystick(size_t Index)
 
 float CInput::CJoystick::GetAxisValue(int Axis)
 {
-	return (SDL_JoystickGetAxis(m_pDelegate, Axis) - SDL_JOYSTICK_AXIS_MIN) / (float)(SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN) * 2.0f - 1.0f;
+	return (SDL_GetJoystickAxis(m_pDelegate, Axis) - SDL_JOYSTICK_AXIS_MIN) / (float)(SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN) * 2.0f - 1.0f;
 }
 
 void CInput::CJoystick::GetJoystickHatKeys(int Hat, int HatValue, int (&aHatKeys)[2])
@@ -228,7 +228,7 @@ void CInput::CJoystick::GetJoystickHatKeys(int Hat, int HatValue, int (&aHatKeys
 
 void CInput::CJoystick::GetHatValue(int Hat, int (&aHatKeys)[2])
 {
-	GetJoystickHatKeys(Hat, SDL_JoystickGetHat(m_pDelegate, Hat), aHatKeys);
+	GetJoystickHatKeys(Hat, SDL_GetJoystickHat(m_pDelegate, Hat), aHatKeys);
 }
 
 bool CInput::CJoystick::Relative(float *pX, float *pY)
@@ -281,14 +281,14 @@ bool CInput::MouseRelative(float *pX, float *pY)
 void CInput::MouseModeAbsolute()
 {
 	m_InputGrabbed = false;
-	SDL_SetRelativeMouseMode(SDL_FALSE);
+	SDL_SetRelativeMouseMode(false);
 	Graphics()->SetWindowGrab(false);
 }
 
 void CInput::MouseModeRelative()
 {
 	m_InputGrabbed = true;
-	SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_SetRelativeMouseMode(true);
 	Graphics()->SetWindowGrab(true);
 	// Clear pending relative mouse motion
 	SDL_GetRelativeMouseState(nullptr, nullptr);
@@ -304,7 +304,7 @@ vec2 CInput::NativeMousePos() const
 bool CInput::NativeMousePressed(int Index) const
 {
 	int i = SDL_GetMouseState(nullptr, nullptr);
-	return (i & SDL_BUTTON(Index)) != 0;
+	return (i & SDL_BUTTON_MASK(Index)) != 0;
 }
 
 const std::vector<IInput::CTouchFingerState> &CInput::TouchFingerStates() const
@@ -468,11 +468,11 @@ void CInput::HandleJoystickButtonEvent(const SDL_JoyButtonEvent &Event)
 
 	const int Key = Event.button + KEY_JOYSTICK_BUTTON_0;
 
-	if(Event.type == SDL_JOYBUTTONDOWN)
+	if(Event.type == SDL_EVENT_JOYSTICK_BUTTON_DOWN)
 	{
 		AddKeyEvent(Key, IInput::FLAG_PRESS);
 	}
-	else if(Event.type == SDL_JOYBUTTONUP)
+	else if(Event.type == SDL_EVENT_JOYSTICK_BUTTON_UP)
 	{
 		AddKeyEvent(Key, IInput::FLAG_RELEASE);
 	}
@@ -713,76 +713,76 @@ int CInput::Update()
 			ProcessSystemMessage(Event.syswm.msg);
 			break;
 
-		case SDL_TEXTEDITING:
+		case SDL_EVENT_TEXT_EDITING:
 			HandleTextEditingEvent(Event.edit.text, Event.edit.start, Event.edit.length);
 			break;
 
 #if SDL_VERSION_ATLEAST(2, 0, 22)
-		case SDL_TEXTEDITING_EXT:
+		case SDL_EVENT_TEXT_EDITING_EXT:
 			HandleTextEditingEvent(Event.editExt.text, Event.editExt.start, Event.editExt.length);
 			SDL_free(Event.editExt.text);
 			break;
 #endif
 
-		case SDL_TEXTINPUT:
+		case SDL_EVENT_TEXT_INPUT:
 			m_CompositionString = "";
 			m_CompositionCursor = 0;
 			AddTextEvent(Event.text.text);
 			break;
 
 		// handle keys
-		case SDL_KEYDOWN:
+		case SDL_EVENT_KEY_DOWN:
 			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_PRESS);
 			break;
 
-		case SDL_KEYUP:
+		case SDL_EVENT_KEY_UP:
 			AddKeyEventChecked(TranslateKeyEventKey(Event.key), IInput::FLAG_RELEASE);
 			break;
 
 		// handle the joystick events
-		case SDL_JOYAXISMOTION:
+		case SDL_EVENT_JOYSTICK_AXIS_MOTION:
 			HandleJoystickAxisMotionEvent(Event.jaxis);
 			break;
 
-		case SDL_JOYBUTTONUP:
-		case SDL_JOYBUTTONDOWN:
+		case SDL_EVENT_JOYSTICK_BUTTON_UP:
+		case SDL_EVENT_JOYSTICK_BUTTON_DOWN:
 			HandleJoystickButtonEvent(Event.jbutton);
 			break;
 
-		case SDL_JOYHATMOTION:
+		case SDL_EVENT_JOYSTICK_HAT_MOTION:
 			HandleJoystickHatMotionEvent(Event.jhat);
 			break;
 
-		case SDL_JOYDEVICEADDED:
+		case SDL_EVENT_JOYSTICK_ADDED:
 			HandleJoystickAddedEvent(Event.jdevice);
 			break;
 
-		case SDL_JOYDEVICEREMOVED:
+		case SDL_EVENT_JOYSTICK_REMOVED:
 			HandleJoystickRemovedEvent(Event.jdevice);
 			break;
 
 		// handle mouse buttons
-		case SDL_MOUSEBUTTONDOWN:
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
 			AddKeyEventChecked(TranslateMouseButtonEventKey(Event.button), IInput::FLAG_PRESS);
 			break;
 
-		case SDL_MOUSEBUTTONUP:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
 			AddKeyEventChecked(TranslateMouseButtonEventKey(Event.button), IInput::FLAG_RELEASE);
 			break;
 
-		case SDL_MOUSEWHEEL:
+		case SDL_EVENT_MOUSE_WHEEL:
 			AddKeyEventChecked(TranslateMouseWheelEventKey(Event.wheel), IInput::FLAG_PRESS | IInput::FLAG_RELEASE);
 			break;
 
-		case SDL_FINGERDOWN:
+		case SDL_EVENT_FINGER_DOWN:
 			HandleTouchDownEvent(Event.tfinger);
 			break;
 
-		case SDL_FINGERUP:
+		case SDL_EVENT_FINGER_UP:
 			HandleTouchUpEvent(Event.tfinger);
 			break;
 
-		case SDL_FINGERMOTION:
+		case SDL_EVENT_FINGER_MOTION:
 			HandleTouchMotionEvent(Event.tfinger);
 			break;
 
@@ -791,14 +791,14 @@ int CInput::Update()
 			// shortcuts
 			switch(Event.window.event)
 			{
-			case SDL_WINDOWEVENT_MOVED:
+			case SDL_EVENT_WINDOW_MOVED:
 				Graphics()->Move(Event.window.data1, Event.window.data2);
 				break;
 			// listen to size changes, this includes our manual changes and the ones by the window manager
-			case SDL_WINDOWEVENT_SIZE_CHANGED:
+			case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
 				Graphics()->GotResized(Event.window.data1, Event.window.data2, -1);
 				break;
-			case SDL_WINDOWEVENT_FOCUS_GAINED:
+			case SDL_EVENT_WINDOW_FOCUS_GAINED:
 				if(m_InputGrabbed)
 				{
 					MouseModeRelative();
@@ -808,7 +808,7 @@ int CInput::Update()
 				m_MouseFocus = true;
 				IgnoreKeys = true;
 				break;
-			case SDL_WINDOWEVENT_FOCUS_LOST:
+			case SDL_EVENT_WINDOW_FOCUS_LOST:
 				std::fill(std::begin(m_aCurrentKeyStates), std::end(m_aCurrentKeyStates), false);
 				m_MouseFocus = false;
 				IgnoreKeys = true;
@@ -819,30 +819,30 @@ int CInput::Update()
 					m_InputGrabbed = true;
 				}
 				break;
-			case SDL_WINDOWEVENT_MINIMIZED:
+			case SDL_EVENT_WINDOW_MINIMIZED:
 #if defined(CONF_PLATFORM_ANDROID) // Save the config when minimized on Android.
 				m_pConfigManager->Save();
 #endif
 				Graphics()->WindowDestroyNtf(Event.window.windowID);
 				break;
 
-			case SDL_WINDOWEVENT_MAXIMIZED:
+			case SDL_EVENT_WINDOW_MAXIMIZED:
 #if defined(CONF_PLATFORM_MACOS) // Todo: remove this when fixed in SDL
 				MouseModeAbsolute();
 				MouseModeRelative();
 #endif
 				[[fallthrough]];
-			case SDL_WINDOWEVENT_RESTORED:
+			case SDL_EVENT_WINDOW_RESTORED:
 				Graphics()->WindowCreateNtf(Event.window.windowID);
 				break;
 			}
 			break;
 
 		// other messages
-		case SDL_QUIT:
+		case SDL_EVENT_QUIT:
 			return 1;
 
-		case SDL_DROPFILE:
+		case SDL_EVENT_DROP_FILE:
 			str_copy(m_aDropFile, Event.drop.file);
 			SDL_free(Event.drop.file);
 			break;

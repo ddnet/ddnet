@@ -18,27 +18,27 @@ static bool UnpackAsset(const char *pFilename)
 	char aAssetFilename[IO_MAX_PATH_LENGTH] = "asset_integrity_files/";
 	str_append(aAssetFilename, pFilename);
 
-	// This uses SDL_RWFromFile because it can read Android assets,
+	// This uses SDL_IOFromFile because it can read Android assets,
 	// which are files stored in the app's APK file. All data files
 	// are stored as assets and unpacked to the external storage.
-	SDL_RWops *pAssetFile = SDL_RWFromFile(aAssetFilename, "rb");
+	SDL_IOStream *pAssetFile = SDL_IOFromFile(aAssetFilename, "rb");
 	if(!pAssetFile)
 	{
 		log_error("android", "Failed to open asset '%s' for reading", pFilename);
 		return false;
 	}
 
-	const long int FileLength = SDL_RWsize(pAssetFile);
+	const long int FileLength = SDL_GetIOSize(pAssetFile);
 	if(FileLength < 0)
 	{
-		SDL_RWclose(pAssetFile);
+		SDL_CloseIO(pAssetFile);
 		log_error("android", "Failed to determine length of asset '%s'", pFilename);
 		return false;
 	}
 
 	char *pData = static_cast<char *>(malloc(FileLength));
-	const size_t ReadLength = SDL_RWread(pAssetFile, pData, 1, FileLength);
-	SDL_RWclose(pAssetFile);
+	const size_t ReadLength = SDL_ReadIO(pAssetFile, pData, 1, FileLength);
+	SDL_CloseIO(pAssetFile);
 
 	if(ReadLength != (size_t)FileLength)
 	{
@@ -93,15 +93,15 @@ static bool EqualIntegrityFiles(const char *pAssetFilename, const char *pStorage
 	char aAssetFilename[IO_MAX_PATH_LENGTH] = "asset_integrity_files/";
 	str_append(aAssetFilename, pAssetFilename);
 
-	SDL_RWops *pAssetFile = SDL_RWFromFile(aAssetFilename, "rb");
+	SDL_IOStream *pAssetFile = SDL_IOFromFile(aAssetFilename, "rb");
 	if(!pAssetFile)
 	{
 		return false;
 	}
 
 	char aAssetMainSha256[SHA256_MAXSTRSIZE];
-	const size_t AssetReadLength = SDL_RWread(pAssetFile, aAssetMainSha256, 1, sizeof(aAssetMainSha256) - 1);
-	SDL_RWclose(pAssetFile);
+	const size_t AssetReadLength = SDL_ReadIO(pAssetFile, aAssetMainSha256, 1, sizeof(aAssetMainSha256) - 1);
+	SDL_CloseIO(pAssetFile);
 	if(AssetReadLength != sizeof(aAssetMainSha256) - 1)
 	{
 		return false;
@@ -162,7 +162,7 @@ static std::vector<CIntegrityFileLine> ReadIntegrityFile(const char *pFilename)
 const char *InitAndroid()
 {
 	// Change current working directory to our external storage location
-	const char *pPath = SDL_AndroidGetExternalStoragePath();
+	const char *pPath = SDL_GetAndroidExternalStoragePath();
 	if(pPath == nullptr)
 	{
 		return "The external storage is not available.";
@@ -251,7 +251,7 @@ constexpr uint32_t COMMAND_RESTART_APP = COMMAND_USER + 1;
 
 void RestartAndroidApp()
 {
-	SDL_AndroidSendMessage(COMMAND_RESTART_APP, 0);
+	SDL_SendAndroidMessage(COMMAND_RESTART_APP, 0);
 }
 
 bool StartAndroidServer(const char **ppArguments, size_t NumArguments)
@@ -260,13 +260,13 @@ bool StartAndroidServer(const char **ppArguments, size_t NumArguments)
 	// We use SDL for this instead of doing it on the Java side because this function blocks
 	// until the user made a choice, which is easier to handle. Only Android 13 (API 33) and
 	// newer support requesting this permission at runtime.
-	if(SDL_GetAndroidSDKVersion() >= 33 && !SDL_AndroidRequestPermission("android.permission.POST_NOTIFICATIONS"))
+	if(SDL_GetAndroidSDKVersion() >= 33 && !SDL_RequestAndroidPermission("android.permission.POST_NOTIFICATIONS"))
 	{
 		return false;
 	}
 
-	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_AndroidGetJNIEnv());
-	jobject Activity = (jobject)SDL_AndroidGetActivity();
+	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_GetAndroidJNIEnv());
+	jobject Activity = (jobject)SDL_GetAndroidActivity();
 	jclass ActivityClass = pEnv->GetObjectClass(Activity);
 
 	jclass StringClass = pEnv->FindClass("java/lang/String");
@@ -291,8 +291,8 @@ bool StartAndroidServer(const char **ppArguments, size_t NumArguments)
 
 void ExecuteAndroidServerCommand(const char *pCommand)
 {
-	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_AndroidGetJNIEnv());
-	jobject Activity = (jobject)SDL_AndroidGetActivity();
+	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_GetAndroidJNIEnv());
+	jobject Activity = (jobject)SDL_GetAndroidActivity();
 	jclass ActivityClass = pEnv->GetObjectClass(Activity);
 
 	jstring Command = pEnv->NewStringUTF(pCommand);
@@ -307,8 +307,8 @@ void ExecuteAndroidServerCommand(const char *pCommand)
 
 bool IsAndroidServerRunning()
 {
-	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_AndroidGetJNIEnv());
-	jobject Activity = (jobject)SDL_AndroidGetActivity();
+	JNIEnv *pEnv = static_cast<JNIEnv *>(SDL_GetAndroidJNIEnv());
+	jobject Activity = (jobject)SDL_GetAndroidActivity();
 	jclass ActivityClass = pEnv->GetObjectClass(Activity);
 
 	jmethodID MethodId = pEnv->GetMethodID(ActivityClass, "isServerRunning", "()Z");

@@ -1272,7 +1272,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	}
 
 	// set flags
-	int SdlFlags = SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_ALLOW_HIGHDPI;
+	int SdlFlags = SDL_WINDOW_MOUSE_GRABBED | SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 	SdlFlags |= (IsOpenGLFamilyBackend) ? SDL_WINDOW_OPENGL : SDL_WINDOW_VULKAN;
 	if(Flags & IGraphicsBackend::INITFLAG_RESIZABLE)
 		SdlFlags |= SDL_WINDOW_RESIZABLE;
@@ -1355,7 +1355,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 		if(!BackendInitGlew(m_BackendType, GlewMajor, GlewMinor, GlewPatch))
 		{
-			SDL_GL_DeleteContext(m_GLContext);
+			SDL_GL_DestroyContext(m_GLContext);
 			SDL_DestroyWindow(m_pWindow);
 			m_pWindow = nullptr;
 			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GLEW_INIT_FAILED;
@@ -1364,8 +1364,8 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 
 	int InitError = IsVersionSupportedGlew(m_BackendType, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch, GlewMajor, GlewMinor, GlewPatch);
 
-	// SDL_GL_GetDrawableSize reports HiDPI resolution even with SDL_WINDOW_ALLOW_HIGHDPI not set, which is wrong
-	if(SdlFlags & SDL_WINDOW_ALLOW_HIGHDPI)
+	// SDL_GL_GetDrawableSize reports HiDPI resolution even with SDL_WINDOW_HIGH_PIXEL_DENSITY not set, which is wrong
+	if(SdlFlags & SDL_WINDOW_HIGH_PIXEL_DENSITY)
 	{
 		if(IsOpenGLFamilyBackend)
 			SDL_GL_GetDrawableSize(m_pWindow, pCurrentWidth, pCurrentHeight);
@@ -1390,7 +1390,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	if(InitError != 0)
 	{
 		if(m_GLContext)
-			SDL_GL_DeleteContext(m_GLContext);
+			SDL_GL_DestroyContext(m_GLContext);
 		SDL_DestroyWindow(m_pWindow);
 		m_pWindow = nullptr;
 
@@ -1494,7 +1494,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		m_pProcessor = nullptr;
 
 		if(m_GLContext)
-			SDL_GL_DeleteContext(m_GLContext);
+			SDL_GL_DestroyContext(m_GLContext);
 		SDL_DestroyWindow(m_pWindow);
 		m_pWindow = nullptr;
 
@@ -1560,7 +1560,7 @@ int CGraphicsBackend_SDL_GL::Shutdown()
 	}
 
 	if(m_GLContext != nullptr)
-		SDL_GL_DeleteContext(m_GLContext);
+		SDL_GL_DestroyContext(m_GLContext);
 	SDL_DestroyWindow(m_pWindow);
 	m_pWindow = nullptr;
 
@@ -1620,18 +1620,18 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 #else
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN);
 #endif
-			SDL_SetWindowResizable(m_pWindow, SDL_FALSE);
+			SDL_SetWindowResizable(m_pWindow, true);
 		}
 		else if(IsDesktopFullscreen)
 		{
 			SDL_SetWindowFullscreen(m_pWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
-			SDL_SetWindowResizable(m_pWindow, SDL_FALSE);
+			SDL_SetWindowResizable(m_pWindow, true);
 		}
 		else
 		{
 			SDL_SetWindowFullscreen(m_pWindow, 0);
-			SDL_SetWindowBordered(m_pWindow, SDL_TRUE);
-			SDL_SetWindowResizable(m_pWindow, SDL_FALSE);
+			SDL_SetWindowBordered(m_pWindow, true);
+			SDL_SetWindowResizable(m_pWindow, false);
 			SDL_DisplayMode DpMode;
 			if(SDL_GetDesktopDisplayMode(g_Config.m_GfxScreen, &DpMode) < 0)
 			{
@@ -1647,8 +1647,8 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 	else
 	{
 		SDL_SetWindowFullscreen(m_pWindow, 0);
-		SDL_SetWindowBordered(m_pWindow, SDL_bool(!IsBorderless));
-		SDL_SetWindowResizable(m_pWindow, SDL_TRUE);
+		SDL_SetWindowBordered(m_pWindow, bool(!IsBorderless));
+		SDL_SetWindowResizable(m_pWindow, true);
 	}
 }
 
@@ -1665,7 +1665,7 @@ bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index)
 		return false;
 	}
 	// Todo SDL: remove this when fixed (changing screen when in fullscreen is bugged)
-	SDL_SetWindowBordered(m_pWindow, SDL_TRUE); //fixing primary monitor goes black when switch screen (borderless OpenGL)
+	SDL_SetWindowBordered(m_pWindow, true); //fixing primary monitor goes black when switch screen (borderless OpenGL)
 
 	SDL_SetWindowPosition(m_pWindow,
 		SDL_WINDOWPOS_CENTERED_DISPLAY(Index),
@@ -1691,7 +1691,7 @@ bool CGraphicsBackend_SDL_GL::UpdateDisplayMode(int Index)
 
 int CGraphicsBackend_SDL_GL::GetWindowScreen()
 {
-	return SDL_GetWindowDisplayIndex(m_pWindow);
+	return SDL_GetDisplayForWindow(m_pWindow);
 }
 
 int CGraphicsBackend_SDL_GL::WindowActive()
@@ -1706,7 +1706,7 @@ int CGraphicsBackend_SDL_GL::WindowOpen()
 
 void CGraphicsBackend_SDL_GL::SetWindowGrab(bool Grab)
 {
-	SDL_SetWindowGrab(m_pWindow, Grab ? SDL_TRUE : SDL_FALSE);
+	SDL_SetWindowGrab(m_pWindow, Grab ? true : false);
 }
 
 bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
@@ -1715,7 +1715,7 @@ bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
 	if(!m_pWindow || (SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP)
 		return false;
 
-	// if the window is at fullscreen use SDL_SetWindowDisplayMode instead, suggested by SDL
+	// if the window is at fullscreen use SDL_SetWindowFullscreenMode instead, suggested by SDL
 	if(SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN)
 	{
 #ifdef CONF_FAMILY_WINDOWS
@@ -1728,10 +1728,10 @@ bool CGraphicsBackend_SDL_GL::ResizeWindow(int w, int h, int RefreshRate)
 		SetMode.w = w;
 		SetMode.h = h;
 		SetMode.refresh_rate = RefreshRate;
-		SDL_SetWindowDisplayMode(m_pWindow, SDL_GetClosestDisplayMode(g_Config.m_GfxScreen, &SetMode, &ClosestMode));
+		SDL_SetWindowFullscreenMode(m_pWindow, SDL_GetClosestFullscreenDisplayMode(g_Config.m_GfxScreen, &SetMode, &ClosestMode));
 #ifdef CONF_FAMILY_WINDOWS
 		// now change it back to fullscreen, this will restore the above set state, bcs SDL saves fullscreen modes apart from other video modes (as of SDL 2.0.16)
-		// see implementation of SDL_SetWindowDisplayMode
+		// see implementation of SDL_SetWindowFullscreenMode
 		SetWindowParams(1, false);
 #endif
 		return true;
@@ -1758,7 +1758,7 @@ void CGraphicsBackend_SDL_GL::GetViewportSize(int &w, int &h)
 void CGraphicsBackend_SDL_GL::NotifyWindow()
 {
 	// Minimum version 2.0.16, after version 2.0.22 the naming is changed to 2.24.0 etc.
-#if SDL_MAJOR_VERSION > 2 || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL >= 16) || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION > 0)
+#if SDL_MAJOR_VERSION > 2 || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION == 0 && SDL_MICRO_VERSION >= 16) || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION > 0)
 	if(SDL_FlashWindow(m_pWindow, SDL_FlashOperation::SDL_FLASH_UNTIL_FOCUSED) != 0)
 	{
 		// fails if SDL hasn't implemented it
@@ -1769,7 +1769,7 @@ void CGraphicsBackend_SDL_GL::NotifyWindow()
 
 bool CGraphicsBackend_SDL_GL::IsScreenKeyboardShown()
 {
-	return SDL_IsScreenKeyboardShown(m_pWindow);
+	return SDL_ScreenKeyboardShown(m_pWindow);
 }
 
 void CGraphicsBackend_SDL_GL::WindowDestroyNtf(uint32_t WindowId)

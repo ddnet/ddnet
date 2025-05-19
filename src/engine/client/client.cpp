@@ -3211,7 +3211,7 @@ void CClient::Run()
 			if(State() == IClient::STATE_QUITTING)
 				break;
 			else
-				SetState(IClient::STATE_QUITTING); // SDL_QUIT
+				SetState(IClient::STATE_QUITTING); // SDL_EVENT_QUIT
 		}
 
 		char aFile[IO_MAX_PATH_LENGTH];
@@ -4926,7 +4926,7 @@ int main(int argc, const char **argv)
 	SDL_SetHint("SDL_TOUCH_MOUSE_EVENTS", "0");
 	SDL_SetHint("SDL_MOUSE_TOUCH_EVENTS", "0");
 
-	// Support longer IME composition strings (enables SDL_TEXTEDITING_EXT).
+	// Support longer IME composition strings (enables SDL_EVENT_TEXT_EDITING_EXT).
 #if SDL_VERSION_ATLEAST(2, 0, 22)
 	SDL_SetHint(SDL_HINT_IME_SUPPORT_EXTENDED_TEXT, "1");
 #endif

@@ -213,7 +213,7 @@ int CSound::Init()
 
 	SDL_AudioSpec Format, FormatOut;
 	Format.freq = g_Config.m_SndRate;
-	Format.format = AUDIO_S16;
+	Format.format = SDL_AUDIO_S16LE;
 	Format.channels = 2;
 	Format.samples = g_Config.m_SndBufferSize;
 	Format.callback = SdlCallback;
