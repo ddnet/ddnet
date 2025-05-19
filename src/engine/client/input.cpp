@@ -2,7 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <SDL3/SDL.h>
 
-#include <SDL_video.h>
 #include <base/system.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
@@ -19,18 +18,6 @@
 #endif
 #ifndef SDL_JOYSTICK_AXIS_MAX
 #define SDL_JOYSTICK_AXIS_MAX 32767
-#endif
-
-#if defined(CONF_FAMILY_WINDOWS)
-#include <windows.h>
-// windows.h must be included before imm.h, but clang-format requires includes to be sorted alphabetically, hence this comment.
-#include <imm.h>
-#endif
-
-// for platform specific features that aren't available or are broken in SDL
-#include <SDL3/SDL_syswm.h>
-#ifdef KeyPress
-#undef KeyPress // Undo pollution from X11/Xlib.h included by SDL_syswm.h on Linux
 #endif
 
 void CInput::AddKeyEvent(int Key, int Flags)
@@ -332,16 +319,12 @@ void CInput::SetClipboardText(const char *pText)
 
 void CInput::StartTextInput()
 {
-	// enable system messages for IME
-	SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
-	SDL_StartTextInput();
+	SDL_StartTextInput(m_pWindow);
 }
 
 void CInput::StopTextInput()
 {
-	SDL_StopTextInput();
-	// disable system messages for performance
-	SDL_EventState(SDL_SYSWMEVENT, SDL_DISABLE);
+	SDL_StopTextInput(m_pWindow);
 	m_CompositionString = "";
 	m_CompositionCursor = 0;
 	m_vCandidates.clear();
@@ -354,8 +337,13 @@ void CInput::EnsureScreenKeyboardShown()
 	{
 		return;
 	}
-	SDL_StopTextInput();
-	SDL_StartTextInput();
+	SDL_StopTextInput(m_pWindow);
+	SDL_StartTextInput(m_pWindow);
+}
+
+void CInput::ClearComposition() const
+{
+	SDL_ClearComposition(m_pWindow);
 }
 
 void CInput::ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const
@@ -591,7 +579,8 @@ void CInput::SetCompositionWindowPosition(float X, float Y, float H)
 	Rect.y = Y / m_pGraphics->ScreenHiDPIScale();
 	Rect.h = H / m_pGraphics->ScreenHiDPIScale();
 	Rect.w = 0;
-	SDL_SetTextInputRect(&Rect);
+	// TODOSDL: we should use the cursor param, this is jank
+	SDL_SetTextInputArea(m_pWindow, &Rect, 0);
 }
 
 static int TranslateKeyEventKey(const SDL_KeyboardEvent &KeyEvent)
@@ -610,12 +599,12 @@ static int TranslateKeyEventKey(const SDL_KeyboardEvent &KeyEvent)
 	// CAPS   =  8192
 	// MODE   = 16384
 	// Sum if you want to ignore multiple modifiers.
-	if(KeyEvent.keysym.mod & g_Config.m_InpIgnoredModifiers)
+	if(KeyEvent.mod & g_Config.m_InpIgnoredModifiers)
 	{
 		return KEY_UNKNOWN;
 	}
 
-	int Key = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(KeyEvent.keysym.sym) : KeyEvent.keysym.scancode;
+	int Key = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(KeyEvent.key, nullptr) : KeyEvent.scancode;
 
 #if defined(CONF_PLATFORM_ANDROID)
 	// Translate the Android back-button to the escape-key so it can be used to open/close the menu, close popups etc.
@@ -706,25 +695,23 @@ int CInput::Update()
 	{
 		switch(Event.type)
 		{
-		case SDL_SYSWMEVENT:
-			ProcessSystemMessage(Event.syswm.msg);
-			break;
-
 		case SDL_EVENT_TEXT_EDITING:
 			HandleTextEditingEvent(Event.edit.text, Event.edit.start, Event.edit.length);
 			break;
-
-#if SDL_VERSION_ATLEAST(2, 0, 22)
-		case SDL_EVENT_TEXT_EDITING_EXT:
-			HandleTextEditingEvent(Event.editExt.text, Event.editExt.start, Event.editExt.length);
-			SDL_free(Event.editExt.text);
-			break;
-#endif
 
 		case SDL_EVENT_TEXT_INPUT:
 			m_CompositionString = "";
 			m_CompositionCursor = 0;
 			AddTextEvent(Event.text.text);
+			break;
+
+		case SDL_EVENT_TEXT_EDITING_CANDIDATES:
+			// TODO: handle Event.edit_candidates.horizontal
+			m_vCandidates.clear();
+			m_vCandidates.reserve(Event.edit_candidates.num_candidates);
+			for(auto i = 0; i < Event.edit_candidates.num_candidates; ++i)
+				m_vCandidates.emplace_back(Event.edit_candidates.candidates[i]);
+			m_CandidateSelectedIndex = Event.edit_candidates.selected_candidate;
 			break;
 
 		// handle keys
@@ -844,54 +831,6 @@ int CInput::Update()
 	}
 
 	return 0;
-}
-
-void CInput::ProcessSystemMessage(SDL_SysWMmsg *pMsg)
-{
-#if defined(CONF_FAMILY_WINDOWS)
-	// Todo SDL: remove this after SDL2 supports IME candidates
-	if(pMsg->subsystem == SDL_SYSWM_WINDOWS && pMsg->msg.win.msg == WM_IME_NOTIFY)
-	{
-		switch(pMsg->msg.win.wParam)
-		{
-		case IMN_OPENCANDIDATE:
-		case IMN_CHANGECANDIDATE:
-		{
-			HWND WindowHandle = pMsg->msg.win.hwnd;
-			HIMC ImeContext = ImmGetContext(WindowHandle);
-			DWORD Size = ImmGetCandidateListW(ImeContext, 0, nullptr, 0);
-			LPCANDIDATELIST pCandidateList = nullptr;
-			if(Size > 0)
-			{
-				pCandidateList = (LPCANDIDATELIST)malloc(Size);
-				Size = ImmGetCandidateListW(ImeContext, 0, pCandidateList, Size);
-			}
-			m_vCandidates.clear();
-			if(pCandidateList && Size > 0)
-			{
-				m_vCandidates.reserve(std::min(pCandidateList->dwCount - pCandidateList->dwPageStart, pCandidateList->dwPageSize));
-				for(DWORD i = pCandidateList->dwPageStart; i < pCandidateList->dwCount && (int)m_vCandidates.size() < (int)pCandidateList->dwPageSize; i++)
-				{
-					LPCWSTR pCandidate = (LPCWSTR)((DWORD_PTR)pCandidateList + pCandidateList->dwOffset[i]);
-					m_vCandidates.push_back(windows_wide_to_utf8(pCandidate).value_or("<invalid candidate>"));
-				}
-				m_CandidateSelectedIndex = pCandidateList->dwSelection - pCandidateList->dwPageStart;
-			}
-			else
-			{
-				m_CandidateSelectedIndex = -1;
-			}
-			free(pCandidateList);
-			ImmReleaseContext(WindowHandle, ImeContext);
-			break;
-		}
-		case IMN_CLOSECANDIDATE:
-			m_vCandidates.clear();
-			m_CandidateSelectedIndex = -1;
-			break;
-		}
-	}
-#endif
 }
 
 bool CInput::GetDropFile(char *aBuf, int Len)

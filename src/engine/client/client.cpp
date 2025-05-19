@@ -4926,22 +4926,13 @@ int main(int argc, const char **argv)
 	SDL_SetHint("SDL_TOUCH_MOUSE_EVENTS", "0");
 	SDL_SetHint("SDL_MOUSE_TOUCH_EVENTS", "0");
 
-	// Support longer IME composition strings (enables SDL_EVENT_TEXT_EDITING_EXT).
-#if SDL_VERSION_ATLEAST(2, 0, 22)
-	SDL_SetHint(SDL_HINT_IME_SUPPORT_EXTENDED_TEXT, "1");
-#endif
-
 #if defined(CONF_PLATFORM_MACOS)
 	// Hints will not be set if there is an existing override hint or environment variable that takes precedence.
 	// So this respects cli environment overrides.
 	SDL_SetHint("SDL_MAC_OPENGL_ASYNC_DISPATCH", "1");
 #endif
 
-#if defined(CONF_FAMILY_WINDOWS)
-	SDL_SetHint("SDL_IME_SHOW_UI", g_Config.m_InpImeNativeUi ? "1" : "0");
-#else
-	SDL_SetHint("SDL_IME_SHOW_UI", "1");
-#endif
+	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, g_Config.m_InpImeNativeUi ? "none" : "composition,candidates");
 
 #if defined(CONF_PLATFORM_ANDROID)
 	// Trap the Android back button so it can be handled in our code reliably
