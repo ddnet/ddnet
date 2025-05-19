@@ -113,8 +113,6 @@ private:
 
 	char m_aDropFile[IO_MAX_PATH_LENGTH];
 
-	void ProcessSystemMessage(SDL_SysWMmsg *pMsg);
-
 public:
 	CInput();
 
@@ -154,6 +152,7 @@ public:
 	void StartTextInput() override;
 	void StopTextInput() override;
 	void EnsureScreenKeyboardShown() override;
+	void ClearComposition() const override;
 	const char *GetComposition() const override { return m_CompositionString.c_str(); }
 	bool HasComposition() const override { return !m_CompositionString.empty(); }
 	int GetCompositionCursor() const override { return m_CompositionCursor; }
