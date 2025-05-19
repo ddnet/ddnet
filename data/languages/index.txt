@@ -145,7 +145,7 @@ russian
 == 643
 == ru
 
-serbian
+serbian_cyrillic
 == Cрпски
 == 688
 == sr-Cyrl

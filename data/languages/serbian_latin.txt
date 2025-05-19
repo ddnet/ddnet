@@ -1956,7 +1956,7 @@ Graphics card
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Na Srpksi preveo Veljko Radovanović
+== Na Srpksi preveo Veljko Radovanović uz pomoć DNR, EliteTee i Kingston-a
 
 Tee
 == Ti
