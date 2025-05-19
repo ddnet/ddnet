@@ -179,6 +179,7 @@ public:
 	virtual void StartTextInput() = 0;
 	virtual void StopTextInput() = 0;
 	virtual void EnsureScreenKeyboardShown() = 0;
+	virtual void ClearComposition() const = 0;
 	virtual const char *GetComposition() const = 0;
 	virtual bool HasComposition() const = 0;
 	virtual int GetCompositionCursor() const = 0;
