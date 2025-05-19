@@ -35,7 +35,7 @@ jobs:
           libmariadb-dev \
           libminiupnpc-dev \
           libnotify-dev \
-          libsdl2-dev \
+          libsdl3-dev \
           libsqlite3-dev \
           libswresample-dev \
           libswscale-dev \
