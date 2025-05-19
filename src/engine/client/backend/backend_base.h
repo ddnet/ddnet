@@ -4,7 +4,7 @@
 #include <engine/client/graphics_threaded.h>
 #include <engine/graphics.h>
 
-#include <SDL_video.h>
+#include <SDL3/SDL_video.h>
 
 #include <atomic>
 #include <cstddef>

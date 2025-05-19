@@ -6,8 +6,8 @@
 
 // Keep our own main, SDL_main.h would rename it to SDL_main otherwise.
 #define SDL_MAIN_HANDLED
-#include <SDL.h>
-#include <SDL_syswm.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_syswm.h>
 
 #include <cmath>
 
