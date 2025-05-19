@@ -5220,20 +5220,17 @@ int main(int argc, const char **argv)
 #endif
 
 	// Do not automatically translate touch events to mouse events and vice versa.
-	SDL_SetHint("SDL_TOUCH_MOUSE_EVENTS", "0");
-	SDL_SetHint("SDL_MOUSE_TOUCH_EVENTS", "0");
+	SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+	SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
 
 	SDL_SetHint(SDL_HINT_IME_IMPLEMENTED_UI, g_Config.m_InpImeNativeUi ? "none" : "composition,candidates");
 
-#if defined(CONF_PLATFORM_ANDROID)
 	// Trap the Android back button so it can be handled in our code reliably
 	// instead of letting the system handle it.
-	SDL_SetHint("SDL_ANDROID_TRAP_BACK_BUTTON", "1");
-#endif
-#if defined(CONF_PLATFORM_ANDROID) || defined(CONF_PLATFORM_IOS)
+	SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
+
 	// Force landscape screen orientation.
-	SDL_SetHint("SDL_IOS_ORIENTATIONS", "LandscapeLeft LandscapeRight");
-#endif
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
 
 	// init SDL
 	if(!SDL_Init(0))
