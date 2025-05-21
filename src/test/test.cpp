@@ -150,3 +150,32 @@ int main(int argc, const char **argv)
 	secure_random_uninit();
 	return Result;
 }
+
+TEST(TestInfo, Sort)
+{
+	std::vector<CTestInfoPath> vEntries;
+	vEntries.resize(3);
+
+	const char aBasePath[] = "test_dir";
+	const char aSubPath[] = "test_dir/subdir";
+	const char aFilePath[] = "test_dir/subdir/file.txt";
+
+	vEntries[0].m_IsDirectory = true;
+	str_copy(vEntries[0].m_aData, aBasePath);
+
+	vEntries[1].m_IsDirectory = true;
+	str_copy(vEntries[1].m_aData, aSubPath);
+
+	vEntries[2].m_IsDirectory = false;
+	str_copy(vEntries[2].m_aData, aFilePath);
+
+	// Sorts directories after files.
+	std::sort(vEntries.begin(), vEntries.end());
+
+	EXPECT_FALSE(vEntries[0].m_IsDirectory);
+	EXPECT_EQ(str_comp(vEntries[0].m_aData, aFilePath), 0);
+	EXPECT_TRUE(vEntries[1].m_IsDirectory);
+	EXPECT_EQ(str_comp(vEntries[1].m_aData, aSubPath), 0);
+	EXPECT_TRUE(vEntries[2].m_IsDirectory);
+	EXPECT_EQ(str_comp(vEntries[2].m_aData, aBasePath), 0);
+}
