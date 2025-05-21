@@ -2043,7 +2043,7 @@ Active: Hook
 
 [Translation credits: Add your own name here when you update translations]
 English translation by the DDNet Team
-== Przetłumaczone przez: Łukasz D, Martin Pola, Tsin, Shymwo, CROACH, Delciak (PKP), Shkyyl i KebsCS
+== Przetłumaczone przez: Łukasz D, Martin Pola, Tsin, Shymwo, CROACH, Ametic (PKP), Shkyyl i KebsCS
 
 No demo with this filename exists
 == Demo z tą nazwą nie istnieje
@@ -2180,28 +2180,28 @@ AntiPing: prediction margin
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Brak VRAM'u. Spróbuj ustawić 'cl_skins_loaded_max' na mniejszą wartość, lub usuń własne zasoby (skiny, entities, itd.), szczególnie te z wysoką rozdzielczością.
 
 This name cannot be used for files and folders
-== 
+== Ta nazwa nie może zostać użyta do plików i folderów.
 
 This skin name cannot be used.
-== 
+== Ta nazwa skina nie może zostać użyta.
 
 Skin could not be loaded due to an error. Check the local console for details.
-== 
+== Nie można załadować skina. Sprawdź konsolę, aby poznać szczegóły.
 
 Skin could not be found.
-== 
+== Skin nie został znaleziony.
 
 No skins match your filter criteria
-== 
+== Nie znaleziono skina spełniającego twoje kryteria.
 
 Preview player's name plate
-== 
+== Podgląd plakietki gracza
 
 Dragger Outline Color
-== 
+== Kolor wewnętrzny draggera
 
 Dragger Inner Color
-== 
+== Kolor zewnętrzny draggera
