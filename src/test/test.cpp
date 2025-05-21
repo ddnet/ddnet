@@ -62,7 +62,7 @@ public:
 		{
 			return m_IsDirectory < Other.m_IsDirectory;
 		}
-		return str_comp(m_aData, Other.m_aData) < 0;
+		return str_comp(m_aData, Other.m_aData) > 0;
 	}
 };
 
