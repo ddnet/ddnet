@@ -25,21 +25,21 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 		}
 	}
 
-	int aStart[2], aNum[2];
+	int aStart[2], aLayersNum[2];
 	for(int i = 0; i < 2; ++i)
-		aMaps[i].GetType(MAPITEMTYPE_LAYER, &aStart[i], &aNum[i]);
+		aMaps[i].GetType(MAPITEMTYPE_LAYER, &aStart[i], &aLayersNum[i]);
 
 	// ensure basic layout
-	if(aNum[0] != aNum[1])
+	if(aLayersNum[0] != aLayersNum[1])
 	{
 		dbg_msg("map_diff", "different layer numbers:");
 		for(int i = 0; i < 2; ++i)
-			dbg_msg("map_diff", "  \"%s\": %d layers", pMapNames[i], aNum[i]);
+			dbg_msg("map_diff", "  \"%s\": %d layers", pMapNames[i], aLayersNum[i]);
 		return false;
 	}
 
 	// preload data
-	for(int j = 0; j < aNum[0]; ++j)
+	for(int j = 0; j < aLayersNum[0]; ++j)
 	{
 		for(int i = 0; i < 2; ++i)
 		{
@@ -50,7 +50,7 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 	}
 
 	// compare
-	for(int j = 0; j < aNum[0]; ++j)
+	for(int j = 0; j < aLayersNum[0]; ++j)
 	{
 		CMapItemLayer *apItem[2];
 		for(int i = 0; i < 2; ++i)
@@ -86,7 +86,7 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 				int Pos = y * apTilemap[0]->m_Width + x;
 				if(apTile[0][Pos].m_Index != apTile[1][Pos].m_Index || apTile[0][Pos].m_Flags != apTile[1][Pos].m_Flags)
 				{
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)", aNum[0], aaName[0], x, y, apTile[0][Pos].m_Index, apTile[0][Pos].m_Flags, apTile[1][Pos].m_Index, apTile[1][Pos].m_Flags);
+					dbg_msg("map_diff", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)", aLayersNum[0], aaName[0], x, y, apTile[0][Pos].m_Index, apTile[0][Pos].m_Flags, apTile[1][Pos].m_Index, apTile[1][Pos].m_Flags);
 				}
 			}
 		}
