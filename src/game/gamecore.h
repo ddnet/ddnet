@@ -264,6 +264,7 @@ public:
 	int m_FreezeStart;
 	int m_FreezeEnd;
 	bool m_IsInFreeze;
+	bool m_IsInKillTile;
 	bool m_DeepFrozen;
 	bool m_LiveFrozen;
 	CTuningParams m_Tuning;
