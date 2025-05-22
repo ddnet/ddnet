@@ -86,7 +86,7 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 				int Pos = y * apTilemap[0]->m_Width + x;
 				if(apTile[0][Pos].m_Index != apTile[1][Pos].m_Index || apTile[0][Pos].m_Flags != apTile[1][Pos].m_Flags)
 				{
-					dbg_msg("map_diff", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)", aNum[0], aaName[0], x, y, apTile[0][Pos].m_Index, apTile[0][Pos].m_Flags, apTile[1][Pos].m_Index, apTile[0][Pos].m_Flags);
+					dbg_msg("map_diff", "[%d:%s] %dx%d: (index: %d, flags: %d) != (index: %d, flags: %d)", aNum[0], aaName[0], x, y, apTile[0][Pos].m_Index, apTile[0][Pos].m_Flags, apTile[1][Pos].m_Index, apTile[1][Pos].m_Flags);
 				}
 			}
 		}
