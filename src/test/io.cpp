@@ -167,3 +167,27 @@ TEST(Io, WriteTruncatesFile)
 
 	EXPECT_FALSE(fs_remove(Info.m_aFilename));
 }
+
+TEST(Io, OpenFileShared)
+{
+	CTestInfo Info;
+
+	IOHANDLE FileWrite1 = io_open(Info.m_aFilename, IOFLAG_WRITE);
+	ASSERT_TRUE(FileWrite1);
+
+	IOHANDLE FileRead1 = io_open(Info.m_aFilename, IOFLAG_READ);
+	ASSERT_TRUE(FileRead1);
+
+	IOHANDLE FileWrite2 = io_open(Info.m_aFilename, IOFLAG_WRITE);
+	ASSERT_TRUE(FileWrite2);
+
+	IOHANDLE FileRead2 = io_open(Info.m_aFilename, IOFLAG_READ);
+	ASSERT_TRUE(FileRead2);
+
+	EXPECT_FALSE(io_close(FileWrite1));
+	EXPECT_FALSE(io_close(FileRead1));
+	EXPECT_FALSE(io_close(FileWrite2));
+	EXPECT_FALSE(io_close(FileRead2));
+
+	EXPECT_FALSE(fs_remove(Info.m_aFilename));
+}
