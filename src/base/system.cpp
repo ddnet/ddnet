@@ -2349,20 +2349,28 @@ int fs_makedir(const char *path)
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
 	if(CreateDirectoryW(wide_path.c_str(), nullptr) != 0)
+	{
 		return 0;
-	if(GetLastError() == ERROR_ALREADY_EXISTS)
+	}
+	const DWORD error = GetLastError();
+	if(error == ERROR_ALREADY_EXISTS)
+	{
 		return 0;
+	}
+	log_error("filesystem", "Failed to create folder '%s' (%ld '%s')", path, error, windows_format_system_message(error).c_str());
 	return -1;
 #else
-#ifdef CONF_PLATFORM_HAIKU
-	struct stat st;
-	if(stat(path, &st) == 0)
+#if defined(CONF_PLATFORM_HAIKU)
+	if(fs_is_dir(path))
+	{
 		return 0;
+	}
 #endif
-	if(mkdir(path, 0755) == 0)
+	if(mkdir(path, 0755) == 0 || errno == EEXIST)
+	{
 		return 0;
-	if(errno == EEXIST)
-		return 0;
+	}
+	log_error("filesystem", "Failed to create folder '%s' (%d '%s')", path, errno, strerror(errno));
 	return -1;
 #endif
 }
@@ -2372,11 +2380,22 @@ int fs_removedir(const char *path)
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_path = windows_utf8_to_wide(path);
 	if(RemoveDirectoryW(wide_path.c_str()) != 0)
+	{
 		return 0;
+	}
+	const DWORD error = GetLastError();
+	if(error == ERROR_FILE_NOT_FOUND)
+	{
+		return 0;
+	}
+	log_error("filesystem", "Failed to remove folder '%s' (%ld '%s')", path, error, windows_format_system_message(error).c_str());
 	return -1;
 #else
-	if(rmdir(path) == 0)
+	if(rmdir(path) == 0 || errno == ENOENT)
+	{
 		return 0;
+	}
+	log_error("filesystem", "Failed to remove folder '%s' (%d '%s')", path, errno, strerror(errno));
 	return -1;
 #endif
 }
@@ -2508,9 +2527,24 @@ int fs_remove(const char *filename)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_filename = windows_utf8_to_wide(filename);
-	return DeleteFileW(wide_filename.c_str()) == 0;
+	if(DeleteFileW(wide_filename.c_str()) != 0)
+	{
+		return 0;
+	}
+	const DWORD error = GetLastError();
+	if(error == ERROR_FILE_NOT_FOUND)
+	{
+		return 0;
+	}
+	log_error("filesystem", "Failed to remove file '%s' (%ld '%s')", filename, error, windows_format_system_message(error).c_str());
+	return 1;
 #else
-	return unlink(filename) != 0;
+	if(unlink(filename) == 0 || errno == ENOENT)
+	{
+		return 0;
+	}
+	log_error("filesystem", "Failed to remove file '%s' (%d '%s')", filename, errno, strerror(errno));
+	return 1;
 #endif
 }
 
@@ -2519,13 +2553,21 @@ int fs_rename(const char *oldname, const char *newname)
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_oldname = windows_utf8_to_wide(oldname);
 	const std::wstring wide_newname = windows_utf8_to_wide(newname);
-	if(MoveFileExW(wide_oldname.c_str(), wide_newname.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED | MOVEFILE_WRITE_THROUGH) == 0)
-		return 1;
+	if(MoveFileExW(wide_oldname.c_str(), wide_newname.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED | MOVEFILE_WRITE_THROUGH) != 0)
+	{
+		return 0;
+	}
+	const DWORD error = GetLastError();
+	log_error("filesystem", "Failed to rename file '%s' to '%s' (%ld '%s')", oldname, newname, error, windows_format_system_message(error).c_str());
+	return 1;
 #else
-	if(rename(oldname, newname) != 0)
-		return 1;
+	if(rename(oldname, newname) == 0)
+	{
+		return 0;
+	}
+	log_error("filesystem", "Failed to rename file '%s' to '%s' (%d '%s')", oldname, newname, errno, strerror(errno));
+	return 1;
 #endif
-	return 0;
 }
 
 int fs_file_time(const char *name, time_t *created, time_t *modified)
