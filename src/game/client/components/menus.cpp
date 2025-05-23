@@ -928,6 +928,9 @@ void CMenus::OnInit()
 	Console()->Chain("cl_asset_hud", ConchainAssetHud, this);
 	Console()->Chain("cl_asset_extras", ConchainAssetExtras, this);
 
+	Console()->Chain("demo_play", ConchainDemoPlay, this);
+	Console()->Chain("demo_speed", ConchainDemoSpeed, this);
+
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL);
 
 	// setup load amount

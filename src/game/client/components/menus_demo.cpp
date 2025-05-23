@@ -1650,3 +1650,20 @@ void CMenus::PopupConfirmDeleteFolder()
 		PopupMessage(Localize("Error"), aError, Localize("Ok"));
 	}
 }
+
+void CMenus::ConchainDemoPlay(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = static_cast<CMenus *>(pUserData);
+	pThis->m_LastPauseChange = pThis->Client()->GlobalTime();
+	pfnCallback(pResult, pCallbackUserData);
+}
+
+void CMenus::ConchainDemoSpeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = static_cast<CMenus *>(pUserData);
+	if(pResult->NumArguments() == 1)
+	{
+		pThis->m_LastSpeedChange = pThis->Client()->GlobalTime();
+	}
+	pfnCallback(pResult, pCallbackUserData);
+}
