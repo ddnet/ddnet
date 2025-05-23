@@ -239,7 +239,7 @@ const char *InitAndroid()
 
 	// The integrity file will be unpacked every time when launching,
 	// so we can simply rename it to update the saved integrity file.
-	if((fs_is_file(INTEGRITY_INDEX_SAVE) && fs_remove(INTEGRITY_INDEX_SAVE) != 0) || fs_rename(INTEGRITY_INDEX, INTEGRITY_INDEX_SAVE) != 0)
+	if(fs_remove(INTEGRITY_INDEX_SAVE) != 0 || fs_rename(INTEGRITY_INDEX, INTEGRITY_INDEX_SAVE) != 0)
 	{
 		return "Failed to update the saved integrity index file.";
 	}

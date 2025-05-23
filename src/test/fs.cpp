@@ -102,6 +102,22 @@ TEST(Filesystem, CantDeleteFileWithRemoveDirectory)
 	EXPECT_FALSE(fs_remove(Info.m_aFilename));
 }
 
+TEST(Filesystem, DeleteNonexistentFile)
+{
+	CTestInfo Info;
+
+	EXPECT_FALSE(fs_is_file(Info.m_aFilename));
+	EXPECT_FALSE(fs_remove(Info.m_aFilename)); // Can delete a file that does not exist.
+}
+
+TEST(Filesystem, DeleteNonexistentDirectory)
+{
+	CTestInfo Info;
+
+	EXPECT_FALSE(fs_is_dir(Info.m_aFilename));
+	EXPECT_FALSE(fs_removedir(Info.m_aFilename)); // Can delete a folder that does not exist.
+}
+
 TEST(Filesystem, DeleteOpenFile)
 {
 	CTestInfo Info;

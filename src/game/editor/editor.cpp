@@ -8999,7 +8999,7 @@ void CEditor::HandleWriterFinishJobs()
 	m_WriterFinishJobs.pop_front();
 
 	char aBuf[2 * IO_MAX_PATH_LENGTH + 128];
-	if(Storage()->FileExists(pJob->GetRealFileName(), IStorage::TYPE_SAVE) && !Storage()->RemoveFile(pJob->GetRealFileName(), IStorage::TYPE_SAVE))
+	if(!Storage()->RemoveFile(pJob->GetRealFileName(), IStorage::TYPE_SAVE))
 	{
 		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not remove old map file '%s'.", pJob->GetRealFileName());
 		ShowFileDialogError("%s", aBuf);

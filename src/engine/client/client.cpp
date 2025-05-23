@@ -2363,8 +2363,7 @@ void CClient::FinishMapDownload()
 	SHA256_DIGEST *pSha256 = m_MapdownloadSha256Present ? &m_MapdownloadSha256 : nullptr;
 
 	bool FileSuccess = true;
-	if(Storage()->FileExists(m_aMapdownloadFilename, IStorage::TYPE_SAVE))
-		FileSuccess &= Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
+	FileSuccess &= Storage()->RemoveFile(m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 	FileSuccess &= Storage()->RenameFile(m_aMapdownloadFilenameTemp, m_aMapdownloadFilename, IStorage::TYPE_SAVE);
 	if(!FileSuccess)
 	{
