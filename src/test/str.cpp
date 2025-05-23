@@ -717,6 +717,14 @@ TEST(Str, TrimWords)
 	EXPECT_STREQ(str_trim_words(pStr3, 3), "dddd");
 	EXPECT_STREQ(str_trim_words(pStr3, 4), "");
 	EXPECT_STREQ(str_trim_words(pStr3, 100), "");
+	const char *pStr4 = "";
+	EXPECT_STREQ(str_trim_words(pStr4, 0), "");
+	EXPECT_STREQ(str_trim_words(pStr4, 1), "");
+	EXPECT_STREQ(str_trim_words(pStr4, 2), "");
+	const char *pStr5 = "     ";
+	EXPECT_STREQ(str_trim_words(pStr5, 0), "");
+	EXPECT_STREQ(str_trim_words(pStr5, 1), "");
+	EXPECT_STREQ(str_trim_words(pStr5, 2), "");
 }
 
 TEST(Str, CopyNum)
