@@ -767,44 +767,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 		pData->m_RecordFinishTime = Time;
 	}
 
-	if(!Server()->IsSixup(ClientId))
-	{
-		CNetMsg_Sv_DDRaceTime Msg;
-		CNetMsg_Sv_DDRaceTimeLegacy MsgLegacy;
-		MsgLegacy.m_Time = Msg.m_Time = (int)(Time * 100.0f);
-		MsgLegacy.m_Check = Msg.m_Check = 0;
-		MsgLegacy.m_Finish = Msg.m_Finish = 1;
-
-		if(pData->m_BestTime)
-		{
-			float Diff100 = (Time - pData->m_BestTime) * 100;
-			MsgLegacy.m_Check = Msg.m_Check = (int)Diff100;
-		}
-		if(VERSION_DDRACE <= Player->GetClientVersion())
-		{
-			if(Player->GetClientVersion() < VERSION_DDNET_MSG_LEGACY)
-			{
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
-			}
-			else
-			{
-				Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientId);
-			}
-		}
-	}
-
-	CNetMsg_Sv_RaceFinish RaceFinishMsg;
-	RaceFinishMsg.m_ClientId = ClientId;
-	RaceFinishMsg.m_Time = Time * 1000;
-	RaceFinishMsg.m_Diff = 0;
-	if(pData->m_BestTime)
-	{
-		RaceFinishMsg.m_Diff = Diff * 1000 * (Time < pData->m_BestTime ? -1 : 1);
-	}
-	RaceFinishMsg.m_RecordPersonal = (Time < pData->m_BestTime || !pData->m_BestTime);
-	RaceFinishMsg.m_RecordServer = Time < GameServer()->m_pController->m_CurrentRecord;
-	Server()->SendPackMsg(&RaceFinishMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
-
+	GameServer()->SendFinish(ClientId, Time, pData->m_BestTime);
 	bool CallSaveScore = g_Config.m_SvSaveWorseScores;
 	bool NeedToSendNewPersonalRecord = false;
 	if(!pData->m_BestTime || Time < pData->m_BestTime)
