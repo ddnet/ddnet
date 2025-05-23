@@ -836,7 +836,8 @@ public:
 		IGraphics::CTextureHandle m_SpriteParticleSnowflake;
 		IGraphics::CTextureHandle m_SpriteParticleSparkle;
 		IGraphics::CTextureHandle m_SpritePulley;
-		IGraphics::CTextureHandle m_aSpriteParticles[3];
+		IGraphics::CTextureHandle m_SpriteHectagon;
+		IGraphics::CTextureHandle m_aSpriteParticles[4];
 	};
 
 	SClientExtrasSkin m_ExtrasSkin;

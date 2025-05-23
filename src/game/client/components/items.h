@@ -37,6 +37,7 @@ private:
 	int m_aParticleSplatOffset[3];
 	int m_DoorHeadOffset;
 	int m_PulleyHeadOffset;
+	int m_FreezeHeadOffset;
 };
 
 #endif
