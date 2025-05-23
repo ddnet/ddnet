@@ -1548,7 +1548,11 @@ void CHud::RenderSpectatorHud()
 	}
 	else if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW)
 	{
-		str_format(aBuf, sizeof(aBuf), Localize("Following %s", "Spectating"), m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId].m_aName);
+		const auto &Player = m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId];
+		if(g_Config.m_ClShowIds)
+			str_format(aBuf, sizeof(aBuf), Localize("Following %d: %s", "Spectating"), Player.ClientId(), Player.m_aName);
+		else
+			str_format(aBuf, sizeof(aBuf), Localize("Following %s", "Spectating"), Player.m_aName);
 	}
 	else
 	{
