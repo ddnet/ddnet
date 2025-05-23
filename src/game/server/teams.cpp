@@ -613,12 +613,12 @@ void CGameTeams::SendTeamsState(int ClientId)
 	}
 }
 
-ERaceState CGameTeams::GetDDRaceState(CPlayer *Player)
+ERaceState CGameTeams::GetDDRaceState(const CPlayer *Player) const
 {
 	if(!Player)
 		return ERaceState::NONE;
 
-	CCharacter *pChar = Player->GetCharacter();
+	const CCharacter *pChar = Player->GetCharacter();
 	if(pChar)
 		return pChar->m_DDRaceState;
 	return ERaceState::NONE;

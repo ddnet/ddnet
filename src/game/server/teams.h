@@ -115,7 +115,7 @@ public:
 	void ResetInvited(int Team);
 	void SetClientInvited(int Team, int ClientId, bool Invited);
 
-	ERaceState GetDDRaceState(CPlayer *Player);
+	ERaceState GetDDRaceState(const CPlayer *Player) const;
 	int GetStartTime(CPlayer *Player);
 	float *GetCurrentTimeCp(CPlayer *Player);
 	void SetDDRaceState(CPlayer *Player, ERaceState DDRaceState);
