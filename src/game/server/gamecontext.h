@@ -367,7 +367,7 @@ public:
 
 private:
 	// starting 1 to make 0 the special value "no client id"
-	uint32_t NextUniqueClientId = 1;
+	uint32_t m_NextUniqueClientId = 1;
 	bool m_VoteWillPass;
 	CScore *m_pScore;
 
@@ -599,5 +599,10 @@ public:
 
 	void ResetTuning();
 };
+
+static inline bool CheckClientId(int ClientId)
+{
+	return ClientId >= 0 && ClientId < MAX_CLIENTS;
+}
 
 #endif
