@@ -79,7 +79,7 @@ void CGameContext::MoveCharacter(int ClientId, int X, int Y, bool Raw)
 
 	pChr->Move(vec2((Raw ? 1 : 32) * X, (Raw ? 1 : 32) * Y));
 	pChr->ResetVelocity();
-	pChr->m_DDRaceState = DDRACE_CHEAT;
+	pChr->m_DDRaceState = ERaceState::CHEATED;
 }
 
 void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData)
@@ -378,7 +378,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 		pChr->GiveWeapon(Weapon, Remove);
 	}
 
-	pChr->m_DDRaceState = DDRACE_CHEAT;
+	pChr->m_DDRaceState = ERaceState::CHEATED;
 }
 
 void CGameContext::Teleport(CCharacter *pChr, vec2 Pos)
@@ -386,7 +386,7 @@ void CGameContext::Teleport(CCharacter *pChr, vec2 Pos)
 	pChr->SetPosition(Pos);
 	pChr->m_Pos = Pos;
 	pChr->m_PrevPos = Pos;
-	pChr->m_DDRaceState = DDRACE_CHEAT;
+	pChr->m_DDRaceState = ERaceState::CHEATED;
 }
 
 void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
@@ -826,7 +826,7 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Target);
 
-	if((pSelf->GetDDRaceTeam(Target) && pController->Teams().GetDDRaceState(pSelf->m_apPlayers[Target]) == DDRACE_STARTED) || (pChr && pController->Teams().IsPractice(pChr->Team())))
+	if((pSelf->GetDDRaceTeam(Target) && pController->Teams().GetDDRaceState(pSelf->m_apPlayers[Target]) == ERaceState::STARTED) || (pChr && pController->Teams().IsPractice(pChr->Team())))
 		pSelf->m_apPlayers[Target]->KillCharacter(WEAPON_GAME);
 
 	pController->Teams().SetForceCharacterTeam(Target, Team);
