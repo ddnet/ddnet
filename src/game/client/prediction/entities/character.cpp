@@ -965,6 +965,34 @@ void CCharacter::HandleTiles(int Index)
 	{
 		m_LastRefillJumps = false;
 	}
+
+	// Teleport gun
+	if(((m_TileIndex == TILE_TELE_GUN_ENABLE) || (m_TileFIndex == TILE_TELE_GUN_ENABLE)) && !m_Core.m_HasTelegunGun)
+	{
+		m_Core.m_HasTelegunGun = true;
+	}
+	else if(((m_TileIndex == TILE_TELE_GUN_DISABLE) || (m_TileFIndex == TILE_TELE_GUN_DISABLE)) && m_Core.m_HasTelegunGun)
+	{
+		m_Core.m_HasTelegunGun = false;
+	}
+
+	if(((m_TileIndex == TILE_TELE_GRENADE_ENABLE) || (m_TileFIndex == TILE_TELE_GRENADE_ENABLE)) && !m_Core.m_HasTelegunGrenade)
+	{
+		m_Core.m_HasTelegunGrenade = true;
+	}
+	else if(((m_TileIndex == TILE_TELE_GRENADE_DISABLE) || (m_TileFIndex == TILE_TELE_GRENADE_DISABLE)) && m_Core.m_HasTelegunGrenade)
+	{
+		m_Core.m_HasTelegunGrenade = false;
+	}
+
+	if(((m_TileIndex == TILE_TELE_LASER_ENABLE) || (m_TileFIndex == TILE_TELE_LASER_ENABLE)) && !m_Core.m_HasTelegunLaser)
+	{
+		m_Core.m_HasTelegunLaser = true;
+	}
+	else if(((m_TileIndex == TILE_TELE_LASER_DISABLE) || (m_TileFIndex == TILE_TELE_LASER_DISABLE)) && m_Core.m_HasTelegunLaser)
+	{
+		m_Core.m_HasTelegunLaser = false;
+	}
 }
 
 void CCharacter::HandleTuneLayer()
@@ -1078,6 +1106,16 @@ void CCharacter::DDRacePostCoreTick()
 	else
 	{
 		HandleTiles(CurrentIndex);
+	}
+
+	// teleport gun
+	if(m_TeleGunTeleport)
+	{
+		m_Core.m_Pos = m_TeleGunPos;
+		if(!m_IsBlueTeleGunTeleport)
+			m_Core.m_Vel = vec2(0, 0);
+		m_TeleGunTeleport = false;
+		m_IsBlueTeleGunTeleport = false;
 	}
 }
 
@@ -1197,6 +1235,8 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int Id, CNetObj_Character *pChar,
 	m_ReloadTimer = 0;
 	m_NumObjectsHit = 0;
 	m_LastRefillJumps = false;
+	m_TeleGunTeleport = false;
+	m_IsBlueTeleGunTeleport = false;
 	m_CanMoveInFreeze = false;
 	m_TeleCheckpoint = 0;
 	m_StrongWeakId = 0;

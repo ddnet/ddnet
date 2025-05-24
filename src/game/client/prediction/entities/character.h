@@ -83,6 +83,10 @@ public:
 
 	bool m_LastRefillJumps;
 
+	vec2 m_TeleGunPos;
+	bool m_TeleGunTeleport;
+	bool m_IsBlueTeleGunTeleport;
+
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; }
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }
