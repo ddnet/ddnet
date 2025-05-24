@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y gcc-mingw-w64-x86-64-posix \
         libpng-dev \
         libwavpack-dev \
         libopusfile-dev \
-        libsdl2-dev \
+        libsdl3-dev \
         cmake \
         glslang-tools \
         libavcodec-extra \
