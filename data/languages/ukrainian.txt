@@ -8,8 +8,8 @@
 == %.2f МіБ
 
 [Demo player duration]
-%d min.
-== %dхв
+%s min.
+== %sхв
 
 %d new mentions
 == Нових згадок: %d
@@ -31,8 +31,8 @@
 == Гравці: %d
 
 [Demo player duration]
-%d sec.
-== %dс
+%s sec.
+== %sс
 
 %d/%d KiB (%.1f KiB/s)
 == %d/%d КіБ (%.1f КіБ/с)

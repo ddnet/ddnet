@@ -1604,12 +1604,12 @@ Go back the specified duration
 == Verilən zaman qədər geri qayıt
 
 [Demo player duration]
-%d min.
-== %d dəq.
+%s min.
+== %s dəq.
 
 [Demo player duration]
-%d sec.
-== %d san.
+%s sec.
+== %s san.
 
 Change the skip duration
 == Keçiləcək zamanı dəyişdir

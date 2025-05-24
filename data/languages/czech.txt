@@ -1334,12 +1334,12 @@ Go back the specified duration
 == Vrátit se o zadanou dobu
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sec.
+%s sec.
+== %s sec.
 
 Change the skip duration
 == Změnit dobu přeskočení
