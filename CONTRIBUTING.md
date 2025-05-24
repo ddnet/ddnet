@@ -11,9 +11,9 @@ A non-exhaustive list of things that usually get rejected:
   https://github.com/ddnet/ddnet/pull/5443#issuecomment-1158437505
 - Breaking backwards compatibility in the network protocol or file formats such as skins and demos.
 - Breaking backwards compatibility in gameplay:
-    + Existing ranks should not be made impossible.
-    + Existing maps should not break.
-    + New gameplay should not make runs easier on already completed maps.
+	- Existing ranks should not be made impossible.
+	- Existing maps should not break.
+	- New gameplay should not make runs easier on already completed maps.
 
 ## Programming languages
 
@@ -59,45 +59,45 @@ For multiple words:
 
 ❌ Avoid:
 
-```C++
+```cpp
 for(int i = 0; i < MAX_CLIENTS; i++)
 {
-    for(int k = 0; k < NUM_DUMMIES; k++)
-    {
-        if(k == 0)
-            continue;
+	for(int k = 0; k < NUM_DUMMIES; k++)
+	{
+		if(k == 0)
+			continue;
 
-        m_aClients[i].Foo();
-    }
+		m_aClients[i].Foo();
+	}
 }
 ```
 
 ✅ Instead do:
 
-```C++
+```cpp
 for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 {
-    for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
-    {
-        if(Dummy == 0)
-            continue;
+	for(int Dummy = 0; Dummy < NUM_DUMMIES; Dummy++)
+	{
+		if(Dummy == 0)
+			continue;
 
-        m_aClients[ClientId].Foo();
-    }
+		m_aClients[ClientId].Foo();
+	}
 }
 ```
 
 More examples can be found [here](https://github.com/ddnet/ddnet/pull/8288#issuecomment-2094097306)
 
-### Teeworlds interpretation of the hungarian notation
+### Our interpretation of the hungarian notation
 
 DDNet inherited the hungarian notation like prefixes from [Teeworlds](https://www.teeworlds.com/?page=docs&wiki=nomenclature)
 
-Only use those prefixes. The ddnet code base does **NOT** follow the whole hungarian notation strictly.
+Only use the prefixes listed below. The ddnet code base does **NOT** follow the whole hungarian notation strictly.
 
 Do **NOT** use `c` for constants or `b` for booleans or `i` for integers.
 
-C-Style function pointers are pointers, but `std::function` are not.
+C-style function pointers are pointers, but `std::function` are not.
 
 #### For variables
 
@@ -120,6 +120,34 @@ Combine these appropriately
 | `I` | Interfaces | `class IFavorites` |
 | `S` | ~~Structs (Use classes instead)~~ | ~~`struct STextContainerUsages`~~ |
 
+### Enumerations
+
+Both unscoped enums (`enum`) and scoped enums (`enum class`) should start with `E` and be CamelCase. The literals should use SCREAMING_SNAKE_CASE.
+
+All new code should use scoped enums where the names of the literals should not contain the enum name.
+
+❌ Avoid:
+
+```cpp
+enum STATUS
+{
+	STATUS_PENDING,
+	STATUS_OKAY,
+	STATUS_ERROR,
+};
+```
+
+✅ Instead do:
+
+```cpp
+enum class EStatus
+{
+	PENDING,
+	OKAY,
+	ERROR,
+};
+```
+
 ### The usage of `goto` is not encouraged
 
 Do not use the `goto` keyword in new code, there are better control flow constructs in C++.
@@ -130,14 +158,14 @@ Do not set variables in if statements.
 
 ❌
 
-```C++
+```cpp
 int Foo;
 if((Foo = 2)) { .. }
 ```
 
 ✅
 
-```C++
+```cpp
 int Foo = 2;
 if(Foo) { .. }
 ```
@@ -148,14 +176,14 @@ Unless the alternative code is more complex and harder to read.
 
 ❌
 
-```C++
+```cpp
 int Foo = 0;
 if(!Foo) { .. }
 ```
 
 ✅
 
-```C++
+```cpp
 int Foo = 0;
 if(Foo != 0) { .. }
 ```
@@ -174,32 +202,32 @@ Use member variables or pass state by parameter instead of using global or stati
 
 Avoid static variables ❌: 
 
-```C++
+```cpp
 int CMyClass::Foo()
 {
-    static int s_Count = 0;
-    s_Count++;
-    return s_Count;
+	static int s_Count = 0;
+	s_Count++;
+	return s_Count;
 }
 ```
 
 Use member variables instead ✅:
 
-```C++
+```cpp
 class CMyClass
 {
-    int m_Count = 0;
+	int m_Count = 0;
 };
 int CMyClass::Foo()
 {
-    m_Count++;
-    return m_Count;
+	m_Count++;
+	return m_Count;
 }
 ```
 
 Constants can be static ✅:
 
-```C++
+```cpp
 static constexpr int ANSWER = 42;
 ```
 
@@ -209,13 +237,13 @@ While the code base already has a lot of methods that start with a ``Get`` prefi
 
 ❌
 
-```C++
+```cpp
 int GetMyVariable() { return m_MyVariable; }
 ```
 
 ✅
 
-```C++
+```cpp
 int MyVariable() { return m_MyVariable; }
 ```
 
@@ -223,19 +251,19 @@ int MyVariable() { return m_MyVariable; }
 
 Instead of doing this ❌:
 
-```C++
+```cpp
 class CFoo
 {
-    int m_Foo;
+	int m_Foo;
 };
 ```
 
 Do this instead if possible ✅:
 
-```C++
+```cpp
 class CFoo
 {
-    int m_Foo = 0;
+	int m_Foo = 0;
 };
 ```
 
@@ -263,13 +291,13 @@ Code file names should be all lowercase and words should be separated with under
 
 ❌
 
-```C++
+```cpp
 src/game/FooBar.cpp
 ```
 
 ✅
 
-```C++
+```cpp
 src/game/foo_bar.cpp
 ```
 
