@@ -163,6 +163,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	SHA256_DIGEST m_MapDetailsSha256 = SHA256_ZEROED;
 	char m_aMapDetailsUrl[256] = "";
 
+	EInfoState m_InfoState = EInfoState::ERROR;
 	std::shared_ptr<CHttpRequest> m_pDDNetInfoTask = nullptr;
 
 	// time
@@ -380,6 +381,7 @@ public:
 	void ResetMapDownload(bool ResetActive);
 	void FinishMapDownload();
 
+	EInfoState InfoState() const override { return m_InfoState; }
 	void RequestDDNetInfo() override;
 	void ResetDDNetInfoTask();
 	void LoadDDNetInfo();
