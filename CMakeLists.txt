@@ -2416,6 +2416,8 @@ if(CLIENT)
     prediction/entities/laser.h
     prediction/entities/pickup.cpp
     prediction/entities/pickup.h
+    prediction/entities/plasma.cpp
+    prediction/entities/plasma.h
     prediction/entities/projectile.cpp
     prediction/entities/projectile.h
     prediction/entity.cpp
