@@ -2194,25 +2194,41 @@ void CGraphics_Threaded::IndicesNumRequiredNotify(unsigned int RequiredIndicesCo
 
 int CGraphics_Threaded::IssueInit()
 {
+	// The flags have to be kept consistent with flags set in the CGraphicsBackend_SDL_GL::SetWindowParams function!
+
 	bool IsPurelyWindowed = g_Config.m_GfxFullscreen == 0;
 	bool IsExclusiveFullscreen = g_Config.m_GfxFullscreen == 1;
 	bool IsDesktopFullscreen = g_Config.m_GfxFullscreen == 2;
 #ifndef CONF_FAMILY_WINDOWS
-	//  special mode for windows only
+	//  Windowed fullscreen is only available on Windows, use desktop fullscreen on other platforms
 	IsDesktopFullscreen |= g_Config.m_GfxFullscreen == 3;
 #endif
 
 	int Flags = 0;
-	if(g_Config.m_GfxBorderless)
-		Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
 	if(IsExclusiveFullscreen)
+	{
 		Flags |= IGraphicsBackend::INITFLAG_FULLSCREEN;
+	}
 	else if(IsDesktopFullscreen)
+	{
 		Flags |= IGraphicsBackend::INITFLAG_DESKTOP_FULLSCREEN;
-	if(IsPurelyWindowed)
+	}
+	else if(IsPurelyWindowed)
+	{
 		Flags |= IGraphicsBackend::INITFLAG_RESIZABLE;
+		if(g_Config.m_GfxBorderless)
+		{
+			Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
+		}
+	}
+	else // Windowed fullscreen
+	{
+		Flags |= IGraphicsBackend::INITFLAG_BORDERLESS;
+	}
 	if(g_Config.m_GfxVsync)
+	{
 		Flags |= IGraphicsBackend::INITFLAG_VSYNC;
+	}
 
 	const int Result = m_pBackend->Init("DDNet Client", &g_Config.m_GfxScreen, &g_Config.m_GfxScreenWidth, &g_Config.m_GfxScreenHeight, &g_Config.m_GfxScreenRefreshRate, &g_Config.m_GfxFsaaSamples, Flags, &g_Config.m_GfxDesktopWidth, &g_Config.m_GfxDesktopHeight, &m_ScreenWidth, &m_ScreenHeight, m_pStorage);
 	AddBackEndWarningIfExists();
@@ -2544,9 +2560,9 @@ void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
 		PropChangedListener();
 }
 
-bool CGraphics_Threaded::SetWindowScreen(int Index)
+bool CGraphics_Threaded::SetWindowScreen(int Index, bool MoveToCenter)
 {
-	if(!m_pBackend->SetWindowScreen(Index))
+	if(!m_pBackend->SetWindowScreen(Index, MoveToCenter))
 	{
 		return false;
 	}
@@ -2560,29 +2576,37 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 	return true;
 }
 
-bool CGraphics_Threaded::SwitchWindowScreen(int Index)
+bool CGraphics_Threaded::SwitchWindowScreen(int Index, bool MoveToCenter)
 {
 	const int IsFullscreen = g_Config.m_GfxFullscreen;
 	const int IsBorderless = g_Config.m_GfxBorderless;
+	const bool IsPurelyWindowed = IsFullscreen == 0 && !IsBorderless;
 
-	if(!SetWindowScreen(Index))
+	if(!SetWindowScreen(Index, !IsPurelyWindowed || MoveToCenter))
 	{
 		return false;
 	}
 
-	// Prevent window from being stretched over multiple monitors by temporarily switching to
-	// windowed fullscreen mode on Windows, which is desktop fullscreen mode on other systems.
-	SetWindowParams(3, false);
+	if(IsFullscreen != 3 && !IsPurelyWindowed)
+	{
+		// Prevent window from being stretched over multiple monitors by temporarily switching to
+		// windowed fullscreen mode on Windows, which is desktop fullscreen mode on other systems.
+		SetWindowParams(3, false);
+	}
 
-	CVideoMode CurMode;
-	GetCurrentVideoMode(CurMode, Index);
+	// In purely windowed mode we preserve the window's size instead of resizing to the screen.
+	if(!IsPurelyWindowed)
+	{
+		CVideoMode CurMode;
+		GetCurrentVideoMode(CurMode, Index);
 
-	g_Config.m_GfxColorDepth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
-	g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
-	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
-	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
+		g_Config.m_GfxColorDepth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
+		g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
+		g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
+		g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
 
-	ResizeToScreen();
+		ResizeToScreen();
+	}
 
 	SetWindowParams(IsFullscreen, IsBorderless);
 	return true;
