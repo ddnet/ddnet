@@ -50,7 +50,7 @@ private:
 
 public:
 	void RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha);
-	void RenderNamePlatePreview(vec2 Position, int Dummy);
+	void RenderNamePlatePreview(vec2 Position, bool Self);
 	void ResetNamePlates();
 	int Sizeof() const override { return sizeof(*this); }
 	void OnWindowResize() override;
