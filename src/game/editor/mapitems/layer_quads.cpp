@@ -223,6 +223,26 @@ void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 
 CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 {
+	CUIRect PosButton, ColorButton, BothButton;
+	pToolBox->HSplitBottom(12.0f, pToolBox, &BothButton);
+	pToolBox->HSplitBottom(4.0f, pToolBox, nullptr);
+	pToolBox->HSplitBottom(12.0f, pToolBox, &ColorButton);
+	pToolBox->HSplitBottom(4.0f, pToolBox, nullptr);
+	pToolBox->HSplitBottom(12.0f, pToolBox, &PosButton);
+
+	static int s_RamdomizeQuadPosButton = 0;
+	static int s_RamdomizeQuadColorButton = 0;
+	static int s_RamdomizeQuadBothButton = 0;
+
+	if(m_pEditor->DoButton_Editor(&s_RamdomizeQuadPosButton, "Randomize position offsets", 0, &PosButton, BUTTONFLAG_LEFT, "Randomize all quad position offsets."))
+		RandomizeQuadOffsets(m_pEditor, m_vQuads.data(), m_vQuads.size(), true, false);
+
+	if(m_pEditor->DoButton_Editor(&s_RamdomizeQuadColorButton, "Randomize color offsets", 0, &ColorButton, BUTTONFLAG_LEFT, "Randomize all quad color offsets."))
+		RandomizeQuadOffsets(m_pEditor, m_vQuads.data(), m_vQuads.size(), false, true);
+
+	if(m_pEditor->DoButton_Editor(&s_RamdomizeQuadBothButton, "Randomize Both offsets", 0, &BothButton, BUTTONFLAG_LEFT, "Randomize all quad offsets to the same value."))
+		RandomizeQuadOffsets(m_pEditor, m_vQuads.data(), m_vQuads.size(), true, true);
+
 	CProperty aProps[] = {
 		{"Image", m_Image, PROPTYPE_IMAGE, -1, 0},
 		{nullptr},
@@ -287,4 +307,40 @@ int CLayerQuads::SwapQuads(int Index0, int Index1)
 const char *CLayerQuads::TypeName() const
 {
 	return "quads";
+}
+
+void CLayerQuads::RandomizeQuadOffsets(CEditor *pEditor, CQuad *pQuads, size_t NumQuads, bool Position, bool Color)
+{
+	if(!Position && !Color)
+		return;
+
+	auto IsValidEnv = [&](int Env) {
+		return Env >= 0 && Env < (int)pEditor->m_Map.m_vpEnvelopes.size();
+	};
+
+	for(size_t i = 0; i < NumQuads; ++i)
+	{
+		CQuad &Quad = pQuads[i];
+		if(!IsValidEnv(Quad.m_ColorEnv) && !IsValidEnv(Quad.m_PosEnv))
+			continue;
+
+		int Env = -1;
+
+		if(Position && (!Color || !IsValidEnv(Quad.m_ColorEnv)))
+			Env = Quad.m_PosEnv;
+		else if(Color && (!Position || !IsValidEnv(Quad.m_PosEnv)))
+			Env = Quad.m_ColorEnv;
+		else if(IsValidEnv(Quad.m_ColorEnv) && IsValidEnv(Quad.m_PosEnv))
+			Env = pEditor->m_Map.m_vpEnvelopes[Quad.m_PosEnv]->EndTime() > pEditor->m_Map.m_vpEnvelopes[Quad.m_ColorEnv]->EndTime() ? Quad.m_PosEnv : Quad.m_ColorEnv;
+
+		if(IsValidEnv(Env))
+		{
+			float EndTime = pEditor->m_Map.m_vpEnvelopes[Env]->EndTime() * 1000.f;
+			int NewVal = (int)random_float(-EndTime, EndTime);
+			if(Position)
+				Quad.m_PosEnvOffset = NewVal;
+			if(Color)
+				Quad.m_ColorEnvOffset = NewVal;
+		}
+	}
 }
