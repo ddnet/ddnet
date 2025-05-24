@@ -2880,6 +2880,7 @@ int str_format_v(char *buffer, int buffer_size, const char *format, va_list args
 	return str_utf8_fix_truncation(buffer);
 }
 
+#if !defined(CONF_DEBUG)
 int str_format_int(char *buffer, size_t buffer_size, int value)
 {
 	buffer[0] = '\0'; // Fix false positive clang-analyzer-core.UndefinedBinaryOperatorResult when using result
@@ -2887,6 +2888,7 @@ int str_format_int(char *buffer, size_t buffer_size, int value)
 	result.ptr[0] = '\0';
 	return result.ptr - buffer;
 }
+#endif
 
 #undef str_format
 int str_format(char *buffer, int buffer_size, const char *format, ...)
