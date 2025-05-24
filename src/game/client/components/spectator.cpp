@@ -171,10 +171,12 @@ bool CSpectator::OnInput(const IInput::CEvent &Event)
 		return true;
 	}
 
-	if(g_Config.m_ClSpectatorMouseclicks)
+	if(g_Config.m_ClSpectatorMouseclicks && m_pClient->m_Snap.m_SpecInfo.m_Active && !IsActive() && !GameClient()->m_MultiViewActivated &&
+		!Ui()->IsPopupOpen() && !m_pClient->m_GameConsole.IsActive() && !m_pClient->m_Menus.IsActive())
 	{
-		if(m_pClient->m_Snap.m_SpecInfo.m_Active && !IsActive() && !GameClient()->m_MultiViewActivated &&
-			!Ui()->IsPopupOpen() && !m_pClient->m_GameConsole.IsActive() && !m_pClient->m_Menus.IsActive())
+		// 1 second delay in pvp modes to prevent accidental switching when killed
+		if(!GameClient()->m_GameInfo.m_SpecAfterDeath || (m_pClient->m_Snap.m_aCharacters[m_pClient->m_Snap.m_LocalClientId].m_Active ||
+									 Client()->GameTick(g_Config.m_ClDummy) > m_LastAliveTick + Client()->GameTickSpeed()))
 		{
 			if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_MOUSE_1)
 			{
@@ -216,6 +218,12 @@ void CSpectator::OnRender()
 			m_MultiViewActivateDelay = 0.0f;
 			GameClient()->m_MultiViewActivated = true;
 		}
+	}
+
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		if(m_pClient->m_Snap.m_pLocalCharacter)
+			m_LastAliveTick = m_pClient->m_Snap.m_pLocalCharacter->m_Tick;
 	}
 
 	if(!m_Active)
@@ -590,6 +598,7 @@ void CSpectator::OnReset()
 	m_WasActive = false;
 	m_Active = false;
 	m_SelectedSpectatorId = NO_SELECTION;
+	m_LastAliveTick = 0;
 }
 
 void CSpectator::Spectate(int SpectatorId)
