@@ -4,6 +4,8 @@
 
 #include <game/gamecore.h>
 
+#include <limits>
+
 typedef void (*TStringArgumentFunction)(char *pStr);
 template<TStringArgumentFunction Func>
 static void TestInplace(const char *pInput, const char *pOutput)
@@ -667,6 +669,17 @@ TEST(Str, Format)
 	EXPECT_STREQ(aBuf, "9: ");
 	EXPECT_EQ(str_format(aBuf, 4, "%d: ", 99), 3);
 	EXPECT_STREQ(aBuf, "99:");
+}
+
+TEST(Str, FormatNumber)
+{
+	char aBuf[16];
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", 0), 1);
+	EXPECT_STREQ(aBuf, "0");
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", std::numeric_limits<int>::min()), 11);
+	EXPECT_STREQ(aBuf, "-2147483648");
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", std::numeric_limits<int>::max()), 10);
+	EXPECT_STREQ(aBuf, "2147483647");
 }
 
 TEST(Str, FormatTruncate)
