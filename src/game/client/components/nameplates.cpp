@@ -756,7 +756,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	Data.m_FontSizeClientId = Data.m_ClientIdSeperateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
-	Data.m_pClan = Dummy == 0 ? g_Config.m_PlayerClan : g_Config.m_ClDummyClan;
+	Data.m_pClan = Dummy == 0 ? g_Config.m_ClPlayerClan : g_Config.m_ClDummyClan;
 	if(!Data.m_pClan[0])
 		Data.m_pClan = "Clan Name";
 	Data.m_FontSizeClan = FontSizeClan;
