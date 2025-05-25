@@ -3,6 +3,7 @@
 #define GAME_SERVER_TEAMS_H
 
 #include <engine/shared/config.h>
+#include <game/race_state.h>
 #include <game/server/gamecontext.h>
 #include <game/teamscore.h>
 
@@ -114,10 +115,10 @@ public:
 	void ResetInvited(int Team);
 	void SetClientInvited(int Team, int ClientId, bool Invited);
 
-	int GetDDRaceState(CPlayer *Player);
+	ERaceState GetDDRaceState(const CPlayer *Player) const;
 	int GetStartTime(CPlayer *Player);
 	float *GetCurrentTimeCp(CPlayer *Player);
-	void SetDDRaceState(CPlayer *Player, int DDRaceState);
+	void SetDDRaceState(CPlayer *Player, ERaceState DDRaceState);
 	void SetStartTime(CPlayer *Player, int StartTime);
 	void SetLastTimeCp(CPlayer *Player, int LastTimeCp);
 	void KillCharacterOrTeam(int ClientId, int Team);

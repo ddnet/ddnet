@@ -59,7 +59,7 @@ void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 	m_DeepFrozen = pChr->m_Core.m_DeepFrozen;
 	m_LiveFrozen = pChr->m_Core.m_LiveFrozen;
 	m_EndlessHook = pChr->m_Core.m_EndlessHook;
-	m_DDRaceState = pChr->m_DDRaceState;
+	m_DDRaceState = static_cast<int>(pChr->m_DDRaceState);
 
 	m_HitDisabledFlags = 0;
 	if(pChr->m_Core.m_HammerHitDisabled)
@@ -176,7 +176,7 @@ bool CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 	pChr->m_Core.m_DeepFrozen = m_DeepFrozen;
 	pChr->m_Core.m_LiveFrozen = m_LiveFrozen;
 	pChr->m_Core.m_EndlessHook = m_EndlessHook;
-	pChr->m_DDRaceState = m_DDRaceState;
+	pChr->m_DDRaceState = static_cast<ERaceState>(m_DDRaceState);
 
 	pChr->m_Core.m_HammerHitDisabled = m_HitDisabledFlags & CSaveTee::HAMMER_HIT_DISABLED;
 	pChr->m_Core.m_ShotgunHitDisabled = m_HitDisabledFlags & CSaveTee::SHOTGUN_HIT_DISABLED;

@@ -77,9 +77,9 @@ void CGameTeams::OnCharacterStart(int ClientId)
 	CCharacter *pStartingChar = Character(ClientId);
 	if(!pStartingChar)
 		return;
-	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && pStartingChar->m_DDRaceState == DDRACE_STARTED)
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && pStartingChar->m_DDRaceState == ERaceState::STARTED)
 		return;
-	if((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || (m_Core.Team(ClientId) != TEAM_FLOCK && !m_aTeamFlock[m_Core.Team(ClientId)])) && pStartingChar->m_DDRaceState == DDRACE_FINISHED)
+	if((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || (m_Core.Team(ClientId) != TEAM_FLOCK && !m_aTeamFlock[m_Core.Team(ClientId)])) && pStartingChar->m_DDRaceState == ERaceState::FINISHED)
 		return;
 	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO &&
 		(m_Core.Team(ClientId) == TEAM_FLOCK || TeamFlock(m_Core.Team(ClientId)) || m_Core.Team(ClientId) == TEAM_SUPER))
@@ -88,7 +88,7 @@ void CGameTeams::OnCharacterStart(int ClientId)
 			ChangeTeamState(m_Core.Team(ClientId), TEAMSTATE_STARTED);
 
 		m_aTeeStarted[ClientId] = true;
-		pStartingChar->m_DDRaceState = DDRACE_STARTED;
+		pStartingChar->m_DDRaceState = ERaceState::STARTED;
 		pStartingChar->m_StartTime = Tick;
 		return;
 	}
@@ -100,11 +100,11 @@ void CGameTeams::OnCharacterStart(int ClientId)
 		CPlayer *pPlayer = GetPlayer(i);
 		if(!pPlayer || !pPlayer->IsPlaying())
 			continue;
-		if(GetDDRaceState(pPlayer) != DDRACE_FINISHED)
+		if(GetDDRaceState(pPlayer) != ERaceState::FINISHED)
 			continue;
 
 		Waiting = true;
-		pStartingChar->m_DDRaceState = DDRACE_NONE;
+		pStartingChar->m_DDRaceState = ERaceState::NONE;
 
 		if(m_aLastChat[ClientId] + Server()->TickSpeed() + g_Config.m_SvChatDelay < Tick)
 		{
@@ -162,7 +162,7 @@ void CGameTeams::OnCharacterStart(int ClientId)
 				// TODO: THE PROBLEM IS THAT THERE IS NO CHARACTER SO START TIME CAN'T BE SET!
 				if(pPlayer && (pPlayer->IsPlaying() || TeamLocked(m_Core.Team(ClientId))))
 				{
-					SetDDRaceState(pPlayer, DDRACE_STARTED);
+					SetDDRaceState(pPlayer, ERaceState::STARTED);
 					SetStartTime(pPlayer, Tick);
 
 					if(First)
@@ -287,7 +287,7 @@ void CGameTeams::Tick()
 		aPlayerNames[0] = 0;
 		for(int j = 0; j < MAX_CLIENTS; j++)
 		{
-			if(Character(j) && Character(j)->m_DDRaceState == DDRACE_CHEAT)
+			if(Character(j) && Character(j)->m_DDRaceState == ERaceState::CHEATED)
 				TeamHasCheatCharacter = true;
 			if(m_Core.Team(j) == i && !m_aTeeStarted[j])
 			{
@@ -360,7 +360,7 @@ void CGameTeams::CheckTeamFinished(int Team)
 
 				for(unsigned int i = 0; i < PlayersCount; ++i)
 				{
-					SetDDRaceState(apTeamPlayers[i], DDRACE_FINISHED);
+					SetDDRaceState(apTeamPlayers[i], ERaceState::FINISHED);
 				}
 
 				return;
@@ -391,7 +391,7 @@ const char *CGameTeams::SetCharacterTeam(int ClientId, int Team)
 		return "Your character is not valid";
 	if(Team == TEAM_SUPER && !Character(ClientId)->IsSuper())
 		return "You can't join super team if you don't have super rights";
-	if(Team != TEAM_SUPER && Character(ClientId)->m_DDRaceState != DDRACE_NONE)
+	if(Team != TEAM_SUPER && Character(ClientId)->m_DDRaceState != ERaceState::NONE)
 		return "You have started racing already";
 	// No cheating through noob filter with practice and then leaving team
 	if(m_aPractice[m_Core.Team(ClientId)] && !m_pGameContext->PracticeByDefault())
@@ -613,18 +613,18 @@ void CGameTeams::SendTeamsState(int ClientId)
 	}
 }
 
-int CGameTeams::GetDDRaceState(CPlayer *Player)
+ERaceState CGameTeams::GetDDRaceState(const CPlayer *Player) const
 {
 	if(!Player)
-		return DDRACE_NONE;
+		return ERaceState::NONE;
 
-	CCharacter *pChar = Player->GetCharacter();
+	const CCharacter *pChar = Player->GetCharacter();
 	if(pChar)
 		return pChar->m_DDRaceState;
-	return DDRACE_NONE;
+	return ERaceState::NONE;
 }
 
-void CGameTeams::SetDDRaceState(CPlayer *Player, int DDRaceState)
+void CGameTeams::SetDDRaceState(CPlayer *Player, ERaceState DDRaceState)
 {
 	if(!Player)
 		return;
@@ -767,44 +767,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 		pData->m_RecordFinishTime = Time;
 	}
 
-	if(!Server()->IsSixup(ClientId))
-	{
-		CNetMsg_Sv_DDRaceTime Msg;
-		CNetMsg_Sv_DDRaceTimeLegacy MsgLegacy;
-		MsgLegacy.m_Time = Msg.m_Time = (int)(Time * 100.0f);
-		MsgLegacy.m_Check = Msg.m_Check = 0;
-		MsgLegacy.m_Finish = Msg.m_Finish = 1;
-
-		if(pData->m_BestTime)
-		{
-			float Diff100 = (Time - pData->m_BestTime) * 100;
-			MsgLegacy.m_Check = Msg.m_Check = (int)Diff100;
-		}
-		if(VERSION_DDRACE <= Player->GetClientVersion())
-		{
-			if(Player->GetClientVersion() < VERSION_DDNET_MSG_LEGACY)
-			{
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
-			}
-			else
-			{
-				Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientId);
-			}
-		}
-	}
-
-	CNetMsg_Sv_RaceFinish RaceFinishMsg;
-	RaceFinishMsg.m_ClientId = ClientId;
-	RaceFinishMsg.m_Time = Time * 1000;
-	RaceFinishMsg.m_Diff = 0;
-	if(pData->m_BestTime)
-	{
-		RaceFinishMsg.m_Diff = Diff * 1000 * (Time < pData->m_BestTime ? -1 : 1);
-	}
-	RaceFinishMsg.m_RecordPersonal = (Time < pData->m_BestTime || !pData->m_BestTime);
-	RaceFinishMsg.m_RecordServer = Time < GameServer()->m_pController->m_CurrentRecord;
-	Server()->SendPackMsg(&RaceFinishMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
-
+	GameServer()->SendFinish(ClientId, Time, pData->m_BestTime);
 	bool CallSaveScore = g_Config.m_SvSaveWorseScores;
 	bool NeedToSendNewPersonalRecord = false;
 	if(!pData->m_BestTime || Time < pData->m_BestTime)
@@ -836,7 +799,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 		}
 	}
 
-	SetDDRaceState(Player, DDRACE_FINISHED);
+	SetDDRaceState(Player, ERaceState::FINISHED);
 	if(NeedToSendNewServerRecord)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
