@@ -916,6 +916,26 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 
 	std::vector<IInput::CTouchFingerState> vRemainingTouchFingerStates = vTouchFingerStates;
 
+	if(!m_vStaleFingers.empty())
+	{
+		// Remove stale fingers that are not pressed anymore.
+		m_vStaleFingers.erase(
+			std::remove_if(m_vStaleFingers.begin(), m_vStaleFingers.end(), [&](const IInput::CTouchFinger &Finger) {
+				return std::find_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
+					return TouchFingerState.m_Finger == Finger;
+				}) == vRemainingTouchFingerStates.end();
+			}),
+			m_vStaleFingers.end());
+		// Prevent stale fingers from activating touch buttons and direct touch.
+		vRemainingTouchFingerStates.erase(
+			std::remove_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
+				return std::find_if(m_vStaleFingers.begin(), m_vStaleFingers.end(), [&](const IInput::CTouchFinger &Finger) {
+					return TouchFingerState.m_Finger == Finger;
+				}) != m_vStaleFingers.end();
+			}),
+			vRemainingTouchFingerStates.end());
+	}
+
 	// Remove remaining finger states for fingers which are responsible for active actions
 	// and release action when the finger responsible for it is not pressed down anymore.
 	bool GotDirectFingerState = false; // Whether DirectFingerState is valid
@@ -996,6 +1016,17 @@ void CTouchControls::UpdateButtons(const std::vector<IInput::CTouchFingerState> 
 	{
 		if(!TouchButton.IsVisible())
 		{
+			if(TouchButton.m_pBehavior->IsActive())
+			{
+				// Remember fingers responsible for buttons that were deactivated due to becoming invisible,
+				// to ensure that these fingers will not activate direct touch input or touch buttons.
+				m_vStaleFingers.push_back(TouchButton.m_pBehavior->m_Finger);
+				const auto ActiveFinger = std::find_if(vRemainingTouchFingerStates.begin(), vRemainingTouchFingerStates.end(), [&](const IInput::CTouchFingerState &TouchFingerState) {
+					return TouchFingerState.m_Finger == TouchButton.m_pBehavior->m_Finger;
+				});
+				dbg_assert(ActiveFinger != vRemainingTouchFingerStates.end(), "Active button finger not found");
+				vRemainingTouchFingerStates.erase(ActiveFinger);
+			}
 			TouchButton.m_pBehavior->SetInactive();
 			continue;
 		}
