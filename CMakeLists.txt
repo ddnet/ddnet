@@ -2359,6 +2359,8 @@ if(CLIENT)
     components/infomessages.h
     components/items.cpp
     components/items.h
+    components/local_server.cpp
+    components/local_server.h
     components/mapimages.cpp
     components/mapimages.h
     components/maplayers.cpp
@@ -2376,6 +2378,7 @@ if(CLIENT)
     components/menus_settings7.cpp
     components/menus_settings_assets.cpp
     components/menus_start.cpp
+    components/menus_start.h
     components/motd.cpp
     components/motd.h
     components/nameplates.cpp

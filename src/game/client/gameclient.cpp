@@ -192,6 +192,8 @@ void CGameClient::OnConsoleInit()
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnInterfacesInit(this);
 
+	m_LocalServer.OnInterfacesInit(this);
+
 	// let all the other components register their console commands
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnConsoleInit();
@@ -598,8 +600,7 @@ void CGameClient::OnConnected()
 		if(g_Config.m_ClAutoDemoOnConnect)
 			Client()->DemoRecorder_HandleAutoStart();
 
-		if(m_Menus.IsServerRunning() && m_aSavedLocalRconPassword[0] != '\0' && net_addr_is_local(&Client()->ServerAddress()))
-			Client()->RconAuth(DEFAULT_SAVED_RCON_USER, m_aSavedLocalRconPassword, g_Config.m_ClDummy);
+		m_LocalServer.RconAuthIfPossible();
 	}
 }
 
@@ -1211,6 +1212,8 @@ void CGameClient::OnShutdown()
 {
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnShutdown();
+
+	m_LocalServer.KillServer();
 }
 
 void CGameClient::OnEnterGame()

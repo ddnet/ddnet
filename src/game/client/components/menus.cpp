@@ -878,6 +878,12 @@ void CMenus::RenderNews(CUIRect MainView)
 	}
 }
 
+void CMenus::OnInterfacesInit(CGameClient *pClient)
+{
+	CComponentInterfaces::OnInterfacesInit(pClient);
+	m_MenusStart.OnInterfacesInit(pClient);
+}
+
 void CMenus::OnInit()
 {
 	if(g_Config.m_ClShowWelcome)
@@ -1138,7 +1144,7 @@ void CMenus::Render()
 		}
 		else if(m_ShowStart)
 		{
-			RenderStartMenu(Screen);
+			m_MenusStart.RenderStartMenu(Screen);
 		}
 		else
 		{
@@ -2232,7 +2238,6 @@ void CMenus::OnReset()
 
 void CMenus::OnShutdown()
 {
-	KillServer();
 	m_CommunityIconLoadJobs.clear();
 	m_CommunityIconDownloadJobs.clear();
 }
@@ -2436,13 +2441,6 @@ void CMenus::RenderBackground()
 	Ui()->MapScreen();
 }
 
-bool CMenus::CheckHotKey(int Key) const
-{
-	return !Input()->ShiftIsPressed() && !Input()->ModifierIsPressed() && !Input()->AltIsPressed() && // no modifier
-	       Input()->KeyPress(Key) &&
-	       !GameClient()->m_GameConsole.IsActive();
-}
-
 int CMenus::DoButton_CheckBox_Tristate(const void *pId, const char *pText, TRISTATE Checked, const CUIRect *pRect)
 {
 	switch(Checked)
@@ -2575,4 +2573,19 @@ void CMenus::RefreshBrowserTab(bool Force)
 			UpdateCommunityCache(true);
 		}
 	}
+}
+
+void CMenus::ForceRefreshLanPage()
+{
+	m_ForceRefreshLanPage = true;
+}
+
+void CMenus::SetShowStart(bool ShowStart)
+{
+	m_ShowStart = ShowStart;
+}
+
+void CMenus::ShowQuitPopup()
+{
+	m_Popup = POPUP_QUIT;
 }
