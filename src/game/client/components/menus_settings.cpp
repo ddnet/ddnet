@@ -3350,12 +3350,12 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	static CButtonContainer s_BackgroundEntitiesMapPicker, s_BackgroundEntitiesReload;
 
-	if(DoButton_FontIcon(&s_BackgroundEntitiesReload, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &ReloadButton, BUTTONFLAG_LEFT))
+	if(Ui()->DoButton_FontIcon(&s_BackgroundEntitiesReload, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &ReloadButton, BUTTONFLAG_LEFT))
 	{
 		m_pClient->m_Background.LoadBackground();
 	}
 
-	if(DoButton_FontIcon(&s_BackgroundEntitiesMapPicker, FONT_ICON_FOLDER, 0, &Button, BUTTONFLAG_LEFT))
+	if(Ui()->DoButton_FontIcon(&s_BackgroundEntitiesMapPicker, FONT_ICON_FOLDER, 0, &Button, BUTTONFLAG_LEFT))
 	{
 		static SPopupMenuId s_PopupMapPickerId;
 		static CPopupMapPickerContext s_PopupMapPickerContext;

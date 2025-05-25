@@ -1143,6 +1143,34 @@ int CUi::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pId, const
 	return DoButtonLogic(pId, Props.m_Checked, pRect, Props.m_Flags);
 }
 
+int CUi::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const unsigned Flags, int Corners, bool Enabled)
+{
+	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.1f : 0.5f) * ButtonColorMul(pButtonContainer)), Corners, 5.0f);
+
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
+	TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+	CUIRect Label;
+	pRect->HMargin(2.0f, &Label);
+	DoLabel(&Label, pText, Label.h * ms_FontmodHeight, TEXTALIGN_MC);
+
+	if(!Enabled)
+	{
+		TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		TextRender()->TextOutlineColor(ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f));
+		DoLabel(&Label, FONT_ICON_SLASH, Label.h * ms_FontmodHeight, TEXTALIGN_MC);
+		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
+
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+
+	return DoButtonLogic(pButtonContainer, Checked, pRect, Flags);
+}
+
 int CUi::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding, bool TransparentInactive, bool Enabled)
 {
 	if(!TransparentInactive || CheckActiveItem(pButtonContainer) || HotItem() == pButtonContainer)
