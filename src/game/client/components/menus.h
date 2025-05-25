@@ -28,16 +28,8 @@
 #include <game/client/ui.h>
 #include <game/voting.h>
 
+#include <game/client/components/menus_start.h>
 #include <game/client/components/skins7.h>
-
-static constexpr const char *DEFAULT_SAVED_RCON_USER = "local-server";
-
-struct CServerProcess
-{
-#if !defined(CONF_PLATFORM_ANDROID)
-	PROCESS m_Process = INVALID_PROCESS;
-#endif
-};
 
 // component to fetch keypresses, override all other input
 class CMenusKeyBinder : public CComponent
@@ -74,6 +66,7 @@ class CMenus : public CComponent
 	static ColorRGBA ms_ColorTabbarActive;
 	static ColorRGBA ms_ColorTabbarHover;
 
+public:
 	int DoButton_Toggle(const void *pId, int Checked, const CUIRect *pRect, bool Active, unsigned Flags = BUTTONFLAG_LEFT);
 	int DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, unsigned Flags = BUTTONFLAG_LEFT, const char *pImageName = nullptr, int Corners = IGraphics::CORNER_ALL, float Rounding = 5.0f, float FontFactor = 0.0f, ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f));
 	int DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator = nullptr, const ColorRGBA *pDefaultColor = nullptr, const ColorRGBA *pActiveColor = nullptr, const ColorRGBA *pHoverColor = nullptr, float EdgeRounding = 10.0f, const SCommunityIcon *pCommunityIcon = nullptr);
@@ -85,6 +78,7 @@ class CMenus : public CComponent
 
 	bool DoLine_RadioMenu(CUIRect &View, const char *pLabel, std::vector<CButtonContainer> &vButtonContainers, const std::vector<const char *> &vLabels, const std::vector<int> &vValues, int &Value);
 
+private:
 	CUi::SColorPickerPopupContext m_ColorPickerPopupContext;
 	ColorHSLA DoLine_ColorPicker(CButtonContainer *pResetId, float LineSize, float LabelSize, float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, ColorRGBA DefaultColor, bool CheckBoxSpacing = true, int *pCheckBoxValue = nullptr, bool Alpha = false);
 	ColorHSLA DoButton_ColorPicker(const CUIRect *pRect, unsigned int *pHslaColor, bool Alpha);
@@ -486,9 +480,6 @@ protected:
 	static void ConchainDemoPlay(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainDemoSpeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
-	// found in menus_start.cpp
-	void RenderStartMenu(CUIRect MainView);
-
 	// found in menus_ingame.cpp
 	STextContainerIndex m_MotdTextContainerIndex;
 	void RenderGame(CUIRect MainView);
@@ -661,8 +652,6 @@ protected:
 
 	IGraphics::CTextureHandle m_TextureBlob;
 
-	bool CheckHotKey(int Key) const;
-
 public:
 	void RenderBackground();
 
@@ -679,10 +668,7 @@ public:
 	bool IsActive() const { return m_MenuActive; }
 	void SetActive(bool Active);
 
-	void RunServer(const char **ppArguments = nullptr, size_t NumArguments = 0);
-	void KillServer();
-	bool IsServerRunning() const;
-
+	void OnInterfacesInit(CGameClient *pClient) override;
 	virtual void OnInit() override;
 
 	virtual void OnStateChange(int NewState, int OldState) override;
@@ -840,10 +826,16 @@ public:
 		DEMOPLAYER_SLICE_SAVE,
 	};
 
-private:
-	static int GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 	void SetMenuPage(int NewPage);
 	void RefreshBrowserTab(bool Force);
+	void ForceRefreshLanPage();
+	void SetShowStart(bool ShowStart);
+	void ShowQuitPopup();
+
+private:
+	CMenusStart m_MenusStart;
+
+	static int GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 
 	// found in menus_ingame.cpp
 	void RenderInGameNetwork(CUIRect MainView);
@@ -853,7 +845,5 @@ private:
 	void RenderSettingsDDNet(CUIRect MainView);
 	void RenderSettingsAppearance(CUIRect MainView);
 	bool RenderHslaScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, float DarkestLight);
-
-	CServerProcess m_ServerProcess;
 };
 #endif
