@@ -87,7 +87,7 @@ int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 				FreeSlot = i;
 			}
 		}
-		else if(net_addr_comp(pAddr, m_aSlots[i].m_Connection.PeerAddress()) == 0)
+		else if(net_addr_comp_noport(pAddr, m_aSlots[i].m_Connection.PeerAddress()) == 0)
 		{
 			DropClient("only one client per IP allowed");
 			return -1;
