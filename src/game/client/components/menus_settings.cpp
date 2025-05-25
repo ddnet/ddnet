@@ -1463,15 +1463,15 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(OldWindowMode != NewWindowMode)
 	{
 		if(NewWindowMode == 0)
-			Client()->SetWindowParams(0, false);
+			Graphics()->SetWindowParams(0, false);
 		else if(NewWindowMode == 1)
-			Client()->SetWindowParams(0, true);
+			Graphics()->SetWindowParams(0, true);
 		else if(NewWindowMode == 2)
-			Client()->SetWindowParams(3, false);
+			Graphics()->SetWindowParams(3, false);
 		else if(NewWindowMode == 3)
-			Client()->SetWindowParams(2, false);
+			Graphics()->SetWindowParams(2, false);
 		else if(NewWindowMode == 4)
-			Client()->SetWindowParams(1, false);
+			Graphics()->SetWindowParams(1, false);
 	}
 
 	if(Graphics()->GetNumScreens() > 1)
@@ -1498,7 +1498,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		s_ScreenDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ScreenDropDownScrollRegion;
 		const int NewScreen = Ui()->DoDropDown(&ScreenDropDown, g_Config.m_GfxScreen, s_vpScreenNames.data(), s_vpScreenNames.size(), s_ScreenDropDownState);
 		if(NewScreen != g_Config.m_GfxScreen)
-			Client()->SwitchWindowScreen(NewScreen);
+			Graphics()->SwitchWindowScreen(NewScreen);
 	}
 
 	MainView.HSplitTop(2.0f, nullptr, &MainView);
@@ -1506,7 +1506,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("V-Sync"), Localize("may cause delay"));
 	if(DoButton_CheckBox(&g_Config.m_GfxVsync, aBuf, g_Config.m_GfxVsync, &Button))
 	{
-		Client()->ToggleWindowVSync();
+		Graphics()->SetVSync(!g_Config.m_GfxVsync);
 	}
 
 	bool MultiSamplingChanged = false;

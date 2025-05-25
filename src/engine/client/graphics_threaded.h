@@ -1195,6 +1195,7 @@ public:
 	void WarnPngliteIncompatibleImages(bool Warn) override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
+	bool SwitchWindowScreen(int Index) override;
 	void Move(int x, int y) override;
 	bool Resize(int w, int h, int RefreshRate) override;
 	void ResizeToScreen() override;

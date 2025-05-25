@@ -4247,50 +4247,16 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 	return 0;
 }
 
-void CClient::SwitchWindowScreen(int Index)
-{
-	//Tested on windows 11 64 bit (gtx 1660 super, intel UHD 630 opengl 1.2.0, 3.3.0 and vulkan 1.1.0)
-	int IsFullscreen = g_Config.m_GfxFullscreen;
-	int IsBorderless = g_Config.m_GfxBorderless;
-
-	if(!Graphics()->SetWindowScreen(Index))
-	{
-		return;
-	}
-
-	SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
-
-	CVideoMode CurMode;
-	Graphics()->GetCurrentVideoMode(CurMode, Index);
-
-	const int Depth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
-	g_Config.m_GfxColorDepth = Depth;
-	g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
-	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
-	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
-
-	Graphics()->ResizeToScreen();
-
-	SetWindowParams(IsFullscreen, IsBorderless);
-}
-
 void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(g_Config.m_GfxScreen != pResult->GetInteger(0))
-			pSelf->SwitchWindowScreen(pResult->GetInteger(0));
+			pSelf->Graphics()->SwitchWindowScreen(pResult->GetInteger(0));
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
-}
-
-void CClient::SetWindowParams(int FullscreenMode, bool IsBorderless)
-{
-	g_Config.m_GfxFullscreen = clamp(FullscreenMode, 0, 3);
-	g_Config.m_GfxBorderless = (int)IsBorderless;
-	Graphics()->SetWindowParams(FullscreenMode, IsBorderless);
 }
 
 void CClient::ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4299,7 +4265,7 @@ void CClient::ConchainFullscreen(IConsole::IResult *pResult, void *pUserData, IC
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(g_Config.m_GfxFullscreen != pResult->GetInteger(0))
-			pSelf->SetWindowParams(pResult->GetInteger(0), g_Config.m_GfxBorderless);
+			pSelf->Graphics()->SetWindowParams(pResult->GetInteger(0), g_Config.m_GfxBorderless);
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
@@ -4311,16 +4277,10 @@ void CClient::ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(!g_Config.m_GfxFullscreen && (g_Config.m_GfxBorderless != pResult->GetInteger(0)))
-			pSelf->SetWindowParams(g_Config.m_GfxFullscreen, !g_Config.m_GfxBorderless);
+			pSelf->Graphics()->SetWindowParams(g_Config.m_GfxFullscreen, !g_Config.m_GfxBorderless);
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
-}
-
-void CClient::ToggleWindowVSync()
-{
-	if(Graphics()->SetVSync(g_Config.m_GfxVsync ^ 1))
-		g_Config.m_GfxVsync ^= 1;
 }
 
 void CClient::Notify(const char *pTitle, const char *pMessage)
@@ -4346,7 +4306,7 @@ void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, I
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(g_Config.m_GfxVsync != pResult->GetInteger(0))
-			pSelf->ToggleWindowVSync();
+			pSelf->Graphics()->SetVSync(pResult->GetInteger(0));
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
