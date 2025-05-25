@@ -1,7 +1,10 @@
 #ifndef ENGINE_SHARED_WEBSOCKETS_H
 #define ENGINE_SHARED_WEBSOCKETS_H
 
+#include <base/detect.h>
+
 #if defined(CONF_FAMILY_UNIX)
+#include <sys/select.h>
 #elif defined(CONF_FAMILY_WINDOWS)
 #include <winsock2.h>
 #endif

@@ -1,5 +1,7 @@
 #if defined(CONF_WEBSOCKETS)
 
+#include "websockets.h"
+
 #include <cstdlib>
 #include <map>
 #include <string>
@@ -13,8 +15,6 @@
 #include <ws2tcpip.h>
 #endif
 #include <libwebsockets.h>
-
-#include "websockets.h"
 
 // not sure why would anyone need more than one but well...
 #define WS_CONTEXTS 4
@@ -74,7 +74,7 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 	switch(reason)
 	{
 	case LWS_CALLBACK_WSI_CREATE:
-		if(pss == NULL)
+		if(pss == nullptr)
 		{
 			return 0;
 		}
@@ -120,7 +120,7 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 	case LWS_CALLBACK_SERVER_WRITEABLE:
 	{
 		websocket_chunk *chunk = (websocket_chunk *)pss->send_buffer.First();
-		if(chunk == NULL)
+		if(chunk == nullptr)
 			break;
 		int chunk_len = chunk->size - chunk->read;
 		int n =
@@ -162,7 +162,7 @@ static struct lws_protocols protocols[] = {
 		sizeof(struct per_session_data) /* per_session_data_size */
 	},
 	{
-		NULL, NULL, 0 /* End of list */
+		nullptr, nullptr, 0 /* End of list */
 	}};
 
 static context_data contexts[WS_CONTEXTS];
@@ -181,7 +181,7 @@ int websocket_create(const char *addr, int port)
 	int first_free = -1;
 	for(int i = 0; i < WS_CONTEXTS; i++)
 	{
-		if(contexts[i].context == NULL)
+		if(contexts[i].context == nullptr)
 		{
 			first_free = i;
 			break;
@@ -194,7 +194,7 @@ int websocket_create(const char *addr, int port)
 	info.user = (void *)ctx_data;
 
 	ctx_data->context = lws_create_context(&info);
-	if(ctx_data->context == NULL)
+	if(ctx_data->context == nullptr)
 	{
 		return -1;
 	}
@@ -205,10 +205,10 @@ int websocket_create(const char *addr, int port)
 int websocket_destroy(int socket)
 {
 	lws_context *context = contexts[socket].context;
-	if(context == NULL)
+	if(context == nullptr)
 		return -1;
 	lws_context_destroy(context);
-	contexts[socket].context = NULL;
+	contexts[socket].context = nullptr;
 	return 0;
 }
 
@@ -216,7 +216,7 @@ int websocket_recv(int socket, unsigned char *data, size_t maxsize,
 	struct sockaddr_in *sockaddrbuf, size_t fromLen)
 {
 	lws_context *context = contexts[socket].context;
-	if(context == NULL)
+	if(context == nullptr)
 		return -1;
 	int n = lws_service(context, -1);
 	if(n < 0)
@@ -246,7 +246,7 @@ int websocket_send(int socket, const unsigned char *data, size_t size,
 	const char *addr_str, int port)
 {
 	lws_context *context = contexts[socket].context;
-	if(context == NULL)
+	if(context == nullptr)
 	{
 		return -1;
 	}
@@ -255,7 +255,7 @@ int websocket_send(int socket, const unsigned char *data, size_t size,
 	snprintf(aBuf, sizeof(aBuf), "%s:%d", addr_str, port);
 	std::string addr_str_with_port = std::string(aBuf);
 	struct per_session_data *pss = ctx_data->port_map[addr_str_with_port];
-	if(pss == NULL)
+	if(pss == nullptr)
 	{
 		struct lws_client_connect_info ccinfo = {0};
 		ccinfo.context = context;
@@ -263,13 +263,13 @@ int websocket_send(int socket, const unsigned char *data, size_t size,
 		ccinfo.port = port;
 		ccinfo.protocol = protocols[0].name;
 		lws *wsi = lws_client_connect_via_info(&ccinfo);
-		if(wsi == NULL)
+		if(wsi == nullptr)
 		{
 			return -1;
 		}
 		lws_service(context, -1);
 		pss = ctx_data->port_map[addr_str_with_port];
-		if(pss == NULL)
+		if(pss == nullptr)
 		{
 			return -1;
 		}
@@ -277,7 +277,7 @@ int websocket_send(int socket, const unsigned char *data, size_t size,
 	websocket_chunk *chunk = (websocket_chunk *)pss->send_buffer.Allocate(
 		size + sizeof(websocket_chunk) + LWS_SEND_BUFFER_PRE_PADDING +
 		LWS_SEND_BUFFER_POST_PADDING);
-	if(chunk == NULL)
+	if(chunk == nullptr)
 		return -1;
 	chunk->size = size;
 	chunk->read = 0;
@@ -291,16 +291,16 @@ int websocket_send(int socket, const unsigned char *data, size_t size,
 int websocket_fd_set(int socket, fd_set *set)
 {
 	lws_context *context = contexts[socket].context;
-	if(context == NULL)
+	if(context == nullptr)
 		return -1;
 	lws_service(context, -1);
 	context_data *ctx_data = (context_data *)lws_context_user(context);
 	int max = 0;
-	for(auto const &x : ctx_data->port_map)
+	for(const auto &[_, pss] : ctx_data->port_map)
 	{
-		if(x.second == NULL)
+		if(pss == nullptr)
 			continue;
-		int fd = lws_get_socket_fd(x.second->wsi);
+		int fd = lws_get_socket_fd(pss->wsi);
 		if(fd > max)
 			max = fd;
 		FD_SET(fd, set);
