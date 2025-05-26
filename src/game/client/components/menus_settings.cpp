@@ -344,13 +344,14 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	static CLineInputBuffered<25> s_FlagFilterInput;
 
 	std::vector<const CCountryFlags::CCountryFlag *> vpFilteredFlags;
-	for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
+	for (const auto &Pair : m_pClient->m_CountryFlags.CountryFlags())
 	{
-		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
-		if(!str_find_nocase(pEntry->m_aCountryCodeString, s_FlagFilterInput.GetString()))
+		const CCountryFlags::CCountryFlag *pCountryFlag = &Pair.second;
+		if (!str_find_nocase(pCountryFlag->m_aCountryCodeString, s_FlagFilterInput.GetString()))
 			continue;
-		vpFilteredFlags.push_back(pEntry);
+		vpFilteredFlags.push_back(pCountryFlag);
 	}
+	std::sort(vpFilteredFlags.begin(), vpFilteredFlags.end(), [](const auto *pA, const auto *pB) { return *pA < *pB; });
 
 	MainView.HSplitTop(10.0f, nullptr, &MainView);
 	MainView.HSplitBottom(20.0f, &MainView, &QuickSearch);

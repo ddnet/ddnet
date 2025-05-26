@@ -1093,7 +1093,7 @@ CUi::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIR
 
 	static CListBox s_ListBox;
 	s_ListBox.SetActive(Active);
-	s_ListBox.DoStart(50.0f, pMenus->m_pClient->m_CountryFlags.Num(), 8, 1, -1, &View, false);
+	s_ListBox.DoStart(50.0f, pMenus->m_pClient->m_CountryFlags.CountryFlags().size(), 8, 1, -1, &View, false);
 
 	if(pPopupContext->m_New)
 	{
@@ -1101,11 +1101,11 @@ CUi::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIR
 		s_ListBox.ScrollToSelected();
 	}
 
-	for(size_t i = 0; i < pMenus->m_pClient->m_CountryFlags.Num(); ++i)
+	for(const auto &[_, CountryFlag] : pMenus->m_pClient->m_CountryFlags.CountryFlags())
 	{
-		const CCountryFlags::CCountryFlag *pEntry = pMenus->m_pClient->m_CountryFlags.GetByIndex(i);
-
-		const CListboxItem Item = s_ListBox.DoNextItem(pEntry, pEntry->m_CountryCode == pPopupContext->m_Selection);
+		const CListboxItem Item = s_ListBox.DoNextItem(&CountryFlag, CountryFlag.m_CountryCode == pPopupContext->m_Selection);
+		if(Item.m_Selected)
+			pPopupContext->m_Selection = CountryFlag.m_CountryCode;
 		if(!Item.m_Visible)
 			continue;
 
@@ -1116,13 +1116,13 @@ CUi::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIR
 		const float OldWidth = FlagRect.w;
 		FlagRect.w = FlagRect.h * 2.0f;
 		FlagRect.x += (OldWidth - FlagRect.w) / 2.0f;
-		pMenus->m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+		pMenus->m_pClient->m_CountryFlags.Render(CountryFlag.m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
 
-		pMenus->Ui()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, TEXTALIGN_MC);
+		pMenus->Ui()->DoLabel(&Label, CountryFlag.m_aCountryCodeString, 10.0f, TEXTALIGN_MC);
 	}
 
-	const int NewSelected = s_ListBox.DoEnd();
-	pPopupContext->m_Selection = NewSelected >= 0 ? pMenus->m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode : -1;
+	s_ListBox.DoEnd();
+
 	if(s_ListBox.WasItemSelected() || s_ListBox.WasItemActivated())
 	{
 		g_Config.m_BrFilterCountry = 1;

@@ -5,13 +5,15 @@
 
 #include <engine/graphics.h>
 #include <game/client/component.h>
-#include <vector>
+
+#include <unordered_map>
 
 class CCountryFlags : public CComponent
 {
 public:
-	struct CCountryFlag
+	class CCountryFlag
 	{
+	public:
 		int m_CountryCode;
 		char m_aCountryCodeString[8];
 		IGraphics::CTextureHandle m_Texture;
@@ -22,21 +24,13 @@ public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;
 
-	size_t Num() const;
-	const CCountryFlag *GetByCountryCode(int CountryCode) const;
-	const CCountryFlag *GetByIndex(size_t Index) const;
+	const std::unordered_map<int, CCountryFlag> &CountryFlags() const;
+
 	void Render(const CCountryFlag *pFlag, ColorRGBA Color, float x, float y, float w, float h);
 	void Render(int CountryCode, ColorRGBA Color, float x, float y, float w, float h);
 
 private:
-	enum
-	{
-		CODE_LB = -1,
-		CODE_UB = 999,
-		CODE_RANGE = CODE_UB - CODE_LB + 1,
-	};
-	std::vector<CCountryFlag> m_vCountryFlags;
-	size_t m_aCodeIndexLUT[CODE_RANGE];
+	std::unordered_map<int, CCountryFlag> m_CountryFlags;
 
 	int m_FlagsQuadContainerIndex;
 

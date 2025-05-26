@@ -47,11 +47,11 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 			continue;
 		}
 
-		int CountryCode = str_toint(pReplacement + 3);
-		if(CountryCode < CODE_LB || CountryCode > CODE_UB)
+		int CountryCode;
+		if(!str_toint(pReplacement + 3, &CountryCode))
 		{
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "country code '%i' not within valid code range [%i..%i]", CountryCode, CODE_LB, CODE_UB);
+			str_format(aBuf, sizeof(aBuf), "country code '%s' not a valid int", pReplacement + 3);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
 			continue;
 		}
@@ -79,42 +79,22 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 			str_format(aBuf, sizeof(aBuf), "loaded country flag '%s'", aOrigin);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "countryflags", aBuf);
 		}
-		m_vCountryFlags.push_back(CountryFlag);
+		m_CountryFlags[CountryCode] = CountryFlag;
 	}
-
-	std::sort(m_vCountryFlags.begin(), m_vCountryFlags.end());
-
-	// find index of default item
-	size_t DefaultIndex = 0;
-	for(size_t Index = 0; Index < m_vCountryFlags.size(); ++Index)
-		if(m_vCountryFlags[Index].m_CountryCode == -1)
-		{
-			DefaultIndex = Index;
-			break;
-		}
-
-	// init LUT
-	if(DefaultIndex != 0)
-		for(size_t &CodeIndexLUT : m_aCodeIndexLUT)
-			CodeIndexLUT = DefaultIndex;
-	else
-		mem_zero(m_aCodeIndexLUT, sizeof(m_aCodeIndexLUT));
-	for(size_t i = 0; i < m_vCountryFlags.size(); ++i)
-		m_aCodeIndexLUT[maximum(0, (m_vCountryFlags[i].m_CountryCode - CODE_LB) % CODE_RANGE)] = i;
 }
 
 void CCountryFlags::OnInit()
 {
 	// load country flags
-	m_vCountryFlags.clear();
+	m_CountryFlags.clear();
 	LoadCountryflagsIndexfile();
-	if(m_vCountryFlags.empty())
+	if(m_CountryFlags.empty())
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "countryflags", "failed to load country flags. folder='countryflags/'");
 		CCountryFlag DummyEntry;
 		DummyEntry.m_CountryCode = -1;
 		mem_zero(DummyEntry.m_aCountryCodeString, sizeof(DummyEntry.m_aCountryCodeString));
-		m_vCountryFlags.push_back(DummyEntry);
+		m_CountryFlags[DummyEntry.m_CountryCode] = DummyEntry;
 	}
 
 	m_FlagsQuadContainerIndex = Graphics()->CreateQuadContainer(false);
@@ -124,19 +104,9 @@ void CCountryFlags::OnInit()
 	Graphics()->QuadContainerUpload(m_FlagsQuadContainerIndex);
 }
 
-size_t CCountryFlags::Num() const
+const std::unordered_map<int, CCountryFlags::CCountryFlag> &CCountryFlags::CountryFlags() const
 {
-	return m_vCountryFlags.size();
-}
-
-const CCountryFlags::CCountryFlag *CCountryFlags::GetByCountryCode(int CountryCode) const
-{
-	return GetByIndex(m_aCodeIndexLUT[maximum(0, (CountryCode - CODE_LB) % CODE_RANGE)]);
-}
-
-const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(size_t Index) const
-{
-	return &m_vCountryFlags[Index % m_vCountryFlags.size()];
+	return m_CountryFlags;
 }
 
 void CCountryFlags::Render(const CCountryFlag *pFlag, ColorRGBA Color, float x, float y, float w, float h)
@@ -151,5 +121,8 @@ void CCountryFlags::Render(const CCountryFlag *pFlag, ColorRGBA Color, float x, 
 
 void CCountryFlags::Render(int CountryCode, ColorRGBA Color, float x, float y, float w, float h)
 {
-	Render(GetByCountryCode(CountryCode), Color, x, y, w, h);
+	auto It = m_CountryFlags.find(CountryCode);
+	if(It == m_CountryFlags.end())
+		It = m_CountryFlags.find(-1);
+	Render(&It->second, Color, x, y, w, h);
 }
