@@ -60,6 +60,14 @@ TEST(Filesystem, SplitFileExtension)
 	EXPECT_STREQ(aExt, "");
 }
 
+TEST(Filesystem, StoragePath)
+{
+	char aStoragePath[IO_MAX_PATH_LENGTH];
+	ASSERT_FALSE(fs_storage_path("TestAppName", aStoragePath, sizeof(aStoragePath)));
+	EXPECT_FALSE(fs_is_relative_path(aStoragePath));
+	EXPECT_TRUE(str_endswith_nocase(aStoragePath, "/TestAppName"));
+}
+
 TEST(Filesystem, CreateCloseDelete)
 {
 	CTestInfo Info;
