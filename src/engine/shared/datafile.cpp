@@ -205,6 +205,13 @@ public:
 			// v4 has compressed data
 			const unsigned OriginalUncompressedSize = m_Info.m_pDataSizes[Index];
 			log_trace("datafile", "loading data. index=%d size=%d uncompressed=%d", Index, DataSize, OriginalUncompressedSize);
+			if(OriginalUncompressedSize == 0)
+			{
+				log_error("datafile", "data size invalid. data will be ignored. index=%d size=%d uncompressed=%d", Index, DataSize, OriginalUncompressedSize);
+				m_ppDataPtrs[Index] = nullptr;
+				m_pDataSizes[Index] = -1;
+				return nullptr;
+			}
 
 			// read the compressed data
 			void *pCompressedData = malloc(DataSize);
@@ -408,7 +415,13 @@ public:
 			for(int Index = 0; Index < m_Header.m_NumRawData; Index++)
 			{
 				const int Size = m_Info.m_pDataSizes[Index];
-				Check(Size > 0, "data size invalid. index=%d size=%d", Index, Size);
+				Check(Size >= 0, "data size invalid. index=%d size=%d", Index, Size);
+				if(Size == 0)
+				{
+					// Data of size zero is not allowed, but due to existing maps with this quirk we instead allow
+					// the file to be loaded and fail loading the data in the GetData function if the size is zero.
+					log_warn("datafile", "invalid file information: data size invalid. index=%d size=%d", Index, Size);
+				}
 			}
 		}
 
