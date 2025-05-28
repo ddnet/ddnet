@@ -2526,17 +2526,47 @@ int fs_parent_dir(char *path)
 int fs_remove(const char *filename)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	const std::wstring wide_filename = windows_utf8_to_wide(filename);
-	if(DeleteFileW(wide_filename.c_str()) != 0)
+	if(fs_is_dir(filename))
 	{
-		return 0;
+		// Not great, but otherwise using this function on a folder would only rename the folder but fail to delete it.
+		return 1;
+	}
+	const std::wstring wide_filename = windows_utf8_to_wide(filename);
+
+	unsigned random_num = secure_rand();
+	std::wstring wide_filename_temp;
+	do
+	{
+		char suffix[64];
+		str_format(suffix, sizeof(suffix), ".%08X.toberemoved", random_num);
+		wide_filename_temp = wide_filename + windows_utf8_to_wide(suffix);
+		++random_num;
+	} while(GetFileAttributesW(wide_filename_temp.c_str()) != INVALID_FILE_ATTRIBUTES);
+
+	// The DeleteFileW function only marks the file for deletion but the deletion may not take effect immediately, which can
+	// cause subsequent operations using this filename to fail until all handles are closed. The MoveFileExW function with the
+	// MOVEFILE_WRITE_THROUGH flag is guaranteed to wait for the file to be moved on disk, so we first rename the file to be
+	// deleted to a random temporary name and then mark that for deletion, to ensure that the filename is usable immediately.
+	if(MoveFileExW(wide_filename.c_str(), wide_filename_temp.c_str(), MOVEFILE_WRITE_THROUGH) == 0)
+	{
+		const DWORD error = GetLastError();
+		if(error == ERROR_FILE_NOT_FOUND)
+		{
+			return 0; // Success: Renaming failed because the original file did not exist.
+		}
+		log_error("filesystem", "Failed to rename file '%s' to '%s' for removal (%ld '%s')", wide_filename, wide_filename_temp, error, windows_format_system_message(error).c_str());
+		return 1;
+	}
+	if(DeleteFileW(wide_filename_temp.c_str()) != 0)
+	{
+		return 0; // Success: Marked the renamed file for deletion successfully.
 	}
 	const DWORD error = GetLastError();
 	if(error == ERROR_FILE_NOT_FOUND)
 	{
-		return 0;
+		return 0; // Success: Another process deleted the renamed file we were about to delete?!
 	}
-	log_error("filesystem", "Failed to remove file '%s' (%ld '%s')", filename, error, windows_format_system_message(error).c_str());
+	log_error("filesystem", "Failed to remove file '%s' (%ld '%s')", wide_filename_temp, error, windows_format_system_message(error).c_str());
 	return 1;
 #else
 	if(unlink(filename) == 0 || errno == ENOENT)
