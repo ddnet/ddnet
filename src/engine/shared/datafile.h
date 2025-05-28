@@ -31,7 +31,7 @@ public:
 	~CDataFileReader();
 	CDataFileReader &operator=(CDataFileReader &&Other);
 
-	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
+	[[nodiscard]] bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
 	void Close();
 	bool IsOpen() const;
 	IOHANDLE File() const;
@@ -125,7 +125,7 @@ public:
 	}
 	~CDataFileWriter();
 
-	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
+	[[nodiscard]] bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
 	int AddItem(int Type, int Id, size_t Size, const void *pData, const CUuid *pUuid = nullptr);
 	int AddData(size_t Size, const void *pData, ECompressionLevel CompressionLevel = COMPRESSION_DEFAULT);
 	int AddDataSwapped(size_t Size, const void *pData);

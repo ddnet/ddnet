@@ -2752,10 +2752,14 @@ int CServer::LoadMap(const char *pMapName)
 
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "maps/%s.map", pMapName);
-	GameServer()->OnMapChange(aBuf, sizeof(aBuf));
-
-	if(!m_pMap->Load(aBuf))
+	if(!GameServer()->OnMapChange(aBuf, sizeof(aBuf)))
+	{
 		return 0;
+	}
+	if(!m_pMap->Load(aBuf))
+	{
+		return 0;
+	}
 
 	// reinit snapshot ids
 	m_IdPool.TimeoutIds();

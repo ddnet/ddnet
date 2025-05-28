@@ -312,7 +312,7 @@ public:
 	void OnConsoleInit() override;
 	void RegisterDDRaceCommands();
 	void RegisterChatCommands();
-	void OnMapChange(char *pNewMapName, int MapNameSize) override;
+	[[nodiscard]] bool OnMapChange(char *pNewMapName, int MapNameSize) override;
 	void OnShutdown(void *pPersistentData) override;
 
 	void OnTick() override;

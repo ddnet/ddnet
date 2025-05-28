@@ -4180,7 +4180,7 @@ void CGameContext::DeleteTempfile()
 	}
 }
 
-void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
+bool CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 {
 	char aConfig[IO_MAX_PATH_LENGTH];
 	str_format(aConfig, sizeof(aConfig), "maps/%s.cfg", g_Config.m_SvMap);
@@ -4189,7 +4189,14 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	if(!LineReader.OpenFile(Storage()->OpenFile(aConfig, IOFLAG_READ, IStorage::TYPE_ALL)))
 	{
 		// No map-specific config, just return.
-		return;
+		return true;
+	}
+
+	CDataFileReader Reader;
+	if(!Reader.Open(Storage(), pNewMapName, IStorage::TYPE_ALL))
+	{
+		log_error("mapchange", "Failed to import settings from '%s': failed to open map '%s' for reading", aConfig, pNewMapName);
+		return false;
 	}
 
 	std::vector<const char *> vpLines;
@@ -4208,9 +4215,6 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		mem_copy(pSettings + Offset, pLine, Length);
 		Offset += Length;
 	}
-
-	CDataFileReader Reader;
-	Reader.Open(Storage(), pNewMapName, IStorage::TYPE_ALL);
 
 	CDataFileWriter Writer;
 
@@ -4238,7 +4242,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 					{
 						// Configs coincide, no need to update map.
 						free(pSettings);
-						return;
+						return true;
 					}
 					Reader.UnloadData(pInfo->m_Settings);
 				}
@@ -4286,15 +4290,21 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		Reader.UnloadData(i);
 	}
 
-	dbg_msg("mapchange", "imported settings");
 	free(pSettings);
 	Reader.Close();
+
 	char aTemp[IO_MAX_PATH_LENGTH];
-	Writer.Open(Storage(), IStorage::FormatTmpPath(aTemp, sizeof(aTemp), pNewMapName));
+	if(!Writer.Open(Storage(), IStorage::FormatTmpPath(aTemp, sizeof(aTemp), pNewMapName)))
+	{
+		log_error("mapchange", "Failed to import settings from '%s': failed to open map '%s' for writing", aConfig, aTemp);
+		return false;
+	}
 	Writer.Finish();
+	log_info("mapchange", "Imported settings from '%s' into '%s'", aConfig, aTemp);
 
 	str_copy(pNewMapName, aTemp, MapNameSize);
 	str_copy(m_aDeleteTempfile, aTemp, sizeof(m_aDeleteTempfile));
+	return true;
 }
 
 void CGameContext::OnShutdown(void *pPersistentData)
