@@ -62,9 +62,8 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 		return;
 	Channels = minimum<size_t>(Channels, pItem->m_Channels, CEnvPoint::MAX_CHANNELS);
 
-	CMapBasedEnvelopePointAccess EnvelopePoints(pThis->m_pLayers->Map());
-	EnvelopePoints.SetPointsRange(pItem->m_StartPoint, pItem->m_NumPoints);
-	if(EnvelopePoints.NumPoints() == 0)
+	pThis->m_pEnvelopePoints->SetPointsRange(pItem->m_StartPoint, pItem->m_NumPoints);
+	if(pThis->m_pEnvelopePoints->NumPoints() == 0)
 		return;
 
 	static std::chrono::nanoseconds s_Time{0};
@@ -91,7 +90,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 		s_Time += CurTime - s_LastLocalTime;
 		s_LastLocalTime = CurTime;
 	}
-	CRenderTools::RenderEvalEnvelope(&EnvelopePoints, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
+	CRenderTools::RenderEvalEnvelope(pThis->m_pEnvelopePoints.get(), s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Result, Channels);
 }
 
 static void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, unsigned char Flags, unsigned char Index, int x, int y, const ivec2 &Offset, int Scale)
@@ -280,6 +279,8 @@ CMapLayers::~CMapLayers()
 
 void CMapLayers::OnMapLoad()
 {
+	m_pEnvelopePoints = std::make_unique<CMapBasedEnvelopePointAccess>(m_pLayers->Map());
+
 	if(!Graphics()->IsTileBufferingEnabled() && !Graphics()->IsQuadBufferingEnabled())
 	{
 		// Find game group
