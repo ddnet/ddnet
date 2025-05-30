@@ -2569,7 +2569,9 @@ int fs_remove(const char *filename)
 	}
 	const std::string filename_temp = windows_wide_to_utf8(wide_filename_temp.c_str()).value_or("(invalid filename)");
 	log_error("filesystem", "Failed to remove file '%s' (%ld '%s')", filename_temp.c_str(), error, windows_format_system_message(error).c_str());
-	return 1;
+	// Success: While the temporary could not be deleted, this is also considered success because the original file does not exist anymore.
+	//          Callers of this function expect that the original file does not exist anymore if and only if the function succeeded.
+	return 0;
 #else
 	if(unlink(filename) == 0 || errno == ENOENT)
 	{
