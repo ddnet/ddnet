@@ -2554,7 +2554,8 @@ int fs_remove(const char *filename)
 		{
 			return 0; // Success: Renaming failed because the original file did not exist.
 		}
-		log_error("filesystem", "Failed to rename file '%s' to '%s' for removal (%ld '%s')", wide_filename, wide_filename_temp, error, windows_format_system_message(error).c_str());
+		const std::string filename_temp = windows_wide_to_utf8(wide_filename_temp.c_str()).value_or("(invalid filename)");
+		log_error("filesystem", "Failed to rename file '%s' to '%s' for removal (%ld '%s')", filename, filename_temp.c_str(), error, windows_format_system_message(error).c_str());
 		return 1;
 	}
 	if(DeleteFileW(wide_filename_temp.c_str()) != 0)
@@ -2566,8 +2567,11 @@ int fs_remove(const char *filename)
 	{
 		return 0; // Success: Another process deleted the renamed file we were about to delete?!
 	}
-	log_error("filesystem", "Failed to remove file '%s' (%ld '%s')", wide_filename_temp, error, windows_format_system_message(error).c_str());
-	return 1;
+	const std::string filename_temp = windows_wide_to_utf8(wide_filename_temp.c_str()).value_or("(invalid filename)");
+	log_error("filesystem", "Failed to remove file '%s' (%ld '%s')", filename_temp.c_str(), error, windows_format_system_message(error).c_str());
+	// Success: While the temporary could not be deleted, this is also considered success because the original file does not exist anymore.
+	//          Callers of this function expect that the original file does not exist anymore if and only if the function succeeded.
+	return 0;
 #else
 	if(unlink(filename) == 0 || errno == ENOENT)
 	{
