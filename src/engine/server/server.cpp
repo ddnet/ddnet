@@ -1138,11 +1138,10 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_DDNetVersionSettled = false;
 	mem_zero(&pThis->m_aClients[ClientId].m_Addr, sizeof(NETADDR));
 	pThis->m_aClients[ClientId].Reset();
+	pThis->m_aClients[ClientId].m_Sixup = Sixup;
 
 	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientId, Sixup);
 	pThis->Antibot()->OnEngineClientJoin(ClientId);
-
-	pThis->m_aClients[ClientId].m_Sixup = Sixup;
 
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(OPEN_SESSION, pThis->ClientAddr(ClientId));
