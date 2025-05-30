@@ -294,6 +294,13 @@ public:
 	virtual void DemoSliceEnd() = 0;
 	virtual void DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser) = 0;
 
+	enum class EInfoState
+	{
+		LOADING,
+		SUCCESS,
+		ERROR,
+	};
+	virtual EInfoState InfoState() const = 0;
 	virtual void RequestDDNetInfo() = 0;
 	virtual bool EditorHasUnsavedData() const = 0;
 
