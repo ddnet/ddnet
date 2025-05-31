@@ -308,4 +308,21 @@ int websocket_fd_set(int socket, fd_set *set)
 	return max;
 }
 
+int websocket_fd_get(int socket, fd_set *set)
+{
+	lws_context *context = contexts[socket].context;
+	if(context == nullptr)
+		return -1;
+	lws_service(context, -1);
+	context_data *ctx_data = (context_data *)lws_context_user(context);
+	for(const auto &[_, pss] : ctx_data->port_map)
+	{
+		if(pss == nullptr)
+			continue;
+		if(FD_ISSET(lws_get_socket_fd(pss->wsi), set))
+			return 1;
+	}
+	return 0;
+}
+
 #endif

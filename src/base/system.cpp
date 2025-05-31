@@ -2660,52 +2660,50 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 {
 	fd_set readfds;
 	FD_ZERO(&readfds);
-	int sockid = 0;
+
+	int maxfd = -1;
 	if(sock->ipv4sock >= 0)
 	{
 		FD_SET(sock->ipv4sock, &readfds);
-		sockid = sock->ipv4sock;
+		maxfd = sock->ipv4sock;
 	}
 	if(sock->ipv6sock >= 0)
 	{
 		FD_SET(sock->ipv6sock, &readfds);
-		if(sock->ipv6sock > sockid)
-			sockid = sock->ipv6sock;
+		maxfd = std::max(maxfd, sock->ipv6sock);
 	}
 #if defined(CONF_WEBSOCKETS)
 	if(sock->web_ipv4sock >= 0)
 	{
-		int maxfd = websocket_fd_set(sock->web_ipv4sock, &readfds);
-		if(maxfd > sockid)
-		{
-			sockid = maxfd;
-			FD_SET(sockid, &readfds);
-		}
+		maxfd = std::max(maxfd, websocket_fd_set(sock->web_ipv4sock, &readfds));
 	}
 #endif
+	if(maxfd < 0)
+	{
+		return 0;
+	}
 
 	/* don't care about writefds and exceptfds */
 	if(time < 0)
 	{
-		select(sockid + 1, &readfds, nullptr, nullptr, nullptr);
+		select(maxfd + 1, &readfds, nullptr, nullptr, nullptr);
 	}
 	else
 	{
 		struct timeval tv;
 		tv.tv_sec = time / 1000000;
 		tv.tv_usec = time % 1000000;
-		select(sockid + 1, &readfds, nullptr, nullptr, &tv);
+		select(maxfd + 1, &readfds, nullptr, nullptr, &tv);
 	}
 
 	if(sock->ipv4sock >= 0 && FD_ISSET(sock->ipv4sock, &readfds))
 		return 1;
-#if defined(CONF_WEBSOCKETS)
-	if(sock->web_ipv4sock >= 0 && FD_ISSET(sockid, &readfds))
-		return 1;
-#endif
 	if(sock->ipv6sock >= 0 && FD_ISSET(sock->ipv6sock, &readfds))
 		return 1;
-
+#if defined(CONF_WEBSOCKETS)
+	if(sock->web_ipv4sock >= 0 && websocket_fd_get(sock->web_ipv4sock, &readfds))
+		return 1;
+#endif
 	return 0;
 }
 

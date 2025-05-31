@@ -17,5 +17,6 @@ int websocket_recv(int socket, unsigned char *data, size_t maxsize, struct socka
 int websocket_send(int socket, const unsigned char *data, size_t size,
 	const char *addr_str, int port);
 int websocket_fd_set(int socket, fd_set *set);
+int websocket_fd_get(int socket, fd_set *set);
 
 #endif // ENGINE_SHARED_WEBSOCKETS_H
