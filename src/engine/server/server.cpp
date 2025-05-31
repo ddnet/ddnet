@@ -212,8 +212,6 @@ void CServer::CClient::Reset()
 	// reset input
 	for(auto &Input : m_aInputs)
 		Input.m_GameTick = -1;
-	m_CurrentInput = 0;
-	mem_zero(&m_LatestInput, sizeof(m_LatestInput));
 
 	m_Snapshots.PurgeAll();
 	m_LastAckedSnapshot = -1;
@@ -1787,12 +1785,22 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			const int LastAckedSnapshot = Unpacker.GetInt();
 			int IntendedTick = Unpacker.GetInt();
 			int Size = Unpacker.GetInt();
+
+			int BufferPosition = IntendedTick % 200;
+			// The client is not allowed to change inputs for a tick they have already sent to the server
+			if(m_aClients[ClientId].m_aInputs[BufferPosition].m_GameTick == IntendedTick)
+			{
+				return;
+			}
 			if(Unpacker.Error() || Size / 4 > MAX_INPUT_SIZE || IntendedTick < MIN_TICK || IntendedTick >= MAX_TICK)
 			{
 				return;
 			}
 
-			m_aClients[ClientId].m_LastAckedSnapshot = LastAckedSnapshot;
+			// The LastAckedSnapshot should only increase
+			if(LastAckedSnapshot > m_aClients[ClientId].m_LastAckedSnapshot || LastAckedSnapshot == -1)
+				m_aClients[ClientId].m_LastAckedSnapshot = LastAckedSnapshot;
+
 			if(m_aClients[ClientId].m_LastAckedSnapshot > 0)
 				m_aClients[ClientId].m_SnapRate = CClient::SNAPRATE_FULL;
 
@@ -1814,11 +1822,18 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			m_aClients[ClientId].m_LastInputTick = IntendedTick;
 
-			CClient::CInput *pInput = &m_aClients[ClientId].m_aInputs[m_aClients[ClientId].m_CurrentInput];
-
+			// TODO: This should probably not be here, the most recent input can be found by looping over the ring buffer
+			// so we should not change the inputs original intended tick since we might need that information
 			if(IntendedTick <= Tick())
 				IntendedTick = Tick() + 1;
 
+			// Check once again that we are not overriding an input the client has already sent
+			// This is a workaround while the above code is still able to change IntendedTick
+			BufferPosition = IntendedTick % 200;
+			if(m_aClients[ClientId].m_aInputs[BufferPosition].m_GameTick == IntendedTick)
+				return;
+
+			CClient::CInput *pInput = &m_aClients[ClientId].m_aInputs[BufferPosition];
 			pInput->m_GameTick = IntendedTick;
 
 			for(int i = 0; i < Size / 4; i++)
@@ -1831,14 +1846,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 
 			GameServer()->OnClientPrepareInput(ClientId, pInput->m_aData);
-			mem_copy(m_aClients[ClientId].m_LatestInput.m_aData, pInput->m_aData, MAX_INPUT_SIZE * sizeof(int));
 
-			m_aClients[ClientId].m_CurrentInput++;
-			m_aClients[ClientId].m_CurrentInput %= 200;
+			CClient::CInput LatestInput;
+			mem_copy(LatestInput.m_aData, pInput->m_aData, MAX_INPUT_SIZE * sizeof(int));
 
 			// call the mod with the fresh input data
 			if(m_aClients[ClientId].m_State == CClient::STATE_INGAME)
-				GameServer()->OnClientDirectInput(ClientId, m_aClients[ClientId].m_LatestInput.m_aData);
+				GameServer()->OnClientFreshInput(ClientId, LatestInput.m_aData);
 		}
 		else if(Msg == NETMSG_RCON_CMD)
 		{
@@ -2879,8 +2893,6 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 			Input.m_Direction = (ClientId & 1) ? -1 : 1;
 			Client.m_aInputs[0].m_GameTick = Tick() + 1;
 			mem_copy(Client.m_aInputs[0].m_aData, &Input, minimum(sizeof(Input), sizeof(Client.m_aInputs[0].m_aData)));
-			Client.m_LatestInput = Client.m_aInputs[0];
-			Client.m_CurrentInput = 0;
 		}
 	}
 
@@ -3104,23 +3116,6 @@ int CServer::Run()
 				UpdateDebugDummies(false);
 #endif
 
-				for(int c = 0; c < MAX_CLIENTS; c++)
-				{
-					if(m_aClients[c].m_State != CClient::STATE_INGAME)
-						continue;
-					bool ClientHadInput = false;
-					for(auto &Input : m_aClients[c].m_aInputs)
-					{
-						if(Input.m_GameTick == Tick() + 1)
-						{
-							GameServer()->OnClientPredictedEarlyInput(c, Input.m_aData);
-							ClientHadInput = true;
-						}
-					}
-					if(!ClientHadInput)
-						GameServer()->OnClientPredictedEarlyInput(c, nullptr);
-				}
-
 				m_CurrentGameTick++;
 				NewTicks++;
 
@@ -3142,7 +3137,6 @@ int CServer::Run()
 					if(!ClientHadInput)
 						GameServer()->OnClientPredictedInput(c, nullptr);
 				}
-
 				GameServer()->OnTick();
 				if(ErrorShutdown())
 				{
