@@ -636,7 +636,7 @@ void CPlayers::RenderPlayer(
 						else
 							Dir = vec2(m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_X, m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_Y) - vec2(m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev.m_X, m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev.m_Y);
 						float HadOkenAngle = 0;
-						if(absolute(Dir.x) > 0.0001f || absolute(Dir.y) > 0.0001f)
+						if(absolute(Dir.x) > 0.0001f || std::abs(Dir.y) > 0.0001f)
 						{
 							Dir = normalize(Dir);
 							HadOkenAngle = angle(Dir);

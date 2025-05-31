@@ -1211,7 +1211,7 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 			{
 				m_ActiveValueSelectorState.m_ScrollValue += MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
 
-				if(absolute(m_ActiveValueSelectorState.m_ScrollValue) > Props.m_Scale)
+				if(std::abs(m_ActiveValueSelectorState.m_ScrollValue) > Props.m_Scale)
 				{
 					const int64_t Count = (int64_t)(m_ActiveValueSelectorState.m_ScrollValue / Props.m_Scale);
 					m_ActiveValueSelectorState.m_ScrollValue = std::fmod(m_ActiveValueSelectorState.m_ScrollValue, Props.m_Scale);

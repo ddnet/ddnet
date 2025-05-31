@@ -213,7 +213,7 @@ constexpr inline ColorHSLA color_cast(const ColorRGBA &rgb)
 	float c = Max - Min;
 	float h = RgbToHue(rgb.r, rgb.g, rgb.b);
 	float l = 0.5f * (Max + Min);
-	float s = (Max != 0.0f && Min != 1.0f) ? (c / (1 - (absolute(2 * l - 1)))) : 0;
+	float s = (Max != 0.0f && Min != 1.0f) ? (c / (1 - (std::abs(2 * l - 1)))) : 0;
 
 	return ColorHSLA(h, s, l, rgb.a);
 }
@@ -224,8 +224,8 @@ constexpr inline ColorRGBA color_cast(const ColorHSLA &hsl)
 	vec3 rgb = vec3(0, 0, 0);
 
 	float h1 = hsl.h * 6;
-	float c = (1.f - absolute(2 * hsl.l - 1)) * hsl.s;
-	float x = c * (1.f - absolute(std::fmod(h1, 2) - 1.f));
+	float c = (1.f - std::abs(2 * hsl.l - 1)) * hsl.s;
+	float x = c * (1.f - std::abs(std::fmod(h1, 2) - 1.f));
 
 	switch(round_truncate(h1))
 	{

@@ -90,7 +90,7 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 
 			case ISound::SHAPE_RECTANGLE:
 			{
-				const vec2 AbsoluteDelta = vec2(absolute(Delta.x), absolute(Delta.y));
+				const vec2 AbsoluteDelta = vec2(absolute(Delta.x), std::abs(Delta.y));
 				const float w = Voice.m_Rectangle.m_Width / 2.0f;
 				const float h = Voice.m_Rectangle.m_Height / 2.0f;
 				RangeX = w;
@@ -791,7 +791,7 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
 
 	// at least 200msec off, else depend on buffer size
 	float Threshold = maximum(0.2f * m_aVoices[VoiceId].m_pSample->m_Rate, (float)m_MaxFrames);
-	if(absolute(m_aVoices[VoiceId].m_Tick - Tick) > Threshold)
+	if(std::abs(m_aVoices[VoiceId].m_Tick - Tick) > Threshold)
 	{
 		// take care of looping (modulo!)
 		if(!(IsLooping && (std::min(m_aVoices[VoiceId].m_Tick, Tick) + m_aVoices[VoiceId].m_pSample->m_NumFrames - std::max(m_aVoices[VoiceId].m_Tick, Tick)) <= Threshold))

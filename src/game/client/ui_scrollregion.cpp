@@ -128,7 +128,7 @@ void CScrollRegion::End()
 
 	m_AnimTargetScrollY = std::clamp(m_AnimTargetScrollY, 0.0f, MaxScroll);
 
-	if(absolute(m_AnimInitScrollY - m_AnimTargetScrollY) < 0.5f)
+	if(std::abs(m_AnimInitScrollY - m_AnimTargetScrollY) < 0.5f)
 		m_AnimTime = 0.0f;
 
 	if(m_AnimTime > 0.0f)

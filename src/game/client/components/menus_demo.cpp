@@ -132,7 +132,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const auto &&FindPreviousMarkerPosition = [&]() {
 		for(int i = pInfo->m_NumTimelineMarkers - 1; i >= 0; i--)
 		{
-			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick && std::abs(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
 			{
 				return (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
 			}
@@ -142,7 +142,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const auto &&FindNextMarkerPosition = [&]() {
 		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
 		{
-			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) > CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) > CurrentTick && std::abs(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
 			{
 				return (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
 			}
@@ -460,14 +460,14 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				if(Input()->ShiftIsPressed())
 				{
 					AmountSeek = s_PrevAmount + (AmountSeek - s_PrevAmount) * 0.05f;
-					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.0001f)
+					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && std::abs(s_PrevAmount - AmountSeek) >= 0.0001f)
 					{
 						PositionToSeek = AmountSeek;
 					}
 				}
 				else
 				{
-					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.001f)
+					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && std::abs(s_PrevAmount - AmountSeek) >= 0.001f)
 					{
 						s_PrevAmount = AmountSeek;
 						PositionToSeek = AmountSeek;

@@ -476,7 +476,7 @@ public:
 	SECURITY_TOKEN GetGlobalToken();
 	SECURITY_TOKEN GetToken(const NETADDR &Addr);
 	// vanilla token/gametick shouldn't be negative
-	SECURITY_TOKEN GetVanillaToken(const NETADDR &Addr) { return absolute(GetToken(Addr)); }
+	SECURITY_TOKEN GetVanillaToken(const NETADDR &Addr) { return std::abs(GetToken(Addr)); }
 };
 
 class CNetConsole

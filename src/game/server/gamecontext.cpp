@@ -2953,7 +2953,7 @@ void CGameContext::ConToggleTuneParam(IConsole::IResult *pResult, void *pUserDat
 		return;
 	}
 
-	float NewValue = absolute(OldValue - pResult->GetFloat(1)) < 0.0001f ? pResult->GetFloat(2) : pResult->GetFloat(1);
+	float NewValue = std::abs(OldValue - pResult->GetFloat(1)) < 0.0001f ? pResult->GetFloat(2) : pResult->GetFloat(1);
 
 	pSelf->Tuning()->Set(pParamName, NewValue);
 	pSelf->Tuning()->Get(pParamName, &NewValue);
@@ -4553,7 +4553,7 @@ void CGameContext::SendFinish(int ClientId, float Time, float PreviousBestTime)
 	RaceFinishMsg.m_Diff = 0;
 	if(PreviousBestTime)
 	{
-		float Diff = absolute(Time - PreviousBestTime);
+		float Diff = std::abs(Time - PreviousBestTime);
 		RaceFinishMsg.m_Diff = Diff * 1000 * (Time < PreviousBestTime ? -1 : 1);
 	}
 	RaceFinishMsg.m_RecordPersonal = (Time < PreviousBestTime || !PreviousBestTime);

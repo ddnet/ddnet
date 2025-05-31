@@ -451,7 +451,7 @@ void CPlayer::Snap(int SnappingClient)
 						vec2 CheckPos = GameServer()->m_apPlayers[id]->GetCharacter()->GetPos();
 						float dx = pPlayer->m_ViewPos.x - CheckPos.x;
 						float dy = pPlayer->m_ViewPos.y - CheckPos.y;
-						if(absolute(dx) < (pPlayer->m_ShowDistance.x / 2.5f) && absolute(dy) < (pPlayer->m_ShowDistance.y / 2.3f))
+						if(absolute(dx) < (pPlayer->m_ShowDistance.x / 2.5f) && std::abs(dy) < (pPlayer->m_ShowDistance.y / 2.3f))
 							SpectatorCount++;
 					}
 				}

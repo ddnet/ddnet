@@ -393,7 +393,7 @@ void CCharacter::FireWeapon()
 				const float aSpreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
 				float a = angle(Direction);
 				a += aSpreading[i + 2];
-				float v = 1 - (absolute(i) / (float)ShotSpread);
+				float v = 1 - (std::abs(i) / (float)ShotSpread);
 				float Speed = mix((float)Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
 				new CProjectile(
 					GameWorld(),
@@ -684,9 +684,9 @@ void CCharacter::HandleSkippableTiles(int Index)
 
 					DiffAngle = SpeederAngle - TeeAngle;
 					SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
-					if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+					if(std::abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 						TempVel += Direction * Force;
-					else if(absolute((int)SpeedLeft) > Force)
+					else if(std::abs((int)SpeedLeft) > Force)
 						TempVel += Direction * -Force;
 					else
 						TempVel += Direction * SpeedLeft;

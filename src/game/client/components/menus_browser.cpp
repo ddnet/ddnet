@@ -1283,7 +1283,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 
 			if(pSelectedServer->m_ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
 			{
-				const int TempTime = absolute(CurrentClient.m_Score);
+				const int TempTime = std::abs(CurrentClient.m_Score);
 				if(TempTime != 0 && TempTime != 9999)
 					Time = TempTime;
 			}

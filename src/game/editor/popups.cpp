@@ -1474,7 +1474,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 	{
 		float CurrentTime = s_CurTimeInput.GetFloat();
 		float CurrentValue = s_CurValueInput.GetFloat();
-		if(!(absolute(CurrentTime - s_CurrentTime) < 0.0001f && absolute(CurrentValue - s_CurrentValue) < 0.0001f))
+		if(!(absolute(CurrentTime - s_CurrentTime) < 0.0001f && std::abs(CurrentValue - s_CurrentValue) < 0.0001f))
 		{
 			auto [OldTime, OldValue] = pEditor->EnvGetSelectedTimeAndValue();
 

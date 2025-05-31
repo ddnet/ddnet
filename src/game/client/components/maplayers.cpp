@@ -844,7 +844,7 @@ void CMapLayers::RenderTileLayer(int LayerIndex, const ColorRGBA &Color)
 			s_vpIndexOffsets.clear();
 			s_vDrawCounts.clear();
 
-			unsigned long long Reserve = absolute(Y1 - Y0) + 1;
+			unsigned long long Reserve = std::abs(Y1 - Y0) + 1;
 			s_vpIndexOffsets.reserve(Reserve);
 			s_vDrawCounts.reserve(Reserve);
 

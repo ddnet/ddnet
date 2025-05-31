@@ -469,7 +469,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					// 0.7 uses milliseconds and ddnets str_time wants centiseconds
 					// 0.7 servers can also send the amount of precision the client should use
 					// we ignore that and always show 3 digit precision
-					str_time((int64_t)absolute(pInfo->m_Score / 10), TIME_MINS_CENTISECS, aBuf, sizeof(aBuf));
+					str_time((int64_t)std::abs(pInfo->m_Score / 10), TIME_MINS_CENTISECS, aBuf, sizeof(aBuf));
 				}
 			}
 			else if(TimeScore)

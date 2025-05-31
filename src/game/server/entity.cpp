@@ -93,11 +93,11 @@ bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 Ch
 		return false;
 
 	float dx = pGameServer->m_apPlayers[SnappingClient]->m_ViewPos.x - CheckPos.x;
-	if(absolute(dx) > pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance.x)
+	if(std::abs(dx) > pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance.x)
 		return true;
 
 	float dy = pGameServer->m_apPlayers[SnappingClient]->m_ViewPos.y - CheckPos.y;
-	return absolute(dy) > pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance.y;
+	return std::abs(dy) > pGameServer->m_apPlayers[SnappingClient]->m_ShowDistance.y;
 }
 
 bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec2 StartPos, vec2 EndPos)
@@ -119,5 +119,5 @@ bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec
 		DistanceToLine = ViewPos - StartPos;
 	}
 	float ClippDistance = std::max(ShowDistance.x, ShowDistance.y);
-	return (absolute(DistanceToLine.x) > ClippDistance || absolute(DistanceToLine.y) > ClippDistance);
+	return (absolute(DistanceToLine.x) > ClippDistance || std::abs(DistanceToLine.y) > ClippDistance);
 }

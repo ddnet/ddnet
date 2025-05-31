@@ -2451,7 +2451,7 @@ void CGameClient::OnPredict()
 	}
 
 	// detect mispredictions of other players and make corrections smoother when possible
-	if(g_Config.m_ClAntiPingSmooth && Predict() && AntiPingPlayers() && m_NewTick && m_PredictedTick >= MIN_TICK && absolute(m_PredictedTick - Client()->PredGameTick(g_Config.m_ClDummy)) <= 1 && absolute(Client()->GameTick(g_Config.m_ClDummy) - Client()->PrevGameTick(g_Config.m_ClDummy)) <= 2)
+	if(g_Config.m_ClAntiPingSmooth && Predict() && AntiPingPlayers() && m_NewTick && m_PredictedTick >= MIN_TICK && absolute(m_PredictedTick - Client()->PredGameTick(g_Config.m_ClDummy)) <= 1 && std::abs(Client()->GameTick(g_Config.m_ClDummy) - Client()->PrevGameTick(g_Config.m_ClDummy)) <= 2)
 	{
 		int PredTime = std::clamp(Client()->GetPredictionTime(), 0, 800);
 		float SmoothPace = 4 - 1.5f * PredTime / 800.f; // smoothing pace (a lower value will make the smoothing quicker)
@@ -2477,10 +2477,10 @@ void CGameClient::OnPredict()
 				for(int j = 0; j < 2; j++)
 				{
 					aMixAmount[j] = 1.0f;
-					if(absolute(PredErr[j]) > 0.05f)
+					if(std::abs(PredErr[j]) > 0.05f)
 					{
 						aMixAmount[j] = 0.0f;
-						if(absolute(RenderDiff[j]) > 0.01f)
+						if(std::abs(RenderDiff[j]) > 0.01f)
 						{
 							aMixAmount[j] = 1.f - std::clamp(RenderDiff[j] / PredDiff[j], 0.f, 1.f);
 							aMixAmount[j] = 1.f - std::pow(1.f - aMixAmount[j], 1 / 1.2f);
@@ -2491,7 +2491,7 @@ void CGameClient::OnPredict()
 						aMixAmount[j] = std::min(aMixAmount[j], (float)(TimePassed / (double)Len));
 				}
 				for(int j = 0; j < 2; j++)
-					if(absolute(RenderDiff[j]) < 0.01f && absolute(PredDiff[j]) < 0.01f && absolute(m_aClients[i].m_PrevPredicted.m_Pos[j] - m_aClients[i].m_Predicted.m_Pos[j]) < 0.01f && aMixAmount[j] > aMixAmount[j ^ 1])
+					if(absolute(RenderDiff[j]) < 0.01f && absolute(PredDiff[j]) < 0.01f && std::abs(m_aClients[i].m_PrevPredicted.m_Pos[j] - m_aClients[i].m_Predicted.m_Pos[j]) < 0.01f && aMixAmount[j] > aMixAmount[j ^ 1])
 						aMixAmount[j] = aMixAmount[j ^ 1];
 				for(int j = 0; j < 2; j++)
 				{
@@ -3219,7 +3219,7 @@ void CGameClient::UpdatePrediction()
 	}
 
 	// advance the gameworld to the current gametick
-	if(pLocalChar && absolute(m_GameWorld.GameTick() - Client()->GameTick(g_Config.m_ClDummy)) < Client()->GameTickSpeed())
+	if(pLocalChar && std::abs(m_GameWorld.GameTick() - Client()->GameTick(g_Config.m_ClDummy)) < Client()->GameTickSpeed())
 	{
 		for(int Tick = m_GameWorld.GameTick() + 1; Tick <= Client()->GameTick(g_Config.m_ClDummy); Tick++)
 		{
@@ -3475,7 +3475,7 @@ void CGameClient::DetectStrongHook()
 		int ToPlayer = m_Snap.m_aCharacters[FromPlayer].m_Prev.m_HookedPlayer;
 		if(ToPlayer < 0 || ToPlayer >= MAX_CLIENTS || !m_Snap.m_aCharacters[ToPlayer].m_Active || ToPlayer != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_HookedPlayer)
 			continue;
-		if(absolute(std::min(m_aLastUpdateTick[ToPlayer], m_aLastUpdateTick[FromPlayer]) - Client()->GameTick(g_Config.m_ClDummy)) < Client()->GameTickSpeed() / 4)
+		if(std::abs(std::min(m_aLastUpdateTick[ToPlayer], m_aLastUpdateTick[FromPlayer]) - Client()->GameTick(g_Config.m_ClDummy)) < Client()->GameTickSpeed() / 4)
 			continue;
 		if(m_Snap.m_aCharacters[FromPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_Direction || m_Snap.m_aCharacters[ToPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[ToPlayer].m_Cur.m_Direction)
 			continue;

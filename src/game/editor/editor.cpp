@@ -355,7 +355,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 			{
 				s_ScrollValue += Ui()->MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
 
-				if(absolute(s_ScrollValue) >= Scale)
+				if(std::abs(s_ScrollValue) >= Scale)
 				{
 					int Count = (int)(s_ScrollValue / Scale);
 					s_ScrollValue = std::fmod(s_ScrollValue, Scale);
@@ -1583,7 +1583,7 @@ void CEditor::DoPointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 CEditor::EAxis CEditor::GetDragAxis(int OffsetX, int OffsetY) const
 {
 	if(Input()->ShiftIsPressed())
-		if(absolute(OffsetX) < absolute(OffsetY))
+		if(absolute(OffsetX) < std::abs(OffsetY))
 			return EAxis::AXIS_Y;
 		else
 			return EAxis::AXIS_X;
@@ -1637,8 +1637,8 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 	auto &&CheckAlignment = [&](CPoint *pQuadPoint) {
 		int DX = pQuadPoint->x - Point.x;
 		int DY = pQuadPoint->y - Point.y;
-		int DiffX = absolute(DX);
-		int DiffY = absolute(DY);
+		int DiffX = std::abs(DX);
+		int DiffY = std::abs(DY);
 
 		if(DiffX <= Threshold && (!GridEnabled || DiffX == 0))
 		{
@@ -1771,7 +1771,7 @@ void CEditor::ComputePointsAlignments(const std::shared_ptr<CLayerQuads> &pLayer
 
 	for(const auto &Alignment : vAllAlignments)
 	{
-		int AbsDiff = absolute(Alignment.m_Diff);
+		int AbsDiff = std::abs(Alignment.m_Diff);
 		if(Alignment.m_Axis == EAxis::AXIS_X)
 		{
 			if(AbsDiff < SmallestDiffY)
@@ -1818,8 +1818,8 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 		CPoint ToCheck = AABB.m_aPoints[Point] + ivec2(OffsetX, OffsetY);
 		int DX = Aligned.x - ToCheck.x;
 		int DY = Aligned.y - ToCheck.y;
-		int DiffX = absolute(DX);
-		int DiffY = absolute(DY);
+		int DiffX = std::abs(DX);
+		int DiffY = std::abs(DY);
 
 		if(DiffX <= Threshold && (!GridEnabled || DiffX == 0))
 		{
@@ -2603,7 +2603,7 @@ bool CEditor::IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C)
 	Point = (Point - Min) * Normal;
 
 	float Area = TriangleArea(A, B, C);
-	return Area > 0.f && absolute(TriangleArea(Point, A, B) + TriangleArea(Point, B, C) + TriangleArea(Point, C, A) - Area) < 0.000001f;
+	return Area > 0.f && std::abs(TriangleArea(Point, A, B) + TriangleArea(Point, B, C) + TriangleArea(Point, C, A) - Area) < 0.000001f;
 }
 
 void CEditor::DoQuadKnife(int QuadIndex)
@@ -2653,7 +2653,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 				if(in_range(OnGrid.y, Min.y, Max.y) && Max.y - Min.y > 0.0000001f)
 				{
 					vec2 OnEdge(v[i].x + (OnGrid.y - v[i].y) / (v[j].y - v[i].y) * (v[j].x - v[i].x), OnGrid.y);
-					float Distance = absolute(OnGrid.x - OnEdge.x);
+					float Distance = std::abs(OnGrid.x - OnEdge.x);
 
 					if(Distance < CellSize && (Distance < MinDistance || MinDistance < 0.f))
 					{
@@ -2665,7 +2665,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 				if(in_range(OnGrid.x, Min.x, Max.x) && Max.x - Min.x > 0.0000001f)
 				{
 					vec2 OnEdge(OnGrid.x, v[i].y + (OnGrid.x - v[i].x) / (v[j].x - v[i].x) * (v[j].y - v[i].y));
-					float Distance = absolute(OnGrid.y - OnEdge.y);
+					float Distance = std::abs(OnGrid.y - OnEdge.y);
 
 					if(Distance < CellSize && (Distance < MinDistance || MinDistance < 0.f))
 					{
@@ -4008,7 +4008,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					SetOperation(OP_NONE);
 				}
 
-				if(s_Operation == OP_CLICK && absolute(Ui()->MouseY() - s_InitialMouseY) > MinDragDistance)
+				if(s_Operation == OP_CLICK && std::abs(Ui()->MouseY() - s_InitialMouseY) > MinDragDistance)
 				{
 					StartDragGroup = true;
 					s_pDraggedButton = m_Map.m_vpGroups[g].get();
@@ -4195,7 +4195,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					SetOperation(OP_NONE);
 				}
 
-				if(s_Operation == OP_CLICK && absolute(Ui()->MouseY() - s_InitialMouseY) > MinDragDistance)
+				if(s_Operation == OP_CLICK && std::abs(Ui()->MouseY() - s_InitialMouseY) > MinDragDistance)
 				{
 					bool EntitiesLayerSelected = false;
 					for(int k : m_vSelectedLayers)
@@ -6091,7 +6091,7 @@ void CEditor::ResetZoomEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int
 {
 	auto [Bottom, Top] = pEnvelope->GetValueRange(ActiveChannels);
 	float EndTime = pEnvelope->EndTime();
-	float ValueRange = absolute(Top - Bottom);
+	float ValueRange = std::abs(Top - Bottom);
 
 	if(ValueRange < m_ZoomEnvelopeY.GetMinValue())
 	{
@@ -7878,7 +7878,7 @@ void CEditor::DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, f
 		if(Clicked || Abrupted)
 			s_Operation = OP_NONE;
 
-		if(s_Operation == OP_CLICKED && absolute(IsVertical ? Ui()->MouseY() - s_InitialMouseY : Ui()->MouseX() - s_InitialMouseX) > 5.0f)
+		if(s_Operation == OP_CLICKED && std::abs(IsVertical ? Ui()->MouseY() - s_InitialMouseY : Ui()->MouseX() - s_InitialMouseX) > 5.0f)
 			s_Operation = OP_DRAGGING;
 
 		if(s_Operation == OP_DRAGGING)

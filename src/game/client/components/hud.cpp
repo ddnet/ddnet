@@ -342,7 +342,7 @@ void CHud::RenderScoreHud()
 				if(apPlayerInfo[t])
 				{
 					if(Client()->IsSixup() && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE)
-						str_time((int64_t)absolute(apPlayerInfo[t]->m_Score) / 10, TIME_MINS_CENTISECS, aScore[t], sizeof(aScore[t]));
+						str_time((int64_t)std::abs(apPlayerInfo[t]->m_Score) / 10, TIME_MINS_CENTISECS, aScore[t], sizeof(aScore[t]));
 					else if(m_pClient->m_GameInfo.m_TimeScore)
 					{
 						if(apPlayerInfo[t]->m_Score != -9999)
@@ -624,8 +624,8 @@ void CHud::RenderCursor()
 		const vec2 ScreenPos = (m_pClient->m_CursorInfo.WorldTarget() - Center) / m_pClient->m_Camera.m_Zoom;
 		const float ClampFactor = std::max(
 			1.0f,
-			absolute(ScreenPos.x / HalfSize.x),
-			absolute(ScreenPos.y / HalfSize.y));
+			std::abs(ScreenPos.x / HalfSize.x),
+			std::abs(ScreenPos.y / HalfSize.y));
 
 		CurWeapon = std::max(0, m_pClient->m_CursorInfo.Weapon() % NUM_WEAPONS);
 		TargetPos = ScreenPos / ClampFactor + Center;
@@ -863,23 +863,23 @@ void CHud::RenderPlayerState(const int ClientId)
 				UsedJumps = !Grounded;
 			}
 
-			if(pCharacter->m_EndlessJump && UsedJumps >= absolute(pCharacter->m_Jumps))
+			if(pCharacter->m_EndlessJump && UsedJumps >= std::abs(pCharacter->m_Jumps))
 			{
-				UsedJumps = absolute(pCharacter->m_Jumps) - 1;
+				UsedJumps = std::abs(pCharacter->m_Jumps) - 1;
 			}
 
-			int UnusedJumps = absolute(pCharacter->m_Jumps) - UsedJumps;
+			int UnusedJumps = std::abs(pCharacter->m_Jumps) - UsedJumps;
 			if(!(pPlayer->m_Jumped & 2) && UnusedJumps <= 0)
 			{
 				// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
 				UnusedJumps = 1;
 			}
-			TotalJumpsToDisplay = std::max(std::min(absolute(pCharacter->m_Jumps), 10), 0);
+			TotalJumpsToDisplay = std::max(std::min(std::abs(pCharacter->m_Jumps), 10), 0);
 			AvailableJumpsToDisplay = std::max(std::min(UnusedJumps, TotalJumpsToDisplay), 0);
 		}
 		else
 		{
-			TotalJumpsToDisplay = AvailableJumpsToDisplay = absolute(m_pClient->m_Snap.m_aCharacters[ClientId].m_ExtendedData.m_Jumps);
+			TotalJumpsToDisplay = AvailableJumpsToDisplay = std::abs(m_pClient->m_Snap.m_aCharacters[ClientId].m_ExtendedData.m_Jumps);
 		}
 
 		// render available and used jumps

@@ -19,7 +19,7 @@ void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 	m_Alive = pChr->m_Alive;
 
 	// This is extremely suspect code, probably interacts badly with force pause
-	m_Paused = absolute(pChr->m_pPlayer->IsPaused());
+	m_Paused = std::abs(pChr->m_pPlayer->IsPaused());
 	if(m_Paused == CPlayer::PAUSE_SPEC && !pChr->m_Paused)
 	{
 		m_Paused = CPlayer::PAUSE_NONE;

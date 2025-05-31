@@ -711,7 +711,7 @@ void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
 
 	// Compute acutal amount of lines to scroll to make sure lines fit in viewport and we don't have empty space
 	int Direction = m_BacklogCurLine - Target < 0 ? -1 : 1;
-	int LinesToScroll = absolute(Target - m_BacklogCurLine);
+	int LinesToScroll = std::abs(Target - m_BacklogCurLine);
 	int ComputedLines = GetLinesToScroll(Direction, LinesToScroll);
 
 	if(Direction == -1)
@@ -1151,7 +1151,7 @@ void CGameConsole::OnRender()
 			pConsole->m_MouseRelease = GetMousePosition();
 		}
 		const float ScaledLineHeight = LineHeight / ScreenSize.y;
-		if(absolute(m_TouchState.m_ScrollAmount.y) >= ScaledLineHeight)
+		if(std::abs(m_TouchState.m_ScrollAmount.y) >= ScaledLineHeight)
 		{
 			if(m_TouchState.m_ScrollAmount.y > 0.0f)
 			{

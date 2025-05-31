@@ -2775,7 +2775,7 @@ void CClient::Update()
 				int64_t PrevPredTickStart = PrevPredTick * time_freq() / GameTickSpeed();
 				m_aPredIntraTick[g_Config.m_ClDummy] = (PredNow - PrevPredTickStart) / (float)(CurPredTickStart - PrevPredTickStart);
 
-				if(absolute(NewPredTick - m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick) > MaxLatencyTicks())
+				if(std::abs(NewPredTick - m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick) > MaxLatencyTicks())
 				{
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", "prediction time reset!");
 					m_PredictedTime.Init(CurTickStart + 2 * time_freq() / GameTickSpeed());

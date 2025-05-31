@@ -721,7 +721,7 @@ void CGameTeams::OnFinish(CPlayer *Player, int TimeTicks, const char *pTimestamp
 	else
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1., CGameContext::FLAG_SIX);
 
-	float Diff = absolute(Time - pData->m_BestTime);
+	float Diff = std::abs(Time - pData->m_BestTime);
 
 	if(Time - pData->m_BestTime < 0)
 	{
