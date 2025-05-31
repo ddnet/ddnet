@@ -38,6 +38,8 @@ class CScore
 	// returns true if the player should be rate limited
 	bool RateLimitPlayer(int ClientId);
 
+	void SendSaveCode(int Team, const std::shared_ptr<CScoreSaveResult> &pSaveResult, std::unique_ptr<CSqlTeamSaveData> &pTeamSave);
+
 public:
 	CScore(CGameContext *pGameServer, CDbConnectionPool *pPool);
 	~CScore() {}

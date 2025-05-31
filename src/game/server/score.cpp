@@ -289,7 +289,6 @@ void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 		return;
 	auto *pController = GameServer()->m_pController;
 	int Team = pController->Teams().m_Core.Team(ClientId);
-	char aBuf[512];
 	if(pController->Teams().GetSaving(Team))
 	{
 		GameServer()->SendChatTarget(ClientId, "Team save already in progress");
@@ -301,7 +300,7 @@ void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 		return;
 	}
 
-	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientId);
+	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientId, Server()->ClientName(ClientId), pServer);
 	SaveResult->m_SaveId = RandomUuid();
 	ESaveResult Result = SaveResult->m_SavedTeam.Save(GameServer(), Team);
 	if(CSaveTeam::HandleSaveError(Result, ClientId, GameServer()))
@@ -316,24 +315,66 @@ void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 	Tmp->m_aGeneratedCode[0] = '\0';
 	GeneratePassphrase(Tmp->m_aGeneratedCode, sizeof(Tmp->m_aGeneratedCode));
 
-	if(Tmp->m_aCode[0] == '\0')
-	{
-		str_format(aBuf,
-			sizeof(aBuf),
-			"Team save in progress. You'll be able to load with '/load %s'",
-			Tmp->m_aGeneratedCode);
-	}
-	else
-	{
-		str_format(aBuf,
-			sizeof(aBuf),
-			"Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails",
-			Tmp->m_aCode,
-			Tmp->m_aGeneratedCode);
-	}
 	pController->Teams().KillCharacterOrTeam(ClientId, Team);
-	GameServer()->SendChatTeam(Team, aBuf);
+	SendSaveCode(Team, SaveResult, Tmp);
+
 	m_pPool->ExecuteWrite(CScoreWorker::SaveTeam, std::move(Tmp), "save team");
+}
+
+void CScore::SendSaveCode(int Team, const std::shared_ptr<CScoreSaveResult> &pSaveResult, std::unique_ptr<CSqlTeamSaveData> &pTeamSave)
+{
+	char aBuf[512];
+	int TeamSize = pSaveResult->m_SavedTeam.GetMembersCount();
+
+	CMsgPacker Msg(NETMSGTYPE_SV_SAVECODE);
+	Msg.AddInt(SAVESTATE_PENDING);
+	Msg.AddString(""); // message
+	Msg.AddString(pSaveResult->m_aRequestingPlayer);
+	Msg.AddString(pTeamSave->m_aServer);
+	Msg.AddString(pTeamSave->m_aGeneratedCode);
+	Msg.AddString(pTeamSave->m_aCode);
+	Msg.AddInt(TeamSize);
+	for(int MemberId = 0; MemberId < MAX_CLIENTS; MemberId++)
+	{
+		if(!GameServer()->m_apPlayers[MemberId])
+			continue;
+		if(GameServer()->GetDDRaceTeam(MemberId) != Team)
+			continue;
+
+		Msg.AddString(Server()->ClientName(MemberId));
+	}
+
+	for(int MemberId = 0; MemberId < MAX_CLIENTS; MemberId++)
+	{
+		if(!GameServer()->m_apPlayers[MemberId])
+			continue;
+		if(GameServer()->GetDDRaceTeam(MemberId) != Team)
+			continue;
+
+		if(GameServer()->GetClientVersion(MemberId) >= VERSION_DDNET_SAVE_CODE)
+		{
+			Server()->SendMsg(&Msg, MSGFLAG_VITAL, MemberId);
+		}
+		else
+		{
+			if(pTeamSave->m_aCode[0] == '\0')
+			{
+				str_format(aBuf,
+					sizeof(aBuf),
+					"Team save in progress. You'll be able to load with '/load %s'",
+					pTeamSave->m_aGeneratedCode);
+			}
+			else
+			{
+				str_format(aBuf,
+					sizeof(aBuf),
+					"Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails",
+					pTeamSave->m_aCode,
+					pTeamSave->m_aGeneratedCode);
+			}
+			GameServer()->SendChatTarget(MemberId, aBuf);
+		}
+	}
 }
 
 void CScore::LoadTeam(const char *pCode, int ClientId)
@@ -367,7 +408,7 @@ void CScore::LoadTeam(const char *pCode, int ClientId)
 		GameServer()->SendChatTarget(ClientId, "Team can't be loaded while practice is enabled");
 		return;
 	}
-	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientId);
+	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientId, Server()->ClientName(ClientId), g_Config.m_SvSqlServerName);
 	SaveResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 	pController->Teams().SetSaving(Team, SaveResult);
 	auto Tmp = std::make_unique<CSqlTeamLoadRequest>(SaveResult);

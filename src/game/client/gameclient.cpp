@@ -16,6 +16,7 @@
 #include <engine/map.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
+#include <engine/shared/csv.h>
 #include <engine/sound.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
@@ -1188,6 +1189,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 		CNetMsg_Sv_MapSoundGlobal *pMsg = (CNetMsg_Sv_MapSoundGlobal *)pRawMsg;
 		m_MapSounds.Play(CSounds::CHN_GLOBAL, pMsg->m_SoundId);
+	}
+	else if(MsgId == NETMSGTYPE_SV_SAVECODE)
+	{
+		CNetMsg_Sv_SaveCode *pMsg = (CNetMsg_Sv_SaveCode *)pRawMsg;
+		OnSaveCodeNetMessage(pMsg, pUnpacker);
 	}
 }
 
@@ -4798,4 +4804,108 @@ int CGameClient::FindFirstMultiViewId()
 			return i;
 	}
 	return ClientId;
+}
+
+void CGameClient::OnSaveCodeNetMessage(const CNetMsg_Sv_SaveCode *pMsg, CUnpacker *pUnpacker)
+{
+	char aBuf[512];
+	int State = pMsg->m_State;
+	const char *pMessage = pMsg->m_pMessage;
+	const char *pSaveRequester = pMsg->m_pSaveRequester;
+	const char *pServerName = pMsg->m_pServerName;
+	const char *pGeneratedCode = pMsg->m_pGeneratedCode;
+	const char *pCode = pMsg->m_pCode;
+	int TeamSize = pMsg->m_NumTeamMembers;
+
+	if(pMessage[0] != '\0')
+		m_Chat.AddLine(-1, TEAM_ALL, pMessage);
+
+	if(State == SAVESTATE_PENDING)
+	{
+		if(pCode[0] == '\0')
+		{
+			str_format(aBuf,
+				sizeof(aBuf),
+				Localize("Team save in progress. You'll be able to load with '/load %s'"),
+				Config()->m_ClStreamerMode == 1 ? "*** *** ***" : pGeneratedCode);
+		}
+		else
+		{
+			str_format(aBuf,
+				sizeof(aBuf),
+				Localize("Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails"),
+				Config()->m_ClStreamerMode == 1 ? "***" : pCode,
+				Config()->m_ClStreamerMode == 1 ? "*** *** ***" : pGeneratedCode);
+		}
+		m_Chat.AddLine(-1, TEAM_ALL, aBuf);
+	}
+	else if(State == SAVESTATE_FALLBACKFILE)
+	{
+		if(pServerName[0] == '\0')
+		{
+			str_format(
+				aBuf,
+				sizeof(aBuf),
+				Localize("Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' to continue"),
+				pSaveRequester,
+				Config()->m_ClStreamerMode == 1 ? "*** *** ***" : pGeneratedCode);
+		}
+		else
+		{
+			str_format(
+				aBuf,
+				sizeof(aBuf),
+				Localize("Team successfully saved by %s. The database connection failed, using generated save code instead to avoid collisions. Use '/load %s' on %s to continue"),
+				pSaveRequester,
+				Config()->m_ClStreamerMode == 1 ? "*** *** ***" : pGeneratedCode,
+				pServerName);
+		}
+		m_Chat.AddLine(-1, TEAM_ALL, aBuf);
+	}
+	else if(State == SAVESTATE_ERROR)
+	{
+		m_Chat.AddLine(-1, TEAM_ALL, Localize("Save failed!"));
+	}
+
+	if(State != SAVESTATE_PENDING && State != SAVESTATE_ERROR && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	{
+		const char *pSavesFile = "ddnet-saves.txt";
+		const char *paSavesHeader[] = {
+			"Time",
+			"Players",
+			"Map",
+			"Code",
+		};
+
+		char aTimestamp[20];
+		str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
+
+		char aNames[1024];
+		aNames[0] = '\0';
+		for(int i = 0; i < TeamSize; i++)
+		{
+			if(i)
+				str_append(aNames, " ");
+			str_append(aNames, pUnpacker->GetString());
+		}
+
+		const bool SavesFileExists = Storage()->FileExists(pSavesFile, IStorage::TYPE_SAVE);
+		IOHANDLE File = Storage()->OpenFile(pSavesFile, IOFLAG_APPEND, IStorage::TYPE_SAVE);
+		if(!File)
+			return;
+
+		const char *apColumns[4] = {
+			aTimestamp,
+			aNames,
+			Client()->GetCurrentMap(),
+			pGeneratedCode,
+		};
+
+		if(!SavesFileExists)
+		{
+			CsvWrite(File, 4, paSavesHeader);
+		}
+		CsvWrite(File, 4, apColumns);
+		io_close(File);
+	}
 }

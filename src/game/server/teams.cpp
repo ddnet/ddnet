@@ -988,12 +988,84 @@ void CGameTeams::ProcessSaveTeam()
 	{
 		if(m_apSaveTeamResult[Team] == nullptr || !m_apSaveTeamResult[Team]->m_Completed)
 			continue;
-		if(m_apSaveTeamResult[Team]->m_aBroadcast[0] != '\0')
-			GameServer()->SendBroadcast(m_apSaveTeamResult[Team]->m_aBroadcast, -1);
-		if(m_apSaveTeamResult[Team]->m_aMessage[0] != '\0' && m_apSaveTeamResult[Team]->m_Status != CScoreSaveResult::LOAD_FAILED)
-			GameServer()->SendChatTeam(Team, m_apSaveTeamResult[Team]->m_aMessage);
+
+		int TeamSize = m_apSaveTeamResult[Team]->m_SavedTeam.GetMembersCount();
+		int State = -1;
+
 		switch(m_apSaveTeamResult[Team]->m_Status)
 		{
+		case CScoreSaveResult::SAVE_FALLBACKFILE:
+			State = SAVESTATE_FALLBACKFILE;
+			break;
+		case CScoreSaveResult::SAVE_WARNING:
+			State = SAVESTATE_WARNING;
+			break;
+		case CScoreSaveResult::SAVE_SUCCESS:
+			State = SAVESTATE_DONE;
+			break;
+		case CScoreSaveResult::SAVE_FAILED:
+			State = SAVESTATE_ERROR;
+			break;
+		case CScoreSaveResult::LOAD_FAILED:
+		case CScoreSaveResult::LOAD_SUCCESS:
+			State = -1;
+			break;
+		}
+
+		if(State != -1)
+		{
+			CMsgPacker Msg(NETMSGTYPE_SV_SAVECODE);
+			Msg.AddInt(State);
+			if(State == SAVESTATE_WARNING || State == SAVESTATE_ERROR)
+			{
+				// pass error messages from the worker thread to the user
+				Msg.AddString(m_apSaveTeamResult[Team]->m_aMessage);
+			}
+			else
+			{
+				// success and known warnings are done on the client side
+				Msg.AddString("");
+			}
+			Msg.AddString(m_apSaveTeamResult[Team]->m_aRequestingPlayer);
+			Msg.AddString(m_apSaveTeamResult[Team]->m_aServer);
+			Msg.AddString(m_apSaveTeamResult[Team]->m_aGeneratedCode);
+			Msg.AddString(m_apSaveTeamResult[Team]->m_aCode);
+			Msg.AddInt(TeamSize);
+			for(int MemberId = 0; MemberId < MAX_CLIENTS; MemberId++)
+			{
+				if(!GameServer()->m_apPlayers[MemberId])
+					continue;
+				if(GameServer()->GetDDRaceTeam(MemberId) != Team)
+					continue;
+				Msg.AddString(Server()->ClientName(MemberId));
+			}
+
+			for(int MemberId = 0; MemberId < MAX_CLIENTS; MemberId++)
+			{
+				if(!GameServer()->m_apPlayers[MemberId])
+					continue;
+				if(GameServer()->GetDDRaceTeam(MemberId) != Team)
+					continue;
+
+				if(GameServer()->GetClientVersion(MemberId) >= VERSION_DDNET_SAVE_CODE)
+				{
+					Server()->SendMsg(&Msg, MSGFLAG_VITAL, MemberId);
+				}
+				else
+				{
+					if(m_apSaveTeamResult[Team]->m_aMessage[0] != '\0' && m_apSaveTeamResult[Team]->m_Status != CScoreSaveResult::LOAD_FAILED)
+						GameServer()->SendChatTeam(Team, m_apSaveTeamResult[Team]->m_aMessage);
+				}
+			}
+		}
+
+		if(m_apSaveTeamResult[Team]->m_aBroadcast[0] != '\0')
+			GameServer()->SendBroadcast(m_apSaveTeamResult[Team]->m_aBroadcast, -1);
+
+		switch(m_apSaveTeamResult[Team]->m_Status)
+		{
+		case CScoreSaveResult::SAVE_FALLBACKFILE:
+		case CScoreSaveResult::SAVE_WARNING:
 		case CScoreSaveResult::SAVE_SUCCESS:
 		{
 			if(GameServer()->TeeHistorianActive())
@@ -1003,7 +1075,7 @@ void CGameTeams::ProcessSaveTeam()
 					m_apSaveTeamResult[Team]->m_SaveId,
 					m_apSaveTeamResult[Team]->m_SavedTeam.GetString());
 			}
-			for(int i = 0; i < m_apSaveTeamResult[Team]->m_SavedTeam.GetMembersCount(); i++)
+			for(int i = 0; i < TeamSize; i++)
 			{
 				if(m_apSaveTeamResult[Team]->m_SavedTeam.m_pSavedTees->IsHooking())
 				{
