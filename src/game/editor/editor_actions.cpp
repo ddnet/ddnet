@@ -678,7 +678,7 @@ void CEditorActionGroup::Undo()
 	{
 		// Undo: delete the group
 		m_pEditor->m_Map.DeleteGroup(m_GroupIndex);
-		m_pEditor->m_SelectedGroup = maximum(0, m_GroupIndex - 1);
+		m_pEditor->m_SelectedGroup = std::max(0, m_GroupIndex - 1);
 	}
 
 	m_pEditor->m_Map.OnModify();
@@ -696,7 +696,7 @@ void CEditorActionGroup::Redo()
 	{
 		// Redo: delete the group
 		m_pEditor->m_Map.DeleteGroup(m_GroupIndex);
-		m_pEditor->m_SelectedGroup = maximum(0, m_GroupIndex - 1);
+		m_pEditor->m_SelectedGroup = std::max(0, m_GroupIndex - 1);
 	}
 
 	m_pEditor->m_Map.OnModify();
@@ -1614,7 +1614,7 @@ void CEditorActionEditEnvelopePointValue::Apply(bool Undo)
 	else
 	{
 		if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
-			CurrentValue = clamp(CurrentValue, 0.0f, 1.0f);
+			CurrentValue = std::clamp(CurrentValue, 0.0f, 1.0f);
 		pEnvelope->m_vPoints[m_PtIndex].m_aValues[m_Channel] = f2fx(CurrentValue);
 
 		if(m_PtIndex != 0)

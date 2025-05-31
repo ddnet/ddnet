@@ -197,8 +197,8 @@ void CPlayer::Tick()
 		if(Server()->GetClientInfo(m_ClientId, &Info))
 		{
 			m_Latency.m_Accum += Info.m_Latency;
-			m_Latency.m_AccumMax = maximum(m_Latency.m_AccumMax, Info.m_Latency);
-			m_Latency.m_AccumMin = minimum(m_Latency.m_AccumMin, Info.m_Latency);
+			m_Latency.m_AccumMax = std::max(m_Latency.m_AccumMax, Info.m_Latency);
+			m_Latency.m_AccumMin = std::min(m_Latency.m_AccumMin, Info.m_Latency);
 		}
 		// each second
 		if(Server()->Tick() % Server()->TickSpeed() == 0)
@@ -225,7 +225,7 @@ void CPlayer::Tick()
 	if(!GameServer()->m_World.m_Paused)
 	{
 		int EarliestRespawnTick = m_PreviousDieTick + Server()->TickSpeed() * 3;
-		int RespawnTick = maximum(m_DieTick, EarliestRespawnTick) + 2;
+		int RespawnTick = std::max(m_DieTick, EarliestRespawnTick) + 2;
 		if(!m_pCharacter && RespawnTick <= Server()->Tick())
 			m_Spawning = true;
 
@@ -451,7 +451,7 @@ void CPlayer::Snap(int SnappingClient)
 						vec2 CheckPos = GameServer()->m_apPlayers[id]->GetCharacter()->GetPos();
 						float dx = pPlayer->m_ViewPos.x - CheckPos.x;
 						float dy = pPlayer->m_ViewPos.y - CheckPos.y;
-						if(absolute(dx) < (pPlayer->m_ShowDistance.x / 2.5f) && absolute(dy) < (pPlayer->m_ShowDistance.y / 2.3f))
+						if(absolute(dx) < (pPlayer->m_ShowDistance.x / 2.5f) && std::abs(dy) < (pPlayer->m_ShowDistance.y / 2.3f))
 							SpectatorCount++;
 					}
 				}

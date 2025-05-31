@@ -313,7 +313,7 @@ bool CMenuBackground::Render()
 	m_Camera.m_Zoom = 0.7f;
 
 	float DistToCenter = distance(m_Camera.m_Center, m_RotationCenter);
-	if(!m_ChangedPosition && absolute(DistToCenter - (float)g_Config.m_ClRotationRadius) <= 0.5f)
+	if(!m_ChangedPosition && std::abs(DistToCenter - (float)g_Config.m_ClRotationRadius) <= 0.5f)
 	{
 		// do little rotation
 		float RotPerTick = 360.0f / (float)g_Config.m_ClRotationSpeed * clamp(Client()->RenderFrameTime(), 0.0f, 0.1f);

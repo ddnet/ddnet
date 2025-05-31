@@ -469,7 +469,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					// 0.7 uses milliseconds and ddnets str_time wants centiseconds
 					// 0.7 servers can also send the amount of precision the client should use
 					// we ignore that and always show 3 digit precision
-					str_time((int64_t)absolute(pInfo->m_Score / 10), TIME_MINS_CENTISECS, aBuf, sizeof(aBuf));
+					str_time((int64_t)std::abs(pInfo->m_Score / 10), TIME_MINS_CENTISECS, aBuf, sizeof(aBuf));
 				}
 			}
 			else if(TimeScore)
@@ -485,7 +485,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			}
 			else
 			{
-				str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 99999));
+				str_format(aBuf, sizeof(aBuf), "%d", std::clamp(pInfo->m_Score, -999, 99999));
 			}
 			TextRender()->Text(ScoreOffset + ScoreLength - TextRender()->TextWidth(FontSize, aBuf), Row.y + (Row.h - FontSize) / 2.0f, FontSize, aBuf);
 
@@ -566,7 +566,7 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 					TextRender()->TextColor(TextColor);
 				}
 				CTextCursor Cursor;
-				TextRender()->SetCursor(&Cursor, ClanOffset + (ClanLength - minimum(TextRender()->TextWidth(FontSize, ClientData.m_aClan), ClanLength)) / 2.0f, Row.y + (Row.h - FontSize) / 2.0f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
+				TextRender()->SetCursor(&Cursor, ClanOffset + (ClanLength - std::min(TextRender()->TextWidth(FontSize, ClientData.m_aClan), ClanLength)) / 2.0f, Row.y + (Row.h - FontSize) / 2.0f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
 				Cursor.m_LineWidth = ClanLength;
 				TextRender()->TextEx(&Cursor, ClientData.m_aClan);
 			}
@@ -578,13 +578,13 @@ void CScoreboard::RenderScoreboard(CUIRect Scoreboard, int Team, int CountStart,
 			// ping
 			if(g_Config.m_ClEnablePingColor)
 			{
-				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f)));
+				TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA((300.0f - std::clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f)));
 			}
 			else
 			{
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
-			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 999));
+			str_format(aBuf, sizeof(aBuf), "%d", std::clamp(pInfo->m_Latency, 0, 999));
 			TextRender()->Text(PingOffset + PingLength - TextRender()->TextWidth(FontSize, aBuf), Row.y + (Row.h - FontSize) / 2.0f, FontSize, aBuf);
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
 
@@ -653,7 +653,7 @@ void CScoreboard::OnRender()
 	const CNetObj_GameInfo *pGameInfoObj = GameClient()->m_Snap.m_pGameInfoObj;
 	const bool Teams = GameClient()->IsTeamPlay();
 	const auto &aTeamSize = GameClient()->m_Snap.m_aTeamSize;
-	const int NumPlayers = Teams ? maximum(aTeamSize[TEAM_RED], aTeamSize[TEAM_BLUE]) : aTeamSize[TEAM_RED];
+	const int NumPlayers = Teams ? std::max(aTeamSize[TEAM_RED], aTeamSize[TEAM_BLUE]) : aTeamSize[TEAM_RED];
 
 	const float ScoreboardSmallWidth = 750.0f + 20.0f;
 	const float ScoreboardWidth = !Teams && NumPlayers <= 16 ? ScoreboardSmallWidth : 1500.0f;

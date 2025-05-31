@@ -462,7 +462,7 @@ private:
 						if(GetX >= 0 && GetY >= 0 && GetX < w && GetY < h)
 						{
 							int Index = GetY * w + GetX;
-							float Mask = 1.f - clamp(length(vec2(sx, sy)) - OutlineCount, 0.f, 1.f);
+							float Mask = 1.f - std::clamp(length(vec2(sx, sy)) - OutlineCount, 0.f, 1.f);
 							c = maximum(c, int(pIn[Index] * Mask));
 						}
 					}
@@ -705,7 +705,7 @@ public:
 
 	const SGlyph *GetGlyph(int Chr, int FontSize)
 	{
-		FontSize = clamp(FontSize, MIN_FONT_SIZE, MAX_FONT_SIZE);
+		FontSize = std::clamp(FontSize, MIN_FONT_SIZE, MAX_FONT_SIZE);
 
 		// Find glyph index and most appropriate font face.
 		FT_Face Face;
@@ -804,8 +804,8 @@ public:
 				{
 					for(unsigned OffX = 0; OffX < pBitmap->width; ++OffX)
 					{
-						const int ImgOffX = clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
-						const int ImgOffY = clamp(y + OffY, y, (y + TexSubHeight) - 1);
+						const int ImgOffX = std::clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
+						const int ImgOffY = std::clamp(y + OffY, y, (y + TexSubHeight) - 1);
 						const size_t ImageOffset = ImgOffY * (TextImage.m_Width * PixelSize) + ImgOffX * PixelSize;
 						for(size_t i = 0; i < PixelSize - 1; ++i)
 						{
@@ -1556,7 +1556,7 @@ public:
 		if(Length < 0)
 			Length = str_length(pText);
 		else
-			Length = minimum(Length, str_length(pText));
+			Length = std::min(Length, str_length(pText));
 
 		const char *pCurrent = pText;
 		const char *pEnd = pCurrent + Length;
@@ -1690,7 +1690,7 @@ public:
 			const char *pBatchEnd = pEnd;
 			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END) && !(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END))
 			{
-				int Wlen = minimum(WordLength(pCurrent), (int)(pEnd - pCurrent));
+				int Wlen = std::min(WordLength(pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = *pCursor;
 				Compare.m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
 				Compare.m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
@@ -1879,7 +1879,7 @@ public:
 					}
 
 					// calculate the full width from the last selection point to the end of this selection draw on screen
-					const float SelWidth = (CharX + maximum(Advance, CharWidth - OutLineRealDiff / 2)) - (LastSelX + LastSelWidth);
+					const float SelWidth = (CharX + std::max(Advance, CharWidth - OutLineRealDiff / 2)) - (LastSelX + LastSelWidth);
 					const float SelX = (LastSelX + LastSelWidth);
 
 					if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
@@ -1931,7 +1931,7 @@ public:
 						}
 					}
 
-					pCursor->m_MaxCharacterHeight = maximum(pCursor->m_MaxCharacterHeight, CharHeight + BearingY);
+					pCursor->m_MaxCharacterHeight = std::max(pCursor->m_MaxCharacterHeight, CharHeight + BearingY);
 
 					if(NextCharacter == 0 && (RenderFlags & TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE) != 0 && Character != ' ')
 						DrawX += BearingX + CharKerning + CharWidth;
@@ -1962,7 +1962,7 @@ public:
 					LastCharWidth = CharWidth;
 				}
 
-				pCursor->m_LongestLineWidth = maximum(pCursor->m_LongestLineWidth, DrawX - pCursor->m_StartX);
+				pCursor->m_LongestLineWidth = std::max(pCursor->m_LongestLineWidth, DrawX - pCursor->m_StartX);
 			}
 
 			if(NewLine)

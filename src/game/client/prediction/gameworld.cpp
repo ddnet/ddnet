@@ -354,7 +354,7 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 		float l = length(Diff);
 		if(l)
 			ForceDir = normalize(Diff);
-		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
+		l = 1 - std::clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
 		float Strength;
 		if(Owner == -1 || !GetCharacterById(Owner))
 			Strength = Tuning()->m_ExplosionStrength;

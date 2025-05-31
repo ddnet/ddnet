@@ -132,7 +132,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const auto &&FindPreviousMarkerPosition = [&]() {
 		for(int i = pInfo->m_NumTimelineMarkers - 1; i >= 0; i--)
 		{
-			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick && std::abs(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
 			{
 				return (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
 			}
@@ -142,7 +142,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const auto &&FindNextMarkerPosition = [&]() {
 		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
 		{
-			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) > CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) > CurrentTick && std::abs(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
 			{
 				return (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
 			}
@@ -161,7 +161,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		NumDurationLabels = i + 1;
 	}
 	if(NumDurationLabels > 0 && s_SkipDurationIndex >= NumDurationLabels)
-		s_SkipDurationIndex = maximum(0, NumDurationLabels - 1);
+		s_SkipDurationIndex = std::max(0, NumDurationLabels - 1);
 
 	// handle keyboard shortcuts independent of active menu
 	float PositionToSeek = -1.0f;
@@ -203,7 +203,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			if(Input()->ModifierIsPressed())
 				PositionToSeek = FindPreviousMarkerPosition();
 			else if(Input()->ShiftIsPressed())
-				s_SkipDurationIndex = maximum(s_SkipDurationIndex - 1, 0);
+				s_SkipDurationIndex = std::max(s_SkipDurationIndex - 1, 0);
 			else
 				TimeToSeek = -s_aSkipDurationsSeconds[s_SkipDurationIndex];
 		}
@@ -212,7 +212,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			if(Input()->ModifierIsPressed())
 				PositionToSeek = FindNextMarkerPosition();
 			else if(Input()->ShiftIsPressed())
-				s_SkipDurationIndex = minimum(s_SkipDurationIndex + 1, NumDurationLabels - 1);
+				s_SkipDurationIndex = std::min(s_SkipDurationIndex + 1, NumDurationLabels - 1);
 			else
 				TimeToSeek = s_aSkipDurationsSeconds[s_SkipDurationIndex];
 		}
@@ -366,8 +366,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			if(s_Operation == OP_DRAGGING)
 			{
 				m_DemoControlsPositionOffset = Ui()->MousePos() - s_InitialMouse;
-				m_DemoControlsPositionOffset.x = clamp(m_DemoControlsPositionOffset.x, -DemoControlsOriginal.x, MainView.w - DemoControlsDragRect.w - DemoControlsOriginal.x);
-				m_DemoControlsPositionOffset.y = clamp(m_DemoControlsPositionOffset.y, -DemoControlsOriginal.y, MainView.h - DemoControlsDragRect.h - DemoControlsOriginal.y);
+				m_DemoControlsPositionOffset.x = std::clamp(m_DemoControlsPositionOffset.x, -DemoControlsOriginal.x, MainView.w - DemoControlsDragRect.w - DemoControlsOriginal.x);
+				m_DemoControlsPositionOffset.y = std::clamp(m_DemoControlsPositionOffset.y, -DemoControlsOriginal.y, MainView.h - DemoControlsDragRect.h - DemoControlsOriginal.y);
 			}
 		}
 	}
@@ -460,14 +460,14 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				if(Input()->ShiftIsPressed())
 				{
 					AmountSeek = s_PrevAmount + (AmountSeek - s_PrevAmount) * 0.05f;
-					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.0001f)
+					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && std::abs(s_PrevAmount - AmountSeek) >= 0.0001f)
 					{
 						PositionToSeek = AmountSeek;
 					}
 				}
 				else
 				{
-					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.001f)
+					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && std::abs(s_PrevAmount - AmountSeek) >= 0.001f)
 					{
 						s_PrevAmount = AmountSeek;
 						PositionToSeek = AmountSeek;

@@ -71,24 +71,24 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 				{
 					// value handle
 					const float v = fx2f(Point.m_aValues[c]);
-					Top = maximum(Top, v);
-					Bottom = minimum(Bottom, v);
+					Top = std::max(Top, v);
+					Bottom = std::min(Bottom, v);
 				}
 
 				if(Point.m_Curvetype == CURVETYPE_BEZIER)
 				{
 					// out-tangent handle
 					const float v = fx2f(Point.m_aValues[c] + Point.m_Bezier.m_aOutTangentDeltaY[c]);
-					Top = maximum(Top, v);
-					Bottom = minimum(Bottom, v);
+					Top = std::max(Top, v);
+					Bottom = std::min(Bottom, v);
 				}
 
 				if(pPrevPoint != nullptr && pPrevPoint->m_Curvetype == CURVETYPE_BEZIER)
 				{
 					// in-tangent handle
 					const float v = fx2f(Point.m_aValues[c] + Point.m_Bezier.m_aInTangentDeltaY[c]);
-					Top = maximum(Top, v);
-					Bottom = minimum(Bottom, v);
+					Top = std::max(Top, v);
+					Bottom = std::min(Bottom, v);
 				}
 			}
 		}

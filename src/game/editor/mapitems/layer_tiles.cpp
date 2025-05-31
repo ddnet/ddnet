@@ -679,7 +679,7 @@ void CLayerTiles::Resize(int NewW, int NewH)
 	mem_zero(pNewData, (size_t)NewW * NewH * sizeof(CTile));
 
 	// copy old data
-	for(int y = 0; y < minimum(NewH, m_Height); y++)
+	for(int y = 0; y < std::min(NewH, m_Height); y++)
 		mem_copy(&pNewData[y * NewW], &m_pTiles[y * m_Width], minimum(m_Width, NewW) * sizeof(CTile));
 
 	// replace old
@@ -721,10 +721,10 @@ void CLayerTiles::ShowInfo()
 	Graphics()->TextureSet(m_pEditor->Client()->GetDebugFont());
 	Graphics()->QuadsBegin();
 
-	int StartY = maximum(0, (int)(ScreenY0 / 32.0f) - 1);
-	int StartX = maximum(0, (int)(ScreenX0 / 32.0f) - 1);
-	int EndY = minimum((int)(ScreenY1 / 32.0f) + 1, m_Height);
-	int EndX = minimum((int)(ScreenX1 / 32.0f) + 1, m_Width);
+	int StartY = std::max(0, (int)(ScreenY0 / 32.0f) - 1);
+	int StartX = std::max(0, (int)(ScreenX0 / 32.0f) - 1);
+	int EndY = std::min((int)(ScreenY1 / 32.0f) + 1, m_Height);
+	int EndX = std::min((int)(ScreenX1 / 32.0f) + 1, m_Width);
 
 	for(int y = StartY; y < EndY; y++)
 		for(int x = StartX; x < EndX; x++)
@@ -1109,7 +1109,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	else if(Prop == ETilesProp::PROP_COLOR_ENV)
 	{
-		int Index = clamp(NewVal - 1, -1, (int)m_pEditor->m_Map.m_vpEnvelopes.size() - 1);
+		int Index = std::clamp(NewVal - 1, -1, (int)m_pEditor->m_Map.m_vpEnvelopes.size() - 1);
 		const int Step = (Index - m_ColorEnv) % 2;
 		if(Step != 0)
 		{

@@ -393,7 +393,7 @@ void CCharacter::FireWeapon()
 				const float aSpreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
 				float a = angle(Direction);
 				a += aSpreading[i + 2];
-				float v = 1 - (absolute(i) / (float)ShotSpread);
+				float v = 1 - (std::abs(i) / (float)ShotSpread);
 				float Speed = mix((float)Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
 				new CProjectile(
 					GameWorld(),
@@ -684,9 +684,9 @@ void CCharacter::HandleSkippableTiles(int Index)
 
 					DiffAngle = SpeederAngle - TeeAngle;
 					SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
-					if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+					if(std::abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 						TempVel += Direction * Force;
-					else if(absolute((int)SpeedLeft) > Force)
+					else if(std::abs((int)SpeedLeft) > Force)
 						TempVel += Direction * -Force;
 					else
 						TempVel += Direction * SpeedLeft;
@@ -1387,7 +1387,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			{
 				if(m_FreezeTime == 0)
 					Freeze();
-				m_FreezeTime = maximum(1, pExtended->m_FreezeEnd - GameWorld()->GameTick());
+				m_FreezeTime = std::max(1, pExtended->m_FreezeEnd - GameWorld()->GameTick());
 			}
 			else if(pExtended->m_FreezeEnd == -1)
 				m_Core.m_DeepFrozen = true;
@@ -1526,12 +1526,12 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	// (this is only needed for autofire weapons to prevent the predicted reload timer from desyncing)
 	if(IsLocal && m_Core.m_ActiveWeapon != WEAPON_HAMMER && !m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
 	{
-		if(maximum(m_LastTuneZoneTick, m_LastWeaponSwitchTick) + GameWorld()->GameTickSpeed() < GameWorld()->GameTick())
+		if(std::max(m_LastTuneZoneTick, m_LastWeaponSwitchTick) + GameWorld()->GameTickSpeed() < GameWorld()->GameTick())
 		{
 			float FireDelay;
 			GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 			const int FireDelayTicks = FireDelay * GameWorld()->GameTickSpeed() / 1000;
-			m_ReloadTimer = maximum(0, m_AttackTick + FireDelayTicks - GameWorld()->GameTick());
+			m_ReloadTimer = std::max(0, m_AttackTick + FireDelayTicks - GameWorld()->GameTick());
 		}
 	}
 }

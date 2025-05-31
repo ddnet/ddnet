@@ -472,7 +472,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		{
 			pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(pEditor, pEditor->m_SelectedGroup, true));
 			pEditor->m_Map.DeleteGroup(pEditor->m_SelectedGroup);
-			pEditor->m_SelectedGroup = maximum(0, pEditor->m_SelectedGroup - 1);
+			pEditor->m_SelectedGroup = std::max(0, pEditor->m_SelectedGroup - 1);
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -1048,7 +1048,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 		}
 		else if(Prop == EQuadProp::PROP_POS_ENV)
 		{
-			int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
+			int Index = std::clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
 			int StepDirection = Index < pQuad->m_PosEnv ? -1 : 1;
 			if(StepDirection != 0)
 			{
@@ -1068,7 +1068,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 		}
 		else if(Prop == EQuadProp::PROP_COLOR_ENV)
 		{
-			int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
+			int Index = std::clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
 			int StepDirection = Index < pQuad->m_ColorEnv ? -1 : 1;
 			if(StepDirection != 0)
 			{
@@ -1187,7 +1187,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 	}
 	else if(Prop == ESoundProp::PROP_POS_ENV)
 	{
-		int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
+		int Index = std::clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
 		const int StepDirection = Index < pSource->m_PosEnv ? -1 : 1;
 		for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 		{
@@ -1204,7 +1204,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 	}
 	else if(Prop == ESoundProp::PROP_SOUND_ENV)
 	{
-		int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
+		int Index = std::clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
 		const int StepDirection = Index < pSource->m_SoundEnv ? -1 : 1;
 		for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 		{
@@ -1474,7 +1474,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 	{
 		float CurrentTime = s_CurTimeInput.GetFloat();
 		float CurrentValue = s_CurValueInput.GetFloat();
-		if(!(absolute(CurrentTime - s_CurrentTime) < 0.0001f && absolute(CurrentValue - s_CurrentValue) < 0.0001f))
+		if(!(absolute(CurrentTime - s_CurrentTime) < 0.0001f && std::abs(CurrentValue - s_CurrentValue) < 0.0001f))
 		{
 			auto [OldTime, OldValue] = pEditor->EnvGetSelectedTimeAndValue();
 
@@ -1613,8 +1613,8 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CU
 			{
 				if(SelectedChannel == c)
 				{
-					FirstSelectedIndex = minimum(FirstSelectedIndex, SelectedIndex);
-					LastSelectedIndex = maximum(LastSelectedIndex, SelectedIndex);
+					FirstSelectedIndex = std::min(FirstSelectedIndex, SelectedIndex);
+					LastSelectedIndex = std::max(LastSelectedIndex, SelectedIndex);
 				}
 			}
 
@@ -2346,7 +2346,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectImage(void *pContext, CUIRect 
 			ImageView.w = ImageView.h;
 		else
 			ImageView.h = ImageView.w;
-		float Max = (float)(maximum(pEditor->m_Map.m_vpImages[ShowImage]->m_Width, pEditor->m_Map.m_vpImages[ShowImage]->m_Height));
+		float Max = (float)(std::max(pEditor->m_Map.m_vpImages[ShowImage]->m_Width, pEditor->m_Map.m_vpImages[ShowImage]->m_Height));
 		ImageView.w *= pEditor->m_Map.m_vpImages[ShowImage]->m_Width / Max;
 		ImageView.h *= pEditor->m_Map.m_vpImages[ShowImage]->m_Height / Max;
 		pEditor->Graphics()->TextureSet(pEditor->m_Map.m_vpImages[ShowImage]->m_Texture);
@@ -2765,15 +2765,15 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSpeedup(void *pContext, CUIRect View
 
 	if(Prop == PROP_FORCE)
 	{
-		pEditor->m_SpeedupForce = clamp(NewVal, 1, 255);
+		pEditor->m_SpeedupForce = std::clamp(NewVal, 1, 255);
 	}
 	else if(Prop == PROP_MAXSPEED)
 	{
-		pEditor->m_SpeedupMaxSpeed = clamp(NewVal, 0, 255);
+		pEditor->m_SpeedupMaxSpeed = std::clamp(NewVal, 0, 255);
 	}
 	else if(Prop == PROP_ANGLE)
 	{
-		pEditor->m_SpeedupAngle = clamp(NewVal, 0, 359);
+		pEditor->m_SpeedupAngle = std::clamp(NewVal, 0, 359);
 		pEditor->AdjustBrushSpecialTiles(false);
 	}
 
@@ -3105,7 +3105,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	if(pEditor->DoButton_FontIcon(&s_DecreaseButton, FONT_ICON_MINUS, 0, &ButtonDecrease, BUTTONFLAG_LEFT, "Decrease animation speed.", IGraphics::CORNER_L, 7.0f))
 	{
 		pEditor->m_AnimateSpeed -= pEditor->m_AnimateSpeed <= 1.0f ? 0.1f : 0.5f;
-		pEditor->m_AnimateSpeed = maximum(pEditor->m_AnimateSpeed, MIN_ANIM_SPEED);
+		pEditor->m_AnimateSpeed = std::max(pEditor->m_AnimateSpeed, MIN_ANIM_SPEED);
 		pEditor->m_AnimateUpdatePopup = true;
 	}
 
@@ -3116,7 +3116,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 			pEditor->m_AnimateSpeed = 0.1f;
 		else
 			pEditor->m_AnimateSpeed += pEditor->m_AnimateSpeed < 1.0f ? 0.1f : 0.5f;
-		pEditor->m_AnimateSpeed = minimum(pEditor->m_AnimateSpeed, MAX_ANIM_SPEED);
+		pEditor->m_AnimateSpeed = std::min(pEditor->m_AnimateSpeed, MAX_ANIM_SPEED);
 		pEditor->m_AnimateUpdatePopup = true;
 	}
 
@@ -3136,7 +3136,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 
 	if(pEditor->DoEditBox(&s_SpeedInput, &EditBox, 10.0f, IGraphics::CORNER_NONE, "The animation speed."))
 	{
-		pEditor->m_AnimateSpeed = clamp(s_SpeedInput.GetFloat(), MIN_ANIM_SPEED, MAX_ANIM_SPEED);
+		pEditor->m_AnimateSpeed = std::clamp(s_SpeedInput.GetFloat(), MIN_ANIM_SPEED, MAX_ANIM_SPEED);
 	}
 
 	return CUi::POPUP_KEEP_OPEN;

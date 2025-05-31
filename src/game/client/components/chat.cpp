@@ -58,7 +58,7 @@ CChat::CChat()
 				str_startswith(pStr, "/load ")))
 		{
 			bool Censor = false;
-			const size_t NumLetters = minimum(NumChars, sizeof(ms_aDisplayText) - 1);
+			const size_t NumLetters = std::min(NumChars, sizeof(ms_aDisplayText) - 1);
 			for(size_t i = 0; i < NumLetters; ++i)
 			{
 				if(Censor)
@@ -1115,7 +1115,7 @@ void CChat::OnPrepareLines(float y)
 			}
 			else
 			{
-				FullWidth += maximum(Cursor.m_LongestLineWidth, AppendCursor.m_LongestLineWidth);
+				FullWidth += std::max(Cursor.m_LongestLineWidth, AppendCursor.m_LongestLineWidth);
 			}
 			Graphics()->SetColor(1, 1, 1, 1);
 			Line.m_QuadContainerIndex = Graphics()->CreateRectQuadContainer(Begin, y, FullWidth, Line.m_aYOffset[OffsetType], MessageRounding(), IGraphics::CORNER_ALL);

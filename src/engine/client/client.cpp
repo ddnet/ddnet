@@ -1637,7 +1637,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				MapCRC = m_MapdownloadCrc;
 				Chunk = m_MapdownloadChunk;
-				Size = minimum(m_TranslationContext.m_MapDownloadChunkSize, m_TranslationContext.m_MapdownloadTotalsize - m_MapdownloadAmount);
+				Size = std::min(m_TranslationContext.m_MapDownloadChunkSize, m_TranslationContext.m_MapdownloadTotalsize - m_MapdownloadAmount);
 			}
 			else
 			{
@@ -2779,7 +2779,7 @@ void CClient::Update()
 				int64_t PrevPredTickStart = PrevPredTick * time_freq() / GameTickSpeed();
 				m_aPredIntraTick[g_Config.m_ClDummy] = (PredNow - PrevPredTickStart) / (float)(CurPredTickStart - PrevPredTickStart);
 
-				if(absolute(NewPredTick - m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick) > MaxLatencyTicks())
+				if(std::abs(NewPredTick - m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV]->m_Tick) > MaxLatencyTicks())
 				{
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client", "prediction time reset!");
 					m_PredictedTime.Init(CurTickStart + 2 * time_freq() / GameTickSpeed());
@@ -4168,8 +4168,8 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 		return 2;
 	}
 	int End = Start + Length;
-	int ChecksumBytesEnd = minimum(End, (int)sizeof(m_Checksum.m_aBytes));
-	int FileStart = maximum(Start, (int)sizeof(m_Checksum.m_aBytes));
+	int ChecksumBytesEnd = std::min(End, (int)sizeof(m_Checksum.m_aBytes));
+	int FileStart = std::max(Start, (int)sizeof(m_Checksum.m_aBytes));
 	unsigned char aStartBytes[sizeof(int32_t)];
 	unsigned char aEndBytes[sizeof(int32_t)];
 	uint_to_bytes_be(aStartBytes, Start);
@@ -4239,7 +4239,7 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 		}
 		for(int i = FileStart; i < End; i += sizeof(aBuf))
 		{
-			int Read = io_read(m_OwnExecutable, aBuf, minimum((int)sizeof(aBuf), End - i));
+			int Read = io_read(m_OwnExecutable, aBuf, std::min((int)sizeof(aBuf), End - i));
 			sha256_update(&Sha256Ctxt, aBuf, Read);
 		}
 	}

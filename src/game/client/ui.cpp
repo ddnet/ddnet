@@ -167,8 +167,8 @@ void CUi::OnCursorMove(float X, float Y)
 {
 	if(!CheckMouseLock())
 	{
-		m_UpdatedMousePos.x = clamp(m_UpdatedMousePos.x + X, 0.0f, Graphics()->WindowWidth() - 1.0f);
-		m_UpdatedMousePos.y = clamp(m_UpdatedMousePos.y + Y, 0.0f, Graphics()->WindowHeight() - 1.0f);
+		m_UpdatedMousePos.x = std::clamp(m_UpdatedMousePos.x + X, 0.0f, Graphics()->WindowWidth() - 1.0f);
+		m_UpdatedMousePos.y = std::clamp(m_UpdatedMousePos.y + Y, 0.0f, Graphics()->WindowHeight() - 1.0f);
 	}
 
 	m_UpdatedMouseDelta += vec2(X, Y);
@@ -198,8 +198,8 @@ void CUi::Update(vec2 MouseWorldPos)
 			if(!CheckMouseLock())
 			{
 				m_UpdatedMousePos = m_TouchState.m_PrimaryPosition * WindowSize;
-				m_UpdatedMousePos.x = clamp(m_UpdatedMousePos.x, 0.0f, WindowSize.x - 1.0f);
-				m_UpdatedMousePos.y = clamp(m_UpdatedMousePos.y, 0.0f, WindowSize.y - 1.0f);
+				m_UpdatedMousePos.x = std::clamp(m_UpdatedMousePos.x, 0.0f, WindowSize.x - 1.0f);
+				m_UpdatedMousePos.y = std::clamp(m_UpdatedMousePos.y, 0.0f, WindowSize.y - 1.0f);
 			}
 			m_UpdatedMouseDelta += m_TouchState.m_PrimaryDelta * WindowSize;
 
@@ -650,9 +650,9 @@ EEditState CUi::DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, 
 		m_MouseSlow = true;
 
 	if(pX)
-		*pX = clamp(MouseX() - pRect->x, 0.0f, pRect->w);
+		*pX = std::clamp(MouseX() - pRect->x, 0.0f, pRect->w);
 	if(pY)
-		*pY = clamp(MouseY() - pRect->y, 0.0f, pRect->h);
+		*pY = std::clamp(MouseY() - pRect->y, 0.0f, pRect->h);
 
 	return Res;
 }
@@ -734,7 +734,7 @@ static SCursorAndBoundingBox CalcFontSizeCursorHeightAndBoundingBox(ITextRender 
 	float TextWidth;
 	do
 	{
-		Size = maximum(Size, MinFontSize);
+		Size = std::max(Size, MinFontSize);
 		// Only consider stop-at-end and ellipsis-at-end when minimum font size reached or font scaling disabled
 		if((Size == MinFontSize || !LabelProps.m_EnableWidthCheck) && Flags != FlagsWithoutStop)
 			TextWidth = pTextRender->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, TextSizeProps);
@@ -1189,7 +1189,7 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 
 		if(ConsumeHotkey(HOTKEY_ENTER) || ((MouseButtonClicked(1) || MouseButtonClicked(0)) && !Inside))
 		{
-			Current = clamp(m_ActiveValueSelectorState.m_NumberInput.GetInteger64(Base), Min, Max);
+			Current = std::clamp(m_ActiveValueSelectorState.m_NumberInput.GetInteger64(Base), Min, Max);
 			DisableMouseLock();
 			SetActiveItem(nullptr);
 			m_ActiveValueSelectorState.m_pLastTextId = nullptr;
@@ -1211,12 +1211,12 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 			{
 				m_ActiveValueSelectorState.m_ScrollValue += MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
 
-				if(absolute(m_ActiveValueSelectorState.m_ScrollValue) > Props.m_Scale)
+				if(std::abs(m_ActiveValueSelectorState.m_ScrollValue) > Props.m_Scale)
 				{
 					const int64_t Count = (int64_t)(m_ActiveValueSelectorState.m_ScrollValue / Props.m_Scale);
 					m_ActiveValueSelectorState.m_ScrollValue = std::fmod(m_ActiveValueSelectorState.m_ScrollValue, Props.m_Scale);
 					Current += Props.m_Step * Count;
-					Current = clamp(Current, Min, Max);
+					Current = std::clamp(Current, Min, Max);
 					m_ActiveValueSelectorState.m_DidScroll = true;
 
 					// Constrain to discrete steps
@@ -1289,14 +1289,14 @@ SEditResult<int64_t> CUi::DoValueSelectorWithState(const void *pId, const CUIRec
 
 float CUi::DoScrollbarV(const void *pId, const CUIRect *pRect, float Current)
 {
-	Current = clamp(Current, 0.0f, 1.0f);
+	Current = std::clamp(Current, 0.0f, 1.0f);
 
 	// layout
 	CUIRect Rail;
 	pRect->Margin(5.0f, &Rail);
 
 	CUIRect Handle;
-	Rail.HSplitTop(clamp(33.0f, Rail.w, Rail.h / 3.0f), &Handle, nullptr);
+	Rail.HSplitTop(std::clamp(33.0f, Rail.w, Rail.h / 3.0f), &Handle, nullptr);
 	Handle.y = Rail.y + (Rail.h - Handle.h) * Current;
 
 	// logic
@@ -1347,7 +1347,7 @@ float CUi::DoScrollbarV(const void *pId, const CUIRect *pRect, float Current)
 		const float Min = Rail.y;
 		const float Max = Rail.h - Handle.h;
 		const float Cur = MouseY() - m_ActiveScrollbarOffset;
-		ReturnValue = clamp((Cur - Min) / Max, 0.0f, 1.0f);
+		ReturnValue = std::clamp((Cur - Min) / Max, 0.0f, 1.0f);
 	}
 
 	// render
@@ -1359,7 +1359,7 @@ float CUi::DoScrollbarV(const void *pId, const CUIRect *pRect, float Current)
 
 float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner)
 {
-	Current = clamp(Current, 0.0f, 1.0f);
+	Current = std::clamp(Current, 0.0f, 1.0f);
 
 	// layout
 	CUIRect Rail;
@@ -1369,7 +1369,7 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 		pRect->HMargin(5.0f, &Rail);
 
 	CUIRect Handle;
-	Rail.VSplitLeft(pColorInner ? 8.0f : clamp(33.0f, Rail.h, Rail.w / 3.0f), &Handle, nullptr);
+	Rail.VSplitLeft(pColorInner ? 8.0f : std::clamp(33.0f, Rail.h, Rail.w / 3.0f), &Handle, nullptr);
 	Handle.x += (Rail.w - Handle.w) * Current;
 
 	CUIRect HandleArea = Handle;
@@ -1435,7 +1435,7 @@ float CUi::DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, co
 		const float Min = Rail.x;
 		const float Max = Rail.w - Handle.w;
 		const float Cur = MouseX() - m_ActiveScrollbarOffset;
-		ReturnValue = clamp((Cur - Min) / Max, 0.0f, 1.0f);
+		ReturnValue = std::clamp((Cur - Min) / Max, 0.0f, 1.0f);
 	}
 
 	// render
@@ -1481,7 +1481,7 @@ bool CUi::DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect,
 	if(NoClampValue)
 	{
 		// clamp the value internally for the scrollbar
-		Value = clamp(Value, Min, Max);
+		Value = std::clamp(Value, Min, Max);
 	}
 
 	CUIRect Label, ScrollBar;
@@ -1514,7 +1514,7 @@ bool CUi::DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect,
 
 void CUi::RenderProgressBar(CUIRect ProgressBar, float Progress)
 {
-	const float Rounding = minimum(5.0f, ProgressBar.h / 2.0f);
+	const float Rounding = std::min(5.0f, ProgressBar.h / 2.0f);
 	ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, Rounding);
 	ProgressBar.w = maximum(ProgressBar.w * Progress, 2 * Rounding);
 	ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, Rounding);
@@ -1706,7 +1706,7 @@ CUi::EPopupMenuFunctionResult CUi::PopupMessage(void *pContext, CUIRect View, bo
 
 void CUi::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
 {
-	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SMessagePopupContext::POPUP_MAX_WIDTH);
+	const float TextWidth = std::min(std::ceil(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SMessagePopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
 	STextSizeProperties TextSizeProps{};
 	TextSizeProps.m_pHeight = &TextHeight;
@@ -1733,7 +1733,7 @@ void CUi::SConfirmPopupContext::YesNoButtons()
 
 void CUi::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
 {
-	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SConfirmPopupContext::POPUP_MAX_WIDTH);
+	const float TextWidth = std::min(std::ceil(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SConfirmPopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
 	STextSizeProperties TextSizeProps{};
 	TextSizeProps.m_pHeight = &TextHeight;

@@ -119,7 +119,7 @@ const char *CLineInput::GetDisplayedString()
 	if(!IsHidden())
 		return m_pStr;
 
-	const size_t NumStars = minimum(GetNumChars(), sizeof(ms_aStars) - 1);
+	const size_t NumStars = std::min(GetNumChars(), sizeof(ms_aStars) - 1);
 	for(size_t i = 0; i < NumStars; ++i)
 		ms_aStars[i] = '*';
 	ms_aStars[NumStars] = '\0';
@@ -569,7 +569,7 @@ void CLineInput::RenderCandidates()
 	// Determine longest candidate width
 	float LongestCandidateWidth = 0.0f;
 	for(int i = 0; i < Input()->GetCandidateCount(); ++i)
-		LongestCandidateWidth = maximum(LongestCandidateWidth, TextRender()->TextWidth(FontSize, Input()->GetCandidate(i)));
+		LongestCandidateWidth = std::max(LongestCandidateWidth, TextRender()->TextWidth(FontSize, Input()->GetCandidate(i)));
 
 	const float NumOffset = 8.0f;
 	const float RectWidth = LongestCandidateWidth + Margin + NumOffset + 2.0f * Padding;

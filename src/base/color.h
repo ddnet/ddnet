@@ -16,8 +16,8 @@
 */
 constexpr inline float RgbToHue(float r, float g, float b)
 {
-	float h_min = minimum(r, g, b);
-	float h_max = maximum(r, g, b);
+	float h_min = std::min({r, g, b});
+	float h_max = std::max({r, g, b});
 
 	float hue = 0.0f;
 	if(h_max != h_min)
@@ -182,7 +182,7 @@ public:
 	{
 		ColorHSLA col = *this;
 		col.l = (l - Darkest) / (1 - Darkest);
-		col.l = clamp(col.l, 0.0f, 1.0f);
+		col.l = std::clamp(col.l, 0.0f, 1.0f);
 		return col.Pack(Alpha);
 	}
 };
@@ -207,13 +207,13 @@ constexpr T color_cast(const F &) = delete;
 template<>
 constexpr inline ColorHSLA color_cast(const ColorRGBA &rgb)
 {
-	float Min = minimum(rgb.r, rgb.g, rgb.b);
-	float Max = maximum(rgb.r, rgb.g, rgb.b);
+	float Min = std::min({rgb.r, rgb.g, rgb.b});
+	float Max = std::max({rgb.r, rgb.g, rgb.b});
 
 	float c = Max - Min;
 	float h = RgbToHue(rgb.r, rgb.g, rgb.b);
 	float l = 0.5f * (Max + Min);
-	float s = (Max != 0.0f && Min != 1.0f) ? (c / (1 - (absolute(2 * l - 1)))) : 0;
+	float s = (Max != 0.0f && Min != 1.0f) ? (c / (1 - (std::abs(2 * l - 1)))) : 0;
 
 	return ColorHSLA(h, s, l, rgb.a);
 }
@@ -224,8 +224,8 @@ constexpr inline ColorRGBA color_cast(const ColorHSLA &hsl)
 	vec3 rgb = vec3(0, 0, 0);
 
 	float h1 = hsl.h * 6;
-	float c = (1.f - absolute(2 * hsl.l - 1)) * hsl.s;
-	float x = c * (1.f - absolute(std::fmod(h1, 2) - 1.f));
+	float c = (1.f - std::abs(2 * hsl.l - 1)) * hsl.s;
+	float x = c * (1.f - std::abs(std::fmod(h1, 2) - 1.f));
 
 	switch(round_truncate(h1))
 	{
@@ -264,13 +264,13 @@ template<>
 constexpr inline ColorHSLA color_cast(const ColorHSVA &hsv)
 {
 	float l = hsv.v * (1 - hsv.s * 0.5f);
-	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l) / minimum(l, 1 - l), l, hsv.a);
+	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l) / std::min(l, 1 - l), l, hsv.a);
 }
 
 template<>
 constexpr inline ColorHSVA color_cast(const ColorHSLA &hsl)
 {
-	float v = hsl.l + hsl.s * minimum(hsl.l, 1 - hsl.l);
+	float v = hsl.l + hsl.s * std::min(hsl.l, 1 - hsl.l);
 	return ColorHSVA(hsl.h, v == 0.0f ? 0 : 2 - (2 * hsl.l / v), v, hsl.a);
 }
 

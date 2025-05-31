@@ -217,7 +217,7 @@ void CHud::RenderScoreHud()
 			}
 
 			static float s_TextWidth100 = TextRender()->TextWidth(14.0f, "100", -1, -1.0f);
-			float ScoreWidthMax = maximum(maximum(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth100);
+			float ScoreWidthMax = maximum(std::max(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth100);
 			float Split = 3.0f;
 			float ImageSize = (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) ? 16.0f : Split;
 			for(int t = 0; t < 2; t++)
@@ -342,7 +342,7 @@ void CHud::RenderScoreHud()
 				if(apPlayerInfo[t])
 				{
 					if(Client()->IsSixup() && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & protocol7::GAMEFLAG_RACE)
-						str_time((int64_t)absolute(apPlayerInfo[t]->m_Score) / 10, TIME_MINS_CENTISECS, aScore[t], sizeof(aScore[t]));
+						str_time((int64_t)std::abs(apPlayerInfo[t]->m_Score) / 10, TIME_MINS_CENTISECS, aScore[t], sizeof(aScore[t]));
 					else if(m_pClient->m_GameInfo.m_TimeScore)
 					{
 						if(apPlayerInfo[t]->m_Score != -9999)
@@ -393,7 +393,7 @@ void CHud::RenderScoreHud()
 			}
 
 			static float s_TextWidth10 = TextRender()->TextWidth(14.0f, "10", -1, -1.0f);
-			float ScoreWidthMax = maximum(maximum(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth10);
+			float ScoreWidthMax = maximum(std::max(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth10);
 			float Split = 3.0f, ImageSize = 16.0f, PosSize = 16.0f;
 
 			for(int t = 0; t < 2; t++)
@@ -605,7 +605,7 @@ void CHud::RenderCursor()
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_pLocalCharacter)
 	{
 		// Render local cursor
-		CurWeapon = maximum(0, m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
+		CurWeapon = std::max(0, m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
 		TargetPos = m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy];
 	}
 	else
@@ -622,12 +622,12 @@ void CHud::RenderCursor()
 		// Calculate factor to keep cursor on screen
 		const vec2 HalfSize = vec2(Center.x - aPoints[0], Center.y - aPoints[1]);
 		const vec2 ScreenPos = (m_pClient->m_CursorInfo.WorldTarget() - Center) / m_pClient->m_Camera.m_Zoom;
-		const float ClampFactor = maximum(
+		const float ClampFactor = std::max(
 			1.0f,
-			absolute(ScreenPos.x / HalfSize.x),
-			absolute(ScreenPos.y / HalfSize.y));
+			std::abs(ScreenPos.x / HalfSize.x),
+			std::abs(ScreenPos.y / HalfSize.y));
 
-		CurWeapon = maximum(0, m_pClient->m_CursorInfo.Weapon() % NUM_WEAPONS);
+		CurWeapon = std::max(0, m_pClient->m_CursorInfo.Weapon() % NUM_WEAPONS);
 		TargetPos = ScreenPos / ClampFactor + Center;
 		if(ClampFactor != 1.0f)
 			Alpha /= 2.0f;
@@ -729,7 +729,7 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 			if(!GameClient()->m_GameInfo.m_HudDDRace && Client()->IsSixup())
 			{
 				const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
-				float NinjaProgress = clamp(pCharacter->m_AmmoCount - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
+				float NinjaProgress = std::clamp(pCharacter->m_AmmoCount - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
 				RenderNinjaBarPos(5 + 10 * 12, 5, 6.f, 24.f, NinjaProgress);
 			}
 		}
@@ -738,11 +738,11 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 			Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpriteWeaponProjectiles[CurWeapon]);
 			if(AmmoOffsetY > 0)
 			{
-				Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSixup, clamp(pCharacter->m_AmmoCount, 0, 10), 0, AmmoOffsetY);
+				Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSixup, std::clamp(pCharacter->m_AmmoCount, 0, 10), 0, AmmoOffsetY);
 			}
 			else
 			{
-				Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSixup, clamp(pCharacter->m_AmmoCount, 0, 10));
+				Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_aAmmoOffset[CurWeapon] + QuadOffsetSixup, std::clamp(pCharacter->m_AmmoCount, 0, 10));
 			}
 		}
 	}
@@ -751,15 +751,15 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 	{
 		// health display
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteHealthFull);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_HealthOffset + QuadOffsetSixup, minimum(pCharacter->m_Health, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_HealthOffset + QuadOffsetSixup, std::min(pCharacter->m_Health, 10));
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteHealthEmpty);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_EmptyHealthOffset + QuadOffsetSixup + minimum(pCharacter->m_Health, 10), 10 - minimum(pCharacter->m_Health, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_EmptyHealthOffset + QuadOffsetSixup + minimum(pCharacter->m_Health, 10), 10 - std::min(pCharacter->m_Health, 10));
 
 		// armor display
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteArmorFull);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup, minimum(pCharacter->m_Armor, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup, std::min(pCharacter->m_Armor, 10));
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteArmorEmpty);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup + minimum(pCharacter->m_Armor, 10), 10 - minimum(pCharacter->m_Armor, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup + minimum(pCharacter->m_Armor, 10), 10 - std::min(pCharacter->m_Armor, 10));
 	}
 }
 
@@ -863,23 +863,23 @@ void CHud::RenderPlayerState(const int ClientId)
 				UsedJumps = !Grounded;
 			}
 
-			if(pCharacter->m_EndlessJump && UsedJumps >= absolute(pCharacter->m_Jumps))
+			if(pCharacter->m_EndlessJump && UsedJumps >= std::abs(pCharacter->m_Jumps))
 			{
-				UsedJumps = absolute(pCharacter->m_Jumps) - 1;
+				UsedJumps = std::abs(pCharacter->m_Jumps) - 1;
 			}
 
-			int UnusedJumps = absolute(pCharacter->m_Jumps) - UsedJumps;
+			int UnusedJumps = std::abs(pCharacter->m_Jumps) - UsedJumps;
 			if(!(pPlayer->m_Jumped & 2) && UnusedJumps <= 0)
 			{
 				// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
 				UnusedJumps = 1;
 			}
-			TotalJumpsToDisplay = maximum(minimum(absolute(pCharacter->m_Jumps), 10), 0);
-			AvailableJumpsToDisplay = maximum(minimum(UnusedJumps, TotalJumpsToDisplay), 0);
+			TotalJumpsToDisplay = std::max(std::min(std::abs(pCharacter->m_Jumps), 10), 0);
+			AvailableJumpsToDisplay = std::max(std::min(UnusedJumps, TotalJumpsToDisplay), 0);
 		}
 		else
 		{
-			TotalJumpsToDisplay = AvailableJumpsToDisplay = absolute(m_pClient->m_Snap.m_aCharacters[ClientId].m_ExtendedData.m_Jumps);
+			TotalJumpsToDisplay = AvailableJumpsToDisplay = std::abs(m_pClient->m_Snap.m_aCharacters[ClientId].m_ExtendedData.m_Jumps);
 		}
 
 		// render available and used jumps
@@ -1091,7 +1091,7 @@ void CHud::RenderPlayerState(const int ClientId)
 
 void CHud::RenderNinjaBarPos(const float x, float y, const float Width, const float Height, float Progress, const float Alpha)
 {
-	Progress = clamp(Progress, 0.0f, 1.0f);
+	Progress = std::clamp(Progress, 0.0f, 1.0f);
 
 	// what percentage of the end pieces is used for the progress indicator and how much is the rest
 	// half of the ends are used for the progress display

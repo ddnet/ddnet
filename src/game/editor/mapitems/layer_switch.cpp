@@ -36,7 +36,7 @@ void CLayerSwitch::Resize(int NewW, int NewH)
 	mem_zero(pNewSwitchData, (size_t)NewW * NewH * sizeof(CSwitchTile));
 
 	// copy old data
-	for(int y = 0; y < minimum(NewH, m_Height); y++)
+	for(int y = 0; y < std::min(NewH, m_Height); y++)
 		mem_copy(&pNewSwitchData[y * NewW], &m_pSwitchTile[y * m_Width], minimum(m_Width, NewW) * sizeof(CSwitchTile));
 
 	// replace old

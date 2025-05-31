@@ -19,7 +19,7 @@ void CSaveTee::Save(CCharacter *pChr, bool AddPenalty)
 	m_Alive = pChr->m_Alive;
 
 	// This is extremely suspect code, probably interacts badly with force pause
-	m_Paused = absolute(pChr->m_pPlayer->IsPaused());
+	m_Paused = std::abs(pChr->m_pPlayer->IsPaused());
 	if(m_Paused == CPlayer::PAUSE_SPEC && !pChr->m_Paused)
 	{
 		m_Paused = CPlayer::PAUSE_NONE;
@@ -638,7 +638,7 @@ bool CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakSt
 
 	if(pGameServer->Collision()->m_HighestSwitchNumber)
 	{
-		for(int i = 1; i < minimum(m_HighestSwitchNumber, pGameServer->Collision()->m_HighestSwitchNumber) + 1; i++)
+		for(int i = 1; i < std::min(m_HighestSwitchNumber, pGameServer->Collision()->m_HighestSwitchNumber) + 1; i++)
 		{
 			pGameServer->Switchers()[i].m_aStatus[Team] = m_pSwitchers[i].m_Status;
 			if(m_pSwitchers[i].m_EndTime)

@@ -25,7 +25,7 @@
 
 void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 {
-	int CurWeapon = clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
+	int CurWeapon = std::clamp(pCurrent->m_Type, 0, NUM_WEAPONS - 1);
 
 	// get positions
 	float Curvature = 0;
@@ -142,7 +142,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemId)
 
 void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCurrent, bool IsPredicted)
 {
-	int CurWeapon = clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS - 1);
+	int CurWeapon = std::clamp(pCurrent->m_Subtype, 0, NUM_WEAPONS - 1);
 	int QuadOffset = 2;
 	float Angle = 0.0f;
 	float IntraTick = IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
@@ -242,7 +242,7 @@ void CItems::RenderFlag(const CNetObj_Flag *pPrev, const CNetObj_Flag *pCurrent,
 
 void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 {
-	int Type = clamp(pCurrent->m_Type, -1, NUM_LASERTYPES - 1);
+	int Type = std::clamp(pCurrent->m_Type, -1, NUM_LASERTYPES - 1);
 	int ColorIn, ColorOut;
 	switch(Type)
 	{
@@ -324,13 +324,13 @@ void CItems::RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA In
 		{
 			// rubber band effect
 			float Thickness = std::sqrt(Len) / 5.f;
-			TicksBody = clamp(Thickness, 1.0f, 5.0f);
+			TicksBody = std::clamp(Thickness, 1.0f, 5.0f);
 		}
 		vec2 Dir = normalize_pre_length(Pos - From, Len);
 
 		float Ms = TicksBody * 1000.0f / Client()->GameTickSpeed();
 		float a = Ms / m_pClient->GetTuning(TuneZone)->m_LaserBounceDelay;
-		a = clamp(a, 0.0f, 1.0f);
+		a = std::clamp(a, 0.0f, 1.0f);
 		float Ia = 1 - a;
 
 		Graphics()->TextureClear();
@@ -722,10 +722,10 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 
 	float T = Pt;
 	if(DestroyTick >= 0)
-		T = minimum(Pt, ((float)(DestroyTick - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed());
+		T = std::min(Pt, ((float)(DestroyTick - 1 - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed());
 
 	float MinTrailSpan = 0.4f * ((pCurrent->m_Type == WEAPON_GRENADE) ? 0.5f : 0.25f);
-	float Step = maximum(Client()->FrameTimeAverage(), (pCurrent->m_Type == WEAPON_GRENADE) ? 0.02f : 0.01f);
+	float Step = std::max(Client()->FrameTimeAverage(), (pCurrent->m_Type == WEAPON_GRENADE) ? 0.02f : 0.01f);
 	for(int i = 1 + (int)(Gt / Step); i < (int)(T / Step); i++)
 	{
 		float t = Step * (float)i + 0.4f * Step * random_float(-0.5f, 0.5f);

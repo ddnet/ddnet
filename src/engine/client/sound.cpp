@@ -26,7 +26,7 @@ static constexpr int SAMPLE_INDEX_FULL = -1;
 
 void CSound::Mix(short *pFinalOut, unsigned Frames)
 {
-	Frames = minimum(Frames, m_MaxFrames);
+	Frames = std::min(Frames, m_MaxFrames);
 	mem_zero(m_pMixBuffer, Frames * 2 * sizeof(int));
 
 	// acquire lock while we are mixing
@@ -90,7 +90,7 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 
 			case ISound::SHAPE_RECTANGLE:
 			{
-				const vec2 AbsoluteDelta = vec2(absolute(Delta.x), absolute(Delta.y));
+				const vec2 AbsoluteDelta = vec2(absolute(Delta.x), std::abs(Delta.y));
 				const float w = Voice.m_Rectangle.m_Width / 2.0f;
 				const float h = Voice.m_Rectangle.m_Height / 2.0f;
 				RangeX = w;
@@ -396,7 +396,7 @@ static int s_WVBufferSize = 0;
 
 static int ReadDataOld(void *pBuffer, int Size)
 {
-	int ChunkSize = minimum(Size, s_WVBufferSize - s_WVBufferPosition);
+	int ChunkSize = std::min(Size, s_WVBufferSize - s_WVBufferPosition);
 	mem_copy(pBuffer, (const char *)s_pWVBuffer + s_WVBufferPosition, ChunkSize);
 	s_WVBufferPosition += ChunkSize;
 	return ChunkSize;
@@ -734,7 +734,7 @@ void CSound::SetVoiceVolume(CVoiceHandle Voice, float Volume)
 	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	Volume = clamp(Volume, 0.0f, 1.0f);
+	Volume = std::clamp(Volume, 0.0f, 1.0f);
 	m_aVoices[VoiceId].m_Vol = (int)(Volume * 255.0f);
 }
 
@@ -749,7 +749,7 @@ void CSound::SetVoiceFalloff(CVoiceHandle Voice, float Falloff)
 	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	Falloff = clamp(Falloff, 0.0f, 1.0f);
+	Falloff = std::clamp(Falloff, 0.0f, 1.0f);
 	m_aVoices[VoiceId].m_Falloff = Falloff;
 }
 
@@ -787,14 +787,14 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
 	if(m_aVoices[VoiceId].m_pSample->m_NumFrames > 0 && IsLooping)
 		Tick = TickOffset % m_aVoices[VoiceId].m_pSample->m_NumFrames;
 	else
-		Tick = clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceId].m_pSample->m_NumFrames);
+		Tick = std::clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceId].m_pSample->m_NumFrames);
 
 	// at least 200msec off, else depend on buffer size
 	float Threshold = maximum(0.2f * m_aVoices[VoiceId].m_pSample->m_Rate, (float)m_MaxFrames);
-	if(absolute(m_aVoices[VoiceId].m_Tick - Tick) > Threshold)
+	if(std::abs(m_aVoices[VoiceId].m_Tick - Tick) > Threshold)
 	{
 		// take care of looping (modulo!)
-		if(!(IsLooping && (minimum(m_aVoices[VoiceId].m_Tick, Tick) + m_aVoices[VoiceId].m_pSample->m_NumFrames - maximum(m_aVoices[VoiceId].m_Tick, Tick)) <= Threshold))
+		if(!(IsLooping && (std::min(m_aVoices[VoiceId].m_Tick, Tick) + m_aVoices[VoiceId].m_pSample->m_NumFrames - std::max(m_aVoices[VoiceId].m_Tick, Tick)) <= Threshold))
 		{
 			m_aVoices[VoiceId].m_Tick = Tick;
 		}
@@ -813,7 +813,7 @@ void CSound::SetVoiceCircle(CVoiceHandle Voice, float Radius)
 		return;
 
 	m_aVoices[VoiceId].m_Shape = ISound::SHAPE_CIRCLE;
-	m_aVoices[VoiceId].m_Circle.m_Radius = maximum(0.0f, Radius);
+	m_aVoices[VoiceId].m_Circle.m_Radius = std::max(0.0f, Radius);
 }
 
 void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
@@ -828,8 +828,8 @@ void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
 		return;
 
 	m_aVoices[VoiceId].m_Shape = ISound::SHAPE_RECTANGLE;
-	m_aVoices[VoiceId].m_Rectangle.m_Width = maximum(0.0f, Width);
-	m_aVoices[VoiceId].m_Rectangle.m_Height = maximum(0.0f, Height);
+	m_aVoices[VoiceId].m_Rectangle.m_Width = std::max(0.0f, Width);
+	m_aVoices[VoiceId].m_Rectangle.m_Height = std::max(0.0f, Height);
 }
 
 ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position)

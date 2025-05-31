@@ -442,7 +442,7 @@ void CMapImages::UpdateEntityLayerText(CImageInfo &TextImage, int TextureSize, i
 		float y = (CurrentNumber / 16) * 64;
 
 		int ApproximateTextWidth = TextRender()->CalculateTextWidth(aBuf, DigitsCount, 0, UniversalSuitableFontSize);
-		int XOffSet = (MaxWidth - clamp(ApproximateTextWidth, 0, MaxWidth)) / 2;
+		int XOffSet = (MaxWidth - std::clamp(ApproximateTextWidth, 0, MaxWidth)) / 2;
 
 		TextRender()->UploadEntityLayerText(TextImage, (TextImage.m_Width / 16) - XOffSet, (TextImage.m_Height / 16) - YOffset, aBuf, DigitsCount, x + XOffSet, y + YOffset, UniversalSuitableFontSize);
 	}
@@ -451,7 +451,7 @@ void CMapImages::UpdateEntityLayerText(CImageInfo &TextImage, int TextureSize, i
 void CMapImages::InitOverlayTextures()
 {
 	int TextureSize = 64 * m_TextureScale / 100;
-	TextureSize = clamp(TextureSize, 2, 64);
+	TextureSize = std::clamp(TextureSize, 2, 64);
 	int TextureToVerticalCenterOffset = (64 - TextureSize) / 2; // should be used to move texture to the center of 64 pixels area
 
 	if(!m_OverlayBottomTexture.IsValid())

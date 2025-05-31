@@ -62,7 +62,7 @@ void CFriends::Init(bool Foes)
 
 const CFriendInfo *CFriends::GetFriend(int Index) const
 {
-	return &m_aFriends[maximum(0, Index % m_NumFriends)];
+	return &m_aFriends[std::max(0, Index % m_NumFriends)];
 }
 
 int CFriends::GetFriendState(const char *pName, const char *pClan) const

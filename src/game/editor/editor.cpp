@@ -334,7 +334,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 
 		if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || ((Ui()->MouseButtonClicked(1) || Ui()->MouseButtonClicked(0)) && !Inside))
 		{
-			Current = clamp(s_NumberInput.GetInteger(Base), Min, Max);
+			Current = std::clamp(s_NumberInput.GetInteger(Base), Min, Max);
 			Ui()->DisableMouseLock();
 			Ui()->SetActiveItem(nullptr);
 			s_pLastTextId = nullptr;
@@ -355,12 +355,12 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 			{
 				s_ScrollValue += Ui()->MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
 
-				if(absolute(s_ScrollValue) >= Scale)
+				if(std::abs(s_ScrollValue) >= Scale)
 				{
 					int Count = (int)(s_ScrollValue / Scale);
 					s_ScrollValue = std::fmod(s_ScrollValue, Scale);
 					Current += Step * Count;
-					Current = clamp(Current, Min, Max);
+					Current = std::clamp(Current, Min, Max);
 					s_DidScroll = true;
 
 					// Constrain to discrete steps
@@ -747,7 +747,7 @@ void CEditor::SelectNextLayer()
 {
 	int CurrentLayer = 0;
 	for(const auto &Selected : m_vSelectedLayers)
-		CurrentLayer = maximum(Selected, CurrentLayer);
+		CurrentLayer = std::max(Selected, CurrentLayer);
 	SelectLayer(CurrentLayer);
 
 	if(m_vSelectedLayers[0] < (int)m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1)
@@ -771,7 +771,7 @@ void CEditor::SelectPreviousLayer()
 {
 	int CurrentLayer = std::numeric_limits<int>::max();
 	for(const auto &Selected : m_vSelectedLayers)
-		CurrentLayer = minimum(Selected, CurrentLayer);
+		CurrentLayer = std::min(Selected, CurrentLayer);
 	SelectLayer(CurrentLayer);
 
 	if(m_vSelectedLayers[0] > 0)
@@ -1583,7 +1583,7 @@ void CEditor::DoPointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 CEditor::EAxis CEditor::GetDragAxis(int OffsetX, int OffsetY) const
 {
 	if(Input()->ShiftIsPressed())
-		if(absolute(OffsetX) < absolute(OffsetY))
+		if(absolute(OffsetX) < std::abs(OffsetY))
 			return EAxis::AXIS_Y;
 		else
 			return EAxis::AXIS_X;
@@ -1637,8 +1637,8 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 	auto &&CheckAlignment = [&](CPoint *pQuadPoint) {
 		int DX = pQuadPoint->x - Point.x;
 		int DY = pQuadPoint->y - Point.y;
-		int DiffX = absolute(DX);
-		int DiffY = absolute(DY);
+		int DiffX = std::abs(DX);
+		int DiffY = std::abs(DY);
 
 		if(DiffX <= Threshold && (!GridEnabled || DiffX == 0))
 		{
@@ -1771,7 +1771,7 @@ void CEditor::ComputePointsAlignments(const std::shared_ptr<CLayerQuads> &pLayer
 
 	for(const auto &Alignment : vAllAlignments)
 	{
-		int AbsDiff = absolute(Alignment.m_Diff);
+		int AbsDiff = std::abs(Alignment.m_Diff);
 		if(Alignment.m_Axis == EAxis::AXIS_X)
 		{
 			if(AbsDiff < SmallestDiffY)
@@ -1818,8 +1818,8 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 		CPoint ToCheck = AABB.m_aPoints[Point] + ivec2(OffsetX, OffsetY);
 		int DX = Aligned.x - ToCheck.x;
 		int DY = Aligned.y - ToCheck.y;
-		int DiffX = absolute(DX);
-		int DiffY = absolute(DY);
+		int DiffX = std::abs(DX);
+		int DiffY = std::abs(DY);
 
 		if(DiffX <= Threshold && (!GridEnabled || DiffX == 0))
 		{
@@ -1896,10 +1896,10 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 		CPoint QuadMin = pCurrentQuad->m_aPoints[0], QuadMax = pCurrentQuad->m_aPoints[0];
 		for(int v = 1; v < 4; v++)
 		{
-			QuadMin.x = minimum(QuadMin.x, pCurrentQuad->m_aPoints[v].x);
-			QuadMin.y = minimum(QuadMin.y, pCurrentQuad->m_aPoints[v].y);
-			QuadMax.x = maximum(QuadMax.x, pCurrentQuad->m_aPoints[v].x);
-			QuadMax.y = maximum(QuadMax.y, pCurrentQuad->m_aPoints[v].y);
+			QuadMin.x = std::min(QuadMin.x, pCurrentQuad->m_aPoints[v].x);
+			QuadMin.y = std::min(QuadMin.y, pCurrentQuad->m_aPoints[v].y);
+			QuadMax.x = std::max(QuadMax.x, pCurrentQuad->m_aPoints[v].x);
+			QuadMax.y = std::max(QuadMax.y, pCurrentQuad->m_aPoints[v].y);
 		}
 
 		CheckAABBAlignment(QuadMin, QuadMax);
@@ -1976,10 +1976,10 @@ void CEditor::QuadSelectionAABB(const std::shared_ptr<CLayerQuads> &pLayer, SAxi
 		for(int i = 0; i < 4; i++)
 		{
 			auto *pPoint = &pQuad->m_aPoints[i];
-			Min.x = minimum(Min.x, pPoint->x);
-			Min.y = minimum(Min.y, pPoint->y);
-			Max.x = maximum(Max.x, pPoint->x);
-			Max.y = maximum(Max.y, pPoint->y);
+			Min.x = std::min(Min.x, pPoint->x);
+			Min.y = std::min(Min.y, pPoint->y);
+			Max.x = std::max(Max.x, pPoint->x);
+			Max.y = std::max(Max.y, pPoint->y);
 		}
 	}
 	CPoint Center = (Min + Max) / 2.0f;
@@ -2588,8 +2588,8 @@ float CEditor::TriangleArea(vec2 A, vec2 B, vec2 C)
 bool CEditor::IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C)
 {
 	// Normalize to increase precision
-	vec2 Min(minimum(A.x, B.x, C.x), minimum(A.y, B.y, C.y));
-	vec2 Max(maximum(A.x, B.x, C.x), maximum(A.y, B.y, C.y));
+	vec2 Min(minimum(A.x, B.x, C.x), std::min(A.y, B.y, C.y));
+	vec2 Max(maximum(A.x, B.x, C.x), std::max(A.y, B.y, C.y));
 	vec2 Size(Max.x - Min.x, Max.y - Min.y);
 
 	if(Size.x < 0.0000001f || Size.y < 0.0000001f)
@@ -2603,7 +2603,7 @@ bool CEditor::IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C)
 	Point = (Point - Min) * Normal;
 
 	float Area = TriangleArea(A, B, C);
-	return Area > 0.f && absolute(TriangleArea(Point, A, B) + TriangleArea(Point, B, C) + TriangleArea(Point, C, A) - Area) < 0.000001f;
+	return Area > 0.f && std::abs(TriangleArea(Point, A, B) + TriangleArea(Point, B, C) + TriangleArea(Point, C, A) - Area) < 0.000001f;
 }
 
 void CEditor::DoQuadKnife(int QuadIndex)
@@ -2647,13 +2647,13 @@ void CEditor::DoQuadKnife(int QuadIndex)
 			for(int i = 0; i < 4; i++)
 			{
 				int j = (i + 1) % 4;
-				vec2 Min(minimum(v[i].x, v[j].x), minimum(v[i].y, v[j].y));
-				vec2 Max(maximum(v[i].x, v[j].x), maximum(v[i].y, v[j].y));
+				vec2 Min(minimum(v[i].x, v[j].x), std::min(v[i].y, v[j].y));
+				vec2 Max(maximum(v[i].x, v[j].x), std::max(v[i].y, v[j].y));
 
 				if(in_range(OnGrid.y, Min.y, Max.y) && Max.y - Min.y > 0.0000001f)
 				{
 					vec2 OnEdge(v[i].x + (OnGrid.y - v[i].y) / (v[j].y - v[i].y) * (v[j].x - v[i].x), OnGrid.y);
-					float Distance = absolute(OnGrid.x - OnEdge.x);
+					float Distance = std::abs(OnGrid.x - OnEdge.x);
 
 					if(Distance < CellSize && (Distance < MinDistance || MinDistance < 0.f))
 					{
@@ -2665,7 +2665,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 				if(in_range(OnGrid.x, Min.x, Max.x) && Max.x - Min.x > 0.0000001f)
 				{
 					vec2 OnEdge(OnGrid.x, v[i].y + (OnGrid.x - v[i].x) / (v[j].x - v[i].x) * (v[j].y - v[i].y));
-					float Distance = absolute(OnGrid.y - OnEdge.y);
+					float Distance = std::abs(OnGrid.y - OnEdge.y);
 
 					if(Distance < CellSize && (Distance < MinDistance || MinDistance < 0.f))
 					{
@@ -2786,7 +2786,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	Graphics()->LinesDraw(aEdges, 4);
 
 	IGraphics::CLineItem aLines[4];
-	int LineCount = maximum(m_QuadKnifeCount - 1, 0);
+	int LineCount = std::max(m_QuadKnifeCount - 1, 0);
 
 	for(int i = 0; i < LineCount; i++)
 		aLines[i] = IGraphics::CLineItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, m_aQuadKnifePoints[i + 1].x, m_aQuadKnifePoints[i + 1].y);
@@ -3089,7 +3089,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	else
 	{
 		// fix aspect ratio of the image in the picker
-		float Max = minimum(View.w, View.h);
+		float Max = std::min(View.w, View.h);
 		View.w = View.h = Max;
 	}
 
@@ -3891,7 +3891,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		UnscrolledLayersBox.HSplitTop(s_InitialCutHeight, nullptr, &UnscrolledLayersBox);
 		UnscrolledLayersBox.y -= s_InitialMouseY - Ui()->MouseY();
 
-		UnscrolledLayersBox.y = clamp(UnscrolledLayersBox.y, MinDraggableValue, MaxDraggableValue);
+		UnscrolledLayersBox.y = std::clamp(UnscrolledLayersBox.y, MinDraggableValue, MaxDraggableValue);
 
 		UnscrolledLayersBox.w = LayersBox.w;
 	}
@@ -4008,7 +4008,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					SetOperation(OP_NONE);
 				}
 
-				if(s_Operation == OP_CLICK && absolute(Ui()->MouseY() - s_InitialMouseY) > MinDragDistance)
+				if(s_Operation == OP_CLICK && std::abs(Ui()->MouseY() - s_InitialMouseY) > MinDragDistance)
 				{
 					StartDragGroup = true;
 					s_pDraggedButton = m_Map.m_vpGroups[g].get();
@@ -4195,7 +4195,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					SetOperation(OP_NONE);
 				}
 
-				if(s_Operation == OP_CLICK && absolute(Ui()->MouseY() - s_InitialMouseY) > MinDragDistance)
+				if(s_Operation == OP_CLICK && std::abs(Ui()->MouseY() - s_InitialMouseY) > MinDragDistance)
 				{
 					bool EntitiesLayerSelected = false;
 					for(int k : m_vSelectedLayers)
@@ -4862,7 +4862,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 		if(Input()->KeyPress(KEY_DOWN))
 		{
 			int OldImage = m_SelectedImage;
-			m_SelectedImage = clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
+			m_SelectedImage = std::clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
 			for(size_t i = m_SelectedImage + 1; i < m_Map.m_vpImages.size(); i++)
 			{
 				if(m_Map.m_vpImages[i]->m_External == m_Map.m_vpImages[m_SelectedImage]->m_External)
@@ -4887,7 +4887,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 		else if(Input()->KeyPress(KEY_UP))
 		{
 			int OldImage = m_SelectedImage;
-			m_SelectedImage = clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
+			m_SelectedImage = std::clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
 			for(int i = m_SelectedImage - 1; i >= 0; i--)
 			{
 				if(m_Map.m_vpImages[i]->m_External == m_Map.m_vpImages[m_SelectedImage]->m_External)
@@ -6091,7 +6091,7 @@ void CEditor::ResetZoomEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int
 {
 	auto [Bottom, Top] = pEnvelope->GetValueRange(ActiveChannels);
 	float EndTime = pEnvelope->EndTime();
-	float ValueRange = absolute(Top - Bottom);
+	float ValueRange = std::abs(Top - Bottom);
 
 	if(ValueRange < m_ZoomEnvelopeY.GetMinValue())
 	{
@@ -6107,7 +6107,7 @@ void CEditor::ResetZoomEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int
 	else
 	{
 		// calculate biggest possible spacing
-		float SpacingFactor = minimum(1.25f, m_ZoomEnvelopeY.GetMaxValue() / ValueRange);
+		float SpacingFactor = std::min(1.25f, m_ZoomEnvelopeY.GetMaxValue() / ValueRange);
 		m_ZoomEnvelopeY.SetValueInstant(SpacingFactor * ValueRange);
 		float Space = 1.0f / SpacingFactor;
 		float Spacing = (1.0f - Space) / 2.0f;
@@ -6132,7 +6132,7 @@ void CEditor::ResetZoomEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int
 	}
 	else
 	{
-		float SpacingFactor = minimum(1.25f, m_ZoomEnvelopeX.GetMaxValue() / EndTime);
+		float SpacingFactor = std::min(1.25f, m_ZoomEnvelopeX.GetMaxValue() / EndTime);
 		m_ZoomEnvelopeX.SetValueInstant(SpacingFactor * EndTime);
 		float Space = 1.0f / SpacingFactor;
 		float Spacing = (1.0f - Space) / 2.0f;
@@ -6850,8 +6850,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		// render lines
 		{
-			float EndTimeTotal = maximum(0.000001f, pEnvelope->EndTime());
-			float EndX = clamp(EnvelopeToScreenX(View, EndTimeTotal), View.x, View.x + View.w);
+			float EndTimeTotal = std::max(0.000001f, pEnvelope->EndTime());
+			float EndX = std::clamp(EnvelopeToScreenX(View, EndTimeTotal), View.x, View.x + View.w);
 			float StartX = clamp(View.x + View.w * m_OffsetEnvelopeX, View.x, View.x + View.w);
 
 			float EndTime = ScreenToEnvelopeX(View, EndX);
@@ -6962,12 +6962,12 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			Ui()->ClipEnable(&ColorBar);
 
-			float StartX = maximum(EnvelopeToScreenX(View, 0), ColorBar.x);
+			float StartX = std::max(EnvelopeToScreenX(View, 0), ColorBar.x);
 			float EndX = EnvelopeToScreenX(View, pEnvelope->EndTime());
 			CUIRect BackgroundView{
 				StartX,
 				ColorBar.y,
-				minimum(EndX - StartX, ColorBar.x + ColorBar.w - StartX),
+				std::min(EndX - StartX, ColorBar.x + ColorBar.w - StartX),
 				ColorBar.h};
 			RenderBackground(BackgroundView, m_CheckerTexture, 16.0f, 1.0f);
 
@@ -7099,12 +7099,12 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 											for(int j = 0; j < SelectedIndex; j++)
 											{
 												if(!IsEnvPointSelected(j))
-													BoundLow = maximum(pEnvelope->m_vPoints[j].m_Time + 1, BoundLow);
+													BoundLow = std::max(pEnvelope->m_vPoints[j].m_Time + 1, BoundLow);
 											}
 											for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
 											{
 												if(!IsEnvPointSelected(j))
-													BoundHigh = minimum(pEnvelope->m_vPoints[j].m_Time - 1, BoundHigh);
+													BoundHigh = std::min(pEnvelope->m_vPoints[j].m_Time - 1, BoundHigh);
 											}
 
 											DeltaX = ClampDelta(s_vAccurateDragValuesX[k], DeltaX, BoundLow, BoundHigh);
@@ -7149,7 +7149,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 											if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
 											{
-												pEnvelope->m_vPoints[i].m_aValues[c] = clamp(pEnvelope->m_vPoints[i].m_aValues[c], 0, 1024);
+												pEnvelope->m_vPoints[i].m_aValues[c] = std::clamp(pEnvelope->m_vPoints[i].m_aValues[c], 0, 1024);
 												s_vAccurateDragValuesY[k] = clamp<float>(s_vAccurateDragValuesY[k], 0, 1024);
 											}
 										}
@@ -7429,7 +7429,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] = std::round(s_vAccurateDragValuesY[0]);
 
 									// clamp time value
-									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = clamp(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c], f2fxt(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, 0);
+									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = std::clamp(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c], f2fxt(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, 0);
 									s_vAccurateDragValuesX[0] = clamp<float>(s_vAccurateDragValuesX[0], f2fxt(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, 0);
 								}
 
@@ -7528,8 +7528,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			{
 				float Value = pEnvelope->m_vPoints[SelectedIndex].m_Time;
 				s_vInitialPositionsX.push_back(Value);
-				MaximumX = maximum(MaximumX, Value);
-				MinimumX = minimum(MinimumX, Value);
+				MaximumX = std::max(MaximumX, Value);
+				MinimumX = std::min(MinimumX, Value);
 			}
 			s_MidpointX = (MaximumX - MinimumX) / 2.0f + MinimumX;
 
@@ -7540,8 +7540,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			{
 				float Value = pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
 				s_vInitialPositionsY.push_back(Value);
-				MaximumY = maximum(MaximumY, Value);
-				MinimumY = minimum(MinimumY, Value);
+				MaximumY = std::max(MaximumY, Value);
+				MinimumY = std::min(MinimumY, Value);
 			}
 			s_MidpointY = (MaximumY - MinimumY) / 2.0f + MinimumY;
 		}
@@ -7562,27 +7562,27 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					for(int j = 0; j < SelectedIndex; j++)
 					{
 						if(!IsEnvPointSelected(j))
-							BoundLow = maximum(pEnvelope->m_vPoints[j].m_Time + 1, BoundLow);
+							BoundLow = std::max(pEnvelope->m_vPoints[j].m_Time + 1, BoundLow);
 					}
 					for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
 					{
 						if(!IsEnvPointSelected(j))
-							BoundHigh = minimum(pEnvelope->m_vPoints[j].m_Time - 1, BoundHigh);
+							BoundHigh = std::min(pEnvelope->m_vPoints[j].m_Time - 1, BoundHigh);
 					}
 
 					float Value = s_vInitialPositionsX[k];
 					float ScaleBoundLow = (BoundLow - Midpoint) / (Value - Midpoint);
 					float ScaleBoundHigh = (BoundHigh - Midpoint) / (Value - Midpoint);
-					float ScaleBoundMin = minimum(ScaleBoundLow, ScaleBoundHigh);
-					float ScaleBoundMax = maximum(ScaleBoundLow, ScaleBoundHigh);
-					s_ScaleFactorX = clamp(s_ScaleFactorX, ScaleBoundMin, ScaleBoundMax);
+					float ScaleBoundMin = std::min(ScaleBoundLow, ScaleBoundHigh);
+					float ScaleBoundMax = std::max(ScaleBoundLow, ScaleBoundHigh);
+					s_ScaleFactorX = std::clamp(s_ScaleFactorX, ScaleBoundMin, ScaleBoundMax);
 				}
 
 				for(size_t k = 0; k < m_vSelectedEnvelopePoints.size(); k++)
 				{
 					int SelectedIndex = m_vSelectedEnvelopePoints[k].first;
 					float ScaleMinimum = s_vInitialPositionsX[k] - Midpoint > fxt2f(1) ? fxt2f(1) / (s_vInitialPositionsX[k] - Midpoint) : 0.0f;
-					float ScaleFactor = maximum(ScaleMinimum, s_ScaleFactorX);
+					float ScaleFactor = std::max(ScaleMinimum, s_ScaleFactorX);
 					pEnvelope->m_vPoints[SelectedIndex].m_Time = std::round((s_vInitialPositionsX[k] - Midpoint) * ScaleFactor + Midpoint);
 				}
 				for(size_t k = 1; k < pEnvelope->m_vPoints.size(); k++)
@@ -7615,7 +7615,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(s_vInitialPositionsY[k] * s_ScaleFactorY);
 
 					if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
-						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = clamp(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel], 0, 1024);
+						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::clamp(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel], 0, 1024);
 				}
 			}
 
@@ -7665,10 +7665,10 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				float ValueStart = ScreenToEnvelopeY(View, s_MouseYStart);
 				float ValueEnd = ScreenToEnvelopeY(View, Ui()->MouseY());
 
-				float TimeMin = minimum(TimeStart, TimeEnd);
-				float TimeMax = maximum(TimeStart, TimeEnd);
-				float ValueMin = minimum(ValueStart, ValueEnd);
-				float ValueMax = maximum(ValueStart, ValueEnd);
+				float TimeMin = std::min(TimeStart, TimeEnd);
+				float TimeMax = std::max(TimeStart, TimeEnd);
+				float ValueMin = std::min(ValueStart, ValueEnd);
+				float ValueMax = std::max(ValueStart, ValueEnd);
 
 				if(!Input()->ShiftIsPressed())
 					DeselectEnvPoints();
@@ -7878,19 +7878,19 @@ void CEditor::DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, f
 		if(Clicked || Abrupted)
 			s_Operation = OP_NONE;
 
-		if(s_Operation == OP_CLICKED && absolute(IsVertical ? Ui()->MouseY() - s_InitialMouseY : Ui()->MouseX() - s_InitialMouseX) > 5.0f)
+		if(s_Operation == OP_CLICKED && std::abs(IsVertical ? Ui()->MouseY() - s_InitialMouseY : Ui()->MouseX() - s_InitialMouseX) > 5.0f)
 			s_Operation = OP_DRAGGING;
 
 		if(s_Operation == OP_DRAGGING)
 		{
 			if(Side == EDragSide::SIDE_TOP)
-				*pValue = clamp(s_InitialMouseOffsetY + View.y + View.h - Ui()->MouseY(), MinValue, MaxValue);
+				*pValue = std::clamp(s_InitialMouseOffsetY + View.y + View.h - Ui()->MouseY(), MinValue, MaxValue);
 			else if(Side == EDragSide::SIDE_RIGHT)
-				*pValue = clamp(Ui()->MouseX() - s_InitialMouseOffsetX - View.x + pDragBar->w, MinValue, MaxValue);
+				*pValue = std::clamp(Ui()->MouseX() - s_InitialMouseOffsetX - View.x + pDragBar->w, MinValue, MaxValue);
 			else if(Side == EDragSide::SIDE_BOTTOM)
-				*pValue = clamp(Ui()->MouseY() - s_InitialMouseOffsetY - View.y + pDragBar->h, MinValue, MaxValue);
+				*pValue = std::clamp(Ui()->MouseY() - s_InitialMouseOffsetY - View.y + pDragBar->h, MinValue, MaxValue);
 			else if(Side == EDragSide::SIDE_LEFT)
-				*pValue = clamp(s_InitialMouseOffsetX + View.x + View.w - Ui()->MouseX(), MinValue, MaxValue);
+				*pValue = std::clamp(s_InitialMouseOffsetX + View.x + View.w - Ui()->MouseX(), MinValue, MaxValue);
 
 			m_CursorType = IsVertical ? CURSOR_RESIZE_V : CURSOR_RESIZE_H;
 		}

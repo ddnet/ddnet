@@ -331,7 +331,7 @@ void CGhost::OnRender()
 			continue;
 
 		int CurPos = Ghost.m_PlaybackPos;
-		int PrevPos = maximum(0, CurPos - 1);
+		int PrevPos = std::max(0, CurPos - 1);
 		if(Ghost.m_Path.Get(PrevPos)->m_Tick > GhostTick)
 			continue;
 

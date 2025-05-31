@@ -7,8 +7,6 @@
 #include <cmath>
 #include <cstdlib>
 
-using std::clamp;
-
 constexpr float pi = 3.1415926535897932384626433f;
 
 constexpr int round_to_int(float f)
@@ -130,32 +128,6 @@ public:
 		return fx2f(value);
 	}
 };
-
-template<typename T>
-constexpr T minimum(T a, T b)
-{
-	return std::min(a, b);
-}
-template<typename T>
-constexpr T minimum(T a, T b, T c)
-{
-	return std::min(std::min(a, b), c);
-}
-template<typename T>
-constexpr T maximum(T a, T b)
-{
-	return std::max(a, b);
-}
-template<typename T>
-constexpr T maximum(T a, T b, T c)
-{
-	return std::max(std::max(a, b), c);
-}
-template<typename T>
-constexpr T absolute(T a)
-{
-	return a < T(0) ? -a : a;
-}
 
 template<typename T>
 constexpr bool in_range(T a, T lower, T upper)

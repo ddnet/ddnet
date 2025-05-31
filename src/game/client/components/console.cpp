@@ -123,7 +123,7 @@ static std::pair<EArgumentCompletionType, int> ArgumentCompletion(const char *pS
 
 	for(const auto &Entry : gs_aArgumentCompletionEntries)
 	{
-		int Length = maximum(str_length(Entry.m_pCommandName), CommandLength);
+		int Length = std::max(str_length(Entry.m_pCommandName), CommandLength);
 		if(str_comp_nocase_num(Entry.m_pCommandName, pCommandStart, Length) == 0)
 		{
 			int CurrentArg = 0;
@@ -688,7 +688,7 @@ int CGameConsole::CInstance::GetLinesToScroll(int Direction, int LinesToScroll)
 		pEntry = m_Backlog.Prev(pEntry);
 	}
 
-	int Amount = maximum(0, Line - LinesToSkip);
+	int Amount = std::max(0, Line - LinesToSkip);
 	while(pEntry && (LinesToScroll > 0 ? Amount < LinesToScroll : true))
 	{
 		if(pEntry->m_LineCount == -1)
@@ -697,7 +697,7 @@ int CGameConsole::CInstance::GetLinesToScroll(int Direction, int LinesToScroll)
 		pEntry = Direction == -1 ? m_Backlog.Prev(pEntry) : m_Backlog.Next(pEntry);
 	}
 
-	return LinesToScroll > 0 ? minimum(Amount, LinesToScroll) : Amount;
+	return LinesToScroll > 0 ? std::min(Amount, LinesToScroll) : Amount;
 }
 
 void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
@@ -705,13 +705,13 @@ void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
 	// This method is used to scroll lines from `StartLine` to `EndLine` to the center of the screen, if possible.
 
 	// Find target line
-	int Target = maximum(0, (int)ceil(StartLine - minimum(StartLine - EndLine, m_LinesRendered) / 2) - m_LinesRendered / 2);
+	int Target = std::max(0, (int)ceil(StartLine - std::min(StartLine - EndLine, m_LinesRendered) / 2) - m_LinesRendered / 2);
 	if(m_BacklogCurLine == Target)
 		return;
 
 	// Compute acutal amount of lines to scroll to make sure lines fit in viewport and we don't have empty space
 	int Direction = m_BacklogCurLine - Target < 0 ? -1 : 1;
-	int LinesToScroll = absolute(Target - m_BacklogCurLine);
+	int LinesToScroll = std::abs(Target - m_BacklogCurLine);
 	int ComputedLines = GetLinesToScroll(Direction, LinesToScroll);
 
 	if(Direction == -1)
@@ -847,7 +847,7 @@ void CGameConsole::CInstance::UpdateSearch()
 	if(!m_vSearchMatches.empty() && SearchChanged)
 		m_CurrentMatchIndex = 0;
 	else
-		m_CurrentMatchIndex = std::clamp(m_CurrentMatchIndex, -1, (int)m_vSearchMatches.size() - 1);
+		m_CurrentMatchIndex = std::std::clamp(m_CurrentMatchIndex, -1, (int)m_vSearchMatches.size() - 1);
 
 	// Reverse order of lines by sorting so we have matches from top to bottom instead of bottom to top
 	std::sort(m_vSearchMatches.begin(), m_vSearchMatches.end(), [](const SSearchMatch &MatchA, const SSearchMatch &MatchB) {
@@ -1151,7 +1151,7 @@ void CGameConsole::OnRender()
 			pConsole->m_MouseRelease = GetMousePosition();
 		}
 		const float ScaledLineHeight = LineHeight / ScreenSize.y;
-		if(absolute(m_TouchState.m_ScrollAmount.y) >= ScaledLineHeight)
+		if(std::abs(m_TouchState.m_ScrollAmount.y) >= ScaledLineHeight)
 		{
 			if(m_TouchState.m_ScrollAmount.y > 0.0f)
 			{
@@ -1358,7 +1358,7 @@ void CGameConsole::OnRender()
 			if(Outside && !CanRenderOneLine)
 				break;
 
-			const int LinesNotRendered = pEntry->m_LineCount - minimum((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
+			const int LinesNotRendered = pEntry->m_LineCount - std::min((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
 			pConsole->m_LinesRendered -= LinesNotRendered;
 
 			TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FONT_SIZE, TEXTFLAG_RENDER);
@@ -1392,8 +1392,8 @@ void CGameConsole::OnRender()
 
 			if(Cursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 			{
-				pConsole->m_CurSelStart = minimum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
-				pConsole->m_CurSelEnd = maximum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+				pConsole->m_CurSelStart = std::min(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+				pConsole->m_CurSelEnd = std::max(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
 			}
 			pConsole->m_LinesRendered += First ? pEntry->m_LineCount - (pConsole->m_BacklogLastActiveLine - SkippedLines) : pEntry->m_LineCount;
 

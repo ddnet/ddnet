@@ -242,10 +242,10 @@ void CAutoMapper::Load(const char *pTileName)
 					CPosRule NewPosRule = {x, y, Value, vNewIndexList};
 					pCurrentIndex->m_vRules.push_back(NewPosRule);
 
-					pCurrentConf->m_StartX = minimum(pCurrentConf->m_StartX, NewPosRule.m_X);
-					pCurrentConf->m_StartY = minimum(pCurrentConf->m_StartY, NewPosRule.m_Y);
-					pCurrentConf->m_EndX = maximum(pCurrentConf->m_EndX, NewPosRule.m_X);
-					pCurrentConf->m_EndY = maximum(pCurrentConf->m_EndY, NewPosRule.m_Y);
+					pCurrentConf->m_StartX = std::min(pCurrentConf->m_StartX, NewPosRule.m_X);
+					pCurrentConf->m_StartY = std::min(pCurrentConf->m_StartY, NewPosRule.m_Y);
+					pCurrentConf->m_EndX = std::max(pCurrentConf->m_EndX, NewPosRule.m_X);
+					pCurrentConf->m_EndY = std::max(pCurrentConf->m_EndY, NewPosRule.m_Y);
 
 					if(x == 0 && y == 0)
 					{
@@ -399,10 +399,10 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, CLayerTiles *pGameLayer,
 
 	CConfiguration *pConf = &m_vConfigs[ConfigId];
 
-	int CommitFromX = clamp(X + pConf->m_StartX, 0, pLayer->m_Width);
-	int CommitFromY = clamp(Y + pConf->m_StartY, 0, pLayer->m_Height);
-	int CommitToX = clamp(X + Width + pConf->m_EndX, 0, pLayer->m_Width);
-	int CommitToY = clamp(Y + Height + pConf->m_EndY, 0, pLayer->m_Height);
+	int CommitFromX = std::clamp(X + pConf->m_StartX, 0, pLayer->m_Width);
+	int CommitFromY = std::clamp(Y + pConf->m_StartY, 0, pLayer->m_Height);
+	int CommitToX = std::clamp(X + Width + pConf->m_EndX, 0, pLayer->m_Width);
+	int CommitToY = std::clamp(Y + Height + pConf->m_EndY, 0, pLayer->m_Height);
 
 	int UpdateFromX = clamp(X + 3 * pConf->m_StartX, 0, pLayer->m_Width);
 	int UpdateFromY = clamp(Y + 3 * pConf->m_StartY, 0, pLayer->m_Height);

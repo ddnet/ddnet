@@ -1788,7 +1788,7 @@ protected:
 
 	static size_t ImageMipLevelCount(size_t Width, size_t Height, size_t Depth)
 	{
-		return std::floor(std::log2(maximum(Width, maximum(Height, Depth)))) + 1;
+		return std::floor(std::log2(maximum(Width, std::max(Height, Depth)))) + 1;
 	}
 
 	static size_t ImageMipLevelCount(const VkExtent3D &ImgExtent)
@@ -3300,11 +3300,11 @@ protected:
 				Scissor.extent.height = (uint32_t)(((float)Scissor.extent.height / (float)ScissorViewport.height) * (float)m_DynamicViewportSize.height);
 			}
 
-			Viewport.x = clamp(Viewport.x, 0.0f, std::numeric_limits<decltype(Viewport.x)>::max());
-			Viewport.y = clamp(Viewport.y, 0.0f, std::numeric_limits<decltype(Viewport.y)>::max());
+			Viewport.x = std::clamp(Viewport.x, 0.0f, std::numeric_limits<decltype(Viewport.x)>::max());
+			Viewport.y = std::clamp(Viewport.y, 0.0f, std::numeric_limits<decltype(Viewport.y)>::max());
 
-			Scissor.offset.x = clamp(Scissor.offset.x, 0, std::numeric_limits<decltype(Scissor.offset.x)>::max());
-			Scissor.offset.y = clamp(Scissor.offset.y, 0, std::numeric_limits<decltype(Scissor.offset.y)>::max());
+			Scissor.offset.x = std::clamp(Scissor.offset.x, 0, std::numeric_limits<decltype(Scissor.offset.x)>::max());
+			Scissor.offset.y = std::clamp(Scissor.offset.y, 0, std::numeric_limits<decltype(Scissor.offset.y)>::max());
 
 			ExecBuffer.m_HasDynamicState = true;
 			ExecBuffer.m_Viewport = Viewport;
@@ -5835,7 +5835,7 @@ public:
 				if(!AllocateDescriptorPool(DescriptorPools, DescriptorPools.m_DefaultAllocSize))
 					return false;
 
-				AllocatedInThisRun = minimum((size_t)DescriptorPools.m_DefaultAllocSize, CurAllocNum);
+				AllocatedInThisRun = std::min((size_t)DescriptorPools.m_DefaultAllocSize, CurAllocNum);
 
 				auto &Pool = DescriptorPools.m_vPools.back();
 				Pool.m_CurSize += AllocatedInThisRun;

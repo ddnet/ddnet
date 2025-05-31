@@ -64,7 +64,7 @@ static void FormatServerbrowserPing(char (&aBuffer)[N], const CServerInfo *pInfo
 
 static ColorRGBA GetPingTextColor(int Latency)
 {
-	return color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
+	return color_cast<ColorRGBA>(ColorHSLA((300.0f - std::clamp(Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
 }
 
 static ColorRGBA GetGametypeTextColor(const char *pGametype)
@@ -488,7 +488,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 	const float LoadingProgressionTimeDiff = s_LoadingProgressionFadeEnd - Client()->GlobalTime();
 	if(LoadingProgressionTimeDiff > 0.0f)
 	{
-		const float RefreshBarAlpha = minimum(LoadingProgressionTimeDiff, 0.8f);
+		const float RefreshBarAlpha = std::min(LoadingProgressionTimeDiff, 0.8f);
 		RefreshBar.h = 2.0f;
 		RefreshBar.w *= ServerBrowser()->LoadingProgression() / 100.0f;
 		RefreshBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, RefreshBarAlpha), IGraphics::CORNER_NONE, 0.0f);
@@ -499,7 +499,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 	const float SearchExcludeAddrStrMax = 130.0f;
 	const float SearchIconWidth = TextRender()->TextWidth(16.0f, FONT_ICON_MAGNIFYING_GLASS);
 	const float ExcludeIconWidth = TextRender()->TextWidth(16.0f, FONT_ICON_BAN);
-	const float ExcludeSearchIconMax = maximum(SearchIconWidth, ExcludeIconWidth);
+	const float ExcludeSearchIconMax = std::max(SearchIconWidth, ExcludeIconWidth);
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
@@ -1283,7 +1283,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 
 			if(pSelectedServer->m_ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
 			{
-				const int TempTime = absolute(CurrentClient.m_Score);
+				const int TempTime = std::abs(CurrentClient.m_Score);
 				if(TempTime != 0 && TempTime != 9999)
 					Time = TempTime;
 			}
@@ -1848,7 +1848,7 @@ CTeeRenderInfo CMenus::GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool C
 	CTeeRenderInfo TeeInfo;
 	TeeInfo.Apply(m_pClient->m_Skins.Find(pSkinName));
 	TeeInfo.ApplyColors(CustomSkinColors, CustomSkinColorBody, CustomSkinColorFeet);
-	TeeInfo.m_Size = minimum(Size.x, Size.y);
+	TeeInfo.m_Size = std::min(Size.x, Size.y);
 	return TeeInfo;
 }
 

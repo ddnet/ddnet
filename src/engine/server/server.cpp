@@ -146,7 +146,7 @@ void CServerBan::ConBanExt(IConsole::IResult *pResult, void *pUser)
 	CServerBan *pThis = static_cast<CServerBan *>(pUser);
 
 	const char *pStr = pResult->GetString(0);
-	int Minutes = pResult->NumArguments() > 1 ? clamp(pResult->GetInteger(1), 0, 525600) : 10;
+	int Minutes = pResult->NumArguments() > 1 ? std::clamp(pResult->GetInteger(1), 0, 525600) : 10;
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "Follow the server rules. Type /rules into the chat.";
 
 	if(str_isallnum(pStr))
@@ -2014,7 +2014,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			{
 				constexpr int MaxDumpedDataSize = 32;
 				char aBuf[MaxDumpedDataSize * 3 + 1];
-				str_hex(aBuf, sizeof(aBuf), pPacket->m_pData, minimum(pPacket->m_DataSize, MaxDumpedDataSize));
+				str_hex(aBuf, sizeof(aBuf), pPacket->m_pData, std::min(pPacket->m_DataSize, MaxDumpedDataSize));
 
 				char aBufMsg[256];
 				str_format(aBufMsg, sizeof(aBufMsg), "strange message ClientId=%d msg=%d data_size=%d", ClientId, Msg, pPacket->m_DataSize);
@@ -2136,7 +2136,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 		}
 		else
 		{
-			const int MaxClients = maximum(ClientCount, m_NetServer.MaxClients() - Config()->m_SvReservedSlots);
+			const int MaxClients = std::max(ClientCount, m_NetServer.MaxClients() - Config()->m_SvReservedSlots);
 			str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", Config()->m_SvName, ClientCount, MaxClients);
 			p.AddString(aBuf, 64);
 		}
@@ -2512,8 +2512,8 @@ void CServer::UpdateRegisterServerInfo()
 		}
 	}
 
-	int MaxPlayers = maximum(m_NetServer.MaxClients() - maximum(g_Config.m_SvSpectatorSlots, g_Config.m_SvReservedSlots), PlayerCount);
-	int MaxClients = maximum(m_NetServer.MaxClients() - g_Config.m_SvReservedSlots, ClientCount);
+	int MaxPlayers = maximum(m_NetServer.MaxClients() - std::max(g_Config.m_SvSpectatorSlots, g_Config.m_SvReservedSlots), PlayerCount);
+	int MaxClients = std::max(m_NetServer.MaxClients() - g_Config.m_SvReservedSlots, ClientCount);
 	char aMapSha256[SHA256_MAXSTRSIZE];
 
 	sha256_str(m_aCurrentMapSha256[MAP_TYPE_SIX], aMapSha256, sizeof(aMapSha256));
@@ -2833,8 +2833,8 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 	if(m_PreviousDebugDummies == g_Config.m_DbgDummies && !ForceDisconnect)
 		return;
 
-	g_Config.m_DbgDummies = clamp(g_Config.m_DbgDummies, 0, MaxClients());
-	for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousDebugDummies, g_Config.m_DbgDummies); ++DummyIndex)
+	g_Config.m_DbgDummies = std::clamp(g_Config.m_DbgDummies, 0, MaxClients());
+	for(int DummyIndex = 0; DummyIndex < std::max(m_PreviousDebugDummies, g_Config.m_DbgDummies); ++DummyIndex)
 	{
 		const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_DbgDummies;
 		const int ClientId = MaxClients() - DummyIndex - 1;
@@ -2878,7 +2878,7 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 			CNetObj_PlayerInput Input = {0};
 			Input.m_Direction = (ClientId & 1) ? -1 : 1;
 			Client.m_aInputs[0].m_GameTick = Tick() + 1;
-			mem_copy(Client.m_aInputs[0].m_aData, &Input, minimum(sizeof(Input), sizeof(Client.m_aInputs[0].m_aData)));
+			mem_copy(Client.m_aInputs[0].m_aData, &Input, std::min(sizeof(Input), sizeof(Client.m_aInputs[0].m_aData)));
 			Client.m_LatestInput = Client.m_aInputs[0];
 			Client.m_CurrentInput = 0;
 		}

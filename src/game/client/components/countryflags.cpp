@@ -100,7 +100,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 	else
 		mem_zero(m_aCodeIndexLUT, sizeof(m_aCodeIndexLUT));
 	for(size_t i = 0; i < m_vCountryFlags.size(); ++i)
-		m_aCodeIndexLUT[maximum(0, (m_vCountryFlags[i].m_CountryCode - CODE_LB) % CODE_RANGE)] = i;
+		m_aCodeIndexLUT[std::max(0, (m_vCountryFlags[i].m_CountryCode - CODE_LB) % CODE_RANGE)] = i;
 }
 
 void CCountryFlags::OnInit()
@@ -131,7 +131,7 @@ size_t CCountryFlags::Num() const
 
 const CCountryFlags::CCountryFlag *CCountryFlags::GetByCountryCode(int CountryCode) const
 {
-	return GetByIndex(m_aCodeIndexLUT[maximum(0, (CountryCode - CODE_LB) % CODE_RANGE)]);
+	return GetByIndex(m_aCodeIndexLUT[std::max(0, (CountryCode - CODE_LB) % CODE_RANGE)]);
 }
 
 const CCountryFlags::CCountryFlag *CCountryFlags::GetByIndex(size_t Index) const

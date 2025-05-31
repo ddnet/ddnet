@@ -1676,7 +1676,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Row.VSplitLeft(5.0f, nullptr, &Row);
 		static CButtonContainer s_SlowDownButton;
 		if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_BACKWARD, 0, &SlowDownButton, BUTTONFLAG_LEFT))
-			m_Speed = clamp(m_Speed - 1, 0, (int)(std::size(DEMO_SPEEDS) - 1));
+			m_Speed = std::clamp(m_Speed - 1, 0, (int)(std::size(DEMO_SPEEDS) - 1));
 
 		// paused
 		CUIRect PausedButton;
@@ -1692,7 +1692,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Row.VSplitLeft(8.0f, nullptr, &Row);
 		static CButtonContainer s_FastForwardButton;
 		if(DoButton_FontIcon(&s_FastForwardButton, FONT_ICON_FORWARD, 0, &FastForwardButton, BUTTONFLAG_LEFT))
-			m_Speed = clamp(m_Speed + 1, 0, (int)(std::size(DEMO_SPEEDS) - 1));
+			m_Speed = std::clamp(m_Speed + 1, 0, (int)(std::size(DEMO_SPEEDS) - 1));
 
 		// speed meter
 		char aBuffer[128];
@@ -2015,7 +2015,7 @@ void CMenus::RenderPopupLoading(CUIRect Screen)
 
 		str_format(aLabel1, sizeof(aLabel1), Localize("%d/%d KiB (%.1f KiB/s)"), Client()->MapDownloadAmount() / 1024, Client()->MapDownloadTotalsize() / 1024, m_DownloadSpeed / 1024.0f);
 
-		const int SecondsLeft = maximum(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize() - Client()->MapDownloadAmount()) / m_DownloadSpeed) : 1);
+		const int SecondsLeft = std::max(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize() - Client()->MapDownloadAmount()) / m_DownloadSpeed) : 1);
 		const int MinutesLeft = SecondsLeft / 60;
 		if(MinutesLeft > 0)
 		{

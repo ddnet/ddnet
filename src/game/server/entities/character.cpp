@@ -933,7 +933,7 @@ bool CCharacter::IncreaseHealth(int Amount)
 {
 	if(m_Health >= 10)
 		return false;
-	m_Health = clamp(m_Health + Amount, 0, 10);
+	m_Health = std::clamp(m_Health + Amount, 0, 10);
 	return true;
 }
 
@@ -941,7 +941,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 {
 	if(m_Armor >= 10)
 		return false;
-	m_Armor = clamp(m_Armor + Amount, 0, 10);
+	m_Armor = std::clamp(m_Armor + Amount, 0, 10);
 	return true;
 }
 
@@ -1143,7 +1143,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 		// m_HookTick can be negative when using the hook_duration tune, which 0.7 clients
 		// will consider invalid. https://github.com/ddnet/ddnet/issues/3915
-		pCharacter->m_HookTick = maximum(0, pCharacter->m_HookTick);
+		pCharacter->m_HookTick = std::max(0, pCharacter->m_HookTick);
 
 		pCharacter->m_Tick = Tick;
 		pCharacter->m_Emote = Emote;
@@ -1493,9 +1493,9 @@ void CCharacter::HandleSkippableTiles(int Index)
 
 					DiffAngle = SpeederAngle - TeeAngle;
 					SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
-					if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+					if(std::abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 						TempVel += Direction * Force;
-					else if(absolute((int)SpeedLeft) > Force)
+					else if(std::abs((int)SpeedLeft) > Force)
 						TempVel += Direction * -Force;
 					else
 						TempVel += Direction * SpeedLeft;

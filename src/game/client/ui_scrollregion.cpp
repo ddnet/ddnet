@@ -126,9 +126,9 @@ void CScrollRegion::End()
 		m_RequestScrollY = -1.0f;
 	}
 
-	m_AnimTargetScrollY = clamp(m_AnimTargetScrollY, 0.0f, MaxScroll);
+	m_AnimTargetScrollY = std::clamp(m_AnimTargetScrollY, 0.0f, MaxScroll);
 
-	if(absolute(m_AnimInitScrollY - m_AnimTargetScrollY) < 0.5f)
+	if(std::abs(m_AnimInitScrollY - m_AnimTargetScrollY) < 0.5f)
 		m_AnimTime = 0.0f;
 
 	if(m_AnimTime > 0.0f)
@@ -153,7 +153,7 @@ void CScrollRegion::End()
 	{
 		float MouseY = Ui()->MouseY();
 		m_ScrollY += (MouseY - (Slider.y + m_SliderGrabPos)) / MaxSlider * MaxScroll;
-		m_SliderGrabPos = clamp(m_SliderGrabPos, 0.0f, SliderHeight);
+		m_SliderGrabPos = std::clamp(m_SliderGrabPos, 0.0f, SliderHeight);
 		m_AnimTargetScrollY = m_ScrollY;
 		m_AnimTime = 0.0f;
 		Grabbed = true;
@@ -186,7 +186,7 @@ void CScrollRegion::End()
 		Ui()->SetActiveItem(nullptr);
 	}
 
-	m_ScrollY = clamp(m_ScrollY, 0.0f, MaxScroll);
+	m_ScrollY = std::clamp(m_ScrollY, 0.0f, MaxScroll);
 	m_ContentScrollOff.y = -m_ScrollY;
 
 	Slider.Draw(m_Params.SliderColor(Grabbed, Ui()->HotItem() == pId), IGraphics::CORNER_ALL, Slider.w / 2.0f);
@@ -196,7 +196,7 @@ bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 {
 	m_LastAddedRect = Rect;
 	// Round up and add magic to fix pixel clipping at the end of the scrolling area
-	m_ContentH = maximum(std::ceil(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOff.y)) + HEIGHT_MAGIC_FIX, m_ContentH);
+	m_ContentH = std::max(std::ceil(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOff.y)) + HEIGHT_MAGIC_FIX, m_ContentH);
 	if(ShouldScrollHere)
 		ScrollHere();
 	return !RectClipped(Rect);
@@ -204,7 +204,7 @@ bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 
 void CScrollRegion::ScrollHere(EScrollOption Option)
 {
-	const float MinHeight = minimum(m_ClipRect.h, m_LastAddedRect.h);
+	const float MinHeight = std::min(m_ClipRect.h, m_LastAddedRect.h);
 	const float TopScroll = m_LastAddedRect.y - (m_ClipRect.y + m_ContentScrollOff.y);
 
 	switch(Option)
@@ -236,7 +236,7 @@ void CScrollRegion::ScrollRelative(EScrollRelative Direction, float SpeedMultipl
 
 void CScrollRegion::ScrollRelativeDirect(float ScrollAmount)
 {
-	m_RequestScrollY = clamp(m_ScrollY + ScrollAmount, 0.0f, m_ContentH - m_ClipRect.h);
+	m_RequestScrollY = std::clamp(m_ScrollY + ScrollAmount, 0.0f, m_ContentH - m_ClipRect.h);
 }
 
 void CScrollRegion::DoEdgeScrolling()

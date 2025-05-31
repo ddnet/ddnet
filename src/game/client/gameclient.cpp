@@ -865,7 +865,7 @@ void CGameClient::OnRender()
 
 		if(m_aCheckInfo[0] > 0)
 		{
-			m_aCheckInfo[0] -= minimum(Client()->GameTick(0) - Client()->PrevGameTick(0), m_aCheckInfo[0]);
+			m_aCheckInfo[0] -= std::min(Client()->GameTick(0) - Client()->PrevGameTick(0), m_aCheckInfo[0]);
 		}
 
 		if(m_aLocalIds[1] >= 0)
@@ -897,7 +897,7 @@ void CGameClient::OnRender()
 
 			if(m_aCheckInfo[1] > 0)
 			{
-				m_aCheckInfo[1] -= minimum(Client()->GameTick(1) - Client()->PrevGameTick(1), m_aCheckInfo[1]);
+				m_aCheckInfo[1] -= std::min(Client()->GameTick(1) - Client()->PrevGameTick(1), m_aCheckInfo[1]);
 			}
 		}
 	}
@@ -1382,7 +1382,7 @@ static CGameInfo GetGameInfo(const CNetObj_GameInfoEx *pInfoEx, int InfoExSize, 
 	}
 	else if(InfoExSize >= 8)
 	{
-		Version = minimum(pInfoEx->m_Version, 4);
+		Version = std::min(pInfoEx->m_Version, 4);
 	}
 	else if(InfoExSize >= 4)
 	{
@@ -1667,7 +1667,7 @@ void CGameClient::OnNewSnapshot()
 						}
 					}
 
-					m_Snap.m_HighestClientId = maximum(m_Snap.m_HighestClientId, pInfo->m_ClientId);
+					m_Snap.m_HighestClientId = std::max(m_Snap.m_HighestClientId, pInfo->m_ClientId);
 
 					// calculate team-balance
 					if(pInfo->m_Team != TEAM_SPECTATORS)
@@ -1873,10 +1873,10 @@ void CGameClient::OnNewSnapshot()
 					continue;
 				}
 				const CNetObj_SwitchState *pSwitchStateData = (const CNetObj_SwitchState *)Item.m_pData;
-				int Team = clamp(Item.m_Id, (int)TEAM_FLOCK, (int)TEAM_SUPER - 1);
+				int Team = std::clamp(Item.m_Id, (int)TEAM_FLOCK, (int)TEAM_SUPER - 1);
 
-				int HighestSwitchNumber = clamp(pSwitchStateData->m_HighestSwitchNumber, 0, 255);
-				if(HighestSwitchNumber != maximum(0, (int)Switchers().size() - 1))
+				int HighestSwitchNumber = std::clamp(pSwitchStateData->m_HighestSwitchNumber, 0, 255);
+				if(HighestSwitchNumber != std::max(0, (int)Switchers().size() - 1))
 				{
 					m_GameWorld.m_Core.InitSwitchers(HighestSwitchNumber);
 					Collision()->m_HighestSwitchNumber = HighestSwitchNumber;
@@ -2451,9 +2451,9 @@ void CGameClient::OnPredict()
 	}
 
 	// detect mispredictions of other players and make corrections smoother when possible
-	if(g_Config.m_ClAntiPingSmooth && Predict() && AntiPingPlayers() && m_NewTick && m_PredictedTick >= MIN_TICK && absolute(m_PredictedTick - Client()->PredGameTick(g_Config.m_ClDummy)) <= 1 && absolute(Client()->GameTick(g_Config.m_ClDummy) - Client()->PrevGameTick(g_Config.m_ClDummy)) <= 2)
+	if(g_Config.m_ClAntiPingSmooth && Predict() && AntiPingPlayers() && m_NewTick && m_PredictedTick >= MIN_TICK && absolute(m_PredictedTick - Client()->PredGameTick(g_Config.m_ClDummy)) <= 1 && std::abs(Client()->GameTick(g_Config.m_ClDummy) - Client()->PrevGameTick(g_Config.m_ClDummy)) <= 2)
 	{
-		int PredTime = clamp(Client()->GetPredictionTime(), 0, 800);
+		int PredTime = std::clamp(Client()->GetPredictionTime(), 0, 800);
 		float SmoothPace = 4 - 1.5f * PredTime / 800.f; // smoothing pace (a lower value will make the smoothing quicker)
 		int64_t Len = 1000 * PredTime * SmoothPace;
 
@@ -2462,7 +2462,7 @@ void CGameClient::OnPredict()
 			if(!m_Snap.m_aCharacters[i].m_Active || i == m_Snap.m_LocalClientId || !m_aLastActive[i])
 				continue;
 			vec2 NewPos = (m_PredictedTick == Client()->PredGameTick(g_Config.m_ClDummy)) ? m_aClients[i].m_Predicted.m_Pos : m_aClients[i].m_PrevPredicted.m_Pos;
-			vec2 PredErr = (m_aLastPos[i] - NewPos) / (float)minimum(Client()->GetPredictionTime(), 200);
+			vec2 PredErr = (m_aLastPos[i] - NewPos) / (float)std::min(Client()->GetPredictionTime(), 200);
 			if(in_range(length(PredErr), 0.05f, 5.f))
 			{
 				vec2 PredPos = mix(m_aClients[i].m_PrevPredicted.m_Pos, m_aClients[i].m_Predicted.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
@@ -2477,21 +2477,21 @@ void CGameClient::OnPredict()
 				for(int j = 0; j < 2; j++)
 				{
 					aMixAmount[j] = 1.0f;
-					if(absolute(PredErr[j]) > 0.05f)
+					if(std::abs(PredErr[j]) > 0.05f)
 					{
 						aMixAmount[j] = 0.0f;
-						if(absolute(RenderDiff[j]) > 0.01f)
+						if(std::abs(RenderDiff[j]) > 0.01f)
 						{
-							aMixAmount[j] = 1.f - clamp(RenderDiff[j] / PredDiff[j], 0.f, 1.f);
+							aMixAmount[j] = 1.f - std::clamp(RenderDiff[j] / PredDiff[j], 0.f, 1.f);
 							aMixAmount[j] = 1.f - std::pow(1.f - aMixAmount[j], 1 / 1.2f);
 						}
 					}
 					int64_t TimePassed = time_get() - m_aClients[i].m_aSmoothStart[j];
 					if(in_range(TimePassed, (int64_t)0, Len - 1))
-						aMixAmount[j] = minimum(aMixAmount[j], (float)(TimePassed / (double)Len));
+						aMixAmount[j] = std::min(aMixAmount[j], (float)(TimePassed / (double)Len));
 				}
 				for(int j = 0; j < 2; j++)
-					if(absolute(RenderDiff[j]) < 0.01f && absolute(PredDiff[j]) < 0.01f && absolute(m_aClients[i].m_PrevPredicted.m_Pos[j] - m_aClients[i].m_Predicted.m_Pos[j]) < 0.01f && aMixAmount[j] > aMixAmount[j ^ 1])
+					if(absolute(RenderDiff[j]) < 0.01f && absolute(PredDiff[j]) < 0.01f && std::abs(m_aClients[i].m_PrevPredicted.m_Pos[j] - m_aClients[i].m_Predicted.m_Pos[j]) < 0.01f && aMixAmount[j] > aMixAmount[j ^ 1])
 						aMixAmount[j] = aMixAmount[j ^ 1];
 				for(int j = 0; j < 2; j++)
 				{
@@ -3219,7 +3219,7 @@ void CGameClient::UpdatePrediction()
 	}
 
 	// advance the gameworld to the current gametick
-	if(pLocalChar && absolute(m_GameWorld.GameTick() - Client()->GameTick(g_Config.m_ClDummy)) < Client()->GameTickSpeed())
+	if(pLocalChar && std::abs(m_GameWorld.GameTick() - Client()->GameTick(g_Config.m_ClDummy)) < Client()->GameTickSpeed())
 	{
 		for(int Tick = m_GameWorld.GameTick() + 1; Tick <= Client()->GameTick(g_Config.m_ClDummy); Tick++)
 		{
@@ -3475,7 +3475,7 @@ void CGameClient::DetectStrongHook()
 		int ToPlayer = m_Snap.m_aCharacters[FromPlayer].m_Prev.m_HookedPlayer;
 		if(ToPlayer < 0 || ToPlayer >= MAX_CLIENTS || !m_Snap.m_aCharacters[ToPlayer].m_Active || ToPlayer != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_HookedPlayer)
 			continue;
-		if(absolute(minimum(m_aLastUpdateTick[ToPlayer], m_aLastUpdateTick[FromPlayer]) - Client()->GameTick(g_Config.m_ClDummy)) < Client()->GameTickSpeed() / 4)
+		if(std::abs(std::min(m_aLastUpdateTick[ToPlayer], m_aLastUpdateTick[FromPlayer]) - Client()->GameTick(g_Config.m_ClDummy)) < Client()->GameTickSpeed() / 4)
 			continue;
 		if(m_Snap.m_aCharacters[FromPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_Direction || m_Snap.m_aCharacters[ToPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[ToPlayer].m_Cur.m_Direction)
 			continue;
@@ -3556,7 +3556,7 @@ vec2 CGameClient::GetSmoothPos(int ClientId)
 	int64_t Now = time_get();
 	for(int i = 0; i < 2; i++)
 	{
-		int64_t Len = clamp(m_aClients[ClientId].m_aSmoothLen[i], (int64_t)1, time_freq());
+		int64_t Len = std::clamp(m_aClients[ClientId].m_aSmoothLen[i], (int64_t)1, time_freq());
 		int64_t TimePassed = Now - m_aClients[ClientId].m_aSmoothStart[i];
 		if(in_range(TimePassed, (int64_t)0, Len - 1))
 		{
@@ -4581,7 +4581,7 @@ void CGameClient::HandleMultiView()
 	// dont hide the position hud if its only one player
 	m_MultiViewShowHud = AmountPlayers == 1;
 	// get the average velocity
-	float AvgVel = clamp(SumVel / AmountPlayers ? SumVel / (float)AmountPlayers : 0.0f, 0.0f, 1000.0f);
+	float AvgVel = std::clamp(SumVel / AmountPlayers ? SumVel / (float)AmountPlayers : 0.0f, 0.0f, 1000.0f);
 
 	if(m_MultiView.m_OldPersonalZoom == m_MultiViewPersonalZoom)
 		m_Camera.SetZoom(CalculateMultiViewZoom(MinPos, MaxPos, AvgVel), g_Config.m_ClMultiViewZoomSmoothness, false);
@@ -4722,7 +4722,7 @@ float CGameClient::CalculateMultiViewMultiplier(vec2 TargetPos)
 	}
 	m_MultiView.m_OldCameraDistance = CurrentCameraDistance;
 
-	return clamp(MapValue(MaxCameraDist, MinCameraDist, MaxVel, MinVel, CurrentCameraDistance), MinVel, UpperLimit);
+	return std::clamp(MapValue(MaxCameraDist, MinCameraDist, MaxVel, MinVel, CurrentCameraDistance), MinVel, UpperLimit);
 }
 
 float CGameClient::CalculateMultiViewZoom(vec2 MinPos, vec2 MaxPos, float Vel)
@@ -4741,7 +4741,7 @@ float CGameClient::CalculateMultiViewZoom(vec2 MinPos, vec2 MaxPos, float Vel)
 	// zoom out to maximum 10 percent of the current zoom for 70 velocity
 	float Diff = clamp(MapValue(70.0f, 15.0f, Zoom * 0.10f, 0.0f, Vel), 0.0f, Zoom * 0.10f);
 	// zoom should stay between 1.1 and 20.0
-	Zoom = clamp(Zoom + Diff, 1.1f, 20.0f);
+	Zoom = std::clamp(Zoom + Diff, 1.1f, 20.0f);
 	// dont go below default zoom
 	Zoom = std::max(CCamera::ZoomStepsToValue(g_Config.m_ClDefaultZoom - 10), Zoom);
 	// add the user preference

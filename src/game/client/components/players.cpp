@@ -555,7 +555,7 @@ void CPlayers::RenderPlayer(
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
 
 			// normal weapons
-			int CurrentWeapon = clamp(Player.m_Weapon, 0, NUM_WEAPONS - 1);
+			int CurrentWeapon = std::clamp(Player.m_Weapon, 0, NUM_WEAPONS - 1);
 			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[CurrentWeapon]);
 			int QuadOffset = CurrentWeapon * 2 + (Direction.x < 0 ? 1 : 0);
 
@@ -636,7 +636,7 @@ void CPlayers::RenderPlayer(
 						else
 							Dir = vec2(m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_X, m_pClient->m_Snap.m_aCharacters[ClientId].m_Cur.m_Y) - vec2(m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev.m_X, m_pClient->m_Snap.m_aCharacters[ClientId].m_Prev.m_Y);
 						float HadOkenAngle = 0;
-						if(absolute(Dir.x) > 0.0001f || absolute(Dir.y) > 0.0001f)
+						if(absolute(Dir.x) > 0.0001f || std::abs(Dir.y) > 0.0001f)
 						{
 							Dir = normalize(Dir);
 							HadOkenAngle = angle(Dir);
@@ -681,7 +681,7 @@ void CPlayers::RenderPlayer(
 					if(AttackTicksPassed < g_pData->m_Weapons.m_aId[CurrentWeapon].m_Muzzleduration + 3)
 					{
 						float t = AttackTicksPassed / g_pData->m_Weapons.m_aId[CurrentWeapon].m_Muzzleduration;
-						AlphaMuzzle = mix(2.0f, 0.0f, minimum(1.0f, maximum(0.0f, t)));
+						AlphaMuzzle = mix(2.0f, 0.0f, std::min(1.0f, std::max(0.0f, t)));
 					}
 
 					int IteX = rand() % g_pData->m_Weapons.m_aId[CurrentWeapon].m_NumSpriteMuzzles;
