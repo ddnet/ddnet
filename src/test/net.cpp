@@ -2,6 +2,10 @@
 
 #include <base/system.h>
 
+#include <chrono>
+
+using namespace std::chrono_literals;
+
 TEST(Net, Ipv4AndIpv6Work)
 {
 	NETADDR Bindaddr = {};
@@ -31,7 +35,7 @@ TEST(Net, Ipv4AndIpv6Work)
 
 	EXPECT_EQ(net_udp_send(Socket2, &TargetV4, "abc", 3), 3);
 
-	EXPECT_EQ(net_socket_read_wait(Socket1, 10000000), 1);
+	EXPECT_EQ(net_socket_read_wait(Socket1, 10s), 1);
 	ASSERT_EQ(net_udp_recv(Socket1, &Addr, &pData), 3);
 	Addr.port = 0;
 	EXPECT_EQ(Addr, LocalhostV4);
@@ -39,7 +43,7 @@ TEST(Net, Ipv4AndIpv6Work)
 
 	EXPECT_EQ(net_udp_send(Socket2, &TargetV6, "def", 3), 3);
 
-	EXPECT_EQ(net_socket_read_wait(Socket1, 10000000), 1);
+	EXPECT_EQ(net_socket_read_wait(Socket1, 10s), 1);
 	ASSERT_EQ(net_udp_recv(Socket1, &Addr, &pData), 3);
 	Addr.port = 0;
 	EXPECT_EQ(Addr, LocalhostV6);
