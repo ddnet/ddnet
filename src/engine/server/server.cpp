@@ -3262,14 +3262,15 @@ int CServer::Run()
 			}
 
 			// wait for incoming data
-			if(NonActive &&
+			if(NonActive && Config()->m_SvShutdownWhenEmpty)
+			{
+				m_RunServer = STOPPING;
+			}
+			else if(NonActive &&
 				!m_aDemoRecorder[RECORDER_MANUAL].IsRecording() &&
 				!m_aDemoRecorder[RECORDER_AUTO].IsRecording())
 			{
-				if(Config()->m_SvShutdownWhenEmpty)
-					m_RunServer = STOPPING;
-				else
-					PacketWaiting = net_socket_read_wait(m_NetServer.Socket(), 1000000);
+				PacketWaiting = net_socket_read_wait(m_NetServer.Socket(), 1000000);
 			}
 			else
 			{
