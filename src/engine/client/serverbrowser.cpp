@@ -1633,7 +1633,7 @@ void CServerBrowser::UpdateServerFriends(CServerInfo *pInfo) const
 	for(int ClientIndex = 0; ClientIndex < minimum(pInfo->m_NumReceivedClients, (int)MAX_CLIENTS); ClientIndex++)
 	{
 		pInfo->m_aClients[ClientIndex].m_FriendState = m_pFriends->GetFriendState(pInfo->m_aClients[ClientIndex].m_aName, pInfo->m_aClients[ClientIndex].m_aClan);
-		pInfo->m_FriendState = maximum(pInfo->m_FriendState, pInfo->m_aClients[ClientIndex].m_FriendState);
+		pInfo->m_FriendState = std::max(pInfo->m_FriendState, pInfo->m_aClients[ClientIndex].m_FriendState);
 		if(pInfo->m_aClients[ClientIndex].m_FriendState != IFriends::FRIEND_NO)
 			pInfo->m_FriendNum++;
 	}

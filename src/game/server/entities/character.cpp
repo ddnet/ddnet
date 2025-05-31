@@ -1143,7 +1143,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 		// m_HookTick can be negative when using the hook_duration tune, which 0.7 clients
 		// will consider invalid. https://github.com/ddnet/ddnet/issues/3915
-		pCharacter->m_HookTick = maximum(0, pCharacter->m_HookTick);
+		pCharacter->m_HookTick = std::max(0, pCharacter->m_HookTick);
 
 		pCharacter->m_Tick = Tick;
 		pCharacter->m_Emote = Emote;

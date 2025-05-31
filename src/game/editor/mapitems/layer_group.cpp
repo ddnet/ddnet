@@ -36,7 +36,7 @@ void CLayerGroup::Convert(CUIRect *pRect) const
 
 void CLayerGroup::Mapping(float *pPoints) const
 {
-	float NormalParallaxZoom = clamp((double)(maximum(m_ParallaxX, m_ParallaxY)), 0., 100.);
+	float NormalParallaxZoom = clamp((double)(std::max(m_ParallaxX, m_ParallaxY)), 0., 100.);
 	float ParallaxZoom = m_pMap->m_pEditor->m_PreviewZoom ? NormalParallaxZoom : 100.0f;
 
 	m_pMap->m_pEditor->RenderTools()->MapScreenToWorld(
@@ -147,8 +147,8 @@ void CLayerGroup::GetSize(float *pWidth, float *pHeight) const
 	{
 		float lw, lh;
 		pLayer->GetSize(&lw, &lh);
-		*pWidth = maximum(*pWidth, lw);
-		*pHeight = maximum(*pHeight, lh);
+		*pWidth = std::max(*pWidth, lw);
+		*pHeight = std::max(*pHeight, lh);
 	}
 }
 

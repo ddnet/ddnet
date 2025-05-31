@@ -1879,7 +1879,7 @@ public:
 					}
 
 					// calculate the full width from the last selection point to the end of this selection draw on screen
-					const float SelWidth = (CharX + maximum(Advance, CharWidth - OutLineRealDiff / 2)) - (LastSelX + LastSelWidth);
+					const float SelWidth = (CharX + std::max(Advance, CharWidth - OutLineRealDiff / 2)) - (LastSelX + LastSelWidth);
 					const float SelX = (LastSelX + LastSelWidth);
 
 					if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
@@ -1931,7 +1931,7 @@ public:
 						}
 					}
 
-					pCursor->m_MaxCharacterHeight = maximum(pCursor->m_MaxCharacterHeight, CharHeight + BearingY);
+					pCursor->m_MaxCharacterHeight = std::max(pCursor->m_MaxCharacterHeight, CharHeight + BearingY);
 
 					if(NextCharacter == 0 && (RenderFlags & TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE) != 0 && Character != ' ')
 						DrawX += BearingX + CharKerning + CharWidth;
@@ -1962,7 +1962,7 @@ public:
 					LastCharWidth = CharWidth;
 				}
 
-				pCursor->m_LongestLineWidth = maximum(pCursor->m_LongestLineWidth, DrawX - pCursor->m_StartX);
+				pCursor->m_LongestLineWidth = std::max(pCursor->m_LongestLineWidth, DrawX - pCursor->m_StartX);
 			}
 
 			if(NewLine)

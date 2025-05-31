@@ -511,7 +511,7 @@ int CEditor::RenderEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CUIRect V
 			char aBuf[128];
 			pfnMatchCallback(vData.at(i), aBuf, Props.m_vColorSplits);
 
-			LargestWidth = maximum(LargestWidth, TextRender()->TextWidth(12.0f, aBuf) + 10.0f);
+			LargestWidth = std::max(LargestWidth, TextRender()->TextWidth(12.0f, aBuf) + 10.0f);
 			if(!Item.m_Visible)
 				continue;
 
@@ -912,7 +912,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 		// Display the map settings edit box after having rendered all the lines, so the dropdown shows in
 		// front of everything, but is still being clipped by the scroll region.
 		if(DisplayFixInput)
-			DoMapSettingsEditBox(&s_Context, &FixInput, 10.0f, maximum(DropdownHeight, 30.0f));
+			DoMapSettingsEditBox(&s_Context, &FixInput, 10.0f, std::max(DropdownHeight, 30.0f));
 
 		s_ScrollRegion.End();
 	}

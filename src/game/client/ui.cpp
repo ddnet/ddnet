@@ -734,7 +734,7 @@ static SCursorAndBoundingBox CalcFontSizeCursorHeightAndBoundingBox(ITextRender 
 	float TextWidth;
 	do
 	{
-		Size = maximum(Size, MinFontSize);
+		Size = std::max(Size, MinFontSize);
 		// Only consider stop-at-end and ellipsis-at-end when minimum font size reached or font scaling disabled
 		if((Size == MinFontSize || !LabelProps.m_EnableWidthCheck) && Flags != FlagsWithoutStop)
 			TextWidth = pTextRender->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, TextSizeProps);

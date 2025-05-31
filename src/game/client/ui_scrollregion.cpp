@@ -196,7 +196,7 @@ bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 {
 	m_LastAddedRect = Rect;
 	// Round up and add magic to fix pixel clipping at the end of the scrolling area
-	m_ContentH = maximum(std::ceil(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOff.y)) + HEIGHT_MAGIC_FIX, m_ContentH);
+	m_ContentH = std::max(std::ceil(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOff.y)) + HEIGHT_MAGIC_FIX, m_ContentH);
 	if(ShouldScrollHere)
 		ScrollHere();
 	return !RectClipped(Rect);

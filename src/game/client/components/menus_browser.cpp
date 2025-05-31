@@ -499,7 +499,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 	const float SearchExcludeAddrStrMax = 130.0f;
 	const float SearchIconWidth = TextRender()->TextWidth(16.0f, FONT_ICON_MAGNIFYING_GLASS);
 	const float ExcludeIconWidth = TextRender()->TextWidth(16.0f, FONT_ICON_BAN);
-	const float ExcludeSearchIconMax = maximum(SearchIconWidth, ExcludeIconWidth);
+	const float ExcludeSearchIconMax = std::max(SearchIconWidth, ExcludeIconWidth);
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 

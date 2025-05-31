@@ -215,8 +215,8 @@ void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 	{
 		for(const auto &Point : Quad.m_aPoints)
 		{
-			*pWidth = maximum(*pWidth, fx2f(Point.x));
-			*pHeight = maximum(*pHeight, fx2f(Point.y));
+			*pWidth = std::max(*pWidth, fx2f(Point.x));
+			*pHeight = std::max(*pHeight, fx2f(Point.y));
 		}
 	}
 }

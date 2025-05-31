@@ -794,7 +794,7 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
 	if(absolute(m_aVoices[VoiceId].m_Tick - Tick) > Threshold)
 	{
 		// take care of looping (modulo!)
-		if(!(IsLooping && (minimum(m_aVoices[VoiceId].m_Tick, Tick) + m_aVoices[VoiceId].m_pSample->m_NumFrames - maximum(m_aVoices[VoiceId].m_Tick, Tick)) <= Threshold))
+		if(!(IsLooping && (minimum(m_aVoices[VoiceId].m_Tick, Tick) + m_aVoices[VoiceId].m_pSample->m_NumFrames - std::max(m_aVoices[VoiceId].m_Tick, Tick)) <= Threshold))
 		{
 			m_aVoices[VoiceId].m_Tick = Tick;
 		}
@@ -813,7 +813,7 @@ void CSound::SetVoiceCircle(CVoiceHandle Voice, float Radius)
 		return;
 
 	m_aVoices[VoiceId].m_Shape = ISound::SHAPE_CIRCLE;
-	m_aVoices[VoiceId].m_Circle.m_Radius = maximum(0.0f, Radius);
+	m_aVoices[VoiceId].m_Circle.m_Radius = std::max(0.0f, Radius);
 }
 
 void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
@@ -828,8 +828,8 @@ void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
 		return;
 
 	m_aVoices[VoiceId].m_Shape = ISound::SHAPE_RECTANGLE;
-	m_aVoices[VoiceId].m_Rectangle.m_Width = maximum(0.0f, Width);
-	m_aVoices[VoiceId].m_Rectangle.m_Height = maximum(0.0f, Height);
+	m_aVoices[VoiceId].m_Rectangle.m_Width = std::max(0.0f, Width);
+	m_aVoices[VoiceId].m_Rectangle.m_Height = std::max(0.0f, Height);
 }
 
 ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float Volume, vec2 Position)

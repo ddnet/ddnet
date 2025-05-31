@@ -1667,7 +1667,7 @@ void CGameClient::OnNewSnapshot()
 						}
 					}
 
-					m_Snap.m_HighestClientId = maximum(m_Snap.m_HighestClientId, pInfo->m_ClientId);
+					m_Snap.m_HighestClientId = std::max(m_Snap.m_HighestClientId, pInfo->m_ClientId);
 
 					// calculate team-balance
 					if(pInfo->m_Team != TEAM_SPECTATORS)
@@ -1876,7 +1876,7 @@ void CGameClient::OnNewSnapshot()
 				int Team = clamp(Item.m_Id, (int)TEAM_FLOCK, (int)TEAM_SUPER - 1);
 
 				int HighestSwitchNumber = clamp(pSwitchStateData->m_HighestSwitchNumber, 0, 255);
-				if(HighestSwitchNumber != maximum(0, (int)Switchers().size() - 1))
+				if(HighestSwitchNumber != std::max(0, (int)Switchers().size() - 1))
 				{
 					m_GameWorld.m_Core.InitSwitchers(HighestSwitchNumber);
 					Collision()->m_HighestSwitchNumber = HighestSwitchNumber;

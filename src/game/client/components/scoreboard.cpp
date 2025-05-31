@@ -653,7 +653,7 @@ void CScoreboard::OnRender()
 	const CNetObj_GameInfo *pGameInfoObj = GameClient()->m_Snap.m_pGameInfoObj;
 	const bool Teams = GameClient()->IsTeamPlay();
 	const auto &aTeamSize = GameClient()->m_Snap.m_aTeamSize;
-	const int NumPlayers = Teams ? maximum(aTeamSize[TEAM_RED], aTeamSize[TEAM_BLUE]) : aTeamSize[TEAM_RED];
+	const int NumPlayers = Teams ? std::max(aTeamSize[TEAM_RED], aTeamSize[TEAM_BLUE]) : aTeamSize[TEAM_RED];
 
 	const float ScoreboardSmallWidth = 750.0f + 20.0f;
 	const float ScoreboardWidth = !Teams && NumPlayers <= 16 ? ScoreboardSmallWidth : 1500.0f;

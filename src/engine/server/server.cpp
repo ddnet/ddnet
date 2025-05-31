@@ -2137,7 +2137,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 		}
 		else
 		{
-			const int MaxClients = maximum(ClientCount, m_NetServer.MaxClients() - Config()->m_SvReservedSlots);
+			const int MaxClients = std::max(ClientCount, m_NetServer.MaxClients() - Config()->m_SvReservedSlots);
 			str_format(aBuf, sizeof(aBuf), "%s [%d/%d]", Config()->m_SvName, ClientCount, MaxClients);
 			p.AddString(aBuf, 64);
 		}
@@ -2513,8 +2513,8 @@ void CServer::UpdateRegisterServerInfo()
 		}
 	}
 
-	int MaxPlayers = maximum(m_NetServer.MaxClients() - maximum(g_Config.m_SvSpectatorSlots, g_Config.m_SvReservedSlots), PlayerCount);
-	int MaxClients = maximum(m_NetServer.MaxClients() - g_Config.m_SvReservedSlots, ClientCount);
+	int MaxPlayers = maximum(m_NetServer.MaxClients() - std::max(g_Config.m_SvSpectatorSlots, g_Config.m_SvReservedSlots), PlayerCount);
+	int MaxClients = std::max(m_NetServer.MaxClients() - g_Config.m_SvReservedSlots, ClientCount);
 	char aMapSha256[SHA256_MAXSTRSIZE];
 
 	sha256_str(m_aCurrentMapSha256[MAP_TYPE_SIX], aMapSha256, sizeof(aMapSha256));
@@ -2835,7 +2835,7 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 		return;
 
 	g_Config.m_DbgDummies = clamp(g_Config.m_DbgDummies, 0, MaxClients());
-	for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousDebugDummies, g_Config.m_DbgDummies); ++DummyIndex)
+	for(int DummyIndex = 0; DummyIndex < std::max(m_PreviousDebugDummies, g_Config.m_DbgDummies); ++DummyIndex)
 	{
 		const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_DbgDummies;
 		const int ClientId = MaxClients() - DummyIndex - 1;

@@ -328,7 +328,7 @@ size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 
 	if(m_WriteToMemory)
 	{
-		size_t NewBufferSize = maximum((size_t)1024, m_BufferSize);
+		size_t NewBufferSize = std::max((size_t)1024, m_BufferSize);
 		while(m_ResponseLength + DataSize > NewBufferSize)
 		{
 			NewBufferSize *= 2;

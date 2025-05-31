@@ -747,7 +747,7 @@ void CEditor::SelectNextLayer()
 {
 	int CurrentLayer = 0;
 	for(const auto &Selected : m_vSelectedLayers)
-		CurrentLayer = maximum(Selected, CurrentLayer);
+		CurrentLayer = std::max(Selected, CurrentLayer);
 	SelectLayer(CurrentLayer);
 
 	if(m_vSelectedLayers[0] < (int)m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers.size() - 1)
@@ -1898,8 +1898,8 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 		{
 			QuadMin.x = minimum(QuadMin.x, pCurrentQuad->m_aPoints[v].x);
 			QuadMin.y = minimum(QuadMin.y, pCurrentQuad->m_aPoints[v].y);
-			QuadMax.x = maximum(QuadMax.x, pCurrentQuad->m_aPoints[v].x);
-			QuadMax.y = maximum(QuadMax.y, pCurrentQuad->m_aPoints[v].y);
+			QuadMax.x = std::max(QuadMax.x, pCurrentQuad->m_aPoints[v].x);
+			QuadMax.y = std::max(QuadMax.y, pCurrentQuad->m_aPoints[v].y);
 		}
 
 		CheckAABBAlignment(QuadMin, QuadMax);
@@ -1978,8 +1978,8 @@ void CEditor::QuadSelectionAABB(const std::shared_ptr<CLayerQuads> &pLayer, SAxi
 			auto *pPoint = &pQuad->m_aPoints[i];
 			Min.x = minimum(Min.x, pPoint->x);
 			Min.y = minimum(Min.y, pPoint->y);
-			Max.x = maximum(Max.x, pPoint->x);
-			Max.y = maximum(Max.y, pPoint->y);
+			Max.x = std::max(Max.x, pPoint->x);
+			Max.y = std::max(Max.y, pPoint->y);
 		}
 	}
 	CPoint Center = (Min + Max) / 2.0f;
@@ -2589,7 +2589,7 @@ bool CEditor::IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C)
 {
 	// Normalize to increase precision
 	vec2 Min(minimum(A.x, B.x, C.x), minimum(A.y, B.y, C.y));
-	vec2 Max(maximum(A.x, B.x, C.x), maximum(A.y, B.y, C.y));
+	vec2 Max(maximum(A.x, B.x, C.x), std::max(A.y, B.y, C.y));
 	vec2 Size(Max.x - Min.x, Max.y - Min.y);
 
 	if(Size.x < 0.0000001f || Size.y < 0.0000001f)
@@ -2648,7 +2648,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 			{
 				int j = (i + 1) % 4;
 				vec2 Min(minimum(v[i].x, v[j].x), minimum(v[i].y, v[j].y));
-				vec2 Max(maximum(v[i].x, v[j].x), maximum(v[i].y, v[j].y));
+				vec2 Max(maximum(v[i].x, v[j].x), std::max(v[i].y, v[j].y));
 
 				if(in_range(OnGrid.y, Min.y, Max.y) && Max.y - Min.y > 0.0000001f)
 				{
@@ -2786,7 +2786,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 	Graphics()->LinesDraw(aEdges, 4);
 
 	IGraphics::CLineItem aLines[4];
-	int LineCount = maximum(m_QuadKnifeCount - 1, 0);
+	int LineCount = std::max(m_QuadKnifeCount - 1, 0);
 
 	for(int i = 0; i < LineCount; i++)
 		aLines[i] = IGraphics::CLineItem(m_aQuadKnifePoints[i].x, m_aQuadKnifePoints[i].y, m_aQuadKnifePoints[i + 1].x, m_aQuadKnifePoints[i + 1].y);
@@ -6850,7 +6850,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		// render lines
 		{
-			float EndTimeTotal = maximum(0.000001f, pEnvelope->EndTime());
+			float EndTimeTotal = std::max(0.000001f, pEnvelope->EndTime());
 			float EndX = clamp(EnvelopeToScreenX(View, EndTimeTotal), View.x, View.x + View.w);
 			float StartX = clamp(View.x + View.w * m_OffsetEnvelopeX, View.x, View.x + View.w);
 
@@ -6962,7 +6962,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			Ui()->ClipEnable(&ColorBar);
 
-			float StartX = maximum(EnvelopeToScreenX(View, 0), ColorBar.x);
+			float StartX = std::max(EnvelopeToScreenX(View, 0), ColorBar.x);
 			float EndX = EnvelopeToScreenX(View, pEnvelope->EndTime());
 			CUIRect BackgroundView{
 				StartX,
@@ -7099,7 +7099,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 											for(int j = 0; j < SelectedIndex; j++)
 											{
 												if(!IsEnvPointSelected(j))
-													BoundLow = maximum(pEnvelope->m_vPoints[j].m_Time + 1, BoundLow);
+													BoundLow = std::max(pEnvelope->m_vPoints[j].m_Time + 1, BoundLow);
 											}
 											for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
 											{
@@ -7528,7 +7528,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			{
 				float Value = pEnvelope->m_vPoints[SelectedIndex].m_Time;
 				s_vInitialPositionsX.push_back(Value);
-				MaximumX = maximum(MaximumX, Value);
+				MaximumX = std::max(MaximumX, Value);
 				MinimumX = minimum(MinimumX, Value);
 			}
 			s_MidpointX = (MaximumX - MinimumX) / 2.0f + MinimumX;
@@ -7540,7 +7540,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			{
 				float Value = pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
 				s_vInitialPositionsY.push_back(Value);
-				MaximumY = maximum(MaximumY, Value);
+				MaximumY = std::max(MaximumY, Value);
 				MinimumY = minimum(MinimumY, Value);
 			}
 			s_MidpointY = (MaximumY - MinimumY) / 2.0f + MinimumY;
@@ -7562,7 +7562,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					for(int j = 0; j < SelectedIndex; j++)
 					{
 						if(!IsEnvPointSelected(j))
-							BoundLow = maximum(pEnvelope->m_vPoints[j].m_Time + 1, BoundLow);
+							BoundLow = std::max(pEnvelope->m_vPoints[j].m_Time + 1, BoundLow);
 					}
 					for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
 					{
@@ -7574,7 +7574,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					float ScaleBoundLow = (BoundLow - Midpoint) / (Value - Midpoint);
 					float ScaleBoundHigh = (BoundHigh - Midpoint) / (Value - Midpoint);
 					float ScaleBoundMin = minimum(ScaleBoundLow, ScaleBoundHigh);
-					float ScaleBoundMax = maximum(ScaleBoundLow, ScaleBoundHigh);
+					float ScaleBoundMax = std::max(ScaleBoundLow, ScaleBoundHigh);
 					s_ScaleFactorX = clamp(s_ScaleFactorX, ScaleBoundMin, ScaleBoundMax);
 				}
 
@@ -7582,7 +7582,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				{
 					int SelectedIndex = m_vSelectedEnvelopePoints[k].first;
 					float ScaleMinimum = s_vInitialPositionsX[k] - Midpoint > fxt2f(1) ? fxt2f(1) / (s_vInitialPositionsX[k] - Midpoint) : 0.0f;
-					float ScaleFactor = maximum(ScaleMinimum, s_ScaleFactorX);
+					float ScaleFactor = std::max(ScaleMinimum, s_ScaleFactorX);
 					pEnvelope->m_vPoints[SelectedIndex].m_Time = std::round((s_vInitialPositionsX[k] - Midpoint) * ScaleFactor + Midpoint);
 				}
 				for(size_t k = 1; k < pEnvelope->m_vPoints.size(); k++)
@@ -7666,9 +7666,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				float ValueEnd = ScreenToEnvelopeY(View, Ui()->MouseY());
 
 				float TimeMin = minimum(TimeStart, TimeEnd);
-				float TimeMax = maximum(TimeStart, TimeEnd);
+				float TimeMax = std::max(TimeStart, TimeEnd);
 				float ValueMin = minimum(ValueStart, ValueEnd);
-				float ValueMax = maximum(ValueStart, ValueEnd);
+				float ValueMax = std::max(ValueStart, ValueEnd);
 
 				if(!Input()->ShiftIsPressed())
 					DeselectEnvPoints();

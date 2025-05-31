@@ -527,7 +527,7 @@ void CSkins::OnUpdate()
 {
 	// Only update skins periodically to reduce FPS impact
 	const std::chrono::nanoseconds StartTime = time_get_nanoseconds();
-	const std::chrono::nanoseconds MaxTime = std::chrono::microseconds(maximum(round_to_int(Client()->RenderFrameTime() / 8.0f), 25));
+	const std::chrono::nanoseconds MaxTime = std::chrono::microseconds(std::max(round_to_int(Client()->RenderFrameTime() / 8.0f), 25));
 	if(m_ContainerUpdateTime.has_value() && StartTime - m_ContainerUpdateTime.value() < MaxTime)
 	{
 		return;

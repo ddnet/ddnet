@@ -217,7 +217,7 @@ void CHud::RenderScoreHud()
 			}
 
 			static float s_TextWidth100 = TextRender()->TextWidth(14.0f, "100", -1, -1.0f);
-			float ScoreWidthMax = maximum(maximum(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth100);
+			float ScoreWidthMax = maximum(std::max(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth100);
 			float Split = 3.0f;
 			float ImageSize = (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) ? 16.0f : Split;
 			for(int t = 0; t < 2; t++)
@@ -393,7 +393,7 @@ void CHud::RenderScoreHud()
 			}
 
 			static float s_TextWidth10 = TextRender()->TextWidth(14.0f, "10", -1, -1.0f);
-			float ScoreWidthMax = maximum(maximum(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth10);
+			float ScoreWidthMax = maximum(std::max(m_aScoreInfo[0].m_ScoreTextWidth, m_aScoreInfo[1].m_ScoreTextWidth), s_TextWidth10);
 			float Split = 3.0f, ImageSize = 16.0f, PosSize = 16.0f;
 
 			for(int t = 0; t < 2; t++)
@@ -605,7 +605,7 @@ void CHud::RenderCursor()
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_pLocalCharacter)
 	{
 		// Render local cursor
-		CurWeapon = maximum(0, m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
+		CurWeapon = std::max(0, m_pClient->m_Snap.m_pLocalCharacter->m_Weapon % NUM_WEAPONS);
 		TargetPos = m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy];
 	}
 	else
@@ -622,12 +622,12 @@ void CHud::RenderCursor()
 		// Calculate factor to keep cursor on screen
 		const vec2 HalfSize = vec2(Center.x - aPoints[0], Center.y - aPoints[1]);
 		const vec2 ScreenPos = (m_pClient->m_CursorInfo.WorldTarget() - Center) / m_pClient->m_Camera.m_Zoom;
-		const float ClampFactor = maximum(
+		const float ClampFactor = std::max(
 			1.0f,
 			absolute(ScreenPos.x / HalfSize.x),
 			absolute(ScreenPos.y / HalfSize.y));
 
-		CurWeapon = maximum(0, m_pClient->m_CursorInfo.Weapon() % NUM_WEAPONS);
+		CurWeapon = std::max(0, m_pClient->m_CursorInfo.Weapon() % NUM_WEAPONS);
 		TargetPos = ScreenPos / ClampFactor + Center;
 		if(ClampFactor != 1.0f)
 			Alpha /= 2.0f;
@@ -874,8 +874,8 @@ void CHud::RenderPlayerState(const int ClientId)
 				// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
 				UnusedJumps = 1;
 			}
-			TotalJumpsToDisplay = maximum(minimum(absolute(pCharacter->m_Jumps), 10), 0);
-			AvailableJumpsToDisplay = maximum(minimum(UnusedJumps, TotalJumpsToDisplay), 0);
+			TotalJumpsToDisplay = std::max(minimum(absolute(pCharacter->m_Jumps), 10), 0);
+			AvailableJumpsToDisplay = std::max(minimum(UnusedJumps, TotalJumpsToDisplay), 0);
 		}
 		else
 		{

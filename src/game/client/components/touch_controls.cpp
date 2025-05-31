@@ -244,7 +244,7 @@ void CTouchControls::CTouchButton::Render() const
 		m_pTouchControls->Graphics()->TextureClear();
 		m_pTouchControls->Graphics()->QuadsBegin();
 		m_pTouchControls->Graphics()->SetColor(ButtonColor);
-		m_pTouchControls->Graphics()->DrawCircle(Center.x, Center.y, Radius, maximum(round_truncate(Radius / 4.0f) & ~1, 32));
+		m_pTouchControls->Graphics()->DrawCircle(Center.x, Center.y, Radius, std::max(round_truncate(Radius / 4.0f) & ~1, 32));
 		m_pTouchControls->Graphics()->QuadsEnd();
 		break;
 	}

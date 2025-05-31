@@ -4163,7 +4163,7 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 	}
 	int End = Start + Length;
 	int ChecksumBytesEnd = minimum(End, (int)sizeof(m_Checksum.m_aBytes));
-	int FileStart = maximum(Start, (int)sizeof(m_Checksum.m_aBytes));
+	int FileStart = std::max(Start, (int)sizeof(m_Checksum.m_aBytes));
 	unsigned char aStartBytes[sizeof(int32_t)];
 	unsigned char aEndBytes[sizeof(int32_t)];
 	uint_to_bytes_be(aStartBytes, Start);

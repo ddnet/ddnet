@@ -244,8 +244,8 @@ void CAutoMapper::Load(const char *pTileName)
 
 					pCurrentConf->m_StartX = minimum(pCurrentConf->m_StartX, NewPosRule.m_X);
 					pCurrentConf->m_StartY = minimum(pCurrentConf->m_StartY, NewPosRule.m_Y);
-					pCurrentConf->m_EndX = maximum(pCurrentConf->m_EndX, NewPosRule.m_X);
-					pCurrentConf->m_EndY = maximum(pCurrentConf->m_EndY, NewPosRule.m_Y);
+					pCurrentConf->m_EndX = std::max(pCurrentConf->m_EndX, NewPosRule.m_X);
+					pCurrentConf->m_EndY = std::max(pCurrentConf->m_EndY, NewPosRule.m_Y);
 
 					if(x == 0 && y == 0)
 					{

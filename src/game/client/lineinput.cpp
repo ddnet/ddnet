@@ -569,7 +569,7 @@ void CLineInput::RenderCandidates()
 	// Determine longest candidate width
 	float LongestCandidateWidth = 0.0f;
 	for(int i = 0; i < Input()->GetCandidateCount(); ++i)
-		LongestCandidateWidth = maximum(LongestCandidateWidth, TextRender()->TextWidth(FontSize, Input()->GetCandidate(i)));
+		LongestCandidateWidth = std::max(LongestCandidateWidth, TextRender()->TextWidth(FontSize, Input()->GetCandidate(i)));
 
 	const float NumOffset = 8.0f;
 	const float RectWidth = LongestCandidateWidth + Margin + NumOffset + 2.0f * Padding;

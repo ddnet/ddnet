@@ -681,7 +681,7 @@ void CPlayers::RenderPlayer(
 					if(AttackTicksPassed < g_pData->m_Weapons.m_aId[CurrentWeapon].m_Muzzleduration + 3)
 					{
 						float t = AttackTicksPassed / g_pData->m_Weapons.m_aId[CurrentWeapon].m_Muzzleduration;
-						AlphaMuzzle = mix(2.0f, 0.0f, minimum(1.0f, maximum(0.0f, t)));
+						AlphaMuzzle = mix(2.0f, 0.0f, minimum(1.0f, std::max(0.0f, t)));
 					}
 
 					int IteX = rand() % g_pData->m_Weapons.m_aId[CurrentWeapon].m_NumSpriteMuzzles;

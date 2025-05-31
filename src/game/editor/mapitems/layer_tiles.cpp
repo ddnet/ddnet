@@ -721,8 +721,8 @@ void CLayerTiles::ShowInfo()
 	Graphics()->TextureSet(m_pEditor->Client()->GetDebugFont());
 	Graphics()->QuadsBegin();
 
-	int StartY = maximum(0, (int)(ScreenY0 / 32.0f) - 1);
-	int StartX = maximum(0, (int)(ScreenX0 / 32.0f) - 1);
+	int StartY = std::max(0, (int)(ScreenY0 / 32.0f) - 1);
+	int StartX = std::max(0, (int)(ScreenX0 / 32.0f) - 1);
 	int EndY = minimum((int)(ScreenY1 / 32.0f) + 1, m_Height);
 	int EndX = minimum((int)(ScreenX1 / 32.0f) + 1, m_Width);
 

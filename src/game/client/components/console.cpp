@@ -123,7 +123,7 @@ static std::pair<EArgumentCompletionType, int> ArgumentCompletion(const char *pS
 
 	for(const auto &Entry : gs_aArgumentCompletionEntries)
 	{
-		int Length = maximum(str_length(Entry.m_pCommandName), CommandLength);
+		int Length = std::max(str_length(Entry.m_pCommandName), CommandLength);
 		if(str_comp_nocase_num(Entry.m_pCommandName, pCommandStart, Length) == 0)
 		{
 			int CurrentArg = 0;
@@ -688,7 +688,7 @@ int CGameConsole::CInstance::GetLinesToScroll(int Direction, int LinesToScroll)
 		pEntry = m_Backlog.Prev(pEntry);
 	}
 
-	int Amount = maximum(0, Line - LinesToSkip);
+	int Amount = std::max(0, Line - LinesToSkip);
 	while(pEntry && (LinesToScroll > 0 ? Amount < LinesToScroll : true))
 	{
 		if(pEntry->m_LineCount == -1)
@@ -705,7 +705,7 @@ void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
 	// This method is used to scroll lines from `StartLine` to `EndLine` to the center of the screen, if possible.
 
 	// Find target line
-	int Target = maximum(0, (int)ceil(StartLine - minimum(StartLine - EndLine, m_LinesRendered) / 2) - m_LinesRendered / 2);
+	int Target = std::max(0, (int)ceil(StartLine - minimum(StartLine - EndLine, m_LinesRendered) / 2) - m_LinesRendered / 2);
 	if(m_BacklogCurLine == Target)
 		return;
 
@@ -1393,7 +1393,7 @@ void CGameConsole::OnRender()
 			if(Cursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 			{
 				pConsole->m_CurSelStart = minimum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
-				pConsole->m_CurSelEnd = maximum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+				pConsole->m_CurSelEnd = std::max(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
 			}
 			pConsole->m_LinesRendered += First ? pEntry->m_LineCount - (pConsole->m_BacklogLastActiveLine - SkippedLines) : pEntry->m_LineCount;
 

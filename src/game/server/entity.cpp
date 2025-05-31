@@ -118,6 +118,6 @@ bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec
 		// No line section was passed but two equal points
 		DistanceToLine = ViewPos - StartPos;
 	}
-	float ClippDistance = maximum(ShowDistance.x, ShowDistance.y);
+	float ClippDistance = std::max(ShowDistance.x, ShowDistance.y);
 	return (absolute(DistanceToLine.x) > ClippDistance || absolute(DistanceToLine.y) > ClippDistance);
 }

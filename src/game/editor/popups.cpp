@@ -472,7 +472,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		{
 			pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionGroup>(pEditor, pEditor->m_SelectedGroup, true));
 			pEditor->m_Map.DeleteGroup(pEditor->m_SelectedGroup);
-			pEditor->m_SelectedGroup = maximum(0, pEditor->m_SelectedGroup - 1);
+			pEditor->m_SelectedGroup = std::max(0, pEditor->m_SelectedGroup - 1);
 			return CUi::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -1614,7 +1614,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CU
 				if(SelectedChannel == c)
 				{
 					FirstSelectedIndex = minimum(FirstSelectedIndex, SelectedIndex);
-					LastSelectedIndex = maximum(LastSelectedIndex, SelectedIndex);
+					LastSelectedIndex = std::max(LastSelectedIndex, SelectedIndex);
 				}
 			}
 
@@ -2346,7 +2346,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupSelectImage(void *pContext, CUIRect 
 			ImageView.w = ImageView.h;
 		else
 			ImageView.h = ImageView.w;
-		float Max = (float)(maximum(pEditor->m_Map.m_vpImages[ShowImage]->m_Width, pEditor->m_Map.m_vpImages[ShowImage]->m_Height));
+		float Max = (float)(std::max(pEditor->m_Map.m_vpImages[ShowImage]->m_Width, pEditor->m_Map.m_vpImages[ShowImage]->m_Height));
 		ImageView.w *= pEditor->m_Map.m_vpImages[ShowImage]->m_Width / Max;
 		ImageView.h *= pEditor->m_Map.m_vpImages[ShowImage]->m_Height / Max;
 		pEditor->Graphics()->TextureSet(pEditor->m_Map.m_vpImages[ShowImage]->m_Texture);
@@ -3105,7 +3105,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	if(pEditor->DoButton_FontIcon(&s_DecreaseButton, FONT_ICON_MINUS, 0, &ButtonDecrease, BUTTONFLAG_LEFT, "Decrease animation speed.", IGraphics::CORNER_L, 7.0f))
 	{
 		pEditor->m_AnimateSpeed -= pEditor->m_AnimateSpeed <= 1.0f ? 0.1f : 0.5f;
-		pEditor->m_AnimateSpeed = maximum(pEditor->m_AnimateSpeed, MIN_ANIM_SPEED);
+		pEditor->m_AnimateSpeed = std::max(pEditor->m_AnimateSpeed, MIN_ANIM_SPEED);
 		pEditor->m_AnimateUpdatePopup = true;
 	}
 

@@ -197,7 +197,7 @@ void CPlayer::Tick()
 		if(Server()->GetClientInfo(m_ClientId, &Info))
 		{
 			m_Latency.m_Accum += Info.m_Latency;
-			m_Latency.m_AccumMax = maximum(m_Latency.m_AccumMax, Info.m_Latency);
+			m_Latency.m_AccumMax = std::max(m_Latency.m_AccumMax, Info.m_Latency);
 			m_Latency.m_AccumMin = minimum(m_Latency.m_AccumMin, Info.m_Latency);
 		}
 		// each second
@@ -225,7 +225,7 @@ void CPlayer::Tick()
 	if(!GameServer()->m_World.m_Paused)
 	{
 		int EarliestRespawnTick = m_PreviousDieTick + Server()->TickSpeed() * 3;
-		int RespawnTick = maximum(m_DieTick, EarliestRespawnTick) + 2;
+		int RespawnTick = std::max(m_DieTick, EarliestRespawnTick) + 2;
 		if(!m_pCharacter && RespawnTick <= Server()->Tick())
 			m_Spawning = true;
 
