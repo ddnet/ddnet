@@ -188,7 +188,7 @@ void CCamera::UpdateCamera()
 				m_AutoSpecCameraZooming = false;
 			}
 		}
-		m_Zoom = clamp(m_Zoom, MinZoomLevel(), MaxZoomLevel());
+		m_Zoom = std::clamp(m_Zoom, MinZoomLevel(), MaxZoomLevel());
 	}
 
 	if(!ZoomAllowed())
@@ -228,7 +228,7 @@ void CCamera::UpdateCamera()
 		if(IsDyncam)
 		{
 			m_DyncamSmoothingSpeedBias -= length(TargetPos - m_LastTargetPos) * std::log10(CameraStabilizingFactor) * 0.02f;
-			m_DyncamSmoothingSpeedBias = clamp(m_DyncamSmoothingSpeedBias, 0.5f, CameraSpeed);
+			m_DyncamSmoothingSpeedBias = std::clamp(m_DyncamSmoothingSpeedBias, 0.5f, CameraSpeed);
 		}
 		else
 		{

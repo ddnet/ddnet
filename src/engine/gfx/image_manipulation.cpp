@@ -113,8 +113,8 @@ static void Dilate(int w, int h, const uint8_t *pSrc, uint8_t *pDest)
 			int Counter = 0;
 			for(int c = 0; c < 4; c++)
 			{
-				const int ClampedX = clamp(x + aDirX[c], 0, w - 1);
-				const int ClampedY = clamp(y + aDirY[c], 0, h - 1);
+				const int ClampedX = std::clamp(x + aDirX[c], 0, w - 1);
+				const int ClampedY = std::clamp(y + aDirY[c], 0, h - 1);
 				const int SrcIndex = ClampedY * w * DILATE_BPP + ClampedX * DILATE_BPP;
 				if(pSrc[SrcIndex + DILATE_BPP - 1] > DILATE_ALPHA_THRESHOLD)
 				{

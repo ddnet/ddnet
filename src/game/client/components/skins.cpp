@@ -282,10 +282,10 @@ static void CheckMetrics(CSkin::CSkinMetricVariable &Metrics, const uint8_t *pIm
 		}
 	}
 
-	Metrics.m_Width = clamp((MaxX - MinX) + 1, 1, CheckWidth);
-	Metrics.m_Height = clamp((MaxY - MinY) + 1, 1, CheckHeight);
-	Metrics.m_OffsetX = clamp(MinX, 0, CheckWidth - 1);
-	Metrics.m_OffsetY = clamp(MinY, 0, CheckHeight - 1);
+	Metrics.m_Width = std::clamp((MaxX - MinX) + 1, 1, CheckWidth);
+	Metrics.m_Height = std::clamp((MaxY - MinY) + 1, 1, CheckHeight);
+	Metrics.m_OffsetX = std::clamp(MinX, 0, CheckWidth - 1);
+	Metrics.m_OffsetY = std::clamp(MinY, 0, CheckHeight - 1);
 	Metrics.m_MaxWidth = CheckWidth;
 	Metrics.m_MaxHeight = CheckHeight;
 }

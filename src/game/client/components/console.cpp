@@ -847,7 +847,7 @@ void CGameConsole::CInstance::UpdateSearch()
 	if(!m_vSearchMatches.empty() && SearchChanged)
 		m_CurrentMatchIndex = 0;
 	else
-		m_CurrentMatchIndex = std::clamp(m_CurrentMatchIndex, -1, (int)m_vSearchMatches.size() - 1);
+		m_CurrentMatchIndex = std::std::clamp(m_CurrentMatchIndex, -1, (int)m_vSearchMatches.size() - 1);
 
 	// Reverse order of lines by sorting so we have matches from top to bottom instead of bottom to top
 	std::sort(m_vSearchMatches.begin(), m_vSearchMatches.end(), [](const SSearchMatch &MatchA, const SSearchMatch &MatchB) {
