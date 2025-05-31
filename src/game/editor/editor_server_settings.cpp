@@ -708,7 +708,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						// Setup input rect, which will be used to draw the map settings input later
 						Label.HMargin(1.0, &FixInput);
 						DisplayFixInput = true;
-						DropdownHeight = minimum(DropdownHeight, EndY - FixInput.y - 16.0f);
+						DropdownHeight = std::min(DropdownHeight, EndY - FixInput.y - 16.0f);
 					}
 					else
 					{
@@ -887,7 +887,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						// Setup input rect in case we are fixing the setting
 						Label.HMargin(1.0, &FixInput);
 						DisplayFixInput = true;
-						DropdownHeight = minimum(DropdownHeight, EndY - FixInput.y - 16.0f);
+						DropdownHeight = std::min(DropdownHeight, EndY - FixInput.y - 16.0f);
 					}
 					else
 					{
@@ -1391,7 +1391,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 		m_vCurrentArgs.emplace_back();
 		auto &NewArg = m_vCurrentArgs.back();
 		// Fill argument value, with a maximum length of 256
-		str_copy(NewArg.m_aValue, pArgStart, minimum((int)sizeof(SCurrentSettingArg::m_aValue), Length + 1));
+		str_copy(NewArg.m_aValue, pArgStart, std::min((int)sizeof(SCurrentSettingArg::m_aValue), Length + 1));
 
 		// Validate argument from the parsed argument of the current setting.
 		// If current setting is not valid, then there are no arguments which results in an error.
@@ -1682,7 +1682,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 	{
 		// Use a substring from the start of the input to the cursor offset
 		char aSubString[128];
-		str_copy(aSubString, m_aCommand, minimum(m_LastCursorOffset + 1, sizeof(aSubString)));
+		str_copy(aSubString, m_aCommand, std::min(m_LastCursorOffset + 1, sizeof(aSubString)));
 
 		// Iterate through available map settings and find those which the beginning matches with the command/setting name we are writing
 		for(auto &pSetting : m_pBackend->m_vpMapSettings)
@@ -1737,7 +1737,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 						// with the current argument value
 
 						auto &CurrentArg = m_vCurrentArgs.at(m_CursorArgIndex);
-						int SubstringLength = minimum(m_LastCursorOffset, CurrentArg.m_End) - CurrentArg.m_Start;
+						int SubstringLength = std::min(m_LastCursorOffset, CurrentArg.m_End) - CurrentArg.m_Start;
 
 						// Substring based on the cursor position inside that argument
 						char aSubString[256];

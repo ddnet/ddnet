@@ -751,15 +751,15 @@ void CHud::RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter)
 	{
 		// health display
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteHealthFull);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_HealthOffset + QuadOffsetSixup, minimum(pCharacter->m_Health, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_HealthOffset + QuadOffsetSixup, std::min(pCharacter->m_Health, 10));
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteHealthEmpty);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_EmptyHealthOffset + QuadOffsetSixup + minimum(pCharacter->m_Health, 10), 10 - minimum(pCharacter->m_Health, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_EmptyHealthOffset + QuadOffsetSixup + minimum(pCharacter->m_Health, 10), 10 - std::min(pCharacter->m_Health, 10));
 
 		// armor display
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteArmorFull);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup, minimum(pCharacter->m_Armor, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup, std::min(pCharacter->m_Armor, 10));
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpriteArmorEmpty);
-		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup + minimum(pCharacter->m_Armor, 10), 10 - minimum(pCharacter->m_Armor, 10));
+		Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_ArmorOffset + QuadOffsetSixup + minimum(pCharacter->m_Armor, 10), 10 - std::min(pCharacter->m_Armor, 10));
 	}
 }
 
@@ -874,8 +874,8 @@ void CHud::RenderPlayerState(const int ClientId)
 				// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
 				UnusedJumps = 1;
 			}
-			TotalJumpsToDisplay = std::max(minimum(absolute(pCharacter->m_Jumps), 10), 0);
-			AvailableJumpsToDisplay = std::max(minimum(UnusedJumps, TotalJumpsToDisplay), 0);
+			TotalJumpsToDisplay = std::max(std::min(absolute(pCharacter->m_Jumps), 10), 0);
+			AvailableJumpsToDisplay = std::max(std::min(UnusedJumps, TotalJumpsToDisplay), 0);
 		}
 		else
 		{

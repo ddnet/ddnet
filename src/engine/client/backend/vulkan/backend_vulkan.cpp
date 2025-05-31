@@ -5835,7 +5835,7 @@ public:
 				if(!AllocateDescriptorPool(DescriptorPools, DescriptorPools.m_DefaultAllocSize))
 					return false;
 
-				AllocatedInThisRun = minimum((size_t)DescriptorPools.m_DefaultAllocSize, CurAllocNum);
+				AllocatedInThisRun = std::min((size_t)DescriptorPools.m_DefaultAllocSize, CurAllocNum);
 
 				auto &Pool = DescriptorPools.m_vPools.back();
 				Pool.m_CurSize += AllocatedInThisRun;

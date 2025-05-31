@@ -198,7 +198,7 @@ void CPlayer::Tick()
 		{
 			m_Latency.m_Accum += Info.m_Latency;
 			m_Latency.m_AccumMax = std::max(m_Latency.m_AccumMax, Info.m_Latency);
-			m_Latency.m_AccumMin = minimum(m_Latency.m_AccumMin, Info.m_Latency);
+			m_Latency.m_AccumMin = std::min(m_Latency.m_AccumMin, Info.m_Latency);
 		}
 		// each second
 		if(Server()->Tick() % Server()->TickSpeed() == 0)

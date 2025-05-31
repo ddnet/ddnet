@@ -40,7 +40,7 @@ protected:
 		switch(Direction)
 		{
 		case DIRECTION_LEFT:
-			ShiftBy = minimum(ShiftBy, m_Width);
+			ShiftBy = std::min(ShiftBy, m_Width);
 			for(int y = 0; y < m_Height; ++y)
 			{
 				if(ShiftBy < m_Width)
@@ -49,7 +49,7 @@ protected:
 			}
 			break;
 		case DIRECTION_RIGHT:
-			ShiftBy = minimum(ShiftBy, m_Width);
+			ShiftBy = std::min(ShiftBy, m_Width);
 			for(int y = 0; y < m_Height; ++y)
 			{
 				if(ShiftBy < m_Width)
@@ -58,7 +58,7 @@ protected:
 			}
 			break;
 		case DIRECTION_UP:
-			ShiftBy = minimum(ShiftBy, m_Height);
+			ShiftBy = std::min(ShiftBy, m_Height);
 			for(int y = ShiftBy; y < m_Height; ++y)
 			{
 				mem_copy(&pTiles[(y - ShiftBy) * m_Width], &pTiles[y * m_Width], m_Width * sizeof(T));
@@ -69,7 +69,7 @@ protected:
 			}
 			break;
 		case DIRECTION_DOWN:
-			ShiftBy = minimum(ShiftBy, m_Height);
+			ShiftBy = std::min(ShiftBy, m_Height);
 			for(int y = m_Height - ShiftBy - 1; y >= 0; --y)
 			{
 				mem_copy(&pTiles[(y + ShiftBy) * m_Width], &pTiles[y * m_Width], m_Width * sizeof(T));

@@ -40,7 +40,7 @@ CSkin::CSkinMetricVariableInt::operator int() const
 
 CSkin::CSkinMetricVariableInt &CSkin::CSkinMetricVariableInt::operator=(int NewVal)
 {
-	m_Value = minimum(m_Value, NewVal);
+	m_Value = std::min(m_Value, NewVal);
 	return *this;
 }
 

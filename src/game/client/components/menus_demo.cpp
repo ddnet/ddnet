@@ -212,7 +212,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			if(Input()->ModifierIsPressed())
 				PositionToSeek = FindNextMarkerPosition();
 			else if(Input()->ShiftIsPressed())
-				s_SkipDurationIndex = minimum(s_SkipDurationIndex + 1, NumDurationLabels - 1);
+				s_SkipDurationIndex = std::min(s_SkipDurationIndex + 1, NumDurationLabels - 1);
 			else
 				TimeToSeek = s_aSkipDurationsSeconds[s_SkipDurationIndex];
 		}

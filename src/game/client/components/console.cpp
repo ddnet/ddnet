@@ -697,7 +697,7 @@ int CGameConsole::CInstance::GetLinesToScroll(int Direction, int LinesToScroll)
 		pEntry = Direction == -1 ? m_Backlog.Prev(pEntry) : m_Backlog.Next(pEntry);
 	}
 
-	return LinesToScroll > 0 ? minimum(Amount, LinesToScroll) : Amount;
+	return LinesToScroll > 0 ? std::min(Amount, LinesToScroll) : Amount;
 }
 
 void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
@@ -705,7 +705,7 @@ void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
 	// This method is used to scroll lines from `StartLine` to `EndLine` to the center of the screen, if possible.
 
 	// Find target line
-	int Target = std::max(0, (int)ceil(StartLine - minimum(StartLine - EndLine, m_LinesRendered) / 2) - m_LinesRendered / 2);
+	int Target = std::max(0, (int)ceil(StartLine - std::min(StartLine - EndLine, m_LinesRendered) / 2) - m_LinesRendered / 2);
 	if(m_BacklogCurLine == Target)
 		return;
 
@@ -1358,7 +1358,7 @@ void CGameConsole::OnRender()
 			if(Outside && !CanRenderOneLine)
 				break;
 
-			const int LinesNotRendered = pEntry->m_LineCount - minimum((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
+			const int LinesNotRendered = pEntry->m_LineCount - std::min((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
 			pConsole->m_LinesRendered -= LinesNotRendered;
 
 			TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FONT_SIZE, TEXTFLAG_RENDER);
@@ -1392,7 +1392,7 @@ void CGameConsole::OnRender()
 
 			if(Cursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 			{
-				pConsole->m_CurSelStart = minimum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+				pConsole->m_CurSelStart = std::min(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
 				pConsole->m_CurSelEnd = std::max(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
 			}
 			pConsole->m_LinesRendered += First ? pEntry->m_LineCount - (pConsole->m_BacklogLastActiveLine - SkippedLines) : pEntry->m_LineCount;

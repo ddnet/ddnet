@@ -467,7 +467,7 @@ void CServerBrowser::Filter()
 			{
 				Filtered = true;
 				// match against player country
-				for(int p = 0; p < minimum(Info.m_NumClients, (int)MAX_CLIENTS); p++)
+				for(int p = 0; p < std::min(Info.m_NumClients, (int)MAX_CLIENTS); p++)
 				{
 					if(Info.m_aClients[p].m_Country == g_Config.m_BrFilterCountryIndex)
 					{
@@ -508,7 +508,7 @@ void CServerBrowser::Filter()
 					}
 
 					// match against players
-					for(int p = 0; p < minimum(Info.m_NumClients, (int)MAX_CLIENTS); p++)
+					for(int p = 0; p < std::min(Info.m_NumClients, (int)MAX_CLIENTS); p++)
 					{
 						if(MatchesFn(Info.m_aClients[p].m_aName, aFilterStrTrimmed) ||
 							MatchesFn(Info.m_aClients[p].m_aClan, aFilterStrTrimmed))
@@ -1133,7 +1133,7 @@ void CServerBrowser::RequestCurrentServerWithRandomToken(const NETADDR &Addr, in
 
 void CServerBrowser::SetCurrentServerPing(const NETADDR &Addr, int Ping)
 {
-	SetLatency(Addr, minimum(Ping, 999));
+	SetLatency(Addr, std::min(Ping, 999));
 }
 
 void CServerBrowser::UpdateFromHttp()
@@ -1630,7 +1630,7 @@ void CServerBrowser::UpdateServerFriends(CServerInfo *pInfo) const
 {
 	pInfo->m_FriendState = IFriends::FRIEND_NO;
 	pInfo->m_FriendNum = 0;
-	for(int ClientIndex = 0; ClientIndex < minimum(pInfo->m_NumReceivedClients, (int)MAX_CLIENTS); ClientIndex++)
+	for(int ClientIndex = 0; ClientIndex < std::min(pInfo->m_NumReceivedClients, (int)MAX_CLIENTS); ClientIndex++)
 	{
 		pInfo->m_aClients[ClientIndex].m_FriendState = m_pFriends->GetFriendState(pInfo->m_aClients[ClientIndex].m_aName, pInfo->m_aClients[ClientIndex].m_aClan);
 		pInfo->m_FriendState = std::max(pInfo->m_FriendState, pInfo->m_aClients[ClientIndex].m_FriendState);

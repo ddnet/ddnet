@@ -119,7 +119,7 @@ const char *CLineInput::GetDisplayedString()
 	if(!IsHidden())
 		return m_pStr;
 
-	const size_t NumStars = minimum(GetNumChars(), sizeof(ms_aStars) - 1);
+	const size_t NumStars = std::min(GetNumChars(), sizeof(ms_aStars) - 1);
 	for(size_t i = 0; i < NumStars; ++i)
 		ms_aStars[i] = '*';
 	ms_aStars[NumStars] = '\0';

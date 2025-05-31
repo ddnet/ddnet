@@ -204,7 +204,7 @@ bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 
 void CScrollRegion::ScrollHere(EScrollOption Option)
 {
-	const float MinHeight = minimum(m_ClipRect.h, m_LastAddedRect.h);
+	const float MinHeight = std::min(m_ClipRect.h, m_LastAddedRect.h);
 	const float TopScroll = m_LastAddedRect.y - (m_ClipRect.y + m_ContentScrollOff.y);
 
 	switch(Option)

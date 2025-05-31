@@ -26,7 +26,7 @@ static constexpr int SAMPLE_INDEX_FULL = -1;
 
 void CSound::Mix(short *pFinalOut, unsigned Frames)
 {
-	Frames = minimum(Frames, m_MaxFrames);
+	Frames = std::min(Frames, m_MaxFrames);
 	mem_zero(m_pMixBuffer, Frames * 2 * sizeof(int));
 
 	// acquire lock while we are mixing
@@ -396,7 +396,7 @@ static int s_WVBufferSize = 0;
 
 static int ReadDataOld(void *pBuffer, int Size)
 {
-	int ChunkSize = minimum(Size, s_WVBufferSize - s_WVBufferPosition);
+	int ChunkSize = std::min(Size, s_WVBufferSize - s_WVBufferPosition);
 	mem_copy(pBuffer, (const char *)s_pWVBuffer + s_WVBufferPosition, ChunkSize);
 	s_WVBufferPosition += ChunkSize;
 	return ChunkSize;
@@ -794,7 +794,7 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
 	if(absolute(m_aVoices[VoiceId].m_Tick - Tick) > Threshold)
 	{
 		// take care of looping (modulo!)
-		if(!(IsLooping && (minimum(m_aVoices[VoiceId].m_Tick, Tick) + m_aVoices[VoiceId].m_pSample->m_NumFrames - std::max(m_aVoices[VoiceId].m_Tick, Tick)) <= Threshold))
+		if(!(IsLooping && (std::min(m_aVoices[VoiceId].m_Tick, Tick) + m_aVoices[VoiceId].m_pSample->m_NumFrames - std::max(m_aVoices[VoiceId].m_Tick, Tick)) <= Threshold))
 		{
 			m_aVoices[VoiceId].m_Tick = Tick;
 		}

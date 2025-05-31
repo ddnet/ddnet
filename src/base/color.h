@@ -16,7 +16,7 @@
 */
 constexpr inline float RgbToHue(float r, float g, float b)
 {
-	float h_min = minimum(r, g, b);
+	float h_min = std::min(r, g, b);
 	float h_max = std::max(r, g, b);
 
 	float hue = 0.0f;
@@ -207,7 +207,7 @@ constexpr T color_cast(const F &) = delete;
 template<>
 constexpr inline ColorHSLA color_cast(const ColorRGBA &rgb)
 {
-	float Min = minimum(rgb.r, rgb.g, rgb.b);
+	float Min = std::min(rgb.r, rgb.g, rgb.b);
 	float Max = std::max(rgb.r, rgb.g, rgb.b);
 
 	float c = Max - Min;
@@ -264,13 +264,13 @@ template<>
 constexpr inline ColorHSLA color_cast(const ColorHSVA &hsv)
 {
 	float l = hsv.v * (1 - hsv.s * 0.5f);
-	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l) / minimum(l, 1 - l), l, hsv.a);
+	return ColorHSLA(hsv.h, (l == 0.0f || l == 1.0f) ? 0 : (hsv.v - l) / std::min(l, 1 - l), l, hsv.a);
 }
 
 template<>
 constexpr inline ColorHSVA color_cast(const ColorHSLA &hsl)
 {
-	float v = hsl.l + hsl.s * minimum(hsl.l, 1 - hsl.l);
+	float v = hsl.l + hsl.s * std::min(hsl.l, 1 - hsl.l);
 	return ColorHSVA(hsl.h, v == 0.0f ? 0 : 2 - (2 * hsl.l / v), v, hsl.a);
 }
 

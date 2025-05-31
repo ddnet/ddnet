@@ -37,7 +37,7 @@ void CLayerTune::Resize(int NewW, int NewH)
 	mem_zero(pNewTuneData, (size_t)NewW * NewH * sizeof(CTuneTile));
 
 	// copy old data
-	for(int y = 0; y < minimum(NewH, m_Height); y++)
+	for(int y = 0; y < std::min(NewH, m_Height); y++)
 		mem_copy(&pNewTuneData[y * NewW], &m_pTuneTile[y * m_Width], minimum(m_Width, NewW) * sizeof(CTuneTile));
 
 	// replace old

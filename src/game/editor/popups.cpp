@@ -1613,7 +1613,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CU
 			{
 				if(SelectedChannel == c)
 				{
-					FirstSelectedIndex = minimum(FirstSelectedIndex, SelectedIndex);
+					FirstSelectedIndex = std::min(FirstSelectedIndex, SelectedIndex);
 					LastSelectedIndex = std::max(LastSelectedIndex, SelectedIndex);
 				}
 			}
@@ -3116,7 +3116,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 			pEditor->m_AnimateSpeed = 0.1f;
 		else
 			pEditor->m_AnimateSpeed += pEditor->m_AnimateSpeed < 1.0f ? 0.1f : 0.5f;
-		pEditor->m_AnimateSpeed = minimum(pEditor->m_AnimateSpeed, MAX_ANIM_SPEED);
+		pEditor->m_AnimateSpeed = std::min(pEditor->m_AnimateSpeed, MAX_ANIM_SPEED);
 		pEditor->m_AnimateUpdatePopup = true;
 	}
 

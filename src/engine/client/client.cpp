@@ -1637,7 +1637,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				MapCRC = m_MapdownloadCrc;
 				Chunk = m_MapdownloadChunk;
-				Size = minimum(m_TranslationContext.m_MapDownloadChunkSize, m_TranslationContext.m_MapdownloadTotalsize - m_MapdownloadAmount);
+				Size = std::min(m_TranslationContext.m_MapDownloadChunkSize, m_TranslationContext.m_MapdownloadTotalsize - m_MapdownloadAmount);
 			}
 			else
 			{
@@ -4162,7 +4162,7 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 		return 2;
 	}
 	int End = Start + Length;
-	int ChecksumBytesEnd = minimum(End, (int)sizeof(m_Checksum.m_aBytes));
+	int ChecksumBytesEnd = std::min(End, (int)sizeof(m_Checksum.m_aBytes));
 	int FileStart = std::max(Start, (int)sizeof(m_Checksum.m_aBytes));
 	unsigned char aStartBytes[sizeof(int32_t)];
 	unsigned char aEndBytes[sizeof(int32_t)];
@@ -4233,7 +4233,7 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 		}
 		for(int i = FileStart; i < End; i += sizeof(aBuf))
 		{
-			int Read = io_read(m_OwnExecutable, aBuf, minimum((int)sizeof(aBuf), End - i));
+			int Read = io_read(m_OwnExecutable, aBuf, std::min((int)sizeof(aBuf), End - i));
 			sha256_update(&Sha256Ctxt, aBuf, Read);
 		}
 	}

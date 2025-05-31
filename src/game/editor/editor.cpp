@@ -771,7 +771,7 @@ void CEditor::SelectPreviousLayer()
 {
 	int CurrentLayer = std::numeric_limits<int>::max();
 	for(const auto &Selected : m_vSelectedLayers)
-		CurrentLayer = minimum(Selected, CurrentLayer);
+		CurrentLayer = std::min(Selected, CurrentLayer);
 	SelectLayer(CurrentLayer);
 
 	if(m_vSelectedLayers[0] > 0)
@@ -1896,8 +1896,8 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 		CPoint QuadMin = pCurrentQuad->m_aPoints[0], QuadMax = pCurrentQuad->m_aPoints[0];
 		for(int v = 1; v < 4; v++)
 		{
-			QuadMin.x = minimum(QuadMin.x, pCurrentQuad->m_aPoints[v].x);
-			QuadMin.y = minimum(QuadMin.y, pCurrentQuad->m_aPoints[v].y);
+			QuadMin.x = std::min(QuadMin.x, pCurrentQuad->m_aPoints[v].x);
+			QuadMin.y = std::min(QuadMin.y, pCurrentQuad->m_aPoints[v].y);
 			QuadMax.x = std::max(QuadMax.x, pCurrentQuad->m_aPoints[v].x);
 			QuadMax.y = std::max(QuadMax.y, pCurrentQuad->m_aPoints[v].y);
 		}
@@ -1976,8 +1976,8 @@ void CEditor::QuadSelectionAABB(const std::shared_ptr<CLayerQuads> &pLayer, SAxi
 		for(int i = 0; i < 4; i++)
 		{
 			auto *pPoint = &pQuad->m_aPoints[i];
-			Min.x = minimum(Min.x, pPoint->x);
-			Min.y = minimum(Min.y, pPoint->y);
+			Min.x = std::min(Min.x, pPoint->x);
+			Min.y = std::min(Min.y, pPoint->y);
 			Max.x = std::max(Max.x, pPoint->x);
 			Max.y = std::max(Max.y, pPoint->y);
 		}
@@ -2588,7 +2588,7 @@ float CEditor::TriangleArea(vec2 A, vec2 B, vec2 C)
 bool CEditor::IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C)
 {
 	// Normalize to increase precision
-	vec2 Min(minimum(A.x, B.x, C.x), minimum(A.y, B.y, C.y));
+	vec2 Min(minimum(A.x, B.x, C.x), std::min(A.y, B.y, C.y));
 	vec2 Max(maximum(A.x, B.x, C.x), std::max(A.y, B.y, C.y));
 	vec2 Size(Max.x - Min.x, Max.y - Min.y);
 
@@ -2647,7 +2647,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 			for(int i = 0; i < 4; i++)
 			{
 				int j = (i + 1) % 4;
-				vec2 Min(minimum(v[i].x, v[j].x), minimum(v[i].y, v[j].y));
+				vec2 Min(minimum(v[i].x, v[j].x), std::min(v[i].y, v[j].y));
 				vec2 Max(maximum(v[i].x, v[j].x), std::max(v[i].y, v[j].y));
 
 				if(in_range(OnGrid.y, Min.y, Max.y) && Max.y - Min.y > 0.0000001f)
@@ -3089,7 +3089,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	else
 	{
 		// fix aspect ratio of the image in the picker
-		float Max = minimum(View.w, View.h);
+		float Max = std::min(View.w, View.h);
 		View.w = View.h = Max;
 	}
 
@@ -6107,7 +6107,7 @@ void CEditor::ResetZoomEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int
 	else
 	{
 		// calculate biggest possible spacing
-		float SpacingFactor = minimum(1.25f, m_ZoomEnvelopeY.GetMaxValue() / ValueRange);
+		float SpacingFactor = std::min(1.25f, m_ZoomEnvelopeY.GetMaxValue() / ValueRange);
 		m_ZoomEnvelopeY.SetValueInstant(SpacingFactor * ValueRange);
 		float Space = 1.0f / SpacingFactor;
 		float Spacing = (1.0f - Space) / 2.0f;
@@ -6132,7 +6132,7 @@ void CEditor::ResetZoomEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int
 	}
 	else
 	{
-		float SpacingFactor = minimum(1.25f, m_ZoomEnvelopeX.GetMaxValue() / EndTime);
+		float SpacingFactor = std::min(1.25f, m_ZoomEnvelopeX.GetMaxValue() / EndTime);
 		m_ZoomEnvelopeX.SetValueInstant(SpacingFactor * EndTime);
 		float Space = 1.0f / SpacingFactor;
 		float Spacing = (1.0f - Space) / 2.0f;
@@ -6967,7 +6967,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			CUIRect BackgroundView{
 				StartX,
 				ColorBar.y,
-				minimum(EndX - StartX, ColorBar.x + ColorBar.w - StartX),
+				std::min(EndX - StartX, ColorBar.x + ColorBar.w - StartX),
 				ColorBar.h};
 			RenderBackground(BackgroundView, m_CheckerTexture, 16.0f, 1.0f);
 
@@ -7104,7 +7104,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 											for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
 											{
 												if(!IsEnvPointSelected(j))
-													BoundHigh = minimum(pEnvelope->m_vPoints[j].m_Time - 1, BoundHigh);
+													BoundHigh = std::min(pEnvelope->m_vPoints[j].m_Time - 1, BoundHigh);
 											}
 
 											DeltaX = ClampDelta(s_vAccurateDragValuesX[k], DeltaX, BoundLow, BoundHigh);
@@ -7529,7 +7529,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				float Value = pEnvelope->m_vPoints[SelectedIndex].m_Time;
 				s_vInitialPositionsX.push_back(Value);
 				MaximumX = std::max(MaximumX, Value);
-				MinimumX = minimum(MinimumX, Value);
+				MinimumX = std::min(MinimumX, Value);
 			}
 			s_MidpointX = (MaximumX - MinimumX) / 2.0f + MinimumX;
 
@@ -7541,7 +7541,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				float Value = pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
 				s_vInitialPositionsY.push_back(Value);
 				MaximumY = std::max(MaximumY, Value);
-				MinimumY = minimum(MinimumY, Value);
+				MinimumY = std::min(MinimumY, Value);
 			}
 			s_MidpointY = (MaximumY - MinimumY) / 2.0f + MinimumY;
 		}
@@ -7567,13 +7567,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
 					{
 						if(!IsEnvPointSelected(j))
-							BoundHigh = minimum(pEnvelope->m_vPoints[j].m_Time - 1, BoundHigh);
+							BoundHigh = std::min(pEnvelope->m_vPoints[j].m_Time - 1, BoundHigh);
 					}
 
 					float Value = s_vInitialPositionsX[k];
 					float ScaleBoundLow = (BoundLow - Midpoint) / (Value - Midpoint);
 					float ScaleBoundHigh = (BoundHigh - Midpoint) / (Value - Midpoint);
-					float ScaleBoundMin = minimum(ScaleBoundLow, ScaleBoundHigh);
+					float ScaleBoundMin = std::min(ScaleBoundLow, ScaleBoundHigh);
 					float ScaleBoundMax = std::max(ScaleBoundLow, ScaleBoundHigh);
 					s_ScaleFactorX = clamp(s_ScaleFactorX, ScaleBoundMin, ScaleBoundMax);
 				}
@@ -7665,9 +7665,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				float ValueStart = ScreenToEnvelopeY(View, s_MouseYStart);
 				float ValueEnd = ScreenToEnvelopeY(View, Ui()->MouseY());
 
-				float TimeMin = minimum(TimeStart, TimeEnd);
+				float TimeMin = std::min(TimeStart, TimeEnd);
 				float TimeMax = std::max(TimeStart, TimeEnd);
-				float ValueMin = minimum(ValueStart, ValueEnd);
+				float ValueMin = std::min(ValueStart, ValueEnd);
 				float ValueMax = std::max(ValueStart, ValueEnd);
 
 				if(!Input()->ShiftIsPressed())

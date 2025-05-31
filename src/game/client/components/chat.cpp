@@ -58,7 +58,7 @@ CChat::CChat()
 				str_startswith(pStr, "/load ")))
 		{
 			bool Censor = false;
-			const size_t NumLetters = minimum(NumChars, sizeof(ms_aDisplayText) - 1);
+			const size_t NumLetters = std::min(NumChars, sizeof(ms_aDisplayText) - 1);
 			for(size_t i = 0; i < NumLetters; ++i)
 			{
 				if(Censor)

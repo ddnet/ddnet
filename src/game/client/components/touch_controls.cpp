@@ -178,7 +178,7 @@ vec2 CTouchControls::CTouchButton::ClampTouchPosition(vec2 TouchPosition) const
 	case EButtonShape::CIRCLE:
 	{
 		const vec2 Center = m_ScreenRect.Center();
-		const float MaxLength = minimum(m_ScreenRect.w, m_ScreenRect.h) / 2.0f;
+		const float MaxLength = std::min(m_ScreenRect.w, m_ScreenRect.h) / 2.0f;
 		const vec2 TouchDirection = TouchPosition - Center;
 		const float Length = length(TouchDirection);
 		if(Length > MaxLength)
@@ -201,7 +201,7 @@ bool CTouchControls::CTouchButton::IsInside(vec2 TouchPosition) const
 	case EButtonShape::RECT:
 		return m_ScreenRect.Inside(TouchPosition);
 	case EButtonShape::CIRCLE:
-		return distance(TouchPosition, m_ScreenRect.Center()) <= minimum(m_ScreenRect.w, m_ScreenRect.h) / 2.0f;
+		return distance(TouchPosition, m_ScreenRect.Center()) <= std::min(m_ScreenRect.w, m_ScreenRect.h) / 2.0f;
 	default:
 		dbg_assert(false, "Unhandled shape");
 		return false;
@@ -240,7 +240,7 @@ void CTouchControls::CTouchButton::Render() const
 	case EButtonShape::CIRCLE:
 	{
 		const vec2 Center = m_ScreenRect.Center();
-		const float Radius = minimum(m_ScreenRect.w, m_ScreenRect.h) / 2.0f;
+		const float Radius = std::min(m_ScreenRect.w, m_ScreenRect.h) / 2.0f;
 		m_pTouchControls->Graphics()->TextureClear();
 		m_pTouchControls->Graphics()->QuadsBegin();
 		m_pTouchControls->Graphics()->SetColor(ButtonColor);

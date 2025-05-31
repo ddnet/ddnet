@@ -488,7 +488,7 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 	const float LoadingProgressionTimeDiff = s_LoadingProgressionFadeEnd - Client()->GlobalTime();
 	if(LoadingProgressionTimeDiff > 0.0f)
 	{
-		const float RefreshBarAlpha = minimum(LoadingProgressionTimeDiff, 0.8f);
+		const float RefreshBarAlpha = std::min(LoadingProgressionTimeDiff, 0.8f);
 		RefreshBar.h = 2.0f;
 		RefreshBar.w *= ServerBrowser()->LoadingProgression() / 100.0f;
 		RefreshBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, RefreshBarAlpha), IGraphics::CORNER_NONE, 0.0f);
@@ -1848,7 +1848,7 @@ CTeeRenderInfo CMenus::GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool C
 	CTeeRenderInfo TeeInfo;
 	TeeInfo.Apply(m_pClient->m_Skins.Find(pSkinName));
 	TeeInfo.ApplyColors(CustomSkinColors, CustomSkinColorBody, CustomSkinColorFeet);
-	TeeInfo.m_Size = minimum(Size.x, Size.y);
+	TeeInfo.m_Size = std::min(Size.x, Size.y);
 	return TeeInfo;
 }
 

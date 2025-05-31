@@ -2015,7 +2015,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			{
 				constexpr int MaxDumpedDataSize = 32;
 				char aBuf[MaxDumpedDataSize * 3 + 1];
-				str_hex(aBuf, sizeof(aBuf), pPacket->m_pData, minimum(pPacket->m_DataSize, MaxDumpedDataSize));
+				str_hex(aBuf, sizeof(aBuf), pPacket->m_pData, std::min(pPacket->m_DataSize, MaxDumpedDataSize));
 
 				char aBufMsg[256];
 				str_format(aBufMsg, sizeof(aBufMsg), "strange message ClientId=%d msg=%d data_size=%d", ClientId, Msg, pPacket->m_DataSize);
@@ -2879,7 +2879,7 @@ void CServer::UpdateDebugDummies(bool ForceDisconnect)
 			CNetObj_PlayerInput Input = {0};
 			Input.m_Direction = (ClientId & 1) ? -1 : 1;
 			Client.m_aInputs[0].m_GameTick = Tick() + 1;
-			mem_copy(Client.m_aInputs[0].m_aData, &Input, minimum(sizeof(Input), sizeof(Client.m_aInputs[0].m_aData)));
+			mem_copy(Client.m_aInputs[0].m_aData, &Input, std::min(sizeof(Input), sizeof(Client.m_aInputs[0].m_aData)));
 			Client.m_LatestInput = Client.m_aInputs[0];
 			Client.m_CurrentInput = 0;
 		}

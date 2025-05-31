@@ -1556,7 +1556,7 @@ public:
 		if(Length < 0)
 			Length = str_length(pText);
 		else
-			Length = minimum(Length, str_length(pText));
+			Length = std::min(Length, str_length(pText));
 
 		const char *pCurrent = pText;
 		const char *pEnd = pCurrent + Length;
@@ -1690,7 +1690,7 @@ public:
 			const char *pBatchEnd = pEnd;
 			if(pCursor->m_LineWidth > 0 && !(pCursor->m_Flags & TEXTFLAG_STOP_AT_END) && !(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END))
 			{
-				int Wlen = minimum(WordLength(pCurrent), (int)(pEnd - pCurrent));
+				int Wlen = std::min(WordLength(pCurrent), (int)(pEnd - pCurrent));
 				CTextCursor Compare = *pCursor;
 				Compare.m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
 				Compare.m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;

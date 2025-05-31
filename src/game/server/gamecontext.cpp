@@ -476,7 +476,7 @@ void CGameContext::SnapSwitchers(int SnappingClient)
 	mem_zero(pSwitchState->m_aEndTicks, sizeof(pSwitchState->m_aEndTicks));
 
 	std::sort(vEndTicks.begin(), vEndTicks.end());
-	const int NumTimedSwitchers = minimum((int)vEndTicks.size(), (int)std::size(pSwitchState->m_aEndTicks));
+	const int NumTimedSwitchers = std::min((int)vEndTicks.size(), (int)std::size(pSwitchState->m_aEndTicks));
 
 	for(int i = 0; i < NumTimedSwitchers; i++)
 	{
@@ -1429,7 +1429,7 @@ void CGameContext::ProgressVoteOptions(int ClientId)
 		return; // shouldn't happen / fail silently
 
 	int VotesLeft = m_NumVoteOptions - pPl->m_SendVoteIndex;
-	int NumVotesToSend = minimum(g_Config.m_SvSendVotesPerTick, VotesLeft);
+	int NumVotesToSend = std::min(g_Config.m_SvSendVotesPerTick, VotesLeft);
 
 	if(!VotesLeft)
 	{
@@ -4457,7 +4457,7 @@ void CGameContext::UpdatePlayerMaps()
 
 		// sort by real client ids, guarantee order on distance changes, O(Nlog(N)) worst case
 		// sort just clients in game always except first (self client id) and last (fake client id) indexes
-		std::sort(&pMap[1], &pMap[minimum(Index, VANILLA_MAX_CLIENTS - 1)]);
+		std::sort(&pMap[1], &pMap[std::min(Index, VANILLA_MAX_CLIENTS - 1)]);
 	}
 }
 
