@@ -46,6 +46,7 @@ struct per_session_data
 
 struct context_data
 {
+	lws_context_creation_info creation_info;
 	lws_context *context;
 	std::map<std::string, per_session_data *> port_map;
 	TRecvBuffer recv_buffer;
@@ -170,14 +171,6 @@ static struct lws_protocols protocols[] = {
 
 int websocket_create(const char *addr, int port)
 {
-	struct lws_context_creation_info info;
-	mem_zero(&info, sizeof(info));
-	info.port = port;
-	info.iface = addr;
-	info.protocols = protocols;
-	info.gid = -1;
-	info.uid = -1;
-
 	// find free context
 	int first_free = -1;
 	for(int i = 0; i < WS_CONTEXTS; i++)
@@ -189,12 +182,20 @@ int websocket_create(const char *addr, int port)
 		}
 	}
 	if(first_free == -1)
+	{
 		return -1;
+	}
 
 	context_data *ctx_data = &contexts[first_free];
-	info.user = (void *)ctx_data;
+	mem_zero(&ctx_data->creation_info, sizeof(ctx_data->creation_info));
+	ctx_data->creation_info.port = port;
+	ctx_data->creation_info.iface = addr;
+	ctx_data->creation_info.protocols = protocols;
+	ctx_data->creation_info.gid = -1;
+	ctx_data->creation_info.uid = -1;
+	ctx_data->creation_info.user = ctx_data;
 
-	ctx_data->context = lws_create_context(&info);
+	ctx_data->context = lws_create_context(&ctx_data->creation_info);
 	if(ctx_data->context == nullptr)
 	{
 		return -1;
