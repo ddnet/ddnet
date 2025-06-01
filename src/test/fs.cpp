@@ -43,9 +43,29 @@ TEST(Filesystem, SplitFileExtension)
 	EXPECT_STREQ(aName, "no_dot");
 	EXPECT_STREQ(aExt, "");
 
+	fs_split_file_extension("no_dot", aName, sizeof(aName)); // extension parameter is optional
+	EXPECT_STREQ(aName, "no_dot");
+
+	fs_split_file_extension("no_dot", nullptr, 0, aExt, sizeof(aExt)); // name parameter is optional
+	EXPECT_STREQ(aExt, "");
+
 	fs_split_file_extension(".dot_first", aName, sizeof(aName), aExt, sizeof(aExt));
 	EXPECT_STREQ(aName, ".dot_first");
 	EXPECT_STREQ(aExt, "");
+
+	fs_split_file_extension(".dot_first", aName, sizeof(aName)); // extension parameter is optional
+	EXPECT_STREQ(aName, ".dot_first");
+
+	fs_split_file_extension(".dot_first", nullptr, 0, aExt, sizeof(aExt)); // name parameter is optional
+	EXPECT_STREQ(aExt, "");
+}
+
+TEST(Filesystem, StoragePath)
+{
+	char aStoragePath[IO_MAX_PATH_LENGTH];
+	ASSERT_FALSE(fs_storage_path("TestAppName", aStoragePath, sizeof(aStoragePath)));
+	EXPECT_FALSE(fs_is_relative_path(aStoragePath));
+	EXPECT_TRUE(str_endswith_nocase(aStoragePath, "/TestAppName"));
 }
 
 TEST(Filesystem, CreateCloseDelete)
