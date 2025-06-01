@@ -351,6 +351,12 @@ void CConsole::SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, vo
 	m_pUnknownCommandUserdata = pUser;
 }
 
+void CConsole::SetIsInViewCallback(FIsInViewCallback pfnCallback, void *pUser)
+{
+	m_pfnIsInViewCallback = pfnCallback;
+	m_pIsInViewUserdata = pUser;
+}
+
 void CConsole::InitChecksum(CChecksumData *pData) const
 {
 	pData->m_NumCommands = 0;
@@ -540,10 +546,18 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientId, bo
 						if(Result.GetVictim() == CResult::VICTIM_ME)
 							Result.SetVictim(ClientId);
 
-						if(Result.HasVictim() && Result.GetVictim() == CResult::VICTIM_ALL)
+						if(Result.HasVictim() && (Result.GetVictim() == CResult::VICTIM_ALL || Result.GetVictim() == CResult::VICTIM_VIEW))
 						{
 							for(int i = 0; i < MAX_CLIENTS; i++)
 							{
+								if(Result.GetVictim() == CResult::VICTIM_VIEW)
+								{
+									bool IsInView = false;
+									if(m_pfnIsInViewCallback)
+										m_pfnIsInViewCallback(i, ClientId, &IsInView, m_pIsInViewUserdata);
+									if(!IsInView)
+										continue;
+								}
 								Result.SetVictim(i);
 								pCommand->m_pfnCallback(&Result, pCommand->m_pUserData);
 							}
@@ -787,6 +801,8 @@ CConsole::CConsole(int FlagMask)
 	m_pFirstExec = nullptr;
 	m_pfnTeeHistorianCommandCallback = nullptr;
 	m_pTeeHistorianCommandUserdata = nullptr;
+	m_pfnIsInViewCallback = nullptr;
+	m_pIsInViewUserdata = nullptr;
 
 	m_pStorage = nullptr;
 
@@ -1082,6 +1098,8 @@ void CConsole::CResult::SetVictim(const char *pVictim)
 		m_Victim = VICTIM_ME;
 	else if(!str_comp(pVictim, "all"))
 		m_Victim = VICTIM_ALL;
+	else if(!str_comp(pVictim, "view"))
+		m_Victim = VICTIM_VIEW;
 	else
 		m_Victim = clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
 }
