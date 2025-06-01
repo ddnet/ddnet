@@ -2722,7 +2722,7 @@ void CGameClient::CClientData::Reset()
 		m_pSkinInfo->SetRefreshCallback(nullptr);
 		m_pSkinInfo = nullptr;
 	}
-	m_RenderInfo.Reset();
+	m_RenderInfo = CTeeRenderInfo();
 
 	m_Angle = 0.0f;
 	m_Active = false;
