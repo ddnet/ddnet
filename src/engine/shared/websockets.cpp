@@ -51,6 +51,9 @@ struct context_data
 	TRecvBuffer recv_buffer;
 };
 
+static context_data contexts[WS_CONTEXTS];
+static std::map<struct lws_context *, context_data *> contexts_map;
+
 static int receive_chunk(context_data *ctx_data, struct per_session_data *pss,
 	void *in, size_t len)
 {
@@ -70,7 +73,7 @@ static int websocket_callback(struct lws *wsi, enum lws_callback_reasons reason,
 {
 	struct per_session_data *pss = (struct per_session_data *)user;
 	lws_context *context = lws_get_context(wsi);
-	context_data *ctx_data = (context_data *)lws_context_user(context);
+	context_data *ctx_data = contexts_map[context];
 	switch(reason)
 	{
 	case LWS_CALLBACK_WSI_CREATE:
@@ -165,8 +168,6 @@ static struct lws_protocols protocols[] = {
 		nullptr, nullptr, 0 /* End of list */
 	}};
 
-static context_data contexts[WS_CONTEXTS];
-
 int websocket_create(const char *addr, int port)
 {
 	struct lws_context_creation_info info;
@@ -198,6 +199,7 @@ int websocket_create(const char *addr, int port)
 	{
 		return -1;
 	}
+	contexts_map[ctx_data->context] = ctx_data;
 	ctx_data->recv_buffer.Init();
 	return first_free;
 }
@@ -208,6 +210,7 @@ int websocket_destroy(int socket)
 	if(context == nullptr)
 		return -1;
 	lws_context_destroy(context);
+	contexts_map.erase(context);
 	contexts[socket].context = nullptr;
 	return 0;
 }
@@ -221,7 +224,7 @@ int websocket_recv(int socket, unsigned char *data, size_t maxsize,
 	int n = lws_service(context, -1);
 	if(n < 0)
 		return n;
-	context_data *ctx_data = (context_data *)lws_context_user(context);
+	context_data *ctx_data = contexts_map[context];
 	websocket_chunk *chunk = (websocket_chunk *)ctx_data->recv_buffer.First();
 	if(chunk == 0)
 		return 0;
@@ -250,7 +253,7 @@ int websocket_send(int socket, const unsigned char *data, size_t size,
 	{
 		return -1;
 	}
-	context_data *ctx_data = (context_data *)lws_context_user(context);
+	context_data *ctx_data = contexts_map[context];
 	char aBuf[100];
 	snprintf(aBuf, sizeof(aBuf), "%s:%d", addr_str, port);
 	std::string addr_str_with_port = std::string(aBuf);
@@ -294,7 +297,7 @@ int websocket_fd_set(int socket, fd_set *set)
 	if(context == nullptr)
 		return -1;
 	lws_service(context, -1);
-	context_data *ctx_data = (context_data *)lws_context_user(context);
+	context_data *ctx_data = contexts_map[context];
 	int max = 0;
 	for(const auto &[_, pss] : ctx_data->port_map)
 	{
@@ -314,7 +317,7 @@ int websocket_fd_get(int socket, fd_set *set)
 	if(context == nullptr)
 		return -1;
 	lws_service(context, -1);
-	context_data *ctx_data = (context_data *)lws_context_user(context);
+	context_data *ctx_data = contexts_map[context];
 	for(const auto &[_, pss] : ctx_data->port_map)
 	{
 		if(pss == nullptr)
