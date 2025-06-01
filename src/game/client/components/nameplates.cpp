@@ -15,13 +15,53 @@
 
 #include "nameplates.h"
 
-static constexpr float DEFAULT_PADDING = 5.0f;
+static float ConfigToFontSize(int Value)
+{
+	return 18.0f + 20.0f * static_cast<float>(Value) / 100.0f;
+}
 
-// Part Types
+// ***** Data *****
+
+class CNamePlateData
+{
+public:
+	bool m_InGame;
+	ColorRGBA m_Color;
+	bool m_ShowName;
+	const char *m_pName;
+	bool m_ShowFriendMark;
+	bool m_ShowClientId;
+	int m_ClientId;
+	float m_FontSizeClientId;
+	bool m_ClientIdSeperateLine;
+	float m_FontSize;
+	bool m_ShowClan;
+	const char *m_pClan;
+	float m_FontSizeClan;
+	bool m_ShowDirection;
+	bool m_DirLeft;
+	bool m_DirJump;
+	bool m_DirRight;
+	float m_FontSizeDirection;
+	bool m_ShowHookStrongWeak;
+	enum class EHookStrongWeakState
+	{
+		WEAK,
+		NEUTRAL,
+		STRONG
+	};
+	EHookStrongWeakState m_HookStrongWeakState;
+	bool m_ShowHookStrongWeakId;
+	int m_HookStrongWeakId;
+	float m_FontSizeHookStrongWeak;
+};
+
+// ***** Part Types *****
 
 class CNamePlatePart
 {
 protected:
+	static constexpr float DEFAULT_PADDING = 5.0f;
 	vec2 m_Size = vec2(0.0f, 0.0f);
 	vec2 m_Padding = vec2(DEFAULT_PADDING, DEFAULT_PADDING);
 	bool m_NewLine = false; // Whether this part is a new line (doesn't do anything else)
@@ -44,15 +84,16 @@ public:
 
 using PartsVector = std::vector<std::unique_ptr<CNamePlatePart>>;
 
-static constexpr ColorRGBA s_OutlineColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
-
 class CNamePlatePartText : public CNamePlatePart
 {
 protected:
+	static constexpr ColorRGBA OUTLINE_COLOR = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
 	STextContainerIndex m_TextContainerIndex;
 	virtual bool UpdateNeeded(CGameClient &This, const CNamePlateData &Data) = 0;
 	virtual void UpdateText(CGameClient &This, const CNamePlateData &Data) = 0;
 	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	bool m_IsTag = false; // Use color as background, add some extra padding
+	int m_QuadContainer = -1; // For tag background
 	CNamePlatePartText(CGameClient &This) :
 		CNamePlatePart(This)
 	{
@@ -62,22 +103,47 @@ protected:
 public:
 	void Update(CGameClient &This, const CNamePlateData &Data) override
 	{
-		if(!UpdateNeeded(This, Data) && m_TextContainerIndex.Valid())
+		bool NeedsUpdate = false;
+		// Change in tag means change in size
+		if(m_IsTag)
+		{
+			if(m_QuadContainer == -1)
+			{
+				m_QuadContainer = This.Graphics()->CreateQuadContainer();
+				NeedsUpdate = true;
+			}
+		}
+		else
+		{
+			if(m_QuadContainer != -1)
+			{
+				This.Graphics()->DeleteQuadContainer(m_QuadContainer);
+				NeedsUpdate = true;
+			}
+		}
+		// If text container is invalid
+		if(!m_TextContainerIndex.Valid())
+			NeedsUpdate = true;
+		// If text has changed
+		if(UpdateNeeded(This, Data))
+			NeedsUpdate = true;
+		// Do nothing if no update needed
+		if(!NeedsUpdate)
 			return;
 
 		// Set flags
-		unsigned int Flags = ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE;
+		unsigned Flags = ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE;
 		if(Data.m_InGame)
 			Flags |= ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGNMENT; // Prevent jittering from rounding
 		This.TextRender()->SetRenderFlags(Flags);
 
+		This.TextRender()->DeleteTextContainer(m_TextContainerIndex);
 		if(Data.m_InGame)
 		{
-			// Create text at standard zoom
+			// Create text at standard zoom when in game
 			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 			This.Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 			This.RenderTools()->MapScreenToInterface(This.m_Camera.m_Center.x, This.m_Camera.m_Center.y);
-			This.TextRender()->DeleteTextContainer(m_TextContainerIndex);
 			UpdateText(This, Data);
 			This.Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 		}
@@ -85,21 +151,81 @@ public:
 		{
 			UpdateText(This, Data);
 		}
-
 		This.TextRender()->SetRenderFlags(0);
 
-		if(!m_TextContainerIndex.Valid())
+		// Calculate size
+		if(m_TextContainerIndex.Valid())
 		{
-			m_Visible = false;
-			return;
+			const STextBoundingBox Bounding = This.TextRender()->GetBoundingBoxTextContainer(m_TextContainerIndex);
+			m_Size = vec2(Bounding.m_W, Bounding.m_H);
+			if(m_IsTag)
+				m_Size += vec2(m_Size.y * 0.8f, 0.0f); // Extra padding
+		}
+		else
+		{
+			m_Size = vec2(0.0f, 0.0f);
 		}
 
-		const STextBoundingBox Container = This.TextRender()->GetBoundingBoxTextContainer(m_TextContainerIndex);
-		m_Size = vec2(Container.m_W, Container.m_H);
+		// Create tag
+		if(m_TextContainerIndex.Valid() && m_IsTag)
+		{
+			This.Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+			This.Graphics()->QuadContainerReset(m_QuadContainer);
+			const float x = 0.0f; // NOLINT(readability-identifier-naming)
+			const float y = -1.0f; // NOLINT(readability-identifier-naming)
+			const float r = 5.0f; // NOLINT(readability-identifier-naming)
+			const float w = m_Size.x;
+			const float h = m_Size.y + 2.0f;
+			// TODO: Move this to graphics/rendertools
+			const int NumSegments = 8;
+			const float SegmentsAngle = pi / 2 / NumSegments;
+
+			for(int i = 0; i < NumSegments; i += 2)
+			{
+				float a1 = i * SegmentsAngle;
+				float a2 = (i + 1) * SegmentsAngle;
+				float a3 = (i + 2) * SegmentsAngle;
+				float Ca1 = std::cos(a1);
+				float Ca2 = std::cos(a2);
+				float Ca3 = std::cos(a3);
+				float Sa1 = std::sin(a1);
+				float Sa2 = std::sin(a2);
+				float Sa3 = std::sin(a3);
+
+				IGraphics::CFreeformItem aFreeformItems[4] = {
+					{x + r, y + r,
+						x + (1 - Ca1) * r, y + (1 - Sa1) * r,
+						x + (1 - Ca3) * r, y + (1 - Sa3) * r,
+						x + (1 - Ca2) * r, y + (1 - Sa2) * r},
+					{x + w - r, y + r,
+						x + w - r + Ca1 * r, y + (1 - Sa1) * r,
+						x + w - r + Ca3 * r, y + (1 - Sa3) * r,
+						x + w - r + Ca2 * r, y + (1 - Sa2) * r},
+					{x + r, y + h - r,
+						x + (1 - Ca1) * r, y + h - r + Sa1 * r,
+						x + (1 - Ca3) * r, y + h - r + Sa3 * r,
+						x + (1 - Ca2) * r, y + h - r + Sa2 * r},
+					{x + w - r, y + h - r,
+						x + w - r + Ca1 * r, y + h - r + Sa1 * r,
+						x + w - r + Ca3 * r, y + h - r + Sa3 * r,
+						x + w - r + Ca2 * r, y + h - r + Sa2 * r},
+				};
+				This.Graphics()->QuadContainerAddQuads(m_QuadContainer, aFreeformItems, 4);
+			}
+			IGraphics::CQuadItem aQuads[5] = {
+				{x + r, y + r, w - r * 2, h - r * 2}, // center
+				{x + r, y, w - r * 2, r}, // top
+				{x + r, y + h - r, w - r * 2, r}, // bottom
+				{x, y + r, r, h - r * 2}, // left
+				{x + w - r, y + r, r, h - r * 2}, // right
+			};
+			This.Graphics()->QuadContainerAddQuads(m_QuadContainer, aQuads, 5);
+		}
 	}
 	void Reset(CGameClient &This) override
 	{
 		This.TextRender()->DeleteTextContainer(m_TextContainerIndex);
+		This.Graphics()->DeleteQuadContainer(m_QuadContainer);
 	}
 	void Render(CGameClient &This, vec2 Pos) const override
 	{
@@ -107,11 +233,28 @@ public:
 			return;
 
 		ColorRGBA OutlineColor, Color;
-		Color = m_Color;
-		OutlineColor = s_OutlineColor.WithMultipliedAlpha(m_Color.a);
-		This.TextRender()->RenderTextContainer(m_TextContainerIndex,
-			Color, OutlineColor,
-			Pos.x - Size().x / 2.0f, Pos.y - Size().y / 2.0f);
+		if(m_IsTag)
+		{
+			ColorRGBA BackgroundColor = m_Color.WithMultipliedAlpha(0.75f);
+			This.Graphics()->SetColor(BackgroundColor);
+			This.Graphics()->TextureClear();
+			This.Graphics()->RenderQuadContainerEx(m_QuadContainer, 0, -1,
+				Pos.x - Size().x / 2.0f, Pos.y - Size().y / 2.0f);
+
+			Color = ColorRGBA(0.0f, 0.0f, 0.0f, m_Color.a);
+			OutlineColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+			This.TextRender()->RenderTextContainer(m_TextContainerIndex,
+				Color, OutlineColor,
+				Pos.x - Size().x / 2.0f + Size().y * 0.4f, Pos.y - Size().y / 2.0f);
+		}
+		else
+		{
+			Color = m_Color;
+			OutlineColor = OUTLINE_COLOR.WithMultipliedAlpha(m_Color.a);
+			This.TextRender()->RenderTextContainer(m_TextContainerIndex,
+				Color, OutlineColor,
+				Pos.x - Size().x / 2.0f, Pos.y - Size().y / 2.0f);
+		}
 	}
 };
 
@@ -163,7 +306,7 @@ public:
 	}
 };
 
-// Part Definitions
+// ***** Part Definitions *****
 
 class CNamePlatePartNewLine : public CNamePlatePart
 {
@@ -175,33 +318,34 @@ public:
 	}
 };
 
-enum Direction
-{
-	DIRECTION_LEFT,
-	DIRECTION_UP,
-	DIRECTION_RIGHT
-};
-
 class CNamePlatePartDirection : public CNamePlatePartIcon
 {
+public:
+	enum class EDirection
+	{
+		LEFT,
+		UP,
+		RIGHT
+	};
+
 private:
-	int m_Direction;
+	EDirection m_Direction;
 
 public:
-	CNamePlatePartDirection(CGameClient &This, Direction Dir) :
+	CNamePlatePartDirection(CGameClient &This, EDirection Direction) :
 		CNamePlatePartIcon(This)
 	{
 		m_Texture = g_pData->m_aImages[IMAGE_ARROW].m_Id;
-		m_Direction = Dir;
+		m_Direction = Direction;
 		switch(m_Direction)
 		{
-		case DIRECTION_LEFT:
+		case EDirection::LEFT:
 			m_Rotation = pi;
 			break;
-		case DIRECTION_UP:
+		case EDirection::UP:
 			m_Rotation = pi / -2.0f;
 			break;
-		case DIRECTION_RIGHT:
+		case EDirection::RIGHT:
 			m_Rotation = 0.0f;
 			break;
 		}
@@ -219,13 +363,13 @@ public:
 		m_Padding.y = m_Size.y / 2.0f;
 		switch(m_Direction)
 		{
-		case DIRECTION_LEFT:
+		case EDirection::LEFT:
 			m_Visible = Data.m_DirLeft;
 			break;
-		case DIRECTION_UP:
+		case EDirection::UP:
 			m_Visible = Data.m_DirJump;
 			break;
-		case DIRECTION_RIGHT:
+		case EDirection::RIGHT:
 			m_Visible = Data.m_DirRight;
 			break;
 		}
@@ -245,7 +389,7 @@ private:
 protected:
 	bool UpdateNeeded(CGameClient &This, const CNamePlateData &Data) override
 	{
-		m_Visible = Data.m_ShowClientId && (Data.m_ClientIdSeperateLine == m_ClientIdSeperateLine);
+		m_Visible = Data.m_ShowClientId && Data.m_ClientIdSeperateLine == m_ClientIdSeperateLine;
 		if(!m_Visible)
 			return false;
 		m_Color = Data.m_Color;
@@ -255,10 +399,7 @@ protected:
 	{
 		m_FontSize = Data.m_FontSizeClientId;
 		m_ClientId = Data.m_ClientId;
-		if(m_ClientIdSeperateLine)
-			str_format(m_aText, sizeof(m_aText), "%d", m_ClientId);
-		else
-			str_format(m_aText, sizeof(m_aText), "%d:", m_ClientId);
+		str_format(m_aText, sizeof(m_aText), "%d", m_ClientId);
 		CTextCursor Cursor;
 		This.TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, m_FontSize, TEXTFLAG_RENDER);
 		This.TextRender()->CreateOrAppendTextContainer(m_TextContainerIndex, &Cursor, m_aText);
@@ -269,6 +410,7 @@ public:
 		CNamePlatePartText(This)
 	{
 		m_ClientIdSeperateLine = ClientIdSeperateLine;
+		m_IsTag = !ClientIdSeperateLine;
 	}
 };
 
@@ -373,15 +515,15 @@ protected:
 		m_Size = vec2(Data.m_FontSizeHookStrongWeak + DEFAULT_PADDING, Data.m_FontSizeHookStrongWeak + DEFAULT_PADDING);
 		switch(Data.m_HookStrongWeakState)
 		{
-		case EHookStrongWeakState::STRONG:
+		case CNamePlateData::EHookStrongWeakState::STRONG:
 			m_Sprite = SPRITE_HOOK_STRONG;
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(6401973));
 			break;
-		case EHookStrongWeakState::NEUTRAL:
+		case CNamePlateData::EHookStrongWeakState::NEUTRAL:
 			m_Sprite = SPRITE_HOOK_ICON;
 			m_Color = ColorRGBA(1.0f, 1.0f, 1.0f);
 			break;
-		case EHookStrongWeakState::WEAK:
+		case CNamePlateData::EHookStrongWeakState::WEAK:
 			m_Sprite = SPRITE_HOOK_WEAK;
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(41131));
 			break;
@@ -414,13 +556,13 @@ protected:
 			return false;
 		switch(Data.m_HookStrongWeakState)
 		{
-		case EHookStrongWeakState::STRONG:
+		case CNamePlateData::EHookStrongWeakState::STRONG:
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(6401973));
 			break;
-		case EHookStrongWeakState::NEUTRAL:
+		case CNamePlateData::EHookStrongWeakState::NEUTRAL:
 			m_Color = ColorRGBA(1.0f, 1.0f, 1.0f);
 			break;
-		case EHookStrongWeakState::WEAK:
+		case CNamePlateData::EHookStrongWeakState::WEAK:
 			m_Color = color_cast<ColorRGBA>(ColorHSLA(41131));
 			break;
 		}
@@ -442,7 +584,7 @@ public:
 		CNamePlatePartText(This) {}
 };
 
-// Name Plates
+// ***** Name Plates *****
 
 class CNamePlate
 {
@@ -479,9 +621,9 @@ private:
 			return;
 		m_Inited = true;
 
-		AddPart<CNamePlatePartDirection>(This, DIRECTION_LEFT);
-		AddPart<CNamePlatePartDirection>(This, DIRECTION_UP);
-		AddPart<CNamePlatePartDirection>(This, DIRECTION_RIGHT);
+		AddPart<CNamePlatePartDirection>(This, CNamePlatePartDirection::EDirection::LEFT);
+		AddPart<CNamePlatePartDirection>(This, CNamePlatePartDirection::EDirection::UP);
+		AddPart<CNamePlatePartDirection>(This, CNamePlatePartDirection::EDirection::RIGHT);
 		AddPart<CNamePlatePartNewLine>(This);
 
 		AddPart<CNamePlatePartFriendMark>(This);
@@ -614,18 +756,18 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	Data.m_pName = GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aName;
 	Data.m_ShowFriendMark = Data.m_ShowName && g_Config.m_ClNamePlatesFriendMark && GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_Friend;
 	Data.m_ShowClientId = Data.m_ShowName && (g_Config.m_Debug || g_Config.m_ClNamePlatesIds);
-	Data.m_FontSize = 18.0f + 20.0f * g_Config.m_ClNamePlatesSize / 100.0f;
+	Data.m_FontSize = ConfigToFontSize(g_Config.m_ClNamePlatesSize);
 
 	Data.m_ClientId = pPlayerInfo->m_ClientId;
 	Data.m_ClientIdSeperateLine = g_Config.m_ClNamePlatesIdsSeperateLine;
-	Data.m_FontSizeClientId = Data.m_ClientIdSeperateLine ? (18.0f + 20.0f * g_Config.m_ClNamePlatesIdsSize / 100.0f) : Data.m_FontSize;
+	Data.m_FontSizeClientId = Data.m_ClientIdSeperateLine ? ConfigToFontSize(g_Config.m_ClNamePlatesIdsSize) : Data.m_FontSize;
 
 	Data.m_ShowClan = Data.m_ShowName && g_Config.m_ClNamePlatesClan;
 	Data.m_pClan = GameClient()->m_aClients[pPlayerInfo->m_ClientId].m_aClan;
-	Data.m_FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNamePlatesClanSize / 100.0f;
+	Data.m_FontSizeClan = ConfigToFontSize(g_Config.m_ClNamePlatesClanSize);
 
-	Data.m_FontSizeHookStrongWeak = 18.0f + 20.0f * g_Config.m_ClNamePlatesStrongSize / 100.0f;
-	Data.m_FontSizeDirection = 18.0f + 20.0f * g_Config.m_ClDirectionSize / 100.0f;
+	Data.m_FontSizeHookStrongWeak = ConfigToFontSize(g_Config.m_ClNamePlatesStrongSize);
+	Data.m_FontSizeDirection = ConfigToFontSize(g_Config.m_ClDirectionSize);
 
 	if(g_Config.m_ClNamePlatesAlways == 0)
 		Alpha *= clamp(1.0f - std::pow(distance(GameClient()->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
@@ -702,7 +844,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 	}
 
 	Data.m_ShowHookStrongWeak = false;
-	Data.m_HookStrongWeakState = EHookStrongWeakState::NEUTRAL;
+	Data.m_HookStrongWeakState = CNamePlateData::EHookStrongWeakState::NEUTRAL;
 	Data.m_ShowHookStrongWeakId = false;
 	Data.m_HookStrongWeakId = 0;
 
@@ -720,7 +862,7 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 				Data.m_ShowHookStrongWeak = Data.m_ShowHookStrongWeakId;
 			else
 			{
-				Data.m_HookStrongWeakState = Selected.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId ? EHookStrongWeakState::STRONG : EHookStrongWeakState::WEAK;
+				Data.m_HookStrongWeakState = Selected.m_ExtendedData.m_StrongWeakId > Other.m_ExtendedData.m_StrongWeakId ? CNamePlateData::EHookStrongWeakState::STRONG : CNamePlateData::EHookStrongWeakState::WEAK;
 				Data.m_ShowHookStrongWeak = g_Config.m_Debug || g_Config.m_ClNamePlatesStrong > 0;
 			}
 		}
@@ -734,12 +876,6 @@ void CNamePlates::RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *p
 
 void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 {
-	const float FontSize = 18.0f + 20.0f * g_Config.m_ClNamePlatesSize / 100.0f;
-	const float FontSizeClan = 18.0f + 20.0f * g_Config.m_ClNamePlatesClanSize / 100.0f;
-
-	const float FontSizeDirection = 18.0f + 20.0f * g_Config.m_ClDirectionSize / 100.0f;
-	const float FontSizeHookStrongWeak = 18.0f + 20.0f * g_Config.m_ClNamePlatesStrongSize / 100.0f;
-
 	CNamePlateData Data;
 
 	Data.m_InGame = false;
@@ -748,7 +884,7 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 
 	Data.m_ShowName = g_Config.m_ClNamePlates || g_Config.m_ClNamePlatesOwn;
 	Data.m_pName = Dummy == 0 ? Client()->PlayerName() : Client()->DummyName();
-	Data.m_FontSize = FontSize;
+	Data.m_FontSize = ConfigToFontSize(g_Config.m_ClNamePlatesSize);
 
 	Data.m_ShowFriendMark = Data.m_ShowName && g_Config.m_ClNamePlatesFriendMark;
 
@@ -761,23 +897,23 @@ void CNamePlates::RenderNamePlatePreview(vec2 Position, int Dummy)
 	Data.m_pClan = Dummy == 0 ? g_Config.m_PlayerClan : g_Config.m_ClDummyClan;
 	if(!Data.m_pClan[0])
 		Data.m_pClan = "Clan Name";
-	Data.m_FontSizeClan = FontSizeClan;
+	Data.m_FontSizeClan = ConfigToFontSize(g_Config.m_ClNamePlatesClanSize);
 
 	Data.m_ShowDirection = g_Config.m_ClShowDirection != 0 ? true : false;
 	Data.m_DirLeft = Data.m_DirJump = Data.m_DirRight = true;
-	Data.m_FontSizeDirection = FontSizeDirection;
+	Data.m_FontSizeDirection = ConfigToFontSize(g_Config.m_ClDirectionSize);
 
-	Data.m_FontSizeHookStrongWeak = FontSizeHookStrongWeak;
+	Data.m_FontSizeHookStrongWeak = ConfigToFontSize(g_Config.m_ClNamePlatesStrongSize);
 	Data.m_HookStrongWeakId = Data.m_ClientId;
 	Data.m_ShowHookStrongWeakId = g_Config.m_ClNamePlatesStrong == 2;
 	if(Dummy == g_Config.m_ClDummy)
 	{
-		Data.m_HookStrongWeakState = EHookStrongWeakState::NEUTRAL;
+		Data.m_HookStrongWeakState = CNamePlateData::EHookStrongWeakState::NEUTRAL;
 		Data.m_ShowHookStrongWeak = Data.m_ShowHookStrongWeakId;
 	}
 	else
 	{
-		Data.m_HookStrongWeakState = Data.m_HookStrongWeakId == 2 ? EHookStrongWeakState::STRONG : EHookStrongWeakState::WEAK;
+		Data.m_HookStrongWeakState = Data.m_HookStrongWeakId == 2 ? CNamePlateData::EHookStrongWeakState::STRONG : CNamePlateData::EHookStrongWeakState::WEAK;
 		Data.m_ShowHookStrongWeak = g_Config.m_ClNamePlatesStrong > 0;
 	}
 
