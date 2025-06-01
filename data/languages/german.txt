@@ -1604,12 +1604,12 @@ Go back the specified duration
 == Gesetzte Dauer zurück
 
 [Demo player duration]
-%d min.
-== %d Min.
+%s min.
+== %s Min.
 
 [Demo player duration]
-%d sec.
-== %d Sek.
+%s sec.
+== %s Sek.
 
 Change the skip duration
 == Überspring-Dauer ändern

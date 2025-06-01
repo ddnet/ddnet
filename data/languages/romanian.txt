@@ -971,12 +971,12 @@ Go back the specified duration
 == Mergi înapoi cu durata specificată
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sec.
+%s sec.
+== %s sec.
 
 Change the skip duration
 == Schimbă durata de sărire

@@ -916,12 +916,12 @@ Go back the specified duration
 == Vrátiť sa o zadanú dobu
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sec.
+%s sec.
+== %s sec.
 
 Change the skip duration
 == Zmeniť dobu preskočenia

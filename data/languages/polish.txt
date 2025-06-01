@@ -1399,12 +1399,12 @@ Go back the specified duration
 == Cofnij o określony czas
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sek.
+%s sec.
+== %s sek.
 
 Change the skip duration
 == Zmień długość pominięcia
