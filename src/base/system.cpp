@@ -2095,6 +2095,9 @@ void net_init()
 	WSADATA wsa_data;
 	dbg_assert(WSAStartup(MAKEWORD(1, 1), &wsa_data) == 0, "WSAStartup failure");
 #endif
+#if defined(CONF_WEBSOCKETS)
+	websocket_init();
+#endif
 }
 
 #if defined(CONF_FAMILY_UNIX)
