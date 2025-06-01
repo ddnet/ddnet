@@ -1604,12 +1604,12 @@ Go back the specified duration
 == Belirtilen süre kadar geri git
 
 [Demo player duration]
-%d min.
-== %d dk.
+%s min.
+== %s dk.
 
 [Demo player duration]
-%d sec.
-== %d sn.
+%s sec.
+== %s sn.
 
 Change the skip duration
 == Atlanacak süreyi değiştir
