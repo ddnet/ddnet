@@ -376,7 +376,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 
 	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)
 	{
-		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
+		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number, Flags);
 		pPickup->m_Pos = Pos;
 		return true; // NOLINT(clang-analyzer-unix.Malloc)
 	}

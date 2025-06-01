@@ -8549,7 +8549,6 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 				Graphics()->TextureSet(pGameClient->m_GameSkin.m_aSpritePickupWeapons[WEAPON_NINJA]);
 				RenderTools()->GetSpriteScale(SPRITE_PICKUP_NINJA, Scale.x, Scale.y);
 				VisualSize = 128;
-				Pos.x -= 10.0f;
 			}
 			else if(DDNetOrCustomEntities)
 			{
@@ -8583,14 +8582,46 @@ void CEditor::RenderGameEntities(const std::shared_ptr<CLayerTiles> &pTiles)
 			else
 				continue;
 
+			Graphics()->QuadsBegin();
+
 			if(Index != ENTITY_FLAGSTAND_RED && Index != ENTITY_FLAGSTAND_BLUE)
 			{
-				Pos += direction(Client()->GlobalTime() * 2.0f + x + y) * 2.5f;
+				const unsigned char Flags = pTiles->m_pTiles[y * pTiles->m_Width + x].m_Flags;
+
+				if(Flags & TILEFLAG_XFLIP)
+					Scale.x = -Scale.x;
+
+				if(Flags & TILEFLAG_YFLIP)
+					Scale.y = -Scale.y;
+
+				if(Flags & TILEFLAG_ROTATE)
+				{
+					Graphics()->QuadsSetRotation(90.f * (pi / 180));
+
+					if(Index == ENTITY_POWERUP_NINJA)
+					{
+						if(Flags & TILEFLAG_XFLIP)
+							Pos.y += 10.0f;
+						else
+							Pos.y -= 10.0f;
+					}
+				}
+				else
+				{
+					if(Index == ENTITY_POWERUP_NINJA)
+					{
+						if(Flags & TILEFLAG_XFLIP)
+							Pos.x += 10.0f;
+						else
+							Pos.x -= 10.0f;
+					}
+				}
 			}
+
 			Scale *= VisualSize;
 			Pos -= vec2((Scale.x - TileSize) / 2.f, (Scale.y - TileSize) / 2.f);
+			Pos += direction(Client()->GlobalTime() * 2.0f + x + y) * 2.5f;
 
-			Graphics()->QuadsBegin();
 			IGraphics::CQuadItem Quad(Pos.x, Pos.y, Scale.x, Scale.y);
 			Graphics()->QuadsDrawTL(&Quad, 1);
 			Graphics()->QuadsEnd();
