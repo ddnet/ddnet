@@ -407,29 +407,15 @@ void CEffects::OnRender()
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		Speed = DemoPlayer()->BaseInfo()->m_Speed;
 
-	if(time() - m_LastUpdate100hz > time_freq() / (100 * Speed))
-	{
-		m_Add100hz = true;
-		m_LastUpdate100hz = time();
-	}
-	else
-		m_Add100hz = false;
-
-	if(time() - m_LastUpdate50hz > time_freq() / (50 * Speed))
-	{
-		m_Add50hz = true;
-		m_LastUpdate50hz = time();
-	}
-	else
-		m_Add50hz = false;
-
-	if(time() - m_LastUpdate5hz > time_freq() / (5 * Speed))
-	{
-		m_Add5hz = true;
-		m_LastUpdate5hz = time();
-	}
-	else
-		m_Add5hz = false;
+	const int64_t Now = time();
+	auto FUpdateClock = [&](bool &Add, int64_t &LastUpdate, int Frequency) {
+		Add = Now - LastUpdate > time_freq() / ((float)Frequency * Speed);
+		if(Add)
+			LastUpdate = Now;
+	};
+	FUpdateClock(m_Add5hz, m_LastUpdate5hz, 5);
+	FUpdateClock(m_Add50hz, m_LastUpdate50hz, 50);
+	FUpdateClock(m_Add100hz, m_LastUpdate100hz, 100);
 
 	if(m_Add50hz)
 		m_pClient->m_Flow.Update();
