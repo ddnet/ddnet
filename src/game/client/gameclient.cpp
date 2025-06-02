@@ -2243,7 +2243,7 @@ void CGameClient::OnNewSnapshot()
 					for(int j = 0; j < Amount; j++)
 					{
 						float Angle = mix(Min, Max, (j + 1) / (float)(Amount + 2));
-						m_Effects.DamageIndicator(Pos, direction(Angle));
+						m_Effects.DamageIndicator(Pos, direction(Angle), 1.0f);
 					}
 				}
 			}

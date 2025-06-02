@@ -19,19 +19,19 @@ public:
 
 	virtual void OnRender() override;
 
-	void BulletTrail(vec2 Pos, float Alpha = 1.f, float TimePassed = 0.f);
-	void SmokeTrail(vec2 Pos, vec2 Vel, float Alpha = 1.f, float TimePassed = 0.f);
-	void SkidTrail(vec2 Pos, vec2 Vel, float Alpha = 1.0f);
-	void Explosion(vec2 Pos, float Alpha = 1.0f);
-	void HammerHit(vec2 Pos, float Alpha = 1.0f);
-	void AirJump(vec2 Pos, float Alpha = 1.0f);
-	void DamageIndicator(vec2 Pos, vec2 Dir, float Alpha = 1.0f);
-	void PlayerSpawn(vec2 Pos, float Alpha = 1.0f);
-	void PlayerDeath(vec2 Pos, int ClientId, float Alpha = 1.0f);
-	void PowerupShine(vec2 Pos, vec2 Size, float Alpha = 1.0f);
-	void FreezingFlakes(vec2 Pos, vec2 Size, float Alpha = 1.0f);
-	void SparkleTrail(vec2 Pos, float Alpha = 1.0f);
-	void Confetti(vec2 Pos, float Alpha = 1.0f);
+	void BulletTrail(vec2 Pos, float Alpha, float TimePassed);
+	void SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed);
+	void SkidTrail(vec2 Pos, vec2 Vel, float Alpha);
+	void Explosion(vec2 Pos, float Alpha);
+	void HammerHit(vec2 Pos, float Alpha);
+	void AirJump(vec2 Pos, float Alpha);
+	void DamageIndicator(vec2 Pos, vec2 Dir, float Alpha);
+	void PlayerSpawn(vec2 Pos, float Alpha);
+	void PlayerDeath(vec2 Pos, int ClientId, float Alpha);
+	void PowerupShine(vec2 Pos, vec2 Size, float Alpha);
+	void FreezingFlakes(vec2 Pos, vec2 Size, float Alpha);
+	void SparkleTrail(vec2 Pos, float Alpha);
+	void Confetti(vec2 Pos, float Alpha);
 
 	void Update();
 };
