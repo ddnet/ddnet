@@ -9,9 +9,15 @@
 
 class CEffects : public CComponent
 {
+private:
 	bool m_Add5hz;
+	int64_t m_LastUpdate5hz = 0;
+
 	bool m_Add50hz;
+	int64_t m_LastUpdate50hz = 0;
+
 	bool m_Add100hz;
+	int64_t m_LastUpdate100hz = 0;
 
 public:
 	CEffects();

@@ -403,34 +403,30 @@ void CEffects::HammerHit(vec2 Pos, float Alpha)
 
 void CEffects::OnRender()
 {
-	static int64_t s_LastUpdate100hz = 0;
-	static int64_t s_LastUpdate50hz = 0;
-	static int64_t s_LastUpdate5hz = 0;
-
 	float Speed = 1.0f;
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		Speed = DemoPlayer()->BaseInfo()->m_Speed;
 
-	if(time() - s_LastUpdate100hz > time_freq() / (100 * Speed))
+	if(time() - m_LastUpdate100hz > time_freq() / (100 * Speed))
 	{
 		m_Add100hz = true;
-		s_LastUpdate100hz = time();
+		m_LastUpdate100hz = time();
 	}
 	else
 		m_Add100hz = false;
 
-	if(time() - s_LastUpdate50hz > time_freq() / (50 * Speed))
+	if(time() - m_LastUpdate50hz > time_freq() / (50 * Speed))
 	{
 		m_Add50hz = true;
-		s_LastUpdate50hz = time();
+		m_LastUpdate50hz = time();
 	}
 	else
 		m_Add50hz = false;
 
-	if(time() - s_LastUpdate5hz > time_freq() / (5 * Speed))
+	if(time() - m_LastUpdate5hz > time_freq() / (5 * Speed))
 	{
 		m_Add5hz = true;
-		s_LastUpdate5hz = time();
+		m_LastUpdate5hz = time();
 	}
 	else
 		m_Add5hz = false;
