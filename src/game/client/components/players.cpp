@@ -427,8 +427,7 @@ void CPlayers::RenderPlayer(
 	float Alpha = (OtherTeam || ClientId < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 	if(ClientId == -2) // ghost
 		Alpha = g_Config.m_ClRaceGhostAlpha / 100.0f;
-	// TODO: snd_game_volume_others
-	const float Volume = 1.0f;
+	const float Volume = OtherTeam ? g_Config.m_SndGameVolumeOthers / 100.0f : 1.0f;
 
 	// set size
 	RenderInfo.m_Size = 64.0f;
