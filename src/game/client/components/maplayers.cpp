@@ -817,6 +817,8 @@ void CMapLayers::OnMapLoad()
 
 void CMapLayers::RenderTileLayer(int LayerIndex, const ColorRGBA &Color)
 {
+	if(LayerIndex < 0)
+		return;
 	STileLayerVisuals &Visuals = *m_vpTileLayerVisuals[LayerIndex];
 	if(Visuals.m_BufferContainerIndex == -1)
 		return; // no visuals were created
