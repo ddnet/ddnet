@@ -1000,10 +1000,10 @@ void CMapLayers::RenderKillTileBorder(int LayerIndex, const ColorRGBA &Color)
 	if(!Visuals.m_BorderKillTile.DoDraw())
 		return;
 
-	BorderX0 = clamp(BorderX0, -300, (int)Visuals.m_Width + 299);
-	BorderY0 = clamp(BorderY0, -300, (int)Visuals.m_Height + 299);
-	BorderX1 = clamp(BorderX1, -300, (int)Visuals.m_Width + 299);
-	BorderY1 = clamp(BorderY1, -300, (int)Visuals.m_Height + 299);
+	BorderX0 = std::clamp(BorderX0, -300, (int)Visuals.m_Width + 299);
+	BorderY0 = std::clamp(BorderY0, -300, (int)Visuals.m_Height + 299);
+	BorderX1 = std::clamp(BorderX1, -300, (int)Visuals.m_Width + 299);
+	BorderY1 = std::clamp(BorderY1, -300, (int)Visuals.m_Height + 299);
 
 	auto DrawKillBorder = [Color, this, LayerIndex](vec2 Offset, vec2 Scale) {
 		offset_ptr_size pOffset = (offset_ptr_size)m_vpTileLayerVisuals[LayerIndex]->m_BorderKillTile.IndexBufferByteOffset();

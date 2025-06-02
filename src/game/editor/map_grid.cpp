@@ -105,7 +105,7 @@ int CMapGrid::Factor() const
 
 void CMapGrid::SetFactor(int Factor)
 {
-	m_GridFactor = clamp(Factor, MIN_GRID_FACTOR, MAX_GRID_FACTOR);
+	m_GridFactor = std::clamp(Factor, MIN_GRID_FACTOR, MAX_GRID_FACTOR);
 }
 
 void CMapGrid::DoSettingsPopup(vec2 Position)

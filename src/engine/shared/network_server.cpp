@@ -50,7 +50,7 @@ bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int Ma
 	m_Address = BindAddr;
 	m_pNetBan = pNetBan;
 
-	m_MaxClients = clamp(MaxClients, 1, (int)NET_MAX_CLIENTS);
+	m_MaxClients = std::clamp(MaxClients, 1, (int)NET_MAX_CLIENTS);
 	m_MaxClientsPerIp = MaxClientsPerIp;
 
 	m_NumConAttempts = 0;

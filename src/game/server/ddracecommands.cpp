@@ -358,7 +358,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 	if(!pChr)
 		return;
 
-	if(clamp(Weapon, -1, NUM_WEAPONS - 1) != Weapon)
+	if(std::clamp(Weapon, -1, NUM_WEAPONS - 1) != Weapon)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
 			"invalid weapon id");
@@ -472,7 +472,7 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	int Victim = pResult->GetVictim();
 	int Seconds = 0;
 	if(pResult->NumArguments() > 1)
-		Seconds = clamp(pResult->GetInteger(1), 0, 360);
+		Seconds = std::clamp(pResult->GetInteger(1), 0, 360);
 
 	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
 	if(!pPlayer)
@@ -611,7 +611,7 @@ void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
 
 	const NETADDR *pAddr = pSelf->Server()->ClientAddr(Victim);
 
-	int Seconds = clamp(pResult->GetInteger(1), 1, 86400);
+	int Seconds = std::clamp(pResult->GetInteger(1), 1, 86400);
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
 	pSelf->VoteMute(pAddr, Seconds, pReason, pSelf->Server()->ClientName(Victim), pResult->m_ClientId);
 }
@@ -690,7 +690,7 @@ void CGameContext::ConMuteId(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
 
-	pSelf->Mute(pAddr, clamp(pResult->GetInteger(1), 1, 86400),
+	pSelf->Mute(pAddr, std::clamp(pResult->GetInteger(1), 1, 86400),
 		pSelf->Server()->ClientName(Victim), pReason);
 }
 
@@ -705,7 +705,7 @@ void CGameContext::ConMuteIp(IConsole::IResult *pResult, void *pUserData)
 			"Invalid network address to mute");
 	}
 	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
-	pSelf->Mute(&Addr, clamp(pResult->GetInteger(1), 1, 86400), nullptr, pReason);
+	pSelf->Mute(&Addr, std::clamp(pResult->GetInteger(1), 1, 86400), nullptr, pReason);
 }
 
 // unmute by mute list index

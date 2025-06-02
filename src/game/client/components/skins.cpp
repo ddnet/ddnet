@@ -282,10 +282,10 @@ static void CheckMetrics(CSkin::CSkinMetricVariable &Metrics, const uint8_t *pIm
 		}
 	}
 
-	Metrics.m_Width = clamp((MaxX - MinX) + 1, 1, CheckWidth);
-	Metrics.m_Height = clamp((MaxY - MinY) + 1, 1, CheckHeight);
-	Metrics.m_OffsetX = clamp(MinX, 0, CheckWidth - 1);
-	Metrics.m_OffsetY = clamp(MinY, 0, CheckHeight - 1);
+	Metrics.m_Width = std::clamp((MaxX - MinX) + 1, 1, CheckWidth);
+	Metrics.m_Height = std::clamp((MaxY - MinY) + 1, 1, CheckHeight);
+	Metrics.m_OffsetX = std::clamp(MinX, 0, CheckWidth - 1);
+	Metrics.m_OffsetY = std::clamp(MinY, 0, CheckHeight - 1);
 	Metrics.m_MaxWidth = CheckWidth;
 	Metrics.m_MaxHeight = CheckHeight;
 }
@@ -895,12 +895,12 @@ void CSkins::RandomizeSkin(int Dummy)
 		ColorHSLA Body;
 		Body.h = random_float();
 		Body.l = random_float(0.0f, MaxBodyLht);
-		Body.s = clamp(GoalSat * GoalSat / (1.0f - Body.l), 0.0f, 1.0f);
+		Body.s = std::clamp(GoalSat * GoalSat / (1.0f - Body.l), 0.0f, 1.0f);
 
 		ColorHSLA Feet;
 		Feet.h = std::fmod(Body.h + s_aSchemes[rand() % std::size(s_aSchemes)], 1.0f);
 		Feet.l = random_float();
-		Feet.s = clamp(GoalSat * GoalSat / (1.0f - Feet.l), 0.0f, 1.0f);
+		Feet.s = std::clamp(GoalSat * GoalSat / (1.0f - Feet.l), 0.0f, 1.0f);
 
 		unsigned *pColorBody = Dummy ? &g_Config.m_ClDummyColorBody : &g_Config.m_ClPlayerColorBody;
 		unsigned *pColorFeet = Dummy ? &g_Config.m_ClDummyColorFeet : &g_Config.m_ClPlayerColorFeet;
