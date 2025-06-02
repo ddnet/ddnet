@@ -537,10 +537,7 @@ void CPlayers::RenderPlayer(
 			m_SkidSoundTime = time();
 		}
 
-		m_pClient->m_Effects.SkidTrail(
-			Position + vec2(-Player.m_Direction * 6, 12),
-			vec2(-Player.m_Direction * 100 * length(Vel), -50),
-			Alpha);
+		m_pClient->m_Effects.SkidTrail(Position, Vel, Player.m_Direction, Alpha);
 	}
 
 	// draw gun

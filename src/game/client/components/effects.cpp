@@ -143,7 +143,7 @@ void CEffects::SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed)
 	m_pClient->m_Particles.Add(CParticles::GROUP_PROJECTILE_TRAIL, &p, TimePassed);
 }
 
-void CEffects::SkidTrail(vec2 Pos, vec2 Vel, float Alpha)
+void CEffects::SkidTrail(vec2 Pos, vec2 Vel, int Direction, float Alpha)
 {
 	if(!m_Add100hz)
 		return;
@@ -151,8 +151,8 @@ void CEffects::SkidTrail(vec2 Pos, vec2 Vel, float Alpha)
 	CParticle p;
 	p.SetDefault();
 	p.m_Spr = SPRITE_PART_SMOKE;
-	p.m_Pos = Pos;
-	p.m_Vel = Vel + random_direction() * 50.0f;
+	p.m_Pos = Pos + vec2(-Direction * 6.0f, 12.0f);
+	p.m_Vel = vec2(-Direction * 100.0f * length(Vel), -50.0f) + random_direction() * 50.0f;
 	p.m_LifeSpan = random_float(0.5f, 1.0f);
 	p.m_StartSize = random_float(24.0f, 36.0f);
 	p.m_EndSize = 0;

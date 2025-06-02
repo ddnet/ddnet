@@ -27,7 +27,7 @@ public:
 
 	void BulletTrail(vec2 Pos, float Alpha, float TimePassed);
 	void SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed);
-	void SkidTrail(vec2 Pos, vec2 Vel, float Alpha);
+	void SkidTrail(vec2 Pos, vec2 Vel, int Direction, float Alpha);
 	void Explosion(vec2 Pos, float Alpha);
 	void HammerHit(vec2 Pos, float Alpha);
 	void AirJump(vec2 Pos, float Alpha);
