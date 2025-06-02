@@ -529,16 +529,7 @@ void CPlayers::RenderPlayer(
 
 	// do skidding
 	if(!InAir && WantOtherDir && length(Vel * 50) > 500.0f)
-	{
-		if(time() - m_SkidSoundTime > time_freq() / 10)
-		{
-			if(g_Config.m_SndGame)
-				m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 1.0f, Position);
-			m_SkidSoundTime = time();
-		}
-
 		m_pClient->m_Effects.SkidTrail(Position, Vel, Player.m_Direction, Alpha);
-	}
 
 	// draw gun
 	if(Player.m_Weapon >= 0)

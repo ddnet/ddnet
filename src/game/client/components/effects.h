@@ -19,6 +19,8 @@ private:
 	bool m_Add100hz;
 	int64_t m_LastUpdate100hz = 0;
 
+	int64_t m_SkidSoundTimer = 0;
+
 public:
 	CEffects();
 	virtual int Sizeof() const override { return sizeof(*this); }

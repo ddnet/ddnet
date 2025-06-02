@@ -145,22 +145,31 @@ void CEffects::SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed)
 
 void CEffects::SkidTrail(vec2 Pos, vec2 Vel, int Direction, float Alpha)
 {
-	if(!m_Add100hz)
-		return;
-
-	CParticle p;
-	p.SetDefault();
-	p.m_Spr = SPRITE_PART_SMOKE;
-	p.m_Pos = Pos + vec2(-Direction * 6.0f, 12.0f);
-	p.m_Vel = vec2(-Direction * 100.0f * length(Vel), -50.0f) + random_direction() * 50.0f;
-	p.m_LifeSpan = random_float(0.5f, 1.0f);
-	p.m_StartSize = random_float(24.0f, 36.0f);
-	p.m_EndSize = 0;
-	p.m_Friction = 0.7f;
-	p.m_Gravity = random_float(-500.0f);
-	p.m_Color = ColorRGBA(0.75f, 0.75f, 0.75f, Alpha);
-	p.m_StartAlpha = Alpha;
-	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+	if(m_Add100hz)
+	{
+		CParticle p;
+		p.SetDefault();
+		p.m_Spr = SPRITE_PART_SMOKE;
+		p.m_Pos = Pos + vec2(-Direction * 6.0f, 12.0f);
+		p.m_Vel = vec2(-Direction * 100.0f * length(Vel), -50.0f) + random_direction() * 50.0f;
+		p.m_LifeSpan = random_float(0.5f, 1.0f);
+		p.m_StartSize = random_float(24.0f, 36.0f);
+		p.m_EndSize = 0;
+		p.m_Friction = 0.7f;
+		p.m_Gravity = random_float(-500.0f);
+		p.m_Color = ColorRGBA(0.75f, 0.75f, 0.75f, Alpha);
+		p.m_StartAlpha = Alpha;
+		m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+	}
+	if(g_Config.m_SndGame)
+	{
+		int64_t Now = time();
+		if(Now - m_SkidSoundTimer > time_freq() / 10)
+		{
+			m_SkidSoundTimer = Now;
+			m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SKID, 1.0f, Pos);
+		}
+	}
 }
 
 void CEffects::BulletTrail(vec2 Pos, float Alpha, float TimePassed)

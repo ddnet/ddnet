@@ -37,8 +37,6 @@ class CPlayers : public CComponent
 	int m_WeaponEmoteQuadContainerIndex;
 	int m_aWeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
 
-	int64_t m_SkidSoundTime = 0;
-
 public:
 	float GetPlayerTargetAngle(
 		const CNetObj_Character *pPrevChar,
