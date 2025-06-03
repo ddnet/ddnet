@@ -48,20 +48,33 @@ class CHud : public CComponent
 	SScoreInfo m_aScoreInfo[2];
 	STextContainerIndex m_FPSTextContainerIndex;
 	STextContainerIndex m_DDRaceEffectsTextContainerIndex;
-	STextContainerIndex m_PlayerAngleTextContainerIndex;
-	float m_PlayerPrevAngle;
-	STextContainerIndex m_aPlayerSpeedTextContainers[2];
-	float m_aPlayerPrevSpeed[2];
-	int m_aPlayerSpeed[2];
-	enum class ESpeedChange
+
+	class CMovementInfoHud
 	{
-		NONE,
-		INCREASE,
-		DECREASE
+	public:
+		enum class ESpeedChange
+		{
+			NONE,
+			INCREASE,
+			DECREASE
+		};
+
+		CMovementInfoHud();
+		void Reset(CHud &This);
+		void OnNewSnapshot(CHud &This, int ClientId);
+		void UpdateTextContainers(CHud &This, float FontSize, int ClientId, int Conn);
+
+		STextContainerIndex m_aPlayerPositionContainers[2];
+		STextContainerIndex m_aPlayerSpeedTextContainers[2];
+		STextContainerIndex m_PlayerAngleTextContainerIndex;
+
+		float m_aPlayerPrevPosition[2];
+		float m_aPlayerPrevSpeed[2];
+		int m_aPlayerPrevSnapSpeed[2];
+		ESpeedChange m_aPlayerSpeedChange[2];
+		float m_PlayerPrevAngle;
 	};
-	ESpeedChange m_aLastPlayerSpeedChange[2];
-	STextContainerIndex m_aPlayerPositionContainers[2];
-	float m_aPlayerPrevPosition[2];
+	CMovementInfoHud m_MovementInfoHud;
 
 	void RenderCursor();
 
@@ -79,18 +92,6 @@ class CHud : public CComponent
 	void RenderSpectatorCount();
 	void RenderDummyActions();
 	void RenderMovementInformation();
-
-	void UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, float &PrevValue);
-	void RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, const ColorRGBA &Color, float X, float Y);
-
-	class CMovementInformation
-	{
-	public:
-		vec2 m_Pos;
-		vec2 m_Speed;
-		float m_Angle = 0.0f;
-	};
-	class CMovementInformation GetMovementInformation(int ClientId, int Conn) const;
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
