@@ -3,6 +3,8 @@
 #include <base/log.h>
 #include <base/system.h>
 
+#include <algorithm>
+
 static int IndexFromNetType(int NetType)
 {
 	switch(NetType)
