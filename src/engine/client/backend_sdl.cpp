@@ -477,17 +477,30 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 {
 	if(BackendType == BACKEND_TYPE_OPENGL)
 	{
-#ifndef CONF_BACKEND_OPENGL_ES
-		// support graphic cards that are pretty old(and linux)
+#if !defined(CONF_BACKEND_OPENGL_ES)
+		// Support graphic cards that are pretty old (and Linux)
 		glewExperimental = GL_TRUE;
 #ifdef CONF_GLEW_HAS_CONTEXT_INIT
-		if(GLEW_OK != glewContextInit())
-#else
-		GLenum InitResult = glewInit();
-		const char *pVideoDriver = SDL_GetCurrentVideoDriver();
-		if(GLEW_OK != InitResult && pVideoDriver && !str_comp(pVideoDriver, "wayland") && GLEW_ERROR_NO_GLX_DISPLAY != InitResult)
-#endif
+		const GLenum InitResult = glewContextInit();
+		if(InitResult != GLEW_OK)
+		{
+			log_error("gfx", "Unable to init glew (glewContextInit): %s", glewGetErrorString(InitResult));
 			return false;
+		}
+#else
+		const GLenum InitResult = glewInit();
+		if(InitResult != GLEW_OK)
+		{
+			// With wayland the glewInit function is allowed to fail with GLEW_ERROR_NO_GLX_DISPLAY,
+			// as it will already have initialized the context with glewContextInit internally.
+			const char *pVideoDriver = SDL_GetCurrentVideoDriver();
+			if(pVideoDriver == nullptr || str_comp(pVideoDriver, "wayland") != 0 || InitResult != GLEW_ERROR_NO_GLX_DISPLAY)
+			{
+				log_error("gfx", "Unable to init glew (glewInit): %s", glewGetErrorString(InitResult));
+				return false;
+			}
+		}
+#endif
 
 #ifdef GLEW_VERSION_4_6
 		if(GLEW_VERSION_4_6)
@@ -623,11 +636,14 @@ static bool BackendInitGlew(EBackendType BackendType, int &GlewMajor, int &GlewM
 		GlewMajor = 3;
 		GlewMinor = 0;
 		GlewPatch = 0;
-
 		return true;
 	}
+	else
+	{
+		dbg_assert(false, "Invalid backend type for glew: %d", (int)BackendType);
+	}
 
-	return true;
+	return false;
 }
 
 static int IsVersionSupportedGlew(EBackendType BackendType, int VersionMajor, int VersionMinor, int VersionPatch, int GlewMajor, int GlewMinor, int GlewPatch)
@@ -1342,7 +1358,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 			SDL_GL_DeleteContext(m_GLContext);
 			SDL_DestroyWindow(m_pWindow);
 			m_pWindow = nullptr;
-			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_UNKNOWN;
+			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GLEW_INIT_FAILED;
 		}
 	}
 
