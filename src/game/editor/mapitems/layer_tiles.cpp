@@ -89,10 +89,25 @@ void CLayerTiles::SetTile(int x, int y, CTile Tile)
 
 	if(m_FillGameTile != -1 && m_LiveGameTiles)
 	{
-		std::shared_ptr<CLayerTiles> pGLayer = m_pEditor->m_Map.m_pGameLayer;
+		std::shared_ptr<CLayerTiles> pLayer = m_pEditor->m_Map.m_pGameLayer;
+		if(m_FillGameTile == TILE_TELECHECKIN || m_FillGameTile == TILE_TELECHECKINEVIL)
+		{
+			if(!m_pEditor->m_Map.m_pTeleLayer)
+			{
+				std::shared_ptr<CLayerTele> pLayerTele = std::make_shared<CLayerTele>(m_pEditor, m_Width, m_Height);
+				m_pEditor->m_Map.MakeTeleLayer(pLayerTele);
+				m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayerTele);
+				int GameGroupIndex = std::find(m_pEditor->m_Map.m_vpGroups.begin(), m_pEditor->m_Map.m_vpGroups.end(), m_pEditor->m_Map.m_pGameGroup) - m_pEditor->m_Map.m_vpGroups.begin();
+				int LayerIndex = m_pEditor->m_Map.m_vpGroups[GameGroupIndex]->m_vpLayers.size() - 1;
+				m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAddLayer>(m_pEditor, GameGroupIndex, LayerIndex));
+			}
+
+			pLayer = m_pEditor->m_Map.m_pTeleLayer;
+		}
+
 		bool HasTile = Tile.m_Index != 0;
 		const CTile ResultTile = {(unsigned char)(HasTile ? m_FillGameTile : TILE_AIR)};
-		pGLayer->SetTile(x, y, ResultTile);
+		pLayer->SetTile(x, y, ResultTile);
 	}
 }
 
