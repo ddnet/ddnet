@@ -799,6 +799,7 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 	{
 		std::shared_ptr<CLayerGroup> pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
 		m_FillGameTile = Result;
+		m_SelectedGameTileOp = Fill;
 		const int OffsetX = -pGroup->m_OffsetX / 32;
 		const int OffsetY = -pGroup->m_OffsetY / 32;
 
@@ -845,7 +846,7 @@ void CLayerTiles::FillGameTiles(EGameTileOp Fill)
 
 			vpActions.push_back(std::make_shared<CEditorBrushDrawAction>(m_pEditor, GameGroupIndex));
 			char aDisplay[256];
-			str_format(aDisplay, sizeof(aDisplay), "Construct '%s' game tiles (x%d)", g_apGametileOpNames[(int)Fill], Changes);
+			str_format(aDisplay, sizeof(aDisplay), "Construct '%s' game tiles (x%d)", g_apGameTileOpNames[(int)Fill], Changes);
 			m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(m_pEditor, vpActions, aDisplay, true));
 		}
 		else
@@ -969,7 +970,12 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	{
 		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 		static int s_GameTilesButton = 0;
-		if(m_pEditor->DoButton_Editor(&s_GameTilesButton, "Game tiles", 0, &Button, BUTTONFLAG_LEFT, "Construct game tiles from this layer."))
+		char aBuf[128];
+		if(m_SelectedGameTileOp == EGameTileOp::NONE || m_SelectedGameTileOp == EGameTileOp::AIR)
+			str_copy(aBuf, "Game tiles", sizeof(aBuf));
+		else
+			str_format(aBuf, sizeof(aBuf), "Game tiles: %s", g_apGameTileOpNames[(size_t)m_SelectedGameTileOp]);
+		if(m_pEditor->DoButton_Editor(&s_GameTilesButton, aBuf, 0, &Button, BUTTONFLAG_LEFT, "Construct game tiles from this layer."))
 			m_pEditor->PopupSelectGametileOpInvoke(m_pEditor->Ui()->MouseX(), m_pEditor->Ui()->MouseY());
 		const int Selected = m_pEditor->PopupSelectGameTileOpResult();
 		FillGameTiles((EGameTileOp)Selected);

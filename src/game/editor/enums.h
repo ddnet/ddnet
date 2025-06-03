@@ -1,7 +1,7 @@
 #ifndef GAME_EDITOR_ENUMS_H
 #define GAME_EDITOR_ENUMS_H
 
-constexpr const char *g_apGametileOpNames[] = {
+constexpr const char *g_apGameTileOpNames[] = {
 	"Air",
 	"Hookable",
 	"Death",
@@ -31,6 +31,8 @@ enum class EGameTileOp
 	RED_CHECK_TELE,
 	LIVE_FREEZE,
 	LIVE_UNFREEZE,
+
+	NONE = -1,
 };
 
 constexpr const char *g_apAutoMapReferenceNames[] = {
