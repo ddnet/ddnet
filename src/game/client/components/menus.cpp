@@ -884,6 +884,7 @@ void CMenus::OnInit()
 	{
 		m_Popup = POPUP_LANGUAGE;
 		m_CreateDefaultFavoriteCommunities = true;
+		g_Config.m_ClOverlayEntitiesHint = 1;
 	}
 
 	if(g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_5 &&
@@ -2318,6 +2319,9 @@ void CMenus::OnRender()
 		SetActive(true);
 		PopupMessage(Localize("Disconnected"), Localize("The server is running a non-standard tuning on a pure game type."), Localize("Ok"));
 	}
+
+	if(!IsActive() || m_GamePage == PAGE_GAME)
+		RenderEntitiesHint();
 
 	if(!IsActive())
 	{
