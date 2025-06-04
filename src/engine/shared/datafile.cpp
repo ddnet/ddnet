@@ -625,7 +625,10 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 		return false;
 	}
 
-	SwapEndianInPlace(pTmpDataFile->m_pData, pTmpDataFile->m_Header.m_Swaplen);
+	// The swap len also includes the size of the header (without the size offset), but the header was already swapped above.
+	const int64_t DataSwapLen = pTmpDataFile->m_Header.m_Swaplen - (int)(sizeof(Header) - Header.SizeOffset());
+	dbg_assert(DataSwapLen == Size, "Swap len and file size mismatch");
+	SwapEndianInPlace(pTmpDataFile->m_pData, DataSwapLen);
 
 	pTmpDataFile->m_Info.m_pItemTypes = (CDatafileItemType *)pTmpDataFile->m_pData;
 	pTmpDataFile->m_Info.m_pItemOffsets = (int *)&pTmpDataFile->m_Info.m_pItemTypes[pTmpDataFile->m_Header.m_NumItemTypes];
