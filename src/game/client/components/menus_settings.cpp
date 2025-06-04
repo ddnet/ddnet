@@ -2455,7 +2455,9 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &LeftView, LineSize))
 			GameClient()->m_Chat.RebuildChat();
 
-		LeftView.HSplitTop(LineSize * 2.0f, &Button, &LeftView);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClCensorChat, Localize("Censor profanity"), &g_Config.m_ClCensorChat, &LeftView, LineSize);
+
+		LeftView.HSplitTop(2 * LineSize, &Button, &LeftView);
 		if(Ui()->DoScrollbarOption(&g_Config.m_ClChatFontSize, &g_Config.m_ClChatFontSize, &Button, Localize("Chat font size"), 10, 100, &CUi::ms_LinearScrollbarScale, CUi::SCROLLBAR_OPTION_MULTILINE))
 		{
 			Chat.EnsureCoherentWidth();
