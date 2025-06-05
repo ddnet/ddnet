@@ -138,7 +138,7 @@ class CConsole : public IConsole
 	public:
 		CCommand *m_pCommand;
 		CResult m_Result;
-		CExecutionQueueEntry(CCommand *pCommand, CResult Result) :
+		CExecutionQueueEntry(CCommand *pCommand, const CResult &Result) :
 			m_pCommand(pCommand),
 			m_Result(Result) {}
 	};
