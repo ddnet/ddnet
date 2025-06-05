@@ -766,20 +766,20 @@ void CGraphicsBackend_SDL_GL::ClampDriverVersion(EBackendType BackendType)
 		// clamp the versions to existing versions(only for OpenGL major <= 3)
 		if(g_Config.m_GfxGLMajor == 1)
 		{
-			g_Config.m_GfxGLMinor = clamp(g_Config.m_GfxGLMinor, 1, 5);
+			g_Config.m_GfxGLMinor = std::clamp(g_Config.m_GfxGLMinor, 1, 5);
 			if(g_Config.m_GfxGLMinor == 2)
-				g_Config.m_GfxGLPatch = clamp(g_Config.m_GfxGLPatch, 0, 1);
+				g_Config.m_GfxGLPatch = std::clamp(g_Config.m_GfxGLPatch, 0, 1);
 			else
 				g_Config.m_GfxGLPatch = 0;
 		}
 		else if(g_Config.m_GfxGLMajor == 2)
 		{
-			g_Config.m_GfxGLMinor = clamp(g_Config.m_GfxGLMinor, 0, 1);
+			g_Config.m_GfxGLMinor = std::clamp(g_Config.m_GfxGLMinor, 0, 1);
 			g_Config.m_GfxGLPatch = 0;
 		}
 		else if(g_Config.m_GfxGLMajor == 3)
 		{
-			g_Config.m_GfxGLMinor = clamp(g_Config.m_GfxGLMinor, 0, 3);
+			g_Config.m_GfxGLMinor = std::clamp(g_Config.m_GfxGLMinor, 0, 3);
 			if(g_Config.m_GfxGLMinor < 3)
 				g_Config.m_GfxGLMinor = 0;
 			g_Config.m_GfxGLPatch = 0;
@@ -1160,7 +1160,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	if(m_NumScreens > 0)
 	{
 		SDL_Rect ScreenPos;
-		*pScreen = clamp(*pScreen, 0, m_NumScreens - 1);
+		*pScreen = std::clamp(*pScreen, 0, m_NumScreens - 1);
 		if(SDL_GetDisplayBounds(*pScreen, &ScreenPos) != 0)
 		{
 			log_error("gfx", "Unable to get display bounds of screen %d: %s", *pScreen, SDL_GetError());

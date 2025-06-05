@@ -334,7 +334,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 
 		if(Ui()->ConsumeHotkey(CUi::HOTKEY_ENTER) || ((Ui()->MouseButtonClicked(1) || Ui()->MouseButtonClicked(0)) && !Inside))
 		{
-			Current = clamp(s_NumberInput.GetInteger(Base), Min, Max);
+			Current = std::clamp(s_NumberInput.GetInteger(Base), Min, Max);
 			Ui()->DisableMouseLock();
 			Ui()->SetActiveItem(nullptr);
 			s_pLastTextId = nullptr;
@@ -360,7 +360,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pId, CUIRect *pRect, const cha
 					int Count = (int)(s_ScrollValue / Scale);
 					s_ScrollValue = std::fmod(s_ScrollValue, Scale);
 					Current += Step * Count;
-					Current = clamp(Current, Min, Max);
+					Current = std::clamp(Current, Min, Max);
 					s_DidScroll = true;
 
 					// Constrain to discrete steps
@@ -1046,7 +1046,7 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const
 			}
 			else
 			{
-				const float AmountSeek = clamp((Ui()->MouseX() - SeekBar.x - Rounding) / (SeekBar.w - 2 * Rounding), 0.0f, 1.0f);
+				const float AmountSeek = std::clamp((Ui()->MouseX() - SeekBar.x - Rounding) / (SeekBar.w - 2 * Rounding), 0.0f, 1.0f);
 				Sound()->SetSampleCurrentTime(SampleId, AmountSeek);
 			}
 		}
@@ -1285,7 +1285,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			const float PipetteButtonWidth = 30.0f;
 			const float ColorPickerButtonWidth = 20.0f;
 			const float Spacing = 2.0f;
-			const size_t NumColorsShown = clamp<int>(round_to_int((TB_Top.w - PipetteButtonWidth - 40.0f) / (ColorPickerButtonWidth + Spacing)), 1, std::size(m_aSavedColors));
+			const size_t NumColorsShown = std::clamp<int>(round_to_int((TB_Top.w - PipetteButtonWidth - 40.0f) / (ColorPickerButtonWidth + Spacing)), 1, std::size(m_aSavedColors));
 
 			CUIRect ColorPalette;
 			TB_Top.VSplitRight(NumColorsShown * (ColorPickerButtonWidth + Spacing) + PipetteButtonWidth, &TB_Top, &ColorPalette);
@@ -2861,7 +2861,7 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 		const float StartTime = fxt2f(apEnvelope[j]->m_vPoints[0].m_Time);
 		const float EndTime = fxt2f(apEnvelope[j]->m_vPoints[apEnvelope[j]->m_vPoints.size() - 1].m_Time);
 		const float TimeRange = EndTime - StartTime;
-		const int Steps = clamp(round_to_int(TimeRange * 10.0f), 250, 2500);
+		const int Steps = std::clamp(round_to_int(TimeRange * 10.0f), 250, 2500);
 		const float StepTime = TimeRange / static_cast<float>(Steps);
 
 		ColorRGBA Result = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
@@ -3891,7 +3891,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		UnscrolledLayersBox.HSplitTop(s_InitialCutHeight, nullptr, &UnscrolledLayersBox);
 		UnscrolledLayersBox.y -= s_InitialMouseY - Ui()->MouseY();
 
-		UnscrolledLayersBox.y = clamp(UnscrolledLayersBox.y, MinDraggableValue, MaxDraggableValue);
+		UnscrolledLayersBox.y = std::clamp(UnscrolledLayersBox.y, MinDraggableValue, MaxDraggableValue);
 
 		UnscrolledLayersBox.w = LayersBox.w;
 	}
@@ -4862,7 +4862,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 		if(Input()->KeyPress(KEY_DOWN))
 		{
 			int OldImage = m_SelectedImage;
-			m_SelectedImage = clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
+			m_SelectedImage = std::clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
 			for(size_t i = m_SelectedImage + 1; i < m_Map.m_vpImages.size(); i++)
 			{
 				if(m_Map.m_vpImages[i]->m_External == m_Map.m_vpImages[m_SelectedImage]->m_External)
@@ -4887,7 +4887,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 		else if(Input()->KeyPress(KEY_UP))
 		{
 			int OldImage = m_SelectedImage;
-			m_SelectedImage = clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
+			m_SelectedImage = std::clamp(m_SelectedImage, 0, (int)m_Map.m_vpImages.size() - 1);
 			for(int i = m_SelectedImage - 1; i >= 0; i--)
 			{
 				if(m_Map.m_vpImages[i]->m_External == m_Map.m_vpImages[m_SelectedImage]->m_External)
@@ -5725,7 +5725,7 @@ void CEditor::RefreshFilteredFileList()
 				}
 			}
 		}
-		m_FilesSelectedIndex = clamp<int>(m_FilesSelectedIndex, 0, m_vpFilteredFileList.size() - 1);
+		m_FilesSelectedIndex = std::clamp<int>(m_FilesSelectedIndex, 0, m_vpFilteredFileList.size() - 1);
 		str_copy(m_aFilesSelectedName, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aName);
 	}
 	else
@@ -6423,7 +6423,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			{
 				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::ORDER, m_SelectedEnvelope, m_SelectedEnvelope + 1));
 				m_Map.SwapEnvelopes(m_SelectedEnvelope, m_SelectedEnvelope + 1);
-				m_SelectedEnvelope = clamp<int>(m_SelectedEnvelope + 1, 0, m_Map.m_vpEnvelopes.size() - 1);
+				m_SelectedEnvelope = std::clamp<int>(m_SelectedEnvelope + 1, 0, m_Map.m_vpEnvelopes.size() - 1);
 				pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 				m_Map.OnModify();
 			}
@@ -6435,7 +6435,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			{
 				m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::ORDER, m_SelectedEnvelope, m_SelectedEnvelope - 1));
 				m_Map.SwapEnvelopes(m_SelectedEnvelope - 1, m_SelectedEnvelope);
-				m_SelectedEnvelope = clamp<int>(m_SelectedEnvelope - 1, 0, m_Map.m_vpEnvelopes.size() - 1);
+				m_SelectedEnvelope = std::clamp<int>(m_SelectedEnvelope - 1, 0, m_Map.m_vpEnvelopes.size() - 1);
 				pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 				m_Map.OnModify();
 			}
@@ -6851,8 +6851,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		// render lines
 		{
 			float EndTimeTotal = maximum(0.000001f, pEnvelope->EndTime());
-			float EndX = clamp(EnvelopeToScreenX(View, EndTimeTotal), View.x, View.x + View.w);
-			float StartX = clamp(View.x + View.w * m_OffsetEnvelopeX, View.x, View.x + View.w);
+			float EndX = std::clamp(EnvelopeToScreenX(View, EndTimeTotal), View.x, View.x + View.w);
+			float StartX = std::clamp(View.x + View.w * m_OffsetEnvelopeX, View.x, View.x + View.w);
 
 			float EndTime = ScreenToEnvelopeX(View, EndX);
 			float StartTime = ScreenToEnvelopeX(View, StartX);
@@ -7149,8 +7149,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 											if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
 											{
-												pEnvelope->m_vPoints[i].m_aValues[c] = clamp(pEnvelope->m_vPoints[i].m_aValues[c], 0, 1024);
-												s_vAccurateDragValuesY[k] = clamp<float>(s_vAccurateDragValuesY[k], 0, 1024);
+												pEnvelope->m_vPoints[i].m_aValues[c] = std::clamp(pEnvelope->m_vPoints[i].m_aValues[c], 0, 1024);
+												s_vAccurateDragValuesY[k] = std::clamp<float>(s_vAccurateDragValuesY[k], 0, 1024);
 											}
 										}
 									}
@@ -7296,8 +7296,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c] = std::round(s_vAccurateDragValuesY[0]);
 
 									// clamp time value
-									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = clamp<int>(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c], 0, f2fxt(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time);
-									s_vAccurateDragValuesX[0] = clamp<float>(s_vAccurateDragValuesX[0], 0, f2fxt(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time);
+									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = std::clamp<int>(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c], 0, f2fxt(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time);
+									s_vAccurateDragValuesX[0] = std::clamp<float>(s_vAccurateDragValuesX[0], 0, f2fxt(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time);
 								}
 
 								if(s_Operation == EEnvelopeEditorOp::OP_CONTEXT_MENU)
@@ -7429,8 +7429,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] = std::round(s_vAccurateDragValuesY[0]);
 
 									// clamp time value
-									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = clamp(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c], f2fxt(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, 0);
-									s_vAccurateDragValuesX[0] = clamp<float>(s_vAccurateDragValuesX[0], f2fxt(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, 0);
+									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = std::clamp(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c], f2fxt(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, 0);
+									s_vAccurateDragValuesX[0] = std::clamp<float>(s_vAccurateDragValuesX[0], f2fxt(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, 0);
 								}
 
 								if(s_Operation == EEnvelopeEditorOp::OP_CONTEXT_MENU)
@@ -7575,7 +7575,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					float ScaleBoundHigh = (BoundHigh - Midpoint) / (Value - Midpoint);
 					float ScaleBoundMin = minimum(ScaleBoundLow, ScaleBoundHigh);
 					float ScaleBoundMax = maximum(ScaleBoundLow, ScaleBoundHigh);
-					s_ScaleFactorX = clamp(s_ScaleFactorX, ScaleBoundMin, ScaleBoundMax);
+					s_ScaleFactorX = std::clamp(s_ScaleFactorX, ScaleBoundMin, ScaleBoundMax);
 				}
 
 				for(size_t k = 0; k < m_vSelectedEnvelopePoints.size(); k++)
@@ -7615,7 +7615,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(s_vInitialPositionsY[k] * s_ScaleFactorY);
 
 					if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
-						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = clamp(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel], 0, 1024);
+						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::clamp(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel], 0, 1024);
 				}
 			}
 
@@ -7884,13 +7884,13 @@ void CEditor::DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, f
 		if(s_Operation == OP_DRAGGING)
 		{
 			if(Side == EDragSide::SIDE_TOP)
-				*pValue = clamp(s_InitialMouseOffsetY + View.y + View.h - Ui()->MouseY(), MinValue, MaxValue);
+				*pValue = std::clamp(s_InitialMouseOffsetY + View.y + View.h - Ui()->MouseY(), MinValue, MaxValue);
 			else if(Side == EDragSide::SIDE_RIGHT)
-				*pValue = clamp(Ui()->MouseX() - s_InitialMouseOffsetX - View.x + pDragBar->w, MinValue, MaxValue);
+				*pValue = std::clamp(Ui()->MouseX() - s_InitialMouseOffsetX - View.x + pDragBar->w, MinValue, MaxValue);
 			else if(Side == EDragSide::SIDE_BOTTOM)
-				*pValue = clamp(Ui()->MouseY() - s_InitialMouseOffsetY - View.y + pDragBar->h, MinValue, MaxValue);
+				*pValue = std::clamp(Ui()->MouseY() - s_InitialMouseOffsetY - View.y + pDragBar->h, MinValue, MaxValue);
 			else if(Side == EDragSide::SIDE_LEFT)
-				*pValue = clamp(s_InitialMouseOffsetX + View.x + View.w - Ui()->MouseX(), MinValue, MaxValue);
+				*pValue = std::clamp(s_InitialMouseOffsetX + View.x + View.w - Ui()->MouseX(), MinValue, MaxValue);
 
 			m_CursorType = IsVertical ? CURSOR_RESIZE_V : CURSOR_RESIZE_H;
 		}
@@ -8386,8 +8386,8 @@ void CEditor::UpdateColorPipette()
 	{
 		// Read color one pixel to the top and left as we would otherwise not read the correct
 		// color due to the cursor sprite being rendered over the current mouse position.
-		const int PixelX = clamp<int>(round_to_int((Ui()->MouseX() - 1.0f) / Ui()->Screen()->w * Graphics()->ScreenWidth()), 0, Graphics()->ScreenWidth() - 1);
-		const int PixelY = clamp<int>(round_to_int((Ui()->MouseY() - 1.0f) / Ui()->Screen()->h * Graphics()->ScreenHeight()), 0, Graphics()->ScreenHeight() - 1);
+		const int PixelX = std::clamp<int>(round_to_int((Ui()->MouseX() - 1.0f) / Ui()->Screen()->w * Graphics()->ScreenWidth()), 0, Graphics()->ScreenWidth() - 1);
+		const int PixelY = std::clamp<int>(round_to_int((Ui()->MouseY() - 1.0f) / Ui()->Screen()->h * Graphics()->ScreenHeight()), 0, Graphics()->ScreenHeight() - 1);
 		Graphics()->ReadPixel(ivec2(PixelX, PixelY), &m_PipetteColor);
 	}
 

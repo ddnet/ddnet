@@ -146,10 +146,10 @@ void CGraphics_Threaded::ClipEnable(int x, int y, int w, int h)
 	if(y < 0)
 		h += y;
 
-	x = clamp(x, 0, ScreenWidth());
-	y = clamp(y, 0, ScreenHeight());
-	w = clamp(w, 0, ScreenWidth() - x);
-	h = clamp(h, 0, ScreenHeight() - y);
+	x = std::clamp(x, 0, ScreenWidth());
+	y = std::clamp(y, 0, ScreenHeight());
+	w = std::clamp(w, 0, ScreenWidth() - x);
+	h = std::clamp(h, 0, ScreenHeight() - y);
 
 	m_State.m_ClipEnable = true;
 	m_State.m_ClipX = x;
@@ -785,7 +785,7 @@ void CGraphics_Threaded::QuadsSetRotation(float Angle)
 
 static unsigned char NormalizeColorComponent(float ColorComponent)
 {
-	return (unsigned char)(clamp(ColorComponent, 0.0f, 1.0f) * 255.0f + 0.5f); // +0.5f to round to nearest
+	return (unsigned char)(std::clamp(ColorComponent, 0.0f, 1.0f) * 255.0f + 0.5f); // +0.5f to round to nearest
 }
 
 void CGraphics_Threaded::SetColorVertex(const CColorVertex *pArray, size_t Num)
@@ -2490,7 +2490,7 @@ void CGraphics_Threaded::WarnPngliteIncompatibleImages(bool Warn)
 
 void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless)
 {
-	g_Config.m_GfxFullscreen = clamp(FullscreenMode, 0, 3);
+	g_Config.m_GfxFullscreen = std::clamp(FullscreenMode, 0, 3);
 	g_Config.m_GfxBorderless = (int)IsBorderless;
 
 	m_pBackend->SetWindowParams(g_Config.m_GfxFullscreen, g_Config.m_GfxBorderless);

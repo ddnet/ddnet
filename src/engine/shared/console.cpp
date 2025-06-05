@@ -726,7 +726,7 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 
 	for(CCommand *pCommand = pConsole->m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
 	{
-		if(pCommand->m_Flags & pConsole->m_FlagMask && pCommand->GetAccessLevel() >= clamp(pResult->GetInteger(0), (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER))
+		if(pCommand->m_Flags & pConsole->m_FlagMask && pCommand->GetAccessLevel() >= std::clamp(pResult->GetInteger(0), (int)ACCESS_LEVEL_ADMIN, (int)ACCESS_LEVEL_USER))
 		{
 			int Length = str_length(pCommand->m_pName);
 			if(Used + Length + 2 < (int)(sizeof(aBuf)))
@@ -1073,7 +1073,7 @@ bool CConsole::CResult::HasVictim() const
 
 void CConsole::CResult::SetVictim(int Victim)
 {
-	m_Victim = clamp<int>(Victim, VICTIM_NONE, MAX_CLIENTS - 1);
+	m_Victim = std::clamp<int>(Victim, VICTIM_NONE, MAX_CLIENTS - 1);
 }
 
 void CConsole::CResult::SetVictim(const char *pVictim)
@@ -1083,5 +1083,5 @@ void CConsole::CResult::SetVictim(const char *pVictim)
 	else if(!str_comp(pVictim, "all"))
 		m_Victim = VICTIM_ALL;
 	else
-		m_Victim = clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
+		m_Victim = std::clamp<int>(str_toint(pVictim), 0, MAX_CLIENTS - 1);
 }

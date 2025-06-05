@@ -46,7 +46,7 @@ void CMapSounds::OnMapLoad()
 	int Start;
 	pMap->GetType(MAPITEMTYPE_SOUND, &Start, &m_Count);
 
-	m_Count = clamp<int>(m_Count, 0, MAX_MAPSOUNDS);
+	m_Count = std::clamp<int>(m_Count, 0, MAX_MAPSOUNDS);
 
 	// load new samples
 	bool ShowWarning = false;

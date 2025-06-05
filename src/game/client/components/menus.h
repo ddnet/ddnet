@@ -308,7 +308,7 @@ protected:
 
 		int NumMarkers() const
 		{
-			return clamp<int>(bytes_be_to_uint(m_TimelineMarkers.m_aNumTimelineMarkers), 0, MAX_TIMELINE_MARKERS);
+			return std::clamp<int>(bytes_be_to_uint(m_TimelineMarkers.m_aNumTimelineMarkers), 0, MAX_TIMELINE_MARKERS);
 		}
 
 		int Length() const

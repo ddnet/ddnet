@@ -1560,7 +1560,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 
 		int Duration = 1;
 		if(pResult->NumArguments() > 1)
-			Duration = clamp(pResult->GetInteger(1), 1, 86400);
+			Duration = std::clamp(pResult->GetInteger(1), 1, 86400);
 
 		pPlayer->OverrideDefaultEmote(EmoteType, pSelf->Server()->Tick() + Duration * pSelf->Server()->TickSpeed());
 	}

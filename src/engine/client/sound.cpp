@@ -158,7 +158,7 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 
 	// clamp accumulated values
 	for(unsigned i = 0; i < Frames * 2; i++)
-		pFinalOut[i] = clamp<int>(((m_pMixBuffer[i] * MasterVol) / 101) >> 8, std::numeric_limits<short>::min(), std::numeric_limits<short>::max());
+		pFinalOut[i] = std::clamp<int>(((m_pMixBuffer[i] * MasterVol) / 101) >> 8, std::numeric_limits<short>::min(), std::numeric_limits<short>::max());
 
 #if defined(CONF_ARCH_ENDIAN_BIG)
 	swap_endian(pFinalOut, sizeof(short), Frames * 2);
@@ -734,7 +734,7 @@ void CSound::SetVoiceVolume(CVoiceHandle Voice, float Volume)
 	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	Volume = clamp(Volume, 0.0f, 1.0f);
+	Volume = std::clamp(Volume, 0.0f, 1.0f);
 	m_aVoices[VoiceId].m_Vol = (int)(Volume * 255.0f);
 }
 
@@ -749,7 +749,7 @@ void CSound::SetVoiceFalloff(CVoiceHandle Voice, float Falloff)
 	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	Falloff = clamp(Falloff, 0.0f, 1.0f);
+	Falloff = std::clamp(Falloff, 0.0f, 1.0f);
 	m_aVoices[VoiceId].m_Falloff = Falloff;
 }
 
@@ -787,7 +787,7 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
 	if(m_aVoices[VoiceId].m_pSample->m_NumFrames > 0 && IsLooping)
 		Tick = TickOffset % m_aVoices[VoiceId].m_pSample->m_NumFrames;
 	else
-		Tick = clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceId].m_pSample->m_NumFrames);
+		Tick = std::clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceId].m_pSample->m_NumFrames);
 
 	// at least 200msec off, else depend on buffer size
 	float Threshold = maximum(0.2f * m_aVoices[VoiceId].m_pSample->m_Rate, (float)m_MaxFrames);
@@ -869,7 +869,7 @@ ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float 
 	{
 		m_aVoices[VoiceId].m_Tick = 0;
 	}
-	m_aVoices[VoiceId].m_Vol = (int)(clamp(Volume, 0.0f, 1.0f) * 255.0f);
+	m_aVoices[VoiceId].m_Vol = (int)(std::clamp(Volume, 0.0f, 1.0f) * 255.0f);
 	m_aVoices[VoiceId].m_Flags = Flags;
 	m_aVoices[VoiceId].m_Position = Position;
 	m_aVoices[VoiceId].m_Falloff = 0.0f;

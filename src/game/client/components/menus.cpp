@@ -174,9 +174,9 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 		pAnimator->m_Active = Checked || MouseInside;
 
 		if(pAnimator->m_Active)
-			pAnimator->m_Value = clamp<float>(pAnimator->m_Value + (Time - pAnimator->m_Time).count() / (double)std::chrono::nanoseconds(100ms).count(), 0, 1);
+			pAnimator->m_Value = std::clamp<float>(pAnimator->m_Value + (Time - pAnimator->m_Time).count() / (double)std::chrono::nanoseconds(100ms).count(), 0, 1);
 		else
-			pAnimator->m_Value = clamp<float>(pAnimator->m_Value - (Time - pAnimator->m_Time).count() / (double)std::chrono::nanoseconds(100ms).count(), 0, 1);
+			pAnimator->m_Value = std::clamp<float>(pAnimator->m_Value - (Time - pAnimator->m_Time).count() / (double)std::chrono::nanoseconds(100ms).count(), 0, 1);
 
 		Rect.w += pAnimator->m_Value * pAnimator->m_WOffset;
 		Rect.h += pAnimator->m_Value * pAnimator->m_HOffset;
@@ -1676,7 +1676,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Row.VSplitLeft(5.0f, nullptr, &Row);
 		static CButtonContainer s_SlowDownButton;
 		if(Ui()->DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_BACKWARD, 0, &SlowDownButton, BUTTONFLAG_LEFT))
-			m_Speed = clamp(m_Speed - 1, 0, (int)(std::size(DEMO_SPEEDS) - 1));
+			m_Speed = std::clamp(m_Speed - 1, 0, (int)(std::size(DEMO_SPEEDS) - 1));
 
 		// paused
 		CUIRect PausedButton;
@@ -1692,7 +1692,7 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		Row.VSplitLeft(8.0f, nullptr, &Row);
 		static CButtonContainer s_FastForwardButton;
 		if(Ui()->DoButton_FontIcon(&s_FastForwardButton, FONT_ICON_FORWARD, 0, &FastForwardButton, BUTTONFLAG_LEFT))
-			m_Speed = clamp(m_Speed + 1, 0, (int)(std::size(DEMO_SPEEDS) - 1));
+			m_Speed = std::clamp(m_Speed + 1, 0, (int)(std::size(DEMO_SPEEDS) - 1));
 
 		// speed meter
 		char aBuffer[128];

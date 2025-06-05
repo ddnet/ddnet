@@ -1124,7 +1124,7 @@ CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	}
 	else if(Prop == ETilesProp::PROP_COLOR_ENV)
 	{
-		int Index = clamp(NewVal - 1, -1, (int)m_pEditor->m_Map.m_vpEnvelopes.size() - 1);
+		int Index = std::clamp(NewVal - 1, -1, (int)m_pEditor->m_Map.m_vpEnvelopes.size() - 1);
 		const int Step = (Index - m_ColorEnv) % 2;
 		if(Step != 0)
 		{

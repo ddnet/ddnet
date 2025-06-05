@@ -1948,7 +1948,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					m_aSnapshotIncomingDataSize[Conn] = 0;
 				}
 
-				mem_copy((char *)m_aaSnapshotIncomingData[Conn] + Part * MAX_SNAPSHOT_PACKSIZE, pData, clamp(PartSize, 0, (int)sizeof(m_aaSnapshotIncomingData[Conn]) - Part * MAX_SNAPSHOT_PACKSIZE));
+				mem_copy((char *)m_aaSnapshotIncomingData[Conn] + Part * MAX_SNAPSHOT_PACKSIZE, pData, std::clamp(PartSize, 0, (int)sizeof(m_aaSnapshotIncomingData[Conn]) - Part * MAX_SNAPSHOT_PACKSIZE));
 				m_aSnapshotParts[Conn] |= (uint64_t)(1) << Part;
 
 				if(Part == NumParts - 1)
@@ -5075,7 +5075,7 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 {
 	int64_t GameTime = m_aGameTime[g_Config.m_ClDummy].Get(time_get());
 	int64_t PredTime = m_PredictedTime.Get(time_get());
-	int64_t SmoothTime = clamp(GameTime + (int64_t)(MixAmount * (PredTime - GameTime)), GameTime, PredTime);
+	int64_t SmoothTime = std::clamp(GameTime + (int64_t)(MixAmount * (PredTime - GameTime)), GameTime, PredTime);
 
 	*pSmoothTick = (int)(SmoothTime * GameTickSpeed() / time_freq()) + 1;
 	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick - 1) * time_freq() / GameTickSpeed()) / (float)(time_freq() / GameTickSpeed());

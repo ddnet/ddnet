@@ -7,8 +7,6 @@
 #include <cmath>
 #include <cstdlib>
 
-using std::clamp;
-
 constexpr float pi = 3.1415926535897932384626433f;
 
 constexpr int round_to_int(float f)

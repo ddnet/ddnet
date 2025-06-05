@@ -1614,7 +1614,7 @@ void CEditorActionEditEnvelopePointValue::Apply(bool Undo)
 	else
 	{
 		if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
-			CurrentValue = clamp(CurrentValue, 0.0f, 1.0f);
+			CurrentValue = std::clamp(CurrentValue, 0.0f, 1.0f);
 		pEnvelope->m_vPoints[m_PtIndex].m_aValues[m_Channel] = f2fx(CurrentValue);
 
 		if(m_PtIndex != 0)
