@@ -610,6 +610,23 @@ bool CServer::HasAuthHidden(int ClientId) const
 	return m_aClients[ClientId].m_AuthHidden;
 }
 
+bool CServer::HasSpecHidden(int ClientId) const
+{
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	return m_aClients[ClientId].m_SpecHidden;
+}
+
+bool CServer::IncludedInServerInfo(int ClientId) const
+{
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
+	const auto &Client = m_aClients[ClientId];
+	if(Client.m_State == CClient::STATE_EMPTY || Client.m_DebugDummy)
+		return false;
+	if(HasSpecHidden(ClientId) && !GameServer()->IsClientPlayer(ClientId))
+		return false;
+	return true;
+}
+
 bool CServer::GetClientInfo(int ClientId, CClientInfo *pInfo) const
 {
 	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "ClientId is not valid");
@@ -1095,6 +1112,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
 	pThis->m_aClients[ClientId].m_AuthHidden = false;
+	pThis->m_aClients[ClientId].m_SpecHidden = false;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_ShowIps = false;
@@ -1127,6 +1145,7 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].m_AuthKey = -1;
 	pThis->m_aClients[ClientId].m_AuthTries = 0;
 	pThis->m_aClients[ClientId].m_AuthHidden = false;
+	pThis->m_aClients[ClientId].m_SpecHidden = false;
 	pThis->m_aClients[ClientId].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientId].m_MaplistEntryToSend = CClient::MAPLIST_UNINITIALIZED;
 	pThis->m_aClients[ClientId].m_Traffic = 0;
@@ -2104,7 +2123,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 	int PlayerCount = 0, ClientCount = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].IncludedInServerInfo())
+		if(IncludedInServerInfo(i))
 		{
 			if(GameServer()->IsClientPlayer(i))
 				PlayerCount++;
@@ -2236,7 +2255,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].IncludedInServerInfo())
+		if(IncludedInServerInfo(i))
 		{
 			if(Remaining == 0)
 			{
@@ -2318,7 +2337,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxCons
 	int PlayerCount = 0, ClientCount = 0, ClientCountAll = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].IncludedInServerInfo())
+		if(IncludedInServerInfo(i))
 		{
 			ClientCountAll++;
 			if(i < MaxConsideredClients)
@@ -2367,7 +2386,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxCons
 	{
 		for(int i = 0; i < MaxConsideredClients; i++)
 		{
-			if(m_aClients[i].IncludedInServerInfo())
+			if(IncludedInServerInfo(i))
 			{
 				Packer.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
 				Packer.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
@@ -2503,7 +2522,7 @@ void CServer::UpdateRegisterServerInfo()
 	int PlayerCount = 0, ClientCount = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].IncludedInServerInfo())
+		if(IncludedInServerInfo(i))
 		{
 			if(GameServer()->IsClientPlayer(i))
 				PlayerCount++;
@@ -2560,7 +2579,7 @@ void CServer::UpdateRegisterServerInfo()
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].IncludedInServerInfo())
+		if(IncludedInServerInfo(i))
 		{
 			JsonWriter.BeginObject();
 
@@ -3813,6 +3832,26 @@ void CServer::ConHideAuthStatus(IConsole::IResult *pResult, void *pUser)
 	}
 }
 
+void CServer::ConHideSpecPresence(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pServer = (CServer *)pUser;
+
+	if(pServer->m_RconClientId >= 0 && pServer->m_RconClientId < MAX_CLIENTS &&
+		pServer->m_aClients[pServer->m_RconClientId].m_State != CServer::CClient::STATE_EMPTY)
+	{
+		if(pResult->NumArguments())
+		{
+			pServer->m_aClients[pServer->m_RconClientId].m_SpecHidden = pResult->GetInteger(0);
+		}
+		else
+		{
+			char aStr[9];
+			str_format(aStr, sizeof(aStr), "Value: %d", pServer->m_aClients[pServer->m_RconClientId].m_SpecHidden);
+			pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aStr);
+		}
+	}
+}
+
 void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 {
 	CServer *pSelf = (CServer *)pUserData;
@@ -4148,6 +4187,7 @@ void CServer::RegisterCommands()
 	Console()->Register("logout", "", CFGFLAG_SERVER, ConLogout, this, "Logout of rcon");
 	Console()->Register("show_ips", "?i[show]", CFGFLAG_SERVER, ConShowIps, this, "Show IP addresses in rcon commands (1 = on, 0 = off)");
 	Console()->Register("hide_auth_status", "?i[hide]", CFGFLAG_SERVER, ConHideAuthStatus, this, "Opt out of spectator count and hide auth status to non-authed players (1 = hidden, 0 = shown)");
+	Console()->Register("hide_spec_presence", "?i[hide]", CFGFLAG_SERVER, ConHideSpecPresence, this, "Don't show yourself in player list when in team -1 (1 = hidden, 0 = shown)");
 
 	Console()->Register("record", "?s[file]", CFGFLAG_SERVER | CFGFLAG_STORE, ConRecord, this, "Record to a file");
 	Console()->Register("stoprecord", "", CFGFLAG_SERVER, ConStopRecord, this, "Stop recording");

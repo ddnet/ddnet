@@ -91,6 +91,7 @@ class CServer : public IServer
 
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
+	const class IGameServer *GameServer() const { return m_pGameServer; }
 	class CConfig *Config() { return m_pConfig; }
 	const CConfig *Config() const { return m_pConfig; }
 	class IConsole *Console() { return m_pConsole; }
@@ -158,6 +159,7 @@ public:
 		int m_AuthKey;
 		int m_AuthTries;
 		bool m_AuthHidden;
+		bool m_SpecHidden;
 		int m_NextMapChunk;
 		int m_Flags;
 		bool m_ShowIps;
@@ -195,11 +197,6 @@ public:
 		std::shared_ptr<CHostLookup> m_pDnsblLookup;
 
 		bool m_Sixup;
-
-		bool IncludedInServerInfo() const
-		{
-			return m_State != STATE_EMPTY && !m_DebugDummy;
-		}
 
 		int ConsoleAccessLevel() const
 		{
@@ -313,6 +310,8 @@ public:
 	int GetAuthedState(int ClientId) const override;
 	const char *GetAuthName(int ClientId) const override;
 	bool HasAuthHidden(int ClientId) const override;
+	bool HasSpecHidden(int ClientId) const override;
+	bool IncludedInServerInfo(int ClientId) const override;
 	void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pMapSha256, int *pMapCrc) override;
 	bool GetClientInfo(int ClientId, CClientInfo *pInfo) const override;
 	void SetClientDDNetVersion(int ClientId, int DDNetVersion) override;
@@ -434,6 +433,7 @@ public:
 	static void ConLogout(IConsole::IResult *pResult, void *pUser);
 	static void ConShowIps(IConsole::IResult *pResult, void *pUser);
 	static void ConHideAuthStatus(IConsole::IResult *pResult, void *pUser);
+	static void ConHideSpecPresence(IConsole::IResult *pResult, void *pUser);
 
 	static void ConAuthAdd(IConsole::IResult *pResult, void *pUser);
 	static void ConAuthAddHashed(IConsole::IResult *pResult, void *pUser);
