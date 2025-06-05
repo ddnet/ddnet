@@ -14,10 +14,44 @@
 #include "console.h"
 #include "linereader.h"
 
+#include <algorithm>
 #include <iterator> // std::size
 #include <new>
 
 // todo: rework this
+
+CConsole::CResult::CResult(int ClientId) :
+	IResult(ClientId)
+{
+	mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
+	m_pArgsStart = nullptr;
+	m_pCommand = nullptr;
+	mem_zero(m_apArgs, sizeof(m_apArgs));
+}
+
+CConsole::CResult::CResult(const CResult &Other) :
+	IResult(Other)
+{
+	mem_copy(m_aStringStorage, Other.m_aStringStorage, sizeof(m_aStringStorage));
+	m_pArgsStart = m_aStringStorage + (Other.m_pArgsStart - Other.m_aStringStorage);
+	m_pCommand = m_aStringStorage + (Other.m_pCommand - Other.m_aStringStorage);
+	for(unsigned i = 0; i < Other.m_NumArgs; ++i)
+		m_apArgs[i] = m_aStringStorage + (Other.m_apArgs[i] - Other.m_aStringStorage);
+}
+
+void CConsole::CResult::AddArgument(const char *pArg)
+{
+	m_apArgs[m_NumArgs++] = pArg;
+}
+
+void CConsole::CResult::RemoveArgument(unsigned Index)
+{
+	dbg_assert(Index < m_NumArgs, "invalid argument index");
+	for(unsigned i = Index; i < m_NumArgs - 1; i++)
+		m_apArgs[i] = m_apArgs[i + 1];
+
+	m_apArgs[m_NumArgs--] = nullptr;
+}
 
 const char *CConsole::CResult::GetString(unsigned Index) const
 {
@@ -93,6 +127,11 @@ const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLeve
 		pInfo = pInfo->m_pNext;
 	}
 	return pInfo;
+}
+
+void CConsole::CCommand::SetAccessLevel(int AccessLevel)
+{
+	m_AccessLevel = std::clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER));
 }
 
 const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int FlagMask) const
@@ -367,6 +406,11 @@ void CConsole::InitChecksum(CChecksumData *pData) const
 		}
 		pData->m_NumCommands += 1;
 	}
+}
+
+void CConsole::SetAccessLevel(int AccessLevel)
+{
+	m_AccessLevel = std::clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER));
 }
 
 bool CConsole::LineIsValid(const char *pStr)
