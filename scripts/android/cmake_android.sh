@@ -131,7 +131,7 @@ export TW_VERSION_CODE=$ANDROID_VERSION_CODE
 
 ANDROID_VERSION_NAME="1.0"
 if [ -z ${TW_VERSION_NAME+x} ]; then
-	ANDROID_VERSION_NAME="$(grep '#define GAME_RELEASE_VERSION' src/game/version.h | awk '{print $3}' | tr -d '"')"
+	ANDROID_VERSION_NAME="$(grep '#define GAME_RELEASE_VERSION_INTERNAL' src/game/version.h | awk '{print $3}')"
 	if [ -z ${ANDROID_VERSION_NAME+x} ]; then
 		ANDROID_VERSION_NAME="1.0"
 	fi
