@@ -312,6 +312,9 @@ void CPlayer::Snap(int SnappingClient)
 	if(!Server()->ClientIngame(m_ClientId))
 		return;
 
+	if(this->GetTeam() == TEAM_SPECTATORS && Server()->HasSpecHidden(m_ClientId) && m_ClientId != SnappingClient && Server()->GetAuthedState(SnappingClient) == AUTHED_NO)
+		return;
+
 	int id = m_ClientId;
 	if(!Server()->Translate(id, SnappingClient))
 		return;
