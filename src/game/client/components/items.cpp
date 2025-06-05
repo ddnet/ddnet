@@ -292,6 +292,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	const ColorRGBA InnerColor = color_cast<ColorRGBA>(ColorHSLA(ColorIn).WithAlpha(Alpha));
 
 	float Ticks;
+	float TicksHead = Client()->GameTick(g_Config.m_ClDummy);
 	if(Type == LASERTYPE_DOOR)
 	{
 		Ticks = 1.0f;
@@ -300,11 +301,14 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	{
 		int PredictionTick = Client()->GetPredictionTick();
 		Ticks = (float)(PredictionTick - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy);
+		TicksHead += Client()->PredIntraGameTick(g_Config.m_ClDummy);
 	}
 	else
+	{
 		Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
+		TicksHead += Client()->IntraGameTick(g_Config.m_ClDummy);
+	}
 
-	float TicksHead = Client()->GameTick(g_Config.m_ClDummy);
 	if(Type == LASERTYPE_DRAGGER)
 	{
 		TicksHead *= (((pCurrent->m_Subtype >> 1) % 3) * 4.0f) + 1;
