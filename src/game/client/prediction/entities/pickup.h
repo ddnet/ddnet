@@ -21,10 +21,12 @@ public:
 
 	int Type() const { return m_Type; }
 	int Subtype() const { return m_Subtype; }
+	int Flags() const { return m_Flags; }
 
 private:
 	int m_Type;
 	int m_Subtype;
+	int m_Flags;
 
 	// DDRace
 
