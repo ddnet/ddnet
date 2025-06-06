@@ -173,10 +173,12 @@ public:
 
 	void ParseArguments(int NumArgs, const char **ppArguments) override;
 	void Register(const char *pName, const char *pParams, int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp) override;
+	void Register(const char *pName, const char *pParams, const char *pHelp, int Flags, const FCommandCallbackNew &Callback) override;
 	void RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp) override;
 	void DeregisterTemp(const char *pName) override;
 	void DeregisterTempAll() override;
 	void Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser) override;
+	void Chain(const char *pName, const FChainCommandCallbackNew &ChainCallback) override;
 	void StoreCommands(bool Store) override;
 
 	bool LineIsValid(const char *pStr) override;
