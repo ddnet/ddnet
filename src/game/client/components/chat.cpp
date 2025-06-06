@@ -160,67 +160,6 @@ void CChat::OnStateChange(int NewState, int OldState)
 		Reset();
 }
 
-void CChat::ConSay(IConsole::IResult *pResult, void *pUserData)
-{
-	((CChat *)pUserData)->SendChat(0, pResult->GetString(0));
-}
-
-void CChat::ConSayTeam(IConsole::IResult *pResult, void *pUserData)
-{
-	((CChat *)pUserData)->SendChat(1, pResult->GetString(0));
-}
-
-void CChat::ConChat(IConsole::IResult *pResult, void *pUserData)
-{
-	const char *pMode = pResult->GetString(0);
-	if(str_comp(pMode, "all") == 0)
-		((CChat *)pUserData)->EnableMode(0);
-	else if(str_comp(pMode, "team") == 0)
-		((CChat *)pUserData)->EnableMode(1);
-	else
-		((CChat *)pUserData)->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all or team as mode");
-
-	if(pResult->GetString(1)[0] || g_Config.m_ClChatReset)
-		((CChat *)pUserData)->m_Input.Set(pResult->GetString(1));
-}
-
-void CChat::ConShowChat(IConsole::IResult *pResult, void *pUserData)
-{
-	((CChat *)pUserData)->m_Show = pResult->GetInteger(0) != 0;
-}
-
-void CChat::ConEcho(IConsole::IResult *pResult, void *pUserData)
-{
-	((CChat *)pUserData)->Echo(pResult->GetString(0));
-}
-
-void CChat::ConClearChat(IConsole::IResult *pResult, void *pUserData)
-{
-	((CChat *)pUserData)->ClearLines();
-}
-
-void CChat::ConchainChatOld(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	((CChat *)pUserData)->RebuildChat();
-}
-
-void CChat::ConchainChatFontSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	CChat *pChat = (CChat *)pUserData;
-	pChat->EnsureCoherentWidth();
-	pChat->RebuildChat();
-}
-
-void CChat::ConchainChatWidth(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	CChat *pChat = (CChat *)pUserData;
-	pChat->EnsureCoherentFontSize();
-	pChat->RebuildChat();
-}
-
 void CChat::Echo(const char *pString)
 {
 	AddLine(CLIENT_MSG, 0, pString);
@@ -228,20 +167,52 @@ void CChat::Echo(const char *pString)
 
 void CChat::OnConsoleInit()
 {
-	Console()->Register("say", "r[message]", CFGFLAG_CLIENT, ConSay, this, "Say in chat");
-	Console()->Register("say_team", "r[message]", CFGFLAG_CLIENT, ConSayTeam, this, "Say in team chat");
-	Console()->Register("chat", "s['team'|'all'] ?r[message]", CFGFLAG_CLIENT, ConChat, this, "Enable chat with all/team mode");
-	Console()->Register("+show_chat", "", CFGFLAG_CLIENT, ConShowChat, this, "Show chat");
-	Console()->Register("echo", "r[message]", CFGFLAG_CLIENT | CFGFLAG_STORE, ConEcho, this, "Echo the text in chat window");
-	Console()->Register("clear_chat", "", CFGFLAG_CLIENT | CFGFLAG_STORE, ConClearChat, this, "Clear chat messages");
+	Console()->Register("say", "r[message]", "Say in chat", CFGFLAG_CLIENT, [&](IConsole::IResult &Result) {
+		SendChat(0, Result.GetString(0));
+	});
+	Console()->Register("say_team", "r[message]", "Say in team chat", CFGFLAG_CLIENT, [&](IConsole::IResult &Result) {
+		SendChat(1, Result.GetString(0));
+	});
+	Console()->Register("chat", "s['team'|'all'] ?r[message]", "Enable chat with all/team mode", CFGFLAG_CLIENT, [&](IConsole::IResult &Result) {
+		const char *pMode = Result.GetString(0);
+		if(str_comp(pMode, "all") == 0)
+			EnableMode(0);
+		else if(str_comp(pMode, "team") == 0)
+			EnableMode(1);
+		else
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", "expected all or team as mode");
+
+		if(Result.GetString(1)[0] || g_Config.m_ClChatReset)
+			m_Input.Set(Result.GetString(1));
+	});
+	Console()->Register("+show_chat", "", "Show chat", CFGFLAG_CLIENT, [&](IConsole::IResult &Result) {
+		m_Show = Result.GetInteger(0) != 0;
+	});
+	Console()->Register("echo", "r[message]", "Echo the text in chat window", CFGFLAG_CLIENT | CFGFLAG_STORE, [&](IConsole::IResult &Result) {
+		Echo(Result.GetString(0));
+	});
+	Console()->Register("clear_chat", "", "Clear chat messages", CFGFLAG_CLIENT | CFGFLAG_STORE, [&](IConsole::IResult &Result) {
+		ClearLines();
+	});
 }
 
 void CChat::OnInit()
 {
 	Reset();
-	Console()->Chain("cl_chat_old", ConchainChatOld, this);
-	Console()->Chain("cl_chat_size", ConchainChatFontSize, this);
-	Console()->Chain("cl_chat_width", ConchainChatWidth, this);
+	Console()->Chain("cl_chat_old", [&](IConsole::IResult &Result, const IConsole::FCommandCallbackNew &Callback) {
+		Callback(Result);
+		RebuildChat();
+	});
+	Console()->Chain("cl_chat_size", [&](IConsole::IResult &Result, const IConsole::FCommandCallbackNew &Callback) {
+		Callback(Result);
+		EnsureCoherentWidth();
+		RebuildChat();
+	});
+	Console()->Chain("cl_chat_width", [&](IConsole::IResult &Result, const IConsole::FCommandCallbackNew &Callback) {
+		Callback(Result);
+		EnsureCoherentFontSize();
+		RebuildChat();
+	});
 }
 
 bool CChat::OnInput(const IInput::CEvent &Event)
