@@ -41,7 +41,7 @@ LaserFlags = [
 ]
 
 PickupFlags = [
-	"XFLIP", "YFLIP", "ROTATE",
+	"XFLIP", "YFLIP", "ROTATE", "NO_PREDICT",
 ]
 
 LaserTypes = ["RIFLE", "SHOTGUN", "DOOR", "FREEZE", "DRAGGER", "GUN", "PLASMA"]
