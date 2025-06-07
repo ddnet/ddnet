@@ -147,7 +147,7 @@ public:
 			m_Ids.push_back(c);
 		}
 	}
-	bool HasStrongAgainst(int From, int To)
+	bool HasStrongAgainst(int From, int To) const
 	{
 		for(int i : m_Ids)
 		{
