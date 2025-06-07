@@ -60,9 +60,9 @@ public:
 	};
 
 	/**
-	* More precise state for @see STATE_LOADING
-	* Sets what is actually happening in the client right now
-	*/
+	 * More precise state for @see STATE_LOADING
+	 * Sets what is actually happening in the client right now
+	 */
 	enum ELoadingStateDetail
 	{
 		LOADING_STATE_DETAIL_INITIAL,
@@ -272,7 +272,7 @@ public:
 
 	virtual IGraphics::CTextureHandle GetDebugFont() const = 0; // TODO: remove this function
 
-	//DDRace
+	// DDRace
 
 	virtual const char *GetCurrentMap() const = 0;
 	virtual const char *GetCurrentMapPath() const = 0;
