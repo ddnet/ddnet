@@ -5,6 +5,12 @@
 #include <ctime>
 #include <functional>
 
+#include <base/detect.h>
+
+#if defined(CONF_FAMILY_UNIX)
+#include <sys/types.h> // pid_t
+#endif
+
 enum class TRISTATE
 {
 	NONE,
@@ -92,5 +98,33 @@ typedef struct NETSTATS
 	uint64_t recv_packets;
 	uint64_t recv_bytes;
 } NETSTATS;
+
+#if defined(CONF_FAMILY_WINDOWS)
+/**
+ * A handle for a process.
+ *
+ * @ingroup Shell
+ */
+typedef void *PROCESS;
+/**
+ * A handle that denotes an invalid process.
+ *
+ * @ingroup Shell
+ */
+constexpr PROCESS INVALID_PROCESS = nullptr;
+#else
+/**
+ * A handle for a process.
+ *
+ * @ingroup Shell
+ */
+typedef pid_t PROCESS;
+/**
+ * A handle that denotes an invalid process.
+ *
+ * @ingroup Shell
+ */
+constexpr PROCESS INVALID_PROCESS = 0;
+#endif
 
 #endif // BASE_TYPES_H
