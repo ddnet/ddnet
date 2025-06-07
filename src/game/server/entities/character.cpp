@@ -96,6 +96,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_TuneZone = Collision()->IsTune(Collision()->GetMapIndex(Pos));
 	m_TuneZoneOld = -1; // no zone leave msg on spawn
+	m_TuneZoneOverride = -1;
 	m_NeededFaketuning = 0; // reset fake tunings on respawn and send the client
 	SendZoneMsgs(); // we want a entermessage also on spawn
 	GameServer()->SendTuningParams(m_pPlayer->GetCid(), m_TuneZone);
@@ -257,7 +258,7 @@ void CCharacter::HandleJetpack()
 	{
 		if(m_Core.m_Jetpack)
 		{
-			float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
+			float Strength = GetTuning(GetOverriddenTuneZone())->m_JetpackStrength;
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, m_pPlayer->GetCid(), m_Core.m_ActiveWeapon);
 		}
 	}
@@ -302,8 +303,8 @@ void CCharacter::HandleNinja()
 		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
 		vec2 GroundElasticity = vec2(
-			GetTuning(m_TuneZone)->m_GroundElasticityX,
-			GetTuning(m_TuneZone)->m_GroundElasticityY);
+			GetTuning(GetOverriddenTuneZone())->m_GroundElasticityX,
+			GetTuning(GetOverriddenTuneZone())->m_GroundElasticityY);
 
 		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), GroundElasticity);
 
@@ -514,7 +515,7 @@ void CCharacter::FireWeapon()
 			else
 				Dir = vec2(0.f, -1.f);
 
-			float Strength = GetTuning(m_TuneZone)->m_HammerStrength;
+			float Strength = GetTuning(GetOverriddenTuneZone())->m_HammerStrength;
 
 			vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 			Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
@@ -531,7 +532,7 @@ void CCharacter::FireWeapon()
 		// if we Hit anything, we have to wait for the reload
 		if(Hits)
 		{
-			float FireDelay = GetTuning(m_TuneZone)->m_HammerHitFireDelay;
+			float FireDelay = GetTuning(GetOverriddenTuneZone())->m_HammerHitFireDelay;
 			m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 		}
 	}
@@ -541,7 +542,7 @@ void CCharacter::FireWeapon()
 	{
 		if(!m_Core.m_Jetpack || !m_pPlayer->m_NinjaJetpack || m_Core.m_HasTelegunGun)
 		{
-			int Lifetime = (int)(Server()->TickSpeed() * GetTuning(m_TuneZone)->m_GunLifetime);
+			int Lifetime = (int)(Server()->TickSpeed() * GetTuning(GetOverriddenTuneZone())->m_GunLifetime);
 
 			new CProjectile(
 				GameWorld(),
@@ -563,7 +564,7 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_SHOTGUN:
 	{
-		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
+		float LaserReach = GetTuning(GetOverriddenTuneZone())->m_LaserReach;
 
 		new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
 		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
@@ -572,7 +573,7 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_GRENADE:
 	{
-		int Lifetime = (int)(Server()->TickSpeed() * GetTuning(m_TuneZone)->m_GrenadeLifetime);
+		int Lifetime = (int)(Server()->TickSpeed() * GetTuning(GetOverriddenTuneZone())->m_GrenadeLifetime);
 
 		new CProjectile(
 			GameWorld(),
@@ -593,7 +594,7 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_LASER:
 	{
-		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
+		float LaserReach = GetTuning(GetOverriddenTuneZone())->m_LaserReach;
 
 		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_LASER);
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
@@ -619,7 +620,7 @@ void CCharacter::FireWeapon()
 	if(!m_ReloadTimer)
 	{
 		float FireDelay;
-		GetTuning(m_TuneZone)->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
+		GetTuning(GetOverriddenTuneZone())->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
 }
@@ -1308,8 +1309,7 @@ void CCharacter::Snap(int SnappingClient)
 	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
 	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
 
-	// -1 is the default value, SnapNewItem zeroes the object, so it would incorrectly become 0
-	pDDNetCharacter->m_TuneZoneOverride = -1;
+	pDDNetCharacter->m_TuneZoneOverride = m_TuneZoneOverride;
 }
 
 void CCharacter::PostSnap()
@@ -2048,13 +2048,40 @@ void CCharacter::HandleTiles(int Index)
 void CCharacter::HandleTuneLayer()
 {
 	m_TuneZoneOld = m_TuneZone;
-	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
-	m_TuneZone = Collision()->IsTune(CurrentIndex);
 
-	if(m_TuneZone)
-		m_Core.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+	int CurrentIndex = Collision()->GetMapIndex(m_Pos);
+	int Type = Collision()->GetTuneType(CurrentIndex);
+	int Number = Collision()->GetTuneNumber(CurrentIndex);
+
+	if(m_TuneZoneOverride == -1)
+	{
+		m_TuneZone = Collision()->IsTune(CurrentIndex);
+	}
 	else
-		m_Core.m_Tuning = *Tuning();
+	{
+		m_TuneZone = 0;
+	}
+
+	if(Type == TILE_TUNE_LOCK_ENABLE)
+	{
+		m_TuneZoneOverride = Number;
+	}
+	else if(Type == TILE_TUNE_LOCK_DISABLE)
+	{
+		m_TuneZoneOverride = -1;
+	}
+
+	if(m_TuneZoneOverride != -1)
+	{
+		m_Core.m_Tuning = TuningList()[m_TuneZoneOverride];
+	}
+	else
+	{
+		if(m_TuneZone)
+			m_Core.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+		else
+			m_Core.m_Tuning = *Tuning();
+	}
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
