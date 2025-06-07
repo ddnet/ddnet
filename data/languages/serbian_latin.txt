@@ -439,8 +439,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Morate ponovo pokrenuti igru da bi sva podešavanja bila primenjena
 
-##### needs translation #####
-
 Demo
 == Snimak
 
@@ -577,7 +575,7 @@ Welcome to DDNet
 == Dobro došli u DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork je kooperativna onlajn igra u kojoj je cilj da vi i vaša grupa teeova dođete do cilja na mapi. Kao novajlija trebali biste započeti na Novice serverima, na kojima se nalaze najjednostavnije mape. Razmislite o pingu da biste izabrali server koji vam je blizu.
+== DDraceNetwork je kooperativna onlajn igra u kojoj je cilj da vi i vaša grupa ti-a dođete do cilja na mapi. Kao novajlija trebali biste započeti na Novice serverima, na kojima se nalaze najjednostavnije mape. Razmislite o pingu da biste izabrali server koji vam je blizu.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Koristite taster k za ubijanje (ponovno pokretanje), q za pauziranje i gledanje drugih igrača. Pogledajte podešavanja za ostale prečice tastera.
@@ -596,6 +594,9 @@ Video name:
 
 Show DDNet map finishes in server browser
 == Prikaži završetka DDNet mape u pregledaču servera
+
+transmits your player name to info.ddnet.org
+== prenosi ime vašeg igrača na info.ddnet.org
 
 Theme
 == Tema
@@ -768,6 +769,9 @@ Show HUD
 may cause delay
 == može prouzrokovati kašnjenje
 
+Use high DPI
+== Koristi visoki DPI
+
 Enable game sounds
 == Koristi zvukove igre
 
@@ -868,7 +872,7 @@ Show quads
 == Prikaži quads
 
 AntiPing
-== AntiPing
+== Predviđanje ( AntiPing )
 
 AntiPing: predict other players
 == AntiPing: predviđanje drugih igrača
@@ -881,6 +885,9 @@ AntiPing: predict grenade paths
 
 Show other players' hook collision lines
 == Prikaži liniju sudara kuke drugih igrača
+
+Show other players' key presses
+== Prikaži pritiske tastera drugih igrača
 
 Show tiles layers from BG map
 == Prikaži slojeve pločica sa BG mape
@@ -907,7 +914,7 @@ New random timeout code
 == Novi slučajni kod isteka vremena
 
 Entities
-== Текстуре
+== Laseri
 
 Emoticons
 == Ikonice osećanja
@@ -1088,25 +1095,26 @@ Loading menu images
 == Učitavanje menu slika
 
 AFR
-== AFR.
+== Afro
 
+# Enough serbians will understand я which is ya so i will leave like this instead of Azija (azija) cause its 4 or less letters
 ASI
-== AZI.
+== Aziя
 
 AUS
-== AUS.
+== Aus
 
 EUR
-== EVR.
+== Evro
 
 NA
-== S.A.
+== S Am
 
 SA
-== J.A.
+== J Am
 
 CHN
-== KIN.
+== Kina
 
 Getting server list from master server
 == Dobijam listu servera sa master servera
@@ -1139,7 +1147,7 @@ Loading skin files
 == Učitavam fajlove tema
 
 Chat command
-== k.jednostav.tekst.komuni.sistema
+== Čet komanda
 
 Enable controller
 == Uključi kontroler
@@ -1300,7 +1308,7 @@ Opacity
 == Providnost
 
 Adjust the opacity of entities belonging to other teams, such as tees and name plates
-== Podesite neprozirnost entiteta koji pripadaju drugim timovima, kao što su majice i natpisne pločice
+== Podesite providnost entiteta koji pripadaju drugim timovima, kao što su majice i natpisne pločice
 
 Quads are used for background decoration
 == Quads su korišćeni za dekoraciju pozadine
@@ -1352,856 +1360,857 @@ Loading sound files
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Неуспешно за време иницијализације. Покушајте променити gfx_backend у OpenGL или Vulkan у settings_ddnet.cfg у директоријуму конфигурације и покушајте поново.
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== Дошло је до грешке при записивању команде. Покушајте ажурирати драјвере за вашу графичку картицу.
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== Извршена је грешка рендеринг команде. Покушајте ажурирати драјвере за вашу графичку картицу.
-
-[Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== Неуспешно слање рендерних команди. Покушајте ажурирати драјвере за вашу графичку картицу.
-
-Could not save downloaded map. Try manually deleting this file: %s
-== Није могуће сачувати преузету мапу. Покушајте ручно обрисати овај фајл: %s.
-
-Initializing components
-== Иницијализација компоненти
-
-Quitting. Please wait…
-== Излазим. Молим вас да почекате…
-
-Restarting. Please wait…
-== Поновно покрећем се. Молим вас да почекате…
-
-Multi-View
-== Мулти-поглед
-
-Rename folder
-== Преименујте фасциклу
-
-A demo with this name already exists
-== Демо са овим именом већ постоји.
-
-A folder with this name already exists
-== Фасцикла са овим именом већ постоји.
-
-Unable to rename the folder
-== Није могуће преименовати фасциклу.
-
-File '%s' already exists, do you want to overwrite it?
-== Датотека '%s' већ постоји, желите ли да је препишете?
-
-(paused)
-== (паузирано)
-
-transmits your player name to info.ddnet.org
-== преноси ваше играчко име на info.ddnet.org
-
-Copy info
-== Копирај информације
-
-No server selected
-== Није изабран сервер
-
-Online clanmates (%d)
-== Чланови клана на мрежи (%d)
-
-[friends (server browser)]
-Offline (%d)
-== Изван мреже (%d)
-
-Click to select server. Double click to join your friend.
-== Кликните да бисте изабрали сервер. Дупли клик за придруживање пријатељу.
-
-Click to remove this player from your friends list.
-== Кликните да бисте уклонили овог играча са листе пријатеља.
-
-Click to remove this clan from your friends list.
-== Кликните да бисте уклонили овај клан са листе пријатеља.
-
-Are you sure that you want to remove the player '%s' from your friends list?
-== Да ли сте сигурни да желите да уклоните играча '%s' са листе пријатеља?
-
-Are you sure that you want to remove the clan '%s' from your friends list?
-== Да ли сте сигурни да желите да уклоните клан '%s' са листе пријатеља?
-
-Add Clan
-== Додај клан
-
-Play the current demo
-== Пусти тренутни демо запис
-
-Pause the current demo
-== Паузирај тренутни демо запис
-
-Stop the current demo
-== Заустави тренутни демо запис
-
-Go back one tick
-== Иди назад један корак
-
-Go forward one tick
-== Иди напред један корак
-
-Slow down the demo
-== Успори демо запис
-
-Speed up the demo
-== Убрзај демо запис
-
-Mark the beginning of a cut (right click to reset)
-== Обележи почетак сечења (десни клик за ресетовање)
-
-Mark the end of a cut (right click to reset)
-== Обележи крај сечења (десни клик за ресетовање)
-
-Export cut as a separate demo
-== Извоз сечења као засебног демо записа
-
-Go back one marker
-== Иди назад један маркер
-
-Go forward one marker
-== Иди напред један маркер
-
-Close the demo player
-== Затвори репродуктор демо записа
-
-Toggle keyboard shortcuts
-== Пребациванје тастатурних пречица
-
-Export demo cut
-== Извоз демо сечења
-
-Cut interval
-== Интервал сечења
-
-Cut length
-== Дужина сечења
-
-All combined
-== Све комбиновано
-
-Folder Link
-== Веза до фасцикле
-
-Open the directory that contains the demo files
-== Отвори директоријум који садржи демо фајлове
-
-Are you sure that you want to delete the folder '%s'?
-== Да ли сте сигурни да желите да обришете фасциклу '%s'?
-
-Are you sure that you want to delete the demo '%s'?
-== Да ли сте сигурни да желите да обришете демо запис '%s'?
-
-Delete folder
-== Обриши фасциклу
-
-Unable to delete the demo '%s'
-== Није могуће обрисати демо запис '%s'
-
-Unable to delete the folder '%s'. Make sure it's empty first.
-== Није могуће обрисати фасциклу '%s'. Проверите прво да ли је празна.
-
-Menu opened. Press Esc key again to close menu.
-== Мени је отворен. Поново притисните тастер Esc да бисте затворили мени.
-
-Save power by lowering refresh rate (higher input latency)
-== Уштедите струју смањивањем стопе освежавања (већа улазна латенција)
-
-Open the settings file
-== Отворите датотеку са подешавањима
-
-Open the directory that contains the configuration and user files
-== Отворите директоријум који садржи конфигурационе и корисничке датотеке.
-
-Open the directory to add custom themes
-== Отворите директоријум за додавање прилагођених тема.
-
-Create a random skin
-== Направите насумичан скин.
-
-Open the directory to add custom skins
-== Отворите директоријум за додавање прилагођених скинова.
-
-No controller found. Plug in a controller.
-== Контролер није пронађен. Прикључите контролер.
-
-Axis
-== Оса
-
-Reset controls
-== Ресетујте контроле
-
-Are you sure that you want to reset the controls to their defaults?
-== Да ли сте сигурни да желите вратити контроле на њихове подразумеване вредности?
-
-Cancel
-== Откажи
-
-Graphics card
-== Графичка картица
-
-Weapons
-== Оружје
-
-Rifle Laser Outline Color
-== Боја контуре ласера за пушку
-
-Rifle Laser Inner Color
-== Боја унутрашњости ласера за пушку
-
-Shotgun Laser Outline Color
-== Боја контуре ласера за пушку са једним цеветом
-
-Shotgun Laser Inner Color
-== Боја унутрашњости ласера за пушку са једним цеветом
-
-Door Laser Outline Color
-== Боја контуре ласера за врата
-
-Door Laser Inner Color
-== Боја унутрашњости ласера за врата
-
-Freeze Laser Outline Color
-== Боја ободова замрзавајућег ласера
-
-Freeze Laser Inner Color
-== Боја унутрашњости замрзавајућег ласера
-
-Set all to Rifle
-== Постави све на пушку
-
-Unregister protocol and file extensions
-== Отказивање протокола и проширења датотека
-
-Open the directory to add custom assets
-== Отворите директоријум за додавање прилагођених ресурса
-
-Moved ingame
-== Померено у игри
-
-[Translation credits: Add your own name here when you update translations]
-English translation by the DDNet Team
-== Serbian translation by DNR, EliteTee, Kingston and Veljko Radovanovic (VekiPro)
+== Neuspelo pokretanje. probaj da promeniš gfx_backend na OpenGL ili Vulkan u settings_ddnet.cfg
 
 [Graphics error]
 Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Nestalo Grafičke memorije. Pokušaj obrisati nebitne teme ili promeniti 'cl_skins_loaded_max' na manju vrednost (skinove, entities, itd.)
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== Greška pri snimanju, pokušaj undaprediti GPU drivere
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Neuspelo renderovanje, pokušaj undaprediti GPU drivere
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== Greška u renderovanju, pokušaj undaprediti GPU drivere
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Grafička greška, pokušaj undaprediti GPU drivere
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Nepoznata greška, probaj da promeniš gfx_backend na OpenGL ili Vulkan u settings_ddnet.cfg
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Neuspeh u pokretanju grafičke,samostalno popravljanje
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Neuspelo pokretanje, Verovatno zato što nisi skinuo drivere za integrisanu grafičku
 
 Could not resolve connect address '%s'. See local console for details.
-== 
+== Neuspelo povezivanje na '%s'. Pogledaj konzolu za detalje
 
 Connect address error
-== 
+== Nepoznata adresa
+
+Could not save downloaded map. Try manually deleting this file: %s
+== Neuspelo skidanje mape, ručno obriši fajl: %s
 
 Could not connect dummy
-== 
+== Neuspelo povezivanje lutke
 
 Error playing demo
-== 
+== Greška pri puštanja snimka
 
 Failed saving the replay!
-== 
+== Neuspelo čuvanje snimka
 
 Saving settings to '%s' failed
-== 
+== Čuvanje podešavanja u '%s' neuspelo
 
 Error saving settings
-== 
+== Neuspelo čuvanje podešavanja
 
 No demo with this filename exists
-== 
+== Nepostoji snimak sa ovim imenom
 
 "%s" is not compatible with pnglite and cannot be loaded by old DDNet versions:
-== 
+== "%s" je nepodržan fajl
 
 Loading demo file from storage
-== 
+== Učitavanje fajla
 
 Some fonts could not be loaded. Check the local console for details.
-== 
+== Fontovi nisu uspeli da se učitaju, proverite konzolu za detalje
+
+Initializing components
+== Učitavanje komponenti
+
+Quitting. Please wait…
+== Gašenje...
+
+Restarting. Please wait…
+== Ponovo pokretanje...
 
 Loading background map
-== 
+== Učitavanje pozadine
 
 Auto-sync player camera
-== 
+== Sinhronizacija kamere igrača
 
 [Auto camera]
 Disabled
-== 
+== Isključena
 
 [Auto camera]
 Enabled
-== 
+== Uključena
 
 [Auto camera]
 Unavailable for this player
-== 
+== Nedostupna za ovog igrača
 
 [Auto camera]
 Inactive
-== 
+== Neaktivna
 
 [Auto camera]
 Active
-== 
+== Aktivna
 
 Searching
-== 
+== Pretraživanje
 
 Enter Username
-== 
+== Ime
 
 Enter Password
-== 
+== Šifra
 
 NOT CONNECTED
-== 
+== Nije povezano
 
 Match %d of %d
-== 
+== Nađeno %d od %d
 
 No results
-== 
+== Nema rezultata
 
 Lines %d - %d (%s)
 == 
 
 Locked
-== 
+== Zaključano
 
 Following
-== 
+== Pratiš
 
 Loading commands…
-== 
+== Učitavanje komandi...
 
 Loading maps…
-== 
+== Učitavanje mapi...
+
+Multi-View
+== Više-Pratnja
 
 [Spectating]
 Following %s
-== 
+== Gledaš %s
 
 [Spectating Camera Mode Icon]
 AUTO
-== 
+== AUTO
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Neke slike neuspešno učitane. Proveri konzolu za detalje
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Neki zvuci neuspešno učitani. Proveri konzolu za detalje
 
 Loading menu themes
-== 
+== Učitavanje temi
 
 Press a key…
-== 
+== Stisni dugme...
 
 Main menu
-== 
+== Glavni meni
+
+Rename folder
+== Preimenuj fasciklu
 
 Render complete
-== 
+== Završeno renderovanje
 
 Are you sure that you want to restart?
-== 
+== Siguran si da želiš restartovati?
 
 Save skin
-== 
+== Sačuvaj skin
 
 Are you sure you want to save your skin? If a skin with this name already exists, it will be replaced.
-== 
+== Dali si siguran da želiš da ga sačuvaš? Ukoliko već postoji skin sa istim imenom biće zamenjen
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== Postoji nesačuvana mapa u uređivaču, možda bi hteo da je sačuvaš
 
 Continue anyway?
-== 
+== Sigurno nastavi?
 
 This name cannot be used for files and folders
-== 
+== Nemoguće koristiti ovo ime
+
+A demo with this name already exists
+== Snimak s tim imenom već postoji
+
+A folder with this name already exists
+== Fascikla s tim imenom već posoji
+
+Unable to rename the folder
+== Neuspešno preimenovana fascikla
+
+File '%s' already exists, do you want to overwrite it?
+== Fajl '%s' već postoji, dali želiš da ga zameniš?
+
+(paused)
+== (pauzirano)
 
 Videos directory
-== 
+== Fascikla videa
 
 Video was saved to '%s'
-== 
+== Video sačuvan u '%s'
 
 Unable to save the skin with a reserved name
-== 
+== Neuspešno čuvanje skina sa rezervisanim imenom 
 
 Unable to save the skin
-== 
+== Neuspešno čuvanje skina
+
+Unable to save the skin with a reserved name
+== Neuspešno čuvanje skina sa rezervisanim imenom
 
 %d/%d KiB (%.1f KiB/s)
-== 
+== %d/%d KiB (%.1f KiB/s)
 
 No local servers found (ports %d-%d)
-== 
+== Nema lokalnih servera (traženi na portovima %d-%d)
 
 Example of usage
-== 
+== Primer korišćenja
 
 No login required
-== 
+== Nalog neobavezan
 
 Communities
-== 
+== Zajednice
+
+Copy info
+== Kopiraj info
+
+No server selected
+== Server nije izabran
 
 Online friends (%d)
-== 
+== Prisutnih prijatelja (%d)
+
+Online clanmates (%d)
+== Prisutnih klan prijatelja (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Neprisutnih (%d)
+
+Click to select server. Double click to join your friend.
+== Klikni da izabereš server, dvaput da uđeš kod njega/nje
+
+Click to remove this player from your friends list.
+== Klikni da obrišeš prijatelja sa liste
+
+Click to remove this clan from your friends list.
+== Klikni da obrišeš klan sa liste
 
 Add friends by entering their name below or by clicking their name in the player list.
-== 
+== Dodaj prijatelje upisivanjem njihovih imena i klana u prazna polja ili u listi igrača na serveru
 
 Add clanmates by entering their clan below and leaving the name blank.
-== 
+== Dodaj klan tako što dodaš 'prijatelja' bez imena,samo sa imenom klana
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== Dali si siguran da želiš obrisati igrača '%s' sa liste?
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== Dali si siguran da želiš obrisati klan '%s' sa liste?
+
+Add Clan
+== Dodaj klan
 
 Server filter
-== 
+== Filter servera
 
 Friends
-== 
+== Prijatelji
+
+Play the current demo
+== Pusti snimak
+
+Pause the current demo
+== Pauziraj snimak
+
+Stop the current demo
+== Zaustavi snimak
 
 Go back the specified duration
-== 
+== Premotaj nazad
 
 [Demo player duration]
 %d min.
-== 
+== %d minimum
 
 [Demo player duration]
 %d sec.
-== 
+== %d sek.
 
 Change the skip duration
-== 
+== Promeni skip duraciju
 
 Go forward the specified duration
-== 
+== Premotaj napred
+
+Go back one tick
+== Idi nazad jedan tik
+
+Go forward one tick
+== Idi napred jedan tik
+
+Go back one marker
+== Premotaj nazad 1 marker
+
+Go forward one marker
+== Premotaj napred 1 marker
+
+Slow down the demo
+== Uspori snimak
+
+Speed up the demo
+== Ubrzaj snimak
+
+Mark the beginning of a cut (right click to reset)
+== Označi početak isečka (desni klik reset)
+
+Mark the end of a cut (right click to reset)
+== Označi kraj isečka (desni klik reset)
+
+Export cut as a separate demo
+== Eksportuj isečak kao poseban snimak
+
+Close the demo player
+== Zatvori snimak
+
+Toggle keyboard shortcuts
+== Uključi klavijaturne prečice
 
 Toggle auto camera
-== 
+== Uključi auto-kameru
+
+Export demo cut
+== Eksportuj
+
+Cut interval
+== Interval isečka
+
+Cut length
+== Dužina isečka
 
 Render cut to video
-== 
+== Renderuj isečak video
 
 Please use a different filename
-== 
+== Prosim koristi različita imena
+
+All combined
+== Sve zajedno
 
 No demo selected
-== 
+== Snimak nije izabran
+
+Folder Link
+== Link za fasciklu
 
 Created
-== 
+== Napravljeno
 
 Netversion
-== 
+== Verzija
 
 Map size
-== 
+== Veličina mape
 
 [Demo details]
 map not included
-== 
+== Mapa nepostoji
+
+Open the directory that contains the demo files
+== Otvori fasciklu sa snimcima
+
+Are you sure that you want to delete the folder '%s'?
+== Da li si siguran da želiš obrisati fasciklu '%s'?
+
+Are you sure that you want to delete the demo '%s'?
+== Da li si siguran da želiš obrisati snimak '%s'?
+
+Delete folder
+== Obriši fasciklu
+
+Unable to delete the demo '%s'
+== Neuspeh u brisanju snimka '%s'
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== Neuspeh u brisanju fascikle '%s'
 
 Dummy is not allowed on this server
-== 
+== Lutka nije dozvoljena u server
 
 Please wait…
-== 
+== Čekaj kenjam...
 
 Edit touch controls
-== 
+== Uredi dodirne kontrole
 
 Close
-== 
+== Zatvori
 
 https://wiki.ddnet.org/wiki/Touch_controls
-== 
+== https://wiki.ddnet.org/wiki/Touch_controls
 
 Save changes
-== 
+== Sačuvaj kontrole
 
 Error saving touch controls
-== 
+== Neuspeh u čuvanju kontroli
 
 Could not save touch controls to file. See local console for details.
-== 
+== Neuspeh u čuvanju kontroli u fajl
 
 Unsaved changes
-== 
+== Nesačuvane promene
 
 Discard changes
-== 
+== Odbaci promene
 
 Are you sure that you want to discard the current changes to the touch controls?
-== 
+== Sigurno želiš da sačuvaš trenutne dodirne kontrole?
 
 Are you sure that you want to reset the touch controls to default?
-== 
+== Da li si siguran da želiš resetovati kontrole na fabrička
 
 Import from clipboard
-== 
+== Uvezi iz klipborda
 
 Are you sure that you want to import the touch controls from the clipboard? This will overwrite your current touch controls.
-== 
+== Da li si siguran da želiš da uneseš kontrole iz klipborda?
 
 Export to clipboard
-== 
+== Kopiraj
 
 Direct touch input while ingame
-== 
+== Direktan dodirni unos dok si u igri
 
 [Direct touch input]
 Disabled
-== 
+== Ugašeno
 
 [Direct touch input]
 Active action
-== 
+== Aktivna akcija
 
 [Direct touch input]
 Aim
-== 
+== Gledaj
 
 [Direct touch input]
 Fire
-== 
+== Pucaj
 
 [Direct touch input]
 Hook
-== 
+== Kuka
 
 Direct touch input while spectating
-== 
+== Direktan dodirni unos dok si u gledaš
 
 Error loading touch controls
-== 
+== Neuspešno učitavanje dodirnih kontroli
 
 Could not load touch controls from file. See local console for details.
-== 
+== Neuspešno učitavanje dodirnih kontroli iz fajla. proveri konzolu
 
 Could not load default touch controls from file. See local console for details.
-== 
+== Neuspešno učitavanje normalnih dodirnih kontroli. proveri konzolu
 
 Could not load touch controls from clipboard. See local console for details.
-== 
+== Neuspešno učitavanje kontoli iz klipborda. proveri konzolu
 
 Community
-== 
+== Zajednica
 
 Round %d/%d
-== 
+== Runda %d/%d
 
 [Team status]
 forbidden
-== 
+== Zabranjeno
 
 [Team status]
 solo
-== 
+== Solo
 
 [Team status]
 allowed
-== 
+== Dozvoljeno
 
 [Team status]
 required
-== 
+== Obavezno
 
 Teams
-== 
+== Timovi
 
 [Team size]
 minimum
-== 
+== minimum
 
 [Team size]
 maximum
-== 
+== maksimum
 
 Loading…
-== 
+== Učitavanje...
 
 Ghosts directory
-== 
+== Direktorijum duhova
 
 Activate all
-== 
+== Aktviraj sve
 
 Deactivate all
-== 
+== Deaktiviraj sve
+
+Menu opened. Press Esc key again to close menu.
+== Menu otvoren, stisni Esc opet da ga zatvoriš
 
 [Hertz]
 Hz
-== 
+== Hz
+
+Save power by lowering refresh rate (higher input latency)
+== Sačuvaj struje smanjivanjem osvežavanja (nije preporučeno)
+
+Open the settings file
+== Otvori fajl za podešavanja
 
 Saves file
-== 
+== Fajl čuvanja trki (u timu)
 
 Open the saves file
-== 
+== Otvori fajl čuvanja trki (u timu)
+
+Open the directory that contains the configuration and user files
+== Otvori fasciklu sa konfiguracijama
+
+Open the directory to add custom themes
+== Otvori fasciklu sa temama
 
 Player info change cooldown
-== 
+== Čekaj malo bato
 
 This skin name cannot be used.
-== 
+== Ovo ime skina je nemoguće koristiti
 
 Skin could not be loaded due to an error. Check the local console for details.
-== 
+== Neuspešno učitavanje skina. Proveri konzolu za detalje
 
 Skin could not be found.
-== 
+== Skin nije pronađen
+
+Create a random skin
+== Napravi nasumični skin
 
 No skins match your filter criteria
-== 
+== Nema nađenih skinova
+
+Open the directory to add custom skins
+== Otvori fasciklu da dodaš skinove
+
+No controller found. Plug in a controller.
+== Kontroler nije pronađen
+
+Axis
+== Aksis
+
+Reset controls
+== Resetuj kontrole
+
+Are you sure that you want to reset the controls to their defaults?
+== Da li si siguran da želiš resetovati kontrole
+
+Cancel
+== Odustani
 
 Show FPS
-== 
+== Prikaži FPS
 
 Renders your frame rate in the top right
-== 
+== Renderuje FPS u gornjem desnom uglu
+
+Graphics card
+== Grafička
+
+[Translation credits: Add your own name here when you update translations]
+English translation by the DDNet Team
+== Na Srpksi preveo Veljko Radovanović uz pomoć DNR, EliteTee i Kingston-a
 
 Tee
-== 
+== Ti
 
 Info Messages
-== 
+== Info poruke
 
 Show local time always
-== 
+== Prikaži lokalno vreme
 
 Show spectator cursor
-== 
+== Prikaži tuđi kursor
 
 Authed name color in scoreboard
-== 
+== Boja admina u listi
 
 Same clan color in scoreboard
-== 
+== Boja prijatelja iz klana u listi
 
 Show client IDs (scoreboard, chat, spectator)
-== 
+== Prikaži ID igrača
 
 Show number of spectators
-== 
+== Prikaži broj posmatrača
 
 Always show chat
-== 
+== Uvek prikaži dopisivanje
 
 Show only chat messages from team members
-== 
+== Prikaži samo poruke od prijatelja iz klana
 
 Chat font size
-== 
+== Veličina slova u četu
 
 Chat width
-== 
+== Dužina četa
 
 [Show name plates]
 None
-== 
+== Ničije
 
 [Show name plates]
 Own
-== 
+== Lične
 
 [Show name plates]
 Others
-== 
+== Tuđe
 
 [Show name plates]
 All
-== 
+== Svačije
 
-Name plates offset
-== 
+[Show players' key presses]
+None
+== Nikome
 
-Show friend icon in name plates
-== 
+[Show players' key presses]
+Own
+== Svoje
 
-Show client IDs in name plates
-== 
+[Show players' key presses]
+Others
+== Drugima
 
-Show client IDs on a seperate line
-== 
-
-Client IDs size
-== 
-
-Hook Strength
-== 
-
-Show hook strength icon indicator
-== 
-
-Show hook strength number indicator
-== 
-
-Size of hook strength icon and number indicator
-== 
-
-Key Presses
-== 
+[Show players' key presses]
+All
+== Svima
 
 Show players' key presses
-== 
+== Prikaži stiskanje kretanja
 
-[Show players' key presses]
-None
-== 
 
-[Show players' key presses]
-Own
-== 
+Name plates offset
+== Razdaljina imena
 
-[Show players' key presses]
-Others
-== 
+Show friend icon in name plates
+== Prikaži srce prijatelja iznad imena
 
-[Show players' key presses]
-All
-== 
+Show client IDs in name plates
+== Prikaži ID u imenu
+
+Show client IDs on a seperate line
+== Prikaži ID u novom redu
+
+Client IDs size
+== Veličina ID-a
+
+Hook Strength
+== Jačina kuke
+
+Show hook strength icon indicator
+== Prikaži ikonu jačine kuke
+
+Show hook strength number indicator
+== Prikaži indikator za jačinu kuke
+
+Size of hook strength icon and number indicator
+== Veličina ikone i indikatora
+
+Key Presses
+== Stiskanje kretanja
 
 Size of key press icons
-== 
+== Veličina tih ikonica
 
-Preview player's name plate
-== 
+Preview player's name plate 
+== Prikaži ime igrača	
 
-Preview dummy's name plate
-== 
+Preview dummy's name plate 
+== Prikaži lutkino ime
 
 Show own player's hook collision line
-== 
+== Prikaži svoje dodirne linije
 
 Always show own player's hook collision line
-== 
+== Uvek prikaži svoje dodirne linije
 
-Always show other players' hook collision lines
-== 
+Always show other players' hook dodirne lines
+== Uvek prikaži tuđe dodirne linije
 
 Width of your own hook collision line
-== 
+== Debljina svojih dodirne linija
 
 Width of others' hook collision line
-== 
+== Debljina tuđih dodirne linija
 
 Preview 'Hook collisions' being pressed
-== 
+== Prikaz dodirne linija kada su stisnute
 
 Show finish messages
-== 
+== Prikaži završnu poruku
+
+Weapons
+== Oružja
+
+Rifle Laser Outline Color
+== Spoljašnja boja lasera
+
+Rifle Laser Inner Color
+== Unutrašnja boja lasera
+
+Shotgun Laser Outline Color
+== Spoljašnja boja magnetne sačmare
+
+Shotgun Laser Inner Color
+== Unutrašnja boja magnetne sačmare
+
+Door Laser Outline Color
+== Spoljašnja boja laserskih vrata
+
+Door Laser Inner Color
+== Unutrašnja boja laserskih vrata
+
+Freeze Laser Outline Color
+== Spoljašnja boja zaleđujućeg lasera
+
+Freeze Laser Inner Color
+== Unutrašnja boja zaleđujućeg lasera
+
+Set all to Rifle
+== Stavi sve kao laser
 
 Dragger Outline Color
-== 
+== Spoljanjša boja magnetnog lasera
 
 Dragger Inner Color
-== 
+== Unutrašnja boja magnetnog lasera
 
 Enable ghost
-== 
+== Uključi duha
 
 Only save improvements
-== 
-
-AntiPing: prediction margin
-== 
+== Čuvaj samo poboljšanja
 
 Regular background color
-== 
+== Boja pozadine (ako je mapa bez pozadine)
 
 Entities background color
-== 
+== Boja pozadine u entities
+
+Unregister protocol and file extensions
+== Odregistruj protokol i ekstenzije fajlova
 
 Basic
-== 
+== Bazično
 
 Custom
-== 
+== Drugačije
 
 Are you sure that you want to delete '%s'?
-== 
+== Sigurno želiš obrisati '%s'?
 
 Delete skin
-== 
+== Obriši skin
 
 Unable to delete skin
-== 
+== Neuspešno obrisano
+
+Open the directory to add custom assets
+== Otvori fasciklu za dodavanje temi
 
 Server could not be started. Make sure to grant the notification permission in the app settings so the server can run in the background.
-== 
+== Nemoguće pokrenuti server. Moraš dozvoliti aplikaciji da server može raditi u pozadinni
 
 [Spectators]
 %d others…
-== 
+== %d ostalih…
+
+AntiPing: prediction margin 
+== AntiPing: margina predviđanja
 
 [Team and size]
 %d\n(%d/%d)
-== 
+==
 
 Team %d (%d/%d)
-== 
+== Tim %d (%d/%d)
 
 [skins]
 Body
-== 
+== Telo
 
 [skins]
 Marking
-== 
+== Tetovaže
 
 [skins]
 Decoration
-== 
+== Dekoracije
 
 [skins]
 Hands
-== 
+== Ruke
 
 [skins]
 Feet
-== 
+== Noge
 
 [skins]
 Eyes
-== 
+== Oči
 
 Aim
-== 
+== Aim
 
 Active: Fire
-== 
+== Aktivno: Udarac
 
 Active: Hook
-== 
+== Aktivno: Kuka
+
+Moved ingame
+== Pomeren u igri
 
 https://wiki.ddnet.org/wiki/Mapping
-== 
+== https://wiki.ddnet.org/wiki/Mapping
