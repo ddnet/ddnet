@@ -42,8 +42,6 @@
 using namespace FontIcons;
 using namespace std::chrono_literals;
 
-CMenusKeyBinder CMenus::m_Binder;
-
 CMenusKeyBinder::CMenusKeyBinder()
 {
 	m_pKeyReaderId = nullptr;
