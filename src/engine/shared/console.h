@@ -4,10 +4,11 @@
 #define ENGINE_SHARED_CONSOLE_H
 
 #include "memheap.h"
-#include <base/math.h>
-#include <base/system.h>
+
 #include <engine/console.h>
 #include <engine/storage.h>
+
+#include <vector>
 
 class CConsole : public IConsole
 {
@@ -22,7 +23,7 @@ class CConsole : public IConsole
 
 		const CCommandInfo *NextCommandInfo(int AccessLevel, int FlagMask) const override;
 
-		void SetAccessLevel(int AccessLevel) { m_AccessLevel = std::clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
+		void SetAccessLevel(int AccessLevel);
 	};
 
 	class CChain
@@ -84,43 +85,16 @@ class CConsole : public IConsole
 		const char *m_pCommand;
 		const char *m_apArgs[MAX_PARTS];
 
-		CResult(int ClientId) :
-			IResult(ClientId)
-		{
-			mem_zero(m_aStringStorage, sizeof(m_aStringStorage));
-			m_pArgsStart = nullptr;
-			m_pCommand = nullptr;
-			mem_zero(m_apArgs, sizeof(m_apArgs));
-		}
+		CResult(int ClientId);
+		CResult(const CResult &Other);
 
-		CResult(const CResult &Other) :
-			IResult(Other)
-		{
-			mem_copy(m_aStringStorage, Other.m_aStringStorage, sizeof(m_aStringStorage));
-			m_pArgsStart = m_aStringStorage + (Other.m_pArgsStart - Other.m_aStringStorage);
-			m_pCommand = m_aStringStorage + (Other.m_pCommand - Other.m_aStringStorage);
-			for(unsigned i = 0; i < Other.m_NumArgs; ++i)
-				m_apArgs[i] = m_aStringStorage + (Other.m_apArgs[i] - Other.m_aStringStorage);
-		}
-
-		void AddArgument(const char *pArg)
-		{
-			m_apArgs[m_NumArgs++] = pArg;
-		}
+		void AddArgument(const char *pArg);
+		void RemoveArgument(unsigned Index) override;
 
 		const char *GetString(unsigned Index) const override;
 		int GetInteger(unsigned Index) const override;
 		float GetFloat(unsigned Index) const override;
 		std::optional<ColorHSLA> GetColor(unsigned Index, float DarkestLighting) const override;
-
-		void RemoveArgument(unsigned Index) override
-		{
-			dbg_assert(Index < m_NumArgs, "invalid argument index");
-			for(unsigned i = Index; i < m_NumArgs - 1; i++)
-				m_apArgs[i] = m_apArgs[i + 1];
-
-			m_apArgs[m_NumArgs--] = nullptr;
-		}
 
 		// DDRace
 
@@ -164,7 +138,7 @@ class CConsole : public IConsole
 	public:
 		CCommand *m_pCommand;
 		CResult m_Result;
-		CExecutionQueueEntry(CCommand *pCommand, CResult Result) :
+		CExecutionQueueEntry(CCommand *pCommand, const CResult &Result) :
 			m_pCommand(pCommand),
 			m_Result(Result) {}
 	};
@@ -202,7 +176,7 @@ public:
 	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
 	void InitChecksum(CChecksumData *pData) const override;
 
-	void SetAccessLevel(int AccessLevel) override { m_AccessLevel = std::clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }
+	void SetAccessLevel(int AccessLevel) override;
 
 	// DDRace
 
