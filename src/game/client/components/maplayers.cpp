@@ -35,12 +35,12 @@ CMapLayers::CMapLayers(int Type, bool OnlineOnly)
 void CMapLayers::OnInit()
 {
 	m_pLayers = Layers();
-	m_pImages = &m_pClient->m_MapImages;
+	m_pImages = &GameClient()->m_MapImages;
 }
 
 CCamera *CMapLayers::GetCurCamera()
 {
-	return &m_pClient->m_Camera;
+	return &GameClient()->m_Camera;
 }
 
 const char *CMapLayers::LoadingTitle() const
@@ -70,12 +70,12 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, 
 	static auto s_LastLocalTime = time_get_nanoseconds();
 	if(pThis->m_OnlineOnly && (pItem->m_Version < 2 || pItem->m_Synchronized))
 	{
-		if(pThis->m_pClient->m_Snap.m_pGameInfoObj)
+		if(pThis->GameClient()->m_Snap.m_pGameInfoObj)
 		{
 			// get the lerp of the current tick and prev
 			const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pThis->Client()->GameTickSpeed();
-			const int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
-			const int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->m_pClient->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+			const int MinTick = pThis->Client()->PrevGameTick(g_Config.m_ClDummy) - pThis->GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick;
+			const int CurTick = pThis->Client()->GameTick(g_Config.m_ClDummy) - pThis->GameClient()->m_Snap.m_pGameInfoObj->m_RoundStartTick;
 			s_Time = std::chrono::nanoseconds((int64_t)(mix<double>(
 									    0,
 									    (CurTick - MinTick),
