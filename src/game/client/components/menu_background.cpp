@@ -362,11 +362,6 @@ CCamera *CMenuBackground::GetCurCamera()
 	return &m_Camera;
 }
 
-const char *CMenuBackground::LoadingTitle() const
-{
-	return Localize("Loading background map");
-}
-
 void CMenuBackground::ChangePosition(int PositionNumber)
 {
 	if(PositionNumber != m_CurrentPosition)
