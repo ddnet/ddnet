@@ -26,6 +26,7 @@ struct IMapSetting
 	enum EType
 	{
 		SETTING_INT,
+		SETTING_FLOAT,
 		SETTING_COMMAND,
 	};
 	const char *m_pName;
@@ -43,6 +44,15 @@ struct SMapSettingInt : public IMapSetting
 
 	SMapSettingInt(const char *pName, const char *pHelp, int Default, int Min, int Max) :
 		IMapSetting(pName, pHelp, IMapSetting::SETTING_INT), m_Default(Default), m_Min(Min), m_Max(Max) {}
+};
+struct SMapSettingFloat : public IMapSetting
+{
+	float m_Default;
+	float m_Min;
+	float m_Max;
+
+	SMapSettingFloat(const char *pName, const char *pHelp, float Default, float Min, float Max) :
+		IMapSetting(pName, pHelp, IMapSetting::SETTING_FLOAT), m_Default(Default), m_Min(Min), m_Max(Max) {}
 };
 struct SMapSettingCommand : public IMapSetting
 {
@@ -1036,6 +1046,10 @@ void CEditor::MapSettingsDropdownRenderCallback(const SPossibleValueMatch &Match
 		{
 			str_format(aOutput, sizeof(aOutput), "%s i[value]", pInfo->m_pName);
 		}
+		else if(pInfo->m_Type == IMapSetting::SETTING_FLOAT)
+		{
+			str_format(aOutput, sizeof(aOutput), "%s f[value]", pInfo->m_pName);
+		}
 		else if(pInfo->m_Type == IMapSetting::SETTING_COMMAND)
 		{
 			SMapSettingCommand *pCommand = (SMapSettingCommand *)pInfo;
@@ -1070,9 +1084,12 @@ void CMapSettingsBackend::OnInit(CEditor *pEditor)
 		// We want to parse the arguments of each map setting so we can autocomplete them later
 		// But that depends on the type of the setting.
 		// If we have a INT setting, then we know we can only ever have 1 argument which is a integer value
+		// If we have a FLOAT setting, then we know we can only ever have 1 argument which is a float value
 		// If we have a COMMAND setting, then we need to parse its arguments
 		if(pSetting->m_Type == IMapSetting::SETTING_INT)
 			LoadSettingInt(std::static_pointer_cast<SMapSettingInt>(pSetting));
+		else if(pSetting->m_Type == IMapSetting::SETTING_FLOAT)
+			LoadSettingFloat(std::static_pointer_cast<SMapSettingFloat>(pSetting));
 		else if(pSetting->m_Type == IMapSetting::SETTING_COMMAND)
 			LoadSettingCommand(std::static_pointer_cast<SMapSettingCommand>(pSetting));
 
@@ -1109,6 +1126,15 @@ void CMapSettingsBackend::LoadSettingInt(const std::shared_ptr<SMapSettingInt> &
 	auto &Arg = m_ParsedCommandArgs[pSetting].back();
 	str_copy(Arg.m_aName, "value");
 	Arg.m_Type = 'i';
+}
+
+void CMapSettingsBackend::LoadSettingFloat(const std::shared_ptr<SMapSettingFloat> &pSetting)
+{
+	// We load an int argument here
+	m_ParsedCommandArgs[pSetting].emplace_back();
+	auto &Arg = m_ParsedCommandArgs[pSetting].back();
+	str_copy(Arg.m_aName, "value");
+	Arg.m_Type = 'f';
 }
 
 void CMapSettingsBackend::LoadSettingCommand(const std::shared_ptr<SMapSettingCommand> &pSetting)
@@ -1197,6 +1223,16 @@ void CMapSettingsBackend::PossibleConfigVariableCallback(const SConfigVariable *
 			pIntVariable->m_Default,
 			pIntVariable->m_Min,
 			pIntVariable->m_Max));
+	}
+	else if(pVariable->m_Type == SConfigVariable::VAR_FLOAT)
+	{
+		SFloatConfigVariable *pFloatVariable = (SFloatConfigVariable *)pVariable;
+		pBackend->m_vpMapSettings.emplace_back(std::make_shared<SMapSettingFloat>(
+			pFloatVariable->m_pScriptName,
+			pFloatVariable->m_pHelp,
+			pFloatVariable->m_Default,
+			pFloatVariable->m_Min,
+			pFloatVariable->m_Max));
 	}
 }
 
@@ -1505,8 +1541,16 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 				}
 				else
 				{
-					std::shared_ptr<SMapSettingInt> pSettingInt = std::static_pointer_cast<SMapSettingInt>(m_pCurrentSetting);
-					str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Invalid argument value: %s at position %d for argument '%s': out of range [%d, %d]", aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName, pSettingInt->m_Min, pSettingInt->m_Max);
+					if(m_pCurrentSetting->m_Type == IMapSetting::SETTING_INT)
+					{
+						std::shared_ptr<SMapSettingInt> pSettingInt = std::static_pointer_cast<SMapSettingInt>(m_pCurrentSetting);
+						str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Invalid argument value: %s at position %d for argument '%s': out of range [%d, %d]", aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName, pSettingInt->m_Min, pSettingInt->m_Max);
+					}
+					else if(m_pCurrentSetting->m_Type == IMapSetting::SETTING_FLOAT)
+					{
+						std::shared_ptr<SMapSettingFloat> pSettingFloat = std::static_pointer_cast<SMapSettingFloat>(m_pCurrentSetting);
+						str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Invalid argument value: %s at position %d for argument '%s': out of range [%.2f, %.2f]", aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName, pSettingFloat->m_Min, pSettingFloat->m_Max);
+					}
 				}
 				m_Error.m_ArgIndex = ErrorArgIndex;
 				m_Error.m_Type = Error;
@@ -1623,7 +1667,19 @@ EValidationResult CMapSettingsBackend::CContext::ValidateArg(int Index, const ch
 
 		return Value >= pSetting->m_Min && Value <= pSetting->m_Max ? EValidationResult::VALID : EValidationResult::OUT_OF_RANGE;
 	}
-	else if(m_pCurrentSetting->m_Type == IMapSetting::SETTING_COMMAND)
+	if(m_pCurrentSetting->m_Type == IMapSetting::SETTING_FLOAT)
+	{
+		std::shared_ptr<SMapSettingFloat> pSetting = std::static_pointer_cast<SMapSettingFloat>(m_pCurrentSetting);
+		if(Index > 0)
+			return EValidationResult::ERROR;
+
+		float Value;
+		if(!str_tofloat(pArg, &Value)) // Try parse the float
+			return EValidationResult::ERROR;
+
+		return Value >= pSetting->m_Min && Value <= pSetting->m_Max ? EValidationResult::VALID : EValidationResult::OUT_OF_RANGE;
+	}
+	if(m_pCurrentSetting->m_Type == IMapSetting::SETTING_COMMAND)
 	{
 		auto &vArgs = m_pBackend->m_ParsedCommandArgs.at(m_pCurrentSetting);
 		if(Index < (int)vArgs.size())
@@ -1713,9 +1769,9 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 		if(!m_pCurrentSetting) // If we are on an argument of an unknown setting, we can't handle it => no possible values, ever.
 			return;
 
-		if(m_pCurrentSetting->m_Type == IMapSetting::SETTING_INT)
+		if(m_pCurrentSetting->m_Type == IMapSetting::SETTING_INT || m_pCurrentSetting->m_Type == IMapSetting::SETTING_FLOAT)
 		{
-			// No possible values for int settings.
+			// No possible values for int or float settings.
 			// Maybe we can add "0" and "1" as possible values for settings that are binary.
 		}
 		else
@@ -1935,12 +1991,12 @@ int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, cons
 	// related to valid map settings, such as parsed command arguments, etc.
 
 	const std::shared_ptr<IMapSetting> &pSetting = Setting();
-	if(pSetting->m_Type == IMapSetting::SETTING_INT)
+	if(pSetting->m_Type == IMapSetting::SETTING_INT || m_pCurrentSetting->m_Type == IMapSetting::SETTING_FLOAT)
 	{
-		// For integer settings, the check is quite simple as we know
+		// For integer or float settings, the check is quite simple as we know
 		// we can only ever have 1 argument.
 
-		// The integer setting cannot be added multiple times, which means if a collision was found, then the only result we
+		// The integer or float setting cannot be added multiple times, which means if a collision was found, then the only result we
 		// can have is REPLACE.
 		// In this case, the collision is found only by checking the command name for every setting in the current map settings.
 		char aBuffer[256];
