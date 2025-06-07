@@ -38,6 +38,7 @@ public:
 	void Reset() override;
 	void Destroy() override;
 	void PreTick();
+	void WeaponTick();
 	void Tick() override;
 	void TickDeferred() override;
 	void TickPaused() override;
@@ -67,11 +68,11 @@ public:
 	void HandleJetpack();
 
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
-	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
+
 	void ReleaseHook();
 	void ResetHook();
 	void ResetInput();
-	void FireWeapon();
+	void FireWeapon(bool EarlyFire = false);
 
 	void Die(int Killer, int Weapon, bool SendKillMsg = true);
 	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon);
