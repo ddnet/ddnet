@@ -849,9 +849,23 @@ void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 		return (void *)id;
 	}
 #elif defined(CONF_FAMILY_WINDOWS)
+	using SetThreadDescriptionFunc = HRESULT(WINAPI *)(HANDLE, PCWSTR);
+	auto GetSetThreadDesc = []() -> SetThreadDescriptionFunc {
+		static SetThreadDescriptionFunc func = []() -> SetThreadDescriptionFunc {
+			constexpr const WCHAR *THREAD_LIB = L"kernel32.dll";
+			constexpr const char *THREAD_DESCRIPTION_SETTER = "SetThreadDescription";
+			HMODULE kernel = GetModuleHandleW(THREAD_LIB);
+			if(kernel)
+				return reinterpret_cast<SetThreadDescriptionFunc>(GetProcAddress(kernel, THREAD_DESCRIPTION_SETTER));
+			return nullptr;
+		}();
+		return func;
+	};
+
 	HANDLE thread = CreateThread(nullptr, 0, thread_run, data, 0, nullptr);
 	dbg_assert(thread != nullptr, "CreateThread failure");
-	// TODO: Set thread name using SetThreadDescription (would require minimum Windows 10 version 1607)
+	if(auto pSetThreadDescription = GetSetThreadDesc())
+		pSetThreadDescription(thread, windows_utf8_to_wide(name).c_str());
 	return thread;
 #else
 #error not implemented
