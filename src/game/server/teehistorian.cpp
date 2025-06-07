@@ -444,10 +444,13 @@ void CTeeHistorian::RecordPlayerInput(int ClientId, uint32_t UniqueClientId, con
 	CNetObj_PlayerInput DiffInput;
 	if(pPrev->m_UniqueClientId == UniqueClientId)
 	{
-		if(mem_comp(&pPrev->m_Input, pInput, sizeof(pPrev->m_Input)) == 0)
-		{
-			return;
-		}
+		// Previously we filtered inputs that matched the previous input.
+		// This caused issues with reproducing the physics.
+		// If the client re-send the previous input and a new input on a tick,
+		// Teehistorian would only record the latter input.
+		//
+		// Note that this means that `INPUT_DIFF` is written with no input difference,
+		// to mark that the client repeated the same input.
 		EnsureTickWritten();
 		Buffer.Reset();
 

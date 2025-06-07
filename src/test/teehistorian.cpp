@@ -484,7 +484,12 @@ TEST_F(TeeHistorian, Input)
 		0x45,
 		0x00, // ClientId 0
 		0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a,
-		// same unique id, same input -> nothing
+		// same unique id, same input -> InputDiff (diff is zero)
+		// this signals new but unchaged input
+		// Note! previously these inputs were filtered.
+		0x44,
+		0x00, // ClientId 0
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		// same unique id, different input -> InputDiff
 		0x44,
 		0x00, // ClientId 0
@@ -500,7 +505,7 @@ TEST_F(TeeHistorian, Input)
 
 	// new player -> InputNew
 	m_TH.RecordPlayerInput(0, 1, &Input);
-	// same unique id, same input -> nothing
+	// same unique id, same input -> InputDiff (zeroed)
 	m_TH.RecordPlayerInput(0, 1, &Input);
 
 	Input.m_Direction = 0;
