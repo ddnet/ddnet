@@ -989,11 +989,16 @@ std::string net_error_message();
 int net_would_block();
 
 /**
- * @todo document
+ * Waits for a socket to have data available to receive up the specified timeout duration.
  *
  * @ingroup Network-General
+ *
+ * @param sock Socket to wait on.
+ * @param nanoseconds Timeout duration to wait.
+ *
+ * @return `1` if data was received within the timeout duration, `0` otherwise.
  */
-int net_socket_read_wait(NETSOCKET sock, int time);
+int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
 
 /**
  * @defgroup Network-UDP
@@ -2901,8 +2906,6 @@ void crashdump_init_if_available(const char *log_file_path);
  * @return Current value of the timer in nanoseconds.
  */
 std::chrono::nanoseconds time_get_nanoseconds();
-
-int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds);
 
 /**
  * Fixes the command line arguments to be encoded in UTF-8 on all systems.
