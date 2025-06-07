@@ -10,7 +10,7 @@ class CPickup : public CEntity
 public:
 	static const int ms_CollisionExtraSize = 6;
 
-	CPickup(CGameWorld *pGameWorld, int Type, int SubType = 0, int Layer = 0, int Number = 0);
+	CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number, int Flags);
 
 	void Reset() override;
 	void Tick() override;
@@ -23,6 +23,7 @@ public:
 private:
 	int m_Type;
 	int m_Subtype;
+	int m_Flags;
 
 	// DDRace
 

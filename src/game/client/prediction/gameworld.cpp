@@ -480,6 +480,8 @@ void CGameWorld::NetObjAdd(int ObjId, int ObjType, const void *pObjData, const C
 	else if((ObjType == NETOBJTYPE_PICKUP || ObjType == NETOBJTYPE_DDNETPICKUP) && m_WorldConfig.m_PredictWeapons)
 	{
 		CPickupData Data = ExtractPickupInfo(ObjType, pObjData, pDataEx);
+		if(Data.m_Flags & PICKUPFLAG_NO_PREDICT)
+			return;
 		CPickup NetPickup = CPickup(this, ObjId, &Data);
 		if(CPickup *pPickup = (CPickup *)GetEntity(ObjId, ENTTYPE_PICKUP))
 		{

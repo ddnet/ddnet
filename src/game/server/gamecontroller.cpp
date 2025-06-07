@@ -383,7 +383,8 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 
 	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)
 	{
-		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
+		int PickupFlags = TileFlagsToPickupFlags(Flags);
+		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number, PickupFlags);
 		pPickup->m_Pos = Pos;
 		return true; // NOLINT(clang-analyzer-unix.Malloc)
 	}
@@ -743,4 +744,16 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// OnPlayerInfoChange(pPlayer);
+}
+
+int IGameController::TileFlagsToPickupFlags(int TileFlags) const
+{
+	int PickupFlags = 0;
+	if(TileFlags & TILEFLAG_XFLIP)
+		PickupFlags |= PICKUPFLAG_XFLIP;
+	if(TileFlags & TILEFLAG_YFLIP)
+		PickupFlags |= PICKUPFLAG_YFLIP;
+	if(TileFlags & TILEFLAG_ROTATE)
+		PickupFlags |= PICKUPFLAG_ROTATE;
+	return PickupFlags;
 }
