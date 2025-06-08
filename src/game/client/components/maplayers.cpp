@@ -243,6 +243,11 @@ void CMapLayers::OnRender()
 		// reset the screen like it was before
 		Graphics()->MapScreen(Screen.x, Screen.y, Screen.w, Screen.h);
 	}
+	// apply game group again
+	else
+	{
+		RenderTools()->MapScreenToGroup(Params.m_Center.x, Params.m_Center.y, m_pLayers->GameGroup(), GetCurCamera()->m_Zoom);
+	}
 }
 
 int CMapLayers::GetLayerType(const CMapItemLayer *pLayer) const
