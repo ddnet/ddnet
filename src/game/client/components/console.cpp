@@ -85,26 +85,48 @@ enum class EArgumentCompletionType
 class CArgumentCompletionEntry
 {
 public:
-	EArgumentCompletionType m_Type;
+	struct CArgument
+	{
+		EArgumentCompletionType m_Type = EArgumentCompletionType::NONE;
+		int m_Index = -1;
+	};
+
+	template<size_t N>
+	constexpr CArgumentCompletionEntry(const char *pCommandName, const CArgument (&Arguments)[N]) :
+		m_pCommandName(pCommandName), m_aArguments{}
+	{
+		static_assert(N <= sizeof(m_aArguments) / sizeof(*m_aArguments), "Extend m_aArguments array size if needed");
+		for(size_t i = 0; i < N; i++)
+			m_aArguments[i] = Arguments[i];
+	}
+
 	const char *m_pCommandName;
-	int m_ArgumentIndex;
+	CArgument m_aArguments[2];
 };
 
-static const CArgumentCompletionEntry gs_aArgumentCompletionEntries[] = {
-	{EArgumentCompletionType::MAP, "sv_map", 0},
-	{EArgumentCompletionType::MAP, "change_map", 0},
-	{EArgumentCompletionType::TUNE, "tune", 0},
-	{EArgumentCompletionType::TUNE, "tune_reset", 0},
-	{EArgumentCompletionType::TUNE, "toggle_tune", 0},
-	{EArgumentCompletionType::TUNE, "tune_zone", 1},
-	{EArgumentCompletionType::SETTING, "reset", 0},
-	{EArgumentCompletionType::SETTING, "toggle", 0},
-	{EArgumentCompletionType::SETTING, "access_level", 0},
-	{EArgumentCompletionType::SETTING, "+toggle", 0},
-	{EArgumentCompletionType::KEY, "bind", 0},
-	{EArgumentCompletionType::KEY, "binds", 0},
-	{EArgumentCompletionType::KEY, "unbind", 0},
-};
+static constexpr CArgumentCompletionEntry gs_aArgumentCompletionEntries[] = {
+	{"sv_map", {{EArgumentCompletionType::MAP, 0}}},
+	{"change_map", {{EArgumentCompletionType::MAP, 0}}},
+	{"tune", {{EArgumentCompletionType::TUNE, 0}}},
+	{"tune_reset", {{EArgumentCompletionType::TUNE, 0}}},
+	{"toggle_tune", {{EArgumentCompletionType::TUNE, 0}}},
+	{"tune_zone", {{EArgumentCompletionType::TUNE, 1}}},
+	{"reset", {{EArgumentCompletionType::SETTING, 0}}},
+	{"toggle", {{EArgumentCompletionType::SETTING, 0}}},
+	{"access_level", {{EArgumentCompletionType::SETTING, 0}}},
+	{"+toggle", {{EArgumentCompletionType::SETTING, 0}}},
+	{"bind", {{EArgumentCompletionType::KEY, 0}}},
+	{"binds", {{EArgumentCompletionType::KEY, 0}}},
+	{"unbind", {{EArgumentCompletionType::KEY, 0}}}};
+static constexpr int gs_ArgumentCompletionEntriesBiggestArgumentIndex = [](const auto &aArgumentCompletionEntries) {
+	int BiggestArgumentIndex = -1;
+	for(const auto &Entry : aArgumentCompletionEntries)
+		for(const auto &Argument : Entry.m_aArguments)
+			if(BiggestArgumentIndex < Argument.m_Index)
+				BiggestArgumentIndex = Argument.m_Index;
+
+	return BiggestArgumentIndex;
+}(gs_aArgumentCompletionEntries);
 
 static std::pair<EArgumentCompletionType, int> ArgumentCompletion(const char *pStr)
 {
@@ -121,30 +143,44 @@ static std::pair<EArgumentCompletionType, int> ArgumentCompletion(const char *pS
 	if(pIt == pCommandEnd)
 		return {EArgumentCompletionType::NONE, -1};
 
+	int CurrentArg = 0;
+	const char *pArgStart = pIt, *pArgEnd = pIt;
+	while(true)
+	{
+		if(CurrentArg > gs_ArgumentCompletionEntriesBiggestArgumentIndex)
+			return {EArgumentCompletionType::NONE, -1};
+
+		if(!pIt[0]) // Checks if there is next argument
+			break;
+
+		pArgStart = pIt;
+		pIt = str_skip_to_whitespace_const(pIt); // Skip argument value
+		pArgEnd = pIt;
+		pIt = str_skip_whitespaces_const(pIt); // Go to next argument position
+
+		if(pArgStart == pIt) // Checks if there is next argument
+			break;
+
+		if(pIt == pArgEnd) // Does not increment CurrentArg when there is no space at the end
+			break;
+
+		CurrentArg++;
+	}
+	if(pIt != pArgEnd)
+		pArgStart = pIt;
+
+	if(CurrentArg > gs_ArgumentCompletionEntriesBiggestArgumentIndex)
+		return {EArgumentCompletionType::NONE, -1};
+
 	for(const auto &Entry : gs_aArgumentCompletionEntries)
 	{
 		int Length = maximum(str_length(Entry.m_pCommandName), CommandLength);
 		if(str_comp_nocase_num(Entry.m_pCommandName, pCommandStart, Length) == 0)
-		{
-			int CurrentArg = 0;
-			const char *pArgStart = nullptr, *pArgEnd = nullptr;
-			while(CurrentArg < Entry.m_ArgumentIndex)
-			{
-				pArgStart = pIt;
-				pIt = str_skip_to_whitespace_const(pIt); // Skip argument value
-				pArgEnd = pIt;
-
-				if(!pIt[0] || pArgStart == pIt) // Check that argument is not empty
-					return {EArgumentCompletionType::NONE, -1};
-
-				pIt = str_skip_whitespaces_const(pIt); // Go to next argument position
-				CurrentArg++;
-			}
-			if(pIt == pArgEnd)
-				return {EArgumentCompletionType::NONE, -1}; // Check that there is at least one space after
-			return {Entry.m_Type, pIt - pStr};
-		}
+			for(const auto &Argument : Entry.m_aArguments)
+				if(Argument.m_Index == CurrentArg)
+					return {Argument.m_Type, pArgStart - pStr};
 	}
+
 	return {EArgumentCompletionType::NONE, -1};
 }
 
@@ -624,13 +660,18 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			{
 				for(const auto &Entry : gs_aArgumentCompletionEntries)
 				{
-					if(Entry.m_Type != CompletionType)
-						continue;
 					const int Len = str_length(Entry.m_pCommandName);
 					if(str_comp_nocase_num(pInputStr, Entry.m_pCommandName, Len) == 0 && str_isspace(pInputStr[Len]))
 					{
-						m_CompletionChosenArgument = -1;
-						str_copy(m_aCompletionBufferArgument, &pInputStr[CompletionPos]);
+						for(const auto &Argument : Entry.m_aArguments)
+						{
+							if(Argument.m_Type != CompletionType)
+								continue;
+
+							m_CompletionChosenArgument = -1;
+							str_copy(m_aCompletionBufferArgument, &pInputStr[CompletionPos]);
+							break;
+						}
 					}
 				}
 			}
