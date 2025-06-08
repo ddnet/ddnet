@@ -66,6 +66,25 @@ void CBinds::Bind(int KeyId, const char *pStr, bool FreeOnly, int ModifierCombin
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "binds", aBuf, gs_BindPrintColor);
 }
 
+void CBinds::SwapBind(int FirstKeyId, int SecondKeyId, int FirstModifierCombination, int SecondModifierCombination)
+{
+	dbg_assert(FirstKeyId >= KEY_FIRST && FirstKeyId < KEY_LAST, "FirstKeyId invalid");
+	dbg_assert(FirstModifierCombination >= MODIFIER_NONE && FirstModifierCombination < MODIFIER_COMBINATION_COUNT, "FirstModifierCombination invalid");
+	dbg_assert(SecondKeyId >= KEY_FIRST && SecondKeyId < KEY_LAST, "SecondKeyId invalid");
+	dbg_assert(SecondModifierCombination >= MODIFIER_NONE && SecondModifierCombination < MODIFIER_COMBINATION_COUNT, "SecondModifierCombination invalid");
+
+	char aBuf[256];
+	char aFirstModifiers[128];
+	char aSecondModifiers[128];
+	GetKeyBindModifiersName(FirstModifierCombination, aFirstModifiers, sizeof(aFirstModifiers));
+	GetKeyBindModifiersName(SecondModifierCombination, aSecondModifiers, sizeof(aSecondModifiers));
+
+	std::swap(m_aapKeyBindings[FirstModifierCombination][FirstKeyId], m_aapKeyBindings[SecondModifierCombination][SecondKeyId]);
+
+	str_format(aBuf, sizeof(aBuf), "swaped bind %s%s (%d) with %s%s (%d)", aFirstModifiers, Input()->KeyName(FirstKeyId), FirstKeyId, aSecondModifiers, Input()->KeyName(SecondKeyId), SecondKeyId);
+	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "binds", aBuf, gs_BindPrintColor);
+}
+
 int CBinds::GetModifierMask(IInput *pInput)
 {
 	int Mask = 0;
@@ -312,6 +331,7 @@ void CBinds::OnConsoleInit()
 	Console()->Register("binds", "?s[key]", CFGFLAG_CLIENT, ConBinds, this, "Print command executed by this keybinding or all binds");
 	Console()->Register("unbind", "s[key]", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key");
 	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys");
+	Console()->Register("swap_bind", "s[key] s[key]", CFGFLAG_CLIENT, ConSwapBind, this, "Swap two binds");
 
 	SetDefaults();
 }
@@ -410,6 +430,34 @@ void CBinds::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)
 {
 	CBinds *pBinds = (CBinds *)pUserData;
 	pBinds->UnbindAll();
+}
+
+void CBinds::ConSwapBind(IConsole::IResult *pResult, void *pUserData)
+{
+	CBinds *pBinds = (CBinds *)pUserData;
+	const char *pFirstBindStr = pResult->GetString(0);
+	const char *pSecondBindStr = pResult->GetString(1);
+
+	const CBindSlot FirstBindSlot = pBinds->GetBindSlot(pFirstBindStr);
+	const CBindSlot SecondBindSlot = pBinds->GetBindSlot(pSecondBindStr);
+
+	if(!FirstBindSlot.m_Key)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "key %s not found", pFirstBindStr);
+		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
+		return;
+	}
+
+	if(!SecondBindSlot.m_Key)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "key %s not found", pSecondBindStr);
+		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
+		return;
+	}
+
+	pBinds->SwapBind(FirstBindSlot.m_Key, SecondBindSlot.m_Key, FirstBindSlot.m_ModifierMask, SecondBindSlot.m_ModifierMask);
 }
 
 CBinds::CBindSlot CBinds::GetBindSlot(const char *pBindString) const

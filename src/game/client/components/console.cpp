@@ -117,7 +117,8 @@ static constexpr CArgumentCompletionEntry gs_aArgumentCompletionEntries[] = {
 	{"+toggle", {{EArgumentCompletionType::SETTING, 0}}},
 	{"bind", {{EArgumentCompletionType::KEY, 0}}},
 	{"binds", {{EArgumentCompletionType::KEY, 0}}},
-	{"unbind", {{EArgumentCompletionType::KEY, 0}}}};
+	{"unbind", {{EArgumentCompletionType::KEY, 0}}},
+	{"swap_bind", {{EArgumentCompletionType::KEY, 0}, {EArgumentCompletionType::KEY, 1}}}};
 static constexpr int gs_ArgumentCompletionEntriesBiggestArgumentIndex = [](const auto &aArgumentCompletionEntries) {
 	int BiggestArgumentIndex = -1;
 	for(const auto &Entry : aArgumentCompletionEntries)

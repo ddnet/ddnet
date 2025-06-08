@@ -18,6 +18,7 @@ class CBinds : public CComponent
 	static void ConBinds(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnbind(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnbindAll(IConsole::IResult *pResult, void *pUserData);
+	static void ConSwapBind(IConsole::IResult *pResult, void *pUserData);
 	class IConsole *GetConsole() const { return Console(); }
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
@@ -65,6 +66,7 @@ public:
 	CBindsSpecial m_SpecialBinds;
 
 	void Bind(int KeyId, const char *pStr, bool FreeOnly = false, int ModifierCombination = MODIFIER_NONE);
+	void SwapBind(int FirstKeyId, int SecondKeyId, int FirstModifierCombination = MODIFIER_NONE, int SecondModifierCombination = MODIFIER_NONE);
 	void SetDefaults();
 	void UnbindAll();
 	const char *Get(int KeyId, int ModifierCombination);
