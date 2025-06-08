@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <ctime>
+#include <functional>
 
 enum class TRISTATE
 {
@@ -71,8 +72,15 @@ typedef struct NETADDR
 	unsigned short port;
 
 	bool operator==(const NETADDR &other) const;
-	bool operator!=(const NETADDR &other) const { return !(*this == other); }
+	bool operator!=(const NETADDR &other) const;
+	bool operator<(const NETADDR &other) const;
 } NETADDR;
+
+template<>
+struct std::hash<NETADDR>
+{
+	size_t operator()(const NETADDR &Addr) const noexcept;
+};
 
 /**
  * @ingroup Network-General

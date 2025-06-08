@@ -1065,6 +1065,21 @@ bool NETADDR::operator==(const NETADDR &other) const
 	return net_addr_comp(this, &other) == 0;
 }
 
+bool NETADDR::operator!=(const NETADDR &other) const
+{
+	return net_addr_comp(this, &other) != 0;
+}
+
+bool NETADDR::operator<(const NETADDR &other) const
+{
+	return net_addr_comp(this, &other) < 0;
+}
+
+size_t std::hash<NETADDR>::operator()(const NETADDR &Addr) const noexcept
+{
+	return std::hash<std::string_view>{}(std::string_view((const char *)&Addr, sizeof(Addr)));
+}
+
 int net_addr_comp_noport(const NETADDR *a, const NETADDR *b)
 {
 	NETADDR ta = *a, tb = *b;
@@ -5268,8 +5283,3 @@ void shell_update()
 	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, nullptr, nullptr);
 }
 #endif
-
-size_t std::hash<NETADDR>::operator()(const NETADDR &Addr) const noexcept
-{
-	return std::hash<std::string_view>{}(std::string_view((const char *)&Addr, sizeof(Addr)));
-}
